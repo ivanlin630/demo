@@ -1,0 +1,1665 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 指標團(Team0)人手池 clean trace(seed=8181 45天) ===
+[GameSetup] 完成：4 teams, 1 factions, 8 persons
+
+tick(day) | anon池 | Δ | pop | minor_pop | outpost_cap | 新增team_id(spinoff) | 同期dispatch事件 | type | blind_check | 原因
+----------|--------|---|-----|-----------|-------------|----------------------|------------------|------|-------------|------
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×93 (oid=0)
+[Order] Team0 buy weapon_melee_low ×3 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=2)
+[Order] Team0 buy material ×54 (oid=3)
+[Order] Team0 buy tools ×5 (oid=4)
+[Order] Team1 sell food ×93 (oid=5)
+[Order] Team1 buy weapon_melee_low ×3 (oid=6)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=7)
+[Order] Team1 buy material ×54 (oid=8)
+[Order] Team1 buy tools ×1 (oid=9)
+[Order] Team2 sell food ×93 (oid=10)
+[Order] Team2 buy weapon_melee_low ×3 (oid=11)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=12)
+[Order] Team2 buy material ×54 (oid=13)
+[Order] Team2 buy tools ×1 (oid=14)
+[Order] Team3 sell food ×93 (oid=15)
+[Order] Team3 buy weapon_melee_low ×3 (oid=16)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=17)
+[Order] Team3 buy material ×54 (oid=18)
+[Order] Team3 buy tools ×1 (oid=19)
+[Harvest] Tick60 季節=春 base=1.1
+t100(d0) |      3 |  -1 |   5 |         0 |          20 | [4] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[4] 與Team0同tile_pos,population5 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+[Succession] Team 4 從匿名晉升新領袖 P3002（統領=0.07）
+[OverflowCapTrace] tick=110 team=4 has_produce=false cap=5 population=1
+[Order] Team4 buy food ×2 (oid=20)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Move] Team 4 抵達 (18,17)
+[SubAI] Team4 引擎→覓食 (覓食)
+[DayNight] Day 1 開始
+
+========== [SpecimenTracer] flush 7 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=10 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: build_workshop:location:delegate=0.98 build_apothecary:location:delegate=0.98 build_mint:location:delegate=0.98 build_stable:location:delegate=0.98 maintain_material:location:delegate=0.66 覓食=0.32 駐守=0.19 建設=0.08
+    狀態: pop=6 food(priv=120.0/gran=0.0/eff=120.0) consume/d=4.8 rung=0 fid=0 coin=200 mat=10
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T0] tick=70 heartbeat（no-decision）pop=6 food(eff=120.0)
+[Specimen T4] tick=110 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.49 慎重=0.42 求生欲=0.48 好戰=0.38 貪婪=0.58 → food_sec_target=3.7天
+[Specimen T4] tick=120 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.49 慎重=0.42 求生欲=0.48 好戰=0.38 貪婪=0.58 → food_sec_target=3.7天
+[Specimen T0] tick=130 heartbeat（no-decision）pop=5 food(eff=118.6)
+[Specimen T4] tick=180 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=190 heartbeat（no-decision）pop=5 food(eff=118.6)
+=======================================================
+[OverflowCapTrace] tick=240 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=240 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=240 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=240 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=240 team=4 has_produce=false cap=5 population=1
+[TickPerf] day=1 avg=20415 us max=3612570 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,17)
+[Merge] Team0 ← Team4 完全合併 (pop=6)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+t400(d1) |      2 |  -1 |   5 |         0 |          20 | [] | {  } | automatic(世界機制,advisor拔擢非直接領主人力決策) | n/a | 疑anon→named晉升(named+1同日,person_generator.gd:103,非死亡非派出)
+[Succession] Team 4 從匿名晉升新領袖 P3003（統領=0.24）
+[OverflowCapTrace] tick=410 team=4 has_produce=false cap=16 population=1
+[Order] Team4 buy food ×2 (oid=21)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 2 開始
+
+========== [SpecimenTracer] flush 9 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T4] tick=240 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=250 heartbeat（no-decision）pop=5 food(eff=117.6)
+[Specimen T4] tick=300 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=310 heartbeat（no-decision）pop=5 food(eff=116.4)
+[Specimen T4] tick=360 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=370 heartbeat（no-decision）pop=5 food(eff=116.4)
+[Specimen T4] tick=410 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.59 慎重=0.44 求生欲=0.35 好戰=0.37 貪婪=0.54 → food_sec_target=3.4天
+[Specimen T4] tick=420 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.59 慎重=0.44 求生欲=0.35 好戰=0.37 貪婪=0.54 → food_sec_target=3.4天
+[Specimen T0] tick=430 heartbeat（no-decision）pop=5 food(eff=118.3)
+=======================================================
+[OverflowCapTrace] tick=480 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=480 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=480 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=480 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=480 team=4 has_produce=false cap=16 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=2 avg=27001 us max=2098560 us ticks=240 teams=5 factions=1
+[Site] 選址 (26, 13) score=366 周邊資源={ "ore_iron": 183, "ore_silver": 77, "wild_horses": 6, "herb": 2 } terrain=mountain
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[SubAI] Team4 引擎→覓食 (覓食)
+[Ambition] Team4 rung 0→1 (商業 cap=3)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+t700(d2) |      1 |  -1 |   4 |         0 |          20 | [5] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[5] 與Team0同tile_pos,population4 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+[Succession] Team 5 從匿名晉升新領袖 P3004（統領=0.78）
+[OverflowCapTrace] tick=710 team=5 has_produce=false cap=49 population=1
+[Order] Team5 buy food ×1 (oid=22)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[Survival] Team5 urgent days_left=0.0 偵查→覓食
+[DayNight] Day 3 開始
+
+========== [SpecimenTracer] flush 10 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T4] tick=480 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=490 heartbeat（no-decision）pop=5 food(eff=118.3)
+[Specimen T4] tick=500 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.59 慎重=0.44 求生欲=0.35 好戰=0.37 貪婪=0.54 → food_sec_target=3.4天
+[Specimen T0] tick=550 heartbeat（no-decision）pop=5 food(eff=117.2)
+[Specimen T4] tick=560 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=610 heartbeat（no-decision）pop=5 food(eff=116.0)
+[Specimen T4] tick=620 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=670 heartbeat（no-decision）pop=5 food(eff=116.0)
+[Specimen T4] tick=680 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T5] tick=710 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.50
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+=======================================================
+[OverflowCapTrace] tick=720 team=0 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=720 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=720 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=720 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=720 team=4 has_produce=false cap=16 population=1
+[OverflowCapTrace] tick=720 team=5 has_produce=false cap=49 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[TickPerf] day=3 avg=24293 us max=839778 us ticks=240 teams=6 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,17)
+[Move] Team 5 抵達 (18,17)
+[Merge] Team0 ← Team4 完全合併 (pop=5)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[Survival] Team5 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (18,17)
+[SubAI] Team5 引擎→覓食 (覓食)
+[Ambition] Team5 rung 0→1 (武力 cap=4)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 4 開始
+
+========== [SpecimenTracer] flush 11 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T5] tick=720 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.50
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+[Specimen T0] tick=730 heartbeat（no-decision）pop=4 food(eff=115.0)
+[Specimen T4] tick=740 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T5] tick=780 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=790 heartbeat（no-decision）pop=4 food(eff=115.0)
+[Specimen T4] tick=800 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T5] tick=800 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.50
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+[Specimen T0] tick=850 heartbeat（no-decision）pop=5 food(eff=116.9)
+[Specimen T5] tick=860 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=910 heartbeat（no-decision）pop=5 food(eff=115.6)
+[Specimen T5] tick=920 heartbeat（no-decision）pop=1 food(eff=3.7)
+=======================================================
+[OverflowCapTrace] tick=960 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=960 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=960 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=960 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=960 team=5 has_produce=false cap=49 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=4 avg=25471 us max=1076636 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (18,17)
+t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[6] 與Team0同tile_pos,population4 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+[Succession] Team 6 從匿名晉升新領袖 P3005（統領=0.10）
+[OverflowCapTrace] tick=1010 team=6 has_produce=false cap=7 population=1
+[Order] Team6 buy food ×2 (oid=23)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (17,17)
+[Move] Team 6 抵達 (18,17)
+[Merge] Team0 ← Team5 完全合併 (pop=5)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 5 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=970 heartbeat（no-decision）pop=5 food(eff=115.6)
+[Specimen T5] tick=980 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T6] tick=1010 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T6] tick=1020 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1030 heartbeat（no-decision）pop=4 food(eff=114.1)
+[Specimen T5] tick=1040 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T6] tick=1080 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=1090 heartbeat（no-decision）pop=4 food(eff=114.1)
+[Specimen T5] tick=1100 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T6] tick=1100 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1150 heartbeat（no-decision）pop=5 food(eff=116.1)
+[Specimen T6] tick=1160 heartbeat（no-decision）pop=1 food(eff=0.0)
+=======================================================
+[OverflowCapTrace] tick=1200 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=1200 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1200 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1200 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1200 team=6 has_produce=false cap=7 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[TickPerf] day=5 avg=26025 us max=857799 us ticks=240 teams=5 factions=1
+[Order] Team0 sell food ×92 (oid=24)
+[Order] Team0 buy weapon_melee_low ×3 (oid=25)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=26)
+[Order] Team0 buy material ×47 (oid=27)
+[Order] Team0 buy tools ×4 (oid=28)
+[Order] Team1 sell food ×74 (oid=29)
+[Order] Team1 buy weapon_melee_low ×3 (oid=30)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=31)
+[Order] Team1 buy material ×42 (oid=32)
+[Order] Team1 buy tools ×1 (oid=33)
+[Order] Team2 sell food ×74 (oid=34)
+[Order] Team2 buy weapon_melee_low ×3 (oid=35)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=36)
+[Order] Team2 buy material ×48 (oid=37)
+[Order] Team2 buy tools ×1 (oid=38)
+[Order] Team3 sell food ×78 (oid=39)
+[Order] Team3 buy weapon_melee_low ×3 (oid=40)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=41)
+[Order] Team3 buy material ×52 (oid=42)
+[Order] Team3 buy tools ×1 (oid=43)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫4+私19) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 24(公庫4+私19) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 24(公庫4+私19) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 6 開始
+
+========== [SpecimenTracer] flush 9 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=1200 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1210 heartbeat（no-decision）pop=5 food(eff=114.7)
+[Specimen T6] tick=1260 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1270 heartbeat（no-decision）pop=5 food(eff=114.7)
+[Specimen T6] tick=1300 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1330 heartbeat（no-decision）pop=5 food(eff=113.4)
+[Specimen T6] tick=1360 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=1390 heartbeat（no-decision）pop=5 food(eff=113.4)
+[Specimen T6] tick=1400 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+=======================================================
+[OverflowCapTrace] tick=1440 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=1440 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1440 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1440 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1440 team=6 has_produce=false cap=7 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 25(公庫4+私20) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=6 avg=25734 us max=1274289 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 25(公庫4+私20) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私16) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 26(公庫5+私21) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SubAI] Team6 引擎→覓食 (覓食)
+[Ambition] Team6 rung 0→1 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 27(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 7 開始
+
+========== [SpecimenTracer] flush 9 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=1450 heartbeat（no-decision）pop=5 food(eff=112.1)
+[Specimen T6] tick=1460 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T6] tick=1500 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T6] tick=1500 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1510 heartbeat（no-decision）pop=5 food(eff=110.9)
+[Specimen T6] tick=1560 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=1570 heartbeat（no-decision）pop=5 food(eff=110.9)
+[Specimen T6] tick=1620 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=1630 heartbeat（no-decision）pop=5 food(eff=109.6)
+=======================================================
+[OverflowCapTrace] tick=1680 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=1680 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1680 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1680 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1680 team=6 has_produce=false cap=7 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 27(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=7 avg=26340 us max=971437 us ticks=240 teams=5 factions=1
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 28(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 28(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[SubAI] Team6 紀律失效，脫離成獨立
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 29(公庫6+私23) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[DayNight] Day 8 開始
+
+========== [SpecimenTracer] flush 9 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=1680 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=1690 heartbeat（no-decision）pop=5 food(eff=109.6)
+[Specimen T6] tick=1740 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=1750 heartbeat（no-decision）pop=5 food(eff=108.3)
+[Specimen T6] tick=1800 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T6] tick=1800 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 備戰=0.80 求和=0.66 迎戰=0.65 覓食=0.59 建設=0.17
+    狀態: pop=1 food(priv=3.0/gran=0.0/eff=3.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1810 heartbeat（no-decision）pop=5 food(eff=107.1)
+[Specimen T6] tick=1860 heartbeat（no-decision）pop=1 food(eff=3.0)
+[Specimen T0] tick=1870 heartbeat（no-decision）pop=5 food(eff=107.1)
+=======================================================
+[OverflowCapTrace] tick=1920 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=1920 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1920 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1920 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=1920 team=6 has_produce=false cap=7 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=8 avg=27376 us max=1130076 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Ambition] Team6 rung 1→0 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 31(公庫6+私25) (需 { "material": 50, "tools": 0 })
+[Outpost] Team1 設施施工 farming → Lv1 at (24,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 9 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=1920 heartbeat（no-decision）pop=1 food(eff=2.7)
+[Specimen T0] tick=1930 heartbeat（no-decision）pop=5 food(eff=106.0)
+[Specimen T6] tick=1980 heartbeat（no-decision）pop=1 food(eff=2.7)
+[Specimen T0] tick=1990 heartbeat（no-decision）pop=5 food(eff=106.0)
+[Specimen T6] tick=2040 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=0.66 建設=0.25
+    狀態: pop=1 food(priv=2.3/gran=0.0/eff=2.3) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=2050 heartbeat（no-decision）pop=5 food(eff=104.8)
+[Specimen T6] tick=2100 heartbeat（no-decision）pop=1 food(eff=2.3)
+[Specimen T0] tick=2110 heartbeat（no-decision）pop=5 food(eff=103.5)
+=======================================================
+[OverflowCapTrace] tick=2160 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=2160 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=2160 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=2160 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=2160 team=6 has_produce=false cap=7 population=1
+[Outpost] 設施完工 farming Lv1 at (24,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫0+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫4+私19) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=9 avg=24518 us max=794548 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Relocate] Team2 棄據點遷向 (24,17)
+[Relocate] Team3 棄據點遷向 (24,17)
+[Order] Team6 buy food ×1 (oid=44)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Order] Team2 sell material ×18 (oid=45)
+[Order] Team3 sell material ×13 (oid=46)
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 10 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=2160 heartbeat（no-decision）pop=1 food(eff=2.0)
+[Specimen T0] tick=2170 heartbeat（no-decision）pop=5 food(eff=103.5)
+[Specimen T6] tick=2220 heartbeat（no-decision）pop=1 food(eff=1.7)
+[Specimen T0] tick=2230 heartbeat（no-decision）pop=5 food(eff=102.2)
+[Specimen T6] tick=2280 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=0.76 建設=0.25 紮營=0.25
+    狀態: pop=1 food(priv=1.7/gran=0.0/eff=1.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=2290 heartbeat（no-decision）pop=5 food(eff=102.2)
+[Specimen T6] tick=2340 heartbeat（no-decision）pop=1 food(eff=1.3)
+[Specimen T0] tick=2350 heartbeat（no-decision）pop=5 food(eff=100.9)
+=======================================================
+[OverflowCapTrace] tick=2400 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=2400 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=2400 team=2 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=2400 team=3 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=2400 team=6 has_produce=false cap=7 population=1
+[TickPerf] day=10 avg=17942 us max=1256559 us ticks=240 teams=5 factions=1
+[Order] Team0 sell food ×77 (oid=47)
+[Order] Team0 buy weapon_melee_low ×3 (oid=48)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=49)
+[Order] Team0 buy material ×41 (oid=50)
+[Order] Team0 buy tools ×4 (oid=51)
+[Order] Team1 sell food ×57 (oid=52)
+[Order] Team1 buy weapon_melee_low ×3 (oid=53)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=54)
+[Order] Team1 buy material ×60 (oid=55)
+[Order] Team1 buy tools ×1 (oid=56)
+[Order] Team2 buy weapon_melee_low ×3 (oid=57)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=58)
+[Order] Team3 buy weapon_melee_low ×3 (oid=59)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=60)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 24(公庫4+私20) (需 { "material": 50, "tools": 0 })
+[Combat Start] Team-1000000 vs Team3
+[Ambush] NPC Team3 被 boar 伏擊
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (19,16)
+[DayNight] Day 11 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=2400 heartbeat（no-decision）pop=1 food(eff=1.3)
+[Specimen T0] tick=2410 heartbeat（no-decision）pop=5 food(eff=99.6)
+[Specimen T6] tick=2460 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=2470 heartbeat（no-decision）pop=5 food(eff=99.6)
+[Specimen T6] tick=2520 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(19, 16)
+    candidates: 覓食=0.69 建設=0.26
+    狀態: pop=1 food(priv=3.3/gran=0.0/eff=3.3) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=2530 heartbeat（no-decision）pop=5 food(eff=98.4)
+[Specimen T6] tick=2580 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=2590 heartbeat（no-decision）pop=5 food(eff=98.4)
+=======================================================
+[OverflowCapTrace] tick=2640 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=2640 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=2640 team=2 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=2640 team=3 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=2640 team=6 has_produce=false cap=7 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 7(公庫2+私5) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=11 avg=14181 us max=671194 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 8(公庫2+私6) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (19,16)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 9(公庫2+私7) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 12 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=2640 heartbeat（no-decision）pop=1 food(eff=3.0)
+[Specimen T0] tick=2650 heartbeat（no-decision）pop=5 food(eff=97.1)
+[Specimen T6] tick=2700 heartbeat（no-decision）pop=1 food(eff=3.0)
+[Specimen T0] tick=2710 heartbeat（no-decision）pop=5 food(eff=95.9)
+[Specimen T6] tick=2760 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(19, 16)
+    candidates: 覓食=0.73 建設=0.27
+    狀態: pop=1 food(priv=2.7/gran=0.0/eff=2.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=2770 heartbeat（no-decision）pop=5 food(eff=95.9)
+[Specimen T6] tick=2820 heartbeat（no-decision）pop=1 food(eff=2.3)
+[Specimen T0] tick=2830 heartbeat（no-decision）pop=5 food(eff=94.6)
+=======================================================
+[OverflowCapTrace] tick=2880 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=2880 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=2880 team=2 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=2880 team=3 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=2880 team=6 has_produce=false cap=7 population=1
+[TickPerf] day=12 avg=12985 us max=623887 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫3+私7) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 27(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Move] Team 2 抵達 (24,17)
+[Move] Team 6 抵達 (19,16)
+[Settle] Team2 安頓於 (24,17) 變居民
+[StrategicAI] Faction0 首要目標: defend target=1
+[Move] Team 3 抵達 (24,17)
+[Settle] Team3 安頓於 (24,17) 變居民
+[DayNight] Day 13 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=2880 heartbeat（no-decision）pop=1 food(eff=2.3)
+[Specimen T0] tick=2890 heartbeat（no-decision）pop=5 food(eff=94.6)
+[Specimen T6] tick=2940 heartbeat（no-decision）pop=1 food(eff=2.0)
+[Specimen T0] tick=2950 heartbeat（no-decision）pop=5 food(eff=93.4)
+[Specimen T6] tick=3000 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(19, 16)
+    candidates: 覓食=0.80 建設=0.26 紮營=0.24
+    狀態: pop=1 food(priv=2.0/gran=0.0/eff=2.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=3010 heartbeat（no-decision）pop=5 food(eff=92.1)
+[Specimen T6] tick=3060 heartbeat（no-decision）pop=1 food(eff=1.7)
+[Specimen T0] tick=3070 heartbeat（no-decision）pop=5 food(eff=92.1)
+=======================================================
+[OverflowCapTrace] tick=3120 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=3120 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3120 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3120 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3120 team=6 has_produce=false cap=7 population=1
+[TickPerf] day=13 avg=18502 us max=695521 us ticks=240 teams=5 factions=1
+[Move] Team 6 抵達 (19,16)
+[DayNight] Day 14 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=3120 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=3130 heartbeat（no-decision）pop=5 food(eff=90.9)
+[Specimen T6] tick=3180 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=3190 heartbeat（no-decision）pop=5 food(eff=90.9)
+[Specimen T6] tick=3240 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(19, 16)
+    candidates: 覓食=0.76 建設=0.26
+    狀態: pop=1 food(priv=3.3/gran=0.0/eff=3.3) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=3250 heartbeat（no-decision）pop=5 food(eff=89.7)
+[Specimen T6] tick=3300 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=3310 heartbeat（no-decision）pop=5 food(eff=88.5)
+=======================================================
+[OverflowCapTrace] tick=3360 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=3360 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3360 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3360 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3360 team=6 has_produce=false cap=7 population=1
+[TickPerf] day=14 avg=16746 us max=630203 us ticks=240 teams=5 factions=1
+[Order] Team2 sell material ×20 (oid=62)
+[Order] Team3 sell material ×14 (oid=63)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=21 known=51
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=3360 heartbeat（no-decision）pop=1 food(eff=3.0)
+[Specimen T0] tick=3370 heartbeat（no-decision）pop=5 food(eff=88.5)
+[Specimen T6] tick=3420 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=3430 heartbeat（no-decision）pop=5 food(eff=87.2)
+[Specimen T6] tick=3480 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=0.71 建設=0.27
+    狀態: pop=1 food(priv=3.7/gran=0.0/eff=3.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=3490 heartbeat（no-decision）pop=5 food(eff=87.2)
+[Specimen T6] tick=3540 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=3550 heartbeat（no-decision）pop=5 food(eff=85.9)
+=======================================================
+[OverflowCapTrace] tick=3600 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=3600 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3600 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3600 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3600 team=6 has_produce=false cap=7 population=1
+[TickPerf] day=15 avg=17166 us max=781697 us ticks=240 teams=5 factions=1
+[Order] Team0 sell food ×62 (oid=43)
+[Order] Team0 buy weapon_melee_low ×3 (oid=44)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=45)
+[Order] Team0 buy material ×34 (oid=46)
+[Order] Team0 buy tools ×4 (oid=47)
+[Order] Team1 sell food ×42 (oid=48)
+[Order] Team1 buy weapon_melee_low ×3 (oid=49)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=50)
+[Order] Team1 buy material ×50 (oid=51)
+[Order] Team1 buy tools ×1 (oid=52)
+[Order] Team2 buy weapon_melee_low ×3 (oid=53)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=54)
+[Order] Team3 buy weapon_melee_low ×3 (oid=55)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=56)
+[DayNight] Day 16 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=3600 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=3610 heartbeat（no-decision）pop=5 food(eff=84.7)
+[Specimen T6] tick=3660 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=3670 heartbeat（no-decision）pop=5 food(eff=84.7)
+[Specimen T6] tick=3720 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(18, 17)
+    candidates: 建設=0.27
+    狀態: pop=1 food(priv=3.0/gran=0.0/eff=3.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=3730 heartbeat（no-decision）pop=5 food(eff=83.3)
+[Specimen T6] tick=3780 heartbeat（no-decision）pop=1 food(eff=3.0)
+[Specimen T0] tick=3790 heartbeat（no-decision）pop=5 food(eff=83.3)
+=======================================================
+[OverflowCapTrace] tick=3840 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=3840 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3840 team=2 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3840 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=3840 team=6 has_produce=false cap=7 population=1
+[TickPerf] day=16 avg=16132 us max=862674 us ticks=240 teams=5 factions=1
+[Sub] Team2 派出子隊 Team7 leader=P2001 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team2 派運輸子隊 Team7 送 material×22 → demand 市場(24,24)
+[Order] Team7 sell material ×21 (oid=56)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 32(公庫7+私26) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 33(公庫7+私26) (需 { "material": 50, "tools": 0 })
+[StrategicAI] Faction0 首要目標: defend target=7
+[DayNight] Day 17 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=3840 heartbeat（no-decision）pop=1 food(eff=2.7)
+[Specimen T0] tick=3850 heartbeat（no-decision）pop=5 food(eff=82.0)
+[Specimen T6] tick=3900 heartbeat（no-decision）pop=1 food(eff=2.7)
+[Specimen T0] tick=3910 heartbeat（no-decision）pop=5 food(eff=80.7)
+[Specimen T6] tick=3960 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(18, 17)
+    candidates: 建設=0.38
+    狀態: pop=1 food(priv=2.3/gran=0.0/eff=2.3) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=3970 heartbeat（no-decision）pop=5 food(eff=80.7)
+[Specimen T6] tick=4020 heartbeat（no-decision）pop=1 food(eff=2.0)
+[Specimen T0] tick=4030 heartbeat（no-decision）pop=5 food(eff=79.5)
+=======================================================
+[OverflowCapTrace] tick=4080 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4080 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=4080 team=2 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4080 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=4080 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=4080 team=7 has_produce=false cap=1 population=1
+[TickPerf] day=17 avg=16601 us max=923582 us ticks=240 teams=6 factions=1
+t4080(d17) |      0 |  +0 |   5 |         0 |          20 | [7] | {  } | n/a | n/a | 無變化
+[Order] Team6 buy food ×1 (oid=56)
+[Move] Team 6 抵達 (16,19)
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=4080 heartbeat（no-decision）pop=1 food(eff=2.0)
+[Specimen T0] tick=4090 heartbeat（no-decision）pop=5 food(eff=79.5)
+[Specimen T6] tick=4140 heartbeat（no-decision）pop=1 food(eff=1.7)
+[Specimen T0] tick=4150 heartbeat（no-decision）pop=5 food(eff=78.2)
+[Specimen T6] tick=4200 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=遷移找糧 task=覓食 tgt=(16, 19)
+    candidates: 遷移找糧=0.62 建設=0.37 紮營=0.25
+    狀態: pop=1 food(priv=1.7/gran=0.0/eff=1.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=4210 heartbeat（no-decision）pop=5 food(eff=77.0)
+[Specimen T6] tick=4260 heartbeat（no-decision）pop=1 food(eff=1.3)
+[Specimen T0] tick=4270 heartbeat（no-decision）pop=5 food(eff=77.0)
+=======================================================
+[OverflowCapTrace] tick=4320 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4320 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=4320 team=2 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4320 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=4320 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=4320 team=7 has_produce=false cap=1 population=1
+[TickPerf] day=18 avg=16465 us max=1010674 us ticks=240 teams=6 factions=1
+[Move] Team 6 抵達 (16,19)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 35(公庫8+私28) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 36(公庫8+私28) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 19 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=4320 heartbeat（no-decision）pop=1 food(eff=1.0)
+[Specimen T0] tick=4330 heartbeat（no-decision）pop=5 food(eff=75.7)
+[Specimen T6] tick=4380 heartbeat（no-decision）pop=1 food(eff=1.0)
+[Specimen T0] tick=4390 heartbeat（no-decision）pop=5 food(eff=75.7)
+[Specimen T6] tick=4440 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(16, 19)
+    candidates: 覓食=0.70 建設=0.25
+    狀態: pop=1 food(priv=3.7/gran=0.0/eff=3.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=4450 heartbeat（no-decision）pop=5 food(eff=74.4)
+[Specimen T6] tick=4500 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=4510 heartbeat（no-decision）pop=5 food(eff=73.0)
+=======================================================
+[OverflowCapTrace] tick=4560 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4560 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=4560 team=2 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4560 team=3 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=4560 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=4560 team=7 has_produce=false cap=1 population=1
+[TickPerf] day=19 avg=16563 us max=931835 us ticks=240 teams=6 factions=1
+[Sub] Team3 派出子隊 Team8 leader=P3001 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team3 派運輸子隊 Team8 送 material×17 → demand 市場(17,24)
+[Order] Team8 sell material ×17 (oid=55)
+[Order] Team2 sell material ×1 (oid=56)
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=20 known=50
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=4560 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=4570 heartbeat（no-decision）pop=5 food(eff=73.0)
+[Specimen T6] tick=4620 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=4630 heartbeat（no-decision）pop=5 food(eff=71.8)
+[Specimen T6] tick=4680 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(16, 19)
+    candidates: 覓食=0.64 建設=0.26
+    狀態: pop=1 food(priv=3.7/gran=0.0/eff=3.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=4690 heartbeat（no-decision）pop=5 food(eff=71.8)
+[Specimen T6] tick=4740 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=4750 heartbeat（no-decision）pop=5 food(eff=70.6)
+=======================================================
+[OverflowCapTrace] tick=4800 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4800 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=4800 team=2 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4800 team=3 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=4800 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=4800 team=7 has_produce=false cap=1 population=1
+[OverflowCapTrace] tick=4800 team=8 has_produce=false cap=1 population=1
+[TickPerf] day=20 avg=9425 us max=464516 us ticks=240 teams=7 factions=1
+t4800(d20) |      0 |  +0 |   5 |         0 |          20 | [8] | {  } | n/a | n/a | 無變化
+[Order] Team0 sell food ×46 (oid=37)
+[Order] Team0 buy weapon_melee_low ×3 (oid=38)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=39)
+[Order] Team0 buy material ×27 (oid=40)
+[Order] Team0 buy tools ×4 (oid=41)
+[Order] Team1 sell food ×52 (oid=42)
+[Order] Team1 buy weapon_melee_low ×3 (oid=43)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=44)
+[Order] Team1 buy material ×43 (oid=45)
+[Order] Team1 buy tools ×1 (oid=46)
+[Order] Team2 buy weapon_melee_low ×3 (oid=47)
+[Order] Team2 buy weapon_ranged_low ×2 (oid=48)
+[Order] Team2 buy food ×2 (oid=49)
+[Order] Team3 buy weapon_melee_low ×3 (oid=50)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=51)
+[Order] Team3 buy food ×2 (oid=52)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 38(公庫8+私30) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (16,19)
+[Move] Team 7 抵達 (24,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 39(公庫9+私30) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 21 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=4800 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=4810 heartbeat（no-decision）pop=5 food(eff=69.4)
+[Specimen T6] tick=4860 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=4870 heartbeat（no-decision）pop=5 food(eff=69.4)
+[Specimen T6] tick=4920 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(16, 19)
+    candidates: 覓食=0.63 建設=0.26
+    狀態: pop=1 food(priv=3.7/gran=0.0/eff=3.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=4930 heartbeat（no-decision）pop=5 food(eff=68.1)
+[Specimen T6] tick=4980 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=4990 heartbeat（no-decision）pop=5 food(eff=68.1)
+=======================================================
+[OverflowCapTrace] tick=5040 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5040 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=5040 team=2 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5040 team=3 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5040 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=5040 team=7 has_produce=false cap=1 population=1
+[OverflowCapTrace] tick=5040 team=8 has_produce=false cap=1 population=1
+[TickPerf] day=21 avg=12078 us max=944896 us ticks=240 teams=7 factions=1
+[Ambition] Team1 rung 0→1 (定居 cap=2)
+[Order] Team7 sell material ×21 (oid=58)
+[Order] Team3 sell material ×1 (oid=59)
+[Move] Team 6 抵達 (16,19)
+[DayNight] Day 22 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=5040 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=5050 heartbeat（no-decision）pop=5 food(eff=66.9)
+[Specimen T6] tick=5100 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=5110 heartbeat（no-decision）pop=5 food(eff=65.7)
+[Specimen T6] tick=5160 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(16, 19)
+    candidates: 覓食=0.62 建設=0.26
+    狀態: pop=1 food(priv=3.0/gran=0.0/eff=3.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=5170 heartbeat（no-decision）pop=5 food(eff=65.7)
+[Specimen T6] tick=5220 heartbeat（no-decision）pop=1 food(eff=2.7)
+[Specimen T0] tick=5230 heartbeat（no-decision）pop=5 food(eff=64.4)
+=======================================================
+[OverflowCapTrace] tick=5280 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5280 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=5280 team=2 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5280 team=3 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5280 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=5280 team=7 has_produce=false cap=1 population=1
+[OverflowCapTrace] tick=5280 team=8 has_produce=false cap=1 population=1
+[TickPerf] day=22 avg=10103 us max=639654 us ticks=240 teams=7 factions=1
+[SurvivalCamp] team=Team7 → 紮營 @(24,22)
+[Survival] Team7 warning days_left=2.9 運輸→紮營
+[Survival] Team8 warning days_left=2.9 運輸→覓食
+[CrudeCamp] Team7 紮營 @(24,22) → civilian
+[Order] Team7 buy material ×37 (oid=60)
+[Order] Team7 buy tools ×1 (oid=61)
+[Move] Team 6 抵達 (16,19)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 41(公庫9+私32) (需 { "material": 50, "tools": 0 })
+[Order] Team8 buy food ×1 (oid=62)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 42(公庫10+私32) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 23 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=5280 heartbeat（no-decision）pop=1 food(eff=2.7)
+[Specimen T0] tick=5290 heartbeat（no-decision）pop=5 food(eff=64.4)
+[Specimen T6] tick=5340 heartbeat（no-decision）pop=1 food(eff=2.3)
+[Specimen T0] tick=5350 heartbeat（no-decision）pop=5 food(eff=63.0)
+[Specimen T6] tick=5400 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(16, 19)
+    candidates: 覓食=0.68 建設=0.26
+    狀態: pop=1 food(priv=2.3/gran=0.0/eff=2.3) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=5410 heartbeat（no-decision）pop=5 food(eff=61.7)
+[Specimen T6] tick=5460 heartbeat（no-decision）pop=1 food(eff=2.0)
+[Specimen T0] tick=5470 heartbeat（no-decision）pop=5 food(eff=61.7)
+=======================================================
+[OverflowCapTrace] tick=5520 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5520 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=5520 team=2 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5520 team=3 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5520 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=5520 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=5520 team=8 has_produce=false cap=1 population=1
+[Order] Team7 buy food ×1 (oid=63)
+[TickPerf] day=23 avg=13607 us max=770426 us ticks=240 teams=7 factions=1
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Move] Team 8 抵達 (18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Survival] Team8 warning days_left=1.2 idle→覓食
+[DayNight] Day 24 開始
+[MsgPrune] 刪除過期訊息 global=3 known=7
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=5520 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=5530 heartbeat（no-decision）pop=5 food(eff=60.5)
+[Specimen T6] tick=5580 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=5590 heartbeat（no-decision）pop=5 food(eff=60.5)
+[Specimen T6] tick=5640 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(16, 19)
+    candidates: 建設=0.26
+    狀態: pop=1 food(priv=3.3/gran=0.0/eff=3.3) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=5650 heartbeat（no-decision）pop=5 food(eff=59.2)
+[Specimen T6] tick=5700 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=5710 heartbeat（no-decision）pop=5 food(eff=57.9)
+=======================================================
+[OverflowCapTrace] tick=5760 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5760 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=5760 team=2 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5760 team=3 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=5760 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=5760 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=5760 team=8 has_produce=false cap=1 population=1
+[TickPerf] day=24 avg=10192 us max=645087 us ticks=240 teams=7 factions=1
+[Move] Team 8 抵達 (18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Survival] Team8 urgent days_left=0.8 idle→覓食
+[Faction] Team7 脫離勢力0
+[Order] Team8 sell material ×17 (oid=62)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Order] Team2 sell material ×4 (oid=63)
+[StrategicAI] Faction0 首要目標: defend target=8
+[Move] Team 8 抵達 (18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Survival] Team8 urgent days_left=0.4 idle→覓食
+[Faction] Team2 脫離勢力0
+[Faction] Team3 脫離勢力0
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=14 known=32
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=5760 heartbeat（no-decision）pop=1 food(eff=3.0)
+[Specimen T0] tick=5770 heartbeat（no-decision）pop=5 food(eff=57.9)
+[Specimen T6] tick=5820 heartbeat（no-decision）pop=1 food(eff=2.7)
+[Specimen T0] tick=5830 heartbeat（no-decision）pop=5 food(eff=56.6)
+[Specimen T6] tick=5880 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(16, 19)
+    candidates: 建設=0.36
+    狀態: pop=1 food(priv=2.7/gran=0.0/eff=2.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=5890 heartbeat（no-decision）pop=5 food(eff=56.6)
+[Specimen T6] tick=5940 heartbeat（no-decision）pop=1 food(eff=2.3)
+[Specimen T0] tick=5950 heartbeat（no-decision）pop=5 food(eff=55.3)
+=======================================================
+[OverflowCapTrace] tick=6000 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=6000 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=6000 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=6000 team=3 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=6000 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=6000 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=6000 team=8 has_produce=false cap=1 population=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 44(公庫10+私34) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Move] Team 8 抵達 (18,20)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 45(公庫10+私34) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=25 avg=14057 us max=809991 us ticks=240 teams=7 factions=1
+t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_dispatched": 2 } | n/a | n/a | 無變化
+[SubAI] Team8 引擎→覓食 (覓食)
+[Order] Team0 sell food ×31 (oid=52)
+[Order] Team0 buy weapon_melee_low ×3 (oid=53)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=54)
+[Order] Team0 buy material ×20 (oid=55)
+[Order] Team0 buy tools ×4 (oid=56)
+[Order] Team1 sell food ×64 (oid=57)
+[Order] Team1 buy weapon_melee_low ×3 (oid=58)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=59)
+[Order] Team1 buy material ×36 (oid=60)
+[Order] Team1 buy tools ×1 (oid=61)
+[Order] Team2 buy weapon_melee_low ×1 (oid=62)
+[Order] Team2 buy food ×17 (oid=63)
+[Order] Team3 buy weapon_melee_low ×1 (oid=64)
+[Order] Team3 buy food ×17 (oid=65)
+[Move] Team 8 抵達 (18,20)
+[CrudeCamp] Team2 紮營 @(24,16) → civilian
+[Order] Team2 buy material ×20 (oid=66)
+[Order] Team6 buy food ×1 (oid=67)
+[Move] Team 3 抵達 (23,16)
+[DayNight] Day 26 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=6000 heartbeat（no-decision）pop=1 food(eff=2.3)
+[Specimen T0] tick=6010 heartbeat（no-decision）pop=5 food(eff=54.0)
+[Specimen T6] tick=6060 heartbeat（no-decision）pop=1 food(eff=2.0)
+[Specimen T0] tick=6070 heartbeat（no-decision）pop=5 food(eff=54.0)
+[Specimen T6] tick=6120 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=遷移找糧 task=覓食 tgt=(14, 19)
+    candidates: 遷移找糧=0.62 建設=0.37 紮營=0.25
+    狀態: pop=1 food(priv=1.7/gran=0.0/eff=1.7) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=6130 heartbeat（no-decision）pop=5 food(eff=52.7)
+[Specimen T6] tick=6180 heartbeat（no-decision）pop=1 food(eff=1.7)
+[Specimen T0] tick=6190 heartbeat（no-decision）pop=5 food(eff=52.7)
+=======================================================
+[OverflowCapTrace] tick=6240 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=6240 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=6240 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=6240 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=6240 team=6 has_produce=false cap=7 population=1
+[OverflowCapTrace] tick=6240 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=6240 team=8 has_produce=false cap=1 population=1
+[TickPerf] day=26 avg=13751 us max=746684 us ticks=240 teams=7 factions=1
+[SubAI] Team8 引擎→貿易 (maintain_food:resource)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=68)
+[CrudeCamp] Team6 紮營 @(15,19) → civilian
+[Order] Team7 sell material ×1 (oid=69)
+[Order] Team3 sell material ×3 (oid=70)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(16,22)
+[Survival] Team8 warning days_left=2.9 貿易→覓食
+[Order] Team6 buy material ×29 (oid=71)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(16,22)
+[DayNight] Day 27 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=6240 heartbeat（no-decision）pop=1 food(eff=1.3)
+[Specimen T0] tick=6250 heartbeat（no-decision）pop=5 food(eff=51.5)
+[Specimen T6] tick=6300 heartbeat（no-decision）pop=1 food(eff=1.3)
+[Specimen T0] tick=6310 heartbeat（no-decision）pop=5 food(eff=50.3)
+[Specimen T6] tick=6360 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=紮營 task=紮營 tgt=(15, 19)
+    candidates: 紮營=1.20 建設=0.24
+    狀態: pop=1 food(priv=1.0/gran=0.0/eff=1.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=6370 heartbeat（no-decision）pop=5 food(eff=50.3)
+[Specimen T6] tick=6420 heartbeat（no-decision）pop=1 food(eff=0.7)
+[Specimen T0] tick=6430 heartbeat（no-decision）pop=5 food(eff=49.0)
+=======================================================
+[OverflowCapTrace] tick=6480 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=6480 team=1 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=6480 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=6480 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=6480 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=6480 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=6480 team=8 has_produce=false cap=1 population=1
+[TickPerf] day=27 avg=15521 us max=598805 us ticks=240 teams=7 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 47(公庫11+私36) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (16,22)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 48(公庫11+私36) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(16,22)
+[Survival] Team8 warning days_left=2.5 idle→覓食
+[Move] Team 1 抵達 (27,17)
+[Move] Team 8 抵達 (16,22)
+[SubAI] Team7 紀律失效，脫離成獨立
+[Faction] Team6 脫離勢力0
+[SubAI] Team8 引擎→覓食 (覓食)
+[DayNight] Day 28 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=6480 heartbeat（no-decision）pop=1 food(eff=0.7)
+[Specimen T0] tick=6490 heartbeat（no-decision）pop=5 food(eff=49.0)
+[Specimen T6] tick=6540 heartbeat（no-decision）pop=1 food(eff=0.4)
+[Specimen T0] tick=6550 heartbeat（no-decision）pop=5 food(eff=47.7)
+[Specimen T6] tick=6600 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=返家補給 task=return_home tgt=(15, 19)
+    candidates: 返家補給=2.69 建設=0.23 駐守=0.22
+    狀態: pop=1 food(priv=0.4/gran=0.0/eff=0.4) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=6610 heartbeat（no-decision）pop=5 food(eff=46.4)
+[Specimen T6] tick=6660 heartbeat（no-decision）pop=1 food(eff=0.1)
+[Specimen T0] tick=6670 heartbeat（no-decision）pop=5 food(eff=46.4)
+=======================================================
+[OverflowCapTrace] tick=6720 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=6720 team=1 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=6720 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=6720 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=6720 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=6720 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=6720 team=8 has_produce=false cap=1 population=1
+[Order] Team7 buy food ×3 (oid=73)
+[TickPerf] day=28 avg=23147 us max=1101241 us ticks=240 teams=7 factions=1
+[Move] Team 8 抵達 (16,22)
+[SubAI] Team8 引擎→貿易 (maintain_food:resource)
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=6720 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=6730 heartbeat（no-decision）pop=5 food(eff=45.1)
+[Specimen T6] tick=6780 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=6790 heartbeat（no-decision）pop=5 food(eff=45.1)
+[Specimen T6] tick=6840 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=返家補給 task=return_home tgt=(15, 19)
+    candidates: 返家補給=3.34 建設=0.23 駐守=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=6850 heartbeat（no-decision）pop=5 food(eff=43.8)
+[Specimen T6] tick=6900 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=6910 heartbeat（no-decision）pop=5 food(eff=42.5)
+=======================================================
+[OverflowCapTrace] tick=6960 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=6960 team=1 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=6960 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=6960 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=6960 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=6960 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=6960 team=8 has_produce=false cap=1 population=1
+[TickPerf] day=29 avg=23945 us max=1481490 us ticks=240 teams=7 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 50(公庫12+私38) (需 { "material": 50, "tools": 0 })
+[Order] Team8 sell material ×17 (oid=72)
+[Order] Team2 sell material ×3 (oid=73)
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=14 known=17
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=6960 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=6970 heartbeat（no-decision）pop=5 food(eff=42.5)
+[Specimen T6] tick=7020 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7030 heartbeat（no-decision）pop=5 food(eff=41.3)
+[Specimen T6] tick=7080 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=返家補給 task=return_home tgt=(15, 19)
+    candidates: 返家補給=3.40 駐守=0.23 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=7090 heartbeat（no-decision）pop=5 food(eff=41.3)
+[Specimen T6] tick=7140 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7150 heartbeat（no-decision）pop=5 food(eff=40.0)
+=======================================================
+[OverflowCapTrace] tick=7200 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=7200 team=1 has_produce=true cap=38 population=6
+[OverflowCapTrace] tick=7200 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=7200 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=7200 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=7200 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=7200 team=8 has_produce=false cap=1 population=1
+[Move] Team 8 抵達 (17,24)
+[SubAI] Team8 引擎→貿易 (maintain_food:resource)
+[TickPerf] day=30 avg=26370 us max=1011310 us ticks=240 teams=7 factions=1
+[Order] Team0 sell food ×16 (oid=65)
+[Order] Team0 buy weapon_melee_low ×3 (oid=66)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=67)
+[Order] Team0 buy material ×13 (oid=68)
+[Order] Team0 buy tools ×4 (oid=69)
+[Order] Team1 buy weapon_melee_low ×3 (oid=70)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=71)
+[Order] Team1 buy material ×47 (oid=72)
+[Order] Team1 buy tools ×1 (oid=73)
+[Order] Team2 buy food ×17 (oid=74)
+[Order] Team3 buy weapon_melee_low ×2 (oid=75)
+[Order] Team3 buy food ×5 (oid=76)
+[Move] Team 8 抵達 (17,24)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(17,25)
+[Survival] Team8 warning days_left=2.9 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(17,25)
+[Order] Team6 buy food ×2 (oid=77)
+[Move] Team 1 抵達 (24,16)
+[Market@(24, 16)] Team1  outpost owner Team2 成交
+[Order] Team8 buy food ×1 (oid=78)
+[DayNight] Day 31 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=7200 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7210 heartbeat（no-decision）pop=5 food(eff=38.8)
+[Specimen T6] tick=7260 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7270 heartbeat（no-decision）pop=5 food(eff=38.8)
+[Specimen T6] tick=7320 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=返家補給 task=return_home tgt=(15, 19)
+    candidates: 返家補給=3.45 駐守=0.23 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=1
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=7330 heartbeat（no-decision）pop=5 food(eff=37.6)
+[Specimen T6] tick=7380 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7390 heartbeat（no-decision）pop=5 food(eff=37.6)
+=======================================================
+[OverflowCapTrace] tick=7440 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=7440 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=7440 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=7440 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=7440 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=7440 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=7440 team=8 has_produce=false cap=1 population=1
+[TickPerf] day=31 avg=23759 us max=1014308 us ticks=240 teams=7 factions=1
+[Order] Team1 buy food ×2 (oid=78)
+[Order] Team2 sell material ×6 (oid=79)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=80)
+[Site] 選址 (27, 12) score=391 周邊資源={ "ore_iron": 183, "ore_silver": 77, "herb": 6, "wild_horses": 7 } terrain=mountain
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 53(公庫13+私40) (需 { "material": 50, "tools": 0 })
+[Outpost] Team2 設施施工 farming → Lv1 at (24,16)
+[Move] Team 8 抵達 (17,25)
+[Infra] Team1 復工 at (24,16)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(17,26)
+[Survival] Team8 warning days_left=2.1 idle→覓食
+[SurvivalCamp] team=Team8 → 紮營 @(17,25)
+[Order] Team7 sell material ×1 (oid=81)
+[CrudeCamp] Team8 紮營 @(17,25) → civilian
+[Order] Team2 buy material ×22 (oid=82)
+[Order] Team3 sell material ×3 (oid=83)
+[Move] Team 1 抵達 (24,16)
+[Order] Team6 buy material ×17 (oid=84)
+[Outpost] 設施完工 farming Lv1 at (24,16)
+[Order] Team8 buy material ×25 (oid=85)
+[DayNight] Day 32 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=7440 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7450 heartbeat（no-decision）pop=5 food(eff=36.4)
+[Specimen T6] tick=7500 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7510 heartbeat（no-decision）pop=5 food(eff=35.1)
+[Specimen T6] tick=7560 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=返家補給 task=return_home tgt=(15, 19)
+    candidates: 返家補給=3.48 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=1
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=7570 heartbeat（no-decision）pop=5 food(eff=35.1)
+[Specimen T6] tick=7620 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7630 heartbeat（no-decision）pop=5 food(eff=33.9)
+=======================================================
+[OverflowCapTrace] tick=7680 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=7680 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=7680 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=7680 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=7680 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=7680 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=7680 team=8 has_produce=true cap=20 population=1
+[Horse] Outpost (17, 25) 捕野馬 +1
+[TickPerf] day=32 avg=31483 us max=1263475 us ticks=240 teams=7 factions=1
+[Move] Team 1 抵達 (24,16)
+[Faction] Team8 脫離勢力0
+[Order] Team2 buy weapon_melee_low ×1 (oid=86)
+[StrategicAI] Faction0 首要目標: defend target=1
+[Move] Team 1 抵達 (24,16)
+[DayNight] Day 33 開始
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=7680 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7690 heartbeat（no-decision）pop=5 food(eff=33.9)
+[Specimen T6] tick=7740 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7750 heartbeat（no-decision）pop=5 food(eff=32.7)
+[Specimen T6] tick=7800 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=返家補給 task=return_home tgt=(15, 19)
+    candidates: 返家補給=3.51 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=1
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=7810 heartbeat（no-decision）pop=5 food(eff=31.4)
+[Specimen T6] tick=7860 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7870 heartbeat（no-decision）pop=5 food(eff=31.4)
+=======================================================
+[OverflowCapTrace] tick=7920 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=7920 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=7920 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=7920 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=7920 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=7920 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=7920 team=8 has_produce=true cap=20 population=1
+[Order] Team7 buy food ×3 (oid=87)
+[TickPerf] day=33 avg=27117 us max=1432186 us ticks=240 teams=7 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 56(公庫14+私42) (需 { "material": 50, "tools": 0 })
+[Move] Team 1 抵達 (24,16)
+[Move] Team 3 抵達 (21,17)
+[DayNight] Day 34 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=7920 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7930 heartbeat（no-decision）pop=5 food(eff=30.2)
+[Specimen T6] tick=7980 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=7990 heartbeat（no-decision）pop=5 food(eff=30.2)
+[Specimen T6] tick=8040 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=返家補給 task=return_home tgt=(15, 19)
+    candidates: 返家補給=3.51 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=1
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=8050 heartbeat（no-decision）pop=5 food(eff=28.9)
+[Specimen T6] tick=8100 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8110 heartbeat（no-decision）pop=5 food(eff=27.6)
+=======================================================
+[OverflowCapTrace] tick=8160 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=8160 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=8160 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=8160 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=8160 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=8160 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=8160 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=34 avg=28228 us max=1470989 us ticks=240 teams=7 factions=1
+[Move] Team 1 抵達 (24,16)
+[Order] Team2 buy weapon_ranged_low ×1 (oid=86)
+[Move] Team 1 抵達 (24,17)
+[Ambition] Team1 rung 0→1 (定居 cap=2)
+[DayNight] Day 35 開始
+[MsgPrune] 刪除過期訊息 global=21 known=38
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=8160 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8170 heartbeat（no-decision）pop=5 food(eff=27.6)
+[Specimen T6] tick=8220 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8230 heartbeat（no-decision）pop=5 food(eff=26.4)
+[Specimen T6] tick=8280 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.45 返家補給=3.41 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=1
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=8290 heartbeat（no-decision）pop=5 food(eff=26.4)
+[Specimen T6] tick=8340 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8350 heartbeat（no-decision）pop=5 food(eff=25.1)
+=======================================================
+[OverflowCapTrace] tick=8400 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=8400 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=8400 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=8400 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=8400 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=8400 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=8400 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=35 avg=21937 us max=751037 us ticks=240 teams=7 factions=1
+[Order] Team0 sell food ×1 (oid=66)
+[Order] Team0 buy weapon_melee_low ×3 (oid=67)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=68)
+[Order] Team0 buy material ×6 (oid=69)
+[Order] Team0 buy tools ×4 (oid=70)
+[Order] Team1 sell food ×24 (oid=71)
+[Order] Team1 buy weapon_melee_low ×3 (oid=72)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=73)
+[Order] Team1 buy material ×19 (oid=74)
+[Order] Team1 buy tools ×1 (oid=75)
+[Order] Team2 buy food ×17 (oid=76)
+[Order] Team3 buy food ×17 (oid=77)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 59(公庫15+私44) (需 { "material": 50, "tools": 0 })
+[SubAI] Team8 紀律失效，脫離成獨立
+[Order] Team6 buy food ×2 (oid=78)
+[Move] Team 2 抵達 (24,17)
+[Move] Team 3 抵達 (21,18)
+[SubAI] Team2 引擎→貿易 (買糧)
+[StrategicAI] Faction0 首要目標: defend target=2
+[Faction] Team2 脫離勢力0
+[Order] Team8 buy food ×3 (oid=80)
+[DayNight] Day 36 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=8400 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8410 heartbeat（no-decision）pop=5 food(eff=23.7)
+[Specimen T6] tick=8460 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8470 heartbeat（no-decision）pop=5 food(eff=23.7)
+[Specimen T6] tick=8520 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.47 返家補給=3.40 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=1
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=8530 heartbeat（no-decision）pop=5 food(eff=22.4)
+[Specimen T6] tick=8580 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8590 heartbeat（no-decision）pop=5 food(eff=22.4)
+=======================================================
+[OverflowCapTrace] tick=8640 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=8640 team=1 has_produce=true cap=20 population=6
+[OverflowCapTrace] tick=8640 team=2 has_produce=true cap=20 population=4
+[OverflowCapTrace] tick=8640 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=8640 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=8640 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=8640 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=36 avg=30599 us max=1093286 us ticks=240 teams=7 factions=1
+[Order] Team0 buy food ×1 (oid=79)
+[StrategicAI] Faction0 首要目標: defend target=1
+[Move] Team 3 抵達 (21,18)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Order] Team7 sell material ×1 (oid=80)
+[Order] Team2 buy material ×12 (oid=81)
+[Order] Team3 sell material ×3 (oid=82)
+[Order] Team3 buy weapon_melee_low ×2 (oid=83)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=84)
+[Move] Team 2 抵達 (24,17)
+[Merge] Team1 ← Team2 完全合併 (pop=10)
+[Ambition] Team1 rung 1→2 (定居 cap=2)
+[Order] Team6 buy material ×16 (oid=85)
+[Order] Team8 buy material ×2 (oid=86)
+[DayNight] Day 37 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=8640 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8650 heartbeat（no-decision）pop=5 food(eff=21.1)
+[Specimen T6] tick=8700 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8710 heartbeat（no-decision）pop=5 food(eff=19.8)
+[Specimen T6] tick=8760 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.50 返家補給=3.40 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=1
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=8770 heartbeat（no-decision）pop=5 food(eff=19.8)
+[Specimen T6] tick=8820 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8830 heartbeat（no-decision）pop=5 food(eff=18.5)
+=======================================================
+[OverflowCapTrace] tick=8880 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=8880 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=8880 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=8880 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=8880 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=8880 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=37 avg=20997 us max=872385 us ticks=240 teams=6 factions=1
+[Move] Team 3 抵達 (21,18)
+[Outpost] Team1 設施施工 apothecary → Lv1 at (24,17)
+[Move] Team 3 抵達 (21,18)
+[Infra] Team1 復工 at (24,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 62(公庫15+私46) (需 { "material": 50, "tools": 0 })
+[Order] Team1 buy food ×2 (oid=84)
+[DayNight] Day 38 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=8880 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8890 heartbeat（no-decision）pop=5 food(eff=18.5)
+[Specimen T6] tick=8940 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=8950 heartbeat（no-decision）pop=5 food(eff=17.3)
+[Specimen T6] tick=9000 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.52 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=1
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=9010 heartbeat（no-decision）pop=5 food(eff=16.1)
+[Specimen T6] tick=9060 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9070 heartbeat（no-decision）pop=5 food(eff=16.1)
+=======================================================
+[OverflowCapTrace] tick=9120 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=9120 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=9120 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=9120 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=9120 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=9120 team=8 has_produce=true cap=20 population=1
+[Order] Team7 buy food ×3 (oid=84)
+[TickPerf] day=38 avg=17207 us max=1174807 us ticks=240 teams=6 factions=1
+[Outpost] 設施完工 apothecary Lv1 at (24,17)
+[Ambition] Team1 rung 2→1 (定居 cap=2)
+[DayNight] Day 39 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=9120 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9130 heartbeat（no-decision）pop=5 food(eff=14.8)
+[Specimen T6] tick=9180 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9190 heartbeat（no-decision）pop=5 food(eff=14.8)
+[Specimen T6] tick=9240 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.55 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=2
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=9250 heartbeat（no-decision）pop=5 food(eff=13.6)
+[Specimen T6] tick=9300 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9310 heartbeat（no-decision）pop=5 food(eff=12.4)
+=======================================================
+[OverflowCapTrace] tick=9360 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=9360 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=9360 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=9360 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=9360 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=9360 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=39 avg=13948 us max=533807 us ticks=240 teams=6 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 63(公庫16+私47) (需 { "material": 50, "tools": 0 })
+[Outpost] Team0 設施施工 farming → Lv1 at (17,17)
+[DayNight] Day 40 開始
+[MsgPrune] 刪除過期訊息 global=16 known=18
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=9360 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9370 heartbeat（no-decision）pop=5 food(eff=12.4)
+[Specimen T6] tick=9420 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9430 heartbeat（no-decision）pop=5 food(eff=11.1)
+[Specimen T6] tick=9480 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.57 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=2
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=9490 heartbeat（no-decision）pop=5 food(eff=11.1)
+[Specimen T6] tick=9540 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9550 heartbeat（no-decision）pop=5 food(eff=9.9)
+=======================================================
+[OverflowCapTrace] tick=9600 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=9600 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=9600 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=9600 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=9600 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=9600 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=40 avg=53764 us max=1248022 us ticks=240 teams=6 factions=1
+[Order] Team0 buy weapon_melee_low ×2 (oid=64)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=65)
+[Order] Team0 buy material ×20 (oid=66)
+[Order] Team0 buy tools ×3 (oid=67)
+[Ambition] Team1 rung 1→0 (定居 cap=2)
+[Order] Team1 buy weapon_melee_low ×6 (oid=68)
+[Order] Team1 buy weapon_ranged_low ×5 (oid=69)
+[Order] Team1 buy material ×44 (oid=70)
+[Order] Team1 buy tools ×5 (oid=71)
+[Order] Team3 buy food ×3 (oid=72)
+[Order] Team6 buy food ×2 (oid=73)
+[Order] Team8 buy food ×3 (oid=74)
+[DayNight] Day 41 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=9600 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9610 heartbeat（no-decision）pop=5 food(eff=8.7)
+[Specimen T6] tick=9660 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9670 heartbeat（no-decision）pop=5 food(eff=8.7)
+[Specimen T6] tick=9720 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.57 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=2
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=9730 heartbeat（no-decision）pop=5 food(eff=7.4)
+[Specimen T6] tick=9780 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9790 heartbeat（no-decision）pop=5 food(eff=7.4)
+=======================================================
+[OverflowCapTrace] tick=9840 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=9840 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=9840 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=9840 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=9840 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=9840 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=41 avg=48180 us max=1059656 us ticks=240 teams=6 factions=1
+[Order] Team0 buy food ×16 (oid=71)
+[Faction] 勢力0 解散
+[Faction] Team0 脫離勢力0
+[Order] Team7 sell material ×1 (oid=73)
+[Order] Team3 sell material ×3 (oid=74)
+[Order] Team3 buy weapon_melee_low ×2 (oid=75)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=76)
+[Order] Team6 buy material ×15 (oid=77)
+[Outpost] 設施完工 farming Lv1 at (17,17)
+[Order] Team8 buy material ×2 (oid=78)
+[DayNight] Day 42 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+
+========== [SpecimenTracer] flush 9 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=9840 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9850 heartbeat（no-decision）pop=5 food(eff=6.1)
+[Specimen T6] tick=9900 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=9910 heartbeat（no-decision）pop=5 food(eff=4.9)
+[Specimen T6] tick=9960 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.46 返家補給=3.40 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=2
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=9970 heartbeat（no-decision）pop=5 food(eff=4.9)
+[Specimen T6] tick=10020 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10030 heartbeat（no-decision）pop=5 food(eff=3.6)
+[Specimen T0] tick=10060 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=2.13 返家補給=2.09 build_workshop:resource=0.30 build_apothecary:resource=0.30 build_mint:resource=0.30 build_stable:resource=0.30 駐守=0.29 maintain_material:resource=0.20 建設=0.15
+    狀態: pop=5 food(priv=3.6/gran=0.0/eff=3.6) consume/d=4.0 rung=0 fid=-1 coin=200 mat=35
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+=======================================================
+[OverflowCapTrace] tick=10080 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=10080 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=10080 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=10080 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=10080 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=10080 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=42 avg=37090 us max=1020981 us ticks=240 teams=6 factions=0
+[Ambition] Team3 rung 1→0 (定居 cap=2)
+[Order] Team0 sell material ×6 (oid=78)
+[Order] Team1 buy food ×9 (oid=79)
+[DayNight] Day 43 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=10080 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10120 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=2.49 返家補給=2.43 駐守=0.29 build_workshop:resource=0.21 build_apothecary:resource=0.21 build_mint:resource=0.21 build_stable:resource=0.21 建設=0.15 maintain_material:resource=0.14
+    狀態: pop=5 food(priv=2.6/gran=0.0/eff=2.6) consume/d=4.0 rung=0 fid=-1 coin=200 mat=35
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T6] tick=10140 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10180 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=2.51 返家補給=2.44 駐守=0.30 build_workshop:resource=0.21 build_apothecary:resource=0.21 build_mint:resource=0.21 build_stable:resource=0.21 建設=0.15 maintain_material:resource=0.14
+    狀態: pop=5 food(priv=2.6/gran=0.0/eff=2.6) consume/d=4.0 rung=0 fid=-1 coin=200 mat=35
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T6] tick=10200 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.48 返家補給=3.40 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=2
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=10240 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=2.86 返家補給=2.78 駐守=0.30 建設=0.14 build_workshop:resource=0.13 build_apothecary:resource=0.13 build_mint:resource=0.13 build_stable:resource=0.13 maintain_material:resource=0.08
+    狀態: pop=5 food(priv=1.6/gran=0.0/eff=1.6) consume/d=4.0 rung=0 fid=-1 coin=200 mat=36
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T6] tick=10260 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10300 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=2.89 返家補給=2.79 駐守=0.30 建設=0.14 build_workshop:resource=0.13 build_apothecary:resource=0.13 build_mint:resource=0.13 build_stable:resource=0.13 maintain_material:resource=0.08
+    狀態: pop=5 food(priv=1.6/gran=0.0/eff=1.6) consume/d=4.0 rung=0 fid=-1 coin=200 mat=36
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+=======================================================
+[OverflowCapTrace] tick=10320 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=10320 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=10320 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=10320 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=10320 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=10320 team=8 has_produce=true cap=20 population=1
+[Order] Team7 buy food ×3 (oid=79)
+[TickPerf] day=43 avg=22503 us max=764101 us ticks=240 teams=6 factions=0
+[DayNight] Day 44 開始
+[MsgPrune] 刪除過期訊息 global=2 known=1
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=10320 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10360 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=3.31 返家補給=3.19 駐守=0.30 建設=0.14 build_workshop:resource=0.03 build_apothecary:resource=0.03 build_mint:resource=0.03 build_stable:resource=0.03 maintain_material:resource=0.02
+    狀態: pop=5 food(priv=0.4/gran=0.0/eff=0.4) consume/d=4.0 rung=0 fid=-1 coin=200 mat=36
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T6] tick=10380 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10420 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=3.47 返家補給=3.34 駐守=0.31 建設=0.14 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_mint:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=200 mat=36
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T6] tick=10440 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.51 返家補給=3.40 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=2
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=10480 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=3.49 返家補給=3.34 駐守=0.31 建設=0.14 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_mint:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=200 mat=36
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T6] tick=10500 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10540 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=3.50 返家補給=3.35 駐守=0.31 建設=0.14 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_mint:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=200 mat=37
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+=======================================================
+[OverflowCapTrace] tick=10560 team=0 has_produce=true cap=20 population=5
+[OverflowCapTrace] tick=10560 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=10560 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=10560 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=10560 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=10560 team=8 has_produce=true cap=20 population=1
+[TickPerf] day=44 avg=22995 us max=726118 us ticks=240 teams=6 factions=0
+[Move] Team 3 抵達 (23,16)
+[Event] Team 0 領袖替換：Person 0 → Person 3004（統領=0.78）
+[Tag] Team0 +軍隊 -生產
+[SoloAI] Team0 → 覓食 (覓食)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[SoloAI] Team0 → 覓食 (覓食)
+[SoloAI] Team0 → 覓食 (覓食)
+[DayNight] Day 45 開始
+[MsgPrune] 刪除過期訊息 global=19 known=19
+
+========== [SpecimenTracer] flush 8 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=10560 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10600 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=3.52 返家補給=3.36 駐守=0.31 建設=0.14 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_mint:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=200 mat=37
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T6] tick=10620 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10660 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=3.50 返家補給=3.43 建設=0.93 駐守=0.35 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_mint:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=200 mat=37
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+[Specimen T6] tick=10680 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(14, 19)
+    candidates: 覓食=3.47 返家補給=3.40 駐守=0.24 建設=0.22 maintain_material:location:delegate=0.00 build_farming:location:delegate=0.00 build_workshop:location:delegate=0.00 build_apothecary:location:delegate=0.00 build_stable:location:delegate=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=-1 coin=0 mat=2
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=10720 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=3.18 返家補給=3.10 建設=0.94 駐守=0.35 build_workshop:resource=0.08 build_apothecary:resource=0.08 build_mint:resource=0.08 build_stable:resource=0.08 maintain_material:resource=0.05
+    狀態: pop=5 food(priv=1.0/gran=0.0/eff=1.0) consume/d=4.0 rung=0 fid=-1 coin=200 mat=39
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+[Specimen T6] tick=10740 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=10780 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=3.18 返家補給=3.10 建設=0.94 駐守=0.35 build_workshop:resource=0.08 build_apothecary:resource=0.08 build_mint:resource=0.08 build_stable:resource=0.08 maintain_material:resource=0.05
+    狀態: pop=5 food(priv=1.0/gran=0.0/eff=1.0) consume/d=4.0 rung=0 fid=-1 coin=200 mat=39
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+=======================================================
+[OverflowCapTrace] tick=10800 team=0 has_produce=false cap=49 population=5
+[OverflowCapTrace] tick=10800 team=1 has_produce=true cap=20 population=10
+[OverflowCapTrace] tick=10800 team=3 has_produce=true cap=38 population=4
+[OverflowCapTrace] tick=10800 team=6 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=10800 team=7 has_produce=true cap=20 population=1
+[OverflowCapTrace] tick=10800 team=8 has_produce=true cap=20 population=1
+[Move] Team 0 抵達 (18,17)
+[Move] Team 3 抵達 (23,16)
+[TickPerf] day=45 avg=27233 us max=917942 us ticks=240 teams=6 factions=0
+
+========== [SpecimenTracer] flush 1 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=10800 heartbeat（no-decision）pop=1 food(eff=0.0)
+=======================================================
+[SpecimenTracer] write_jsonl → docs/measurements/2026-08-11-scale-econ-manpower-trace-sharpened-seed8181.specimen.jsonl (374 entries)
+
+[dump] → res://docs/measurements/2026-08-11-scale-econ-manpower-trace-sharpened-seed8181.json
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
