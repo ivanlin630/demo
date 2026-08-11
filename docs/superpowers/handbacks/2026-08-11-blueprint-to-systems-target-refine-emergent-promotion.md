@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[★用戶精修target model(憲法精神、給真源調查更利判準):anon→named該湧現非機械強制·refined target:①預設(no story)=dispatch記名領隊+匿名跟班、任務完跟班歸隊回anon池不減②湧現升格(genuine理由才發生、偶發情境/人格驅動非每派必轉):(a)匿名任務中不爽→冒個性/脫隊/變named刺頭(b)領隊死→跟班接手→named繼承·★判準給measurer:code現在是機械『每dispatch必轉1 anon→named』(=bug純消耗沒故事、該修成歸隊)還是偶發『因不爽/接班升格』(=feature真故事該留)·連earlier tick400 anon→named(person_generator:103)驗是機械still emergent·★emergent stories種子(好戲):信使半路脫隊/斥候隊長戰死小兵接棒回來成named老兵=自然湧現·WHAT target定案(用戶):dispatch匿名循環(歸隊)為主+anon→named偶發genuine事件(不爽/succession)為輔、禁機械每派必轉·非我斷言中性驗·序:measurer對照此refined target查真源→回systems→重consolidate+gap定位→我TG推用戶定修法·地基KEEP"
 ---
 
