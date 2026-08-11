@@ -128,22 +128,27 @@ func _test_defensive_real_consumer() -> void:
 	_ok(t.contact_vigilant_until > state.world.current_tick and thr_after < thr_before - 1e-6,
 		"defensive→vigilant 設+threat_threshold %.3f→%.3f 真降(餵既有 threat gate、非 write-only flag)" % [thr_before, thr_after])
 
-# ⑧ ★rescue 真 consumer：react=rescue→dispatch_anon_messenger TASK_SCOUT 到 lost-pos(非 write-only)。
+# ⑧ ★rescue 真 consumer：react=rescue→named-led TASK_SCOUT 到 lost-pos(非 write-only、統一派遣=非孤匿名)。
 func _test_rescue_real_consumer() -> void:
 	print("--- ⑧★rescue 真 consumer ---")
 	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 100000
 	var t := TeamData.new(); t.team_id = 1; t.faction_id = 0; t.tile_pos = Vector2i(5,5)
 	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 8)
 	var lp := PersonData.new(); lp.id = 11; lp.values = {}; state.persons[11] = lp; t.leader_id = 11
+	# ★統一派遣：rescue 走 named-led → 需 spare 記名當跑腿領隊（次要 advisor P12）。
+	var adv := PersonData.new(); adv.id = 12; adv.skills = {"統領": 0.3}; state.persons[12] = adv; t.named_members = [12]
 	state.teams[1] = t
 	Probe.reset(); Probe.enabled = true
 	var entry: Dictionary = {"kind": "scout", "is_team": true, "subject_ref": 99, "dispatched_tick": 0, "last_known_pos": Vector2i(9,9)}
 	FactionAISystem.new()._apply_contact_reaction(state, t, entry, "rescue")
 	Probe.enabled = false
 	var scout_spawned: bool = false
+	var scout_named_led: bool = false
 	for tid in state.teams:
 		var s: TeamData = state.teams[tid]
 		if s.parent_team_id == 1 and s.current_task == TeamData.TASK_SCOUT and s.move_target == Vector2i(9,9):
-			scout_spawned = true; break
-	_ok(scout_spawned and int(Probe.counts.get("contact.react_rescue", 0)) == 1,
-		"rescue→TASK_SCOUT 子隊真 dispatch 到 lost-pos(9,9)(非 write-only flag、reuse scout 機具)")
+			scout_spawned = true
+			scout_named_led = (s.leader_id == 12)   # ★named-led(非 leaderless -1)→succession 784 從不誤觸
+			break
+	_ok(scout_spawned and scout_named_led and int(Probe.counts.get("contact.react_rescue", 0)) == 1,
+		"rescue→named-led TASK_SCOUT 子隊(leader=P12 次要記名、非孤匿名)真 dispatch 到 lost-pos(9,9)")

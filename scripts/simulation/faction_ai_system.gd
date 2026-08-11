@@ -2041,7 +2041,42 @@ func _try_herald_side(state: WorldState, team: TeamData) -> void:
 	Probe.bump("help.letter_dispatched")
 	_ledger_record(team, "herald", state.world.current_tick, false, state.world.current_tick, dist, tgt["pos"])   # ★失聯帳本記帳(herald=非team letter、subject_ref=spawn_tick、last_pos=target)
 
-# 偵察 side：領主 + 子民 belief 陳舊 + mini-util>0 → 派 anon 斥候（亦 anon 化、不再 named subteam）。
+# ★統一派遣模型（§2 組成=named-led）：借一個 spare 記名當單人任務跑腿領隊。
+#   §1 匿名不落單、單獨必記名 → routine 單人事(scout/care/rescue)派「次要記名」(統領最低=留親信/強將辦要事)。
+#   ★genuine 戰略約束(§2)：leader_id 本人不在 named_members(留守領隊)、已出任務的記名已 remove_member 出 roster
+#   → 可動用記名 = 現 named_members。無 spare→-1(領主少做=named-scarcity 真約束、非 crank、非孤匿名頂替)。
+func _pick_dispatch_runner(state: WorldState, team: TeamData) -> int:
+	var best_id: int = -1
+	var best_cmd: float = 1e30
+	for nid in team.named_members:
+		var p = state.persons.get(nid)
+		if p == null:
+			continue
+		var cmd: float = float(p.skills.get("統領", 0.0))
+		if cmd < best_cmd:   # 次要=統領最低（強將/親信留辦要事、routine 派次要）
+			best_cmd = cmd; best_id = nid
+	return best_id
+
+# ★統一派遣：單人記名跑腿共用入口（scout/care/rescue）——走 dispatch()(named-led→非 leaderless→succession
+#   faction_ai:784 從不誤觸→無機械升格、無 anon drain)、補 scout lifecycle 欄(reason/start_tick/extra_data)。
+#   §3 歸隊：dispatch() 子隊完任務 recall_envoy→try_merge_back→記名回母 roster(零 drain)。
+#   無 spare 記名→-1(§2 少做、§1 匿名不落單)。返 sub_id 或 -1。
+func _dispatch_named_runner(state: WorldState, team: TeamData, task: String, reason: String,
+		move_target: Vector2i, order_target_id: int, dist: int) -> int:
+	var runner: int = _pick_dispatch_runner(state, team)
+	if runner == -1:
+		return -1   # named-scarcity：無 spare 記名可跑腿 → 少做（genuine 約束、不派孤匿名）
+	var sid: int = SubteamSystem.new().dispatch(state, team.team_id, runner, 1, task, move_target, order_target_id, "", [])
+	if sid == -1:
+		return -1
+	var sub: TeamData = state.teams[sid]
+	sub.task_reason     = reason                          # dispatch() 不設 reason → 補（subteam dispatcher 路由/throttle 依此）
+	sub.task_start_tick = state.world.current_tick        # dispatch() 不設 → 補（_tick_info_scout timeout budget 依此）
+	sub.task_extra_data = {"scout_mother": team.team_id, "timeout": SubteamSystem.founding_timeout(dist)}
+	SubteamSystem.equip_envoy_mounts(state, team, sub)
+	return sid
+
+# 偵察 side：領主 + 子民 belief 陳舊 + mini-util>0 → 派記名斥候（§2 named-led、次要記名單人跑腿）。
 func _try_scout_side(state: WorldState, team: TeamData) -> void:
 	if team.population < 2:
 		return
@@ -2059,11 +2094,8 @@ func _try_scout_side(state: WorldState, team: TeamData) -> void:
 	if mini <= 0.0:
 		return
 	var dist: int = _hex_dist(team.tile_pos, tgt["pos"])
-	var sid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
-		TeamData.TASK_SCOUT, "info_scout", tgt["pos"], int(tgt["id"]),
-		{"scout_mother": team.team_id, "timeout": SubteamSystem.founding_timeout(dist)})
+	var sid: int = _dispatch_named_runner(state, team, TeamData.TASK_SCOUT, "info_scout", tgt["pos"], int(tgt["id"]), dist)
 	if sid != -1:
-		SubteamSystem.equip_envoy_mounts(state, team, state.teams[sid])
 		Probe.bump("scout.dispatched")
 		_ledger_record(team, "scout", sid, true, state.world.current_tick, dist, tgt["pos"])   # ★失聯帳本記帳(scout=team subject、last_pos=target)
 
@@ -5134,11 +5166,8 @@ func _dispatch_care_scout(state: WorldState, team: TeamData, entry: Dictionary) 
 	if vpos == Vector2i(-1, -1):
 		return   # 三層皆無 pos → 查不了
 	var dist: int = _hex_dist(team.tile_pos, vpos)
-	var sid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
-		TeamData.TASK_SCOUT, "info_scout", vpos, vid,
-		{"scout_mother": team.team_id, "timeout": SubteamSystem.founding_timeout(dist)})
+	var sid: int = _dispatch_named_runner(state, team, TeamData.TASK_SCOUT, "info_scout", vpos, vid, dist)
 	if sid != -1:
-		SubteamSystem.equip_envoy_mounts(state, team, state.teams[sid])
 		if Probe.enabled: Probe.bump("care.scout_dispatched")
 
 # ★care-loop ②秤：care(責任/仁慈) vs ignore(野心/疏忽) competing util（禁 if/elif 死一條、零死常數）。
@@ -5228,11 +5257,9 @@ func _apply_contact_reaction(state: WorldState, team: TeamData, entry: Dictionar
 		"rescue":       # ★真 consumer：reuse scout side-dispatch 派去查失聯單位 last-known pos（資訊收集 fit、救援隊 verb 照 defer）。
 			var lost_pos: Vector2i = _lost_unit_pos(state, team, entry)
 			if lost_pos != Vector2i(-1, -1) and team.population >= 2:
-				var rid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
-					TeamData.TASK_SCOUT, "contact_rescue", lost_pos, int(entry.get("subject_ref", -1)),
-					{"scout_mother": team.team_id, "timeout": SubteamSystem.founding_timeout(_hex_dist(team.tile_pos, lost_pos))})
+				var rid: int = _dispatch_named_runner(state, team, TeamData.TASK_SCOUT, "contact_rescue",
+					lost_pos, int(entry.get("subject_ref", -1)), _hex_dist(team.tile_pos, lost_pos))
 				if rid != -1:
-					SubteamSystem.equip_envoy_mounts(state, team, state.teams[rid])
 					if Probe.enabled: Probe.bump("contact.react_rescue")
 		"writeoff":     # 註銷當沒了（resolved=true 已在 caller）
 			if Probe.enabled: Probe.bump("contact.react_writeoff")
