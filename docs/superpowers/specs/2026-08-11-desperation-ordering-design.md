@@ -1,6 +1,6 @@
 # 絕境排序（iii）— 求援先於叛離的 genuine repricing（WHAT / vision）
 
-status: DRAFT（pending R①[兩 util 公式 citation 驗] + R² → build）
+status: LOCKED（2026-08-11：R①全靶citation+R² CLEAN、3必查項折入§2.5 → systems HOW/build）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-11
 溯源：① scale-economy → relief-death 6 層 gate-chain（whack-a-mole）→ 用戶拍 A iii-pivot（退源頭斷螺旋）。底查 `2026-08-11-...-iii-baseline-consolidated`（QA-verified）：threat 主導=genuine 不碰;herald 求援 mini-util=-0.004 razor-thin near-miss;defect_util=+0.13 過關但公式零 consequence-pricing。★行為變 slice（fp 預期分化 intended）。
@@ -24,6 +24,11 @@ date: 2026-08-11
 
 ### 非靶：threat-dominance
 底查證 genuine（Team2 面真雙威脅、排威脅優先=util 真贏）→ **不碰**。
+
+## §2.5 ★HOW-binding 必查項（R² CLEAN、寫死非留 implementer）
+- **②hedge 項 bounded 證明**：catastrophe-hedge 項**不得退化成「alternative 夠慘→unconditional 正」crank**——低 severity 時 hedge 項該**趨近零**（非 flat offset 讓 herald 變無視 cost-benefit 的 always-ask）;hedge scale with **catastrophe 程度 × 求援可逆/便宜度**兩者。HOW 須 machine/measure demonstrate bounded。否則 = 用「真值」包裝變相 boost。
+- **③差異化走同一連續 state 變數**：餓叛≠野心叛的 consequence 項強度**必由現有連續 starvation-state 訊號驅動**（distress_pressure/food_days 類）、**禁新增 if-starving/if-not-starving 兩 branch**（隱性寫死非湧現）。HOW 明講 consequence 項 = 現有 starvation 訊號的連續函式。
+- **④順序=硬量測 gate**：「求援先於叛離」是**未驗斷言**、build 完**必量測驗證真 emergent**（非文字宣稱）。硬性 gate 非 aspirational。
 
 ## §3 量測（湧現、fp intended）
 - **靶1**：可救的餓隊 **求援先於叛離 fire**（Team2 求救成功活過 defect）;人格分化（驕傲晚求/務實早求）。
