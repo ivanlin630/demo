@@ -1,0 +1,265 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 指標團(Team0)人手池 clean trace(seed=8181 5天) ===
+[GameSetup] 完成：4 teams, 1 factions, 8 persons
+
+tick(day) | anon池 | Δ | pop | minor_pop | outpost_cap | 新增team_id(spinoff) | 同期dispatch事件 | type | blind_check | 原因
+----------|--------|---|-----|-----------|-------------|----------------------|------------------|------|-------------|------
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×93 (oid=0)
+[Order] Team0 buy weapon_melee_low ×3 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=2)
+[Order] Team0 buy material ×54 (oid=3)
+[Order] Team0 buy tools ×5 (oid=4)
+[Order] Team1 sell food ×93 (oid=5)
+[Order] Team1 buy weapon_melee_low ×3 (oid=6)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=7)
+[Order] Team1 buy material ×54 (oid=8)
+[Order] Team1 buy tools ×1 (oid=9)
+[Order] Team2 sell food ×93 (oid=10)
+[Order] Team2 buy weapon_melee_low ×3 (oid=11)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=12)
+[Order] Team2 buy material ×54 (oid=13)
+[Order] Team2 buy tools ×1 (oid=14)
+[Order] Team3 sell food ×93 (oid=15)
+[Order] Team3 buy weapon_melee_low ×3 (oid=16)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=17)
+[Order] Team3 buy material ×54 (oid=18)
+[Order] Team3 buy tools ×1 (oid=19)
+[Harvest] Tick60 季節=春 base=1.1
+[AnonTrace] from=0 to=4 count=1 caller=?:-1 func=?
+t100(d0) |      3 |  -1 |   5 |         0 |          20 | [4] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[4] 與Team0同tile_pos,population5 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+[Succession] Team 4 從匿名晉升新領袖 P3002（統領=0.07）
+[Order] Team4 buy food ×2 (oid=20)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Move] Team 4 抵達 (18,17)
+[SubAI] Team4 引擎→覓食 (覓食)
+[DayNight] Day 1 開始
+
+========== [SpecimenTracer] flush 7 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=10 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: build_workshop:location:delegate=0.98 build_apothecary:location:delegate=0.98 build_mint:location:delegate=0.98 build_stable:location:delegate=0.98 maintain_material:location:delegate=0.66 覓食=0.32 駐守=0.19 建設=0.08
+    狀態: pop=6 food(priv=120.0/gran=0.0/eff=120.0) consume/d=4.8 rung=0 fid=0 coin=200 mat=10
+    leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
+[Specimen T0] tick=70 heartbeat（no-decision）pop=6 food(eff=120.0)
+[Specimen T4] tick=110 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.49 慎重=0.42 求生欲=0.48 好戰=0.38 貪婪=0.58 → food_sec_target=3.7天
+[Specimen T4] tick=120 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.49 慎重=0.42 求生欲=0.48 好戰=0.38 貪婪=0.58 → food_sec_target=3.7天
+[Specimen T0] tick=130 heartbeat（no-decision）pop=5 food(eff=118.6)
+[Specimen T4] tick=180 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=190 heartbeat（no-decision）pop=5 food(eff=118.6)
+=======================================================
+[TickPerf] day=1 avg=22511 us max=3600203 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,17)
+[AnonTrace] from=4 to=0 count=0 caller=?:-1 func=?
+[Merge] Team0 ← Team4 完全合併 (pop=6)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[AnonTrace] from=0 to=4 count=1 caller=?:-1 func=?
+t400(d1) |      2 |  -1 |   5 |         0 |          20 | [] | {  } | automatic(世界機制,advisor拔擢非直接領主人力決策) | n/a | 疑anon→named晉升(named+1同日,person_generator.gd:103,非死亡非派出)
+[Succession] Team 4 從匿名晉升新領袖 P3003（統領=0.24）
+[Order] Team4 buy food ×2 (oid=21)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 2 開始
+
+========== [SpecimenTracer] flush 9 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T4] tick=240 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=250 heartbeat（no-decision）pop=5 food(eff=117.6)
+[Specimen T4] tick=300 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=310 heartbeat（no-decision）pop=5 food(eff=116.4)
+[Specimen T4] tick=360 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T0] tick=370 heartbeat（no-decision）pop=5 food(eff=116.4)
+[Specimen T4] tick=410 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.59 慎重=0.44 求生欲=0.35 好戰=0.37 貪婪=0.54 → food_sec_target=3.4天
+[Specimen T4] tick=420 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.59 慎重=0.44 求生欲=0.35 好戰=0.37 貪婪=0.54 → food_sec_target=3.4天
+[Specimen T0] tick=430 heartbeat（no-decision）pop=5 food(eff=118.3)
+=======================================================
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=2 avg=30841 us max=2171216 us ticks=240 teams=5 factions=1
+[Site] 選址 (26, 13) score=366 周邊資源={ "ore_iron": 183, "ore_silver": 77, "wild_horses": 6, "herb": 2 } terrain=mountain
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[SubAI] Team4 引擎→覓食 (覓食)
+[Ambition] Team4 rung 0→1 (商業 cap=3)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[AnonTrace] from=0 to=5 count=1 caller=?:-1 func=?
+t700(d2) |      1 |  -1 |   4 |         0 |          20 | [5] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[5] 與Team0同tile_pos,population4 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+[Succession] Team 5 從匿名晉升新領袖 P3004（統領=0.78）
+[Order] Team5 buy food ×1 (oid=22)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[Survival] Team5 urgent days_left=0.0 偵查→覓食
+[DayNight] Day 3 開始
+
+========== [SpecimenTracer] flush 10 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T4] tick=480 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=490 heartbeat（no-decision）pop=5 food(eff=118.3)
+[Specimen T4] tick=500 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.34
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.59 慎重=0.44 求生欲=0.35 好戰=0.37 貪婪=0.54 → food_sec_target=3.4天
+[Specimen T0] tick=550 heartbeat（no-decision）pop=5 food(eff=117.2)
+[Specimen T4] tick=560 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=610 heartbeat（no-decision）pop=5 food(eff=116.0)
+[Specimen T4] tick=620 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T0] tick=670 heartbeat（no-decision）pop=5 food(eff=116.0)
+[Specimen T4] tick=680 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T5] tick=710 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.50
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+=======================================================
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[TickPerf] day=3 avg=35946 us max=1190636 us ticks=240 teams=6 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,17)
+[Move] Team 5 抵達 (18,17)
+[AnonTrace] from=4 to=0 count=0 caller=?:-1 func=?
+[Merge] Team0 ← Team4 完全合併 (pop=5)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[Survival] Team5 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (18,17)
+[SubAI] Team5 引擎→覓食 (覓食)
+[Ambition] Team5 rung 0→1 (武力 cap=4)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 4 開始
+
+========== [SpecimenTracer] flush 11 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T5] tick=720 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.50
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+[Specimen T0] tick=730 heartbeat（no-decision）pop=4 food(eff=115.0)
+[Specimen T4] tick=740 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T5] tick=780 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=790 heartbeat（no-decision）pop=4 food(eff=115.0)
+[Specimen T4] tick=800 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T5] tick=800 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.50
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.97 慎重=0.48 求生欲=0.38 好戰=0.91 貪婪=0.52 → food_sec_target=2.0天
+[Specimen T0] tick=850 heartbeat（no-decision）pop=5 food(eff=116.9)
+[Specimen T5] tick=860 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=910 heartbeat（no-decision）pop=5 food(eff=115.6)
+[Specimen T5] tick=920 heartbeat（no-decision）pop=1 food(eff=3.7)
+=======================================================
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=4 avg=27447 us max=985722 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (18,17)
+[AnonTrace] from=0 to=6 count=1 caller=?:-1 func=?
+t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[6] 與Team0同tile_pos,population4 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+[Succession] Team 6 從匿名晉升新領袖 P3005（統領=0.10）
+[Order] Team6 buy food ×2 (oid=23)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (17,17)
+[Move] Team 6 抵達 (18,17)
+[AnonTrace] from=5 to=0 count=0 caller=?:-1 func=?
+[Merge] Team0 ← Team5 完全合併 (pop=5)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 5 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=970 heartbeat（no-decision）pop=5 food(eff=115.6)
+[Specimen T5] tick=980 heartbeat（no-decision）pop=1 food(eff=3.7)
+[Specimen T6] tick=1010 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T6] tick=1020 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1030 heartbeat（no-decision）pop=4 food(eff=114.1)
+[Specimen T5] tick=1040 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T6] tick=1080 heartbeat（no-decision）pop=1 food(eff=0.0)
+[Specimen T0] tick=1090 heartbeat（no-decision）pop=4 food(eff=114.1)
+[Specimen T5] tick=1100 heartbeat（no-decision）pop=1 food(eff=3.3)
+[Specimen T6] tick=1100 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+[Specimen T0] tick=1150 heartbeat（no-decision）pop=5 food(eff=116.1)
+[Specimen T6] tick=1160 heartbeat（no-decision）pop=1 food(eff=0.0)
+=======================================================
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[TickPerf] day=5 avg=27890 us max=971157 us ticks=240 teams=5 factions=1
+
+========== [SpecimenTracer] flush 1 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T6] tick=1200 intent=日常 | winner=覓食 task=覓食 tgt=(18, 17)
+    candidates: 覓食=1.00 紮營=0.37
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=0 coin=0 mat=0
+    leader: 野心=0.46 慎重=0.38 求生欲=0.61 好戰=0.56 貪婪=0.56 → food_sec_target=3.7天
+=======================================================
+[SpecimenTracer] write_jsonl → docs/measurements/2026-08-11-scale-econ-manpower-trace-sharpened-seed8181.specimen.jsonl (50 entries)
+
+[dump] → res://docs/measurements/2026-08-11-scale-econ-manpower-trace-sharpened-seed8181.json
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+

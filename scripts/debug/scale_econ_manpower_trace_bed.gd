@@ -42,7 +42,7 @@ func _initialize() -> void:
 	var seen_tids: Dictionary = {}
 	for tid in state.teams: seen_tids[tid] = true
 	var prev_counts: Dictionary = {}
-	var watch_keys: Array = ["help.letter_dispatched", "care.scout_dispatched", "distribute.dispatch",
+	var watch_keys: Array = ["help.letter_dispatched", "scout.dispatched", "care.scout_dispatched", "distribute.dispatch",
 		"migrant.dispatched", "invest.dispatched", "death.starve_anon", "death.defect_leave"]
 	for k in watch_keys: prev_counts[k] = 0
 	var prev_named: int = -1
@@ -103,8 +103,11 @@ func _initialize() -> void:
 				var deliberate_hit: bool = false
 				if dispatch_today.has("help.letter_dispatched"):
 					reasons.append("求援信使派出(herald)"); deliberate_hit = true
+				if dispatch_today.has("scout.dispatched"):
+					reasons.append("★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader")
+					deliberate_hit = true
 				if dispatch_today.has("care.scout_dispatched"):
-					reasons.append("care-loop scout派出"); deliberate_hit = true
+					reasons.append("care-loop scout派出(_dispatch_care_scout,與上面scout.dispatched不同函式)"); deliberate_hit = true
 				if dispatch_today.has("distribute.dispatch"):
 					reasons.append("distribute convoy派出"); deliberate_hit = true
 				if dispatch_today.has("migrant.dispatched"):
@@ -128,19 +131,16 @@ func _initialize() -> void:
 					if state.teams.has(ntid) and state.teams[ntid].tile_pos == t.tile_pos:
 						own_spinoff.append(ntid)
 				if not own_spinoff.is_empty():
-					var over: bool = t.population > cap
-					# ★觸發時機誠實註記:check_overflow_for_team正規走日邊界(population_system.gd sim_runner.gd:231
-					# tick%TICKS_PER_DAY==0)、但event_system.gd:55(Succession named-successor分支)可離峰直呼
-					# check_overflow_for_team——非整日邊界tick出現的spinoff=走後者、population<=cap不代表矛盾。
-					var on_day_boundary: bool = (ct % WorldState.TICKS_PER_DAY == 0)
-					reasons.append("population-overflow分村(Team%s 與Team0同tile_pos,population%d %s cap%d,%s)" % [
-						str(own_spinoff), t.population, (">" if over else "<="), cap,
-						("日邊界檢查tick" if on_day_boundary else "★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核")])
-					if not deliberate_hit:
-						evt_type = "automatic(世界機制,領主無得選)"
-						blind_check = "n/a(非領主決策,不適用盲派判準)"
 					for ntid in own_spinoff:
 						if not int(ntid) in state.specimen_team_ids: state.specimen_team_ids.append(int(ntid))
+					if deliberate_hit:
+						# ★訂正(2026-08-11):同tile新team_id出現+同tick有dispatch訊號(scout/herald等)共存時,
+						# 真因是dispatch本身(leaderless anon信使子隊born在母隊tile_pos,非population-overflow)。
+						# 直接tap(check_overflow_for_team)已坐實Team0全程未曾真overflow,「population-overflow分村」
+						# 這條猜測已被推翻棄用,別再對這情況下此結論。
+						reasons.append("新team(Team%s)=上面dispatch產生的leaderless anon子隊(誕生於母隊tile_pos,非overflow)" % str(own_spinoff))
+					else:
+						reasons.append("★新team(Team%s)與Team0同tile_pos但無對應dispatch訊號、原因不明——★★2026-08-11訂正:『population-overflow分村』這個猜測已被直接tap推翻(Team0全程45天population從未超過cap20,check_overflow_for_team對Team0首呼在tick240),別用此猜測,待進一步查" % str(own_spinoff))
 				elif not new_today.is_empty():
 					reasons.append("(同日別隊Team%s分村,tile_pos不同非Team0自己的spinoff,巧合排除)" % str(new_today))
 				if deliberate_hit:

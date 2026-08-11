@@ -27,7 +27,7 @@ tick(day) | anon池 | Δ | pop | minor_pop | outpost_cap | 新增team_id(spinoff
 [Order] Team3 buy material ×54 (oid=18)
 [Order] Team3 buy tools ×1 (oid=19)
 [Harvest] Tick60 季節=春 base=1.1
-t100(d0) |      3 |  -1 |   5 |         0 |          20 | [4] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[4] 與Team0同tile_pos,population5 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+t100(d0) |      3 |  -1 |   5 |         0 |          20 | [4] | { "scout.dispatched": 1 } | deliberate(領主dispatch決策) | state-aware(code-confirmed:dispatch函式檔前檢查AnonTierSystem.total_pop才發,見檔頭註) | ★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader + 新team(Team[4])=上面dispatch產生的leaderless anon子隊(誕生於母隊tile_pos,非overflow)
 [Succession] Team 4 從匿名晉升新領袖 P3002（統領=0.07）
 [Order] Team4 buy food ×2 (oid=20)
 [SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
@@ -55,7 +55,7 @@ t100(d0) |      3 |  -1 |   5 |         0 |          20 | [4] | {  } | automatic
 [Specimen T4] tick=180 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=190 heartbeat（no-decision）pop=5 food(eff=118.6)
 =======================================================
-[TickPerf] day=1 avg=19742 us max=3059718 us ticks=240 teams=5 factions=1
+[TickPerf] day=1 avg=18141 us max=2992188 us ticks=240 teams=5 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
@@ -67,7 +67,7 @@ t100(d0) |      3 |  -1 |   5 |         0 |          20 | [4] | {  } | automatic
 [Move] Team 4 抵達 (17,17)
 [Merge] Team0 ← Team4 完全合併 (pop=6)
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
-t400(d1) |      2 |  -1 |   5 |         0 |          20 | [] | {  } | automatic(世界機制,advisor拔擢非直接領主人力決策) | n/a | 疑anon→named晉升(named+1同日,person_generator.gd:103,非死亡非派出)
+t400(d1) |      2 |  -1 |   5 |         0 |          20 | [] | { "scout.dispatched": 1 } | deliberate(領主dispatch決策) | state-aware(code-confirmed:dispatch函式檔前檢查AnonTierSystem.total_pop才發,見檔頭註) | ★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader
 [Succession] Team 4 從匿名晉升新領袖 P3003（統領=0.24）
 [Order] Team4 buy food ×2 (oid=21)
 [SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
@@ -97,7 +97,7 @@ t400(d1) |      2 |  -1 |   5 |         0 |          20 | [] | {  } | automatic(
 =======================================================
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
-[TickPerf] day=2 avg=28953 us max=1631164 us ticks=240 teams=5 factions=1
+[TickPerf] day=2 avg=24900 us max=1649839 us ticks=240 teams=5 factions=1
 [Site] 選址 (26, 13) score=366 周邊資源={ "ore_iron": 183, "ore_silver": 77, "wild_horses": 6, "herb": 2 } terrain=mountain
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
 [Move] Team 4 抵達 (18,17)
@@ -117,7 +117,7 @@ t400(d1) |      2 |  -1 |   5 |         0 |          20 | [] | {  } | automatic(
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
 [Move] Team 4 抵達 (18,17)
-t700(d2) |      1 |  -1 |   4 |         0 |          20 | [5] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[5] 與Team0同tile_pos,population4 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+t700(d2) |      1 |  -1 |   4 |         0 |          20 | [5] | { "scout.dispatched": 1 } | deliberate(領主dispatch決策) | state-aware(code-confirmed:dispatch函式檔前檢查AnonTierSystem.total_pop才發,見檔頭註) | ★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader + 新team(Team[5])=上面dispatch產生的leaderless anon子隊(誕生於母隊tile_pos,非overflow)
 [Succession] Team 5 從匿名晉升新領袖 P3004（統領=0.78）
 [Order] Team5 buy food ×1 (oid=22)
 [SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
@@ -145,7 +145,7 @@ t700(d2) |      1 |  -1 |   4 |         0 |          20 | [5] | {  } | automatic
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
 [SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
-[TickPerf] day=3 avg=29144 us max=865521 us ticks=240 teams=6 factions=1
+[TickPerf] day=3 avg=27732 us max=1085627 us ticks=240 teams=6 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
@@ -187,11 +187,11 @@ t700(d2) |      1 |  -1 |   4 |         0 |          20 | [5] | {  } | automatic
 =======================================================
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
-[TickPerf] day=4 avg=25042 us max=1150940 us ticks=240 teams=5 factions=1
+[TickPerf] day=4 avg=28050 us max=1187644 us ticks=240 teams=5 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
 [Move] Team 5 抵達 (18,17)
-t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automatic(世界機制,領主無得選) | n/a(非領主決策,不適用盲派判準) | population-overflow分村(Team[6] 與Team0同tile_pos,population4 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)
+t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | { "scout.dispatched": 1 } | deliberate(領主dispatch決策) | state-aware(code-confirmed:dispatch函式檔前檢查AnonTierSystem.total_pop才發,見檔頭註) | ★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader + 新team(Team[6])=上面dispatch產生的leaderless anon子隊(誕生於母隊tile_pos,非overflow)
 [Succession] Team 6 從匿名晉升新領袖 P3005（統領=0.10）
 [Order] Team6 buy food ×2 (oid=23)
 [SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
@@ -241,7 +241,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Move] Team 6 抵達 (18,17)
 [SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
 [Survival] Team6 urgent days_left=0.0 idle→覓食
-[TickPerf] day=5 avg=23390 us max=1027781 us ticks=240 teams=5 factions=1
+[TickPerf] day=5 avg=30586 us max=1160024 us ticks=240 teams=5 factions=1
 [Order] Team0 sell food ×92 (oid=24)
 [Order] Team0 buy weapon_melee_low ×3 (oid=25)
 [Order] Team0 buy weapon_ranged_low ×2 (oid=26)
@@ -306,7 +306,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 =======================================================
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 25(公庫4+私20) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
-[TickPerf] day=6 avg=28308 us max=1102358 us ticks=240 teams=5 factions=1
+[TickPerf] day=6 avg=29306 us max=1544886 us ticks=240 teams=5 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 25(公庫4+私20) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
@@ -346,7 +346,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 =======================================================
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 27(公庫5+私22) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
-[TickPerf] day=7 avg=25914 us max=1284387 us ticks=240 teams=5 factions=1
+[TickPerf] day=7 avg=31578 us max=1351270 us ticks=240 teams=5 factions=1
 [Move] Team 6 抵達 (18,17)
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 28(公庫5+私22) (需 { "material": 50, "tools": 0 })
@@ -379,7 +379,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 =======================================================
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
-[TickPerf] day=8 avg=23151 us max=909416 us ticks=240 teams=5 factions=1
+[TickPerf] day=8 avg=24776 us max=846787 us ticks=240 teams=5 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
@@ -411,7 +411,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Outpost] 設施完工 farming Lv1 at (24,17)
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫0+私2) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫4+私19) (需 { "material": 50, "tools": 0 })
-[TickPerf] day=9 avg=19795 us max=724649 us ticks=240 teams=5 factions=1
+[TickPerf] day=9 avg=25315 us max=987402 us ticks=240 teams=5 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
 [Relocate] Team2 棄據點遷向 (24,17)
 [Relocate] Team3 棄據點遷向 (24,17)
@@ -436,7 +436,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Specimen T6] tick=2340 heartbeat（no-decision）pop=1 food(eff=1.3)
 [Specimen T0] tick=2350 heartbeat（no-decision）pop=5 food(eff=100.9)
 =======================================================
-[TickPerf] day=10 avg=17361 us max=1007663 us ticks=240 teams=5 factions=1
+[TickPerf] day=10 avg=18538 us max=1036116 us ticks=240 teams=5 factions=1
 [Order] Team0 sell food ×77 (oid=47)
 [Order] Team0 buy weapon_melee_low ×3 (oid=48)
 [Order] Team0 buy weapon_ranged_low ×2 (oid=49)
@@ -473,7 +473,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Specimen T0] tick=2590 heartbeat（no-decision）pop=5 food(eff=98.4)
 =======================================================
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 7(公庫2+私5) (需 { "material": 50, "tools": 0 })
-[TickPerf] day=11 avg=14803 us max=848858 us ticks=240 teams=5 factions=1
+[TickPerf] day=11 avg=14568 us max=812420 us ticks=240 teams=5 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 8(公庫2+私6) (需 { "material": 50, "tools": 0 })
 [Move] Team 6 抵達 (19,16)
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 9(公庫2+私7) (需 { "material": 50, "tools": 0 })
@@ -492,7 +492,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Specimen T6] tick=2820 heartbeat（no-decision）pop=1 food(eff=2.3)
 [Specimen T0] tick=2830 heartbeat（no-decision）pop=5 food(eff=94.6)
 =======================================================
-[TickPerf] day=12 avg=11097 us max=453509 us ticks=240 teams=5 factions=1
+[TickPerf] day=12 avg=15820 us max=619328 us ticks=240 teams=5 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫3+私7) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 27(公庫5+私22) (需 { "material": 50, "tools": 0 })
 [Move] Team 2 抵達 (24,17)
@@ -516,7 +516,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Specimen T6] tick=3060 heartbeat（no-decision）pop=1 food(eff=1.7)
 [Specimen T0] tick=3070 heartbeat（no-decision）pop=5 food(eff=92.1)
 =======================================================
-[TickPerf] day=13 avg=16738 us max=768955 us ticks=240 teams=5 factions=1
+[TickPerf] day=13 avg=20151 us max=758255 us ticks=240 teams=5 factions=1
 [Move] Team 6 抵達 (19,16)
 [DayNight] Day 14 開始
 
@@ -533,7 +533,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Specimen T6] tick=3300 heartbeat（no-decision）pop=1 food(eff=3.3)
 [Specimen T0] tick=3310 heartbeat（no-decision）pop=5 food(eff=88.5)
 =======================================================
-[TickPerf] day=14 avg=15411 us max=619253 us ticks=240 teams=5 factions=1
+[TickPerf] day=14 avg=26511 us max=1115553 us ticks=240 teams=5 factions=1
 [Order] Team2 sell material ×20 (oid=62)
 [Order] Team3 sell material ×14 (oid=63)
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
@@ -554,7 +554,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Specimen T6] tick=3540 heartbeat（no-decision）pop=1 food(eff=3.7)
 [Specimen T0] tick=3550 heartbeat（no-decision）pop=5 food(eff=85.9)
 =======================================================
-[TickPerf] day=15 avg=15888 us max=625302 us ticks=240 teams=5 factions=1
+[TickPerf] day=15 avg=24347 us max=984960 us ticks=240 teams=5 factions=1
 [Order] Team0 sell food ×62 (oid=43)
 [Order] Team0 buy weapon_melee_low ×3 (oid=44)
 [Order] Team0 buy weapon_ranged_low ×2 (oid=45)
@@ -585,7 +585,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Specimen T6] tick=3780 heartbeat（no-decision）pop=1 food(eff=3.0)
 [Specimen T0] tick=3790 heartbeat（no-decision）pop=5 food(eff=83.3)
 =======================================================
-[TickPerf] day=16 avg=18495 us max=1027893 us ticks=240 teams=5 factions=1
+[TickPerf] day=16 avg=21791 us max=1200217 us ticks=240 teams=5 factions=1
 [Sub] Team2 派出子隊 Team7 leader=P2001 advisors=[] (pop=1 cap=1 task=運輸)
 [Convoy] Team2 派運輸子隊 Team7 送 material×22 → demand 市場(24,24)
 [Order] Team7 sell material ×21 (oid=56)
@@ -608,7 +608,7 @@ t1000(d4) |      0 |  -1 |   4 |         0 |          20 | [6] | {  } | automati
 [Specimen T6] tick=4020 heartbeat（no-decision）pop=1 food(eff=2.0)
 [Specimen T0] tick=4030 heartbeat（no-decision）pop=5 food(eff=79.5)
 =======================================================
-[TickPerf] day=17 avg=17158 us max=1081067 us ticks=240 teams=6 factions=1
+[TickPerf] day=17 avg=20660 us max=1123295 us ticks=240 teams=6 factions=1
 t4080(d17) |      0 |  +0 |   5 |         0 |          20 | [7] | {  } | n/a | n/a | 無變化
 [Order] Team6 buy food ×1 (oid=56)
 [Move] Team 6 抵達 (16,19)
@@ -628,7 +628,7 @@ t4080(d17) |      0 |  +0 |   5 |         0 |          20 | [7] | {  } | n/a | n
 [Specimen T6] tick=4260 heartbeat（no-decision）pop=1 food(eff=1.3)
 [Specimen T0] tick=4270 heartbeat（no-decision）pop=5 food(eff=77.0)
 =======================================================
-[TickPerf] day=18 avg=15410 us max=858544 us ticks=240 teams=6 factions=1
+[TickPerf] day=18 avg=16233 us max=883180 us ticks=240 teams=6 factions=1
 [Move] Team 6 抵達 (16,19)
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 35(公庫8+私28) (需 { "material": 50, "tools": 0 })
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 36(公庫8+私28) (需 { "material": 50, "tools": 0 })
@@ -648,7 +648,7 @@ t4080(d17) |      0 |  +0 |   5 |         0 |          20 | [7] | {  } | n/a | n
 [Specimen T6] tick=4500 heartbeat（no-decision）pop=1 food(eff=3.7)
 [Specimen T0] tick=4510 heartbeat（no-decision）pop=5 food(eff=73.0)
 =======================================================
-[TickPerf] day=19 avg=14403 us max=932280 us ticks=240 teams=6 factions=1
+[TickPerf] day=19 avg=17977 us max=1338872 us ticks=240 teams=6 factions=1
 [Sub] Team3 派出子隊 Team8 leader=P3001 advisors=[] (pop=1 cap=1 task=運輸)
 [Convoy] Team3 派運輸子隊 Team8 送 material×17 → demand 市場(17,24)
 [Order] Team8 sell material ×17 (oid=55)
@@ -669,7 +669,7 @@ t4080(d17) |      0 |  +0 |   5 |         0 |          20 | [7] | {  } | n/a | n
 [Specimen T6] tick=4740 heartbeat（no-decision）pop=1 food(eff=3.3)
 [Specimen T0] tick=4750 heartbeat（no-decision）pop=5 food(eff=70.6)
 =======================================================
-[TickPerf] day=20 avg=9617 us max=478714 us ticks=240 teams=7 factions=1
+[TickPerf] day=20 avg=11796 us max=659764 us ticks=240 teams=7 factions=1
 t4800(d20) |      0 |  +0 |   5 |         0 |          20 | [8] | {  } | n/a | n/a | 無變化
 [Order] Team0 sell food ×46 (oid=37)
 [Order] Team0 buy weapon_melee_low ×3 (oid=38)
@@ -706,7 +706,7 @@ t4800(d20) |      0 |  +0 |   5 |         0 |          20 | [8] | {  } | n/a | n
 [Specimen T6] tick=4980 heartbeat（no-decision）pop=1 food(eff=3.7)
 [Specimen T0] tick=4990 heartbeat（no-decision）pop=5 food(eff=68.1)
 =======================================================
-[TickPerf] day=21 avg=11581 us max=702941 us ticks=240 teams=7 factions=1
+[TickPerf] day=21 avg=12001 us max=745594 us ticks=240 teams=7 factions=1
 [Ambition] Team1 rung 0→1 (定居 cap=2)
 [Order] Team7 sell material ×21 (oid=58)
 [Order] Team3 sell material ×1 (oid=59)
@@ -726,7 +726,7 @@ t4800(d20) |      0 |  +0 |   5 |         0 |          20 | [8] | {  } | n/a | n
 [Specimen T6] tick=5220 heartbeat（no-decision）pop=1 food(eff=2.7)
 [Specimen T0] tick=5230 heartbeat（no-decision）pop=5 food(eff=64.4)
 =======================================================
-[TickPerf] day=22 avg=13603 us max=664582 us ticks=240 teams=7 factions=1
+[TickPerf] day=22 avg=12925 us max=706457 us ticks=240 teams=7 factions=1
 [SurvivalCamp] team=Team7 → 紮營 @(24,22)
 [Survival] Team7 warning days_left=2.9 運輸→紮營
 [Survival] Team8 warning days_left=2.9 運輸→覓食
@@ -753,7 +753,7 @@ t4800(d20) |      0 |  +0 |   5 |         0 |          20 | [8] | {  } | n/a | n
 [Specimen T0] tick=5470 heartbeat（no-decision）pop=5 food(eff=61.7)
 =======================================================
 [Order] Team7 buy food ×1 (oid=63)
-[TickPerf] day=23 avg=13464 us max=575083 us ticks=240 teams=7 factions=1
+[TickPerf] day=23 avg=13289 us max=689892 us ticks=240 teams=7 factions=1
 [SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
 [Move] Team 8 抵達 (18,20)
 [SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
@@ -774,7 +774,7 @@ t4800(d20) |      0 |  +0 |   5 |         0 |          20 | [8] | {  } | n/a | n
 [Specimen T6] tick=5700 heartbeat（no-decision）pop=1 food(eff=3.3)
 [Specimen T0] tick=5710 heartbeat（no-decision）pop=5 food(eff=57.9)
 =======================================================
-[TickPerf] day=24 avg=9011 us max=496917 us ticks=240 teams=7 factions=1
+[TickPerf] day=24 avg=10667 us max=583908 us ticks=240 teams=7 factions=1
 [Move] Team 8 抵達 (18,20)
 [SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
 [Survival] Team8 urgent days_left=0.8 idle→覓食
@@ -817,7 +817,7 @@ t4800(d20) |      0 |  +0 |   5 |         0 |          20 | [8] | {  } | n/a | n
 [SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
 [Move] Team 8 抵達 (18,20)
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 45(公庫10+私34) (需 { "material": 50, "tools": 0 })
-[TickPerf] day=25 avg=13902 us max=647580 us ticks=240 teams=7 factions=1
+[TickPerf] day=25 avg=18251 us max=803987 us ticks=240 teams=7 factions=1
 t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_dispatched": 2 } | n/a | n/a | 無變化
 [SubAI] Team8 引擎→覓食 (覓食)
 [Order] Team0 sell food ×31 (oid=52)
@@ -854,7 +854,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=6180 heartbeat（no-decision）pop=1 food(eff=1.7)
 [Specimen T0] tick=6190 heartbeat（no-decision）pop=5 food(eff=52.7)
 =======================================================
-[TickPerf] day=26 avg=12160 us max=711065 us ticks=240 teams=7 factions=1
+[TickPerf] day=26 avg=13546 us max=735421 us ticks=240 teams=7 factions=1
 [SubAI] Team8 引擎→貿易 (maintain_food:resource)
 [Order] Team3 buy weapon_ranged_low ×2 (oid=68)
 [CrudeCamp] Team6 紮營 @(15,19) → civilian
@@ -879,7 +879,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=6420 heartbeat（no-decision）pop=1 food(eff=0.7)
 [Specimen T0] tick=6430 heartbeat（no-decision）pop=5 food(eff=49.0)
 =======================================================
-[TickPerf] day=27 avg=14626 us max=656122 us ticks=240 teams=7 factions=1
+[TickPerf] day=27 avg=21537 us max=988620 us ticks=240 teams=7 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 47(公庫11+私36) (需 { "material": 50, "tools": 0 })
 [Move] Team 8 抵達 (16,22)
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 48(公庫11+私36) (需 { "material": 50, "tools": 0 })
@@ -906,7 +906,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T0] tick=6670 heartbeat（no-decision）pop=5 food(eff=46.4)
 =======================================================
 [Order] Team7 buy food ×3 (oid=73)
-[TickPerf] day=28 avg=26916 us max=1154787 us ticks=240 teams=7 factions=1
+[TickPerf] day=28 avg=31686 us max=1423202 us ticks=240 teams=7 factions=1
 [Move] Team 8 抵達 (16,22)
 [SubAI] Team8 引擎→貿易 (maintain_food:resource)
 [DayNight] Day 29 開始
@@ -925,7 +925,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=6900 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=6910 heartbeat（no-decision）pop=5 food(eff=42.5)
 =======================================================
-[TickPerf] day=29 avg=22847 us max=1323430 us ticks=240 teams=7 factions=1
+[TickPerf] day=29 avg=28465 us max=1513227 us ticks=240 teams=7 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 50(公庫12+私38) (需 { "material": 50, "tools": 0 })
 [Order] Team8 sell material ×17 (oid=72)
 [Order] Team2 sell material ×3 (oid=73)
@@ -947,7 +947,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 =======================================================
 [Move] Team 8 抵達 (17,24)
 [SubAI] Team8 引擎→貿易 (maintain_food:resource)
-[TickPerf] day=30 avg=23290 us max=974247 us ticks=240 teams=7 factions=1
+[TickPerf] day=30 avg=31223 us max=1659753 us ticks=240 teams=7 factions=1
 [Order] Team0 sell food ×16 (oid=65)
 [Order] Team0 buy weapon_melee_low ×3 (oid=66)
 [Order] Team0 buy weapon_ranged_low ×2 (oid=67)
@@ -984,7 +984,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=7380 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=7390 heartbeat（no-decision）pop=5 food(eff=37.6)
 =======================================================
-[TickPerf] day=31 avg=24076 us max=1025932 us ticks=240 teams=7 factions=1
+[TickPerf] day=31 avg=28628 us max=1204874 us ticks=240 teams=7 factions=1
 [Order] Team1 buy food ×2 (oid=78)
 [Order] Team2 sell material ×6 (oid=79)
 [Order] Team3 buy weapon_ranged_low ×2 (oid=80)
@@ -1021,7 +1021,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T0] tick=7630 heartbeat（no-decision）pop=5 food(eff=33.9)
 =======================================================
 [Horse] Outpost (17, 25) 捕野馬 +1
-[TickPerf] day=32 avg=31648 us max=1194613 us ticks=240 teams=7 factions=1
+[TickPerf] day=32 avg=35503 us max=2078746 us ticks=240 teams=7 factions=1
 [Move] Team 1 抵達 (24,16)
 [Faction] Team8 脫離勢力0
 [Order] Team2 buy weapon_melee_low ×1 (oid=86)
@@ -1043,7 +1043,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T0] tick=7870 heartbeat（no-decision）pop=5 food(eff=31.4)
 =======================================================
 [Order] Team7 buy food ×3 (oid=87)
-[TickPerf] day=33 avg=23511 us max=1215263 us ticks=240 teams=7 factions=1
+[TickPerf] day=33 avg=28525 us max=1300865 us ticks=240 teams=7 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 56(公庫14+私42) (需 { "material": 50, "tools": 0 })
 [Move] Team 1 抵達 (24,16)
 [Move] Team 3 抵達 (21,17)
@@ -1063,7 +1063,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=8100 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=8110 heartbeat（no-decision）pop=5 food(eff=27.6)
 =======================================================
-[TickPerf] day=34 avg=25486 us max=1099560 us ticks=240 teams=7 factions=1
+[TickPerf] day=34 avg=29263 us max=1530593 us ticks=240 teams=7 factions=1
 [Move] Team 1 抵達 (24,16)
 [Order] Team2 buy weapon_ranged_low ×1 (oid=86)
 [Move] Team 1 抵達 (24,17)
@@ -1084,7 +1084,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=8340 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=8350 heartbeat（no-decision）pop=5 food(eff=25.1)
 =======================================================
-[TickPerf] day=35 avg=24567 us max=1052227 us ticks=240 teams=7 factions=1
+[TickPerf] day=35 avg=32392 us max=1658032 us ticks=240 teams=7 factions=1
 [Order] Team0 sell food ×1 (oid=66)
 [Order] Team0 buy weapon_melee_low ×3 (oid=67)
 [Order] Team0 buy weapon_ranged_low ×2 (oid=68)
@@ -1122,7 +1122,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=8580 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=8590 heartbeat（no-decision）pop=5 food(eff=22.4)
 =======================================================
-[TickPerf] day=36 avg=29643 us max=863140 us ticks=240 teams=7 factions=1
+[TickPerf] day=36 avg=38403 us max=1341565 us ticks=240 teams=7 factions=1
 [Order] Team0 buy food ×1 (oid=79)
 [StrategicAI] Faction0 首要目標: defend target=1
 [Move] Team 3 抵達 (21,18)
@@ -1153,7 +1153,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=8820 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=8830 heartbeat（no-decision）pop=5 food(eff=18.5)
 =======================================================
-[TickPerf] day=37 avg=16857 us max=855643 us ticks=240 teams=6 factions=1
+[TickPerf] day=37 avg=23210 us max=1089697 us ticks=240 teams=6 factions=1
 [Move] Team 3 抵達 (21,18)
 [Outpost] Team1 設施施工 apothecary → Lv1 at (24,17)
 [Move] Team 3 抵達 (21,18)
@@ -1177,7 +1177,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T0] tick=9070 heartbeat（no-decision）pop=5 food(eff=16.1)
 =======================================================
 [Order] Team7 buy food ×3 (oid=84)
-[TickPerf] day=38 avg=18006 us max=994377 us ticks=240 teams=6 factions=1
+[TickPerf] day=38 avg=25779 us max=1905944 us ticks=240 teams=6 factions=1
 [Outpost] 設施完工 apothecary Lv1 at (24,17)
 [Ambition] Team1 rung 2→1 (定居 cap=2)
 [DayNight] Day 39 開始
@@ -1196,7 +1196,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=9300 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=9310 heartbeat（no-decision）pop=5 food(eff=12.4)
 =======================================================
-[TickPerf] day=39 avg=16426 us max=708170 us ticks=240 teams=6 factions=1
+[TickPerf] day=39 avg=19411 us max=932764 us ticks=240 teams=6 factions=1
 [Site] Faction0 派工失敗: 資源不足 1.5x: material 有 63(公庫16+私47) (需 { "material": 50, "tools": 0 })
 [Outpost] Team0 設施施工 farming → Lv1 at (17,17)
 [DayNight] Day 40 開始
@@ -1215,7 +1215,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=9540 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=9550 heartbeat（no-decision）pop=5 food(eff=9.9)
 =======================================================
-[TickPerf] day=40 avg=46470 us max=1165612 us ticks=240 teams=6 factions=1
+[TickPerf] day=40 avg=65374 us max=1129405 us ticks=240 teams=6 factions=1
 [Order] Team0 buy weapon_melee_low ×2 (oid=64)
 [Order] Team0 buy weapon_ranged_low ×2 (oid=65)
 [Order] Team0 buy material ×20 (oid=66)
@@ -1244,7 +1244,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 [Specimen T6] tick=9780 heartbeat（no-decision）pop=1 food(eff=0.0)
 [Specimen T0] tick=9790 heartbeat（no-decision）pop=5 food(eff=7.4)
 =======================================================
-[TickPerf] day=41 avg=43186 us max=964210 us ticks=240 teams=6 factions=1
+[TickPerf] day=41 avg=65304 us max=2094387 us ticks=240 teams=6 factions=1
 [Order] Team0 buy food ×16 (oid=71)
 [Faction] 勢力0 解散
 [Faction] Team0 脫離勢力0
@@ -1275,7 +1275,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
     狀態: pop=5 food(priv=3.6/gran=0.0/eff=3.6) consume/d=4.0 rung=0 fid=-1 coin=200 mat=35
     leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
 =======================================================
-[TickPerf] day=42 avg=32938 us max=910471 us ticks=240 teams=6 factions=0
+[TickPerf] day=42 avg=41354 us max=1255334 us ticks=240 teams=6 factions=0
 [Ambition] Team3 rung 1→0 (定居 cap=2)
 [Order] Team0 sell material ×6 (oid=78)
 [Order] Team1 buy food ×9 (oid=79)
@@ -1308,7 +1308,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
     leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
 =======================================================
 [Order] Team7 buy food ×3 (oid=79)
-[TickPerf] day=43 avg=20728 us max=808822 us ticks=240 teams=6 factions=0
+[TickPerf] day=43 avg=29428 us max=1237534 us ticks=240 teams=6 factions=0
 [DayNight] Day 44 開始
 [MsgPrune] 刪除過期訊息 global=2 known=1
 
@@ -1337,7 +1337,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
     狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=200 mat=37
     leader: 野心=0.30 慎重=0.70 求生欲=0.50 好戰=0.00 貪婪=0.50 → food_sec_target=5.6天
 =======================================================
-[TickPerf] day=44 avg=24408 us max=1009536 us ticks=240 teams=6 factions=0
+[TickPerf] day=44 avg=37026 us max=1502505 us ticks=240 teams=6 factions=0
 [Move] Team 3 抵達 (23,16)
 [Event] Team 0 領袖替換：Person 0 → Person 3004（統領=0.78）
 [Tag] Team0 +軍隊 -生產
@@ -1375,7 +1375,7 @@ t6000(d25) |      0 |  +0 |   5 |         0 |          20 | [] | { "help.letter_
 =======================================================
 [Move] Team 0 抵達 (18,17)
 [Move] Team 3 抵達 (23,16)
-[TickPerf] day=45 avg=26332 us max=974499 us ticks=240 teams=6 factions=0
+[TickPerf] day=45 avg=39085 us max=2021512 us ticks=240 teams=6 factions=0
 
 ========== [SpecimenTracer] flush 1 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
 [Specimen T6] tick=10800 heartbeat（no-decision）pop=1 food(eff=0.0)

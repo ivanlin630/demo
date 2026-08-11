@@ -1589,21 +1589,21 @@
     },
     {
       "anon": 3,
-      "blind_check": "n/a(非領主決策,不適用盲派判準)",
+      "blind_check": "state-aware(code-confirmed:dispatch函式檔前檢查AnonTierSystem.total_pop才發,見檔頭註)",
       "cap": 20,
       "day": 0,
       "delta": -1,
       "dispatch": {
-
+        "scout.dispatched": 1
       },
-      "guess": "population-overflow分村(Team[4] 與Team0同tile_pos,population5 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)",
+      "guess": "★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader + 新team(Team[4])=上面dispatch產生的leaderless anon子隊(誕生於母隊tile_pos,非overflow)",
       "minor_pop": 0,
       "new_teams": [
         4
       ],
       "pop": 5,
       "tick": 100,
-      "type": "automatic(世界機制,領主無得選)"
+      "type": "deliberate(領主dispatch決策)"
     },
     {
       "anon": 3,
@@ -6391,19 +6391,19 @@
     },
     {
       "anon": 2,
-      "blind_check": "n/a",
+      "blind_check": "state-aware(code-confirmed:dispatch函式檔前檢查AnonTierSystem.total_pop才發,見檔頭註)",
       "cap": 20,
       "day": 1,
       "delta": -1,
       "dispatch": {
-
+        "scout.dispatched": 1
       },
-      "guess": "疑anon→named晉升(named+1同日,person_generator.gd:103,非死亡非派出)",
+      "guess": "★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader",
       "minor_pop": 0,
       "new_teams": [],
       "pop": 5,
       "tick": 400,
-      "type": "automatic(世界機制,advisor拔擢非直接領主人力決策)"
+      "type": "deliberate(領主dispatch決策)"
     },
     {
       "anon": 2,
@@ -11191,21 +11191,21 @@
     },
     {
       "anon": 1,
-      "blind_check": "n/a(非領主決策,不適用盲派判準)",
+      "blind_check": "state-aware(code-confirmed:dispatch函式檔前檢查AnonTierSystem.total_pop才發,見檔頭註)",
       "cap": 20,
       "day": 2,
       "delta": -1,
       "dispatch": {
-
+        "scout.dispatched": 1
       },
-      "guess": "population-overflow分村(Team[5] 與Team0同tile_pos,population4 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)",
+      "guess": "★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader + 新team(Team[5])=上面dispatch產生的leaderless anon子隊(誕生於母隊tile_pos,非overflow)",
       "minor_pop": 0,
       "new_teams": [
         5
       ],
       "pop": 4,
       "tick": 700,
-      "type": "automatic(世界機制,領主無得選)"
+      "type": "deliberate(領主dispatch決策)"
     },
     {
       "anon": 1,
@@ -15993,21 +15993,21 @@
     },
     {
       "anon": 0,
-      "blind_check": "n/a(非領主決策,不適用盲派判準)",
+      "blind_check": "state-aware(code-confirmed:dispatch函式檔前檢查AnonTierSystem.total_pop才發,見檔頭註)",
       "cap": 20,
       "day": 4,
       "delta": -1,
       "dispatch": {
-
+        "scout.dispatched": 1
       },
-      "guess": "population-overflow分村(Team[6] 與Team0同tile_pos,population4 <= cap20,★離峰tick(非日邊界)→較可能走event_system.gd:55 Succession連鎖呼叫,非routine日檢,待QA specimen核)",
+      "guess": "★偵察anon信使派出(scout,_try_scout_side→dispatch_anon_messenger,leaderless 1人子隊,faction_ai_system.gd:2062)——只有faction leader才會fire,Team0是is_faction_leader + 新team(Team[6])=上面dispatch產生的leaderless anon子隊(誕生於母隊tile_pos,非overflow)",
       "minor_pop": 0,
       "new_teams": [
         6
       ],
       "pop": 4,
       "tick": 1000,
-      "type": "automatic(世界機制,領主無得選)"
+      "type": "deliberate(領主dispatch決策)"
     },
     {
       "anon": 0,
