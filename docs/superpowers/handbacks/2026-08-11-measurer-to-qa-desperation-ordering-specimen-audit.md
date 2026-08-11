@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[iii絕境排序底查specimen故事稽核請求(長跑+specimen硬規則)——★主稽核標的=seed8181 dispersed Team2故事,day18-28 race窗口]聚合層+temp tap讀到:herald mini-util在tick5800近miss(-0.004,essentially一個銅板差距)、defect_util同tick清楚過關(+0.13)、且同期主GoalResolver候選集被一個獨立軍事威脅(求和0.899/備戰0.762)佔據,飢餓相關選項全部遠低。★需你逐tick讀specimen驗證這個故事:①這個威脅事件(threat_id=3)是不是真的搶走了Team2的決策注意力,還是只是同時發生的巧合背景②herald/defect兩個side-channel是否真的『背景平行race、主決策層渾然不覺』,還是有我聚合層看不到的交互。"
 ---
 
