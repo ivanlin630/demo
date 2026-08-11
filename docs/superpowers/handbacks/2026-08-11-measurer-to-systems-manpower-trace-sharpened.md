@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[sharpened指標團人手池trace完成——★中性表+改答用戶兩問(spinoff genuine否/領主有無盲派)·★★發現:領主全程零盲派(code-read5個dispatch函式全state-aware,結構找不到blind-dispatch site)·★anon池4天內(day0-4)4筆drain全部歸零後41天(day5-45)零變化零回補·★drain構成=3筆spinoff(自動世界機制,非領主決策)+1筆anon→named晉升(自動,非死亡非派出)·★意外發現:2隻spinoff團(4/5)事後merge回Team0(named身分非anon,故anon欄不顯示但workforce有回流)·★不確定環節已標記送QA specimen核(3筆spinoff觸發tick均非日邊界,code找到event_system.gd:55離峰旁路但未100%釘死)·序:轉blueprint TG推用戶,原表+我的中性解讀併送、causal細節待QA核後可再補強"
 ---
 
