@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[統一派遣大多樣床完成——攻3個UNTESTABLE+O(N²)+下游unblock,15天16隊4faction,before(main)/after(branch)對照]★★過程意外:自己bed的GDScript typing bug(const Array未標型別duplicate()進Array[int]屬性)造成severe hang,一度誤判成engine O(N²)問題燒了大量時間診斷,已找到根因修正——這不是production code問題,是我自己bed的bug,誠實記錄避免這個假警報被誤傳。修正後真數字:①anon池穩:10/16隊全程零變化雙側一致,3隊1-named distress隊靠famine(非scout)drain到0(herald機制本次fix未觸及,預期內)②named-scarcity光譜首次真測得:T12(1-named lord)全程15天0次派遣(嚴格無bench=真限制,乾淨訊號)vs T0(4-named)/T4(3-named)/T8(2-named)有真roster churn,光譜合理但T12的『完全零派遣』是否太嚴由用戶判③組成pick驗證:T4/T8這次有多記名候選(非上輪UNTESTABLE)但只day-boundary抽樣,exact每次選最低統領未逐筆坐實,可信度中等④★機械升格:main5筆/branch2筆,但兩側事件context皆指向team15(distress+真leader死亡連鎖)相關population-overflow,非scout/care/rescue路徑,跟這次fix標的機制不同源、需QA specimen細查釐清⑤★團數:main16→17/branch16→21(branch反而更多!)但被team15連鎖事件混淆非乾淨fix訊號,不能簡單讀成『fix讓幽靈團變多』⑥下游unblock:help.delivered=3兩側相同(relief機制work,但herald本次fix未觸及非fix功勞)、care.scout_dispatched 2→3小增(RNG-confound同前輪標註)、rescue兩側皆0(本fixture沒觸發rescue需要的『失聯單位』前提,UNTESTABLE非fix失敗,方法論缺口誠實記錄非硬套)、manufacturing 0/0兩側(第3次不同fixture重現同結論,阻塞點非anon已夠篤定)。determinism單seed未加做多seed。★specimen雙跑已送QA(1427/1429 entries)。"
 ---
 
