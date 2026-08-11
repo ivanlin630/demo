@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[請QA故事稽核:指標團(Team0)人手池sharpened trace——3筆spinoff事件(t100/t700/t1000)全發生在非日邊界tick(100/700/1000,均非240倍數),code-read找到event_system.gd:55(Succession named-successor分支)可離峰直呼check_overflow_for_team的旁路,但我未能在本輪內確認t100那筆真正的觸發鏈(是否真的是某次領袖replace連鎖call、或有我沒找到的第三條路徑)——★★這是我報告裡唯一『不確定』的因果環節,其餘(anon→named晉升/famine/dispatch)都有明確Probe訊號佐證。★也請核:團4/團5其後merge回Team0(named非anon)是否真如log字面'完全合併'般乾淨(有無資源/anon桶遺失)。specimen已附team0(+spinoff團4/5/6動態納入)。"
 ---
 
