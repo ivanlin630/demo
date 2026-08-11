@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等QA+下一票）——iii④順序gate+校準+flag(B)逐隊判已完成寄出(★★razor-thin margin真被fix翻轉但Team2 trajectory-shift需blueprint WHAT裁)+specimen已送QA
+**狀態**：工作中（等下一票）——★★誠實更正上輪verdict已寄出(Team2 day37『消亡』是我腳本bug誤讀,QA抓到真相=成功併入Team1的正面結局)，iii④順序gate最終結論=fix全面正面
+
+**工單**：無（QA REFRAME我上輪verdict：day37『pop=-99』根本不是死亡,是我daily_log腳本對state.teams.get(2)查無此隊(因併入Team1)誤判成死亡吐-99 sentinel。raw log決定性證據:day36 [Move]Team2抵達(24,17)+[Merge]Team1←Team2完全合併(pop=10)。已誠實更正並主動撤回上輪『trajectory-shift需blueprint WHAT裁』的整個框架——defect被擋是換來12天緩衝讓Team2成功併入強鄰的正面結果,非延後死亡;Team3走獨立自給路線同樣活下來,兩隊皆從baseline死亡軌跡救出。①②④數字不受此bug影響維持有效。已回systems handback:2026-08-11-measurer-to-systems-iii-calibrate-correction.md，iii④這條線現在完整結論=fix全面正面，交systems/blueprint判斷最終定案。
+
+---
+
+**狀態(舊)**：工作中（等QA+下一票）——iii④順序gate+校準+flag(B)逐隊判已完成寄出(★★razor-thin margin真被fix翻轉但Team2 trajectory-shift需blueprint WHAT裁)+specimen已送QA
 
 **工單**：無（iii④順序gate驗收已完成寄systems+specimen已送QA：tick級決定性證據確認QA上輪razor-thin margin假說——Team2 tick5800同一tick herald mini=+0.1717過關vs defect_util=-0.00056被consequence(0.1306)壓下,hedge+consequence聯手真翻轉race。Team3同款。聚合面改善(attrition20.8%→8.3%,letter_dispatched1→2),defect_fire5→7逐隊拆解非單隊惡化(分散多隊含anon旁支)。★★flag(B)確認且更精確:Team2雖day24defect被擋但此後food_days持續0/unrest飆233→308,day37完全消失(pop=-99)——比baseline永遠殭屍態更早死透,真trajectory-shift非簡單變好變壞,需blueprint WHAT層判斷團隊徹底死亡vs永久殭屍態何者更合理(超出measure-first範圍)。Team3則明確改善(day45存活回穩)。餓叛≠野心叛確認(Team1食物健康仍defect,consequence正確不壓)。落地4檔已git commit(a7a1adb4)。已回systems handback:2026-08-11-measurer-to-systems-iii-calibrate-verdict.md+to:qa specimen稽核請求，別下accept，等QA verdict才鎖因果，Team2 trajectory-shift交blueprint WHAT裁。
 
