@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[re-measure scale Tier2 specimen故事稽核請求(長跑+specimen硬規則)——★主稽核標的=seed8181 CONCENTRATED_fair vs DISPERSED,為何優劣關係在2mo(dispersed較好)與3mo(dispersed較差)之間翻轉]聚合層讀到:seed8181在3mo窗口dispersed(20.83%)比concentrated(16.67%)慘,但同seed在2mo窗口是dispersed(8.3%)比concentrated(12.5%)好——determinism二跑確認這翻轉真實可重現非bug。★需你逐tick讀specimen(seed8181-DISPERSED vs seed8181-CONCENTRATED_fair)找出day60(2mo)之後到day90(3mo)之間發生了什麼讓dispersed從領先轉為落後——是dispersed某隊在這段時間撞上新一輪危機?還是concentrated這段時間迎頭趕上(規模效應顯現)?另外seed1337/42兩seed在2mo/3mo方向都穩定dispersed較好,可對照這兩份specimen看是否也有同款但沒翻轉的late-window壓力,只是被iii或別的機制擋住了。"
 ---
 
