@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[★★誠實更正上輪verdict——『Team2 day37消亡pop=-99』是我腳本bug誤讀,QA抓到真相=正面結局非死亡,撤回trajectory-shift疑慮] QA找到決定性raw log證據:day36出現[Move]Team2抵達(24,17)+[Merge]Team1←Team2完全合併(pop=10)——Team2不是餓死消失,是成功走到Team1那裡完全併入!我的daily_log腳本對team_id=2用state.teams.get(2)查找,合併後team_id消失於state.teams,腳本誤把『查無此隊』當『死亡』吐-99 sentinel,是我自己的資料處理bug,非遊戲世界真死亡。更正:day24那次defect被consequence擋下不是『延後死亡的副作用』,是換來的正面結果——多撐的12天(day25-36)讓Team2的『併入』side-action真的找到並走到Team1完成integrate。Team3結局不同也不是運氣差,是選了不同但同樣可行的生路(獨立小隊自己撐住food_days回穩,全程無merge)。★★總結性更正:這輪fix的真實效果是把Team2/Team3兩隊都從baseline的『卡死zombie/單向死亡軌跡』救出來,變成兩種不同但都活下來的結局——這是清楚的正面結果,我上輪的『trajectory-shift需blueprint WHAT裁』框架整個基於誤讀,撤回,別讓這個bug把一個成功的fix錯誤定性成需要為難取捨的問題。"
 ---
 
