@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[manufacture noop診斷完成——★★決定性:no_facility是主因兩scenario皆然,QA code-read假說用真tap數字確認,labor(no_worker)是次要因素]seed8181 concentrated vs dispersed(4mo)真實tap breakdown:concentrated{noop_no_outpost:575,noop_no_worker:126,noop_no_facility:1161★主因,noop_no_material:0};dispersed{noop_no_outpost:477,noop_no_worker:78,noop_no_facility:644★主因,noop_no_material:197}。no_facility在兩邊都是最大noop原因(concentrated超no_worker9倍,dispersed超no_worker8倍)——直接確認QA的code-read推論:4個月短窗內manufacturing專屬設施(區別於基礎outpost civilian site)從未真正蓋到level>0,連candidate的demand entry都沒生成過,這是precondition未滿足非labor不夠或優先序被威脅佔走。labor短缺(no_worker)確實存在但是次要因素,不是主要擋點——這代表你原本假說『labor_pool崩=擋manufacture=同擋care-loop relief那根』只對了一半:labor短缺有貢獻但不是主因,主因是manufacturing facility建設進度本身太慢(4個月連level1的專屬製造設施都還沒蓋出來,同期construct.complete_upgrade_facility雖有非零成長但那多半是基礎civilian outpost升級非manufacturing專屬設施)。material短缺在concentrated完全不缺(0)但dispersed偶爾短缺(197)——小村資源餘裕較薄的合理差異,非決定性但值得記錄。★裁bar建議:no_facility為主因≠anon-cohort/care-loop那個deferred根blocker,是一個不同的、獨立的『manufacturing facility建設速度太慢』問題——不建議跟anon-overflow那條線合併判定,是新的、獨立的斷點。"
 ---
 
