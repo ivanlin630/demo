@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[re-measure scale v2生產淨值帳完成——★★決定性:manufacture.fired=0全程兩scenario皆然,labor_pool早期崩潰不回補,『size是否帶來長期生產優勢』目前無法回答因為製造管線根本沒真正運轉過]seed8181 concentrated_fair vs dispersed,4mo(6mo超工具10分鐘timeout故降級,仍長於established安全3mo窗,誠實聲明scope妥協)+雙邊specimen已產。★決定性共同發現(非差異化,兩邊一樣糟):concentrated labor_pool month1=9→month2起崩至2且4個月從未回補,manufacture.fired全程=0,manufacture.output={}(零產出);dispersed labor_pool month1=5→month2起崩至1同樣從未回補,manufacture.fired全程=0。兩scenario在4個月內完全零manufacturing產出——這代表你問的『size長期生產優勢』這個問題目前答不了,不是size差異造成什麼結果,是manufacturing pipeline本身在這個fixture下從未真正fire過,兩邊都卡在同一個execution-layer斷點上。★誠實建議:在能回答生產淨值帳這個問題前,需要先診斷manufacture為何全程noop(既有tap manufacture.noop_no_outpost/no_worker/no_facility/no_material可以cheap定位是哪一關擋住,這輪我依『先交決定性共同發現』原則沒有再往下挖,因為兩scenario結果相同代表這不是size比較的問題,是manufacturing系統本身的問題,值得先單獨診斷再回頭做concentration比較)。construct.complete_upgrade_facility兩邊都有非零成長(concentrated 0→4,dispersed 1→6)顯示建設本身有在運作,convoy.deliver_settled兩邊都接近0(concentrated=1,dispersed=0)顯示貿易吞吐量也極低。核心村存活面(pop_core)兩邊都相對穩定(concentrated17,dispersed19,4個月內小幅波動)。"
 ---
 
