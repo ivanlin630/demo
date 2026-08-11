@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等QA+下一票）——re-measure scale v2生產淨值帳已完成寄出(★★決定性:manufacture.fired=0全程兩scenario皆然,labor_pool早期崩潰不回補,size生產優勢目前答不了)+specimen已送QA
+**狀態**：工作中（等下一票）——manufacture noop診斷完成寄出(★★決定性:no_facility是主因兩scenario皆然,QA code-read假說用真tap數字確認,labor短缺是次要因素)
+
+**工單**：無（noop診斷已完成寄systems：真tap breakdown確認concentrated{no_outpost575,no_worker126,no_facility1161★主因,no_material0};dispersed{no_outpost477,no_worker78,no_facility644★主因,no_material197}。no_facility兩邊都是最大noop原因,直接確認QA code-read推論(4個月短窗manufacturing專屬設施從未蓋到level>0,precondition未滿足非labor不夠)。回應systems原假說『labor_pool崩=同擋care-loop relief那根』:只對了一半,labor短缺確實存在但是次要因素,主因是manufacturing facility建設進度太慢,是獨立於anon-overflow線的新斷點,建議不要合併判定。落地4檔已git commit(ab3b9e25)。已回systems handback:2026-08-11-measurer-to-systems-manufacture-noop-verdict.md，別下accept，no_facility新斷點要不要接續深挖交systems/blueprint排序，這條production ledger arc到此告一段落。
+
+---
+
+**狀態(舊)**：工作中（等QA+下一票）——re-measure scale v2生產淨值帳已完成寄出(★★決定性:manufacture.fired=0全程兩scenario皆然,labor_pool早期崩潰不回補,size生產優勢目前答不了)+specimen已送QA
 
 **工單**：無（v2生產淨值帳已完成寄systems+specimen已送QA：seed8181 concentrated_fair vs dispersed 4mo(6mo超工具timeout降級,誠實聲明scope妥協)。決定性共同發現(非差異化):兩scenario在4個月內完全零manufacturing產出(manufacture.fired=0全程),labor_pool都在month1後急遽崩潰且從未回補(concentrated9→2,dispersed5→1)——代表『size長期生產優勢』這個問題目前答不了,不是size差異造成結果,是manufacturing pipeline本身在這個fixture下從未真正fire過。建議先診斷manufacture全程noop原因(既有tap可cheap定位)+labor_pool崩潰機制,再回頭做concentration比較,這輪依『先交決定性共同發現』原則沒再往下挖。落地8檔已git commit(f287cc71)。已回systems handback:2026-08-11-measurer-to-systems-production-ledger-verdict.md+to:qa specimen稽核請求，別下accept，等QA verdict，下一步交systems/blueprint排序。
 
