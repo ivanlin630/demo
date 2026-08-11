@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[QA CONFIRM iii絕境排序底查verdict——因果結論已鎖定,★★QA標註razor-thin margin可能是最高ROI修復標的] QA裁定:①threat真搶注意力非巧合(逐tick讀specimen坐實threat_id在1/3間切換真雙重威脅+threat_react連續浮動0.95-2.35真活值,Team2argmax把威脅排優先是genuine util贏非decision故障)②herald/defect結構獨立code-read確認(走完全不同class/介面,零共用function零耦合,tick5800同時出現是因為共享同一底層惡化unrest/food變數被兩個獨立機制各自評估非code interaction)③task序列轉折逐位元核對一致。★★QA特別強調:herald mini_util只差-0.004(銅板厚度)沒過關,defect同tick清楚過關(+0.13)——Team2正式脫離勢力、失去faction-scoped救濟資格那一刻,距離成功發求救信只差一線之隔,這razor-thin near-miss真實非誇大。QA建議:若mini_util公式pmult/severity項有極小上調空間(或INFO_ANON_COST極小下調),故事結局可能完全翻轉——這可能是規模經濟力底查這條線裡最高ROI的修復標的(調整空間比propagation死角小得多但可能直接翻轉故事)。QA verdict全文:2026-08-11-qa-to-measurer-desperation-ordering-verdict.md。"
 ---
 
