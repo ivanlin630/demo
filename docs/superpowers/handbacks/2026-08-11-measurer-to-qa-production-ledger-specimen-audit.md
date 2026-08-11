@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[re-measure scale v2生產淨值帳specimen故事稽核請求(長跑+specimen硬規則)——★主稽核標的=為何manufacture.fired全程=0(4個月零產出)+labor_pool從month1到month2為何急遽崩潰(concentrated9→2,dispersed5→1)且從未回補]聚合層讀到:兩scenario在4個月內完全零manufacturing產出,labor_pool都在month1後急遽崩潰。★需你逐tick讀specimen驗證:①team0(lord)逐月的候選集裡有沒有評估過生產/建設相關選項,還是被別的優先序(威脅回應/求援/叛離)完全佔據②labor_pool驟降是否對應某個具體事件(anon池被population-overflow spinoff搬空/團隊tag變化/團隊實際離開該tile)③manufacture noop卡在哪個原因(no_outpost/no_worker/no_facility/no_material)。"
 ---
 
