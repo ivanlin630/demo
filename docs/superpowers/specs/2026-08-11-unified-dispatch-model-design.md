@@ -36,4 +36,5 @@ date: 2026-08-11
 - 組成**依重要性分化**（要害→記名/親信、routine→次要記名、規模→記名帶團）+ 人格 modulate。
 - 湧現升格照 fire（領隊死→接班）於 genuine 場景;機械升格 0。
 - **★re-measure 下游**（anon 漏光疑 relief/care/builder 派不出真根之一 → 修後量會不會跟著通、**不預設**、免再 over-claim）。
+- **★★re-measure 團數 / O(N²) perf（用戶 2026-08-11 連結假設）**：機械升格每次生一個獨立記名幽靈團（trace Team4/5/6=升格信使）→ 疑膨脹團數餵 O(N²)。修後斷此團源 → 量「幽靈團生成數 / 總團數 / per-tick 成本」修前 vs 修後、**測其對 O(N²) 貢獻量級**（顯著=白賺 perf 勝、次要=誠實記）。★假設非結論（4× over-claim 教訓）、硬數字定。連 [[project_framework_seams]] perf O(N²) / 時間統一 wave。
 - determinism;無 regression;constitution 綠（組成=決策非硬閘、無新死常數）。
