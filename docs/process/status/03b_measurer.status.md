@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——anon真consumer trace已完成寄出(★★決定性:population overflow spin-off是真兇,非leak非named-競爭,對應blueprint結構偏小象限)
+**狀態**：工作中（等下一票）——iii絕境排序底查已完成寄出(★herald近miss-0.004+defect零consequence-pricing+意外第三因主決策層被威脅佔用)+specimen已送QA
+
+**工單**：無（iii絕境排序底查已完成寄systems+specimen已送QA：herald mini-util在tick5800(day~24.2)近miss(-0.004,essentially銅板差),同一tick defect_util清楚過關(+0.13);code-read確認defect formula零項pricing叛離後果。★★意外第三因(supersede原ticket框架):同期主GoalResolver候選集被獨立軍事威脅佔據(求和0.899/備戰0.762霸榜),飢餓選項全遠低於威脅回應,herald/defect兩side-channel在背景平行race主決策層渾然不覺,真實決策焦點根本不在飢荒上。落地4檔已git commit(0a19aff6)。已回systems handback:2026-08-11-measurer-to-systems-desperation-ordering-verdict.md+to:qa specimen稽核請求，別下accept，等QA verdict才鎖因果，output供systems/blueprint spec iii genuine repricing判斷。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——anon真consumer trace已完成寄出(★★決定性:population overflow spin-off是真兇,非leak非named-競爭,對應blueprint結構偏小象限)
 
 **工單**：無（anon consumer trace已完成寄systems：get_stack() caller trace精準抓到真兇——lord Team0每次anon流失(from=0→to={4,5,6} count=1)逐筆對應同期[Succession]Team4/5/6從匿名晉升新領袖事件,這是population overflow觸發的『晉升一人成新獨立團隊leader』spin-off機制,非任何crisis-relief側dispatch。同期from={4,5,6}→to=0 count=0是另一種零效果呼叫非真正歸還。★★決定性回答blueprint a/b/iii:不是leak(spin-off設計上就永久離開非借出)、不是named機制競爭(herald/scout/distribute/migrant/invest全程0)、是『結構偏小』象限(pool起始容量對連續4次population-overflow spin-off撐不住)。落地2檔已git commit(8784f972)。已回systems handback:2026-08-11-measurer-to-systems-anon-consumer-verdict.md，care-loop branch仍hold，交systems/blueprint裁決最終定案。
 
