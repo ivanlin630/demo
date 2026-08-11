@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——QA CONFIRM真兇故事(genuine famine extinction),re-measure scale這條追問線量測面收斂
+**狀態**：工作中（等QA+下一票）——re-measure scale v2生產淨值帳已完成寄出(★★決定性:manufacture.fired=0全程兩scenario皆然,labor_pool早期崩潰不回補,size生產優勢目前答不了)+specimen已送QA
+
+**工單**：無（v2生產淨值帳已完成寄systems+specimen已送QA：seed8181 concentrated_fair vs dispersed 4mo(6mo超工具timeout降級,誠實聲明scope妥協)。決定性共同發現(非差異化):兩scenario在4個月內完全零manufacturing產出(manufacture.fired=0全程),labor_pool都在month1後急遽崩潰且從未回補(concentrated9→2,dispersed5→1)——代表『size長期生產優勢』這個問題目前答不了,不是size差異造成結果,是manufacturing pipeline本身在這個fixture下從未真正fire過。建議先診斷manufacture全程noop原因(既有tap可cheap定位)+labor_pool崩潰機制,再回頭做concentration比較,這輪依『先交決定性共同發現』原則沒再往下挖。落地8檔已git commit(f287cc71)。已回systems handback:2026-08-11-measurer-to-systems-production-ledger-verdict.md+to:qa specimen稽核請求，別下accept，等QA verdict，下一步交systems/blueprint排序。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——QA CONFIRM真兇故事(genuine famine extinction),re-measure scale這條追問線量測面收斂
 
 **工單**：無（QA CONFIRM：raw log決定性事件(day64/79 [Death]+[Extinct])確認Team6/7/8是genuine famine extinction非merge誤讀,翻轉真兇故事站得住。QA補充觀察(非裁定):1人spinoff隊結構上幾乎注定餓死,死亡驅動可能跟村落選址策略無關、是population-overflow機制副產品死亡率,是否該filter/分開報告交systems/blueprint方法論裁量,建議連同concentrated側等價spinoff命運一併查才能判斷公平性。已整合這條arc累積完整圖像(①confound-clear首驗②方向反轉但非全面一致③seed8181翻轉真兇=spinoff隊死亡)寄systems收斂回報。已回systems handback:2026-08-11-measurer-to-systems-remeasure-final-close.md，序②③+spinoff隊算不算的方法論題交systems/blueprint整合判斷，這條追問線到此收斂，等下一票。
 
