@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[anon-pool收支診斷完成——★★誠實結論:數據不乾淨支持LEAK也不支持GENUINE-scarcity-via-named-dispatch-competition,可能是blueprint框架外的第三種可能(pool結構性偏小/routine非crisis消耗)] 決定性測量:lord(Team0)AnonTierSystem.total_pop min=0 max=3,day5前耗盡,此後40天(89%窗口)永久卡0從未回補。但named crisis-relief機制(herald/scout/distribute/migrant/invest)全數0或近0——這直接排除『genuine scarcity=多個side-dispatch機制真競爭搶同一池』的字面解讀(因為根本沒有足夠dispatch活動構成『競爭』)。唯一lord-attributable活動=3個task=idle子隊(parent=0,tick400/800/1100 create+merge_back),淨效果趨近零,不解釋depletion。★分類結論:現有tap集合(dispatch側named機制+merge_back側breakdown)收支帳對不上觀察到的pool depletion——既非教科書LEAK(dispatched沒回=data不支持,因為named dispatched幾乎是0)也非教科書GENUINE-競爭(demand不足以構成競爭)。可能是pool本身起始就偏小(config anon_tiers:平民4,對pop6隊)+某個我tap集合外的機制(可能succession/population overflow/其他routine非crisis事件)在早期(tick0-500前)消耗掉。誠實回報非強行套進leak/genuine二選一,建議下一步(若仍需精確定案):trace dispatch側(非merge_back側)在tick0-500窗口,直接查AnonTierSystem.transfer_proportional每次呼叫的caller+context,才能抓到真正consumer。cheap優先原則下我這輪未再深挖(已達decisive程度的部分已交付,剩餘部分屬於另一層次挖掘,交你判斷是否值得繼續)。"
 ---
 
