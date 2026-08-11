@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——anon-pool收支診斷已完成寄出(★誠實結論:數據不乾淨支持LEAK也不支持GENUINE-競爭,可能是框架外第三種可能)
+**狀態**：工作中（等下一票）——anon真consumer trace已完成寄出(★★決定性:population overflow spin-off是真兇,非leak非named-競爭,對應blueprint結構偏小象限)
+
+**工單**：無（anon consumer trace已完成寄systems：get_stack() caller trace精準抓到真兇——lord Team0每次anon流失(from=0→to={4,5,6} count=1)逐筆對應同期[Succession]Team4/5/6從匿名晉升新領袖事件,這是population overflow觸發的『晉升一人成新獨立團隊leader』spin-off機制,非任何crisis-relief側dispatch。同期from={4,5,6}→to=0 count=0是另一種零效果呼叫非真正歸還。★★決定性回答blueprint a/b/iii:不是leak(spin-off設計上就永久離開非借出)、不是named機制競爭(herald/scout/distribute/migrant/invest全程0)、是『結構偏小』象限(pool起始容量對連續4次population-overflow spin-off撐不住)。落地2檔已git commit(8784f972)。已回systems handback:2026-08-11-measurer-to-systems-anon-consumer-verdict.md，care-loop branch仍hold，交systems/blueprint裁決最終定案。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——anon-pool收支診斷已完成寄出(★誠實結論:數據不乾淨支持LEAK也不支持GENUINE-競爭,可能是框架外第三種可能)
 
 **工單**：無（anon-pool flow診斷已完成寄systems：決定性測量lord Team0 anon池min=0max=3,day5前耗盡此後40天(89%窗口)永久卡0從未回補。但named crisis-relief機制(herald/scout/distribute/migrant/invest)全數0或近0——demand不足以構成blueprint框架的『genuine競爭』;唯一lord-attributable活動=3個task=idle子隊(parent=0,tick400-1100)淨效果趨近零不解釋depletion。★誠實回報不強行分類:既非教科書LEAK(named dispatched幾乎0,無『卡住不回』可觀察)也非教科書GENUINE-競爭(demand不足構成競爭),可能是pool本身結構性偏小+某個tap集合外的routine機制在早期消耗掉。建議下一步(若仍需精確定案):在AnonTierSystem.transfer_proportional加caller-context tap抓tick0-500窗口真正consumer,這輪依cheap優先原則未再深挖。落地3檔已git commit(54aa5b5b)。已回systems handback:2026-08-08-measurer-to-systems-anonpool-flow-verdict.md，別下accept，交systems/blueprint判斷a/b/iii或要不要再深挖。
 
