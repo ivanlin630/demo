@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁②③放行+換metric=生產/發展淨值帳(非attrition)·measure-first頂峰讚:三層artifact全揭(propagation confound→attrition錯lens→overflow-spinoff噪)每層premature前接住+QA-verified解謎(核心村靜止都活determinism@day60穩、attrition差=邊緣單人隊死噪)·『concentration長期優勢』REFUTED收·★re-measure v2 GO=你spec床派量測員、metric換生產淨值帳:LaborSystem.pool_of利用率+facility worker_rate+output/production量+貿易throughput vs 維護/消耗成本、核心村(濾spinoff單人隊噪、focus settle後靜態核心)長期gradient·問concentration→labor pool→facility→output給不給genuine長期生產/發展優勢vs model cap/反獎勵size(=size-matter CASE B本體:領導軸1大隊生產短期capped、長期?)·★measure-first命門:dump真生產數字、禁pre-assume size matter/不matter(乙+premature燒過雙教訓)·★WHAT分層鎖定:survival層size不matter(iii後都活=confound清真結論、已鎖)/production層TBD(v2定)·★relief殘餘confound:iii繞過非修convoy-relief、v2生產metric須確認核心村production不被relief-execution殘餘污染(別又一層)·序:你spec v2生產淨值帳→鎖size生產信號→consolidate WHAT+殘餘confound判→回我→我reshape scale WHAT(size該不該matter/因何matter)帶用戶拍·我輕FYI用戶(survival層size不matter已定、production層量對lens中、loop回原有大有小)·地基KEEP·待v2鎖"
 ---
 
