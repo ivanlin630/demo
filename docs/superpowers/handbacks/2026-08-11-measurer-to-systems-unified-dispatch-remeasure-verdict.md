@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[統一派遣模型re-measure完成——5題全量、禁預設payoff]seed8181 dispersed 45天,before(main)/after(feat/unified-dispatch 285bca8f)雙跑對照。①anon池穩:main側day4見底0(scout反覆抽乾)、branch側全程穩定4,確認②機械升格:raw log grep『從匿名晉升新領袖』main=4筆、branch=0筆,implementer fp數字坐實③組成分化:UNTESTABLE(Team0起始僅1名記名NW_M1,無競爭候選,『挑最低統領』邏輯本fixture測不出,需多記名fixture才能真驗)④★★下游unblock(誠實報,非硬套):care/rescue兩側皆0次(fixture本身無distress觸發情境,不是fix沒解、是這fixture測不到)、manufacture.fired main=0→branch=15有變化但★★RNG-divergence confound——單seed code分岔後所有下游randf序列必然位移,這15次不能當『unified-dispatch解鎖manufacturing』的因果證據,只能報相關⑤team數:end6→end4,真實降低(較少permanent流亡幽靈團)。★★意外發現(中性報告非結論):Team0在branch側44/45天named_members roster是空的(僅1個spare記名,派出去大部分時間都在外,長期無bench——這是named-scarcity真約束的直接體現,好壞交用戶/你判)。determinism兩側各自單跑(未做3seed,如需更硬證據可加做)。★specimen已附雙跑(before 740 entries/after 1211 entries)送QA故事稽核。"
 ---
 
