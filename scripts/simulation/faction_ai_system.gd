@@ -1643,6 +1643,16 @@ const INFO_RELIEF_EXPECT: float = DecisionTerms.DESPERATION_DAYS * ResourceSyste
 const INFO_ANON_COST: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 1 anon 邊際成本≈其每日食耗/產出 proxy（0.8）
 # ★scope 硬限：只 herald/scout 兩條 1-anon 資訊跑腿（非泛化 side-task 框架繞 argmax）。
 
+# ★iii 靶1 catastrophe-hedge（TEST VALUE、measurer 校準）：near-catastrophe 時便宜可逆 ask 的 option-value。
+const HEDGE_ONSET: float = 0.55            # TEST VALUE — hedge 起算 severity 門檻；低於此 near-catastrophe 未至 → hedge=0（§2.5②bounded、非 flat always-ask）
+const HEDGE_CATASTROPHE_MAG: float = 1.0   # TEST VALUE — 災難量級（factionless→死 避免的 option 值）；measurer 校到 razor-thin near-miss 翻
+
+# catastrophe-hedge：severity（趨近絕境/死的連續訊號）越高、求援對抗災難的 option-value 越高（可能救命+低成本可逆+保 faction）。
+# hedge_proximity 於 HEDGE_ONSET 以下 →0（bounded、非 flat offset）；pmult 人格 modulate（同 relief 項、驕傲晚求務實早求、非硬 boost 逼 fire）。
+static func herald_hedge(severity: float, pmult: float) -> float:
+	var hedge_proximity: float = clampf((severity - HEDGE_ONSET) / (1.0 - HEDGE_ONSET), 0.0, 1.0)
+	return hedge_proximity * HEDGE_CATASTROPHE_MAG * pmult
+
 const INFO_DISPATCH_CADENCE: int = WorldState.TICKS_PER_DAY   # 求援/偵察=慢策略,每日評一次即可(per-team 錯開防每 tick O(teams²) 掃)
 
 func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
@@ -2008,8 +2018,12 @@ func _try_herald_side(state: WorldState, team: TeamData) -> void:
 		return   # 無施助者（belief/名冊皆無）
 	if Probe.enabled: Probe.bump("help.target_resolved")   # ★缺口A:severity>0 且解出施助者
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
-	var mini: float = severity * _help_pmult(lv) * INFO_RELIEF_EXPECT - INFO_ANON_COST
-	if Probe.enabled: Probe.note("help.mini_util", mini)
+	var pmult: float = _help_pmult(lv)
+	var hedge: float = herald_hedge(severity, pmult)   # ★iii 靶1：catastrophe-hedge option-value（bounded、pmult modulate）
+	var mini: float = severity * pmult * INFO_RELIEF_EXPECT - INFO_ANON_COST + hedge
+	if Probe.enabled:
+		Probe.note("help.mini_util", mini)
+		Probe.note("help.hedge", hedge)   # ★②machine-demonstrate tap：hedge 值可觀測
 	if mini <= 0.0:
 		return   # cost-benefit 不划算（傲慢撐/輕度餓不值 1 anon）
 	# ★B carrier：payload=origin 自己 food 買單 snapshot（讀自己 need、非 target live state；感知鐵律 honest）。
