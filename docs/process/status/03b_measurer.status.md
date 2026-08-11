@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——manufacture noop診斷完成寄出(★★決定性:no_facility是主因兩scenario皆然,QA code-read假說用真tap數字確認,labor短缺是次要因素)
+**狀態**：工作中（等下一票）——demand-injected probe完成寄出(★★負向決定性:注入正確resource仍無法解鎖manufacturing,原假說不成立,依ticket自己邏輯decisive失敗未繼續conditional比較)
+
+**工單**：無（demand-injected probe已完成寄systems：seed8181 concentrated(4mo)每日注入synthetic order_buy(goods/tools精確對應workshop facility use_demand=true輸出resource,code-read確認)進team0-3team_known,感知鐵律-honest格式。★★先驗注入生效檢查失敗:manufacturing_level全程=0(4個月),manufacture.fired全程=0,noop_no_facility持續上升(249→962)仍是主因。修正一個自己的property名稱診斷bug(workshop_level應為manufacturing_level)後數字不變,確認非診斷artifact是真實負向結果。原假說『no_facility純缺demand信號』不成立,阻塞點在demand→facility_deficit→實際觸發建設這條鏈路更深處。依ticket自己明訂的『先驗注入生效才繼續conditional比較』邏輯,pre-check decisive失敗,未繼續跑dispersed對照也未進行完整生產淨值帳比較,誠實回報負向鎖定結果。用戶要求『好了先回報』已直接回systems。落地4檔已git commit(76bad416)。已回systems handback:2026-08-11-measurer-to-systems-demand-injected-verdict.md，別下accept，下一步(診斷候選層排擠 vs 收斂此線)交systems/blueprint判斷。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——manufacture noop診斷完成寄出(★★決定性:no_facility是主因兩scenario皆然,QA code-read假說用真tap數字確認,labor短缺是次要因素)
 
 **工單**：無（noop診斷已完成寄systems：真tap breakdown確認concentrated{no_outpost575,no_worker126,no_facility1161★主因,no_material0};dispersed{no_outpost477,no_worker78,no_facility644★主因,no_material197}。no_facility兩邊都是最大noop原因,直接確認QA code-read推論(4個月短窗manufacturing專屬設施從未蓋到level>0,precondition未滿足非labor不夠)。回應systems原假說『labor_pool崩=同擋care-loop relief那根』:只對了一半,labor短缺確實存在但是次要因素,主因是manufacturing facility建設進度太慢,是獨立於anon-overflow線的新斷點,建議不要合併判定。落地4檔已git commit(ab3b9e25)。已回systems handback:2026-08-11-measurer-to-systems-manufacture-noop-verdict.md，別下accept，no_facility新斷點要不要接續深挖交systems/blueprint排序，這條production ledger arc到此告一段落。
 
