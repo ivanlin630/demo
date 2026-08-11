@@ -52,11 +52,23 @@ func _run(label: String, config_path: String, s: int) -> Dictionary:
 	var team_daily: Dictionary = {}
 	for tid in ORIG_TIDS: team_daily[tid] = []
 	var labor_daily: Array = []
+	# ★QA抓到方法論漏洞修正：同一連續run內記錄day60 checkpoint(非另開2mo-only獨立run比較，避免不同bed腳本
+	# RNG消耗footprint不同導致從tick0就分道揚鑣、兩個attrition%其實不是同一world的兩個時間點)。
+	var checkpoint_2mo: Dictionary = {}
+	var checkpoint_2mo_tick: int = WorldState.TICKS_PER_MONTH * 2
 
 	for tick in range(ticks):
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
+		if state.world.current_tick == checkpoint_2mo_tick:
+			var cp_pop: int = _total_pop(state)
+			var full_roster: Dictionary = {}
+			for tid2 in state.teams: full_roster[tid2] = state.teams[tid2].population
+			checkpoint_2mo = {"tick": checkpoint_2mo_tick, "day": checkpoint_2mo_tick / WorldState.TICKS_PER_DAY,
+				"pop": cp_pop, "attrition_pct": 0.0 if start_pop == 0 else 100.0 * (start_pop - cp_pop) / float(start_pop),
+				"full_roster": full_roster}
+			print("  [checkpoint@day60 全隊roster] %s" % str(full_roster))
 		if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 			for tid in state.teams:
 				var t: TeamData = state.teams[tid]
@@ -78,6 +90,9 @@ func _run(label: String, config_path: String, s: int) -> Dictionary:
 
 	var end_pop: int = _total_pop(state)
 	var attrition: float = 0.0 if start_pop == 0 else 100.0 * (start_pop - end_pop) / float(start_pop)
+	var final_roster: Dictionary = {}
+	for tid3 in state.teams: final_roster[tid3] = state.teams[tid3].population
+	print("  [final@day%d 全隊roster] %s" % [MONTHS * 30, str(final_roster)])
 
 	SpecimenTracer.flush()
 	var spec_path: String = "docs/measurements/2026-08-11-scale-econ-remeasure-tier2-seed%d-%s.specimen.jsonl" % [s, label]
@@ -85,12 +100,15 @@ func _run(label: String, config_path: String, s: int) -> Dictionary:
 	SpecimenTracer.reset()
 	Probe.enabled = false
 
-	print("  final: pop=%d attrition=%.2f%%" % [end_pop, attrition])
+	print("  ★checkpoint@2mo(day%s): pop=%s attrition=%s%%" % [
+		str(checkpoint_2mo.get("day")), str(checkpoint_2mo.get("pop")), str(checkpoint_2mo.get("attrition_pct"))])
+	print("  final(day%d,3mo): pop=%d attrition=%.2f%%" % [MONTHS * 30, end_pop, attrition])
 	for tid in ORIG_TIDS:
 		var last = team_daily[tid][-1] if not team_daily[tid].is_empty() else {}
 		print("  Team%d final: %s" % [tid, str(last)])
 
 	return {"start_pop": start_pop, "end_pop": end_pop, "attrition_pct": attrition,
+		"checkpoint_2mo": checkpoint_2mo, "final_roster": final_roster,
 		"succession_count": 0, "team_daily": team_daily, "labor_daily": labor_daily}
 
 func _total_pop(state: WorldState) -> int:
