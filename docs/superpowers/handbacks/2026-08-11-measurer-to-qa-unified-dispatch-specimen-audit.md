@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[請QA故事稽核:統一派遣模型re-measure雙specimen(before main 740 entries/after branch 1211 entries)]★最想請你核兩點:①manufacture.fired main=0→branch=15這個變化,讀specimen確認是真有motive→action因果鏈(比如named-scarcity緩解讓某隊多出產能真的去蓋facility)還是純RNG-divergence巧合(單seed code分岔後下游randf序列必然位移,我不敢排除巧合)②branch側Team0的named_members roster 44/45天空的(唯一記名成員NW_M1幾乎全程在外scout)——這個『長期無bench』狀態故事上合理嗎(scout任務真的持續有util驅動,還是卡在某種重複觸發迴圈)。"
 ---
 
