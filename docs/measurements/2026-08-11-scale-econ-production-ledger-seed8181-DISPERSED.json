@@ -1,0 +1,61 @@
+{
+  "construct_upgrade_total": 6,
+  "convoy_deliver_settled_total": 0,
+  "core_pop": 19,
+  "end_pop": 19,
+  "manufacture_fired_total": 0,
+  "manufacture_output": {
+
+  },
+  "monthly_log": [
+    {
+      "construct_upgrade_total": 1,
+      "convoy_deliver_settled_total": 0,
+      "labor_mult_gather_food": 0.163027656477438,
+      "labor_pool": 5,
+      "manufacture_fired_total": 0,
+      "month": 1,
+      "outpost_level": 1,
+      "pop_core": 19,
+      "pop_total": 22
+    },
+    {
+      "construct_upgrade_total": 5,
+      "convoy_deliver_settled_total": 0,
+      "labor_mult_gather_food": 0,
+      "labor_pool": 1,
+      "manufacture_fired_total": 0,
+      "month": 2,
+      "outpost_level": 0,
+      "pop_core": 19,
+      "pop_total": 22
+    },
+    {
+      "construct_upgrade_total": 5,
+      "convoy_deliver_settled_total": 0,
+      "labor_mult_gather_food": 0,
+      "labor_pool": 1,
+      "manufacture_fired_total": 0,
+      "month": 3,
+      "outpost_level": 1,
+      "pop_core": 19,
+      "pop_total": 19
+    },
+    {
+      "construct_upgrade_total": 6,
+      "convoy_deliver_settled_total": 0,
+      "labor_mult_gather_food": 0,
+      "labor_pool": 1,
+      "manufacture_fired_total": 0,
+      "month": 4,
+      "outpost_level": 1,
+      "pop_core": 19,
+      "pop_total": 19
+    }
+  ],
+  "months": 4,
+  "scenario": "DISPERSED",
+  "seed": 8181,
+  "spinoff_creation_count": 6,
+  "start_pop": 24
+}
