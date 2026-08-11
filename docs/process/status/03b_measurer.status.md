@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——iii絕境排序底查QA CONFIRM已轉發systems,量測+故事稽核雙軌收尾(★★QA標註razor-thin margin=最高ROI修復標的)
+**狀態**：工作中（等QA+下一票）——iii④順序gate+校準+flag(B)逐隊判已完成寄出(★★razor-thin margin真被fix翻轉但Team2 trajectory-shift需blueprint WHAT裁)+specimen已送QA
+
+**工單**：無（iii④順序gate驗收已完成寄systems+specimen已送QA：tick級決定性證據確認QA上輪razor-thin margin假說——Team2 tick5800同一tick herald mini=+0.1717過關vs defect_util=-0.00056被consequence(0.1306)壓下,hedge+consequence聯手真翻轉race。Team3同款。聚合面改善(attrition20.8%→8.3%,letter_dispatched1→2),defect_fire5→7逐隊拆解非單隊惡化(分散多隊含anon旁支)。★★flag(B)確認且更精確:Team2雖day24defect被擋但此後food_days持續0/unrest飆233→308,day37完全消失(pop=-99)——比baseline永遠殭屍態更早死透,真trajectory-shift非簡單變好變壞,需blueprint WHAT層判斷團隊徹底死亡vs永久殭屍態何者更合理(超出measure-first範圍)。Team3則明確改善(day45存活回穩)。餓叛≠野心叛確認(Team1食物健康仍defect,consequence正確不壓)。落地4檔已git commit(a7a1adb4)。已回systems handback:2026-08-11-measurer-to-systems-iii-calibrate-verdict.md+to:qa specimen稽核請求，別下accept，等QA verdict才鎖因果，Team2 trajectory-shift交blueprint WHAT裁。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——iii絕境排序底查QA CONFIRM已轉發systems,量測+故事稽核雙軌收尾(★★QA標註razor-thin margin=最高ROI修復標的)
 
 **工單**：無（QA CONFIRM verdict已轉發systems：①threat真搶注意力非巧合(逐tick坐實兩個不同敵對隊+threat_react真活值,Team2 argmax把威脅排優先是genuine util贏)②herald/defect code-read確認結構完全獨立(零共用function零耦合,tick5800同時出現是共享底層變數被獨立評估非interaction)③task序列逐位元核對一致。★★QA特別強調herald mini_util只差-0.004(銅板厚度)沒過關vs defect清楚過關(+0.13)——Team2脫離勢力失去救濟資格那刻距成功求救只差一線,建議這razor-thin margin可能是規模經濟這條線最高ROI修復標的(調整空間小但可能直接翻轉故事)。已回systems handback:2026-08-11-measurer-to-systems-desperation-ordering-qa-confirmed.md，量測+故事稽核雙軌收尾，交systems/blueprint判斷iii genuine repricing最終定案。
 
