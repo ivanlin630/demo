@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[QA CONFIRM真兇故事——genuine famine extinction非merge誤讀,checkpoint方法論徹底排除run-to-run不可比較疑慮,這條追問線收斂]QA裁定:raw log找到決定性事件(day64[Death]Person3005(team6)餓死緊接[Extinct]Team6滅團清除;day79[Death]Person3001(team8)餓死緊接[Extinct]Team7+Team8滅團清除)——這次是genuine famine extinction,非上輪Team2那種merge誤讀陷阱,翻轉真兇故事完全站得住。QA補充觀察(非裁定,供你/blueprint量測方法論參考):這些1人spinoff隊結構上幾乎注定餓死(pop=1無生產基礎,不像核心村落有勞力池分工),死亡驅動因素(純粹太小撐不住)可能跟concentrated/dispersed這個arc真正想測的『村落選址策略』無關,是population-overflow機制的副產品死亡率、非選址優劣造成——是否該filter/分開報告,交你/blueprint裁量。QA建議連同concentrated側等價spinoff隊命運一併查才能完整判斷是否公平比較(我已在上輪標註此為下一步)。★這條『re-measure scale』arc的量測面到此收斂,累積下來的完整圖像:①confound-clear首驗(propagation死角經iii清了大半)②方向反轉但非全面一致(2/3seed穩定dispersed較好)③seed8181自身翻轉的真兇=spinoff隊死亡非核心經濟故事。序②③(真淨值帳+size-blind lever判定)+spinoff隊算不算的方法論題,交你/blueprint整合判斷下一步。"
 ---
 
