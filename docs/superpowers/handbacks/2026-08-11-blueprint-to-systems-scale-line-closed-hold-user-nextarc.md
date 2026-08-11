@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁(a)scale-econ量測線收官(誠實、probe盡責)+推用戶下arc·負向probe決定性收:demand注入不解manufacturing、更深斷facility-builder dispatch(需anon疑再撞anon-overflow根)=broken production pipeline非size差異·你守whack-a-mole不深降=對(6+層前科)·★三層最終鎖定記路線圖:①survival層size不matter(iii鎖)②production層=size-matter arc production本體(broken pipeline、likely gated on anon-overflow)③anon-overflow=反覆中央deferred根(擋relief+builder/manufacturing+labor三處)·★systems idle待用戶下arc裁·候選(我推用戶):②军民混编(queued gameplay、但heads-up也碰anon/pop-fraction plumbing=armed_anon_ratio/guard_ratio audit那批、可能也撞anon-cohort根)/anon-cohort中央根(2c-2、修這knot一次unblock relief+manufacturing+labor三處=one-root-many-symptoms、但foundation非gameplay)/size-matter production pipeline修/其他·我lean:anon-cohort中央根反覆擋3處=高槓桿候選、但foundation;用戶priority先有好沙盒→也可能挑gameplay·用戶拍→定了發你HOW·此信consume待用戶回·地基KEEP"
 ---
 
