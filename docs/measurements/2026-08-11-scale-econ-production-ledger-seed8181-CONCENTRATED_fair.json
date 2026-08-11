@@ -4,6 +4,12 @@
   "core_pop": 17,
   "end_pop": 18,
   "manufacture_fired_total": 0,
+  "manufacture_noop": {
+    "noop_no_facility": 1161,
+    "noop_no_material": 0,
+    "noop_no_outpost": 575,
+    "noop_no_worker": 126
+  },
   "manufacture_output": {
 
   },

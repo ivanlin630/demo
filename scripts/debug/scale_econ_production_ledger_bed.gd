@@ -81,6 +81,14 @@ func _initialize() -> void:
 	for k in Probe.amounts:
 		if String(k).begins_with("manufacture.output."):
 			manufacture_output[k] = Probe.amounts[k]
+	# ★systems ticket:manufacture noop 主因(既有tap純讀,零新production改動)
+	var manufacture_noop: Dictionary = {
+		"noop_no_outpost": int(Probe.counts.get("manufacture.noop_no_outpost", 0)),
+		"noop_no_worker": int(Probe.counts.get("manufacture.noop_no_worker", 0)),
+		"noop_no_facility": int(Probe.counts.get("manufacture.noop_no_facility", 0)),
+		"noop_no_material": int(Probe.counts.get("manufacture.noop_no_material", 0)),
+	}
+	print("  ★manufacture noop breakdown: %s" % str(manufacture_noop))
 
 	print("\n───── 生產淨值帳總結 ─────")
 	print("  end_pop(全)=%d end_pop(核心0-3)=%d" % [end_pop, core_pop])
@@ -101,6 +109,7 @@ func _initialize() -> void:
 		"manufacture_fired_total": int(Probe.counts.get("manufacture.fired", 0)),
 		"construct_upgrade_total": int(Probe.counts.get("construct.complete_upgrade_facility", 0)),
 		"convoy_deliver_settled_total": int(Probe.counts.get("convoy.deliver_settled", 0)),
+		"manufacture_noop": manufacture_noop,
 		"spinoff_creation_count": succession_count}
 	var f := FileAccess.open("res://docs/measurements/2026-08-11-scale-econ-production-ledger-seed%d-%s.json" % [s, label], FileAccess.WRITE)
 	if f != null:
