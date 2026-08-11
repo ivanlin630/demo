@@ -1,6 +1,6 @@
 # 主動升匿名 — named-scarcity 的 genuine 出口（WHAT / vision）
 
-status: DRAFT（pending R①[機制可承載性、硬數據] + R² → build）
+status: LOCKED（2026-08-12：R①硬數據坐實[generate_for_team 通用原語 6 caller/4 tier 資質訊號/獨立人格]+R² CLEAN、1 必查項折入 §2.5 → systems HOW/build）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-12
 溯源：統一派遣 arc（MERGED `6b899d66`）大測試量出 named-scarcity 光譜（T12 1-named 領主全程 0 派遣）→ 用戶提「人手不夠可主動升匿名」→ named-scarcity A/B 的 genuine B。設計雛形見 game-design 路線圖 parked 條。
@@ -14,6 +14,9 @@ date: 2026-08-12
 - **觸發/考量**：領主判斷需更多記名（想派任務沒 spare / 壯大村需副手 / 多線任務吃緊）+ **有夠格匿名候選**（資質/技能浮現、非每個平民都幹部料）。
 - **util 秤 + 人格 modulate**：野心/擴張 → 樂提充實班底;多疑 → 吝嗇不輕信;絕境（現在就缺手）→ 被迫提。
 - **挑誰**：較有能力/技能的匿名（genuine——資質浮現、非隨機）。
+
+## §2.5 ★HOW-binding 必查項（R² CLEAN、同 iii spec② 標準、寫死非留 implementer）
+提拔 util **必自證 bounded 非 crank**：絕境被迫提 / 野心樂提 / 多疑吝嗇提 **三種人格分化須真從 util 競秤湧現**、**禁簡化成「named 不夠就必然觸發」**（= 變相自動補滿、與 §1「禁自動補滿」字面矛盾）。HOW 公式定案須 machine/measure demonstrate：低需求或多疑領主時提拔 util **趨零/不 fire**、非 flat 逢缺必補。
 
 ## §3 ★genuine 成本（核心、讓它不是 crank）
 - 被提者從此是**有身分的個體**（自己的忠誠/慾望/目標）→ ①**脫離可替換勞力池**（少一個 fungible 勞力）②**★未來忠誠風險**（他日後可能不滿/要更多/甚至叛）= **提拔是投資也是賭注**。
