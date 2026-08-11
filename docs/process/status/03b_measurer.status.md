@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——iii絕境排序底查已完成寄出(★herald近miss-0.004+defect零consequence-pricing+意外第三因主決策層被威脅佔用)+specimen已送QA
+**狀態**：工作中（等下一票）——iii絕境排序底查QA CONFIRM已轉發systems,量測+故事稽核雙軌收尾(★★QA標註razor-thin margin=最高ROI修復標的)
+
+**工單**：無（QA CONFIRM verdict已轉發systems：①threat真搶注意力非巧合(逐tick坐實兩個不同敵對隊+threat_react真活值,Team2 argmax把威脅排優先是genuine util贏)②herald/defect code-read確認結構完全獨立(零共用function零耦合,tick5800同時出現是共享底層變數被獨立評估非interaction)③task序列逐位元核對一致。★★QA特別強調herald mini_util只差-0.004(銅板厚度)沒過關vs defect清楚過關(+0.13)——Team2脫離勢力失去救濟資格那刻距成功求救只差一線,建議這razor-thin margin可能是規模經濟這條線最高ROI修復標的(調整空間小但可能直接翻轉故事)。已回systems handback:2026-08-11-measurer-to-systems-desperation-ordering-qa-confirmed.md，量測+故事稽核雙軌收尾，交systems/blueprint判斷iii genuine repricing最終定案。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——iii絕境排序底查已完成寄出(★herald近miss-0.004+defect零consequence-pricing+意外第三因主決策層被威脅佔用)+specimen已送QA
 
 **工單**：無（iii絕境排序底查已完成寄systems+specimen已送QA：herald mini-util在tick5800(day~24.2)近miss(-0.004,essentially銅板差),同一tick defect_util清楚過關(+0.13);code-read確認defect formula零項pricing叛離後果。★★意外第三因(supersede原ticket框架):同期主GoalResolver候選集被獨立軍事威脅佔據(求和0.899/備戰0.762霸榜),飢餓選項全遠低於威脅回應,herald/defect兩side-channel在背景平行race主決策層渾然不覺,真實決策焦點根本不在飢荒上。落地4檔已git commit(0a19aff6)。已回systems handback:2026-08-11-measurer-to-systems-desperation-ordering-verdict.md+to:qa specimen稽核請求，別下accept，等QA verdict才鎖因果，output供systems/blueprint spec iii genuine repricing判斷。
 
