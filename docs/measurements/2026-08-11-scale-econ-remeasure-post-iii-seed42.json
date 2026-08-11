@@ -1,0 +1,394 @@
+{
+  "concentrated": {
+    "attrition_pct": 25,
+    "bail_reasons": {
+
+    },
+    "convoy.deliver": 0,
+    "convoy.deliver_settled": 0,
+    "convoy.dispatch": 0,
+    "end_pop": 18,
+    "manufacture.fired": 0,
+    "seed": 42,
+    "start_pop": 24
+  },
+  "dispersed": {
+    "attrition_pct": 4.16666666666667,
+    "bail_reasons": {
+      "convoy.deliver_bail_sell_ownerless": 2
+    },
+    "convoy.deliver": 2,
+    "convoy.deliver_settled": 0,
+    "convoy.dispatch": 2,
+    "end_pop": 23,
+    "manufacture.fired": 0,
+    "relief_dispatched_to_t2": false,
+    "relief_outcome": "never_attempted",
+    "seed": 42,
+    "start_pop": 24,
+    "t2_famine_days": 0,
+    "t2_pop_daily": [
+      {
+        "day": 1,
+        "food": 116,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 2,
+        "food": 112,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 3,
+        "food": 106,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 4,
+        "food": 102,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 5,
+        "food": 96,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 6,
+        "food": 92,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 7,
+        "food": 88,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 8,
+        "food": 82,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 9,
+        "food": 78,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 10,
+        "food": 72,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 11,
+        "food": 68,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 12,
+        "food": 64,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 13,
+        "food": 58,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 14,
+        "food": 54,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 15,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 16,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 17,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 18,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 19,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 20,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 21,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 22,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 23,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 24,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 25,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 26,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 27,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 28,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 29,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 30,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 31,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 32,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 33,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 34,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 35,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 36,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 37,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 38,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 39,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 40,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 41,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 42,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 43,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 44,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 45,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 46,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 47,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 48,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 49,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 50,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 51,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 52,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 53,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 54,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 55,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 56,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 57,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 58,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 59,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 60,
+        "food": 48,
+        "pop": 6,
+        "task": "覓食"
+      }
+    ]
+  },
+  "seed": 42
+}

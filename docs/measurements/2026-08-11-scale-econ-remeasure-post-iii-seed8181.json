@@ -1,0 +1,250 @@
+{
+  "concentrated": {
+    "attrition_pct": 12.5,
+    "bail_reasons": {
+
+    },
+    "convoy.deliver": 1,
+    "convoy.deliver_settled": 1,
+    "convoy.dispatch": 1,
+    "end_pop": 21,
+    "manufacture.fired": 0,
+    "seed": 8181,
+    "start_pop": 24
+  },
+  "dispersed": {
+    "attrition_pct": 8.33333333333333,
+    "bail_reasons": {
+      "convoy.deliver_bail_sell_ownerless": 1
+    },
+    "convoy.deliver": 1,
+    "convoy.deliver_settled": 0,
+    "convoy.dispatch": 2,
+    "end_pop": 22,
+    "manufacture.fired": 0,
+    "relief_dispatched_to_t2": false,
+    "relief_outcome": "never_attempted",
+    "seed": 8181,
+    "start_pop": 24,
+    "t2_famine_days": 2,
+    "t2_pop_daily": [
+      {
+        "day": 1,
+        "food": 116,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 2,
+        "food": 112,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 3,
+        "food": 106,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 4,
+        "food": 102,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 5,
+        "food": 96,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 6,
+        "food": 92,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 7,
+        "food": 88,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 8,
+        "food": 82,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 9,
+        "food": 78,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 10,
+        "food": 72,
+        "pop": 6,
+        "task": "遷徙"
+      },
+      {
+        "day": 11,
+        "food": 68,
+        "pop": 6,
+        "task": "遷徙"
+      },
+      {
+        "day": 12,
+        "food": 64,
+        "pop": 6,
+        "task": "遷徙"
+      },
+      {
+        "day": 13,
+        "food": 58,
+        "pop": 6,
+        "task": "外交"
+      },
+      {
+        "day": 14,
+        "food": 54,
+        "pop": 6,
+        "task": "外交"
+      },
+      {
+        "day": 15,
+        "food": 48,
+        "pop": 6,
+        "task": "外交"
+      },
+      {
+        "day": 16,
+        "food": 44,
+        "pop": 6,
+        "task": "外交"
+      },
+      {
+        "day": 17,
+        "food": 33.3,
+        "pop": 5,
+        "task": "外交"
+      },
+      {
+        "day": 18,
+        "food": 28.3,
+        "pop": 5,
+        "task": "外交"
+      },
+      {
+        "day": 19,
+        "food": 25,
+        "pop": 5,
+        "task": "外交"
+      },
+      {
+        "day": 20,
+        "food": 20,
+        "pop": 5,
+        "task": "外交"
+      },
+      {
+        "day": 21,
+        "food": 16.7,
+        "pop": 5,
+        "task": "外交"
+      },
+      {
+        "day": 22,
+        "food": 13.3,
+        "pop": 5,
+        "task": "外交"
+      },
+      {
+        "day": 23,
+        "food": 8.3,
+        "pop": 5,
+        "task": "外交"
+      },
+      {
+        "day": 24,
+        "food": 5,
+        "pop": 5,
+        "task": "貿易"
+      },
+      {
+        "day": 25,
+        "food": 0.7,
+        "pop": 4,
+        "task": "覓食"
+      },
+      {
+        "day": 26,
+        "food": 0,
+        "pop": 4,
+        "task": "return_home"
+      },
+      {
+        "day": 27,
+        "food": 0,
+        "pop": 4,
+        "task": "覓食"
+      },
+      {
+        "day": 28,
+        "food": 0,
+        "pop": 4,
+        "task": "覓食"
+      },
+      {
+        "day": 29,
+        "food": 0,
+        "pop": 4,
+        "task": "覓食"
+      },
+      {
+        "day": 30,
+        "food": 0,
+        "pop": 4,
+        "task": "覓食"
+      },
+      {
+        "day": 31,
+        "food": 0,
+        "pop": 4,
+        "task": "return_home"
+      },
+      {
+        "day": 32,
+        "food": 0,
+        "pop": 4,
+        "task": "return_home"
+      },
+      {
+        "day": 33,
+        "food": 0.8,
+        "pop": 4,
+        "task": "貿易"
+      },
+      {
+        "day": 34,
+        "food": 1.4,
+        "pop": 4,
+        "task": "return_home"
+      },
+      {
+        "day": 35,
+        "food": 0,
+        "pop": 4,
+        "task": "return_home"
+      },
+      {
+        "day": 36,
+        "food": 0,
+        "pop": 4,
+        "task": "貿易"
+      }
+    ]
+  },
+  "seed": 8181
+}
