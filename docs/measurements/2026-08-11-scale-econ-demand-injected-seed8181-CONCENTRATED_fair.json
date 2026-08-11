@@ -1,0 +1,62 @@
+{
+  "construct_upgrade_total": 3,
+  "convoy_deliver_settled_total": 1,
+  "core_pop": 11,
+  "end_pop": 11,
+  "manufacture_fired_total": 0,
+  "manufacture_noop": {
+    "noop_no_facility": 962,
+    "noop_no_material": 0,
+    "noop_no_outpost": 534,
+    "noop_no_worker": 26
+  },
+  "manufacture_output": {
+
+  },
+  "monthly_log": [
+    {
+      "construct_upgrade_total": 0,
+      "labor_pool": 5,
+      "manufacture_fired_total": 0,
+      "manufacturing_level": 0,
+      "month": 1,
+      "noop_no_facility_total": 249,
+      "outpost_level": 1,
+      "pop_core": 20
+    },
+    {
+      "construct_upgrade_total": 1,
+      "labor_pool": 4,
+      "manufacture_fired_total": 0,
+      "manufacturing_level": 0,
+      "month": 2,
+      "noop_no_facility_total": 314,
+      "outpost_level": 1,
+      "pop_core": 16
+    },
+    {
+      "construct_upgrade_total": 2,
+      "labor_pool": 4,
+      "manufacture_fired_total": 0,
+      "manufacturing_level": 0,
+      "month": 3,
+      "noop_no_facility_total": 656,
+      "outpost_level": 1,
+      "pop_core": 16
+    },
+    {
+      "construct_upgrade_total": 3,
+      "labor_pool": 4,
+      "manufacture_fired_total": 0,
+      "manufacturing_level": 0,
+      "month": 4,
+      "noop_no_facility_total": 962,
+      "outpost_level": 1,
+      "pop_core": 11
+    }
+  ],
+  "months": 4,
+  "scenario": "CONCENTRATED_fair",
+  "seed": 8181,
+  "start_pop": 24
+}
