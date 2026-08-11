@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等QA+下一票）——re-measure scale Tier2鎖定已完成寄出(★★非全面鎖定,2/3 seed穩定dispersed較好+seed8181自身跨窗長真deterministic翻轉)+specimen已送QA
+**狀態**：工作中（等下一票）——QA挑戰已驗證解謎:seed8181翻轉真兇=population-overflow spinoff隊死亡非核心村落故事,方法論(兩獨立run可比較)已確認站得住
+
+**工單**：無（回應QA對re-measure tier2的方法論挑戰：加同run內day60 checkpoint機制驗證,attrition=8.333333333333%完全重現原獨立2mo-only run結果,確認兩次獨立跑法確實可比較(QA的『不可比較』疑慮排除)。但加全隊roster追蹤(非只ORIG_TIDS0-3)找到真相:day60→90之間的3人attrition差距全部來自population-overflow spin-off的1人獨立小隊(Team6/7/8)消失,核心4隊(0/1/3,Team2已day37併入Team1)day37後完全靜止,跟QA原判讀逐位元吻合。★意義:seed8181的『2mo/3mo翻轉』不是concentrated/dispersed村落經濟規模效應時變轉折,是聚合metric被邊緣spinoff隊死亡率拖動。新問題(spinoff隊死亡算不算規模經濟比較)交systems/blueprint判斷。落地5檔已git commit(34a24b64)。已回systems+QA handback，這條線量測面告一段落，等下一票。
+
+---
+
+**狀態(舊)**：工作中（等QA+下一票）——re-measure scale Tier2鎖定已完成寄出(★★非全面鎖定,2/3 seed穩定dispersed較好+seed8181自身跨窗長真deterministic翻轉)+specimen已送QA
 
 **工單**：無（Tier2鎖定已完成寄systems+specimen已送QA：3seed×2scenario全跑3mo+雙邊specimen+determinism二跑byte-identical。誠實結論非簡單『鎖了』:seed1337/42在2mo/3mo都穩定dispersed較好,但seed8181本身在2mo(dispersed較好)與3mo(dispersed較差)之間真的翻轉,determinism確認非bug非noise,是真實可重現的世界動態差異。這比systems要求的『鎖定方向反轉』複雜——多數seed支持dispersed較好,但至少一個seed顯示優劣本身動態/時變,需specimen深挖WHY。落地22檔已git commit(87a52659)。已回systems handback:2026-08-11-measurer-to-systems-remeasure-tier2-verdict.md+to:qa specimen稽核請求(優先seed8181 window-sensitivity案例)，別下accept，等QA verdict，序②③(真淨值帳+lever判定)交systems判斷是否現在放行。
 
