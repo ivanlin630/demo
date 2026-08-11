@@ -17,7 +17,7 @@ date: 2026-08-11
 - **★genuine 戰略約束**：單人任務消耗記名、記名有限 → 領主能同時派的單人任務受限於可動用記名數（親信珍貴、挑著用）。= genuine 非 crank。
 
 ## §3 全員歸隊（return-cycle）
-派出的記名任務完歸記名 roster、匿名跟班歸匿名池。**無 monotonic drain**。（群派遣 envoy/builder/convoy/settler/facility-builder 已符;修的是 4 個現況孤匿名 scout/herald/care-scout/rescue。）
+派出的記名任務完歸記名 roster、匿名跟班歸匿名池。**無 monotonic drain**。（群派遣 envoy/builder/convoy/settler/facility-builder 已符;修的是 3 個現況孤匿名 scout/care-scout/rescue，herald 移出見 §5。）
 
 ## §4 匿名→named 只湧現（genuine 事件、非機械）
 - 領隊戰死 → 跟班接班（真 succession、真故事）。
