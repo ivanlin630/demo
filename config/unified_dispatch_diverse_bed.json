@@ -1,0 +1,1120 @@
+{
+  "_doc": "統一派遣大多樣床(measurer持久fixture,2026-08-11,spec docs/superpowers/specs/2026-08-11-unified-dispatch-diverse-bed-measure-HOW.md)：攻上輪4隊fixture的3個UNTESTABLE題(組成分化1-named測不出/named-scarcity光譜/下游unblock無distress觸發)+O(N²) at scale。16隊4faction(各1 lord+3 member)：pop混4/8/12/20(各出現4次)、記名數混1/2/3/4(各出現4次,關鍵維度)、4隊distress(低食runway:T2/T5/T10/T15,跨faction/pop/named分散)、faction3 lord(T12)刻意1-named做極端『領主自己都嚴無bench』對照組。branch feat/unified-dispatch(285bca8f) vs main對照用。",
+  "seed": 8181,
+  "mode": "explicit",
+  "max_ticks": 50000,
+  "map": {
+    "radius": 25,
+    "resource_richness": 5
+  },
+  "teams": [
+    {
+      "id": 0,
+      "name": "F0_Lord",
+      "tile_pos": [
+        10,
+        10
+      ],
+      "population": 20,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 0,
+      "is_faction_leader": true,
+      "anon_tiers": {
+        "平民": 15
+      },
+      "resources": {
+        "food": 200.0,
+        "material": 20.0,
+        "coin": 300.0,
+        "tools": 2.0
+      },
+      "leader": {
+        "name": "F0_Lord_L",
+        "age": 40,
+        "loyalty": 0.9,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.7,
+          "生產": 0.5,
+          "商業": 0.4
+        },
+        "values": {
+          "野心": 0.4,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F0_Lord_M1",
+          "loyalty": 0.85,
+          "skills": {
+            "統領": 0.5,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F0_Lord_M2",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.3,
+            "生產": 0.5
+          }
+        },
+        {
+          "name": "F0_Lord_M3",
+          "loyalty": 0.75,
+          "skills": {
+            "統領": 0.6,
+            "生產": 0.3
+          }
+        },
+        {
+          "name": "F0_Lord_M4",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.2,
+            "生產": 0.4
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 200
+      }
+    },
+    {
+      "id": 1,
+      "name": "F0_M1",
+      "tile_pos": [
+        12,
+        10
+      ],
+      "population": 8,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 0,
+      "anon_tiers": {
+        "平民": 5
+      },
+      "resources": {
+        "food": 120.0,
+        "material": 10.0,
+        "coin": 150.0,
+        "tools": 1.0
+      },
+      "leader": {
+        "name": "F0_M1_L",
+        "age": 35,
+        "loyalty": 0.85,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.5,
+          "生產": 0.5,
+          "商業": 0.3
+        },
+        "values": {
+          "野心": 0.3,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F0_M1_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.3,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F0_M1_A2",
+          "loyalty": 0.75,
+          "skills": {
+            "統領": 0.15,
+            "生產": 0.5
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 120
+      }
+    },
+    {
+      "id": 2,
+      "name": "F0_M2_distress",
+      "tile_pos": [
+        10,
+        12
+      ],
+      "population": 4,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 0,
+      "anon_tiers": {
+        "平民": 2
+      },
+      "resources": {
+        "food": 5.0,
+        "material": 5.0,
+        "coin": 50.0,
+        "tools": 0.5
+      },
+      "leader": {
+        "name": "F0_M2_L",
+        "age": 35,
+        "loyalty": 0.8,
+        "stress": 0.2,
+        "skills": {
+          "統領": 0.3,
+          "生產": 0.4,
+          "商業": 0.2
+        },
+        "values": {
+          "野心": 0.2,
+          "慎重": 0.5,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.6
+        }
+      },
+      "named_members": [
+        {
+          "name": "F0_M2_A1",
+          "loyalty": 0.7,
+          "skills": {
+            "統領": 0.1,
+            "生產": 0.3
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 5
+      }
+    },
+    {
+      "id": 3,
+      "name": "F0_M3",
+      "tile_pos": [
+        8,
+        10
+      ],
+      "population": 12,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 0,
+      "anon_tiers": {
+        "平民": 8
+      },
+      "resources": {
+        "food": 150.0,
+        "material": 12.0,
+        "coin": 180.0,
+        "tools": 1.2
+      },
+      "leader": {
+        "name": "F0_M3_L",
+        "age": 38,
+        "loyalty": 0.85,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.5,
+          "生產": 0.5,
+          "商業": 0.35
+        },
+        "values": {
+          "野心": 0.35,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F0_M3_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.4,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F0_M3_A2",
+          "loyalty": 0.78,
+          "skills": {
+            "統領": 0.25,
+            "生產": 0.45
+          }
+        },
+        {
+          "name": "F0_M3_A3",
+          "loyalty": 0.75,
+          "skills": {
+            "統領": 0.1,
+            "生產": 0.5
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 150
+      }
+    },
+    {
+      "id": 4,
+      "name": "F1_Lord",
+      "tile_pos": [
+        20,
+        10
+      ],
+      "population": 12,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 1,
+      "is_faction_leader": true,
+      "anon_tiers": {
+        "平民": 8
+      },
+      "resources": {
+        "food": 150.0,
+        "material": 15.0,
+        "coin": 200.0,
+        "tools": 1.5
+      },
+      "leader": {
+        "name": "F1_Lord_L",
+        "age": 42,
+        "loyalty": 0.9,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.7,
+          "生產": 0.5,
+          "商業": 0.4
+        },
+        "values": {
+          "野心": 0.4,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F1_Lord_M1",
+          "loyalty": 0.85,
+          "skills": {
+            "統領": 0.45,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F1_Lord_M2",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.2,
+            "生產": 0.5
+          }
+        },
+        {
+          "name": "F1_Lord_M3",
+          "loyalty": 0.78,
+          "skills": {
+            "統領": 0.55,
+            "生產": 0.3
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 150
+      }
+    },
+    {
+      "id": 5,
+      "name": "F1_M1_distress",
+      "tile_pos": [
+        22,
+        10
+      ],
+      "population": 4,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 1,
+      "anon_tiers": {
+        "平民": 2
+      },
+      "resources": {
+        "food": 5.0,
+        "material": 5.0,
+        "coin": 50.0,
+        "tools": 0.5
+      },
+      "leader": {
+        "name": "F1_M1_L",
+        "age": 33,
+        "loyalty": 0.8,
+        "stress": 0.2,
+        "skills": {
+          "統領": 0.3,
+          "生產": 0.4,
+          "商業": 0.2
+        },
+        "values": {
+          "野心": 0.2,
+          "慎重": 0.5,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.6
+        }
+      },
+      "named_members": [
+        {
+          "name": "F1_M1_A1",
+          "loyalty": 0.7,
+          "skills": {
+            "統領": 0.1,
+            "生產": 0.3
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 5
+      }
+    },
+    {
+      "id": 6,
+      "name": "F1_M2",
+      "tile_pos": [
+        20,
+        12
+      ],
+      "population": 8,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 1,
+      "anon_tiers": {
+        "平民": 5
+      },
+      "resources": {
+        "food": 120.0,
+        "material": 10.0,
+        "coin": 150.0,
+        "tools": 1.0
+      },
+      "leader": {
+        "name": "F1_M2_L",
+        "age": 35,
+        "loyalty": 0.85,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.5,
+          "生產": 0.5,
+          "商業": 0.3
+        },
+        "values": {
+          "野心": 0.3,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F1_M2_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.35,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F1_M2_A2",
+          "loyalty": 0.75,
+          "skills": {
+            "統領": 0.2,
+            "生產": 0.5
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 120
+      }
+    },
+    {
+      "id": 7,
+      "name": "F1_M3",
+      "tile_pos": [
+        18,
+        10
+      ],
+      "population": 20,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 1,
+      "anon_tiers": {
+        "平民": 15
+      },
+      "resources": {
+        "food": 200.0,
+        "material": 20.0,
+        "coin": 300.0,
+        "tools": 2.0
+      },
+      "leader": {
+        "name": "F1_M3_L",
+        "age": 40,
+        "loyalty": 0.85,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.6,
+          "生產": 0.5,
+          "商業": 0.4
+        },
+        "values": {
+          "野心": 0.35,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F1_M3_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.5,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F1_M3_A2",
+          "loyalty": 0.78,
+          "skills": {
+            "統領": 0.3,
+            "生產": 0.45
+          }
+        },
+        {
+          "name": "F1_M3_A3",
+          "loyalty": 0.76,
+          "skills": {
+            "統領": 0.15,
+            "生產": 0.5
+          }
+        },
+        {
+          "name": "F1_M3_A4",
+          "loyalty": 0.74,
+          "skills": {
+            "統領": 0.4,
+            "生產": 0.35
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 200
+      }
+    },
+    {
+      "id": 8,
+      "name": "F2_Lord",
+      "tile_pos": [
+        10,
+        20
+      ],
+      "population": 8,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 2,
+      "is_faction_leader": true,
+      "anon_tiers": {
+        "平民": 5
+      },
+      "resources": {
+        "food": 120.0,
+        "material": 10.0,
+        "coin": 150.0,
+        "tools": 1.0
+      },
+      "leader": {
+        "name": "F2_Lord_L",
+        "age": 41,
+        "loyalty": 0.9,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.7,
+          "生產": 0.5,
+          "商業": 0.4
+        },
+        "values": {
+          "野心": 0.4,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F2_Lord_M1",
+          "loyalty": 0.85,
+          "skills": {
+            "統領": 0.3,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F2_Lord_M2",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.5,
+            "生產": 0.4
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 120
+      }
+    },
+    {
+      "id": 9,
+      "name": "F2_M1",
+      "tile_pos": [
+        12,
+        20
+      ],
+      "population": 20,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 2,
+      "anon_tiers": {
+        "平民": 15
+      },
+      "resources": {
+        "food": 200.0,
+        "material": 20.0,
+        "coin": 300.0,
+        "tools": 2.0
+      },
+      "leader": {
+        "name": "F2_M1_L",
+        "age": 40,
+        "loyalty": 0.85,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.6,
+          "生產": 0.5,
+          "商業": 0.4
+        },
+        "values": {
+          "野心": 0.35,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F2_M1_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.45,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F2_M1_A2",
+          "loyalty": 0.78,
+          "skills": {
+            "統領": 0.25,
+            "生產": 0.45
+          }
+        },
+        {
+          "name": "F2_M1_A3",
+          "loyalty": 0.76,
+          "skills": {
+            "統領": 0.5,
+            "生產": 0.35
+          }
+        },
+        {
+          "name": "F2_M1_A4",
+          "loyalty": 0.74,
+          "skills": {
+            "統領": 0.1,
+            "生產": 0.5
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 200
+      }
+    },
+    {
+      "id": 10,
+      "name": "F2_M2_distress",
+      "tile_pos": [
+        10,
+        22
+      ],
+      "population": 4,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 2,
+      "anon_tiers": {
+        "平民": 2
+      },
+      "resources": {
+        "food": 5.0,
+        "material": 5.0,
+        "coin": 50.0,
+        "tools": 0.5
+      },
+      "leader": {
+        "name": "F2_M2_L",
+        "age": 34,
+        "loyalty": 0.8,
+        "stress": 0.2,
+        "skills": {
+          "統領": 0.3,
+          "生產": 0.4,
+          "商業": 0.2
+        },
+        "values": {
+          "野心": 0.2,
+          "慎重": 0.5,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.6
+        }
+      },
+      "named_members": [
+        {
+          "name": "F2_M2_A1",
+          "loyalty": 0.7,
+          "skills": {
+            "統領": 0.1,
+            "生產": 0.3
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 5
+      }
+    },
+    {
+      "id": 11,
+      "name": "F2_M3",
+      "tile_pos": [
+        8,
+        20
+      ],
+      "population": 12,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 2,
+      "anon_tiers": {
+        "平民": 8
+      },
+      "resources": {
+        "food": 150.0,
+        "material": 12.0,
+        "coin": 180.0,
+        "tools": 1.2
+      },
+      "leader": {
+        "name": "F2_M3_L",
+        "age": 37,
+        "loyalty": 0.85,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.5,
+          "生產": 0.5,
+          "商業": 0.35
+        },
+        "values": {
+          "野心": 0.35,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F2_M3_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.35,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F2_M3_A2",
+          "loyalty": 0.78,
+          "skills": {
+            "統領": 0.2,
+            "生產": 0.45
+          }
+        },
+        {
+          "name": "F2_M3_A3",
+          "loyalty": 0.75,
+          "skills": {
+            "統領": 0.05,
+            "生產": 0.5
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 150
+      }
+    },
+    {
+      "id": 12,
+      "name": "F3_Lord_strict",
+      "tile_pos": [
+        20,
+        20
+      ],
+      "population": 4,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 3,
+      "is_faction_leader": true,
+      "anon_tiers": {
+        "平民": 2
+      },
+      "resources": {
+        "food": 120.0,
+        "material": 10.0,
+        "coin": 150.0,
+        "tools": 1.0
+      },
+      "leader": {
+        "name": "F3_Lord_L",
+        "age": 39,
+        "loyalty": 0.9,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.65,
+          "生產": 0.5,
+          "商業": 0.4
+        },
+        "values": {
+          "野心": 0.4,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F3_Lord_M1",
+          "loyalty": 0.85,
+          "skills": {
+            "統領": 0.3,
+            "生產": 0.4
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 120
+      }
+    },
+    {
+      "id": 13,
+      "name": "F3_M1",
+      "tile_pos": [
+        22,
+        20
+      ],
+      "population": 8,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 3,
+      "anon_tiers": {
+        "平民": 5
+      },
+      "resources": {
+        "food": 120.0,
+        "material": 10.0,
+        "coin": 150.0,
+        "tools": 1.0
+      },
+      "leader": {
+        "name": "F3_M1_L",
+        "age": 35,
+        "loyalty": 0.85,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.5,
+          "生產": 0.5,
+          "商業": 0.3
+        },
+        "values": {
+          "野心": 0.3,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F3_M1_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.25,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F3_M1_A2",
+          "loyalty": 0.75,
+          "skills": {
+            "統領": 0.4,
+            "生產": 0.4
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 120
+      }
+    },
+    {
+      "id": 14,
+      "name": "F3_M2",
+      "tile_pos": [
+        20,
+        22
+      ],
+      "population": 12,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 3,
+      "anon_tiers": {
+        "平民": 8
+      },
+      "resources": {
+        "food": 150.0,
+        "material": 12.0,
+        "coin": 180.0,
+        "tools": 1.2
+      },
+      "leader": {
+        "name": "F3_M2_L",
+        "age": 36,
+        "loyalty": 0.85,
+        "stress": 0.0,
+        "skills": {
+          "統領": 0.5,
+          "生產": 0.5,
+          "商業": 0.35
+        },
+        "values": {
+          "野心": 0.35,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F3_M2_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.4,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F3_M2_A2",
+          "loyalty": 0.78,
+          "skills": {
+            "統領": 0.15,
+            "生產": 0.45
+          }
+        },
+        {
+          "name": "F3_M2_A3",
+          "loyalty": 0.75,
+          "skills": {
+            "統領": 0.55,
+            "生產": 0.3
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 150
+      }
+    },
+    {
+      "id": 15,
+      "name": "F3_M3_distress_rich",
+      "tile_pos": [
+        18,
+        20
+      ],
+      "population": 20,
+      "tags": [
+        "統領",
+        "生產"
+      ],
+      "faction_id": 3,
+      "anon_tiers": {
+        "平民": 15
+      },
+      "resources": {
+        "food": 5.0,
+        "material": 20.0,
+        "coin": 300.0,
+        "tools": 2.0
+      },
+      "leader": {
+        "name": "F3_M3_L",
+        "age": 40,
+        "loyalty": 0.85,
+        "stress": 0.2,
+        "skills": {
+          "統領": 0.6,
+          "生產": 0.5,
+          "商業": 0.4
+        },
+        "values": {
+          "野心": 0.35,
+          "慎重": 0.6,
+          "義氣": 0.6,
+          "好戰": 0.0,
+          "求生欲": 0.5
+        }
+      },
+      "named_members": [
+        {
+          "name": "F3_M3_A1",
+          "loyalty": 0.8,
+          "skills": {
+            "統領": 0.45,
+            "生產": 0.4
+          }
+        },
+        {
+          "name": "F3_M3_A2",
+          "loyalty": 0.78,
+          "skills": {
+            "統領": 0.25,
+            "生產": 0.45
+          }
+        },
+        {
+          "name": "F3_M3_A3",
+          "loyalty": 0.76,
+          "skills": {
+            "統領": 0.5,
+            "生產": 0.35
+          }
+        },
+        {
+          "name": "F3_M3_A4",
+          "loyalty": 0.74,
+          "skills": {
+            "統領": 0.1,
+            "生產": 0.5
+          }
+        }
+      ],
+      "outpost": {
+        "type": "civilian",
+        "level": 1,
+        "terrain": "plains",
+        "tile_food_init": 5
+      }
+    }
+  ]
+}

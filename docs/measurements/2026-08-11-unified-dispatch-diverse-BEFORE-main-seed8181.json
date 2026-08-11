@@ -1,0 +1,3160 @@
+{
+  "daily_log": [
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 4,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 24,
+        "scout.dispatched": 2
+      },
+      "day": 1,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 186.666666666667,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 114.666666666667,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 2.7270346556351,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 150.797955279414,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 118.359673549585,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 117.999699884322,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.641708958093,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 2.33333333333333,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 142,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 151.126436678457,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 11
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 2.73774482023415,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 118.30534960489,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 191.626451580711,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 119.036023687829,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 200.127587658513,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 8,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 50,
+        "scout.dispatched": 2
+      },
+      "day": 2,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 173.333333333333,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 109.333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0.833626477319444,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.96277331403,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 116.66054594381,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 115.337356561298,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.339791390517,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 134,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 153.702264042913,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 11
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0.866928381777014,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 116.962704724615,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 183.232809412322,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 118.989459480423,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 200.279651766347,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 12,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 90,
+        "scout.dispatched": 2
+      },
+      "day": 3,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 153.333333333333,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 101.333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.287239504103,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 114.123644284532,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 112.292495306257,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 152.138917682013,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 122,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 120.890064319153,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 115.518904337038,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 171.205220058057,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 118.235380367024,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 199.074848869842,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 19
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 12,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 119,
+        "scout.dispatched": 2
+      },
+      "day": 4,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 140,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 96,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.686055473087,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 115.309171860461,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 109.824653950698,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.755436622881,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 114,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 120.855925052601,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 148.798815327833,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 163.366061004499,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 116.097928228304,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 196.847506699276,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 16,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 159,
+        "scout.dispatched": 2
+      },
+      "day": 5,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 120,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 87.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.303939993949,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 116.91193268561,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 107.187456524763,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 153.384932170688,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 102,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 120.909548325781,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 145.696475229855,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 151.769358028935,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 112.903263202311,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 194.155743209668,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 20,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 183,
+        "scout.dispatched": 2
+      },
+      "day": 6,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 106.666666666667,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 82.6666666666666,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.137333435962,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 117.674892281736,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 105.05281090307,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 153.584877510387,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 94,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 120.908630567643,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 143.334886245152,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 143.36786784353,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 111.725013083579,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 191.268240400316,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 24,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 208,
+        "scout.dispatched": 2
+      },
+      "day": 7,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 93.3333333333334,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 77.3333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.629148997014,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 116.203539270919,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 103.497022290805,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 153.460384613747,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 86,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 120.409681965826,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 142.97110332353,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 134.605444984283,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 109.503243850039,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 188.061519499005,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 1,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 28,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 248,
+        "scout.dispatched": 2
+      },
+      "day": 8,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 73.3333333333334,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 69.3333333333332,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 152.11379416045,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 114.060709454623,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 100.177544329166,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 155.65221504805,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 74,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 121.756143368513,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 142.466568671321,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 122.905499615848,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 107.349782111714,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 181.89729700581,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 3,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 28,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 274,
+        "scout.dispatched": 2
+      },
+      "day": 9,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 60.0000000000001,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 63.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 152.706750150811,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 112.700965581122,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 98.1340303385439,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 157.248228080322,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 12,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 17
+        },
+        "2": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 66,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 122.731131014809,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 143.416994060639,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 115.671955847183,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 105.946317903712,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 178.918242186756,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 7,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 32,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 312,
+        "scout.dispatched": 2
+      },
+      "day": 10,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 40.0000000000001,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 55.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 151.54046258716,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 110.706531094501,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 95.1862008984693,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 156.986363741053,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 11,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.1,
+            0.6
+          ],
+          "named_size": 4,
+          "pop": 16
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 54,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 123.832702830109,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 147.174781905047,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 98.397965951356,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 103.374215960871,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 174.073611997358,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 7,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 37,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 335,
+        "scout.dispatched": 2
+      },
+      "day": 11,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 26.6666666666667,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 50.6666666666666,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 150.802557318407,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 109.63596549214,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 92.8811524823211,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 157.967440437424,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 11,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.6,
+            0.5
+          ],
+          "named_size": 4,
+          "pop": 16
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 46,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 124.967200761936,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 150.190777671881,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 85.0646326180227,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 101.436413313192,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 170.087283521957,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 19
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 7,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 42,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 360,
+        "scout.dispatched": 2
+      },
+      "day": 12,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 13.3333333333334,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 45.3333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 150.724435875468,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 108.249983089111,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 90.7877929630597,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 156.525573694673,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 11,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.6,
+            0.5
+          ],
+          "named_size": 4,
+          "pop": 16
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 38,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 124.959121337763,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 153.636512055206,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 71.7312992846893,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 99.2540232284391,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 165.517203909499,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 1,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 7,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 48,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 398,
+        "scout.dispatched": 2
+      },
+      "day": 13,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 0,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 37.3333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 150.233527370477,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 106.66249776927,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 87.6341486057178,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 156.655466139651,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 11,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.6,
+            0.45
+          ],
+          "named_size": 4,
+          "pop": 16
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 26,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 3,
+          "food_eff": 127.100165309851,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55,
+            0.197171926498413
+          ],
+          "named_size": 4,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 158.767060065139,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 51.7312992846893,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 96.3110584264328,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 160.263959658689,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 1,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 7,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 48,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 422,
+        "scout.dispatched": 2
+      },
+      "day": 14,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 0,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 31.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 149.664186193071,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 105.679911498912,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 85.8096315631824,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 155.946091673568,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 11,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.6,
+            0.45
+          ],
+          "named_size": 4,
+          "pop": 16
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 18,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 3,
+          "food_eff": 127.986256988564,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55,
+            0.197171926498413
+          ],
+          "named_size": 4,
+          "pop": 8
+        },
+        "5": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 160.841091320432,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 38.397965951356,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 94.8240935866166,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 156.511161787743,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 2,
+        "construct.complete_upgrade_facility": 3,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 7,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 55,
+        "help.target_resolved": 4,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 461,
+        "scout.dispatched": 2
+      },
+      "day": 15,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 0,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 23.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 148.256102353068,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 103.923533280402,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 82.8781498804025,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 156.649844920847,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 11,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.6,
+            0.5
+          ],
+          "named_size": 4,
+          "pop": 16
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 6,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 136.051752586468,
+          "named_cmds": [
+            0.45,
+            0.2,
+            0.55,
+            0.197171926498413,
+            0.0676808282732964,
+            0.0870767533779144
+          ],
+          "named_size": 6,
+          "pop": 9
+        },
+        "5": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "6": {
+          "alive": true,
+          "anon": 7,
+          "food_eff": 168.206858953807,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 10
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 18.397965951356,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "anon": 4,
+          "food_eff": 92.4090169047262,
+          "named_cmds": [
+            0.3,
+            0.5
+          ],
+          "named_size": 2,
+          "pop": 7
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 148.960830158843,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 17
+    }
+  ],
+  "days": 15,
+  "distress_tids": [
+    2,
+    5,
+    10,
+    15
+  ],
+  "facility_log": {
+    "team10": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team11": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team12": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team13": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team14": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team15": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team4": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team5": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team6": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team7": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team8": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team9": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    }
+  },
+  "final_team_count": 17,
+  "initial_named_count": {
+    "0": 4,
+    "1": 2,
+    "2": 1,
+    "3": 3,
+    "4": 3,
+    "5": 1,
+    "6": 2,
+    "7": 4,
+    "8": 2,
+    "9": 4,
+    "10": 1,
+    "11": 3,
+    "12": 1,
+    "13": 2,
+    "14": 3,
+    "15": 4
+  },
+  "seed": 8181,
+  "totals": {
+    "care.scout_dispatched": 2,
+    "construct.complete_upgrade_facility": 3,
+    "contact.react_rescue": 0,
+    "death.starve_anon": 7,
+    "death.starve_minor": 0,
+    "help.delivered": 3,
+    "help.letter_dispatched": 3,
+    "help.severity_positive": 55,
+    "help.target_resolved": 4,
+    "manufacture.fired": 0,
+    "manufacture.noop_no_facility": 461,
+    "scout.dispatched": 2
+  }
+}
