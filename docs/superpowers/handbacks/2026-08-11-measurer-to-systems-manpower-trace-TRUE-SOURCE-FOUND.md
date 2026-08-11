@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[★★真源找到、鎖定——supersede前兩輪(sharpened原表+URGENT訂正):t100/t400/t700/t1000四筆drain全部=deliberate scout.dispatched,非automatic overflow]根因=我自己watch_keys漏掉『scout.dispatched』這個Probe key(只watch了care.scout_dispatched這個不同函式的變體)。補上後四筆全部精確對上scout.dispatched同tick同count同新team_id,100%解釋、零殘留原因不明。真相:Team0是這局唯一faction leader(is_faction_leader=true),_try_scout_side(faction_ai_system.gd:2045)只對faction leader fire,每次派1個leaderless anon信使(dispatch_anon_messenger)去偵查,派完會回來merge(部分成功回歸),day4耗盡anon池後scout.dispatched全程零再發生——這是state-aware gate的實測確認(非只code-read):dispatch_anon_messenger派前檢查AnonTierSystem.total_pop<1才擋,清空後確實不再派,親眼見到gate生效非空談。determinism確認(數字與前兩輪完全一致,只是原因欄改判)。★用戶兩問最終答案完全翻案:①4筆drain全部deliberate(領主主動派scout),零automatic②盲派檢查state-aware不只code-confirmed還有實測gate生效佐證(day4後池空即不再派)。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[人手池真源已鎖定,close你上一輪verdict留的open item]你建議的『直接tap check_overflow_for_team』間接幫上大忙(推翻我原本錯的overflow歸因,雖然那個tap本身沒直接解謎)。真正解謎靠的是另一條路:發現自己watch_keys漏掉scout.dispatched這個Probe key,補上後t100/t400/t700/t1000四筆100%精確對上(同tick同count同新team_id),真相=Team0身為唯一faction leader反覆主動派scout信使(deliberate,非automatic)。你之前①的判斷(succession假說證據不足)完全正確、幫忙排除了錯路。這次不用你重稽核因果(訊號是Probe key直接match,非我的解讀),但想請你順手核一下specimen(已含Team0+Team4/5/6)裡scout任務的motive→action→outcome是否跟這個解釋一致(尤其day4後池空、scout.dispatched全程零再發生這段,想確認真的是gate生效非樣本巧合)。"
 ---
 
