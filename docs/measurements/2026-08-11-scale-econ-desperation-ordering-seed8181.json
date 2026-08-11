@@ -1,0 +1,282 @@
+{
+  "daily_log": [
+    {
+      "day": 1,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 2,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 3,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 4,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 5,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 6,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 7,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 8,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 9,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "覓食",
+      "t2_unrest": 0
+    },
+    {
+      "day": 10,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "遷徙",
+      "t2_unrest": 0
+    },
+    {
+      "day": 11,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "遷徙",
+      "t2_unrest": 0
+    },
+    {
+      "day": 12,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "遷徙",
+      "t2_unrest": 0
+    },
+    {
+      "day": 13,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 14,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 15,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 16,
+      "t2_faction_id": 0,
+      "t2_pop": 6,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 17,
+      "t2_faction_id": 0,
+      "t2_pop": 5,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 18,
+      "t2_faction_id": 0,
+      "t2_pop": 5,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 19,
+      "t2_faction_id": 0,
+      "t2_pop": 5,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 20,
+      "t2_faction_id": 0,
+      "t2_pop": 5,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 21,
+      "t2_faction_id": 0,
+      "t2_pop": 5,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 22,
+      "t2_faction_id": 0,
+      "t2_pop": 5,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 23,
+      "t2_faction_id": 0,
+      "t2_pop": 5,
+      "t2_task": "外交",
+      "t2_unrest": 0
+    },
+    {
+      "day": 24,
+      "t2_faction_id": 0,
+      "t2_pop": 5,
+      "t2_task": "貿易",
+      "t2_unrest": 18
+    },
+    {
+      "day": 25,
+      "t2_faction_id": -1,
+      "t2_pop": 5,
+      "t2_task": "覓食",
+      "t2_unrest": 23
+    },
+    {
+      "day": 26,
+      "t2_faction_id": -1,
+      "t2_pop": 5,
+      "t2_task": "貿易",
+      "t2_unrest": 23
+    },
+    {
+      "day": 27,
+      "t2_faction_id": -1,
+      "t2_pop": 5,
+      "t2_task": "貿易",
+      "t2_unrest": 23
+    },
+    {
+      "day": 28,
+      "t2_faction_id": -1,
+      "t2_pop": 5,
+      "t2_task": "投靠",
+      "t2_unrest": 23
+    },
+    {
+      "day": 29,
+      "t2_faction_id": -1,
+      "t2_pop": 5,
+      "t2_task": "投靠",
+      "t2_unrest": 23
+    },
+    {
+      "day": 30,
+      "t2_faction_id": -1,
+      "t2_pop": 5,
+      "t2_task": "投靠",
+      "t2_unrest": 23
+    },
+    {
+      "day": 31,
+      "t2_faction_id": -1,
+      "t2_pop": 5,
+      "t2_task": "貿易",
+      "t2_unrest": 23
+    },
+    {
+      "day": 32,
+      "t2_faction_id": -1,
+      "t2_pop": 5,
+      "t2_task": "貿易",
+      "t2_unrest": 23
+    },
+    {
+      "day": 33,
+      "t2_faction_id": -1,
+      "t2_pop": 4,
+      "t2_task": "貿易",
+      "t2_unrest": 23
+    },
+    {
+      "day": 34,
+      "t2_faction_id": -1,
+      "t2_pop": 3,
+      "t2_task": "貿易",
+      "t2_unrest": 23
+    },
+    {
+      "day": 35,
+      "t2_faction_id": -1,
+      "t2_pop": 1,
+      "t2_task": "貿易",
+      "t2_unrest": 23
+    }
+  ],
+  "days": 35,
+  "defect_terms_t2": [
+    {
+      "defect_util": 0.13,
+      "distress_pressure": 0.575,
+      "loyalty_deficit": 0.5,
+      "stay_benefit": 0.1575,
+      "team": 2,
+      "tick": 5800,
+      "unrest": 23
+    }
+  ],
+  "help_mini_util_terms_t2": [
+    {
+      "anon_cost": 0.8,
+      "mini": -0.46325333333333,
+      "pmult": 0.4592,
+      "relief_expect": 2.4,
+      "severity": 0.305555555555556,
+      "team": 2,
+      "tick": 5500
+    },
+    {
+      "anon_cost": 0.8,
+      "mini": -0.00405333333333,
+      "pmult": 0.4592,
+      "relief_expect": 2.4,
+      "severity": 0.722222222222223,
+      "team": 2,
+      "tick": 5800
+    }
+  ],
+  "seed": 8181
+}
