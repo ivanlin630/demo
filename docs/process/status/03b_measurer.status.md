@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——QA挑戰已驗證解謎:seed8181翻轉真兇=population-overflow spinoff隊死亡非核心村落故事,方法論(兩獨立run可比較)已確認站得住
+**狀態**：工作中（等下一票）——QA CONFIRM真兇故事(genuine famine extinction),re-measure scale這條追問線量測面收斂
+
+**工單**：無（QA CONFIRM：raw log決定性事件(day64/79 [Death]+[Extinct])確認Team6/7/8是genuine famine extinction非merge誤讀,翻轉真兇故事站得住。QA補充觀察(非裁定):1人spinoff隊結構上幾乎注定餓死,死亡驅動可能跟村落選址策略無關、是population-overflow機制副產品死亡率,是否該filter/分開報告交systems/blueprint方法論裁量,建議連同concentrated側等價spinoff命運一併查才能判斷公平性。已整合這條arc累積完整圖像(①confound-clear首驗②方向反轉但非全面一致③seed8181翻轉真兇=spinoff隊死亡)寄systems收斂回報。已回systems handback:2026-08-11-measurer-to-systems-remeasure-final-close.md，序②③+spinoff隊算不算的方法論題交systems/blueprint整合判斷，這條追問線到此收斂，等下一票。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——QA挑戰已驗證解謎:seed8181翻轉真兇=population-overflow spinoff隊死亡非核心村落故事,方法論(兩獨立run可比較)已確認站得住
 
 **工單**：無（回應QA對re-measure tier2的方法論挑戰：加同run內day60 checkpoint機制驗證,attrition=8.333333333333%完全重現原獨立2mo-only run結果,確認兩次獨立跑法確實可比較(QA的『不可比較』疑慮排除)。但加全隊roster追蹤(非只ORIG_TIDS0-3)找到真相:day60→90之間的3人attrition差距全部來自population-overflow spin-off的1人獨立小隊(Team6/7/8)消失,核心4隊(0/1/3,Team2已day37併入Team1)day37後完全靜止,跟QA原判讀逐位元吻合。★意義:seed8181的『2mo/3mo翻轉』不是concentrated/dispersed村落經濟規模效應時變轉折,是聚合metric被邊緣spinoff隊死亡率拖動。新問題(spinoff隊死亡算不算規模經濟比較)交systems/blueprint判斷。落地5檔已git commit(34a24b64)。已回systems+QA handback，這條線量測面告一段落，等下一票。
 
