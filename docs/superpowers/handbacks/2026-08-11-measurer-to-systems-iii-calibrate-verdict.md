@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[iii④順序gate+校準+flag(B)逐隊判完成——★★razor-thin margin真的被fix翻轉(tick級決定性數字)但Team2最終trajectory-shift非簡單變好變壞,需blueprint WHAT裁]seed8181 dispersed逐隊45天,temp tap(已revert)+determinism二跑byte-identical。★①tick5800(day~24.2)Team2同一tick:herald mini=+0.1717(過關會fire)/defect_util=-0.00056(consequence 0.1306把原+0.13壓成負、擋下)——QA上輪標註的razor-thin margin確實被hedge+consequence聯手翻轉,tick級證據decisive。Team3同款(defect tick5800被consequence壓到-0.0144擋下,herald稍晚tick5900轉正+0.466)。②聚合面改善:attrition20.8%→8.3%(顯著降)/help.letter_dispatched1→2(herald確實多fire)/defect_fire5→7逐隊拆解後分散多隊(anon-promoted旁支隊6/7/8各1+Team0/3各1+Team2兩次)非單隊惡化。③★★flag(B)確認且更精確:Team2雖day24那次defect真被擋,但food_days此後持續掛0、unrest飆到233→308,最終day37完全消失(pop=-99)——比baseline『永遠卡pop=1殭屍』更早死透。這是真trajectory-shift,非簡單變好或變壞,需你/blueprint WHAT層判斷『團隊徹底死亡』vs『永久殭屍態』何者更合理敘事(這題超出我measure-first範圍)。Team3則明顯改善(day45存活pop=4、food_days回升4.58,無二次defect)。④餓叛vs野心叛區分:Team1(食物健康food_days4.9→3.6穩定)day42仍defect一次,符合『野心叛不變』設計意圖(consequence≈0不壓)。⑤specimen已送QA(970 entries)故事稽核,因果結論待verdict。"
 ---
 
