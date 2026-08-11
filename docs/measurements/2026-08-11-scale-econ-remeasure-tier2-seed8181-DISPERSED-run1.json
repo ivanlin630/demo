@@ -1,0 +1,2268 @@
+{
+  "attrition_pct": 20.8333333333333,
+  "end_pop": 19,
+  "labor_daily": [
+    {
+      "day": 5,
+      "outpost_level": 1,
+      "pool": 5
+    },
+    {
+      "day": 10,
+      "outpost_level": 1,
+      "pool": 5
+    },
+    {
+      "day": 15,
+      "outpost_level": 1,
+      "pool": 5
+    },
+    {
+      "day": 20,
+      "outpost_level": 1,
+      "pool": 5
+    },
+    {
+      "day": 25,
+      "outpost_level": 1,
+      "pool": 5
+    },
+    {
+      "day": 30,
+      "outpost_level": 1,
+      "pool": 5
+    },
+    {
+      "day": 35,
+      "outpost_level": 1,
+      "pool": 5
+    },
+    {
+      "day": 40,
+      "outpost_level": 1,
+      "pool": 5
+    },
+    {
+      "day": 45,
+      "outpost_level": 0,
+      "pool": 1
+    },
+    {
+      "day": 50,
+      "outpost_level": 0,
+      "pool": 1
+    },
+    {
+      "day": 55,
+      "outpost_level": 0,
+      "pool": 1
+    },
+    {
+      "day": 60,
+      "outpost_level": 0,
+      "pool": 1
+    },
+    {
+      "day": 65,
+      "outpost_level": 1,
+      "pool": 1
+    },
+    {
+      "day": 70,
+      "outpost_level": 0,
+      "pool": 1
+    },
+    {
+      "day": 75,
+      "outpost_level": 0,
+      "pool": 1
+    },
+    {
+      "day": 80,
+      "outpost_level": 1,
+      "pool": 1
+    },
+    {
+      "day": 85,
+      "outpost_level": 0,
+      "pool": 1
+    },
+    {
+      "day": 90,
+      "outpost_level": 1,
+      "pool": 1
+    }
+  ],
+  "start_pop": 24,
+  "succession_count": 0,
+  "team_daily": {
+    "0": [
+      {
+        "day": 1,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 2,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 3,
+        "faction_id": 0,
+        "pop": 4,
+        "unrest": 0
+      },
+      {
+        "day": 4,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 5,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 6,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 7,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 8,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 9,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 10,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 11,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 12,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 13,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 14,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 15,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 16,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 17,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 18,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 19,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 20,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 21,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 22,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 23,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 24,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 25,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 26,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 27,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 28,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 29,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 30,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 31,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 32,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 33,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 34,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 35,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 36,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 37,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 38,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 39,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 40,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 41,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 16
+      },
+      {
+        "day": 42,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 42
+      },
+      {
+        "day": 43,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 69
+      },
+      {
+        "day": 44,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 95
+      },
+      {
+        "day": 45,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 46,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 47,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 48,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 49,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 50,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 51,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 52,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 53,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 54,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 55,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 56,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 57,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 58,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 59,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 60,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 61,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 62,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 63,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 64,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 80
+      },
+      {
+        "day": 65,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 83
+      },
+      {
+        "day": 66,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 44
+      },
+      {
+        "day": 67,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 68,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 69,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 70,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 71,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 72,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 73,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 74,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 75,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 76,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 77,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 78,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 79,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 80,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 81,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 82,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 83,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 5
+      },
+      {
+        "day": 84,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 7
+      },
+      {
+        "day": 85,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 8
+      },
+      {
+        "day": 86,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 8
+      },
+      {
+        "day": 87,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 8
+      },
+      {
+        "day": 88,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 8
+      },
+      {
+        "day": 89,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 8
+      },
+      {
+        "day": 90,
+        "faction_id": -1,
+        "pop": 5,
+        "unrest": 8
+      }
+    ],
+    "1": [
+      {
+        "day": 1,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 2,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 3,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 4,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 5,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 6,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 7,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 8,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 9,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 10,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 11,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 12,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 13,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 14,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 15,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 16,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 17,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 18,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 19,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 20,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 21,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 22,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 23,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 24,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 25,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 26,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 27,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 28,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 29,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 30,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 31,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 32,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 33,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 34,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 35,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 36,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 37,
+        "faction_id": 0,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 38,
+        "faction_id": 0,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 39,
+        "faction_id": 0,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 40,
+        "faction_id": 0,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 41,
+        "faction_id": 0,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 42,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 43,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 44,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 45,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 46,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 47,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 48,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 49,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 0
+      },
+      {
+        "day": 50,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 1
+      },
+      {
+        "day": 51,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 27
+      },
+      {
+        "day": 52,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 53
+      },
+      {
+        "day": 53,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 80
+      },
+      {
+        "day": 54,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 106
+      },
+      {
+        "day": 55,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 133
+      },
+      {
+        "day": 56,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 159
+      },
+      {
+        "day": 57,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 185
+      },
+      {
+        "day": 58,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 212
+      },
+      {
+        "day": 59,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 238
+      },
+      {
+        "day": 60,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 265
+      },
+      {
+        "day": 61,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 291
+      },
+      {
+        "day": 62,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 317
+      },
+      {
+        "day": 63,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 344
+      },
+      {
+        "day": 64,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 370
+      },
+      {
+        "day": 65,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 397
+      },
+      {
+        "day": 66,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 423
+      },
+      {
+        "day": 67,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 449
+      },
+      {
+        "day": 68,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 476
+      },
+      {
+        "day": 69,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 502
+      },
+      {
+        "day": 70,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 529
+      },
+      {
+        "day": 71,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 555
+      },
+      {
+        "day": 72,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 581
+      },
+      {
+        "day": 73,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 608
+      },
+      {
+        "day": 74,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 634
+      },
+      {
+        "day": 75,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 661
+      },
+      {
+        "day": 76,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 667
+      },
+      {
+        "day": 77,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 693
+      },
+      {
+        "day": 78,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 720
+      },
+      {
+        "day": 79,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 746
+      },
+      {
+        "day": 80,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 773
+      },
+      {
+        "day": 81,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 799
+      },
+      {
+        "day": 82,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 825
+      },
+      {
+        "day": 83,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 852
+      },
+      {
+        "day": 84,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 878
+      },
+      {
+        "day": 85,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 905
+      },
+      {
+        "day": 86,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 931
+      },
+      {
+        "day": 87,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 957
+      },
+      {
+        "day": 88,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 984
+      },
+      {
+        "day": 89,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 1010
+      },
+      {
+        "day": 90,
+        "faction_id": -1,
+        "pop": 10,
+        "unrest": 1037
+      }
+    ],
+    "2": [
+      {
+        "day": 1,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 2,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 3,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 4,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 5,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 6,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 7,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 8,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 9,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 10,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 11,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 12,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 13,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 14,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 15,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 16,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 17,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 18,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 19,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 20,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 21,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 22,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 23,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 24,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 18
+      },
+      {
+        "day": 25,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 26,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 48
+      },
+      {
+        "day": 27,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 74
+      },
+      {
+        "day": 28,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 101
+      },
+      {
+        "day": 29,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 127
+      },
+      {
+        "day": 30,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 154
+      },
+      {
+        "day": 31,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 180
+      },
+      {
+        "day": 32,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 206
+      },
+      {
+        "day": 33,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 233
+      },
+      {
+        "day": 34,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 259
+      },
+      {
+        "day": 35,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 286
+      },
+      {
+        "day": 36,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 308
+      },
+      {
+        "day": 37,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 38,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 39,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 40,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 41,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 42,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 43,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 44,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 45,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 46,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 47,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 48,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 49,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 50,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 51,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 52,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 53,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 54,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 55,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 56,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 57,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 58,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 59,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 60,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 61,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 62,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 63,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 64,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 65,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 66,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 67,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 68,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 69,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 70,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 71,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 72,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 73,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 74,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 75,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 76,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 77,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 78,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 79,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 80,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 81,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 82,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 83,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 84,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 85,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 86,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 87,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 88,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 89,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      },
+      {
+        "day": 90,
+        "faction_id": null,
+        "note": "gone_or_merged",
+        "pop": -1
+      }
+    ],
+    "3": [
+      {
+        "day": 1,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 2,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 3,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 4,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 5,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 6,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 7,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 8,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 9,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 10,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 11,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 12,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 13,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 14,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 15,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 16,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 17,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 18,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 19,
+        "faction_id": 0,
+        "pop": 6,
+        "unrest": 0
+      },
+      {
+        "day": 20,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 21,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 22,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 23,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 0
+      },
+      {
+        "day": 24,
+        "faction_id": 0,
+        "pop": 5,
+        "unrest": 18
+      },
+      {
+        "day": 25,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 26,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 27,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 28,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 29,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 30,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 31,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 32,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 33,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 34,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 35,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 36,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 37,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 38,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 39,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 40,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 41,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 42,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 43,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 44,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 45,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 46,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 47,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 48,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 49,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 50,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 51,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 52,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 53,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 54,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 55,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 56,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 57,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 58,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 59,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 60,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 61,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 62,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 63,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 64,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 65,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 66,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 67,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 68,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 69,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 70,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 71,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 72,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 73,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 74,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 75,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 76,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 77,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 78,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 79,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 80,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 81,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 82,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 83,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 84,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 85,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 86,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 87,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 88,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 89,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      },
+      {
+        "day": 90,
+        "faction_id": -1,
+        "pop": 4,
+        "unrest": 34
+      }
+    ]
+  }
+}
