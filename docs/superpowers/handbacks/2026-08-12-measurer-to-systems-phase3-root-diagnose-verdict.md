@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[#3-#5 root-diagnose完成+★意外揭露新bug]specimen手動選team_id(繞過官方helper)致同seed世界真分岔(teams130→148)已isolation A/B坐實,非只specimen內容差；#3①立國gate=cmd+ambition雙擋structural②spawn主力=運輸/偵查churn非founding,merge有嘗試(168)但完成率僅4.8%③migrant/invest評估即100%轉fire,瓶頸在評估機會極稀非decision under-fire④promote100%desperate=16筆leader-month全平民tier structural confirm⑤intent卡致富=faction-level設計(leader驅動)非bug,T18自己危機不影響共享intent"
 ---
 
