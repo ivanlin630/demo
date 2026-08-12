@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[#3②JOIN funnel精確定位+#3③target-resolution genuine-vs-bug分野,兩機制答案不同]①belief-gap(領主不知host位置)乾淨排除(0/4636次to_task);168次併入決策134次真co-locate(78.8%到達,travel非瓶頸);co-locate後8完成+36reject(82%已解決案例是host「養不起」拒收=吻合這局pop崩潰背景,偏genuine)+90次co-locate無對應結果(缺口未追根,誠實flag);②migrant瓶頸=belief-propagation缺口(est_null 9/10=90%,一旦有belief幾乎都正邊際)=偏bug;invest瓶頸=already_farming排除(9/16=56%)非belief缺口(僅12.5%)=偏genuine結構限制(target pool本身就窄)——migrant跟invest答案不同,別合併判"
 ---
 
