@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[decouple-suspicion-promotion realistic驗證——輕量通知]promote.fired 0→4/field_desperate 0→4,T4/T8解卡+T8三次完整drain-promote週期,T0 bounded不受影響,T12仍零變化(獨立根因非decouple沒生效)。核心數字是named/need逐日state直讀,不涉及candidates推論,不強制稽核。specimen已附,若有餘力想抽查T8三次promote週期的exact tick時序或T12為何全程零dispatch,歡迎看;沒空的話這條線我視為可以跟著systems判斷收官。"
 ---
 
