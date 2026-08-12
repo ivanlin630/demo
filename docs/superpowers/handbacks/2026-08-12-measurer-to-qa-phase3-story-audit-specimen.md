@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[③長期故事驗證 specimen 佐證]seed1337 2月窗,8隊抽樣4174 entries,同批送systems的first-pass敘事+top incoherences引用此specimen"
 ---
 

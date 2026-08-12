@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[③長期故事驗證 first-pass 完成——seed1337 2月窗(受限已知perf ceiling,非6-12月)]①中性敘事②top incoherences ranked③4維verdict,specimen已另信送QA佐證"
 ---
 
