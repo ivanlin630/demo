@@ -6073,68 +6073,36 @@ func _test_update_armor_config() -> void:
 	print("S7 Task5 OK")
 
 func _test_update_guard_ratio() -> void:
-	print("--- S7 Task6: _update_guard_ratio ---")
+	print("--- S7 Task6: _update_guard_ratio（军民混编 Slice A：連續人格 + belief-threat）---")
 	var fai := FactionAISystem.new()
 	var state := WorldState.new()
-	# 場景 A：MILITARY + 鄰格有敵對 team → 0.4
-	var t_mil := TeamData.new()
-	t_mil.team_id = 100
-	t_mil.tags = [TeamData.TAG_MILITARY]
-	t_mil.faction_id = 10
-	t_mil.tile_pos = Vector2i(5, 5)
-	state.teams[100] = t_mil
-	var t_enemy := TeamData.new()
-	t_enemy.team_id = 101
-	t_enemy.faction_id = 20  # 不同 faction
-	t_enemy.tile_pos = Vector2i(6, 6)  # distance ~1
-	state.teams[101] = t_enemy
-	state.rebuild_team_tile_index()   # 空間索引前置（production 由 sim_runner post-move 建）
-	fai._update_guard_ratio(t_mil, state)
-	assert(t_mil.guard_ratio >= 0.35,
-		"MILITARY 鄰敵 應 >=0.35，實際=%s" % str(t_mil.guard_ratio))
-	# 場景 B：current_task=攻擊 → 0.1
-	t_mil.current_task = TeamData.TASK_ATTACK
-	state.rebuild_team_tile_index()
-	fai._update_guard_ratio(t_mil, state)
-	assert(t_mil.guard_ratio <= 0.15,
-		"攻擊中 應 <=0.15，實際=%s" % str(t_mil.guard_ratio))
-	# 場景 C：PRODUCE 無威脅 → 0.15
-	var t_pro := TeamData.new()
-	t_pro.team_id = 102
-	t_pro.tags = [TeamData.TAG_PRODUCE]
-	t_pro.faction_id = 30
-	t_pro.tile_pos = Vector2i(-20, -20)
-	state.teams[102] = t_pro
-	state.rebuild_team_tile_index()
-	fai._update_guard_ratio(t_pro, state)
-	assert(t_pro.guard_ratio <= 0.2,
-		"PRODUCE 無威脅 應 <=0.2，實際=%s" % str(t_pro.guard_ratio))
-	# 場景 D：default 無威脅 → 0.2
-	var t_def := TeamData.new()
-	t_def.team_id = 103
-	t_def.faction_id = 40
-	t_def.tile_pos = Vector2i(-30, -30)
+	# 場景 A：高慎重 leader、無威脅 → 守衛保守（連續、bounded）。
+	var t_hi := TeamData.new(); t_hi.team_id = 100; t_hi.faction_id = 10; t_hi.tile_pos = Vector2i(5, 5)
+	var lp_hi := PersonData.new(); lp_hi.id = 1100; lp_hi.values = {"慎重": 0.9, "好戰": 0.5}; state.persons[1100] = lp_hi; t_hi.leader_id = 1100
+	state.teams[100] = t_hi
+	fai._update_guard_ratio(t_hi, state)
+	assert(t_hi.guard_ratio >= 0.05 and t_hi.guard_ratio <= 0.5, "guard bounded，實際=%s" % str(t_hi.guard_ratio))
+	# 場景 B：低慎重 leader → guard < 高慎重（連續人格分化、非離散跳）。
+	var t_lo := TeamData.new(); t_lo.team_id = 101; t_lo.faction_id = 11; t_lo.tile_pos = Vector2i(8, 8)
+	var lp_lo := PersonData.new(); lp_lo.id = 1101; lp_lo.values = {"慎重": 0.1, "好戰": 0.5}; state.persons[1101] = lp_lo; t_lo.leader_id = 1101
+	state.teams[101] = t_lo
+	fai._update_guard_ratio(t_lo, state)
+	assert(t_lo.guard_ratio < t_hi.guard_ratio, "低慎重 %s < 高慎重 %s（連續人格分化）" % [str(t_lo.guard_ratio), str(t_hi.guard_ratio)])
+	# 場景 C：攻擊中 → 前線投入、guard 降。
+	var g_before: float = t_hi.guard_ratio
+	t_hi.current_task = TeamData.TASK_ATTACK
+	fai._update_guard_ratio(t_hi, state)
+	assert(t_hi.guard_ratio < g_before, "攻擊中 %s < 非攻擊 %s（前線投入留守少）" % [str(t_hi.guard_ratio), str(g_before)])
+	# 場景 D：god-view 除——鄰格敵但未 discovered（team_discovered 空）→ belief-threat 0 → 不受真位置影響。
+	var t_def := TeamData.new(); t_def.team_id = 103; t_def.faction_id = 40; t_def.tile_pos = Vector2i(-30, -30)
+	var lp_d := PersonData.new(); lp_d.id = 1103; lp_d.values = {"慎重": 0.5, "好戰": 0.5}; state.persons[1103] = lp_d; t_def.leader_id = 1103
 	state.teams[103] = t_def
-	state.rebuild_team_tile_index()
+	var t_enemy := TeamData.new(); t_enemy.team_id = 104; t_enemy.faction_id = 41; t_enemy.tile_pos = Vector2i(-29, -30); state.teams[104] = t_enemy  # 鄰格敵、未 discovered
 	fai._update_guard_ratio(t_def, state)
-	assert(t_def.guard_ratio >= 0.15 and t_def.guard_ratio <= 0.25,
-		"default 無威脅 應 ~0.2，實際=%s" % str(t_def.guard_ratio))
-	# 場景 E：高聲望盟友（rep>=0.7）不應計為威脅
-	var t_ally_a := TeamData.new()
-	t_ally_a.team_id = 104
-	t_ally_a.faction_id = 50
-	t_ally_a.tile_pos = Vector2i(20, 20)
-	var t_ally_b := TeamData.new()
-	t_ally_b.team_id = 105
-	t_ally_b.faction_id = 51   # 不同 faction
-	t_ally_b.tile_pos = Vector2i(21, 20)   # 鄰格
-	t_ally_a.known_reputations[105] = 0.8   # 高聲望
-	state.teams[104] = t_ally_a
-	state.teams[105] = t_ally_b
-	state.rebuild_team_tile_index()
-	fai._update_guard_ratio(t_ally_a, state)
-	assert(t_ally_a.guard_ratio <= 0.25,
-		"鄰格盟友（rep=0.8）不應觸發威脅 guard_ratio，實際=%s" % str(t_ally_a.guard_ratio))
+	var g_no_disc: float = t_def.guard_ratio
+	state.team_discovered[103] = []   # 明確空 discovered
+	fai._update_guard_ratio(t_def, state)
+	assert(abs(t_def.guard_ratio - g_no_disc) < 1e-6, "未 discovered 敵鄰格→guard 不變 %s（god-view 除、不偷看真位置）" % str(t_def.guard_ratio))
 	print("S7 Task6 OK")
 
 func _test_faction_ai_run_calls_all_updates() -> void:
