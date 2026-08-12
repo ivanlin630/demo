@@ -1745,9 +1745,53 @@ func _try_promote_advisor(state: WorldState, team: TeamData) -> void:
 	if new_named == null:
 		return
 	state.add_member(team, new_named.id)   # 加記名進 lord roster（非 spawn 孤立 subteam=與機械誤升 bug 涇渭）
+	# ★晉升初始心情/忠誠（post-add_member hook、★不改通用 generate 污染全體）：從源團 state 算取代白紙 0/0。
+	_apply_promotion_initial_state(state, team, new_named, fired_desperate)
 	if Probe.enabled:
 		Probe.bump("promote.fired")
 		if fired_desperate and not fired_normal: Probe.bump("promote.field_desperate")   # A 急徵弱 officer
+
+# ★晉升初始心情/忠誠常數（TEST VALUE、measurer 校準）。三調 bounded、genuine 從 state、無新 randf。
+const PROMOTE_UNREST_SAT: float = 40.0              # 源團 unrest 飽和（mirror _count_stress_sources unrest>40）
+const PROMOTE_LOY_GRATITUDE: float = 0.5           # 提拔感激正底（×義氣/信義 pmod）
+const PROMOTE_LOY_UNREST_W: float = 0.5            # 源團舊怨 carryover 拖
+const PROMOTE_LOY_DESPERATE_DRAG: float = 0.1      # 急徵措手不及→稍低
+const PROMOTE_LOY_FLOOR: float = 0.2               # ★§4.5 怨團拔低忠誠但非 0（舊怨 vs 感激拉扯有翻轉空間）
+const PROMOTE_STRESS_SAT_BASE: float = 0.1         # 提拔滿足→低 stress 正底（★非麻木、非 0）
+const PROMOTE_STRESS_UNREST_W: float = 0.4         # 源團艱困 carryover stress
+const PROMOTE_STRESS_DESPERATE: float = 0.35       # 急徵火線措手不及
+const PROMOTE_STRESS_CAP: float = 0.8              # ★§4.5 摻壓但非崩潰
+const PROMOTE_FEAR_DESPERATE: float = 0.3          # 急徵被硬推上火線→怕
+const PROMOTE_FEAR_UNREST_W: float = 0.2
+const PROMOTE_FEAR_CAP: float = 0.7                # 非崩潰
+
+# ★晉升初始心情/忠誠（§2/§3、§4.5 bounded、genuine 從 state 湧現非死常數、determinism 純算術無 randf）。
+#   忠誠=提拔感激正底(義氣/信義 modulate) − 源團舊怨(unrest carryover) − 急徵拖；floor>0（怨團非 0）。
+#   心情=提拔滿足低 stress 正底(非麻木) + 源團艱困 + 情境(fired_desperate 摻 stress/fear 非 0、cap 非崩潰)。
+#   ★rep 項移除(HALT fix、systems 坐實)：known_reputations 是 TEAM-id keyed 且 own-team 領主無自 reputation entry
+#   →heard_rep 恆惰性 0.5=偽 state-derived 違 genuine 命門。源團對領主態度已由 unrest_turns 完整捕捉(discontent 拖)。
+func _apply_promotion_initial_state(state: WorldState, team: TeamData, officer: PersonData, fired_desperate: bool) -> void:
+	# 源訊號（感知鐵律：全 own-state）：源團 unrest（own-state discontent）+ 情境（desperate own-context）。
+	var unrest_norm: float = clampf(float(team.unrest_turns) / PROMOTE_UNREST_SAT, 0.0, 1.0)
+	# 義氣/信義 modulate（officer 本人越重恩義→越感激；mirror stay_benefit pmod）。
+	var honor: float = float(officer.values.get("義氣", 0.5))
+	var trust: float = float(officer.values.get("信義", 0.5))
+	var pmod: float = 0.5 + (honor + trust) * 0.5   # [0.5, 1.5]
+	# ── 初始忠誠（感激 − 舊怨 − 急徵拖）──
+	var gratitude: float = PROMOTE_LOY_GRATITUDE * pmod
+	var discontent: float = PROMOTE_LOY_UNREST_W * unrest_norm
+	var desp_drag: float = PROMOTE_LOY_DESPERATE_DRAG if fired_desperate else 0.0
+	var loy: float = clampf(gratitude - discontent - desp_drag, PROMOTE_LOY_FLOOR, 1.0)
+	LoyaltyBank.set_baseline(officer, loy, "promotion_initial")   # override generate rng 預設
+	# ── 初始心情（stress/fear 取代白紙 0/0）──
+	var stress: float = PROMOTE_STRESS_SAT_BASE + PROMOTE_STRESS_UNREST_W * unrest_norm \
+		+ (PROMOTE_STRESS_DESPERATE if fired_desperate else 0.0)
+	officer.stress = clampf(stress, 0.0, PROMOTE_STRESS_CAP)
+	var fear: float = (PROMOTE_FEAR_DESPERATE if fired_desperate else 0.0) + PROMOTE_FEAR_UNREST_W * unrest_norm
+	officer.fear = clampf(fear, 0.0, PROMOTE_FEAR_CAP)
+	if Probe.enabled:
+		Probe.note("promote.init_loyalty", loy)
+		Probe.note("promote.init_stress", officer.stress)
 
 func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
