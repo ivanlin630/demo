@@ -1,6 +1,6 @@
 # 军民混编 / 民兵動員 — 團型驅動的 mobilizable 分數（WHAT / vision）v2
 
-status: LOCKED（2026-08-12：re-R² CLEAN、6 findings 真訂正 → Slice A 先切 build;Slice B 待承重牆 spike 後另行 R²）
+status: Slice A MERGED `998f5344`；Slice B spike 解承重牆=charter/mobilization split（避 Track②A、MEDIUM）→ pending R² Slice B → build
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-12
 溯源：size-matter 維度②（audit 2026-08-03）+ grounding 表 + ★R② 異質框外審 ISSUES（6 findings、Agent 讀 code + reviewer 親驗 2/2 最要害）→ 訂正。
@@ -18,7 +18,15 @@ date: 2026-08-12
 - guard_ratio（`faction_ai:3069` 硬編碼 0.1/0.15/0.2/0.35/0.4 離散 tag-gated 死常數）→ **連續、人格化**（慎重/責任/威脅感知 modulate、非死值），不損原意（夜哨比 + ★finding⑤ 漏列消費者 `_check_night_raid` 夜襲免疫一併接）。
 - 動員/守衛 trigger → **belief-threat**（`ThreatAssessment.score`）取代 `_has_hostile_within` god-view。★finding⑥：belief-threat 現只服務 uses_unified 隊、純軍團零 belief-threat → Slice A 須讓守衛決策的 threat 也走 belief（否則軍團無感知）。
 
-## §3 Slice B — 團型梯度 + 分數化動員（高風險、須先解承重牆）
+## §3 Slice B — charter/mobilization split（spike 解承重牆、MEDIUM gameplay 續、避 Track②A）
+★spike 核心洞見：`TAG_PRODUCE` binary **混淆兩正交概念**——**charter/團型**（村/軍/商、穩定、建點定=「這是什麼隊」）vs **mobilization**（當下勞力↔戰力配置、動態隨威脅=「人力怎麼分配」）。decouple = **拆這兩者**（非主業過半 flip、非全解綁含路由=Track②A）：
+- **charter（穩定）驅動**：A 路由（`uses_unified:2394`/:2901/:412/:4535）+ E 薪資 pop-cap（`population:30`/`salary:30`）+ C 居民鎖（`faction_ai:502` is_resident_static/駐守）。★**讀 charter 不改行為**——村 charter 隊動員民兵時 charter 不變 → **路由不 churn → 零 Track②A 糾纏**。
+- **★mobilization-fraction（動態、新欄）驅動**：B 勞力池（`labor:27/37 pool_of`/`faction_ai:3683/3728`、pool 分數化）+ F 裝備（`faction_ai:3002/3037`）+ D 脆弱度（`interaction:395/301/303/521`/`diplomatic:263` 劫/撫/稅）。= Slice B 核心工作。
+- **團型梯度** = charter 本身可分級（專業軍團/後備半兵半農/居民團）+ mobilized_fraction 動態 → guns-vs-butter（威脅→動員抽勞力→產出掉;和平解甲）。
+- ★finding④ `manufacturing:86` labor_share>1 膨脹 bug 同修;finding③ 3 天 cache staleness 觸重算。
+- **effort=MEDIUM**（加 mobilized_fraction 欄 + B~4/F~2/D~4 讀 fraction;A 路由/E 薪資/C 居民鎖 UNCHANGED 讀 charter 零行為變）= **gameplay arc、不需 user-scale Track②A**。
+
+## §3-old Slice B — 團型梯度 + 分數化動員（高風險、須先解承重牆）
 - 團型二元（`outpost:401` civilian/military 定死）→ **梯度**（專業軍團純軍/後備半兵半農/居民團民兵）。
 - pool_of 二元 by-tag（`labor:23`）→ **分數 membership**（表達半兵半農）。★finding④：`manufacturing:86` 分子仍讀原始 population → labor_share>1.0 產出膨脹 bug、須同修。★finding③：guns-vs-butter 勞力池 3 天 cache staleness 須觸發重算。
 - **guns-vs-butter**：威脅→動員抽勞力→產出掉;和平→解甲回田。
