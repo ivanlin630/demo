@@ -1,0 +1,3674 @@
+{
+  "daily_log": [
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 4,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 24,
+        "promote.field_desperate": 0,
+        "promote.fired": 0,
+        "scout.dispatched": 2
+      },
+      "day": 1,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 186.666666666667,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 114.666666666667,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 2.72519538784287,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 150.549992300342,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 118.337951016561,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 117.953279040125,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 152.314018626327,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 2.33333333333333,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 142,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 8,
+          "food_eff": 139.842893825997,
+          "named_cmds": [
+            0.45,
+            0.55
+          ],
+          "named_size": 2,
+          "officer_need": 0,
+          "pop": 11,
+          "task": "貿易",
+          "tiers": {
+            "平民": 8,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 2.72845415698108,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 118.353409478621,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 192.137851359824,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 104.605690531229,
+          "named_cmds": [
+            0.5
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 7,
+          "task": "覓食",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 200.59337868885,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 18
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 7,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 50,
+        "promote.field_desperate": 0,
+        "promote.fired": 0,
+        "scout.dispatched": 2
+      },
+      "day": 2,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 173.333333333333,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 109.333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0.824533989016729,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 150.424028471595,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 116.705732160427,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 116.381583865336,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 152.639585198659,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 134,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 8,
+          "food_eff": 140.819107930232,
+          "named_cmds": [
+            0.45,
+            0.55
+          ],
+          "named_size": 2,
+          "officer_need": 0,
+          "pop": 11,
+          "task": "貿易",
+          "tiers": {
+            "平民": 8,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0.838353791611755,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 117.870052552027,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 184.303687251,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 104.091406227084,
+          "named_cmds": [
+            0.5
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 7,
+          "task": "覓食",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 197.017696704858,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 19
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 11,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 89,
+        "promote.field_desperate": 0,
+        "promote.fired": 0,
+        "scout.dispatched": 2
+      },
+      "day": 3,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 153.333333333333,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 101.333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 150.249201095902,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 113.957236623218,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 112.927067903114,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 154.018246849145,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 122,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 8,
+          "food_eff": 143.68139272777,
+          "named_cmds": [
+            0.45,
+            0.55
+          ],
+          "named_size": 2,
+          "officer_need": 0,
+          "pop": 11,
+          "task": "貿易",
+          "tiers": {
+            "平民": 8,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 117.148191375154,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 171.876520340863,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 103.665137104339,
+          "named_cmds": [
+            0.5
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 7,
+          "task": "覓食",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 195.265365814028,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 19
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 12,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 114,
+        "promote.field_desperate": 0,
+        "promote.fired": 0,
+        "scout.dispatched": 2
+      },
+      "day": 4,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 140,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 96,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 149.775900730948,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 115.178309085845,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 110.6974092015,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 154.300778066781,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 114,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 8,
+          "food_eff": 143.409115874926,
+          "named_cmds": [
+            0.45,
+            0.55
+          ],
+          "named_size": 2,
+          "officer_need": 0,
+          "pop": 11,
+          "task": "貿易",
+          "tiers": {
+            "平民": 8,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 116.033370166071,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 164.667033305356,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 102.519645877624,
+          "named_cmds": [
+            0.5
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 7,
+          "task": "覓食",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 191.617382295056,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 19
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 2,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 16,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 152,
+        "promote.field_desperate": 0,
+        "promote.fired": 0,
+        "scout.dispatched": 2
+      },
+      "day": 5,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 120,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 87.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 148.99035015444,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 116.069471686466,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 108.356216820856,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 155.144112716747,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 102,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 8,
+          "food_eff": 138.957796790226,
+          "named_cmds": [
+            0.55
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 10,
+          "task": "貿易",
+          "tiers": {
+            "平民": 8,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 113.410421644634,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 152.207294152096,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 89.3301847728829,
+          "named_cmds": [],
+          "named_size": 0,
+          "officer_need": 1,
+          "pop": 6,
+          "task": "覓食",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 187.334350908002,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 20
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 2,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 20,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 179,
+        "promote.field_desperate": 1,
+        "promote.fired": 1,
+        "scout.dispatched": 2
+      },
+      "day": 6,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 106.666666666667,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 82.6666666666666,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 148.706806538886,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 116.483211872725,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 106.010301059602,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 156.070544697644,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 94,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 105.205196547107,
+          "named_cmds": [
+            0.55
+          ],
+          "named_size": 1,
+          "officer_need": 0.6,
+          "pop": 7,
+          "task": "貿易",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 112.322411122314,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 144.84966952507,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 88.7200834991158,
+          "named_cmds": [
+            0.111527137458324
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 6,
+          "task": "覓食",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 184.625209150059,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 22
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 2,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 0,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 23,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 208,
+        "promote.field_desperate": 1,
+        "promote.fired": 1,
+        "scout.dispatched": 2
+      },
+      "day": 7,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 93.3333333333334,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 77.3333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 148.268631086639,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 114.91402950269,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 103.52905865611,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 156.132401683543,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 14,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 19
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 86,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 104.201205589466,
+          "named_cmds": [
+            0.55
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 7,
+          "task": "貿易",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 135.008726727693,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 137.332408520314,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 86.6596073107956,
+          "named_cmds": [
+            0.111527137458324
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 6,
+          "task": "覓食",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 181.74015751415,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 21
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 4,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 1,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 27,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 250,
+        "promote.field_desperate": 1,
+        "promote.fired": 1,
+        "scout.dispatched": 2
+      },
+      "day": 8,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 73.3333333333334,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 69.3333333333332,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 148.188392496116,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 112.574544063422,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 99.9683807181604,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 156.504384276495,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 2,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 4
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 74,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 94.5378603723675,
+          "named_cmds": [],
+          "named_size": 0,
+          "officer_need": 1,
+          "pop": 6,
+          "task": "治理",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 135.04962922847,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 126.007519621574,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 75.1206823758091,
+          "named_cmds": [],
+          "named_size": 0,
+          "officer_need": 1,
+          "pop": 5,
+          "task": "覓食",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 177.572521232634,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 23
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 4,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 2,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 28,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 276,
+        "promote.field_desperate": 1,
+        "promote.fired": 1,
+        "scout.dispatched": 2
+      },
+      "day": 9,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 60.0000000000001,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 63.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 148.183946998508,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 111.045492589719,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 98.1206283320087,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 157.933260874902,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 66,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 5,
+          "food_eff": 94.7548141352461,
+          "named_cmds": [],
+          "named_size": 0,
+          "officer_need": 1,
+          "pop": 6,
+          "task": "貿易",
+          "tiers": {
+            "平民": 5,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 138.316905635533,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 118.771103033855,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 73.9366934346341,
+          "named_cmds": [],
+          "named_size": 0,
+          "officer_need": 1,
+          "pop": 5,
+          "task": "覓食",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 173.601447168549,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 23
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 4,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 4,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 31,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 316,
+        "promote.field_desperate": 3,
+        "promote.fired": 3,
+        "scout.dispatched": 2
+      },
+      "day": 10,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 40.0000000000001,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 55.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 148.683223107473,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 109.093369957748,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 94.3194723848045,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 157.604716838143,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 54,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 92.1172789037544,
+          "named_cmds": [
+            0.551106929779053
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 6,
+          "task": "貿易",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 10,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 143.332703358663,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 107.488766044661,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 3,
+          "food_eff": 71.8518586664286,
+          "named_cmds": [
+            0.0321533791720867
+          ],
+          "named_size": 1,
+          "officer_need": 0.6,
+          "pop": 5,
+          "task": "覓食",
+          "tiers": {
+            "平民": 3,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 169.968818342374,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 23
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 4,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 4,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 35,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 344,
+        "promote.field_desperate": 3,
+        "promote.fired": 3,
+        "scout.dispatched": 2
+      },
+      "day": 11,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 26.6666666666667,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 50.6666666666666,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 148.160338466559,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 107.84307680432,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 92.638598469179,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 159.027541639976,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.1,
+            0.6
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 46,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 90.2154706264553,
+          "named_cmds": [
+            0.551106929779053
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 6,
+          "task": "貿易",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 8,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 146.728386494169,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 100.053435604157,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 3,
+          "food_eff": 70.2464073354702,
+          "named_cmds": [
+            0.0321533791720867
+          ],
+          "named_size": 1,
+          "officer_need": 0.6,
+          "pop": 5,
+          "task": "覓食",
+          "tiers": {
+            "平民": 3,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 165.969535301315,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 23
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 5,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 4,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 39,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 372,
+        "promote.field_desperate": 3,
+        "promote.fired": 3,
+        "scout.dispatched": 2
+      },
+      "day": 12,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 13.3333333333334,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "建設",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 45.3333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 146.337564182281,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 106.581695947872,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 90.9194016332341,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 159.276784507632,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.6,
+            0.45
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 38,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 88.4548006010196,
+          "named_cmds": [
+            0.551106929779053
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 6,
+          "task": "貿易",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 6,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 149.996922230105,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 92.5065164268872,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 3,
+          "food_eff": 60.5846920672127,
+          "named_cmds": [],
+          "named_size": 0,
+          "officer_need": 1,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 3,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 161.655726907937,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 24
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 5,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 4,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 45,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 416,
+        "promote.field_desperate": 4,
+        "promote.fired": 4,
+        "scout.dispatched": 2
+      },
+      "day": 13,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 0,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "外交",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 37.3333333333333,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 147.172698174732,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 104.556241792285,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 88.0138429444798,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 159.379196562189,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.45,
+            0.6
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 26,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 86.3604475612796,
+          "named_cmds": [
+            0.551106929779053
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 6,
+          "task": "貿易",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 3,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 152.974321314764,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 80.4327539246996,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 57.7221013567022,
+          "named_cmds": [
+            0.139991775155067
+          ],
+          "named_size": 1,
+          "officer_need": 0.666666666666667,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 155.266227353991,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 24
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 5,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 4,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 46,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 447,
+        "promote.field_desperate": 4,
+        "promote.fired": 4,
+        "scout.dispatched": 2
+      },
+      "day": 14,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 0,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "外交",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 31.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 147.788328770304,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 103.243101462513,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 85.4163262465053,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 160.418798405367,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.45,
+            0.6
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 18,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 84.8579072628964,
+          "named_cmds": [
+            0.551106929779053
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 6,
+          "task": "貿易",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 1,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 152.970357601654,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 72.9163055224433,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 55.770887833431,
+          "named_cmds": [
+            0.139991775155067
+          ],
+          "named_size": 1,
+          "officer_need": 0.666666666666667,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 151.349948785855,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 24
+    },
+    {
+      "counts": {
+        "care.scout_dispatched": 5,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "death.starve_anon": 4,
+        "death.starve_minor": 0,
+        "help.delivered": 3,
+        "help.letter_dispatched": 3,
+        "help.severity_positive": 52,
+        "help.target_resolved": 3,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 495,
+        "promote.field_desperate": 4,
+        "promote.fired": 4,
+        "scout.dispatched": 2
+      },
+      "day": 15,
+      "per_team": {
+        "0": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 15,
+          "food_eff": 0,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.6,
+            0.2
+          ],
+          "named_size": 4,
+          "officer_need": 0,
+          "pop": 20,
+          "task": "外交",
+          "tiers": {
+            "平民": 15,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "1": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 23.9999999999999,
+          "named_cmds": [
+            0.3,
+            0.15
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "10": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "11": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 147.918395161544,
+          "named_cmds": [
+            0.35,
+            0.2,
+            0.05
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "12": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 101.495560937395,
+          "named_cmds": [
+            0.3
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "13": {
+          "alive": true,
+          "anon": 5,
+          "food_eff": 82.4747106967465,
+          "named_cmds": [
+            0.25,
+            0.4
+          ],
+          "named_size": 2,
+          "pop": 8
+        },
+        "14": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 160.797947185845,
+          "named_cmds": [
+            0.4,
+            0.15,
+            0.55
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "15": {
+          "alive": true,
+          "anon": 13,
+          "food_eff": 0,
+          "named_cmds": [
+            0.25,
+            0.1,
+            0.45,
+            0.5
+          ],
+          "named_size": 4,
+          "pop": 18
+        },
+        "2": {
+          "alive": true,
+          "anon": 0,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 2
+        },
+        "3": {
+          "alive": true,
+          "anon": 8,
+          "food_eff": 6,
+          "named_cmds": [
+            0.4,
+            0.25,
+            0.1
+          ],
+          "named_size": 3,
+          "pop": 12
+        },
+        "4": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 4,
+          "food_eff": 82.1626394838684,
+          "named_cmds": [
+            0.551106929779053
+          ],
+          "named_size": 1,
+          "officer_need": 0.5,
+          "pop": 6,
+          "task": "貿易",
+          "tiers": {
+            "平民": 4,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "5": {
+          "alive": true,
+          "anon": 1,
+          "food_eff": 0,
+          "named_cmds": [
+            0.1
+          ],
+          "named_size": 1,
+          "pop": 3
+        },
+        "6": {
+          "alive": true,
+          "anon": 6,
+          "food_eff": 155.841464842783,
+          "named_cmds": [
+            0.35,
+            0.2
+          ],
+          "named_size": 2,
+          "pop": 9
+        },
+        "7": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 60.4512466023276,
+          "named_cmds": [
+            0.5,
+            0.3,
+            0.15,
+            0.4
+          ],
+          "named_size": 4,
+          "pop": 20
+        },
+        "8": {
+          "alive": true,
+          "ambition": 0.4,
+          "anon": 2,
+          "food_eff": 52.977548082258,
+          "named_cmds": [
+            0.139991775155067
+          ],
+          "named_size": 1,
+          "officer_need": 0.666666666666667,
+          "pop": 4,
+          "task": "覓食",
+          "tiers": {
+            "平民": 2,
+            "新兵": 0,
+            "老兵": 0,
+            "菁英": 0
+          }
+        },
+        "9": {
+          "alive": true,
+          "anon": 15,
+          "food_eff": 148.152105693928,
+          "named_cmds": [
+            0.45,
+            0.25,
+            0.5,
+            0.1
+          ],
+          "named_size": 4,
+          "pop": 20
+        }
+      },
+      "team_count": 24
+    }
+  ],
+  "days": 15,
+  "distress_tids": [
+    2,
+    5,
+    10,
+    15
+  ],
+  "facility_log": {
+    "team10": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team11": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team12": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team13": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team14": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team15": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team4": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team5": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team6": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team7": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team8": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team9": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    }
+  },
+  "final_team_count": 24,
+  "initial_named_count": {
+    "0": 4,
+    "1": 2,
+    "2": 1,
+    "3": 3,
+    "4": 3,
+    "5": 1,
+    "6": 2,
+    "7": 4,
+    "8": 2,
+    "9": 4,
+    "10": 1,
+    "11": 3,
+    "12": 1,
+    "13": 2,
+    "14": 3,
+    "15": 4
+  },
+  "seed": 8181,
+  "totals": {
+    "care.scout_dispatched": 5,
+    "construct.complete_upgrade_facility": 2,
+    "contact.react_rescue": 0,
+    "death.starve_anon": 4,
+    "death.starve_minor": 0,
+    "help.delivered": 3,
+    "help.letter_dispatched": 3,
+    "help.severity_positive": 52,
+    "help.target_resolved": 3,
+    "manufacture.fired": 0,
+    "manufacture.noop_no_facility": 495,
+    "promote.field_desperate": 4,
+    "promote.fired": 4,
+    "scout.dispatched": 2
+  }
+}
