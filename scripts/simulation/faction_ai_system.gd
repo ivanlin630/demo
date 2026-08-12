@@ -5149,12 +5149,14 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 			print("[Uprising A] Team%d 守城留勢力（義氣=%.2f stay=%.2f>secede=%.2f，old owner=Team%d）" % [
 				team.team_id, honor, stay_u, secede_u, old_owner_id])
 		else:
+			if Probe.enabled: Probe.bump("uprising.secede")   # ★tap-gap 補：起義自立脫離 faction（全量暫態可觀測）
 			state.clear_team_faction(team)   # 自立脫離 faction（雙向同步）
 			print("[Uprising A] Team%d 守城自立（野心=%.2f secede=%.2f>=stay=%.2f，old owner=Team%d）" % [
 				team.team_id, ambition, secede_u, stay_u, old_owner_id])
 		if tile: OutpostOwnerBank.set_owner(tile, team.team_id, "takeover")
 	else:
 		# Path B 流亡（原 spec E 邏輯）
+		if Probe.enabled: Probe.bump("uprising.exile")   # ★tap-gap 補：起義流亡脫離 faction
 		state.clear_team_faction(team)   # 起義流亡脫離 faction（雙向同步）
 		state.remove_tag(team, TeamData.TAG_PRODUCE, "uprising_exile")
 		state.add_tag(team, "流亡", "uprising_exile")
@@ -5256,9 +5258,11 @@ func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: St
 		if strong_id != -1:
 			state.set_team_faction(team, state.teams[strong_id].faction_id)   # 投降強鄰 faction（雙向同步）
 		else:
+			if Probe.enabled: Probe.bump("defection.surrender_fail")   # ★tap-gap 補：投降強鄰 fail→脫離獨立
 			state.clear_team_faction(team)
 	else:
 		print("[Defection] Team%d path C: 獨立" % team.team_id)
+		if Probe.enabled: Probe.bump("defection.independent")   # ★tap-gap 補：defection 獨立脫離
 		state.clear_team_faction(team)
 
 func _has_memory_type(person: PersonData, type: String) -> bool:
