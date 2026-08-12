@@ -2,7 +2,7 @@ extends SceneTree
 
 # named-scarcity 出口 A+B TDD（spec 2026-08-12）：B 訓練 util need-connect(真根修) + A 絕境 field-promote(救急弱)。
 # 核：①officer_need bounded ②B train_drive=officer_need×MAG machine-demonstrate(0→0、full 贏 build argmax、bounded)
-#   ③A 真絕境 field-promote 弱平民 fire + 非絕境不 relax + 多疑絕境照樣不濫拔。
+#   ③A 真絕境 field-promote 弱平民 fire + 非絕境不 relax + 前多疑-blocked 領主 now 提拔（decouple 解卡）。
 
 var _fail: int = 0
 func _ok(c: bool, m: String) -> void:
@@ -105,12 +105,14 @@ func _initialize() -> void:
 	_ok(int(Probe.counts.get("promote.fired", 0)) == 1 and int(Probe.counts.get("promote.field_desperate", 0)) == 0,
 		"有菁英候選缺officer → normal 提好 officer fire（非 A 急徵路、field_desperate=0）")
 
-	print("=== ⑤A 人格：多疑領主絕境照樣不濫拔（pmult 壓）===")
+	print("=== ⑤★倒因果修：前多疑-blocked 領主真絕境 now field-promote（decouple、relief 解卡）===")
+	# 用戶裁 decouple：慎重0.9/野心0.2 lord 舊 desp_util=1×(0.3+0.18−0.63→0)=0 never fire → now pmult=0.48 → desp_util 0.48>0.3 fire。
 	var pd := _mk_lord(8, 0, {"野心": 0.2, "慎重": 0.9}, {"平民": 6})
 	Probe.reset(); Probe.enabled = true
 	fai._try_promote_advisor(pd[0], pd[1])
 	Probe.enabled = false
-	_ok(int(Probe.counts.get("promote.fired", 0)) == 0, "★多疑領主真絕境仍不 field-promote（desp_util 過 pmult 夾 0、genuine 分化非逢缺必補）")
+	_ok(int(Probe.counts.get("promote.field_desperate", 0)) == 1,
+		"★前多疑-blocked 領主(慎重0.9/野心0.2)真絕境 now field-promote fire（多疑與提拔 decouple、relief 不再被慎重永久卡）")
 
 	if _fail == 0: print("=== DONE === ALL PASS")
 	else: print("=== DONE === %d FAIL" % _fail)

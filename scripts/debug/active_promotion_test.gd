@@ -1,8 +1,9 @@
 extends SceneTree
 
 # 主動升匿名 TDD（spec 2026-08-12 §2/§2.5/§3/§4）：領主 deliberate 提拔 anon→named、bounded 非 crank。
-# 核：①§2.5 promote_util bounded machine-demonstrate(低需求/多疑→util→0 非 flat 逢缺必補)②三人格分化 util 湧現
-#   ③候選資質 gate(低 tier→低)④firing=named+1/anon-1(kill_random 真扣)/獨立人格⑤多疑照樣不提(非自動補滿)。
+# ★多疑與提拔 decouple（用戶裁、倒因果修）：慎重不再壓提拔（懷疑對已存在的人、擋創造=倒因果）；差異化=野心 rate。
+# 核：①§2.5 promote_util bounded(低需求→0 need-gated 非 flat)+野心 modulate②野心差異化(rate 非 gate、低野心仍 fire)
+#   ③候選資質 gate(低 tier→低)④firing=named+1/anon-1(kill_random 真扣)/獨立人格⑤前多疑-blocked 領主 now 提拔(relief 解卡)。
 
 var _fail: int = 0
 func _ok(c: bool, m: String) -> void:
@@ -29,32 +30,36 @@ func _mk_lord(villages: int, advisors: int, leader_vals: Dictionary, anon: Dicti
 func _initialize() -> void:
 	var fai := FactionAISystem.new()
 
-	print("=== ①§2.5 promote_util bounded machine-demonstrate ===")
-	# 低需求 → util→0（非 flat 逢缺必補）。
-	_ok(FactionAISystem.promote_util(0.0, 0.9, 0.2, 1.0) == 0.0, "demand=0 → util=0（記名夠不提、bounded）")
-	# ★多疑領主(慎重 0.9)→ pmult 夾 0 → util=0 即便 demand=1（非 flat 逢缺必補=§2.5 命門）。
-	_ok(FactionAISystem.promote_util(1.0, 0.2, 0.9, 1.0) == 0.0, "★多疑(慎重0.9)demand=1 → util=0（多疑吝嗇、非逢缺必補）")
-	# 野心領主(野心 0.9)高需求 → util>threshold。
-	_ok(FactionAISystem.promote_util(1.0, 0.9, 0.2, 1.0) > 0.3, "野心(0.9)demand=1 → util>0.3（樂提）")
-	# machine-demonstrate：util vs demand 曲線（野心 vs 多疑 vs 中性）+ 單調 + 多疑恆低。
+	print("=== ①§2.5 promote_util bounded machine-demonstrate（野心 modulate、多疑 decouple）===")
+	# 低需求 → util→0（need-gated、非 flat 逢缺必補；bounded 不變）。
+	_ok(FactionAISystem.promote_util(0.0, 0.9, 1.0) == 0.0, "demand=0 → util=0（記名夠不提、bounded need-gated）")
+	# ★倒因果修（用戶裁）：慎重不再壓提拔——低野心 lord 缺 officer+候選 → 照樣 fire（懷疑對已存在的人、擋創造=倒因果）。
+	_ok(FactionAISystem.promote_util(1.0, 0.2, 1.0) > 0.3, "★低野心 demand=1+候選 → util>0.3 照 fire（多疑與提拔 decouple、非被慎重永久卡）")
+	# 野心領主(野心 0.9)高需求 → util 更高（rate 差異、非 gate）。
+	_ok(FactionAISystem.promote_util(1.0, 0.9, 1.0) > FactionAISystem.promote_util(1.0, 0.2, 1.0),
+		"野心高 util > 野心低（差異化=野心 rate、皆 fire）")
+	# machine-demonstrate：util vs demand 曲線（野心 modulate rate）+ 單調 + bounded（demand=0→0）。
 	print("  --- promote_util vs demand（quality=1.0）machine-demonstrate ---")
-	var amb_prev := -1.0; var mono := true
+	var amb_prev := -1.0; var lo_prev := -1.0; var mono := true
 	for i in range(6):
 		var dm: float = float(i) / 5.0
-		var u_amb: float = FactionAISystem.promote_util(dm, 0.9, 0.2, 1.0)
-		var u_par: float = FactionAISystem.promote_util(dm, 0.2, 0.9, 1.0)
-		var u_neu: float = FactionAISystem.promote_util(dm, 0.5, 0.5, 1.0)
-		print("    demand=%.1f  野心=%.3f 中性=%.3f 多疑=%.3f" % [dm, u_amb, u_neu, u_par])
+		var u_amb: float = FactionAISystem.promote_util(dm, 0.9, 1.0)   # 野心大→養大班底
+		var u_lo: float = FactionAISystem.promote_util(dm, 0.2, 1.0)    # 野心低→仍 need-driven fire、rate 低
+		var u_neu: float = FactionAISystem.promote_util(dm, 0.5, 1.0)
+		print("    demand=%.1f  野心高=%.3f 中性=%.3f 野心低=%.3f" % [dm, u_amb, u_neu, u_lo])
 		if u_amb < amb_prev - 1e-9: mono = false
-		amb_prev = u_amb
-		if u_par > 1e-9: mono = false   # 多疑恆 0（pmult 夾 0）
-	_ok(mono, "野心 util 對 demand 單調非遞減 + 多疑恆 0（bounded、人格分化非 flat）")
+		if u_lo < lo_prev - 1e-9: mono = false
+		amb_prev = u_amb; lo_prev = u_lo
+	_ok(mono, "util 對 demand 單調非遞減（野心 modulate rate、bounded demand=0→0、非 flat）")
+	_ok(FactionAISystem.promote_util(0.0, 0.9, 1.0) == 0.0 and FactionAISystem.promote_util(0.0, 0.2, 1.0) == 0.0,
+		"★bounded：demand=0 → 各野心 util 皆 0（need-gated 不變、純去慎重壓制無新 crank）")
 
-	print("=== ②三人格分化（同 demand/quality、util 湧現非硬 branch）===")
-	var u_a: float = FactionAISystem.promote_util(0.8, 0.9, 0.2, 1.0)   # 野心樂提
-	var u_n: float = FactionAISystem.promote_util(0.8, 0.5, 0.5, 1.0)   # 中性
-	var u_p: float = FactionAISystem.promote_util(0.8, 0.2, 0.9, 1.0)   # 多疑吝嗇
-	_ok(u_a > u_n and u_n > u_p, "野心 %.3f > 中性 %.3f > 多疑 %.3f（三分化從 util 競秤湧現）" % [u_a, u_n, u_p])
+	print("=== ②野心差異化（rate 非 gate、低野心仍 fire）===")
+	var u_a: float = FactionAISystem.promote_util(0.8, 0.9, 1.0)   # 野心高
+	var u_n: float = FactionAISystem.promote_util(0.8, 0.5, 1.0)   # 中性
+	var u_p: float = FactionAISystem.promote_util(0.8, 0.2, 1.0)   # 野心低
+	_ok(u_a > u_n and u_n > u_p, "野心高 %.3f > 中性 %.3f > 野心低 %.3f（差異化=野心 rate）" % [u_a, u_n, u_p])
+	_ok(u_p > 0.3, "★野心低 %.3f 仍 > 0.3 fire（need-driven、野心 modulate rate 非 gate、非多疑永久卡）" % u_p)
 
 	print("=== ③候選資質 gate（低 tier→低 util）===")
 	var qb := _mk_lord(6, 0, {"野心": 0.9, "慎重": 0.2}, {"平民": 8})   # 只平民
@@ -75,13 +80,14 @@ func _initialize() -> void:
 	var newid: int = eteam.named_members[eteam.named_members.size() - 1]
 	_ok(estate.persons.has(newid) and estate.persons[newid].values.size() > 0, "被提者=獨立人格個體(generate() values 非複製)=§3 忠誠賭注真實")
 
-	print("=== ⑤多疑領主同場景 → 不提（非自動補滿、named-scarcity 照缺）===")
-	var p := _mk_lord(8, 0, {"野心": 0.2, "慎重": 0.9}, {"菁英": 6})
+	print("=== ⑤★倒因果修：前被多疑永久卡的領主 now 缺 officer+候選 → 提拔（relief 解卡）===")
+	# 用戶裁 decouple：慎重0.6/野心0.3 lord 舊 pmult=0.3+0.27−0.42=0.15<0.3 never fire → now pmult=0.57 → util>0.3 fire。
+	var p := _mk_lord(8, 0, {"野心": 0.3, "慎重": 0.6}, {"菁英": 6})
 	Probe.reset(); Probe.enabled = true
 	fai._try_promote_advisor(p[0], p[1])
 	Probe.enabled = false
-	_ok(int(Probe.counts.get("promote.fired", 0)) == 0 and (p[1] as TeamData).named_members.is_empty(),
-		"★多疑領主(慎重0.9)同缺人手 → 不提（非自動補滿、多疑照樣缺=genuine 分化）")
+	_ok(int(Probe.counts.get("promote.fired", 0)) == 1 and (p[1] as TeamData).named_members.size() == 1,
+		"★前多疑-blocked 領主(慎重0.6/野心0.3)now 缺 officer+菁英候選 → 提拔 fire（named-scarcity relief 不再被多疑倒因果卡）")
 
 	print("=== ⑥bounded：記名夠(spare≥desired)→demand 0→不提 ===")
 	var s := _mk_lord(2, 4, {"野心": 0.9, "慎重": 0.2}, {"菁英": 6})   # 2 村 desired=1、已 4 記名
