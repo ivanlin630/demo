@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[③ #3② merge-exec pin根(forward-drive,不依賴#3①立國裁)+#3③改判『先釐清genuine自保非逕修』+#3①待用戶(已推TG,b天生霸主/c養成白手起家/兩者)·#3②[執行bug、派修前先pin確切根]兼併consolidate_dispatch=168/set_ok=168但mergein.complete=8(4.8%)=order成功隊卻併不進來,根在post-order execution:trace是travel(併隊移動到target途中卡/迷路)/target-move(目標隊自己在動追不上)/timeout(order有效期太短沒到就過期)/其他?→pin確切drop點(結構列舉非逐隻猜,同手不聽腦執行層drop點列舉法[[project_hand_obeys_brain_arc]])→出根我帶修·此bug獨立於#3①立國門檻(併不進來不管誰立國都要修)故現在就pin·#3③[改判:非逕修、先釐清]recovery崩潰期靜默=領主自身pop崩1-6→CONVOY_MIN_PARENT_POP early-return不派——★可能genuine自保(不送最後的人出去救別人=對的survival-bounded、連[[project_recovery_path_arc]]survival-bounded ROI設計)非bug·需propagation-vs-precondition tap split釐清:是『決策想派但precondition硬擋』(可能genuine)還是『propagation dead-end評估機會根本到不了』(才是bug)→分清再判、禁逕修成『崩潰期硬派救援』(=違自保genuine)·#4 tier-up=已知arc(training never happens→desperate-only promote)本session tier-up-chain根、待#3①後排·#5 close非bug·序:#3② pin根→我帶修;#3③釐清genuine-vs-bug;#3①待用戶b/c→我串整個有大有小修法·地基KEEP"
 ---
 
