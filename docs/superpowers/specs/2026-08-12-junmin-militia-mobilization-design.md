@@ -1,6 +1,6 @@
 # 军民混编 / 民兵動員 — 團型驅動的 mobilizable 分數（WHAT / vision）v2
 
-status: Slice A MERGED `998f5344`；Slice B spike 解承重牆=charter/mobilization split（避 Track②A、MEDIUM）→ pending R² Slice B → build
+status: Slice A MERGED `998f5344`；Slice B R② CLEAN（charter/mobilization split、正交性結構保證、單點 uses_unified wrapper 4-caller 自動受益）→ systems build
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-12
 溯源：size-matter 維度②（audit 2026-08-03）+ grounding 表 + ★R② 異質框外審 ISSUES（6 findings、Agent 讀 code + reviewer 親驗 2/2 最要害）→ 訂正。
