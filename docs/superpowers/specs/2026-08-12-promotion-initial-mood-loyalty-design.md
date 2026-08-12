@@ -1,6 +1,6 @@
 # 晉升 → 初始心情/忠誠（WHAT / vision）
 
-status: DRAFT（pending R①[硬讀可用源訊號、7× 教訓不假設] + R² → build）
+status: LOCKED（2026-08-12：R①硬讀四靶坐實[源訊號=團層級 unrest_turns+known_reputations、情境=desperate 布林已在 code、接既有零新 plumbing]+R² CLEAN、1 標準必查項折入 §4.5 → systems HOW/build）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-12
 溯源：用戶問「不同情況晉升的屬性/個性/心情怎處理」→ 現況心情一律 `stress=0/fear=0` 白紙（無情境、`person_generator:55-56`）;屬性=src_tier genuine、個性=獨立 archetype roll genuine → 心情/忠誠是唯一沒反映情境的缺口。用戶定案：**參照源團狀態 + 被晉升該開心滿足**。
@@ -18,8 +18,11 @@ date: 2026-08-12
 - **情境調**：和平練成→冷靜滿足;絕境戰場急徵→開心但**摻壓力/怕**（光榮被選中，但被硬推上火線、措手不及）。
 - **源團艱困調**：困苦團→carryover 壓力。
 
+## §4.5 ★HOW-binding 必查項（R² CLEAN、同 iii/A+B bounded 標準、寫死）
+三調公式 **machine-demonstrate bounded、非「情境決定死值」crank**：怨團拔→低忠誠但**非 0**（舊怨 vs 提拔感激拉扯、仍有翻轉空間）;絕境急徵→摻壓力但**非崩潰**;和平練成→冷靜但**非麻木**。避免退化成情境→硬設死值。
+
 ## §4 接既有系統（非新機制）
-忠誠/凝聚力/恩義/`stress`/`fear` 既有欄。★參照的源訊號 = **R① 硬讀確認可用**（匿名團有無「集體忠誠/士氣」值可直接參照？或用團層級 `unrest`/食物/領主關係/恩義史推）= 不假設（7× over-claim 教訓）。
+忠誠/凝聚力/恩義/`stress`/`fear` 既有欄。★源訊號（R① 坐實）：**cohort 無集體忠誠欄 → 走團層級**——`unrest_turns`（:116、已是 defect distress input）+ `known_reputations`（:227、對領主信任度、_faction_stay_benefit 同 pattern）推源團對領主態度/恩義。情境旗標 = `_try_promote_advisor` 既有 `desperate` 布林。怨團拔複雜個體日後可能叛 = 直接餵既有 `defect_util`（讀 promoted officer 自己 loyalty）、零新 plumbing。
 
 ## §5 量測（湧現、硬數據）
 - **不同情況分化**：幸福村 vs 怨團 / 和平練成 vs 絕境急徵 → 初始心情/忠誠明顯不同。
