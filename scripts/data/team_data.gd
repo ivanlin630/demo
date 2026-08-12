@@ -216,6 +216,10 @@ var armed_anon_ratio: float = 0.0
 var anon_treasury: float = 0.0   # 匿名兵 wage 沉澱
 var fatigue: float = 0.0
 var guard_ratio: float = 0.2
+# ★军民混编 Slice B：動員比 [0,1]=戰力配置(當兵)比、labor 配置=1−此(務農/生產)。
+#   charter(TAG 團型)正交、動態從 belief-threat+charter 基底+人格湧現(FactionAISystem._update_mobilization)。
+#   guns-vs-butter：威脅→升(抽勞力當兵→產出掉)、和平→降(解甲回田)。
+var mobilized_fraction: float = 0.0
 var armor_config: Dictionary = {
 	"head":       "none",
 	"torso":      "low",

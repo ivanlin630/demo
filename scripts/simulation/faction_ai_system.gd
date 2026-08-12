@@ -841,6 +841,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			_evaluate_owner_contact(state, team)
 			_tick_resident_unrest(state, team)   # ★SLICE B D:deficit→unrest / fed→relief（餵現成 defection≥20）
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.outpost", _t3)
+		_update_mobilization(team, state)   # ★军民混编 Slice B：先更新動員比（equip/guard 讀）
 		_update_equip_order(state, team)
 		# anon_combat_skill / anon_wage 改 computed（AnonTierSystem），不再主動更新
 		_update_armor_config(team)
@@ -2999,7 +3000,8 @@ func _update_equip_order(state: WorldState, team: TeamData) -> void:
 		return
 	team.equip_order = { "melee_low": 0, "melee_high": 0, "ranged_low": 0, "ranged_high": 0 }
 	var can_equip: int = total_weapons / 2
-	if team.tags.has(TeamData.TAG_MILITARY) or team.current_task == TeamData.TASK_LOOT \
+	# ★军民混编 Slice B F裝備：讀動員比（動員=戰鬥配置→配高階武）取代靜態 TAG_MILITARY gate（民兵動員時亦武裝）。
+	if team.mobilized_fraction >= EQUIP_MOBILIZE_THRESH or team.current_task == TeamData.TASK_LOOT \
 			or team.current_task == TeamData.TASK_ATTACK:
 		var pool_mh: int = (int(team.resources.get("weapon_melee_high", 0)) + int(equipped_units["melee_high"])) / 2
 		var pool_rh: int = (int(team.resources.get("weapon_ranged_high", 0)) + int(equipped_units["ranged_high"])) / 2
@@ -3085,6 +3087,36 @@ func _update_guard_ratio(team: TeamData, state: WorldState) -> void:
 		+ threat_norm * GUARD_W_THREAT - attack_commit * GUARD_W_ATTACK
 	team.guard_ratio = clampf(ratio, 0.05, 0.5)
 	if Probe.enabled: Probe.note("guard.ratio", team.guard_ratio)
+
+# ★军民混编 Slice B：mobilized_fraction 常數（TEST VALUE、measurer 校準）。charter 基底=團型梯度（正交於 mobilized 動態欄）。
+const MOBILIZE_BASE_MILITARY: float = 0.7   # 專業軍團純軍：base 高（平時多當兵）
+const MOBILIZE_BASE_RESERVE: float = 0.3    # 後備半兵半農（無 PRODUCE/MILITARY tag）
+const MOBILIZE_BASE_PRODUCE: float = 0.05   # 居民團民兵：base 低（平時務農、威脅才召）
+const MOBILIZE_W_THREAT: float = 0.5        # belief-threat → 升動員（guns-vs-butter）
+const MOBILIZE_W_MARTIAL: float = 0.15      # 好戰 → 更動員
+const MOBILIZE_CACHE_EPS: float = 0.01      # 動員態變超此 → 觸 labor cache 重算（finding③）
+const EQUIP_MOBILIZE_THRESH: float = 0.5    # F 裝備：動員比≥此=按戰鬥隊配高階武（取代靜態 TAG_MILITARY gate）
+
+# ★军民混编 Slice B mobilization：戰力配置比從 charter 基底 + belief-threat + 好戰 人格湧現。
+#   guns-vs-butter：威脅→升(抽勞力當兵→產出掉)、和平→降回 base(解甲回田)。★genuine 非死常數、bounded[0,1]、感知鐵律(belief-threat)。
+#   finding③：動員態變超 EPS → 該格 labor cache 失效重算。
+func _update_mobilization(team: TeamData, state: WorldState) -> void:
+	var base: float = MOBILIZE_BASE_RESERVE
+	if team.tags.has(TeamData.TAG_MILITARY):
+		base = MOBILIZE_BASE_MILITARY
+	elif team.tags.has(TeamData.TAG_PRODUCE):
+		base = MOBILIZE_BASE_PRODUCE
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var martial: float = float(leader.values.get("好戰", 0.5)) if leader != null else 0.5
+	var threat_norm: float = clampf(_max_belief_threat(state, team) / GUARD_THREAT_NORM, 0.0, 1.0)
+	var frac: float = clampf(base + threat_norm * MOBILIZE_W_THREAT + martial * MOBILIZE_W_MARTIAL - MOBILIZE_W_MARTIAL * 0.5, 0.0, 1.0)
+	var old: float = team.mobilized_fraction
+	team.mobilized_fraction = frac
+	if Probe.enabled: Probe.note("mobilize.fraction", frac)
+	if absf(frac - old) > MOBILIZE_CACHE_EPS:   # ★finding③：動員改變 labor 池 → 觸重算
+		var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+		if tile != null:
+			tile.labor_eval_next_tick = 0
 
 # ──────── 輔助函數 ────────
 
