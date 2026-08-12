@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[主動升匿名前後對照——輕量通知,非強制稽核請求]promote.fired全程0次(兩fixture),結論建立在Probe.counts純聚合計數+util公式數學證明(quality上限×pmult上限結構性低於THRESHOLD),非behavior-causal specimen敘事推論——依§長跑hook『純聚合metric不下behavior因果者可免』的但書,這輪嚴格說不需要你的specimen故事稽核。但ticket有明訂送QA,specimen(1211/1429 entries)照舊附上,如果你手上有餘力想抽查我的數學(quality=0.1429/util_max=0.171<0.3)或想確認specimen裡真的完全沒有任何promote相關的候選/決策紀錄,歡迎看;沒空的話這條線我視為close,不強制等你回覆。"
 ---
 
