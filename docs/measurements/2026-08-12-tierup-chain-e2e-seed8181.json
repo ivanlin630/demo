@@ -1,0 +1,467 @@
+{
+  "daily_log": [
+    {
+      "day": 1,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "貿易",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "建設",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 2,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "貿易",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 3,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "貿易",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 4,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "貿易",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 5,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "建設",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 6,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 7,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 8,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 9,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 10,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 11,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 12,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 13,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 14,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 15,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 16,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 17,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 18,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 19,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    },
+    {
+      "day": 20,
+      "promote_fired_total": 0,
+      "t0_archetype": "武力",
+      "t0_exp_peasant": 0,
+      "t0_named": 1,
+      "t0_task": "覓食",
+      "t0_tiers": {
+        "平民": 10,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      },
+      "t2_archetype": "定居",
+      "t2_named": 1,
+      "t2_task": "外交",
+      "t2_tiers": {
+        "平民": 2,
+        "新兵": 0,
+        "老兵": 0,
+        "菁英": 0
+      }
+    }
+  ],
+  "days": 20,
+  "promote_fired_total": 0,
+  "seed": 8181
+}
