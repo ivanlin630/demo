@@ -41,8 +41,19 @@ func _initialize() -> void:
 	print("=== ①officer_need bounded（single source 供 B/A）===")
 	var suff := _mk_lord(2, 4, {}, {"平民": 8})   # 2 村 desired=1、已 4 記名 → 夠
 	var short := _mk_lord(8, 0, {}, {"平民": 8})   # 8 村 desired=4、0 記名 → 缺
-	_ok(FactionAISystem.officer_need(suff[0], suff[1]) == 0.0, "officer 夠(spare4≥desired1) → officer_need=0（bounded）")
+	_ok(FactionAISystem.officer_need(suff[0], suff[1]) == 0.0, "officer 夠(spare4≥desired1 且 bench4≥CONCURRENT) → officer_need=0（bounded）")
 	_ok(FactionAISystem.officer_need(short[0], short[1]) == 1.0, "officer 缺(spare0/desired4) → officer_need=1.0")
+	# ★realistic-scarce（arc 原症、villages-oversight 漏、dispatch-demand catches）：村數-satisfied 但 bench 短缺。
+	var realistic := _mk_lord(2, 1, {}, {"平民": 8})   # 2 村 desired=1、spare=1 → governing 足(oversight_need=0)、但 bench=1<CONCURRENT2
+	_ok(FactionAISystem.officer_need(realistic[0], realistic[1]) > 0.0,
+		"★realistic-scarce(村數 governing 足但 bench=1 短缺)→ officer_need=%.2f>0（dispatch-demand 補 villages-oversight 漏的真壓力）" % FactionAISystem.officer_need(realistic[0], realistic[1]))
+	# dispatch 派出後 bench→0：想派更多派不出=T12 原症 → officer_need 更高。
+	var depleted := _mk_lord(2, 0, {}, {"平民": 8})   # 派出後 spare=0
+	_ok(FactionAISystem.officer_need(depleted[0], depleted[1]) > FactionAISystem.officer_need(realistic[0], realistic[1]),
+		"派出後 bench=0（想派更多派不出）→ officer_need 更高（%.2f>%.2f、T12 原症）" % [FactionAISystem.officer_need(depleted[0], depleted[1]), FactionAISystem.officer_need(realistic[0], realistic[1])])
+	# ★bounded 守：bench 足（spare≥CONCURRENT）+ 村數足 → dispatch-demand 0 → officer_need 0。
+	var benched := _mk_lord(2, 2, {}, {"平民": 8})   # spare=2≥CONCURRENT2 → 有 bench
+	_ok(FactionAISystem.officer_need(benched[0], benched[1]) == 0.0, "bench 足(spare2≥CONCURRENT2)→ officer_need=0（bounded、能派無壓不練）")
 
 	print("=== ②B: train_drive = officer_need × MAG machine-demonstrate（bounded、贏 build argmax）===")
 	const BUILD_REF: float = 1.11   # 硬數據：build util ≈ 1.11（訓練須夠高才轉）

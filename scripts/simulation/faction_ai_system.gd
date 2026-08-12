@@ -1664,6 +1664,7 @@ const PROMOTE_ELITE_COMBAT: float = 0.7        # 菁英 combat=候選資質正�
 const TRAIN_OFFICER_MAG: float = 1.3           # B：officer_need→訓練 util 放大（full need 須贏 build≈1.11 argmax）
 const PROMOTE_DESPERATE_DEMAND: float = 0.9    # A：急徵門檻——officer_need≥此=真急需（+spare 0 +normal 未 fire）才 relax
 const PROMOTE_DESPERATE_SPARE: int = 0         # A：真無替代——現有記名副手需=0（連一個都沒）才算絕境
+const OFFICER_DISPATCH_CONCURRENT: float = 2.0 # dispatch-demand：領主想保留的 spare named bench（並發派遣 scout/care/relief）；bench≥此→無派遣壓力
 
 # ★人格 modulate（野心樂提/多疑吝嗇、單一真源供 normal + desperate 共用）。
 static func _promote_pmult(ambition: float, caution: float) -> float:
@@ -1680,7 +1681,11 @@ static func promote_util_desperate(demand: float, ambition: float, caution: floa
 	return clampf(demand, 0.0, 1.0) * _promote_pmult(ambition, caution)
 
 # ★officer-need（named-scarcity 訊號、single source 供 B 訓練 util + A/normal 提拔 demand）：
-#   只領主有 officer-need（村不派遣官）；desired ∝ 管轄村數(saturate)、spare=現有記名副手；spare≥desired→0(bounded 非逢缺必補)。
+#   兩分量取 max（取真反映「缺 officer」最大壓力）——
+#   ①villages-oversight：desired ∝ 管轄村數(saturate)、spare=記名副手；spare≥desired→0（governing 足）。
+#   ②dispatch-demand（arc 本旨真 named-scarcity）：有村=有 scout/care/relief 派遣需求(想派) 且 spare named bench 短缺
+#     （post-unified-dispatch 派遣借 spare named；派出後 bench→0 想派更多派不出=T12 原症）→ bench<CONCURRENT→高 need。
+#   ★genuine 非 crank：真反映真壓力（想派沒人），非 bump MAG 逼贏。bounded：bench 足 or 無村→兩分量皆 0。
 static func officer_need(state: WorldState, team: TeamData) -> float:
 	var f = state.factions.get(team.faction_id)
 	if f == null or f.leader_team_id != team.team_id:
@@ -1689,11 +1694,15 @@ static func officer_need(state: WorldState, team: TeamData) -> float:
 	for mid in f.member_team_ids:
 		if mid != team.team_id:
 			oversight += 1   # 管轄村數（自身除外）=派遣/照看負擔 proxy
-	var desired: float = clampf(float(oversight) * PROMOTE_NAMED_PER_VILLAGE, 0.0, PROMOTE_MAX_DESIRED)
-	if desired <= 0.0:
+	if oversight <= 0:
 		return 0.0   # 無管轄（solo warlord）→ 無派遣需求 → 0
-	var spare: int = team.named_members.size()
-	return clampf((desired - float(spare)) / desired, 0.0, 1.0)   # spare≥desired→0 bounded
+	var spare: float = float(team.named_members.size())   # 可借派遣的 spare named bench
+	# ①governing oversight
+	var desired: float = clampf(float(oversight) * PROMOTE_NAMED_PER_VILLAGE, 0.0, PROMOTE_MAX_DESIRED)
+	var oversight_need: float = clampf((desired - spare) / desired, 0.0, 1.0) if desired > 0.0 else 0.0
+	# ②dispatch-demand：有村想派 × bench 短缺（bench≥CONCURRENT→0 能派無壓、bench=0→1 想派派不出）
+	var dispatch_demand: float = clampf((OFFICER_DISPATCH_CONCURRENT - spare) / OFFICER_DISPATCH_CONCURRENT, 0.0, 1.0)
+	return maxf(oversight_need, dispatch_demand)   # 取最大壓力（governing 或 dispatch 任一真缺=缺 officer）
 
 # 最佳可用匿名候選資質(0..1)：最高 tier 的 combat / 菁英 combat（資質浮現、非每平民幹部料）。
 func _best_candidate_quality(team: TeamData) -> float:
