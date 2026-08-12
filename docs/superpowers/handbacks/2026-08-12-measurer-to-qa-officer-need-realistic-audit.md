@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[請QA故事稽核:officer_need realistic驗證雙specimen]核心claim=T4/T8在officer_need真達1.0(真dispatch drain非公式產物)的日子裡,task始終是貿易/覓食,一次都沒切到訓練——這是逐日task欄位(Chinese string)+specimen candidates交叉讀出來的,需要故事稽核鎖定。★最想請你核:①T4day8-15/T8day5-15這些『need=1.0但task非訓練』的日子,能否在specimen candidates裡直接看到訓練選項出現過但輸掉、還是連候選都沒生成(跟tier-up-chain-e2e那次T2『archetype gate導致候選消失』同型態,但這次T4/T8已經applicable=true理論上該進候選)②T12全程anon/named/officer_need零變化,15天13個左右真決策點(非只day-boundary)是否confirm從未真dispatch過③4隊床T0訓練候選只在tick10出現一次(util=0.076)之後45天再也沒出現過,這個『出現一次就消失』的模式(同上輪tier-up-chain-e2e一樣)是否有共通機制解釋(比如某個eval-cadence gate)。"
 ---
 

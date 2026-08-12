@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[低威脅+好戰兩清sub-case完成——★★★兩個都NOT fire,但原因跟你預想的都不一樣]清fixture(threat_react max 1.1-1.5,成功排除combat confound):T0(NORMAL人格好戰0/野心0.4)+T2(WARLORD人格好戰0.9/野心0.9)各1記名,4隊2faction孤立小地圖30天。★★★決定性:兩個sub-case都NOT fire,但不是因為train量級不夠(①)、也不是因為需要驗證人格差異化(②)——是因為officer_need全程兩隊都卡在0.5(標準proxy值),從未達1.0,原因是T0/T2皆從未真的dispatch過任何scout/care/rescue(named全程=1,bench從未drain)。人格差異(好戰0 vs 0.9)在這個測試裡完全沒機會展現,因為兩隊都卡在同一個更早的瓶頸:沒有真dispatch機會發生,need根本沒爬到會讓weight_train差異產生決定性影響的高值。這代表你的决策樹『①②都不fire even低威脅=真量級gap回blueprint』這個分支目前技術上成立,但★誠實flag一個方法論缺口:這個fixture只給1個filler/faction(刻意簡化),很可能就是bench從未drain的直接原因(對比16隊diverse床每faction3個filler、T4/T8真drain到0)——換句話說我這輪成功排除了threat confound,但可能無意間引入了『dispatch機會不足』這個新confound,取代原本那個。尚未產出『有dispatch機會+零威脅+人格對照』三條件同時滿足的乾淨fixture,如果要100%排除所有confound、拿到真正乾淨的量級判決,可能還需要第三輪(多filler+零威脅+人格對照)。"
 ---
 

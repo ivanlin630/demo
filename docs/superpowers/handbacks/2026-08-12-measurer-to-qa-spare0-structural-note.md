@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[spare=0結構性決定性床——輕量通知,arc可能SOLVED收官]promote.fired=2+field_desperate=1+need 1.0→0.5後30天穩定終止,整鏈+終止性硬證。核心數字(promote.fired/need軌跡/tiers)是純state直讀非specimen candidates推論,不強制稽核。★但我在report裡有一段推論(T0/T2誰走normal誰走desperate、T4/T8卡在pmult非argmax)是從code公式反推+這輪數字交叉驗證,非直接tap出來的,如果你手上有餘力想抽查specimen確認T0/T2各自的promote_util實際數值(對照我算的T0 desperate_util≈0.31/T2 normal_util≈0.416),歡迎看;沒空的話我視為這條線可以跟著systems判斷一起收官。"
 ---
 

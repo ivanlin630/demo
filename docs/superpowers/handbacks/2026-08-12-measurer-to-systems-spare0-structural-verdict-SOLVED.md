@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[spare=0結構性決定性床完成——★★★arc SOLVED:整鏈+終止性硬證,且意外釐清promote根本不需要訓練argmax贏]promote.fired=2(T0/T2各1次),promote.field_desperate=1。promote後spare 0→1,officer_need 1.0→0.5,此後30天穩定不再變動——完整整鏈+終止性硬證(用戶死循環疑的realistic反證)。★★★意外重大釐清:promote(_try_promote_advisor)是ambient side-effect呼叫,非argmax競爭選項,不需要『訓練』這個TASK贏過build/覓食/threat選項就能fire——只要spare=0真結構性達成+quality或desperate條件滿足即可直接fire,完全繞過訓練argmax這條路。這回頭解釋了為什麼T4/T8(combat床)雖然真drain到spare=0/need=1.0但promote仍未fire:他們的人格(野心0.3-0.35/慎重0.6)算出的pmult太低(desperate_util≈0.15-0.195<threshold0.3),不是argmax輸的問題,是promote_util本身(不管normal或desperate)未過門檻——真正的量級gap在pmult/threshold這裡,不在訓練task贏不贏argmax(那條路徑對large-oversight/dispatch-drained的lord根本是選配非必經)。"
 ---
 
