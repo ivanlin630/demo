@@ -47,15 +47,17 @@ func _initialize() -> void:
 
 	var new_keys: Array = ["promote.fired", "promote.field_desperate",
 		"migrant.dispatched", "migrant.arrived", "invest.dispatched",
-		"migrant.util_evaluated", "invest.roi_evaluated",
 		"relocate.ordered", "relocate.comply", "relocate.resist", "relocate.started",
 		"relocate.abandoned", "relocate.arrived", "relocate.resettled",
 		"cohesion.defect_fire", "cohesion.uprising_stay_faction", "g2.ambition_promote", "g2.ambition_demote",
 		"g2.faction_found", "death.combat_pop", "death.starve_anon",
-		"spawn.migrant", "spawn.messenger", "spawn.solo_exile", "spawn.overflow_split",
-		"spawn.captive_breakaway", "spawn.unrest_split",
-		"merge.consolidate_dispatch", "merge.set_ok", "mergein.dissolve", "mergein.subteam"]
-	# spawn.dispatch_<task> 的 <task> 是活字串(繁中 TASK_* 常數,不猜)，跑完直接掃 Probe.counts 前綴撈全部真實值。
+		"merge.consolidate_dispatch", "merge.set_ok", "mergein.dissolve", "mergein.subteam",
+		# #3② merge 執行 funnel（既有 production tap，非新加，systems 結構列舉的塌點鏈）：
+		"merge.pair_seen", "merge.try_entered", "merge.guard_fail_ordertgt",
+		"accept.merge_reject", "accept.merge_accept",
+		# #3③ migrant/invest 決策層 precondition vs 傳播層 dead-end 三段 funnel（本輪新加 5 個 temp tap，回報後revert）：
+		"migrant.reached_eval_entry", "migrant.precond_block_pop", "migrant.util_evaluated",
+		"invest.reached_eval_entry", "invest.precond_block_pop", "invest.precond_block_food", "invest.roi_evaluated"]
 	var prev_new: Dictionary = {}
 	for k in new_keys: prev_new[k] = 0
 	var mobilize_peak_prev: float = 0.0
