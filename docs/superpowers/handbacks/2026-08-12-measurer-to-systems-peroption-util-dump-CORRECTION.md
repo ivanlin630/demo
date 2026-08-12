@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[per-option util dump完成——★★★同時訂正我上一輪verdict的措辭錯誤,QA抓到]train util真值=0.40-0.405(非1.3理論值),NOT輸給日常貿易/覓食——貿易在candidates裡只有0.0455幾乎墊底,我上輪daily_log的task=貿易欄位是TaskArbiter既有committed task(慣性),非這tick argmax贏家,誤把它當成『打贏訓練的對手』。真正持續壓過訓練的是求和(0.692)+survival(0.5)兩個threat驅動選項——T4/T8這局全程threat_react=1-10.5(有時到8-10.5),整場在交戰/被威脅狀態,這是這個16隊diverse fixture本身的confound(我建床時沒設計出這麼密集的衝突,是世界機制自己長出來的faction間威脅)。覓食(0.4-0.46)其實跟訓練(0.4-0.405)幾乎打平,某些tick訓練還可能反超。這改變6th-gap的診斷方向:不是單純『train genuine低/MAG under-model』的二選一,是第三種可能——train本身量級不算差,問題是這個fixture恰好讓兩隊全程被threat纏住,騰不出手練兵,禁預設任一邊,建議換低威脅fixture對照才能乾淨回答『一般村莊訓練贏不贏日常任務』這題。build:resource系選項util=1.25但nd=True(死分支,同前幾輪一貫模式,非活躍競爭者)。"
 ---
 
