@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[tier-up鏈端到端硬跑驗完成——★★★發現比你code-read假說更深一層的斷點]4隊2faction床:T0=FORCE-archetype lord(derive_archetype確認真的='武力'、戰術0.6、資源充足avoid survival干擾)+filler;T2=non-FORCE lord(同T12複製,野心0.4慎重0.6)+filler。20天(4800 ticks)。★決定性:鏈連結構存在(applicable/to_task/TASK_TRAIN/exp累積/try_promote wiring全confirmed存在,非幻覺),但T0(合格FORCE領主)20天內『訓練』一次都沒真正勝出argmax——specimen candidates逐日顯示訓練util穩定0.32-0.34,持續輸給build_workshop(1.11)/覓食(0.63)/建設(0.56)等常規選項從未接近勝出,T0.anon_exp[平民]全程=0.0(訓練從未執行過一刻,非只是慢,是零)。breakpoint②(archetype gate)獨立CONFIRM:T2(non-FORCE)候選清單全程完全不出現『訓練』選項,applicable=false運作正確——但這只是兩個斷點之一,不是唯一根因。★真正命門:ambient_train_drive=0.5這個weight太低,即使FORCE+資源充足+有兵可訓也結構性打不贏build/forage,你原假說『鏈連+FORCE會訓+步調合理→dormant只是fixture沒FORCE領主』不成立(FORCE領主真的擺了,鏈仍不轉)、『非-FORCE不訓=breakpoint②小修』也不夠(那條confirm是真的,但單獨修它不會讓鏈真的跑起來,因為FORCE領主自己也贏不了argmax)。裁向:你原本3個裁向選項都部分對部分不夠,交你/blueprint重新評估——這次是硬數據,非我猜測。"
 ---
 
