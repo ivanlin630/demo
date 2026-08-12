@@ -1655,6 +1655,66 @@ static func herald_hedge(severity: float, pmult: float) -> float:
 
 const INFO_DISPATCH_CADENCE: int = WorldState.TICKS_PER_DAY   # 求援/偵察=慢策略,每日評一次即可(per-team 錯開防每 tick O(teams²) 掃)
 
+# ★主動升匿名（統一派遣 §4 第 3 路 anon→named、named-scarcity genuine 出口）常數（TEST VALUE、measurer 校準）。
+const PROMOTE_NAMED_PER_VILLAGE: float = 0.5   # 領主每管幾村想要 1 記名副手（∝管轄、saturate）
+const PROMOTE_MAX_DESIRED: float = 4.0         # 想要記名上限（不養龐大朝廷、demand saturate）
+const PROMOTE_THRESHOLD: float = 0.3           # 提拔 util 門檻（>此才提；bounded 非逢缺必補）
+const PROMOTE_ELITE_COMBAT: float = 0.7        # 菁英 combat=候選資質正規化基準
+
+# ★§2.5 提拔 util（bounded 非 crank、machine-demonstrable）：
+#   demand(需求缺口、記名夠→0 bounded 非 flat 逢缺必補) × pmult(人格：野心樂提/多疑吝嗇) × quality(候選資質：低 tier→低)。
+#   三人格分化(絕境被迫/野心樂提/多疑吝嗇)從此三因子競秤湧現(非三硬 branch)；低需求 / 多疑 / 無夠格候選 → util→0 不 fire。
+static func promote_util(demand: float, ambition: float, caution: float, candidate_quality: float) -> float:
+	var pmult: float = clampf(0.3 + ambition * 0.9 - caution * 0.7, 0.0, 1.5)   # 野心↑樂提、多疑/慎重↑吝嗇
+	return clampf(demand, 0.0, 1.0) * pmult * clampf(candidate_quality, 0.0, 1.0)
+
+# 領主提拔需求(bounded)：desired ∝ 管轄村數(saturate)、spare=現有記名副手；spare≥desired → 0(夠人手不提=bounded 非逢缺必補)。
+func _promote_demand(state: WorldState, team: TeamData) -> float:
+	var f = state.factions.get(team.faction_id)
+	if f == null:
+		return 0.0
+	var oversight: int = 0
+	for mid in f.member_team_ids:
+		if mid != team.team_id:
+			oversight += 1   # 管轄村數（自身除外）=派遣/照看負擔 proxy
+	var desired: float = clampf(float(oversight) * PROMOTE_NAMED_PER_VILLAGE, 0.0, PROMOTE_MAX_DESIRED)
+	if desired <= 0.0:
+		return 0.0   # 無管轄（solo warlord）→ 無派遣需求 → demand 0
+	var spare: int = team.named_members.size()
+	return clampf((desired - float(spare)) / desired, 0.0, 1.0)   # spare≥desired→0 bounded
+
+# 最佳可用匿名候選資質(0..1)：最高 tier 的 combat / 菁英 combat（資質浮現、非每平民幹部料）。
+func _best_candidate_quality(team: TeamData) -> float:
+	var best: float = 0.0
+	for tier in AnonTierSystem.TIER_ORDER:
+		if AnonTierSystem.tier_count(team, tier) > 0:
+			best = maxf(best, float(AnonTierSystem.TIER_STATS[tier]["combat"]))
+	return clampf(best / PROMOTE_ELITE_COMBAT, 0.0, 1.0)
+
+# ★主動升匿名決策（§2 領主 deliberate、§3 真代價、§4 第 3 路 anon→named）。
+#   非自動補滿：demand>0 只是入場、須 util>THRESHOLD(人格+候選資質競秤)才提 → 多疑/低需求/無夠格候選照樣不提。
+func _try_promote_advisor(state: WorldState, team: TeamData) -> void:
+	var f = state.factions.get(team.faction_id)
+	if f == null or f.leader_team_id != team.team_id:
+		return   # 只領主 deliberate 提拔班底（村副手 parked）
+	if AnonTierSystem.total_pop(team) <= 0:
+		return   # 無 anon 可提
+	var demand: float = _promote_demand(state, team)
+	if demand <= 0.0:
+		return   # 記名夠/無管轄 → 需求 0（bounded）
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var quality: float = _best_candidate_quality(team)
+	var util: float = promote_util(demand, float(lv.get("野心", 0.5)), float(lv.get("慎重", 0.5)), quality)
+	if Probe.enabled: Probe.note("promote.util", util)
+	if util <= PROMOTE_THRESHOLD:
+		return   # ★bounded：低需求 / 多疑吝嗇 / 無夠格候選 → 不提（非 flat 逢缺必補）
+	# ★genuine 提拔（§3 真代價）：generate_for_team = kill_random 1 anon(偏高 tier 精銳、真扣池) + generate() 獨立人格值(非複製) + 不可逆。
+	var new_named: PersonData = PersonGenerator.generate_for_team(state, team, "member")
+	if new_named == null:
+		return
+	state.add_member(team, new_named.id)   # 加記名進 lord roster（非 spawn 孤立 subteam=與機械誤升 bug 涇渭）
+	if Probe.enabled: Probe.bump("promote.fired")
+
 func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
@@ -1664,6 +1724,7 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		if state.world.current_tick < team.info_eval_next_tick:
 			continue
 		team.info_eval_next_tick = state.world.current_tick + INFO_DISPATCH_CADENCE
+		_try_promote_advisor(state, team)   # ★主動升匿名：領主 genuine 提拔補班底(bounded)→先於 dispatch 令新 advisor 當 tick 可用、解 named-scarcity
 		_try_herald_side(state, team)
 		_try_scout_side(state, team)
 		_try_distribute_side(state, team)
