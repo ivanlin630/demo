@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[請QA故事稽核:tier-up鏈端到端specimen(790KB,T0/T1/T2/T3全記錄)]這輪結論(訓練util 0.32-0.34穩定輸給build/覓食0.5-1.1+,T0.anon_exp[平民]全程0.0)是從specimen candidates逐日讀出來的behavior-causal claim,非純聚合計數,依§長跑hook需要你的故事稽核才能鎖。★最想請你核:①我讀的candidates數字(訓練=0.32~0.34穩定敬陪末座)是否真的代表『訓練從未真正接近勝出』,還是有我沒注意到的日子/tick訓練其實贏過但被我的day-boundary抽樣漏看(我的bed只在日邊界抽樣,同unified-dispatch-diverse那次的已知限制)②T2(non-FORCE)候選清單完全不見『訓練』選項這個negative evidence你能否獨立驗證(applicable=false)③T0.ambition_archetype全程='武力'我有沒有看錯(這是整個E2E測試成立的前提,若archetype其實中途變了會推翻整個設計)。"
 ---
 
