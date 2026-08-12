@@ -1,37 +1,33 @@
-# 军民混编 / 民兵動員 — 團型驅動的 mobilizable 分數（WHAT / vision）
+# 军民混编 / 民兵動員 — 團型驅動的 mobilizable 分數（WHAT / vision）v2
 
-status: DRAFT（pending R①[前提 grounding 已 file:line、驗新概念大框] + R²[大框、升異質框外審] → 鎖 → slice）
+status: DRAFT-v2（R②異質框外審 6 findings 訂正、拆兩 slice、pending reviewer re-R² → 鎖 → slice）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-12
-溯源：size-matter arc 維度②軍力/军民混编（audit 2026-08-03）→ 用戶「照路線圖一直做下去」啟動。grounding 表 `2026-08-12-...-junmin-militia-grounding-table`（硬讀 file:line）：三 ratio 各自為政 + 勞力池二元 + 團型二元 + **動員機制不存在（grep 零）**。
+溯源：size-matter 維度②（audit 2026-08-03）+ grounding 表 + ★R② 異質框外審 ISSUES（6 findings、Agent 讀 code + reviewer 親驗 2/2 最要害）→ 訂正。
 
-## §1 命門（統一非補丁 + genuine + 感知鐵律，寫死）
-- **統一非補丁**：5 散落收進**一個模型**、禁再加平行補丁（armed_anon_ratio/guard_ratio/captive_guard_ratio/pool_of by-tag/團型二元）。
-- **genuine 非死常數**：動員程度由真 threat + 團型 + 人格湧現、非 flat;guard_ratio 硬編碼離散死常數（0.1/0.15/…tag-gated）= **照妖鏡族連續化/人格化**。
-- **★感知鐵律**：動員 trigger（威脅→動員）讀 **belief-threat**（`threat_assessment` belief 路、同 threat-oracle arc）、**非 god-view**（現 `_has_hostile_within` 掃真位置）。
+## §0 ★R② 訂正定案（framing 誠實化 + 拆刀）
+- **★不是「5 折 1」（訂正 finding①，我原 framing 自相矛盾）**：實情=**guard_ratio 死常數 de-patch（照妖鏡）** + **新建 mobilizable 分數（動員維度、grep 零=全新）** + **團型二元→梯度**;而 armed_anon_ratio（裝備上限、非動員量）/ captive_guard_ratio（既連續、別域）/ TASK_TRAIN（育成品質、非動員量）= **明講保留、不折**。誠實 scope。
+- **★★拆兩 slice（blast radius 差異大）**：
+  - **Slice A（低風險、先）**：guard_ratio 照妖鏡（離散死常數→連續人格）+ 動員 trigger 走 **belief-threat**（修 `_has_hostile_within` god-view）。不碰決策路由。
+  - **Slice B（高風險、後）**：團型梯度 + pool_of 分數化 + guns-vs-butter 動員機制。**★finding② 承重牆**：`uses_unified(team)=has(TAG_PRODUCE)`（`faction_ai:2394`）決策路由綁團型 binary、~15 處硬 binary gate（is_resident_static 等）→ 團型梯度須先/同時**decouple 路由 vs 團型**（觸 framework 結構債、見 §3）。
 
-## §2 核心：團型驅動的 mobilizable 分數（統一 5 散落）
-- **一個 mobilizable 分數**取代三 ratio + 二元勞力 + 二元團型：每團有「可動員為戰力的人力比例」，由**團型上限 × 威脅 × 人格**決定。
-- **★團型分級（非二元、梯度）**：
-  - **專業軍團**（騎士/貴族兵）= 純軍、拒屯兵、不算勞力。
-  - **後備/開墾團** = 屯兵、半兵半農、部分勞力。
-  - **居民團** = 民兵制、主力勞力 + 小武裝比、防禦才召。
-- **★guns-vs-butter 真成本**：威脅 → 民兵動員 → 人力從**勞力池抽去戰力** → 產出掉（真戰爭成本）;和平 → **解甲回田**（人力還勞力池、產出回）。= `pool_of` 從二元 by-tag 改**分數 membership**（表達半兵半農）。
-- **人格 modulate**：好戰/責任 → 早動員/多動員;慎重 → 保守（怕掏空生產）;野心 → 擴軍。genuine 非死常數。
+## §1 命門（寫死）
+統一非補丁（收進一模型禁平行補丁）/ genuine 非死常數（動員由真 threat+團型+人格湧現）/ ★感知鐵律（動員 trigger 讀 belief-threat 非 god-view）。
 
-## §3 統一收編（audit 散落清單）
-armed_anon_ratio（庫存推 equippability 保為裝備上限、非動員量）/ guard_ratio（照妖鏡:離散死常數→連續人格）/ captive_guard_ratio（既有連續、併同族）/ TAG_MILITARY·TAG_PRODUCE（二元→團型梯度）/ TASK_TRAIN（育成 tier、餵戰力品質、非動員量）。
+## §2 Slice A — guard 照妖鏡 + belief-threat（低風險先做）
+- guard_ratio（`faction_ai:3069` 硬編碼 0.1/0.15/0.2/0.35/0.4 離散 tag-gated 死常數）→ **連續、人格化**（慎重/責任/威脅感知 modulate、非死值），不損原意（夜哨比 + ★finding⑤ 漏列消費者 `_check_night_raid` 夜襲免疫一併接）。
+- 動員/守衛 trigger → **belief-threat**（`ThreatAssessment.score`）取代 `_has_hostile_within` god-view。★finding⑥：belief-threat 現只服務 uses_unified 隊、純軍團零 belief-threat → Slice A 須讓守衛決策的 threat 也走 belief（否則軍團無感知）。
 
-## §4 前提（grounding 已 file:line 坐實）
-- P1 三 ratio 各 owner 各規則互不通（armed_anon `equipment:62`/guard `faction_ai:3069`/captive `manpower`）。
-- P2 pool_of 二元 by-tag（`labor:23`、無法表達民兵分數）。
-- P3 團型二元建點定死（`outpost:401`）。
-- P4 動員機制不存在（grep 零=全新建）。
-- P5 guard_ratio 用 `_has_hostile_within` god-view（感知鐵律違、統一走 belief）。
+## §3 Slice B — 團型梯度 + 分數化動員（高風險、須先解承重牆）
+- 團型二元（`outpost:401` civilian/military 定死）→ **梯度**（專業軍團純軍/後備半兵半農/居民團民兵）。
+- pool_of 二元 by-tag（`labor:23`）→ **分數 membership**（表達半兵半農）。★finding④：`manufacturing:86` 分子仍讀原始 population → labor_share>1.0 產出膨脹 bug、須同修。★finding③：guns-vs-butter 勞力池 3 天 cache staleness 須觸發重算。
+- **guns-vs-butter**：威脅→動員抽勞力→產出掉;和平→解甲回田。
+- **★★承重牆（finding②，Slice B 前置）**：`uses_unified` + ~15 硬 binary gate 綁團型 TAG → 團型變梯度前，**須定義半軍半民隊的路由語意**（decouple 路由 vs 團型分類）= 觸 [[project_framework_seams]] 結構債（可能需 Track②A 一角）。**Slice B 開工前先小 spike 定 decouple 法**。
+
+## §4 前提（R① CLEAN 全坐實）
+P1 三 ratio 各 owner / P2 pool_of 二元 / P3 團型二元 / P4 動員機制 grep 零全新 / P5 guard god-view（`_has_hostile_within`）。+ ★finding② uses_unified 綁 TAG binary（`faction_ai:2394`、~15 gate blast）。
 
 ## §5 量測（湧現、硬數據）
-- **威脅→動員→產出掉**（guns-vs-butter 真成本可測）+ **和平→解甲→產出回**。
-- **團型分化**：軍團純軍/居民團民兵防禦才召/開墾團半兵半農。
-- **人格分化**：好戰早動員/慎重保守。
-- **★感知鐵律**：動員讀 belief-threat（遠/敵 stale 反映）、無 god-view。
-- 統一驗：三 ratio/二元勞力/二元團型 收進一模型、無平行補丁殘留（constitution）。determinism。
+- **Slice A**：guard_ratio 連續人格分化（慎重高守衛保守/責任高多守）+ 動員 trigger belief-threat（遠/敵 stale、無 god-view、軍團也有感知）。
+- **Slice B**：威脅→動員→產出掉（guns-vs-butter）+ 和平解甲 + 團型梯度分化(軍團/半農/民兵) + labor_share≤1（膨脹 bug 修）+ 路由 decouple 後半軍半民隊行為定義正確。
+- 統一驗無平行補丁殘留;determinism;constitution。
