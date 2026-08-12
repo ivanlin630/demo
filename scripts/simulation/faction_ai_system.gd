@@ -1666,19 +1666,21 @@ const PROMOTE_DESPERATE_DEMAND: float = 0.9    # A：急徵門檻——officer_n
 const PROMOTE_DESPERATE_SPARE: int = 0         # A：真無替代——現有記名副手需=0（連一個都沒）才算絕境
 const OFFICER_DISPATCH_CONCURRENT: float = 2.0 # dispatch-demand：領主想保留的 spare named bench（並發派遣 scout/care/relief）；bench≥此→無派遣壓力
 
-# ★人格 modulate（野心樂提/多疑吝嗇、單一真源供 normal + desperate 共用）。
-static func _promote_pmult(ambition: float, caution: float) -> float:
-	return clampf(0.3 + ambition * 0.9 - caution * 0.7, 0.0, 1.5)   # 野心↑樂提、多疑/慎重↑吝嗇
+# ★人格 modulate（純野心：野心大 pmult 高養大班底/務實野心中養夠用；base 0.3）。
+#   ★多疑與提拔 decouple（用戶裁、倒因果修）：懷疑是對「已存在的人」、沒提拔哪來對象可疑→懷疑擋創造=倒因果。
+#   慎重壓制項已去；多疑 genuine 位置=下游對待現有 officer（猜忌/防範/清算=內政忠誠，PARK 未來 arc、非 promotion gate）。
+static func _promote_pmult(ambition: float) -> float:
+	return clampf(0.3 + ambition * 0.9, 0.0, 1.5)   # 野心↑樂提；無慎重壓制
 
 # ★§2.5 提拔 util（bounded 非 crank、machine-demonstrable）：demand × pmult × quality。
-#   三人格分化(絕境被迫/野心樂提/多疑吝嗇)從三因子競秤湧現(非三硬 branch)；低需求 / 多疑 / 無夠格候選 → util→0 不 fire。
-static func promote_util(demand: float, ambition: float, caution: float, candidate_quality: float) -> float:
-	return clampf(demand, 0.0, 1.0) * _promote_pmult(ambition, caution) * clampf(candidate_quality, 0.0, 1.0)
+#   差異化=野心（rate、非 gate）；need-gated（demand）+ candidate-gated（quality）→ 低需求 / 無夠格候選 → util→0 不 fire。
+static func promote_util(demand: float, ambition: float, candidate_quality: float) -> float:
+	return clampf(demand, 0.0, 1.0) * _promote_pmult(ambition) * clampf(candidate_quality, 0.0, 1.0)
 
 # ★A 急徵 util（絕境不挑食=drop quality 因子）：只在真絕境 gate 通過後評（見 _try_promote_advisor）。
-#   仍過 pmult → 多疑領主絕境照樣不濫拔（genuine 分化保留）；非逢缺必補（demand<絕境門檻不走此路）。
-static func promote_util_desperate(demand: float, ambition: float, caution: float) -> float:
-	return clampf(demand, 0.0, 1.0) * _promote_pmult(ambition, caution)
+#   野心 modulate rate；need-gated（demand<絕境門檻不走此路=bounded 非逢缺必補）。
+static func promote_util_desperate(demand: float, ambition: float) -> float:
+	return clampf(demand, 0.0, 1.0) * _promote_pmult(ambition)
 
 # ★officer-need（named-scarcity 訊號、single source 供 B 訓練 util + A/normal 提拔 demand）：
 #   兩分量取 max（取真反映「缺 officer」最大壓力）——
@@ -1724,19 +1726,19 @@ func _try_promote_advisor(state: WorldState, team: TeamData) -> void:
 	if demand <= 0.0:
 		return   # 記名夠/無管轄 → 需求 0（bounded）
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
-	var amb: float = float(lv.get("野心", 0.5)); var cau: float = float(lv.get("慎重", 0.5))
+	var amb: float = float(lv.get("野心", 0.5))   # 差異化=野心（慎重與提拔 decouple、倒因果修）
 	var quality: float = _best_candidate_quality(team)
-	var util: float = promote_util(demand, amb, cau, quality)
+	var util: float = promote_util(demand, amb, quality)
 	if Probe.enabled: Probe.note("promote.util", util)
 	# 【normal 路】好候選（訓練/tier-up 育成或天生高 tier）→ util 過門檻 → 提好 officer。
 	var fired_normal: bool = util > PROMOTE_THRESHOLD
 	# 【A 急徵路】真絕境（急需 demand≥門檻 + 真無替代 spare=0 + normal 未 fire=無夠格候選）→ relax quality gate、拔最佳平民 NOW=弱 officer。
-	#   ★bounded 非逢缺必補：demand 未達絕境 or 有記名 or normal 已 fire → 不走此路；仍過 pmult（多疑絕境照樣不濫拔）。
+	#   ★bounded 非逢缺必補：demand 未達絕境 or 有記名 or normal 已 fire → 不走此路；仍過 pmult（野心 modulate rate）。
 	var desperate: bool = (not fired_normal) and demand >= PROMOTE_DESPERATE_DEMAND \
 		and team.named_members.size() <= PROMOTE_DESPERATE_SPARE
-	var fired_desperate: bool = desperate and promote_util_desperate(demand, amb, cau) > PROMOTE_THRESHOLD
+	var fired_desperate: bool = desperate and promote_util_desperate(demand, amb) > PROMOTE_THRESHOLD
 	if not (fired_normal or fired_desperate):
-		return   # ★bounded：低需求 / 多疑吝嗇 / 無夠格候選且非絕境 → 不提（非 flat 逢缺必補）
+		return   # ★bounded：低需求 / 無夠格候選且非絕境 → 不提（need-gated + candidate-gated、非 flat 逢缺必補）
 	# ★genuine 提拔（§3 真代價）：generate_for_team = kill_random 1 anon(偏高 tier 精銳、真扣池) + generate() 獨立人格值(非複製) + 不可逆。
 	#   A 絕境時池內僅平民 → kill_random 拔平民 → _apply_promotion_skills 依 src_tier 灌少技能=天然弱 officer（救急不救好）。
 	var new_named: PersonData = PersonGenerator.generate_for_team(state, team, "member")
