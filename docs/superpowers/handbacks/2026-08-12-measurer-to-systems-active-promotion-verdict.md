@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[主動升匿名前後對照完成——決定性:promote.fired=0全程,兩fixture零一次fire,有數學證明非樣本運氣]feat/active-anon-promotion 630f177c,同一bed(4隊dispersed45天+16隊diverse15天,seed8181)在branch重跑,main(無此commit)即為before基準無需重跑(main不含新function)。★★★決定性結果:promote.fired在兩個fixture、全部15/45天、所有隊(含T12這個1-named lord測試案例)=0,一次都沒fire。★不是empirical樣本運氣差——有數學證明:quality=tier_combat/0.7,兩fixture的anon組成全是平民tier(combat=0.1→quality=0.1429),util_max=demand(≤1)×pmult(≤1.5極端人格ambition=1caution=0)×quality=0.171,結構上低於THRESHOLD=0.3,無論demand/人格如何組合都不可能跨過門檻——只有新兵(quality=0.429→util_max=0.514)以上tier的anon才可能fire。①named-scarcity完全未紓解(T12全程util=0.0114,連唯一測到的16隊床樣本都遠低於門檻)②人格分化:formula結構上genuine(ambition↑caution↓→pmult↑,數學驗證過)但零fire事件=無法empirically驗證真實分化,只能報formula設計合理non-crank、不能報『觀察到分化』③THRESHOLD校準:兩fixture(平民tier起始村,貼近真實新村狀態)結構性dormant,0.3門檻對『平民tier起始』從未可能通過,不是校準微調問題是結構性gap(需新兵+tier anon才有機會)④⑤⑥(anon代價/玩壞風險/O(N²)幽靈團):皆N/A——零fire=零代價零風險零新團,無法測但也無害。determinism確認(重跑兩次數字完全一致)。★過程一次自我教訓:worktree清理時重蹈『先刪後複製』覆轍(這正是memory feedback_specimen_handoff_landed_path標記過的血證模式)——這次立刻發現+用已保存的檔案內容重建+補跑+這次先copy再cleanup,誠實記錄。"
 ---
 
