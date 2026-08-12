@@ -1,0 +1,66 @@
+et_ok": 404, "mergein.dissolve": 5, "mergein.subteam": 7 } mobilize_peak=1.000
+
+───── 終態總結 ─────
+  start_pop=444 end_pop=298 attrition=32.9% extinct_tick=-1
+  final: teams=148 factions=8 established=0
+  final intent histogram: { "CONQUER": 4, "RICH": 60, "DEFEND": 19, "HOLD": 0, "EXPAND": 0, "FOUND": 0, "NONE": 2 }
+  promote.fired 累計=32
+  promote.field_desperate 累計=32
+  migrant.dispatched 累計=0
+  migrant.arrived 累計=0
+  invest.dispatched 累計=4
+  migrant.util_evaluated 累計=0
+  invest.roi_evaluated 累計=6
+  relocate.ordered 累計=3
+  relocate.comply 累計=0
+  relocate.resist 累計=0
+  relocate.started 累計=12
+  relocate.abandoned 累計=12
+  relocate.arrived 累計=6
+  relocate.resettled 累計=4
+  cohesion.defect_fire 累計=28
+  cohesion.uprising_stay_faction 累計=0
+  g2.ambition_promote 累計=223
+  g2.ambition_demote 累計=118
+  g2.faction_found 累計=0
+  death.combat_pop 累計=0
+  death.starve_anon 累計=70
+  spawn.migrant 累計=0
+  spawn.messenger 累計=0
+  spawn.solo_exile 累計=0
+  spawn.overflow_split 累計=0
+  spawn.captive_breakaway 累計=3
+  spawn.unrest_split 累計=0
+  merge.consolidate_dispatch 累計=448
+  merge.set_ok 累計=404
+  mergein.dissolve 累計=5
+  mergein.subteam 累計=8
+  mobilize.fraction 全程峰值=1.000
+  spawn.dispatch_* 分布={ "spawn.dispatch_擴建": 16, "spawn.dispatch_idle": 5, "spawn.dispatch_偵查": 75, "spawn.dispatch_運輸": 89, "spawn.dispatch_信使": 7 }
+
+[dump] → res://docs/measurements/2026-08-12-phase3-story-audit-seed1337-2mo.json
+
+========== [SpecimenTracer] flush 2 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T12] tick=14400 intent={ "intent": "致富", "why": "結盟拓勢", "mode": "ally" } | winner=build_stable:resource task=貿易 tgt=(28, 3)
+    candidates: build_stable:resource=1.50 徵收=1.23 maintain_material:resource=1.00 囤貨=0.61 貿易=0.61 買料=0.11 建設=0.09
+    狀態: pop=1 food(priv=6.5/gran=0.0/eff=6.5) consume/d=0.8 rung=0 fid=3 coin=0 mat=7
+    leader: 野心=0.11 慎重=0.40 求生欲=0.95 好戰=0.05 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T17] tick=14400 heartbeat（no-decision）pop=7 food(eff=599.6)
+=======================================================
+[SpecimenTracer] write_jsonl → res://docs/measurements/2026-08-12-phase3-story-audit-seed1337-2mo.specimen.jsonl (3761 entries)
+=== DONE ===
+
+---isolation(neutral,matches committed original 130/299)---
+.23 掠奪=0.23 建設=0.22 吸納=0.06 貿易=0.03 survival=0.00
+    狀態: pop=10 food(priv=34.2/gran=0.0/eff=34.2) consume/d=8.0 rung=2 fid=-1 coin=15 mat=13
+    leader: 野心=0.62 慎重=0.62 求生欲=0.42 好戰=0.60 貪婪=0.36 → food_sec_target=4.0天
+[Specimen T24] tick=14400 intent=防衛 | winner=返家補給 task=return_home tgt=(19, 15)
+    candidates: 返家補給=3.61 乞食=2.77 掠奪=2.75 駐守=0.31 備戰=0.29 建設=0.18 求和=0.08 貿易=0.03 survival=0.00 吸納=0.00 maintain_food:resource=0.00 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=8 food(priv=0.0/gran=0.0/eff=0.0) consume/d=6.4 rung=0 fid=-1 coin=5 mat=9
+    leader: 野心=0.37 慎重=0.53 求生欲=0.55 好戰=0.43 貪婪=0.39 → food_sec_target=4.6天
+[Specimen T36] tick=14400 heartbeat（no-decision）pop=6 food(eff=22.0)
+[Specimen T42] tick=14400 heartbeat（no-decision）pop=15 food(eff=59.4)
+=======================================================
+[SpecimenTracer] write_jsonl → res://docs/measurements/2026-08-12-phase3-story-audit-seed1337-2mo.specimen.jsonl (4174 entries)
+=== DONE ===
+
