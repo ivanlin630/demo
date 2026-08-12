@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[officer_need dispatch-demand realistic驗證完成——6th-gap CONFIRMED真缺口,連need=1.0都贏不了argmax]feat/named-scarcity-ab 7304e16c,同一4隊(45天)+16隊(15天)realistic床,加task/officer_need/tiers逐日追蹤4個lord(T0/T4/T8/T12)。★★★決定性:T12(ticket最關心案例)15天內從未真dispatch,bench卡在1,officer_need卡在標準proxy值0.5,implementer自己誠實flag的『pre-dispatch bench=1→0.5→不練』預言完全命中——但T4/T8這兩隊真的透過實際dispatch把bench耗到0,officer_need真達理論最大值1.0(非公式產物,是真dispatch drain出來的genuine壓力),implementer聲稱『full need真贏build argmax』——實測:T4/T8在need=1.0的日子task始終是貿易/覓食,一次都沒切到訓練。promote.fired/field_desperate全部=0(兩床全程)。★6th-gap系統自己標的疑慮CONFIRMED成立:formula genuine(officer_need正確反映真dispatch壓力,結構乾淨,R²的判斷沒錯)但即使genuine壓力真的達到理論最大值,argmax量級仍不夠贏,整條chain(train→tier-up→promote→need降→終止)連第一步都沒發生過——這不是『T12特例沒機會』的問題,是連能達到need=1.0的T4/T8都卡住,問題比T12案例更根本。"
 ---
 
