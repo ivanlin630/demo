@@ -1,6 +1,6 @@
 # named-scarcity 出口 — 急徵（A、弱）+ 訓練（B、正常）（WHAT / vision）
 
-status: DRAFT（pending R①[硬數據、機制可承載] + R² → build）
+status: LOCKED（2026-08-12：R①硬數據坐實[ambient_train_drive=0.5 flat/門檻0.3絕對/train→tier-up鏈build前已wired/平民skill空天然弱]+R² CLEAN、1必查項折入§4.5、底層promotion+tier-up機制已banked=接線為主 → systems HOW/build）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-12
 溯源：主動升匿名建好但 dormant（硬數據：平民 quality 0.14<門檻 0.3 + 訓練 util 0.33 flat 從不勝 argmax）→ 用戶定案：**訓練=平常但緩不濟急 → 做 A+B;A 急徵人手，人才庫只有平民則選出來很廢**。共用既有 promotion 機制（`generate_for_team`、已 build banked `31d42ee5` 系）。
@@ -21,6 +21,9 @@ date: 2026-08-12
 
 ## §4 自平衡（湧現非腳本）
 A 弱（拔平民=廢 officer）→ 自然只當**最後手段**;B（練好兵）品質好 → 自然是**首選**。領主人格分化（謹慎早練備著/野心擴張多練/絕境被迫急徵拔廢的）。無腳本強迫、從真代價湧現。
+
+## §4.5 ★HOW-binding 必查項（R² CLEAN、同 iii 順序 gate 標準、寫死）
+**自平衡順序 = 硬量測 gate（非文字宣稱）**：build 完**必量測驗證**「A 只在真絕境 fire（弱 officer）+ B 為首選（officer 夠不練/缺才練）+ 兩路平衡從真代價湧現」= 硬性 gate、非 aspirational。（同 iii §④、統一派遣 §順序標準。）
 
 ## §5 量測（湧現、硬數據、5× over-claim 教訓）
 - **B**：缺 officer 領主真訓→tier-up→promote 好 officer（端到端 fire）;★officer 夠→不練（bounded 非 always-train）;人格分化訓練率。
