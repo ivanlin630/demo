@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶戳破我over-claim(第5次):B『匿名tier-up』已存在非大arc——我grep確認training_system TASK_TRAIN累積exp+try_promote→平民→新兵→老兵→菁英已建、主動提拔已建=鏈備齊、我沒先grep就框成大arc錯·★measure-first驗整條鏈端到端(硬數據非inference、4×教訓):①鏈接得起來否=一村真訓練→平民升新兵/老兵→那人變active-promotable(quality過0.3門檻)→主動提拔真fire?端到端跑驗②★領主會不會『決定』訓練=named稀缺領主決策層挑TASK_TRAIN養officer否?還是和平生產村只生產不訓練→管線never啟動=真斷點候選(這才是dormant真根疑點)③步調/成本=平民→夠格tier要多久exp/物資?leader戰術cap(弱領主訓不到高tier)genuine約束否?·★裁向依驗:若鏈連+領主會訓+步調合理→主動提拔dormant只是fixture沒訓練=merge banked正確、真世界會fire(A/B/C moot、named-scarcity靠既有train-tier-promote鏈genuine解);若領主決策層不選訓練(斷點②)→那是小修(訓練決策接scarcity壓力)非大arc;若步調太慢→tuning·output→餵我+用戶定·★這次禁憑grep斷言(我剛犯)、measurer硬跑端到端+領主訓練決策fire率·序:驗→verdict→我推用戶·地基KEEP·待驗"
 ---
 
