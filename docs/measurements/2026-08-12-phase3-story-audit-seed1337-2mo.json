@@ -1,0 +1,118 @@
+{
+  "curve": [
+    {
+      "established": 0,
+      "factions": 8,
+      "intent": {
+        "CONQUER": 4,
+        "DEFEND": 8,
+        "EXPAND": 0,
+        "FOUND": 0,
+        "HOLD": 1,
+        "NONE": 2,
+        "RICH": 21
+      },
+      "mobilize_fraction_peak": 1,
+      "month": 1,
+      "new_delta": {
+        "death.combat_pop": 0,
+        "death.starve_anon": 6,
+        "g2.ambition_demote": 25,
+        "g2.ambition_promote": 70,
+        "g2.faction_found": 0,
+        "invest.dispatched": 0,
+        "migrant.arrived": 0,
+        "migrant.dispatched": 0,
+        "promote.field_desperate": 18,
+        "promote.fired": 18,
+        "reaction.N3_defect": 0,
+        "relocate.abandoned": 0,
+        "relocate.arrived": 0,
+        "relocate.comply": 0,
+        "relocate.ordered": 0,
+        "relocate.resettled": 0,
+        "relocate.resist": 0,
+        "relocate.started": 0
+      },
+      "pop": 436,
+      "teams": 105
+    },
+    {
+      "established": 0,
+      "factions": 8,
+      "intent": {
+        "CONQUER": 2,
+        "DEFEND": 22,
+        "EXPAND": 0,
+        "FOUND": 0,
+        "HOLD": 1,
+        "NONE": 1,
+        "RICH": 59
+      },
+      "mobilize_fraction_peak": 1,
+      "month": 2,
+      "new_delta": {
+        "death.combat_pop": 0,
+        "death.starve_anon": 83,
+        "g2.ambition_demote": 81,
+        "g2.ambition_promote": 123,
+        "g2.faction_found": 0,
+        "invest.dispatched": 5,
+        "migrant.arrived": 1,
+        "migrant.dispatched": 1,
+        "promote.field_desperate": 14,
+        "promote.fired": 14,
+        "reaction.N3_defect": 0,
+        "relocate.abandoned": 9,
+        "relocate.arrived": 5,
+        "relocate.comply": 0,
+        "relocate.ordered": 3,
+        "relocate.resettled": 3,
+        "relocate.resist": 0,
+        "relocate.started": 9
+      },
+      "pop": 299,
+      "teams": 130
+    }
+  ],
+  "end_pop": 299,
+  "extinct_tick": -1,
+  "final": {
+    "established": 0,
+    "factions": 8,
+    "teams": 130
+  },
+  "final_intent": {
+    "CONQUER": 2,
+    "DEFEND": 22,
+    "EXPAND": 0,
+    "FOUND": 0,
+    "HOLD": 1,
+    "NONE": 1,
+    "RICH": 59
+  },
+  "mobilize_fraction_peak_final": 1,
+  "months": 2,
+  "new_keys_total": {
+    "death.combat_pop": 0,
+    "death.starve_anon": 89,
+    "g2.ambition_demote": 106,
+    "g2.ambition_promote": 193,
+    "g2.faction_found": 0,
+    "invest.dispatched": 5,
+    "migrant.arrived": 1,
+    "migrant.dispatched": 1,
+    "promote.field_desperate": 32,
+    "promote.fired": 32,
+    "reaction.N3_defect": 0,
+    "relocate.abandoned": 9,
+    "relocate.arrived": 5,
+    "relocate.comply": 0,
+    "relocate.ordered": 3,
+    "relocate.resettled": 3,
+    "relocate.resist": 0,
+    "relocate.started": 9
+  },
+  "seed": 1337,
+  "start_pop": 444
+}

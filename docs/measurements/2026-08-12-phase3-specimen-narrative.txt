@@ -1,0 +1,125 @@
+=== team_id=0 entries=241 ===
+  tick=    10 pop=9 food=1300 coin=50 faction=0 intent=? task=? result=?
+  tick=  1170 pop=7 food=363.222222222222 coin=38.8888888888889 faction=0 intent=? task=? result=?
+  tick=  2370 pop=7 food=335.222222222223 coin=38.8888888888889 faction=0 intent=? task=? result=?
+  tick=  3570 pop=7 food=307.222222222223 coin=38.8888888888889 faction=0 intent=? task=? result=?
+  tick=  4770 pop=7 food=279.222222222223 coin=38.8888888888889 faction=0 intent=? task=? result=?
+  tick=  5970 pop=7 food=251.222222222223 coin=38.8888888888889 faction=0 intent=? task=? result=?
+  tick=  7170 pop=6 food=191.333333333334 coin=33.3333333333333 faction=0 intent=? task=? result=?
+  tick=  8350 pop=6 food=167.333333333334 coin=33.3333333333333 faction=0 intent=? task=? result=?
+  tick=  9550 pop=6 food=143.333333333334 coin=26.22378471352 faction=0 intent=? task=? result=?
+  tick= 10750 pop=6 food=119.333333333334 coin=26.22378471352 faction=0 intent=? task=? result=?
+  tick= 11950 pop=6 food=95.3333333333341 coin=26.22378471352 faction=0 intent=? task=? result=?
+  tick= 13150 pop=6 food=71.3333333333341 coin=1.33489582463107 faction=0 intent=? task=? result=?
+  tick= 14350 pop=4 food=22.2222222222227 coin=0.889930549754046 faction=0 intent=? task=? result=?
+
+=== team_id=6 entries=595 ===
+  tick=    10 pop=10 food=250 coin=15 faction=1 intent=日常 task=建設 result=committed
+  tick=   810 pop=10 food=223.333333333333 coin=15 faction=1 intent=防衛 task=徵收 result=try_set_noop
+  tick=  1300 pop=10 food=210 coin=15 faction=1 intent=防衛 task=逃跑 result=committed
+  tick=  3260 pop=10 food=143.333333333333 coin=15 faction=1 intent=? task=? result=?
+  tick=  3920 pop=10 food=120 coin=15 faction=1 intent=防衛 task=覓食 result=committed
+  tick=  4410 pop=10 food=103.333333333333 coin=15 faction=1 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick=  4910 pop=8 food=69.3333333333331 coin=12 faction=1 intent=防衛 task=外交 result=try_set_noop
+  tick=  5400 pop=8 food=58.6666666666664 coin=12 faction=1 intent=防衛 task=徵收 result=try_set_noop
+  tick=  5890 pop=8 food=45.3333333333331 coin=12 faction=1 intent=防衛 task=徵收 result=try_set_noop
+  tick=  6900 pop=10 food=19.9999999999997 coin=15 faction=1 intent=防衛 task=攻擊 result=committed
+  tick=  8220 pop=10 food=0.715172058700553 coin=15 faction=-1 intent=防衛 task=return_home result=committed
+  tick= 11100 pop=10 food=26.5613045206533 coin=15 faction=-1 intent=? task=? result=?
+  tick= 14040 pop=10 food=32.358218779436 coin=15 faction=-1 intent=? task=? result=?
+  tick= 14400 pop=10 food=34.2409406882697 coin=15 faction=-1 intent=防衛 task=貿易 result=try_set_noop
+
+=== team_id=12 entries=241 ===
+  tick=    10 pop=8 food=1300 coin=50 faction=3 intent=? task=? result=?
+  tick=  1180 pop=8 food=470.666666666666 coin=50 faction=3 intent=? task=? result=?
+  tick=  2380 pop=8 food=438.666666666666 coin=50 faction=3 intent=? task=? result=?
+  tick=  3580 pop=8 food=406.666666666666 coin=50 faction=3 intent=? task=? result=?
+  tick=  4780 pop=7 food=327.833333333333 coin=43.75 faction=3 intent=? task=? result=?
+  tick=  5980 pop=7 food=299.833333333333 coin=43.75 faction=3 intent=? task=? result=?
+  tick=  7180 pop=6 food=233 coin=37.5 faction=3 intent=? task=? result=?
+  tick=  8380 pop=6 food=209 coin=37.5 faction=3 intent=? task=? result=?
+  tick=  9550 pop=7 food=175.547619047619 coin=52.7721452983269 faction=3 intent=? task=? result=?
+  tick= 10750 pop=2 food=87.8027210884352 coin=15.077755799522 faction=3 intent=? task=? result=?
+  tick= 11950 pop=2 food=66.8027210884351 coin=5.67072313211062 faction=3 intent=? task=? result=?
+  tick= 13150 pop=1 food=29.4013605442176 coin=2.83536156605531 faction=3 intent=? task=? result=?
+  tick= 14350 pop=1 food=25.4013605442176 coin=2.83536156605531 faction=3 intent=? task=? result=?
+
+=== team_id=18 entries=1183 ===
+  tick=    10 pop=10 food=250 coin=15 faction=4 intent=日常 task=建設 result=committed
+  tick=  1650 pop=10 food=196.666666666667 coin=15 faction=4 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=貿易 result=try_set_noop
+  tick=  3680 pop=10 food=205.083333333333 coin=20.35 faction=4 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=貿易 result=try_set_noop
+  tick=  5660 pop=8 food=158.819047619047 coin=26.6219844592469 faction=4 intent=致富 task=外交 result=try_set_noop
+  tick=  6650 pop=6 food=99.1142857142855 coin=19.9664883444352 faction=4 intent=致富 task=貿易 result=try_set_noop
+  tick=  7630 pop=6 food=79.1142857142855 coin=19.9664883444352 faction=4 intent=致富 task=逃跑 result=committed
+  tick=  8610 pop=6 food=59.1142857142855 coin=17.4664883444352 faction=4 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=逃跑 result=committed
+  tick=  9590 pop=6 food=41.1142857142855 coin=17.4664883444352 faction=4 intent=致富 task=貿易 result=try_set_noop
+  tick= 10570 pop=6 food=21.1142857142855 coin=17.4664883444352 faction=4 intent=致富 task=貿易 result=try_set_noop
+  tick= 11550 pop=4 food=2.11428571428547 coin=17.4664883444352 faction=4 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=覓食 result=committed
+  tick= 12530 pop=3 food=1.61555620129595 coin=17.4664883444352 faction=4 intent=致富 task=投靠 result=committed
+  tick= 13440 pop=1 food=0 coin=17.4664883444352 faction=4 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=貿易 result=committed
+  tick= 14340 pop=1 food=0 coin=18.7677418603686 faction=4 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=貿易 result=committed
+  tick= 14400 pop=1 food=0 coin=18.7677418603686 faction=4 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=逃跑 result=committed
+
+=== team_id=24 entries=952 ===
+  tick=    10 pop=8 food=250 coin=15 faction=5 intent=日常 task=建設 result=committed
+  tick=  2440 pop=8 food=244 coin=18.75 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick=  5350 pop=8 food=166.666666666667 coin=18.75 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=徵收 result=try_set_noop
+  tick=  6140 pop=8 food=145.333333333334 coin=18.75 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick=  6930 pop=8 food=124 coin=18.75 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick=  7720 pop=8 food=102.666666666667 coin=18.75 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick=  8510 pop=8 food=81.3333333333335 coin=11.8437815760088 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick=  9300 pop=8 food=62.6666666666668 coin=11.8437815760088 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick= 10090 pop=8 food=41.3333333333335 coin=11.8437815760088 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick= 10920 pop=8 food=29.3333333333333 coin=11.8437815760088 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=貿易 result=try_set_noop
+  tick= 11710 pop=8 food=29.3333333333333 coin=11.8437815760088 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=貿易 result=try_set_noop
+  tick= 12500 pop=8 food=26.6666666666667 coin=11.8437815760088 faction=5 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=貿易 result=try_set_noop
+  tick= 14220 pop=8 food=0 coin=4.74906477196295 faction=-1 intent=防衛 task=return_home result=committed
+  tick= 14400 pop=8 food=0 coin=4.74906477196295 faction=-1 intent=防衛 task=return_home result=committed
+
+=== team_id=30 entries=306 ===
+  tick=    10 pop=10 food=250 coin=15 faction=7 intent=日常 task=覓食 result=committed
+  tick=  1460 pop=10 food=150 coin=11.25 faction=7 intent=防衛 task=逃跑 result=committed
+  tick=  2550 pop=10 food=113.333333333333 coin=11.25 faction=7 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=徵收 result=try_set_noop
+  tick=  2800 pop=10 food=106.666666666667 coin=11.25 faction=7 intent=防衛 task=徵收 result=try_set_noop
+  tick=  3300 pop=10 food=89.9999999999999 coin=11.25 faction=-1 intent=防衛 task=覓食 result=committed
+  tick=  4440 pop=8 food=39.9999999999999 coin=9 faction=-1 intent=防衛 task=建設 result=try_set_noop
+  tick=  5220 pop=6 food=14 coin=6.75 faction=-1 intent=防衛 task=紮營 result=committed
+  tick=  6660 pop=6 food=0 coin=6.75 faction=-1 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=return_home result=committed
+  tick=  8160 pop=6 food=0 coin=6.75 faction=-1 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=覓食 result=committed
+  tick=  9660 pop=6 food=0 coin=6.75 faction=-1 intent=? task=? result=?
+  tick= 11160 pop=4 food=0 coin=6.75 faction=-1 intent=? task=? result=?
+  tick= 12660 pop=3 food=0 coin=6.75 faction=-1 intent={'intent': '防衛', 'mode': 'hold', 'why': '慎重/威脅驅動，備戰守土'} task=return_home result=committed
+  tick= 14050 pop=1 food=0 coin=6.75 faction=-1 intent=? task=? result=?
+  tick= 14350 pop=1 food=0 coin=6.75 faction=-1 intent=? task=? result=?
+
+=== team_id=36 entries=319 ===
+  tick=    10 pop=9 food=1120 coin=20 faction=-1 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=覓食 result=committed
+  tick=   620 pop=6 food=201.333333333333 coin=13.3333333333333 faction=-1 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=外交 result=try_set_noop
+  tick=  1460 pop=6 food=137.5 coin=10 faction=-1 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=逃跑 result=committed
+  tick=  2900 pop=6 food=109.5 coin=10 faction=-1 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=逃跑 result=committed
+  tick=  4460 pop=6 food=77.5 coin=10 faction=-1 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=逃跑 result=committed
+  tick=  6020 pop=6 food=45.5 coin=4 faction=-1 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=逃跑 result=committed
+  tick=  7580 pop=6 food=6.71875 coin=2.25 faction=-1 intent=致富 task=return_home result=committed
+  tick=  9080 pop=6 food=19.319115216136 coin=1.11022302462516e-16 faction=-1 intent=致富 task=貿易 result=try_set_noop
+  tick=  9800 pop=6 food=20 coin=1.11022302462516e-16 faction=-1 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=貿易 result=try_set_noop
+  tick= 10520 pop=6 food=20 coin=1.11022302462516e-16 faction=-1 intent=致富 task=迎戰 result=try_set_noop
+  tick= 10920 pop=6 food=12 coin=1.11022302462516e-16 faction=-1 intent=致富 task=紮營 result=committed
+  tick= 12480 pop=6 food=15.0265580452815 coin=1.11022302462516e-16 faction=-1 intent=? task=? result=?
+  tick= 14040 pop=6 food=23.0351873302605 coin=1.11022302462516e-16 faction=-1 intent=? task=? result=?
+  tick= 14400 pop=6 food=21.9960990842575 coin=1.11022302462516e-16 faction=-1 intent=? task=? result=?
+
+=== team_id=42 entries=337 ===
+  tick=    10 pop=10 food=180 coin=8 faction=-1 intent={'intent': '致富', 'mode': 'trade', 'why': '貪婪驅動，treasury 增'} task=貿易 result=committed
+  tick=   920 pop=10 food=159 coin=0.28918434381485 faction=-1 intent=致富 task=迎戰 result=try_set_noop
+  tick=  1500 pop=10 food=142.333333333333 coin=0.28918434381485 faction=-1 intent=? task=? result=?
+  tick=  2100 pop=10 food=119 coin=0.28918434381485 faction=-1 intent=致富 task=外交 result=try_set_noop
+  tick=  2400 pop=10 food=112.333333333333 coin=0.28918434381485 faction=-1 intent=致富 task=逃跑 result=committed
+  tick=  4020 pop=10 food=55.6666666666666 coin=0.28918434381485 faction=-1 intent=致富 task=覓食 result=committed
+  tick=  5520 pop=10 food=40.3666666666666 coin=0.28918434381485 faction=-1 intent=致富 task=覓食 result=committed
+  tick=  6660 pop=10 food=26.5466666666667 coin=0.28918434381485 faction=-1 intent=致富 task=逃跑 result=committed
+  tick=  7940 pop=10 food=5.07874924010134 coin=0.28918434381485 faction=-1 intent=致富 task=return_home result=committed
+  tick=  9360 pop=10 food=8.21615175713492 coin=0.292646458023361 faction=-1 intent=? task=? result=?
+  tick= 11040 pop=10 food=37.201435219975 coin=0.292646458023361 faction=-1 intent=? task=? result=?
+  tick= 12720 pop=15 food=63.4172038008802 coin=5.33534332911235 faction=-1 intent=? task=? result=?
+  tick= 14400 pop=15 food=59.4027266162008 coin=5.33534332911235 faction=-1 intent=? task=? result=?
+
