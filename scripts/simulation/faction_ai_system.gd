@@ -3051,34 +3051,40 @@ func _update_armor_config(team: TeamData) -> void:
 	elif has_low:
 		team.armor_config["torso"] = "low"
 
-func _has_hostile_within(state: WorldState, team: TeamData, range_hex: int) -> bool:
-	# 空間索引：只掃鄰域候選（超集）取代全隊掃 → 收 O(N²)/hr。live 復驗 has + hex_dist 保零行為變。
-	for tid in state.teams_within(team.tile_pos, range_hex):
-		if tid == team.team_id: continue
-		if not state.teams.has(tid): continue
-		var other: TeamData = state.teams[tid]
-		if other.faction_id == team.faction_id and team.faction_id != -1: continue
-		# 高聲望盟友過濾（rep >= 0.7 視為友軍，預設 0.5；結盟後 +0.2 → 達標）
-		var rep: float = float(team.known_reputations.get(other.team_id, 0.5))
-		if rep >= 0.7: continue
-		var d: int = _hex_dist(team.tile_pos, other.tile_pos)
-		if d <= range_hex:
-			return true
-	return false
+# ★_has_hostile_within（god-view: teams_within+LIVE tile_pos 掃真位置）已除——唯一 caller _update_guard_ratio
+#   改走 _max_belief_threat（ThreatAssessment.score belief-threat、感知鐵律）。軍團守衛決策不再偷看真位置。
 
+# ★军民混编 Slice A：guard_ratio 照妖鏡 de-patch（離散 tag-gated 死常數 → 連續人格化）+ belief-threat（去 god-view）。
+const GUARD_BASE: float = 0.1           # 人人守一點（base、TEST VALUE）
+const GUARD_W_CAUTION: float = 0.2      # 慎重人格→守衛保守
+const GUARD_W_MARTIAL: float = 0.15     # 好戰/尚武→重防務（責任/load proxy、人格非 tag）
+const GUARD_W_THREAT: float = 0.25      # belief-threat 感知→升守
+const GUARD_W_ATTACK: float = 0.1       # 攻擊/掠奪=前線投入→留守少
+const GUARD_THREAT_NORM: float = 1.0    # belief-threat 正規化基準（score≈1=顯著威脅）
+
+# guard 的 belief-threat 輸入（★感知鐵律：ThreatAssessment.score max over discovered hostiles、取代 _has_hostile_within god-view）。
+func _max_belief_threat(state: WorldState, team: TeamData) -> float:
+	var mx: float = 0.0
+	for oid in state.team_discovered.get(team.team_id, []):
+		if oid == team.team_id: continue
+		var other: TeamData = state.teams.get(oid)
+		if other == null: continue
+		if other.faction_id == team.faction_id and team.faction_id != -1: continue   # 同勢力不算敵
+		mx = maxf(mx, ThreatAssessment.score(state, team, other))
+	return mx
+
+# guard_ratio = clampf(base + 慎重×W + 好戰×W + belief-threat_norm×W − attack_commit×W, 0.05, 0.5)。
+#   ★genuine 非死常數（人格+belief-threat 湧現、非離散 tag-gated）、bounded [0.05,0.5]、感知鐵律（threat 全 belief 無 god-view）。
 func _update_guard_ratio(team: TeamData, state: WorldState) -> void:
-	var ratio: float = 0.2  # default
-	if team.current_task == TeamData.TASK_ATTACK or team.current_task == TeamData.TASK_LOOT:
-		ratio = 0.1
-	else:
-		var threat: bool = _has_hostile_within(state, team, 3)
-		if team.tags.has(TeamData.TAG_MILITARY) and threat:
-			ratio = 0.4
-		elif threat:
-			ratio = 0.35
-		elif team.tags.has(TeamData.TAG_PRODUCE):
-			ratio = 0.15
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var caution: float = float(leader.values.get("慎重", 0.5)) if leader != null else 0.5
+	var martial: float = float(leader.values.get("好戰", 0.5)) if leader != null else 0.5
+	var threat_norm: float = clampf(_max_belief_threat(state, team) / GUARD_THREAT_NORM, 0.0, 1.0)
+	var attack_commit: float = 1.0 if (team.current_task == TeamData.TASK_ATTACK or team.current_task == TeamData.TASK_LOOT) else 0.0
+	var ratio: float = GUARD_BASE + caution * GUARD_W_CAUTION + martial * GUARD_W_MARTIAL \
+		+ threat_norm * GUARD_W_THREAT - attack_commit * GUARD_W_ATTACK
 	team.guard_ratio = clampf(ratio, 0.05, 0.5)
+	if Probe.enabled: Probe.note("guard.ratio", team.guard_ratio)
 
 # ──────── 輔助函數 ────────
 
