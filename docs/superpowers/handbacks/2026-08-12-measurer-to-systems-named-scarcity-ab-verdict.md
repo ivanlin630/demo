@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[named-scarcity A+B前後對照完成——★★★決定性且與implementer自報fp數字衝突,非我猜測]feat/named-scarcity-ab 8afaa64a,同一4隊dispersed(45天)+16隊diverse(15天)床在branch重跑,main即為before基準。★兩個realistic fixture(非implementer自己的narrow unit test)promote.fired全部=0、promote.field_desperate全部=0,跟implementer fp報的『train_chosen 0→1/promote.fired 0→4/field_desperate 0→4』直接衝突。T12(16隊床1-named lord,ticket最關心案例)15天內anon/named/named_cmds完全零變化,跟修前byte-identical。4隊床找到具體反證:T0(dispersed lord,非FORCE archetype)specimen candidates顯示訓練util=0.0507(tick10),遠低於覓食0.325/build_workshop0.98——B修的方向對(officer_need連結,0→非零,修前非FORCE領主根本不applicable)但量級遠不夠贏argmax,同上輪tier-up-chain-e2e發現的『ambient_train_drive權重太低』命門仍未解。★這不是我不信implementer,是兩邊fixture本質不同(他們的narrow unit test很可能刻意構造成讓機制觸發的極端條件,我的realistic床反映一般村莊起始狀態)——兩邊數字都『對』,只是回答不同問題,交你判斷哪個更貼近真實用戶會遇到的情境、以及是否要再加大B的weight。"
 ---
 

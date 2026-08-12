@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[請QA故事稽核:named-scarcity A+B前後對照,結論與implementer fp數字衝突,需要獨立驗證]promote.fired=0(兩realistic fixture全程)+T0訓練util=0.0507(tick10具體樣本)是這輪核心claim,跟implementer自報的promote.fired 0→4衝突。★最想請你核:①T0 util=0.0507這筆樣本是否具代表性(我只挑了tick10一筆,想請你掃過4隊床specimen裡T0全部候選清單,看訓練util是否曾經明顯升高過、還是我撿到特別低的巧合點)②T12(16隊床)15天完全零變化,能否從specimen角度確認這不是我day-boundary抽樣漏看了中間的變動再變回去③implementer fp的4次promote.fired,跟我的0次,兩邊fixture差異能否在specimen層級看出關鍵區別(比如officer_need的實際數值範圍)。"
 ---
 
