@@ -19,13 +19,17 @@ static func ensure_fresh(state: WorldState, tile: HexTileData) -> void:
 		return
 	rebalance(state, tile)
 
-# 共址 PRODUCE 勞力池 pop（軍隊無 TAG_PRODUCE 不算）。≥1 防除零。
+# ★军民混编 Slice B：可務農勞力 = pop×(1−動員比)（動員的人當兵不下田=guns-vs-butter）。
+static func labor_pop(team: TeamData) -> float:
+	return float(team.population) * (1.0 - clampf(team.mobilized_fraction, 0.0, 1.0))
+
+# 共址 PRODUCE 勞力池（軍隊無 TAG_PRODUCE 不算）；動員後只算未動員勞力。≥1 防除零。
 static func pool_of(state: WorldState, tile: HexTileData) -> float:
 	var p: float = 0.0
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
 		if t.tile_pos == tile.tile_pos and TeamData.TAG_PRODUCE in t.tags:
-			p += float(t.population)
+			p += labor_pop(t)
 	return maxf(p, 1.0)
 
 # rebalance（deterministic）：pool → 列 workstations → need 權重 → 比例+demand-cap+溢出串聯 → fill。
@@ -35,7 +39,7 @@ static func rebalance(state: WorldState, tile: HexTileData) -> void:
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
 		if t.tile_pos == tile.tile_pos and TeamData.TAG_PRODUCE in t.tags:
-			teams.append(t); pool += float(t.population)
+			teams.append(t); pool += labor_pop(t)   # ★動員後只算未動員勞力（guns-vs-butter）
 	# 列 workstations（sorted key，deterministic）：active 採集資源 + active 製造設施。
 	var demand: Dictionary = {}
 	for res in tile.resources.keys():

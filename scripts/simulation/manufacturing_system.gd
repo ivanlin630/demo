@@ -83,7 +83,8 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 
 		# ★統一勞力池：pop_mult→labor_mult(共址勞力稀缺分配);labor_share=本隊佔池比例(多隊防雙算,單隊=1)。
 		LaborSystem.ensure_fresh(state, tile)
-		var labor_share: float = float(team.population) / LaborSystem.pool_of(state, tile)
+		# ★军民混编 finding④：分子同步分數化(動員後可務農 pop)、分母亦分數化 → labor_share≤1、多隊 Σ≤1。
+		var labor_share: float = LaborSystem.labor_pop(team) / LaborSystem.pool_of(state, tile)
 		var avg_skill: float  = _avg_skill(state, team, "製造")
 
 		var ran_any: bool = false

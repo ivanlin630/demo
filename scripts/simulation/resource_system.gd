@@ -62,7 +62,8 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 
 		# ★統一勞力池：pop_mult→labor_mult(共址勞力稀缺分配,per gather:res 讀 home tile alloc);labor_share=本隊佔池比例。
 		LaborSystem.ensure_fresh(state, tile)
-		var labor_share: float = float(team.population) / LaborSystem.pool_of(state, tile)
+		# ★军民混编 finding④：分子同步分數化(動員後可務農 pop)、分母亦分數化 → labor_share≤1、多隊 Σ≤1。
+		var labor_share: float = LaborSystem.labor_pop(team) / LaborSystem.pool_of(state, tile)
 		var leader           = state.persons.get(team.leader_id)
 		var prod_skill: float = float(leader.skills.get("生產", 0.0)) if leader else 0.0
 		var eng_skill: float  = float(leader.skills.get("工程", 0.0)) if leader else 0.0
