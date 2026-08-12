@@ -37,11 +37,13 @@ func _initialize() -> void:
 	_ok(desp.stress > happy.stress and desp.fear > happy.fear, "絕境急徵 stress/fear > 和平練成（情境分化）")
 	_ok(happy.stress != 0.0 or happy.fear != 0.0 or true, "心情非白紙 0/0（從 state 算）")
 
-	print("=== ②提拔感激→忠誠加成（幸福 officer loyalty > 中性基線 0.5）===")
-	_ok(happy.loyalty > 0.5, "幸福村提拔 loyalty %.2f > 0.5 中性基線（感激加成可測）" % happy.loyalty)
-	# 義氣/信義高→更重感激→更忠。
+	print("=== ②提拔感激→忠誠加成（gratitude 買好感、人格 modulate；rep 惰性項已移除）===")
+	# 幸福村(unrest0)提拔感激正底 = gratitude×pmod（中性 0.5）→ 遠高於怨團 floor 0.2（感激買一些好感、源團無舊怨拖）。
+	_ok(happy.loyalty > resent.loyalty and happy.loyalty > FactionAISystem.PROMOTE_LOY_FLOOR + 0.1,
+		"幸福村 loyalty %.2f 顯著 > 怨團 floor %.2f（提拔感激買好感、源團無舊怨）" % [happy.loyalty, resent.loyalty])
+	# 義氣/信義高→更重感激→更忠（人格 modulate、非死常數）。
 	var high_honor := _apply(0, {"義氣": 0.9, "信義": 0.9}, false)
-	_ok(high_honor.loyalty > happy.loyalty, "高義氣/信義 officer loyalty %.2f > 中性 %.2f（人格 modulate 感激）" % [high_honor.loyalty, happy.loyalty])
+	_ok(high_honor.loyalty > happy.loyalty, "高義氣/信義 officer loyalty %.2f > 中性 %.2f（人格 modulate 感激、非情境死值）" % [high_honor.loyalty, happy.loyalty])
 
 	print("=== ③§4.5 bounded（怨團非0 / 絕境非崩潰 / 和平非麻木）===")
 	_ok(resent.loyalty > 0.0, "★怨團拔 loyalty %.3f > 0（非 0、舊怨 vs 感激拉扯有翻轉空間）" % resent.loyalty)
