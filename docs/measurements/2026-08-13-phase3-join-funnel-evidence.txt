@@ -1,0 +1,18 @@
+-1, -1)
+    candidates: survival=1.56 備戰=0.95 求和=0.91 迎戰=0.54 外交=0.45 徵收=0.37 建設=0.08 貿易=0.03 maintain_food:resource=0.00
+    狀態: pop=1 food(priv=0.0/gran=0.0/eff=0.0) consume/d=0.8 rung=0 fid=4 coin=19 mat=1
+    leader: 野心=0.03 慎重=0.46 求生欲=0.89 好戰=0.13 貪婪=0.53 → food_sec_target=5.7天
+[Specimen T6] tick=14400 intent=防衛 | winner=build_workshop:resource task=貿易 tgt=(14, 20)
+    candidates: build_workshop:resource=1.37 build_apothecary:resource=1.37 build_stable:resource=1.37 maintain_material:resource=0.91 駐守=0.28 買料=0.23 掠奪=0.23 建設=0.22 吸納=0.06 貿易=0.03 survival=0.00
+    狀態: pop=10 food(priv=34.2/gran=0.0/eff=34.2) consume/d=8.0 rung=2 fid=-1 coin=15 mat=13
+    leader: 野心=0.62 慎重=0.62 求生欲=0.42 好戰=0.60 貪婪=0.36 → food_sec_target=4.0天
+[Specimen T24] tick=14400 intent=防衛 | winner=返家補給 task=return_home tgt=(19, 15)
+    candidates: 返家補給=3.61 乞食=2.77 掠奪=2.75 駐守=0.31 備戰=0.29 建設=0.18 求和=0.08 貿易=0.03 survival=0.00 吸納=0.00 maintain_food:resource=0.00 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=8 food(priv=0.0/gran=0.0/eff=0.0) consume/d=6.4 rung=0 fid=-1 coin=5 mat=9
+    leader: 野心=0.37 慎重=0.53 求生欲=0.55 好戰=0.43 貪婪=0.39 → food_sec_target=4.6天
+[Specimen T36] tick=14400 heartbeat（no-decision）pop=6 food(eff=22.0)
+[Specimen T42] tick=14400 heartbeat（no-decision）pop=15 food(eff=59.4)
+=======================================================
+[SpecimenTracer] write_jsonl → res://docs/measurements/2026-08-12-phase3-story-audit-seed1337-2mo.specimen.jsonl (4174 entries)
+=== DONE ===
+

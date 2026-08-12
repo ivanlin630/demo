@@ -52,12 +52,14 @@ func _initialize() -> void:
 		"cohesion.defect_fire", "cohesion.uprising_stay_faction", "g2.ambition_promote", "g2.ambition_demote",
 		"g2.faction_found", "death.combat_pop", "death.starve_anon",
 		"merge.consolidate_dispatch", "merge.set_ok", "mergein.dissolve", "mergein.subteam",
-		# #3② merge 執行 funnel（既有 production tap，非新加，systems 結構列舉的塌點鏈）：
-		"merge.pair_seen", "merge.try_entered", "merge.guard_fail_ordertgt",
-		"accept.merge_reject", "accept.merge_accept",
-		# #3③ migrant/invest 決策層 precondition vs 傳播層 dead-end 三段 funnel（本輪新加 5 個 temp tap，回報後revert）：
-		"migrant.reached_eval_entry", "migrant.precond_block_pop", "migrant.util_evaluated",
-		"invest.reached_eval_entry", "invest.precond_block_pop", "invest.precond_block_food", "invest.roi_evaluated"]
+		# #3② 真 funnel=JOIN（併入→TASK_JOIN，非 TASK_MERGE，systems 2026-08-13 更正）：
+		# to_task 三分流(本輪新加 temp tap)+既有 production tap(join.dispatch/arrived_no_handler/accept.join_accept)。
+		"join.to_task_no_host", "join.to_task_belief_gap", "join.to_task_ok",
+		"join.dispatch", "join.arrived_no_handler", "accept.join_accept", "accept.join_reject",
+		# #3③ target-resolution 分野（本輪新加 temp tap）：belief-不知(est_null) vs 真無正值(marg/roi_nonpositive)。
+		"migrant.holding_seen", "migrant.est_null", "migrant.marg_nonpositive", "migrant.util_evaluated",
+		"invest.holding_seen", "invest.est_null", "invest.already_farming", "invest.roi_nonpositive",
+		"invest.roi_evaluated"]
 	var prev_new: Dictionary = {}
 	for k in new_keys: prev_new[k] = 0
 	var mobilize_peak_prev: float = 0.0
