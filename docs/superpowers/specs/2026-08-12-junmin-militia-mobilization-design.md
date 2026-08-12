@@ -1,6 +1,6 @@
 # 军民混编 / 民兵動員 — 團型驅動的 mobilizable 分數（WHAT / vision）v2
 
-status: DRAFT-v2（R②異質框外審 6 findings 訂正、拆兩 slice、pending reviewer re-R² → 鎖 → slice）
+status: LOCKED（2026-08-12：re-R² CLEAN、6 findings 真訂正 → Slice A 先切 build;Slice B 待承重牆 spike 後另行 R²）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-12
 溯源：size-matter 維度②（audit 2026-08-03）+ grounding 表 + ★R② 異質框外審 ISSUES（6 findings、Agent 讀 code + reviewer 親驗 2/2 最要害）→ 訂正。
