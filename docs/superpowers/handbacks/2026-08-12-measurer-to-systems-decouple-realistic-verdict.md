@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[decouple-suspicion-promotion realistic驗證完成——relief確實解卡(promote.fired 0→4),T12仍未解但根因不同,①野心差異化本輪fixture答不了]feat/decouple-suspicion-promotion 7ee9ec29,同16隊diverse床(15天)重跑,before=前輪officer_need branch的0/0。★決定性:promote.fired 0→4、field_desperate 0→4——T4/T8(先前卡在pmult太低)這次真的解卡,T8身上drain→promote→need降→再drain→再promote完整週期重複3次,每次promote後named穩定回1(bounded非疊加失控)。T0(named=4已足額)officer_need全程=0,bounded control確認不受影響。★T12仍完全零變化——不是decouple沒生效,是T12從未有機會真dispatch drain(獨立根因,decouple只解pmult門檻不解『沒dispatch機會』這個更早瓶頸,同前幾輪已確認)。團數21→24小升(officer補得快、lord能更頻繁care/scout,非明顯runaway)。★誠實限制:現有diverse床4個lord野心值全相同(0.4),無法測①野心差異化(rate高低對照)這題;另跑spare0結構性床(T0野心0.4/T2野心0.9)確認無regression但該床兩隊tick0即刻雙雙fire同樣測不出rate差異——這題手上fixture都答不了,交你判斷是否需要專門新床。"
 ---
 
