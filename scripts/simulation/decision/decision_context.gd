@@ -437,9 +437,10 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.archetype = team.ambition_archetype
 	c.rung = team.ambition_rung
 	c.has_trainable = not team.anon_cohorts.is_empty()   # 有 anon 可練
-	# T5.2 訓練 eval-gate 對齊：drop rung 條件（rung 優先序移 coeff/esteem urgency 承接）→ 僅 FORCE archetype。
-	if c.archetype == AmbitionLadder.ARCHETYPE_FORCE:
-		c.ambient_train_drive = 0.5   # TEST VALUE — 低 magnitude 讓位緊急決策
+	# ★named-scarcity B（真根修）：訓練 util = f(officer-need)——取代舊 flat 0.5 死常數（跟 officer-need 脫鉤的
+	#   fake number、缺 officer 領主照樣不練=硬數據 0.33 永輸 build）。缺 officer(記名<desired)→訓練值高贏 argmax
+	#   →練兵→tier-up→promote 好 officer；officer 夠/非領主→officer_need=0→訓練值 0 不練（bounded 非 always-train）。
+	c.ambient_train_drive = FactionAISystem.officer_need(state, team) * FactionAISystem.TRAIN_OFFICER_MAG
 	# plan_phase 退役（S2.5）：team.plan_phase 由 §6 narrative_label 於 gather 尾寫（S2.4），此處不再 derive。
 	# 征服溶入（序5）：readiness/thr_eff/富 prey（鏡射舊 cascade G3/G4，helper 已 static）。
 	# readiness_thr_eff = threshold × hunger_relief（越餓門檻越低=豁出去搶糧；連續信號零新閘）。

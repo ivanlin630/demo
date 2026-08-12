@@ -386,8 +386,10 @@ static var REGISTRY: Dictionary = {
 	"訓練": {
 		"affinity": [0.0, 0.1, 0.0, 0.7, 0.2], "sets": {"ambient": true, "strategic_selfinit": true},
 		"terms": [["train_drive", "train"]],
+		# ★named-scarcity B：訓練 applicable 連 officer-need（非只 FORCE archetype）——缺 officer 領主(ambient_train_drive>0
+		#   =officer_need>0)亦可練兵補班底;officer 夠 且 非 FORCE → 不 applicable（bounded、非 always-train）。
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.archetype == AmbitionLadder.ARCHETYPE_FORCE and ctx.has_trainable,
+			return ctx.has_trainable and (ctx.archetype == AmbitionLadder.ARCHETYPE_FORCE or ctx.ambient_train_drive > 0.0),
 		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:
 			# 野心階梯溶入（序3）：練兵=原地 TASK_TRAIN（training_system 累積階兵）。
 			return {"task": TeamData.TASK_TRAIN, "target": team.tile_pos},
