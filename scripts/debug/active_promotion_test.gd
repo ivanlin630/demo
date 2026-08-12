@@ -85,7 +85,7 @@ func _initialize() -> void:
 
 	print("=== ⑥bounded：記名夠(spare≥desired)→demand 0→不提 ===")
 	var s := _mk_lord(2, 4, {"野心": 0.9, "慎重": 0.2}, {"菁英": 6})   # 2 村 desired=1、已 4 記名
-	_ok(fai._promote_demand(s[0], s[1]) == 0.0, "spare(4)≥desired(1)→demand=0（bounded、夠人手不提）")
+	_ok(FactionAISystem.officer_need(s[0], s[1]) == 0.0, "spare(4)≥desired(1)→officer_need=0（bounded、夠人手不提）")
 	Probe.reset(); Probe.enabled = true
 	fai._try_promote_advisor(s[0], s[1])
 	Probe.enabled = false

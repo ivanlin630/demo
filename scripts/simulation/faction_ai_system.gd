@@ -1660,28 +1660,49 @@ const PROMOTE_NAMED_PER_VILLAGE: float = 0.5   # 領主每管幾村想要 1 記�
 const PROMOTE_MAX_DESIRED: float = 4.0         # 想要記名上限（不養龐大朝廷、demand saturate）
 const PROMOTE_THRESHOLD: float = 0.3           # 提拔 util 門檻（>此才提；bounded 非逢缺必補）
 const PROMOTE_ELITE_COMBAT: float = 0.7        # 菁英 combat=候選資質正規化基準
+# ★named-scarcity A+B（訓練 need-connect + 絕境 field-promote）常數（TEST VALUE、measurer 校準）。
+const TRAIN_OFFICER_MAG: float = 1.3           # B：officer_need→訓練 util 放大（full need 須贏 build≈1.11 argmax）
+const PROMOTE_DESPERATE_DEMAND: float = 0.9    # A：急徵門檻——officer_need≥此=真急需（+spare 0 +normal 未 fire）才 relax
+const PROMOTE_DESPERATE_SPARE: int = 0         # A：真無替代——現有記名副手需=0（連一個都沒）才算絕境
+const OFFICER_DISPATCH_CONCURRENT: float = 2.0 # dispatch-demand：領主想保留的 spare named bench（並發派遣 scout/care/relief）；bench≥此→無派遣壓力
 
-# ★§2.5 提拔 util（bounded 非 crank、machine-demonstrable）：
-#   demand(需求缺口、記名夠→0 bounded 非 flat 逢缺必補) × pmult(人格：野心樂提/多疑吝嗇) × quality(候選資質：低 tier→低)。
-#   三人格分化(絕境被迫/野心樂提/多疑吝嗇)從此三因子競秤湧現(非三硬 branch)；低需求 / 多疑 / 無夠格候選 → util→0 不 fire。
+# ★人格 modulate（野心樂提/多疑吝嗇、單一真源供 normal + desperate 共用）。
+static func _promote_pmult(ambition: float, caution: float) -> float:
+	return clampf(0.3 + ambition * 0.9 - caution * 0.7, 0.0, 1.5)   # 野心↑樂提、多疑/慎重↑吝嗇
+
+# ★§2.5 提拔 util（bounded 非 crank、machine-demonstrable）：demand × pmult × quality。
+#   三人格分化(絕境被迫/野心樂提/多疑吝嗇)從三因子競秤湧現(非三硬 branch)；低需求 / 多疑 / 無夠格候選 → util→0 不 fire。
 static func promote_util(demand: float, ambition: float, caution: float, candidate_quality: float) -> float:
-	var pmult: float = clampf(0.3 + ambition * 0.9 - caution * 0.7, 0.0, 1.5)   # 野心↑樂提、多疑/慎重↑吝嗇
-	return clampf(demand, 0.0, 1.0) * pmult * clampf(candidate_quality, 0.0, 1.0)
+	return clampf(demand, 0.0, 1.0) * _promote_pmult(ambition, caution) * clampf(candidate_quality, 0.0, 1.0)
 
-# 領主提拔需求(bounded)：desired ∝ 管轄村數(saturate)、spare=現有記名副手；spare≥desired → 0(夠人手不提=bounded 非逢缺必補)。
-func _promote_demand(state: WorldState, team: TeamData) -> float:
+# ★A 急徵 util（絕境不挑食=drop quality 因子）：只在真絕境 gate 通過後評（見 _try_promote_advisor）。
+#   仍過 pmult → 多疑領主絕境照樣不濫拔（genuine 分化保留）；非逢缺必補（demand<絕境門檻不走此路）。
+static func promote_util_desperate(demand: float, ambition: float, caution: float) -> float:
+	return clampf(demand, 0.0, 1.0) * _promote_pmult(ambition, caution)
+
+# ★officer-need（named-scarcity 訊號、single source 供 B 訓練 util + A/normal 提拔 demand）：
+#   兩分量取 max（取真反映「缺 officer」最大壓力）——
+#   ①villages-oversight：desired ∝ 管轄村數(saturate)、spare=記名副手；spare≥desired→0（governing 足）。
+#   ②dispatch-demand（arc 本旨真 named-scarcity）：有村=有 scout/care/relief 派遣需求(想派) 且 spare named bench 短缺
+#     （post-unified-dispatch 派遣借 spare named；派出後 bench→0 想派更多派不出=T12 原症）→ bench<CONCURRENT→高 need。
+#   ★genuine 非 crank：真反映真壓力（想派沒人），非 bump MAG 逼贏。bounded：bench 足 or 無村→兩分量皆 0。
+static func officer_need(state: WorldState, team: TeamData) -> float:
 	var f = state.factions.get(team.faction_id)
-	if f == null:
-		return 0.0
+	if f == null or f.leader_team_id != team.team_id:
+		return 0.0   # 非領主（solo/村）→ 無派遣官需求
 	var oversight: int = 0
 	for mid in f.member_team_ids:
 		if mid != team.team_id:
 			oversight += 1   # 管轄村數（自身除外）=派遣/照看負擔 proxy
+	if oversight <= 0:
+		return 0.0   # 無管轄（solo warlord）→ 無派遣需求 → 0
+	var spare: float = float(team.named_members.size())   # 可借派遣的 spare named bench
+	# ①governing oversight
 	var desired: float = clampf(float(oversight) * PROMOTE_NAMED_PER_VILLAGE, 0.0, PROMOTE_MAX_DESIRED)
-	if desired <= 0.0:
-		return 0.0   # 無管轄（solo warlord）→ 無派遣需求 → demand 0
-	var spare: int = team.named_members.size()
-	return clampf((desired - float(spare)) / desired, 0.0, 1.0)   # spare≥desired→0 bounded
+	var oversight_need: float = clampf((desired - spare) / desired, 0.0, 1.0) if desired > 0.0 else 0.0
+	# ②dispatch-demand：有村想派 × bench 短缺（bench≥CONCURRENT→0 能派無壓、bench=0→1 想派派不出）
+	var dispatch_demand: float = clampf((OFFICER_DISPATCH_CONCURRENT - spare) / OFFICER_DISPATCH_CONCURRENT, 0.0, 1.0)
+	return maxf(oversight_need, dispatch_demand)   # 取最大壓力（governing 或 dispatch 任一真缺=缺 officer）
 
 # 最佳可用匿名候選資質(0..1)：最高 tier 的 combat / 菁英 combat（資質浮現、非每平民幹部料）。
 func _best_candidate_quality(team: TeamData) -> float:
@@ -1699,21 +1720,32 @@ func _try_promote_advisor(state: WorldState, team: TeamData) -> void:
 		return   # 只領主 deliberate 提拔班底（村副手 parked）
 	if AnonTierSystem.total_pop(team) <= 0:
 		return   # 無 anon 可提
-	var demand: float = _promote_demand(state, team)
+	var demand: float = officer_need(state, team)
 	if demand <= 0.0:
 		return   # 記名夠/無管轄 → 需求 0（bounded）
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var amb: float = float(lv.get("野心", 0.5)); var cau: float = float(lv.get("慎重", 0.5))
 	var quality: float = _best_candidate_quality(team)
-	var util: float = promote_util(demand, float(lv.get("野心", 0.5)), float(lv.get("慎重", 0.5)), quality)
+	var util: float = promote_util(demand, amb, cau, quality)
 	if Probe.enabled: Probe.note("promote.util", util)
-	if util <= PROMOTE_THRESHOLD:
-		return   # ★bounded：低需求 / 多疑吝嗇 / 無夠格候選 → 不提（非 flat 逢缺必補）
+	# 【normal 路】好候選（訓練/tier-up 育成或天生高 tier）→ util 過門檻 → 提好 officer。
+	var fired_normal: bool = util > PROMOTE_THRESHOLD
+	# 【A 急徵路】真絕境（急需 demand≥門檻 + 真無替代 spare=0 + normal 未 fire=無夠格候選）→ relax quality gate、拔最佳平民 NOW=弱 officer。
+	#   ★bounded 非逢缺必補：demand 未達絕境 or 有記名 or normal 已 fire → 不走此路；仍過 pmult（多疑絕境照樣不濫拔）。
+	var desperate: bool = (not fired_normal) and demand >= PROMOTE_DESPERATE_DEMAND \
+		and team.named_members.size() <= PROMOTE_DESPERATE_SPARE
+	var fired_desperate: bool = desperate and promote_util_desperate(demand, amb, cau) > PROMOTE_THRESHOLD
+	if not (fired_normal or fired_desperate):
+		return   # ★bounded：低需求 / 多疑吝嗇 / 無夠格候選且非絕境 → 不提（非 flat 逢缺必補）
 	# ★genuine 提拔（§3 真代價）：generate_for_team = kill_random 1 anon(偏高 tier 精銳、真扣池) + generate() 獨立人格值(非複製) + 不可逆。
+	#   A 絕境時池內僅平民 → kill_random 拔平民 → _apply_promotion_skills 依 src_tier 灌少技能=天然弱 officer（救急不救好）。
 	var new_named: PersonData = PersonGenerator.generate_for_team(state, team, "member")
 	if new_named == null:
 		return
 	state.add_member(team, new_named.id)   # 加記名進 lord roster（非 spawn 孤立 subteam=與機械誤升 bug 涇渭）
-	if Probe.enabled: Probe.bump("promote.fired")
+	if Probe.enabled:
+		Probe.bump("promote.fired")
+		if fired_desperate and not fired_normal: Probe.bump("promote.field_desperate")   # A 急徵弱 officer
 
 func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
