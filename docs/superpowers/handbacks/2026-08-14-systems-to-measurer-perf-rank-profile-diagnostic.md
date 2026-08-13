@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[perf profile diagnostic:pin rank_scored 內真熱 sub-part(R² CLEAN、diagnostic-first、byte-identical arc 前置)·FACT:rank_scored 93.7%(perf_phase_bed 已測)、weight()是cheap純函式非熱點(reviewer親驗)·pin熱點真身(temp timing tap用完revert):對rank_scored一次呼叫拆時間:①DecisionContext.gather(state,team)(decision_engine:50)總時 vs ②option-loop(:64-67 for opt in applicable×for term:weight×eval)總時·②再拆per-term eval時間:哪些term貴(threat_pressure/reachability/marginal_economy/belief類 vs 廉價flat如survival_pressure/camp_drive)→dump term→累積us排序·①再拆gather內子計算:threat assessment/reachability(PathSystem)/belief scan/tile掃各佔·★輸出=rank_scored內時間分布(gather vs loop、貴term排序、gather子熱點)→pin dominant sub-part=systems spec byte-identical優化(gather子快取call-scoped/貴term memoize/redundant消除、對應§3)·★方法:延伸perf_phase_bed(force_full_hd全隊near+phase_timing我已建)加rank_scored內層tap or measurer自建temp tap;warring seed1337短窗(perf_phase_bed 1天240tick已夠、force_full_hd每tick跑faction_ai)·★注:temp tap用完revert(同gather-yield/ledger溫度計慣例)·evidence-only禁預設哪個熱·output→systems收口定優化slice(R²已定binding:gather快取必call-scoped非跨tick、剪枝須數學支配論證)·地基KEEP"
 ---
 
