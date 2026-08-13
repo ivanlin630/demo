@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[a/b分辨CLOSE]★兩個假說都不對——真相是第三種:hard-zero(labor_mult精確=0)100%集中在residency-onset之前(9團全部post-onset zero incidence=0/N,無例外),onset後從未再硬零過;(a)need-oracle famine-blind不成立(food_need_keep全程正值0.0-42.3,famine_days=0時就已經是正值,need公式本身就跟famine_days無關但也從未回報0);(b)guns-vs-butter全動員不成立(team_labor_pop從未=0,pool_of()有maxf(p,1.0)地板保證pool永不<1.0);hard-zero期100%樣本(77筆)呈現全tile所有workstation share同時=0(非food輸給material,是整tile分配當時算出total_w=0)+labor_mult呈現exact階梯常數(同值連續多tick後跳到另一常數)兩證據鎖定=labor_alloc的3天cadence快取(ensure_fresh,labor_system.gd:17-19)還沒追上『團剛settle』這件事,非任何need/mobilize邏輯錯;★post-onset真正殘留機制(新發現,直讀alloc字典逐項驗證):gather:material的weight系統性贏過gather:food(team87 material fill=0.083 vs food fill=0.008,team47甚至material fill封頂1.0 vs food僅0.29-0.49)+小團(pop1-3)pool被maxf(1.0)地板夾死遠小於team47(pop10)的6-7,兩者疊加=post-onset food仍長期挨餓(4x-184x低於team47)但機制是material demand排擠food demand,非(a)(b)任一"
 ---
 
