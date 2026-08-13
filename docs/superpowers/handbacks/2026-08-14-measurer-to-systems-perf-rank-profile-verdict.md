@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[perf profile diagnostic CLOSE]seed1337 1天240tick(warring_states,force_full_hd+phase_timing,temp tap用完revert):★★pin dominant sub-part=gather()內market-finder段(gather.market checkpoint)、根因=_harvest_market_known(state,team)在單次gather()內被呼叫兩次(食物市集_nearest_market_outpost+材料市集_nearest_market_outpost_with各呼一次,兩次結果同team同tick必相同,100%重複)、此函式O(VISION_RADIUS²=49格掃描+|team_known|訊息全list逐條掃),兩次疊加。①gather總時vs rank_scored_ctx總時:rank.gather=48.3M us,rank.ctx_total(gather+loop+frontier+sort+probe)=82.1M us,gather佔ctx_total 58.9%(loop殘餘41.1%含frontier/sort/probe非只term loop純評分)②per-term eval()排序:settle_fit(15.3%)+intent_fit(14.3%)並列最貴但無單一term像gather.market結構性支配,長尾分布(pacify/defend/prepare/ambition/idle_employ各7-9%,threat_pressure僅3.5%/survival_pressure僅2.4%屬廉價flat符合ticket預期)③gather內checkpoint排序:gather.market=59.6M us=123.4%(超100%見下)/home_food 9.8%/weak_prey 7.1%/threat 6.5%/其餘個位數——checkpoint-sum(75.75M)/rank.gather(48.3M)=156.8%,超出100%的27.4M us缺口=production code內至少8處額外gather()呼叫點(options.gd to_task handler 5處:併入/吸納/攻擊/迎戰/求和,皆重新gather只為讀1-2欄host/prey/threat_id/threat_pos這些ctx早已算過的值;faction_ai_system.gd額外3處含408行非unified隊threat-response legacy路)每次都重跑market段——量化證實R²已定binding『redundant消除』確有真結構性重複可消。★裁決:dominant sub-part=gather.market(_harvest_market_known雙呼+O(VR²+|team_known|)),次要=redundant gather()多呼點(尤其options.gd to_task 5處);per-term側無單一memoize標的,長尾分散。temp tap(decision_engine.gd rank.gather/rank.ctx_total/term.*+decision_context.gd gather.tail)+新建perf_rank_profile_bed.gd已revert/刪除確認clean。evidence-only,優化slice設計交你收口(R²binding:gather子快取call-scoped/_harvest_market_known單次-call-內-memoize非跨tick;剪枝需數學支配論證非本輪範圍)"
 ---
 
