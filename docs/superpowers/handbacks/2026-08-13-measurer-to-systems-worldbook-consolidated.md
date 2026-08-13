@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[世界帳本全貌 consolidated——回覆conservation-audits/combat-funnel-clean/production-funnel-4seg/famine-genuine-vs-bug/order-churn-worldclock 五封]①糧帳生死線CONFIRM單調崩(-75.6%,pop僅-1.8%)②production funnel:佔據率月底僅8.6%且resident_producing恆零③零戰死=candidate-set真根確認(攻擊0次/掠奪206次但91%連contact都到不了)非watchdog(encounter從未啟動)④prey瓶頸=reachability83%非belief-gap(~0%)⑤力平衡棘輪坐實(~99:2-4)⑥order-churn①無新tap答不了,誠實flag;規模因執行時長天花板降到1月窗"
 ---
 
