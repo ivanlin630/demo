@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch slice B4+B5(生存產出層、R² CLEAN、bundle 一 worktree、先做):堵『安家後採糧硬零/material 排擠 food』=已 settled 團餓死根·完整 inline plan 免依賴 worktree 有 spec 檔·★B4 settle→invalidate labor cache(明確 bug 小修):settle/紮營成功落腳點立即 LaborSystem.ensure_fresh(state,tile)、加在 _convert_to_resident(interaction:1363 body 末+呼叫端 faction_ai:1963 後)+establish_crude_camp 成功後;只提早刷既有 cadence 非改分配邏輯·TDD:bed settle 一團於 fresh tile→同 tick labor_mult(tile,gather:food)>0(非等3天)·★B5 food need 隨飢餓升(NeedOracle 單點勿平行):need_oracle:105 _self_use food 分支×famine_escalation=1+maxf(0,(SAFE_DAYS−food_days)/SAFE_DAYS)×FAMINE_GAIN;SAFE_DAYS=ResourceSystem.FORAGE_FLOOR_DAYS(5、既有錨非新knob)、FAMINE_GAIN=TEST VALUE bounded(建議2.0、measurer bounded-verify);food_days=effective_food(state,team)/(pop×FOOD_PER_PERSON_PER_DAY);thread state 進 _self_use(need_keep:14 已有 state 可傳、trivial);TDD bounded 兩象限:食飽(food_days>=5)→escalation=1 need 不變+瀕餓(food_days=0)→need=base×(1+GAIN)+整合:飢餓團 gather:food weight 升→rebalance 多分 labor·★invariant:感知鐵律(B5 讀自家 food_days=自知非god-view、B4 無決策讀);零新RNG;fp 標 intended-change(B5 行為有意改)·★量測 gate(交 measurer 綠才 merge):B4 新居民首3天採糧非硬零+B5 飢餓村勞力回糧/吃飽村照舊 bounded 兩象限·worktree feat/survival-prod-b4b5 base 現 main(code 未改=同origin)、handback 寫 main mailbox 絕對路徑·地基 KEEP"
 ---
 

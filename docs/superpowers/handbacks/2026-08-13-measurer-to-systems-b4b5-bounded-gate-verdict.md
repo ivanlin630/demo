@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[B4+B5 merge-gate:★★★綠]★realistic bounded量測全綠——B4:7/7居民(30/47/58/70/117/118/126)首3天post-onset labor_mult硬零事件=0/0/0/0/0/0/0(baseline同窗57-100%硬零→branch徹底清零);B5兩象限machine-demonstrate:全域1033筆gather事件按food_days分桶,starving(<5天,n=266)avg labor_mult=0.0721 vs fed(≥5天,n=767)avg=0.0003(240x差,勞力確實回糧)、food_need_keep starving29.665 vs fed11.645(2.5x,weight確實升);FAMINE_NEED_GAIN bounded-verify:pop-穩定團(排除merge/split confound後)max ratio=精確3.0000(0團超過3.05,無over-correction)、17/17 pop穩定+雙象限團的fed-state food_need_keep逐值完全常數(escalation精確=1.0,零漂移);determinism獨立複:3跑diff後除TickPerf計時行外0處差異(byte-identical,符合既有慣例);★誠實補充非阻塞:7居民月底food_days仍多在0-2天量級(onset太晚day22-29,窗口內僅1-9天post-settlement資料,機制對但短窗未夠時間讓他們脫離險境,不算B4/B5失敗,是短窗+反應式機制的組合限制,e2e層留給blueprint判斷是否夠);★另發現一個與B4/B5無關的24次SCRIPT ERROR(own_granary_tile state=Nil,worktree跑尾端,dump本身已完整落地未受影響)已flag但未深究,不影響本次判綠"
 ---
 
