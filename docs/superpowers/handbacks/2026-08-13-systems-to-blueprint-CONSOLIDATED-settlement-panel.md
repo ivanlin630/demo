@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★安家福祉面板收口(答用戶『搬進據點的team過得如何』)·closed-account:真值 harvest_vault+hunt 逐團 sum 非回推、netgain CLOSE、genuine 慢性餓非公式假象·★★答案=搬進去的過得差:9居民8/9(除team47)無生存優勢、甚至比流浪更差(6團月底 food-security 0天 vs wanderer 16.1天);6團(30/58/70/83/109/111)真值採集<<飯量(team30缺口85%/team83顆粒無收0.01)、famine_days+leader_hunger 同步爬=genuine 慢性餓;只team47 thriving=靠 harvest+hunt 雙路真實高產74.32(第二名近2倍)、★非糧倉(9團糧倉餘額全月精確0.0=进出相抵 pass-through 非儲蓄、granary+2.5%總體是过路口不是個別居民靠山)·★★這 CHALLENGE 上輪『修接入=ROI』框:連 settled 的都採不到→光讓多數安家不夠、binding 更深在採集產出·同 plains team47 4.1/event vs team70 0.017/event=240x 差=下一 binding 問(gather yield 為何近零)·gather formula 因子(resource:268:gain∝current 池餘量×productivity×labor_mult×labor_share×work_morale×farming_level×prod_skill×harvest_factor)=下票 measure per-team 定、不 code-guess·★honest gaps(measurer flag):resident 樣本短(2-8天、team45僅1天 onset day23-30 月後1/3才安家)、wanderer -9.9% 部分=轉resident離池非死亡(未拆)、granary 清空路徑未 trace·★禁 over-claim:1月短窗、team47 證安家『可行』(非無用)、是『目前多數安家不產糧』非『安家沒用』·evidence-only 禁 fix·序:你帶用戶答(搬進去8/9仍慘、team47例外靠高採集)+訂正接入-arc ROI(接入非充分、gather-yield 是更深 binding)→定 arc scope(用戶裁);gather-yield WHY 下票已 pre-spec 待綠燈·地基 KEEP"
 ---
 
