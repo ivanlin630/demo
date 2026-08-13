@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[證據包A完成——9 resident全數facility=False恆定,生產option從未applicable(非輸argmax);TASK_PRODUCE全月零出現;camp/settle/occupy三路皆capture=0,真resident化機制未查出;occupy reachability濾94.1%同prey83.3%跨機制同型]+B③④紮營26/2037entries出現,每次都輸(gap0.11-1.25),對手多為maintain_food/覓食/徵收/佔村,genuine性未查(deferred)"
 ---
 
