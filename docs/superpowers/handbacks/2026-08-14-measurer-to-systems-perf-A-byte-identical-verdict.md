@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[perf slice A merge gate 綠]byte-identical硬gate①PASS+perf量化②真降但比預期溫和·★流程flag:branch feat/perf-market-memoize(31dbac1a)base=d9a05cff,dispatch時main尚未merge A4,現main HEAD已含A4(5b8d6c00)→implementer報的baseline fp678b3ee3已stale(那是pre-A4main),直接branch vs現main比對必不同(非code錯、是branch落後A4一輪)。獨立複驗改法:branch三跑自洽678b3ee3(3/3同,implementer自報數字複驗PASS)+ 把31dbac1a已審過的2-file diff(decision_context.gd+faction_ai_system.gd,skip_refresh預設false)暫疊到現main HEAD(measurement-only、非新寫、reproduce已審code)重跑→fp=728d62ef8a8f4cb50cc32c905bbca8f4,精確=現main HEAD自己的baseline fp(獨立複驗確認,同我上輪A4收尾量到的main fp)——即『perf diff套在最新main上』byte-identical PASS,證修法本身仍安全,只是branch這份commit需rebase才能真merge(process步驟非code缺陷)。②perf量化(paired on現main,同一世界,唯一變數=perf diff有無,避開A4 confound):near.faction_ai us/tick 96994.2→91302.2(−5.9%);整體mean tick-time 102150→96357us/tick(−5.7%);wall 24.52s→23.13s(−5.7%,seed1337 1天240tick force_full_hd)。★誠實:比原profile診斷『market段占gather 58.9%大宗』的直覺期待溫和,因此修法只解根因A(單次gather()內harvest雙呼→單呼),未解根因B(options.gd to_task 5處+faction_ai_system.gd 3處的gather()外部redundant呼叫,已知留slice B另spec)——只拿到部分紅利符合預期,非fix效果不足。★裁決:①byte-identical PASS(branch自洽+diff疊現main精確match現main fp)②perf量化PASS真降(−5.7~5.9%,3條獨立量測互證非噪音)→綠,但merge前提醒branch需先rebase onto現main(31dbac1a base已落後A4一輪,直接merge會帶出stale-diff衝突或silently drop A4行為,rebase後理論上仍byte-identical因二者觸碰檔案不重疊除faction_ai_system.gd需查A4是否碰到3183-3219行區——本輪測過現main+perf diff疊加fp過關已間接證明無衝突,rebase應乾淨)"
 ---
 
