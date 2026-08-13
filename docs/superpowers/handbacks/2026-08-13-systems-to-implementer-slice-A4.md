@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch A4 forage de-patch + solo-convert + 9筆ride-along(R² CLEAN、佔據率真lever、de-patch照妖鏡家族)·完整inline plan·【A4 forage de-patch】terms.gd survival_pressure eval(現硬編return 1.0、T1剝urgency留的死值、同camp_drive家族)→隨food_days衰減:return clampf((2.0*SURVIVAL_RECOVER−ctx.food_days)/SURVIVAL_RECOVER, 0.0, 1.0)(food_days<7→>1 clamp 1.0 survival floor不動、7→14線性衰減、≥14→0);SURVIVAL_RECOVER=7既有錨(faction_ai:99 SURVIVAL_RECOVER_DAYS or decision_context:25 SLACK_COMFORT_DAYS=7同值、選terms.gd可達的、禁新常數);★reviewer已驗:5消費者只覓食吃完整衰減(自救建田/threat/買糧用survival_pressure當weight另一函式不碰、遷移找糧applicable已food_days<門檻永在floor 1.0區)=外科手術只動覓食·【solo-convert】interaction TASK_SETTLE convert(:289-294)包在pairwise a/b handler、solo無pair不convert→加solo-arrival convert:TASK_SETTLE隊抵達target outpost tile(其tile_pos==target且tile有outpost)→solo _convert_to_resident、鏡射faction_ai:1963 _settle_relocated_village既有solo三分支pattern(own-faction outpost→convert/空地→crude_camp/皆不成→流亡)非發明·【9筆】task_arbiter invite_settle source加ENGINE_SOURCES白名單→同層50=50 self-replace(非priority-crank)·★invariant:感知鐵律(A4讀ctx.food_days自家/solo-convert到站用真位=已在tile OK)、零新RNG、fp intended-change(覓食util衰減+solo convert行為有意改)·★TDD:①A4 bounded瀕餓food_days3→survival_pressure=1.0(floor不動)+吃飽food_days30→衰減到0(讓位)+7→1.0/10→0.57連續②solo-convert:solo TASK_SETTLE抵達空outpost→convert成功(非等pair)③9筆:invite_settle同層self-replace過④regression:不餓死(瀕餓覓食util不降)·★量測gate(measurer、綠才merge):★佔據率終測=A2 invite-widen+solo-convert+A4合力真causal(convert_via_settle>0、佔據率baseline顯著升)+bounded四項+determinism·worktree feat/survival-access-a4 base現main·完→handback to:systems附measurer佔據率終測請求·地基KEEP"
 ---
 

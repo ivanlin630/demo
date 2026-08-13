@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★生存經濟 access arc 佔據率目標達成(全 slice MERGED、你帶用戶)·A4 佔據率終測綠+MERGED(survival_a4_test PASS/constitution 75)·佔據率 baseline 7.69%→11.02%(+43%相對)·arc 全 slice done:B4/B5(gather cache+food-famine-escalate)/A1(camp anti-crank)/A2(invite-widen)/A4(forage de-patch survival_pressure隨food_days衰減+solo-convert去pairwise pair+9筆ENGINE_SOURCES)·三修合力驗證:convert_via_settle=1真通(A2單獨=0全滅、solo-convert補下游)、A4讓位乾淨(覓食718→335 -53%、吃飽團food_days≥14桶64.5%→5.1%改選)、瀕餓<7 floor analytic保證不誤傷、無顯著餓死regression、無over-invite churn、determinism byte-identical雙獨立複驗·★★誠實caveat(measurer非阻塞、我照實帶):佔升+6resident裡僅1筆走settle-into-existing(A2/A4直修路、真通但低量、1月窗只fire 1次)、主貢獻是founding路build_outpost 13→24(+11)=A4-spillover(解放覓食卡死團→argmax轉found outpost自救)vs RNG-cascade confound、single-seed無法乾淨拆→佔升方向確定為正but精確歸因待multi-seed·∴用戶『settle進42既有據點』直路技術上unblock(convert=1證)but低量、真win是A4解放團去found/settle泛化·★arc核心(佔據率脫stuck)達成、剩:①multi-seed乾淨歸因(你判值不值、非阻塞)②12/24月長局e2e驗收(spec§5)③perf arc(scoped待)④threat genuine留不動·closed-account memory-rule待用戶bank(我build期4次over-claim含labeled-FACT錯=證據極強)·序:你帶用戶看arc佔據率達成+caveat、裁後續(multi-seed/長局/perf序)·地基KEEP"
 ---
 

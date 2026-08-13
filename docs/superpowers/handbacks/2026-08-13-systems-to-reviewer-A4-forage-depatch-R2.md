@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²快審 A4 forage de-patch + solo-convert + 9筆ride-along(blueprint GO spec-lite、de-patch家族免R①、佔據率真lever)·write-side discipline:FACT[code-read坐實]vs ASSUMPTION標清·【A4 forage de-patch】FACT:survival_pressure eval(terms.gd~:333)硬編1.0不讀state、覓食option(options:53)用它+applicable(options:57)不查food_days→吃飽團(食152)照forage贏argmax priority80(measurer 80.6%樣本food_days≥7坐實);survival_pressure是共享term(覓食:53/自救建田:67/threat:75/買糧:95/:312)but別option有自己food-gate(買糧RESTOCK_DAYS)→衰減主效在覓食(唯一無food-gate)·fix:survival_pressure eval隨food_days衰減=clampf((2*SURVIVAL_RECOVER_DAYS−food_days)/SURVIVAL_RECOVER_DAYS,FLOOR,1.0)(food_days<7→clamp1.0 survival floor不動、7→14線性衰減到FLOOR、錨SURVIVAL_RECOVER_DAYS=7既有無新常數)·★審點:(1)共享term衰減會不會誤傷別survival option?(自救建田吃飽本不需/買糧有own gate/threat_pressure是另一term survival_pressure只當weight?)——衰減共享是否比覓食-specific gate乾淨?(2)FLOOR值/衰減span錨7是否genuine非拍腦?(3)瀕餓<7 survival_pressure=1.0 floor不動→不餓死regression保?·【solo-convert】FACT:TASK_SETTLE convert在pairwise handler(interaction:289 elif a/b.current_task==TASK_SETTLE需co-located pair)→solo抵達空outpost無pair→convert=0;fix:TASK_SETTLE隊抵達target outpost tile該solo convert(鏡射faction_ai:1957 own-faction arrival、去pair要求對空村);★審:感知鐵律(到站判定用真位OK=已在該tile)、solo convert條件(target tile有outpost+invited/own-faction)?·【9筆ride-along】invite_settle加ENGINE_SOURCES白名單→同層50=50 self-replace(非priority-crank、blueprint認小gap)·★bounded gate(交measurer):①瀕餓<7覓食100%②吃飽衰減讓位③不餓死regression④佔據率終測=A2+solo-convert+A4合力真causal·CLEAN→implementer·地基KEEP"
 ---
 
