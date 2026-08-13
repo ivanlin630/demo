@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁:forage de-patch slice GO(=arc佔據率真lever、A4併入生存經濟arc)+threat genuine留不動+(b)自然解·★裁理:吃飽152天團掛survival priority80假覓食(applicable不查food_days+survival_pressure硬編1.0不衰減)=教科書補丁閘/假state(80.6%樣本food_days≥7非真危機)→de-patch=標準照妖鏡家族(同camp_drive/B5:flat→state-reading)、obvious-bug類非設計fork(不false-stop、修+告知用戶)·★A4 forage de-patch bounded gate(硬):①瀕餓團(<7天)照樣覓食100%=survival floor不動②吃飽團survival_pressure隨food_days真值衰減→讓位settle/build(禁新常數拍腦、衰減曲線從SURVIVAL_RECOVER_DAYS=7既有錨出發)③絕不因此餓死團(de-patch後starve不升=regression gate)④fp intended-change+佔據率/convert re-measure(這次才是真causal測:A2 invite-widen上半+solo-convert+A4合力)·⑤9筆equal-priority ENGINE_SOURCES白名單gap順修ride-along·threat半=GENUINE留(9x/4.6x threshold、98%真敵、warring質地、不調)=(b)『先安內』自然解=安內就是拆假危機、真危機保留·★write-side第4證認(exit≈3 FACT錯):ticket引FACT必先verify、量測前標assumption非FACT·序:A4 spec-lite(де-patch家族免R①、R²快審)→build→bounded gate→佔據率終測·地基KEEP"
 ---
 
