@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★gather-yield WHY 收口(CLOSE、真值逐事件、非 code-guess)·binding=labor_mult(gather:food workstation fill)決定性主兇=240x 差來源、枯池/技能/效率/productivity 全排除(team87 池226.8≈team47 268.7 但 gain 差410x=枯池決定性反例)·5團(70/83/87/109/111)57-80% 採集 tick labor_mult 硬零=多數時候根本沒分到勞力採糧(硬零非低值)·機制(labor_system:36-90):tile 共用勞力池 rebalance()、gather:food 跟 gather:material/mfg:* 搶同一小 pool(pool=Σ共址 PRODUCE 隊 labor_pop、按 _workstation_need weight 比例分)·★systems code-logic 收窄硬零成兩候選根(:66-83、禁預設哪個、measure 定):（a）wgt[gather:food]=0=NeedOracle food need_keep+demand=0(餓著卻不報食物需求=famine-blind need-oracle=bug、連統一矩陣 need-oracle arc)（b）pool=0=共址 PRODUCE 隊 labor_pop 全動員(guns-vs-butter warring 選軍不選糧=genuine tradeoff、連軍民混編 arc)·測法:dump 全 tile.labor_alloc→別工位有勞力但 food 沒=(a)/全 0=(b)·★arc scope 定案含意:單修接入不夠(已 resident 團被 labor 分配餓死、新接入重蹈)、arc 必動 labor→food-under-famine 這條·★9居民 has_tag_produce 全 100% True(排除缺 tag 簡單解)·★ownership-mismatch 這輪 measurer 未報(labor_mult 太決定性、食物幾乎沒採到 where-deposit moot=次要、未跑非結論)·honest:_workstation_need 同格競爭細節+(a)/(b)分辨=下票 pre-spec·禁 over-claim(收窄到兩 testable 根、哪個=measure)·evidence-only 禁 fix·序:你帶用戶(gather-yield 卡 labor 分配非枯池非懶)+定 arc scope(接入+labor-food-allocation)→下票分 a/b·地基 KEEP"
 ---
 
