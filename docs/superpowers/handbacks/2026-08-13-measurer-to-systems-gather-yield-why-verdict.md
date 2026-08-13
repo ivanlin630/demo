@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[gather-yield WHY CLOSE]★binding因子=labor_mult(gather:food workstation fill),非tile枯池——team87 current(tile池)=226.8跟team47的268.7同量級(僅1.18x)但gain仍相差410x,決定性排除①頭號嫌疑;labor_mult_ratio(47 vs 各團)=5x(30)/29x(58)/53x(70)/171x(87)/137x(109)/96x(111)/★415x(83),其餘因子(productivity/harvest_factor/prod_skill/labor_share)全部落在1-13x內遠不夠解釋240x差;70/83/87/109/111五團labor_mult=0事件佔57-80%(team47/45全程0次為零)——多數採集tick直接gain=0(硬零非低值);機制面(labor_system.gd:36-90+109-115):labor_mult=tile-level『gather:food workstation』fill值=need加權跟同格其他workstation(gather:material/mfg:*)搶同一份小pool(pool=Σ co-located PRODUCE隊labor_pop,K_GATHER demand cap相同、按_workstation_need比例分,OVERFLOW_ITERS=8迭代收斂)——非team自己'沒去採',是tile勞力池分配機制把這些隊的'採糧'工位配到接近0;9居民has_tag_produce全程100%True(排除team自己缺TAG_PRODUCE這個簡單解釋),真正驅動weight的NeedOracle細節(其他workstation搶贏的具體原因)這輪未逐一trace,交你判斷值不值得再深一層"
 ---
 
