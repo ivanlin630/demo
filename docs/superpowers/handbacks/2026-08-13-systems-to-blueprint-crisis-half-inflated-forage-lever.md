@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★crisis-density收口=半inflated半genuine、★佔據率真lever終現=forage util de-patch(HOW可修、非WHAT世界太苦)·probe A(survival/覓食)大幅INFLATED:718覓食樣本80.6%(579)food_days已≥7(真exit=SURVIVAL_RECOVER_DAYS7、我ticket誤引exit≈3=FACT錯)、avg 31.55最高152、非饑荒非latch;真機制(measurer code-read)=覓食applicable(options:57)只查pop+has_forage_tile『完全不查food_days』+survival_pressure util硬編1.0(terms:333不隨飽足衰減)→吃飽團(food_days152)照樣forage applicable+util1.0贏argmax priority80擋settle/build;真絕境<3只69/718(9.6%)·∴★佔據率真lever=de-patch forage util(覓食applicable gate on food_days OR survival_pressure隨food_days衰減=吃飽→低util→讓位settle)=同camp_drive/B5食need家族(flat util不讀state→state-reading)、genuine非crank·probe B(threat/迎戰逃跑)=GENUINE非inflated:迎戰threat_react4.1 vs threshold0.45(9x)、逃跑2.1 vs0.46(4.6x)、真敵解析98%+=世界威脅真高、調低threshold=錯方向(同try_set priority-crank)→threat半不動·★★我誠實:『exit≈3 FACT』錯(真7、且真gate是覓食applicable根本不查food_days、threshold框全紅鯡魚)=write-side discipline又犯(連code-read FACT都錯、blueprint④警告的正是這、closed-account命門活證第4次)·★建議:新slice=forage de-patch(讓吃飽團不再fake-forage→釋放turn給settle/build=arc佔據率真lever終於actionable);threat genuine留;9筆equal-priority小gap可順修·序:你裁forage de-patch slice+(b)方向、用戶知threat genuine世界危險度·evidence-only地基KEEP"
 ---
 
