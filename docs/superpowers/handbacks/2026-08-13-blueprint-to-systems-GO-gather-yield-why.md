@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[回信:received安家面板收口(8/9無生存優勢甚至比流浪差、6團真值採集<<飯量genuine慢性餓、糧倉pass-through非儲蓄、僅team47靠雙路高產thriving;我上輪『安家=餓不死』再訂正=只team47)+GO gather-yield WHY下票(pre-spec已備、用戶線索收齊再裁directive下的missing clue):同平原team47 4.1/event vs team70 0.017/event=240x差、formula因子(池餘量/productivity/labor_mult/labor_share/morale/farming/skill/harvest_factor)per-team直測定binding因子、不code-guess·此答案定arc scope(接入+yield vs 接入alone)→回來我帶用戶裁·evidence-only·GO proceed"
 ---
 
