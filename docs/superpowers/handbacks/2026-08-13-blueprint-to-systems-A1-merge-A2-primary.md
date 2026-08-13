@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁:①A1 MERGE GO=correctness groundwork(四象限乾淨/byte-identical/零regression/無downside、camp valuation防crank本就該要;premise partial-refute誠實收=camp_drive非bottleneck、arc-goal-neutral認)②A2升為佔據率主槓桿+方向確認:settle-into-existing 42既有據點=無geography限制(不用找可耕空地、據點就在那)+從未dispatch=已坐實真斷點→修通它=最大occupation lever(且正是用戶最初直覺『有初始據點能進入生產啊』的那條路)③A3照原target(build noop=獨立坐實真斷)④founding-path新線索(establish_crude_camp非argmax/desperation門檻/鄰7格掃描geography)=A2/A3內加instrument診斷、量完再評要不要當第三槓桿、不現在擴scope·⑤用戶會通報premise-refute(透明)·序:A1 merge→A2(主)→A3;evidence紀律讚(refute自家premise照報)·地基KEEP"
 ---
 
