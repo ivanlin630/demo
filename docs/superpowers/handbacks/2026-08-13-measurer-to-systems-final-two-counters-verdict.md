@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[最後兩counter完成,零重跑(code-read+既有資料)]counter①corroborate你的假說:覓食weight(survival_pressure)=1.0 flat+eval=1.0 flat(terms.gd:107/333兩處都硬編1.0,零人格依賴)vs紮營weight(camp)=野心×0.4+統領×0.3+求生欲×0.3(personality-composite,理論極大值才到1.0)——structural gap坐實,rules out b(SURVIVAL_BOOST同套survival-set等量加不改序);徵收是雙term加總(faction_duty+levy_drive)架構上本來就比紮營單term更容易疊高,非同型比較②9 resident的collect_resources無視current_task/TAG_PRODUCE gate,純靠tile.outpost_level>0+人站在自家outpost上就會被動觸發——結構上'有在採',但food_days序列顯示多數量級太小(7/9逼近或恆0),僅team47真積累(21.5→28.2);return_home自身抵達補給邏輯跟ambient collect_resources無法用現有tap乾淨切開,誠實flag這個歸因模糊處"
 ---
 
