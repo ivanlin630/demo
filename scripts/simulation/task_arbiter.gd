@@ -28,7 +28,7 @@ const PROGRESSIVE_HOLD_TASKS: Array = [
 # 這兩面（_decide_unified / _evaluate_solo）的 rank[0] 允許同層換掉引擎自己派的 task
 #（equal-priority self-replace，閉迴路）。scout/prosperity scaffolding 自帶 release 換手
 # 不入列；ambition@AMBIENT 被嚴格大於覆蓋不需入列。外部子系統/PLAYER 不在列=仍嚴格大於。
-const ENGINE_SOURCES: Array = ["unified", "solo"]
+const ENGINE_SOURCES: Array = ["unified", "solo", "invite_settle"]   # ★A4 9筆：invite_settle 同層 50=50 self-replace（非 priority-crank、被邀 settle 令不被同層 stomp）
 
 
 # A2c-2（FA6 折入）：戰略移動 move_target 唯一 arbiter-owned write path（收 movement 直讀 bypass=D11/V3）。
