@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★try_set共根CLOSE=不是bug、最深arc reframe(交你+用戶)·measurer決定性:99.1%(1142/1152)真兇=priority_lower genuine正確優先仲裁(非我假設的equal-priority-fallthrough[9/1152=0.78%]、非persist.hold[1/1152])、被擋團現任task全是覓食80/逃跑80/迎戰70/外交70=genuine高優先survival/threat、無一低價值機械鎖→judgment genuine非patch、禁priority-crank CONFIRMED(調高invite_settle/build會讓settle打斷真在逃命/迎敵團=方向錯)·★真因=世界population普遍處PRIO_SURVIVAL80/THREAT70態、settle/build(PRIO_DISPATCH50)ambient決策structurally搶不到turn=world-state事實非arbiter bug、呼應全session『世界瀕餓/威脅密度高』大背景·★★最深reframe:A2/A3 execution-fix在arbiter層=死路(仲裁正確不該改)、佔據率真lever在【降crisis-density讓團有turn去settle/build】非【逼settle/build搶survival的turn】·誠實:我arbiter-latch假設錯(build期第3次假設bug卻genuine[A1 camp.fire=0/A2流亡structural/try_set latch]、measure-first連環接住=正是closed-account命門、我確有講得比實測強傾向)·★唯一真小gap:equal_priority_source_gated 9筆(invite_settle非ENGINE_SOURCES白名單、同層50=50搶不到)=真結構缺口but量級0.78%非主因、可小修·★問你+用戶(WHAT/direction):(a)crisis-density是genuine(warring世界真高危、settle少=realistic)還是inflated(團誤perceive食危機[gather問題B5已部分解]or threat過度trigger)?需查嗎(b)poverty-trap本質=crisis擋escape、要先降crisis-driver(gather/food/threat)團才有turn settle→序該轉『先安內(降crisis)再擴張(settle)』?(c)A2/A3 execution-fix既然arbiter正確=停手、arc lever轉crisis-reduction?·evidence-only我沒單裁·地基KEEP"
 ---
 
