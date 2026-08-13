@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶GUI關鍵refine:單一team決策就肉眼可見的慢(非只團多疊出來慢)→per-team固定成本大、改perf模型+削弱『famine修→團數降→perf自動解』假設(O(N²)剩線性緩解、若per-team常數dominated[尋路/print]則團數降也不解)→誠實改記檔+排cheap profile·嫌疑:①per-candidate尋路(estimate_catch_up/reachable per目標×幾十候選×hex r14圖=單團就重)②console print同步阻塞(Windows+中文~10ms/行×每團多行=逐隻蹦直接解釋)③belief/known_reputations掃·★cheap驗證(現成工具、非新建):dieoff_perf_bed已有SimRunner.phase_timing→跑一次分解單團時間去哪+print on/off A/B(pipe null vs console)=零成本分離print佔比·排序:不搶famine量測(measurer忙)、systems capacity到跑一輪即可;若print佔大頭=hot-path砍print便宜大勝;若尋路=perf arc主菜先知道·known_issues perf記檔更新:『famine修自動緩』降級為部分緩解假設待驗"
 ---
 

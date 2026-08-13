@@ -1121,3 +1121,6 @@ established=0 真根**非** goal orphan（立國鏈已接：gate `faction_ai:103
 
 ## 記檔：用戶眼球「思考時間長」= O(N²) wall-clock perf + print-overhead（2026-08-13、③story-audit GUI 觀察）
 用戶 GUI 親跑 seed1337 看終端：決策輪 fire 時每 team 決策**逐隻慢慢印出**（預期瞬完）=**wall-clock 每輪決策 stall**=#1 perf O(N²)（~130 團互查、[[project_time_scale_wave]] LOD 真根 O(N²)/目標50隊）**活體確認**、**非 sim-clock 節奏**（時鐘比第三守恆軸是 sim-clock 生存 timing=獨立事、與此眼球無關）。疑疊加 **print-overhead**（Windows console print 慢 + 決策路徑 debug print 拖）=未來 perf arc **便宜候選**（砍 hot-path debug print）。★處理序（blueprint）：famine/碎裂先修→團數降→O(N²) 自動緩→不夠再 perf arc（perf 非現在解、記檔待）。連 [[reference_hob_perf_protocol]]。
+
+## 記檔更新：per-team perf 固定成本（2026-08-13、用戶 GUI 單團就慢 refine）
+用戶 GUI：**單一 team 決策就肉眼可見慢**（非只團多疊）→ **per-team 固定成本大**。∴上方「famine 修→團數降→O(N²) 自動緩」**降級為部分緩解假設待驗**（O(N²) 剩線性緩解；若 per-team 常數 dominated 則團數降也不解）。嫌疑：①per-candidate 尋路（`estimate_catch_up`/reachable per 目標×幾十候選×hex r14 圖=單團就重）②console print 同步阻塞（Windows+中文~10ms/行×每團多行=逐隻蹦直接解釋）③belief/known_reputations 掃。★cheap 驗證（systems 跑、dieoff_perf_bed DIEOFF_PHASE=1 phase_timing + print console-vs-null A/B）→ print 佔大頭=hot-path 砍 print 便宜大勝 / 尋路=perf arc 主菜。
