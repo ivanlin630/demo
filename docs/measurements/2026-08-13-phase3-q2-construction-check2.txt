@@ -1,0 +1,16 @@
+total entries=2037
+★建設/自救建田 WON: team=6 tick=10 winner={'nd': False, 'opt': '建設', 'util': 0.102943915485499} decision_task=建設 result=committed
+★建設/自救建田 WON: team=18 tick=10 winner={'nd': False, 'opt': '建設', 'util': 0.0672773131592725} decision_task=建設 result=committed
+★建設/自救建田 WON: team=24 tick=10 winner={'nd': False, 'opt': '建設', 'util': 0.0949037863198164} decision_task=建設 result=committed
+★建設/自救建田 WON: team=6 tick=260 winner={'nd': False, 'opt': '建設', 'util': 0.476276706396392} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=2200 winner={'nd': False, 'opt': '建設', 'util': 0.195217300932947} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=2260 winner={'nd': False, 'opt': '建設', 'util': 0.315917536108117} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=4320 winner={'nd': False, 'opt': '建設', 'util': 0.165220652054509} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=4380 winner={'nd': False, 'opt': '建設', 'util': 0.169517399858025} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=4440 winner={'nd': False, 'opt': '建設', 'util': 0.176131546349224} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=4500 winner={'nd': False, 'opt': '建設', 'util': 0.184812618470628} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=4560 winner={'nd': False, 'opt': '建設', 'util': 0.189695719652143} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=4620 winner={'nd': False, 'opt': '建設', 'util': 0.19332534288853} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=4700 winner={'nd': False, 'opt': '建設', 'util': 0.194002869511732} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=30 tick=4800 winner={'nd': False, 'opt': '建設', 'util': 0.193371011226426} decision_task=建設 result=try_set_noop
+★建設/自救建田 WON: team=42 tick=6600 winner={'nd': False, 'opt': '建設', 'util': 0.441080063964517} decision_task=建設 result=try_set_noop

@@ -1,0 +1,33 @@
+=== 四pool t0 vs tN ===
+team_food:  14330.0 -> 3887.4  (-72.9%)
+granary:    29600.0 -> 30326.7  (2.5%)
+tile_pool:  76805.0 -> 76795.5  (-0.0%)
+GRAND:      120735.0 -> 111009.6  (-8.1%)
+
+=== 逐日四pool曲線(前10+後5天) ===
+day= 1 team= 12833.7 granary= 30800.3 tile_pool= 76805.0 GRAND= 120439.0
+day= 2 team= 12447.7 granary= 30890.3 tile_pool= 76805.0 GRAND= 120143.0
+day= 3 team= 11906.3 granary= 30987.7 tile_pool= 76805.0 GRAND= 119699.0
+day= 4 team= 11632.7 granary= 30965.3 tile_pool= 76805.0 GRAND= 119403.0
+day= 5 team= 11211.3 granary= 30942.7 tile_pool= 76805.0 GRAND= 118959.0
+day= 6 team= 10927.3 granary= 30930.7 tile_pool= 76805.0 GRAND= 118663.0
+day= 7 team= 10646.7 granary= 30918.7 tile_pool= 76805.0 GRAND= 118370.3
+day= 8 team= 10125.1 granary= 31015.3 tile_pool= 76805.0 GRAND= 117945.4
+day= 9 team=  9836.1 granary= 31008.3 tile_pool= 76805.0 GRAND= 117649.4
+day=10 team=  9404.5 granary= 31008.3 tile_pool= 76805.0 GRAND= 117217.8
+day=26 team=  4787.4 granary= 30516.7 tile_pool= 76802.8 GRAND= 112106.9
+day=27 team=  4567.9 granary= 30522.0 tile_pool= 76804.2 GRAND= 111894.1
+day=28 team=  4433.8 granary= 30329.4 tile_pool= 76797.9 GRAND= 111561.1
+day=29 team=  4220.0 granary= 30326.7 tile_pool= 76797.1 GRAND= 111343.8
+day=30 team=  3887.4 granary= 30326.7 tile_pool= 76795.5 GRAND= 111009.6
+
+=== close check ===
+{'delta_grand': -9725.37811155098, 'diff': -7.276e-11, 'sum_flow': -9725.3781115509}
+
+=== food_flow 分類(依ticket INFLOW/TRANSFER/SINK) ===
+INFLOW sum=665.2  SINK sum=-10458.0  TRANSFER sum(理論該近0)=67.4
+未分類: []
+
+=== erase evaporation 樣本 ===
+erase.food_snapshot samples n= 0
+erase_evaporation total = 0

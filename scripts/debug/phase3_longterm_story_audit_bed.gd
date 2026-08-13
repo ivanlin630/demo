@@ -36,6 +36,12 @@ func _initialize() -> void:
 	seed(WORLD_SEED)
 	Probe.enabled = true
 	Probe.reset()
+	# ★嚴格食物守恆帳(2026-08-13)：開既有driver-ledger(WorldState.record_driver,ResourceBank/TileBank
+	# 全部8個banker函式已呼叫,零新production tap,只是平常off省成本)——逐tick drain(避4096 ring cap
+	# 被非food寫入擠掉)進自家per-reason累加器,只留field=="food"的entry。
+	WorldState.driver_ledger_enabled = true
+	WorldState.clear_driver_ledger()
+	var food_flow: Dictionary = {}   # reason -> Σdelta（全程累加,月底才印,零reset）
 	FactionAISystem._a2b_remote_tribute_payers.clear()
 	var state := WorldState.new()
 	var runner := SimRunner.new()
@@ -44,6 +50,13 @@ func _initialize() -> void:
 	GameSetup.setup(state, config)
 
 	SpecimenDumpHelper.setup_from_env(state)   # ★別改成手動 specimen_team_ids，見上方危險註記
+
+	# ★守恆帳close-check真正t0快照(2026-08-13追加,修正版):必須在tick loop開始前(setup剛完成後)拍,
+	# 否則day1快照(原pool_curve[0])已經吃掉day1當天的flow,跟food_flow(從setup起算全累加)重複計入
+	# day1那段→diff偏差≈gen_seed+init_preset量級(已跑一次驗證坐實此偏差來源非漏tap)。
+	var pool_true_t0: Dictionary = _pool_census(state, 0)
+	WorldState.clear_driver_ledger()   # ★丟setup期間(gen_seed/init_preset)已排隊的entry——已烤進pool_true_t0快照,
+	# 不丟會被下面tick loop第一次drain重複算(state已變+driver又算一次=雙計)。
 
 	var new_keys: Array = ["promote.fired", "promote.field_desperate",
 		"migrant.dispatched", "migrant.arrived", "invest.dispatched",
@@ -92,6 +105,7 @@ func _initialize() -> void:
 
 	var curve: Array = []
 	var daily_curve: Array = []   # ★饑荒genuine-vs-bug診斷:逐日全域census(fragment vs 主隊food_days對照)+8 leader逐日food/task
+	var pool_curve: Array = []   # ★嚴格守恆帳:逐日四pool(Σteam.food/Σgranary/Σtile-regen-pool/GRAND)
 	var start_pop: int = _total_pop(state)
 	var no_player := Vector2i(-1, -1)
 	var extinct_tick: int = -1
@@ -101,6 +115,12 @@ func _initialize() -> void:
 	var encounter_ever_active: bool = false
 	for tick in range(total_ticks):
 		runner.advance_tick(state, no_player)
+		if not WorldState.driver_ledger.is_empty():   # 每tick drain,避非food寫入把food entry擠出ring cap
+			for _e in WorldState.driver_ledger:
+				if String(_e.get("field", "")) == "food":
+					var _r: String = String(_e.get("reason", ""))
+					food_flow[_r] = float(food_flow.get(_r, 0.0)) + float(_e.get("delta", 0.0))
+			WorldState.clear_driver_ledger()
 		if state.encounter_active:
 			encounter_ever_active = true
 			if state.encounter_tick > 800:
@@ -111,6 +131,7 @@ func _initialize() -> void:
 			var cur_starve: int = int(Probe.counts.get("death.starve_anon", 0))
 			daily_curve.append(_daily_census(state, day, cur_starve - prev_starve))
 			prev_starve = cur_starve
+			pool_curve.append(_pool_census(state, day))
 		if (tick + 1) % WorldState.TICKS_PER_MONTH == 0:
 			var month: int = (tick + 1) / WorldState.TICKS_PER_MONTH
 			var snap: Dictionary = {
@@ -145,7 +166,28 @@ func _initialize() -> void:
 		print("  %s 累計=%d" % [k, int(Probe.counts.get(k, 0))])
 	print("  mobilize.fraction 全程峰值=%.3f" % float(Probe.peaks.get("mobilize.fraction", 0.0)))
 
+	# ★嚴格守恆帳收口:merge erase-evaporation(走Probe.add_amount,獨立累加器)進food_flow同一份、印close-check。
+	food_flow["erase_evaporation"] = Probe.amount("food_flow.erase_evaporation")
+	var pool_t0: Dictionary = pool_true_t0   # ★真t0(setup後、tick loop前),非pool_curve[0](day1後,已被drain重複計入)
+	var pool_tN: Dictionary = pool_curve[-1] if pool_curve.size() > 0 else {}
+	var delta_grand: float = float(pool_tN.get("grand", 0.0)) - float(pool_t0.get("grand", 0.0))
+	var sum_flow: float = 0.0
+	for k in food_flow: sum_flow += food_flow[k]
+	print("\n───── 嚴格食物守恆帳 ─────")
+	print("  t0 pool: team_food=%.1f granary=%.1f tile_pool=%.1f GRAND=%.1f" % [
+		pool_t0.get("team_food", 0.0), pool_t0.get("granary_food", 0.0), pool_t0.get("tile_pool_food", 0.0), pool_t0.get("grand", 0.0)])
+	print("  tN pool: team_food=%.1f granary=%.1f tile_pool=%.1f GRAND=%.1f" % [
+		pool_tN.get("team_food", 0.0), pool_tN.get("granary_food", 0.0), pool_tN.get("tile_pool_food", 0.0), pool_tN.get("grand", 0.0)])
+	print("  ΔGRAND=%.1f  Σfood_flow(全reason加總)=%.1f  close-check diff=%.3f" % [delta_grand, sum_flow, delta_grand - sum_flow])
+	print("  food_flow by reason:")
+	var flow_keys: Array = food_flow.keys()
+	flow_keys.sort_custom(func(a, b): return absf(food_flow[a]) > absf(food_flow[b]))
+	for k in flow_keys:
+		print("    %s = %.1f" % [k, food_flow[k]])
+
 	var dump: Dictionary = {"seed": WORLD_SEED, "months": months, "curve": curve, "daily_curve": daily_curve,
+		"pool_curve": pool_curve, "pool_true_t0": pool_true_t0, "food_flow": food_flow,
+		"conservation_close_check": {"delta_grand": delta_grand, "sum_flow": sum_flow, "diff": delta_grand - sum_flow},
 		"start_pop": start_pop, "end_pop": end_pop, "extinct_tick": extinct_tick,
 		"final": {"teams": state.teams.size(), "factions": state.factions.size(),
 			"established": WarringHarness._established_count(state)},
@@ -162,6 +204,10 @@ func _initialize() -> void:
 	dump["join_order_set_samples"] = Probe.samples.get("join.order_set", [])
 	dump["join_reached_pair_samples"] = Probe.samples.get("join.reached_pair", [])
 	dump["combatopt_fire_samples"] = Probe.samples.get("combatopt.fire_sample", [])
+	dump["income_harvest_vault_samples"] = Probe.samples.get("income.harvest_vault", [])
+	dump["income_harvest_team_samples"] = Probe.samples.get("income.harvest_team", [])
+	dump["income_hunt_samples"] = Probe.samples.get("income.hunt", [])
+	dump["erase_food_snapshot_samples"] = Probe.samples.get("erase.food_snapshot", [])
 	print("  join.order_set samples=%d join.reached_pair samples=%d" % [
 		dump["join_order_set_samples"].size(), dump["join_reached_pair_samples"].size()])
 	dump["watchdog_hits"] = watchdog_hits
@@ -181,6 +227,23 @@ func _initialize() -> void:
 	SpecimenDumpHelper.dump(state, "res://docs/measurements/2026-08-12-phase3-story-audit-seed%d-%dmo.specimen.jsonl" % [WORLD_SEED, months])
 	print("=== DONE ===")
 	quit()
+
+# ★嚴格守恆帳(2026-08-13):四pool逐日分解。Σteam.food(團私產)/Σgranary(全tile public_storage.food,
+# 據點糧倉)/Σtile_pool(全tile resources.food,自然regen池,先前total_food從未算過這塊!)/GRAND=三者和。
+func _pool_census(state: WorldState, day: int) -> Dictionary:
+	var team_food: float = 0.0
+	for tid in state.teams:
+		team_food += float(state.teams[tid].resources.get("food", 0))
+	var granary_food: float = 0.0
+	var tile_pool_food: float = 0.0
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		granary_food += float(tile.public_storage.get("food", 0))
+		tile_pool_food += float(tile.resources.get("food", 0))
+	return {
+		"day": day, "team_food": team_food, "granary_food": granary_food,
+		"tile_pool_food": tile_pool_food, "grand": team_food + granary_food + tile_pool_food,
+	}
 
 func _total_pop(state: WorldState) -> int:
 	var total: int = 0
@@ -212,12 +275,17 @@ func _daily_census(state: WorldState, day: int, starve_delta: int) -> Dictionary
 			resident_n += 1; resident_pop += t.population; resident_food_days_sum += fd
 			if t.current_task == TeamData.TASK_PRODUCE: resident_producing_n += 1
 			# ★證據包A(2026-08-13):逐 resident team 詳細trace(純讀零新tap,呼既有static函式)。
+			# ★systems澄清後追加(2026-08-13):糧倉(granary tile public_storage) vs team.resources food拆分——
+			# 驗證effective_food()是否已含granary(own_granary_tile同一tile=harvest deposit dst_tile,理論上已含)。
+			var _granary: HexTileData = ResourceSystem.own_granary_tile(state, t)
 			resident_detail.append({
 				"team_id": tid, "day": day, "current_task": t.current_task,
-				"has_own_outpost": ResourceSystem.own_granary_tile(state, t) != null,
+				"has_own_outpost": _granary != null,
 				"has_manufacturing_facility": FactionAISystem.has_manufacturing_facility(state, t),
 				"has_tag_produce": t.tags.has(TeamData.TAG_PRODUCE),
 				"is_subteam": t.parent_team_id != -1, "pop": t.population, "food_days": fd,
+				"granary_food": float(_granary.public_storage.get("food", 0)) if _granary != null else -1.0,
+				"team_food": float(t.resources.get("food", 0)),
 			})
 		else:
 			nonresident_n += 1; nonresident_pop += t.population; nonresident_food_days_sum += fd
