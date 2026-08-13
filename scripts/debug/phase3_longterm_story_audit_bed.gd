@@ -75,8 +75,11 @@ func _initialize() -> void:
 		# 既有production tap(raid.*/combatopt無新改)。
 		"combatopt.fire_攻擊", "combatopt.fire_掠奪",
 		"raid.resolve", "raid.extort", "raid.combat_at_outpost", "raid.combat_open_field", "raid.loot_noresolve",
-		# production funnel①佔據路徑(camp本輪新加2個temp+既有spawn.dispatch_安頓+settle本輪新加1個temp)。
-		"camp.fire", "camp.tile_found", "camp.no_unowned_tile", "settle.convert_to_resident",
+		# 證據包A⑥ 第三路resident化=佔村(全既有production tap,零新改,上輪camp/settle已確認雙0這輪不重複tap)。
+		"occupy.applicable", "occupy.ctx_hastarget", "occupy.appl_kill_pop", "occupy.appl_kill_hasbase",
+		"occupy.dispatch", "occupy.dispatch_survival", "occupy.scan_outpost_target", "occupy.scan_kill_nobel",
+		"occupy.scan_kill_unreach", "occupy.scan_kill_notweak", "occupy.scan_kill_margin", "occupy.scan_passed",
+		"occupy.capture_flip",
 		# production funnel④流通率(全既有production trade.market_bail.* tap,零新改)。
 		"trade.market_bail.buy_no_stock", "trade.market_bail.buy_no_want", "trade.market_bail.buy_cant_afford",
 		"trade.market_bail.buy_carry_full", "trade.market_bail.buy_withdraw_empty",
@@ -195,6 +198,7 @@ func _daily_census(state: WorldState, day: int, starve_delta: int) -> Dictionary
 	# food_days對照+resident裡真跑TASK_PRODUCE比例。
 	var resident_n: int = 0; var resident_pop: int = 0; var resident_food_days_sum: float = 0.0
 	var resident_producing_n: int = 0
+	var resident_detail: Array = []
 	var nonresident_n: int = 0; var nonresident_pop: int = 0; var nonresident_food_days_sum: float = 0.0
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
@@ -207,6 +211,14 @@ func _daily_census(state: WorldState, day: int, starve_delta: int) -> Dictionary
 		if FactionAISystem.is_resident_static(state, t):
 			resident_n += 1; resident_pop += t.population; resident_food_days_sum += fd
 			if t.current_task == TeamData.TASK_PRODUCE: resident_producing_n += 1
+			# ★證據包A(2026-08-13):逐 resident team 詳細trace(純讀零新tap,呼既有static函式)。
+			resident_detail.append({
+				"team_id": tid, "day": day, "current_task": t.current_task,
+				"has_own_outpost": ResourceSystem.own_granary_tile(state, t) != null,
+				"has_manufacturing_facility": FactionAISystem.has_manufacturing_facility(state, t),
+				"has_tag_produce": t.tags.has(TeamData.TAG_PRODUCE),
+				"is_subteam": t.parent_team_id != -1, "pop": t.population, "food_days": fd,
+			})
 		else:
 			nonresident_n += 1; nonresident_pop += t.population; nonresident_food_days_sum += fd
 	return {
@@ -218,7 +230,7 @@ func _daily_census(state: WorldState, day: int, starve_delta: int) -> Dictionary
 		"main_food_days_avg": (main_food_days_sum / main_n) if main_n > 0 else -1.0,
 		"resident_n": resident_n, "resident_pop": resident_pop,
 		"resident_food_days_avg": (resident_food_days_sum / resident_n) if resident_n > 0 else -1.0,
-		"resident_producing_n": resident_producing_n,
+		"resident_producing_n": resident_producing_n, "resident_detail": resident_detail,
 		"nonresident_n": nonresident_n, "nonresident_pop": nonresident_pop,
 		"nonresident_food_days_avg": (nonresident_food_days_sum / nonresident_n) if nonresident_n > 0 else -1.0,
 		"leaders": _leader_diag(state),

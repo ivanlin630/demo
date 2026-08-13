@@ -4,1244 +4,7 @@
     "combat.end_readiness_above_thr": 21,
     "combat.end_retreat": 2
   },
-  "combatopt_fire_samples": [
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 260
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 440
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 24,
-      "tick": 560
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 1000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 1030
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 1030
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 1100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 1100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 1100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 1110
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 1200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 1200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 1200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 1230
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 1230
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 1300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 1300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 11,
-      "tick": 1300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 1300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 1300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 1310
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 1400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 1400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 1400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 1400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 1500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 1500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 1500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 1600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 1600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 1610
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 1610
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 30,
-      "tick": 1640
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 1700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 1700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 1700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 30,
-      "tick": 1700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 1800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 1800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 30,
-      "tick": 1800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 1900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 30,
-      "tick": 1900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 1910
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 2000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 2000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 30,
-      "tick": 2000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 2100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 30,
-      "tick": 2100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2110
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 2110
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 2200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2210
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 2300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2320
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 2400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 2500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2510
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 2600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 2600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 2700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 2800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2810
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 2900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 2900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 2900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 2900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 2910
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 3000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 3000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 3000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 3010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 3100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 3100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 3100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 3100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 3200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 3200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 3200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 3200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3210
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 17,
-      "tick": 3210
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 3300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 3300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 3300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 49,
-      "tick": 3370
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 24,
-      "tick": 3400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 3400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 3400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 3410
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 24,
-      "tick": 3460
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 19,
-      "tick": 3500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 24,
-      "tick": 3520
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 24,
-      "tick": 3600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 3610
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 49,
-      "tick": 3610
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 3800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 3810
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 3900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 3900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 4010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 4100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4110
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 4200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 4210
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4210
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 4300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 4410
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 4500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 4530
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 4600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 4700
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 4800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 4900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 4900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 5000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 5100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 5110
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 5200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 18,
-      "tick": 5210
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 5300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 5400
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 5500
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 5600
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 16,
-      "tick": 5710
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 21,
-      "tick": 5710
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 16,
-      "tick": 5800
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 16,
-      "tick": 5900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 13,
-      "tick": 6010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 15,
-      "tick": 6110
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 16,
-      "tick": 6110
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 6130
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 8,
-      "tick": 6130
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 6200
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 6,
-      "tick": 6300
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 16,
-      "tick": 6510
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 1,
-      "tick": 6810
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 56,
-      "tick": 6810
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 6810
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 56,
-      "tick": 6900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 6900
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 1,
-      "tick": 6910
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 56,
-      "tick": 7000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 7000
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 1,
-      "tick": 7010
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 56,
-      "tick": 7100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 7100
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 1,
-      "tick": 7110
-    },
-    {
-      "opt": "掠奪",
-      "readiness": 1,
-      "team_id": 9,
-      "tick": 7200
-    }
-  ],
+  "combatopt_fire_samples": [],
   "curve": [
     {
       "established": 0,
@@ -1456,13 +219,10 @@
         "accept.join_reject": 1,
         "atk.blocked_ct_197": 2,
         "atk.reached": 35,
-        "camp.fire": 0,
-        "camp.no_unowned_tile": 0,
-        "camp.tile_found": 1132,
         "cohesion.defect_fire": 1,
         "cohesion.uprising_stay_faction": 0,
         "combat.ended_n": 21,
-        "combatopt.fire_掠奪": 206,
+        "combatopt.fire_掠奪": 0,
         "combatopt.fire_攻擊": 0,
         "conq.combat_decisive": 0,
         "conq.combat_entered": 22,
@@ -1494,15 +254,28 @@
         "migrant.holding_seen": 0,
         "migrant.marg_nonpositive": 0,
         "migrant.util_evaluated": 0,
-        "prey.call_count": 93031,
-        "prey.call_empty_pool": 4699,
-        "prey.candidates_seen": 1253424,
+        "occupy.appl_kill_hasbase": 0,
+        "occupy.appl_kill_pop": 0,
+        "occupy.applicable": 48,
+        "occupy.capture_flip": 0,
+        "occupy.ctx_hastarget": 48,
+        "occupy.dispatch": 7,
+        "occupy.dispatch_survival": 0,
+        "occupy.scan_kill_margin": 12,
+        "occupy.scan_kill_nobel": 0,
+        "occupy.scan_kill_notweak": 1250,
+        "occupy.scan_kill_unreach": 21347,
+        "occupy.scan_outpost_target": 22683,
+        "occupy.scan_passed": 74,
+        "prey.call_count": 0,
+        "prey.call_empty_pool": 0,
+        "prey.candidates_seen": 0,
         "prey.faction_attack_stake": 0,
         "prey.faction_attack_target_found": 0,
-        "prey.found": 24364,
-        "prey.no_belief": 2,
-        "prey.not_weak_enough": 167005,
-        "prey.unreachable": 1043358,
+        "prey.found": 0,
+        "prey.no_belief": 0,
+        "prey.not_weak_enough": 0,
+        "prey.unreachable": 0,
         "promote.field_desperate": 18,
         "promote.fired": 18,
         "raid.combat_at_outpost": 0,
@@ -1517,7 +290,6 @@
         "relocate.resettled": 0,
         "relocate.resist": 0,
         "relocate.started": 0,
-        "settle.convert_to_resident": 0,
         "trade.market_bail.buy_cant_afford": 3,
         "trade.market_bail.buy_carry_full": 3,
         "trade.market_bail.buy_no_stock": 353,
@@ -1740,6 +512,7 @@
       "nonresident_n": 59,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -1954,6 +727,7 @@
       "nonresident_n": 59,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -2168,6 +942,7 @@
       "nonresident_n": 62,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -2382,6 +1157,7 @@
       "nonresident_n": 62,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -2596,6 +1372,7 @@
       "nonresident_n": 65,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -2810,6 +1587,7 @@
       "nonresident_n": 66,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -3024,6 +1802,7 @@
       "nonresident_n": 69,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -3238,6 +2017,7 @@
       "nonresident_n": 73,
       "nonresident_pop": 445,
       "pop": 445,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -3452,6 +2232,7 @@
       "nonresident_n": 74,
       "nonresident_pop": 445,
       "pop": 445,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -3666,6 +2447,7 @@
       "nonresident_n": 74,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -3880,6 +2662,7 @@
       "nonresident_n": 77,
       "nonresident_pop": 445,
       "pop": 445,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -4094,6 +2877,7 @@
       "nonresident_n": 76,
       "nonresident_pop": 445,
       "pop": 445,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -4308,6 +3092,7 @@
       "nonresident_n": 77,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -4522,6 +3307,7 @@
       "nonresident_n": 80,
       "nonresident_pop": 445,
       "pop": 445,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -4736,6 +3522,7 @@
       "nonresident_n": 80,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -4950,6 +3737,7 @@
       "nonresident_n": 84,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -5164,6 +3952,7 @@
       "nonresident_n": 88,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -5378,6 +4167,7 @@
       "nonresident_n": 89,
       "nonresident_pop": 443,
       "pop": 443,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -5592,6 +4382,7 @@
       "nonresident_n": 90,
       "nonresident_pop": 444,
       "pop": 444,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -5806,6 +4597,7 @@
       "nonresident_n": 91,
       "nonresident_pop": 441,
       "pop": 441,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -6020,6 +4812,7 @@
       "nonresident_n": 93,
       "nonresident_pop": 440,
       "pop": 440,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -6234,6 +5027,7 @@
       "nonresident_n": 96,
       "nonresident_pop": 440,
       "pop": 440,
+      "resident_detail": [],
       "resident_food_days_avg": -1,
       "resident_n": 0,
       "resident_pop": 0,
@@ -6448,6 +5242,19 @@
       "nonresident_n": 98,
       "nonresident_pop": 433,
       "pop": 439,
+      "resident_detail": [
+        {
+          "current_task": "逃跑",
+          "day": 23,
+          "food_days": 1.88315418663569,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 6,
+          "team_id": 30
+        }
+      ],
       "resident_food_days_avg": 1.88315418663569,
       "resident_n": 1,
       "resident_pop": 6,
@@ -6662,6 +5469,19 @@
       "nonresident_n": 100,
       "nonresident_pop": 433,
       "pop": 439,
+      "resident_detail": [
+        {
+          "current_task": "return_home",
+          "day": 24,
+          "food_days": 1.20738957809605,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 6,
+          "team_id": 30
+        }
+      ],
       "resident_food_days_avg": 1.20738957809605,
       "resident_n": 1,
       "resident_pop": 6,
@@ -6876,6 +5696,30 @@
       "nonresident_n": 96,
       "nonresident_pop": 423,
       "pop": 439,
+      "resident_detail": [
+        {
+          "current_task": "return_home",
+          "day": 25,
+          "food_days": 0.175275654254463,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 6,
+          "team_id": 30
+        },
+        {
+          "current_task": "return_home",
+          "day": 25,
+          "food_days": 2.68360428174335,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 10,
+          "team_id": 47
+        }
+      ],
       "resident_food_days_avg": 1.42943996799891,
       "resident_n": 2,
       "resident_pop": 16,
@@ -7090,6 +5934,30 @@
       "nonresident_n": 100,
       "nonresident_pop": 423,
       "pop": 439,
+      "resident_detail": [
+        {
+          "current_task": "return_home",
+          "day": 26,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 6,
+          "team_id": 30
+        },
+        {
+          "current_task": "return_home",
+          "day": 26,
+          "food_days": 2.56674843452239,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 10,
+          "team_id": 47
+        }
+      ],
       "resident_food_days_avg": 1.2833742172612,
       "resident_n": 2,
       "resident_pop": 16,
@@ -7304,6 +6172,63 @@
       "nonresident_n": 97,
       "nonresident_pop": 416,
       "pop": 438,
+      "resident_detail": [
+        {
+          "current_task": "return_home",
+          "day": 27,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 6,
+          "team_id": 30
+        },
+        {
+          "current_task": "return_home",
+          "day": 27,
+          "food_days": 2.61399016205416,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 10,
+          "team_id": 47
+        },
+        {
+          "current_task": "return_home",
+          "day": 27,
+          "food_days": 0.347385909270232,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 58
+        },
+        {
+          "current_task": "治理",
+          "day": 27,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 3,
+          "team_id": 70
+        },
+        {
+          "current_task": "治理",
+          "day": 27,
+          "food_days": 2.5,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 1,
+          "team_id": 87
+        }
+      ],
       "resident_food_days_avg": 1.09227521426488,
       "resident_n": 5,
       "resident_pop": 22,
@@ -7518,6 +6443,85 @@
       "nonresident_n": 95,
       "nonresident_pop": 412,
       "pop": 437,
+      "resident_detail": [
+        {
+          "current_task": "return_home",
+          "day": 28,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 6,
+          "team_id": 30
+        },
+        {
+          "current_task": "return_home",
+          "day": 28,
+          "food_days": 3.11902806371133,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 10,
+          "team_id": 47
+        },
+        {
+          "current_task": "return_home",
+          "day": 28,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 58
+        },
+        {
+          "current_task": "治理",
+          "day": 28,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 3,
+          "team_id": 70
+        },
+        {
+          "current_task": "治理",
+          "day": 28,
+          "food_days": 1.88088536154688,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 1,
+          "team_id": 83
+        },
+        {
+          "current_task": "治理",
+          "day": 28,
+          "food_days": 1.96791642891277,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 1,
+          "team_id": 87
+        },
+        {
+          "current_task": "治理",
+          "day": 28,
+          "food_days": 2.29166666666667,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 111
+        }
+      ],
       "resident_food_days_avg": 1.32278521726252,
       "resident_n": 7,
       "resident_pop": 25,
@@ -7732,6 +6736,96 @@
       "nonresident_n": 95,
       "nonresident_pop": 411,
       "pop": 438,
+      "resident_detail": [
+        {
+          "current_task": "return_home",
+          "day": 29,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 6,
+          "team_id": 30
+        },
+        {
+          "current_task": "return_home",
+          "day": 29,
+          "food_days": 3.52471313371709,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 10,
+          "team_id": 47
+        },
+        {
+          "current_task": "return_home",
+          "day": 29,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 58
+        },
+        {
+          "current_task": "return_home",
+          "day": 29,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 3,
+          "team_id": 70
+        },
+        {
+          "current_task": "return_home",
+          "day": 29,
+          "food_days": 1.05780838997487,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 1,
+          "team_id": 83
+        },
+        {
+          "current_task": "治理",
+          "day": 29,
+          "food_days": 1.53123364573376,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 1,
+          "team_id": 87
+        },
+        {
+          "current_task": "return_home",
+          "day": 29,
+          "food_days": 1.66666666666667,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 109
+        },
+        {
+          "current_task": "治理",
+          "day": 29,
+          "food_days": 1.48738716740656,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 111
+        }
+      ],
       "resident_food_days_avg": 1.15847612543737,
       "resident_n": 8,
       "resident_pop": 27,
@@ -7946,6 +7040,107 @@
       "nonresident_n": 96,
       "nonresident_pop": 400,
       "pop": 436,
+      "resident_detail": [
+        {
+          "current_task": "return_home",
+          "day": 30,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 6,
+          "team_id": 30
+        },
+        {
+          "current_task": "return_home",
+          "day": 30,
+          "food_days": 1.69881818672597,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 9,
+          "team_id": 45
+        },
+        {
+          "current_task": "return_home",
+          "day": 30,
+          "food_days": 3.30612388734391,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 10,
+          "team_id": 47
+        },
+        {
+          "current_task": "return_home",
+          "day": 30,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 58
+        },
+        {
+          "current_task": "return_home",
+          "day": 30,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": false,
+          "pop": 3,
+          "team_id": 70
+        },
+        {
+          "current_task": "return_home",
+          "day": 30,
+          "food_days": 0,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 1,
+          "team_id": 83
+        },
+        {
+          "current_task": "return_home",
+          "day": 30,
+          "food_days": 0.768152060805603,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 1,
+          "team_id": 87
+        },
+        {
+          "current_task": "return_home",
+          "day": 30,
+          "food_days": 0.496521460544855,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 109
+        },
+        {
+          "current_task": "治理",
+          "day": 30,
+          "food_days": 0.272452990966872,
+          "has_manufacturing_facility": false,
+          "has_own_outpost": true,
+          "has_tag_produce": true,
+          "is_subteam": true,
+          "pop": 2,
+          "team_id": 111
+        }
+      ],
       "resident_food_days_avg": 0.726896509598579,
       "resident_n": 9,
       "resident_pop": 36,
@@ -8170,68 +7365,7 @@
     }
   ],
   "join_order_set_samples": [],
-  "join_reached_pair_samples": [
-    {
-      "a": 37,
-      "b": 60,
-      "tick": 5900
-    },
-    {
-      "a": 58,
-      "b": 6,
-      "tick": 6300
-    },
-    {
-      "a": 34,
-      "b": 105,
-      "tick": 6900
-    },
-    {
-      "a": 34,
-      "b": 106,
-      "tick": 6900
-    },
-    {
-      "a": 105,
-      "b": 34,
-      "tick": 6900
-    },
-    {
-      "a": 105,
-      "b": 106,
-      "tick": 6900
-    },
-    {
-      "a": 106,
-      "b": 34,
-      "tick": 6900
-    },
-    {
-      "a": 106,
-      "b": 105,
-      "tick": 6900
-    },
-    {
-      "a": 105,
-      "b": 119,
-      "tick": 7000
-    },
-    {
-      "a": 119,
-      "b": 105,
-      "tick": 7000
-    },
-    {
-      "a": 123,
-      "b": 7,
-      "tick": 7000
-    },
-    {
-      "a": 34,
-      "b": 119,
-      "tick": 7100
-    }
-  ],
+  "join_reached_pair_samples": [],
   "mobilize_fraction_peak_final": 1,
   "months": 1,
   "new_keys_total": {
@@ -8239,13 +7373,10 @@
     "accept.join_reject": 1,
     "atk.blocked_ct_197": 2,
     "atk.reached": 35,
-    "camp.fire": 0,
-    "camp.no_unowned_tile": 0,
-    "camp.tile_found": 1132,
     "cohesion.defect_fire": 1,
     "cohesion.uprising_stay_faction": 0,
     "combat.ended_n": 21,
-    "combatopt.fire_掠奪": 206,
+    "combatopt.fire_掠奪": 0,
     "combatopt.fire_攻擊": 0,
     "conq.combat_decisive": 0,
     "conq.combat_entered": 22,
@@ -8277,15 +7408,28 @@
     "migrant.holding_seen": 0,
     "migrant.marg_nonpositive": 0,
     "migrant.util_evaluated": 0,
-    "prey.call_count": 93031,
-    "prey.call_empty_pool": 4699,
-    "prey.candidates_seen": 1253424,
+    "occupy.appl_kill_hasbase": 0,
+    "occupy.appl_kill_pop": 0,
+    "occupy.applicable": 48,
+    "occupy.capture_flip": 0,
+    "occupy.ctx_hastarget": 48,
+    "occupy.dispatch": 7,
+    "occupy.dispatch_survival": 0,
+    "occupy.scan_kill_margin": 12,
+    "occupy.scan_kill_nobel": 0,
+    "occupy.scan_kill_notweak": 1250,
+    "occupy.scan_kill_unreach": 21347,
+    "occupy.scan_outpost_target": 22683,
+    "occupy.scan_passed": 74,
+    "prey.call_count": 0,
+    "prey.call_empty_pool": 0,
+    "prey.candidates_seen": 0,
     "prey.faction_attack_stake": 0,
     "prey.faction_attack_target_found": 0,
-    "prey.found": 24364,
-    "prey.no_belief": 2,
-    "prey.not_weak_enough": 167005,
-    "prey.unreachable": 1043358,
+    "prey.found": 0,
+    "prey.no_belief": 0,
+    "prey.not_weak_enough": 0,
+    "prey.unreachable": 0,
     "promote.field_desperate": 18,
     "promote.fired": 18,
     "raid.combat_at_outpost": 0,
@@ -8300,7 +7444,6 @@
     "relocate.resettled": 0,
     "relocate.resist": 0,
     "relocate.started": 0,
-    "settle.convert_to_resident": 0,
     "trade.market_bail.buy_cant_afford": 3,
     "trade.market_bail.buy_carry_full": 3,
     "trade.market_bail.buy_no_stock": 353,
@@ -8317,11 +7460,7 @@
   },
   "seed": 1337,
   "spawn_dispatch_breakdown": {
-    "spawn.dispatch_idle": 4,
-    "spawn.dispatch_信使": 5,
-    "spawn.dispatch_偵查": 30,
-    "spawn.dispatch_擴建": 16,
-    "spawn.dispatch_運輸": 44
+
   },
   "start_pop": 444,
   "watchdog_hits": 0

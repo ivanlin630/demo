@@ -1,0 +1,70 @@
+=== occupy funnel (月合計) ===
+  occupy.appl_kill_hasbase = 0
+  occupy.appl_kill_pop = 0
+  occupy.applicable = 48
+  occupy.capture_flip = 0
+  occupy.ctx_hastarget = 48
+  occupy.dispatch = 7
+  occupy.dispatch_survival = 0
+  occupy.scan_kill_margin = 12
+  occupy.scan_kill_nobel = 0
+  occupy.scan_kill_notweak = 1250
+  occupy.scan_kill_unreach = 21347
+  occupy.scan_outpost_target = 22683
+  occupy.scan_passed = 74
+
+=== resident_detail 逐日逐團 ===
+總共出現過的 resident team_id: [30, 45, 47, 58, 70, 83, 87, 109, 111]
+
+--- team_id=30 (出現 8 天) ---
+  day=23 task=逃跑     outpost=True facility=False tag_produce=True subteam=False pop=6 food_days=1.9
+  day=24 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=6 food_days=1.2
+  day=25 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=6 food_days=0.2
+  day=26 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=6 food_days=0.0
+  day=27 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=6 food_days=0.0
+  day=28 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=6 food_days=0.0
+  day=29 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=6 food_days=0.0
+  day=30 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=6 food_days=0.0
+
+--- team_id=45 (出現 1 天) ---
+  day=30 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=9 food_days=1.7
+
+--- team_id=47 (出現 6 天) ---
+  day=25 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=10 food_days=2.7
+  day=26 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=10 food_days=2.6
+  day=27 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=10 food_days=2.6
+  day=28 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=10 food_days=3.1
+  day=29 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=10 food_days=3.5
+  day=30 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=10 food_days=3.3
+
+--- team_id=58 (出現 4 天) ---
+  day=27 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=0.3
+  day=28 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=0.0
+  day=29 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=0.0
+  day=30 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=0.0
+
+--- team_id=70 (出現 4 天) ---
+  day=27 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=3 food_days=0.0
+  day=28 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=3 food_days=0.0
+  day=29 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=3 food_days=0.0
+  day=30 task=return_home outpost=True facility=False tag_produce=True subteam=False pop=3 food_days=0.0
+
+--- team_id=83 (出現 3 天) ---
+  day=28 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=1 food_days=1.9
+  day=29 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=1 food_days=1.1
+  day=30 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=1 food_days=0.0
+
+--- team_id=87 (出現 4 天) ---
+  day=27 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=1 food_days=2.5
+  day=28 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=1 food_days=2.0
+  day=29 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=1 food_days=1.5
+  day=30 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=1 food_days=0.8
+
+--- team_id=109 (出現 2 天) ---
+  day=29 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=1.7
+  day=30 task=return_home outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=0.5
+
+--- team_id=111 (出現 3 天) ---
+  day=28 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=2.3
+  day=29 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=1.5
+  day=30 task=治理     outpost=True facility=False tag_produce=True subteam=True pop=2 food_days=0.3
