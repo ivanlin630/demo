@@ -1,0 +1,44 @@
+--- team_id=30 ---
+  day=23 task=逃跑         stock=   9.0 (首筆)
+  day=24 task=return_home stock=   5.8 net_gain(vs前次快照,含補給/採集混合)=   +1.6
+  day=25 task=return_home stock=   0.8 net_gain(vs前次快照,含補給/採集混合)=   -0.2
+  day=26 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +4.0
+  day=27 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +4.8
+  day=28 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +4.8
+  day=29 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +4.8
+  day=30 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +4.8
+--- team_id=45 ---
+  day=30 task=return_home stock=  12.2 (首筆)
+--- team_id=47 ---
+  day=25 task=return_home stock=  21.5 (首筆)
+  day=26 task=return_home stock=  20.5 net_gain(vs前次快照,含補給/採集混合)=   +7.1
+  day=27 task=return_home stock=  20.9 net_gain(vs前次快照,含補給/採集混合)=   +8.4
+  day=28 task=return_home stock=  25.0 net_gain(vs前次快照,含補給/採集混合)=  +12.0
+  day=29 task=return_home stock=  28.2 net_gain(vs前次快照,含補給/採集混合)=  +11.2
+  day=30 task=return_home stock=  26.4 net_gain(vs前次快照,含補給/採集混合)=   +6.3
+--- team_id=58 ---
+  day=27 task=return_home stock=   0.6 (首筆)
+  day=28 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +1.0
+  day=29 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +1.6
+  day=30 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +1.6
+--- team_id=70 ---
+  day=27 task=治理         stock=   0.0 (首筆)
+  day=28 task=治理         stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +2.4
+  day=29 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +2.4
+  day=30 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   +2.4
+--- team_id=83 ---
+  day=28 task=治理         stock=   1.5 (首筆)
+  day=29 task=return_home stock=   0.8 net_gain(vs前次快照,含補給/採集混合)=   +0.1
+  day=30 task=return_home stock=   0.0 net_gain(vs前次快照,含補給/採集混合)=   -0.0
+--- team_id=87 ---
+  day=27 task=治理         stock=   2.0 (首筆)
+  day=28 task=治理         stock=   1.6 net_gain(vs前次快照,含補給/採集混合)=   +0.4
+  day=29 task=治理         stock=   1.2 net_gain(vs前次快照,含補給/採集混合)=   +0.5
+  day=30 task=return_home stock=   0.6 net_gain(vs前次快照,含補給/採集混合)=   +0.2
+--- team_id=109 ---
+  day=29 task=return_home stock=   2.7 (首筆)
+  day=30 task=return_home stock=   0.8 net_gain(vs前次快照,含補給/採集混合)=   -0.3
+--- team_id=111 ---
+  day=28 task=治理         stock=   3.7 (首筆)
+  day=29 task=治理         stock=   2.4 net_gain(vs前次快照,含補給/採集混合)=   +0.3
+  day=30 task=治理         stock=   0.4 net_gain(vs前次快照,含補給/採集混合)=   -0.3
