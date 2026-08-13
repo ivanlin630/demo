@@ -207,9 +207,7 @@ func _initialize() -> void:
 	dump["income_harvest_vault_samples"] = Probe.samples.get("income.harvest_vault", [])
 	dump["income_harvest_team_samples"] = Probe.samples.get("income.harvest_team", [])
 	dump["income_hunt_samples"] = Probe.samples.get("income.hunt", [])
-	dump["income_harvest_vault_samples"] = Probe.samples.get("income.harvest_vault", [])
-	dump["income_harvest_team_samples"] = Probe.samples.get("income.harvest_team", [])
-	dump["income_hunt_samples"] = Probe.samples.get("income.hunt", [])
+	dump["gather_factor_trace_samples"] = Probe.samples.get("gather.factor_trace", [])
 	dump["erase_food_snapshot_samples"] = Probe.samples.get("erase.food_snapshot", [])
 	print("  join.order_set samples=%d join.reached_pair samples=%d" % [
 		dump["join_order_set_samples"].size(), dump["join_reached_pair_samples"].size()])
