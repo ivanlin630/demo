@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶追問『據點採集不少吧?』→blueprint code算帳:據點=小口徑水龍頭非湧泉、面孔二數學根坐實+世界總承載可能天生不足、派驗證·★code常數帳(事實):採集長期上限=tile再生率(採5%/天池穩定在採出=長回);REGEN plains 8/森林3/山0.5 per day×harvest_factor季節×labor_share分池;消耗0.8/人/天=10人隊8/天·∴平原據點滿載8/天vs隊吃8=剛好餬口零盈餘;森林3<6.4-8=住著也慢性餓;只有level3(自2.0+6鄰×0.5)才可能真盈餘·=7/9居民趨零非bug是口徑≤消耗的數學必然;team47疑佔平原(對照查證中含在ac568c7c)·★更大帳(方向硬、需驗):42據點全佔滿全力採、按地形混合總產出疑<355/天總消耗=創世參數水龍頭天生小、世界承載力<出生人口=born-insolvent在genesis參數層·派驗:①42據點地形分布(幾個平原/森林/山)+各tile productivity/resource_cap②全佔據理論總產能上限計算vs 355/天③9居民各自據點地形對照(7趨零vs team47=地形/等級差?)·此帳定案→裁決題完整化=貧困陷阱三層(①不肯安家分數結構②安家龍頭口徑僅餬口③升級才有盈餘但餓著升不動)→用戶裁生存經濟基座arc scope(含不含承載力genesis參數)·evidence-only禁fix"
 ---
 
