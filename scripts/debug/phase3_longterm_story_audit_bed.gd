@@ -98,7 +98,17 @@ func _initialize() -> void:
 		"trade.market_bail.buy_carry_full", "trade.market_bail.buy_withdraw_empty",
 		"trade.market_bail.sell_no_surplus", "trade.market_bail.sell_ownerless", "trade.market_bail.sell_owner_no_coin",
 		"trade.market_bail.sell_no_price", "trade.market_bail.sell_owner_cant_afford", "trade.market_bail.sell_zero_qty",
-		"trade.market_bail.sell_storage_full", "trade.peer_deal"]
+		"trade.market_bail.sell_storage_full", "trade.peer_deal",
+		# A2 diagnostic-first(2026-08-13,measurer):settle-into-existing per-gate funnel pin(全新temp tap,用完revert)。
+		"a2.evaluate_team_tick", "a2.own_empty_outpost_seen", "a2.no_resident_pass", "a2.reach_dispatch_or_invite",
+		"a2.pop_ge8_pass", "a2.pop_ge8_fail", "a2.dispatch_score_wins", "a2.invite_score_wins",
+		"a2.route_dispatch", "a2.route_invite", "a2.route_military_dead_end",
+		"a2.dispatch_pop_after_gate_pass", "a2.dispatch_pop_after_gate_fail",
+		"a2.dispatch_no_sub_leader", "a2.dispatch_subteam_create_fail", "a2.dispatch_task_settle_set",
+		"a2.invite_call", "a2.invite_candidate_exile_tag", "a2.invite_belief_null", "a2.invite_out_of_range",
+		"a2.invite_range_pass", "a2.invite_accept", "a2.invite_reject", "a2.invite_task_settle_set",
+		"a2.convert_via_subteam_arrival", "a2.convert_via_pair_interaction",
+		"worldgen.build_outpost"]
 	var prev_new: Dictionary = {}
 	for k in new_keys: prev_new[k] = 0
 	var mobilize_peak_prev: float = 0.0
@@ -264,8 +274,14 @@ func _daily_census(state: WorldState, day: int, starve_delta: int) -> Dictionary
 	var resident_producing_n: int = 0
 	var resident_detail: Array = []
 	var nonresident_n: int = 0; var nonresident_pop: int = 0; var nonresident_food_days_sum: float = 0.0
+	# ★A2 diagnostic-first(2026-08-13):直讀TASK_SETTLE在途團數,拆subteam(dispatch路)vs非subteam(invite路)——
+	# 測『邀請流亡抵達空outpost後是否卡在TASK_SETTLE走不出去』假說(純讀零新tap)。
+	var settle_inflight_subteam: int = 0; var settle_inflight_nonsubteam: int = 0
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
+		if t.current_task == TeamData.TASK_SETTLE:
+			if t.parent_team_id != -1: settle_inflight_subteam += 1
+			else: settle_inflight_nonsubteam += 1
 		var fd: float = ResourceSystem.effective_food(state, t) / maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 		total_food += ResourceSystem.effective_food(state, t)
 		if t.parent_team_id != -1:
@@ -306,6 +322,7 @@ func _daily_census(state: WorldState, day: int, starve_delta: int) -> Dictionary
 		"resident_n": resident_n, "resident_pop": resident_pop,
 		"resident_food_days_avg": (resident_food_days_sum / resident_n) if resident_n > 0 else -1.0,
 		"resident_producing_n": resident_producing_n, "resident_detail": resident_detail,
+		"settle_inflight_subteam": settle_inflight_subteam, "settle_inflight_nonsubteam": settle_inflight_nonsubteam,
 		"nonresident_n": nonresident_n, "nonresident_pop": nonresident_pop,
 		"nonresident_food_days_avg": (nonresident_food_days_sum / nonresident_n) if nonresident_n > 0 else -1.0,
 		"leaders": _leader_diag(state),
