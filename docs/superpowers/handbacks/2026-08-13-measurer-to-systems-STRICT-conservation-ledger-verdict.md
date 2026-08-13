@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[嚴格食物守恆帳CLOSE(diff=-7e-11)+建設trace——★重大訂正我先前-75.6%claim]GRAND真總量僅-8.1%(120735→111009.6)非-75.6%;tile natural regen pool(佔6成+)全程近乎不動(-0.04%);真崩的是team.food(-72.9%,這是-75.6%數字的真實來源但那是團私產非世界總量);granary穩定+2.5%;dominant sink=eat_team(-10366.7,佔SINK99%,genuine);erase-evaporation=0(本月無滅團);過程發現+修正(已revert)record_driver契約bug(set_amt/pool_set記絕對值非delta,close-check第一版差到56M);Q2建設確實會贏argmax但除tick10外全部try_set_noop,同JOIN/raid/occupy funnel決策贏執行斷pattern"
 ---
 
