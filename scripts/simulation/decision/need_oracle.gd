@@ -11,7 +11,7 @@ class_name NeedOracle
 
 # 保留向 need：自用(消耗品) + 供應鏈(中間品下游 gap 傳導)。
 static func need_keep(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
-	return _self_use(team, res, leader_values) + _supply_chain(state, team, res) \
+	return _self_use(state, team, res, leader_values) + _supply_chain(state, team, res) \
 		+ _construction_facility_need(state, team, res, leader_values)
 
 # ★means-end build-cost need（Gate B trade-primary 核心）：team 想建的 facility → 其 build-cost need
@@ -102,10 +102,18 @@ const PURE_INTERMEDIATE: Array = ["material", "ore_iron", "ore_steel", "gem", "h
 # ── 自用推導（消耗率=世界物理 flat；buffer 天數人格化。取代 TARGET_PER_POP 自用身分）──
 # food 真推導；純中間品=0（走供應鏈）；終端消耗品（武器/tools/藥/armor/arrows）=buffer base
 # （★S4 換真消耗率×人格 buffer；S2 暫用 TARGET_PER_POP base，reader 未切故無產線影響）。goods=純貿易 need_keep=0。
-static func _self_use(team: TeamData, res: String, leader_values: Dictionary) -> float:
+# ★B5 生存產出層：food need 隨飢餓升（material 排擠 food 根修）。SAFE_DAYS=既有錨(FORAGE_FLOOR_DAYS)、GAIN=TEST VALUE bounded。
+const FAMINE_SAFE_DAYS: float = ResourceSystem.FORAGE_FLOOR_DAYS   # 5：>此天食=subsistence-safe 不 escalate
+const FAMINE_NEED_GAIN: float = 2.0   # TEST VALUE bounded — 瀕餓 food need 放大（measurer bounded-verify、非 fire-crank）
+
+static func _self_use(state: WorldState, team: TeamData, res: String, leader_values: Dictionary) -> float:
 	if res == "food":
-		return ResourceSystem.FOOD_PER_PERSON_PER_DAY * float(team.population) \
-			* DecisionTerms.food_security_target(leader_values)
+		var pop: float = float(team.population)
+		var base: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY * pop * DecisionTerms.food_security_target(leader_values)
+		# ★感知鐵律：讀自家 food_days（自知肚餓、非 god-view）。飢餓 escalation 讓 gather:food weight 升→rebalance 多分採糧。
+		var food_days: float = ResourceSystem.effective_food(state, team) / maxf(pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		var famine_escalation: float = 1.0 + maxf(0.0, (FAMINE_SAFE_DAYS - food_days) / FAMINE_SAFE_DAYS) * FAMINE_NEED_GAIN
+		return base * famine_escalation   # 食飽(food_days≥5)→×1 不變；瀕餓(food_days=0)→×(1+GAIN)
 	if res == "goods":
 		return 0.0   # goods 純貿易品，無自用消費 sink（#6）
 	if res in PURE_INTERMEDIATE:

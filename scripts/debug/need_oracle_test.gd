@@ -32,16 +32,20 @@ func _mk_team(pop: int) -> TeamData:
 # ── S1：food 自用真推導（日耗×pop×人格安全天）──
 func _test_s1_food_self_use() -> void:
 	print("--- S1：food 自用推導（消耗率×pop×人格 buffer 天）---")
-	var team := _mk_team(10)   # pop 10
+	# ★B5：_self_use food 讀 food_days（需 state+ample food→food_days≥5→escalation=1→need=base、保原 S1 語意）。
+	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 0
+	var team := _mk_team(10)   # pop 10（leader+9 named）
+	team.resources["food"] = 200.0   # food_days=200/(10×0.8)=25≥5 → escalation=1
+	state.teams[1] = team
 	var neutral := {"慎重": 0.5, "野心": 0.5}
 	var expected: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY * 10.0 * DecisionTerms.food_security_target(neutral)
-	var got: float = NeedOracle.need_keep(null, team, "food", neutral)
-	_ok(absf(got - expected) < 0.001, "food need_keep(%.1f) = 日耗×pop×安全天(%.1f)" % [got, expected])
+	var got: float = NeedOracle.need_keep(state, team, "food", neutral)
+	_ok(absf(got - expected) < 0.001, "food need_keep(%.1f) = 日耗×pop×安全天(%.1f)（食飽 escalation=1）" % [got, expected])
 	# 人格化：慎重領袖 buffer 大 → food need_keep 高（存久）
 	var cautious := {"慎重": 1.0, "野心": 0.0}
 	var greedy := {"慎重": 0.0, "野心": 1.0}
-	var nk_caution: float = NeedOracle.need_keep(null, team, "food", cautious)
-	var nk_greedy: float = NeedOracle.need_keep(null, team, "food", greedy)
+	var nk_caution: float = NeedOracle.need_keep(state, team, "food", cautious)
+	var nk_greedy: float = NeedOracle.need_keep(state, team, "food", greedy)
 	_ok(nk_caution > nk_greedy, "★人格化：慎重領袖 food need_keep(%.1f) > 大膽領袖(%.1f)（buffer 大）" % [nk_caution, nk_greedy])
 
 # ── goods=純貿易品 need_keep=0（#6）+ demand S3 前 fallback ──
@@ -82,7 +86,7 @@ func _test_s2_supply_chain_gating() -> void:
 	# 無設施隊 → 供應鏈=0（gating），純中間品 need_keep=0
 	var n := _mk_state_team_facility(10, "weaponsmith_level", 0)
 	_ok(NeedOracle.need_keep(n[0], n[1], "material", lv) == 0.0, "★無製造設施→material need_keep=0（設施 gating，不背供應鏈）")
-	_ok(NeedOracle._self_use(n[1], "gem", lv) == 0.0, "純中間品 gem 自用=0（need 全走供應鏈）")
+	_ok(NeedOracle._self_use(n[0], n[1], "gem", lv) == 0.0, "純中間品 gem 自用=0（need 全走供應鏈）")
 
 # ── S2：gap 非 raw（下游成品已滿→不囤原料）──
 func _test_s2_gap_not_raw() -> void:
