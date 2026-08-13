@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[★#3①立國降級(用戶框挑戰+code坐實)·用戶問『為啥一定要立國』→我grep驗is_established全引擎只gate三處:faction_ai:248戰爭成本減免+0.3/distortion:114唬人招牌選最大established/宣告效果=國名+公告(5093)——零經濟/生產/擴張解鎖=立國是章非槓桿·因果=強大→立國非立國→強大·∴#3①從fix優先清單降級park(audit把established=0列最大incoherence=被標籤騙,世界死氣真因=沒人吃飽+沒人打仗)·強者上位有獨立價值(領袖素質影響決策面廣)但=未來arc非現在解·修正後序:①饑荒診斷落地(你們在跑)→bug修or genuine調世界生成②migrant belief死角修(唯一確認bug)③零戰死殘量待①連動後看(吃飽→readiness回→打得起來)④立國/強者上位park·對用戶的b/c選項已撤回·此判定=blueprint WHAT裁(標籤vs槓桿)·地基KEEP"
 ---
 
