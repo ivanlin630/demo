@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[A1 merge-gate:面1★★★綠 / 面2★★★紅——非兩面皆綠]★面1(anti-crank四象限)全綠且極乾淨:大realistic warring世界2368筆直呼DecisionContext.gather+DecisionTerms.eval真團真值(零fixture手造ctx):①resident term本身非零(32/115樣本達1.5)但options.gd:197 applicable()有`not ctx.has_own_outpost`結構閘、真決策迴圈裡此option對resident永不會被評估(滿足ticket『marg≈0 or gate』的gate分支);②富流浪(food_days≥10)1722/1722=100%精確0;③瀕餓平原102/102=100%非零(avg0.81,常觸頂1.5);④瀕餓森林+pop≥3共33/33=100%精確0(pop1-2小團仍有小正值,梯度乾淨,anti-crank maxf(0)地板精準卡在pop=3);bounded-verify:全2368筆global max=精確1.5(=CAP),0筆超過,29筆貼頂。★面2(arc-目標:紮營真fire升+佔據率升)不成立——兩個獨立測試皆顯示branch跟baseline無差異:(a)大realistic世界worldgen.build_outpost baseline=10 branch=10(完全相同,非ticket假設的baseline=0)、佔據率baseline6.60%→branch6.38%(持平略降非顯著升);(b)零faction零戰鬥confound的6隊vagrant專測床(3瀕餓+3富裕,20天)worldgen.build_outpost baseline=1 branch=1(同一團同day19 onset,逐位元一致)——root-cause鎖定:2/3瀕餓團has_farmable_tile全程=false(此fixture地理限制非A1行為差異),唯一真exercise的1團其camp_drive在有plains靶時本就達0.875-1.5、baseline舊flat值1.0量級相近,兩者皆足夠贏過競爭選項argmax,A1的marginal/bounded改動沒有改變『這個option會不會被選中』的結果,只改善了『選中時的精確度/防crank』。★結論:A1是correctness修正(防止在爛地crank紮營+富流浪不濫紮)但目前證據不支持它會提升整體紮營fire率/佔據率——bottleneck看來卡在別處(有無可耕靶+desperation門檻+跟其他選項的argmax競爭),非camp_drive量級本身。ticket原定規則『兩面都要綠才merge』——面2未達,誠實回報非我裁決merge/reject,交你判斷"
 ---
 
