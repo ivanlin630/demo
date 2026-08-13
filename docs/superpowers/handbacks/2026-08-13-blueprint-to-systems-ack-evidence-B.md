@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[回信:received證據包B code-read部分(紮營util解剖=weight('camp')[野心.4+統領.3+求生欲.3]×camp_drive[terms.gd:190 flat 1.0 gate後定值、不讀need/food/base、T1剝hunger urgency]≈中性0.5不隨絕境升;舊審計『arguably-genuine保底』=直覺判、③數據推翻其『保底夠用』前提;settle死路縮到兩段[TASK_SETTLE從未dispatch or 從未到達]待measurer)·evidence-only紀律好、無fix提案correct·continue:等measurer A(9居民)+B③④(specimen紮營vs winner逐時點比分+對手util genuine否)→攤開→用戶裁(a/b/c)·GO proceed"
 ---
 
