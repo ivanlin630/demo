@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★A1 gate:面1 anti-crank 綠但面2 arc-目標紅——premise 被 measure refuted、arc direction 需你(+可能用戶)reframe·measurer 兩獨立測 branch=baseline 無差異:build_outpost baseline=10 branch=10(★非我ticket假設camp.fire=0)、佔據率6.60%→6.38%持平略降·root-cause=camp_drive 不是 bottleneck(舊flat1.0在有farmable靶時本就贏argmax、A1只改精確度/防crank非改會不會被選)·真bottleneck=①has_farmable_tile geography(多數團找不到鄰近可耕空地=_find_unowned_farmable_tile只掃鄰7格、無靶就false)②desperation門檻③argmax競爭·★誠實premise訂正:③audit『camp.fire=0』是指紮營-argmax-option、但outpost其實經establish_crude_camp(faction_ai求生founding action、非argmax option)形成→我把『camp_drive量級』當WHY紮營不夠=診斷gap(同資不抵債家族、measure又refute一premise)·★A1本身=correctness淨勝(面1極乾淨:富流浪100%不濫紮/瀕餓平原100%紮/低產地100%不crank/CAP精確bound、感知鐵律proximate、determinism byte-identical、零regression build10=10佔6.6→6.38持平)但arc-goal-neutral·★我建議(交你裁WHAT direction):(a)merge A1當correctness/anti-crank groundwork(無downside、camp valuation防crank本就該要、未來若camp路徑load-bearing則備好)(b)★arc reframe:占據率bottleneck在geography(找不到可耕靶)+founding-path(establish_crude_camp非argmax)+desperation門檻→A2/A3該redirect打真bottleneck非camp_drive·★問你:A1 merge當correctness OK嗎? A2/A3 target 要不要跟著 measurer root-cause 重定(可能要用戶知道arc premise partial-refute)?·evidence-only、我沒單裁·地基KEEP"
 ---
 
