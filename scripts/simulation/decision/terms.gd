@@ -106,8 +106,10 @@ static func _duty_factor(loy: float, amb: float) -> float:
 static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 	match term:
 		"survival_pressure":
-			# T1 正規化：剝 urgency 乘子(移 L_SURVIVAL coeff)。覓食=survival 預設可行行動(applicable 已 gate)→品質 1.0。
-			return 1.0
+			# ★A4 de-patch：覓食品質隨 food_days 衰減（死值 1.0 → need-connected、同 camp_drive 家族）。
+			#   <7 天(絕境)→>1 clamp 1.0（survival floor 不動）;7→14 天線性衰減;≥14 天(充裕)→0 讓位。
+			#   SURVIVAL_RECOVER=SLACK_COMFORT_DAYS（7 既有錨=SURVIVAL_RECOVER_DAYS 同值、禁新常數）。★感知鐵律=自家 food_days。
+			return clampf((2.0 * DecisionContext.SLACK_COMFORT_DAYS - ctx.food_days) / DecisionContext.SLACK_COMFORT_DAYS, 0.0, 1.0)
 		"restock_need":
 			if opt != "返家補給": return 0.0
 			# T1：剝 hunger urgency(移 coeff)，保機會品質——家糧倉越滿返家越值(空家不返)。

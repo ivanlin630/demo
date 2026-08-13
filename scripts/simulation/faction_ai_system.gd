@@ -796,6 +796,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			OrderSystem.new().tick_team_orders(state, team)
 			team.order_eval_next_tick = state.world.current_tick + OrderSystem.ORDER_POST_CADENCE
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.orders_ambition", _t3)
+		# ★A4 solo-convert：被邀 settle 的獨立團(非子隊)抵達 target outpost→就地轉居民
+		#   （非等 pairwise interaction 有 co-located 對手；鏡射 _settle_relocated_village solo 三分支）。
+		if team.current_task == TeamData.TASK_SETTLE and team.parent_team_id == -1:
+			_tick_solo_settle(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.survival", _t3)
@@ -1960,6 +1964,23 @@ func tick_relocations_all(state: WorldState) -> void:
 			v.move_target = tgt   # 續移（movement 推進）
 
 # 抵達落腳：own-faction outpost→convert_to_resident、空地→establish_crude_camp founding、皆不成→原地流亡收束。
+# ★A4 solo-convert：獨立 TASK_SETTLE 團抵達即安頓（鏡射 _settle_relocated_village 三分支、非發明）。
+#   還在路上(move_target≠-1)→不動;抵 own-faction outpost→convert;空地→crude_camp;皆不成→release 回 idle(後續再遷/流亡)。
+func _tick_solo_settle(state: WorldState, team: TeamData) -> void:
+	if team.move_target != Vector2i(-1, -1):
+		return   # 還在移動路上（未抵 target）
+	var tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
+	if tile != null and tile.outpost_owner != -1:
+		var o: TeamData = state.teams.get(tile.outpost_owner)
+		if o != null and o.faction_id == team.faction_id and o.team_id != team.team_id:
+			InteractionSystem.new()._convert_to_resident(state, team)   # 被邀入 faction 後同 faction outpost 落腳
+			if Probe.enabled: Probe.bump("convert_via_settle")
+			return
+	if establish_crude_camp(state, team):   # 空地 founding（新 level-1 outpost）
+		if Probe.enabled: Probe.bump("convert_via_settle")
+		return
+	TaskArbiter.release(team)   # 皆不成 → 回 idle（後續再遷/流亡，genuine 失敗案）
+
 func _settle_relocated_village(state: WorldState, v: TeamData) -> void:
 	var tile: HexTileData = state.world.tiles.get(v.tile_pos.x * 1000 + v.tile_pos.y)
 	if tile != null and tile.outpost_owner != -1:
