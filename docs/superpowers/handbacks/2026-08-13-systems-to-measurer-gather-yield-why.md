@@ -35,6 +35,14 @@ gain = productivity × current(tile池餘量) × COLLECT_RATE(0.05) × labor_mul
 ## ★輸出
 **team47 vs team70/83 各因子並排表** + 各因子 **team47/team70 比值** → 最大比值 = 主兇（一眼定 240x 來自枯池 / 無 labor alloc / 低 farming / 低 skill / 低 morale / 或多因子疊）。
 
+## ★併入：ownership-mismatch seam 檢查（blueprint 查出、用戶問「跑公庫嗎」）
+**code seam CONFIRMED（我複核）**：存入端 `deposit`（resource:288）只查 `outpost_level>0`、**無 owner check**（註假設採集者=owner 但不驗）；吃飯端 `own_granary_tile`（:400）**要 `outpost_owner==team`**。∴站**非自有** outpost（level>0、owner≠己）→ 採的糧存進該倉**但吃不到**=邊採邊餓。
+- ★**nuance（別搞錯 population）**：panel 9 居民 resident_detail 準則=`own_granary≠null`=**owner-matched**→**對這 9 團 seam 不適用**（它們 own 自己 tile、granary=0 是清空/低 yield 非 ownership）。mismatch 若存在=在**站非自有 outpost 的團**（panel 因 own_granary=null 歸為 wanderer）。
+- ★**check（world-wide、非只 9 panel）**：掃**所有站 outpost_level>0 tile 的團**：`腳下 tile.outpost_owner == team.team_id`？
+  - **mismatch 團數** + 其 `harvest_intake_vault` 流向誰的倉（存進非自有倉的量 Σ）。
+  - 這些 mismatch 團的 team.food / famine 狀態（採進吃不到→餓？）。
+- ★**不預設**（blueprint 定）：6 團採集量本身近零（0.01-15% 飯量）=主病**可能仍在 yield**、ownership 是**第二嫌疑並查**（別讓 ownership 假說蓋過 yield 真測）。
+
 ## 紀律
-官方 `SpecimenDumpHelper` 勿手設 `specimen_team_ids`（observer-neutrality [[feedback_observer_no_global_rng]]）。若現 specimen batch 已含這些 tile/team 欄可直讀、不足才補 tap（**先讀既有 dump 再決定跑不跑**）。
+官方 `SpecimenDumpHelper` 勿手設 `specimen_team_ids`（observer-neutrality [[feedback_observer_no_global_rng]]）。若現 specimen batch 已含這些 tile/team/owner 欄可直讀、不足才補 tap（**先讀既有 dump 再決定跑不跑**）。
 output → systems 收口（gather-yield binding 因子）→ blueprint 定 arc scope（接入+yield vs 接入 alone）帶用戶裁。地基 KEEP。
