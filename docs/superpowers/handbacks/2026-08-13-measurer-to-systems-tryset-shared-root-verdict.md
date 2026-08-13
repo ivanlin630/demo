@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[try_set共根CLOSE]★★★不是latch bug——99.1%(1142/1152)真兇=priority_lower(genuine正確優先權仲裁,非equal-priority-fallthrough這個ticket原假設的第③條),equal_priority_source_gated僅9/1152(0.78%),persist.hold僅1/1152(0.09%);逐筆context dump鎖定被擋團的『現任task』全部是覓食(80)/逃跑(80)/迎戰(70)/外交(70)這些genuine高優先survival/threat任務,無一筆是低價值task被機械鎖住——判定=genuine非patch,禁priority-crank(調高invite_settle/build優先級會讓settle/建設反過來打斷真正在逃命/迎敵的團,方向錯);唯一真結構缺口是equal_priority_source_gated這9筆(候選當下task_priority剛好也是PRIO_DISPATCH=50但task_reason非engine-source,ENGINE_SOURCES白名單設計排除invite_settle這類非unified/solo來源)——量級小(0.78%)不是A2/A3完成率低的主因;真正解釋『A2 40/41卡+A3 12/15 noop』的是這個世界population本身普遍處於PRIO_SURVIVAL(80)/PRIO_THREAT(70)級的求生/威脅狀態,settle/建設這類PRIO_DISPATCH(50)級ambient決策structurally很難搶到執行機會——這是world-state事實非arbiter bug,呼應本session稍早已多次坐實的『世界瀕餓/威脅密度高』大背景"
 ---
 
