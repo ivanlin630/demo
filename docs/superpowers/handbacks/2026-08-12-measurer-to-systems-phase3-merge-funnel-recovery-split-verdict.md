@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[#3②merge funnel真塌點比預期更早+#3③migrant/invest真塌點=找不到可用holding非precondition非decision]①你點名的併入funnel(pair_seen/try_entered/accept)全程0/0/0/0/0——168次consolidate_dispatch/set_ok後execution從未engage一次,8次真完成(mergein.dissolve+subteam)另有源頭=_resolve_mergein第二呼叫點(accept.join_accept弱方join路,interaction_system.gd:1287,跟你點名的強拉路徑:511完全不同機制)②migrant/invest三段funnel:reached_entry→precond_block只擋61%/26%,真正瓶頸在precondition過關後找holding這段(migrant147/148、invest277/282過關後找不到可用target,連evaluated都到不了)——偏propagation/target-availability而非decision-under-fire,但無法100%排除genuine self-preservation"
 ---
 
