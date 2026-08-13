@@ -51,6 +51,9 @@ var has_strong_neighbor: bool = false
 var strong_neighbor_id: int = -1
 var has_farmable_tile: bool = false
 var farmable_pos: Vector2i = Vector2i(-1, -1)
+# ★A1 紮營價值=MarginalEconomy 真帳：靶 farmable tile 的純 est（terrain=belief 地理、outpost1/farming0、pop）+ 覓食餬口日產 floor。
+var camp_target_est: VillageEstimate = null   # 無靶→null（保守不行動）
+var camp_forage_floor: float = 0.0
 var has_aid_target: bool = false
 var aid_target_id: int = -1
 # 買糧（Phase 1）：最近市集 outpost + 是否有錢（specie）。
@@ -291,6 +294,12 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)
 	c.farmable_pos = _ft
+	# ★A1：紮營靶 est（terrain=靶 tile 地理 belief、outpost1/farming0/pop）+ 覓食餬口日產 floor（camp_marginal 用）。
+	if c.has_farmable_tile:
+		var _ftile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_ft))
+		if _ftile != null:
+			c.camp_target_est = VillageEstimate.make(_ftile.terrain, 1, 0, team.population)
+	c.camp_forage_floor = ResourceSystem._forage_subsist_buffer(team) / ResourceSystem.FORAGE_FLOOR_DAYS   # 日產同源
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.strong_farm", _tg)
 	var _aid: int = _fa._find_aid_target(state, team)
 	c.has_aid_target = _aid != -1

@@ -7,6 +7,9 @@ const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× wei
 const DESPERATION_DAYS: float = 3.0    # TEST VALUE — 食物低於此才入絕境 option（對齊 WARNING_DAYS）
 const DESPERATION_SCALE: float = 1.2   # TEST VALUE — 絕境 drive 量級（對齊 survival-class 域，不碾壓 forage/restock）
 const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略低於 join/camp）
+# ★A1 紮營價值=MarginalEconomy 真帳（term 非 gate、禁 crank bound）。
+const CAMP_MARGINAL_CAP: float = 1.5   # TEST VALUE bound — 紮營 drive 封頂（非 inflate、measurer bounded-verify）
+const CAMP_URGENCY_DAYS: float = ResourceSystem.PROVISION_DAYS   # 10 既有錨 — food runway 緊迫度尺
 const FACTION_DUTY_DRIVE: float = 1.5   # TEST VALUE — 派系協同量級（攻擊/徵收/外交同級；commander-v2 單意圖後成員一次服務一意圖的子命令=無同級矛盾，war-priority LESSER 已 revert）
 const DEFECT_AMBITION_K: float = 1.0    # TEST VALUE — 野心折損 faction_duty 權重斜率（脫軌逃閥）
 const ATTACK_DRIVE_BASE: float = 0.3    # TEST VALUE — 個人參戰基值；× attack weight(好戰/殘忍)=染色 HOW
@@ -188,9 +191,15 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# T1：剝 hunger/threat urgency(移 coeff)，保名聲磁鐵品質(高名聲 host 投靠更值)。
 			return clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
 		"camp_drive":
-			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
-			# T1：剝 hunger urgency(移 coeff)。可耕地已 gate→品質 1.0。
-			return 1.0
+			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
+			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:
+				return 0.0
+			# marg=靶 tile 淨可持續產能超覓食餬口的增量（maxf(0) anti-crank：低產 tile→0 不值紮）。
+			var marg: float = MarginalEconomy.camp_marginal(ctx.camp_target_est, ctx.camp_forage_floor)
+			var daily_need: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+			# urgency=food runway 緊迫度（富流浪 food_days≥URGENCY_DAYS→0 不急紮）。
+			var urgency: float = clampf((CAMP_URGENCY_DAYS - ctx.food_days) / CAMP_URGENCY_DAYS, 0.0, 1.0)
+			return clampf(marg / maxf(daily_need, 0.001), 0.0, CAMP_MARGINAL_CAP) * urgency
 		"beg_drive":
 			if opt != "乞食" or not ctx.has_aid_target: return 0.0
 			# T1：剝 hunger urgency(移 coeff)。低品質最後手段=低 band 定值。

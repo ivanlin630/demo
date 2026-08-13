@@ -34,6 +34,12 @@ static func migrant_marginal(est: VillageEstimate, k: int) -> float:
 	var after: float = _inflow_est(est_after)
 	return after - before - float(k) * MIGRANT_UPKEEP
 
+# ★紮營邊際（A1、Slice survival-access）：紮營落腳該 farmable tile 的淨可持續產能超出「原本覓食餬口日產」的增量。
+#   = maxf(0, _inflow_est(est) − forage_floor)。純算術零新常數、鏡射 migrant_marginal（god-view 防線一致=只吃 est）。
+#   低產 tile（森林 regen 3 + 高 pop → _inflow_est 邊際 → 0）→ maxf(0)=0 → 不值紮（anti-crank marginal 路徑）。
+static func camp_marginal(est: VillageEstimate, forage_floor: float) -> float:
+	return maxf(0.0, _inflow_est(est) - forage_floor)
+
 # ★投資 ROI（§1.1.2、Slice R2）：升 farming 一級的淨回收（食產增益 × 有效視野 − 升級料價值）。
 # ★★命門（survival-bounded、治 HORIZON 自打臉）：discrimination 非靠調 HORIZON、靠有效視野綁「殘存活窗」——
 #   投資後仍赤字（net_after<0）→ effective_days 綁 food_est/−net_after（短）→ Δinflow×短窗 < cost → ROI 負 → 不投
