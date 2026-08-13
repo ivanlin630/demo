@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[gather-yield WHY:240x 同平原採集差真兇(blueprint GO、用戶線索收齊再裁 arc scope 的 missing clue)·problem:同 plains、team47 4.1/event vs team70 0.017/event(40次採僅0.67)vs team83 0.01(顆粒無收)=240x 差、定 binding 因子·★gather formula(resource_system:268)per-team 直測分項(不 code-guess、逐 harvest 事件 dump 各乘數):gain=productivity×current(tile池餘量)×COLLECT_RATE(0.05)×labor_mult×labor_share×work_morale×(1+farming_level×0.5)×(1+prod_skill×0.3)×harvest_factor·★逐團(9居民、重點 team47 vs 30/70/83)dump 各因子值:①current(該團 tile.resources.food 池餘量、疑枯竭=gain∝current 頭號嫌疑;plains 均衡池≈160[regen8÷COLLECT0.05]、若 team70 tile current<<160=枯池)②productivity(tile.productivity)③labor_mult(LaborSystem.labor_mult gather:food or LABOR_SCALE 若無 alloc=team70 疑無 labor 分配到採糧)④labor_share⑤work_morale⑥farming_level(tile)⑦prod_skill(leader 生產技能)⑧harvest_factor(tile 季節/狀態)⑨outpost_mult⑩pop(context)·★輸出=team47 vs team70/83 各因子並排表→一眼定 240x 差來自哪個乘數(枯池? 無labor alloc? 低farming? 低skill? 低morale?)·可能多因子疊、報各因子 team47/team70 比值→最大比值=主兇·官方 SpecimenDumpHelper 勿手設 team_ids·evidence-only 禁 fix 禁預設·output→systems 收口(gather-yield binding 因子)→blueprint 定 arc scope(接入+yield vs 接入alone)帶用戶裁·地基 KEEP"
 ---
 
