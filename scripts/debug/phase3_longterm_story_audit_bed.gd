@@ -207,6 +207,9 @@ func _initialize() -> void:
 	dump["income_harvest_vault_samples"] = Probe.samples.get("income.harvest_vault", [])
 	dump["income_harvest_team_samples"] = Probe.samples.get("income.harvest_team", [])
 	dump["income_hunt_samples"] = Probe.samples.get("income.hunt", [])
+	dump["income_harvest_vault_samples"] = Probe.samples.get("income.harvest_vault", [])
+	dump["income_harvest_team_samples"] = Probe.samples.get("income.harvest_team", [])
+	dump["income_hunt_samples"] = Probe.samples.get("income.hunt", [])
 	dump["erase_food_snapshot_samples"] = Probe.samples.get("erase.food_snapshot", [])
 	print("  join.order_set samples=%d join.reached_pair samples=%d" % [
 		dump["join_order_set_samples"].size(), dump["join_reached_pair_samples"].size()])
@@ -286,6 +289,12 @@ func _daily_census(state: WorldState, day: int, starve_delta: int) -> Dictionary
 				"is_subteam": t.parent_team_id != -1, "pop": t.population, "food_days": fd,
 				"granary_food": float(_granary.public_storage.get("food", 0)) if _granary != null else -1.0,
 				"team_food": float(t.resources.get("food", 0)),
+				# ★安家報酬對照面板(2026-08-13):terrain(承載力對照,純讀零新tap)。
+				"terrain": String(_granary.terrain) if _granary != null else "",
+				"outpost_level": int(_granary.outpost_level) if _granary != null else -1,
+				# ★netgain回推假象質疑回應(2026-08-13):famine_days(團級斷糧累積,純讀零新tap)+leader hunger(個人級)。
+				"famine_days": t.famine_days,
+				"leader_hunger": float(state.persons[t.leader_id].hunger) if t.leader_id != -1 and state.persons.has(t.leader_id) else -1.0,
 			})
 		else:
 			nonresident_n += 1; nonresident_pop += t.population; nonresident_food_days_sum += fd

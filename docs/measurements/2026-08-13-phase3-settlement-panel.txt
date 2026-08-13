@@ -1,0 +1,78 @@
+=== ①②③④⑤⑥ 9 resident 逐日 panel ===
+
+--- team_id=30  residency-onset=day23  terrain=plains ---
+  day=23 task=逃跑         pop= 6 granary_food=    0.0 team_food=   9.0 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=24 task=return_home pop= 6 granary_food=    0.0 team_food=   5.8 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=25 task=return_home pop= 6 granary_food=    0.0 team_food=   0.8 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=26 task=return_home pop= 6 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=0.4 leader_hunger=0.01 terrain=plains
+  day=27 task=return_home pop= 6 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=1.2 leader_hunger=0.03 terrain=plains
+  day=28 task=return_home pop= 6 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=2.5 leader_hunger=0.05 terrain=plains
+  day=29 task=return_home pop= 6 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=3.3 leader_hunger=0.07 terrain=plains
+  day=30 task=return_home pop= 6 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=4.6 leader_hunger=0.09 terrain=plains
+
+--- team_id=45  residency-onset=day30  terrain=plains ---
+  day=30 task=return_home pop= 9 granary_food=    0.0 team_food=  12.2 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+
+--- team_id=47  residency-onset=day25  terrain=plains ---
+  day=25 task=return_home pop=10 granary_food=    0.0 team_food=  21.5 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=26 task=return_home pop=10 granary_food=    0.0 team_food=  20.5 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=27 task=return_home pop=10 granary_food=    0.0 team_food=  20.9 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=28 task=return_home pop=10 granary_food=    0.0 team_food=  25.0 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=29 task=return_home pop=10 granary_food=    0.0 team_food=  28.2 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=30 task=return_home pop=10 granary_food=    0.0 team_food=  26.4 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+
+--- team_id=58  residency-onset=day27  terrain=plains ---
+  day=27 task=return_home pop= 2 granary_food=    0.0 team_food=   0.6 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=28 task=return_home pop= 2 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=0.8 leader_hunger=0.01 terrain=plains
+  day=29 task=return_home pop= 2 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=1.7 leader_hunger=0.02 terrain=plains
+  day=30 task=return_home pop= 2 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=2.9 leader_hunger=0.05 terrain=plains
+
+--- team_id=70  residency-onset=day27  terrain=plains ---
+  day=27 task=治理         pop= 3 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=0.4 leader_hunger=0.01 terrain=plains
+  day=28 task=治理         pop= 3 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=1.7 leader_hunger=0.05 terrain=plains
+  day=29 task=return_home pop= 3 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=2.5 leader_hunger=0.07 terrain=plains
+  day=30 task=return_home pop= 3 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=3.8 leader_hunger=0.12 terrain=plains
+
+--- team_id=83  residency-onset=day28  terrain=plains ---
+  day=28 task=治理         pop= 1 granary_food=    0.0 team_food=   1.5 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=29 task=return_home pop= 1 granary_food=    0.0 team_food=   0.8 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=30 task=return_home pop= 1 granary_food=    0.0 team_food=   0.0 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+
+--- team_id=87  residency-onset=day27  terrain=plains ---
+  day=27 task=治理         pop= 1 granary_food=    0.0 team_food=   2.0 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=28 task=治理         pop= 1 granary_food=    0.0 team_food=   1.6 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=29 task=治理         pop= 1 granary_food=    0.0 team_food=   1.2 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+  day=30 task=return_home pop= 1 granary_food=    0.0 team_food=   0.6 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=plains
+
+--- team_id=109  residency-onset=day29  terrain=forest ---
+  day=29 task=return_home pop= 2 granary_food=    0.0 team_food=   2.7 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=forest
+  day=30 task=return_home pop= 2 granary_food=    0.0 team_food=   0.8 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=forest
+
+--- team_id=111  residency-onset=day28  terrain=forest ---
+  day=28 task=治理         pop= 2 granary_food=    0.0 team_food=   3.7 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=forest
+  day=29 task=治理         pop= 2 granary_food=    0.0 team_food=   2.4 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=forest
+  day=30 task=治理         pop= 2 granary_food=    0.0 team_food=   0.4 food_sec_days(granary)=   0.0 famine_days=0.0 leader_hunger=0.00 terrain=forest
+
+=== ★真值 income.harvest_vault samples(逐團逐日真採集量,非回推) ===
+harvest_vault samples total n=1000
+  team_id=30: 21 harvest events, Σgain=5.65, avg=0.269/event
+  team_id=47: 10 harvest events, Σgain=40.99, avg=4.099/event
+  team_id=58: 7 harvest events, Σgain=0.69, avg=0.099/event
+  team_id=70: 40 harvest events, Σgain=0.67, avg=0.017/event
+  team_id=83: 10 harvest events, Σgain=0.01, avg=0.001/event
+  team_id=87: 21 harvest events, Σgain=0.12, avg=0.006/event
+  team_id=109: 8 harvest events, Σgain=0.00, avg=0.000/event
+  team_id=111: 9 harvest events, Σgain=0.00, avg=0.000/event
+  9居民裡從未出現在harvest_vault samples的: [45]
+
+=== 對照組(nonresident/wanderer)人口軌跡 ===
+day= 1 nonresident_n=  59 nonresident_pop= 444 nonresident_fd=52.9 starve_delta=0
+day= 2 nonresident_n=  59 nonresident_pop= 444 nonresident_fd=45.4 starve_delta=0
+day= 3 nonresident_n=  62 nonresident_pop= 444 nonresident_fd=41.8 starve_delta=0
+day= 4 nonresident_n=  62 nonresident_pop= 444 nonresident_fd=38.7 starve_delta=0
+day= 5 nonresident_n=  65 nonresident_pop= 444 nonresident_fd=37.7 starve_delta=0
+day=26 nonresident_n= 100 nonresident_pop= 423 nonresident_fd=25.3 starve_delta=0
+day=27 nonresident_n=  97 nonresident_pop= 416 nonresident_fd=18.6 starve_delta=0
+day=28 nonresident_n=  95 nonresident_pop= 412 nonresident_fd=20.4 starve_delta=0
+day=29 nonresident_n=  95 nonresident_pop= 411 nonresident_fd=19.5 starve_delta=0
+day=30 nonresident_n=  96 nonresident_pop= 400 nonresident_fd=16.1 starve_delta=1

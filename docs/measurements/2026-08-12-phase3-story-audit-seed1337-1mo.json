@@ -7,8 +7,8 @@
   "combatopt_fire_samples": [],
   "conservation_close_check": {
     "delta_grand": -9725.37811155098,
-    "diff": -0.00000000007276,
-    "sum_flow": -9725.3781115509
+    "diff": -56060651.2884834,
+    "sum_flow": 56050925.9103718
   },
   "curve": [
     {
@@ -5251,15 +5251,19 @@
         {
           "current_task": "逃跑",
           "day": 23,
+          "famine_days": 0,
           "food_days": 1.88315418663569,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 6,
           "team_food": 9.03914009585131,
-          "team_id": 30
+          "team_id": 30,
+          "terrain": "plains"
         }
       ],
       "resident_food_days_avg": 1.88315418663569,
@@ -5480,15 +5484,19 @@
         {
           "current_task": "return_home",
           "day": 24,
+          "famine_days": 0,
           "food_days": 1.20738957809605,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 6,
           "team_food": 5.79546997486103,
-          "team_id": 30
+          "team_id": 30,
+          "terrain": "plains"
         }
       ],
       "resident_food_days_avg": 1.20738957809605,
@@ -5709,28 +5717,36 @@
         {
           "current_task": "return_home",
           "day": 25,
+          "famine_days": 0,
           "food_days": 0.175275654254463,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 6,
           "team_food": 0.841323140421421,
-          "team_id": 30
+          "team_id": 30,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 25,
+          "famine_days": 0,
           "food_days": 2.68360428174335,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 10,
           "team_food": 21.4688342539468,
-          "team_id": 47
+          "team_id": 47,
+          "terrain": "plains"
         }
       ],
       "resident_food_days_avg": 1.42943996799891,
@@ -5951,28 +5967,36 @@
         {
           "current_task": "return_home",
           "day": 26,
+          "famine_days": 0.416666666666667,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0.00698905414243726,
+          "outpost_level": 1,
           "pop": 6,
           "team_food": 0,
-          "team_id": 30
+          "team_id": 30,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 26,
+          "famine_days": 0,
           "food_days": 2.56674843452239,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 10,
           "team_food": 20.5339874761791,
-          "team_id": 47
+          "team_id": 47,
+          "terrain": "plains"
         }
       ],
       "resident_food_days_avg": 1.2833742172612,
@@ -6193,67 +6217,87 @@
         {
           "current_task": "return_home",
           "day": 27,
+          "famine_days": 1.25,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0.0262423793596382,
+          "outpost_level": 1,
           "pop": 6,
           "team_food": 0,
-          "team_id": 30
+          "team_id": 30,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 27,
+          "famine_days": 0,
           "food_days": 2.61399016205416,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 10,
           "team_food": 20.9119212964333,
-          "team_id": 47
+          "team_id": 47,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 27,
+          "famine_days": 0,
           "food_days": 0.347385909270232,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 0.555817454832371,
-          "team_id": 58
+          "team_id": 58,
+          "terrain": "plains"
         },
         {
           "current_task": "治理",
           "day": 27,
+          "famine_days": 0.416666666666667,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0.0125032514585313,
+          "outpost_level": 1,
           "pop": 3,
           "team_food": 0,
-          "team_id": 70
+          "team_id": 70,
+          "terrain": "plains"
         },
         {
           "current_task": "治理",
           "day": 27,
+          "famine_days": 0,
           "food_days": 2.5,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 1,
           "team_food": 2,
-          "team_id": 87
+          "team_id": 87,
+          "terrain": "plains"
         }
       ],
       "resident_food_days_avg": 1.09227521426488,
@@ -6474,93 +6518,121 @@
         {
           "current_task": "return_home",
           "day": 28,
+          "famine_days": 2.5,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0.0494269566007722,
+          "outpost_level": 1,
           "pop": 6,
           "team_food": 0,
-          "team_id": 30
+          "team_id": 30,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 28,
+          "famine_days": 0,
           "food_days": 3.11902806371133,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 10,
           "team_food": 24.9522245096907,
-          "team_id": 47
+          "team_id": 47,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 28,
+          "famine_days": 0.833333333333333,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0.0117089297242966,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 0,
-          "team_id": 58
+          "team_id": 58,
+          "terrain": "plains"
         },
         {
           "current_task": "治理",
           "day": 28,
+          "famine_days": 1.66666666666667,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0.0458247691720153,
+          "outpost_level": 1,
           "pop": 3,
           "team_food": 0,
-          "team_id": 70
+          "team_id": 70,
+          "terrain": "plains"
         },
         {
           "current_task": "治理",
           "day": 28,
+          "famine_days": 0,
           "food_days": 1.88088536154688,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 1,
           "team_food": 1.50470828923751,
-          "team_id": 83
+          "team_id": 83,
+          "terrain": "plains"
         },
         {
           "current_task": "治理",
           "day": 28,
+          "famine_days": 0,
           "food_days": 1.96791642891277,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 1,
           "team_food": 1.57433314313021,
-          "team_id": 87
+          "team_id": 87,
+          "terrain": "plains"
         },
         {
           "current_task": "治理",
           "day": 28,
+          "famine_days": 0,
           "food_days": 2.29166666666667,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 3.66666666666667,
-          "team_id": 111
+          "team_id": 111,
+          "terrain": "forest"
         }
       ],
       "resident_food_days_avg": 1.32278521726252,
@@ -6781,106 +6853,138 @@
         {
           "current_task": "return_home",
           "day": 29,
+          "famine_days": 3.33333333333333,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0.0688750176732337,
+          "outpost_level": 1,
           "pop": 6,
           "team_food": 0,
-          "team_id": 30
+          "team_id": 30,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 29,
+          "famine_days": 0,
           "food_days": 3.52471313371709,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 10,
           "team_food": 28.1977050697367,
-          "team_id": 47
+          "team_id": 47,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 29,
+          "famine_days": 1.66666666666667,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0.0248434722701232,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 0,
-          "team_id": 58
+          "team_id": 58,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 29,
+          "famine_days": 2.5,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0.0709409949497695,
+          "outpost_level": 1,
           "pop": 3,
           "team_food": 0,
-          "team_id": 70
+          "team_id": 70,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 29,
+          "famine_days": 0,
           "food_days": 1.05780838997487,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 1,
           "team_food": 0.846246711979897,
-          "team_id": 83
+          "team_id": 83,
+          "terrain": "plains"
         },
         {
           "current_task": "治理",
           "day": 29,
+          "famine_days": 0,
           "food_days": 1.53123364573376,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 1,
           "team_food": 1.22498691658701,
-          "team_id": 87
+          "team_id": 87,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 29,
+          "famine_days": 0,
           "food_days": 1.66666666666667,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 2.66666666666666,
-          "team_id": 109
+          "team_id": 109,
+          "terrain": "forest"
         },
         {
           "current_task": "治理",
           "day": 29,
+          "famine_days": 0,
           "food_days": 1.48738716740656,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 2.3798194678505,
-          "team_id": 111
+          "team_id": 111,
+          "terrain": "forest"
         }
       ],
       "resident_food_days_avg": 1.15847612543737,
@@ -7101,119 +7205,155 @@
         {
           "current_task": "return_home",
           "day": 30,
+          "famine_days": 4.58333333333333,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0.0916958380504095,
+          "outpost_level": 1,
           "pop": 6,
           "team_food": 0,
-          "team_id": 30
+          "team_id": 30,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 30,
+          "famine_days": 0,
           "food_days": 1.69881818672597,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 9,
           "team_food": 12.231490944427,
-          "team_id": 45
+          "team_id": 45,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 30,
+          "famine_days": 0,
           "food_days": 3.30612388734391,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 10,
           "team_food": 26.4489910987513,
-          "team_id": 47
+          "team_id": 47,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 30,
+          "famine_days": 2.91666666666667,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0.0538362852999609,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 0,
-          "team_id": 58
+          "team_id": 58,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 30,
+          "famine_days": 3.75,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": false,
+          "leader_hunger": 0.11626227216105,
+          "outpost_level": 1,
           "pop": 3,
           "team_food": 0,
-          "team_id": 70
+          "team_id": 70,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 30,
+          "famine_days": 0,
           "food_days": 0,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 1,
           "team_food": 0,
-          "team_id": 83
+          "team_id": 83,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 30,
+          "famine_days": 0,
           "food_days": 0.768152060805603,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 1,
           "team_food": 0.614521648644482,
-          "team_id": 87
+          "team_id": 87,
+          "terrain": "plains"
         },
         {
           "current_task": "return_home",
           "day": 30,
+          "famine_days": 0,
           "food_days": 0.496521460544855,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 0.794434336871768,
-          "team_id": 109
+          "team_id": 109,
+          "terrain": "forest"
         },
         {
           "current_task": "治理",
           "day": 30,
+          "famine_days": 0,
           "food_days": 0.272452990966872,
           "granary_food": 0,
           "has_manufacturing_facility": false,
           "has_own_outpost": true,
           "has_tag_produce": true,
           "is_subteam": true,
+          "leader_hunger": 0,
+          "outpost_level": 1,
           "pop": 2,
           "team_food": 0.435924785546995,
-          "team_id": 111
+          "team_id": 111,
+          "terrain": "forest"
         }
       ],
       "resident_food_days_avg": 0.726896509598579,
@@ -7450,33 +7590,33 @@
     "convoy_load_inv_out": -1.66666666666667,
     "convoy_unload_excess_in": 402.659027777778,
     "convoy_unload_excess_out": -402.659027777778,
-    "eat_depleted": -14.5089206588541,
-    "eat_granary": -0,
-    "eat_granary_depleted": -6.31956116271634,
-    "eat_team": -10366.6666666666,
+    "eat_depleted": 0,
+    "eat_granary": 0.555817454832371,
+    "eat_granary_depleted": 0,
+    "eat_team": 571379.253632953,
     "erase_evaporation": 0,
     "extort_in": 486.461656746032,
     "extort_out": -486.461656746032,
-    "harvest_deplete": -67.3857402614033,
+    "harvest_deplete": 101343.434008395,
     "harvest_intake_vault": 67.3857402614032,
     "hunt": 607.358219632506,
     "market_buy_in": 26,
     "market_sell_out": -4,
     "merge_absorb_in": 164.816666666666,
-    "merge_absorb_out": -164.816666666666,
+    "merge_absorb_out": 0,
     "merge_share_in": 1005.57222222222,
     "merge_share_out": -1005.57222222222,
-    "npc_deposit_vault": -1543.33333333333,
-    "npc_deposit_vault_in": 1543.33333333333,
+    "npc_deposit_vault": 994,
+    "npc_deposit_vault_in": 8743.33333333333,
     "npc_loot_in": 35.3838292309642,
     "npc_loot_out": -35.3838292309642,
-    "npc_withdraw_vault": 809.623958333334,
-    "npc_withdraw_vault_out": -809.623958333334,
-    "provision_carry": 86.0661790986869,
-    "provision_granary_out": -86.0661790986876,
-    "readiness_food": -3.10800000000001,
-    "regen_food": 57.866817304755,
-    "spend_holding_team": -22,
+    "npc_withdraw_vault": 5544,
+    "npc_withdraw_vault_out": 45109.41875,
+    "provision_carry": 1048.17625079562,
+    "provision_granary_out": 13547,
+    "readiness_food": 3042.24009999885,
+    "regen_food": 55299071.7835863,
+    "spend_holding_team": 241.154266007131,
     "subteam_split_in": 3671.3993580141,
     "subteam_split_out": -3671.3993580141,
     "trade_goods_in": 687,
@@ -7487,2504 +7627,6004 @@
   "income_harvest_team_samples": [],
   "income_harvest_vault_samples": [
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 0,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 5,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 12,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 32,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 37,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 39,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 41,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 50,
       "tick": 100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 32,
       "tick": 200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 37,
       "tick": 200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 39,
       "tick": 200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 15,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 30,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 32,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 37,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 40,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 50,
       "tick": 300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 19,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 24,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 32,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 36,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 37,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 50,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 30,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 37,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 60,
       "tick": 500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 19,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 34,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 60,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 19,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 60,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 37,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 37,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 30,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 36,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 63,
       "tick": 1200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 18,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 1300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 36,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 19,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 24,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 30,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 36,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 66,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 67,
       "tick": 1500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 33,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 1600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 5,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 40,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 41,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 40,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 69,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 1800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 69,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 1900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 15,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 38,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 46,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 72,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 74,
       "tick": 2200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 15,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 30,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 65,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 15,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 58,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 75,
       "tick": 2400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 52,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 51,
       "tick": 2600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 58,
       "tick": 2600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 77,
       "tick": 2600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 2700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 78,
       "tick": 2700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 2800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 2900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 2900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 2900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 2900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 2900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 2900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 76,
       "tick": 2900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 3000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 66,
       "tick": 3000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 79,
       "tick": 3000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 80,
       "tick": 3000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 3100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 3200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 3200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 3200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 50,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 50,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 68,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 50,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 57,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 66,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 82,
       "tick": 3500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 3,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 82,
       "tick": 3600
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 50,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 59,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 84,
       "tick": 3700
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 78,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 84,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 89,
       "tick": 3800
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 43,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 53,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 84,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 85,
       "tick": 3900
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 5,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 37,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 50,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 78,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 84,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 85,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 87,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 88,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 91,
       "tick": 4000
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 5,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 21,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 79,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 82,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 84,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 87,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 90,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 91,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 93,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 95,
       "tick": 4100
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 5,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 21,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 79,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 84,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 87,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 89,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 91,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 96,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 97,
       "tick": 4200
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 5,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 72,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 87,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 88,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 91,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 97,
       "tick": 4300
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 5,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 30,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 32,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 49,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 81,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 84,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 87,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 88,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 90,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 91,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 94,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 97,
       "tick": 4400
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 5,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 9,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 17,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 32,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 35,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 42,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 55,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 61,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 62,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 70,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 73,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 84,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 87,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 88,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 90,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 91,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 96,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 97,
       "tick": 4500
     },
     {
+      "deposited": 0,
       "gain": 0,
       "team_id": 98,
       "tick": 4500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 9,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 42,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 50,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 55,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 62,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 68,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 70,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 4600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 42,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 49,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 55,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 70,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 4700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 55,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 70,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 82,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 4800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 41,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 49,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 55,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 60,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 70,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 93,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 99,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 100,
+      "tick": 4900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 40,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 41,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 49,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 55,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 64,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 79,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 99,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 49,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 50,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 55,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 70,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 96,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 31,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 41,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 49,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 50,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 31,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 41,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 49,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 70,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 110,
+      "tick": 5300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5400
+    },
+    {
+      "deposited": 0.640190784203644,
+      "gain": 0.640190784203644,
+      "team_id": 30,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 34,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 55,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 70,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 100,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 103,
+      "tick": 5400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5500
+    },
+    {
+      "deposited": 0.398949311647721,
+      "gain": 0.398949311647721,
+      "team_id": 30,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 89,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 98,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 100,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5600
+    },
+    {
+      "deposited": 0.402284009311382,
+      "gain": 0.402284009311382,
+      "team_id": 30,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 34,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 37,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 62,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 64,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 96,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 100,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 104,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 108,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 109,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 112,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 114,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 115,
+      "tick": 5600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5700
+    },
+    {
+      "deposited": 0.354045869698333,
+      "gain": 0.354045869698333,
+      "team_id": 30,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 34,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 50,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 62,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 96,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 100,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 109,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 116,
+      "tick": 5700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5800
+    },
+    {
+      "deposited": 0.307101418227839,
+      "gain": 0.307101418227839,
+      "team_id": 30,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 40,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 41,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 50,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 83,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 96,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 108,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 109,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 114,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 118,
+      "tick": 5800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 5900
+    },
+    {
+      "deposited": 0.349800809714581,
+      "gain": 0.349800809714581,
+      "team_id": 30,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 34,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 40,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 5900
+    },
+    {
+      "deposited": 2.97407229142926,
+      "gain": 2.97407229142926,
+      "team_id": 47,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 62,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 78,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 83,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 5900
+    },
+    {
+      "deposited": 0.0936368371189125,
+      "gain": 0.0936368371189125,
+      "team_id": 95,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 96,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 105,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 109,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 113,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 117,
+      "tick": 5900
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6000
+    },
+    {
+      "deposited": 0.388950937617972,
+      "gain": 0.388950937617972,
+      "team_id": 30,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 34,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6000
+    },
+    {
+      "deposited": 4.92928729116509,
+      "gain": 4.92928729116509,
+      "team_id": 47,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 62,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 73,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 83,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 6000
+    },
+    {
+      "deposited": 0.13850450090024,
+      "gain": 0.13850450090024,
+      "team_id": 95,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 105,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 6000
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6100
+    },
+    {
+      "deposited": 0.341868831525595,
+      "gain": 0.341868831525595,
+      "team_id": 30,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 40,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 46,
+      "tick": 6100
+    },
+    {
+      "deposited": 2.40981223538066,
+      "gain": 2.40981223538066,
+      "team_id": 47,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 64,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 83,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6100
+    },
+    {
+      "deposited": 0.0796053471715839,
+      "gain": 0.0796053471715836,
+      "team_id": 95,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 97,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 105,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 106,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 120,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 121,
+      "tick": 6100
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 19,
+      "tick": 6200
+    },
+    {
+      "deposited": 0.398715240697807,
+      "gain": 0.398715240697807,
+      "team_id": 30,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 38,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 39,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 40,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 46,
+      "tick": 6200
+    },
+    {
+      "deposited": 3.15142402672626,
+      "gain": 3.15142402672626,
+      "team_id": 47,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 64,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 65,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 67,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 83,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 6200
+    },
+    {
+      "deposited": 0.0909782796204444,
+      "gain": 0.0909782796204443,
+      "team_id": 95,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 105,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 106,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 121,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 122,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 123,
+      "tick": 6200
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6300
+    },
+    {
+      "deposited": 0.324453047519044,
+      "gain": 0.324453047519044,
+      "team_id": 30,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 32,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 46,
+      "tick": 6300
+    },
+    {
+      "deposited": 3.7857569610653,
+      "gain": 3.7857569610653,
+      "team_id": 47,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 50,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 83,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 87,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 6300
+    },
+    {
+      "deposited": 0.103351273722752,
+      "gain": 0.103351273722752,
+      "team_id": 95,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 106,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 119,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 121,
+      "tick": 6300
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 6400
+    },
+    {
+      "deposited": 0.406843006828973,
+      "gain": 0.406843006828973,
+      "team_id": 6,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6400
+    },
+    {
+      "deposited": 0.321051186225569,
+      "gain": 0.321051186225569,
+      "team_id": 30,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 42,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 46,
+      "tick": 6400
+    },
+    {
+      "deposited": 3.05481990187951,
+      "gain": 3.05481990187951,
+      "team_id": 47,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6400
+    },
+    {
+      "deposited": 0.148974448003401,
+      "gain": 0.148974448003401,
+      "team_id": 58,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 65,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6400
+    },
+    {
+      "deposited": 0.119953178997148,
+      "gain": 0.119953178997148,
+      "team_id": 70,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 83,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 6400
+    },
+    {
+      "deposited": 0.100672350253286,
+      "gain": 0.100672350253286,
+      "team_id": 95,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 100,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 105,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 106,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 109,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 120,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 121,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 124,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 126,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 127,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 129,
+      "tick": 6400
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6500
+    },
+    {
+      "deposited": 0.195216837818913,
+      "gain": 0.195216837818913,
+      "team_id": 22,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 27,
+      "tick": 6500
+    },
+    {
+      "deposited": 0.398377707138648,
+      "gain": 0.398377707138648,
+      "team_id": 30,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 33,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 36,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 40,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 46,
+      "tick": 6500
+    },
+    {
+      "deposited": 4.11397919876327,
+      "gain": 4.11397919876327,
+      "team_id": 47,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6500
+    },
+    {
+      "deposited": 0.104337823300182,
+      "gain": 0.104337823300182,
+      "team_id": 58,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 62,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 65,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6500
+    },
+    {
+      "deposited": 0.112739691229076,
+      "gain": 0.112739691229076,
+      "team_id": 70,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 83,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6500
+    },
+    {
+      "deposited": 0.0293738129204271,
+      "gain": 0.0293738129204271,
+      "team_id": 87,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 93,
+      "tick": 6500
+    },
+    {
+      "deposited": 0.11998899175447,
+      "gain": 0.11998899175447,
+      "team_id": 95,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 100,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 105,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 109,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 120,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 121,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 127,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 129,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 130,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 132,
+      "tick": 6500
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6600
+    },
+    {
+      "deposited": 0.171176120725836,
+      "gain": 0.171176120725836,
+      "team_id": 22,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 27,
+      "tick": 6600
+    },
+    {
+      "deposited": 0.370386295438196,
+      "gain": 0.370386295438196,
+      "team_id": 30,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 33,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 36,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 40,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 46,
+      "tick": 6600
+    },
+    {
+      "deposited": 3.52394095291989,
+      "gain": 3.52394095291989,
+      "team_id": 47,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 50,
+      "tick": 6600
+    },
+    {
+      "deposited": 0.158295511935782,
+      "gain": 0.158295511935782,
+      "team_id": 58,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 62,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6600
+    },
+    {
+      "deposited": 0.164538064694879,
+      "gain": 0.164538064694879,
+      "team_id": 70,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 71,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6600
+    },
+    {
+      "deposited": 0.0257586843651348,
+      "gain": 0.0257586843651348,
+      "team_id": 87,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 88,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 93,
+      "tick": 6600
+    },
+    {
+      "deposited": 0.0975645998945809,
+      "gain": 0.0975645998945808,
+      "team_id": 95,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 6600
+    },
+    {
+      "deposited": 0.0945046719932385,
+      "gain": 0.0945046719932384,
+      "team_id": 102,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 105,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 107,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 109,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 111,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 120,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 121,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 123,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 126,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 127,
+      "tick": 6600
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6700
+    },
+    {
+      "deposited": 0.122283141284688,
+      "gain": 0.122283141284688,
+      "team_id": 22,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 29,
+      "tick": 6700
+    },
+    {
+      "deposited": 0.363520172878495,
+      "gain": 0.363520172878495,
+      "team_id": 30,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 33,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 46,
+      "tick": 6700
+    },
+    {
+      "deposited": 5.95174640850816,
+      "gain": 5.95174640850816,
+      "team_id": 47,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 6700
+    },
+    {
+      "deposited": 0.129298762710971,
+      "gain": 0.129298762710971,
+      "team_id": 58,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6700
+    },
+    {
+      "deposited": 0.142892389001875,
+      "gain": 0.142892389001875,
+      "team_id": 70,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 71,
+      "tick": 6700
+    },
+    {
+      "deposited": 0.00470828923750377,
+      "gain": 0.00470828923750377,
+      "team_id": 83,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6700
+    },
+    {
+      "deposited": 0.0305245460152154,
+      "gain": 0.0305245460152155,
+      "team_id": 87,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 6700
+    },
+    {
+      "deposited": 0.138578389423757,
+      "gain": 0.138578389423757,
+      "team_id": 95,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 101,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 105,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 106,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 107,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 109,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 120,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 121,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 123,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 126,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 127,
+      "tick": 6700
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 5,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 17,
+      "tick": 6800
+    },
+    {
+      "deposited": 0.13539934444387,
+      "gain": 0.13539934444387,
+      "team_id": 22,
+      "tick": 6800
+    },
+    {
+      "deposited": 0.29001882089188,
+      "gain": 0.29001882089188,
+      "team_id": 30,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 33,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 35,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 43,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 46,
+      "tick": 6800
+    },
+    {
+      "deposited": 7.09621648662181,
+      "gain": 7.09621648662181,
+      "team_id": 47,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 48,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 53,
+      "tick": 6800
+    },
+    {
+      "deposited": 0.148843595762039,
+      "gain": 0.148843595762039,
+      "team_id": 58,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 62,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 66,
+      "tick": 6800
+    },
+    {
+      "deposited": 0.127751448309912,
+      "gain": 0.127751448309912,
+      "team_id": 70,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 71,
+      "tick": 6800
+    },
+    {
+      "deposited": 0.00410595750777855,
+      "gain": 0.00410595750777855,
+      "team_id": 83,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 84,
+      "tick": 6800
+    },
+    {
+      "deposited": 0.0337970475134655,
+      "gain": 0.0337970475134655,
+      "team_id": 87,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 91,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 92,
+      "tick": 6800
+    },
+    {
+      "deposited": 0.164469876694985,
+      "gain": 0.164469876694985,
+      "team_id": 95,
+      "tick": 6800
+    },
+    {
+      "deposited": 0,
+      "gain": 0,
+      "team_id": 100,
+      "tick": 6800
     }
   ],
   "income_hunt_samples": [
