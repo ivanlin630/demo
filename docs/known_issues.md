@@ -1118,3 +1118,6 @@ established=0 **不是** 世界死氣的真根=**被標籤騙**。blueprint grep
 
 ## ★founding never-establish 真根定案（2026-08-12、③story-audit + systems code-read、supersede「立國 orphan」stale 記載）
 established=0 真根**非** goal orphan（立國鏈已接：gate `faction_ai:1039`→emit `:1045`→`_declare_established:5070`），**是 gate 門檻 vs leader-gen 分布 mismatch=structural**：立國 gate `cmd≥0.4 + 野心≥0.6`（+readiness≥0.7/member≥2、後兩者從沒擋），but 凡人 leader-gen `統領∈[0.1,0.4]`（skill base randf[0,0.3]+leader0.1）/`野心∈[0.35,0.65]`（NORMAL_LO/HI）**系統性低於 gate**、只**霸主-archetype**（hi_v 野心+hi_s 統領+SKILL_TAIL[0.5,0.9]）夠格。典型 warring 床無霸主 leader→「立國」goal 從不 emit→established=0「世界不建國」。fix=WHAT/balance 用戶裁（a 降門檻/b 確保霸主 spawn/c 接受立國罕見=macro 扁平代價、連正統/王朝 arc）。
+
+## 記檔：用戶眼球「思考時間長」= O(N²) wall-clock perf + print-overhead（2026-08-13、③story-audit GUI 觀察）
+用戶 GUI 親跑 seed1337 看終端：決策輪 fire 時每 team 決策**逐隻慢慢印出**（預期瞬完）=**wall-clock 每輪決策 stall**=#1 perf O(N²)（~130 團互查、[[project_time_scale_wave]] LOD 真根 O(N²)/目標50隊）**活體確認**、**非 sim-clock 節奏**（時鐘比第三守恆軸是 sim-clock 生存 timing=獨立事、與此眼球無關）。疑疊加 **print-overhead**（Windows console print 慢 + 決策路徑 debug print 拖）=未來 perf arc **便宜候選**（砍 hot-path debug print）。★處理序（blueprint）：famine/碎裂先修→團數降→O(N²) 自動緩→不夠再 perf arc（perf 非現在解、記檔待）。連 [[reference_hob_perf_protocol]]。

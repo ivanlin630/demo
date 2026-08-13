@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶clarify『思考時間長』=console逐隻蹦出決策=wall-clock每輪決策stall=#1 perf O(N²)活體確認、非sim-clock節奏(我前封時鐘比解讀撤、時鐘比軸照量但與此觀察無關)·用戶GUI親跑看終端:決策輪fire時每team決策逐隻慢慢印出、預期瞬完·=O(N²)(130團互查)可見版+疑print-overhead疊加(Windows console print慢、決策路徑debug print拖=未來perf arc便宜候選記檔)·處理序不變:famine/碎裂先修→團數降→O(N²)自動緩→不夠再perf arc·此信=記檔非新工、併known perf檔案·GO proceed"
 ---
 
