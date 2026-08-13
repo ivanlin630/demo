@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[crisis-density genuine-vs-inflated 兩 probe(blueprint 派、決定佔據率真lever是否降crisis;禁預設;★write-side discipline:以下區分FACT[我code-read坐實]vs HYPOTHESIS[待你measure]、別把假設當診斷)·【probe A survival 卡】FACT(code-read):DESPERATION_DAYS=3.0(terms:7 survival-entry)、FORAGE_FLOOR_DAYS=5.0(覓食封頂)、survival option applicable=food_days<desperation_entry_threshold(~3人格化)、exit≈entry≈3無另一更高exit門檻→參數層3<5『無硬死鎖』(團數學上可覓食到5>3出survival)=blueprint嫌疑A『exit>forage-cap參數mismatch』parameter-level不成立·HYPOTHESIS待measure:survival-task(覓食/FORAGE)團的food_days分布——卡在<3出不來(=覓食收入empirically達不到門檻=income/gather問題[連B5]非參數)? or 達≥3卻仍survival(=stickiness latch)? or 真達5-cap上下震盪(=genuine週期)?·【probe B threat over-trigger】FACT:threat-task applicable=threat/threat_react>threat_threshold(THREAT_BASE_THRESHOLD+caution*0.3人格化、decision_context:249)+threat_react≥THREAT_BOOST_FLOOR boost·HYPOTHESIS待measure:迎戰/逃跑(70-80)團的threat_react實際量級 vs 其threat_threshold——真有鄰近hostile高threat_react(genuine)? or 背景級低threat卻觸發threat-task(over-trigger=threshold太低/threat_react膨脹、連_threat_recent閘統一矩陣線)?被擋團threat來源逐筆(真敵in belief range?)·★output=兩probe數據→定crisis genuine(世界真危險=WHAT交用戶裁危險度)vs inflated(income達不到門檻/threat over-trigger=de-patch修perception/threshold)→systems收口blueprint定(b)序·官方helper勿手設team_ids先讀既有dump·evidence-only·地基KEEP"
 ---
 

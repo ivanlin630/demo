@@ -146,6 +146,7 @@ func _initialize() -> void:
 			daily_curve.append(_daily_census(state, day, cur_starve - prev_starve))
 			prev_starve = cur_starve
 			pool_curve.append(_pool_census(state, day))
+			_crisis_density_scan(state, day)   # ★crisis-density genuine-vs-inflated(2026-08-13,measurer):純讀零新tap
 		if (tick + 1) % WorldState.TICKS_PER_MONTH == 0:
 			var month: int = (tick + 1) / WorldState.TICKS_PER_MONTH
 			var snap: Dictionary = {
@@ -219,6 +220,8 @@ func _initialize() -> void:
 	dump["join_reached_pair_samples"] = Probe.samples.get("join.reached_pair", [])
 	dump["combatopt_fire_samples"] = Probe.samples.get("combatopt.fire_sample", [])
 	dump["tryset_blocker_context_samples"] = Probe.samples.get("tryset.blocker_context", [])
+	dump["crisis_survival_scan_samples"] = Probe.samples.get("crisis.survival_scan", [])
+	dump["crisis_threat_scan_samples"] = Probe.samples.get("crisis.threat_scan", [])
 	dump["income_harvest_vault_samples"] = Probe.samples.get("income.harvest_vault", [])
 	dump["income_harvest_team_samples"] = Probe.samples.get("income.harvest_team", [])
 	dump["income_hunt_samples"] = Probe.samples.get("income.hunt", [])
@@ -246,6 +249,31 @@ func _initialize() -> void:
 
 # ★嚴格守恆帳(2026-08-13):四pool逐日分解。Σteam.food(團私產)/Σgranary(全tile public_storage.food,
 # 據點糧倉)/Σtile_pool(全tile resources.food,自然regen池,先前total_food從未算過這塊!)/GRAND=三者和。
+# ★crisis-density genuine-vs-inflated(2026-08-13,measurer,systems-to-measurer-crisis-density-probes.md)：
+# probe A(survival卡):SURVIVAL_TASKS團food_days分布+在survival task內的持續tick數(ticks_in_task)。
+# probe B(threat over-trigger):TASK_DEFEND/TASK_FLEE團的threat_react vs threat_threshold+threat_id(真敵否)。
+# 純讀直呼DecisionContext.gather(零production tap、零fixture手造ctx，鏡射A1/A2 camp_drive_scan手法)。
+func _crisis_density_scan(state: WorldState, day: int) -> void:
+	if not Probe.enabled: return
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.current_task in FactionAISystem.SURVIVAL_TASKS:
+			var ctx: DecisionContext = DecisionContext.gather(state, t)
+			Probe.bump_sample("crisis.survival_scan", {
+				"team_id": tid, "day": day, "current_task": t.current_task,
+				"food_days": ctx.food_days, "pop": t.population,
+				"ticks_in_task": state.world.current_tick - t.task_start_tick,
+				"desperation_entry_threshold": ctx.desperation_entry_threshold,
+			}, 3000)
+		elif t.current_task == TeamData.TASK_DEFEND or t.current_task == TeamData.TASK_FLEE:
+			var ctx2: DecisionContext = DecisionContext.gather(state, t)
+			Probe.bump_sample("crisis.threat_scan", {
+				"team_id": tid, "day": day, "current_task": t.current_task,
+				"threat_react": ctx2.threat_react, "threat_threshold": ctx2.threat_threshold,
+				"threat_id": ctx2.threat_id, "pop": t.population,
+				"ticks_in_task": state.world.current_tick - t.task_start_tick,
+			}, 3000)
+
 func _pool_census(state: WorldState, day: int) -> Dictionary:
 	var team_food: float = 0.0
 	for tid in state.teams:
