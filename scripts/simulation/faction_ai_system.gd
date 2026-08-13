@@ -597,7 +597,12 @@ func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileDa
 	for tid in state.team_discovered.get(team.team_id, []):
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
-		if not ("流亡" in t.tags): continue
+		# ★A2 拓寬 invite 候選（佔據率主槓桿）：領主可邀「非生產非戰鬥的遊蕩團」進自家空 outpost。
+		#   排：已 settled 生產隊 / 子隊 / 戰鬥中(combat_target≠-1) / 攻擊掠奪中(active raider 語意 mismatch)。
+		#   ★設計選擇：含 idle merchant / ex-military drifter 皆可邀、最終 accept 靠 invitee diplomacy 決策(不適者自拒)、只硬排 active-raider。
+		if t.tags.has(TeamData.TAG_PRODUCE) or t.parent_team_id != -1 \
+				or t.combat_target != -1 or t.current_task == TeamData.TASK_ATTACK:
+			continue
 		if t.current_task == TeamData.TASK_SETTLE: continue   # 已在路上，不重邀
 		if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
 		# A3 感知鐵律：邀請距離 gate 用 belief last-seen 非 live（跨圖不邀；無 belief/過期→belief_pos(-1,-1)→擋）。
