@@ -105,7 +105,7 @@ func _initialize() -> void:
 		"a2.route_dispatch", "a2.route_invite", "a2.route_military_dead_end",
 		"a2.dispatch_pop_after_gate_pass", "a2.dispatch_pop_after_gate_fail",
 		"a2.dispatch_no_sub_leader", "a2.dispatch_subteam_create_fail", "a2.dispatch_task_settle_set",
-		"a2.invite_call", "a2.invite_candidate_exile_tag", "a2.invite_belief_null", "a2.invite_out_of_range",
+		"a2.invite_call", "a2.invite_candidate_exile_tag", "a2.invite_candidate_pass_filter", "a2.invite_belief_null", "a2.invite_out_of_range",
 		"a2.invite_range_pass", "a2.invite_accept", "a2.invite_reject", "a2.invite_task_settle_set",
 		"a2.convert_via_subteam_arrival", "a2.convert_via_pair_interaction",
 		"worldgen.build_outpost"]
