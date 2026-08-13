@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[perf slice A MERGED(byte-identical −5.7% tick-time)+slice B 接續·A=gather market-finder 冗餘消除(_harvest_market_known 單gather二刷→一刷)·★byte-identical 硬證:cherry-pick 到現 main 後 fp=728d62ef 精確==現main baseline(零行為變、我獨立跑 a4_determinism_check 複驗)+market_memoize_test PASS+constitution 75·perf 量化(measurer paired 現main):near.faction_ai −5.9%/mean tick-time −5.7%/wall −5.7%(3條互證非噪音)·★誠實:比 profile『market占gather 58.9%』溫和、因 A 只解根因α(單gather內二刷→一刷)、未解根因β(options.gd to_task 5處+faction_ai 3處外部 redundant gather 呼、=measurer 量的 27.4M超額缺口)=部分紅利符合預期非fix不足·★流程 nuance(記取):branch base d9a05cff pre-A4、dispatch時main未merge A4→branch stale-behind-A4、implementer報的baseline fp678b3ee3是pre-A4 stale;我用 cherry-pick(非merge)套 perf diff 到現main避 stale-base drop A4、fp精確match證乾淨(連 [[feedback_worktree_stale_base]] 家族=dispatch worktree slice 期間別的slice先merge→base漂移、cherry-pick/rebase解)·序:slice B(redundant gather 8+呼點消除、reuse已算ctx非重gather、byte-identical、較大refactor需R²)接續拿β紅利→perf 綠全套→12/24月長局e2e·B6/vitals/memory-rule掛用戶·地基KEEP"
 ---
 

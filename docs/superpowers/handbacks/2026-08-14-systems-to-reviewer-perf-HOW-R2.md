@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² 審 perf arc HOW spec(rank_scored 熱點優化、byte-identical、blueprint GO 經濟arc後)·spec=2026-08-14-perf-rank-scored-HOW.md·★診斷-first型spec(非直接改法):FACT(code-read)=rank_scored 93.7%但weight()是cheap純函式(match+廉價算術)→weight-memoize不是win(我先前scope猜錯、code-read糾正);熱點真身=gather(per-team重設定)or貴term eval(threat/reachability/marginal)=HYPOTHESIS待profile·§2 diagnostic-first拆rank_scored內時間(gather vs option-loop vs per-term)pin真熱再優化·§3 byte-identical candidate(待pin):gather子計算快取/貴term memoize/redundant-recompute消除;★禁cadence改(行為變)+禁heuristic early-prune(可能改argmax)、剪枝只准provably-dominated/non-applicable·§4 gate=fp三跑identical+vs baseline同fp(byte-identical硬)·★審點:(1)『byte-identical』定義夠硬嗎?fp gate擋得住偷偷改argmax?(2)§3 candidate哪個有隱藏行為變風險?(gather快取跨tick=stale=行為變?我標『同一gather內』夠清?)(3)剪枝『provably-dominated』界線?(4)diagnostic-first對perf妥(vs直接優化)?·evidence-only、優化前先profile·CLEAN→profile diagnostic dispatch→pin→優化slice·地基KEEP"
 ---
 
