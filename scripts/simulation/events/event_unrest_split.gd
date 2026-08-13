@@ -102,6 +102,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	AnonTierSystem.transfer_proportional(parent, new_team, anon_split)
 
 	state.create_team(new_team)   # S9 chokepoint：註冊 + known/discovered init
+	if Probe.enabled: Probe.bump("spawn.unrest_split")   # ★tap-gap 補：高 unrest 分裂生新隊（碎裂源可測、全量暫態可觀測）
 	UnrestBank.reset(parent, "split")
 	return new_team
 
