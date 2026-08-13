@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[A2 settle-into-existing funnel CLOSE]★雙重100%死路,零混雜——dispatch路35次嘗試全部(35/35=100%)卡在MIN_PARENT_POP_AFTER_DISPATCH=10這個硬gate(owner population-settler_count<10即返回,無一次通過);invite路250次呼叫全部(0/250=100%)在最外層候選過濾就撲空——`\"流亡\" in t.tags`這個過濾條件全月零命中,code-read坐實根因:`流亡`tag只有一處被賦予(faction_ai_system.gd:5194,`uprising_exile`叛亂逃離事件專屬),一般漂泊/無據點團從未被打上此tag,結構上不可能被invite候選到;funnel尾端(settle_inflight_subteam/nonsubteam)全月30天逐日皆=0確認雙路徑零TASK_SETTLE曾被set;本月resident_n 0→4全數來自founding路(worldgen.build_outpost=8)非此settle-into-existing funnel;★關鍵假設完全證實:owner-dispatch路被population門檻鎖死、invite路被tag定義過窄鎖死,兩條路都不是給『一般wanderer』走的,ticket原假設方向正確且這輪坐實到100%乾淨無混雜的程度"
 ---
 
