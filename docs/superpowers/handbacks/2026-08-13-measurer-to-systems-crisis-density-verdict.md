@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[crisis-density兩probe CLOSE]★probe A(survival/覓食)=大幅inflated——718筆覓食樣本裡80.6%(579筆)food_days已≥7(SURVIVAL_RECOVER_DAYS真exit門檻,非ticket FACT誤引的~3);這579筆avg food_days=31.55(有的高達152),且逐日追蹤確認非『卡在hysteresis latch』——是code-read挖出的第三種機制:_evaluate_survival(faction_ai_system.gd:4572-4573)`if uses_unified(team) or team.parent_team_id==-1: return`,對絕大多數團(非子隊/TAG_MERCHANT/TAG_PRODUCE)這個舊hysteresis exit-check根本不執行、求生entry/exit全交給正常DecisionEngine argmax迴圈,而『覓食』option applicable()只查pop+has_forage_tile不查food_days、其util項survival_pressure是terms.gd:333硬編1.0(本session稍早已驗證的舊發現)——導致食物早已充裕的團純粹因為forage util公式不隨飽足感衰減而持續在argmax贏、非真饑荒未解;真正仍在desperation_entry_threshold(~3)以下的只有69/718(9.6%),3-7區間139/718(19.4%)。★probe B(threat/迎戰+逃跑)=genuine非inflated——迎戰123筆threat_react avg4.101 vs threshold avg0.451(margin+3.65,~9倍)、逃跑329筆threat_react avg2.144 vs threshold avg0.464(margin+1.68,~4.6倍),threat_id真敵解析率兩者皆98%+——沒有背景噪音誤觸發訊號,世界威脅密度是真的高非perception bug。★結論:crisis-density一半inflated一半genuine——survival/覓食這半是HOW層級可修的de-patch候選(forage util該隨food_days衰減,非WHAT層世界太苦難的問題);threat/迎戰逃跑這半是genuine world-state,調低threshold方向錯(同try_set那輪的priority-crank警告同款邏輯)"
 ---
 
