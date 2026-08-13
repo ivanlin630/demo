@@ -59,20 +59,55 @@ func _initialize() -> void:
 		# #3③ target-resolution 分野（本輪新加 temp tap）：belief-不知(est_null) vs 真無正值(marg/roi_nonpositive)。
 		"migrant.holding_seen", "migrant.est_null", "migrant.marg_nonpositive", "migrant.util_evaluated",
 		"invest.holding_seen", "invest.est_null", "invest.already_farming", "invest.roi_nonpositive",
-		"invest.roi_evaluated"]
+		"invest.roi_evaluated",
+		# #新A 零戰死 pin：真 NPC combat 走 npc_combat_system.gd(interaction_system.gd:323-342 start_combat)，
+		# 非 encounter_system.gd(僅player/beast-ambush 用，headless 無player 理論上 encounter_active 恆false，
+		# 下方 watchdog_hits/encounter_ever_active 實測驗證此假設非只code-read猜)。全部既有 production tap，零新改。
+		"conq.combat_entered", "conq.combat_decisive", "conq.combat_retreat",
+		"death.combat_pop", "death.combat_named", "combat.ended_n",
+		"atk.reached", "atk.blocked_ct_197",
+		# 零戰死 root REFINE：_find_weakest_prey 內部逐段 breakdown（本輪新加 6 個 temp tap）+
+		# faction 攻擊 directive 兩段(本輪新加 2 個 temp tap)。
+		"prey.call_count", "prey.call_empty_pool", "prey.candidates_seen", "prey.no_belief",
+		"prey.unreachable", "prey.not_weak_enough", "prey.found",
+		"prey.faction_attack_stake", "prey.faction_attack_target_found",
+		# 零戰死 CLEAN combat funnel（supersede attack-gate）：攻擊/掠奪無條件fire計數(本輪新加2個temp)+
+		# 既有production tap(raid.*/combatopt無新改)。
+		"combatopt.fire_攻擊", "combatopt.fire_掠奪",
+		"raid.resolve", "raid.extort", "raid.combat_at_outpost", "raid.combat_open_field", "raid.loot_noresolve",
+		# production funnel①佔據路徑(camp本輪新加2個temp+既有spawn.dispatch_安頓+settle本輪新加1個temp)。
+		"camp.fire", "camp.tile_found", "camp.no_unowned_tile", "settle.convert_to_resident",
+		# production funnel④流通率(全既有production trade.market_bail.* tap,零新改)。
+		"trade.market_bail.buy_no_stock", "trade.market_bail.buy_no_want", "trade.market_bail.buy_cant_afford",
+		"trade.market_bail.buy_carry_full", "trade.market_bail.buy_withdraw_empty",
+		"trade.market_bail.sell_no_surplus", "trade.market_bail.sell_ownerless", "trade.market_bail.sell_owner_no_coin",
+		"trade.market_bail.sell_no_price", "trade.market_bail.sell_owner_cant_afford", "trade.market_bail.sell_zero_qty",
+		"trade.market_bail.sell_storage_full", "trade.peer_deal"]
 	var prev_new: Dictionary = {}
 	for k in new_keys: prev_new[k] = 0
 	var mobilize_peak_prev: float = 0.0
 
 	var curve: Array = []
+	var daily_curve: Array = []   # ★饑荒genuine-vs-bug診斷:逐日全域census(fragment vs 主隊food_days對照)+8 leader逐日food/task
 	var start_pop: int = _total_pop(state)
 	var no_player := Vector2i(-1, -1)
 	var extinct_tick: int = -1
+	var prev_starve: int = 0
 
+	var watchdog_hits: int = 0
+	var encounter_ever_active: bool = false
 	for tick in range(total_ticks):
 		runner.advance_tick(state, no_player)
-		if state.encounter_active and state.encounter_tick > 800:
-			runner._encounter_system.resolve_encounter_end(state, "draw")
+		if state.encounter_active:
+			encounter_ever_active = true
+			if state.encounter_tick > 800:
+				watchdog_hits += 1
+				runner._encounter_system.resolve_encounter_end(state, "draw")
+		if (tick + 1) % WorldState.TICKS_PER_DAY == 0:
+			var day: int = (tick + 1) / WorldState.TICKS_PER_DAY
+			var cur_starve: int = int(Probe.counts.get("death.starve_anon", 0))
+			daily_curve.append(_daily_census(state, day, cur_starve - prev_starve))
+			prev_starve = cur_starve
 		if (tick + 1) % WorldState.TICKS_PER_MONTH == 0:
 			var month: int = (tick + 1) / WorldState.TICKS_PER_MONTH
 			var snap: Dictionary = {
@@ -107,7 +142,7 @@ func _initialize() -> void:
 		print("  %s 累計=%d" % [k, int(Probe.counts.get(k, 0))])
 	print("  mobilize.fraction 全程峰值=%.3f" % float(Probe.peaks.get("mobilize.fraction", 0.0)))
 
-	var dump: Dictionary = {"seed": WORLD_SEED, "months": months, "curve": curve,
+	var dump: Dictionary = {"seed": WORLD_SEED, "months": months, "curve": curve, "daily_curve": daily_curve,
 		"start_pop": start_pop, "end_pop": end_pop, "extinct_tick": extinct_tick,
 		"final": {"teams": state.teams.size(), "factions": state.factions.size(),
 			"established": WarringHarness._established_count(state)},
@@ -121,6 +156,20 @@ func _initialize() -> void:
 			spawn_dispatch_breakdown[k] = int(Probe.counts[k])
 	dump["spawn_dispatch_breakdown"] = spawn_dispatch_breakdown
 	print("  spawn.dispatch_* 分布=%s" % str(spawn_dispatch_breakdown))
+	dump["join_order_set_samples"] = Probe.samples.get("join.order_set", [])
+	dump["join_reached_pair_samples"] = Probe.samples.get("join.reached_pair", [])
+	dump["combatopt_fire_samples"] = Probe.samples.get("combatopt.fire_sample", [])
+	print("  join.order_set samples=%d join.reached_pair samples=%d" % [
+		dump["join_order_set_samples"].size(), dump["join_reached_pair_samples"].size()])
+	dump["watchdog_hits"] = watchdog_hits
+	dump["encounter_ever_active"] = encounter_ever_active
+	var combat_end_breakdown: Dictionary = {}
+	for k in Probe.counts:
+		if String(k).begins_with("combat.end_"):
+			combat_end_breakdown[k] = int(Probe.counts[k])
+	dump["combat_end_breakdown"] = combat_end_breakdown
+	print("  watchdog_hits=%d encounter_ever_active=%s combat.end_*=%s" % [
+		watchdog_hits, str(encounter_ever_active), str(combat_end_breakdown)])
 	Probe.enabled = false
 	var f := FileAccess.open("res://docs/measurements/2026-08-12-phase3-story-audit-seed%d-%dmo.json" % [WORLD_SEED, months], FileAccess.WRITE)
 	if f != null:
@@ -134,6 +183,46 @@ func _total_pop(state: WorldState) -> int:
 	var total: int = 0
 	for tid in state.teams: total += state.teams[tid].population
 	return total
+
+# 饑荒genuine-vs-bug診斷:逐日全域census。fragment(parent_team_id!=-1,即scout/convoy/migrant等
+# 派出的subteam)vs主隊(parent_team_id==-1)的food_days對照——若fragment系統性比主隊餓得快
+# 又持續存在(未merge_back)=支持『碎片不回歸→獨立餓死』假說;若差異不大=偏genuine(全域同樣缺糧)。
+func _daily_census(state: WorldState, day: int, starve_delta: int) -> Dictionary:
+	var sub_n: int = 0; var sub_food_days_sum: float = 0.0; var sub_pop: int = 0
+	var main_n: int = 0; var main_food_days_sum: float = 0.0; var main_pop: int = 0
+	var total_food: float = 0.0
+	# production funnel①②③(2026-08-13 追加,純讀零新tap)：resident(is_resident_static)vs非resident
+	# food_days對照+resident裡真跑TASK_PRODUCE比例。
+	var resident_n: int = 0; var resident_pop: int = 0; var resident_food_days_sum: float = 0.0
+	var resident_producing_n: int = 0
+	var nonresident_n: int = 0; var nonresident_pop: int = 0; var nonresident_food_days_sum: float = 0.0
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		var fd: float = ResourceSystem.effective_food(state, t) / maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		total_food += ResourceSystem.effective_food(state, t)
+		if t.parent_team_id != -1:
+			sub_n += 1; sub_food_days_sum += fd; sub_pop += t.population
+		else:
+			main_n += 1; main_food_days_sum += fd; main_pop += t.population
+		if FactionAISystem.is_resident_static(state, t):
+			resident_n += 1; resident_pop += t.population; resident_food_days_sum += fd
+			if t.current_task == TeamData.TASK_PRODUCE: resident_producing_n += 1
+		else:
+			nonresident_n += 1; nonresident_pop += t.population; nonresident_food_days_sum += fd
+	return {
+		"day": day, "teams": state.teams.size(), "pop": _total_pop(state), "total_food": total_food,
+		"starve_anon_delta": starve_delta,
+		"subteam_n": sub_n, "subteam_pop": sub_pop,
+		"subteam_food_days_avg": (sub_food_days_sum / sub_n) if sub_n > 0 else -1.0,
+		"main_n": main_n, "main_pop": main_pop,
+		"main_food_days_avg": (main_food_days_sum / main_n) if main_n > 0 else -1.0,
+		"resident_n": resident_n, "resident_pop": resident_pop,
+		"resident_food_days_avg": (resident_food_days_sum / resident_n) if resident_n > 0 else -1.0,
+		"resident_producing_n": resident_producing_n,
+		"nonresident_n": nonresident_n, "nonresident_pop": nonresident_pop,
+		"nonresident_food_days_avg": (nonresident_food_days_sum / nonresident_n) if nonresident_n > 0 else -1.0,
+		"leaders": _leader_diag(state),
+	}
 
 # #3①立國gate(cmd/野心/readiness三連AND，公式抄faction_ai_system.gd:1039-1044原樣，純讀零改) +
 # #4 anon_cohorts tier分布。逐 faction leader 每月記一筆。
@@ -166,5 +255,8 @@ func _leader_diag(state: WorldState) -> Array:
 			"gate_all_pass": gate_cmd and gate_ambition and gate_readiness and gate_member,
 			"anon_cohorts": leader_team.anon_cohorts.duplicate(),
 			"pop": leader_team.population, "faction_intent": String(f.intent.get("type", "")) if f.intent is Dictionary else "",
+			"faction_intent_target_id": int(f.intent.get("target_id", -1)) if f.intent is Dictionary else -1,
+			"food_days": ResourceSystem.effective_food(state, leader_team) / maxf(float(leader_team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001),
+			"current_task": leader_team.current_task, "is_subteam": leader_team.parent_team_id != -1,
 		})
 	return out

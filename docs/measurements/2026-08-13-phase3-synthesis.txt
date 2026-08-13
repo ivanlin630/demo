@@ -1,0 +1,141 @@
+=== 基本 ===
+seed 1337 months 1 start_pop 444 end_pop 436
+final {'established': 0, 'factions': 8, 'teams': 105}
+watchdog_hits 0 encounter_ever_active False
+combat_end_breakdown {'combat.end_mortal_flee': 19, 'combat.end_readiness_above_thr': 21, 'combat.end_retreat': 2}
+
+=== ①糧帳/戰鬥/prey/market 1月合計 ===
+  accept.join_accept = 2
+  accept.join_reject = 1
+  atk.blocked_ct_197 = 2
+  atk.reached = 35
+  camp.fire = 0
+  camp.no_unowned_tile = 0
+  camp.tile_found = 1132
+  cohesion.defect_fire = 1
+  cohesion.uprising_stay_faction = 0
+  combat.ended_n = 21
+  combatopt.fire_掠奪 = 206
+  combatopt.fire_攻擊 = 0
+  conq.combat_decisive = 0
+  conq.combat_entered = 22
+  conq.combat_retreat = 1
+  death.combat_named = 0
+  death.combat_pop = 0
+  death.starve_anon = 6
+  g2.ambition_demote = 25
+  g2.ambition_promote = 70
+  g2.faction_found = 0
+  invest.already_farming = 0
+  invest.dispatched = 0
+  invest.est_null = 0
+  invest.holding_seen = 0
+  invest.roi_evaluated = 0
+  invest.roi_nonpositive = 0
+  join.arrived_no_handler = 0
+  join.dispatch = 12
+  join.to_task_belief_gap = 0
+  join.to_task_no_host = 0
+  join.to_task_ok = 0
+  merge.consolidate_dispatch = 0
+  merge.set_ok = 0
+  mergein.dissolve = 0
+  mergein.subteam = 2
+  migrant.arrived = 0
+  migrant.dispatched = 0
+  migrant.est_null = 0
+  migrant.holding_seen = 0
+  migrant.marg_nonpositive = 0
+  migrant.util_evaluated = 0
+  prey.call_count = 93031
+  prey.call_empty_pool = 4699
+  prey.candidates_seen = 1253424
+  prey.faction_attack_stake = 0
+  prey.faction_attack_target_found = 0
+  prey.found = 24364
+  prey.no_belief = 2
+  prey.not_weak_enough = 167005
+  prey.unreachable = 1043358
+  promote.field_desperate = 18
+  promote.fired = 18
+  raid.combat_at_outpost = 0
+  raid.combat_open_field = 0
+  raid.extort = 19
+  raid.loot_noresolve = 0
+  raid.resolve = 19
+  relocate.abandoned = 0
+  relocate.arrived = 0
+  relocate.comply = 0
+  relocate.ordered = 0
+  relocate.resettled = 0
+  relocate.resist = 0
+  relocate.started = 0
+  settle.convert_to_resident = 0
+  trade.market_bail.buy_cant_afford = 3
+  trade.market_bail.buy_carry_full = 3
+  trade.market_bail.buy_no_stock = 353
+  trade.market_bail.buy_no_want = 366
+  trade.market_bail.buy_withdraw_empty = 0
+  trade.market_bail.sell_no_price = 0
+  trade.market_bail.sell_no_surplus = 768
+  trade.market_bail.sell_owner_cant_afford = 193
+  trade.market_bail.sell_owner_no_coin = 2
+  trade.market_bail.sell_ownerless = 0
+  trade.market_bail.sell_storage_full = 0
+  trade.market_bail.sell_zero_qty = 3
+  trade.peer_deal = 29
+
+=== ②daily_curve 糧帳曲線(total_food/pop/teams/starve_delta) ===
+day= 1 teams= 59 pop=444 total_food=   18834 starve_delta=  0 resident_n=  0/ 59 resident_producing=  0 main_fd=53.4 sub_fd=48.9 nonres_fd=52.9 res_fd=-1.0
+day= 2 teams= 59 pop=444 total_food=   16358 starve_delta=  0 resident_n=  0/ 59 resident_producing=  0 main_fd=45.6 sub_fd=43.8 nonres_fd=45.4 res_fd=-1.0
+day= 3 teams= 62 pop=444 total_food=   14662 starve_delta=  0 resident_n=  0/ 62 resident_producing=  0 main_fd=42.1 sub_fd=40.5 nonres_fd=41.8 res_fd=-1.0
+day= 4 teams= 62 pop=444 total_food=   13573 starve_delta=  0 resident_n=  0/ 62 resident_producing=  0 main_fd=38.5 sub_fd=39.6 nonres_fd=38.7 res_fd=-1.0
+day= 5 teams= 65 pop=444 total_food=   13133 starve_delta=  0 resident_n=  0/ 65 resident_producing=  0 main_fd=37.2 sub_fd=39.4 nonres_fd=37.7 res_fd=-1.0
+day= 6 teams= 66 pop=444 total_food=   12837 starve_delta=  0 resident_n=  0/ 66 resident_producing=  0 main_fd=36.4 sub_fd=40.9 nonres_fd=37.4 res_fd=-1.0
+day= 7 teams= 69 pop=444 total_food=   12545 starve_delta=  0 resident_n=  0/ 69 resident_producing=  0 main_fd=35.6 sub_fd=40.3 nonres_fd=36.7 res_fd=-1.0
+day= 8 teams= 73 pop=445 total_food=   10125 starve_delta=  0 resident_n=  0/ 73 resident_producing=  0 main_fd=29.2 sub_fd=38.7 nonres_fd=31.5 res_fd=-1.0
+day= 9 teams= 74 pop=445 total_food=   10752 starve_delta=  0 resident_n=  0/ 74 resident_producing=  0 main_fd=31.8 sub_fd=35.7 nonres_fd=32.7 res_fd=-1.0
+day=10 teams= 74 pop=444 total_food=    9405 starve_delta=  0 resident_n=  0/ 74 resident_producing=  0 main_fd=28.1 sub_fd=36.5 nonres_fd=30.3 res_fd=-1.0
+day=11 teams= 77 pop=445 total_food=    9110 starve_delta=  0 resident_n=  0/ 77 resident_producing=  0 main_fd=27.5 sub_fd=35.0 nonres_fd=29.5 res_fd=-1.0
+day=12 teams= 76 pop=445 total_food=    8821 starve_delta=  0 resident_n=  0/ 76 resident_producing=  0 main_fd=26.6 sub_fd=37.0 nonres_fd=29.1 res_fd=-1.0
+day=13 teams= 77 pop=444 total_food=    8387 starve_delta=  0 resident_n=  0/ 77 resident_producing=  0 main_fd=26.5 sub_fd=35.0 nonres_fd=28.6 res_fd=-1.0
+day=14 teams= 80 pop=445 total_food=    8064 starve_delta=  0 resident_n=  0/ 80 resident_producing=  0 main_fd=25.2 sub_fd=34.9 nonres_fd=27.7 res_fd=-1.0
+day=15 teams= 80 pop=444 total_food=    8425 starve_delta=  0 resident_n=  0/ 80 resident_producing=  0 main_fd=27.3 sub_fd=32.7 nonres_fd=28.8 res_fd=-1.0
+day=16 teams= 84 pop=444 total_food=    8155 starve_delta=  0 resident_n=  0/ 84 resident_producing=  0 main_fd=27.7 sub_fd=28.3 nonres_fd=27.9 res_fd=-1.0
+day=17 teams= 88 pop=444 total_food=    8825 starve_delta=  0 resident_n=  0/ 88 resident_producing=  0 main_fd=31.1 sub_fd=27.5 nonres_fd=30.0 res_fd=-1.0
+day=18 teams= 89 pop=443 total_food=    7566 starve_delta=  1 resident_n=  0/ 89 resident_producing=  0 main_fd=27.4 sub_fd=25.9 nonres_fd=26.9 res_fd=-1.0
+day=19 teams= 90 pop=444 total_food=    8267 starve_delta=  0 resident_n=  0/ 90 resident_producing=  0 main_fd=29.0 sub_fd=25.2 nonres_fd=27.8 res_fd=-1.0
+day=20 teams= 91 pop=441 total_food=    6994 starve_delta=  2 resident_n=  0/ 91 resident_producing=  0 main_fd=25.6 sub_fd=24.5 nonres_fd=25.2 res_fd=-1.0
+day=21 teams= 93 pop=440 total_food=    6707 starve_delta=  1 resident_n=  0/ 93 resident_producing=  0 main_fd=24.7 sub_fd=22.6 nonres_fd=23.9 res_fd=-1.0
+day=22 teams= 96 pop=440 total_food=    7358 starve_delta=  0 resident_n=  0/ 96 resident_producing=  0 main_fd=27.7 sub_fd=20.2 nonres_fd=24.9 res_fd=-1.0
+day=23 teams= 99 pop=439 total_food=    6177 starve_delta=  1 resident_n=  1/ 99 resident_producing=  0 main_fd=23.4 sub_fd=17.6 nonres_fd=21.3 res_fd=1.9
+day=24 teams=101 pop=439 total_food=    6811 starve_delta=  0 resident_n=  1/101 resident_producing=  0 main_fd=26.5 sub_fd=15.9 nonres_fd=22.4 res_fd=1.2
+day=25 teams= 98 pop=439 total_food=    6446 starve_delta=  0 resident_n=  2/ 98 resident_producing=  0 main_fd=23.9 sub_fd=15.9 nonres_fd=21.2 res_fd=1.4
+day=26 teams=102 pop=439 total_food=    7277 starve_delta=  0 resident_n=  2/102 resident_producing=  0 main_fd=31.0 sub_fd=15.6 nonres_fd=25.3 res_fd=1.3
+day=27 teams=102 pop=438 total_food=    5276 starve_delta=  0 resident_n=  5/102 resident_producing=  0 main_fd=21.1 sub_fd=13.0 nonres_fd=18.6 res_fd=1.1
+day=28 teams=102 pop=437 total_food=    6036 starve_delta=  0 resident_n=  7/102 resident_producing=  0 main_fd=24.4 sub_fd=11.6 nonres_fd=20.4 res_fd=1.3
+day=29 teams=103 pop=438 total_food=    5820 starve_delta=  0 resident_n=  8/103 resident_producing=  0 main_fd=22.5 sub_fd=11.4 nonres_fd=19.5 res_fd=1.2
+day=30 teams=105 pop=436 total_food=    4589 starve_delta=  1 resident_n=  9/105 resident_producing=  0 main_fd=16.3 sub_fd=12.7 nonres_fd=16.1 res_fd=0.7
+
+=== ③ join.reached_pair / order_set samples ===
+order_set count 0
+reached_pair count 12
+ reached_pair {'a': 37, 'b': 60, 'tick': 5900}
+ reached_pair {'a': 58, 'b': 6, 'tick': 6300}
+ reached_pair {'a': 34, 'b': 105, 'tick': 6900}
+ reached_pair {'a': 34, 'b': 106, 'tick': 6900}
+ reached_pair {'a': 105, 'b': 34, 'tick': 6900}
+ reached_pair {'a': 105, 'b': 106, 'tick': 6900}
+ reached_pair {'a': 106, 'b': 34, 'tick': 6900}
+ reached_pair {'a': 106, 'b': 105, 'tick': 6900}
+ reached_pair {'a': 105, 'b': 119, 'tick': 7000}
+ reached_pair {'a': 119, 'b': 105, 'tick': 7000}
+ reached_pair {'a': 123, 'b': 7, 'tick': 7000}
+ reached_pair {'a': 34, 'b': 119, 'tick': 7100}
+
+=== ④ combatopt_fire_samples readiness distribution ===
+n= 206 min= 1 max= 1
+by opt: Counter({'掠奪': 206})
+
+=== ⑤ spawn_dispatch_breakdown / combat_end_breakdown ===
+{'spawn.dispatch_idle': 4, 'spawn.dispatch_信使': 5, 'spawn.dispatch_偵查': 30, 'spawn.dispatch_擴建': 16, 'spawn.dispatch_運輸': 44}
