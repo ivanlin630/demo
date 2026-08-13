@@ -311,12 +311,14 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.leader_values["_loyalty"] = c.leader_loyalty
 	# 買糧（Phase 1）：注入 _is_merchant（weight("buyfood") 讀，同 _loyalty 法）+ 最近市集 + 有錢。
 	c.leader_values["_is_merchant"] = c.is_merchant
-	var _mkt: Vector2i = _fa._nearest_market_outpost(state, team)
+	# ★perf slice A：refresh market cache 一次(call-scoped)、下兩 finder skip_refresh 讀 cache（去 _harvest_market_known 100% 冗餘二刷）。
+	_fa._harvest_market_known(state, team)
+	var _mkt: Vector2i = _fa._nearest_market_outpost(state, team, true)
 	c.has_food_market = _mkt != Vector2i(-1, -1)
 	c.food_market_pos = _mkt
 	c.food_market_dist = _fa._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1
 	# ★買料信號（material means-end，Gate B）：有 material stock 的已知市集 + material 缺口（need_keep 含 construction need）。
-	c.has_material_market = _fa._nearest_market_outpost_with(state, team, "material") != Vector2i(-1, -1)
+	c.has_material_market = _fa._nearest_market_outpost_with(state, team, "material", true) != Vector2i(-1, -1)
 	c.material_shortfall = maxf(NeedOracle.need_keep(state, team, "material", c.leader_values) \
 		- ResourceSystem.effective_holding(state, team, "material"), 0.0)
 	c.material_build_urgency = NeedOracle.max_material_facility_desire(state, team)   # ★v2a：買料 util 繫建設迫切
