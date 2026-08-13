@@ -3154,8 +3154,10 @@ func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
 # ★god-view Slice C：找最近「已知市集 outpost」（belief-gate，非全圖 god-view）。
 # 只掃 team_market_known（三源習得：創世/親見/relay），非全 state.world.tiles。無已知市集→(-1,-1)。
 # 確定性（無 RNG）：harvest 讀既有 entry/tile，不加 dice。
-func _nearest_market_outpost(state: WorldState, team: TeamData) -> Vector2i:
-	_harvest_market_known(state, team)   # 更新 known（直接親見 vision 半徑內 + relay harvest team_known 訊息）
+func _nearest_market_outpost(state: WorldState, team: TeamData, skip_refresh: bool = false) -> Vector2i:
+	# ★perf：skip_refresh=true 時跳 _harvest_market_known（caller 已 refresh 一次、同 team 同 tick cache 同）→ 去 100% 冗餘掃。
+	if not skip_refresh:
+		_harvest_market_known(state, team)   # 更新 known（直接親見 vision 半徑內 + relay harvest team_known 訊息）
 	var known: Dictionary = state.team_market_known.get(team.team_id, {})
 	var best_pos: Vector2i = Vector2i(-1, -1)
 	var best_d: int = 1 << 30
@@ -3173,8 +3175,9 @@ func _nearest_market_outpost(state: WorldState, team: TeamData) -> Vector2i:
 
 # 找最近「已知市集 outpost 且有指定 res stock」（買料 action 用；belief-gate 同 _nearest_market_outpost）。
 # res 濾 public_storage>0（有貨可買）。無 → (-1,-1)。確定性（無 RNG）。
-func _nearest_market_outpost_with(state: WorldState, team: TeamData, res: String) -> Vector2i:
-	_harvest_market_known(state, team)
+func _nearest_market_outpost_with(state: WorldState, team: TeamData, res: String, skip_refresh: bool = false) -> Vector2i:
+	if not skip_refresh:   # ★perf：同 _nearest_market_outpost，caller refresh 一次後 skip 冗餘
+		_harvest_market_known(state, team)
 	var known: Dictionary = state.team_market_known.get(team.team_id, {})
 	var best_pos: Vector2i = Vector2i(-1, -1)
 	var best_d: int = 1 << 30
