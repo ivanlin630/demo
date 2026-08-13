@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[A2 merge-gate:★★★紅——候選拓寬確實work但funnel下游全滅,佔據率移動是別的路徑confound非A2機制]branch feat/survival-access-a2(628b9894)對baseline main同輪測(seed1337,1月窗,GODOT_TIMEOUT=6000):①佔據率baseline3.74%(4/107)→branch6.86%(7/102)表面看似升,但★決定性反證:settle-into-existing的實際轉換數(a2.convert_via_subteam_arrival+a2.convert_via_pair_interaction)branch跟baseline皆=0——這次佔據率變動100%來自founding路(worldgen.build_outpost baseline8→branch12),A2完全沒碰這條路,8→12的差很可能是invite路diplomacy擲骰改變下游randf序列的RNG-cascade confound(ticket自己標記的intended-change fp變),不是A2機制的因果效應;②invite真fire funnel:候選拓寬確實massively work(a2.invite_candidate_pass_filter baseline0→branch1477、a2.invite_accept baseline0→branch41)但下游災難性坍塌——a2.invite_task_settle_set只1/41(97.6%卡在TaskArbiter.try_set),而且連那唯一1筆task_settle_set最終也convert=0(卡在interaction_system.gd的TASK_SETTLE到站判定要求『co-located pair』、solo抵達空outpost者永遠沒有配對對象——這是我上一輪A2診斷票就抓到、這branch完全沒碰的同一個結構缺口);③候選過濾器本身有code-read坐實的新瓶頸候選機制:task_arbiter.gd:64-70『persist.hold』門檻(PRIO_DISPATCH=50<PRIO_THREAT=70、target若在PROGRESSIVE_HOLD_TASKS且persist_strength夠高會擋invite_settle)——這輪沒直接tap驗證但是file:line吻合40/41失敗量級的最可能候選,建議下一輪直接tap驗證;④bounded churn未見明顯失控(settle_inflight_nonsubteam全月僅短暫=1旋即歸0,resident_n成長溫和跟founding路一致無爆量);determinism獨立複3跑byte-identical(除TickPerf外)。★誠實結論:A2的『拓寬候選』這半做對了(0→1477→41真的動了)、但『讓candidate真正變成resident』這半完全沒做到(41→0),ticket原定的『佔據率真升』arc-goal本輪證據不支持是A2的因果貢獻——照報非預設綠"
 ---
 
