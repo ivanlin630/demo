@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch slice A2(佔據率主槓桿=拓寬invite候選、R² CLEAN+2訂正已納)·★★citation訂正(我over-claim、誠實收):『流亡tag只faction_ai:5194專屬』=錯,實≥4 producer(faction_ai:5163 uprising_exile/event_tag_shift:14 gain_exile/population_system:60 overflow_split/reaction_system:320 solo_exile);invite 250/250零命中是EMPIRICAL(這批樣本剛好沒流亡wanderer)非『結構不可能』·★fix(單點_try_invite_nearby_exile:600 filter收窄版、R²要求排combat-active免邀劫掠war-band當居民):`if not(\"流亡\" in t.tags): continue`→`if t.tags.has(TeamData.TAG_PRODUCE) or t.parent_team_id!=-1 or t.combat_target!=-1 or t.current_task==TeamData.TASK_ATTACK: continue`(排:已settled生產隊/子隊/戰鬥中/攻擊掠奪中);設計選擇明記=非生產非戰鬥的遊蕩團(含idle merchant/ex-military drifter)皆可邀、最終accept靠invitee diplomacy決策(不適者自拒)、只硬排active-raider語意mismatch·dispatch pop gate(MIN_PARENT_POP_AFTER_DISPATCH=10)保留genuine不動·★invariant:感知鐵律(讀t.tags同既有pattern+belief_pos range不動、不讀is_resident_static live位)、零新RNG、fp intended-change(invite候選變寬=行為有意改)·★TDD:①現況流亡team邀得到(regression)②非生產遊蕩wanderer(no PRODUCE/no combat)現在邀得到(新)③戰鬥中war-band(combat_target≠-1或task=攻擊)不被邀(語意排除)④生產隊/子隊不被邀·★量測gate(measurer bounded、綠才merge):佔據率baseline6.4%→顯著升 AND 不over-invite churn(settle不爆量/不反覆invite-abandon)·worktree feat/survival-access-a2 base現main·完→handback to:systems附measurer量測請求·地基KEEP"
 ---
 
