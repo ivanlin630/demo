@@ -2,7 +2,7 @@
 from: systems-note: blueprint
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[★用戶正當發火:別再擠牙膏、AI該自己找全線索判真根而非用戶一直提示缺啥→派一次到位總調查、回報=完整收口帳非片段·★用戶兩個殺手問題(現有poverty-trap故事解釋不了、=真根候選第一名):Q1『兩個月能把食物抽乾嗎?』帳面不該能——開局存量42據點×倉800=33,600+私糧≈萬餘→總4-5萬、日耗355→光吃該撐130+天,但實測月1食物-75.6%=吃不掉這麼快→★必有未知漏(sink):候選=food decay腐壞?隊解散/餓死erase時攜糧+倉糧蒸發(conservation break)?vault_overflow_drop倉滿丟?稅制sink?trade燒?encounter損?——嚴格守恆帳從沒算過·Q2『前期有餘糧為何不搞建設?』村開局倉800=有盈餘、為何月1零建設/升級?『窮升不動』解釋不了開局盈餘期→查倉富村月1的build/upgrade決策trace(評估過?ROI gate?cost gate?根本沒評估?)·★總調查(一次到位、全包=新2項+舊3項pending):①嚴格食物守恆帳:t0總存量分解(team.food+全倉+tile池)+逐日Σinflow(harvest/hunt/forage)−Σ消耗(0.8×pop)−Σ其他sink(逐項列舉tap:decay/erase蒸發/overflow/稅/trade/encounter)=Δ存量、帳必須關起來(守恆!)、抓dominant drain=-75.6%的真兇②倉富村盈餘期建設決策trace(Q2)③42據點地形分布+全佔總產能vs355(承載力、已派)④9居民task+進帳歸因+team47對照(已派)⑤granary累積數據(已派)·★合併回報:全帳收口後systems consolidate單一完整故事(含Q1 Q2解答)→我一次帶用戶、不再片段·★紀律:凡對用戶報數先自問『這帳關得起來嗎、解釋得了實測斜率嗎』、關不起來=先找漏再報·evidence-only禁fix"
 ---
 
