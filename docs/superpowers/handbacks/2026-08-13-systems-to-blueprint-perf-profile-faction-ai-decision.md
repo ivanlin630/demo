@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[perf profile 實測完(短窗跑法成功、答用戶『運算卡哪』)·★兇手=faction_ai 93.7% 非嫌疑清單任一(尋路/print/belief 全排除)·評測床 perf_phase_bed.gd(force_full_hd 全隊 near+phase_timing+短窗 DAYS+累積相位表、純 debug 零 production 侵入)·跑 seed1337 warring 1天240tick wall28.3s·★相位表:near.faction_ai=93.7%(26.5s/28.3s)、near.move[含尋路 estimate_catch_up]=1.3%、near.reactions=1.1%、near.vision[belief 掃]=1.0%、餘全<0.8%·★三嫌疑全 DISPROVEN:①尋路=near.move 1.3% 排除②belief 掃=near.vision 1.0% 排除③print=phase_sum 100% of wall→print/glue≈0% 排除(答 Q2 print 佔比≈0)·★熱點 pin(faction_ai 內層 [FaiPhase] 每 tick 一致):loop1.assign_tasks+unified.rank+assign.leader_unified 主宰→code 位 _assign_tasks(faction_ai:2308)→_decide_unified(:2399)→DecisionEngine.rank_scored(:2410=unified.rank)·★perf 根 CONFIRM=統一決策框架 per-team option 排序:每 faction 的每 member team(:2348 loop)每 DECISION_CADENCE 呼一次 rank_scored(所有 option×term×weight)→隨 team 數×option 數擴張=die-off/大世界天花板真因·★caveat 誠實:force_full_hd=worst-case(全隊 near 每 tick 跑 faction_ai、無 far 批次降頻)→絕對 tick-time 誇大;real LOD far 隊 FAR_ZONE_INTERVAL 批次→實際低;但相對宰制(faction_ai>>其餘)+team-count 擴張=perf 根成立、corroborate 決策成本 O(teams×options)·★hook QA 豁免:純 perf 聚合 metric 不下 behavior 因果(哪 phase 吃 CPU 非隊為何做X)·evidence-only 禁 fix·序:你帶用戶看『卡在決策引擎排序非尋路』→若要修 perf(cache ranking/降 cadence/early-prune option/memoize term)=另 arc 待用戶裁、我不提 fix·與饑荒 ledger 平行(measurer 跑)"
 ---
 
