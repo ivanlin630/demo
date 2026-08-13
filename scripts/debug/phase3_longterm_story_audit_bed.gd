@@ -108,7 +108,11 @@ func _initialize() -> void:
 		"a2.invite_call", "a2.invite_candidate_exile_tag", "a2.invite_candidate_pass_filter", "a2.invite_belief_null", "a2.invite_out_of_range",
 		"a2.invite_range_pass", "a2.invite_accept", "a2.invite_reject", "a2.invite_task_settle_set",
 		"a2.convert_via_subteam_arrival", "a2.convert_via_pair_interaction",
-		"worldgen.build_outpost"]
+		"worldgen.build_outpost",
+		# try_set共根diagnostic(2026-08-13,measurer):A2 invite_settle + A3 unified建設(TASK_BUILD) return-false分歸因。
+		"tryset.blocked_combat_lock", "tryset.blocked_crisis_immune", "tryset.blocked_persist_hold",
+		"tryset.blocked_final_priority_lower", "tryset.blocked_final_equal_priority_source_gated",
+		"tryset.blocked_final_unknown"]
 	var prev_new: Dictionary = {}
 	for k in new_keys: prev_new[k] = 0
 	var mobilize_peak_prev: float = 0.0
@@ -214,6 +218,7 @@ func _initialize() -> void:
 	dump["join_order_set_samples"] = Probe.samples.get("join.order_set", [])
 	dump["join_reached_pair_samples"] = Probe.samples.get("join.reached_pair", [])
 	dump["combatopt_fire_samples"] = Probe.samples.get("combatopt.fire_sample", [])
+	dump["tryset_blocker_context_samples"] = Probe.samples.get("tryset.blocker_context", [])
 	dump["income_harvest_vault_samples"] = Probe.samples.get("income.harvest_vault", [])
 	dump["income_harvest_team_samples"] = Probe.samples.get("income.harvest_team", [])
 	dump["income_hunt_samples"] = Probe.samples.get("income.hunt", [])
