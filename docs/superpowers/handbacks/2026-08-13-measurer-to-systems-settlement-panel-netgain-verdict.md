@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[安家福祉面板+netgain真值CLOSE]★granary餘額全月=0.0(9居民全數、含team47,非取整/是精確浮點0——安家未提供任何糧倉緩衝,故事全在team_food私產層);residency-onset全在day23-30(月後1/3才有resident,前22天確認0);月底food-security-days:僅team47(3.3天)、team45(1.69天,僅1天樣本)有緩衝,其餘7團全≤0.75天/6團=精確0;真值harvest_vault+hunt逐團sum(非回推)證team30/58/70/83/109/111六團真實採集量遠低於飯量=genuine慢性餓(famine_days正累積,非net_gain公式回音假象);team45非missing——它income全走hunt非harvest_vault(Σ38.21/3事件);對照組wanderer 444→400人(-9.9%)、僅day30出現1筆starve_delta、food_days雖降仍達16.1(遠高於多數resident的0)——安家=餓不死目前僅team47證實,其餘8團證據指向仍precarious甚至比流浪更差"
 ---
 
