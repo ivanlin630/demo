@@ -71,6 +71,9 @@ construction commitment latch+resume（branch 5b166eb1，已 revert 出 main 529
 - **★systems 診斷教訓（memory `feedback_avoid_rabbithole` 已記）**：凍源我 3 次翻轉（non-tap→tap→latch），前兩次 code 論證/舊 json 對照猜錯，第 3 次 worktree cache-stale bug，**乾淨 fresh 重現（full re-import 排 cache）才坐實**。
 - A1 核心（新 outpost founding `construct.complete_build`）兩 seed 皆 0（但在凍化 run 上=suspect，clean 重量待 latch 修）。
 
+### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
+`WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
+
 ### ⏸(舊)A1 stall latch+resume = 部分改善 HOLD（↑已升級為凍化 regression）（**A1 核心新 outpost founding 未坐實**，revert merge 待 per-action-count，blueprint 判 2026-07-26）
 construction commitment latch + resume 治本（branch `feat/construction-commitment-latch` 5b166eb1，**已 revert 出 main** 5292faec，hold 不 merge）。**latch**（`_should_reeval` 施工中 skip 例行 cadence argmax，`force_reeval` 繞威脅 :401-423）+ **resume**（優先召回 `construction_team_id` 原隊繞 gate）。
 - **★blueprint 6mo 雙 seed 判 = 部分改善非閉 A1**：①latch modest+seed 不一（stall seed1337 95.6→87.3、seed42 96→89.7 = 降 6-8pt 仍~90% 離格；complete seed1337 33→56 但 **seed42 12→10 反向**）②**★16/16 抽樣 completion 全 `action='upgrade_facility'`（既有 outpost 升設施），零筆 `'build'`（新 outpost founding）= A1 核心硬標準未坐實**（可能真 0、可能 8-cap 抽樣 missed）。
