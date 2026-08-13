@@ -1369,6 +1369,10 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 	TaskArbiter.release(subteam)
 	TaskArbiter.transition(state, subteam, "生產", TaskArbiter.PRIO_AMBIENT)
 	state.detach_subteam(subteam)   # 變居民脫離母團（雙向同步）
+	# ★B4：settle 落腳即刷 labor cache（覆蓋所有 _convert_to_resident 呼叫端）→ 新居民同 tick 採糧非硬零(免等 3 天 cadence)。
+	var _settle_tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(subteam.tile_pos))   # canonical tile-key(非 inline 公式、公式改不靜默斷)
+	if _settle_tile != null:
+		LaborSystem.ensure_fresh(state, _settle_tile)
 	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
 		subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])
 	# 流民變居民後，若同 tile 有 SUBTEAM+PRODUCE 子隊（暫派駐居民），觸發回母團

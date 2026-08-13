@@ -4675,6 +4675,7 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	if not team.tags.has(new_tag):
 		state.add_tag(team, new_tag, "crude_camp_settle")
 	state.remove_tag(team, "流亡", "crude_camp_settle")
+	LaborSystem.ensure_fresh(state, tile)   # ★B4：紮營落腳即刷 labor cache→新居民同 tick 採糧非硬零(fresh tile labor_alloc 空→rebalance)
 	print("[CrudeCamp] Team%d 紮營 @(%d,%d) → %s" % [
 		team.team_id, team.tile_pos.x, team.tile_pos.y, tile.outpost_type])
 	return true
