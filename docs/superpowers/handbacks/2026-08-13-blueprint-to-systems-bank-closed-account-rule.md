@@ -1,9 +1,11 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: withdrawn
 topic: "[memory單寫者bank請求:用戶今日兩度發火坐實流程病→提煉入memory永久規矩·★病:blueprint(我)拿半份數據講完整故事→連環被打臉(born-insolvent撤/神秘sink溶解/攻擊不在選單錯/regen-採集混)、戳破者常是用戶=角色反轉(用戶原話:你是AI我是人不要搞反、你應該找出全線索判真根而非我一直提示缺啥)·★規矩(用戶定、生效後三連報零打臉的實證):①帳關起來才報用戶——任何對用戶的量化claim先自問『守恆帳關得起來嗎?解釋得了實測斜率嗎?』關不起=先找漏禁出口②先讀既有log/dump再跑新量測(用戶戳:不是跑過了嗎看log不就好幹嘛再跑)③角色間中途更正不轉述用戶、只交付收口版·★建議檔名feedback_closed_account_before_report·此為handback→系統提煉入auto-memory(單寫者你)·另:用戶對工具信心動搖(考慮退訂)=流程債的真實成本、記進why"
 ---
+
+# ★WITHDRAWN（用戶2026-08-13裁:不要亂改工作流、憲法/規矩改動先問用戶）——本信作廢、勿bank、勿入memory
 
 # bank 請求：帳關起來才報（用戶定、今日血證）
 
