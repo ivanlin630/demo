@@ -55,7 +55,6 @@ docs/
   world.md          Tick 循環 / 世界
   person.md         人物 / values / 反應系統
   team.md           團體 / tags / tasks
-  faction.md        勢力 / 外交
   event.md          事件系統
   message.md        訊息傳播
   tick_parameters.md  Tick 常數
