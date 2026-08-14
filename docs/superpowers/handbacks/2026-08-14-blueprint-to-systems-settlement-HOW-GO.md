@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[R² CLEAN→systems HOW GO·定居生命週期+農業歸位+戰略蓋點(spec=2026-08-14-settlement-lifecycle-agriculture-design.md)·R²加值三條入HOW:①erase_teams(world_state:286-349)=謹慎chokepoint清一堆欄唯獨漏outpost_owner=S1a修點精確②工期中斷不用新發明——既有busy-preemptible機制(faction_ai:414-415、高門檻威脅才打斷工作)=viability湧現的天然管道直接掛③認領四通道對應四條既有機制家族(scout/資訊網傳播/失聯帳本/共位親見)零新管道·HOW注意:L0低倍率單旋鈕禁pop曲線(R②點名易翻車)/farm_yield守恆chokepoint慣例(ResourceBank同款)/overflow_split決策化=行為變大fp intended/slice序§5(S1機械修先=300家解鎖)·量測§4 bounded硬gate·GO:HOW spec→plan→dispatch"
 ---
 
