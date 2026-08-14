@@ -327,6 +327,13 @@
 - 死亡順序：弱者先死（minor → anon → named）
 - 生育是生命事件（可與行動並行），不與行動反應競爭單一名額
 
+### ★ 生存決策 = 讀真 state 非死常數（照妖鏡族，生存經濟 arc 2026-08-13，enforce 起步）
+生存/接入類決策項的 util/need **讀團自身真 state**（食糧跑道/飢餓）、**禁 flat 死常數**（死常數=吃飽仍照做的假 state）。感知鐵律：讀**自家** state=自知非 god-view。
+- **食物 need 隨飢餓升**（`NeedOracle._self_use` food 分支×famine-escalation、單一 source 勿平行 food-need）→ 飢餓時 labor 自然回糧、吃飽不誤搶。
+- **覓食 util 隨飽足衰減**（`survival_pressure` eval 隨 food_days 衰減、瀕餓 floor 1.0 不動/吃飽讓位 settle）→ 吃飽團不 fake-forage 佔決策 turn。
+- **紮營價值=邊際經濟真帳**（`MarginalEconomy.camp_marginal` 共讀既有 substrate、地形期望流−覓食地板 × 緊迫度、`maxf(0,·)` anti-crank）→ 低產地/富流浪不濫紮。**禁 crank**：接既有 MarginalEconomy 共讀、bounded 非調分數到贏。
+- **bounded machine-demonstrate=merge 硬 gate**：瀕餓照常求生（floor 不誤傷）+ 吃飽讓位（四象限驗）。HOW=`specs/2026-08-13-survival-economy-*`、code 為準。
+
 ## 資料模型不變量規則（防散落純量 drift）
 
 1. **可衍生聚合 → computed getter，不存可變欄位**。任何 `= f(權威來源)` 的值用唯讀 getter（範本 `team_data.population` / `wounded` / `anon_combat_skill`）。物理上不可 drift；加人必須動真來源（named_members / anon_cohorts），不能偷改數字。

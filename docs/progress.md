@@ -669,3 +669,20 @@ need-quantity 收斂成單一思考驅動 oracle。
 - **Arc2 dispatch 收斂 → 降級低優先**：R① 揭 4 個 rank_*（survival/threat/scored/ambient）全是同 DecisionOptions.applicable() 池 + 同 terms filtered subset，**非繞過引擎、無 bypass 可拆**=cosmetic cleanup 非 de-patch → 降級（含 survival/threat 語意併=北極星，日後）。
 - **Arc2 = 統一 threat oracle（原 Arc3 上移，🔵R① 驗中）**：roadmap 稱 8 處各算/3 門檻不一致=真高值打架種子。**★前提先驗 R①**（稽核前提連兩次被打臉[need 7處→2軸、dispatch 三重→4 filtered]→不假設，驗 8 處真各算還是同源 filtered）。
 - **★鐵律**：稽核前提不可靠、連被 R① 修正 → 每 arc spec 前 R① factcheck，永不在稽核假設上寫 spec。路線序動態（非固定）。
+
+## ★生存經濟 access arc + 12mo 期末考（2026-08-13~14）
+③長期故事驗證（退一步跑長局找世界故事）→ 收斂：世界**非**資不抵債（嚴格守恆帳 CLOSE、GRAND 僅 -8.1% 溫和、tile 池滿）= 分配/接入問題非產能。深根鏈：team.food 崩=91% 流浪不定居→背糧一路吃只出不進 + 安家後 gather 卡（labor 分配）+ 接入執行斷（紮營/settle/建設）。
+
+**生存經濟 access arc（全 slice MERGED）**——WHAT=blueprint、HOW=systems、R² CLEAN、measurer bounded gate：
+- **B4/B5**：settle→即刷 labor cache（新居民採糧非硬零）+ food need 隨飢餓升（NeedOracle `_self_use` 接 famine、material 排擠 food 根修）。
+- **A1**：紮營價值=`MarginalEconomy.camp_marginal` 真帳（camp_drive 死常數 1.0→state-reading、anti-crank 雙防線）=correctness（佔據非其 lever）。
+- **A2**：拓寬 invite 候選（`_try_invite_nearby_exile` filter `流亡`→非 PRODUCE 非戰鬥遊蕩團）=settle-into-existing funnel 頂。
+- **A4**：forage de-patch（`survival_pressure` eval 1.0→隨 food_days 衰減、吃飽讓位 settle）+ solo-convert（TASK_SETTLE 抵空 outpost 去 pairwise pair 要求）+ 9 筆 invite_settle 入 ENGINE_SOURCES。
+- **佔據率 7.69%→11.02%（+43%）**、determinism byte-identical、bounded 不誤傷瀕餓。
+- ★診斷 CLOSE 但非 bug 的：**try_set 共根=genuine**（99% priority_lower 正確仲裁、被擋團全 survival/threat 態、禁 priority-crank）；**crisis-density 半 inflated**（覓食 util flat 吃飽仍 forage=A4 lever）**半 genuine**（threat 真高留、warring 質地）。
+
+**perf arc slice A MERGED**：gather market-finder 冗餘消除（`_harvest_market_known` 單 gather 二刷→一刷、byte-identical fp==baseline、-5.7% tick-time）。redundant-gather 大宗=跨-phase 非 byte-identical-safe（收 A）；LOD/scan-nearby 記 [[project_time_scale_wave]] 未來。
+
+**★12mo 期末考（誠實：metric 升健康未升=必要非充分）**：佔據率升 80% 高原**但主靠 founding 非 settle-into-existing**（convert_via_settle 全年僅 1）；★**residents 反而全世界最餓**（wanderer 才吃飽=「佔據↑=世界好」被推翻）；深層 dysfunction 長年：pop -85%、established 全年 0、combat 死全年 0、factions 8→2、守成心態、終局崩。WHY 待 QA specimen 二輪。
+
+**掛用戶**：B6 小團 pool 地板 / vitals 生存預算 invariant（spec 待核）/ closed-account memory-rule / checkpoint-resume 基建 / LOD arc 排序。

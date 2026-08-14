@@ -145,6 +145,17 @@
 | NPC 消失（人口掉） | 暴露公式 + test setup 食物不足 | main.gd 加食物 or 降門檻 |
 | 食物/疲勞 1/10 速率 bug | 公式 /TICKS_PER_DAY 假設每 tick 跑，實際每 hour | ✅ 已修（2026-06-07，cadence-aware）|
 
+
+## ★生存經濟 arc 常數（2026-08-13~14、value=code 為準勿抄此、防 drift）
+| 常數 | 用途 | code |
+|---|---|---|
+| `FAMINE_NEED_GAIN` | food need 飢餓放大上限（瀕餓 ×(1+GAIN)、measurer bounded max 3.0） | `decision/need_oracle.gd` |
+| forage 衰減錨 | `survival_pressure` 隨 food_days 衰減、錨 `SURVIVAL_RECOVER_DAYS`(=SLACK_COMFORT_DAYS 7、<7 floor 1.0/≥14→0) | `decision/terms.gd` |
+| `CAMP_MARGINAL_CAP`/`CAMP_URGENCY_DAYS` | 紮營 drive 封頂(bound 1.5)/緊迫度尺(=PROVISION_DAYS 10) | `decision/terms.gd`+`marginal_economy.gd` |
+| `LABOR_CADENCE` | tile labor_alloc 重算週期(3 天)；★settle 落腳即 `ensure_fresh` 避新居民首窗硬零 | `labor_system.gd` |
+
+*註：本檔 value 易 drift，一律以 code const 為準（glance-aid B）。*
+
 ---
 
-*最後更新：2026-06-02*
+*最後更新（生存arc 2026-08-14 補；本檔 value 指 code）*：舊 2026-06-02 base + ：2026-06-02*

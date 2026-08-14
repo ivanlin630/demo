@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[doc欠帳盤點(用戶要查、你owner、glance-aid瘦身規格更新=薄/指code/禁死細節)·按priority:①progress.md(8/3)欠11天:晉升三arc/軍民混編/③audit全程/生存經濟arc(B4B5A1A2A4)/perf A/12mo期末考②invariants.md(8/5)欠契約:charter-mobilization(labor_pop=pop×(1−mob)、labor_share≤1)/B5 need famine-escalation/A4 survival_pressure隨food_days衰減/camp=MarginalEconomy共讀;(vitals生存預算invariant另計=待用戶核spec後)③tick_parameters.md(8/3)欠:FAMINE_GAIN max3.0/覓食衰減錨SURVIVAL_RECOVER_DAYS/LABOR_CADENCE語意④team.md欠mobilized_fraction/charter模型、person.md欠晉升3-signal初始心情忠誠⑤roadmap.md死化石=執行早前裁定(archive+指向game-design路線圖)⑥★CLAUDE.md文件清單列faction.md但檔不存在=清單stale;CLAUDE.md改前必確認用戶(memory規矩)→你擬minimal修正(刪faction.md行or併faction內容指向)連同其他CLAUDE.md欠帳一起列→我帶用戶確認再動·⑦event/glossary(6/10)低priority on-touch順手·全部照glance-aid B規格(瘦、指標code為準)、on-touch非特批大重寫·地基KEEP"
 ---
 
