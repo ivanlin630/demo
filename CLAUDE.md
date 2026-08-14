@@ -50,6 +50,7 @@ tools/                 godot等工具
 ```
 docs/
   invariants.md     ★ 跨系統規則（每 session 開頭讀一次）
+  mechanism-intents.md ★ 機制意圖帳（WHAT 權威:code 服從表、表只服從用戶;改機制先查）
   game-design.md    遊戲設計理念
   glossary.md       術語表
   world.md          Tick 循環 / 世界
