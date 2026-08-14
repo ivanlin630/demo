@@ -22,7 +22,7 @@ if (-not (Test-Path $exe)) { $exe = "A:\GDS\demo\tools\godot\Godot_v4.2.2-stable
 $stdoutLog = if ($env:GODOT_DETACH_OUT) { $env:GODOT_DETACH_OUT } else { Join-Path $env:TEMP ("godot_detach_" + (New-Guid).ToString('N').Substring(0,8) + ".log") }
 
 # Build a temp .cmd carrying env (WMI Create does not inherit PS session env) + redirect. Avoids quote hell.
-$envLines = Get-ChildItem env: | Where-Object { $_.Name -like 'WARRING_*' -or $_.Name -eq 'GODOT_TIMEOUT' -or $_.Name -like 'LADDER_*' -or $_.Name -like 'SPECIMEN_*' -or $_.Name -eq 'FOOD_DAYS_THRESHOLD' -or $_.Name -eq 'ADHOC_TICKS' } |
+$envLines = Get-ChildItem env: | Where-Object { $_.Name -like 'WARRING_*' -or $_.Name -eq 'GODOT_TIMEOUT' -or $_.Name -like 'LADDER_*' -or $_.Name -like 'SPECIMEN_*' -or $_.Name -eq 'FOOD_DAYS_THRESHOLD' -or $_.Name -eq 'ADHOC_TICKS' -or $_.Name -eq 'LW_MONTHS' -or $_.Name -eq 'PERF_SEED' -or $_.Name -eq 'PERF_DAYS' -or $_.Name -eq 'PERF_CONFIG' } |
     ForEach-Object { 'set "' + $_.Name + '=' + $_.Value + '"' }
 $argStr = ($args | ForEach-Object { '"' + $_ + '"' }) -join ' '
 $cmdBody = @()
