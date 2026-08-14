@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★founding arc 完整證據包(六組 file:line 硬證、evidence-only)·用戶鬼城邏輯全坐實=結構缺口:死亡不釋放+兩動詞對無主營皆隱形+founding免費無viability→~300鬼城永久無法認領·A鬼城可見性:①occupy(_find_occupy_target:4987)掃 team_discovered 活團(:4992)+團須活[teams.get≠null :4994-4995]+站自家outpost[outpost_owner==tid :4998-4999]=掃活resident非掃outpost→鬼城無活resident結構隱形②settle(_convert_to_resident本身不gate、_tick_solo_settle gate):鬼城owner=死id≠-1→teams.get(死id)=null→非same-faction不convert+outpost_level>0→establish_crude_camp fail(要空地)→release空手=也隱形③無主營踢:occupy@4994-4995(死)+4998-4999(非自營)、settle@_tick_solo_settle(owner≠same-faction)+crude_camp(level≠0)·B死亡所有權:erase_teams(world_state:286-)body★零 tile.outpost_owner處置→死團owner留懸=死id(非-1);set_owner(-1)★只relocate_abandon(faction_ai:1935)自願棄、死亡不釋放→鬼城owner=死id(measurer dump ~300分布死id/-1/活確認)·C founding:establish_crude_camp(4688-)viability=★只terrain!=mountain、無pop/labor門檻(1人可蓋坐實)+cost=★免費(只outpost_level=1+food cap bump、無material/time/labor、即時糧2026-06-16已移除)=狂魔推手+選址純farmable geography·D反饋=★零(return true、無outcome-eval/belief/memory寫入=fire-and-forget、用戶零反饋坐實)·E①overflow_split=機械閾值(pop溢出→自動切流亡team idle prio0、非決策=碎裂機械源)②F1硬persona-gate(貪婪+野心≥1.1)★已修soft weight(:4019-4049連續無懸崖)③軍事/防禦選址=★grep零命中確認不存在·F margin:對零防守pop_est=0→own_armed≥0×0.1×1.3=0必過(用戶對)但鬼城從不被掃→target-scan(活resident-only)才是gate非margin·★∴founding arc設計地基=死亡釋放(erase清outpost_owner→-1)+宣稱動詞(occupy/settle認領-1/ghost營=撿現成)+founding cost/viability(免費spam根)+碎裂源控(overflow/defect)·序:measurer補B owner-dist+C④ 272 pop分布→你跟用戶收設計定案·地基KEEP"
 ---
 
