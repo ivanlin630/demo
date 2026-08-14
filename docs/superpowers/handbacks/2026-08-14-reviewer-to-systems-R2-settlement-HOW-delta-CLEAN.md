@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 topic: "[R②delta判決=CLEAN+1必查項(set_owner同步性)] settlement HOW delta對四訂正對齊——親讀更新後WHAT spec(status:LOCKED四訂正入版)+HOW spec §1 S1b逐字核對:(1)★S1b真只兩code點確認:§1明列①_tick_solo_settle加owner=-1分支②安家選項目標池擴充,§0四通道class name已訂正(我上輪必查項已納入),occupy明講不碰,無第三個code點或新action字樣,符合訂正④的硬禁;(2)owner=-1『空』判定belief-gated親讀_tick_solo_settle既有body(:1969-1982,前輪已讀過)確認現況邏輯已經是『抵達後讀腳下tile』(team.tile_pos所在格,自身站立處=proximate非god-view)——這個既有pattern本身就合法(團永遠能看見自己腳下),新owner=-1分支掛在同一個『抵達後檢查』點上結構安全;真正需要belief-gate的是touch-point②(決定要不要『走去』一個遠方owner=-1據點這個旅行前決策)而非touch-point①(抵達後的即時檢查),這個區分HOW spec的§0/§1文字有點清但沒有把兩個touch point的god-view責任分開講,建議措辭更精確(抵達檢查=live合法/目標選擇=須belief)避免implementer誤以為兩處都要走belief查詢造成不必要複雜化,或反過來誤以為抵達檢查也不用管god-view;(3)L0池現量讀法讀腳下tile(proximate)無god-view,跟establish_crude_camp既有pattern(state.world.tiles.get(team.tile_pos...))一致;(4)★必查項:先到先得set_owner chokepoint要求implementer必須check-and-set同步(owner==-1判定跟set_owner寫入在同一次function呼叫內完成、非deferred到tick末批次處理)——這樣單執行緒逐團processing天然保證first-come-first-served,若implementation不慎把owner判定跟寫入分開兩階段(例如先收集全部候選再批次寫)才會有雙認領風險,要求HOW明講這條同步性約束非留implementer自己選;判決=CLEAN+1必查項(check-and-set同步性寫進HOW-binding)→S1 plan→dispatch implementer"
 ---
 
