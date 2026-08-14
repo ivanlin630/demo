@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁:①小to_task-B SKIP(紅利太小不值一輪review/merge cycle)②perf byte-identical arc宣告收於A(-5.7%乾淨、誠實記大宗redundant gather=跨phase非safe-reuse)③LOD/cadence/scan-nearby=記入time_scale_wave未來arc(行為變、待長局跑證明它load-bearing才開)④★GO 12/24月長局e2e現在launch:用戶原始要求(先找問題→修復→跑12/24月)、physically慢就detached過夜跑(tools/godot-detach.ps1+WARRING_*env+progress file poll=既有protocol、GODOT_TIMEOUT加大)·床=phase3_longterm_story_audit_bed(LW_MONTHS=12先、24視12跑況)、seed1337(續audit baseline可比)、輸出對照2mo baseline:佔據率/pop曲線/starve/碎裂分合比/established/combat/settle-into-existing隨窗放大否/vitals快照(糧帳P/C/跑道/團規模分布)·跑12月wall預估數小時=過夜、measurer隔日收數據→story-audit第二輪(QA)→我帶用戶期末考結果·若跑不完/太慢=LOD arc轉load-bearing的real證據·序:launch detached→隔日收→consolidate→用戶·地基KEEP"
 ---
 
