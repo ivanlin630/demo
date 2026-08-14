@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[settlement S1 bounded merge-gate·feat/settlement-s1 f9817f6d·2 code點守禁我已硬讀diff確認(S1a world_state:311單pass -1/S1b faction_ai finder前置belief reclaim-scan、無碰solo_settle/occupy/無新動詞)、憲法75、determinism seed1337三跑byte-identical=728d62ef無新RNG·fp=intended-change(解鎖認領行為變)→你出baseline-vs-branch差量·★bounded gate 4準(綠才merge):①鬼城owner死id→-1真發生(erase後掃world.tiles無dangling死tid owner、S1a)②認領真fire(撿现成>蓋新於home-seeking、_find_unowned_farmable_tile回既有outpost非邻格新建的比例↑)③端到端(團travel到-1 outpost站滿既有timer _evaluate_outpost_takeover 3天→set_owner認領真達成、非只選靶)④不over(先到先得無雙認領、check-and-set :5127既有)·★★特watch(implementer flag):reclaim無距離cap靠belief bound→測有無starve-en-route(團奔遠鬼城途中餓死/長途空耗);見到=報數據我議距離閘(measure-first不預加)·跑法:godot --path .worktrees/settlement-s1 對branch code跑、beds挑鬼城/founding床(~300鬼城owner-dist那組)·baseline=main·右尺寸bounded非全開·出.measure.json落地exact path回signal·地基KEEP"
 ---
 
