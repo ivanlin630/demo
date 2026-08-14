@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 topic: "[用戶令:QA找原因再討論(下arc裁決前置)·五題、data-first(先讀既有12mo aggregate+specimen、缺料才flag systems補tap/短床、勿預設)·①★叛離風暴WHY(下arc主角):月1-4 defect_fire 84次=觸發過鬆(unrest閾值/distress公式機械化?)還是genuine(真餓真怨合理出走)?讀specimen叛離當事團motive→state→action:叛時unrest/loyalty/food真值多少?同構條件比例?若全同一機械模式=過鬆嫌疑、若動機多樣=genuine·②月5後零新定居零建設WHY:build_outpost月1-3集中272次→月5後0、convert同死;候選=可耕地掃描枯竭?團全碎到過不了desperation gate?誰在月4-5停的、當時世界state?③投資全年0複核:12mo invest funnel(evaluated?precond block?)確認是碎裂→母團小→自保gate連鎖還是另有斷點④合併12mo複核:merge order/reach/accept全年量、82%famine-reject+74%never-reach的2mo結論在12mo尺度還成立否⑤248死因缺口:先試從既有data推(per-team pop delta vs starve_anon計數、named死能否從specimen/曲線倒推)、推不出=flag systems補死因counter·output=五題各verdict(根找到/假說強化/需tap)→回我→我帶用戶討論裁下arc·對抗禁預設·地基KEEP"
 ---
 
