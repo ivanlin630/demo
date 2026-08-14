@@ -6,12 +6,12 @@ owner: systems（HOW）← design `2026-08-14-settlement-lifecycle-agriculture-d
 
 ## §0 接點圖 + 命門（HOW 守）
 - **禁 crank / 禁死常數 pop 曲線**：viability 由**工期+地形物理湧現**（付不付得起工期=過濾器）、L0 採集低倍率**單旋鈕**（禁 pop-curve、R² 點名易翻車）。
-- **感知鐵律**：認領決策讀 **belief**（四通道=既有機制家族：`VisionSystem` 共位親見 / `ScoutSystem` 斥候 / `MessageSystem`+`BeliefSystem` 資訊網傳聞[可失真] / 失聯帳本推斷）——**零新管道**、抵達才見真章（belief 過期→既有遭遇機制）。
+- **感知鐵律**：認領決策讀 **belief**（四通道=既有機制家族、★R² 訂正真 class name：`VisionSystem`(vision_system.gd) 共位親見 / **斥候=`FactionAISystem._try_scout_side` + `SubteamSystem.dispatch_anon_messenger`**(非獨立 ScoutSystem 類) / **資訊網傳聞[可失真]=`SimMessageSystem`(message_system.gd)+`BeliefSystem`** / 失聯帳本推斷=`BeliefSystem`)——**零新管道**、抵達才見真章（belief 過期→既有遭遇機制）。
 - **守恆=可溯源**：farm_yield 走 chokepoint（`TileBank.deposit(...,"farm_yield")` 同 ResourceBank reason 慣例、守恆稽核含農業）。resource 分類學入 invariants（零生成 礦寶 / 自然再生 野味藥草野馬 / 生產類 食物 / 木材=採集加速維持）。
 
 ## §1 據點生命週期
 ### S1a 死亡釋放（機械修、R² 點名精確修點）
-`erase_teams`（world_state:286-349、謹慎 chokepoint 清一堆欄**唯漏 outpost_owner**）→ 每 dead tid 清其 owned tile `outpost_owner=-1`（掃 dead 名下 outpost tile；或 erase 迴圈內順手）。
+`erase_teams`（world_state:286-349、謹慎 chokepoint 清一堆欄**唯漏 outpost_owner**）→ 清 dead tid owned tile `outpost_owner=-1`。★**R² 效率**：**單 pass over `state.world.tiles` 配既有 `dead:Dictionary` membership**（同 :315 附近 `for otid in teams: if dead.has(...)` pattern）、**非對每 dead team 各掃全圖**（避 O(dead×tiles)）。
 - **★fp intended-change**（解鎖認領=行為變、非 byte-identical）；不廣播（知情走 §0 四通道 belief）。
 ### S1b 認領動詞（belief-gated）
 `occupy`（`_find_occupy_target`:4987）+ settle（`_tick_solo_settle`）**加無主營（owner=-1）候選**：抵達+belief 確認空→接管（修繕成本 << 新建工期）。
