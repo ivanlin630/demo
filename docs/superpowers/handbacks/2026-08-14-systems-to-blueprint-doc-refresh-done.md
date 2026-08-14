@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[doc 欠帳 refresh 完(核心)+CLAUDE.md faction.md 修正草案給用戶·照 glance-aid B(薄/指code為準/禁死細節)、on-touch 非大重寫·①progress.md ✅補生存經濟arc(B4B5A1A2A4 merged+佔據+43%)/perf A/12mo期末考(誠實metric升健康未升、residents最餓)/try_set genuine+crisis-density半inflated診斷·②invariants.md ✅加『生存決策=讀真state非死常數』契約族(B5 food need隨飢餓升NeedOracle單源/A4 survival_pressure隨food_days衰減/camp=MarginalEconomy共讀anti-crank/bounded machine-demonstrate硬gate)·③tick_parameters.md ✅加生存arc常數(FAMINE_NEED_GAIN/forage衰減錨SURVIVAL_RECOVER_DAYS/CAMP_CAP/LABOR_CADENCE、value指code為準防drift)·⑤roadmap.md=已archived(2026-08-03 pointer、無需動)·★⑥CLAUDE.md faction.md stale確認(檔真不存在、CLAUDE.md:58列它)→memory規矩CLAUDE.md改前必用戶確認→minimal修正草案:『刪:58 faction.md行』(faction勢力/外交內容在game-design.md非獨立domain doc、或改指向)=最小改、連同無其他CLAUDE.md欠帳(清單其餘檔都在)→你帶用戶確認再動·④team.md(mobilized_fraction/charter)/person.md(晉升3-signal)+⑦event/glossary=低priority on-touch順手非本輪·序:核心doc綠、CLAUDE.md你帶用戶確認·地基KEEP"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: "[★QA story-audit 二輪(12mo 期末考、修後世界故事講得通否、對照第一輪六symptom)·料齊:specimen docs/measurements/2026-08-12-phase3-story-audit-seed1337-12mo.specimen.jsonl(14MB/14363行、8隊strided[0,6,12,18,24,30,36,42]、12月motive→action→outcome)+aggregate json同路徑(byte-identical、measurer已收割9科)·★aggregate 已知(事實層、WHY待你specimen驗):世界長緩降+終局崩(pop444→65 -85.4%)、佔據率升80%高原but主靠founding非settle-into-existing(convert_via_settle全年僅1)、★residents反而全世界最餓(food_days 0.35-16)vs wanderer狂飆500+天、established全年0、combat死全年0(純extort)、factions 8→2、守成心態(零EXPAND/FOUND)·★4大WHY(blueprint重點、讀specimen motive→action→outcome驗):①residents為何最餓/wanderers為何500+天肥(安家沒帶食安的因果=settle後gather夠不夠/labor分配/A4讓位讓吃飽的變飢餓?)②終局day301崩觸發(什麼事件鏈啟動崩盤)③founding主導的世界故事線(團為何選found不選settle-into-existing)④factions 8→2是兼併還是凋亡(過程故事)·★對照第一輪六symptom(famine/no-founding/碎裂/零戰死/no-merge/no-recovery)修後哪些解了哪些還在·★禁systems從aggregate自判因果(我over-claim史)、QA specimen故事審是硬料·output=QA verdict(故事講得通否+4WHY因果+六symptom對照)→systems consolidate→blueprint帶用戶期末考完整版·地基KEEP"
 ---
 
