@@ -1,6 +1,6 @@
 # 定居生命週期 + 農業歸位 + 戰略蓋點（WHAT / vision）
 
-status: LOCKED-pending-R²（2026-08-14 用戶逐段磨完核可;三塊一傘）
+status: LOCKED（2026-08-14 用戶過目核可[含四輪 review 訂正:L0 短期看圖塊存糧/搶城競爭明寫/S1b 降回既有動詞條件補全/HOW-binding 硬禁平行搶城 action]+R① 全量 citation 驗無矛盾+R² CLEAN → systems HOW resume）
 owner: blueprint（WHAT）→ R² → systems HOW
 溯源：12mo 期末考(健康未升)→ 五題 cause-hunt → founding arc 證據包(六組 file:line)→ 用戶多輪設計討論定案。核心事實:①~300 鬼城 vs 28 活團、死亡不釋放所有權(erase_teams 零處置)、occupy/settle 兩動詞對無主營結構隱形(faction_ai:4987/_tick_solo_settle)②蓋營免費+瞬間+零 viability+零反饋(establish_crude_camp:4688、fire-and-forget)③農業 design-drift 事故:原設計=農田憑空產糧(git b288904a 2026-05-24)、守恆化 refactor 誤傷刪除(d4de89c5 2026-06-11 P2 不印 food)、農田降格成採集倍率、ROI 估算器仍按原設計估=信念與物理錯配。
 
