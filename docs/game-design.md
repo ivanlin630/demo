@@ -157,7 +157,7 @@
 - **正面羈絆 + 人物成長弧**（★新維度、七維度未含）→ `notes/2026-07-19-bonds-and-character-arcs-brainstorm.md`（正面羈絆=背叛的賭注重量 / 人會變成長弧 / 個人效忠 vs 忠於位·派系——**與現「人格固定 by design」有張力，升 canonical 前須調和**）。
 - **經濟階級**（★新視角、game-design 未名）→ `notes/2026-07-19-economic-class-brainstorm.md`（相對剝奪於財富兩鉤，窮 member 怨囤財頭人→叛，大半湧現）。
 - **技術/知識（技術≠技能 + 知識即資訊）**（§未來加技術 placeholder l.241 深化）→ `notes/2026-07-19-technology-knowledge-brainstorm.md`（技術=能做啥·配方上限·可傳可失 / 技能=做多好 / 知識=不均分佈的資訊，接核心「資訊不透明」命題）。
-- **memory-only vision 項**（非 note、但屬願景）：NPC 個別傷亡追蹤（[[project_future_improvements]]，team-pop 粒度→記名個體）；未成年長大/coming-of-age（[[project_population_fixes]]，生命週期 #6 機制）；PersonGenerator（匿名升格記名/天賦人物）。
+- **memory-only vision 項**（非 note、但屬願景）：NPC 個別傷亡追蹤（[[project_future_improvements]]，team-pop 粒度→記名個體）；**個體 coming-of-age**（person.age 驅動的個人成年弧、生命週期 #6——≠已實作的 cohort 簡版 10%/月;原 memory `project_population_fixes` 已 prune、願景以此行為準）；PersonGenerator（匿名升格記名/天賦人物）。
 - 玩家錨 C（資訊不對稱崛起）= 進入「本就活著的世界」的**鏡頭/參與者**，**非世界存在的理由**。先有好沙盒，玩家才是好鏡頭。
 - 量測導向：believability 不靠單元測達標，靠「活世界自己跑出該有的戲」（戰國 seed 類驗證床）。
 
