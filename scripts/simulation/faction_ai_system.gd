@@ -4668,8 +4668,30 @@ func try_hunt_predator(state: WorldState, team: TeamData) -> bool:
 	NpcCombatSystem.new().start_combat(state, team.team_id, bid)
 	return true
 
-# 找本格+鄰格 無主(owner==-1, level==0) 可農(plains/forest) tile；無 → (-1,-1)。
+# home-seeking 靶：撿现成優先（settlement S1b）→ fallback 邻格新建空農地。無 → (-1,-1)。
+# ★S1b 目標池擴充：先掃 belief-known 無主(owner==-1)既有 outpost（level>0=已建 infra，撿现成修缮
+#   << 新建工期→優先）；再 fallback 原邻7格空農地新建。到達後 establish_crude_camp（空地）或既有
+#   _evaluate_outpost_takeover 3 天 timer（既有 outpost）自然分流——本函式只選靶，不新增認領動詞。
+# ★感知鐵律 touch-point 分責：目標選擇=旅行前決策=須 belief → 只掃 team_market_known（vision/relay
+#   習得 discovered set，非全圖 god-view；讀 known tile live 結構=既有 market-finder 同 convention），
+#   非直掃 state.world.tiles。抵達後 timer 讀腳下=live 合法（既有 :5118 team.tile_pos 自站處）。
 func _find_unowned_farmable_tile(state: WorldState, team: TeamData) -> Vector2i:
+	# ① 撿现成：belief-known 無主既有 outpost（最近者）。known 為 discovered set，讀 live owner=既有慣例。
+	var best_reclaim: Vector2i = Vector2i(-1, -1)
+	var best_d: int = 1 << 30
+	for tile_id in state.team_market_known.get(team.team_id, {}):
+		var kt: HexTileData = state.world.tiles.get(tile_id)
+		if kt == null or kt.outpost_level <= 0:
+			continue   # demolish/失效 → 略（同 market-finder re-validate）
+		if kt.outpost_owner != -1:
+			continue   # 有主（自家或他隊）非鬼城→不撿
+		var d: int = _hex_dist(team.tile_pos, kt.tile_pos)
+		if d < best_d:
+			best_d = d
+			best_reclaim = kt.tile_pos
+	if best_reclaim != Vector2i(-1, -1):
+		return best_reclaim
+	# ② fallback 新建：本格+鄰格 無主(owner==-1, level==0) 可農(非山) tile。
 	var dirs: Array = [Vector2i.ZERO, Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1),
 		Vector2i(0,-1), Vector2i(1,-1), Vector2i(-1,1)]
 	for d in dirs:

@@ -311,6 +311,13 @@ func erase_teams(tids: Array) -> void:
 		# 3b. 傷亡累積器 _cas_carry 餘量清除（隊死 chokepoint=所有消滅路徑；防 team_id 重用洩漏。
 		# §D4 A / reviewer R②：真累積器硬要求顯式 erase，非靠 start_combat 隱式重置）
 		NpcCombatSystem._cas_carry.erase(tid)
+	# 3a. settlement S1a 死亡釋放：dead tid owned outpost tile → outpost_owner=-1（鬼城解鎖，供他隊既有
+	# takeover timer 撿现成認領）。★R² 效率：單 pass over world.tiles 配 dead:Dictionary O(1) membership
+	# （非每 dead team 各掃全圖 O(dead×tiles)）。同 :315 for-otid-if-dead.has pattern。
+	for tid in world.tiles:
+		var wt: HexTileData = world.tiles[tid]
+		if dead.has(wt.outpost_owner):
+			wt.outpost_owner = -1
 	# 3. 其他隊指向任一 dead tid 的 ref 單趟全清（死隊間互指不清：隨 teams.erase 一併消失）
 	for otid in teams:
 		if dead.has(otid):
