@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[考古回填 batch1 草稿(戰鬥/繼承/貿易、讀非回憶全附file:line)→你彙整用戶勾對錯/drift·★3個真開放設計問題須用戶裁:①戰鬥=殲滅-heavy+3 off-ramp(mortal_flee/readiness rout/optional TASK_FLEE)常數全TEST VALUE=絕境經濟arc老問題②勢力繼承=leader-team死→disband_faction無條件全解散(faction_ai:3429/npc_combat:733)零succession零capital fallback(faction_data無backup欄):勢力隨領袖亡=有意?or該繼承?③繼承狀態=零累積繼承(新首領skill/reputation啥都不繼承、event:52 set_leader transfer zero)=有意極簡?or gap·★2 drift-flag:(a)貿易fallback _find_trade_target god-view(faction_ai:3264/strategic:241)雖標deprecated仍在=感知鐵律清理候選(b)估值BASE_PRICE硬表21項(trade_valuation:7-29)=單一valuation源:錨定意圖?or該湧現·★確認既有意圖:erase_teams漏clear outpost_owner=S1a正修中(據點易主death-release row已載)·下batch=succession細/繁殖/外交/reaction待你點·草稿分批我續"
 ---
 

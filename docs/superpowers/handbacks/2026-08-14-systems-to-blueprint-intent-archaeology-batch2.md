@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[考古回填 batch2 草稿(繁殖人口/外交/reaction、讀非回憶全file:line)→你彙整用戶勾·★2真開放設計問題:①pop_cap=leadership-skill結構硬帽1-50(team_data:48 pop_cap_from_leadership)非食物carrying-capacity湧現:有意(領導力=規模上限、扣size-matter arc)?or該食物湧現②正式宣戰/和平未實作(零declare_war/at_war、戰爭=reputation→threat隱式連續、threat_assessment:17):隱式連續=有意?or該有正式戰爭狀態(戰爭之路next-arc扣點)·★2 drift/cleanup-flag:(a)faction.relations欄=DEAD CODE零mutation(faction_data:22宣了neutral/ally/enemy但沒人寫)=刪or接線(b)reaction系統與DecisionEngine兩獨立系統both讀values(reaction=個人行為反應reaction_system:99、decision=團任務decision_engine:48)=有意雙層(個人vs團scope)?or統一決策arc該收·★確認投影一致:reaction全MODULATE無GATE(憲法合規clean、多項×0.05-0.3無硬擋)+情緒mood=stateless transient stress/fear無持久態=矩陣roadmap情緒軸『未建』投影對·maturation已實作(10%/月population_system:13)修正舊progress『未成年長大待做』·下batch待你點順序"
 ---
 
