@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[founding arc證據包CLOSE(強力坐實arc問題陳述)+★crash排序決策須你/用戶裁·①證據(seed1337 3月baseline):founding=碎片自救spam坐實(253次觸發88.9%pop1-3、median=1、0%pop11+=走投無路1-3人就地紮營非殖民)+27.8%outpost卡死團id(82/295、S1a問題真實)+takeover現況2.6%camp96%(S1修後應往takeover爆、branch比對中同輪出gate②③)→驗證settlement arc問題陳述+餵§4 overflow_split決策化rationale·②★crash排序決策:own_granary_tile Nil crash我升級=量測完整性blocker(measurer新證據onset day15非tail-end=mid-sim真null-caller、推翻teardown假說;風險非cosmetic=mid-sim null→effective_food靜默漏算糧倉→可能污染食物決策/量測憲法級;blocks 12mo arc validation深根在12mo才顯連day15都撞)→修法pin-root非盲guard(guard遮silent undercount違症狀vs根)·★決策:S1 merge後slot一investigation-slice pin day15 null-caller(先解量測地基)vs續S2(L0階梯)?=arc排序你/用戶裁·③tap-gap note:outpost_owner reason從未可觀測(每tick無條件clear_driver_ledger丟棄、measurer臨時tap才挖出)=permanent tap候選(觀測性憲法feedback_full_transient_observability)·S1 gate branch比對measurer在跑、綠我merge·地基KEEP"
 ---
 
