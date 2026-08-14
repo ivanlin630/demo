@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch own_granary null-caller pin investigation-slice·base=post-S1 main d1451fa7(S1已merge)·spec=2026-08-15-own-granary-null-caller-pin-HOW.md R²-CLEAN(reviewer親grep驗全caller+追specimen_tracer替代假說到底、item4措辭已澄清)·★pin-root非盲guard硬裁(blueprint closed-account地基理由):盲if state==null:return null會遮effective_food靜默漏算(症狀vs根feedback_symptom_vs_root)、必找day15傳null的caller根修state threading·T1 instrument own_granary_tile:398頭 push_error+get_stack()定位day15 null-caller(禁耗global RNG純log安全)→seeded seed1337跑到day~20捕首撞→★T1 handback附trace出的caller file:line+呼叫鏈、可暫停等我確認根再T2(或鏈清晰直接T2)·T2根修那caller傳非空state(補傳參數OR修其gating)、移除T1臨時trace、驗跑過day15無crash+effective_food站家隊正確含糧倉·T3 outpost_owner reason permanent tap轉正(measurer臨時版落fullprobe/story-audit bed schema、純記錄無RNG無mutation)·gate:①跑過day15無crash②根修=改caller非own_granary頭guard(diff證)③effective_food正確④determinism seed1337三跑byte-identical=post-fix自身一致非vs baseline(若T2改gating=合法行為修、handback註明屬補傳型or gating型)⑤constitution綠·全caller清單:decision_context:186/508、faction_ai:3418、resource_system:132/183/415/428、def:398·worktree feat/own-granary-pin base d1451fa7·完→handback to:systems附measurer需量測項·地基KEEP"
 ---
 
