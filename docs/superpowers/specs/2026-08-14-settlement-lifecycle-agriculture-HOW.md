@@ -10,16 +10,17 @@ owner: systems（HOW）← design `2026-08-14-settlement-lifecycle-agriculture-d
 - **守恆=可溯源**：farm_yield 走 chokepoint（`TileBank.deposit(...,"farm_yield")` 同 ResourceBank reason 慣例、守恆稽核含農業）。resource 分類學入 invariants（零生成 礦寶 / 自然再生 野味藥草野馬 / 生產類 食物 / 木材=採集加速維持）。
 
 ## §1 據點生命週期
-### S1a 死亡釋放（機械修、R² 點名精確修點）
-`erase_teams`（world_state:286-349、謹慎 chokepoint 清一堆欄**唯漏 outpost_owner**）→ 清 dead tid owned tile `outpost_owner=-1`。★**R² 效率**：**單 pass over `state.world.tiles` 配既有 `dead:Dictionary` membership**（同 :315 附近 `for otid in teams: if dead.has(...)` pattern）、**非對每 dead team 各掃全圖**（避 O(dead×tiles)）。
+### S1a 死亡釋放（機械修、★解鎖既有 takeover-timer=關鍵）
+`erase_teams`（world_state:286-349、謹慎 chokepoint 清一堆欄**唯漏 outpost_owner**）→ 清 dead tid owned tile `outpost_owner=-1`。★**R² 效率**：**單 pass over `state.world.tiles` 配既有 `dead:Dictionary` membership**（同 :315 pattern）、非對每 dead team 各掃全圖。
+- ★★**含意（用戶記憶訂正、我 over-claim 修）**：認領**機制現成**=`_evaluate_outpost_takeover`（faction_ai:5117、`OUTPOST_TAKEOVER_DAYS=3`）站 `owner==-1` 據點 3 天→`set_owner` takeover。但被 S1a bug 餓死（死團 owner=死 id≠-1→timer `if owner!=-1: reset` 跳過）。**S1a 清 owner→-1 = 300 死鬼城直接進 timer 認領池**（現成機制活過來）、非新造。
 - **★fp intended-change**（解鎖認領=行為變、非 byte-identical）；不廣播（知情走 §0 四通道 belief）。
-### S1b 撿鬼城 = 既有 settle 補全 + 目標池擴充（★用戶訂正③④：非新認領動詞）
-**★HOW-binding 硬禁（用戶訂正④、code 只准兩處）**：
-1. **settle 補 owner=-1 分支**：`_tick_solo_settle`（A4 solo-convert）現只 convert same-faction outpost（owner==同faction）→ **加 owner=-1（無主營）分支**：抵達 outpost_level>0 且 owner=-1 → solo 接管入住（`set_owner(team)`+convert resident）。修繕成本 << 新建工期=撿比蓋划算物理基礎。
-2. **安家選項目標池擴充**：settle/invite 候選目標池 **納入 owner=-1 outpost tile**（既有 settle 決策的 target 集擴充、非新 action）。
-- **★禁新增任何搶城類 action**；**occupy 不碰**（occupy 仍只打活 resident）；需新 action=**停下呈報**（不自作主張）。
-- **★感知鐵律**：owner=-1「空」判定用 **belief**（team_discovered/tile belief、過期→抵達發現有人→既有遭遇機制談判/入夥/衝突/離開）。
-- **★② 搶鬼城競爭（用戶訂正②）**：先到先得（首個 convert 者 `set_owner` 認領）；後到發現 owner≠-1（belief 過期）→ 既有 settle-fail/遭遇路；情報時效回報（belief decay=誤判自然）。
+### S1b 撿鬼城 = 目標池擴充 only（★再縮：認領靠既有 timer、settle-convert 不碰）
+**★重拟（用戶記憶訂正 over-claim 後、blueprint「能靠 S1a+目標池就不碰 settle」）**：認領**機制=既有 takeover-timer**（S1a 解鎖後活）、**不新造 convert 分支**。S1b 縮成**一 code 點**：
+1. **安家/決策目標池擴充**：settle/移動決策候選目標池 **納入 belief-known `owner=-1` outpost tile**（=給團「想去站鬼城」的理由→travel 過去→既有 timer 3 天認領）。
+- ★**`_tick_solo_settle` owner=-1 convert 分支 = 暫不做**（timer 已認領、避平行造重複機制）；除非 measure 顯 timer 3 天太慢需 instant-convert=停下呈報再議。
+- **★禁新增任何搶城類 action**；**occupy 不碰**；需新 action=**停下呈報**。
+- **★感知鐵律 touch-point 分責（R² delta refine）**：**①抵達檢查**（timer 讀腳下 tile owner=-1）=**live 合法**（團永遠看得見自己腳下=proximate、非 god-view）；**②目標選擇**（決定「走去」遠方 owner=-1 據點=旅行前決策）=**須 belief**（team_discovered/tile belief、過期→抵達發現有人=既有遭遇路）。**兩 touch-point god-view 責任分開：抵達=live、目標=belief。**
+- **★② 搶鬼城競爭（訂正②）**：先到先得（首個站滿 timer 者 `set_owner`）；後到發現 owner≠-1（belief 過期）→既有路。★**check-and-set 同步性（R² 必查項）**：timer 的 `owner==-1 判定 + set_owner 寫入`同一 function 呼叫內（:5127-5131 既有 pattern 已如此=單執行緒逐團天然 first-come、非 deferred 批次）。
 
 ## §2 L0 營地階梯（S2）
 **露宿(免費隱含不動)→ L0 營地 → L1 村(工期)→ L2/L3(既有)**。
