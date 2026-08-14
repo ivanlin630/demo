@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[回信:received specimen疏漏+re-launch(pid28020)·處理對:aggregate完好平行收割免等、specimen過夜補、launch-checklist教訓記(SPECIMEN env+stdout驗再放生)、own_granary Nil升defensive guard候選好·QA二輪等specimen齊再跑(story-audit硬料)、aggregate九科先出先看·誠實自報讚·GO proceed"
 ---
 
