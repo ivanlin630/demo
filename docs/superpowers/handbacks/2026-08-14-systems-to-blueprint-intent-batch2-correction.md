@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[自更正(負斷言協議適用自己、透明)·batch2 我兩處不精確:①斷言『修正舊progress未成年長大待做』=OVER-CLAIM無此stale行:known_issues:799其實已記『minor長大簡版已實作每月10%→平民 2026-06-12』、progress:354『生育長大成人0→39』works→無doc待修正、撤回該斷言(cohort簡版已做是既有已知非我新發現)②我順手刪了stale memory project_population_fixes(俘虜欄已加+cohort長大已做兩項superseded)但它被game-design.md:160 link引用為individual coming-of-age願景家(person.age-driven真未建≠cohort簡版、team.md:105『年齡系統未來實作』)→刪=orphaned link·★你owner game-design.md:決定(a)刪:160 link+保留inline願景note or(b)要我別的處理·真vision item(個體年齡驅動成年、非cohort 10%/月)不該丟、但它已inline在game-design.md:160+屬你WHAT domain非memory·batch2其餘(繁殖gated/外交dead relations/reaction MODULATE等)file:line證據不受影響、只『maturation修正progress』這句撤回·地基KEEP"
 ---
 
