@@ -36,7 +36,7 @@ owner: systems（HOW）← blueprint crash-first ruling（2026-08-15、closed-ac
 1. seeded 跑過 day15（長窗）無 own_granary null crash。
 2. 根修=**改 caller state threading**（非 own_granary 頭 guard）——diff 證根位置。
 3. `effective_food` 站家隊正確含糧倉（T2 驗 print）。
-4. determinism seed1337 三跑 byte-identical（tap 純記錄不破）。
+4. **determinism seed1337 三跑 byte-identical = 「post-fix code 自身三跑一致」**（R² 必查項③澄清）——**非** vs pre-fix baseline。★若 T2 根修=改某 caller gating（合法行為修：該 caller 本不該在 null-state 期跑）則 post-fix 世界**本就該**≠ pre-fix baseline，那是**正確行為修正非退回**；只驗 post-fix 自身 determinism（同 seed 三跑 byte-identical）不破。若 T2=單純補傳 state 參數（無行為變）則 post-fix 應 vs baseline 一致——兩情境 T1 定位後才知、handback 註明屬哪型。tap（T3）純記錄→無論哪型都不破 determinism。
 5. constitution_gate 綠。
 
 ## §4 界外

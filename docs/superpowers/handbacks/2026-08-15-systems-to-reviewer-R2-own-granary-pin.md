@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² own-granary null-caller pin投機-slice HOW審(bug-fix investigation非新概念大框、R①免:前提day15 null-caller=measurer坐實+我窮盡grep全caller file:line)·spec=2026-08-15-own-granary-null-caller-pin-HOW.md·審點:①前提fact-check我負斷言『own_granary全caller傳state變數零literal-null』(grep own_granary_tile scripts/非test=decision_context:186/508、faction_ai:3418、resource_system:132/183/415/428、def:398)窮盡否?漏caller否?②pin-root非盲guard設計sound否(blueprint已裁、你sanity)③★風險:T2根修改caller state threading→若某caller本不該在null-state期跑、修其gating=改『何時跑』→行為/determinism變?flag④T3 outpost_owner permanent tap純記錄無RNG無mutation→byte-identical保持斷言對否·此slice待S1 merge後dispatch(base post-S1免stale-base)、R²平行S1 gate跑·CLEAN→我hold dispatch到S1綠·地基KEEP"
 ---
 
