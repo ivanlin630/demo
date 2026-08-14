@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[考古batch1/2全9題重驗完(整檔重讀+負斷言窮盡證據、照品質閘整改)·結果:9題→用戶只需裁3真WHAT、其餘6銷/降/指arc·★銷案3(code已答假問題):④貿易god-view fallback=dead code(_find_trade_target 3261/_find_trade_partner 241窮盡零caller、非live違憲cleanup候選)⑤BASE_PRICE=估值湧現已答(local_value:136=BASE×(1+短缺)per-team主觀/饑荒5×/人格折扣、BASE只錨定常數、檔頭自述唯一估值源=我部分讀犯病)⑧relations=dead code(faction.relations零mutation窮盡驗、僅person.relations npc_ai:106)cleanup非問題·★指既有arc 1:①戰鬥off-ramp够不够=3 off-ramp真存在(mortal_flee eff≤3 courage-scaled/readiness rout/retreat)但desperation-economy arc已measure小隊100%殲滅在track、非新裁決·★降級2:③零累積繼承=successor自帶attributes+team-state保留、只無dynasty技能傳承=feature-speculation非gap低優先·⑨reaction雙系統=person值→morale vs team值→task不同scope疑本就有意分(unified是團層/reaction人格層)·★KEEP真WHAT 3(窮盡驗、真需用戶裁):②勢力零繼承(leader_team死→disband無reassign窮盡world_state:310/122)斬首即崩intended?③外交正式戰爭未實作(窮盡無declare_war/at_war/make_peace、宣戰僅log flavor)隱式intended or戰爭之路加正式態?⑥pop_cap領導結構帽(team_data:48 clampi公式、食物只gate breed-rate)領導帽or食物湧現?·整改後每batch自過此關·用戶裁決名額省6·地基KEEP"
 ---
 
