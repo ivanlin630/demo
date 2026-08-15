@@ -42,7 +42,7 @@ func _initialize() -> void:
 	WorldState.driver_ledger_enabled = true
 	WorldState.clear_driver_ledger()
 	var food_flow: Dictionary = {}   # reason -> Σdelta（全程累加,月底才印,零reset）
-	var owner_reason_by_team: Dictionary = {}   # ★TEMP measurer diag（9resident-takeover-verify、用完revert）：team_id(當owner)→最近一次set_owner reason（last-write-wins同OutpostOwnerBank本身語意）
+	var owner_reason_by_team: Dictionary = {}   # T3 永久 tap（觀測性憲法）：team_id(當owner)→最近一次set_owner reason（last-write-wins同OutpostOwnerBank本身語意）。純記錄、無RNG、無mutation→determinism不破。
 	FactionAISystem._a2b_remote_tribute_payers.clear()
 	var state := WorldState.new()
 	var runner := SimRunner.new()
@@ -135,7 +135,7 @@ func _initialize() -> void:
 				if String(_e.get("field", "")) == "food":
 					var _r: String = String(_e.get("reason", ""))
 					food_flow[_r] = float(food_flow.get(_r, 0.0)) + float(_e.get("delta", 0.0))
-				elif String(_e.get("field", "")) == "outpost_owner":   # ★TEMP measurer diag（用完revert）
+				elif String(_e.get("field", "")) == "outpost_owner":   # T3 永久 tap：outpost_owner reason（driver-ledger 每 tick 被 clear 丟棄前撈；純記錄）
 					var _owner_id: int = int(_e.get("delta", -1))
 					if _owner_id != -1:
 						owner_reason_by_team[_owner_id] = String(_e.get("reason", ""))
@@ -234,7 +234,7 @@ func _initialize() -> void:
 	dump["erase_food_snapshot_samples"] = Probe.samples.get("erase.food_snapshot", [])
 	dump["worldgen_build_outpost_pop_samples"] = Probe.samples.get("worldgen.build_outpost_pop", [])   # ★TEMP measurer diag（用完revert）
 	dump["ghost_town_owner_scan"] = _ghost_town_owner_scan(state)   # ★TEMP measurer diag（用完revert）
-	dump["owner_reason_by_team"] = owner_reason_by_team   # ★TEMP measurer diag（9resident-takeover-verify、用完revert）
+	dump["owner_reason_by_team"] = owner_reason_by_team   # T3 永久 tap（fullprobe/story-audit schema）：owner→reason 分布（camp/takeover/capture），measurer 臨時版轉正
 	print("  join.order_set samples=%d join.reached_pair samples=%d" % [
 		dump["join_order_set_samples"].size(), dump["join_reached_pair_samples"].size()])
 	dump["watchdog_hits"] = watchdog_hits

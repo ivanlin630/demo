@@ -987,14 +987,14 @@ func _attempt_barter(state: WorldState, a: TeamData, b: TeamData) -> void:
 	# a 可給的（a surplus 且 b 缺=b 想要）
 	for give_res in TradeValuation.BASE_PRICE.keys():
 		if give_res == "coin": continue
-		var a_surplus: float = maxf(float(a.resources.get(give_res, 0)) - TradeValuation.reserve(a, give_res, TradeValuation.leader_vals(state, a)), 0.0)
+		var a_surplus: float = maxf(float(a.resources.get(give_res, 0)) - TradeValuation.reserve(a, give_res, TradeValuation.leader_vals(state, a), state), 0.0)
 		if a_surplus <= 0.0: continue
 		# b 是否想要（b 對該 res 估值 > a 對該 res 估值,即 b 較缺）
 		if TradeValuation.local_value(b, give_res) <= TradeValuation.local_value(a, give_res): continue
 		# 找 b 能回付的（b surplus 且 a 想要）
 		for pay_res in TradeValuation.BASE_PRICE.keys():
 			if pay_res == "coin" or pay_res == give_res: continue
-			var b_surplus: float = maxf(float(b.resources.get(pay_res, 0)) - TradeValuation.reserve(b, pay_res, TradeValuation.leader_vals(state, b)), 0.0)
+			var b_surplus: float = maxf(float(b.resources.get(pay_res, 0)) - TradeValuation.reserve(b, pay_res, TradeValuation.leader_vals(state, b), state), 0.0)
 			if b_surplus <= 0.0: continue
 			if TradeValuation.local_value(a, pay_res) <= TradeValuation.local_value(b, pay_res): continue
 			# 等值互換：以雙方各自估值算可換量,取較小值的一筆
