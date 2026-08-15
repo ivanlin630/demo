@@ -4717,7 +4717,6 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	tile.outpost_type = "military" if is_military else "civilian"
 	tile.outpost_level = 1
 	if Probe.enabled: Probe.bump("worldgen.build_outpost")   # world-gen variety 靶B：新開局 build-outpost 實測 fire
-	if Probe.enabled: Probe.bump_sample("worldgen.build_outpost_pop", {"pop": team.population, "tick": state.world.current_tick}, 500)   # ★TEMP measurer diag（用完revert）：founding觸發時team.population分布
 	OutpostOwnerBank.set_owner(tile, team.team_id, "camp")
 	# 只抬 food cap（regen 才產糧）,不送即時糧。2026-06-16 A/B 量測:即時糧非 load-bearing
 	# （拿掉後 2yr×4config died=0、pop 不掉）→ 移除以恢復絕境稀缺,與玩家紮營版一致。

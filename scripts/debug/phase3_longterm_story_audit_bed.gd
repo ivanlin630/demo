@@ -232,8 +232,6 @@ func _initialize() -> void:
 	dump["income_hunt_samples"] = Probe.samples.get("income.hunt", [])
 	dump["gather_factor_trace_samples"] = Probe.samples.get("gather.factor_trace", [])
 	dump["erase_food_snapshot_samples"] = Probe.samples.get("erase.food_snapshot", [])
-	dump["worldgen_build_outpost_pop_samples"] = Probe.samples.get("worldgen.build_outpost_pop", [])   # ★TEMP measurer diag（用完revert）
-	dump["ghost_town_owner_scan"] = _ghost_town_owner_scan(state)   # ★TEMP measurer diag（用完revert）
 	dump["owner_reason_by_team"] = owner_reason_by_team   # T3 永久 tap（fullprobe/story-audit schema）：owner→reason 分布（camp/takeover/capture），measurer 臨時版轉正
 	print("  join.order_set samples=%d join.reached_pair samples=%d" % [
 		dump["join_order_set_samples"].size(), dump["join_reached_pair_samples"].size()])
@@ -261,26 +259,6 @@ func _initialize() -> void:
 # probe A(survival卡):SURVIVAL_TASKS團food_days分布+在survival task內的持續tick數(ticks_in_task)。
 # probe B(threat over-trigger):TASK_DEFEND/TASK_FLEE團的threat_react vs threat_threshold+threat_id(真敵否)。
 # 純讀直呼DecisionContext.gather(零production tap、零fixture手造ctx，鏡射A1/A2 camp_drive_scan手法)。
-# ★TEMP measurer diag（ghosttown-owner-founding-pop ticket、用完revert）：終態全tile outpost owner分布
-# （純讀既有state,零mutation零RNG）。dead=owner id存在但state.teams.get(owner)==null(死團不釋放)、
-# empty=owner==-1(從未佔或已釋放)、alive=owner在世團(正常持有)。
-func _ghost_town_owner_scan(state: WorldState) -> Dictionary:
-	var dead: int = 0
-	var empty: int = 0
-	var alive: int = 0
-	for tid in state.world.tiles:
-		var tile: HexTileData = state.world.tiles[tid]
-		if tile.outpost_level <= 0:
-			continue
-		var owner: int = tile.outpost_owner
-		if owner == -1:
-			empty += 1
-		elif state.teams.get(owner) == null:
-			dead += 1
-		else:
-			alive += 1
-	return {"total_outposts": dead + empty + alive, "dead_owner": dead, "empty_owner": empty, "alive_owner": alive}
-
 func _crisis_density_scan(state: WorldState, day: int) -> void:
 	if not Probe.enabled: return
 	for tid in state.teams:
