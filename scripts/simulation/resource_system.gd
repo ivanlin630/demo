@@ -5,6 +5,9 @@ const FOOD_PER_PERSON_PER_DAY: float = 0.8   # TEST VALUE — R1 張力校準：
 #  0.8 使 plains op1 養小鎮微盈餘[繁榮]、forest op1 微赤[苟活須交易]、赤字溫和不成餓死潮）
 # 讀B：覓食 = 苟活地板。覓食來源食物淨貢獻上限 = 幾日餬口（超額不 bank、不耗 wild_game）。
 const FORAGE_FLOOR_DAYS: float = 5.0         # TEST VALUE — 覓食淨貢獻上限=幾日餬口（1.5→5 苟活韌性；<建國7天門）
+# ★settlement S2a L0 營地：採腳下 food 池現量×低倍率單旋鈕（禁 pop-curve；池竭→採量遞減→遊牧移動湧現）。
+const L0_FORAGE_MULT: float = 0.15           # TEST VALUE — L0 營地日採＝腳下 food 池現量之比例（單旋鈕、bounded、measurer 校準）
+const L0_DECAY_DAYS: int = 3                  # TEST VALUE — L0 營地棄置衰敗天數（無人 forage reset→camp_level=0 無廢墟）
 const WILD_GAME_REGEN_PER_DAY: float = 0.15  # TEST VALUE — 獵物慢繁殖回補（月級，上限夾 resource_cap）
 const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
 const PROVISION_DAYS: float = 10.0           # TEST VALUE — 旅途乾糧天數（自家 outpost 補 carried buffer）
@@ -55,7 +58,16 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 			continue
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level == 0:
-			# 無據點隊零被動食物；食物唯一來源 = 狩獵（小獵物 + 野獸）
+			# ★S2a L0 營地採集：camp_level>0 → 讀腳下 food 池現量×低倍率單旋鈕（禁 pop-curve）、走既有 bank
+			# chokepoint（守恆:tile→team 轉移）。池竭→採量遞減→遊牧移動湧現。有人 forage→reset 衰敗計時。
+			if tile.camp_level > 0:
+				var pool_food: float = float(tile.resources.get("food", 0))
+				if pool_food > 0.0:
+					var draw: float = minf(pool_food, pool_food * L0_FORAGE_MULT * day_fraction)
+					TileBank.pool_set(tile, "food", pool_food - draw, "l0_forage_drain")
+					ResourceBank.add(team, "food", draw, "l0_forage")
+				tile.camp_ticks_left = L0_DECAY_DAYS * WorldState.TICKS_PER_DAY   # 有人在=不棄置
+			# 無據點隊零被動食物（L0 forage 外）；狩獵（小獵物 + 野獸）仍為唯一主動肉源
 			if int(tile.resources.get("wild_game", 0)) > 0:
 				HuntSystem.new().hunt_small_game(state, team, tile, false)   # 被動小獵
 			continue

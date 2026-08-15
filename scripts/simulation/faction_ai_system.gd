@@ -4703,32 +4703,21 @@ func _find_unowned_farmable_tile(state: WorldState, team: TeamData) -> Vector2i:
 		return p
 	return Vector2i(-1, -1)
 
-# 在腳下無主可農地即時立 crude civilian L1 camp（求生豁免，免建材/免工期）。回傳成功否。
+# ★settlement S2a：紮營=建 L0 營地（transient shelter，非真據點）。設 camp_level=1、**不**設
+# outpost_level（保持 0=語意正確 L0 非據點、不觸全樹 47 個 level==0 空 tile 哨兵）、**不** set_owner
+# （無領土宣稱）、**不**清流亡/**不**升居民 tag（勞力池/居民身分從 L1 起、S2b 工期）。拔營無沉沒
+# （棄置 L0_DECAY_DAYS → camp_level=0 無廢墟、地圖自清）。L0 靠 collect_resources L0 forage 採腳下池吊命。
+# ★感知鐵律：讀腳下 team.tile_pos（proximate 自站處合法）。L1 據點=S2b 工期，非本函式。回傳成功否。
 func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x*1000 + team.tile_pos.y)
-	if tile == null or tile.outpost_level > 0 or tile.outpost_owner != -1:
+	if tile == null or tile.outpost_level > 0 or tile.outpost_owner != -1 or tile.camp_level > 0:
 		return false
 	if tile.terrain == "mountain":
 		return false
-	var leader: PersonData = state.persons.get(team.leader_id)
-	var martial: float = float(leader.values.get("好戰", 0.5)) if leader else 0.5
-	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
-	var is_military: bool = (martial > 0.6 or ambition > 0.7)   # TEST VALUE 門檻
-	tile.outpost_type = "military" if is_military else "civilian"
-	tile.outpost_level = 1
-	if Probe.enabled: Probe.bump("worldgen.build_outpost")   # world-gen variety 靶B：新開局 build-outpost 實測 fire
-	OutpostOwnerBank.set_owner(tile, team.team_id, "camp")
-	# 只抬 food cap（regen 才產糧）,不送即時糧。2026-06-16 A/B 量測:即時糧非 load-bearing
-	# （拿掉後 2yr×4config died=0、pop 不掉）→ 移除以恢復絕境稀缺,與玩家紮營版一致。
-	tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), CRUDE_CAMP_FOOD_SEED)
-	# 身分躍遷（比照 _auto_settle_builder）：升軍/生產 tag、清流亡（流浪→定居，非一律生產）
-	var new_tag: String = TeamData.TAG_MILITARY if is_military else TeamData.TAG_PRODUCE
-	if not team.tags.has(new_tag):
-		state.add_tag(team, new_tag, "crude_camp_settle")
-	state.remove_tag(team, "流亡", "crude_camp_settle")
-	LaborSystem.ensure_fresh(state, tile)   # ★B4：紮營落腳即刷 labor cache→新居民同 tick 採糧非硬零(fresh tile labor_alloc 空→rebalance)
-	print("[CrudeCamp] Team%d 紮營 @(%d,%d) → %s" % [
-		team.team_id, team.tile_pos.x, team.tile_pos.y, tile.outpost_type])
+	tile.camp_level = 1
+	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
+	if Probe.enabled: Probe.bump("settlement.camp_l0")   # L0 紮營 fire tap（觀測性）
+	print("[CampL0] Team%d 紮營 L0 @(%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 	return true
 
 func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> void:

@@ -24,6 +24,19 @@ func tick_all(state: WorldState) -> void:
 	# 每日 outpost 鄰格 wild_horses 批採進公庫（tick_all 每 6 小時跑，日邊界才採）
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		_collect_wild_horses_by_outposts(state)
+		_decay_l0_camps(state)
+
+# ★settlement S2a：L0 營地棄置衰敗（每日、全 tile sweep 覆近+遠區、零 RNG）。有人 forage 者當日已
+# 在 collect_resources reset camp_ticks_left→full；無人→此處遞減、<=0→camp_level=0（無廢墟、地圖自清）。
+func _decay_l0_camps(state: WorldState) -> void:
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.camp_level <= 0:
+			continue
+		tile.camp_ticks_left -= WorldState.TICKS_PER_DAY
+		if tile.camp_ticks_left <= 0:
+			tile.camp_level = 0
+			tile.camp_ticks_left = 0
 
 const WILD_HORSE_REGEN_CHANCE: float = 0.05   # 每月 5% chance +1（極慢）
 const WILD_HORSE_TILE_CAP: int = 3
