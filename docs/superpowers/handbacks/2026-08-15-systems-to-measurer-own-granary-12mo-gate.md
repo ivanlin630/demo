@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[own_granary pin 12mo bounded merge-gate·feat/own-granary-pin e8ad1cb8 base d1451fa7·2 code點我硬讀diff確認(interaction:990/997 reserve補傳state第4arg、own_granary零改=非guard、tap純記錄)·根pin漂亮(runtime trace:reserve state=null DEFAULT+barter漏傳)·★此slice目的=解12mo量測封鎖→gate須親證:①full 12mo horizon crash-confirm(fix後跨全horizon own_granary null crash=0、或若冒出別的null-caller報file:line;implementer 3360t+ clean但自報detach/wrapper長run flaky提早死=tooling非code、你godot-detach.ps1 WMI-parented撐長run)②owner_reason_by_team永久tap dump值合理(camp/takeover/capture分布=T3轉正驗)③determinism spot(post-fix seed1337可复728d62ef=補傳型byte-identical、你若順手驗)·★byte-identical注記:窗內一致(barter多非自家糧倉格→own_granary兩側null)、12mo若bartering隊在自家糧倉才分岔=正確行為修非退回(gate④措辭:post-fix自身三跑一致非vs pre-fix baseline)·跑法godot --path .worktrees/own-granary-pin對branch跑(worktree應在)、baseline=main·出.measure.json落地exact path·★若12mo tooling-blocked跑不完(非crash是flaky死)報我=另開tooling issue、fix核心gate已branch驗綠仍可議merge·地基KEEP"
 ---
 
