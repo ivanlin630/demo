@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[own_granary pin 12mo bounded merge-gate 綠]branch feat/own-granary-pin(e8ad1cb8),seed1337 full 12mo horizon(360天/86400tick)via tools/godot-detach.ps1 WMI-parented(避開工具層timeout,~5小時完跑無中斷)。★①crash-confirm=硬綠:grep SCRIPT ERROR全log=0次,涵蓋整年(先前pre-fix同床3月窗撞own_granary crash-storm數百次;post-fix全年0次),隱含也排除implementer窮盡負斷言外冒出的其他null-caller(0 SCRIPT ERROR即涵蓋所有種類非只own_granary)——implementer『唯一live null源=barter兩呼點』坐實。★②owner_reason_by_team永久tap dump值合理:157筆camp123(78.3%)/takeover34(21.7%)/capture0,分布健康★附帶觀察:takeover占比21.7%遠高於我先前測的pre-S1 baseline(2.6%),研判own-granary-pin branch base已含settlement-s1(我剛verdict綠的那條)合併效果,非本輪fix貢獻,分布本身無異常。ghost_town_owner_scan:dead_owner=0(全年,S1a效果延續)、empty_owner217/alive60/total277,79%閒置略高但跟population崩潰(444→56,-87.4%,比先前12mo run更慘,推測S1+own-granary-pin疊加後世界演化路徑分岔)相符非異常。★③determinism spot綠:post-fix seed1337 1000t StateFingerprint=728d62ef8a8f4cb50cc32c905bbca8f4,精確match implementer聲稱+main baseline現值,補傳型byte-identical坐實。★裁決:①②③全綠→建議merge。tooling(godot-detach.ps1)全程無flaky,一次過,implementer先前擔心的detach/wrapper長run flaky本輪未重現(可能已被較早我做的LW_MONTHS白名單擴充+更穩定的執行時段解決,非決定性排除但這次乾淨跑完供參考)。"
 ---
 
