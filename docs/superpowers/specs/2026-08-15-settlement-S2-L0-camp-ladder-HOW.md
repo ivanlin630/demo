@@ -5,7 +5,8 @@ owner: systems（HOW）← design `2026-08-14-settlement-lifecycle-agriculture-d
 溯源：12mo 期末考深根（碎裂→non-viable 小團→崩塌）→ S1 merged（鬼城釋放）→ crash merged（12mo 解封、深根 pop-87.4% 乾淨可測）→ blueprint 裁 S2 next（viability 層直攻餓）。
 
 ## §0 命門（HOW 守、整檔驗證後）
-- **★L0 用獨立 flag `tile.camp_level`、非 `outpost_level=0`**（**驗證 blocker**）：`outpost_level==0` 全樹 = **「無據點/空 tile」哨兵**（窮盡：need_oracle:42/80、faction_ai:492/505/3293/4010/4119/4178/4213/5022 共 ~10 處 guard skip）。L0 若設 outpost_level=0 → 所有 level==0 guard 把 L0 當空 tile（採集/認領/facility 全誤判）。∴ **L0 = `outpost_level` 保持 0（語意正確：L0 非真據點、無設施/倉/領土）+ 新 `tile.camp_level: int`（0=無、1=L0 營地）標 transient shelter**。既有 level==0 guard 全不動（L0 對它們＝正確地「還不是據點」）、camp 專屬邏輯讀 camp_level。
+- **★L0 用獨立 flag `tile.camp_level`、非 `outpost_level=0`**（**驗證 blocker**）：`outpost_level==0/<=0` 全樹 = **「無據點/空 tile」哨兵**（★**真窮盡 grep no-head、47 站跨 14 檔**：faction_ai 18/outpost_system 7/order_system 5/player_command 3/resource_system 2/observer_query 2/harvest 2/need_oracle 2/state_fingerprint 1/player_query 1/manufacturing 1/interaction 1/game_setup 1/food_flow 1。**★R² 訂正**：初稿「~10 處」是我 grep 誤用 `head` 截斷成 faction_ai 單檔子集=第 8 次負斷言 head-undercount、reviewer 親 grep 抓；方向不變**更強**）。L0 若設 outpost_level=0 → 全 47 guard 把 L0 當空 tile（採集/認領/facility/升級鏈全誤判）。∴ **L0 = `outpost_level` 保持 0（語意正確：L0 非真據點、無設施/倉/領土）+ 新 `tile.camp_level: int`（0=無、1=L0 營地）標 transient shelter**。既有 47 guard 全不動（L0 對它們＝正確地「還不是據點」）、camp 專屬邏輯讀 camp_level。
+- **★★state_fingerprint:119 determinism 要害（R² 必查項）**：現 fp 於 `t.outpost_level<=0 and construction_team_id==-1` 條件下**跳過該 tile**（:119-122）→ L0（outpost_level 保持 0、無 construction）當前**不入 fingerprint** → camp_level 狀態變化對 determinism **不可見**（盲點 + determinism gap）。∴ **S2a 必顯式把 `camp_level` 納入 state_fingerprint**（:119 條件擴充或 :122 欄位加），否則 fp intended-change 驗證抓不到 L0 變化。
 - **禁 crank / 禁死常數 pop 曲線**（design §0）：viability 由工期+地形物理湧現、L0 採集低倍率**單旋鈕**。
 - **感知鐵律**：L0 選址/採集讀腳下 live（proximate 自站處合法、同既有 :4708 establish_crude_camp 讀 team.tile_pos）；跨距目標選擇走 belief（S1b 既有）。
 - **守恆**：L0 採集走既有 harvest chokepoint（不新開生成路）。
@@ -21,7 +22,7 @@ owner: systems（HOW）← design `2026-08-14-settlement-lifecycle-agriculture-d
 - **拆 `establish_crude_camp` → 紮營建 L0**：改為設 `camp_level=1`（**不** set outpost_level、**不** set_owner=真領土宣稱）+ tag 躍遷（定居/流浪界線從 L1 起→**L0 tag 待議**：spec design §2「L0 無居民身分」→ L0 **不**清流亡/不升 PRODUCE tag（勞力池從 L1 起）；team 標 camping 狀態 via tile.camp_level + team.tile_pos 對位）。**拔營無沉沒**：離開/棄置 camp_level→0（無廢墟、地圖自清）。
 - **L0 採集（最低、單旋鈕）**：L0 隊採集讀**腳下 tile 池現量**（既有 harvest 路）、低倍率 `L0_FORAGE_MULT`（單旋鈕 TEST VALUE、禁 pop-curve）；**遊牧循環湧現**=池吃乾→移（再生率只定久留線非產糧公式）。**無**倉/農田/設施/稅/領土。
 - **L0 衰敗**：棄置 `L0_DECAY_DAYS`（TEST VALUE）自動 camp_level→0（物理、cadence tick 掃）。只 L1+ 留廢墟（=S1 可認領鬼城；L0 消失無痕）。
-- **TDD**：①camp_level 欄存在+fingerprint 納②紮營設 camp_level=1 不設 outpost_level（既有 level==0 guard 不誤判）③L0 隊採集腳下池（低倍率、池竭移動）④棄置 L0_DECAY_DAYS 後 camp_level→0 無廢墟⑤L0 不清流亡不升居民 tag（勞力池不含 L0）。
+- **TDD**：①camp_level 欄存在+**顯式納 state_fingerprint**（:119 條件/欄位、L0 變化 fp 可見）②紮營設 camp_level=1 不設 outpost_level（既有 level==0 guard 不誤判）③L0 隊採集腳下池（低倍率、池竭移動）④棄置 L0_DECAY_DAYS 後 camp_level→0 無廢墟⑤L0 不清流亡不升居民 tag（勞力池不含 L0）⑥**★R² 必查項:回歸驗最要害 consumer 不被 L0 誤觸**——`outpost_system.gd` 升級鏈 7 站（446/469/511/638/658/681/745：L0 camp tile 不被當可升級/可建 outpost）+ `state_fingerprint:119`（L0 tile determinism 正確）+ 抽驗 order_system(5)/harvest(2)/need_oracle(2) 代表（L0 不被當市集/採集據點/oracle 據點）。非只驗 faction_ai 既有清單。
 
 ### S2b：建點=L0→L1（數天勞力工期=viability 過濾）
 - **建點動作**：L0（camp_level=1）隊決策「紮根」→ 進 L1 建造工期（`outpost_level 0→1`、數天勞力）；期間 current_task=建設（既有 TASK 或新 camp→L1 transition state）、**不覓食=機會成本**。

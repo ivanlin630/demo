@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² settlement S2(L0營地階梯+L1工期)HOW審·spec=2026-08-15-settlement-S2-L0-camp-ladder-HOW.md·R①免(前提全file:line坐實)·審點:①★前提fact-check負斷言『outpost_level==0全樹=無據點空tile哨兵~10處(need_oracle:42/80/faction_ai:492/505/3293/4010/4119/4178/4213/5022)→L0必用獨立camp_level非level=0』窮盡否漏site否?+『camp_level窮盡零存在』確認否?②★設計:L0=camp_level獨立flag(outpost_level保持0語意正確L0非真據點)——是延伸統一or框架內冗餘(camp_level跟outpost_type/level重疊做重疊事?)③機制意圖對照:mechanism-intents『紮營vs建點』row(露宿免費/L0臨時無倉無居民/L1工期)+『蓋新點戰略三動機非亂蓋』——S2符否?④感知鐵律:L0選址採集讀腳下live(proximate合法同establish_crude_camp:4708)⑤補丁閘:工期中斷用既有busy-preemptible非新gate、establish_crude_camp拆非疊·此slice待R²CLEAN→S2a plan→dispatch(base post-crash main f9bb8283)·地基KEEP"
 ---
 
