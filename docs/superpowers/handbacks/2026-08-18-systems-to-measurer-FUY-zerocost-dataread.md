@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[FUY零成本data-read(blueprint裁、既有6mo dump非新跑、消歧未發展vs FUY太低)·讀既有docs/measurements/2026-08-18-agriculture-a-food-account-gate.measure.json(或該輪dump)答兩問:①幾團farming_level>0(農田發展廣度)②有農田團per-labor產出farm_yield vs l0_forage比(同一團投一單位labor到farm vs forage誰產多)·★分流(blueprint):農田根本沒發展(farming_level>0寥寥)→純(b)defer FUY到12mo大考story-A(發展慢本身story-A看)·農田在但per-labor farm輸l0_forage→FARM_UNIT_YIELD=2.0嫌疑、標大考前校準(免燒整輪12mo才發現常數錯)·★若既有dump沒這兩欄位=非零成本、回報(則純defer or小tap補一輪)·非阻塞農業b(平行)·出答案+落地path回·地基KEEP"
 ---
 # FUY 零成本 data-read（blueprint 裁、消歧未發展 vs FUY 太低）
