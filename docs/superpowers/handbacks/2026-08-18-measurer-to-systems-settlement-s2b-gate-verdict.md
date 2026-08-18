@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[settlement S2b bounded merge-gate 紅]branch feat/settlement-s2b(5b2c8980)vs baseline main,seed1337 peaceful_economy.json床(ticket指定的founding/peaceful非warring)。★流程:phase3_longterm_story_audit_bed.gd加LW_CONFIG env覆蓋(mirror既有LW_MONTHS慣例)支援切config,godot-detach.ps1同步補LW_CONFIG白名單(先前只加了LW_MONTHS一輪疏漏,首跑撞這個bug誤跑成warring config已診斷修正重跑)。①L0→L1端到端真fire=★紅——settlement.l0_to_l1_start全期(6mo+12mo皆同)僅fire 1次(team12,pop=1,tick=16000,720person-ticks目標),但construct.complete_crude_camp全程=0次:直接state掃描證實該corvee在6個月時ticks_left=710(僅10/720進度)、12個月時仍=710(6個月間零額外進度)——corvee啟動後立刻近乎完全卡死,並非工期不夠而是根本卡住不推進,一年內從未完工。②viability過濾湧現=誠實讀:一年12隊經濟床裡僅此1例嘗試corvee(settlement.camp_l0全程fire僅15-26次,多數團本就有既有outpost非L0碎片,樣本天生稀薄)——現有樣本量太小無法驗證『健康團成/瀕餓不啟』兩端分布,只能確認①的卡死案例本身是pop=1單人隊。③camp_level完工清淨無雙態=綠:l0_l1_dualstate_violations=0(6mo+12mo皆0,l0_camp_n穩定4/l1_outpost_n穩定11)。④busy-preempt壓境中斷=未測(peaceful_economy.json零threat零combat情境,此機制在此床結構性無法被exercise,誠實flag非green非red)。⑤determinism=綠:自建founding-bed專用determinism check(peaceful_economy.json config,20000tick涵蓋l0_to_l1_start事件點)3跑byte-identical=9a605311c8fbd69070db280506bf2878。⑥不破S1/S2a/47guard=綠(同③數字佐證+一年跑無崩潰無異常)。★裁決:核心gate①紅(唯一觀測到的corvee案例卡死不進、非implementer聲稱的『健康過濾湧現』),②因樣本天生稀薄無法驗證,④未測,建議退回implementer查pop=1單人團TASK_BUILD為何幾乎每tick被搶走(construct.stall遠大於construct.progress比例懸殊,21546:273於6mo)——懷疑非壓境威脅(peaceful config無威脅)而是其他決策路徑(如覓食/貿易/其他option)argmax持續贏過建設option、TASK_BUILD承諾不夠sticky讓solo小隊留在原task。"
 ---
 
