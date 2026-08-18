@@ -1,0 +1,34 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-18-systems-to-measurer-perf-cut3-quantify.md",
+  "branch": "feat/perf-cut3-alloc",
+  "branch_commit": "79af2ddb",
+  "baseline": "main HEAD (已含刀A _hex_dist static)",
+  "bed": "scripts/debug/perf_cut3_quantify_bed.gd (temp, reverted after use)",
+  "config": "warring_states.json",
+  "seed": 1337,
+  "days": 3,
+  "ticks": 720,
+  "contamination_note": "第一輪4次跑(baseline×2+branch×2)跟agriculture-b的popcap長跑(不同project path但同機器)並行,branch run1顯示114.55s/122.57s明顯偏高——用戶抓到這是背景CPU負載污染,那組數字作廢不用。popcap+mergein-pin長跑全部跑完、機器閒置後,重跑本輪乾淨數字如下。",
+  "runs_clean": {
+    "baseline_run1": { "wall_s": 92.09, "p1_ctx_total_us": 319532842, "p1_selection_pct": 97.6 },
+    "baseline_run2": { "wall_s": 92.85, "p1_ctx_total_us": 322489458, "p1_selection_pct": 97.5 },
+    "branch_run1":   { "wall_s": 97.73, "p1_ctx_total_us": 346858481, "p1_selection_pct": 97.6 },
+    "branch_run2":   { "wall_s": 91.91, "p1_ctx_total_us": 322641932, "p1_selection_pct": 97.5 }
+  },
+  "averages": {
+    "baseline_wall_s": 92.47, "branch_wall_s": 94.82,
+    "baseline_ctx_total_us": 321011150, "branch_ctx_total_us": 334750206.5
+  },
+  "noise_analysis": {
+    "baseline_internal_noise_pct": 0.8,
+    "branch_internal_noise_pct": 6.1,
+    "baseline_vs_branch_wall_delta_pct": 2.5,
+    "baseline_vs_branch_ctx_total_delta_pct": 4.3,
+    "verdict": "觀到的baseline-vs-branch平均差(2.5~4.3%)小於branch自己內部兩跑的噪聲(6.1%)——落在run-noise範圍內,無法把刀3的真實效果從噪聲中分離出來。"
+  },
+  "stop_loss_criterion_applied": {
+    "ticket_criterion": "此刀quantify落run-noise(<同側兩跑波動)→回報perf arc收官banked刀A總gain(不無限追、過度優化=鑽牛角尖)",
+    "result": "TRIGGERED — 差值(2.5~4.3%)<branch內部噪聲(6.1%),按ticket自訂止損準則,建議perf arc在此收官。",
+    "banked_gain": "刀A(_hex_dist static,perf-cut1-quantify輪已驗)~8-13% wall-clock/ctx_total gain,已merge進main,是這個perf arc的真實產出。"
+  }
+}
