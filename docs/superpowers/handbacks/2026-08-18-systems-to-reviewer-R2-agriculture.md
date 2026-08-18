@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² 農業(農田獨立生產線+drift正位+⑥據點放大器)HOW審·spec=2026-08-18-settlement-agriculture-HOW.md·★大經濟改須審·審點:①★前提fact-check(負斷言、我已窮盡no-head):farm_yield chokepoint全樹0處(未建)確認?farming_level唯一產糧用法=resource_system:289 gain*=(1+farming_level×0.5)gather乘數(drift)確認?=mechanism-intents農田row『獨立產糧不經野地池』的code與表不符②★★經濟擾動風險(大改命門):drift正位移除:289 gather乘數→農田tile gather yield掉(farming_level不再boost採集)+新獨立農田生產線→食物從哪來的分佈大變、恐擾既有food-tension校準(FOOD_PER_PERSON 0.8/regen rate/granary)=淨效果安全否?會不會mass-starve or爆倉?(建議gate要求before/after食物帳)③禁crank(命門):農田產出=真物理等級×單位×勞力工位×季節、labor從勞力池抽guns-vs-butter、farming_level升級走既有construction spine真工期真料、非白灌boost④冗餘查:獨立農田線vs既有野地池gather=雙源(不同、intended)非框架冗餘?⑤據點放大器⑥:effective_pop_cap=領導基數×據點結構放大器=genuine據點投資回報非死常數pop曲線?L0不放大(守S2a界線)?⑥守恆:farm_yield chokepoint TileBank.deposit tagged守恆稽核含農業⑦感知鐵律:農業自家據點自家勞力自家糧倉own-state·此slice待R²CLEAN→農業a plan→dispatch(base post-S2b main e38f74d8)·地基KEEP"
 ---
 

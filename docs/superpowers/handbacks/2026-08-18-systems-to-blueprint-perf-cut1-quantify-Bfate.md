@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[perf刀1 quantify結果→你Phase2 owner裁B-fate+刀2序·★gain真實~8-13%(wall/ctx_total)但全來自刀A(_hex_dist static砍FactionAISystem.new()alloc、影響多呼點_estimate_delay/harvest/faction_ai:2409非只terrain finder)·★刀B(memo)0命中:find_nearest_terrain_scan 509=509 baseline==branch、memo_hit=0——warring局frontier每goal查不同terrain、自己call scope內無同(terrain,max_range)二次查=memo從沒機會命中→byte-identical但目前死重量代碼(memo Dict 6th param貫穿_resolve_resource/location_prereq→finder換不到實測效益)·★measure-first示範:Phase1建議B(97.5%主塊)、quantify推翻B、gain在trivial順手A=你quantify每刀%的目的兌現·★★我建議(你裁):①strip刀B保刀A(死重量+YAGNI、未來workload需要再cheap re-add)→乾淨merge刀A gain·②刀2改D(spatial index)非C:measurer證509次O(tiles)全圖掃跨team不共享刀B完全沒降、D降的是這509次單次成本=frontier真路;C(gather de-dup 8+處)另值·correctness已證byte-identical、我hold merge等你裁B-fate+刀2序·與農業a平行·地基KEEP"
 ---
 
