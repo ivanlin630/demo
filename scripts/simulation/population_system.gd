@@ -25,19 +25,9 @@ func check_overflow_for_team(state: WorldState, tid: int) -> void:
 	if not state.teams.has(tid):
 		return
 	var team: TeamData = state.teams[tid]
-	var cap: int
-	# PRODUCE 居民用 outpost cap
-	if team.tags.has(TeamData.TAG_PRODUCE):
-		var fai := FactionAISystem.new()
-		cap = fai._outpost_pop_cap(state, team.tile_pos)
-		if cap == 0:   # 無 outpost 的 PRODUCE 流民，仍用 leader cap fallback
-			var leader = state.persons.get(team.leader_id)
-			var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-			cap = TeamData.pop_cap_from_leadership(cmd)
-	else:
-		var leader = state.persons.get(team.leader_id)
-		var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-		cap = TeamData.pop_cap_from_leadership(cmd)
+	# ★農業b ⑥：effective_pop_cap=領導基數×據點放大器（統一取代 PRODUCE-outpost-table/leader-only 分流；
+	# L0/無據點→放大器×1=領導帽守 S2a 界線；據點發展→承載更多=size matter via 據點 genuine）。
+	var cap: int = FactionAISystem.effective_pop_cap(state, team)
 	var overflow: int = team.population - cap
 	if overflow <= 0:
 		return

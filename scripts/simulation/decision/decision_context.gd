@@ -493,7 +493,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			Probe.bump("absorb.target_found")   # DIAG：有 capacity-bound 弱鄰可吸（finder 非空）
 	# §HOW-8 resource_slack（systems 公式）：空 pop 容量 × 舒適度（≠food_days 餘命；spare 主軸、comfort gate）。
 	var _cmd: float = float(ldr.skills.get("統領", 0.0)) if ldr != null else 0.0
-	var _cap: int = TeamData.pop_cap_from_leadership(_cmd)
+	var _cap: int = FactionAISystem.effective_pop_cap(state, team)
 	var _spare: float = clampf(float(_cap - team.population) / maxf(float(_cap), 1.0), 0.0, 1.0)
 	var _comfort: float = clampf(c.food_days / SLACK_COMFORT_DAYS, 0.0, 1.0)
 	c.resource_slack = _spare * _comfort

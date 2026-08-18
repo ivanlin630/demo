@@ -7148,18 +7148,30 @@ func _test_resident_pop_cap_overflow() -> void:
 	tile.outpost_type = "civilian"
 	tile.outpost_owner = 0
 	state.world.tiles[0] = tile
-	# PRODUCE team pop=30，超過 L1 cap=20
+	# ★農業b ⑥：effective_pop_cap=領導基數×據點放大器。弱領導(0.2)+L1→effective 低→pop30 溢出到 effective。
 	var t := TeamData.new()
 	t.team_id = 0; t.tile_pos = Vector2i(0, 0); _seed_pop(t, 30)
 	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
-	leader.skills = { "統領": 0.9 }   # 統領高,普通 cap 會大,但 PRODUCE 應用 outpost cap=20
+	leader.skills = { "統領": 0.2 }   # 弱領導：base×amp(L1) < 30 → 溢出（⑥ 領導 matter）
 	state.persons[100] = leader; t.leader_id = leader.id
 	state.teams[0] = t
+	var eff: int = FactionAISystem.effective_pop_cap(state, t)
 	var ps := PopulationSystem.new()
 	ps.check_overflow_for_team(state, 0)
-	assert(t.population <= 20, "PRODUCE pop 應降到 outpost cap=20，實際=%d" % t.population)
-	print("Resident Task3 OK (剩 %d)" % t.population)
+	assert(t.population <= eff, "PRODUCE pop 應降到 effective_pop_cap(領導×據點放大器)=%d，實際=%d" % [eff, t.population])
+	# ★對照：強領導(0.9)同 L1 據點→effective 高→pop30 不溢出（好領主×好據點複合放大、⑥ 語意）
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var tile2 := HexTileData.new(); tile2.tile_pos = Vector2i(0,0); tile2.outpost_level = 1
+	tile2.outpost_type = "civilian"; tile2.outpost_owner = 0; s2.world.tiles[0] = tile2
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(0,0); _seed_pop(t2, 30)
+	t2.faction_id = 10; t2.tags = [TeamData.TAG_PRODUCE]
+	var ldr2 := PersonData.new(); ldr2.id = 100; ldr2.skills = {"統領": 0.9}; s2.persons[100] = ldr2; t2.leader_id = 100
+	s2.teams[0] = t2
+	var eff2: int = FactionAISystem.effective_pop_cap(s2, t2)
+	PopulationSystem.new().check_overflow_for_team(s2, 0)
+	assert(eff2 > eff and t2.population == 30, "強領導+據點→effective(%d)>弱(%d)、pop30 不溢出(複合放大)" % [eff2, eff])
+	print("Resident ⑥ pop_cap OK (弱剩 %d/eff %d、強留 30/eff %d)" % [t.population, eff, eff2])
 
 func _test_resident_movement_lock() -> void:
 	print("--- Resident Task4: 居民 movement 鎖定 ---")

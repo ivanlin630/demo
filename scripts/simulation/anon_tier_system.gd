@@ -266,7 +266,7 @@ static func capture_routed_as_captive(state: WorldState, winner: TeamData, retre
 	# guard 餘力 cap（守衛容量；滿則俘不下）
 	var leader = state.persons.get(winner.leader_id) if state != null else null
 	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-	var pop_cap: int = TeamData.pop_cap_from_leadership(cmd)
+	var pop_cap: int = FactionAISystem.effective_pop_cap(state, winner)
 	var budget: int = maxi(pop_cap - winner.population - total_captives(winner), 0)
 	if budget <= 0:
 		return 0
