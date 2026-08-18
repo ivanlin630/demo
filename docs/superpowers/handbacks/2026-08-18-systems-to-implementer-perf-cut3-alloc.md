@@ -7,12 +7,12 @@ topic: "[dispatch perf刀3=alloc-churn sweep(hot-path FactionAISystem.new() find
 
 # dispatch perf 刀3=alloc-churn sweep（hot-path finder 靜態化）
 
-spec=`docs/superpowers/specs/2026-08-18-perf-phase2-cut3-alloc-sweep-HOW.md`（**R²-CLEAN**、reviewer 親重跑 count + 抽驗 _find_own_outpost 純）。base=main `3f40745e`。與農業平行。
+spec=`docs/superpowers/specs/2026-08-18-perf-phase2-cut3-alloc-sweep-HOW.md`（**R²-CLEAN**、reviewer 親重跑 count + 抽驗 `_find_own_outpost` 純）。base=main `3f40745e`。與農業平行。
 
 ## ★核心（刀A 同族）
 hot-path finder（state+team→target、無 instance state）改 **static func** → replace `FactionAISystem.new().<finder>` 為 `FactionAISystem.<finder>` 免 per-call alloc。
-- **scope**：hot 決策路 30 site（options15/goal_resolver7/need_oracle4/decision_context4）、(9×) 最大量優先。
-- **★逐 finder 驗無 instance state**（不碰 _last_site_sig/_last_dispatch_fail、不呼別的 instance method 鏈間接碰 state；reviewer 已驗 _find_own_outpost 純、其餘你逐個查鏈）；某 finder 內部呼 instance method 鏈→順鏈靜態化 or 該 finder 保 new()（不硬拆）。
+- **scope**：hot 決策路 30 site（options15/goal_resolver7/need_oracle4/decision_context4）、`_find_own_outpost`(9×) 最大量優先。
+- **★逐 finder 驗無 instance state**（不碰 `_last_site_sig`/`_last_dispatch_fail`、不呼別的 instance method 鏈間接碰 state；reviewer 已驗 `_find_own_outpost` 純、其餘你逐個查鏈）；某 finder 內部呼 instance method 鏈→順鏈靜態化 or 該 finder 保 new()（不硬拆）。
 - compiler 強制 static 無法碰 instance=編譯期保 statelessness。
 
 ## ★憲法 gate（硬）
@@ -24,4 +24,4 @@ byte-identical 3 跑機器證（同 seed StateFingerprint 精確 match）+ const
 ## TDD
 ①靜態化 finder 呼==原 instance 呼逐 finder 同值 ②hot path 無 FactionAISystem.new()（grep 證、剩 dispatch 類合法）③byte-identical 3 跑 ④constitution。
 
-worktree `feat/perf-cut3-alloc`。完 → handback 附 measurer。地基 KEEP。
+worktree `feat/perf-cut3-alloc`。與農業平行。完 → handback 附 measurer。地基 KEEP。
