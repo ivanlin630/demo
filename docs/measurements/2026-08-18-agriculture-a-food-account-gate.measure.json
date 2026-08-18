@@ -1,0 +1,43 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-18-systems-to-measurer-agriculture-a-gate.md",
+  "branch": "feat/agriculture-a",
+  "branch_commit": "18f40293",
+  "bed": "scripts/debug/phase3_longterm_story_audit_bed.gd (existing persistent fixture, reused unmodified)",
+  "config": "peaceful_economy.json (settled/developed economy, non-warring per ticket requirement)",
+  "seed": 1337,
+  "months": 6,
+  "baseline_dump": "docs/measurements/2026-08-12-phase3-story-audit-seed1337-6mo-peaceful_economy.json (main HEAD)",
+  "branch_dump": ".worktrees/agriculture-a/docs/measurements/2026-08-12-phase3-story-audit-seed1337-6mo-peaceful_economy.json (feat/agriculture-a 18f40293)",
+  "food_production_totals_6mo": {
+    "baseline": { "harvest_intake_vault": 6742.9, "farm_yield": 0.0, "hunt": 1135.8, "l0_forage": 619.2 },
+    "branch":   { "harvest_intake_vault": 3737.2, "farm_yield": 380.2, "hunt": 532.2, "l0_forage": 4452.3 },
+    "note": "harvest_intake_vault dropped -44.6% (drift 正位移除 :289 gather 乘數的預期直接效應)；farm_yield 新增但量小(380.2)；l0_forage 暴增(619.2→4452.3，+619%)——見下方 finding。"
+  },
+  "conservation_pool_6mo": {
+    "baseline": { "t0_grand": 25468.0, "tN_grand": 25785.3, "delta_grand": 317.3 },
+    "branch":   { "t0_grand": 25468.0, "tN_grand": 26453.3, "delta_grand": 985.3 },
+    "note": "t0 相同(同seed)；branch ΔGRAND 較大但為正、無崩塌無爆倉徵象(granary tN=391.8、team_food tN=2200.9 均健康值域，非卡頂)。"
+  },
+  "food_security_6mo": {
+    "baseline": { "start_pop": 72, "end_pop": 61, "attrition_pct": 15.3, "death_starve_anon": 10, "teams_final": 12 },
+    "branch":   { "start_pop": 72, "end_pop": 65, "attrition_pct": 9.7, "death_starve_anon": 5, "teams_final": 14 },
+    "verdict": "無 mass-starve；branch 反而 starve 死亡數更低(5 vs 10)、attrition 更低(9.7% vs 15.3%)——非退化。"
+  },
+  "s1_s2a_s2b_sanity_6mo": {
+    "baseline": { "settlement.camp_l0": 14, "settlement.l0_to_l1_start": 3, "construct.complete_crude_camp": 2, "construct.complete": 17 },
+    "branch":   { "settlement.camp_l0": 12, "settlement.l0_to_l1_start": 2, "construct.complete_crude_camp": 0, "construct.complete": 17 },
+    "verdict": "同量級持續 fire，未見斷點；construct.complete_crude_camp 0 vs 2 屬小樣本(6mo/~12隊)雜訊，非破壞跡象。"
+  },
+  "determinism": {
+    "method": "self-built temp scripts/debug/agri_a_fp_check.gd (peaceful_economy.json, seed1337, 2000 ticks), 3 runs, deleted after use",
+    "branch_fp_3_runs": "7e3465d4686c1eee31b760d87e451ce0 / 7e3465d4686c1eee31b760d87e451ce0 / 7e3465d4686c1eee31b760d87e451ce0",
+    "verdict": "byte-identical 3/3"
+  },
+  "farm_unit_yield_calibration_finding": {
+    "farm_yield_total_6mo": 380.2,
+    "harvest_intake_vault_delta_vs_baseline": -3005.7,
+    "l0_forage_delta_vs_baseline": 3833.1,
+    "interpretation": "farm_yield(380.2) 遠小於 harvest_intake_vault 被移除的量(-3005.7)，總量沒垮是因為 l0_forage 暴增(+3833.1)頂上，不是 farm_yield 頂上——實際補償通路跟 spec 設計意圖(farm production 取代 gather 乘數)不同。這是相關性觀察，非已用 QA story-audit 驗證的因果結論(這輪為省時間跳過 SPECIMEN_* env、沒留 specimen trace)——若 systems 要鎖定『為什麼是 l0_forage 頂而非 farm_yield』的因果故事，需要另開 SPECIMEN_SAMPLE_N 跑一輪餵 QA 讀 motive→action→outcome。純聚合數字本身(mass-starve/pool/determinism)不需要 QA，已經是決定性答案。",
+    "FARM_UNIT_YIELD_verdict": "implementer 拍的 2.0 從純數字角度看可能偏低(farm_yield 對總帳貢獻遠不及被移除的乘數量級)，但因為系統靠 l0_forage 自然補上、沒有 mass-starve/爆倉，這輪數據不構成『必須調高』的硬證據——只構成『farm production 沒有如設計般成為主要補償通路』的觀察，是否要緊由 systems 判斷(spec 意圖 vs 湧現行為的落差是否可接受)。"
+  }
+}
