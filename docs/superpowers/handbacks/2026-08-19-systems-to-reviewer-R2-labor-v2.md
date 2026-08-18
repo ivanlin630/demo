@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² labor-slice v2(食物真邊際分配+farm production解耦+估算器、v1 FAIL後全鏈重做)HOW審·spec=2026-08-19-labor-marginal-food-alloc-v2-HOW.md(v1 SUPERSEDED)·R①免(前提v1 FAIL+level-cancellation formula驗坐實)·★審點:①★level-decouple正確性(v2命門):現fyield=level×FUY×flabor×harvest、flabor=fill×SCALE=alloc/(level×K_FARM)→level分子分母相消labor-starved level-independent確認?v2解耦=demand[farm]=level×K_FARM只作alloc capacity cap不除進production、production=alloc×per-labor-yield(level×FUY×harvest level生效)→production∝level×alloc正確?magnitude不爆(FARM_UNIT_YIELD 2.0正規化守)?②T1真邊際:食物組合併food_need(double-count keep)+組內per-labor yield分配labor流向高者、farm cap=level×K_FARM=真邊際非優先序常數?③禁crank yields真公式④感知鐵律own-tile/own-state無god-view⑤T2 gather產出對稱不受破⑥T3估算器==production同源⑦補丁閘:解耦=移雙計level非貼補丁(demand饱和blueprint已否)·gate:production隨level真升(核心治level-cancellation)+share+B5瀕餓食勞力飆+動員照抽+守恆+fill%診斷非gate·★under-scope兩次教訓、這次全鏈(分配+產出+信念)一致、你特查有無漏第三處未跟上的level依賴·待R²CLEAN→dispatch·地基KEEP"
 ---
 # R² labor-slice v2（食物真邊際分配 + farm production 解耦 + 估算器）HOW 審
