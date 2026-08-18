@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: agriculture-b-perf-interim-churn-finding
 ---
 
