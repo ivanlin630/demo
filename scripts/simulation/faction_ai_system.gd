@@ -2406,7 +2406,7 @@ static func consolidate_target_of(state: WorldState, mt: TeamData, f) -> int:
 		if small_b and small_c:
 			return absorber_id
 	if "攻擊" in f.goals and leader_team != null:
-		var d: int = fai._hex_dist(mt.tile_pos, leader_team.tile_pos)
+		var d: int = _hex_dist(mt.tile_pos, leader_team.tile_pos)   # ★perf cut1 A：static（unqualified self-call）
 		if d > 1 and d <= CONSOLIDATE_MAX_DIST:
 			var ldr_leader = state.persons.get(leader_team.leader_id)
 			var ldr_cmd: float = float(ldr_leader.skills.get("統領", 0.0)) if ldr_leader else 0.0
@@ -3347,7 +3347,7 @@ func _calc_own_armed(state: WorldState, team: TeamData) -> int:
 	var anon_pop: int    = maxi(team.population - named_count, 0)
 	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)
 
-func _hex_dist(a: Vector2i, b: Vector2i) -> int:
+static func _hex_dist(a: Vector2i, b: Vector2i) -> int:   # ★perf cut1 A：純算術零 instance state → static（免 per-call FactionAISystem.new() alloc）
 	var dx := b.x - a.x
 	var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2

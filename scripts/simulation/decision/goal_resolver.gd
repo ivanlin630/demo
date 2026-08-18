@@ -80,6 +80,7 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 		return []   # harness 無 state/team → 無 goal frontier（安全）
 	var out: Array = []
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var frontier_memo: Dictionary = {}   # ★perf cut1 B：call-scoped terrain-tile memo（team.tile_pos 當下固定、同 terrain 多 goal 免重掃全圖）；返回即棄禁跨 tick
 	for g in team.goal_state:
 		if String(g.get("status", "")) != "active":
 			continue
@@ -98,9 +99,9 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 			var kind: String = String(prereq.get("kind", ""))
 			var cand: Dictionary = {}
 			if kind == GoalRegistry.PREREQ_RESOURCE:
-				cand = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, prereq)   # S2 買 + S3 採@地形
+				cand = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, prereq, frontier_memo)   # S2 買 + S3 採@地形
 			elif kind == GoalRegistry.PREREQ_LOCATION:
-				cand = _resolve_location_prereq(state, team, ctx, g, gt, payoff, prereq)   # S3 定位型
+				cand = _resolve_location_prereq(state, team, ctx, g, gt, payoff, prereq, frontier_memo)   # S3 定位型
 			# manpower/facility/subgoal = S4-S6（無 candidate，stub 邊界）
 			if not cand.is_empty():
 				out.append(cand)
@@ -387,7 +388,7 @@ const SEEK_TILE_RANGE: int = 30   # TEST VALUE — belief-reachable 上界（bou
 const RES_HARVEST_TERRAIN: Dictionary = {"material": "forest"}
 
 static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: DecisionContext,
-		g: Dictionary, gt: String, payoff: float, prereq: Dictionary) -> Dictionary:
+		g: Dictionary, gt: String, payoff: float, prereq: Dictionary, memo: Dictionary = {}) -> Dictionary:
 	var res: String = String(prereq.get("res", ""))
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 組件 E 泛化：qty 走通用 need_keep（任 res）。
@@ -408,7 +409,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 			return {}   # ★閉環完成:已有該地形 outpost → 採 satisfied（既有 harvest 供給）
 		# ★A1 founding：缺料+無該地形 outpost → 派子隊到最近該地形 tile 建 civilian outpost（複用 _dispatch_builder consumer）。
 		# 移除舊 in-place TASK_BUILD + TASK_MIGRATE frontier（TASK_BUILD 無 consumer=死路;founding 本質派子隊,合 WHAT §4）。
-		var pos: Vector2i = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)   # 純地形=公共地理
+		var pos: Vector2i = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE, memo)   # 純地形=公共地理（★cut1 B call-scoped memo）
 		# ★A1 裁③：remote forest founding（異格）→ 派子隊（子隊真移動→抵達→建，正常）。
 		# ★裁② guard：pos == team.tile_pos（隊已站該地形）= same-tile founding，無母隊就地 outpost-build 路 → 靜默（followup）。
 		if pos != Vector2i(-1, -1) and pos != team.tile_pos:
@@ -418,7 +419,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 
 # ★S3 定位型前置 handler（組件 C）：{kind:location, terrain, control?}。查隊在/有滿足 tile，未滿→tile frontier candidate。
 static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: DecisionContext,
-		g: Dictionary, gt: String, payoff: float, prereq: Dictionary) -> Dictionary:
+		g: Dictionary, gt: String, payoff: float, prereq: Dictionary, memo: Dictionary = {}) -> Dictionary:
 	var terrain: String = String(prereq.get("terrain", ""))
 	var need_control: bool = bool(prereq.get("control", false))
 	# 已滿？隊在/擁有滿足條件 tile（own outpost terrain match）。
@@ -433,7 +434,7 @@ static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: Dec
 		pos = find_nearest_known_tile(state, team, terrain)
 	else:
 		# (i) 純地形/物理地理 → 公共知識全圖掃（# gate-ok）
-		pos = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)
+		pos = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE, memo)   # ★cut1 B call-scoped memo
 	if pos == Vector2i(-1, -1):
 		return {}
 	return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
@@ -466,20 +467,26 @@ static func _mk_delegate_candidate(team: TeamData, g: Dictionary, gt: String, fr
 
 # ★must-fix②(i) 純地形/物理地理查詢（公共知識 legit）→ 全圖掃標 # gate-ok（比照 constitution_gate:41）。
 # belief-reachable=bounded hex dist（非全知 PathSystem live）。決定性 tie-break tile_id。零 randf。
-static func find_nearest_terrain_tile(state: WorldState, team: TeamData, terrain: String, max_range: int) -> Vector2i:
+static func find_nearest_terrain_tile(state: WorldState, team: TeamData, terrain: String, max_range: int, memo: Dictionary = {}) -> Vector2i:
+	# ★perf cut1 B：call-scoped memo（frontier_candidates 傳入 local Dict、team.tile_pos 當下固定→同 team 多 goal
+	#   查同 (terrain,max_range) 全圖只掃 1 次、後續命中）。byte-identical by construction（deterministic 同輸出）。
+	#   ★嚴格 call-scoped⊂tick：memo 為 frontier local、返回即棄、禁跨 tick cache。default {} → 無 memo 獨立呼點照原掃。
+	var mkey: String = terrain + ":" + str(max_range)
+	if memo.has(mkey):
+		return memo[mkey]
 	var best: Vector2i = Vector2i(-1, -1)
 	var best_d: int = 1 << 30
 	var best_id: int = 1 << 30
-	var fai := FactionAISystem.new()
 	for tid in state.world.tiles:   # gate-ok: 地理=公共知識（terrain 靜態物理地理非動態所有權，比照 constitution_gate:41 市集地理先例）
 		var t: HexTileData = state.world.tiles[tid]
 		if t == null or (terrain != "" and t.terrain != terrain):
 			continue
-		var d: int = fai._hex_dist(team.tile_pos, t.tile_pos)
+		var d: int = FactionAISystem._hex_dist(team.tile_pos, t.tile_pos)   # ★perf cut1 A：static（免 fai alloc）
 		if d > max_range:
 			continue   # belief-reachable bounded（非全知 PathSystem）
 		if d < best_d or (d == best_d and int(tid) < best_id):
 			best_d = d; best_id = int(tid); best = t.tile_pos
+	memo[mkey] = best
 	return best
 
 # ★must-fix②(ii) 所有權/control 動態查詢（踩 invariants:192 市集判例）→ 讀 team_tile_known belief（禁全圖 god-view）。
@@ -490,12 +497,11 @@ static func find_nearest_known_tile(state: WorldState, team: TeamData, terrain: 
 	var best: Vector2i = Vector2i(-1, -1)
 	var best_d: int = 1 << 30
 	var best_id: int = 1 << 30
-	var fai := FactionAISystem.new()
 	for tid in known:   # 只掃 belief store（已發現 tile，非全圖）→ 無 god-view
 		var t: HexTileData = state.world.tiles.get(tid)
 		if t == null or (terrain != "" and t.terrain != terrain):
 			continue
-		var d: int = fai._hex_dist(team.tile_pos, t.tile_pos)
+		var d: int = FactionAISystem._hex_dist(team.tile_pos, t.tile_pos)   # ★perf cut1 A：static（免 fai alloc）
 		if d < best_d or (d == best_d and int(tid) < best_id):
 			best_d = d; best_id = int(tid); best = t.tile_pos
 	return best
@@ -508,7 +514,7 @@ static func _harvest_tile_known(state: WorldState, team: TeamData) -> void:
 	for dx in range(-vr, vr + 1):   # bounded=vision（非全圖 god-view）
 		for dy in range(-vr, vr + 1):
 			var p: Vector2i = team.tile_pos + Vector2i(dx, dy)
-			if fai._hex_dist(team.tile_pos, p) > vr:
+			if FactionAISystem._hex_dist(team.tile_pos, p) > vr:   # ★perf cut1 A：static
 				continue
 			var tid: int = p.x * 1000 + p.y
 			if state.world.tiles.has(tid):
@@ -531,7 +537,7 @@ static func _estimate_delay_days(team: TeamData, to_task: Dictionary) -> float:
 	var days: float = 0.0
 	var target = to_task.get("target", Vector2i(-1, -1))
 	if team != null and target is Vector2i and target != Vector2i(-1, -1) and target != team.tile_pos:
-		days += float(FactionAISystem.new()._hex_dist(team.tile_pos, target)) / MOVE_TILES_PER_DAY
+		days += float(FactionAISystem._hex_dist(team.tile_pos, target)) / MOVE_TILES_PER_DAY   # ★perf cut1 A：static（免 per-candidate .new() alloc）
 	var task: String = String(to_task.get("task", ""))
 	# ★A1:founding(build_type)/facility 委派亦含 build 工期（雖不發 TASK_BUILD，仍派子隊施工）。
 	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE \
