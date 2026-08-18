@@ -26,9 +26,10 @@ extends SceneTree
 #   create_team 後各加 spawn.solo_exile/spawn.overflow_split/spawn.captive_breakaway/spawn.unrest_split。
 
 const WORLD_SEED: int = 1337
-const CONFIG_PATH := "res://config/warring_states.json"
+const CONFIG_PATH_DEFAULT := "res://config/warring_states.json"
 
 func _initialize() -> void:
+	var config_path: String = OS.get_environment("LW_CONFIG") if OS.has_environment("LW_CONFIG") else CONFIG_PATH_DEFAULT
 	var months: int = int(OS.get_environment("LW_MONTHS")) if OS.has_environment("LW_MONTHS") else 12
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	print("=== ③長期故事驗證(seed=%d %d月 ticks=%d) ===" % [WORLD_SEED, months, total_ticks])
@@ -46,7 +47,7 @@ func _initialize() -> void:
 	FactionAISystem._a2b_remote_tribute_payers.clear()
 	var state := WorldState.new()
 	var runner := SimRunner.new()
-	var config: Dictionary = GameSetup.load_config(CONFIG_PATH)
+	var config: Dictionary = GameSetup.load_config(config_path)
 	config["seed"] = WORLD_SEED
 	GameSetup.setup(state, config)
 
@@ -110,6 +111,7 @@ func _initialize() -> void:
 		"a2.invite_range_pass", "a2.invite_accept", "a2.invite_reject", "a2.invite_task_settle_set",
 		"a2.convert_via_subteam_arrival", "a2.convert_via_pair_interaction",
 		"worldgen.build_outpost", "convert_via_settle", "settlement.camp_l0",
+		"settlement.l0_to_l1_start", "construct.complete_crude_camp", "construct.complete",
 		# try_set共根diagnostic(2026-08-13,measurer):A2 invite_settle + A3 unified建設(TASK_BUILD) return-false分歸因。
 		"tryset.blocked_combat_lock", "tryset.blocked_crisis_immune", "tryset.blocked_persist_hold",
 		"tryset.blocked_final_priority_lower", "tryset.blocked_final_equal_priority_source_gated",
@@ -245,10 +247,12 @@ func _initialize() -> void:
 	print("  watchdog_hits=%d encounter_ever_active=%s combat.end_*=%s" % [
 		watchdog_hits, str(encounter_ever_active), str(combat_end_breakdown)])
 	Probe.enabled = false
-	var f := FileAccess.open("res://docs/measurements/2026-08-12-phase3-story-audit-seed%d-%dmo.json" % [WORLD_SEED, months], FileAccess.WRITE)
+	var config_tag: String = "" if config_path == CONFIG_PATH_DEFAULT else "-" + config_path.get_file().get_basename()
+	var out_path: String = "res://docs/measurements/2026-08-12-phase3-story-audit-seed%d-%dmo%s.json" % [WORLD_SEED, months, config_tag]
+	var f := FileAccess.open(out_path, FileAccess.WRITE)
 	if f != null:
 		f.store_string(JSON.stringify(dump, "  ")); f.close()
-		print("\n[dump] → res://docs/measurements/2026-08-12-phase3-story-audit-seed%d-%dmo.json" % [WORLD_SEED, months])
+		print("\n[dump] → %s" % out_path)
 	SpecimenDumpHelper.dump(state, "res://docs/measurements/2026-08-12-phase3-story-audit-seed%d-%dmo.specimen.jsonl" % [WORLD_SEED, months])
 	print("=== DONE ===")
 	quit()
