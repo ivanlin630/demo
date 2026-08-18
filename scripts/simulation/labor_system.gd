@@ -59,7 +59,7 @@ static func rebalance(state: WorldState, tile: HexTileData) -> void:
 	var wgt: Dictionary = {}
 	var total_w: float = 0.0
 	for k in keys:
-		var w: float = _workstation_need(state, teams, String(k))
+		var w: float = _workstation_need(state, teams, String(k), tile)
 		wgt[k] = w; total_w += w
 	# 需求加權比例 + demand-cap + 溢出串聯（iterate 到穩，固定上限）。
 	var alloc: Dictionary = {}
@@ -94,7 +94,11 @@ static func rebalance(state: WorldState, tile: HexTileData) -> void:
 	tile.labor_alloc = out
 	tile.labor_eval_next_tick = state.world.current_tick + LABOR_CADENCE
 
-static func _workstation_need(state: WorldState, teams: Array, key: String) -> float:
+static func _workstation_need(state: WorldState, teams: Array, key: String, tile: HexTileData) -> float:
+	# ★labor-slice T1 食物工位邊際分配：食物組(gather:food + farm)合併 need-weight=food_need(單一非拆兩份
+	# 重複計、跨資源 food-vs-material 不變)、組內按 per-labor yield 比例分(farm 發展好高 yield_f 自然拿多=治斷崖)。
+	if key == "gather:food" or key == "farm":
+		return _food_group_need(state, teams, key, tile)
 	var w: float = 0.0
 	if key.begins_with("gather:"):
 		var res: String = key.substr(7)
@@ -108,12 +112,26 @@ static func _workstation_need(state: WorldState, teams: Array, key: String) -> f
 			for t in teams:
 				var lv: Dictionary = TradeValuation.leader_vals(state, t)
 				w += NeedOracle.need_keep(state, t, res, lv) + NeedOracle.demand(state, t, res, lv)
-	elif key == "farm":
-		# ★農業a：農田工位 need=food need（farm 產 food，同 gather:food 的 need 權重法）。
-		for t in teams:
-			var lv: Dictionary = TradeValuation.leader_vals(state, t)
-			w += NeedOracle.need_keep(state, t, "food", lv) + NeedOracle.demand(state, t, "food", lv)
 	return w
+
+# ★T1：食物組 per-labor yield 比例分。food_need(單一)×yield_g/(yg+yf) or yield_f/(yg+yf)。純算術零 randf。
+# yield_g=productivity×COLLECT_RATE(own-tile)、yield_f=farming_level×FARM_UNIT_YIELD×harvest_factor(own-tile)。
+static func _food_group_need(state: WorldState, teams: Array, key: String, tile: HexTileData) -> float:
+	var food_need: float = 0.0
+	for t in teams:
+		var lv: Dictionary = TradeValuation.leader_vals(state, t)
+		food_need += NeedOracle.need_keep(state, t, "food", lv) + NeedOracle.demand(state, t, "food", lv)
+	if food_need <= 0.0:
+		return 0.0
+	var yield_g: float = tile.productivity * ResourceSystem.COLLECT_RATE
+	var yield_f: float = float(tile.farming_level) * ResourceSystem.FARM_UNIT_YIELD * tile.harvest_factor
+	var denom: float = yield_g + yield_f
+	if denom <= 0.0:
+		# 無 yield → 全歸 gather（farm 工位僅 farming_level>0 存在；此為退化守衛）
+		return food_need if key == "gather:food" else 0.0
+	if key == "gather:food":
+		return food_need * yield_g / denom
+	return food_need * yield_f / denom   # farm
 
 # labor_mult(tile, workstation_key) = fill × LABOR_SCALE（取代 pop_mult；fill∈[0,1] 乘 SCALE 還原量級）。
 # 未分配(w=0/工位不存在)→0（need-driven：不需要的工位無勞力）。

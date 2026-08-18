@@ -43,5 +43,10 @@ static func _sustainable_inflow(state: WorldState, team: TeamData) -> float:
 	var pop_mult: float = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
 	var leader = state.persons.get(team.leader_id)
 	var prod_skill: float = float(leader.skills.get("生產", 0.0)) if leader != null else 0.0
-	var farming_bonus: float = 1.0 + float(tile.farming_level) * 0.5
-	return sustainable * outpost_mult * pop_mult * farming_bonus * (1.0 + prod_skill * 0.3)
+	# ★labor-slice T2 估算器 coherence：移 farming_bonus(1+farming×0.5 乘性 gather-boost drift、農業a 已從
+	# gather 移除、估算器同步移)、改加項 farm_yield_contribution=獨立農田線(estimator==allocation 同 per-labor 物理源)。
+	# ★勞力飽和因子 labor_mult(farm)=fill×SCALE：labor-starved 時 farm ROI 誠實變低(own-tile labor_alloc、感知鐵律 self)。
+	var gather_inflow: float = sustainable * outpost_mult * pop_mult * (1.0 + prod_skill * 0.3)
+	var farm_fill: float = LaborSystem.labor_mult(tile, "farm")   # fill×SCALE、無 alloc→0(誠實:未分勞力=未產)
+	var farm_contribution: float = float(tile.farming_level) * ResourceSystem.FARM_UNIT_YIELD * tile.harvest_factor * farm_fill
+	return gather_inflow + farm_contribution
