@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: perf-cut2-D-quantify-verdict
 ---
 
