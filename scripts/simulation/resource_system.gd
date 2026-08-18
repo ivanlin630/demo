@@ -103,6 +103,11 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 		# farm_yield chokepoint（TileBank.deposit 守恆稽核含農業）。感知鐵律：自家據點/勞力/糧倉 own-state。
 		if tile.farming_level > 0 and tile.outpost_owner == team.team_id:
 			var flabor: float = LaborSystem.labor_mult(tile, "farm")   # 勞力池分配給農田工位（fill×SCALE、與 gather/mfg 競爭）
+			if Probe.enabled:   # ★TEMP measurer diag（FUY-perteam-farmlabor、用完revert）：per-team飽和度+pop+level取樣
+				Probe.add_amount("diag.pt_flabor_sum." + str(team.team_id), flabor)
+				Probe.bump("diag.pt_flabor_n." + str(team.team_id))
+				Probe.note("diag.pt_pop." + str(team.team_id), float(team.population))
+				Probe.note("diag.pt_level." + str(team.team_id), float(tile.farming_level))
 			var fyield: float = float(tile.farming_level) * FARM_UNIT_YIELD * flabor * tile.harvest_factor * day_fraction
 			if fyield > 0.0:
 				TileBank.deposit(tile, "food", fyield, "farm_yield")
