@@ -1,0 +1,55 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-18-systems-to-measurer-perf-cut1-quantify.md",
+  "branch": "feat/perf-cut1",
+  "branch_commit": "b0d40ce1",
+  "bed": "scripts/debug/perf_cut1_quantify_bed.gd (temp, reverted after use)",
+  "config": "warring_states.json",
+  "seed": 1337,
+  "days": 3,
+  "ticks": 720,
+  "runs": {
+    "baseline_main": {
+      "wall_s": 109.17,
+      "p1_ctx_total_us": 381513208,
+      "p1_selection_us": 371995678,
+      "p1_selection_pct": 97.5,
+      "p1_candidate_gen_us": 1599103,
+      "p1_candidate_gen_pct": 0.4,
+      "p1_scoring_us": 3212692,
+      "p1_scoring_pct": 0.8,
+      "find_nearest_terrain_scan_calls": 509
+    },
+    "branch_run1": {
+      "wall_s": 94.38,
+      "p1_ctx_total_us": 330816995,
+      "p1_selection_us": 322573068,
+      "p1_selection_pct": 97.5,
+      "p1_candidate_gen_us": 1425262,
+      "p1_candidate_gen_pct": 0.4,
+      "p1_scoring_us": 2939913,
+      "p1_scoring_pct": 0.9,
+      "find_nearest_terrain_scan_calls": 509
+    },
+    "branch_run2_with_memo_hit_print": {
+      "wall_s": 100.65,
+      "p1_ctx_total_us": 356232720,
+      "p1_selection_us": 347424868,
+      "p1_selection_pct": 97.5,
+      "p1_candidate_gen_us": 1546268,
+      "p1_candidate_gen_pct": 0.4,
+      "p1_scoring_us": 3152305,
+      "p1_scoring_pct": 0.9,
+      "find_nearest_terrain_scan_calls": 509,
+      "find_nearest_terrain_memo_hit": 0
+    }
+  },
+  "run_to_run_noise_note": "branch wall 94.38s vs 100.65s (~6% variance between two branch runs, same seed/config/ticks) — cross-run comparisons should be read as ranges, not single-point deltas.",
+  "findings": {
+    "wall_clock_delta_vs_baseline": "-7.8% to -13.5% (range across the two branch runs, noise included)",
+    "ctx_total_delta_vs_baseline": "-6.6% to -13.3%",
+    "p1_selection_pct_of_ctx_total": "unchanged, 97.5% both baseline and branch — cut1 did not shift the relative stage breakdown",
+    "find_nearest_terrain_scan_calls": "509 == 509, byte-identical count baseline vs branch",
+    "find_nearest_terrain_memo_hit": "0 — memo (Cut B) produced zero cache hits in this fixture",
+    "attribution": "the observed wall-clock/ctx_total reduction is attributable to Cut A (_hex_dist made static, removes per-call .new() allocation across multiple call sites: find_nearest_terrain_tile, _estimate_delay_days, _harvest_tile_known, faction_ai_system.gd:2409), not Cut B (the find_nearest_terrain_tile call-scoped memo). In this 3-day warring_states workload, no frontier_candidates() call ever requests the same (terrain,max_range) key twice within its own call scope, so the memo never gets an opportunity to hit."
+  }
+}
