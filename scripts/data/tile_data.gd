@@ -13,6 +13,12 @@ var occupied_by: int = -1
 var outpost_type: String = ""       # "" | "civilian" | "military"
 var outpost_level: int = 0          # 0=無, 1/2/3
 var outpost_owner: int = -1         # team_id
+# ★settlement S2a：L0 營地階梯——獨立 flag，非 outpost_level=0（全樹 47 站把 level==0 當空 tile 哨兵）。
+# L0=transient shelter：無倉/設施/領土/居民身分（outpost_level 保持 0）。camp_level 0=無、1=L0。
+# camp_ticks_left：棄置衰敗計時（forage 時 reset=full、regenerate_tiles 每日遞減；<=0→camp_level=0 無廢墟）。
+# ★兩欄皆納 state_fingerprint（determinism；同 construction_ticks_left 慣例）。
+var camp_level: int = 0
+var camp_ticks_left: int = 0
 # ★資訊網 bootstrap-fix 界⑤：隱匿據點旗（一行前瞻 stub、現恆 false=公告名冊；名冊 fallback filter not outpost_hidden）。
 # 對抗資訊戰層（parked）將來令首領設 true=秘密據點不上組織名冊。現不加功能。
 var outpost_hidden: bool = false

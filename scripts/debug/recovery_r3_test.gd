@@ -199,9 +199,11 @@ func _test_relocate_full_pipeline() -> void:
 	var resettled: int = int(Probe.counts.get("relocate.resettled", 0))
 	var v_now: TeamData = state.teams.get(1)
 	var at_target: bool = v_now != null and v_now.tile_pos == target
-	var new_outpost: bool = tt.outpost_owner == 1
-	_ok(abandoned > 0 and resettled > 0 and at_target and new_outpost and origin_tile.outpost_owner == -1,
-		"★全 pipeline：棄爛地(abandoned=%d、原 owner→-1)→travel 抵好地(at_target=%s)→establish 落腳(resettled=%d、新 owner=村)＝真完成遷(非只決策 fire)" % [abandoned, str(at_target), resettled])
+	# ★S2a：establish_crude_camp 現建 L0（camp_level=1、不 set_owner）；L1 owned 據點=S2b 工期後。
+	# 落腳 landing 判準改 camp_level（resettle 抵好地立 L0 營地=真完成遷；L1 領土宣稱 S2b 恢復）。
+	var new_camp: bool = tt.camp_level == 1
+	_ok(abandoned > 0 and resettled > 0 and at_target and new_camp and origin_tile.outpost_owner == -1,
+		"★全 pipeline：棄爛地(abandoned=%d、原 owner→-1)→travel 抵好地(at_target=%s)→establish 落腳 L0(resettled=%d、camp_level=1)＝真完成遷(非只決策 fire；L1=S2b)" % [abandoned, str(at_target), resettled])
 
 # ★★★自然觸發全 pipeline（②驗執行端、非 hand-call _begin）：advance_tick 中決策層(領主令/村自願)真觸發遷村→執行完成。
 func _test_relocate_natural_pipeline() -> void:

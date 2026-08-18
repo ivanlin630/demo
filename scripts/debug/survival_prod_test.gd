@@ -17,17 +17,19 @@ func _mk_team(food: float, anon: int) -> Array:
 	return [state, t]
 
 func _initialize() -> void:
-	print("=== B4：settle/紮營落腳 → 同 tick labor cache 刷、採糧非硬零 ===")
+	print("=== B4(S2a 訂正)：紮營→L0、L0 採腳下池同 tick 非硬零（L1 labor cache=S2b 工期後）===")
 	var a := _mk_team(0.0, 6)
 	var state: WorldState = a[0]; var team: TeamData = a[1]
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(5,5); tile.terrain = "plains"
 	tile.resources["food"] = 50.0; tile.resource_cap["food"] = 100.0
-	tile.labor_eval_next_tick = 999999   # cache 假 fresh（若不刷則 gather:food 恆 0）
 	state.world.tiles[5005] = tile
 	var ok: bool = FactionAISystem.new().establish_crude_camp(state, team)
-	_ok(ok, "establish_crude_camp 成功")
-	_ok(LaborSystem.labor_mult(tile, "gather:food") > 0.0,
-		"★同 tick labor_mult(gather:food)=%.3f>0（settle 即刷 cache、非等 3 天硬零）" % LaborSystem.labor_mult(tile, "gather:food"))
+	# ★S2a：紮營=L0（camp_level=1、不設 outpost_level、不入勞力池）。L1 據點/居民勞力=S2b 工期後。
+	_ok(ok and tile.camp_level == 1, "紮營 → L0 camp_level=1")
+	_ok(tile.outpost_level == 0, "L0 不設 outpost_level（勞力/居民身分從 L1 起=S2b）")
+	ResourceSystem.new().collect_resources(state, [1], WorldState.TICKS_PER_DAY)
+	_ok(float(team.resources.get("food", 0)) > 0.0,
+		"★L0 採腳下池同 tick 非硬零（food=%.2f、直採池非經 labor cache）" % float(team.resources.get("food", 0)))
 
 	print("=== B5：food need 隨飢餓升 bounded 兩象限（NeedOracle 單點）===")
 	var lv := {}

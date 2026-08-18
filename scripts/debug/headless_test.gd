@@ -6735,7 +6735,7 @@ func _test_find_unowned_farmable() -> void:
 	print("find unowned farmable OK")
 
 func _test_crude_camp() -> void:
-	print("--- 即時 crude camp ---")
+	print("--- 紮營 L0 (settlement S2a) ---")
 	var fai := FactionAISystem.new()
 	var state := WorldState.new(); state.world = WorldData.new()
 	var tile := HexTileData.new()
@@ -6743,35 +6743,33 @@ func _test_crude_camp() -> void:
 	tile.outpost_owner = -1; tile.outpost_level = 0
 	tile.resource_cap = {"food": 50.0}
 	state.world.tiles[tile.tile_id] = tile
-	# 和平流民 leader → 民營 + 生產 tag
 	var peaceful := PersonData.new(); peaceful.id = 0; peaceful.team_id = 0
 	peaceful.values = {"好戰": 0.2, "野心": 0.5, "求生欲": 0.9}
 	state.persons[0] = peaceful
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
-	_seed_pop(team, 3); team.resources = {"material": 0}; team.tags = ["流亡"]   # 流民無建材、流亡身分
+	_seed_pop(team, 3); team.resources = {"material": 0}; team.tags = ["流亡"]
 	state.teams[0] = team
 	var ok: bool = fai.establish_crude_camp(state, team)
-	assert(ok, "無主可農地應能立 crude camp（免建材）")
-	assert(tile.outpost_level == 1 and tile.outpost_owner == 0, "tile 應成 team0 L1")
-	assert(tile.outpost_type == "civilian", "和平流民 → 民營")
-	assert(team.tags.has("生產") and not team.tags.has("流亡"), "和平流民紮營 → 升生產、清流亡")
-	assert(float(tile.resource_cap.get("food", 0)) >= 50.0, "食物 cap 不降")
-	assert(not fai.establish_crude_camp(state, team), "已佔格不可再立")
-	# 好戰 leader → 軍營 + 軍隊 tag（不一律生產）
-	var tile2 := HexTileData.new()
-	tile2.tile_id = 5*1000+4; tile2.tile_pos = Vector2i(5,4); tile2.terrain = "plains"
-	tile2.outpost_owner = -1; tile2.outpost_level = 0; tile2.resource_cap = {"food": 50.0}
-	state.world.tiles[tile2.tile_id] = tile2
-	var raider := PersonData.new(); raider.id = 1000; raider.team_id = 1
-	raider.values = {"好戰": 0.9, "野心": 0.8, "殘忍": 0.7}
-	state.persons[1000] = raider
+	# ★S2a：紮營=L0（transient shelter）——camp_level=1、outpost_level 保持 0、不 set_owner、不改 tag。
+	assert(ok, "無主可農地應能立 L0 營地")
+	assert(tile.camp_level == 1, "tile camp_level=1（L0）")
+	assert(tile.outpost_level == 0, "L0 不設 outpost_level（不觸 level==0 空 tile 哨兵）")
+	assert(tile.outpost_owner == -1, "L0 不 set_owner（無領土宣稱）")
+	assert(tile.camp_ticks_left == ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY, "L0 衰敗計時起算")
+	assert(team.tags.has("流亡"), "L0 不清流亡（居民身分從 L1 起）")
+	assert(not team.tags.has("生產") and not team.tags.has("軍隊"), "L0 不升居民 tag（勞力池從 L1 起）")
+	assert(not fai.establish_crude_camp(state, team), "已有 camp 不可再立（camp_level guard）")
+	# 第二隊：L0 無 leader-values 分軍/民之別（L0 無 outpost_type）
 	var t2 := TeamData.new(); t2.team_id = 1; t2.leader_id = 1000; t2.tile_pos = Vector2i(5,4)
 	t2.tags = ["流亡"]
+	var tile2 := HexTileData.new()
+	tile2.tile_id = 5*1000+4; tile2.tile_pos = Vector2i(5,4); tile2.terrain = "plains"
+	tile2.outpost_owner = -1; tile2.outpost_level = 0
+	state.world.tiles[tile2.tile_id] = tile2
 	state.teams[1] = t2
-	fai.establish_crude_camp(state, t2)
-	assert(tile2.outpost_type == "military", "好戰流民 → 軍營")
-	assert(t2.tags.has("軍隊"), "好戰流民紮營 → 升軍隊（非一律生產）")
-	print("crude camp OK")
+	assert(fai.establish_crude_camp(state, t2), "第二隊亦能立 L0")
+	assert(tile2.camp_level == 1 and tile2.outpost_level == 0 and tile2.outpost_owner == -1, "L0 一致（無軍/民 type、無 owner）")
+	print("crude camp L0 OK")
 
 # W4: NPC TASK_TRAIN 累積 exp 後應實際升階（training_system 補 try_promote caller）
 func _test_npc_promote_via_training() -> void:
@@ -15649,8 +15647,9 @@ func _test_p2a_camp_arrival() -> void:
 	t.task_priority = TaskArbiter.PRIO_DISPATCH
 	fa._evaluate_survival(state, t)
 	var tile: HexTileData = state.world.tiles.get(1*1000 + 1)
-	assert(tile.outpost_owner == t.team_id, "[p2a] unified 隊 camp 到達未立營（W1 hoist 失敗）owner=%d" % tile.outpost_owner)
-	print("[p2a] camp arrival hoist OK")
+	# ★S2a：camp 到達立 L0（camp_level=1、不 set_owner）。W1 hoist 判準改 camp_level（L0 非領土宣稱）。
+	assert(tile.camp_level == 1, "[p2a] unified 隊 camp 到達未立 L0（W1 hoist 失敗）camp_level=%d owner=%d" % [tile.camp_level, tile.outpost_owner])
+	print("[p2a] camp arrival hoist OK (L0)")
 
 func _test_p2a_join_player_forced() -> void:
 	print("--- P2a join player forced (W2) ---")
