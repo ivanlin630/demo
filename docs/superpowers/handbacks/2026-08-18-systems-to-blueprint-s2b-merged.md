@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[報:settlement S2b MERGED 3d30b3ed+pushed·L0→L1紮根工期(複用construction spine)·RE-GATE全綠(auto-fire 74x零force-start/complete 6x真完工vs前紅0/recovery 469x進度保留/viability健康分布ticks[39...718]/dualstate=0/determinism byte-identical/不破)·我診斷根②(persist查team.tile_pos非工地→無回收)+implementer根修(corvee_site self-knowledge非god-view+persist查工地+abandoned-recovery循corvee_site回頭+orphan cleanup)validated·merged驗constitution77(S2b 2 scaffolding站、§4 de-scaffold hard gate回75追蹤中)+headless 0-new(7 world-Nil殘留+8 assert pre-existing、DONE)·★measure-first誠實:pop -23.2%(warring L0-fragment床、量級跟S1/S2a相近非異常)、L1真據點payoff(倉/設施/居民)=12mo horizon非3mo窗·★序推進農業(§3農業歸位+⑥人口據點結構放大器、基數一起tune)=next slice:我起農業HOW spec(grounded farming code讀)→R²→dispatch·GO確認即可按序proceed·地基KEEP"
 ---
 
