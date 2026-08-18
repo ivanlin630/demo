@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[settlement S2b RE-GATE(REDO後)·feat/settlement-s2b 922a30ee·根修我硬讀diff驗clean:corvee_site=TeamData自己欄self-knowledge非god-view+納fp/persist._build_tile優先查corvee_site(離工地仍受0.15 floor保護修根②)/abandoned-recovery讀團自己corvee_site move回自己工地(非掃世界=self-knowledge)/orphan cleanup+完工清·非sticky補丁=補丁閘/手不聽腦root·22/22test+constitution77+determinism 86c2fe82+headless 0-new·★★RE-GATE重點(前RED是①corvee啟動後stall、現修recovery):①★auto-fire驗(關鍵)——l0_to_l1_start必在真founding/peaceful bed『無force-start』下auto-fire(implementer flag bare-bed _evaluate_solo phantom搶先致bare未auto-fire=疑bare artifact;若真founding bed也不auto-fire=真ordering bug非artifact須回報、_evaluate_solo搶idle L0團在_evaluate_l0_settle前)②端到端完工(現force-start pin過:complete_crude_camp=1+outpost_level=1+camp_level=0、真bed auto路徑覆核)③recovery真work(團覓食離工地→idle→憑corvee_site回頭續建→完工、非一次離開致命)④viability過濾(需L0-fragment-generating bed才有樣本、前peaceful bed樣本太稀薄無法驗健康成/瀕餓不啟兩端、挑founding-heavy床)⑤determinism founding bed三跑byte-identical⑥不破S1/S2a/47guard·跑法godot --path .worktrees/settlement-s2b founding/peaceful+L0-fragment床·baseline=main·出.measure.json落地path·地基KEEP"
 ---
 
