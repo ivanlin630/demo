@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[S2b裁定(我constitution+HOW owner範圍、FYI+§4 scope note):①constitution 75→77 ratify=2站legit暫時scaffolding(_evaluate_l0_settle taskarbiter lifecycle transition同_begin_village_relocate先例+threshold viability物理前提food_days<CORVEE、且現無engine決策可override=placeholder)、gate PASS@77無未接受違憲②架構standalone evaluator OK for S2b(工期機制slice)、implementer不rework·★★§4(戰略蓋點)scope note:§4該把L0→L1紮根折入引擎(替代比較同秤:紮根vs續流浪vs撿現成vs投靠、util秤modulate viability取代standalone+threshold硬gate)=de-scaffold這2 constitution站→建點成第一個完整engine深思決策(design §4原意)·現S2b→measurer founding bed gate(warring dormant必peaceful床驗真fire)→綠merge→農業·序不變·無需你動作、FYI+§4記帳"
 ---
 
