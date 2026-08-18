@@ -467,15 +467,16 @@ static func _mk_delegate_candidate(team: TeamData, g: Dictionary, gt: String, fr
 # ★must-fix②(i) 純地形/物理地理查詢（公共知識 legit）→ 全圖掃標 # gate-ok（比照 constitution_gate:41）。
 # belief-reachable=bounded hex dist（非全知 PathSystem live）。決定性 tie-break tile_id。零 randf。
 static func find_nearest_terrain_tile(state: WorldState, team: TeamData, terrain: String, max_range: int) -> Vector2i:
+	# ★perf cut1 B(memo) stripped：measurer quantify 證 memo 0 命中（warring frontier 每 goal 查不同 terrain）
+	#   =死重量 YAGNI 出局；純掃回歸。刀A（_hex_dist static）保留。
 	var best: Vector2i = Vector2i(-1, -1)
 	var best_d: int = 1 << 30
 	var best_id: int = 1 << 30
-	var fai := FactionAISystem.new()
 	for tid in state.world.tiles:   # gate-ok: 地理=公共知識（terrain 靜態物理地理非動態所有權，比照 constitution_gate:41 市集地理先例）
 		var t: HexTileData = state.world.tiles[tid]
 		if t == null or (terrain != "" and t.terrain != terrain):
 			continue
-		var d: int = fai._hex_dist(team.tile_pos, t.tile_pos)
+		var d: int = FactionAISystem._hex_dist(team.tile_pos, t.tile_pos)   # ★perf cut1 A：static（免 fai alloc、保留）
 		if d > max_range:
 			continue   # belief-reachable bounded（非全知 PathSystem）
 		if d < best_d or (d == best_d and int(tid) < best_id):
@@ -490,12 +491,11 @@ static func find_nearest_known_tile(state: WorldState, team: TeamData, terrain: 
 	var best: Vector2i = Vector2i(-1, -1)
 	var best_d: int = 1 << 30
 	var best_id: int = 1 << 30
-	var fai := FactionAISystem.new()
 	for tid in known:   # 只掃 belief store（已發現 tile，非全圖）→ 無 god-view
 		var t: HexTileData = state.world.tiles.get(tid)
 		if t == null or (terrain != "" and t.terrain != terrain):
 			continue
-		var d: int = fai._hex_dist(team.tile_pos, t.tile_pos)
+		var d: int = FactionAISystem._hex_dist(team.tile_pos, t.tile_pos)   # ★perf cut1 A：static（免 fai alloc）
 		if d < best_d or (d == best_d and int(tid) < best_id):
 			best_d = d; best_id = int(tid); best = t.tile_pos
 	return best
@@ -508,7 +508,7 @@ static func _harvest_tile_known(state: WorldState, team: TeamData) -> void:
 	for dx in range(-vr, vr + 1):   # bounded=vision（非全圖 god-view）
 		for dy in range(-vr, vr + 1):
 			var p: Vector2i = team.tile_pos + Vector2i(dx, dy)
-			if fai._hex_dist(team.tile_pos, p) > vr:
+			if FactionAISystem._hex_dist(team.tile_pos, p) > vr:   # ★perf cut1 A：static
 				continue
 			var tid: int = p.x * 1000 + p.y
 			if state.world.tiles.has(tid):
@@ -531,7 +531,7 @@ static func _estimate_delay_days(team: TeamData, to_task: Dictionary) -> float:
 	var days: float = 0.0
 	var target = to_task.get("target", Vector2i(-1, -1))
 	if team != null and target is Vector2i and target != Vector2i(-1, -1) and target != team.tile_pos:
-		days += float(FactionAISystem.new()._hex_dist(team.tile_pos, target)) / MOVE_TILES_PER_DAY
+		days += float(FactionAISystem._hex_dist(team.tile_pos, target)) / MOVE_TILES_PER_DAY   # ★perf cut1 A：static（免 per-candidate .new() alloc）
 	var task: String = String(to_task.get("task", ""))
 	# ★A1:founding(build_type)/facility 委派亦含 build 工期（雖不發 TASK_BUILD，仍派子隊施工）。
 	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE \

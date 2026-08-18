@@ -316,7 +316,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _mkt: Vector2i = _fa._nearest_market_outpost(state, team, true)
 	c.has_food_market = _mkt != Vector2i(-1, -1)
 	c.food_market_pos = _mkt
-	c.food_market_dist = _fa._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1
+	c.food_market_dist = FactionAISystem._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1   # ★perf cut1 A：static
 	# ★買料信號（material means-end，Gate B）：有 material stock 的已知市集 + material 缺口（need_keep 含 construction need）。
 	c.has_material_market = _fa._nearest_market_outpost_with(state, team, "material", true) != Vector2i(-1, -1)
 	c.material_shortfall = maxf(NeedOracle.need_keep(state, team, "material", c.leader_values) \
@@ -357,7 +357,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_buyable_food = false
 	for _so in OrderSystem.new().received_sell_orders(state, team):
 		if String(_so.get("res", "")) == "food" \
-				and _fa._hex_dist(team.tile_pos, _so.get("pos", Vector2i.ZERO)) <= OrderSystem.MERCHANT_MAX_RANGE:
+				and FactionAISystem._hex_dist(team.tile_pos, _so.get("pos", Vector2i.ZERO)) <= OrderSystem.MERCHANT_MAX_RANGE:   # ★perf cut1 A：static
 			c.has_buyable_food = true
 			break
 	# Fix B 遷移找糧 target（視野內可達 wild_game[pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）。
