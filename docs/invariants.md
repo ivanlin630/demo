@@ -413,3 +413,8 @@ for tid in faction.member_team_ids:
 - **stakes target finder**：攻擊/外交→`_nearest_independent`（最近獨立隊）；徵收→`_richest_member`（同 faction 最富 member，**雙重排除自身** `== team.team_id`，因 `_richest_member` 未排自身）。徵收/外交=非戰（不設 combat_target）。
 - **脫軌逃閥**：`faction_duty` weight **與** 個人 drive（`attack_drive`/`levy_drive`/`diplo_drive`）共用脫軌因子 `_duty_factor = clampf(loy − max(0,野心−0.5)×DEFECT_K, 0,1)` → 低忠誠+高野心 member 的 duty 與個人驅力齊壓 0 → 個人驅力（survival/野心/貿易）蓋過 → 不參與/自走=破framework脫軌。faction_duty 是**加權 term 非 hard override**（非 100% 服從，by construction）。
 - **危時不為派系做事**：survival-class term 危時量級碾壓 faction_duty（食物優先；攻擊/徵收/外交皆然）。
+
+## perf 優化 arc（用戶+blueprint 憲章 2026-08-18）
+- **★優化兩道分類（每個 perf 優化必分類 + 對應驗證）**：(a) **位元級安全道**＝cache/memo/spatial-index/避重複 query/減 allocation → **不改行為、FP byte-identical 機器證（3 跑）**；(b) **行為影響道**＝降頻/deferred cascade → **時序變=指紋變=intended-change 流程**（fp 標 + 全故事審）+ **守 LOD 紅線**（§掃近隊兩-channel/nearby-scan：餵決策的鄰隊位置一律 belief last-seen 非 live god-view、遠威脅經情報網不隱形）。**分類錯（把行為影響誤當安全道 merge）=違規**（外部 agent 誤列降頻為無害已被 blueprint 修正）。
+- **★perf 禁降故事生成 fidelity（紅線）**：Team decision fidelity / message / reaction 等**故事生成機制不可為 perf 犧牲**（reaction all-far 從沒跑=故事基質已薄、perf 不得再削）。優化只碰「怎麼算得快」非「算什麼/多細」。
+- **驗證流程**：每改→full sim→Story QA **不降不取消**（過渡期分層：slice 短窗+定向 QA、arc 里程碑 full 12mo+全故事審=現行實務）；終極目標=把 full sim 壓便宜到每改全跑付得起。
