@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[strip刀B保刀A(blueprint裁、feat/perf-cut1續)·quantify證memo 0命中(509=509、warring frontier每goal查不同terrain)=死重量YAGNI出局、刀A(_hex_dist static)8-13%真gain保留·strip:①移除find_nearest_terrain_tile的memo 6th param+內memo查/寫邏輯→回純掃(但保刀A的_hex_dist static呼)②移除_resolve_resource_prereq/_resolve_location_prereq的memo param傳遞③移除frontier_candidates的frontier_memo local dict+穿參·保留:刀A全部(_hex_dist static+全呼點replace去alloc)·★驗:strip後仍byte-identical 3跑(vs baseline、應=6a51b8c3同刀A-only、因B本0效果移除不改行為)+perf_cut1_test A部分仍PASS(B測隨memo移除刪)+constitution+headless 0-new·完→handback to:systems、我merge刀A·worktree feat/perf-cut1同·地基KEEP"
 ---
 # strip 刀B 保刀A（blueprint 裁）
