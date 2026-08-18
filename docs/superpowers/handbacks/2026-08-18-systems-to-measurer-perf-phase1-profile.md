@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[perf arc Phase1 細 profile(只量不改evidence-only禁edit、與settlement S2b gate平行不搶)·擴充perf_phase_bed既有FaiPhase markers往內鑽把93.7%(near.faction_ai=DecisionEngine.rank_scored per-team)拆開·Team step拆解各階段:①perception/state gathering②needs eval③candidate generation(applicable gates)④scoring(term×weight)⑤selection⑥execution各分支(movement-pathfinding/resource/event/message/faction-reaction)·每階段量:耗時+呼叫次數+candidates/evaluations量+重複world query偵測(同tick同query幾次=memo機會)+allocation熱點+『全體慢vs特定team/action慢』分布(per-team timing histogram+per-option execution timing)·短窗3-7天(上次成功經驗)·★output=hot-spot排行、每項標註『byte-identical-safe與否』(=兩道分類:安全道cache/memo/index/減alloc vs 行為影響道降頻/deferred)供blueprint帶用戶裁Phase2清單·★觀測禁耗global RNG+禁污染Probe(invariants §83、profiling markers須_begin/_end_observe或等價、on/off byte-identical)·evidence-only禁edit production邏輯(markers=temp instrumentation用完revert同你既有temp tap慣例)·出.measure.json落地path"
 ---
 
