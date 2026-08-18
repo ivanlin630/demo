@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[settlement S2a bounded merge-gate·feat/settlement-s2a a52549fa base d5807d69·核心HOW我硬讀diff+branch show確認全held:camp_level獨立flag(不觸47站level==0哨兵)/state_fingerprint:119加camp_level<=0條件+emit camp|campleft(我flag的determinism要害正確修)/establish_crude_camp camp_level=1+camp_ticks_left decay無set_owner(L0非領土outpost_owner保持-1)/outpost_level保持0·16/16test+headless 0-new(8 pre-existing)+constitution75+byte-identical 6a51b8c3+fp intended-change·★bounded gate:①L0/L1界線真(L0無倉/設施/不入勞力池pool_of天然排除、outpost_level=0+owner=-1)②紮營廉價無沉沒(L0建免費、decay L0_DECAY_DAYS棄置camp_level→0無廢墟)③L0 forage低倍率遊牧(L0_FORAGE_MULT=0.15讀腳下food池、池竭移動)④不破47既有guard(L0不被當空tile以外誤觸)⑤determinism byte-identical三跑⑥★interim行為watch:S2a-only=全4 caller founding→L0非L1(無瞬間L1 until S2b)→測interim世界:founding現產L0(camp_l0 probe fire、outpost_level=1新建應↓)、S1 reclaim撿現成L1 ghost仍運作(主路徑不受影響)、碎片改transient L0少造ghost(interim應更健康非regression、design-aligned)·L0_FORAGE_MULT/L0_DECAY_DAYS校準(遊牧循環質感)·跑法godot --path .worktrees/settlement-s2a對branch·baseline=main·出.measure.json落地path·地基KEEP"
 ---
 
