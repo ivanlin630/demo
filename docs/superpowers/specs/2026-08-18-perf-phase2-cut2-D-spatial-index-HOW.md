@@ -17,7 +17,7 @@ owner: systems（HOW）← perf 憲章 + Phase1（frontier 97.5%）+ 刀1 quanti
 
 ## §2 Task（TDD、byte-identical 機器證每 task）
 ### D：tiles-by-terrain 空間索引
-- **建索引**：`terrain → [tile_id...]`（或 (tile_id, tile_pos)）。★**生命週期**（R² 議、safest 優先）：**per-tick 重建 or lazy-first-query-per-tick**（tick-stamp 自動失效）——避 terrain 可變性假設、per-tick 一建 vs 509 查=淨贏；★若 R²/implementer 坐實 **terrain 全程 immutable**（世界生成後不變、無 terraform/event 改 terrain）則可升 **build-once cache**（免每 tick 重建、更省；此 cross-tick cache **合法**=terrain 免疫非 team-relative、異於刀B memo 的 team.tile_pos-relative 須 per-tick）。**先 per-tick safe、immutable 坐實才 build-once**。
+- **建索引**：`terrain → [tile_id...]`（或 (tile_id, tile_pos)）。★**生命週期=build-once（R² 訂正、terrain immutable 親驗坐實）**：**世界生成完成後建一次、全程沿用**（無 per-tick 重建）。★**terrain immutable 坐實**（R² 親 grep 全 scripts/simulation/ `.terrain=`）：production 唯一寫入 `world_generator.gd:67 tile.terrain=_random_terrain(rng)`（世界生成一次性）、**零 runtime terrain 重寫**（無 terraform/event 改 terrain 機制）→ **build-once cross-tick cache 合法**（terrain 免疫、team-independent、異於刀B memo 的 team.tile_pos-relative 須 per-tick）。免 per-tick 重建開銷 + 一輪「先 safe 再升級」驗證循環。（若未來加 terraform/terrain-change→須加 index 失效 hook、屆時 backlog。）
 - **查詢**：find_nearest_terrain_tile 改為**只 iterate 索引裡該 terrain 的 tiles**（非全圖）、套**同一 `(d, tid)` tie-break**（平手最小 tid、逐字保 :481 比較）→ 回同一塊。
 - **★tie-break 保序驗**：索引候選集套 `(d, tid)` 比較 = 與全圖掃同結果（explicit tid、order-independent）。
 - **TDD**：①index 建對（terrain→tiles 正確分組）②find_nearest_terrain_tile 用 index 結果==全圖掃結果（**含平手 case 逐一驗**：多同距 tile→回最小 tid、byte-identical 命門）③scan 成本降（iterate terrain-X tiles 非全 tiles、call 數同 509 但單次 O(terrain-X)）④per-tick 失效正確（跨 tick 不用 stale index）or immutable build-once 正確⑤constitution 綠。
