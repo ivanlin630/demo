@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[FUY data-read=第三條路(非你a/b)、你裁·★①農田廣度10/13隊76.9%夠廣→排除(a)純defer(農田發展了非寥寥)②farm/forage ratio 0.1555看似FUY該調(b)但根因=勞力配額:farm labor_mult飽和度僅0.211(farm勞力位長期只拿21%應得、被gather/mfg同池搶走)、滿飽和farm_yield≈3369 ratio收斂0.737·結構:l0_forage不吃勞力池(免費fallback站著就有)farm吃池競爭→per-labor對forage不良定義·★結論:調高FARM_UNIT_YIELD不解瓶頸(21%×2=42%仍遠不到飽和=paper-over)、真根=farm勞力位長期under-served(K_FARM=5.0 labor_system:10太高分母大? or labor_mult分配序位farm系統性墊底?)·measure-first又贏:小tap消歧非常數是勞力分配(調常數會paper-over)·★決策(你WHAT):(a)defer到12mo大考story A(farm-starved-of-labor會不會破surplus→export大考看、FARM_UNIT_YIELD=2.0凍provisional)or(b)開一輪查LaborSystem分配邏輯(K_FARM量級/farm vs gather/mfg序位、per-team拆:大團staff farm=正確湧現vs全團starve farm=misconfig)·★我lean:先per-team快拆消歧(大團有無staff farm=guns-vs-butter正確emergence還是farm系統墊底misconfig)再定defer/修=避免大考才發現farm結構性拿不到勞力·連project_size_matter_arc勞力池+農業a guns-vs-butter意圖(farm該真競爭勞力)·農業b(⑥放大器)+perf刀3平行進行中·地基KEEP"
 ---
 # FUY data-read=第三條路（勞力分配非常數）、你裁
