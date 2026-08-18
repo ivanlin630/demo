@@ -1,0 +1,31 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-18-systems-to-measurer-FUY-perteam-farmlabor.md",
+  "bed": "scripts/debug/fuy_perteam_farmlabor_bed.gd (temp, reverted after use)",
+  "config": "peaceful_economy.json",
+  "seed": 1337,
+  "months": 6,
+  "note_on_pop": "Probe.peaks(max-seen) proxy for 'final' pop/level — pop 幾乎不隨時間變(死亡少)，level 建成後穩定，proxy 可信。",
+  "per_team": [
+    {"team": 0, "pop": 6, "farming_level": 2, "flabor_avg": 0.129, "n": 340},
+    {"team": 1, "pop": 6, "farming_level": 1, "flabor_avg": 0.194, "n": 94},
+    {"team": 2, "pop": 6, "farming_level": 1, "flabor_avg": 0.214, "n": 281},
+    {"team": 3, "pop": 6, "farming_level": 1, "flabor_avg": 0.289, "n": 321},
+    {"team": 4, "pop": 6, "farming_level": 2, "flabor_avg": 0.077, "n": 339},
+    {"team": 5, "pop": 6, "farming_level": 1, "flabor_avg": 0.278, "n": 407},
+    {"team": 7, "pop": 6, "farming_level": 3, "flabor_avg": 0.067, "n": 313},
+    {"team": 9, "pop": 6, "farming_level": 1, "flabor_avg": 0.369, "n": 376},
+    {"team": 10, "pop": 6, "farming_level": 1, "flabor_avg": 0.294, "n": 68},
+    {"team": 11, "pop": 6, "farming_level": 1, "flabor_avg": 0.228, "n": 87}
+  ],
+  "by_farming_level": {
+    "level_1": {"n_teams": 7, "flabor_avg_of_avgs": 0.267, "range": [0.194, 0.369]},
+    "level_2": {"n_teams": 2, "flabor_avg_of_avgs": 0.103, "range": [0.077, 0.129]},
+    "level_3": {"n_teams": 1, "flabor_avg_of_avgs": 0.067, "range": [0.067, 0.067]}
+  },
+  "pop_variance": "0（全部10隊終態pop=6，peaceful_economy.json 這個 config 本身沒有 pop 分野——①team-size emergence 假說在此床上無法評估，非確認非否證，是資料集本身缺少 pop 變異）。",
+  "conclusion": {
+    "hypothesis_1_size_emergence": "UNTESTABLE in this dataset — pop 全部相同(=6)，沒有變異可驗，非結論。",
+    "hypothesis_2_structural": "CONFIRMED — farming_level 與 flabor 飽和度呈清楚單調負相關：L1 avg≈0.267 → L2 avg≈0.103 → L3=0.067。跟 systems code-read 預測完全吻合：farm demand=farming_level×K_FARM(5.0) 隨 level 線性增大，gather:food demand 固定=K_GATHER(5.0)不變，兩者 need-weight 相等(皆=food need_keep+demand)故按比例分配到的『$』量相近，但 farm 要填滿的『桶』隨 level 變大→level 越高、同樣配額下 fill% 越低。",
+    "root_confirmed": "gather/farm 冗餘食競爭：gather:food 桶小恆先 cap 見底、farm 桶隨 level 變大恆填不滿——K_FARM 相對 K_GATHER 的相對關係(非絕對值)是根，farming_level 越高越惡化，不是團大小的問題。"
+  }
+}
