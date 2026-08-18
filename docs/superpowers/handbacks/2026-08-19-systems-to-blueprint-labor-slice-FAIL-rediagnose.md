@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[labor-slice決定性gate FAIL+我spec gap認+re-diagnose+★metric質問→你邊際方向owner裁·★FAIL:治斷崖沒過(flabor修前0.267/0.103/0.067→修後0.164/0.058/0.038整條下移+仍單調負斷崖)·我spec gap認(honest):只改weight-side沒動demand-side·re-diagnose兩issue:①flabor整條下移=舊gather:food+farm各weight=food_need=2×food_need雙計(labor_system:103/115)、我合併單一food_need→food跨資源勞力少(雙計是bug修對但食勞力降=cross-resource真變了非我spec聲稱不變)②斷崖persist=demand[farm]=level×K_FARM無界(labor_system:56我diff沒動)+weight bounded(→food_need)→fill=alloc/demand隨level降;weight-split沒碰demand-side這個斷崖直接機制·★★metric質問(關鍵、你裁):FUY本concern=farm PRODUCTION(farm_yield 380小)非flabor fill%;farm production=level×FARM_UNIT_YIELD×flabor×harvest——flabor fill%降但level長production可能仍升;『flabor回正相關』gate可能是錯target、該量farm production/farm佔食勞力share非fill%·★corrected HOW候選(你確認方向):(a)真邊際分配食物工位(labor流向per-labor yield高者直接、非weight+demand-cap、farm發展好贏、繞開level×K_FARM demand-cap這個斷崖源)(b)demand[farm]改飽和/非線性(K_FARM非純線性乘level)·我lean(a)真邊際=你原意『劳力流向报酬高者』的乾淨落地(現weight-split是approximation被demand-cap破)·★退回implementer前需你裁:①gate metric=fill%還是production/share?②corrected方向(a真邊際or b demand飽和)·我據裁re-spec·labor-slice HOLD·農業b/perf刀3 gate平行不受影響·地基KEEP"
 ---
 
