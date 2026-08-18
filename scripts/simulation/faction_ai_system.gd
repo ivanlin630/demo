@@ -4734,16 +4734,29 @@ func _evaluate_l0_settle(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id and state.player_id != -1:
 		return   # 玩家走 command，不自動紮根
 	if team.current_task != TeamData.TASK_IDLE:
-		return   # 只 idle L0 隊紮根（committed/求生/戰/交易不打斷）
+		return   # 只 idle 隊評估（committed/求生/戰/交易不打斷）
+	var pop: float = float(team.population)
+	var burn: float = maxf(pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var food_days: float = ResourceSystem.effective_food(state, team) / burn
+	# ★REDO 根修：abandoned-corvee recovery（自己起的工程未完→回頭續建，非永久 abandon）。
+	# 團覓食後 idle → 憑 corvee_site（self-knowledge、非 god-view）回工地續建。一次離開非致命。
+	if team.corvee_site != Vector2i(-1, -1):
+		var csite: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.corvee_site))
+		if csite != null and csite.construction_team_id == team.team_id and csite.construction_ticks_left > 0:
+			# 我的未完工程仍在：食足→回頭續建（在工地即進工期、離工地則 move 回）；瀕餓→續遊牧（工程掛著等回頭）
+			if food_days >= float(L0_TO_L1_CORVEE_DAYS):
+				TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+				if team.tile_pos != team.corvee_site:
+					team.move_target = team.corvee_site   # 走回工地（_tick_construction 需站上才推進）
+				if Probe.enabled: Probe.bump("settlement.l0_to_l1_resume")
+			return
+		team.corvee_site = Vector2i(-1, -1)   # 工程完成/消失（他隊接管/decay）→ 清工地記憶
+	# 起新 corvee：站自己 L0 + viable + 該格無據點/未施工
 	var tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
 	if tile == null or tile.camp_level != 1:
 		return   # 須站自己 L0 營地（腳下 camp）
 	if tile.outpost_level > 0 or tile.construction_team_id != -1:
 		return   # 已據點 / 施工中
-	# viable：食足付得起工期（瀕餓不啟；零硬門檻——emergent 死於工期是更深過濾）
-	var pop: float = float(team.population)
-	var burn: float = maxf(pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
-	var food_days: float = ResourceSystem.effective_food(state, team) / burn
 	if food_days < float(L0_TO_L1_CORVEE_DAYS):
 		return   # 付不起工期食 → 不啟（續遊牧 L0 forage；viability 物理前提、瀕餓不啟）
 	# 建點：type by leader 好戰/野心（同舊 establish_crude_camp 慣例）
@@ -4756,6 +4769,7 @@ func _evaluate_l0_settle(state: WorldState, team: TeamData) -> void:
 	tile.construction_team_id = team.team_id
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
+	team.corvee_site = team.tile_pos   # ★記工地（recovery 憑此回頭）
 	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)   # L0→L1 紮根 lifecycle transition（同 _begin_village_relocate；constitution baseline ratify）
 	if Probe.enabled: Probe.bump("settlement.l0_to_l1_start")
 	print("[CorveeL1] Team%d L0→L1 紮根工期 @(%d,%d) %s (%d person-ticks)" % [

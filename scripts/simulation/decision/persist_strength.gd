@@ -36,6 +36,16 @@ const CONSTRUCTION_ACTIVE_FLOOR: float = 0.15   # TEST VALUE — >PERSIST_HOLD_T
 # 開放式/無承諾動作（progressive-only gate 排除 → persist=0，走既有 timeout）。
 const NON_PROGRESSIVE: Array = [TeamData.TASK_IDLE, TeamData.TASK_FLEE]
 
+# ★settlement S2b：TASK_BUILD 的工地 tile——優先 corvee_site（自己起的 L0→L1 工程、團可能離開覓食後回頭），
+# 否則腳下（remote founding 子隊 on-site / 其他 build）。修「團離開→persist 查 team.tile_pos 錯 tile→floor miss→
+# abandoned corvee stall forever」根（self-knowledge corvee_site 非 god-view）。
+static func _build_tile(state: WorldState, team: TeamData) -> HexTileData:
+	if team.corvee_site != Vector2i(-1, -1):
+		var ct: HexTileData = state.world.tiles.get(team.corvee_site.x * 1000 + team.corvee_site.y)
+		if ct != null and ct.construction_team_id == team.team_id and ct.construction_ticks_left > 0:
+			return ct   # 自己未完 corvee 工地（離開仍認得）
+	return state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+
 # 算持守強度 + 寫 team.persist_strength（決策層 rank cadence 呼）。純算術零 RNG。
 static func compute(state: WorldState, team: TeamData) -> float:
 	var ps: float = _value(state, team)
@@ -70,7 +80,7 @@ static func _value(state: WorldState, team: TeamData) -> float:
 		var computed: float = base_persist * sf   # persist_effective = persist × safe_factor（糧見底→sf→0→放手求生）
 		# ★active-construction hard floor：施工真進行中(construction_ticks_left>0)→persist≥CONSTRUCTION_ACTIVE_FLOOR
 		#   （蓋過 safe_factor；cold-start/低 lean 也擋 routine argmax 搶班；crisis 自有 ≥THREAT bypass，不靠此）。
-		var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+		var tile: HexTileData = _build_tile(state, team)   # ★S2b：corvee_site 優先（離開工地仍受保護、回頭續建）
 		if tile != null and tile.construction_ticks_left > 0:
 			return maxf(computed, CONSTRUCTION_ACTIVE_FLOOR)
 		return computed
@@ -79,7 +89,7 @@ static func _value(state: WorldState, team: TeamData) -> float:
 # ★safe_factor（§4b）：safe_ratio=runway/ETA → [0,1]，人格 ratio_floor 餘裕。糧充裕→1(黏)；見底→0(放手)。
 # 乘法縮放連續（非硬門檻塌=避 PROGRESSIVE_HOLD attrition→0 向凍 regression）。純算術零 RNG。
 static func _safe_factor(state: WorldState, team: TeamData, stick: float, flex: float) -> float:
-	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	var tile: HexTileData = _build_tile(state, team)   # ★S2b：corvee_site 優先
 	if tile == null or tile.construction_ticks_left <= 0:
 		return 1.0   # 無真施工中 → 不調制（safe）
 	var eta_days: float = float(tile.construction_ticks_left) / maxf(float(team.population), 1.0)   # 粗估:剩 person-ticks/pop
@@ -96,7 +106,7 @@ static func _safe_factor(state: WorldState, team: TeamData, stick: float, flex: 
 #   解決決策層 cadence(1日) vs 執行層(每tick) 落差）；非施工 committed 動作退回 committed 時間佔比 proxy。
 static func _progress(state: WorldState, team: TeamData) -> float:
 	if team.current_task == TeamData.TASK_BUILD:
-		var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+		var tile: HexTileData = _build_tile(state, team)   # ★S2b：corvee_site 優先
 		if tile != null and tile.construction_ticks_left > 0:
 			var total: int = OutpostSystem.construction_ticks_total(tile)
 			if total > 0:

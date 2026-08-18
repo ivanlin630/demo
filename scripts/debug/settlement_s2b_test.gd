@@ -32,6 +32,8 @@ func _init() -> void:
 	_t3_tick_progresses()
 	_t4_complete_to_l1()
 	_t5_preemptible()
+	_t6_abandoned_recovery()
+	_t7_orphan_cleanup()
 	if _fail == 0: print("ALL PASS")
 	else: print("FAILS=%d" % _fail)
 	quit()
@@ -95,3 +97,40 @@ func _t4_complete_to_l1() -> void:
 func _t5_preemptible() -> void:
 	print("--- ⑤ 工期可 busy-preempt ---")
 	_ok(TeamData.TASK_BUILD in FactionAISystem.PREEMPTIBLE_TASKS, "TASK_BUILD ∈ PREEMPTIBLE_TASKS（壓境威脅可打斷 L0→L1 工期、既有機制）")
+
+# ⑥ ★REDO 根修：abandoned-corvee recovery（團離開工地覓食後回頭續建、進度保留、非永久卡死）
+func _t6_abandoned_recovery() -> void:
+	print("--- ⑥ abandoned-corvee recovery ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fai := FactionAISystem.new()
+	var team := _mk_l0_team(state, Vector2i(11,11), 100.0, 5)
+	fai._evaluate_l0_settle(state, team)
+	var tile: HexTileData = state.world.tiles[11011]
+	_ok(team.corvee_site == Vector2i(11,11), "起工期→記工地 corvee_site=(11,11)")
+	# 模擬做一段後離開覓食（survival）：推一 tick 進度、team 離工地變 idle（他處）
+	OutpostSystem.new()._tick_construction(state, tile)
+	var progressed: int = tile.construction_ticks_left
+	_ok(progressed < FactionAISystem.L0_TO_L1_CORVEE_DAYS * WorldState.TICKS_PER_DAY, "工期有推進")
+	team.current_task = TeamData.TASK_IDLE   # 覓食完 release→idle
+	team.tile_pos = Vector2i(13,13)          # 已離工地（覓食走遠）
+	team.move_target = Vector2i(-1,-1)
+	# recovery：idle + 有未完 corvee + viable → 回頭續建
+	fai._evaluate_l0_settle(state, team)
+	_ok(team.current_task == TeamData.TASK_BUILD, "recovery→回 TASK_BUILD（非永久卡死）")
+	_ok(team.move_target == Vector2i(11,11), "move_target=工地（走回續建）")
+	_ok(tile.construction_ticks_left == progressed, "進度保留（未 reset、續建非重頭）")
+	_ok(tile.construction_team_id == team.team_id, "construction_team_id 仍為起者")
+
+# ⑦ orphan cleanup：施工隊已亡 → _tick_construction 清 zombie construction（非永卡）
+func _t7_orphan_cleanup() -> void:
+	print("--- ⑦ orphan cleanup ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fai := FactionAISystem.new()
+	var team := _mk_l0_team(state, Vector2i(14,14), 100.0, 5)
+	fai._evaluate_l0_settle(state, team)
+	var tile: HexTileData = state.world.tiles[14014]
+	_ok(tile.construction_team_id == team.team_id, "corvee 起（ct_id=team）")
+	state.teams.erase(team.team_id)   # 施工隊亡（pop=1 餓死 viability 過濾）
+	OutpostSystem.new()._tick_construction(state, tile)
+	_ok(tile.construction_team_id == -1 and tile.construction_ticks_left == 0 and tile.construction_target.is_empty(),
+		"施工隊亡 → 清 orphan construction（防 zombie 永卡）")
