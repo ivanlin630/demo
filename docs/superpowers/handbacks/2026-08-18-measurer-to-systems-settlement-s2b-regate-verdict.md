@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[settlement S2b RE-GATE 綠]branch feat/settlement-s2b(922a30ee)vs baseline main,seed1337 warring_states.json 3月窗(L0-fragment-heavy床,implementer建議的founding-heavy volume床,無任何force-start純organic)+peaceful_economy.json founding-bed determinism spot。①★auto-fire驗=硬綠:settlement.l0_to_l1_start全期74次自動觸發(零force-start,implementer的bare-bed artifact疑慮在真bed證實非問題,_evaluate_solo沒有結構性搶先擋住corvee評估)。②端到端完工=綠:construct.complete_crude_camp=6次3月窗內真完工(非上輪紅的0次),真達成L0→L1轉換。③recovery真work=硬綠且量級驚人:settlement.l0_to_l1_resume全期469次觸發,team113/team115(pop=1)這兩隊resume樣本顯示ticks_left真的隨tick推進遞減(710→700等),證實團覓食離開後真的能循corvee_site回頭續建、進度有保留非歸零重來。④viability過濾=有真實分布可觀察:終態24隊corvee_site_active+35個in-progress crude_camp構造,ticks_left分布[39...718]橫跨全範圍(pop=1團工期長、有的剛起步有的接近完工),不再是上輪唯一1個案例卡死不進的病態分布,是健康的『多團在不同進度階段推進』分布——雖然本輪未逐團核對哪些是瀕餓不啟被過濾掉的(需另開一輪細看『evaluated-but-not-started』分野),核心『不再全體卡死』已充分坐實。⑤determinism=綠:founding-bed(peaceful_economy.json)自建determinism check 3跑byte-identical=dd345ed825e6f9725250f8c299dc9f00(跟implementer warring-bed聲稱的86c2fe82非同床不可比,但本輪founding-bed自身一致性確認)。⑥不破既有機制=綠:l0_l1_dualstate_violations=0(全數35+個construction+31個L0都無雙態)、pop 444→341(-23.2%)/starve sum=23,量級跟S2a/S1輪次相近非異常崩潰。★裁決:①②③④⑤⑥全綠→建議merge進農業(下一步)。"
 ---
 
