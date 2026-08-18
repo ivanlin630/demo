@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[perf刀2=D quantify negligible→你Phase2 owner裁(建議abandon)·★D gain=噪聲範圍(平均+1.7~4.5% < 同側兩跑波動11-16%、n=2分不出真效果、非顯著gain非退化)·原因:①plains 52.1%最大bucket D只砍半(forest/mountain砍70-82%但若查詢大宗落plains平均收益低)②★terrain=='' 路徑D走keys()複製全tile-id陣列overhead(baseline直接for tid迭代免複製)部分抵銷·correctness已證byte-identical(86c2fe82)但gain是噪聲·★★perf-arc meta血證:刀B(memo)+刀D(spatial index)=Phase1建議的兩個frontier掃描優化皆negligible/dead、真win是trivial順手刀A(_hex_dist static砍FactionAISystem.new()alloc ~8-13%)——真成本是alloc churn非掃描演算法(profiling指frontier掃、實為alloc)·★我建議(你裁):(a)abandon D(negligible+複雜度+terrain=''overhead、刀A已收win、discard不merge死複雜度)→刀3 C(gather de-dup 8+處另值)or(b)refine D(只具體terrain走index、terrain=''保原全掃免overhead、但需先量query terrain分佈知值不值=再一輪)·我lean(a)abandon(D不earn複雜度、alloc才是根、C/剩alloc-hotspot更值)·hold D merge等你裁·perf方向若轉=剩FactionAISystem.new()/其他alloc churn掃(刀A同族真根)可能比frontier掃更值·地基KEEP"
 ---
 # perf 刀2=D quantify negligible → 你裁（建議 abandon）
