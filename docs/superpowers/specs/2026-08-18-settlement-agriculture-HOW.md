@@ -29,7 +29,7 @@ owner: systems（HOW）← settlement design §3 + mechanism-intents「農田」
 - **TDD**：①農田產出獨立入糧倉標 farm_yield（守恆帳平）②farming_level 不再 boost gather（:289 移除、gather 純野地池）③farm_labor 抽勞力池（gather 掉=guns-vs-butter）④harvest_factor 季節調制⑤無 farming_level→產出 0（無田不產）。
 
 ### 農業b：⑥ 據點結構放大器 pop-cap（人口 ruling）
-- **pop-cap 放大**：`effective_pop_cap = pop_cap_from_leadership(領導基數) × 據點結構放大器(outpost_level/設施發展)`（或加法、R² 議形式）→ **居民團據點發展→承載更多**（size 靠據點 genuine、非死曲線）。**基數(領導)+放大器一起 tune**（⑥ 明示）。
+- **pop-cap 放大（★乘法、R² 建議定案）**：`effective_pop_cap = pop_cap_from_leadership(領導基數) × 據點結構放大器(outpost_level/設施發展)`——**乘法非加法**（R² 建議：MarginalEconomy._inflow_est `outpost_mult×pop_mult×farming_bonus×…` 乘性合成先例；乘法讓「好領主+好據點」複合放大、「爛領主+好據點」不靠據點單撐到好領主承載量=語意符「據點是領導力**放大器**」⑥ ruling 字面）→ **居民團據點發展→承載更多**（size 靠據點 genuine、非死曲線）。**基數(領導)+放大器一起 tune**（⑥ 明示）。**★L0 不放大 auto**：L0 `outpost_level=0`→放大器天然=1（S2a camp_level 獨立 flag 已確保 L0 無 outpost_level>0、結構自動成立、零額外 code）。
 - **★禁死常數 pop 曲線**：放大器=據點 level/設施的結構函數（發展越高承載越大=genuine 投資回報）、非查表。
 - **感知鐵律**：讀自家據點自家 level（self-knowledge）。
 - **TDD**：①據點 level↑→effective_pop_cap↑（放大器生效）②領導基數仍為底（無據點=領導帽、L0 不放大=界線守 S2a）③overflow（pop>effective_cap）走既有 check_overflow_for_team④基數+放大器 tune 後合理量級（不爆不塌）。
@@ -39,7 +39,8 @@ owner: systems（HOW）← settlement design §3 + mechanism-intents「農田」
 2. **守恆可溯源**：farm_yield chokepoint tagged、守恆稽核含農業、GRAND 帳平。
 3. **guns-vs-butter**：farm_labor 抽勞力→gather 掉（勞力池競爭真發生）。
 4. **據點放大器 genuine**：據點發展→pop-cap↑（size matter via 據點、非死曲線、L0 不放大）。
-5. determinism byte-identical（農業純算術+既有 chokepoint、無新 RNG）；constitution 綠；**禁 crank（R² 命門）**。fp intended-change（drift 正位+新生產線=行為變大）。
+5. **★★量化食物帳（R² 必查項、大改命門、農業a 硬 gate）**：drift 正位（移除 :289 gather 乘數 + 新增獨立農田線）**前後聚合對比**——measurer 量**全樹 food production 總量 + team food-security 分布**，**驗淨效應無意外暴衝/塌陷**（★`UNIT_YIELD` 量級須校準得 **≈ 被移除的 `×(1+farming_level×0.5)` 乘數量級**：拍太低→淨食物驟降 mass-starve、拍太高→糧食經濟被削弱失意義）。非只驗「兩系統概念獨立」、要驗**總量級守住**。
+6. determinism byte-identical（農業純算術+既有 chokepoint、無新 RNG）；constitution 綠；**禁 crank（R² 命門）**。fp intended-change（drift 正位+新生產線=行為變大）。
 
 ## §4 界外
 - §4 戰略蓋點決策（含 §4 de-scaffold L0→L1 折入引擎 hard gate）=農業後 next。
