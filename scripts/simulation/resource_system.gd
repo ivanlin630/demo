@@ -7,6 +7,11 @@ const FOOD_PER_PERSON_PER_DAY: float = 0.8   # TEST VALUE — R1 張力校準：
 const FORAGE_FLOOR_DAYS: float = 5.0         # TEST VALUE — 覓食淨貢獻上限=幾日餬口（1.5→5 苟活韌性；<建國7天門）
 # ★settlement S2a L0 營地：採腳下 food 池現量×低倍率單旋鈕（禁 pop-curve；池竭→採量遞減→遊牧移動湧現）。
 const L0_FORAGE_MULT: float = 0.15           # TEST VALUE — L0 營地日採＝腳下 food 池現量之比例（單旋鈕、bounded、measurer 校準）
+# ★農業a FARM_UNIT_YIELD 校準命門（R² 必查、measurer 硬 gate）：農田日產=farming_level×此×farm_labor×harvest_factor。
+# 初估≈被移除的 gather 乘數量級（×(1+farming×0.5) 於 L2 加 base food gather ~1.0×≈2 food/day；farm L2 產
+# =2×此×flabor(~0.7)×harvest→需此≈1.4~2.0 匹配）。★farm 抽勞力→gather 掉，淨效應 measurer 量化食物帳驗（拍太
+# 低 mass-starve、太高爆倉/削弱經濟）。取 2.0 中值待 measurer 校準。
+const FARM_UNIT_YIELD: float = 2.0           # TEST VALUE ★校準命門 — measurer 量化食物帳驗淨效應
 const L0_DECAY_DAYS: int = 3                  # TEST VALUE — L0 營地棄置衰敗天數（無人 forage reset→camp_level=0 無廢墟）
 const WILD_GAME_REGEN_PER_DAY: float = 0.15  # TEST VALUE — 獵物慢繁殖回補（月級，上限夾 resource_cap）
 const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
@@ -91,6 +96,16 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 			_collect_from_tile(state, team, tile, outpost_mult, tile, labor_share, prod_skill, eng_skill, gained, day_fraction)
 
 		_apply_normal_tax(state, team, tile, gained)
+
+		# ★農業a：農田獨立生產線（drift 正位、farming 從 gather 乘數改獨立產出）——owner 隊每日產農田糧入自家糧倉。
+		# 產出=farming_level × FARM_UNIT_YIELD × farm_labor工位(勞力池競爭 gather/mfg=guns-vs-butter) × harvest_factor(季節)。
+		# owner-gate：一 tile 一次（owner 隊觸發、非每共址隊重產）。⑤無 farming_level→產出 0（無田不產）。
+		# farm_yield chokepoint（TileBank.deposit 守恆稽核含農業）。感知鐵律：自家據點/勞力/糧倉 own-state。
+		if tile.farming_level > 0 and tile.outpost_owner == team.team_id:
+			var flabor: float = LaborSystem.labor_mult(tile, "farm")   # 勞力池分配給農田工位（fill×SCALE、與 gather/mfg 競爭）
+			var fyield: float = float(tile.farming_level) * FARM_UNIT_YIELD * flabor * tile.harvest_factor * day_fraction
+			if fyield > 0.0:
+				TileBank.deposit(tile, "food", fyield, "farm_yield")
 
 func regenerate_tiles(state: WorldState, cadence_ticks: int = WorldState.TICKS_PER_DAY) -> void:
 	# R1：food regen 乘 day_fraction（與 consumption 同 cadence 基準）→ REGEN_RATE 值成真 per-day
@@ -286,7 +301,8 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 		gain *= team.work_morale
 		match res:
 			"food":
-				gain *= (1.0 + float(src_tile.farming_level) * 0.5)
+				# ★農業a drift 正位：移除 farming_level gather 乘數（farming 不再 boost 野地池採集、
+				#   改驅動獨立農田生產線 farm_yield=雙源獨立）。野地池 food 採集純野地物理。
 				gain *= (1.0 + prod_skill * 0.3)
 				gain *= src_tile.harvest_factor
 			"material":
