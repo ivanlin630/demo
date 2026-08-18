@@ -9,6 +9,7 @@ owner: systems（HOW）← settlement design §2 + S2 HOW spec §2b
 - **禁 crank / 禁死常數**：工期常數單旋鈕（TEST VALUE）、viability=付得起工期物理湧現（瀕餓建不成=零硬門檻）。
 - **感知鐵律**：L0→L1 決策讀腳下自家 L0（proximate 合法、team 站自己 camp）；跨距目標=S1b belief 既有（本 slice 是站定後紮根、非旅行）。
 - **守恆**：完工 food cap 抬非送即時糧（既有 :362 註「絕不送即時糧」原則守）。
+- **★★corvee 必 persist-保護（gate① 紅補、2026-08-18）**：in-place solo L0→L1 corvee 啟動後**必 stick 到完工**、否則 TASK_BUILD 被 routine argmax(覓食/貿易)搶班→10 ticks 就走→永不回→stall forever（team12 pop=1 血證）。`persist_strength` 有 `CONSTRUCTION_ACTIVE_FLOOR=0.15` hard-floor 本為 remote founding 子隊加、**solo in-place corvee 漏保護**（疑團離開 tile 後 persist 查 team.tile_pos=查錯 tile→無 floor→無回收）。修=延伸 persist 保護覆蓋 solo corvee（查 corvee-tile 非 team.tile_pos）or abandoned-corvee recovery。=手不聽腦/補丁閘 root 非新 sticky 補丁。★連 [[project_hand_obeys_brain_arc]]。
 
 ## §1 現況（grounded 驗證、負斷言先 wc-l 後宣）
 - **construction spine 存在**：`_tick_construction:272`（driver）、`_complete_construction:315`（completion match action）。`"crude_camp"` 分支:361 完工設 L1+owner+food+tag。`"build"`:327/`"upgrade_level"`:350/`"upgrade_facility"`:354 其他 action。
