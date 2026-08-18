@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[re-spec前深層發現須你確認scope(1st失敗因under-scope、避3rd)·★level-cancellation CONFIRMED(formula精確驗):farm production=fyield=level×FARM_UNIT_YIELD×flabor×harvest、flabor=labor_mult(farm)=fill×SCALE=alloc/(level×K_FARM)×SCALE→level分子(yield)與level分母(demand内fill)相消→labor-starved(fill<1、正是farm常態21%)時fyield=FARM_UNIT_YIELD×alloc×SCALE×harvest/K_FARM=LEVEL-INDEPENDENT·意思:發展farm於labor-starved完全不增production(demand=level×K_FARM抵銷yield的level)、只有滿飽和fill=1時level才生效(但farm從不飽和)·★∴你『production隨level升』gate用allocation單獨達不到:(a)真邊際分配無論怎麼分、只要production仍走level×fill(fill=alloc/level×K_FARM)、level就抵銷·★(a)『繞開demand-cap』的真義=farm production從fill/demand機制解耦:production=farm_alloc×per_labor_yield(per_labor_yield=level×FARM_UNIT_YIELD×harvest真level-dependent、發展farm每勞力真更產)→level不再抵銷+邊際分配讓高yield farm拿多份=雙贏·★但這比純allocation大:碰農業a farm_yield產出公式(resource:106)+估算器(farm_yield建模)+labor_mult語意·★確認scope:labor-slice v2=①食物工位真邊際分配②★farm production解耦fill/demand=alloc×per-labor-yield(level生效)③估算器同步·我lean這是唯一能達你production-隨-level gate的路(demand饱和你已否、但問題根是level雙計:yield有level+demand有level相消、解耦是移demand側的level不是貼補丁)·你確認scope(含production公式改)→我re-spec v2→R²·labor-slice HOLD·農業b/perf平行·地基KEEP"
 ---
 
