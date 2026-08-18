@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² perf Phase2刀1(frontier call-scoped memo B+_hex_dist static A、全安全道byte-identical)HOW審·spec=2026-08-18-perf-phase2-cut1-frontier-memo-hexdist-HOW.md·R①免(前提Phase1 profile+file:line坐實)·審點:①★memo-safety(核心):find_nearest_terrain_tile call-scoped memo keyed(terrain,max_range)——team.tile_pos於frontier_candidates一次呼叫內固定確認?terrain靜態無mutation確認?call-scoped返回即棄無跨tick leak確認?=byte-identical by construction成立?②_hex_dist純度(無instance state可static)確認?③無新常數(memo=機制非旋鈕)④感知鐵律不動(find_nearest_terrain_tile已# gate-ok地理公共知識、memo同答案更快取非改god-view語意)⑤補丁閘:memo=延伸非繞過·憲章gate=byte-identical 3跑機器證(最強驗證)·此slice待R²CLEAN→dispatch implementer(base post-S2b-REDO或現main)·與settlement平行·地基KEEP"
 ---
 # R² perf Phase2 刀1（frontier memo B + _hex_dist static A、全安全道）
