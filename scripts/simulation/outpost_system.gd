@@ -364,6 +364,8 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.outpost_level = 1
 			OutpostOwnerBank.set_owner(tile, int(tile.construction_target.get("owner", team.team_id)), "construct")
 			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
+			tile.camp_level = 0        # ★S2b：L0 消融進 L1（完工清 camp flag、L1 outpost_level 接手）
+			tile.camp_ticks_left = 0
 			var camp_tag: String = TeamData.TAG_MILITARY if tile.outpost_type == "military" else TeamData.TAG_PRODUCE
 			if not team.tags.has(camp_tag):
 				team.tags.append(camp_tag)
