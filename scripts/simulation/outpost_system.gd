@@ -290,6 +290,10 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 				"ct_reason": ct.task_reason if ct != null else "",
 				"ticks_left": tile.construction_ticks_left,
 			})
+		if state.teams.get(tile.construction_team_id) == null:   # ★S2b: 施工隊已亡→清 orphan construction(防 zombie 永卡)
+			tile.construction_team_id = -1
+			tile.construction_ticks_left = 0
+			tile.construction_target = {}
 		return  # 無施工隊在格，暫停（faction_ai._try_resume_construction 負責召回復工）
 	# ★progress tap（進度真動否）
 	if Probe.enabled:
@@ -364,6 +368,9 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.outpost_level = 1
 			OutpostOwnerBank.set_owner(tile, int(tile.construction_target.get("owner", team.team_id)), "construct")
 			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
+			tile.camp_level = 0        # ★S2b：L0 消融進 L1（完工清 camp flag、L1 outpost_level 接手）
+			tile.camp_ticks_left = 0
+			team.corvee_site = Vector2i(-1, -1)   # ★S2b：工程完成→清工地記憶
 			var camp_tag: String = TeamData.TAG_MILITARY if tile.outpost_type == "military" else TeamData.TAG_PRODUCE
 			if not team.tags.has(camp_tag):
 				team.tags.append(camp_tag)

@@ -87,6 +87,7 @@ const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算�
 # （survival 選擇統一委派 DecisionEngine.rank_survival → DecisionTerms weight，消雙 owner）
 const SOLO_COMMITMENT_BONUS: float = 0.15   # TEST VALUE — SoloAI 慣性加成（止 flip-flop，非鎖死）
 const CRUDE_CAMP_FOOD_SEED: float = 40.0   # TEST VALUE — 紮營種子糧（+同抬 cap）
+const L0_TO_L1_CORVEE_DAYS: int = 3        # TEST VALUE 單旋鈕 — L0→L1 紮根工期（person-ticks=此×TICKS_PER_DAY、pop 推進）
 # stuck: task 仍是進攻型但 move_target 已被 movement 清掉（off-map / 無路徑）→ 視為 idle 允許重評
 const STUCK_TASKS: Array = [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
 
@@ -803,6 +804,8 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.survival", _t3)
+		# ★S2b：L0→L1 紮根工期（idle 且站自己 L0 且 viable → 起工期；lifecycle transition 延伸 camp/settle 族）
+		_evaluate_l0_settle(state, team)
 		# 獨立戰略層（建國 intent）已在前段 solo 迴圈評估（_evaluate_solo 前，不雙寫）。
 		# 序5 dissolve：prosperity attack 決策已溶進主 rank（solo/unified 攻擊 option）——loop3 cascade invoke 刪。
 		# 保留的 scout scaffolding 生命週期（逾時釋放 / prey 消失 / 收斂轉攻）走 _tick_conquest_scout。
@@ -4719,6 +4722,58 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	if Probe.enabled: Probe.bump("settlement.camp_l0")   # L0 紮營 fire tap（觀測性）
 	print("[CampL0] Team%d 紮營 L0 @(%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 	return true
+
+# ★settlement S2b：L0→L1 紮根工期（in-place、複用 construction spine、非派子隊）。team 站自己 L0
+# （腳下 camp_level=1）+ viable（食足付得起工期、瀕餓不啟）+ idle → 設腳下 construction_target crude_camp
+# → 走既有 _tick_construction/_complete_construction 完工晉 L1（清 camp_level=0、set_owner、居民 tag）。
+# 決策落點延伸 camp/settle 族（lifecycle transition 同 _tick_solo_settle、非新求解器）。
+# ★感知鐵律：讀腳下自站 tile（proximate 合法）。viability=付得起工期物理湧現（瀕餓不啟、emergent 死於工期=深過濾）。
+func _evaluate_l0_settle(state: WorldState, team: TeamData) -> void:
+	if team.leader_id == -1:
+		return
+	if team.leader_id == state.player_id and state.player_id != -1:
+		return   # 玩家走 command，不自動紮根
+	if team.current_task != TeamData.TASK_IDLE:
+		return   # 只 idle 隊評估（committed/求生/戰/交易不打斷）
+	var pop: float = float(team.population)
+	var burn: float = maxf(pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var food_days: float = ResourceSystem.effective_food(state, team) / burn
+	# ★REDO 根修：abandoned-corvee recovery（自己起的工程未完→回頭續建，非永久 abandon）。
+	# 團覓食後 idle → 憑 corvee_site（self-knowledge、非 god-view）回工地續建。一次離開非致命。
+	if team.corvee_site != Vector2i(-1, -1):
+		var csite: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.corvee_site))
+		if csite != null and csite.construction_team_id == team.team_id and csite.construction_ticks_left > 0:
+			# 我的未完工程仍在：食足→回頭續建（在工地即進工期、離工地則 move 回）；瀕餓→續遊牧（工程掛著等回頭）
+			if food_days >= float(L0_TO_L1_CORVEE_DAYS):
+				TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+				if team.tile_pos != team.corvee_site:
+					team.move_target = team.corvee_site   # 走回工地（_tick_construction 需站上才推進）
+				if Probe.enabled: Probe.bump("settlement.l0_to_l1_resume")
+			return
+		team.corvee_site = Vector2i(-1, -1)   # 工程完成/消失（他隊接管/decay）→ 清工地記憶
+	# 起新 corvee：站自己 L0 + viable + 該格無據點/未施工
+	var tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
+	if tile == null or tile.camp_level != 1:
+		return   # 須站自己 L0 營地（腳下 camp）
+	if tile.outpost_level > 0 or tile.construction_team_id != -1:
+		return   # 已據點 / 施工中
+	if food_days < float(L0_TO_L1_CORVEE_DAYS):
+		return   # 付不起工期食 → 不啟（續遊牧 L0 forage；viability 物理前提、瀕餓不啟）
+	# 建點：type by leader 好戰/野心（同舊 establish_crude_camp 慣例）
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var martial: float = float(leader.values.get("好戰", 0.5)) if leader else 0.5
+	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
+	var camp_type: String = "military" if (martial > 0.6 or ambition > 0.7) else "civilian"
+	tile.construction_target = {"action": "crude_camp", "type": camp_type, "level": 1, "owner": team.team_id}
+	tile.construction_ticks_left = L0_TO_L1_CORVEE_DAYS * WorldState.TICKS_PER_DAY
+	tile.construction_team_id = team.team_id
+	tile.construction_started_tick = state.world.current_tick
+	tile.construction_last_progress_tick = state.world.current_tick
+	team.corvee_site = team.tile_pos   # ★記工地（recovery 憑此回頭）
+	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)   # L0→L1 紮根 lifecycle transition（同 _begin_village_relocate；constitution baseline ratify）
+	if Probe.enabled: Probe.bump("settlement.l0_to_l1_start")
+	print("[CorveeL1] Team%d L0→L1 紮根工期 @(%d,%d) %s (%d person-ticks)" % [
+		team.team_id, team.tile_pos.x, team.tile_pos.y, camp_type, tile.construction_ticks_left])
 
 func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)
