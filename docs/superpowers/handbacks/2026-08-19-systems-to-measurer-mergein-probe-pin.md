@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[churn probe pin(農業b popcap長跑順帶、不另跑)·pin SurvivalMergeIn churn是(b)arrival-never還是(c)accept-reject·報三數:①join.resolve count(=_resolve_join真fire次數;若<<SurvivalMergeIn 698=(b)joiner沒co-locate到host、committed JOIN沒到達)②accept.join_reject count(若高=(c)host拒loop)③mergein.dissolve vs mergein.subteam((a)dissolve=false→subteam占多=團變附庸非消失)·這三probe你popcap輪應已有(Probe.bump在interaction:1275/1285/1303/1309)、順帶dump不另跑·pin出a/b/c我定churn修方向·②pop-account完整分布照跑完回報(effective_pop_cap分布/爆塌/overflow率、churn confound已知、數字仍要)·地基KEEP"
 ---
 # churn probe pin（農業b popcap 長跑順帶、不另跑）
