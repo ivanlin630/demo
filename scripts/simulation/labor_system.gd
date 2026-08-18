@@ -7,6 +7,7 @@ class_name LaborSystem
 
 const K_MFG: float = 3.0                 # TEST VALUE — 每設施 level 要 3 手（L2 workshop demand=6）
 const K_GATHER: float = 5.0              # TEST VALUE — 每採集線 5 手飽和
+const K_FARM: float = 5.0                # TEST VALUE — 每 farming_level 5 手飽和（★農業a 農田工位、與 gather/mfg 競爭同池）
 const LABOR_SCALE: float = 1.0           # TEST VALUE — 校準:pop5 單隊單工位 fill=1→labor_mult=1.0=現 pop_mult@pop5
 const LABOR_CADENCE: int = TimeScale.TICK_PER_DAY * 3   # 常駐慢 cadence（非每 tick 抖）
 const LABOR_CRISIS_FOOD_DAYS: float = 2.0              # 共址任一隊 food_days<此→即時重算(危機搶勞力)
@@ -50,6 +51,9 @@ static func rebalance(state: WorldState, tile: HexTileData) -> void:
 		var lvl: int = int(tile.get(level_key))
 		if lvl > 0:
 			demand["mfg:" + String(level_key)] = float(lvl) * K_MFG
+	# ★農業a：農田工位=勞力池新 demand 源（farming_level>0 才列、與 gather/mfg 競爭=guns-vs-butter 自動）。
+	if tile.farming_level > 0:
+		demand["farm"] = float(tile.farming_level) * K_FARM
 	var keys: Array = demand.keys(); keys.sort()
 	# need 權重（need_oracle，per-workstation output res，Σ 共址隊；survival 天然拉高食，無 scripted floor）。
 	var wgt: Dictionary = {}
@@ -104,6 +108,11 @@ static func _workstation_need(state: WorldState, teams: Array, key: String) -> f
 			for t in teams:
 				var lv: Dictionary = TradeValuation.leader_vals(state, t)
 				w += NeedOracle.need_keep(state, t, res, lv) + NeedOracle.demand(state, t, res, lv)
+	elif key == "farm":
+		# ★農業a：農田工位 need=food need（farm 產 food，同 gather:food 的 need 權重法）。
+		for t in teams:
+			var lv: Dictionary = TradeValuation.leader_vals(state, t)
+			w += NeedOracle.need_keep(state, t, "food", lv) + NeedOracle.demand(state, t, "food", lv)
 	return w
 
 # labor_mult(tile, workstation_key) = fill × LABOR_SCALE（取代 pop_mult；fill∈[0,1] 乘 SCALE 還原量級）。
