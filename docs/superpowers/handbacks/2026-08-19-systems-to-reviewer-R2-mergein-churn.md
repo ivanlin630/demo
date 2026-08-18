@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² SurvivalMergeIn churn (b)arrival-never pin+根修 investigation-slice HOW審·spec=2026-08-19-mergein-churn-arrival-pin-HOW.md·R①免(前提measurer probe-pin坐實:join.resolve~10 vs commit 698=1.4%=(b)arrival-never)·審點:①前提fact-check:JOIN commit→movement→arrival co-locate→_resolve_join路(interaction:46/206/226)確認?resolve走到時運作正常確認?commit698 vs resolve~10落差=arrival-never確認?②investigation approach:T1 runtime-trace pin i(movement不執行)/ii(cadence重評reset persist弱S2b款)/iii(移動host chase)=measure-first不假設sub-cause合理?③★手不聽腦root非補丁:T2根修committed JOIN真resolve(persist-to-arrival或movement修或mobile-host處理)非繞過補丁④感知鐵律trace讀own-state禁耗global RNG⑤hand-obeys-brain家族(12mo大考#4/S2b corvee cousin)·gate=churn消+team不暴增+perf回正+committed JOIN真resolve·此slice base現main·與農業b re-measure/labor-v2平行·待R²CLEAN→dispatch·地基KEEP"
 ---
 # R² SurvivalMergeIn churn (b)arrival-never pin+根修 HOW審

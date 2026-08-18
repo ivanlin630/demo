@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch SurvivalMergeIn churn (b)arrival-never pin+根修·base main b223a862·spec=2026-08-19-mergein-churn-arrival-pin-HOW.md R²-CLEAN(reviewer親讀resolve路結構完整、investigation measure-first三候選互斥、T2手不聽腦架構級根修非補丁)·★(b)arrival-never定案(probe:join.resolve~10 vs commit 698=1.4%=joiner從沒抵達host、每cadence重commit反覆)=hand-obeys-brain家族(project_hand_obeys_brain_arc、12mo大考#4/S2b corvee cousin)·★T1 runtime-trace pin sub-cause(禁耗global RNG的temp trace、同own_granary款):instrument JOIN-committed隊追(i)movement不執行(try_set TASK_JOIN後MovementSystem有無真朝join_pos移動、move_target設否path推進否)(ii)cadence重評reset(survival re-eval每cadence是否重commit JOIN reset task_start/move在到達前=persist太弱S2b corvee款、_should_reeval cadence頻率vs移動到達時間)(iii)移動host chase(join_pos追移動中host每commit更新host現位joiner永不及)·seeded短局跑捕churn(day51左右密集)→pin i/ii/iii→★T1 handback附caller/機制+我確認根再T2(或鏈清直接T2)·★T2根修依T1:(i)→補movement執行(JOIN task驅move到join_pos)(ii)→JOIN survival persist-to-arrival(committed JOIN在途不被cadence重評reset/蓋、比照S2b corvee persist款、到達或timeout才釋放)(iii)→mobile-host proximity-resolve(不強求精確co-locate)or host rendezvous·移T1 trace·★手不聽腦root非補丁(別在resolve端疊繞過)·感知鐵律讀own-state(movement/target自己)·gate:churn消(join.resolve/commit比例回正非1.4%)+team不暴增(49→242病消)+perf回正(40-70×消)+committed JOIN真resolve+determinism+constitution+不破既有JOIN/survival+fp intended·worktree feat/mergein-churn-fix·完→handback附measurer·地基KEEP"
 ---
 
