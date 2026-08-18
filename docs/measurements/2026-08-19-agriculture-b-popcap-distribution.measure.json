@@ -1,0 +1,48 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-18-systems-to-measurer-agriculture-b-gate.md",
+  "bed": "scripts/debug/agri_b_popcap_bed.gd (temp, reverted after use)",
+  "branch": "feat/agriculture-b",
+  "branch_commit": "70a5d0cd",
+  "config": "warring_states.json",
+  "seed": 1337,
+  "months": 3,
+  "wall_clock_note": "此輪跑了異常久(數小時,遠超同規格局正常耗時)——本身就是效能發現,見below performance_degradation。",
+  "final_state": {
+    "start_pop": 444,
+    "end_pop": 362,
+    "attrition_pct": 18.5,
+    "start_teams": 49,
+    "final_teams": 162,
+    "final_factions": 8,
+    "max_team_id_seen": ">300 (大量team建立又消滅/合併,final存活162非峰值)"
+  },
+  "performance_degradation": {
+    "day90_tickperf": "avg=793034us max=20157758us ticks=240 teams=162 factions=8",
+    "comparison_baseline": "典型headless test tick avg量級~10000-20000us(10-20ms)",
+    "slowdown_factor": "~40-70x per-tick平均變慢(推算793034/~15000≈53x)，尖峰20.2秒單tick",
+    "verdict": "嚴重效能degradation，隨team數暴增(49→162+存活、峰值>300 id)复合O(隊數)迴圈成本疊加"
+  },
+  "effective_pop_cap_distribution": {
+    "n_snapshots": 4096,
+    "min": 1, "p10": 7, "p50": 15, "p90": 45, "max": 100,
+    "collapse_zone_cap_lt_5_snapshots": 217,
+    "runaway_zone_cap_gt_150_snapshots": 0
+  },
+  "overflow_mechanism": {
+    "popcap_overflow_fire_total": 3,
+    "teams_triggered": 3,
+    "per_team": {"team3": 1, "team43": 1, "team0": 1},
+    "pop_gt_100_runaway_candidate_snapshots": 0,
+    "verdict": "effective_pop_cap 自己的 overflow 機制(check_overflow_for_team pop>cap才觸發)全期只fire 3次——非'爆'非嚴重'塌churn'的直接來源。爆(runaway pop>100)0次、cap>150 runaway區0次快照——強領導複合放大沒有在這局造成population爆炸。"
+  },
+  "separate_churn_finding": {
+    "source": "docs/superpowers/handbacks/2026-08-18-measurer-to-systems-agriculture-b-perf-interim.md",
+    "survival_mergein_total": 698,
+    "note": "這是完全不同的機制(FactionAISystem survival-decision的併入分支try_set重複commit、非PopulationSystem.check_overflow_for_team的pop-cap overflow split)。697次committed但從未真正resolve成merge_teams。這才是真正的'churn'主因，跟 effective_pop_cap 本身的 overflow 機制關聯是間接的：cap<5 collapse zone 佔217/4096快照(~5.3%)顯示大量隊落在近崩潰帽區，這些弱隊更容易進入survival決策模式去嘗試merge-in、進而餵養這個獨立的698次churn迴圈——但兩者是兩套機制，不是同一根。"
+  },
+  "conclusion": {
+    "runaway_verdict": "無——強領導複合放大沒有觀察到population爆炸(pop>100零次、cap>150零次)。",
+    "collapse_verdict": "有但要分兩層講：①effective_pop_cap自己的overflow機制很少fire(3次)，本身不是churn源；②cap<5近崩潰區佔約5.3%快照，這些弱隊間接餵養了一個完全獨立的698次SurvivalMergeIn churn(committed-but-never-resolves bug，疑跟agriculture-b無關的既有bug被高強度局逼出來，需要main baseline對照才能坐實歸因)。",
+    "performance_verdict": "嚴重——day90 tick avg 793ms/max 20.2s，比正常量級慢40-70倍，主因team暴增(O(隊數)迴圈成本)+698次白做工churn迴圈。"
+  }
+}
