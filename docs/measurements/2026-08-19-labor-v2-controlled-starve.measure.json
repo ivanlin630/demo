@@ -1,0 +1,35 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-19-systems-to-measurer-labor-v2-controlled-starve.md",
+  "bed": "scripts/debug/labor_v2_controlled_starve_bed.gd (temp, reverted after use)",
+  "config": "peaceful_economy.json",
+  "seed": 1337,
+  "months": 6,
+  "controlled_pair": {
+    "baseline": {"branch": "main HEAD (無labor-slice變更)", "start_pop": 72, "end_pop": 70, "teams_final": 13, "death_starve_anon": 2, "food_pool_delta": 1074.8},
+    "branch": {"branch": "feat/labor-marginal-food-v2 (e9f1abb5)", "start_pop": 72, "end_pop": 32, "teams_final": 10, "death_starve_anon": 32, "food_pool_delta": 1100.3}
+  },
+  "q1_attribution": {
+    "verdict": "CONFIRMED — 同seed/config/months/bed controlled對照，main=2 vs branch=32，16倍差距，明確可歸因labor-v2。這是controlled比較(同床同條件僅branch不同)，消除了先前uncontrolled(跨輪次歷史數字比)的confound。"
+  },
+  "q2_decomposition": {
+    "total_death_events": 32,
+    "honest_chronic_food_flow_avg_lt_neg0.5": 19,
+    "lag_window_food_flow_avg_gt_0": 0,
+    "ambiguous_neg0.5_to_0": 13,
+    "verdict": "honest主導、lag-window=0——32起死亡事件裡沒有任何一起是food_flow_avg>0(原本穩定/成長中突然被crisis打斷、B5沒趕上)的情況。19起明確chronic慢性低(food_flow_avg<-0.5)，13起ambiguous但仍是負值(-0.5~0之間，仍是緩慢衰退非急墜)，合計32起全部落在food_flow_avg≤0——一致指向genuine under-feeding(honest)，非safety-net觸發delay(lag-window)。",
+    "sample_death_events": [
+      {"tick": 7400, "team": 10, "famine_days": 7.1, "food_flow_avg": -1.048},
+      {"tick": 7600, "team": 11, "famine_days": 7.1, "food_flow_avg": -1.001},
+      {"tick": 7900, "team": 9, "famine_days": 7.1, "food_flow_avg": -0.928},
+      {"tick": 10000, "team": 3, "famine_days": 7.1, "food_flow_avg": -1.065},
+      {"tick": 10000, "team": 9, "famine_days": 7.1, "food_flow_avg": -0.149},
+      {"tick": 10000, "team": 10, "famine_days": 9.2, "food_flow_avg": -0.109}
+    ],
+    "note_on_famine_grace": "所有死亡事件的famine_days都≥7.1(對應FAMINE_GRACE_DAYS=7)——死亡前都經過至少7天的完整grace窗口，且窗口內food_flow_avg持續非正，不是『原本正常突然被打斷grace還沒跑完就死』的模式。"
+  },
+  "conclusion": {
+    "attribution": "starve增加(2→32)明確可歸因labor-v2的T1食物邊際分配變更。",
+    "decomposition": "honest主導(19確定+13偏honest=32/32全部food_flow_avg≤0，lag-window=0)——是雙計移除後food-labor水位變誠實導致部分團genuine under-fed，非B5安全網觸發delay造成的可避免死亡。",
+    "recommendation_per_ticket_framework": "按ticket自己定的分流準則(honest主導→merge+記accepted cost+12mo監控;lag-window主導→評cheap mitigation再merge)，這輪數據落在honest主導這一格——建議merge+記accepted cost+安排12mo監控，非需要調B5觸發閾值的mitigation。"
+  }
+}
