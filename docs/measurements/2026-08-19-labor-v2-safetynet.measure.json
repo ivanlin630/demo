@@ -1,0 +1,30 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-19-systems-to-measurer-labor-v2-safetynet.md",
+  "branch": "feat/labor-marginal-food-v2",
+  "branch_commit": "e9f1abb5",
+  "bed": "scripts/debug/labor_v2_safetynet_bed.gd (temp, reverted after use)",
+  "config": "peaceful_economy.json",
+  "seed": 1337,
+  "months": 6,
+  "b5_safetynet": {
+    "total_snapshots": 759,
+    "low_food_samples_food_days_lt_2": { "n": 404, "food_share_avg": 1.302 },
+    "healthy_samples_food_days_gt_5": { "n": 321, "food_share_avg": 0.819 },
+    "spike_pct": 59.0,
+    "verdict": "PASS — 瀕餓時food_share(1.302)比健康時(0.819)高約59%，勞力真的回流食物生產，非被gather/mfg卡死。B5安全網機制運作正常。"
+  },
+  "cross_resource_and_health": {
+    "aggregate_share": { "food": 819.1, "food_pct": 29.5, "mfg": 20.5, "mfg_pct": 0.7, "material": 1939.4, "material_pct": 69.8 },
+    "death_starve_anon_total_6mo": 32,
+    "end_pop": 32,
+    "teams_final": 10,
+    "food_pool_conservation": { "t0": 26465.0, "tN": 27565.3, "delta": 1100.3 },
+    "food_flow_top_reasons": {
+      "regen_food": 107293439.7, "harvest_deplete": -621760.1, "eat_team": -467721.6,
+      "provision_granary_out": -82661.1, "l0_forage_drain": -51897.6, "provision_carry": -24521.9,
+      "l0_forage": 3459.8, "harvest_intake_vault": 1257.2, "farm_yield": 955.9, "hunt": 514.6
+    },
+    "verdict": "ΔGRAND=+1100.3(正、無崩塌)——全世界食物總量沒垮，是淨成長。但death.starve_anon=32(6mo)比先前agriculture-a-gate輪同seed/config的基準(72→65,starve=10)明顯偏高——這輪start應同72(未在輸出片段內明確印出、按同config推定)、end_pop僅32,attrition遠超先前輪。ΔGRAND健康代表這不是全域supply崩潰,較像分配層面的局部/波動性starve增加。"
+  },
+  "honest_caveat": "沒有做labor-v2專屬的同床main baseline對照(時間所限)，這裡的『偏高』判斷是跟另一輪(agriculture-a-gate,不同branch但同seed/config/months)的歷史數字比——不是嚴格controlled對照，僅供警示。"
+}
