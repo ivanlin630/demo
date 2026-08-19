@@ -4,7 +4,11 @@ extends SceneTree
 #   PERF_CONFIG=B → specimen 掛 N 隊、逐 tick fp 落檔並與 A 檔比對、印第一個分岔 tick。
 # 用法：PERF_SEED=1337 PERF_DAYS=1500 PERF_CONFIG=A ... 然後 PERF_CONFIG=B ...
 
-const OUT_A: String = "A:/GDS/demo/.worktrees/ewma-advance-decouple/neutral_A.txt"
+# ★衛生修：原本硬編某 worktree 絕對路徑（該 worktree 一刪就壞）→ 改走 env（WARRING_OUT，
+# godot-detach 白名單內）、預設落 user://（Godot 使用者目錄、與 worktree 生命週期解耦）。
+static func _out_a() -> String:
+	var p: String = OS.get_environment("WARRING_OUT")
+	return p if p != "" else "user://specimen_neutral_A.txt"
 
 func _initialize() -> void:
 	_run(); quit()
@@ -16,13 +20,13 @@ func _run() -> void:
 	var nspec: int = int(OS.get_environment("LW_MONTHS")) if OS.get_environment("LW_MONTHS") != "" else 7
 	print("=== specimen neutrality bed：mode=%s seed=%d ticks=%d nspec=%d ===" % [mode, seed_v, ticks, nspec])
 	if mode == "A":
-		var fa: Array = _run_pass(seed_v, ticks, [], OUT_A)   # ★增量落檔（被 reap 也留 partial）
-		print("[bed] A pass done → %s（%d fp）" % [OUT_A, (fa[0] as Array).size()])
+		var fa: Array = _run_pass(seed_v, ticks, [], _out_a())   # ★增量落檔（被 reap 也留 partial）
+		print("[bed] A pass done → %s（%d fp）" % [_out_a(), (fa[0] as Array).size()])
 		return
 	# B pass
-	var base: Array = _load(OUT_A)
+	var base: Array = _load(_out_a())
 	if base.is_empty():
-		print("[bed] ✗ 先跑 A pass（找不到 %s）" % OUT_A); return
+		print("[bed] ✗ 先跑 A pass（找不到 %s）" % _out_a()); return
 	var probe_pass: Array = _run_pass(seed_v, 0, [], "")   # 只 setup 拿 team 清單（零 tick）
 	var picks: Array = (probe_pass[1] as Array).slice(0, nspec)
 	print("[bed] B pass specimens=%s" % str(picks))
