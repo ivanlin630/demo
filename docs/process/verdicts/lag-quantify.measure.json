@@ -1,0 +1,65 @@
+{
+  "ticket": "lag份額quantify（QA判labor-v2 accepted cost分解=REVISE的specimen複驗）",
+  "bed": "labor-v2 combined branch (feat/labor-marginal-food-v2 @383ec81e)，peaceful_economy.json seed=1337 6mo — 同床同seed同config，跟原labor-v2-combined-remeasure verdict可比",
+
+  "mechanism_finding": {
+    "verdict": "★決定性code-read：famine死亡機制與food_flow_avg(EMA)完全無關",
+    "evidence": "resource_system.gd:157-188，famine_days累積/死亡觸發只依『food_available(=team.resources+own_granary_tile) < food_needed』的每日STOCK check(satisfaction<FAMINE_SATISFACTION_THRESHOLD=0.3)，不讀food_flow_avg。food_flow_avg純粹是診斷/AI決策輸入信號(:20 FLOW_WINDOW_DAYS=5.0 EMA)，非死亡的因果驅動。",
+    "implication": "『EMA lag導致誤殺』這個假說原本框架有誤——EMA不gate死亡，死亡是直接的stock check。真正該問的問題是：用EMA的正負號來『分類』死亡是genuine-chronic還是lag-artifact，這個分類方法本身準不準——這才是QA原本擔心的（分類/歸因準確度，非死亡本身真偽）。"
+  },
+
+  "pass1_classify": {
+    "method": "temp tap（resource_system.gd _update_food_flow）：per-team滾動20筆瞬時daily_rate歷史(非EMA)，死亡當下dump。跑法：Probe.enabled=true，未掛specimen。",
+    "raw_log": "docs/measurements/2026-08-20-lag-quantify-classify.log",
+    "result": "start_teams=12 end_teams=9 death.starve_anon=28（與原labor-v2-combined-remeasure verdict的28完全吻合，確認deterministic reproduce成功）",
+    "distinct_dying_teams": 7,
+    "note": "28起死亡事件實際來自僅7個distinct team（每隊famine grace(7天)後連續4天minor/anon死亡，7隊×4=28），非28個獨立團——這點原始verdict的『28起』計數口徑正確(events非teams)，但lag份額分析應以7個team-level軌跡為單位判斷，非28個獨立事件。",
+    "per_team_classification": [
+      {"team": 10, "raw_daily_rate_pattern": "全程穩定正值(20筆全部+2.79~+2.86，avg最終收斂在-0.016~-0.008)", "food_flow_avg_at_death": "-0.016 → -0.008", "classification": "★TRUE EMA-LAG MISCLASSIFICATION候選——raw signal顯示genuinely正向/健康，EMA仍帶負值只因窗口更早的赤字還沒平滑完", "events": 4},
+      {"team": 9, "raw_daily_rate_pattern": "全程精確0.000(20筆全部0，含最早窗口)", "food_flow_avg_at_death": "-0.298 → -0.005", "classification": "GENUINELY STUCK AT ZERO——非chronic遞減也非lag，是effective_food完全停滯在0(生產完全停擺)，EMA緩慢收斂向0跟raw一致方向，非誤判", "events": 4},
+      {"team": 4, "raw_daily_rate_pattern": "全程精確0.000", "food_flow_avg_at_death": "-1.021 → -0.555", "classification": "同Team9=GENUINELY STUCK AT ZERO", "events": 4},
+      {"team": 5, "raw_daily_rate_pattern": "全程精確0.000", "food_flow_avg_at_death": "-1.005 → -0.546", "classification": "同Team9=GENUINELY STUCK AT ZERO", "events": 4},
+      {"team": 8, "raw_daily_rate_pattern": "主要-1.6持續負值，穿插2次收穫式正spike(+17.6/+18.8)但不足以扭轉趨勢", "food_flow_avg_at_death": "-1.097 → -0.597", "classification": "GENUINE CHRONIC——raw跟EMA方向一致，無誤判", "events": 4},
+      {"team": 11, "raw_daily_rate_pattern": "主要-1.6負值，穿插正spike(+14.0/+5.45)", "food_flow_avg_at_death": "-0.217 → -0.118", "classification": "AMBIGUOUS-OSCILLATING——雜訊大但淨趨勢仍負，EMA正確平滑掉噪音、非誤判", "events": 4},
+      {"team": 0, "raw_daily_rate_pattern": "主要-1.6負值，穿插多次正spike(+17.6/+4.8/+3.2)", "food_flow_avg_at_death": "-0.114 → -0.062", "classification": "同Team11=AMBIGUOUS-OSCILLATING，非誤判", "events": 4}
+    ],
+    "lag_share_answer": {
+      "significant_lag_misclassification": "1/7 teams (14.3%)、4/28 events (14.3%)",
+      "genuinely_stuck_at_zero": "3/7 teams (42.9%)、12/28 events (42.9%) — 這是原分類『chronic<-0.5』12起裡的一部分，但更精確描述是『production完全停擺』非『持續消耗中』",
+      "genuine_chronic_decline": "1/7 teams (14.3%)、4/28 events (14.3%)",
+      "ambiguous_oscillating_but_net_negative": "2/7 teams (28.6%)、8/28 events (28.6%) — EMA分類為ambiguous(-0.5~0)但raw訊號顯示EMA判讀正確非誤判",
+      "verdict": "用raw daily_rate重新檢驗後，28起裡只有4起(Team10、14.3%)是真正的EMA-lag誤判候選；其餘24起(85.7%)無論是stuck-at-zero/chronic/oscillating，raw訊號都跟EMA分類方向一致，非誤判。"
+    },
+    "alternative_death_cause_check": {
+      "combat_target": "全部28起死亡的combat_target均=-1（無一起在死亡當下處於戰鬥狀態）——排除『被搶/戰鬥致死』替代死因",
+      "task_pattern": "team4/5全程task=return_home（返家途中持續餓死，非決策錯誤，是真正趕不及）；team8/9多為訓練/移動；team0/10/11混合訓練/建設/idle——無證據顯示決策層選錯（沒有明顯『不去找食物』的錯誤決策模式）",
+      "labor_share": "多數死亡時labor_share=1.00(全勞力投入)，隨人口死亡遞減(0.75→0.60→0.17)符合機械縮編、非決策棄置"
+    }
+  },
+
+  "pass2_specimen": {
+    "method": "同seed/config/branch reload，對Pass1找到的7個distinct隊(0/4/5/8/9/10/11)全掛SpecimenTracer(全覆蓋優於原定3-5+3-5抽樣)",
+    "raw_log": "docs/measurements/2026-08-20-lag-quantify-specimen.log",
+    "specimen_jsonl": "docs/measurements/2026-08-20-lag-quantify-specimen.jsonl (4338 entries)",
+    "★CRITICAL_CAVEAT_determinism_divergence": {
+      "finding": "掛SpecimenTracer導致模擬軌跡真實分岔——Pass2 death.starve_anon total=26（非Pass1的28）,且Team10具體死亡型態不同：Pass1顯示Team10單一連續famine episode(7→8→9→10共4起)；Pass2顯示Team10兩段分開的較短episode(famine=7,8各出現2次、從未到9或10)。",
+      "interpretation": "SpecimenTracer的_begin_observe/_end_observe機制宣稱『specimen capture純觀測、suppress RNG+Probe』，但這次實測顯示為特定team開啟specimen確實改變了該team乃至世界的後續模擬結果——不是零成本/中立的，至少在這個情境下。這可能違反(或至少測試邊界超出)invariants §83『觀測禁耗global RNG』的既有保證範圍(該保證原本針對『specimen開/關全域』零成本，未必涵蓋『對特定team開specimen』這個更窄情境)。",
+      "consequence": "specimen.jsonl裡的Team10軌跡不能當成Pass1死亡事件的精確重演——QA讀specimen時應把它當『同類型隊伍的典型決策/資源軌跡範例』，非『這28起死亡事件的逐格真實重播』。這是我這輪意外發現的獨立finding，不在原ticket範圍內，但重要到必須揭露，建議systems/implementer code-read SpecimenTracer的capture路徑是否有未被_begin_observe/_end_observe包住的RNG或狀態副作用。",
+      "flag_for": "systems/implementer（observability instrumentation正確性，非我能修）"
+    },
+    "specimen_team10_note": "Pass2 specimen顯示Team10的effective_food在tick12010→13270間從0.996持續成長到46.45（同期famine=7,8兩度出現但未死透），跟Pass1的food_private=0.0+famine 7→10連續惡化形成鮮明對比——這進一步佐證上述軌跡分岔是真實的(非我誤讀)，而非提供『Team10為何被誤判』的乾淨佐證(因為Pass2的Team10已經是不同的模擬分支)。"
+  },
+
+  "within_tick_ordering_hypothesis": {
+    "note": "★未完全驗證的假說、供systems參考：Team10『raw daily_rate為正卻仍死亡』的更精確解釋，可能不是純EMA平滑滯後，而是tick內執行順序——resolve_consumption的STOCK check(決定famine_days)發生在當日income入帳『之前』，而_update_food_flow/effective_food讀值發生在income入帳『之後』（同函式內consumption迴圈的後半段）——若當日income剛好在check後才到帳，flow訊號會顯示『健康』但那筆錢救不了當天已經觸發的famine_days累積。這個假說本輪未逐行code-read證實時序，是觀察data pattern後的推論，標記為待驗證。",
+    "confidence": "medium — 基於Pass1 raw data的間接推論，非直接code-read坐實時序"
+  },
+
+  "cleanup": {
+    "temp_tap_reverted": "resource_system.gd（_flow_history滾動累加器+_apply_famine_attrition的death.trajectory dump）— git checkout -- 確認乾淨",
+    "temp_beds_deleted": ["scripts/debug/lag_quantify_classify_bed.gd", "scripts/debug/lag_quantify_specimen_bed.gd"],
+    "compile_check": "godot --path .worktrees/labor-marginal-food-v2 --headless --import 乾淨編譯"
+  },
+
+  "summary": "★核心結論：famine死亡機制與food_flow_avg(EMA)無關(純stock check)，EMA只是診斷信號。用raw daily_rate重新檢驗28起死亡(7個distinct team)：僅1隊/4起(14.3%)是真正的EMA-lag分類誤判候選(Team10，raw訊號持續正向但EMA仍負)；其餘24起(85.7%)無論stuck-at-zero(3隊/12起)、chronic(1隊/4起)、oscillating(2隊/8起)，raw訊號都跟原EMA分類方向一致，非誤判。替代死因排查：全部28起死亡時combat_target=-1(排除被搶)、labor_share/task型態顯示無決策棄置跡象。★意外重要發現：對7個team開SpecimenTracer導致模擬軌跡真實分岔(26 vs 28死亡、Team10具體命運不同)，specimen.jsonl不能當Pass1事件的精確重播，只能當同類軌跡的典型範例——已標記請systems/implementer code-read SpecimenTracer的中立性保證邊界。14.3%的lag誤判比例是否算『顯著』（動用B5預核槓桿）交systems/blueprint裁決；本輪已提供可據以判斷的精確數字與逐隊分類，而非籠統估計。"
+}

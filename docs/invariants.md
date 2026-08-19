@@ -372,6 +372,8 @@ for tid in faction.member_team_ids:
 - player 分支偵測靠 `WorldState.get_player_team_id()`（單一源）。但**死者 person 已 erase 時偵測查不到**（leader_id=-1 且不在 named）→ 已知是 player team 的 external caller（encounter `_check_player_wiped`、player_command stale-heir 終局）**直呼 public `EventSystem.handle_player_succession(state, team)`** 繞過自動偵測。所有真實路徑呼 `on_leader_death` 時死者 person 尚在 `persons`（combat 在 erase 前呼、famine/encounter/安全網從不 erase）→ 自動偵測對它們成立。
 - 冪等：`on_leader_death` 的 player 偵測分支對已 pending 同隊 `choose_heir` 直接回 `true` 不重設（安全網每 tick 重呼）；`handle_player_succession` 本身不帶冪等（external caller 要即時重評）。
 
+- **勢力盟主繼承（faction 層、≠ 上列 team 層 leader 繼承）** = `WorldState.succeed_or_disband_faction` 單一 owner（繼承-lite slice）：領袖團死 → 成員中最強者接位（統領→pop→tid 全序），無成員才 `disband_faction`。候選過濾**必吃死集合**見〈死亡窗口（走屍隊）決策紀律〉。
+
 ## 關係圖（typed-edge）
 
 - typed 關係事實只經 `RelationGraph`（add_edge/edges_of_type/edges_to/strongest）寫讀 `PersonData.relation_edges`。
@@ -433,3 +435,21 @@ for tid in faction.member_team_ids:
 - **★護欄①值域鎖死**：`priority` 只准填 `TaskArbiter` **既有具名常數**（`PRIO_COMBAT/SURVIVAL/THREAT/PLAYER/VENDETTA/DISPATCH/FACTION/AMBIENT`）、**禁裸 int**（防隨手標 `99` 繞過整個優先序階梯=真後門）。
 - **★護欄②必附 why-comment**：任何 option 使用此欄覆蓋預設，**須在 REGISTRY entry 留一行理由**（防日後有人為了讓某 option「贏」隨手蓋掉、事後看不出是刻意設計還是誤標）。
 - **首例**：`紮根`（L0→L1 工期）留 `survival` set（絕境隊也該能被 util 秤、拿掉=隱含硬門檻）但標 `PRIO_DISPATCH`——**長工期發展型動作必須能被 threat(70)/survival(80) 打斷**（`corvee_site` recovery 讓進度不歸零）。
+
+## 死亡窗口（走屍隊）決策紀律（2026-08-20 systems 立、R² 繼承-lite 抓到具體 race 後升格）
+
+滅團**不即時 erase**（`world_state.gd:44` 註：中途 erase 不安全、多系統持 team_ids 快照）→ 存在**兩層窗口**，窗口內死隊在 `state.teams` **完全活著**（無 `is_dead` flag、population 可能非 0）：
+
+| 窗口 | 範圍 | 已死但仍可見的集合 |
+|---|---|---|
+| **大窗**：`teams_pending_erase` 標記 → tick 末 `cleanup_extinct_teams` | 該 tick 剩餘全部系統 | `state.teams_pending_erase` |
+| **小窗**：`erase_teams` 批次迴圈內（真 `teams.erase` 在迴圈**之後**） | 迴圈內每隊的 step1/2 | 該函式內已建的 `dead` 字典（`world_state.gd:287-292`） |
+
+**紀律（判準=後果是否跨窗口存續）**：
+- **純粹改動「即將消失的物件」→ 無害、免防**（step1 孤兒化子隊 `parent_team_id=-1`、`disband_faction` 把同批死者 `faction_id=-1`）——寫進去的值隨物件一起消失。
+- **★產生「窗口後仍生效的綁定」→ 必須排除死集合**：選出/指派/接位/締約一個 team_id 並寫入**存活實體**的欄位。只信 `teams.has(tid)` = 綁到走屍。
+  - 血證（R² 2026-08-20）：勢力盟主繼承若只信 `teams.has(cid)`，領袖隊在 `dead_list` 順序中先處理時，**同批死亡的隊友仍 `has()==true`** → 選為繼任者、然後同一次 `erase_teams` 親手清掉它。
+- **傳法（零新資料結構）**：小窗傳該函式已建的 `dead`；大窗傳既有 `state.teams_pending_erase`。**禁**為此新增 `is_dead` 旗標或平行登記（兩集合已是權威）。
+- 新增任何「跨窗口存續綁定」的機制時，**spec 必須明寫吃哪個死集合**；R² 視為必查項。
+
+（繼承-lite slice 接線時落地；契約先立，後續同類機制一律照此。與上方「team reference 契約 B 類瞬時懸空」互補：B 類講 erase **之後**的懸空自癒，本節講 erase **之前**的走屍可見。）

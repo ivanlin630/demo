@@ -16079,12 +16079,16 @@ func _test_need_gather_updates() -> void:
 	var state := _mk_min_state()
 	var team := _mk_team(state, 5, {"野心": 0.5})   # 既有 helper：最小 state + 1 team（含 leader）
 	assert(team.need_urgency.size() == 0, "gather 前 need_urgency 空")
-	var ctx := DecisionContext.gather(state, team)
-	assert(team.need_urgency.size() == NeedHierarchy.N_LAYERS, "gather 後 need_urgency size 5")
+	# ★advance 解耦：預設 gather 是純讀（不推進持久 EWMA、不改 plan_phase）——只有真決策評估傳 true。
+	var ctx_ro := DecisionContext.gather(state, team)
+	assert(team.need_urgency.size() == 0, "★純讀 gather 不推進持久 need_urgency（仍空）")
+	assert(ctx_ro.need_urgency.size() == NeedHierarchy.N_LAYERS, "純讀仍給 ctx 有效快照（raw、不落 team）")
+	var ctx := DecisionContext.gather(state, team, true)
+	assert(team.need_urgency.size() == NeedHierarchy.N_LAYERS, "advance=true 後 need_urgency size 5")
 	assert(ctx.need_urgency.size() == NeedHierarchy.N_LAYERS, "ctx 快照 size 5")
-	# 第二次 gather → EWMA 累積（值變，非重置）
+	# 第二次 advance → EWMA 累積（值變，非重置）
 	var first := team.need_urgency[NeedHierarchy.L_BELONGING]
-	var _ctx2 := DecisionContext.gather(state, team)
+	var _ctx2 := DecisionContext.gather(state, team, true)
 	var second := team.need_urgency[NeedHierarchy.L_BELONGING]
 	assert(second >= first, "EWMA 累積不倒退，%f→%f" % [first, second])
 	print("[TEST] need_gather_updates PASS")

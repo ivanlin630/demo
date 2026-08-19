@@ -4,7 +4,7 @@ extends SceneTree
 #   PERF_CONFIG=B → specimen 掛 N 隊、逐 tick fp 落檔並與 A 檔比對、印第一個分岔 tick。
 # 用法：PERF_SEED=1337 PERF_DAYS=1500 PERF_CONFIG=A ... 然後 PERF_CONFIG=B ...
 
-const OUT_A: String = "A:/GDS/demo/.worktrees/settlement-s4b/neutral_A.txt"
+const OUT_A: String = "A:/GDS/demo/.worktrees/ewma-advance-decouple/neutral_A.txt"
 
 func _initialize() -> void:
 	_run(); quit()

@@ -21,6 +21,59 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## ✅ EWMA advance / gather 解耦 MERGED（2026-08-20）＝specimen 非中立性**根修**、大考 blocker#1 拆除
+
+**根（比 tracer bug 大一層）**：`DecisionContext.gather` **每被呼叫一次就推進一次持久 EWMA**（`decision_context:565` `need_urgency` 非冪等 + `:569` 衍生 `plan_phase`），而 gather **全站 11 caller** → **同 tick 同隊推進次數 = 走過幾條路徑、且取決於哪個選項贏**＝**main 既存缺陷**（specimen tracer 對每個候選呼 `to_task` 只是把它照出來）。R² 親驗坐實 `consistency_coeff` 回傳值**直接乘進每個 option 的 util** → `need_urgency` 是**直接改變 argmax 贏家**的乘數，不是旁支資料。
+
+**修**：`gather(state, team, advance := false)`，**唯讀為預設**。判定表：`decision_engine:50/165`=true；`options.gd` 全部 `to_task` 內=false；`faction_ai:417`（threat 門檻 gate read）=false；`:1885` + **side-dispatch 家族**（distribute/migrant/herald/scout）=false；**`:921` G2c ambient=`not uses_unified(team)`**（implementer 親驗 loop3 內無 unified 排除、unified 隊同 tick 可能已在 `_decide_unified` 推進過）。**零新結構**（無 `*_advanced_tick`、無 TeamData 旗標）。
+- **否決案（留檔）**：(c) 擴 `_begin_observe` 成 observe-scope snapshot/restore＝黑名單型防線、新欄必漏（同族已 4 例：LOD→RNG→specimen→gather-write）；「`plan_phase` 移出 fp」＝**調鈍偵測器**讓症狀消失，而真傷害在 `need_urgency`（本就不在 fp）。
+- **安全方向**：預設 false 的失效模式＝**EWMA stale（tap 看得見）**，非世界被靜默擾動。
+
+**gate（★systems 於合併結果親跑——implementer 的 branch base 早於 §4c/繼承-lite merge，而 §4c 同樣改 `gather` body，故全部重驗）**：
+- ★**oracle**：`specimen_neutrality_bed`（7 specimens/seed1337/1200t）→ **零分岔**（修前同床 tick **439** 分岔）→ 根修生效**且無殘留**：`gather` 其餘寫入（`ensure_fresh`/`labor_alloc`/`idle_employ_*`/`consolidate_*` cache 群）**未涉入**。
+- 推進 ≤1/隊/tick：**超額 tick=0、最差比值 1.00**；determinism **三跑 byte-identical** `338247f6a1c5f811f7d5e53f0eaddb92`；constitution **PASS 75**；headless **0-new**（＝重刷後的 6 條 baseline）；TDD **8/8**（含「純讀 5 次→狀態零變化」）。
+- `plan_phase` 五層分佈 branch vs main **無重心位移**（警戒 2→4 隊＝絕對數極小噪音）、**未 crank alpha**。
+**★待補（大考啟動閘 A4）**：本 slice **真的改行為**（intended-change），而現有閘全是非行為因果型 → **QA 故事稽核**（帶 specimen trace、合併後 main）補這塊，**趕在大考啟動前**。
+
+## ✅ §4c 選址反饋迴路 + 繼承-lite MERGED（2026-08-20）
+
+- **§4c 結果反饋迴路**（思考層四缺件之一、**第一條反饋邊**）：建點結局 → 寫**自己 leader** 的記憶 → 下次選址讀回。三掛點=L0 decay／主動棄村（失敗）+ 據點升級完工（興旺）；`SettlementMemory.site_bias` 線性衰減 **TTL 30 天**（非永久黑名單）、以 `quality_multiplier` **乘既有選址品質項**（紮根/紮營，**不新增 term 線**）。self-knowledge（只讀自己 leader、**禁全域黑名單**、記憶隨人不隨團）。
+  - R² 2 必查項均在 dispatch 前定案：①**禁原樣重用 `write_memory`**（它不是純 append，會無條件寫 `p.relations[subject_id]` → 傳 tile_id 會塞「跟一塊地的交情」假記錄）→ 新增薄函式 `write_site_memory`；②decay 掛點缺 founder 資料 → 加 `tile.camp_team_id`（**已進 fp**，否則 L0 歸屬變化=determinism 盲點）。
+  - **systems merge-gate 退回 2 項（已修）**：**B** `quality_multiplier` clamp 下界 `0.0`→**`0.25`**——兩次同地失敗會讓乘子=0 → 選址 util 歸零＝**絕對門檻 pre-empt 引擎**（瀕餓隊唯一去處也不能紮）＝patch-gate 病型；**C** 補 tap（`site_memory.write` vs `.applied`）——`MEMORY_MAX=20` FIFO 且與人際記憶共用 `p.memory`，site 記憶恐**未到期先被擠掉**＝反饋靜默失效，零 tap 則大考時無法判定此 slice 有沒有在運作。
+- **繼承-lite**：勢力領袖團死 → 最強成員接位（統領→pop→team_id **全序**），無成員才 `disband`（原行為）。單一 owner `WorldState.succeed_or_disband_faction`，三處死亡路徑全走它。
+  - R² 必查項＝**dead-man-walking race**（`erase_teams` 批次期間 `state.teams` 仍持全部 dead_list、領袖隊先處理則同批死者被選為繼任）→ 三處接線各傳既有死集合（`erase_teams` 傳自己的 `dead`、另兩處傳 `teams_pending_erase`），**零新資料結構**。systems merge-gate 退回 **A**：`known_member_states.erase` 移出繼承函式（`npc_combat:733` 那條路**團還活著**、抹活隊 belief）。
+  - 契約升格 → `invariants.md`〈死亡窗口（走屍隊）決策紀律〉。
+- **gate（合併結果親跑）**：constitution **PASS sites=75**、兩支 TDD **ALL PASS（9 + 15）**、implementer 側 det×3 byte-identical。fp 與訂正前相同＝a4 warring 1000t 窗內**掛點 dormant**（無 L0 decay／完工／棄村／領袖團死事件），**非沒生效**——真效果要在 12mo 大考的長窗才顯。
+- **待辦（D 裁定）**：§4b merge 後「擴點」一併乘 `quality_multiplier`（同層、不新增 term 線）。
+
+## 🎓 12mo 大考 啟動閘（systems 立 2026-08-20、單一入口；細節散落各條，此處只收斂「能不能開考 / 開考看什麼 / 考前不准動什麼」）
+
+**性質**：修復疊加後的**新基線**大考，**不是**與第一次大考（2026-08-13~14）byte-comparable 的重跑——中間 settlement S1~S4/農業a-b/labor-v2/churn-fix 全是**蓄意行為改動**，正是要被大考評判的東西。
+
+### A. 開考 blocker（綠才開）
+| # | 項 | 狀態 |
+|---|---|---|
+| 1 | **specimen 非中立性修**（specimen 開關改變世界軌跡→大考的 story-audit 全靠 specimen 讀故事、不修=讀到的不是被評的那個世界） | in flight（implementer） |
+| 2 | §4b 有機 gate（measurer）+ §4c gate | in flight |
+| 4 | **QA 故事稽核 EWMA 解耦後的決策動力學**（推進頻率真的變了；現有閘皆非行為因果型） | 待派（measurer 出 specimen trace → QA） |
+| 3 | 在飛 slice 全 merge 或明確排除（labor-v2/churn-fix 已 merged；§4a merged；繼承-lite dispatched） | 進行中 |
+
+### B. 具名監看清單（開考時必看，非「順便」）
+1. **經濟 4 科目**（`game-design.md:132` blueprint owner）：A 富裕農村 / B 製造樞紐 / C 戰爭經濟 / D 需求不足型衰退。
+2. **accepted cost 定奪**（starve baseline 8 vs combined 28）——**★其分解數字（honest vs lag-window）已被 QA 判 REVISE、暫不可信**（EMA 非瞬時流）；大考前需 specimen 複驗瞬時 daily_rate。**預核槓桿**：若顯人口死亡螺旋（非趨穩）→ B5 觸發閾值調早，**免再請示**。
+3. **`mint_level` 全世界 0%**：仍 0% → 紅旗查設施鏈（established 雞生蛋家族前科）；>0% → 發展曲線正常。併科目 B 看。
+4. **零產出卡死**（`daily_rate` 恆 0.000 且 `task=return_home` 餓死）——新病型、獨立診斷。
+5. **perf**：per-team +34% re-open candidate + k 值誠實 NULL → **「撞不撞牆」併大考本身觀察**、不再單開量測輪（perf 五路 2026-08-20 全 CLOSE）。
+   ★**因此大考 run 必須開 phase profile + 週期取樣 `(tick, N_teams, per-tick ms, 6 階段 breakdown)`**——12mo 是**單一連續 run 內 N 自然成長**，天然消掉「跨 session CPU contention」與「跨 run config 差異」兩大 confound（正是 perf③ k 值測不準的原因）→ **scaling 曲線免費附帶**，這是唯一能乾淨回答 O(N) vs O(N²) 的機會，**別漏開**。
+   perf re-open candidate 帳（大考後）：`FactionAISystem.new()` **全站 40 站點**全呼純 finder helper、該類 instance state 只有兩個 **print-dedupe** dict → helper 轉 static＝位元級安全道（量級大於 perf⑤ 的 26 站）；loop1 dedup 1.72%；JOIN same-target reassert 0.23%（reassert 事件中 **94.28% 是無進展純重申**）。
+6. **政治質地**（外交/背叛密度）：blueprint (A) 簽字後的回設計值；過死 → (B) 補償調 `p` 走 tuning 流程，**觸發權在 Story QA verdict**。
+7. **farming-as-pillar / FUY**、settlement 深根 pop、founding 碎片 spam / 鬼城比率。
+
+### C. ★考前凍結範圍（**窄**、勿誤讀成全面凍結）
+凍結的**只有**「會改變**大考正要評判的那個維度本身**的觸發頻率」的改動——具體=**loop1 faction dedup DEFER**（會腰斬外交/背叛觸發率 → 污染政治維歸因 + 毀掉與第一次大考的可比性；correctness 面不變、大考後單獨走）。
+**不凍結**：settlement/農業/labor/繼承 等 slice 的行為改動——它們是大考的**受試對象**，merge 進去才是正確姿勢。
+判準一句：**改「被量的東西」= 正常進考；改「量尺/觸發率本身」= 凍到考後。**
+
 ## 📍 當前狀態（2026-08-19）——settlement lifecycle arc（S1→農業a 全 merged）+ perf arc 收官 + labor/churn 在飛
 
 ### settlement lifecycle arc（12mo 期末考深根 → 鬼城/碎裂 lifecycle 修）

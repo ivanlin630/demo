@@ -47,7 +47,7 @@ static func stall_patience_factor(leader_values: Dictionary) -> float:
 # 量測探針（征服名實）要讀 util 排序根 → 走此無損 accessor（不重算 term loop）。
 static func rank_scored(state: WorldState, team: TeamData) -> Array:
 	GoalResolver.ensure_maintain_goals(state, team)   # ★means-end S2（組件 A）:冪等確保 5 資源維持 goal + 更新 active/satisfied
-	var ctx: DecisionContext = DecisionContext.gather(state, team)
+	var ctx: DecisionContext = DecisionContext.gather(state, team, true)   # ★真決策評估入口 → 推進 EWMA（advance=true）
 	var scored: Array = rank_scored_ctx(ctx, team.current_option, state, team)   # ★means-end:傳 state/team 供 goal frontier hook
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	return scored
@@ -162,7 +162,7 @@ static func rank(state: WorldState, team: TeamData) -> Array:
 # （non-unified 隊 current_option 由 faction_ai 非-survival 行為管，survival dispatch 不奪）。
 # 承諾慣性比對 team.current_task（non-unified 無 current_option 語意）。
 static func rank_survival(state: WorldState, team: TeamData) -> Array:
-	var ctx: DecisionContext = DecisionContext.gather(state, team)
+	var ctx: DecisionContext = DecisionContext.gather(state, team, true)   # ★真決策評估入口 → 推進 EWMA（advance=true）
 	# ② 絕境階梯：applicable() 已收單一源 stall 排除 + 單一 option 豁免（全 rank 路共用）→ 此處直取 survival 子集。
 	var candidates: Array = []
 	for opt in DecisionOptions.applicable(ctx):

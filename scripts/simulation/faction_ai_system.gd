@@ -413,6 +413,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	if team.current_task != TeamData.TASK_IDLE and not _busy_preemptible:
 		return   # 忙且不可 preempt → 原行為
 	# 手算 argmax 撕除 → 引擎 rank_threat 秤（融合非刪）。threat_react/threshold 由 ctx 鏡射舊掃描。
+	# ★advance=false：此處只是 threat 門檻 gate read；真評估在下方 _decide_unified 內部（decision_engine 已 advance）。
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
 	if team.current_task == TeamData.TASK_IDLE:
 		# unified 隊（商隊/生產）idle threat 反應由 _decide_unified 主 rank 處理（鏡射 survival unified 排除，
@@ -914,7 +915,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# 取首個 dispatchable option（非 IDLE）走 PRIO_AMBIENT；貿易 target 已在 to_task「貿易」內
 		# （_merchant_trade_target：arb 單→巡市集→fallback）→ ambient 語意保。
 		if team.current_task == TeamData.TASK_IDLE:
-			var _ctx := DecisionContext.gather(state, team)
+			# ★advance：G2c ambient 是獨立決策入口 → 非 unified 隊在此推進；unified 隊同 tick 可能已在
+			# _decide_unified（decision_engine advance=true）推進過、仍 IDLE 才落到這段 → 對其降 false，
+			# 保「每隊每 tick 推進 ≤1」（need.ewma_advance tap 為安全網）。
+			var _ctx := DecisionContext.gather(state, team, not uses_unified(team))
 			for _opt in DecisionEngine.rank_ambient(_ctx):
 				var _td: Dictionary = DecisionOptions.to_task(state, team, String(_opt))
 				var _tk: String = String(_td.get("task", TeamData.TASK_IDLE))
@@ -1984,6 +1988,9 @@ func _begin_village_relocate(state: WorldState, village: TeamData, target_pos: V
 	if cur_tile != null and cur_tile.outpost_owner == village.team_id:
 		OutpostOwnerBank.set_owner(cur_tile, -1, "relocate_abandon")
 		if Probe.enabled: Probe.bump("relocate.abandoned")
+		# ★§4c 反饋（失敗掛點之二）：主動棄村＝這塊地沒撐住 → 寫棄村隊自己 leader 的選址記憶
+		# （actor 乾淨＝決定棄的人就是記取教訓的人）。self-knowledge、零 RNG、只寫存活 leader。
+		SettlementMemory.record_site_outcome(state, village, cur_tile, SettlementMemory.SITE_FAILED)
 	# 轉 mobile（TASK_MIGRATE reason=relocate @PRIO_SURVIVAL；非 ENGINE_SOURCE reason → 同層覓食 self-replace 擋不動、保遷途）
 	village.task_extra_data = {"relocate_target": target_pos, "relocate_spawn": state.world.current_tick}
 	TaskArbiter.release(village)
@@ -3480,7 +3487,10 @@ func _on_team_extinct(state: WorldState, team: TeamData) -> void:
 		var f = state.factions[team.faction_id]
 		f.member_team_ids.erase(team.team_id)
 		if f.leader_team_id == team.team_id:
-			state.disband_faction(team.faction_id)
+			# ★繼承-lite：排除本 tick 已判死未 erase 的隊（既有 teams_pending_erase＝正好要排除的集合）
+			var _pending: Dictionary = {}
+			for _pid in state.teams_pending_erase: _pending[_pid] = true
+			state.succeed_or_disband_faction(team.faction_id, team.team_id, _pending)
 	if not state.teams_pending_erase.has(team.team_id):
 		state.teams_pending_erase.append(team.team_id)
 
@@ -4769,6 +4779,7 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 		return false
 	tile.camp_level = 1
 	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
+	tile.camp_team_id = team.team_id   # ★§4c：記起建隊（decay 時才知道「這是誰的失敗」；完工/消失時清）
 	if Probe.enabled: Probe.bump("settlement.camp_l0")   # L0 紮營 fire tap（觀測性）
 	print("[CampL0] Team%d 紮營 L0 @(%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 	return true

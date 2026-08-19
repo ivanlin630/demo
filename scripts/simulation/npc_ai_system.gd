@@ -73,6 +73,22 @@ func write_memory(p: PersonData, type: String, subject_id: int,
 	_trigger_goals(p, type, subject_id)
 	_write_relation_edge(p, type, subject_id, tick, intensity)   # G2a：同步 typed 邊
 
+# ★§4c 選址記憶專用薄函式（R² 必查項①：禁原樣重用 write_memory）：
+# write_memory 不是純 append——它連呼 _update_relations（只要 subject_id != -1 就無條件寫
+# p.relations[subject_id]）/ _trigger_goals / _write_relation_edge；subject 傳 tile_id 會在人際
+# 關係字典塞「跟一塊地的交情」假記錄，汙染所有假設 relations.keys() 是 person id 的 code。
+# 故本函式只做 memory.append + _trim_memory，★跳過三個 interpersonal side-effect；
+# 共用 write_memory 完全不動（8 個既有 caller 零影響）。零 RNG。
+func write_site_memory(p: PersonData, type: String, tile_id: int,
+		tick: int, intensity: float) -> void:
+	if p == null:
+		return
+	p.memory.append({
+		"type": type, "subject_id": tile_id,
+		"tick": tick, "intensity": intensity,
+	})
+	_trim_memory(p)
+
 func _write_relation_edge(p: PersonData, type: String, subject_id: int,
 		tick: int, intensity: float) -> void:
 	# G2a additive：對齊 _trigger_goals 映射，填 typed 邊。reader 在 G2b/G2d。

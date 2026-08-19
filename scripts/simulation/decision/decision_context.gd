@@ -54,6 +54,7 @@ var farmable_pos: Vector2i = Vector2i(-1, -1)
 # ★A1 紮營價值=MarginalEconomy 真帳：靶 farmable tile 的純 est（terrain=belief 地理、outpost1/farming0、pop）+ 覓食餬口日產 floor。
 var camp_target_est: VillageEstimate = null   # 無靶→null（保守不行動）
 var camp_forage_floor: float = 0.0
+var camp_site_quality_mult: float = 1.0   # ★§4c：紮營靶地的選址記憶乘子（1.0=無記憶/已過期）
 # ★§4a 紮根（L0→L1 建點入引擎）：物理可行性 + 可行性帳素材。全部 own-state（腳下 tile=自己站著＝親見最高信、
 # 自己的 corvee_site 記憶、自己的 food_runway），零 god-view、零新旋鈕（ETA 讀既有 L0_TO_L1_CORVEE_DAYS）。
 var can_settle_here: bool = false            # 站自己 L0 營地 + 該格無據點 + 無人施工 + 非玩家隊
@@ -176,7 +177,11 @@ var survival_stall_active: Array = []
 # 計畫層 S2 plan_phase 已退役（決策引擎重構 S2.5）→ 五層急迫度 coeff 取代；team.plan_phase
 # 純顯示欄由 §6 narrative_label 寫（S2.4），不再 derive。
 
-static func gather(state: WorldState, team: TeamData) -> DecisionContext:
+# ★advance 解耦（specimen 非中立根修）：gather 原本每呼一次就推進持久 EWMA（need_urgency 非冪等）
+# 並改寫衍生的 plan_phase → 同 tick 同隊被推進幾次＝走過幾條路徑、且取決於哪個選項贏＝既存缺陷
+# （tracer 只是把它照出來）。現在預設 advance=false（純讀），只有【真正的一次決策評估】傳 true。
+# ★零新結構：不加 *_advanced_tick 欄／不加 TeamData 旗標，推進與否由 caller 語意決定。
+static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
 	var c := DecisionContext.new()
 	var _tg: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var ldr: PersonData = state.persons.get(team.leader_id)
@@ -322,7 +327,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if _site != null and (c.can_settle_here or c.settle_resume_site != Vector2i(-1, -1)):
 		# 選址品質：地力（productivity）× 可耕潛力（farmable terrain=能發展農業的地）。腳下=親見，最高信。
 		var _farm_pot: float = 0.4 if _site.terrain == "mountain" else 1.0   # 可農判準沿用既有慣例（山不可農、_find_unowned_farmable_tile:4750）
-		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0)
+		# ★§4c 反饋讀回：同一 leader 對這塊地的過往結局（失敗折價/興旺加分、線性衰減過期歸零）。
+		# 掛既有選址品質項＝不新增獨立 term 線；self-knowledge（只讀自己 leader memory）。
+		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0) 			* SettlementMemory.quality_multiplier(state, team, _site.tile_id)
 		# ETA=既有工期常數 + 殘距（回工地的路程；腳下=0）。零新旋鈕。
 		var _dist: int = FactionAISystem._hex_dist(team.tile_pos, _site_pos)
 		c.settle_eta_days = float(FactionAISystem.L0_TO_L1_CORVEE_DAYS) + float(_dist)
@@ -362,6 +369,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		var _ftile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_ft))
 		if _ftile != null:
 			c.camp_target_est = VillageEstimate.make(_ftile.terrain, 1, 0, team.population)
+			c.camp_site_quality_mult = SettlementMemory.quality_multiplier(state, team, _ftile.tile_id)   # ★§4c 反饋（紮營靶地）
 	c.camp_forage_floor = ResourceSystem._forage_subsist_buffer(team) / ResourceSystem.FORAGE_FLOOR_DAYS   # 日產同源
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.strong_farm", _tg)
 	var _aid: int = _fa._find_aid_target(state, team)
@@ -598,12 +606,21 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		c.has_acceptable_join_host = _reachable and not _recently_rejected
 	# 需求金字塔（決策引擎重構 S1）：五層急迫度 EWMA 更新（inert——本 slice 不接 rank_scored）。
 	# compute_raw 讀 food_days/threat(已算) + team/state；ewma_update 累積進持久 team.need_urgency。
-	var _raw_need: PackedFloat32Array = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)
-	team.need_urgency = NeedHierarchy.ewma_update(team.need_urgency, _raw_need)
-	c.need_urgency = team.need_urgency
-	# §6 主敘事標籤：team.plan_phase 來源改接五層急迫度衍生(argmax)，非 derive_plan_phase 自算。
-	# GUI(observer_query_api/observer_inspect_panel)讀 team.plan_phase 不變，來源改接。
-	team.plan_phase = NeedHierarchy.narrative_label(team.need_urgency)
+	# ★只有 advance=true（真決策評估）才推進持久 EWMA + 改寫衍生 plan_phase；純讀路徑只拷貝現值。
+	if advance:
+		var _raw_need: PackedFloat32Array = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)
+		team.need_urgency = NeedHierarchy.ewma_update(team.need_urgency, _raw_need)
+		# §6 主敘事標籤：team.plan_phase 來源接五層急迫度衍生(argmax)。GUI 讀 team.plan_phase 不變。
+		team.plan_phase = NeedHierarchy.narrative_label(team.need_urgency)
+		if Probe.enabled: Probe.bump("need.ewma_advance")   # ★憲法級 tap：實推進處（驗每隊每 tick ≤1）
+	else:
+		if Probe.enabled: Probe.bump("need.gather_readonly")   # ★唯讀路
+	# 邊角：從沒被 advance 過的隊（第一次就走唯讀路）→ ctx 給當下 raw 值（★只進 ctx、不寫 team），
+	# 免得下游拿到空陣列。真正的持久推進仍只發生在 advance=true。
+	if team.need_urgency.is_empty() and not advance:
+		c.need_urgency = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)
+	else:
+		c.need_urgency = team.need_urgency
 	# ② 絕境階梯：蒐 active stall cooldown option（applicable() 排除單一源；純讀 dict 零 RNG）。
 	var _stall_now: int = state.world.current_tick
 	for _sopt in team.survival_stall_cooldown:
