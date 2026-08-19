@@ -129,6 +129,39 @@ func create_faction(leader_team_id: int) -> int:
 	set_team_faction(teams[leader_team_id], f.faction_id)
 	return f.faction_id
 
+# ★繼承-lite（用戶 2026-08-15 裁簡易版；爭位/內戰＝王朝 arc 界外）：勢力領袖團死 → 最強成員接位，
+# 沒人接才解散（原行為）。單一 owner：三處領袖團死路徑全走這裡。
+# 最強＝統領（該隊 leader skills["統領"]、無 leader 視 0）降序 → 平手 population 大 → 再平手 team_id 小
+#（全序＝determinism）。零 RNG、零新結構。
+# ★also_dead＝本 tick 已判死但尚未真 erase 的隊（erase_teams 批次期間 state.teams 仍持有全部 dead_list；
+#   領袖隊若排在前面處理，同批死亡的隊友此刻仍 teams.has()==true → 會選出「這 tick 稍後就被清掉的
+#   死人繼任者」）。呼叫點傳自己的 dead 集合 / 既有 teams_pending_erase。
+# bookkeeping 只需清 known_member_states[死者]（FactionData 中唯一 team-id-keyed 欄；其餘皆 faction 層級）。
+func succeed_or_disband_faction(faction_id: int, dead_leader_tid: int, also_dead: Dictionary = {}) -> void:
+	if not factions.has(faction_id):
+		return
+	var f = factions[faction_id]
+	f.known_member_states.erase(dead_leader_tid)
+	var best: int = -1
+	var best_cmd: float = -1.0
+	var best_pop: int = -1
+	for cid in f.member_team_ids:
+		if cid == dead_leader_tid or also_dead.has(cid) or not teams.has(cid):
+			continue
+		var cand: TeamData = teams[cid]
+		var ldr: PersonData = persons.get(cand.leader_id)
+		var cmd: float = float(ldr.skills.get("統領", 0.0)) if ldr != null else 0.0
+		var pop: int = cand.population
+		if cmd > best_cmd 				or (cmd == best_cmd and pop > best_pop) 				or (cmd == best_cmd and pop == best_pop and (best == -1 or cid < best)):
+			best = cid; best_cmd = cmd; best_pop = pop
+	if best == -1:
+		if Probe.enabled: Probe.bump("faction.disband_no_heir")
+		disband_faction(faction_id)
+		return
+	f.leader_team_id = best
+	if Probe.enabled: Probe.bump("faction.succession")
+	print("[Succession] 勢力%d 領袖團 %d 死 → %d 接位" % [faction_id, dead_leader_tid, best])
+
 func disband_faction(faction_id: int) -> void:
 	if not factions.has(faction_id):
 		return
@@ -307,7 +340,8 @@ func erase_teams(tids: Array) -> void:
 			f.member_team_ids.erase(tid)
 			f.known_member_states.erase(tid)
 			if f.leader_team_id == tid:
-				disband_faction(team.faction_id)
+				# ★繼承-lite：領袖團死 → 先找接班（傳本批 dead 集合，排除同波死者＝dead-man-walking race）
+				succeed_or_disband_faction(team.faction_id, tid, dead)
 		# 3b. 傷亡累積器 _cas_carry 餘量清除（隊死 chokepoint=所有消滅路徑；防 team_id 重用洩漏。
 		# §D4 A / reviewer R②：真累積器硬要求顯式 erase，非靠 start_combat 隱式重置）
 		NpcCombatSystem._cas_carry.erase(tid)
