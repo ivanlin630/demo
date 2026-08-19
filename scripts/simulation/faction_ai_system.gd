@@ -2509,7 +2509,14 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
 		# full_probe（診斷）：fold 路 merge 實派 + merge-applicable 隊 option 去向（B 鐵證：該併卻選別的）。
-		if opt == "併入": Probe.bump("merge.consolidate_dispatch")
+		if opt == "併入":
+			Probe.bump("merge.consolidate_dispatch")
+			# ★T1 TEMP TRACE（churn recommit pin；T2 移；純讀）：在途重委派 vs 新承諾。
+			if Probe.enabled:
+				if team.current_task == TeamData.TASK_JOIN and team.social_target == int(td.get("social_target", -1)):
+					Probe.bump("jt.recommit_same")   # (ii) 已 JOIN 同 target 又派=在途重委派（task_start 不 reset，仍未抵達）
+				else:
+					Probe.bump("jt.fresh_commit")    # 新 JOIN 承諾（新 target 或前非 JOIN）
 		if Probe.enabled and opt == "吸納": Probe.bump("absorb.dispatch")   # §HOW-7 強方吸納實派
 		if Probe.enabled and team.faction_id != -1 and team.parent_team_id == -1:
 			var _fc2 = state.factions.get(team.faction_id)
