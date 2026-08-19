@@ -81,9 +81,18 @@ construction commitment latch+resume（branch 5b166eb1，已 revert 出 main 529
 **①指標訂正（重要、防未來誤判）**：`[SurvivalMergeIn]` **log 行 (joiner,host) pair 次數 ≠ churn 次數**——print 在 `faction_ai:4863`（survival 路 `_trigger_survival` 每次 rank 選「併入」都印），**committed JOIN 在途期間**（`JOIN_TIMEOUT` 6 天+殘距）每 cadence 會 **re-set 同 target 並再 print** → pair 數把「**在途重申**」與「**跨 episode 重演**」混算。`join_rejected` cooldown（`JOIN_REJECT_COOLDOWN_TICKS=480`=**2 天**、`decision_context:530` gate `has_acceptable_join_host`）**只在 timeout/abort/拒收「事後」才寫**、擋不到在途重申（設計如此、非漏）。∴ **修前 698 行/54× vs 修後 1647 行/81× 的比較無效**（雙重不可比：同樣被混算污染 + 698 是 day65 partial vs 1647 是 day90 full；且原輪 full stdout 被 wrapper race 吃掉=無有效對照值）。**有效 churn 證據改用**：team 暴增（同 day90：242→**152**、-37%）+ 出路真 fire（abort_ghost 21 / timeout 1 / reject 33）+ 控制床構造斷根（`mergein_join_lifecycle_test` PROVEN）。
 **②真 follow-up（cheap、非 blocker）**：在途重申**燒 CPU**（每 cadence re-rank + re-set 同 target + print，無狀態進展）→ 候選修=committed JOIN 在途時 survival 不重複 re-set 同 target（=hand-obeys-brain 家族的「**重申抑制**」、屬既有 persist/commitment 語意延伸非新機制）；順帶讓 pair-print 恢復成可信指標。排 §4 之後。
 
-### ⏳★`food_flow_avg` 5 日 EMA 落後可能誤導決策（2026-08-20 QA 稽核副產、通用風險、待 measure）
+### ⛔★★specimen 非中立性：掛 tracer 讓模擬軌跡真實分岔（2026-08-20 measurer 意外撞到、威脅所有 specimen-based QA）
+**現象**：同 seed/config/branch，Pass1（無 specimen）`death.starve_anon=28`、Pass2（7 隊掛 tracer）=**26**，Team10 死亡型態亦改變 → **掛 specimen 本身改了世界**；specimen.jsonl **不能當精確重播**、只能當「同類型典型軌跡」。
+**★systems code-read（既有三道防線都在、分岔源不在它們）**：①`is_specimen`(specimen_tracer:21) 純讀零 RNG ②capture 路徑(:56/86/107/148) **全包 `_begin/_end_observe`**（`Probe.enabled=false`+`suppress_observe_noise=true`）③**LOD-exempt 已移除**(`sim_runner:506-507/518`)。
+**★假說（待 implementer investigation 查證/否證）**：**非 RNG 的狀態副作用**——tracer re-query 呼叫**帶 lazy cache 的系統**（`LaborSystem.ensure_fresh`、belief snapshot/`known_member_states` 寫入、market memo、PathSystem 快取）→ 提前暖化/更新 → 下游行為改變；`_begin_observe` 只擋 RNG+Probe、**擋不住 cache/state mutation**。
+**★影響**：QA 故事稽核建立在 specimen 忠實重播上 → 判決可信度打折。**invariants §83 保證範圍要擴**（原測「全域 specimen 開/關 byte-identical」、未涵蓋「對特定 team 開」窄情境）。**修前**：specimen 只當典型軌跡；**非 specimen 的 deterministic 量測不受影響**。
+
+### ⏳零產出卡死（2026-08-20 lag-quantify 副產、與 honest-under-fed 不同病型）
+28 起 starve 死亡的 7 隊裡：**team9/4/5 全程 raw `daily_rate` 精確 0.000**=**生產完全停擺**（非慢性遞減）；**team4/5 全程 `task=return_home`**（返家途中餓死、趕不及=**非決策錯**）。→ 「零產出卡死」需獨立診斷（為何完全沒有任何 income：無 tile 可採？勞力全抽走？task 卡住不生產？）、**12mo 大考留意**。非阻塞。
+
+### ⏳`food_flow_avg` 5 日 EMA 落後（★2026-08-20 降級重寫：不影響死亡判定、只影響決策輸入）
 QA 稽核 labor-v2 死亡分類時揭：`food_flow_avg` 是 **5 日 EMA**（`resource_system:20 FLOW_WINDOW_DAYS=5.0`、`:241-242 alpha=day_fraction/FLOW_WINDOW_DAYS`）、**結構性落後瞬時 daily_rate**。死亡明細見多筆 EMA **單調爬向零卻仍為負**（team10 -0.016→-0.008、team9 -0.040→-0.005、team0 -0.114→-0.062）=「真實日流已回正、EMA 沒追上」簽名。
-**★通用風險（非只影響量測分類）**：同一 `food_flow_avg` 餵**多處決策**（生育 gate `reaction:197`、野心 rung 積累、crisis/persist safe_factor 等）→ **EMA 落後可能讓決策讀到過時的食物態**：食物已回正但 EMA 仍負→團續留絕境模式（過度保守）；或食物已崩但 EMA 仍正→晚進求生（反應遲鈍）。**現況純假說**（QA 只證了量測分類面）→ 需一輪 measure（瞬時 daily_rate vs EMA 對照、看決策點誤判率）才能定是否要改（候選：決策讀短窗/雙軌 EMA+瞬時、或只在分類/量測面改）。**非阻塞**、排 perf 線索包與 §4 之後。
+**★★訂正（measurer lag-quantify code-read 坐實）：famine 死亡與 EMA 無關**——`resource_system:157-188` famine_days 累積/死亡**只看每日 STOCK check**（`food_available<food_needed`、satisfaction<0.3）、**完全不讀 `food_flow_avg`**。∴「EMA lag 導致誤殺」**假說不成立**；EMA 的實際角色=診斷 + **AI 決策輸入**。用 EMA 正負號**分類死亡**的準確度=**85.7%**（28 起裡 4 起誤判、集中 Team10）。**剩餘風險（降級後）**：同一 `food_flow_avg` 餵**多處決策**（生育 gate `reaction:197`、野心 rung 積累、crisis/persist safe_factor 等）→ **EMA 落後可能讓決策讀到過時的食物態**：食物已回正但 EMA 仍負→團續留絕境模式（過度保守）；或食物已崩但 EMA 仍正→晚進求生（反應遲鈍）。**現況純假說**（QA 只證了量測分類面）→ 需一輪 measure（瞬時 daily_rate vs EMA 對照、看決策點誤判率）才能定是否要改（候選：決策讀短窗/雙軌 EMA+瞬時、或只在分類/量測面改）。**非阻塞**、排 perf 線索包與 §4 之後。
 
 ### ⏳★★perf 真兇=`near.faction_ai` 決策核心（2026-08-20 perf 線索包①② 決定性）+ ★loop1 全量雙掃（LOD 不生效、systems code-read 坐實）
 **①phase profile（現 main、10 天窗）**：`near.faction_ai` **獨占 93.1% wall**（191.5s/205.8s）、其餘 near.* 全部加總 <7%。**★systems 先前點名的 4 個候選全部 <0.15%、不是真兇**（l0_settle 0.01% / farm_prodline 0.04% / construction_tick 0.05% / labor_rebalance 0.01%）——原本都缺獨立 phase marker（被吃進混桶），補 tap 驗完發現吃時間的根本不是它們。
