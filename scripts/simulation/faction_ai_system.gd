@@ -1984,6 +1984,9 @@ func _begin_village_relocate(state: WorldState, village: TeamData, target_pos: V
 	if cur_tile != null and cur_tile.outpost_owner == village.team_id:
 		OutpostOwnerBank.set_owner(cur_tile, -1, "relocate_abandon")
 		if Probe.enabled: Probe.bump("relocate.abandoned")
+		# ★§4c 反饋（失敗掛點之二）：主動棄村＝這塊地沒撐住 → 寫棄村隊自己 leader 的選址記憶
+		# （actor 乾淨＝決定棄的人就是記取教訓的人）。self-knowledge、零 RNG、只寫存活 leader。
+		SettlementMemory.record_site_outcome(state, village, cur_tile, SettlementMemory.SITE_FAILED)
 	# 轉 mobile（TASK_MIGRATE reason=relocate @PRIO_SURVIVAL；非 ENGINE_SOURCE reason → 同層覓食 self-replace 擋不動、保遷途）
 	village.task_extra_data = {"relocate_target": target_pos, "relocate_spawn": state.world.current_tick}
 	TaskArbiter.release(village)
@@ -4772,6 +4775,7 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 		return false
 	tile.camp_level = 1
 	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
+	tile.camp_team_id = team.team_id   # ★§4c：記起建隊（decay 時才知道「這是誰的失敗」；完工/消失時清）
 	if Probe.enabled: Probe.bump("settlement.camp_l0")   # L0 紮營 fire tap（觀測性）
 	print("[CampL0] Team%d 紮營 L0 @(%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 	return true

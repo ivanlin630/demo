@@ -353,6 +353,10 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				_auto_settle_builder(state, team, tile)
 		"upgrade_level":
 			tile.outpost_level = tile.construction_target["level"]
+			# ★§4c 反饋（成功掛點）：據點升級完工＝這塊地養得起發展 → 寫該 tile owner 隊 leader 的選址記憶。
+			var _owner_team: TeamData = state.teams.get(tile.outpost_owner) if tile.outpost_owner != -1 else null
+			if _owner_team != null:
+				SettlementMemory.record_site_outcome(state, _owner_team, tile, SettlementMemory.SITE_THRIVED)
 			print("[Outpost] Team%d 升級 → %s Lv%d" % [
 				team.team_id, tile.outpost_type, tile.outpost_level])
 		"upgrade_facility":
@@ -369,6 +373,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			OutpostOwnerBank.set_owner(tile, int(tile.construction_target.get("owner", team.team_id)), "construct")
 			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
 			tile.camp_level = 0        # ★S2b：L0 消融進 L1（完工清 camp flag、L1 outpost_level 接手）
+			tile.camp_team_id = -1     # ★§4c：L0 生命週期結束（升 L1）→ 清起建隊欄
 			tile.camp_ticks_left = 0
 			team.corvee_site = Vector2i(-1, -1)   # ★S2b：工程完成→清工地記憶
 			var camp_tag: String = TeamData.TAG_MILITARY if tile.outpost_type == "military" else TeamData.TAG_PRODUCE

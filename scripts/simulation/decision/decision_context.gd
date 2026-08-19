@@ -54,6 +54,7 @@ var farmable_pos: Vector2i = Vector2i(-1, -1)
 # ★A1 紮營價值=MarginalEconomy 真帳：靶 farmable tile 的純 est（terrain=belief 地理、outpost1/farming0、pop）+ 覓食餬口日產 floor。
 var camp_target_est: VillageEstimate = null   # 無靶→null（保守不行動）
 var camp_forage_floor: float = 0.0
+var camp_site_quality_mult: float = 1.0   # ★§4c：紮營靶地的選址記憶乘子（1.0=無記憶/已過期）
 # ★§4a 紮根（L0→L1 建點入引擎）：物理可行性 + 可行性帳素材。全部 own-state（腳下 tile=自己站著＝親見最高信、
 # 自己的 corvee_site 記憶、自己的 food_runway），零 god-view、零新旋鈕（ETA 讀既有 L0_TO_L1_CORVEE_DAYS）。
 var can_settle_here: bool = false            # 站自己 L0 營地 + 該格無據點 + 無人施工 + 非玩家隊
@@ -313,7 +314,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if _site != null and (c.can_settle_here or c.settle_resume_site != Vector2i(-1, -1)):
 		# 選址品質：地力（productivity）× 可耕潛力（farmable terrain=能發展農業的地）。腳下=親見，最高信。
 		var _farm_pot: float = 0.4 if _site.terrain == "mountain" else 1.0   # 可農判準沿用既有慣例（山不可農、_find_unowned_farmable_tile:4750）
-		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0)
+		# ★§4c 反饋讀回：同一 leader 對這塊地的過往結局（失敗折價/興旺加分、線性衰減過期歸零）。
+		# 掛既有選址品質項＝不新增獨立 term 線；self-knowledge（只讀自己 leader memory）。
+		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0) 			* SettlementMemory.quality_multiplier(state, team, _site.tile_id)
 		# ETA=既有工期常數 + 殘距（回工地的路程；腳下=0）。零新旋鈕。
 		var _dist: int = FactionAISystem._hex_dist(team.tile_pos, _site_pos)
 		c.settle_eta_days = float(FactionAISystem.L0_TO_L1_CORVEE_DAYS) + float(_dist)
@@ -325,6 +328,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		var _ftile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_ft))
 		if _ftile != null:
 			c.camp_target_est = VillageEstimate.make(_ftile.terrain, 1, 0, team.population)
+			c.camp_site_quality_mult = SettlementMemory.quality_multiplier(state, team, _ftile.tile_id)   # ★§4c 反饋（紮營靶地）
 	c.camp_forage_floor = ResourceSystem._forage_subsist_buffer(team) / ResourceSystem.FORAGE_FLOOR_DAYS   # 日產同源
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.strong_farm", _tg)
 	var _aid: int = _fa._find_aid_target(state, team)

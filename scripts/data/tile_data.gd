@@ -19,6 +19,9 @@ var outpost_owner: int = -1         # team_id
 # ★兩欄皆納 state_fingerprint（determinism；同 construction_ticks_left 慣例）。
 var camp_level: int = 0
 var camp_ticks_left: int = 0
+# ★§4c：L0 營地的起建隊（decay 時要知道「這是誰的失敗」；tile sweep 讀不到 team）。
+# 完工晉 L1 / 營地消失時清回 -1。★必入 state_fingerprint（否則 L0 歸屬變化＝determinism 盲點）。
+var camp_team_id: int = -1
 # ★資訊網 bootstrap-fix 界⑤：隱匿據點旗（一行前瞻 stub、現恆 false=公告名冊；名冊 fallback filter not outpost_hidden）。
 # 對抗資訊戰層（parked）將來令首領設 true=秘密據點不上組織名冊。現不加功能。
 var outpost_hidden: bool = false
