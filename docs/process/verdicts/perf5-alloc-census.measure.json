@@ -1,0 +1,43 @@
+{
+  "ticket": "perf⑤ alloc普查（per-tick per-site新實例創建計數，刀A=_hex_dist static已證真根家族，找殘餘alloc熱點）",
+  "method_note": "★誠實聲明methodology範圍：本輪用grep-based靜態call-site census（非runtime instrumented per-call計數）。真runtime計數需逐一包每個.new()呼叫點(30+處)加tap，超出本輪合理budget；本census改用『class是否有instance state』(靜態code-read判斷)+『call site出現次數』(grep -c)+『所在cadence/迴圈』(交叉既有phase profiling知識)三者組合，給出可信的『哪裡浪費』排序，非逐次精確us數字。",
+
+  "confirmed_pattern_reference": {
+    "already_fixed": "_hex_dist (faction_ai_system.gd:3406, 註記'perf cut1 A：純算術零instance state→static，免per-call FactionAISystem.new() alloc')——本輪census用同一診斷邏輯(class有無instance state)找同類殘餘case"
+  },
+
+  "stateless_classes_new_call_census": {
+    "note": "以下class經code-read確認『零instance var宣告』=方法皆stateless、.new()純屬不必要alloc、跟_hex_dist同款可轉static",
+    "SubteamSystem": { "instance_vars": 0, "new_call_sites_in_faction_ai": 7, "call_sites_lines": "619,1926,2288,3673,3749,3887,3930,4034", "note": ".dispatch()系列，settle/expand/migrate/upgrade各種派遣動作觸發，非每tick但decision-cadence內頻繁" },
+    "OutpostSystem": { "instance_vars": 0, "new_call_sites_in_faction_ai": 10, "call_sites_lines": "3535,3583,4241,4244,4274,4290,4294,4300,4380,4432", "note": "infra評估路徑(INFRA_INTERVAL cadence gate)內密集呼叫，同一次_evaluate_infrastructure可能連續多次new()", "additional_sites": "resource_system.gd:352、movement_system.gd:291，跨檔同款" },
+    "DiplomaticAiSystem": { "instance_vars": 0, "new_call_sites_in_faction_ai": 3, "call_sites_lines": "643,734,746", "note": "外交/背叛評估，FACTION_UPDATE_INTERVAL(200)/BETRAY_CHECK_INTERVAL(500)cadence gate" },
+    "NpcAiSystem": { "instance_vars": 0, "new_call_sites_in_faction_ai": 2, "call_sites_lines": "4921,5324" },
+    "BeastSystem": { "instance_vars": 0, "new_call_sites_in_faction_ai": 1, "call_sites_lines": "4726" },
+    "MovementSystem": { "instance_vars": 0, "new_call_sites": "resource_system.gd:142,332；movement_system.gd自身不需(方法已是method呼叫者)", "note": "resource_system.gd內每次collect呼叫都new一個MovementSystem純為呼叫carry_space_for_res" },
+    "OrderSystem": { "instance_vars": 1, "instance_var_detail": "_msg := SimMessageSystem.new()（組合依賴、非自身狀態）", "new_call_sites_in_faction_ai": 3, "call_sites_lines": "827,3226,5017", "note": "borderline——OrderSystem本身無狀態，但每次.new()會巢狀多new一個SimMessageSystem，雙重alloc浪費" }
+  },
+
+  "stateful_classes_not_safe_for_blanket_static": {
+    "note": "以下class有真instance state(組合子系統參照或跨呼叫累積dict)，static轉換需更小心(非本輪判斷範圍，只flag)",
+    "InteractionSystem": { "instance_vars": 5, "detail": "_msg/_vision/_equip/_skill_sys/_combat（組合多個子系統參照）", "new_call_sites": ".gd內19處(faction_ai裡4處：2029,2042,2718,2767)" },
+    "NpcCombatSystem": { "instance_vars": 3, "detail": "_msg/_skill_sys/_equip（同款組合模式）", "new_call_sites_in_faction_ai": 2, "call_sites_lines": "224,4727" },
+    "EventSystem": { "instance_vars": 2, "detail": "_events/_event_names Array——需先確認是per-call scratch還是跨呼叫累積狀態才能判斷static安不安全", "new_call_sites_in_faction_ai": 1, "call_sites_lines": "821" },
+    "FactionAISystem_self": {
+      "instance_vars": 2, "detail": "_last_site_sig/_last_dispatch_fail(Dictionary，疑為跨呼叫防抖/去重快取)",
+      "★secondary_finding_beyond_perf": "movement_system.gd 3處呼叫`FactionAISystem.new()._evaluate_storage_visit/_find_own_outpost(...)`(lines 69,288,324)——這些呼叫用的是全新throwaway instance，其_last_site_sig/_last_dispatch_fail快取永遠是空的，若這兩個dict的設計意圖是跨tick去重/防抖，這些cross-file呼叫路徑上的去重機制可能從未真正生效（非本輪能坐實的行為bug，只是code-read看到的疑點，flag給implementer確認是否為真缺陷非純perf議題）"
+    }
+  },
+
+  "estimated_priority_ranking": {
+    "note": "依『call site數量×是否在高頻cadence』粗排，非精確us數字",
+    "1_OutpostSystem": "10+處call site、部分在INFRA_INTERVAL評估路徑內連續多次new——最大宗殘餘alloc熱點候選",
+    "2_SubteamSystem": "7處call site、dispatch()橫跨多種派遣情境",
+    "3_OrderSystem": "3處但雙重alloc(巢狀SimMessageSystem)",
+    "4_DiplomaticAiSystem": "3處，但cadence較低頻(200/500 tick interval)",
+    "5_others": "NpcAiSystem/BeastSystem/MovementSystem等單一或低頻site，量級小"
+  },
+
+  "recommendation": "OutpostSystem/SubteamSystem/DiplomaticAiSystem/NpcAiSystem/BeastSystem/MovementSystem（stateless，共~26個call site）皆可比照_hex_dist的『刀A』模式轉static——每個都是純函式呼叫、零跨呼叫狀態，轉換風險低（機械改法：class方法補static、去掉呼叫端.new()）。OrderSystem需先處理巢狀SimMessageSystem依賴才能轉。InteractionSystem/NpcCombatSystem因組合子系統參照，轉換要嘛把子系統參照也一併static化、要嘛維持instance化——較大改動非cheap-win。是否值得批次動這批『刀A同款』留給blueprint/systems裁（跟perf③④一樣屬於量小但方向明確的backlog候選，非本輪能精確算出us數字，需implementer後續驗證）。",
+
+  "summary": "靜態census找到約26個stateless-class的.new()殘餘call site（OutpostSystem 10+/SubteamSystem 7/DiplomaticAiSystem 3/OrderSystem 3/NpcAiSystem 2/BeastSystem 1/MovementSystem 2），皆跟已修的_hex_dist同款可轉static、風險低。另flag一個FactionAISystem自身跨呼叫防抖快取(_last_site_sig/_last_dispatch_fail)在movement_system.gd的3處throwaway-instance呼叫路徑上可能從未生效的潛在行為疑點（非perf議題，供implementer參考）。本輪未做逐點runtime us量測（超出budget），census+風險分級已足以讓blueprint/systems判斷是否批次動這批。"
+}

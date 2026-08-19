@@ -1,0 +1,37 @@
+{
+  "ticket": "perf④ 重申CPU份額quantify（known_issues(a)的cheap-win candidate）",
+  "baseline": "現main，normal LOD，warring_states seed=1337",
+  "target": "in-flight JOIN每cadence重申（re-rank+re-set同target+print）成本佔比——faction_ai_system.gd:4679-4697的survival-latch重選分支，DECISION_CADENCE(1天，或crisis時1/4天)驅動的release-then-retrigger",
+
+  "method": "temp tap：release前捕捉team.current_task==TASK_JOIN時的social_target，_trigger_survival()呼叫後比對社交目標是否不變（=same_target純重申浪費）或改變/離開JOIN（=有效工作），計時整段_trigger_survival呼叫、按此分類累加",
+
+  "attempt_history": {
+    "15d_run": "0 JOIN reassert events captured（跑到day15/80團時churn量還太低，未撞到JOIN reassertion窗口）",
+    "45d_run": "GODOT_TIMEOUT=1800s撞牆(process killed)，未跑完，無有效輸出",
+    "25d_run": "★成功，完整輸出，見下"
+  },
+
+  "run_config": { "days": 25, "ticks": 6000, "end_teams": 109, "wall_s": 1105.97 },
+
+  "result": {
+    "join_reassert_total_us": 2658725,
+    "same_target_waste_us": 2506719,
+    "same_target_pct_of_reassert": "94.28%",
+    "changed_useful_us": 152006,
+    "changed_pct_of_reassert": "5.72%",
+    "other_survival_reeval_us": 8154974,
+    "join_same_target_waste_pct_of_wall": "0.2267%",
+    "join_reassert_total_pct_of_wall": "0.2404%"
+  },
+
+  "verdict": "★決定性：JOIN in-flight重申的『純浪費』(re-rank+re-set同target、無狀態進展)占整體wall time僅0.23%，量級小。但**質**的訊號很乾淨：每次JOIN重申裡有94.28%是純浪費(same-target)、只有5.72%是真正有效(target換了或離開JOIN)——known_issues.md原本描述的『重申抑制』候選修法方向正確（committed JOIN在途時抑制同target重複re-set），只是量級不大，非perf大刀。跟perf③的loop1去重(1.72% of wall)同一類：修法方向HOW正確、但ROI（cost/benefit）需blueprint裁是否在12mo大考前值得動，還是跟loop1去重一起排backlog。",
+
+  "cleanup": {
+    "worktree_removed": ".worktrees/perf4-join-reassert",
+    "temp_tap_reverted": "faction_ai_system.gd（_pc_was_join/_pc_prev_target/_pc_t0局部變數+Probe.bump呼叫）— git checkout --確認乾淨",
+    "temp_bed_deleted": "scripts/debug/perf4_join_reassert_bed.gd",
+    "compile_check": "godot --path .worktrees/perf4-join-reassert --headless --import 乾淨編譯（移除worktree前確認）"
+  },
+
+  "summary": "JOIN in-flight重申純浪費=0.23% of wall（量級小），但reassert事件中94.28%確認是純浪費、5.72%有效——known_issues.md的『重申抑制』修法方向坐實正確，量級判斷交blueprint（跟perf③loop1去重的1.72%同類決策：值不值得在12mo大考前動）。"
+}
