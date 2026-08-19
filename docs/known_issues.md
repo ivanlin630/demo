@@ -119,6 +119,12 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 📐 `_inflow_est` 的 `pop_mult` 在 pop≥20 飽和 ⇒「抽人不痛」（考後 backlog、blueprint 2026-08-20 確認）
+`MarginalEconomy._inflow_est` 的 `pop_mult = clamp(sqrt(pop/5), 0.5, 2.0)` 於 **pop≥20 觸頂** → 從大村抽走 6 個 settler，家內產能估計**零損失**（大村剎車床實測**家內邊際恆 `0.00`**）。
+∴ §4b 擴點的剎車**確實 bounded**（util `0.3635 → 0.1148`、`applicable` 仍 true＝非硬 gate），但**剎車語意是「同樣產出攤給更多人所以每人不划算」（per-capita 分母），不是「抽人很痛所以不擴」**。
+**歸屬**：既有 `_inflow_est` 性質、**非 §4b 引入**；屬 [[有大有小 arc]] **CASE B 規模經濟 absent** 家族在**擴張決策面**的具體現形（「團越大、多一個人越不值錢」在 pop≥20 後完全消失）。
+**裁定＝考後 backlog**（blueprint 確認 systems 三理由）：①標準場景 pop 卡 6、走不到 20 → 現在調＝**在沒有大村的世界裡調大村參數**＝「壓力鍋裡調藥」同型 ②12mo 大考產出第一批「到底有沒有大村」的證據 ③若世界確實長不出大村，此參數優先序**自動降**（它只在 pop≥20 才有意義）。
+
 ### 🔬 `DecisionContext.gather` 有寫副作用 → 任何非決策路徑呼叫都擾動世界（specimen 非中立性的真根方向、2026-08-20 implementer 隔離）
 
 **重現**（`specimen_neutrality_bed.gd` 兩段式 A/B 比 fp）：seed1337、**7 specimens**、1200 tick → 首次分岔 **tick 439**（1 specimen/300 tick 零分岔＝要夠多 specimen＋夠久才炸，與 measurer 觀察一致）。
