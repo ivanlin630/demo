@@ -21,11 +21,34 @@ $timedOut = $false
 if (-not $proc.WaitForExit($timeoutSec * 1000)) {
     $timedOut = $true
     try { $proc.Kill() } catch {}
-    try { $proc.WaitForExit() } catch {}
+    # Bounded grace: killed process still owns the stdout/stderr redirect handles for a moment.
+    # Unbounded WaitForExit could hang the wrapper; 5s is ample for handle teardown.
+    try { [void]$proc.WaitForExit(5000) } catch {}
+}
+# Read redirect files tolerantly: after a Kill the handles may not be released yet, so
+# ReadAllBytes throws "being used by another process" and the whole stdout vanishes.
+# FileShare::ReadWrite lets us read while the handle lives; retry with backoff covers the
+# brief window where even shared open is refused. Returns empty array only if all attempts fail.
+# Note: returns are comma-wrapped and typed [byte[]] - PowerShell unrolls arrays on output,
+# which turns an empty (0-byte) file into $null and breaks Encoding.GetString().
+function Read-BytesTolerant([string]$path) {
+    for ($i = 0; $i -lt 5; $i++) {
+        try {
+            $fs = New-Object System.IO.FileStream($path, [System.IO.FileMode]::Open,
+                [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+            try {
+                $ms = New-Object System.IO.MemoryStream
+                try { $fs.CopyTo($ms); return ,[byte[]]$ms.ToArray() } finally { $ms.Dispose() }
+            } finally { $fs.Dispose() }
+        } catch {
+            Start-Sleep -Milliseconds 300
+        }
+    }
+    return ,[byte[]]@()
 }
 $cp950 = [System.Text.Encoding]::GetEncoding(950)
-$bytesOut = [System.IO.File]::ReadAllBytes($tempOut)
-$bytesErr = [System.IO.File]::ReadAllBytes($tempErr)
+$bytesOut = Read-BytesTolerant $tempOut
+$bytesErr = Read-BytesTolerant $tempErr
 Remove-Item $tempOut, $tempErr -ErrorAction SilentlyContinue
 $text = $cp950.GetString($bytesOut) + $cp950.GetString($bytesErr)
 $text -split "`r?`n"
