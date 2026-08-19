@@ -221,7 +221,7 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		return
 	var absorber_leader = state.persons.get(absorber.leader_id)
 	var absorber_cmd: float = float(absorber_leader.skills.get("統領", 0.0)) if absorber_leader else 0.0
-	var absorber_cap: int = TeamData.pop_cap_from_leadership(absorber_cmd)
+	var absorber_cap: int = FactionAISystem.effective_pop_cap(state, absorber)
 	var capacity: int = absorber_cap - absorber.population
 	if capacity <= 0:
 		print("[Merge] Team%d 容量已滿，無法合併 Team%d" % [absorber_id, absorbed_id])
@@ -286,7 +286,7 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	var absorbed: TeamData = state.teams[absorbed_id]
 	var absorber_leader = state.persons.get(absorber.leader_id)
 	var absorber_cmd: float = float(absorber_leader.skills.get("統領", 0.0)) if absorber_leader else 0.0
-	var absorber_cap: int   = TeamData.pop_cap_from_leadership(absorber_cmd)
+	var absorber_cap: int   = FactionAISystem.effective_pop_cap(state, absorber)
 	var capacity: int       = absorber_cap - absorber.population
 
 	# 子隊回歸但母團已滿 → 獨立分團，不重試

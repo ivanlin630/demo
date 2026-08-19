@@ -7148,18 +7148,38 @@ func _test_resident_pop_cap_overflow() -> void:
 	tile.outpost_type = "civilian"
 	tile.outpost_owner = 0
 	state.world.tiles[0] = tile
-	# PRODUCE team pop=30，超過 L1 cap=20
+	# ★農業b ⑥：effective_pop_cap=領導基數×據點放大器。弱領導(0.2)+L1→effective 低→pop30 溢出到 effective。
 	var t := TeamData.new()
 	t.team_id = 0; t.tile_pos = Vector2i(0, 0); _seed_pop(t, 30)
 	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
-	leader.skills = { "統領": 0.9 }   # 統領高,普通 cap 會大,但 PRODUCE 應用 outpost cap=20
+	leader.skills = { "統領": 0.2 }   # 弱領導：base×amp(L1) < 30 → 溢出（⑥ 領導 matter）
 	state.persons[100] = leader; t.leader_id = leader.id
 	state.teams[0] = t
+	var eff: int = FactionAISystem.effective_pop_cap(state, t)
 	var ps := PopulationSystem.new()
+	# ★_seed_pop 在 leader 指派前呼 → named_in=0 → 種 30 anon、之後 +leader ⇒ 實際 pop=31（population 是
+	#   computed getter，不能直接寫）。故用實測 pop_before 當基準，別假設 ==30（假設 30 會假紅/假綠）。
+	var pop_before: int = t.population
+	assert(pop_before > eff, "測前提：弱領導 pop(%d) 需 > effective(%d) 才驗得到溢出" % [pop_before, eff])
 	ps.check_overflow_for_team(state, 0)
-	assert(t.population <= 20, "PRODUCE pop 應降到 outpost cap=20，實際=%d" % t.population)
-	print("Resident Task3 OK (剩 %d)" % t.population)
+	assert(t.population <= eff and t.population < pop_before,
+		"PRODUCE pop 應降到 effective_pop_cap(領導×據點放大器)=%d，實際=%d（溢出前 %d）" % [eff, t.population, pop_before])
+	# ★對照：強領導(0.9)同 L1 據點→effective 高→pop30 不溢出（好領主×好據點複合放大、⑥ 語意）
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var tile2 := HexTileData.new(); tile2.tile_pos = Vector2i(0,0); tile2.outpost_level = 1
+	tile2.outpost_type = "civilian"; tile2.outpost_owner = 0; s2.world.tiles[0] = tile2
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(0,0); _seed_pop(t2, 30)
+	t2.faction_id = 10; t2.tags = [TeamData.TAG_PRODUCE]
+	var ldr2 := PersonData.new(); ldr2.id = 100; ldr2.skills = {"統領": 0.9}; s2.persons[100] = ldr2; t2.leader_id = 100
+	s2.teams[0] = t2
+	var eff2: int = FactionAISystem.effective_pop_cap(s2, t2)
+	# 同上：基準取實測 pop_before2（=31），非寫死 30。斷言語意不變：強領導+據點 → effective 高 → pop 不溢出。
+	var pop_before2: int = t2.population
+	PopulationSystem.new().check_overflow_for_team(s2, 0)
+	assert(eff2 > eff and t2.population == pop_before2 and pop_before2 <= eff2,
+		"強領導+據點→effective(%d)>弱(%d)、pop%d 不溢出(複合放大)" % [eff2, eff, pop_before2])
+	print("Resident ⑥ pop_cap OK (弱 %d→%d/eff %d、強留 %d/eff %d)" % [pop_before, t.population, eff, t2.population, eff2])
 
 func _test_resident_movement_lock() -> void:
 	print("--- Resident Task4: 居民 movement 鎖定 ---")
@@ -15281,6 +15301,11 @@ func _mk_produce_team_on(state: WorldState, pos: Vector2i) -> TeamData:
 	team.tags.append(TeamData.TAG_PRODUCE)
 	_seed_pop(team, 10)
 	var ldr := PersonData.new(); ldr.id = 8000; ldr.team_id = 800
+	# ★fixture 缺欄補齊（農業b ⑥ 暴露）：原本只設 values、沒設 skills["統領"] → effective_pop_cap 讀到 0.0
+	# → pop_cap_from_leadership(0.0)=1 ×放大器 ≈ 2 → _seed_pop(10) 立刻超額 → overflow 拆走生產人力 →
+	# 殘隊跑不動 collect/mint（[g1a] 礦村未鑄幣）。main 沒露是因舊 PRODUCE 走 leader-independent
+	# _outpost_pop_cap(L1=20)，fixture 一直隱含假設 leader-independent cap。0.5 對齊其他 fixture 慣例。
+	ldr.skills["統領"] = 0.5
 	ldr.values["貪婪"] = 0.8; ldr.values["野心"] = 0.6
 	state.persons[8000] = ldr; team.leader_id = 8000
 	state.teams[800] = team

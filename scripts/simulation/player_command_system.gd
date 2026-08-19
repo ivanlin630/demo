@@ -824,7 +824,7 @@ func _accept_join_request(state: WorldState, from_id: int) -> Dictionary:
 	# 預估可進人數（受 pop_cap 限,與 merge 部分合併同口徑）
 	var leader = state.persons.get(pt.leader_id)
 	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-	var capacity: int = TeamData.pop_cap_from_leadership(cmd) - pt.population
+	var capacity: int = FactionAISystem.effective_pop_cap(state, pt) - pt.population
 	var will_join: int = mini(from_team.population, maxi(capacity, 0))
 	if will_join <= 0:
 		return { "ok": false, "msg": "隊伍已滿，無法收留" }

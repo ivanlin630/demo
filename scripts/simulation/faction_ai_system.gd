@@ -501,6 +501,29 @@ func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
 	var arr: Array = OUTPOST_POP_CAP.get(tile.outpost_type, [10, 20, 40])
 	return int(arr[clampi(tile.outpost_level - 1, 0, 2)])
 
+# ★農業b ⑥ 據點結構放大器：effective_pop_cap = 領導基數(pop_cap_from_leadership) × 據點放大器(乘法、⑥ ruling)。
+# 放大器=據點結構函數(outpost_level 為主 + 設施發展加成)、非死曲線查表；發展越高承載越大=genuine 投資回報
+# (size matter via 據點、好領主×好據點複合放大)。★L0 不放大 auto：outpost_level=0(含 L0 camp)→放大器=1.0
+# →effective=領導基數(領導帽、守 S2a 界線、零額外 code)。感知鐵律：讀自家據點自家 level(self-knowledge)。純算術零 RNG。
+const POP_CAP_AMP_PER_LEVEL: float = 1.0      # TEST VALUE ★校準命門 — outpost_level 每級放大量(基數+放大器一起 tune)
+const POP_CAP_AMP_PER_FACILITY: float = 0.2   # TEST VALUE ★校準命門 — 設施發展每級加成
+static func effective_pop_cap(state: WorldState, team: TeamData) -> int:
+	var leader = state.persons.get(team.leader_id)
+	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
+	var base: int = TeamData.pop_cap_from_leadership(cmd)
+	return int(round(float(base) * _pop_cap_amplifier(state, team)))
+
+# 據點結構放大器（自家腳下 outpost_level + 設施發展）；非站自家據點/L0→1.0。感知鐵律：只讀自家據點結構
+# (self-knowledge)。★foot-tile-only 零掃（同舊 _outpost_pop_cap(team.tile_pos) 慣例）——居民常態站自家 outpost、
+# hot path(gather resource_slack/member-assign)每呼零 O(tiles) 掃、免 perf 塌。純算術零 RNG。
+static func _pop_cap_amplifier(state: WorldState, team: TeamData) -> float:
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or tile.outpost_level == 0 or tile.outpost_owner != team.team_id:
+		return 1.0   # 非站自家據點 / L0(outpost_level=0) → 領導帽(不放大、守 S2a 界線)
+	var fac_sum: int = tile.farming_level + tile.manufacturing_level + tile.stable_level \
+		+ tile.apothecary_level + tile.smelter_level + tile.weaponsmith_level + tile.armorsmith_level
+	return 1.0 + float(tile.outpost_level) * POP_CAP_AMP_PER_LEVEL + float(fac_sum) * POP_CAP_AMP_PER_FACILITY
+
 func _is_resident_team(state: WorldState, team: TeamData) -> bool:
 	return FactionAISystem.is_resident_static(state, team)
 
@@ -2426,7 +2449,7 @@ static func consolidate_target_of(state: WorldState, mt: TeamData, f) -> int:
 	if absorber_id != -1:
 		var mt_leader = state.persons.get(mt.leader_id)
 		var mt_cmd: float = float(mt_leader.skills.get("統領", 0.0)) if mt_leader else 0.0
-		var mt_cap: int = TeamData.pop_cap_from_leadership(mt_cmd)
+		var mt_cap: int = effective_pop_cap(state, mt)
 		var small_b: bool = mt.population < int(float(mt_cap) * SMALL_TEAM_RATIO)
 		var small_c: bool = float(mt.population) < float(state.teams[absorber_id].population) * SMALL_VS_LARGE
 		if small_b and small_c:
@@ -2436,7 +2459,7 @@ static func consolidate_target_of(state: WorldState, mt: TeamData, f) -> int:
 		if d > 1 and d <= CONSOLIDATE_MAX_DIST:
 			var ldr_leader = state.persons.get(leader_team.leader_id)
 			var ldr_cmd: float = float(ldr_leader.skills.get("統領", 0.0)) if ldr_leader else 0.0
-			var ldr_cap: int = TeamData.pop_cap_from_leadership(ldr_cmd) - leader_team.population
+			var ldr_cap: int = effective_pop_cap(state, leader_team) - leader_team.population
 			if ldr_cap > 0:
 				return f.leader_team_id
 	return -1
@@ -2624,7 +2647,7 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 			continue
 		var t_leader = state.persons.get(t.leader_id)
 		var t_cmd: float = float(t_leader.skills.get("統領", 0.0)) if t_leader else 0.0
-		var t_cap: int = TeamData.pop_cap_from_leadership(t_cmd) - t.population
+		var t_cap: int = effective_pop_cap(state, t) - t.population
 		if t_cap <= 0:
 			continue
 		# S-A 靶A 餵養 gate#1（防搬餓）：吸附者須有糧 + 併後合隊真能撐 ABSORBER_MIN_SURVIVE_DAYS。
@@ -5064,7 +5087,7 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 func _find_absorb_target(state: WorldState, team: TeamData) -> int:
 	var ldr: PersonData = state.persons.get(team.leader_id)
 	var cmd: float = float(ldr.skills.get("統領", 0.0)) if ldr else 0.0
-	var slack: int = TeamData.pop_cap_from_leadership(cmd) - team.population
+	var slack: int = effective_pop_cap(state, team) - team.population
 	if slack <= 0:
 		return -1   # 無統領餘裕 → 吸不下
 	var best_id: int = -1
