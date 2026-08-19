@@ -119,6 +119,17 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 👶 人口不成長：真根待分解（領導天花板假說已 REFUTED、現指向生育引擎結構性關閉）
+**現象**：`peaceful_economy` day5→day90 population median/max **精確卡 6**；§4b 擴點門檻 pop≥12 **三個 run 零次滿足**。
+**★假說一（領導天花板）＝REFUTED**（measurer 快照 seed1337 day20、11 隊）：統領實測**全部 0.600**、`effective_pop_cap` **76–99**、population **3–6**、**AT_CAP=0.0%** → **cap 根本沒在綁**。（systems 的錯誤＝把「統領 0.08→cap 6 恰好等於 median 6」的**算術巧合**當坐實；公式為真但「這條在綁」未驗＝file:line 坐實公式 ≠ 坐實主導。附帶事實：該 config 的 leader 統領**全體一致 0.600**＝fixture 特性、非隨機樣本。）
+**假說二（待測、已派 measurer 用既有 `reaction.breed` tap 分解）＝生育引擎結構性關閉**：
+1. ★生育迴圈 `reaction_system:21-36` 迭代 `state.persons` 過濾 team ⇒ **只有 named 會生、anon cohort 完全不生**，而村人口主體是 anon。
+2. `_breed_balance`（`:185-188`）要求該隊 **named 兩性皆有**（`minf(m,f)<=0 → 0`）⇒ 小村 named 僅 1–3 人、**單性機率極高 → 直接不生**。
+3. 另兩道門：`food_flow_avg > BREED_FLOW_MIN=1.2`（**持續**淨盈餘；labor-v2 輪量測顯示多數隊 chronic ≤0）、`minor < 25% pop`。
+4. 下游 `MATURE_RATE=0.1`（月）——**若 breed 全期 fire=0 則此項完全不是瓶頸**。
+**★arc 連結**（blueprint 2026-08-20）：named-only 生育正是用戶 2026-08-18 問「這種生育怎麼跟**王朝血脈**對齊」時討論的同一結構 → 若坐實，意圖帳的**「生育兩層」問題提前現形**，修法與 [[王朝 arc]]／領導成長管道（established④）**同族、該一起排**。
+**對大考的意義**：若坐實，科目 A 的答案會是「**正循環斷在人口引擎、不在經濟**」——符合 blueprint 定的「大考是診斷器非及格考」。
+
 ### 📐 `_inflow_est` 的 `pop_mult` 在 pop≥20 飽和 ⇒「抽人不痛」（考後 backlog、blueprint 2026-08-20 確認）
 `MarginalEconomy._inflow_est` 的 `pop_mult = clamp(sqrt(pop/5), 0.5, 2.0)` 於 **pop≥20 觸頂** → 從大村抽走 6 個 settler，家內產能估計**零損失**（大村剎車床實測**家內邊際恆 `0.00`**）。
 ∴ §4b 擴點的剎車**確實 bounded**（util `0.3635 → 0.1148`、`applicable` 仍 true＝非硬 gate），但**剎車語意是「同樣產出攤給更多人所以每人不划算」（per-capita 分母），不是「抽人很痛所以不擴」**。
