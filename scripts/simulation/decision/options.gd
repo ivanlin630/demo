@@ -200,6 +200,22 @@ static var REGISTRY: Dictionary = {
 			if ft == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_CAMP, "target": ft},
 	},
+	"紮根": {
+		# ★§4a 建點入引擎（取代 _evaluate_l0_settle scaffolding）：L0 營地 → L1 據點的工期決策。
+		# applicable=★只物理可行性（站自己 L0 空地 or 自己未完工地）——viability 不做硬門檻，
+		#   撐不撐得過工期由 rooting_drive 的可行性帳表達（瀕餓 util→0 自然不開工、禁硬門檻回潮）。
+		# ★to_task 零世界寫入（只回 {task,target,settle_site}）：construction_* / corvee_site 由
+		#   try_set 成功後的 commit-hook 寫（faction_ai._commit_settle_site）——否則 try_set false
+		#   （combat 鎖／crisis 免疫窗／persist hold／搶班失敗）會留下「tile 標記但隊沒進 BUILD」的 zombie 工地。
+		"affinity": [0.5, 0.1, 0.0, 0.2, 0.2], "sets": {"survival": true},
+		"terms": [["rooting_drive", "rooting"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.can_settle_here or ctx.settle_resume_site != Vector2i(-1, -1),
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			var _ctx: DecisionContext = DecisionContext.gather(state, team)
+			var _site: Vector2i = _ctx.settle_resume_site if _ctx.settle_resume_site != Vector2i(-1, -1) else team.tile_pos
+			return {"task": TeamData.TASK_BUILD, "target": _site, "settle_site": _site},
+	},
 	"乞食": {
 		"affinity": [0.8, 0.0, 0.2, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["beg_drive", "beg"]],
