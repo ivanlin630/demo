@@ -21,6 +21,11 @@ static func record_site_outcome(state: WorldState, team: TeamData, tile: HexTile
 		return   # leader 已亡/未設 → 沒人記得
 	NpcAiSystem.new().write_site_memory(leader, outcome, tile.tile_id,
 		state.world.current_tick, SITE_MEMORY_INTENSITY)
+	# ★tap（憲法級）：寫端計數。p.memory 是 MEMORY_MAX FIFO 且與人際記憶共用 → site 記憶很可能
+	# 還沒到 TTL 就被擠掉；write vs applied 的落差＝eviction 吞掉多少反饋（否則此 slice 靜默失效無從判定）。
+	if Probe.enabled:
+		Probe.bump("site_memory.write")
+		Probe.bump("site_memory.write." + outcome)
 
 # 讀：該 leader 對某 tile 的選址記憶調整量（正=好地、負=壞地、0=無記憶或已過期）。
 # 調整量 = Σ intensity × max(0, 1 − 已過天數/TTL)（線性衰減、過期歸零非永久黑名單）。
@@ -47,7 +52,18 @@ static func site_bias(state: WorldState, team: TeamData, tile_id: int) -> float:
 		bias += w if t == SITE_THRIVED else -w
 	return bias
 
+# ★下界 0.25 非 0（merge-gate 訂正 B）：兩次同地失敗 → bias=-1.0 → 若下界 0 則乘子=0 →
+# settle_site_quality/camp_drive 直接歸零＝【絕對門檻 pre-empt 引擎】（瀕餓隊連唯一去處都不能紮）
+# ＝patch-gate 病型、違「禁硬門檻回潮」。0.25＝記憶重度折價但仍可被絕境秤贏（湧現過濾非門檻）。
+const QUALITY_FLOOR: float = 0.25   # TEST VALUE — 記憶折價下限（保留被絕境壓過的可能）
+const QUALITY_CEIL: float = 2.0
+
 # 選址品質乘子（掛既有選址 util 的地點品質項、★不新增獨立 term 線）：
-# bias 正→>1（好地更值得）、負→<1（壞地折價）、無記憶→1.0。clamp 防越界。
+# bias 正→>1（好地更值得）、負→<1（壞地折價）、無記憶→1.0。
+# ★tap（憲法級全量暫態可觀測性）：乘子 != 1.0＝記憶真的作用到決策 → bump applied；
+#   與寫端 site_memory.write 對照可量出 MEMORY_MAX FIFO eviction 吞掉多少反饋。
 static func quality_multiplier(state: WorldState, team: TeamData, tile_id: int) -> float:
-	return clampf(1.0 + site_bias(state, team, tile_id), 0.0, 2.0)
+	var mult: float = clampf(1.0 + site_bias(state, team, tile_id), QUALITY_FLOOR, QUALITY_CEIL)
+	if Probe.enabled and not is_equal_approx(mult, 1.0):
+		Probe.bump("site_memory.applied")
+	return mult

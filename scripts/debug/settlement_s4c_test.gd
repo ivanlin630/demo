@@ -16,6 +16,7 @@ func _init() -> void:
 	_t4_leader_change_no_inherit()
 	_t5_no_relations_pollution()
 	_t6_camp_team_in_fp()
+	_t7_floor_and_taps()
 	if _fail == 0: print("ALL PASS")
 	else: print("FAILS=%d" % _fail)
 	quit()
@@ -114,3 +115,27 @@ func _t6_camp_team_in_fp() -> void:
 	tile.camp_team_id = team.team_id
 	var fp1: String = StateFingerprint.compute(s)
 	_ok(fp0 != fp1, "camp_team_id 改變→fp 改變（非盲點）")
+
+# ⑦ merge-gate 訂正 B/C：折價下界不歸零（禁絕對門檻）+ 讀寫端 tap
+func _t7_floor_and_taps() -> void:
+	print("--- ⑦ 折價下界 + tap ---")
+	var s := _world()
+	var team := _mk(s, 1, Vector2i(11,11))
+	Probe.enabled = true
+	Probe.reset()
+	# 連兩次同地失敗 → bias=-1.0（0.5+0.5）→ 若無下界會歸零＝硬門檻
+	SettlementMemory.record_site_outcome(s, team, s.world.tiles[11011], SettlementMemory.SITE_FAILED)
+	SettlementMemory.record_site_outcome(s, team, s.world.tiles[11011], SettlementMemory.SITE_FAILED)
+	var mult: float = SettlementMemory.quality_multiplier(s, team, 11011)
+	_ok(mult >= SettlementMemory.QUALITY_FLOOR - 1e-6 and mult > 0.0,
+		"★兩次失敗→乘子=%.2f ≥ 下界 %.2f（非 0＝不成絕對門檻、瀕餓仍可被絕境秤贏）" % [mult, SettlementMemory.QUALITY_FLOOR])
+	_ok(mult < 0.5, "但確實重度折價（%.2f）" % mult)
+	_ok(int(Probe.counts.get("site_memory.write", 0)) == 2, "寫端 tap=2（site_memory.write）")
+	_ok(int(Probe.counts.get("site_memory.write.site_failed", 0)) == 2, "寫端分型 tap（write.site_failed=2）")
+	_ok(int(Probe.counts.get("site_memory.applied", 0)) >= 1, "讀端 tap（applied，乘子!=1.0 才記）")
+	# 無記憶 → 乘子 1.0 且不記 applied
+	Probe.reset()
+	var _m2: float = SettlementMemory.quality_multiplier(s, team, 9999)
+	_ok(absf(_m2 - 1.0) < 1e-6 and int(Probe.counts.get("site_memory.applied", 0)) == 0,
+		"無記憶→乘子 1.0 且不記 applied（tap 只在真作用時計）")
+	Probe.enabled = false
