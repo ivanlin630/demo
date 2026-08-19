@@ -85,7 +85,19 @@ construction commitment latch+resume（branch 5b166eb1，已 revert 出 main 529
 QA 稽核 labor-v2 死亡分類時揭：`food_flow_avg` 是 **5 日 EMA**（`resource_system:20 FLOW_WINDOW_DAYS=5.0`、`:241-242 alpha=day_fraction/FLOW_WINDOW_DAYS`）、**結構性落後瞬時 daily_rate**。死亡明細見多筆 EMA **單調爬向零卻仍為負**（team10 -0.016→-0.008、team9 -0.040→-0.005、team0 -0.114→-0.062）=「真實日流已回正、EMA 沒追上」簽名。
 **★通用風險（非只影響量測分類）**：同一 `food_flow_avg` 餵**多處決策**（生育 gate `reaction:197`、野心 rung 積累、crisis/persist safe_factor 等）→ **EMA 落後可能讓決策讀到過時的食物態**：食物已回正但 EMA 仍負→團續留絕境模式（過度保守）；或食物已崩但 EMA 仍正→晚進求生（反應遲鈍）。**現況純假說**（QA 只證了量測分類面）→ 需一輪 measure（瞬時 daily_rate vs EMA 對照、看決策點誤判率）才能定是否要改（候選：決策讀短窗/雙軌 EMA+瞬時、或只在分類/量測面改）。**非阻塞**、排 perf 線索包與 §4 之後。
 
-### ⏳per-team tick 成本 +34%（2026-08-19 農業b final round、粗 normalization、需 phase profile 才能定罪）
+### ⏳★★perf 真兇=`near.faction_ai` 決策核心（2026-08-20 perf 線索包①② 決定性）+ ★loop1 全量雙掃（LOD 不生效、systems code-read 坐實）
+**①phase profile（現 main、10 天窗）**：`near.faction_ai` **獨占 93.1% wall**（191.5s/205.8s）、其餘 near.* 全部加總 <7%。**★systems 先前點名的 4 個候選全部 <0.15%、不是真兇**（l0_settle 0.01% / farm_prodline 0.04% / construction_tick 0.05% / labor_rebalance 0.01%）——原本都缺獨立 phase marker（被吃進混桶），補 tap 驗完發現吃時間的根本不是它們。
+**真兇在 `near.faction_ai` 內部**（相對占比前四）：`loop1.factions` 19.0% / `loop1.assign_tasks` 18.8% / `unified.rank` 17.5% / `assign.leader_unified` 12.8% / `gather.market` 6.7%。
+**★★具體 finding（measurer 指出 + systems code-read 坐實）**：`_evaluate_all_body(state, _team_ids)`（`faction_ai_system.gd:712`）**參數 `_team_ids` 底線前綴=刻意未用**、迴圈 `for fid in state.factions`=**全量 factions 掃**；而 `sim_runner.gd:152` `faction_ai` entry 是 **`lod: LOD_BOTH`** → **faction 層決策（member_snap/update_goals/assign_tasks/infra/diplo）每 tick 全量跑兩次（near pass + far pass）、LOD 近遠分流對 loop1 完全不生效**。
+- **★修=行為影響道（非安全道）**：去重會讓 faction 決策頻率 2×/tick→1×/tick=**行為變（fp）**；per perf 憲章需 intended-change 流程 + LOD 紅線檢查 + blueprint 裁。候選形狀：(a) loop1 真正吃 `_team_ids`（近遠各處理自己的）(b) 只在 near pass 跑 (c) **per-faction tick-stamp 去重**（最小 delta：每 faction 每 tick 處理一次、first pass wins）。**未裁前不動**。
+- **★誠實缺口（未 root-cause）**：measurer 的 `fai_inner` 累加器總和 696.5s vs outer 桶 191.5s=**3.6× 對不上**（loop1 雙付只解釋 ~10%）→ **inner 相對占比方向性可信、絕對值不可信**、需 code-read 確認 instrumentation 語意（懷疑其他 `DecisionContext.gather` 路徑沒被 gate 在同一 zoom 窗）。
+
+### ⏳~~per-team tick 成本 +34%~~ → ★推論已被 bisect 削弱（2026-08-20 訂正）
+**②slice 歸因 bisect（同床同 seed 同窗 10 天、三 commit 嚴格序列跑）**：`94e2f826`(pre-L0) / `3d30b3ed`(post-S2b) / 現 main 在 **49→56-73 團**範圍 per-team 成本**幾乎重合**（2415 / 2463 / **2209** us per team——現 main 甚至略快）、end_teams 也幾乎一樣 → **此規模窗內沒有單一 slice 可歸因的加價**。
+**★∴ systems 先前「+34%=三 slice 疊加真開銷」的推論削弱**：那 +34% 來自 **670.6ms/152 隊 vs 793ms/242 隊**，但兩點來自**不同 run/不同 config/不同 day-in-run**、**非同方法論控制**（measurer 標 confound 警訊）；且低 N 區間走勢與那兩點**方向相反**。→ **改判：規模驅動（superlinear）為主、slice 疊加未坐實**。若要鎖定高 N 的真實加價，需 **100-200 團區間同方法論 bisect**（systems 裁：**先不做**、已知非 slice 驅動、優先做 ③scaling 曲線正式版）。
+**順手**：低 N 冪次擬合 **k≈2.1**（各 commit 2.1/2.7/2.9、noise 大僅方向性）=**超線性、疑 O(N²) 量級**→ 12mo 大考規模會更惡化。
+
+
 day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）vs 原輪 `793ms / 20.2s @242 隊`。**絕對值略優、但 per-team=4.41ms vs 3.28ms=重約 34%**。★**可疑點**：O(N²) 總成本下 per-team 應 ∝N、隊數**變少**(242→152)時 per-team 該**降**才對、卻升 34% → 指向三 slice 疊加**真的加了 per-team 開銷**（labor-v2 per-labor yield 計算 / 農業b `effective_pop_cap` per overflow check / churn-fix JOIN timeout 塊）。**但**本輪無 phase breakdown、世界組成/faction/encounter 未控制 → **粗量測非定罪**。perf arc 已依止損準則收官（blueprint re-open 條件=**長局跑出新明確熱點**）→ 此條為 **re-open candidate**、需先一輪 phase profile（Phase1 那套 6 階段）才算「明確熱點」。排 §4 之後 / 12mo 大考一併看。
 
 ### ⏳`tools/godot.ps1` wrapper timeout-kill race：長跑 stdout 憑空消失（2026-08-19 measurer 揪出、複現 2 次含 solo run）
