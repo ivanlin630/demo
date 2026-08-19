@@ -731,7 +731,10 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 		if not succeeded and team.faction_id != -1 and state.factions.has(team.faction_id):
 			var f = state.factions[team.faction_id]
 			if f.leader_team_id == team.team_id:
-				state.disband_faction(team.faction_id)
+				# ★繼承-lite：同上，排除本 tick 已判死未 erase 的隊
+				var _pending: Dictionary = {}
+				for _pid in state.teams_pending_erase: _pending[_pid] = true
+				state.succeed_or_disband_faction(team.faction_id, team.team_id, _pending)
 	state.remove_member(team, p.id, false)   # 戰死：出 named（隨後 persons.erase，team_id 免清）
 	if team.leader_id == p.id:
 		team.leader_id = -1
