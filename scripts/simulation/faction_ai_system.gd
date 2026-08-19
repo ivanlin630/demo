@@ -2513,7 +2513,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			Probe.bump("merge.consolidate_dispatch")
 			# ★T1 TEMP TRACE（churn recommit pin；T2 移；純讀）：在途重委派 vs 新承諾。
 			if Probe.enabled:
-				if team.current_task == TeamData.TASK_JOIN and team.social_target == int(td.get("social_target", -1)):
+				if team.current_task == TeamData.TASK_JOIN and team.social_target == int(td.get("social_target", -1)):   # gate-ok: probe bookkeeping (T1 churn trace 分類，非決策)
 					Probe.bump("jt.recommit_same")   # (ii) 已 JOIN 同 target 又派=在途重委派（task_start 不 reset，仍未抵達）
 				else:
 					Probe.bump("jt.fresh_commit")    # 新 JOIN 承諾（新 target 或前非 JOIN）
