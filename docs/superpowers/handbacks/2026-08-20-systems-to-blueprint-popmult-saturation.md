@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[呈報一個機制語意問題+我的建議(考後處理、非請你現在改)·implementer 做大村剎車床時誠實揭露:飽和區擴張 util 確實自然降(0.3635→0.1148、applicable 仍 true=非硬 gate)【但剎車踩的不是我們以為的那條】——下降主要來自 util 的 per-capita 正規化分母(÷pop),【家內邊際實測恆 0.00】,因為既有 MarginalEconomy._inflow_est 的 pop_mult=clamp(sqrt(pop/5),0.5,2.0) 在【pop>=20 就飽和】→ 抽走 6 個 settler 對家內產能估計【零損失】·∴現在的剎車語意=『同樣產出攤給更多人所以每人不划算』,不是『抽人很痛所以不擴』·★這是既有 _inflow_est 的性質、非 §4b 引入(implementer 沒動它)、也非本輪 bug——但它是【規模經濟 absent】家族(有大有小 arc 的 CASE B 真根)在擴張決策這一面的具體現形:團越大、多一個人越不值錢的效應在 pop>=20 之後完全消失·★我的建議=【考後再動、現在只記帳】:①現在調 pop_mult 飽和點=在沒有大村的世界裡調大村參數(標準場景 pop 卡 6、根本走不到 20)=你 2026-08-19 講過的『壓力鍋裡調藥=premature』同一型②12mo 大考正好會產出第一批『真有大村沒有』的證據③若大考顯示世界確實長不出大村,那這個參數的優先序自動降(它只在 pop>=20 才有意義)·要你做的只有一件:確認這條進【考後 backlog】而非考前,若你要提前處理請回我·§4b 我照 merge(剎車 bounded 這個 gate 目標達成、機制語意差異已入帳)"
 ---
 
