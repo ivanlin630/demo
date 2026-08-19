@@ -46,7 +46,7 @@ func _t1_succeeds() -> void:
 	_ok(s.factions.has(fid), "faction 續存（未解散）")
 	if s.factions.has(fid):
 		_ok(s.factions[fid].leader_team_id == 2, "最強統領(0.8=Team2)接位、實際=%d" % s.factions[fid].leader_team_id)
-		_ok(not s.factions[fid].known_member_states.has(1), "known_member_states 已清死者")
+		_ok(not s.factions[fid].known_member_states.has(1), "known_member_states 已清死者（由 erase_teams 既有清理負責、非繼承函式）")
 
 func _t2_disband_no_heir() -> void:
 	print("--- ② 無成員→仍 disband ---")

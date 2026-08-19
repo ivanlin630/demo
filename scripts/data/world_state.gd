@@ -136,12 +136,15 @@ func create_faction(leader_team_id: int) -> int:
 # ★also_dead＝本 tick 已判死但尚未真 erase 的隊（erase_teams 批次期間 state.teams 仍持有全部 dead_list；
 #   領袖隊若排在前面處理，同批死亡的隊友此刻仍 teams.has()==true → 會選出「這 tick 稍後就被清掉的
 #   死人繼任者」）。呼叫點傳自己的 dead 集合 / 既有 teams_pending_erase。
-# bookkeeping 只需清 known_member_states[死者]（FactionData 中唯一 team-id-keyed 欄；其餘皆 faction 層級）。
+# bookkeeping：known_member_states 由各呼叫點自己的既有清理負責（本函式不碰，見下方訂正註）。
 func succeed_or_disband_faction(faction_id: int, dead_leader_tid: int, also_dead: Dictionary = {}) -> void:
 	if not factions.has(faction_id):
 		return
 	var f = factions[faction_id]
-	f.known_member_states.erase(dead_leader_tid)
+	# ★merge-gate 訂正（A）：不在此 erase known_member_states[死者]——三處語境都不該由本函式做：
+	#   erase_teams 前一行已 erase（冗餘）／faction_ai 那條稍後走 cleanup→erase_teams 也會 erase（冗餘）／
+	#   ★npc_combat 那條【團還活著】（只是 named leader 死、on_leader_death 回 false），抹掉一支仍在世
+	#   成員隊的 faction belief 記錄＝未經 spec 的 belief 破壞、可能改 faction 決策。
 	var best: int = -1
 	var best_cmd: float = -1.0
 	var best_pop: int = -1
