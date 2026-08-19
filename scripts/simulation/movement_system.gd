@@ -58,36 +58,6 @@ func process(state: WorldState, team_ids: Array,
 			var bpos: Vector2i = BeliefSystem.belief_pos(state, tid, tgt_id)
 			if bpos != Vector2i(-1, -1):
 				team.move_target = bpos
-			# ★T1 TEMP TRACE（mergein churn arrival-never pin；T2 移；純讀零 RNG、god-view 僅觀測不影響 sim）
-			if Probe.enabled and team.current_task == TeamData.TASK_JOIN:
-				Probe.bump("jt.mv_seen")
-				if bpos == Vector2i(-1, -1):
-					Probe.bump("jt.belief_stale")        # (iii) 過期→move_target 凍結於舊 last-seen
-				else:
-					Probe.bump("jt.belief_fresh")
-					if bpos != target.tile_pos:
-						Probe.bump("jt.belief_lag")      # (iii) belief!=host live=host 移動、joiner 追過期位
-				if target.move_target != Vector2i(-1, -1):
-					Probe.bump("jt.host_mobile")         # (iii) host 自己在移動中
-				if team.tile_pos == target.tile_pos:
-					Probe.bump("jt.colocated")           # 到 host=resolve 應觸發
-				elif team.tile_pos == team.move_target:
-					Probe.bump("jt.at_target_host_absent")  # (i/iii) 到 move_target 但 host 不在此=撲空 ghost tile
-				else:
-					Probe.bump("jt.in_transit")          # (i) 仍行軍朝 move_target
-				# 距離/年齡 溫度計（純觀測）：tail-chase 判準=age 拉長但 dist 不收斂。
-				var _d: int = FactionAISystem._hex_dist(team.tile_pos, target.tile_pos)
-				if _d <= 1: Probe.bump("jt.dist_le1")
-				elif _d <= 4: Probe.bump("jt.dist_2_4")
-				else: Probe.bump("jt.dist_ge5")
-				var _age: int = state.world.current_tick - team.task_start_tick
-				if _age < WorldState.TICKS_PER_DAY: Probe.bump("jt.age_lt1d")
-				elif _age < WorldState.TICKS_PER_DAY * 3: Probe.bump("jt.age_1_3d")
-				else: Probe.bump("jt.age_ge3d")
-				Probe.bump_sample("jt.sample", {"tid": tid, "host": tgt_id, "dist": _d,
-					"age_d": float(_age) / float(WorldState.TICKS_PER_DAY),
-					"host_mobile": target.move_target != Vector2i(-1, -1),
-					"belief_lag": bpos != Vector2i(-1, -1) and bpos != target.tile_pos}, 12)
 	var arrived: Array = []
 	var moved: Array = []
 	for tid in team_ids:

@@ -137,6 +137,13 @@ const STATION_TASKS: Array = [
 	TeamData.TASK_TRAIN, TeamData.TASK_MANUFACTURE, TeamData.TASK_GOVERN, TeamData.TASK_PRODUCE,
 ]
 const STATION_TIMEOUT: int = TimeScale.TICK_PER_DAY * 4
+# ★T2 churn 根修（mergein arrival-never）：committed JOIN 原本零 release/timeout 出路（TRADE/STATION 都有、
+# JOIN 沒有）→ 追不到的 host 讓隊卡在 JOIN 不朽、每 cadence 重 commit 同 target=698× SurvivalMergeIn churn。
+# 補上「到達或放棄」契約（hand-obeys-brain：腦承諾、手要嘛完成要嘛釋放），非在 resolve 端疊繞過。
+# 額度同 TRADE 款按殘距估（非死常數）：base + 殘距×per_hex；到期 release → 下 cadence 重 rank
+# （belief 還在→可能再派同 host；belief 死→to_task 自然退榜選別的 survival option）。TEST VALUE。
+const JOIN_TIMEOUT: int = TimeScale.TICK_PER_DAY * 6
+const JOIN_TIMEOUT_PER_HEX: int = TimeScale.TICK_PER_DAY * 12 / 24  # 12h/hex（鏡射 TRADE）
 
 # ── Outpost 居民派駐 AI ──
 const RESIDENCY_CADENCE: int = TimeScale.TICK_PER_DAY * 3    # 3 天 評估一次 outpost 居民派駐
@@ -834,6 +841,22 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			if state.world.current_tick - team.task_start_tick > _trade_allow:
 				Probe.bump("trade.timeout")   # 漏斗站5：timeout 放棄
 				TaskArbiter.release(team)
+		# ★T2 churn 根修：committed JOIN 的到達契約（單一源，與 TRADE/STATION timeout 同塊）。
+		# ①撲空 abort：已站上 move_target（或 move_target 已清=到點）且對 social_target 的 belief 已死
+		#   → 走到的是 ghost tile、host 不在且我方不知其位 → release 重評（感知鐵律：讀自己 belief，
+		#   非查 host 真位）。②timeout：殘距估額度內沒 resolve → release（追移動 host 追不到的止血）。
+		elif team.current_task == TeamData.TASK_JOIN and team.task_priority != TaskArbiter.PRIO_PLAYER:   # JOIN 走 survival@80 > PLAYER@60 → 用 !=（只豁免玩家命令），非 <
+			var _join_allow: int = JOIN_TIMEOUT
+			if team.move_target != Vector2i(-1, -1):
+				_join_allow += _hex_dist(team.tile_pos, team.move_target) * JOIN_TIMEOUT_PER_HEX
+			var _arrived_empty: bool = team.move_target == Vector2i(-1, -1) or team.tile_pos == team.move_target
+			var _belief_dead: bool = team.social_target == -1 				or BeliefSystem.belief_pos(state, team.team_id, team.social_target) == Vector2i(-1, -1)
+			if _arrived_empty and _belief_dead:
+				Probe.bump("join.abort_ghost")   # 撲空：走到 last-seen 空格 + belief 死
+				_release_failed_join(state, team)
+			elif state.world.current_tick - team.task_start_tick > _join_allow:
+				Probe.bump("join.timeout")
+				_release_failed_join(state, team)
 		# A1a: 四 no-release 駐地 task timeout（transition 進場已由 arbiter 蓋 task_start_tick）。
 		# PLAYER@60 現任豁免（護欄：引擎 timeout 不清玩家命令；四 task 現無 player command 入口，防未來）。
 		elif team.current_task in STATION_TASKS and team.task_priority < TaskArbiter.PRIO_PLAYER:
@@ -2509,14 +2532,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
 		# full_probe（診斷）：fold 路 merge 實派 + merge-applicable 隊 option 去向（B 鐵證：該併卻選別的）。
-		if opt == "併入":
-			Probe.bump("merge.consolidate_dispatch")
-			# ★T1 TEMP TRACE（churn recommit pin；T2 移；純讀）：在途重委派 vs 新承諾。
-			if Probe.enabled:
-				if team.current_task == TeamData.TASK_JOIN and team.social_target == int(td.get("social_target", -1)):   # gate-ok: probe bookkeeping (T1 churn trace 分類，非決策)
-					Probe.bump("jt.recommit_same")   # (ii) 已 JOIN 同 target 又派=在途重委派（task_start 不 reset，仍未抵達）
-				else:
-					Probe.bump("jt.fresh_commit")    # 新 JOIN 承諾（新 target 或前非 JOIN）
+		if opt == "併入": Probe.bump("merge.consolidate_dispatch")
 		if Probe.enabled and opt == "吸納": Probe.bump("absorb.dispatch")   # §HOW-7 強方吸納實派
 		if Probe.enabled and team.faction_id != -1 and team.parent_team_id == -1:
 			var _fc2 = state.factions.get(team.faction_id)
@@ -4867,6 +4883,19 @@ func _survival_food_days(state: WorldState, team: TeamData) -> float:
 # （food 沒回升 ≥RELIEF_MIN）→ true → caller release → 下 cadence re-rank → survival @80 preempt 卡住 task。
 # baseline lazy 蓋（crisis_committed_tick != task_start_tick=新 task episode → 重蓋）；task 變自動重置=進度隊（② 換格/
 # 正常完工）task_start_tick 變 → 計時歸零 → 不誤 fire。只讀自身 food_days（合憲，非 god-view）；零 RNG。
+# ★T2 churn 根修 (3)：arrival-fail 釋放（撲空/timeout）復用既有 rejection-learning（零新機制）——
+# 寫 join_rejected memory（同 interaction._resolve_join:1280 拒收路），decision_context:530
+# has_acceptable_join_host 於 JOIN_REJECT_COOLDOWN_TICKS 內即不再把此 host 當出路
+# → 破「release→下 cadence 併入又贏→再派同 target」的 churn 換皮。cooldown 過期可再試（非永久黑名單）。
+# 純寫 memory + release，零 RNG（write_memory 路徑無 randf）。
+func _release_failed_join(state: WorldState, team: TeamData) -> void:
+	var host_id: int = team.social_target
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader != null and host_id != -1:
+		NpcAiSystem.new().write_memory(leader, "join_rejected", host_id, state.world.current_tick, 0.5)
+	state.clear_social_target(team)
+	TaskArbiter.release(team)
+
 func _famine_crisis(state: WorldState, team: TeamData) -> bool:
 	if team.current_task == TeamData.TASK_IDLE:
 		return false   # 無 committed task → 自然 re-rank，無可 release

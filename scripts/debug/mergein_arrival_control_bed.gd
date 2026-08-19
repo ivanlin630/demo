@@ -7,6 +7,9 @@ extends SceneTree
 #   A host 靜止        → 若到達+resolve = movement 執行正常（(i) 排除）
 #   B host 移動(同速)   → 若永不到達 = (iii) host-chase（joiner 追移動目標、同速追不上）
 #   C host 移動 + 每 cadence 重委派 → 看 (ii) 重委派是否額外惡化（task_start/move 是否被重置）
+# ★注意：本床只驅動 movement/interaction（不呼 evaluate_all）→ 場景 D 仍顯示 arrival-never，
+#   那是「沒有生命週期塊時的原病灶」對照；T2 的 timeout/撲空 abort 出路由
+#   mergein_join_lifecycle_test.gd 驗（該測走 evaluate_all 真路徑）。
 # 純量測 debug script，零 production 邏輯改動（trace tap 為 T1 temp、T2 移）。
 
 var _next_id: int = 1
@@ -103,10 +106,7 @@ func _scenario(label: String, host_moves: bool, recommit: bool, see_mode: String
 	print("  dist 起=%d → 末=%d | joiner=%s host=%s" % [d0, d1,
 		str(joiner.tile_pos) if s.teams.has(joiner.team_id) else "(消失=已併)",
 		str(host.tile_pos)])
-	print("  belief: stale=%d lag=%d | mv_seen=%d in_transit=%d at_target_host_absent=%d colocated=%d" % [
-		int(Probe.counts.get("jt.belief_stale", 0)), int(Probe.counts.get("jt.belief_lag", 0)),
-		int(Probe.counts.get("jt.mv_seen", 0)), int(Probe.counts.get("jt.in_transit", 0)),
-		int(Probe.counts.get("jt.at_target_host_absent", 0)), int(Probe.counts.get("jt.colocated", 0))])
-	print("  join.resolve=%d  結果=%s" % [int(Probe.counts.get("join.resolve", 0)),
+	print("  join.resolve=%d timeout=%d abort_ghost=%d  結果=%s" % [int(Probe.counts.get("join.resolve", 0)),
+		int(Probe.counts.get("join.timeout", 0)), int(Probe.counts.get("join.abort_ghost", 0)),
 		("★到達/resolve @tick=%d" % resolved_tick) if resolved_tick != -1 else "✗%d 天內從未到達（arrival-never）" % days])
 	Probe.reset()

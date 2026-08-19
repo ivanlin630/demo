@@ -1,11 +1,10 @@
 extends SceneTree
 
 # T1 runtime-trace bed（mergein churn (b)arrival-never pin·systems dispatch 2026-08-19）。
-# seeded warring 短局跑 → 讀 jt.* 溫度計 pin sub-cause i/ii/iii：
-#   (i)  movement 不執行 → jt.in_transit / jt.mv_seen 低、jt.at_target_host_absent 低
-#   (ii) cadence 重委派 reset → jt.recommit_same 遠超 jt.fresh_commit（在途反覆委派）
-#   (iii) 移動 host chase / belief-stale ghost → jt.belief_lag / jt.host_mobile / jt.at_target_host_absent / jt.belief_stale 高
-# 純觀測、零 sim 邏輯改（trace tap 已 inline movement/faction_ai，T2 移）。
+# seeded warring 短局跑 → churn 溫度計：commit(merge.consolidate_dispatch) vs 真 resolve(join.resolve)
+# 比例 + arrival-fail 兩出路(join.timeout / join.abort_ghost) + host 拒(accept.join_reject) + 分流。
+# T1 pin 用的 jt.* temp tap 已於 T2 移除；本床改讀 production probe（長期可用）。
+# 純觀測、零 sim 邏輯改。
 
 func _initialize() -> void:
 	_run(); quit()
@@ -48,14 +47,10 @@ func _run() -> void:
 			print("[bed] 全滅 @tick=%d" % tick); break
 	_dump_sidecar(side_path, int(ticks / WorldState.TICKS_PER_DAY), state.teams.size())
 
-	print("\n--- churn 溫度計（jt.* + commit/resolve）---")
+	print("\n--- churn 溫度計（commit/resolve + arrival-fail 出路）---")
 	var keys: Array = [
 		"merge.consolidate_dispatch", "join.resolve", "join.arrived_no_handler",
-		"jt.fresh_commit", "jt.recommit_same",
-		"jt.mv_seen", "jt.in_transit", "jt.at_target_host_absent", "jt.colocated",
-		"jt.belief_fresh", "jt.belief_stale", "jt.belief_lag", "jt.host_mobile",
-		"jt.dist_le1", "jt.dist_2_4", "jt.dist_ge5",
-		"jt.age_lt1d", "jt.age_1_3d", "jt.age_ge3d",
+		"join.timeout", "join.abort_ghost", "accept.join_reject", "mergein.dissolve", "mergein.subteam",
 	]
 	for k in keys:
 		print("  %-32s = %d" % [k, int(Probe.counts.get(k, 0))])
@@ -63,24 +58,9 @@ func _run() -> void:
 	var commit: int = int(Probe.counts.get("merge.consolidate_dispatch", 0))
 	var resolve: int = int(Probe.counts.get("join.resolve", 0))
 	print("\n[ratio] join.resolve/commit = %d/%d = %.1f%%" % [resolve, commit, 100.0 * resolve / maxf(commit, 1)])
-	var mv: int = int(Probe.counts.get("jt.mv_seen", 0))
-	if mv > 0:
-		print("[mv breakdown] in_transit=%.0f%% at_target_host_absent=%.0f%% colocated=%.0f%%" % [
-			100.0 * int(Probe.counts.get("jt.in_transit", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.at_target_host_absent", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.colocated", 0)) / mv])
-		print("[belief] fresh=%.0f%% stale=%.0f%% lag(host移動)=%.0f%% host_mobile=%.0f%%" % [
-			100.0 * int(Probe.counts.get("jt.belief_fresh", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.belief_stale", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.belief_lag", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.host_mobile", 0)) / mv])
-	var recommit: int = int(Probe.counts.get("jt.recommit_same", 0))
-	var fresh: int = int(Probe.counts.get("jt.fresh_commit", 0))
-	print("[commit-mix] recommit_same=%d fresh_commit=%d → recommit 占 %.0f%%" % [
-		recommit, fresh, 100.0 * recommit / maxf(recommit + fresh, 1)])
 
 	Probe.enabled = false
-	print("\n=== mergein-churn T1 trace DONE ===")
+	print("\n=== mergein-churn trace DONE ===")
 
 # sidecar dump（reap 存活：長跑被殺也有 partial 溫度計可讀；純寫檔零 sim 影響）。
 func _dump_sidecar(path: String, day: int, teams: int) -> void:
@@ -91,29 +71,12 @@ func _dump_sidecar(path: String, day: int, teams: int) -> void:
 		return
 	var keys: Array = [
 		"merge.consolidate_dispatch", "join.resolve", "join.arrived_no_handler",
-		"jt.fresh_commit", "jt.recommit_same",
-		"jt.mv_seen", "jt.in_transit", "jt.at_target_host_absent", "jt.colocated",
-		"jt.belief_fresh", "jt.belief_stale", "jt.belief_lag", "jt.host_mobile",
-		"jt.dist_le1", "jt.dist_2_4", "jt.dist_ge5",
-		"jt.age_lt1d", "jt.age_1_3d", "jt.age_ge3d",
+		"join.timeout", "join.abort_ghost", "accept.join_reject", "mergein.dissolve", "mergein.subteam",
 	]
 	f.store_string("[day %d] teams=%d\n" % [day, teams])
 	for k in keys:
 		f.store_string("%-32s = %d\n" % [k, int(Probe.counts.get(k, 0))])
-	var mv: int = int(Probe.counts.get("jt.mv_seen", 0))
 	var commit: int = int(Probe.counts.get("merge.consolidate_dispatch", 0))
 	var resolve: int = int(Probe.counts.get("join.resolve", 0))
 	f.store_string("ratio resolve/commit = %d/%d = %.1f%%\n" % [resolve, commit, 100.0 * resolve / maxf(commit, 1)])
-	if mv > 0:
-		f.store_string("mv%%: in_transit=%.0f at_target_host_absent=%.0f colocated=%.0f | belief fresh=%.0f stale=%.0f lag=%.0f host_mobile=%.0f\n" % [
-			100.0 * int(Probe.counts.get("jt.in_transit", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.at_target_host_absent", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.colocated", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.belief_fresh", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.belief_stale", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.belief_lag", 0)) / mv,
-			100.0 * int(Probe.counts.get("jt.host_mobile", 0)) / mv])
-	var rc: int = int(Probe.counts.get("jt.recommit_same", 0))
-	var fc: int = int(Probe.counts.get("jt.fresh_commit", 0))
-	f.store_string("commit-mix: recommit_same=%d fresh=%d → recommit %.0f%%\n" % [rc, fc, 100.0 * rc / maxf(rc + fc, 1)])
 	f.close()
