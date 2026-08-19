@@ -11,7 +11,7 @@ owner: systems（HOW）← labor-slice v1 FAIL(治斷崖沒過) + level-cancella
 ## §1 現況（grounded）
 - 分配（labor_system:45-93）：食物兩工位 need-weight 相等、demand[gather:food]=K_GATHER/[farm]=level×K_FARM、proportional-capped-by-demand。
 - 產出（resource:104-108）：`fyield=level×FUY×labor_mult×harvest`、labor_mult=`fill×SCALE`、fill=`alloc/(level×K_FARM)`=level 相消。
-- 估算器（food_flow:46-47 v1 已改加 farm_contribution×farm_fill；farm_fill=labor_mult=fill 仍走 level-cancel demand）。
+- 估算器（★**R² 訂正現況**：main 上 `food_flow:46-47` 仍是**原始 `farming_bonus=1.0+farming_level*0.5` 乘性 boost**、v1 未 merge 無 farm_contribution 痕跡；`marginal_economy:21` 同 pattern；**T3=整條替換從零寫 farm_contribution 非調既有**）。★reviewer 窮盡 grep 確認乘性 farming_bonus bug 恰 2 處（food_flow:46+marginal_economy:21 皆 T3 scope、faction_ai:2161 facility_roi 是下游消費者自動繼承 T3 修、無漏第三處）。
 
 ## §2 Task（TDD、每 task headless 驗）
 ### T1：食物工位真邊際分配（labor 流向 per-labor yield 高者）

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[農業b bounded merge-gate·feat/agriculture-b 70a5d0cd·⑥據點放大器pop-cap乘法·核心HOW我硬讀diff驗held:effective_pop_cap:503=pop_cap_from_leadership基數×_pop_cap_amplifier、amplifier:518=1+outpost_level×AMP_PER_LEVEL(1.0)+設施sum×AMP_PER_FACILITY(0.2)、L0/無據點→1.0(outpost_level=0)、foot-tile self-knowledge(:509只讀自家據點結構)、路由population_system check_overflow→effective·9/9+constitution77+determinism 4b412db8(≠pre=pop-cap LIVE行為變)·★★兩gate重點:①headless full-run confirm(implementer本session tooling無法自驗長run、一次400s run顯count=10 vs baseline8=舊pop-cap測待訂正⑥、#1已修_test_resident_pop_cap_overflow、#2未pinpoint→你跑full headless確認0-new+指殘餘#2哪個assert)②★★pop-account爆/塌雙面(設計張力、無clamp):舊_outpost_pop_cap L1=20是leader-independent floor;新base(1-50)×amp(1+level+fac)→弱領導(統領≈0 base1)×L1(amp2)=2<<舊20=塌(overflow churn居民撐不住)、強領導(base50)×amp=100+>>舊50帽=爆(runaway pop?);量:effective_pop_cap分布(弱領導居民有無塌到churn/強領導有無爆runaway)、pop總量不爆不塌、overflow事件率·嚴重(塌churn or爆runaway)→回報我systems校準ruling(抬base floor/clamp effective/混合outpost-floor max/amp tune、POP_CAP_AMP_PER_LEVEL 1.0/PER_FACILITY 0.2待校準)·③不破S1/S2a/S2b/農業a④determinism 4b412db8驗⑤fp intended-change標·跑法godot --path .worktrees/agriculture-b·baseline=main·出.measure.json落地path·地基KEEP"
 ---
 
