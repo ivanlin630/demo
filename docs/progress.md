@@ -21,6 +21,31 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## 🎓 12mo 大考 啟動閘（systems 立 2026-08-20、單一入口；細節散落各條，此處只收斂「能不能開考 / 開考看什麼 / 考前不准動什麼」）
+
+**性質**：修復疊加後的**新基線**大考，**不是**與第一次大考（2026-08-13~14）byte-comparable 的重跑——中間 settlement S1~S4/農業a-b/labor-v2/churn-fix 全是**蓄意行為改動**，正是要被大考評判的東西。
+
+### A. 開考 blocker（綠才開）
+| # | 項 | 狀態 |
+|---|---|---|
+| 1 | **specimen 非中立性修**（specimen 開關改變世界軌跡→大考的 story-audit 全靠 specimen 讀故事、不修=讀到的不是被評的那個世界） | in flight（implementer） |
+| 2 | §4b 有機 gate（measurer）+ §4c gate | in flight |
+| 3 | 在飛 slice 全 merge 或明確排除（labor-v2/churn-fix 已 merged；§4a merged；繼承-lite dispatched） | 進行中 |
+
+### B. 具名監看清單（開考時必看，非「順便」）
+1. **經濟 4 科目**（`game-design.md:132` blueprint owner）：A 富裕農村 / B 製造樞紐 / C 戰爭經濟 / D 需求不足型衰退。
+2. **accepted cost 定奪**（starve baseline 8 vs combined 28）——**★其分解數字（honest vs lag-window）已被 QA 判 REVISE、暫不可信**（EMA 非瞬時流）；大考前需 specimen 複驗瞬時 daily_rate。**預核槓桿**：若顯人口死亡螺旋（非趨穩）→ B5 觸發閾值調早，**免再請示**。
+3. **`mint_level` 全世界 0%**：仍 0% → 紅旗查設施鏈（established 雞生蛋家族前科）；>0% → 發展曲線正常。併科目 B 看。
+4. **零產出卡死**（`daily_rate` 恆 0.000 且 `task=return_home` 餓死）——新病型、獨立診斷。
+5. **perf**：per-team +34% re-open candidate（需 phase profile 才算「明確熱點」）+ k 值誠實 NULL → **「撞不撞牆」併大考本身觀察**、不再單開量測輪。
+6. **政治質地**（外交/背叛密度）：blueprint (A) 簽字後的回設計值；過死 → (B) 補償調 `p` 走 tuning 流程，**觸發權在 Story QA verdict**。
+7. **farming-as-pillar / FUY**、settlement 深根 pop、founding 碎片 spam / 鬼城比率。
+
+### C. ★考前凍結範圍（**窄**、勿誤讀成全面凍結）
+凍結的**只有**「會改變**大考正要評判的那個維度本身**的觸發頻率」的改動——具體=**loop1 faction dedup DEFER**（會腰斬外交/背叛觸發率 → 污染政治維歸因 + 毀掉與第一次大考的可比性；correctness 面不變、大考後單獨走）。
+**不凍結**：settlement/農業/labor/繼承 等 slice 的行為改動——它們是大考的**受試對象**，merge 進去才是正確姿勢。
+判準一句：**改「被量的東西」= 正常進考；改「量尺/觸發率本身」= 凍到考後。**
+
 ## 📍 當前狀態（2026-08-19）——settlement lifecycle arc（S1→農業a 全 merged）+ perf arc 收官 + labor/churn 在飛
 
 ### settlement lifecycle arc（12mo 期末考深根 → 鬼城/碎裂 lifecycle 修）
