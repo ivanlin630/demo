@@ -413,6 +413,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	if team.current_task != TeamData.TASK_IDLE and not _busy_preemptible:
 		return   # 忙且不可 preempt → 原行為
 	# 手算 argmax 撕除 → 引擎 rank_threat 秤（融合非刪）。threat_react/threshold 由 ctx 鏡射舊掃描。
+	# ★advance=false：此處只是 threat 門檻 gate read；真評估在下方 _decide_unified 內部（decision_engine 已 advance）。
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
 	if team.current_task == TeamData.TASK_IDLE:
 		# unified 隊（商隊/生產）idle threat 反應由 _decide_unified 主 rank 處理（鏡射 survival unified 排除，
@@ -914,7 +915,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# 取首個 dispatchable option（非 IDLE）走 PRIO_AMBIENT；貿易 target 已在 to_task「貿易」內
 		# （_merchant_trade_target：arb 單→巡市集→fallback）→ ambient 語意保。
 		if team.current_task == TeamData.TASK_IDLE:
-			var _ctx := DecisionContext.gather(state, team)
+			# ★advance：G2c ambient 是獨立決策入口 → 非 unified 隊在此推進；unified 隊同 tick 可能已在
+			# _decide_unified（decision_engine advance=true）推進過、仍 IDLE 才落到這段 → 對其降 false，
+			# 保「每隊每 tick 推進 ≤1」（need.ewma_advance tap 為安全網）。
+			var _ctx := DecisionContext.gather(state, team, not uses_unified(team))
 			for _opt in DecisionEngine.rank_ambient(_ctx):
 				var _td: Dictionary = DecisionOptions.to_task(state, team, String(_opt))
 				var _tk: String = String(_td.get("task", TeamData.TASK_IDLE))
