@@ -21,6 +21,20 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## ✅ EWMA advance / gather 解耦 MERGED（2026-08-20）＝specimen 非中立性**根修**、大考 blocker#1 拆除
+
+**根（比 tracer bug 大一層）**：`DecisionContext.gather` **每被呼叫一次就推進一次持久 EWMA**（`decision_context:565` `need_urgency` 非冪等 + `:569` 衍生 `plan_phase`），而 gather **全站 11 caller** → **同 tick 同隊推進次數 = 走過幾條路徑、且取決於哪個選項贏**＝**main 既存缺陷**（specimen tracer 對每個候選呼 `to_task` 只是把它照出來）。R² 親驗坐實 `consistency_coeff` 回傳值**直接乘進每個 option 的 util** → `need_urgency` 是**直接改變 argmax 贏家**的乘數，不是旁支資料。
+
+**修**：`gather(state, team, advance := false)`，**唯讀為預設**。判定表：`decision_engine:50/165`=true；`options.gd` 全部 `to_task` 內=false；`faction_ai:417`（threat 門檻 gate read）=false；`:1885` + **side-dispatch 家族**（distribute/migrant/herald/scout）=false；**`:921` G2c ambient=`not uses_unified(team)`**（implementer 親驗 loop3 內無 unified 排除、unified 隊同 tick 可能已在 `_decide_unified` 推進過）。**零新結構**（無 `*_advanced_tick`、無 TeamData 旗標）。
+- **否決案（留檔）**：(c) 擴 `_begin_observe` 成 observe-scope snapshot/restore＝黑名單型防線、新欄必漏（同族已 4 例：LOD→RNG→specimen→gather-write）；「`plan_phase` 移出 fp」＝**調鈍偵測器**讓症狀消失，而真傷害在 `need_urgency`（本就不在 fp）。
+- **安全方向**：預設 false 的失效模式＝**EWMA stale（tap 看得見）**，非世界被靜默擾動。
+
+**gate（★systems 於合併結果親跑——implementer 的 branch base 早於 §4c/繼承-lite merge，而 §4c 同樣改 `gather` body，故全部重驗）**：
+- ★**oracle**：`specimen_neutrality_bed`（7 specimens/seed1337/1200t）→ **零分岔**（修前同床 tick **439** 分岔）→ 根修生效**且無殘留**：`gather` 其餘寫入（`ensure_fresh`/`labor_alloc`/`idle_employ_*`/`consolidate_*` cache 群）**未涉入**。
+- 推進 ≤1/隊/tick：**超額 tick=0、最差比值 1.00**；determinism **三跑 byte-identical** `338247f6a1c5f811f7d5e53f0eaddb92`；constitution **PASS 75**；headless **0-new**（＝重刷後的 6 條 baseline）；TDD **8/8**（含「純讀 5 次→狀態零變化」）。
+- `plan_phase` 五層分佈 branch vs main **無重心位移**（警戒 2→4 隊＝絕對數極小噪音）、**未 crank alpha**。
+**★待補（大考啟動閘 A4）**：本 slice **真的改行為**（intended-change），而現有閘全是非行為因果型 → **QA 故事稽核**（帶 specimen trace、合併後 main）補這塊，**趕在大考啟動前**。
+
 ## ✅ §4c 選址反饋迴路 + 繼承-lite MERGED（2026-08-20）
 
 - **§4c 結果反饋迴路**（思考層四缺件之一、**第一條反饋邊**）：建點結局 → 寫**自己 leader** 的記憶 → 下次選址讀回。三掛點=L0 decay／主動棄村（失敗）+ 據點升級完工（興旺）；`SettlementMemory.site_bias` 線性衰減 **TTL 30 天**（非永久黑名單）、以 `quality_multiplier` **乘既有選址品質項**（紮根/紮營，**不新增 term 線**）。self-knowledge（只讀自己 leader、**禁全域黑名單**、記憶隨人不隨團）。
@@ -41,6 +55,7 @@
 |---|---|---|
 | 1 | **specimen 非中立性修**（specimen 開關改變世界軌跡→大考的 story-audit 全靠 specimen 讀故事、不修=讀到的不是被評的那個世界） | in flight（implementer） |
 | 2 | §4b 有機 gate（measurer）+ §4c gate | in flight |
+| 4 | **QA 故事稽核 EWMA 解耦後的決策動力學**（推進頻率真的變了；現有閘皆非行為因果型） | 待派（measurer 出 specimen trace → QA） |
 | 3 | 在飛 slice 全 merge 或明確排除（labor-v2/churn-fix 已 merged；§4a merged；繼承-lite dispatched） | 進行中 |
 
 ### B. 具名監看清單（開考時必看，非「順便」）
