@@ -54,3 +54,25 @@ owner: systems（HOW）← design `2026-08-14-settlement-lifecycle-agriculture-d
 - (a) JOIN 在途重申抑制 / (b) per-team +34% = known_issues follow-up、§4 後。
 
 序：**R² delta 審**（非全審、blueprint 明示）→ CLEAN → §4a dispatch → gate → merge → §4b → §4c。地基 KEEP。
+
+## §5 R²delta 訂正（2026-08-20、CLEAN+1 必查項 + 5 議定套用）
+
+### ★必查項（zombie construction race）：**systems 裁 (b) 根治、非 (a) 降機率**
+**race**（reviewer 親讀鏈）：`_decide_unified` 於 **:2520 呼 `to_task`**（spec 原案在此寫 `construction_target/ticks_left/construction_team_id/corvee_site`）、**:2575 才呼 `try_set`**；`try_set`(task_arbiter:49-79) **真的會 false**（combat_target 鎖 :51-52 / crisis-released 免疫窗 :56-58 / `PROGRESSIVE_HOLD_TASKS`+persist≥`PERSIST_HOLD_THRESHOLD` :64-70 / 一般搶班失敗）→ **副作用已落地但隊沒進 TASK_BUILD** → `_tick_construction`(outpost_system:272-297) 只在 `construction_team_id` 對應隊**已死**才清 orphan、隊活著只落「無施工隊、暫停」→ 且 `紮根` applicable 要求 `construction_team_id==-1` → **這格對所有人永久卡=zombie 工地**。
+- **★裁定=(b) 兩段式 commit-after-success**：`to_task` **只回 `{task, target}`（零世界寫入）**；`construction_target`/`construction_ticks_left`/`construction_team_id`/`corvee_site` 寫入**移到 `_set_ok==true` 之後**的 commit-hook（**比照既有 pattern**：`td.has("combat_target")`/`td.has("social_target")` 在 try_set 成功後才處理、`_decide_unified:2586-2589` 先例）。
+- **★為何不取 (a)**（applicable 加 `current_task==IDLE`）：①(a) 只把踩雷機率壓回舊碼等級、**沒移除雷**——未來任何 option 只要在 `to_task` 寫世界狀態就再炸同一坑（=治症非治根）②(a) 等於「committed 隊永不改選紮根」=**行為限制**、與 §4 engine 化「替代比較同秤/公平競爭」的目的相牴（S2b 舊碼正是 IDLE-only）③本 arc 命門「禁硬門檻回潮」。★**(b) 是結構修正、且有既有先例**。
+- **TDD 補（R² 要求）**：非 idle 隊（正做別的 progressive task、persist 高）+ 站自己 L0 空地 + `紮根` 進 ranked → **try_set 失敗 → tile `construction_target` 仍空、`construction_team_id` 仍 -1（零 zombie 殘留）**。
+
+### ②util 非硬 gate=維持（reviewer 支持）、但 gate 要**真測**且含邊界
+不加 applicable 物理下限（硬線=走回頭路、違 §0）。**但這是 empirical claim 非 by-construction** → §3 gate「瀕餓不開工」必須**真跑量測**、且**須含 isolated 邊界情境**：附近**無 join host、無 forage tile**（紮根事實上是唯一非零選項）的瀕餓隊，**是否仍低 util 選中它然後餓死在工地**。
+
+### ④overflow 保底=**margin-based 優於純 delay**（採納 reviewer 方向）
+機械 split 降 last-resort 用 **margin**（`population > cap × POP_OVERFLOW_MARGIN`）**取代純時間延遲**：純 delay 與溢出量級無關（小超額與難民潮式暴增同一延遲、大超額傷害更大）；margin 讓小溢出留給決策層（擴張 option）慢慢解、**只有滾到顯著超額（=決策層明顯沒接住）才機械介入**，且 margin 隨 population 成長**最終必觸發**（不需額外時間備援=無「決策永遠沒接住」死角）。**`POP_OVERFLOW_MARGIN` = TEST VALUE（建議起 1.15）、待量測校準**。
+
+### ⑤§4c 衰減公式**寫進 spec 本體**（非留 implementer 猜、R² 要求）
+- 建點/認領結局寫 `write_memory(leader, type, tile_id, tick, weight)`：`site_failed`（棄置/團滅/長期糧負）weight **0.5**、`site_thrived`（存活+積累）weight **0.5**（沿用 `join_rejected` 既有 weight 慣例）。
+- **有效期/衰減**：`SITE_MEMORY_TTL_DAYS`=**TEST VALUE 30 天（一季）**（★比 `JOIN_REJECT_COOLDOWN_TICKS`=480tick=2 日長：選址是低頻高成本決策、記憶該跨季節）；**選址 util 調整量 = weight × max(0, 1 − 已過天數/TTL)**（線性衰減、**過期歸零非永久黑名單**）。
+- **self-knowledge**：只讀自己 leader memory（非全域）；★TDD 驗「非同團不受影響」+「過期後該地 util 回復」。
+
+### ③⑥（無需改）
+③零新旋鈕：`MarginalEconomy._inflow_est`/`ctx.idle_labor`/`persist_strength._safe_factor`/`L0_TO_L1_CORVEE_DAYS` 皆既有、reviewer 親驗。⑥「1 人碎片蓋不如投」湧現：ETA∝人力反比 + `join_drive` 獨立高權重=兩條獨立算出、結構支持湧現、§3 gate 已列驗收項。
