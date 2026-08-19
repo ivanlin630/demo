@@ -48,7 +48,9 @@
 2. **accepted cost 定奪**（starve baseline 8 vs combined 28）——**★其分解數字（honest vs lag-window）已被 QA 判 REVISE、暫不可信**（EMA 非瞬時流）；大考前需 specimen 複驗瞬時 daily_rate。**預核槓桿**：若顯人口死亡螺旋（非趨穩）→ B5 觸發閾值調早，**免再請示**。
 3. **`mint_level` 全世界 0%**：仍 0% → 紅旗查設施鏈（established 雞生蛋家族前科）；>0% → 發展曲線正常。併科目 B 看。
 4. **零產出卡死**（`daily_rate` 恆 0.000 且 `task=return_home` 餓死）——新病型、獨立診斷。
-5. **perf**：per-team +34% re-open candidate（需 phase profile 才算「明確熱點」）+ k 值誠實 NULL → **「撞不撞牆」併大考本身觀察**、不再單開量測輪。
+5. **perf**：per-team +34% re-open candidate + k 值誠實 NULL → **「撞不撞牆」併大考本身觀察**、不再單開量測輪（perf 五路 2026-08-20 全 CLOSE）。
+   ★**因此大考 run 必須開 phase profile + 週期取樣 `(tick, N_teams, per-tick ms, 6 階段 breakdown)`**——12mo 是**單一連續 run 內 N 自然成長**，天然消掉「跨 session CPU contention」與「跨 run config 差異」兩大 confound（正是 perf③ k 值測不準的原因）→ **scaling 曲線免費附帶**，這是唯一能乾淨回答 O(N) vs O(N²) 的機會，**別漏開**。
+   perf re-open candidate 帳（大考後）：`FactionAISystem.new()` **全站 40 站點**全呼純 finder helper、該類 instance state 只有兩個 **print-dedupe** dict → helper 轉 static＝位元級安全道（量級大於 perf⑤ 的 26 站）；loop1 dedup 1.72%；JOIN same-target reassert 0.23%（reassert 事件中 **94.28% 是無進展純重申**）。
 6. **政治質地**（外交/背叛密度）：blueprint (A) 簽字後的回設計值；過死 → (B) 補償調 `p` 走 tuning 流程，**觸發權在 Story QA verdict**。
 7. **farming-as-pillar / FUY**、settlement 深根 pop、founding 碎片 spam / 鬼城比率。
 
