@@ -1,0 +1,74 @@
+{
+  "ticket": "perf③ scaling曲線正式版（k定量+loop1雙跑成本佔比，systems裁：跳過100-200團補bisect，直接往③）",
+  "baseline": "現main，normal LOD（force_full_hd=false，非①的LOD-off worst-case——這次要的是真實production節奏下的數字）",
+  "run_config": { "config": "warring_states.json", "seed": 1337, "days": 30, "ticks": 7200 },
+  "methodology_note": "★依systems訂正的量測窗口硬要求：window涵蓋72個完整100-tick週期（=FAR_ZONE_INTERVAL全週期覆蓋），份額用全程tick-averaged口徑（非抽樣特定tick）",
+  "contention_caveat": {
+    "finding": "本輪執行期間與另一個session的specimen_neutrality_bed.gd process並發（未主動殺掉、避免打斷其合法工作，已在早期確認過一次contention後選擇讓兩者並跑），已知污染窗口至少覆蓋wall前~377s（該session process第2次重跑出現、跟perf3幾乎同時起跑）",
+    "impact": "★loop1雙跑成本quantify(a)(b)兩個dup/nondup比例是同run內部比值，兩邊應同比例被contention拉長、比值本身相對穩健可信；★k值擬合用的是絕對us_per_team數字，contention期間(早期約day1-3附近)的絕對值可能偏高，可能是day3附近數字出現跳升的部分原因（day2 us_per_team=1478→day3=2052，單日+39%，比其餘day-to-day波動大）",
+    "recommendation": "若要更乾淨的k值數字，建議重跑時先確認main dir/其他worktree無並發godot process再起跑（本輪已建立此檢查習慣，見cleanup記錄）"
+  },
+
+  "item_a_loop1_dualpass_cost": {
+    "method": "temp tap（faction_ai_system.gd _evaluate_all_body）：用『本tick第幾次呼叫evaluate_all』(1=near或唯一呼叫、2=far必為dup)分類，累加進靜態dict（單調累加到run結尾讀一次，非跨tick重複取樣，避免①犯過的stale-read/cross-contamination問題）",
+    "call_counts": { "nondup_calls": 720, "dup_calls": 72, "note": "nondup=NEAR_CADENCE(10)驅動的720次=7200/10；dup=FAR_ZONE_INTERVAL(100)驅動的72次=7200/100，完全match理論值，確認tap正確" },
+    "dup_share_of_ticks": "72/7200 = 1.0%（★確認systems訂正：far pass只在1%的tick雙跑，非每tick）",
+    "dup_share_of_calls": "72/(720+72) = 9.09%（call數口徑，跟tick口徑不同，兩者都對）",
+    "general_reeval": {
+      "definition": "member_snap+update_goals+assign_tasks（無interval gate、每次evaluate_all呼叫都跑）",
+      "nondup_us": 731552536, "dup_us": 20681874,
+      "dup_share_pct": "2.75%（=dup_us/(nondup_us+dup_us)）"
+    },
+    "infra_diplo_betray": {
+      "definition": "INFRA_INTERVAL(500)/FACTION_UPDATE_INTERVAL(200)/BETRAY_CHECK_INTERVAL(500)三個interval-gated子行為，皆100的倍數",
+      "nondup_us": 5842583, "dup_us": 5996688,
+      "dup_share_pct": "50.65%（★確認systems訂正：這三個子行為『每次自己cadence到期』幾乎必雙跑，非1%量級，接近50/50）"
+    },
+    "total_loop1_us": 764073681,
+    "total_dup_us": 26678562,
+    "dup_pct_of_loop1": "3.49%",
+    "dup_pct_of_wall": "1.72%（=去重能省的絕對值，占整體wall time）",
+    "waste_composition": {
+      "general_share_of_waste": "77.5%（20,681,874us）",
+      "idb_share_of_waste": "22.5%（5,996,688us）",
+      "interpretation": "雖然infra/diplo/betray的『重複率』(50.65%)遠高於一般重評(2.75%)，但因為一般重評呼叫頻率高太多（792次 vs 只在各自cadence到期才跑），一般重評貢獻了去重浪費的大部分絕對時間(77.5%)。若只做一半去重(只修infra/diplo/betray)，只能拿回22.5%的可省成本；若要拿回大部分(77.5%)，需要處理一般重評本身忽略_team_ids的問題（更根本、也更貴的改動）。"
+    },
+    "verdict": "★去重的真實決策價值=只占wall time的1.72%——量級遠小於粗估的『loop1兩桶37.8%對半』。這是個真實但SMALL的優化機會，非大刀。修法（是否go/行為道判斷）留給blueprint裁，但量級數字顯示：即使完美去重，也只省得回wall time的1.72%，不是決定性的perf改善手段。"
+  },
+
+  "item_b_k_value_fit": {
+    "method": "log-log最小二乘回歸（us_per_team = A × N^k），30個日資料點（day1-30，teams 56→122）",
+    "data_points": "docs/measurements/2026-08-20-perf3-scaling-30d-data.txt（30行[scale]資料）",
+    "regression_result": { "k": 0.636, "A": 139.661, "R_squared": 0.567 },
+    "★honest_assessment": "R²=0.567=弱擬合（僅56.7%變異被power-law模型解釋）——不是我能自信給你一個精確k值的狀態。",
+    "segment_wise_k_volatility": {
+      "day1_to_10": "k≈1.58（N 56→77, cost 1384→2286）",
+      "day10_to_20": "k≈0.47（N 77→93, cost 2286→2499）",
+      "day20_to_30": "k≈0.71（N 93→122, cost 2499→3032）",
+      "interpretation": "分段k值在0.47~1.58間大幅擺動——這不是乾淨的單一power-law關係，短窗內combat/faction/churn等其他因素的雜訊量級跟team-count-driven scaling訊號同量級甚至更大，混在一起看不清真正的函數形狀。"
+    },
+    "cross_validation_against_known_high_N_points": {
+      "known_point_1": "152團(agri-b最後輪day90)→4410us/team",
+      "known_point_2": "242團(原始churn discovery)→3278us/team",
+      "regression_prediction_at_152": "3388us/team（實際4410，低估23%）",
+      "regression_prediction_at_242": "4594us/team（實際3278，高估40%）",
+      "verdict": "回歸預測跟兩個獨立高N觀測點都對不上（方向還相反：一個低估一個高估）——進一步確認這條回歸線不可靠、不該直接拿來外推12mo規模。"
+    },
+    "extrapolation_with_explicit_uncertainty": {
+      "at_N_242_regression_says": "4594us/team → tick_us≈1112ms",
+      "at_N_500_regression_says": "7290us/team → tick_us≈3645ms",
+      "at_N_1000_regression_says": "11332us/team → tick_us≈11332ms(11.3s/tick)",
+      "caveat": "以上數字基於R²=0.567的弱回歸，且不跟獨立觀測點吻合，★僅供參考級別、非可信預測。誠實結論：現有數據不足以自信回答『12mo規模會不會撞牆』——需要更乾淨的方法論（多seed平均、隔開combat密集期、排除contention），而非單一run單一seed的日序列。"
+    },
+    "verdict": "★無法給出高信心的k值——這是本輪最誠實但可能最不滿意的結論。可以確定的方向性事實：per-team成本隨N增長(56→122團間從1384→3032us/team、粗略~2.2倍)，但增長率本身雜訊很大，不足以斷定是O(N)、O(N^1.5)還是O(N²)。"
+  },
+
+  "cleanup": {
+    "worktree_removed": ".worktrees/perf3-scaling",
+    "temp_tap_reverted": "faction_ai_system.gd（_dp_cost累加器+call classification邏輯）— git checkout --確認乾淨",
+    "temp_bed_deleted": "scripts/debug/perf3_scaling_bed.gd",
+    "compile_check": "godot --path .worktrees/perf3-scaling --headless --import 乾淨編譯（移除worktree前確認）"
+  },
+
+  "summary": "(a)loop1雙跑成本quantify=決定性乾淨結果：去重僅能省回1.72% of wall time（遠小於粗估37.8%），其中77.5%的可省成本來自一般重評(忽略_team_ids、貴但重複率低2.75%)而非infra/diplo/betray(重複率高50.65%但貴的絕對值小)——修哪個看blueprint要拿回多少、值不值得動behavior-affecting道。(b)k值多點擬合=誠實的NULL結果：R²=0.567弱擬合，分段k值0.47~1.58劇烈擺動，且回歸線跟兩個獨立高N觀測點都對不上——現有單run單seed方法論不足以自信定出O(N)vs O(N²)，需要更乾淨的multi-seed/combat-isolated方法論才能真正回答『12mo撞不撞牆』。本輪執行期間與另一session process並發、已誠實揭露contention可能影響early-day絕對數字（但(a)的比率型結論相對穩健）。"
+}
