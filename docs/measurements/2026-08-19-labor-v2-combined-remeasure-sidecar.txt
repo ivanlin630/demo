@@ -1,0 +1,9 @@
+[day 180] teams=14 pop=64 GRAND=27133.1
+death.starve_anon = 8
+merge.consolidate_dispatch       = 15
+join.resolve                     = 1
+join.timeout                     = 0
+join.abort_ghost                 = 0
+accept.join_reject               = 5
+mergein.dissolve                 = 0
+mergein.subteam                  = 1

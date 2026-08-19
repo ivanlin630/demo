@@ -1,0 +1,66 @@
+{
+  "measured_at_head": "affdb140",
+  "ticket": "docs/superpowers/handbacks/2026-08-19-systems-to-measurer-laborv2-combined-remeasure.md",
+  "bed": "scripts/debug/labor_v2_combined_remeasure_bed.gd (temp, self-authored this round since the original labor_v2_controlled_starve_bed.gd was never committed and was gone after the prior round's revert)",
+  "config": "peaceful_economy.json",
+  "seed": 1337,
+  "months": 6,
+  "controlled_pair": {
+    "baseline": {
+      "branch": "main HEAD (含churn-fix, affdb140, descendant of 7877310a)",
+      "start_pop": 72, "end_pop": 64, "teams_final": 14,
+      "death_starve_anon": 8, "grand_t0": 25468.0, "grand_tN": 27133.1, "delta_grand": 1665.1,
+      "churn_probes": {"merge.consolidate_dispatch": 15, "join.resolve": 1, "join.timeout": 0, "join.abort_ghost": 0, "accept.join_reject": 5, "mergein.dissolve": 0, "mergein.subteam": 1, "resolve_commit_ratio_pct": 6.7},
+      "raw_log": "docs/measurements/2026-08-19-labor-v2-combined-baseline-churnfixed-main.log"
+    },
+    "combined": {
+      "branch": "feat/labor-marginal-food-v2 @383ec81e (churn-fixed main merged in, labor-v2 logic unchanged)",
+      "start_pop": 72, "end_pop": 38, "teams_final": 9,
+      "death_starve_anon": 28, "grand_t0": 25468.0, "grand_tN": 25691.9, "delta_grand": 223.9,
+      "churn_probes": {"merge.consolidate_dispatch": 47, "join.resolve": 2, "join.timeout": 0, "join.abort_ghost": 1, "accept.join_reject": 6, "mergein.dissolve": 0, "mergein.subteam": 2, "resolve_commit_ratio_pct": 4.3},
+      "raw_log": "docs/measurements/2026-08-19-labor-v2-combined-branch-run.log"
+    }
+  },
+  "q1_new_starve_delta": {
+    "delta": 20,
+    "ratio": "3.5x (28/8)",
+    "verdict": "同床同seed/config/months, 唯branch差=controlled比較。churn-fix後真honest水位: 8 vs 28, delta=20, 3.5倍——這是merge labor-v2要記的真accepted cost。"
+  },
+  "q2_compare_old_16x": {
+    "old_numbers": "main=2 vs labor-v2=32 (16x), 用的是已刪除、未commit過的舊版labor_v2_controlled_starve_bed.gd",
+    "new_numbers": "main(churn-fixed)=8 vs combined=28 (3.5x)",
+    "ratio_drop": "16x -> 3.5x，比例大幅降低，方向支持churn-hostage假說(部分32含churn人質、churn-fix後放行)",
+    "IMPORTANT_CAVEAT": "★baseline本身也從2變8(+6)——這不能全歸churn-fix，因為baseline(main-only,無labor-v2)理論上不該被JOIN churn修復大幅影響。git log查scripts/simulation/resource_system.gd與faction_ai_system.gd近期改動只有churn-fix本身(b107d3b2/e1d0c00a/e1e1940f)，沒有其他food/famine相關commit，排除了main另有食物機制變更的confound。但★本輪bed是我這輪重新手刻(舊床已刪除從未commit過)，跟舊床的drive方式(encounter處理/tribute清空時機等細節)未必byte-identical——舊main=2跟新main=8的落差有可能部分來自bed重建的determinism差異，非純production code改動效果。★★可信的乾淨對照是同一bed內baseline vs combined的3.5x delta(這輪唯一變因=branch)，跨bed歷史對照(16x vs 3.5x)只作方向性佐證、非精確科學數字。",
+    "direct_within_labor_v2_lineage": "若只看labor-v2自己的歷史軌跡(pre-fix e9f1abb5=32 vs post-fix 383ec81e combined=28)，delta=-4(12.5%降)——比controlled-bed內3.5x的降幅小很多，暗示peaceful_economy這個場景本身churn量天然低(commit僅15-47次、resolve僅1-2次)，churn-fix在這場景的邊際效益不像warring_states高壓場景(698次)那麼戲劇化。"
+  },
+  "q3_honest_lag_window_decomposition": {
+    "baseline_n8": {"chronic_lt_neg0.5": 1, "ambiguous_neg0.5_to_0": 7, "lag_window_gt_0": 0},
+    "combined_n28": {"chronic_lt_neg0.5": 12, "ambiguous_neg0.5_to_0": 16, "lag_window_gt_0": 0},
+    "verdict": "分解仍成立：baseline與combined的死亡事件food_flow_avg全部≤0(0起lag-window)——honest主導結論不變，churn-fix沒有改變這個定性結論，只改變了量(8→28而非2→32)。"
+  },
+  "q4_end_state": {
+    "baseline": {"end_pop": 64, "teams_final": 14, "delta_grand": 1665.1},
+    "combined": {"end_pop": 38, "teams_final": 9, "delta_grand": 223.9},
+    "note": "combined ΔGRAND仍正(+223.9)，經濟沒有全域崩潰，但明顯比baseline虛弱(1665.1→223.9)，跟population大幅流失(64→38只是baseline自己的end_pop，對照combined的38 vs baseline 64)一致"
+  },
+  "churn_gap_coverage_2_3_4": {
+    "team_explosion": "未觀察到——baseline 12→14隊(略增)、combined 12→9隊(因死亡減少，非churn暴增)。此床(peaceful_economy)未複現原始49→242+的team暴增症狀。",
+    "perf": "未量(此bed未加TickPerf計時)——仍是缺口，原793ms/40-70x degradation數字未在此輪覆蓋，需另一輪或農業b re-measure補。",
+    "same_pair_repeat": "未在此bed捕捉join-target pair級細節(這輪聚焦death.starve_detail非join細節)——同對隊反覆的權威證據仍是churn-fix-gate輪已完成的mergein_join_lifecycle_test.gd TDD控制床(ALL PASS，見docs/process/verdicts/mergein-churn-fix.measure.json)，本輪不重複驗證。",
+    "verdict": "此床(peaceful_economy)churn天然量級低(commit 15-47次、resolve 1-2次、timeout全程0、abort_ghost至多1次)，如ticket預期'若此床churn量天然低則註明'——確認：此床不是churn高壓測試場景，②③④完整覆蓋仍需農業b re-measure(如ticket規劃)。"
+  },
+  "q5_headless_0new": {
+    "baseline_main": {"result": "0-new", "log": "既有churn-fix-gate輪已驗(見mergein-churn-fix.measure.json)"},
+    "combined_branch": {
+      "result": "0-new",
+      "fails_matched_known_baseline": ["Team23 task=建設 order=-1", "弱目標未加入攻擊goal", "own_granary null-crash(pre-existing)", "紮營=1.0", "FORCE(任rung)→ambient_train_drive 0.5", "rung擴張+武力未選擴張intent", "戰鬥中擋不resolve"],
+      "wrapper_note": "★wrapper timeout-kill race已由systems修復(d18ff8fc)——本輪stdout完整存活(headless log/churn-trace log皆完整無corruption)，跟churn-fix-gate輪的wrapper-corruption問題不再重演。",
+      "log": "docs/measurements/2026-08-19-labor-v2-combined-headless-sanity.log"
+    }
+  },
+  "temp_instrumentation": {
+    "tap": "resource_system.gd _apply_famine_attrition: 新增 Probe.bump_sample('death.starve_detail', {tick,team,famine_days,food_flow_avg}, 500) 於 death.starve_anon bump後——加在main dir與.worktrees/labor-marginal-food-v2兩邊，跑完revert",
+    "bed": "scripts/debug/labor_v2_combined_remeasure_bed.gd——main dir與worktree兩邊，跑完revert/刪"
+  },
+  "summary": "controlled同床(peaceful_economy seed1337 6mo)乾淨對照：churn-fixed baseline(main)=8 starve vs churn-fixed+labor-v2(combined)=28 starve, delta=20, 3.5倍——這是真honest accepted cost(下降自舊16x，方向支持churn-hostage部分解釋，但★baseline自己2→8的落差有部分歸因於bed重建non-byte-identical、非純churn-fix效果，已誠實揭露此confound，同bed內3.5x是最可信數字)。honest主導/lag-window=0分解不變。headless兩邊0-new。此床churn天然量低、②③④team暴增/perf/同對隊反覆缺口留給農業b re-measure覆蓋(同對隊反覆已由churn-fix-gate輪控制床TDD單獨證實，不算缺口)。"
+}

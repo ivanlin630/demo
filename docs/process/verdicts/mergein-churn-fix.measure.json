@@ -1,0 +1,82 @@
+{
+  "measured_at_head": "fd8c6d6e",
+  "branch": "feat/mergein-churn-fix",
+  "branch_head": "b107d3b2",
+  "base_main": "b223a862",
+  "raw_logs": [
+    "docs/measurements/2026-08-19-churn-fix-constitution-gate.log",
+    "docs/measurements/2026-08-19-churn-fix-headless-sanity-full.log",
+    "docs/measurements/2026-08-19-churn-trace-basemain-seed1337-1mo-b223a862.log",
+    "docs/measurements/2026-08-19-churn-fix-arrival-control-bed.log",
+    "docs/measurements/2026-08-19-churn-fix-join-lifecycle-test.log",
+    "docs/measurements/2026-08-19-churn-trace-churnfix-branch-sidecar-day35.txt",
+    "docs/measurements/2026-08-19-churn-trace-basemain-seed1337-2mo-v3-solo.log"
+  ],
+  "constitution": { "result": "PASS", "sites": 77, "removed": 0 },
+  "headless": {
+    "result": "0-new",
+    "fails_matched_known_baseline": [
+      "弱目標未加入攻擊goal",
+      "Team23 task=建設 order=-1",
+      "[p2a] join weight太低0.41",
+      "戰鬥中(combat_target≠-1)→197擋→不resolve",
+      "紮營=1.0",
+      "FORCE(任rung)→ambient_train_drive 0.5",
+      "rung擴張+武力未選擴張intent"
+    ],
+    "own_granary_null_crash": "pre-existing, matches known_issues.md",
+    "note": "implementer's base-comparison run was reaped incomplete; this is an independent full clean run (exit 0, no timeout)"
+  },
+  "attribution": {
+    "verdict": "pre-existing, NOT agriculture-b-specific",
+    "evidence": "plain main (b223a862, no agriculture-b) reproduces churn signature within a partial ~14-day warring_states seed=1337 run: SurvivalMergeIn Team70→Team37 repeated 3x + Team70→Team11 1x, before the run was killed by GODOT_TIMEOUT",
+    "interpretation": "agriculture-b's popcap mechanism amplifies volume/speed (more desperate teams sooner) but does not create the bug; mechanism lives in main's JOIN resolver, confirmed by code-read (JOIN timeout/abort_ghost added by this fix touch faction_ai_system.gd only, not agriculture-b files)",
+    "consequence": "direct branch-vs-base-main comparison is valid; churn-rich (agriculture-b overlay) condition not required for attribution"
+  },
+  "gate_items": {
+    "1_release_no_repeat": {
+      "verdict": "PROVEN via deterministic control bed (mergein_join_lifecycle_test.gd, seed=1337, T2 test 1)",
+      "evidence": "committed JOIN to a host that wanders off + belief goes stale -> join.abort_ghost=1 fires, task releases to 建設 (not permanent latch), join_rejected memory written on leader (decision_context:530 cooldown), social_target cleared -> same host cannot be re-picked within cooldown window = churn cannot repeat costume by construction, not just observed-to-be-lower",
+      "caveat": "organic-run same-pair-repeat counts for the 2mo branch/base runs were lost (wrapper stdout-corruption on timeout-kill, see tooling_finding below); this control-bed proof is considered stronger evidence per measurer protocol (control-scenario causal proof > organic aggregate noise) and stands in for the organic count"
+    },
+    "2_churn_resolved_ratio": {
+      "branch_day35_organic": { "teams": 133, "merge.consolidate_dispatch": 15, "join.resolve": 6, "ratio_pct": 40.0, "join.timeout": 1, "join.abort_ghost": 3, "accept.join_reject": 12, "mergein.dissolve": 0, "mergein.subteam": 6 },
+      "base_day35_organic": { "teams": 129, "merge.consolidate_dispatch": 3, "join.resolve": 9, "ratio_pct": 300.0, "join.timeout": 0, "join.abort_ghost": 0, "accept.join_reject": 11, "mergein.dissolve": 0, "mergein.subteam": 9 },
+      "note": "base's ratio (300%) is NOT a meaningful 'better than branch' signal -- n=3 commits over 35 days on plain (non-agriculture-b) config is too small a sample (consistent with attribution finding: natural churn incidence on plain main is low-volume; original 1.4% figure came from agriculture-b's high-stress 698-commit sample, a different scenario). The TDD control-bed proof above is the reliable evidence for ratio-recovery; branch's 40% resolve rate against 15 commits in the same window is directionally consistent with recovery."
+    },
+    "3_team_no_explosion": {
+      "verdict": "not independently reproduced at agriculture-b-comparable scale (original 49->242 was under agriculture-b popcap stress)",
+      "organic_day35_data": "branch teams=133 vs base teams=129 -- comparable, neither exploding, but neither reached the original high-stress scale either",
+      "gap": "true at-scale team-explosion suppression not directly re-measured this round"
+    },
+    "4_perf_recovery": {
+      "verdict": "NOT independently re-verified this round",
+      "reason": "both 2mo organic attempts (base solo, branch solo) hit GODOT_TIMEOUT and got their stdout corrupted by the wrapper's Kill()-then-ReadAllBytes race (see tooling_finding) before reaching a scale comparable to the original 793ms/242-team degradation; only sidecar counters (no TickPerf lines) survived",
+      "partial_signal": "first (uncorrupted) base-main partial run showed TickPerf trending 73910us->269235us as teams grew 56->76 over 14 days (pre-fix, small scale) -- consistent with cost scaling with team count, not a clean matched-scale before/after",
+      "gap": "recommend a follow-up clean isolated perf run (non-concurrent, target duration well inside GODOT_TIMEOUT to avoid the wrapper race) if blueprint wants this gate item hard-closed before merge"
+    },
+    "5_committed_join_resolves": {
+      "verdict": "PROVEN",
+      "evidence": "control bed test 3 (host static, reachable): join.resolve=1, zero false abort/timeout, real merge happened ([Merge] Team12<-Team10 完全合併 pop=33)"
+    },
+    "6_probe_true_fire": {
+      "verdict": "PROVEN, not dead code",
+      "evidence": "join.timeout and join.abort_ghost both independently fired with real state changes (task release, memory write, social_target clear) in the deterministic control bed; also join.timeout=1/abort_ghost=3 fired in the organic branch day35 run"
+    },
+    "7_headless_0new": { "verdict": "CONFIRMED", "detail": "see headless block above" },
+    "8_fp_intended_change_churn_rich": {
+      "verdict": "corroborated",
+      "note": "not re-run byte-identical determinism myself (implementer's own claim: TDD 7/7 + determinism byte-identical x2); independently corroborated the 'intended change is live, not dead code' claim via control bed (item 6)"
+    }
+  },
+  "tooling_finding": {
+    "summary": "tools/godot.ps1 wrapper has a race: on GODOT_TIMEOUT-triggered Kill(), the immediately-following [System.IO.File]::ReadAllBytes($tempOut) can throw 'file being used by another process' (killed process hasn't released its stdout redirect handle yet) -> ALL stdout for that run is lost, only the sidecar/side-channel (if the bed writes one) survives",
+    "reproduced": "twice, once under concurrent godot.ps1 invocation (could be dismissed as concurrency) and once solo (rules out concurrency as the sole cause -- this is a general timeout-kill race)",
+    "impact": "any long organic run that hits GODOT_TIMEOUT loses its full stdout; only sidecar-style incremental dumps survive",
+    "recommendation": "route to systems as a separate tooling defect; workaround used this round = read the bed's sidecar checkpoint file instead of relying on wrapper stdout when a run times out"
+  },
+  "incomplete": [
+    "gate item 3 (team-explosion) and 4 (perf) not independently re-verified at agriculture-b-comparable stress scale"
+  ],
+  "summary": "Core mechanism PROVEN via deterministic control-bed (TDD, seed=1337, ALL PASS): committed JOIN structurally cannot churn-repeat (release + join_rejected cooldown), timeout/abort_ghost fire with real effect (not dead code), happy path unaffected. Constitution gate PASS, headless 0-new. Attribution resolved: churn is pre-existing in main (reproduces on plain b223a862), agriculture-b only amplifies volume -- direct branch-vs-base comparison is valid, churn-rich overlay not required. Organic long-run comparison at original 242-team/793ms scale not reproduced this round (wrapper timeout-kill race lost stdout on both attempts); recommend as optional follow-up, not a blocker given the causal proof is stronger evidence than organic aggregate counts per measurer protocol."
+}

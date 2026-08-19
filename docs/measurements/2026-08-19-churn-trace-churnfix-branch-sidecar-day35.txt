@@ -1,0 +1,10 @@
+[day 35] teams=133
+merge.consolidate_dispatch       = 15
+join.resolve                     = 6
+join.arrived_no_handler          = 0
+join.timeout                     = 1
+join.abort_ghost                 = 3
+accept.join_reject               = 12
+mergein.dissolve                 = 0
+mergein.subteam                  = 6
+ratio resolve/commit = 6/15 = 40.0%

@@ -1,0 +1,90 @@
+{
+  "ticket": "perf 線索包①②（用戶 priority 改判：效能=目前最大問題）",
+  "baseline": "現 main (settlement arc + churn-fix + labor-v2 全落地)",
+  "method_note": "★三段跑法皆嚴格序列(非併發)避免CPU contention污染timing比較；每段跑完立即revert temp tap+刪自建bed+確認乾淨編譯+移除worktree",
+
+  "item1_phase_profile": {
+    "run_config": { "config": "warring_states.json", "seed": 1337, "days": 5, "mode": "force_full_hd=true + phase_timing=true（LOD-off worst-case profile，既有 perf_phase_bed.gd 慣用手法）" },
+    "bed": "scripts/debug/perfclue_profile_bed.gd（自建、跑完刪）",
+    "raw_log": "docs/measurements/2026-08-20-perfclue-profile-day5.log",
+    "outer_bucket_result": {
+      "wall_total_s": 205.80,
+      "near_faction_ai_pct_of_wall": "93.1%",
+      "near_faction_ai_us": 191523629,
+      "note": "SimRunner 既有 _ph/_pht 粗相位表（near.vision/move/messages/interact/economy/consume/faction_ai/...），成熟穩定機制，數字可信",
+      "verdict": "★決定性：near.faction_ai（含 FactionAISystem.evaluate_all + info_side_dispatch_all）獨占 93.1% wall time，其餘全部 near.* 相位加總不到 7%"
+    },
+    "fai_inner_breakdown": {
+      "method": "臨時加 static _fai_ph_cumulative 累加器（gated SimRunner.phase_timing，跑完連同 4 個具名 tap 一起 revert）",
+      "raw_log": "同上檔案 [fai_inner] 區塊",
+      "top_relative_shares": [
+        {"phase": "loop1.factions", "pct_of_fai_inner": "19.0%"},
+        {"phase": "loop1.assign_tasks", "pct_of_fai_inner": "18.8%"},
+        {"phase": "unified.rank", "pct_of_fai_inner": "17.5%"},
+        {"phase": "assign.leader_unified", "pct_of_fai_inner": "12.8%"},
+        {"phase": "gather.market", "pct_of_fai_inner": "6.7%"},
+        {"phase": "assign.members", "pct_of_fai_inner": "6.0%"},
+        {"phase": "member.unified", "pct_of_fai_inner": "6.0%"},
+        {"phase": "loop2.solo", "pct_of_fai_inner": "3.8%"}
+      ],
+      "caveat_total_mismatch": "★誠實揭露：fai_inner 累加總和(696.5s)遠超outer near.faction_ai桶(191.5s)，比值~3.6x，未完全root-cause。已code-read確認一個真實貢獻源：_evaluate_all_body 的 loop1（member_snap/update_goals/assign_tasks）完全忽略傳入的 _team_ids 參數、每次呼叫都對 state.factions 全量掃（faction_ai_system.gd:717-729），意味著 near-pass 與 far-pass 呼叫（SYSTEMS registry 'faction_ai' 為 lod=LOD_BOTH）都各付一次全量 loop1 成本——但呼叫頻率比(near每10 ticks : far每100 ticks=10:1)只能解釋~10%膨脹，無法解釋 3.6x。不確定是否還有其他重入/未 gate 的 _fai_pht_s 呼叫路徑（如 options.gd 的 DecisionContext.gather 呼叫）疊加寫入同一 static dict 造成混算。relative proportions（各子相位占 fai_inner 總和的百分比）仍可能有參考價值，但绝对值不可信、待 implementer code-read 確認機制後再定案。",
+      "verdict": "PARTIAL — outer bucket 決定性可信；inner breakdown 相對占比方向性參考，絕對值有已知未解 3.6x 膨脹待查"
+    },
+    "named_item_taps": {
+      "method": "4 個 Probe.bump(name, us) 細 tap，直接包裹目標函式呼叫，無累加器複雜度，可信",
+      "results": {
+        "l0_settle": { "us": 14846, "pct_of_wall": "0.01%", "target": "_evaluate_l0_settle (faction_ai_system.gd:838)", "current_bucket": "loop3.prosperity（跟 _tick_conquest_scout 混桶，無獨立標記）" },
+        "farm_prodline": { "us": 85232, "pct_of_wall": "0.04%", "target": "FoodFlow.update (resource_system.gd:227)", "current_bucket": "near.consume（跟 salary+fatigue 混桶）" },
+        "construction_tick": { "us": 101879, "pct_of_wall": "0.05%", "target": "OutpostSystem.tick_all (sim_runner.gd:392)", "current_bucket": "near.outpost_ambush（跟 faction_snapshot+ambush 混桶，tl 原空白=完全無標記）" },
+        "labor_rebalance": { "us": 18967, "pct_of_wall": "0.01%", "target": "LaborSystem.rebalance cadence 重算 (labor_system.gd:21)", "current_bucket": "視 caller 而定（decision_context.gd 內、多處 DecisionContext.gather 呼叫）" }
+      },
+      "verdict": "★決定性、意外：systems 原懷疑的 4 個具名科目（L0 階梯檢查/farm 生產線/construction tick/labor rebalance）全部<0.05% of wall——沒有一個是有意義的 hotspot。真正的成本集中在 near.faction_ai 內部的核心決策/排序機制（loop1 全量掃 + unified.rank + assign.leader_unified + gather.market），不是這 4 個原本被點名的候選"
+    },
+    "summary": "①最終結論：+34% 單價花在哪 → 不在 L0/farm/construction/labor-rebalance 這 4 個具名候選（合計<0.15% of wall），而在 near.faction_ai 步驟本身（93.1% of wall）；再往內看，loop1（per-faction/per-member 全量掃描，完全忽略 near/far team_ids 分流）+ unified 決策排序 + leader-unified 路徑 + market gather 是內部前四大占比。loop1 忽略 team_ids 這點是唯一已 code-read 坐實的具體機制性發現（file:line 可查）；其餘 inner 占比方向性參考、待 implementer 進一步 code-read 確認 3.6x 總量對不上的原因。"
+  },
+
+  "item2_slice_bisect": {
+    "run_config": { "config": "warring_states.json", "seed": 1337, "days": 10, "anchors": ["94e2f826 (pre-L0, S1)", "3d30b3ed (post-S2b)", "b1c8917b (現 main HEAD)"] },
+    "bed": "scripts/debug/slice_bisect_bed.gd（自建、逐字複製進 3 個獨立 worktree 跑、跑完全部刪）",
+    "method_note": "★嚴格序列跑（3 段依序、非同時起 3 個 godot process）避免 timing 互相污染，符合用戶先前對併發跑量測的疑慮",
+    "raw_logs": [
+      "docs/measurements/2026-08-20-bisect-preL0-94e2f826.log",
+      "docs/measurements/2026-08-20-bisect-postS2b-3d30b3ed.log",
+      "docs/measurements/2026-08-20-bisect-mainhead.log"
+    ],
+    "per_day_table": {
+      "day1":  {"preL0": {"teams":56,"us_per_team":1228.95}, "postS2b": {"teams":56,"us_per_team":1184.64}, "mainhead": {"teams":56,"us_per_team":1263.54}},
+      "day2":  {"preL0": {"teams":58,"us_per_team":1348.59}, "postS2b": {"teams":58,"us_per_team":1295.55}, "mainhead": {"teams":61,"us_per_team":1325.18}},
+      "day3":  {"preL0": {"teams":61,"us_per_team":1635.41}, "postS2b": {"teams":61,"us_per_team":1680.13}, "mainhead": {"teams":61,"us_per_team":1690.82}},
+      "day4":  {"preL0": {"teams":60,"us_per_team":2064.25}, "postS2b": {"teams":60,"us_per_team":1947.95}, "mainhead": {"teams":61,"us_per_team":1889.46}},
+      "day5":  {"preL0": {"teams":60,"us_per_team":2121.48}, "postS2b": {"teams":60,"us_per_team":1978.65}, "mainhead": {"teams":63,"us_per_team":1787.48}},
+      "day6":  {"preL0": {"teams":62,"us_per_team":2087.94}, "postS2b": {"teams":62,"us_per_team":1890.79}, "mainhead": {"teams":67,"us_per_team":1784.07}},
+      "day7":  {"preL0": {"teams":65,"us_per_team":2032.46}, "postS2b": {"teams":65,"us_per_team":1963.52}, "mainhead": {"teams":68,"us_per_team":1927.10}},
+      "day8":  {"preL0": {"teams":68,"us_per_team":2172.04}, "postS2b": {"teams":68,"us_per_team":2106.24}, "mainhead": {"teams":74,"us_per_team":1898.30}},
+      "day9":  {"preL0": {"teams":70,"us_per_team":2002.17}, "postS2b": {"teams":70,"us_per_team":2082.79}, "mainhead": {"teams":72,"us_per_team":2135.93}},
+      "day10": {"preL0": {"teams":72,"us_per_team":2415.15}, "postS2b": {"teams":72,"us_per_team":2462.53}, "mainhead": {"teams":73,"us_per_team":2208.79}}
+    },
+    "wall_and_end_teams": {
+      "preL0":    {"wall_s": 293.10, "end_teams": 72},
+      "postS2b":  {"wall_s": 285.78, "end_teams": 72},
+      "mainhead": {"wall_s": 285.29, "end_teams": 73}
+    },
+    "verdict": "★決定性、意外：三個 commit 在 49→56-73 團範圍(day1-10)的 team 成長軌跡跟 per-team us 幾乎重合，無單一 slice 可歸因的顯著加價——mainhead 甚至跟另兩者持平或略快（非變慢）。★L0→L1 紮根工期(S2b)、settlement S1 兩個 slice 在這個規模窗內都沒有production出可測得的額外單價",
+    "caveat": "此結論僅適用於此次量測窗口（49-73團、10天）。systems 原引用的『+34%』degradation 很可能發生在更高團數規模（現有已知的 152-242團範圍，來自其他長跑），不在本次 bisect 覆蓋的範圍內——之前的一輪測量顯示更高team數反而per-team成本更低(242團→3278us/team vs 152團→4410us/team)，跟本次低N範圍內per-team成本隨N增長的走勢方向相反，這兩組數字來自不同run/不同config/不同day-in-run(非同方法論控制)、不可直接拼接成一條曲線；若要精確定位『+34%』的slice歸因，需要在100-200團規模區間用同一bisect方法論補測，本輪未做（budget/時間考量，且該規模單一段10天窗會需要遠超10min的wall time）"
+  },
+
+  "item3_scaling_curve_partial_bonus": {
+    "note": "非本輪主要任務，但②的10天bisect數據可順手供曲線擬合初步線索，故一併記錄",
+    "low_N_trend": "mainhead: day1 N=56 us_per_team=1264 → day10 N=73 us_per_team=2209；粗略冪次擬合 k=ln(2209/1264)/ln(73/56)≈2.1（preL0/postS2b 兩段各自擬合出 k≈2.7/2.9，樣本點少+day-to-day noise大，僅供方向性參考：超線性、可能O(N^2)量級，非O(N)）",
+    "high_N_single_points": "既有：242團→3278us/team（原793ms avg場景）、152團→4410us/team（本session前一輪農業b最後輪day90）——這兩點跟本輪10天低N趨勢方向不一致（高N反而每團更便宜），暗示這兩個高N點來自的run有其他confound（day-in-run累積效應/churn動態/戰鬥頻率變化等），不是純team-count驅動的乾淨對照",
+    "caveat": "此區塊為①②附帶產物、非完整③交付，仍需在100-200團區間補跑同方法論才能鎖定真實O(N)/O(N²)曲線"
+  },
+
+  "cleanup": {
+    "worktrees_removed": [".worktrees/perf-clue-mainhead", ".worktrees/perf-bisect-preL0", ".worktrees/perf-bisect-postS2b"],
+    "temp_taps_reverted": "faction_ai_system.gd(4行:l0_settle tap+_fai_ph_cumulative累加器)/labor_system.gd(2行)/resource_system.gd(2行)/sim_runner.gd(2行)——git checkout --確認乾淨、--headless --import乾淨編譯",
+    "temp_beds_deleted": ["scripts/debug/perfclue_profile_bed.gd", "scripts/debug/slice_bisect_bed.gd"]
+  },
+
+  "summary": "①：near.faction_ai 獨占 93.1% wall time（決定性），systems 原點名的 4 個具名候選(L0/farm/construction/labor-rebalance)全部<0.15% of wall、非真兇；真兇在 evaluate_all 內部 loop1(全量忽略 team_ids)+unified.rank+leader_unified+gather.market。loop1 忽略 team_ids 是唯一已 code-read 坐實的具體機制性發現。②：三個歷史 commit(pre-L0/post-S2b/現main)在49-73團規模窗內 per-team 成本幾乎重合，此規模下無單一slice可歸因的顯著加價——『+34%』degradation 很可能只在更高團數規模顯現，本輪未覆蓋、需後續在100-200團區間同方法論補測才能鎖定真正歸因的 slice。"
+}
