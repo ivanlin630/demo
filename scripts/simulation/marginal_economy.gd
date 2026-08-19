@@ -18,8 +18,16 @@ static func _inflow_est(est: VillageEstimate) -> float:
 	var lvl: int = clampi(est.outpost_level, 1, OUTPOST_MULT.size())
 	var outpost_mult: float = OUTPOST_MULT[lvl - 1]
 	var pop_mult: float = clampf(sqrt(float(est.pop) / 5.0), 0.5, 2.0)
-	var farming_bonus: float = 1.0 + float(est.farming_level) * 0.5
-	return sustainable * outpost_mult * pop_mult * farming_bonus * (1.0 + est.prod_skill * 0.3)
+	# ★labor v2 T3 鏡射：移 farming_bonus、改 farm_contribution=新 production 式(level×FUY×harvest×est_farm_labor)。
+	# est-based 勞力飽和：est_farm_labor=min(pop,capacity)/K_FARM(labor-starved pop<cap→pop/K_FARM、level 生效)、
+	# god-view 防線守(僅 est 結構欄 farming/pop/harvest、無 live-tile 讀)。estimator==production 同源。
+	var gather_inflow: float = sustainable * outpost_mult * pop_mult * (1.0 + est.prod_skill * 0.3)
+	var farm_contribution: float = 0.0
+	if est.farming_level > 0:
+		var est_share: float = minf(float(est.pop), float(est.farming_level) * LaborSystem.K_FARM)
+		var est_farm_labor: float = est_share / LaborSystem.K_FARM * LaborSystem.LABOR_SCALE
+		farm_contribution = float(est.farming_level) * ResourceSystem.FARM_UNIT_YIELD * est.harvest_factor * est_farm_labor
+	return gather_inflow + farm_contribution
 
 # ★移民邊際：加 k 人到該村的淨可持續產能增量（pop_mult concave+封頂 → 邊際遞減）。
 # = _inflow_est(pop+k) − _inflow_est(pop) − k×MIGRANT_UPKEEP。
