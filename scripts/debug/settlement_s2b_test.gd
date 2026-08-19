@@ -44,6 +44,7 @@ func _init() -> void:
 	_t6_abandoned_recovery()
 	_t7_orphan_cleanup()
 	_t8_no_zombie_on_try_set_fail()
+	_t9_commit_priority_interruptible()
 	if _fail == 0: print("ALL PASS")
 	else: print("FAILS=%d" % _fail)
 	quit()
@@ -172,3 +173,33 @@ func _t8_no_zombie_on_try_set_fail() -> void:
 	_ok(tile.construction_team_id == -1, "★tile construction_team_id 仍 -1（無 zombie 工地）")
 	_ok(tile.construction_ticks_left == 0, "★tile construction_ticks_left 仍 0")
 	_ok(team.corvee_site == Vector2i(-1, -1), "★corvee_site 未被寫（commit-hook 只在 try_set 成功後）")
+
+# ⑨ ★§4a REDO：紮根 commit priority 解耦驗（動態、非靜態 set 成員資格）。
+#   紮根留在 survival set（絕境層要能同秤競爭），但 committed 後只值 PRIO_DISPATCH(50)
+#   → 壓境威脅(@70)/絕境(@80) 仍能真的打斷 L1 工期（S2b viability 中斷路不被 engine 化吃掉）。
+func _t9_commit_priority_interruptible() -> void:
+	print("--- ⑨ 紮根 commit priority=50、可被 threat/survival 打斷 ---")
+	_ok(DecisionOptions.priority_for("紮根") == TaskArbiter.PRIO_DISPATCH,
+		"priority_for(紮根)=PRIO_DISPATCH(50)（REGISTRY priority 欄覆寫 survival-set 預設 80）")
+	_ok(DecisionOptions.is_in_set("紮根", "survival"),
+		"仍在 survival set（rank_survival 收得到＝絕境層同秤、無隱含硬門檻）")
+	# (a) committed 紮根 → task_priority 真的是 50
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := _mk_l0_team(state, Vector2i(21,21), 100.0, 5)
+	_engine_decide(state, team)
+	_ok(team.current_task == TeamData.TASK_BUILD and team.task_priority == TaskArbiter.PRIO_DISPATCH,
+		"committed 紮根：task=%s priority=%d（=50）" % [team.current_task, team.task_priority])
+	# (b) 壓境威脅 @PRIO_THREAT(70) → 真的 preempt 成功
+	var _threat_ok: bool = TaskArbiter.try_set(state, team, TeamData.TASK_FLEE, Vector2i(22,21),
+		TaskArbiter.PRIO_THREAT, "unified")
+	_ok(_threat_ok and team.current_task == TeamData.TASK_FLEE,
+		"★威脅 @70 打斷工期成功（task=%s；工期非不可中斷）" % team.current_task)
+	# (c) 絕境 @PRIO_SURVIVAL(80) → 也能打斷（committed 紮根不鎖死絕境出路）
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var t2 := _mk_l0_team(s2, Vector2i(23,23), 100.0, 5)
+	_engine_decide(s2, t2)
+	var _surv_ok: bool = TaskArbiter.try_set(s2, t2, TeamData.TASK_FORAGE, Vector2i(24,23),
+		TaskArbiter.PRIO_SURVIVAL, "survival")
+	_ok(_surv_ok and t2.current_task == TeamData.TASK_FORAGE,
+		"★絕境 @80 打斷工期成功（task=%s；corvee_site 記憶留著→既有 recovery 回頭續建不丟進度）" % t2.current_task)
+	_ok(t2.corvee_site == Vector2i(23,23), "被打斷後 corvee_site 仍記著工地（recovery 前提）")
