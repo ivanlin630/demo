@@ -21,8 +21,12 @@ owner: systems（HOW）← §4 WHAT 補定①②③（blueprint）+ §4 HOW `202
 ### T1 新 engine option「擴點」（=②擴張動機、純邊際帳）
 - **applicable（只物理可行性）**：`has_own_outpost`（有家）+ `_evaluate_new_outpost_location` 回有效 pos + 母隊 pop 足以派子隊（**沿用 `_dispatch_builder` 既有守衛/門檻、不新增**）+ 非玩家。
 - **util=邊際帳（零新旋鈕）**：
-  - **家內邊際**（再投一單位勞力的產出）：`ctx.idle_labor` 高 ⇒ 家內邊際 ≈0（閒勞力=沒地方用）；輔以家 tile `_inflow_est(家 est)` 的頂格程度（farming/facility 已滿→追加勞力無處去）。
-  - **分點期望邊際**：`MarginalEconomy._inflow_est(候選地 est)`——`VillageEstimate` 由候選 tile 地理（terrain/harvest_factor）+ 擬派 settler 數（`_dispatch_builder` 既有配額）構造。
+  - **★家內邊際（R²訂正、精確公式非手揮）**：**鏡射既有 `migrant_marginal`(marginal_economy:35-43) 的 `_inflow_est` 差分 idiom、方向相反（人力離開非加入）**：
+    `家內邊際 = _inflow_est(家est, pop=team.population) − _inflow_est(家est, pop=team.population − settler)`
+    → **兩邊同量綱（食物/日）**、與「分點期望邊際」(`_inflow_est(候選地 est)`) **直接可比、零額外係數**。
+    ★**原稿「`idle_labor` 高⇒≈0、輔以頂格程度」是手揮且量綱不符**（`idle_labor`=手數 vs `_inflow_est`=食物/日 → 被迫發明換算係數=**偷藏新旋鈕**、違 §0）→ 已移除。
+    **`ctx.idle_labor` 角色降級**：只做 **applicable 篩選/早退優化**（idle 高=值得算），**不進 util 公式本體**。
+  - **分點期望邊際**：`MarginalEconomy._inflow_est(候選地 est)`——★**候選地 est 沿用既有 `camp_target_est` pattern**（`decision_context:323-327`：`VillageEstimate.make(候選 tile.terrain, outpost_level=1, farming_level=0, pop=擬派 settler 數)`；terrain=公共地理[選址評分本就在讀]、level/farming=**假設剛建成值非讀真實村**、pop=自己要派的人=self-knowledge）→ **god-view 疑慮不成立**（`_inflow_est` 結構上只吃 struct=既有防線、算的是「如果派人去會怎樣」的推演）。
   - **建置成本**：母隊被抽走的 settler 產能（=settler 數 × 家內每手邊際）+ 工期期間分點零產出（既有 construction ticks）。
   - **`util ∝ max(0, 分點期望邊際 − 建置成本 − 家內邊際)`**；人格只 **modulate 既有權重**（野心/慎重、非另加線）。
 - **to_task=delegate 既有路**：回 `{delegate:true, build_type, target:pos, settler:…}`（比照 goal_resolver `_mk_delegate_candidate` / faction_ai:3869 既有 `build_type` 分支）→ 由既有 `_dispatch_builder` 執行。**★zombie 教訓沿用**：任何世界寫入只在 try_set 成功後（§4a `_commit_settle_site` 同款；若 delegate 路本身在 dispatch 內寫則沿用既有、不新增 to_task 副作用）。
@@ -47,3 +51,10 @@ owner: systems（HOW）← §4 WHAT 補定①②③（blueprint）+ §4 HOW `202
 §4c 反饋迴路（`site_failed`/`site_thrived` memory + `SITE_MEMORY_TTL_DAYS` 30 天線性衰減）=下一 slice（spec 已定公式、見 §4 HOW §5）。軍事選址本體/長程計劃脊椎=next arc。
 
 序：R² delta → CLEAN → dispatch → gate（含 §4a deferred empirical）→ merge → §4c。地基 KEEP。
+
+## §5 R²delta 訂正（2026-08-20、CLEAN+1 必查項 + 4 答覆）
+- **★必查項=家內邊際公式**（見 §2 T1 已改寫）：`_inflow_est` 差分、鏡射 `migrant_marginal`、移除手揮描述、`idle_labor` 降級為篩選用。**dispatch 信須帶精確公式給 implementer、非留白**。
+- **②候選地 est**：沿用既有 `camp_target_est` pattern（一模一樣先例）、不另設計。
+- **③margin=1.15 empirical**：已在 §3 gate（擴點 util 是否真在 pop 近 cap 時贏過其他 option）、reviewer 判無需再加。
+- **④delegate 路 zombie race=結構上不存在**（reviewer 親查）：`_dispatch_goal_delegate`(faction_ai:3861-3882) **不經 `TaskArbiter.try_set`**（`_decide_unified` 內獨立 `if td.get("delegate")` 分支）、`_dispatch_builder`(:3617-3676) **六道 guard 全在前、唯一世界寫入 `SubteamSystem.dispatch` 在最後一行(:3667)=all-or-nothing**、任一 guard 失敗前零副作用 → **與 §4a race 不同類、可放心複用、不需額外 commit-hook**。
+- **⑤「有家但家很爛」非新死角**：擴點只是**多加一個候選**、非取代；util 低/applicable false 時 argmax 照樣落既有選項（建設/生產/駐守…）=既有狀態延續、非新靜默死角。
