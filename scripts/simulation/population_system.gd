@@ -21,6 +21,10 @@ func _mature_minors(state: WorldState) -> void:
 		AnonTierSystem.add_anon(team, AnonCohort.TIER_PLEB, n)
 		print("[PopMgmt] Team%d %d 名未成年長大成人（平民）" % [tid, n])
 
+# ★§4b 唯一新常數（TEST VALUE、R² 判 margin 優於純 delay）：機械拆隊保底的觸發倍率。
+# population > cap × 此值 才機械介入；之間的小超額留給決策層（擴點）自己解。
+const POP_OVERFLOW_MARGIN: float = 1.15
+
 func check_overflow_for_team(state: WorldState, tid: int) -> void:
 	if not state.teams.has(tid):
 		return
@@ -28,9 +32,16 @@ func check_overflow_for_team(state: WorldState, tid: int) -> void:
 	# ★農業b ⑥：effective_pop_cap=領導基數×據點放大器（統一取代 PRODUCE-outpost-table/leader-only 分流；
 	# L0/無據點→放大器×1=領導帽守 S2a 界線；據點發展→承載更多=size matter via 據點 genuine）。
 	var cap: int = FactionAISystem.effective_pop_cap(state, team)
+	# ★§4b overflow 決策化（margin-based 保底、非純時間 delay）：小超額留給決策層（擴點 option 的邊際帳
+	# 會隨閒勞力/承載壓力升→團主動開分點＝有計畫的擴張），只有滾到顯著超額（決策層明顯沒接住）才機械
+	# 介入拆隊。margin 隨 population 成長最終必觸發＝無「決策永遠沒接住」死角；★保底不刪（避免 pop 卡 cap
+	# 無出口）。純 delay 與溢出量級無關（小超額與難民潮同一延遲）→ 用 margin 而非時間。
+	if float(team.population) <= float(cap) * POP_OVERFLOW_MARGIN:
+		return
 	var overflow: int = team.population - cap
 	if overflow <= 0:
 		return
+	if Probe.enabled: Probe.bump("overflow_split.mechanical_fire")   # 決策化生效驗：此計數應趨近 0
 	var spare_id: int = -1
 	for nid in team.named_members:
 		if nid != team.leader_id:
