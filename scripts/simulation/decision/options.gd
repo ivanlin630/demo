@@ -200,6 +200,26 @@ static var REGISTRY: Dictionary = {
 			if ft == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_CAMP, "target": ft},
 	},
+	"紮根": {
+		# ★§4a 建點入引擎（取代 _evaluate_l0_settle scaffolding）：L0 營地 → L1 據點的工期決策。
+		# applicable=★只物理可行性（站自己 L0 空地 or 自己未完工地）——viability 不做硬門檻，
+		#   撐不撐得過工期由 rooting_drive 的可行性帳表達（瀕餓 util→0 自然不開工、禁硬門檻回潮）。
+		# ★to_task 零世界寫入（只回 {task,target,settle_site}）：construction_* / corvee_site 由
+		#   try_set 成功後的 commit-hook 寫（faction_ai._commit_settle_site）——否則 try_set false
+		#   （combat 鎖／crisis 免疫窗／persist hold／搶班失敗）會留下「tile 標記但隊沒進 BUILD」的 zombie 工地。
+		"affinity": [0.5, 0.1, 0.0, 0.2, 0.2], "sets": {"survival": true},
+		# ★commit priority 解耦（§4a REDO）：留在 survival set（rank_survival 只收 survival-set，
+		#   拿掉＝絕境隊結構性沒紮根選項＝隱含硬門檻），但 committed 後只值 @50——
+		#   否則 @80 > PRIO_THREAT(70) 會讓壓境威脅再也打不斷 L1 工期（敵人壓境還在蓋房子）。
+		"priority": TaskArbiter.PRIO_DISPATCH,
+		"terms": [["rooting_drive", "rooting"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.can_settle_here or ctx.settle_resume_site != Vector2i(-1, -1),
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			var _ctx: DecisionContext = DecisionContext.gather(state, team)
+			var _site: Vector2i = _ctx.settle_resume_site if _ctx.settle_resume_site != Vector2i(-1, -1) else team.tile_pos
+			return {"task": TeamData.TASK_BUILD, "target": _site, "settle_site": _site},
+	},
 	"乞食": {
 		"affinity": [0.8, 0.0, 0.2, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["beg_drive", "beg"]],
@@ -429,7 +449,25 @@ const FEUD_ATTACK_MIN := 0.5
 # option → commit priority。**全 dispatch 路一律讀此**（_decide_unified/_evaluate_solo/_trigger_survival/
 # _decide_subteam/_try_join_target）→ 不變量:survival 保序=命運不看走哪 dispatch 路，solo/unified/subteam
 # commit priority 一致（survival-class 皆 PRIO_SURVIVAL）。加 survival-class option 自動涵蓋（SURVIVAL_OPTION_SET）。
+# ★護欄①白名單（§4a REDO addendum）：REGISTRY "priority" 欄的合法值域＝TaskArbiter 具名常數本身。
+# 新增優先序層級時在 TaskArbiter 定常數並加進此表（單一源），不接受 REGISTRY 端自創數字。
+const PRIORITY_ALLOWED: Array = [
+	TaskArbiter.PRIO_DISPATCH, TaskArbiter.PRIO_PLAYER, TaskArbiter.PRIO_THREAT, TaskArbiter.PRIO_SURVIVAL,
+]
+
 static func priority_for(opt: String) -> int:
+	# ★§4a REDO：REGISTRY 通用 optional 欄 "priority" 優先——set membership（在哪些 rank 清單競爭）
+	# 與 commit priority（committed 後誰能打斷）本是兩件事，原本被此函式綁死。長工期的發展型
+	# survival option（紮根）是第一個暴露它的：留在 survival set（絕境層也要能同秤競爭、
+	# 禁隱含硬門檻），但 commit 只值 PRIO_DISPATCH（壓境威脅/絕境仍能打斷工期＝S2b 中斷路）。
+	var entry: Dictionary = REGISTRY.get(opt, {})
+	if entry.has("priority"):
+		# ★護欄①值域鎖死（reviewer 要求、code 端落實非只靠註解）：只認 TaskArbiter 既有具名常數，
+		#   禁裸 int（防日後隨手標 99 繞過整個優先序階梯）。非法值→assert 擋下 + 退回預設推導。
+		var _p: int = int(entry["priority"])
+		assert(_p in PRIORITY_ALLOWED, "option '%s' 的 priority 欄只准填 TaskArbiter 具名常數（禁裸 int），得到 %d" % [opt, _p])
+		if _p in PRIORITY_ALLOWED:
+			return _p
 	if is_in_set(opt, "survival") or opt == "survival":
 		return TaskArbiter.PRIO_SURVIVAL   # 求生 preempt 同層(絕境隊命運不看 dispatch 路)
 	if opt in ["備戰", "迎戰", "求和"]:

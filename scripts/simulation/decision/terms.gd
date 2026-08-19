@@ -8,6 +8,7 @@ const DESPERATION_DAYS: float = 3.0    # TEST VALUE — 食物低於此才入絕
 const DESPERATION_SCALE: float = 1.2   # TEST VALUE — 絕境 drive 量級（對齊 survival-class 域，不碾壓 forage/restock）
 const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略低於 join/camp）
 # ★A1 紮營價值=MarginalEconomy 真帳（term 非 gate、禁 crank bound）。
+const ROOTING_SAFETY_FACTOR: float = 1.5   # TEST VALUE — 紮根可行性帳安全係數：runway 需 ≥ ETA×此才算滿分（工期外要有餘糧收尾、非硬門檻只影響斜率）
 const CAMP_MARGINAL_CAP: float = 1.5   # TEST VALUE bound — 紮營 drive 封頂（非 inflate、measurer bounded-verify）
 const CAMP_URGENCY_DAYS: float = ResourceSystem.PROVISION_DAYS   # 10 既有錨 — food runway 緊迫度尺
 const FACTION_DUTY_DRIVE: float = 1.5   # TEST VALUE — 派系協同量級（攻擊/徵收/外交同級；commander-v2 單意圖後成員一次服務一意圖的子命令=無同級矛盾，war-priority LESSER 已 revert）
@@ -202,6 +203,17 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# urgency=food runway 緊迫度（富流浪 food_days≥URGENCY_DAYS→0 不急紮）。
 			var urgency: float = clampf((CAMP_URGENCY_DAYS - ctx.food_days) / CAMP_URGENCY_DAYS, 0.0, 1.0)
 			return clampf(marg / maxf(daily_need, 0.001), 0.0, CAMP_MARGINAL_CAP) * urgency
+		"rooting_drive":
+			# ★§4a 紮根（L0→L1 建點）＝可行性帳 × 選址品質（term 非 gate；瀕餓由帳自然壓到 0，不設硬門檻）。
+			# 可行性：撐不撐得過工期——ETA（既有工期常數+殘距）vs 自己的糧餘命 food_runway。
+			#   runway ≥ ETA×SAFETY → 1.0；runway → 0 → 0.0（線性、無死常數門檻、ETA≫runway 自然 util→0）。
+			# 品質：腳下/工地 tile 地力×可農潛力（親見最高信；差地→低 util→寧可續流浪/投靠）。
+			# ★anti-crank：兩項都是真值（撐不撐得過 × 值不值得蓋），不為了讓它 fire 而抬分。
+			if opt != "紮根" or ctx.settle_eta_days <= 0.0:
+				return 0.0
+			var _need_days: float = ctx.settle_eta_days * ROOTING_SAFETY_FACTOR
+			var _feasible: float = clampf(ctx.food_runway_days / maxf(_need_days, 0.001), 0.0, 1.0)
+			return _feasible * clampf(ctx.settle_site_quality, 0.0, 1.0)
 		"beg_drive":
 			if opt != "乞食" or not ctx.has_aid_target: return 0.0
 			# T1：剝 hunger urgency(移 coeff)。低品質最後手段=低 band 定值。
@@ -348,6 +360,9 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		# 無 0.2 floor（floor 會讓知足 leader 也被推去成長 → 抹平 TC4/TC7）。
 		"ambition":          return clampf(float(v.get("野心", 0.5)) - 0.2, 0.0, 1.0) * 1.5
 		"settle":            return float(v.get("義氣", 0.5)) * 0.5 + float(v.get("慎重", 0.5)) * 0.5
+		# ★§4a 紮根：人格只 MODULATE 既有價值（野心=想有自己的地盤、統領=撐得住工程、慎重=不冒進），
+		# 不另加線、不加新旋鈕（鏡射 camp weight 家族）。
+		"rooting":           return float(v.get("野心", 0.5)) * 0.4 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("慎重", 0.5)) * 0.3
 		"feud":              return 0.3 + float(v.get("好戰", 0.5)) * 0.5
 		"faction_duty":      return _duty_factor(float(v.get("_loyalty", 0.5)), float(v.get("野心", 0.5)))
 		"levy":              return 0.2 + float(v.get("貪婪", 0.5)) * 0.5 + float(v.get("好戰", 0.5)) * 0.3

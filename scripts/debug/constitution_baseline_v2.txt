@@ -74,5 +74,3 @@ scripts/simulation/faction_ai_system.gd::_find_own_outpost::gv_mapscan  # legit-
 scripts/simulation/faction_ai_system.gd::consolidate_target_of::gv_teamstate  # gray: 同-faction own-member pop(faction 知自家人,可 known_member_states 精修待評)
 scripts/simulation/faction_ai_system.gd::_enemy_outpost_positions::gv_mapscan  # gate-ok(legit,followup-fixed 63d93aab): belief-filtered(owner-belief proxy) 全圖 loop 保留但只避已知敵,非全知(loop 結構 hoist perf 留故 fingerprint 仍在,tracked-legit)
 scripts/simulation/strategic_ai_system.gd::_find_trade_partner::gv_mapscan  # CANDIDATE-LEAK: partner discovered 但 outpost pos 讀 live(半漏,待 R²+follow-up)
-scripts/simulation/faction_ai_system.gd::_evaluate_l0_settle::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎外 L0→L1 紮根 transition,同 _begin_village_relocate、非決策閘 override)——settlement S2b、呈 systems R² ratify baseline 75→77
-scripts/simulation/faction_ai_system.gd::_evaluate_l0_settle::threshold  # gate-ok: viability 物理前提(food_days<CORVEE 付得起工期 + type by leader 好戰/野心 persona 閾,同舊 establish_crude_camp、非決策 override)——settlement S2b、呈 systems R² ratify baseline 75→77

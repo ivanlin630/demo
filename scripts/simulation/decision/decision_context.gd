@@ -54,6 +54,13 @@ var farmable_pos: Vector2i = Vector2i(-1, -1)
 # ★A1 紮營價值=MarginalEconomy 真帳：靶 farmable tile 的純 est（terrain=belief 地理、outpost1/farming0、pop）+ 覓食餬口日產 floor。
 var camp_target_est: VillageEstimate = null   # 無靶→null（保守不行動）
 var camp_forage_floor: float = 0.0
+# ★§4a 紮根（L0→L1 建點入引擎）：物理可行性 + 可行性帳素材。全部 own-state（腳下 tile=自己站著＝親見最高信、
+# 自己的 corvee_site 記憶、自己的 food_runway），零 god-view、零新旋鈕（ETA 讀既有 L0_TO_L1_CORVEE_DAYS）。
+var can_settle_here: bool = false            # 站自己 L0 營地 + 該格無據點 + 無人施工 + 非玩家隊
+var settle_resume_site: Vector2i = Vector2i(-1, -1)   # 自己未完工地（回頭續建；S2b corvee recovery 語意）
+var settle_eta_days: float = 0.0             # 工期 ETA（既有工期常數 + 殘距日；ETA≫runway → util→0）
+var settle_site_quality: float = 0.0         # 腳下/工地 tile 選址品質（地力×farm 潛力，0..1）
+var food_runway_days: float = 0.0            # 自己的糧餘命（FoodFlow 快取；可行性帳分母）
 var has_aid_target: bool = false
 var aid_target_id: int = -1
 # 買糧（Phase 1）：最近市集 outpost + 是否有錢（specie）。
@@ -291,6 +298,25 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.best_protector_rep = team.get_protector_rep(_sn) if _sn != -1 else 0.5   # 選中 host rep 供 join_drive 磁鐵
 	if Probe.enabled and _sn != -1 and absf(c.best_protector_rep - 0.5) > 0.01:
 		Probe.bump("rep.host_nonneutral")   # DIAG：磁鐵有差別（strong_neighbor protector_rep 脫 0.5）
+	# ★§4a 紮根素材（own-state；物理可行性與可行性帳分離：這裡只算「事實」，值不值由 term 秤）。
+	c.food_runway_days = team.food_runway
+	var _uf: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
+	var _not_player: bool = not (team.leader_id == state.player_id and state.player_id != -1)
+	c.can_settle_here = _not_player and team.leader_id != -1 and _uf != null 		and _uf.camp_level == 1 and _uf.outpost_level == 0 and _uf.construction_team_id == -1
+	# recovery：自己起的工程未完 → 回頭續建（憑自己 corvee_site 記憶，非掃世界）
+	if _not_player and team.corvee_site != Vector2i(-1, -1):
+		var _cs: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.corvee_site))
+		if _cs != null and _cs.construction_team_id == team.team_id and _cs.construction_ticks_left > 0:
+			c.settle_resume_site = team.corvee_site
+	var _site_pos: Vector2i = c.settle_resume_site if c.settle_resume_site != Vector2i(-1, -1) else team.tile_pos
+	var _site: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_site_pos))
+	if _site != null and (c.can_settle_here or c.settle_resume_site != Vector2i(-1, -1)):
+		# 選址品質：地力（productivity）× 可耕潛力（farmable terrain=能發展農業的地）。腳下=親見，最高信。
+		var _farm_pot: float = 0.4 if _site.terrain == "mountain" else 1.0   # 可農判準沿用既有慣例（山不可農、_find_unowned_farmable_tile:4750）
+		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0)
+		# ETA=既有工期常數 + 殘距（回工地的路程；腳下=0）。零新旋鈕。
+		var _dist: int = FactionAISystem._hex_dist(team.tile_pos, _site_pos)
+		c.settle_eta_days = float(FactionAISystem.L0_TO_L1_CORVEE_DAYS) + float(_dist)
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)
 	c.farmable_pos = _ft
