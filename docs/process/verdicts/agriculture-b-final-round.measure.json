@@ -1,0 +1,107 @@
+{
+  "measured_at_head": "e32aa628",
+  "branch": "feat/agriculture-b",
+  "branch_head": "5b986d44",
+  "baseline_main": "current main (includes churn-fix 7877310a + labor-v2 eb20531d)",
+  "run_config": { "config": "warring_states.json", "seed": 1337, "months": 3, "ticks": 21600, "days_completed": 90, "bed": "scripts/debug/agrib_final_round_bed.gd (self-authored, deleted after use)" },
+  "run_status": "COMPLETE, full 90/90 days, exit 0, no timeout (wall elapsed ~10800s budget not exhausted -- run finished before cap)",
+  "raw_log": "task bujgtbeom stdout, 1.4MB, [TickPerf]/[SurvivalMergeIn] lines fully intact (wrapper race fix confirmed holding)",
+  "raw_log_extracts": [
+    "docs/measurements/2026-08-19-agrib-final-round-pair-counts.txt (136 distinct SurvivalMergeIn joiner->host pairs, sorted by count desc)",
+    "docs/measurements/2026-08-19-agrib-final-round-tickperf.txt (all 90 [TickPerf] daily lines)"
+  ],
+
+  "item1_fixture_vs_organic_facility_gate": {
+    "fixture_half": {
+      "verdict": "CONFIRMED fixture artifact, not production bug (already ratified by systems handback 2026-08-19-systems-to-measurer-agrib-fixture-noretrun.md)",
+      "evidence": "headless_test.gd:15297 _mk_produce_team_on never set leader.skills[\"統領\"] -> effective_pop_cap collapsed to ~2 for a 10-pop seeded team -> immediate overflow strip. Fixed test-only at 5b986d44 (production code untouched, determinism fp unchanged at 24cffe3b). [g1a] now green (mint_level=1/coin_delta=200)."
+    },
+    "organic_half": {
+      "verdict": "NO structural facility-development gap correlated with cap found in this scenario",
+      "n_snapshots": 6000,
+      "cap_lt5": { "n": 274, "pct_of_total": "4.6%", "mint_level_gt0_pct": "0.0%", "farming_level_gt0_pct": "4.0%" },
+      "cap_ge5": { "n": 5726, "mint_level_gt0_pct": "0.0%", "farming_level_gt0_pct": "5.5%" },
+      "interpretation": "mint_level>0 is 0.0% for BOTH groups -- no team of any cap size developed a mint facility in this scenario at all, so mint-development absence is not cap-driven (likely scenario-wide: warring_states doesn't route teams toward mint investment regardless of leadership). farming_level>0 shows a mild gap (4.0% low-cap vs 5.5% high-cap, ~1.4x) but the effect size is small and low-cap sample (n=274) is much smaller than high-cap (n=5726) -- not strong evidence of a structural leader-skill-driven development floor problem.",
+      "recommendation": "no production floor needed based on this evidence; fixture fix alone is sufficient for item 1"
+    }
+  },
+
+  "item2_popcap_distribution": {
+    "verdict": "confirms prior round's 0-runaway finding, re-validated at full 90-day/152-team scale",
+    "cap_distribution": { "min": 1, "p10": 7, "p50": 14, "p90": 40, "max": 100 },
+    "cap_lt5_pct": "4.6% (274/6000)",
+    "prior_round_cap_lt5_pct": "5.3% (comparable, slightly lower)",
+    "runaway_checks": { "pop_gt100": 0, "cap_gt150": 0 },
+    "overflow_fire_count": 2,
+    "prior_round_overflow_fire_count": 3,
+    "note": "no pop explosion, no cap explosion, overflow event rate stayed low (2 vs prior 3) -- item ⑥ (no-runaway) re-confirmed at this scale"
+  },
+
+  "item3_churn_high_stress_coverage": {
+    "team_explosion": {
+      "verdict": "SUPPRESSED, not eliminated -- 49->152 vs original 49->242",
+      "trajectory_day50_to_90": "132->138->139->149->154->156->158(peak,day80)->155->152(final)",
+      "interpretation": "team count grew then plateaued/mildly receded from day50 onward, a fundamentally different shape than the original's unbounded 49->242 climb. This is the strongest positive signal for churn-fix at the original high-stress scale."
+    },
+    "perf": {
+      "day1": { "avg_us": 121174, "max_us": 9089555, "teams": 56 },
+      "peak_avg_day86": { "avg_us": 694975, "max_us": 13861894, "teams": 156 },
+      "final_day90": { "avg_us": 670618, "max_us": 17373333, "teams": 152 },
+      "original_cited": { "avg_us": 793000, "max_us": 20200000, "teams": 242, "degradation_note": "original ticket cited '40-70x' degradation; exact derivation formula not confirmed by measurer this round" },
+      "day1_to_day90_degradation_this_round": "5.5x (121174 -> 670618 avg_us)",
+      "max_over_avg_ratio_day90_this_round": "25.9x (17373333/670618)",
+      "max_over_avg_ratio_original": "25.5x (20200000/793000)",
+      "per_team_avg_cost_this_round": "4.41 ms/team (670618us / 152 teams)",
+      "per_team_avg_cost_original": "3.28 ms/team (793000us / 242 teams)",
+      "verdict": "MIXED, not a clean recovery -- absolute final avg tick time (670ms) is comparable to or slightly better than original (793ms), and max/avg spike ratio is nearly identical (25.9x vs 25.5x) suggesting the same underlying spike shape persists. But this round reached that absolute time at a much LOWER team count (152 vs 242), so per-team cost did NOT improve and is actually ~34% worse by this rough normalization. Caution: per-team normalization is crude (doesn't control for faction count/encounters), flagged as observation not a hard conclusion.",
+      "full_daily_series_location": "task bujgtbeom stdout, grep '[TickPerf]' -- all 90 days intact, available on request"
+    },
+    "same_pair_repeat": {
+      "verdict": "metric-corrected per systems' 2026-08-19-systems-to-measurer-churn-metric-correction.md -- accept.join_reject is NOT this metric; recomputed from raw [SurvivalMergeIn] log line parsing",
+      "method": "grep '[SurvivalMergeIn] team=X → 併入 Y' across full run, parsed (joiner,host) pairs, counted",
+      "total_lines": 1647,
+      "distinct_pairs": 136,
+      "max_single_pair_repeat": "81x (Team117->Team26)",
+      "top5_pairs": ["Team117->Team26: 81", "Team131->Team31: 79", "Team56->Team48: 59", "Team159->Team32: 48", "Team97->Team156: 47"],
+      "repeat_distribution": "38 pairs appear exactly once (no recommit), 98 pairs recur (>1x); long tail: 16 pairs at 11x, several pairs 20-40x, 5 pairs above 40x",
+      "original_cited": "698 lines, max single-pair repeat 54x",
+      "comparison_verdict": "RAW COUNTS ARE HIGHER, NOT LOWER: 1647 lines (vs 698) and max repeat 81x (vs 54x). This is the opposite direction from what churn-fix should produce IF the two runs are directly comparable.",
+      "caveat_not_apples_to_apples": "measurer does not have confirmed evidence that the original 698-line/54x run reached the full 90-day window -- if it was a partial run cut short during the runaway 49->242 explosion (plausible, since an unbounded explosion would eventually blow past GODOT_TIMEOUT), then comparing total accumulated line-counts across different elapsed durations is invalid. This round ran the complete 90 days. Flagging as an open reconciliation question for systems rather than asserting churn-fix regressed on this axis.",
+      "dispatch_counter_mismatch": "merge.consolidate_dispatch probe counter = 512 total, but raw grep of [SurvivalMergeIn] print lines = 1647 -- a 3.2x discrepancy. Measurer does not have the current print call-site confirmed this round (did not re-diff faction_ai_system.gd this pass) -- flagging as an open question: either the print fires on ticks beyond the initial commit (e.g. a per-tick reaffirm/chase print not gated by the dispatch bump), or there is a second print call site. Systems/implementer should confirm via code-read."
+    },
+    "dispatch_breakdown": {
+      "merge.consolidate_dispatch": 512,
+      "join.resolve": 21,
+      "join.timeout": 1,
+      "join.abort_ghost": 21,
+      "accept.join_reject": 33,
+      "accounted": "75 (resolve+abort_ghost+accept.join_reject) = 14.6% of 512",
+      "unaccounted": "437 (85.4%)",
+      "category_attempt": {
+        "timeout_released": "negligible -- join.timeout fired only 1x total across full 90-day run, cannot explain the 437 gap",
+        "still_in_flight_vs_recommit_residue": "NOT cleanly separated this round -- measurer did not capture a final per-team task/committed-state snapshot at day90 to distinguish 'still actively committed, run just ended' from 'silently recommitted to same target without resolving prior attempt'. Indirect evidence from the pair-distribution: 98/136 distinct pairs show count>1 (implying at least one repeat event per pair), and the raw-line-vs-dispatch-counter mismatch (1647 vs 512) suggests substantial repeated-chase activity beyond first commit -- consistent with recommit-residue being the dominant component of the unaccounted 437, but this is inference from the pair data, not a direct measurement.",
+        "gap_flagged_as_incomplete": true
+      }
+    }
+  },
+
+  "item4_headless_determinism": {
+    "verdict": "EXEMPTED this round per systems ratification (2026-08-19-systems-to-measurer-agrib-fixture-noretrun.md) -- implementer already did full headless comparison (0-new beyond 6 known pre-existing + g1a now green), determinism fp unchanged at 24cffe3b (production code untouched by the test-only fixture fix). Measurer did not re-run headless/determinism independently this round; deferred to implementer's confirmed claim per explicit systems instruction."
+  },
+
+  "cleanup": {
+    "population_system.gd_temp_tap": "reverted (popcap.snapshot/popcap.overflow_fire Probe calls removed), git diff clean vs branch HEAD",
+    "agrib_final_round_bed.gd": "deleted (was never committed, worktree-local only)",
+    "sidecar_file": "deleted (was never committed, worktree-local only)",
+    "compile_check": "godot --path .worktrees/agriculture-b --headless --import completed with no GDScript errors"
+  },
+
+  "incomplete": [
+    "item3 same_pair_repeat comparison to original 698/54x is not confirmed apples-to-apples (original run's completion status/elapsed-duration unconfirmed)",
+    "item3 dispatch_counter vs raw-line-count mismatch (512 vs 1647) not root-caused this round -- needs a code-read of the print call site",
+    "item3 dispatch breakdown's 437 unaccounted teams not cleanly split into still-in-flight vs recommit-residue (inferred from pair data only, not directly measured)",
+    "item3 perf verdict is MIXED (absolute recovery ambiguous, per-team cost did not clearly improve) -- not a clean PASS, needs systems/blueprint judgment call on whether this clears the gate"
+  ],
+
+  "summary": "Full 90-day high-stress warring_states run completed (exit 0, no timeout) -- the only opportunity to validate churn-fix at the original catastrophic-explosion scale. Team explosion is clearly suppressed (49->152 vs original 49->242, trajectory plateaus from day50 rather than climbing unbounded) -- this is the strongest positive result. Pop-cap distribution stays healthy (0 runaway both directions, cap<5 rate flat vs prior round). Item 1's organic facility-development question resolves clean: no cap-correlated structural facility-development block found, fixture fix alone suffices, no production floor needed. However item 3's other two axes are NOT clean wins: perf's absolute numbers are roughly comparable to original but per-team cost did not improve (and the max/avg spike ratio is nearly identical to original, ~26x both times), and the raw same-pair-repeat churn signature (1647 lines/136 pairs/max 81x) came out HIGHER than the original's cited 698/54x -- the opposite of what a successful churn-fix should show, though this comparison's validity is undermined by not knowing whether the original run reached full duration before being cut short by its own explosion. Recommend systems reconcile the original run's actual elapsed coverage before treating the same-pair-repeat regression as real, and have implementer confirm the dispatch-counter/raw-line-count print-call-site discrepancy (512 vs 1647) before calling item 3 closed."
+}
