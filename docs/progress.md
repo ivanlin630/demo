@@ -58,7 +58,11 @@
 | 4 | **QA 故事稽核 EWMA 解耦後的決策動力學**（推進頻率真的變了；現有閘皆非行為因果型） | 待派（measurer 出 specimen trace → QA） |
 | 3 | 在飛 slice 全 merge 或明確排除（labor-v2/churn-fix 已 merged；§4a merged；繼承-lite dispatched） | 進行中 |
 
+### ★大考的性質（blueprint 2026-08-20 定）
+**大考是【診斷器】不是【及格考】**——科目的本職是**診斷正循環斷在哪**，不是判世界過不過。故科目判準**不改不預設**：若 12mo 撞上人口天花板，「**斷點＝領導天花板、非經濟**」**就是科目 A 的答案**（不是 A 測失敗）。
+
 ### B. 具名監看清單（開考時必看，非「順便」）
+0. **★統領分佈 + `effective_pop_cap` 分佈**（min/median/max/直方）＝判「世界是否**領導荒**」。溯源：§4b gate 實測 peaceful 90 天 population **精確卡 6**、擴點門檻 pop≥12 **零次滿足**；code-read＝`pop_cap_from_leadership = round(49×min(統領/0.8,1))+1`（統領 0.08→cap 6）、放大器要站自家 L1+ 據點。**blueprint 裁：領導綁帽＝設計意圖 CONFIRMED（意圖帳 2026-08-15 row、用戶親裁）非 drift**；真相＝**意圖對 + 基數 tune 從未執行 + 統領成長管道斷（established④）三合一**。
 1. **經濟 4 科目**（`game-design.md:132` blueprint owner）：A 富裕農村 / B 製造樞紐 / C 戰爭經濟 / D 需求不足型衰退。
 2. **accepted cost 定奪**（starve baseline 8 vs combined 28）——**★其分解數字（honest vs lag-window）已被 QA 判 REVISE、暫不可信**（EMA 非瞬時流）；大考前需 specimen 複驗瞬時 daily_rate。**預核槓桿**：若顯人口死亡螺旋（非趨穩）→ B5 觸發閾值調早，**免再請示**。
 3. **`mint_level` 全世界 0%**：仍 0% → 紅旗查設施鏈（established 雞生蛋家族前科）；>0% → 發展曲線正常。併科目 B 看。
@@ -68,6 +72,12 @@
    perf re-open candidate 帳（大考後）：`FactionAISystem.new()` **全站 40 站點**全呼純 finder helper、該類 instance state 只有兩個 **print-dedupe** dict → helper 轉 static＝位元級安全道（量級大於 perf⑤ 的 26 站）；loop1 dedup 1.72%；JOIN same-target reassert 0.23%（reassert 事件中 **94.28% 是無進展純重申**）。
 6. **政治質地**（外交/背叛密度）：blueprint (A) 簽字後的回設計值；過死 → (B) 補償調 `p` 走 tuning 流程，**觸發權在 Story QA verdict**。
 7. **farming-as-pillar / FUY**、settlement 深根 pop、founding 碎片 spam / 鬼城比率。
+
+### B-2. 大考後的路（blueprint 2026-08-20 排序，非考前項）
+- **(a)** measurer 快照先答「統領 0.08 是 fixture／週轉／全域現象」（已插隊派出）。
+- **(b)** **領導成長管道＝考後 arc 候選**——與 established④、繼承-lite、王朝 arc、7/19 成長弧 note **同一族**，該一起做。
+- **(c)** **基數 tune 要帶數字**（快照 + 大考數據齊才動；用戶預授權過但不准空手調）。
+- 「飽和剎車」科目：標準場景**降級**（村到不了飽和＝大考該記錄的事實）＋**大村 config 床**單測機制正確性（已折進 §4b 票）。修人口鏈＝整個 arc 量級、**非考前項**。
 
 ### C. ★考前凍結範圍（**窄**、勿誤讀成全面凍結）
 凍結的**只有**「會改變**大考正要評判的那個維度本身**的觸發頻率」的改動——具體=**loop1 faction dedup DEFER**（會腰斬外交/背叛觸發率 → 污染政治維歸因 + 毀掉與第一次大考的可比性；correctness 面不變、大考後單獨走）。
