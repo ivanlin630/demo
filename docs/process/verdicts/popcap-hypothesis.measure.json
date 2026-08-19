@@ -1,0 +1,35 @@
+{
+  "ticket": "population天花板假說坐實/推翻（插隊#1，響應§4b的population卡在6發現）",
+  "hypothesis": "team_data.pop_cap_from_leadership = round(49×min(統領/0.8,1))+1，統領≈0.08-0.10→cap 6-7，與§4b量到的median/max=6吻合，猜population被領袖統領技能決定的天花板鎖住",
+
+  "peaceful_economy_snapshot": {
+    "config": "peaceful_economy.json", "seed": 1337, "day": 20,
+    "raw_log": "docs/measurements/2026-08-20-popcap-hypothesis-peaceful.log",
+    "leadership_distribution": { "min": 0.600, "median": 0.600, "max": 0.600 },
+    "per_team_sample": "11個PRODUCE隊全部：統領=0.600、cap=76~99(視outpost_level/farming而異)、population=3~6",
+    "at_cap_count": 0, "below_cap_count": 11, "at_cap_pct": "0.0%",
+    "verdict": "★★假說REFUTED——leadership skill實際=0.600(非猜測的0.08-0.10)，effective_pop_cap算出76-99，population卡在6遠遠低於這個天花板(AT_CAP比例=0.0%)。這是清楚的判定(b)：population<<cap，瓶頸不在領導帽，是繁殖/成人化速率(P5_breed chance或MATURE_RATE=0.1)或其他population成長機制本身"
+  },
+
+  "warring_states_snapshot": {
+    "config": "warring_states.json", "seed": 1337,
+    "attempts": [
+      { "day": 20, "result": "n=0 PRODUCE隊", "log": "docs/measurements/2026-08-20-popcap-hypothesis-warring.log" },
+      { "day": 25, "result": "n=0 PRODUCE隊", "log": "docs/measurements/2026-08-20-popcap-hypothesis-warring-25d.log" },
+      { "day": 30, "result": "timeout(1200s)未跑完", "log": "docs/measurements/2026-08-20-popcap-hypothesis-warring-30d.log" },
+      { "day": 35, "result": "n=0 PRODUCE隊", "log": "docs/measurements/2026-08-20-popcap-hypothesis-warring-35d.log" }
+    ],
+    "verdict": "★誠實回報測不到——warring_states在現main(post-EWMA解耦)分支上，到day35都還沒有任何隊擁有TAG_PRODUCE標記(尚未settle成生產隊)。這跟§4b輪(不同branch/較早commit)day25就出現produce_n=2不同，可能是EWMA解耦改變世界動力學後settle時程delay，或純粹樣本/seed互動差異。未進一步追查(不在本輪cheap-snapshot範圍)，如實標記N/A非湊數字。",
+    "note": "沒有warring_states的AT_CAP數據不影響整體判定——peaceful_economy的數據已經清楚、單面倒地refute假說，不需要warring_states來平衡結論"
+  },
+
+  "final_determination": {
+    "choice": "(b) population < cap 但長不上去 = 繁殖/成人化速率才是瓶頸",
+    "confidence": "高（peaceful_economy數據乾淨、11/11隊一致、無模糊帶）",
+    "leadership_skill_note": "★另一個意外發現：peaceful_economy這個config裡所有leader的統領技能完全一致=0.600（非隨機分布），這本身可能是fixture/config設計特性(標準化測試leader)非隨機世界的代表性樣本——若要看『典型』統領分布，需要用有隨機leader生成的場景(如warring_states)才更有代表性，但那個場景這次沒能取得PRODUCE隊數據。"
+  },
+
+  "recommendation": "假說(a)已被peaceful_economy數據推翻，population天花板不是統領技能問題。真根應往population_system.gd的MATURE_RATE(=0.1，每月10% minor→成人)或minor_population的『補充』機制去查——是否有新minor持續產生餵養這個成人化管線，還是minor池本身也卡住/從未補充。這是下一步該查的具體方向，但已超出本輪cheap-snapshot範圍，交systems/blueprint判斷是否要開下一輪。",
+
+  "summary": "假說REFUTED：peaceful_economy 11個PRODUCE隊快照顯示population(3-6)遠低於effective_pop_cap(76-99)，AT_CAP比例0%，非天花板飽和。真根在繁殖/成人化速率(MATURE_RATE等)非leadership。warring_states因EWMA解耦後世界動力學可能改變，到day35都還沒有PRODUCE隊可採樣，如實回報測不到，不影響已經清楚的peaceful_economy判定。"
+}
