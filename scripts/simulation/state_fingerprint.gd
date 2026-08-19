@@ -118,8 +118,8 @@ static func _emit_tiles(state: WorldState, buf: PackedStringArray) -> void:
 		var t: HexTileData = state.world.tiles[tid]
 		if t.outpost_level <= 0 and t.construction_team_id == -1 and t.camp_level <= 0:
 			continue   # 純野格無 outpost/施工/L0營地 → 不入 fingerprint（★S2a：camp_level>0 必入、否則 L0 變化 determinism 盲點）
-		buf.append("H|%d|owner=%d|lvl=%d|camp=%d|campleft=%d|farm=%s|ctid=%d|cleft=%d|store=%s" % [
-			tid, t.outpost_owner, t.outpost_level, t.camp_level, t.camp_ticks_left,
+		buf.append("H|%d|owner=%d|lvl=%d|camp=%d|campleft=%d|campteam=%d|farm=%s|ctid=%d|cleft=%d|store=%s" % [
+			tid, t.outpost_owner, t.outpost_level, t.camp_level, t.camp_ticks_left, t.camp_team_id,
 			str(t.get("farming_level")), t.construction_team_id, t.construction_ticks_left,
 			_dict_canon(t.public_storage)])
 

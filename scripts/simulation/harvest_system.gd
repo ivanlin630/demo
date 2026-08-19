@@ -35,8 +35,14 @@ func _decay_l0_camps(state: WorldState) -> void:
 			continue
 		tile.camp_ticks_left -= WorldState.TICKS_PER_DAY
 		if tile.camp_ticks_left <= 0:
+			# ★§4c 反饋（失敗掛點之一）：L0 營地被棄置到衰敗＝這塊地沒留住人 → 寫起建隊 leader 的
+			# 選址記憶（隊已滅/leader 已亡則跳過＝人死沒人記得）。純讀 camp_team_id、零 RNG。
+			var _founder: TeamData = state.teams.get(tile.camp_team_id) if tile.camp_team_id != -1 else null
+			if _founder != null:
+				SettlementMemory.record_site_outcome(state, _founder, tile, SettlementMemory.SITE_FAILED)
 			tile.camp_level = 0
 			tile.camp_ticks_left = 0
+			tile.camp_team_id = -1
 
 const WILD_HORSE_REGEN_CHANCE: float = 0.05   # 每月 5% chance +1（極慢）
 const WILD_HORSE_TILE_CAP: int = 3

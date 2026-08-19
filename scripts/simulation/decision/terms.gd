@@ -202,7 +202,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var daily_need: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 			# urgency=food runway 緊迫度（富流浪 food_days≥URGENCY_DAYS→0 不急紮）。
 			var urgency: float = clampf((CAMP_URGENCY_DAYS - ctx.food_days) / CAMP_URGENCY_DAYS, 0.0, 1.0)
-			return clampf(marg / maxf(daily_need, 0.001), 0.0, CAMP_MARGINAL_CAP) * urgency
+			# ★§4c 反饋：同 leader 對該靶地的過往結局折價/加分（乘既有品質、不新增 term 線）。
+			return clampf(marg / maxf(daily_need, 0.001), 0.0, CAMP_MARGINAL_CAP) * urgency 				* ctx.camp_site_quality_mult
 		"rooting_drive":
 			# ★§4a 紮根（L0→L1 建點）＝可行性帳 × 選址品質（term 非 gate；瀕餓由帳自然壓到 0，不設硬門檻）。
 			# 可行性：撐不撐得過工期——ETA（既有工期常數+殘距）vs 自己的糧餘命 food_runway。
