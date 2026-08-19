@@ -36,3 +36,21 @@ date: 2026-08-20 ／ owner: systems ／ 溯源：specimen 非中立性 investiga
 ## §5 範圍界線
 - **不動** `gather` 其餘 7 處寫入（labor ensure_fresh / idle_employ / consolidate cache）——implementer 已實證它們**不是**本次分岔源；它們是 cache/cadence 性質，另案。
 - **不動** tracer（`capture_options` 照舊呼 to_task）——根修後那條路變唯讀即可；(a)「tracer 改用既有 ctx / to_task_probe」降為**可選 cleanup**，gate①綠就不必做。
+
+## §6 R² delta（2026-08-20、判決 CLEAN、reviewer 親判 3 個開放 caller）
+R² 親驗坐實：`consistency_coeff`(`need_hierarchy:110-121`) 的 `alignment=Σ affinity×urgency` **直接乘進每個 option 的 util**（`u *= _coeff`）→ `need_urgency` 是**直接改變 argmax 贏家**的乘數、非旁支資料；`ewma_update`(:124-131) 親讀確認**真非冪等**（同 tick 同 `raw` 連呼兩次 → `prev` 被推向 `raw` 兩次）。11 caller 行號零漂移。
+
+### advance 判定表（**spec 定案、非留給 implementer 猜**）
+| caller | advance | 理由 |
+|---|---|---|
+| `decision_engine:50` / `:165` | **true** | 真決策評估入口 |
+| `options.gd:167/185/219/251/383/395` | **false** | `to_task` 是「把選項具體化成 task」、非新一輪評估 |
+| `faction_ai:416` | **false** | 親讀 :410-432＝**threat 門檻 gate read**，過門檻後 :432 呼 `_decide_unified` → 內部再走 `decision_engine:50`（已 true）。若此處也 true＝同隊同 tick 扣兩次＝**本 slice 要修的病徵本身** |
+| `faction_ai:917` | **true（★條件式）** | 獨立 ambient 階梯決策入口（`rank_ambient`+`try_set`），語意上是真評估。**★但只在 `current_task == TASK_IDLE`(:916) 跑** → **implementer 必須確認**：`uses_unified` 隊會不會同 tick 先走 `_decide_unified`（已 advance）**又**因仍 IDLE 落到這段？**若會 → 對 `uses_unified` 隊降 `false`**（借用同 tick 已推進的值）、只對非 unified/solo 隊維持 true。T3 的 tap（每隊每 tick advance 計數）**會直接抓到**沒守住的情況 |
+| `faction_ai:1881` `_try_distribute_side` | **false** | comment 自陳「脫主 argmax」＝**side-dispatch**（附加動作），主決策已在別處評估過。★**通則擴及整個 side-dispatch 家族**（distribute/migrant/herald/scout…）**全 false**——否則一隊一 tick 觸發多個 side-action 各推一次＝同款病換皮 |
+
+### gate 追加（R② 建議、低成本加固、非阻塞）
+**gate 6**：長跑（數百 tick 以上）前後比對 **`plan_phase` 分佈**（五層急迫度佔比；欄位/tap 現成）。若修正後分佈**整體重心大幅位移**（非只軌跡變平滑）→ 代表原病其實在**餵養**某個已被依賴的行為模式 → 回報、多看一眼。
+（R② 對 gate 5「遲鈍就回報、禁自行 crank alpha」判定**正確且夠**：頻率是量測到的真實現象、alpha 是調參掩蓋現象，不可混為一談。）
+### R② 對其餘 3 問答覆（確認、無需改 spec）
+②見上；③「預設 false 失效模式＝stale 非靜默擾動」**成立**（最壞＝用較舊 `need_urgency` 算 coeff、可能選次佳＝靈敏度劣化，**非資料損毀**：不 null/不 NaN/不 crash/不洩漏跨隊資訊）；④specimen bed 零分岔**只證「觀測不再改變世界」**（中立性維度）、**不證「決策本身還好」**（正交）→ 故加 gate 6。
