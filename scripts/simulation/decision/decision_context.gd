@@ -168,7 +168,11 @@ var survival_stall_active: Array = []
 # 計畫層 S2 plan_phase 已退役（決策引擎重構 S2.5）→ 五層急迫度 coeff 取代；team.plan_phase
 # 純顯示欄由 §6 narrative_label 寫（S2.4），不再 derive。
 
-static func gather(state: WorldState, team: TeamData) -> DecisionContext:
+# ★advance 解耦（specimen 非中立根修）：gather 原本每呼一次就推進持久 EWMA（need_urgency 非冪等）
+# 並改寫衍生的 plan_phase → 同 tick 同隊被推進幾次＝走過幾條路徑、且取決於哪個選項贏＝既存缺陷
+# （tracer 只是把它照出來）。現在預設 advance=false（純讀），只有【真正的一次決策評估】傳 true。
+# ★零新結構：不加 *_advanced_tick 欄／不加 TeamData 旗標，推進與否由 caller 語意決定。
+static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
 	var c := DecisionContext.new()
 	var _tg: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var ldr: PersonData = state.persons.get(team.leader_id)
@@ -565,12 +569,21 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		c.has_acceptable_join_host = _reachable and not _recently_rejected
 	# 需求金字塔（決策引擎重構 S1）：五層急迫度 EWMA 更新（inert——本 slice 不接 rank_scored）。
 	# compute_raw 讀 food_days/threat(已算) + team/state；ewma_update 累積進持久 team.need_urgency。
-	var _raw_need: PackedFloat32Array = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)
-	team.need_urgency = NeedHierarchy.ewma_update(team.need_urgency, _raw_need)
-	c.need_urgency = team.need_urgency
-	# §6 主敘事標籤：team.plan_phase 來源改接五層急迫度衍生(argmax)，非 derive_plan_phase 自算。
-	# GUI(observer_query_api/observer_inspect_panel)讀 team.plan_phase 不變，來源改接。
-	team.plan_phase = NeedHierarchy.narrative_label(team.need_urgency)
+	# ★只有 advance=true（真決策評估）才推進持久 EWMA + 改寫衍生 plan_phase；純讀路徑只拷貝現值。
+	if advance:
+		var _raw_need: PackedFloat32Array = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)
+		team.need_urgency = NeedHierarchy.ewma_update(team.need_urgency, _raw_need)
+		# §6 主敘事標籤：team.plan_phase 來源接五層急迫度衍生(argmax)。GUI 讀 team.plan_phase 不變。
+		team.plan_phase = NeedHierarchy.narrative_label(team.need_urgency)
+		if Probe.enabled: Probe.bump("need.ewma_advance")   # ★憲法級 tap：實推進處（驗每隊每 tick ≤1）
+	else:
+		if Probe.enabled: Probe.bump("need.gather_readonly")   # ★唯讀路
+	# 邊角：從沒被 advance 過的隊（第一次就走唯讀路）→ ctx 給當下 raw 值（★只進 ctx、不寫 team），
+	# 免得下游拿到空陣列。真正的持久推進仍只發生在 advance=true。
+	if team.need_urgency.is_empty() and not advance:
+		c.need_urgency = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)
+	else:
+		c.need_urgency = team.need_urgency
 	# ② 絕境階梯：蒐 active stall cooldown option（applicable() 排除單一源；純讀 dict 零 RNG）。
 	var _stall_now: int = state.world.current_tick
 	for _sopt in team.survival_stall_cooldown:
