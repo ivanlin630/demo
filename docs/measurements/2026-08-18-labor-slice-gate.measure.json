@@ -1,0 +1,34 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-18-systems-to-measurer-labor-slice-gate.md",
+  "branch": "feat/labor-marginal-food",
+  "branch_commit": "02db6096",
+  "bed": "scripts/debug/labor_slice_perteam_bed.gd (temp, reverted after use)",
+  "config": "peaceful_economy.json",
+  "seed": 1337,
+  "months": 6,
+  "headless_full_run": {
+    "method": "godot.ps1 --import (cache rebuild) then headless_test.gd, detached",
+    "result": "0 assertion failures (clean, post-cache-rebuild) — confirms implementer's own 9/9 + 0-new claim independently."
+  },
+  "per_team_flabor": [
+    {"team": 0, "pop": 6, "farming_level": 1, "flabor_avg": 0.155, "n": 42},
+    {"team": 1, "pop": 6, "farming_level": 1, "flabor_avg": 0.225, "n": 38},
+    {"team": 2, "pop": 6, "farming_level": 1, "flabor_avg": 0.117, "n": 110},
+    {"team": 3, "pop": 6, "farming_level": 1, "flabor_avg": 0.093, "n": 205},
+    {"team": 4, "pop": 6, "farming_level": 3, "flabor_avg": 0.038, "n": 290},
+    {"team": 5, "pop": 6, "farming_level": 1, "flabor_avg": 0.121, "n": 180},
+    {"team": 7, "pop": 6, "farming_level": 2, "flabor_avg": 0.058, "n": 187},
+    {"team": 9, "pop": 6, "farming_level": 1, "flabor_avg": 0.244, "n": 186},
+    {"team": 10, "pop": 6, "farming_level": 1, "flabor_avg": 0.151, "n": 124},
+    {"team": 11, "pop": 6, "farming_level": 1, "flabor_avg": 0.205, "n": 13}
+  ],
+  "by_farming_level_comparison": {
+    "before_labor_slice_fix": {"level_1": 0.267, "level_2": 0.103, "level_3": 0.067, "source": "docs/measurements/2026-08-18-FUY-perteam-farmlabor.measure.json"},
+    "after_labor_slice_fix":  {"level_1": 0.164, "level_2": 0.058, "level_3": 0.038, "note": "level_1 = simple average across 8 level-1 teams (0.155,0.225,0.117,0.093,0.121,0.244,0.151,0.205)"},
+    "relative_decay_L1_to_L3": {"before": 0.251, "after": 0.232, "verdict": "決定性gate FAIL — 斷崖幾乎未被治，相對陡峭度(L3/L1比)前後幾乎相同(0.251→0.232),絕對值甚至全面更低。"}
+  },
+  "root_cause_diagnosis": {
+    "finding": "labor_system.gd:56 `demand[\"farm\"] = float(tile.farming_level) * K_FARM` 這行沒被這輪diff動到——T1只改了_workstation_need的weight算法(_food_group_need),demand分母仍隨level線性無界成長,而weight分子(food_need×yield_f/(yield_g+yield_f))隨level增加會漸進趨近food_need這個有限上限(level→∞時yield_f支配yield_g,weight→food_need,不再繼續隨level長大)。fill=分配到的量/demand,分子有界、分母無界線性成長,fill理論上仍必然隨level增加而下降——這就是為什麼斷崖沒被治好、且相對陡峭度幾乎一樣。",
+    "implication": "要真治斷崖,demand[\"farm\"]這條線本身也要跟著調(例如K_FARM不是常數、或demand也跟yield掛勾成某種飽和函數),單改weight這一側結構上救不了——這是T1實作對spec意圖(『farm高level拿多份』)的邏輯性缺口,非參數校準問題。"
+  }
+}

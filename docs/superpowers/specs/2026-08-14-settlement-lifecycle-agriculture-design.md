@@ -33,7 +33,7 @@ owner: blueprint（WHAT）→ R² → systems HOW
 - **食物雙源、互不相干(用戶原案)**:①野地池(採集/覓食對象、再生率物理、維持現狀、L0 吃這口)②**農田=獨立生產線**:
   `農田產出/天 = farming_level × 單位產量 × 勞力配置(labor 工位) × harvest_factor(季節)` → 直接入糧倉、來源標籤 `farm_yield`(守恆可稽核)。
 - **要勞力**:農田=勞力池工位 → 軍民混編 guns-vs-butter 自動生效(動員抽農夫→田產掉);**吃季節**(作物比野採更受 harvest_factor);**等級=投資**=大村規模優勢的長期出口([[project_size_matter_arc]] 真落地)。
-- ROI 估算器不改——物理跟上信念(錯配自動解)。
+- ~~ROI 估算器不改——物理跟上信念(錯配自動解)~~ **更正(2026-08-18 農業a落地後)**:實作的新物理(farm_yield 獨立線+勞力耦合)與估算器舊 gather-boost 模型**形狀不同**、非單純恢復 → 估算器須對齊新物理(含勞力飽和因子:labor-starved 時 farm ROI 誠實變低)、全 self-knowledge 無 god-view。與 FUY 三分流裁定同 slice 落地。
 - 資源分類學入 invariants(systems):零生成(礦寶)/自然再生(野味藥草野馬)/生產類(食物);木材=採集加速維持。
 
 ## §3 戰略蓋點決策（思考層第一戰）

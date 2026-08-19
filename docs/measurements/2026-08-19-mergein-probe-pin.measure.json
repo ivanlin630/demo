@@ -1,0 +1,30 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-19-systems-to-measurer-mergein-probe-pin.md",
+  "bed": "scripts/debug/agri_b_popcap_bed.gd (temp, reverted after use)",
+  "branch": "feat/agriculture-b",
+  "branch_commit": "70a5d0cd",
+  "config": "warring_states.json",
+  "seed": 1337,
+  "months": 2,
+  "note": "原3個月popcap輪的bed沒印這三個probe(補印前已跑完)，另開2個月短局補跑同seed/config專門pin這題。",
+  "probe_counts": {
+    "join.resolve": 7,
+    "accept.join_accept": 7,
+    "accept.join_reject": 11,
+    "mergein.dissolve": 1,
+    "mergein.subteam": 6,
+    "merge.surv_ok": 588,
+    "merge.surv_fail": 685
+  },
+  "comparison": {
+    "survival_mergein_commits_3mo_original_run": 698,
+    "join_resolve_2mo_this_run": 7,
+    "extrapolated_join_resolve_3mo": "~10-11 (linear scale from 2mo)",
+    "ratio": "join.resolve(~10) << SurvivalMergeIn commits(698) — 約1.4%轉換率"
+  },
+  "verdict": {
+    "diagnosis": "(b) arrival-never",
+    "reasoning": "join.resolve(真正_resolve_join fire次數)=7，遠遠小於SurvivalMergeIn(commit到併入任務的次數)=698——委託task被commit(TaskArbiter.try_set成功)不代表joiner真的移動到host共位觸發_resolve_join。accept.join_reject=11也不小，但跟join.resolve(7)同量級，不是主導因素——host拒絕(c)存在但不是churn主因。真正的落差在committed(數百次)vs真fire(個位數)之間，指向joiner多數時候從未真正抵達host所在tile。",
+    "secondary_finding": "即使少數真正resolve的join(7次)裡,mergein.dissolve只1次、mergein.subteam 6次——多數併入結果是變附庸(subteam)而非真消失,呼應(a)選項但這不是churn的主因,是resolve之後的分流結果。"
+  }
+}

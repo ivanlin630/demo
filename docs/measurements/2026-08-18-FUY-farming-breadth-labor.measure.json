@@ -1,0 +1,26 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-18-systems-to-measurer-FUY-zerocost-dataread.md",
+  "note_on_zero_cost": "既有 docs/measurements/2026-08-18-agriculture-a-food-account-gate.measure.json 與其底層 dump 對 farming_level 欄位命中數=0（已 grep 驗證），非零成本——依 ticket 自訂分流之一走小 tap 補一輪（main 已含 agriculture-a，非阻塞農業b）。",
+  "bed": "scripts/debug/fuy_farming_breadth_bed.gd (temp, reverted after use)",
+  "config": "peaceful_economy.json",
+  "seed": 1337,
+  "months": 6,
+  "q1_farming_breadth": {
+    "final_teams": 13,
+    "teams_with_farming_level_gt0": 10,
+    "pct": 76.9,
+    "per_team_farming_level": {"team0": 2, "team1": 1, "team2": 1, "team3": 1, "team4": 2, "team5": 1, "team7": 3, "team9": 1, "team10": 1, "team11": 1},
+    "verdict": "廣度充足(10/13=76.9%)，非「farming_level>0 寥寥」——排除 blueprint 分流(a)純 defer 到 12mo。"
+  },
+  "q2_farm_vs_forage": {
+    "farm_yield_6mo_total": 710.9,
+    "l0_forage_6mo_total": 4572.9,
+    "raw_ratio_farm_over_forage": 0.1555,
+    "farm_labor_mult_avg": 0.211,
+    "farm_labor_mult_n": 2626,
+    "projected_farm_yield_if_fully_staffed": 3369.7,
+    "projected_ratio_if_fully_staffed": 0.737,
+    "note": "farm labor_mult 平均只 0.211(1.0=需求全滿足)——farm 勞力位長期被 gather/mfg 搶走、只拿到約 21% 應得勞力配額。若 farm labor 滿飽和(mult=1.0)，farm_yield 線性外推 ≈710.9/0.211≈3369.7，届時 farm/forage 比從 0.1555 升到 ≈0.737——差距大幅收斂，不是懸殊落敗。另一結構性因素：l0_forage 完全不吃 LaborSystem 勞力池(免費 fallback 機制)，farm_yield 吃勞力池(跟 gather/mfg 同池競爭)——per-labor 這個框架本身對 l0_forage 不是良定義比較(分母=0)。"
+  },
+  "conclusion": "①廣度夠(10/13隊)→非純defer案例。②raw ratio(0.1555)看似farm慘輸forage，但根因主要是farm labor長期只拿到~21%配額(labor contention跟gather/mfg搶)，非FARM_UNIT_YIELD常數本身錯——若labor滿飽和，farm/forage比會收斂到~0.74。blueprint原分流(a)/(b)都不完全貼合這個結果：真正該查的是farm勞力位為何長期under-served(K_FARM=5.0/farming_level太高?或labor_mult分配優先序讓farm系統性墊底?)，這是第三條路，不是FARM_UNIT_YIELD本身該調高——調高FARM_UNIT_YIELD不會解決labor瓶頸，只會讓已經吃到勞力的那21%產出更多，緩解有限。"
+}

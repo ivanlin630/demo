@@ -47,3 +47,10 @@ owner: systems（HOW）← settlement design §3 + mechanism-intents「農田」
 - 季節機制完整（若 harvest_factor 佔位）=backlog。植林/軍事選址=next arc。
 
 序：R² 審此 HOW（drift 正位健全性+禁 crank+守恆+據點放大器非死曲線）→ CLEAN → 農業a plan → dispatch（base post-S2b main）→ gate → merge → 農業b → §4。地基 KEEP。
+
+## §5 ★估算器 coherence 修（blueprint 裁 2026-08-18、mandatory、打包 labor-slice）
+- **★「ROI 估算器不改」前提失效→估算器對齊新物理=必做非選項**（blueprint 裁、意圖帳鐵律「信念該追物理真形狀」）：農業a drift-正位讓物理成獨立 farm_yield 線、但 `food_flow._sustainable_inflow:46-47`+`MarginalEconomy._inflow_est` 仍算 `farming_bonus=1+farming_level×0.5`（OLD gather-boost）=信念-物理形狀分歧。
+- **更新**：估算器建模新物理（farm_yield 獨立線 + **勞力飽和因子**=labor-starved 時 ROI 誠實變低、治「投資報酬騙人」老雷）、全 self-knowledge 無 god-view（own-tile own-farming own-labor）。
+- **★打包（不分批、免中間態不一致）**：等 per-team 數據 → **一 slice 一致落地** = 三分流裁定((i)K_FARM 調/(ii)emergence defer/(iii)邊際分配改)+ 估算器 coherence 修 +（若 iii）邊際分配。**§2 農業b（據點放大器）與此獨立、可先行**。
+- ★註：§2 乘法先例引的 `farming_bonus` 亦此 stale 公式（結構型 composition 先例仍成立、但 farming_bonus 本身待此修對齊）。
+- mechanism-intents「農田/ROI 估算器」row=blueprint 補註（estimator 對齊新物理、原因入檔）。

@@ -1,0 +1,31 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-18-systems-to-measurer-perf-cut2-D-quantify.md",
+  "branch": "feat/perf-cut2-D",
+  "branch_commit": "aeee021c",
+  "baseline": "main HEAD (already includes 刀A _hex_dist static, 刀B memo stripped per perf-cut1-quantify)",
+  "bed": "scripts/debug/perf_cut2d_quantify_bed.gd (temp, reverted after use)",
+  "config": "warring_states.json",
+  "seed": 1337,
+  "days": 3,
+  "ticks": 720,
+  "terrain_distribution": {
+    "total_tiles": 631,
+    "forest": { "n": 189, "pct": 30.0 },
+    "mountain": { "n": 113, "pct": 17.9 },
+    "plains": { "n": 329, "pct": 52.1 },
+    "note": "最大 bucket(plains)佔全圖 52.1%——非「幾乎全圖」但也不小；terrain-narrow 對 plains 查詢只砍約一半掃描量，遠不如 forest/mountain 查詢受益顯著。"
+  },
+  "runs": {
+    "baseline_run1": { "wall_s": 118.49, "p1_ctx_total_us": 408128490, "p1_selection_pct": 97.7, "find_nearest_terrain_scan_calls": 509 },
+    "baseline_run2": { "wall_s": 105.24, "p1_ctx_total_us": 366024679, "p1_selection_pct": 97.5, "find_nearest_terrain_scan_calls": 509 },
+    "branch_run1":   { "wall_s": 123.92, "p1_ctx_total_us": 452003145, "p1_selection_pct": 97.6, "find_nearest_terrain_scan_calls": 510 },
+    "branch_run2":   { "wall_s": 103.61, "p1_ctx_total_us": 357218925, "p1_selection_pct": 97.5, "find_nearest_terrain_scan_calls": 510 }
+  },
+  "averages": {
+    "baseline_wall_s": 111.87, "branch_wall_s": 113.77, "wall_delta_pct": 1.7,
+    "baseline_ctx_total_us": 387076584.5, "branch_ctx_total_us": 404611035.0, "ctx_total_delta_pct": 4.5
+  },
+  "noise_floor_note": "同 seed/config/tick 數 2 跑內部即有 ~10-13% wall/ctx_total 波動（baseline run1 vs run2: 118.49s vs 105.24s = -11.2%；branch run1 vs run2: 123.92s vs 103.61s = -16.4%）——這個噪聲量級跟 baseline-vs-branch 平均差(+1.7%~+4.5%)同量級或更大，n=2 無法把 D 的效果從噪聲中分離出來。",
+  "scan_count": "509→510，D 沒有降低呼叫次數(設計上就跟刀B正交，只降單次成本非次數)，符合預期。",
+  "verdict": "GAIN 未偵測到、亦非確認退化——落在 negligible/noise-floor 這格。平均 ctx_total branch 反而略高(+4.5%)但在噪聲範圍內不算證據。terrain 分佈(plains 52.1%)支持「bucket 不夠小」假說：D 對最常見/最大的地形(plains)只砍約一半掃描量,加上 _terrain_tile_ids/tiles_by_terrain 查詢本身的間接層(Dictionary lookup + terrain==\"\"時 .keys() 陣列複製,見 finding.location_prereq_empty_terrain)可能抵銷掉這塊收益。建議 systems 參考 ticket 自訂框架:negligible→回報議,非直接 merge。"
+}

@@ -418,3 +418,11 @@ for tid in faction.member_team_ids:
 - **★優化兩道分類（每個 perf 優化必分類 + 對應驗證）**：(a) **位元級安全道**＝cache/memo/spatial-index/避重複 query/減 allocation → **不改行為、FP byte-identical 機器證（3 跑）**；(b) **行為影響道**＝降頻/deferred cascade → **時序變=指紋變=intended-change 流程**（fp 標 + 全故事審）+ **守 LOD 紅線**（§掃近隊兩-channel/nearby-scan：餵決策的鄰隊位置一律 belief last-seen 非 live god-view、遠威脅經情報網不隱形）。**分類錯（把行為影響誤當安全道 merge）=違規**（外部 agent 誤列降頻為無害已被 blueprint 修正）。
 - **★perf 禁降故事生成 fidelity（紅線）**：Team decision fidelity / message / reaction 等**故事生成機制不可為 perf 犧牲**（reaction all-far 從沒跑=故事基質已薄、perf 不得再削）。優化只碰「怎麼算得快」非「算什麼/多細」。
 - **驗證流程**：每改→full sim→Story QA **不降不取消**（過渡期分層：slice 短窗+定向 QA、arc 里程碑 full 12mo+全故事審=現行實務）；終極目標=把 full sim 壓便宜到每改全跑付得起。
+
+## resource 分類學（農業a merge 落定、守恆稽核依此）
+- **零生成**：礦/寶石（ore_*/gem）=挖完就沒、無再生無生產龍頭（守恆硬守=不可憑空生）。
+- **自然再生**：野味/藥草/野馬（食物野地池/herb/horses 野生源）=regen 率物理再生（`regenerate_tiles`）。
+- **生產類**：食物（farm_yield 農田獨立產線龍頭 + 野地採集雙源）=可有掛帳生產龍頭（`TileBank.deposit(...,"farm_yield")` chokepoint、守恆稽核含農業源）。
+- **木材採集加速**：伐木場=加快野地木材收集（非獨立生產、樹非短期可種）。
+- **鑄幣**：coin 唯一源=`_tick_mint` 礦→幣（room-capped 守恆、無其他生成）。
+- ★守恆=**可溯源非禁生成**：生產類/regen 可有掛帳龍頭（tagged reason）、零生成類硬守不可生。守恆稽核（InvariantAudit）逐源對帳。

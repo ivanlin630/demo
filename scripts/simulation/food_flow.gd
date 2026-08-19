@@ -43,5 +43,8 @@ static func _sustainable_inflow(state: WorldState, team: TeamData) -> float:
 	var pop_mult: float = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
 	var leader = state.persons.get(team.leader_id)
 	var prod_skill: float = float(leader.skills.get("生產", 0.0)) if leader != null else 0.0
-	var farming_bonus: float = 1.0 + float(tile.farming_level) * 0.5
-	return sustainable * outpost_mult * pop_mult * farming_bonus * (1.0 + prod_skill * 0.3)
+	# ★labor v2 T3：移原始 farming_bonus(1+level×0.5 乘性 boost)、改 farm_contribution=新 production 式
+	# (level×FUY×harvest×farm_labor、level 生效+勞力飽和誠實、estimator==production 同源)。感知鐵律 own-tile self。
+	var gather_inflow: float = sustainable * outpost_mult * pop_mult * (1.0 + prod_skill * 0.3)
+	var farm_contribution: float = float(tile.farming_level) * ResourceSystem.FARM_UNIT_YIELD * tile.harvest_factor * LaborSystem.farm_labor(tile)
+	return gather_inflow + farm_contribution

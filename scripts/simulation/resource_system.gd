@@ -102,7 +102,9 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 		# owner-gate：一 tile 一次（owner 隊觸發、非每共址隊重產）。⑤無 farming_level→產出 0（無田不產）。
 		# farm_yield chokepoint（TileBank.deposit 守恆稽核含農業）。感知鐵律：自家據點/勞力/糧倉 own-state。
 		if tile.farming_level > 0 and tile.outpost_owner == team.team_id:
-			var flabor: float = LaborSystem.labor_mult(tile, "farm")   # 勞力池分配給農田工位（fill×SCALE、與 gather/mfg 競爭）
+			# ★labor v2 T2 level-decouple：用 farm_labor(share/K_FARM×SCALE、level-independent 正規化)非 labor_mult
+			# (fill=share/(level×K_FARM)→level 相消)。fyield=level×FUY×harvest×farm_labor → ∝ level×alloc、發展真增產。
+			var flabor: float = LaborSystem.farm_labor(tile)
 			var fyield: float = float(tile.farming_level) * FARM_UNIT_YIELD * flabor * tile.harvest_factor * day_fraction
 			if fyield > 0.0:
 				TileBank.deposit(tile, "food", fyield, "farm_yield")
