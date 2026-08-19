@@ -41,3 +41,20 @@ owner: systems（HOW）← measurer probe-pin (b)arrival-never CONFIRMED + bluep
 - resolve 後分流（subteam vs dissolve）=既有、非本 slice。
 
 序：R² 審此 HOW（(b) 前提+trace pin approach+手不聽腦 root 非補丁）→ CLEAN → dispatch implementer（base 現 main）→ pin→根修→gate→merge。地基 KEEP。
+
+## §5 ★T2 精確化（T1 pin 後 systems 定案、2026-08-19）
+**T1 根定案**：(iii) 移動 host + belief lag/失聯（控制床 6 場景決定性：場景 D=host 移動+belief 只在委派當下→20 日零到達卡 ghost tile；A/B/C/E/F 皆真到達=(i) movement 正常、(ii) 重委派單獨不致命）。**結構根**=`TASK_JOIN` 無完成/放棄契約。
+
+**★systems 自驗（負斷言窮盡、no-head）**：`TASK_JOIN` 全樹 15 命中、含 release/timeout/clear/abort/expire **0**=確認無專屬出路。
+
+**★但既有兩塊必須納入設計（避冗餘求解器/churn 換皮）**：
+1. **既有 timeout 單源塊 `faction_ai:829-841`**（W2 TRADE：`task_start_tick` + `TRADE_TIMEOUT` + 殘距額度 `×TRADE_TIMEOUT_PER_HEX` + `Probe.bump` + `TaskArbiter.release`；A1a STATION_TASKS 同款）→ **JOIN timeout 必須寫進此塊**（`elif current_task == TASK_JOIN` 同 pattern、同 task_start_tick 單源），**非新 dispatch 站/新機制**=延伸統一。
+2. **★crisis-override 已是泛化安全網 `faction_ai:389`**（`_famine_crisis` → release、註明涵蓋 5 種 stuck-task **含「併入-pending」**）——∴「JOIN 零出路」須精確化為「**無專屬**出路；crisis-override 只在**深餓未緩**才 fire（`CRISIS_FLOOR`+`CRISIS_DAYS`+food 沒回升），非普遍出路」。JOIN timeout 觸發面（到不了/撲空、與飢餓無關）**與 crisis-override 正交、合理共存非冗餘**；但**兩者 release 後處理須一致**（見 3）。
+
+**★T2 定案（三件、按 systems 裁）**：
+- **(1) JOIN timeout**（進既有單源塊 :829-841）：`JOIN_TIMEOUT + 殘距×PER_HEX` 未 resolve → Probe + `TaskArbiter.release`。TEST VALUE 常數鏡射 TRADE 款。
+- **(2) 撲空 abort（感知鐵律 own-belief）**：committed JOIN + 已站上/已清 move_target + `BeliefSystem.belief_pos(self, social_target)==(-1,-1)`（自己的 belief 死=撲空語意、**非 god-view 查 host 真位**）→ release。
+- **(3) ★★release 後別立刻重選同 host（防 churn 換皮、implementer 提案未列、systems 必要件）**：release 後下 cadence `併入` 仍會贏、`to_task` 讀 belief 一恢復就再派同 target → **churn 只是換個路徑重演**。**復用既有 rejection-learning**（`_resolve_join:1280` 已有 `write_memory(leader,"join_rejected",host_id,tick,0.5)` + cooldown、finder 於 cooldown 內不再選此 host、語意=「這 host 此刻不可行」）→ **arrival-fail 也寫同一 memory**（拒絕/到不了語意對稱）=**零新機制**。（or 鏡射 crisis-override 的 `crisis_released_task/until` 免疫款；擇一、勿雙做。）
+- **(4) proximity-resolve 不加**（場景 E 證 belief lag 追擊仍能 resolve、非必需）=最小根修、不動 resolve 語意。
+
+**gate 補**：churn 消須驗 **release 後不重演**（同對隊 SurvivalMergeIn 反覆數歸零、非只總數降）。
