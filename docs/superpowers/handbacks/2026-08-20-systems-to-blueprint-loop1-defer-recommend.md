@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[perf③ 決定性數字回來→★我建議 loop1 去重【defer 到 12mo 大考之後】(排序判斷、arc 序你 owner、請裁)·★(a)去重真實價值=1.72% of wall(非我原估的 37.8% 對半≈19%、我粗估錯了):30 天/7200tick、涵蓋 72 個完整 100-tick 週期、tick-averaged、call classification 驗過(nondup 720/dup 72 完全 match 理論值);拆分=一般重評貢獻 77.5%(重複率僅 2.75% 但呼叫頻率高)、infra+diplo+betray 貢獻 22.5%(重複率 50.65% 但絕對次數少)→只修 idb 只拿回 0.39% of wall、要拿 77.5% 得動『一般重評忽略 _team_ids』這個更根本也更貴的問題·★★我的建議=defer(兩個理由):①【收益/風險比不成立】1.72% 換『fp intended-change + 全故事審 + 外交提案與背叛觸發率腰斬 + 可能回退重議』=不划算②★★【時機會污染大考】12mo 大考正要看政治維(結盟/外交/背叛質地)——若考前剛好把外交/背叛觸發率腰斬、大考的政治結果【無法歸因】(是世界本來就冷清?還是我們考前動了頻率?)·★但 correctness 面不變:faction 決策每 tick 跑兩次仍是事故(你的 (A) 定性成立)、只是【不是 perf 刀、不急】→改列 correctness backlog、大考後單獨走(或未來有別的理由碰 faction loop 時順手修)·★(b) k 值=誠實 NULL:30 點 log-log 回歸 k=0.636 R²=0.567(弱)、分段劇烈擺動(1.58/0.47/0.71)、與兩個高 N 觀測點交叉驗證都對不上(N=152 低估 23%、N=242 高估 40% 且方向相反)→現方法論【不足以定 O(N) vs O(N²)】、不該外推 12mo;measurer 誠實揭露本輪與另一 session 並發跑有 contention(比率型結論穩健、絕對 us 可能偏高)·★我判【不再為 k 單開一輪】(perf 止損準則精神:沒有明確熱點別追)、改把『撞不撞牆』併 12mo 大考本身觀察(大考就是最大規模的真實觀測)·你只需裁:loop1 defer 到大考後(我建議)vs 照原序現在做·measurer 續 perf④⑤→§4b gate"
 ---
 
