@@ -15301,6 +15301,11 @@ func _mk_produce_team_on(state: WorldState, pos: Vector2i) -> TeamData:
 	team.tags.append(TeamData.TAG_PRODUCE)
 	_seed_pop(team, 10)
 	var ldr := PersonData.new(); ldr.id = 8000; ldr.team_id = 800
+	# ★fixture 缺欄補齊（農業b ⑥ 暴露）：原本只設 values、沒設 skills["統領"] → effective_pop_cap 讀到 0.0
+	# → pop_cap_from_leadership(0.0)=1 ×放大器 ≈ 2 → _seed_pop(10) 立刻超額 → overflow 拆走生產人力 →
+	# 殘隊跑不動 collect/mint（[g1a] 礦村未鑄幣）。main 沒露是因舊 PRODUCE 走 leader-independent
+	# _outpost_pop_cap(L1=20)，fixture 一直隱含假設 leader-independent cap。0.5 對齊其他 fixture 慣例。
+	ldr.skills["統領"] = 0.5
 	ldr.values["貪婪"] = 0.8; ldr.values["野心"] = 0.6
 	state.persons[8000] = ldr; team.leader_id = 8000
 	state.teams[800] = team
