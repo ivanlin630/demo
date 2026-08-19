@@ -426,3 +426,10 @@ for tid in faction.member_team_ids:
 - **木材採集加速**：伐木場=加快野地木材收集（非獨立生產、樹非短期可種）。
 - **鑄幣**：coin 唯一源=`_tick_mint` 礦→幣（room-capped 守恆、無其他生成）。
 - ★守恆=**可溯源非禁生成**：生產類/regen 可有掛帳龍頭（tagged reason）、零生成類硬守不可生。守恆稽核（InvariantAudit）逐源對帳。
+
+## 決策 option 的「競爭範圍」與「承諾優先級」解耦（§4a、2026-08-20 systems 裁 + R² 護欄）
+- **兩語意本就不同、禁再綁死**：`sets`（`survival`/`passive_survival`…）=**這個 option 在哪些 rank 清單裡競爭**（`rank_survival` 只收 survival-set）；**commit priority**=**committed 後誰能打斷它**（`TaskArbiter` 階梯）。
+- **★`DecisionOptions.REGISTRY` 可用 optional `"priority"` 欄顯式覆蓋** `priority_for` 的預設推導（預設：survival-set→`PRIO_SURVIVAL` / threat 三 option→`PRIO_THREAT` / 其餘→`PRIO_DISPATCH`）。**此欄是把 threat 早已在用的顯式覆蓋模式推廣成通用**（收斂「隱式 set 推導 + 顯式 threat 清單」兩套並存語意）、**非後門**。
+- **★護欄①值域鎖死**：`priority` 只准填 `TaskArbiter` **既有具名常數**（`PRIO_COMBAT/SURVIVAL/THREAT/PLAYER/VENDETTA/DISPATCH/FACTION/AMBIENT`）、**禁裸 int**（防隨手標 `99` 繞過整個優先序階梯=真後門）。
+- **★護欄②必附 why-comment**：任何 option 使用此欄覆蓋預設，**須在 REGISTRY entry 留一行理由**（防日後有人為了讓某 option「贏」隨手蓋掉、事後看不出是刻意設計還是誤標）。
+- **首例**：`紮根`（L0→L1 工期）留 `survival` set（絕境隊也該能被 util 秤、拿掉=隱含硬門檻）但標 `PRIO_DISPATCH`——**長工期發展型動作必須能被 threat(70)/survival(80) 打斷**（`corvee_site` recovery 讓進度不歸零）。

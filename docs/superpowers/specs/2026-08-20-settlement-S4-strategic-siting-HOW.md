@@ -76,3 +76,8 @@ owner: systems（HOW）← design `2026-08-14-settlement-lifecycle-agriculture-d
 
 ### ③⑥（無需改）
 ③零新旋鈕：`MarginalEconomy._inflow_est`/`ctx.idle_labor`/`persist_strength._safe_factor`/`L0_TO_L1_CORVEE_DAYS` 皆既有、reviewer 親驗。⑥「1 人碎片蓋不如投」湧現：ETA∝人力反比 + `join_drive` 獨立高權重=兩條獨立算出、結構支持湧現、§3 gate 已列驗收項。
+
+### ★R² 快查回覆套用（2026-08-20、priority 解耦支持 + 3 要求）
+- **護欄①值域鎖死**：`priority` 欄只准 `TaskArbiter` 具名常數、**禁裸 int**。**護欄②必附 why-comment**。→ **已入 `invariants.md`（權威落點）+ 要求 REGISTRY entry 留理由行**。
+- **★§3 gate 補（empirical、非只信推理）**：「**壓境頻繁區域的紮根隊，中斷-續建循環次數 / 平均完工時長是否顯著劣化**（vs 無威脅區同款隊）」——驗 `corvee_site` recovery 在真實 threat 密度下夠不夠、不變成「開工又中斷」新 churn。（reviewer 親讀確認結構上足夠：`_tick_construction` 找不到 active_team 時**純暫停不歸零**、`settle_resume_site` 憑自己 `corvee_site` 回頭=self-knowledge；threat 側 `PRIO_THREAT self-replace` 既有黏性壓低反覆短打斷——但那是 code 推理、需量測坐實。）
+- reviewer 附帶確認：**zombie race 已在 worktree 修好**（`_commit_settle_site` 四呼點 :2586/:2894/:3038/:4828 皆 `_set_ok`/`_surv_ok` 後才 commit、`to_task` 零世界寫入）=該條收斂。
