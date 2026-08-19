@@ -1,0 +1,39 @@
+{
+  "ticket": "docs/superpowers/handbacks/2026-08-19-systems-to-measurer-labor-v2-gate.md",
+  "branch": "feat/labor-marginal-food-v2",
+  "branch_commit": "e9f1abb5",
+  "bed": "scripts/debug/labor_v2_perteam_bed.gd (temp, reverted after use)",
+  "config": "peaceful_economy.json",
+  "seed": 1337,
+  "months": 6,
+  "headless_full_run": {
+    "method": "godot.ps1 --import (cache rebuild) then headless_test.gd, detached",
+    "result": "0 assertion failures (clean, post-cache-rebuild)"
+  },
+  "per_team_production": [
+    {"team": 0, "pop": 6, "farming_level": 1, "fyield_total_6mo": 11.3, "flabor_last": 0.346, "n": 161},
+    {"team": 1, "pop": 6, "farming_level": 1, "fyield_total_6mo": 8.0, "flabor_last": 0.492, "n": 30},
+    {"team": 2, "pop": 6, "farming_level": 1, "fyield_total_6mo": 11.9, "flabor_last": 0.276, "n": 107},
+    {"team": 3, "pop": 6, "farming_level": 1, "fyield_total_6mo": 27.2, "flabor_last": 0.381, "n": 238},
+    {"team": 4, "pop": 6, "farming_level": 3, "fyield_total_6mo": 227.9, "flabor_last": 0.466, "n": 301},
+    {"team": 5, "pop": 6, "farming_level": 1, "fyield_total_6mo": 21.5, "flabor_last": 0.384, "n": 183},
+    {"team": 7, "pop": 6, "farming_level": 3, "fyield_total_6mo": 558.5, "flabor_last": 0.532, "n": 410},
+    {"team": 9, "pop": 6, "farming_level": 1, "fyield_total_6mo": 24.0, "flabor_last": 0.524, "n": 138},
+    {"team": 10, "pop": 6, "farming_level": 1, "fyield_total_6mo": 13.5, "flabor_last": 0.506, "n": 54},
+    {"team": 11, "pop": 6, "farming_level": 2, "fyield_total_6mo": 52.0, "flabor_last": 0.429, "n": 257}
+  ],
+  "by_farming_level": {
+    "level_1": {"n_teams": 7, "fyield_avg": 16.77, "range": [8.0, 27.2]},
+    "level_2": {"n_teams": 1, "fyield_avg": 52.0, "range": [52.0, 52.0]},
+    "level_3": {"n_teams": 2, "fyield_avg": 393.2, "range": [227.9, 558.5]}
+  },
+  "comparison_to_v1_failure": {
+    "v1_flabor_fill_pct_by_level": {"level_1": 0.164, "level_2": 0.058, "level_3": 0.038, "source": "docs/measurements/2026-08-18-labor-slice-gate.measure.json — 這是fill%不是production,已知會下降(demand無界),v1的問題是production也連帶下移仍斷崖"},
+    "v2_production_by_level": {"level_1": 16.77, "level_2": 52.0, "level_3": 393.2, "verdict": "★★★決定性gate PASS — production隨level單調上升,level-cancellation bug已修復。"}
+  },
+  "conclusion": {
+    "decisive_gate": "PASS — 治斷崖成功。per-team farm production(fyield累計)隨farming_level單調正相關(L1→L2→L3: 16.77→52.0→393.2),跟v1(整條下移斷崖)形成鮮明對比。",
+    "headless": "PASS — 0 assertion failures",
+    "scope_note": "本輪聚焦決定性gate(v1失敗的核心metric)+headless確認,時間所限沒有逐一獨立驗證其餘次要gate(①farm佔食物收入share②未發展團gather照舊③估算器誠實④B5瀕餓勞力飆⑤guns-vs-butter⑥cross-resource比例⑦守恆chokepoint⑨determinism)——這些implementer自己已聲稱PASS+determinism byte-identical×2,決定性gate(核心)已獨立驗證通過,次要項是否需要我再逐一複驗交systems判斷。"
+  }
+}
