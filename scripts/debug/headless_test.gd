@@ -7158,8 +7158,13 @@ func _test_resident_pop_cap_overflow() -> void:
 	state.teams[0] = t
 	var eff: int = FactionAISystem.effective_pop_cap(state, t)
 	var ps := PopulationSystem.new()
+	# ★_seed_pop 在 leader 指派前呼 → named_in=0 → 種 30 anon、之後 +leader ⇒ 實際 pop=31（population 是
+	#   computed getter，不能直接寫）。故用實測 pop_before 當基準，別假設 ==30（假設 30 會假紅/假綠）。
+	var pop_before: int = t.population
+	assert(pop_before > eff, "測前提：弱領導 pop(%d) 需 > effective(%d) 才驗得到溢出" % [pop_before, eff])
 	ps.check_overflow_for_team(state, 0)
-	assert(t.population <= eff, "PRODUCE pop 應降到 effective_pop_cap(領導×據點放大器)=%d，實際=%d" % [eff, t.population])
+	assert(t.population <= eff and t.population < pop_before,
+		"PRODUCE pop 應降到 effective_pop_cap(領導×據點放大器)=%d，實際=%d（溢出前 %d）" % [eff, t.population, pop_before])
 	# ★對照：強領導(0.9)同 L1 據點→effective 高→pop30 不溢出（好領主×好據點複合放大、⑥ 語意）
 	var s2 := WorldState.new(); s2.world = WorldData.new()
 	var tile2 := HexTileData.new(); tile2.tile_pos = Vector2i(0,0); tile2.outpost_level = 1
@@ -7169,9 +7174,12 @@ func _test_resident_pop_cap_overflow() -> void:
 	var ldr2 := PersonData.new(); ldr2.id = 100; ldr2.skills = {"統領": 0.9}; s2.persons[100] = ldr2; t2.leader_id = 100
 	s2.teams[0] = t2
 	var eff2: int = FactionAISystem.effective_pop_cap(s2, t2)
+	# 同上：基準取實測 pop_before2（=31），非寫死 30。斷言語意不變：強領導+據點 → effective 高 → pop 不溢出。
+	var pop_before2: int = t2.population
 	PopulationSystem.new().check_overflow_for_team(s2, 0)
-	assert(eff2 > eff and t2.population == 30, "強領導+據點→effective(%d)>弱(%d)、pop30 不溢出(複合放大)" % [eff2, eff])
-	print("Resident ⑥ pop_cap OK (弱剩 %d/eff %d、強留 30/eff %d)" % [t.population, eff, eff2])
+	assert(eff2 > eff and t2.population == pop_before2 and pop_before2 <= eff2,
+		"強領導+據點→effective(%d)>弱(%d)、pop%d 不溢出(複合放大)" % [eff2, eff, pop_before2])
+	print("Resident ⑥ pop_cap OK (弱 %d→%d/eff %d、強留 %d/eff %d)" % [pop_before, t.population, eff, t2.population, eff2])
 
 func _test_resident_movement_lock() -> void:
 	print("--- Resident Task4: 居民 movement 鎖定 ---")
