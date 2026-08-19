@@ -40,3 +40,22 @@ owner: systems（HOW）← 用戶裁定 2026-08-15（考古 batch1 開放問題�
 爭位/內戰/繼承正當性=**王朝 arc**（用戶明示疊加、本 slice 不做）。首都/遷都=界外。
 
 序：R² delta → CLEAN → dispatch → gate → merge。地基 KEEP。
+
+## §5 R²delta 訂正（2026-08-20、CLEAN+1 必查項）
+### ★必查項：候選存活判定必須排除「同一波死亡、尚未真 erase」的隊（dead-man-walking 繼任者 race）
+**race（reviewer 親讀 `erase_teams`:286-357 時序抓到）**：批次迴圈 `for tid in dead_list` 期間，**`state.teams` 仍完整持有全部 dead_list 隊**（真正 `teams.erase` 在迴圈之後）；`f.member_team_ids.erase(tid)`(:307) **只清當前處理的那一隊**；若**領袖隊在陣列順序上先處理**，同批死亡的隊友此刻**仍在 `member_team_ids` 且 `teams.has()` 為 true** → 候選過濾若只信 `teams.has(cid)` → **選出一個這 tick 稍後就會被同一次 `erase_teams` 清掉的「已死繼任者」**（faction 瞬間又要再走一次繼承或崩潰）。
+**★三處呼叫點全吃同款風險**（非三處彼此不相容）：codebase 本就有 `teams_pending_erase` 佇列 + `cleanup_extinct_teams` 統一收尾（`faction_ai:3484-3489` comment 明載「die-off 潮批次…結尾一次 erase_teams」）→ 一場團滅/一波飢荒同 tick 死多隊時，領袖先處理就會踩。
+**修法（零新資料結構、符合 §0）**：
+- `succeed_or_disband_faction(state, faction_id, dead_leader_tid, also_dead: Dictionary = {})`——候選過濾**同時排除 `also_dead`**。
+- **`erase_teams` 呼叫點**：傳自己函式內**已建好的 `dead` 集合**（:287-292）。
+- **`faction_ai:3482` / `npc_combat:733`**：傳**既有 `state.teams_pending_erase`**（記錄「本 tick 已判定死亡、尚未真 erase」=**正好就是要排除的集合**）。
+- **TDD 補**：同一波死亡（領袖隊 + 隊友、**領袖在順序中先處理**）→ 繼任者**不得是同批死者**（該選真正存活的第三隊；無則 disband）。
+
+### 小訂正
+§1「`leader_team_id` **無任何 reassign 路**」→ 精確化為「**運行時**無 reassign 路」（`game_setup:396` 是**開局玩家接管**路、非運行中繼承；reviewer 親 grep ~50 處命中逐一過濾，**只有該處是賦值**、其餘全是即時讀取）。
+
+### R² 對其餘 4 審點答覆（全確認我方向、無需改）
+**②bookkeeping 完整**：`FactionData` 全欄位親查，**只有 `known_member_states` 是 team-id-keyed**（我已處理）；`goals`/`goal_drivers`/`intent`/`strategy`/`relations`/`strategic_goals`/`tribute_rate`/`directive_change_tick` 全是 **faction 層級屬性**（綁「目標/意圖」非「誰執行」）→ **不需隨 leader 換人搬動**。
+**③tie-break** 修好 race 後自動成立（否則是在錯的候選池上排序）。
+**④「最強=統領」合法**（自家勢力成員 leader skill=同 faction 內部本就可見、同 `_faction_roster_pos` self-knowledge 邊界、非跨勢力偷窺）。
+**⑤無舊值快取殘留**：~50 處 `leader_team_id` 命中**全是即時讀**（`==`/`!=` 或 `state.teams.get(f.leader_team_id)` 現查）、**零快取進別欄位** → 只要該欄位本身更新正確、下游全讀到新值。
