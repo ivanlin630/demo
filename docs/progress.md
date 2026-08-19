@@ -21,6 +21,19 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## ✅ 12mo 大考 harness + §4b 擴點 MERGED（2026-08-20）
+
+**大考 harness（純觀測、零行為改動）**：`scripts/debug/exam_12mo_bed.gd`，每日一筆 JSONL 增量落檔（被 reap 也留 partial）：`day/tick`、`n_teams/n_persons/n_factions`、`tick_us_avg/max`、**六階段 `phase_us` breakdown**；監看清單一次抓齊＝`mint_level_dist`／**瞬時 `daily_rate`（非 EMA）→ zero/neg 隊數**（零產出卡死病型）／`site_memory.write` vs `applied`（§4c eviction）／`need.ewma_advance` vs budget／starve 明細／政治家族（diplo・alliance・betray）／**統領分佈 + `effective_pop_cap` 分佈**（科目 A「世界是否領導荒」具名檢查）；**同 run 併掛 `SpecimenDumpHelper`**（QA 故事稽核用）。
+- **為何一次抓齊**：perf k 值誠實 NULL 的根因是**跨 run 比較**被 CPU contention + config 差異污染；12mo 是**單一連續 run 內 N 自然成長** → 唯一能乾淨測 scaling 的機會，**漏開儀器＝重跑 12 個月**。
+- smoke（seed1337 day3）已看得出訊號：`cmd_dist` 重心壓在 **0.1–0.3**、`eff_pop_cap_dist` median **16**。
+- ★**fp 與 main byte-identical** ＝純觀測零行為變（合併後 det 交叉驗：merged fp ＝ §4b 單獨 fp `3d154f26…` **完全相同**）。
+
+**§4b 擴點（有家隊的邊際擴張）**：rebase 到含 §4c／繼承-lite／EWMA 的 main（唯一衝突＝bed add/add）、`gather` 呼點全 `advance=false`（cache 讀寫非決策評估）、D 裁定＝擴點乘 `SettlementMemory.quality_multiplier`（同一品質層、不新增 term 線）。
+- **大村 config 床 ALL PASS**（blueprint 裁 (丙)）：擴點**真 fire**／飽和區 util **0.3635→0.1148 自然降**／飽和區 **`applicable` 仍 true＝非硬 gate、只讓 util 說話**。
+- ★**field-dormant 且已被裁定接受**：標準場景 pop 卡 6、擴點門檻 pop≥12 **零次滿足**（blueprint：**村到不了飽和＝大考該記錄的事實**，非 §4b 失敗）。
+- ★**機制語意誠實揭露**：剎車來源是 util 的 **per-capita 分母**、**非家內邊際**（家內恆 `0.00`＝`_inflow_est` 的 `pop_mult` 在 pop≥20 飽和＝**抽人不痛**）→ 既有性質非本 slice 引入、屬 size-matter CASE B 家族、**考後 backlog**（blueprint 確認）。床把這條 note **印進輸出**，不只留在信裡。
+- **gate（合併結果親跑）**：constitution **PASS 75**／§4b TDD **ALL PASS(15)**／大村床 **ALL PASS**／det 兩跑 `3d154f2678a474a942d7a5d7446e8acc`／headless **0-new**。
+
 ## ✅ EWMA advance / gather 解耦 MERGED（2026-08-20）＝specimen 非中立性**根修**、大考 blocker#1 拆除
 
 **根（比 tracer bug 大一層）**：`DecisionContext.gather` **每被呼叫一次就推進一次持久 EWMA**（`decision_context:565` `need_urgency` 非冪等 + `:569` 衍生 `plan_phase`），而 gather **全站 11 caller** → **同 tick 同隊推進次數 = 走過幾條路徑、且取決於哪個選項贏**＝**main 既存缺陷**（specimen tracer 對每個候選呼 `to_task` 只是把它照出來）。R² 親驗坐實 `consistency_coeff` 回傳值**直接乘進每個 option 的 util** → `need_urgency` 是**直接改變 argmax 贏家**的乘數，不是旁支資料。
