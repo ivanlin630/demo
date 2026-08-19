@@ -329,7 +329,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _farm_pot: float = 0.4 if _site.terrain == "mountain" else 1.0   # 可農判準沿用既有慣例（山不可農、_find_unowned_farmable_tile:4750）
 		# ★§4c 反饋讀回：同一 leader 對這塊地的過往結局（失敗折價/興旺加分、線性衰減過期歸零）。
 		# 掛既有選址品質項＝不新增獨立 term 線；self-knowledge（只讀自己 leader memory）。
-		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0) 			* SettlementMemory.quality_multiplier(state, team, _site.tile_id)
+		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0) * SettlementMemory.quality_multiplier(state, team, _site.tile_id)
 		# ETA=既有工期常數 + 殘距（回工地的路程；腳下=0）。零新旋鈕。
 		var _dist: int = FactionAISystem._hex_dist(team.tile_pos, _site_pos)
 		c.settle_eta_days = float(FactionAISystem.L0_TO_L1_CORVEE_DAYS) + float(_dist)
@@ -357,7 +357,9 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 				c.expand_home_marginal = MarginalEconomy._inflow_est(_home_now) - MarginalEconomy._inflow_est(_home_after)
 			# 分點期望邊際：沿用 camp_target_est pattern（terrain=公共地理、剛建成 level1/farming0、pop=自己要派的人）
 			var _site_est := VillageEstimate.make(_cand.terrain, 1, 0, _settler)
-			c.expand_site_marginal = MarginalEconomy._inflow_est(_site_est)
+			# ★D 裁定（§4c 反饋同一品質層、不新增 term 線）：擴點選址也乘自己 leader 的選址記憶乘子
+			# （同紮根/紮營）——去過的失敗地折價、興旺地加分、線性衰減過期歸零。
+			c.expand_site_marginal = MarginalEconomy._inflow_est(_site_est) * SettlementMemory.quality_multiplier(state, team, _cand.tile_id)
 			# 建置成本：工期期間分點零產出，用既有規劃視野攤提（既有 BUILD_TICKS + PLANNING_HORIZON_DAYS，零新常數）
 			var _build_days: float = float(OutpostSystem.BUILD_TICKS["civilian"][0]) / float(WorldState.TICKS_PER_DAY)
 			c.expand_build_cost = c.expand_site_marginal 				* clampf(_build_days / MarginalEconomy.PLANNING_HORIZON_DAYS, 0.0, 1.0)
