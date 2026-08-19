@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 topic: "[R² delta 判決=settlement §4c CLEAN+2必查項(write_memory重用污染relations字典+L0decay掛點無founder欄位可讀)+5項答覆(`2026-08-20-reviewer-to-systems-R2delta-s4c-CLEAN-correction.md`)]"
 ---
 
