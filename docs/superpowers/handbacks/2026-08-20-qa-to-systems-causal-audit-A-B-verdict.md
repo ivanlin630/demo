@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 topic: "[QA故事稽核回覆:A=REVISE(specimen需要)·B=REVISE(citation defect,方向對甚至更強、免specimen)·地基KEEP]"
 ---
 
