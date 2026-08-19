@@ -21,6 +21,30 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## 📍 當前狀態（2026-08-19）——settlement lifecycle arc（S1→農業a 全 merged）+ perf arc 收官 + labor/churn 在飛
+
+### settlement lifecycle arc（12mo 期末考深根 → 鬼城/碎裂 lifecycle 修）
+溯源：12mo 期末考（誠實成績單：佔據 metric +43% 但世界不健康、深根=碎裂→non-viable 小團→貧窮陷阱）→ founding 證據包坐實（seed1337 3mo：**founding 88.9% 是 pop1-3 碎片 spam**/median 1/0% pop11+=走投無路就地紮營非殖民；**鬼城 27.8% 卡死團 id**；takeover 現況 2.6% camp 96%）。
+
+- **S1 死亡釋放+撿現成 → main（merge `94e2f826`，2026-08-15）**：①`erase_teams` 清死團 `outpost_owner=-1`（單 pass O(tiles) 配既有 dead:Dict）②`_find_unowned_farmable_tile` 前置 belief reclaim-scan（撿現成鬼城優先於新建、目標選擇讀 `team_market_known` belief=感知鐵律、抵達後既有 `_evaluate_outpost_takeover` 3 天 timer 認領）。**gate 全綠**：dead_owner **82→0**、takeover **4→40**（2.6%→27.2%、真端到端非只選靶）、不 over（check-and-set 雙層）、byte-identical、constitution 75。**硬禁 2 code 點守**（無新搶城動詞、不碰 solo_settle convert）。
+- **own_granary null-caller pin → main（merge `e210c00a`，2026-08-15、12mo 量測解封）**：根 pin（runtime trace）=`TradeValuation.reserve` 有 `state=null` DEFAULT + `_attempt_barter`(interaction:990/997) **漏傳 state** → `own_granary_tile(null)` 崩；**onset 實際 day0.8 非 day15**（推翻 teardown 假說）。fix=**補傳型根修**（呼點補傳 state、own_granary 零改=非盲 guard、byte-identical）。**12mo full horizon 0 SCRIPT ERROR**（pre-fix 數百次）=**解封 12mo 量測**（深根 pop -87.4% 現乾淨可測）。★誠實：headless 仍 7 `world Nil` 殘留（第二源未 pin、known_issues 保持 OPEN 非 resolved）。
+- **S2a L0 營地階梯 → main（merge `93d55923`，2026-08-18）**：L0=**新 `tile.camp_level` 獨立 flag**（`outpost_level` 保持 0——★窮盡驗 `outpost_level==0` 全樹 **47 站 14 檔**是「無據點」哨兵、L0 佔用會全誤判）+ **顯式納 `state_fingerprint`**（否則 L0 變化 determinism 盲點）。紮營→L0（不 set_owner=非領土、拔營無沉沒 decay→0 無廢墟）、L0 forage 低倍率單旋鈕讀腳下池（遊牧循環湧現）、L0 不入勞力池。**gate 全綠**+★interim 超預期：**pop 194→352(+81.4%)、starve 107→21(-80.4%)**、founding 253→0 徹底轉 L0、89% L0 真衰敗無廢墟。（measure-first：單 seed 3mo 鼓舞非定論。）
+- **S2b L0→L1 紮根工期 → main（merge `3d30b3ed`，2026-08-18）**：複用既有 construction spine（`_tick_construction`/`_complete_construction` crude_camp 分支）、完工清 camp_level（L0 消融進 L1 無雙態）、工期中斷用既有 busy-preemptible、viability=付不付得起工期物理湧現。★**首輪 gate RED**（corvee 啟動後卡死 10/720 ticks、`construct.stall:progress=21546:273`）→ systems 診斷根②=**persist 查 `team.tile_pos` 非工地→floor miss→無回收** → 根修=新 `corvee_site`（TeamData 自己欄=self-knowledge 非 god-view）+ persist 查 corvee_site + abandoned-recovery（循 corvee_site 回頭續建進度保留）+ orphan cleanup。**RE-GATE 全綠**：auto-fire **74×**（零 force-start）、complete **6×**（vs 前 0）、**recovery 469×** 進度保留、viability 健康分布 ticks[39...718]、dualstate=0。★constitution **75→77**（`_evaluate_l0_settle` taskarbiter+threshold=**暫時 scaffolding**、**§4 de-scaffold=blueprint 硬 gate**「拆這 2 站+回 75」同 arc 內清）。
+- **農業a 農田獨立生產線 + drift 正位 → main（merge `20a77c5c`，2026-08-18）**：★**意圖帳 drift 正位**（`mechanism-intents` 農田 row「獨立產糧不經野地池」vs code `resource_system:289 gain*=(1+farming_level×0.5)`=gather 乘數）→ 移除乘數 + 新獨立產線 `farming_level×FARM_UNIT_YIELD×farm_labor×harvest_factor` → `TileBank.deposit(...,"farm_yield")` chokepoint（owner-gate self-knowledge）+ farm_labor 接勞力池（guns-vs-butter）。**量化食物帳 gate 綠**：無 mass-starve 無爆倉、反淨改善（attrition 15.3%→9.7%、starve 10→5、ΔGRAND +317→+985）。★FARM_UNIT_YIELD=2.0 provisional（farm 未成主糧源=下游 FUY 調查起點）。
+- **resource 分類學入 invariants**（零生成 礦寶/自然再生 野味藥草/生產類 食物 farm_yield 龍頭/木材採集加速/coin 唯一源 mint）：守恆=**可溯源非禁生成**。
+
+### perf arc（用戶帶入 external agent 憲章 → Phase1 profile → Phase2 四刀 → 收官）
+**憲章入 invariants**：①優化兩道分類（**位元級安全道**=cache/memo/index/減 alloc→FP byte-identical 機器證 vs **行為影響道**=降頻/deferred→時序變=intended-change+LOD 紅線）②**禁降故事生成 fidelity**（Team decision/message/reaction 不為 perf 犧牲）③每改→full sim→Story QA 不降。
+- **Phase1 細 profile**：`GoalResolver.frontier_candidates()` 占 ctx_total **97.5%**（顛覆上輪「term 評分迴圈」推測）。
+- **刀A `_hex_dist` static → main（merge `0f58c74a`，2026-08-18）**：砍 `FactionAISystem.new()` per-call alloc、**~8-13% wall/ctx gain**、byte-identical=**arc 唯一真 gain（banked）**。
+- **刀B(call-scoped memo)/刀D(spatial index)/刀3(finder alloc sweep) 全 discard**：memo **0 命中**（509=509）、D 落噪聲（+1.7~4.3% < 同側波動 11-16%）、刀3 同落噪聲。**★止損準則觸發**（連續兩刀落噪聲→arc 收官不無限追）。
+- **★★meta 血證**：profiling 指的熱點（frontier 掃描）≠ 真可優化成本（**alloc churn**）；**每刀 quantify 定生死**（n≥2 noise-check、單跑會被機器噪聲/背景負載污染誤判）；止損救場保住真 win。未來 re-open=長局跑出新明確熱點才開。
+
+### 在飛（2026-08-19，序：churn-fix=critical path）
+- **★churn-fix（SurvivalMergeIn (b)arrival-never）=critical path**：農業b 長跑揪出 **698× SurvivalMergeIn churn**（team 暴增 49→242、per-tick 793ms=**40-70× perf degradation**）→ probe-pin 定案 **(b)arrival-never**（`join.resolve` ~10 vs commit 698=**1.4%**、joiner 從沒移動抵達 host、每 cadence 重 commit=**hand-obeys-brain 家族**、S2b corvee cousin）。investigation-slice 在跑（T1 runtime-trace pin i movement 不執行/ii cadence 重評 reset/iii 移動 host chase → T2 手不聽腦根修 persist-to-arrival）。
+- **labor-slice v2（食物真邊際分配 + farm production level-decouple + 估算器 coherence）HOLD**：FUY 調查鏈（farm 未成主糧→農田廣度 76.9% 非未發展→**farm 勞力位只拿 21%**→code-read 排除 B5-escalation 嫌疑→per-team 坐實 **level 越高 flabor 越低 0.267/0.103/0.067=結構餓死進步者**）→ v1 只改 weight-side **FAIL** → 挖出 **level-cancellation 真根**（`fyield=level×FUY×flabor`、`flabor=fill=alloc/(level×K_FARM)`→level 分子分母相消→labor-starved farm production **level-independent**）→ v2 全鏈（真邊際分配+production 解耦 `alloc×per-labor-yield`+估算器整條替換）→ **決定性 gate PASS**（production 隨 level 真升 **L3=23×L1**）+B5 保護 PASS（瀕餓 food_share +59% 真飆回）+ΔGRAND 健康。★**HOLD 原因**：controlled 同床坐實 starve **2→32(16×)** 可歸因、分解=**honest 水位主導 lag-window=0**（B5 免嫌），但 **32 含 churn 人質**（弱隊想逃生卻到不了）→ blueprint 裁 **churn-fix 先 merge → labor-v2 疊上 combined re-measure 真 honest 水位** 才 merge+記真 accepted cost（帳目紀律：接受代價要接受真代價、否則 12mo 監控基線也錯）。
+- **農業b（⑥ 據點結構放大器 pop-cap 乘法 `領導基數×(1+level×AMP+設施×AMP)`）HOLD**：pop-account **無爆**（p90=45/max=100 帽真拉高但零 runaway=⑥ 設計驗證通過）、pop-cap 自身 overflow 僅 3×（塌證據薄弱）；HOLD 因 churn 未修（merge 會把 churn-inflated baseline 寫進 main=違 closed-account）。floor 校準（cap<5 佔 5.3%）=churn 修完 re-measure 才定。
+
 ## 📍 當前狀態（2026-08-03）——logistics 甲 merged + 有大有小 arc（CASE B → 統一勞力池 merged 待 §8）
 
 ### 近期里程碑（2026-08-02~03）
