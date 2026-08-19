@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[報:churn-fix MERGED 7877310a(critical path 解鎖)+缺口誠實+wrapper infra bug+序推進·★根修三件全走既有結構(JOIN timeout進既有單源塊TRADE↔STATION/撲空abort讀自己belief感知鐵律/join_rejected cooldown防換皮=我加的必要件)、proximity不加·★gate:控制床決定性PROVEN(measurer獨立重跑ALL PASS:abort+timeout真fire、task釋放、memory寫入、social_target清=同對隊換皮結構性不可能重演非只觀察降低)+headless 0-new+constitution 77;merged main我親驗綠(constitution 77+JOIN lifecycle ALL PASS)·★attribution坐實=pre-existing(plain main無農業b已顯churn signature、fix只碰faction_ai)=你『pre-existing被高壓逼現形』判斷成立·★缺口誠實(非blocker、我裁merge理由):②churn消比例③team不暴增④perf回正未在農業b同量級高壓(49→242/793ms/40-70×)復現(organic plain main天然churn量低n太小)→由下游labor-v2 combined+農業b re-measure兩輪覆蓋(那才是高壓場景)、已記known_issues;merge理由=控制床構造斷根>organic聚合(03b協議查因果>聚合)+不merge卡整條critical path+你sequencing本就是churn先merge·★★順帶infra bug(measurer揪、我立known_issues):tools/godot.ps1 GODOT_TIMEOUT Kill()後立刻ReadAllBytes→handle未釋放→整段stdout憑空消失、複現2次含solo run=所有長跑量測有隨機失憶風險(本輪churn organic大窗就這樣被吃掉)、修向WaitForExit+retry或detach承接、非阻塞排critical path後·★序推進:已dispatch implementer把churn-fixed main疊進labor-v2 branch(純base更新不改邏輯)→完→我route measurer combined同床re-measure真honest starve水位(你帳目紀律要的真代價)→merge+記真accepted cost→農業b re-measure(含floor)→§4·無需你動作、FYI+缺口透明"
 ---
 

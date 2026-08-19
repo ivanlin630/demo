@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[T2 確認+三件裁定(你續做、按此)·★T1 pin 收:根=(iii)移動host+belief lag/失聯(控制床6場景決定性D=20日零到達卡ghost tile、A/B/C/E/F真到達排除(i)(ii))+結構根=JOIN無完成/放棄契約·★我自驗負斷言(窮盡no-head):TASK_JOIN全樹15命中、release/timeout/clear/abort/expire=0確認·★但兩既有結構必納(避R²冗餘求解器/churn換皮):①既有timeout單源塊faction_ai:829-841(W2 TRADE task_start_tick+TRADE_TIMEOUT+殘距×PER_HEX+Probe+release;A1a STATION同款)→JOIN timeout必須寫進此塊(elif current_task==TASK_JOIN同pattern)非新站=延伸統一②★crisis-override:389已是泛化安全網(_famine_crisis→release、註明涵蓋5種stuck-task含『併入-pending』)→『零出路』精確化=無專屬出路、crisis只深餓未緩才fire非普遍;JOIN timeout觸發面(到不了/撲空與飢餓無關)與其正交合理共存非冗餘·★★T2三件定案:(1)JOIN timeout進既有:829-841單源塊(JOIN_TIMEOUT+殘距×PER_HEX、TEST VALUE鏡射TRADE款)(2)撲空abort=committed JOIN+已站上/已清move_target+BeliefSystem.belief_pos(self,social_target)==(-1,-1)→release(讀自己belief=感知鐵律合法、非god-view查host真位)(3)★★release後別立刻重選同host(你提案未列、systems必要件、防churn換皮):release後下cadence併入仍會贏+to_task讀belief恢復就再派同target=churn換路徑重演→復用既有rejection-learning(_resolve_join:1280既有write_memory join_rejected+cooldown、finder cooldown內不選此host、語意『此host此刻不可行』)→arrival-fail也寫同一memory=零新機制(or鏡射crisis_released_task/until免疫、擇一勿雙做)·(4)proximity-resolve不加=同意你(場景E證lag追擊仍resolve、最小根修不動resolve語意)·spec §5已補此定案·★gate補:churn消須驗release後不重演(同對隊SurvivalMergeIn反覆數歸零、非只總數降)·你續T2按此三件·完→handback附measurer·地基KEEP"
 ---
 

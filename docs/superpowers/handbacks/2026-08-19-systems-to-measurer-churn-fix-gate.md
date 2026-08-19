@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[churn-fix bounded merge-gate(critical path、labor-v2/農業b 都等它)·feat/mergein-churn-fix b107d3b2 base main b223a862·核心HOW我硬讀diff驗全held:①JOIN timeout寫進既有單源塊(TRADE與STATION_TASKS之間elif、JOIN_TIMEOUT=6日+殘距×12h/hex鏡射TRADE款、非新站)②撲空abort讀BeliefSystem.belief_pos(state,team.team_id,social_target)==(-1,-1)=自己belief感知鐵律(非god-view查host真位)③_release_failed_join寫join_rejected memory走既有decision_context:530 finder cooldown=防churn換皮零新機制④proximity不加·T1 temp trace已移(movement零diff、production零TEMP殘留)·TDD 7/7+constitution 77+determinism byte-identical×2·★★fp==base main注意:warring 1000t內JOIN arrival-fail未觸發=該窗dormant非無效果→必用churn-rich床才量得到·★★★gate:①★release後不重演(我加的關鍵gate:同對隊SurvivalMergeIn反覆數歸零、非只總數降=分辨真修vs churn換皮)②churn消(join.resolve/commit比例回正、原1.4%)③team不暴增(原49→242+病消)④perf回正(原per-tick 793ms/40-70×degradation消)⑤committed JOIN真resolve⑥join.timeout/撲空abort probe真fire數(機制真觸發非死碼)⑦headless 0-new(implementer base對照被reap未完成→你補確認、對照known_issues:437 pre-existing集)⑧fp intended-change於churn-rich床(dormant窗byte-identical已驗)·★★attribution前置(重要):churn原在feat/agriculture-b popcap床(warring_states 3mo)顯現、你先前判『疑pre-existing、農業b弱隊放大現形、未跑main baseline坐實』→本gate請先確認churn在plain main(無農業b)重現否:重現→branch vs base main直接對照;不重現/微弱→改用churn-rich條件(疊agriculture-b or 你judgment選床)並註明=同時順帶坐實attribution(pre-existing vs 農業b放大)·跑法godot --path .worktrees/mergein-churn-fix·出.measure.json落地path·地基KEEP"
 ---
 
