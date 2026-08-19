@@ -1,0 +1,78 @@
+{
+  "ticket": "§4b bounded gate（feat/settlement-s4b @8cb9a51b，擴點option純邊際帳+overflow margin決策化）",
+  "runs": [
+    { "config": "peaceful_economy.json", "seed": 1337, "days": 45, "log": "docs/measurements/2026-08-20-s4b-organic-peaceful.log" },
+    { "config": "peaceful_economy.json", "seed": 1337, "days": 90, "log": "docs/measurements/2026-08-20-s4b-organic-peaceful-90d.log" },
+    { "config": "warring_states.json", "seed": 1337, "days": 30, "log": "docs/measurements/2026-08-20-s4b-organic-warring.log" }
+  ],
+
+  "gate5_mechanical": {
+    "constitution": { "result": "PASS", "sites": 75, "removed": 0 },
+    "headless": { "result": "0-new", "fails_matched_known_baseline": ["Team23 task=建設 order=-1 x2", "弱目標未加入攻擊goal", "own_granary null-crash(pre-existing)", "T1義氣base≠1.0(硬鎖coeff)", "[p2a] join weight太低0.41", "戰鬥中(combat_target≠-1)→197擋→不resolve", "FORCE(任rung)→ambient_train_drive 0.5", "rung擴張+武力未選擴張intent"] },
+    "determinism": { "result": "PASS", "method": "peaceful_economy seed1337 5天，跑兩次diff全stdout", "note": "唯一差異在[TickPerf]的avg_us/max_us（wall-clock計時本質非決定性，非遊戲邏輯），其餘全部byte-identical——遊戲state/決策/事件輸出確認determinism持有" }
+  },
+
+  "gate3_zero_new_constants": {
+    "verdict": "CONFIRMED via code-read",
+    "evidence": "diff中僅population_system.gd新增POP_OVERFLOW_MARGIN=1.15一個常數；expand_drive/expand_home_marginal/expand_site_marginal/expand_build_cost全部委派既有MarginalEconomy._inflow_est()+既有OutpostSystem.BUILD_TICKS+既有MarginalEconomy.PLANNING_HORIZON_DAYS，零換算係數、零新旋鈕，跟systems原diff-read結論一致"
+  },
+
+  "gate1_motive_differentiation": {
+    "verdict": "①部分確認——紮根(無家/L0)機制活著且bounded，擴點(有家)機制在測試場景中applicable gate從未滿足",
+    "settle_rooting": {
+      "peaceful_45d": { "start": 1, "resume": 11, "camp_l0": 4 },
+      "peaceful_90d": "同45d模式(未重新統計，45d已顯示bounded非runaway：11次resume/45天≈每4天一次，非spam)",
+      "warring_30d": { "start": 4, "resume": 36, "camp_l0": 22 },
+      "interpretation": "紮根(無家才建家)確認fire、且次數合理(非runaway)——start遠小於resume，代表『新起工地』少、『續建/恢復』多，符合設計預期(工期長+偶爾中斷才需要多次resume，非每次都重新起工)"
+    },
+    "expand": {
+      "all_3_runs": "s4b.expand_fire = 0（三次獨立run全部零次）",
+      "root_cause": "applicable gate要求team.population >= settler(6)*2=12；三個run(peaceful45d/peaceful90d/warring30d)裡PRODUCE隊population從未超過10（peaceful穩定卡在median=6/max=6整整90天無變化；warring day30時pop_max也只到10）",
+      "verdict": "★決定性但意外：擴點機制的applicable閘在本輪測試的3個場景/窗口內從未被滿足過，機制完全沒有機會fire。這不是bug（applicable邏輯本身經code-read+TDD驗證正確），而是population成長動態本身在這些場景/窗口內達不到擴點所需的規模門檻。"
+    }
+  },
+
+  "gate2_overflow_and_pop_cap": {
+    "peaceful_45d": { "overflow_split_mechanical_fire": 0, "pop_stuck_in_margin_band": 0, "note": "pop從未接近cap，機械保底完全沒被測到" },
+    "peaceful_90d": { "overflow_split_mechanical_fire": 0 },
+    "warring_30d": { "overflow_split_mechanical_fire": 1, "note": "機械保底確認至少fire過一次，證明safety net真的能在需要時介入(pop不會卡死在cap無出口)" },
+    "verdict": "PARTIAL——機械觸發次數低(warring 1次/peaceful 0次)符合『大部分小超額留給決策層自己解』的設計意圖方向，但因population本身很少接近cap(見gate1)，這個gate的『機械觸發→0』說法在本輪測試場景下更準確地說是『機械觸發極罕見，因為pop很少長到需要觸發的規模』——並非decision層主動接住了很多case（因為決策層的expand機制也從未fire），是兩者都沒被真正壓力測試到。pop不卡cap本身確認成立(從未觀察到population卡在cap之上出不去的情況)。"
+  },
+
+  "gate4_s4a_deferred_empirical": {
+    "item_a_starve_at_construction_site": {
+      "peaceful_45d": { "total_deaths": 20, "death_while_task_BUILD": 0, "pct": "0.0%" },
+      "warring_30d": { "total_deaths": 2, "death_while_task_BUILD": 0, "pct": "0.0%" },
+      "verdict": "PASS（在本輪樣本內）——未觀察到任何一起『餓死在工地』事件，rooting_drive的可行性帳(food_runway_days vs settle_eta_days)看起來有效阻止瀕餓隊硬撐蓋房子。樣本量偏小(peaceful 20起/warring僅2起)，屬方向性確認非窮盡證明。"
+    },
+    "item_b_threat_frequency_interrupt_resume": {
+      "peaceful_no_threat": "resume=11次/45天 = 0.244次/天/全域",
+      "warring_high_threat": "resume=36次/30天 = 1.2次/天/全域",
+      "ratio": "warring比peaceful高約4.9倍（正規化天數後）",
+      "verdict": "CONFIRMED——威脅頻繁區確實顯示明顯更高的中斷-續建循環頻率(約5倍)，符合§4a原本擔心的『壓境頻繁區中斷-續建循環』現象方向；但這本身未必是bug——中斷後能『續建』(resume)代表abandoned-corvee recovery機制在運作(隊記得自己的未完工地、回頭能接著蓋)，是S2b設計的『self-knowledge非god-view』精神展現，非死鎖。是否要進一步降低中斷頻率(如威脅暫緩/免疫窗擴大)屬blueprint平衡判斷，非本輪能單獨判定好壞。"
+    }
+  },
+
+  "named_item_saturation_brake": {
+    "verdict": "★★UNTESTABLE IN CURRENT RUNS——不是『剎車踩不住』，是『油門從未踩下去過』",
+    "a_fire_count_continuity": "N/A（expand_fire=0，無法量測連續性/spam模式）",
+    "b_pop_oscillation_near_saturation_line": "N/A（population從未接近pop=20飽和線，peaceful穩定在6、warring最高到10）",
+    "c_expanded_site_survival_rate": "N/A（0個分點被建立，無存活率可算）",
+    "diagnosis": "applicable閘 team.population >= settler(6)*2=12 在測試的3個場景/窗口內結構性不可達。這代表systems原本擔心的『飽和區(pop>=20)擴張』這個具名科目的**前提本身**(村莊pop能長到20+的saturation regime)在peaceful_economy(90天)/warring_states(30天)這兩個標準場景下都沒有出現——population穩定停在遠低於12(更遠低於20)的水位。",
+    "possible_explanations": [
+      "(1) population成長機制本身在這些config下速率很慢/有其他均衡點(peaceful 90天pop=6完全不變，看起來像穩定均衡非成長中)——需要code-read population成長來源(minor成熟/migrant/overflow-split前的自然增殖?)才能確認是config參數問題還是機制本身速率問題",
+      "(2) 可能需要專門設計的『大村economy』config(如提高初始population/降低死亡率/延長窗口到數月)才能重現具名科目描述的飽和情境——目前手上的peaceful_economy/warring_states都不是為此設計的",
+      "(3) 若這確實反映『正常遊玩中村莊很少長這麼大』，則具名科目本身的優先序可能該重新評估——飽和區擴張剎車的問題只在『村莊真的長到那麼大』時才有意義，若這種規模本來就罕見，這個議題的急迫性可能低於原本假設"
+    ],
+    "recommendation": "無法在本輪內完成具名科目要的3個子問題。建議：若blueprint仍認為這個具名科目重要，需要①先code-read/量測population成長的真實速率上限與均衡點是什麼（獨立小題，cheap）②視結果決定要不要專門設計一個『快速拉大村』config或延長窗口到3-6個月才能真正壓力測試擴點機制。本輪不擅自升級範圍，如實回報「測不到」而非勉強湊數字。"
+  },
+
+  "cleanup": {
+    "worktree": ".worktrees/settlement-s4b（保留，非temp——implementer的真feature worktree，未移除）",
+    "temp_taps_reverted": "faction_ai_system.gd(s4b.expand_fire tap)+resource_system.gd(s4b.death_task tap)——git checkout --確認乾淨",
+    "temp_bed_deleted": "scripts/debug/s4b_organic_bed.gd",
+    "compile_check": "godot --path .worktrees/settlement-s4b --headless --import 乾淨編譯"
+  },
+
+  "summary": "⑤(mechanical: constitution/headless/determinism)全PASS。③(零新常數)code-read CONFIRMED。①(motive分化)部分確認：紮根機制活著且bounded(非runaway)，但擴點機制的applicable閘在3個測試場景/窗口內從未被滿足，完全沒fire過。②(overflow機械觸發+pop不卡cap)PARTIAL：機械觸發罕見符合設計方向，但因population從未真正逼近cap，這個gate沒被真正壓力測試到。④(§4a deferred)：item(a)餓死在工地=PASS(0起觀察到，樣本偏小)；item(b)威脅頻繁區中斷續建循環=CONFIRMED存在(約5倍於無威脅區)，但屬預期內的abandoned-corvee-recovery運作證據非死鎖。★★最重要發現：具名科目(飽和區擴張自然剎車)完全UNTESTABLE——不是機制壞了，是population在測試場景下從未長到需要擴點/接近飽和線的規模，油門沒踩下去、剎車自然無從測起。這是本輪最大的懸而未決問題，建議blueprint決定優先序：先查population成長真實速率、或專門設計快速拉大村的測試config，才能真正回答這個具名科目。"
+}
