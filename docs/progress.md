@@ -64,12 +64,15 @@
 **性質**：修復疊加後的**新基線**大考，**不是**與第一次大考（2026-08-13~14）byte-comparable 的重跑——中間 settlement S1~S4/農業a-b/labor-v2/churn-fix 全是**蓄意行為改動**，正是要被大考評判的東西。
 
 ### A. 開考 blocker（綠才開）
-| # | 項 | 狀態 |
+| # | 項 | 狀態（2026-08-20 刷新） |
 |---|---|---|
-| 1 | **specimen 非中立性修**（specimen 開關改變世界軌跡→大考的 story-audit 全靠 specimen 讀故事、不修=讀到的不是被評的那個世界） | in flight（implementer） |
-| 2 | §4b 有機 gate（measurer）+ §4c gate | in flight |
-| 4 | **QA 故事稽核 EWMA 解耦後的決策動力學**（推進頻率真的變了；現有閘皆非行為因果型） | 待派（measurer 出 specimen trace → QA） |
-| 3 | 在飛 slice 全 merge 或明確排除（labor-v2/churn-fix 已 merged；§4a merged；繼承-lite dispatched） | 進行中 |
+| 1 | **specimen 非中立性修**（不修＝story-audit 讀到的不是被評的那個世界） | ✅ **MERGED**（EWMA advance/gather 解耦＝根修；oracle 1200t 零分岔、合併結果親驗） |
+| 2 | §4b 有機 gate（measurer）+ §4c gate | ✅ **完成**（§4c merged；§4b gate verdict 收＋大村床補上 field-untestable 那塊） |
+| 3 | 在飛 slice 全 merge 或明確排除 | ✅ **清空**（labor-v2／churn-fix／§4a／§4c／繼承-lite／EWMA 解耦／§4b／harness 全 merged） |
+| 4 | **QA 故事稽核 EWMA 解耦後的決策動力學**（推進頻率真的變了；merge 依據的閘全是 determinism／中立性／0-new＝**非行為因果型**） | ⏳ **唯一剩餘**：measurer 出 specimen trace → QA 讀 motive→action→outcome |
+| 5 | 大考儀器就位 | ✅ **MERGED**（`exam_12mo_bed.gd`；fp 與 main byte-identical＝純觀測） |
+
+**★非 blocker 但開考前會回來的**：measurer 的 popcap 快照（統領 0.08 是 fixture／週轉／全域）——它不擋開考，但會決定科目 A 的讀法。
 
 ### ★大考的性質（blueprint 2026-08-20 定）
 **大考是【診斷器】不是【及格考】**——科目的本職是**診斷正循環斷在哪**，不是判世界過不過。故科目判準**不改不預設**：若 12mo 撞上人口天花板，「**斷點＝領導天花板、非經濟**」**就是科目 A 的答案**（不是 A 測失敗）。
