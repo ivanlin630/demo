@@ -21,6 +21,17 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## ✅ §4c 選址反饋迴路 + 繼承-lite MERGED（2026-08-20）
+
+- **§4c 結果反饋迴路**（思考層四缺件之一、**第一條反饋邊**）：建點結局 → 寫**自己 leader** 的記憶 → 下次選址讀回。三掛點=L0 decay／主動棄村（失敗）+ 據點升級完工（興旺）；`SettlementMemory.site_bias` 線性衰減 **TTL 30 天**（非永久黑名單）、以 `quality_multiplier` **乘既有選址品質項**（紮根/紮營，**不新增 term 線**）。self-knowledge（只讀自己 leader、**禁全域黑名單**、記憶隨人不隨團）。
+  - R² 2 必查項均在 dispatch 前定案：①**禁原樣重用 `write_memory`**（它不是純 append，會無條件寫 `p.relations[subject_id]` → 傳 tile_id 會塞「跟一塊地的交情」假記錄）→ 新增薄函式 `write_site_memory`；②decay 掛點缺 founder 資料 → 加 `tile.camp_team_id`（**已進 fp**，否則 L0 歸屬變化=determinism 盲點）。
+  - **systems merge-gate 退回 2 項（已修）**：**B** `quality_multiplier` clamp 下界 `0.0`→**`0.25`**——兩次同地失敗會讓乘子=0 → 選址 util 歸零＝**絕對門檻 pre-empt 引擎**（瀕餓隊唯一去處也不能紮）＝patch-gate 病型；**C** 補 tap（`site_memory.write` vs `.applied`）——`MEMORY_MAX=20` FIFO 且與人際記憶共用 `p.memory`，site 記憶恐**未到期先被擠掉**＝反饋靜默失效，零 tap 則大考時無法判定此 slice 有沒有在運作。
+- **繼承-lite**：勢力領袖團死 → 最強成員接位（統領→pop→team_id **全序**），無成員才 `disband`（原行為）。單一 owner `WorldState.succeed_or_disband_faction`，三處死亡路徑全走它。
+  - R² 必查項＝**dead-man-walking race**（`erase_teams` 批次期間 `state.teams` 仍持全部 dead_list、領袖隊先處理則同批死者被選為繼任）→ 三處接線各傳既有死集合（`erase_teams` 傳自己的 `dead`、另兩處傳 `teams_pending_erase`），**零新資料結構**。systems merge-gate 退回 **A**：`known_member_states.erase` 移出繼承函式（`npc_combat:733` 那條路**團還活著**、抹活隊 belief）。
+  - 契約升格 → `invariants.md`〈死亡窗口（走屍隊）決策紀律〉。
+- **gate（合併結果親跑）**：constitution **PASS sites=75**、兩支 TDD **ALL PASS（9 + 15）**、implementer 側 det×3 byte-identical。fp 與訂正前相同＝a4 warring 1000t 窗內**掛點 dormant**（無 L0 decay／完工／棄村／領袖團死事件），**非沒生效**——真效果要在 12mo 大考的長窗才顯。
+- **待辦（D 裁定）**：§4b merge 後「擴點」一併乘 `quality_multiplier`（同層、不新增 term 線）。
+
 ## 🎓 12mo 大考 啟動閘（systems 立 2026-08-20、單一入口；細節散落各條，此處只收斂「能不能開考 / 開考看什麼 / 考前不准動什麼」）
 
 **性質**：修復疊加後的**新基線**大考，**不是**與第一次大考（2026-08-13~14）byte-comparable 的重跑——中間 settlement S1~S4/農業a-b/labor-v2/churn-fix 全是**蓄意行為改動**，正是要被大考評判的東西。
