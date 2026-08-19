@@ -123,6 +123,11 @@ var flee_from_pos: Vector2i = Vector2i(-1, -1)
 # ★settlement S2b：L0→L1 紮根工地位（自己起的 corvee，team 記得自己未完工程=self-knowledge 非 god-view）。
 # 啟動記=腳下 L0 位；離開覓食後憑此回頭續建（abandoned-corvee recovery）；完工/放棄清 (-1,-1)。納 state_fingerprint。
 var corvee_site: Vector2i = Vector2i(-1, -1)
+
+# ★§4b 擴點：選址評估 cadence 快取（_evaluate_new_outpost_location 是 O(tiles)，不可每次 gather 跑）。
+# 非決策狀態、不入 fingerprint（純效能快取；過期即重算）。
+var expand_eval_next_tick: int = 0
+var expand_site_cached: Vector2i = Vector2i(-1, -1)
 var last_tile_pos: Vector2i = Vector2i(-999, -999)   # 上一移動步位置（observe_velocity 用）
 var move_tick_acc: int = 0
 var combat_target: int = -1

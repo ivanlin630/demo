@@ -214,6 +214,16 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var _need_days: float = ctx.settle_eta_days * ROOTING_SAFETY_FACTOR
 			var _feasible: float = clampf(ctx.food_runway_days / maxf(_need_days, 0.001), 0.0, 1.0)
 			return _feasible * clampf(ctx.settle_site_quality, 0.0, 1.0)
+		"expand_drive":
+			# ★§4b 擴點＝純邊際帳（三項同量綱 食物/日、零換算係數、零新旋鈕）：
+			#   分點期望邊際 − 建置成本(工期零產出攤提) − 家內邊際(抽走 settler 的產能損失)。
+			#   ≤0 → 不值得擴（max(0,·)）＝anti-crank：不為了讓它 fire 而抬分。
+			#   家內邊際大（家裡人力還很值錢）→ 擴點自然輸；家內邊際小（人力過剩、farming 頂格）→ 擴點自然贏。
+			if opt != "擴點" or not ctx.can_expand:
+				return 0.0
+			var _net: float = ctx.expand_site_marginal - ctx.expand_build_cost - ctx.expand_home_marginal
+			var _daily_need: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+			return clampf(maxf(_net, 0.0) / maxf(_daily_need, 0.001), 0.0, CAMP_MARGINAL_CAP)
 		"beg_drive":
 			if opt != "乞食" or not ctx.has_aid_target: return 0.0
 			# T1：剝 hunger urgency(移 coeff)。低品質最後手段=低 band 定值。
@@ -362,6 +372,8 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"settle":            return float(v.get("義氣", 0.5)) * 0.5 + float(v.get("慎重", 0.5)) * 0.5
 		# ★§4a 紮根：人格只 MODULATE 既有價值（野心=想有自己的地盤、統領=撐得住工程、慎重=不冒進），
 		# 不另加線、不加新旋鈕（鏡射 camp weight 家族）。
+		# ★§4b 擴點：人格只 MODULATE 既有價值（野心=想擴張、慎重=怕分散），不另加線。
+		"expand":            return float(v.get("野心", 0.5)) * 0.6 			+ (1.0 - float(v.get("慎重", 0.5))) * 0.4
 		"rooting":           return float(v.get("野心", 0.5)) * 0.4 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("慎重", 0.5)) * 0.3
 		"feud":              return 0.3 + float(v.get("好戰", 0.5)) * 0.5
 		"faction_duty":      return _duty_factor(float(v.get("_loyalty", 0.5)), float(v.get("野心", 0.5)))

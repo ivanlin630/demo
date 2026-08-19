@@ -220,6 +220,28 @@ static var REGISTRY: Dictionary = {
 			var _site: Vector2i = _ctx.settle_resume_site if _ctx.settle_resume_site != Vector2i(-1, -1) else team.tile_pos
 			return {"task": TeamData.TASK_BUILD, "target": _site, "settle_site": _site},
 	},
+	"擴點": {
+		# ★§4b ②擴張動機（純邊際帳）：有家的隊開第二據點。原本 紮營 被 not has_own_outpost 擋死＝
+		#   有家隊結構性無法擴張（size-matter arc 記的 spread gap）→ 本 option 補上。
+		# applicable=只物理可行性（有家＋選址有效候選＋母隊 pop 足以派子隊[沿用 _dispatch_builder
+		#   既有規則、不新增門檻]＋非玩家）；值不值得擴全由 expand_drive 的邊際帳決定。
+		# to_task=delegate 既有路（build_type）→ _dispatch_builder：六道 guard 全在前、唯一世界寫入
+		#   在最後一行 all-or-nothing → 與 §4a 那種 to_task 副作用 race 不同類，不需額外 commit-hook。
+		"affinity": [0.1, 0.1, 0.0, 0.3, 0.5], "sets": {"ambient": true, "strategic_selfinit": true},
+		# ★commit priority（§4a invariants 契約）：擴點＝發展型動作 → @50，壓境威脅/絕境仍能打斷。
+		"priority": TaskArbiter.PRIO_DISPATCH,
+		"terms": [["expand_drive", "expand"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.can_expand,
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			var _ctx: DecisionContext = DecisionContext.gather(state, team)
+			if not _ctx.can_expand: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			var _ldr: PersonData = state.persons.get(team.leader_id)
+			var _tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_ctx.expand_pos))
+			var _type: String = FactionAISystem.new()._pick_outpost_type(state, team, _ldr, _tile)
+			return {"delegate": true, "task": TeamData.TASK_BUILD, "target": _ctx.expand_pos,
+				"build_type": _type, "settler": _ctx.expand_settler},
+	},
 	"乞食": {
 		"affinity": [0.8, 0.0, 0.2, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["beg_drive", "beg"]],

@@ -61,6 +61,15 @@ var settle_resume_site: Vector2i = Vector2i(-1, -1)   # 自己未完工地（回
 var settle_eta_days: float = 0.0             # 工期 ETA（既有工期常數 + 殘距日；ETA≫runway → util→0）
 var settle_site_quality: float = 0.0         # 腳下/工地 tile 選址品質（地力×farm 潛力，0..1）
 var food_runway_days: float = 0.0            # 自己的糧餘命（FoodFlow 快取；可行性帳分母）
+# ★§4b 擴點（②擴張動機、純邊際帳）：全部同量綱（食物/日），零換算係數。
+# 物理可行性 + 三個既有量的差分：家內邊際（人力離開的產能損失，鏡射 migrant_marginal 的差分 idiom、
+# 方向相反）／分點期望邊際（_inflow_est(候選地 est)）／建置成本（工期期間分點零產出、以既有規劃視野攤提）。
+var can_expand: bool = false
+var expand_pos: Vector2i = Vector2i(-1, -1)
+var expand_settler: int = 0                  # 擬派 settler 數（沿用 _dispatch_builder 既有 pop 規則、不新增門檻）
+var expand_site_marginal: float = 0.0        # 分點期望邊際（食物/日）
+var expand_home_marginal: float = 0.0        # 家內邊際＝抽走 settler 的產能損失（食物/日）
+var expand_build_cost: float = 0.0           # 建置成本＝工期期間分點零產出，攤在既有規劃視野上（食物/日）
 var has_aid_target: bool = false
 var aid_target_id: int = -1
 # 買糧（Phase 1）：最近市集 outpost + 是否有錢（specie）。
@@ -317,6 +326,34 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		# ETA=既有工期常數 + 殘距（回工地的路程；腳下=0）。零新旋鈕。
 		var _dist: int = FactionAISystem._hex_dist(team.tile_pos, _site_pos)
 		c.settle_eta_days = float(FactionAISystem.L0_TO_L1_CORVEE_DAYS) + float(_dist)
+	# ★§4b 擴點素材。★idle_labor 只當篩選/早退（idle 高＝值得算），★不進 util 公式本體
+	#   （手數 vs 食物/日 量綱不符、進公式會逼出換算係數＝偷藏新旋鈕）。
+	#   選址評估是 O(tiles)＝用既有 INFRA_INTERVAL cadence 快取，不每次 gather 跑。
+	if c.has_own_outpost and c.idle_labor > 0.0 			and not (team.leader_id == state.player_id and state.player_id != -1):
+		if state.world.current_tick >= team.expand_eval_next_tick:
+			team.expand_eval_next_tick = state.world.current_tick + FactionAISystem.INFRA_INTERVAL
+			var _loc: Dictionary = _fa._evaluate_new_outpost_location(state, team)
+			team.expand_site_cached = _loc.get("pos", Vector2i(-1, -1)) if not _loc.is_empty() else Vector2i(-1, -1)
+		var _cand_pos: Vector2i = team.expand_site_cached
+		var _cand: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_cand_pos)) if _cand_pos != Vector2i(-1, -1) else null
+		# settler 數＝沿用 _dispatch_builder 既有規則（level1 建造隊 6 人、母隊須 ≥2 倍）＝不新增門檻
+		var _settler: int = maxi(6, 1 * 4)
+		if _cand != null and team.population >= _settler * 2:
+			c.can_expand = true
+			c.expand_pos = _cand_pos
+			c.expand_settler = _settler
+			var _home: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
+			if _home != null:
+				# 家內邊際：鏡射 migrant_marginal 的 _inflow_est 差分（方向相反＝人力離開）
+				var _home_now := VillageEstimate.make(_home.terrain, _home.outpost_level, _home.farming_level, team.population)
+				var _home_after := VillageEstimate.make(_home.terrain, _home.outpost_level, _home.farming_level, team.population - _settler)
+				c.expand_home_marginal = MarginalEconomy._inflow_est(_home_now) - MarginalEconomy._inflow_est(_home_after)
+			# 分點期望邊際：沿用 camp_target_est pattern（terrain=公共地理、剛建成 level1/farming0、pop=自己要派的人）
+			var _site_est := VillageEstimate.make(_cand.terrain, 1, 0, _settler)
+			c.expand_site_marginal = MarginalEconomy._inflow_est(_site_est)
+			# 建置成本：工期期間分點零產出，用既有規劃視野攤提（既有 BUILD_TICKS + PLANNING_HORIZON_DAYS，零新常數）
+			var _build_days: float = float(OutpostSystem.BUILD_TICKS["civilian"][0]) / float(WorldState.TICKS_PER_DAY)
+			c.expand_build_cost = c.expand_site_marginal 				* clampf(_build_days / MarginalEconomy.PLANNING_HORIZON_DAYS, 0.0, 1.0)
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)
 	c.farmable_pos = _ft
