@@ -50,6 +50,8 @@ func _run() -> void:
 	config["seed"] = seed_v
 	GameSetup.setup(state, config)
 
+	SpecimenDumpHelper.setup_from_env(state)   # ★長跑硬規則：附 specimen trace 送 QA 故事稽核
+
 	var no_player := Vector2i(-1, -1)
 	for tick in range(ticks):
 		runner.advance_tick(state, no_player)
@@ -61,6 +63,9 @@ func _run() -> void:
 		if state.teams.is_empty():
 			print("[bed] 全滅 @tick=%d" % tick); break
 	_report(cfg_name, state, int(ticks / WorldState.TICKS_PER_DAY), out_path)
+	var spec_path: String = OS.get_environment("SPECIMEN_OUT")
+	if spec_path == "": spec_path = "docs/measurements/convoy-return-closure-%s.specimen.jsonl" % cfg_name
+	SpecimenDumpHelper.dump(state, spec_path)
 	Probe.enabled = false
 	print("=== convoy RETURN 守恆床 DONE ===")
 
@@ -111,6 +116,10 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 		int(Probe.counts.get("convoy.dispatch", 0)), int(Probe.counts.get("convoy.dispatch_attempt", 0)),
 		int(Probe.counts.get("convoy.deliver", 0)), int(Probe.counts.get("convoy.deliver_settled", 0)),
 		int(Probe.counts.get("convoy.return", 0))])
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks == "persist.hold" or ks == "convoy.rehome" or ks == "convoy.dispatch_attempt" 				or ks == "convoy.drop.inflight_convoy" or ks.begins_with("convoy.stranded"):
+			lines.append("  %-46s = %d" % [ks, int(Probe.counts[k])])
 	var fates: Dictionary = {}
 	var residual: Dictionary = {}     # fate → {res → 量}
 	var VAL_KEYS: Array = ["coin", "food", "material", "goods", "gem", "tools"]

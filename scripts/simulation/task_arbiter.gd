@@ -22,6 +22,12 @@ const PERSIST_HOLD_THRESHOLD: float = 0.1   # TEST VALUE — slice 調
 const PROGRESSIVE_HOLD_TASKS: Array = [
 	TeamData.TASK_BUILD, TeamData.TASK_CONSTRUCT, TeamData.TASK_UPGRADE,
 	TeamData.TASK_EXPAND, TeamData.TASK_SETTLE, TeamData.TASK_MIGRATE,
+	# ★convoy RETURN 收尾（HOW spec 2026-08-21 §5）：porter 是「有終點會完成」的 progressive 動作
+	# （送到→回家歸建），本來就該在列。漏列的實測代價＝送完貨的 porter 在 RETURN 途中被 routine
+	# （貿易/外交）搶班 → 漂 27.9 日才碰巧與母隊同格歸建，期間「一隊一 convoy」throttle 鎖死該領主
+	# 所有後續 deliver。★不新增優先級層：既有 hold 條件已保「危機 axis(≥PRIO_THREAT)不介入、
+	# 玩家命令不擋、同 task 不擋」→ 餓/被襲仍搶得走，不是硬鎖。
+	TeamData.TASK_CONVOY,
 ]
 
 # A1a 拆閥（spec 2026-07-07-A1a-arbiter-valve）：引擎主 rank 的 dispatch source 白名單。

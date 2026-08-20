@@ -803,6 +803,16 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		var parent: TeamData = state.teams.get(sub.parent_team_id)
 		if parent != null and parent.tile_pos == sub.tile_pos:
 			sub_sys.try_merge_back(state, sub_id)   # convoy.return telemetry 移入 try_merge_back（真 merge 點對齊 [Merge]）
+		elif parent != null and sub.task_extra_data.has("convoy_phase"):
+			# ★convoy RETURN 收尾（實測根因）：porter 回到出發時的 home_pos，但母隊【自己走掉了】→ 舊路走
+			# TaskArbiter.release ＝ 把承諾態直接丟掉（繞過仲裁，T1 的 hold 根本沒機會問），porter 變 IDLE
+			# → 下輪決策改派成 貿易/外交 → 實測漂 27.9 日才碰巧同格歸建，期間 throttle 鎖死該領主全部 deliver。
+			# 正解：不釋放，保持 CONVOY 承諾態、改追母隊【當下】位置（貨仍物理搬運，★不瞬移交割）。
+			# 追不上/追太久 → 由 T3（elapsed > MULT×ETA）判 stranded 轉獨立，不會無限追。
+			sub.task_extra_data["home_pos"] = parent.tile_pos
+			sub.move_target = parent.tile_pos
+			_stamp_return_eta(state, sub, parent.tile_pos, sub.task_extra_data)   # 重新計本段 ETA 預算
+			if Probe.enabled: Probe.bump("convoy.rehome")
 		else:
 			TaskArbiter.release(sub)
 			if parent != null:
@@ -2803,6 +2813,7 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 			xd["convoy_phase"] = "RETURN"
 			sub.move_target = home_pos   # 掉頭回家（reuse RETURN→merge_back 生命週期、避 R1 subteam-lifecycle 坑）
 			sub.task_start_tick = state.world.current_tick
+			_stamp_return_eta(state, sub, home_pos, xd)
 			return
 		# 抵達 demand 市場 → DELIVER：visitor_sell deposit cargo 入 buyer tile + settle buy 單 → fulfilled++
 		var tile: HexTileData = state.world.tiles.get(market_pos.x * 1000 + market_pos.y)
@@ -2829,8 +2840,14 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 		xd["convoy_phase"] = "RETURN"
 		sub.move_target = home_pos   # 掉頭回家
 		sub.task_start_tick = state.world.current_tick
+		_stamp_return_eta(state, sub, home_pos, xd)
 		return
 	if phase == "RETURN":
+		# ★T3 回不去 ＝ 失敗事件（執行失敗反饋鐵律）：母隊已滅／長期不可達 → 轉獨立隊
+		# （貨物留在身上＝守恆，★禁瞬移交割 §2），並 T0 喚醒它重想，不得靜默漂流。
+		if _return_is_hopeless(state, sub, xd):
+			_convoy_go_independent(state, sub, xd)
+			return
 		if sub.move_target != Vector2i(-1, -1):
 			return   # 還在回程
 		# 到家歸建 → 釋放抽出 pop（merge_back，非 settle）。convoy.return telemetry 在真 merge 點(try_merge_back)認
@@ -2839,6 +2856,52 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 		return
 	# 未知 phase 保險：歸建
 	merge_queue.append(sub.team_id)
+
+# ★T3 相對錨定（HOW spec §3：不新增絕對天數常數）：回程放棄門檻 ＝ 此倍數 × 進入 RETURN 當下的預期 ETA。
+# 3.0 ＝ 容忍繞路/擋路/被危機打斷兩次仍在路上；超過就不是「慢」而是「回不去」。
+const RETURN_ABANDON_ETA_MULT: float = 3.0
+
+# 進入 RETURN 時記下「預期回程 ETA」與起算 tick，供 T3 判「長期不可達」（相對錨定、非絕對天數）。
+func _stamp_return_eta(state: WorldState, sub: TeamData, home_pos: Vector2i, xd: Dictionary) -> void:
+	xd["return_start_tick"] = state.world.current_tick
+	xd["return_eta"] = _estimate_eta_to(state, sub, home_pos)   # 無路 → 9999999 哨兵（下方判無路）
+
+# T3 判準：①母隊不在了 ②進 RETURN 當下就無路可回 ③已耗時 > MULT × 預期 ETA。
+func _return_is_hopeless(state: WorldState, sub: TeamData, xd: Dictionary) -> bool:
+	if not state.teams.has(sub.parent_team_id):
+		xd["abandon_reason"] = "parent_gone"
+		return true
+	var eta: int = int(xd.get("return_eta", -1))
+	if eta >= 9999999:
+		xd["abandon_reason"] = "no_path"
+		return true
+	if eta <= 0:
+		return false   # 尚未戳記（舊存檔/未知路徑）→ 不判，交給正常歸建
+	var elapsed: int = state.world.current_tick - int(xd.get("return_start_tick", state.world.current_tick))
+	if float(elapsed) > RETURN_ABANDON_ETA_MULT * float(eta):
+		xd["abandon_reason"] = "timeout"
+		return true
+	return false
+
+# T3 執行：脫離母隊成獨立隊（★貨物原封不動留在身上＝守恆，不瞬移回母隊）＋ T0 喚醒重想 ＋ 清 convoy 旗標。
+# ★失敗記憶（recent_failures）本刀不寫：全樹 .gd 對 recent_failures 命中數 ＝ 0（只存在於 invariants 與
+#   失敗律 spec），該容器由「失敗反饋機制」那支 slice 落地；此處先出事件與 tap，待該 slice 接上。
+func _convoy_go_independent(state: WorldState, sub: TeamData, xd: Dictionary) -> void:
+	var reason: String = String(xd.get("abandon_reason", "unknown"))
+	var parent_id: int = sub.parent_team_id
+	xd.erase("convoy_phase")   # 不再是 convoy（避免日後被 try_merge_back 誤計 convoy.return）
+	state.detach_subteam(sub)
+	TaskArbiter.release(sub)   # 回 IDLE → 下輪自己重想（帶著貨自謀生路）
+	WorldEvents.emit(state, "convoy_stranded", [sub.team_id])   # T0 喚醒：當輪重想，不靜默漂流
+	if Probe.enabled:
+		Probe.bump("convoy.stranded")
+		Probe.bump("convoy.stranded." + reason)
+		Probe.bump_sample("convoy.stranded", {
+			"porter": sub.team_id, "parent": parent_id, "reason": reason,
+			"tick": state.world.current_tick, "eta": int(xd.get("return_eta", -1)),
+			"carrying": sub.resources.duplicate(),
+		}, 16)
+	print("[Convoy] Team%d 回不了母隊 Team%d（%s）→ 轉獨立隊，貨物留在身上" % [sub.team_id, parent_id, reason])
 
 # ★convoy DELIVER bail 分因（讀 _market_visitor_sell 的 sell_* bail 差量歸因 convoy，不改 interaction）。
 const _CONVOY_SELL_BAILS: Array = ["sell_no_surplus", "sell_owner_no_coin", "sell_no_price",
