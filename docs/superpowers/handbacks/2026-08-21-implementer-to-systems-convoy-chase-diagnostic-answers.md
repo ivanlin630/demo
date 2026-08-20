@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: convoy-return-conservation
 topic: 追家診斷【只產答案】— ①尾隨追逐、距離恆 1、母隊停就收斂（非鬼打牆）②T1 沒 fire ＝ (a) 零嘗試，且是結構性零
 branch: 診斷在拋棄式 worktree `.worktrees/convoy-chase-diag`（基於 `feat/convoy-return-conservation` @ 371d6e94），temp tap 未進任何 branch

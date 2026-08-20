@@ -47,3 +47,38 @@ hold 還有**第二個條件**：`team.persist_strength > PERSIST_HOLD_THRESHOLD
 
 ### gate 追加
 - **gate 8**：`persist.hold` 對 CONVOY **真的 fire**（porter 在 RETURN 途中被 routine 選項嘗試搶班 → 被擋、`Probe` 有值）；★**同時驗 survival 仍能搶**（gate 4 已有）。
+
+---
+
+## §6 診斷回填與帳目訂正（2026-08-21，實測後補；★這段是給未來讀者的，別讓錯誤結論留在檔面上）
+
+### ★T1 是 **inert-by-construction**，不是「有效但沒遇到情境」
+`diag.convoy_preempt_attempt` **75 天 ＝ 0**：**連一次 `try_set` 落在 `current_task == CONVOY` 的隊上都沒有**。
+根因（`file:line` 坐實）：
+- `faction_ai:761-762`：`parent_team_id != -1` → 子隊走 `_evaluate_subteam`，**完全不進 `_evaluate_solo`／`_decide_unified`**
+- `faction_ai:2753-2756`：`_evaluate_subteam` 對 `TASK_CONVOY` **直接早退**
+
+⇒ **世界上沒有任何一條路會對 CONVOY porter 呼 `try_set`**，`PROGRESSIVE_HOLD_TASKS` 自然無用武之地。
+**修前它被 `release()` 繞過（先打成 IDLE），修後根本沒人搶** —— **T1 前後都不可能 fire**。
+
+**帳目訂正（不得記為通過）**：
+- **gate 8**（`persist.hold` 對 CONVOY 真 fire）＝ **合成床（TDD）證據；live 結構上不可達**
+- **gate 4**（survival 仍可搶）＝ **同上** —— **沒人嘗試就沒得搶**。
+  ★ porter 在 CONVOY 期間**只有 reaction 層在跑**（specimen：decision **0**、reaction 10、heartbeat 10）。
+- ⇒ **27.9 → 9.2/1.3 日的改善 100% 來自 `merge_queue` 的 rehome 根因修**，T1 功勞為 **0**。
+
+**T1 仍保留**（CONVOY 本來就是 progressive task，漏列是不一致；一旦子隊將來走一般決策它就生效），
+★**但 `task_arbiter.gd` 那段註解必須訂正**——現行註解宣稱「漏列的實測代價＝被 routine 搶班」，
+**那個因果在 live 不成立**，會誤導後人以為它正在起作用。
+
+### ★T3 的兜底被它要限制的機制自己重置（**待修**）
+`_stamp_return_eta` 在**每次 rehome 都重算**（`faction_ai:814`）
+⇒ **T3 的「`elapsed > 3 × ETA` 放棄門檻」在追逐期間每次都被重置**
+⇒ **只要母隊持續移動，T3 這條兜底永遠不會觸發**。
+
+本例因母隊抵達目的地而自然收斂（尾隨追逐、**距離恆為 1、從不擴大**，母隊一停即 merge），
+但**遇到長期流亡／持續移動的母隊，追逐的唯一終點只剩「母隊停」或「母隊滅團」**。
+
+**裁定**：**放棄預算錨定在「進入 RETURN 的那一刻」，rehome 只更新路徑目標、不得重置預算**。
+（＝ 兜底要錨在**承諾開始**，不是錨在**最近一次調整**——否則任何會重算的機制都能無限延後它。）
+→ 另開 slice `convoy-return-t3-budget`（**不塞進本刀**，避免 QA 正在審的東西被移動）。
