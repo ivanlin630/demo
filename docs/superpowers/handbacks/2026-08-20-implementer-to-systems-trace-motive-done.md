@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: "[trace 動機欄 done（考前小觀測 slice）·branch feat/trace-motive-field @bc50c05b·T1 intent→strategic_intent（why/mode 一起、flush 印出兩層並列）·T2 新增「本tick動機」＝主需求層(need_urgency argmax 的 narrative_label、純讀現成)+五層層值+winner_util（直接從既有 candidates 取、★沒重算 term loop 沒重算 ctx）·T3 仍在 _begin_observe 內、零 state 寫入零 RNG·gate 全綠:specimen bed 新欄有值(decision rows 12/18 實例已附)+★specimen_neutrality_bed 7specimens/1200t 零分岔+det fp=3d154f2678a474a942d7a5d7446e8acc 與現 main byte-identical(純觀測零行為變)+constitution 75+headless 0-new]"
 branch: feat/trace-motive-field
 commit: bc50c05b
