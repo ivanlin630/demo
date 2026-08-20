@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: convoy RETURN 守恆量測 DONE — ★不是守恆破口（殘留→0），是「回家遲到 27.9 日」的生命週期債；★我 30 天窗的初判自我訂正
 branch: feat/convoy-return-conservation
 commit: 0218839b
