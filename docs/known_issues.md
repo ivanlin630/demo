@@ -125,6 +125,15 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 🚚 CONVOY porter 在運輸期間**完全沒有決策**（2026-08-21 診斷坐實，★交 blueprint 判是否 by design）
+`faction_ai:761-762` 子隊一律走 `_evaluate_subteam`；`:2753-2756` 對 `TASK_CONVOY` **直接早退** ⇒
+porter 整趟**不進任何決策路徑**。specimen 佐證（追逐窗 tick 3600–4600）：porter_12 共 20 筆 entry ＝
+**reaction 10 ＋ heartbeat 10、decision 0** `@371d6e94 2026-08-21`。
+**連帶**：`PROGRESSIVE_HOLD_TASKS` 對 CONVOY **結構上不可達**（沒人呼 `try_set` 就沒有 hold 可談），
+「survival 仍可搶」在 live **也不成立**——**沒人嘗試就沒得搶**。
+**reaction 層仍在跑**，所以 porter 不是完全無反應；但「**運輸中的隊伍該不該有決策能力**」
+（遇襲改道？瀕餓就地覓食？）是**願景層問題**，非 systems 可裁 → **已呈報 blueprint**。
+
 ### 👶★★生育 merge 後世界層級幾乎沒生效：90 天 `breed.born = 1`（2026-08-21 D1 短跑；**根因在 systems 的設計，非實作**）
 **實測** `breed.born=1 · reaction.breed=1 · n_persons 24→24 凍結（每 10 天取樣皆 24）` **@70a792b3 2026-08-21** · repro: `EXAM_CONFIG=peaceful EXAM_MONTHS=3 EXAM_SEED=1337 .\tools\godot.ps1 --headless --script scripts/debug/exam_12mo_bed.gd` （正本 `docs/process/verdicts/d1-pop-vs-cap.measure.json`）。specimen 側證：`breed.rate_sample` 顯示 `breed_progress` **有在累加**（0.001→0.084）＝**機制路徑是通的、只是極慢**。
 **★★根因（systems code-read + 算術，兩條疊乘）**：

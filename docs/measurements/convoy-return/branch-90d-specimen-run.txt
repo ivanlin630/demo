@@ -1,0 +1,16 @@
+[peaceful_economy day 90] teams=19 porters_tracked=3
+  convoy: dispatch=3 attempt=12 deliver=3 settled=3 return=3
+  convoy.dispatch_attempt                        = 12
+  convoy.drop.inflight_convoy                    = 9
+  convoy.rehome                                  = 7
+  persist.hold                                   = 15
+  下場分佈：{ "merged_home": 2, "ghost_alive": 1 }
+  ★殘留（未回母隊、還在 porter 身上）：{ "ghost_alive": { "coin": 6.37484488644468, "food": 2, "material": 0.00274752736645, "goods": 24 } }
+   porter=12 parent=5 dispatch@2400 出發帶={ "food": 17, "material": 64, "coin": 133.333333333333, "tools": 5 } ｜脫離@-1 task= phase= 身上={  } ｜結局=merged_home 現持={ "food": 3.52599863481086, "material": 0.09239388204936 }
+     ★結案 tick=4600（出發後 2200 tick = 9.2 日）
+     母隊 5：dispatch 當下={ "food": 85, "material": 266, "coin": 666.666666666667, "tools": 25 } ｜現在={ "food": 5.68150178247834, "material": 65, "coin": 756.328929511618, "goods": 3, "tools": 30 } ｜現在公庫={  }
+   porter=19 parent=7 dispatch@12600 出發帶={ "food": 7.33333333333333, "material": 50, "coin": 120, "goods": 8, "tools": 2 } ｜脫離@12900 task=idle phase=? 身上={  } ｜結局=left_convoy 現持={ "food": 2, "material": 0.00274752736645, "coin": 6.37484488644468, "goods": 24 }
+     母隊 7：dispatch 當下={ "food": 11, "material": 109.601248251815, "coin": 180, "goods": 12, "tools": 3 } ｜現在={ "material": 83.5337209989871, "coin": 429.787463000248, "goods": 15, "tools": 5 } ｜現在公庫={ "material": 0.02756481797211, "arrows": 0.70745867257368 }
+   porter=20 parent=3 dispatch@15800 出發帶={ "food": 6.26666666666667, "material": 59, "coin": 377.3049950667, "goods": 2, "tools": 11.2 } ｜脫離@-1 task= phase= 身上={  } ｜結局=merged_home 現持={ "food": 6.88365943996714, "material": 0.01705401314869, "coin": 76.0298397123427 }
+     ★結案 tick=16100（出發後 300 tick = 1.3 日）
+     母隊 3：dispatch 當下={ "food": 9.4, "material": 228.900312062954, "coin": 565.95749260005, "goods": 3, "tools": 16.8 } ｜現在={ "material": 60, "coin": 1333.56043016703, "goods": 3 } ｜現在公庫={ "material": 185.939762285763, "tools": 28, "horses": 2 }

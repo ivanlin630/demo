@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: convoy-chase-diagnostic
 tier: probe
-status: open
+status: consumed
 topic: "[派工·★診斷票不是修法票(排在 failure-feedback 之後,不急)·兩個問題一輪查完·①porter 追家是自適應還是鬼打牆:measurer 實測 convoy.rehome=7【全部集中在 porter_12 單一趟】,porter_19/20 各 0 次;我自訂的『出現 rehome>=5 的趟次就開票』判準已觸發,但樣本僅 1 趟,所以先查【是什麼樣的情境會連追 7 次】——母隊在移動什麼(遷村?戰略移動?)、每次 rehome 的距離差、追逐期間 porter 的 util 是不是一直判歸建最高·②★T1 那一行在 live 從來沒 fire 過:measurer 的 task-tagged 乾淨 tap 測得 persist.hold 對 CONVOY 可歸因=0(39 次全是建設),implementer 原估『CONVOY≈6』已判撤回;問題=為什麼沒觸發?(a)沒人嘗試搶 CONVOY 的班(那 hold 本來就無用武之地) (b)嘗試了但沒走到 hold 判斷·★禁止:不要順手『修好』它——這票只產答案不產修法;要不要加追逐上限、T1 要不要留,我拿到答案再裁"
 ---
 
