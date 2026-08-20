@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "convoy RETURN specimen故事稽核請求：血緣修驗證通過(56筆non-empty convoy_phase,team_id含母隊3/5/7+子隊12/19/20)，正本聚合verdict已寄systems"
 ---
 

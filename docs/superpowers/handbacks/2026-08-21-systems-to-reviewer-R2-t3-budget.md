@@ -2,7 +2,7 @@
 from: systems
 to: reviewer
 slice: convoy-return-t3-budget
-status: open
+status: consumed
 topic: "[R② 審設計(小 delta,本體已在 convoy spec §6)·問題:T3『elapsed > 3×ETA 就放棄』這條兜底,被 _stamp_return_eta 每次 rehome 重算(faction_ai:814)給重置 ⇒ 母隊持續移動時 T3 永不觸發=兜底被它要限制的機制自己重置·裁定:放棄預算錨在【進入 RETURN 那一刻】,rehome 只更新路徑目標不重置預算·★我要你優先打的【新失效模式】:錨死預算會不會讓『長但健康的追逐』被誤殺?——實測那趟追逐 1000 tick≈4.2 日、rehome 7 次、每次重算 ETA 74~171 不等;若錨在進 RETURN 那刻的 ETA(當時可能只算到近距離的家),3×ETA 可能【小於】一趟正常尾隨的耗時 ⇒ porter 在還會成功的情況下提前轉獨立隊、貨滯留·我想不出乾淨的替代錨(用 max(初始ETA, 當前ETA) 又等於沒錨),所以這題我沒有預設答案,要你判·★另附:T1 是 inert-by-construction(faction_ai:761-762 + :2753-2756 = 沒有任何路徑對 CONVOY porter 呼 try_set),本刀順帶訂正 task_arbiter 那段宣稱『被 routine 搶班』的誤導註解,該行本身保留"
 ---
 
