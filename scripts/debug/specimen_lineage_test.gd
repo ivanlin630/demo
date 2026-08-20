@@ -40,7 +40,11 @@ func _run() -> void:
 	SpecimenTracer.is_specimen(s, 12)
 	_ok(s.specimen_team_ids == before, "★⑥判定不寫 state（純觀測、清單未被擴寫）")
 
-	# ⑤ 環狀保護：12 ↔ 14 互為 parent（病態資料）→ 不得無限迴圈
+	# ⑤ 環狀保護：兩隊互為 parent（病態資料）→ 不得無限迴圈
+	# ★注意：必須先 reset 清黏著表——否則前面幾條已讓 12 進過範圍，黏著會【正確地】讓它的子隊也在範圍，
+	#   那樣就測不到環狀收斂（這條 FAIL 過一次，根因是測試前提被黏著改變、非 code 錯）。
+	SpecimenTracer.reset()
+	SpecimenTracer.enabled = true
 	var t14 := _mk_team(s, 14, -1)
 	t14.parent_team_id = 12
 	s.teams[12].parent_team_id = 14
@@ -51,5 +55,20 @@ func _run() -> void:
 	s.specimen_team_ids = [5]
 	_ok(not SpecimenTracer.is_specimen(s, 5) and not SpecimenTracer.is_specimen(s, 12),
 		"④enabled=false → 一律 false（零成本 gate）")
+
+	# ⑧★黏著式：進過範圍的隊，即使 parent 被清成 -1（併不完的子隊活著脫離）仍在範圍
+	SpecimenTracer.reset()
+	SpecimenTracer.enabled = true
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	_mk_team(s2, 7, -1)
+	var porter := _mk_team(s2, 19, 7)
+	s2.specimen_team_ids = [7]
+	_ok(SpecimenTracer.is_specimen(s2, 19), "⑧前：子隊在範圍（血緣）")
+	s2.detach_subteam(porter)   # ＝ _merge_into 併不完時走的那條（subteam_system:319）
+	_ok(porter.parent_team_id == -1, "⑧脫離後 parent=-1（重現根因）")
+	_ok(SpecimenTracer.is_specimen(s2, 19), "★⑧黏著：血緣斷了仍在範圍（不再靜默掉出）")
+	_ok(not SpecimenTracer.is_specimen(s2, 99), "⑧沒進過範圍的隊不會因黏著而誤入")
+	SpecimenTracer.reset()
+	_ok(not SpecimenTracer.is_specimen(s2, 19), "⑧reset 後黏著表清空（跨 run 不殘留）")
 
 	print("=== %s（fail=%d）===" % ["ALL PASS" if _fail == 0 else "HAS FAILURE", _fail])

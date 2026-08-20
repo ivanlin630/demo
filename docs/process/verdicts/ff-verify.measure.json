@@ -1,0 +1,47 @@
+{
+  "slice": "failure-feedback",
+  "ticket": "失敗反饋Phase0獨立驗證(maker側數字已有,systems要獨立數字+並排讀+suppress真假辨別)",
+  "measured_at_head": "7a12d3b1-dirty",
+  "measured_date": "2026-08-21",
+  "note": "systems票面標commit=167d6922,worktree HEAD已推進到7a12d3b1(該branch後續有其他commit累積),但獨立跑出的gate6數字跟maker原報一字不差,功能面等價；-dirty來自本輪2個L3 temp tap未commit",
+
+  "method": "同床(failure_feedback_measure_bed.gd)同seed(1337)同config(peaceful_economy)同窗(30天)跑baseline(.worktrees/convoy-baseline)vs branch(.worktrees/failure-feedback)。",
+
+  "repro": {
+    "baseline": "cd A:\\GDS\\demo\\.worktrees\\convoy-baseline; $env:GODOT_TIMEOUT='1200';$env:PERF_SEED='1337';$env:LW_CONFIG='peaceful_economy';$env:ADHOC_DAYS='30';$env:PERF_OUT='<path>'; ..\\..\\tools\\godot.ps1 --headless --script scripts/debug/failure_feedback_measure_bed.gd",
+    "branch": "cd A:\\GDS\\demo\\.worktrees\\failure-feedback;（同env）..\\..\\tools\\godot.ps1 --headless --script scripts/debug/failure_feedback_measure_bed.gd　（★需先套用本輪2個temp tap，見下方cleanup，否則無ff_probe.*輸出）"
+  },
+
+  "★gate6並排數字：全獨立確認成立": {
+    "order.placed": "baseline 357 → branch 356",
+    "order.filled": "baseline 3 → branch 3",
+    "order.abandoned": "baseline 290 → branch 290（完全沒動）",
+    "failure.recorded.order_abandoned_buy": "branch 169（baseline無此key，機制不存在）",
+    "failure.suppressed.買單": "branch 64（最深折價0.595）",
+    "decision.opt_chosen.買糧": "baseline 36 → branch 29（−19.4%，19.4%非19%，四捨五入差異）",
+    "判定": "★獨立確認maker gate6主張全部成立，並排讀結論一致：症狀(abandoned/filled)完全沒動，抑制量真實發生但作用在別的層面（掛單是機械層不經util，GATE-B填單率3/357≈0.8%/3/356≈0.84%皆未被碰到）。"
+  },
+
+  "★★systems特別要的數字：suppress的64次裡,真抑制vs抑制不存在的行為": {
+    "method_detail": "在decision_engine.gd的rank_scored_ctx()裡，於折價乘法前後各設一個temp變數，捕捉買糧折損量(discount_loss，加法可逆——boost都在折價後才加，不受混淆)。排序完scored後，用discount_loss還原『若無折價買糧的undiscounted最終分數』，跟同輪次scored裡除買糧外的最高分(best_other)比較：undiscounted>best_other→這次折價真的翻盤了argmax(若無折價買糧會贏)；否則→買糧本來就贏不了，折價沒有改變結果。",
+    "raw": {
+      "total_checked": 33,
+      "real_suppress(would_win=true,undiscounted會贏)": 24,
+      "suppress_nothing(would_win=false,undiscounted也贏不了)": 9,
+      "real_suppress_rate": "24/33 ≈ 72.7%"
+    },
+    "誠實局限": "total_checked=33，跟failure.suppressed.買單的64次總量不完全對齊——推測因為mult_for_option可能在同一tick被呼叫超過一次(不只rank_scored_ctx這條路徑)或有部分discount事件發生在non-reeval的tick(不進入我這個tap點)，33是『發生在真正argmax評選當下、且我的tap有捕捉到』的子集，不是全部64次的逐一對帳。★這個33vs64的落差本身可能值得systems追問(還有哪些call site在discount 買糧但沒被我這個tap算到)，我誠實標出不掩蓋。",
+    "判定": "★★多數(73%)的suppress事件是真抑制——沒有discount的話買糧會贏。這代表failure feedback機制的『折價確實在改變argmax結果』這個核心假設站得住，不是『tap在自我安慰』。少數(27%)case裡買糧本來就贏不了，折價是錦上添花非雪中送炭，但這不是問題——折價設計上就是連續折損，不需要每次都恰好卡在翻盤邊界才算『有效』。",
+    "team維度側面觀察(16筆cap樣本)": "team8混合出現both outcomes(5真抑制/4抑制不存在,close call)，team10/team11樣本裡100%真抑制(它們的best_other明顯偏低，代表這兩隊的其他選項本來就弱，買糧只要沒被壓就贏)——不同隊的『折價敏感度』有差異，值得注意但非本票核心。"
+  },
+
+  "landed_paths": {
+    "baseline30": "docs/measurements/ff-verify/baseline30.txt",
+    "branch30_v1_no_tap": "docs/measurements/ff-verify/branch30.txt(第一版,無suppress_check breakdown)",
+    "branch30_v2_full": "docs/measurements/ff-verify/branch30-v2.txt(★正式引用版,含suppress_check數字)"
+  },
+
+  "specimen": "本輪未產(同maker原判斷:結論是聚合帳+機制性suppress_check,非world變好變壞的behavior因果宣稱，不觸發specimen硬規則)。若systems要據此裁A1其餘四族接線方向，需要另外補specimen走QA故事稽核。",
+
+  "cleanup": "2個L3 temp tap：①decision_engine.gd rank_scored_ctx()裡的discount_loss捕捉+還原比對邏輯(約20行，純觀測不改變u的實際計算路徑，只是額外記錄+比較)②failure_feedback_measure_bed.gd印ff_probe.*+sample(純print，bed-side)。僅在worktree(.worktrees/failure-feedback)、未commit、零production行為變化，等systems確認後revert。"
+}

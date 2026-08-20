@@ -1,0 +1,36 @@
+[peaceful_economy day 30] teams=13
+--- 症狀（別單看這欄）---
+  order.placed                   = 356
+  order.filled                   = 3
+  order.abandoned                = 290
+  order.replaced                 = 0
+--- ★抑制量（並排看：症狀降但這裡飆＝大家都放棄了，不是病好了）---
+  failure.recorded.order_abandoned_buy = 169
+  failure.suppressed.買單          = 64
+  failure.pruned                 = 3
+  最深折價 = 0.595（1.0 − 乘數）
+--- 被折價的那兩個 option 的行為 ---
+  decision.opt_chosen.買糧         = 29
+  decision.opt_chosen.買料         = 0
+  decision.opt_applicable.買糧     = 52
+  decision.opt_applicable.買料     = 70
+--- ★ff_probe:買糧折價是否真的翻盤(每次suppress發生時,undiscounted是否會贏) ---
+  ff_probe.suppress_check.total  = 33
+  ff_probe.suppress_check.suppress_nothing = 9
+  ff_probe.suppress_check.real_suppress = 24
+  sample={ "team": 8, "tick": 3260, "discount_loss": 0.12008724535137, "buyfood_final": 0.48539466398329, "buyfood_undiscounted": 0.60548190933466, "best_other": 0.72201182644963, "would_win": false }
+  sample={ "team": 8, "tick": 4200, "discount_loss": 0.02845516348258, "buyfood_final": 2.1128020934326, "buyfood_undiscounted": 2.14125725691517, "best_other": 2.10777298675974, "would_win": true }
+  sample={ "team": 8, "tick": 4380, "discount_loss": 0.00876865747392, "buyfood_final": 2.73999722124318, "buyfood_undiscounted": 2.7487658787171, "best_other": 2.6915276744167, "would_win": true }
+  sample={ "team": 8, "tick": 5520, "discount_loss": 0.17564305493568, "buyfood_final": 3.41119944929744, "buyfood_undiscounted": 3.58684250423312, "best_other": 3.45476524841785, "would_win": true }
+  sample={ "team": 8, "tick": 5600, "discount_loss": 0.16414719935104, "buyfood_final": 3.31098467798188, "buyfood_undiscounted": 3.47513187733293, "best_other": 3.46870643469691, "would_win": true }
+  sample={ "team": 8, "tick": 5800, "discount_loss": 0.12533132098898, "buyfood_final": 0.80304883448496, "buyfood_undiscounted": 0.92838015547395, "best_other": 1.20006870344043, "would_win": false }
+  sample={ "team": 11, "tick": 6100, "discount_loss": 0.03271621434387, "buyfood_final": 1.41772725127037, "buyfood_undiscounted": 1.45044346561424, "best_other": 0.75520857533932, "would_win": true }
+  sample={ "team": 10, "tick": 6200, "discount_loss": 0.0326142386584, "buyfood_final": 1.10074159220084, "buyfood_undiscounted": 1.13335583085924, "best_other": 0.43108803280659, "would_win": true }
+  sample={ "team": 11, "tick": 6200, "discount_loss": 0.03385282320101, "buyfood_final": 1.8093595147412, "buyfood_undiscounted": 1.8432123379422, "best_other": 0.27791170682162, "would_win": true }
+  sample={ "team": 8, "tick": 6300, "discount_loss": 0.04856299214597, "buyfood_final": 3.07886588809853, "buyfood_undiscounted": 3.12742888024449, "best_other": 3.11535957211256, "would_win": true }
+  sample={ "team": 10, "tick": 6300, "discount_loss": 0.03379863846935, "buyfood_final": 1.60020611571372, "buyfood_undiscounted": 1.63400475418307, "best_other": 0.75705981782675, "would_win": true }
+  sample={ "team": 11, "tick": 6300, "discount_loss": 0.03368131416552, "buyfood_final": 2.22958062257145, "buyfood_undiscounted": 2.26326193673697, "best_other": 0.7587191445899, "would_win": true }
+  sample={ "team": 10, "tick": 6400, "discount_loss": 0.0337909235394, "buyfood_final": 2.09775813375349, "buyfood_undiscounted": 2.13154905729289, "best_other": 0.75861065050125, "would_win": true }
+  sample={ "team": 11, "tick": 6400, "discount_loss": 0.03247160804853, "buyfood_final": 2.64238439636319, "buyfood_undiscounted": 2.67485600441172, "best_other": 0.75995201051593, "would_win": true }
+  sample={ "team": 8, "tick": 6480, "discount_loss": 0.02069051128075, "buyfood_final": 3.43425616321519, "buyfood_undiscounted": 3.45494667449594, "best_other": 3.45993969464302, "would_win": false }
+  sample={ "team": 8, "tick": 6500, "discount_loss": 0.01771384981439, "buyfood_final": 3.44849614006117, "buyfood_undiscounted": 3.46620998987556, "best_other": 3.47249975454807, "would_win": false }

@@ -24,15 +24,28 @@ const HEARTBEAT_CADENCE: int = WorldState.TICKS_PER_DAY / 4   # TEST VALUE — 6
 # 選在【判定處】往上走 parent 鏈，而非在每個 spawn 點註冊——後者是「記得註冊」的紀律型解，
 # 枚舉會過期（同族已栽三次）。純觀測：is_specimen 只被 tracer 讀，不參與任何決策。
 const LINEAGE_MAX_DEPTH: int = 8   # 母子鏈深度上限（防環/防病態深度；現行世界最深 2 層）
+# ★黏著式範圍（2026-08-21，根因見下）：一旦進過範圍就永遠在範圍內，直到 reset()。
+# ★根因（不是猜的，是 tap 逐筆抓到的）：`SubteamSystem._merge_into` **無條件** `state.detach_subteam(absorbed)`
+#   （`subteam_system.gd:319`），但**只有 `population <= 0` 才 erase**（`:320-321`）；
+#   另一條 `capacity <= 0` 早退路徑（`:294-298`）也是 detach 後直接 return。
+#   ⇒ **併不完的子隊會【活著】但 `parent_team_id = -1`** ⇒ 血緣鏈斷 ⇒ 靜默掉出 specimen 範圍。
+#   實證：porter19 於 tick 12900 `parent 7 → -1`（task 仍是運輸）後續 36 天零 entry。
+# ★純觀測：本表是 tracer 自己的 static（**不寫 world state**、不進 fingerprint、零 RNG）。
+static var _ever_in_scope: Dictionary = {}
+
 static func is_specimen(state: WorldState, team_id: int) -> bool:
 	if not enabled:
 		return false
+	if _ever_in_scope.has(team_id):
+		return true
 	if team_id in state.specimen_team_ids:
+		_ever_in_scope[team_id] = true
 		return true
 	var cur: TeamData = state.teams.get(team_id)
 	var depth: int = 0
 	while cur != null and cur.parent_team_id != -1 and depth < LINEAGE_MAX_DEPTH:
-		if cur.parent_team_id in state.specimen_team_ids:
+		if cur.parent_team_id in state.specimen_team_ids or _ever_in_scope.has(cur.parent_team_id):
+			_ever_in_scope[team_id] = true   # 黏著：血緣斷了也追得到（見上方根因）
 			return true
 		cur = state.teams.get(cur.parent_team_id)
 		depth += 1
@@ -60,6 +73,7 @@ static func reset() -> void:
 	intent_hist.clear()
 	decision_count = 0
 	_last_entry_tick.clear()
+	_ever_in_scope.clear()   # ★黏著表隨 reset 清（跨 run 不殘留）
 
 # ── capture_options：DecisionEngine rank/rank_survival 的 scored[] tap（現丟棄，唯一拿全 util 點）──
 # scored 元素 = {u, i, opt}（decision_engine 內部格式）→ 存本決策全候選 {opt, util}。
@@ -284,6 +298,11 @@ static func _snapshot(state: WorldState, team: TeamData) -> Dictionary:
 	return {
 		"task": team.current_task,
 		"parent_team_id": team.parent_team_id,
+		# ★QA 的「追到哪裡算合理／路徑像不像回家」本質是空間問題 → 座標與目標必須在 snapshot 裡
+		"tile_pos": [team.tile_pos.x, team.tile_pos.y],
+		"move_target": [team.move_target.x, team.move_target.y],
+		# ★rehome 可見：不寫在這裡的話，specimen 看不出這是第幾次追家（寫入端在 convoy slice）
+		"rehome_n": int(_xd.get("rehome_n", 0)),
 		"convoy_phase": String(_xd.get("convoy_phase", "")) if _xd.has("convoy_phase") else "",
 		"pop": team.population,
 		"food_private": float(team.resources.get("food", 0)),

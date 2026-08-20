@@ -149,6 +149,12 @@ var ambition_cap: int = 0             # 終極野心封頂 rung
 var ambition_rung: int = 0            # 當前實際 rung（0 生存…4 稱霸）
 var ambition_eval_next_tick: int = 0
 # G1 訂單系統：權威訂單（message 為可失真傳播副本）。{order_id, kind, res, qty_remaining, expire_tick}
+# ★執行失敗反饋鐵律（用戶立法 2026-08-21）：隊層失敗記憶 `"<option>|<target>" → {tick,count,ttl}`。
+# 掛隊層【非 leader p.memory】：那條 FIFO MEMORY_MAX=20 與人際記憶共用、已知會被擠掉。
+# ★入 state_fingerprint：它直接改變下輪 argmax ＝直接因果態（同 breed_progress 前例，非可重算快取）。
+# bounded：FailureMemory.prune 讀寫時清過期項。
+var recent_failures: Dictionary = {}
+
 var active_orders: Array = []
 var order_eval_next_tick: int = 0   # 下次訂單 cadence 評估 tick
 var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）

@@ -1,0 +1,13 @@
+[peaceful_economy day 30] teams=13
+--- 症狀（別單看這欄）---
+  order.placed                   = 357
+  order.filled                   = 3
+  order.abandoned                = 290
+  order.replaced                 = 0
+--- ★抑制量（並排看：症狀降但這裡飆＝大家都放棄了，不是病好了）---
+  （無 failure.suppressed.* ＝ 折價從未生效）
+--- 被折價的那兩個 option 的行為 ---
+  decision.opt_chosen.買糧         = 36
+  decision.opt_chosen.買料         = 0
+  decision.opt_applicable.買糧     = 49
+  decision.opt_applicable.買料     = 70
