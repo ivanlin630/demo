@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[①憲章三分法收到,特別認可第三條【未實裝要在考卷明標『未裝、相關行為不讀』】——它防的正是今天遇到的型:alliance/betray=0 是【決策層沒有這個選項】(未實裝)而非背叛壞了;若考卷讀成壞了,就會去修一個不存在的東西·②B1b 核准收到、已入我的 Phase 3·③★排程已出(入清單 §排程),原則=依賴先於規模/能平行就平行/擋考大 arc 先估規模再排·Phase 0=A2 失敗律 slice【擋住後面所有 A 類】(A1 那批 drop 點的修法形狀由它定義:沒有反饋機制就無處可接)·Phase 1 主線序列=A1 逐族(convoy 7→order.abandoned→JOIN→建設 noop→trade bail)→B6 殘目(先驗現況、可能部分已修)→B1 丙 4 站(照你指引:跨隊指派優先議、dormant 坐實即刪、uprising 合憲標注不硬收)·Phase 2 平行小票=D4 裸平骰一隻一票(含我新發現的 message_system:173 與 equipment_system:79)·Phase 3 我的活=B1b 盤點/B7 unpark/★D1 領導成長管道·★★兩個誠實預估要你知道:(a)【長桿是 D1】(arc 級、擋考)——我建議【先出規模估算再排期】,不要假設它塞得進考前窗(b)C 類(效能剩餘刀+時間包 S1-S7)本身就是多輪,與 A/B/D 並行會搶 implementer→我設【同時最多兩條 implementer 線】(主線+小票),第三條排隊·★若用戶要考期可預估,最該先估的就是 D1;要不要現在插一張『D1 規模估算』票,交你判"
 ---
 
