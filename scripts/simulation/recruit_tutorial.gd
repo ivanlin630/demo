@@ -11,7 +11,7 @@ func check(state: WorldState) -> void:
 	if pt == null or float(pt.resources.get("food", 0)) < FOOD_THRESHOLD: return
 	if not state.player_forced_event.is_empty(): return
 	# 生 tutorial 流民團
-	var tid: int = _next_team_id(state)
+	var tid: int = state.consume_next_team_id()
 	var team := TeamData.new(); team.team_id = tid; team.tile_pos = pt.tile_pos
 	team.current_task = TeamData.TASK_JOIN
 	var nl := PersonData.new(); nl.id = _next_person_id(state)
@@ -26,10 +26,6 @@ func check(state: WorldState) -> void:
 	state.player_state["recruit_tutorial_fired"] = true
 	print("[Tutorial] 投奔者小隊 Team%d 求投靠玩家" % tid)
 
-func _next_team_id(state: WorldState) -> int:
-	var m: int = 0
-	for k in state.teams: m = maxi(m, int(k))
-	return m + 1
 
 func _next_person_id(state: WorldState) -> int:
 	var m: int = 0

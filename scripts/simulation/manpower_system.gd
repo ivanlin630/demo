@@ -198,7 +198,7 @@ static func _spawn_breakaway(state: WorldState, holder: TeamData, detached: Dict
 	if keep_n <= 0:
 		return
 	var nt := TeamData.new()
-	nt.team_id = _next_team_id(state)
+	nt.team_id = state.consume_next_team_id()
 	nt.tile_pos = holder.tile_pos
 	state.set_team_faction(nt, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
 	state.set_team_tags(nt, [TeamData.TAG_EXILE], "captive_breakaway")
@@ -225,12 +225,6 @@ static func _spawn_breakaway(state: WorldState, holder: TeamData, detached: Dict
 		return
 	state.create_team(nt)   # S9 chokepoint：註冊 + known/discovered init
 
-static func _next_team_id(state: WorldState) -> int:
-	var max_id: int = 0
-	for tid in state.teams:
-		if tid > max_id:
-			max_id = tid
-	return max_id + 1
 
 # ───── guard-cap：captive_cap = guard_n × GUARD_CAP_MULT，超限強制處置超額（逼決策別囤）─────
 # means-end：殘忍 leader → 苛用（部分戰損處置）；否則 → 釋放（全數保留成流民）。守恆：走既有 detach/breakaway 路由。

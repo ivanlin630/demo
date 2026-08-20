@@ -58,6 +58,13 @@ var _next_faction_id: int = 0
 # beast pseudo-team id counter（負區段，避開正常 team id）。★per-world（非 BeastSystem instance var，
 # 亦禁 static var）：每 world fresh init → per-seed 決定性 + 每 beast 唯一遞減 id。舊 instance var 令每
 # BeastSystem.new() 重置 -1000000 → 全 beast 撞同 id → create_team 靜默覆寫（beast id 碰撞 bug）。
+# ★team id 單一分配器（slice monotonic-team-id 2026-08-21）：★永不重用。
+# 修前全站有 7 份獨立的 `_next_team_id`＝`max(現存 id)+1` ⇒ 最高 id 的隊一死，下一個子隊就撿回同一號碼
+# ⇒ specimen／量測床／QA 都拿 team_id 當身分 ⇒ 兩條命被縫成一條假故事（實測 team12：命1 2400→4600、
+#   空白 4600–7300、命2 7300 起，max_gap 2740 與空白完全吻合）。
+# ★收斂成【一個動作】而非「七處各讀同一計數器」——後者只是把「重用 id」換成「七個物理上分開的計數概念」。
+var next_team_id: int = 0
+
 var next_beast_id: int = -1000000
 var player_id: int = -1
 var specimen_team_ids: Array[int] = []   # 指標團：LOD-exempt + SpecimenTracer 詳捕決策（觀測 only，debug/seed 設）
@@ -146,6 +153,18 @@ func _rebuild_owner_outpost() -> void:
 			_oo_map[t.outpost_owner] = tile_id
 	_oo_epoch = OwnerOutpostIndex.epoch
 	if Probe.enabled: Probe.bump("owner_outpost.rebuild")
+
+# ★唯一出生口：配一個新 team id（單調遞增、永不重用）。
+# 防禦性 floor：若 state 裡已存在 >= 計數器的 id（例如未來的存檔載入忘了同步），
+# 這裡把計數器抬過去並【留下 tap】——寧可看得見地自我修復，也不要靜默撞號。
+func consume_next_team_id() -> int:
+	for tid in teams:
+		if int(tid) >= next_team_id and int(tid) >= 0:
+			next_team_id = int(tid) + 1
+			if Probe.enabled: Probe.bump("teamid.floor_bump")
+	var id: int = next_team_id
+	next_team_id += 1
+	return id
 
 func create_faction(leader_team_id: int) -> int:
 	if not teams.has(leader_team_id):

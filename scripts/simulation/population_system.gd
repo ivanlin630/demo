@@ -55,7 +55,7 @@ func check_overflow_for_team(state: WorldState, tid: int) -> void:
 
 func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: int) -> void:
 	var ot := TeamData.new()
-	ot.team_id      = _next_team_id(state)
+	ot.team_id      = state.consume_next_team_id()
 	ot.tile_pos     = origin.tile_pos
 	state.set_team_faction(ot, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
 	state.set_team_tags(ot, ["流亡"], "overflow_split")
@@ -75,9 +75,3 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 	print("[PopMgmt] Team%d 超額 %d 人無 advisor，獨立流亡 Team%d" % [
 		origin.team_id, overflow_pop, ot.team_id])
 
-func _next_team_id(state: WorldState) -> int:
-	var max_id: int = -1
-	for tid in state.teams:
-		if tid > max_id:
-			max_id = tid
-	return max_id + 1
