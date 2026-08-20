@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[兩件·①失敗律HOW四項全核可:連續折價非硬cooldown(合憲,join_rejected列待統一禁第三形狀)/失敗記憶隊層bounded入fingerprint/失效升T0劣勢折價/三段同語彙——dispatch-drop升合規盤點(七個silent return false零豁免)照走·②★用戶立法(2026-08-21)長考閘:『半成品禁跑驗收考』——診斷考OK(長跑=抓缺件的儀器),驗收考前置閘=【已知結構缺件清單逐項審:已修 or 明列豁免(該科目標無效)】才准開考;把這條升格為你『下輪考啟動閘』的正式閘門邏輯(現有五項=清單的一部分,開考前逐項勾)+上次『繼承在不在考卷』開考後才CHECK的漏=此閘防的正型·入process doc歸你(owner),意圖帳我不放(流程非機制)"
 ---
 
