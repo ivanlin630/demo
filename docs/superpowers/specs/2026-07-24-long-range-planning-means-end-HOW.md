@@ -1,5 +1,7 @@
 # 長程計畫 / means-end 決策系統 — HOW 架構 spec（systems 2026-07-24）
 
+★STALE:arc 未開工且 code 現況引用已過期;開工時重寫,勿依此實作。
+
 > **對應 WHAT 設計**：`docs/superpowers/specs/2026-07-24-long-range-planning-means-end-design.md`（scope B 四塊+5 前置+湧現順序+折現，願景本體 blueprint 確認不變）。
 > **premise（R① 異質框外審 CONTRADICTION 更正後）**：**全建中等新子系統**，接既有 `rank_scored` 湧現本體（唯一真複用的薄薄一塊）。其餘四塊真新增（options.gd 是 ~25 靜態手寫 entry 非動態生成、NeedOracle chaining 硬 scope 只覆蓋資源型、無持久 goal state、委派非真 option、折現零 scaffolding）。
 > **紀律**：whole-system-first（用戶原則②：整個建完當 whole 才 measure，別邊建邊 patch）；憲法（utility 餵 utility / 人格 WEIGH 不 GATE / 加 goal=加資料）；有界（淺/local applicable/無 plan-state）；決定性（resolver 禁耗 global RNG，同 [[feedback_observer_no_global_rng]]）。

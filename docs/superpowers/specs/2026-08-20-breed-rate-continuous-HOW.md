@@ -4,11 +4,8 @@ date: 2026-08-20 ／ owner: systems ／ 用戶拍板 **(乙) 強化版**（bluep
 狀態：待 R② → dispatch。**intended-change + tuning 流程**。
 ★**時間側 HOLD 遵守**：本 spec **不新增任何 cadence/interval/時長常數**，也不改既有時間錨；速率以「**每人每日**」表達、乘既有 elapsed 量。
 
-## §1 前提（實測 + file:line）
-- 現況 `reaction_system:197-215`：`surplus = t.food_flow_avg > BREED_FLOW_MIN(1.2)` **硬門檻** → 過了才 `randf() < chance`（`chance = (0.15 + 醫療×0.1) × balance`）＝**懸崖 + 抽獎**。
-- **funnel 實測（evidence-only 輪）**：`surplus` 攔截 **97.3%（warring）／94.1%（peaceful）**＝壓倒性主閘；`safe` 0、`fed` 0.4–8%、`minor<cap` 8–13%、單性 balance 5.6–6.4%、`team_no_person` 0。
-- ★**尺度依賴**：`food_flow_avg` 是 **team 級絕對值**（`resource_system:236-243`），非 per-capita → pop3 需 +1.2/日（每人 0.4）、pop30 亦僅需 +1.2（每人 0.04）＝**大團容易 10 倍**；而世界多數團 pop 3–6、57–62% 淨流為負 → **小村近乎全域封鎖**。
-- 大考坐實：`reaction.breed` **整 12 個月 0 次**；觀測到的人口成長全是 world-gen minor 存量出清。
+## §1 前提（動機摘要）
+舊制 team 級絕對門檻 1.2:surplus 閘攔 97.3%/94.1%(exam funnel)→改 per-capita 連續;公式細節以 code 為準(reaction_system)。
 
 ## §2 設計（用戶裁定的形狀）
 **生育率 ＝ 連續函數 of「相對盈餘」**，瀕餓≈0 → 溫飽少 → 盈餘多，**無懸崖、無抽獎**。

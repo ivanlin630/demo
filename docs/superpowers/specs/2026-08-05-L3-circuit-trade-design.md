@@ -3,6 +3,7 @@
 status: LOCKED（R① CLEAN 2026-08-05 + P2/P3 訂正已納：真缺口=既有 fallback 路太 naive 非「無此路」）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-05
+★LOCKED 未排程(backlog)。
 溯源：§5 三層 root 之 L3（隔格跨勢力貿易死:賣方從不讀外市集板）；資訊網補完批。
 
 ## 動機

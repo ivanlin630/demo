@@ -2,6 +2,7 @@
 
 status: DRAFT（2026-08-13 blueprint 初稿、待用戶過目 → 再 R②）
 owner: blueprint（WHAT）
+★DRAFT 待用戶過目;與 2026-08-21 長考閘職能重疊待釐清。
 溯源：③ 長期故事驗證 audit 暴露流程級缺口——有 code invariants、無「健康世界」量化參照系，每輪 audit 在 genuine-vs-bug 打轉無尺可量。用戶要求根本層視角後補。
 
 ## §0 命門

@@ -4,7 +4,7 @@
 > 來源：QA 抓 6 隊（62/71/73/79/84/90）→ systems code-locate → measurer trace CONFIRMED。root=`faction_ai:1727`。known_issues「subteam-idle-latch」。[[手不聽腦 mini-arc]] 第 3 種。
 
 ## 病象（measurer 坐實 @9a915fe7）
-6 隊 `food-ok 2.5-4.58 + committed=覓食 + would_succeed=true 卻 task=idle，reason=subteam`。team73 血證：停 forage tile (26,9)，parent (25,6)，每 ~100-200t 抵達即被召回。drop 計數 **ARRIVE_MERGEQ 337 ≈ LOOP2B_RELEASE 346（1:1 振盪指紋）**。
+6 隊 `food-ok 2.5-4.58 + committed=覓食 + would_succeed=true 卻 task=idle，reason=subteam`。血證:337/346 振盪指紋(原始 log 見 docs/measurements)。
 
 ## root（補丁閘坐實）
 `_evaluate_subteam`（`faction_ai_system.gd:1727`）：

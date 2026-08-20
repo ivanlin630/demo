@@ -2,6 +2,7 @@
 
 date: 2026-08-20 ／ owner: systems ／ 溯源：measurer breed 分解意外發現 → systems 親驗 → blueprint 裁「LOD＝解析度非存在」
 狀態：待 ①blueprint 一行裁（§6 的 (甲)）＋ ②R² → dispatch。**大考 HALT 至本修 merge**。
+★SUPERSEDED(2026-08-21):near/far 分班+率補償機制已由「事件比例計算」新法取代(見 2026-08-20-event-proportional-compute-HOW);本檔=歷史紀錄勿依此操作。
 
 ## §1 前提（file:line、範圍已自糾）
 - `sim_runner` SYSTEMS：`reactions`(`:156`)／`cleanup`(`:157`) ＝ `lod=LOD_NEAR` **且 `shape="teams"`**。

@@ -4,6 +4,7 @@ status: DRAFT → reviewer R²
 owner: systems（HOW）；WHAT=`2026-08-05-L3-circuit-trade-design.md`（blueprint LOCKED、R① CLEAN）
 date: 2026-08-05
 branch: 新 slice `feat/L3-circuit-trade`（off 更新後 main，含核心 arc merge）
+★DRAFT 未 dispatch,branch 註記已 stale。
 
 ## 目標（承 WHAT）
 讓「去外市集看看」成為 genuine 決策 → 遠距跨勢力商路湧現。**升級既有 fallback 路、非蓋平行機制**（R① HOW 約束）。

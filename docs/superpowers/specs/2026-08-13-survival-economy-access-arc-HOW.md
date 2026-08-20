@@ -2,6 +2,7 @@
 
 status: DRAFT→R²（2026-08-13）
 owner: systems（HOW）← design `2026-08-13-survival-economy-access-arc-design.md`（blueprint WHAT、R² CLEAN）
+★大部已 merge(A1/A2/crisis-lock 結論入 game-design);本檔留殘項參照。
 build-unblock: ★主樹編譯 OK（faction_ai:2490 temp-diag 已 revert、無 distance_to、perf bed 本 session 跑過）=blueprint 顧慮的 compile blocker **已清**。
 
 ## §0 接點圖 + 命門（HOW 守）

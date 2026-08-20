@@ -1,5 +1,7 @@
 # 持守統一（Persistence Unification）— WHAT 設計（藍圖×用戶 brainstorm 2026-07-26）
 
+★PARK(checklist B7);23 散落機制盤點以 code 為準。
+
 > **定位**：WHAT/願景設計（behavior/model/scope），非 HOW 架構 spec。定案後交 systems 做 HOW（架構 spec + plan + slice）。
 > **起源**：means-end 建完後，A1 施工卡在執行端；深挖發現「committed 卻落跑」是貫穿全專案的 recurring 家族（手不聽腦）。用戶點破：**「手（執行持守）統一是統一矩陣的一個維度，沒做＝系統不健康」**。盤點坐實現有 23 個散落持守機制（`docs/superpowers/2026-07-26-commitment-persistence-inventory.md`）。這是**腦（決策 means-end）已統一、但「持守」從沒被統一收過**的補課。
 > **★重要區分（用戶釐清）**：決策層統一的是「**選**」（一個 rank 引擎）；「**持守**」（多堅持 committed 動作）是**橫跨決策層+執行層、兩層都散拼的另一個關注點**——本 arc 收的是它。

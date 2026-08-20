@@ -3,6 +3,7 @@
 status: WORKING(用戶要求「時間定案前先討論所有東西的頻率」;本檔=code 全掃描原始表,value 以 code 為準)
 owner: blueprint(討論素材);審計執行時歸 systems HOW
 來源: Explore agent 全掃 scripts/(45 tool calls);基準 1 tick=6min/240=1天
+★本檔=舊法快照(2026-08-20 掃描當時值);WORLD_SPEED_MULT/近遠分班/收成 6h 重擲等已由 time-reanchor spec+背景律取代;審計以 debug/time_const_check.gd 為準。
 
 ## 設計層總覽(遊戲時間)
 

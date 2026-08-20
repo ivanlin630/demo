@@ -1,5 +1,7 @@
 # 乙 規模動態 — 整併 util boost（de-patch util-starvation）HOW spec（2026-08-01）
 
+★已 merge;隊數收斂後續=效能 arc 五刀之 F。
+
 **blueprint COMMIT（用戶 balance 精神）**：真根＝整併 util 結構餓死（per-option util dump 定案）。**boost 整併 util**——`absorb_drive`（野心/擴張 weigh→強吸弱、帝國）+ `join_drive`（弱求 protection/利益→投靠強），**兩路同一根**、走既有 argmax 人格 weigh（統一非特判、R² grep 硬檢）。**激進度保守起步**（寧欠整併也別塌 1 blob、起低、靠 §5 合量 tune 朝 ~50）。人格分化：野心高→吸/擴、義氣/弱→join/stay＝**有大有小湧現自人格**。
 
 ---

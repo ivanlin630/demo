@@ -2,6 +2,7 @@
 
 status: LOCKED-pending-R²（2026-08-13 用戶核可分數改法+紮營/進駐區分;B6 PENDING 用戶裁）
 owner: blueprint（WHAT）→ R² → systems HOW
+★大部已 merge(A1/A2/crisis-lock 結論入 game-design);本檔留殘項參照。
 溯源：③ 長期故事驗證全鏈收口（全實測、帳關）：世界富（池 -0.04%/倉 +2.5%）但 91% 流浪接不到 → 四段鏈：①紮營分數結構永輸（26 戰全敗、camp_drive flat 1.0×人格 0.5 vs 求生 1.0）②進駐從未派出+建設 12/15 noop（手不聽腦）③安家後採糧硬零（labor cache 3 天 lag）+ material 排擠 food（need 不隨飢餓升級）+ 小團 pool 地板④→零累積→市場空→餓死碎裂→零興衰。效能（faction_ai 93.7%）= **獨立後續 arc**（純優化、byte-identical 驗證、排在 12/24 月驗收跑之前），不入本 arc。
 
 ## §1 命門（用戶定、寫死）

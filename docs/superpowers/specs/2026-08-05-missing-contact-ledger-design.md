@@ -3,6 +3,7 @@
 status: LOCKED（R① CLEAN 2026-08-05 + 1 整併義務已納：與既有 _evaluate_owner_contact 同原語處理）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-05
+★LOCKED 未排程(backlog)。
 溯源：用戶定 2026-08-05「不只求援——所有信使與子隊都應有同個系統,感知人怎麼太久沒消息」；資訊網補完批。
 
 ## ★核心原則（用戶定）：通例非特例

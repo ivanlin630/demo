@@ -4,6 +4,7 @@ status: DRAFT → reviewer R²
 owner: systems（HOW）；WHAT=`2026-08-05-missing-contact-ledger-design.md`（blueprint LOCKED、R① CLEAN）
 date: 2026-08-05
 branch: 新 slice `feat/missing-contact-ledger`（off 更新後 main，含核心 arc merge）
+★DRAFT 未 dispatch,branch 註記已 stale。
 
 ## 目標（承 WHAT）
 所有派出單位共用一張「預期聯絡帳本」——逾時→belief 標失聯→思考層人格反應。**通例統一非特例**（禁散建），**reuse 既有 last_tick 原語、母↔子收斂一套**（R① 整併義務、防第 4 散落點）。

@@ -3,6 +3,7 @@
 status: Slice A MERGED `998f5344`；Slice B R② CLEAN（charter/mobilization split、正交性結構保證、單點 uses_unified wrapper 4-caller 自動受益）→ systems build
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-12
+★Slice A/B 已 merge(998f5344/6fff46e7);唯一活項=團型梯度待驗(completion checklist D5)。
 溯源：size-matter 維度②（audit 2026-08-03）+ grounding 表 + ★R② 異質框外審 ISSUES（6 findings、Agent 讀 code + reviewer 親驗 2/2 最要害）→ 訂正。
 
 ## §0 ★R② 訂正定案（framing 誠實化 + 拆刀）

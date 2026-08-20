@@ -3,6 +3,7 @@
 **日期**：2026-07-29
 **owner**：blueprint（WHAT）→ 交 systems 做 HOW
 **狀態**：WHAT 定案（待用戶複審 spec）
+★下游 slice 多已 merge;殘餘 WHAT 待 B7 unpark 時併議。
 **精度層級**：乙級（tile-local 內生糧流），非丙級（全地圖糧源搜索）
 
 ---
