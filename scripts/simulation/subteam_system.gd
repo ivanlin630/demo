@@ -57,7 +57,7 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	pop_count = maxi(pop_count, 0)
 
 	var sub := TeamData.new()
-	sub.team_id          = _next_team_id(state)
+	sub.team_id          = state.consume_next_team_id()
 	sub.tile_pos         = parent.tile_pos
 	sub.current_task     = task   # 新 team 建立豁免：dispatch 出的 task = PRIO_DISPATCH
 	sub.task_priority    = TaskArbiter.PRIO_DISPATCH if task != TeamData.TASK_IDLE else 0
@@ -112,7 +112,7 @@ func dispatch_anon_migrants(state: WorldState, parent_id: int, k: int,
 	if AnonTierSystem.total_pop(parent) < k:
 		return -1   # anon 不夠 k（不掏空）
 	var sub := TeamData.new()
-	sub.team_id          = _next_team_id(state)
+	sub.team_id          = state.consume_next_team_id()
 	sub.tile_pos         = parent.tile_pos
 	sub.current_task     = TeamData.TASK_MIGRATE
 	sub.task_priority    = TaskArbiter.PRIO_DISPATCH
@@ -143,7 +143,7 @@ func dispatch_anon_messenger(state: WorldState, parent_id: int, task: String, re
 	if AnonTierSystem.total_pop(parent) < 1:
 		return -1   # 無 anon 可分當信使
 	var sub := TeamData.new()
-	sub.team_id          = _next_team_id(state)
+	sub.team_id          = state.consume_next_team_id()
 	sub.tile_pos         = parent.tile_pos
 	sub.current_task     = task
 	sub.task_priority    = TaskArbiter.PRIO_DISPATCH if task != TeamData.TASK_IDLE else 0
@@ -342,9 +342,3 @@ func _pick_subteam_leader(state: WorldState, team: TeamData, task: String) -> in
 			best_val = v; best_id = pid
 	return best_id
 
-func _next_team_id(state: WorldState) -> int:
-	var max_id: int = -1
-	for tid in state.teams:
-		if tid > max_id:
-			max_id = tid
-	return max_id + 1

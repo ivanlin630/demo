@@ -62,7 +62,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	if dissenters.is_empty():
 		return null
 	var new_team := TeamData.new()
-	new_team.team_id   = _next_team_id(state)
+	new_team.team_id   = state.consume_next_team_id()
 	new_team.tile_pos  = parent.tile_pos
 	state.set_team_faction(new_team, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
 	# 新團 resources 全 0 = 空池（downstream 一律 .get(k,0)）→ clear_all 等價且不憑空生
@@ -115,9 +115,3 @@ func reset_loyalty_on_transfer(p: PersonData, transfer_type: String) -> void:
 		"voluntary":    LoyaltyBank.set_baseline(p, 0.5, "voluntary")
 		"master":       LoyaltyBank.set_baseline(p, 0.9, "master")
 
-func _next_team_id(state: WorldState) -> int:
-	var max_id: int = 0
-	for tid in state.teams:
-		if tid > max_id:
-			max_id = tid
-	return max_id + 1
