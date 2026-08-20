@@ -119,6 +119,16 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 📈 N² 歸因：per-eval 掃描 ∝ |team_discovered|，穩態飽和於 N（2026-08-21、ramp vs 穩態的和解）
+**量測**（warring seed1337 day1-40）：`|team_discovered|` median **2→76**（38×）、`scan_per_team_day` **165→8784**（53×）、`global_tile_share` **99.2%→74.3%**。
+**★表面矛盾**：`scan/team` vs **N** 回歸 k≈**3.87** → 隱含總成本 k≈4.87，**與大考量到的 k≈2.004 對不上**。
+**★和解（systems 用同一份資料算 `median/N`）**：比值 day5 **0.09** → day20 0.29 → day40 **0.58**（p90/N 0.18→0.69）＝ **discovered 正在填滿、趨向飽和**。
+- **ramp 期**（|discovered| 與 N 同時長、比值上升）→ 對 N 的回歸**虛高**（`1.1/0.298≈3.7` ≈ 實測 3.87 ＝ **day↔N 共線假象**，measurer 自己抓到）。
+- **穩態**（`|discovered| → N`）→ per-eval **∝ N** → 總成本 **∝ N²** ＝ **正好 k≈2.004**（12mo 大考遠在 day40 之後、量的是長期行為）。
+∴ **兩份數字不互斥，是不同 regime**；**不需要**開對照式量測去切開 day vs N（穩態會合流）。
+**★對主刀的意義**：「限制 per-eval 掃描範圍」仍是主刀，但**正當性理由改寫**——不是「discovered 隨 N 超線性成長」，而是**穩態下每隊要把認識的世界掃一遍**。
+**★不受 confound 干擾的乾淨結論**：`_find_own_outpost` 全圖掃**持續佔 74–99%** → **優先索引**（已 dispatch、必須 byte-identical）。
+
 ### 📋 訂單簿健康度：成交率 0.7%、壽命是硬常數牆、churn 0%（2026-08-21 世界級數字、用戶追問的舊懸案）
 **數字**（peaceful_economy seed1337、90 天完整）：`order.placed 1001` ／ `filled` **7** ／ `abandoned 945` ／ `replaced` **0** → **成交率 0.7%**、abandon **94.4%**。
 **★★「壽命」不是分布、是硬常數牆**：`ORDER_LIFETIME = 5 * TICKS_PER_DAY`（`order_system.gd:3`）**寫死**、下單當下 `expire_tick` 即固定；16 筆 abandon 樣本 `age_ticks` **全部 = 1200、零變異** ＝ 每張被砍的單都**活滿整整 5 天**。∴ 原本想要的「平均壽命/年齡分布」**退化成單點常數**。
