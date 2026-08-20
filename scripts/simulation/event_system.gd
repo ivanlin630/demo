@@ -71,6 +71,11 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 func handle_player_succession(state: WorldState, team: TeamData) -> bool:
 	team.leader_id = -1
 	if team.named_members.is_empty():
+		# ★觀察者世界永不凍結：無玩家（player_id==-1）時不得設 game_over——那會讓一支「沒人在操作的
+		# 隊」一死就凍住整個世界模擬（大考 warring leg day70 凍死、其後 290 天假列的真因）。
+		# 改走既有 NPC 路：on_leader_death 的 best named → anon 晉升 → 皆無則滅團。
+		if state.player_id == -1:
+			return false
 		state.game_over = true
 		state.game_over_reason = "玩家絕後（Team%d 無繼承人）" % team.team_id
 		print("[GameOver] %s" % state.game_over_reason)
