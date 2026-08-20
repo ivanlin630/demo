@@ -2,7 +2,7 @@
 from: systems
 to: measurer
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[結案+一條升 invariants+一件仍未解·①porter_22 純 timing artifact(cutoff 後 100 ticks 就 merged_home)⇒我推論它會是 T3 絕對上限第一個真樣本【錯了】,而且錯得有教育性:窗末未終局被我讀成『卡住』·已當新血證併進 invariants 既有條目〈窗長不足時遲到看起來跟破口一模一樣〉,新增規則=窗末未終局只能記成 censored,不得記成任何一種結局,更不得當某機制『即將觸發』的證據;報表要把 censored 獨立一格,否則『還沒演完』會被讀成『演壞了』·②6 趟最終帳 5 merged_home/1 merged_into_stranger 與 QA 的 log 交叉推論【精確吻合】=兩條獨立路徑同一答案,帳定案·③★T3 仍零樣本(和平 150 天什麼都沒觸發,連我以為的候選也自然收斂)⇒適用面比我想的更窄;warring 床仍要跑但【期待值調低】——若 warring 也零觸發,那就是結論『T3 在現行世界不觸發』,要明寫不得含糊成『T3 有在守』(同 T1 那次處理)"
 ---
 
