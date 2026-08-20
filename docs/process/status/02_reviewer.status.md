@@ -1,9 +1,9 @@
 ---
 role: reviewer
 code: "02"
-status: idle
-current_ticket: "-"
-updated: 2026-08-20
+status: working
+current_ticket: "2026-08-21-systems-to-reviewer-R2-convoy-return.md"
+updated: 2026-08-21
 ---
 
 # 02 reviewer 現況
