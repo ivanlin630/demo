@@ -81,7 +81,7 @@ construction commitment latch+resume（branch 5b166eb1，已 revert 出 main 529
 **①指標訂正（重要、防未來誤判）**：`[SurvivalMergeIn]` **log 行 (joiner,host) pair 次數 ≠ churn 次數**——print 在 `faction_ai:4863`（survival 路 `_trigger_survival` 每次 rank 選「併入」都印），**committed JOIN 在途期間**（`JOIN_TIMEOUT` 6 天+殘距）每 cadence 會 **re-set 同 target 並再 print** → pair 數把「**在途重申**」與「**跨 episode 重演**」混算。`join_rejected` cooldown（`JOIN_REJECT_COOLDOWN_TICKS=480`=**2 天**、`decision_context:530` gate `has_acceptable_join_host`）**只在 timeout/abort/拒收「事後」才寫**、擋不到在途重申（設計如此、非漏）。∴ **修前 698 行/54× vs 修後 1647 行/81× 的比較無效**（雙重不可比：同樣被混算污染 + 698 是 day65 partial vs 1647 是 day90 full；且原輪 full stdout 被 wrapper race 吃掉=無有效對照值）。**有效 churn 證據改用**：team 暴增（同 day90：242→**152**、-37%）+ 出路真 fire（abort_ghost 21 / timeout 1 / reject 33）+ 控制床構造斷根（`mergein_join_lifecycle_test` PROVEN）。
 **②真 follow-up（cheap、非 blocker）**：在途重申**燒 CPU**（每 cadence re-rank + re-set 同 target + print，無狀態進展）→ 候選修=committed JOIN 在途時 survival 不重複 re-set 同 target（=hand-obeys-brain 家族的「**重申抑制**」、屬既有 persist/commitment 語意延伸非新機制）；順帶讓 pair-print 恢復成可信指標。排 §4 之後。
 
-### ⛔★★specimen 非中立性：掛 tracer 讓模擬軌跡真實分岔（2026-08-20 measurer 意外撞到、威脅所有 specimen-based QA）
+### ✅specimen 非中立性 —— **根修已 MERGED（2026-08-21 結案）**：掛 tracer 讓模擬軌跡真實分岔（2026-08-20 measurer 意外撞到、威脅所有 specimen-based QA）
 **現象**：同 seed/config/branch，Pass1（無 specimen）`death.starve_anon=28`、Pass2（7 隊掛 tracer）=**26**，Team10 死亡型態亦改變 → **掛 specimen 本身改了世界**；specimen.jsonl **不能當精確重播**、只能當「同類型典型軌跡」。
 **★systems code-read（既有三道防線都在、分岔源不在它們）**：①`is_specimen`(specimen_tracer:21) 純讀零 RNG ②capture 路徑(:56/86/107/148) **全包 `_begin/_end_observe`**（`Probe.enabled=false`+`suppress_observe_noise=true`）③**LOD-exempt 已移除**(`sim_runner:506-507/518`)。
 **★假說（待 implementer investigation 查證/否證）**：**非 RNG 的狀態副作用**——tracer re-query 呼叫**帶 lazy cache 的系統**（`LaborSystem.ensure_fresh`、belief snapshot/`known_member_states` 寫入、market memo、PathSystem 快取）→ 提前暖化/更新 → 下游行為改變；`_begin_observe` 只擋 RNG+Probe、**擋不住 cache/state mutation**。
@@ -151,7 +151,7 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 **便宜查法＝facility-score 快照**（已核准併下輪新基線考規格第五項）：一份就能答「workshop 有沒有被評分、輸給誰、差多少」。
 **連鎖**：workshop → tools → apothecary(2)/smeltery(3)/weaponsmith(3)/armorsmith(3)/mint(5) **全部卡在同一個上游**；也連 `known_issues:17` 的 tools/weapon production=0 與 order kill_nostock 噪音。
 
-### 🧊 舊 warring 長跑可能靜默凍結（`game_over` × headless；2026-08-20 measurer retro-audit CONFIRMED）
+### ⚠️舊 warring 長跑可能靜默凍結 —— **機制已修（觀察者永不凍結 MERGED）；★歷史資料仍受污染、舊結論仍須按 signature 自查**（`game_over` × headless；2026-08-20 measurer retro-audit CONFIRMED）
 `warring_states.json` **有 `player` 區塊** → headless 仍指定 player team（**歷來都是 Team48**）；該隊 leader 死且 named 空 → `event_system:74` `game_over=true` → `sim_runner:70-72` **整個 tick 不推進**。而多數長跑床的「day」是 **loop counter 非真 tick** → 凍結後**繼續寫出假天數**。
 **★degenerate signature（任何人都能 30 秒自查）**：log 出現 `[GameOver] 玩家絕後（Team48 無繼承人）`；其後 progress marker **背靠背**跳出（如 `tick=7200 月=1`＋`tick=14400 月=2`）且 **teams 數完全相同**、中間無任何模擬內容。
 **retro-audit 結果（4 檔命中）**：`2026-07-22-ms-divert-spec-1337`（★低風險：凍結點接近真實結尾）／`2026-07-23-materialhold-1337`（**★★高風險**：宣稱 months=3，但真 ticking 疑似只到 tick 3840–7199 之間）／`2026-07-24-materialsupply-1337`（**★★高風險**：同 signature）／`2026-07-24-ordernoise-1337`（證據不足、風險未知）。
@@ -159,7 +159,7 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 **處置（systems 裁、比例原則）**：**不深挖考古**——對應 handback 多已 prune、文件承重面只剩本檔 `:199` 一句（已就地加 caveat）。**signature 已記於此**，將來若哪條舊結論**真的變成承重前提**，30 秒即可自查。修法見 spec `2026-08-20-observer-world-never-freezes-HOW.md`。
 **★同族**：與〈LOD 紅線〉同根——**玩家中心假設在無玩家世界裡靜默停掉東西**（一個停個體反應、一個停整個世界）。本 session 兩次踩同一族。
 
-### 🌍★★★ 無玩家 headless ＝ **個體反應層**從不執行（LOD 紅線違憲；★範圍已於同日更正：原寫「四系統」是錯的）（2026-08-20 measurer 實證 + systems 親驗 code；**擋考級**）
+### ✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線修；rate-equivalence far/near=1.00）**（LOD 紅線違憲；★範圍已於同日更正：原寫「四系統」是錯的）（2026-08-20 measurer 實證 + systems 親驗 code；**擋考級**）
 **機制**：`sim_runner` SYSTEMS registry 中 **`reactions`／`cleanup`／`outpost_tick`／`regen` 標 `lod=LOD_NEAR`**；near 判定＝`_get_near_teams:508` `_hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS(3)`。headless 床慣傳 `player_pos=(-1,-1)` → **全隊恆 far** → `_run_systems:171` 直接 `continue` → 四系統整段跳過。
 **各自 body（單一 call site、已窮盡 grep）**：
 - `reactions` ＝ `ReactionSystem.evaluate_all`：**生育 `P5_breed`**／逃／暴動／叛／怠工／士氣／`goal_alignment`。
@@ -182,7 +182,7 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 量測 bed 若用 `OS.set_environment(...)` + 下游 `XXX.setup_from_env()` 的組合在**同一進程內**傳參 → 實測 **specimen 捕獲 0 決策**（Godot 對同進程 set 後立即讀回不保證可見）。
 **改法**：直接指定目標欄位（該例＝`state.specimen_team_ids`），不要繞 env。**env 只用於「外部 launcher → 進程啟動時」傳參**，不要當進程內部的參數傳遞管道。
 
-### 👶 人口不成長：真根待分解（領導天花板假說已 REFUTED、現指向生育引擎結構性關閉）
+### ⚠️人口不成長 —— **機制已修（生育＝per-capita 連續速率 MERGED）；效果待量（AT_CAP 短跑）**（領導天花板假說已 REFUTED、現指向生育引擎結構性關閉）
 **現象**：`peaceful_economy` day5→day90 population median/max **精確卡 6**；§4b 擴點門檻 pop≥12 **三個 run 零次滿足**。
 **★假說一（領導天花板）＝REFUTED**（measurer 快照 seed1337 day20、11 隊）：統領實測**全部 0.600**、`effective_pop_cap` **76–99**、population **3–6**、**AT_CAP=0.0%** → **cap 根本沒在綁**。（systems 的錯誤＝把「統領 0.08→cap 6 恰好等於 median 6」的**算術巧合**當坐實；公式為真但「這條在綁」未驗＝file:line 坐實公式 ≠ 坐實主導。附帶事實：該 config 的 leader 統領**全體一致 0.600**＝fixture 特性、非隨機樣本。）
 **假說二（待測、已派 measurer 用既有 `reaction.breed` tap 分解）＝生育引擎結構性關閉**：
@@ -199,7 +199,7 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 **歸屬**：既有 `_inflow_est` 性質、**非 §4b 引入**；屬 [[有大有小 arc]] **CASE B 規模經濟 absent** 家族在**擴張決策面**的具體現形（「團越大、多一個人越不值錢」在 pop≥20 後完全消失）。
 **裁定＝考後 backlog**（blueprint 確認 systems 三理由）：①標準場景 pop 卡 6、走不到 20 → 現在調＝**在沒有大村的世界裡調大村參數**＝「壓力鍋裡調藥」同型 ②12mo 大考產出第一批「到底有沒有大村」的證據 ③若世界確實長不出大村，此參數優先序**自動降**（它只在 pop≥20 才有意義）。
 
-### 🔬 `DecisionContext.gather` 有寫副作用 → 任何非決策路徑呼叫都擾動世界（specimen 非中立性的真根方向、2026-08-20 implementer 隔離）
+### ⚠️`DecisionContext.gather` 有寫副作用 —— **部分修**（`need_urgency`/`plan_phase` 已移出＝specimen 非中立根修；★**cache 群仍在**、另案） → 任何非決策路徑呼叫都擾動世界（specimen 非中立性的真根方向、2026-08-20 implementer 隔離）
 
 **重現**（`specimen_neutrality_bed.gd` 兩段式 A/B 比 fp）：seed1337、**7 specimens**、1200 tick → 首次分岔 **tick 439**（1 specimen/300 tick 零分岔＝要夠多 specimen＋夠久才炸，與 measurer 觀察一致）。
 **元凶隔離**：跳過 `capture_options` → **1200 tick 全同**。∴分岔源＝`specimen_tracer:62` 對每個候選呼 `DecisionOptions.to_task`，而 `to_task` 的 closure 會呼 **`DecisionContext.gather`，gather 會寫 state**。

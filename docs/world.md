@@ -85,6 +85,8 @@ var last_encounter_result: Dictionary = {}
 
 ## LOD 分區模擬
 
+> ★**效能 arc〈事件比例計算〉落地後本節作廢、由該 arc 重寫**（用戶 2026-08-21 拍板：**模擬層零 LOD**、計算跟隨**事件密度**、不跟隨任何觀察者；近/遠分班刪除）。**在該 arc 的 G 刀落地前，本節仍是現行實作的正確描述。**
+
 定義於 `scripts/simulation/sim_runner.gd`：
 
 | 區域 | 觸發條件 | 執行步驟 |
