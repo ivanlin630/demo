@@ -28,14 +28,21 @@
 
   "★item③churn率": "order.replaced=0，90天內0次重掛，硬證據非估計。",
 
-  "warring_states_90days_IN_PROGRESS": {
-    "status": "跑到day10/90為止(仍在跑,已知warring_states per-tick成本隨N成長快,90天可能需要數小時以上),本verdict先送peaceful決定性數字,warring完成後另補handback或併入下一輪",
-    "note": "ORDER_LIFETIME=5天是全域硬常數不分config,結構性結論(壽命非分布/是硬牆)不會因warring而改變;會變的是fill_rate/abandon_rate的具體數字(warring市場動態不同,可能因戰爭死亡/隊伍churn更劇烈導致fill_rate更低或abandon更快)"
+  "warring_states_90days_COMPLETE": {
+    "order.placed": 4587,
+    "order.filled": 317,
+    "order.abandoned": 3839,
+    "order.replaced": 0,
+    "still_open_at_run_end": 431,
+    "fill_rate": 0.0691,
+    "abandon_rate": 0.8369,
+    "replace_churn_rate": 0.0,
+    "note": "★fill_rate 6.91%比peaceful的0.7%高約10倍——warring隊數多(168 vs 17)+市場密度高,5天窗口內撮合機會多很多。ORDER_LIFETIME=5天硬常數結論同樣成立(16筆sample age_ticks全部=1200,零變異)。order.replaced同樣=0,兩config皆確認零重疊式churn。"
   },
 
   "landed_paths": {
     "peaceful_full_jsonl": "docs/measurements/orderbook/orderbook-peaceful-3mo.jsonl(含最後一行final_probe_counts+final_probe_samples)",
-    "warring_partial_jsonl": "docs/measurements/orderbook/orderbook-warring-3mo.jsonl(進行中,day10為止)"
+    "warring_full_jsonl": "docs/measurements/orderbook/orderbook-warring-3mo.jsonl(90天完整,含final_probe_counts+samples)"
   },
 
   "cleanup": "純觀測,零code變更(taps已在main merged,本輪只是跑床,無temp tap)。"
