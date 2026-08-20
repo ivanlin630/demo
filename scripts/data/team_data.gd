@@ -74,6 +74,12 @@ var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，�
 # 由 ResourceSystem.resolve_consumption 每 cadence 更新（見 _update_food_flow）。
 var food_flow_avg: float = 0.0    # 日均淨食物流 EMA（食物/天）
 var food_flow_last: float = -1.0   # 上次取樣 effective_food（sentinel -1 = 未初始化，首取樣不計流）
+# ★生育連續速率（累積器）：progress 每日累加 births，跨過 1.0 就產一個 minor 名額。
+# ★兩欄都是【直接因果態】（值本身決定下次跨過 1.0 是哪個 tick）→ 必入 state_fingerprint
+#   （對比被排除的 food_flow_avg/need_urgency＝可重算 ephemeral 快取）。
+var breed_progress: float = 0.0
+# sentinel -1 ＝ 未初始化：首次評估【只蓋戳記不累加】（同 food_flow_last 慣例）→ 冷啟動噴發結構上不可能。
+var breed_progress_last_tick: int = -1
 var rung_stall_count: int = 0   # 計畫層：連續失守當前 rung milestone 次數（達 K 降 rung）
 var plan_phase: String = ""   # 計畫層 S2：中長期 phase（求糧/成長/聚勢/立國），gather 導出持久（GUI/hysteresis）
 var rung_pop_last: int = 0   # 計畫層 S3：上期 pop（算單期驟降，survival-bypass 劇變偵測）
