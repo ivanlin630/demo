@@ -1,5 +1,7 @@
 # HOW spec：convoy RETURN 收尾（讓車回站、不加車）
 
+slice: convoy-return-conservation   <!-- P9 交接縫閘：slice id = branch 名去掉 feat/。★tier 不寫這裡——tier 的唯一來源是派工 handback，避免第二個真相 -->
+
 date: 2026-08-21 ／ owner: systems ／ WHAT ＝ blueprint 裁定（採 systems 案：**修 RETURN 收尾、`一次一支` throttle 不動**）
 狀態：待 R² → dispatch。
 

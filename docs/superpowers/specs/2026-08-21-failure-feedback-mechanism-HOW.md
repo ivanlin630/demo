@@ -1,5 +1,7 @@
 # HOW spec：執行失敗反饋機制（Phase 0；A1 五族的形狀由本 slice 定義）
 
+slice: failure-feedback   <!-- P9 交接縫閘：slice id = branch 名去掉 feat/。★tier 不寫這裡——tier 的唯一來源是派工 handback，避免第二個真相 -->
+
 date: 2026-08-21 ／ owner: systems ／ WHAT ＝ 用戶立法〈執行失敗反饋鐵律〉（`invariants.md`）
 狀態：待 R² → dispatch。★**這是 A1 的前置**：先有反饋機制，drop 點才有地方接。
 

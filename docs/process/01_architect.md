@@ -96,3 +96,49 @@ handback 內含觸及檔/驗收法摘要（指向 spec，注意事項寫 spec/pl
 **保留**：`plans/_archive/` 不刪（歷史脈絡）。
 
 ★ 這條同時是 P7「三態誠實」的樣本：**一條規則寫在 doc 上、實際沒有東西在執行它，就該明寫，而不是繼續讀起來像已武裝。**
+
+---
+
+## ★P9 交接縫：派工單必帶 `slice:` 與 `tier:`（2026-08-21 用戶核）
+
+**背景**：前作那八項 harness 是「**漏了會被發現**」，不是「**不會漏**」——
+寫一封空信所有警報就閉嘴、`to:` 寫錯零紅燈、而且全部只是「1h 後告訴 blueprint」。
+用戶 2026-08-04 立的法（`00_roles:30`）：**hook 提醒 ≠ gate；gate 裝執行點（鎖／merge），非 advisory 上游。**
+`seam-gate.sh` 就是那條裝在 merge 上的閘。
+
+### 寫作紀律（★只綁新寫的，舊產物不溯改）
+
+**派工 handback 的 frontmatter 必帶兩欄**：
+```yaml
+from: systems
+to: implementer
+slice: convoy-return-conservation   # = branch 名去掉 feat/；★唯一的真相來源
+tier: full                          # full | probe
+status: open
+```
+**其他產物**（HOW spec／R² verdict handback／`.measure.json`）**只帶 `slice:`**，**不要再寫 `tier:`**
+——tier 的唯一來源是派工單，寫兩處就是製造第二個真相。
+（`.measure.json` 用既有的頂層 `"slice"` key，語意改為 branch slice id。）
+
+### 兩檔
+
+| tier | 欠什麼 | 用於 |
+|---|---|---|
+| **`full`** | spec ＋ **R² verdict** ＋ handback ＋ `.measure.json` | 產 code、要 merge 進 main |
+| **`probe`** | handback（下因果結論再加 QA ref） | 列舉盤點／加 tap／診斷票／量測票 |
+
+⛔ **`tier` 由 systems 在派工時決定，做的人不得自選**——**能自己選輕流程的 agent，是在改自己的考卷。**
+⛔ **兩檔都不砍 review**：**輕流程省的是 paperwork，不是 check。**
+
+### 上線階段
+**SOFT（現在）**：只印不擋，收集 baseline。**HARD**：baseline 穩定後才轉，**轉硬後「增列 baseline ＝ STOP，要人裁」**。
+⛔ **不回溯武裝**：沒宣告 `slice:` 的產物根本不在母體、永遠不可能被標紅＝**結構性空洞**。
+
+### 機器明確不做的
+**不驗職責／越界**（那是判斷題）、**不驗內容品質**（永遠是人的活）。機器只驗「**產物在不在**」。
+
+```bash
+bash .claude/hooks/seam-gate.sh              # 當前 branch，SOFT
+bash .claude/hooks/seam-gate.sh --selftest   # 良品 fixture：證儀器沒壞
+SEAM_MODE=hard bash .claude/hooks/seam-gate.sh
+```
