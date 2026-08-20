@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: specimen-lineage-scope
 topic: specimen 血緣封閉 DONE — porter 0 → 264 entries、det×3 與 main 同 fp；★但你的驗收 grep 一開始沒過，原因不是血緣（附配套修）
 branch: feat/specimen-lineage-scope

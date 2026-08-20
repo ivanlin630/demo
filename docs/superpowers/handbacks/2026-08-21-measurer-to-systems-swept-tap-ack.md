@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "回掃入標記：①守恆帳ledger=temp,請開票移除②convoy branch merge衝突直接取有tap版本沒問題(反正temp會清)③另一產tap(faction_ai_system.gd/task_arbiter.gd兩個production tap)main dir查過乾淨,只有bed檔被掃到"
 ---
 

@@ -17,9 +17,26 @@ static var decision_count: int = 0
 static var _last_entry_tick: Dictionary = {}
 const HEARTBEAT_CADENCE: int = WorldState.TICKS_PER_DAY / 4   # TEST VALUE — 6h；specimen 無決策超此→補心跳(timeline 無洞、有界)
 
-# specimen 判定：enabled 且 team_id ∈ state.specimen_team_ids（gate 一律過此，零漏）。
+# specimen 判定：enabled 且（team_id ∈ specimen_team_ids ★或其祖先在清單內）。
+# ★血緣封閉（QA 擋下 convoy slice 後升 invariants，2026-08-21）：子隊是 SubteamSystem.dispatch
+# 【執行期】才生出來的新 team_id，靜態清單在 setup 當下凍結 → porter/scout/builder 這些
+# 「整條 slice 的主角」永遠進不了範圍（實證：convoy specimen 1701 行、convoy 出現 0 次）。
+# 選在【判定處】往上走 parent 鏈，而非在每個 spawn 點註冊——後者是「記得註冊」的紀律型解，
+# 枚舉會過期（同族已栽三次）。純觀測：is_specimen 只被 tracer 讀，不參與任何決策。
+const LINEAGE_MAX_DEPTH: int = 8   # 母子鏈深度上限（防環/防病態深度；現行世界最深 2 層）
 static func is_specimen(state: WorldState, team_id: int) -> bool:
-	return enabled and team_id in state.specimen_team_ids
+	if not enabled:
+		return false
+	if team_id in state.specimen_team_ids:
+		return true
+	var cur: TeamData = state.teams.get(team_id)
+	var depth: int = 0
+	while cur != null and cur.parent_team_id != -1 and depth < LINEAGE_MAX_DEPTH:
+		if cur.parent_team_id in state.specimen_team_ids:
+			return true
+		cur = state.teams.get(cur.parent_team_id)
+		depth += 1
+	return false
 
 # ★觀測非侵入單點（observer_no_global_rng 家族）：tracer 的 re-query（純觀測，非真決策）包此——
 # 關 Probe.enabled（防 tracer re-query bump 污染 Probe counter）+ suppress_observe_noise（防 randf）。
@@ -158,8 +175,9 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 static func heartbeat_sweep(state: WorldState) -> void:
 	if not enabled: return
 	var now: int = state.world.current_tick
-	for tid in state.specimen_team_ids:
-		if not state.teams.has(tid): continue
+	# ★血緣封閉：掃全隊、用 is_specimen 判（含子隊），否則子隊有決策 entry 卻沒有 heartbeat＝時間維又出洞。
+	for tid in state.teams:
+		if not is_specimen(state, int(tid)): continue
 		if now - int(_last_entry_tick.get(tid, -999999999)) < HEARTBEAT_CADENCE: continue
 		var team: TeamData = state.teams[tid]
 		var _obs: Array = _begin_observe()   # _snapshot callees 可能 bump Probe → suppress
@@ -260,7 +278,13 @@ static func _snapshot(state: WorldState, team: TeamData) -> Dictionary:
 			_buy_food_qty = int(o["qty_remaining"])
 	var _mtile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	var _at_market: bool = _mtile != null and _mtile.outpost_level > 0   # 在市集 outpost（讀板成交前提）
+	# ★血緣封閉配套（2026-08-21）：子隊進了範圍，QA 才需要「這是誰、正在執行什麼」——
+	# 沒有這兩欄，porter 的 entry 跟母隊長得一樣，故事層仍然認不出主角。純讀、零行為。
+	var _xd: Dictionary = team.task_extra_data if team.task_extra_data is Dictionary else {}
 	return {
+		"task": team.current_task,
+		"parent_team_id": team.parent_team_id,
+		"convoy_phase": String(_xd.get("convoy_phase", "")) if _xd.has("convoy_phase") else "",
 		"pop": team.population,
 		"food_private": float(team.resources.get("food", 0)),
 		"food_granary": granary_food,

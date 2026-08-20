@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "★★convoy RETURN獨立驗證verdict：①②④③主張全獨立確認成立；★★但你要的3個數字出兩個意外——rehome全7次集中porter_12單趟(超過你自訂rehome>=5病態門檻,應開票非不開)、persist.hold對CONVOY可歸因=0非implementer估的≈6(全39次都是建設task)；歸建樣本n=2,延長窗75→150天沒增加(瓶頸=dispatch稀有非觀察時間)"
 ---
 
