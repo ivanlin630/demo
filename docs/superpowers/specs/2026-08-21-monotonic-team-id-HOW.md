@@ -57,7 +57,7 @@ WorldState.consume_next_team_id() -> int     # 唯一出生口；內部單調遞
 3. **依賴 `max(id)` 語意**的其他地方
 4. **存檔／載入**：舊存檔的 id 與新計數器的起始值（**載入後 `next_team_id` 必須 > 檔內最大 id**）
 5. **負區段**：`next_beast_id` 與 team id 的區段不得相撞
-6. **fp**：id 序列改變 ⇒ **`state_fingerprint` 會變 ＝ intended-change**（**非迴歸**）
+6. **fp** ★**2026-08-21 實測訂正（我原本寫「會變」不夠精確）**：**`fp` 只在「有隊死在新生之前」的世界會變**；a4 床那 1000 tick **恰好不觸發** ⇒ **det 與 main 同 fp**。★**兩個方向都別寫錯**：同 fp **不等於**「本刀沒有行為改變」——**convoy 世界就變了**（`dispatch 7 → 4`）。
 
 ## §4 gate
 1. **id 永不重用**：合成床——建隊→滅團→再建隊，**新隊 id 必大於所有歷史 id**
@@ -66,7 +66,7 @@ WorldState.consume_next_team_id() -> int     # 唯一出生口；內部單調遞
    - 量測床 `porters_tracked` 與 `trips_total` **一致**（現況 3 vs 6）
    - specimen 同一 id **不再出現「無主空白」**
    - `_ever_in_scope` 不再有假涵蓋（**同號碼不同隊不得自動入範圍**）
-4. **det×3 穩定**；`fp` **intended-change**（**要在帳上明寫，別讓人讀成迴歸**）
+4. **det×3 穩定**；`fp` **只在「有隊死在新生之前」的世界會變**（見 §3 第 6 項的精確說法，**別寫成「必變」**）
 5. **憲法 ≤74**；**headless 0-new**
 6. ★**§3 稽核逐條有結論**（**「沒有」也要附窮盡證據**），缺一條不算過
 7. ★**產生器唯一性（機械防線，非紀律）**：`grep -c "func _next_team_id" scripts/` **＝ 0**，

@@ -125,6 +125,15 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 💾 全樹**沒有存檔／載入路徑**（2026-08-21 窮盡稽核副產物，記錄事實非缺陷）
+`monotonic-team-id` 的 §3 稽核第 4 項要查「載入後 `next_team_id` 是否 > 檔內最大 id」，
+窮盡搜索結果：**`ResourceSaver`／`store_var`／`save_game`／`load_game`／`to_dict`／`from_dict`
+在非-debug code 命中 0**（唯一 `FileAccess.WRITE` 是 `observer_main.gd:224` 的文字 dump）`@aa9f3ad9 2026-08-21`。
+⇒ **今天不可能載到 stale 計數器**；該 gate **無對象可驗 ＝ 空過，未宣稱通過**（照實記）。
+★ **未來實作存檔時必須回頭補**：載入後 `next_team_id` **必須 > 檔內最大 id**，
+否則新隊會撞舊號、id 重用那族的病全部復發（分配器已有 floor guard 兜底並 `Probe.bump("teamid.floor_bump")`，
+但那是**自我修復、不是設計保證**）。
+
 ### 🚚★porter 餓到「投靠」非母隊：convoy 貨物隨人被第三方吸收（2026-08-21 QA 故事稽核挖出，★第四種結局）
 QA 交叉 6 筆真實 merge log 與 specimen 逐筆核對發現：**`Team1 ← Team12`** —— **某支 porter（持有 id 12 的那一支）在該趟根本沒回到真母隊 `Team5`**，而是併進完全無關的 `Team1`。★**措辭已訂正**：原本寫「porter_12 **第二趟**」是錯的——**`team_id` 會被重用**（`_next_team_id = max(現存 id)+1`，見〈身分不是 id〉），**「同一個 id」不等於「同一支隊」**；這裡講的是**某一趟**，不是「同一隻的第二趟」。
 `tick7700` `task→投靠`（求收留）、`food` 掉到 **1.17**（瀕死）、`tick8000` **`parent_team_id` 直接改寫成 `1`**、`task→覓食`
