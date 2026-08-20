@@ -69,7 +69,8 @@
 | 1 | **specimen 非中立性修**（不修＝story-audit 讀到的不是被評的那個世界） | ✅ **MERGED**（EWMA advance/gather 解耦＝根修；oracle 1200t 零分岔、合併結果親驗） |
 | 2 | §4b 有機 gate（measurer）+ §4c gate | ✅ **完成**（§4c merged；§4b gate verdict 收＋大村床補上 field-untestable 那塊） |
 | 3 | 在飛 slice 全 merge 或明確排除 | ✅ **清空**（labor-v2／churn-fix／§4a／§4c／繼承-lite／EWMA 解耦／§4b／harness 全 merged） |
-| 4 | **QA 故事稽核 EWMA 解耦後的決策動力學**（推進頻率真的變了；merge 依據的閘全是 determinism／中立性／0-new＝**非行為因果型**） | ⏳ **唯一剩餘**：measurer 出 specimen trace → QA 讀 motive→action→outcome |
+| 4 | **QA 故事稽核 EWMA 解耦後的決策動力學** | ✅ **PASS**（QA 逐 tick util 追蹤：team9 tick5940 `build 0.62` vs `買糧 0.60` 一線之差 → tick6060 `買糧 0.98` **逆轉勝** → tick7200 `遷移找糧 3.09` 壓倒＝**util 對飢餓真實連續反應、會真的切換**，非手不聽腦） |
+| 6 | **specimen trace 動機欄修**（`intent` 是戰略層慢 cadence 姿態、被誤讀成本 tick 動機 → 大考主儀器是 QA 讀故事，欄位誤導會讓整場判讀失真） | ⏳ 已派 implementer（考前） |
 | 5 | 大考儀器就位 | ✅ **MERGED**（`exam_12mo_bed.gd`；fp 與 main byte-identical＝純觀測） |
 
 **★非 blocker 但開考前會回來的**：measurer 的 popcap 快照（統領 0.08 是 fixture／週轉／全域）——它不擋開考，但會決定科目 A 的讀法。

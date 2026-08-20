@@ -205,6 +205,8 @@ S3 material 缺口鏈 `find_nearest_terrain_tile` 純地形找最近 forest，**
 - forest real-cost 0-3% 極少。
 - **★教訓**：我一度據 measurer T48 **transient 單點** re-scope 成「no-outpost 主體」→ proper end-state 分類糾回 GATE-A 主體。**該先要分類分布再 halt，別憑單 specimen**（[[feedback_fileline_vs_interpretation]] transient≠end-state 主體）。
 - **★re-prioritize（呈 blueprint）**：①GATE-A（56-61%）②薄利 harvest rate（23-36%）③no-outpost forage 裁(a)（8-13%）。②③繫 harvest rate/trade，可能 GATE-A+harvest rate 解大半。GATE-B（買糧空間錯配 arrive→attempt 崩）伺候剩餘 trade。
+- **★★story-level 首證（QA 2026-08-20、EWMA trace 稽核順手獨立讀到）**：`peaceful_economy` team8 `tick2960→4860`（**約 8 天**）：`coin=1000` **整段不變**、`orders` 持續掛 `{kind:buy,res:food,qty_rem:17→21}`（**不減反增**）、`food_private` 卡 `0`，直到 tick4920 才一口氣跳 10。＝**「有錢、已下單、持續下單、就是進不了貨」**——比「有錢不買」重一型。**判定＝撮合卡死（GATE-B），非 genuine 斷供**。★意義：先前 GATE-B 的證據全是**聚合數字**，這是第一個**故事層**證據（QA 不看聚合、純讀逐 tick 也撞到同一堵牆＝診斷在兩個獨立層面互證）。
+- **★★對 accepted cost 的歸因連動（待 A 項稽核查證）**：labor-v2 combined 那 **28 起 chronic 死亡**，若掛著買糧單而食物不動 → 部分死亡是**「買不到」（GATE-B）而非「honest 水位」** → **不改「接受代價」這個決定，但改它的意義**（代價的一部分可能是既有執行斷被高壓環境放大顯影）。**已要求 QA 做 A 項 specimen 稽核時一併查 `orders` 的 buy-food `qty_rem` 是否長期不動**。
 - **★GATE-B = local-only 撮合（真空間分配，死法②）**：`_market_visitor_buy`（interaction:781）只從**抵達 tile 的 granary**買 → 遠方 surplus 搆不到 → 空間錯配（buy-fill 0.5%：seek 1363→arrive 333→fill 4；sell_no_surplus 主導）。同 material Gate B。修=分配機制（surplus 流向 demand），大於 GATE-A。
 - **forest 真缺**（T7/T43/T47 regen<burn）=少數 + 被 GATE-B 堵死逃不掉，修 GATE-B 後自動有出路（買糧/遷移）。
 - **★attack 序**：GATE-A 先（最大槓桿+survival-correct+洩 buy-fill 壓力）→ GATE-B（死法②分配機制，兼 goods）。**★session keystone**：兩閘=開頭 starvation 死隊 + 結尾 workshop-build 終閘同根。呈 blueprint sanity-check framing（`...-food-gates-confirmed-attack`）。連 [[project_economy_arc]] 死法②/[[project_desperation_economy]]。
