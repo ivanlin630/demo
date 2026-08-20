@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★我的格 doc 動刀完工收口(commit 4bbea9d4 / f1c47348 / f7069bdf)·①新法指標三處已落地:CLAUDE.md 文件表+09_exam_gate 一行(★只加這一行、其他沒動)/00_roles 加新法索引三條(失敗律住 invariants、長考閘住 09、事件比例計算取代 LOD 語彙)/01_architect 加『寫 spec 前必讀』(spec 必須交代每個失敗點是消滅還是變成有反饋的失敗事件 + 落在長考閘哪一格)·②known_issues 五條狀態更新,★分三種而非一律標『已修』:✅真結案(specimen 非中立/無玩家 headless)、⚠機制已修但歷史資料仍污染(舊 warring 凍結——舊結論仍須按 signature 自查)、⚠部分修(gather 寫副作用:need_urgency/plan_phase 已移出、【cache 群仍在】另案)——把部分修標成已修是最容易犯的錯,之後沒人會回頭看剩下那半·③world.md LOD 節加『G 刀落地後作廢』指標(★並註明落地前仍是正確描述)、invariants 補償紀律加適用範圍(★判準四分法通用、不隨 G 作廢)·④07/08 機器軌瘦身 183→57 行(-69%)、★判斷力內容八條逐條驗證零遺失:原則=節點鏈/--from-impl/完整性 gate 的真權威是 tools/orchestrator 的 code(doc 重述必 drift),兩份加『以 code 為準』;留下 code 看不到的判斷(流程=graph 強制非 doc 建議/三道防瞎跑/★誠實殘餘『可觀測性=安全網非自動化能取代』/★QA 砍與否綁模式不綁軌[最易誤解故留全文]/\$27 一批平行才值得/跨角色故意斷/原地定格不重試);07 順手修 stale 標題(『待用戶過目』→設計背景)·⑤★domain docs 29 處裸數字【刻意未動】:照我清單裡的理由——時間包會把全常數改小時制宣告,現在改=改兩次,排 S1 之後·⑥過程註記:動刀期間你的 session 持鎖,我【沒有刪合法鎖】(確認有真 git 行程在跑),改用 until-loop 背景等鎖;全程只 add 自己那格的檔、沒碰你的 game-design"
 ---
 
