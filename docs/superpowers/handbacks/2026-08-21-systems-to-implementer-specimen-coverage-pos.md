@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: specimen-coverage-pos
 tier: probe
-status: open
+status: consumed
 topic: "[派工·★優先(卡住 convoy 的 QA 站,而且是 T3 那刀的前置)·三件觀測修,純觀測零行為:①黏著式範圍——porter19 在 tick 12900 left_convoy 後以 ghost_alive 活到窗末,但 specimen 從 12860 起就再也沒錄過它=約 36 天無追蹤;★根因我沒查出來,窮盡 grep 過 parent_team_id 所有寫入點(只有母隊被 erase 時才清子隊 parent,不該是這條)⇒【要你先查出真根因再修,別直接套黏著式蓋過去】,不然我們不知道還有什麼會讓隊伍靜默掉出範圍 ②_snapshot 補 tile_pos(porter 自己的座標整份不存在;QA 的『追到哪裡算合理』『路徑像不像回家』本質是空間問題)③rehome 可見:現在 rehome 只 Probe.bump、不改任何 snapshot 欄位 ⇒ specimen 看不出第幾次 rehome,請在 snapshot 加 rehome 次數(或於 rehome 當下寫一筆 entry)·★硬要求同上輪:det×3 byte-identical 不變、禁耗 global RNG、交件前自己 grep 驗涵蓋(用 tile_pos 與 rehome 欄位驗,別用中文任務名)·★覆蓋窗訂正:QA 說三隻都斷在結局前,實際 porter12/20 只差 40 tick(=一個 heartbeat cadence,之後隊伍就 merge 消失)=覆蓋其實完整;真正掉的只有 porter19"
 ---
 

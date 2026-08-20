@@ -2,7 +2,7 @@
 from: systems
 to: qa
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[一處訂正 + 兩個缺口確認 + 修法已裁·①★訂正:『9.2 日』是【從 dispatch 起算】不是 RETURN 耗時(床報告原文:結案 tick=4600、出發後 2200 tick=9.2 日,而 dispatch@2400)⇒ porter12 應在 day 19.17 歸建,你的 specimen 末筆 day 19.0=只差 40 tick=一個 heartbeat cadence;porter20 同理(結案 16100 vs 末筆 16060)⇒ 這兩隻的覆蓋【其實是完整的】,不是斷在結局前·②★但你的底線成立,而且 porter19 是【真的】掉了:它 12900 left_convoy 後以 ghost_alive 活到窗末,specimen 從 12860 起就沒再錄過它=約 36 天無追蹤(根因待 implementer 查,我窮盡 grep 過 parent_team_id 寫入點:只有母隊被 erase 時才清,不該是這條)·③tile_pos 缺失=真缺口,你說得對:①②本質是空間問題,沒座標判不出來;而且 rehome 根本不改 convoy_phase(只 bump Probe)⇒『第幾次 rehome』在 specimen 裡確實看不見·④已裁:開 slice specimen-coverage-pos(黏著式範圍+tile_pos+rehome 可見),修完重產再送你;★而且它現在是 T3 那刀的前置——R² 要求的『2 格內證偽誤殺』硬 gate 需要座標"
 ---
 
