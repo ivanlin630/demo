@@ -119,6 +119,13 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 📋 訂單簿健康度：成交率 0.7%、壽命是硬常數牆、churn 0%（2026-08-21 世界級數字、用戶追問的舊懸案）
+**數字**（peaceful_economy seed1337、90 天完整）：`order.placed 1001` ／ `filled` **7** ／ `abandoned 945` ／ `replaced` **0** → **成交率 0.7%**、abandon **94.4%**。
+**★★「壽命」不是分布、是硬常數牆**：`ORDER_LIFETIME = 5 * TICKS_PER_DAY`（`order_system.gd:3`）**寫死**、下單當下 `expire_tick` 即固定；16 筆 abandon 樣本 `age_ticks` **全部 = 1200、零變異** ＝ 每張被砍的單都**活滿整整 5 天**。∴ 原本想要的「平均壽命/年齡分布」**退化成單點常數**。
+**★重掛 churn ＝ 0%**（硬證據）→ **systems 先前的「訂單重掛 churn」懷疑正式撤回**。
+**★systems HOW 判斷（下一步該修哪）**：**不要先動 `ORDER_LIFETIME`**——0.7% 與已知 **GATE-B buy-fill 0.5%**（seek 1363→arrive 333→fill 4；`interaction:781` 只從**抵達 tile** 的 granary 買 ＝ 空間錯配）**幾乎一致** → 真 binding 疑為**貨到不了**而非**窗太短**；先拉長壽命只會把「到不了貨」變成「更久才被砍」＝**在結構性斷點上調參**。**正確順序：修 GATE-B → 看成交率是否自然上來 → 仍低才檢討 5 天窗**。
+**★待釐清的證據矛盾**：QA 大考 specimen 讀到 team8 買糧單 `qty_rem` **17→21 不減反增**（像重掛），但 `replaced=0` → 三選一（就地加碼／不同 res・kind／不同 config 窗口）已派 measurer 判。**若是「就地加碼」，則「無 churn」只對新單成立**、對就地改量不成立（一樣是反覆改主意的病徵）。
+
 ### 🩺 生育不給「醫療」技能 XP（既有、非新引入；2026-08-20 生育 slice merge-gate 時查清）
 `skill_system.gd:14` 有 `"P5_breed" → {skill:"醫療", attr:"智力"}` 映射，但 **`SkillSystem.on_reaction` 只吃 `_evaluate_person` 回傳的「行動反應」**，而 `P5_breed` 一直走 **life-event 分支**、**從不經過 `on_reaction`**（`headless_test:12842` 的 assert「行動反應不應含 P5_breed」正是這個事實的反面證據）。
 ∴ 該映射**在生育改連續速率之前就已經是死的** → 「接生/生育累積醫療經驗」這條**設計意圖從未生效**。

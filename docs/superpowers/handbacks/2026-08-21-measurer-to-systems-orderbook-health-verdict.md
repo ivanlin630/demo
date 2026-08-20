@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "★票2 verdict(peaceful完整90天,warring進行中)：訂單簿健康度——★★決定性:壽命不是分布是硬常數牆(ORDER_LIFETIME=5天,order_system.gd:3),成交率0.7%,churn=0(order.replaced全期0次)"
 ---
 
