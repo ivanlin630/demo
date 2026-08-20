@@ -11,8 +11,8 @@ owner: blueprint(WHAT)
 - **頻率=決策層級**:想多勤由「你在想多大的事」決定,不是每系統自己發明一顆 cadence。
 
 ## §1 時間重錨
-- 1 tick=**1 分鐘**(TICKS_PER_HOUR 10→60、TICKS_PER_DAY 240→1440;根源單點 world_state)。
-- 遭遇動作=10 tick=**10 分鐘**(速度差檔位維持)。
+- **根旋鈕=`TICKS_PER_HOUR`,唯一自由參數(用戶定:以小時為單位,日後可再改)**。初值 60(→tick=1 分=推導結果,非寫死身分);TICKS_PER_DAY 等全由它導;全 code 只講小時/天,換 tick 粒度=改這一顆。
+- 遭遇動作=**10 分鐘**(時間宣告;tick 數=TICKS_PER_HOUR/6 推導)。**守衛:動作 tick 數≥10 才保速度差檔位**(time_const_check assert;=TICKS_PER_HOUR≥60 的下限由此而來,調小要先過這關)。
 - 世界格=動作×MAP_SCALE=240 tick=**4 小時**(平原);`WORLD_SPEED_MULT` **刪除**;A2 四件套出隊列。
 - 行為≈不變(移動 4.8h→4h=唯一小 intended;糧耗/格 -17%);UI 播放 `TICKS_PER_SECOND` ×6 同步。
 
