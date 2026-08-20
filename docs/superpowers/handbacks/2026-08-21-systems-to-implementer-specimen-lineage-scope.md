@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: specimen-lineage-scope
 tier: probe
-status: open
+status: consumed
 topic: "[派工·★插隊到 failure-feedback 前面(小、且卡住 convoy 那條 slice 的 QA 站)·specimen 選樣血緣封閉修·根因已定位:SpecimenDumpHelper.setup_from_env 把 state.specimen_team_ids 在 setup 當下【凍結成固定清單】,而 porter 子隊是 SubteamSystem.dispatch 執行期才生成的新 team_id → 永遠進不了範圍;實證 convoy specimen 1701 行裡 convoy 出現 0 次、只有母隊 3/5/7,整條 slice 的主角自始至終沒被錄到·改法(我傾向 a,你可反對):在 trace 判定處改成【母隊在範圍內 → 其子隊自動在範圍內】(往上走 parent_team_id 鏈),不必在 spawn 點註冊;★硬要求:純觀測、零行為改動、禁耗 global RNG、det×3 byte-identical 必須不變·驗收=拿 convoy 那床重跑一次,grep -c convoy specimen > 0 且能看到 porter 的 motive→action→outcome·做完直接回我,我再放 measurer 重產 specimen 給 QA"
 ---
 

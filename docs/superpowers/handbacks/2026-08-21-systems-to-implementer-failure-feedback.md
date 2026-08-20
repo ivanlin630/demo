@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: failure-feedback
 tier: full
-status: open
+status: consumed
 topic: "[派工·執行失敗反饋機制 Phase 0(用戶立法:執行失敗=事件必反饋決策層、禁靜默丟棄、同因禁無記憶反覆撞)·R② CLEAN(判決檔 2026-08-21-reviewer-to-systems-R2-failure-feedback-CLEAN.md)·★★排序:convoy RETURN 那張【先】做完收尾再開這張,別同時開兩個 worktree·★這支是 A1 五族的形狀來源,請當【通用機制】做不是單點修——形狀對了後面四族是照抄,形狀錯代價乘以五·★兩個 R² 要求已摺進 spec:①gate6 回報 order.abandoned 變化的【同一份】報告必須【並排】附 failure.suppressed.<option> 變化量(tap 存在≠有人看;折價會降低嘗試頻率而頻率下降本身就會把症狀數字沖淡,即使 GATE-B 沒修好)②新失敗事件必須在 world_events.gd 登記 kind(FUNC_KINDS 或 STATE_KINDS),沒登記 T0 對帳守衛抓不到這個新來源·四裁定全確認:連續折價非硬cooldown/recent_failures掛隊層非leader p.memory/失效升T0劣勢只折價/反射弧三段同語彙"
 ---
 

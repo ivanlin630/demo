@@ -134,3 +134,25 @@ watchdog v4 不再問「有沒有東西在動」（v3 病：量測跑半天＝�
 ## ★P9：派工單 frontmatter 必帶 `slice:` 與 `tier:`
 
 本體與兩檔定義見 `01_architect §P9 交接縫`。要點：`slice:` ＝ branch 名去掉 `feat/`＝**唯一真相來源**；`tier:` **只寫在派工單**（其他產物不寫，免第二個真相）；**tier 由 systems 定，做的人不得自選**；**兩檔都不砍 review**。閘：`bash .claude/hooks/seam-gate.sh`（SOFT 只印不擋）。
+
+---
+
+## ★merge 後必驗：git 說「已合併」≠ code 真的在樹上（2026-08-21 實戰事故）
+
+```bash
+bash .claude/hooks/merge-verify.sh        # 掃最近 30 個 merge；exit 1 = 有改動被丟
+```
+
+**病**：Windows 上 `git merge` 會瞬鎖 index —— 半途 `MERGE_HEAD` 在、但**沒有任何 staged**，
+commit 出來就是**把 branch 記成已合併、改動卻沒帶進來**。
+★ **比丟改動更陰險的是**：git 從此認為那條 branch **已 merged** ⇒ 之後再 `git merge` 只會說 *nothing to do*，
+**而 code 根本不在樹上**。症狀是「功能莫名其妙不見了」，**而 log 看起來完全正常**。
+
+**血證 `4bdce7c1`**：branch 改了 4 個檔，**3 個新檔進來了、被修改的 `specimen_tracer.gd` 沒進來**
+（Windows 鎖的典型半途 stage）。HEAD 裡連 `parent_team_id` 都找不到，但 `git merge` 說沒事可做。
+
+★ **偵測判準第一版我也寫錯過**：問「這個 merge 整體有沒有變化」抓不到——
+那個 merge 同時帶了別的檔，**整體有變化，只是把 branch 的改動丟了**。
+**正確問法是逐檔**：「branch 改過的每個檔，在 merge 結果裡拿的是誰的版本？」
+
+**修法**：從 branch **補一個新 commit**（**別重寫 history**），**逐檔 `md5sum` 對過再 commit**。
