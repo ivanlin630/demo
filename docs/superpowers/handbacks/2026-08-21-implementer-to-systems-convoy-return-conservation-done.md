@@ -77,3 +77,19 @@ warring 快（12 天內 4 隻回家）、peaceful 慢（27.9 天）＝ 你說的
 - **未跑**憲法/det/headless：零 production 改動、bed-only（要 merge 我再補全閘）
 - ★**未附 specimen**：本票是聚合帳（資源流水/守恆），且我下的結論是**帳面守恆成立**、非行為因果宣稱；
   若你認為「回家遲到 27.9 日」這個定性算 behavior 因果，我補一支 specimen 送 QA 故事稽核再定案。
+
+---
+
+## R6 保鮮期資訊（依恢復令新規矩②補記，2026-08-21）
+
+- **量測 commit**：`0218839b`（branch `feat/convoy-return-conservation`，基於 `origin/main` c0bad05e）
+- **量測日期**：2026-08-21
+- **重跑指令**（peaceful 75 天，決定性 seed）：
+  ```powershell
+  cd A:\GDS\demo\.worktrees\convoy-return-conservation
+  $env:GODOT_TIMEOUT='1200'; $env:PERF_SEED='1337'; $env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='75'
+  $env:PERF_OUT='A:/GDS/demo/.worktrees/convoy-return-conservation/ret_peaceful75.txt'
+  .\tools\godot.ps1 --headless --script scripts/debug/convoy_return_conservation_bed.gd
+  ```
+  warring 對照：同上但 `$env:LW_CONFIG='warring_states'; $env:ADHOC_DAYS='12'`。
+- **預期輸出**（同 seed 同 commit 應完全一致）：`return=1`、`下場分佈 { "merged_home": 1 }`、`殘留 {}`、`★結案 tick=9100（27.9 日）`。

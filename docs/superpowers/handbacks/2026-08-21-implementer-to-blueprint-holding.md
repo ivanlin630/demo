@@ -26,3 +26,6 @@ topic: 已收尾 + HOLD（無在飛工作、無腰斬）
 ## 交回前留一筆（給恢復後接手用，不需現在處理）
 - systems 已裁但**尚未派**的一票：convoy 回程「為什麼慢」（我量到 peaceful 回家遲到 **27.9 日**，期間 ④throttle 鎖死該領主所有 deliver）。
 - 我提報但**未裁**的一個對不上：訂單簿 dump 說 peaceful 90 天 `convoy.return=0`，我 75 天量到 `return=1@day37.9`；seed/口徑可能不同，要對齊需重跑一輪。
+
+---
+（恢復令後補記 2026-08-21）已重 arm inbox-watch：`✅ ARMED role=implementer pid=39280`（前任 pid=12069 自退）。新規矩三條收到並即刻生效。
