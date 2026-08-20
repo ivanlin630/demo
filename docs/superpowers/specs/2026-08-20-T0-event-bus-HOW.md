@@ -16,12 +16,16 @@ blueprint 的 T0 同時含**兩個方向相反的效果**：**瞬醒＝更常想
 - **儲存**：`state.pending_rethink: Dictionary`（team_id → true）。**不放 TeamData**（它是 tick 內暫態、非持久世界態）→ ★**不入 fp**（同 `*_eval_next_tick` 那批 cadence 排程欄的既有慣例；但**要在註解寫明為何不入**，避免日後誤判成盲點）。
 - **消費順序 ＝ team_id 升序**（穩定；禁 Dictionary 迭代序直接用）。
 - **消費即清**：該隊本輪思考完 → 清旗標。
+- ★**明文設計保證（R² ④ 要求、升格為設計條款而非事後量測）**：**消費迴圈必須在單一 tick 內把「當下快照」清空、不得分批**（禁「效能考量下只處理前 N 個、其餘留到下 tick」）。
+  **理由**：`pending_rethink` 不入 fp 的正當性**完全建立在「它是 tick 內暫態」之上**；一旦分批，它就跨 tick 存活、`*_eval_next_tick` 的類比不成立 → 變成 determinism 盲點。
+  ★**且不能只靠 gate 3 的三跑 byte-identical 事後抓**——byte-identical 抓得到「殘留造成分岔」，**抓不到「有殘留但三跑都一樣殘留」的偽陰性**（determinism 相同 ≠ 沒有殘留，只代表殘留是 deterministic 的）。
 
 ## §2 ★全量事件盤點（blueprint 明令「不搞白名單挑食」）
 **現況：沒有中央事件登記**——`emit_message` 用 **17 個 ad-hoc 字串型別**；而「戰鬥起／領袖死／滅團」只是**函式呼叫**、不經訊息層。
 **盤點來源三類（實作時逐條掛點，spec 附完整表）**：
 1. **訊息型（17 種、`emit_message` 為 chokepoint）**：`combat_start`／`combat_end`／`famine_warning`／`faction_defect`／`faction_establish`／`diplomacy`／`extortion`／`subjugate`／`tribute`／`aid_given`／`aid_refused`／`trade_done`／`order_*`／`order_delivered`／`outpost_built`／`split`／`replace`。
-2. **函式 chokepoint 型**：`NpcCombatSystem.start_combat`（被襲）／`EventSystem.on_leader_death`（領袖死）／`FactionAISystem._on_team_extinct`（滅團・目睹）／`WorldState.erase_teams`（同批死亡）。
+2. **函式 chokepoint 型**：`NpcCombatSystem.start_combat`（被襲）／`EventSystem.on_leader_death`（領袖死）／`FactionAISystem._on_team_extinct`（滅團・目睹）／`WorldState.erase_teams`（同批死亡）／★**`DiplomaticAiSystem._execute_betrayal`（背叛）＝R² 抓到的第五個、我原本漏列**。
+   ★**背叛這個漏洞的形狀值得記**：該函式全檔 **零 `emit_message`**，直接改 faction 歸屬 + 砍受害方聲望 −0.5 + 寫受害方 leader memory，只 `Probe.bump("g3.betrayal")`；**但它有 `state.player_alerts.append(...)` 通知玩家** → **玩家會立刻知道自己被背叛，NPC 受害者不會** ＝ 本日反覆出現的**玩家中心**家族又一實例。掛點：對 **`ally_team`（受害方）** 標 `pending_rethink`。
 3. **狀態跨線型（需新增偵測點）**：**跨餓線**（`famine_days` 由 0 轉正、或 `food_days` 跌破人格安全線）／**勞力危機**／**關鍵情報抵達**（belief 更新且改變已知威脅/機會）。
 ★**守衛（新不變量）**：**新增突發事件型別必掛 T0**——`debug` 加一支檢查：`emit_message` 的 type 集合 與 T0 掛點表**對帳**，有新 type 未掛 → **FAIL**（同 constitution_gate 級別）。這條讓「白名單挑食」**結構上不可能**，而不是靠紀律。
 
@@ -41,4 +45,6 @@ blueprint 的 T0 同時含**兩個方向相反的效果**：**瞬醒＝更常想
 
 ## §5 風險
 - ★**漏掉事件型別 ＝ 該想的時候沒想**（比慢更糟）→ §2 守衛是硬要求，且 **A2 不得在守衛缺席時落地**。
+- ★**對帳守衛只保護第一類（`emit_message`）**（R² ③ 指出）：第二類（函式 chokepoint）與第三類（狀態跨線）**沒有結構性保護**——`_execute_betrayal` 正是從這個缺口漏掉的活案例。
+  **弱防護建議（非本輪阻塞、記入 backlog）**：chokepoint 函式頂端統一加可 grep 的標記註解（如 `# T0-CHOKEPOINT: <event>`），另備一支輕量掃描：找「函式名含 `_execute_`/`_on_`/`_trigger_` 前綴、但無標記」的可疑函式 → **印出供人工複核、不自動 FAIL**（比 `emit_message` 那支弱，但比零防護強）。
 - **pending 不入 fp** 的判斷若錯（它其實跨 tick 存活）→ determinism 盲點 → ★gate 3 的三跑 byte-identical 是這條的實證防線。
