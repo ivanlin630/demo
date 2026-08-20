@@ -177,3 +177,50 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 | 實作 | 貼一行啟動 + 收 handback | 機械、低腦力 |
 
 兩個設計腦不重複（異工），實作非同步跑（並行紅利）。
+
+---
+
+## ★P7 三態誠實表（用戶核 2026-08-21；`docs/process/*` 每條流程規則標「有沒有東西在檢查它」）
+
+**為什麼**：`docs/process/*` 現在**讀起來全部都像已武裝**，實際幾乎全靠 agent 自律。
+敢寫下「這條宣告了但沒有東西在執行」，比假裝有守誠實得多。
+★ 而**兩態不夠**——用戶 2026-08-04 就立過法：**hook 提醒 ≠ gate**。所以分三態：
+
+| 記號 | 意思 |
+|---|---|
+| 🔒 **enforced** | 機器會**擋**（gate 失敗／`decision:block`／merge 前紅燈） |
+| 🔔 **advisory** | 機器**偵測到並告訴你**，但攔不住（hook 注入提醒／Monitor 事件） |
+| 📜 **declared** | **沒有任何東西在檢查**，純 agent 自律 |
+
+### 現況（2026-08-21 盤，`.claude/hooks/` + `scripts/debug/` 逐支對照）
+
+| 規則 | 態 | 執行者 |
+|---|---|---|
+| 憲法 site-freeze（禁新增引擎外 task 指派／god-view） | 🔒 | `constitution_gate.gd`（merge 前跑，`current ⊆ baseline`） |
+| implementer 收尾（consume／回主目錄／提醒重 arm） | 🔒 | `implementer-cleanup.sh`（Stop hook，`decision:block`） |
+| 母體地板（普查塌到 0 不得讀成綠） | 🔒 | `expect-min-gate.sh`（exit 1） |
+| 量測主張保鮮期（R6） | 🔒 | `stale-claims.sh`（exit 1／2）**但只綁新寫的** |
+| 交接縫產物齊全（P9） | 🔔→🔒 | `seam-gate.sh` **現為 SOFT（只印不擋）**，baseline 穩定後轉 HARD |
+| 信箱主動觸發（別人寫信會叫醒你） | 🔔 | `inbox-watch.sh`（Monitor 事件） |
+| 每 turn 未讀提醒 | 🔔 | `handback-inbox.sh` |
+| **watcher 失聰偵測** | 🔔 | `handback-inbox.sh` 每 turn 閘（**warn-only／fail-open，刻意不擋**） |
+| 停滯／鏈斷（含出貨沒推下一站） | 🔔 | `watchdog.sh` v4（喚醒 blueprint，**blueprint 才決定推不推用戶**） |
+| 角色在線 | 🔔 | `peers.sh`（純讀，供人與 watchdog 用） |
+| L 層級判定（L1/L2/L3） | 🔔 | `layer-check.sh`（PreToolUse 注入提醒，**攔不住**） |
+| 長跑必經 QA 故事稽核 | 🔔 | `longrun-qa-gate.sh`（PostToolUse 注入，**攔不住**） |
+| **感知鐵律**（決策讀 belief 非 god-view） | 🔒**半** | `constitution_gate` 抓得到 `gv_mapscan`/`gv_teamstate` 這類**已指紋化**的 god-view；**新形態的隔空作用抓不到** |
+| **R② 每 slice 必過 reviewer** | 📜→🔔 | 以前**純散文**；P9 SOFT 後，**有宣告 `slice:` 的**才看得到（未宣告的仍在母體外） |
+| status 所有權（寄件端不自寫 consumed） | 📜→🔔 | inbox-watch v2 會把「誤寫 consumed」的信**撈出來一次**（治得到症狀，治不到寫的人） |
+| **QA-ref 鎖閘**（含因果結論的 handback 必帶 `QA:<ref\|PENDING>`；無則 systems 拒鎖 spec） | 📜 | **無機器**——寫在 00_roles:30、由 systems 人工守。★「這段有沒有下因果結論」是判斷題，機器判不了；能機器化的只有「宣告了要 QA 卻沒附 ref」 |
+| 無斷點自動鏈（收信＝做完＋推下一站） | 📜 | 只有 `COMMIT-NO-LETTER` 間接偵測；**「有沒有推對下一站」沒有東西在看** |
+| 角色邊界（不越界、不 inline 代打） | 📜 | 無。**「這個決定該不該他做」是判斷題，機器做不了**（P9 §6 明列不做） |
+| 長考閘（09，半成品禁跑驗收考） | 📜 | 人工清單；§6 地基保鮮期那格才有 `stale-claims` 撐 |
+| 全量暫態可觀測性（新 decision 必接 tap） | 📜 | 無 |
+| 負斷言協議（窮盡搜索、禁 `head`） | 📜 | 無（`expect-min-gate` 只擋「母體塌陷」這一種失敗型態） |
+| 機制意圖帳（改既有機制先對照） | 📜 | 無 |
+| doc glance-aid 瘦身 | 📜 | 無（on-touch 自律） |
+
+★ **這張表本身也要 on-touch 維護**：新增 hook／gate 時順手改一行，不必特批。
+★ **看到 📜 不代表該補機器**——有些（角色邊界、內容品質、該不該他做）**本來就只能是人的活**，
+硬做就變成「**a proxy for judgement is a prose claim wearing a schema**」。
+標 📜 的價值在於**不再假裝它有守**。
