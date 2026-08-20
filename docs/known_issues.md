@@ -10,6 +10,12 @@
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
 
+> ★**狀態標記三態慣例（2026-08-21 立、blueprint 認可）**——**禁一律標「已修」**：
+> - **✅ 真結案**：機制已修 **且** 影響面已清（可直接不再讀）。
+> - **⚠ 機制已修、歷史資料仍污染**：修法已 merge，但**舊量測/舊結論仍受影響** → 必附**自查方法**（如 signature）。
+> - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
+> ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
+
 ### ★material-need bootstrap gap（code-provable，reviewer R² 2026-07-30 揭）
 `NeedOracle.need_keep(material)` 對**無 outpost 隊結構性恆 0**：`_self_use(material)` material∈`PURE_INTERMEDIATE`(need_oracle:100,111)→0；`_supply_chain` 無設施→0；`_construction_facility_need` `_find_own_outpost==(-1,-1)`(need_oracle:38-40)→0。∴ `goal_resolver:197` `holding>=need_keep(0)` 恆真→吐空、**founding 分支(:206-219「★A1 founding」)碰不到**。**⇒ 雞生蛋 bootstrap gap**：無 outpost 隊永不「想要」material（need_keep≡0）→永不因缺料立國拿料；material-founding 動機**只對已有 outpost + 缺料設施需求的隊**存在（established 隊建 secondary forest outpost 供設施）。**fresh 隊 settle-motive 走 settle_fit（上述三段①，已知 flat/broken）非 material。** 這是 A1「缺料→立國」假設的 code-provable 修正：該動機對 fresh 隊不存在（bootstrap gap）、對 established 隊 gated on need_keep>0。折入 means-end 全系統（need 沿依賴鏈上傳 chaining 該讓「想建設施→缺料→缺 outpost→想 found」串起來）。連 [[project_food_flow_runway]] measure-first Step0（①fixture 據此修＝established 隊測 live secondary-founding，非 fresh 隊死 fixture）。**用戶兩原則**（memory `feedback_whole_system_first`）：①健全系統才有價值模擬結果 ②整個系統做完當 whole 才 measure，非邊建邊 patch。**∴ material 全 PARK**（settle-motive/伐木場/regen/初始庫存/gate②/BUY 弱閥）until **means-end/長程計畫全系統**（2026-07-19-long-range-planning-brainstorm.md，scope=B 全四塊：慾望 registry × means-end 依賴圖 × applicability 湧現順序 × 折現/承諾）設計+建完當一個 whole。L1 大功能，brainstorm（用戶主導）→spec→plan→implement。★架構 orientation：機制大半已在（`option.applicable`=前置 gate、`rank_scored`=湧現順序、`NeedOracle`=need 傳播），缺口=(a)need 沿依賴鏈上傳 chaining (b)goal-as-chainable-option → 實作=擴非新引擎。
 
