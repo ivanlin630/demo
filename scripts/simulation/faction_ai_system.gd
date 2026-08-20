@@ -2582,6 +2582,9 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			continue   # 起建失敗（料被消耗/slot 滿）→ 試次佳（覓食…、失敗案留）
 		# ★means-end S5 委派：delegate candidate 贏 → 派子隊執行 action，母隊留守（本 cadence 畢）；派失敗→試次佳。
 		if td.get("delegate", false):
+			# ★TEMP TAP（上游一層）：選中 → 真的走到 delegate 派工的次數（含 rank>0 的重試）
+			if Probe.enabled and (String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute"):
+				Probe.bump("convoy.route.delegate_entered." + String(td.get("kind", "")))
 			if _dispatch_goal_delegate(state, team, td):
 				team.current_option = String(e["opt"])   # 承諾追蹤(label:delegate)
 				return
@@ -3087,6 +3090,9 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
 		# ★means-end S5 委派（solo）：delegate candidate 贏 → 派子隊，母隊留守。
 		if td.get("delegate", false):
+			# ★TEMP TAP（上游一層、solo 路徑）
+			if Probe.enabled and (String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute"):
+				Probe.bump("convoy.route.delegate_entered_solo." + String(td.get("kind", "")))
 			if _dispatch_goal_delegate(state, team, td):
 				team.current_option = String(e["opt"])
 				return
@@ -3286,6 +3292,7 @@ func _can_trade(state: WorldState, team: TeamData) -> bool:
 # arb 單原點市場 → 最近市集 outpost（公開地標豁免）。廢 _find_trade_target team-chase（漫遊追人，
 # 由 market-as-place 到場 resolver 取代）。市集＝固定地標，到達穩定（解 65% 漫遊撲空）。
 func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
+	if Probe.enabled: Probe.bump("merchant.target_attempt")   # ★TEMP TAP（seek_market drop 列舉）
 	if team.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
 		var ord: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
 		if not ord.is_empty():
@@ -3295,6 +3302,8 @@ func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
 	var mkt: Vector2i = _nearest_market_outpost(state, team)
 	if mkt != Vector2i(-1, -1):
 		Probe.bump("g1.seek_market")
+	elif Probe.enabled:
+		Probe.bump("merchant.drop.no_known_market")   # ★TEMP TAP：連一個已知市集都沒有（belief-gate 空）
 	return mkt   # (-1,-1) = 無市場可去
 
 # ★god-view Slice C：找最近「已知市集 outpost」（belief-gate，非全圖 god-view）。
@@ -3975,18 +3984,28 @@ const CONVOY_PORTER_POP: int = 2          # TEST VALUE — porter 子隊 pop（�
 const CONVOY_MIN_PARENT_POP: int = 4      # TEST VALUE — 母隊抽 porter 後留守下限（比 build gate 10 輕，porter 小）
 const CONVOY_CARGO_CAP: float = 200.0     # TEST VALUE — 單趟載重上限
 func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool:
+	# ★TEMP TAP（convoy dispatch-drop 結構列舉、evidence-only）：七個原本靜默的 return false 各具名計數
+	# ＋進入本函式的總次數。純觀測、Probe-gated、零行為零 RNG。用完 revert。
+	var _kind: String = String(td.get("kind", "deliver"))
+	if Probe.enabled:
+		Probe.bump("convoy.dispatch_attempt")
+		Probe.bump("convoy.attempt_kind." + _kind)
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	if target == Vector2i(-1, -1) or target == team.tile_pos:
+		if Probe.enabled: Probe.bump("convoy.drop.1_no_target")
 		return false
 	if team.population < CONVOY_MIN_PARENT_POP:
+		if Probe.enabled: Probe.bump("convoy.drop.2_parent_pop")
 		return false
 	var cargo: Dictionary = td.get("cargo", {})
 	if cargo.is_empty():
+		if Probe.enabled: Probe.bump("convoy.drop.3_cargo_empty")
 		return false
 	# ★throttle：一隊同時只一 convoy 在飛（防 surplus 每 cadence 重派 porter storm→warring 49 隊 porter 爆炸 perf 死）。
 	for tid in state.teams:
 		var pt: TeamData = state.teams[tid]
 		if pt.parent_team_id == team.team_id and pt.current_task == TeamData.TASK_CONVOY:
+			if Probe.enabled: Probe.bump("convoy.drop.4_inflight_convoy")
 			return false
 	var res: String = String(cargo.keys()[0])
 	var want_qty: float = minf(float(cargo[res]), CONVOY_CARGO_CAP)
@@ -3995,14 +4014,24 @@ func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool
 		and home_tile.outpost_owner == team.team_id) else 0.0
 	var load: float = minf(want_qty, float(team.resources.get(res, 0)) + vault)
 	if load < 1.0:
+		# ★TEMP TAP：附帶 want/私產/vault 三數 → 分辨「世界真沒貨」vs「機制擋住」
+		if Probe.enabled:
+			Probe.bump("convoy.drop.5_load_lt1")
+			Probe.bump_sample("convoy.drop.5_load_lt1", {
+				"team": team.team_id, "res": res, "want": want_qty,
+				"priv": float(team.resources.get(res, 0)), "vault": vault,
+			})
 		return false   # 母隊實無貨可載
 	var advisor_id: int = _pick_or_promote_advisor(state, team)
 	if advisor_id == -1:
+		if Probe.enabled: Probe.bump("convoy.drop.6_no_advisor")
 		return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, team.team_id, advisor_id, CONVOY_PORTER_POP, TeamData.TASK_CONVOY, target)
 	if sub_id == -1:
+		if Probe.enabled: Probe.bump("convoy.drop.7_subteam_fail")
 		return false
+	if Probe.enabled: Probe.bump("convoy.drop.0_dispatched")   # 通過七關＝真派出（對照分母）
 	var sub: TeamData = state.teams[sub_id]
 	# ★重診 instrument：FETCH 前源分佈（母隊私產 vs vault）——split 後 porter 已帶 frac×res。
 	var parent_priv_after_split: float = float(team.resources.get(res, 0))
