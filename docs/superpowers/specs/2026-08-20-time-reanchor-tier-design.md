@@ -17,7 +17,8 @@ owner: blueprint(WHAT)
 - 行為≈不變(移動 4.8h→4h=唯一小 intended;糧耗/格 -17%);UI 播放 `TICKS_PER_SECOND` ×6 同步。
 
 ## §2 常數規約(裸 tick 禁絕)
-- 全時間常數以 `TimeScale.days()/hours()` 宣告(如 `SALARY_DAYS=7`);**禁裸 tick 字面量**。
+- 全時間常數以 `TimeScale.hours()` 宣告(**小時=正典單位,用戶定**;`days()`=語法糖);**禁裸 tick 字面量**。
+- **★計時相對錨定(用戶定,治「節奏改→計時卡死」)**:凡守護「有預期時長活動」的 timeout/計時 → 一律 `k × 該活動預期時長`(工地=k×預期工期、貿易/JOIN=k×往返 ETA、失聯=k×訊息往返尺度;有 floor/ceiling)——物理/節奏變速自動成比例跟;**找不到自然錨的才准絕對小時**。審計逐顆標錨定對象;護欄型絕對值(如 L0 衰敗 3 天=物理)不在此限。
 - 誠實命名:`PER_TICK` 只准真 per-tick;per-呼叫/per-窗改名。速度類附人話換算(格/天、動作/小時)。
 - 審計工作清單=inventory 檔 B 派(~20 顆)+§9 魔法數;`debug/time_const_check.gd`=審計入口、擴充成規約守衛(新增裸 tick=FAIL)。
 
