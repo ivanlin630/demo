@@ -1,0 +1,42 @@
+{
+  "ticket": "票2：訂單簿健康度專用短窗(2-3個月)——用戶追問舊懸案,要世界級數字",
+
+  "method": "既有merged tap(order_id/created_tick/placed/filled/abandoned/replaced)+exam_12mo_bed.gd(watch_prefixes已補trade./order.,結尾dump全量Probe.counts)。跑LW_MONTHS=3(90天),seed1337:peaceful_economy已跑滿90天★完整;warring_states進行中(見below)。",
+
+  "peaceful_economy_90days_COMPLETE": {
+    "order.placed": 1001,
+    "order.filled": 7,
+    "order.abandoned": 945,
+    "order.replaced": 0,
+    "still_open_at_run_end": 49,
+    "fill_rate": 0.007,
+    "abandon_rate": 0.944,
+    "replace_churn_rate": 0.0,
+    "placed_by_kind": {
+      "buy_food": 162, "buy_material": 110, "buy_tools": 5, "buy_weapon_melee_low": 166,
+      "buy_weapon_ranged_low": 153, "sell_food": 81, "sell_goods": 50, "sell_material": 101, "sell_tools": 173
+    }
+  },
+
+  "★★決定性發現：壽命不是分布，是硬常數牆": {
+    "code": "order_system.gd:3 `const ORDER_LIFETIME: int = 5 * WorldState.TICKS_PER_DAY`（=1200 ticks，固定5天，非隨機/非市場條件驅動）；order_system.gd:36 `expire = current_tick + ORDER_LIFETIME` 在下單當下就寫死到期時間。",
+    "證據": "order.abandoned.sample(16筆cap樣本,order_id 1-16,team 0-3,跨不同res/kind)age_ticks全部=1200，逐一驗證，零變異——這不是『分布』，是每張被abandon的單100%都活滿整整5天才被砍。",
+    "意義": "①item①『standing order平均壽命/年齡分布』的真答案＝退化成單點：所有abandoned單(佔94.4%)壽命恆為5天，唯一有變異空間的只有極少數filled單(7/1001=0.7%)的實際成交時點(<5天，本輪無sample tap記錄各自實際成交tick,只有count無distribution)。②order.replaced=0代表'重掛churn'這條路完全沒被走過——不是churn率低,是這個機制在這90天裡一次都沒fire。"
+  },
+
+  "★item②成交率": "0.7%(7/1001)——世界級數字，極低。94.4%訂單活滿5天到期被砍、4.9%還在架上未到期未成交(run結束時的snapshot殘留)。",
+
+  "★item③churn率": "order.replaced=0，90天內0次重掛，硬證據非估計。",
+
+  "warring_states_90days_IN_PROGRESS": {
+    "status": "跑到day10/90為止(仍在跑,已知warring_states per-tick成本隨N成長快,90天可能需要數小時以上),本verdict先送peaceful決定性數字,warring完成後另補handback或併入下一輪",
+    "note": "ORDER_LIFETIME=5天是全域硬常數不分config,結構性結論(壽命非分布/是硬牆)不會因warring而改變;會變的是fill_rate/abandon_rate的具體數字(warring市場動態不同,可能因戰爭死亡/隊伍churn更劇烈導致fill_rate更低或abandon更快)"
+  },
+
+  "landed_paths": {
+    "peaceful_full_jsonl": "docs/measurements/orderbook/orderbook-peaceful-3mo.jsonl(含最後一行final_probe_counts+final_probe_samples)",
+    "warring_partial_jsonl": "docs/measurements/orderbook/orderbook-warring-3mo.jsonl(進行中,day10為止)"
+  },
+
+  "cleanup": "純觀測,零code變更(taps已在main merged,本輪只是跑床,無temp tap)。"
+}
