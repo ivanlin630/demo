@@ -29,6 +29,9 @@ func _run() -> void:
 	config["seed"] = seed_v
 	GameSetup.setup(state, config)
 
+	# ★長跑硬規則（用戶 2026-07-22）：附 specimen trace → 送 QA 故事稽核，才可下 behavior 因果結論。
+	SpecimenDumpHelper.setup_from_env(state)
+
 	var no_player := Vector2i(-1, -1)
 	for tick in range(ticks):
 		runner.advance_tick(state, no_player)
@@ -39,6 +42,9 @@ func _run() -> void:
 		if state.teams.is_empty():
 			print("[bed] 全滅 @tick=%d" % tick); break
 	_report(cfg_name, int(ticks / WorldState.TICKS_PER_DAY), state, out_path, true)
+	var spec_path: String = OS.get_environment("SPECIMEN_OUT")
+	if spec_path == "": spec_path = "docs/measurements/convoy-drop-enum-%s.specimen.jsonl" % cfg_name
+	SpecimenDumpHelper.dump(state, spec_path)
 	Probe.enabled = false
 	print("=== convoy drop enum DONE ===")
 
