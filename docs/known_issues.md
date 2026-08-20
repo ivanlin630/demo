@@ -119,6 +119,10 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 🔧 bed 工具坑：`OS.set_environment` 同進程讀回不可靠（2026-08-20 measurer 實證）
+量測 bed 若用 `OS.set_environment(...)` + 下游 `XXX.setup_from_env()` 的組合在**同一進程內**傳參 → 實測 **specimen 捕獲 0 決策**（Godot 對同進程 set 後立即讀回不保證可見）。
+**改法**：直接指定目標欄位（該例＝`state.specimen_team_ids`），不要繞 env。**env 只用於「外部 launcher → 進程啟動時」傳參**，不要當進程內部的參數傳遞管道。
+
 ### 👶 人口不成長：真根待分解（領導天花板假說已 REFUTED、現指向生育引擎結構性關閉）
 **現象**：`peaceful_economy` day5→day90 population median/max **精確卡 6**；§4b 擴點門檻 pop≥12 **三個 run 零次滿足**。
 **★假說一（領導天花板）＝REFUTED**（measurer 快照 seed1337 day20、11 隊）：統領實測**全部 0.600**、`effective_pop_cap` **76–99**、population **3–6**、**AT_CAP=0.0%** → **cap 根本沒在綁**。（systems 的錯誤＝把「統領 0.08→cap 6 恰好等於 median 6」的**算術巧合**當坐實；公式為真但「這條在綁」未驗＝file:line 坐實公式 ≠ 坐實主導。附帶事實：該 config 的 leader 統領**全體一致 0.600**＝fixture 特性、非隨機樣本。）
