@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: convoy-return-t3-budget
 topic: T3 累加版 DONE — ★誠實結論：本刀在這個世界【完全沒有行為差】（與母刀逐項相同、fp 相同），累加預算 inert、gate9 零樣本
 branch: feat/convoy-return-t3-budget

@@ -2,7 +2,7 @@
 from: implementer
 to: measurer
 cc: systems
-status: open
+status: consumed
 slice: convoy-return-conservation
 topic: ★放行重產 convoy specimen（systems 下放放行權）— branch/commit、環境變數、自驗指令全在這封
 branch: feat/convoy-return-conservation
