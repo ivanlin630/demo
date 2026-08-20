@@ -5717,11 +5717,12 @@ func _test_econ_growth_reads_coherent_food() -> void:
 	t.tile_pos = Vector2i(9,9)            # 離開糧倉格 → 無自家糧倉
 	t.food_flow_avg = 0.0                 # 無持續淨盈餘
 	assert(ResourceSystem.effective_food(state, t) < 0.01, "[econ] 前置:離家後 effective_food 該≈0")
-	var starved_bred: bool = false
-	for i in 300:
-		if "P5_breed" in rs_evaluate_life_events_for_test(state, leader, t):
-			starved_bred = true; break
-	assert(not starved_bred, "[econ] 真餓隊(私產+糧倉皆空)仍不該生育")
+	# ★新契約（原測 vacuous：_evaluate_life_events 現在恆回空陣列＝必然通過、驗不到東西）：
+	# 真餓隊 rel_surplus ≤ 0 → progress 不增 → 推真實時間也不生。
+	# ★注意：同一隊在本測前段（盈餘期）已累積過 progress 殘量 → 判準是「不再增加」而非「等於 0」。
+	var prog_before: float = t.breed_progress
+	assert(not breed_within_days_for_test(state, t, 90), "[econ] 真餓隊(私產+糧倉皆空)90 日仍不該生育")
+	assert(absf(t.breed_progress - prog_before) < 1e-9, "[econ] 真餓隊 breed_progress 不該再增加（rel_surplus<=0）")
 	# gate fail → base 0.05（vs pass 0.55）；leader 預設 野心0.5→+0.15 → 上限約0.2 < 0.3
 	assert(rs._score_expand(state, leader, t) < 0.3, "[econ] 真餓隊擴張 food gate 該 fail")
 	print("[econ] growth reads coherent food OK")
@@ -12824,11 +12825,12 @@ func _test_breed_needs_both_sexes() -> void:
 	t_m.food_flow_avg = 100.0   # R2：正向 flow → surplus_ok=true，使 no-breed 純因全男(非 flow 缺)
 	var p_m := PersonData.new(); p_m.id = 1; p_m.team_id = 0; p_m.sex = "male"
 	p_m.needs = { "safety": 1.0, "food": 1.0 }
-	var bred: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(_no_granary_state(), p_m, t_m):
-			bred = true; break
-	assert(not bred, "全男隊(anon全男+male breeder)不應出 P5_breed")
+	# ★新契約（原測 vacuous、同上）：全男隊 _breed_balance=0 → 每人速率 0 → 推時間也不生。
+	var st_m := _no_granary_state()
+	st_m.persons[p_m.id] = p_m; p_m.team_id = t_m.team_id; st_m.teams[t_m.team_id] = t_m
+	t_m.food_flow_avg = float(t_m.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.0   # 盈餘充足、只剩性別結構擋
+	assert(not breed_within_days_for_test(st_m, t_m, 90), "全男隊(anon全男+male breeder)90 日不生（balance=0）")
+	assert(t_m.breed_progress == 0.0, "全男隊 breed_progress 不累積")
 	print("breed needs both sexes OK")
 
 func _test_breed_decoupled() -> void:

@@ -11,13 +11,11 @@ const BREED_BASE_RATE: float = 0.0133
 # K 錨在實測分布（spec §6）：peaceful d45 的 p90 = 0.148 取整 → 語意＝「本世界前 10% 健康的村」落在 f≈0.5。
 # 飽和效果：r=0.15→f≈0.50 / r=0.5→f≈0.77 / r=2.7→f≈0.95 / r=12.7→f≈0.99（暴富村不爆生）。
 const BREED_K: float = 0.15
-# 醫療技能相對權重：沿用舊式 (BREED_BASE_CHANCE 0.15 + 醫療×0.1) 的比例＝0.1/0.15≈0.667，
+# 醫療技能相對權重：沿用舊抽獎式的「0.1/0.15」比例＝0.667（舊式為 chance = 0.15 + 醫療×0.1），
 # 改寫成乘法 persona_mult = (1 + 醫療×此值) × balance，維持既有人格語意不新增旋鈕。
 const BREED_MEDIC_RATE: float = 0.667
-const BREED_BASE_CHANCE: float = 0.15   # TEST VALUE（舊抽獎式殘留：已無 caller、保留供對照/回溯）
 # R2 flow-not-stock：生育 gate 讀持續淨食物流盈餘（食物/天），非 stale 滿倉 stock。
 # 門檻 ≈ 半人份日餐 → 有真盈餘養新口才生（爆倉不再驅動）。TEST VALUE，bed 校。
-const BREED_FLOW_MIN: float = 1.2   # TEST VALUE — 生育所需日均淨食物盈餘
 
 var _npc_ai: NpcAiSystem
 
@@ -59,8 +57,9 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 					for _s in range(maxi(trials, 1)):
 						skill_sys.on_reaction(person, reaction)
 			# 生命事件（獨立於行動反應，可並行）
-			for ev in _evaluate_life_events(state, person, team):   # ★breed 已移出（trials 不再餵 breed）
-				_apply_life_event(state, person, team, ev)
+			# ★生育已移出到 team-level _tick_breed（見上）→ 此處不再呼 _evaluate_life_events：
+			# 它現在恆回空陣列，在「每人每次 evaluate_all」的熱路徑上白配一個 Array。
+			# 函式本身保留為未來其他生命事件的擴充點（床有直呼）。
 			match reaction:
 				"P2_produce": morale_acc += 1.0; morale_n += 1
 				"N4_shirk":   morale_acc -= 1.0; morale_n += 1
