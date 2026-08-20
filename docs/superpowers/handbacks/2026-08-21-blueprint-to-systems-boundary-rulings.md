@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[清單三邊界=用戶已裁:①A5脊椎不擋(豁免標『無前瞻計畫類不讀』,考後主軸)②B3-B5戰爭之路全豁免(戰爭欄廢考;warring config照跑測壓力下經濟/人口/效能)③★D4質地類=擋考——照妖鏡殘目全清才考:已知四隻(逃跑3格人格化/資訊扭曲平骰/問詢說謊30%/顧問誤導50%)+你verify時順手窮盡盤一輪『裸平骰/死常數決策點』存量,盤出來的全入D4·清單checklist已更新,verify照走;考前工程範圍=A1-A4+B1B2B6B7+C全+D1D2D4(D3邊緣豁免可)·規模不小,排程你出(effort序你裁,建議質地類D4=implementer平行小票消化)"
 ---
 

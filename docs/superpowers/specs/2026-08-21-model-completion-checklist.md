@@ -3,6 +3,7 @@
 status: DRAFT(blueprint WHAT 盤點;各項現況待 systems code-verify 後轉 CANONICAL)
 owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 用戶令:「模型與統一框架哪還沒做完,一起入清單,全做完再跑長跑。」——本清單=下輪長考(診斷/驗收皆同)的前置閘實體。
+★憲章(用戶原話 2026-08-21):「**下次長跑後不要再看到已知的模型問題。我可以接受未知或未實裝項目。不然會一直影響我們調參數、甚至未來項目的判斷。車組裝好了我們再上路跑。**」——三分法:已知壞=禁上路/未知=診斷考的目的/未實裝=豁免可但考卷明標「未裝,相關行為不讀」(防「沒裝」誤讀成「壞了」)。
 
 ## A. 反射弧本體(思考模型四邊補完)
 | # | 件 | 現況(待驗) |
@@ -17,6 +18,7 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 | # | 件 | 現況(待驗) |
 |---|---|---|
 | B1 | 引擎外決策存量盤點 | ★**systems 已盤完（2026-08-21、見下 §B1 明細）**：寫入側乾淨、決策側找到 **4 個真存量** |
+| B1b | **★mini-scorer 平行決策層窮盡盤點**(uprising 自帶算分/DiplomaticAiSystem accept-reject 各一例;全站還有幾套?)+B1 丙 4 站處置(收編 or 合憲標注;dormant 死枝坐實後刪) | blueprint 核准入列 2026-08-21 |
 | B2 | 商隊 survival 履約(統一框架 B 首序舊帳) | 待驗(可能已折入) |
 | B3 | capture/flip encounter-only(headless 恒不 fire)=戰爭科目結構廢考 | 戰爭之路已定案未修 |
 | B4 | intent 從不選征服(survival-mode 收斂;B3 修後才測得出真偽) | 同上 |
