@@ -29,3 +29,7 @@ date: 2026-08-20 ／ owner: systems ／ 溯源：T0-A2 證偽「輪詢是浪費�
 4. **量化（三方對照、對齊既有量法：全新檔名 + 序列跑 + 同窗）**：`reeval.directive` 次數、決策次數/日、`wall/day` —— **與 main 98.0 / A1 133.1 / A2×3 110.8 併排報**；★**預期這一刀能把 wall 壓到 main 以下**，若沒有，照實報、不要調參湊。
 5. det×3 + constitution ≤75 + headless 0-new + **fp intended-change**（成員重評時機真的變了）。
 6. ★**故事面**：抽樣看「命令沒變的那些輪」成員在做什麼——**應該是繼續執行原任務**，而非停滯（確認省下的是 churn、不是必要的重新規劃）。
+
+## §5 順帶觀察（**不在本 slice 修**、記檔備查）
+`_update_goals:1078-1081`：`f.goals.clear()` / `goal_drivers.clear()` **在** `if leader_team == null: return` **之前** → **領袖隊短暫不存在時（例如繼承窗、erase 批次期間），該 faction 的命令會被清空且不重建**。
+本 slice 的改動**不會惡化它**（反而讓「命令從有變無」正確地蓋戳記＝成員會知道命令沒了）；但這個 early-return-after-clear 的形狀本身值得日後單獨看。
