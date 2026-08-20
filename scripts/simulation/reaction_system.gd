@@ -2,10 +2,20 @@ class_name ReactionSystem
 
 const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
 const MORALE_LERP: float = 0.1          # 每次 evaluate_all 呼叫的士氣收斂率（trials 補償用同一常數）
-const BREED_BASE_CHANCE: float = 0.15   # TEST VALUE
+# ★生育＝per-capita 相對盈餘驅動的【連續速率】（取代舊「硬懸崖門檻 + 每次抽獎」）。
+# BREED_BASE_RATE 反推（spec §7、用戶拍 pacing (B)「約一個月一個名額」）：
+#   目標＝健康村（f ≈ 0.5，即 rel_surplus ≈ K = 0.15 ＝本世界前 10%）、5 名適齡成人 → 1 名額/30 日
+#   births_per_day = BASE_RATE × f × eligible × persona_mult
+#   → 1/30 = BASE_RATE × 0.5 × 5 × 1.0 → BASE_RATE = 0.0133（名額 / 適齡人·日）
+const BREED_BASE_RATE: float = 0.0133
+# K 錨在實測分布（spec §6）：peaceful d45 的 p90 = 0.148 取整 → 語意＝「本世界前 10% 健康的村」落在 f≈0.5。
+# 飽和效果：r=0.15→f≈0.50 / r=0.5→f≈0.77 / r=2.7→f≈0.95 / r=12.7→f≈0.99（暴富村不爆生）。
+const BREED_K: float = 0.15
+# 醫療技能相對權重：沿用舊抽獎式的「0.1/0.15」比例＝0.667（舊式為 chance = 0.15 + 醫療×0.1），
+# 改寫成乘法 persona_mult = (1 + 醫療×此值) × balance，維持既有人格語意不新增旋鈕。
+const BREED_MEDIC_RATE: float = 0.667
 # R2 flow-not-stock：生育 gate 讀持續淨食物流盈餘（食物/天），非 stale 滿倉 stock。
 # 門檻 ≈ 半人份日餐 → 有真盈餘養新口才生（爆倉不再驅動）。TEST VALUE，bed 校。
-const BREED_FLOW_MIN: float = 1.2   # TEST VALUE — 生育所需日均淨食物盈餘
 
 var _npc_ai: NpcAiSystem
 
@@ -26,6 +36,9 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 		var team: TeamData = state.teams.get(tid)
 		if team == null:
 			continue
+		# ★生育：team-level 連續累積器（每隊每次 evaluate_all 一次；rate×真實Δt 本來就是正確降頻語意
+		# → ★不吃 LOD trials，其餘累積型補償照舊）。
+		_tick_breed(state, team)
 		var morale_acc: float = 0.0
 		var morale_n: int = 0
 		for pid in state.persons:
@@ -44,8 +57,9 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 					for _s in range(maxi(trials, 1)):
 						skill_sys.on_reaction(person, reaction)
 			# 生命事件（獨立於行動反應，可並行）
-			for ev in _evaluate_life_events(state, person, team, trials):
-				_apply_life_event(state, person, team, ev)
+			# ★生育已移出到 team-level _tick_breed（見上）→ 此處不再呼 _evaluate_life_events：
+			# 它現在恆回空陣列，在「每人每次 evaluate_all」的熱路徑上白配一個 Array。
+			# 函式本身保留為未來其他生命事件的擴充點（床有直呼）。
 			match reaction:
 				"P2_produce": morale_acc += 1.0; morale_n += 1
 				"N4_shirk":   morale_acc -= 1.0; morale_n += 1
@@ -204,28 +218,70 @@ func _breed_balance(team: TeamData, breeder_sex: String = "") -> float:
 	return minf(m, f) / maxf((m + f) / 2.0, 1.0)
 
 # 生命事件層（與行動反應並行，winner-take-all 不適用）
-func _evaluate_life_events(state: WorldState, p: PersonData, t: TeamData, trials: int = 1) -> Array:
-	var events: Array = []
-	var safe: bool = float(p.needs.get("safety", 1.0)) > 0.7
-	var fed: bool = float(p.needs.get("food", 1.0)) > 0.7
-	# R2 flow-not-stock：生育讀持續淨食物流盈餘，非 stale 滿倉 → 爆倉不再驅動成長。
-	# 覓食/爆倉 net~0 → 不生；賣特產換糧 net>0（致富 intent 驅動）→ 才長。
-	var surplus_ok: bool = t.food_flow_avg > BREED_FLOW_MIN
-	var cap: int = maxi(1, int(t.population * 0.25))
-	if safe and fed and surplus_ok and t.minor_population < cap:
-		var balance: float = _breed_balance(t, p.sex)   # 全單性→0→不繁衍
+# ★生育已改為 team-level 連續累積器（見 _tick_breed）：不再逐人抽獎、不再有硬門檻懸崖。
+# 本函式保留為其他「生命事件」的擴充點（目前無其他事件）。
+func _evaluate_life_events(_state: WorldState, _p: PersonData, _t: TeamData, _trials: int = 1) -> Array:
+	return []
+
+# ★T1 度量：rel_surplus ＝ 相對盈餘（比例量）＝ 日均淨食物流 / 全隊日食耗。
+# 比例量同時解掉兩個舊病：小村被【絕對門檻】封死、大團被【人均攤薄】。
+static func breed_rel_surplus(t: TeamData) -> float:
+	var need: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	return t.food_flow_avg / need
+
+# ★T2 速率形狀：f(r) = 0 (r<=0) / r/(r+K) (r>0)——連續、單調、飽和於 1、無懸崖。
+static func breed_f(rel_surplus: float) -> float:
+	if rel_surplus <= 0.0:
+		return 0.0
+	return rel_surplus / (rel_surplus + BREED_K)
+
+# ★T3 累積器（每 evaluate_all 每隊一次）：progress += rate × eligible × elapsed_days；
+# 跨過 1.0 就產一個 minor（受 cap 限制）。
+# ★★elapsed_days 用 per-team 真實流逝（breed_progress_last_tick），★禁用呼叫情境的 cadence 常數當
+#   elapsed——near/far 穿梭會重複累加（headless 不會踩、但有玩家遊玩是常態）。
+# ★sentinel -1（未初始化）→ 首次評估只蓋戳記不累加＝冷啟動噴發結構上不可能。
+func _tick_breed(state: WorldState, team: TeamData) -> void:
+	var now: int = state.world.current_tick
+	if team.breed_progress_last_tick < 0:
+		team.breed_progress_last_tick = now   # 首次：只蓋戳記
+		return
+	var elapsed_days: float = float(now - team.breed_progress_last_tick) / float(WorldState.TICKS_PER_DAY)
+	team.breed_progress_last_tick = now
+	if elapsed_days <= 0.0:
+		return
+	var cap: int = maxi(1, int(team.population * 0.25))
+	if team.minor_population >= cap:
+		return   # 名額已滿：不累加（避免存滿一大桶後一次噴出）
+	var f: float = breed_f(breed_rel_surplus(team))
+	if f <= 0.0:
+		return   # 相對盈餘 ≤ 0 → 世界窮就少生（(甲) 精神保留）
+	# 適齡＝needs 達標的隊員；persona_mult 沿用既有 醫療 與 _breed_balance（兩性結構仍是先決）
+	var daily: float = 0.0
+	for pid in state.persons:
+		var person: PersonData = state.persons[pid]
+		if person.team_id != team.team_id:
+			continue
+		if float(person.needs.get("safety", 1.0)) <= 0.7 or float(person.needs.get("food", 1.0)) <= 0.7:
+			continue
+		var balance: float = _breed_balance(team, person.sex)
 		if balance <= 0.0:
-			return events
-		var chance: float = (BREED_BASE_CHANCE + float(p.skills.get("醫療", 0.0)) * 0.1) * balance
-		# ★真·多次試驗（禁用單抽 1-(1-p)^n：那會結構性封頂每窗最多 1 次＝系統性低估）。
-		# ★團級 cap 逐次檢查（迴圈內），否則 far pass 會突破 near 端本來就會撞到的上限。
-		for _i in range(maxi(trials, 1)):
-			if t.minor_population + events.size() >= cap:
-				break
-			if randf() < chance:
-				events.append("P5_breed")
-				if Probe.enabled: Probe.bump("reaction.breed")
-	return events
+			continue
+		daily += BREED_BASE_RATE * f * (1.0 + float(person.skills.get("醫療", 0.0)) * BREED_MEDIC_RATE) * balance
+	if daily <= 0.0:
+		return
+	team.breed_progress += daily * elapsed_days
+	if Probe.enabled:
+		Probe.bump_sample("breed.rate_sample", {
+			"team": team.team_id, "rel_surplus": snappedf(breed_rel_surplus(team), 0.001),
+			"f": snappedf(f, 0.001), "daily_rate": snappedf(daily, 0.0001),
+			"progress": snappedf(team.breed_progress, 0.001), "elapsed_days": snappedf(elapsed_days, 0.01),
+		}, 24)
+	while team.breed_progress >= 1.0 and team.minor_population < cap:
+		team.minor_population += 1
+		team.breed_progress -= 1.0
+		if Probe.enabled:
+			Probe.bump("breed.born")
+			Probe.bump("reaction.breed")   # 既有 key 保留（下游/舊床仍讀）
 
 func _apply_life_event(_state: WorldState, _person: PersonData, team: TeamData, ev: String) -> void:
 	match ev:

@@ -5704,12 +5704,10 @@ func _test_econ_growth_reads_coherent_food() -> void:
 	assert(ResourceSystem.effective_food(state, t) > 168.0, \
 		"[econ] 前置:effective_food 不足，實際=%.1f" % ResourceSystem.effective_food(state, t))
 	# R2 flow-not-stock：生育讀 food_flow_avg（持續淨盈餘），非 stock。設正向 flow → 該生育。
-	t.food_flow_avg = ReactionSystem.BREED_FLOW_MIN + 5.0
-	var bred: bool = false
-	for i in 300:
-		if "P5_breed" in rs_evaluate_life_events_for_test(state, leader, t):
-			bred = true; break
-	assert(bred, "[econ] 持續淨盈餘 flow 卻不生育")
+	# ★新契約：rel_surplus = flow / (pop×FPPD) > 0 → 連續速率累積；給明顯正盈餘 + 足夠天數
+	t.food_flow_avg = float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.0   # rel_surplus≈1.0
+	var bred: bool = breed_within_days_for_test(state, t, 120)
+	assert(bred, "[econ] 持續淨盈餘（rel_surplus≈1）120 日內卻不生育")
 	# 擴張：糧倉足 + 統領 + 低壓 → food gate 該認 effective_food → 高分(>0.5)
 	var rs := ReactionSystem.new()
 	var expand_score: float = rs._score_expand(state, leader, t)
@@ -5719,16 +5717,30 @@ func _test_econ_growth_reads_coherent_food() -> void:
 	t.tile_pos = Vector2i(9,9)            # 離開糧倉格 → 無自家糧倉
 	t.food_flow_avg = 0.0                 # 無持續淨盈餘
 	assert(ResourceSystem.effective_food(state, t) < 0.01, "[econ] 前置:離家後 effective_food 該≈0")
-	var starved_bred: bool = false
-	for i in 300:
-		if "P5_breed" in rs_evaluate_life_events_for_test(state, leader, t):
-			starved_bred = true; break
-	assert(not starved_bred, "[econ] 真餓隊(私產+糧倉皆空)仍不該生育")
+	# ★新契約（原測 vacuous：_evaluate_life_events 現在恆回空陣列＝必然通過、驗不到東西）：
+	# 真餓隊 rel_surplus ≤ 0 → progress 不增 → 推真實時間也不生。
+	# ★注意：同一隊在本測前段（盈餘期）已累積過 progress 殘量 → 判準是「不再增加」而非「等於 0」。
+	var prog_before: float = t.breed_progress
+	assert(not breed_within_days_for_test(state, t, 90), "[econ] 真餓隊(私產+糧倉皆空)90 日仍不該生育")
+	assert(absf(t.breed_progress - prog_before) < 1e-9, "[econ] 真餓隊 breed_progress 不該再增加（rel_surplus<=0）")
 	# gate fail → base 0.05（vs pass 0.55）；leader 預設 野心0.5→+0.15 → 上限約0.2 < 0.3
 	assert(rs._score_expand(state, leader, t) < 0.3, "[econ] 真餓隊擴張 food gate 該 fail")
 	print("[econ] growth reads coherent food OK")
 
 # 測試入口：直呼私有 _evaluate_life_events（簽名含 state）
+# ★生育新契約（連續速率累積器，取代舊「逐次抽獎回 P5_breed」）：測試改為推進真實時間、看 minor 是否成長。
+# 回傳：在 days 天內是否至少生出一個 minor。person 已在 team 內（by team_id）。
+func breed_within_days_for_test(state: WorldState, team: TeamData, days: int) -> bool:
+	var rs := ReactionSystem.new()
+	var before: int = team.minor_population
+	var windows: int = days * 24
+	for _i in range(windows):
+		state.world.current_tick += int(WorldState.TICKS_PER_DAY / 24)
+		rs.evaluate_all(state, [team.team_id], null, 1)
+		if team.minor_population > before:
+			return true
+	return team.minor_population > before
+
 func rs_evaluate_life_events_for_test(state: WorldState, p: PersonData, t: TeamData) -> Array:
 	var rs := ReactionSystem.new()
 	return rs._evaluate_life_events(state, p, t)
@@ -10891,17 +10903,14 @@ func _test_p5_needs_surplus() -> void:
 	var p := PersonData.new(); p.id = 1; p.team_id = 0   # needs 預設 safe/fed
 	var rs := ReactionSystem.new()
 	var st := _no_granary_state()
-	var bad: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(st, p, team):
-			bad = true; break
-	assert(not bad, "無淨食物盈餘不生")
-	team.food_flow_avg = ReactionSystem.BREED_FLOW_MIN + 5.0   # 持續淨盈餘 → 該生
-	var got: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(st, p, team):
-			got = true; break
-	assert(got, "盈餘該生")
+	# ★新契約：無盈餘（rel_surplus<=0）→ progress 不增、永不生
+	team.food_flow_avg = 0.0
+	if not st.persons.has(p.id): st.persons[p.id] = p
+	p.team_id = team.team_id
+	if not st.teams.has(team.team_id): st.teams[team.team_id] = team
+	assert(not breed_within_days_for_test(st, team, 60), "無淨食物盈餘不生")
+	team.food_flow_avg = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.0
+	assert(breed_within_days_for_test(st, team, 120), "盈餘該生（rel_surplus≈1、120 日內）")
 	print("Reaction Task4a OK")
 
 func _test_n5_coin_conserved() -> void:
@@ -12816,11 +12825,12 @@ func _test_breed_needs_both_sexes() -> void:
 	t_m.food_flow_avg = 100.0   # R2：正向 flow → surplus_ok=true，使 no-breed 純因全男(非 flow 缺)
 	var p_m := PersonData.new(); p_m.id = 1; p_m.team_id = 0; p_m.sex = "male"
 	p_m.needs = { "safety": 1.0, "food": 1.0 }
-	var bred: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(_no_granary_state(), p_m, t_m):
-			bred = true; break
-	assert(not bred, "全男隊(anon全男+male breeder)不應出 P5_breed")
+	# ★新契約（原測 vacuous、同上）：全男隊 _breed_balance=0 → 每人速率 0 → 推時間也不生。
+	var st_m := _no_granary_state()
+	st_m.persons[p_m.id] = p_m; p_m.team_id = t_m.team_id; st_m.teams[t_m.team_id] = t_m
+	t_m.food_flow_avg = float(t_m.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.0   # 盈餘充足、只剩性別結構擋
+	assert(not breed_within_days_for_test(st_m, t_m, 90), "全男隊(anon全男+male breeder)90 日不生（balance=0）")
+	assert(t_m.breed_progress == 0.0, "全男隊 breed_progress 不累積")
 	print("breed needs both sexes OK")
 
 func _test_breed_decoupled() -> void:
@@ -12840,17 +12850,15 @@ func _test_breed_life_event() -> void:
 	var team := _bootstrap_breed_team(10, 0, 1000.0)
 	var p := _bootstrap_breed_person(1.0, 1.0)
 	var st := _no_granary_state()
-	var got: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(st, p, team):
-			got = true; break
-	assert(got, "條件滿足多次抽樣應出現 P5_breed")
+	# ★新契約：條件滿足 → 連續速率累積 → 有限天數內產 minor（不再是逐次抽獎的 P5_breed 事件）
+	st.persons[p.id] = p; p.team_id = team.team_id; st.teams[team.team_id] = team
+	team.food_flow_avg = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.0
+	var got: bool = breed_within_days_for_test(st, team, 120)
+	assert(got, "條件滿足 → 120 日內應產 minor（新契約：連續速率非抽獎）")
 	p.needs["safety"] = 0.0
-	var bad: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(st, p, team):
-			bad = true; break
-	assert(not bad, "不安全不應生育")
+	p.needs["safety"] = 0.1   # 不安全 → 不列入適齡
+	team.minor_population = 0; team.breed_progress = 0.0; team.breed_progress_last_tick = -1
+	assert(not breed_within_days_for_test(st, team, 60), "不安全不應生育")
 	print("Bootstrap Task3b OK")
 
 func _test_breed_parallel_with_action() -> void:
@@ -12862,11 +12870,11 @@ func _test_breed_parallel_with_action() -> void:
 	var st := _no_granary_state()
 	var action: String = rs._evaluate_person(st, p, team)
 	assert(action == "P1_comply", "高忠誠應 P1_comply，實際=%s" % action)
-	var got: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(st, p, team):
-			got = true; break
-	assert(got, "行動與生育應並行")
+	# ★新契約：行動反應（P1_comply）與生育累積器同時進行——同一 evaluate_all 內兩者都跑
+	st.persons[p.id] = p; p.team_id = team.team_id; st.teams[team.team_id] = team
+	team.food_flow_avg = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.0
+	var got: bool = breed_within_days_for_test(st, team, 120)
+	assert(got, "行動與生育應並行（行動仍 P1_comply、生育照樣累積出 minor）")
 	print("Bootstrap Task3c OK")
 
 func _test_breed_cap() -> void:
@@ -12875,17 +12883,16 @@ func _test_breed_cap() -> void:
 	var p := _bootstrap_breed_person(1.0, 1.0)
 	var st := _no_granary_state()
 	var t4 := _bootstrap_breed_team(4, 1, 1000.0)   # minor 已達 cap=1
-	var capped: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(st, p, t4):
-			capped = true; break
-	assert(not capped, "達 cap 不應生育 (pop=4 cap=1 minor=1)")
+	t4.team_id = 4
+	st.persons[p.id] = p; p.team_id = 4; st.teams[4] = t4
+	t4.food_flow_avg = float(t4.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.0
+	assert(not breed_within_days_for_test(st, t4, 120), "達 cap 不應生育 (pop=4 cap=1 minor=1)")
 	var t20 := _bootstrap_breed_team(20, 4, 1000.0)   # cap=5 minor=4
-	var ok: bool = false
-	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(st, p, t20):
-			ok = true; break
-	assert(ok, "pop=20 cap=5 minor=4 應可生育")
+	t20.team_id = 20
+	var p2 := _bootstrap_breed_person(1.0, 1.0)
+	p2.id = p.id + 1; p2.team_id = 20; st.persons[p2.id] = p2; st.teams[20] = t20
+	t20.food_flow_avg = float(t20.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.0
+	assert(breed_within_days_for_test(st, t20, 120), "pop=20 cap=5 minor=4 應可生育")
 	print("Bootstrap Task3d OK")
 
 # ════════════════════════════════════════════════════════════════════

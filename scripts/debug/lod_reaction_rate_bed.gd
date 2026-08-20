@@ -21,7 +21,7 @@ func _mk(seed_v: int) -> Array:
 	var team := TeamData.new(); team.team_id = 1; team.tile_pos = Vector2i(0,0); team.faction_id = -1
 	team.tags = [TeamData.TAG_PRODUCE]      # 讓 P2_produce 真的成為 winner（morale target 才會拉高）
 	team.work_morale = 0.5                  # ★起點遠離 target → lerp 收斂速度差異才看得出來
-	team.food_flow_avg = 5.0            # 盈餘（過 BREED_FLOW_MIN）
+	team.food_flow_avg = 5.0            # 明顯正的相對盈餘（rel_surplus 高 → f 大；舊式的絕對門檻已廢）
 	# ★_breed_balance 讀 anon 池的性別比（非 named 的 sex）→ 必須有 anon 母體，否則 balance=0 恆不生
 	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 60)
 	team.anon_female_ratio = 0.5
