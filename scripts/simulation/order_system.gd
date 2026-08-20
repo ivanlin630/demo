@@ -119,6 +119,13 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		else:
 			# ★abandoned tap：逾時未成交（帶 order_id + 壽命，事後可串）
 			Probe.bump("order.abandoned")
+			# ★執行失敗反饋鐵律 T4 示範接線：買單到期沒人填 ＝ 執行失敗，不准靜默丟棄。
+			# 記隊層失敗記憶 → 下輪「買糧/買料」（＝依賴市場供貨的決策）折價；TTL 用 ORDER_LIFETIME
+			# ＝該動作的自然重試週期（相對錨定，不新增全域絕對天數常數）。
+			# ★劣勢非失效：市場這次沒送到，不代表計畫不可行 → 只折價、不升 T0 喚醒（spec §T3）。
+			if String(o.get("kind", "")) == "buy":
+				FailureMemory.record(state, team, "買單", String(o.get("res", "")),
+					ORDER_LIFETIME, "order_abandoned_buy")
 			if Probe.enabled:
 				Probe.bump_sample("order.abandoned.sample", {
 					"order_id": int(o.get("order_id", -1)), "team": team.team_id,
