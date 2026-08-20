@@ -16,6 +16,14 @@ const GATHER_SKIP: Array = ["wild_horses", "wild_game"]   # 活物不走 generic
 
 # lazy-on-cadence：僅 current_tick>=labor_eval_next_tick 才真重算；否則直讀既存 alloc（生產每 tick 只讀 share、零雙算）。
 static func ensure_fresh(state: WorldState, tile: HexTileData) -> void:
+	# ★T0-A1 ③：共址任一 PRODUCE 隊糧餘命跌破危機線＝勞力危機 → 共址各隊當 tick 可重新思考
+	# （原本只有「重算勞力分配」，隊自己不會因此提前重評）。純讀既有 food_runway，零 RNG。
+	for _tid in state.teams:
+		var _t: TeamData = state.teams[_tid]
+		if _t.tile_pos != tile.tile_pos or not TeamData.TAG_PRODUCE in _t.tags:
+			continue
+		if _t.food_runway > 0.0 and _t.food_runway < LABOR_CRISIS_FOOD_DAYS:
+			WorldEvents.emit(state, "labor_crisis", [_tid])
 	if state.world.current_tick < tile.labor_eval_next_tick and not tile.labor_alloc.is_empty():
 		return
 	rebalance(state, tile)

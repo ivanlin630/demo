@@ -58,6 +58,10 @@ var specimen_team_ids: Array[int] = []   # 指標團：LOD-exempt + SpecimenTrac
 # ★訂單簿 tap：order_id 全域遞增計數器（★存 state 非 static var——static 跨 new() 會 id 碰撞、
 # 見 known_issues beast id 前科）。只增不減；存檔即帶走。
 var next_order_id: int = 1
+# ★T0-A1 事件匯流排：本 tick 被事件喚醒、可立即重新思考的隊（team_id → true）。
+# ★不入 state_fingerprint：因為它【單 tick 內清空】（tick 結尾 WorldEvents.consume_and_clear），
+#   不跨 tick 存活＝非持久狀態。分批消費會讓這個正當性失效。
+var pending_rethink: Dictionary = {}
 var player_state: Dictionary = {}
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []
@@ -332,6 +336,14 @@ func erase_teams(tids: Array) -> void:
 			dead_list.append(tid)
 	if dead_list.is_empty():
 		return
+	# ★T0-A1 ②：同批死亡 → 死者的 faction 同僚立即重新思考（盟主/成員結構剛變）
+	var _notify: Array = []
+	for _dtid in dead_list:
+		var _dt: TeamData = teams[_dtid]
+		if _dt.faction_id != -1 and factions.has(_dt.faction_id):
+			for _mid in factions[_dt.faction_id].member_team_ids:
+				if not dead.has(_mid): _notify.append(_mid)
+	WorldEvents.emit(self, "teams_erased", _notify)
 	for tid in dead_list:
 		var team: TeamData = teams[tid]
 		# 1. 母子：脫離 parent + 孤兒化自己的子隊

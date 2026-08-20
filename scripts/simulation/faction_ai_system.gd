@@ -2952,7 +2952,18 @@ func _directive_fresh(state: WorldState, team: TeamData) -> bool:
 	return state.factions[team.faction_id].directive_change_tick > team.last_decision_tick
 
 # ⑦ 統一「何時重評」predicate（唯一判斷點，架構紀律）：IDLE/stuck/crisis/命令新→即時；否則 cadence 節流。
+# ★T0-A1 T3：cadence 到期 OR pending_rethink（只加不減——輪詢照舊、事件只是額外喚醒來源）。
+# ★「在途不想」（intended-change、單獨標注）：移動中的隊不因 cadence 重評（省掉「走著走著反覆改主意」
+#   的空轉），★但仍受事件喚醒（被襲/情報/餓線照樣瞬醒）→ 反應性升、計算降。
+const TRAVEL_TASKS: Array = [
+	TeamData.TASK_TRADE, TeamData.TASK_JOIN, TeamData.TASK_BEG, TeamData.TASK_MERGE,
+	TeamData.TASK_MIGRATE, TeamData.TASK_ESCORT, TeamData.TASK_CONSTRUCT,
+]
+
 func _should_reeval(state: WorldState, team: TeamData) -> bool:
+	if WorldEvents.is_pending(state, team.team_id):
+		if Probe.enabled: Probe.bump("reeval.event")
+		return true      # ★事件瞬醒：不等 cadence
 	if team.current_task == TeamData.TASK_IDLE:
 		if Probe.enabled: Probe.bump("reeval.idle")
 		return true      # 空閒/剛釋放→即重評
@@ -2974,6 +2985,12 @@ func _should_reeval(state: WorldState, team: TeamData) -> bool:
 		if Probe.enabled: Probe.bump("reeval.directive")
 		return true               # faction 新命令→即時響應
 	if state.world.current_tick >= team.decision_eval_next_tick:
+		# ★在途不想：真的在移動中的 travel task（move_target 已設且未到）→ 不因 cadence 重評；
+		# 事件喚醒仍在上方最前面（被襲/情報/餓線照樣瞬醒）。
+		if team.current_task in TRAVEL_TASKS and team.move_target != Vector2i(-1, -1) 				and team.tile_pos != team.move_target:
+			if Probe.enabled: Probe.bump("reeval.skip_in_transit")
+			team.decision_eval_next_tick = state.world.current_tick + DECISION_CADENCE
+			return false
 		if Probe.enabled: Probe.bump("reeval.cadence")
 		return true
 	return false   # 否則 cadence 節流
@@ -3467,6 +3484,14 @@ func _check_ore_surplus(state: WorldState, faction) -> float:
 
 # 滅團標記：清 faction 引用 + 排入延遲清除（資產路由延到 erase 當下，捕捉時序間加回的 coin）
 func _on_team_extinct(state: WorldState, team: TeamData) -> void:
+	# ★T0-A1 ②：目睹者＝同格其他隊（滅團是就地可見的事件），加同 faction 成員（自家消息傳得到）
+	var _witness: Array = []
+	for _wid in state.teams_on_tile(team.tile_pos):
+		if _wid != team.team_id: _witness.append(_wid)
+	if team.faction_id != -1 and state.factions.has(team.faction_id):
+		for _mid in state.factions[team.faction_id].member_team_ids:
+			if _mid != team.team_id: _witness.append(_mid)
+	WorldEvents.emit(state, "team_extinct", _witness)
 	# defense-in-depth（systems addendum 2026-07-19）：野獸死=狩獵結果非隊死因統計，不計入 extinct.* 死因計數器。
 	# loop3 beast-skip 已令 beast 正常走不到此（combat cleanup 擁有 beast 清理）→ 此守衛冗餘但防未來別條 extinct 路誤計。
 	if Probe.enabled and team.beast_kind == "":
