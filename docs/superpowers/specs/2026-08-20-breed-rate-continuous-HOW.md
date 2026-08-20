@@ -41,3 +41,20 @@ dispatch 前先要一份分布快照（measurer，可從**既有大考 specimen/
 6. **LOD 等價**：far pass（低頻）與 near pass 在同窗內**累積產出相同**（`elapsed_days` 語意正確）；移除 breed trials 分支後**其餘累積型補償仍在**。
 7. det×3、constitution ≤75、headless 0-new、**fp intended-change**（含 `breed_progress` 新欄入 fp）。
 8. **★世界級 sanity**：短窗跑 peaceful → `reaction.breed`（或新 probe `breed.born`）**> 0** 且**不爆炸**（人口曲線平滑上升、非指數）。
+
+## §5 R²delta（判決 CLEAN + 1 必查項、2026-08-20）
+**R² 確認核心推論成立**：連續累積器**不是機率型**，`progress += rate×Δt` 是對「時間流逝」的**精確積分**——切一段與切十段總和相同（**零離散化誤差**）→ **移除 breed 專屬 `trials` 分支、保留 morale/XP/loyalty/unrest 那批機率型補償**方向正確、**不衝突** LOD 降頻補償紀律（那條管的是機率型）。
+
+### ★必查項：`elapsed_days` 必須是 **per-team 真實流逝**，不得用呼叫情境的 cadence 常數
+**坑**：若 `elapsed_days = cadence / TICKS_PER_DAY`（near 傳 `NEAR_CADENCE`、far 傳 `FAR_ZONE_INTERVAL` 的**固定常數**），**跨 near/far 邊界的隊會算錯**——例：某隊 10 tick 前才以 near 身分被評過，下一刻因玩家移動變 far、恰逢 `tick%100==0` 被 far pass 呼到，若餵 `elapsed=100 tick`，**與已算過的 10 tick 重疊 → 同一段時間重複累加**（反向 far→near 則少算）。
+★**headless/exam 場景不會發生**（`player_id==-1` → `_get_near_teams` 全空、全隊恆 far、無穿梭）→ **不影響 T0 與大考數字**；但**正常有玩家遊玩時是常態**（玩家移動使隊伍在近遠區穿梭）。
+**修法**：
+- 新欄 **`TeamData.breed_progress_last_tick: int = -1`**（★systems 已窮盡查過：**無可借用的現成戳記**——既有 tick 欄全是 `*_eval_next_tick` 排程型；唯一回望戳 `last_decision_tick` 掛在**決策路**、cadence 不同，借用會錯）。
+- 每次評估：`elapsed_days = (current_tick - breed_progress_last_tick) / float(TICKS_PER_DAY)`，算完更新戳記。
+- ★**冷啟動（R² (e) 的提醒）走既有慣例**：sentinel `-1` ＝ 未初始化 → **首次評估只蓋戳記、不累加**（＝ `food_flow_last: float = -1.0` 的「首取樣 seed，不計流」同款；`team_data.gd:76` / `resource_system:237-238`）→ **「長期未評估後首次評估一次噴出一堆 minor」結構上不可能發生**。
+- **兩個新欄（`breed_progress` / `breed_progress_last_tick`）都入 `state_fingerprint`**：R² 給了比「照 camp_team_id 前例」更精確的理由——`state_fingerprint:69` 排除的是 `food_runway`/`food_flow_avg`/`need_urgency` 這類**可重算的 ephemeral 快取**；而這兩欄是**直接因果態**（值本身決定「下一次跨過 1.0 是哪個 tick」），與 `minor_population` 同類 → 入 `_emit_teams` 那批持久欄。
+
+### gate 追加/修訂
+- **gate 9（新）**：near/far **穿梭不重複累加**——合成床：同一隊先以 near 身分評估、再以 far 身分評估，總累加量 ＝ **真實流逝天數 × rate**（非 near 窗 + far 窗相加）。
+- **gate 10（新）**：**冷啟動不爆**——新生成/長期未評估的隊，首次評估**產出 0 個 minor**（只蓋戳記）。
+- **gate 5 措辭修訂（R² 純措辭建議、採納）**：「同 `rel_surplus` 下 pop3 vs pop30 每人速率相同」是**公式結構的構造性保證**（`rate` 只吃比例量與 persona、不含絕對 pop），**不是靠測試驗證的設計性質**；此 gate 的角色是**迴歸測試**（防 implementer 在 `_breed_balance` 或別處**偷渡絕對 pop 依賴**），描述時要分清這兩種角色。
