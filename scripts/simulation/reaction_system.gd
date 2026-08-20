@@ -13,7 +13,14 @@ func _init() -> void:
 	_npc_ai = NpcAiSystem.new()
 
 # ★trials（LOD 紅線修）：far pass 每次呼叫代表 trials 個 near 窗（cadence/NEAR_CADENCE=10）。
-# 只有 breed 用得到（唯一 randf 處）；其餘反應是決定性 _score_*+argmax，跑一次語意即正確。
+# ★判準＝【每次呼叫是否累積/抽獎】，不是【有沒有 RNG】：
+#   補償對象＝每次呼叫累積一點的量（far 少跑 9/10 次 → 累積速度只剩 1/10＝降真實）——
+#     ①work_morale 的重複 lerp（w_eff=1-(1-MORALE_LERP)^trials，精確等價）
+#     ②skill_sys.on_reaction 的 XP 累加（跑 trials 次，保 MAX_SKILL 夾頂語意）
+#     ③comply 的 loyalty +0.01（×trials）④riot/expand 的 unrest ±1（×trials）
+#     ⑤breed 的抽獎（真·多次試驗 for-loop，禁單抽 1-(1-p)^n）
+#   不補＝達標即發生一次的離散事件（flee/defect 離隊：條件持續下次照樣發生＝最多延遲，非降率）
+#     與觸底飽和型（stress -= 0.3）。決定性 _score_*+argmax 選擇本身跑一次語意即正確。
 func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, trials: int = 1) -> void:
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
