@@ -7,5 +7,6 @@ static func set_owner(tile: HexTileData, owner: int, reason: String = "") -> voi
 	if tile.outpost_owner == owner:
 		return
 	tile.outpost_owner = owner
+	OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint①：owner 真變 → owner→outpost 索引失效
 	WorldState.record_driver(tile, "outpost_owner", float(owner), reason)
 	Probe.bump("g1.outpost_change")

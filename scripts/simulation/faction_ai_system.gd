@@ -5103,10 +5103,22 @@ func _should_abandon_current_task(team: TeamData, survival_target: Vector2i) -> 
 	var surv_dist: int = _hex_dist(team.tile_pos, survival_target)
 	return surv_dist <= cur_dist + 2
 
+# ★效能 arc B：改查 state 的 owner→outpost 索引（等價替換舊全圖掃；語意＝tiles 迭代序第一個符合者）。
+# 12 個 production 呼點 × 全圖掃 → O(1) 查表 + 只在所有權/等級跨 0 後重建一次。
 func _find_own_outpost(state: WorldState, team: TeamData) -> Vector2i:
-	for tile_id in state.world.tiles:
+	var tile: HexTileData = state.own_outpost_tile(team.team_id)
+	var pos: Vector2i = tile.tile_pos if tile != null else Vector2i(-1, -1)
+	if OwnerOutpostIndex.shadow:
+		OwnerOutpostIndex.shadow_check("find_own_outpost", team.team_id,
+			_scan_own_outpost_legacy(state, team.team_id), pos)
+	return pos
+
+# 舊全圖掃保留為影子對照基準（gate①）：production 路徑不呼叫，只有 OwnerOutpostIndex.shadow 開時跑。
+static func _scan_own_outpost_legacy(state: WorldState, team_id: int) -> Vector2i:
+	for tile_id in state.world.tiles:   # gate-ok: shadow-only 基準掃（debug 對照，production 不走）
+		OwnerOutpostIndex.legacy_visits += 1
 		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
+		if tile.outpost_level > 0 and tile.outpost_owner == team_id:
 			return tile.tile_pos
 	return Vector2i(-1, -1)
 
@@ -5120,13 +5132,26 @@ static func _faction_roster_pos(state: WorldState, member: TeamData, target_id: 
 	var target: TeamData = state.teams.get(target_id)
 	if target == null or target.faction_id != member.faction_id:
 		return Vector2i(-1, -1)   # ③他勢力/④分裂後 ex-faction（當下 faction_id gate；known gap:非 frozen snapshot）
-	# ②只固定 outpost（inline _find_own_outpost 邏輯，static 免 new instance；移動 target 無 outpost→-1）
-	for tile_id in state.world.tiles:   # gate-ok: own-faction infra 位掃（同 _find_own_outpost 地理型；讀 static outpost_owner 結構非 indexed 他隊 live 態，③faction gate 已限同勢力，感知鐵律 legit）
+	# ②只固定 outpost（★效能 arc B：改查同一個 owner→outpost 索引；本處 inline 掃與 _find_own_outpost
+	# 語意本來相同＝tiles 迭代序第一個符合者，⑤隱匿旗仍在查到的那塊 tile 上判，行為不變）
+	var tile: HexTileData = state.own_outpost_tile(target_id)
+	var pos: Vector2i = Vector2i(-1, -1)
+	if tile != null and not tile.outpost_hidden:   # ⑤隱匿據點不上名冊
+		pos = tile.tile_pos                        # ①只位置零 live-state
+	if OwnerOutpostIndex.shadow:
+		OwnerOutpostIndex.shadow_check("faction_roster_pos", target_id,
+			_scan_roster_pos_legacy(state, target_id), pos)
+	return pos
+
+# 舊 inline 全圖掃保留為影子對照基準（gate①）：production 不呼叫。
+static func _scan_roster_pos_legacy(state: WorldState, target_id: int) -> Vector2i:
+	for tile_id in state.world.tiles:   # gate-ok: shadow-only 基準掃（debug 對照，production 不走）
+		OwnerOutpostIndex.legacy_visits += 1
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0 and tile.outpost_owner == target_id:
 			if tile.outpost_hidden:
-				return Vector2i(-1, -1)   # ⑤隱匿據點不上名冊
-			return tile.tile_pos          # ①只位置零 live-state
+				return Vector2i(-1, -1)
+			return tile.tile_pos
 	return Vector2i(-1, -1)
 
 func _estimate_eta_to(state: WorldState, team: TeamData, target: Vector2i) -> int:
