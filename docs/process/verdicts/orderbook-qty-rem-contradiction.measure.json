@@ -1,0 +1,20 @@
+{
+  "ticket": "systems追問③：QA讀team8 qty_rem 17→21不減反增 vs 我量到order.replaced=0，三選一釐清",
+
+  "★config更正": "QA描述的team8(coin=1000附近)+qty_rem 17→21軌跡，實際找到的來源是`docs/measurements/2026-08-20-ewma-story-trace-peaceful_economy.specimen.jsonl`——★是peaceful_economy不是warring_states（systems原信誤標為warring）。我orderbook verdict的order.replaced=0是同config(peaceful_economy)但不同run(90天訂單簿專用短窗vs這份1個月EWMA trace)——嚴格說不是同一次跑，不能直接拿彼此的Probe計數互相對照(見下方替代驗證方式)。",
+
+  "★★(a)排除：code層面窮盡搜索,qty_remaining無任何『就地調大』寫入路徑": {
+    "搜索範圍": "grep全scripts/simulation對qty_remaining的所有寫入點，只3處：①order_system.gd:46 post_order()初始設定(新單建立時)②order_system.gd:375 settle_orders() `qty_remaining=want-filled`(filled>=0恆成立→只會變小或不變)③interaction_system.gd:916/922 `maxi(qty_remaining-filled,0)`(同樣只會變小或不變)。faction_ai_system.gd兩處only讀(for o in active_orders迭代)，零寫入。",
+    "結論": "★(a)確定為FALSE——沒有任何code path能讓同一張單(同order_id)的qty_remaining變大，一定是不同的單。"
+  },
+
+  "★真相：非(a)非典型(b)，是(b)的一個子情形——序列式重掛非重疊式重掛": {
+    "trace證據": "team8的buy_food qty軌跡：17(16採樣點穩定)→21(7點)→9→6→21(持續到trace結束)——這種先降後升的非單調模式，配合上面的code排除，證明每次『數字變了』都是一張全新的order_id，不是settle_orders的自然扣減。",
+    "為何order.replaced抓不到": "`order.replaced`的判定條件(order_system.gd:39-43)是『新單posted當下，team.active_orders裡★還有★同kind+res的舊單未清』才bump——這是抓★重疊★(overlapping)的重掛。team8這個模式看起來更像：舊單先被填滿(order.filled)或到期(order.abandoned)清空後，隔一段時間隊伍★重新評估★又決定買同一種資源→post了一張全新單，但那時候舊單已經不在active_orders裡了→不觸發replaced判定。",
+    "★行為意義": "這不是『訂單簿機制的churn』，是★決策層反覆對同一資源重新下單★——舊單死了(填滿/過期)之後又重新起意再買，跟QA原本擔心的『決策層反覆改主意』病徵性質相同，只是觸發路徑不同(序列式重下單 vs 重疊式改單)，order.replaced這個特定counter設計上就不是為了抓這種序列模式，不是bug，是這個counter的定義範圍窄。"
+  },
+
+  "建議(不越界判HOW，僅指出量測缺口)": "若systems/blueprint想量『同res反覆下單』這個更廣的行為(不限overlapping)，需要新tap：追蹤『同隊同kind+res連續兩張單的created_tick間隔』，非現有order.replaced能回答。",
+
+  "cleanup": "純重新解析既有specimen jsonl+code grep，無新跑、無code變更。"
+}
