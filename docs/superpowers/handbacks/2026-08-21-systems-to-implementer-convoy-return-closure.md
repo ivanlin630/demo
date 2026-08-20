@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: convoy-return-conservation
 tier: full
-status: open
+status: consumed
 topic: "[派工·convoy RETURN 收尾(R② CLEAN 已過)·spec=docs/superpowers/specs/2026-08-21-convoy-return-closure-HOW.md·★核心只有一行改動起手:PROGRESSIVE_HOLD_TASKS 加 TeamData.TASK_CONVOY(task_arbiter:22)——別自己發明新優先級層·★這是【遲到不是破口】的票:實測 deliver=1/settled=1/return=1,貨全在,只是歸建延遲 27.9 日,所以【禁止】改成加車或瞬移交割(§2)·gate 共 8 條(含 survival 仍可搶、守恆對帳、fp intended-change、persist.hold 對 CONVOY 真 fire)·★應變已寫死在 §5:若 gate1 歸建延遲仍不降,首要嫌疑=persist_strength 的 time-proxy(elapsed/COMMIT_HORIZON_DAYS 非真進度),屆時才給 RETURN 腿真距離進度——【不要先加】·新規矩三條:長跑前寫 busy beacon、量測數字帶 commit+日期+重跑指令、產物 frontmatter 帶 slice:"
 ---
 

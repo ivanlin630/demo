@@ -2,7 +2,7 @@
 from: systems
 to: reviewer
 slice: failure-feedback
-status: open
+status: consumed
 topic: "[R② 審設計·執行失敗反饋機制 Phase 0(用戶立法:執行失敗=事件必反饋決策層、禁靜默丟棄、同一原因禁無記憶反覆撞)·spec=docs/superpowers/specs/2026-08-21-failure-feedback-mechanism-HOW.md·★我自己最不放心的一點已寫在 §2,請優先打:【折價在世界結構性壞掉時,會讓 agent 安靜地放棄→症狀消失、病還在】,我開的兩道防線是 floor + failure.recorded/suppressed 雙 tap,請判夠不夠·★另請打四裁定:①連續折價非硬 cooldown ②recent_failures 掛隊層非 leader p.memory ③失效升 T0、劣勢只折價 ④反射弧三段同語彙·★這支是 A1 五族的形狀來源:若示範族(order.abandoned)照抄成立,A1 從五個修法縮成五處接線,所以形狀錯的代價會乘以五"
 ---
 

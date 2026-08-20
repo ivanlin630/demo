@@ -45,6 +45,11 @@ systems 已裁：**①形狀＝連續折價（非硬 cooldown）②記憶放隊�
 2. ★**floor 生效**：極端絕境（該 option 是唯一出路）→ **仍可被選中**（**不得絕對否決**）。
 3. **過期恢復**：TTL 後 util **回到原值**（非永久黑名單）。
 4. **失效升 T0**：仲裁拒絕已承諾任務 → **該隊當 tick 被喚醒**（用既有 `WorldEvents`）。
+   ★**implementer 必做**：新失敗事件要**在 `world_events.gd` 登記 kind**（現有三清單 `MESSAGE_KINDS`／`FUNC_KINDS`／`STATE_KINDS`，大概率屬 `FUNC_KINDS` 或 `STATE_KINDS`）。**沒登記 → T0 自己的對帳守衛抓不到這個新來源**（守衛只結構性保護①，這是它的誠實邊界）。
 5. ★**可觀測**：`failure.recorded.*` / `failure.suppressed.*` 有值；**放棄率可從數據看出**（§2(b)）。
-6. **示範族真的接上**：`order.abandoned` 94.4% 的世界裡，**掛單行為出現可觀測的變化**（★**不預設變好或變壞**——只要求**看得見**；變差反而是 GATE-B 的證據）。
+6. ★**示範族真的接上，且症狀與抑制量【同一份報告並排看】**：`order.abandoned` 94.4% 的世界裡，掛單行為出現**可觀測的變化**（★**不預設變好或變壞**——只要求**看得見**；變差反而是 GATE-B 的證據）。
+   ★★**回報 `order.abandoned` 變化的【同一份】報告，必須【並排】附上 `failure.suppressed.<option>` 的變化量，不准只報前者。**（R² 加固、2026-08-21 採納）
+   理由：**tap 存在 ≠ 有人會去看它**。gate 5／gate 6 若各自獨立打勾，就可能出現「`order.abandoned` 顯著下降（表面漂亮）＋ 沒人去翻 `suppressed`」——而**折價會降低嘗試頻率，降低頻率本身就會把症狀數字沖淡**，即使 GATE-B 完全沒修好。
+   綁成同一份報告後，「**症狀降了但 suppressed 飆高**」這個「症狀消失、病還在」的組合，**在報告格式層面就自動被看見**，不必靠 QA 自己想到要交叉查。
+   （本 session 已因同型缺口栽過兩次：specimen observe-scope 黑名單漏欄、LOD 補償碼靠紀律記得移除。這是「**hook 提醒非 gate，gate 裝執行點**」的具體應用，成本是一句措辭。）
 7. det×3、constitution ≤74、headless 0-new、**fp intended-change**（決策分數真的變了）。
