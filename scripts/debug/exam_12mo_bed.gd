@@ -133,7 +133,9 @@ func _run() -> void:
 		row["daily_rate_neg_teams"] = neg_rate
 		row["daily_rate_sampled"] = rates.size()
 		# probe 家族當日增量（starve/政治/§4c/EWMA）
-		var watch_prefixes: Array = ["death.", "site_memory.", "need.", "diplo", "alliance", "betray", "faction."]
+		# ★訂單簿 tap：加 trade./order.（原過濾器把訂單家族整個漏掉＝世界級數字事後救不回）
+		var watch_prefixes: Array = ["death.", "site_memory.", "need.", "diplo", "alliance", "betray",
+			"faction.", "trade.", "order."]
 		var deltas: Dictionary = {}
 		for key in Probe.counts.keys():
 			var ks: String = String(key)
@@ -162,6 +164,16 @@ func _run() -> void:
 		day_us = 0; day_max_us = 0; day_ticks = 0; phase_acc.clear()
 		if state.teams.is_empty():
 			print("[exam] 全滅 @day=%d" % day); break
+	# ★結尾 dump 全量 Probe.counts（成本近零、保住所有未預見的問題——這輪的教訓：
+	# 過濾器沒列到的 family 事後完全救不回）。JSONL 最後一行。
+	if f != null:
+		var _all: Dictionary = {}
+		for _k in Probe.counts.keys():
+			_all[String(_k)] = int(Probe.counts[_k])
+		var _samples: Dictionary = {}
+		for _sk in Probe.samples.keys():
+			_samples[String(_sk)] = Probe.samples[_sk]
+		f.store_line(JSON.stringify({"final_probe_counts": _all, "final_probe_samples": _samples}))
 	if f != null: f.close()
 	SpecimenDumpHelper.dump(state, _env("SPECIMEN_OUT", "docs/measurements/exam_12mo.specimen.jsonl"))
 	SimRunner.phase_timing = false

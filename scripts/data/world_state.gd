@@ -54,6 +54,9 @@ var _next_faction_id: int = 0
 var next_beast_id: int = -1000000
 var player_id: int = -1
 var specimen_team_ids: Array[int] = []   # 指標團：LOD-exempt + SpecimenTracer 詳捕決策（觀測 only，debug/seed 設）
+# ★訂單簿 tap：order_id 全域遞增計數器（★存 state 非 static var——static 跨 new() 會 id 碰撞、
+# 見 known_issues beast id 前科）。只增不減；存檔即帶走。
+var next_order_id: int = 1
 var player_state: Dictionary = {}
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []
