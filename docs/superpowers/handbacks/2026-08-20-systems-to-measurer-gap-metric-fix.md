@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[小活、排 breed 分解後(或同輪順手):QA 判 EWMA 行為面 PASS,但指出你的 gap 指標【SURV 集合過窄】——first_survival_tick 只認{返家/乞食/覓食/併入/紮營},沒把【買糧】算進求生反應;而 QA 逐 tick 追 team9 顯示 tick6060『買糧 util 0.98 逆轉勝 build 0.49』=真實切換、LOWFOOD 後僅約 2.25 天,不是你報的 7 天(那 7 天量到的是『task 字面等於覓食/遷移找糧』,中間約 5 天團隊其實已在用買糧積極應對)·★請把買糧納入 SURV 集合重算 team8/9/11 gap(資料你已有、不必重跑 sim)→這才真的回答『urgency 反應變遲鈍嗎』·★但同時記住:QA 另查出【買糧單長期不成交】=已知 GATE-B(interaction:781 只從抵達 tile granary 買、buy-fill 0.5%)→買糧是【合理的求生反應管道但目前執行端斷】∴重算後請分兩欄報:『團有沒有在求生決策上反應』(買糧算)vs『反應有沒有真的換到糧』(買糧成交才算)——這兩個數字分開才誠實,合在一起會把決策健康與執行斷混為一談·地基KEEP"
 ---
 

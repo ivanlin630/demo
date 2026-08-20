@@ -1,0 +1,41 @@
+{
+  "ticket": "breed gate分解（systems原假設：4道門哪道最常擋，或結構性歸零因單性）",
+  "baseline": "現main，peaceful_economy seed=1337，25天",
+
+  "★★DECISIVE_FINDING_supersedes_original_ask": {
+    "raw_result": "breedgate.calls = 0（全期，全部11個PRODUCE隊）——funnel所有階段(safe_pass/fed_pass/surplus_pass/minor_cap_pass/all4_pass/balance_pass/reaction.breed)全部0，因為連_evaluate_life_events這個函式本身都從未被呼叫過一次",
+    "root_cause_confirmed_via_code_read": {
+      "chain": "ReactionSystem.evaluate_all 只在 sim_runner.gd 的 SYSTEMS registry 'reactions' entry 執行，該entry lod=LOD_NEAR（只near team跑，far team完全跳過）→ near/far分類靠 _get_near_teams(state, player_pos)：_hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS(=3) 才算near → 我(以及本session/本專案絕大多數bed)慣用的 no_player := Vector2i(-1, -1) 傳給advance_tick，代入hex distance公式，任何真實地圖座標的team距離(-1,-1)幾乎必然遠超3 → **所有隊永遠被分類為far → ReactionSystem.evaluate_all對任何隊都從未執行過** → breed(P5_breed)/flee/riot/defect/shirk/produce-morale/goal_alignment等『個體反應』全部結構性零fire，不是被4道門中任何一道擋住，是整個reaction評估函式從未被呼叫",
+      "verified": "同run交叉確認：全期0個[PopMgmt]列印(minor成熟)、11/11隊minor_population精確=0(25天無一個minor誕生)"
+    },
+    "scope_note": "★force_full_hd=true時_get_near_teams直接return全隊(sim_runner.gd:501-502)不受此影響——本session的perf①③ profiling輪用了force_full_hd=true，未受此bug影響；但②bisect/§4b organic/population天花板快照/EWMA story trace/本輪，全部用normal LOD+no_player=(-1,-1)，★★全數受此bug影響，person-level reaction內容(非純timing/非consumption/famine，那些是LOD_BOTH不受影響)在這些輪次裡都沒有真正跑過"
+  },
+
+  "retroactive_correction_to_prior_rounds_this_session": {
+    "§4b_population_stuck_at_6": "★很可能是同一根因——population從day5到day90完全不變，不是『繁殖速率慢』(我§4b輪初判)，是繁殖(P5_breed)整個從未評估過，跟population-cap假說(REFUTED)都只是這個更上游bug的下游症狀",
+    "popcap_hypothesis_round": "同上，peaceful_economy day20快照0起minor可能也是這個原因，AT_CAP=0.0%的判定本身仍成立(population<<cap是事實)，但『真根往MATURE_RATE查』這個建議方向需要修正——問題不在MATURE_RATE(minor→adult轉換率)，在更上游的breed評估根本沒跑",
+    "ewma_story_trace": "trace裡的specimen entries本身應該還是有效的(specimen capture在faction_ai/decision層，非reaction層，跟這個bug無關)，但『求生/成長切換latency』分析裡若涉及個體reaction驅動的行為，也可能受影響——需要QA讀故事時留意"
+  },
+
+  "piggyback_settle_timing": {
+    "config": "peaceful_economy", "branch": "現main(post-EWMA)",
+    "first_produce_day": 1,
+    "note": "跟先前pre-EWMA(c2acc743)的day1結果一致——settle timing在peaceful_economy上pre/post EWMA相同，這條徹底清乾淨(per systems的piggyback要求)"
+  },
+
+  "per_team_snapshot": {
+    "note": "11個PRODUCE隊快照：named(m=1-3,f=0全部) anon_female_ratio=0.50 anon_total=2-4 breed_balance(無breeder加成)=1.000（因anon有50/50性別比、balance公式吃得到）minor_pop=0(全部) population=3-7",
+    "interpretation": "★意外：所有named成員的性別欄位顯示f=0(0個female)——若這是真實的、非fixture/config特性，則『結構性懷疑』(named單性)在這個config裡是真的(所有leader/advisor都是男性)，但breed_balance算出來仍是1.000（滿分）因為anon_female_ratio=0.50提供了平衡——★證實系統設計上anon的假想性別比確實能『救』named單性的問題，即使named全單性，只要anon有正常性別比，_breed_balance公式仍會給出健康值。這部分假說被數據推翻：不是性別不平衡擋住breed，是breed從未被評估。"
+  },
+
+  "recommendation": "★★這是本輪最重要的發現，優先級高於原本breed gate的4道門分析（門的分析已經沒有意義，因為calls=0）。建議：①這個LOD_NEAR-only reactions + no_player=(-1,-1)的組合，很可能是本專案『無玩家headless長跑』的一個結構性方法論缺口，值得systems評估：是否要讓no-player模式下reactions系統改用不同的near判定(如force_full_hd、或給一個合理的預設player_pos、或讓reactions額外跑LOD_BOTH)。②若這是『設計如此』(reactions本來就只該給near-player附近的隊跑，遠方隊不模擬個體反應是有意設計的效能/範圍決策)，那所有『無玩家headless organic bed』對person-level反應內容(breed/flee/riot/defect等)的觀測結論都要重新框定成『force_full_hd模式下的觀測』或『個體反應在遠方隊本來就不模擬』，非bug。★這個判斷屬於WHAT/HOW範疇，非量測員能裁，交systems/blueprint。",
+
+  "cleanup": {
+    "worktree_removed": ".worktrees/breed-gate-decompose",
+    "temp_tap_reverted": "reaction_system.gd（breedgate.*漏斗counter）— git checkout --確認乾淨",
+    "temp_bed_deleted": "scripts/debug/breedgate_bed.gd",
+    "compile_check": "godot --path .worktrees/breed-gate-decompose --headless --import 乾淨編譯"
+  },
+
+  "summary": "★★決定性但意外的發現，超出原始ask範圍：breed gate的4道門分析本身無意義，因為_evaluate_life_events(breed評估所在函式)在整個25天/11隊裡calls=0——完全從未被呼叫過。根因code-read坐實：ReactionSystem.evaluate_all是LOD_NEAR-only，而no_player:=Vector2i(-1,-1)這個本session(及疑似本專案)慣用的headless跑法會讓所有隊的hex距離必然超過LOD_NEAR_RADIUS而被分類成far，導致reactions系統對任何隊都從未執行。這解釋了§4b輪population卡在6的更上游根因(非我原本猜測的MATURE_RATE慢)。這是WHAT/HOW層級的判斷，是否算bug需要systems/blueprint裁決——若是設計如此，需要修正本session多輪對person-level反應內容的觀測框定。piggyback：post-EWMA peaceful_economy first_produce_day=1，跟pre-EWMA一致，settle timing疑慮徹底清乾淨。"
+}

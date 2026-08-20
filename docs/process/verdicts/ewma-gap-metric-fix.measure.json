@@ -1,0 +1,21 @@
+{
+  "ticket": "gap指標SURV集合修正（QA反饋：漏了買糧，需分兩欄報：決策反應vs真實拿到糧）",
+  "method": "重新解析既有jsonl（docs/measurements/2026-08-20-ewma-story-trace-peaceful_economy.specimen.jsonl），不重跑sim。SURV集合擴增：{返家,乞食,覓食,併入,紮營,return_home,買糧,返家補給,遷移找糧}",
+
+  "recalculated_gaps": {
+    "team8": { "first_low_food_tick": 2720, "first_surv_decision_tick": 2960, "surv_decision_opt": "買糧", "gap_decision_days": 1.0, "first_food_actually_improved_tick": null, "gap_actual_food_days": null },
+    "team9": { "first_low_food_tick": 5520, "first_surv_decision_tick": 6060, "surv_decision_opt": "買糧", "gap_decision_days": 2.25, "first_food_actually_improved_tick": null, "gap_actual_food_days": null, "note": "跟QA逐tick讀的tick6060/2.25天完全吻合" },
+    "team11": { "first_low_food_tick": 5160, "first_surv_decision_tick": 5520, "surv_decision_opt": "買糧", "gap_decision_days": 1.5, "first_food_actually_improved_tick": null, "gap_actual_food_days": null }
+  },
+
+  "two_column_report": {
+    "決策反應健康度(有沒有在求生決策上反應，買糧算)": "3/3隊都在1.0~2.25天內切到求生決策(買糧)——反應不遲鈍，符合QA判EWMA行為面PASS的方向",
+    "執行有沒有真的換到糧(買糧成交才算)": "3/3隊在整個追蹤窗口內effective_food從未出現明顯回升(定義:>低點1.5倍且>日耗3倍)——完全對應QA已知的GATE-B(interaction:781買糧單長期不成交、buy-fill 0.5%)，決策健康但執行端斷"
+  },
+
+  "verdict": "★原本我報的~7天延遲(用task字面等於覓食判定)其實混淆了『團隊還沒切到求生決策』跟『團隊已經在用買糧但task字面沒顯示成覓食/遷移』——修正後：決策層反應快(1-2.25天)，真正的延遲來自買糧單執行端斷(GATE-B)，非urgency決策反應變遲鈍。這回答了systems原本的核心問題：EWMA解耦沒有讓urgency反應變遲鈍，決策健康；卡點在下游執行(既有已知issue，非本輪新發現)。",
+
+  "cleanup": "純重新解析既有jsonl，無code變更、無新跑。",
+
+  "summary": "QA反饋正確：SURV集合加入買糧後，team8/9/11的求生決策反應延遲從~7天修正為1.0/2.25/1.5天(team9跟QA獨立讀出的2.25天完全吻合)。分兩欄報：決策反應健康(買糧算,1-2.25天內切換)vs真實拿到糧(買糧成交才算,3/3隊全期未觀察到)——確認決策層不遲鈍，延遲來自已知GATE-B執行斷，非EWMA解耦造成的urgency反應退化。"
+}
