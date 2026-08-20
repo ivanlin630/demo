@@ -1,9 +1,9 @@
-[peaceful_economy day 130] teams=18 porters_tracked=3 trips_total=6
+[peaceful_economy day 150] teams=18 porters_tracked=3 trips_total=6
   convoy: dispatch=7 attempt=16 deliver=7 settled=6 return=7
   convoy.dispatch_attempt                        = 16
   convoy.drop.inflight_convoy                    = 9
   convoy.rehome                                  = 14
-  persist.hold                                   = 39
+  persist.hold                                   = 63
   下場分佈：{ "merged_home": 5, "merged_into_stranger": 1 }
   ★殘留（未回母隊、還在 porter 身上）：{  }
    porter=12 parent=5 dispatch@2400 出發帶={ "food": 17, "material": 64, "coin": 133.333333333333, "tools": 5 } ｜脫離@-1 task= phase= 身上={  } ｜結局=merged_home 現持={ "food": 13, "material": 31, "coin": 223.34867296268, "tools": 5 }
@@ -14,13 +14,13 @@
      母隊 5：dispatch 當下={ "food": 13.6727396874326, "material": 37, "coin": 747.529145034639, "tools": 25 } ｜現在={ "material": 52, "coin": 562.29577430715, "tools": 25 } ｜現在公庫={ "material": 175.101301602715, "horses": 10 }
    porter=20 parent=7 dispatch@11840 出發帶={ "food": 17.5124269462478, "material": 47, "coin": 120, "goods": 8, "tools": 2 } ｜脫離@-1 task= phase= 身上={  } ｜結局=merged_home 現持={ "food": 5.33333333333333, "material": 68, "coin": 469.975884751733, "tools": 11.2 }
      ★結案 tick=15000（出發後 3160 tick = 13.2 日）
-     母隊 7：dispatch 當下={ "food": 26.2686404193717, "material": 112.699196412244, "coin": 180, "goods": 12, "tools": 3 } ｜現在={ "food": 310.139798427598, "material": 75.4622945411608, "coin": 706.490968055517, "goods": 18, "tools": 5 } ｜現在公庫={  }
+     母隊 7：dispatch 當下={ "food": 26.2686404193717, "material": 112.699196412244, "coin": 180, "goods": 12, "tools": 3 } ｜現在={ "food": 338.4057803529, "material": 75.4622945411608, "coin": 706.490968055517, "goods": 18, "tools": 5 } ｜現在公庫={  }
    porter=20 parent=3 dispatch@15700 出發帶={ "food": 11.7833333333333, "material": 68, "coin": 463.03036716298, "tools": 11.2 } ｜脫離@-1 task= phase= 身上={  } ｜結局=merged_home 現持={ "food": 5.33333333333333, "material": 68, "coin": 469.975884751733, "tools": 11.2 }
      ★結案 tick=16900（出發後 1200 tick = 5.0 日）
-     母隊 3：dispatch 當下={ "food": 17.675, "material": 74.0125624161231, "coin": 694.545550744469, "tools": 16.8 } ｜現在={ "material": 60, "coin": 852.96324300225, "goods": 14 } ｜現在公庫={ "material": 75.5610570415472, "tools": 14 }
+     母隊 3：dispatch 當下={ "food": 17.675, "material": 74.0125624161231, "coin": 694.545550744469, "tools": 16.8 } ｜現在={ "food": 1.93242869201688, "material": 60, "coin": 722.96324300225, "goods": 14 } ｜現在公庫={ "material": 77.3344807160685, "tools": 14 }
    porter=22 parent=3 dispatch@14200 出發帶={ "food": 7.33333333333333, "material": 58, "coin": 320, "tools": 11.2 } ｜脫離@14600 task=紮營 phase=RETURN 身上={ "food": 4.66666666666667, "coin": 667.975917907449, "tools": 11.2 } ｜結局=merged_home 現持={ "food": 5.33333333333333, "material": 68, "coin": 465.808574198481, "goods": 5.6, "tools": 5.6 }
      ★結案 tick=15700（出發後 1500 tick = 6.3 日）
-     母隊 3：dispatch 當下={ "food": 11, "material": 202, "coin": 480, "tools": 16.8 } ｜現在={ "material": 60, "coin": 852.96324300225, "goods": 14 } ｜現在公庫={ "material": 75.5610570415472, "tools": 14 }
+     母隊 3：dispatch 當下={ "food": 11, "material": 202, "coin": 480, "tools": 16.8 } ｜現在={ "food": 1.93242869201688, "material": 60, "coin": 722.96324300225, "goods": 14 } ｜現在公庫={ "material": 77.3344807160685, "tools": 14 }
    porter=22 parent=3 dispatch@16900 出發帶={ "food": 9.46666666666667, "material": 68, "coin": 465.808574198481, "goods": 5.6, "tools": 5.6 } ｜脫離@17600 task=覓食 phase=RETURN 身上={ "food": 4.8, "material": 68, "coin": 465.808574198481, "goods": 5.6, "tools": 5.6 } ｜結局=merged_home 現持={ "food": 5.33333333333333, "material": 68, "coin": 465.808574198481, "goods": 5.6, "tools": 5.6 }
      ★結案 tick=18100（出發後 1200 tick = 5.0 日）
-     母隊 3：dispatch 當下={ "food": 14.2, "material": 65.0125624161231, "coin": 698.712861297722, "goods": 8.4, "tools": 8.4 } ｜現在={ "material": 60, "coin": 852.96324300225, "goods": 14 } ｜現在公庫={ "material": 75.5610570415472, "tools": 14 }
+     母隊 3：dispatch 當下={ "food": 14.2, "material": 65.0125624161231, "coin": 698.712861297722, "goods": 8.4, "tools": 8.4 } ｜現在={ "food": 1.93242869201688, "material": 60, "coin": 722.96324300225, "goods": 14 } ｜現在公庫={ "material": 77.3344807160685, "tools": 14 }
