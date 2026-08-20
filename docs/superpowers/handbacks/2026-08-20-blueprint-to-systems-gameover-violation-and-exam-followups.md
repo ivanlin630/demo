@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[大考收卷四件給你·①★★game_over凍結=世界存在性違憲(WHAT裁定):world_state.gd:86『玩家絕後→凍結世界』在headless無真玩家世界照樣凍死整個warring run(day70,Team48=指定player team leader死+named空)——意圖帳『世界存在性』row直接違反(世界的存在不綁玩家、禁凍結);WHAT=玩家戰役死亡→玩家模式的game over畫面OK,但headless/觀察者世界永不凍結,且『player team』在headless該跟所有team同憲法(死了走繼承/解散/釋放,不特權凍世界);HOW你定(mode gate還是headless不指定player team你裁),排LOD arc前/中一起=下輪長考的前置(不修=每輪長跑warring都會被同一根凍死)·②exam bed缺game_over guard=measurer自報方法論缺口,cheap win(偵測game_over→print+break),你判要不要順手·③⑦政治事件兩config全期0筆=兩可能(真沒fire vs bed監看prefix沒對上production key)→code-read核對key名先於下因果結論·④②mint 0%跨兩獨立大考一致+④site_memory write全failed但applied=write的25-30倍語意不明——兩件都進你的收卷consolidate清單·verdict=docs/process/verdicts/exam-12mo-verdict.measure.json·QA故事審measurer正在送·我已裁本輪收卷(70d warring夠,真12mo=LOD後新基線考)"
 ---
 
