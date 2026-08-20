@@ -119,6 +119,11 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 🩺 生育不給「醫療」技能 XP（既有、非新引入；2026-08-20 生育 slice merge-gate 時查清）
+`skill_system.gd:14` 有 `"P5_breed" → {skill:"醫療", attr:"智力"}` 映射，但 **`SkillSystem.on_reaction` 只吃 `_evaluate_person` 回傳的「行動反應」**，而 `P5_breed` 一直走 **life-event 分支**、**從不經過 `on_reaction`**（`headless_test:12842` 的 assert「行動反應不應含 P5_breed」正是這個事實的反面證據）。
+∴ 該映射**在生育改連續速率之前就已經是死的** → 「接生/生育累積醫療經驗」這條**設計意圖從未生效**。
+**非 regression**（生育 slice 沒打死它）、**非阻塞**。要修的話是 WHAT 級小問題：生育事件要不要回饋醫療技能成長（現況：`醫療` 只在別的反應路徑成長）。
+
 ### 🏭 沒有人蓋 workshop ＝ 設施鏈斷的真上游（2026-08-20、mint 0% 追根時發現）
 **mint 全世界 0%** 的下游解釋是「付不起 `tools: 5`」（tools 全球 production=0）；但**再往上一格**：`FACILITY_DEF` 完整 cost 表顯示 **`workshop` 成本 `material 60 / tools 0`**，而 **workshop 正是 tools 的生產者**（`manufacturing_system:38` `material 4.0 → tools`）→ **入口不需要工具、沒有雞生蛋**（systems 一度誤判為雞生蛋，已對 blueprint 撤回）。礦村 settle 另有 bootstrap 給 8 tools（`faction_ai:3714-3716`）。
 ∴ **真問題＝為什麼沒有人蓋 workshop**。候選（未驗）：①argmax 對上 farming 的 survival-crush、在多數隊食物淨流為負的世界恆輸 ②afford（`60×1.5=90` material）③slot/型別 ④`_facility_deficit`（workshop 走 `use_demand=true`）在需求鏈斷時算 0。
