@@ -35,7 +35,7 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 | D1 | 領導成長管道斷(established④;統領 0.08→cap6=村結構性小) | 人口/規模科目污染→擋 |
 | D2 | anon 2c-2(晉升釋放 anon) | 待驗影響面 |
 | D3 | loop1 correctness 債/pop_mult 飽和/FA7 FA8 | 邊緣,可豁免標注 |
-| D4 | 死常數人格化 backlog(逃跑 3 格/資訊扭曲平骰/其他照妖鏡殘目) | 質地級,可豁免 |
+| D4 | 死常數人格化 backlog | ★**用戶裁：擋考**（質地類全清才考）。systems 已窮盡盤點裸平骰側，**4 隻已知 + 2 隻新發現 + 1 邊界**（見 §D4 明細） |
 | D5 | 軍民 Slice B(團型梯度) | 待驗依賴 |
 
 ## ★邊界裁定(用戶劃線 2026-08-21)
@@ -75,3 +75,29 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 
 ### ★由此浮出的下一層問題（非 B1 本體、記此備查）
 `DiplomaticAiSystem.handle_diplomacy_message` 是**另一個自成一套的決策層**（accept/reject 外交提案）。B1 只盤 `try_set` 側；**「還有幾套 mini-scorer 平行於統一引擎」是更大的盤點**（uprising 是一例、diplomacy 是一例）→ 建議列為 **B1b**。
+
+
+---
+
+## §D4 明細（systems 窮盡盤點、2026-08-21）
+
+### 方法
+`randf()/randf_range/randi()/randi_range` 全 `scripts/simulation` **140 命中逐行看過**。
+**先排除非決策類**（合法）：世界生成 `world_generator` 38／`person_generator` 16／`game_setup` 15；**ID 生成**（`str(randi())`）；**加權抽樣**（`message_system:149`、`anon_tier_system:114/128`）；**不確定性模擬**（`vision_system:110/127`、`path_system:196`、`distortion_engine` 的 `randf_range` 估值扭曲）。
+
+### ★裸平骰決策點（D4 靶）
+| # | 站 | 平骰 | 備註 |
+|---|---|---|---|
+| 1–4 | `distortion_engine:28/31/54/60` | `0.4`／`0.5`／`0.3`／`0.4` | ＝**「資訊扭曲平骰」本尊**（位置偏移／origin 錯置／task 謠言 ×2） |
+| 5 | `inquiry_system:70` | `0.3` | ＝**「問詢說謊 30%」** |
+| 6 | `advisor_system:37` | `0.5` | ＝**「顧問誤導 50%」**（錯高估 vs 錯低估對半） |
+| **7** | **`message_system:173`** | **`0.3`** | ★**新發現、不在原四隻清單**：`"malicious" if randf()<0.3 else "silent"` |
+| **8** | **`equipment_system:79`** | **`0.5`** | ★**新發現**：`recovered = 2 if randf()<0.5 else 0`（戰後裝備回收；偏 world-mechanic，但仍是對半平骰） |
+| 9 | `ambush_system:42` | `AMBUSH_BASE_CHANCE` | **邊界**：死常數但屬**世界機制觸發率**（非人格決策）→ 是否納入交 blueprint |
+
+### 已人格化/合憲（**不是** D4 靶、列此免重複盤）
+`diplomatic_ai_system:130`（慎重³ 加權骰、有 `gate-ok` 註記）／`:325`（`margin × BETRAY_MARGIN_CHANCE`，margin 由情勢算）／`advisor_system:22`（`randf() < skills[skill]`）／`manpower_system:146`（`p_flee` 計算值）／`faction_ai:2889`（`fail_chance` 計算值）／`hunt_system:22`（`chance` 計算值）。
+
+### 死常數側（非骰）
+＝ `constitution_gate` 的 **`threshold`(9) + `rng`(3)** 兩類（gate 已在列舉、baseline 75→74）。**逐站清單需跑 gate 的 verbose 列舉取得**（本輪只取到型別分佈）→ **列為 D4 的第二批**，與裸平骰分開消化。
+★注意：`gate-ok:` 註記的站是**已判合憲**（如慎重³ 骰、event-ID），**不在 D4 靶內**。
