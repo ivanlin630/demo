@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: owner→outpost 索引（效能 arc B 縮小版）DONE — byte-identical 確認、影子對照 43,219/0、量化照實報
 branch: feat/owner-outpost-index
 commit: 07172639
