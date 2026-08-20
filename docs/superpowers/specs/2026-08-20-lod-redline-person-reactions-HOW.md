@@ -19,7 +19,7 @@ far pass 頻率是 near 的 **1/10**（`FAR_ZONE_INTERVAL=100` vs `NEAR_CADENCE=
 - **換算式**：`p_eff = 1.0 - pow(1.0 - p, ratio)`，`ratio = cadence / NEAR_CADENCE`（本例 far=10）。**數學上等價於「該窗內 ratio 次獨立試驗至少發生一次」**，且**只抽一次 randf**（determinism 友善、不增 RNG 消耗筆數）。
 - 施用點：`ReactionSystem.evaluate_all(state, teams, skill_sys, cadence)` 新增 cadence 參數 → `_evaluate_life_events` 的 breed chance、`_evaluate_person` 內各機率型反應。**非機率型（門檻/狀態判定）不換算**（它們是狀態讀取、不是每 tick 抽獎）。
 - ★**要 implementer 逐一分類**並在 handback 列表：哪些是「每次呼叫抽獎」（要換算）、哪些是「狀態門檻」（不換算）。分類錯＝遠隊行為率錯。
-- ★**`GOAL_CHECK_INTERVAL` 對齊檢查**（`reaction_system:25` `current_tick % GOAL_CHECK_INTERVAL == 0`）：far pass 只在 `tick % 100 == 0` 執行 → 若 `GOAL_CHECK_INTERVAL` 與 100 **不整除相容**，遠隊的 goal 更新/`goal_alignment` 可能**永遠不 fire**（無聲）。必須驗並回報實際值；不相容則改判準（如「距上次 goal check 已過 N tick」）而非硬對齊。
+- ★**`GOAL_CHECK_INTERVAL` 對齊＝systems 已親驗、無需處理**：`reaction_system:3` `GOAL_CHECK_INTERVAL = 10 × TICKS_PER_HOUR = 100` **恰等於** `FAR_ZONE_INTERVAL=100` → far pass（`tick%100==0`）**每次都落在 goal-check tick 上**；且 near 隊雖每 10 tick 跑一次 reactions，goal check 也只在 `tick%100==0` fire → **兩者 goal-check 頻率本來就相同**，不需換算、不需改判準。（記錄此驗證是因為若哪天有人動 `NEAR_CADENCE`/`FAR_ZONE_INTERVAL`/`GOAL_CHECK_INTERVAL` 任一，這個巧合對齊會無聲失效。）
 
 ## §4 determinism / fp
 遠隊現在會跑反應 → **RNG 消耗筆數與順序改變** → **fp intended-change**（世界真的不同了：這正是修的目的）。det 三跑 byte-identical 仍必須成立。
