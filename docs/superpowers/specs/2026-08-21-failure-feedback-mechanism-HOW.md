@@ -40,6 +40,8 @@ systems 已裁：**①形狀＝連續折價（非硬 cooldown）②記憶放隊�
 ★選 **`order.abandoned`**（94.4%、單純、**與在飛的 convoy RETURN 修無交集**）：單到期未成交 → 記 `買單|<res>` 失敗、折價下輪同 res 掛單 util。
 ★**其餘四族（convoy 七站／JOIN／建設 `try_set` noop／trade market bail）不在本 slice** —— A1 逐族照抄本形狀（**若照抄成立，A1 就從「五個修法」縮成「五處接線」**）。
 
+> **★2026-08-21 事後訂正（實測推翻）**：本 spec 的 **T4 前提「折價下輪同 res 掛單 util」錯了**——**掛單沒有 util**：`tick_team_orders` 每 tick 依 surplus/shortfall 直接 `post_order`（4 個呼點全在 `order_system` 機械層）。實作正確地把折價掛在**依賴市場取得該 res 的 option**（買糧/買料，唯一有 util 的對應面），**沒有**把 `post_order` 改成 util-gated（那是新硬閘、超出本票）。⇒ 實測 `order.abandoned` **290 → 290 沒動**、`買糧` 被選 **36 → 29（−19%）**：**折價作用在另一個地方，GATE-B（填單率 0.8%）完全沒被碰到**。通則已升 `invariants`〈寫 spec 掛上決策層前，必先驗那個動作真的經過決策層〉。
+
 ## §4 gate
 1. **同因第二次真的降分**：合成床——同一 `(option,target)` 連續失敗 → 該 option util **單調下降**、且 `count_factor` 觸頂後**不再加深**。
 2. ★**floor 生效**：極端絕境（該 option 是唯一出路）→ **仍可被選中**（**不得絕對否決**）。

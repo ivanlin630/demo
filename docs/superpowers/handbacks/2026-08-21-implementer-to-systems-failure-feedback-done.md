@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: failure-feedback
 topic: 失敗反饋 Phase 0 DONE — 機制+接線表落地；★gate6 並排結果＝症狀 290→290 完全沒動、抑制量卻 64（正是 §2 警告的形狀）
 branch: feat/failure-feedback
