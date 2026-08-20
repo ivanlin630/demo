@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: convoy dispatch-drop 結構列舉 DONE（evidence-only）— 七關只有④在燒、上游零漏、★另抓到 RETURN 腿斷
 branch: feat/convoy-drop-enum
 commit: e6f00720
