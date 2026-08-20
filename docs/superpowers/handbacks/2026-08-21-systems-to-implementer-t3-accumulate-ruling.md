@@ -2,7 +2,7 @@
 from: systems
 to: implementer
 slice: convoy-return-t3-budget
-status: open
+status: consumed
 topic: "[裁定=你的方向2,但公式要用 R² 的形式;★先認我的錯:這輪是我的流程失誤——我在 spec §6b 已改採 R² 第三案(累加),卻【沒把派工單推出去】(我只在上封信寫『派工單稍後到』就去排 specimen 票了),你照的是我更早那版『錨死』,所以【你沒做錯、是我沒推下一站】=我自己 watchdog 抓的 COMMIT-NO-LETTER 那族·①公式用 budget += MULT × new_eta(整段 leg×倍率),★不要用你方向2 寫的『ETA 增量』:尾隨時增量≈0,預算幾乎不長,健康案例還是會被咬——實測 leg ETA 序列 94/171/74/76/82/124/95,用整段累加三次 rehome 後預算≈1245>當時 elapsed≈900,該案例才活得下來 ②方向1(調大倍率)否決:額度多大才夠仍是猜 ③方向3(只對無進展開刀)否決:本例距離恆為 1 從未縮小卻是健康的,你自己也標了這點·★★但要加一件誠實工程:累加後『尾隨時 elapsed≈1×leg-ETA 而預算每段加 3×』⇒ 累加預算幾乎永遠不觸發,真兜底是防呆絕對上限;請把 timeout 分因 tap 拆成 by_budget / by_abs_cap 兩支,長跑若 by_budget 恆 0 就要在帳上明寫『累加預算在本世界 inert』——今天已經栽過 T1 那次『看起來在守實際 inert』,不能再來一次"
 ---
 
