@@ -131,7 +131,7 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 1. **`BASE_RATE` 的推導假設在這個世界不成立**：我用「健康村 `f≈0.5` × **5 名適齡成人** → 1 名額/30 日」反推 `0.0133`；**實測 24 named / 17 隊 ≈ 1.4 名/隊** → **光此一項就慢 ~3.5×**；而多數隊 `rel_surplus ≤ 0` → **`f = 0` ＝ 完全不生**（p90 才 0.148、`f≈0.5` 只在最頂十分位）。頂級村配 1 名 named：`0.0133 × 0.5 × 1 ≈ 0.00665/日` → **~150 天/名額**（設計目標 30 天）。
 2. **★named/anon 不對稱（merged code 實證）**：`breed_rel_surplus` 分母用 **`t.population`**（`team_data.gd:55` ＝ leader + named + **anon 全部**），但適齡迴圈只跑 **`state.persons`（named only）** → **anon 吃飯拉低 `rel_surplus`、卻不能生 ＝ 雙重懲罰**；anon 越多、越不可能生。
 **★這不是「修了沒生效」，是「修對了一半」**：懸崖→連續、尺度依賴（絕對→比例）都成立；**沒解掉的是「誰能生」這一層**（生育掛 **named 名冊**、非人口）——正是 blueprint 早先指出的**意圖帳「生育兩層」問題**（用戶 2026-08-18 問「這種生育怎麼跟**王朝血脈**對齊」時討論的同一結構）。
-**恢復後的三個選項（systems 初判，未經 R²）**：**(a) 讓 anon 也能生**（結構解、接王朝血脈那條）／**(b) 把 `BASE_RATE` 調大 ~25×**（★**crank**：用常數補結構問題）／**(c) 分母改只算 named**（★**不真實**：大 anon 村會顯得很富裕）→ **傾向 (a)**。
+**恢復後的三個選項（systems 初判，未經 R²）**：**(a) 讓 anon 也能生**（結構解、接王朝血脈那條）／**(b) 把 `BASE_RATE` 調大 ~25×**（★**crank**：用常數補結構問題）／**(c) 分母改只算 named**（★**不真實**：大 anon 村會顯得很富裕）→ **systems 與 blueprint 皆 lean (a)**。★**但 (a) 是 WHAT 級**（兩層人口模型動「誰能生」）→ **恢復後由 blueprint 帶用戶拍、R² 前不定案**（blueprint 2026-08-21 裁）；**systems 不得逕自出 HOW spec**。
 **★附帶訂正（measurer 抓到、我的判準太天真）**：D1 票裡我先寫死「`AT_CAP > 0` → 開 arc」——實測 `AT_CAP=41%` **是碎片化 artifact**（`n_persons` 凍結 24、`n_teams` 12→17-19，同一批人被拆進更多隊 → 個別隊 pop/cap 比值**機械性上升**）→ **該判準在 pop 沒真成長前不可用**。
 **其餘 D1 數字**：跨門檻 12 隊數 **全期 0**；統領成長機制本體 ＝ `SkillSystem.on_reaction`（`skill_system.gd:23-33`，`REACTION_SKILL_MAP["P4_expand"]`；**我 grep `_grow_leadership_tenure` 沒命中是對的，該函式不存在**），`reaction.P4_expand` **224 次/90 天＝在跑**，但 `cmd_dist.median` 恆 **0.6** 未動（單次成長量 `BASE_GROWTH=0.005×…` 太小）。
 
