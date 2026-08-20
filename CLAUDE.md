@@ -62,6 +62,7 @@ docs/
   progress.md       開發進度
   known_issues.md   已知 bug / 待修清單
   process/          session 工作流（00_roles, 01_architect, 03_implementer）
+  process/09_exam_gate.md  ★長考閘：驗收考/診斷考的開考前置閘（半成品禁跑驗收考）
   superpowers/      specs / plans / handbacks
 ```
 ---

@@ -158,6 +158,11 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 - langgraph 機器軌（**少用**，只大/並行活；動機=機器誤判 A2a + $27/slice；含下游 LG `--from-impl` 可選）→ `08_machine_workflow_v2.md`（系統讀；`07_orchestrator_machine.md`=設計背景）。
 - ~~`06_pipeline_orchestration.md`~~ **作廢**（全 pipeline 藍圖 orchestrator 模型；2026-07-08 切回多終端已 revert；留史）。
 
+**★2026-08-21 新法索引（三條都不住在本 doc，開場必須知道去哪找）**：
+- **執行失敗反饋鐵律**（用戶立法）：執行失敗＝事件、必反饋決策層、**禁靜默丟棄**；同一原因**禁無記憶反覆撞** → 本體與 HOW 四項在 **`invariants.md`〈執行失敗反饋鐵律〉**。
+- **長考閘**（用戶立法）：**半成品禁跑驗收考**；驗收考＝清單清零、診斷考＝**對齊審查**（一道閘兩模式）→ **`process/09_exam_gate.md`**。
+- **事件比例計算**（用戶拍板、取代「LOD／重要性」語彙）：模擬層零 LOD、計算跟隨**事件密度**不跟隨觀察者 → spec `2026-08-20-event-proportional-compute-HOW.md` + `progress.md`〈效能 arc〉。
+
 ## 你的負擔
 
 | 對象 | 你做什麼 | 頻率 |
