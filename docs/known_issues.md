@@ -129,6 +129,12 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 **實證**（measurer、peaceful seed1337 25 天）：`breedgate.calls=0`（全期全隊零呼叫）、11/11 隊 `minor_population=0`、零 `[PopMgmt]`。
 **★★大考中彈**：`exam_12mo_bed.gd:55/64` 用 `no_player=(-1,-1)` 且**未開 `force_full_hd`** → 照現況開考＝量一個**建設不動、不鑄幣、不再生、不生育**的世界。**已暫停開考**，WHAT 裁定（世界存在是否綁玩家位置）呈 blueprint（systems 建議：無玩家→全隊視為 near）。
 **★★範圍更正（2026-08-20 同日、systems 自糾）**：near 區塊按 **tick cadence** 執行（`:239`）、**不以 `near_teams` 非空為條件**；`_run_systems` 依 **shape** 派發（`:178-185`）：`shape=state`／`shape=regen` **完全不碰 teams 陣列** → **`outpost_tick`（建設/鑄幣/馬廄）與 `regen`（tile 再生）照常執行**。**真正死掉的只有 shape=teams 的 `reactions` 與 `cleanup`**（與 `breedgate.calls=0` 實證吻合）。∴**撤回**兩條先前寫下的污染指控：①「`mint_level` 0% 有更平凡解釋」→ 撤回，鑄幣一直在跑、監看項照舊；②「founding `complete_build=0` 的 buy-preempt 歸因是 confound」→ 撤回，建設一直正常前進。
+**★★污染 triage 清單（systems 2026-08-20、blueprint ⑤ 要的；分四級、逐項標可信度）**
+- **A 級＝直接失效（結論本體建立在 person-reaction 事件上）**：①**人口成長/生育**——「村莊卡 6 不長」的真根就是 breed 從沒被評估（`breedgate.calls=0`）；`MATURE_RATE` 慢這個懷疑方向**撤回**。②任何「個體叛逃/怠工/暴動/敲詐**從不發生**」的觀察 ＝ **artifact**，不是世界性質。
+- **B 級＝通道部分死（有其他來源、結論打折不歸零）**：`LoyaltyBank.adjust` 全站 **14 caller、其中 3 個在 reaction_system**（`goal_alignment` 通道死、其餘 11 條照常）→ 忠誠相關結論**部分受影響**；`cleanup_goals`（**單一 caller 在 LOD_NEAR 塊**）→ headless 中**個人 goal 從不清理**，舊 goal 殘留可能污染 means-end 觀察。
+- **C 級＝系統性偏置、方向已知**：`work_morale` **只在 reactions 統計寫入**（`team_data:117`），headless 中**恆為預設 1.0**；而它被 `resource_system:303 gain *= team.work_morale` **直接乘進採集產出** → **所有 headless 產出量測都是「零士氣變異」的世界**。修好後產出會出現變異（升降皆可能）＝**大考前必須知道的基線位移來源**。
+- **★C 級的重量級案例：labor-v2 accepted cost（28 起 chronic 死亡）**——飢餓/死亡機制本身走 `resource_system`（LOD_BOTH、不受影響），但那個世界**零出生**：人口只出不進 → **所有 starve/attrition 基線都是「不會補人的世界」量出來的**。這不推翻「接受代價」的決定，但**它的量級解讀要重新校準**（與 GATE-B 那條歸因連動一起看）。
+- **D 級＝不受影響（明確標出、避免過度恐慌）**：團級決策/移動/貿易/戰鬥/建設/鑄幣/馬廄/tile 再生（`LOD_BOTH` 或 `shape=state`）；**QA 的 EWMA 故事稽核**（決策層 util 追蹤）；**GATE-B 診斷**（`interaction` 層）；perf 五路（`force_full_hd` 或 tick-time 層）。
 **★回頭影響（縮至 person-reaction 層；需逐床 audit，未逐一驗證前不下結論）**：全 **243 個 debug 床僅 20 個**用 `force_full_hd`。已知受影響候選：本 session 的 §4b organic gate／popcap 快照／breed 分解；更早的 **founding `complete_build=0`「buy-preempts-founding」診斷**（若建設本就不前進，該歸因可能是 confound）。**`mint_level` 全世界 0%** 這個大考監看項現有更平凡的解釋。
 **★注意反例**：`force_full_hd=true` 的床（如 perf①③ profiling）**不受影響**（`_get_near_teams:501-502` 直接回全隊）；且 `force_full_hd` **不是中性開關**——它同時拿掉 far 降頻＝移速/思考恢復全速（`sim_runner:109` 自警「勿在正式跑開…需配 gen 重校」）。
 
