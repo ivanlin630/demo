@@ -1,0 +1,60 @@
+{
+  "ticket": "EWMA解耦MERGED後行為面補驗（specimen trace餵QA故事稽核，大考blocker#4）",
+  "baseline": "現main(a954df86後)，seed=1337，1個月窗(7200 ticks)",
+  "specimen_scope": "15隊代表性strided取樣(sorted team_id等距，非隨機、RNG-neutral)——全隊(~50-110)tracing太貴(30天timeout撞牆)，改用established SpecimenDumpHelper同款取樣邏輯手動指定",
+
+  "trace_deliverables": {
+    "warring_states": { "entries": 6515, "path": "docs/measurements/2026-08-20-ewma-story-trace-warring_states.specimen.jsonl", "raw_log": "docs/measurements/2026-08-20-ewma-story-trace-warring.log" },
+    "peaceful_economy": { "entries": 1464, "path": "docs/measurements/2026-08-20-ewma-story-trace-peaceful_economy.specimen.jsonl", "raw_log": "docs/measurements/2026-08-20-ewma-story-trace-peaceful.log" }
+  },
+
+  "latency_analysis": {
+    "method": "逐隊解析jsonl：first_low_food_tick=effective_food首次<consume_per_day×3的tick；first_survival_tick=task首次落入{返家/乞食/覓食/併入/紮營/return_home}的tick；gap=兩者差（正=先缺糧後求生、負=先求生後才踩到缺糧門檻，可能是威脅驅動非飢餓驅動）",
+    "warring_states_gaps": [
+      {"team": 22, "gap_days": 0.83, "note": "先缺糧後求生"},
+      {"team": 29, "gap_days": 0.42, "note": "先缺糧後求生"},
+      {"team": 32, "gap_days": -17.08, "note": "先求生(威脅驅動疑)後才踩到缺糧門檻"},
+      {"team": 39, "gap_days": -1.25, "note": "先求生後才踩到缺糧門檻"},
+      {"team": 42, "gap_days": -18.75, "note": "先求生(威脅驅動疑)後才踩到缺糧門檻"},
+      {"team": 45, "gap_days": -3.75, "note": "先求生後才踩到缺糧門檻"},
+      {"team": 0, "gap_days": null, "note": "缺糧但全期未觀察到survival task切換(可能仍在覓食前的其他反應階段，或15天/月窗內沒切完)"},
+      {"team": 3, "gap_days": null, "note": "同上"},
+      {"team": 19, "gap_days": null, "note": "同上"}
+    ],
+    "peaceful_economy_gaps": [
+      {"team": 0, "gap_days": 1.25},
+      {"team": 4, "gap_days": 0.5},
+      {"team": 7, "gap_days": -3.5, "note": "先求生後才踩到缺糧門檻"},
+      {"team": 8, "gap_days": 10.17, "note": "★較長延遲"},
+      {"team": 9, "gap_days": 7.0, "note": "★較長延遲"},
+      {"team": 10, "gap_days": 2.67},
+      {"team": 11, "gap_days": 8.5, "note": "★較長延遲"}
+    ],
+    "interpretation": "gap分布很寬(0.4天~10+天，含多個負gap)，沒有單一乾淨數字可判『urgency反應是否變遲鈍』。★這個分析本身只是起點——是否算『遲鈍』需要對照EWMA-merge前的同seed同gap分布才有意義（本輪未做pre/post EWMA的行為gap對照，只做了trace捕獲本身，這是本輪的已知缺口，誠實揭露）。",
+    "caveat": "★本輪未產出EWMA-merge前後的直接對照gap數字（時間/budget限制），只給出post-EWMA現狀的gap分布——QA讀trace時建議聚焦『這個gap分布本身是否合理』(存在10天延遲是否算過長)，而非跟一個我沒能提供的『之前』基準比較。"
+  },
+
+  "settle_timing_regression_check": {
+    "purpose": "回應systems③『請把它併進queue#2』的要求：warring_states day35仍無PRODUCE隊，疑EWMA-merge延後settle",
+    "attempts": [
+      { "branch": "c2acc743(pre-EWMA, EWMA相關commit前)", "config": "warring_states", "days_attempted": "20/25/30/35/40", "result": "多次timeout或到day40仍未在窗口內找到PRODUCE隊(1200s budget不足以跑到出現為止)" },
+      { "branch": "現main(post-EWMA)", "config": "warring_states", "days_attempted": "20/25/30/35", "result": "同樣：n=0 PRODUCE隊(見popcap-hypothesis輪的獨立確認)" },
+      { "branch": "c2acc743(pre-EWMA)", "config": "peaceful_economy", "days_attempted": 15, "result": "first_produce_day=1（非常快）" }
+    ],
+    "★重要修正": "★★pre-EWMA main跟post-EWMA main在warring_states上都同樣『很晚才有PRODUCE隊』（甚至pre-EWMA在1200s budget內也沒能等到）——這代表『§4b輪day25就有produce_n=2』這個對照點，很可能不是main分支的特性，而是settlement-s4b分支自己的§4a/§4b settle相關改動讓teams更快settle，跟EWMA解耦無關。",
+    "verdict": "★未能坐實EWMA-merge造成settle delay regression——pre/post EWMA main在warring_states上的settle時程看起來相近(都慢/測不到)，沒有觀察到『EWMA前更快、EWMA後變慢』的方向性證據。peaceful_economy上pre-EWMA顯示day1就有PRODUCE隊(非常快)，但本輪未取得post-EWMA peaceful_economy的對照數字(時間/budget限制)。",
+    "recommendation": "若systems仍認為這條regression疑慮重要，建議：①補peaceful_economy的post-EWMA對照(應該很快，不貴)②warring_states的比較需要更長budget(1200s不足)才能等到PRODUCE隊出現、或改用settlement-s4b分支本身pre/post的對照(而非main pre/post)，因為原始『day25有produce_n=2』的觀察點本來就來自settlement-s4b分支非main。"
+  },
+
+  "cleanup": {
+    "worktrees_removed": [".worktrees/ewma-story-trace", ".worktrees/pre-ewma-baseline"],
+    "temp_beds_deleted": ["ewma_story_trace_bed.gd", "settle_timing_bed.gd（兩個worktree各一份）"],
+    "production_code_touched": "無——純觀測bed，未碰任何production code"
+  },
+
+  "known_bug_found_and_fixed_inline": {
+    "finding": "初版bed用OS.set_environment(\"SPECIMEN_SAMPLE_N\",\"200\")+SpecimenDumpHelper.setup_from_env(state)的組合，結果SpecimenTracer捕獲0決策——懷疑OS.set_environment在同進程內對get_environment/has_environment讀回不可靠(Godot engine limitation，未深究根因)。改用直接指定state.specimen_team_ids+SpecimenTracer.enabled=true(鏡射lag-quantify輪已驗證有效的模式)後正常捕獲。此為bed自身的一次性除錯，非production code問題，未另開handback，此處僅記錄避免未來重蹈覆轍。"
+  },
+
+  "summary": "trace落地完成(warring 6515 entries/peaceful 1464 entries，15隊代表性取樣)，交QA讀motive→action→outcome故事。latency分析顯示gap分布很寬(0.4~10+天)但缺pre-EWMA對照基準，不能斷定是否變遲鈍——已誠實揭露此缺口。settle-timing regression check★未能坐實——pre/post EWMA main在warring_states上表現相近，原始的『day25 produce_n=2』對照點更可能來自settlement-s4b分支自己的功能改動而非EWMA解耦，這是對systems原假設的一個修正。"
+}
