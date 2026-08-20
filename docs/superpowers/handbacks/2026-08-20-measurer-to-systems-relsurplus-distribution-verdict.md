@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "★T0分布快照verdict(生育HOW前置)——rel_surplus三份snapshot(peaceful d45/d200+warring d25),★pop>12級距全空缺口,item③初步支持『小村被絕對門檻誤殺』方向但信心中等"
 ---
 
