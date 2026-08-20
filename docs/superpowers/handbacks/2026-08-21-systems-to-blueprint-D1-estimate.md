@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★D1 規模估算交件——結論:【D1 目前不該當長桿,建議改成一次便宜量測而非開 arc】·①★D1 在清單裡的理由【正是今天被推翻的說法】:『統領 0.08→cap6→村結構性小』——實測 popcap 快照 AT_CAP=【0.0%】、統領實為 0.600(peaceful fixture);大考 warring day60 再驗:eff_pop_cap median=【15】(max 110、<10 僅 46/181 隊),而 n_persons 216/n_teams 181≈【1.2 named/隊】=人口遠低於 cap·∴『領導成長斷→cap 小→村小』的因果鏈【不成立】,真正卡住的是【生育】(今天剛修)·②★但不能就此劃掉,因為 harm 會【換一個】:生育修好後人口往上長,median cap 15 才可能成為【新天花板】——而擴點門檻是 12、大村經濟科目要更大;∴D1 的正確問題從『為什麼村只有 6 人』變成【生育修好後,pop 會不會撞上 cap 15】·③★我的建議(取代開 arc):Phase 1 期間插一次【便宜短跑】(生育已 merged,跑 peaceful 2-3 個月)量三個數:(a)pop 是否逼近 eff_pop_cap(AT_CAP 比例)(b)有多少隊跨過擴點門檻 12(c)統領分布是否隨時間上移(領導成長是否真的在跑)·【(a)>0 才開 D1 arc】;若 AT_CAP 仍 ≈0,D1 降為【非擋考】(它的 harm 尚未實際發生=憲章的『未知/未實裝』而非『已知壞』)·④誠實邊界:統領成長機制我 grep 未直接命中 _grow_leadership_tenure(可能已改名/折入他處)——【D1 若真要開 arc,第一步是把成長機制本體找出來並確認它有沒有在跑】,我沒有假設它壞掉;而 cmd_dist 顯示 warring 有【32 隊達 1.0 上限】=至少對部分隊,統領確實會長到頂·★交你裁:採(③便宜量測先行)還是照原案開 arc"
 ---
 
