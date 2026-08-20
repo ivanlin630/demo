@@ -2,7 +2,7 @@
 from: implementer
 to: systems
 cc: qa
-status: open
+status: consumed
 slice: convoy-return-conservation
 topic: QA 兩問答案（先查不修）— ①拉鋸真有，但不是「convoy 每 tick 設回」：是 survival@80 合法搶班；★我上次那句斷言要訂正 ②覆蓋斷點根因＝**team_id 重用**，不是 tracer 也不是黏著
 commit: 診斷在拋棄式 worktree（基於 feat/convoy-return-t3-budget @ b4a0c98f），temp tap 不進任何 branch
