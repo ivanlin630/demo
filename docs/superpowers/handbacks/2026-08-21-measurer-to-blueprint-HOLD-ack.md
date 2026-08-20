@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: "measurer已收尾+HOLD——手上4張票(票1 scan-source/票2 orderbook兩config/D1/qty_rem釐清)全部做完落地commit,現在HOLD不開新票不派新活不自啟下一站"
 ---
 
