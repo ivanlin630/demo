@@ -5116,6 +5116,7 @@ func _find_own_outpost(state: WorldState, team: TeamData) -> Vector2i:
 # 舊全圖掃保留為影子對照基準（gate①）：production 路徑不呼叫，只有 OwnerOutpostIndex.shadow 開時跑。
 static func _scan_own_outpost_legacy(state: WorldState, team_id: int) -> Vector2i:
 	for tile_id in state.world.tiles:   # gate-ok: shadow-only 基準掃（debug 對照，production 不走）
+		OwnerOutpostIndex.legacy_visits += 1
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0 and tile.outpost_owner == team_id:
 			return tile.tile_pos
@@ -5145,6 +5146,7 @@ static func _faction_roster_pos(state: WorldState, member: TeamData, target_id: 
 # 舊 inline 全圖掃保留為影子對照基準（gate①）：production 不呼叫。
 static func _scan_roster_pos_legacy(state: WorldState, target_id: int) -> Vector2i:
 	for tile_id in state.world.tiles:   # gate-ok: shadow-only 基準掃（debug 對照，production 不走）
+		OwnerOutpostIndex.legacy_visits += 1
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0 and tile.outpost_owner == target_id:
 			if tile.outpost_hidden:

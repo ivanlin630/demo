@@ -25,6 +25,8 @@ static var epoch: int = 1
 static var shadow: bool = false
 static var shadow_checks: int = 0
 static var shadow_fails: int = 0
+# 舊掃的 tile 訪問次數（只在 legacy 基準掃裡累加＝debug 路徑；用來把「省下的工」量成真實 visits 而非猜滿掃）
+static var legacy_visits: int = 0
 
 static func invalidate() -> void:
 	epoch += 1
@@ -32,6 +34,7 @@ static func invalidate() -> void:
 static func shadow_reset() -> void:
 	shadow_checks = 0
 	shadow_fails = 0
+	legacy_visits = 0
 
 # 影子對照：expect（舊全圖掃結果）vs got（索引結果）不等即印 team/tile 並記 FAIL。
 static func shadow_check(tag: String, team_id: int, expect: Vector2i, got: Vector2i) -> void:
