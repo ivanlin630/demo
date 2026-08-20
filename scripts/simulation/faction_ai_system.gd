@@ -2860,6 +2860,10 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 # ★T3 相對錨定（HOW spec §3：不新增絕對天數常數）：回程放棄門檻 ＝ 此倍數 × 進入 RETURN 當下的預期 ETA。
 # 3.0 ＝ 容忍繞路/擋路/被危機打斷兩次仍在路上；超過就不是「慢」而是「回不去」。
 const RETURN_ABANDON_ETA_MULT: float = 3.0
+# ★防呆絕對上限（systems 裁 2026-08-21，spec §6b）：**系統健康維護**用——回收被無限期扣住的
+# 「一隊一 convoy」名額，★**不是**追逐品質判準、★**不得當 tuning 旋鈕**。很寬鬆是刻意的：
+# 正常局不該綁到（gate 10：`by_abs_cap` 佔比應為 0）。
+const RETURN_ABS_CAP_TICKS: int = 60 * WorldState.TICKS_PER_DAY   # TEST VALUE — 60 日
 
 # 進入 RETURN 時記下「預期回程 ETA」與起算 tick，供 T3 判「長期不可達」（相對錨定、非絕對天數）。
 # ★T3 放棄預算錨在【進入 RETURN 那一刻】（systems 裁定 2026-08-21）。
@@ -2867,12 +2871,21 @@ const RETURN_ABANDON_ETA_MULT: float = 3.0
 # `elapsed > MULT×ETA` 就【永遠不會】觸發。通則：兜底錨在承諾開始，不是錨在最近一次調整。
 func _stamp_return_eta(state: WorldState, sub: TeamData, home_pos: Vector2i, xd: Dictionary) -> void:
 	var eta: int = _estimate_eta_to(state, sub, home_pos)   # 無路 → 9999999 哨兵（下方判無路）
-	xd["return_eta_leg"] = eta                             # 本段路徑 ETA（診斷用；不參與放棄判定）
-	if not xd.has("return_budget_eta"):                    # ★只在進 RETURN 的第一次立預算
+	xd["return_eta_leg"] = eta                             # 本段路徑 ETA（診斷用 + 本段無路判定）
+	if eta >= 9999999:
+		return                                             # 無路：不把哨兵值灌進預算
+	if not xd.has("return_budget"):
+		# 首次進 RETURN：立預算 + 起算點（起算點此後【永不重設】）
 		xd["return_start_tick"] = state.world.current_tick
-		xd["return_budget_eta"] = eta
-	elif Probe.enabled:
-		Probe.bump("convoy.rehome_budget_kept")            # rehome 只換路徑目標、預算不動（可觀測）
+		xd["return_budget"] = int(RETURN_ABANDON_ETA_MULT * float(eta))
+		xd["rehome_n"] = 0
+	else:
+		# ★真 rehome：預算【累加】整段 leg×倍率（非換掉、非增量）——目標真的變遠時預算才跟著長。
+		xd["return_budget"] = int(xd["return_budget"]) + int(RETURN_ABANDON_ETA_MULT * float(eta))
+		xd["rehome_n"] = int(xd.get("rehome_n", 0)) + 1    # ★specimen 讀這欄（覆蓋票的 reader 對應 writer）
+		if Probe.enabled:
+			Probe.bump("convoy.rehome_budget_added")
+			Probe.note("convoy.return_budget_peak", float(xd["return_budget"]))
 
 # T3 判準：①母隊不在了 ②進 RETURN 當下就無路可回 ③已耗時 > MULT × 預期 ETA。
 func _return_is_hopeless(state: WorldState, sub: TeamData, xd: Dictionary) -> bool:
@@ -2883,12 +2896,21 @@ func _return_is_hopeless(state: WorldState, sub: TeamData, xd: Dictionary) -> bo
 	if int(xd.get("return_eta_leg", 0)) >= 9999999:
 		xd["abandon_reason"] = "no_path"
 		return true
-	var eta: int = int(xd.get("return_budget_eta", -1))
-	if eta <= 0:
+	var budget: int = int(xd.get("return_budget", -1))
+	if budget <= 0:
 		return false   # 尚未立預算（舊存檔/未知路徑）→ 不判，交給正常歸建
 	var elapsed: int = state.world.current_tick - int(xd.get("return_start_tick", state.world.current_tick))
-	if float(elapsed) > RETURN_ABANDON_ETA_MULT * float(eta):
+	# ★★防呆絕對上限＝【系統健康維護】（回收被無限期扣為人質的「一隊一 convoy」名額），
+	#   ★不是追逐品質判準、★不得當 tuning 旋鈕調。理由：等速平行移動時累加預算與 elapsed 同步成長、
+	#   永不觸發（§6d 已寫下這個誠實邊界）——真正的最後防線是這條，累加預算只是便宜的早退。
+	#   時間包 §2 容許此處用絕對值：比值恆定是它的定義，這裡是真的找不到自然錨。
+	if elapsed > RETURN_ABS_CAP_TICKS:
 		xd["abandon_reason"] = "timeout"
+		xd["abandon_sub"] = "abs_cap"
+		return true
+	if elapsed > budget:
+		xd["abandon_reason"] = "timeout"
+		xd["abandon_sub"] = "budget"
 		return true
 	return false
 
@@ -2905,9 +2927,13 @@ func _convoy_go_independent(state: WorldState, sub: TeamData, xd: Dictionary) ->
 	if Probe.enabled:
 		Probe.bump("convoy.stranded")
 		Probe.bump("convoy.stranded." + reason)
+		# ★timeout 分因（spec §6d gate11）：by_budget vs by_abs_cap 分開計——
+		#   若長跑 by_budget 恆 0，帳上要明寫「累加預算在本世界 inert」，不得含糊記成「T3 有在守」。
+		if reason == "timeout":
+			Probe.bump("convoy.stranded.timeout.by_" + String(xd.get("abandon_sub", "unknown")))
 		Probe.bump_sample("convoy.stranded", {
 			"porter": sub.team_id, "parent": parent_id, "reason": reason,
-			"tick": state.world.current_tick, "budget_eta": int(xd.get("return_budget_eta", -1)),
+			"tick": state.world.current_tick, "budget": int(xd.get("return_budget", -1)),
 			"leg_eta": int(xd.get("return_eta_leg", -1)),
 			"carrying": sub.resources.duplicate(),
 		}, 16)
