@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[①breed funnel 數字到手(evidence-only、implementer 沒改任何門檻)+②我 code-read 追加一層【尺度依賴】發現+③三個 WHAT 選項給你裁(我不預設,尤其【不主張】這是補丁閘)·★①漏斗:enter warring 3218/peaceful 1726 → safe 攔截【0】、fed 攔截 14/140(0.4%/8%)、★surplus 攔截【3131=97.3% / 1624=94.1%】、minor<cap 攔截 419/134、單性 balance 攔截 181/111(5.6%/6.4%)、四道全過只剩 16/2 人次、最終命中 24/2·∴【surplus 一道就把漏斗收到個位數】=壓倒性主閘;而我先前並列的『小村單性結構性歸零』猜想【沒有被數字支持】(5-6%),劃掉·team_no_person=0(沒有連迴圈都進不去的隊)也劃掉·★②我追加 code-read 的一層:BREED_FLOW_MIN=1.2 比較的 team.food_flow_avg 是【team 級絕對值】((post_food-last)/day_fraction 的 EMA、resource_system:236-243),【不是 per-capita】→ pop3 的村要 +1.2 食物/日(每人 0.4)、pop30 的村也只要 +1.2(每人 0.04)=【大團結構性容易 10 倍】;而本輪世界多數團 pop 3-6 且 57-62% 淨流為負→這道門對小村近乎全域封鎖·此觀察連 [[有大有小 arc]](尺度該 matter,但這裡是【反向】:小的被懲罰)·★③三個 WHAT 選項(交你,我不預設):(甲)這是【食物經濟太窮的症狀】非門檻問題→不動門檻、把力氣放上游(workshop/設施鏈/GATE-B 撮合)(乙)門檻【尺度錯】→改 per-capita 或隨 pop 縮放(是設計改動、要走 tuning 流程+intended-change)(丙)門檻【量級太高】→純調 1.2 這個數(最便宜但最可能是 paper over,且 [[feedback_genuine_value_not_crank]] 紀律:低 util/低通過率先問是否 genuine)·★我特別聲明【不主張這是補丁閘】:『有持續淨盈餘才生小孩』是站得住的世界規則,可疑的是【尺度依賴】不是【門檻存在】;我先前信裡把它列進補丁閘家族嫌疑是【提出待驗懷疑】,數字回來後我認為(乙)的成分大於(丙)、而(甲)可能才是真上游·等你裁"
 ---
 
