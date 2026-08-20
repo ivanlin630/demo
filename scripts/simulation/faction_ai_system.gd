@@ -3975,6 +3975,11 @@ const CONVOY_PORTER_POP: int = 2          # TEST VALUE — porter 子隊 pop（�
 const CONVOY_MIN_PARENT_POP: int = 4      # TEST VALUE — 母隊抽 porter 後留守下限（比 build gate 10 輕，porter 小）
 const CONVOY_CARGO_CAP: float = 200.0     # TEST VALUE — 單趟載重上限
 func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool:
+	# ★全量暫態可觀測性：convoy 派工 chokepoint 的分母。本函式原本七個 return false 全靜默＝
+	# 「從不派 convoy」與「派得很順」在 tap 上長得一模一樣。列舉輪（2026-08-21）量到 ④throttle 是
+	# 唯一會燒的一關（peaceful 90% / warring 12%），故常設保留「總嘗試」與「④」兩個計數；
+	# 其餘六關列舉完即撤（實測恆 0）。純觀測、Probe-gated、零行為零 RNG。
+	if Probe.enabled: Probe.bump("convoy.dispatch_attempt")
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	if target == Vector2i(-1, -1) or target == team.tile_pos:
 		return false
@@ -3987,6 +3992,7 @@ func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool
 	for tid in state.teams:
 		var pt: TeamData = state.teams[tid]
 		if pt.parent_team_id == team.team_id and pt.current_task == TeamData.TASK_CONVOY:
+			if Probe.enabled: Probe.bump("convoy.drop.inflight_convoy")   # ★唯一會燒的 drop（見上）
 			return false
 	var res: String = String(cargo.keys()[0])
 	var want_qty: float = minf(float(cargo[res]), CONVOY_CARGO_CAP)
