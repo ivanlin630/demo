@@ -525,3 +525,32 @@ convoy RETURN 腿：**30 天窗**觀測到「母隊一毛沒收到、porter 身�
 ### 落地順序（與現有工單接合）
 - **第一份清單 ＝ convoy dispatch-drop 列舉**（`faction_ai:3977-4006` **7 個靜默 `return false`**）——本律使它從「找效能斷點」升級為**合規盤點**：★**每個 drop 點要嘛消滅、要嘛變成有反饋的失敗事件**，**不准原樣留著**。
 - 其後：`order.abandoned`（94.4% 靜默到期）／JOIN／建設 try_set 失敗／trade market bail 各族，逐族納管。
+
+## 承諾態只能經仲裁移轉：直接寫欄位 ＝ 承諾靜默消失（2026-08-21 立，convoy RETURN 實戰產出）
+
+**血證**：convoy RETURN 歸建遲到 27.9 日。我在 spec §5 預測首要嫌疑是 `persist_strength` 的 time-proxy，
+並要求「先補一行 `PROGRESSIVE_HOLD_TASKS += TASK_CONVOY`」。
+**實測：那一行單獨補 ＝ 與 main 逐字節相同、零效果。**
+真根因是 `faction_ai:797-809` 的 merge_queue：母隊走掉 → `parent.tile_pos != sub.tile_pos` → 走
+`TaskArbiter.release(sub)`，而 **`release()` 直接寫欄位、繞過 `try_set`** ⇒ 承諾態被丟掉、隊變 `IDLE`
+⇒ 下一輪決策**合法地**把它改派成別的事。
+
+★ **為什麼 hold 擋不住**：`PROGRESSIVE_HOLD_TASKS` 擋的是「**CONVOY → 別的**」；
+而現場發生的是「**IDLE → 別的**」——**承諾在被問之前就已經不存在了**。
+`diag.convoy_preempt_try.* = 0`／`persist.hold = 0` ＝ **根本沒有人問過仲裁**。
+
+### 規則
+1. **任何會讓隊伍離開一個承諾態（progressive／hold 類 task）的路徑，都必須經過 `try_set`／`transition`**，
+   讓仲裁有機會拒絕。**直接寫 `current_task` 等欄位 ＝ 繞過仲裁。**
+2. `release()` 是**合法的**，但它的語意是「**承諾已結束**」。
+   **當承諾其實還在（`convoy_phase` 非空、build 未完、護送未達）時呼叫 `release()` ＝ bug。**
+3. 新增任何 `release()` 呼叫點時，**必須說明「為什麼此刻承諾確實結束了」**；說不出來就是該走 `transition`。
+
+### ★診斷順序（可複用）
+遇到「承諾態被搶走」型症狀，**先分兩種可能再開藥**：
+- **(a) 搶班沒走仲裁**（沒人問過）→ 查 `try_set` 的 try/hold tap **是不是 0**。**0 ＝ 問題不在門檻，在根本沒問。**
+- **(b) 仲裁問了但沒守住**（門檻／持守強度不足）→ 這時才輪到調 hold／persist。
+**先看 tap 是不是 0，再談門檻。** 反過來做會像我這次一樣，把藥開在沒發生的事情上。
+
+★ 這是「**補丁閘優先查**」的近親：不是機械 override 壓過引擎，而是**繞過引擎**——
+症狀一樣（決策層看起來沒生效），查法一樣（先問「引擎到底有沒有被呼叫」）。

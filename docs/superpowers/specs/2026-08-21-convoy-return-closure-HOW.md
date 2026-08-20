@@ -38,6 +38,8 @@ date: 2026-08-21 ／ owner: systems ／ WHAT ＝ blueprint 裁定（採 systems 
 R² 親查指出：`TaskArbiter.PROGRESSIVE_HOLD_TASKS`（`task_arbiter:22`）**正是現成對的工具**，而 **`TASK_CONVOY` 目前不在裡面** → **補一行**比含糊寫「走既有承諾機制」更省事，且**自動滿足「survival 仍可搶」**（`try_set:60-70` 的 hold 條件明載：**危機 axis（任一側 ≥`PRIO_THREAT`）不介入／玩家命令不擋／同 task 不擋**）。
 **採納**：`PROGRESSIVE_HOLD_TASKS` **加入 `TeamData.TASK_CONVOY`**。
 
+> **★2026-08-21 事後訂正（實測推翻）**：下面這段預測**錯了**。單獨補 `PROGRESSIVE_HOLD_TASKS += TASK_CONVOY` **與 main 逐字節相同、零效果**；真根因是 `faction_ai:797-809` merge_queue 走 `TaskArbiter.release()` **繞過 `try_set`**，承諾在被問之前就沒了（`persist.hold = 0`、`convoy_preempt_try = 0`）。**hold 擋的是「CONVOY → 別的」，現場是「IDLE → 別的」。** 通則已升 `invariants`〈承諾態只能經仲裁移轉〉+〈先看 tap 是不是 0，再談門檻〉。
+
 ### ★systems 追加親驗（reviewer 未往下追的第二前提）
 hold 還有**第二個條件**：`team.persist_strength > PERSIST_HOLD_THRESHOLD(0.1)`。
 親查 `persist_strength`：`_value` **只對 `NON_PROGRESSIVE=[IDLE, FLEE]` 回 0** → CONVOY **有值**；`_progress` 對**非 BUILD** 走 **fallback ＝ `elapsed / COMMIT_HORIZON_DAYS`**，而 porter 的 `task_start_tick` **從 dispatch 起算**（phase 變化不重設）→ 到 RETURN 時 elapsed **已累積可觀** → **持守強度足夠、補一行即生效**。

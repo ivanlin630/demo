@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: convoy-return-conservation
 topic: convoy RETURN 收尾 DONE — ★gate1 那一行本身沒用，真根因是 merge_queue 繞過仲裁 release；修後 27.9 日 → 9.2/1.3 日、吞吐 ×3
 branch: feat/convoy-return-conservation
