@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: "★★12mo大考verdict:peaceful完整12mo綠+warring★真實只70天就game_over凍結(超前解你day120裁定)——population首次摸到pop≥12擴點門檻+scaling k≈2.0坐實"
 ---
 
