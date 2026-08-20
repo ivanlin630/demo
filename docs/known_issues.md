@@ -124,7 +124,11 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 **★★「壽命」不是分布、是硬常數牆**：`ORDER_LIFETIME = 5 * TICKS_PER_DAY`（`order_system.gd:3`）**寫死**、下單當下 `expire_tick` 即固定；16 筆 abandon 樣本 `age_ticks` **全部 = 1200、零變異** ＝ 每張被砍的單都**活滿整整 5 天**。∴ 原本想要的「平均壽命/年齡分布」**退化成單點常數**。
 **★重掛 churn ＝ 0%**（硬證據）→ **systems 先前的「訂單重掛 churn」懷疑正式撤回**。
 **★systems HOW 判斷（下一步該修哪）**：**不要先動 `ORDER_LIFETIME`**——0.7% 與已知 **GATE-B buy-fill 0.5%**（seek 1363→arrive 333→fill 4；`interaction:781` 只從**抵達 tile** 的 granary 買 ＝ 空間錯配）**幾乎一致** → 真 binding 疑為**貨到不了**而非**窗太短**；先拉長壽命只會把「到不了貨」變成「更久才被砍」＝**在結構性斷點上調參**。**正確順序：修 GATE-B → 看成交率是否自然上來 → 仍低才檢討 5 天窗**。
-**★待釐清的證據矛盾**：QA 大考 specimen 讀到 team8 買糧單 `qty_rem` **17→21 不減反增**（像重掛），但 `replaced=0` → 三選一（就地加碼／不同 res・kind／不同 config 窗口）已派 measurer 判。**若是「就地加碼」，則「無 churn」只對新單成立**、對就地改量不成立（一樣是反覆改主意的病徵）。
+**★證據矛盾已釐清（2026-08-21 measurer、窮盡搜索）**：`qty_remaining` 全 `scripts/simulation` **僅 3 處寫入**（`order_system:46` 新單設定／`:375` `want-filled`／`interaction:916,922` `maxi(qty-filled,0)`），**全部單調不增** → team8 的 17→21 **上升必然是不同 `order_id`**、**「就地調大」確定 FALSE**。
+**真相＝序列式重掛**（舊單**已死**後隔一段再重新下單），而 `order.replaced` 抓的是**重疊式**（舊單**未清**就再掛）→ ∴ **「訂單簿無 churn」只對「重疊式」成立**；**「序列式重新下單」未經測量**。
+★**systems 裁：現在不為它開量測輪**——在 fill 0.7%／abandon 94.4% 的世界裡，**單到期後重新下單是正確反應**（隊仍然需要糧），它是 **0.7% 的下游症狀、不是獨立病**；等 GATE-B／dispatch-drop 釐清後若仍要量，**tap 設計已備**：追蹤同隊同 `kind+res` **連續兩張單的 `created_tick` 間隔**（現有 counter 答不了）。
+★**別把「churn=0」讀成「沒有反覆下單」**——這是 counter 的**定義範圍**，不是世界的性質。
+（附：systems 原信誤標該筆為 warring，實為 **peaceful_economy**；measurer 更正。）
 
 ### 🩺 生育不給「醫療」技能 XP（既有、非新引入；2026-08-20 生育 slice merge-gate 時查清）
 `skill_system.gd:14` 有 `"P5_breed" → {skill:"醫療", attr:"智力"}` 映射，但 **`SkillSystem.on_reaction` 只吃 `_evaluate_person` 回傳的「行動反應」**，而 `P5_breed` 一直走 **life-event 分支**、**從不經過 `on_reaction`**（`headless_test:12842` 的 assert「行動反應不應含 P5_breed」正是這個事實的反面證據）。
