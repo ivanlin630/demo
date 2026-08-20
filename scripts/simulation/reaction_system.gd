@@ -1,6 +1,7 @@
 class_name ReactionSystem
 
 const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+const MORALE_LERP: float = 0.1          # 每次 evaluate_all 呼叫的士氣收斂率（trials 補償用同一常數）
 const BREED_BASE_CHANCE: float = 0.15   # TEST VALUE
 # R2 flow-not-stock：生育 gate 讀持續淨食物流盈餘（食物/天），非 stale 滿倉 stock。
 # 門檻 ≈ 半人份日餐 → 有真盈餘養新口才生（爆倉不再驅動）。TEST VALUE，bed 校。
@@ -30,9 +31,11 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 				LoyaltyBank.adjust(person, alignment, "goal_alignment")
 			var reaction: String = _evaluate_person(state, person, team)
 			if reaction != "none":
-				_apply_reaction(state, person, team, reaction)
+				_apply_reaction(state, person, team, reaction, trials)
 				if skill_sys != null:
-					skill_sys.on_reaction(person, reaction)
+					# ★每次呼叫累加技能 → 跑 trials 次（非 growth×trials；跑滿次才精確含 MAX_SKILL 夾頂語意）
+					for _s in range(maxi(trials, 1)):
+						skill_sys.on_reaction(person, reaction)
 			# 生命事件（獨立於行動反應，可並行）
 			for ev in _evaluate_life_events(state, person, team, trials):
 				_apply_life_event(state, person, team, ev)
@@ -43,7 +46,11 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 				_:            morale_n += 1   # 其他 reaction 中性計入
 		if morale_n > 0:
 			var target_morale: float = clampf(1.0 + (morale_acc / float(morale_n)) * 0.5, 0.5, 1.5)
-			team.work_morale = clampf(lerpf(team.work_morale, target_morale, 0.1), 0.5, 1.5)
+			# ★重複 lerp 的精確等價（固定 target）：w_eff = 1 − (1−0.1)^trials
+			# far pass 若只 lerp 一次，收斂速度只剩 1/10；而 work_morale 直接乘進採集產出
+			# （resource_system gain *= work_morale）＝世界級影響。
+			var w_eff: float = 1.0 - pow(1.0 - MORALE_LERP, float(maxi(trials, 1)))
+			team.work_morale = clampf(lerpf(team.work_morale, target_morale, w_eff), 0.5, 1.5)
 		# 序7 reaction 溶入：bridge panic-flee try_set 撕除 → 集體恐慌現由引擎 survival option
 		# 驅動（ctx.team_panic → threat_pressure → FLEE，faction_ai 主 rank/threat 路派發，PRIO 語意保）。
 		# 個體反應 apply（下方 _apply_reaction/_apply_life_event）= consequence scaffolding，全不動。
@@ -253,14 +260,19 @@ func _score_extort(p: PersonData, _t: TeamData) -> float:
 	base -= float(p.values.get("慎重", 0.5)) * 0.25
 	return base
 
-func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reaction: String) -> void:
+# ★LOD trials 補償（addendum）：判準是【每次呼叫是否累積】，不是【有沒有 RNG】。
+# far pass 少跑 9/10 次 → 每次呼叫累積一點的量若不補，累積速度只剩 1/10＝仍然降真實。
+# 補：comply loyalty +0.01×trials、riot/expand unrest ±1×trials。
+# ★不補（達標即發生一次、非每次累積）：N1_flee/N3_defect 離隊（條件持續下次照樣發生＝最多延遲
+#   100 tick、非降率）、stress -= 0.3（觸底即止的飽和型）。
+func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reaction: String, trials: int = 1) -> void:
 	match reaction:
 		"P1_comply":
-			LoyaltyBank.adjust(person, 0.01, "comply")
+			LoyaltyBank.adjust(person, 0.01 * float(maxi(trials, 1)), "comply")   # ★每次呼叫累積 → ×trials
 		"P2_produce":
 			pass   # 效果改由 work_morale 係數體現（evaluate_all 統計）
 		"P4_expand":
-			UnrestBank.reduce(team, 1, "recover")
+			UnrestBank.reduce(team, maxi(trials, 1), "recover")   # ★每次呼叫累積 → ×trials
 		"N1_flee":
 			if team.population <= 1 and person.id == team.leader_id:
 				return   # solo 無處可逃：不變化、stress 不洩壓（持續高壓餵 N2/N3）
@@ -275,7 +287,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 					if Probe.enabled: Probe.bump("death.defect_leave")
 			# 非 named/leader（anon 無個體）→ 無 cohort 來源可動，population getter 不變
 		"N2_riot":
-			UnrestBank.add(team, 1, "reaction")
+			UnrestBank.add(team, maxi(trials, 1), "reaction")   # ★每次呼叫累積 → ×trials
 		"N3_defect":
 			if team.population <= 1 and person.id == team.leader_id:
 				return   # solo leader 無從叛逃自己

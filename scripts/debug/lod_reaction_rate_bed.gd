@@ -19,6 +19,8 @@ func _mk(seed_v: int) -> Array:
 	t.resources = {"food": 200.0}; t.resource_cap = {"food": 400.0}
 	s.world.tiles[0] = t
 	var team := TeamData.new(); team.team_id = 1; team.tile_pos = Vector2i(0,0); team.faction_id = -1
+	team.tags = [TeamData.TAG_PRODUCE]      # 讓 P2_produce 真的成為 winner（morale target 才會拉高）
+	team.work_morale = 0.5                  # ★起點遠離 target → lerp 收斂速度差異才看得出來
 	team.food_flow_avg = 5.0            # 盈餘（過 BREED_FLOW_MIN）
 	# ★_breed_balance 讀 anon 池的性別比（非 named 的 sex）→ 必須有 anon 母體，否則 balance=0 恆不生
 	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 60)
@@ -26,10 +28,17 @@ func _mk(seed_v: int) -> Array:
 	team.resources = {"food": 300.0}
 	s.teams[1] = team
 	# 40 名有名成員（半男半女、needs 足）→ 生育母體夠大、cap=pop*0.25
+	# 一名高壓成員 → N2_riot 真的 fire（unrest 才有累積可比）
+	var rioter := PersonData.new(); rioter.id = 90; rioter.team_id = 1
+	rioter.sex = "男"; rioter.needs = {"safety": 0.2, "food": 0.9}
+	rioter.stress = 0.95; rioter.fear = 0.95; rioter.loyalty = 0.5
+	rioter.values = {"殘忍": 0.9, "慎重": 0.1}
+	s.persons[rioter.id] = rioter; team.named_members.append(rioter.id)
 	for i in range(3):   # 少量 named breeder → 期望次數落在未飽和區
 		var p := PersonData.new(); p.id = 100 + i; p.team_id = 1
 		p.sex = "男" if i % 2 == 0 else "女"
 		p.needs = {"safety": 0.9, "food": 0.9}
+		p.skills = {"生產": 0.8}
 		p.loyalty = 0.9; p.stress = 0.1
 		s.persons[p.id] = p
 		team.named_members.append(p.id)
@@ -49,6 +58,8 @@ func _run() -> void:
 		rs.evaluate_all(sa, [1], null, 1)
 	var near_breed: int = int(Probe.counts.get("reaction.breed", 0))
 	var near_minor: int = ta.minor_population
+	var near_morale: float = ta.work_morale
+	var near_unrest: int = ta.unrest_turns
 	# B：far 節奏（每 10 窗呼一次、trials=10）＝同樣 720 個 near 窗的時間
 	var wb := _mk(1337); var sb: WorldState = wb[0]; var tb: TeamData = wb[1]
 	Probe.reset()
@@ -57,6 +68,8 @@ func _run() -> void:
 		rs.evaluate_all(sb, [1], null, 10)
 	var far_breed: int = int(Probe.counts.get("reaction.breed", 0))
 	var far_minor: int = tb.minor_population
+	var far_morale: float = tb.work_morale
+	var far_unrest: int = tb.unrest_turns
 	Probe.enabled = false
 	print("  near: breed=%d minor=%d ｜ far: breed=%d minor=%d（同 %d 個 near 窗）" % [
 		near_breed, near_minor, far_breed, far_minor, windows])
@@ -71,5 +84,12 @@ func _run() -> void:
 		"★未飽和區間（cap=%d、near %d、far %d）＝ratio 是真 rate 證據、非被 cap 綁住" % [cap_a, near_minor, far_minor])
 	_ok(near_minor <= cap_a and far_minor <= cap_a,
 		"★團級 cap 兩側都守住（cap=%d、near %d、far %d）＝迴圈內逐次檢查有效" % [cap_a, near_minor, far_minor])
+	# ★addendum gate：累積型（每次呼叫累積一點）也要 far≈near——判準是「每次呼叫是否累積」非「有沒有 RNG」。
+	print("  work_morale: near=%.4f far=%.4f ｜ unrest: near=%d far=%d" % [
+		near_morale, far_morale, near_unrest, far_unrest])
+	_ok(absf(near_morale - far_morale) <= 0.05,
+		"★work_morale far≈near（|Δ|=%.4f ≤ 0.05）＝lerp 補償 w_eff=1-(1-0.1)^trials 有效（它乘進採集產出）" % absf(near_morale - far_morale))
+	_ok(absf(float(near_unrest - far_unrest)) <= maxf(float(near_unrest) * 0.25, 2.0),
+		"★unrest far≈near（near %d vs far %d）＝±1×trials 補償有效" % [near_unrest, far_unrest])
 	if _fail == 0: print("ALL PASS")
 	else: print("FAILS=%d" % _fail)
