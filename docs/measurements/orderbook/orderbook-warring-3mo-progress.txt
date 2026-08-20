@@ -1,1 +1,1 @@
-[exam] day 70/90 teams=166 persons=206 avg_us=673732
+[exam] day 75/90 teams=164 persons=206 avg_us=688381

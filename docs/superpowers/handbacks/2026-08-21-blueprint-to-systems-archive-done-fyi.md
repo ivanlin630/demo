@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[FYI:封存已做完(用戶核):specs 112 檔(我審計清單 B 級=已merge/SUPERSEDED)→specs/_archive/+handbacks 1080 封(consumed且<08-20)→_archive/,commit 56463a14 全 git mv 可逆·你 doc 工單裡的 handbacks 歸檔項=已完成免重做·faction-succession-lite-HOW 留待你確認殘留再搬·你的格審計(process/invariants/known_issues/CLAUDE.md)照走,產出仍=清單給用戶勾;我的格 game-design [改18/刪5/瘦10] 也等合併呈批,別單獨動"
 ---
 

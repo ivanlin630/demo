@@ -43,3 +43,29 @@ date: 2026-08-21 ／ owner: systems ／ 判準六條見 blueprint 工單 v2
 
 ## ★CLAUDE.md
 本輪**未提任何改動**——它 91 行、且**任何改動需用戶核可**；目前內容與新法**無牴觸**（它講的是工作流與指令，不含被推翻的機制描述）。
+
+
+---
+
+## 【補掃】`process/` 12 檔（2026-08-21 續掃）
+
+### ★最重要的一項不是「牴觸」而是「**找不到**」——新法沒有入口指標
+**除新立的 `09_exam_gate.md` 外，沒有任何 process 檔／`CLAUDE.md` 提到今日新法**：
+- **執行失敗反饋鐵律**（住在 `invariants.md`）
+- **長考閘**（住在 `process/09_exam_gate.md`）
+- **事件比例計算**（取代「LOD/重要性」；住在 spec + `progress`）
+→ **下一個 session 開場讀 `00_roles` 時，找不到今天立的法**。
+**建議【改指標】**：
+| 檔 | 加什麼 | 備註 |
+|---|---|---|
+| `00_roles.md` | 文檔導覽表加三行：失敗律（invariants）／長考閘（09）／事件比例計算（取代 LOD 語彙） | systems owner、**可直接改** |
+| `01_architect.md` | 「寫 spec 前必讀」清單加：失敗律 + 長考閘 | systems owner |
+| `CLAUDE.md` | 文件位置表加 `09_exam_gate.md` 一行 | ★**需用戶核可**、只列不動 |
+
+### 其餘 process 檔：**體質良好，本輪不建議動**
+- `04_qa.md`：release-gate 暫停**有完整 banner + 可逆條件**（「轉自動交付則硬閘回歸」）＝**不是 stale**、標註方式正確。
+- `06_pipeline_orchestration.md`（5 行）＝ **標準 tombstone**（作廢宣告 + 現行權威 + 「勿依本 doc 操作」）→ ★**判準③「SUPERSEDED 沒標死」的範本**，其餘該標死的可照抄此格式。
+- `07_orchestrator_machine.md`(98)＋`08_machine_workflow_v2.md`(85)＝機器軌 183 行，而 `CLAUDE.md:72` 定位為**少用**（只大/並行活才上）→ **【瘦】候選**：留「何時該上機器軌 + 入口 + 成本警語」，細節壓縮；**但不刪**（軌仍可用）。
+
+### 歸檔項：**已由 blueprint 完成**（specs 112 檔 + handbacks 1080 封 → `_archive/`、`commit 56463a14`、全 `git mv` 可逆）→ 本清單不重複列。
+★`2026-08-20-faction-succession-lite-HOW.md`：**確認可歸檔**——slice 已 merge（`d11550a4`）、§5 必查項已接線、產出的契約已入 `invariants`〈死亡窗口（走屍隊）決策紀律〉，**spec 本身無殘留未落地內容**。
