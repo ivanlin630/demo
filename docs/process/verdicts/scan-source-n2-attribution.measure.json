@@ -1,0 +1,37 @@
+{
+  "ticket": "票1(優先)：坐實N²真來源——systems假說『N²來自team_discovered集合隨N成長』",
+
+  "method": "worktree(.worktrees/scan-source-tap)L3 temp tap:13處team_discovered迴圈(faction_ai_system.gd)各插Probe.bump('scan.discovered_iter')+_find_own_outpost全圖world.tiles掃插Probe.bump('scan.global_tile')。新bed(scan_source_bed.gd)跑warring_states seed1337 40天完整(day1-40,n_teams自然成長56→139,無game_over/無異常),每日snapshot|team_discovered|分布+兩tap當日增量。",
+
+  "landed_path": "docs/measurements/2026-08-21-scan-source-n2-warring-40d.jsonl（原跑在worktree因godot-detach.ps1 env白名單沒收自訂SCAN_DAYS/SCAN_OUT落bed預設相對路徑，已複製進main落地path，40天完整無缺）",
+
+  "①|team_discovered|分布隨N/day成長": {
+    "raw": "median從day1的2一路漲到day40的76(38倍)，min/p90/max同步大幅成長(day40: min0/p90 91/max101)——★清楚不是flat/bounded，確定持續成長中，40天遠未飽和。",
+    "★★關鍵發現:day與n_teams在本run高度共線(collinear)，兩種回歸給出天差地遠的story": {
+      "vs n_teams(如你原本要的判準)": "k≈3.668 R²=0.989——遠超線性(k=1)，是super-linear",
+      "vs day(elapsed time)": "k≈1.106 R²=0.938——★幾乎剛好線性",
+      "n_teams本身 vs day": "k≈0.298 R²=0.930——n_teams隨day成長是次線性/漸緩(單一run裡team數成長本身在減速，不是穩定線性)",
+      "數學上的解釋": "因為n_teams~day^0.298，若disc_median真正的驅動是day(k≈1.1)，代回n_teams反推的視覺化k會自動變成≈1.1/0.298≈3.7——跟我量到的3.668幾乎完全吻合。★這代表『vs n_teams』那組k=3.7的super-linear表象，很可能是day↔n_teams共線性造成的數學假象，真正驅動更像是『累積時間』(每隊隨著時間流逝持續累積認識的隊伍，跟vision_system.gd:26-94逐tick偵查/detect機制吻合——每次成功偵查+append，append-only從不移除，天然隨經過的tick數累積)，不是『隊越多每隊認識的隊越多』這種N直接驅動的機制。",
+      "誠實局限": "單一run(單seed單config)裡day/N天生共線，這份資料★無法乾淨切開兩個假說——要真正分離需要對照(例如同N不同day，或同day不同N的多run比較)，這輪短窗預算內沒做，交你判值不值得。"
+    }
+  },
+
+  "②per-eval實際掃描量vs N(你的關鍵判準)": {
+    "raw_vs_n_teams": "scan_per_team_day從day1的165.02漲到day40的8784.49(53倍)，k≈3.871 R²=0.981——★字面上『是』隨N上升，但遠超簡單線性(k=1)，是明顯super-linear。",
+    "raw_vs_day": "k≈1.183 R²=0.956——同樣接近線性，跟上面①的day-driven故事一致。",
+    "★★跟既有k≈2.0(day1-69 near.faction_ai總wall-time回歸,exam-12mo-verdict.measure.json)的算術矛盾": "若scan_per_team真的以k≈3.87隨N成長，total scan volume(=scan_per_team×n_teams)對N的冪次會是3.87+1≈4.87——遠超你們之前用wall-clock時間量到的k≈2.0(near.faction_ai總成本)。這兩個數字兜不起來，代表兩種可能：(i)scan.discovered_iter+scan.global_tile這兩個tap只捕捉了near.faction_ai裡的一部分工作(還有其他沒被這輪tap到的per-eval運算，例如util評分/candidate排序等，佔比可能才是真正決定k≈2.0的主力，掃描迴圈只是配角)(ii)本run樣本量小(40點)+day/N共線造成的回歸不穩定，數字本身不可全信。★不下判斷交你，只誠實報矛盾。"
+  },
+
+  "③_find_own_outpost全圖掃佔比": {
+    "raw": "global_tile_share(scan.global_tile/(scan.global_tile+scan.discovered_iter))從day1的99.18%緩降到day40的74.33%——★★全程都是絕對多數，即使N長到139隊、discovered_iter絕對量暴漲53倍後，global_tile掃描仍佔了近3/4的『追蹤到的』掃描總量。",
+    "意義": "值得單獨做索引——這是本輪唯一結構清楚、不受day/N共線混淆干擾的乾淨結論：_find_own_outpost(全圖world.tiles掃,被呼9次)在你追蹤的兩類掃描裡★持續是最大宗貢獻者，不會因為discovered_iter追上來而失去優勢地位(74%仍是壓倒性多數)。"
+  },
+
+  "★★總結給你判": {
+    "你的假說『N²來自team_discovered隨N成長』": "★字面上部分成立(scan/team確實隨N raw regression顯著上升)，但更誠實的讀法是：這個上升可能主要是『累積時間』驅動、被N/day共線放大成看起來super-linear-vs-N的表象；且就算全信N-regression，其隱含的total-scan冪次(4.87)也跟你們既有wall-clock k≈2.0對不上，兩者不能同時為真。",
+    "唯一乾淨、不受混淆的結論": "_find_own_outpost全圖掃是持續的最大宗掃描來源(74-99%)，值得優先索引——這條不需要解開day/N共線就站得住。",
+    "如需坐實N vs day的因果": "需要對照式量測(不同seed/config讓day/N軌跡分離)，本輪短窗未做，交你判要不要開。"
+  },
+
+  "cleanup": "temp tap(faction_ai_system.gd,13+1處Probe.bump)+temp bed(scan_source_bed.gd)僅存在於worktree(.worktrees/scan-source-tap),★worktree保留待你確認後移除(未merge進main,zero production影響)。"
+}
