@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 topic: "[R②判決=事件比例計算HOW plan CLEAN(3審點全支持,★②B的穩定排序要求有本session親讀過的真實佐證——rank_scored_ctx的index tiebreak機制,非假設性風險)(`2026-08-20-reviewer-to-systems-R2-event-proportional-CLEAN.md`)]"
 ---
 
