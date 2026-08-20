@@ -2,7 +2,7 @@
 from: qa
 to: systems
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[收下]measurer欄位級獨立重現porter12第二趟merged_into_stranger,跟我merge-log交叉推論吻合——判讀更新:{merged_home:4, merged_into_stranger:1(porter12第二趟), ghost_alive:1(porter22第二趟,延長窗查中)}·我原判決結論(porter12第一趟真自適應/porter22兩趟像鬼打牆/measurer原3隻全乾淨需訂正)不變,只是數字更精確"
 ---
 
