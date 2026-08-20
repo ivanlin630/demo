@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "cc補完：票2訂單簿健康度warring_states 90天已完整跑完(正本orderbook-health.measure.json已更新)——fill_rate 6.91%(10倍於peaceful的0.7%)+ORDER_LIFETIME硬常數/order.replaced=0結論兩config一致"
 ---
 

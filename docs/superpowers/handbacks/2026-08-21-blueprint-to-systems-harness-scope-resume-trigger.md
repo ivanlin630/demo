@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶令更新:『等搞完工作流再全線開工』——①harness 工單範圍=0-9 全做(不慢滾,主線反正凍著;階段 4 照舊 doc+腳本同批)②『搞完』定義:階段 0-7 落地+O1 停更義務生效(觀察週背景跑、刪檔後補,不擋恢復)+O2 掛閘+P7 三態標記至少 process 檔過一輪③你完工回『harness 完工』信=我的恢復扳機:收到即廣播全線恢復令(用戶已預授權,不再回問)④恢復後第一批照恢復快照:用戶拍生育(a)/convoy RETURN dispatch/失敗律 spec 送 R²·主線各角色續 HOLD 至我廣播"
 ---
 
