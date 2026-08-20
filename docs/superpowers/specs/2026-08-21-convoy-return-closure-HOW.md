@@ -108,3 +108,22 @@ hold 還有**第二個條件**：`team.persist_strength > PERSIST_HOLD_THRESHOLD
    ★ 這是本輪 T1 教訓（**先看 tap 再談門檻**）的同精神延伸：**T3 也不該只靠公式推理過關**。
    **前置**：本 gate 需要 specimen 有 `tile_pos` ⇒ **`specimen-coverage-pos` 那刀必須先落地**。
 10. **防呆上限不得在正常局綁到**：正常世界的 `stranded(timeout)` 中，**因絕對上限觸發的比例應為 0**。
+
+### §6d 累加案的誠實邊界（2026-08-21 實測後補；★別讓它變成第二個 inert 機制）
+
+**實測（`feat/convoy-return-t3-budget` @742ea66d，錨死版）**：那趟追逐進 RETURN 時 ETA ＝ 94 ⇒ 預算 282，
+而實際追逐走了 **1000 tick** ⇒ tick≈3882 判 timeout ⇒ **原本 9.2 日成功歸建、帶回 296 coin 的那趟變成遊魂**，
+`dispatch 3→2`、`deliver 3→1`。**證偽 gate 在 merge 前就咬到了。**
+
+**改用累加後的算術**（`budget += MULT × new_eta`，實測 leg ETA 序列 94/171/74/76/82/124/95）：
+三次 rehome 後預算已 ≈1245 > 當時 elapsed ≈900 ⇒ **該健康案例會存活**。
+
+★★ **但要誠實寫下它的代價**：在尾隨情境下，**每段 elapsed 實際發生時間 ≈ 1× leg-ETA，而預算每段加 3×**
+⇒ **累加預算幾乎永遠不會觸發**。也就是說：
+
+> **真正的兜底是「防呆絕對上限」，累加預算是便宜的早退，不是主要防線。**
+
+**必須寫成可觀測，不能靠相信**（今天已經栽過 T1 那一次「看起來在守、實際 inert」）：
+- tap `convoy.stranded.timeout.by_budget` vs `convoy.stranded.timeout.by_abs_cap` **分開計**
+- **gate 11**：若長跑中 `by_budget` **恆為 0**，就要在帳上明寫「**累加預算在本世界 inert**」，
+  **不得含糊記成「T3 有在守」**。

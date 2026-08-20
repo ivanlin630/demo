@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: convoy-return-t3-budget
 topic: T3 預算錨定 DONE（照裁定實作）+ ★兜底咬中健康案例的實測數字：那趟 9.2 日成功歸建變成 timeout 遊魂，待你裁三選一
 branch: feat/convoy-return-t3-budget（基於 feat/convoy-return-conservation @ e4e1d969）
