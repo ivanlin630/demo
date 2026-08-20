@@ -1,8 +1,8 @@
 ---
 role: reviewer
 code: "02"
-status: working
-current_ticket: "2026-08-21-systems-to-reviewer-R2-convoy-return.md"
+status: HOLD
+current_ticket: "-"
 updated: 2026-08-21
 ---
 

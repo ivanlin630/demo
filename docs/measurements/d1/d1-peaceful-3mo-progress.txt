@@ -1,0 +1,1 @@
+[exam] day 55/90 teams=18 persons=24 avg_us=14233
