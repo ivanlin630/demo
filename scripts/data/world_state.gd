@@ -17,8 +17,9 @@ var global_messages: Array = []
 # 每封 Dictionary：{origin_team_id, faction_id, target_lord_id, target_pos, kind, payload, current_pos, spawn_tick, timeout, speed}
 var in_transit_letters: Array = []
 # 觀測事件 channel（observer slice）：emit_ambient 專用 append-only。
-# 獨立於 global_messages —— 後者 size() 被 order_system 借作 order_id 空間，
-# 任何 append 會位移 oid 流 = 擾動訂單行為；此 channel sim 零讀（僅 observer UI 消費）。
+# 獨立於 global_messages —— ★理由已更新（2026-08-20）：order_id 改走 next_order_id 專用
+# 計數器後，append 不再位移 oid 流；保持分離的現行理由＝global_messages 無界成長 +
+# observer channel 純度（此 channel sim 零讀、僅 observer UI 消費）。
 var observer_messages: Array = []
 var team_known: Dictionary = {}
 var team_discovered: Dictionary = {}   # int team_id → Array[int] 已知 team_id 清單
@@ -54,6 +55,9 @@ var _next_faction_id: int = 0
 var next_beast_id: int = -1000000
 var player_id: int = -1
 var specimen_team_ids: Array[int] = []   # 指標團：LOD-exempt + SpecimenTracer 詳捕決策（觀測 only，debug/seed 設）
+# ★訂單簿 tap：order_id 全域遞增計數器（★存 state 非 static var——static 跨 new() 會 id 碰撞、
+# 見 known_issues beast id 前科）。只增不減；存檔即帶走。
+var next_order_id: int = 1
 var player_state: Dictionary = {}
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []

@@ -1,5 +1,12 @@
 extends SceneTree
 # ★12mo 大考 run harness（純觀測、零 production 行為改動）。
+# ★★本床跑的是【無玩家世界】：setup 後把 player 拆掉（見下方 _strip_player）。
+#   理由：warring_states.json 有 player 區塊 → 會建玩家隊；那隊 leader 一死且無 named 繼承人
+#   → event_system game_over=true → sim_runner 凍結世界（H 不變量）。我們是在「有玩家的 config」
+#   上跑「無人值守的世界模擬」，結果那個沒人操作的玩家隊一死，整個世界就停
+#   （measurer 實測：warring leg day~70 凍結、床沒 guard 傻跑到 86400 次＝290 天 degenerate 假列）。
+#   ★若未來要量【真的有玩家】的情境，game_over 凍結是預期行為、不是 bug——那時別拆 player。
+#   ★禁改 sim_runner 的 game_over 語意（真有玩家時那條是對的）＝量測側修、不動 production。
 # 動機：跨 run 比較被 CPU contention + config 差異污染 → k 值誠實 NULL；12mo 是【單一連續 run 內 N 自然
 # 成長】＝天然消掉那兩個 confound → 唯一能乾淨回答 O(N) vs O(N²) 的機會 → 必須一次抓齊（漏開＝重跑 12 月）。
 #
@@ -49,6 +56,7 @@ func _run() -> void:
 		print("[exam] ✗ config 載入失敗：%s" % cfg); return
 	config["seed"] = seed_v
 	GameSetup.setup(state, config)
+	_strip_player(state)                      # ★T2：拆掉玩家（無人值守世界模擬；理由見床頭）
 	SpecimenDumpHelper.setup_from_env(state)   # ★同 run 併掛 specimen trace（QA 故事稽核用）
 
 	var f: FileAccess = FileAccess.open(out_path, FileAccess.WRITE)
@@ -60,6 +68,20 @@ func _run() -> void:
 	var prev_food: Dictionary = {}          # team_id → 上次日採樣的 effective_food（算瞬時 daily_rate）
 	var prev_probe: Dictionary = {}         # probe key → 上次值（算當日增量）
 	for t in range(ticks):
+		# ★T1 guard：世界凍結就停，別再傻跑（否則 loop counter 被當 day 一路寫到底＝degenerate 假列：
+		# tick 凍結、phase_us 塌成單 key、probe 全空）。
+		if state.game_over:
+			var _fd: int = state.world.current_tick / WorldState.TICKS_PER_DAY
+			var _msg: String = "[exam] ★世界凍結（game_over）@day=%d tick=%d loop_i=%d → 中止（後續列不產）" % [
+				_fd, state.world.current_tick, t]
+			print(_msg)
+			if prog_path != "":
+				var _gf := FileAccess.open(prog_path, FileAccess.WRITE)
+				if _gf != null:
+					_gf.store_string(_msg + "
+")
+					_gf.close()
+			break
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(state, no_player)
 		var dt: int = Time.get_ticks_usec() - t0
@@ -133,7 +155,9 @@ func _run() -> void:
 		row["daily_rate_neg_teams"] = neg_rate
 		row["daily_rate_sampled"] = rates.size()
 		# probe 家族當日增量（starve/政治/§4c/EWMA）
-		var watch_prefixes: Array = ["death.", "site_memory.", "need.", "diplo", "alliance", "betray", "faction."]
+		# ★訂單簿 tap：加 trade./order.（原過濾器把訂單家族整個漏掉＝世界級數字事後救不回）
+		var watch_prefixes: Array = ["death.", "site_memory.", "need.", "diplo", "alliance", "betray",
+			"faction.", "trade.", "order."]
 		var deltas: Dictionary = {}
 		for key in Probe.counts.keys():
 			var ks: String = String(key)
@@ -162,8 +186,32 @@ func _run() -> void:
 		day_us = 0; day_max_us = 0; day_ticks = 0; phase_acc.clear()
 		if state.teams.is_empty():
 			print("[exam] 全滅 @day=%d" % day); break
+	# ★結尾 dump 全量 Probe.counts（成本近零、保住所有未預見的問題——這輪的教訓：
+	# 過濾器沒列到的 family 事後完全救不回）。JSONL 最後一行。
+	if f != null:
+		var _all: Dictionary = {}
+		for _k in Probe.counts.keys():
+			_all[String(_k)] = int(Probe.counts[_k])
+		var _samples: Dictionary = {}
+		for _sk in Probe.samples.keys():
+			_samples[String(_sk)] = Probe.samples[_sk]
+		f.store_line(JSON.stringify({"final_probe_counts": _all, "final_probe_samples": _samples}))
 	if f != null: f.close()
 	SpecimenDumpHelper.dump(state, _env("SPECIMEN_OUT", "docs/measurements/exam_12mo.specimen.jsonl"))
 	SimRunner.phase_timing = false
 	Probe.enabled = false
 	print("=== exam harness DONE（JSONL → %s）===" % out_path)
+
+# ★T2：量測側拆玩家（不動 production）。GameSetup 目前沒有 no-player 選項 → setup 後就地清掉
+# player 身分與其待決狀態；那支隊伍留著當一般 NPC 隊（leader 死改走一般繼承，不再觸發 game_over）。
+func _strip_player(state: WorldState) -> void:
+	if state.player_id == -1:
+		return
+	print("[exam] 拆玩家：player_id %d → -1（無人值守世界模擬；有玩家情境請勿拆）" % state.player_id)
+	state.player_id = -1
+	state.player_forced_event = {}
+	state.player_forced_event_id = ""
+	state.player_pending_targets = []
+	state.player_hostile_teams = []
+	state.player_pre_encounter = {}
+	state.player_state = {}

@@ -248,7 +248,14 @@ static func _snapshot(state: WorldState, team: TeamData) -> Dictionary:
 	var _buy_food_qty: int = 0
 	var _orders_summary: Array = []
 	for o in team.active_orders:
-		_orders_summary.append({"kind": o["kind"], "res": o["res"], "qty_rem": int(o["qty_remaining"])})
+		# ★訂單簿 tap：帶 order_id + 壽命 → QA 讀故事可直接分辨「同一張單卡了 8 天」vs「重掛了 5 次」
+		# （原本只能用 qty_rem 跳動反推）。
+		_orders_summary.append({
+			"order_id": int(o.get("order_id", -1)), "kind": o["kind"], "res": o["res"],
+			"qty_rem": int(o["qty_remaining"]),
+			"created_tick": int(o.get("created_tick", -1)),
+			"age_days": snappedf(float(state.world.current_tick - int(o.get("created_tick", state.world.current_tick))) / float(WorldState.TICKS_PER_DAY), 0.1),
+		})
 		if o["kind"] == "buy" and o["res"] == "food":
 			_buy_food_qty = int(o["qty_remaining"])
 	var _mtile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)

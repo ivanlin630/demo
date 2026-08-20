@@ -30,11 +30,21 @@ var _msg := SimMessageSystem.new()
 func post_order(state: WorldState, team: TeamData, kind: String, res: String, qty: int) -> int:
 	if qty <= 0:
 		return -1
-	var oid: int = state.global_messages.size()   # 借全域 message id 空間，唯一
+	# ★訂單簿 tap：專用全域遞增 id（原本借 global_messages.size()＝訊息一被裁剪就會重複發號）。
+	var oid: int = state.next_order_id
+	state.next_order_id += 1
 	var expire: int = state.world.current_tick + ORDER_LIFETIME
+	# ★replaced tap：同隊同 kind 同 res 的舊單還沒清就再掛＝重掛 churn 的硬證據
+	#（取代原本靠 qty_remaining 不減反增的推測）。
+	for _o in team.active_orders:
+		if String(_o.get("kind", "")) == kind and String(_o.get("res", "")) == res:
+			Probe.bump("order.replaced")
+			Probe.bump("order.replaced.%s_%s" % [kind, res])
+			break
 	team.active_orders.append({
 		"order_id": oid, "kind": kind, "res": res,
 		"qty_remaining": qty, "expire_tick": expire,
+		"created_tick": state.world.current_tick,   # ★壽命起算（QA 讀故事可直接看「同一張單卡了幾天」）
 	})
 	var desc: String = "Team%d %s %s ×%d" % [team.team_id, ("徵" if kind == "buy" else "售"), res, qty]
 	# WS-2：訂單會合 pos route 到下單隊最近自家 outpost 市集（固定點，非隨隊移動的舊 snapshot）。
@@ -50,6 +60,8 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 	_register_on_board(state, team, oid, kind, res, qty, expire)
 	print("[Order] Team%d %s %s ×%d (oid=%d)" % [team.team_id, kind, res, qty, oid])
 	Probe.bump("g1.order_placed")
+	Probe.bump("order.placed")
+	Probe.bump("order.placed.%s_%s" % [kind, res])
 	Probe.bump("trade.post_" + kind)   # 漏斗站1：張貼 buy/sell 分流（純觀測）
 	return oid
 
@@ -104,6 +116,16 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 	for o in team.active_orders:
 		if int(o["expire_tick"]) > state.world.current_tick:
 			kept.append(o)
+		else:
+			# ★abandoned tap：逾時未成交（帶 order_id + 壽命，事後可串）
+			Probe.bump("order.abandoned")
+			if Probe.enabled:
+				Probe.bump_sample("order.abandoned.sample", {
+					"order_id": int(o.get("order_id", -1)), "team": team.team_id,
+					"kind": String(o.get("kind", "")), "res": String(o.get("res", "")),
+					"qty_rem": int(o.get("qty_remaining", 0)),
+					"age_ticks": state.world.current_tick - int(o.get("created_tick", 0)),
+				}, 16)
 	team.active_orders = kept
 	# WS-2b：同步市集看板（鏡像權威）——過期/已滿足/已消失單從看板清，避免商隊讀幽靈單撲空。
 	_sync_board(state, team)
@@ -357,6 +379,7 @@ func settle_orders(team: TeamData, before: Dictionary, _tick: int) -> bool:
 	for o in team.active_orders:
 		if int(o["qty_remaining"]) <= 0:
 			Probe.bump("g1.order_fulfilled")
+			Probe.bump("order.filled")   # ★filled tap（qty 歸零完成）
 		else:
 			kept.append(o)
 	team.active_orders = kept

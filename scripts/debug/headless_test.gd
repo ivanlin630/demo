@@ -16382,7 +16382,7 @@ func _test_observer_ambient_events() -> void:
 		"Team7 俘獲 Team8 5人", t, {"origin": "7", "loser": "8", "count": 5})
 	assert(state.observer_messages.size() == 1, "emit_ambient 未進 observer_messages")
 	assert(state.global_messages.is_empty(),
-		"emit_ambient 竟進 global_messages（size 被借作 order_id 空間，會擾訂單行為）")
+		"emit_ambient 竟進 global_messages（該 channel 須保純度：sim 零讀、僅 observer UI 消費；且防無界成長。註：order_id 已改走 next_order_id 專用計數器，不再借此 size）")
 	assert(m.type == "captives_taken" and m.params["count"] == 5, "emit_ambient 欄位錯")
 	var after_known: int = state.team_known.get(7, []).size() if state.team_known.has(7) else 0
 	assert(after_known == before_known, "emit_ambient 竟進 team_known（會擾 RNG 流）")

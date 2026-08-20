@@ -922,9 +922,10 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 				var dead_team: TeamData = state.teams.get(int(fe.get("team_id", -1)))
 				if dead_team != null:
 					EventSystem.new().handle_player_succession(state, dead_team)
-				else:
+				elif state.player_id != -1:
 					state.game_over = true
 					state.game_over_reason = "玩家絕後（隊已滅,無繼承人）"
+				# ★無玩家（player_id==-1）→ 不設 game_over（觀察者世界永不凍結；同 event_system 守衛）
 				result = { "ok": true, "msg": "無人可繼承,終局" }
 			elif not live.has(response):
 				# 單一 stale（選了已死候選）→ 不清 forced,讓玩家重選

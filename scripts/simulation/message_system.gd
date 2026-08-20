@@ -46,8 +46,10 @@ func emit_message(state: WorldState, type: String, description: String,
 	return msg
 
 # 觀測事件（observer slice Task0 補洞）：進 observer_messages 獨立 channel。
-# 不進 global_messages（其 size() 被 order_system 借作 order_id 空間，append 會位移
-# oid 流 = 擾動訂單行為）、不進 team_known（_exchange_one_way 逐訊息 randf）
+# 不進 global_messages（★理由已更新：order_id 自 2026-08-20 起走 WorldState.next_order_id
+# 專用計數器，不再借 global_messages.size()＝append 不再位移 oid 流。現在的理由是
+# ①global_messages 無界成長 ②observer channel 純度：sim 零讀、僅 observer UI 消費）、
+# 不進 team_known（_exchange_one_way 逐訊息 randf）
 # → 零 RNG 消耗、零行為變、seeded warring 流不擾。append-only，單寫者格局不變。
 const OBSERVER_MSG_CAP: int = 2000   # 上限裁尾（observer 消費為 tick 水位增量，不吃舊段）
 func emit_ambient(state: WorldState, type: String, description: String,

@@ -66,7 +66,17 @@ func _init() -> void:
 	_player_cmd          = PlayerCommandSystem.new()
 	_ambush_system       = AmbushSystem.new()
 
+# ★T4 觀察者守衛（一次性、不洗版）：呼叫端宣稱無玩家（player_pos=(-1,-1)）卻 state 說有玩家
+# （player_id != -1）＝兩個來源互相矛盾 → 該世界會保留玩家中心行為（豁免 gate 生效、leader 死可凍世界）。
+# 放 production 而非床裡：放床裡的斷言依賴的正是它要抓的那份紀律（床沒清 player_id，多半也不會呼斷言）。
+static var _observer_guard_warned: bool = false
+
 func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
+	if player_pos == Vector2i(-1, -1) and state.player_id != -1 and not _observer_guard_warned:
+		_observer_guard_warned = true
+		print("[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=%d ——" % state.player_id
+			+ " 該世界仍帶玩家中心行為（豁免 gate 生效、玩家隊 leader 死可凍世界）。"
+			+ "觀察者長跑請於 setup 後清 state.player_id=-1（見 exam_12mo_bed._strip_player）。")
 	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick（不計時，非真 tick）
 	if state.game_over:
 		return "game_over"
