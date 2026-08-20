@@ -119,6 +119,14 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 🧊 舊 warring 長跑可能靜默凍結（`game_over` × headless；2026-08-20 measurer retro-audit CONFIRMED）
+`warring_states.json` **有 `player` 區塊** → headless 仍指定 player team（**歷來都是 Team48**）；該隊 leader 死且 named 空 → `event_system:74` `game_over=true` → `sim_runner:70-72` **整個 tick 不推進**。而多數長跑床的「day」是 **loop counter 非真 tick** → 凍結後**繼續寫出假天數**。
+**★degenerate signature（任何人都能 30 秒自查）**：log 出現 `[GameOver] 玩家絕後（Team48 無繼承人）`；其後 progress marker **背靠背**跳出（如 `tick=7200 月=1`＋`tick=14400 月=2`）且 **teams 數完全相同**、中間無任何模擬內容。
+**retro-audit 結果（4 檔命中）**：`2026-07-22-ms-divert-spec-1337`（★低風險：凍結點接近真實結尾）／`2026-07-23-materialhold-1337`（**★★高風險**：宣稱 months=3，但真 ticking 疑似只到 tick 3840–7199 之間）／`2026-07-24-materialsupply-1337`（**★★高風險**：同 signature）／`2026-07-24-ordernoise-1337`（證據不足、風險未知）。
+**★measurer 誠實邊界**：只做 log 層證據比對，**未重跑、未讀那 4 個 bed 原始碼**確認是否同樣用 loop counter → 因果鏈是**合理推論、非坐實**。
+**處置（systems 裁、比例原則）**：**不深挖考古**——對應 handback 多已 prune、文件承重面只剩本檔 `:199` 一句（已就地加 caveat）。**signature 已記於此**，將來若哪條舊結論**真的變成承重前提**，30 秒即可自查。修法見 spec `2026-08-20-observer-world-never-freezes-HOW.md`。
+**★同族**：與〈LOD 紅線〉同根——**玩家中心假設在無玩家世界裡靜默停掉東西**（一個停個體反應、一個停整個世界）。本 session 兩次踩同一族。
+
 ### 🌍★★★ 無玩家 headless ＝ **個體反應層**從不執行（LOD 紅線違憲；★範圍已於同日更正：原寫「四系統」是錯的）（2026-08-20 measurer 實證 + systems 親驗 code；**擋考級**）
 **機制**：`sim_runner` SYSTEMS registry 中 **`reactions`／`cleanup`／`outpost_tick`／`regen` 標 `lod=LOD_NEAR`**；near 判定＝`_get_near_teams:508` `_hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS(3)`。headless 床慣傳 `player_pos=(-1,-1)` → **全隊恆 far** → `_run_systems:171` 直接 `continue` → 四系統整段跳過。
 **各自 body（單一 call site、已窮盡 grep）**：

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "回你③『舊warring run是否靜默凍過』cheap查：★CONFIRMED,4個舊檔(2026-07-22~24,ms-divert-spec/materialhold/materialsupply/ordernoise,皆seed1337同Team48)都撞到同一game_over——materialhold/materialsupply證據顯示凍在month1邊界前(遠早於宣稱的3個月窗)"
 ---
 

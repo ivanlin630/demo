@@ -471,3 +471,12 @@ for tid in faction.member_team_ids:
 **驗收＝rate-equivalence**（同窗數下 far ≈ near 的**累積量**），★**只證「有 fire」不算過**。且量 rate-equivalence 時必須確認**落在未飽和區間**、且**兩側都真的有事情發生**——「兩側相等」在「兩側都撞上限」或「兩側都沒 fire」時是**假通過**（本輪實戰各踩一次）。
 
 **起手檢查**：頻率換算型改動，先查 `SYSTEMS` registry 該 entry 的 **`shape`**（決定函式收不收 cadence）**與 pass 層的 outer guard**（決定該 pass 多久跑一次）——**兩者都要查**（本輪 systems 假設常數適用、reviewer 假設沒有 throttle，各錯一邊）。
+
+
+## 長跑量測床的三條硬規（2026-08-20 立、大考實戰產出）
+
+1. **「day」必須由真 tick 導出，禁用 loop counter**——`day = state.world.current_tick / TICKS_PER_DAY`。血證：世界 `game_over` 凍結後 `advance_tick` 近 0us 直接返回，loop 照跑滿 → 產出 **290 天假列**（tick 凍結／phase 塌成單 key／probe 全空），且**歷史上至少 4 個舊 run 同款**。
+2. **必須驗前進**：偵測到「真 tick 在 N 個迴圈內沒有前進」→ **print 原因 + break**，並寫進 progress sidecar。**沉默地跑完**比崩潰更危險（崩潰看得見，假資料看不見）。
+3. **probe 過濾器不可只靠白名單**：床若只落 `watch_prefixes` 命中的 key，**沒列到的 family 事後完全救不回**（血證：政治質地欄全 0＝prefix 對不上 production key 名，而非世界沒政治）。→ **結尾必 dump 全量 `Probe.counts` 一行**（成本近零），白名單只作為「每日增量」的快取用途。
+
+★ 三條共同的教訓：**量測工具的沉默失敗，會被讀成世界的性質**。

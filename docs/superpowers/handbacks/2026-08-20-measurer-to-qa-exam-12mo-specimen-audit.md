@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "★★12mo大考specimen故事稽核請求(經濟四科目)——正本to:blueprint 2026-08-20-measurer-to-blueprint-exam-12mo-verdict.md，附★warring只70天真相"
 ---
 
