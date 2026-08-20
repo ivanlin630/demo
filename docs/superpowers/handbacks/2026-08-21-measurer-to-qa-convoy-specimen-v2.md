@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "convoy specimen v2(implementer放行版,feat/convoy-return-t3-budget@b4a0c98f)：3隻porter全部merged_home乾淨結案(9.2/13.2/6.3日)+附[Split]/[Merge]原始log行供②合法獨立vs③真stranded辨別；★這輪碰巧沒有ghost_alive案例可辨別，Split事件(Team24)供你參考『合法獨立長怎樣』"
 ---
 

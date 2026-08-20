@@ -125,6 +125,24 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 🚚★porter 餓到「投靠」非母隊：convoy 貨物隨人被第三方吸收（2026-08-21 QA 故事稽核挖出，★第四種結局）
+QA 交叉 6 筆真實 merge log 與 specimen 逐筆核對發現：**`Team1 ← Team12`** —— porter_12 第二趟
+**根本沒回到真母隊 `Team5`，而是併進完全無關的 `Team1`**。specimen 對得上：
+`tick7700` `task→投靠`（求收留）、`food` 掉到 **1.17**（瀕死）、`tick8000` **`parent_team_id` 直接改寫成 `1`**、`task→覓食`
+`@convoy-specimen-t3budget 2026-08-21`。
+⇒ **porter 自己撐不住、被路過的隊收留，貨（剩餘 material/coin）跟人一起被吸收。**
+**6 筆 merge 中 1 筆錯認 owner ＝ 17%。**
+
+**這是第四種結局**，跟既有三分類（`merged_home` 真回家／母團滿員或部分合併＝合法獨立／`stranded` timeout）**都對不上**。
+
+**★兩個層次的問題（已分派）**：
+- **WHAT（blueprint）**：這是 **bug 還是 genuine 悲劇**？「瀕死投靠」壓過「送貨回家」的優先序該不該存在？
+- **HOW（systems）**：**貨物所有權**——領主派出的貨在**未經交易／未經同意**下轉移給第三方。
+  全域守恆不破，但這是**吸收式的所有權移轉**。
+
+**連帶：量測儀器也錯了**——床把它算成 `merged_home`（以「隊伍消失」推論），
+`measurer` 的「**3 隻 porter 全部乾淨 merged_home**」需訂正為「**6 次 merge 中 5 次回真 parent、1 次錯認 owner**」。
+
 ### 🚚 CONVOY porter 在運輸期間**完全沒有決策**（2026-08-21 診斷坐實，★交 blueprint 判是否 by design）
 `faction_ai:761-762` 子隊一律走 `_evaluate_subteam`；`:2753-2756` 對 `TASK_CONVOY` **直接早退** ⇒
 porter 整趟**不進任何決策路徑**。specimen 佐證（追逐窗 tick 3600–4600）：porter_12 共 20 筆 entry ＝
