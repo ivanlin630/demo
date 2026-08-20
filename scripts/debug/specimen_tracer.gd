@@ -113,12 +113,29 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 			beliefs.append({"tgt": tgt_team_id, "est": bel})
 	var _snap: Dictionary = _snapshot(state, team)   # _snapshot callees 可能 bump Probe → 同包 suppress
 	_end_observe(_obs)
+	# ★T1 改名（QA 誤讀修）：這欄來自 capture_intent tap，掛在【戰略層】（_emit_goal /
+	# _evaluate_independent_strategy、慢 cadence）＝戰略姿態，★不是本 tick 決策 winner 的動機
+	# （team9 整段停在「防衛/備戰守土」而後段真正驅動的是缺糧＝兩層混用同一欄名，非 stale bug）。
+	# ★T2 本 tick 動機：winner 為什麼贏——主需求層（team.need_urgency argmax 的 narrative_label，
+	# 純讀現成值、不重算）+ 五層數值 + winner 在 candidates 裡的 util。★零重算、零 state 寫入。
+	var _cands: Array = scr.get("candidates", [])
+	var _winner_util: float = 0.0
+	for _c in _cands:
+		if String((_c as Dictionary).get("opt", "")) == winner_opt:
+			_winner_util = float((_c as Dictionary).get("util", 0.0)); break
+	var _layers: PackedFloat32Array = team.need_urgency
+	var _need_now: Dictionary = {
+		"主需求層": NeedHierarchy.narrative_label(_layers) if _layers.size() == NeedHierarchy.N_LAYERS else "",
+		"層值": Array(_layers),
+		"winner_util": snappedf(_winner_util, 0.001),
+	}
 	var entry: Dictionary = {
 		"tick": state.world.current_tick,
 		"team_id": team.team_id,
 		"想什麼": {
-			"intent": intent,
-			"candidates": scr.get("candidates", []),
+			"strategic_intent": intent,
+			"本tick動機": _need_now,
+			"candidates": _cands,
 			"beliefs": beliefs,
 			"threat": scr.get("threat", {}),
 		},
@@ -280,8 +297,11 @@ static func _print_entry(e: Dictionary) -> void:
 	var cand_str: String = ""
 	for c in w["candidates"]:
 		cand_str += "%s=%.2f%s " % [c["opt"], c["util"], "✗" if c.get("nd", false) else ""]
-	print("[Specimen T%d] tick=%d intent=%s | winner=%s task=%s tgt=%s" % [
-		e["team_id"], e["tick"], str(w["intent"]),
+	# ★讀者一眼分兩層：strategic_intent＝慢 cadence 戰略姿態；motive＝本 tick 這個 winner 為何贏。
+	var _m: Dictionary = w.get("本tick動機", {})
+	print("[Specimen T%d] tick=%d strategic_intent=%s | motive=%s(util=%.2f) | winner=%s task=%s tgt=%s" % [
+		e["team_id"], e["tick"], str(w.get("strategic_intent", w.get("intent", "?"))),
+		str(_m.get("主需求層", "?")), float(_m.get("winner_util", 0.0)),
 		d["winner_opt"], d["task"], str(d["target"])])
 	print("    candidates: %s" % cand_str.strip_edges())
 	if not w["beliefs"].is_empty():
