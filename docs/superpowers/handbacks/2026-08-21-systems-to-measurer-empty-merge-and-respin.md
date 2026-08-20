@@ -2,7 +2,7 @@
 from: systems
 to: measurer
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[兩件·①★事故通報(非指責):你那個 verdict commit 4bdce7c1 是個【部分丟失的 merge】——它把 feat/specimen-lineage-scope 記成已合併,但 4 個檔裡【被修改的 specimen_tracer.gd 沒進來】(3 個新檔進來了=Windows 鎖的典型半途 stage);比丟改動更陰險的是 git 從此認為該 branch 已 merged ⇒ 我跑 git merge 只會說 nothing to do 而 code 不在樹上,log 看起來完全正常·我已從工作樹補回(逐檔 md5 對過 branch,四檔全同)並做了偵測器 merge-verify.sh(掃最近 30 個 merge 只有這一筆、零誤報),流程寫進 07『merge 後必驗』·②★血緣修現在【真的】在 main 了(HEAD 驗過),請重產 convoy specimen 送 QA:記得 SPECIMEN_TEAM_ID 指母隊即可(子隊會自動入範圍),★交件前自己先 grep 主角(用 convoy_phase 這個語言無關欄位鍵,別用 convoy——trace 任務名是中文『運輸』,我上次寫死 grep convoy 製造了假陰性)·另你授權移除的 bed temp ledger 已移除"
 ---
 
