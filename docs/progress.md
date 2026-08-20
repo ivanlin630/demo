@@ -21,6 +21,23 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## ✅ 觀察者世界永不凍結 + 大考床兩修 + 訂單簿 tap MERGED（2026-08-20、三票同支）
+
+- **★觀察者世界永不凍結**（世界存在性違憲修；blueprint WHAT 裁「玩家戰役死亡→玩家模式 game over OK；headless/觀察者世界永不凍結」）：
+  - **T1 production 守衛兩處**（`event_system` / `player_command_system`）：`player_id == -1` → **不得設 `game_over`**、改走既有 NPC 路。`choose_heir` 第二凍結路經 R² 親追確認 **`player_id==-1` 時結構性不可達**（三個呼叫源全自帶 gate）→ **未動**。
+  - **★T4 `[ObserverGuard]` 一次性守衛**：`player_pos==(-1,-1)`（呼叫端說無玩家）**卻** `player_id != -1`（state 說有玩家）＝**兩來源矛盾**的結構性偵測 → print 一次。★**放 production 而非床內斷言**（R² 原建議放床裡；我改置放位置，理由：**床內斷言依賴的正是它要抓的那份紀律**）。
+  - **床**：`game_over` guard（不再產 degenerate 假列）+ `_strip_player` + 床頭註記。
+  - **R² 紅利**：codebase 既有一票「玩家豁免自動決策」gate 本就寫成 `and state.player_id != -1` → **清這一個欄位就讓所有豁免 gate 自動失效**、原 player team 變回受 AI 決策，不必逐一改。
+- **訂單簿 tap**：`order_id`（`WorldState` 持久 counter，★順手修掉**借 `global_messages.size()` 發號**的重複 id 隱患）+ `created_tick` + `order.placed/filled/abandoned/replaced`（**`replaced` ＝重掛 churn 硬證據**，取代 `qty_rem` 反推）+ 床 `watch_prefixes` 補洞 + **結尾 dump 全量 `Probe.counts`**（結構性防線：讓「prefix 沒列到＝事後救不回」滅絕）。
+- **gate（合併結果親跑）**：constitution **PASS 75**／observer TDD **ALL PASS**（含 **★有玩家仍凍、H 不變量沒被誤傷** + `[ObserverGuard]` 真的印一行）／orderbook TDD **ALL PASS**（四 probe 全打出、`abandoned` sample 帶 `age_ticks`）／det 兩跑 `dd047873b3597e2dfe1a90a679a4ad34`／headless **0-new**。
+
+## 🔬 breed 零繁殖：funnel 證據到手（evidence-only，**WHAT 待用戶拍板**）
+`surplus`（`food_flow_avg > BREED_FLOW_MIN=1.2`）＝**壓倒性主閘**：warring 攔截 **97.3%**、peaceful **94.1%**；`safe` **零攔截**、`fed` 0.4–8%、`minor<cap` 8–13%、**單性 balance 僅 5.6/6.4%（原猜想被數字劃掉）**、`team_no_person = 0`（劃掉）。
+★**systems 追加 code-read**：`BREED_FLOW_MIN` 比較的 `team.food_flow_avg` 是 **team 級絕對值、非 per-capita**（`resource_system:236-243`）→ **pop3 需 +1.2/日（每人 0.4）、pop30 也只需 +1.2（每人 0.04）＝大團結構性容易 10 倍**；世界多數團 pop 3–6 且 57–62% 淨流為負 → **對小村近乎全域封鎖**（連「有大有小」arc，但方向**相反：小的被懲罰**）。
+**★立場**：**不主張這是補丁閘**——「有持續淨盈餘才生小孩」規則站得住，**病在尺度形狀、不在門檻存在**。
+**blueprint lean（待用戶拍）**：**(乙) 強化版＝per-capita + 連續調速**（用戶先前已裁「食物另管生育速率」；rate 語意本就該連續 MODULATE：瀕餓≈0／溫飽低／盈餘高 → 現行「team 級 1.2 硬懸崖 + 15% 抽獎」**形狀錯兩處**）；**(丙) 純調 1.2 否決**（crank）；**(甲) 上游（workshop/設施鏈/GATE-B）本來就在走、兩者不互斥**。
+**HOW 備用考量**（blueprint 提，寫進未來 spec）：純 per-capita 會不會**反向懲罰大團**（人均盈餘被攤薄）→ 曲線形狀**看真分布定、禁新死常數**。
+
 ## 🎓★★ 12mo 大考（第一次在「活著的世界」）——收卷 consolidate（2026-08-20）
 
 **性質**：LOD 紅線修後的**新基線**；修前 `reactions` 全期零執行（生育/士氣/暴動/叛/怠工全死），**不可與舊輪比**。
