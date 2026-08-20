@@ -1,0 +1,28 @@
+{
+  "slice": "convoy-return-conservation",
+  "ticket": "fate分類器修正(systems 2026-08-21):區分merged_home vs merged_into_stranger,並修正一個更深的儀器bug(同porter多趟只追蹤第一趟)",
+  "measured_at_head": "b4a0c98f-dirty(bed-only temp tap)",
+  "measured_date": "2026-08-21",
+
+  "★★意外發現(比原始ticket更深一層)": {
+    "原bug": "bed的_rec是Dictionary(porter_id→單一trip記錄)，`not _rec.has(tid)`這個條件在porter第二次被dispatch(current_task再度變CONVOY)時永遠為false(因為tid早已存在於_rec)→第二趟完全沒被追蹤，第一趟的fate(如果已終局)靜靜卡住，_observe的skip條件(`fate!=in_flight and fate!=left_convoy`)讓第二趟徹底隱形。",
+    "影響": "本輪dispatch=7但porters_tracked只顯示3——這3個unique porter_id背後其實藏了6趟trip(trips_total=6)，只有『各porter的第一趟』曾被追蹤到，其餘全部漏測。QA抓到的porter_12第二趟正是這個漏測的受害者。",
+    "修法": "改_rec為Dictionary(porter_id→Array[trip記錄])，dispatch偵測條件改成『無記錄 OR 最新一趟已終局』才開新trip，_report同步改成flatten全trips逐筆列印/分類。"
+  },
+
+  "★fate分類修正結果(75天,seed1337,peaceful_economy,feat/convoy-return-t3-budget@b4a0c98f)": {
+    "trips_total": 6,
+    "下場分佈": {"merged_home": 4, "merged_into_stranger": 1, "ghost_alive(仍在途未終局)": 1},
+    "★★porter_12第二趟(QA抓到的那筆)": "dispatch@7300 parent=Team5 → 脫離@7700 task=投靠 phase=RETURN → 結局=merged_into_stranger(併入陌生隊Team1非原parent Team5)，結案tick=8200(3.8日)。★★獨立重現QA發現，欄位級證據(非僅log行推論)。",
+    "porter_22第二趟": "dispatch@16900 parent=Team3 → 脫離@17600 task=覓食(仍RETURN phase) → 到day75窗口結束仍為left_convoy(ghost_alive)，未終局，交由更長窗口才能觀察其最終結果。"
+  },
+
+  "誠實訂正我先前的敘事": "先前verdict(2026-08-21-measurer-to-qa-convoy-specimen-v2.md)寫『3隻porter全部merged_home』——這句話本身沒錯(當時只看得到3趟第一次dispatch，全部乾淨)，但★不完整——沒看到的第二趟裡有1趟是merged_into_stranger、1趟仍在途。系統性根因是儀器只追第一趟，不是我誤讀已有數據。",
+
+  "landed_paths": {
+    "corrected_report": "docs/measurements/convoy-return/convoy-t3budget-75d-v2.txt",
+    "specimen(determinism確認同前版)": "docs/measurements/convoy-return/convoy-specimen-t3budget-v2.specimen.jsonl(1810 entries/221非空convoy_phase，跟修分類器前的run完全一致，證明只改了bed的觀測/分類邏輯，世界本身未受影響)"
+  },
+
+  "cleanup": "bed(scripts/debug/convoy_return_conservation_bed.gd)的多趟追蹤重構+fate分類修正，屬量測工具本體升級(非production行為變化)，temp性質，worktree(.worktrees/convoy-return-t3-budget)內，等systems確認要不要把這個修法提交進工具本體(這個bug類型可能還會在下次量測復發，值得考慮保留非revert)。"
+}
