@@ -21,6 +21,33 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## 🎓★★ 12mo 大考（第一次在「活著的世界」）——收卷 consolidate（2026-08-20）
+
+**性質**：LOD 紅線修後的**新基線**；修前 `reactions` 全期零執行（生育/士氣/暴動/叛/怠工全死），**不可與舊輪比**。
+**有效窗**：peaceful **完整 360 天**；warring **只有 day1–70**（day~70 `[GameOver] 玩家絕後（Team48）` → `sim_runner:70-72` 凍世界；bed 的 day 是 loop counter 非真 tick，仍寫到 360 → **day71–360 全 discard**）。
+
+### ★★最重要的一項：⑨人口曲線——**第一次真的長過 pop≥12**
+peaceful 12 隊 strided 樣本中 **3 隊摸到/超過 §4b 擴點門檻**（team5=**14**、team6=13、team8=13；team10=11 差一點）。
+→ **直接解除 §4b「population 卡在 6 不動」的疑慮**：**LOD 修後 genuine 成長真的會發生**，§4b 的 field-dormant 是「當時世界不會生小孩」的後果，不是機制設計錯。warring（窗短 + 戰爭壓力）只 1 隊摸到 12。
+
+### 其餘八項
+- **①scaling**：warring day1–69 **完整回歸 k≈2.004（R²=0.892）** ＝ **O(N²) 定案**、`near.faction_ai` 持續是壓倒性大頭。（★我 day60 用兩點粗估的 **k≈2.35** 由此**取代**；同結論、精度不同。peaceful 小 N 雜訊大、量不出來。）
+- **②mint_level**：**兩 config 全期 0%**（peaceful 360 天 / warring 69 天全卡 L0）→ **跨兩個獨立大考一致**＝**設施鏈斷**，非量測 artifact（鑄幣 tick 確認一直在跑）。
+- **③daily_rate**：收官時多數隊瞬時糧食流為**負**（peaceful 57%／warring 62%）＝同量級、非 warring 獨有。
+- **④site_memory**：write **100% 全 `site_failed`**、applied 是 write 的 25–30 倍。**★systems 判讀（語意正常、非 bug）**：`write` 掛 `record_site_outcome`＝**事件數**；`applied` 掛 `quality_multiplier != 1.0`＝**每個候選地點評估都呼一次的讀用數** → 單位不同、不該互比。**真訊號＝`site_thrived = 0`＝全期沒有任何據點升級完工**（選址記憶只學得到「這地不好」＝**單邊學習**）。
+- **⑤ewma_advance ≤ budget**：**PASS**、兩 config 全窗 0 違規（EWMA 解耦在長窗仍守住）。
+- **⑥starve 新基線**：warring 日均 starve 率 ≈ peaceful 的 **4.8×**（0.652 vs 0.136／天）＝**活著世界的新 accepted cost 紀錄**（取代「零出生世界」量的舊數字）。
+- **⑦政治事件＝★量測 artifact、本輪無效**：床的 `watch_prefixes`（`diplo`/`alliance`/`betray`/`faction.`）**對 production 政治 key 一個都對不上**——實際是 `envoy.*`／`g3.betrayal`／`g2.faction_found`／`cohesion.*`，且 `diplo`/`alliance` 開頭的 key **在 production 根本不存在**。**★該清單是 systems 寫 harness dispatch 時憑印象列的**（自報自糾）。→ 這欄**標本輪無數據、不找補**；prefix 更正 + **結尾 dump 全量 `Probe.counts`**（結構性防線，讓「沒列到＝救不回」滅絕）已 dispatch。
+- **⑧統領/cap 分佈**：warring 中位數（cmd 0.216／cap 14）**高於** peaceful（cmd 0.098／cap 8）——方向有意思，**不下因果解讀**（交 QA 故事審）。
+
+### 落地
+`docs/process/verdicts/exam-12mo-verdict.measure.json`；specimen：`docs/measurements/exam12mo/exam-12mo-{peaceful,warring}.specimen.jsonl`（各 12 隊 strided）→ **QA 故事審進行中**（經濟四科目）。
+### 由此開出的工單
+1. **★觀察者世界永不凍結**（`game_over` 違憲、blueprint WHAT 已裁）→ spec 已寫、**R② 中**；**下輪長考前置**。
+2. exam bed：game_over guard + **no-player**（觀察者長跑不指定 player team）+ prefix 更正 → 已 dispatch。
+3. **mint 0% ＝ 設施鏈調查**（跨兩考一致，升為具名 backlog）。
+4. `site_thrived=0`（沒有據點升級完工）＝ settlement 發展鏈待查。
+
 ## ✅★★ LOD 紅線修 MERGED（2026-08-20）＝個體反應層不再綁玩家位置、**大考 HALT 解除**
 
 **根**（measurer 意外發現 → systems 親驗 → blueprint 認定違憲）：`reactions`/`cleanup` ＝ `lod=LOD_NEAR` **且 `shape="teams"`**；near 判定＝距 `player_pos` ≤3 → headless 傳 `(-1,-1)` 使全隊皆 far ⇒ **無玩家＝全世界零個體反應；有玩家＝遠隊零個體反應**（生育/逃/暴動/叛/怠工/士氣/`goal_alignment`/npc goal cleanup）。實證 `breedgate.calls=0`、11/11 隊 `minor=0`。
