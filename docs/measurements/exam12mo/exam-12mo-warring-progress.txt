@@ -1,1 +1,1 @@
-[exam] day 60/360 teams=164 persons=207 avg_us=848484
+[exam] day 360/360 teams=181 persons=216 avg_us=0
