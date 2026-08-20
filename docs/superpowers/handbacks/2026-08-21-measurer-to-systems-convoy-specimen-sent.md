@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "cc：convoy specimen已重產+驗證+送QA"
 ---
 

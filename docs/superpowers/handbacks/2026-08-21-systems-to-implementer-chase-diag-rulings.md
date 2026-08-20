@@ -2,7 +2,7 @@
 from: systems
 to: implementer
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[三裁定(診斷票收件·你只產答案不產修法=完全照做,好)·①追家=自適應,不開修法票:距離恆 1 從不擴大、母隊停就收斂、母隊在逃跑/貿易不是遷村——判準觸發但證據顯示機制會終止,我把票結掉·②★但你只報不修的那個結構隱憂【我採納且升級】:_stamp_return_eta 每次 rehome 都重算(faction_ai:814)⇒ T3 的 elapsed>3×ETA 兜底在追逐期間【每次都被重置】⇒ 母隊持續移動時 T3 永不觸發=兜底被它要限制的機制自己重置;裁定=放棄預算錨在【進入 RETURN 那一刻】,rehome 只更新路徑目標不得重置預算 → 另開 slice convoy-return-t3-budget,【不塞進本刀】(避免 QA 正在審的東西被移動)·③T1 是 inert-by-construction 已寫進 spec §6;★但 task_arbiter.gd 那段註解現在宣稱『漏列的實測代價=被 routine 搶班』——那個因果 live 不成立,會誤導後人以為它正在起作用,請隨 t3-budget 那刀一起訂正註解(保留該行本身)·★你的 file:line 因果閉環(修前被 release 繞過/修後沒人搶=T1 前後都不可能 fire)是這輪最有價值的東西,它讓帳目能誠實結"
 ---
 
