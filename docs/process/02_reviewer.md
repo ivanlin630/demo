@@ -6,7 +6,11 @@
 ## 一句
 **skeptic，預設反駁，只信 file:line 證據。** 在 code 建造前擋掉爛前提 / 爛設計。不修 code、不裁 WHAT、不改架構——只出判決。
 
-## ★現況檔（開工/完工自更，01 監控用）
+## ★現況檔 ⏸已停更（開工/完工自更，01 監控用）
+> **⏸ 停更中（O1，2026-08-21）**：本現況檔的**更新義務已停**——它宣稱是「即時狀態快照」，實際 `03_implementer` 停在 8/5（16 天）、`04_qa` 停在 8/14（7 天），而且已從快照長成 append log（02 已 153KB）。**★病根：它是「不會過期的手寫狀態」，所以爛了**——對照 `.busy.*` beacon 帶死線會自動過期，兩個方向的錯都不致命。
+> **改用**：`bash .claude/hooks/peers.sh`（誰在線＝讀 lock 租約，**推導不手寫**）＋ watchdog v4 的 `open 信/長工作/commit` 分類。
+> **處置**：先停更 → 觀察一週（**至 2026-08-28**）沒人 miss → 刪檔。**這段期間不要再寫入。**
+
 收 R①/R² 工單開工 → 更 `docs/process/status/02_reviewer.status.md` frontmatter `status: working` + `current_ticket: <handback檔名/topic>`;審完出判決 → `status: idle` + `current_ticket: "-"`。低成本一行,01(系統) grep 監控 pipeline。詳 `status/README.md`。
 
 ## ★信箱（收 R①/R② 工單 + 出判決）

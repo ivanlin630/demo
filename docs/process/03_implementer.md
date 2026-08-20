@@ -1,6 +1,10 @@
 **子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：實作 plan。
 
-## ★現況檔（開工/完工自更，01 監控用）
+## ★現況檔 ⏸已停更（開工/完工自更，01 監控用）
+> **⏸ 停更中（O1，2026-08-21）**：本現況檔的**更新義務已停**——它宣稱是「即時狀態快照」，實際 `03_implementer` 停在 8/5（16 天）、`04_qa` 停在 8/14（7 天），而且已從快照長成 append log（02 已 153KB）。**★病根：它是「不會過期的手寫狀態」，所以爛了**——對照 `.busy.*` beacon 帶死線會自動過期，兩個方向的錯都不致命。
+> **改用**：`bash .claude/hooks/peers.sh`（誰在線＝讀 lock 租約，**推導不手寫**）＋ watchdog v4 的 `open 信/長工作/commit` 分類。
+> **處置**：先停更 → 觀察一週（**至 2026-08-28**）沒人 miss → 刪檔。**這段期間不要再寫入。**
+
 收工單開工 → 更 `docs/process/status/03_implementer.status.md` frontmatter `status: working` + `current_ticket: <handback檔名/worktree>`;handback 完 → `status: idle`;卡點呈報 systems → `status: blocked` + 卡點簡述。低成本一行,01(系統) grep 監控。詳 `status/README.md`。
 
 ### 第一步（強制）：建立隔離 worktree
@@ -132,3 +136,22 @@ rm -f .claude/hooks/.busy.implementer
 
 **忘了寫 beacon 會怎樣**：watchdog 還有 `ps -W | grep -i godot`（★必須帶 `-W`，實測不帶抓不到 WMI-detach 起的 Godot）
 與檔案活動兩層 derived 判斷兜底，所以最壞只是多一次 `CHAIN-BROKEN` 誤報，不會打斷你。
+
+---
+
+## ★裁定：`plans/` 停用，HOW spec 就是唯一產物（systems 裁 2026-08-21）
+
+**背景**：blueprint 在 P9 工單裡把「`plans/` 空目錄＝plan 還欠不欠」交給 systems 前置定。
+
+**實測**（負斷言協議：窮盡、不用 `head`）：
+- `docs/superpowers/plans/` **頂層 0 個 md**；遞迴 **52 個全在 `_archive/`**，最新一份 **2026-07-13**。
+- 同期 `docs/superpowers/specs/` 頂層 **30 份**活躍，最新是今天。
+- ★而 `session-role.sh` 到今天為止**仍叫 implementer「照 `docs/superpowers/plans/` 逐 task 做」**——**指向一個空目錄**。
+
+**裁定**：**不恢復產出 plan，改 doc 宣告**。理由：plan 這個中間產物在 2026-07 已被 **HOW spec 吸收**
+（spec 本身就帶 §任務拆解／§驗收法），再維護第二份等於雙寫；**實務上大家早就只寫 spec 了，只有文件沒跟上**。
+
+**連動已修**：`session-role.sh` 的 implementer 指路 → `docs/superpowers/specs/<日期>-<slice>-HOW.md`。
+**保留**：`plans/_archive/` 不刪（歷史脈絡）。
+
+★ 這條同時是 P7「三態誠實」的樣本：**一條規則寫在 doc 上、實際沒有東西在執行它，就該明寫，而不是繼續讀起來像已武裝。**

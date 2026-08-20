@@ -77,3 +77,22 @@ handback 內含觸及檔/驗收法摘要（指向 spec，注意事項寫 spec/pl
 3. **鏈序**：長跑 → 量測員（附 specimen）→ **QA 故事稽核（出 verdict ref）** → verdict → systems 鎖 spec / blueprint 鎖 WHAT。QA session 沒開＝flow owner flag blocker（`00_roles`）、非 silent skip。
 
 ∴ **不帶 QA verdict ref 就無法過 spec-lock**＝結構硬擋，取代「記得送 QA」的 advisory。連 `03b_measurer §⑤`（findings 必附 specimen→QA）、`00_roles` 接力流向、memory [[feedback_qa_inversion]]。
+
+---
+
+## ★裁定：`plans/` 停用，HOW spec 就是唯一產物（systems 裁 2026-08-21）
+
+**背景**：blueprint 在 P9 工單裡把「`plans/` 空目錄＝plan 還欠不欠」交給 systems 前置定。
+
+**實測**（負斷言協議：窮盡、不用 `head`）：
+- `docs/superpowers/plans/` **頂層 0 個 md**；遞迴 **52 個全在 `_archive/`**，最新一份 **2026-07-13**。
+- 同期 `docs/superpowers/specs/` 頂層 **30 份**活躍，最新是今天。
+- ★而 `session-role.sh` 到今天為止**仍叫 implementer「照 `docs/superpowers/plans/` 逐 task 做」**——**指向一個空目錄**。
+
+**裁定**：**不恢復產出 plan，改 doc 宣告**。理由：plan 這個中間產物在 2026-07 已被 **HOW spec 吸收**
+（spec 本身就帶 §任務拆解／§驗收法），再維護第二份等於雙寫；**實務上大家早就只寫 spec 了，只有文件沒跟上**。
+
+**連動已修**：`session-role.sh` 的 implementer 指路 → `docs/superpowers/specs/<日期>-<slice>-HOW.md`。
+**保留**：`plans/_archive/` 不刪（歷史脈絡）。
+
+★ 這條同時是 P7「三態誠實」的樣本：**一條規則寫在 doc 上、實際沒有東西在執行它，就該明寫，而不是繼續讀起來像已武裝。**

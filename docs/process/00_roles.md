@@ -92,7 +92,11 @@ topic: <一行>
 
 channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統做；本節即首個 dogfood（`2026-06-19-blueprint-to-systems-handback-channel.md`）。
 
-### ★角色現況檔（狀態快照，01/系統監控用，用戶定 2026-07-13）
+### ★角色現況檔（狀態快照，01/系統監控用，用戶定 2026-07-13）  ⏸ **已停更（O1，2026-08-21）**
+> **⏸ 停更中（O1，2026-08-21）**：本現況檔的**更新義務已停**——它宣稱是「即時狀態快照」，實際 `03_implementer` 停在 8/5（16 天）、`04_qa` 停在 8/14（7 天），而且已從快照長成 append log（02 已 153KB）。**★病根：它是「不會過期的手寫狀態」，所以爛了**——對照 `.busy.*` beacon 帶死線會自動過期，兩個方向的錯都不致命。
+> **改用**：`bash .claude/hooks/peers.sh`（誰在線＝讀 lock 租約，**推導不手寫**）＋ watchdog v4 的 `open 信/長工作/commit` 分類。
+> **處置**：先停更 → 觀察一週（**至 2026-08-28**）沒人 miss → 刪檔。**這段期間不要再寫入。**
+
 信箱=工單傳遞;**現況檔=即時狀態快照**（互補非重複）。**02/03/03b/04 各自更** `docs/process/status/<code>_<role>.status.md` 的 frontmatter `status`（idle/working/blocked）+ `current_ticket`——收工單開工標 working+工單、完工回 idle。**01(系統/architect) grep 監控**整體 pipeline（誰忙誰閒免逐一問）：`grep -H -E "^(status|current_ticket):" docs/process/status/0*.status.md`。慣例詳 `status/README.md`。**義務**:各角色開工/完工時順手更新自己那格（一行 frontmatter，低成本）。
 
 ## ★★無斷點自動鏈（用戶定案 2026-07-09，總則）
