@@ -4,7 +4,16 @@
 # (PowerShell: $env:SESSION_ROLE='systems'; claude)
 emit() { printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":%s}}' "$1"; }
 # 多行安全：escape \ → " → 換行(\n)，再包雙引號
-json_str() { printf '%s' "$1" | sed ':a;N;$!ba;s/\\/\\\\/g; s/"/\\"/g; s/\n/\\n/g' | awk 'BEGIN{printf "\""} {printf "%s",$0} END{printf "\""}'; }
+# ★JSON 逃逸（2026-08-21 修）：舊版 sed 版對 `"` 完全沒跳脫 → 只要注入內容含引號就吐出非法 JSON。
+#   session-role 的 blueprint 專屬 context 本來就含 Monitor(command="…") ⇒ 那段一直是壞的。
+#   awk 版一次處理反斜線／引號／換行三種。
+json_str() {
+  printf '%s' "$1" | awk '
+BEGIN { ORS=""; printf "\"" }
+  { gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); if (NR > 1) printf "\\n"; printf "%s", $0 }
+  END { printf "\"" }
+  '
+}
 
 # ★唯一信箱 = main repo 的 handbacks（worktree session 也指這，共用實體資料夾）。
 _MAIN_REPO="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" 2>/dev/null)"

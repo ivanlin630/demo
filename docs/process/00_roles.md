@@ -82,6 +82,7 @@ topic: <一行>
 **★裁決信 marker（給 implementer 的完成判定，2026-07-09）**：task 是否完成**由 01/②判決，非 implementer 自判**（QA 可能 redo）。01 判完寫 `to:implementer` 的信，topic 帶 marker：`[DONE]`（approved/merged→implementer 收尾：consume+cd 回主目錄+重 arm；**ctx 靠 auto-compact 不手動清**）或 `[REDO]`（要改→implementer 還 warm 直接改）。**Stop-hook `implementer-cleanup.sh` 據 `[DONE]` 逼收尾**（見 `03_implementer.md §5`）。`/clear` 是用戶鍵入 agent 不能自 issue → 全流程零手動鍵入靠 auto-compact。
 
 生命週期（★status 所有權=收件端，非寄件端；2026-07-13 用戶戳）：
+> **★2026-08-21 harness v2**：watcher arm 改**搶佔式**（新的一定贏、舊的印「讓位」自退）；lock 帶 `session_id` ⇒ 「覆蓋仍在」變成**可驗證事實**；`SEEN` 落地 ⇒ **重 arm 不重吐**；**每 turn 閘**在你打字時就告訴你 watcher 掛了。細節見 `07_mailbox_trigger §收件端`。
 1. **發送方寫信一律 `status: open`**——不管你自己「做完沒」。open/consumed 表**收件端讀了沒**,非寄件端做完沒。**寄件端絕不自寫 `consumed`**（自寫=收件 Monitor 只掃 open→這封永不被主動喚醒送達→靜默漏看）。「我這輪做完了」=寫一封 open 信給下一站,那封的 consumed 由**下一站**改。詳 `07_mailbox_trigger §status 所有權`。
 2. **每 session 開頭掃 `handbacks/`，讀 `to: 本角色 / status: open` 的**（義務）。
    - **自動 📬（hook，gitignore 本地）**：`SessionStart → session-role.sh`（開頭掃一次）+ `UserPromptSubmit → handback-inbox.sh`（**每 turn 掃**，補 session 中途別角色寫的；空則靜默）。掃 frontmatter `to:$SESSION_ROLE status:open` = 讀真值源，免 QUEUE.md drift。消滅人肉轉述。

@@ -33,6 +33,7 @@
 1. **寄件端寫信一律 `status: open`**——不管你「做完沒」。open/consumed 表的是**收件端讀了沒**，非寄件端做完沒。**寄件端絕不自寫 `consumed`**（自寫 consumed = 收件端 Monitor 只掃 open → **這封信永遠不會被主動喚醒送達** → 靜默漏看）。
 2. **`consumed` 只有收件端、讀完動工後才改**（open→consumed）＝「我收到並處理了」的回執。
 3. 「我(寄件)這輪工作做完了」≠「consumed」。你做完 = 寫一封 `open` 信給下一站；那封信的 consumed 由**下一站**改。
+4. **★v2 補了一個 singleton 治不了的洞（2026-08-21）**：寄件端誤寫 `consumed` 的信，watcher 過濾條件已放寬成 `to:我 && ( status:open || 啟動後動過 )` → **仍會被吐一次**。★但只在「這封信從沒露過面」時吐——否則**我自己把信改成 consumed 就會把自己叫醒＝自我通知迴圈**。（這條不免除鐵律 1：寄件端還是一律寫 `open`。）
 
 > 白話：consumed 是**收件人簽收**，不是**寄件人寄出**。你寄出永遠 open，等對方簽。
 
@@ -44,7 +45,21 @@ Monitor(command="bash .claude/hooks/inbox-watch.sh", persistent=true, descriptio
 ```
 - 常駐輪詢（預設 20s，`INBOX_POLL_S` 可調）找 `to:<我> && status:open && 沒見過` → 每封新信吐一行事件 → **本 session 自動醒、讀信、動工**。
 - emit-once（key=path+mtime）：同信不重觸；revise 重開（mtime 變）→ 重新吐。
-- 開場既有 open 信標 `[開場既存]` 吐一次（讓剛開的 session 知道待辦）。
+- **★arm 是搶佔式（v2，2026-08-21）**：不比誰心跳新，比誰後 arm。**新的一定贏**；舊的下一輪讀到 lock 不是自己 → 印 `⛔ 讓位` 後自退（孤兒自己清自己）。
+  - v1 病：開機判一次、`exit 0` 走人；舊進程每 20s touch ⇒ lock 永遠新鮮 ⇒ **只要舊進程活著就永遠沒辦法合法重新 arm**，唯一出路是手動殺進程。
+  - ★取捨：誤開第二個同角色 session，被踢的是舊的（可能才是正在工作的那個）——但**它會印出來，看得見**。土法分辨：**5 分鐘內看到第二次「讓位」＝ 真的有另一個同角色 session 活著**。
+- **★arm 完必須看到這三行之一**，否則就是沒 arm 成功——**不要自己解釋成「已有實例覆蓋」**：
+  - `✅ ARMED role=<你> pid=<n>（無前任）`
+  - `✅ ARMED …（前任 pid=… 將於下輪自退）` / `（前任同 session 但已死，已接手）`
+  - `✅ 覆蓋仍在（同 session，watcher pid=X 存活，已驗）` ← **這句現在是可驗證的事實，不是猜測**
+  - ★通則（值得記）：**守衛不要輸出「需要被解讀的狀態」，要輸出「已經處置完的結果」。**
+    `已有實例在跑 → 退出` 是狀態，agent 得猜下一步；`✅ ARMED（前任將自退）` 是結果，沒有東西要猜。
+- **★不再吐 `[開場既存]` 全量 backlog**（v2 刪）：那件事本來就有人做、而且做得更好
+  （`session-role.sh` SessionStart 注入待辦 + `handback-inbox.sh` **每 turn** 掃）。**Monitor 現在只做一件事：吐真正新到的信。**
+- **★SEEN 落地成檔** `.claude/hooks/.inbox-seen.<role>`：新 watcher 繼承前任吐過什麼 → **重 arm 不重吐**。
+  （沒有這條：auto-compact → 重 arm → SEEN 空 → 全部 open 信重吐 → ctx 又漲 → 再 compact…**自我循環**。）
+- **★每 turn 閘**（掛在 `handback-inbox.sh`）：watcher 沒在跑 → 你**下一次打字**就會看到 ⛔，而不是幾小時後才發現失聰。
+  **兩條紀律不可妥協**：**只警告絕不阻擋**（閘門自己有 bug 就 brick 六個 session）、**fail-open**（讀不到 `session_id`／舊格式 lock 就退回現行行為，**絕不因為讀不到就報警**）。
 
 #### ★blueprint 專屬：Telegram 進站 Monitor（開場**額外** arm 一條、與信箱並列，存活 restart/compact）
 用戶要遠端用 Telegram 驅動 blueprint（免盯 CLI）。**只 blueprint 一個 session** 開場多 arm 這條（其他角色不 arm、走 git 信箱）：
