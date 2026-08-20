@@ -6,7 +6,14 @@ tools/*
 !tools/orchestrator/
 
 # Claude Code local config
-.claude/
+# .claude：★harness 納入版控（2026-08-21）——改版前提「每步可獨立 revert」需要版控，
+#   而原本整包 ignore = 0 追蹤檔 = 沒有 revert 安全網、fresh clone 也拿不到 harness。
+#   只納 hooks/*.sh 與 settings.json；locks/.busy.*/settings.local.json(機器專屬)/worktrees(整包 repo 拷貝) 續 ignore。
+.claude/*
+!.claude/hooks/
+.claude/hooks/*
+!.claude/hooks/*.sh
+!.claude/settings.json
 
 # Superpowers plugin cache
 .superpowers/
