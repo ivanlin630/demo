@@ -21,6 +21,17 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## ✅★★ LOD 紅線修 MERGED（2026-08-20）＝個體反應層不再綁玩家位置、**大考 HALT 解除**
+
+**根**（measurer 意外發現 → systems 親驗 → blueprint 認定違憲）：`reactions`/`cleanup` ＝ `lod=LOD_NEAR` **且 `shape="teams"`**；near 判定＝距 `player_pos` ≤3 → headless 傳 `(-1,-1)` 使全隊皆 far ⇒ **無玩家＝全世界零個體反應；有玩家＝遠隊零個體反應**（生育/逃/暴動/叛/怠工/士氣/`goal_alignment`/npc goal cleanup）。實證 `breedgate.calls=0`、11/11 隊 `minor=0`。
+**blueprint 裁**：此＝用戶 2026-08-14 立身宣言「**只准降解析度、不降真實；禁 DF/RW 式凍結等玩家**」的**直接違憲現形**——世界的存在綁玩家，正是立專案要反對的東西。
+**修**：兩 entry 改 `LOD_BOTH`、`reactions` 走 `teams_cadence`；`trials = cadence / NEAR_CADENCE`（near 1／far 10）。
+- ★**補償五條**（判準＝**每次呼叫是否累積/抽獎**，**不是**有沒有 RNG——這是我 spec 原本的漏洞、addendum 修）：`work_morale` 的 `w_eff=1-(1-0.1)^trials`（重複 lerp 精確等價）／技能 XP 跑 `trials` 次（保 `MAX_SKILL` 夾頂）／comply loyalty ×trials／unrest ±1 ×trials／**breed 真·多次試驗**（禁單抽 `1-(1-p)^n`＝結構性封頂每窗最多 1 次）。
+- **不補兩類**：離散門檻型（叛逃/出走＝**最多延遲、非降率**）、飽和型（`stress-=0.3`）。
+- **(甲)「無玩家→全隊 near」＝blueprint 裁不做**（×10 世界節奏 + 全基線報廢、零憲法增益；`_get_near_teams` 未動）。
+**gate（合併結果親跑，全綠）**：★rate-equivalence **far/near=1.00**、且**落在未飽和區**（cap16、兩側各 9）＋ `work_morale` **|Δ|=0.0000**、`unrest` 20/20 ＝三個補償都真的有效；無玩家 headless **`breed=11`／`minor=11`（修前 0）**；det 兩跑 `dd047873b3597e2dfe1a90a679a4ad34`；constitution **PASS 75**；headless **0-new**；**perf +3.7%**（10 天窗同組對照、個位數 %）。
+**★方法論產出**（已入 `invariants`〈LOD 降頻補償紀律〉）：四型別補償表 + 上限逐次重查 + **rate-equivalence 的兩種假通過**（兩側都撞上限／兩側都沒 fire，implementer 本輪各踩並自己抓到）+ 起手要**同時查 registry `shape` 與 pass 層 outer guard**（本輪 systems 與 reviewer 各錯一邊）。
+
 ## ✅ 12mo 大考 harness + §4b 擴點 MERGED（2026-08-20）
 
 **大考 harness（純觀測、零行為改動）**：`scripts/debug/exam_12mo_bed.gd`，每日一筆 JSONL 增量落檔（被 reap 也留 partial）：`day/tick`、`n_teams/n_persons/n_factions`、`tick_us_avg/max`、**六階段 `phase_us` breakdown**；監看清單一次抓齊＝`mint_level_dist`／**瞬時 `daily_rate`（非 EMA）→ zero/neg 隊數**（零產出卡死病型）／`site_memory.write` vs `applied`（§4c eviction）／`need.ewma_advance` vs budget／starve 明細／政治家族（diplo・alliance・betray）／**統領分佈 + `effective_pop_cap` 分佈**（科目 A「世界是否領導荒」具名檢查）；**同 run 併掛 `SpecimenDumpHelper`**（QA 故事稽核用）。
@@ -70,7 +81,7 @@
 | 2 | §4b 有機 gate（measurer）+ §4c gate | ✅ **完成**（§4c merged；§4b gate verdict 收＋大村床補上 field-untestable 那塊） |
 | 3 | 在飛 slice 全 merge 或明確排除 | ✅ **清空**（labor-v2／churn-fix／§4a／§4c／繼承-lite／EWMA 解耦／§4b／harness 全 merged） |
 | 4 | **QA 故事稽核 EWMA 解耦後的決策動力學** | ✅ **PASS**（QA 逐 tick util 追蹤：team9 tick5940 `build 0.62` vs `買糧 0.60` 一線之差 → tick6060 `買糧 0.98` **逆轉勝** → tick7200 `遷移找糧 3.09` 壓倒＝**util 對飢餓真實連續反應、會真的切換**，非手不聽腦） |
-| 7 | ★★★ **無玩家 headless ＝ reactions／outpost_tick（建設+鑄幣）／regen／cleanup 四系統從不執行**（`lod=LOD_NEAR` × `player_pos=(-1,-1)`）；`exam_12mo_bed` 正踩此坑 | 🔴 **擋考中**：WHAT 裁定呈 blueprint（世界存在是否綁玩家位置；systems 建議「無玩家→全隊 near」） |
+| 7 | ★★★ **無玩家 headless ＝ 個體反應層（reactions/cleanup）從不執行**（`lod=LOD_NEAR` × `shape=teams` × `player_pos=(-1,-1)`；★範圍已自糾：`outpost_tick`/`regen` 是 shape=state/regen、**照常執行**） | ✅ **MERGED、HALT 解除**（rate-equivalence 1.00、無玩家 headless breed 11、perf +3.7%） |
 | 6 | **specimen trace 動機欄修**（`intent` 是戰略層慢 cadence 姿態、被誤讀成本 tick 動機 → 大考主儀器是 QA 讀故事，欄位誤導會讓整場判讀失真） | ⏳ 已派 implementer（考前） |
 | 5 | 大考儀器就位 | ✅ **MERGED**（`exam_12mo_bed.gd`；fp 與 main byte-identical＝純觀測） |
 
