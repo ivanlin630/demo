@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²delta(短、只審填進去的常數與其推導,設計面你上輪已 CLEAN+必查項已納入 §5)·spec=2026-08-20-breed-rate-continuous-HOW.md §6/§7 新增·①形狀 f(r)=r/(r+K)、K=0.15=peaceful d45 的 p90(0.148)取整→語意『本世界前 10% 健康村落在 f≈0.5』;分布實據:p75 三份 snapshot 全≈0(約 3/4 隊 rel_surplus<=0)、正尾細長 max 12.7·②BASE_RATE=0.0133 由用戶拍的 pacing (B) 反推:健康村 f=0.5 × 5 名適齡 → 1 名額/30 日·③我請你審三點:(a)K 取 p90 這個選法合不合理——我的論證是『把 f=0.5 的中點放在世界前 10% 健康村』使曲線的敏感區間落在真的會發生的範圍(0~0.5),而非落在幾乎不存在的高位;但也可以選 K=正值中位數(更寬鬆)或 K=p75(更嚴),你認為 p90 這個錨會不會讓多數正盈餘村擠在 f<0.5 的低速區(b)★量級錨定的意義我改寫過(舊規則期望 3.6 次/人/日=通過即瞬間填滿 cap、真 binding 是 cap 非機率)——你獨立驗這個算術與結論(NEAR_CADENCE=10→24 次/日、cap=max(1,int(pop×0.25)));若我算錯,整個 pacing 討論的前提就錯(c)sanity 表『85 倍盈餘只換 2 倍速率』是否符合『飽和』設計意圖、有沒有反直覺到會被當成 bug·★不必重審設計面(累積器/戳記/fp/gate 1-10 你上輪已判)·CLEAN→我 dispatch"
 ---
 
