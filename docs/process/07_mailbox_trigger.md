@@ -85,3 +85,31 @@ Monitor(command="source tools/telegram/config.local.sh && python tools/telegram/
 ## 邊界
 - Monitor 只喚**活著的 session**（idle 掛 prompt + monitor armed）。關窗 = 斷；重開再 arm。
 - 要喚**人**（非 session）用 `PushNotification`（桌面/手機）——寄件端可選加，提醒用戶某軌有事。
+
+---
+
+## ★stall 處置準則（watchdog v4，2026-08-21 用戶定案）
+
+watchdog v4 不再問「有沒有東西在動」（v3 病：量測跑半天＝全靜＝被誤判成停滯），
+改問「**有沒有人在等一個不會來的東西**」。fire 走 stdout → 喚醒 **blueprint**（arm 它的 session）。
+訊息由 bash 算完整（誰沒開／最老的信／活著的角色／長工作／最後 commit），目標是 **blueprint 一輪短回合就能判**。
+
+| 收到 | 動作 |
+|---|---|
+| 🔴 `DEAD-ROLE` | **推用戶**——只有他能開終端。訊息帶 `$env:SESSION_ROLE='<role>'; claude` |
+| 🟡 `UNRESPONSIVE` | 信是給我自己的 → 自己動。不是 → 寫信催該角色，**不推用戶**。同一封第二次才推 |
+| 🟡 `COMMIT-NO-LETTER` | 查 commit 是誰的活 → 寫信要他補推下一站（他出貨了但沒推鏈） |
+| 🟡 `CHAIN-BROKEN` | 查最後一封信在等誰。等用戶裁 → 推；等角色 → 補寫下一站信；查不出 → 推用戶 |
+| 🟠 `RUNAWAY` | 推用戶（長工作超過 8h，可能要殺 godot） |
+
+★ 原則：**只有「開終端／WHAT 裁決／授權」才推用戶**，角色間能解的 blueprint 自己推鏈。
+
+**七類分類器**（`DEAD-ROLE` / `RUNNING` / `RUNAWAY` / `UNRESPONSIVE` / `COMMIT-NO-LETTER` / `CHAIN-BROKEN` / `OK`）：
+- `DEAD-ROLE` **獨立於 RUNNING**——信給一個沒開的角色，不管別人在不在忙，都是 bug。
+- `RUNNING`（beacon／godot 進程／檔案活動任一為真）→ **靜默，不管跑多久**，除非撞 `RUNAWAY`。
+- 同一 class 連續成立 → **`RE_ARM`(4h) 內只響一次**（v3 病：fire 後重置 ⇒ 每 5h 重響）。
+- ★`COMMIT-NO-LETTER` 與 `CHAIN-BROKEN` 用的 git 信號**不可混**：前者只看 `main`，後者看全 ref。
+  （v3 病：取全 ref 最新 commit ⇒ merge 到 main 卻沒寫信，反而把警報壓住 1h。）
+
+**參數**（用戶 2026-08-21 拍板）：`POLL=15m` / `T_DEAD=15m` / `T_UNRESP=1h` / `T_IDLE=1h` / `T_MAX_RUN=8h` / `RE_ARM=4h`。
+**長工作 beacon** 的寫法與紀律見 `03b_measurer.md` / `03_implementer.md` §長工作 beacon。

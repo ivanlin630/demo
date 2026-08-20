@@ -110,3 +110,25 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
    - **`[DONE]` 信**（approved/merged）→ 這時才收尾：**consume 該信 → cd 回主目錄 → 重 arm inbox-watch → 待命下一 task**。**ctx 不用手動清**（`/clear` 是用戶鍵入、agent/hook 不能自 issue → 不強制）；context 累積到滿 Claude Code **自動 compact**，`/compact` 重觸 SessionStart(source=compact) → **職責自動重載**。Stop-hook `implementer-cleanup.sh` 偵 `[DONE]` 逼你做這幾步。
 
 ∴ 完成判定歸 01（防過早清 ctx→redo 冷啟）、主目錄恆 main、worktree 隔離改 code、handback 走 main mailbox 自動觸發下一站、職責 compact 後自動重載、**零手動鍵入**。
+
+---
+
+## ★長工作 beacon（watchdog v4 用，2026-08-21 用戶定案）
+
+長工作（長跑量測／大窗 bed／長編譯）**開跑前寫、跑完刪**：
+
+```bash
+# 開跑前
+echo $(( $(date +%s) + 28800 )) > .claude/hooks/.busy.implementer      # 8h 死線
+# 跑完
+rm -f .claude/hooks/.busy.implementer
+```
+
+**★紀律（設計重點，不是實作細節）**：
+- **beacon 只能「壓下」警報，永遠不能「製造」警報**——它讓 watchdog 知道「這裡的靜止是有原因的」，不會反過來讓 watchdog 因為它而報警。
+- **帶死線、會自動過期**：忘了刪 → 8h 後自動失效、回到 derived 判斷；忘了寫 → 只是多響一次。**兩個方向的錯都不致命。**
+- ⇒ 通則：**手寫狀態只准存在於「會過期」的形式**。這樣拿得到宣告式的準確度，又躲得開「手寫狀態會腐爛」的刀
+  （反例：`docs/process/status/*.status.md` 是不會過期的手寫狀態，所以爛了——見 O1）。
+
+**忘了寫 beacon 會怎樣**：watchdog 還有 `ps -W | grep -i godot`（★必須帶 `-W`，實測不帶抓不到 WMI-detach 起的 Godot）
+與檔案活動兩層 derived 判斷兜底，所以最壞只是多一次 `CHAIN-BROKEN` 誤報，不會打斷你。

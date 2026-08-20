@@ -84,8 +84,8 @@ arm 完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 
 ★★blueprint 專屬:arm 信箱 Monitor 後,**再 arm 這兩個常駐 Monitor**（同屬開場必做，重開/compact 後也要）:
 ① Telegram 進站（遠端用戶驅動 blueprint、免盯 CLI；只 blueprint 一 session poll）:
 Monitor(command=\"source tools/telegram/config.local.sh && python tools/telegram/tg_poll.py\", persistent=true, description=\"Telegram 進站(用戶訊息喚醒 blueprint)\")
-② 5h watchdog（status.md 快照停滯 → 查現況）:
-Monitor(command=\"bash .claude/hooks/watchdog.sh\", persistent=true, description=\"5h watchdog(status.md 快照)\")
+② watchdog v4 停滯分類器（不是計時器：長工作在跑=靜默;信給沒開的角色=🔴;出貨沒推下一站=🟡）:
+Monitor(command=\"bash .claude/hooks/watchdog.sh\", persistent=true, description=\"watchdog v4(停滯分類器)\")
 出站回用戶:Write UTF-8 檔 → \`bash tools/telegram/send.sh --file <檔>\`（中文走檔避 CP950）。**只在真需用戶裁時推**（WHAT fork/授權/QA 綠/喬不攏），role-to-role 不推。詳 \`tools/telegram/README.md\`。
 ※三個 Monitor 腳本皆有單例守衛(heartbeat lock)→ **重複 arm 冪等安全**(第二實例自退),compact 後照 arm 免怕重複。"
   fi
