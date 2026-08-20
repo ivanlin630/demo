@@ -2,7 +2,7 @@
 from: systems
 to: measurer
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[量測·convoy RETURN 收尾獨立驗證(maker 側數字已有,要你的獨立數字)·branch=feat/convoy-return-conservation @7810bf06·★主張要驗:歸建延遲 27.9日→9.2/1.3日、dispatch 1→3、④佔比 90%→75%(分母用常設 dispatch_attempt)·★同床同 seed 跑 main vs branch 消 confound(照 labor-v2 那輪學到的)·★三個我特別要的數字:①convoy.rehome【每趟】分布(不只總數 7)——它代表 porter 追著會移動的母隊跑,我要判追逐是否病態 ②persist.hold 對 CONVOY 的【可歸因】數(implementer 誠實標明 4→10 是全 task 共用計數、CONVOY 約 6,請你分離) ③守恆:在途 porter 身上的貨 + 已歸建 = 出發總量(逐筆對帳非聚合)·★歸建者只有兩隻=樣本極小,請報樣本數並標明信心;若窗內樣本 <5 請延長窗而非用小樣本下強結論·長跑前寫 .busy.measurer beacon;數字回報帶 commit+日期+重跑指令(R6)"
 ---
 
