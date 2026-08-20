@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: monotonic-team-id
 topic: team_id 永不重用 DONE — 七份收斂成一個出生口、gate7 做成機械閘、六項稽核逐條有證；★fp 說法要精確（不是「必變」）
 branch: feat/monotonic-team-id
