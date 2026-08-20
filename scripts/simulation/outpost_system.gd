@@ -331,6 +331,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 		"build":
 			tile.outpost_type  = tile.construction_target["type"]
 			tile.outpost_level = tile.construction_target["level"]
+			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（完工 0→>0；set_owner 可能因 owner 未變而 early-return，不能依賴它）
 			OutpostOwnerBank.set_owner(tile, tile.construction_team_id, "construct")
 			var n: String = get_outpost_name(tile.outpost_type, tile.outpost_level)
 			SimMessageSystem.new().emit_message(state, "outpost_built",
@@ -370,6 +371,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			# 玩家紮營完工（Y 版）：免材料,只抬 food cap（regen 才產糧）,絕不送即時糧（去剝削）
 			tile.outpost_type  = str(tile.construction_target.get("type", "civilian"))
 			tile.outpost_level = 1
+			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（紮營完工 0→1）
 			OutpostOwnerBank.set_owner(tile, int(tile.construction_target.get("owner", team.team_id)), "construct")
 			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
 			tile.camp_level = 0        # ★S2b：L0 消融進 L1（完工清 camp flag、L1 outpost_level 接手）
@@ -389,6 +391,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				tile.tile_pos.x, tile.tile_pos.y])
 			tile.outpost_type  = ""
 			tile.outpost_level = 0
+			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（拆除 >0→0）
 			OutpostOwnerBank.set_owner(tile, -1, "demolish")
 			# ★god-view Slice C：市集拆了(outpost_level→0，唯一真消失路)→清所有隊 team_market_known 對此 tile 的
 			# 條目（tile 級：知此市集的隊都該忘）。★只 demolish 清；capture/set_owner 不清（市集還在=known 位置仍有效，

@@ -48,6 +48,12 @@ var offmap_extinct_coin: float = 0.0  # off-map 滅團（radius 全無有效格�
 # 消費端（hostile-within / co-location / 居民查）以鄰域查取代全掃 → 收 O(N²)/hr。
 # 純加速結構、非真值源：消費端仍 live 復驗 tile_pos/hex_dist（容 key 碰撞 + 建後瞬時態）。
 var teams_by_tile: Dictionary = {}   # tile_id(int = x*1000+y) → Array[int] team_ids
+
+# ★效能 arc B：owner → 自家據點 tile_id 索引（取代 _find_own_outpost / _faction_roster_pos 的全圖掃）。
+# 純加速結構、非真值源：表由 world.tiles **迭代序**整表重建、每 owner 只留第一個命中
+# ＝完全重現舊掃「迭代序中的第一個符合者」語意（HOW spec §3）。失效走 OwnerOutpostIndex.epoch。
+var _oo_map: Dictionary = {}      # team_id → tile_id（owner=-1 亦入表，與舊掃對任何輸入皆等價）
+var _oo_epoch: int = 0            # 0 = 尚未建（OwnerOutpostIndex.epoch 從 1 起）
 var _next_faction_id: int = 0
 # beast pseudo-team id counter（負區段，避開正常 team id）。★per-world（非 BeastSystem instance var，
 # 亦禁 static var）：每 world fresh init → per-seed 決定性 + 每 beast 唯一遞減 id。舊 instance var 令每
@@ -120,6 +126,26 @@ static func record_driver(entity, field: String, delta: float, reason: String) -
 
 static func clear_driver_ledger() -> void:
 	driver_ledger.clear()
+
+# ★效能 arc B：owner → 自家據點查表（等價替換 `for tile_id in world.tiles` 全圖掃）。
+# 回傳該 team 在 world.tiles 迭代序中的第一個 outpost_level>0 據點 tile，無則 null。
+# 失效即整表重建（見 OwnerOutpostIndex 檔頭：整表重建天然免疫 spec §3 的「後設蓋前者」陷阱）。
+func own_outpost_tile(team_id: int) -> HexTileData:
+	if _oo_epoch != OwnerOutpostIndex.epoch:
+		_rebuild_owner_outpost()
+	var tid = _oo_map.get(team_id, null)
+	if tid == null:
+		return null
+	return world.tiles.get(tid)
+
+func _rebuild_owner_outpost() -> void:
+	_oo_map.clear()
+	for tile_id in world.tiles:   # ★依 world.tiles 迭代序 → 每 owner 只留第一個命中＝舊掃同一選擇
+		var t: HexTileData = world.tiles[tile_id]
+		if t.outpost_level > 0 and not _oo_map.has(t.outpost_owner):
+			_oo_map[t.outpost_owner] = tile_id
+	_oo_epoch = OwnerOutpostIndex.epoch
+	if Probe.enabled: Probe.bump("owner_outpost.rebuild")
 
 func create_faction(leader_team_id: int) -> int:
 	if not teams.has(leader_team_id):
@@ -371,6 +397,7 @@ func erase_teams(tids: Array) -> void:
 		var wt: HexTileData = world.tiles[tid]
 		if dead.has(wt.outpost_owner):
 			wt.outpost_owner = -1
+			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint③：繞過 bank 的直接 owner 寫
 	# 3. 其他隊指向任一 dead tid 的 ref 單趟全清（死隊間互指不清：隨 teams.erase 一併消失）
 	for otid in teams:
 		if dead.has(otid):
