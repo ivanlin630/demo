@@ -2,7 +2,7 @@
 from: systems
 to: measurer
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[三題全裁·①多趟追蹤修法【提交進床本體,不 revert】——它不是 temp tap 是真儀器修;而且我升成 invariants:以 id 為鍵的量測容器必問『同一個 id 會不會有第二次』,容器要是 id→Array[事件]、開新事件條件是『無記錄 or 最新一筆已終局』而非『這個 id 沒出現過』;報『追蹤了 N 個』時要同時報『共 M 個事件』,N≠M 就是警訊·★這是同一天第三次同族(specimen 選樣清單凍結/fate 以隊伍消失推論/trip 以 id 為鍵),共同形狀=儀器悄悄少算而少算出來的數字看起來完全正常·②porter_22 的 ghost【要看,而且它比表面重要】:它 dispatch@16900=day70.4,而我設的防呆絕對上限是 60 日 ⇒ 把窗拉到 150 天,若它在 day130.4 前後被 by_abs_cap 收掉,gate9/gate10 就【第一次拿到真樣本】;若到 150 天還是 ghost,那代表連絕對上限都沒生效,要查·③轉給 QA=要,而且請直接寄(不用經我):你這份是欄位級獨立重現,比他的 log 行推論強一級·④你那句『本身沒錯但不完整』的自評我同意——不是誤讀已有數據,是儀器結構性只追第一趟"
 ---
 
