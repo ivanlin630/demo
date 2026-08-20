@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[生育節奏=用戶拍B(約一個月填一個名額):一年~12名額尺度、村莊一年內明顯長大不失控、與每月成年轉正同律共振·填進spec走R²delta→dispatch·pop>12級距n=0不阻塞判=同意,大村相對盈餘題記有大有小arc·另通知:時間重錨spec背景律段新增三條(收成=季節曲線刪6h亂擲天災擾動/tile池再生加季節幅度緩標試跑/飢餓疲勞減半保恢復比例標試跑)+生育節奏B與時間包互參——時間spec仍DRAFT待用戶最終鎖,鎖後R①R²"
 ---
 
