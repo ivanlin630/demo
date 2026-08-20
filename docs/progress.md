@@ -103,6 +103,13 @@
 6. **政治質地**（外交/背叛密度）：blueprint (A) 簽字後的回設計值；過死 → (B) 補償調 `p` 走 tuning 流程，**觸發權在 Story QA verdict**。
 7. **farming-as-pillar / FUY**、settlement 深根 pop、founding 碎片 spam / 鬼城比率。
 
+### B-3. 大考「之後」立刻要跑的專用短窗（2–3 個月即可、★禁與大考平行）
+**訂單簿健康度**（用戶追問訂單噪音 → blueprint 立為經濟具名 metric）：①standing order 平均壽命/年齡分布 ②成交率（filled vs 永不成交）③重掛 churn 率（同團同品反覆掛）。
+- **本輪大考只能給 specimen 層近似**（床的 `watch_prefixes` 不含 `trade.`/訂單類、結尾不 dump 全量 `Probe.counts` → **世界級數字這輪救不回**；specimen 的 `orders` 摘要無 `order_id`/建立 tick，三項全靠出現-消失-`qty_rem` 軌跡反推）→ **報告時必標「取樣層級、非世界級」**。
+- **tap 已 dispatch**（`order_id`+`created_tick`+`order.placed/filled/abandoned/replaced`；`replaced` ＝重掛的硬證據，取代 `qty_rem` 不減反增的推測）。
+- ★**禁與大考平行跑**：第二個 Godot 進程的 CPU contention 會污染大考正在量的 per-tick 時間（＝perf③ k 值測不準的元凶重演）。
+- ★**同票補的更重要一項**：床的過濾器加 `trade.`/`order.` **＋結尾 dump 全量 `Probe.counts`**——**這輪教訓：過濾器沒列到的 probe family 事後完全救不回**，而全量 dump 一行成本近零、保住所有「當時沒想到要問」的問題。
+
 ### B-2. 大考後的路（blueprint 2026-08-20 排序，非考前項）
 - **(a)** measurer 快照先答「統領 0.08 是 fixture／週轉／全域現象」（已插隊派出）。
 - **(b)** **領導成長管道＝考後 arc 候選**——與 established④、繼承-lite、王朝 arc、7/19 成長弧 note **同一族**，該一起做。

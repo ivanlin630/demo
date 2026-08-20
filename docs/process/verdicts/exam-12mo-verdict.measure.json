@@ -1,0 +1,68 @@
+{
+  "ticket": "★★12mo大考(HALT解除,活著的世界第一次跑)——peaceful_economy(完整12mo)+warring_states(★真實只70天,詳下)",
+
+  "★★critical_finding_warring_truncated": {
+    "summary": "warring_states leg檔案雖顯示day360/360,但★真實模擬只跑到day~70就因game_over凍結——day71-360在jsonl裡是exam bed loop counter沒查game_over產生的degenerate假列(tick凍結16742不變/phase_us塌成只剩stale 'encounter'單key/probe_delta全空/n_teams n_persons凍結),★分析用途完全discard,只用day1-70。",
+    "root_cause_evidence": {
+      "stdout_log": "godot_detach_0f0db47e.log grep到「[GameOver] 玩家絕後（Team48 無繼承人）」",
+      "code_path": "sim_runner.gd:70-74 advance_tick()開頭:if state.game_over: return \"game_over\"（H不變量,凍結世界不推進tick,設計意圖非bug）;觸發點event_system.gd:71-77 handle_player_succession:player team(headless下仍有指定player team=Team48)leader死+named_members空→game_over=true",
+      "jsonl_symptom": "day69 tick=16560(=69×240整除,乾淨);day70 tick=16742(未到16800,partial day含28.9秒單tick massive spike——推測即game_over觸發瞬間的cascade);day71起tick恆16742不變,phase_us只剩{'encounter':stale值},probe_delta={},n_teams/n_persons凍結181/216——bed loop counter(exam_12mo_bed.gd:62 for t in range(ticks))不檢查game_over,continue跑滿86400次呼叫,每次advance_tick在game_over分支近0us即返回,day計數(exam_12mo_bed.gd:73 day=(t+1)/TICKS_PER_DAY)只依loop counter非真tick,盲目寫到day360"
+    },
+    "bed_methodology_gap": "exam_12mo_bed.gd沒有game_over guard(既沒print警告也沒提早break)——這是★量測工具本身的缺口非production bug,交systems判要不要補(建議:偵測state.game_over翻true時print+break,省69658次無意義呼叫+避免產出誤導性假天數)",
+    "disposal": "已依blueprint裁定(2026-08-20-blueprint-to-measurer-exam-warring-cut-day120.md)『run若在day120前自行結束/崩→照實收、別重跑』——game_over在day70發生,遠早於day120 cutoff,★不重跑,誠實回報真相非湊數字到360"
+  },
+
+  "valid_data_windows": {
+    "peaceful_economy": "day1-360完整12個月(seed1337),乾淨無異常",
+    "warring_states": "day1-69完整乾淨+day70 partial(182/240 ticks含終局spike)=★真實約2.3個月,day71-360全部discard"
+  },
+
+  "landed_paths": {
+    "peaceful_jsonl": "docs/measurements/exam12mo/exam-12mo-peaceful.jsonl",
+    "peaceful_specimen": "docs/measurements/exam12mo/exam-12mo-peaceful.specimen.jsonl(12隊strided,22061 entries)",
+    "warring_jsonl": "docs/measurements/exam12mo/exam-12mo-warring.jsonl(★只day1-70可用,day71-360 discard)",
+    "warring_specimen": "docs/measurements/exam12mo/exam-12mo-warring.specimen.jsonl(12隊strided,14766 entries——★誠實自曝:launch時漏設SPECIMEN_OUT,原落到預設路徑docs/measurements/exam_12mo.specimen.jsonl,已mv進exam12mo/目錄統一存放,內容不受影響)"
+  },
+
+  "checklist_9items": {
+    "①scaling曲線": {
+      "warring(day1-69,n=69pts)": "k≈2.004(R²=0.892,n_teams 56→184,tick_us_avg 67410→857540us)——★清楚O(N²)量級,比blueprint早先用day60 sidecar粗估的k≈2.35更精確(用完整69天回歸非兩點估),結論方向一致：near.faction_ai持續是壓倒性大頭(day70單日累計phase_us.near.faction_ai=28,670,109us佔該日tick_us總和絕大部分)",
+      "peaceful(day1-360,n=360pts)": "k≈0.539(R²=0.279)——n_teams範圍太窄(12→23)+人少雜訊大,跟本session更早perf輪結論一致:小N regime量不出乾淨scaling exponent,warring才是唯一乾淨機會(且已抓到)"
+    },
+    "②mint_level分佈": "★持續0%——peaceful全360天、warring全69天,兩config全期mint_level_dist只有{'L0':N},從未觀察到L1以上。跨兩個獨立12mo(理應)大考config一致坐實『鑄幣從未真正升級過』,建議查設施鏈(systems/blueprint判優先序)",
+    "③daily_rate zero/neg隊數": {
+      "peaceful day360": "zero=3/23(13%) neg=13/23(57%)",
+      "warring day69": "zero=17/180(9%) neg=112/180(62%)",
+      "備註": "兩config收官時多數隊瞬時糧食流(非EMA)都是負的,warring比例略高但同量級,非warring獨有病態"
+    },
+    "④site_memory write vs applied": {
+      "peaceful(day1-360)": "write=94(100%全部同時計入write.site_failed=94) vs applied=2746",
+      "warring(day1-69)": "write=148(同100%計入site_failed=148) vs applied=4502",
+      "備註": "★誠實記錄數字不詮釋:write計數器100%跟site_failed重疊(每次write都被標failed),但applied是遠大於write的獨立計數(25-30倍)——兩計數器語意關係不明朗,交systems判讀(可能是applied走的是另一條非write路徑,非§4c eviction問題本身)"
+    },
+    "⑤need.ewma_advance≤budget": "PASS——peaceful全360天/warring全69天,0違規天數(ewma_advance_day從未超過ewma_advance_budget=teams×day_ticks),每隊每tick≤1推進規則長窗仍守住",
+    "⑥starve明細+新accepted cost基線": {
+      "peaceful(360天)": "starve_anon=40+starve_minor=9=49死,defect_leave=27——日均starve率≈0.136/天",
+      "warring(69天)": "starve_anon=34+starve_minor=11=45死,defect_leave=60——日均starve率≈0.652/天,★約4.8倍於peaceful日均率——這是活著世界第一次的新accepted cost基線,warring明顯壓力更大(死因跟脫隊都更頻繁)"
+    },
+    "⑦政治家族計數": "★兩config diplo/alliance/betray前綴計數全期完全0筆(peaceful 360天、warring 69天全掛零)——即使warring day70 n_factions已長到8個(faction機制確實在動),診斷政治事件(外交/結盟/背叛)仍全數未觀察到一筆。兩種可能誠實並陳:(a)這些機制在目前fixture/世界動態下真的沒fire(b)bed監看的prefix跟production實際key名沒對上,是量測工具死角非世界真相——交systems判斷需不需要code-read查key名核對",
+    "⑧統領+effective_pop_cap分佈": {
+      "peaceful day360": "cmd中位數0.098(0大宗12/23=52%在L0.0),cap中位數8(範圍1-91)",
+      "warring day69": "cmd中位數0.216(範圍0.008-1.0),cap中位數14(範圍1-100)",
+      "備註": "warring統領中位數+cap中位數都明顯高於peaceful,方向有意思但不下因果解讀,交blueprint/systems判『世界是否領導荒』科目A"
+    },
+    "⑨★人口曲線(pop≥12擴點門檻是否被摸到)": {
+      "aggregate": "peaceful persons 24→36(+50%,360天)teams12→23(+92%);warring persons130→216(+66%,69天)teams56→184(+229%,多數新隊來自population-overflow spin-off/戰爭分裂非單純有機成長)",
+      "★★per-team specimen掃描(12隊strided樣本,非全隊,結論僅適用抽樣範圍)": {
+        "peaceful": "★★3隊真的摸到/超過pop≥12門檻——team5 max_pop=14、team6=13、team8=13,team10=11差一點。這是本session(乃至本專案)★第一次在headless長跑裡觀察到population真的長過§4b擴點門檻,直接回答§4b輪『population從day5到day90卡在6』的疑慮已解除(LOD修後genuine成長會發生)",
+        "warring": "1隊(team28)剛好摸到pop=12(門檻線上),其餘11隊上限8-10,warring因69天窗口較短+戰爭壓力population成長明顯不如peaceful"
+      }
+    }
+  },
+
+  "specimen_dump": "已產出,path見上,尚未送QA故事稽核(依工作流hook規定★長跑必附specimen trace才可下behavior因果結論,本verdict目前只報聚合數字+specimen落地path,因果/故事層留給QA)",
+
+  "cleanup": "純觀測run,零production code改動,exam_12mo_bed.gd未修改(★發現的bed day-counter沒查game_over是exam bed本身的方法論缺口,非L3 tap問題,不需revert動作,交systems判要不要補)",
+
+  "honesty_note": "★誠實優先於完整原則貫徹:warring檔名/day欄位顯示360但真實只70天可信,已在最上方critical_finding清楚標註+9項清單全部改用截斷後的valid window重算,無湊數字。"
+}
