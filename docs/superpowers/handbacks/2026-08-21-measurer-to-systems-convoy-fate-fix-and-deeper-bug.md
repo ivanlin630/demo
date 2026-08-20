@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "★★fate分類器修正完成+找到更深一層儀器bug：床原本只追蹤『每個porter_id的第一趟』,第二趟(含QA抓到的那筆porter_12→Team1)完全隱形；修正後獨立重現QA發現，trips_total=6(非3)，下場4 merged_home/1 merged_into_stranger/1仍在途"
 ---
 

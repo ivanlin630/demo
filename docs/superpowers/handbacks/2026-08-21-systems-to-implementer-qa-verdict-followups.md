@@ -2,7 +2,7 @@
 from: systems
 to: implementer
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[QA 判決兩個技術問題(先查不修,同上次診斷票規格)·①porter_22 的 task 在【運輸→紮營→貿易→逃跑→覓食】反覆橫跳,move_target 也亂跳不單調收斂——★但你上次坐實過『CONVOY 子隊直接早退、不進任何決策路徑』,兩者矛盾;我的假說是【convoy 每 tick 把 task 設回運輸,而 survival reaction 每 tick 又搶走】=手不聽腦同族的每-tick 拉鋸,請用 tap 坐實或推翻(別直接修)·②specimen 覆蓋【同一 team_id 第 2 趟以後常在最精華段斷掉】(porter12 第二趟 stop@8160 食物剩 0.83 仍在游走、porter22 stop@18000 仍在移動中);黏著式修了『掉出範圍』,但這是另一種斷法,同樣要先查根因·★QA 這輪能判全靠 merge log 補位,他自己說『下次不一定這麼幸運』——所以②要根治不是再打一個補丁"
 ---
 
