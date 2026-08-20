@@ -90,7 +90,8 @@ func _run() -> void:
 
 	# ⑤ 逾時（elapsed > 3×ETA）
 	var w5 := _mk(); var s5: WorldState = w5[0]; var p5: TeamData = w5[2]
-	p5.task_extra_data["return_eta"] = 100
+	p5.task_extra_data["return_budget_eta"] = 100
+	p5.task_extra_data["return_eta_leg"] = 100
 	p5.task_extra_data["return_start_tick"] = s5.world.current_tick - 400   # 400 > 3×100
 	Probe.reset()
 	fai._tick_convoy(s5, p5, [])
@@ -99,13 +100,29 @@ func _run() -> void:
 
 	# ⑤b 未逾時 → 不放棄
 	var w5b := _mk(); var s5b: WorldState = w5b[0]; var p5b: TeamData = w5b[2]
-	p5b.task_extra_data["return_eta"] = 100
+	p5b.task_extra_data["return_budget_eta"] = 100
+	p5b.task_extra_data["return_eta_leg"] = 100
 	p5b.task_extra_data["return_start_tick"] = s5b.world.current_tick - 200   # 200 < 300
 	p5b.move_target = Vector2i(0, 0)
 	Probe.reset()
 	fai._tick_convoy(s5b, p5b, [])
 	_ok(int(Probe.counts.get("convoy.stranded", 0)) == 0 and p5b.parent_team_id == 5,
 		"⑤b 還在合理時間內 → 不放棄（不誤殺）")
+
+	# ⑤c ★預算錨在進 RETURN 那一刻：rehome 重新戳記【不得】重置 start_tick / 預算
+	var w5c := _mk(); var s5c: WorldState = w5c[0]; var p5c: TeamData = w5c[2]
+	var fai_c := FactionAISystem.new()
+	fai_c._stamp_return_eta(s5c, p5c, Vector2i(0, 0), p5c.task_extra_data)   # 進 RETURN：立預算
+	var t_start: int = int(p5c.task_extra_data["return_start_tick"])
+	var budget0: int = int(p5c.task_extra_data["return_budget_eta"])
+	s5c.world.current_tick += 500                                            # 追了 500 tick
+	fai_c._stamp_return_eta(s5c, p5c, Vector2i(2, 0), p5c.task_extra_data)   # rehome：只換路徑目標
+	_ok(int(p5c.task_extra_data["return_start_tick"]) == t_start,
+		"★⑤c rehome 不重置 start_tick（%d 維持）" % t_start)
+	_ok(int(p5c.task_extra_data["return_budget_eta"]) == budget0,
+		"★⑤c rehome 不重置放棄預算（%d 維持）" % budget0)
+	_ok(int(p5c.task_extra_data.get("return_eta_leg", -1)) >= 0,
+		"⑤c 本段 ETA 有更新（診斷用、不參與放棄判定）")
 
 	# ⑥ T2：同格 → merge_back 認 return 並清旗標
 	var w6 := _mk(); var s6: WorldState = w6[0]; var lord6: TeamData = w6[1]; var p6: TeamData = w6[2]

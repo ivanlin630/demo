@@ -22,11 +22,16 @@ const PERSIST_HOLD_THRESHOLD: float = 0.1   # TEST VALUE — slice 調
 const PROGRESSIVE_HOLD_TASKS: Array = [
 	TeamData.TASK_BUILD, TeamData.TASK_CONSTRUCT, TeamData.TASK_UPGRADE,
 	TeamData.TASK_EXPAND, TeamData.TASK_SETTLE, TeamData.TASK_MIGRATE,
-	# ★convoy RETURN 收尾（HOW spec 2026-08-21 §5）：porter 是「有終點會完成」的 progressive 動作
-	# （送到→回家歸建），本來就該在列。漏列的實測代價＝送完貨的 porter 在 RETURN 途中被 routine
-	# （貿易/外交）搶班 → 漂 27.9 日才碰巧與母隊同格歸建，期間「一隊一 convoy」throttle 鎖死該領主
-	# 所有後續 deliver。★不新增優先級層：既有 hold 條件已保「危機 axis(≥PRIO_THREAT)不介入、
-	# 玩家命令不擋、同 task 不擋」→ 餓/被襲仍搶得走，不是硬鎖。
+	# ★convoy RETURN（HOW spec 2026-08-21 §5）：porter 是「有終點會完成」的 progressive 動作，故在列。
+	# ★★訂正（診斷實測 2026-08-21，systems 裁定 ③）：本行目前是 **inert-by-construction**，
+	#   live 從未 fire（75 天 0 次 try_set 落在 CONVOY 隊上）。原因是結構性的：
+	#   `faction_ai:761-762` 子隊不進 `_decide_unified`、`faction_ai:2753-2756` CONVOY 子隊在
+	#   `_evaluate_subteam` 直接早退 ⇒ 沒有任何路徑會對 porter 呼 try_set。
+	#   舊註解宣稱「漏列的代價＝porter 被 routine 搶班」——**那個因果不成立**：修前 porter 是先被
+	#   `merge_queue` 的 `TaskArbiter.release()` 打成 IDLE，才被合法改派的（27.9 日漂流的真因）。
+	#   27.9 → 9.2/1.3 日的改善 100% 來自 merge_queue 的 rehome 修，本行功勞 0。
+	#   保留此行的理由：萬一日後 CONVOY 子隊改走決策路，保護已在位（零成本死碼）。
+	# ★不新增優先級層：既有 hold 條件已保「危機 axis(≥PRIO_THREAT)不介入、玩家命令不擋、同 task 不擋」。
 	TeamData.TASK_CONVOY,
 ]
 

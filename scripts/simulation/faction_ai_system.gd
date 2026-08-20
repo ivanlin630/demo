@@ -2862,21 +2862,30 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 const RETURN_ABANDON_ETA_MULT: float = 3.0
 
 # 進入 RETURN 時記下「預期回程 ETA」與起算 tick，供 T3 判「長期不可達」（相對錨定、非絕對天數）。
+# ★T3 放棄預算錨在【進入 RETURN 那一刻】（systems 裁定 2026-08-21）。
+# 舊寫法每次 rehome 都重算 start_tick + eta ⇒ 兜底被它要限制的那個機制自己重置：母隊只要持續移動，
+# `elapsed > MULT×ETA` 就【永遠不會】觸發。通則：兜底錨在承諾開始，不是錨在最近一次調整。
 func _stamp_return_eta(state: WorldState, sub: TeamData, home_pos: Vector2i, xd: Dictionary) -> void:
-	xd["return_start_tick"] = state.world.current_tick
-	xd["return_eta"] = _estimate_eta_to(state, sub, home_pos)   # 無路 → 9999999 哨兵（下方判無路）
+	var eta: int = _estimate_eta_to(state, sub, home_pos)   # 無路 → 9999999 哨兵（下方判無路）
+	xd["return_eta_leg"] = eta                             # 本段路徑 ETA（診斷用；不參與放棄判定）
+	if not xd.has("return_budget_eta"):                    # ★只在進 RETURN 的第一次立預算
+		xd["return_start_tick"] = state.world.current_tick
+		xd["return_budget_eta"] = eta
+	elif Probe.enabled:
+		Probe.bump("convoy.rehome_budget_kept")            # rehome 只換路徑目標、預算不動（可觀測）
 
 # T3 判準：①母隊不在了 ②進 RETURN 當下就無路可回 ③已耗時 > MULT × 預期 ETA。
 func _return_is_hopeless(state: WorldState, sub: TeamData, xd: Dictionary) -> bool:
 	if not state.teams.has(sub.parent_team_id):
 		xd["abandon_reason"] = "parent_gone"
 		return true
-	var eta: int = int(xd.get("return_eta", -1))
-	if eta >= 9999999:
+	# ★無路以【本段】判（追到一半母隊走進不可達處也算），放棄預算以【進 RETURN 當下】判
+	if int(xd.get("return_eta_leg", 0)) >= 9999999:
 		xd["abandon_reason"] = "no_path"
 		return true
+	var eta: int = int(xd.get("return_budget_eta", -1))
 	if eta <= 0:
-		return false   # 尚未戳記（舊存檔/未知路徑）→ 不判，交給正常歸建
+		return false   # 尚未立預算（舊存檔/未知路徑）→ 不判，交給正常歸建
 	var elapsed: int = state.world.current_tick - int(xd.get("return_start_tick", state.world.current_tick))
 	if float(elapsed) > RETURN_ABANDON_ETA_MULT * float(eta):
 		xd["abandon_reason"] = "timeout"
@@ -2898,7 +2907,8 @@ func _convoy_go_independent(state: WorldState, sub: TeamData, xd: Dictionary) ->
 		Probe.bump("convoy.stranded." + reason)
 		Probe.bump_sample("convoy.stranded", {
 			"porter": sub.team_id, "parent": parent_id, "reason": reason,
-			"tick": state.world.current_tick, "eta": int(xd.get("return_eta", -1)),
+			"tick": state.world.current_tick, "budget_eta": int(xd.get("return_budget_eta", -1)),
+			"leg_eta": int(xd.get("return_eta_leg", -1)),
 			"carrying": sub.resources.duplicate(),
 		}, 16)
 	print("[Convoy] Team%d 回不了母隊 Team%d（%s）→ 轉獨立隊，貨物留在身上" % [sub.team_id, parent_id, reason])
