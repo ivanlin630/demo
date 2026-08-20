@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[systems 已收尾 + HOLD·手上票全部落地(commit+push),未開新票、未派新活、未自啟下一站·★恢復用快照見內文(誰在哪、下一步是什麼、判準已寫死在哪)"
 ---
 
