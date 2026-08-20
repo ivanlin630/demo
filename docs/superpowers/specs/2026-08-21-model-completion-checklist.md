@@ -16,7 +16,7 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 ## B. 統一決策框架未收編/斷裂
 | # | 件 | 現況(待驗) |
 |---|---|---|
-| B1 | 引擎外決策存量盤點(constitution_gate 只禁新增;存量哪些決策仍 bypass 引擎=需窮盡列舉) | 待 systems 盤 |
+| B1 | 引擎外決策存量盤點 | ★**systems 已盤完（2026-08-21、見下 §B1 明細）**：寫入側乾淨、決策側找到 **4 個真存量** |
 | B2 | 商隊 survival 履約(統一框架 B 首序舊帳) | 待驗(可能已折入) |
 | B3 | capture/flip encounter-only(headless 恒不 fire)=戰爭科目結構廢考 | 戰爭之路已定案未修 |
 | B4 | intent 從不選征服(survival-mode 收斂;B3 修後才測得出真偽) | 同上 |
@@ -43,3 +43,33 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 
 ## 閘規則(已立法,引用)
 驗收考=清單清零;診斷考=科目對齊審(被蓋科目先修或降級)。本清單=閘的實體;systems 驗完現況欄轉 CANONICAL,每修一件勾一件。
+
+
+---
+
+## §B1 明細（systems code-verify、2026-08-21）
+
+### 方法（負斷言紀律）
+兩側各自窮盡：**寫入側** ＝ `\.current_task *= *` 全站（117 命中，**逐行看過**）；**決策側** ＝ `TaskArbiter.try_set` 全站（**20 站，逐站讀 caller 語境**）。
+
+### 寫入側：**乾淨**（零違規）
+117 個命中**絕大多數是讀**（`==` 比較）。真正的寫入僅五類、且皆有既有註記：
+- 新 team 建立豁免：`population_system:62`（overflow 流亡）／`reaction_system:403`（放逐生成）／`subteam_system:62,117,148`（子隊 dispatch task）
+- tutorial：`recruit_tutorial:16`
+- **arbiter 自身**：`task_arbiter:76,96,107,122,143`
+∴ **沒有任何系統繞過 arbiter 直接改 task**。
+
+### 決策側：20 站分三類
+**(甲) 引擎路徑（rank → to_task → try_set）4 站**：`_decide_unified:2626`（`td["task"]`）／`_decide_subteam:2941`／`_trigger_survival:4899`／`_evaluate_all_body:930`（`rank_ambient`）。
+另 `_decide_unified:2579`（BUILD@SURVIVAL）＝**引擎選項「自救建田」的執行端**（`opt` 由 rank 選出）→ 歸甲。
+**(乙) 玩家/命令/回復通道 6 站**（合法非引擎）：`_assign_tasks:2453`（`player_commanded_task`）／`player_command_system:241,565,1021`／`sim_runner:278`＋`interaction:1327`（乞食超時回復）／`interaction:639 _deliver_order`（信使送達命令，玩家 `PRIO_PLAYER`／NPC `PRIO_DISPATCH`）。
+**(丙) ★真存量：引擎外決策 4 站**
+| 站 | 性質 | 判讀 |
+|---|---|---|
+| `_evaluate_uprising:5384/5388` | **自帶 mini-scorer**：`stand = 野心×0.5 + 慎重×0.3 + 義氣×0.2` vs `flee = 求生×0.5 + (1−義氣)×0.3`，`stand > flee` 二選一 | **人格加權＝合憲**（非死常數門檻），但**自成一套評分、不經 DecisionEngine** ＝ **統一框架的真缺口** |
+| `_commit_conquest_attack:337/352` | scout↔attack 切換由**手寫條件**（`_is_stuck` / `_was_scout`）決定 | 意圖來自戰略層，但**切換點是手寫分支**、非 util 秤 |
+| `_try_invite_nearby_exile:651` | ★**跨隊指派**：A 隊在 B 隊回 `accept` 後**直接對 B 隊 `try_set(SETTLE)`** | 決策點其實在 `DiplomaticAiSystem.handle_diplomacy_message`（另一套 mini 決策層）→ **受邀方除 accept/reject 外無自主權** |
+| `_evaluate_independent_strategy:1403` | 建國吞併 ATTACK；★**註解自陳「此分支現不觸；weak prey 已由 prosperity defer 收」** | **dormant（自陳）→ 待 probe 坐實**；若真死 → 該刪不該留（死枝會誤導後人） |
+
+### ★由此浮出的下一層問題（非 B1 本體、記此備查）
+`DiplomaticAiSystem.handle_diplomacy_message` 是**另一個自成一套的決策層**（accept/reject 外交提案）。B1 只盤 `try_set` 側；**「還有幾套 mini-scorer 平行於統一引擎」是更大的盤點**（uprising 是一例、diplomacy 是一例）→ 建議列為 **B1b**。
