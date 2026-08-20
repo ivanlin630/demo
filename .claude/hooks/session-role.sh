@@ -96,8 +96,25 @@ Monitor(command=\"source tools/telegram/config.local.sh && python tools/telegram
 ② watchdog v4 停滯分類器（不是計時器：長工作在跑=靜默;信給沒開的角色=🔴;出貨沒推下一站=🟡）:
 Monitor(command=\"bash .claude/hooks/watchdog.sh\", persistent=true, description=\"watchdog v4(停滯分類器)\")
 出站回用戶:Write UTF-8 檔 → \`bash tools/telegram/send.sh --file <檔>\`（中文走檔避 CP950）。**只在真需用戶裁時推**（WHAT fork/授權/QA 綠/喬不攏），role-to-role 不推。詳 \`tools/telegram/README.md\`。
-※三個 Monitor 腳本皆有單例守衛(heartbeat lock)→ **重複 arm 冪等安全**(第二實例自退),compact 後照 arm 免怕重複。"
+※arm 語意（v2，2026-08-21）：**同 session 重複 arm 冪等**（會印 `✅ 覆蓋仍在（已驗）`，前任不死）；**跨 session arm 會搶佔**（新的當家，前任印 `⛔ 讓位` 後自退）。compact 後照 arm，安全。"
   fi
+fi
+
+
+# ── ★append：peer 表 + arm 自測指示（2026-08-21；唯一六角色共用件，只 append 不改既有文字）──
+if [ -n "$ROLE_KEY" ]; then
+  _HOOKD="${_MAIN_REPO:-${CLAUDE_PROJECT_DIR:-.}}/.claude/hooks"
+  _PEERS=""
+  [ -f "$_HOOKD/peers.sh" ] && _PEERS="$(bash "$_HOOKD/peers.sh" 2>/dev/null)"
+  CTX="${CTX}
+
+★★arm 完必須看到下列其一，否則就是【沒 arm 成功】——不要自己把訊息解釋成「已有實例覆蓋」：
+  ✅ ARMED role=<你> pid=<n>（無前任 / 前任將自退 / 前任同 session 但已死）
+  ✅ 覆蓋仍在（同 session，watcher pid=X 存活，已驗）   ← 這句現在是可驗證的事實
+通則：**守衛不要輸出「需要被解讀的狀態」，要輸出「已經處置完的結果」**。
+
+現在誰在線（peers.sh 即時讀 lock 租約；ALIVE=watcher 在跑 / NO-WATCH=終端開著但 watcher 掉了 / DEAD=沒開）:
+${_PEERS:-（peers.sh 不可用）}"
 fi
 
 emit "$(json_str "$CTX")"

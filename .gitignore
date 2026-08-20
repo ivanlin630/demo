@@ -4,6 +4,14 @@
 # Local tools (executables, not source)
 tools/*
 !tools/orchestrator/
+# ★telegram bridge：程式碼納版控（同 .claude 的理由：改版要能 revert）；
+#   config.local.sh 含真 TG_TOKEN ⇒ 續 ignore，執行期產物(.tg_poll.lock/.tg_last_id)也 ignore。
+!tools/telegram/
+tools/telegram/*
+!tools/telegram/*.py
+!tools/telegram/*.sh
+!tools/telegram/README.md
+tools/telegram/config.local.sh
 
 # Claude Code local config
 # .claude：★harness 納入版控（2026-08-21）——改版前提「每步可獨立 revert」需要版控，
