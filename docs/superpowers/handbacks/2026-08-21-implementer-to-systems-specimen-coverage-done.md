@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: specimen-coverage-pos
 topic: specimen 覆蓋修 DONE — ★根因是 tap 抓到的（_merge_into 併不完就 detach 但不 erase），非猜；det 與 main 同 fp
 branch: feat/specimen-coverage-pos
