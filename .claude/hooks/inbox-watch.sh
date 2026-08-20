@@ -105,6 +105,24 @@ if [ -f "$SEEN_F" ]; then
   done < "$SEEN_F"
 fi
 
+# ── ★開場 priming（2026-08-21 恢復日實測補）───────────────────────────
+# 病：任何【批次改 mtime】的操作（git checkout/pull/stash）會讓剛 arm 的 watcher 把所有被碰到的
+#     to:我 舊信各吐一次——SEEN_PATH 是空的，而放寬過濾又把「啟動後動過」算進來。239 封信可以爆一串。
+# 解：arm 當下把「已存在且非 open」的信全部視為【已露過面】。語意上正確：
+#     ⑤ 那條洞針對的是【啟動後才到】的誤寫 consumed 信；arm 之前就存在的 consumed 信，
+#     本來就已由 SessionStart 注入／handback-inbox 每 turn 掃處理過了。
+while IFS= read -r _p; do [ -n "$_p" ] && SEEN_PATH["$_p"]=1; done < <(
+  shopt -s nullglob; _f=("$HANDBACK_DIR"/*.md)
+  [ "${#_f[@]}" -gt 0 ] && awk -v role="$ROLE_KEY" '
+    FNR<=10 {
+      low=tolower($0)
+      if (low ~ ("^to:[ \t]*" role "([ \t]|$)")) to[FILENAME]=1
+      if (low ~ "^status:[ \t]*open([ \t]|$)")   st[FILENAME]=1
+    }
+    END { for (f in to) if (!(f in st)) print f }
+  ' "${_f[@]}"
+)
+
 while true; do
   # ★讓位檢查：lock 不是我 → 有更新的 watcher 當家，本實例自退（孤兒自己清自己）
   cur="$(cut -f1 "$LOCK" 2>/dev/null)"
