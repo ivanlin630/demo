@@ -1075,7 +1075,46 @@ func _conquest_viable(state: WorldState, f, leader_team: TeamData, target_id: in
 
 # commander-v2 means-end 重構：意圖 predicate → 子需求現算(深度1) → 真 affordance 匹配 → 每令帶 driver。
 # 北極星：凡 named 意圖必有可解釋驅動（f.goal_drivers[goal]={intent,why,mode}）。
+# ★命令戳記誠實化（T1 戳記責任上移 + T2 覆蓋所有離開路徑）
+# 根：本函式每輪【先 clear goals+goal_drivers 再重發】→ _emit_goal 的「goal not in f.goals」永遠成立
+#   → 每次重發都像全新命令 → 每次蓋 directive_change_tick → 全體成員被喚醒。
+#   實測：純重申 88.0%、成員喚醒 92.1% 來自純重申。
+# ★形狀＝【薄外殼 + 內層重建】：外殼存快照 → 呼內層（內層可任意 early-return）→ 比對 → 蓋一次戳記。
+#   ★這樣比對必然覆蓋【所有離開路徑】，包含 leader_team==null 與【玩家 override】那條——
+#   後者今天完全不經 _emit_goal ⇒ 現況是「玩家下令、成員不被喚醒」，被「_emit_goal 無條件蓋」掩蓋著；
+#   外殼式比對順手把它修好（玩家 override 內容變 → 蓋戳記 → 成員當輪被喚醒）。
 func _update_goals(state: WorldState, f) -> void:
+	var _prev_goals: Array = f.goals.duplicate()
+	var _prev_drivers: Dictionary = f.goal_drivers.duplicate(true)
+	_rebuild_goals(state, f)
+	# ★T3 比對範圍＝語意欄（goals 集合 + goal_drivers 的 intent/why/mode）；不比 tick 類附帶欄。
+	# ★偽陰性（命令真變卻不喚醒）比偽陽性嚴重 → 不確定時判「變了」。
+	if _goals_changed(_prev_goals, _prev_drivers, f):
+		f.directive_change_tick = state.world.current_tick
+		if Probe.enabled: Probe.bump("directive.stamp")
+	elif Probe.enabled:
+		Probe.bump("directive.restate_no_stamp")   # 純重申：不蓋戳記＝成員不被喚醒（省下的正是 churn）
+
+# 語意比對：goals 集合（順序無關）+ 每個 goal 的 driver 三欄。
+static func _goals_changed(prev_goals: Array, prev_drivers: Dictionary, f) -> bool:
+	if prev_goals.size() != f.goals.size():
+		return true
+	for g in f.goals:
+		if not (g in prev_goals):
+			return true
+	if prev_drivers.size() != f.goal_drivers.size():
+		return true
+	for g in f.goal_drivers:
+		if not prev_drivers.has(g):
+			return true
+		var a: Dictionary = f.goal_drivers[g]
+		var b: Dictionary = prev_drivers[g]
+		if String(a.get("intent", "")) != String(b.get("intent", "")) 				or String(a.get("why", "")) != String(b.get("why", "")) 				or String(a.get("mode", "")) != String(b.get("mode", "")):
+			return true
+	return false
+
+# 內層：專心重建（可任意 early-return；戳記由上方外殼統一負責）
+func _rebuild_goals(state: WorldState, f) -> void:
 	f.goals.clear()
 	f.goal_drivers.clear()
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
@@ -1226,8 +1265,8 @@ func _emit_goal(state: WorldState, f, goal: String, intent_type: String, why: St
 	if goal not in f.goals:
 		f.goals.append(goal)
 	f.goal_drivers[goal] = {"intent": intent_type, "why": why, "mode": mode}
-	# ⑦ 統一重評 stamp（單一 choke point，涵蓋全 11 呼叫點）：faction 命令變化 → 成員 directive_fresh 即重評。
-	f.directive_change_tick = state.world.current_tick
+	# ★戳記責任已上移到 _update_goals 外殼（T1）：_emit_goal 是低階寫入，不該決定世界要不要重新思考。
+	# （原本在此無條件蓋 → 每輪清空重建都像新命令 → 88% 純重申也喚醒全體成員。）
 	if Probe.enabled: Probe.bump("intent.goal_emit")
 	# specimen tap：commander goal → capture intent（leader team 是 specimen 時）
 	SpecimenTracer.capture_intent(state, f.leader_team_id, intent_type, why, mode)
