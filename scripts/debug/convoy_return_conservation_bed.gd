@@ -96,14 +96,11 @@ func _observe(state: WorldState) -> void:
 			continue
 		var p: TeamData = state.teams.get(pid)
 		if p == null:
-			# ★measurer temp tap(2026-08-21,convoy-return-verify票③守恆逐筆對帳)：
-			# 消失前最後一次存活時snapshot(last_res)當守恆比對基準(merge_into同格瞬間資源已轉出,事後讀不到)
+			# 消失：這 tick 有 convoy.return → 歸建；否則滅團/其他移除
 			r["fate"] = "merged_home" if returned_this_tick > 0 else "erased"
 			r["end_tick"] = now
-			r["conserve_last_res"] = r.get("last_res", {})
 			if returned_this_tick > 0: returned_this_tick -= 1
 			continue
-		r["last_res"] = _snap(p)
 		if p.current_task != TeamData.TASK_CONVOY and r["left_tick"] == -1:
 			var xd: Dictionary = p.task_extra_data if p.task_extra_data is Dictionary else {}
 			r["left_tick"] = now
@@ -145,31 +142,6 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 			residual[f] = acc
 	lines.append("  下場分佈：%s" % str(fates))
 	lines.append("  ★殘留（未回母隊、還在 porter 身上）：%s" % str(residual))
-	# ★measurer temp tap(2026-08-21,convoy-return-verify票③守恆逐筆對帳)：
-	# 出發總量(dispatch) vs 已歸建(merged_home用消失前last snapshot) + 在途(still_convoy/ghost_alive用現持)
-	var ledger_dispatch: Dictionary = {}
-	var ledger_returned: Dictionary = {}
-	var ledger_inflight: Dictionary = {}
-	var per_porter_diff: Array = []
-	for pid2 in _rec:
-		var r2: Dictionary = _rec[pid2]
-		var d: Dictionary = r2["porter_at_dispatch"]
-		var f2: String = String(r2["fate"])
-		var alive2: TeamData = state.teams.get(pid2)
-		var cur: Dictionary = _snap(alive2) if alive2 != null else (r2.get("conserve_last_res", {}) as Dictionary)
-		var d_sum: float = 0.0; var c_sum: float = 0.0
-		for k2 in VAL_KEYS:
-			var dv: float = float(d.get(k2, 0)); var cv: float = float(cur.get(k2, 0))
-			d_sum += dv; c_sum += cv
-			ledger_dispatch[k2] = float(ledger_dispatch.get(k2, 0)) + dv
-			if f2 == "merged_home":
-				ledger_returned[k2] = float(ledger_returned.get(k2, 0)) + cv
-			elif alive2 != null:
-				ledger_inflight[k2] = float(ledger_inflight.get(k2, 0)) + cv
-		per_porter_diff.append("porter=%d fate=%s dispatch_sum=%.2f last/cur_sum=%.2f" % [pid2, f2, d_sum, c_sum])
-	lines.append("  ★★守恆帳(逐筆基準)：出發總量=%s ｜已歸建(消失前last snapshot)=%s ｜在途(現持)=%s" % [
-		str(ledger_dispatch), str(ledger_returned), str(ledger_inflight)])
-	lines.append("  ★守恆逐筆(dispatch_sum應大致等於last/cur_sum,差額=沿途已delivery/消耗,非洩漏)：\n    " + "\n    ".join(per_porter_diff))
 	# 逐隻明細（少量、值得逐隻看）
 	for pid in _rec:
 		var r: Dictionary = _rec[pid]

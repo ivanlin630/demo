@@ -199,6 +199,7 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 | 憲法 site-freeze（禁新增引擎外 task 指派／god-view） | 🔒 | `constitution_gate.gd`（merge 前跑，`current ⊆ baseline`） |
 | implementer 收尾（consume／回主目錄／提醒重 arm） | 🔒 | `implementer-cleanup.sh`（Stop hook，`decision:block`） |
 | 母體地板（普查塌到 0 不得讀成綠） | 🔒 | `expect-min-gate.sh`（exit 1） |
+| **空 merge／改動被丟**（git 說已合併但 code 不在樹上） | 🔒 | `merge-verify.sh`（exit 1）——**每次 merge 後跑**。血證 `4bdce7c1` |
 | 量測主張保鮮期（R6） | 🔒 | `stale-claims.sh`（exit 1／2）**但只綁新寫的** |
 | 交接縫產物齊全（P9） | 🔔→🔒 | `seam-gate.sh` **現為 SOFT（只印不擋）**，baseline 穩定後轉 HARD |
 | 信箱主動觸發（別人寫信會叫醒你） | 🔔 | `inbox-watch.sh`（Monitor 事件） |
