@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: monotonic-team-id
 tier: full
-status: open
+status: consumed
 topic: "[派工·team_id 永不重用(R² v2 CLEAN)·spec=docs/superpowers/specs/2026-08-21-monotonic-team-id-HOW.md·★這刀的重點【不是那個計數器,是七處收斂 + 六項稽核】:全站 7 份獨立 _next_team_id 全部同款 max(現存id)+1(R² 親 grep 抓到、我獨立確認正好 7 份每檔 1 份),收斂成 WorldState.consume_next_team_id() 並【刪掉七份】——不要改成七處各自讀同一計數器(那只是把 bug 從『重用 id』換成『七個物理上分開的計數概念』)·★§3.0 是前置:grep -c func _next_team_id 必須=0,否則下面六項稽核做完也驗不出核心宣稱·★六項稽核【『沒有』也要附窮盡證據】(禁 head 截斷):id 連續/上界假設、max(id) 語意依賴、★存檔載入(載入後 next_team_id 必須 > 檔內最大 id)、負區段(next_beast_id)相撞、fp intended-change·★fp 會變=intended-change,要在帳上明寫別讓人讀成迴歸·★落地後把 expect-min-gate 的 TEAM_ID_GEN_MAX 從 7 收緊到 0(我先凍結在 7 防第 8 份,你落地後改)·★這刀落地前,所有 specimen/床/QA 讀法裡的『同一 id』都只能讀成『同一個號碼』"
 ---
 

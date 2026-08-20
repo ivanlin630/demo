@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "porter_22結果：延長窗到150天後純timing artifact——它其實在tick=18100(day75.4,75天窗cutoff後僅100 ticks)就正常merged_home了，不是卡住；★沒能拿到T3絕對上限的真樣本(什麼都沒觸發)；★但完整6趟trip最終確認=5 merged_home/1 merged_into_stranger，跟QA原始『6次merge5次回真parent』精確吻合"
 ---
 
