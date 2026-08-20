@@ -893,3 +893,42 @@ need-quantity 收斂成單一思考驅動 oracle。
 **★12mo 期末考（誠實：metric 升健康未升=必要非充分）**：佔據率升 80% 高原**但主靠 founding 非 settle-into-existing**（convert_via_settle 全年僅 1）；★**residents 反而全世界最餓**（wanderer 才吃飽=「佔據↑=世界好」被推翻）；深層 dysfunction 長年：pop -85%、established 全年 0、combat 死全年 0、factions 8→2、守成心態、終局崩。WHY 待 QA specimen 二輪。
 
 **掛用戶**：B6 小團 pool 地板 / vitals 生存預算 invariant（spec 待核）/ closed-account memory-rule / checkpoint-resume 基建 / LOD arc 排序。
+
+
+---
+
+## 2026-08-21：harness 改版（0–9＋O1/O2/P7/P9 SOFT）＋ 恢復後第一批
+
+### harness（全部 landed，merge 前閘全綠）
+**止血三項**：`watchdog` v4 停滯**分類器**（不再問「有沒有東西在動」＝量測跑半天被誤判；改問「**有沒有人在等一個不會來的東西**」）／
+`COMMIT-NO-LETTER`（出貨沒推下一站）／**R6 量測主張保鮮期**（`stale-claims.sh`，接 `09` 開考閘）。
+**預防**：`inbox-watch` v2（**arm 搶佔式**、`session_id` 綁定、`SEEN` 落地不重吐、每 turn 失聰閘 warn-only／fail-open）／
+`peers.sh` 角色註冊表／`session-role` peer 表＋ARMED 自測／`tg_poll` 搶佔。
+**選配**：O1 `status/*.status.md` **停更**（觀察至 2026-08-28 再刪）／O2 `expect-min-gate.sh` **母體地板**。
+**P7 三態誠實表**（`00_roles`）：4 🔒 enforced／7 🔔 advisory／9 📜 declared —— **標 📜 的價值在於不再假裝它有守**。
+**P9 `seam-gate.sh` SOFT 上線**：`slice:` 欄＝唯一真相來源、`tier` 由 systems 派工時定（**做的人不得自選**）、**兩檔都不砍 review**。
+★**裁定**：`plans/` 停用，**HOW spec 是唯一產物**（52 份全在 `_archive`、最新 2026-07-13，而 `session-role` 至今指向那個空目錄）。
+
+### 順手修掉的三個地基問題
+1. **harness 原本 0 個檔在版控**（`.claude/` 整包 ignore）⇒「每步可獨立 revert」的前提不成立。已納管。
+2. **`json_str` 對雙引號零跳脫** ⇒ 注入內容含 `"` 就吐**非法 JSON**；blueprint 的 SessionStart context 本來就含引號 ⇒ **那段一直是壞的**。
+3. **空 merge**（`4bdce7c1`）：branch 記成已合併但改動被丟，**且 git 從此說 nothing to do**。做了 `merge-verify.sh`（逐檔比對；掃 30 個 merge 零誤報）。
+
+### slice
+- **specimen 血緣封閉 MERGED**（`e7c61ee1`，含補回被空 merge 丟掉的內容）：
+  母隊入選 ⇒ **執行期派生的子隊自動入選**；`_snapshot` 補 `task`/`parent_team_id`/`convoy_phase`
+  （**第二個洞：原本不記「這隊在執行什麼」，QA 拿到也認不出主角**）。porter **0 → 264 entries**、det fp ＝ main。
+- **convoy RETURN 收尾**（`371d6e94`，**待 QA**）：**27.9 日 → 9.2/1.3 日**、吞吐 ×3、④佔比 90%→75%。
+  ★**帳目誠實**：`persist.hold` 對 CONVOY **可歸因 ＝ 0** ⇒ **T1 那一行在 live 從未 fire**，改善 **100% 來自 merge_queue 根因修**；
+  gate 8 記為「**合成床證據、live 未觸發**」。歸建樣本 **n=2 低信心**（延長窗無用，**瓶頸是 dispatch 本身稀有**）。
+  `rehome` 7 次全集中單趟 ⇒ **依我先寫死的判準開診斷票**。
+- **失敗反饋 Phase 0**（`167d6922`，**待驗**）：反射弧＋`OPTION_FAIL_KEY` 接線表落地。
+  ★**gate 6 並排立刻兌現**：機制在動（169 記錄／64 折價／`買糧` 被選 −19%）但**症狀 `order.abandoned` 290→290 沒動**
+  —— **折價作用在另一個地方**（掛單是機械層、不經 util），**GATE-B 填單率 0.8% 完全沒被碰到**。
+
+### ★今日最值得記的結構教訓（全升 `invariants`）
+1. **承諾態只能經仲裁移轉**：直接寫欄位 ＝ 承諾靜默消失。診斷序 ＝ **先看 try/hold tap 是不是 0，再談門檻**。
+2. **specimen 選樣必須血緣封閉**；**檔案存在 ≠ 內容涵蓋**；**驗收關鍵字要挑語料裡真的存在的**（我寫死 `grep convoy` 而任務名是中文「運輸」＝自造假陰性）。
+3. ★★**寫 spec 掛上決策層前，必先驗那個動作真的經過決策層** —— **同日兩次同形狀**（`release()` 繞過 `try_set`／`post_order` 不經 util）。
+   **判準修正：前提句型是「X 會經過 Y」而我沒當場貼出 Y 的呼叫點，就送 R①。**
+   連帶：**A1「五處接線」估算是條件式的**，每族要先查動作經不經過 util（已主動報 blueprint 別拿它排長桿）。
