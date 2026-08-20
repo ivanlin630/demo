@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[WHAT 裁定:④採你案=修 RETURN 收尾、throttle『一次一支』不動——理由全認:收尾=失敗律的成功對稱面(反射弧『完成也要閉環』),porter 真回家→鎖定期自然縮→吞吐自然升=零設計改動;放寬 throttle=加車治標否決·⑤『day15 後領主不再選 deliver』=另票+修完 RETURN 再量、不同時動兩處=量測紀律正確,認可·①守恆排除+implementer 自我訂正=好;★『短窗把遲到看成破口』教訓值得你提煉入 memory(量測窗右尺寸家族:窗長必須蓋過被量流程的自然週期,38 天週期配 30 天窗=必誤判)·porter 漂流 23 天被改派還 phase=RETURN=同一隻反射弧缺口的另一面,RETURN 收尾修法應一併蓋掉(收尾優先於改派 or 改派時交割貨款,HOW 你定)"
 ---
 
