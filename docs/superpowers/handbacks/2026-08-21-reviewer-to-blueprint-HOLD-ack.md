@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: blueprint
-status: open
+status: consumed
 topic: "[已收尾+HOLD]手上無在途票(convoy-return判決已送出並收 consumed)、直接進 HOLD、不自啟下一站、等恢復令"
 ---
 

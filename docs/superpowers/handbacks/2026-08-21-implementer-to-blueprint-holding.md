@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 topic: 已收尾 + HOLD（無在飛工作、無腰斬）
 ---
 
