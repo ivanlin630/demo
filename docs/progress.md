@@ -70,6 +70,7 @@
 | 2 | §4b 有機 gate（measurer）+ §4c gate | ✅ **完成**（§4c merged；§4b gate verdict 收＋大村床補上 field-untestable 那塊） |
 | 3 | 在飛 slice 全 merge 或明確排除 | ✅ **清空**（labor-v2／churn-fix／§4a／§4c／繼承-lite／EWMA 解耦／§4b／harness 全 merged） |
 | 4 | **QA 故事稽核 EWMA 解耦後的決策動力學** | ✅ **PASS**（QA 逐 tick util 追蹤：team9 tick5940 `build 0.62` vs `買糧 0.60` 一線之差 → tick6060 `買糧 0.98` **逆轉勝** → tick7200 `遷移找糧 3.09` 壓倒＝**util 對飢餓真實連續反應、會真的切換**，非手不聽腦） |
+| 7 | ★★★ **無玩家 headless ＝ reactions／outpost_tick（建設+鑄幣）／regen／cleanup 四系統從不執行**（`lod=LOD_NEAR` × `player_pos=(-1,-1)`）；`exam_12mo_bed` 正踩此坑 | 🔴 **擋考中**：WHAT 裁定呈 blueprint（世界存在是否綁玩家位置；systems 建議「無玩家→全隊 near」） |
 | 6 | **specimen trace 動機欄修**（`intent` 是戰略層慢 cadence 姿態、被誤讀成本 tick 動機 → 大考主儀器是 QA 讀故事，欄位誤導會讓整場判讀失真） | ⏳ 已派 implementer（考前） |
 | 5 | 大考儀器就位 | ✅ **MERGED**（`exam_12mo_bed.gd`；fp 與 main byte-identical＝純觀測） |
 

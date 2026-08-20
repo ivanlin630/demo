@@ -119,6 +119,18 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 🌍★★★ 無玩家 headless ＝ 四個世界系統從不執行（2026-08-20 measurer 實證 + systems 親驗 code；**擋考級**）
+**機制**：`sim_runner` SYSTEMS registry 中 **`reactions`／`cleanup`／`outpost_tick`／`regen` 標 `lod=LOD_NEAR`**；near 判定＝`_get_near_teams:508` `_hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS(3)`。headless 床慣傳 `player_pos=(-1,-1)` → **全隊恆 far** → `_run_systems:171` 直接 `continue` → 四系統整段跳過。
+**各自 body（單一 call site、已窮盡 grep）**：
+- `reactions` ＝ `ReactionSystem.evaluate_all`：**生育 `P5_breed`**／逃／暴動／叛／怠工／士氣／`goal_alignment`。
+- `outpost_tick` ＝ `OutpostSystem.tick_all`：**`_tick_construction`（建設進度）+ `_tick_mint`（鑄幣）+ `produce_stable_day`**。
+- `regen` ＝ `ResourceSystem.regenerate_tiles`（tile 資源再生）。
+- `cleanup` ＝ npc goal cleanup。
+**實證**（measurer、peaceful seed1337 25 天）：`breedgate.calls=0`（全期全隊零呼叫）、11/11 隊 `minor_population=0`、零 `[PopMgmt]`。
+**★★大考中彈**：`exam_12mo_bed.gd:55/64` 用 `no_player=(-1,-1)` 且**未開 `force_full_hd`** → 照現況開考＝量一個**建設不動、不鑄幣、不再生、不生育**的世界。**已暫停開考**，WHAT 裁定（世界存在是否綁玩家位置）呈 blueprint（systems 建議：無玩家→全隊視為 near）。
+**★回頭影響（需逐床 audit，未逐一驗證前不下結論）**：全 **243 個 debug 床僅 20 個**用 `force_full_hd`。已知受影響候選：本 session 的 §4b organic gate／popcap 快照／breed 分解；更早的 **founding `complete_build=0`「buy-preempts-founding」診斷**（若建設本就不前進，該歸因可能是 confound）。**`mint_level` 全世界 0%** 這個大考監看項現有更平凡的解釋。
+**★注意反例**：`force_full_hd=true` 的床（如 perf①③ profiling）**不受影響**（`_get_near_teams:501-502` 直接回全隊）；且 `force_full_hd` **不是中性開關**——它同時拿掉 far 降頻＝移速/思考恢復全速（`sim_runner:109` 自警「勿在正式跑開…需配 gen 重校」）。
+
 ### 🔧 bed 工具坑：`OS.set_environment` 同進程讀回不可靠（2026-08-20 measurer 實證）
 量測 bed 若用 `OS.set_environment(...)` + 下游 `XXX.setup_from_env()` 的組合在**同一進程內**傳參 → 實測 **specimen 捕獲 0 決策**（Godot 對同進程 set 後立即讀回不保證可見）。
 **改法**：直接指定目標欄位（該例＝`state.specimen_team_ids`），不要繞 env。**env 只用於「外部 launcher → 進程啟動時」傳參**，不要當進程內部的參數傳遞管道。
