@@ -29,3 +29,17 @@ date: 2026-08-20 ／ owner: systems ／ 溯源：大考 warring leg day70 凍死
 2. **有玩家仍凍**（不得誤傷）：`player_id != -1` 的同款情境 → `game_over=true`、`sim_runner` 回 `"game_over"`（現行行為不變）。
 3. exam bed 短窗 smoke：day 欄與真實 tick **一致**（不再出現 loop-counter 假天數）。
 4. det×3、constitution ≤75、headless 0-new、**fp intended-change**（無玩家長跑不再提早凍 → 世界更長、必然不同）。
+
+
+## §5 R²delta（判決 CLEAN、2026-08-20）
+**R² 親驗補強（無需改設計）**：
+- `game_over = true` 全 `scripts/` **只命中兩處 production**（＋2 處 `headless_test` fixture，故意測凍結、非生產路徑）→ 我「已窮盡兩處」的宣稱**成立、零遺漏**。
+- ★**`choose_heir` 那條第二凍結路（`sim_runner:73-74`）在 `player_id==-1` 時結構性不可達**：三個呼叫源全部自帶 gate（`event_system:39` 明確 `player_id != -1 and team == player_team`；`encounter_system:1376` 開頭 `if state.player_id == -1 or state.game_over: return`；`player_command_system:924` 屬 pending 回應下游、非入口）→ **不是我漏掉，是它本來就安全**；T1 兩處守衛屬 defense-in-depth。
+- ★**`player_id` 單向性親驗無反例**：全 `scripts/simulation/` 的 8 處 `player_id =` 賦值**沒有任何一處寫回 `-1`** → 真玩家一旦設定不會被意外清空；唯一會變回 -1 的是 T2 那處（故意的）。
+- ★**既有慣例佐證單一權威設計選對了**：codebase 大量「玩家豁免自動決策」的 gate 本來就寫成複合條件 `and state.player_id != -1`（如 `faction_ai:4250`、§4a 紮根）→ **T2 清 `player_id` 這一個動作會一次性讓所有豁免 gate 自動失效**、原 player team 自動變回受 AI 決策，**不需逐一改 gate**。
+
+### ★T4（採納 R② 加固建議、但**改置放位置**）：偵測「忘了 T2」
+R② 指出 T1 只擋**凍結**，擋不住**忘了 T2 → 那支 player team 因既有豁免 gate 整跑呆滯**（世界存在性受損的較輕版：一隊被特權凍結）。
+- **R² 原建議**：觀察者床 setup 收尾斷言 `player_id == -1`。
+- **★我改置放位置**：**放在床裡的斷言，依賴的正是它要抓的那份紀律**（床沒呼 T2，多半也不會呼那個斷言）。改成 **production 側一次性守衛**：`sim_runner.advance_tick` 中，若 **`player_pos == Vector2i(-1,-1)`（呼叫端宣稱無玩家）卻 `state.player_id != -1`（state 說有玩家）** → **`print` 一次** `[ObserverGuard] 呼叫端無玩家座標但 state.player_id=%d 未清：該隊將被既有玩家豁免 gate 排除在 AI 決策外（觀察者跑法請清 player_id）`（一次性旗標、不每 tick 洗版）。
+- **理由**：這是**兩個來源互相矛盾**的結構性偵測（caller 說沒玩家、state 說有），不靠任何人記得呼什麼；成本一行 print。
