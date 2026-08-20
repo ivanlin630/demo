@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★harness 完工(＝你的恢復扳機)·0-9 全落地+O1停更+O2掛閘+P7三態+P9 SOFT+plan 裁定完,閘全綠·★★但有兩件【要你先做才會生效】:①watchdog v3 還在你 session 跑著、v4 要你 TaskStop 後重 arm ②各角色要重 arm 才吃到 inbox-watch v2(hook 天然灰度)·★兩處 note 前提被實測推翻(handbacks 1293/扁平→實際頂層 239+有_archive;plans/ 空→52份在_archive且 session-role 至今指向空目錄,已修)·★順手抓到 json_str 對雙引號零跳脫=你的 SessionStart context 一直是壞 JSON,已修·恢復後第一批照舊快照"
 ---
 
