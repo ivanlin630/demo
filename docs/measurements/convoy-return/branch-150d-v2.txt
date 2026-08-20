@@ -3,7 +3,9 @@
   convoy.dispatch_attempt                        = 12
   convoy.drop.inflight_convoy                    = 9
   convoy.rehome                                  = 7
+  convoy.rehome.porter_12                        = 7
   persist.hold                                   = 39
+  persist.hold.建設                                = 39
   下場分佈：{ "merged_home": 2, "ghost_alive": 1 }
   ★殘留（未回母隊、還在 porter 身上）：{ "ghost_alive": { "coin": 53.6248448864447, "food": 14.1458333333333, "material": 0.00274752736645, "goods": 15 } }
   ★★守恆帳(逐筆基準)：出發總量={ "coin": 630.638328400033, "food": 30.6, "material": 173, "goods": 10, "gem": 0, "tools": 18.2 } ｜已歸建(消失前last snapshot)={ "coin": 362.101166420733, "food": 22.6666666666667, "material": 43.0170540131487, "goods": 1, "gem": 0, "tools": 5 } ｜在途(現持)={ "coin": 53.6248448864447, "food": 14.1458333333333, "material": 0.00274752736645, "goods": 15, "gem": 0, "tools": 0 }

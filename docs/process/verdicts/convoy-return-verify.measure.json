@@ -1,0 +1,67 @@
+{
+  "slice": "convoy-return-conservation",
+  "ticket": "convoy RETURN收尾獨立驗證(maker側數字已有,systems要獨立數字)",
+  "measured_at_head": "7810bf06-dirty",
+  "measured_date": "2026-08-21",
+  "note_dirty": "-dirty來自本輪3個L3 temp tap(faction_ai_system.gd/task_arbiter.gd/convoy_return_conservation_bed.gd)，純觀測零行為變化，未commit(temp)",
+
+  "method": "同床(convoy_return_conservation_bed.gd)同seed(1337)同config(peaceful_economy)跑main baseline(.worktrees/convoy-baseline@1b98d4b3)vs branch(.worktrees/convoy-return-conservation@7810bf06)消confound。窗口150天(比maker原75天延長2倍,見樣本數討論)。",
+
+  "repro": {
+    "baseline": "cd A:\\GDS\\demo\\.worktrees\\convoy-baseline; $env:GODOT_TIMEOUT='1800';$env:PERF_SEED='1337';$env:LW_CONFIG='peaceful_economy';$env:ADHOC_DAYS='150';$env:PERF_OUT='<path>'; ..\\..\\tools\\godot.ps1 --headless --script scripts/debug/convoy_return_conservation_bed.gd",
+    "branch": "cd A:\\GDS\\demo\\.worktrees\\convoy-return-conservation; (同env,PERF_SEED=1337,ADHOC_DAYS=150); ..\\..\\tools\\godot.ps1 --headless --script scripts/debug/convoy_return_conservation_bed.gd　（★需先套用本輪3個temp tap才有rehome per-porter/persist.hold task-tagged輸出，見下方tap清單）"
+  },
+
+  "①歸建延遲": {
+    "baseline": "27.9日(1隻歸建者,150天窗全程只此1隻,dispatch全期恆=1)",
+    "branch": "9.2日(porter12) / 1.3日(porter20)，2隻歸建者",
+    "判定": "★獨立確認maker主張成立"
+  },
+
+  "②吞吐": {
+    "baseline": "convoy.dispatch=1(150天窗全程恆定,無第2次)",
+    "branch": "convoy.dispatch=3(day85即達3,到day150仍恆定=3,無第4次)",
+    "判定": "★獨立確認maker主張成立(1→3)"
+  },
+
+  "④佔比": {
+    "baseline": "convoy.drop.inflight_convoy=9 / convoy.dispatch_attempt=10 = 90.0%",
+    "branch": "convoy.drop.inflight_convoy=9 / convoy.dispatch_attempt=12 = 75.0%",
+    "判定": "★獨立確認maker主張成立(90%→75%,分母皆用常設tap convoy.dispatch_attempt)"
+  },
+
+  "③守恆(逐筆對帳)": {
+    "porter12(merged_home,9.2日)": "dispatch_sum=219.33 → last_snapshot_sum=269.35(增加，對應沿途貿易生coin，非洩漏)",
+    "porter19(left_convoy,150天窗結束仍卡住未歸建)": "dispatch_sum=187.33 → current_sum=82.77(減少，對應沿途已delivery/消耗)",
+    "porter20(merged_home,1.3日)": "dispatch_sum=455.77 → last_snapshot_sum=164.44(大幅減少，對應大部分已delivery)",
+    "判定": "★無洩漏跡象——增減皆可用『沿途貿易/delivery』解釋，非資源憑空消失。★scope限制：本帳只分『已歸建』vs『在途』兩桶，未獨立核對『delivery到目的地』量(convoy.deliver_settled=3=dispatch=3已對齊，交叉一致)。"
+  },
+
+  "★①convoy.rehome每趟分布(systems特別要的數字①)": {
+    "raw": "convoy.rehome總數=7，全部發生在porter_12單一趟(convoy.rehome.porter_12=7)，porter_19/porter_20該欄位不存在(=0次)",
+    "★★判定(套用systems預先寫死的判準)": "porter_12單趟rehome=7次，★★超過systems預寫的『rehome>=5→追逐病態』門檻——3隻porter裡只有1隻經歷rehome，但那1隻在單趟裡被連續rehome 7次才在第9.2天歸建。這不是『多數趟次rehome<=2』的正常自適應樣貌，是集中在單一趟次的高頻追逐。★依你自己預寫的判準，這應該觸發『開下一輪裁定票』分支，非『不開票』分支。",
+    "誠實局限": "樣本僅3趟convoy(dispatch=3)，rehome行為只在1趟裡觀察到，無法排除是這1趟母隊移動特別頻繁的個案，非系統性追逐病態——但你的判準本身是寫死的『出現≥5的趟次即觸發』，這裡確實出現了。"
+  },
+
+  "★②persist.hold對CONVOY的可歸因數(systems特別要的數字②)": {
+    "raw": "persist.hold總數=39，全部標記為persist.hold.建設=39，★無persist.hold.CONVOY或任何CONVOY相關task tag出現過（0次）",
+    "★★重大更正implementer原估計": "implementer原估『CONVOY約6』（從『4→10全task共用計數』反推），★本輪用task-tagged乾淨tap直接測得CONVOY可歸因persist.hold=0，非約6。150天窗口內，T1的『PROGRESSIVE_HOLD_TASKS加TASK_CONVOY』這個修法，在本次量測窗裡從未真正攔下任何一次搶班——所有persist.hold活動(39次)都來自建設(construction)task。",
+    "可能解讀(不下定論,交你判)": "(a)T1修法本身沒問題但這個窗口/seed剛好沒有CONVOY task被嘗試搶班的情境(取樣運氣)(b)maker根因修的『merge_queue改rehome不release』路徑本身已經在T1的persist.hold檢查之前/之外攔截了問題，導致persist.hold這個特定gate在CONVOY身上根本沒機會被觸發(即『真正解決問題的是rehome機制，非T1本身，T1可能是備而不用的安全網』)——若是後者，implementer報的『live 4→10』數字裡的CONVOY份額需要重新檢視來源。"
+  },
+
+  "★③樣本數與信心(systems特別要的③)": {
+    "merged_home歸建者樣本數": "n=2（porter12、porter20），★延長窗口75天→150天(2倍)後樣本數【沒有增加】——75天窗時已是這2隻，150天窗仍是這2隻+1隻始終卡在left_convoy未歸建。",
+    "★★重要發現": "延長觀察窗無法增加樣本，因為瓶頸不是『觀察時間不夠長』，是『dispatch本身極稀有』——150天全程只發生3次convoy dispatch(day85前3次全部發生，day85-150整整65天無新dispatch)。要提高樣本數需要【多seed】而非【單一seed更長窗】，這是不同量級的量測投入，交你判值不值得。",
+    "信心判定": "n=2對『9.2日/1.3日』這組數字維持低信心——兩點對比雖然乾淨(跟baseline 27.9日方向一致、數量級差3-20倍)，但無法排除seed特定性。"
+  },
+
+  "landed_paths": {
+    "baseline_150d": "docs/measurements/convoy-return/baseline-150d.txt",
+    "branch_150d_v1_no_tap": "docs/measurements/convoy-return/branch-150d.txt(第一版,無per-porter/task-tag breakdown)",
+    "branch_150d_v2_full": "docs/measurements/convoy-return/branch-150d-v2.txt(★正式引用版,含①②數字)"
+  },
+
+  "specimen": "★本輪(v2)未產specimen(systems 2026-08-21補充信：SpecimenDumpHelper採樣id在setup當下凍結,porter子隊執行期才生成=採不到,implementer插隊修血緣封閉中)。第一版branch-150d.specimen.jsonl已產但預期同樣受此bug影響未驗證。等implementer修完通知再補跑specimen+送QA故事稽核。",
+
+  "cleanup": "3個L3 temp tap(faction_ai_system.gd:815附近+task_arbiter.gd:75附近+convoy_return_conservation_bed.gd 3處bed-side守恆帳計算)僅存在於worktree(.worktrees/convoy-return-conservation)，未commit，皆純觀測零行為變化，等你確認後revert(git checkout --或直接worktree不merge任何temp tap進main)。"
+}
