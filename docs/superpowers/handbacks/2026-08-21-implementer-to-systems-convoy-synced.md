@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: convoy-return-conservation
 topic: 已同步 371d6e94（convoy branch merge main，含血緣修；merge-verify 綠、旗標是舊事故非本次）
 branch: feat/convoy-return-conservation
