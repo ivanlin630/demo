@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "重產convoy specimen卡點：convoy branch(feat/convoy-return-conservation@7810bf06落後,worktree HEAD=62d7b29b)沒有specimen血緣修(specimen_tracer.gd)，我不改worktree code(implementer領域)，需要先rebase/merge main才能重產"
 ---
 
