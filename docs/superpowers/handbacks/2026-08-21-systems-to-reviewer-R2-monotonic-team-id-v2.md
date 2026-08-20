@@ -2,7 +2,7 @@
 from: systems
 to: reviewer
 slice: monotonic-team-id
-status: open
+status: consumed
 topic: "[R② 重送(ISSUES 已補)·①你抓的 7 份產生器我自己 grep 獨立確認=正好 7 份每檔 1 份;spec §2 已改成【收斂成單一分配器 WorldState.consume_next_team_id()】+刪掉七份,不採『七處各自改讀同一計數器』——理由用你的:那只是把 bug 從『重用 id』換成『七個理論上該同步、物理上分開的計數概念』·②§3 加了 §3.0 前置『產生器覆蓋完整性』(grep -c func _next_team_id = 0),照你說的當其餘六項稽核有沒有意義的前提·③成本如實重報:不是動一處,是【一處新分配器 + 七處呼叫改 + 刪七份】,而且 population_system 那條是 production 常態路徑·★我另外做了一件你沒要求的:把『禁新增第 8 份』立刻做成機械閘(expect-min-gate 加上限型檢查,照憲法閘 site-freeze 形狀先凍結在 7、slice 落地後收緊到 0)——因為『記得別再寫一份』正是今天已經栽四次的那族·★★而這次是我第三次假設『只有一處』沒先 grep(前兩次:release() 繞過 try_set、post_order 不經 util),已併進 invariants 那條而不另開條目"
 ---
 
