@@ -11,7 +11,9 @@ var _npc_ai: NpcAiSystem
 func _init() -> void:
 	_npc_ai = NpcAiSystem.new()
 
-func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) -> void:
+# ★trials（LOD 紅線修）：far pass 每次呼叫代表 trials 個 near 窗（cadence/NEAR_CADENCE=10）。
+# 只有 breed 用得到（唯一 randf 處）；其餘反應是決定性 _score_*+argmax，跑一次語意即正確。
+func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, trials: int = 1) -> void:
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
 		if team == null:
@@ -32,7 +34,7 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 				if skill_sys != null:
 					skill_sys.on_reaction(person, reaction)
 			# 生命事件（獨立於行動反應，可並行）
-			for ev in _evaluate_life_events(state, person, team):
+			for ev in _evaluate_life_events(state, person, team, trials):
 				_apply_life_event(state, person, team, ev)
 			match reaction:
 				"P2_produce": morale_acc += 1.0; morale_n += 1
@@ -188,7 +190,7 @@ func _breed_balance(team: TeamData, breeder_sex: String = "") -> float:
 	return minf(m, f) / maxf((m + f) / 2.0, 1.0)
 
 # 生命事件層（與行動反應並行，winner-take-all 不適用）
-func _evaluate_life_events(state: WorldState, p: PersonData, t: TeamData) -> Array:
+func _evaluate_life_events(state: WorldState, p: PersonData, t: TeamData, trials: int = 1) -> Array:
 	var events: Array = []
 	var safe: bool = float(p.needs.get("safety", 1.0)) > 0.7
 	var fed: bool = float(p.needs.get("food", 1.0)) > 0.7
@@ -201,9 +203,14 @@ func _evaluate_life_events(state: WorldState, p: PersonData, t: TeamData) -> Arr
 		if balance <= 0.0:
 			return events
 		var chance: float = (BREED_BASE_CHANCE + float(p.skills.get("醫療", 0.0)) * 0.1) * balance
-		if randf() < chance:
-			events.append("P5_breed")
-			if Probe.enabled: Probe.bump("reaction.breed")
+		# ★真·多次試驗（禁用單抽 1-(1-p)^n：那會結構性封頂每窗最多 1 次＝系統性低估）。
+		# ★團級 cap 逐次檢查（迴圈內），否則 far pass 會突破 near 端本來就會撞到的上限。
+		for _i in range(maxi(trials, 1)):
+			if t.minor_population + events.size() >= cap:
+				break
+			if randf() < chance:
+				events.append("P5_breed")
+				if Probe.enabled: Probe.bump("reaction.breed")
 	return events
 
 func _apply_life_event(_state: WorldState, _person: PersonData, team: TeamData, ev: String) -> void:

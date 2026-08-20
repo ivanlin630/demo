@@ -153,8 +153,11 @@ static var SYSTEMS: Array = [
 	{"name": "info_dispatch",    "fn": "_step6b2_info_dispatch",    "lod": LOD_BOTH, "shape": "teams",         "tl": "near.faction_ai"},
 	{"name": "training",         "fn": "_step6f_training",          "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
 	{"name": "strategic_ai",     "fn": "_step6e_strategic_ai",      "lod": LOD_BOTH, "shape": "state",         "tl": "near.strategic_ai"},
-	{"name": "reactions",        "fn": "_step7_person_reactions",   "lod": LOD_NEAR, "shape": "teams",         "tl": ""},
-	{"name": "cleanup",          "fn": "_step7b_npc_goal_cleanup",  "lod": LOD_NEAR, "shape": "teams",         "tl": "near.reactions"},
+	# ★LOD 紅線修：個體反應層不再綁玩家位置（原 LOD_NEAR + near 判定=距 player_pos<=3 →
+	# headless 傳 (-1,-1) 使全隊皆 far ⇒ 無玩家＝全世界零個體反應；有玩家＝遠隊零個體反應）。
+	# 改 LOD_BOTH；reactions 走 teams_cadence 拿 cadence → far pass 用 trials 補回被跳過的窗次。
+	{"name": "reactions",        "fn": "_step7_person_reactions",   "lod": LOD_BOTH, "shape": "teams_cadence", "tl": ""},
+	{"name": "cleanup",          "fn": "_step7b_npc_goal_cleanup",  "lod": LOD_BOTH, "shape": "teams",         "tl": "near.reactions"},
 	{"name": "events",           "fn": "_step8_generate_events",    "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
 	{"name": "emit",             "fn": "_step9_emit_messages",      "lod": LOD_BOTH, "shape": "state",         "tl": "near.events_emit"},
 ]
@@ -474,8 +477,10 @@ func _step6e_strategic_ai(state: WorldState) -> void:
 	for fid in state.factions:
 		_strategic_ai_system.tick(state, state.factions[fid])
 
-func _step7_person_reactions(state: WorldState, team_ids: Array) -> void:
-	_reaction_system.evaluate_all(state, team_ids, _skill_system)
+func _step7_person_reactions(state: WorldState, team_ids: Array, cadence: int) -> void:
+	# trials = cadence / NEAR_CADENCE（near pass=1、far pass=10）→ far 隊每次呼叫代表 10 個 near 窗，
+	# ★只在 breed 那條真·多次試驗（ReactionSystem 全檔唯一 randf；其餘反應決定性 argmax 零 RNG）。
+	_reaction_system.evaluate_all(state, team_ids, _skill_system, maxi(cadence / NEAR_CADENCE, 1))
 
 func _step7b_npc_goal_cleanup(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
