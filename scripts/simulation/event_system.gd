@@ -29,6 +29,7 @@ func process_events(state: WorldState, team_ids: Array) -> Array:
 
 # 由外部呼叫（Leader 死亡/失效後繼承）。繼承邏輯單一 owner。
 func on_leader_death(state: WorldState, team: TeamData) -> bool:
+	WorldEvents.emit(state, "leader_death", [team.team_id])   # ★T0-A1 ②
 	# player team → choose_heir forced（凍世界）／絕後 game_over
 	if state.player_id != -1 and team.team_id == state.get_player_team_id():
 		# 冪等：安全網每 tick 對 leaderless 重呼，已 pending choose_heir 不重設

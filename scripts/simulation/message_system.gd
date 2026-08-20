@@ -36,6 +36,16 @@ func emit_message(state: WorldState, type: String, description: String,
 	msg.source_pos = team.tile_pos
 	msg.origin_team_id = team.team_id
 	msg.origin_tick = state.world.current_tick
+	# ★T0-A1 ①訊息型掛點（emit_message 是單一 chokepoint → 全 17 型別一次掛齊、不挑食）：
+	# 標記【發起隊】+ params 內出現的隊 id（target/origin/ally…）→ 本 tick 可立即重新思考。
+	var _subjects: Array = [team.team_id]
+	for _k in params.keys():
+		var _ks: String = String(_k)
+		if _ks.ends_with("team") or _ks.ends_with("team_id") or _ks == "origin_team" or _ks == "target":
+			var _v = params[_k]
+			if typeof(_v) == TYPE_INT or typeof(_v) == TYPE_FLOAT:
+				_subjects.append(int(_v))
+	WorldEvents.emit(state, type, _subjects)
 	msg.strength = 1.0
 	msg.params = params
 	state.global_messages.append(msg)

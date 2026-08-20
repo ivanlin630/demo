@@ -330,6 +330,9 @@ func consider_betrayal(state: WorldState, self_team: TeamData,
 func _execute_betrayal(state: WorldState, self_team: TeamData,
 		ally_team: TeamData) -> void:
 	state.clear_team_faction(self_team)   # 背叛離團（雙向同步）
+	# ★T0-A1 ②第五個 chokepoint（R² 抓到的漏網）：本函式全檔零 emit_message、卻有 player_alerts
+	# 通知玩家 → 玩家立刻知道自己被背叛、NPC 受害者卻不會＝玩家中心家族。這裡把受害方喚醒。
+	WorldEvents.emit(state, "betrayed", [ally_team.team_id])
 	ally_team.update_reputation(self_team.team_id, -0.5)
 	var ally_leader: PersonData = state.persons.get(ally_team.leader_id)
 	if ally_leader:

@@ -104,6 +104,7 @@ func tick_critical_npcs(state: WorldState, all_team_ids: Array) -> void:
 						print("[Recover] Person%d %s: critical → wounded" % [p.id, part])
 
 func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
+	WorldEvents.emit(state, "combat_engaged", [atk_id, def_id])   # ★T0-A1 ②：被襲方當 tick 就能反應（不必等 cadence）
 	var atk: TeamData = state.teams[atk_id]
 	var def: TeamData = state.teams[def_id]
 	state.set_combat_target(atk, def_id)

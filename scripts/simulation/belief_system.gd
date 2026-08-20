@@ -195,6 +195,16 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 	# ★裁A（belief-freshness 縫，Slice D）：firsthand 親見（source_id==obs_id）= 觀察者本 tick 直接確認位置
 	# → value.last_tick=current_tick（對齊 vision:114 另一 firsthand 路）。轉述(source≠obs)不寫（轉述≠親見 fresh，
 	# 位置該當 last-seen 非「本 tick 可見」）。value.last_tick 語意=「位置最後被 firsthand 直接確認的 tick」。
+	# ★T0-A1 ③：關鍵情報抵達＝【首見該目標】或【已知位置改變】→ 觀察者當 tick 可重新思考
+	# （原本要等 cadence 才會用上新情報）。純讀既有 claims，零 RNG。
+	if fields.has("tile_pos"):
+		var _prev: Array = _coerce(state.team_intel.get(obs_id, {}).get(tgt_id, null))
+		var _known_pos = null
+		for _c in _prev:
+			var _cv: Dictionary = _c["value"]
+			if _cv.has("tile_pos"): _known_pos = _cv["tile_pos"]; break
+		if _known_pos == null or _known_pos != fields["tile_pos"]:
+			WorldEvents.emit(state, "intel_arrived", [obs_id])
 	var firsthand: bool = source_type == "親見" and source_id == obs_id
 	var found := false
 	for c in cs:

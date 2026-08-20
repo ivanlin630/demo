@@ -181,6 +181,10 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 			_update_person_needs(state, tid, "food", satisfaction, day_fraction)
 			# 團級斷糧累積 + grace 後 minor/anon 耗損
 			if satisfaction < FAMINE_SATISFACTION_THRESHOLD:
+				# ★T0-A1 ③狀態跨線型（本刀新增偵測點）：famine_days 由 0 轉正＝剛跨過餓線
+				# → 該隊當 tick 就能重新思考（不必等 cadence 才發現自己在餓）。
+				if team.famine_days <= 0.0:
+					WorldEvents.emit(state, "famine_crossed", [team.team_id])
 				team.famine_days += day_fraction
 				if team.famine_days > float(FAMINE_GRACE_DAYS):
 					_apply_famine_attrition(state, team, day_fraction)

@@ -228,6 +228,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 			_encounter_system.resolve_encounter_end(state, result)
 		_step1_advance_time(state)
 		if phase_timing: _pht("encounter", _te)
+		WorldEvents.consume_and_clear(state)   # ★T0-A1 單 tick 清空（encounter 路也要，否則跨 tick 存活）
 		return result    # propagate to bridge
 	_step1_advance_time(state)
 	var _t: int = Time.get_ticks_usec() if phase_timing else 0   # 相位計時鏈起點
@@ -305,6 +306,9 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	_step_captives(state)
 	_step_cleanup_extinct_teams(state)
 	if phase_timing: _t = _pht("captives_cleanup", _t)
+	# ★T0-A1：★tick 結尾單次清空（先依 team_id 升序消費、再整個清）——不分批、不跨 tick 存活；
+	# 這正是 pending_rethink 不必入 state_fingerprint 的正當性基礎。
+	WorldEvents.consume_and_clear(state)
 	return ""   # non-encounter tick
 
 # 受控人力 P1：captive 待遇決策 + 軌跡（cadence 內部 gate，全域；同化/暴動/逃 守恆）
