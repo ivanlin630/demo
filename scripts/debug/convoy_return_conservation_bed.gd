@@ -10,7 +10,7 @@ extends SceneTree
 #   ④結尾：下場分佈 + 殘留 coin/貨總量（依下場分類）+ 母隊資源變化
 # env：LW_CONFIG（peaceful_economy）、LW_MONTHS(1)、ADHOC_DAYS(覆寫天數)、PERF_SEED(1337)、PERF_OUT(sidecar)
 
-var _rec: Dictionary = {}          # porter_id → 記錄
+var _rec: Dictionary = {}          # porter_id → Array[trip 記錄]（★同一porter可能多趟,2026-08-21修）
 var _last_return: int = 0
 
 func _initialize() -> void:
@@ -80,27 +80,44 @@ func _observe(state: WorldState) -> void:
 		var t: TeamData = state.teams[tid]
 		if t.parent_team_id == -1:
 			continue
-		if t.current_task == TeamData.TASK_CONVOY and not _rec.has(tid):
+		# ★2026-08-21修:同一porter可能多趟(dispatch>porters_tracked時發生)→只有『沒紀錄』或『最新一趟已終局』才開新趟
+		var _trips: Array = _rec.get(tid, [])
+		var _need_new_trip: bool = _trips.is_empty() or not (String(_trips[-1]["fate"]) in ["in_flight", "left_convoy"])
+		if t.current_task == TeamData.TASK_CONVOY and _need_new_trip:
 			var parent: TeamData = state.teams.get(t.parent_team_id)
-			_rec[tid] = {
+			_trips.append({
 				"parent": t.parent_team_id, "dispatch_tick": now,
 				"porter_at_dispatch": _snap(t),
 				"parent_at_dispatch": _snap(parent) if parent != null else {},
 				"left_tick": -1, "left_task": "", "left_phase": "", "left_res": {},
 				"fate": "in_flight", "end_res": {},
-			}
+			})
+			_rec[tid] = _trips
 
 	for pid in _rec:
-		var r: Dictionary = _rec[pid]
+		var trips: Array = _rec[pid]
+		if trips.is_empty(): continue
+		var r: Dictionary = trips[-1]   # 只有最新一趟可能還在飛
 		if r["fate"] != "in_flight" and r["fate"] != "left_convoy":
 			continue
 		var p: TeamData = state.teams.get(pid)
 		if p == null:
-			# 消失：這 tick 有 convoy.return → 歸建；否則滅團/其他移除
-			r["fate"] = "merged_home" if returned_this_tick > 0 else "erased"
+			# ★measurer temp tap(2026-08-21,systems fate分類器修正:區分merged_home vs merged_into_stranger)
+			# 消失：這 tick 有 convoy.return → 歸建，但要比對【消失前最後已知parent_team_id】跟【dispatch當下parent】
+			# 才知道併回的是真母隊還是陌生隊(投靠/瀕死收留)。
+			if returned_this_tick > 0:
+				var last_known_parent: int = int(r.get("last_parent_id", r["parent"]))
+				if last_known_parent == int(r["parent"]):
+					r["fate"] = "merged_home"
+				else:
+					r["fate"] = "merged_into_stranger"
+					r["merged_into"] = last_known_parent
+				returned_this_tick -= 1
+			else:
+				r["fate"] = "erased"
 			r["end_tick"] = now
-			if returned_this_tick > 0: returned_this_tick -= 1
 			continue
+		r["last_parent_id"] = p.parent_team_id   # ★每tick更新,消失前最後一次即為併入對象的線索
 		if p.current_task != TeamData.TASK_CONVOY and r["left_tick"] == -1:
 			var xd: Dictionary = p.task_extra_data if p.task_extra_data is Dictionary else {}
 			r["left_tick"] = now
@@ -111,7 +128,11 @@ func _observe(state: WorldState) -> void:
 
 func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void:
 	var lines: Array = []
-	lines.append("[%s day %d] teams=%d porters_tracked=%d" % [cfg, day, state.teams.size(), _rec.size()])
+	var _all_trips: Array = []   # ★flatten全porter全趟(2026-08-21修,一porter可能多趟)
+	for _pid2 in _rec:
+		for _tr in (_rec[_pid2] as Array):
+			_all_trips.append([_pid2, _tr])
+	lines.append("[%s day %d] teams=%d porters_tracked=%d trips_total=%d" % [cfg, day, state.teams.size(), _rec.size(), _all_trips.size()])
 	lines.append("  convoy: dispatch=%d attempt=%d deliver=%d settled=%d return=%d" % [
 		int(Probe.counts.get("convoy.dispatch", 0)), int(Probe.counts.get("convoy.dispatch_attempt", 0)),
 		int(Probe.counts.get("convoy.deliver", 0)), int(Probe.counts.get("convoy.deliver_settled", 0)),
@@ -123,8 +144,9 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 	var fates: Dictionary = {}
 	var residual: Dictionary = {}     # fate → {res → 量}
 	var VAL_KEYS: Array = ["coin", "food", "material", "goods", "gem", "tools"]
-	for pid in _rec:
-		var r: Dictionary = _rec[pid]
+	for _pair in _all_trips:
+		var pid: int = _pair[0]
+		var r: Dictionary = _pair[1]
 		var f: String = String(r["fate"])
 		# 存活者用當下資源、已消失者用脫離當下（沒脫離就直接消失＝歸建/滅團，無殘留可言）
 		var alive: TeamData = state.teams.get(pid)
@@ -142,9 +164,10 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 			residual[f] = acc
 	lines.append("  下場分佈：%s" % str(fates))
 	lines.append("  ★殘留（未回母隊、還在 porter 身上）：%s" % str(residual))
-	# 逐隻明細（少量、值得逐隻看）
-	for pid in _rec:
-		var r: Dictionary = _rec[pid]
+	# 逐隻明細（少量、值得逐隻看，含同porter多趟）
+	for _pair2 in _all_trips:
+		var pid: int = _pair2[0]
+		var r: Dictionary = _pair2[1]
 		var par: TeamData = state.teams.get(int(r["parent"]))
 		var par_now: Dictionary = _snap(par) if par != null else {}
 		var par_vault: Dictionary = {}
@@ -153,10 +176,12 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 			if ht != null and ht.outpost_owner == par.team_id:
 				for k in ht.public_storage:
 					if float(ht.public_storage[k]) > 0.001: par_vault[k] = float(ht.public_storage[k])
-		lines.append("   porter=%d parent=%s dispatch@%d 出發帶=%s ｜脫離@%s task=%s phase=%s 身上=%s ｜結局=%s 現持=%s" % [
+		lines.append("   porter=%d parent=%s dispatch@%d 出發帶=%s ｜脫離@%s task=%s phase=%s 身上=%s ｜結局=%s%s 現持=%s" % [
 			pid, str(r["parent"]), int(r["dispatch_tick"]), str(r["porter_at_dispatch"]),
 			str(r["left_tick"]), str(r["left_task"]), str(r["left_phase"]), str(r["left_res"]),
-			str(r["fate"]), str(r["end_res"])])
+			str(r["fate"]),
+			("(併入陌生隊Team%s非原parent Team%s)" % [str(r.get("merged_into", "?")), str(r["parent"])]) if r["fate"] == "merged_into_stranger" else "",
+			str(r["end_res"])])
 		if r.has("end_tick"):
 			var dt: int = int(r["end_tick"]) - int(r["dispatch_tick"])
 			lines.append("     ★結案 tick=%d（出發後 %d tick = %.1f 日）" % [
