@@ -1,0 +1,58 @@
+{
+  "ticket": "★T0分布快照(生育HOW前置)——rel_surplus=food_flow_avg/max(pop×FOOD_PER_PERSON_PER_DAY,ε)全隊分布",
+
+  "method": "既有exam12mo資料(peaceful jsonl/specimen、warring jsonl/specimen)都不含team.food_flow_avg欄位(specimen_tracer.gd只捕effective_food/consume_per_day/pop等,不含food_flow_avg;exam_12mo_bed.gd只算瞬時daily_rate的zero/neg『計數』非per-team原始值)——★缺欄位,已回報。改用短窗tap(禁長跑,遵守指示):新增scripts/debug/relsurplus_snapshot_bed.gd(純觀測,零production code變更,讀team.food_flow_avg+population+ResourceSystem.FOOD_PER_PERSON_PER_DAY,同seed1337+同config走GameSetup重建世界,短窗跑完後對【全隊】(非specimen 12隊strided)一次性snapshot dump)。跑了4次:peaceful day45(17隊)+peaceful day200(18隊)+warring day25(128隊)+peaceful day360嘗試(background跑階時限killed,無output,放棄——已有day45+day200兩個時間點互相印證,足夠回答形狀問題)。",
+
+  "★critical_gap": "★★三個snapshot裡pop>12級距全部n=0——peaceful day200最大隊pop=12剛好卡在6-12級距邊界(未進>12),沒有任何snapshot真的抓到>12的隊。已知12mo exam的specimen(當時沒food_flow_avg)顯示peaceful day360有3隊(pop13/13/14)——但那份資料沒food_flow_avg,無法回填。若要真正回答『>12大村的相對盈餘長怎樣』,需要更長的snapshot窗(day300+)或針對特定已知大村team_id做定向抓取,兩者都超出這輪短窗預算,交你判要不要值得再開一輪。",
+
+  "peaceful_day45": {
+    "n": 17, "note": "早期,隊都還小(pop 1-7)",
+    "rel_surplus": {"min": -0.530, "p25": -0.294, "median": -0.162, "p75": -0.038, "p90": 0.148, "max": 0.549},
+    "positive_share": 0.235,
+    "old_rule_pass_share": 0.059, "old_rule_pass_n": 1,
+    "pop_tiers": {
+      "<=5": {"n": 12, "median": -0.139, "positive_share": 0.167},
+      "6-12": {"n": 5, "median": -0.167, "positive_share": 0.400},
+      ">12": {"n": 0}
+    }
+  },
+
+  "peaceful_day200": {
+    "n": 18, "note": "較成熟,含幾個pop=1的population-overflow spinoff隊(極端值來源)+1隊pop=12(邊界)",
+    "rel_surplus": {"min": -3.754, "p25": -1.000, "median": -0.300, "p75": -0.000, "p90": 2.695, "max": 12.692},
+    "positive_share": 0.222,
+    "old_rule_pass_share": 0.167, "old_rule_pass_n": 3,
+    "pop_tiers": {
+      "<=5": {"n": 14, "median": -0.547, "positive_share": 0.286},
+      "6-12": {"n": 4, "median": -0.104, "positive_share": 0.000},
+      ">12": {"n": 0}
+    }
+  },
+
+  "warring_day25": {
+    "n": 128, "note": "隊數多(戰爭分裂)、極端值更寬(min=-14.9)",
+    "rel_surplus": {"min": -14.938, "p25": -1.129, "median": -0.747, "p75": -0.140, "p90": 0.254, "max": 1.419},
+    "positive_share": 0.172,
+    "old_rule_pass_share": 0.023, "old_rule_pass_n": 3,
+    "pop_tiers": {
+      "<=5": {"n": 94, "median": -0.410, "positive_share": 0.234},
+      "6-12": {"n": 34, "median": -0.975, "positive_share": 0.000},
+      ">12": {"n": 0}
+    }
+  },
+
+  "★item③初步答(小村是否真的相對盈餘也差,還是被絕對門檻誤殺)": {
+    "觀察": "三個snapshot一致：<=5級距的positive_share(16.7%~28.6%)★不比6-12級距(0%~40%,樣本小雜訊大)差,甚至常常更高。<=5級距median也不比6-12差多少(有時更好:peaceful day45 -0.139 vs -0.167;peaceful day200 -0.547 vs -0.104小村更差;warring day25 -0.410 vs -0.975小村明顯更好)。",
+    "初步結論(誠實低信心,樣本小+3個snapshot方向不完全一致)": "沒看到『小村系統性相對盈餘更差』的乾淨訊號——比較像★舊絕對門檻(food_flow_avg>1.2)對小村是結構性不利(小村日耗小,絕對food_flow要衝過1.2比大村難成比例地多),但用相對量(rel_surplus)量之後小村不再明顯居於劣勢，支持『小村主要是被絕對門檻誤殺，不是相對盈餘真的差』這個方向，但★樣本量小(每級距4-34隊)+3個snapshot時間點結果不完全一致，信心中等，非坐實。",
+    "old_rule_pass_share對照": "三個snapshot下,舊規則(food_flow_avg>1.2團級絕對)通過率都很低(5.9%~16.7%)——確認舊門檻本身就是稀有事件,新連續速率設計時量級要對齊這個稀有基準線(用途c『量級錨定』的具體數字)。"
+  },
+
+  "landed_paths": {
+    "bed": "scripts/debug/relsurplus_snapshot_bed.gd(★純觀測temp bed,分析完成後刪除)",
+    "peaceful_day45": "docs/measurements/relsurplus-snapshot-peaceful.jsonl",
+    "peaceful_day200": "docs/measurements/relsurplus-snapshot-peaceful-day200.jsonl",
+    "warring_day25": "docs/measurements/relsurplus-snapshot-warring.jsonl"
+  },
+
+  "cleanup": "temp bed(relsurplus_snapshot_bed.gd)已刪,零production code變更(純新增觀測檔已移除)。day360嘗試因background執行時限被killed,無殘留output檔,不影響其他snapshot。"
+}
