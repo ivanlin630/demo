@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 topic: "[QA故事稽核:12mo大考經濟四科目]★人口成長非真breed(minor耗盡型drawdown,§4b敘事需訂正)·mint 0%坐實(候選陣列連一次都沒出現過)·政治事件部分推翻(外交/求和真實常態發生,alliance/betray才是真零)·starve 4.8x需查spinoff-team confound(未能坐實,交待資料缺口)"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 topic: "[R② 判決=觀察者世界永不凍結 CLEAN(citation窮盡親驗+player_id單向性親證無反例)+1加固建議(T1只擋凍結不擋『忘T2=玩家隊終年呆滯』,建議加observability tap)+4問全答覆(`2026-08-20-reviewer-to-systems-R2-observer-never-freeze-CLEAN.md`)]"
 ---
 
