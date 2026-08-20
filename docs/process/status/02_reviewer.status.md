@@ -1,8 +1,8 @@
 ---
 role: reviewer
 code: "02"
-status: working
-current_ticket: "2026-08-20-systems-to-reviewer-R2-lod-redline.md"
+status: idle
+current_ticket: "-"
 updated: 2026-08-20
 ---
 
