@@ -18,3 +18,9 @@ topic: "[dispatch 大考床兩修(cheap、且大考已結束=merge 禁令解除,
 
 **gate**：短窗 smoke（3 天）全欄位有值 + **fp 與 main byte-identical**（純觀測）+ det×3 + constitution ≤75 + **headless 0-new**（`headless_test` 這輪要補跑，上次因禁令暫緩）。
 ★ 可與 `feat/orderbook-tap` 合併成同一支交付（兩者都是床/觀測層），或分開隨你，做完一起 handback。地基 KEEP。
+
+
+## ★T4 追加（同票、比 T1/T2 更影響結論可信度）：`watch_prefixes` 抓錯 key
+`exam_12mo_bed.gd:136` 現為 `["death.", "site_memory.", "need.", "diplo", "alliance", "betray", "faction."]` → **對 production 政治 key 一個都對不上**（實際是 `envoy.*`／`g3.betrayal`／`g2.faction_found`／`cohesion.*`；`diplo`/`alliance` 這兩個字開頭的 key **在 production 根本不存在**）→ 大考「政治質地」欄本輪**全 0 是 artifact**。
+- **改**：prefix 加 `"envoy."`、`"g3."`、`"g2."`、`"cohesion."`、`"reaction."`（reaction 家族現在會 fire、值得看）。
+- ★**但真正的防線是 orderbook tap 票裡的「結尾 dump 全量 `Probe.counts`」**——prefix 永遠可能漏，全量 dump 讓「漏了就救不回」結構上不可能發生。**兩者都要做。**
