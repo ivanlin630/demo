@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: "[R²審 spec:時間重錨+頻率層級制(docs/superpowers/specs/2026-08-20-time-reanchor-tier-design.md,LOCKED 用戶逐段核可)·R①免=前提全 file:line 坐實於同日 inventory 檔(2026-08-20-time-frequency-inventory.md)·審點:①內部矛盾(根旋鈕小時制 vs 各段宣告/守衛 assert 動作tick≥10 vs TICKS_PER_HOUR≥60 推導對不對)②意圖帳 diff(遭遇戰時間尺 row/世界存在性 row/生育 row——spec 與表有無衝突)③層級制搬家八支=intended-change 清單完備性(有沒有漏標會被統計等價床誤殺的項)④工期表§3c 與 settlement spec S2(L0/L1 工期)交叉一致⑤計時相對錨定規約與現有 timeout 家族的衝突面(護欄型豁免清單夠不夠明確)·CLEAN→systems HOW(排 LOD arc 後);矛盾→回我"
 ---
 
