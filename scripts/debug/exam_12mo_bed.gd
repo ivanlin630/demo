@@ -112,11 +112,19 @@ func _run() -> void:
 		#   → 判「世界是否領導荒」（領導帽是 CONFIRMED 設計意圖，基數 tune/統領成長才是變數）。
 		var cmds: Array = []
 		var caps: Array = []
+		# ★D1票(2026-08-21 systems dispatch)：生育修好後pop會不會撞cap——AT_CAP比例+跨門檻12隊數
+		var at_cap_n: int = 0
+		var ge12_n: int = 0
 		for tid2 in state.teams:
 			var tm: TeamData = state.teams[tid2]
 			var l2: PersonData = state.persons.get(tm.leader_id)
 			cmds.append(float(l2.skills.get("統領", 0.0)) if l2 != null else 0.0)
-			caps.append(FactionAISystem.effective_pop_cap(state, tm))
+			var cap_v: int = FactionAISystem.effective_pop_cap(state, tm)
+			caps.append(cap_v)
+			if cap_v > 0 and float(tm.population) / float(cap_v) >= 0.9: at_cap_n += 1
+			if tm.population >= 12: ge12_n += 1
+		row["d1_at_cap_n"] = at_cap_n
+		row["d1_ge12_n"] = ge12_n
 		cmds.sort(); caps.sort()
 		var cmd_hist: Dictionary = {}
 		for cv in cmds:

@@ -1,0 +1,41 @@
+{
+  "ticket": "D1便宜短跑：生育修好後,pop會不會撞上effective_pop_cap",
+
+  "method": "exam_12mo_bed.gd(main,已加d1_at_cap_n/d1_ge12_n附加欄位,L3純觀測)跑peaceful_economy seed1337 LW_MONTHS=3(90天完整),含specimen(15隊strided)。★生育mergeF後第一次量新機制世界效果。",
+
+  "★★headline finding：breed幾乎沒發生，AT_CAP問題還沒輪到問": {
+    "breed.born": "全期90天=1(final_probe_counts)",
+    "reaction.breed": "全期90天=1",
+    "n_persons軌跡": "day1=24 → day90=24——★完全凍結,90天內total persons一個都沒淨增加(每10天取樣: [24,24,24,24,24,24,24,24,24]全部相同)",
+    "判讀": "這正是systems票裡預先寫死的『更嚴重的事』：生育今天merge後跑滿90天，breed.born仍≈0，不是『pop撞cap』的問題，是『pop根本沒在長』——breed mechanism修了但世界層級效果幾乎沒發生。"
+  },
+
+  "(a)AT_CAP比例": {
+    "raw": "d1_at_cap_n(population/effective_pop_cap>=0.9的隊數)：day1=0/12隊 → day90=7/17隊(≈41%)",
+    "★誠實結構性拆解(不能直接套systems的>0判準)": "AT_CAP比例上升不是因為population真的長大逼近cap——n_persons全程凍結在24，AT_CAP上升的真正原因是n_teams從12漲到17-19(population-overflow分裂，同一批24人被拆進更多隊)，隊變小+隊變多→個別隊的population/cap比值機械性上升，★這是團隊碎片化artifact非真實成長壓力。若照字面套用你判準『(a)>0→開D1 arc』會被這個artifact誤導。",
+    "建議": "AT_CAP這個科目在breed幾乎不發生的世界裡量不出真訊號——要重跑要等breed機制先真正把population養大，現在量到的7/17是雜訊非信號。"
+  },
+
+  "(b)跨過擴點門檻12的隊數": {
+    "raw": "d1_ge12_n全期90天恆=0——沒有任何一隊在任何一天population>=12。",
+    "判讀": "跟headline finding一致：population沒在長，自然不會有隊撞到12這個更高的門檻。"
+  },
+
+  "(c)統領分布是否隨時間上移": {
+    "★前置(systems/blueprint要求)：統領成長機制本體定位+確認有沒有在跑": {
+      "本體": "SkillSystem.on_reaction()（skill_system.gd:23-33）透過REACTION_SKILL_MAP[\"P4_expand\"]→統領技能，growth=BASE_GROWTH(0.005)×魅力×(0.5+0.5×毅力)×skill_mult",
+      "有沒有在跑": "★確認有在跑——final_probe_counts裡reaction.P4_expand=224(90天內224次fire，非死機制)。systems grep _grow_leadership_tenure沒命中是對的——這個函式名不存在，真正的成長路徑是通用反應→技能成長系統的一支，不是專屬的leadership-tenure函式。"
+    },
+    "raw趨勢": "cmd_dist.median全程恆=0.6，day1到day90完全沒變(每10天取樣全部0.6)。max從0.6緩升到0.631(day81後)，min全程0。",
+    "判讀": "★沒有明顯上移——即使P4_expand確實有在fire(224次/90天)，統領技能成長量太小(BASE_GROWTH=0.005×係數，單次成長幅度極小)在median層級90天內看不出移動；只有max端有極輕微爬升(0.6→0.631)，暗示個別高活躍隊的統領技能正緩慢累積，但群體中位數尚未受影響。"
+  },
+
+  "specimen": "docs/measurements/d1/d1-peaceful-3mo.specimen.jsonl(15隊strided)——breed.rate_sample側面顯示team6的breed『progress』累加器有在動(0.001→0.084經過樣本窗口)，代表新連續速率機制的計算路徑是work的，只是累積速度極慢/或早期還沒到門檻，非完全dead——跟n_persons凍結24的聚合結論並不矛盾(progress累加中但還沒有任何隊達到出生門檻)。",
+
+  "landed_paths": {
+    "jsonl": "docs/measurements/d1/d1-peaceful-3mo.jsonl(90天完整+final_probe_counts/samples)",
+    "specimen": "docs/measurements/d1/d1-peaceful-3mo.specimen.jsonl"
+  },
+
+  "cleanup": "exam_12mo_bed.gd加d1_at_cap_n/d1_ge12_n附加欄位(L3純觀測,8行,零production行為變化)，已在main，未revert(視為量測工具本身的合法擴充，同trade./order. watch_prefixes先例)。"
+}
