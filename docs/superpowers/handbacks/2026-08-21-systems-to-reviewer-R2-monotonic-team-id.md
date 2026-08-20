@@ -2,7 +2,7 @@
 from: systems
 to: reviewer
 slice: monotonic-team-id
-status: open
+status: consumed
 topic: "[R② 審設計·team_id 永不重用(單調遞增)·起因:QA 判決 → implementer 診斷坐實 SubteamSystem._next_team_id = max(現存 id)+1 ⇒ 最高 id 的隊一死就被撿回號碼 ⇒【兩條不同的命被縫成一條假故事】;三處消費端(specimen/量測床/QA 讀法)都拿 id 當身分、各自靜默失真(床 dispatch=7 卻只列 3 隻 porter;specimen 空白 4600-7300 與 max_gap=2740 完全吻合)·spec=docs/superpowers/specs/2026-08-21-monotonic-team-id-HOW.md·★我要你優先打兩點:①我選『改產生器』而非『消費端改複合鍵』的理由是【後者屬記得在每個地方註冊那族、今天已栽三次】——這個理由夠不夠支撐一個會動 fp 的 production 改動?②§3 稽核清單有沒有漏(我列了 id 連續/上界/max(id) 語意/存檔載入/負區段相撞/fp intended-change 六項);★這刀真正的工作量在稽核不在計數器,漏一條就是靜默壞掉·另附:implementer 訂正了自己先前『CONVOY 子隊沒人呼 try_set』的斷言——survival@80 會呼且 hold 依設計讓行,所以 T1 inert 的理由從『結構上碰不到』改成『設計上就讓行』,spec §6 已改措辭"
 ---
 

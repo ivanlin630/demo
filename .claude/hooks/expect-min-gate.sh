@@ -54,7 +54,20 @@ else
   check "憲法閘 sites" 55 "${_out#sites=}"
 fi
 
-# ⑤ R6 標記母體（stale-claims 自己也有地板；這裡再確認全庫掃跑得起來）
+# ⑤ ★team id 產生器份數（★上限型檢查，與其他項相反：這裡是「不得【超過】」）
+#    全站 7 份獨立 `_next_team_id`、全部同款 `max(現存id)+1` ⇒ id 會被重用 ⇒ 兩條命被縫成一條假故事。
+#    修法(slice monotonic-team-id)＝收斂成 WorldState 單一分配器；★在那之前先【凍結】防第 8 份出現。
+#    ——照憲法閘 site-freeze 的形狀：先禁新增，slice 落地後把 GEN_MAX 收緊到 0。
+GEN_MAX="${TEAM_ID_GEN_MAX:-7}"
+_gen=$(grep -rc "func _next_team_id" scripts/ --include='*.gd' 2>/dev/null | grep -v ':0$' | wc -l)
+if [ "$_gen" -gt "$GEN_MAX" ]; then
+  echo "🔴 team id 產生器 ${_gen} 份 > 凍結上限 ${GEN_MAX} —— ★有人又複製了一份 max(id)+1，id 重用會再擴散"
+  fail=1
+else
+  echo "✅ team id 產生器: ${_gen}（凍結上限 ${GEN_MAX}；slice monotonic-team-id 落地後應收緊到 0）"
+fi
+
+# ⑥ R6 標記母體（stale-claims 自己也有地板；這裡再確認全庫掃跑得起來）
 _sc=$(bash .claude/hooks/stale-claims.sh 2>/dev/null | grep -o "掃到量測標記 [0-9]*" | grep -o "[0-9]*")
 check "R6 量測標記" 1 "${_sc:-}"
 
