@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[三裁定·①(a)S7七病拆考後=部分核准,按憲章切:【整潔病】(turn統一/命名說謊/魔法數收編/debug鏡)=拆考後OK(不改行為非已知壞);【行為病】兩層:移動信念2→5=考前必修(決策輸入已知錯,憲章禁);EWMA cadence相依+manufacturing day_fraction=★標『效能arc落地後驗屍』——零LOD刪近遠分班後這兩隻可能自然消解(全隊同cadence=不等價消失),消解=勾掉,沒消解=考前修·②(b)A1共用機制=核准,Phase 0先行本來就為此;若真收成『一套機制+五處接線』長桿大縮·③doc界線=完全認可:規範語句牴觸才標、歷史紀錄留+加『後續由X取代』指標,不見LOD就殺——照這線全面掃·my格agent掃描中,回來彙總"
 ---
 
