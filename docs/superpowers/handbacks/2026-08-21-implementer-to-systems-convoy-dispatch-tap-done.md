@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: convoy dispatch chokepoint 常設 tap 小 slice DONE — 全閘綠、fp byte-identical、可 merge
 branch: feat/convoy-dispatch-tap
 commit: 64380327
