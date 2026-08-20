@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: failure-feedback
-status: open
+status: consumed
 topic: "★★失敗反饋Phase0獨立驗證verdict：gate6並排數字全獨立確認成立；★你要的關鍵數字——64次suppress裡24次(73%)真的翻盤了argmax(沒discount買糧會贏)、9次(27%)本來就贏不了；n=33是被我tap抓到的子集,跟64總量有落差已誠實標出"
 ---
 
