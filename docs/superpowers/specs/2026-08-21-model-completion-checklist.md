@@ -101,3 +101,34 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 ### 死常數側（非骰）
 ＝ `constitution_gate` 的 **`threshold`(9) + `rng`(3)** 兩類（gate 已在列舉、baseline 75→74）。**逐站清單需跑 gate 的 verbose 列舉取得**（本輪只取到型別分佈）→ **列為 D4 的第二批**，與裸平骰分開消化。
 ★注意：`gate-ok:` 註記的站是**已判合憲**（如慎重³ 骰、event-ID），**不在 D4 靶內**。
+
+
+---
+
+## §排程（systems 出、effort 序、2026-08-21）
+
+★**原則**：①**依賴先於規模**（改法形狀未定的，先定形狀）②**能平行就平行**（implementer 主線 + 小票並行）③**擋考的大 arc 先估規模再排**（否則考期無法預估）。
+
+### Phase 0（形狀先定，**擋住後面所有 A 類**）
+- **A2 失敗律 slice**：隊層 `recent_failures` + 連續折價 + 失效升 T0（HOW 已裁）。
+  ★**必須先做**：A1 那批 drop 點的**修法形狀**由它定義（「消滅 or 變成有反饋的失敗事件」——沒有反饋機制就無處可接）。
+
+### Phase 1（主線，序列）
+1. **A1 dispatch-drop 合規盤點 → 修**：convoy 7 站（列舉票 in-flight）→ `order.abandoned`（94.4% 靜默）→ JOIN → 建設 `try_set` noop → trade market bail，**逐族**。
+2. **B6 手不聽腦殘目**：`subteam-idle-latch`（HIGH 舊帳）+ 建設 noop 族 ← **先驗現況**（可能部分已修）。
+3. **B1 丙 4 站處置**（blueprint 指引）：**跨隊指派優先議**（受邀方無自主權＝違自主決策精神）→ dormant 死枝**坐實即刪** → conquest scout↔attack 手寫切換 → uprising **合憲可標注、不硬收**。
+
+### Phase 2（平行小票，可與 Phase 1 同時跑）
+- **D4 質地類**：裸平骰 6 隻 + 邊界 1 隻（`distortion` ×4／`inquiry`／`advisor`／★新發現 `message_system:173`／`equipment_system:79`／邊界 `ambush`），**一隻一票**；死常數側（gate `threshold`+`rng`）為第二批。
+
+### Phase 3（我的活，與上面並行）
+- **B1b**：mini-scorer 平行決策層**窮盡盤點**（已知兩例：`uprising`、`DiplomaticAiSystem.handle_diplomacy_message`）。
+- **B7 持守統一** spec（arc 已立案 PARK → 需 unpark）。
+- **★D1 領導成長管道**（established④）：**這是本清單的長桿**——arc 級、擋考。**先出規模估算再排期**，不要假設它能塞進考前窗。
+
+### 待驗項（measurer/我 code-read，可插空）
+**B2** 商隊 survival 履約是否已折入／**D2** anon 2c-2 影響面／**D5** 軍民 Slice B 依賴／**A3** `site_thrived` 零筆（依賴 §3c 工期落地）。
+
+### ★風險與誠實預估
+- **長桿 ＝ D1**（領導成長管道）與 **A1 逐族納管**（族數多）。**考期以清單清零為準、非日曆**（用戶已定）。
+- **C 類（效能 arc 剩餘刀 + 時間包 S1–S7）本身就是多輪**；與 A/B/D 並行會搶 implementer——**同一時間最多兩條 implementer 線**（主線 + 小票），第三條要排隊。
