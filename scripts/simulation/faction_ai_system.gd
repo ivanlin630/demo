@@ -2,7 +2,11 @@ class_name FactionAISystem
 
 const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
-const DECISION_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # TEST VALUE — 非-unified 週期重評（解 IDLE-lock）
+# ★T0-A2 輪詢退場：A1 讓事件能瞬醒後，「沒事發生也每天想一次」的輪詢就是純空轉。
+# 這個倍率把輪詢拉長；★保留【慢心跳】＝拉長後的 cadence 本身（零事件時仍會最終重新思考，
+# 禁「沒事件就永遠不想」＝思考餓死）。TEST VALUE，×3 / ×6 兩檔各量一次供 systems 裁。
+const DECISION_CADENCE_MULT: int = 3
+const DECISION_CADENCE: int = TimeScale.TICK_PER_DAY * DECISION_CADENCE_MULT   # TEST VALUE — 非-unified 週期重評（解 IDLE-lock）
 const DISPATCH_DIST_THRESHOLD: int   = 2
 # ★糧流 Slice B1 糧橋（解 A1 子隊餓死）：出發配糧 need=burn×ETA_total×safe_margin；母隊 food 撥得起才派。
 const FOOD_BRIDGE_SAFE_MARGIN: float = 1.5   # TEST VALUE — 需糧餘裕（緩衝途中 harvest 不足/繞路）

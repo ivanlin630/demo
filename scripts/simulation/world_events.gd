@@ -57,13 +57,13 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 static func is_pending(state: WorldState, team_id: int) -> bool:
 	return state.pending_rethink.has(team_id)
 
-# ★單 tick 清空（sim_runner tick 結尾呼一次）：先取當下快照、★依 team_id 升序消費
-#（禁 Dictionary 迭代序），再整個清掉——不分批、不跨 tick 存活。
+# ★單 tick 清空（sim_runner tick 結尾呼一次）：不分批、不跨 tick 存活
+#（這是 pending_rethink 不入 state_fingerprint 的正當性基礎）。
+# ★誠實界定：本函式【只負責清空】——決策的消費順序由既有 team 迴圈決定
+#   （那本來就是 deterministic 的）；這裡不提供、也不需要順序保證。
 static func consume_and_clear(state: WorldState) -> void:
 	if state.pending_rethink.is_empty():
 		return
-	var ids: Array = state.pending_rethink.keys()
-	ids.sort()   # ★升序＝穩定消費順序
 	if Probe.enabled:
-		Probe.bump("t0.consumed", ids.size())
+		Probe.bump("t0.consumed", state.pending_rethink.size())
 	state.pending_rethink.clear()
