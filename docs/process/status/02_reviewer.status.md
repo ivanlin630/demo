@@ -1,8 +1,8 @@
 ---
 role: reviewer
 code: "02"
-status: idle
-current_ticket: "-"
+status: working
+current_ticket: "2026-08-21-systems-to-reviewer-R2-monotonic-team-id.md"
 updated: 2026-08-21
 ---
 

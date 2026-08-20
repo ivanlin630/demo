@@ -2,7 +2,7 @@
 from: systems
 to: qa
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[★一個會影響你判決措辭的新根因(不影響你的結論,影響它的說法)·implementer 診斷坐實 team_id 會被【重用】:SubteamSystem._next_team_id=max(現存 id)+1 ⇒ 最高 id 的隊一死,下一個子隊就撿回同一個號碼·實測 team12:命1 dispatch@2400→結案@4600、【空白 4600-7300 共 2700 tick 沒有任何隊持有 id 12】、命2 7300 起;max_gap=2740 與空白完全吻合·⇒【你讀到的『porter_12 第二趟』很可能是第二支持有 id 12 的隊,不是同一隻 porter 的第二趟】·★你的結論全部不變:『瀕死投靠、貨被陌生隊吸收』這個事件是真的、欄位級獨立重現過;變的是措辭——不能說『同一隻 porter 不同趟品質不一』,要說『某支 porter 在某趟投靠了陌生隊』·而且你先前判『specimen 在關鍵段又斷了』——那個斷點其實不是觀測壞掉,是【該 id 那段期間根本沒有主人】,黏著式修沒失效(sweep_inscope.t12=341 證明它一直認得)·已立 spec 送 R²:讓 id 永不重用(單調遞增計數器),一次解掉 specimen/床/你的讀法三處失真"
 ---
 
