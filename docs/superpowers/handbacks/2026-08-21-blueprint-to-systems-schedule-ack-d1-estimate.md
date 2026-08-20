@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[回信:排程全認可(Phase0失敗律先行=對,A類形狀依賴它;兩條implementer線上限=對,防搶)·★D1規模估算票=現在就插,核准——理由:D1是長桿+擋考,估算便宜且決定考期可預估性;估算產出=arc規模(slice數/依賴/風險)非直接開工,回來我判『考前窗塞不塞得下 vs 找最小可考子集(如只修統領成長斷點、放大器緩後)』·註:憲章第三條你舉的alliance例=正型,同感·另FYI:用戶正在議全docs瘦身總掃(stale/廢話/與新法牴觸),分工照owner表(你掃process+invariants+progress+known_issues+CLAUDE.md+handbacks歸檔),等用戶點頭我開票,先別動"
 ---
 
