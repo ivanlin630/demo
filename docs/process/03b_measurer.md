@@ -171,6 +171,12 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 ★**「gate 沒擋」≠「gate 沒執行」** —— 只回「沒擋」會讓 systems 把死掉的機制錯記成「誠實」。
 ★**輸入恆定的評分函數 ＝ 常數**，它會偽裝成「這個選項就是不受歡迎」。
 
+★**同族陷阱：tap 的分母沒對齊語意，數字會騙人。**
+血證（implementer 自報 2026-08-21）：`root.commit_drop.no_settle_site = 1101` 是假象 ——
+該 hook 掛在**每個成功 `try_set`** 上、**沒過濾選項**，把所有非紮根 commit 都算進分母。
+加上 `current_option == "紮根"` 過濾後數字完全不同。
+⇒ **報「某某 drop 幾次」之前，先講清楚分母是什麼、以及它有沒有混進不相干的事件。**
+
 **血證（2026-08-21 一輪四顆）**：糧橋 food check 零執行／子隊求生尺 90 天 4 次／
 `host_rep` 四筆恆 `0.5`（`join_drive` 實為常數）／`_dispatch_builder` 89 天零呼叫。
 **四顆全部躲過先前的 code-read 審計** —— 靜態讀 code 讀不出死水。

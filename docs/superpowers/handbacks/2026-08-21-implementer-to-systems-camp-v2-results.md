@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: camp-stay-brick v2
 topic: 四端同秤已接完 — ★驗收 2 綠 1 紅（#1 仍 0，但現在【每一階都有數字】：贏 8 → 開工 1 → 完工 0）；headless 9→15 仍不可 merge；三個裁定點
 branch: feat/camp-access
