@@ -14,7 +14,7 @@ func check(state: WorldState) -> void:
 	var tid: int = state.consume_next_team_id()
 	var team := TeamData.new(); team.team_id = tid; team.tile_pos = pt.tile_pos
 	team.current_task = TeamData.TASK_JOIN
-	var nl := PersonData.new(); nl.id = _next_person_id(state)
+	var nl := PersonData.new(); nl.id = state.consume_next_person_id()
 	nl.team_id = tid; nl.person_name = "投奔者"; nl.role = "leader"
 	nl.skills = {"狩獵": 0.5, "求生": 0.5, "戰鬥": 0.4}   # 略偏堪用
 	LoyaltyBank.set_baseline(nl, 0.9, "init")             # 忠誠偏高
@@ -27,7 +27,3 @@ func check(state: WorldState) -> void:
 	print("[Tutorial] 投奔者小隊 Team%d 求投靠玩家" % tid)
 
 
-func _next_person_id(state: WorldState) -> int:
-	var m: int = 0
-	for k in state.persons: m = maxi(m, int(k))
-	return m + 1

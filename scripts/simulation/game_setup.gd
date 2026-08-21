@@ -351,7 +351,7 @@ static func _setup_random_player(state, config, rng) -> void:
 			ResourceBank.set_amt(team, k, int(round(float(starting[k]) * richness_mult)), "init_starting")
 
 	var leader := PersonData.new()
-	leader.id = _next_person_id(state)
+	leader.id = state.consume_next_person_id()
 	leader.person_name = pcfg.get("leader_name", "玩家")
 	leader.role = "leader"
 	leader.team_id = team.team_id
@@ -432,11 +432,6 @@ static func _find_weakest_faction(state, config) -> int:
 # ── 內部 helpers ──────────────────────────────────────
 
 
-static func _next_person_id(state: WorldState) -> int:
-	var m: int = -1
-	for pid in state.persons:
-		if int(pid) > m: m = int(pid)
-	return m + 1
 
 static func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x; var dy := b.y - a.y
@@ -632,11 +627,11 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 	team.resources = base_res
 	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init
 	var leader_cfg: Dictionary = t_cfg.get("leader", {})
-	var leader: PersonData = _make_person(team.team_id, leader_cfg, true)
+	var leader: PersonData = _make_person(state, team.team_id, leader_cfg, true)
 	state.persons[leader.id] = leader
 	state.set_leader(team, leader.id)   # chokepoint：leader_id+team_id+role（建國）
 	for nm_cfg in t_cfg.get("named_members", []):
-		var nm: PersonData = _make_person(team.team_id, nm_cfg, false)
+		var nm: PersonData = _make_person(state, team.team_id, nm_cfg, false)
 		state.persons[nm.id] = nm
 		state.add_member(team, nm.id)
 	_setup_anon_tiers(team, t_cfg, target_pop)
@@ -658,9 +653,12 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 				tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), f)
 	# 注意：faction member 加入由 _setup_explicit_teams 第三段處理（factions 此時尚未建立）
 
-static func _make_person(team_id: int, p_cfg: Dictionary, is_leader: bool) -> PersonData:
+# ★slice monotonic-person-id：原本 `p.id = team_id*1000 + 序號` 是第四種【互不相通】的配號方案，
+# 且靠 `static var _member_counters`（跨 WorldState 實例殘留＝同一 process 跑第二個世界時會接續計數）。
+# 兩者一併廢掉，改走唯一出生口——全樹零處依賴 id 的結構（`.id / 1000`、`.id % 1000` 命中 0）。
+static func _make_person(state: WorldState, team_id: int, p_cfg: Dictionary, is_leader: bool) -> PersonData:
 	var p := PersonData.new()
-	p.id = (team_id * 1000) + (0 if is_leader else _next_member_id(team_id))
+	p.id = state.consume_next_person_id()
 	p.person_name = p_cfg.get("name", "P%d" % p.id)
 	p.role = "leader" if is_leader else "civilian"
 	p.team_id = team_id
@@ -676,11 +674,6 @@ static func _make_person(team_id: int, p_cfg: Dictionary, is_leader: bool) -> Pe
 		p.attributes[k] = float(p_cfg["attributes"][k])
 	return p
 
-static var _member_counters: Dictionary = {}
-static func _next_member_id(team_id: int) -> int:
-	var n: int = int(_member_counters.get(team_id, 0)) + 1
-	_member_counters[team_id] = n
-	return n
 
 static func _setup_player(state: WorldState, config: Dictionary) -> void:
 	var pcfg: Dictionary = config.get("player", {})
