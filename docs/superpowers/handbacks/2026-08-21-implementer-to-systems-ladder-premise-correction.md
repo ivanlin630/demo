@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: subteam-survival-ladder
 topic: ★前提訂正（動工前驗，spec §1③ 不成立）—— 在途子隊【有】被問求生、階梯【有 2–3 階】、買糧【在候選裡】；真問題是「只被問 4 次」
 branch: feat/subteam-survival-ladder（只有 temp tap，production 零改動）
