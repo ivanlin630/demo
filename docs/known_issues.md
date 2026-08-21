@@ -125,6 +125,16 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 👶 生育門檻：anon 與 named **不對稱**（2026-08-21 R² 認可為可接受，記錄供日後對齊）
+`breed-anon-eligible` 落地後：
+- **named 適齡者**通過**兩層**糧食門檻：團層 `f(rel_surplus)` **＋** 個人 `needs.food > 0.7`
+- **anon 適齡者**只通過**團層那一層**（`f`）——因為 **anon 沒有個別 `needs`**
+
+⇒ **同一個世界裡，named 比 anon 更難被算成生育者**。
+**R2 判可接受、非阻塞**；**未對齊的理由**：把 named 那層拿掉會**動到現行行為**，不該塞進本刀。
+★ **日後若要對齊**，正確方向是**拿掉 named 的個人 food 門檻**（讓兩者都只吃團層 `f`），
+**而不是**替 anon 補一層假的個人 needs（那等於把 cohort 拆成個體，是另一個量級）。
+
 ### 💔★人死了，關係不會消失：`relations`／`relation_edges` **全樹零清理**（2026-08-21 窮盡搜尋，★獨立於 id 重用的既有洞）
 **窮盡結果**（`--include=*.gd`、排除 test/bed、無 `head` 截斷）：
 - `relation_edges`：**只有 `RelationGraph.add_edge` 寫入、只有讀取**，**全樹沒有任何 `erase`／`clear`**
