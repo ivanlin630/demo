@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★P9 已轉 HARD(你交代「到了就轉順手報我」) — 兩件對齊都到位、逐 slice 表零誤殺、閘成本 1.5s;附一條「已知殘影」防未來誤判
 ---
 
