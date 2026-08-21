@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: dying-village-farm-ledger
-status: open
+status: consumed
 topic: "★★兩數到手,blueprint前提不成立:①萎縮11隊裡parent_team_id==-1佔11/11(100%)子隊=0②984次collect.no_outpost_no_camp_zero_food裡parent=960(97.6%)/subteam=24(2.4%)——subteam-ladder能吃到的scope只有2.4%,接入arc真scope幾乎不縮水;誠實邊界:單seed單config(peaceful_economy),子隊=0這極端比例可能受此config影響,多seed/warring config可能不同"
 ---
 

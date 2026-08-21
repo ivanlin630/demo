@@ -176,6 +176,17 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 **⇒ 一句話**：**這些村不是「地養不起」，是「沒有把嘴接到池子上」。**
 **錢買不到糧（`coin=705` 無用）、地夠肥（plains）、池子滿的（runway 364 天）——它們就是沒紮營、沒據點。**
 
+★★ **兩根【不同根】已坐實**（2026-08-21）：
+| 問 | 答 |
+|---|---|
+| 萎縮 11 隊裡 `parent_team_id == -1` 佔幾隊 | **11／11（100%）**，**子隊 ＝ 0** |
+| 984 次零採集裡子隊佔幾次 | **parent 960（97.6%）／ subteam 24（2.4%）** |
+
+⇒ **`subteam-survival-ladder` 能吃到的 scope 只有 2.4%** ⇒ **接入 arc 的真 scope 幾乎不縮水（97.6%）。**
+★ **這推翻了「兩者同根、ladder 落地後再量殘餘」的排序前提** ——**它們是兩根獨立的病**。
+★ **measurer 誠實邊界（照抄）**：**單 seed 單 config（`peaceful_economy`）**，
+**「子隊 ＝ 0」這個極端比例可能受此 config 影響**，**多 seed／warring 可能不同**。
+
 ★ **這與既有 arc 對得上**（memory `project_size_matter_arc`）：
 「**三接入動詞各斷：紮營分數輸／settle 從未 dispatch／建設 argmax 贏但 `try_set` noop**」
 ⇒ **本輪是那條 arc 的獨立再確認，而且證據強得多**（984 次零採集 cadence、8/11 村站在滿池上餓）。
