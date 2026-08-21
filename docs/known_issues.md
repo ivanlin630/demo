@@ -1510,7 +1510,35 @@ established=0 真根**非** goal orphan（立國鏈已接：gate `faction_ai:103
 
 **意義**：`size_matter` arc 記的「settle 從未 dispatch」，
 **先前把嫌疑指向糧橋（`faction_ai:3799` `_eta_build` 高估 24×）—— 實測否決。**
-**真閘在建材 cost（`_can_afford` 1.5×）這一層。**
+~~**真閘在建材 cost（`_can_afford` 1.5×）這一層。**~~
+
+### ★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上零疊代**
+
+measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
+`faction_ai:717 _evaluate_all_body` 的外層是 `for fid in state.factions:` ⇒ **零疊代**
+⇒ **`_update_goals` / `_assign_tasks` / `_evaluate_infrastructure` 三者從未被呼叫過一次。**
+⇒ T1 那 28 次必然全部來自另一個呼叫點 `_dispatch_goal_delegate`（per-team，不經 `state.factions`）。
+
+**systems 自驗並擴大（窮盡 grep `create_faction` 全部呼叫點）**：
+
+| 建國路徑 | 出處 | 和平床上會發生嗎 |
+|---|---|---|
+| **config 預塞** | `game_setup.gd:298 / :572` | 只有 **3/29** config 有 `factions`（`default` / `perf_scale` / `warring_states`） |
+| **戰勝後建國** | `npc_combat_system.gd:784` | ❌ 和平床無戰鬥 |
+| **外交臣服** | `diplomatic_ai_system.gd:251` | ❌ |
+| **玩家命令** | `player_command_system.gd` ×4 | ❌ headless 無玩家 |
+
+★★**結論（推論，已標明）：和平床上 faction 永遠不可能出現** ——
+**「建國」這個動詞只掛在「打贏」和「臣服」上，沒有「經濟／聚落成長 → 立國」的和平路徑。**
+
+★**影響面**：**26/29 個 config 沒有 `factions`**（含 `world_sim`、`econ_bed`、全部 `infonet_*`、
+`unified_dispatch_diverse_bed`）⇒ **這些床上 faction 層全程 dormant**。
+**過去在和平床上做的量測，量的都是一個「沒有勢力層」的世界** —— 結論的適用範圍比我們以為的窄。
+
+**分流訂正**：先前記的「冷啟動雞生蛋（沒人有料→沒人蓋→永遠沒料）」**描述錯了**。
+真相是**蓋 manufacturing 的那條迴圈根本沒跑**。
+★但**第三類判別（「從未被填過」≠「被榨乾」）本身仍然成立**，只是這顆展品的成因要改述。
+
 
 **未處置**（camp-access 在飛，不插隊）。要接的下一步是**查那 28 次缺的是哪種建材、以及是否 genuine-depletion**
 （memory `resource_depletion_genuine_vs_blind`：池空 ≠ bug，先分 genuine vs 盲派）。

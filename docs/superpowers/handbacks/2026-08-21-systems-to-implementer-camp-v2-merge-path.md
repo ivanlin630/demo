@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: ★merge 准(headless 先清淨,我的條件一條沒鬆) — 但這不是放寬,是【分帳】兩道閘;#1 不豁免只是改掛真兇;你下一張票 = A1 建設族(你自己量出來的 8→1)
 ---

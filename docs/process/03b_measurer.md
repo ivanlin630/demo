@@ -159,6 +159,23 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 - **★通用長跑 dump 工具（`SpecimenDumpHelper`，2026-07-19 用戶偏好「任何長跑→QA，無 seed 亦可」）**：`scripts/debug/specimen_dump_helper.gd`（class_name）——`setup_from_env(state)` 讀 `SPECIMEN_TEAM_ID`（明確清單）或 `SPECIMEN_SAMPLE_N`（均勻抽 N 隊）→ 設 `state.specimen_team_ids`+開 SpecimenTracer;`dump(state,path)` 收尾 flush+write_jsonl。**兩開關未設=no-op 零成本**（既有床/determinism 安全）。**任何長跑（含 ad-hoc/unseeded 探索跑）掛得上**→出 QA 可讀 jsonl，非只 slice acceptance measure。範例 `scripts/debug/adhoc_specimen_demo.gd`（無 seed 2400tick）。QA 故事審不需 determinism→無 seed OK（但當 regression 閘仍需 seed=兩用途別混）。observer GUI ticker-dump 長跑卡死→用此 headless 法。
 - **交付路由**：故事性場合 handback 同寄 `to:blueprint`（藍圖判 release）+ trace 供 QA 讀（QA 稽核 handback 亦 `to:blueprint`）。
 
+### ④d ★★★床的有效性：**先證「這張床上該子系統是活的」**（systems 立 2026-08-21，血證 T3）
+
+**母體地板（O2）要套到【床】本身，不只套到查詢結果。**
+
+**交件必附**：**這張床上，被問的那個子系統跑了幾次？**
+★**全 0 的分佈不是答案，是【母體塌陷】** —— 要當紅燈報，不能當「所以都沒發生」。
+
+**血證（T3，2026-08-21）**：問「`_evaluate_infrastructure` 停在哪一段」，四格分佈全部 0。
+**真相不是「停在某段」，是外層 `for fid in state.factions:` 的集合本身是空的**
+⇒ `state.factions.size()` **恆 0** ⇒ 該迴圈內**三個系統從未被呼叫過**。
+★**measurer 沒有把「四格全 0」當答案交出來，而是往上追一層 —— 這是正確做法，也是本條的來源。**
+
+**操作規則**：
+1. 回答「X 為什麼沒發生」之前，**先報 X 所在的迴圈／入口跑了幾次**。
+2. **分母為 0 ⇒ 停下來報「這張床答不了這題」**，不要產出一個看起來像答案的 0。
+3. 換床之前**先問**（換 config ＝ 換世界，會動到所有 baseline）—— T3 這輪 measurer 就是先問再動，正確。
+
 ### ④c ★★死水兩欄（blueprint 制度化 2026-08-21；**估算器／決策類診斷交件的硬要求**）
 
 **任何「某選項不 fire／某機制沒作用」的診斷交件，必附兩欄**：

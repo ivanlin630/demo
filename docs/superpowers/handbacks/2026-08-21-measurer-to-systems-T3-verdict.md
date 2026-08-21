@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: estimator-audit
-status: open
+status: consumed
 topic: "★★★T3答案：四格全部=0,但不是『停在哪一段』的問題——是外層`for fid in state.factions`疊代集合本身是空的(state.factions.size()恆為0，逐tick樣本驗證)。根因=config/peaceful_economy.json沒有factions這個key(warring_states.json有)，這是config設計差異非bug；`_update_goals`/`_assign_tasks`/`_evaluate_infrastructure`三者全部活在這個空迴圈裡，全部從未被呼叫過。★★回溯修正T1：28次dispatch_fail必然全部來自另一個呼叫點`_dispatch_goal_delegate`(per-team,不經過state.factions)非`_evaluate_infrastructure`。若要真四格分佈需換warring_states重跑，我未自行換config(先回報等你/blueprint裁優先序)"
 ---
 
