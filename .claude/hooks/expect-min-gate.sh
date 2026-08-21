@@ -54,7 +54,35 @@ else
   check "憲法閘 sites" 55 "${_out#sites=}"
 fi
 
-# ⑤ R6 標記母體（stale-claims 自己也有地板；這裡再確認全庫掃跑得起來）
+# ⑤ ★team id 產生器份數（★上限型檢查，與其他項相反：這裡是「不得【超過】」）
+#    全站 7 份獨立 `_next_team_id`、全部同款 `max(現存id)+1` ⇒ id 會被重用 ⇒ 兩條命被縫成一條假故事。
+#    修法(slice monotonic-team-id)＝收斂成 WorldState 單一分配器；★在那之前先【凍結】防第 8 份出現。
+#    ——照憲法閘 site-freeze 的形狀：先禁新增，slice 落地後把 GEN_MAX 收緊到 0。
+GEN_MAX="${TEAM_ID_GEN_MAX:-0}"   # ★slice monotonic-team-id 已落地（七份收斂成 WorldState.consume_next_team_id）→ 收緊到 0
+_gen=$(grep -rc "func _next_team_id" scripts/ --include='*.gd' 2>/dev/null | grep -v ':0$' | wc -l)
+if [ "$_gen" -gt "$GEN_MAX" ]; then
+  echo "🔴 team id 產生器 ${_gen} 份 > 上限 ${GEN_MAX} —— ★有人又複製了一份 max(id)+1，id 重用會再擴散"
+  fail=1
+else
+  echo "✅ team id 產生器: ${_gen}（上限 ${GEN_MAX}）"
+fi
+
+# ⑤b ★同族 pattern 閘（gate 7：做成閘不是做成約定）——禁止任何「掃 state.teams 取 max 再 +1」的 team id 配發，
+#     即使不叫 _next_team_id。抓法：函式體內同時出現 `for ... in state.teams` 與 `max_id + 1` / `m + 1` 的檔案。
+#     ★必須是「掃 state.teams」那種（person id 另有其事，不在本閘範圍）：用 awk 看同一函式內
+#     `for ... in state.teams` 之後 5 行內是否出現 `return <var> + 1`。
+_pat=$(find scripts -name '*.gd' -not -path 'scripts/debug/*' -print0 2>/dev/null | xargs -0 -r awk '
+  /for [A-Za-z_]+ in state\.teams/ { hot = 5; next }
+  hot > 0 { if ($0 ~ /return [A-Za-z_]+ \+ 1/) { print FILENAME; hot = 0 } else hot-- }
+' | sort -u | wc -l)
+if [ "$_pat" -gt 0 ]; then
+  echo "🔴 仍有 ${_pat} 個檔案帶「掃 teams 取 max 再 +1」的 id 配發 pattern —— 唯一出生口是 WorldState.consume_next_team_id()"
+  fail=1
+else
+  echo "✅ 無 max(id)+1 配發 pattern（唯一出生口＝WorldState.consume_next_team_id）"
+fi
+
+# ⑥ R6 標記母體（stale-claims 自己也有地板；這裡再確認全庫掃跑得起來）
 _sc=$(bash .claude/hooks/stale-claims.sh 2>/dev/null | grep -o "掃到量測標記 [0-9]*" | grep -o "[0-9]*")
 check "R6 量測標記" 1 "${_sc:-}"
 

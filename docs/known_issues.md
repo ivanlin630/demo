@@ -125,6 +125,52 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 💔★人死了，關係不會消失：`relations`／`relation_edges` **全樹零清理**（2026-08-21 窮盡搜尋，★獨立於 id 重用的既有洞）
+**窮盡結果**（`--include=*.gd`、排除 test/bed、無 `head` 截斷）：
+- `relation_edges`：**只有 `RelationGraph.add_edge` 寫入、只有讀取**，**全樹沒有任何 `erase`／`clear`**
+- `p.relations`：**只有 `npc_ai_system.gd:122` 一處寫入**，**零清理**
+- person 死亡收尾（`npc_combat_system.gd:739-750`）＝ `remove_member` ＋ `persons.erase`，**不碰關係**
+- **讀取端不擋死人**：`RelationGraph.strongest`（`relation_graph.gd`）**只比 intensity，不檢查該 id 是否還活著**
+`@aa9f3ad9 2026-08-21`
+
+**⇒ 兩個獨立問題，別混在一起修**（R② 明確要求分開報）：
+- **(A) 懸空關係（既有洞）**：仇人／恩人死了之後，`feud`／`gratitude` 邊**永遠留著**，
+  而讀取端會**把已不存在的 id 當成有效目標** ⇒ **復仇 goal 可能鎖定一個死人**。
+  ★ 這與**執行失敗反饋鐵律**直接相關：**目標不存在 ＝ 計畫失效**，應該升 T0 重想，
+  而不是每輪安靜地重新選一個不存在的目標 —— **這是 A1 五族的候選**。
+- **(B) id 重用交互**：新人撿到舊 id ⇒ **平白繼承一段跟自己毫無關係的恩怨情仇**
+  （`monotonic-person-id` slice 處理）。
+
+**★WHAT 成分（已呈 blueprint）**：「**仇人死了，仇恨該怎麼辦**」是設計問題——
+消解？轉移給子嗣（血仇代代相傳很有戲）？留著但只影響對其團體的觀感？
+**機制上現在是「留著且指向虛空」，那個是 bug；但「該怎麼辦」不是我能裁的。**
+
+### 💾 全樹**沒有存檔／載入路徑**（2026-08-21 窮盡稽核副產物，記錄事實非缺陷）
+`monotonic-team-id` 的 §3 稽核第 4 項要查「載入後 `next_team_id` 是否 > 檔內最大 id」，
+窮盡搜索結果：**`ResourceSaver`／`store_var`／`save_game`／`load_game`／`to_dict`／`from_dict`
+在非-debug code 命中 0**（唯一 `FileAccess.WRITE` 是 `observer_main.gd:224` 的文字 dump）`@aa9f3ad9 2026-08-21`。
+⇒ **今天不可能載到 stale 計數器**；該 gate **無對象可驗 ＝ 空過，未宣稱通過**（照實記）。
+★ **未來實作存檔時必須回頭補**：載入後 `next_team_id` **必須 > 檔內最大 id**，
+否則新隊會撞舊號、id 重用那族的病全部復發（分配器已有 floor guard 兜底並 `Probe.bump("teamid.floor_bump")`，
+但那是**自我修復、不是設計保證**）。
+
+### 🚚★porter 餓到「投靠」非母隊：convoy 貨物隨人被第三方吸收（2026-08-21 QA 故事稽核挖出，★第四種結局）
+QA 交叉 6 筆真實 merge log 與 specimen 逐筆核對發現：**`Team1 ← Team12`** —— **某支 porter（持有 id 12 的那一支）在該趟根本沒回到真母隊 `Team5`**，而是併進完全無關的 `Team1`。★**措辭已訂正**：原本寫「porter_12 **第二趟**」是錯的——**`team_id` 會被重用**（`_next_team_id = max(現存 id)+1`，見〈身分不是 id〉），**「同一個 id」不等於「同一支隊」**；這裡講的是**某一趟**，不是「同一隻的第二趟」。
+`tick7700` `task→投靠`（求收留）、`food` 掉到 **1.17**（瀕死）、`tick8000` **`parent_team_id` 直接改寫成 `1`**、`task→覓食`
+`@convoy-specimen-t3budget 2026-08-21`。
+⇒ **porter 自己撐不住、被路過的隊收留，貨（剩餘 material/coin）跟人一起被吸收。**
+**6 筆 merge 中 1 筆錯認 owner ＝ 17%。**
+
+**這是第四種結局**，跟既有三分類（`merged_home` 真回家／母團滿員或部分合併＝合法獨立／`stranded` timeout）**都對不上**。
+
+**★兩個層次的問題（已分派）**：
+- **WHAT（blueprint）**：這是 **bug 還是 genuine 悲劇**？「瀕死投靠」壓過「送貨回家」的優先序該不該存在？
+- **HOW（systems）**：**貨物所有權**——領主派出的貨在**未經交易／未經同意**下轉移給第三方。
+  全域守恆不破，但這是**吸收式的所有權移轉**。
+
+**連帶：量測儀器也錯了**——床把它算成 `merged_home`（以「隊伍消失」推論），
+`measurer` 的「**3 隻 porter 全部乾淨 merged_home**」需訂正為「**6 次 merge 中 5 次回真 parent、1 次錯認 owner**」。
+
 ### 🚚 CONVOY porter 在運輸期間**完全沒有決策**（2026-08-21 診斷坐實，★交 blueprint 判是否 by design）
 `faction_ai:761-762` 子隊一律走 `_evaluate_subteam`；`:2753-2756` 對 `TASK_CONVOY` **直接早退** ⇒
 porter 整趟**不進任何決策路徑**。specimen 佐證（追逐窗 tick 3600–4600）：porter_12 共 20 筆 entry ＝

@@ -339,7 +339,7 @@ static func _setup_random_player(state, config, rng) -> void:
 		int(config.get("map", {}).get("resource_richness", 5)), 1.0)
 
 	var team := TeamData.new()
-	team.team_id = _next_team_id(state)
+	team.team_id = state.consume_next_team_id()
 	var target_pop: int = int(pcfg.get("population", 10))
 	state.set_team_tags(team, ["統領"], "player_init")
 	team.resources = _default_full_resources()
@@ -431,11 +431,6 @@ static func _find_weakest_faction(state, config) -> int:
 
 # ── 內部 helpers ──────────────────────────────────────
 
-static func _next_team_id(state: WorldState) -> int:
-	var m: int = -1
-	for tid in state.teams:
-		if int(tid) > m: m = int(tid)
-	return m + 1
 
 static func _next_person_id(state: WorldState) -> int:
 	var m: int = -1
@@ -530,7 +525,7 @@ static func _apply_preset_resources(team: TeamData, preset_key: String,
 static func _create_team(state: WorldState, rng, pop_range: Array,
 		named_ratio: float, richness_mult: float, preset_key: String) -> TeamData:
 	var team := TeamData.new()
-	team.team_id = _next_team_id(state)
+	team.team_id = state.consume_next_team_id()
 	var target_pop: int = rng.randi_range(pop_range[0], pop_range[1])
 
 	match preset_key:

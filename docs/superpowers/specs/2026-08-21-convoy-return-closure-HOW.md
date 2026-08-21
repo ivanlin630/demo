@@ -58,7 +58,14 @@ hold 還有**第二個條件**：`team.persist_strength > PERSIST_HOLD_THRESHOLD
 - `faction_ai:761-762`：`parent_team_id != -1` → 子隊走 `_evaluate_subteam`，**完全不進 `_evaluate_solo`／`_decide_unified`**
 - `faction_ai:2753-2756`：`_evaluate_subteam` 對 `TASK_CONVOY` **直接早退**
 
-⇒ **世界上沒有任何一條路會對 CONVOY porter 呼 `try_set`**，`PROGRESSIVE_HOLD_TASKS` 自然無用武之地。
+⇒ **faction-AI 那條決策路**確實碰不到 CONVOY porter。
+
+> **★2026-08-21 稍後訂正（更長的窗推翻了前半句的絕對版本）**：
+> **survival 層（`src=survival`、`PRIO_SURVIVAL 80`）走的是別條路，它【會】對 CONVOY 子隊呼 `try_set`**，
+> 而且 **hold 依設計對 `≥PRIO_THREAT` 讓行** ⇒ **擋不住、也不該擋**。
+> 先前量到「0 次嘗試」是**窗口偏差**（那 75 天沒有 porter 餓到觸發 survival）。
+> ⇒ **T1 依舊 inert，但理由要改寫**：不是「**沒人搶**」，而是「**會搶的那個本來就不受 hold 管**」。
+> **「結構上碰不到」→ 訂正為「設計上就讓行」。**
 **修前它被 `release()` 繞過（先打成 IDLE），修後根本沒人搶** —— **T1 前後都不可能 fire**。
 
 **帳目訂正（不得記為通過）**：
