@@ -7,7 +7,16 @@ const MORALE_LERP: float = 0.1          # 每次 evaluate_all 呼叫的士氣收
 #   目標＝健康村（f ≈ 0.5，即 rel_surplus ≈ K = 0.15 ＝本世界前 10%）、5 名適齡成人 → 1 名額/30 日
 #   births_per_day = BASE_RATE × f × eligible × persona_mult
 #   → 1/30 = BASE_RATE × 0.5 × 5 × 1.0 → BASE_RATE = 0.0133（名額 / 適齡人·日）
-const BREED_BASE_RATE: float = 0.0133
+# ★重錨（slice breed-anon-eligible 2026-08-21，先量再定）：
+#   舊推導的錨是「健康村 5 名適齡成人」——★實測不存在（named 只有 1.4 名/隊）。
+#   新錨＝BASE = (1/30) / (0.5 × 適齡數(P_ref))，目標 pacing (B)＝健康村一個月一個名額。
+#   P_ref 由量測定（`breed_pref_measure_bed.gd`）：peaceful × seeds{1337,42,8181} × day{30,60,90}
+#   ＝ 9 個 snapshot 取【中位數的中位數】（單一快照的中位數本身也是抽樣值）。
+#   ★母體只取 pop>=2 的村：day60 起有 13-14/20 隊萎縮成「只剩領主」的殘骸，
+#     把它們算進去會得到 P_ref=1.0 → BASE=0.0667（5×），等於把【世界在掉人】這個病烙進生育常數。
+#   實測 pop>=2 子母體：中位 pop=6.0、中位適齡=6.0（9 snapshot 內 6,6,6,6,4,5.5,6,6,6 穩定）
+#   ⇒ BASE = (1/30)/(0.5×6) = 0.01111。★注意這是【略降】（0.0133→0.0111），不是往上 crank。
+const BREED_BASE_RATE: float = 0.0111
 # K 錨在實測分布（spec §6）：peaceful d45 的 p90 = 0.148 取整 → 語意＝「本世界前 10% 健康的村」落在 f≈0.5。
 # 飽和效果：r=0.15→f≈0.50 / r=0.5→f≈0.77 / r=2.7→f≈0.95 / r=12.7→f≈0.99（暴富村不爆生）。
 const BREED_K: float = 0.15
@@ -205,6 +214,16 @@ func _score_breed(p: PersonData, t: TeamData) -> float:
 # 兩性平衡因子(0..1)：全單性→0(不繁衍);越平衡越高。
 # anon 用 team.anon_female_ratio 估男女數;named 性別取不到 state.persons(本系統簽名 (p,t) 無 state)，
 # 退而用 breeder 自身 sex 近似計入一方(approximation;系統可後續改簽名傳 state 精修)。
+# ★anon 的 safety 代理：用既有世界訊號，不新增機制。「當家的人覺得安全」＝ anon 處境的合理代理。
+# 無 named → 取 leader；連 leader 都沒有 → 0.5（★不是 1.0：缺人管理的隊不該預設最安全）。
+func _breed_safety_proxy(state: WorldState, team: TeamData, named_total: int, named_safe: int) -> float:
+	if named_total > 0:
+		return float(named_safe) / float(named_total)
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader != null:
+		return 1.0 if float(leader.needs.get("safety", 1.0)) > 0.7 else 0.0
+	return 0.5
+
 func _breed_balance(team: TeamData, breeder_sex: String = "") -> float:
 	var anon_total: int = AnonTierSystem.total_pop(team)
 	var m: float = float(anon_total) * (1.0 - team.anon_female_ratio)
@@ -256,17 +275,44 @@ func _tick_breed(state: WorldState, team: TeamData) -> void:
 	if f <= 0.0:
 		return   # 相對盈餘 ≤ 0 → 世界窮就少生（(甲) 精神保留）
 	# 適齡＝needs 達標的隊員；persona_mult 沿用既有 醫療 與 _breed_balance（兩性結構仍是先決）
+	# ★生育(a)（用戶 2026-08-21 拍板）：anon 也算生育者。修前分母是 team.population（含 anon）、
+	# 但適齡迴圈只跑 named ⇒ anon 吃飯拉低 rel_surplus 卻不能生＝雙重懲罰（實測 n_persons 24→24 凍結）。
 	var daily: float = 0.0
+	var named_eligible: int = 0
+	var named_safe: int = 0
+	var named_total: int = 0
 	for pid in state.persons:
 		var person: PersonData = state.persons[pid]
 		if person.team_id != team.team_id:
 			continue
+		named_total += 1
+		if float(person.needs.get("safety", 1.0)) > 0.7:
+			named_safe += 1
 		if float(person.needs.get("safety", 1.0)) <= 0.7 or float(person.needs.get("food", 1.0)) <= 0.7:
 			continue
 		var balance: float = _breed_balance(team, person.sex)
 		if balance <= 0.0:
 			continue
+		named_eligible += 1
 		daily += BREED_BASE_RATE * f * (1.0 + float(person.skills.get("醫療", 0.0)) * BREED_MEDIC_RATE) * balance
+	# ★anon 這一半：cohort 計數、不實例化個體。
+	#   ①適齡數＝healthy 桶（wounded 不算；minor 本來就分開存，不在 anon 池）
+	#   ②food 不另設門檻——f(rel_surplus) 已是團層糧食項，再加一層＝同一件事扣兩次
+	#   ③safety 代理＝該隊 named 通過安全門檻的【比例】（無 named 取 leader、★再無取 0.5：
+	#     缺人管理的隊不該預設「最安全」）
+	#   ④醫療加成＝無（anon 沒有技能欄，照實給 0 不假裝有）
+	var anon_fit: int = AnonCohort.by_health(team.anon_cohorts, "healthy")
+	if anon_fit > 0:
+		var safety_proxy: float = _breed_safety_proxy(state, team, named_total, named_safe)
+		# balance 用 anon 兩性池（不帶 named +1 的偏移）：anon 是群體不是某一個人
+		var anon_balance: float = _breed_balance(team, "")
+		if anon_balance > 0.0 and safety_proxy > 0.0:
+			daily += BREED_BASE_RATE * f * anon_balance * float(anon_fit) * safety_proxy
+			if Probe.enabled:
+				Probe.bump("breed.eligible_anon")
+				Probe.note("breed.safety_proxy", safety_proxy)
+	if Probe.enabled and named_eligible > 0:
+		Probe.bump("breed.eligible_named")
 	if daily <= 0.0:
 		return
 	team.breed_progress += daily * elapsed_days
