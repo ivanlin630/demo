@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: convoy-return-t3-budget
-status: open
+status: consumed
 topic: "★gate9 T3 stranded specimen直寄(systems授權跳過中繼)：3筆stranded事件(porter100/118/164,parent25/31/30)故事稽核——我的趨勢判讀是猜測級(純距離序列反推,非動作序列),尤porter164(母隊靜止仍卡在dist=1未merge)需你motive→action→outcome坐實"
 ---
 
