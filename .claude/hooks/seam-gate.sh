@@ -31,26 +31,35 @@ ROOT="${_MAIN:-.}"; cd "$ROOT" || exit 2
 SPEC_D="docs/superpowers/specs"
 HB_D="docs/superpowers/handbacks"
 
-# 掃「頂層 frontmatter 宣告了 slice: <id>」的 md（只看前 12 行＝frontmatter 區）
-_decl_md() {  # $1=dir $2=slice
-  local d="$1" id="$2" f
+# ★單次 awk 掃描（2026-08-21 perf 修）：原版對每個檔 spawn 一次 head ⇒ 300+ 封信 ＝ 600+ 進程，
+#   實測【單次跑 1m47s】，當 merge 閘完全不能用。
+#   ★而 handback-inbox.sh 的檔頭正好記著 2026-07-05 修過同一個病（每檔 spawn 3 進程 → 33s 撞 timeout
+#   → 改單次 awk）——我寫這支時原封不動重犯了一次。這裡照同一個藥修。
+_scan() {   # 一次 awk 掃完 specs+handbacks，輸出：slice|kind|from|tier
+  #   ★分隔符用直線而非 tab：本檔經多層工具寫入，反斜線跳脫會被吃掉（實測踩過兩次）。
+  #   awk 內全程用 [[:space:]]、不寫任何反斜線 ⇒ 沒有可壞的地方。
+  #   ★perf：原版對每個檔 spawn 一次 head ⇒ 300+ 封信 = 600+ 進程，實測【單次 1m47s】完全不能當 merge 閘。
+  #   handback-inbox.sh 檔頭記著 2026-07-05 修過同一個病（改單次 awk），我寫這支時原封不動重犯一次。
   shopt -s nullglob
-  for f in "$d"/*.md; do
-    # ★取值後比對，不是整行比對：行尾常有註解／空白，整行比對會假陰性
-    #   （2026-08-21 真語料自測踩到：slice: 後面加了 HTML 註解，spec 命中數就掉回 0）
-    v=$(head -12 "$f" 2>/dev/null | grep -iE "^slice:" | head -1 | sed -e "s/^[Ss]lice:[[:space:]]*//" -e "s/[[:space:]]*<!--.*//" -e "s/[[:space:]]*#.*//" -e "s/[[:space:]]*$//" | tr -d '\r')
-    [ "$v" = "$id" ] && echo "$f"
-  done
+  local files=("$SPEC_D"/*.md "$HB_D"/*.md)
+  [ "${#files[@]}" -eq 0 ] && return 0
+  awk '
+    FNR==1 { sl=""; fr=""; ti=""; done=0; knd = (FILENAME ~ /specs/) ? "spec" : "hb" }
+    FNR<=12 {
+      low = tolower($0)
+      if (low ~ /^slice:/) { v=$0; sub(/^[^:]*:[[:space:]]*/,"",v); sub(/[[:space:]]*<!--.*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); sl=v }
+      if (low ~ /^from:/)  { v=tolower($0); sub(/^[^:]*:[[:space:]]*/,"",v); gsub(/[[:space:]]/,"",v); fr=v }
+      if (low ~ /^tier:/)  { v=$0; sub(/^[^:]*:[[:space:]]*/,"",v); sub(/[[:space:]]*<!--.*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); ti=v }
+      if (FNR==12 && sl != "" && !done) { print sl "|" knd "|" fr "|" ti; done=1 }
+    }
+    ENDFILE { if (!done && sl != "") print sl "|" knd "|" fr "|" ti }
+  ' "${files[@]}"
 }
-_decl_measure() {  # $1=slice ；.measure.json 用頂層 "slice" key（既有欄位，語意改為 branch slice id）
+
+_decl_measure() {  # .measure.json 用頂層 "slice" key
   grep -rl "\"slice\"[[:space:]]*:[[:space:]]*\"$1\"" docs --include='*.measure.json' 2>/dev/null
 }
-_any_decl_count() {  # 母體：宣告了任何 slice: 欄的產物總數
-  local n=0
-  n=$(( n + $(grep -lE "^slice:[[:space:]]*[a-z0-9]" "$SPEC_D"/*.md 2>/dev/null | wc -l) ))
-  n=$(( n + $(grep -lE "^slice:[[:space:]]*[a-z0-9]" "$HB_D"/*.md 2>/dev/null | wc -l) ))
-  echo "$n"
-}
+_any_decl_count() { _scan | awk -F'|' '$1!=""{n++} END{print n+0}'; }
 
 # ── 良品 fixture 自測（★證 regex/解析沒壞；對真語料格式跑，不是對想像跑）──
 if [ "${1:-}" = "--selftest" ]; then
@@ -85,26 +94,15 @@ if [ "${SEAM_SKIP_FLOOR:-0}" != "1" ]; then
   [ "$total" -eq 0 ] && echo "（母體 0：還沒有產物宣告 slice: 欄——只綁新寫的，舊產物不溯改，屬正常）"
 fi
 
-specs=$(_decl_md "$SPEC_D" "$SLICE"); hbs=$(_decl_md "$HB_D" "$SLICE"); meas=$(_decl_measure "$SLICE")
-n_spec=$(printf '%s' "$specs" | grep -c . || true)
-n_hb=$(printf '%s'  "$hbs"   | grep -c . || true)
+# ★一次掃描、四個數字全從同一份結果算（原版對每檔 spawn head，實測 1m47s）
+_S=$(_scan)
+n_spec=$(printf '%s\n' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $2=="spec"{n++} END{print n+0}')
+n_hb=$(printf '%s\n' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $2=="hb"{n++} END{print n+0}')
+n_rev=$(printf '%s\n' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $2=="hb" && $3=="reviewer"{n++} END{print n+0}')
+# tier：★只認派工單裡寫的（做的人不得自選）——取該 slice 第一個有 tier 的 handback
+TIER=$(printf '%s\n' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $4!=""{print $4; exit}')
+meas=$(_decl_measure "$SLICE")
 n_meas=$(printf '%s' "$meas" | grep -c . || true)
-n_rev=0
-if [ -n "$hbs" ]; then
-  while IFS= read -r f; do
-    [ -z "$f" ] && continue
-    head -12 "$f" | grep -qiE '^from:[[:space:]]*reviewer' && n_rev=$((n_rev+1))
-  done <<< "$hbs"
-fi
-# tier：★只認派工單裡寫的（做的人不得自選）
-TIER=""
-if [ -n "$hbs" ]; then
-  while IFS= read -r f; do
-    [ -z "$f" ] && continue
-    t=$(head -12 "$f" | grep -iE "^tier:" | head -1 | sed -e "s/^[Tt]ier:[[:space:]]*//" -e "s/[[:space:]]*<!--.*//" -e "s/[[:space:]]*#.*//" | tr -d ' \r')
-    [ -n "$t" ] && { TIER="$t"; break; }
-  done <<< "$hbs"
-fi
 
 echo "[seam-gate:${MODE}] slice=${SLICE}  tier=${TIER:-（未宣告）}"
 echo "  spec=${n_spec}  handback=${n_hb}  R²verdict=${n_rev}  measure=${n_meas}"
