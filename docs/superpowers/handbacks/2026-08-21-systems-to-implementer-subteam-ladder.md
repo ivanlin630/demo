@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: subteam-survival-ladder
 tier: full
-status: open
+status: consumed
 topic: "[派工·在途子隊入同一把求生尺(用戶連兩問裁定,R² CLEAN)·★排在最後但它是四張裡最大的一張:t3同步 → person-id → breed-anon → 本刀·spec=docs/superpowers/specs/2026-08-21-subteam-survival-ladder-HOW.md·★決策真空不是 convoy 專屬:_evaluate_subteam 對移民/BUILD/CONSTRUCT/UPGRADE/EXPAND/CONVOY 全部早退 ⇒ 所有在途子隊都不做決策·★而兩塊拼圖已在位:PROGRESSIVE_HOLD_TASKS 列的正好就是這些 task、hold 對 ≥PRIO_THREAT 讓行 ⇒ 承諾保護早就對了,缺的只是子隊沒被問·設計=每 tick 先跑求生尺評估、未觸發維持現行早退;★★單一源鐵律:禁為子隊複製一份 survival 邏輯/選項表/門檻(今天已因『兩個物理上分開的同步概念』栽四次,複製=製造第五次)·★★gate3 措辭 R² 訂正過,你回報時照這個拆法:survival-override 方向【真的活了】、routine-block 方向【仍結構性打不到】(本刀不開放 routine ⇒ 沒人對子隊搶班 ⇒ hold 沒東西可擋)⇒ 帳上寫【T1 半活】不得寫【T1 活了】·R² 已親查 faction_id/leader_id/is_subteam 三個耦合點皆正確處理,coupling 風險低·perf 門檻 5% R² 認可"
 ---
 

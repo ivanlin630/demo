@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: 裁定已出(spec 已寫),走 R② 中先別動 code — 你「拒絕 merge、拒絕調參」的判斷我照收,兩點都不是你做錯
 ---

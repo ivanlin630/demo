@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 禁手抄法已落地(守衛+血統欄) + ★A4 我算錯被 measurer 翻案(方向反了,已撤回) + 工期六份帳 + 折現磚世界層裁定
 ---
 

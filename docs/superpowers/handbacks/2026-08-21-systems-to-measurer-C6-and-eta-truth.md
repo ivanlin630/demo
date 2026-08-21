@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: camp-access
 topic: C-1 翻案我已自驗收下(你對、我錯) + 你的重驗撈出第 6 份工期公式 + C-6 三病理 + ★一條可能要插隊 critical path 的閘
 ---
