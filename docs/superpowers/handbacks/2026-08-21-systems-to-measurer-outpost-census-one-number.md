@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★★一個數字可能統一今天所有線 — peaceful 卷有幾個 tile 是「有主的 outpost」?(mint 0%/設施鏈斷/建材 0/冷啟動 可能全掛在同一顆)
 ---
 
