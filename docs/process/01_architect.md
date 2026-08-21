@@ -151,6 +151,28 @@ bash .claude/hooks/seam-gate.sh --selftest   # 良品 fixture：證儀器沒壞
 SEAM_MODE=hard bash .claude/hooks/seam-gate.sh
 ```
 
+### ★★P9 已轉 HARD（2026-08-21）
+
+**預設 `SEAM_MODE=hard` ＝ 缺件擋 merge**（`seam-gate.sh:27`）。轉換依據：
+
+1. **兩件對齊完成**（blueprint 核准的前置）：
+   ① measurer `.measure.json` 的 `slice` ＝ branch slice id（**只綁新寫**，已驗：`camp-access`／`estimator-audit`／
+   `breed-anon-eligible`／`convoy-return-*` 等新檔皆帶）
+   ② **HARD 只管轄「有含 `tier` 的 dispatch handback」的 slice**（派工票 ＝ 入場券，
+   自然排除紀律生效前的 slice；`seam-gate.sh:131-140`）
+2. **逐 slice 表零誤殺**：HARD 下的紅全部落在
+   **①在飛未 merge**（`camp-access`／`subteam-survival-ladder`）或**②未開工**（`eta-single-model`）——
+   **沒有任何一條「可 merge 卻被擋」**。
+3. **閘自己的成本已量**：**1.5s**（轉 HARD 前必量，見下方教訓）。
+
+★**已知殘影（不修，記錄即可）**：`convoy-return-conservation`／`monotonic-team-id`／`monotonic-person-id`
+**已 merge 進 main**（`merged=1`、`0 commits ahead`）但仍讀紅 —— 因為它們的量測產物寫在對齊紀律之前。
+**閘不會再擋它們**（東西已在 main），**紅字是歷史殘影不是誤殺**。
+★**看到這三條紅不要以為閘壞了** —— 這行字就是為了防那個誤判而寫的。
+
+**逃生門**：`SEAM_MODE=soft bash .claude/hooks/seam-gate.sh`。
+**自測**：`bash .claude/hooks/seam-gate.sh --selftest`（證解析沒壞，對真語料格式跑）。
+
 ### ★P9 SOFT 期觀察項：**spec 改了、派工單沒跟著改**（2026-08-21 立，blueprint 核准記錄）
 
 **血證（犯的人是 systems 自己，兩次）**：

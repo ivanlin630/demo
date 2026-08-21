@@ -24,7 +24,7 @@
 #   bash .claude/hooks/seam-gate.sh --selftest      # 良品 fixture 自測（證儀器沒壞）
 # exit: 0=通過（SOFT 永遠 0）/ 1=HARD 缺件 / 2=★儀器塌陷（母體地板或自測失敗）
 set -u
-MODE="${SEAM_MODE:-soft}"
+MODE="${SEAM_MODE:-hard}"   # ★2026-08-21 轉 HARD（兩件對齊完成+逐slice表零誤殺;逃生門 SEAM_MODE=soft）
 _MAIN="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" 2>/dev/null)"
 ROOT="${_MAIN:-.}"; cd "$ROOT" || exit 2
 

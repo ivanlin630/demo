@@ -207,7 +207,7 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 | **承諾即檔名**（信裡說「已派」必附檔名） | 🔔 | **收件端簽收時 `ls` 驗**（執行點在收件端）——`07 §承諾即檔名`。**機器不驗散文**，見下列 |
 | 「信裡承諾了一張票、但票沒開」 | 📜 | **無機器，且全自動化不可行**（**prose ≠ schema**）。★血證：systems 自己犯兩次（T3 派工單沒推／gate9 票只寫在被 consumed 的信裡）|
 | 量測主張保鮮期（R6） | 🔒 | `stale-claims.sh`（exit 1／2）**但只綁新寫的** |
-| 交接縫產物齊全（P9） | 🔔→🔒 | `seam-gate.sh` **現為 SOFT（只印不擋）**，baseline 穩定後轉 HARD |
+| 交接縫產物齊全（P9） | **🔒** | ★**2026-08-21 已轉 HARD（預設擋 merge）**。轉前兩件對齊完成（measurer `.measure.json` `slice`＝branch id；HARD 只管轄**有含 `tier` 派工單**的 slice）＋逐 slice 表**零誤殺**。逃生門 `SEAM_MODE=soft`。**已 merge 的舊 slice 仍讀紅＝歷史殘影，閘不會再擋它們**（見 `01_architect §P9`） |
 | 信箱主動觸發（別人寫信會叫醒你） | 🔔 | `inbox-watch.sh`（Monitor 事件） |
 | 每 turn 未讀提醒 | 🔔 | `handback-inbox.sh` |
 | **watcher 失聰偵測** | 🔔 | `handback-inbox.sh` 每 turn 閘（**warn-only／fail-open，刻意不擋**） |
@@ -216,7 +216,7 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 | L 層級判定（L1/L2/L3） | 🔔 | `layer-check.sh`（PreToolUse 注入提醒，**攔不住**） |
 | 長跑必經 QA 故事稽核 | 🔔 | `longrun-qa-gate.sh`（PostToolUse 注入，**攔不住**） |
 | **感知鐵律**（決策讀 belief 非 god-view） | 🔒**半** | `constitution_gate` 抓得到 `gv_mapscan`/`gv_teamstate` 這類**已指紋化**的 god-view；**新形態的隔空作用抓不到** |
-| **R② 每 slice 必過 reviewer** | 📜→🔔 | 以前**純散文**；P9 SOFT 後，**有宣告 `slice:` 的**才看得到（未宣告的仍在母體外） |
+| **R② 每 slice 必過 reviewer** | **🔒**（受 P9 管轄的 slice） | P9 HARD 後，**有含 `tier` 派工單的 slice 缺 R² verdict ＝ 擋 merge**；未宣告的仍在母體外（📜） |
 | status 所有權（寄件端不自寫 consumed） | 📜→🔔 | inbox-watch v2 會把「誤寫 consumed」的信**撈出來一次**（治得到症狀，治不到寫的人） |
 | **QA-ref 鎖閘**（含因果結論的 handback 必帶 `QA:<ref\|PENDING>`；無則 systems 拒鎖 spec） | 📜 | **無機器**——寫在 00_roles:30、由 systems 人工守。★「這段有沒有下因果結論」是判斷題，機器判不了；能機器化的只有「宣告了要 QA 卻沒附 ref」 |
 | 無斷點自動鏈（收信＝做完＋推下一站） | 📜 | 只有 `COMMIT-NO-LETTER` 間接偵測；**「有沒有推對下一站」沒有東西在看** |

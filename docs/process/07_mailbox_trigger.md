@@ -133,7 +133,7 @@ watchdog v4 不再問「有沒有東西在動」（v3 病：量測跑半天＝�
 
 ## ★P9：派工單 frontmatter 必帶 `slice:` 與 `tier:`
 
-本體與兩檔定義見 `01_architect §P9 交接縫`。要點：`slice:` ＝ branch 名去掉 `feat/`＝**唯一真相來源**；`tier:` **只寫在派工單**（其他產物不寫，免第二個真相）；**tier 由 systems 定，做的人不得自選**；**兩檔都不砍 review**。閘：`bash .claude/hooks/seam-gate.sh`（SOFT 只印不擋）。
+本體與兩檔定義見 `01_architect §P9 交接縫`。要點：`slice:` ＝ branch 名去掉 `feat/`＝**唯一真相來源**；`tier:` **只寫在派工單**（其他產物不寫，免第二個真相）；**tier 由 systems 定，做的人不得自選**；**兩檔都不砍 review**。閘：`bash .claude/hooks/seam-gate.sh`（★**2026-08-21 起預設 HARD ＝ 擋 merge**；逃生門 `SEAM_MODE=soft`）。
 
 ---
 
