@@ -1,5 +1,8 @@
 # Blueprint 交接快照(2026-08-20、compact 前)
 
+## ★掛起任務(2026-08-21 用戶令):三小刀+P9 HARD 對齊完工後→同步雲端模板 repo
+systems 交完「三小刀(QA閘機械化/beacon互斥+addA警告/worktree自動拆)+P9 對齊」完工信 → 把工作流檔同步到 https://github.com/ivanlin630/workflow-template-v(clone 已在 scratchpad):docs/process/*.md(含新 09_exam_gate,注意模板已有 09_workflow_principles 不同檔共存)+.claude/hooks/*.sh 全套+settings.json(若 hook 註冊變)+handbacks README;不帶 telegram 機密/專案 game 內容;push 用既有 gh 憑證。
+
 ## ★正在跑:12mo 大考二回(detached、勿中斷、禁平行 Godot)
 - peaceful leg 完(27min);warring leg day55/360 起跑 10:37、預估一天+(155 隊、avg_us 386k→843k 爬=**k 撞牆曲線現場直播=考後 LOD arc 的設計輸入**)
 - 用戶邊玩遊戲=**timing 段污染、世界結果不受影響**(決定性);考後補計時短窗(與訂單簿短窗同輪)
