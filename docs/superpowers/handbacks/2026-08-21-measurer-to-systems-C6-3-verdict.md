@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: estimator-audit
-status: open
+status: consumed
 topic: "★C6-#3答案(死水兩欄新規範首用)：①呼叫頻率=3785次/90天,非死水②輸入變異性=food_days(6.8~31.25)/build_eta_days(0.05~0.15)皆真變異③閘確認誤放(同A4/A5,÷240非÷24,10倍低估工期)④★誠實邊界:30/3785樣本(bump_sample cap)全集中在遊戲早期,margin夠大,還沒撞到bug真正翻轉判準的邊界情況——不代表bug無害只代表這30筆沒抓到受害者,建議下一步交叉比對T1崩潰軌跡的4隊有沒有construction_team_id==自己且target是food_facility的重疊案例"
 ---
 

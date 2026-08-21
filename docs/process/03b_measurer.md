@@ -159,6 +159,21 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 - **★通用長跑 dump 工具（`SpecimenDumpHelper`，2026-07-19 用戶偏好「任何長跑→QA，無 seed 亦可」）**：`scripts/debug/specimen_dump_helper.gd`（class_name）——`setup_from_env(state)` 讀 `SPECIMEN_TEAM_ID`（明確清單）或 `SPECIMEN_SAMPLE_N`（均勻抽 N 隊）→ 設 `state.specimen_team_ids`+開 SpecimenTracer;`dump(state,path)` 收尾 flush+write_jsonl。**兩開關未設=no-op 零成本**（既有床/determinism 安全）。**任何長跑（含 ad-hoc/unseeded 探索跑）掛得上**→出 QA 可讀 jsonl，非只 slice acceptance measure。範例 `scripts/debug/adhoc_specimen_demo.gd`（無 seed 2400tick）。QA 故事審不需 determinism→無 seed OK（但當 regression 閘仍需 seed=兩用途別混）。observer GUI ticker-dump 長跑卡死→用此 headless 法。
 - **交付路由**：故事性場合 handback 同寄 `to:blueprint`（藍圖判 release）+ trace 供 QA 讀（QA 稽核 handback 亦 `to:blueprint`）。
 
+### ④e ★★取樣偏差：`bump_sample` 是 **first-N**，不是隨機樣本（systems 立 2026-08-21）
+
+`probe_stats.gd`：`if arr.size() < cap: append` ⇒ **滿了就再也不記**。
+★**所有取樣證據永遠只是「最早的 N 筆」＝ 系統性早期偏差。**
+
+**交件要求**：
+1. ★**同時報【母體】與【樣本數】** —— 「4 筆都是 X」在 **母體=4** 與 **母體=4000 只看最早 4 筆**
+   之下，**意思完全相反**。
+2. ★**「樣本裡沒看到受害者」≠「沒有受害者」** —— 照 C6-#3 的寫法**明標邊界**
+   （measurer 自標「不代表 bug 無害，只代表這 30 筆沒抓到受害者」＝**正確示範**）。
+3. **重讀舊證據時一律帶這個保留。**
+
+**修法形狀（已記，不插隊）**：時間分層／對數間隔的**確定性**取樣
+（★**不得用 `randf`** —— 觀測儀器禁耗 global RNG，三跑 byte-identical 是硬條件）。
+
 ### ④d ★★★床的有效性：**先證「這張床上該子系統是活的」**（systems 立 2026-08-21，血證 T3）
 
 **母體地板（O2）要套到【床】本身，不只套到查詢結果。**
