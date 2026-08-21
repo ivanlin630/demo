@@ -1,0 +1,44 @@
+{
+  "slice": "breed-anon-eligible",
+  "ticket": "systems追票x3(survivor-foodflow→URGENT-wrong-metric→correction-not-a-bug收斂)：存活隊effective_food(非food_flow_avg)在day60→90漲跌、knife-edge隊數、team5 vs team10/11地形差異",
+  "measured_at_branch": "40ab0ab4(feat/breed-anon-eligible,.worktrees/breed-anon)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天(同前兩輪)",
+
+  "①存活隊effective_food(真實庫存)day60→90趨勢": {
+    "n(day60且day90都存活)": 16,
+    "中位Δeffective_food": 10.91,
+    "正成長佔比": "13/16 (81%)",
+    "判讀": "★★答systems的一刀分辨題：81%存活隊真實庫存在day60→90是成長的。這支持『擬真篩選、非世界破』——存活下來的隊確實在累積真實糧食，不是全體撐著等死。"
+  },
+
+  "②★★意外發現(非票面直接問，但強相關)：多數『存活隊』其實已萎縮成pop=1": {
+    "day60快照": "18隊仍存活，其中11隊pop=1(僅剩領主)、只有7隊(team1/2/3/4/6/7/8)pop>=2",
+    "判讀": "★這修正了『擬真篩選=強村存活』的直覺敘事——不是『強村活、弱村死』，而是**幾乎所有村都先被削到剩1人**，然後那1人的食物數學才變得容易打平(1人食量小)。與gate②先前發現的『day60起13-14/20隊萎縮到只剩領主』量級一致，這裡是同一現象的『之後怎樣』：剩1人後多數真的靠自己活下來(effective_food漲)，但這已經不是『村』的存續，是『個體survival』的存續。這個區分建議systems/blueprint留意：『81%正成長』回答的是『世界能不能養活倖存個體』，不完全等於『世界能不能養活村莊』。"
+  },
+
+  "③knife-edge隊數(★量測解析度警告)": {
+    "偵測法": "daily(每日1筆)採effective_food，high>=50後崩到<=5算1次週期(啟發式，非嚴謹訊號處理)",
+    "結果": "9/19隊在90天內至少出現1次『高峰後崩落』(team0/2/3/4/5/8/9/10/11各1次)",
+    "★★解析度警告(誠實自曝)": "systems原描述team5的knife-edge是『每~800 tick週期性+3.67注入後每心跳衰減-0.33』——這是tick級的細週期，我的採樣是day級(每240 tick才記1筆)，**看不到800-tick(~3.3天)這種sub-day週期**，只能看到『整個90天內有沒有出現過一次大起大落』。★★我這裡的knife_cycles=1(每隊)只證明『曾經高過一次又低過一次』，不能證明『持續在週期性拉鋸』——要精確回答『team5那種模式有幾隊』需要tick級或至少每日多次採樣重跑，本輪未做（不在原ticket的『不必重跑』範圍內，我判斷用現有daily解析度先給概略答案比空手更有用，但精度上誠實告知邊界）。"
+  },
+
+  "④team5 vs team10/11 地形/可及資源(day90快照)": {
+    "team5": {"pos": "(11,3)", "terrain": "forest", "tile_food": 49.0, "tile_food_cap": 49.0, "granary": "無自家糧倉", "coin": 705, "ef_day60": 0.0, "ef_day90": 2.3},
+    "team10": {"pos": "(16,2)", "terrain": "plains", "tile_food": 61.2, "tile_food_cap": 268.0, "granary": "無自家糧倉", "coin": 200, "ef_day60": 1.0, "ef_day90": 388.0},
+    "team11": {"pos": "(9,9)", "terrain": "plains", "tile_food": 50.4, "tile_food_cap": 186.0, "granary": "無自家糧倉", "coin": 200, "ef_day90": 457.4},
+    "判讀": "★★決定性差異＝tile_food_cap(地格食物產出上限)：team5所在forest tile cap僅49(且已頂格，無成長空間)；team10/11所在plains tile cap分別268/186，有大量headroom可累積。全存活隊快照顯示forest地格(team5 cap=49、team14 cap=51)系統性遠低於plains地格(多數100-400)。★coin不是瓶頸這點被獨立驗證：team5 coin=705(全場數一數二高)卻卡在ef≈2；team10/11 coin僅200卻ef暴衝到388/457——高coin買不到糧食的可能原因(我未深查，留給你們)：可能是市場/貿易系統沒有把coin轉換成食物的路徑，或forest地格本身產出上限鎖死讓覓食/生產雙雙碰頂。"
+  },
+
+  "全部16隊day60→90 effective_food明細": "見docs/measurements/breed-deathcause/branch-90d-effectivefood.txt 第18-35行",
+  "全部16隊地形/資源快照明細": "見同檔第38-54行",
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/branch-90d-effectivefood.txt",
+    "bed(擴充版,加effective_food/knife-edge/地形快照)": "scripts/debug/breed_deathcause_bed.gd(main+.worktrees/breed-anon逐字相同)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\breed-anon --script scripts/debug/breed_deathcause_bed.gd",
+
+  "cleanup": "busy beacon清除。bed本輪三度擴充(死因+崩潰軌跡+effective_food/knife-edge/地形)，累計功能已相當完整，建議留常設，交systems最終裁。"
+}

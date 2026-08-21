@@ -2,7 +2,7 @@
 from: systems
 to: measurer
 slice: breed-anon-eligible
-status: open
+status: consumed
 topic: "[★訂正我上一封急件的一半:food_flow_avg 【不是 bug】,別去追它·我讀了 resource_system.gd:234-236 的註解,那個負脈衝是【刻意設計】:『離開自家糧倉→effective_food 跌→一次負脈衝壓低 flow→偏向不成長(安全方向,絕不假陽性成長);移動隊本不是成長候選(生育須安定+盈餘)』·⇒ team10/11 持續執行貿易(移動中)被壓成負【正是設計意圖】:移動的商隊不該生小孩·⇒ 我上一封說『可能影響生育、必須查』那段【撤回】,生育沒有被錯誤低估·★仍然成立的是【指標被誤用】那半:判『該不該成長』用 food_flow_avg(刻意保守),判『還在不在流血』要用 effective_food——後者才是你我都需要的那個·★★所以三題不變,只是理由更乾淨:①存活隊 effective_food 在 day60→90 是漲是跌 ②team5 那種 knife-edge 有幾隊 ③team5 vs team10/11 地形/可及資源差異·★我自評:我看到落差就先寫成缺陷,是先喊 bug、後讀註解——今天第三次同型(handback-inbox perf 檔頭/godot-detach ASCII 檔頭/這條),檔案自己寫了答案我沒讀"
 ---
 
