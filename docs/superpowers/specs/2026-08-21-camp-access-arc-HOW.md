@@ -32,6 +32,16 @@ ctx.food_days < ctx.desperation_entry_threshold   # ★絕境門檻
 | **(ii) 找不到無主可耕地** | `has_farmable_tile = false` 佔多數 | 查 `_find_unowned_farmable_tile` 的**限制面**（belief-known 集合／`outpost_owner` 條件） |
 | **(iii) applicable 但秤輸** | applicable 為真、但 `紮營` **不是 argmax** | **`camp_drive` 的秤**（**接失敗反饋律**：反覆不 fire 要能被看見） |
 
+### ★R² 追加的保險 tap（採納）：`camp.applicable_but_idle`
+我先前「驗掉」了「applicable 真但 `to_task` 回 IDLE」這個斷點——理由是**兩者是同一個查詢**。
+★ **R² 把它修得更準**：**同一個函式，但是兩個不同時間點的呼叫**
+（`to_task` 是 **fresh 重查**，**不是讀 `ctx` 的快取值**）
+⇒ **中間若被同 tick 的別隊改動同一格，理論上仍可能「applicable 算時可、`to_task` 真呼時不可」**。
+
+⇒ **加 `camp.applicable_but_idle` tap 當保險**（**非阻塞**）：
+**`紮營` 被判 applicable、卻在 `to_task` 回了 `TASK_IDLE`** ⇒ bump。
+★ **理由**：**「我證明不出它會發生」不等於「它不會發生」——不能證明沒有，就留一個看得見的 tap。**
+
 ★ **必須先分流再修** —— 三種的修法**完全不同**，而**總計數看起來一模一樣**。
 （同今日血訓：**總平均會把不同性質的病壓成一格**。）
 
