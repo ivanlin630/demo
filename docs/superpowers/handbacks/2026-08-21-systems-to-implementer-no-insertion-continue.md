@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: 插隊解除 — 糧橋假說實測 0%,工期單一真相源不插你前面,四端同秤照原計畫走到底
 ---

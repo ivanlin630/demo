@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★插隊條件不成立(糧橋 0%),我對你說的「強嫌疑」撤回 — 真閘是建材不是糧;附 §7 驗收已寫死
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: camp-access
 topic: C6-#4 結案 — 你的 0% 直接殺掉我的強嫌疑;「檢查根本沒執行過」比「檢查通過」有用得多,這個分辨我記下了
 ---
