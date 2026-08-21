@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: camp-access
 topic: 接入 arc — ★三分流診斷完成（(ii) 死、(i)(iii) 各半、且是同一個 catch-22）＋ 已 de-patch (i)；★acceptance 未達成，剩下的 binding 是設計裁定，我沒動
 branch: feat/camp-access
