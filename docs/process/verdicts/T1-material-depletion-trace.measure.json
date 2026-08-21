@@ -1,0 +1,30 @@
+{
+  "slice": "estimator-audit",
+  "ticket": "blueprint票T1：28次dispatch_fail各缺哪種建材(逐次分類)+builder周邊庫存/產地中性trace+genuine-depletion vs bug分流",
+  "measured_at_head": "bbc0a3d0(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "faction_ai_system.gd:_dispatch_builder的資源檢查迴圈加6行sample tap(dispatch_fail.material_detail)，捕捉{team,resource,need_1.5x,avail,vault,private,home_mfg_level,tick}逐筆，Probe-gated零行為改動。",
+
+  "★★①28次全部缺同一種資源：material(100%)": {
+    "短缺資源種類分佈": {"material": 28},
+    "tools從未短缺": "OUTPOST_COST civilian的tools需求=0，civilian outpost本來就不吃tools，這條路徑上tools永遠不會成為瓶頸——不是漏查，是這個outpost_type本來就不需要tools。"
+  },
+
+  "★★★②比『缺哪種資源』更重要的發現：28次全部發生在tick=10(★世界開局第1小時)，90天內僅此一波，之後從未再嘗試過": {
+    "逐筆數據關鍵欄位(完整28筆見report)": "所有28筆的tick欄位=10，無一筆晚於tick10。vault(公庫)全部=0；private(私產)只有兩種值：0或20；need_1.5x固定75(=OUTPOST_COST civilian L1 material 50×1.5)；home_mfg_level全部=0(沒有一個team的腳下有manufacturing設施)。",
+    "★★判讀(依既有紀律分流)": "★這不是genuine-depletion(有因合理消費/世界機制——但這裡從頭到尾沒有『消費』這回事，vault從第一刻就是0，不是被榨乾的)。★也不完全是傳統『bug=無因機械榨乾』(沒有被榨乾，是從未被填過)。★★這是第三種：【冷啟動貧窮/雞生蛋死結】——世界起始時沒有team有75 material(私產最高20)，而material的唯一生產管道(manufacturing設施)本身需要material去建，且home_mfg_level全部=0=從未有team建成過manufacturing——沒有material→蓋不了manufacturing→沒有material來源→永遠蓋不了outpost，形成結構性死結，不是消費耗竭。",
+    "★更關鍵的『gate沒擋vs gate沒執行』分辨(套用你C6-4教我的框架)": "★★_dispatch_builder這個函式本身在90天內【只在tick=10附近被呼叫過這28次，之後整整89天再也沒被呼叫過一次】——不是『被material擋住89天持續失敗』，是『呼叫這個函式的上游判斷，只在世界剛開局時觸發過一輪，然後就再也不觸發了』。這比『material不夠』本身更值得關注：如果material之後補上了(例如某天material存量終於>=75)，但呼叫路徑已經不會再走到這裡，那修material本身不會讓dispatch重新發生——真正的缺口可能在『誰、什麼條件下會再次呼叫_dispatch_builder』，不是material數量。",
+    "★誠實邊界": "我沒有逐行追『誰呼叫_dispatch_builder、呼叫頻率的判斷條件是什麼』(這是決策層的上游code，非本輪查點)——這是我從『tick分佈全部=10』這個數字反推出的結構性推論，信心中等偏高(28筆tick分佈的證據很硬)，但『為什麼上游不再呼叫』本身需要另一輪code-read或tap才能坐實，非我這輪已驗證的結論，僅供你/implementer下一步查點方向。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/join-material-90d.txt",
+    "bed": "scripts/debug/join_accept_measure_bed.gd(main)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/join_accept_measure_bed.gd",
+
+  "cleanup": "busy beacon清除。dispatch_fail.material_detail sample tap建議留(補『缺哪種資源+何時發生』的細節盲點)，交systems判permanent。"
+}

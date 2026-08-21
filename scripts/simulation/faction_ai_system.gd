@@ -3741,6 +3741,13 @@ var _last_site_sig: Dictionary = {}
 var _last_dispatch_fail: Dictionary = {}
 
 func _log_dispatch_fail(faction_id: int, reason: String, cost: Dictionary) -> void:
+	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,C6-#4糧橋佔比票)：分類計數,fire於de-dup前=真實觸發率非只變化次數
+		var _cat: String = "資源不足" if reason.begins_with("資源不足") else \
+			("advisor不可用" if reason.begins_with("無 advisor") else \
+			("pop不足" if reason.begins_with("pop 不足") else \
+			("糧橋不足" if reason.begins_with("糧橋不足") else \
+			("subteam失敗" if reason.begins_with("subteam") else "其他"))))
+		Probe.bump("dispatch_fail." + _cat)
 	if _last_dispatch_fail.get(faction_id, "") == reason:
 		return
 	_last_dispatch_fail[faction_id] = reason
@@ -3779,6 +3786,12 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		if k == "ticks": continue
 		var avail: float = float(vault.get(k, 0)) + float(leader_team.resources.get(k, 0))
 		if avail < float(cost[k]) * 1.5:
+			if Probe.enabled:   # ★measurer L3 tap(2026-08-21,blueprint建材depletion trace票)：短缺資源種類+周邊生產中性trace
+				Probe.bump_sample("dispatch_fail.material_detail", {"team": leader_team.team_id,
+					"resource": k, "need_1.5x": float(cost[k]) * 1.5, "avail": avail,
+					"vault": float(vault.get(k, 0)), "private": float(leader_team.resources.get(k, 0)),
+					"home_mfg_level": (home_tile.manufacturing_level if home_tile != null else -1),
+					"tick": state.world.current_tick}, 30)
 			_log_dispatch_fail(leader_team.faction_id,
 				"資源不足 1.5x: %s 有 %.0f(公庫%.0f+私%.0f)" % [k, avail,
 				float(vault.get(k, 0)), float(leader_team.resources.get(k, 0))], cost)

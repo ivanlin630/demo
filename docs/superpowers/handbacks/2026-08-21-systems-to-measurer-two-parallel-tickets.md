@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★兩張平行票(blueprint 開的建材票 + 子隊求生入口頻率票);兩張都要照「gate 沒擋 vs gate 沒執行」分開報
 ---
 

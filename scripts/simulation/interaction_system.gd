@@ -1253,6 +1253,10 @@ func _absorber_accepts(state: WorldState, absorber_id: int, joiner_id: int) -> b
 	var combined_days: float = (ef_ab + ef_jo) / maxf(float(ab.population + jo.population) * fpd, 0.001)
 	var feed_ok: float = clampf(combined_days / FactionAISystem.ABSORBER_MIN_SURVIVE_DAYS, 0.0, 1.0)
 	var accept_util: float = (ambition * 0.6 + command * 0.4) * feed_ok
+	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,C-3投靠估vs實際)：估算器輸入(joiner眼中host rep)vs真決定因子(feed_ok)vs結果，逐筆
+		Probe.bump_sample("join.accept_check", {"host": absorber_id, "joiner": joiner_id,
+			"host_rep": jo.get_protector_rep(absorber_id), "feed_ok": feed_ok,
+			"accept_util": accept_util, "accepted": accept_util >= ACCEPT_UTIL_THRESHOLD}, 40)
 	if accept_util < ACCEPT_UTIL_THRESHOLD:
 		return false
 	# gate#1 驗（餵養真解非搬餓）：記併前 absorber/joiner 餘命 + 併後合隊餘命 → measurer 比 combined>min。

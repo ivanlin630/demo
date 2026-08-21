@@ -1,0 +1,39 @@
+{
+  "slice": "estimator-audit",
+  "ticket": "systems票C-3：投靠估的收容機率(join_drive term只秤host名聲)vs實際被收容率(_absorber_accepts真秤food)",
+  "measured_at_head": "bbc0a3d0(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "interaction_system.gd:_absorber_accepts加5行sample tap(join.accept_check)，捕捉{host,joiner,host_rep,feed_ok,accept_util,accepted}逐筆，Probe-gated零行為改動。既有accept.join_accept/accept.join_reject計數tap是production原有(非本輪新增)。",
+
+  "★★答案(★誠實邊界:n=4樣本小,peaceful_economy低衝突世界90天只觸發4次併入嘗試)": {
+    "accept.join_accept": 3,
+    "accept.join_reject": 1,
+    "實際收容率": "75.0% (3/4)",
+    "逐筆對照": [
+      {"host": 1, "joiner": 13, "host_rep": 0.5, "feed_ok": 1.0, "accept_util": 0.42, "accepted": true},
+      {"host": 3, "joiner": 11, "host_rep": 0.5, "feed_ok": 0.0, "accept_util": 0.0, "accepted": false},
+      {"host": 6, "joiner": 19, "host_rep": 0.5, "feed_ok": 1.0, "accept_util": 0.42, "accepted": true},
+      {"host": 1, "joiner": 3, "host_rep": 0.5, "feed_ok": 1.0, "accept_util": 0.42, "accepted": true}
+    ]
+  },
+
+  "★★意外發現(比75%這個數字更重要)：host_rep在全部4筆樣本裡恆為0.5(中性/預設值)，從未真的差異化過": {
+    "判讀": "★join_drive term的『名聲磁鐵』(REP_MAGNET_W=1.0，高名聲host投靠翻贏逃)這個機制在本輪90天內【一次都沒被真正差異化測試過】——所有joiner對所有host的protector_rep belief都停在冷啟動預設值0.5，沒有任何一筆樣本顯示過真實累積出的高/低名聲。⇒ 這正是C6-4學到的『gate沒擋 vs gate沒執行』分辨的同類病：不是『名聲磁鐵算錯』，是『名聲磁鐵這輪根本沒機會發揮作用過一次』(狀態=未爆非無害，同ledger §E-#4現在的標法)。",
+    "唯一的拒絕案例是genuine": "team3拒team11，feed_ok=0.0(合併後撐不住)——accept_util直接算成0，是真的『沒飯』擋下，不是名聲問題。這筆本身沒有問題，是_absorber_accepts正確運作的例子。",
+    "估錯方向1(高名聲卻被拒,估算器過度樂觀案例)": 0,
+    "估錯方向2(低/中性名聲但食力夠也被收,估算器可能低估案例)": "3(但這3筆的rep都只是預設值0.5，不是『真的被低估的高信任host』，跟估錯方向2的原意不完全吻合，僅供參考)"
+  },
+
+  "★誠實邊界": "n=4太小，無法對『名聲磁鐵是否真的失效』下結論——可能只是這90天窗口裡沒有任何一對team之間發生過足夠多次互動去累積出偏離0.5的protector_rep，不代表這個機制設計上有問題。若要更有信心的答案，建議：①拉長天數或多seed②換warring_states等衝突較多的config(投靠/併入在生存壓力大的世界應該更常觸發)③或直接查get_protector_rep的更新路徑，看它多快/多容易離開0.5(這是code讀，不需要重跑)。",
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/join-accept-peaceful-90d.txt",
+    "bed": "scripts/debug/join_accept_measure_bed.gd(main)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/join_accept_measure_bed.gd",
+
+  "cleanup": "busy beacon清除(本階段結束後)。join.accept_check sample tap建議留(補既有accept.join_accept/reject計數旁的因子細節)，交systems判permanent。"
+}
