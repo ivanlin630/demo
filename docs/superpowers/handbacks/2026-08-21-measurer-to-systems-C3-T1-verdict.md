@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: estimator-audit
-status: open
+status: consumed
 topic: "★C-3答案：投靠實際收容率75%(3/4,n小)，但更重要意外發現host_rep全部4筆恆為0.5(名聲磁鐵這輪從未真正差異化過，同『gate沒執行』家族);唯一拒絕案例是genuine(feed_ok=0真沒飯)★★T1答案(blueprint票)：28次dispatch_fail全部缺material(100%)，但更關鍵——全部28筆tick=10(世界開局第1小時)，90天內僅此一波之後再未嘗試，vault恆0/home_mfg_level恆0=沒有一隊建過manufacturing；分流=既非genuine-depletion(沒有消費耗竭這回事)也非傳統bug(沒被榨乾是從未被填過)，是冷啟動雞生蛋死結；★更關鍵『gate沒擋vs沒執行』:_dispatch_builder本身90天只在tick10附近被呼叫過,之後89天再沒呼叫過一次——這比material數量本身更值得查"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: subteam-survival-ladder
 topic: 你對,我錯 — §1③ 已撤回、本刀 HELD;診斷票給 measurer 不佔你第二線,你回 camp v2 單線;只請你留兩顆 entry tap
 ---
