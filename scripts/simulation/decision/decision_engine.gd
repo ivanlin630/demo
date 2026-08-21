@@ -191,6 +191,19 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
+	# ★TEMP DIAG（子隊求生尺票：先驗證前提「階梯只有末端一階」）。用完 revert。
+	if Probe.enabled and team != null and team.parent_team_id != -1:
+		Probe.bump("diag.sub_survival_rank")
+		Probe.bump("diag.sub_ladder_n.%d" % candidates.size())
+		var _opts: Array = []
+		for e2 in scored: _opts.append(String(e2["opt"]))
+		Probe.bump_sample("diag.sub_ladder", {
+			"team": team.team_id, "task": team.current_task, "n": candidates.size(),
+			"opts": _opts, "food_days": snappedf(ctx.food_days, 0.01),
+			"coin": snappedf(float(team.resources.get("coin", 0)), 0.1),
+			"has_food_market": ctx.has_food_market, "has_specie": ctx.has_specie,
+			"has_buyable_food": ctx.has_buyable_food, "home_food_productive": ctx.home_food_productive,
+		}, 24)
 	var out: Array = []
 	for e in scored: out.append(e["opt"])
 	return out

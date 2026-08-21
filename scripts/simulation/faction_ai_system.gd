@@ -4773,6 +4773,11 @@ func _richest_member(state: WorldState, f) -> int:
 	return best_tid
 
 func _evaluate_survival(state: WorldState, team: TeamData) -> void:
+	# ★求生尺入口可觀測（systems 2026-08-21 指派；全量暫態可觀測性：決策入口不能是盲點）。
+	# ★兩顆缺一不可：分清「沒被呼叫」vs「呼叫了但上游 gate 擋掉」——今天才被同形問題咬過一次
+	#   （糧橋那顆看似誠實，實際是上游 gate 先短路、那段一次都沒執行過＝未爆而非沒錯）。
+	if Probe.enabled and team.parent_team_id != -1:
+		Probe.bump("survival.entry_called.subteam")
 	if team.leader_id == state.player_id and state.player_id != -1:
 		return
 	# 紮營到達結算（W1 hoist）：在 TASK_CAMP 途中，腳下若為無主可農地即立 crude camp + 釋放。
@@ -4795,6 +4800,8 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	#   全退會無求生評估→餓死 zombie(reviewer 抓的 regression)。
 	if uses_unified(team) or team.parent_team_id == -1:
 		return   # unified 任隊 / 非子隊 → 求生走引擎(DecisionEngine);舊系統不雙觸發
+	if Probe.enabled and team.parent_team_id != -1:
+		Probe.bump("survival.entry_passed.subteam")   # ★放行：子隊真的進到求生評估
 	# S2 礦村：建造子隊在途或施工中（TASK_CONSTRUCT/TASK_BUILD + parent 存在）→ 豁免求生打斷。
 	# 背景：礦山偏遠、FAR 區 LOD 移動慢，bootstrap food 在途中耗盡；famine grace 7天。
 	# builder 到達後立即起建（BUILD），山地 ore harvest 可快速補糧，不會死亡殭屍。
