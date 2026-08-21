@@ -1,0 +1,31 @@
+{
+  "slice": "estimator-audit",
+  "ticket": "systems票(★最高優先,一個數字)：peaceful_economy全期owned outpost數(outpost_level>0且outpost_owner!=-1)+是否有中途新增；併同C6-#1棄工抖動(construct.progress vs construct.stall)",
+  "measured_at_head": "21a51f68(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★★★outpost普查答案：0個中途新增，鏈成立": {
+    "day0(config開局自帶)": 11,
+    "day90(全期結束)": 9,
+    "遊戲中途新增的outpost數": 0,
+    "判讀": "★★★這條鏈成立：peaceful_economy全期沒有任何一個新outpost被建成——全部owned outpost都是config開局自帶(11個)，90天下來只有【減少】(11→9，兩個消失，可能滅團/decay，非本輪深查)，從未增加。這直接驗證了`outpost.l0_to_l1=0`(你已實測)的下游意義：不只是『這個計數器是0』，是『整條從無到有蓋出一個outpost的鏈，90天內連一次都沒成功過』。設施鏈斷(mint 0%等)的真上游確實可能是『根本沒有人有新outpost可蓋設施』——你的假說在這個數字上成立，`afford×1.5`那個閘的前提(它有沒有被走到)確實需要重驗。"
+  },
+
+  "★C6-#1棄工抖動(用既有construct.progress/construct.stall production tap，零新增)": {
+    "construct.progress(有隊在場真的在推進)": 344,
+    "construct.stall(有工地但無隊在場推進)": 5871,
+    "stall佔比": "94.5% (5871/(344+5871))",
+    "判讀": "★工地『有標記但沒人在推進』的狀態佔壓倒性多數(94.5%)——這與75%棄置率/89%棄置率(前次C6-4發現的camp.abandoned)同源：不管是camp(L0)還是outpost construction(L1+)，共同模式是『標記了要蓋但實際執行時間極少』。這與outpost普查的『從未新增一個outpost』互相印證：construction機制本身在90天裡幾乎都在stall狀態，只有極少數tick真的有人在場推進，這解釋了為何即使有蓋的『意圖』(construction_team_id/target設了)，也幾乎不會真的蓋成。",
+    "★誠實邊界": "construct.stall是ticks累計(每次hourly cadence檢查都可能重複算同一個停滯中的工地)，不是『N個不同的棄工事件』——5871這個數字混合了『少數幾個工地長期停滯』和『很多次短暫停滯』兩種可能，沒有拆分成『distinct工地數』vs『累計停滯tick數』。若要更精確回答『幾次決定去蓋→中途棄』，需要另外追蹤『每個construction_target從開始到結束(complete或timeout)的最終命運』，本輪用既有tap只能給出聚合的progress:stall比例，未做這層拆分。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/outpost-census-90d.txt, docs/measurements/breed-deathcause/C6-1-abandon-90d.txt",
+    "bed": "scripts/debug/join_accept_measure_bed.gd(main)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/join_accept_measure_bed.gd",
+
+  "cleanup": "busy beacon清除。"
+}

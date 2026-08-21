@@ -21,6 +21,12 @@ func _run() -> void:
 	if config.is_empty(): print("[FAIL] config"); return
 	config["seed"] = sd
 	GameSetup.setup(state, config)
+	# ★systems票(最高優先,一個數字)：day0(config開局自帶)owned outpost普查
+	var owned_day0: Array = []
+	for tid0 in state.world.tiles:
+		var tt0: HexTileData = state.world.tiles[tid0]
+		if tt0.outpost_level > 0 and tt0.outpost_owner != -1:
+			owned_day0.append({"tile_id": tid0, "pos": [tt0.tile_pos.x, tt0.tile_pos.y], "owner": tt0.outpost_owner, "level": tt0.outpost_level})
 	var no_player := Vector2i(-1, -1)
 	for tick in range(days * WorldState.TICKS_PER_DAY):
 		runner.advance_tick(state, no_player)
@@ -115,6 +121,31 @@ func _run() -> void:
 		if ratios.size() > 0:
 			lines.append("  raw_ratio分佈(取樣%d筆,不受first-N影響因eval/saturated是plain counter)：min=%.2f max=%.2f median=%.2f" % [
 				ratios.size(), ratios[0], ratios[-1], ratios[ratios.size()/2]])
+	# ★systems票C6-#1：棄工抖動(決定去蓋→中途棄)——用既有construct.progress/construct.stall production tap，零新增
+	lines.append("★★C6-#1棄工抖動：construct.progress vs construct.stall(既有tap,無新增)：")
+	lines.append("  construct.progress(有隊在場真的在推進) = %d" % int(Probe.counts.get("construct.progress", 0)))
+	lines.append("  construct.stall(有工地但無隊在場推進)   = %d" % int(Probe.counts.get("construct.stall", 0)))
+	if Probe.samples.has("construct.stall"):
+		lines.append("  ★stall樣本(前若干筆，含施工隊當下task/reason，判斷『棄』的樣貌)：")
+		for smp6 in (Probe.samples["construct.stall"] as Array):
+			lines.append("    %s" % str(smp6))
+	# ★systems票(最高優先,一個數字)：day90 owned outpost普查 + 對照day0(有無中途新增)
+	var owned_day90: Array = []
+	for tid9 in state.world.tiles:
+		var tt9: HexTileData = state.world.tiles[tid9]
+		if tt9.outpost_level > 0 and tt9.outpost_owner != -1:
+			owned_day90.append({"tile_id": tid9, "pos": [tt9.tile_pos.x, tt9.tile_pos.y], "owner": tt9.outpost_owner, "level": tt9.outpost_level})
+	lines.append("★★★outpost普查(最高優先一個數字)：")
+	lines.append("  day0(config開局自帶) owned outpost數 = %d" % owned_day0.size())
+	for o in owned_day0: lines.append("    %s" % str(o))
+	lines.append("  day90(全期結束) owned outpost數 = %d" % owned_day90.size())
+	for o in owned_day90: lines.append("    %s" % str(o))
+	var day0_ids: Dictionary = {}
+	for o in owned_day0: day0_ids[int(o["tile_id"])] = true
+	var new_since: Array = []
+	for o in owned_day90:
+		if not day0_ids.has(int(o["tile_id"])): new_since.append(o)
+	lines.append("  ★遊戲中途新增的outpost數 = %d (%s)" % [new_since.size(), str(new_since)])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
