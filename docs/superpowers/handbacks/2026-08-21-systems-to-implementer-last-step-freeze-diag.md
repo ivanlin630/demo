@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: last-step-freeze
 tier: probe
-status: open
+status: consumed
 topic: "[派工·★診斷票只產答案不產修法(同前兩張規格)·題目:『明明相鄰卻不走最後一步』——QA 逐 tick 讀 specimen 坐實,三筆 convoy stranded 的 porter【全部】在走到相鄰格後連續多個判斷週期一步不走,直到 T3 逾時把它們收掉·porter100 [17,18]→[16,19] 凍 240tick/porter118 [10,12]→[11,11] 凍 200tick/porter164 [10,15]→[10,14] 一進 RETURN 即刻凍(最乾淨樣本)·★我已幫你排除一個假設:三筆差值 (-1,1)/(1,-1)/(0,-1) 全在 PathSystem.HEX_DIRS 裡=真六角相鄰,不是度量錯配,就是最後一步不走·QA 建議的可疑方向(未驗):移動系統的『已到達判定』/convoy 的 move_target 更新與移動 cadence 沒對齊/相鄰格被判成已到達但 tile_pos 沒真寫入·★連帶一起查:porter164 在 OUTBOUND→RETURN 那刻 material 沒從 30.00 掉(其他乾淨案例都會掉一截)⇒ 懷疑連貨都沒真交割;若『到達判定沒觸發』是共同根因,交割不觸發就說得通·★★這個缺陷之所以今天才被發現,是因為 T3 逾時兜底【一直正確地】把它們收掉、把現場清乾淨了"
 ---
 
