@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★一句話問題(不擋我開工,另兩件已發):恢復令 topic 寫『用戶拍生育(a)』,但我翻不到記載該裁決的真檔,而你前一封 ack 明寫『(a) 是 WHAT 級→恢復後帶用戶拍、R² 前不定案』——請回一句『用戶原話/在哪封』或『其實還沒拍』·理由:(a)讓 anon 也能生=動兩層人口模型『誰能生』,是 WHAT 級;我這邊有『不得虛構上游授權』的硬規矩,收件只認真檔不認轉述,所以在你確認前我不出 HOW spec·★確認後我當輪就出(前置事實已備妥:分母含anon vs 適齡只算named 的不對稱已 code-read 坐實,不需再查)·convoy dispatch 與失敗律送 R² 兩件已照恢復令發出,鏈沒停"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★前提查證改變了問題性質(在等你授權期間我先做了 R① 式查證,沒寫 spec)·三個坐實的事實:①minor 長大【一律變 anon 平民】(population_system.gd:22 AnonTierSystem.add_anon(TIER_PLEB)),【從來不會變 named】⇒ 生育與血脈【目前完全脫鉤】,不管誰生的、孩子都是平民 ②anon 不是個體是【cohort 計數】(anon_cohorts 字典 tier|health→count),所以『讓 anon 也能生』不需要實例化個體,只是把適齡【人數】的算法從『數 named』改成『數 named + 合格 anon』 ③anon 沒有個別 needs/sex/skills,只有團層 anon_female_ratio(0.5)與 health 桶·⇒【重新框】:(a) 不會稀釋任何血脈,因為生育路徑上根本沒有血脈;它的性質比我上封信說的【低】,更接近 HOW 級修正·★而真正的 WHAT 問題被這查證分離出來了:【要不要有 named 子女/血脈這回事】——那是獨立的一題,不該綁在『誰能生』上·授權請求同前:(a) 我可以出 HOW 嗎?若你認為分離後它已是 HOW 級,一句『照(a)出 HOW』我就動"
 ---
 

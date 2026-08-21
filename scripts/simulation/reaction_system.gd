@@ -396,7 +396,7 @@ func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) 
 		state.add_member(t, person.id)   # 入隊：append + team_id 回指
 		return
 	var ot := TeamData.new()
-	ot.team_id = _next_team_id(state)
+	ot.team_id = state.consume_next_team_id()
 	ot.tile_pos = pos
 	state.set_team_faction(ot, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
 	state.set_team_tags(ot, ["流亡"], "solo_exile")
@@ -409,11 +409,6 @@ func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) 
 	print("[Reaction] Person%d 離團自立流亡 Team%d at (%d,%d)" % [
 		person.id, ot.team_id, pos.x, pos.y])
 
-func _next_team_id(state: WorldState) -> int:
-	var max_id: int = -1
-	for tid in state.teams:
-		if tid > max_id: max_id = tid
-	return max_id + 1
 
 func _maybe_write_memory(person: PersonData, reaction: String, tick: int) -> void:
 	if reaction in ["none", "P1_comply", "P2_produce"]:

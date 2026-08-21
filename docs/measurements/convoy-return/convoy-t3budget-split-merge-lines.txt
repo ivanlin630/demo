@@ -1,0 +1,10 @@
+[Merge] Team5 ← Team12 完全合併 (pop=6)
+[Merge] Team1 ← Team12 完全合併 (pop=7)
+[Merge] Team2 ← Team15 完全合併 (absorber_pop=7)
+[Merge] Team7 ← Team20 完全合併 (pop=5)
+[Merge] Team6 ← Team0 完全合併 (absorber_pop=7)
+[Merge] Team7 ← Team20 完全合併 (pop=5)
+[Merge] Team6 ← Team21 完全合併 (absorber_pop=7)
+[Merge] Team3 ← Team22 完全合併 (pop=5)
+[Merge] Team3 ← Team20 完全合併 (pop=5)
+[Split] Team24 回歸失敗（母團滿員），獨立為新分團

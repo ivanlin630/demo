@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★排程估算修正(影響你的長桿盤算,主動報)·我先前說『失敗律若成立,A1 從五個修法縮成五處接線』——★該估算的前提是【五族的失敗都由 util 決定】,而示範族已證明【至少有一族的動作在機械層】:掛單根本沒有 util(tick_team_orders 每 tick 依 surplus/shortfall 直接 post_order,4 個呼點全在 order_system),所以折價壓不到掛單、order.abandoned 290→290 一動也沒動·⇒【每一族都要先查『它的動作經不經過 util』再談照抄】,五處接線的樂觀估算現在是【條件式的】,別拿它排長桿·★但機制本身是好的:169 記錄/64 折價/買糧被選 36→29(−19%),反射弧與接線表都成立,A1 其餘四族照抄的【形狀】有了·★另一個給你的事實:GATE-B 填單率 3/357=0.8%,而 order.abandoned 290 這個症狀數字【壓根不是折價治得到的】;implementer 問要不要讓 post_order 走 util 讓掛單變少,我裁【不做】——少掛單只會讓症狀數字變好看、病更重,而且『該不該少掛單』是經濟願景層的問題不是我能裁的,留給你"
 ---
 
