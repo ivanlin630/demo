@@ -1,0 +1,63 @@
+{
+  "slice": "breed-anon-eligible",
+  "ticket": "systems票(2026-08-21)：①獨立驗生育(a) gate①②死因分佈+『掉到pop=1』隊軌跡(第二件比第一件重要)",
+  "measured_at_head_main_baseline": "289d6f06(main)",
+  "measured_at_branch": "40ab0ab4(feat/breed-anon-eligible,.worktrees/breed-anon)",
+  "measured_date": "2026-08-21",
+
+  "★L3聲明": "scripts/simulation/health_system.gd:check_starvation_deaths 原僅print無Probe計數(named餓死/失血完全measure盲點)——補1行Probe.bump(death.starve_named_hunger/bleed)，Probe-gated、零行為改動。同步port到main與.worktrees/breed-anon(該檔兩邊逐字相同,零diff)。",
+
+  "①gate①獨立驗證(同床=breed_anon_measure_bed.gd邏輯併入新床,同seed1337/peaceful_economy/90天)": {
+    "baseline(main,289d6f06)": {"breed.born": 1, "pop_total": "72→35", "teams_end": 17, "eligible_named": "0(tap不存在於main)", "eligible_anon": "0(同上)"},
+    "branch(40ab0ab4)": {"breed.born": 5, "pop_total": "72→43", "teams_end": 16, "eligible_named": 305, "eligible_anon": 305, "safety_proxy_peak": 1.0},
+    "判讀": "與implementer自報數字逐項吻合(born 1→5、pop 72→35變72→43、eligible_anon=305)——★★獨立複現成功,gate①CONFIRMED。"
+  },
+
+  "②★★死因分佈+崩潰軌跡(同seed/config/天數,baseline與branch分別跑)": {
+    "baseline死因(90天累計)": {"death.starve_anon": 25, "death.starve_named_hunger": 2, "death.defect_leave": 19, "extinct.starve": 2, "extinct.other": 1},
+    "branch死因(90天累計)": {"death.starve_anon": 20, "death.starve_named_hunger": 1, "death.defect_leave": 19, "extinct.starve": 1},
+    "死因判讀": "★兩者death.defect_leave恆為19(無差)、starve_anon branch略低(20<25,extinct.starve 1<2)——生育(a)讓部分瀕危村多撐一點,但量級/形狀不變:starve_anon與defect_leave是兩大主因,規模相當(非死因單一)。★死因新tap(death.starve_named_hunger)顯示named因餓死直接死亡的案例很少(1-2例)——多數named是靠defect_leave(N1_flee/N3_defect反應)先脫隊而非活活餓死,即『先跑不等死』。",
+
+    "逐10日桶(baseline+branch高度一致，day40/50是主要死亡波峰)": {
+      "day40": "starve_anon 5, defect_leave 7",
+      "day50": "starve_anon 14(branch同), defect_leave 3",
+      "day60起": "急遽趨緩(day70/80每桶defect_leave 3-4、starve_anon 0-2)",
+      "判讀": "★這不是持續穩態死亡,是一波集中在day30-60的『早期篩選』——之後存活隊進入相對穩定期。時間分佈本身就是重要發現:不是『世界持續在死人』,是『開局前60天篩掉弱勢村,之後穩定』。"
+    },
+
+    "崩潰隊(pop>=2→<=1)軌跡(branch跑,4筆,baseline逐字相同trail↔確認非branch造成)": {
+      "team10": "day29(pop6)→day38(pop1)，famine_days 1.67→10.83單調爬升不曾中斷；food_flow_avg全程負(-2.64→-0.39，變小是因為人少了少吃不是止血)；task輪替 貿易→治理→覓食(非卡單一task)；named_n day31時1人、day32起變0(named先走剩anon)",
+      "team5": "day36(pop5)→day45(pop1)，famine_days 1.67→10.83同型；task輪替 return_home↔覓食",
+      "team11": "day37(pop5)→day46(pop1)，famine_days 1.25→10.42同型；★day45出現task=投靠(尋求收容的逃生嘗試)，day46建設——並非放棄，是嘗試過逃生仍未脫險",
+      "team0(第4筆補列)": "day39(pop6)→day48(pop1)，同型",
+      "共同特徵": [
+        "famine_days單調爬升、無一次歸零/中斷(★代表這些隊從未有一次成功止血的窗口，不是偶發挨餓)",
+        "food_flow_avg全程為負，數值縮小只因pop減少(少人少吃)，不是流入轉正——★不是『快恢復了』，是『還在流血只是流量變小』",
+        "task在覓食/貿易/治理/建設/return_home/投靠間正常輪替，非卡死單一task或凍結——★隊伍持續嘗試多種生存手段(含投靠=尋求收容)，非手不聽腦執行斷",
+        "minor全程=0——這些隊從未生過小孩(即使有生育(a)也一樣，因為它們的food窗口從未轉正過，適齡評估過不了f(rel_surplus))"
+      ]
+    },
+
+    "★整體判讀(供systems/blueprint裁,非我判決)": "這4筆軌跡呈現的是【結構性長期糧食負流】——團隊有主動嘗試(換task/投靠)但food_flow_avg從未轉正，famine_days單調不歸零直到死到剩1人才(因為少人少吃)自然趨緩。依既有『genuine-depletion vs盲派』判準([[feedback_resource_depletion_genuine_vs_blind]])：★這看起來偏genuine(隊有回應世界狀態、非決策不讀資源盲派)，但『food_flow_avg為何持續為負且從未轉正』本身是否有機械/規模經濟根因，我未深挖(不在本票範圍)——若要往下查建議查該4隊的resource收支明細(生產vs消耗vs人口比)。"
+  },
+
+  "★specimen": {
+    "路徑": "docs/measurements/breed-deathcause/branch-90d.specimen.jsonl(1839 entries)",
+    "team覆蓋": "{5: 580, 10: 558, 11: 636, 12: 44, 13: 21}(★12/13為血緣鏈自動納入的子隊，非主動挑選)",
+    "tick覆蓋": "5/10/11三隊皆tick=10~21600(全90天)，涵蓋各自崩潰窗口(team10 day29-38≈tick6960-9120、team5 day36-45≈tick8640-10800、team11 day37-46≈tick8880-11040)",
+    "去向": "behavior因果宣稱(『為何這些隊會結構性掉人』)，依標準流程直寄QA故事稽核。",
+    "repro(deterministic驗證)": "同seed同config重跑branch兩次(有/無SPECIMEN_TEAM_ID)得到逐字相同collapse trail，確認可重現。"
+  },
+
+  "landed_paths": {
+    "bed": "scripts/debug/breed_deathcause_bed.gd(main + .worktrees/breed-anon逐字相同副本)",
+    "baseline_report": "docs/measurements/breed-deathcause/baseline-90d.txt",
+    "branch_report_pass1(無specimen)": "docs/measurements/breed-deathcause/branch-90d-pass1.txt",
+    "branch_report_specimen": "docs/measurements/breed-deathcause/branch-90d-specimen.txt",
+    "specimen": "docs/measurements/breed-deathcause/branch-90d.specimen.jsonl"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; $env:SPECIMEN_TEAM_ID='10,5,11'; $env:SPECIMEN_OUT='<path>.specimen.jsonl'; .\\tools\\godot.ps1 --headless --path <main或.worktrees\\breed-anon> --script scripts/debug/breed_deathcause_bed.gd",
+
+  "cleanup": "busy beacon清除。bed建議留常設(死因+崩潰軌跡是通用診斷需求,同convoy系列beds先例)，交systems裁。health_system.gd的L3 tap(death.starve_named_hunger/bleed)同樣建議留(補既有盲點,零行為改動)，交systems判是否permanent。"
+}

@@ -1,0 +1,63 @@
+[peaceful_economy day 90 seed 1337] teams=17
+  pop_total 72 → 35｜named 25｜minors 0
+  breed.born               = 1
+  breed.eligible_named     = 0
+  breed.eligible_anon      = 0
+  ★★死因分佈(合計,累加不分桶)：
+    death.starve_anon              = 25
+    death.starve_named_hunger      = 2
+    death.defect_leave             = 19
+    extinct.starve                 = 2
+    extinct.other                  = 1
+  ★★死因逐10日桶(day, key=delta，只列非全0的桶)：
+    day= 40 { "death.starve_anon": 5, "death.defect_leave": 7 }
+    day= 50 { "death.starve_anon": 14, "death.defect_leave": 3 }
+    day= 60 { "death.starve_anon": 1, "death.defect_leave": 1 }
+    day= 70 { "death.starve_anon": 2, "death.defect_leave": 4 }
+    day= 80 { "death.starve_anon": 2, "death.starve_named_hunger": 1, "death.defect_leave": 3, "extinct.starve": 1, "extinct.other": 1 }
+    day= 90 { "death.starve_anon": 1, "death.starve_named_hunger": 1, "death.defect_leave": 1, "extinct.starve": 1 }
+  ★★崩潰隊(pop>=2→<=1)逐筆+trailing history(最近10日快照)：
+    ---- team=10 day=38 famine_days=10.8 named_n=0 minor_before=0 task=覓食 tags=["統領", "生產"] ----
+      { "day": 29, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 1.66666666666667, "task": "貿易", "food_flow_avg": -2.63533942170782, "tags": ["統領", "生產"] }
+      { "day": 30, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 2.91666666666667, "task": "貿易", "food_flow_avg": -2.02988239021592, "tags": ["統領", "生產"] }
+      { "day": 31, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 3.75, "task": "貿易", "food_flow_avg": -1.70566506400087, "tags": ["統領", "生產"] }
+      { "day": 32, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 4.58333333333333, "task": "貿易", "food_flow_avg": -1.43323244961185, "tags": ["統領", "生產"] }
+      { "day": 33, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 5.83333333333333, "task": "治理", "food_flow_avg": -1.10395392964894, "tags": ["統領", "生產"] }
+      { "day": 34, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 6.66666666666667, "task": "治理", "food_flow_avg": -0.92762795477446, "tags": ["統領", "生產"] }
+      { "day": 35, "pop": 4, "minor": 0, "named_n": 0, "famine_days": 7.91666666666667, "task": "覓食", "food_flow_avg": -0.71450972673889, "tags": ["統領", "生產"] }
+      { "day": 36, "pop": 3, "minor": 0, "named_n": 0, "famine_days": 8.75, "task": "覓食", "food_flow_avg": -0.60038664538476, "tags": ["統領", "生產"] }
+      { "day": 37, "pop": 2, "minor": 0, "named_n": 0, "famine_days": 9.58333333333333, "task": "覓食", "food_flow_avg": -0.50449155619136, "tags": ["統領", "生產"] }
+      { "day": 38, "pop": 1, "minor": 0, "named_n": 0, "famine_days": 10.8333333333333, "task": "覓食", "food_flow_avg": -0.38858695676545, "tags": ["統領", "生產"] }
+    ---- team=5 day=45 famine_days=10.8 named_n=0 minor_before=0 task=return_home tags=["統領", "生產"] ----
+      { "day": 36, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 1.66666666666667, "task": "return_home", "food_flow_avg": -2.25345132573829, "tags": ["統領", "生產"] }
+      { "day": 37, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 2.5, "task": "return_home", "food_flow_avg": -1.89352507232176, "tags": ["統領", "生產"] }
+      { "day": 38, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 3.75, "task": "return_home", "food_flow_avg": -1.45849645327561, "tags": ["統領", "生產"] }
+      { "day": 39, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 4.58333333333333, "task": "return_home", "food_flow_avg": -1.2255421586552, "tags": ["統領", "生產"] }
+      { "day": 40, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 5.83333333333333, "task": "覓食", "food_flow_avg": -0.94397952151046, "tags": ["統領", "生產"] }
+      { "day": 41, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 6.66666666666667, "task": "覓食", "food_flow_avg": -0.79320501460254, "tags": ["統領", "生產"] }
+      { "day": 42, "pop": 4, "minor": 0, "named_n": 0, "famine_days": 7.5, "task": "覓食", "food_flow_avg": -0.66651254699241, "tags": ["統領", "生產"] }
+      { "day": 43, "pop": 3, "minor": 0, "named_n": 0, "famine_days": 8.75, "task": "覓食", "food_flow_avg": -0.51338437502714, "tags": ["統領", "生產"] }
+      { "day": 44, "pop": 2, "minor": 0, "named_n": 0, "famine_days": 9.58333333333333, "task": "return_home", "food_flow_avg": -0.43138548179364, "tags": ["統領", "生產"] }
+      { "day": 45, "pop": 1, "minor": 0, "named_n": 0, "famine_days": 10.8333333333333, "task": "return_home", "food_flow_avg": -0.33227666450656, "tags": ["統領", "生產"] }
+    ---- team=11 day=46 famine_days=10.4 named_n=0 minor_before=0 task=建設 tags=["統領", "生產"] ----
+      { "day": 37, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 1.25, "task": "治理", "food_flow_avg": -0.43456336856037, "tags": ["統領", "生產"] }
+      { "day": 38, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 2.5, "task": "治理", "food_flow_avg": -0.33472444650107, "tags": ["統領", "生產"] }
+      { "day": 39, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 3.33333333333333, "task": "治理", "food_flow_avg": -0.28126151407382, "tags": ["統領", "生產"] }
+      { "day": 40, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 4.58333333333333, "task": "覓食", "food_flow_avg": -0.216642983352, "tags": ["統領", "生產"] }
+      { "day": 41, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 5.41666666666667, "task": "覓食", "food_flow_avg": -0.18204028462216, "tags": ["統領", "生產"] }
+      { "day": 42, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 6.25, "task": "覓食", "food_flow_avg": -0.15296440582835, "tags": ["統領", "生產"] }
+      { "day": 43, "pop": 4, "minor": 0, "named_n": 0, "famine_days": 7.5, "task": "覓食", "food_flow_avg": -0.11782154175783, "tags": ["統領", "生產"] }
+      { "day": 44, "pop": 3, "minor": 0, "named_n": 0, "famine_days": 8.33333333333334, "task": "覓食", "food_flow_avg": -0.09900282328262, "tags": ["統領", "生產"] }
+      { "day": 45, "pop": 2, "minor": 0, "named_n": 0, "famine_days": 9.58333333333333, "task": "投靠", "food_flow_avg": -0.07625738297984, "tags": ["統領", "生產"] }
+      { "day": 46, "pop": 1, "minor": 0, "named_n": 0, "famine_days": 10.4166666666667, "task": "建設", "food_flow_avg": -0.06407738430945, "tags": ["統領", "生產"] }
+    ---- team=0 day=48 famine_days=0.0 named_n=0 minor_before=0 task=覓食 tags=["統領", "生產"] ----
+      { "day": 39, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 1.66666666666667, "task": "return_home", "food_flow_avg": -2.71217645550611, "tags": ["統領", "生產"] }
+      { "day": 40, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 2.91666666666667, "task": "return_home", "food_flow_avg": -2.08906647122606, "tags": ["統領", "生產"] }
+      { "day": 41, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 3.75, "task": "return_home", "food_flow_avg": -1.7553961320719, "tags": ["統領", "生產"] }
+      { "day": 42, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 4.58333333333333, "task": "return_home", "food_flow_avg": -1.47502036097708, "tags": ["統領", "生產"] }
+      { "day": 43, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 5.83333333333333, "task": "return_home", "food_flow_avg": -1.13614126184056, "tags": ["統領", "生產"] }
+      { "day": 44, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 6.66666666666667, "task": "return_home", "food_flow_avg": -0.95467425474103, "tags": ["統領", "生產"] }
+      { "day": 45, "pop": 4, "minor": 0, "named_n": 0, "famine_days": 7.91666666666667, "task": "製造", "food_flow_avg": -0.73534226450249, "tags": ["統領", "生產"] }
+      { "day": 46, "pop": 3, "minor": 0, "named_n": 0, "famine_days": 8.75, "task": "製造", "food_flow_avg": -0.61789176392223, "tags": ["統領", "生產"] }
+      { "day": 47, "pop": 2, "minor": 0, "named_n": 0, "famine_days": 9.58333333333333, "task": "return_home", "food_flow_avg": -0.51920071829577, "tags": ["統領", "生產"] }
+      { "day": 48, "pop": 1, "minor": 0, "named_n": 0, "famine_days": 0, "task": "覓食", "food_flow_avg": -0.39991675697434, "tags": ["統領", "生產"] }

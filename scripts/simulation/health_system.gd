@@ -236,6 +236,7 @@ static func check_starvation_deaths(state: WorldState) -> void:
 		if team == null: continue
 		var cause: String = "餓死" if p.hunger >= 0.7 else "失血而亡"
 		print("[Death] Person%d (team%d) %s" % [pid, p.team_id, cause])
+		if Probe.enabled: Probe.bump("death.starve_named_hunger" if p.hunger >= 0.7 else "death.starve_named_bleed")   # ★measurer L3 tap(2026-08-21,量測盲點:此路徑原僅print無Probe計數)
 		p.is_dead = true   # 留屍標記：反向 roster audit 跳過（team_id 保留但不在 roster）
 		state.remove_member(team, pid, false)   # 死亡留屍不改籍（保 get_player_team_id）
 		if team.leader_id == pid:
