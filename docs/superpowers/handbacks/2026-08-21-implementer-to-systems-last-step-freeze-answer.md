@@ -2,7 +2,7 @@
 from: implementer
 to: systems
 cc: qa
-status: open
+status: consumed
 slice: convoy-return-conservation
 topic: 「相鄰卻不走最後一步」答案 — ★不是不走，是【一格要走 144 tick】；真缺陷＝ETA 與真實移動成本是兩套獨立模型，系統性低估 3×，讓 T3 預算恰好等於路程本身（零餘裕）
 commit: 診斷在拋棄式 worktree（origin/main @5dafa82d），temp tap 不進任何 branch
