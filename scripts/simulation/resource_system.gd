@@ -75,6 +75,7 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 				tile.camp_ticks_left = L0_DECAY_DAYS * WorldState.TICKS_PER_DAY   # 有人在=不棄置
 			elif Probe.enabled:
 				Probe.bump("collect.no_outpost_no_camp_zero_food")   # ★measurer L3 tap：無據點且無camp→此cadence零被動食物
+				Probe.bump("collect.no_outpost_no_camp_zero_food.subteam" if team.parent_team_id != -1 else "collect.no_outpost_no_camp_zero_food.parent")   # ★systems票(984-subteam-share)：拆母隊/子隊
 			# 無據點隊零被動食物（L0 forage 外）；狩獵（小獵物 + 野獸）仍為唯一主動肉源
 			if int(tile.resources.get("wild_game", 0)) > 0:
 				HuntSystem.new().hunt_small_game(state, team, tile, false)   # 被動小獵

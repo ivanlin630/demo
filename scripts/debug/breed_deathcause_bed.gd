@@ -143,9 +143,20 @@ func _run() -> void:
 		lines.append("    team=%d terrain=%s pos=%s tile_pool_food=%.1f cap=%.1f runway_日=%.1f camp_level=%d outpost_level=%d effective_food(真實庫存,含私產+自家糧倉)=%.1f" % [
 			int(tid5), cur_terrain, str(t5.tile_pos), cur_pool, cur_cap, runway, cur_camp, cur_outpost, ef_now])
 	lines.append("    ★terrain_tally(萎縮隊分佈)=%s" % str(terrain_tally))
+	# ★systems票(984-subteam-share)：萎縮隊裡parent_team_id==-1(母隊) vs 子隊佔幾隊——含子隊全量掃(前面萎縮隊清單只算母隊)。
+	var shrunk_parent_n: int = 0
+	var shrunk_sub_n: int = 0
+	for tid6 in state.teams:
+		var t6: TeamData = state.teams[tid6]
+		if t6.beast_kind != "" or t6.population > 1: continue
+		if t6.parent_team_id == -1: shrunk_parent_n += 1
+		else: shrunk_sub_n += 1
+	lines.append("    ★★pop<=1隊母隊vs子隊拆帳(含子隊,前面萎縮隊清單只列母隊)：母隊=%d 子隊=%d 合計=%d" % [
+		shrunk_parent_n, shrunk_sub_n, shrunk_parent_n + shrunk_sub_n])
 	lines.append("  ★★被動採集確認鏈(collect.*累計次數,零代表整條路徑90天沒跑過一次)：")
-	for k5 in ["collect.gather_ran", "collect.l0_forage_ran", "collect.no_outpost_no_camp_zero_food"]:
-		lines.append("    %-36s = %d" % [k5, int(Probe.counts.get(k5, 0))])
+	for k5 in ["collect.gather_ran", "collect.l0_forage_ran", "collect.no_outpost_no_camp_zero_food",
+		"collect.no_outpost_no_camp_zero_food.parent", "collect.no_outpost_no_camp_zero_food.subteam"]:
+		lines.append("    %-46s = %d" % [k5, int(Probe.counts.get(k5, 0))])
 	# ★systems票(2026-08-21 dying-village-farm-ledger)：垂死村農田帳三分流(未建/建了養不起/forest掙扎)。
 	# 垂死＝本輪曾發生pop>=2→<=1崩潰(_collapse_log)；存活＝從未崩潰且day90 pop>=2。逐隊報，不給總平均。
 	lines.append("  ★★★垂死村農田帳(逐隊，三分流判準見ticket)：")

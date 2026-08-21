@@ -1,0 +1,27 @@
+{
+  "slice": "dying-village-farm-ledger",
+  "ticket": "systems票：984裡子隊佔幾次+萎縮11隊裡子隊佔幾隊——決定subteam-ladder能吃掉多少scope",
+  "measured_at_head": "4687ae9c(main)",
+  "measured_at_branch": "40ab0ab4(feat/breed-anon-eligible,.worktrees/breed-anon)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天(同breed-deathcause系列輪)",
+
+  "★L3聲明": "resource_system.gd同一tap點加1行,依team.parent_team_id拆parent/subteam兩個計數器,Probe-gated零行為改動。",
+
+  "★★答案：blueprint前提不成立，subteam-ladder吃不到多少": {
+    "①萎縮11隊裡parent_team_id==-1(母隊)佔幾隊": "11/11 (100%)，子隊=0",
+    "②984次collect.no_outpost_no_camp_zero_food裡子隊佔幾次": "parent=960 (97.6%)，subteam=24 (2.4%)",
+    "判讀": "★★兩個數一致指向同一結論：這輪(peaceful_economy 90天seed1337)裡，『零被動食物』的受害者幾乎全是母隊(parent_team_id==-1)，不是六種早退子隊。blueprint『subteam-ladder會吃掉984一大塊』的前提在這輪數據上不成立——ladder能吃到的scope只有24/984(2.4%)，接入arc的真scope幾乎不縮水(960/984仍是母隊funnel斷)。★這也跟你自己的證據方向吻合：那11隊tags=統領/生產、was_convoy:false，本來就該是母隊，這次是結構性複驗非新發現。"
+  },
+
+  "★誠實邊界": "本輪唯一seed(1337)/唯一config(peaceful_economy)，子隊=0這個極端比例可能受此config影響(peaceful世界subteam派遣本來就少，warring/後勤密集config可能子隊佔比更高)——若要更泛化的結論建議多seed/多config交叉驗證，本輪只能回答『這個代表性樣本上』的答案。",
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/subteam-share-90d.txt",
+    "bed(六度擴充)": "scripts/debug/breed_deathcause_bed.gd(main+.worktrees/breed-anon逐字相同)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\breed-anon --script scripts/debug/breed_deathcause_bed.gd",
+
+  "cleanup": "busy beacon清除。"
+}
