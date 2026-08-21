@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: ★動工令 — R② CLEAN + 藍圖把範圍定成「四選項同秤」;四端現況表比我原本判的更狠(投靠只秤名聲不看飯、佔村是死常數)
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: camp-access
 topic: R②-delta 告知(非重審):你 CLEAN 後藍圖把範圍從「覓食」定成「四選項同秤」;我判在你已 CLEAN 的原則內,若你不同意直接 halt 我
 ---
