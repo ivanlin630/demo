@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[用戶問兩句,我照實答·①工作流改好了嗎=骨架完成但【還沒轉硬】:0-9+O1/O2/P7 三態表/P9 SOFT+兩帖收緊(承諾即檔名/HARD 入場券)+三小刀(QA閘機械化/bash-guard/worktree 自動拆)全落地並實測;唯一卡點=measurer 把 .measure.json 的 slice 值對齊成 branch id,那件一到就轉 HARD·②現在在做專案嗎=★誠實答:今天大半在修儀器不是在做世界·今日 7 個 merge 裡只有 2 個是世界機制(convoy RETURN 收尾、失敗反饋 Phase 0),其餘 5 個是儀器/身分基礎建設(specimen 血緣+覆蓋+座標、team_id、person_id、harness)·★但那些不是可選的:QA 連三次判不了(主角沒被錄到→沒座標→身分被縫接),沒有它們就沒有可信的世界結論——今天最後那個『明明相鄰卻不走最後一步』的真 bug,正是靠修好的儀器才看得見·★★而要誠實的另一半:兩張真正動世界的票【還在隊列裡沒開始】(breed-anon=人口凍結 24 的根、subteam-ladder=六種在途子隊的決策真空)·③建議把世界票往前提:last-step-freeze 診斷雖是新開的,但它是世界機制 bug(porter 不走最後一步、貨疑似沒交割)不是儀器,建議與 breed-anon 併行;t3-budget(已證 inert 的兜底)排最後"
 ---
 
