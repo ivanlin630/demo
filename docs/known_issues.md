@@ -370,6 +370,43 @@ porter 整趟**不進任何決策路徑**。specimen 佐證（追逐窗 tick 360
 ∴ 該映射**在生育改連續速率之前就已經是死的** → 「接生/生育累積醫療經驗」這條**設計意圖從未生效**。
 **非 regression**（生育 slice 沒打死它）、**非阻塞**。要修的話是 WHAT 級小問題：生育事件要不要回饋醫療技能成長（現況：`醫療` 只在別的反應路徑成長）。
 
+### ⚠️★★回溯標注：以下 peaceful 卷結論**全部缺一個章節**——「**這張卷沒有勢力層**」（2026-08-21，用戶令）
+
+**已坐實**：`peaceful_economy` **無 `factions`**（`state.factions.size()` 恆 0，逐 tick 驗）
+⇒ `faction_ai:725` `for fid in state.factions:`（**loop1**）**零疊代**
+⇒ **`_update_goals` / `_assign_tasks` / `_evaluate_infrastructure` 全程未執行。**
+
+**但範圍要精確**（systems 自驗，避免過度作廢既有結論）：
+
+| 在 peaceful 卷 | 狀態 |
+|---|---|
+| `_evaluate_infrastructure`（**faction 級**：升級 outpost／擴建設施／`_dispatch_builder` 蓋新 outpost） | ❌ **零疊代** |
+| `_evaluate_independent_infrastructure`（**獨立隊自家 outpost 蓋設施**，`faction_ai:786`，在 **loop2** `for tid in state.teams`） | ✅ **有跑**（每 `INFRA_INTERVAL`） |
+
+⇒ ★**不能簡單說「設施建造的程式碼沒跑」** —— 獨立隊那條有跑。
+
+### ★★★ 但由此浮出一條可能統一今天所有線的鏈（**假說，一個數字可定案**）
+
+`_evaluate_independent_infrastructure` 的第一道門是 **`faction_ai:4394` `_find_own_outpost` == -1 就 return**，
+下一行還要 **`tile.outpost_level != 0`**。
+
+```
+outpost.l0_to_l1 = 0（實測）      ← 沒有隊靠紮根取得 outpost
+  + peaceful 無 faction          ← 另一條蓋 outpost 的路(_dispatch_builder)零疊代
+  ⇒ 獨立隊唯一設施入口每次卡在 :4394 空轉
+  ⇒ 沒有 workshop ⇒ 沒有 tools
+  ⇒ apothecary / smeltery / weaponsmith / armorsmith / mint 全斷
+  ⇒ mint_level 全期 0%
+```
+★**若成立，「設施鏈斷」的真上游不是 `afford×1.5`，而是「沒有人有 outpost 可蓋設施」**
+—— **而那正是 §7 #1 `outpost.l0_to_l1 = 0` 本身。**
+
+★**一個數字可定案**：**peaceful 卷裡 `outpost_level > 0` 且 `outpost_owner != -1` 的 tile 有幾個？**
+- **若 ＝ 0** ⇒ 鏈成立，**下方「afford×1.5 是閘①」的結論前提要重驗**（那個閘可能根本沒被走到）
+- **若 > 0**（config 自帶 outpost）⇒ 鏈第 3 步不成立，下方結論不受影響
+
+**在這個數字回來之前，下方結論一律標「前提待重驗」，不得引用為定論。**（票已派 measurer。）
+
 ### 🏭 沒有人蓋 workshop ＝ 設施鏈斷的真上游（2026-08-20、mint 0% 追根時發現）
 **mint 全世界 0%** 的下游解釋是「付不起 `tools: 5`」（tools 全球 production=0）；但**再往上一格**：`FACILITY_DEF` 完整 cost 表顯示 **`workshop` 成本 `material 60 / tools 0`**，而 **workshop 正是 tools 的生產者**（`manufacturing_system:38` `material 4.0 → tools`）→ **入口不需要工具、沒有雞生蛋**（systems 一度誤判為雞生蛋，已對 blueprint 撤回）。礦村 settle 另有 bootstrap 給 8 tools（`faction_ai:3714-3716`）。
 ∴ **真問題＝為什麼沒有人蓋 workshop**。候選（未驗）：①argmax 對上 farming 的 survival-crush、在多數隊食物淨流為負的世界恆輸 ②afford（`60×1.5=90` material）③slot/型別 ④`_facility_deficit`（workshop 走 `use_demand=true`）在需求鏈斷時算 0。
