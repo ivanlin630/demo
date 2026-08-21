@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: breed-anon-eligible
-status: open
+status: consumed
 topic: "★①gate①獨立複現CONFIRMED(born1→5/pop72→35變72→43/eligible_anon=305逐項吻合implementer自報)②死因分佈:starve_anon(20-25)與defect_leave(19)兩大主因量級相當,死亡集中day30-60早期篩選波峰非持續穩態;4隊崩潰軌跡共同特徵=famine_days單調不歸零+food_flow_avg全程負(縮小只因少人少吃非止血)+task正常輪替非凍結(含一次投靠嘗試)+minor全程0；補health_system.gd既有量測盲點(named餓死原僅print無Probe,已加death.starve_named_hunger/bleed tap,L3零行為改動)；specimen(1839筆,涵蓋3崩潰隊+2血緣子隊)直寄QA"
 ---
 

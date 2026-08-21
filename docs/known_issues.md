@@ -125,22 +125,37 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
-### 🏚★★世界在掉人：day60 起 **13–14/20 隊萎縮到「只剩領主」**（2026-08-21 生育量測副產物）
-`breed-anon-eligible` 的常數重錨量測（peaceful × seeds 1337/42/8181 × day 30/60/90）**順帶撈到**：
-**day60 起有 13–14／20 隊只剩 `pop=1`**，且 **不是新生小隊** ——
-實測 id 4/5/9/10/11…、tags `["統領","生產"]`、`was_convoy:false`
-⇒ **是原本的村掉人掉到剩一個領主** `@40ab0ab4 2026-08-21`。
+### 🏚★★開局 60 天的結構性篩選：13–14／20 隊萎縮到「只剩領主」（2026-08-21，★framing 已被數據訂正兩次）
+**實測**（peaceful、measurer 獨立複現 `@40ab0ab4` 2026-08-21）：
 
-**★這個發現改變了生育那條線的意義**：
-生育修好後 `breed.born` **1 → 5**、`pop_total` **72→35 變成 72→43** —— **衰減趨緩，但世界仍在掉人**。
-⇒ **生育不是人口問題的根，只是把「結構性零產出」補上了。真正的問題是人去哪了。**
+**死因分佈**（baseline / branch）：`starve_anon` **25 / 20**、`defect_leave` **19 / 19**、
+`starve_named_hunger` **2 / 1**、`extinct.starve` **2 / 1**。
 
-★ **連帶的方法論**（implementer 在重錨時的判斷，值得記）：
-**把「只剩領主」的殘骸算進 `P_ref` 母體 ⇒ 等於把「世界在掉人」這個病烙進生育常數。**
-—— **常數的母體選擇本身就是一個會把病固化的地方。**
+★ **訂正一（我原本寫錯的）**：**不是「世界持續在掉人」**——
+`day40` 桶 ＝ `starve_anon 5 + defect_leave 7`、`day50` 桶 ＝ `starve_anon 14 + defect_leave 3`，
+**這兩桶佔全程死亡量的大半**；`day60` 起**急遽趨緩**。
+⇒ **是開局前 60 天篩掉結構性弱勢村，之後進入相對穩定期。**
 
-**下一步（未開票）**：查 **死因分佈** —— 餓死？戰死？`defect_leave`？
-**在知道人往哪裡消失之前，任何「人口修法」都是在補水桶而不是補洞。**
+★ **訂正二（更精確的死法）**：**named 真正餓死極少（1–2 例）**，
+**多數 named 是靠 `defect_leave`（N1_flee／N3_defect）先脫隊** —— **「先跑不等死」**。
+
+**★★四隊崩潰軌跡的共同特徵**（team 10/5/11/0，崩潰窗 day29–48）：
+1. **`famine_days` 單調爬升、從未歸零** —— **沒有一次成功止血的窗口**，不是偶發挨餓
+2. **`food_flow_avg` 全程為負**，數值變小是**因為人少了少吃**、**不是流入轉正**
+   ⇒ ★**不是快恢復，是流血變慢**
+3. `task` **正常輪替、非凍結**（含一次投靠嘗試）⇒ **不是「手不聽腦」**——**它們在努力，只是拿不到食物**
+4. `minor` 全程 0
+
+**★量測盲點（measurer 順手補掉）**：`health_system.gd` 的 **named 餓死原本只有 `print`、沒有 Probe tap**
+⇒ **過去所有死因分析對這一項是全盲的**。已加 `death.starve_named_hunger` / `bleed`（L3、零行為改動）。
+
+**★未答的關鍵問題（能一刀分辨 genuine vs 經濟破）**：
+> **存活下來的隊，`food_flow_avg` 是正的嗎？**
+- **是** ⇒ 這是**真的擬真篩選**（弱村淘汰、強村存活）＝ **好戲，不是 bug**
+- **否**（全部隊都是負的，只是有些撐得久） ⇒ **世界根本養不活任何村**＝ **經濟破**
+
+（依 memory `feedback_resource_depletion_genuine_vs_blind`：**池空 ≠ bug**，要先分辨 genuine-depletion vs bug，
+**不預設「掉人＝壞掉」**。）
 
 ### 👶 生育門檻：anon 與 named **不對稱**（2026-08-21 R² 認可為可接受，記錄供日後對齊）
 `breed-anon-eligible` 落地後：
