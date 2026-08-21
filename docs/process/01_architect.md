@@ -142,3 +142,23 @@ bash .claude/hooks/seam-gate.sh              # 當前 branch，SOFT
 bash .claude/hooks/seam-gate.sh --selftest   # 良品 fixture：證儀器沒壞
 SEAM_MODE=hard bash .claude/hooks/seam-gate.sh
 ```
+
+### ★P9 SOFT 期觀察項：**spec 改了、派工單沒跟著改**（2026-08-21 立，blueprint 核准記錄）
+
+**血證（犯的人是 systems 自己，兩次）**：
+1. **T3 累加案**：我在 spec §6b 改採 R② 的第三案，**但沒推派工單** ⇒ implementer 照**舊版（錨死）**做了一整輪，
+   跑出「沒收一趟成功行程」的結果才發現。
+2. **gate 9 warring 票**：只寫在一封**後來被 consumed 的信**裡，**從沒變成正式工單** ⇒ 掉在地上，被用戶問起才發現。
+
+★ **這是現行偵測器的真盲區**：`watchdog` 的 `COMMIT-NO-LETTER` 抓的是「**git 落地了但沒寫信**」，
+**抓不到「spec 改了但沒推下一站」**。
+⇒ **產物有兩種——一種在 git 裡、一種在信箱裡，而我們只給前者裝了閘。**
+
+**觀察項（P9 SOFT 期收集，HARD 化時再決定要不要收成硬閘）**：
+> 對每個宣告 `slice:` 的 slice，比對 **spec 的最後修改**與**該 slice 的 dispatch handback 時間**——
+> **spec 在 dispatch 之後才改** ⇒ 標「**spec drifted after dispatch**」。
+
+**先不做成閘的理由**（誠實記，免得日後看起來像忘了）：
+- spec 在 dispatch 後被修改**常常是正常的**（收到實作回報後補訂正、加事後訂正段），**誤報率會很高**
+- 要分辨「**正常的事後補記**」與「**該重推卻沒推的設計變更**」，機器目前**分不出來**
+⇒ **SOFT 期先只收集、看誤報率**，再決定閘的形狀。
