@@ -1,0 +1,45 @@
+{
+  "slice": "estimator-audit",
+  "ticket": "systems票(docs/estimator-ledger.md)：物理欄C-1(最優先,估值vs實際完成天數+遠candidate折現)、C-2(OUTPOST_MULT鏡射)——C-3/C-4/C-5待續",
+  "measured_at_head": "13613995(main)",
+  "measured_date": "2026-08-21",
+  "method": "純code-read+獨立算術驗算(非sim run，物理常數本身是確定性算式，無需跑世界)",
+
+  "★★C-2 OUTPOST_MULT鏡射：誠實(無drift)": {
+    "MarginalEconomy.OUTPOST_MULT": "[1.0, 1.4, 2.0] (marginal_economy.gd:10)",
+    "FoodFlow.OUTPOST_MULT": "[1.0, 1.4, 2.0] (food_flow.gd:12)",
+    "判讀": "逐字相同，鏡射無drift。分類=誠實。"
+  },
+
+  "★★★C-1 最重要：ledger的A4判讀有算術錯誤，方向要反過來——我獨立重算後翻案": {
+    "我查到的物理真值(獨立驗算，非採信ledger現成數字)": {
+      "construction_ticks_left衰減cadence": "outpost_system.gd:162 _tick_construction只在OutpostSystem.tick_all()裡跑,該函式由sim_runner.gd的LOD_NEAR step table驅動——NEAR_CADENCE=WorldState.TICKS_PER_HOUR(sim_runner.gd:5)⇒近區每『小時』才觸發1次,非每game-tick。TICKS_PER_HOUR=TICKS_PER_DAY/24=10 ticks(world_state.gd:5)⇒★★每天只觸發24次，非240次。",
+      "每次觸發衰減量": "outpost_system.gd:311 `tile.construction_ticks_left -= maxi(active_team.population, 1)`——flat扣population，無日分數/無技能加成。",
+      "★★正確公式": "真實完工天數 = BUILD_TICKS / (population × 24)　——不是 ÷240（ledger算式用了240）",
+      "TASK_BUILD(facility founding,BUILD_TICKS civilian=[100,300,600])@pop=1,L1": "100/(1×24) = 4.17天　——ledger算成0.42天(÷240)，差10倍",
+      "TASK_SETTLE(crude_camp,L0→L1,faction_ai_system.gd:5044 `construction_ticks_left = L0_TO_L1_CORVEE_DAYS(3) × TICKS_PER_DAY(240) = 720`)@pop=1": "720/(1×24) = 30天　——這條路徑ledger完全沒算入(只算了facility BUILD_TICKS那條)"
+    },
+    "★★重新分類(推翻ledger A4)": {
+      "BUILD_DAYS_EST=3.0 vs TASK_BUILD(facility)真值4.17天@pop=1,L1": "低估(3.0<4.17，約-28%)，非ledger宣稱的『高估7倍』",
+      "BUILD_DAYS_EST=3.0 vs TASK_SETTLE(crude_camp)真值30天@pop=1": "★★嚴重低估(3.0<<30，約-90%)，且方向與ledger宣稱【完全相反】",
+      "分類": "說謊——但方向反了。ledger寫『高估工期~7×』，我獨立驗算後是【低估】，settle路徑低估幅度更達10倍量級。"
+    },
+    "A3(移動)重驗，維持ledger判讀=誠實驗證『說謊』方向成立": {
+      "查點": "movement在sim_runner.gd:147 lod=LOD_BOTH(非LOD_NEAR)⇒每game-tick都跑,非小時批次——結構上不像construction有隱藏cadence除數陷阱。",
+      "MOVE_TILES_PER_DAY(估)=2.0 vs BASE_MOVE_TICKS(真,movement_system.gd:5)=48÷TICKS_PER_DAY(240)=0.2日/格=5格/日(真)": "高估移動時間2.5×，方向與ledger宣稱一致。分類維持=說謊(高估，如ledger所寫)。"
+    },
+    "★★A3+A4合成效果重新評估(ledger的『決策層系統性不去遠處建設』假說需修正)": "ledger原假說：A3(移動高估2.5×)+A4(建設高估7×)同向放大遠candidate折現→系統性不去遠處。★我的發現：A4方向錯——真實是低估(輕則-28%,重則-90%)。⇒合成效果不是『兩者同向推遠candidate折現趨零』，而是【移動段被高估折現、建設段被低估折現】方向相反抵銷一部分——實際折現量介於『只算A3』與『兩者同向』之間，比ledger假說更溫和。★★更值得關注的是反過來的風險：BUILD_DAYS_EST被低估(尤其settle路徑低到10倍量級)⇒決策層可能【低估了完成一個settle所需的真實時間】，若這個低估的delay被拿去跟『需要撐過那麼久的真實生存視窗』比較(desperation/food_days邏輯)，可能導致【過度樂觀地承諾settle/build】、之後真撐不到完工——這跟這session稍早的獨立發現『last-step-freeze/T3預算=路程本身零餘裕/porter永遠超載』是同一個家族(決策端低估成本→承諾後現實骨感)，值得systems/implementer交叉對照。"
+  },
+
+  "★C-4附帶發現(非本輪主查，順手驗算，供交叉參考)": {
+    "查點": "faction_ai_system.gd:3796-3803 派遣食物橋接估(_need_food)，用的是【另一個獨立的_eta_build公式】(非goal_resolver的BUILD_DAYS_EST常數)：`_eta_build = BUILD_TICKS[type][level-1] / pop`(3799行，沒有÷24)",
+    "判讀": "若這條也用同一個_tick_construction cadence(尚未100%逐行追完,信心中等)，那麼此公式把『真實天數=ticks/(pop×24)』誤算成『ticks/pop』——★方向是【高估24倍】(跟goal_resolver的BUILD_DAYS_EST低估方向相反!)。high估→_need_food算出來的需糧量偏多→派遣食物橋接偏保守(安全side，不是導致餓死的方向)。",
+    "★誠實邊界": "本欄信心中等：沒有100%逐行確認這條facility founding路徑用的construction_ticks_left衰減跟outpost_system.gd:311完全同一機制(可能是不同dispatch類型走不同completion邏輯)，供你/implementer核實，不當坐實結論。",
+    "FOOD_BRIDGE_MOVE_PER_DAY=2.0 '鏡射goal_resolver'": "與MOVE_TILES_PER_DAY同源同誤差(2.5倍高估移動時間)，同樣是「安全side」(需糧算多不算少)。",
+    "初步判讀": "這條估算器(_need_food)的兩個分量都偏向【多算需糧】非少算——若真實porter餓死案發生，這個估算器本身不像是元兇；更可能是執行端(carry cap/實際裝載量)沒有真的把算出來的_need_food裝上車，這跟本session稍早『porter cap=10 vs 背30-200』的既有發現同族，建議C-4完整驗證時直接查『派遣當下實際裝載量 vs _need_food算出來的值』兩者差距，而非只查ETA估準不準。"
+  },
+
+  "尚待進行(本輪未做,範圍太大先checkpoint)": ["C-3 投靠估的收容機率vs實際被收容率", "C-4 完整驗證(帶糧實際裝載量vs算出來的_need_food，需specimen/sim數據非純code讀)", "C-5 B2/B5抽驗"],
+
+  "repro": "純code-read+算術，無sim指令；驗算式見上表，任何人可用同一份code重算。"
+}
