@@ -1498,3 +1498,19 @@ established=0 真根**非** goal orphan（立國鏈已接：gate `faction_ai:103
 
 ## 記檔更新：per-team perf 固定成本（2026-08-13、用戶 GUI 單團就慢 refine）
 用戶 GUI：**單一 team 決策就肉眼可見慢**（非只團多疊）→ **per-team 固定成本大**。∴上方「famine 修→團數降→O(N²) 自動緩」**降級為部分緩解假設待驗**（O(N²) 剩線性緩解；若 per-team 常數 dominated 則團數降也不解）。嫌疑：①per-candidate 尋路（`estimate_catch_up`/reachable per 目標×幾十候選×hex r14 圖=單團就重）②console print 同步阻塞（Windows+中文~10ms/行×每團多行=逐隻蹦直接解釋）③belief/known_reputations 掃。★cheap 驗證（systems 跑、dieoff_perf_bed DIEOFF_PHASE=1 phase_timing + print console-vs-null A/B）→ print 佔大頭=hot-path 砍 print 便宜大勝 / 尋路=perf arc 主菜。
+
+## ★建造隊派遣的真閘 ＝ 建材，不是糧（2026-08-21 實測，lead 非結論）
+
+**量測**：`docs/measurements/breed-deathcause/dispatch-fail-90d.txt`
+（peaceful_economy, day 90, seed 1337, teams=19）@ `52f08fdf`
+
+- `dispatch_fail.資源不足 = 28 (100.0%)` —— **28 次派遣失敗全部同一個原因**
+- `dispatch_fail.糧橋不足 / pop不足 / advisor不可用 / subteam失敗` **全部 = 0**
+- `bridge.no_go_food = 0` ⇒ food-bridge 檢查 **一次都沒執行過**（建材 gate 更早短路）
+
+**意義**：`size_matter` arc 記的「settle 從未 dispatch」，
+**先前把嫌疑指向糧橋（`faction_ai:3799` `_eta_build` 高估 24×）—— 實測否決。**
+**真閘在建材 cost（`_can_afford` 1.5×）這一層。**
+
+**未處置**（camp-access 在飛，不插隊）。要接的下一步是**查那 28 次缺的是哪種建材、以及是否 genuine-depletion**
+（memory `resource_depletion_genuine_vs_blind`：池空 ≠ bug，先分 genuine vs 盲派）。

@@ -79,10 +79,21 @@
 1. **「決定去蓋 → 中途棄」結構性抖動**
    #1/#2 **低估** ⇒ 決定要蓋（看起來便宜）；#3 **高估 24×** ⇒ `safe_ratio` 分母暴增 ⇒ `safe_factor` 塌 ⇒ **蓋到一半放棄**。
    **同一條決策鏈的兩端方向相反。** 屬「反覆重試」家族。
-2. ★★**#4 可能就是「settle 從未 dispatch」的閘**
+2. ~~★★**#4 可能就是「settle 從未 dispatch」的閘**~~ ⇒ ★**實測否決（measurer C6-#4，2026-08-21）**
+
+   **`dispatch_fail.糧橋不足 = 0 (0.0%)`，90 天 28 次派遣失敗 100% 是「建材資源不足」。**
+   `bridge.no_go_food` / `bridge.topup` 雙雙 ＝ 0 ⇒ **food-bridge 檢查這輪一次都沒機會執行**
+   ——**更早的建材 cost gate 先擋掉全部**。
+   ⇒ **#4 的 24× 高估是「未爆」，不是「無害」**：它仍然錯，只是上游 gate 100% 先短路，讓它沒機會咬人。
+   ⇒ **插隊條件不成立，工期單一真相源不插隊**，camp-access 續走。
+   ★**我對 blueprint 說過這條「與 settle 從未 dispatch 對得上、是強嫌疑」——該說法撤回。**
+   **真正擋建造隊派遣的是建材，不是糧。** 這正是我當時堅持「未實測不當事實用」的理由。
+
+   <details><summary>原假說（留史）</summary>
    糧橋 `_need_food = pop × 0.8 × (travel + build) × margin`，**build 段高估 24×**
    ⇒ 需糧被算成 24 倍 ⇒ **`_avail_food < _need_food` 幾乎恆真 ⇒ 建造隊根本派不出去**。
    **與 `size_matter` arc 已記錄的「settle 從未 dispatch」對得上**，但**必須實測 `_log_dispatch_fail("糧橋不足")` 的實際觸發率才算數**（memory：`fileline_vs_interpretation` —— 有行號 ≠ 坐實因果）。
+   </details>
 3. **#5 求生蓋田閘假 pass**
    註解寫明意圖是「**蓋得完的田才蓋**」，但 ÷240 讓工期看起來只有 1/10
    ⇒ **蓋不完的田也判定蓋得完** ⇒ **蓋到一半餓死**。直接踩「滿池餓死」arc。
