@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: dying-village-farm-ledger
-status: open
+status: consumed
 topic: "★★優先題答案：terrain_tally={plains:9,forest:2}——82%萎縮隊在plains,cap假說死透,瓶頸在提取端★★★決定性發現:8/11萎縮隊站在滿/近滿食物池(runway 61-364天)卻effective_food只有2.3-9.2——『池滿人餓』用戶假說成立,是提取funnel斷非承載力;確認鏈證實無outpost+camp_level=0的團隊該cadence物理上零被動食物(collect.no_outpost_no_camp_zero_food累計984次)，camp_level=1的team10/11是正面對照組(ef暴漲至388/457)；③corvée結構code讀:labor_pop/pool_of未發現依construction狀態扣減的路徑,假說目前不成立(信心中等,未做即時快照)；四分流已逐隊分類，補collect.*確認鏈3個L3 tap"
 ---
 
