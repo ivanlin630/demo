@@ -32,5 +32,21 @@ hit=$(awk '
 [ -z "$hit" ] && exit 0
 
 bn=$(basename "$hit")
-MSG="★01 判 [DONE]（${bn}）→ 收尾 lifecycle（03_implementer §5）：①把該信 status:consumed ②cd 回主目錄 ${_MAIN} 確認在 main ③重 arm inbox-watch 待命下一 task。（ctx 不用手動清——滿了會自動 compact 並重載職責。）做完這幾步再結束。"
+
+# ★worktree 自動拆（用戶拍板 2026-08-21，刀3；56GB 血案根治）
+#   [DONE] ＝ 這條 slice 的活結束了 ⇒ 它的 worktree 不該繼續佔著磁碟。
+#   ★機械驗：從該信的 slice: 欄推 worktree 路徑，還在就把「拆」寫進 nag（不自動刪——
+#   刪東西要人看一眼，而且 worktree 裡可能還有沒 commit 的東西）。
+_slice=$(head -12 "$hit" 2>/dev/null | grep -iE "^slice:" | head -1 | sed -e "s/^[Ss]lice:[[:space:]]*//" -e "s/[[:space:]]*<!--.*//" | tr -d " ")
+_wt_msg=""
+if [ -n "$_slice" ] && [ -d "${_MAIN}/.worktrees/${_slice}" ]; then
+  _dirty=$(git -C "${_MAIN}/.worktrees/${_slice}" status --porcelain 2>/dev/null | head -3)
+  if [ -n "$_dirty" ]; then
+    _wt_msg=" ④★worktree .worktrees/${_slice} 還在【而且有未 commit 的東西】——先確認那些改動要不要留（別直接拆），處理完再 git worktree remove。"
+  else
+    _wt_msg=" ④★拆掉本 slice 的 worktree：git worktree remove .worktrees/${_slice}（乾淨、可安全拆；不拆會累積成磁碟黑洞——56GB 血案）。"
+  fi
+fi
+
+MSG="★01 判 [DONE]（${bn}）→ 收尾 lifecycle（03_implementer §5）：①把該信 status:consumed ②cd 回主目錄 ${_MAIN} 確認在 main ③重 arm inbox-watch 待命下一 task。${_wt_msg}（ctx 不用手動清——滿了會自動 compact 並重載職責。）做完這幾步再結束。"
 python -c "import json,sys; print(json.dumps({'decision':'block','reason':sys.argv[1]}))" "$MSG"

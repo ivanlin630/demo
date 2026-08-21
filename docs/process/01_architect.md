@@ -116,7 +116,15 @@ slice: convoy-return-conservation   # = branch 名去掉 feat/；★唯一的真
 tier: full                          # full | probe
 status: open
 ```
-**其他產物**（HOW spec／R² verdict handback／`.measure.json`）**只帶 `slice:`**，**不要再寫 `tier:`**
+★**若這條 slice 會下「長跑因果結論」，派工單再加一欄**（用戶拍板 2026-08-21，刀1）：
+```yaml
+qa: required        # ＝ merge 前必須有 QA verdict；seam-gate 機械驗它在不在
+```
+**這把 2026-08-04 立的 QA-verdict 閘，從 systems 自律升成 merge 閘機械驗。**
+★ **同 `tier`：由 systems 在派工時定，做的人不得自選**——**能自己決定要不要送 QA 的 agent，是在改自己的考卷**。
+★ **機器只驗「QA verdict 在不在」，不驗它判得對不對**——那永遠是人的活。
+
+**其他產物**（HOW spec／R² verdict handback／`.measure.json`）**只帶 `slice:`**，**不要再寫 `tier:`／`qa:`**
 ——tier 的唯一來源是派工單，寫兩處就是製造第二個真相。
 （`.measure.json` 用既有的頂層 `"slice"` key，語意改為 branch slice id。）
 

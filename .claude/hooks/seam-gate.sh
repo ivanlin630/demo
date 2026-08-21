@@ -44,15 +44,16 @@ _scan() {   # 一次 awk 掃完 specs+handbacks，輸出：slice|kind|from|tier
   local files=("$SPEC_D"/*.md "$HB_D"/*.md)
   [ "${#files[@]}" -eq 0 ] && return 0
   awk '
-    FNR==1 { sl=""; fr=""; ti=""; done=0; knd = (FILENAME ~ /specs/) ? "spec" : "hb" }
+    FNR==1 { sl=""; fr=""; ti=""; qa=""; done=0; knd = (FILENAME ~ /specs/) ? "spec" : "hb" }
     FNR<=12 {
       low = tolower($0)
       if (low ~ /^slice:/) { v=$0; sub(/^[^:]*:[[:space:]]*/,"",v); sub(/[[:space:]]*<!--.*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); sl=v }
       if (low ~ /^from:/)  { v=tolower($0); sub(/^[^:]*:[[:space:]]*/,"",v); gsub(/[[:space:]]/,"",v); fr=v }
       if (low ~ /^tier:/)  { v=$0; sub(/^[^:]*:[[:space:]]*/,"",v); sub(/[[:space:]]*<!--.*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); ti=v }
-      if (FNR==12 && sl != "" && !done) { print sl "|" knd "|" fr "|" ti; done=1 }
+      if (low ~ /^qa:/)    { v=tolower($0); sub(/^[^:]*:[[:space:]]*/,"",v); sub(/[[:space:]]*<!--.*/,"",v); gsub(/[[:space:]]/,"",v); qa=v }
+      if (FNR==12 && sl != "" && !done) { print sl "|" knd "|" fr "|" ti "|" qa; done=1 }
     }
-    ENDFILE { if (!done && sl != "") print sl "|" knd "|" fr "|" ti }
+    ENDFILE { if (!done && sl != "") print sl "|" knd "|" fr "|" ti "|" qa }
   ' "${files[@]}"
 }
 
@@ -101,11 +102,18 @@ n_hb=$(printf '%s\n' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $2=="hb"{n++} END
 n_rev=$(printf '%s\n' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $2=="hb" && $3=="reviewer"{n++} END{print n+0}')
 # tier：★只認派工單裡寫的（做的人不得自選）——取該 slice 第一個有 tier 的 handback
 TIER=$(printf '%s\n' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $4!=""{print $4; exit}')
+# ★QA 閘機械化（用戶拍板 2026-08-21，刀1）：把 2026-08-04 立的 QA-verdict 閘從 systems 自律升成 merge 閘機械驗。
+#   判準來源＝派工單的 `qa:` 欄（**由 systems 定，同 tier**）：`required` ＝ 這條 slice 會下長跑因果結論。
+#   ★機器只驗「QA verdict 在不在」，不驗它判得對不對——那永遠是人的活。
+QA_REQ=$(printf '%s
+' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $5!=""{print $5; exit}')
+n_qa=$(printf '%s
+' "$_S" | awk -F'|' -v s="$SLICE" '$1==s && $2=="hb" && $3=="qa"{n++} END{print n+0}')
 meas=$(_decl_measure "$SLICE")
 n_meas=$(printf '%s' "$meas" | grep -c . || true)
 
 echo "[seam-gate:${MODE}] slice=${SLICE}  tier=${TIER:-（未宣告）}"
-echo "  spec=${n_spec}  handback=${n_hb}  R²verdict=${n_rev}  measure=${n_meas}"
+echo "  spec=${n_spec}  handback=${n_hb}  R²verdict=${n_rev}  measure=${n_meas}  QA=${n_qa}${QA_REQ:+（qa:${QA_REQ}）}"
 
 miss=""
 case "$TIER" in
@@ -114,6 +122,7 @@ case "$TIER" in
     [ "$n_rev"  -eq 0 ] && miss="${miss} R²verdict"
     [ "$n_hb"   -eq 0 ] && miss="${miss} handback"
     [ "$n_meas" -eq 0 ] && miss="${miss} .measure.json"
+    [ "$QA_REQ" = "required" ] && [ "$n_qa" -eq 0 ] && miss="${miss} QA-verdict"
     ;;
   probe)
     [ "$n_hb"   -eq 0 ] && miss="${miss} handback"

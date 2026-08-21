@@ -155,3 +155,11 @@ rm -f .claude/hooks/.busy.implementer
 **保留**：`plans/_archive/` 不刪（歷史脈絡）。
 
 ★ 這條同時是 P7「三態誠實」的樣本：**一條規則寫在 doc 上、實際沒有東西在執行它，就該明寫，而不是繼續讀起來像已武裝。**
+
+### ★[DONE] 收尾必做：**拆掉本 slice 的 worktree**（用戶拍板 2026-08-21）
+```bash
+git worktree remove .worktrees/<slice>
+```
+- **不拆會累積成磁碟黑洞**（**56GB 血案**）。
+- ★**worktree 有未 commit 的東西時，先確認那些改動要不要留，別直接拆**
+  —— `implementer-cleanup.sh` 會**先判髒不髒**，髒的時候**不會叫你拆**，而是叫你先處理。

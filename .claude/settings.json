@@ -29,6 +29,15 @@
             "command": "bash .claude/hooks/layer-check.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/bash-guard.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
