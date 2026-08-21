@@ -125,21 +125,28 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
-### 📉★`food_flow_avg`（5 日 EMA）與真實庫存**脫鉤**，可能被結構性鎖負（2026-08-21 QA 逐 tick 坐實）
-**證據**：`team10`／`team11` 崩潰剩 1 人後，**`effective_food` 從 0 一路漲到 368／448**
-（持續 18–43 天、`task=貿易`、`winner=build_workshop:resource`），**真實庫存明明在暴漲**；
-而聚合面的 **`food_flow_avg` 仍掛負** `@40ab0ab4 2026-08-21`。
+### 📉 `food_flow_avg` 不是「庫存健康度」，它是**刻意保守的成長訊號**（2026-08-21，★我先喊 bug、後讀註解的訂正）
+**現象**（QA 逐 tick 坐實）：`team10`／`team11` 崩潰剩 1 人後 **`effective_food` 從 0 漲到 368／448**
+（持續 18–43 天、`task=貿易`），**而聚合面的 `food_flow_avg` 仍掛負** `@40ab0ab4 2026-08-21`。
 
-**疑因**（QA 指出，未坐實）：`resource_system.gd:20/230-243` —— 該檔自身註解提到
-「**離開自家糧倉 → `effective_food` 跌 → 一次負脈衝壓低 flow**」；
-這兩隊**持續執行 `貿易`**，若 EMA 取樣點落在「離開糧倉」的判定上，**EMA 可能被結構性鎖負**。
+★★ **但這不是 bug** —— `resource_system.gd:234-236` 的註解**寫得清清楚楚，是刻意設計**：
+> 「離開自家糧倉 → `effective_food` 跌（糧倉不計）→ 一次負脈衝壓低 flow → **偏向不成長（安全方向，絕不假陽性成長）**；
+> 重新定居後 EMA 於窗內回復。**移動隊本不是成長候選（生育須安定＋盈餘）**」
 
-**★影響範圍**：**過去所有用 `food_flow_avg` 判「這隊還在不在流血」的結論都要重看**——
-包含 measurer 這輪的「四隊全程負 ＝ 還在流血」（**其中兩隊實際已翻正**）。
-★ 也包含**生育**：`breed_rel_surplus` 用的正是 `team.food_flow_avg`
-⇒ **若它對某些隊結構性偏負，那些隊的 `f(rel)` 會被壓低、生育被低估**。**未驗，但必須查。**
+⇒ `team10/11` **持續執行 `貿易`（移動中）**，被壓成負 **正是設計意圖**：**移動的商隊不該生小孩。**
 
-**判準**：**判「現在的存量狀態」用 `effective_food`（真實庫存）；`food_flow_avg` 只能用來看趨勢方向，且要先確認它沒被鎖負。**
+**★真正的教訓是「指標被誤用」，不是「指標說謊」**：
+| 問題 | 該用什麼 |
+|---|---|
+| 「這隊**該不該成長／生育**？」 | **`food_flow_avg`**（刻意保守、寧可漏不可假陽性） |
+| 「這隊**還在不在流血**？」 | ★**`effective_food`（真實庫存）** —— **`food_flow_avg` 回答不了這題** |
+
+⇒ measurer 那句「四隊 `food_flow_avg` 全程負 ＝ 還在流血」**是誤用**（其中兩隊真實庫存已暴漲），
+**但指標本身沒壞**，**生育也沒有被錯誤低估**。
+
+★ **systems 自評**：我看到落差就先寫成「結構性鎖負／影響生育」的缺陷條目，**是先喊 bug、後讀註解**。
+**今天第三次**同型（`handback-inbox.sh` perf 檔頭／`godot-detach.ps1` ASCII 檔頭／本條）——
+**檔案自己寫了答案，我沒讀就先下結論。**
 
 ### 🤝 「投靠」決策正確但**執行沒接上**（2026-08-21 QA 坐實）
 `team11` tick10700/10900/10910 三筆完整 candidates：**`併入`（投靠／求收容）util ＝ 2.90–2.91**，
