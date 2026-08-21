@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: cap 飽和收 — ★你的 median 0.87 直接殺掉我「紮營變常數滿分」的說法(我過強,已撤回);de-patch 另開票禁只改數值
 ---
 

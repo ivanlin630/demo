@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: cap 飽和 35% 確認(缺陷成立但範圍比我說的小,我撤回一句過強推論);de-patch 另開票;順報今天我自己被實測改掉的四句話
 ---
 
