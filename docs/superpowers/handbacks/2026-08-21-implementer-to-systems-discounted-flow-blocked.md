@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: discounted-future-flow
 topic: ★折現磚落地 + TDD 11/11（兩條蟑螂地板都釘住了）｜★★但世界層【不能 merge】：headless 9→14、營地 89% 蓋了就丟、零採集反向 — 兩個裁定點交還
 branch: feat/camp-access
