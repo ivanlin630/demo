@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★四端同秤結果 2 綠 1 紅 — 一個我【不願自己裁】的問題:§7 門檻是我寫的,現在該不該放寬?附完整數字與我的建議
 ---
 
