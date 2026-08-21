@@ -1,0 +1,37 @@
+{
+  "slice": "camp-access",
+  "ticket": "systems票C6-#4(★可能插隊critical path)：糧橋不足(bridge.no_go_food)在dispatch_fail裡的實際佔比——判要不要讓工期單一真相源插到camp-access之前",
+  "measured_at_branch": "feat/camp-access(.worktrees/camp-access)，我加了dispatch_fail.*分類tap後commit=見repro",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "faction_ai_system.gd:_log_dispatch_fail chokepoint加7行分類tap(dispatch_fail.<類別>)，fire於既有de-dup檢查前(=真實觸發次數非只變化次數)，Probe-gated零行為改動。camp_access_diag_bed.gd加對應報表段。",
+
+  "★★★答案：糧橋不足=0%，不構成critical path插隊理由": {
+    "dispatch_fail逐類佔比(90天累計，合計28次)": {
+      "資源不足(建材1.5x檢查，比糧橋更早的gate)": "28次 (100.0%)",
+      "advisor不可用": "0次 (0%)",
+      "pop不足": "0次 (0%)",
+      "★糧橋不足(bridge.no_go_food，你懷疑的元兇)": "0次 (0.0%)",
+      "subteam失敗": "0次 (0%)",
+      "其他": "0次 (0%)"
+    },
+    "既有tap交叉驗證": "bridge.no_go_food(既有tap)=0，與我的dispatch_fail.糧橋不足=0完全吻合，非新增tap算錯。bridge.topup(成功派遣)也=0——★這輪90天完全沒有一次派遣通過『資源不足1.5x』那道更早的gate，food-bridge檢查(_avail_food<_need_food)根本沒被執行過一次。",
+    "判讀": "★★C6-#4假說不成立：糧橋(_eta_build高估24倍→_need_food虛高→擋派遣)在這90天窗口裡【一次都沒機會發生】，因為所有28次失敗全部卡在更早、更基本的『建材資源不足1.5x』檢查——連走到food-bridge那一關的門檻都沒跨過。⇒ 不建議讓『工期單一真相源』插隊到camp-access之前；真正擋住派遣的是建材資源(cost，非food)，這是另一個問題。"
+  },
+
+  "★意外發現(非本題,但同一批data順手看到)：camp大量建了又棄": {
+    "camp.built": 28,
+    "camp.abandoned": 25,
+    "判讀": "89%(25/28)紮營最終被棄——量級很大，但這是camp-access主線既有在查的東西(camp_marginal天花板0.826/camp.lost_to分佈)，非本票範圍，僅供交叉參考。camp.lost_to逐項顯示紮營util(0.2-0.24)持續輸給備戰(199次)/覓食(145次)/貿易(46次)等候選——與ledger A1『camp_marginal基準線與世界矛盾』的既有診斷方向一致。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/dispatch-fail-90d.txt",
+    "code": "scripts/simulation/faction_ai_system.gd(camp-access worktree,dispatch_fail.*分類tap)，scripts/debug/camp_access_diag_bed.gd(camp-access worktree,加報表段)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\camp-access --script scripts/debug/camp_access_diag_bed.gd　（需先套用dispatch_fail.* tap，見附註commit）",
+
+  "cleanup": "busy beacon清除。dispatch_fail.*分類tap建議留permanent(補既有'資源不足/pop不足/advisor'三分支缺的計數盲點，同名餓死tap/collect確認鏈先例)，交systems判。"
+}

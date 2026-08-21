@@ -1,0 +1,56 @@
+[peaceful_economy day 90 seed 1337] teams=19
+--- 零採集（病） ---
+  collect.no_outpost_no_camp_zero_food           = 1244
+  collect.no_outpost_no_camp_zero_food.parent    = 1190
+  collect.no_outpost_no_camp_zero_food.subteam   = 54
+  collect.l0_forage_ran                          = 190
+--- 三分流（temp tap 已撤；證據見 2026-08-21 交件） ---
+  camp.diag.i_above_desperation                  = 0
+  camp.diag.ii_no_farmable                       = 0
+  camp.diag.iii_applicable_but_not_chosen        = 0
+  camp.diag.has_outpost_already                  = 0
+  camp.applicable_but_idle                       = 0
+--- ★逐隊歸格（不得只給總數） ---
+--- ★分流(iii) 輸給誰 ---
+  camp.lost_to.build_apothecary:resource         = 18
+  camp.lost_to.build_workshop:resource           = 116
+  camp.lost_to.deliver_material                  = 9
+  camp.lost_to.maintain_food:resource            = 13
+  camp.lost_to.maintain_tools:resource           = 17
+  camp.lost_to.survival                          = 36
+  camp.lost_to.併入                                = 17
+  camp.lost_to.備戰                                = 199
+  camp.lost_to.囤貨                                = 2
+  camp.lost_to.歸建                                = 4
+  camp.lost_to.求和                                = 3
+  camp.lost_to.覓食                                = 145
+  camp.lost_to.買糧                                = 19
+  camp.lost_to.貿易                                = 46
+  camp.lost_to.返家補給                              = 21
+  camp.lost_to.遷移找糧                              = 47
+  camp.won_argmax                                = 24
+    [camp.lost] { "team": 8, "camp_u": 0.228, "winner": "貿易", "win_u": 0.552, "food_days": 12.5 }
+    [camp.lost] { "team": 8, "camp_u": 0.22, "winner": "求和", "win_u": 0.837, "food_days": 12.08 }
+    [camp.lost] { "team": 8, "camp_u": 0.225, "winner": "貿易", "win_u": 1.232, "food_days": 11.25 }
+    [camp.lost] { "team": 8, "camp_u": 0.229, "winner": "貿易", "win_u": 1.36, "food_days": 11.25 }
+    [camp.lost] { "team": 8, "camp_u": 0.232, "winner": "貿易", "win_u": 1.28, "food_days": 10.83 }
+    [camp.lost] { "team": 8, "camp_u": 0.234, "winner": "貿易", "win_u": 1.223, "food_days": 10.42 }
+    [camp.lost] { "team": 8, "camp_u": 0.236, "winner": "貿易", "win_u": 1.183, "food_days": 10 }
+    [camp.lost] { "team": 8, "camp_u": 0.237, "winner": "貿易", "win_u": 1.156, "food_days": 9.58 }
+    [camp.lost] { "team": 8, "camp_u": 0.238, "winner": "貿易", "win_u": 1.138, "food_days": 9.17 }
+    [camp.lost] { "team": 8, "camp_u": 0.239, "winner": "survival", "win_u": 1.129, "food_days": 8.75 }
+--- ★★C6-#4 dispatch_fail 分類佔比(判糧橋是否卡住所有派遣) ---
+  dispatch_fail.資源不足             = 28 (100.0%)
+  dispatch_fail.advisor不可用       = 0 (0.0%)
+  dispatch_fail.pop不足            = 0 (0.0%)
+  dispatch_fail.糧橋不足             = 0 (0.0%)
+  dispatch_fail.subteam失敗        = 0 (0.0%)
+  dispatch_fail.其他               = 0 (0.0%)
+  dispatch_fail 合計               = 28
+  bridge.no_go_food(既有tap,應與糧橋不足相等) = 0
+  bridge.topup(成功派遣次數,對照分母)      = 0
+--- 世界狀態（gate1/6 用） ---
+  pop=1 村數 = 12｜母隊人口合計 = 43
+  breed.born                                     = 1
+  camp.built                                     = 28
+  camp.abandoned                                 = 25
