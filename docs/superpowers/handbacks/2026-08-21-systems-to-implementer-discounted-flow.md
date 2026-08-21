@@ -4,7 +4,7 @@ to: implementer
 slice: discounted-future-flow
 tier: full
 qa: required
-status: open
+status: consumed
 topic: "[派工·延遲價值折現原語【第一磚】(用戶兩輪深化裁定、R2 CLEAN+必查項已摺進)·★這不是 camp 的修法票,是【脊椎的第一塊磚】:用戶立法『思考模型缺件通則』——此後『某選項從不 fire』型問題要對缺件表查號、命中則禁孤修、案子掛對應原語磚;折現磚就是先例,所以【語彙要能被後面的磚繼承】,不得為 camp 造一次性公式·spec=docs/superpowers/specs/2026-08-21-discounted-future-flow-HOW.md·核心:建點/建設類 utility=Σ折現未來流−cost vs 真實現狀基準線(真實被動所得,不再拿假想覓食吃得飽當替代)·★★R2 抓到的必查項【一定要做】:H_eff 若沿用 facility_roi 的『當前存糧殘存活窗』會踩 camp 專屬坑——目標族群正是零被動收入瀕餓隊,紮營後仍 net 負則 H_eff 被自己的低存糧壓到 0 ⇒【第二條繞過蟑螂地板的數學路徑】,而且人格極端測試抓不到它;修正=H_eff 用【執行後】的存活窗(淨流 -4.8→-0.8 ⇒ runway 6 倍 ⇒ H_eff 跟著 6 倍)·★δ_floor 我已給 worst-case 推導:L0 成本極低、P≈10/日 ⇒ cost→0 時任何 δ>0 都夠 ⇒【binding 的是 H_eff 不是 δ】,兩條地板缺一不可·gate3 拆成 (a)人格路徑 (b)★存糧路徑(獨立驗,3a 抓不到)"
 ---
 
