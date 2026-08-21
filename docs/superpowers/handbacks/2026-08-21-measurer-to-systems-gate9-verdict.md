@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-t3-budget
-status: open
+status: consumed
 topic: "★★gate9 verdict：warring_states 30天(非原定90天,誠實自曝env白名單坑)已拿到決定性答案——convoy.stranded=3(全timeout),逐筆distance=2/1/1，★≤2格比例=100%(3/3)支持『gate9證偽誤殺』方向；peaceful 150天=0 vs warring 30天=3，驗證你原判『warring才是T3唯一自然情境』"
 ---
 
