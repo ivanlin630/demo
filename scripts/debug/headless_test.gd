@@ -1984,8 +1984,12 @@ func _test_term_normalize_t3() -> void:
 func _test_term_normalize_t1() -> void:
 	print("[TEST] term_normalize_t1")
 	var ctx := DecisionContext.new()
-	# survival_pressure(覓食) 恆 1.0
-	assert(DecisionTerms.eval("survival_pressure", ctx, "覓食") == 1.0, "覓食=1.0")
+	# ★survival_pressure(覓食) base 不隨飢餓變（舊編碼 == 1.0 已過期；改相對斷言、零魔數）
+	ctx.food_days = 1.0
+	var _sp_a: float = DecisionTerms.eval("survival_pressure", ctx, "覓食")
+	ctx.food_days = 25.0
+	assert(is_equal_approx(_sp_a, DecisionTerms.eval("survival_pressure", ctx, "覓食")),
+		"覓食 base 不隨 food_days 變")
 	# restock_need(返家補給) = home_food/RESTOCK_MIN clamp[0,1]
 	ctx.home_food = 5.0
 	var rn := DecisionTerms.eval("restock_need", ctx, "返家補給")
@@ -14475,11 +14479,24 @@ func _test_decision_context_gather() -> void:
 func _test_decision_terms() -> void:
 	print("--- 決策引擎 Task2: Term + 人格權重 ---")
 	var ctx := DecisionContext.new()
-	# T1(Class A)：survival_pressure base 剝 urgency→恆 1.0(飢餓優先序移 coeff)，不再隨 food 變。
+	# ★T1 不變量（Class A）：survival_pressure base【不隨 food_days 變】（飢餓優先序在 coeff）。
+	#   舊編碼是 `== 1.0`——那顆 1.0 本身是手抄常數，且在 base 換成「腳下真實可採日流」後過期。
+	#   ★新編碼更強：改成【相對斷言、零魔數】直接測「不隨飢餓變」。
 	ctx.food_days = 1.0
-	assert(DecisionTerms.eval("survival_pressure", ctx, "覓食") == 1.0, "T1:覓食 base 恆 1.0")
+	var _fp_hungry: float = DecisionTerms.eval("survival_pressure", ctx, "覓食")
 	ctx.food_days = 30.0
-	assert(DecisionTerms.eval("survival_pressure", ctx, "覓食") == 1.0, "T1:覓食 base 恆 1.0(飢餓在 coeff)")
+	var _fp_full: float = DecisionTerms.eval("survival_pressure", ctx, "覓食")
+	assert(is_equal_approx(_fp_hungry, _fp_full), "T1:覓食 base 不隨 food_days 變（飢餓在 coeff）")
+	# ★新增（證「位置盲」已解、舊編碼證不到）：同 ctx 下自家營地 tile vs 荒地 tile 必須不同價。
+	var _ctx_camp := DecisionContext.new()
+	_ctx_camp.population = 5
+	_ctx_camp.forage_yield_here = 8.0     # 站自家 L0 營地：被動採集流
+	var _ctx_waste := DecisionContext.new()
+	_ctx_waste.population = 5
+	_ctx_waste.forage_yield_here = 0.0    # 荒地：採不到
+	assert(DecisionTerms.eval("survival_pressure", _ctx_camp, "覓食")
+			> DecisionTerms.eval("survival_pressure", _ctx_waste, "覓食"),
+		"★覓食不再位置盲：自家營地 > 荒地")
 	var greedy := {"貪婪": 0.9}
 	var meek := {"貪婪": 0.1}
 	assert(DecisionTerms.weight("economic", greedy) > DecisionTerms.weight("economic", meek), "貪婪高→經濟權重高")
@@ -15116,7 +15133,11 @@ func _test_survival_magnitude() -> void:
 	print("--- survival-class term 量級支配 ---")
 	# T1 正規化(裁定 Class A 機械更新)：base eval 剝 urgency→值域[0,1]品質；飢餓優先序移 coeff。
 	var c := DecisionContext.new()
-	assert(DecisionTerms.eval("survival_pressure", c, "覓食") == 1.0, "T1:覓食 base 恆 1.0(飢餓移 L_SURVIVAL coeff)")
+	c.food_days = 2.0
+	var _sm_a: float = DecisionTerms.eval("survival_pressure", c, "覓食")
+	c.food_days = 40.0
+	assert(is_equal_approx(_sm_a, DecisionTerms.eval("survival_pressure", c, "覓食")),
+		"T1:覓食 base 不隨 food_days 變（飢餓移 L_SURVIVAL coeff）")
 	c.home_food = 5.0
 	assert(abs(DecisionTerms.eval("restock_need", c, "返家補給") - 0.5) < 0.01, "T1:restock=home_food/RESTOCK_MIN(5/10)")
 	c.threat = 0.0; c.team_panic = 0.0
@@ -15612,6 +15633,13 @@ func _mk_strong_neighbor_team(state: WorldState, pos: Vector2i, target: TeamData
 	t.resources = {"food": 100.0}   # < pop×14=420 → 非 aid 目標
 	state.teams[tid] = t
 	_p2a_place_tile(state, pos)
+	# ★fixture 補完（camp-stay-brick v2）：投靠現在秤【host 有沒有飯】（host 村的被動流），
+	#   舊場景是在「投靠 util 還是常數」的年代寫的 ⇒ 當年不必給 host 村子就能通過。
+	#   ★補的是【場景缺的世界事實】，不是斷言：強鄰得真的是個有產出的村。
+	var _ht: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	if _ht != null:
+		_ht.outpost_level = 1
+		_ht.outpost_owner = tid
 	if not state.team_discovered.has(target.team_id):
 		state.team_discovered[target.team_id] = []
 	state.team_discovered[target.team_id].append(tid)
@@ -15628,6 +15656,11 @@ func _mk_player_strong_team(state: WorldState, pos: Vector2i) -> TeamData:
 	t.resources = {"food": 100.0}
 	state.teams[tid] = t
 	_p2a_place_tile(state, pos)
+	# ★同 _mk_strong_neighbor_team：投靠現在秤 host 村的被動流 → 玩家強隊也得真的是個村。
+	var _pt: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	if _pt != null:
+		_pt.outpost_level = 1
+		_pt.outpost_owner = tid
 	var pl := PersonData.new(); pl.id = 99999; pl.team_id = tid
 	state.persons[99999] = pl
 	t.leader_id = 99999

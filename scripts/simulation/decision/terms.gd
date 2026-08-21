@@ -10,7 +10,6 @@ const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略
 # ★A1 紮營價值=MarginalEconomy 真帳（term 非 gate、禁 crank bound）。
 const ROOTING_SAFETY_FACTOR: float = 1.5   # TEST VALUE — 紮根可行性帳安全係數：runway 需 ≥ ETA×此才算滿分（工期外要有餘糧收尾、非硬門檻只影響斜率）
 const CAMP_MARGINAL_CAP: float = 1.5   # TEST VALUE bound — 紮營 drive 封頂（非 inflate、measurer bounded-verify）
-const CAMP_URGENCY_DAYS: float = ResourceSystem.PROVISION_DAYS   # 10 既有錨 — food runway 緊迫度尺
 const FACTION_DUTY_DRIVE: float = 1.5   # TEST VALUE — 派系協同量級（攻擊/徵收/外交同級；commander-v2 單意圖後成員一次服務一意圖的子命令=無同級矛盾，war-priority LESSER 已 revert）
 const DEFECT_AMBITION_K: float = 1.0    # TEST VALUE — 野心折損 faction_duty 權重斜率（脫軌逃閥）
 const ATTACK_DRIVE_BASE: float = 0.3    # TEST VALUE — 個人參戰基值；× attack weight(好戰/殘忍)=染色 HOW
@@ -115,8 +114,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 				var _gain: float = ctx.forage_yield_here if opt == "覓食" else ctx.forage_yield_target
 				return clampf(DiscountedFlow.flow_utility(_gain, ctx.passive_food_daily,
 					float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
-					ctx.leader_values, ctx.net_food_flow, ctx.food_stock,
-					0.0, 0.0, CAMP_URGENCY_DAYS), 0.0, CAMP_MARGINAL_CAP)
+					ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP)
 			# ★A4 de-patch：覓食品質隨 food_days 衰減（死值 1.0 → need-connected、同 camp_drive 家族）。
 			#   <7 天(絕境)→>1 clamp 1.0（survival floor 不動）;7→14 天線性衰減;≥14 天(充裕)→0 讓位。
 			return clampf((2.0 * DecisionContext.SLACK_COMFORT_DAYS - ctx.food_days) / DecisionContext.SLACK_COMFORT_DAYS, 0.0, 1.0)
@@ -196,8 +194,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   同一把尺、現成的流（佔下來即有，無工期 ⇒ delay 0）。
 			return clampf(DiscountedFlow.flow_utility(ctx.occupy_target_flow, ctx.passive_food_daily,
 				float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
-				ctx.leader_values, ctx.net_food_flow, ctx.food_stock,
-				0.0, 0.0, CAMP_URGENCY_DAYS), 0.0, CAMP_MARGINAL_CAP)
+				ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP)
 		"join_drive":
 			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。
 			# 名聲磁鐵 §3：× (1 + host protector_rep × REP_MAGNET_W)——高名聲 host 投靠翻贏逃，中性(0.5)加成小。
@@ -210,8 +207,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var _rep_mult: float = clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
 			return clampf(DiscountedFlow.flow_utility(ctx.join_host_flow, ctx.passive_food_daily,
 				float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
-				ctx.leader_values, ctx.net_food_flow, ctx.food_stock,
-				0.0, 0.0, CAMP_URGENCY_DAYS), 0.0, CAMP_MARGINAL_CAP) * _rep_mult
+				ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP) * _rep_mult
 		"camp_drive":
 			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
 			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:
@@ -221,20 +217,25 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   ★baseline ＝【真實】被動所得（這族隊 ＝ 0），不再拿「假想覓食吃得飽」抵扣整份口糧。
 			#   ★H_eff 用【執行後】淨流算殘存活窗（R² 必查項）：紮營讓流血變慢，本身就延長視野
 			#     ——否則「沒紮營→存糧低→H_eff 小→紮營不划算」是同一個 catch-22 換一層。
+			# ★正規化與其餘三個 option 共用【同一個入口】DiscountedFlow.flow_utility
+			#   （模組頭條：禁為單一 option 造一次性公式）——原本這裡自造一份「除以 10 天口糧」，
+			#   實測讓紮營恆常封頂 1.5、把四選項的順序資訊全毀（併入 1.59 vs 紮營 1.61 的假並列）。
+			# cost ≈ 0（L0 ＝ transient shelter，建置成本極低）；★delay ＝【工期】不是 0：
+			#   `camp_target_est` 估的是 outpost_level=1 的村產 ⇒ 那份流要等「走到靶地 + 紮根工期」才接上。
+			#   spec 四選項表寫明「投靠/佔村＝現成 0；紮營/建設＝工期」——這正是「現成的流打贏要等的流」
+			#   那句話的落點；先前寫 0 ＝ 白送紮營一整段免費未來。★§4c 選址記憶仍乘在最後。
 			var gain: float = MarginalEconomy._inflow_est(ctx.camp_target_est)   # 靶地可持續日產（真實未來流）
 			var daily_need: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
-			var w_food: float = DiscountedFlow.flow_weight("food", ctx.leader_values)
-			var delta: float = DiscountedFlow.delta_of(ctx.leader_values)
-			var post_net: float = ctx.net_food_flow + (gain - ctx.passive_food_daily)
-			var h_eff: float = DiscountedFlow.horizon_eff(post_net, ctx.food_stock)
-			# L0 ＝ transient shelter，建置成本極低（非 L1 工期）⇒ cost ≈ 0（spec §2⑤ worst-case 推導同此假設）
-			var value: float = DiscountedFlow.option_value(gain * w_food, ctx.passive_food_daily * w_food,
-				0.0, delta, h_eff)
-			# 正規化：以「CAMP_URGENCY_DAYS 天份口糧」為單位（既有錨，不新增常數）→ 與其餘 option 同量級；
-			# 上限沿用 CAMP_MARGINAL_CAP（bounded、非 inflate）。★§4c 選址記憶仍乘在最後。
-			var _cu: float = clampf(value / maxf(daily_need * CAMP_URGENCY_DAYS, 0.001), 0.0, CAMP_MARGINAL_CAP) 				* ctx.camp_site_quality_mult
+			var _raw: float = DiscountedFlow.flow_utility(gain, ctx.passive_food_daily, daily_need,
+				ctx.leader_values, ctx.net_food_flow, ctx.food_stock, 0.0, ctx.camp_flow_delay_days)
+			var _cu: float = clampf(_raw, 0.0, CAMP_MARGINAL_CAP) 				* ctx.camp_site_quality_mult
 			if Probe.enabled:
-				Probe.note("discount.horizon_eff", h_eff)
+				# ★cap saturation 常設可觀測（spec §3「先量測、後動刀」要的那個率；修完不忘）：
+				#   被 CAMP_MARGINAL_CAP 夾掉 ＝ 紮營變常數滿分、鑑別度歸零。
+				if _raw >= CAMP_MARGINAL_CAP: Probe.bump("discount.camp_capped")   # 分母＝既有 discount.camp_evaluated
+				Probe.note("discount.camp_raw_u", _raw)
+				Probe.note("discount.horizon_eff", DiscountedFlow.horizon_eff(
+					ctx.net_food_flow + (gain - ctx.passive_food_daily), ctx.food_stock))
 				Probe.note("discount.flow_food", gain)
 				Probe.bump("discount.camp_evaluated")
 			return _cu

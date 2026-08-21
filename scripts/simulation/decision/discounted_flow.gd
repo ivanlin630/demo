@@ -62,9 +62,14 @@ static func option_value(gain_daily: float, baseline_daily: float, cost: float,
 #   gain_daily     ＝ 選了它之後的【真實】被動/採集日流
 #   baseline_daily ＝ 不選它的現狀真實所得（無據點無營地 ⇒ 0）
 #   delay_days     ＝ 這個流要等多久才接上（投靠/佔村＝現成 0；紮營/建設＝工期）——折現天然懲罰等待
+# ★正規化＝【同一段視野、同一個 δ】的口糧現值（實測病修正 2026-08-21）：
+#   value 是整段視野的現值（PV，最長 90 天 ⇒ δ-sum ≈17 天份），若拿固定「N 天口糧」當分母，
+#   任何 gain ≥ need 的 option 都會衝破 cap ⇒ 四選項並列封頂、順序資訊全毀（實測 紮營/併入 同時 1.5）。
+#   分母改用 pv(daily_need,…) ⇒ utility ＝「這個選項相當於幾倍餬口」，δ/H 在分子分母相消，
+#   而 delay（wait_mult）與 cost 仍留在分子 ⇒ 等待與前期投入照樣被折價（人格 δ 在此才有意義）。
 static func flow_utility(gain_daily: float, baseline_daily: float, daily_need: float,
 		values: Dictionary, net_flow: float, food_stock: float,
-		cost: float = 0.0, delay_days: float = 0.0, norm_days: float = 10.0) -> float:
+		cost: float = 0.0, delay_days: float = 0.0) -> float:
 	var d: float = delta_of(values)
 	var post_net: float = net_flow + (gain_daily - baseline_daily)
 	var h: float = horizon_eff(post_net, food_stock)
@@ -73,4 +78,4 @@ static func flow_utility(gain_daily: float, baseline_daily: float, daily_need: f
 	# 等待期折現：delay 天後才開始領 → 整段流乘 δ^delay（現成的流天然贏要等的流）
 	var wait_mult: float = pow(clampf(d, DELTA_FLOOR, DELTA_CAP), maxf(delay_days, 0.0))
 	var value: float = pv(gain_daily, d, h) * wait_mult - pv(baseline_daily, d, h) - cost
-	return value / maxf(daily_need * norm_days, 0.001)
+	return value / maxf(pv(daily_need, d, h), 0.001)

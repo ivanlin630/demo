@@ -60,4 +60,26 @@ func _run() -> void:
 	_ok(v_with_base < v_zero_base and v_with_base > 0.0,
 		"★baseline＝真實被動所得（6/日）→ 增益縮小但仍為正（%.1f < %.1f）" % [v_with_base, v_zero_base])
 
+	# ★gate6 正規化【不得飽和】（camp-stay-brick v2 實測病）：
+	#   value 是【整段視野的現值】(PV，最長 90 天)，若拿「10 天口糧」當分母，
+	#   任何 gain ≥ need 的 option 都會衝破 cap ⇒ 四個選項全部並列封頂、順序資訊全毀。
+	#   ⇒ 分母必須是【同一段視野、同一個 δ】的口糧現值 ⇒ utility ＝「這選項相當於幾倍餬口」。
+	var need: float = 8.0
+	var vals: Dictionary = {"慎重": 0.5}
+	var u_sub: float = DiscountedFlow.flow_utility(need, 0.0, need, vals, 0.0, 100.0)
+	_ok(is_equal_approx(u_sub, 1.0),
+		"★★gate6 gain==need → utility=1.0（不是封頂值），實得 %.3f" % u_sub)
+	var u_double: float = DiscountedFlow.flow_utility(need * 2.0, 0.0, need, vals, 0.0, 100.0)
+	_ok(is_equal_approx(u_double, 2.0), "gate6 gain=2×need → utility=2.0，實得 %.3f" % u_double)
+	var u_half: float = DiscountedFlow.flow_utility(need * 0.5, 0.0, need, vals, 0.0, 100.0)
+	_ok(u_half < u_sub and u_half > 0.0, "gate6 只夠半份餬口 → 明顯低於 1（%.3f）" % u_half)
+	# 視野長短不得改變「幾倍餬口」這個比值（分子分母同視野 ⇒ δ、H 相消）
+	# （執行後【仍】重赤字 ⇒ H_eff 真的短：net -20 + gain 8 = -12/日、存糧 100 → runway ≈8 天）
+	var u_short_h: float = DiscountedFlow.flow_utility(need, 0.0, need, vals, -20.0, 100.0)
+	_ok(is_equal_approx(u_short_h, u_sub),
+		"gate6 視野長短不改變倍數（短視野 %.3f == 長視野 %.3f）" % [u_short_h, u_sub])
+	# 等待期仍要被懲罰（現成的流 > 要等的流）——正規化改法不得洗掉 delay 訊號
+	var u_delayed: float = DiscountedFlow.flow_utility(need, 0.0, need, vals, 0.0, 100.0, 0.0, 30.0)
+	_ok(u_delayed < u_sub, "gate6 delay 30 天仍被折價（%.3f < %.3f）" % [u_delayed, u_sub])
+
 	print("=== %s（fail=%d）===" % ["ALL PASS" if _fail == 0 else "HAS FAILURE", _fail])
