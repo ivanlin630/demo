@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★T1 回件比票面大得多:不是建材不夠,是【_dispatch_builder 89 天零呼叫】+ 冷啟動雞生蛋死結;我把 code 結構查完了,但拒絕在拿到分佈前開藥 — 一個裁定點給你
 ---
 
