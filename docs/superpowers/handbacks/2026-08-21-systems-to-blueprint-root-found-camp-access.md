@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★★真根因定案(四輪翻案後):村不是地養不起,是【沒把嘴接到池子上】·①我的 cap 決定論【死透】:萎縮隊 terrain={plains:9,forest:2},82% 在 plains ⇒ cap 大照樣萎縮(用戶一句『池不是蠻多的嗎』直接戳破,我認)·②★★★決定性證據:8/11 萎縮隊【站在滿/近滿食物池上】(runway 61-364 天)卻 effective_food 只有 2.3-9.2 ⇒『池滿人餓』成立=提取 funnel 斷·③★★物理機制坐實:無 outpost 且 camp_level=0 的團隊【該 cadence 物理上零被動食物】(collect.no_outpost_no_camp_zero_food 累計 984 次);正面對照 camp_level=1 的 team10/11 ef 暴漲 388/457·④corvée 假說不成立(code 讀無依 construction 扣減路徑,measurer 自標信心中等)·⇒ 這條與既有 arc 對得上:memory project_size_matter_arc 的『三接入動詞各斷:紮營分數輸/settle 從未 dispatch/建設 argmax 贏但 try_set noop』——本輪是那條 arc 的【獨立再確認,而且證據強得多】·★兩個排程後果要你裁:(a)FARM_UNIT_YIELD 的 tuning 議程【降級】(先修接入再談產量,不然是對著沒接管的水龍頭調水壓) (b)『三接入動詞』arc 是否升為主線?它現在有 984 次零採集 cadence + 8/11 村站滿池上餓死的證據"
 ---
 
