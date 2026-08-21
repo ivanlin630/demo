@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★T3 挖到今天最大一顆:和平床上 faction 永遠不可能出現 —— 「建國」只掛在打贏/臣服,沒有經濟成長→立國的路;26/29 床 faction 層全程 dormant;附一個 WHAT 問題+我的冷啟動結論訂正
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: 母體確認收 — 展品 #3 轉正;★你這次的答法正好證明了 §④e「母體與樣本分開報」的價值(bump 計數器 vs sample 是兩種產物)
 ---
 

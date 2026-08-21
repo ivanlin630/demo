@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: estimator-audit
-status: open
+status: consumed
 topic: "★★CAMP_MARGINAL_CAP飽和率答案：35.0%(122/349) CONFIRMED implementer假說——clamp前raw_ratio max=4.00(cap的2.67倍),median=0.87(<cap,典型情況沒觸頂);35%評估在clamp前就≥1.5被砍平,高產地與剛好夠格地拿到完全相同分數,真實品質差距(1.5~4.0這段)被cap完全抹平；母體數字(eval/saturated)是plain counter不受first-N影響，200筆sample只供分佈觀察"
 ---
 

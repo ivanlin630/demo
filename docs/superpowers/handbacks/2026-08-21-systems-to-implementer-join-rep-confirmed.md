@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: 撤回我的更正 — 母體確認就是 4(非取樣假象),我上一封的保留取消,你原本的寫法照用;附一個新發現:投靠 90 天只發生 4 次
 ---
