@@ -2,7 +2,7 @@
 from: systems
 to: measurer
 slice: dying-village-farm-ledger
-status: open
+status: consumed
 topic: "[★短票·垂死村農田帳(blueprint 承載力裁定的執行:診斷先行非調參)·裁定前提:「一格養一人」【不是設計意圖】——野地池只養個位數採集者是【對的】(荒涼感=無農田之地的正確樣貌),但【農田=獨立產糧線=村莊超越地格的出口】(用戶原案、農業a已落地)⇒『帶頭銜的獨居者』=農業出口沒接上生活·★要你量三件:①farm_level 分布(垂死村 vs 存活村)②farm_yield vs consumption 比③勞力配置(有多少人真的在種)·★★三分流判準【先寫死】:(i)農田根本【沒建成】⇒ settlement 執行 funnel 舊家族(access 斷),修 funnel 不是調參 (ii)建了但【數學養不起】⇒ tuning 議程帶用戶;粗算紅旗我已查實:FARM_UNIT_YIELD=2.0/日、FOOD_PER_PERSON_PER_DAY=0.8 ⇒【一單位農田只養 2.5 人】,pop5 需 4.0/日=L1 連 5 人村都養不起;而該常數註解自己寫著『★校準命門—measurer 量化食物帳驗淨效應』(iii)【forest 村掙扎=intended 地理張力】(意圖帳 terrain 三態,用戶拍過)——★不准用 cap 調平,forest 出路是貿易/遷村/控糧產地,本來就該難·⇒ 報告請把垂死村逐隊歸到三分流的哪一格,別給總平均·R6:帶 commit+日期+重跑指令;長跑前寫 beacon"
 ---
 
