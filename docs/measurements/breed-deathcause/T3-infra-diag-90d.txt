@@ -37,6 +37,16 @@
     { "team": 11, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
     { "team": 11, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
   ★短缺資源種類分佈={ "material": 28 }
+★★追查：_evaluate_all_body本身呼叫次數(判斷faction迴圈整體死活)：
+  evaluate_all_body.entry              = 2376
+  evaluate_all_body.factions_size_sum   = 0
+  evaluate_all_body.last_tick(最後一次呼叫時的tick) = 21600
+  前5筆tick樣本：
+    { "tick": 10, "mod_infra": 10, "n_factions": 0 }
+    { "tick": 20, "mod_infra": 20, "n_factions": 0 }
+    { "tick": 30, "mod_infra": 30, "n_factions": 0 }
+    { "tick": 40, "mod_infra": 40, "n_factions": 0 }
+    { "tick": 50, "mod_infra": 50, "n_factions": 0 }
 ★★T3 infra entry四格停駐分佈：
   infra.entry(呼叫總次數)                    = 0
   infra.stop.guard(guard早退,非決策閘)         = 0

@@ -8,7 +8,7 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 ## A. 反射弧本體(思考模型四邊補完)
 | # | 件 | 現況(待驗) |
 |---|---|---|
-| A1 | 行動邊:dispatch-drop 合規盤點(convoy 7 silent false+order.abandoned/JOIN/建設 try_set/trade bail 逐族=消滅 or 有反饋失敗事件) | 列舉票 in-flight |
+| A1 | 行動邊:dispatch-drop 合規盤點(convoy 7 silent false+order.abandoned/JOIN/建設 try_set/trade bail 逐族=消滅 or 有反饋失敗事件) | ★**建設族升為下一張 implementer 票**(blueprint 裁 2026-08-21)——**首次拿到硬數字**:紮根 argmax 贏 **8** → 真開工 **1**(見 §F1) |
 | A2 | 失敗回饋邊:失敗律落地(隊層 recent_failures+連續折價+失效升 T0) | HOW 已裁待 slice |
 | A3 | 成功回饋單邊病:site_thrived 全期零筆(升級完工真發生後才有教材;§3c 工期落地連動驗) | 依賴鏈 |
 | A4 | T0 事件匯流排(所有突發事件→喚醒;時間包/效能 arc 同體) | spec LOCKED 待執行 |
@@ -23,7 +23,7 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 | B3 | capture/flip encounter-only(headless 恒不 fire)=戰爭科目結構廢考 | 戰爭之路已定案未修 |
 | B4 | intent 從不選征服(survival-mode 收斂;B3 修後才測得出真偽) | 同上 |
 | B5 | alliance/betray 決策層無選項(結盟=敘事標籤沒接行動) | 戰爭之路 scope |
-| B6 | 手不聽腦殘目:subteam-idle-latch(HIGH 舊帳)+建設 try_set noop 族 | 待驗(部分可能已修) |
+| B6 | 手不聽腦殘目:subteam-idle-latch(HIGH 舊帳)+建設 try_set noop 族 | ★**建設 noop 族已坐實未修**(§F1 的 `8→1`);subteam-idle-latch 仍待驗 |
 | B7 | 持守統一(23 硬鎖→人格加權秤;手不聽腦②型根治) | arc 已立案 PARK |
 
 ## C. 已排定修復(考前隊列既有,列此對齊)
@@ -132,3 +132,35 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 ### ★風險與誠實預估
 - **長桿 ＝ D1**（領導成長管道）與 **A1 逐族納管**（族數多）。**考期以清單清零為準、非日曆**（用戶已定）。
 - **C 類（效能 arc 剩餘刀 + 時間包 S1–S7）本身就是多輪**；與 A/B/D 並行會搶 implementer——**同一時間最多兩條 implementer 線**（主線 + 小票），第三條要排隊。
+
+---
+
+## §F1 ★未勾項：`outpost.l0_to_l1 > 0`（世界驗收尺 #1，**紅著、不豁免**）
+
+**blueprint 裁定 2026-08-21（分帳，非放寬）**：
+**slice 交付閘** 與 **世界驗收尺** 是**兩道閘**。
+`camp-access` 四端同秤這一刀的**本分（估值層）已驗實** ⇒ **交付准**；
+**但 §7 #1 不豁免、不消失** ⇒ **轉記本清單為未勾項，owner 改掛真兇。**
+
+### 斷點鏈（同床 peaceful 90d seed 1337 @ `70198bc0`）
+```
+紮根贏 argmax  = 8    ← ★估值層(camp-access 的活)是好的:applicable 且真的贏
+→ 真的開工      = 1    ← 7 個掉在 commit／仲裁端
+→ 完工          = 0    ← 那 1 個也沒完成
+```
+
+### 兩段各有 owner（**不再掛 camp-access 估值層**）
+| 段 | 歸屬 | 為什麼 |
+|---|---|---|
+| **`8 → 1`** | ★**A1 建設族**（＋B6）＝**手不聽腦第 4 型本尊** | 建設 argmax 贏、`try_set` noop —— **既列，現在有硬數字了** |
+| **`1 → 0`** | **camp-access 工期票**（新開） | 工期端，**與 75% 棄置同源**（人走了工地就停） |
+
+### 勾銷條件
+**兩票落地後同床重量**，`outpost.l0_to_l1 > 0` 才勾。
+★**世界驗收尺原話不變**（滿池餓死清零 ＋ 蓋了就丟率崩 ＋ L0→L1 > 0），**三綠才算世界層過**。
+
+### ★二值門檻的使命記錄
+`> 0` 這條**禁旋鈕假造**的設計**已經奏效**：
+它沒有被任何調參糊過去，而是**把「無解釋的 0」逼成「有座標的斷點鏈」** ——
+**它抓到的事實是「斷點在別片」，這個事實照記。**
+

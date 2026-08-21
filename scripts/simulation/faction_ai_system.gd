@@ -715,6 +715,12 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	SpecimenTracer.heartbeat_sweep(state)
 
 func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
+	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,T3追查)：本函式呼叫次數+factions是否為空+代表性tick值
+		Probe.bump("evaluate_all_body.entry")
+		Probe.add_amount("evaluate_all_body.factions_size_sum", float(state.factions.size()))
+		Probe.bump_sample("evaluate_all_body.tick_sample", {"tick": state.world.current_tick,
+			"mod_infra": state.world.current_tick % INFRA_INTERVAL, "n_factions": state.factions.size()}, 5)
+		Probe.note("evaluate_all_body.last_tick", state.world.current_tick)
 	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	for fid in state.factions:
 		var f = state.factions[fid]
@@ -4401,13 +4407,21 @@ func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> 
 		_dispatch_facility_builder(state, team, tile.tile_pos, pick["facility"])
 
 func _evaluate_infrastructure(state: WorldState, faction) -> void:
+	if Probe.enabled: Probe.bump("infra.entry")   # ★measurer L3 tap(2026-08-21,T3票)：函式被呼叫總次數
 	var leader_team: TeamData = state.teams.get(faction.leader_team_id)
-	if leader_team == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
-	if leader_team.combat_target != -1: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if leader_team == null:
+		if Probe.enabled: Probe.bump("infra.stop.guard")
+		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if leader_team.combat_target != -1:
+		if Probe.enabled: Probe.bump("infra.stop.guard")
+		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var leader: PersonData = state.persons.get(leader_team.leader_id)
-	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if leader == null:
+		if Probe.enabled: Probe.bump("infra.stop.guard")
+		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	# 玩家 leader → 不自動決策（後續用 AdvisorSystem.push_outpost_advice）
 	if leader_team.leader_id == state.player_id and state.player_id != -1:
+		if Probe.enabled: Probe.bump("infra.stop.guard")
 		return
 	var _ti: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	# (1) 升級既有 outpost
@@ -4416,6 +4430,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if tile.outpost_owner != leader_team.team_id: continue
 		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue   # gate-ok: world-mechanic: outpost level cap (>=3)
 		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
+			if Probe.enabled: Probe.bump("infra.stop.1_upgrade")   # ★measurer L3 tap(T3票)：段(1)升級return
 			if SimRunner.phase_timing: _fai_pht("infra.upgrade", _ti)
 			return
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.upgrade", _ti)
@@ -4446,6 +4461,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if owner_team.tile_pos == tile.tile_pos and owner_team.combat_target == -1 \
 				and owner_team.current_task != TeamData.TASK_BUILD:
 			if OutpostSystem.new()._subteam_upgrade_facility(state, owner_team, tile, pick["facility"]):
+				if Probe.enabled: Probe.bump("infra.stop.2_facility")   # ★measurer L3 tap(T3票)：段(2)擴建return(owner在場)
 				if SimRunner.phase_timing: _fai_pht("infra.facility", _ti)
 				return
 		# tile 上同 faction 居民團出工出料
@@ -4455,9 +4471,11 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 				print("[Infra] Team%d 令居民 Team%d 就地擴建 %s at (%d,%d)" % [
 					owner_team.team_id, resident.team_id, pick["facility"],
 					tile.tile_pos.x, tile.tile_pos.y])
+				if Probe.enabled: Probe.bump("infra.stop.2_facility")   # ★measurer L3 tap(T3票)：段(2)擴建return(居民出工)
 				if SimRunner.phase_timing: _fai_pht("infra.facility", _ti)
 				return
 		if _dispatch_facility_builder(state, owner_team, tile.tile_pos, pick["facility"]):
+			if Probe.enabled: Probe.bump("infra.stop.2_facility")   # ★measurer L3 tap(T3票)：段(2)擴建return(派builder)
 			if SimRunner.phase_timing: _fai_pht("infra.facility", _ti)
 			return
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.facility", _ti)
@@ -4466,9 +4484,12 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	# (3) 蓋新 outpost
 	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.new_loc", _ti)
-	if loc.is_empty(): return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if loc.is_empty():
+		if Probe.enabled: Probe.bump("infra.stop.3_loc_empty")   # ★measurer L3 tap(T3票)：段(3)loc.is_empty()return
+		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	# S4.4：ore 機會已融入 _pick_outpost_type 人格秤（傳 loc_tile），移除硬 civilian override。
 	var outpost_type: String = _pick_outpost_type(state, leader_team, leader, loc.get("tile", null))
+	if Probe.enabled: Probe.bump("infra.stop.3_reached_dispatch_builder")   # ★measurer L3 tap(T3票)：段(3)真的呼叫到_dispatch_builder
 	_dispatch_builder(state, leader_team, loc.pos, outpost_type, 1)
 
 # ──────── 設施需求迴路（score = 地利 × (1+缺口) × 個性）────────

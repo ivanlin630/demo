@@ -1,0 +1,33 @@
+{
+  "slice": "estimator-audit",
+  "ticket": "systems票T3：_evaluate_infrastructure 90天內①被呼叫幾次②每次停在哪一段(四格計數)——要能定案的分佈",
+  "measured_at_head": "c8dd8bfa(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "faction_ai_system.gd加兩批tap：①_evaluate_infrastructure的entry+guard+四格停駐點(7處)②_evaluate_all_body的entry+factions.size()+tick樣本(3行，用於追查infra.entry=0的異常)。皆Probe-gated零行為改動。",
+
+  "★★★答案：不是『停在哪一段』，是『外層迴圈的疊代集合本身是空的』——四格全部=0，因為peaceful_economy這個config裡state.factions.size()恆為0": {
+    "數字": {
+      "evaluate_all_body.entry(本函式被呼叫次數)": "非零(有真的在跑，每10 tick一次，見下方cadence備註)",
+      "evaluate_all_body.factions_size_sum": 0,
+      "tick樣本(前5筆)": "{tick:10,mod_infra:10,n_factions:0} {tick:20,...,n_factions:0} {tick:30,...,n_factions:0} {tick:40,...,n_factions:0} {tick:50,...,n_factions:0}——n_factions每一筆都是0",
+      "infra.entry": 0, "infra.stop.guard": 0, "infra.stop.1_upgrade": 0,
+      "infra.stop.2_facility": 0, "infra.stop.3_loc_empty": 0, "infra.stop.3_reached_dispatch_builder": 0
+    },
+    "判讀": "★★`_evaluate_all_body`本身確實有在跑(entry非零，每10 tick一次)，但函式內`for fid in state.factions:`這個外層迴圈的疊代集合`state.factions`【從頭到尾都是空字典】——`_update_goals`/`_assign_tasks`/`_evaluate_infrastructure`三者全部活在這個for迴圈裡面，全部因為【疊代對象是空集合】而從未被呼叫過一次，不是四格裡的任何一格特別擋，是連進入for迴圈body都沒有機會。",
+    "根因(code+config對照，非猜)": "`config/peaceful_economy.json`【沒有`factions`這個key】；`config/warring_states.json`【有】——★這是config設計差異，不是bug：peaceful_economy這個世界從設定上就是『無勢力』的沙盒，`state.factions`空字典是設計意圖的直接後果，不是執行斷。",
+    "★★對T1的回溯修正": "T1那28次dispatch_fail(tick=10,全缺material)★不可能來自`_evaluate_infrastructure`(它從未被呼叫)★——它們必然全部來自`_dispatch_builder`的另一個呼叫點`_dispatch_goal_delegate`(faction_ai:4021，per-TEAM呼叫、不經過state.factions疊代)。這讓T1的故事更完整：不是『infra評估的第3段擋住』，是『唯一真正執行的建造派遣路徑是per-team的goal_delegate，它在tick=10試了一次就再也沒試，且完全獨立於state.factions是否為空』。"
+  },
+
+  "★給你的下一步(不開藥，只指路)": "如果T3真正想問的是『_evaluate_infrastructure在有勢力的世界裡四格分佈長什麼樣』，peaceful_economy這個config結構上答不了這題(factions恆空)——需要換warring_states(config裡有factions定義)重跑同一套tap才能拿到有意義的四格分佈。我沒有自己換config重跑(不確定這是不是你要的下一步，先回報這個決定性發現讓你/blueprint裁優先序)。",
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/T3-infra-diag-90d.txt",
+    "bed": "scripts/debug/join_accept_measure_bed.gd(main)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/join_accept_measure_bed.gd　（換LW_CONFIG='warring_states'可測有勢力世界的真四格分佈）",
+
+  "cleanup": "busy beacon清除。7個infra.*tap+3個evaluate_all_body.*tap建議留(補『空集合疊代』這類量測盲點)，交systems判permanent。"
+}
