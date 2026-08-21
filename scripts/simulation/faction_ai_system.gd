@@ -5022,6 +5022,10 @@ func _survival_food_days(state: WorldState, team: TeamData) -> float:
 # 純寫自己站上的 tile + 自己的 corvee_site 記憶，零 RNG。
 func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> void:
 	if not td.has("settle_site"):
+		# ★注意：本 hook 對【每個成功 try_set】都會被呼叫，所以這顆若不過濾就會把所有非紮根 commit 也算進來
+		#   （上一輪 1101 就是這個假象）。只在當下選項真的是紮根時才算「掉了」。
+		if Probe.enabled and team.current_option == "紮根":
+			Probe.bump("root.commit_drop.no_settle_site")
 		return
 	var site: Vector2i = td["settle_site"]
 	var tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(site))
@@ -5035,6 +5039,10 @@ func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> v
 		if Probe.enabled: Probe.bump("settlement.l0_to_l1_resume")
 		return
 	if tile.camp_level != 1 or tile.outpost_level > 0 or tile.construction_team_id != -1:
+		# ★驗收#1（l0_to_l1 二值）的解釋層：紮根【贏了 argmax 卻沒落地】要分因，不能只看到 0。
+		if Probe.enabled:
+			var _why: String = "no_camp" if tile.camp_level != 1 else ("already_outpost" if tile.outpost_level > 0 else "occupied_by_other")
+			Probe.bump("root.commit_drop." + _why)
 		return   # 情境已變（他隊先蓋/已升級）→ 不落地（下 cadence 重評）
 	# 建點 type by leader 好戰/野心（沿用 establish_crude_camp 慣例、非新旋鈕）
 	var leader: PersonData = state.persons.get(team.leader_id)

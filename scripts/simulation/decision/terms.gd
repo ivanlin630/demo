@@ -107,9 +107,18 @@ static func _duty_factor(loy: float, amb: float) -> float:
 static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 	match term:
 		"survival_pressure":
+			# ★camp-stay-brick v2（四選項同秤）：覓食／遷移找糧改問【選它之後拿得到多少食物流】，
+			#   走與紮營同一把尺 DiscountedFlow.flow_utility ⇒ ★在自家營地覓食 vs 在荒地覓食【不同價】
+			#   （舊式只是 f(food_days)：存量函數、位置盲，於是「原地一直覓食」永遠免費）。
+			#   其餘吃這顆 weight 的 option（自救建田／逃跑／返家補給）不在本刀範圍，維持舊式壓力值。
+			if opt == "覓食" or opt == "遷移找糧":
+				var _gain: float = ctx.forage_yield_here if opt == "覓食" else ctx.forage_yield_target
+				return clampf(DiscountedFlow.flow_utility(_gain, ctx.passive_food_daily,
+					float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
+					ctx.leader_values, ctx.net_food_flow, ctx.food_stock,
+					0.0, 0.0, CAMP_URGENCY_DAYS), 0.0, CAMP_MARGINAL_CAP)
 			# ★A4 de-patch：覓食品質隨 food_days 衰減（死值 1.0 → need-connected、同 camp_drive 家族）。
 			#   <7 天(絕境)→>1 clamp 1.0（survival floor 不動）;7→14 天線性衰減;≥14 天(充裕)→0 讓位。
-			#   SURVIVAL_RECOVER=SLACK_COMFORT_DAYS（7 既有錨=SURVIVAL_RECOVER_DAYS 同值、禁新常數）。★感知鐵律=自家 food_days。
 			return clampf((2.0 * DecisionContext.SLACK_COMFORT_DAYS - ctx.food_days) / DecisionContext.SLACK_COMFORT_DAYS, 0.0, 1.0)
 		"restock_need":
 			if opt != "返家補給": return 0.0
@@ -183,16 +192,26 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 要根據地驅力（純野心 base_need；匱乏→奪產村的 hunger boost 走 intent_fit term，與掠奪 parallel）。
 			# 人格染色走 weight("occupy")。無 outpost 流浪狼 base_need=1（最需要），有 outpost 弱驅 0.3。
 			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
-			# T1：base 1.2→1.0；要根據地品質(無 outpost 流浪狼最需要 1.0，有 outpost 弱驅 0.3)。
-			return 1.0 if not ctx.has_own_outpost else 0.3
+			# ★camp-stay-brick v2：舊式是死常數 1.0/0.3（不看那村產不產糧）⇒ 改問【那個村的實際產能】，
+			#   同一把尺、現成的流（佔下來即有，無工期 ⇒ delay 0）。
+			return clampf(DiscountedFlow.flow_utility(ctx.occupy_target_flow, ctx.passive_food_daily,
+				float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
+				ctx.leader_values, ctx.net_food_flow, ctx.food_stock,
+				0.0, 0.0, CAMP_URGENCY_DAYS), 0.0, CAMP_MARGINAL_CAP)
 		"join_drive":
 			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。
 			# 名聲磁鐵 §3：× (1 + host protector_rep × REP_MAGNET_W)——高名聲 host 投靠翻贏逃，中性(0.5)加成小。
 			if opt != "併入": return 0.0
 			# ★REVERT crank(2026-08-02)：protection urgency 已 revert(同 absorb crank 家族)——原 join 已 fire 於 hunger/threat
 			# (genuine survival 覆蓋受威脅弱隊靠強);加的 preemptive protection=crank-leaning(case B size 不 matter)。回原 quality band。
-			# T1：剝 hunger/threat urgency(移 coeff)，保名聲磁鐵品質(高名聲 host 投靠更值)。
-			return clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
+			# ★camp-stay-brick v2：舊式【只秤 host 名聲、不看 host 有沒有飯】⇒ 改成同一把尺：
+			#   host 村的被動流（現成、無工期 ⇒ delay 0），名聲磁鐵降為【乘數】而非全部。
+			#   ⇒ 高名聲但自己快餓死的 host 不再自動拿高分（那正是舊式的缺陷）。
+			var _rep_mult: float = clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
+			return clampf(DiscountedFlow.flow_utility(ctx.join_host_flow, ctx.passive_food_daily,
+				float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
+				ctx.leader_values, ctx.net_food_flow, ctx.food_stock,
+				0.0, 0.0, CAMP_URGENCY_DAYS), 0.0, CAMP_MARGINAL_CAP) * _rep_mult
 		"camp_drive":
 			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
 			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:

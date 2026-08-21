@@ -67,6 +67,15 @@ func _run() -> void:
 	lost.sort()
 	for l in lost: lines.append(l)
 	lines.append("  %-46s = %d" % ["camp.won_argmax", int(Probe.counts.get("camp.won_argmax", 0))])
+	lines.append("--- ★紮根 funnel（驗收#1 的解釋層）---")
+	lines.append("  %-46s = %d" % ["root.won_argmax", int(Probe.counts.get("root.won_argmax", 0))])
+	var rl: Array = []
+	for k in Probe.counts.keys():
+		if String(k).begins_with("root.lost_to."): rl.append("  %-46s = %d" % [String(k), int(Probe.counts[k])])
+	rl.sort()
+	for l in rl: lines.append(l)
+	if rl.is_empty() and int(Probe.counts.get("root.won_argmax", 0)) == 0:
+		lines.append("  ★紮根從未進入候選（applicable 都沒過）")
 	if Probe.samples.has("camp.lost"):
 		for smp in Probe.samples["camp.lost"].slice(0, 10):
 			lines.append("    [camp.lost] %s" % str(smp))
@@ -74,6 +83,10 @@ func _run() -> void:
 		lines.append("--- ★camp_drive 零件（分流 iii 第三層） ---")
 		for smp in Probe.samples["camp.drive_parts"].slice(0, 10):
 			lines.append("    %s" % str(smp))
+	for k in Probe.counts.keys():
+		var kr: String = String(k)
+		if kr.begins_with("root.commit_drop.") or kr.begins_with("settlement.l0_to_l1") or kr.begins_with("construct.complete"):
+			lines.append("  %-46s = %d" % [kr, int(Probe.counts[k])])
 	lines.append("--- 世界狀態（gate1/6 用） ---")
 	var pop1: int = 0
 	var pop_total: int = 0

@@ -56,3 +56,21 @@ static func pv(daily_flow: float, delta: float, horizon: float) -> float:
 static func option_value(gain_daily: float, baseline_daily: float, cost: float,
 		delta: float, horizon: float) -> float:
 	return pv(gain_daily, delta, horizon) - pv(baseline_daily, delta, horizon) - cost
+
+# ★四選項同尺的【唯一】入口（撿／投／紮／覓食-遷移都呼這個；禁各自再造一份正規化）。
+# 問的是同一件事：「選它之後我未來拿得到多少食物流」。
+#   gain_daily     ＝ 選了它之後的【真實】被動/採集日流
+#   baseline_daily ＝ 不選它的現狀真實所得（無據點無營地 ⇒ 0）
+#   delay_days     ＝ 這個流要等多久才接上（投靠/佔村＝現成 0；紮營/建設＝工期）——折現天然懲罰等待
+static func flow_utility(gain_daily: float, baseline_daily: float, daily_need: float,
+		values: Dictionary, net_flow: float, food_stock: float,
+		cost: float = 0.0, delay_days: float = 0.0, norm_days: float = 10.0) -> float:
+	var d: float = delta_of(values)
+	var post_net: float = net_flow + (gain_daily - baseline_daily)
+	var h: float = horizon_eff(post_net, food_stock)
+	if h <= 0.0:
+		return 0.0
+	# 等待期折現：delay 天後才開始領 → 整段流乘 δ^delay（現成的流天然贏要等的流）
+	var wait_mult: float = pow(clampf(d, DELTA_FLOOR, DELTA_CAP), maxf(delay_days, 0.0))
+	var value: float = pv(gain_daily, d, h) * wait_mult - pv(baseline_daily, d, h) - cost
+	return value / maxf(daily_need * norm_days, 0.001)

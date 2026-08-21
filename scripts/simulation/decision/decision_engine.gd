@@ -121,6 +121,15 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				else:
 					Probe.bump("camp.won_argmax")
 				break
+		# ★紮根（L0→L1）funnel 可觀測：驗收 #1 是二值（l0_to_l1 > 0），要能分辨
+		#   「沒 applicable」vs「applicable 但秤輸」——否則 0 只是個沒有解釋的 0。
+		for e in scored:
+			if String(e["opt"]) == "紮根":
+				if String(scored[0]["opt"]) != "紮根":
+					Probe.bump("root.lost_to." + String(scored[0]["opt"]))
+				else:
+					Probe.bump("root.won_argmax")
+				break
 	# per-option 選中分布（argmax=rank[0]；判「applicable 過但選中恆 0」=結構性死鎖 ④）
 	if Probe.enabled and not scored.is_empty() and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
 		Probe.bump("decision.opt_chosen." + String(scored[0]["opt"]))

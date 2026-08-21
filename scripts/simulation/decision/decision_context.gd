@@ -57,6 +57,12 @@ var camp_forage_floor: float = 0.0
 # ★折現原語（脊椎第一磚）：真實現狀三量——基準線／淨流／存糧。★baseline 是【真實被動所得】，
 # 無據點且無營地 ⇒ 0（實測那些隊就是 0），不再拿「假想覓食餬口」當替代方案。
 var passive_food_daily: float = 0.0
+# ★四選項同尺（camp-stay-brick v2）：每個選項「選了之後拿得到多少食物流」的【真實】素材。
+# 血統①：全部走 MarginalEconomy._inflow_est / tile 實際量，禁再造第二份產能常數。
+var forage_yield_here: float = 0.0       # 覓食：腳下 tile 的真實可採日流（★在自家營地 vs 荒地必須不同價）
+var forage_yield_target: float = 0.0     # 遷移找糧：目標 tile 的真實可採日流
+var join_host_flow: float = 0.0          # 投靠：host 村的被動流（現成、無工期）
+var occupy_target_flow: float = 0.0      # 佔村：那個村的實際產能（非二值常數）
 var net_food_flow: float = 0.0
 var food_stock: float = 0.0
 var camp_site_quality_mult: float = 1.0   # ★§4c：紮營靶地的選址記憶乘子（1.0=無記憶/已過期）
@@ -388,6 +394,33 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	elif _ptile != null and _ptile.camp_level > 0:
 		c.passive_food_daily = ResourceSystem.L0_FORAGE_MULT * float(_ptile.resources.get("food", 0))
 	c.net_food_flow = team.food_flow_avg          # 日均淨食物流（已含消耗）
+	# ★覓食＝腳下 tile 的真實所得：有自家營地 ⇒ L0 被動採集；否則 ⇒ 主動覓食可得（同一個 tile 池，位置有差）
+	# 覓食日產的【單一源】＝既有 _forage_subsist_buffer / FORAGE_FLOOR_DAYS（＝pop×食/人/日），
+	# ★但要讓位置有差：實得受該 tile 現有食物池上限；站自家 L0 營地則走被動採集率。
+	var _forage_rate: float = ResourceSystem._forage_subsist_buffer(team) / ResourceSystem.FORAGE_FLOOR_DAYS
+	if _ptile != null:
+		var _pool: float = float(_ptile.resources.get("food", 0))
+		c.forage_yield_here = (ResourceSystem.L0_FORAGE_MULT * _pool) if _ptile.camp_level > 0 			else minf(_pool, _forage_rate)
+	var _seek: Vector2i = c.food_seek_target
+	if _seek != Vector2i(-1, -1):
+		var _stile: HexTileData = state.world.tiles.get(_seek.x * 1000 + _seek.y)
+		if _stile != null:
+			c.forage_yield_target = minf(float(_stile.resources.get("food", 0)), _forage_rate)
+	# ★投靠＝host 村的被動流（現成、無工期）；★佔村＝目標村的實際產能（非死常數）
+	if c.strong_neighbor_id != -1:
+		var _host: TeamData = state.teams.get(c.strong_neighbor_id)
+		if _host != null:
+			var _htile: HexTileData = state.world.tiles.get(_host.tile_pos.x * 1000 + _host.tile_pos.y)
+			if _htile != null and _htile.outpost_level > 0:
+				c.join_host_flow = MarginalEconomy._inflow_est(VillageEstimate.make(
+					_htile.terrain, _htile.outpost_level, 0, _host.population)) / maxf(float(_host.population), 1.0) 					* float(team.population)   # host 的人均流 × 我要帶過去的人數
+	if c.occupy_target_id != -1:
+		var _vt: TeamData = state.teams.get(c.occupy_target_id)
+		if _vt != null:
+			var _vtile: HexTileData = state.world.tiles.get(_vt.tile_pos.x * 1000 + _vt.tile_pos.y)
+			if _vtile != null:
+				c.occupy_target_flow = MarginalEconomy._inflow_est(VillageEstimate.make(
+					_vtile.terrain, maxi(_vtile.outpost_level, 1), 0, _vt.population))
 	c.food_stock = ResourceSystem.effective_food(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.strong_farm", _tg)
 	var _aid: int = _fa._find_aid_target(state, team)
