@@ -1,0 +1,37 @@
+{
+  "slice": "convoy-return-t3-budget",
+  "ticket": "gate9補發票(2026-08-21 systems)：warring_states找T3 stranded第一個真樣本+逐筆報distance",
+  "measured_at_head": "e3aa3d69(main,已merge convoy母刀0c92cd96,非t3-budget分支——票面允許先用母刀跑)",
+  "measured_date": "2026-08-21",
+
+  "★★誠實自曝：兩個env變數被godot-detach白名單濾掉，窗口比原定短": {
+    "ADHOC_DAYS未在白名單(只ADHOC_TICKS在)+PERF_OUT未在白名單(只WARRING_*/SPECIMEN_*/LW_*/PERF_SEED-DAYS-CONFIG在)": "都被靜默丟棄——ADHOC_DAYS='90'沒生效，退回LW_MONTHS未設的預設值(1個月=30天)；PERF_OUT沒生效，報表只留在raw stdout log(CP950)沒進sidecar檔。",
+    "處置": "從raw log(iconv轉碼)撈出完整30天最終報告，落地成UTF-8檔。SPECIMEN_TEAM_ID/SPECIMEN_SAMPLE_N也忘了設→SpecimenDumpHelper no-op，本輪無specimen。",
+    "結論": "雖然只有30天(非原定90天)、且無specimen，★但30天窗內已經拿到決定性答案(見下)，不需要重跑就能回答票面的核心問題。specimen若要送QA故事稽核需要重跑補上(見下建議)。"
+  },
+
+  "★★gate9核心答案(30天,seed1337,warring_states)": {
+    "trips_total": 50,
+    "下場分佈": {"merged_home": 34, "stranded": 3, "still_convoy(censored,未終局)": 10, "ghost_alive(censored,未終局)": 3},
+    "convoy.stranded": 3,
+    "convoy.stranded.timeout": 3,
+    "判準①有stranded→逐筆報distance": [
+      {"porter": 100, "parent": 25, "tick": 4380, "dist": 2},
+      {"porter": 118, "parent": 31, "tick": 5590, "dist": 1},
+      {"porter": 164, "parent": 30, "tick": 6250, "dist": 1}
+    ],
+    "★★≤2格比例": "3/3 = 100%——全部stranded事件發生時porter都在原parent 1-2格範圍內，非遠距離真正走失。",
+    "判讀(依systems預寫判準)": "有stranded(非零樣本)→答判準①：≤2格比例=100%(3/3)，支持『gate9證偽誤殺』方向——T3在warring世界會真的fire，且fire時porter並非遠在天邊，是近在咫尺卻仍卡在timeout判定裡，不是誤殺遠距離正常在途的porter。★n=3樣本小，若要更高信心建議延長窗或多seed。"
+  },
+
+  "★對照：peaceful vs warring": "peaceful_economy 150天=0 stranded(T3從未fire)；warring_states僅30天=3 stranded——明確驗證了systems原判斷『warring母隊滅團/長期不可達較多，是唯一有機會產生stranded的自然情境』。",
+
+  "landed_paths": {
+    "report": "docs/measurements/gate9/gate9-warring-30d-report.txt(從raw stdout log iconv轉碼撈出)",
+    "raw_stdout_log(CP950,post-mortem用)": "C:\\Users\\I12\\AppData\\Local\\Temp\\godot_detach_2abe3c78.log(本地暫存,非committed)"
+  },
+
+  "repro(★下次用LW_MONTHS非ADHOC_DAYS，godot-detach白名單教訓)": "$env:PERF_SEED='1337'; $env:LW_CONFIG='warring_states'; $env:LW_MONTHS='3'; $env:WARRING_OUT='<絕對路徑>.txt'; $env:SPECIMEN_SAMPLE_N='10'; $env:SPECIMEN_OUT='<絕對路徑>.specimen.jsonl'; .\\tools\\godot-detach.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/convoy_gate9_warring_bed.gd",
+
+  "cleanup": "新增scripts/debug/convoy_gate9_warring_bed.gd(main,純觀測temp bed，零production code變更)，本輪未revert——等systems判要不要保留(同convoy_return_conservation_bed.gd先例，可能也值得留作warring版的常設診斷工具)。"
+}

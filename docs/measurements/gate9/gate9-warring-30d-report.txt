@@ -1,0 +1,25 @@
+  convoy.rehome                                  = 154
+  persist.hold                                   = 4
+  convoy.drop.inflight_convoy                    = 34
+  convoy.stranded                                = 3
+  convoy.stranded.timeout                        = 3
+  下場分佈：{ "merged_home": 34, "stranded": 3, "still_convoy(censored,未終局)": 10, "ghost_alive(censored,未終局)": 3 }
+  ★★stranded逐筆(distance=當下porter與原parent hex距離,-1=parent已不存在無法算)：
+    { "porter": 100, "parent": 25, "tick": 4380, "dist": 2, "porter_pos": [17, 18], "parent_pos": [15, 19] }
+    { "porter": 118, "parent": 31, "tick": 5590, "dist": 1, "porter_pos": [10, 12], "parent_pos": [11, 11] }
+    { "porter": 164, "parent": 30, "tick": 6250, "dist": 1, "porter_pos": [10, 15], "parent_pos": [10, 14] }
+
+[warring_states day 30] teams=125 porters_tracked=50 trips_total=50
+  convoy: dispatch=86 attempt=120 deliver=35 settled=21 return=65 stranded=3
+  convoy.dispatch_attempt                        = 120
+  convoy.rehome                                  = 154
+  persist.hold                                   = 4
+  convoy.drop.inflight_convoy                    = 34
+  convoy.stranded                                = 3
+  convoy.stranded.timeout                        = 3
+  下場分佈：{ "merged_home": 34, "stranded": 3, "still_convoy(censored,未終局)": 10, "ghost_alive(censored,未終局)": 3 }
+  ★★stranded逐筆(distance=當下porter與原parent hex距離,-1=parent已不存在無法算)：
+    { "porter": 100, "parent": 25, "tick": 4380, "dist": 2, "porter_pos": [17, 18], "parent_pos": [15, 19] }
+    { "porter": 118, "parent": 31, "tick": 5590, "dist": 1, "porter_pos": [10, 12], "parent_pos": [11, 11] }
+    { "porter": 164, "parent": 30, "tick": 6250, "dist": 1, "porter_pos": [10, 15], "parent_pos": [10, 14] }
+=== gate9 warring convoy stranded床 DONE ===
