@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ③死水族已制度化落地(總帳 §H + 03b §④c 硬要求);①②④⑤ 全收;缺件表那族等 T3 你定性,code 對應欄我補
 ---
 
