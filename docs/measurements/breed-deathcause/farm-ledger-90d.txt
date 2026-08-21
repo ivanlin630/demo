@@ -1,0 +1,153 @@
+[peaceful_economy day 90 seed 1337] teams=16
+  pop_total 72 → 43｜named 25｜minors 1
+  breed.born               = 5
+  breed.eligible_named     = 305
+  breed.eligible_anon      = 305
+  breed.safety_proxy(peak) = 1.000
+  ★★死因分佈(合計,累加不分桶)：
+    death.starve_anon              = 20
+    death.defect_leave             = 19
+    extinct.starve                 = 1
+  ★★死因逐10日桶(day, key=delta，只列非全0的桶)：
+    day= 40 { "death.starve_anon": 5, "death.defect_leave": 7 }
+    day= 50 { "death.starve_anon": 14, "death.defect_leave": 3 }
+    day= 60 { "death.starve_anon": 1, "death.defect_leave": 1 }
+    day= 70 { "death.defect_leave": 4 }
+    day= 80 { "death.defect_leave": 4 }
+    day= 90 { "extinct.starve": 1 }
+  ★★★垂死村農田帳(逐隊，三分流判準見ticket)：
+    垂死 team=0 pop=1 terrain=plains owned_tile=(6, 8) farm_level=1 yield/日=0.03 consume/日=0.80 比值=0.04 勞力share/demand=0.06/5.00
+    存活 team=1 pop=8 terrain=plains owned_tile=(10, 8) farm_level=0 yield/日=0.00 consume/日=6.40 比值=0.00 勞力share/demand=0.00/0.00
+    存活 team=2 pop=6 terrain=plains owned_tile=(8, 6) farm_level=1 yield/日=1.09 consume/日=4.80 比值=0.23 勞力share/demand=1.67/5.00
+    垂死 team=3 pop=1 terrain=plains owned_tile=(8, 10) farm_level=2 yield/日=0.00 consume/日=0.80 比值=0.00 勞力share/demand=0.00/10.00
+    垂死 team=4 pop=1 terrain=plains owned_tile=(6, 10) farm_level=2 yield/日=0.00 consume/日=0.80 比值=0.00 勞力share/demand=0.00/10.00
+    垂死 team=5 pop=1 terrain=plains owned_tile=(10, 6) farm_level=1 yield/日=0.01 consume/日=0.80 比值=0.02 勞力share/demand=0.02/5.00
+    存活 team=6 pop=9 terrain=plains owned_tile=(5, 9) farm_level=0 yield/日=0.00 consume/日=7.20 比值=0.00 勞力share/demand=0.00/0.00
+    存活 team=7 pop=7 terrain=plains owned_tile=(11, 9) farm_level=3 yield/日=1.74 consume/日=5.60 比值=0.31 勞力share/demand=0.90/15.00
+    存活 team=8 pop=2 terrain=N/A(無自家outpost) owned_tile=無 farm_level=-1 yield/日=0.00 consume/日=1.60 比值=0.00 勞力share/demand=0.00/0.00
+    垂死 team=10 pop=1 terrain=mountain owned_tile=(10, 10) farm_level=1 yield/日=0.04 consume/日=0.80 比值=0.05 勞力share/demand=0.06/5.00
+    垂死 team=11 pop=1 terrain=mountain owned_tile=(7, 11) farm_level=0 yield/日=0.00 consume/日=0.80 比值=0.00 勞力share/demand=0.00/0.00
+    垂死 team=14 pop=1 terrain=N/A(無自家outpost) owned_tile=無 farm_level=-1 yield/日=0.00 consume/日=0.80 比值=0.00 勞力share/demand=0.00/0.00
+    垂死 team=16 pop=1 terrain=N/A(無自家outpost) owned_tile=無 farm_level=-1 yield/日=0.00 consume/日=0.80 比值=0.00 勞力share/demand=0.00/0.00
+    垂死 team=17 pop=1 terrain=N/A(無自家outpost) owned_tile=無 farm_level=-1 yield/日=0.00 consume/日=0.80 比值=0.00 勞力share/demand=0.00/0.00
+    垂死 team=18 pop=1 terrain=N/A(無自家outpost) owned_tile=無 farm_level=-1 yield/日=0.00 consume/日=0.80 比值=0.00 勞力share/demand=0.00/0.00
+    垂死 team=20 pop=1 terrain=N/A(無自家outpost) owned_tile=無 farm_level=-1 yield/日=0.00 consume/日=0.80 比值=0.00 勞力share/demand=0.00/0.00
+  ★★存活隊 effective_food(真實庫存)趨勢 day60→90(中位數+正成長佔比)：
+    n(day60且day90都存活)=16 中位Δeffective_food=10.91 正成長佔比=13/16(81%)
+      team=0 ef(day60)=0.0 ef(day90)=2.7 Δ=2.7 knife_cycles=1
+      team=1 ef(day60)=78.5 ef(day90)=114.2 Δ=35.7 knife_cycles=0
+      team=2 ef(day60)=35.5 ef(day90)=0.0 Δ=-35.5 knife_cycles=1
+      team=3 ef(day60)=0.0 ef(day90)=2.3 Δ=2.3 knife_cycles=1
+      team=4 ef(day60)=0.0 ef(day90)=16.3 Δ=16.3 knife_cycles=1
+      team=5 ef(day60)=0.0 ef(day90)=2.3 Δ=2.3 knife_cycles=1
+      team=6 ef(day60)=488.1 ef(day90)=708.9 Δ=220.8 knife_cycles=0
+      team=7 ef(day60)=46.4 ef(day90)=71.1 Δ=24.7 knife_cycles=0
+      team=8 ef(day60)=67.0 ef(day90)=148.1 Δ=81.1 knife_cycles=1
+      team=10 ef(day60)=1.0 ef(day90)=388.0 Δ=387.0 knife_cycles=1
+      team=11 ef(day60)=225.6 ef(day90)=457.4 Δ=231.7 knife_cycles=1
+      team=14 ef(day60)=17.2 ef(day90)=47.4 Δ=30.2 knife_cycles=0
+      team=16 ef(day60)=8.4 ef(day90)=3.7 Δ=-4.8 knife_cycles=0
+      team=17 ef(day60)=2.7 ef(day90)=3.3 Δ=0.7 knife_cycles=0
+      team=18 ef(day60)=3.7 ef(day90)=9.2 Δ=5.5 knife_cycles=0
+      team=20 ef(day60)=10.4 ef(day90)=7.0 Δ=-3.4 knife_cycles=0
+  ★★knife-edge(高峰>=50後崩到<=5算1次週期)週期數統計：
+    有knife-edge週期的隊數=9/19：[[8, 1], [11, 1], [10, 1], [9, 1], [5, 1], [4, 1], [0, 1], [3, 1], [2, 1]]
+  ★★地形/可及資源快照(存活隊,day90當下state)：
+    team=0 pos=(6, 8) terrain=plains tile_food=150.0 tile_food_cap=150.0 granary_food=0 coin=680
+    team=1 pos=(10, 8) terrain=plains tile_food=173.8 tile_food_cap=178.0 granary_food=50.1942843503758 coin=1147
+    team=2 pos=(8, 6) terrain=plains tile_food=178.9 tile_food_cap=179.0 granary_food=0 coin=475
+    team=3 pos=(11, 7) terrain=plains tile_food=160.0 tile_food_cap=160.0 granary_food=無自家糧倉 coin=800
+    team=4 pos=(4, 10) terrain=plains tile_food=110.0 tile_food_cap=110.0 granary_food=無自家糧倉 coin=800
+    team=5 pos=(11, 3) terrain=forest tile_food=49.0 tile_food_cap=49.0 granary_food=無自家糧倉 coin=705
+    team=6 pos=(5, 9) terrain=plains tile_food=168.1 tile_food_cap=400.0 granary_food=628.911911730329 coin=300
+    team=7 pos=(15, 5) terrain=plains tile_food=24.7 tile_food_cap=156.0 granary_food=無自家糧倉 coin=300
+    team=8 pos=(15, 5) terrain=plains tile_food=24.7 tile_food_cap=156.0 granary_food=無自家糧倉 coin=1116
+    team=10 pos=(16, 2) terrain=plains tile_food=61.2 tile_food_cap=268.0 granary_food=無自家糧倉 coin=200
+    team=11 pos=(9, 9) terrain=plains tile_food=50.4 tile_food_cap=186.0 granary_food=無自家糧倉 coin=200
+    team=14 pos=(15, 3) terrain=forest tile_food=51.0 tile_food_cap=51.0 granary_food=無自家糧倉 coin=1
+    team=16 pos=(5, 16) terrain=plains tile_food=196.0 tile_food_cap=196.0 granary_food=無自家糧倉 coin=0
+    team=17 pos=(7, 5) terrain=plains tile_food=291.0 tile_food_cap=291.0 granary_food=無自家糧倉 coin=42
+    team=18 pos=(5, 13) terrain=plains tile_food=115.0 tile_food_cap=115.0 granary_food=無自家糧倉 coin=0
+    team=20 pos=(6, 8) terrain=plains tile_food=150.0 tile_food_cap=150.0 granary_food=無自家糧倉 coin=30
+  ★★存活隊 food_flow_avg 分佈(day60/90，含famine_days是否曾歸零)：
+    day=60 n=18 中位food_flow_avg=0.325 正值佔比=11/18(61%) famine曾歸零=18/18(100%)
+      team=0 pop=1 famine_days=12.08 food_flow_avg=-0.032 ever_zero_famine=true
+      team=1 pop=7 famine_days=0.00 food_flow_avg=2.019 ever_zero_famine=true
+      team=2 pop=6 famine_days=0.00 food_flow_avg=-1.216 ever_zero_famine=true
+      team=3 pop=5 famine_days=0.83 food_flow_avg=-0.037 ever_zero_famine=true
+      team=4 pop=5 famine_days=0.00 food_flow_avg=-0.033 ever_zero_famine=true
+      team=5 pop=1 famine_days=25.83 food_flow_avg=-0.014 ever_zero_famine=true
+      team=6 pop=8 famine_days=0.00 food_flow_avg=6.689 ever_zero_famine=true
+      team=7 pop=5 famine_days=0.00 food_flow_avg=4.458 ever_zero_famine=true
+      team=8 pop=2 famine_days=0.00 food_flow_avg=6.606 ever_zero_famine=true
+      team=9 pop=1 famine_days=8.33 food_flow_avg=-0.006 ever_zero_famine=true
+      team=10 pop=1 famine_days=0.00 food_flow_avg=-0.204 ever_zero_famine=true
+      team=11 pop=1 famine_days=0.00 food_flow_avg=12.018 ever_zero_famine=true
+      team=14 pop=1 famine_days=0.00 food_flow_avg=1.852 ever_zero_famine=true
+      team=15 pop=1 famine_days=0.00 food_flow_avg=1.509 ever_zero_famine=true
+      team=16 pop=1 famine_days=0.00 food_flow_avg=0.167 ever_zero_famine=true
+      team=17 pop=1 famine_days=0.00 food_flow_avg=0.285 ever_zero_famine=true
+      team=18 pop=1 famine_days=0.00 food_flow_avg=0.364 ever_zero_famine=true
+      team=20 pop=1 famine_days=0.00 food_flow_avg=1.022 ever_zero_famine=true
+    day=90 n=16 中位food_flow_avg=0.195 正值佔比=9/16(56%) famine曾歸零=16/16(100%)
+      team=0 pop=1 famine_days=0.00 food_flow_avg=0.305 ever_zero_famine=true
+      team=1 pop=8 famine_days=0.00 food_flow_avg=1.943 ever_zero_famine=true
+      team=2 pop=6 famine_days=2.08 food_flow_avg=-1.260 ever_zero_famine=true
+      team=3 pop=1 famine_days=0.00 food_flow_avg=-0.056 ever_zero_famine=true
+      team=4 pop=1 famine_days=0.00 food_flow_avg=-0.342 ever_zero_famine=true
+      team=5 pop=1 famine_days=0.00 food_flow_avg=0.100 ever_zero_famine=true
+      team=6 pop=9 famine_days=0.00 food_flow_avg=3.274 ever_zero_famine=true
+      team=7 pop=7 famine_days=0.00 food_flow_avg=-0.131 ever_zero_famine=true
+      team=8 pop=2 famine_days=0.00 food_flow_avg=2.442 ever_zero_famine=true
+      team=10 pop=1 famine_days=0.00 food_flow_avg=10.519 ever_zero_famine=true
+      team=11 pop=1 famine_days=0.00 food_flow_avg=7.345 ever_zero_famine=true
+      team=14 pop=1 famine_days=0.00 food_flow_avg=-0.755 ever_zero_famine=true
+      team=16 pop=1 famine_days=0.00 food_flow_avg=0.335 ever_zero_famine=true
+      team=17 pop=1 famine_days=0.00 food_flow_avg=-0.435 ever_zero_famine=true
+      team=18 pop=1 famine_days=0.00 food_flow_avg=0.291 ever_zero_famine=true
+      team=20 pop=1 famine_days=0.00 food_flow_avg=-0.272 ever_zero_famine=true
+  ★★崩潰隊(pop>=2→<=1)逐筆+trailing history(最近10日快照)：
+    ---- team=10 day=38 famine_days=10.8 named_n=0 minor_before=0 task=覓食 tags=["統領", "生產"] ----
+      { "day": 29, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 1.66666666666667, "task": "貿易", "food_flow_avg": -2.63533942170782, "tags": ["統領", "生產"] }
+      { "day": 30, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 2.91666666666667, "task": "貿易", "food_flow_avg": -2.02988239021592, "tags": ["統領", "生產"] }
+      { "day": 31, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 3.75, "task": "貿易", "food_flow_avg": -1.70566506400087, "tags": ["統領", "生產"] }
+      { "day": 32, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 4.58333333333333, "task": "貿易", "food_flow_avg": -1.43323244961185, "tags": ["統領", "生產"] }
+      { "day": 33, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 5.83333333333333, "task": "治理", "food_flow_avg": -1.10395392964894, "tags": ["統領", "生產"] }
+      { "day": 34, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 6.66666666666667, "task": "治理", "food_flow_avg": -0.92762795477446, "tags": ["統領", "生產"] }
+      { "day": 35, "pop": 4, "minor": 0, "named_n": 0, "famine_days": 7.91666666666667, "task": "覓食", "food_flow_avg": -0.71450972673889, "tags": ["統領", "生產"] }
+      { "day": 36, "pop": 3, "minor": 0, "named_n": 0, "famine_days": 8.75, "task": "覓食", "food_flow_avg": -0.60038664538476, "tags": ["統領", "生產"] }
+      { "day": 37, "pop": 2, "minor": 0, "named_n": 0, "famine_days": 9.58333333333333, "task": "覓食", "food_flow_avg": -0.50449155619136, "tags": ["統領", "生產"] }
+      { "day": 38, "pop": 1, "minor": 0, "named_n": 0, "famine_days": 10.8333333333333, "task": "覓食", "food_flow_avg": -0.38858695676545, "tags": ["統領", "生產"] }
+    ---- team=5 day=45 famine_days=10.8 named_n=0 minor_before=0 task=return_home tags=["統領", "生產"] ----
+      { "day": 36, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 1.66666666666667, "task": "return_home", "food_flow_avg": -2.25345132573829, "tags": ["統領", "生產"] }
+      { "day": 37, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 2.5, "task": "return_home", "food_flow_avg": -1.89352507232176, "tags": ["統領", "生產"] }
+      { "day": 38, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 3.75, "task": "return_home", "food_flow_avg": -1.45849645327561, "tags": ["統領", "生產"] }
+      { "day": 39, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 4.58333333333333, "task": "return_home", "food_flow_avg": -1.2255421586552, "tags": ["統領", "生產"] }
+      { "day": 40, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 5.83333333333333, "task": "覓食", "food_flow_avg": -0.94397952151046, "tags": ["統領", "生產"] }
+      { "day": 41, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 6.66666666666667, "task": "覓食", "food_flow_avg": -0.79320501460254, "tags": ["統領", "生產"] }
+      { "day": 42, "pop": 4, "minor": 0, "named_n": 0, "famine_days": 7.5, "task": "覓食", "food_flow_avg": -0.66651254699241, "tags": ["統領", "生產"] }
+      { "day": 43, "pop": 3, "minor": 0, "named_n": 0, "famine_days": 8.75, "task": "覓食", "food_flow_avg": -0.51338437502714, "tags": ["統領", "生產"] }
+      { "day": 44, "pop": 2, "minor": 0, "named_n": 0, "famine_days": 9.58333333333333, "task": "return_home", "food_flow_avg": -0.43138548179364, "tags": ["統領", "生產"] }
+      { "day": 45, "pop": 1, "minor": 0, "named_n": 0, "famine_days": 10.8333333333333, "task": "return_home", "food_flow_avg": -0.33227666450656, "tags": ["統領", "生產"] }
+    ---- team=11 day=46 famine_days=10.4 named_n=0 minor_before=0 task=建設 tags=["統領", "生產"] ----
+      { "day": 37, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 1.25, "task": "治理", "food_flow_avg": -0.43456336856037, "tags": ["統領", "生產"] }
+      { "day": 38, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 2.5, "task": "治理", "food_flow_avg": -0.33472444650107, "tags": ["統領", "生產"] }
+      { "day": 39, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 3.33333333333333, "task": "治理", "food_flow_avg": -0.28126151407382, "tags": ["統領", "生產"] }
+      { "day": 40, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 4.58333333333333, "task": "覓食", "food_flow_avg": -0.216642983352, "tags": ["統領", "生產"] }
+      { "day": 41, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 5.41666666666667, "task": "覓食", "food_flow_avg": -0.18204028462216, "tags": ["統領", "生產"] }
+      { "day": 42, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 6.25, "task": "覓食", "food_flow_avg": -0.15296440582835, "tags": ["統領", "生產"] }
+      { "day": 43, "pop": 4, "minor": 0, "named_n": 0, "famine_days": 7.5, "task": "覓食", "food_flow_avg": -0.11782154175783, "tags": ["統領", "生產"] }
+      { "day": 44, "pop": 3, "minor": 0, "named_n": 0, "famine_days": 8.33333333333334, "task": "覓食", "food_flow_avg": -0.09900282328262, "tags": ["統領", "生產"] }
+      { "day": 45, "pop": 2, "minor": 0, "named_n": 0, "famine_days": 9.58333333333333, "task": "投靠", "food_flow_avg": -0.07625738297984, "tags": ["統領", "生產"] }
+      { "day": 46, "pop": 1, "minor": 0, "named_n": 0, "famine_days": 10.4166666666667, "task": "建設", "food_flow_avg": -0.06407738430945, "tags": ["統領", "生產"] }
+    ---- team=0 day=48 famine_days=0.0 named_n=0 minor_before=0 task=覓食 tags=["統領", "生產"] ----
+      { "day": 39, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 1.66666666666667, "task": "return_home", "food_flow_avg": -2.71217645550611, "tags": ["統領", "生產"] }
+      { "day": 40, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 2.91666666666667, "task": "return_home", "food_flow_avg": -2.08906647122606, "tags": ["統領", "生產"] }
+      { "day": 41, "pop": 6, "minor": 0, "named_n": 1, "famine_days": 3.75, "task": "return_home", "food_flow_avg": -1.7553961320719, "tags": ["統領", "生產"] }
+      { "day": 42, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 4.58333333333333, "task": "return_home", "food_flow_avg": -1.47502036097708, "tags": ["統領", "生產"] }
+      { "day": 43, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 5.83333333333333, "task": "return_home", "food_flow_avg": -1.13614126184056, "tags": ["統領", "生產"] }
+      { "day": 44, "pop": 5, "minor": 0, "named_n": 0, "famine_days": 6.66666666666667, "task": "return_home", "food_flow_avg": -0.95467425474103, "tags": ["統領", "生產"] }
+      { "day": 45, "pop": 4, "minor": 0, "named_n": 0, "famine_days": 7.91666666666667, "task": "製造", "food_flow_avg": -0.73534226450249, "tags": ["統領", "生產"] }
+      { "day": 46, "pop": 3, "minor": 0, "named_n": 0, "famine_days": 8.75, "task": "製造", "food_flow_avg": -0.61789176392223, "tags": ["統領", "生產"] }
+      { "day": 47, "pop": 2, "minor": 0, "named_n": 0, "famine_days": 9.58333333333333, "task": "return_home", "food_flow_avg": -0.51920071829577, "tags": ["統領", "生產"] }
+      { "day": 48, "pop": 1, "minor": 0, "named_n": 0, "famine_days": 0, "task": "覓食", "food_flow_avg": -0.39991675697434, "tags": ["統領", "生產"] }
