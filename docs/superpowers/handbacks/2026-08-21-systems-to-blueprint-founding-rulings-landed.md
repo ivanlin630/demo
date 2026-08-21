@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 建國案四項全收 + ⑥回溯標注已落(且比預期重要:可能統一 mint/設施鏈/建材/冷啟動 成一顆) + 四句教訓已入 memory
 ---
 
