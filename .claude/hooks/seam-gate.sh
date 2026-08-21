@@ -119,8 +119,15 @@ case "$TIER" in
     [ "$n_hb"   -eq 0 ] && miss="${miss} handback"
     ;;
   "")
-    echo "  ⚠ 這條 slice 的派工單沒宣告 tier —— ★tier 由 systems 在 dispatch frontmatter 寫死，做的人不得自選"
-    [ "$MODE" = "hard" ] && { echo "🔴 HARD：tier 未宣告 = 無法判該欠什麼"; exit 1; }
+    # ★HARD 入場券（blueprint 核准 2026-08-21）：【有含 tier 的 dispatch handback】才進 HARD 管轄。
+    #   用派工票劃代 ⇒ 紀律生效前的老 slice 自然不在管轄內，【零回溯武裝】
+    #   （回溯武裝是結構性空洞：沒宣告的東西根本不在母體，永遠不可能被標紅）。
+    #   ★逃生門的責任歸屬寫明：dispatch handback 是 systems 寫的 ⇒ 漏寫 tier 是 systems 自己的失誤，
+    #   而且【SOFT/HARD 都會印這行】，看得見。
+    echo "  ⚠ 這條 slice 沒有含 tier 的派工單 —— ★tier 由 systems 在 dispatch frontmatter 寫死，做的人不得自選"
+    if [ "$MODE" = "hard" ]; then
+      echo "  ⏭ HARD 不管轄（無派工票＝紀律生效前的 slice，或 systems 漏寫 tier）——★這行本身就是給 systems 看的"
+    fi
     exit 0
     ;;
   *) echo "  ⚠ 未知 tier「${TIER}」（只認 full|probe）"; [ "$MODE" = "hard" ] && exit 1; exit 0 ;;

@@ -223,6 +223,15 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 | 機制意圖帳（改既有機制先對照） | 📜 | 無 |
 | doc glance-aid 瘦身 | 📜 | 無（on-touch 自律） |
 
+★★ **通則：閘的成本也是要量的東西（2026-08-21 血證、blueprint 核准入表）**
+> **把一道閘從 advisory 轉成 enforced 之前，必須先量它自己跑一次要多久。**
+
+血證：`seam-gate` 單次 **1m47s**（對 300+ 封信每檔 spawn 一次 `head`）——
+而 `handback-inbox.sh` 的檔頭**正好記著 2026-07-05 修過同一個病**（改單次 awk），**systems 原封不動重犯一次**。
+已修 **1m47s → 1.0s**。
+★ **為什麼這件事非記不可**：**跑不動的硬閘最後一定會被繞過或關掉，比沒有閘更糟**
+——它會留下「我們有守」的錯覺，而那正是 P7 三態表存在的理由。
+
 ★ **這張表本身也要 on-touch 維護**：新增 hook／gate 時順手改一行，不必特批。
 ★ **看到 📜 不代表該補機器**——有些（角色邊界、內容品質、該不該他做）**本來就只能是人的活**，
 硬做就變成「**a proxy for judgement is a prose claim wearing a schema**」。
