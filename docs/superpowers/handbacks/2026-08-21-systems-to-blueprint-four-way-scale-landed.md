@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 四裁定全收 + ★你要的「四選項同秤」我查全四端了,比預期狠:投靠只秤名聲不看飯、佔村是死常數;implementer 已 GO
 ---
 
