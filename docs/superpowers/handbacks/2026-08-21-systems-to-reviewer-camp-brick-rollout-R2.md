@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: camp-access
 topic: R② 審裁定 —— 折現磚「只鋪一半」論;我自己最沒把握的承重點已標出,請優先打那三顆
 ---
