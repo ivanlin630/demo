@@ -69,10 +69,10 @@ fi
 
 # ⑤b ★同族 pattern 閘（gate 7：做成閘不是做成約定）——禁止任何「掃 state.teams 取 max 再 +1」的 team id 配發，
 #     即使不叫 _next_team_id。抓法：函式體內同時出現 `for ... in state.teams` 與 `max_id + 1` / `m + 1` 的檔案。
-#     ★必須是「掃 state.teams」那種（person id 另有其事，不在本閘範圍）：用 awk 看同一函式內
+#     ★必須是「掃 state.teams」那種（team 與 person 兩族都納管：兩個單一出生口 consume_next_team_id / consume_next_person_id）：用 awk 看同一函式內
 #     `for ... in state.teams` 之後 5 行內是否出現 `return <var> + 1`。
 _pat=$(find scripts -name '*.gd' -not -path 'scripts/debug/*' -print0 2>/dev/null | xargs -0 -r awk '
-  /for [A-Za-z_]+ in state\.teams/ { hot = 5; next }
+  /for [A-Za-z_]+ in state\.(teams|persons)/ { hot = 5; next }
   hot > 0 { if ($0 ~ /return [A-Za-z_]+ \+ 1/) { print FILENAME; hot = 0 } else hot-- }
 ' | sort -u | wc -l)
 if [ "$_pat" -gt 0 ]; then

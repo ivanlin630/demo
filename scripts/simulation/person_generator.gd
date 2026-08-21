@@ -46,7 +46,7 @@ static func generate(state: WorldState, seed_offset: int,
 	rng.seed = seed_offset
 
 	var p := PersonData.new()
-	p.id = _next_id(state)
+	p.id = state.consume_next_person_id()
 	p.person_name = _random_name(rng, state)
 	p.role = role
 	p.age = rng.randi_range(18, 50)
@@ -122,11 +122,6 @@ static func _apply_promotion_skills(p: PersonData, src_tier: String, seed: int) 
 		var v: float = rng.randf_range(float(band[0]), float(band[1]))
 		p.skills[sk] = maxf(float(p.skills.get(sk, 0.0)), v)
 
-static func _next_id(state: WorldState) -> int:
-	var max_id: int = -1
-	for pid in state.persons:
-		if int(pid) > max_id: max_id = int(pid)
-	return max_id + 1
 
 static func _random_name(rng: RandomNumberGenerator, state: WorldState) -> String:
 	var attempts: int = 10

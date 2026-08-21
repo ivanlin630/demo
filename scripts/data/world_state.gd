@@ -64,6 +64,11 @@ var _next_faction_id: int = 0
 #   空白 4600–7300、命2 7300 起，max_gap 2740 與空白完全吻合）。
 # ★收斂成【一個動作】而非「七處各讀同一計數器」——後者只是把「重用 id」換成「七個物理上分開的計數概念」。
 var next_team_id: int = 0
+# ★person id 單一分配器（slice monotonic-person-id 2026-08-21，形狀照抄 team-id 那刀）。
+# ★傷害面比 team 那次更隱蔽：`p.relations`（person_data:62）與 `p.relation_edges`（:63）**都以 person id 當鍵**
+#   ⇒ 新人撿到舊 id 會平白繼承一段跟自己毫無關係的恩怨情仇，而且【不報錯、聚合數字也不反常】
+#   （team 重用至少會在 specimen／床這種有人在看的地方露破綻）。
+var next_person_id: int = 0
 
 var next_beast_id: int = -1000000
 var player_id: int = -1
@@ -157,6 +162,16 @@ func _rebuild_owner_outpost() -> void:
 # ★唯一出生口：配一個新 team id（單調遞增、永不重用）。
 # 防禦性 floor：若 state 裡已存在 >= 計數器的 id（例如未來的存檔載入忘了同步），
 # 這裡把計數器抬過去並【留下 tap】——寧可看得見地自我修復，也不要靜默撞號。
+# ★唯一出生口（person）：單調遞增、永不重用。floor 同 team 版：state 裡已有 >= 計數器的 id 就抬過去 + 留 tap。
+func consume_next_person_id() -> int:
+	for pid in persons:
+		if int(pid) >= next_person_id and int(pid) >= 0:
+			next_person_id = int(pid) + 1
+			if Probe.enabled: Probe.bump("personid.floor_bump")
+	var id: int = next_person_id
+	next_person_id += 1
+	return id
+
 func consume_next_team_id() -> int:
 	for tid in teams:
 		if int(tid) >= next_team_id and int(tid) >= 0:
