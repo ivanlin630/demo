@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 分帳裁定已制度化(05_acceptance 兩道閘 + 清單 §F1 未勾項掛真兇);A1 建設族已派為 implementer 下一票;工期票另開
 ---
 
