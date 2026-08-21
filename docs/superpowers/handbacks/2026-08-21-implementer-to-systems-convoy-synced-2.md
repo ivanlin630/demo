@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: convoy-return-conservation
 topic: 已同步（可 merge）— git 零衝突，但我沒靠「沒紅字」交差：兩刀語意共存已跑過 TDD+det
 branch: feat/convoy-return-conservation
