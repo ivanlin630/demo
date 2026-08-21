@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: breed-anon-eligible
-status: open
+status: consumed
 topic: "★①存活隊effective_food day60→90中位Δ=+10.91,正成長佔比13/16(81%)→支持『擬真篩選非世界破』②★★意外發現:81%正成長的『存活隊』裡day60時11/18已萎縮成pop=1——不是『強村活弱村死』,是『幾乎所有村先削到剩1人,那1人的食物數學才好打平』,這是個體存續非村莊存續③knife-edge=9/19隊出現過1次高峰後崩落,但★解析度警告:我daily採樣看不到你描述的800-tick(~3.3天)sub-day週期,這數字只答『有沒有大起大落』不是『持續拉鋸幾次』④team5(forest,tile_food_cap=49已頂格,coin=705卻ef≈2)vs team10/11(plains,cap=268/186,coin僅200卻ef暴衝388/457)——決定性差異是地格cap非coin,forest系統性遠低於plains"
 ---
 
