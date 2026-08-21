@@ -159,6 +159,25 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 - **★通用長跑 dump 工具（`SpecimenDumpHelper`，2026-07-19 用戶偏好「任何長跑→QA，無 seed 亦可」）**：`scripts/debug/specimen_dump_helper.gd`（class_name）——`setup_from_env(state)` 讀 `SPECIMEN_TEAM_ID`（明確清單）或 `SPECIMEN_SAMPLE_N`（均勻抽 N 隊）→ 設 `state.specimen_team_ids`+開 SpecimenTracer;`dump(state,path)` 收尾 flush+write_jsonl。**兩開關未設=no-op 零成本**（既有床/determinism 安全）。**任何長跑（含 ad-hoc/unseeded 探索跑）掛得上**→出 QA 可讀 jsonl，非只 slice acceptance measure。範例 `scripts/debug/adhoc_specimen_demo.gd`（無 seed 2400tick）。QA 故事審不需 determinism→無 seed OK（但當 regression 閘仍需 seed=兩用途別混）。observer GUI ticker-dump 長跑卡死→用此 headless 法。
 - **交付路由**：故事性場合 handback 同寄 `to:blueprint`（藍圖判 release）+ trace 供 QA 讀（QA 稽核 handback 亦 `to:blueprint`）。
 
+### ④c ★★死水兩欄（blueprint 制度化 2026-08-21；**估算器／決策類診斷交件的硬要求**）
+
+**任何「某選項不 fire／某機制沒作用」的診斷交件，必附兩欄**：
+
+| 欄 | 要報什麼 |
+|---|---|
+| **呼叫頻率** | 這段決策在窗內**被呼叫幾次**（不是「有沒有通過」，是**有沒有執行到**） |
+| **輸入變異性** | 它吃的關鍵輸入**在窗內變化過嗎**（min/max/相異值數；**恆定 ＝ 零資訊量**） |
+
+★**「gate 沒擋」≠「gate 沒執行」** —— 只回「沒擋」會讓 systems 把死掉的機制錯記成「誠實」。
+★**輸入恆定的評分函數 ＝ 常數**，它會偽裝成「這個選項就是不受歡迎」。
+
+**血證（2026-08-21 一輪四顆）**：糧橋 food check 零執行／子隊求生尺 90 天 4 次／
+`host_rep` 四筆恆 `0.5`（`join_drive` 實為常數）／`_dispatch_builder` 89 天零呼叫。
+**四顆全部躲過先前的 code-read 審計** —— 靜態讀 code 讀不出死水。
+
+★**「沒被呼叫」通常有多種成因（cadence／上游早退／各段 return／無可選目標），
+修法完全不同 ⇒ 報【分佈】不報【總數】，且不要順便開藥**（處方權在 systems／blueprint）。
+
 ## ★量測可溯源協議（用戶定 2026-07-13，全量測角色遵守）
 
 **原則**：任何寫進 handback 的數字，必須**當下能回查、事後能辨真偽**。裸轉述（「我跑過看到 71%」）禁止——原始輸出沒落地、沒標 code 版本＝日後對不上時分不清「舊 code 過期數字」vs「determinism 壞了」，只能重跑（浪費）。
