@@ -4546,6 +4546,7 @@ func _is_food_facility_short(facility: String) -> bool:
 #   蓋不完(build_eta≥食窗)→viable=false→落覓食（可能餓死+料浪費＝genuine 失敗案必留、禁 crank always-win）。
 # scope 硬限：僅 FOOD_FACILITIES（產糧）+料已備 means-end build→food；禁泛化 build-instead-of-forage。純算術零 RNG。
 func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
+	if Probe.enabled: Probe.bump("food_rescue.entry")   # ★measurer L3 tap(2026-08-21,C6-#3票)：呼叫頻率
 	var none: Dictionary = {"viable": false, "facility": "", "util": 0.0}
 	if team.tile_pos == Vector2i(-1, -1):
 		return none
@@ -4581,6 +4582,12 @@ func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
 		# ★genuine P(survive_to_harvest)：建工期(person-ticks / pop / 日tick) < 餓死窗(food_days) 才蓋得完。
 		var build_eta_days: float = float(cost.get("ticks", 72)) \
 			/ maxf(float(team.population), 1.0) / float(WorldState.TICKS_PER_DAY)
+		if Probe.enabled:   # ★measurer L3 tap(2026-08-21,C6-#3票)：輸入變異性(閘核心兩值)+真物理對照(÷24非÷240)
+			Probe.bump_sample("food_rescue.gate_check", {"team": team.team_id, "food_days": food_days,
+				"build_eta_days_ESTIMATE_bug÷240": build_eta_days,
+				"build_eta_days_TRUE÷24": float(cost.get("ticks", 72)) / maxf(float(team.population), 1.0) / 24.0,
+				"passed_with_bug": build_eta_days < food_days,
+				"tick": state.world.current_tick}, 30)
 		if build_eta_days >= food_days:
 			continue   # 蓋不完的田不能吃 → 覓食贏（失敗案留、禁 crank always-win）
 		# util = 1.0（求生行動基線、同覓食）+ 食安價值 frac（永久增產覆蓋每日食耗率、[0,1]）→ 蓋得完時穩越覓食。

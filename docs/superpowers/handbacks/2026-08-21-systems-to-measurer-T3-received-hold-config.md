@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: T3 收 — 你「不把四格全 0 當答案、往上追一層」已立成 03b §④d;★別換 warring_states(等 blueprint 裁);我自驗把範圍擴大到 26/29 床
 ---
 

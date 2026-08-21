@@ -82,6 +82,25 @@ func _run() -> void:
 	lines.append("  infra.stop.3_loc_empty(段3 loc.is_empty return) = %d (%.1f%%)" % [s3e, 100.0*s3e/maxf(entry-g,1)])
 	lines.append("  infra.stop.3_reached_dispatch_builder(真呼叫到) = %d (%.1f%%)" % [s3r, 100.0*s3r/maxf(entry-g,1)])
 	lines.append("  ★驗算：guard+四格總和(%d) 應等於 entry(%d)" % [g+s1+s2+s3e+s3r, entry])
+	# ★systems票C6-#3：求生蓋田閘(faction_ai:4548 ÷240)呼叫頻率+輸入變異性(比照#4報法)
+	lines.append("★★C6-#3 求生蓋田閘：呼叫頻率+輸入變異性(÷240估算vs÷24真物理對照)：")
+	lines.append("  food_rescue.entry(呼叫總次數) = %d" % int(Probe.counts.get("food_rescue.entry", 0)))
+	if Probe.samples.has("food_rescue.gate_check"):
+		var bug_passed: int = 0
+		var true_would_fail: int = 0
+		var fdays: Array = []
+		for smp4 in (Probe.samples["food_rescue.gate_check"] as Array):
+			lines.append("    %s" % str(smp4))
+			if bool(smp4.get("passed_with_bug", false)): bug_passed += 1
+			var buggy_eta: float = float(smp4.get("build_eta_days_ESTIMATE_bug÷240", 0.0))
+			var true_eta: float = float(smp4.get("build_eta_days_TRUE÷24", 0.0))
+			var fd: float = float(smp4.get("food_days", 0.0))
+			if buggy_eta < fd and true_eta >= fd: true_would_fail += 1
+			fdays.append(fd)
+		lines.append("  ★用bug公式(÷240)通過閘的次數 = %d / %d樣本" % [bug_passed, (Probe.samples["food_rescue.gate_check"] as Array).size()])
+		lines.append("  ★★假通過(bug通過但用真物理÷24重算會fail的) = %d ——這些是真正『蓋不完卻通過』的案例" % true_would_fail)
+	else:
+		lines.append("    (無sample，本輪求生蓋田閘從未走到這一步)")
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":

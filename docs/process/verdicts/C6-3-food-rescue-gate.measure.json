@@ -1,0 +1,41 @@
+{
+  "slice": "estimator-audit",
+  "ticket": "systems票C6-#3：求生蓋田閘(faction_ai:4548 build_eta_days÷240)——比照#4報法,不只閘有沒有誤放,也要閘有沒有執行到。新規範(03b §④c死水兩欄)：呼叫頻率+輸入變異性",
+  "measured_at_head": "5e5f4f4b(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "faction_ai_system.gd:_food_rescue_eval加entry計數(1行)+核心兩值sample tap(6行,含用÷24真物理重算的對照值)，Probe-gated零行為改動。",
+
+  "①呼叫頻率(★死水兩欄第1欄)": {
+    "food_rescue.entry": 3785,
+    "判讀": "★★不是死水——3785次/90天，這個機制持續在被呼叫，非dormant。與T3(faction層0次)/C-3(host_rep恆定)形成對比：per-team路徑(不經過state.factions)確實活著，符合systems判斷『這兩條不受faction層dormant影響』。"
+  },
+
+  "②輸入變異性(★死水兩欄第2欄)": {
+    "food_days範圍(30樣本)": "6.84 ~ 31.25（有真實變異，非常數）",
+    "build_eta_days_ESTIMATE(bug÷240)範圍": "0.05 ~ 0.15（隨build進度cost.ticks遞減而縮小，有變異）",
+    "判讀": "兩個關鍵輸入皆非死水常數，都在真實變化——這條診斷不是『機制沒被呼叫』家族，是『機制被呼叫但公式本身算錯』家族(同A4/A5)。"
+  },
+
+  "★★③閘有沒有誤放(code層already confirmed via A4同款bug)": {
+    "faction_ai_system.gd:4582-4583": "build_eta_days = cost.ticks / population / TICKS_PER_DAY(240)——與A4/A5同一種cadence除數錯誤(construction_ticks_left真實衰減是24次/日非240次/日，見前次C-1驗算)。",
+    "正確公式": "build_eta_days_TRUE = cost.ticks / population / 24",
+    "判讀": "★★確認『閘有誤放』——用÷240的估計值恆比真值小10倍，導致P(survive_to_harvest)判準系統性偏樂觀(以為蓋得完，實際上要花10倍時間)。"
+  },
+
+  "★★④閘有沒有真的放過『假通過』案例(★誠實邊界:30/3785樣本太小，本輪樣本內沒抓到)": {
+    "bug公式通過閘的次數": "30/30(樣本內)",
+    "假通過(bug通過但用真值÷24重算會fail的)": "0——本輪抽樣的30筆裡，food_days(6.8~31.25)都遠大於true_eta(最大只到1.5)，即使用正確公式也會通過，還沒撞到bug真正翻轉判準的邊界情況",
+    "誠實邊界": "★bump_sample cap=30，只抓到3785次呼叫裡的前30次(集中在tick10-640，遊戲早期，此時cost.ticks還大但food_days也還高，margin夠大)。★★這不代表bug無害——只代表『這30個早期樣本』沒撞到邊界，晚期(cost.ticks接近0但team仍處於食物緊繃、food_days接近true_eta的臨界窗口)可能才是真正的受害案例，本輪未覆蓋到。若要抓到真正的『假通過→半途餓死』受害者，需要①提高sample cap或改用『只記錄margin最小的N筆』的取樣策略②或直接查已知的T1/breed-deathcause的4隊崩潰軌跡裡有沒有『construction_team_id==自己且target是food facility』的重疊案例(交叉比對非重跑)。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/C6-3-food-rescue-90d.txt",
+    "bed": "scripts/debug/join_accept_measure_bed.gd(main)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/join_accept_measure_bed.gd",
+
+  "cleanup": "busy beacon清除。food_rescue.entry+food_rescue.gate_check兩tap建議留，交systems判permanent。"
+}

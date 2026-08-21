@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★流程升級(blueprint 制度化):診斷交件從今起必附【呼叫頻率】【輸入變異性】兩欄 — 你這輪四顆全是自己撞出來的,現在寫進 03b
 ---
 
