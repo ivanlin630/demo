@@ -180,8 +180,9 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 		return false
 	# ★後勤 SLICE A convoy.return telemetry：在真 merge 點認 convoy porter（對齊 [Merge] 事件，無論它經 CONVOY 或
 	#   被 loop2b release→IDLE 併回路——task_extra_data.convoy_phase 標記 release 不清，故此處統一準確計）。
-	if Probe.enabled and sub.task_extra_data.has("convoy_phase"):
-		Probe.bump("convoy.return")
+	if sub.task_extra_data.has("convoy_phase"):
+		if Probe.enabled: Probe.bump("convoy.return")
+		sub.task_extra_data.erase("convoy_phase")   # ★T2 抵達即結案：清旗標（子隊隨 merge 消失，殘留旗標只會讓後續誤判）
 	# ★失聯帳本清帳：子隊(scout/convoy)回歸→標母 ledger 對應筆 resolved（team subject by subject_ref、inline 避跨 class 呼叫）。
 	for e in parent.dispatch_ledger:
 		if not bool(e.get("resolved", false)) and bool(e.get("is_team", false)) and int(e.get("subject_ref", -1)) == sub_id:

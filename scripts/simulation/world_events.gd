@@ -29,6 +29,7 @@ const FUNC_KINDS: Array = [
 	"team_extinct",        # FactionAISystem._on_team_extinct（目睹）
 	"teams_erased",        # WorldState.erase_teams（同批死亡）
 	"betrayed",            # ★DiplomaticAiSystem._execute_betrayal（受害方＝ally_team）
+	"convoy_stranded",     # FactionAISystem._convoy_go_independent（回不了母隊→轉獨立，帶著貨自謀生路）
 	"plan_invalidated",    # ★FailureMemory.record_invalidation（當前計畫已不可行→該隊當 tick 重想）
 ]
 
