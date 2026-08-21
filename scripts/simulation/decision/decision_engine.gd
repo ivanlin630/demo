@@ -106,6 +106,21 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])   # tiebreak：applicable 順序
+	# ★接入 arc 常設可觀測（gate4 失敗反饋：反覆不 fire 要能被看見，不得靜默）：
+	#   紮營 applicable 卻不是 argmax → 記「輸給誰、差多少」；贏了記 camp.won_argmax。
+	if Probe.enabled and not scored.is_empty() and team != null:
+		for e in scored:
+			if String(e["opt"]) == "紮營":
+				if String(scored[0]["opt"]) != "紮營":
+					Probe.bump("camp.lost_to." + String(scored[0]["opt"]))
+					Probe.bump_sample("camp.lost", {
+						"team": team.team_id, "camp_u": snappedf(float(e["u"]), 0.001),
+						"winner": String(scored[0]["opt"]), "win_u": snappedf(float(scored[0]["u"]), 0.001),
+						"food_days": snappedf(ctx.food_days, 0.01),
+					}, 30)
+				else:
+					Probe.bump("camp.won_argmax")
+				break
 	# per-option 選中分布（argmax=rank[0]；判「applicable 過但選中恆 0」=結構性死鎖 ④）
 	if Probe.enabled and not scored.is_empty() and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
 		Probe.bump("decision.opt_chosen." + String(scored[0]["opt"]))

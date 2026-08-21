@@ -193,11 +193,19 @@ static var REGISTRY: Dictionary = {
 		"affinity": [0.6, 0.1, 0.0, 0.1, 0.2], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["camp_drive", "camp"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.food_days < ctx.desperation_entry_threshold and ctx.has_farmable_tile \
-					and not ctx.has_own_outpost,
+		# ★接入 arc de-patch（實測分流：母隊零採集 1109 次中，517 卡此門檻／592 applicable 卻秤輸／0 找不到可耕地）：
+		# ★沒有被動收入的隊不該等到瀕餓才准紮營——那是 catch-22：不餓→不 applicable；餓了→ applicable
+		#   但必然輸給「立刻找吃的」（覓食/買糧吃 survival boost）。⇒ 拿掉絕境門檻，改由 camp_drive 的真值
+		#   （marg × urgency × 選址記憶）自己秤（term 非 gate）。★不抬 camp 分數、不加補償補丁；
+		#   秤輸與否留常設 tap（camp.lost_to.* / camp.won_argmax）看得見。
+			return ctx.has_farmable_tile and not ctx.has_own_outpost,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
-			if ft == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			if ft == Vector2i(-1, -1):
+				# ★R² 保險 tap：applicable 算過可以、to_task 真呼時卻沒地了（同函式、不同時間點；
+				#   中間可能被同 tick 別隊佔走）。「證明不出會發生」≠「不會發生」→ 留一個看得見的 tap。
+				if Probe.enabled: Probe.bump("camp.applicable_but_idle")
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_CAMP, "target": ft},
 	},
 	"紮根": {
