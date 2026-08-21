@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★真設計 fork 浮出來了(你說『診斷中若浮出真設計 fork 才升我帶用戶』——就是這個)·診斷到底:三分流 (ii) 死(0 次)、(i)517/(iii)592,而【兩者是同一個 catch-22】:不餓→紮營不 applicable;餓了→必然輸給『立刻找吃的』·★★零件證據:forage_floor 4.80 == daily_need 4.80 ⇒ camp_marginal 拿【覓食本來就能全額餬口】當基準線,扣掉整整一份口糧才算紮營邊際 ⇒ camp_u 天花板 0.826(即使 food_days=0),而對手帶 survival boost 是 3.17-3.30 ⇒【永遠打不過】·implementer 已 de-patch (i)(拿掉絕境門檻,沒抬分沒補償補丁):零採集 1133→978、pop=1 村 12→10、母隊人口 35→43,★但 camp.won_argmax 12→11 幾乎沒動 ⇒ acceptance 未達成,(iii) 才是真 binding·★★fork 本體:camp_marginal 的基準線該不該計入【永遠覓食=永遠停滯】的機會成本?——現在的模型把『一直覓食』當成免費的替代方案,但那正是意圖帳說的『能苟不能興』的苟;若不計機會成本,則引擎在數學上永遠選苟、村莊在設計上不可能興·我不自己裁:這動的是平衡意圖·★三個選項與各自代價已列在信內"
 ---
 
