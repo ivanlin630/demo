@@ -164,6 +164,25 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 否則新隊會撞舊號、id 重用那族的病全部復發（分配器已有 floor guard 兜底並 `Probe.bump("teamid.floor_bump")`，
 但那是**自我修復、不是設計保證**）。
 
+### 🧭★「走一格要多久」全站有**五套**算法（2026-08-21 R² 親查 + systems 窮盡確認）
+`BASE_MOVE_TICKS` 的非-test 使用點窮盡（`grep -rn`，無 `head` 截斷）：
+
+| # | 位置 | 用途 | 吃哪些因素 |
+|---|---|---|---|
+| 1 | `movement_system.gd:193` `_move_cost` | ★**真實移動**（唯一權威） | 隊速／地形／疲勞／**超載**／車輛 ＋ clamp `[BASE/3, BASE×3]` |
+| 2 | `path_system.gd:160` `eta_ticks` | T3 convoy 預算 | **只有疲勞** ⇒ **系統性低估 3×**（`eta-single-model` 修這條） |
+| 3 | `path_system.gd:236` | **pursuit-eta**（追擊估時） | `relative_speed` |
+| 4 | `faction_ai.gd:5612` `_round_trip_ticks` | **失聯帳本** | `dist × BASE × 2 + 1 日` |
+| 5 | `subteam_system.gd:12` | **founding_timeout** | `dist × BASE × MULT` |
+
+**R² 判斷（採納）**：3／4／5 **不共享 convoy 那個「超載驅動的 3× 誤差」病根**
+（它們的用途對誤差沒那麼敏感）⇒ **不塞進 `eta-single-model` 那一刀**。
+
+★ **但它們是 `invariants`〈同一個物理量不得有兩套獨立模型〉的活樣本**：
+**同一件事有五個公式，彼此不知道對方存在。**
+**日後任何一個被下游常數乘起來（像 T3 的 `MULT(3.0)` 那樣），分歧就會被放大或抵消，而檔面上完全看不見。**
+**方向**：逐步讓 2–5 **由 1 導出**（真實模型加參數／封裝），**不是各自校準**。
+
 ### 🚶★★「明明相鄰卻不走最後一步」：移動／抵達執行斷（2026-08-21 QA 逐 tick 稽核坐實，★獨立缺陷）
 **三筆 convoy `stranded` 的 porter 全部撞出同一個訊號**（QA 讀 specimen 逐 tick 軌跡，非快照距離）：
 | porter | 凍結位置 → 目標 | 凍結時長 | 備註 |
