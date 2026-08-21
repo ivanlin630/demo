@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: monotonic-person-id
 topic: person_id 永不重用 DONE — ★出生口實測是 4 種不是 2 種（第 4 種還帶跨 world 殘留 static）；fp 在 a4 床不變但**有條件**，附精確說法
 branch: feat/monotonic-person-id
