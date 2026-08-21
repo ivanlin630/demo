@@ -1,0 +1,51 @@
+{
+  "slice": "convoy-return-t3-budget",
+  "ticket": "gate9-metric-hole票(2026-08-21 systems)：瞬時distance≤2判不出(a)即將抵達vs(b)永恆尾隨，補趨勢序列+specimen",
+  "measured_at_head": "f9ad46c3(main,同一份convoy母刀0c92cd96,無code變更,純bed加dist_hist tap)",
+  "measured_date": "2026-08-21",
+
+  "repro": "$env:PERF_SEED='1337'; $env:LW_CONFIG='warring_states'; $env:LW_MONTHS='1'; $env:SPECIMEN_TEAM_ID='25,31,30'; $env:SPECIMEN_OUT='docs/measurements/gate9/gate9-warring-30d-v2.specimen.jsonl'; .\\tools\\godot-detach.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/convoy_gate9_warring_bed.gd",
+
+  "★aggregate與v1完全一致(同seed同config,純加tap,零production變動)": {
+    "trips_total": 50,
+    "下場分佈": {"merged_home": 34, "stranded": 3, "still_convoy(censored,未終局)": 10, "ghost_alive(censored,未終局)": 3},
+    "convoy.stranded": 3, "convoy.stranded.timeout": 3
+  },
+
+  "★★趨勢分析(systems判準：距離序列單調下降⇒(a)誤殺 / 持平⇒(b)正確收掉；母隊該窗內有無移動)": {
+
+    "porter100_parent25_stranded@tick4380_dist2": {
+      "dist_trend(每20tick,tick4080-4360共15筆)": "dist=1持續(tick4080-4280,期間parent移動3次:[18,18]→[17,18]→[16,19])→dist=2(tick4300-4360,parent這段停在[15,19])",
+      "母隊該窗內移動": "有移動(3次)，但移動方向與porter方向不收斂——distance反而從1惡化到2",
+      "判讀": "非單調下降(不是(a))。distance發散/惡化，符合『追不上、越拉越遠』——(b)正確收掉，且比典型(b)更明確：不只持平，還在惡化。"
+    },
+
+    "porter118_parent31_stranded@tick5590_dist1": {
+      "dist_trend(tick5300-5580共15筆)": "dist=1，全部15筆無一例外，即使parent在tick5390-5400移動過一次([10,12]→[11,11])",
+      "母隊該窗內移動": "有移動(1次)，但porter始終卡在距離1，未能收斂到0",
+      "判讀": "教科書級(b)『永恆尾隨』——與systems票面舉的porter_12(1000 tick距離恆為1)同型態，只是窗口較短(280 tick)。非(a)，正確收掉無疑義。"
+    },
+
+    "porter164_parent30_stranded@tick6250_dist1": {
+      "dist_trend(tick6080-6240共9筆)": "dist=0(tick6080,與parent同格!)→dist=1(tick6100起持平到6240)，parent全程停在[10,14]不動",
+      "母隊該窗內移動": "零移動(整窗stationary)",
+      "判讀": "★不完全符合systems票面(a)/(b)任一種預設情境——parent沒動、porter卻從『已經同格』退到距離1並卡住160 tick未再收斂回0。不是『追不上移動中母隊』的(b)典型，也不是『正在收斂』的(a)(因為根本沒有下降趨勢，是從0退回1)。★這看起來更像獨立的第三種模式：porter已抵達過、但『抵達→完成merge』這段執行沒接上(母隊完全靜止仍卡關)，值得systems/QA另案關注是否為merge時機/tile占位問題，而非chase-timeout問題本身。"
+    }
+  },
+
+  "★★修正後gate9判讀(取代v1『100%≤2格支持誤殺』的初判)": "三筆stranded事件，趨勢資料顯示**0/3呈現(a)單調收斂訊號**(即『再一兩步就到』的誤殺特徵一個都沒出現)。porter100呈距離惡化(強(b))；porter118呈教科書級持平(標準(b))；porter164雖非典型(b)(母隊靜止)，但同樣不是(a)——它是『已到過又卡住』的第三型，不構成timeout誤殺的證據，反而指向另一個獨立問題(merge完成執行斷)。★結論：gate9原判準(距離≤2)本身無法回答『該不該fire』，但補了趨勢後，這3筆樣本**沒有一筆支持『T3誤殺』**——T3在這3筆上都收得對，porter164額外標記為一個新的、跟chase-timeout無關的可疑點供後續調查。",
+
+  "★specimen": {
+    "路徑": "docs/measurements/gate9/gate9-warring-30d-v2.specimen.jsonl",
+    "自驗覆蓋": "1326 entries，team_id涵蓋{25,30,31,57,87,100,101,113,118,137,164}——3個parent(25,31,30)+3個porter(100,118,164)全部在內(SPECIMEN_TEAM_ID='25,31,30'觸發血緣鏈自動納入子隊porter，符合已merge的specimen血緣修正)。",
+    "去向": "直接轉QA故事稽核(systems票面明示『behavior因果宣稱必須走QA稽核』+早前已授權『轉給QA要,直接寄,不用經我』)——本輪的『誤殺/正確』結論屬behavior causal claim，趨勢數字是我的動作序列判讀,QA需獨立核verify motive→action→outcome。"
+  },
+
+  "landed_paths": {
+    "v2_report(raw log iconv,未進sidecar因PERF_OUT非godot-detach白名單)": "raw stdout log: C:\\Users\\I12\\AppData\\Local\\Temp\\godot_detach_32ae7b32.log(本地暫存,非committed)",
+    "specimen": "docs/measurements/gate9/gate9-warring-30d-v2.specimen.jsonl(committed)",
+    "bed(留常設,含dist_hist tap)": "scripts/debug/convoy_gate9_warring_bed.gd(committed)"
+  },
+
+  "cleanup": "busy beacon清除；bed本輪起視為常設診斷工具(同v1裁定'bed留常設=要')，此次追加的dist_hist tap一併留(非temp)。"
+}

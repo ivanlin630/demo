@@ -119,9 +119,20 @@ func _observe(state: WorldState) -> void:
 			r["end_res"] = _snap(p)
 			_stranded_log.append({"porter": pid, "parent": orig_parent_id, "tick": now, "dist": dist,
 				"porter_pos": [p.tile_pos.x, p.tile_pos.y],
-				"parent_pos": [orig_parent.tile_pos.x, orig_parent.tile_pos.y] if orig_parent != null else null})
+				"parent_pos": [orig_parent.tile_pos.x, orig_parent.tile_pos.y] if orig_parent != null else null,
+				"dist_trend": (r.get("dist_hist", []) as Array).duplicate()})
 			continue
 		r["last_parent_id"] = p.parent_team_id
+		# ★measurer temp tap(2026-08-21,systems票②趨勢非瞬時):每20 tick記{tick,dist,parent_pos}
+		# 供stranded發生時回顧『距離是否收斂(即將抵達)vs持平(永恆尾隨)』+『母隊有無移動』。bound最近15筆。
+		if now % 20 == 0 and int(r["parent"]) != -1:
+			var _pp: TeamData = state.teams.get(int(r["parent"]))
+			if _pp != null:
+				var _dh: Array = r.get("dist_hist", [])
+				_dh.append({"tick": now, "dist": FactionAISystem._hex_dist(p.tile_pos, _pp.tile_pos),
+					"parent_pos": [_pp.tile_pos.x, _pp.tile_pos.y]})
+				if _dh.size() > 15: _dh.pop_front()
+				r["dist_hist"] = _dh
 		if p.current_task != TeamData.TASK_CONVOY and r["left_tick"] == -1:
 			var xd: Dictionary = p.task_extra_data if p.task_extra_data is Dictionary else {}
 			r["left_tick"] = now

@@ -2,7 +2,7 @@
 from: systems
 to: measurer
 slice: convoy-return-t3-budget
-status: open
+status: consumed
 topic: "[★先講最重要的:你拿到的數字很好,但【我的 gate 指標本身有洞】,所以 100% ≤2 格【還不能】判定誤殺·洞在哪:『距離 1』在兩種完全相反的情境下長得一模一樣——(a)即將抵達(距離正在收斂,再一兩步就到)=誤殺 vs (b)永恆尾隨(距離恆為 1、永遠追不到;porter_12 那趟就是 1000 tick 距離恆為 1)=正確收掉;同一個數字,一個該救一個該殺·⇒ 要補的是【趨勢】不是【瞬時值】:①stranded 前 N tick 的距離序列(單調下降=a/持平=b)②母隊在該窗內有沒有移動③rehome_n 在該窗內的增量·三選二即可判,而且你的 log 可能已經有料不必重跑·★★而且這輪要補 specimen:一旦我們要下『誤殺/正確』的因果結論,那就是 behavior 因果宣稱=必須走 QA 故事稽核(你這輪 SPECIMEN_TEAM_ID 忘了設,正好一起補)·裁定:①30 天樣本【夠回答"T3 在 warring 真的會 fire"】,不夠回答"該不該 fire";②bed 留常設=要(warring 是 T3 唯一自然情境,值得常設)·★你自曝的 env 白名單坑我已修:godot-detach.ps1 現在會對『像本專案但不在白名單』的 env 出聲警告(ADHOC_DAYS 實測會警告、WARRING_SEEDS 不吵、啟動照常);順帶學到一件事——那支檔頭自己寫著 ASCII-only(PS5.1),我塞中文進去把它弄壞了一輪才發現"
 ---
 
