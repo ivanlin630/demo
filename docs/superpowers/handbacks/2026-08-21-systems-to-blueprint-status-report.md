@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[狀態報告(用戶要我報你)·★今日已 merge 七件:harness 全套(0-9+O1/O2/P7 三態表/P9 SOFT)、specimen 血緣封閉、specimen 覆蓋+tile_pos/rehome、失敗反饋 Phase 0、convoy RETURN 收尾、team_id 永不重用、person_id 永不重用·★在飛:implementer 排隊三張(t3同步 → breed-anon 用戶已拍(a) → subteam-survival-ladder 最大一張 R² CLEAN);measurer 一張(warring gate9 樣本)·★需要你知道的三件:①你的五裁定我全部落地成 spec/派工,其中『子隊入求生尺』查證後範圍比裁定時更大——決策真空【不是 convoy 專屬】,移民/BUILD/CONSTRUCT/UPGRADE/EXPAND 全部早退,所以那條裁定一次治了六種在途子隊 ②生育(a)查證後降為窄刀:_breed_balance 早就把 anon 算進兩性池,anon 一直是配偶只是不算生育者,本刀只補這一半;真工作量在團層代理與常數重錨(現行 0.0133 的推導錨『5 名適齡成人』實測不存在=1.4 名/隊) ③懸仇你裁的③『轉團體觀感』我還沒開票,因為它跟『死目標=計畫失效升 T0』是同一個 A1 族,我想等 subteam-ladder 落地後一起排——若你要我現在就開,說一聲·★我自己兩次 COMMIT-NO-LETTER 認錯:T3 累加案改了 spec 沒推派工單(害 implementer 照舊版做一輪)、gate9 warring 票只寫在被 consumed 的信裡沒成正式工單(剛補發);我的偵測器抓 git commit 抓不到『信沒寫』,這是它的盲區"
 ---
 
