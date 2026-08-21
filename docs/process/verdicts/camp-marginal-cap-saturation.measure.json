@@ -1,0 +1,28 @@
+{
+  "slice": "estimator-audit",
+  "ticket": "systems票(★最高優先)：CAMP_MARGINAL_CAP(=1.5) saturation率——implementer觀察折現磚接上後『紮營長期坐在cap上』的假說，擋著de-patch決策",
+  "measured_at_head": "6a88601a(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "decision/terms.gd:camp_drive term加5行tap，clamp前捕捉raw_ratio(marg/daily_need,未clamp)+是否觸頂(camp_marginal.saturated是plain bump counter,非sample,不受first-N影響)+200筆sample供分佈觀察。Probe-gated零行為改動。",
+
+  "★★答案：35%飽和率，假說CONFIRMED": {
+    "camp_marginal.eval(camp_drive term被評估總次數)": 349,
+    "camp_marginal.saturated(raw_ratio>=1.5次數)": 122,
+    "飽和率": "35.0% (122/349)",
+    "raw_ratio分佈(200筆取樣,母體數字eval/saturated不受first-N影響)": {"min": 0.00, "max": 4.00, "median": 0.87},
+    "判讀": "★★implementer的假說成立：35%的評估次數，紮營term的核心比值(marg/daily_need)在clamp前就已經≥1.5，被砍平到同一個天花板。★更關鍵的是max=4.00——raw_ratio最高可達cap的2.67倍，意味著『很好的地』跟『剛好夠格的地』在clamp後拿到完全相同的分數(都=1.5)，真實品質差距(1.5~4.0這段，佔比可能不小，1/3評估都在這個帶內)被cap完全抹平。★這確實是『cap吃掉磚的鑑別度』——clamp後的1.5×urgency×quality無法反映site本身2.67倍的真實產能差距。"
+  },
+
+  "★對『人格失效』假說的部分佐證(非本輪深查，僅供交叉)": "median=0.87(<cap)代表『典型情況』本身沒有觸頂，只有前1/3左右的高產地被砍平——這代表cap不是『恆定滿分』(不是每次都saturate)，是『高端site的鑑別度被砍』。若implementer觀察到的『紮營長期坐在cap上』是指『紮營贏的那些案例剛好都是高產地被砍到1.5的那35%』，此假說在本輪數字上站得住；若是指『紮營util本身很少變化』，需要另外量測camp_drive term在argmax競爭中的實際勝率分佈(非本輪查點)。",
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/cap-saturation-90d.txt",
+    "bed": "scripts/debug/join_accept_measure_bed.gd(main)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/join_accept_measure_bed.gd",
+
+  "cleanup": "busy beacon清除。camp_marginal.eval/saturated/ratio_sample三tap建議留，交systems判permanent。"
+}

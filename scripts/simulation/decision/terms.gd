@@ -202,6 +202,12 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var daily_need: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 			# urgency=food runway 緊迫度（富流浪 food_days≥URGENCY_DAYS→0 不急紮）。
 			var urgency: float = clampf((CAMP_URGENCY_DAYS - ctx.food_days) / CAMP_URGENCY_DAYS, 0.0, 1.0)
+			if Probe.enabled:   # ★measurer L3 tap(2026-08-21,CAMP_MARGINAL_CAP saturation票)：clamp前raw ratio+是否觸頂
+				var _raw_ratio: float = marg / maxf(daily_need, 0.001)
+				Probe.bump("camp_marginal.eval")
+				if _raw_ratio >= CAMP_MARGINAL_CAP: Probe.bump("camp_marginal.saturated")
+				Probe.bump_sample("camp_marginal.ratio_sample", {"raw_ratio": _raw_ratio, "cap": CAMP_MARGINAL_CAP,
+					"saturated": _raw_ratio >= CAMP_MARGINAL_CAP, "urgency": urgency}, 200)
 			# ★§4c 反饋：同 leader 對該靶地的過往結局折價/加分（乘既有品質、不新增 term 線）。
 			return clampf(marg / maxf(daily_need, 0.001), 0.0, CAMP_MARGINAL_CAP) * urgency 				* ctx.camp_site_quality_mult
 		"rooting_drive":

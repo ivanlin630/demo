@@ -101,6 +101,20 @@ func _run() -> void:
 		lines.append("  ★★假通過(bug通過但用真物理÷24重算會fail的) = %d ——這些是真正『蓋不完卻通過』的案例" % true_would_fail)
 	else:
 		lines.append("    (無sample，本輪求生蓋田閘從未走到這一步)")
+	# ★systems票(★最高優先)：CAMP_MARGINAL_CAP saturation率——擋著de-patch決策的那顆
+	lines.append("★★CAMP_MARGINAL_CAP(=1.5) saturation率：")
+	var cm_eval: int = int(Probe.counts.get("camp_marginal.eval", 0))
+	var cm_sat: int = int(Probe.counts.get("camp_marginal.saturated", 0))
+	lines.append("  camp_marginal.eval(camp_drive term被評估總次數) = %d" % cm_eval)
+	lines.append("  camp_marginal.saturated(raw_ratio>=CAP次數)     = %d (%.1f%%)" % [cm_sat, 100.0*cm_sat/maxf(cm_eval,1)])
+	if Probe.samples.has("camp_marginal.ratio_sample"):
+		var ratios: Array = []
+		for smp5 in (Probe.samples["camp_marginal.ratio_sample"] as Array):
+			ratios.append(float(smp5.get("raw_ratio", 0.0)))
+		ratios.sort()
+		if ratios.size() > 0:
+			lines.append("  raw_ratio分佈(取樣%d筆,不受first-N影響因eval/saturated是plain counter)：min=%.2f max=%.2f median=%.2f" % [
+				ratios.size(), ratios[0], ratios[-1], ratios[ratios.size()/2]])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
