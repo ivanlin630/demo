@@ -1,0 +1,61 @@
+{
+  "slice": "dying-village-farm-ledger",
+  "ticket": "systems票+addendum(2026-08-21)：垂死村農田帳三→四分流(未建/養不起/forest掙扎/池runway vs提取funnel)",
+  "measured_at_head": "c40fa5c2(main)",
+  "measured_at_branch": "40ab0ab4(feat/breed-anon-eligible,.worktrees/breed-anon)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天(同breed-deathcause系列輪)",
+
+  "★L3聲明": "resource_system.gd:collect_resources 加3個Probe.bump確認鏈tap(collect.gather_ran/l0_forage_ran/no_outpost_no_camp_zero_food)——純計數、零行為改動、Probe-gated。main+.worktrees/breed-anon同步。",
+
+  "★★addendum優先題答案：terrain_tally={plains:9, forest:2}——cap假說死": {
+    "萎縮到pop<=1的11隊地形分佈": "plains=9(82%)、forest=2(18%)",
+    "判讀": "★★這一個數字判死了『地格cap是決定性差異』的假說——82%萎縮隊在plains，若cap是主因，萎縮隊該以forest為主。cap假說撤回成立，瓶頸必在提取端(用戶原判斷方向正確)。"
+  },
+
+  "★★池runway vs 實際提取(11隊萎縮隊逐隊，非總平均)": {
+    "共同模式": "★幾乎全部萎縮隊的『當下站立tile』食物池是滿的或接近滿的(pool_food≈cap)，runway全部61~364天(遠超任何合理承載力擔憂)，但team.effective_food(真實持有)只有2.3~9.2(team10/11/14例外，見下)——★★『池滿而人餓』的用戶假說在8/11隊上直接成立，是提取funnel斷，不是承載力問題。",
+    "逐隊": [
+      {"team": 0, "terrain": "plains", "pool": 150.0, "cap": 150.0, "runway_日": 187.5, "camp_level": 0, "outpost_level": 1, "effective_food": 2.7, "分流": "(ii)有outpost有farm(level1)但勞力share僅0.06/5.00(1.2%)→產出0.03/日"},
+      {"team": 3, "terrain": "plains", "pool": 160.0, "cap": 160.0, "runway_日": 200.0, "camp_level": 0, "outpost_level": 0, "effective_food": 2.3, "分流": "(iv)無outpost無camp→collect_resources整條路徑零被動食物(見下確認鏈)；有farm_level=2但owned_tile非現在站立tile，勞力share=0"},
+      {"team": 4, "terrain": "plains", "pool": 110.0, "cap": 110.0, "runway_日": 137.5, "camp_level": 0, "outpost_level": 0, "effective_food": 16.3, "分流": "同team3(iv)，但ef較高(可能尚有餘糧未耗盡)"},
+      {"team": 5, "terrain": "forest", "pool": 49.0, "cap": 49.0, "runway_日": 61.3, "camp_level": 0, "outpost_level": 0, "effective_food": 2.3, "分流": "(iv)無outpost無camp+forest低cap雙重不利，但主因仍是(iv)提取斷非cap(runway仍61天遠超需求)"},
+      {"team": 10, "terrain": "plains", "pool": 61.2, "cap": 268.0, "runway_日": 76.5, "camp_level": 1, "outpost_level": 0, "effective_food": 388.0, "分流": "★例外：camp_level=1(有camp)，L0 forage路徑真的在跑，ef暴漲成功案例——證明camp_level是關鍵開關"},
+      {"team": 11, "terrain": "plains", "pool": 50.4, "cap": 186.0, "runway_日": 63.0, "camp_level": 1, "outpost_level": 0, "effective_food": 457.4, "分流": "★同team10，camp_level=1成功案例"},
+      {"team": 14, "terrain": "forest", "pool": 51.0, "cap": 51.0, "runway_日": 63.8, "camp_level": 0, "outpost_level": 0, "effective_food": 47.4, "分流": "camp_level=0卻ef尚可(47.4)，可能靠遷移穿梭多個tile的L0 forage累積或先前存量未耗盡，非本輪深查"},
+      {"team": 16, "terrain": "plains", "pool": 196.0, "cap": 196.0, "runway_日": 245.0, "camp_level": 0, "outpost_level": 0, "effective_food": 3.7, "分流": "(iv)無outpost無camp→零被動食物"},
+      {"team": 17, "terrain": "plains", "pool": 291.0, "cap": 291.0, "runway_日": 363.8, "camp_level": 0, "outpost_level": 0, "effective_food": 3.3, "分流": "(iv)同上，站在全場pool最大的tile(291)卻餓，最刺眼的一筆"},
+      {"team": 18, "terrain": "plains", "pool": 115.0, "cap": 115.0, "runway_日": 143.8, "camp_level": 0, "outpost_level": 0, "effective_food": 9.2, "分流": "(iv)同上"},
+      {"team": 20, "terrain": "plains", "pool": 150.0, "cap": 150.0, "runway_日": 187.5, "camp_level": 0, "outpost_level": 1, "effective_food": 7.0, "分流": "(ii)有outpost，同team0模式"}
+    ]
+  },
+
+  "★★被動採集確認鏈(逐環tap，90天累計)": {
+    "collect.gather_ran": 1945,
+    "collect.l0_forage_ran": 460,
+    "collect.no_outpost_no_camp_zero_food": 984,
+    "判讀": "★三條路徑都『真的有跑』(非死代碼/死迴圈)，但984次『整條cadence零被動食物』證實：★無outpost且camp_level=0的團隊在那次cadence物理上不可能拿到任何被動食物(collect_resources:65-78的code路徑本身如此——只有camp_level>0才會從腳下pool抽food，否則只剩被動小獵一條肉源)。★★這不是bug（code邏輯本身自洽，行為完全如寫），是一個設計上的『開關』：camp_level似乎需要主動建立（同corvée/construction脈絡），孤身領主很難/很少去建camp，導致long-term stuck在零被動食物態，即使腳下pool是滿的。"
+  },
+
+  "③corvée與gather勞力互動(結構code讀，非新量測)": {
+    "查點": "scripts/simulation/labor_system.gd:32-42 labor_pop()/pool_of()",
+    "發現": "labor_pop(team)=population×(1-mobilized_fraction)——只受軍事動員影響，★未發現任何依current_task(是否在建設/corvée)扣減labor_pop或pool_of的程式碼路徑。demand字典(rebalance函式)只列gather/mfg/farm三類workstation，沒有『construction』競爭同一個池的demand entry。",
+    "判讀": "★結構上看，『corvée從gather線抽走勞力』這個機制在目前code裡沒有找到——construction的person-tick消耗(L0_TO_L1_CORVEE_DAYS等)看起來是獨立計算，不透過這個labor_alloc池。若corvée期間仍然餓死，機制不是這裡（不是這個池被搶），可能要查construction本身的time-to-complete vs 團隊食物余裕的比較(faction_ai_system.gd:4547一帶已有P(survive_to_harvest)相關邏輯，值得implementer查)。此為code讀非量測結果，信心中等，未親測corvée進行中的即時labor_alloc快照。"
+  },
+
+  "★★三分流→實際觀察到的分流(逐隊已標於上表)": {
+    "(i)農田根本沒建成": "team11(mountain,farm_level=0,但有outpost)",
+    "(ii)建了但勞力沒進去(非『math不夠』，是『勞力=0』，無法測試math是否真的養不起)": "team0/20(有outpost+farm但share僅1-2%)；team3/4(有farm level2但share=0)；team5/10(有farm level1但share<1%)——★★注意：本輪沒有任何一隊達到接近滿載的farm labor share，因此無法用本輪數據回答『農田math本身夠不夠』(systems的紅旗計算假設滿載，但滿載案例在90天內沒出現過，see前次verdict breed-survivor-effectivefood已提team7 farm_level=3也只6%share)",
+    "(iii)forest掙扎": "team5/14——但addendum已證這不是主因(萎縮隊82%在plains)，forest只是次要疊加因素",
+    "(iv)★★池滿人餓=提取funnel斷(本輪最大發現，非原三分流之一，是addendum新增且證實成立)": "team3/4/5/16/17/18(6隊，佔萎縮隊過半)：站在滿/近滿的pool上，因camp_level=0+無outpost，物理上拿不到任何被動食物；team10/11反例證實camp_level=1時ef能暴漲，是這個假說的正面對照組。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/farm-ledger-addendum-90d.txt",
+    "bed(五度擴充,累計死因+崩潰+effective_food+knife-edge+地形+農田帳+runway+collect確認鏈)": "scripts/debug/breed_deathcause_bed.gd(main+.worktrees/breed-anon逐字相同)"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\breed-anon --script scripts/debug/breed_deathcause_bed.gd",
+
+  "cleanup": "busy beacon清除。collect.*三個L3 tap建議留(補既有盲點，同名餓死tap先例)。bed已累計五輪擴充功能完整，強烈建議留常設。"
+}

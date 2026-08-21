@@ -120,6 +120,58 @@ func _run() -> void:
 			if int(row.get(k, 0)) > 0: nonzero[k] = row[k]
 		if not nonzero.is_empty():
 			lines.append("    day=%3d %s" % [int(row["day"]), str(nonzero)])
+	# ★systems addendum(2026-08-21)：四分流優先題——萎縮隊地形分佈(plains佔幾隊)+池runway vs 提取率。
+	lines.append("  ★★★addendum優先題：萎縮隊(pop<=1)當下(day90)實際站立地形+池runway：")
+	var terrain_tally: Dictionary = {}
+	for tid5 in state.teams:
+		var t5: TeamData = state.teams[tid5]
+		if t5.beast_kind != "" or t5.parent_team_id != -1 or t5.population > 1: continue
+		var cur_terrain: String = "?"; var cur_pool: float = -1.0; var cur_cap: float = -1.0
+		var cur_camp: int = -1; var cur_outpost: int = -1
+		for tid_k2 in state.world.tiles:
+			var tt3: HexTileData = state.world.tiles[tid_k2]
+			if tt3.tile_pos == t5.tile_pos:
+				cur_terrain = tt3.terrain
+				cur_pool = float(tt3.resources.get("food", 0))
+				cur_cap = float(tt3.resource_cap.get("food", -1))
+				cur_camp = tt3.camp_level; cur_outpost = tt3.outpost_level
+				break
+		terrain_tally[cur_terrain] = int(terrain_tally.get(cur_terrain, 0)) + 1
+		var consume_d: float = float(t5.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+		var runway: float = (cur_pool / consume_d) if consume_d > 0.0 and cur_pool >= 0.0 else -1.0
+		var ef_now: float = ResourceSystem.effective_food(state, t5)
+		lines.append("    team=%d terrain=%s pos=%s tile_pool_food=%.1f cap=%.1f runway_日=%.1f camp_level=%d outpost_level=%d effective_food(真實庫存,含私產+自家糧倉)=%.1f" % [
+			int(tid5), cur_terrain, str(t5.tile_pos), cur_pool, cur_cap, runway, cur_camp, cur_outpost, ef_now])
+	lines.append("    ★terrain_tally(萎縮隊分佈)=%s" % str(terrain_tally))
+	lines.append("  ★★被動採集確認鏈(collect.*累計次數,零代表整條路徑90天沒跑過一次)：")
+	for k5 in ["collect.gather_ran", "collect.l0_forage_ran", "collect.no_outpost_no_camp_zero_food"]:
+		lines.append("    %-36s = %d" % [k5, int(Probe.counts.get(k5, 0))])
+	# ★systems票(2026-08-21 dying-village-farm-ledger)：垂死村農田帳三分流(未建/建了養不起/forest掙扎)。
+	# 垂死＝本輪曾發生pop>=2→<=1崩潰(_collapse_log)；存活＝從未崩潰且day90 pop>=2。逐隊報，不給總平均。
+	lines.append("  ★★★垂死村農田帳(逐隊，三分流判準見ticket)：")
+	var collapsed_ids: Dictionary = {}
+	for c2 in _collapse_log: collapsed_ids[int(c2["team_id"])] = true
+	for tid4 in state.teams:
+		var t4: TeamData = state.teams[tid4]
+		if t4.beast_kind != "" or t4.parent_team_id != -1: continue
+		var is_dying: bool = bool(collapsed_ids.get(tid4, false)) or t4.population <= 1
+		var owned_tile: HexTileData = null
+		for tid_k in state.world.tiles:
+			var tt2: HexTileData = state.world.tiles[tid_k]
+			if tt2.outpost_level > 0 and tt2.outpost_owner == tid4:
+				owned_tile = tt2; break
+		var farm_level: int = int(owned_tile.farming_level) if owned_tile != null else -1
+		var flabor: float = LaborSystem.farm_labor(owned_tile) if owned_tile != null else 0.0
+		var fshare: float = float((owned_tile.labor_alloc.get("farm", {}) as Dictionary).get("share", 0.0)) if owned_tile != null else 0.0
+		var fdemand: float = float(farm_level) * LaborSystem.K_FARM if owned_tile != null else 0.0
+		var fyield_day: float = (float(farm_level) * ResourceSystem.FARM_UNIT_YIELD * owned_tile.harvest_factor * flabor) if owned_tile != null else 0.0
+		var consume_day: float = float(t4.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+		var ratio: float = (fyield_day / consume_day) if consume_day > 0.0 else -1.0
+		lines.append("    %s team=%d pop=%d terrain=%s owned_tile=%s farm_level=%d yield/日=%.2f consume/日=%.2f 比值=%.2f 勞力share/demand=%.2f/%.2f" % [
+			("垂死" if is_dying else "存活"), int(tid4), int(t4.population),
+			(owned_tile.terrain if owned_tile != null else "N/A(無自家outpost)"),
+			(str(owned_tile.tile_pos) if owned_tile != null else "無"),
+			farm_level, fyield_day, consume_day, ratio, fshare, fdemand])
 	lines.append("  ★★存活隊 effective_food(真實庫存)趨勢 day60→90(中位數+正成長佔比)：")
 	var ef60: Dictionary = {}; var ef90: Dictionary = {}
 	for tid3 in _ef_hist:

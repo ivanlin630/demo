@@ -71,11 +71,15 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 					var draw: float = minf(pool_food, pool_food * L0_FORAGE_MULT * day_fraction)
 					TileBank.pool_set(tile, "food", pool_food - draw, "l0_forage_drain")
 					ResourceBank.add(team, "food", draw, "l0_forage")
+					if Probe.enabled: Probe.bump("collect.l0_forage_ran")   # ★measurer L3 tap(2026-08-21,確認被動採集鏈真的有跑)
 				tile.camp_ticks_left = L0_DECAY_DAYS * WorldState.TICKS_PER_DAY   # 有人在=不棄置
+			elif Probe.enabled:
+				Probe.bump("collect.no_outpost_no_camp_zero_food")   # ★measurer L3 tap：無據點且無camp→此cadence零被動食物
 			# 無據點隊零被動食物（L0 forage 外）；狩獵（小獵物 + 野獸）仍為唯一主動肉源
 			if int(tile.resources.get("wild_game", 0)) > 0:
 				HuntSystem.new().hunt_small_game(state, team, tile, false)   # 被動小獵
 			continue
+		if Probe.enabled: Probe.bump("collect.gather_ran")   # ★measurer L3 tap：有據點gather路徑真的有跑
 
 		# ★統一勞力池：pop_mult→labor_mult(共址勞力稀缺分配,per gather:res 讀 home tile alloc);labor_share=本隊佔池比例。
 		LaborSystem.ensure_fresh(state, tile)
