@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: ★更正我上一封的插播 — 「host_rep 恆 0.5 = 常數」是 n=4 且取樣器是 first-N,我超前了;測試設計先別綁死這條
 ---

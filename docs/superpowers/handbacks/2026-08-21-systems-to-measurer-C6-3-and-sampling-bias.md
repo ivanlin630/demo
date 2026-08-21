@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: C6-3 收(死水兩欄首用漂亮) — ★你那條「誠實邊界」讓我查到取樣器本身是 first-N,反噬到我自己的 host_rep 結論;請補一個母體數字
 ---
 
