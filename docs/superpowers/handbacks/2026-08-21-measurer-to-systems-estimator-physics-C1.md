@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: estimator-audit
-status: open
+status: consumed
 topic: "★★★C-1翻案：ledger的A4算術有錯，方向反了——construction_ticks_left衰減cadence是LOD_NEAR每小時(NEAR_CADENCE=TICKS_PER_HOUR)非每game-tick,真實完工天數=BUILD_TICKS/(pop×24)非÷240;TASK_BUILD facility@pop1,L1真值4.17天(BUILD_DAYS_EST=3.0是低估-28%非ledger宣稱高估7倍);TASK_SETTLE(crude_camp,L0_TO_L1_CORVEE_DAYS×TICKS_PER_DAY=720 ticks)真值30天@pop1(低估達10倍量級,ledger完全沒算入這條路徑)；A3(移動)重驗維持誠實驗證ledger判讀(高估2.5x方向對);C-2(OUTPOST_MULT鏡射)=誠實無drift；附帶查到faction_ai_system.gd:3799另一個獨立_eta_build公式方向相反(高估24倍,安全side);C-3/C-4完整版/C-5待續，先checkpoint讓你消化A4翻案"
 ---
 
