@@ -2,7 +2,7 @@
 from: systems
 to: reviewer
 slice: discounted-future-flow
-status: open
+status: consumed
 topic: "[R2 審設計·延遲價值折現原語第一磚(用戶兩輪深化裁定;C 死、A 治標不採,正解=真根是長期計畫與思考模型不連貫)·spec=docs/superpowers/specs/2026-08-21-discounted-future-flow-HOW.md·核心:建點/建設類 utility=折現未來收益流 vs 真實現狀基準線(真實被動所得,不再拿假想覓食吃得飽當替代方案)·★我要你優先打四點:①我把 H_eff 直接沿用 facility_roi 已驗證的 survival-bounded 有效視野(投資後仍赤字→綁殘存活窗;轉正→full horizon,PLANNING_HORIZON_DAYS=90 已存在且 measurer 驗過 [40,120] robust)——這個沿用夠不夠?會不會 camp 的情境有 facility 沒有的坑? ②★蟑螂地板我只寫了『δ>=δ_floor 且必須讓永遠覓食對所有人格都是劣解』,但【沒有給出 δ_floor 的求法】——它其實是一個不等式解,而我不確定它有沒有封閉解、還是只能量測逼近;請判這樣寫夠不夠可實作,或要我先給求法 ③人格映射(δ←耐性/慎重;w_k←貪婪財/野心權/好戰軍)是用戶原話,我照抄——但『貪婪對賺錢型未來收益折得少』在實作上是調 w 還是調 δ?我寫成調 w(在意哪種明天),與用戶『貪婪≠短視』一致,請覆核我沒讀錯 ④scope 限建點/建設類——但基準線『真實被動所得』一改,其他 option 的相對排序也會被動變動嗎?若會,那 scope 就不是真的限住了"
 ---
 
