@@ -41,6 +41,7 @@ func _decay_l0_camps(state: WorldState) -> void:
 			if _founder != null:
 				SettlementMemory.record_site_outcome(state, _founder, tile, SettlementMemory.SITE_FAILED)
 			tile.camp_level = 0
+			if Probe.enabled: Probe.bump("camp.abandoned")   # ★gate3：蓋了就丟＝亂蓋的特徵
 			tile.camp_ticks_left = 0
 			tile.camp_team_id = -1
 

@@ -54,6 +54,11 @@ var farmable_pos: Vector2i = Vector2i(-1, -1)
 # ★A1 紮營價值=MarginalEconomy 真帳：靶 farmable tile 的純 est（terrain=belief 地理、outpost1/farming0、pop）+ 覓食餬口日產 floor。
 var camp_target_est: VillageEstimate = null   # 無靶→null（保守不行動）
 var camp_forage_floor: float = 0.0
+# ★折現原語（脊椎第一磚）：真實現狀三量——基準線／淨流／存糧。★baseline 是【真實被動所得】，
+# 無據點且無營地 ⇒ 0（實測那些隊就是 0），不再拿「假想覓食餬口」當替代方案。
+var passive_food_daily: float = 0.0
+var net_food_flow: float = 0.0
+var food_stock: float = 0.0
 var camp_site_quality_mult: float = 1.0   # ★§4c：紮營靶地的選址記憶乘子（1.0=無記憶/已過期）
 # ★§4a 紮根（L0→L1 建點入引擎）：物理可行性 + 可行性帳素材。全部 own-state（腳下 tile=自己站著＝親見最高信、
 # 自己的 corvee_site 記憶、自己的 food_runway），零 god-view、零新旋鈕（ETA 讀既有 L0_TO_L1_CORVEE_DAYS）。
@@ -373,6 +378,17 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			c.camp_target_est = VillageEstimate.make(_ftile.terrain, 1, 0, team.population)
 			c.camp_site_quality_mult = SettlementMemory.quality_multiplier(state, team, _ftile.tile_id)   # ★§4c 反饋（紮營靶地）
 	c.camp_forage_floor = ResourceSystem._forage_subsist_buffer(team) / ResourceSystem.FORAGE_FLOOR_DAYS   # 日產同源
+	# ★折現原語（第一磚）需要的三個【真實現狀】量：基準線不再用「假想覓食吃得飽」。
+	c.passive_food_daily = 0.0
+	var _ptile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if c.has_own_outpost:
+		c.passive_food_daily = MarginalEconomy._inflow_est(VillageEstimate.make(
+			_ptile.terrain if _ptile != null else "plains",
+			maxi(_ptile.outpost_level if _ptile != null else 1, 1), 0, team.population))
+	elif _ptile != null and _ptile.camp_level > 0:
+		c.passive_food_daily = ResourceSystem.L0_FORAGE_MULT * float(_ptile.resources.get("food", 0))
+	c.net_food_flow = team.food_flow_avg          # 日均淨食物流（已含消耗）
+	c.food_stock = ResourceSystem.effective_food(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.strong_farm", _tg)
 	var _aid: int = _fa._find_aid_target(state, team)
 	c.has_aid_target = _aid != -1

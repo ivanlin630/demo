@@ -197,13 +197,27 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
 			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:
 				return 0.0
-			# marg=靶 tile 淨可持續產能超覓食餬口的增量（maxf(0) anti-crank：低產 tile→0 不值紮）。
-			var marg: float = MarginalEconomy.camp_marginal(ctx.camp_target_est, ctx.camp_forage_floor)
+			# ★折現原語（脊椎第一磚，2026-08-21）取代舊的「今天流量對今天流量」比法：
+			#   value = Σ_{t≤H_eff} gain·δ^t − Σ baseline·δ^t − cost
+			#   ★baseline ＝【真實】被動所得（這族隊 ＝ 0），不再拿「假想覓食吃得飽」抵扣整份口糧。
+			#   ★H_eff 用【執行後】淨流算殘存活窗（R² 必查項）：紮營讓流血變慢，本身就延長視野
+			#     ——否則「沒紮營→存糧低→H_eff 小→紮營不划算」是同一個 catch-22 換一層。
+			var gain: float = MarginalEconomy._inflow_est(ctx.camp_target_est)   # 靶地可持續日產（真實未來流）
 			var daily_need: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
-			# urgency=food runway 緊迫度（富流浪 food_days≥URGENCY_DAYS→0 不急紮）。
-			var urgency: float = clampf((CAMP_URGENCY_DAYS - ctx.food_days) / CAMP_URGENCY_DAYS, 0.0, 1.0)
-			# ★§4c 反饋：同 leader 對該靶地的過往結局折價/加分（乘既有品質、不新增 term 線）。
-			var _cu: float = clampf(marg / maxf(daily_need, 0.001), 0.0, CAMP_MARGINAL_CAP) * urgency 				* ctx.camp_site_quality_mult
+			var w_food: float = DiscountedFlow.flow_weight("food", ctx.leader_values)
+			var delta: float = DiscountedFlow.delta_of(ctx.leader_values)
+			var post_net: float = ctx.net_food_flow + (gain - ctx.passive_food_daily)
+			var h_eff: float = DiscountedFlow.horizon_eff(post_net, ctx.food_stock)
+			# L0 ＝ transient shelter，建置成本極低（非 L1 工期）⇒ cost ≈ 0（spec §2⑤ worst-case 推導同此假設）
+			var value: float = DiscountedFlow.option_value(gain * w_food, ctx.passive_food_daily * w_food,
+				0.0, delta, h_eff)
+			# 正規化：以「CAMP_URGENCY_DAYS 天份口糧」為單位（既有錨，不新增常數）→ 與其餘 option 同量級；
+			# 上限沿用 CAMP_MARGINAL_CAP（bounded、非 inflate）。★§4c 選址記憶仍乘在最後。
+			var _cu: float = clampf(value / maxf(daily_need * CAMP_URGENCY_DAYS, 0.001), 0.0, CAMP_MARGINAL_CAP) 				* ctx.camp_site_quality_mult
+			if Probe.enabled:
+				Probe.note("discount.horizon_eff", h_eff)
+				Probe.note("discount.flow_food", gain)
+				Probe.bump("discount.camp_evaluated")
 			return _cu
 		"rooting_drive":
 			# ★§4a 紮根（L0→L1 建點）＝可行性帳 × 選址品質（term 非 gate；瀕餓由帳自然壓到 0，不設硬門檻）。

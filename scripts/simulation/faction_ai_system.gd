@@ -4915,6 +4915,7 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	if tile.terrain == "mountain":
 		return false
 	tile.camp_level = 1
+	if Probe.enabled: Probe.bump("camp.built")   # ★gate3：紮營次數（要與 L0→L1 晉級率、L0 廢棄率一起看）
 	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
 	tile.camp_team_id = team.team_id   # ★§4c：記起建隊（decay 時才知道「這是誰的失敗」；完工/消失時清）
 	if Probe.enabled: Probe.bump("settlement.camp_l0")   # L0 紮營 fire tap（觀測性）
