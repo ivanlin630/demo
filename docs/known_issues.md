@@ -125,6 +125,23 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 🏚★★世界在掉人：day60 起 **13–14/20 隊萎縮到「只剩領主」**（2026-08-21 生育量測副產物）
+`breed-anon-eligible` 的常數重錨量測（peaceful × seeds 1337/42/8181 × day 30/60/90）**順帶撈到**：
+**day60 起有 13–14／20 隊只剩 `pop=1`**，且 **不是新生小隊** ——
+實測 id 4/5/9/10/11…、tags `["統領","生產"]`、`was_convoy:false`
+⇒ **是原本的村掉人掉到剩一個領主** `@40ab0ab4 2026-08-21`。
+
+**★這個發現改變了生育那條線的意義**：
+生育修好後 `breed.born` **1 → 5**、`pop_total` **72→35 變成 72→43** —— **衰減趨緩，但世界仍在掉人**。
+⇒ **生育不是人口問題的根，只是把「結構性零產出」補上了。真正的問題是人去哪了。**
+
+★ **連帶的方法論**（implementer 在重錨時的判斷，值得記）：
+**把「只剩領主」的殘骸算進 `P_ref` 母體 ⇒ 等於把「世界在掉人」這個病烙進生育常數。**
+—— **常數的母體選擇本身就是一個會把病固化的地方。**
+
+**下一步（未開票）**：查 **死因分佈** —— 餓死？戰死？`defect_leave`？
+**在知道人往哪裡消失之前，任何「人口修法」都是在補水桶而不是補洞。**
+
 ### 👶 生育門檻：anon 與 named **不對稱**（2026-08-21 R² 認可為可接受，記錄供日後對齊）
 `breed-anon-eligible` 落地後：
 - **named 適齡者**通過**兩層**糧食門檻：團層 `f(rel_surplus)` **＋** 個人 `needs.food > 0.7`

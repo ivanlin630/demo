@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: breed-anon-eligible
 topic: 生育(a) DONE — born 1→5、pop 72→35 變 72→43；★常數是【略降】0.0133→0.0111（先量再定，母體排除「只剩領主」的殘骸）
 branch: feat/breed-anon-eligible
