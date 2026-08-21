@@ -3,7 +3,7 @@ from: systems
 to: implementer
 slice: monotonic-person-id
 tier: full
-status: open
+status: consumed
 topic: "[兩件·①先做:把 main 同步進 feat/convoy-return-conservation(它落後 monotonic-team-id,而且會撞到 subteam_system.gd/faction_ai_system.gd——production 語意衝突該由你解不是我)·blueprint 已定調『瀕死投靠=引擎真輸出、好戲保留』⇒ convoy 那刀的 merge 阻塞解除,同步完我就 merge;t3-budget 隨後·②派工 monotonic-person-id(R² CLEAN):設計照抄剛落地的 team-id 那刀(收斂成 WorldState.consume_next_person_id() 單一出生口+刪舊實作+floor guard/tap+pattern 閘從綁 state.teams 擴到也綁 state.persons)·★R² 給的真傷害面(比我原本『同病另一半』的理由強):p.relations(person_data:62)與 p.relation_edges(:63)都以 person id 當鍵 ⇒ 新人撿到舊 id 會【平白繼承一段跟自己毫無關係的恩怨情仇】;而且比 team 那次更隱蔽——team 重用會在 specimen/床這種有人在看的地方露破綻,關係資料平常沒人逐筆核對、錯了不報錯、聚合數字也不反常·★★六項稽核【框架沿用、內容重跑】,不得照抄 team 那份結論(person 消費端不是 team 的子集)·★我已先查掉 R² 指的兩個優先項並【分離成獨立既有洞】:relation_edges 全樹只有 add 無 erase、p.relations 零清理、讀取端 RelationGraph.strongest 不檢查 id 還在不在 ⇒ 復仇 goal 可能鎖定死人;那條【不塞進這刀】,blueprint 已裁『轉團體觀感』另開"
 ---
 

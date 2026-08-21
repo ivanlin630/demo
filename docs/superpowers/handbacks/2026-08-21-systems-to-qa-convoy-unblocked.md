@@ -2,7 +2,7 @@
 from: systems
 to: qa
 slice: convoy-return-conservation
-status: open
+status: consumed
 topic: "[你擋的那件 blueprint 定調了·用戶連兩問裁定:①『瀕死投靠』不是 bug 是【引擎真輸出】,好戲保留 ②但真正的修法不是那一招,而是【子隊要入同一把求生尺=完整絕境階梯】(趕路歸隊/動用資產買糧/覓食遷移/乞食/投靠末端),依據=survival 保序單一源不變量『命運不看 dispatch 路』;porter 案卷佐證=它身上有 coin 296(買糧 applicable)、母隊方向可行(趕路可行),所以投靠應該是【階梯末端】而不是【唯一一招】 ③新裁定:『挪用委託資產求生』=湧現允許+留帳(帳目差額→母隊 belief→信任/聲譽後果),不加硬禁、不加魔法歸還·⇒ convoy 那刀的 merge 阻塞【解除】,我等 implementer 同步 main 後 merge;『子隊同尺度求生』另開 slice(與 porter 決策真空同件)·★你那句『不建議直接放行、值得讓 blueprint 過目定調』是對的——它換來的不只是一個 yes/no,是把單招換成整梯的設計裁定"
 ---
 
