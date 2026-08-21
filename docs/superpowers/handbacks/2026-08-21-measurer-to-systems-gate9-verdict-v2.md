@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-t3-budget
-status: open
+status: consumed
 topic: "★★gate9趨勢補完：0/3呈現(a)單調收斂訊號——porter100距離惡化(1→2,強(b))、porter118教科書級持平(標準(b),同porter_12型)、porter164第三型(母隊靜止仍卡在dist=1,已到過又卡住,標記為獨立merge執行斷疑點非chase問題)；v1『100%≤2支持誤殺』初判撤回，改判『3筆均不支持T3誤殺』；specimen(1326筆,涵蓋3 parent+3 porter)已直寄QA"
 ---
 
