@@ -2,7 +2,7 @@
 from: systems
 to: measurer
 slice: breed-anon-eligible
-status: open
+status: consumed
 topic: "[一個能一刀分辨的問題(你手上資料可能已經有,不必重跑)·★存活下來的隊,food_flow_avg 是【正】的嗎?·是 ⇒ 這是真的擬真篩選(弱村淘汰、強村存活)=好戲不是 bug;否(全部隊都是負的、只是有些撐得久)⇒ 世界根本養不活任何村=經濟破·這一題的答案決定接下來是【不動】還是【開一個經濟 arc】,而目前所有資料都只看了【崩潰的那 4 隊】、沒看存活的那 16 隊·請報:存活隊在 day60/90 的 food_flow_avg 分佈(至少中位數與正值佔比)、以及 famine_days 有沒有歸零過·★你這輪三件我都收下:①gate① 逐項獨立複現 ②死因分佈把我的框訂正了兩次(不是持續掉人是開局 60 天篩選;named 多數是 defect_leave 先脫隊不是餓死在崗位上)③補掉 health_system named 餓死只有 print 無 Probe 的盲點——那條讓【過去所有死因分析對該項全盲】,補得好"
 ---
 

@@ -125,6 +125,32 @@ day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）
 ### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
 `WorldState.record_driver(entity, field, delta, reason)` 收 **delta**，但 `TileBank.set_amt`(tile_bank:41)/`TileBank.pool_set`(:65) 及 `ResourceBank.set_amt` 傳**絕對值**當 delta（deposit/withdraw/pool_add 傳真 delta ✓；tile_bank:40 註自認「delta 記絕對值慣例」）。**不影響 gameplay**（`driver_ledger` 預設 off、record_driver 純觀測零副作用）**但污染守恆稽核**：measurer 嚴格食物守恆帳第一版 `Σfood_flow` 差 **5600 萬**即此（`regen_food` 每天每 tile pool_set 記整池絕對值疊加）。measurer 已 prototype 真-delta fix（`amt - 呼叫前值`）+ **revert**（temp diag，main 乾淨）。**修** = set_amt/pool_set 讀舊值算 delta（同 deposit/withdraw 範式）。= [[feedback_full_transient_observability]] tap 完整性領域（systems owner）。formal fix 候選、待 blueprint/用戶排序（低急、稽核工具用時才咬）。
 
+### 📉★`food_flow_avg`（5 日 EMA）與真實庫存**脫鉤**，可能被結構性鎖負（2026-08-21 QA 逐 tick 坐實）
+**證據**：`team10`／`team11` 崩潰剩 1 人後，**`effective_food` 從 0 一路漲到 368／448**
+（持續 18–43 天、`task=貿易`、`winner=build_workshop:resource`），**真實庫存明明在暴漲**；
+而聚合面的 **`food_flow_avg` 仍掛負** `@40ab0ab4 2026-08-21`。
+
+**疑因**（QA 指出，未坐實）：`resource_system.gd:20/230-243` —— 該檔自身註解提到
+「**離開自家糧倉 → `effective_food` 跌 → 一次負脈衝壓低 flow**」；
+這兩隊**持續執行 `貿易`**，若 EMA 取樣點落在「離開糧倉」的判定上，**EMA 可能被結構性鎖負**。
+
+**★影響範圍**：**過去所有用 `food_flow_avg` 判「這隊還在不在流血」的結論都要重看**——
+包含 measurer 這輪的「四隊全程負 ＝ 還在流血」（**其中兩隊實際已翻正**）。
+★ 也包含**生育**：`breed_rel_surplus` 用的正是 `team.food_flow_avg`
+⇒ **若它對某些隊結構性偏負，那些隊的 `f(rel)` 會被壓低、生育被低估**。**未驗，但必須查。**
+
+**判準**：**判「現在的存量狀態」用 `effective_food`（真實庫存）；`food_flow_avg` 只能用來看趨勢方向，且要先確認它沒被鎖負。**
+
+### 🤝 「投靠」決策正確但**執行沒接上**（2026-08-21 QA 坐實）
+`team11` tick10700/10900/10910 三筆完整 candidates：**`併入`（投靠／求收容）util ＝ 2.90–2.91**，
+**遠遠壓過第二名 `備戰`（0.76）**，且 **`result=committed`**（真的選了、不是算出來沒切換）。
+**但投靠沒有成功脫險**——tick10900 起 task 掉回 `紮營`，`pop` 停在 1。
+⇒ **util 算對、承諾也對，是執行完成度斷**（目標可能不存在／搆不到）。
+
+★ **QA 的謹慎值得照抄**：它與 convoy 那類「**決策對、最後一步沒接上**」**症狀模式相似**，
+但 **QA 明說「只能指出相似性、不能斷言同源」**——**沒有更深的軌跡可以確認根因是否相同**。
+**未開票；併入「決策對、執行斷」家族觀察。**
+
 ### 🏚★★開局 60 天的結構性篩選：13–14／20 隊萎縮到「只剩領主」（2026-08-21，★framing 已被數據訂正兩次）
 **實測**（peaceful、measurer 獨立複現 `@40ab0ab4` 2026-08-21）：
 

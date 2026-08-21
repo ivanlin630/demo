@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: breed-anon-eligible
-status: open
+status: consumed
 topic: "★死因/崩潰隊specimen直寄(behavior因果宣稱慣例):3隊(5/10/11)結構性掉人到pop=1軌跡,共同特徵famine_days單調不歸零+food_flow_avg全程負(縮小只因少人少吃)+task正常輪替非凍結+minor全程0；我的判讀是團層聚合快照(daily snapshot)反推,未走過specimen逐tick決策記錄，尤其『food_flow_avg為何從未轉正』需你story audit坐實"
 ---
 
