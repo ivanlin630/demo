@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: build-eta-single-source
 topic: 交件收 — ★但我把 tier 標錯了(probe→full),不是你的問題;補送 R² 中 + 請 measurer 補一輪;你「不用 SEAM_MODE=soft 繞」記一筆
 ---

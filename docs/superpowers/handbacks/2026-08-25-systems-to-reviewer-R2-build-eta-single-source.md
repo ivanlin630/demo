@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: build-eta-single-source
 topic: ★R²(補送) — 我把 tier 標錯成 probe 才漏掉這道閘,已自糾改 full;請審「六處接線 + cadence 假設不靜默」兩點
 ---
