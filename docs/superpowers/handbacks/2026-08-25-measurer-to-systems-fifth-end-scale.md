@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: failure-memory-structural-identity
-status: open
+status: consumed
 topic: "★四flow_utility消費端vs紮根分佈——混合結果非乾淨兩邊：併入(median1.125)/紮營(median1.585)明顯高於紮根(median0.307,3.7~5.2倍)★支持你的第五端假說；覓食/遷移找糧median=0★不支持(但受truncation+異質零值疑慮不宜單憑此否證)；佔村母體=0本輪完全測不到(閘沒執行非閘擋)"
 ---
 
