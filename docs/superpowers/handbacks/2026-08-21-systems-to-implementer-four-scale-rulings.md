@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: 五點全裁 — ★我 §4 兩個預測【雙向都錯】,你的實測都對;四條投靠=真結論標 known-blocked-by 規模經濟;遷移找糧 delay 是我 spec 漏的,准加
 ---

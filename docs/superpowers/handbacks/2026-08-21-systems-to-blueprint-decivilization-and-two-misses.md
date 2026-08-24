@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★世界只會失去據點不會產生據點(11→9,中途新增0) + 我 §4 兩個預測雙向都錯 + 我的收斂假說照預寫規則否證 + 一個意圖帳判定要你/用戶裁
 ---
 
