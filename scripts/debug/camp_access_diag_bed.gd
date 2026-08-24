@@ -184,6 +184,46 @@ func _run() -> void:
 				key2, total_n, d2.size(), str(d2)])
 	else:
 		lines.append("  (無sample)")
+	# ★systems票(brick-acceptance)：失敗記憶磚驗收——覆蓋率+suppressed分佈+過渡窗tap(禁用fp,spec那條預測錯了)
+	lines.append("★★★失敗記憶磚驗收：")
+	lines.append("  failure.entries_written(record()被呼叫總次數) = %d" % int(Probe.counts.get("failure.entries_written", 0)))
+	lines.append("  failure.entries_max(Probe.note=最後一次呼叫時那隊的recent_failures.size()，非全局peak) = %s" % str(Probe.peaks.get("failure.entries_max", "無")))
+	if Probe.samples.has("failure.first_hit"):
+		lines.append("  ★過渡窗首次命中：%s" % str(Probe.samples["failure.first_hit"]))
+	else:
+		lines.append("  ★過渡窗首次命中：無sample(新key空間90天內從未寫入過一次⇒第三隻恆1.0機制，紅燈)")
+	lines.append("  ★★覆蓋率(獨立掃state.teams.recent_failures，非sample非counter，真母體)：")
+	var distinct_keys: Dictionary = {}
+	var total_count_sum: int = 0
+	for tid_f in state.teams:
+		var t_f: TeamData = state.teams[tid_f]
+		for k_f in t_f.recent_failures:
+			var e_f: Dictionary = t_f.recent_failures[k_f]
+			distinct_keys[String(k_f)] = true
+			total_count_sum += int(e_f.get("count", 0))
+	lines.append("    day90當下仍存活(未過期)的distinct(結構id,target) key數 = %d" % distinct_keys.size())
+	lines.append("    這些key的count總和(連續失敗次數加總) = %d" % total_count_sum)
+	lines.append("    覆蓋率(distinct key數) = %d ★注意:這只是day90快照(未過期項)，非90天內出現過的全部distinct key，過期已被prune掉的key不計入" % distinct_keys.size())
+	lines.append("  ★★suppressed分佈(failure.suppressed.<structural_id>累計，聚合層級=option/goal_type:frontier_kind，非細到target)：")
+	var supp_tally: Dictionary = {}
+	for k_s in Probe.counts.keys():
+		var ks_s: String = String(k_s)
+		if ks_s.begins_with("failure.suppressed."):
+			supp_tally[ks_s.substr("failure.suppressed.".length())] = int(Probe.counts[k_s])
+	var supp_keys: Array = supp_tally.keys(); supp_keys.sort()
+	for sk in supp_keys:
+		lines.append("    %-40s = %d" % [sk, int(supp_tally[sk])])
+	lines.append("  ★build_workshop:resource特別確認 = %d" % int(Probe.counts.get("failure.suppressed.build_workshop:resource", 0)))
+	lines.append("  failure.suppressed_depth(Probe.note=最後一次觸發時的折價深度1-m，非峰值) = %s" % str(Probe.peaks.get("failure.suppressed_depth", "無")))
+	lines.append("  failure.invalidated.* / failure.pruned：")
+	for k_i in Probe.counts.keys():
+		var ks_i: String = String(k_i)
+		if ks_i.begins_with("failure.invalidated.") or ks_i == "failure.pruned":
+			lines.append("    %-40s = %d" % [ks_i, int(Probe.counts[k_i])])
+	if Probe.samples.has("failure.recorded"):
+		lines.append("  failure.recorded樣本(cap=16，非母體，供逐筆檢視)：")
+		for smp_r in (Probe.samples["failure.recorded"] as Array):
+			lines.append("    %s" % str(smp_r))
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":

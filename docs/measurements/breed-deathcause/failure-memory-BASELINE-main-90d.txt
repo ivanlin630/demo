@@ -1,0 +1,178 @@
+[peaceful_economy day 90 seed 1337] teams=19
+--- 零採集（病） ---
+  collect.no_outpost_no_camp_zero_food           = 1042
+  collect.no_outpost_no_camp_zero_food.parent    = 1001
+  collect.no_outpost_no_camp_zero_food.subteam   = 41
+  collect.l0_forage_ran                          = 287
+--- 三分流（temp tap 已撤；證據見 2026-08-21 交件） ---
+  camp.diag.i_above_desperation                  = 0
+  camp.diag.ii_no_farmable                       = 0
+  camp.diag.iii_applicable_but_not_chosen        = 0
+  camp.diag.has_outpost_already                  = 0
+  camp.applicable_but_idle                       = 0
+--- ★逐隊歸格（不得只給總數） ---
+--- ★分流(iii) 輸給誰 ---
+  camp.lost_to.build_apothecary:resource         = 27
+  camp.lost_to.build_workshop:resource           = 153
+  camp.lost_to.deliver_material                  = 10
+  camp.lost_to.maintain_food:resource            = 10
+  camp.lost_to.maintain_tools:resource           = 6
+  camp.lost_to.survival                          = 38
+  camp.lost_to.乞食                                = 20
+  camp.lost_to.併入                                = 69
+  camp.lost_to.備戰                                = 217
+  camp.lost_to.歸建                                = 9
+  camp.lost_to.求和                                = 2
+  camp.lost_to.紮根                                = 1
+  camp.lost_to.覓食                                = 120
+  camp.lost_to.買糧                                = 3
+  camp.lost_to.貿易                                = 30
+  camp.lost_to.返家補給                              = 27
+  camp.won_argmax                                = 35
+--- ★紮根 funnel（驗收#1 的解釋層）---
+  root.won_argmax                                = 1
+  root.lost_to.build_apothecary:resource         = 1
+  root.lost_to.build_workshop:resource           = 55
+  root.lost_to.deliver_material                  = 1
+  root.lost_to.maintain_tools:resource           = 1
+  root.lost_to.survival                          = 3
+  root.lost_to.乞食                                = 1
+  root.lost_to.備戰                                = 27
+  root.lost_to.歸建                                = 2
+  root.lost_to.紮營                                = 2
+  root.lost_to.貿易                                = 6
+  root.lost_to.返家補給                              = 2
+    [camp.lost] { "team": 8, "camp_u": 0.228, "winner": "貿易", "win_u": 0.552, "food_days": 12.5 }
+    [camp.lost] { "team": 8, "camp_u": 0.093, "winner": "求和", "win_u": 0.837, "food_days": 12.08 }
+    [camp.lost] { "team": 8, "camp_u": 0.091, "winner": "貿易", "win_u": 1.232, "food_days": 11.25 }
+    [camp.lost] { "team": 8, "camp_u": 0.093, "winner": "貿易", "win_u": 1.36, "food_days": 11.25 }
+    [camp.lost] { "team": 8, "camp_u": 0.094, "winner": "貿易", "win_u": 1.28, "food_days": 10.83 }
+    [camp.lost] { "team": 8, "camp_u": 0.095, "winner": "貿易", "win_u": 1.223, "food_days": 10.42 }
+    [camp.lost] { "team": 8, "camp_u": 0.096, "winner": "貿易", "win_u": 1.183, "food_days": 10 }
+    [camp.lost] { "team": 8, "camp_u": 0.096, "winner": "貿易", "win_u": 1.156, "food_days": 9.58 }
+    [camp.lost] { "team": 8, "camp_u": 0.096, "winner": "貿易", "win_u": 1.138, "food_days": 9.17 }
+    [camp.lost] { "team": 8, "camp_u": 0.097, "winner": "survival", "win_u": 1.129, "food_days": 8.75 }
+  construct.complete                             = 18
+  construct.complete_upgrade_facility            = 17
+  settlement.l0_to_l1_start                      = 3
+  construct.complete_crude_camp                  = 1
+--- 世界狀態（gate1/6 用） ---
+  pop=1 村數 = 12｜母隊人口合計 = 50
+  breed.born                                     = 1
+  camp.built                                     = 24
+  outpost.l0_to_l1                               = 1
+  camp.abandoned                                 = 20
+★★★outpost普查(重量令)：
+  day0 owned outpost數 = 11
+  day90 owned outpost數 = 12
+  ★遊戲中途新增的outpost數 = 1 ([{ "tile_id": 13006, "pos": [13, 6], "owner": 8, "level": 1 }])
+★★CAMP_MARGINAL_CAP saturation率：
+  discount.camp_evaluated = 836
+  discount.camp_capped    = 423 (50.6%)
+  discount.camp_raw_u(本輪最大值,Probe.note=peak非最後一次) = 4.465281735
+  discount.horizon_eff(本輪最大值)                        = 90
+  discount.flow_food(本輪最大值)                          = 8.76356092008266
+--- ★join母體+QA指路dump：join.accept_check逐筆(cap=40) ---
+  accept.join_accept+reject = 5 (accept=2 reject=3)
+  ★join.accept_check樣本數=5，cap=40，樣本數<cap ⇒ 完整母體
+    { "host": 2, "joiner": 14, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }
+    { "host": 1, "joiner": 16, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }
+    { "host": 3, "joiner": 18, "host_rep": 0.5, "feed_ok": 0.18326313210758, "accept_util": 0.07697051548519, "accepted": false }
+    { "host": 3, "joiner": 11, "host_rep": 0.5, "feed_ok": 0.07641981489598, "accept_util": 0.03209632225631, "accepted": false }
+    { "host": 9, "joiner": 19, "host_rep": 0.5, "feed_ok": 0, "accept_util": 0, "accepted": false }
+★★★build-eta-single-source 五處預測對照：
+  #3持守 persist.hold(觸發率,分子;預測變寬鬆=值該降) = 37
+  #4糧橋 dispatch_fail.糧橋不足(先前0,預測仍0或更寬鬆) = 0
+  #4糧橋對照 dispatch_fail.資源不足(先前28次全是這個) = 28
+  #5求生蓋田閘 food_rescue.entry(呼叫頻率) = 3948
+    { "team": 3, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 3, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 4, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 4, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 5, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 5, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 7, "food_days": 8.33333333333333, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 7, "food_days": 8.33333333333333, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 3, "food_days": 31.1203280596887, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 3, "food_days": 31.1203280596887, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 4, "food_days": 31.1849266438154, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 4, "food_days": 31.1849266438154, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 5, "food_days": 31.1119156020612, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 5, "food_days": 31.1119156020612, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 7, "food_days": 7.97779236602585, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 7, "food_days": 7.97779236602585, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 7, "food_days": 7.21304518171111, "build_eta_days": 1, "passed": true, "tick": 300 }
+    { "team": 7, "food_days": 7.21304518171111, "build_eta_days": 1, "passed": true, "tick": 300 }
+    { "team": 3, "food_days": 30.3882735142466, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 3, "food_days": 30.3882735142466, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 4, "food_days": 30.5214667680808, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 4, "food_days": 30.5214667680808, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 5, "food_days": 30.5901932664793, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 7, "food_days": 6.84418376823645, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 7, "food_days": 6.84418376823645, "build_eta_days": 1, "passed": true, "tick": 480 }
+    { "team": 7, "food_days": 6.84418376823645, "build_eta_days": 1, "passed": true, "tick": 480 }
+    { "team": 3, "food_days": 29.9345457713891, "build_eta_days": 1.5, "passed": true, "tick": 640 }
+    { "team": 3, "food_days": 29.9345457713891, "build_eta_days": 1.5, "passed": true, "tick": 640 }
+    { "team": 4, "food_days": 29.7578729699447, "build_eta_days": 1.5, "passed": true, "tick": 640 }
+    { "team": 4, "food_days": 29.7578729699447, "build_eta_days": 1.5, "passed": true, "tick": 640 }
+  #5求生蓋田閘 pass=30/30(樣本,預測變嚴=pass率該降,非死水閘沒執行) reject=0
+  #1/#2/#6紮根funnel：root.won_argmax=1 settlement.l0_to_l1_start=3 construct.complete_crude_camp=1
+★★★exact-pair命中率：root.lost_to逐筆(team,winner,target)：
+  母體=root.lost_to.*計數器總和(不受first-N影響)，樣本=101筆(cap=200,樣本數<cap⇒完整母體)
+    (team,winner)=10|build_workshop:resource 總次數=6 distinct_target數=2 分佈={ "(10, 8)": 2, "(13, 6)": 4 }
+    (team,winner)=10|紮營 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=11|build_workshop:resource 總次數=45 distinct_target數=2 分佈={ "(10, 8)": 33, "(13, 6)": 12 }
+    (team,winner)=13|備戰 總次數=8 distinct_target數=1 分佈={ "無": 8 }
+    (team,winner)=15|歸建 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=16|備戰 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=17|maintain_tools:resource 總次數=1 distinct_target數=1 分佈={ "(8, 10)": 1 }
+    (team,winner)=17|備戰 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=17|貿易 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=18|備戰 總次數=8 distinct_target數=1 分佈={ "無": 8 }
+    (team,winner)=19|備戰 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=19|紮營 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=19|貿易 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=20|貿易 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=21|備戰 總次數=8 distinct_target數=1 分佈={ "無": 8 }
+    (team,winner)=22|歸建 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=3|build_workshop:resource 總次數=1 distinct_target數=1 分佈={ "(13, 6)": 1 }
+    (team,winner)=3|survival 總次數=2 distinct_target數=1 分佈={ "無": 2 }
+    (team,winner)=5|build_workshop:resource 總次數=2 distinct_target數=1 分佈={ "(10, 8)": 2 }
+    (team,winner)=7|build_apothecary:resource 總次數=1 distinct_target數=1 分佈={ "(10, 8)": 1 }
+    (team,winner)=7|deliver_material 總次數=1 distinct_target數=1 分佈={ "(10, 8)": 1 }
+    (team,winner)=7|乞食 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=7|返家補給 總次數=2 distinct_target數=1 分佈={ "無": 2 }
+    (team,winner)=8|survival 總次數=1 distinct_target數=1 分佈={ "無": 1 }
+    (team,winner)=8|貿易 總次數=3 distinct_target數=1 分佈={ "無": 3 }
+    (team,winner)=9|build_workshop:resource 總次數=1 distinct_target數=1 分佈={ "(8, 6)": 1 }
+★★★失敗記憶磚驗收：
+  failure.entries_written(record()被呼叫總次數) = 0
+  failure.entries_max(Probe.note=最後一次呼叫時那隊的recent_failures.size()，非全局peak) = 無
+  ★過渡窗首次命中：無sample(新key空間90天內從未寫入過一次⇒第三隻恆1.0機制，紅燈)
+  ★★覆蓋率(獨立掃state.teams.recent_failures，非sample非counter，真母體)：
+    day90當下仍存活(未過期)的distinct(結構id,target) key數 = 5
+    這些key的count總和(連續失敗次數加總) = 365
+    覆蓋率(distinct key數) = 5 ★注意:這只是day90快照(未過期項)，非90天內出現過的全部distinct key，過期已被prune掉的key不計入
+  ★★suppressed分佈(failure.suppressed.<structural_id>累計，聚合層級=option/goal_type:frontier_kind，非細到target)：
+    買單                                       = 339
+  ★build_workshop:resource特別確認 = 0
+  failure.suppressed_depth(Probe.note=最後一次觸發時的折價深度1-m，非峰值) = 0.6
+  failure.invalidated.* / failure.pruned：
+    failure.pruned                           = 28
+  failure.recorded樣本(cap=16，非母體，供逐筆檢視)：
+    { "team": 0, "key": "買單|weapon_melee_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 0, "key": "買單|weapon_ranged_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 0, "key": "買單|material", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 1, "key": "買單|weapon_melee_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 1, "key": "買單|weapon_ranged_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 1, "key": "買單|material", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 2, "key": "買單|weapon_melee_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 2, "key": "買單|weapon_ranged_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 2, "key": "買單|material", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 3, "key": "買單|weapon_melee_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 3, "key": "買單|weapon_ranged_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 4, "key": "買單|weapon_melee_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 4, "key": "買單|weapon_ranged_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 5, "key": "買單|weapon_melee_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 5, "key": "買單|weapon_ranged_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }
+    { "team": 6, "key": "買單|weapon_melee_low", "reason": "order_abandoned_buy", "count": 1, "tick": 1210 }

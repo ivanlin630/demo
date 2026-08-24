@@ -27,12 +27,16 @@ $stdoutLog = if ($env:GODOT_DETACH_OUT) { $env:GODOT_DETACH_OUT } else { Join-Pa
 #   bugs: the tool quietly does less, and the reduced result looks completely normal.
 #   Fix: keep the whitelist (avoid dragging unrelated env), but WARN about project-looking env vars
 #   that are NOT whitelisted. Warn only - never guess, never auto-add.
+#   2026-08-25 fix: ADHOC_DAYS and PERF_OUT added to the actual pass-through whitelist (measurer
+#   hit the same near-miss a second time on a different ticket batch - the WARN was firing correctly,
+#   these two names were just never added after the first incident). Minimal name-only fix, no new
+#   convention introduced (per implementer's own recommended option).
 #   NOTE: this file must stay ASCII-only (PS 5.1 reads BOM-less .ps1 as ANSI; non-ASCII breaks parsing).
 $known = @('WARRING_','SPECIMEN_','LADDER_','LW_','PERF_','ADHOC_','EXAM_','GODOT_','FOOD_DAYS_')
-$envLines = Get-ChildItem env: | Where-Object { $_.Name -like 'WARRING_*' -or $_.Name -eq 'GODOT_TIMEOUT' -or $_.Name -like 'LADDER_*' -or $_.Name -like 'SPECIMEN_*' -or $_.Name -eq 'FOOD_DAYS_THRESHOLD' -or $_.Name -eq 'ADHOC_TICKS' -or $_.Name -eq 'LW_MONTHS' -or $_.Name -eq 'LW_CONFIG' -or $_.Name -eq 'PERF_SEED' -or $_.Name -eq 'PERF_DAYS' -or $_.Name -eq 'PERF_CONFIG' } |
+$envLines = Get-ChildItem env: | Where-Object { $_.Name -like 'WARRING_*' -or $_.Name -eq 'GODOT_TIMEOUT' -or $_.Name -like 'LADDER_*' -or $_.Name -like 'SPECIMEN_*' -or $_.Name -eq 'FOOD_DAYS_THRESHOLD' -or $_.Name -eq 'ADHOC_TICKS' -or $_.Name -eq 'ADHOC_DAYS' -or $_.Name -eq 'LW_MONTHS' -or $_.Name -eq 'LW_CONFIG' -or $_.Name -eq 'PERF_SEED' -or $_.Name -eq 'PERF_DAYS' -or $_.Name -eq 'PERF_CONFIG' -or $_.Name -eq 'PERF_OUT' } |
     ForEach-Object { 'set "' + $_.Name + '=' + $_.Value + '"' }
 $passedNames = @{}
-Get-ChildItem env: | Where-Object { $_.Name -like 'WARRING_*' -or $_.Name -eq 'GODOT_TIMEOUT' -or $_.Name -like 'LADDER_*' -or $_.Name -like 'SPECIMEN_*' -or $_.Name -eq 'FOOD_DAYS_THRESHOLD' -or $_.Name -eq 'ADHOC_TICKS' -or $_.Name -eq 'LW_MONTHS' -or $_.Name -eq 'LW_CONFIG' -or $_.Name -eq 'PERF_SEED' -or $_.Name -eq 'PERF_DAYS' -or $_.Name -eq 'PERF_CONFIG' } | ForEach-Object { $passedNames[$_.Name] = $true }
+Get-ChildItem env: | Where-Object { $_.Name -like 'WARRING_*' -or $_.Name -eq 'GODOT_TIMEOUT' -or $_.Name -like 'LADDER_*' -or $_.Name -like 'SPECIMEN_*' -or $_.Name -eq 'FOOD_DAYS_THRESHOLD' -or $_.Name -eq 'ADHOC_TICKS' -or $_.Name -eq 'ADHOC_DAYS' -or $_.Name -eq 'LW_MONTHS' -or $_.Name -eq 'LW_CONFIG' -or $_.Name -eq 'PERF_SEED' -or $_.Name -eq 'PERF_DAYS' -or $_.Name -eq 'PERF_CONFIG' -or $_.Name -eq 'PERF_OUT' } | ForEach-Object { $passedNames[$_.Name] = $true }
 foreach ($e in (Get-ChildItem env:)) {
     $n = $e.Name
     if ($passedNames.ContainsKey($n)) { continue }
