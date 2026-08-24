@@ -162,6 +162,28 @@ func _run() -> void:
 	lines.append("  #1/#2/#6紮根funnel：root.won_argmax=%d settlement.l0_to_l1_start=%d construct.complete_crude_camp=%d" % [
 		int(Probe.counts.get("root.won_argmax", 0)), int(Probe.counts.get("settlement.l0_to_l1_start", 0)),
 		int(Probe.counts.get("construct.complete_crude_camp", 0))])
+	# ★systems票(exact-pair-hitrate)：root.lost_to逐筆(team,winner,target)，算distinct-target數(母體vs樣本分開報)
+	lines.append("★★★exact-pair命中率：root.lost_to逐筆(team,winner,target)：")
+	if Probe.samples.has("root.lost_to.pair"):
+		var pairs: Array = Probe.samples["root.lost_to.pair"]
+		var per_team_winner: Dictionary = {}   # "team|winner" → Dictionary(target→count)
+		for p in pairs:
+			var key: String = "%s|%s" % [str(p.get("team", -1)), str(p.get("winner", "?"))]
+			var d: Dictionary = per_team_winner.get(key, {})
+			var tgt: String = str(p.get("target", "無"))
+			d[tgt] = int(d.get(tgt, 0)) + 1
+			per_team_winner[key] = d
+		lines.append("  母體=root.lost_to.*計數器總和(不受first-N影響)，樣本=%d筆(cap=200,%s)" % [
+			pairs.size(), ("樣本數<cap⇒完整母體" if pairs.size() < 200 else "樣本數=cap需注意截斷")])
+		var keys2: Array = per_team_winner.keys(); keys2.sort()
+		for key2 in keys2:
+			var d2: Dictionary = per_team_winner[key2]
+			var total_n: int = 0
+			for v in d2.values(): total_n += int(v)
+			lines.append("    (team,winner)=%s 總次數=%d distinct_target數=%d 分佈=%s" % [
+				key2, total_n, d2.size(), str(d2)])
+	else:
+		lines.append("  (無sample)")
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":

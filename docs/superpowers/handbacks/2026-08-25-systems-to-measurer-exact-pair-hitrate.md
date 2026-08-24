@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★動工前的一個數字(R² 把它從事後升格成前提):那 45 次是「同一個 tile 反覆」還是「45 個不同 tile」?
 ---

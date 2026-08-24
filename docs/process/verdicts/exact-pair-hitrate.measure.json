@@ -1,0 +1,31 @@
+{
+  "slice": "failure-memory-structural-identity",
+  "ticket": "systems票(動工前前提)：team11那45次build_workshop是同一tile反覆還是45個不同tile？+一般化target重複率分佈",
+  "measured_at_head": "0a5ae8e0(main，尚未有此slice的worktree，直接在main上跑，符合『動工前』的性質)",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "decision_engine.gd:rank_scored_ctx的root.lost_to.*計數點加5行sample tap(root.lost_to.pair)，捕捉{team,winner,target}逐筆——target從winner候選的cand.target或cand.to_task.target取(視候選來源GoalResolver直接candidate或delegate candidate而定)。camp_access_diag_bed.gd加對應報表段(per team+winner分組統計distinct_target數)。皆Probe-gated零行為改動。",
+
+  "★★★答案：team11那45次是2個distinct target，非同一tile反覆也非45個不同tile": {
+    "team11|build_workshop:resource": {"總次數": 45, "distinct_target數": 2, "分佈": {"(10, 8)": 33, "(13, 6)": 12}},
+    "判讀": "★★這不是ticket判讀規則裡的任一極端——不是『target高度重複』(單一tile吃掉全部45次)，也不是『target幾乎每次不同』(45個不同tile)。是【小數量distinct target、各自被重度重複命中】：兩個tile分別被鎖定33次與12次。★對exact-pair(option結構id,target id)這把key而言：這代表『蓋工坊@(10,8)』這個exact-pair本身會被連續嘗試33次、『蓋工坊@(13,6)』被嘗試12次——★★exact-pair命中率在這個案例上是高的，不是『恆不同⇒命中率趨近0』的risk情境。"
+  },
+
+  "★★一般化：target重複率分佈(全部team×winner組合，101筆完整母體)": {
+    "母體vs樣本": "101筆(cap=200，樣本數<cap⇒完整母體，非first-N截斷)",
+    "模式①(GoalResolver location-bound候選：build_workshop/build_apothecary/deliver_material/maintain_tools)": "全部呈現『distinct_target數1~2，每個target被重複多次』的形狀——team10同樣鎖定(10,8)/(13,6)這兩個tile(2次/4次)，跟team11撞到同一對tile；team9單筆(8,6)；team7/5/3各自1個target單次或少次。★★沒有一筆呈現『每次都不同target』的模式。",
+    "模式②(靜態options：備戰/貿易/survival/紮營/歸建/乞食/返家補給)": "target全部='無'(這類option在candidate結構裡本來就不帶地點——它們是static option，非GoalResolver frontier candidate，沒有`cand`/`to_task.target`欄位)。★這類option原本就不在exact-pair(option,target)這把key的適用範圍內(它們沒有target可比對)，exact-pair的risk評估應聚焦在有location的GoalResolver候選(build_*/deliver_material/maintain_*等)。"
+  },
+
+  "★★對判讀規則的回答": "依你先寫好的判準：build_workshop這類location-bound候選『target高度重複』成立(2個distinct target，各自33/12次重複)——★exact-pair咬得到，不是『幾乎不存在』的risk情境。★誠實邊界：這是peaceful_economy單seed單run的樣本，101筆母體裡真正大量重複的案例集中在team10/11這兩隊、且巧合鎖定同一對tile座標——不排除某些世界(warring_states/多seed)下distinct target數會更高，但至少在這個代表性樣本上，『target幾乎每次不同』的最壞情境沒有出現。",
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/exact-pair-hitrate-v2-90d.txt",
+    "code": "scripts/simulation/decision/decision_engine.gd(root.lost_to.pair tap)，scripts/debug/camp_access_diag_bed.gd(main，報表段)"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo --script scripts/debug/camp_access_diag_bed.gd",
+
+  "cleanup": "busy beacon清除。root.lost_to.pair tap建議留(補既有root.lost_to.*計數缺的target細節)，交systems判permanent。"
+}

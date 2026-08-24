@@ -127,6 +127,11 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			if String(e["opt"]) == "紮根":
 				if String(scored[0]["opt"]) != "紮根":
 					Probe.bump("root.lost_to." + String(scored[0]["opt"]))
+					# ★measurer L3 tap(2026-08-25,exact-pair-hitrate票)：輸家(team,target)配對,供distinct-target計算
+					var _wcand: Dictionary = (scored[0]["cand"] as Dictionary) if scored[0].has("cand") else {}
+					var _wtgt = _wcand.get("target", (_wcand.get("to_task", {}) as Dictionary).get("target", null))
+					Probe.bump_sample("root.lost_to.pair", {"team": team.team_id,
+						"winner": String(scored[0]["opt"]), "target": (str(_wtgt) if _wtgt != null else "無")}, 200)
 				else:
 					Probe.bump("root.won_argmax")
 				break
