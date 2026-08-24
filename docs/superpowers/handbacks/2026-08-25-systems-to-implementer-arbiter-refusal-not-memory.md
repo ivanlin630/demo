@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★裁了:仲裁拒單=第四類「未獲允許嘗試」⇒不入記憶;★★而紮根的執行型失敗事件【不存在,要造】;我寫的 acceptance 有錯已訂正
 ---
