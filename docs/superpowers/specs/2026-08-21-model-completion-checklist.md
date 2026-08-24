@@ -54,7 +54,23 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 ### 方法（負斷言紀律）
 兩側各自窮盡：**寫入側** ＝ `\.current_task *= *` 全站（117 命中，**逐行看過**）；**決策側** ＝ `TaskArbiter.try_set` 全站（**20 站，逐站讀 caller 語境**）。
 
-### 寫入側：**乾淨**（零違規）
+### ⚠️ 寫入側：~~**乾淨**（零違規）~~ ⇒ ★**訂正：那是【只查了一道門】的結論**（2026-08-25）
+
+**`camp-construction-duration` 第一趟窮盡列舉 `current_task = ` ＝ 9 處**，發現
+★**`TaskArbiter.release()` 一道 guard 都不過**，而它有 **59 個 caller**。
+
+⇒ ★**我當時的「寫入側乾淨」＝ 只驗了 `try_set` 那道門**；
+**`release()` 是沒鎖的側門，它從來不在我的母體裡。**
+★**這是負斷言失效的教科書形狀**：我證的是「**經過那道門的都合規**」，
+**不是**「**所有改 `current_task` 的路都合規**」——**兩者差 59 個 caller。**
+
+（同 memory `feedback_spec_premise_verify_decision_layer`：**機械層旁路決策層**。
+ ★**判準修正**：查「X 有沒有被守住」時，**母體是「所有會寫 X 的路」，不是「X 的守衛被呼叫幾次」。**）
+
+⇒ **處置**：併入 `convoy-return-task-authority`（**scope 已升格為「task 卸除單一門」**），
+**59 caller 逐一歸類（合法卸除 vs 旁路）**。**B1 在該票結案前不得標為 done。**
+
+### 原記錄（留史）：寫入側掃描結果
 117 個命中**絕大多數是讀**（`==` 比較）。真正的寫入僅五類、且皆有既有註記：
 - 新 team 建立豁免：`population_system:62`（overflow 流亡）／`reaction_system:403`（放逐生成）／`subteam_system:62,117,148`（子隊 dispatch task）
 - tutorial：`recruit_tutorial:16`

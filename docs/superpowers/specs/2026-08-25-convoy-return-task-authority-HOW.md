@@ -3,7 +3,7 @@ slice: convoy-return-task-authority
 tier: full
 qa: required
 from: systems
-topic: RETURN 期間 task 主導權沒鎖住 —— convoy_phase 與 current_task 是兩份真相,arbiter 只看後者
+topic: ★scope 已升格(blueprint 2026-08-25)=「task 卸除單一門」—— release() 59 caller 旁路所有 guard;convoy RETURN 只是其中一個受害者
 ---
 
 # convoy RETURN：**task 主導權沒鎖住**
@@ -67,3 +67,28 @@ new_task != team.current_task
 ## §5 acceptance
 ★**主指標 ＝ RETURN 期間 `task = 運輸` 的佔比**（margin 轉不動它）。
 `stranded` 計數**只當輔助**，★**不得單獨當通過依據**。
+
+---
+
+## §I ★★scope 升格：**「task 卸除單一門」**（blueprint 裁 2026-08-25）
+
+本票原本只管 convoy RETURN。**升格後管的是整個「誰可以把一支隊從它的 task 上卸下來」。**
+
+### 為什麼升格
+`camp-construction-duration` 第一趟窮盡列舉 `current_task = ` **＝ 9 處**：
+★**`release()` 一道 guard 都不過**，**59 個 caller**。
+⇒ ★**convoy RETURN 被劫走只是這個結構的一個受害者，不是獨立的 bug。**
+⇒ 且**清單 §B1 的「寫入側乾淨」是只查了 `try_set` 那道門的結論** —— 已回填訂正。
+
+### 修法形狀（blueprint 指定）
+1. ★**`release()` 也要過 arbiter／guard —— 讓「單一門」名實相符**
+2. ★**59 個 caller 逐一歸類**：**合法卸除**（任務真的完成／目標消失／隊死）
+   vs ★**旁路**（拿 release 當「我就是要換 task」的後門）
+   —— **窮盡紀律，不得抽樣**
+3. **若診斷顯示影響面超出本票 ⇒ 再升 arc**（blueprint 保留）
+
+### ★量測順序（改寫本票第一趟）
+**先報「RETURN 期間 `current_task` 被改寫時走哪一條路」的分佈**
+（`try_set` ／ ★`release` ／ `transition` ／ 其他）——
+**這一格定了，(a)(b) 兩個舊假說才輪得到。**
+
