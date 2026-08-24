@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: R² — 失敗記憶改結構身分 key(零人工表);請優先打【結構身分真的到得了嗎】與【exact-pair 會不會等於沒折價】兩顆
 ---
