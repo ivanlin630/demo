@@ -29,7 +29,21 @@ new_task != team.current_task
 而 `convoy_phase` 存在 **extra-data**（`faction_ai_system.gd:2819/2846` `xd["convoy_phase"]="RETURN"`）
 ⇒ ★**arbiter 完全不看它。**
 
-### 兩個候選機制（**都待驗，不得直接照著改**）
+### ★★2026-08-25 更新：**先驗 `release()` 路徑，(a)(b) 都往後排**
+`camp-construction-duration` 第一趟窮盡列舉 `current_task = ` **＝ 9 處**，發現：
+| 路 | 過哪些 guard |
+|---|---|
+| `try_set` ×4 | combat／crisis／**persist hold**／優先序 |
+| ★**`release()` ×1** | ★**一道都不過**（`TaskArbiter.release(` **59 個 caller**） |
+| `transition()` ×1 | combat／crisis／emergency，**不過 persist hold** |
+
+★**「持守 floor 守的是 `try_set` 那道門，而離開的隊是從旁邊那扇沒鎖的門走的。」**
+⇒ **本票假說 (b)「一次被搶就永久解鎖」建立在「被 `try_set` 搶」的前提上 ——
+若 porter 是被 `release()` 放掉的，(b) 根本還沒輪到。**
+⇒ ★**第一趟改成：RETURN 期間 `current_task` 被改寫時，是走哪一條路？**
+（`try_set` ／ ★`release` ／ `transition` ／ 其他）**這一格分佈定了才談 (a)(b)。**
+
+### 兩個候選機制（**都待驗，且排在 release 路徑分佈之後**）
 | # | 假說 | 性質 |
 |---|---|---|
 | **(a)** | **第一次被搶的原因**：porter 的 `persist_strength` ≤ 門檻 ⇒ **hold 從未生效** | 需量 `persist.hold` 對 porter 的觸發率 |

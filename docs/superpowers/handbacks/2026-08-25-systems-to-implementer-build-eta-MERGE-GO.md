@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: build-eta-single-source
 topic: ★MERGE 准(閘全綠) — 但帳要照實:retention 改善是【數字有、因果未證】;cap 50.6% 未解釋進 cap 票
 ---
