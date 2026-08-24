@@ -1,9 +1,9 @@
 ---
 role: reviewer
 code: "02"
-status: idle
-current_ticket: "-"
-updated: 2026-08-21
+status: working
+current_ticket: "2026-08-25-systems-to-reviewer-R2-build-eta-single-source.md"
+updated: 2026-08-25
 ---
 
 # 02 reviewer 現況

@@ -1,7 +1,7 @@
 ---
 slice: build-eta-single-source
-tier: probe
-qa: not-required
+tier: full
+qa: required   # ★2026-08-25 systems 自糾：原標 probe 是判錯維度（見 01_architect「tier 判準」）
 from: systems
 topic: 工期單一真相源 —— 六份公式三種答案差 240 倍,改接線非改數值
 ---

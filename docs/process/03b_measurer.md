@@ -249,6 +249,14 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 `站① 9 − 守衛 0 − (ok 6 + fail 3) = 0` ⇒ ★**列舉完整、沒有漏掉的暗門。**
 **對不平 ⇒ 有你沒想到的分支，先別解讀分佈。**
 
+### ④j ★tap 欄名不要把 bug 寫死進去（2026-08-25）
+
+血證：`food_rescue.gate_check` 的欄位曾叫
+`build_eta_days_ESTIMATE_bug÷240` / `build_eta_days_TRUE÷24` / `passed_with_bug`。
+**bug 修掉之後，欄名就變成假訊息** ——
+★**「留著舊欄名會讓半年後的人以為那個 bug 還在。」**
+⇒ **欄名寫「這個量是什麼」，不要寫「這個量現在有什麼毛病」**；毛病寫在帳上（ledger／known_issues），不寫在 schema 裡。
+
 ### ④c ★★死水兩欄（blueprint 制度化 2026-08-21；**估算器／決策類診斷交件的硬要求**）
 
 **任何「某選項不 fire／某機制沒作用」的診斷交件，必附兩欄**：

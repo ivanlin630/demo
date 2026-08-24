@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: eta-single-model
 topic: ★交付准(本分達成) — 但 gate4「3→0」被 QA 推翻成 margin 稀釋,轉未勾項掛新票;gate6 0.874 不修=准,你的理由我立成規則
 ---
