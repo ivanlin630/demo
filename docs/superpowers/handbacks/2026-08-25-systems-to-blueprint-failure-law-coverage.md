@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★診斷落①分支且我追到更深一層:失敗反饋律的【接線面積 = 2 個 option】,接 candidate 也不會生效;附一條新通則「機制已立 ≠ 機制已覆蓋」;請定磚
 ---
 
