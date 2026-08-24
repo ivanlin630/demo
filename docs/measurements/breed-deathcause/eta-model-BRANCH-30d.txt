@@ -1,9 +1,11 @@
-[warring_states day 5] teams=67 porters_tracked=1 trips_total=1
-  convoy: dispatch=1 attempt=1 deliver=1 settled=1 return=1 stranded=0
-  convoy.dispatch_attempt                        = 1
-  convoy.rehome                                  = 2
-  下場分佈：{ "merged_home": 1 }
+[warring_states day 10] teams=74 porters_tracked=2 trips_total=2
+  convoy: dispatch=3 attempt=3 deliver=2 settled=2 return=1 stranded=0
+  convoy.dispatch_attempt                        = 3
+  convoy.rehome                                  = 9
+  persist.hold                                   = 2
+  下場分佈：{ "merged_home": 1, "still_convoy(censored,未終局)": 1 }
   ★★stranded逐筆(distance=當下porter與原parent hex距離,-1=parent已不存在無法算)：
-  ★★gate6 convoy.eta_vs_actual：n=2 平均比值=0.718(1.0=同步,顯著<1=ETA仍低估)
+  ★★gate6 convoy.eta_vs_actual：n=3 平均比值=0.881(1.0=同步,顯著<1=ETA仍低估)
     { "porter": 57, "eta": 157, "actual": 200, "ratio": 0.785, "tick": 700 }
     { "porter": 57, "eta": 65, "actual": 100, "ratio": 0.65, "tick": 800 }
+    { "porter": 72, "eta": 362, "actual": 300, "ratio": 1.207, "tick": 2300 }
