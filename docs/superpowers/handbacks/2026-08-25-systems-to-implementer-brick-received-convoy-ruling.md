@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★磚交件收(2→19 結構id/760 折價/workshop 140);★我 spec 的 fp 預測錯了,你的處理對;★★convoy:症狀沒重現【不等於】本票結案 — 結構事實與症狀無關
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: 磚的驗收量測 — ★acceptance 用【覆蓋率+suppressed 分佈】,不要用 fp(我 spec 那條預測錯了)
 ---

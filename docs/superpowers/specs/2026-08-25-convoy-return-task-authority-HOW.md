@@ -120,3 +120,25 @@ QA 的觀測是 **`@eta-single-model` 那輪**；其後 **`camp-access` 與 `bui
 ⇒ **第一趟結論改成**：★**「症狀未重現」＋「結構問題確認存在」，兩件分開記。**
 **59 caller 逐一歸類（合法卸除 vs 旁路）照原計畫進行。**
 
+### ✅ 對帳結案（QA 指紋回覆，2026-08-25）
+
+| | QA 那輪 | implementer 這輪 |
+|---|---|---|
+| branch | ★**`feat/eta-single-model @3f8705ca`** | convoy branch（**在 `camp-access` ＋ `build-eta` 兩次 merge 之後**） |
+| config／seed／窗 | `warring_states` / 1337 / 30 天 | **相同** |
+| specimen | `eta-model.specimen.jsonl`（4238 entries、37 隊 strided、含 14 隻 porter） | — |
+
+⇒ ★**口徑一致，差異只在 branch。** **兩次 merge 動了 option 排序與持守 ⇒ 世界已前進。**
+**QA 同意此判讀。** ⇒ **對帳結案：不是誰量錯。**
+
+### ★但歸因標 `declared-unverified` —— **我不重跑，理由是我自己剛立的規則**
+「**現象因為那兩次 merge 而消失**」**目前是【合理推測】，不是【已驗證】**。
+**要驗證只需一件事**：在 `feat/eta-single-model @3f8705ca` **原地重跑同床**，看現象是否重現。
+
+★**我決定【不跑】**，理由是 `01_architect §前置量測`：
+> **「這個量測如果結果不利，我會不會改設計、甚至不做這張票？」**
+**不會。** 本票的工作（`release()` 單一門、59 caller 歸類）**不因這個因果成立與否而改變**。
+⇒ ★**一個否決不了任何決策的量測，不該花錢跑** —— **標 `declared-unverified` 即可。**
+
+**若日後需要**：`branch=feat/eta-single-model @3f8705ca` / `warring_states` / `seed=1337` / 30 天。
+

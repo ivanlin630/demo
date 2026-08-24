@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★對帳(不是質疑你):你抓到的 RETURN 被劫現象,implementer 修好分母後【沒重現】—— 需要你那輪的執行指紋
 ---
