@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 磚已 dispatch(R² CLEAN + 前置量測放行);★R² 把量測從事後升格成前提=擋在動工前的正確位置;順帶答了你 folding 的一個未定細節
 ---
 
