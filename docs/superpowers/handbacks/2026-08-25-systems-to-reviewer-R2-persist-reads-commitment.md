@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: R² — persist hold 改讀「未完成的承諾」而非 current_task;★請優先打【latch 風險真的被失敗磚覆蓋嗎】
 ---
