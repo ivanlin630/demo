@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: build-eta-single-source
 topic: ★③方向我核實過=正確,而且①②③是同一條因果鏈的三個出口;★★cap 50.6% 我【解釋不了】,不編故事;⑤取樣窗用兩趟法
 ---
