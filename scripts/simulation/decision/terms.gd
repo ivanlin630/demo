@@ -114,10 +114,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 				# ★覓食＝腳下，現成（delay 0）；遷移找糧＝要走過去（delay ＝ 路程日數，systems 裁定 2026-08-21）。
 				var _gain: float = ctx.forage_yield_here if opt == "覓食" else ctx.forage_yield_target
 				var _delay: float = 0.0 if opt == "覓食" else ctx.food_seek_delay_days
-				return clampf(DiscountedFlow.flow_utility(_gain, ctx.passive_food_daily,
+				var _fu: float = clampf(DiscountedFlow.flow_utility(_gain, ctx.passive_food_daily,
 					float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
 					ctx.leader_values, ctx.net_food_flow, ctx.food_stock,
 					0.0, _delay), 0.0, CAMP_MARGINAL_CAP)
+				if Probe.enabled:
+					Probe.bump_sample("flow.forage_u_sample", {"opt": opt, "u": snappedf(_fu, 0.0001)}, 200)
+				return _fu
 			# ★A4 de-patch：覓食品質隨 food_days 衰減（死值 1.0 → need-connected、同 camp_drive 家族）。
 			#   <7 天(絕境)→>1 clamp 1.0（survival floor 不動）;7→14 天線性衰減;≥14 天(充裕)→0 讓位。
 			return clampf((2.0 * DecisionContext.SLACK_COMFORT_DAYS - ctx.food_days) / DecisionContext.SLACK_COMFORT_DAYS, 0.0, 1.0)
@@ -195,9 +198,12 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
 			# ★camp-stay-brick v2：舊式是死常數 1.0/0.3（不看那村產不產糧）⇒ 改問【那個村的實際產能】，
 			#   同一把尺、現成的流（佔下來即有，無工期 ⇒ delay 0）。
-			return clampf(DiscountedFlow.flow_utility(ctx.occupy_target_flow, ctx.passive_food_daily,
+			var _ou: float = clampf(DiscountedFlow.flow_utility(ctx.occupy_target_flow, ctx.passive_food_daily,
 				float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
 				ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP)
+			if Probe.enabled:
+				Probe.bump_sample("flow.occupy_u_sample", {"u": snappedf(_ou, 0.0001)}, 200)
+			return _ou
 		"join_drive":
 			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。
 			# 名聲磁鐵 §3：× (1 + host protector_rep × REP_MAGNET_W)——高名聲 host 投靠翻贏逃，中性(0.5)加成小。
@@ -208,9 +214,12 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   host 村的被動流（現成、無工期 ⇒ delay 0），名聲磁鐵降為【乘數】而非全部。
 			#   ⇒ 高名聲但自己快餓死的 host 不再自動拿高分（那正是舊式的缺陷）。
 			var _rep_mult: float = clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
-			return clampf(DiscountedFlow.flow_utility(ctx.join_host_flow, ctx.passive_food_daily,
+			var _ju: float = clampf(DiscountedFlow.flow_utility(ctx.join_host_flow, ctx.passive_food_daily,
 				float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
 				ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP) * _rep_mult
+			if Probe.enabled:
+				Probe.bump_sample("flow.join_u_sample", {"u": snappedf(_ju, 0.0001)}, 200)
+			return _ju
 		"camp_drive":
 			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
 			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:
@@ -256,7 +265,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 				return 0.0
 			var _need_days: float = ctx.settle_eta_days * ROOTING_SAFETY_FACTOR
 			var _feasible: float = clampf(ctx.food_runway_days / maxf(_need_days, 0.001), 0.0, 1.0)
-			return _feasible * clampf(ctx.settle_site_quality, 0.0, 1.0)
+			var _ru: float = _feasible * clampf(ctx.settle_site_quality, 0.0, 1.0)
+			if Probe.enabled:
+				Probe.bump_sample("rooting.u_sample", {"u": snappedf(_ru, 0.0001),
+					"feasible": snappedf(_feasible, 0.0001), "quality": snappedf(ctx.settle_site_quality, 0.0001)}, 200)
+			return _ru
 		"expand_drive":
 			# ★§4b 擴點＝純邊際帳（三項同量綱 食物/日、零換算係數、零新旋鈕）：
 			#   分點期望邊際 − 建置成本(工期零產出攤提) − 家內邊際(抽走 settler 的產能損失)。

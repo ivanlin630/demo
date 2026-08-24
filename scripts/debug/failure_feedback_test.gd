@@ -104,5 +104,24 @@ func _run() -> void:
 	# ★磚④：key 由結構身分組出——同 id 不同 target ⇒ 兩筆獨立記憶（不是一筆）
 	_ok(tA.recent_failures.size() == 1, "磚④exact-pair：只寫了一筆記憶（同 id 不同 target 不合併）")
 
+	# ══════ 失敗三分類（blueprint 裁 2026-08-25）：前提型【不折價】但要留鉤子 ══════
+	# ★法理：折價的語意是「這條路我試過、失敗了」的真實資訊；
+	#   缺料的真實教訓是「先去解決料」，不是「這裡不好」⇒ 折價它就是把假教訓寫進記憶。
+	var wC := _mk(); var sC: WorldState = wC[0]; var tC: TeamData = wC[1]
+	var before_c: float = FailureMemory.mult_for(sC, tC, "build_workshop:resource", "9,9")
+	for _j in range(3):
+		FailureMemory.record_blocked(sC, tC, "build_workshop:resource", "9,9", "material_material")
+	var after_c: float = FailureMemory.mult_for(sC, tC, "build_workshop:resource", "9,9")
+	_ok(is_equal_approx(after_c, before_c), "★三分①前提型【不折價】（%.3f == %.3f）" % [after_c, before_c])
+	_ok(tC.recent_failures.is_empty(), "★三分①前提型不寫 recent_failures（不污染折價記憶）")
+	_ok(tC.blocked_by.has(FailureMemory.key("build_workshop:resource", "9,9")),
+		"★★三分①blocked_by 有記（means-end 磚的鉤子，不得丟掉）")
+	_ok(String((tC.blocked_by[FailureMemory.key("build_workshop:resource", "9,9")] as Dictionary).get("blocker", "")) == "material_material",
+		"三分①blocked_by 記得【被什麼擋住】而不只是「失敗了」")
+	# ★對照：同一個 id+target 走【執行型】仍然照折（證明不是把折價整個關掉）
+	FailureMemory.record(sC, tC, "build_workshop:resource", "9,9", TTL, "order_abandoned_buy")
+	_ok(FailureMemory.mult_for(sC, tC, "build_workshop:resource", "9,9") < before_c,
+		"★★三分②執行型仍然折價（兩面分開驗：不是把折價關掉）")
+
 	Probe.enabled = false
 	print("=== %s（fail=%d）===" % ["ALL PASS" if _fail == 0 else "HAS FAILURE", _fail])

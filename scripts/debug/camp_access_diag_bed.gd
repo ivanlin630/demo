@@ -7,6 +7,17 @@ extends SceneTree
 func _initialize() -> void:
 	_run(); quit()
 
+static func _dist_str(samples: Array, field: String) -> String:
+	if samples.is_empty(): return "無sample"
+	var vals: Array = []
+	for s in samples:
+		if (s as Dictionary).has(field): vals.append(float(s[field]))
+	if vals.is_empty(): return "無sample(欄位缺)"
+	vals.sort()
+	var n: int = vals.size()
+	var med: float = vals[n / 2] if n % 2 == 1 else (float(vals[n / 2 - 1]) + float(vals[n / 2])) / 2.0
+	return "n=%d(★母體受bump_sample cap=200,非全量) min=%.4f median=%.4f max=%.4f" % [n, vals[0], med, vals[n - 1]]
+
 func _run() -> void:
 	var cfg: String = OS.get_environment("LW_CONFIG") if OS.get_environment("LW_CONFIG") != "" else "peaceful_economy"
 	var days: int = int(OS.get_environment("ADHOC_DAYS")) if OS.get_environment("ADHOC_DAYS") != "" else 90
@@ -184,6 +195,29 @@ func _run() -> void:
 				key2, total_n, d2.size(), str(d2)])
 	else:
 		lines.append("  (無sample)")
+	# ★systems票(brick-regression-diagnosis)：診斷①紮根/建設util-vs-winner+applicable數；診斷②won→start→complete漏斗
+	lines.append("★★★診斷①紮根util掉到贏不了？(root.lost_to.pair含util欄位,逐筆)：")
+	lines.append("  decision.opt_applicable.紮根 = %d" % int(Probe.counts.get("decision.opt_applicable.紮根", 0)))
+	if Probe.samples.has("root.lost_to.pair"):
+		for p2 in (Probe.samples["root.lost_to.pair"] as Array):
+			if p2.has("root_u"):
+				lines.append("    team=%s winner=%s root_u=%s winner_u=%s target=%s" % [
+					str(p2.get("team")), str(p2.get("winner")), str(p2.get("root_u")), str(p2.get("winner_u")), str(p2.get("target"))])
+	lines.append("★★★診斷②won→start→complete漏斗(是沒贏還是贏了沒開工/沒完工)：")
+	lines.append("  root.won_argmax=%d → settlement.l0_to_l1_start=%d → construct.complete_crude_camp=%d → outpost.l0_to_l1=%d" % [
+		int(Probe.counts.get("root.won_argmax", 0)), int(Probe.counts.get("settlement.l0_to_l1_start", 0)),
+		int(Probe.counts.get("construct.complete_crude_camp", 0)), int(Probe.counts.get("outpost.l0_to_l1", 0))])
+	# ★systems票(fifth-end-scale)：四flow_utility消費端 vs rooting_drive 值域對比(min/median/max,非只peak,03b§④f)
+	lines.append("★★★診斷③(fifth-end-scale)：四flow_utility消費端 util分佈 vs rooting_drive 分佈：")
+	lines.append("  ★母體(decision.opt_applicable.<opt>,真count非sample)：覓食=%d 遷移找糧=%d 佔村=%d 併入=%d 紮營=%d 紮根=%d" % [
+		int(Probe.counts.get("decision.opt_applicable.覓食", 0)), int(Probe.counts.get("decision.opt_applicable.遷移找糧", 0)),
+		int(Probe.counts.get("decision.opt_applicable.佔村", 0)), int(Probe.counts.get("decision.opt_applicable.併入", 0)),
+		int(Probe.counts.get("decision.opt_applicable.紮營", 0)), int(Probe.counts.get("decision.opt_applicable.紮根", 0))])
+	lines.append("  覓食/遷移找糧(flow.forage_u_sample.u，sample cap=200,若母體>200則此為前N非全量)：%s" % _dist_str(Probe.samples.get("flow.forage_u_sample", []) as Array, "u"))
+	lines.append("  佔村(flow.occupy_u_sample.u，sample cap=200)：%s" % _dist_str(Probe.samples.get("flow.occupy_u_sample", []) as Array, "u"))
+	lines.append("  併入(flow.join_u_sample.u，sample cap=200)：%s" % _dist_str(Probe.samples.get("flow.join_u_sample", []) as Array, "u"))
+	lines.append("  紮營(discount.camp_ratio_sample.raw_ratio，clamp前，注意其clamp後上限=CAMP_MARGINAL_CAP,sample cap=200)：%s" % _dist_str(Probe.samples.get("discount.camp_ratio_sample", []) as Array, "raw_ratio"))
+	lines.append("  紮根(rooting.u_sample.u，可證偽對照組，sample cap=200)：%s" % _dist_str(Probe.samples.get("rooting.u_sample", []) as Array, "u"))
 	# ★systems票(brick-acceptance)：失敗記憶磚驗收——覆蓋率+suppressed分佈+過渡窗tap(禁用fp,spec那條預測錯了)
 	lines.append("★★★失敗記憶磚驗收：")
 	lines.append("  failure.entries_written(record()被呼叫總次數) = %d" % int(Probe.counts.get("failure.entries_written", 0)))

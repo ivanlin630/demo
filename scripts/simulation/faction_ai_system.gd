@@ -3801,16 +3801,25 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 					"vault": float(vault.get(k, 0)), "private": float(leader_team.resources.get(k, 0)),
 					"home_mfg_level": (home_tile.manufacturing_level if home_tile != null else -1),
 					"tick": state.world.current_tick}, 30)
+			# ★前提型（blueprint 裁 2026-08-25）：這是「計畫好、世界沒備妥」——★不折價，記 blocked_by。
+			FailureMemory.record_blocked(state, leader_team, leader_team.current_dispatch_id,
+				leader_team.current_dispatch_target, "material_" + k)
 			_log_dispatch_fail(leader_team.faction_id,
 				"資源不足 1.5x: %s 有 %.0f(公庫%.0f+私%.0f)" % [k, avail,
 				float(vault.get(k, 0)), float(leader_team.resources.get(k, 0))], cost)
 			return false
 	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
 	if advisor_id == -1:
+		# ★前提型（blueprint 裁 2026-08-25）：這是「計畫好、世界沒備妥」——★不折價，記 blocked_by。
+		FailureMemory.record_blocked(state, leader_team, leader_team.current_dispatch_id,
+			leader_team.current_dispatch_target, "no_advisor")
 		_log_dispatch_fail(leader_team.faction_id, "無 advisor 可派可升", cost)
 		return false
 	var pop: int = maxi(6, level * 4)   # TEST VALUE — 建造隊最小 6 人；pop*2 門檻=12(lv1)
 	if leader_team.population < pop * 2:
+		# ★前提型（blueprint 裁 2026-08-25）：這是「計畫好、世界沒備妥」——★不折價，記 blocked_by。
+		FailureMemory.record_blocked(state, leader_team, leader_team.current_dispatch_id,
+			leader_team.current_dispatch_target, "pop")
 		_log_dispatch_fail(leader_team.faction_id,
 			"pop 不足: %d < %d" % [leader_team.population, pop * 2], cost)
 		return false
@@ -3825,6 +3834,9 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		* (_eta_travel + _eta_build) * FOOD_BRIDGE_SAFE_MARGIN
 	var _avail_food: float = float(vault.get("food", 0)) + float(leader_team.resources.get("food", 0))
 	if _avail_food < _need_food:
+		# ★前提型（blueprint 裁 2026-08-25）：這是「計畫好、世界沒備妥」——★不折價，記 blocked_by。
+		FailureMemory.record_blocked(state, leader_team, leader_team.current_dispatch_id,
+			leader_team.current_dispatch_target, "food_bridge")
 		_log_dispatch_fail(leader_team.faction_id,
 			"糧橋不足: food %.0f < 需 %.0f(burn×ETA %.1f 天)" % [_avail_food, _need_food, _eta_travel + _eta_build], cost)
 		if Probe.enabled: Probe.bump("bridge.no_go_food")

@@ -94,6 +94,27 @@ func _run() -> void:
 	if live_by_day.size() > 30:
 		lines.append("  逐日活條目數（後 10 日）：%s" % str(live_by_day.slice(live_by_day.size() - 10)))
 
+	lines.append("--- ④★三分類兩面分開驗（防修回頭）---")
+	lines.append("  A面 文明化：outpost.l0_to_l1 = %d / start = %d / complete_crude_camp = %d"
+		% [_c("outpost.l0_to_l1"), _c("settlement.l0_to_l1_start"), _c("construct.complete_crude_camp")])
+	lines.append("  B面 徒勞折價仍咬：failure.suppressed.買糧 = %d   ★零⇒折價被關掉了(修回頭)"
+		% _c("failure.suppressed.買糧"))
+	lines.append("  failure.blocked_total(前提型：不折價) = %d" % _c("failure.blocked_total"))
+	for kb in Probe.counts.keys():
+		if String(kb).begins_with("failure.blocked."):
+			lines.append("  %-46s = %d" % [String(kb), _c(String(kb))])
+	lines.append("--- ⑤★折價前/後 util 對比(分開「本來就該輸」與「被磚壓低」) ---")
+	if Probe.samples.has("failure.penalty_delta"):
+		var ds: Array = Probe.samples["failure.penalty_delta"]
+		lines.append("  樣本 %d 筆(cap 40)" % ds.size())
+		for e4 in ds.slice(0, 14):
+			var raw: float = float(e4.get("u_raw", 0.0))
+			var aft: float = float(e4.get("u_after", 0.0))
+			lines.append("    %-30s u_raw=%.4f -> %.4f (折掉 %.1f%%)"
+				% [String(e4.get("opt", "")), raw, aft, 100.0 * (1.0 - aft / maxf(raw, 0.0001))])
+	else:
+		lines.append("  (無樣本 ⇒ 這輪沒有任何 util 被折價壓低過)")
+
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":

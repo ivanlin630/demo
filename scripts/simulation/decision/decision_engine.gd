@@ -75,7 +75,14 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# ★結構身分 key（磚 2026-08-25）：靜態 option 的結構身分就是它自己；
 		#   目標多半沒有 ⇒ 退化成 `(id, ∅)`（§3c：不是特例、不是第二套）。
 		if team != null:
+			# ★QA 要的那顆：折價【之前】的原始 util —— 與折價後對比才分得開
+			#   「這個 option 本來就該輸」與「失敗磚額外把它壓低了」。
+			var _u_raw: float = u
 			u *= FailureMemory.mult_for(state, team, opt)
+			if Probe.enabled and u < _u_raw:
+				Probe.bump_sample("failure.penalty_delta", {"opt": opt, "team": team.team_id,
+					"u_raw": snappedf(_u_raw, 0.0001), "u_after": snappedf(u, 0.0001),
+					"tick": state.world.current_tick if state != null else -1}, 40)
 		# 層0 安全氣囊（★插在 coeff 乘法之後——寫死此序：coeff 前會被 0.15 floor 打折失效）：
 		# 極低糧時 survival-class 加法超量級破頂，隨 food→0 線性放大，奪回 argmax。全 SURVIVAL_OPTION_SET 等量加
 		# (不改 survival-class 內部相對序，只集體破頂)。food_days=FLOOR 時加成=0 平滑銜接無 flip-flop。
@@ -108,7 +115,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			var _cid: String = "%s:%s" % [String(cand.get("goal_type", "")), String(cand.get("frontier_kind", ""))]
 			var _cu: float = float(cand.get("util", 0.0))
 			if String(cand.get("goal_type", "")) != "":
+				var _cu_raw: float = _cu
 				_cu *= FailureMemory.mult_for(state, team, _cid, _target_id(cand))
+				# ★同上：candidate 路也要能分開「本來就低」與「被折價壓低」。
+				if Probe.enabled and _cu < _cu_raw:
+					Probe.bump_sample("failure.penalty_delta", {"opt": _cid, "team": team.team_id,
+						"u_raw": snappedf(_cu_raw, 0.0001), "u_after": snappedf(_cu, 0.0001),
+						"tick": state.world.current_tick}, 40)
 			scored.append({"u": _cu, "i": idx, "opt": String(cand.get("label", "")), "cand": cand})
 			idx += 1
 	scored.sort_custom(func(a, b):
@@ -139,7 +152,8 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 					var _wcand: Dictionary = (scored[0]["cand"] as Dictionary) if scored[0].has("cand") else {}
 					var _wtgt = _wcand.get("target", (_wcand.get("to_task", {}) as Dictionary).get("target", null))
 					Probe.bump_sample("root.lost_to.pair", {"team": team.team_id,
-						"winner": String(scored[0]["opt"]), "target": (str(_wtgt) if _wtgt != null else "無")}, 200)
+						"winner": String(scored[0]["opt"]), "target": (str(_wtgt) if _wtgt != null else "無"),
+						"root_u": snappedf(float(e["u"]), 0.001), "winner_u": snappedf(float(scored[0]["u"]), 0.001)}, 200)
 				else:
 					Probe.bump("root.won_argmax")
 				break

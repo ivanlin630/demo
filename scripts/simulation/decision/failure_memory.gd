@@ -35,6 +35,26 @@ const COUNT_CAP: int = 3           # TEST VALUE — count_factor 上限（連撞
 static func key(structural_id: String, target: String = "-") -> String:
 	return "%s|%s" % [structural_id, target if target != "" else "-"]
 
+# ★★失敗三分類（blueprint 裁 2026-08-25，形式＝【反饋分流】不是 key 增維 —— key 維持 (結構id, target)）：
+#   ①前提型（缺料/缺人/付不起 ＝ 計畫好、世界沒備妥）⇒ ★不折價，記 `blocked_by`
+#   ②執行型（真試真敗）                              ⇒ 折價 exact-pair（＝下面的 record）
+#   ③失效型（目標消失/不可行）                        ⇒ T0（record_invalidation，既有不動）
+#   ★型別是 fail【擲出點】的一次性結構標注（code 結構），不是另一張要平行維護的表。
+#   ★原設計本來就有「失效升 T0／劣勢只折價」的二分；這次只是把它下沉到折價端，語意一致。
+#
+# ★前提型：不寫 recent_failures（不折價），只記「被什麼擋住」＋留 tap。
+static func record_blocked(state: WorldState, team: TeamData, structural_id: String,
+	target: String, blocker: String) -> void:
+	if team == null or structural_id == "":
+		return
+	var k: String = key(structural_id, target)
+	team.blocked_by[k] = {"blocker": blocker, "tick": state.world.current_tick}
+	if Probe.enabled:
+		Probe.bump("failure.blocked." + blocker)
+		Probe.bump("failure.blocked_total")
+		Probe.bump_sample("failure.blocked", {"team": team.team_id, "key": k,
+			"blocker": blocker, "tick": state.world.current_tick}, 40)
+
 # 劣勢：這次不划算、計畫仍成立 → 只折價（不喚醒）。
 static func record(state: WorldState, team: TeamData, option: String, target: String,
 		ttl_ticks: int, reason: String) -> void:

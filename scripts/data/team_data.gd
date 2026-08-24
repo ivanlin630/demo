@@ -96,6 +96,11 @@ var current_option: String = ""   # 統一決策引擎承諾用（現行 option 
 #   `id` ＝ 結構身分（靜態 option ＝ option 名；goal candidate ＝ goal_type:frontier_kind），
 #   `target` ＝ 目標識別（有目標才填；沒有就空 ⇒ 退化成 §3c 的 `(id, ∅)`）。
 var current_dispatch_id: String = ""
+# ★前提型阻塞（blueprint 裁 2026-08-25）：「計畫好、世界沒備妥」不折價，但要記下【被什麼擋住】。
+#   ★理由：折價的語意是「這條路我試過、失敗了」的真實資訊；
+#   缺料的真實教訓是「先去解決料」，不是「這裡不好」⇒ 折價它 ＝ 把假教訓寫進記憶。
+#   ★blueprint 明指這是未來 means-end 磚的鉤子（缺料 → 去弄料），不得丟掉。
+var blocked_by: Dictionary = {}   # key(結構身分) → {"blocker": String, "tick": int}
 var current_dispatch_target: String = ""
 # ★持守統一 Slice 1（HOW spec 2026-07-28 §5）：決策層算的持守強度（人格加權沉沒成本+前瞻，progressive-only，
 # clamp≤PERSIST_CAP<危機量級）。取代 5 flat commitment bonus。決策層 rank cadence 算+寫；Slice 2 補進度事件新鮮度。
