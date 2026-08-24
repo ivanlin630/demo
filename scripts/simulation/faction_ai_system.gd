@@ -2856,6 +2856,22 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 			return
 		if sub.move_target != Vector2i(-1, -1):
 			return   # 還在回程
+		# ★gate6 tap（eta-single-model 2026-08-21）：預估 ETA / 實際回程時間。
+		#   1.0 ＝ 兩套模型同步；顯著 <1 ＝ ETA 又在低估（修完不忘，讓它變成可持續觀測的量）。
+		#   純觀測、不耗 RNG（觀測不得改被觀測物）。
+		if Probe.enabled:
+			var _eta_est: int = int(xd.get("return_eta", 0))
+			if _eta_est > 0 and _eta_est < 9999999:
+				var _actual: int = state.world.current_tick - int(xd.get("return_start_tick", state.world.current_tick))
+				var _ratio: float = float(_eta_est) / maxf(float(_actual), 1.0)
+				# ★用 sum+n（讓消費端算平均），★不用 Probe.note ——那是 peak，
+				#   對「兩套模型同不同步」而言 peak 只會報最好的那一趟，會騙人。
+				Probe.add_amount("convoy.eta_vs_actual_sum", _ratio)
+				Probe.bump("convoy.eta_vs_actual_n")
+				Probe.bump_sample("convoy.eta_vs_actual", {
+					"porter": sub.team_id, "eta": _eta_est, "actual": _actual,
+					"ratio": snappedf(_ratio, 0.001), "tick": state.world.current_tick,
+				}, 16)
 		# 到家歸建 → 釋放抽出 pop（merge_back，非 settle）。convoy.return telemetry 在真 merge 點(try_merge_back)認
 		# convoy_phase 統一計（對齊 [Merge]；porter 可能經 CONVOY 或被 release→IDLE 併回路，皆準確）。
 		merge_queue.append(sub.team_id)
@@ -5267,7 +5283,7 @@ static func _scan_roster_pos_legacy(state: WorldState, target_id: int) -> Vector
 func _estimate_eta_to(state: WorldState, team: TeamData, target: Vector2i) -> int:
 	var path: Dictionary = PathSystem.find_path(state, team.tile_pos, target)
 	if path.path.is_empty(): return 9999999
-	return PathSystem.eta_ticks(team, path.cost)
+	return PathSystem.eta_ticks(state, team, path.path)
 
 func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1

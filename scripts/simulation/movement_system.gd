@@ -168,11 +168,21 @@ func _resource_weight(key: String) -> float:
 		_:                   return 1.0
 
 func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> int:
+	return step_ticks_at(state, team, team.tile_pos, time_mult)
+
+# ★「走出一格要幾 tick」的【單一模型】（eta-single-model 2026-08-21）。
+#   在此之前 `PathSystem.eta_ticks` 自己有一份只吃疲勞的公式，系統性低估 3×
+#   （porter 永遠超載 ⇒ 真實每格吃 MAX clamp，而 ETA 只算 1×BASE）
+#   ⇒ T3 的「MULT × ETA」預算恰好等於真實路程時間、餘裕為 0，最後一格必超支。
+#   ★修法是把兩邊收斂成一個，不是讓兩邊各自校準（同 `feedback_genuine_value_not_crank`）。
+#   `at` ＝ 出發格（地形吃出發格，與原本用 `team.tile_pos` 的語意一致）；
+#   隊速組成／疲勞／超載／車輛全部沿用，clamp 不變。
+func step_ticks_at(state: WorldState, team: TeamData, at: Vector2i, time_mult: float = 1.0) -> int:
 	var speed: float = _compute_team_speed(state, team) * time_mult
-	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
-	if state.world.tiles.has(tile_id):
-		var terrain: String = (state.world.tiles[tile_id] as HexTileData).terrain
-		speed *= TERRAIN_SPEED_MULT.get(terrain, 1.0)
+	var tile_id: int = at.x * 1000 + at.y
+	var tile: HexTileData = state.world.tiles.get(tile_id)
+	if tile != null:
+		speed *= TERRAIN_SPEED_MULT.get(tile.terrain, 1.0)
 	# 疲勞懲罰
 	if team.fatigue >= 1.0:
 		speed *= 0.3
@@ -186,9 +196,7 @@ func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> in
 	# 車輛地形懲罰
 	var wagons: int = get_effective_wagons(team)
 	if wagons > 0:
-		var tile_id2: int = team.tile_pos.x * 1000 + team.tile_pos.y
-		var tile2 = state.world.tiles.get(tile_id2)
-		var terrain2: String = tile2.terrain if tile2 else "plains"
+		var terrain2: String = tile.terrain if tile != null else "plains"
 		speed *= WAGON_TERRAIN_MULT.get(terrain2, 1.0)
 	return clamp(int(round(float(BASE_MOVE_TICKS) / maxf(speed, 0.01))), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
 

@@ -8832,14 +8832,41 @@ func _test_find_path_no_path() -> void:
 
 func _test_eta_ticks() -> void:
 	print("--- Path Task3: eta_ticks ---")
+	# ★單一模型（eta-single-model 2026-08-21）：舊編碼 `assert(eta == 240)` 是【手抄物理】
+	#   （BASE_MOVE_TICKS × 格數 抄進測試），且它抄的是那份【只吃疲勞】的舊公式。
+	#   新編碼改成結構斷言：ETA 必須等於「逐格問真實移動成本」的累加 —— 零魔數、且更強。
+	var state := WorldState.new(); state.world = WorldData.new()
+	var path: Array = []
+	for i in range(6):
+		var pos := Vector2i(i, 0)
+		var t := HexTileData.new()
+		t.tile_id = pos.x * 1000 + pos.y; t.tile_pos = pos; t.terrain = "plains"
+		state.world.tiles[t.tile_id] = t
+		path.append(pos)
 	var team := TeamData.new()
+	team.team_id = 1
 	_seed_pop(team, 5); team.fatigue = 0.0
-	var eta = PathSystem.eta_ticks(team, 5.0)
-	# A1：BASE_MOVE_TICKS = 48（×5 留）, speed_mult = 1.0 → eta = 5 * 48 = 240（A2 ×5→1 後 = 1200）
-	assert(eta == 240, "eta 應 240，實際=%d" % eta)
-	team.fatigue = 0.5   # speed reduced
-	var eta2 = PathSystem.eta_ticks(team, 5.0)
-	assert(eta2 > eta, "fatigue 應延長 ETA")
+	team.tile_pos = path[0]
+	state.teams[team.team_id] = team
+	var mv := MovementSystem.new()
+	var walked: int = 0
+	for i in range(path.size() - 1):
+		team.tile_pos = path[i]
+		walked += mv._move_cost(state, team)
+	team.tile_pos = path[0]
+	var eta: int = PathSystem.eta_ticks(state, team, path)
+	assert(eta == walked, "eta 必須＝逐格真實移動成本累加（eta=%d, walked=%d）" % [eta, walked])
+	# ★收斂後才看得見的真相：真實移動模型的疲勞懲罰有【死區】——
+	#   `fatigue > 0.5` 才開始扣速（`movement_system` 疲勞段），而舊 ETA 用連續 `1−fatigue`
+	#   ⇒ 舊 ETA 對「微疲勞」隊多算懲罰、對超載隊少算 3× 懲罰，兩邊都不是世界真的在跑的那份。
+	#   ⇒ 這裡改用【真的會扣速】的疲勞值，斷言的仍是同一件事：疲勞延長 ETA。
+	team.fatigue = 0.8
+	var eta2: int = PathSystem.eta_ticks(state, team, path)
+	assert(eta2 > eta, "fatigue 應延長 ETA（eta2=%d > eta=%d）" % [eta2, eta])
+	# 死區本身也釘住（免得哪天有人「順手」把它改成連續而沒人發現）
+	team.fatigue = 0.5
+	assert(PathSystem.eta_ticks(state, team, path) == eta,
+		"fatigue=0.5 仍在死區內（真實移動模型 >0.5 才扣速）")
 	print("Path Task3 OK")
 
 func _test_observe_velocity_visible() -> void:

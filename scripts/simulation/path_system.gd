@@ -155,10 +155,23 @@ static func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 
 # ────────── ETA ──────────
 
-static func eta_ticks(team: TeamData, path_cost: float) -> int:
-	var speed_mult: float = _team_speed_mult(team)
-	return int(path_cost * float(MovementSystem.BASE_MOVE_TICKS) / maxf(speed_mult, 0.1))
+# ★單一模型（eta-single-model 2026-08-21）：ETA 不再自己算「走一格多久」——
+#   逐格問 `MovementSystem.step_ticks_at`（＝世界真的會用的那份公式與 clamp）並累加。
+#   ★舊版只吃疲勞，看不到超載/地形/車輛 ⇒ 對永遠超載的 porter 系統性低估 3×，
+#     讓 T3 的「MULT × ETA」預算恰好等於真實路程時間（餘裕 0）。
+#   `path` ＝ `find_path().path`（含起點；每一步的成本吃【出發格】地形，與真實移動同語意）。
+static func eta_ticks(state: WorldState, team: TeamData, path: Array) -> int:
+	if path.size() <= 1:
+		return 0
+	var mv := MovementSystem.new()
+	var total: int = 0
+	for i in range(path.size() - 1):
+		total += mv.step_ticks_at(state, team, path[i])
+	return total
 
+# ★仍留給 pursuit-eta（`estimate_catch_up:233`）用 —— 那是全站「走一格多久」的【第三套】公式，
+#   R² 判它與失聯帳本／founding_timeout 一起不共享同一個病根，**本刀不收**（見 known_issues）。
+#   ⚠ 不要新增 caller：新的消費端一律走 `eta_ticks` / `MovementSystem.step_ticks_at`。
 static func _team_speed_mult(team: TeamData) -> float:
 	var mult: float = 1.0
 	mult *= clampf(1.0 - team.fatigue, 0.1, 1.0)
