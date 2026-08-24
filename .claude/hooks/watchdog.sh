@@ -64,7 +64,8 @@ claim_lock() {
       return 1
     fi
   fi
-  printf '%s\t%s\t%s\n' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
+  # ★第 4 欄 proto 戳：讓【下一代】也能被機械判出（欄數判代只認得出「比現行少欄」的）
+  printf '%s\t%s\t%s\tproto=4\n' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
   return 0
 }
 

@@ -89,7 +89,8 @@ if [ -n "$MYSID" ] && [ -n "$prev_sid" ] && [ "$prev_sid" = "$MYSID" ] && _watch
   exit 0
 fi
 
-printf '%s\t%s\t%s\n' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
+# ★第 4 欄 proto 戳（同 watchdog）：向後相容——偵測是「欄數 < 3 ＝ 舊代」，4 欄仍判同代，不誤報
+printf '%s\t%s\t%s\tproto=2\n' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
 if [ -n "$MYSID" ] && [ -n "$prev_sid" ] && [ "$prev_sid" = "$MYSID" ]; then
   echo "[inbox-watch] ✅ ARMED role=${ROLE_KEY} pid=$$（前任同 session 但已死，已接手）"
 elif [ -n "$prev_pid" ] && [ "$prev_fields" -lt "$LOCK_FIELDS_CUR" ] 2>/dev/null; then

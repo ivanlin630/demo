@@ -215,3 +215,36 @@ ls docs/superpowers/handbacks/<你聲稱的檔名>     # 收件端簽收動作�
 **全角色 API 餓死、監視器活著但腦全下線。** `watchdog` 分類器對它報 `CHAIN-BROKEN`
 —— **分類正確，但當下無人能動**。**不需要修分類器**；認得這個型就好。
 
+### ★跨代縫是**全 harness 通病**，不是兩支 script 的 bug（窮盡掃描 2026-08-25）
+
+**三個案例**：`watchdog`（永遠待命）／`inbox-watch`（同信吐兩次）／
+★`tg_poll`（**8/19 老 poller 與 v2 搶 `getUpdates` offset** —— 這個**不是重複，是訊息靜默遺失**）。
+**同型缺口出現三次 ＝ 架構信號** ⇒ 不逐案修，做窮盡掃描。
+
+**掃描範圍 ＝ 常駐單例（有 `while true` ／ poll loop 者）**：
+
+| 檔 | 跨代保護 |
+|---|---|
+| `.claude/hooks/watchdog.sh` | ✅ 已修 |
+| `.claude/hooks/inbox-watch.sh` | ✅ 已修 |
+| `tools/telegram/tg_poll.py` | ✅ 已修（**顯式 `proto=` 版本戳**） |
+| `tools/orchestrator/run.py` | 無 lock，但**非常駐 poller**（pipeline runner、機器軌少用）⇒ 不在此範圍 |
+| `tools/telegram/fetch_chat_id.sh` | 一次性 helper，非單例 |
+
+### ★規則：**常駐單例必須自報協議版本**
+**欄數判代只是 retrofit** —— 它只認得出「**比現行少欄**」的世代，
+**對「舊版也寫同欄數」無效**（`tg_poll` 正是這種）。
+⇒ **一律加顯式 `proto=N` 戳**。偵測規則**向後相容、不對現役版本誤報**：
+
+| 前任 lock | 判定 |
+|---|---|
+| 欄數 < 現行下限 | **舊代**（不會自退） |
+| 有 `proto=N` 且 `N <` 現行 | **舊代** |
+| 欄數足但**無 `proto`** | **同代**（現役版本，會讀歸屬、會自退） |
+
+### ⚠️ 實作陷阱（我自己踩到，記下來）
+★**偵測必須讀「覆寫 lock 之前」的快照。**
+第一版我把偵測函式寫在 `open(LOCK,"w")` 之後才呼叫 ⇒ **它讀到的是自己剛寫的內容**
+⇒ **永遠判「同代」、守衛靜默失效**。
+★**一個永遠回 False 的守衛比沒有守衛更糟** —— 它讓人以為已經被保護了。
+

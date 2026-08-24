@@ -41,10 +41,43 @@ _fresh = os.path.exists(LOCK) and (time.time() - os.path.getmtime(LOCK)) < STALE
 if _fresh and MYSID and _sid and _sid == MYSID:
     print("[tg-poll] ✅ 覆蓋仍在（同 session，poller pid=%s 心跳新鮮，已驗）→ 本次不重複 arm" % _pid, flush=True)
     sys.exit(0)
-open(LOCK, "w").write("%d	%s" % (os.getpid(), MYSID))
+# ★協議版本戳（跨代縫第三案例，2026-08-25）：欄數判代對「舊版也寫同欄數」無效
+#   ⇒ 顯式自報版本。偵測規則（向後相容，不會對現役版本誤報）：
+#     欄數 < 2            ⇒ 確定舊代
+#     有 proto=N 且 N < 現行 ⇒ 舊代
+#     欄數 >= 2 但無 proto ⇒ 視為【同代】（它會讀 lock 歸屬、會自退）
+PROTO = 2
+# ★★必須在【覆寫 lock 之前】擷取前任內容 —— 否則偵測讀到的是自己剛寫的，守衛靜默失效。
+try:
+    _prev_parts = open(LOCK).read().strip().split("	")
+except Exception:
+    _prev_parts = []
+open(LOCK, "w").write("%d	%s	proto=%d" % (os.getpid(), MYSID, PROTO))
+def _prev_is_old_gen():
+    """前任是否為【不會自退】的舊代。★兩個 poller 並存 = 互搶 getUpdates offset = 訊息靜默遺失。"""
+    parts = _prev_parts          # ★用覆寫前擷取的快照，不可重讀 LOCK（那是自己）
+    if not parts or parts == [""]:
+        return False
+    if len(parts) < 2:
+        return True
+    for x in parts[2:]:
+        if x.startswith("proto="):
+            try:
+                return int(x.split("=", 1)[1]) < PROTO
+            except Exception:
+                return True
+    return False   # 無 proto 但欄數足 ⇒ 現役版本，會自退
+
+_old_gen = bool(_pid) and _prev_is_old_gen()
 print("[tg-poll] ✅ ARMED pid=%d%s" % (
     os.getpid(),
-    ("（前任 pid=%s 將於下輪自退）" % _pid) if _pid else "（無前任）"), flush=True)
+    "（已接管 lock）" if _old_gen else
+    (("（前任 pid=%s 將於下輪自退）" % _pid) if _pid else "（無前任）")), flush=True)
+if _old_gen:
+    # ★不能輸出「將於下輪自退」那句安撫話 —— 跨代下那是假話。必須說出人要做什麼。
+    print("[tg-poll] 🔺 需人工介入：前任 pid=%s 是【舊版 poller】(不讀 lock 歸屬、永不讓位)" % _pid, flush=True)
+    print("[tg-poll]    兩個 poller 並存會互搶 getUpdates offset ⇒ ★訊息會靜默遺失，不只是重複。", flush=True)
+    print("[tg-poll]    處置：kill 那個舊 poller 進程（pid=%s）後本實例即為唯一消費者。" % _pid, flush=True)
 
 def get_updates(offset, timeout):
     url = API + "?" + urllib.parse.urlencode({"offset": offset, "timeout": timeout})
