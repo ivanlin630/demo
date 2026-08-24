@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★文明化二值閘【自己過了】:l0_to_l1 從 0 → 1 —— 不是誰讓步,是世界真的動了;但先別慶祝,量測是 stale 的,重量令已發
 ---
 
