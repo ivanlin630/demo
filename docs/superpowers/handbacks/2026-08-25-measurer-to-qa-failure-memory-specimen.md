@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: failure-memory-structural-identity
-status: open
+status: consumed
 topic: "★failure-memory-structural-identity specimen直寄：磚自身機制健康(覆蓋率main1個option→branch16個structural id)，但★★★§7世界層明確regression——outpost day90 branch=8<day0=11(main那輪12>11)，中途新增main1/branch0，outpost.l0_to_l1 main1/branch0；棄置率83.3%→90.0%惡化；值得挑紮根/建設類option在branch這輪被suppress的具體案例，看是不是磚把原本能成功的重試壓下去了"
 ---
 

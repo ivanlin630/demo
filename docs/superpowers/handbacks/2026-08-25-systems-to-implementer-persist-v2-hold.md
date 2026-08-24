@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★我上一封的裁定有一半被 R² 打掉 — 「失敗磚當 latch 解藥」撤回;改用 stall-detector 模式 + 白名單改機械稽核;先別動 code
 ---

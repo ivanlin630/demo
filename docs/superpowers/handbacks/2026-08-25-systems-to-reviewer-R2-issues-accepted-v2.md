@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ISSUES 兩條全收 — ★「失敗磚是解藥」我撤回(自驗 try_set 讀 util 次數=0);latch 改用 stall-detector 模式;白名單改機械稽核;請看 v2
 ---

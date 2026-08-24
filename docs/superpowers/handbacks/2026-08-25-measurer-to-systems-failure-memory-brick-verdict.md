@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: failure-memory-structural-identity
-status: open
+status: consumed
 topic: "★★磚自身指標健康(覆蓋率main1個option→branch16個structural id,build_workshop:resource=140逐字符合implementer自報;規律驗證算術證明count1→2→3嚴格遞減至COUNT_CAP後plateau,符合設計非bug;反面驗證code結構+exact-pair既有數據雙重佐證)——但★★★§7世界層明確regression:outpost day90 branch=8<day0=11(main那輪12>11)，中途新增main1/branch0，outpost.l0_to_l1main1/branch0(counter整條缺席)，棄置率83.3%→90.0%惡化;只有collect.no_outpost_no_camp_zero_food改善(1042→886)。磚機制生效與世界層變差同時發生，我沒做因果診斷，呈現對照供你判讀是否為磚的副作用；specimen已直寄QA挑day0-90間的流失/新增缺席案例；順手修godot-detach.ps1白名單漏洞(implementer預警的第二次同型血證)"
 ---
 
