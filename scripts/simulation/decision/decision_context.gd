@@ -350,7 +350,11 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0) * SettlementMemory.quality_multiplier(state, team, _site.tile_id)
 		# ETA=既有工期常數 + 殘距（回工地的路程；腳下=0）。零新旋鈕。
 		var _dist: int = FactionAISystem._hex_dist(team.tile_pos, _site_pos)
-		c.settle_eta_days = float(FactionAISystem.L0_TO_L1_CORVEE_DAYS) + float(_dist)
+		# ★工期單一真相源（2026-08-25）：`L0_TO_L1_CORVEE_DAYS` 是【person-ticks 的來源】不是天數——
+		#   `_commit_settle_site` 寫進 tile 的是 `CORVEE_DAYS × TICKS_PER_DAY` person-ticks，
+		#   真正要幾天取決於這支隊有幾個人；舊式等於假設 pop≈10。
+		c.settle_eta_days = OutpostSystem.build_eta_days(
+			FactionAISystem.L0_TO_L1_CORVEE_DAYS * WorldState.TICKS_PER_DAY, team.population) + float(_dist)
 	# ★§4b 擴點素材。★idle_labor 只當篩選/早退（idle 高＝值得算），★不進 util 公式本體
 	#   （手數 vs 食物/日 量綱不符、進公式會逼出換算係數＝偷藏新旋鈕）。
 	#   選址評估是 O(tiles)＝用既有 INFRA_INTERVAL cadence 快取，不每次 gather 跑。
@@ -379,7 +383,9 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			# （同紮根/紮營）——去過的失敗地折價、興旺地加分、線性衰減過期歸零。
 			c.expand_site_marginal = MarginalEconomy._inflow_est(_site_est) * SettlementMemory.quality_multiplier(state, team, _cand.tile_id)
 			# 建置成本：工期期間分點零產出，用既有規劃視野攤提（既有 BUILD_TICKS + PLANNING_HORIZON_DAYS，零新常數）
-			var _build_days: float = float(OutpostSystem.BUILD_TICKS["civilian"][0]) / float(WorldState.TICKS_PER_DAY)
+			# ★工期單一真相源（2026-08-25）：舊式除的是整日 tick、而且連 pop 都沒除 ⇒ 與真值差一個量級。
+			var _build_days: float = OutpostSystem.build_eta_days(
+				int(OutpostSystem.BUILD_TICKS["civilian"][0]), _settler)
 			c.expand_build_cost = c.expand_site_marginal 				* clampf(_build_days / MarginalEconomy.PLANNING_HORIZON_DAYS, 0.0, 1.0)
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)

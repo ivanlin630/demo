@@ -523,7 +523,8 @@ static func _harvest_tile_known(state: WorldState, team: TeamData) -> void:
 
 # ★S6 折現（組件 F，HOW §7）：delay-based discount（連續，符憲法 utility 連續）。
 const MOVE_TILES_PER_DAY: float = 2.0   # TEST VALUE — 移速估（淺啟發，delay 有界）
-const BUILD_DAYS_EST: float = 3.0       # TEST VALUE — build/settle 工期估（淺啟發，非讀細 BUILD_TICKS）
+# ★工期單一真相源（2026-08-25）：舊 `BUILD_DAYS_EST = 3.0` 是手抄的一個「大概三天」——
+#   它其實只在 pop≈10 時才對，pop 少一半就要兩倍時間。改讀 `OutpostSystem.build_eta_days`。
 const DISCOUNT_BASE: float = 0.5        # TEST VALUE — 折現率基值（人格/絕境調）
 
 # delay 估（淺啟發有界）：移動天數（target hex dist÷移速）+ build/settle 工期。純狀態零 randf。
@@ -536,7 +537,9 @@ static func _estimate_delay_days(team: TeamData, to_task: Dictionary) -> float:
 	# ★A1:founding(build_type)/facility 委派亦含 build 工期（雖不發 TASK_BUILD，仍派子隊施工）。
 	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE \
 			or to_task.has("build_type") or to_task.has("facility"):
-		days += BUILD_DAYS_EST
+		# 代表性工期＝一級民用據點的 person-ticks，除以【這支隊自己的人力】（同一把尺）
+		days += OutpostSystem.build_eta_days(
+			int(OutpostSystem.BUILD_TICKS["civilian"][0]), team.population if team != null else 1)
 	return days
 
 # ★人格折現率 rate（WHAT §6「人格=折現率」，權重非 gate）：絕境→高(短視,遠 candidate 折趨零不走遠路)/
