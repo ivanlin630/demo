@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: R²-delta 不 halt(記憶斷代認可) + 加一顆過渡窗 tap — 理由是我自己的「假設不靜默」規則
 ---
