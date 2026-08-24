@@ -2546,6 +2546,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		+ (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
 	team.last_decision_tick = state.world.current_tick   # 命令 freshness 比對基準（截斷 directive_fresh 死循環）
 	_detect_survival_stall(state, team)   # ② 絕境階梯 DETECT（單一源全 5 路決策 entry 之一：latch 隊 reason=unified 在此）
+	_detect_commitment_stall(state, team)   # ★承諾停滯偵測（同 entry，讀進度事實）
 	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
 	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
@@ -2986,6 +2987,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		return
 	sub.subteam_eval_next_tick = state.world.current_tick + SUBTEAM_CADENCE
 	_detect_survival_stall(state, sub)   # ② 絕境階梯 DETECT（單一源全 5 路決策 entry 之一：subteam）
+	_detect_commitment_stall(state, sub)   # ★承諾停滯偵測（同 entry，讀進度事實）
 	var parent: TeamData = state.teams.get(sub.parent_team_id)
 	if parent == null:
 		return
@@ -3138,6 +3140,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		+ (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
 	team.last_decision_tick = state.world.current_tick   # 命令 freshness 比對基準
 	_detect_survival_stall(state, team)   # ② 絕境階梯 DETECT（單一源全 5 路決策 entry 之一：non-unified solo）
+	_detect_commitment_stall(state, team)   # ★承諾停滯偵測（同 entry，讀進度事實）
 
 	# 序5 dissolve：舊「FORCE 隊 cadence tick 讓給 loop3 prosperity_attack」yield 閘已刪——
 	# 征服攻擊決策溶進主 rank（攻擊 option: intent_fit 征服 × readiness/富prey），FORCE 隊直接主 rank
@@ -5159,6 +5162,59 @@ func _stamp_survival_commit(state: WorldState, team: TeamData, opt: String) -> v
 #   committed N 天（耐性人格 scaled）後看 relief-magnitude：足→resolving（清 stall，X 起作用留它）；
 #   不足/plateau→stall（硬排除該 option bounded window→ applicable() 排除→argmax 換次格；rank_survival 帶單一 option 豁免）。
 #   ★食 inline（零 gather 零 RNG）。只讀自身 food_days（合憲，非 god-view）。
+# ★★承諾停滯偵測（建設版 stall-detector，convoy-return-task-authority v2）。
+#   ★比照 `_detect_survival_stall` 的已驗證模式，但判準讀的是【進度事實】：
+#   工地的 person-ticks 有沒有在減少／convoy 有沒有在接近終點 —— **不是**「有沒有被折價」。
+#   （「失敗磚會順便解決 latch」那條已被 R² 打掉：折價影響 argmax 選誰贏，
+#    hold 擋的是贏家能不能生效，兩個閘互不相通。）
+#   ★人格化耐性（stall_patience_factor × STALL_BASE_DAYS），不是死常數門檻。
+#   ★recover-restarve 邊界：baseline 太舊 ⇒ 視為新 episode 重置，不把「曾好轉又變糟」誤判成同一段。
+#   ★STALLED ⇒ 發 `construction_abandoned` typed 事件 —— 那是紮根【執行型失敗】的進料口
+#     （systems 窮盡查過：production 本來沒有任何「施工放棄」事件；`camp.abandoned` 是 L0 無人衰減，不是這個）。
+func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
+	var c: Dictionary = CommitmentFields.unfinished(state, team)
+	if c.is_empty():
+		team.commit_stall_kind = ""   # 沒有未完成承諾 → 沒有可偵的東西
+		return
+	var kind: String = String(c.get("kind", ""))
+	var prog: float = float(c.get("progress", 0.0))
+	var now: int = state.world.current_tick
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var patience: float = DecisionEngine.stall_patience_factor(leader.values if leader != null else {})
+	var stall_ticks: int = int(DecisionEngine.STALL_BASE_DAYS * patience * float(WorldState.TICKS_PER_DAY))
+	# 換了承諾種類（例：工地做完換 convoy）⇒ 新 episode
+	if team.commit_stall_kind != kind:
+		team.commit_stall_kind = kind
+		team.commit_stall_tick = now
+		team.commit_stall_progress = prog
+		return
+	# recover-restarve 邊界：baseline 太舊＝必為 stale 再進 → 重置視為新 episode
+	if now - team.commit_stall_tick > stall_ticks + DecisionEngine.STALL_EXCLUDE_WINDOW:
+		team.commit_stall_tick = now
+		team.commit_stall_progress = prog
+		return
+	# relief_min ＝ 1.0 ＝【至少推進過一個 person-tick】（真值那行每次扣 maxi(pop,1) ≥ 1）
+	#   —— 不是我拍的門檻，是進度的最小單位。
+	var verdict: int = DecisionEngine.stall_verdict(team.commit_stall_tick, team.commit_stall_progress,
+		now, prog, stall_ticks, 1.0)
+	match verdict:
+		DecisionEngine.STALL_RESOLVING:
+			team.commit_stall_tick = now      # 有進展 → 重置 baseline，繼續等
+			team.commit_stall_progress = prog
+		DecisionEngine.STALL_STALLED:
+			if Probe.enabled:
+				Probe.bump("commit.stall_fire")
+				Probe.bump("commit.stall_fire." + kind)
+				Probe.bump_sample("commit.stall_fire", {"team": team.team_id, "kind": kind,
+					"waited_ticks": now - team.commit_stall_tick, "progress": prog,
+					"baseline": team.commit_stall_progress, "tick": now}, 30)
+			if kind == "construction":
+				WorldEvents.emit(state, "construction_abandoned", [team.team_id])
+				# ★放棄 ＝ 卸下這個工地（否則它會永遠掛在隊身上，偵測器每輪重放）
+				team.corvee_site = Vector2i(-1, -1)
+		_:
+			pass   # STALL_WAITING：耐性未耗盡，續等
+	
 func _detect_survival_stall(state: WorldState, team: TeamData) -> void:
 	if team.survival_committed_option == "":
 		return   # 未承諾 → 無可偵（待 try_set 蓋章）
