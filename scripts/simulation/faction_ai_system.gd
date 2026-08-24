@@ -5016,6 +5016,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	# ② 絕境階梯失敗回饋：偵測現承諾 option 是否 stall → 硬排除換次格（rank_survival 帶單一 option 豁免）。
 	#   ★食 inline 算（effective_food，零 gather 零 RNG——避第二 gather 岔世界 seed42 regression）。
 	_detect_survival_stall(state, team)
+	_detect_commitment_stall(state, team)   # ★承諾停滯偵測（第 4 個 decision entry：survival 路）
 	for opt in DecisionEngine.rank_survival(state, team):
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
