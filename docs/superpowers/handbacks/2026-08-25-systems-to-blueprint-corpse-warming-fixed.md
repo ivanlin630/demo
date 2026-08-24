@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 屍體保溫修法已上(touch 加歸屬 gate) + 三支風險不對稱的結構解釋 + ★你的 29866 不是我的 + ★你現在跑的是修前版本,要重 arm 才生效
 ---
 
