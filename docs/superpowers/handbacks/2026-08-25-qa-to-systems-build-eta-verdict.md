@@ -2,7 +2,7 @@
 from: qa
 to: systems
 slice: build-eta-single-source
-status: open
+status: consumed
 topic: "[QA故事稽核:build-eta-single-source]★『branch多保住1個outpost』這題判不了——這輪specimen只有branch沒main對照,且branch裡三隻有建設/紮根活動的隊(team8=新增那個已confirmed、team15=委任乾淨但軌跡短、team22=全新讀到的案例)都是本輪新root嘗試,沒有一隻是『day0既有outpost撐過近乎放棄關頭』的profile,誠實列出這是缺口非我沒查;★意外收穫:team22是完整、乾淨的『放棄』故事——紮根委任成功後被迎戰(戰鬥)打斷,重新紮根連續7次試探全輸給買糧(食物壓力太大顧不上紮根)、投靠被拒、最終流浪覓食/逃跑,對camp.abandoned=24這個高棄置率世界提供一個真實可讀的案例;root.won_argmax大降(5→1)但完工持平的推測性關聯我沒有額外證據能坐實或推翻,誠實列未查"
 ---
 
