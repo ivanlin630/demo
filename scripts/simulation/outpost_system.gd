@@ -313,6 +313,9 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 		# ★stall tap（關鍵一階根）：施工隊去向——construction_team_id 那隊現 task/pos/reason，揭它跑哪被啥改。
 		if Probe.enabled:
 			Probe.bump("construct.stall")
+			# ★per-action 維度（A1 交件時列出的前置量測）：跨工程的總計 stall 率
+			#   不能套到紮根身上（`crude_camp` 只佔全部起造的一小部分）。
+			Probe.bump("construct.stall." + String(tile.construction_target.get("action", "unknown")))
 			var ct: TeamData = state.teams.get(tile.construction_team_id)
 			Probe.bump_sample("construct.stall", {
 				"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
@@ -330,6 +333,7 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	# ★progress tap（進度真動否）
 	if Probe.enabled:
 		Probe.bump("construct.progress")
+		Probe.bump("construct.progress." + String(tile.construction_target.get("action", "unknown")))   # ★per-action（同 stall，兩者要能對比）
 		Probe.bump_sample("construct.progress", {
 			"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
 			"ticks_left": tile.construction_ticks_left, "active": active_team.team_id,

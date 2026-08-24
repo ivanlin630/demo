@@ -75,6 +75,18 @@ static func _value(state: WorldState, team: TeamData) -> float:
 	var base_persist: float = clampf(PERSIST_CAP * progress * lean, 0.0, PERSIST_CAP)
 	# ★糧流感知 Slice A（§4）：TASK_BUILD 有真 ETA → safe_ratio 調制（乘法縮放非硬塌，避 regression 向凍）。
 	#   5 種無 ETA task 走原 persist（safe_ratio 不介入，維持 Slice 1-4 行為）。
+	# ★工期票儀器（2026-08-25，純觀測、Probe-gated、零 RNG）：分清「floor 沒擋」與「floor 沒執行到」。
+	#   ★結構上的洞：整段保護的入口條件是 `current_task == TASK_BUILD`，
+	#   一旦被搶走一次，`current_task` 就不再是 BUILD ⇒ **之後永遠不再受 floor 保護**
+	#   （與 convoy RETURN 那條同族：保護讀的狀態、與「還在施工」這件事是兩份真相）。
+	#   ⇒ 這裡把「明明還有未完工地、卻因為 task 不是 BUILD 而跳過 floor」記成一格。
+	if Probe.enabled and team.current_task != TeamData.TASK_BUILD:
+		var _ot: HexTileData = _build_tile(state, team)
+		if _ot != null and _ot.construction_ticks_left > 0 and _ot.construction_team_id == team.team_id:
+			Probe.bump("build.floor_skipped.task_not_build")
+			Probe.bump_sample("build.floor_skipped", {"team": team.team_id, "task": team.current_task,
+				"reason": team.task_reason, "ticks_left": _ot.construction_ticks_left,
+				"tick": state.world.current_tick}, 30)
 	if team.current_task == TeamData.TASK_BUILD:
 		var sf: float = _safe_factor(state, team, stick, flex)
 		var computed: float = base_persist * sf   # persist_effective = persist × safe_factor（糧見底→sf→0→放手求生）
@@ -82,7 +94,11 @@ static func _value(state: WorldState, team: TeamData) -> float:
 		#   （蓋過 safe_factor；cold-start/低 lean 也擋 routine argmax 搶班；crisis 自有 ≥THREAT bypass，不靠此）。
 		var tile: HexTileData = _build_tile(state, team)   # ★S2b：corvee_site 優先（離開工地仍受保護、回頭續建）
 		if tile != null and tile.construction_ticks_left > 0:
+			if Probe.enabled: Probe.bump("build.floor_applied")
 			return maxf(computed, CONSTRUCTION_ACTIVE_FLOOR)
+		# ★task 是 BUILD 但沒有活工地 ⇒ floor 不適用（分兩格，別跟上面那個洞混在一起）
+		if Probe.enabled:
+			Probe.bump("build.floor_absent." + ("tile_null" if tile == null else "no_active_ticks"))
 		return computed
 	return base_persist
 

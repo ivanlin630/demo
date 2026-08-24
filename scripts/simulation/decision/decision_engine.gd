@@ -127,8 +127,20 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			if String(e["opt"]) == "紮根":
 				if String(scored[0]["opt"]) != "紮根":
 					Probe.bump("root.lost_to." + String(scored[0]["opt"]))
+					# ★工期票 §E（team22 案例）：counter 只說「輸了 N 次」，
+					#   看不出「同一隊、連續、輸給同一個對手」。集中度要用【逐隊/逐對手計數】看。
+					#   ★這兩顆是 plain counter（不受 first-N 截斷）⇒ 母體完整。
+					#   若集中在少數隊少數對手 ⇒ 那是【排不上隊】不是【蓋不完】，修法方向完全不同。
+					if team != null:
+						Probe.bump("root.lost_by_team.%d" % team.team_id)
+						Probe.bump("root.lost_pair.%d|%s" % [team.team_id, String(scored[0]["opt"])])
+						# 連續性只能靠有序樣本（first-N ⇒ 判讀時必須標明是樣本非母體）
+						Probe.bump_sample("root.lost_seq", {"team": team.team_id,
+							"winner": String(scored[0]["opt"]),
+							"tick": state.world.current_tick if state != null else -1}, 200)
 				else:
 					Probe.bump("root.won_argmax")
+					if team != null: Probe.bump("root.won_by_team.%d" % team.team_id)
 				break
 	# per-option 選中分布（argmax=rank[0]；判「applicable 過但選中恆 0」=結構性死鎖 ④）
 	if Probe.enabled and not scored.is_empty() and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:

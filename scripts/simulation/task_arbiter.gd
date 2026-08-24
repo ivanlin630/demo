@@ -52,6 +52,21 @@ static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
 # 嘗試設 task。優先權嚴格大於現任才搶得動（同層先到先得）。
 # state 供抗命判定讀 leader；回 true = 已設；false = 被現任擋下。
 # 呼叫端必須處理 false：被擋時不得執行配套副作用（prosperity_target_id 等）。
+# ★工期票儀器（2026-08-25，純觀測、Probe-gated、零 RNG）：
+#   施工中的隊【被什麼選項叫走】—— 記 new_task 與雙方 priority，
+#   才分得出「routine 搶贏了（floor 沒擋住）」vs「THREAT/SURVIVAL 合法搶（設計如此）」。
+#   ★呼叫點在【換 task 成功】的當下，此時 `team.current_task` 還是舊值。
+static func _note_build_preempt(state: WorldState, team: TeamData, new_task: String,
+	priority: int, source: String) -> void:
+	if team.current_task != TeamData.TASK_BUILD or new_task == TeamData.TASK_BUILD:
+		return
+	Probe.bump("build.preempted_by." + new_task)
+	Probe.bump_sample("build.preempted", {"team": team.team_id, "to": new_task,
+		"to_prio": priority, "from_prio": team.task_priority, "source": source,
+		"persist": snappedf(team.persist_strength, 0.001),
+		"corvee": [team.corvee_site.x, team.corvee_site.y],
+		"tick": state.world.current_tick}, 30)
+
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "") -> bool:
 	if team.combat_target != -1:
@@ -83,6 +98,8 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
+		# ★工期票儀器（2026-08-25）：施工中的隊被搶走時留名（純觀測、Probe-gated、零 RNG）
+		if Probe.enabled: _note_build_preempt(state, team, new_task, priority, _source)
 		team.task_start_tick = state.world.current_tick
 		return true
 	# A1a source-gated equal-priority self-replace：引擎每 cadence 的 rank[0] 同層換掉
@@ -103,6 +120,8 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
+		# ★工期票儀器（2026-08-25）：施工中的隊被搶走時留名（純觀測、Probe-gated、零 RNG）
+		if Probe.enabled: _note_build_preempt(state, team, new_task, priority, _source)
 		team.task_start_tick = state.world.current_tick
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
@@ -113,6 +132,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			team.current_task = new_task
 			team.move_target = move_target
 			team.task_priority = priority
+			if Probe.enabled: _note_build_preempt(state, team, new_task, priority, "defy_" + _source)
 			team.task_reason = "defy_" + _source
 			team.task_start_tick = state.world.current_tick
 			return true
@@ -124,7 +144,17 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 
 
 # task 完成 / 取消 / 釋放條件達成 → 回 idle + priority 歸 0
+# ★工期票儀器（2026-08-25）：`release()` 是【機械層旁路決策層】的那條路——
+#   它不看 combat 鎖、不看 crisis 窗、不看 persist hold，也就不會經過 `_note_build_preempt`。
+#   ⇒ 施工中的隊若是【被 release 掉】，`build.preempted_by.*` 會是 0 而工地照樣停。
+#   ★全樹 59 個 caller，此處是唯一收口 ⇒ 掛在這裡才窮盡。
 static func release(team: TeamData) -> void:
+	if Probe.enabled and team.current_task == TeamData.TASK_BUILD:
+		Probe.bump("build.released")
+		Probe.bump_sample("build.released", {"team": team.team_id,
+			"reason": team.task_reason, "prio": team.task_priority,
+			"corvee": [team.corvee_site.x, team.corvee_site.y],
+			"persist": snappedf(team.persist_strength, 0.001)}, 30)
 	team.current_task = TeamData.TASK_IDLE
 	team.move_target = Vector2i(-1, -1)
 	team.task_priority = 0
@@ -146,6 +176,10 @@ static func transition(state: WorldState, team: TeamData, new_task: String, prio
 		return                                                # crisis-免疫（補 transition 洩漏，對齊 try_set:45）
 	if team.task_priority >= PRIO_THREAT and priority < team.task_priority:
 		return                                                # emergency-respect：擋外部低 prio in-place stomp
+	# ★工期票儀器（2026-08-25）：`transition()` 是第三條寫 `current_task` 的路（就地轉換）——
+	#   它過 combat/crisis/emergency 三道 guard，但【不過 persist hold】⇒ 施工中的隊可被就地換走。
+	if Probe.enabled and team.current_task == TeamData.TASK_BUILD and new_task != TeamData.TASK_BUILD:
+		Probe.bump("build.transitioned_to." + new_task)
 	team.current_task = new_task
 	team.task_priority = priority
 	team.task_reason = _source
