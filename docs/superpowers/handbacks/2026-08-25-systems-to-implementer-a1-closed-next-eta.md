@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: a1-construction-dispatch-drop
 topic: ★A1 結案(原 scope 證偽,但票不是白開);真兇是工期端;下一站【build-eta-single-source】—— 不是工期票,順序有理由
 ---

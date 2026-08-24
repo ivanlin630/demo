@@ -119,3 +119,16 @@ commit      entered 6，五種 early-return 全部 = 0（含 resume 2 ＝ 認回
 - **`construct.stall` 需要 per-action 維度**（implementer 正確拒絕把跨所有工程的 12.4:1 總計套到紮根身上；
   `construct.start 23` vs `settlement.l0_to_l1_start 4` ⇒ 紮根只佔一小部分）⇒ **列為工期票的前置量測。**
 
+### ✅ 升級為**驗收級**（measurer 獨立重跑，2026-08-25）
+上表原標「開發回饋、非驗收」。**measurer 已獨立重跑、逐字相符**：
+**殘差 ＝ 0（完整列舉）**、**`root.commit_drop.no_camp = 0` 確認推翻 spec §3 假說**、
+`camp.built 26 / abandoned 24` 與 `camp-access` 那輪一致（**那份 75% 作廢**）。
+`.measure.json`：`docs/process/verdicts/a1-root-funnel-acceptance.measure.json`；specimen 已直寄 QA。
+⇒ ★**本票的結論（原 scope 證偽、真兇在工期端）現在有驗收級數字撐，不是開發自測。**
+
+### 📌 記錄：本檔的前一版被掃進 `8278a9f3`（`Merge feat/camp-access`）
+我在該 merge **進行中**跑了 `git add docs/` ⇒ 本檔與 `03b_measurer.md` 一併進了那個 merge commit。
+**內容是已定案裁定、非半成品** ⇒ 依既有紀律 **不重寫 history、透明記錄即可**
+（memory `feedback_concurrent_session_wip_sweep`）。
+★**教訓**：**共用 main dir 時，`git add <目錄>` 之前要先確認沒有 merge 在進行**（`.git/MERGE_HEAD`）。
+
