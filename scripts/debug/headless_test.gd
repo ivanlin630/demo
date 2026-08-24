@@ -167,6 +167,7 @@ func _initialize() -> void:
 	_test_find_path_cache()
 	_test_find_path_no_path()
 	_test_eta_ticks()
+	_test_build_eta_cadence_assumption()
 	_test_observe_velocity_visible()
 	_test_observe_velocity_invisible()
 	_test_estimate_catch_up_reachable()
@@ -8840,6 +8841,24 @@ func _test_find_path_no_path() -> void:
 	assert(r.path.is_empty(), "無路徑應空 path")
 	assert(r.cost == INF, "cost 應 INF")
 	print("Path Task2c OK")
+
+# ★「假設不靜默」的第二半（reviewer 指正 2026-08-25：偵測 ≠ 告知）：
+#   `OutpostSystem.build_eta_days` 的分母是「一天有幾個 near cadence 窗」，
+#   前提是施工推進（`outpost_tick`）跑在 near pass。那個前提**靜態可判**（registry 讀得到）
+#   ⇒ 寫成 headless 斷言，失效當場紅；runtime 那顆 `build_eta.cadence_assumption_stale`
+#   保留當佐證，但不再是主要防線 —— ★一個沒人去看的 Probe 值等於沒有。
+func _test_build_eta_cadence_assumption() -> void:
+	print("--- build_eta 分母的 cadence 假設 ---")
+	var found: bool = false
+	for e in SimRunner.SYSTEMS:
+		if String(e.get("name", "")) == "outpost_tick":
+			found = true
+			assert(int(e.get("lod", -1)) == SimRunner.LOD_NEAR,
+				"build_eta 分母假設：outpost_tick 必須掛 LOD_NEAR（改掛別的 LOD ⇒ 六處工期估值全錯）")
+			break
+	assert(found, "build_eta 分母假設：SimRunner.SYSTEMS 裡找不到 outpost_tick")
+	assert(OutpostSystem._outpost_tick_runs_in_near_pass(), "accessor 的 registry 讀法與本斷言必須一致")
+	print("build_eta cadence 假設 OK（每日推進 %d 次）" % int(OutpostSystem.build_ticks_per_day()))
 
 func _test_eta_ticks() -> void:
 	print("--- Path Task3: eta_ticks ---")
