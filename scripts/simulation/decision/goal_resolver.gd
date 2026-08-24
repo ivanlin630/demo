@@ -391,7 +391,17 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 	var res: String = String(prereq.get("res", ""))
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 組件 E 泛化：qty 走通用 need_keep（任 res）。
-	if ResourceSystem.effective_holding(state, team, res) >= NeedOracle.need_keep(state, team, res, lv):
+	# ★workshop 診斷票儀器（2026-08-25，純觀測、Probe-gated、零 RNG）：★死水兩欄。
+	#   要分辨「反覆重贏」是【前置永遠補不滿】還是【補滿又用掉】：
+	#   只看贏幾次分不出來，要看【持有量與門檻】這兩個輸入到底有沒有在動。
+	var _hold: float = ResourceSystem.effective_holding(state, team, res)
+	var _keep: float = NeedOracle.need_keep(state, team, res, lv)
+	if Probe.enabled:
+		Probe.bump("goal.res_prereq.%s|%s" % [gt, res])
+		Probe.bump_sample("goal.res_prereq", {"team": team.team_id, "goal": gt, "res": res,
+			"holding": snappedf(_hold, 0.01), "need_keep": snappedf(_keep, 0.01),
+			"satisfied": _hold >= _keep, "tick": state.world.current_tick}, 200)
+	if _hold >= _keep:
 		return {}   # 前置滿
 	# ── 取得手段 1：買（S2，市場取得不需定位；belief-gated）──
 	if ctx.has_specie:
@@ -440,6 +450,8 @@ static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: Dec
 
 static func _mk_candidate(team: TeamData, g: Dictionary, gt: String, frontier_kind: String, payoff: float,
 		ctx: DecisionContext, to_task: Dictionary) -> Dictionary:
+	# ★workshop 診斷票儀器：candidate 產生數 ＝ 漏斗分母（won 只是其中一格）。
+	if Probe.enabled: Probe.bump("goal.cand." + gt + ":" + frontier_kind)
 	return {
 		"util": _candidate_util(payoff, ctx, _estimate_delay_days(team, to_task)),   # ★S6:util 含 delay 折現
 		"to_task": to_task,

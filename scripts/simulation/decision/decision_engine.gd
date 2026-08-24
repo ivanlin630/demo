@@ -123,6 +123,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				break
 		# ★紮根（L0→L1）funnel 可觀測：驗收 #1 是二值（l0_to_l1 > 0），要能分辨
 		#   「沒 applicable」vs「applicable 但秤輸」——否則 0 只是個沒有解釋的 0。
+		# ★workshop 診斷票儀器：goal candidate 贏 argmax 的逐 label／逐隊分佈
+		#   （★plain counter：母體完整，不受 first-N 截斷）。
+		if Probe.enabled and not scored.is_empty() and team != null:
+			var _top: Dictionary = scored[0]
+			if _top.has("cand"):
+				Probe.bump("goal.won." + String(_top["opt"]))
+				Probe.bump("goal.won_pair.%d|%s" % [team.team_id, String(_top["opt"])])
 		for e in scored:
 			if String(e["opt"]) == "紮根":
 				if String(scored[0]["opt"]) != "紮根":

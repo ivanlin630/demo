@@ -2585,6 +2585,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		var _t2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task（label 非 static REGISTRY key）；static option 走既有。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
+		if Probe.enabled and e.has("cand"): Probe.bump("goal.dispatch." + opt)   # ★workshop 診斷票：贏了之後真的被派出去幾次
 		if SimRunner.phase_timing: _fai_pht("unified.to_task", _t2)
 		# ★復甦 R2 §2B.1（build-as-survival self-rescue）：自救建田 → 發起/續產糧設施 construction
 		# （_ensure 內 _subteam_upgrade_facility 起建+transition BUILD；起建後升 PRIO_SURVIVAL survival-tier 保 sustain）。
@@ -2990,6 +2991,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 			return
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, sub, opt)
+		if Probe.enabled and e.has("cand"): Probe.bump("goal.dispatch." + opt)   # ★workshop 診斷票（同上）
 		if td.get("delegate", false):
 			continue   # ★S5:子隊不再委派(避 sub-sub nesting)→試次佳(自己做)
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
@@ -3154,6 +3156,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			return
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
+		if Probe.enabled and e.has("cand"): Probe.bump("goal.dispatch." + opt)   # ★workshop 診斷票：贏了之後真的被派出去幾次
 		# ★means-end S5 委派（solo）：delegate candidate 贏 → 派子隊，母隊留守。
 		if td.get("delegate", false):
 			if _dispatch_goal_delegate(state, team, td):
