@@ -1,0 +1,60 @@
+{
+  "slice": "build-eta-single-source",
+  "ticket": "systems票：工期六份公式收斂單一源後，五處已預測會變的實際變多少+§7三條+outpost普查",
+  "measured_at_branch": "feat/build-eta-single-source @aa397695(.worktrees/build-eta-single-source，base=main post camp-access merge)",
+  "measured_at_main_baseline": "74b4e285(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天，同床(camp_access_diag_bed.gd，main+branch逐字相同)",
+
+  "★L3聲明": "camp_access_diag_bed.gd加一段(19行)報五處預測對照(persist.hold/dispatch_fail.糧橋不足+資源不足/food_rescue.entry+gate_check pass率/root funnel摘要)。純觀測，main+worktree逐字相同。",
+
+  "★★自曝一個我自己的bug(已修正)": "第一版report line用`smpf.get('passed',...)`讀樣本，但main那邊的food_rescue.gate_check樣本欄位仍是舊key`passed_with_bug`(main還沒收斂)，branch才是新key`passed`——造成main那邊算出『pass=0/30』的假讀數(實際30筆樣本全部`passed_with_bug:true`)。已核對原始樣本內容訂正，本報表下方數字是訂正後的。",
+
+  "①③④§7三條+outpost普查": {
+    "day0/day90/新增": {"main": "11/11/新增1(tile13006,team8)", "branch": "11/12/新增1(同tile)",
+      "判讀": "★★branch比main多淨1個outpost(12 vs 11)，儘管兩邊『中途新增』事件都只記到1次——差異來自『保住』而非『多新增』：main淨態=11(11保住+1新增-1流失)，branch淨態=12(11保住+1新增-0流失)。這是retention面的改善，非creation面。"},
+    "camp.built/abandoned": {"main": "26/24(92.3%棄置率)", "branch": "24/20(83.3%棄置率)",
+      "判讀": "★棄置率降(92.3%→83.3%)，方向是改善，但仍是高棄置率的世界(8成以上還是棄)。"},
+    "collect.no_outpost_no_camp_zero_food": "本輪未特別對照(不在這張票的五處清單內，維持不變的假設未驗證)"
+  },
+
+  "②五處預測對照(逐項，兩種結果都收)": {
+    "#3持守persist.hold": {"main": 33, "branch": 37,
+      "判讀": "+12%(33→37)，方向與'變寬鬆=更願意繼續持有承諾'的預測一致(舊式高估殘餘成本24x⇒錯誤提早放手；修正後成本估得準⇒更願意撐下去⇒持守次數升非降)。★我在票面判準label上原寫『預測變寬鬆=值該降』可能理解反了方向，交你核實正確語意——這裡只報數字不堅持我的方向判讀。"},
+    "#4糧橋dispatch_fail": {"糧橋不足": {"main": 0, "branch": 0}, "資源不足": {"main": 28, "branch": 28},
+      "判讀": "兩邊逐字相同——這條完全不受這次修法影響，仍是28次dispatch_fail全部卡在更早的建材資源門檻，糧橋門檻始終沒機會執行到(呼應先前T1/C6-4發現)。"},
+    "#5求生蓋田閘": {
+      "food_rescue.entry(呼叫頻率)": {"main": 4194, "branch": 3948, "差": "-5.9%"},
+      "pass率(訂正後,30樣本)": {"main": "30/30(100%,用main自己的舊÷240公式)", "branch": "30/30(100%,用branch的新單一源公式)"},
+      "判讀": "★誠實邊界(與C6-3那輪相同的取樣限制)：這30筆樣本仍集中在遊戲早期(tick10-640)，food_days(6.8~31.25)遠大於build_eta_days(不管新舊公式都<1.5天)，margin太寬，看不到『變嚴後pass率該降』的效果——不是修法沒用(C-1那輪已用純算術驗證過方向與量級)，是這個取樣窗口沒有覆蓋到邊界案例。呼叫頻率降了5.9%，方向上略微支持『閘變嚴後少數早期案例改道』，但幅度小、不算決定性。"
+    },
+    "#1/#2/#6紮根funnel歸位": {
+      "root.won_argmax": {"main": 5, "branch": 1}, "settlement.l0_to_l1_start": {"main": 4, "branch": 3},
+      "construct.complete_crude_camp": {"main": 1, "branch": 1}, "outpost.l0_to_l1": {"main": 1, "branch": 1},
+      "判讀": "★紮根『贏argmax』的次數大降(5→1)，但『最終真的完工』的次數持平(both=1)，且day90淨態branch反而更好(12>11)——這暗示：紮根被argmax選中的次數變少了，但一旦選中，follow-through(不被中途撤換/放棄)的比率變高了，跟#3持守變寬鬆的方向一致。這是推測性關聯，非坐實因果，供你判讀。"
+    }
+  },
+
+  "★★CAMP_MARGINAL_CAP saturation：31.4%→50.6%，惡化": {
+    "main": {"evaluated": 886, "capped": 278, "rate": "31.4%"},
+    "branch": {"evaluated": 836, "capped": 423, "rate": "50.6%"},
+    "判讀": "★這條不在票面五處預測清單內，是意外發現：cap飽和率不降反升，且升幅不小(+19.2個百分點)。這次修法沒有de-patch CAMP_MARGINAL_CAP(那是另一張獨立的票)，飽和率會不會被這次工期修法間接推高值得systems留意——若cap de-patch票還沒排上，這個數字可能會繼續累加成更大的問題。"
+  },
+
+  "★specimen": {
+    "路徑": "docs/measurements/breed-deathcause/build-eta.specimen.jsonl",
+    "規模": "7017 entries",
+    "去向": "長跑+behavior因果結論(尤其outpost淨態改善/棄置率降這兩條)⇒直寄QA故事稽核。"
+  },
+
+  "landed_paths": {
+    "branch_report": "docs/measurements/breed-deathcause/build-eta-BRANCH-90d.txt",
+    "main_baseline_report": "docs/measurements/breed-deathcause/build-eta-BASELINE-main-90d.txt",
+    "specimen": "docs/measurements/breed-deathcause/build-eta.specimen.jsonl",
+    "bed": "scripts/debug/camp_access_diag_bed.gd(main+worktree逐字相同)"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; $env:SPECIMEN_SAMPLE_N='10'; $env:SPECIMEN_OUT='<path>.specimen.jsonl'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\build-eta-single-source --script scripts/debug/camp_access_diag_bed.gd",
+
+  "cleanup": "busy beacon清除。"
+}

@@ -143,6 +143,25 @@ func _run() -> void:
 			jc.size(), ("樣本數<cap" if jc.size() < 40 else "樣本數=cap需查是否截斷")])
 		for jsmp in jc:
 			lines.append("    %s" % str(jsmp))
+	# ★systems票(build-eta-single-source世界層)：五處已預測會變的實測
+	lines.append("★★★build-eta-single-source 五處預測對照：")
+	lines.append("  #3持守 persist.hold(觸發率,分子;預測變寬鬆=值該降) = %d" % int(Probe.counts.get("persist.hold", 0)))
+	lines.append("  #4糧橋 dispatch_fail.糧橋不足(先前0,預測仍0或更寬鬆) = %d" % int(Probe.counts.get("dispatch_fail.糧橋不足", 0)))
+	lines.append("  #4糧橋對照 dispatch_fail.資源不足(先前28次全是這個) = %d" % int(Probe.counts.get("dispatch_fail.資源不足", 0)))
+	var fre: int = int(Probe.counts.get("food_rescue.entry", 0))
+	lines.append("  #5求生蓋田閘 food_rescue.entry(呼叫頻率) = %d" % fre)
+	if Probe.samples.has("food_rescue.gate_check"):
+		var fp: int = 0
+		var fc: Array = Probe.samples["food_rescue.gate_check"]
+		for smpf in fc:
+			if bool(smpf.get("passed", false)): fp += 1
+			lines.append("    %s" % str(smpf))
+		lines.append("  #5求生蓋田閘 pass=%d/%d(樣本,預測變嚴=pass率該降,非死水閘沒執行) reject=%d" % [fp, fc.size(), fc.size()-fp])
+	else:
+		lines.append("  #5求生蓋田閘：本輪無sample(閘完全沒執行到,非『擋住』)")
+	lines.append("  #1/#2/#6紮根funnel：root.won_argmax=%d settlement.l0_to_l1_start=%d construct.complete_crude_camp=%d" % [
+		int(Probe.counts.get("root.won_argmax", 0)), int(Probe.counts.get("settlement.l0_to_l1_start", 0)),
+		int(Probe.counts.get("construct.complete_crude_camp", 0))])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
