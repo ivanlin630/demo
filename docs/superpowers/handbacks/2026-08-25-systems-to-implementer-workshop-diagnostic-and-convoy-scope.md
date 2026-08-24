@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: workshop-followthrough-diagnostic
 topic: ★兩張票已依 blueprint 裁定調整:①新開 workshop follow-through【診斷票非修】②convoy 票 scope 升格「task 卸除單一門」— 你挖到的 release 59 caller 是主體
 ---

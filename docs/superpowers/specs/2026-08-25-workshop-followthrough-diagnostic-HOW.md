@@ -45,3 +45,56 @@ topic: ★診斷【非修】—— build_workshop 贏 45 次之後,到底有沒�
 `tier: probe`（★**純診斷、零行為改動** —— 由 **`det fp` 不變 ＋ headless 0-new** 佐證；
 ★**fp 一變就不是 probe**，見 `01_architect` tier 判準）。
 tap 全 Probe-gated、**禁耗 global RNG**。
+
+---
+
+## §6 ★★診斷結果：**落在①分支**，且接線缺口有 `file:line`
+
+**implementer 的發現（我已自驗）**：
+- `decision_engine.gd:76` `u *= FailureMemory.mult_for_option(...)` ⇒ **只乘在【靜態 option】那個迴圈**
+- ★`decision_engine.gd:104` `scored.append({"u": float(cand.get("util", 0.0)), ...})`
+  ⇒ **goal candidate 用【生 util】進池，完全不過折價**
+- `FailureMemory.mult_for_option` production 全樹 **只有 1 個 caller**（就是 `:76`）
+
+⇒ ★**`build_workshop` 是 goal candidate ⇒ 失敗多少次都不折價 ⇒ team 11 連贏 45 次。**
+
+## §7 ★★★systems 追查：**接上去也不會生效** —— 真正的問題是【接線面積】
+
+```gdscript
+const OPTION_FAIL_KEY: Dictionary = {
+    "買糧": ["買單", "food"],
+    "買料": ["買單", "material"],
+}
+...
+var m = OPTION_FAIL_KEY.get(option)
+if m == null: return 1.0          # ★不在表上 ⇒ 恆 1.0
+```
+
+★★**失敗反饋律目前的接線面積 ＝ 【2 個 option】**（買糧／買料）。
+**其餘所有 option 恆 1.0** —— 這也解釋了為什麼「有咬」的 339 筆**全是買單**。
+
+⇒ ★**把 `:104` 接上 `mult_for_option` 也沒用** —— candidate 的 label 不在那兩筆裡，一樣回 1.0。
+
+### ★這不是 bug，是【宣告過的未完成】
+`decision_engine.gd:74` 註解自己寫著：
+> **「未接線的 option 恆 1.0 ＝ 對其餘 option 零行為。」**
+⇒ **它被誠實宣告過**。問題不在隱藏，在**沒有人把「接線面積」當成一個要追蹤的量**。
+
+### ★★由此立一條通則：**「機制已立」≠「機制已覆蓋」**
+帳上把一條律記成 `done` 時，**必須同時記【覆蓋率】** ——
+「失敗反饋律已落地」與「**它對 2/N 個 option 生效**」是**兩件事**。
+★**同族**：`PROGRESSIVE_HOLD_TASKS`（手工白名單，已兩次漏列：CONVOY、TASK_CAMP）
+／`OPTION_FAIL_KEY`（手工白名單，2 筆）—— ★**第三次同型。**
+
+## §8 修法形狀（**待 blueprint 定磚，我不自選**）
+★**手工對照表在這裡註定漏**：candidate 的 label 是**組合出來的**
+（`goal_resolver.gd:447` `gt + ":" + frontier_kind`、`deliver_<res>`、`<label>:delegate`）
+⇒ **label 空間近乎開放，白名單永遠追不上。**
+
+⇒ ★**修法方向應是「失敗記憶以【動作的真實身份】為 key，而不是靠一張人工對照表」**
+—— **同〈禁手抄物理〉家族：第二份人工維護的真相必然 drift。**
+（**且與 blueprint「排序＝折現值比較的自然輸出、禁新排序常數」同精神**：
+ 折價是「這條路我試過、失敗了」的**真實資訊**，不是排序旋鈕。）
+
+★**但「動作的真實身份」怎麼定義**（動作類別？目標？兩者組合？）**是設計問題，需 R²。**
+
