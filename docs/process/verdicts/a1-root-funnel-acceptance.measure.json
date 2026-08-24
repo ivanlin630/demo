@@ -1,0 +1,63 @@
+{
+  "slice": "a1-construction-dispatch-drop",
+  "ticket": "implementer票：A1紮根funnel drop分佈驗收版(獨立確認，非開發回饋)",
+  "measured_at_branch": "feat/a1-construction-dispatch-drop @3edfddd3(.worktrees/a1-construction-dispatch-drop，base=feat/camp-access)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+  "bed": "scripts/debug/a1_root_funnel_bed.gd(implementer新增，已commit，測前跑過--import)",
+
+  "★★★殘差稽核=0✅(優先項)": {
+    "站①(root.funnel.to_task)": 9,
+    "守衛drop": 0,
+    "try_set_ok": 6, "try_set_fail": 3,
+    "殘差 = 9 - 0 - (6+3)": 0,
+    "判讀": "列舉完整，沒有沒被列到的出口。"
+  },
+
+  "★★★root.commit_drop.no_camp = 0：獨立確認，spec §3高嫌疑假說被推翻": {
+    "數字": 0,
+    "判讀": "★★這是implementer自己標記『份量很重』的一條——獨立重跑逐字確認=0，與implementer開發回饋一致。"
+  },
+
+  "逐站數字(與implementer開發回饋逐字相符)": {
+    "站0 argmax": {"root.won_argmax": 5},
+    "站①→②守衛": {"drop小計": 0},
+    "站②try_set": {"ok": 6, "fail.persist_hold": 1, "fail.priority_or_sametier": 2, "drop小計": 3},
+    "站③commit-hook": {"entered(分母)": 6, "no_settle_site": 0, "tile_null": 0, "no_camp": 0, "already_outpost": 0, "occupied_by_other": 0, "resume(非drop,認回自己工地)": 2, "drop小計": 0},
+    "站④真開工": {"start": 4, "complete_crude_camp": 1, "outpost.l0_to_l1": 1}
+  },
+
+  "★母體語意分離(事件數 vs 存量結果，已內建於床)": {
+    "獨立紮根機會(commit.entered − resume)": 4,
+    "其中真開工start": 4,
+    "其中被③擋掉": 0,
+    "站③drop率": "0.0%(分母已扣resume,不用resume灌大分母)"
+  },
+
+  "§3假說對照(no_camp與棄置是否同源，待驗非結論)": {
+    "camp.built": 26, "camp.abandoned": 24, "root.commit_drop.no_camp": 0,
+    "判讀": "no_camp=0意味這個特定drop原因(蓋了就丟via commit-hook層)沒有發生——與camp.abandoned=24(建設完成後的棄置)是不同層次的『棄』，non-同源，implementer票面已標『待驗非結論』，我獨立跑到的數字與此判讀一致，不再深入詮釋。"
+  },
+
+  "工期端(對照，非本刀查點)": {
+    "construct.start": 23, "construct.start_task_not_build": 7,
+    "construct.progress": 679, "construct.stall": 8385, "construct.timeout_cancel": 0
+  },
+
+  "★對implementer開發回饋的獨立驗證結論": "全部逐字相符(argmax 5/dispatch 9/守衛0/try_set ok6 fail3/commit entered6/③drop0/resume2/start4/complete1/l0_to_l1 1/殘差0)。這是乾淨的獨立複現，非同一份運算的重印——不同worktree、不同呼叫，數字完全一致，支持determinism健康，implementer的開發回饋數字現已升格為驗收數字。",
+
+  "★specimen": {
+    "路徑": "docs/measurements/breed-deathcause/a1-root-funnel.specimen.jsonl",
+    "規模": "7158 entries，15隊(與camp-access那批相同分佈，因stacked分支+同seed)",
+    "去向": "長跑+behavior因果結論(尤其no_camp=0這條)⇒依票面要求直寄QA故事稽核。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/a1-root-funnel-90d.txt",
+    "specimen": "docs/measurements/breed-deathcause/a1-root-funnel.specimen.jsonl"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; $env:SPECIMEN_SAMPLE_N='10'; $env:SPECIMEN_OUT='<path>.specimen.jsonl'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\a1-construction-dispatch-drop --script scripts/debug/a1_root_funnel_bed.gd",
+
+  "cleanup": "busy beacon清除(本階段結束後)。"
+}

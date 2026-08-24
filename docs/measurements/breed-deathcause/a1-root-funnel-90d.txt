@@ -1,0 +1,57 @@
+[peaceful_economy day 90 seed 1337] teams=21
+--- 站0 argmax ---
+  root.won_argmax                              = 5
+  紮根 applicable 卻沒贏，輸給誰：
+  root.lost_to.build_apothecary:resource       = 2
+  root.lost_to.build_workshop:resource         = 21
+  root.lost_to.deliver_material                = 2
+  root.lost_to.survival                        = 9
+  root.lost_to.乞食                              = 1
+  root.lost_to.併入                              = 2
+  root.lost_to.備戰                              = 24
+  root.lost_to.囤貨                              = 1
+  root.lost_to.建設                              = 5
+  root.lost_to.歸建                              = 2
+  root.lost_to.紮營                              = 1
+  root.lost_to.覓食                              = 17
+  root.lost_to.貿易                              = 10
+  root.lost_to.返家補給                            = 14
+--- 站① to_task（結構上不可能回空；不等於分母＝有人加了早退） ---
+  root.funnel.to_task                          = 9
+--- 站①→② 守衛（結構列舉：殘差必須為 0，否則有沒列到的出口） ---
+  （無 —— 紮根沒有落在 no_target / idle_task 任何一格）
+  站①→②drop 小計                                  = 0
+--- 站② try_set（四道拒絕各自留名） ---
+  root.funnel.try_set_ok                       = 6
+  root.funnel.try_set_fail.persist_hold        = 1
+  root.funnel.try_set_fail.priority_or_sametier = 2
+  站②drop 小計                                    = 3
+  ★殘差稽核：站①(9) − 守衛(0) − try_set(6 ok + 3 fail) = 0 ✅列舉完整
+--- 站③ commit-hook（try_set 成功【之後】仍可能不落地） ---
+  root.commit.entered（分母）                      = 6
+  root.commit_drop.no_settle_site              = 0
+  root.commit_drop.tile_null                   = 0
+  root.commit_drop.no_camp                     = 0
+  root.commit_drop.already_outpost             = 0
+  root.commit_drop.occupied_by_other           = 0
+  settlement.l0_to_l1_resume                   = 2   ★不是 drop，是認回自己的工地
+  站③drop 小計                                    = 0
+--- 站④ 真開工之後 ---
+  settlement.l0_to_l1_start                    = 4
+  construct.complete_crude_camp                = 1
+  outpost.l0_to_l1                             = 1
+--- ★母體語意 ---
+  獨立紮根機會（commit.entered − resume） = 4
+  其中真開工 start                      = 4
+  其中被 ③ 擋掉                          = 0
+  ⇒ 站③ drop 率 = 0.0%（分母已扣掉 resume，不用 resume 灌大分母）
+--- §3 假說對照：③no_camp 與「蓋了就丟」是否同源（待驗，非結論） ---
+  camp.built                                   = 26
+  camp.abandoned                               = 24
+  root.commit_drop.no_camp                     = 0
+--- 工期端（不在本刀，僅對照） ---
+  construct.start                              = 23
+  construct.start_task_not_build               = 7
+  construct.progress                           = 679
+  construct.stall                              = 8385
+  construct.timeout_cancel                     = 0
