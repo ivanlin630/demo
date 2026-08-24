@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: a1-construction-dispatch-drop
 branch: feat/a1-construction-dispatch-drop @ 3edfddd3 (pushed, base=feat/camp-access)
 topic: ★A1 儀器落地+分佈(開發回饋非驗收)·殘差稽核=0 列舉完整;★★spec §3 高嫌疑假說 ③(d)=0/4【推翻】,我上封講的「兩條線併一顆」自己收回;★★「8→1」的 1 不在 dispatch 在工期(start 4→complete 1);票面 8 與 1 都要重新定義

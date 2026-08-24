@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: camp-access MERGE 准;★但我要訂正自己三句話 — §7 ② 門檻我寫壞了(從頭就綠、零鑑別力),「壓回反向」建立在作廢數字上;照實版:這刀掙到的是 ①
 ---
 
