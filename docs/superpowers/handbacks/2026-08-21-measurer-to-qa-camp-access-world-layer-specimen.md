@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: camp-access
-status: open
+status: consumed
 topic: "★camp-access世界層specimen直寄(implementer票明示長跑+behavior因果⇒必附specimen)：三條spec §7判準字面全PASS但②③改善幅度小(近乎持平)僅①紮根funnel真正翻案；★join reject從1暴增到8(accept率75%→27%)最需要故事層驗證是不是genuine(host食力/population飽和)還是bug"
 ---
 

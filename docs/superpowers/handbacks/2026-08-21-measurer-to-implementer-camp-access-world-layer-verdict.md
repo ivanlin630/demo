@@ -2,7 +2,7 @@
 from: measurer
 to: implementer
 slice: camp-access
-status: open
+status: consumed
 topic: "★世界層三條字面全PASS但②③改善幅度小(近乎持平)，唯一真正『從死到活』是①紮根funnel(0→1,root.won_argmax=5);★★cap saturation 35.0%→31.4%，遠未達你自己設的『近0則de-patch票作廢』門檻，de-patch必要性未被推翻；join母體4→11但accept率75%→27%(reject暴增)，需故事層驗證；specimen(7158筆,15隊)已直寄QA"
 ---
 
