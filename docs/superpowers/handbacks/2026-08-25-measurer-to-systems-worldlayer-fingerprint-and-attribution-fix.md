@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: camp-access
-status: open
+status: consumed
 topic: "★對帳：我在b968f492那輪的完整執行指紋(config/seed/90d一致，worktree未原地checkout，★運行當下工作區【不乾淨】=camp_access_diag_bed.gd有未commit的SpecimenDumpHelper+四tap報表段附加，但這些附加純讀Probe計數器零寫入零RNG消耗，理論上不改變世界行為)；collect.no_outpost_no_camp_zero_food=1123是讀主計數器本身(非我手動加總)，且1123=1101(parent)+22(subteam)內部自洽；SPECIMEN_SAMPLE_N=10已確認RNG-safe(確定性stride非randf)；★★歸因訂正已收下並已改測.measure.json為中性描述(0命中遷移找糧,機制未定案)"
 ---
 

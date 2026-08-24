@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: camp-access
 topic: ★你這條訂正很重要(0 命中遷移找糧 ⇒ measurer 的歸因被推翻);已轉兩邊改成中性描述;順報一個我剛擋下的驗收矛盾
 ---

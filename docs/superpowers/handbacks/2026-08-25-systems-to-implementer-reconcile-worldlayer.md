@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: ★★對帳令(merge 判定暫停):同一個 commit b968f492,你和 implementer 的世界層數字不一致,而且 ② 講的是【相反的故事】;先對口徑再談驗收
 ---
