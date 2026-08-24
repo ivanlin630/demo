@@ -2579,6 +2579,10 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		var _t2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task（label 非 static REGISTRY key）；static option 走既有。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
+		# ★A1 drop 儀器（站①）＝ dispatch 分母：argmax 贏了、真的要派了。
+		#   ★不掛在 options.gd 的 to_task 裡——那顆會被 `decision_engine` 的評分迴圈
+		#   （`previous_task` 承諾比對）也呼到，那不是 dispatch，會把分母灌大（實測 12 vs 真實 dispatch 數）。
+		if Probe.enabled and opt == "紮根": Probe.bump("root.funnel.to_task")
 		if SimRunner.phase_timing: _fai_pht("unified.to_task", _t2)
 		# ★復甦 R2 §2B.1（build-as-survival self-rescue）：自救建田 → 發起/續產糧設施 construction
 		# （_ensure 內 _subteam_upgrade_facility 起建+transition BUILD；起建後升 PRIO_SURVIVAL survival-tier 保 sustain）。
@@ -2598,6 +2602,8 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			continue
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+			# ★A1 站①→② 之間的守衛（結構列舉：不留無法解釋的殘差）。紮根結構上不該落這裡。
+			if Probe.enabled and opt == "紮根": Probe.bump("root.funnel.pre_try_set_drop.no_target")
 			continue   # 不可派 → 試次佳(修凍死)
 		# 投靠玩家：走 forced_event（玩家決定收留），不自動 merge（對稱 + UX）
 		if opt == "併入" and td.has("social_target"):
@@ -2634,6 +2640,10 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# 高值經濟 @50 換掉；task_arbiter self-replace 已擴認 70 同層 threat option 可換 迎戰→求和)。其餘 @50。
 		# ★絕境經濟 ① 單一源：option→priority 收 DecisionOptions.priority_for（survival 保序不看 dispatch 路）。
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "unified")
+		# ★A1 drop 儀器（站②）：紮根 argmax 贏了之後，try_set 到底過沒過、被哪一道擋。
+		#   結構列舉（四道拒絕各自留名），不逐隻抓。純觀測、Probe-gated。
+		if Probe.enabled and opt == "紮根":
+			Probe.bump("root.funnel.try_set_ok" if _set_ok else "root.funnel.try_set_fail." + TaskArbiter.last_deny_reason())
 		if _set_ok: _stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
@@ -2643,7 +2653,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# timeout 起算已改讀 try_set 蓋章的 task_start_tick（單源），此路不需另外蓋章。
 		if _set_ok and td["task"] == TeamData.TASK_TRADE:
 			Probe.bump("trade.dispatch.unified_" + opt)
-		if _set_ok: _commit_settle_site(state, team, td)   # ★§4a 紮根：世界寫入只在 try_set 成功後（zombie 工地根治）
+		if _set_ok: _commit_settle_site(state, team, td, opt)   # ★§4a 紮根：世界寫入只在 try_set 成功後（zombie 工地根治）
 		# 掠奪/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（社交 resolver 讀）
 		if td.has("combat_target"):
 			state.set_combat_target(team, int(td["combat_target"]))
@@ -2984,6 +2994,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 			return
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, sub, opt)
+		if Probe.enabled and opt == "紮根": Probe.bump("root.funnel.to_task")   # 站①（同上：dispatch 分母）
 		if td.get("delegate", false):
 			continue   # ★S5:子隊不再委派(避 sub-sub nesting)→試次佳(自己做)
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
@@ -3001,10 +3012,15 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 					HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
 				return
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
-		if not TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for(opt), "subteam"):   # ★① 單一源(subteam survival @80 preempt,team19 換子隊 bug 收)
+		var _sub_ok: bool = TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for(opt), "subteam")   # ★① 單一源(subteam survival @80 preempt,team19 換子隊 bug 收)
+		# ★A1 drop 儀器（站②）：紮根 argmax 贏了之後，try_set 到底過沒過、被哪一道擋。
+		#   結構列舉（四道拒絕各自留名），不逐隻抓。純觀測、Probe-gated。
+		if Probe.enabled and opt == "紮根":
+			Probe.bump("root.funnel.try_set_ok" if _sub_ok else "root.funnel.try_set_fail." + TaskArbiter.last_deny_reason())
+		if not _sub_ok:
 			continue
 		_stamp_survival_commit(state, sub, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
-		_commit_settle_site(state, sub, td)   # ★§4a 紮根 commit-hook（try_set 已成功才到此）
+		_commit_settle_site(state, sub, td, opt)   # ★§4a 紮根 commit-hook（try_set 已成功才到此）
 		if td.has("combat_target"): state.set_combat_target(sub, int(td["combat_target"]))
 		if td.has("social_target"): state.set_social_target(sub, int(td["social_target"]))
 		_wire_threat_task(sub, td)   # 迎戰/求和 aux target（threat repertoire 保留）
@@ -3148,6 +3164,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			return
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
+		if Probe.enabled and opt == "紮根": Probe.bump("root.funnel.to_task")   # 站①（同上：dispatch 分母）
 		# ★means-end S5 委派（solo）：delegate candidate 贏 → 派子隊，母隊留守。
 		if td.get("delegate", false):
 			if _dispatch_goal_delegate(state, team, td):
@@ -3156,16 +3173,23 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			continue
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_IDLE, Vector2i(-1, -1), "idle_skip")   # Fix2b 早退 tap
+			if Probe.enabled and opt == "紮根": Probe.bump("root.funnel.pre_try_set_drop.idle_task")   # 站①→②守衛
 			continue
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
+			if Probe.enabled and opt == "紮根": Probe.bump("root.funnel.pre_try_set_drop.no_target")   # 站①→②守衛
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
-		if not TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "solo"):   # ★① 單一源(solo survival @80 preempt 安頓)
+		var _solo_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "solo")   # ★① 單一源(solo survival @80 preempt 安頓)
+		# ★A1 drop 儀器（站②）：紮根 argmax 贏了之後，try_set 到底過沒過、被哪一道擋。
+		#   結構列舉（四道拒絕各自留名），不逐隻抓。純觀測、Probe-gated。
+		if Probe.enabled and opt == "紮根":
+			Probe.bump("root.funnel.try_set_ok" if _solo_ok else "root.funnel.try_set_fail." + TaskArbiter.last_deny_reason())
+		if not _solo_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # Fix2b 早退 tap
 			continue
 		_stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
-		_commit_settle_site(state, team, td)   # ★§4a 紮根 commit-hook（try_set 已成功才到此）
+		_commit_settle_site(state, team, td, opt)   # ★§4a 紮根 commit-hook（try_set 已成功才到此）
 		# 掠奪/佔村/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（鏡射 _decide_unified）
 		if td.has("combat_target"): state.set_combat_target(team, int(td["combat_target"]))
 		if td.has("social_target"): state.set_social_target(team, int(td["social_target"]))
@@ -4956,6 +4980,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	_detect_survival_stall(state, team)
 	for opt in DecisionEngine.rank_survival(state, team):
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		if Probe.enabled and opt == "紮根": Probe.bump("root.funnel.to_task")   # 站①（同上：dispatch 分母）
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # 路徑維 tap：finder 撲空 attempt（churn 現形）
@@ -4967,6 +4992,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 				if _maybe_request_join_player(state, team):
 					return
 		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "survival")   # ★① 單一源(收 @80)
+		# ★A1 drop 儀器（站②）：紮根 argmax 贏了之後，try_set 到底過沒過、被哪一道擋。
+		#   結構列舉（四道拒絕各自留名），不逐隻抓。純觀測、Probe-gated。
+		if Probe.enabled and opt == "紮根":
+			Probe.bump("root.funnel.try_set_ok" if _surv_ok else "root.funnel.try_set_fail." + TaskArbiter.last_deny_reason())
 		if Probe.enabled and opt == "併入":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
 			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
 		if not _surv_ok:
@@ -4974,7 +5003,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		if _surv_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed")   # specimen tap（顯式 committed）
 			_stamp_survival_commit(state, team, opt)   # ② 蓋章 committed option baseline（單一源全 5 路之一）
-			_commit_settle_site(state, team, td)   # ★§4a 紮根 commit-hook（_surv_ok 為真才到此）
+			_commit_settle_site(state, team, td, opt)   # ★§4a 紮根 commit-hook（_surv_ok 為真才到此）
 			if td.has("combat_target"):
 				state.set_combat_target(team, int(td["combat_target"]))
 			if td.has("social_target"):
@@ -5020,16 +5049,22 @@ func _survival_food_days(state: WorldState, team: TeamData) -> float:
 # 若副作用先寫，會留下「tile 已標記施工、隊卻沒進 TASK_BUILD」的永久 zombie 工地
 # （_tick_construction 只在施工隊已死才清 orphan，隊活著只會一直「無施工隊、暫停」）。
 # 純寫自己站上的 tile + 自己的 corvee_site 記憶，零 RNG。
-func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> void:
+# ★A1 drop 儀器（站③，2026-08-25）：`opt` 由 caller 明示傳入，不再讀 `team.current_option`——
+#   unified 路在呼叫前就設好 current_option，但 subteam／solo 兩路是【呼叫之後】才設，
+#   靠它過濾會讀到上一輪的選項（instrument 自己說謊）。caller 手上就有 opt，直接傳。
+func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary, opt: String = "") -> void:
+	# funnel 分母：紮根真的走到 commit-hook 幾次（try_set 已成功）。
+	if Probe.enabled and opt == "紮根": Probe.bump("root.commit.entered")
 	if not td.has("settle_site"):
-		# ★注意：本 hook 對【每個成功 try_set】都會被呼叫，所以這顆若不過濾就會把所有非紮根 commit 也算進來
-		#   （上一輪 1101 就是這個假象）。只在當下選項真的是紮根時才算「掉了」。
-		if Probe.enabled and team.current_option == "紮根":
+		# ★`settle_site` 全樹只有 options.gd:229（紮根 to_task）產出 —— 窮盡確認過。
+		#   ⇒ 紮根走到這裡卻沒有 settle_site 結構上不可能；這顆是【有人加了早退】的告警金絲雀。
+		if Probe.enabled and opt == "紮根":
 			Probe.bump("root.commit_drop.no_settle_site")
 		return
 	var site: Vector2i = td["settle_site"]
 	var tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(site))
 	if tile == null:
+		if Probe.enabled and opt == "紮根": Probe.bump("root.commit_drop.tile_null")
 		return
 	if tile.construction_team_id == team.team_id and tile.construction_ticks_left > 0:
 		# recovery：自己的未完工程 → 只認回工地（工期不重置），走回去續建

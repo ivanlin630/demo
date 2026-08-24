@@ -52,15 +52,25 @@ static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
 # 嘗試設 task。優先權嚴格大於現任才搶得動（同層先到先得）。
 # state 供抗命判定讀 leader；回 true = 已設；false = 被現任擋下。
 # 呼叫端必須處理 false：被擋時不得執行配套副作用（prosperity_target_id 等）。
+# ★A1 建設族 drop 儀器（2026-08-21，純觀測、Probe-gated、零 RNG）：
+#   `try_set` 只回 bool，caller 看不出【被哪一道擋下】。
+#   四道拒絕各自留名，caller（紮根 dispatch 四路）在 false 時讀它並歸類 —— 結構列舉，不逐隻抓。
+#   ⚠ 只在 Probe.enabled 時寫；production 行為零改動。
+static var _deny_reason: String = ""
+static func last_deny_reason() -> String:
+	return _deny_reason
+
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "") -> bool:
 	if team.combat_target != -1:
+		if Probe.enabled: _deny_reason = "combat_lock"
 		return false   # 戰鬥鎖絕對（combat 結束流程清 combat_target）
 	# crisis-override 免疫窗：剛 crisis-released 的 task 短時間禁重委派（防同 cadence release-then-instant-recommit：
 	# defection「等待新領主」/solo FLEE 子系統立刻打回原 task → survival 永無機會）。只擋「同一 task」→ survival
 	# 選別的 task（覓食/買糧…）不受阻，順利接住餓死隊。到期自動解。
 	if new_task == team.crisis_released_task and team.crisis_released_task != "" \
 			and state.world.current_tick < team.crisis_released_until:
+		if Probe.enabled: _deny_reason = "crisis_immunity"
 		return false
 	# ★持守統一 Slice 3 門檻式（§6）：committed progressive 動作（persist_strength 高）擋【非危機】搶班，完成優先。
 	# 危機 axis（任一側 ≥PRIO_THREAT：combat/survival/threat）不介入=守命/背水一戰；玩家命令（PRIO_PLAYER）authority 不擋；
@@ -72,7 +82,9 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			and priority < PRIO_THREAT and team.task_priority < PRIO_THREAT \
 			and priority != PRIO_PLAYER \
 			and team.persist_strength > PERSIST_HOLD_THRESHOLD:
-		if Probe.enabled: Probe.bump("persist.hold")
+		if Probe.enabled:
+			Probe.bump("persist.hold")
+			_deny_reason = "persist_hold"
 		return false
 	if team.current_task == TeamData.TASK_IDLE or priority > team.task_priority:
 		# 漏斗站4探針（純觀測）：TRADE 在途被搶 → 記誰搶走（new_task|source）
@@ -84,6 +96,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.task_priority = priority
 		team.task_reason = _source
 		team.task_start_tick = state.world.current_tick
+		if Probe.enabled: _deny_reason = ""
 		return true
 	# A1a source-gated equal-priority self-replace：引擎每 cadence 的 rank[0] 同層換掉
 	# 引擎自己派的 task（腦選、手無條件執行）。兩側都要 engine-owned：新 source 在白名單、
@@ -104,6 +117,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.task_priority = priority
 		team.task_reason = _source
 		team.task_start_tick = state.world.current_tick
+		if Probe.enabled: _deny_reason = ""
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
 	if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH:
@@ -120,6 +134,8 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			# 壓抑：慾望轉 stress/unrest（餵既有叛變管線；stress 進 desire 公式 → 憋多了爆）
 			leader.stress = minf(leader.stress + 0.05, 1.0)
 			UnrestBank.add(team, 1, "task")
+	# ★到這裡＝沒有被前三道擋，是【優先序不足／同層搶班失敗】（含抗命被壓抑那支）。
+	if Probe.enabled: _deny_reason = "priority_or_sametier"
 	return false
 
 
