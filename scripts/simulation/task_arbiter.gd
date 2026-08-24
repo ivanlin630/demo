@@ -52,6 +52,23 @@ static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
 # 嘗試設 task。優先權嚴格大於現任才搶得動（同層先到先得）。
 # state 供抗命判定讀 leader；回 true = 已設；false = 被現任擋下。
 # 呼叫端必須處理 false：被擋時不得執行配套副作用（prosperity_target_id 等）。
+# ★convoy 票儀器（2026-08-25，純觀測、Probe-gated、零 RNG）：
+#   ★第一趟只要一格分佈：RETURN 期間 `current_task` 被改寫時【走哪一條路】。
+#   窮盡確認（`grep -rn "current_task = " --include=*.gd scripts/simulation/`）：
+#   對一支【已存在】的 porter 而言，寫入路只有 `try_set` / `release` / `transition` 三條
+#   （其餘命中是「新隊建立豁免」與 recruit_tutorial，寫的是別的隊；decision_context 那筆是【讀】）。
+#   ⇒ 這三顆掛滿 ＝ 母體完整，沒有「其他」那一格。
+static func _note_convoy_rewrite(team: TeamData, path: String, new_task: String) -> void:
+	if String(team.task_extra_data.get("convoy_phase", "")) != "RETURN":
+		return
+	if new_task == team.current_task:
+		return   # 同 task（更新 target）不算改寫
+	Probe.bump("convoy.rewrite." + path)
+	Probe.bump("convoy.rewrite.%s.%s" % [path, new_task])
+	Probe.bump_sample("convoy.rewrite", {"team": team.team_id, "path": path,
+		"from": team.current_task, "to": new_task, "from_prio": team.task_priority,
+		"reason": team.task_reason, "persist": snappedf(team.persist_strength, 0.001)}, 40)
+
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "") -> bool:
 	if team.combat_target != -1:
@@ -83,6 +100,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
+		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
 		team.task_start_tick = state.world.current_tick
 		return true
 	# A1a source-gated equal-priority self-replace：引擎每 cadence 的 rank[0] 同層換掉
@@ -103,6 +121,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
+		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
 		team.task_start_tick = state.world.current_tick
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
@@ -113,6 +132,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			team.current_task = new_task
 			team.move_target = move_target
 			team.task_priority = priority
+			if Probe.enabled: _note_convoy_rewrite(team, "try_set_defy", new_task)
 			team.task_reason = "defy_" + _source
 			team.task_start_tick = state.world.current_tick
 			return true
@@ -125,6 +145,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 
 # task 完成 / 取消 / 釋放條件達成 → 回 idle + priority 歸 0
 static func release(team: TeamData) -> void:
+	if Probe.enabled: _note_convoy_rewrite(team, "release", TeamData.TASK_IDLE)
 	team.current_task = TeamData.TASK_IDLE
 	team.move_target = Vector2i(-1, -1)
 	team.task_priority = 0
@@ -146,6 +167,7 @@ static func transition(state: WorldState, team: TeamData, new_task: String, prio
 		return                                                # crisis-免疫（補 transition 洩漏，對齊 try_set:45）
 	if team.task_priority >= PRIO_THREAT and priority < team.task_priority:
 		return                                                # emergency-respect：擋外部低 prio in-place stomp
+	if Probe.enabled: _note_convoy_rewrite(team, "transition", new_task)
 	team.current_task = new_task
 	team.task_priority = priority
 	team.task_reason = _source

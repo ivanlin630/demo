@@ -2741,6 +2741,20 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 # ──────── 子團自主 AI ────────
 
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	# ★★convoy 票儀器（2026-08-25）：systems 立的「margin 轉不動的量」＝ RETURN 期間 task 還是不是運輸。
+	#   ★★掛在【這裡】而不是 `_tick_convoy` 裡：`_tick_convoy` 的呼叫條件本身就是
+	#   `current_task == TASK_CONVOY` ⇒ 在那裡數分母 ＝ 只數到「task 還是運輸的」
+	#   ⇒ 佔比恆等於 100%，是【選擇偏差的同語反覆】，不是答案。
+	#   （第一版就掛在那裡，day25 量到 886/886＝100%；先自己戳破才沒報出去。）
+	if Probe.enabled and String(sub.task_extra_data.get("convoy_phase", "")) == "RETURN":
+		Probe.bump("convoy.return_tick")
+		if sub.current_task == TeamData.TASK_CONVOY:
+			Probe.bump("convoy.return_task_is_convoy")
+		else:
+			Probe.bump("convoy.return_task_other." + sub.current_task)
+			Probe.bump_sample("convoy.return_task_other", {"team": sub.team_id,
+				"task": sub.current_task, "reason": sub.task_reason,
+				"tick": state.world.current_tick}, 40)
 	# ②a 信使外交：envoy_proposal 子隊追蹤刷新 target best_estimate + 自配 timeout（新 invariant 自守）
 	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "envoy_proposal":
 		_tick_envoy(state, sub, merge_queue)
