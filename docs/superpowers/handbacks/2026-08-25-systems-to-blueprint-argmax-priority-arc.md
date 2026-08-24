@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★連兩張票的原假設都被自己的第一趟推翻,真根收斂到【argmax 層排不上隊】= arc 級;附一個我該認的錯 + release() 59 caller 旁路所有 guard
 ---
 
