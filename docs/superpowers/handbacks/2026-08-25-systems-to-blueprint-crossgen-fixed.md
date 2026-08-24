@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 跨代縫已修(兩支都改,機械判代不用等逾時) + 通則入 07/memory + 去文明化 acceptance 頭條已升格進兩張票
 ---
 
