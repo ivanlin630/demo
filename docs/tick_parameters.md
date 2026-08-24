@@ -150,8 +150,8 @@
 | 常數 | 用途 | code |
 |---|---|---|
 | `FAMINE_NEED_GAIN` | food need 飢餓放大上限（瀕餓 ×(1+GAIN)、measurer bounded max 3.0） | `decision/need_oracle.gd` |
-| forage 衰減錨 | `survival_pressure` 隨 food_days 衰減、錨 `SURVIVAL_RECOVER_DAYS`(=SLACK_COMFORT_DAYS 7、<7 floor 1.0/≥14→0) | `decision/terms.gd` |
-| `CAMP_MARGINAL_CAP`/`CAMP_URGENCY_DAYS` | 紮營 drive 封頂(bound 1.5)/緊迫度尺(=PROVISION_DAYS 10) | `decision/terms.gd`+`marginal_economy.gd` |
+| forage 衰減錨 | `survival_pressure` 隨 food_days 衰減、錨 `SURVIVAL_RECOVER_DAYS`(=SLACK_COMFORT_DAYS 7、<7 floor 1.0/≥14→0)。★覓食/遷移找糧已改走折現尺(腳下 tile 真實日產,含 `wild_game` 被動小獵)，此衰減式僅餘其他 option 用 | `decision/terms.gd` |
+| `CAMP_MARGINAL_CAP` | 紮營 drive 封頂(bound 1.5)。★`CAMP_URGENCY_DAYS` 已刪：四選項改用 `DiscountedFlow.flow_utility` 的同視野口糧現值正規化(utility=幾倍餬口)，緊迫度尺零 caller | `decision/terms.gd`+`decision/discounted_flow.gd` |
 | `LABOR_CADENCE` | tile labor_alloc 重算週期(3 天)；★settle 落腳即 `ensure_fresh` 避新居民首窗硬零 | `labor_system.gd` |
 
 *註：本檔 value 易 drift，一律以 code const 為準（glance-aid B）。*

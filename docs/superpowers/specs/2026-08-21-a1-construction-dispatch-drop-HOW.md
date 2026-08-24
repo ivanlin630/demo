@@ -79,3 +79,43 @@ topic: A1 建設族 —— 「紮根 argmax 贏 8 → 真開工 1」的 7 個 dr
 ## §6 閘
 `headless` ／ `det×3` fp ／ `constitution_gate` ／ `seam-gate`（**HARD**）／
 ★**tap 全部 Probe-gated**，且**不得耗 global RNG**（觀測禁改被觀測物）。
+
+---
+
+## §B ★★分佈回來了：**本票原始 scope【證偽】，重新定義**（2026-08-25）
+
+**實測**（`peaceful_economy` / 1337 / 90d，殘差稽核 **＝ 0 ⇒ 列舉完整**）：
+```
+argmax won = 5      (lost_to 合計 111：備戰24/workshop21/覓食17/返家14/貿易10/…)
+dispatch    = 9     ★比 argmax 多 4 —— 迴圈 fallthrough，紮根有 4 次以【次佳】被試
+守衛 drop   = 0
+try_set     ok 6 / fail 3   （persist_hold 1、同層搶班 2、★combat_lock 0、crisis_immunity 0）
+commit      entered 6，五種 early-return 全部 = 0（含 resume 2 ＝ 認回自己工地、非 drop）
+            ⇒ ★獨立紮根機會 = 4，全部 start，站③ drop 率 0.0%
+工期        start 4 → complete 1 → outpost.l0_to_l1 1
+```
+
+### ⚠️ 訂正一：**票面「贏 8 → 開工 1」的 8 與 1 都要重新定義**
+同床同 seed 實測是 **9 dispatch / 4 start / 1 complete**。
+（票面那組是 `b968f492` 的舊數字，已被後續 commit 取代。）
+★**`won_argmax` 不是機會數** —— dispatch 還有 fallthrough；`entered` 含 resume。**母體語意要先講清楚才能談 drop 率。**
+
+### ⚠️ 訂正二：**§3 的高嫌疑假說 ③(d)【推翻】**
+`root.commit_drop.no_camp = **0 / 4**`。
+「決策時 `can_settle_here` 真、commit 時 `camp_level` 已掉」**一次都沒發生**。
+⇒ ★**它不是 camp 棄置率的同一顆病。**（implementer 也主動收回自己「兩條線併一顆」的推測。）
+
+### ⚠️ 訂正三：**「手不聽腦第 4 型」在這條路上本輪只值 3 次，且機制不是預期的那個**
+不是 combat 鎖／crisis 免疫窗（**兩者皆 0**），是 **persist hold 1 ＋ 同層搶班 2**
+⇒ 若要修是 `persist_strength` / `priority` 層，**不是 arbiter 的鎖**。**量級太小，本輪不開藥。**
+
+## §C 本票結案方式
+- ★**原始 scope（找 commit／仲裁端的 7 個 drop）＝ 證偽，無病可修。**
+- ★**但票不是白開**：它產出了**完整列舉的漏斗儀器 ＋ 殘差稽核 = 0**，
+  **這是永久資產** —— 以後任何人問「紮根為什麼沒發生」都有現成分佈可讀。
+- ★**真病灶已定位：工期端（`start 4 → complete 1`，流失 75%）**
+  ⇒ **移交 `camp-construction-duration` 票**（該票 §4 早已寫死排序：
+  **必須排在 `build-eta-single-source` 之後**，否則棄工原因會被 `persist_strength:95` 的 24× 高估蓋掉）。
+- **`construct.stall` 需要 per-action 維度**（implementer 正確拒絕把跨所有工程的 12.4:1 總計套到紮根身上；
+  `construct.start 23` vs `settlement.l0_to_l1_start 4` ⇒ 紮根只佔一小部分）⇒ **列為工期票的前置量測。**
+

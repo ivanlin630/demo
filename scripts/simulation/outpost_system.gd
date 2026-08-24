@@ -375,6 +375,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			OutpostOwnerBank.set_owner(tile, int(tile.construction_target.get("owner", team.team_id)), "construct")
 			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
 			tile.camp_level = 0        # ★S2b：L0 消融進 L1（完工清 camp flag、L1 outpost_level 接手）
+			if Probe.enabled: Probe.bump("outpost.l0_to_l1")   # ★gate3：晉級率（真的長成村，不是蓋了就丟）
 			tile.camp_team_id = -1     # ★§4c：L0 生命週期結束（升 L1）→ 清起建隊欄
 			tile.camp_ticks_left = 0
 			team.corvee_site = Vector2i(-1, -1)   # ★S2b：工程完成→清工地記憶

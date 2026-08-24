@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: ★MERGE 准 — 對帳結案(以 measurer 為準,你的舊數字作廢);但驗收要照實寫:這刀掙到的是 ①,②③沒有實質改善
 ---

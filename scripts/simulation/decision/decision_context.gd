@@ -54,7 +54,25 @@ var farmable_pos: Vector2i = Vector2i(-1, -1)
 # ★A1 紮營價值=MarginalEconomy 真帳：靶 farmable tile 的純 est（terrain=belief 地理、outpost1/farming0、pop）+ 覓食餬口日產 floor。
 var camp_target_est: VillageEstimate = null   # 無靶→null（保守不行動）
 var camp_forage_floor: float = 0.0
+# ★折現原語（脊椎第一磚）：真實現狀三量——基準線／淨流／存糧。★baseline 是【真實被動所得】，
+# 無據點且無營地 ⇒ 0（實測那些隊就是 0），不再拿「假想覓食餬口」當替代方案。
+var passive_food_daily: float = 0.0
+# ★四選項同尺（camp-stay-brick v2）：每個選項「選了之後拿得到多少食物流」的【真實】素材。
+# 血統①：全部走 MarginalEconomy._inflow_est / tile 實際量，禁再造第二份產能常數。
+var forage_yield_here: float = 0.0       # 覓食：腳下 tile 的真實可採日流（★在自家營地 vs 荒地必須不同價）
+var forage_yield_target: float = 0.0     # 遷移找糧：目標 tile 的真實可採日流
+# ★遷移找糧的流【要走過去才接上】＝到目標的路程日數（systems 裁定 2026-08-21：spec 四選項表漏了這條，
+#   「現成的流打贏要等的流」對它一樣適用）。用既有 `_hex_dist`，零新旋鈕。
+var food_seek_delay_days: float = 0.0
+var join_host_flow: float = 0.0          # 投靠：host 村的被動流（現成、無工期）
+var occupy_target_flow: float = 0.0      # 佔村：那個村的實際產能（非二值常數）
+var net_food_flow: float = 0.0
+var food_stock: float = 0.0
 var camp_site_quality_mult: float = 1.0   # ★§4c：紮營靶地的選址記憶乘子（1.0=無記憶/已過期）
+# ★紮營的流【要等多久才接上】＝走到靶地的路程 + L0→L1 紮根工期（既有常數，零新旋鈕）。
+#   `camp_target_est` 估的是 outpost_level=1 的村產 ⇒ 那份流在紮根完成前根本不存在；
+#   spec 四選項表寫明「投靠/佔村＝現成 0；紮營/建設＝工期」，折現天然懲罰等待。
+var camp_flow_delay_days: float = 0.0
 # ★§4a 紮根（L0→L1 建點入引擎）：物理可行性 + 可行性帳素材。全部 own-state（腳下 tile=自己站著＝親見最高信、
 # 自己的 corvee_site 記憶、自己的 food_runway），零 god-view、零新旋鈕（ETA 讀既有 L0_TO_L1_CORVEE_DAYS）。
 var can_settle_here: bool = false            # 站自己 L0 營地 + 該格無據點 + 無人施工 + 非玩家隊
@@ -372,7 +390,47 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		if _ftile != null:
 			c.camp_target_est = VillageEstimate.make(_ftile.terrain, 1, 0, team.population)
 			c.camp_site_quality_mult = SettlementMemory.quality_multiplier(state, team, _ftile.tile_id)   # ★§4c 反饋（紮營靶地）
+			# 走過去的路程 + 紮根工期（沿用 settle_eta_days 的同一組既有常數）
+			c.camp_flow_delay_days = float(FactionAISystem._hex_dist(team.tile_pos, _ft)) 				+ float(FactionAISystem.L0_TO_L1_CORVEE_DAYS)
 	c.camp_forage_floor = ResourceSystem._forage_subsist_buffer(team) / ResourceSystem.FORAGE_FLOOR_DAYS   # 日產同源
+	# ★折現原語（第一磚）需要的三個【真實現狀】量：基準線不再用「假想覓食吃得飽」。
+	c.passive_food_daily = 0.0
+	var _ptile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if c.has_own_outpost:
+		c.passive_food_daily = MarginalEconomy._inflow_est(VillageEstimate.make(
+			_ptile.terrain if _ptile != null else "plains",
+			maxi(_ptile.outpost_level if _ptile != null else 1, 1), 0, team.population))
+	elif _ptile != null and _ptile.camp_level > 0:
+		c.passive_food_daily = ResourceSystem.L0_FORAGE_MULT * float(_ptile.resources.get("food", 0))
+	c.net_food_flow = team.food_flow_avg          # 日均淨食物流（已含消耗）
+	# ★覓食＝腳下 tile 的真實所得：有自家營地 ⇒ L0 被動採集；否則 ⇒ 主動覓食可得（同一個 tile 池，位置有差）
+	# 覓食日產的【單一源】＝既有 _forage_subsist_buffer / FORAGE_FLOOR_DAYS（＝pop×食/人/日），
+	# ★但要讓位置有差：實得受該 tile 現有食物池上限；站自家 L0 營地則走被動採集率。
+	var _forage_rate: float = ResourceSystem._forage_subsist_buffer(team) / ResourceSystem.FORAGE_FLOOR_DAYS
+	if _ptile != null:
+		c.forage_yield_here = _tile_forage_yield(_ptile, _forage_rate)
+	var _seek: Vector2i = c.food_seek_target
+	if _seek != Vector2i(-1, -1):
+		var _stile: HexTileData = state.world.tiles.get(_seek.x * 1000 + _seek.y)
+		if _stile != null:
+			c.forage_yield_target = _tile_forage_yield(_stile, _forage_rate)
+			c.food_seek_delay_days = float(FactionAISystem._hex_dist(team.tile_pos, _seek))
+	# ★投靠＝host 村的被動流（現成、無工期）；★佔村＝目標村的實際產能（非死常數）
+	if c.strong_neighbor_id != -1:
+		var _host: TeamData = state.teams.get(c.strong_neighbor_id)
+		if _host != null:
+			var _htile: HexTileData = state.world.tiles.get(_host.tile_pos.x * 1000 + _host.tile_pos.y)
+			if _htile != null and _htile.outpost_level > 0:
+				c.join_host_flow = MarginalEconomy._inflow_est(VillageEstimate.make(
+					_htile.terrain, _htile.outpost_level, 0, _host.population)) / maxf(float(_host.population), 1.0) 					* float(team.population)   # host 的人均流 × 我要帶過去的人數
+	if c.occupy_target_id != -1:
+		var _vt: TeamData = state.teams.get(c.occupy_target_id)
+		if _vt != null:
+			var _vtile: HexTileData = state.world.tiles.get(_vt.tile_pos.x * 1000 + _vt.tile_pos.y)
+			if _vtile != null:
+				c.occupy_target_flow = MarginalEconomy._inflow_est(VillageEstimate.make(
+					_vtile.terrain, maxi(_vtile.outpost_level, 1), 0, _vt.population))
+	c.food_stock = ResourceSystem.effective_food(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.strong_farm", _tg)
 	var _aid: int = _fa._find_aid_target(state, team)
 	c.has_aid_target = _aid != -1
@@ -691,3 +749,17 @@ static func _home_granary_food(state: WorldState, team: TeamData) -> float:
 		if tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
 			return float(tile.public_storage.get("food", 0))
 	return 0.0
+
+
+# ★覓食日產的【單一源】：站在這格、選「覓食」之後真正拿得到的食物日流。
+#   實際發生的兩條路（`ResourceSystem` collect 迴圈）——
+#   ①自家 L0 營地 ⇒ 腳下 food 池 × L0_FORAGE_MULT（池竭→採量遞減）
+#   ②無據點狩獵 ⇒ `HuntSystem` 被動小獵，淨貢獻 latch 在 subsistence buffer ⇒ 可持續日流＝餬口率
+#   ★兩條都沒有（無營地、無獵物、池空）⇒ 0：這正是「在荒地覓食 ≠ 在營地覓食」的位置差。
+static func _tile_forage_yield(tile: HexTileData, forage_rate: float) -> float:
+	var pool: float = float(tile.resources.get("food", 0))
+	if tile.camp_level > 0 and pool > 0.0:
+		return ResourceSystem.L0_FORAGE_MULT * pool
+	if int(tile.resources.get("wild_game", 0)) > 0:
+		return forage_rate            # 獵物在 ⇒ 餬口地板拿得到（超額不 bank，見 HuntSystem buffer latch）
+	return minf(pool, forage_rate)

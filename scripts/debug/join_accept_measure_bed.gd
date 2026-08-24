@@ -108,14 +108,18 @@ func _run() -> void:
 	else:
 		lines.append("    (無sample，本輪求生蓋田閘從未走到這一步)")
 	# ★systems票(★最高優先)：CAMP_MARGINAL_CAP saturation率——擋著de-patch決策的那顆
+	# ★key 改名（camp-access merge 2026-08-25）：`camp_marginal.*` 那組掛在已被取代的
+	#   `marg/urgency` 公式上，隨折現版一起消失。新 key 語意也變了——
+	#   `raw_ratio` 現在是「這個選項相當於幾倍餬口」（同視野口糧現值正規化），
+	#   ≥1.5 才夾頂；舊的 35% 大部分是量綱錯，兩個數字【不可直接相比】。
 	lines.append("★★CAMP_MARGINAL_CAP(=1.5) saturation率：")
-	var cm_eval: int = int(Probe.counts.get("camp_marginal.eval", 0))
-	var cm_sat: int = int(Probe.counts.get("camp_marginal.saturated", 0))
-	lines.append("  camp_marginal.eval(camp_drive term被評估總次數) = %d" % cm_eval)
-	lines.append("  camp_marginal.saturated(raw_ratio>=CAP次數)     = %d (%.1f%%)" % [cm_sat, 100.0*cm_sat/maxf(cm_eval,1)])
-	if Probe.samples.has("camp_marginal.ratio_sample"):
+	var cm_eval: int = int(Probe.counts.get("discount.camp_evaluated", 0))
+	var cm_sat: int = int(Probe.counts.get("discount.camp_capped", 0))
+	lines.append("  discount.camp_evaluated(camp_drive term被評估總次數) = %d" % cm_eval)
+	lines.append("  discount.camp_capped(raw_ratio>=CAP次數)     = %d (%.1f%%)" % [cm_sat, 100.0*cm_sat/maxf(cm_eval,1)])
+	if Probe.samples.has("discount.camp_ratio_sample"):
 		var ratios: Array = []
-		for smp5 in (Probe.samples["camp_marginal.ratio_sample"] as Array):
+		for smp5 in (Probe.samples["discount.camp_ratio_sample"] as Array):
 			ratios.append(float(smp5.get("raw_ratio", 0.0)))
 		ratios.sort()
 		if ratios.size() > 0:

@@ -152,8 +152,13 @@ owner: blueprint(WHAT 清單本體);現況欄=systems 驗證權威
 ### 兩段各有 owner（**不再掛 camp-access 估值層**）
 | 段 | 歸屬 | 為什麼 |
 |---|---|---|
-| **`8 → 1`** | ★**A1 建設族**（＋B6）＝**手不聽腦第 4 型本尊** | 建設 argmax 贏、`try_set` noop —— **既列，現在有硬數字了** |
-| **`1 → 0`** | **camp-access 工期票**（新開） | 工期端，**與 75% 棄置同源**（人走了工地就停） |
+| ~~**`8 → 1`**~~ | ~~A1 建設族~~ ⇒ ★**證偽，2026-08-25** | 分佈實測：**commit／仲裁端 drop ＝ 0**；`try_set` fail 僅 3（persist hold 1 ＋ 同層搶班 2，**combat 鎖/crisis 免疫窗皆 0**）。**無病可修。** |
+| **`start → complete`** | ★**`camp-construction-duration`（工期票）＝ 真兇** | 實測 **`4 start → 1 complete`（流失 75%）** —— 漏斗真正的斷點在**工期端**，不在 dispatch |
+| ★**棄置率 89%→92%** | ★**改掛工期票**（原掛 A1，**A1 證偽後改掛**） | 同機制家族：**無人在場 ⇒ `camp_ticks_left` 遞減**；與「人走了工地就停」同源 |
+
+> ★**母體語意訂正**：票面「贏 8 → 開工 1」的 **8 與 1 都是舊 commit 的數字**。
+> 同床同 seed 實測是 **9 dispatch / 4 start / 1 complete**
+> （`won_argmax = 5` **不是機會數**——dispatch 有 fallthrough；`entered 6` 含 `resume 2`）。
 
 ### 勾銷條件
 **兩票落地後同床重量**，`outpost.l0_to_l1 > 0` 才勾。
