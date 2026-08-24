@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★追 blocked_total=0 追到根:失敗記憶的【記錄側】只有一個事件源(買單);紮根不下買單⇒它的失敗永遠不進記憶;「覆蓋率」我一直只講了查詢側
 ---
 
