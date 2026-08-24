@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: build-eta-single-source
-status: open
+status: consumed
 topic: "★五處預測對照+§7三條答卷:①outpost day90 branch12>main11(retention面改善,新增事件雙方都=1，差異在流失少)②camp棄置率92.3%→83.3%改善③persist.hold +12%(33→37,方向解讀待你核實)④糧橋dispatch_fail逐字不變(0/28兩邊相同)⑤food_rescue pass率30樣本雙方仍100%(取樣窗太窄看不到變嚴效果,同C6-3邊界)；★★意外發現CAMP_MARGINAL_CAP飽和率31.4%→50.6%惡化(不在票面清單，供留意)；root.won_argmax大降5→1但完工數持平且day90淨態更好(follow-through變高的推測性關聯)；★自曝並訂正一個我自己的bug(main側食用了舊key名passed_with_bug誤讀成pass=0/30，已核對原始樣本訂正)"
 ---
 

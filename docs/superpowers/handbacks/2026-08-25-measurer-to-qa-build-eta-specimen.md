@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: build-eta-single-source
-status: open
+status: consumed
 topic: "★build-eta-single-source specimen直寄：day90 outpost淨態branch12>main11(retention改善)+棄置率92.3%→83.3%改善+root.won_argmax大降5→1但完工數持平——值得挑那個day90多出來的outpost所在隊(還是同一隊team8+tile13006，還是別的隊被保住)看動作序列；★意外發現CAMP_MARGINAL_CAP飽和率31.4%→50.6%惡化"
 ---
 
