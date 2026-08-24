@@ -5104,9 +5104,15 @@ func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> v
 		return
 	if tile.camp_level != 1 or tile.outpost_level > 0 or tile.construction_team_id != -1:
 		# ★驗收#1（l0_to_l1 二值）的解釋層：紮根【贏了 argmax 卻沒落地】要分因，不能只看到 0。
-		if Probe.enabled:
-			var _why: String = "no_camp" if tile.camp_level != 1 else ("already_outpost" if tile.outpost_level > 0 else "occupied_by_other")
-			Probe.bump("root.commit_drop." + _why)
+		var _why: String = "no_camp" if tile.camp_level != 1 else ("already_outpost" if tile.outpost_level > 0 else "occupied_by_other")
+		if Probe.enabled: Probe.bump("root.commit_drop." + _why)
+		# ★★記錄側擴（blueprint 裁 2026-08-25）：失敗律原文本來就要求「仲裁拒單／組隊失敗／資源不足／路不通 → 必反饋」
+		#   —— 枚舉早就含非買單類；記錄側只接了買單一源，那正是「機制已立 ≠ 已覆蓋」。
+		#   ★這裡是【紮根真的試了但沒落地】＝ 執行型（不是前提型：不是世界沒備妥，是搶輸／情境變了）⇒ 照折 exact-pair。
+		#   ★acceptance 明列：紮根失敗要【真的出現在記憶裡】。
+		if team.current_dispatch_id != "":
+			FailureMemory.record(state, team, team.current_dispatch_id, team.current_dispatch_target,
+				SubteamSystem.founding_timeout(1), "root_commit_" + _why)
 		return   # 情境已變（他隊先蓋/已升級）→ 不落地（下 cadence 重評）
 	# 建點 type by leader 好戰/野心（沿用 establish_crude_camp 慣例、非新旋鈕）
 	var leader: PersonData = state.persons.get(team.leader_id)
