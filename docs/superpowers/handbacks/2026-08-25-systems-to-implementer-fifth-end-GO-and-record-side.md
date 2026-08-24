@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: rooting-fifth-end-same-ruler
 topic: ★第五端 GO(分佈混合但同池坐實 3.7~5.2 倍) — ★★但兩個尺差別混為一談,本票不解決第二個;另附記錄側擴的裁定
 ---
