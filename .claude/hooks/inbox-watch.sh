@@ -73,6 +73,13 @@ START_TS=$(date +%s)
 prev_pid=""; prev_sid=""
 if [ -f "$LOCK" ]; then IFS=$'\t' read -r prev_pid prev_sid _ < "$LOCK" 2>/dev/null; fi
 prev_pid="${prev_pid:-}"; prev_sid="${prev_sid:-}"
+# ★跨代偵測（同 watchdog v4，用戶 2026-08-25 抓到的縫）：
+#   「前任將於下輪自退」只有在【前任也跑新版】時成立。舊版 watcher 不讀 lock 歸屬、永不讓位
+#   ⇒ 新舊並存、同一封信吐兩次。★機械判代：本版寫 3 欄（pid/sid/cpid），欄數 < 3 ＝ 舊代。
+LOCK_FIELDS_CUR=3
+prev_fields=0
+[ -f "$LOCK" ] && prev_fields="$(awk -F'\t' 'NR==1{print NF; exit}' "$LOCK" 2>/dev/null || echo 0)"
+prev_fields="${prev_fields:-0}"
 
 _watcher_alive() { [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null; }
 
@@ -85,6 +92,12 @@ fi
 printf '%s\t%s\t%s\n' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
 if [ -n "$MYSID" ] && [ -n "$prev_sid" ] && [ "$prev_sid" = "$MYSID" ]; then
   echo "[inbox-watch] ✅ ARMED role=${ROLE_KEY} pid=$$（前任同 session 但已死，已接手）"
+elif [ -n "$prev_pid" ] && [ "$prev_fields" -lt "$LOCK_FIELDS_CUR" ] 2>/dev/null; then
+  # ★舊代前任：它【不會】自退 ⇒ 不可輸出「將於下輪自退」那句安撫話（那是跨代下的假話）
+  echo "[inbox-watch] ✅ ARMED role=${ROLE_KEY} pid=$$（已接管 lock）"
+  echo "[inbox-watch] 🔺 但需人工介入：前任 pid=${prev_pid} 是【舊版 watcher】（欄數 ${prev_fields} < ${LOCK_FIELDS_CUR}）"
+  echo "               舊版不讀 lock 歸屬、永不讓位 ⇒ 新舊並存、同一封信會吐兩次。"
+  echo "               處置：TaskStop 那個舊 Monitor task（pid=${prev_pid}）。"
 elif [ -n "$prev_pid" ]; then
   echo "[inbox-watch] ✅ ARMED role=${ROLE_KEY} pid=$$（前任 pid=${prev_pid}${prev_sid:+ sid=${prev_sid%%-*}…} 將於下輪自退）"
 else

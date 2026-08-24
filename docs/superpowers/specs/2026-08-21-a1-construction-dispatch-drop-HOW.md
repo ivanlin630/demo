@@ -64,6 +64,18 @@ topic: A1 建設族 —— 「紮根 argmax 贏 8 → 真開工 1」的 7 個 dr
 - `1 → 0`（工期端）→ **`camp-access` 工期票**（另開，不併）
 - `subteam-idle-latch`（B6 另一半舊帳）→ 不動
 
+## §A ★★acceptance 頭條（blueprint 升格 2026-08-25）
+
+**普查坐實**：`peaceful` 90 天 **outpost day0 ＝ 11 → day90 ＝ 9、中途新增 ＝ 0**
+⇒ ★**這個世界只會失去據點、不會產生據點**（文明化從未發生、去文明化正常運作）。
+**併同 `construct.progress 344 / stall 5871 ＝ 94.5% 停滯`。**
+
+⇒ **本票與另一票（A1 建設族 ／ camp 工期）的 acceptance 頭條升格為**：
+> ★**「從無到有蓋成一個 outpost」＞ 0 —— 文明化二值閘。**
+
+**二值、無旋鈕可假造**（同 §7 #1 的設計理由）。**兩票落地後同床重量。**
+★**blueprint 明示不開新案**：修法就是這兩票，**排程零調整**。
+
 ## §6 閘
 `headless` ／ `det×3` fp ／ `constitution_gate` ／ `seam-gate`（**HARD**）／
 ★**tap 全部 Probe-gated**，且**不得耗 global RNG**（觀測禁改被觀測物）。

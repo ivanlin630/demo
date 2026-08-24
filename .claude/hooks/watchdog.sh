@@ -43,12 +43,26 @@ dur() { local s=${1:-0}
   if [ "$s" -lt 3600 ] 2>/dev/null; then echo "$((s/60))m"; else echo "$((s/3600))h$(((s%3600)/60))m"; fi; }
 
 # ── 單例：每 tick 重搶。搶不到不退出（下 tick 再搶）⇒ 前任死掉會自動接手 ────
+# 回傳：0=搶到 / 1=同代持有(它會自退) / 2=★舊代持有(它【不會】自退，需人工 TaskStop)
+#
+# ★跨代縫（用戶 2026-08-25 抓到，額度斷電四天期間曝光）：
+#   v4「新的一定贏」的前提 ＝ 舊方也跑 v4、會讀 lock 歸屬而自退。
+#   跨代時舊方是 v3（compact 前 Monitor 起的常駐舊碼）：不讀 lock 歸屬、永不讓位、每 poll 還 touch
+#   ⇒ lock 永遠新鮮 ⇒ v4 永遠停在「待命」，而 v3 照舊每 5h 響 14 連發。
+#   ⇒ 這是【對稱升級假設】的失敗 —— 跨代才是常態，不是例外。
+# ★機械判代訊號：v4 寫【3 欄】pid/sid/cpid；欄數 < 3 ＝ 舊代。
+#   （優於「等 N 輪逾時」：不必等，當場判得出來。）
+LOCK_FIELDS_V4=3
 claim_lock() {
-  local cur age
+  local cur age nf
   cur="$(cut -f1 "$LOCK" 2>/dev/null)"
   if [ -n "$cur" ] && [ "$cur" != "$$" ]; then
     age=$(( $(date +%s) - $(stat -c %Y "$LOCK" 2>/dev/null || echo 0) ))
-    [ "$age" -lt $(( POLL_S + 120 )) ] && return 1
+    if [ "$age" -lt $(( POLL_S + 120 )) ]; then
+      nf="$(awk -F'\t' 'NR==1{print NF; exit}' "$LOCK" 2>/dev/null)"
+      [ -n "$nf" ] && [ "$nf" -lt "$LOCK_FIELDS_V4" ] 2>/dev/null && return 2
+      return 1
+    fi
   fi
   printf '%s\t%s\t%s\n' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
   return 0
@@ -115,19 +129,37 @@ announce() {
   echo "[watchdog v4] ✅ ARMED sid=${MYSID} pid=$$（poll $(dur $POLL_S) / DEAD $(dur $T_DEAD) / UNRESP $(dur $T_UNRESP) / IDLE $(dur $T_IDLE) / MAXRUN $(dur $T_MAX_RUN)）"
 }
 
-last_class="OK"; last_fire=0; run_since=0; standby_said=0
+# ★待命升級參數（跨代不必等、當場判；同代久不讓位才逾時升級）
+STANDBY_MAX_ROUNDS="${STANDBY_MAX_ROUNDS:-8}"   # 8 × POLL ≈ 2h
+ESCALATE_EVERY="${ESCALATE_EVERY:-8}"           # 升級訊息複述間隔（輪）——說一次會被錯過
+last_class="OK"; last_fire=0; run_since=0; standby_said=0; standby_rounds=0; claim_rc=0; holder=""
 while true; do
-  if ! claim_lock; then
+  claim_lock; claim_rc=$?
+  if [ "$claim_rc" != "0" ]; then
     # ★ONCE 模式搶不到必須退出（草案 bug：ONCE 只在成功那趟結尾才判 ⇒ 搶不到就無窮迴圈）
-    [ "$ONCE" = "1" ] && { echo "[watchdog v4] 另一實例持有 lock → 本趟不判"; exit 0; }
-    # 待命也要輸出「已處置完的結果」，不是讓人猜的狀態；只說一次，不洗版
-    [ "$standby_said" = "0" ] && {
-      standby_said=1
-      echo "[watchdog v4] ⏳ 待命 pid=$$（另一實例持有 lock；前任退場後本進程自動接手，無須人工介入）"
-    }
+    [ "$ONCE" = "1" ] && { echo "[watchdog v4] 另一實例持有 lock（rc=$claim_rc）→ 本趟不判"; exit 0; }
+    holder="$(cut -f1 "$LOCK" 2>/dev/null)"
+    standby_rounds=$(( standby_rounds + 1 ))
+    if [ "$claim_rc" = "2" ]; then
+      # ★舊代持有：它不會自退 ⇒ 這【不是】可以等的狀態，必須說出「人要做什麼」；且要複述（說一次會被錯過）
+      if [ "$standby_said" = "0" ] || [ $(( standby_rounds % ESCALATE_EVERY )) -eq 0 ]; then
+        standby_said=1
+        echo "[watchdog v4] 🔺 需人工介入：lock 由【舊版 watcher】持有 pid=${holder}（欄數 < ${LOCK_FIELDS_V4}）"
+        echo "               舊版不讀 lock 歸屬、永不讓位 ⇒ 本進程【不會】自動接手。"
+        echo "               處置：TaskStop 那個舊 Monitor task（pid=${holder}）→ 本進程下一輪自動上位。"
+      fi
+    else
+      if [ "$standby_said" = "0" ]; then
+        standby_said=1
+        echo "[watchdog v4] ⏳ 待命 pid=$$（同代 pid=${holder} 持有；前任退場後本進程自動接手，無須人工介入）"
+      elif [ "$standby_rounds" -ge "$STANDBY_MAX_ROUNDS" ] && [ $(( standby_rounds % ESCALATE_EVERY )) -eq 0 ]; then
+        echo "[watchdog v4] 🔺 需人工介入：同代 pid=${holder} 持有 lock 已逾 $(dur $(( standby_rounds * POLL_S ))) 仍不讓位"
+        echo "               （疑似卡住或非預期版本）處置：TaskStop 該 task → 本進程下一輪自動上位。"
+      fi
+    fi
     sleep "$POLL_S"; continue
   fi
-  standby_said=0
+  standby_said=0; standby_rounds=0
   announce
 
   now=$(date +%s)
