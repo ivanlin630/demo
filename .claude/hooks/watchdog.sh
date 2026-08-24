@@ -238,7 +238,14 @@ while true; do
     last_class="$class"; last_fire=$now
   fi
 
-  touch "$LOCK" 2>/dev/null
+  # ★★只准 touch【自己的】lock（blueprint 現場抓到「替屍體保溫死鎖」2026-08-25）：
+  #   若非持有者也 touch ⇒ 死 holder 的 lock 被外人保鮮 ⇒ 「lock stale」永不成立
+  #   ⇒ 全體永遠待命、升級訊息每 2h 空響。
+  #   ★本檔的控制流【本來】就只有持有者走到這裡（待命分支在上面 continue 了），
+  #   但把不變量做成【局部檢查】而不是「靠控制流保證」—— 日後有人搬動這行也不會復發。
+  #   ★注意三支常駐單例的風險不對稱：inbox-watch / tg_poll 的非持有者是【直接 exit】，
+  #   碰不到 touch；只有 watchdog 的非持有者【留在待命迴圈】⇒ 它是唯一會出事的那個。
+  [ "$(cut -f1 "$LOCK" 2>/dev/null)" = "$$" ] && touch "$LOCK" 2>/dev/null
   [ "$ONCE" = "1" ] && exit 0
   sleep "$POLL_S"
 done
