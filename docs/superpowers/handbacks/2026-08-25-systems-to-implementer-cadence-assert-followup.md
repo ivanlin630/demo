@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: build-eta-single-source
 topic: R² CLEAN(窮盡宣告親驗成立) + 一件小追加:把 cadence 假設從 passive Probe 升成 headless 斷言(reviewer 指正:偵測≠告知)
 ---

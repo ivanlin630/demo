@@ -95,3 +95,29 @@ BEGIN { ORS=""; printf "\"" }
   '
 }
 printf '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":%s}}' "$(json_str "$CTX")"
+
+# ── ★承諾即檔名(機械版):我在信裡說「已請/已派 <角色>」,但沒有寄給該角色的信 ──
+#   血證 2026-08-25:systems 兩封信寫「已請 measurer 補一輪」,信根本沒發 ⇒ 該站永遠收不到工單。
+#   這是 P7「承諾即檔名」從 prose 升級成機械檢查(只掃自己今天寄出的信,零成本)。
+#   ★已知界限(P7 📜 declared):只掃「今天」——跨日承諾(昨天說要寄、今天仍沒寄)抓不到。
+#   刻意不擴大:掃全歷史會把已完成的舊承諾一起翻出來當雜訊,反而讓人開始忽略這個警告。
+_promise_check() {
+  local d="docs/superpowers/handbacks" me="${SESSION_ROLE:-systems}" today
+  today="$(date +%Y-%m-%d)"
+  [ -d "$d" ] || return 0
+  local f role hit miss=0
+  for f in "$d"/${today}-${me}-to-*.md; do
+    [ -f "$f" ] || continue
+    for role in blueprint systems implementer measurer reviewer qa; do
+      [ "$role" = "$me" ] && continue
+      grep -qE "(已請|已派|已寄|已轉)[^。]{0,6}${role}" "$f" 2>/dev/null || continue
+      hit=$(ls "$d"/${today}-${me}-to-${role}-*.md 2>/dev/null | head -1)
+      [ -n "$hit" ] && continue
+      echo "  ⚠ $(basename "$f") 宣稱已通知 ${role}，但今天沒有 ${me}-to-${role} 的信"
+      miss=$((miss+1))
+    done
+  done
+  [ "$miss" -gt 0 ] && echo "  ⇒ ★承諾即檔名:把信補上,或把那句話改掉(別讓下游永遠等一封不存在的信)"
+  return 0
+}
+_promise_check
