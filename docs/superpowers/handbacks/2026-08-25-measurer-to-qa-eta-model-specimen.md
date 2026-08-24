@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: eta-single-model
-status: open
+status: consumed
 topic: "★eta-single-model specimen直寄：gate4 stranded 3→0(main vs branch同seed)——這是behavior因果宣稱，我只做了code層『機制還在』的靜態確認(T3邏輯未變)，沒有走過specimen驗證這輪0次真的是margin改善還是巧合；gate6 eta/actual比值0.874(73筆)，個別porter的動作序列可交叉看delay估算是否真的貼近實際"
 ---
 

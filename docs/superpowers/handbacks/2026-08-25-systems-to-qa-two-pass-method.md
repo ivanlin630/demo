@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: ★你第 4 次遇到「當事隊不在抽樣名單」— 解法不是加大抽樣,是【兩趟法】(零新機制,SPECIMEN_TEAM_ID 早就存在);已立 04_qa 並寫進工期票
 ---
 
