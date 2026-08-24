@@ -1,0 +1,37 @@
+{
+  "slice": "failure-memory-structural-identity",
+  "ticket": "systems票(fifth-end-scale)：四flow_utility消費端(覓食/遷移找糧terms.gd:117、佔村:198、併入:211、紮營:232)實際util分佈 vs rooting_drive(:259)分佈，可證偽假說「紮根是同秤漏掉的第五端」",
+  "measured_at_branch": "feat/failure-memory-structural-identity(.worktrees/failure-memory-structural-identity)",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天(同前輪brick-regression-diagnosis同一seed同床)",
+
+  "★L3聲明": "terms.gd 4處return前插1個Probe.bump_sample(sample cap=200,存clampf後值)；camp_access_diag_bed.gd加診斷③報表段(含母體count+分佈dump)+一個純字串聚合helper函式(_dist_str,min/median/max非只peak,03b§④f)。皆Probe-gated零行為改動。",
+
+  "★★★母體(decision.opt_applicable.<opt>，真count非sample，於decision_engine.gd:102既有tap)": {
+    "覓食": 620, "遷移找糧": 129, "佔村": 0, "併入": 214, "紮營": 657, "紮根": 81
+  },
+
+  "★★★分佈(min/median/max，非只peak)": {
+    "覓食+遷移找糧(flow.forage_u_sample.u)": "n=200(★母體749,sample cap=200先到先錄=前N,非全量,可能early-tick偏態) min=0.0000 median=0.0000 max=1.0000",
+    "佔村(flow.occupy_u_sample.u)": "無sample——★母體=0：閘沒執行(has_occupy_target全程未曾為true)，非閘擋掉；本輪世界配置下佔村這個選項完全沒被評過一次，此對照組本輪不可測(03b§④h/④j)",
+    "併入(flow.join_u_sample.u)": "n=200(★母體214,sample幾乎全量93%,可信) min=0.0000 median=1.1250 max=1.1250",
+    "紮營(discount.camp_ratio_sample.raw_ratio，clamp前)": "n=200(★母體657,sample僅前30%,early-tick偏態較重) min=-31.4641 median=1.5852 max=4.2195",
+    "紮根(rooting.u_sample.u，對照組)": "n=90(★母體與opt_applicable.紮根=81不完全對齊,兩者計數口徑不同一但同量級,非truncated——90<cap=200,此為近全量) min=0.0000 median=0.3073 max=1.0000"
+  },
+
+  "★★★可證偽點判讀(混合結果，不完全落在你預寫的兩格任一邊)": {
+    "併入/紮營——支持「尺不同」": "併入median=1.125(3.7倍於紮根0.307)、紮營median=1.585(5.2倍於紮根0.307)——這兩個消費端典型值明顯高於紮根，方向與你的假說一致。",
+    "覓食/遷移找糧——不支持「尺不同」": "★median=0.0000，非明顯高於紮根(0.307)，甚至更低——這個消費端本輪沒有呈現『尺不同、天生贏面大』的樣子。但★需警示：這組樣本受truncation影響最大(母體749只取前200，early-tick偏態)，且median=0可能反映『大量團隊此刻不缺糧→flow_utility正確地判斷不值得覓食』這個genuine零值，不必然是同一種『結構性打不過』——覓食跟紮根的『0』意義可能不同源，不是嚴格同型比較。",
+    "佔村——無法檢驗": "★母體=0，本輪世界配置下這個選項的applicable gate全程未曾為true，完全沒有數據可比。這不是『尺不同不成立』的證據，是『這輪測不到』。",
+    "整體判讀": "★不是「兩者同量級⇒推論垮」的乾淨反例，也不是「四端全部明顯高於⇒尺不同全面成立」的乾淨正例——是三分：2/4(併入/紮營)支持、1/4(覓食)不支持但有truncation+異質零值疑慮、1/4(佔村)本輪不可測。供你裁：若只看有把握的高信度端(併入/紮營，樣本量足)，方向支持你的假說；覓食端的反例值得注意但不宜單憑一個可能異質的median就否證整個推論。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/fifth-end-scale-90d.txt",
+    "code": "scripts/simulation/decision/terms.gd(4處flow.*_u_sample/rooting.u_sample taps)，scripts/debug/camp_access_diag_bed.gd(診斷③報表段+_dist_str helper)"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\failure-memory-structural-identity --script scripts/debug/camp_access_diag_bed.gd",
+
+  "cleanup": "busy beacon清除。worktree兩處L3 tap依本session慣例保留未revert(同decision_engine.gd root_u/winner_u先例,供implementer順手folded進他們自己的commit)。"
+}

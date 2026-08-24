@@ -242,11 +242,12 @@
 ★★★診斷②won→start→complete漏斗(是沒贏還是贏了沒開工/沒完工)：
   root.won_argmax=2 → settlement.l0_to_l1_start=1 → construct.complete_crude_camp=0 → outpost.l0_to_l1=0
 ★★★診斷③(fifth-end-scale)：四flow_utility消費端 util分佈 vs rooting_drive 分佈：
-  覓食/遷移找糧(flow.forage_u_sample.u)：n=200(★母體受bump_sample cap=200,非全量) min=0.0000 median=0.0000 max=1.0000
-  佔村(flow.occupy_u_sample.u)：無sample
-  併入(flow.join_u_sample.u)：n=200(★母體受bump_sample cap=200,非全量) min=0.0000 median=1.1250 max=1.1250
-  紮營(discount.camp_ratio_sample.raw_ratio，clamp前，注意其clamp後上限=CAMP_MARGINAL_CAP)：n=200(★母體受bump_sample cap=200,非全量) min=-31.4641 median=1.5852 max=4.2195
-  紮根(rooting.u_sample.u，可證偽對照組)：n=90(★母體受bump_sample cap=200,非全量) min=0.0000 median=0.3073 max=1.0000
+  ★母體(decision.opt_applicable.<opt>,真count非sample)：覓食=620 遷移找糧=129 佔村=0 併入=214 紮營=657 紮根=81
+  覓食/遷移找糧(flow.forage_u_sample.u，sample cap=200,若母體>200則此為前N非全量)：n=200(★母體受bump_sample cap=200,非全量) min=0.0000 median=0.0000 max=1.0000
+  佔村(flow.occupy_u_sample.u，sample cap=200)：無sample
+  併入(flow.join_u_sample.u，sample cap=200)：n=200(★母體受bump_sample cap=200,非全量) min=0.0000 median=1.1250 max=1.1250
+  紮營(discount.camp_ratio_sample.raw_ratio，clamp前，注意其clamp後上限=CAMP_MARGINAL_CAP,sample cap=200)：n=200(★母體受bump_sample cap=200,非全量) min=-31.4641 median=1.5852 max=4.2195
+  紮根(rooting.u_sample.u，可證偽對照組，sample cap=200)：n=90(★母體受bump_sample cap=200,非全量) min=0.0000 median=0.3073 max=1.0000
 ★★★失敗記憶磚驗收：
   failure.entries_written(record()被呼叫總次數) = 569
   failure.entries_max(Probe.note=最後一次呼叫時那隊的recent_failures.size()，非全局peak) = 4

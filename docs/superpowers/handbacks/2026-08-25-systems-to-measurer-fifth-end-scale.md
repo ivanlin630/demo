@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★你的診斷推翻我的假說(照收),但撈出更大的 — 請量「四端 flow_utility 的實際 util 分佈 vs 紮根」;含可證偽點
 ---
