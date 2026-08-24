@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: camp-access
 topic: 三問全裁 — ★Q1 門檻【不調】(#1 從 0 變 1 = 二值閘自己過了,不需要放寬);你抓到的 stale 對帳=對,重量令已發;兩條通則已立
 ---
