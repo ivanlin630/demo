@@ -3815,7 +3815,9 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	# 母隊(公庫+私產)food 撥得起才派→出發配糧到夠（下方 top-up）；不豐→no-go（別派餓死途中 dissolve）。
 	# ★ETA_total=去程(dist/移速)+建程(BUILD_TICKS/pop)（§5）；純算術零 RNG。收編取代礦山 ad-hoc food bootstrap。
 	var _eta_travel: float = float(_hex_dist(leader_team.tile_pos, target_pos)) / FOOD_BRIDGE_MOVE_PER_DAY
-	var _eta_build: float = float(OutpostSystem.BUILD_TICKS[outpost_type][level - 1]) / maxf(float(pop), 1.0)
+	# ★工期單一真相源（2026-08-25）：舊式漏除每日推進窗數 ⇒ 高估 24× ⇒ 糧橋門檻過嚴。
+	var _eta_build: float = OutpostSystem.build_eta_days(
+		int(OutpostSystem.BUILD_TICKS[outpost_type][level - 1]), pop)
 	var _need_food: float = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
 		* (_eta_travel + _eta_build) * FOOD_BRIDGE_SAFE_MARGIN
 	var _avail_food: float = float(vault.get("food", 0)) + float(leader_team.resources.get("food", 0))
@@ -4580,13 +4582,15 @@ func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
 		if not os._can_afford(team, tile, cost):
 			continue   # 料未備（公庫+私產不足）→ 非 self-rescue 候選（禁掏空、genuine）
 		# ★genuine P(survive_to_harvest)：建工期(person-ticks / pop / 日tick) < 餓死窗(food_days) 才蓋得完。
-		var build_eta_days: float = float(cost.get("ticks", 72)) \
-			/ maxf(float(team.population), 1.0) / float(WorldState.TICKS_PER_DAY)
+		# ★工期單一真相源（2026-08-25）：舊式除的是整日 tick(240) 而非每日推進窗數(24)
+		#   ⇒ 低估 10× ⇒ 這道「蓋得完才蓋」的閘放行了蓋不完的案子。修好後【會變嚴】——intended-change。
+		var build_eta_days: float = OutpostSystem.build_eta_days(
+			int(cost.get("ticks", 72)), team.population)
 		if Probe.enabled:   # ★measurer L3 tap(2026-08-21,C6-#3票)：輸入變異性(閘核心兩值)+真物理對照(÷24非÷240)
 			Probe.bump_sample("food_rescue.gate_check", {"team": team.team_id, "food_days": food_days,
-				"build_eta_days_ESTIMATE_bug÷240": build_eta_days,
-				"build_eta_days_TRUE÷24": float(cost.get("ticks", 72)) / maxf(float(team.population), 1.0) / 24.0,
-				"passed_with_bug": build_eta_days < food_days,
+				# ★舊 key 名把 bug 寫在裡面（÷240 低估／÷24 真值對照）——已收斂到單一源，只留真值與結果。
+				"build_eta_days": build_eta_days,
+				"passed": build_eta_days < food_days,
 				"tick": state.world.current_tick}, 30)
 		if build_eta_days >= food_days:
 			continue   # 蓋不完的田不能吃 → 覓食贏（失敗案留、禁 crank always-win）

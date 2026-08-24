@@ -97,6 +97,38 @@ const FACILITY_DEF: Dictionary = {
 	},
 }
 
+# ────────── 工期單一真相源（build-eta-single-source 2026-08-25）──────────
+# ★病：全樹六份獨立公式、三種答案、極端差 240 倍（見 `docs/estimator-ledger.md §E`）。
+#   #3/#4 漏掉「一天推進幾次」⇒ 高估 24×；#5/#6 除了 TICKS_PER_DAY(240) ⇒ 低估 10×。
+#   ★修法是【改接線】不是【改數值】——把 2 改成 5，三個月後又爛。
+#
+# 真值只有一處：`_tick_construction` 每執行一次扣 `maxi(pop, 1)` person-ticks（本檔 `:311`），
+# 而它掛在 `SimRunner.SYSTEMS` 的 `outpost_tick` 上（`lod = LOD_NEAR`）
+# ⇒ **一天執行幾次 ＝ 一天有幾個 near cadence 窗**。
+# ★分母因此【由 cadence 同源推導】，禁手抄 `24`：
+#   `TICKS_PER_DAY / NEAR_CADENCE`（目前 240/10 ＝ 24）——兩顆都動到就自動跟著改。
+static func build_ticks_per_day() -> float:
+	# ★假設：`outpost_tick` 跑在 near pass。它是 `LOD_NEAR`，所以成立；
+	#   但這是【假設】不是恆真 ⇒ 留一顆告警，別靜默照算（同「觀測要看得見」那條）。
+	if Probe.enabled and not _outpost_tick_runs_in_near_pass():
+		Probe.bump("build_eta.cadence_assumption_stale")
+	return float(WorldState.TICKS_PER_DAY) / maxf(float(SimRunner.NEAR_CADENCE), 1.0)
+
+# `outpost_tick` 是否仍在 near pass 跑（讀 registry，不手抄）。
+static func _outpost_tick_runs_in_near_pass() -> bool:
+	for e in SimRunner.SYSTEMS:
+		if String(e.get("name", "")) == "outpost_tick":
+			return int(e.get("lod", SimRunner.LOD_NEAR)) in [SimRunner.LOD_NEAR, SimRunner.LOD_BOTH]
+	return false   # 表裡找不到 ⇒ 假設已失效
+
+# ★六個估值點的【唯一】入口：剩餘 person-ticks + 施工人力 → 還要幾天。
+#   `pop` ＝ 實際推進工程的人數（真值那行用 `maxi(pop, 1)`，此處同源夾同一個下限）。
+static func build_eta_days(ticks_left: int, pop: int) -> float:
+	if ticks_left <= 0:
+		return 0.0
+	var per_tick_progress: float = maxf(float(pop), 1.0)   # 同 `_tick_construction` 的 maxi(pop, 1)
+	return float(ticks_left) / (per_tick_progress * maxf(build_ticks_per_day(), 0.001))
+
 static func slot_cap(tile: HexTileData) -> int:
 	var arr: Array = FACILITY_SLOTS.get(tile.outpost_type, [0, 0, 0])
 	return int(arr[clampi(tile.outpost_level - 1, 0, 2)])

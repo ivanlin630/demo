@@ -92,7 +92,9 @@ static func _safe_factor(state: WorldState, team: TeamData, stick: float, flex: 
 	var tile: HexTileData = _build_tile(state, team)   # ★S2b：corvee_site 優先
 	if tile == null or tile.construction_ticks_left <= 0:
 		return 1.0   # 無真施工中 → 不調制（safe）
-	var eta_days: float = float(tile.construction_ticks_left) / maxf(float(team.population), 1.0)   # 粗估:剩 person-ticks/pop
+	# ★工期單一真相源（2026-08-25）：舊式漏掉「一天推進幾次」⇒ 高估 24× ⇒ `safe_ratio = runway/eta`
+	#   分母暴增 ⇒ 提早放手。改讀 `OutpostSystem.build_eta_days`（intended-change：持守會變寬鬆）。
+	var eta_days: float = OutpostSystem.build_eta_days(tile.construction_ticks_left, team.population)
 	if eta_days <= 0.0:
 		return 1.0
 	var safe_ratio: float = team.food_runway / eta_days   # runway 撐得到完成否
