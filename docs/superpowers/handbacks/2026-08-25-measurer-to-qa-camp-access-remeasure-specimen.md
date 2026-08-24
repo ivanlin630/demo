@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: camp-access
-status: open
+status: consumed
 topic: "★camp-access重量令(e927be2f)specimen直寄：outpost中途新增=1(tile[13,6],team8)是本輪最關鍵事件——同seed main baseline仍是只減不增，這個新outpost是遷移找糧delay修法的獨立效果，值得挑這隊(team8)的動作序列驗證『是不是真的靠遷移找糧找到地才紮根』；join.accept_check逐筆dump已補齊(11筆完整母體，8筆reject全部genuine feed_ok不足，與你先前坐實的host側genuine方向吻合，供交叉confirm)"
 ---
 
