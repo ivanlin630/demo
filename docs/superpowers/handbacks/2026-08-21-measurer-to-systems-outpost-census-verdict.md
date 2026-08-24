@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: estimator-audit
-status: open
+status: consumed
 topic: "★★★outpost普查答案：day0=11(config開局自帶)、day90=9(只減不增)、中途新增=0——鏈成立!整條從無到有蓋出一個outpost的鏈90天內連一次都沒成功過，設施鏈斷真上游可能真是『根本沒人有新outpost可蓋設施』，afford×1.5那個閘的前提需要重驗；★併同C6-#1：construct.progress=344 vs construct.stall=5871(94.5%停滯)，與75%/89%棄置率同源，但誠實邊界=stall是累計tick非distinct工地數，未拆分"
 ---
 

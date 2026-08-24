@@ -1,0 +1,31 @@
+[peaceful_economy day 90 seed 1337] teams=17
+--- 零採集（病） ---
+  collect.no_outpost_no_camp_zero_food           = 1133
+  collect.no_outpost_no_camp_zero_food.parent    = 1109
+  collect.no_outpost_no_camp_zero_food.subteam   = 24
+  collect.l0_forage_ran                          = 173
+--- 三分流（temp tap 已撤；證據見 2026-08-21 交件） ---
+  camp.diag.i_above_desperation                  = 0
+  camp.diag.ii_no_farmable                       = 0
+  camp.diag.iii_applicable_but_not_chosen        = 0
+  camp.diag.has_outpost_already                  = 0
+  camp.applicable_but_idle                       = 0
+--- ★逐隊歸格（不得只給總數） ---
+--- ★分流(iii) 輸給誰 ---
+  camp.won_argmax                                = 0
+--- ★紮根 funnel（驗收#1 的解釋層）---
+  root.won_argmax                                = 0
+  ★紮根從未進入候選（applicable 都沒過）
+  construct.complete                             = 16
+  construct.complete_upgrade_facility            = 16
+--- 世界狀態（gate1/6 用） ---
+  pop=1 村數 = 12｜母隊人口合計 = 35
+  breed.born                                     = 1
+--- ★★修後CAMP_MARGINAL_CAP saturation率(修前35.0%基準對照) ---
+  discount.camp_evaluated = 0
+  discount.camp_capped    = 0 (0.0%)
+  discount.camp_raw_u(最後一次,單值非history)  = 無
+  discount.horizon_eff(最後一次)               = 無
+  discount.flow_food(最後一次)                 = 無
+--- ★join母體(上輪=4) ---
+  accept.join_accept+reject = 4 (accept=3 reject=1)
