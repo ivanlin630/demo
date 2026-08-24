@@ -2612,6 +2612,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				if _maybe_request_join_player(state, team):
 					return
 		team.current_option = opt   # 承諾追蹤實際派出
+		_stamp_dispatch_identity(team, opt, e, td)   # ★失敗記憶結構身分（單一寫入點）
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
 		elif opt == "佔村": Probe.bump("occupy.dispatch")
@@ -3015,6 +3016,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		if td.has("social_target"): state.set_social_target(sub, int(td["social_target"]))
 		_wire_threat_task(sub, td)   # 迎戰/求和 aux target（threat repertoire 保留）
 		sub.current_option = opt      # 承諾慣性（COMMITMENT_BONUS 讀，防抖動）
+		_stamp_dispatch_identity(sub, opt, e, td)   # ★失敗記憶結構身分（單一寫入點）
 		HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
 		print("[SubAI] Team%d 引擎→%s (%s)" % [sub.team_id, td["task"], opt])
 		return
@@ -3180,6 +3182,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		team.solo_task_last = td["task"]   # F-D4：task 承諾記此槽（solo_intent 保留戰略 intent）
 		team.current_option = opt          # 承諾慣性：引擎 COMMITMENT_BONUS 讀
+		_stamp_dispatch_identity(team, opt, e, td)   # ★失敗記憶結構身分（單一寫入點）
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		if td["task"] == TeamData.TASK_TRADE:
 			Probe.bump("trade.dispatch.solo")   # 漏斗站4（timeout 起算由 try_set 蓋章 task_start_tick）
@@ -5019,6 +5022,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		if _surv_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed")   # specimen tap（顯式 committed）
 			_stamp_survival_commit(state, team, opt)   # ② 蓋章 committed option baseline（單一源全 5 路之一）
+			# ★失敗記憶結構身分：survival 路不設 current_option，但身分照樣要蓋——
+			#   否則這條路下的買單會沒有身分、退回舊語彙。四條 dispatch 路一個都不能漏。
+			#   ★這條路 rank_survival 回的是 option 名（沒有 goal candidate）⇒ 傳空 dict。
+			_stamp_dispatch_identity(team, opt, {}, td)
 			_commit_settle_site(state, team, td)   # ★§4a 紮根 commit-hook（_surv_ok 為真才到此）
 			if td.has("combat_target"):
 				state.set_combat_target(team, int(td["combat_target"]))
@@ -5134,6 +5141,22 @@ func _famine_crisis(state: WorldState, team: TeamData) -> bool:
 
 # ② 絕境階梯 STAMP（單一源全 5 路 try_set 成功站呼）：蓋章真 option 字串 + tick + food baseline。
 #   換到新 survival option 才重蓋（同 option 續承諾則 baseline 保留累積時間=stall 計時不 reset）。非 survival option 不蓋。
+# ★失敗記憶結構身分（磚 2026-08-25，裁定 (B)）：dispatch 當下把身分蓋在隊上，
+#   讓之後失敗的載體（買單／工程…）記得【是誰下的令】。
+#   靜態 option ⇒ id ＝ option 名、target 空（§3c 退化）；
+#   goal candidate ⇒ id ＝ `goal_type:frontier_kind`（★由結構欄位組出，不反解 label）、target ＝ 目標格。
+#   ★單一寫入點：四條 dispatch 路都呼這裡，避免各自蓋各自的（那就是又一份 drift）。
+static func _stamp_dispatch_identity(team: TeamData, opt: String, e: Dictionary, td: Dictionary) -> void:
+	var cand: Dictionary = (e.get("cand", {}) as Dictionary)
+	var gt: String = String(cand.get("goal_type", ""))
+	if gt != "":
+		team.current_dispatch_id = "%s:%s" % [gt, String(cand.get("frontier_kind", ""))]
+		var tgt = td.get("target", null)
+		team.current_dispatch_target = ("%d,%d" % [tgt.x, tgt.y]) if (tgt is Vector2i and tgt != Vector2i(-1, -1)) else ""
+	else:
+		team.current_dispatch_id = opt
+		team.current_dispatch_target = ""
+
 func _stamp_survival_commit(state: WorldState, team: TeamData, opt: String) -> void:
 	if not DecisionOptions.is_in_set(opt, "survival"): return
 	if team.survival_committed_option == opt: return   # 同 option 續承諾：保留 baseline 累積 stall 時間

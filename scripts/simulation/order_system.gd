@@ -44,6 +44,11 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 	team.active_orders.append({
 		"order_id": oid, "kind": kind, "res": res,
 		"qty_remaining": qty, "expire_tick": expire,
+		# ★★失敗記憶結構身分（磚 2026-08-25，裁定 (B)）：單子記住【是誰下的令】。
+		#   沒有這兩欄，失敗只能記成「某張買單掛了」，折價就只咬得到「買單」這個依賴，
+		#   ★咬不到那個【一直重複下單的動作】—— 而那正是 workshop 連贏 45 次的形狀。
+		"fail_id": team.current_dispatch_id,
+		"fail_target": team.current_dispatch_target,
 		"created_tick": state.world.current_tick,   # ★壽命起算（QA 讀故事可直接看「同一張單卡了幾天」）
 	})
 	var desc: String = "Team%d %s %s ×%d" % [team.team_id, ("徵" if kind == "buy" else "售"), res, qty]
@@ -123,9 +128,21 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 			# 記隊層失敗記憶 → 下輪「買糧/買料」（＝依賴市場供貨的決策）折價；TTL 用 ORDER_LIFETIME
 			# ＝該動作的自然重試週期（相對錨定，不新增全域絕對天數常數）。
 			# ★劣勢非失效：市場這次沒送到，不代表計畫不可行 → 只折價、不升 T0 喚醒（spec §T3）。
+			# ★結構身分 key：用【下令者】的身分記，不是用「買單」這個依賴記。
+			#   身分在 post_order 當下由 dispatch 自帶（`team.current_dispatch_*`）。
+			#   ★沒帶到身分的單（過渡窗的舊單／測試直接下單）⇒ 退回既有語彙，不靜默丟失，並留 tap。
 			if String(o.get("kind", "")) == "buy":
-				FailureMemory.record(state, team, "買單", String(o.get("res", "")),
-					ORDER_LIFETIME, "order_abandoned_buy")
+				var _fid: String = String(o.get("fail_id", ""))
+				var _ftg: String = String(o.get("fail_target", ""))
+				if _fid == "":
+					_fid = "買單"
+					_ftg = String(o.get("res", ""))
+					if Probe.enabled: Probe.bump("failure.key_fallback_no_dispatch_id")
+				FailureMemory.record(state, team, _fid, _ftg, ORDER_LIFETIME, "order_abandoned_buy")
+				if Probe.enabled:
+					Probe.bump("failure.structural_key_used")
+					Probe.bump_sample("failure.structural_key", {"id": _fid, "target": _ftg,
+						"team": team.team_id, "res": String(o.get("res", "")), "tick": state.world.current_tick}, 40)
 			if Probe.enabled:
 				Probe.bump_sample("order.abandoned.sample", {
 					"order_id": int(o.get("order_id", -1)), "team": team.team_id,

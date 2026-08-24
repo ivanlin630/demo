@@ -72,8 +72,10 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# ★執行失敗反饋（用戶立法 2026-08-21）：同一原因反覆撞 → 連續折價（非硬 cooldown、非新 term 線）。
 		# ★乘在 survival/threat 破頂【加法】boost 之前 → 絕境仍能壓過折價再試（FLOOR + 加法 boost 雙保險，
 		# 不得絕對否決）。未接線的 option 恆 1.0 ＝ 對其餘 option 零行為。
+		# ★結構身分 key（磚 2026-08-25）：靜態 option 的結構身分就是它自己；
+		#   目標多半沒有 ⇒ 退化成 `(id, ∅)`（§3c：不是特例、不是第二套）。
 		if team != null:
-			u *= FailureMemory.mult_for_option(state, team, opt)
+			u *= FailureMemory.mult_for(state, team, opt)
 		# 層0 安全氣囊（★插在 coeff 乘法之後——寫死此序：coeff 前會被 0.15 floor 打折失效）：
 		# 極低糧時 survival-class 加法超量級破頂，隨 food→0 線性放大，奪回 argmax。全 SURVIVAL_OPTION_SET 等量加
 		# (不改 survival-class 內部相對序，只集體破頂)。food_days=FLOOR 時加成=0 平滑銜接無 flip-flop。
@@ -101,7 +103,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	# S2+ candidate util 護欄（HOW §8 must-fix①）：走 dev_urgency 壓制 + 上界<survival boost（發展慾望絕不蓋活命）。
 	if state != null and team != null:
 		for cand in GoalResolver.frontier_candidates(state, team, ctx):
-			scored.append({"u": float(cand.get("util", 0.0)), "i": idx, "opt": String(cand.get("label", "")), "cand": cand})
+			# ★★§4 folding：candidate 路接上【同一把尺、同一個入口】。
+			#   結構身分由欄位組出（`goal_type` + `frontier_kind`），★不反解 label 字串。
+			var _cid: String = "%s:%s" % [String(cand.get("goal_type", "")), String(cand.get("frontier_kind", ""))]
+			var _cu: float = float(cand.get("util", 0.0))
+			if String(cand.get("goal_type", "")) != "":
+				_cu *= FailureMemory.mult_for(state, team, _cid, _target_id(cand))
+			scored.append({"u": _cu, "i": idx, "opt": String(cand.get("label", "")), "cand": cand})
 			idx += 1
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
@@ -166,6 +174,15 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 # ★F4：PASSIVE_SURVIVAL_SET const 已刪、單源 REGISTRY[opt].sets.passive_survival（is_in_set 讀）。
 # 被動求生 repertoire：覓食/買糧/乞食/返家補給/紮營/併入/自救建田=被動求生→"survival" 一組保 fallthrough。
 # 需求分組：passive_survival 成員→"survival"（不看 affinity）；非→按 affinity 主層。
+# ★目標識別（結構身分 key 的第二欄）：candidate 的目標藏在 `to_task.target`。
+#   Vector2i 轉成穩定字串；沒有目標 ⇒ 空字串 ⇒ key 退化成 `(id, ∅)`。
+static func _target_id(cand: Dictionary) -> String:
+	var tt: Dictionary = cand.get("to_task", {})
+	var tgt = tt.get("target", null)
+	if tgt is Vector2i and tgt != Vector2i(-1, -1):
+		return "%d,%d" % [tgt.x, tgt.y]
+	return ""
+
 static func _need_category(opt: String) -> String:
 	if DecisionOptions.is_in_set(opt, "passive_survival"):
 		return "survival"

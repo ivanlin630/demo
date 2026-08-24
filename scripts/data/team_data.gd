@@ -91,6 +91,12 @@ var need_urgency: PackedFloat32Array = PackedFloat32Array()
 var solo_intent: Dictionary = {}
 var solo_task_last: String = ""   # SoloAI 上次選的 task（承諾慣性；與戰略 intent 分離，F-D4）
 var current_option: String = ""   # 統一決策引擎承諾用（現行 option 名）
+# ★失敗記憶結構身分（磚 2026-08-25，裁定 (B)）：**下令當下的身分由 dispatch 自帶**，
+#   讓失敗的載體（買單／工程…）在失敗時記得【是誰下的令】，而不是只記得「某張單掛了」。
+#   `id` ＝ 結構身分（靜態 option ＝ option 名；goal candidate ＝ goal_type:frontier_kind），
+#   `target` ＝ 目標識別（有目標才填；沒有就空 ⇒ 退化成 §3c 的 `(id, ∅)`）。
+var current_dispatch_id: String = ""
+var current_dispatch_target: String = ""
 # ★持守統一 Slice 1（HOW spec 2026-07-28 §5）：決策層算的持守強度（人格加權沉沒成本+前瞻，progressive-only，
 # clamp≤PERSIST_CAP<危機量級）。取代 5 flat commitment bonus。決策層 rank cadence 算+寫；Slice 2 補進度事件新鮮度。
 var persist_strength: float = 0.0

@@ -23,16 +23,17 @@ const FLOOR: float = 0.25          # TEST VALUE — 折價下限（絕不歸零�
 const INTENSITY: float = 0.2       # TEST VALUE — 單次新鮮失敗的折價強度
 const COUNT_CAP: int = 3           # TEST VALUE — count_factor 上限（連撞加深到此為止）
 
-# ★接線表（A1 五族照抄的地方就是這張表）：決策 option → 它依賴的那件事的失敗 key。
-# 例：「買糧」依賴的是【food 買單真的被填】；買單一再到期沒人送 → 下輪別再一頭撞市場。
-# 未列的 option ＝ 無折價（1.0），故本機制對其餘 option 零行為。
-const OPTION_FAIL_KEY: Dictionary = {
-	"買糧": ["買單", "food"],
-	"買料": ["買單", "material"],
-}
-
-static func key(option: String, target: String = "-") -> String:
-	return "%s|%s" % [option, target if target != "" else "-"]
+# ★★結構身分 key（磚 2026-08-25，blueprint 定 / systems 裁 (B)）：
+#   舊的 `OPTION_FAIL_KEY` 人工表【已刪】。它不只是懶人表，是「記錄側講依賴、決策側講動作」
+#   這兩種語彙之間的橋；橋既然改放在【記錄側】（下令時自帶身分），表就沒有存在理由。
+#
+#   key ＝ `(結構身分 id, 目標 id)`：
+#     • 靜態 option  ⇒ id ＝ option 名（`買糧`／`買料`…），目標多半為空 ⇒ 退化成 `(id, ∅)`
+#     • goal candidate ⇒ id ＝ `goal_type:frontier_kind`（★由結構欄位組出，不反解 label），目標 ＝ 該動作的目標
+#   ⇒ ★覆蓋是【構造性】的：每個動作天生有身分，沒有表可漏。
+#   ⛔ 先做 exact-pair；★類級泛化（折掉所有同類）**不預做** —— 過度泛化 ＝ 懲罰擴散、反傷探索。
+static func key(structural_id: String, target: String = "-") -> String:
+	return "%s|%s" % [structural_id, target if target != "" else "-"]
 
 # 劣勢：這次不划算、計畫仍成立 → 只折價（不喚醒）。
 static func record(state: WorldState, team: TeamData, option: String, target: String,
@@ -50,6 +51,15 @@ static func record(state: WorldState, team: TeamData, option: String, target: St
 	prune(state, team)
 	if Probe.enabled:
 		Probe.bump("failure.recorded." + reason)
+		# ★★過渡窗 tap（reviewer 建議、systems 採納 2026-08-25）：
+		#   我們接受「舊 key 記憶斷代」的理由是【一輪就換完】—— ★那是一個假設。
+		#   依「假設不靜默」：假設要能自己喊出來，不能靠相信。
+		#   ⇒ 記【新 key 空間的條目數】與【首次命中】：長期停在 0/極低 ＝ 新 key 根本沒被寫入
+		#     ＝ 我們做出了第三個「恆 1.0」的機制（前兩隻：OPTION_FAIL_KEY 只接 2 個、exact-pair 命中率）。
+		Probe.bump("failure.entries_written")
+		Probe.note("failure.entries_max", float(team.recent_failures.size()))
+		Probe.bump_sample("failure.first_hit", {"tick": now, "team": team.team_id,
+			"key": k, "reason": reason}, 1)   # cap 1 ⇒ first-N 正好給【第一次】
 		Probe.bump_sample("failure.recorded", {
 			"team": team.team_id, "key": k, "reason": reason,
 			"count": prev_count + 1, "tick": now,
@@ -100,11 +110,9 @@ static func prune(state: WorldState, team: TeamData) -> void:
 	if Probe.enabled and not dead.is_empty():
 		Probe.bump("failure.pruned")
 
-# 決策引擎唯一入口：option 名 → 查接線表 → 折價乘數（未接線 option 恆 1.0＝零行為）。
-static func mult_for_option(state: WorldState, team: TeamData, option: String) -> float:
-	if team == null or team.recent_failures.is_empty():
+# ★決策引擎【唯一】入口（§4：一套記憶、一個查詢入口——不准 candidate 用新的、option 用舊的）。
+#   查的就是這個動作自己的結構身分，不再經任何對照表。
+static func mult_for(state: WorldState, team: TeamData, structural_id: String, target: String = "") -> float:
+	if team == null or team.recent_failures.is_empty() or structural_id == "":
 		return 1.0
-	var m = OPTION_FAIL_KEY.get(option)
-	if m == null:
-		return 1.0
-	return mult(state, team, String(m[0]), String(m[1]))
+	return mult(state, team, structural_id, target)

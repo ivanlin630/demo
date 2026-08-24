@@ -338,6 +338,10 @@ static func _delegate_variant(state: WorldState, team: TeamData, ctx: DecisionCo
 		"to_task": dtask,
 		"source_goal": self_cand.get("source_goal", {}),
 		"label": String(self_cand.get("label", "")) + ":delegate",
+		# ★§0b：委派變體【繼承】原 candidate 的結構欄位——
+		#   否則「自己做」與「派人做」在下游會長成兩個不同身分（那正是要消滅的 drift）。
+		"goal_type": self_cand.get("goal_type", ""),
+		"frontier_kind": self_cand.get("frontier_kind", ""),
 		"delegate": true,
 	}
 
@@ -445,6 +449,11 @@ static func _mk_candidate(team: TeamData, g: Dictionary, gt: String, frontier_ki
 		"to_task": to_task,
 		"source_goal": g,
 		"label": gt + ":" + frontier_kind,   # root_goal + frontier_kind（有界 label，HOW §7）
+		# ★§0b 結構欄位補齊（失敗記憶結構身分磚 2026-08-25，R² 親驗指出的隱藏成本）：
+		#   `label` 是【組合出來的字串】，之前 `gt` 與 `frontier_kind` 沒有各自的欄位 ⇒
+		#   下游要拿結構身分只能反解字串。這裡把已經隱含的東西還原成欄位（補齊，非新設計）。
+		"goal_type": gt,
+		"frontier_kind": frontier_kind,
 		"delegate": false,   # 委派變體 = S5（組件 D）別提前
 	}
 
@@ -461,6 +470,9 @@ static func _mk_delegate_candidate(team: TeamData, g: Dictionary, gt: String, fr
 		"to_task": to_task,
 		"source_goal": g,
 		"label": gt + ":" + frontier_kind + ":delegate",
+		# ★§0b 同上：委派變體也要帶結構欄位（否則「同一 goal 的自己做 vs 派人做」在下游長得不一樣）。
+		"goal_type": gt,
+		"frontier_kind": frontier_kind,
 		"delegate": true,
 	}
 
