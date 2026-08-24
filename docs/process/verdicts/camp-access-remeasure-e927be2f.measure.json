@@ -1,0 +1,80 @@
+{
+  "slice": "camp-access",
+  "ticket": "systems重量令：camp-access世界層三條改在e927be2f(遷移找糧delay=行為改動)重跑+outpost普查+join.accept_check dump(QA指路)+標籤更正",
+  "measured_at_branch": "feat/camp-access @e927be2f(.worktrees/camp-access)",
+  "measured_at_main_baseline": "5791a709(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天，同床(main+branch用逐字相同camp_access_diag_bed.gd)",
+
+  "★L3聲明": [
+    "camp_access_diag_bed.gd(main+worktree)：加SpecimenDumpHelper支援+outpost普查(day0/day90/新增)+四tap報表(標籤更正為『本輪最大值』非『最後一次』，Probe.note存的是peak)+join.accept_check逐筆dump。",
+    "interaction_system.gd(worktree)：補5行join.accept_check sample tap——★發現camp-access branch原本沒有這顆tap(main有、branch缺)，已從main port過來，Probe-gated零行為改動。"
+  ],
+
+  "★★★outpost普查：中途新增=1，首次文明化動作獨立佐證": {
+    "main baseline(同seed)": {"day0": 11, "day90": 9, "中途新增": 0},
+    "branch@e927be2f": {"day0": 11, "day90": 11, "中途新增": 1, "新增明細": [{"tile_id": 13006, "pos": [13, 6], "owner": 8, "level": 1}]},
+    "判讀": "★★★這就是systems預寫的判準所指的『文明化動作首次發生』：main同seed跑法仍是day0=11→day90=9(只減不增，跟b968f492/舊main一致)；branch在e927be2f真的長出了1個新outpost(team8, tile[13,6])。這與b968f492那輪(day0=11 day90=9 新增=0，跟main一樣)不同——e927be2f這個commit(遷移找糧delay修法)真的讓世界產生了b968f492沒有的效果。"
+  },
+
+  "①outpost.l0_to_l1 > 0：獨立確認PASS(=1)，與b968f492一致": {
+    "outpost.l0_to_l1": 1,
+    "root.won_argmax": 5,
+    "判讀": "與implementer在b968f492量到的1一致，本輪e927be2f獨立重跑確認同樣=1。"
+  },
+
+  "②camp.abandoned < camp.built：PASS但幅度未變": {
+    "camp.built": 26, "camp.abandoned": 24,
+    "判讀": "與b968f492那輪逐字相同(built/abandoned未變)——遷移找糧delay修法不影響這條路徑，符合預期(那是完全不同的option)。"
+  },
+
+  "③collect.no_outpost_no_camp_zero_food vs main同床baseline：PASS，幅度未變": {
+    "main baseline": 1133, "branch": 1123, "差值": "-0.9%",
+    "判讀": "與b968f492那輪逐字相同——這條也不受遷移找糧delay修法影響。"
+  },
+
+  "★四tap(標籤已更正為『本輪最大值』)": {
+    "cap_saturation": {"discount.camp_evaluated": 886, "discount.camp_capped": 278, "飽和率": "31.4%",
+      "判讀": "與b968f492那輪逐字相同——遷移找糧delay修法不影響camp_drive term，31.4%飽和率維持，仍未達『崩到近0』的de-patch作廢門檻。"},
+    "discount.camp_raw_u(本輪最大值)": 4.465281735,
+    "discount.horizon_eff(本輪最大值)": 90,
+    "discount.flow_food(本輪最大值)": 8.76356092008266
+  },
+
+  "★★★join.accept_check逐筆dump(QA指路，補上branch缺的tap後拿到)": {
+    "母體": "11筆(cap=40,樣本數<cap⇒完整母體，非first-N截斷)",
+    "逐筆": [
+      {"host": 2, "joiner": 14, "host_rep": 0.5, "feed_ok": 1.0, "accept_util": 0.42, "accepted": true},
+      {"host": 3, "joiner": 17, "host_rep": 0.5, "feed_ok": 0.238, "accept_util": 0.100, "accepted": false},
+      {"host": 3, "joiner": 11, "host_rep": 0.5, "feed_ok": 0.076, "accept_util": 0.032, "accepted": false},
+      {"host": 1, "joiner": 11, "host_rep": 0.5, "feed_ok": 0.871, "accept_util": 0.366, "accepted": true},
+      {"host": 0, "joiner": 19, "host_rep": 0.5, "feed_ok": 0.0, "accept_util": 0.0, "accepted": false},
+      {"host": 7, "joiner": 10, "host_rep": 0.5, "feed_ok": 0.0, "accept_util": 0.0, "accepted": false},
+      {"host": 3, "joiner": 10, "host_rep": 0.5, "feed_ok": 0.0, "accept_util": 0.0, "accepted": false},
+      {"host": 8, "joiner": 21, "host_rep": 0.5, "feed_ok": 0.171, "accept_util": 0.086, "accepted": false},
+      {"host": 7, "joiner": 5, "host_rep": 0.5, "feed_ok": 0.059, "accept_util": 0.025, "accepted": false},
+      {"host": 2, "joiner": 9, "host_rep": 0.5, "feed_ok": 1.0, "accept_util": 0.42, "accepted": true},
+      {"host": 1, "joiner": 24, "host_rep": 0.5, "feed_ok": 0.567, "accept_util": 0.238, "accepted": false}
+    ],
+    "★判讀(依systems預寫判準：feed_ok≈0⇒genuine拒絕/feed_ok明顯>0卻仍拒⇒accept_util門檻或人格項有問題)": "8筆reject裡，feed_ok分別為0.238/0.076/0/0/0/0.171/0.059/0.567——全部低於ACCEPT_UTIL_THRESHOLD(0.3)能跨過的水準(即使feed_ok=0.567那筆,accept_util也只有0.238仍<0.3)。★★8筆reject全部是genuine(host自己也緊)，沒有一筆是『feed_ok明顯>0卻被accept_util門檻/人格項卡住』的可疑案例。這與QA先前坐實的『team10 pop=1連續43天換6+目標求收容,非thrash,host側genuine』方向完全吻合——本輪逐筆dump是這個結論的量化補證。",
+    "host_rep仍恆為0.5": "join_drive term的名聲磁鐵這輪(e927be2f)仍是常數，與遷移找糧delay修法無關的既有觀察(b968f492時已發現，此commit未變)。"
+  },
+
+  "★specimen(v2,含新join tap的run)": {
+    "路徑": "docs/measurements/breed-deathcause/camp-access-e927be2f-v2.specimen.jsonl",
+    "規模": "7158 entries，15隊",
+    "去向": "behavior因果結論(尤其outpost新增=1這個關鍵事件)⇒直寄QA故事稽核。"
+  },
+
+  "landed_paths": {
+    "branch_report_v1(無join dump)": "docs/measurements/breed-deathcause/camp-access-e927be2f-BRANCH-90d.txt",
+    "branch_report_v2(含join.accept_check dump)": "docs/measurements/breed-deathcause/camp-access-e927be2f-BRANCH-90d-v2.txt",
+    "main_baseline": "docs/measurements/breed-deathcause/camp-access-e927be2f-BASELINE-main-90d.txt",
+    "specimen": "docs/measurements/breed-deathcause/camp-access-e927be2f-v2.specimen.jsonl",
+    "bed(main+worktree逐字相同,已加SpecimenDumpHelper+outpost普查+四tap+join dump)": "scripts/debug/camp_access_diag_bed.gd"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; $env:SPECIMEN_SAMPLE_N='10'; $env:SPECIMEN_OUT='<path>.specimen.jsonl'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\camp-access --script scripts/debug/camp_access_diag_bed.gd",
+
+  "cleanup": "busy beacon清除。interaction_system.gd的join.accept_check tap建議commit到camp-access branch(implementer信裡授權我自己決定)——已決定commit，理由：這是既有main tap的移植補完，非新機制，且這輪重量已直接用到，留著避免下次又要來回確認。"
+}

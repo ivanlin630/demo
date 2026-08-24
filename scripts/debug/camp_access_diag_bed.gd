@@ -23,6 +23,12 @@ func _run() -> void:
 	config["seed"] = sd
 	GameSetup.setup(state, config)
 	SpecimenDumpHelper.setup_from_env(state)
+	# ★systems重量令(2026-08-25,camp-access@e927be2f)：day0 owned outpost普查
+	var owned_day0: Array = []
+	for tid0 in state.world.tiles:
+		var tt0: HexTileData = state.world.tiles[tid0]
+		if tt0.outpost_level > 0 and tt0.outpost_owner != -1:
+			owned_day0.append({"tile_id": tid0, "pos": [tt0.tile_pos.x, tt0.tile_pos.y], "owner": tt0.outpost_owner, "level": tt0.outpost_level})
 	var no_player := Vector2i(-1, -1)
 	for tick in range(days * WorldState.TICKS_PER_DAY):
 		runner.advance_tick(state, no_player)
@@ -103,25 +109,46 @@ func _run() -> void:
 		lines.append("--- 樣本（前 12） ---")
 		for smp in Probe.samples["camp.diag"].slice(0, 12):
 			lines.append("    %s" % str(smp))
-	# ★implementer票(2026-08-21 camp-access世界層)：修後cap saturation率+discount三值+join母體
-	lines.append("--- ★★修後CAMP_MARGINAL_CAP saturation率(修前35.0%基準對照) ---")
-	var dce: int = int(Probe.counts.get("discount.camp_evaluated", 0))
-	var dcc: int = int(Probe.counts.get("discount.camp_capped", 0))
-	lines.append("  discount.camp_evaluated = %d" % dce)
-	lines.append("  discount.camp_capped    = %d (%.1f%%)" % [dcc, 100.0*dcc/maxf(dce,1)])
-	lines.append("  discount.camp_raw_u(最後一次,單值非history)  = %s" % str(Probe.peaks.get("discount.camp_raw_u", "無")))
-	lines.append("  discount.horizon_eff(最後一次)               = %s" % str(Probe.peaks.get("discount.horizon_eff", "無")))
-	lines.append("  discount.flow_food(最後一次)                 = %s" % str(Probe.peaks.get("discount.flow_food", "無")))
-	lines.append("--- ★join母體(上輪=4) ---")
-	var ja: int = int(Probe.counts.get("accept.join_accept", 0))
-	var jr: int = int(Probe.counts.get("accept.join_reject", 0))
-	lines.append("  accept.join_accept+reject = %d (accept=%d reject=%d)" % [ja+jr, ja, jr])
+	# ★systems重量令(2026-08-25)：day90 owned outpost普查+對照day0
+	var owned_day90: Array = []
+	for tid9 in state.world.tiles:
+		var tt9: HexTileData = state.world.tiles[tid9]
+		if tt9.outpost_level > 0 and tt9.outpost_owner != -1:
+			owned_day90.append({"tile_id": tid9, "pos": [tt9.tile_pos.x, tt9.tile_pos.y], "owner": tt9.outpost_owner, "level": tt9.outpost_level})
+	lines.append("★★★outpost普查(重量令)：")
+	lines.append("  day0 owned outpost數 = %d" % owned_day0.size())
+	lines.append("  day90 owned outpost數 = %d" % owned_day90.size())
+	var day0_ids2: Dictionary = {}
+	for o in owned_day0: day0_ids2[int(o["tile_id"])] = true
+	var new_since2: Array = []
+	for o in owned_day90:
+		if not day0_ids2.has(int(o["tile_id"])): new_since2.append(o)
+	lines.append("  ★遊戲中途新增的outpost數 = %d (%s)" % [new_since2.size(), str(new_since2)])
+	# ★systems重量令：四tap(標籤更正=本輪最大值,非最後一次;Probe.note存的是peak)
+	lines.append("★★CAMP_MARGINAL_CAP saturation率：")
+	var dce2: int = int(Probe.counts.get("discount.camp_evaluated", 0))
+	var dcc2: int = int(Probe.counts.get("discount.camp_capped", 0))
+	lines.append("  discount.camp_evaluated = %d" % dce2)
+	lines.append("  discount.camp_capped    = %d (%.1f%%)" % [dcc2, 100.0*dcc2/maxf(dce2,1)])
+	lines.append("  discount.camp_raw_u(本輪最大值,Probe.note=peak非最後一次) = %s" % str(Probe.peaks.get("discount.camp_raw_u", "無")))
+	lines.append("  discount.horizon_eff(本輪最大值)                        = %s" % str(Probe.peaks.get("discount.horizon_eff", "無")))
+	lines.append("  discount.flow_food(本輪最大值)                          = %s" % str(Probe.peaks.get("discount.flow_food", "無")))
+	lines.append("--- ★join母體+QA指路dump：join.accept_check逐筆(cap=40) ---")
+	var ja2: int = int(Probe.counts.get("accept.join_accept", 0))
+	var jr2: int = int(Probe.counts.get("accept.join_reject", 0))
+	lines.append("  accept.join_accept+reject = %d (accept=%d reject=%d)" % [ja2+jr2, ja2, jr2])
+	if Probe.samples.has("join.accept_check"):
+		var jc: Array = Probe.samples["join.accept_check"]
+		lines.append("  ★join.accept_check樣本數=%d，cap=40，%s ⇒ 完整母體" % [
+			jc.size(), ("樣本數<cap" if jc.size() < 40 else "樣本數=cap需查是否截斷")])
+		for jsmp in jc:
+			lines.append("    %s" % str(jsmp))
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
 		var f := FileAccess.open(out_path, FileAccess.WRITE)
 		if f != null: f.store_string(text + "\n"); f.close()
-	var spec_path: String = OS.get_environment("SPECIMEN_OUT")
-	if spec_path != "":
-		SpecimenDumpHelper.dump(state, spec_path)
+	var spec_path2: String = OS.get_environment("SPECIMEN_OUT")
+	if spec_path2 != "":
+		SpecimenDumpHelper.dump(state, spec_path2)
 	Probe.enabled = false

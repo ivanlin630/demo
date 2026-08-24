@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: camp-access
 topic: ★重量令:你量的 b968f492 早於 e927be2f(遷移找糧 delay=行為改動);併三件小事(join tap dump/標籤更正/你的床沒 commit)
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: camp-access
 topic: 加一顆既有 tap 的 dump(QA 指路,最省成本):join.accept_check —— 8 次 reject 遠低於 cap 40 = 完整母體不受 first-N 影響
 ---

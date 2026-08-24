@@ -1,0 +1,40 @@
+[peaceful_economy day 90 seed 1337] teams=17
+--- 零採集（病） ---
+  collect.no_outpost_no_camp_zero_food           = 1133
+  collect.no_outpost_no_camp_zero_food.parent    = 1109
+  collect.no_outpost_no_camp_zero_food.subteam   = 24
+  collect.l0_forage_ran                          = 173
+--- 三分流（temp tap 已撤；證據見 2026-08-21 交件） ---
+  camp.diag.i_above_desperation                  = 0
+  camp.diag.ii_no_farmable                       = 0
+  camp.diag.iii_applicable_but_not_chosen        = 0
+  camp.diag.has_outpost_already                  = 0
+  camp.applicable_but_idle                       = 0
+--- ★逐隊歸格（不得只給總數） ---
+--- ★分流(iii) 輸給誰 ---
+  camp.won_argmax                                = 0
+--- ★紮根 funnel（驗收#1 的解釋層）---
+  root.won_argmax                                = 0
+  ★紮根從未進入候選（applicable 都沒過）
+  construct.complete                             = 16
+  construct.complete_upgrade_facility            = 16
+--- 世界狀態（gate1/6 用） ---
+  pop=1 村數 = 12｜母隊人口合計 = 35
+  breed.born                                     = 1
+★★★outpost普查(重量令)：
+  day0 owned outpost數 = 11
+  day90 owned outpost數 = 9
+  ★遊戲中途新增的outpost數 = 0 ([])
+★★CAMP_MARGINAL_CAP saturation率：
+  discount.camp_evaluated = 0
+  discount.camp_capped    = 0 (0.0%)
+  discount.camp_raw_u(本輪最大值,Probe.note=peak非最後一次) = 無
+  discount.horizon_eff(本輪最大值)                        = 無
+  discount.flow_food(本輪最大值)                          = 無
+--- ★join母體+QA指路dump：join.accept_check逐筆(cap=40) ---
+  accept.join_accept+reject = 4 (accept=3 reject=1)
+  ★join.accept_check樣本數=4，cap=40，樣本數<cap ⇒ 完整母體
+    { "host": 1, "joiner": 13, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }
+    { "host": 3, "joiner": 11, "host_rep": 0.5, "feed_ok": 0, "accept_util": 0, "accepted": false }
+    { "host": 6, "joiner": 19, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }
+    { "host": 1, "joiner": 3, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }

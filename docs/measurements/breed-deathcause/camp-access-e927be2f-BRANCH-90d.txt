@@ -1,0 +1,82 @@
+[peaceful_economy day 90 seed 1337] teams=21
+--- 零採集（病） ---
+  collect.no_outpost_no_camp_zero_food           = 1123
+  collect.no_outpost_no_camp_zero_food.parent    = 1101
+  collect.no_outpost_no_camp_zero_food.subteam   = 22
+  collect.l0_forage_ran                          = 168
+--- 三分流（temp tap 已撤；證據見 2026-08-21 交件） ---
+  camp.diag.i_above_desperation                  = 0
+  camp.diag.ii_no_farmable                       = 0
+  camp.diag.iii_applicable_but_not_chosen        = 0
+  camp.diag.has_outpost_already                  = 0
+  camp.applicable_but_idle                       = 0
+--- ★逐隊歸格（不得只給總數） ---
+--- ★分流(iii) 輸給誰 ---
+  camp.lost_to.build_apothecary:resource         = 25
+  camp.lost_to.build_workshop:resource           = 127
+  camp.lost_to.deliver_material                  = 9
+  camp.lost_to.maintain_food:resource            = 5
+  camp.lost_to.maintain_tools:resource           = 32
+  camp.lost_to.survival                          = 68
+  camp.lost_to.乞食                                = 7
+  camp.lost_to.併入                                = 74
+  camp.lost_to.備戰                                = 258
+  camp.lost_to.囤貨                                = 1
+  camp.lost_to.建設                                = 9
+  camp.lost_to.歸建                                = 2
+  camp.lost_to.求和                                = 2
+  camp.lost_to.紮根                                = 5
+  camp.lost_to.覓食                                = 139
+  camp.lost_to.買糧                                = 41
+  camp.lost_to.貿易                                = 22
+  camp.lost_to.返家補給                              = 14
+  camp.won_argmax                                = 38
+--- ★紮根 funnel（驗收#1 的解釋層）---
+  root.won_argmax                                = 5
+  root.lost_to.build_apothecary:resource         = 2
+  root.lost_to.build_workshop:resource           = 21
+  root.lost_to.deliver_material                  = 2
+  root.lost_to.survival                          = 9
+  root.lost_to.乞食                                = 1
+  root.lost_to.併入                                = 2
+  root.lost_to.備戰                                = 24
+  root.lost_to.囤貨                                = 1
+  root.lost_to.建設                                = 5
+  root.lost_to.歸建                                = 2
+  root.lost_to.紮營                                = 1
+  root.lost_to.覓食                                = 17
+  root.lost_to.貿易                                = 10
+  root.lost_to.返家補給                              = 14
+    [camp.lost] { "team": 8, "camp_u": 0.228, "winner": "貿易", "win_u": 0.552, "food_days": 12.5 }
+    [camp.lost] { "team": 8, "camp_u": 0.093, "winner": "求和", "win_u": 0.837, "food_days": 12.08 }
+    [camp.lost] { "team": 8, "camp_u": 0.091, "winner": "貿易", "win_u": 1.232, "food_days": 11.25 }
+    [camp.lost] { "team": 8, "camp_u": 0.093, "winner": "貿易", "win_u": 1.36, "food_days": 11.25 }
+    [camp.lost] { "team": 8, "camp_u": 0.094, "winner": "貿易", "win_u": 1.28, "food_days": 10.83 }
+    [camp.lost] { "team": 8, "camp_u": 0.095, "winner": "貿易", "win_u": 1.223, "food_days": 10.42 }
+    [camp.lost] { "team": 8, "camp_u": 0.096, "winner": "貿易", "win_u": 1.183, "food_days": 10 }
+    [camp.lost] { "team": 8, "camp_u": 0.096, "winner": "貿易", "win_u": 1.156, "food_days": 9.58 }
+    [camp.lost] { "team": 8, "camp_u": 0.096, "winner": "貿易", "win_u": 1.138, "food_days": 9.17 }
+    [camp.lost] { "team": 8, "camp_u": 0.097, "winner": "survival", "win_u": 1.129, "food_days": 8.75 }
+  construct.complete                             = 21
+  construct.complete_upgrade_facility            = 20
+  settlement.l0_to_l1_start                      = 4
+  construct.complete_crude_camp                  = 1
+  settlement.l0_to_l1_resume                     = 2
+--- 世界狀態（gate1/6 用） ---
+  pop=1 村數 = 14｜母隊人口合計 = 50
+  breed.born                                     = 1
+  camp.built                                     = 26
+  outpost.l0_to_l1                               = 1
+  camp.abandoned                                 = 24
+★★★outpost普查(重量令)：
+  day0 owned outpost數 = 11
+  day90 owned outpost數 = 11
+  ★遊戲中途新增的outpost數 = 1 ([{ "tile_id": 13006, "pos": [13, 6], "owner": 8, "level": 1 }])
+★★CAMP_MARGINAL_CAP saturation率：
+  discount.camp_evaluated = 886
+  discount.camp_capped    = 278 (31.4%)
+  discount.camp_raw_u(本輪最大值,Probe.note=peak非最後一次) = 4.465281735
+  discount.horizon_eff(本輪最大值)                        = 90
+  discount.flow_food(本輪最大值)                          = 8.76356092008266
+--- ★join母體+QA指路dump：join.accept_check逐筆(cap=40) ---
+  accept.join_accept+reject = 11 (accept=3 reject=8)
