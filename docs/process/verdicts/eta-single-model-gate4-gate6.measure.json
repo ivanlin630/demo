@@ -1,0 +1,36 @@
+{
+  "slice": "eta-single-model",
+  "ticket": "implementer票：gate4 stranded同床同seed前後對照(雙向判準,不預設歸零) + gate6 convoy.eta_vs_actual",
+  "measured_at_branch": "feat/eta-single-model @3f8705ca(.worktrees/eta-single-model)",
+  "measured_at_main_baseline": "a0110bb6(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, warring_states, 30天，main與branch用逐字相同convoy_gate9_warring_bed.gd(main側加了gate6報表段,branch原生tap)",
+
+  "★L3聲明": "convoy_gate9_warring_bed.gd(main+worktree逐字相同)加gate6報表段(convoy.eta_vs_actual_sum/_n讀取+samples列印)。gate6底層tap(faction_ai_system.gd:2869-2871)是implementer自己在eta-single-model branch上加的,main沒有這個tap呼叫點(main的convoy return機制是舊版,無此tap)——main側gate6顯示n=0是預期行為,非bug。",
+
+  "★★★gate4：3→0，顯著減少，方向符合預期": {
+    "main baseline(同seed,30天)": {"trips_total": 50, "stranded": 3, "stranded.timeout": 3, "stranded.parent_gone": 0, "stranded.no_path": 0},
+    "branch(同seed,30天)": {"trips_total": 52, "stranded": 0},
+    "判讀": "★顯著減少(3→0)，符合implementer預期方向(修法生效)。main那3筆全部是timeout原因(0筆parent_gone/no_path)——符合implementer判準『只有timeout那格該掉,另外兩格掉了才可疑』:確實只有timeout格掉了(3→0)，沒有別的reason格被誤動。",
+    "★★歸零檢查(implementer明確要求:不預設歸零,反而要查T3是否永不觸發)": "已做code層核實：`_convoy_go_independent`函式(faction_ai_system.gd:2911)與`RETURN_ABANDON_ETA_MULT=3.0`(:2884)常數在branch上完全未變、觸發條件`elapsed > RETURN_ABANDON_ETA_MULT*eta`(:2903)邏輯未動——T3機制結構上仍可觸發，不是被拿掉了。★誠實邊界：這只是『機制還在』的靜態確認，不是『這輪0是不是巧合』的正面測試——n=52 trips/30天樣本量不算大，budget從~1.0x(修前)變成真正的3.0x(修後,implementer自己的gate3數字)，這麼寬的margin下0次stranded在統計上完全合理，但若要更高信心排除『T3事實上變得極難觸發』的疑慮，建議延長天數或多seed。"
+  },
+
+  "★★gate6：convoy.eta_vs_actual，n=73，平均比值0.874": {
+    "n": 73, "平均比值": 0.874,
+    "判讀": "顯著<1.0(仍低估約12.6%)，但比修前的~3倍低估(implementer gate3數字:budget/真實路程時間修前≈1.0,即eta本身低估到需要3倍margin才夠)已經大幅改善。個別樣本比值分佈0.65~1.207，有真實變異(非死水常數)——estimator已經從『系統性低估3倍』變成『輕度低估~13%』。",
+    "誠實邊界": "0.874不是implementer原本樂觀預期的『1.0=完全同步』，仍有改善空間，但方向與量級都是實質進步。"
+  },
+
+  "★det fp沒變的情報(implementer自報,已核實不需我重驗)": "implementer已自證:main與branch的a4_determinism_check(1000 tick)fp都是793afde925135e49ab90b824a6d91a47——因為那張1000-tick的warring床根本沒跑到convoy回程/T3，這是床覆蓋度情報非修法失敗，det仍綠(三跑穩定)。",
+
+  "landed_paths": {
+    "branch_report(day30最終,含前段checkpoint)": "raw stdout log(detached): C:\\Users\\I12\\AppData\\Local\\Temp\\godot_detach_b40e6f34.log(本地暫存,非committed)",
+    "main_baseline_report": "raw stdout log(detached): C:\\Users\\I12\\AppData\\Local\\Temp\\godot_detach_893583cc.log(本地暫存,非committed)",
+    "specimen(branch)": "docs/measurements/breed-deathcause/eta-model.specimen.jsonl",
+    "bed(main+worktree逐字相同,加gate6報表段)": "scripts/debug/convoy_gate9_warring_bed.gd"
+  },
+
+  "repro": "$env:LW_CONFIG='warring_states'; $env:LW_MONTHS='1'; $env:PERF_SEED='1337'; $env:SPECIMEN_SAMPLE_N='10'; $env:SPECIMEN_OUT='<path>.specimen.jsonl'; .\\tools\\godot-detach.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\eta-single-model --script scripts/debug/convoy_gate9_warring_bed.gd　（此世界很重,90-125隊/8factions,務必用detached非foreground,GODOT_TIMEOUT=600都不夠）",
+
+  "cleanup": "busy beacon清除。gate6報表段建議留(main側也留著,雖然main目前n=0,但若main日後也加同款tap,床已就緒)。"
+}

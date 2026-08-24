@@ -169,6 +169,14 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 	lines.append("  ★★stranded逐筆(distance=當下porter與原parent hex距離,-1=parent已不存在無法算)：")
 	for s in _stranded_log:
 		lines.append("    %s" % str(s))
+	# ★implementer票(2026-08-21 eta-single-model)：gate6 convoy.eta_vs_actual——porter真正到家時的ETA估值vs實際比值
+	var evn: int = int(Probe.counts.get("convoy.eta_vs_actual_n", 0))
+	var evs: float = float(Probe.amounts.get("convoy.eta_vs_actual_sum", 0.0))
+	lines.append("  ★★gate6 convoy.eta_vs_actual：n=%d 平均比值=%.3f(1.0=同步,顯著<1=ETA仍低估)" % [
+		evn, (evs / maxf(evn, 1))])
+	if Probe.samples.has("convoy.eta_vs_actual"):
+		for s2 in (Probe.samples["convoy.eta_vs_actual"] as Array):
+			lines.append("    %s" % str(s2))
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
