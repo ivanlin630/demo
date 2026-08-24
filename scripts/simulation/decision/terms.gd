@@ -111,10 +111,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   （舊式只是 f(food_days)：存量函數、位置盲，於是「原地一直覓食」永遠免費）。
 			#   其餘吃這顆 weight 的 option（自救建田／逃跑／返家補給）不在本刀範圍，維持舊式壓力值。
 			if opt == "覓食" or opt == "遷移找糧":
+				# ★覓食＝腳下，現成（delay 0）；遷移找糧＝要走過去（delay ＝ 路程日數，systems 裁定 2026-08-21）。
 				var _gain: float = ctx.forage_yield_here if opt == "覓食" else ctx.forage_yield_target
+				var _delay: float = 0.0 if opt == "覓食" else ctx.food_seek_delay_days
 				return clampf(DiscountedFlow.flow_utility(_gain, ctx.passive_food_daily,
 					float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
-					ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP)
+					ctx.leader_values, ctx.net_food_flow, ctx.food_stock,
+					0.0, _delay), 0.0, CAMP_MARGINAL_CAP)
 			# ★A4 de-patch：覓食品質隨 food_days 衰減（死值 1.0 → need-connected、同 camp_drive 家族）。
 			#   <7 天(絕境)→>1 clamp 1.0（survival floor 不動）;7→14 天線性衰減;≥14 天(充裕)→0 讓位。
 			return clampf((2.0 * DecisionContext.SLACK_COMFORT_DAYS - ctx.food_days) / DecisionContext.SLACK_COMFORT_DAYS, 0.0, 1.0)

@@ -4788,6 +4788,7 @@ func _run_sim_test() -> void:
 	# ── P2a 絕境 option（投靠/紮營/乞食） ──
 	_test_p2a_survival_terms()
 	_test_p2a_survival_options()
+	_test_join_vs_camp_law()
 	_test_p2a_camp_arrival()
 	_test_p2a_join_player_forced()
 	_test_p2a_survival_priority()
@@ -6602,13 +6603,19 @@ func _test_survival_decision_tree() -> void:
 	var t3 := TeamData.new(); t3.team_id = 0; t3.tile_pos = Vector2i(0,0); _seed_pop(t3, 5); t3.resources["food"] = 0
 	var l3 := PersonData.new(); l3.id = 100; l3.values = { "義氣": 0.7, "信義": 0.7, "求生欲": 0.5 }
 	s3.persons[100] = l3; t3.leader_id = 100
-	var ally := TeamData.new(); ally.team_id = 1; ally.tile_pos = Vector2i(2,0); _seed_pop(ally, 20); ally.faction_id = 99
+	# ★host 是張好飯票才該投靠（camp-stay-brick v2 起，投靠秤 host 村的真實被動流）：
+	#   L2 據點 + pop 10（> 1.5×5 仍算強鄰）⇒ 人均產出高於 t3 自己去開荒。
+	var ally := TeamData.new(); ally.team_id = 1; ally.tile_pos = Vector2i(2,0); _seed_pop(ally, 10); ally.faction_id = 99
 	ally.resources["food"] = 500
 	var ally_leader := PersonData.new(); ally_leader.id = 200
 	s3.persons[200] = ally_leader; ally.leader_id = 200
 	s3.teams[0] = t3; s3.teams[1] = ally; s3.team_discovered[0] = [1]
+	var _ally_tile: HexTileData = s3.world.tiles.get(2 * 1000 + 0)
+	if _ally_tile != null:
+		_ally_tile.outpost_level = 2
+		_ally_tile.outpost_owner = 1
 	t3.known_reputations[1] = 0.6
-	BeliefSystem.record_claim(s3, 0, 1, 0, "親見", {"population_est": 20, "tile_pos": Vector2i(2, 0), "last_tick": s3.world.current_tick}, 1.0, false)  # Phase-E：強鄰投靠讀 belief（position-belief）
+	BeliefSystem.record_claim(s3, 0, 1, 0, "親見", {"population_est": 10, "tile_pos": Vector2i(2, 0), "last_tick": s3.world.current_tick}, 1.0, false)  # Phase-E：強鄰投靠讀 belief（position-belief）
 	fai._trigger_survival(s3, t3, "urgent")
 	assert(t3.current_task == TeamData.TASK_JOIN, "Path 3 應 投靠，實際=%s" % t3.current_task)
 	# (4) 默認 → 乞食（pop > FORAGE_VIABLE_POP 跳覓食；周圍格皆有主 → 無法紮營 → 落到乞食）
@@ -15604,10 +15611,17 @@ func _test_p2a_survival_terms() -> void:
 
 # ── P2a helpers（manual WorldState 風格，仿 P1） ──
 
+# ★冪等（2026-08-21）：原本每次呼叫都 new 一顆蓋掉舊的 —— 兩隊站同一格時（W2：NPC 與玩家隊同格），
+#   後呼叫的那次會把前一次設好的 `outpost_level/outpost_owner` 一起洗掉，
+#   於是「同格玩家村」在決策看來是塊空地、`join_host_flow=0`。改成有就沿用、只更新 terrain。
 func _p2a_place_tile(state: WorldState, pos: Vector2i, terrain: String = "plains") -> void:
-	var t := HexTileData.new()
-	t.tile_id = pos.x * 1000 + pos.y; t.tile_pos = pos; t.terrain = terrain
-	state.world.tiles[t.tile_id] = t
+	var tid: int = pos.x * 1000 + pos.y
+	var t: HexTileData = state.world.tiles.get(tid)
+	if t == null:
+		t = HexTileData.new()
+		t.tile_id = tid; t.tile_pos = pos
+		state.world.tiles[tid] = t
+	t.terrain = terrain
 
 # 無家深危 unified merchant 隊：food_days=1<DESPERATION、leader 給 values、本格 plains（可農）
 func _mk_unified_desperate_team(state: WorldState, pos: Vector2i, values: Dictionary) -> TeamData:
@@ -15626,11 +15640,15 @@ func _mk_unified_desperate_team(state: WorldState, pos: Vector2i, values: Dictio
 	return t
 
 # 強鄰：pop>1.5×目標、入目標 team_discovered、rep 預設 0.5、可達、獨立 faction、food 低（非 aid 目標）
-func _mk_strong_neighbor_team(state: WorldState, pos: Vector2i, target: TeamData) -> TeamData:
+# ★host 品質參數化（systems 裁定 2026-08-21）：投靠現在秤【host 村的真實被動流】⇒ 場景必須說清楚
+#   「這個 host 是不是一張好飯票」。預設 ＝ 好飯票（L2、pop 16）：人均高 ⇒ 投靠划算。
+#   ★差飯票（L1、pop 30）由 `_test_join_vs_camp_law` 專測，見那裡的 known-blocked-by 註記。
+func _mk_strong_neighbor_team(state: WorldState, pos: Vector2i, target: TeamData,
+		host_outpost_level: int = 2, host_pop: int = 16) -> TeamData:
 	var tid: int = 700 + state.teams.size()
 	var t := TeamData.new(); t.team_id = tid; t.tile_pos = pos; t.faction_id = -1
-	_seed_pop(t, 30)   # > 1.5×10
-	t.resources = {"food": 100.0}   # < pop×14=420 → 非 aid 目標
+	_seed_pop(t, host_pop)   # > 1.5×10
+	t.resources = {"food": 100.0}   # < pop×14 → 非 aid 目標
 	state.teams[tid] = t
 	_p2a_place_tile(state, pos)
 	# ★fixture 補完（camp-stay-brick v2）：投靠現在秤【host 有沒有飯】（host 村的被動流），
@@ -15638,28 +15656,29 @@ func _mk_strong_neighbor_team(state: WorldState, pos: Vector2i, target: TeamData
 	#   ★補的是【場景缺的世界事實】，不是斷言：強鄰得真的是個有產出的村。
 	var _ht: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if _ht != null:
-		_ht.outpost_level = 1
+		_ht.outpost_level = host_outpost_level
 		_ht.outpost_owner = tid
 	if not state.team_discovered.has(target.team_id):
 		state.team_discovered[target.team_id] = []
 	state.team_discovered[target.team_id].append(tid)
 	# Phase-E：_find_strong_neighbor 讀 belief → 供投靠決策看見「強鄰」
 	BeliefSystem.record_claim(state, target.team_id, tid, target.team_id, "親見",
-		{"population_est": 30, "tile_pos": t.tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
+		{"population_est": host_pop, "tile_pos": t.tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
 	return t
 
 # 玩家強隊：state.player_id + leader=player + strong
 func _mk_player_strong_team(state: WorldState, pos: Vector2i) -> TeamData:
 	var tid: int = 700 + state.teams.size()
 	var t := TeamData.new(); t.team_id = tid; t.tile_pos = pos; t.faction_id = -1
-	_seed_pop(t, 30)
+	_seed_pop(t, 16)
 	t.resources = {"food": 100.0}
 	state.teams[tid] = t
 	_p2a_place_tile(state, pos)
-	# ★同 _mk_strong_neighbor_team：投靠現在秤 host 村的被動流 → 玩家強隊也得真的是個村。
+	# ★同 _mk_strong_neighbor_team：投靠秤的是 host 村的真實被動流 ⇒ 玩家強隊也得是張好飯票
+	#   （L2、pop 16：人均夠高，投靠才划算）。
 	var _pt: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if _pt != null:
-		_pt.outpost_level = 1
+		_pt.outpost_level = 2
 		_pt.outpost_owner = tid
 	var pl := PersonData.new(); pl.id = 99999; pl.team_id = tid
 	state.persons[99999] = pl
@@ -15674,6 +15693,43 @@ func _give_home_outpost(state: WorldState, team: TeamData, pos: Vector2i) -> voi
 	tile.outpost_level = 1
 	tile.outpost_owner = team.team_id
 	tile.public_storage = {"food": 200.0}   # 家糧倉有糧（≥RESTOCK_MIN）→ 返家補給 home-empty gate 過
+
+# ════════ 投靠 vs 自立：★排序【由真實流量決定】的法條（systems 裁定 2026-08-21）════════
+#
+# ★舊編碼斷言的是「義氣隊必投靠」——那是「join_drive 還是常數」年代的產物。
+#   四端同秤（`DiscountedFlow`）之後，投靠秤的是【host 村的真實被動流】，
+#   ⇒ 正確的法條不是「義氣隊必投靠」，是「**投靠划算就投靠、不划算就自立**」。
+#   blueprint 已裁：真結論照收，禁用人格 crank 翻盤。
+#
+# ★known-blocked-by：**有大有小 arc（CASE B 規模經濟 absent）**
+#   `MarginalEconomy._inflow_est` 在 pop≥20 飽和（plains L1 ＝ 16.0/日）⇒ host 人均單調遞減
+#   ⇒ **擁擠的 host 在食物上必輸自建村**，而且嚴格邊際 `inflow(30+10)−inflow(30) = 0` 更強。
+#   ⇒ 下面方向 B（差飯票→自立）現在是【真結論】；等規模經濟落地後這條的門檻會移動，
+#     但**法條本身（排序由真實流量決定）不變** —— 這正是把它寫成法條而非結果的理由。
+func _test_join_vs_camp_law() -> void:
+	print("--- 投靠 vs 自立：排序由真實流量決定 ---")
+	var vals: Dictionary = {"義氣": 0.9, "信義": 0.8, "求生欲": 0.8}
+	# 方向 A：host 是張好飯票（L2、pop 16 ⇒ 人均高）→ 同一個義氣隊必須【投靠】
+	var sa := WorldState.new(); sa.world = WorldData.new()
+	var ja := _mk_unified_desperate_team(sa, Vector2i(2,2), vals)
+	_mk_strong_neighbor_team(sa, Vector2i(3,2), ja, 2, 16)
+	var ctx_a := DecisionContext.gather(sa, ja)
+	FactionAISystem.new()._decide_unified(sa, ja)
+	assert(ja.current_task == TeamData.TASK_JOIN,
+		"法條A：好飯票 host（join_flow=%.2f）→ 應投靠，實際=%s" % [ctx_a.join_host_flow, ja.current_task])
+	# 方向 B：host 擁擠（L1、pop 30 ⇒ 人均低）→ 同一個義氣隊必須【自立】
+	var sb := WorldState.new(); sb.world = WorldData.new()
+	var jb := _mk_unified_desperate_team(sb, Vector2i(2,2), vals)
+	_mk_strong_neighbor_team(sb, Vector2i(3,2), jb, 1, 30)
+	var ctx_b := DecisionContext.gather(sb, jb)
+	FactionAISystem.new()._decide_unified(sb, jb)
+	assert(jb.current_task != TeamData.TASK_JOIN,
+		"法條B：擁擠 host（join_flow=%.2f）→ 不該投靠，實際=%s" % [ctx_b.join_host_flow, jb.current_task])
+	# ★法條本體：兩個場景的差異【只有 host 品質】，而排序真的跟著翻 ⇒ 秤的是流量不是人格
+	assert(ctx_a.join_host_flow > ctx_b.join_host_flow,
+		"法條：好飯票的 host 流必須高於擁擠 host（%.2f > %.2f）" % [ctx_a.join_host_flow, ctx_b.join_host_flow])
+	print("[law] join_flow 好=%.2f / 擠=%.2f → task 好=%s / 擠=%s" % [
+		ctx_a.join_host_flow, ctx_b.join_host_flow, ja.current_task, jb.current_task])
 
 func _test_p2a_survival_options() -> void:
 	print("--- P2a survival options ---")

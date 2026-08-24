@@ -61,6 +61,9 @@ var passive_food_daily: float = 0.0
 # 血統①：全部走 MarginalEconomy._inflow_est / tile 實際量，禁再造第二份產能常數。
 var forage_yield_here: float = 0.0       # 覓食：腳下 tile 的真實可採日流（★在自家營地 vs 荒地必須不同價）
 var forage_yield_target: float = 0.0     # 遷移找糧：目標 tile 的真實可採日流
+# ★遷移找糧的流【要走過去才接上】＝到目標的路程日數（systems 裁定 2026-08-21：spec 四選項表漏了這條，
+#   「現成的流打贏要等的流」對它一樣適用）。用既有 `_hex_dist`，零新旋鈕。
+var food_seek_delay_days: float = 0.0
 var join_host_flow: float = 0.0          # 投靠：host 村的被動流（現成、無工期）
 var occupy_target_flow: float = 0.0      # 佔村：那個村的實際產能（非二值常數）
 var net_food_flow: float = 0.0
@@ -411,6 +414,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _stile: HexTileData = state.world.tiles.get(_seek.x * 1000 + _seek.y)
 		if _stile != null:
 			c.forage_yield_target = _tile_forage_yield(_stile, _forage_rate)
+			c.food_seek_delay_days = float(FactionAISystem._hex_dist(team.tile_pos, _seek))
 	# ★投靠＝host 村的被動流（現成、無工期）；★佔村＝目標村的實際產能（非死常數）
 	if c.strong_neighbor_id != -1:
 		var _host: TeamData = state.teams.get(c.strong_neighbor_id)
