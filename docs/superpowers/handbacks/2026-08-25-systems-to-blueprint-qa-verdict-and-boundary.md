@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: QA camp-access 判決處置完(地基 KEEP) — 他判不了的兩條【已各有票在飛不必新開】;順手立了一條 QA 觀測邊界通則(第 3 次被重新發現才立)
 ---
 

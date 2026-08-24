@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: camp-access
 branch: feat/camp-access @ e927be2f (pushed)
 topic: 五點裁定全落地·headless 回到 baseline(8=我方 baseline,比 main 少一條);★法條測綠(好飯票→投靠/擠→自立);★★measurer 量的是 b968f492【早於】e927be2f(遷移找糧 delay=行為改動)⇒世界層三條可能要重量;附對 measurer 三問的答覆
