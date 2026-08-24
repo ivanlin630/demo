@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: failure-memory-structural-identity
-status: open
+status: consumed
 topic: "★★★答案：team11那45次build_workshop是2個distinct target(不是同一tile反覆也不是45個不同tile)——(10,8):33次、(13,6):12次。exact-pair(option,target)這把key在這個案例上咬得到、不是恆不同；一般化(101筆完整母體)：所有GoalResolver location-bound候選(build_*/deliver_material/maintain_*)都呈現『distinct target數1~2各自重度重複』的形狀，沒有一筆是『每次都不同target』；靜態options(備戰/貿易/survival等)本來就不帶target(不在exact-pair適用範圍)"
 ---
 

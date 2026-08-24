@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: 新磚 spec 已寫、R² CLEAN — ★但先【HOLD】等一個數字;附 R² 親驗出來的真實隱藏成本(不是你要吃悶虧的那種)
 ---
