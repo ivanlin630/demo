@@ -1,0 +1,72 @@
+{
+  "slice": "camp-access",
+  "ticket": "implementer票：spec §7世界層三條(同床同seed vs main)+四個新tap，長跑附specimen",
+  "measured_at_branch": "feat/camp-access @b968f492(.worktrees/camp-access)",
+  "measured_at_main_baseline": "b3e54405(main)",
+  "measured_date": "2026-08-21",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天，main與branch同一份camp_access_diag_bed.gd(同床)",
+
+  "★L3聲明": "camp_access_diag_bed.gd(worktree內)加SpecimenDumpHelper.setup_from_env/dump + 四個新tap的報表段(5行+15行)；main側複製同一份bed檔跑baseline(未動main production code)。純觀測床改動。",
+
+  "①outpost.l0_to_l1 > 0：PASS(1>0)，且funnel整體活了": {
+    "outpost.l0_to_l1": 1,
+    "root.won_argmax": 5,
+    "settlement.l0_to_l1_start": 4,
+    "settlement.l0_to_l1_resume": 2,
+    "construct.complete_crude_camp": 1,
+    "判讀": "★上輪(52f08fdf)=0(紮根從未進入候選)；本輪root.won_argmax=5，紮根真的能贏argmax、真的start了4次、resume 2次、完工1次(crude_camp)、最終晉升L0→L1=1次。判準①通過，紮根funnel從『完全死』變『偶爾活』。"
+  },
+
+  "②camp.abandoned < camp.built：PASS但幅度小，棄置率其實微升": {
+    "camp.built": 26, "camp.abandoned": 24,
+    "上輪(52f08fdf)": "built=28, abandoned=25 (89.3%棄置率)",
+    "本輪": "built=26, abandoned=24 (92.3%棄置率)",
+    "淨開放(built-abandoned)": "本輪+2 vs 上輪+3",
+    "判讀": "★★判準字面上通過(24<26)，但這是個弱門檻——只要不是100%棄置就會過。棄置『率』(24/26=92.3%)其實比上輪(25/28=89.3%)還高一點點，淨開放量(+2 vs +3)也略減。不建議把這條字面PASS當作『棄置問題已改善』——數字方向其實持平或略惡化，只是門檻本身設得寬鬆。"
+  },
+
+  "③collect.no_outpost_no_camp_zero_food 低於同床main baseline：PASS，但改善幅度小": {
+    "main baseline(同seed同床本輪重跑)": 1133,
+    "branch": 1123,
+    "差值": "-10 (-0.9%)",
+    "上輪(跨commit比較,票面已標記無效)": "branch 1244 vs main 1133(當時branch更差,反向)",
+    "判讀": "★同床同seed本輪重跑後，branch(1123) < main(1133)成立，方向對了(上輪的『反向』已修正)。但改善幅度很小(-0.9%)——不是『大幅改善』，是『從更差翻正到略優』。"
+  },
+
+  "★四個新tap": {
+    "cap_saturation": {
+      "discount.camp_evaluated": 886, "discount.camp_capped": 278,
+      "飽和率": "31.4%",
+      "上輪基準(修前,舊tap名camp_marginal)": "35.0%",
+      "判讀": "★★關鍵：implementer原本假說『flow_utility分母量綱錯是35%飽和的真因,修好後應顯著下降』——本輪35.0%→31.4%，只降了3.6個百分點，遠遠不是『崩到近0』。implementer信裡自己寫的判準『若崩到近0,cap de-patch票直接作廢』——本輪31.4%不算崩到近0，cap de-patch的必要性看起來沒有被這個修法消除。"
+    },
+    "discount.camp_raw_u(最後一次快照)": 4.465281735,
+    "discount.horizon_eff(最後一次快照)": 90,
+    "discount.flow_food(最後一次快照)": 8.76356092008266,
+    "camp.lost_to分佈(紮營applicable卻沒贏時輸給誰)": "備戰(258)最大宗，其次併入(74)、建設族(build_workshop 127/apothecary 25等)、覓食(139)、survival(68)——備戰/建設/覓食/survival四大類吃掉紮營大部分argmax機會，camp.won_argmax=38 vs 上述輸掉的加總遠超此數。",
+    "join母體": {
+      "本輪": "accept+reject=11(accept=3, reject=8)",
+      "上輪": "accept+reject=4(accept=3, reject=1)",
+      "判讀": "★★join嘗試次數從4次升到11次(呼叫頻率真的變了，非死水)，但accept維持3不變、reject從1暴增到8——現在『投靠』更常被嘗試但更常被拒。呼應implementer信裡的判讀提醒：『投靠是秤輸不是秤不到』——這輪call frequency明顯上升，支持『接線確實做了』，但accept rate從75%掉到27%，需要interpretation(可能host食力吃緊/population飽和導致更多拒絕，非本輪深查)。"
+    }
+  },
+
+  "★specimen": {
+    "路徑": "docs/measurements/breed-deathcause/camp-access-worldlayer.specimen.jsonl",
+    "規模": "7158 entries, 15 teams(0,1,2,3,4,6,7,8,9,10,11,14,15,22,23)",
+    "去向": "長跑+behavior因果結論(spec §7三條+四tap判讀含臆測成分)⇒依implementer票面要求，直接寄QA故事稽核。"
+  },
+
+  "★★總評": "三條判準字面上都PASS，但②③改善幅度都很小(近乎持平)，唯一真正『從死到活』的是①(紮根funnel從0到有)。cap saturation(31.4%)遠未達implementer自己設定的『近0』門檻，de-patch必要性未被推翻。join母體上升到11但accept率下降，需要故事層驗證。",
+
+  "landed_paths": {
+    "branch_report": "docs/measurements/breed-deathcause/camp-access-worldlayer-BRANCH-90d.txt",
+    "main_baseline_report": "docs/measurements/breed-deathcause/camp-access-worldlayer-BASELINE-main-90d.txt",
+    "specimen": "docs/measurements/breed-deathcause/camp-access-worldlayer.specimen.jsonl",
+    "bed": "scripts/debug/camp_access_diag_bed.gd(main+.worktrees/camp-access逐字相同，含SpecimenDumpHelper支援+四tap報表)"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='90'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; $env:SPECIMEN_SAMPLE_N='10'; $env:SPECIMEN_OUT='<path>.specimen.jsonl'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\camp-access --script scripts/debug/camp_access_diag_bed.gd　（main baseline同指令換--path A:\\GDS\\demo，不需specimen）",
+
+  "cleanup": "busy beacon清除。main側的camp_access_diag_bed.gd複製檔案建議留(同床比較常設工具)，交systems判permanent。"
+}
