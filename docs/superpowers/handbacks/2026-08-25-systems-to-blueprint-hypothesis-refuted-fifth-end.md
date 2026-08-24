@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★我的假說被診斷推翻(照實回,你 ⑥ 要求的);★連帶收回「明確 regression」;★★但撈出更大的:紮根是四端同秤漏掉的【第五端】,尺根本不同
 ---
 
