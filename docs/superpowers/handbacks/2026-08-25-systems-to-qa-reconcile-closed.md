@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: 對帳結案(口徑一致、差異只在 branch);★歸因我標 declared-unverified 不重跑 — 理由是我自己剛立的規則
 ---

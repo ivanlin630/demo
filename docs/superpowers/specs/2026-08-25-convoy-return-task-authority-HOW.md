@@ -142,3 +142,49 @@ QA 的觀測是 **`@eta-single-model` 那輪**；其後 **`camp-access` 與 `bui
 
 **若日後需要**：`branch=feat/eta-single-model @3f8705ca` / `warring_states` / `seed=1337` / 30 天。
 
+---
+
+## §K ★★★裁定：**問題不是「有人偷繞」，是 `release()` 混了兩種語意**
+
+implementer 窮盡歸類 59 caller，結論**比「旁路」更硬**：
+★**`release-first` 是 arbiter【自己文件化】的通道**，**7 處帶這個 idiom**。
+`task_arbiter.gd:142`（`transition` 的 doc）明寫：
+> ★**emergency task 自身的正當退場走 release**（→re-rank/re-set）…
+> resolution caller **已改 release-first**（現任＝IDLE@0 → **guard 不 fire** → 正常轉換）
+
+**我已自驗，屬實。** ⇒ ★**不是漏洞，是設計，而且設計理由正當**（避免 guard 誤傷正當退場）。
+
+### ★★真正的病：**一個函式承載兩種語意**
+| 語意 | 例 | 該不該過 persist hold |
+|---|---|---|
+| **①正當退場** | task 真的完成／目標消失／隊死／timeout | ❌**不該擋**（擋了就是 latch） |
+| ★**②我想換 task** | 還在施工，但想去做別的 | ✅**該過秤** |
+
+★**兩者在 code 上是同一個 `release()`** ⇒ **persist hold 想擋 ② 卻擋不到**
+—— **因為 ① 和 ② 長得一模一樣。**
+
+### ★★★而這與 convoy／紮根是**同一個形狀**
+> **「保護讀的狀態」與「事實」是兩份真相。**
+- **事實**：這隊**有一個未完成的承諾**（`corvee_site != -1`／`construction_team_id == 自己`／convoy 未結案）
+- **保護讀的**：`current_task` —— ★**而 `release()` 剛好把它清成 `IDLE`**
+
+⇒ ★**hold 讀了一個【會被清掉的代理】，而不是【事實】。**
+
+## §L 修法方向（**systems 裁；arbiter 契約 ＝ HOW ＝ 我 owner**）
+
+★**persist hold 的判準改讀「有沒有未完成的承諾」這個【事實】，
+不再只讀 `current_task` 這個【會被 release 清掉的代理】。**
+
+- ⇒ **`release-first` 這個 idiom 可以保留**（正當退場照走），
+  ★**但「先 release 再 set 別的」不再自動繞過持守** —— 因為 hold 看的是承諾，不是 task 欄位。
+- ⛔ **不改 59 個 caller**（那是治症狀）；★**改判準，一處。**
+
+### ★latch 風險與它的解藥（**必須一起講**）
+「讀承諾」比「讀 current_task」更黏 ⇒ **latch 風險上升**（memory 有血證：latch 凍世界）。
+★**但解藥現在剛好到位**：**失敗記憶結構身分磚已落地**
+（`(結構 id, target)`、覆蓋 19 個結構 id、760 次折價）
+⇒ ★**撐不下去的承諾會【自己折價退出】，不需要靠「隨時可以 release 走人」當逃生門。**
+**這兩張票是互補的，順序也對：失敗磚先落地，持守才敢變硬。**
+
+**⇒ 送 R²。** ★**請 reviewer 特別打「latch 風險是否真的被失敗磚覆蓋」這一點。**
+
