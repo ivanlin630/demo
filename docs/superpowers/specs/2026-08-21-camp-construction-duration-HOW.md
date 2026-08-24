@@ -50,6 +50,18 @@ topic: camp-access 工期票 —— 「開工 1 → 完工 0」與 75% 棄置同
 **二值、無旋鈕可假造**（同 §7 #1 的設計理由）。**兩票落地後同床重量。**
 ★**blueprint 明示不開新案**：修法就是這兩票，**排程零調整**。
 
+## §D ★量測設計：**兩趟法**（必用，見 `04_qa`）
+
+本票要驗的是「**哪些隊棄工、為什麼**」—— ★**那幾隊幾乎一定不在等距抽樣（`SPECIMEN_SAMPLE_N`）裡**
+（已四次同款：convoy porter／camp host／A1 的 start=4 有 2 筆／team15）。
+
+**做法（同 seed，兩趟）**：
+1. **第一趟**：tap 記錄「**開工但未完工的 tile 與其 `construction_team_id`**」⇒ 得到 team id 清單
+   ★**前置**：`construct.stall` 需要 **per-action 維度**（A1 已列，implementer 正確拒絕把跨工程的 12.4:1 總計套到紮根）
+2. **第二趟**：`SPECIMEN_TEAM_ID=<那幾隊>` 重跑 ⇒ **QA 直接讀得到棄工當下那幾隊在想什麼**
+
+★**開票時就指定，不要等 QA 回「判不了」才補跑。**
+
 ## §5 閘
 `headless` ／ `det×3` ／ `constitution_gate` ／ `seam-gate`（HARD）／
 世界驗收：**`outpost.l0_to_l1 > 0`**（§7 #1，二值）—— ★**本票 ＋ A1 票落地後同床重量**

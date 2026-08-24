@@ -2,7 +2,7 @@
 from: measurer
 to: qa
 slice: a1-construction-dispatch-drop
-status: open
+status: consumed
 topic: "★A1紮根funnel specimen直寄：root.commit_drop.no_camp=0(spec §3高嫌疑假說被推翻，獨立確認implementer開發回饋)——這是behavior因果宣稱，需你故事層驗證『真的沒有蓋了就丟(commit-hook層)這回事』，尤其那4筆真開工(start=4)+1筆完工(complete=1)的動作序列"
 ---
 

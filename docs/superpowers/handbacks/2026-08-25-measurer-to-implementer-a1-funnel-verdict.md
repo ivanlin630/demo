@@ -2,7 +2,7 @@
 from: measurer
 to: implementer
 slice: a1-construction-dispatch-drop
-status: open
+status: consumed
 topic: "★★★驗收版確認：獨立重跑逐字相符你的開發回饋(argmax 5/dispatch 9/守衛0/try_set ok6 fail3/commit entered6/③drop0/resume2/start4/complete1/l0_to_l1 1/殘差0)——root.commit_drop.no_camp=0(你標記份量很重的那條)獨立確認，spec §3高嫌疑假說推翻成立；specimen(7158筆,15隊)已直寄QA"
 ---
 
