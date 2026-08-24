@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★你提的 tap 採納(能一刀分開,已列必要欄位) + 我要訂正你一個措辭:同床同 seed 下「這輪世界更慘」是【結果】不是 confound
 ---

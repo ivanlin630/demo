@@ -1,0 +1,34 @@
+{
+  "slice": "failure-memory-structural-identity",
+  "ticket": "systems票：兩個診斷證實/推翻假說「折價反傷探索」——①紮根/建設被折價次數+util掉到贏不了 ②won→start漏斗斷點",
+  "measured_at_branch": "feat/failure-memory-structural-identity(.worktrees/failure-memory-structural-identity)",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天(同前輪failure-memory-brick-acceptance那份run，同一seed同床，未重跑世界只加了兩個新tap後重跑一次取得util細節)",
+
+  "★L3聲明": "decision_engine.gd的root.lost_to.pair sample擴充2個欄位(root_u/winner_u,1行)；camp_access_diag_bed.gd加診斷①②報表段(12行)。皆Probe-gated零行為改動。",
+
+  "★★★診斷①：紮根本身從未被suppressed過一次——假說在『紮根自己被折價』這個字面意義上不成立": {
+    "decision.opt_applicable.紮根": 81,
+    "root.won_argmax": 2,
+    "★關鍵發現": "18個structural id的suppressed分佈裡(build_workshop=140/build_apothecary=134/build_stable=35/建設=10/紮營=47/求和=92等)，★★『紮根』完全不在名單裡——紮根這個structural id在90天內0次被failure-memory折價。",
+    "util差距的真實樣貌(逐筆root_u vs winner_u)": {
+      "壓倒性輸(10~40倍差距,佔多數)": "主要來自team5對build_workshop/apothecary/stable(同一地點(8,6)的兄弟facility候選)：root_u穩定在0.09~0.14，對手winner_u穩定在1.395——這個懸殊差距是紮根自己baseline util偏低造成的結構性劣勢，不是被折價壓下去的(因為紮根自己0次被折價)。",
+      "近乎打平(<2%差距,罕見但存在)": "team5對紮營：root_u=1.664 vs winner_u=1.674；team27對紮營：root_u=1.116/1.137、1.635/1.638——這幾筆是真正接近的競賽，值得注意的是『紮營』本身被折價47次，若紮營未被折價，它的util只會更高(讓紮根輸更多，非更少)——★suppression在這些近戰案例裡的方向若有影響，也是幫紮根而非害紮根。"
+    },
+    "判讀(依你預寫的兩格判準之外的第三種結果，兩者都收但不完全對號入座)": "★假說『紮根一失敗就被折價』字面上不成立——紮根從未被折價。但『建設類(build_workshop等goal candidate)』確實被大量折價(134/140/35次)，只是這些candidate即使被壓，仍以懸殊優勢擊敗紮根——suppression沒有、也不太可能改變這些matchup的勝負。★regression的真根因看起來不是『折價反傷紮根的探索』，比較像是『紮根天生util就打不過同地點的facility候選』這個結構性劣勢——這件事在main baseline應該也存在(紮根從舊表時代起就沒被特別優待)，需要進一步比對main baseline在同樣matchup下root_u/winner_u是否也是這個懸殊比例，本輪未做(main沒有這個新tap，需額外補main側同款tap才能對比，供你裁要不要追)。"
+  },
+
+  "★★★診斷②：won→start→complete漏斗——第三種結果，不完全落在你預寫的兩格裡": {
+    "漏斗": {"root.won_argmax": 2, "settlement.l0_to_l1_start": 1, "construct.complete_crude_camp": 0, "outpost.l0_to_l1": 0},
+    "判讀": "★不是『連argmax都沒贏』(won=2>0)，也不是『won>0但start=0』(start=1>0)——是第三種：贏了2次、其中1次真的開工、但★★90天內從未完工過一次★★。這比你預寫的兩格判準更細：斷點不在argmax也不在commit/仲裁端(那道門顯然過了，因為start=1)，是在【施工本身】——construct.complete_crude_camp=0意味著那1次開工的crude_camp從頭到尾沒蓋完。★這條需要另外查construction_ticks_left/construct.stall/construct.timeout_cancel這幾個既有tap，看那個工地是卡住(stall)、被放棄、還是單純還沒蓋完(day90時仍在途中/censored，非真失敗)——本輪為了先答你要的兩個問題沒有深挖這條，供你裁要不要另開一輪追。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/brick-regression-diag-90d.txt",
+    "code": "scripts/simulation/decision/decision_engine.gd(root.lost_to.pair加root_u/winner_u)，scripts/debug/camp_access_diag_bed.gd(診斷①②報表段)"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\failure-memory-structural-identity --script scripts/debug/camp_access_diag_bed.gd",
+
+  "cleanup": "busy beacon清除。"
+}

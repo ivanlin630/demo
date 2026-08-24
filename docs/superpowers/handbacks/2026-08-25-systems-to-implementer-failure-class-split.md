@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★裁定回來了:帶原因但形式是【反饋分流】不是 key 增維(key 不動);三分類機械可判;acceptance 兩面分開驗防修回頭
 ---
