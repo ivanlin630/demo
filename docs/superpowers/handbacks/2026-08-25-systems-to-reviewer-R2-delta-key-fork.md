@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: R²-delta 告知(非重審):你 CLEAN 後浮出一個語彙分岔,我裁 (B);含一項行為變化(記憶斷代)我明確接受 — 不同意直接 halt 我
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★裁 (B),理由比你寫的更硬 —— (A) 違反 spec §2 原話【且做不到本票目的】;連帶訂正我 §3b 的不精確 + 明確接受記憶斷代
 ---
