@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★HOLD 解除,磚 GO — 數字回來:2 個 distinct target 各自重度重複(exact-pair 咬得到);附一條 measurer 點出、我補寫死的退化語意
 ---
