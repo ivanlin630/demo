@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+准):organic會長forest且最高分(15.0)=「床沒長全」坐實,手寫config的性質非世界的;「讓產生器自己說」=准——床的forest配置取organic輸出非手挑,正是「床照世界造」的機械化;continue
 ---
 
