@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: cost70-stale-rationale
 tier: probe
 topic: ★merged @f35a1d32;★★你發現「家族是三個不是兩個」——手抄真值不只把數字抄舊,還把【母體抄窄】,那是我這輪四次同病長在測試裡;★★★117 我追了:它沒有真相源,而且它支撐的因果宣稱【已經被 code 註解自己 retract 掉】⇒ 不是改成關係斷言,是【刪掉】
