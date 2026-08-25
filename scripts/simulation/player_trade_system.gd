@@ -15,8 +15,8 @@ var _msg: SimMessageSystem = SimMessageSystem.new()
 #   漏傳 ⇒ reserve 內 state=null ⇒ need_keep(null) → effective_food(null) → own_granary_tile(null) 崩。
 #   ★而即使不崩，reserve 也會【只算私產不含糧倉】⇒ 定居隊糧在糧倉時誤判自己沒糧。
 #   ★★這是感知鐵律的鏡像：god-view 是讀了不該讀的，本例是【讀不到該讀的】。
-func _sellable_qty(team: TeamData, res: String, leader_values: Dictionary = {},
-		state: WorldState = null) -> float:
+func _sellable_qty(team: TeamData, res: String, leader_values: Dictionary,
+		state: WorldState) -> float:
 	return maxf(float(team.resources.get(res, 0)) - TradeValuation.reserve(team, res, leader_values, state), 0.0)
 
 # ──────── Public API ────────

@@ -76,13 +76,15 @@ static func leader_vals(state: WorldState, team: TeamData) -> Dictionary:
 	var l: PersonData = state.persons.get(team.leader_id)
 	return l.values if l != null else {}
 
-# M4：storage-aware stock（state 給→effective_holding 算糧倉貨，null→team.resources 私產）。
+# ★storage-aware stock —— ★★null fallback【已刪除】(2026-08-26)：
+#   簽名擋住的東西不該被實作放行。舊版的「state != null 才算糧倉、否則只算私產」是【靜默】給出錯的估值
+#   （定居隊糧在糧倉、私產 0 ⇒ 誤判自己沒糧）——★崩會被看見，那個不會。
+#   ★同一個病已經修過一輪（own_granary_null_caller_test 檔頭：「根修＝呼點補傳 state」），
+#     而 default 讓它長回來 ⇒ ★★修實例會長回來，刪掉 default 才不會。
 static func _stock(state: WorldState, team: TeamData, res: String) -> float:
-	if state != null:
-		return ResourceSystem.effective_holding(state, team, res)
-	return float(team.resources.get(res, 0))
+	return ResourceSystem.effective_holding(state, team, res)
 
-static func reserve(team: TeamData, res: String, leader_values: Dictionary = {}, state: WorldState = null) -> float:
+static func reserve(team: TeamData, res: String, leader_values: Dictionary, state: WorldState) -> float:
 	# need-oracle S4b：reserve = 保留向 need_keep（R² 核心兩量落點）。coin 特例保留。
 	if res == "coin":
 		return float(team.resources.get("coin", 0)) * 0.5
@@ -99,32 +101,32 @@ static func reserve(team: TeamData, res: String, leader_values: Dictionary = {},
 	return NeedOracle.need_keep(state, team, res, leader_values) * _reserve_factor(team, leader_values, state)
 
 # 非活命品 reserve 人格化液化係數：貪婪/慎重↑守貨(高)、急迫/絕境↓鬆手賣(低)。純算術零 randf。
-static func _reserve_factor(team: TeamData, leader_values: Dictionary, state: WorldState = null) -> float:
+static func _reserve_factor(team: TeamData, leader_values: Dictionary, state: WorldState) -> float:
 	var hoard: float = (float(leader_values.get("貪婪", 0.5)) + float(leader_values.get("慎重", 0.5))) * 0.5
 	var factor: float = RESERVE_BASE + (hoard - 0.5) * RESERVE_HOARD_K - _urgency(team, state) * RESERVE_URGENCY_K
 	return clampf(factor, RESERVE_FACTOR_MIN, RESERVE_FACTOR_MAX)
 
 # ★material-hold-protection：construction-material reserve 用「只食急迫」液化係數（對 coin_urg 免疫）。
 # =_reserve_factor 但 urgency 只用 food_urg 非 max(food,coin)→coin 焦慮不逼賣要蓋的料；acute food 仍降 factor 可賣(守護)。
-static func _reserve_factor_food_only(team: TeamData, leader_values: Dictionary, state: WorldState = null) -> float:
+static func _reserve_factor_food_only(team: TeamData, leader_values: Dictionary, state: WorldState) -> float:
 	var hoard: float = (float(leader_values.get("貪婪", 0.5)) + float(leader_values.get("慎重", 0.5))) * 0.5
 	var factor: float = RESERVE_BASE + (hoard - 0.5) * RESERVE_HOARD_K - _food_urgency(team, state) * RESERVE_URGENCY_K
 	return clampf(factor, RESERVE_FACTOR_MIN, RESERVE_FACTOR_MAX)
 
 # 只食急迫 [0,1]：食物天數低→鬆手賣（decouple coin_urg，供 material-hold food-only factor + acute 守護）。純狀態零 randf。
-static func _food_urgency(team: TeamData, state: WorldState = null) -> float:
+static func _food_urgency(team: TeamData, state: WorldState) -> float:
 	var pop: float = maxf(float(team.population), 1.0)
 	var food_days: float = _stock(state, team, "food") / (pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY)
 	return clampf((DecisionTerms.DESPERATION_DAYS - food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
 
 # 隊急迫度 [0,1]：食物天數低 + 人均 coin 缺 → 鬆手賣非活命品換 coin/糧。純狀態，零 randf。
-static func _urgency(team: TeamData, state: WorldState = null) -> float:
+static func _urgency(team: TeamData, state: WorldState) -> float:
 	var pop: float = maxf(float(team.population), 1.0)
 	var coin_urg: float = clampf(1.0 - float(team.resources.get("coin", 0)) / (pop * URGENCY_COIN_COMFORT), 0.0, 1.0)
 	return maxf(_food_urgency(team, state), coin_urg)
 
 # ask 售價：折扣人格化——商業技能 + 急迫鬆手(折扣深)，貪婪守價(折扣收窄→部分談崩)。零 randf。
-static func ask_price(seller: TeamData, res: String, commerce: float, leader_values: Dictionary, state: WorldState = null) -> float:
+static func ask_price(seller: TeamData, res: String, commerce: float, leader_values: Dictionary, state: WorldState) -> float:
 	var greed: float = float(leader_values.get("貪婪", 0.5))
 	var discount: float = clampf(
 		commerce * COMMERCE_DISCOUNT_K + _urgency(seller, state) * URGENCY_DISCOUNT_K - (greed - 0.5) * GREED_HOLD_K,
@@ -133,7 +135,7 @@ static func ask_price(seller: TeamData, res: String, commerce: float, leader_val
 
 # 唯一 local_value：coin 恆 face value；survival 不對稱(饑荒最高 5×)；非 survival clamp[-0.5,1.0]。
 # M4：state 給→stock 算 effective_holding(糧倉貨算進,不誤判短缺)；null→team.resources 私產。
-static func local_value(team: TeamData, res: String, state: WorldState = null) -> float:
+static func local_value(team: TeamData, res: String, state: WorldState) -> float:
 	if res == "coin":
 		return 1.0   # currency: always face value, no supply/demand modulation
 	if not BASE_PRICE.has(res):

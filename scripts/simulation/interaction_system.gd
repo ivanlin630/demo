@@ -659,14 +659,10 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 # 公開存取（DTO 估值用）：估值單一源 TradeValuation，trade_session DTO 經此取單價
 # ★同上接線：這一支【不崩】但更隱密——`_stock` 的 null guard 讓它退回
 #   「只算私產、不含糧倉」，靜默給出錯的估值。★崩會被看見，這個不會。
-func local_value(team: TeamData, res: String, state: WorldState = null) -> float:
+func local_value(team: TeamData, res: String, state: WorldState) -> float:
 	return TradeValuation.local_value(team, res, state)
 
 # ──────── 雙向 market 結算（取代舊 _resolve_trade）────────
-
-func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
-	# 留底邏輯收進 TradeValuation.reserve（單一源），NPC + 玩家路徑同用。候選1：food 留底吃領袖人格。
-	return TradeValuation.reserve(team, res, leader_values)
 
 func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int, price: float) -> void:
 	ResourceBank.add(seller, res, -qty, "trade_goods_out")

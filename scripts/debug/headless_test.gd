@@ -11654,16 +11654,16 @@ func _test_trade_reserve_no_drain() -> void:
 	# 舊 flat pop×TARGET 被液化取代(intent:降底→willing 賣方變多)；此測驗「不可刷光+單一源 delegate」不變。
 	var reserve_amt: float = TradeValuation.reserve(t, "material", {}, state)
 	t.resources["material"] = reserve_amt
-	assert(pts._sellable_qty(t, "material") < 1.0,
-		"material 在 reserve 量 → 不可賣（修刷光），實際 sellable=%.1f" % pts._sellable_qty(t, "material"))
+	assert(pts._sellable_qty(t, "material", {}, state) < 1.0,
+		"material 在 reserve 量 → 不可賣（修刷光），實際 sellable=%.1f" % pts._sellable_qty(t, "material", {}, state))
 	# 單一源：delegate 結果須等於 TradeValuation.reserve
-	assert(is_equal_approx(pts._sellable_qty(t, "material"),
+	assert(is_equal_approx(pts._sellable_qty(t, "material", {}, state),
 		maxf(reserve_amt - TradeValuation.reserve(t, "material", {}, state), 0.0)),
 		"_sellable_qty 須 delegate TradeValuation.reserve（單一源）")
 	# 超 reserve 部分可賣
 	t.resources["material"] = reserve_amt + 50.0
-	assert(pts._sellable_qty(t, "material") > 40.0,
-		"超 reserve 部分可賣,實際=%.1f" % pts._sellable_qty(t, "material"))
+	assert(pts._sellable_qty(t, "material", {}, state) > 40.0,
+		"超 reserve 部分可賣,實際=%.1f" % pts._sellable_qty(t, "material", {}, state))
 	print("[OK] _test_trade_reserve_no_drain (reserve=%.0f)" % reserve_amt)
 
 func _test_npc_barter_coinless() -> void:
