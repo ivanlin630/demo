@@ -1730,3 +1730,24 @@ func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) 
 ★**仍 blind**：`faction_ai_system:3475`（商隊自評值）、`interaction_system:952/996/1002/1004/1005`（易貨估值）、`player_trade_system:46/85/88/137/139`、`player_api_mapper:864/866/876/879`。
 ⇒ ★★**同族 blind-view，但屬另一張票 —— 列管，不擴張當前 slice。**
 
+## ★★★`assert(false, …)` 讓 headless process **掛死到逾時**（hang，不是 abort）（2026-08-25，implementer 實測）
+**假說（他提，能同時解釋兩份互斥證據）**：★**編譯期常數 vs 執行期條件**
+| assert 形態 | 觀察 |
+|---|---|
+| ★**執行期條件**（`assert(x > 0, …)`） | ★**印 `SCRIPT ERROR: Assertion failed:` 後【繼續跑】** —— 血證：單一 headless run 裡 6 條共存 |
+| ★★**編譯期常數 false**（`assert(false, …)`） | ★★★**process hang 到逾時** |
+
+⇒ ★★**「`assert` 會不會中止」這個問題【本身問錯了】** —— 正確問法是
+**「這個 `assert` 的條件是【編譯期可判定】的嗎？」**
+★**同族**：`01_architect`「問題的框架也會建立在錯誤前提上」的又一次實例。
+
+### ★★★而 `hang` 比 `abort` 更危險 —— **它會偽裝成「正在工作」**
+| | 外顯 | 誰會發現 |
+|---|---|---|
+| `abort` | **exit code 非 0** | 閘會抓 |
+| ★**`hang`** | ★★**看起來像「跑很久」** | ★★★**可能被判成 `RUNNING` ⇒ 監控靜默** |
+
+★**與同日 watchdog 的 `RUNNING` 遮蔽是同一枚硬幣的兩面**：**「有東西在動」不等於「事情在前進」。**
+★★**現有防線裡唯一抓得到它的是【結尾標記】** —— **hang ⇒ 沒有結尾標記 ⇒ 判「無法證明跑完」。**
+（★**那條標記原本是為 parse error 加的，對 hang 一併有效。**）
+

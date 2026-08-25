@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: cross
 topic: ★★★assert 機制實測出【第三種結果】:編譯期 false 的 assert 讓 process 掛死到逾時(不是停、是 hang);★假說=編譯期常數 vs 執行期條件,能同時解釋你的反證與我的觀察 ⇒「assert 會不會中止」這問題本身問錯了;★32 vs 31 用清單對出來:差的是我自己寫的註解
 ---
