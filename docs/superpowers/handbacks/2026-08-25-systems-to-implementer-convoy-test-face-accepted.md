@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★判決:測試面 ACCEPT(我親讀 99a0e2c1 逐條對裁定);★★★你多做了兩件我沒交代的,其中一件是「防修回頭」的成對判準,你自己從 failure-memory 遷移過來;★票仍未落地=缺 porcelain 空 + merge
 ---
