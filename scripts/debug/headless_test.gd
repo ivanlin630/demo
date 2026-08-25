@@ -4819,6 +4819,8 @@ func _run_sim_test() -> void:
 	_test_meansend_recurses_into_subrecipe()
 	_test_meansend_cycle_terminates_loudly()
 
+	_test_sellable_reads_granary()
+
 	print("=== DONE ===")
 	# ★結尾標記（systems 裁 2026-08-25）：回答【有沒有跑完】，不是【有沒有失敗】。
 	#   血證：parse error 時輸出是 `FAIL=0`——跟全綠長得一模一樣。
@@ -11566,18 +11568,22 @@ func _test_price_covers_input_cost() -> void:
 func _test_famine_price_spike() -> void:
 	print("--- Econ Task2b: 飢荒不對稱 clamp ---")
 	var team := TeamData.new()
+	# ★補 state：`local_value` 的 `state: WorldState = null` default 讓這種呼叫編得過，
+	#   但下游 `own_granary_tile(null)` 會崩 ⇒ 7 行 SCRIPT ERROR 被當 baseline 收了很久。
+	#   ★根修是拔 default；在那之前，測試自己要建好世界。
+	var state := WorldState.new()
 	_seed_pop(team, 10)
 	team.resources = {}
 	# 生存品 stock 0 → 5×；一般品 stock 0 → 2×
-	assert(is_equal_approx(TradeValuation.local_value(team, "food"),
+	assert(is_equal_approx(TradeValuation.local_value(team, "food", state),
 		float(TradeValuation.BASE_PRICE["food"]) * 5.0), "food 饑荒應 5×")
-	assert(is_equal_approx(TradeValuation.local_value(team, "material"),
+	assert(is_equal_approx(TradeValuation.local_value(team, "material", state),
 		float(TradeValuation.BASE_PRICE["material"]) * 2.0), "material 饑荒維持 2×")
 	# 過剩下限 0.5× 兩者皆同
 	team.resources = { "food": 100000.0, "material": 100000.0 }
-	assert(is_equal_approx(TradeValuation.local_value(team, "food"),
+	assert(is_equal_approx(TradeValuation.local_value(team, "food", state),
 		float(TradeValuation.BASE_PRICE["food"]) * 0.5), "food 過剩 0.5×")
-	assert(is_equal_approx(TradeValuation.local_value(team, "material"),
+	assert(is_equal_approx(TradeValuation.local_value(team, "material", state),
 		float(TradeValuation.BASE_PRICE["material"]) * 0.5), "material 過剩 0.5×")
 	print("Econ Task2b OK")
 
@@ -11591,8 +11597,8 @@ func _test_trade_valuation_single_source() -> void:
 	t.resources = { "food": 1.0, "medicine": 1.0, "coin": 1000.0 }
 	state.teams[1] = t
 	for res in ["food", "medicine", "goods"]:
-		var v_direct: float = TradeValuation.local_value(t, res)
-		var v_inter: float = InteractionSystem.new().local_value(t, res)
+		var v_direct: float = TradeValuation.local_value(t, res, state)
+		var v_inter: float = InteractionSystem.new().local_value(t, res, state)
 		assert(is_equal_approx(v_direct, v_inter),
 			"%s：interaction.local_value 須 == TradeValuation（同源）" % res)
 		# 接受路徑（player_trade preview）：玩家「想要」res×1，wants_value 即接受判定用單價
@@ -11602,10 +11608,10 @@ func _test_trade_valuation_single_source() -> void:
 		assert(is_equal_approx(float(ev.get("wants_value", -999.0)), v_direct),
 			"%s：evaluate/preview 接受用單價 須 == 天平 TradeValuation 單價（天平==接受）" % res)
 	# survival 5× 區確認生效（缺糧不對稱應遠 >2× base）
-	assert(TradeValuation.local_value(t, "food") > TradeValuation.BASE_PRICE["food"] * 2.0,
+	assert(TradeValuation.local_value(t, "food", state) > TradeValuation.BASE_PRICE["food"] * 2.0,
 		"缺糧 survival 不對稱應 >2× base（驗 5× 區生效）")
 	# coin 硬閘：恆 face value 1.0（與短缺無關）
-	assert(is_equal_approx(TradeValuation.local_value(t, "coin"), 1.0), "coin 恆 face value 1.0")
+	assert(is_equal_approx(TradeValuation.local_value(t, "coin", state), 1.0), "coin 恆 face value 1.0")
 	print("[OK] _test_trade_valuation_single_source")
 
 func _test_trade_reserve_no_drain() -> void:
@@ -11613,15 +11619,16 @@ func _test_trade_reserve_no_drain() -> void:
 	print("--- Trade 問題1: reserve 單一源,玩家不可刷光 ---")
 	var pts := PlayerTradeSystem.new()
 	var t := TeamData.new(); t.team_id = 1; _seed_pop(t, 10)
+	var state := WorldState.new()   # ★同上：reserve 的 state default 讓漏傳編得過
 	# unified-commerce M3/M5：非活命品 reserve 液化人格化(pop×TARGET×factor,<flat)→用單一源實際 reserve 量。
 	# 舊 flat pop×TARGET 被液化取代(intent:降底→willing 賣方變多)；此測驗「不可刷光+單一源 delegate」不變。
-	var reserve_amt: float = TradeValuation.reserve(t, "material")
+	var reserve_amt: float = TradeValuation.reserve(t, "material", {}, state)
 	t.resources["material"] = reserve_amt
 	assert(pts._sellable_qty(t, "material") < 1.0,
 		"material 在 reserve 量 → 不可賣（修刷光），實際 sellable=%.1f" % pts._sellable_qty(t, "material"))
 	# 單一源：delegate 結果須等於 TradeValuation.reserve
 	assert(is_equal_approx(pts._sellable_qty(t, "material"),
-		maxf(reserve_amt - TradeValuation.reserve(t, "material"), 0.0)),
+		maxf(reserve_amt - TradeValuation.reserve(t, "material", {}, state), 0.0)),
 		"_sellable_qty 須 delegate TradeValuation.reserve（單一源）")
 	# 超 reserve 部分可賣
 	t.resources["material"] = reserve_amt + 50.0
@@ -16667,3 +16674,40 @@ func _test_meansend_cycle_terminates_loudly() -> void:
 	assert(r.is_empty(), "環應回空陣列，得到 %d 條" % r.size())
 	assert(after == before + 1, "★環偵測必須留痕（tap 未加 1：%d → %d）" % [before, after])
 	print("[OK] _test_meansend_cycle_terminates_loudly")
+
+# ★reserve 必須看得見自家糧倉（systems 裁 2026-08-25，own-granary-pin 漏改的決策讀者之一）。
+#   ★②③成對：只驗「糧倉隊不可賣」會分不出【修好了】與【全部一律不賣】。
+func _test_sellable_reads_granary() -> void:
+	print("--- reserve 看得見糧倉（定向 fixture，正反成對）---")
+	var pts := PlayerTradeSystem.new()
+	var state := WorldState.new()
+
+	# ②正向：糧在【糧倉】、私產 0 ⇒ 留底該認得它 ⇒ 不可賣
+	var gpos := Vector2i(3, 3)
+	var gt := HexTileData.new()
+	gt.tile_id = gpos.x * 1000 + gpos.y; gt.tile_pos = gpos; gt.terrain = "plains"
+	gt.outpost_owner = 1; gt.outpost_level = 1
+	gt.public_storage = {"food": 100.0}
+	state.world.tiles[gt.tile_id] = gt
+	var settled := TeamData.new(); settled.team_id = 1; _seed_pop(settled, 10)
+	settled.tile_pos = gpos
+	settled.resources = {"food": 0.0}
+	state.teams[1] = settled
+	var sell_settled: float = pts._sellable_qty(settled, "food", {}, state)
+	assert(sell_settled <= 0.001,
+		"★糧在糧倉的隊仍被判可賣 %.1f ⇒ reserve 沒看見糧倉（接線沒接上）" % sell_settled)
+
+	# ③反向：私產有糧、無糧倉 ⇒ 行為不得改變（否則是「一律不賣」而非修好）
+	var wpos := Vector2i(9, 9)
+	var wt := HexTileData.new()
+	wt.tile_id = wpos.x * 1000 + wpos.y; wt.tile_pos = wpos; wt.terrain = "plains"
+	wt.outpost_owner = -1; wt.outpost_level = 0
+	state.world.tiles[wt.tile_id] = wt
+	var nomad := TeamData.new(); nomad.team_id = 2; _seed_pop(nomad, 10)
+	nomad.tile_pos = wpos
+	nomad.resources = {"food": 500.0}   # 遠超留底
+	state.teams[2] = nomad
+	var sell_nomad: float = pts._sellable_qty(nomad, "food", {}, state)
+	assert(sell_nomad > 0.0,
+		"★★無糧倉、私產充足的隊也不可賣 ⇒ 改過頭（變成一律不賣），實際 %.1f" % sell_nomad)
+	print("[OK] _test_sellable_reads_granary（糧倉隊 %.1f / 遊牧隊 %.1f）" % [sell_settled, sell_nomad])

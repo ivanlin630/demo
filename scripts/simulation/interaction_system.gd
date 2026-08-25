@@ -657,8 +657,10 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 # ──────── 貿易 ────────
 
 # 公開存取（DTO 估值用）：估值單一源 TradeValuation，trade_session DTO 經此取單價
-func local_value(team: TeamData, res: String) -> float:
-	return TradeValuation.local_value(team, res)
+# ★同上接線：這一支【不崩】但更隱密——`_stock` 的 null guard 讓它退回
+#   「只算私產、不含糧倉」，靜默給出錯的估值。★崩會被看見，這個不會。
+func local_value(team: TeamData, res: String, state: WorldState = null) -> float:
+	return TradeValuation.local_value(team, res, state)
 
 # ──────── 雙向 market 結算（取代舊 _resolve_trade）────────
 

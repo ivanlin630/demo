@@ -10,8 +10,14 @@ var _msg: SimMessageSystem = SimMessageSystem.new()
 # ──────── Helpers ────────
 
 # 留底走 TradeValuation.reserve（單一源）：玩家路徑全資源留底，不再刷光 NPC（修問題1）。
-func _sellable_qty(team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
-	return maxf(float(team.resources.get(res, 0)) - TradeValuation.reserve(team, res, leader_values), 0.0)
+# ★接線（systems 裁 2026-08-25）：`state` 本來就在呼叫端手上（:72 同一行傳給了
+#   `leader_vals`、卻沒傳進來）——不是拿不到，是【簽名沒開那個口】。
+#   漏傳 ⇒ reserve 內 state=null ⇒ need_keep(null) → effective_food(null) → own_granary_tile(null) 崩。
+#   ★而即使不崩，reserve 也會【只算私產不含糧倉】⇒ 定居隊糧在糧倉時誤判自己沒糧。
+#   ★★這是感知鐵律的鏡像：god-view 是讀了不該讀的，本例是【讀不到該讀的】。
+func _sellable_qty(team: TeamData, res: String, leader_values: Dictionary = {},
+		state: WorldState = null) -> float:
+	return maxf(float(team.resources.get(res, 0)) - TradeValuation.reserve(team, res, leader_values, state), 0.0)
 
 # ──────── Public API ────────
 
@@ -31,7 +37,7 @@ func get_tradeable_resources(state: WorldState, pt_id: int, tgt_id: int) -> Dict
 	var sellable: Dictionary = {}
 	var _tgt_lv: Dictionary = TradeValuation.leader_vals(state, tgt)
 	for res in TradeValuation.BASE_PRICE.keys():
-		var qty: float = _sellable_qty(tgt, res, _tgt_lv)
+		var qty: float = _sellable_qty(tgt, res, _tgt_lv, state)
 		if qty > 0.0:
 			sellable[res] = qty
 
@@ -69,7 +75,7 @@ func evaluate_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionar
 	# Layer 1 — Self-preservation (hard reject)
 	for res in player_wants:
 		var want_qty: float = float(player_wants[res])
-		var avail: float    = _sellable_qty(tgt, res, TradeValuation.leader_vals(state, tgt))
+		var avail: float    = _sellable_qty(tgt, res, TradeValuation.leader_vals(state, tgt), state)
 		if want_qty > avail:
 			return { "accepted": false, "reason": "資源不足：" + res, "ratio": 0.0, "threshold": 1.0 }
 

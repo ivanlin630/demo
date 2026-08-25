@@ -469,7 +469,11 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	# 修「滿手武器卻機械判定買不起糧餓死」——用 reserve 只認超留底(不逼賣光防身武器)。
 	var _weapon_liquid: bool = false
 	for _w in ["weapon_melee_low", "weapon_melee_high", "weapon_ranged_low", "weapon_ranged_high"]:
-		if float(team.resources.get(_w, 0)) - TradeValuation.reserve(team, _w) > 0.0:
+		# ★止血（systems 裁 2026-08-25）：漏傳 `state` ⇒ `reserve` 內 `state=null` default
+		#   ⇒ need_keep(null) → _self_use(null) → effective_food(null) → own_granary_tile(null) 崩。
+		#   ★既有裁決（`own_granary_null_caller_test.gd` 檔頭）：【根修＝呼點補傳 state，非在
+		#   own_granary 頭加 guard】——同一個 bug 修過一次、漏了這一站。
+		if float(team.resources.get(_w, 0)) - TradeValuation.reserve(team, _w, {}, state) > 0.0:
 			_weapon_liquid = true
 			break
 	c.has_specie = float(team.resources.get("coin", 0)) > 0.0 \
