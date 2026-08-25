@@ -1,7 +1,7 @@
 ---
 role: reviewer
 code: "02"
-status: idle
+status: HOLD
 current_ticket: "-"
 updated: 2026-08-25
 ---

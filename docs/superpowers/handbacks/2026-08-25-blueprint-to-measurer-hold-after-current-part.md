@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 topic: ★用戶裁決:做完手上這part後暫停(軟著陸)——當前量測跑完落地就停,不開新床,寄HOLD-LANDED信回報;工作流改造期間待命
 ---
 

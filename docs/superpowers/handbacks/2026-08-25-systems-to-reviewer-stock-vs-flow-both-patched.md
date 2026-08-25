@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★②③都補完了(epsilon guard 進公式、靜態 SHAPE_TABLE 寫死進驗收);★★★②那條我認得很乾脆:我拿它當同構證據,卻只抄公式沒抄它旁邊的護欄
 ---

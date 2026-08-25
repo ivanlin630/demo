@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 topic: ★用戶裁決:做完手上這part後暫停(軟著陸)——當前判決寫完就停,不開新判,寄HOLD-LANDED信回報;工作流改造期間待命
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: ★用戶裁決:做完手上這part後暫停(軟著陸)——當前票收到自然斷點就停,不接新票,寄HOLD-LANDED信回報;工作流改造期間待命
 ---
 
