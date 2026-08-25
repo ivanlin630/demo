@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: resolver-exit-fates
 tier: probe
 topic: ★★★答案:`_resolve_build_facility` 在 30 天內【一次都沒有】回過真正的 build candidate——連 day 0 都沒有;⇒ day0 那 39 次不是它產的(那是 founding 路徑);★★而你寫死的那個陷阱救了這顆:548 筆非空全是【買 material】,只列「空的原因」會把它整個漏在母體外;交付 @83a06b16,fp 不變,對帳每天平

@@ -16,7 +16,14 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 > - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
 > ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
 
-### ⏳★★★建造從 day 1 起【不再被提出】（2026-08-26 定位；★本條原標題是「材料 catch-22」，**已訂正**，舊讀法保留在下方以免它借屍還魂）
+### ⏳★★★建造：**兩條路，兩個不同的病**（2026-08-26 三度訂正；★舊讀法全部保留在下方，因為每一個都曾經看起來很有道理）
+
+★★**我們一直把「建造」當成一件事在追，而它是【兩條獨立的路】**：
+| 路 | 做什麼 | 實測（`peaceful_economy`／`seed 1337`／30 天） |
+|---|---|---|
+| ★**founding**（新建 outpost） | `_dispatch_builder` | **day 0 嘗試 39 次、全部卡在材料閘、之後 30 天零嘗試** |
+| ★★**facility**（在自家 outpost 上蓋設施） | `_resolve_build_facility` | ★★★**30 天內【一次都沒有】產出過 build candidate —— 連 day 0 都沒有** |
+⇒ ★**漏斗那欄 `cand.build` 量到的是 founding，不是 facility。** ★★**facility 這條【從來沒有 fire 過】。**
 
 ★**逐日分桶的漏斗（`main`，`peaceful_economy`／`seed 1337`／30 天）**：
 ```
@@ -36,6 +43,16 @@ day |  cand  build |  decide  win_cand |  deleg  br_build
 - ★**真正的消失路徑 ＝【被移除】**：`goal_resolver.gd:57-63` 四個 `continue` 條件任一成立
   （`otile == null`／`outpost_type` 不在 `allowed_outpost`／`current_level > 0`／`_facility_deficit < CONSTRUCTION_DESIRE_MIN`）
   **就把 goal 從 `goal_state` 整個拿掉**。★★**四個條件哪一個成立，尚未量。**
+
+## ★★facility 這條路的出口分布（`entry` 為分母，三種歸宿互斥且窮盡、逐日對帳）
+```
+build_candidate      = 0     ★★★每一天都是 0
+resource_candidate   = 548   ★「先去買料」的 candidate，穿著 facility 的名字（貿易 516／無 task 欄 32）
+empty_defer_infra    = 最大的回空類（38/12/24/15/18…）★語意是「交給 infra path 就地建」，而 build_ok = 0
+empty_wrong_type     = 持續（16/10/14/9…）★而那 7 隊 30/30 都有 outpost ⇒ 有 outpost ≠ type 對
+empty_already_built / empty_no_fdef / empty_pop_low = 少量
+```
+★**`resource_candidate` 比所有回空類加起來還多** ⇒ ★★**這支函式最常做的事是說「先去買料」。**
 
 ★★★**而這裡有一個母體盲點（implementer 自揭）**：`goal.skip.seen` 迭代的是 `team.goal_state`
 ⇒ **被移除的 goal 不在裡面，永遠不會被 `seen` 數到** ——
