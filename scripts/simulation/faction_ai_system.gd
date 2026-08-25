@@ -3479,7 +3479,7 @@ func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 		var snap: Dictionary = BeliefSystem.best_estimate(state, merchant.team_id, tid)
 		var max_gap: float = 0.0
 		for res in TradeValuation.BASE_PRICE:
-			var my_val: float = TradeValuation.local_value(merchant, res)
+			var my_val: float = TradeValuation.local_value(merchant, res, state)
 			var their_val_est: float = my_val
 			if snap.has(res) and res in ["food", "material"]:
 				var pop: int = int(snap.get("population", 10))

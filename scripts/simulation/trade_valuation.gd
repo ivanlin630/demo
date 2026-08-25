@@ -140,6 +140,19 @@ static func local_value(team: TeamData, res: String, state: WorldState = null) -
 		return 0.0
 	var pop: float    = maxf(float(team.population), 1.0)
 	var stock: float  = _stock(state, team, res)
+	# ★★接線的【執行證據】tap（2026-08-26）：`fp` 不變只證等價、不證執行。
+	#   ★這裡直接量【傳了 state 之後，看到的庫存有沒有真的不一樣】——
+	#     `blind` ＝ 舊行為（只看 team.resources）、`stock` ＝ 新行為（含糧倉/公庫）。
+	#   ⇒ `differs` 非零 ＝ 新路徑真的被走到且真的改變了估值；
+	#     全 0 ＝ 要嘛沒走到、要嘛這些隊本來就沒有糧倉（兩者用 `calls_with_state` 分）。
+	if Probe.enabled:
+		Probe.bump("local_value.calls")
+		if state != null:
+			Probe.bump("local_value.calls_with_state")
+			var blind: float = float(team.resources.get(res, 0))
+			if not is_equal_approx(blind, stock):
+				Probe.bump("local_value.state_changes_stock")
+				Probe.bump("local_value.state_changes_stock." + res)
 	var target: float = pop * float(TARGET_PER_POP.get(res, 1.0))
 	var shortage: float = (target - stock) / maxf(target, 1.0)   # ≤ 1.0
 	if res in SURVIVAL_GOODS and shortage > 0.5:

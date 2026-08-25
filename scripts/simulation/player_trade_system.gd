@@ -43,7 +43,7 @@ func get_tradeable_resources(state: WorldState, pt_id: int, tgt_id: int) -> Dict
 
 	var prices: Dictionary = {}
 	for res in TradeValuation.BASE_PRICE.keys():
-		prices[res] = TradeValuation.local_value(tgt, res)
+		prices[res] = TradeValuation.local_value(tgt, res, state)
 
 	return {
 		"player":          player_res,
@@ -82,10 +82,10 @@ func evaluate_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionar
 	# Layer 2 — Economic fairness
 	var gives_value: float = 0.0
 	for res in player_gives:
-		gives_value += TradeValuation.local_value(tgt, res) * float(player_gives[res])
+		gives_value += TradeValuation.local_value(tgt, res, state) * float(player_gives[res])
 	var wants_value: float = 0.0
 	for res in player_wants:
-		wants_value += TradeValuation.local_value(tgt, res) * float(player_wants[res])
+		wants_value += TradeValuation.local_value(tgt, res, state) * float(player_wants[res])
 
 	var ratio: float = gives_value / maxf(wants_value, 0.01)
 
@@ -134,9 +134,9 @@ func preview_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionary
 	var wants_value: float = 0.0
 	if tgt != null:
 		for res in offer.get("player_gives", {}).keys():
-			gives_value += TradeValuation.local_value(tgt, res) * float(offer["player_gives"][res])
+			gives_value += TradeValuation.local_value(tgt, res, state) * float(offer["player_gives"][res])
 		for res in offer.get("player_wants", {}).keys():
-			wants_value += TradeValuation.local_value(tgt, res) * float(offer["player_wants"][res])
+			wants_value += TradeValuation.local_value(tgt, res, state) * float(offer["player_wants"][res])
 
 	return {
 		"accepted":    eval.get("accepted", false),

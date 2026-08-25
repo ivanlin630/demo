@@ -861,9 +861,9 @@ static func map_trade_session(state: WorldState, target_id: int) -> Dictionary:
 		if res == "coin":
 			continue
 		if int(pt.resources.get(res, 0)) >= 1:   # 整數 ≥1 才可交易，避免碎量顯示 ×0 幽靈列
-			p_items.append({ "grade": res, "qty": int(pt.resources[res]), "unit_value": TradeValuation.local_value(pt, res) })
+			p_items.append({ "grade": res, "qty": int(pt.resources[res]), "unit_value": TradeValuation.local_value(pt, res, state) })
 		if int(tgt.resources.get(res, 0)) >= 1:
-			t_items.append({ "grade": res, "qty": int(tgt.resources[res]), "unit_value": TradeValuation.local_value(tgt, res) })
+			t_items.append({ "grade": res, "qty": int(tgt.resources[res]), "unit_value": TradeValuation.local_value(tgt, res, state) })
 	if int(pt.resources.get("coin", 0)) > 0:
 		p_items.append({ "grade": "coin", "qty": int(pt.resources["coin"]), "unit_value": 1.0 })
 	if int(tgt.resources.get("coin", 0)) > 0:
@@ -873,10 +873,10 @@ static func map_trade_session(state: WorldState, target_id: int) -> Dictionary:
 	var wants: Dictionary = offer.get("player_wants", {})
 	var give_v: float = 0.0
 	for r in gives:
-		give_v += TradeValuation.local_value(tgt, r) * float(gives[r])   # NPC 視角(收 player 給)，與 evaluate_offer 同源
+		give_v += TradeValuation.local_value(tgt, r, state) * float(gives[r])   # NPC 視角(收 player 給)，與 evaluate_offer 同源
 	var want_v: float = 0.0
 	for r in wants:
-		want_v += TradeValuation.local_value(tgt, r) * float(wants[r])   # NPC 視角(給出)，與 evaluate_offer 同源
+		want_v += TradeValuation.local_value(tgt, r, state) * float(wants[r])   # NPC 視角(給出)，與 evaluate_offer 同源
 	var accept: bool = false
 	if not gives.is_empty() or not wants.is_empty():
 		var ev := PlayerTradeSystem.new().evaluate_offer(state, pt.team_id, target_id,
