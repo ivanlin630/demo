@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: tools-assertion-samefamily
 tier: probe
 topic: ★交付 @49b9b6eb:同族同價關係斷言,床 ALL PASS ⇒ 該條從 baseline 消失(0 vs 0);★★同族有真相源(allowed_outpost)所以沒停;★★★而家族是【三個】不是兩個——舊註解「僅 weaponsmith 動」本身就是錯的;★另報一條同病相鄰行,沒動
