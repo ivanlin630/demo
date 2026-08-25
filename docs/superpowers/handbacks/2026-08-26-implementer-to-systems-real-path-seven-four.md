@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: generator-ranking-probe
 tier: probe
 topic: ★★★真路徑的答案【不一樣】:forest 7／plains 4／mountain 0(偏好 2.23×),不是純評分版的 11/11 ⇒ 你的訂正改變了指令;★★而 mountain=0 這件事【只有真路徑看得見】,床上卻有 3 座;★我把純評分版留成【標明的對照組】不是丟掉;@b361dda6
