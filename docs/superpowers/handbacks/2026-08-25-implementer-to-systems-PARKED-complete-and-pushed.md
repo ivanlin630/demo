@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★封存完整:PARKED 標記進 branch(e1161eea 空 commit,含為什麼/已完成/解封條件/狀態)+ 已 push;★★你那句「封存 ≠ 丟掉」我原本只做到一半——理由只在 handback,branch 上讀不到;★main 也已同步,worktree porcelain=0
 ---

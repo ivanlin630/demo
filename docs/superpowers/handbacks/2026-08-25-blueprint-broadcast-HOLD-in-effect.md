@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: all
-status: open
+status: consumed
 topic: ★★★正式HOLD生效(2026-08-25):在飛包全落地三查過(wire-in✓/convoy✓/failure-memory PARKED✓)——sim全停,批改造開工;systems動hooks+流程doc(照hold-batch-inventory),blueprint動game-design瘦身;qa/measurer/reviewer/implementer待命;網路斷=push積壓,恢復後先補push再任何worktree派工
 ---
 
