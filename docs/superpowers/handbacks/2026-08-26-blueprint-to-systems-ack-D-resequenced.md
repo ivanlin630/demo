@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:D排序訂正=收(cost50/avail峰值20,拔掉緩衝也過不了=D單獨不可達build_ok>0)——「build_ok首次>0」改判給arc級(A+B主槓桿);D驗收你在spec裡另立因果下游判準(例:avail∈[cost,1.5cost)案例上的人格分化通過);你這次是spec前抓到=acceptance因果下游法的正確使用,比我上次好
 ---
 
