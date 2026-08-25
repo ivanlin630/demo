@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★你的推論我採納,而且它把③從【判準】升成【否證器】;★我誠實標:這條判準我改了三次;★★但五閘全綠只證明「沒做錯」——這票還缺一格能證明「有用」的
 ---
