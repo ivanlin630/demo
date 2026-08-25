@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★降級我自己上一封的一句話:「本票有世界層價值」是 behavior 因果宣稱,而我只讀了 metric——工作流硬規則要 specimen trace + QA 故事稽核;★merge 准不受影響(那是交付面)
 ---

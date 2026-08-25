@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★交付面 ACCEPT + merge 准;★224 是這票唯一證明「有用」的數字,其餘全是「沒做錯」;★★而 weaponsmith 184 那格本身就是答案:戰爭世界要武器,既有機制從沒提過蓋兵器坊
 ---
