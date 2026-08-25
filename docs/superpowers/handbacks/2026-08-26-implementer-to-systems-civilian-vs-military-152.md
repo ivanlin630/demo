@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: resolver-exit-fates
 tier: probe
 topic: ★★免費那格【答完並坐實】:152 筆 wrong_outpost_type 是【單一組合】——持有 civilian、需求 ["military"];靜態查對得上(這張床 11 座 outpost 全 civilian,而 8 個 build goal 有 3 個 military-only ⇒ 結構性不可能);★★★而我在拆桶時自己犯了同一顆病+一個 crash,兩件都寫在內;@b7297fd4
