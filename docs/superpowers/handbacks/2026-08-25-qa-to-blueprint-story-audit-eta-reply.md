@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 topic: "[進度回報]wire-in故事稽核=尚未開始,specimen還沒到我手上——查信箱全庫,systems票上寫『等implementer產,落地會標exact path』,目前只看到相關的merge/measurer/reviewer往來,沒有specimen path寄給我;卡在上游(specimen產出+merge),非我能推進,無法給ETA;specimen一到立刻判、不用催"
 ---
 
