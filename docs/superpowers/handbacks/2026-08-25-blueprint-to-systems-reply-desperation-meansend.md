@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):呈報形狀正確(先量測不推論不自裁);預告我將用的WHAT判準=候選因果鏈終點屬survival則不該吃發展係數(蟑螂地板同源),等380分類數字回來再裁;此量測屬在飛包內不算新票
 ---
 
