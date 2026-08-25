@@ -411,15 +411,26 @@ static func _delegate_variant(state: WorldState, team: TeamData, ctx: DecisionCo
 # →manpower(pop)→全滿 build_F action。first-unsatisfied 前置生 frontier（means-end 湧現順序）。
 static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: DecisionContext,
 		g: Dictionary, gt: String, def: Dictionary) -> Dictionary:
+	# ★★★三種歸宿，不是「空的各種原因」（systems 寫死 2026-08-26）：
+	#   ①真的 build candidate ②【買料】candidate（穿著 facility 的名字、`task = TASK_TRADE`）③回空。
+	#   ★★★壞掉會長什麼樣：只列「回空的原因」⇒ ②那條【回非空但不是 build】的路整個不在母體裡
+	#     ⇒ 上一顆的母體盲點換個地方重演。★而 ② 已經騙過我們一次（`emitted_facility` day6 回升
+	#       被讀成「又開始想蓋了」，實際是「又開始想買料了」）。
+	#   ★分母＝進入本函式的次數（不是 `facility_resolve_empty`，那只是三種歸宿之一）；
+	#     三種歸宿逐日各自加總 == 分母。
+	var _rday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	if Probe.enabled: Probe.bump("resolver.entry" + _rday)
 	var f: String = String(def.get("facility", ""))
 	var fdef: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
 	if fdef.is_empty():
+		if Probe.enabled: Probe.bump("resolver.empty_no_fdef" + _rday)
 		return {}
 	var payoff: float = float(def.get("payoff", 1.5))
 	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 	var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 	# F 已建 → satisfied（無 candidate）。
 	if own_tile != null and int(own_tile.get(fdef.get("current_level_key", ""))) > 0:
+		if Probe.enabled: Probe.bump("resolver.empty_already_built" + _rday)
 		return {}
 	# 前置 1：resource build-cost（material/tools）——缺→接 S2/S3 資源鏈（need_keep 已含 construction need）。
 	var cost: Dictionary = OutpostSystem.upgrade_cost(f, 1)
@@ -427,23 +438,33 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 		if float(cost.get(res, 0)) > 0.0:
 			var c: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, {"kind": GoalRegistry.PREREQ_RESOURCE, "res": res})
 			if not c.is_empty():
+				# ★★★非空【但不是 build】：這是那條騙過我們一次的路（`task` 多半是貿易/製造）。
+				#   ⇒ 單獨一格，★不得跟真 build candidate 合計。
+				if Probe.enabled:
+					Probe.bump("resolver.resource_candidate" + _rday)
+					Probe.bump("resolver.resource_candidate.res." + String(res))
+					Probe.bump("resolver.resource_candidate.task." + String((c.get("to_task", {}) as Dictionary).get("task", "(無task欄)")))
 				return c   # first-unsatisfied resource → 取得 frontier（買/採）
 	# 前置 2：facility outpost-type（需 allowed_outpost type outpost）——無合適 type→建 outpost frontier。
 	var allowed: Array = fdef.get("allowed_outpost", [])
 	if own_tile == null or not (own_tile.outpost_type in allowed):
 		# ★A1 裁②：same-tile founding（隊站空 tile 建 new outpost）無母隊就地 outpost-build 路 → 移除 candidate，靜默。
 		# 屬 facility-type-mismatch known_issues followup（non-A1-core），前置未滿=靜默（whole-system-first，不造假）。
+		if Probe.enabled: Probe.bump("resolver.empty_wrong_outpost_type" + _rday)
 		return {}
 	# 前置 3：manpower pop（既有 build pop 門檻）——不足→靜默（S4 最小，passive 繁殖增，無主動 recruit task）。
 	if team.population < GoalRegistry.FACILITY_BUILD_POP_MIN:
+		if Probe.enabled: Probe.bump("resolver.empty_pop_below_min" + _rday)
 		return {}
 	# ★A1 全滿 → facility 建：
 	# owner 在場（team 站 own outpost）→ **defer 給 infra path**（不生 candidate）。infra desire-based _pick_facility
 	# 選最想建 facility 就地建（較 goal REGISTRY-order 聰明；單一 build slot 不撞），忠於二裁意圖「接 infra path 非另立子隊路」。
 	# （goal REGISTRY-order 就地建會壟斷 build slot→礦村建 workshop 非 mint→15360 regression；量測坐實。）
 	if team.tile_pos == own_tile.tile_pos:
+		if Probe.enabled: Probe.bump("resolver.empty_defer_infra" + _rday)   # ★不是失敗：交給 infra path 就地建
 		return {}
 	# owner 不在場（own outpost 在別格）→ facility candidate（派子隊 remote 真移動→抵達→建，_dispatch_facility_builder）。
+	if Probe.enabled: Probe.bump("resolver.build_candidate" + _rday)   # ★★唯一算「成功」的那種
 	return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
 		{"facility": f, "target": own_tile.tile_pos})
 

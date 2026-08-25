@@ -243,6 +243,33 @@ func _run() -> void:
 	for kf in Probe.counts.keys():
 		if String(kf).begins_with("goal.build_fate.removed_") and String(kf).find(".gt.") > 0:
 			lines.append("      %-52s = %d" % [String(kf), int(Probe.counts[kf])])
+	# ★★★_resolve_build_facility 的三種歸宿（★不是「空的各種原因」）
+	#   ①build_candidate＝唯一算成功　②resource_candidate＝非空但【不是 build】（穿著 facility 名字的買料）
+	#   ③empty_*＝各種回空。★三者加總必須 == entry（分母＝進入函式次數）。
+	lines.append("--- ★_resolve_build_facility 三種歸宿（逐日，★分母=entry）---")
+	var ex: Array = ["build_candidate", "resource_candidate",
+		"empty_no_fdef", "empty_already_built", "empty_wrong_outpost_type",
+		"empty_pop_below_min", "empty_defer_infra"]
+	lines.append("  day | entry | ★build ★res | noFdef built wrongType popLow deferInfra | 對帳")
+	var bad3: int = 0
+	for d4 in range(31):
+		var sf4: String = ".day.%03d" % d4
+		var ent: int = _c("resolver.entry" + sf4)
+		if ent == 0: continue
+		var vv4: Array = []
+		var sm4: int = 0
+		for ek in ex:
+			var q: int = _c("resolver." + String(ek) + sf4)
+			vv4.append(q); sm4 += q
+		if sm4 != ent: bad3 += 1
+		lines.append("  %3d | %5d | %6d %5d | %6d %5d %9d %6d %10d | %s" % [d4, ent,
+			int(vv4[0]), int(vv4[1]), int(vv4[2]), int(vv4[3]), int(vv4[4]), int(vv4[5]), int(vv4[6]),
+			"✅" if sm4 == ent else "❌差 %d" % (ent - sm4)])
+	lines.append("  ★★★%s" % ("三種歸宿互斥且窮盡：每天都加得回 entry" if bad3 == 0 else "%d 天對不起來 ⇒ 還有一條出口沒被列舉" % bad3))
+	for kr in Probe.counts.keys():
+		var krs: String = String(kr)
+		if krs.begins_with("resolver.resource_candidate.res.") or krs.begins_with("resolver.resource_candidate.task."):
+			lines.append("      %-50s = %d" % [krs, int(Probe.counts[kr])])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
