@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: funnel-tick-buckets
 tier: probe
 topic: ★★★沉默的起點定位到了,而且在【最上游】:build 類 candidate day0 生 39 個,day1 起【永遠 0】——而候選總量/決策/candidate 得勝【全部持續到 day30】;⇒ 不是「提了不贏」也不是「贏了不派」,是【再也沒有人提要蓋】;交付 @9015a5eb,fp 不變
