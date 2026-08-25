@@ -355,3 +355,376 @@ convoy `porter_22` 在 **75 天窗末仍 `ghost_alive`**，被讀成「**卡住�
 **發現觀測器有副作用時，不只是「修掉它」** ——
 ★**要列出【哪些已交件的數字受影響】**，因為那些結論可能建立在觀測器造出來的現象上。
 
+## World
+
+
+- 世界獨立運作
+- 玩家不是世界中心
+
+
+## Map
+
+
+- Hex Grid Only
+- 禁止 Square Grid 假設
+
+
+## Time
+
+
+- 大地圖與遭遇戰共用時間尺度
+
+### ★ TimeScale 骨架三不變量（time-scale wave slice A，2026-07-05，enforce 起步）
+```
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## Information
+
+
+- 認知不等於真實
+- NPC 可說謊
+- 訊息可能失真
+- 任何資訊命令都需傳遞 ,永不跨距離傳播,也不全知
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## Simulation
+
+
+- Event = Consequence
+- 禁止 Scripted Outcome
+- **遍歷 id 快照前必驗存在**：team/person id 陣列是 tick 開頭的快照，元素可能在本 tick 內滅團/死亡被移除；存取 dict 前先驗 `.has(id)`，否則 Invalid get index
+
+
+## ★★ 三條對稱不變量（統一架構骨架，believability 北極星，藍圖 2026-06-29）
+
+
+同一隻病（憑空 / latch / 無可解釋來源）跨三域，三條對稱不變量 = 統一架構全骨架：
+```
+凡 named 意圖  必有可解釋驅動        ← 決策域  ✓ done（commander-v2 無因令=0 enforce）
+凡 belief     必有 provenance(來源)  ← 信息域  G3 待 enforce（provenance 即識破機制：能追來源才能疑）
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## ★ 意圖驅動完備（決策域，藍圖 2026-06-28）
+
+
+- **凡 named 意圖必有可解釋驅動**：每個 named 意圖（派系令 / 隊 task / 人物 action / 野心階）**必追得回根驅動**——need / value / belief / **父意圖**。**追不出驅動 = bug**（閾值/tag/latch 憑空跳出=該病）。
+- **連貫來自共享父意圖，非收斂單一**：多重命令 OK 甚至嚮往——只要可解釋。統領先 utility 選**戰略意圖**（征服敵X / 防衛 / 致富 / 擴張），意圖**生成協同子命令**（征服X → 攻擊X[手段] + 對X盟友外交[欺敵拖住] + 徵收[籌軍費]＝多令服務同一意圖）。**每令帶「為什麼」（連回父意圖）**。欺敵 = driver 真實（服務征服X）+ action 不真心（戰術外交）。
+- **= 因果脊椎 + 統一決策合一**（[[project_causal_spine]] / [[project_unified_decision_framework]]）：驅動鏈 = 因果脊椎顯化 + 強制。直接定義玩家錨 C——世界 driver-complete → 玩家情報遊戲 = 從看得到的 action 反推看不到的 driver（外交=真結盟還是欺敵？囤糧=遠征還是投機？）。亦是 believability 審計鏡（走任一意圖問 driver，答不出=洞）。
+- **範圍紀律**：北極星 + 不變量，**非現在停下給所有 action 塞 driver 欄重寫**。**統領層現在落實**（commander-unify 第一處）；其餘 = 審計鏡頭，按 player-visibility 排序逐步補——新工作須滿足，舊工作照洞補。**禁鑽牛角尖**（[[feedback_avoid_rabbithole]]）。
+
+
+## 關鍵設計規則
+
+
+- **不直接 script 結果**：所有行為從 NPC values/skills/stress/loyalty 計算產生
+- **新功能前定義**：影響的世界狀態、資訊流動、時間消耗、受影響群體、二次後果
+
+
+## 對稱性
+
+
+- **無玩家專屬機制**：任一交互 / 生存系統（戰鬥 / 貿易 / 外交 / 覓食 / 狩獵 / 任務 / 賞金…）NPC 必須同樣能用
+- 玩家與 NPC 走同一套底層數學；差別只在玩家可手動接管、NPC 自動解算
+
+### 敗方損耗對稱
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 玩法節奏
+
+
+- **decisions-not-chores**：玩家做決策，模擬跑雜活；壓力存在是為製造決策岔路，不是逼玩家重複操作
+- 可跳時間；事件只在 juncture 介入
+- **激情時刻全手動 + 真風險**，且主要由玩家冒險決策觸發（非隨機 spam）
+
+
+## UI 邊界
+
+
+- **UI 只經 player API**：UI 層（`scripts/ui/*`）禁止直讀/直寫 `WorldState`；一切經 `SimBridge` → `PlayerQueryApi`/`PlayerCommandApi` 的 DTO
+- **DTO 是 UI 契約**：玩家 UI 需要的任何 sim 資訊，必須 map 進 DTO（非讓 UI 繞道取）→ 換 UI（文字↔圖形）只需接同一 API
+- **觀測 UI（ObserverMain）= 平行契約**：god-view 合法（觀測非玩家），但**全 read-only**——經 `ObserverBridge` → `ObserverQueryApi` DTO，禁寫任何 sim state（唯一 sim 側接點=`emit_ambient` append，見訂單系統節）。玩家 UI 禁用 ObserverQueryApi（god-view 洩漏）。`world_map_view.gd` 雙用途（`_observer` guard 分流），動 player 繪製須顧 observer 分支。
+
+
+## NPC
+
+
+決策來源：
+
+- Values
+- Skills
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## Interaction
+
+
+- **嚴禁非同格互動**：戰鬥 / 貿易 / 外交 / 投靠 / 徵收 / 信使 / 安頓 / 安撫 全部需 `team.tile_pos == other.tile_pos`
+- 觸發點：`interaction_system.process_on_move`（mover 對全 team 掃同格 → try_interact）
+
+
+## Anon
+
+
+- anon 是 team-level 抽象集體，**無個體 entity**
+- 統一儲存於 `team.anon_cohorts`（稀疏 dict，鍵 `"tier|health"`→count；tier ∈ 平民/新兵/老兵/菁英，health ∈ healthy/wounded）
+- 變動只透過 `AnonCohort`（add/move/remove）或 `AnonTierSystem`（add_anon/remove_anon/kill_random/wound_random/heal_random/kill_wounded/transfer_proportional/try_promote）
+- `population` / `wounded` / `anon_combat_skill` / `anon_wage` 為 computed getter（投影自 cohort，**不可直接寫**，舊 set no-op）
+- 入團時保留來源 tier（戰俘 / 投靠 帶原 tier 進入）；受傷 = move healthy→wounded；晉升 named/leader 從 anon 桶移除 1
+
+
+## Task
+
+
+- `current_task` 是團體狀態（不是個體）
+- `combat_target` 是「正在戰鬥」flag（戰鬥中設、結束清）
+- `prosperity_target_id` 是「想攻擊誰」意圖（攻擊 AI 評估時設）
+- 兩者語意分離，不可混用
+- **每個高優先 task 必須有釋放條件**：進得去必須出得來，否則凍結世界（高優先 task 蓋住一切）
+
+
+## 財產 / 守恆
+
+
+- **居民私產與統治者公庫永不混淆**：私產（採集稅後）vs 公庫（owner 稅金）兩錢包分明
+- **建造資源嚴格本地**：建材來自施工團自身 + 腳下據點公庫（兩源皆可），不可動用他處據點的資產（非隔空遠端取物）
+- **有限資源守恆**：建造永不消耗有限資源；任何死亡 / 滅團，資產走守恆路由，永不憑空銷毀
+- coin 只能由鑄幣產生，無其他來源
+
+
+## ★ 統一搬運脊椎（後勤，用戶定 2026-08-01，enforce 起步）
+
+
+**所有供給的空間移動走同一 convoy 原件**（`_tick_convoy` FETCH→OUTBOUND→DELIVER→RETURN）。後勤運自己的 / 貿易換外面 / 進貢 / 領主分配 = **不同 dispatch 動機 + 不同 DELIVER 終點**，但**共用同一搬運機制**。禁各建平行搬運路。
+
+- **一個機制、多種動機/終點**：DELIVER 終點分支（賣 market_order / 領主→居民直注 / 進貢入上級 vault…）擴 `_resolve_market_at_outpost`，非另刻搬運迴圈。
+- **新供給移動需求 = 加 candidate 動機（`_*_candidates`）+ 加 DELIVER 終點分支**，不是新搬運系統。
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## ★ 統一勞力池（生產規模、用戶定 size-matter 2026-08-03，enforce 起步）
+
+
+**勞力＝有限稀缺資源**：所有生產（採集+每製造設施）吃**同一 per-tile 勞力池**（共址 `TAG_PRODUCE` 隊 pop 總和）。`LaborSystem` 單一共享 allocator、採集端+製造端共讀（統一非平行）。取代舊兩套免費 `sqrt(pop/5)` pop_mult residue。
+
+- **deterministic**：allocator sorted key + 純算術 + cascade 固定迭代上限 + **零 RNG** → 三跑 byte-identical。
+- **need-gated、無 scripted min-floor**：工位 need 權重走 `need_oracle`（self+supply+construction+trade、多級供給鏈傳播）；`need=0 → fill=0 → 產出 0`（不需求貨不產＝真經濟）。**禁加 min-floor 保底**（違憲法硬 gate）；buffer/戰略儲備走 genuine anticipatory need（need_oracle reserve target）非 floor。
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 飢餓 / 人口
+
+
+- 飢餓判定唯一來源 = 團糧（個人不另算飢餓）
+- 死亡順序：弱者先死（minor → anon → named）
+- 生育是生命事件（可與行動並行），不與行動反應競爭單一名額
+
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 資料模型不變量規則（防散落純量 drift）
+
+
+1. **可衍生聚合 → computed getter，不存可變欄位**。任何 `= f(權威來源)` 的值用唯讀 getter（範本 `team_data.population` / `wounded` / `anon_combat_skill`）。物理上不可 drift；加人必須動真來源（named_members / anon_cohorts），不能偷改數字。
+2. **來源/雙向關係走單一入口**。anon 改動走 `AnonCohort`/`AnonTierSystem` 入口；勿直接 `anon_cohorts[k] = ...`。team↔faction 走 `set_team_faction`、child↔parent 走 `set_subteam_parent`、**named 成員↔person.team_id 走 `add_member`/`remove_member`**（勿直接 `named_members.append/erase`；`remove_member(...,clear_team_id:=false)` 給晉升 leader/死亡留屍/轉隊已先設目標隊三類）。**leader_id 賦值走 `set_leader(team, pid, old_leader_action)` chokepoint**（設 leader_id + **強制 person.team_id 回指本隊**[根修 slice2 揭的 leader/team_id desync] + role="leader" + 出 named_members;`old_leader_action="member"` 舊 leader 降 named）。建隊構造（`beast:30` 全新欄位初始化）+ bulk 清空（`subteam _merge_into` 尾 per-member add 後）= 明示豁免。**新增轉隊/晉升/死亡路徑須：入 roster（add_member/set_leader）或標 `person.is_dead`**（否則反向 audit 抓）。**combat_target 走 `set_combat_target`/`clear`（純戰鬥語意）、投靠/乞食社交目標走 `set_social_target`/`clear`（≠戰鬥,別塞 combat_target 否則被 `_try_interact:197` 戰鬥早退吃掉=BEG/JOIN 死路）。**
+3. **不可衍生的真存量 / 不變量 → 註冊進 `InvariantAudit.check`**。真存守恆量（coin_eq **全池=team.resources+anon_treasury+person.coin+tile.public_storage.coin+abandoned_coin,見 `CoinAudit`；coin_eq 剔 ore=採集產出非守恆、mint 唯一 coin 源走 ledger 認增發**）、cohort 自洽、faction/subteam/**roster（named/leader↔team_id **雙向**:forward=roster→team_id、reverse=活人 team_id→roster,`p.is_dead`/team 不存在跳；`_check_roster_bidir`）**等靠 audit 守。加新不變量 = 加一個 `_check_*` 並在 `check()` 呼叫。
+4. **改資料模型前讀本節。**
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## team reference 契約
+
+
+移除 team 一律走 `state.erase_team(tid)`（唯一 chokepoint，清光所有指向它的 ref）。但解析時分兩類 —— **實證後的區分**（2026-06-18 batch1 子 session 證偽「全部納管 ref 永遠活」）：
+
+### A. 維護集合元素 → 保證活 → `require_team`
+`faction.member_team_ids` / `subteam_ids` / `team_known[obs]` / `team_discovered[obs]` 內的元素由 erase_team + 雙向 audit 持續維護，迭代時**每個元素必活**：
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## Leader 繼承單一 owner
+
+
+- **繼承邏輯單一 owner = `EventSystem.on_leader_death(state, team) -> bool`。** 偵測單一點 = `faction_ai` 每-tick 安全網（`leader_id==-1` → 呼 owner）；`npc_combat._kill_named_npc` 戰中即時呼為效能捷徑（非另一 owner）。
+- 禁止在 `on_leader_death` 外自行決定繼承人 / promote。裸置 `leader_id = -1` 僅允許作 transient（須由安全網次 tick 補位）。
+- 分派：player → forced `choose_heir`（named 空則 `game_over`）；NPC → best named 無門檻晉升 → 無 named 則 anon 晉升 → 皆無回 `false` 滅團。晉升成功後呼 `PopulationSystem.check_overflow_for_team`（弱 leader → pop_cap 溢出回饋）。
+- player 分支偵測靠 `WorldState.get_player_team_id()`（單一源）。但**死者 person 已 erase 時偵測查不到**（leader_id=-1 且不在 named）→ 已知是 player team 的 external caller（encounter `_check_player_wiped`、player_command stale-heir 終局）**直呼 public `EventSystem.handle_player_succession(state, team)`** 繞過自動偵測。所有真實路徑呼 `on_leader_death` 時死者 person 尚在 `persons`（combat 在 erase 前呼、famine/encounter/安全網從不 erase）→ 自動偵測對它們成立。
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 關係圖（typed-edge）
+
+
+- typed 關係事實只經 `RelationGraph`（add_edge/edges_of_type/edges_to/strongest）寫讀 `PersonData.relation_edges`。
+- 圖核心**型別無關**：只按 `type`/`target` filter；加新型別 = 加 reader，**禁改 RelationGraph 核心**（WHAT spec §4 硬約束）。
+- 扁平 `relations`（純量泛好感）與 typed 圖**語義分職**並存：前者連續情感（loyalty/反應），後者事件型關係邊（feud/protect/gratitude/killed）。
+- G2 用型別：`feud`/`gratitude`/`protect`（write_memory 填）/`killed`（G2d 死亡鏈）。未來 `kin`/`spouse`/`master` 等同型塞入。
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 私人脫軌（血仇）
+
+
+- feud 邊由戰鬥（looted/betrayal/extorted 記憶 → G2a `write_memory` 映射）populate（敗方含 leader 對勝方獲 feud）；本層只加 reader，不重做血仇 populate。
+- `NpcAiSystem.vendetta_target` 讀 leader 最強 feud 邊 + 衝動 gate（好戰 ≥ `VENDETTA_BELLIGERENCE`、慎重 < `VENDETTA_PRUDENCE`、intensity ≥ `VENDETTA_INTENSITY`，全 TEST VALUE）→ 回仇人 team_id（存在且非自隊）否則 -1。冷靜 leader 隱忍不脫軌。
+- 脫軌 = `faction_ai.evaluate_all` 在 `_evaluate_threat` 後以 `TaskArbiter.PRIO_VENDETTA`(55) try_set TASK_ATTACK：生存(80)/威脅(70) 擋得住、prosperity(50) 擋不住。置於 threat 後因 `_evaluate_threat` 只在 idle 動作 → threat 先佔 task 則 vendetta@55 搶不動（威脅優先）。
+- `relation_edges` 的行為 consumer = `vendetta_target`（G2a 圖不再 dormant）。pre-existing dormant `NpcAiSystem.get_goal_task_override` 已刪（revenge 意圖由本路徑經 G2a 圖取代）。
+
+
+## 訂單系統
+
+
+- 訂單權威存發起隊 `active_orders`；`emit_message("order_buy"/"order_sell")` 為**可失真傳播副本**（殘缺市場知識湧現，復用 message propagate/distort）。
+- **★`global_messages` 禁外部 append**：`order_system` 借 `global_messages.size()` 當 order_id 空間 → 任何非 `emit_message` 傳播路徑的 append 位移 oid 流=訂單去重/履約行為真變（2026-07-04 observer 軌 seeded 逐點 diff 實證）。**觀測型事件走 `emit_ambient` → `state.observer_messages`**（獨立 append-only channel，cap 裁尾）：不進 global_messages/team_known、**sim 禁讀**、無 RNG 消耗——觀測零擾 by construction。
+- 履約/讀取依 message 副本，須回發起隊 active_orders 核對（撲空 = 副本過期/失真，G1d）。
+- 生產需求偏好讀 `OrderSystem.received_buy_orders`，不另建需求表。同格本地交易沿用既有 interaction trade；跨格商隊 = G1d。
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 隊目標單一 owner = leader 野心階梯
+
+
+- 隊無獨立目標。`TeamData.ambition_rung/archetype/cap` 由 leader values + 隊安全經 `AmbitionLadder` derive，**單一真值源**。換 leader → 重 derive（方向劇變）。
+- faction strategic_goals **衍生**自 faction-leader 階梯（`strategic_ai._update_faction_goals` 讀 rung/archetype），禁他處獨立定隊/勢力戰略目標。
+- 階梯門檻/權重全 TEST VALUE（正式平衡 pass 調）。rung→每階 task/tag 全表 = G2c ✅；個人脫軌（血仇）= G2d ✅（見「私人脫軌」）。
+- 隊常態行為由 `AmbitionLadder.rung_task(archetype×rung)` 驅動（既有 TASK_*，零新 task），`PRIO_AMBIENT` 只填 idle。生存 rung→`_trigger_survival`；武力擴張→prosperity；立國/稱霸→faction strategic(G2b)。極絕境/威脅/脫軌(vendetta)優先序皆高於 ambient ladder。
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 混合協調（faction stakes vs team 日常）
+
+- **stakes-to-faction → 頂層協同；team 日常 op → 個體**（ruling §1）。stakes 集合 = **攻擊/徵收/外交**（`DecisionContext.STAKES_SET`）由霸主 `_update_goals` **means-end** 設 `f.goals`（單意圖→主令+補肢，每令帶 driver；viability gate=稀有蓄意）；unified 隊經 `faction_duty` term 響應。日常（貿易/掠奪/scout/survival）無 faction_duty=各隊個體決。**立國 = leader-level（`_declare_established`，非 member option，不在 stakes 集合）；掠奪 = 日常個體（非 stakes）；結盟 ⊂ 外交。** **war-priority（`FACTION_DUTY_DRIVE_LESSER`）已 revert**：單意圖後成員一次服務一意圖的子命令（主令+補肢）無同級矛盾，徵收/外交 drive 回 `FACTION_DUTY_DRIVE`(1.5) 與攻擊同級。
+- **頂層決 WHETHER，人格染 HOW**：派系 directive 決定「要不要做」；member 經對應 option 的個人 drive×weight 染色執行強度。染色映射：攻擊=`attack_drive×attack`(好戰/殘忍)、徵收=`levy_drive×levy`(貪婪/好戰)、外交=`diplo_drive×diplo`(義氣/計謀)。協同≠同質。
+- **stakes target finder**：攻擊/外交→`_nearest_independent`（最近獨立隊）；徵收→`_richest_member`（同 faction 最富 member，**雙重排除自身** `== team.team_id`，因 `_richest_member` 未排自身）。徵收/外交=非戰（不設 combat_target）。
+- **脫軌逃閥**：`faction_duty` weight **與** 個人 drive（`attack_drive`/`levy_drive`/`diplo_drive`）共用脫軌因子 `_duty_factor = clampf(loy − max(0,野心−0.5)×DEFECT_K, 0,1)` → 低忠誠+高野心 member 的 duty 與個人驅力齊壓 0 → 個人驅力（survival/野心/貿易）蓋過 → 不參與/自走=破framework脫軌。faction_duty 是**加權 term 非 hard override**（非 100% 服從，by construction）。
+- **危時不為派系做事**：survival-class term 危時量級碾壓 faction_duty（食物優先；攻擊/徵收/外交皆然）。
+
+
+## perf 優化 arc（用戶+blueprint 憲章 2026-08-18）
+
+- **★優化兩道分類（每個 perf 優化必分類 + 對應驗證）**：(a) **位元級安全道**＝cache/memo/spatial-index/避重複 query/減 allocation → **不改行為、FP byte-identical 機器證（3 跑）**；(b) **行為影響道**＝降頻/deferred cascade → **時序變=指紋變=intended-change 流程**（fp 標 + 全故事審）+ **守 LOD 紅線**（§掃近隊兩-channel/nearby-scan：餵決策的鄰隊位置一律 belief last-seen 非 live god-view、遠威脅經情報網不隱形）。**分類錯（把行為影響誤當安全道 merge）=違規**（外部 agent 誤列降頻為無害已被 blueprint 修正）。
+- **★perf 禁降故事生成 fidelity（紅線）**：Team decision fidelity / message / reaction 等**故事生成機制不可為 perf 犧牲**（reaction all-far 從沒跑=故事基質已薄、perf 不得再削）。優化只碰「怎麼算得快」非「算什麼/多細」。
+- **驗證流程**：每改→full sim→Story QA **不降不取消**（過渡期分層：slice 短窗+定向 QA、arc 里程碑 full 12mo+全故事審=現行實務）；終極目標=把 full sim 壓便宜到每改全跑付得起。
+
+
+## resource 分類學（農業a merge 落定、守恆稽核依此）
+
+- **零生成**：礦/寶石（ore_*/gem）=挖完就沒、無再生無生產龍頭（守恆硬守=不可憑空生）。
+- **自然再生**：野味/藥草/野馬（食物野地池/herb/horses 野生源）=regen 率物理再生（`regenerate_tiles`）。
+- **生產類**：食物（farm_yield 農田獨立產線龍頭 + 野地採集雙源）=可有掛帳生產龍頭（`TileBank.deposit(...,"farm_yield")` chokepoint、守恆稽核含農業源）。
+- **木材採集加速**：伐木場=加快野地木材收集（非獨立生產、樹非短期可種）。
+- **鑄幣**：coin 唯一源=`_tick_mint` 礦→幣（room-capped 守恆、無其他生成）。
+- ★守恆=**可溯源非禁生成**：生產類/regen 可有掛帳龍頭（tagged reason）、零生成類硬守不可生。守恆稽核（InvariantAudit）逐源對帳。
+
+
+## 決策 option 的「競爭範圍」與「承諾優先級」解耦（§4a、2026-08-20 systems 裁 + R² 護欄）
+
+- **兩語意本就不同、禁再綁死**：`sets`（`survival`/`passive_survival`…）=**這個 option 在哪些 rank 清單裡競爭**（`rank_survival` 只收 survival-set）；**commit priority**=**committed 後誰能打斷它**（`TaskArbiter` 階梯）。
+- **★`DecisionOptions.REGISTRY` 可用 optional `"priority"` 欄顯式覆蓋** `priority_for` 的預設推導（預設：survival-set→`PRIO_SURVIVAL` / threat 三 option→`PRIO_THREAT` / 其餘→`PRIO_DISPATCH`）。**此欄是把 threat 早已在用的顯式覆蓋模式推廣成通用**（收斂「隱式 set 推導 + 顯式 threat 清單」兩套並存語意）、**非後門**。
+- **★護欄①值域鎖死**：`priority` 只准填 `TaskArbiter` **既有具名常數**（`PRIO_COMBAT/SURVIVAL/THREAT/PLAYER/VENDETTA/DISPATCH/FACTION/AMBIENT`）、**禁裸 int**（防隨手標 `99` 繞過整個優先序階梯=真後門）。
+- **★護欄②必附 why-comment**：任何 option 使用此欄覆蓋預設，**須在 REGISTRY entry 留一行理由**（防日後有人為了讓某 option「贏」隨手蓋掉、事後看不出是刻意設計還是誤標）。
+- **首例**：`紮根`（L0→L1 工期）留 `survival` set（絕境隊也該能被 util 秤、拿掉=隱含硬門檻）但標 `PRIO_DISPATCH`——**長工期發展型動作必須能被 threat(70)/survival(80) 打斷**（`corvee_site` recovery 讓進度不歸零）。
+
+
+## 死亡窗口（走屍隊）決策紀律（2026-08-20 systems 立、R² 繼承-lite 抓到具體 race 後升格）
+
+
+滅團**不即時 erase**（`world_state.gd:44` 註：中途 erase 不安全、多系統持 team_ids 快照）→ 存在**兩層窗口**，窗口內死隊在 `state.teams` **完全活著**（無 `is_dead` flag、population 可能非 0）：
+
+| 窗口 | 範圍 | 已死但仍可見的集合 |
+|---|---|---|
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## LOD 降頻補償紀律（2026-08-20 立、LOD 紅線修實戰產出）
+
+
+> ★**適用範圍（2026-08-21 加）**：效能 arc 的 **G 刀（零 LOD／刪近遠分班）落地後，本節僅適用於「仍然存在的降頻機制」**（如未來任何 tier 降頻）。**判準本身（機率型/累積型/離散門檻型/飽和型四分法）通用、不隨 G 作廢。**
+
+**LOD 只能降解析度、不能降真實**（用戶 2026-08-14 立身宣言）。當某系統從「每 N tick 跑」改成「每 M tick 跑」（M>N，`trials = M/N`），逐項按**行為型別**判斷要不要補償——**判準是「每次呼叫是否累積/抽獎」，不是「有沒有用 RNG」**（這個誤判本人犯過：見下）：
+
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 長跑量測床的三條硬規（2026-08-20 立、大考實戰產出）
+
+
+1. **「day」必須由真 tick 導出，禁用 loop counter**——`day = state.world.current_tick / TICKS_PER_DAY`。血證：世界 `game_over` 凍結後 `advance_tick` 近 0us 直接返回，loop 照跑滿 → 產出 **290 天假列**（tick 凍結／phase 塌成單 key／probe 全空），且**歷史上至少 4 個舊 run 同款**。
+2. **必須驗前進**：偵測到「真 tick 在 N 個迴圈內沒有前進」→ **print 原因 + break**，並寫進 progress sidecar。**沉默地跑完**比崩潰更危險（崩潰看得見，假資料看不見）。
+3. **probe 過濾器不可只靠白名單**：床若只落 `watch_prefixes` 命中的 key，**沒列到的 family 事後完全救不回**（血證：政治質地欄全 0＝prefix 對不上 production key 名，而非世界沒政治）。→ **結尾必 dump 全量 `Probe.counts` 一行**（成本近零），白名單只作為「每日增量」的快取用途。
+
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## 承諾態只能經仲裁移轉：直接寫欄位 ＝ 承諾靜默消失（2026-08-21 立，convoy RETURN 實戰產出）
+
+
+**血證**：convoy RETURN 歸建遲到 27.9 日。我在 spec §5 預測首要嫌疑是 `persist_strength` 的 time-proxy，
+並要求「先補一行 `PROGRESSIVE_HOLD_TASKS += TASK_CONVOY`」。
+**實測：那一行單獨補 ＝ 與 main 逐字節相同、零效果。**
+真根因是 `faction_ai:797-809` 的 merge_queue：母隊走掉 → `parent.tile_pos != sub.tile_pos` → 走
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## specimen 選樣必須「血緣封閉」：執行期生成的實體不得落在觀測範圍外（2026-08-21 立，convoy RETURN QA 判不了產出）
+
+
+**血證**：convoy RETURN 收尾送 QA 故事稽核 → **QA 判不了**。specimen 1701 行裡 **`convoy` 出現 0 次**、
+只有母隊 `3/5/7`。因為 `SpecimenDumpHelper.setup_from_env` 把 `state.specimen_team_ids`
+**在 setup 當下凍結成固定清單**，而 porter 子隊是 **`SubteamSystem.dispatch` 執行期才生成的新 `team_id`**
+⇒ **永遠不可能進範圍**。
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## ★工作紀律八條 → 已搬家（2026-08-25 #4 doc 瘦身）
+
+
+**原本 176 行（全檔 21%）躲在一個只講第一條的標題底下。★它們是【我們怎麼做事】，不是【世界怎麼運作】。**
+| 去哪了 | 內容 |
+|---|---|
+| ★`docs/process/01_architect.md` | **spec 紀律三條**（掛決策層前先驗／前提標已驗或假設／「只有一處實作」也是負斷言） |
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## ★★★觀測器**禁任何副作用**（不只禁耗 RNG）——2026-08-25 擴充
+
+
+**既有條款**：觀測儀器（tracer／probe／HOB）**禁耗 global RNG**，否則**觀測會改變被觀測物**。
+
+★**2026-08-25 血證把它擴到更嚴重的形式**：
+> **停滯偵測器的舊 `STALLED` 分支【會清 `corvee_site`】** ——
+
+> ★血證／案例 → `invariants-cases.md`（同標題節）
+
+
+## ★means-end / 前提解析的「無手段終止」不得靜默（2026-08-25）
+
+
+**遞迴解析前置依賴時，走到「這個資源沒有任何取得手段」而終止 —— 必須發 tap。**
+★**理由**：那是**最容易被誤判的分支**（真相源只蓋部分物理 ⇒ 明明有路卻回「無手段」），
+**而它的外顯症狀是「什麼都沒發生」** ⇒ ★**沒有 tap 就等於製造量測盲點，違反「全量暫態可觀測性」。**
+**tap 必須帶【是哪個資源】，否則只知道有終止、不知道缺口在哪。**
+

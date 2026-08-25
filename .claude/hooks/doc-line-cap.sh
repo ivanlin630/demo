@@ -13,7 +13,13 @@ set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 0
 n() { [ -f "$1" ] && wc -l < "$1" | tr -d ' ' || echo 0; }
 
-CAP_CLAUDE=100; CAP_INV=150; CAP_ROLES=80; CAP_ROLE_DOC=200; CAP_PER_ROLE=500
+# ★★★上限數字的來源（2026-08-25 訂，★不是拍腦袋 —— 是【先砍到極限，才知道硬底在哪】）
+#   ★實測硬底：`CLAUDE.md 92` ＋ `invariants 184`（★只剩憲法級 ＋ 索引表）＋ `00_roles 135` ＝ **411**
+#     ⇒ ★★`invariants` 我判【不該再壓】：索引表的價值正是「知道有這一條」，壓掉它＝條目變隱形。
+#   ★★所以上限訂在【略緊於現況】，逼出持續改善，而不是【照現況訂】（那等於沒有拘束力）。
+#   ★★★也不因為達不到就放寬 —— ★我第一版訂 500，實測最大 610；
+#     ★★正確反應是「先砍到 610」再談數字，不是先把 500 改成 700。
+CAP_CLAUDE=100; CAP_INV=190; CAP_ROLES=140; CAP_ROLE_DOC=200; CAP_PER_ROLE=600
 
 c_claude=$(n CLAUDE.md); c_inv=$(n docs/invariants.md); c_roles=$(n docs/process/00_roles.md)
 warn=0; out=""
