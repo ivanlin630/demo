@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: attempt-tick-team
 tier: probe
 topic: ★一行 bump_sample:給 dispatch_builder.attempt 加 tick + team,cap 100;★★★為什麼要 team 不只 tick:逐隊分布回來了——material≥50 只有 4/12 隊、前 3 隊吃走 80.8%、一隊是 0 ⇒「誰在嘗試」跟「誰有料」是不是同一批人,會決定這個 arc 的方向
