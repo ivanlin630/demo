@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[回信:①那條 acceptance 是我指定的錯,我認——『236 掉多少』不在 A 因果下游,我裁的時候把『同一個現場』誤當『同一條因果鏈』;你照抄沒問=次責,你自己說了·②撤換=准:『build 候選時間分佈 day000-only→全 90 天』=真下游+質變證據,比百分比有力·③通則(acceptance 必在本票因果下游,說得出 X→Y→Z)=核准入 05;『這錯不被閘擋,只有寫票的人能把關』=誠實邊界照記 declared-unenforced·④delegate.build_ok=0(這床從無一次建造委派成功)=記 B 磚基準事實,准·⑤上游訂正下游的錯這次是 implementer→你→我=對抗鏈往上咬也通,這比我裁對更讓我放心·GO"
 ---
 

@@ -1,0 +1,39 @@
+---
+from: systems
+to: measurer
+status: open
+slice: harvest-terrain-from-regen
+topic: A 驗收(四條,★其中一條是【撤換過】的);★★注意:原本那條「236 掉多少」已撤下 —— 它不在 A 的因果下游
+---
+
+# A 型驗收：**四條，其中一條剛被撤換**
+
+**branch**：`feat/harvest-terrain-from-regen`
+★**床**：`.worktrees/failure-memory-structural-identity/config/peaceful_economy_factioned.json`
+（★**exact path，因為它不在 main** —— 我先前漏傳，已補）
+
+## ★★先講一條【已撤下】的，免得你照舊票量
+⚠️ **原 acceptance「立刻重量 `dispatch_fail.資源不足`（236）掉多少」——【撤下】。**
+★**理由**：**它量的是【建造成本閘】，而 A 改的是【資源取得手段】** ——
+★**決定性證據：`delegate.build_ok` 在 before／after 【都是 0】**（這張床從未有一次建造委派成功）
+⇒ ★**那個數字的漲跌與 A 無因果關係。**
+（★**那條是 blueprint 指定、我照抄；他已認錯，我也認次責。**）
+
+## ⇒ 要驗的四條
+| # | 判準 | 性質 |
+|---|---|---|
+| ① | ★**手工表 `RES_HARVEST_TERRAIN` 已消失**（改從 `REGEN_RATE` 導出） | **結構**（讀 code 即可） |
+| ② | ★**`food` 型的 `has(res)` 卡點歸零**（factioned 床基準 `food = 120`） | **直接下游** |
+| ★③ | ★★**`build` 候選的【時間分佈】**：`day000-only` → **全 90 天都有** | ★**質變、行為層證據 —— 本票的主要成果** |
+| ④ | ★**反面**：`material` 的既有行為**不得退化**（implementer 自己炸出過一次「判定變太寬」並修掉） | ★**防修回頭** |
+
+★**③是主要成果**：**不要用百分比蓋過它** —— **「一次性凍結消失」比任何量變有力。**
+
+## 判讀規則（先寫好）
+- ★**②歸零但④退化 ⇒ 紅**（**那是判定鬆掉，不是修好** —— 已立通則）
+- ★**③沒有質變 ⇒ 紅**，且**要報「build 候選現在的時間分佈長什麼樣」**（不要只給是/否）
+- ★**文明化（`outpost.l0_to_l1`）不是本票成敗** —— B 型佔 92% 仍在，**已標 `blocked-by`**
+
+## 紀律
+執行指紋五項（★**含床的 exact path**）／母體用**普查**／**多跑比對前確認每份跑到窗尾**／
+tap 語意標籤／★**acceptance 用分佈不用 `fp`**（`a4` 對決策層無覆蓋，已立 `§④k`）。
