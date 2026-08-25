@@ -16,4 +16,3 @@ unjudged	戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve
 unjudged	紮營=1.0
 unjudged	[FAIL] Team23 task=建設 order=-1	×2；systems 初判可能落在建材閘 arc，優先查
 unjudged	[FAIL] 弱目標未加入攻擊 goal
-stale-test	Invalid get index 'intent' (on base: 'Dictionary').	headless_test.gd:1339 讀 e["想什麼"]["intent"]，但 bc50c05b 已改名為 strategic_intent；★這不是 assert 而是 push_error ⇒ _test_specimen_tracer 從該行【中止】，其後 8 個 assert 從此沒跑過＝靜默覆蓋洞

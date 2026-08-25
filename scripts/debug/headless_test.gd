@@ -1336,7 +1336,18 @@ func _test_specimen_tracer() -> void:
 	assert(SpecimenTracer.entries.size() == 1, "[specimen] 決策未成 entry")
 	var e: Dictionary = SpecimenTracer.entries[0]
 	assert(e.has("tick") and e["team_id"] == 0, "[specimen] entry 缺 tick/team_id")
-	assert(e["想什麼"]["intent"]["intent"] == "致富", "[specimen] entry intent 錯 %s" % str(e["想什麼"]["intent"]))
+	# ★★stale test 修（2026-08-26）：`bc50c05b` 把 entry 的動機欄 `intent` 改名 `strategic_intent`
+	#   （真相源 `specimen_tracer.gd:171`），測試沒跟 ⇒ 讀到不存在的 key。
+	#   ★而它是 `Invalid get index` ＝ **push_error 不是 assert** ⇒ 本函式從那行【中止】，
+	#     底下 8 個 assert 從那天起【一次都沒跑過】—— 沒人看到它們紅，因為它們沒被執行。
+	#   ★★所以順手把【型別】也 assert 起來：`strategic_intent` 是混型欄位
+	#     （`specimen_tracer.gd:135`：capture_intent 有跑＝Dictionary、沒跑＝String fallback）
+	#     ⇒ 不驗型別的話，下次它退化成 String 又會是同一種【靜默中止】，而不是紅。
+	assert(e["想什麼"].has("strategic_intent"), "[specimen] entry 缺 strategic_intent 欄（改名漏跟？）")
+	assert(e["想什麼"]["strategic_intent"] is Dictionary,
+		"[specimen] strategic_intent 應為 Dictionary（capture_intent 已跑），實得 %s" % str(e["想什麼"]["strategic_intent"]))
+	assert(e["想什麼"]["strategic_intent"]["intent"] == "致富",
+		"[specimen] entry strategic_intent 錯 %s" % str(e["想什麼"]["strategic_intent"]))
 	assert(not e["想什麼"]["candidates"].is_empty(), "[specimen] entry 無 candidates")
 	assert(e["做什麼"]["winner_opt"] == "貿易" and e["做什麼"]["task"] == TeamData.TASK_TRADE,
 		"[specimen] entry winner/task 錯 %s" % str(e["做什麼"]))
