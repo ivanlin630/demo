@@ -42,6 +42,7 @@ const NOT_COMMITMENT: Dictionary = {
 	"pending_owner_change_tick": "偵測緩衝倒數，與本隊承諾無關",
 	"current_task": "★它【就是】被 release 清掉的那個代理 —— v2 的整個重點是不再靠它當判準",
 	"commit_stall_site": "stall-detector 的 baseline 綁在哪個工地（偵測器自己的記帳），承諾事實在 tile 上不在這欄",
+	"commit_stall_target": "同 commit_stall_site：stall-detector 在 episode 起點快照的【目標】，偵測器自己的記帳，承諾事實在 tile 上不在這欄",
 	"order_task": "上級指派的【型別標籤】；判未完成看的是對象還在不在（order_target_id 已在 READS）",
 }
 
