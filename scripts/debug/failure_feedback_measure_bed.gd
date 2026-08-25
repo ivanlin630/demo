@@ -59,6 +59,33 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 	for k in ["decision.opt_chosen.買糧", "decision.opt_chosen.買料",
 			"decision.opt_applicable.買糧", "decision.opt_applicable.買料"]:
 		lines.append("  %-30s = %d" % [k, int(Probe.counts.get(k, 0))])
+	# ★★磚的三面 acceptance（systems 裁：閘綠 ≠ 這一版達標）。
+	#   ★每一面都要能區分【沒達標】與【沒進料】——那是兩種完全不同的結果，
+	#   混在一起報就是把「量不到」當成「沒發生」。
+	lines.append("--- ★★三面 acceptance ---")
+	var root_done: int = int(Probe.counts.get("outpost.l0_to_l1", 0))
+	lines.append("  ①文明化恢復 outpost.l0_to_l1 = %d" % root_done)
+	lines.append("     ★這一面【要同床 main baseline 才可判】：絕對值不告訴你有沒有恢復。")
+	var bite: int = int(Probe.counts.get("failure.suppressed.買糧", 0))
+	lines.append("  ②買糧 339 型仍咬 failure.suppressed.買糧 = %d" % bite)
+	if bite == 0:
+		lines.append("     ⚠ 0 ＝ 折價對買糧【從未生效】——不是「不咬了」，是【沒發生】，兩者不可互換。")
+	var rec_root: int = 0
+	var rec_keys: Array = []
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("failure.recorded."):
+			rec_keys.append("%s=%d" % [ks.substr(17), int(Probe.counts[k])])
+			if ks.find("root") >= 0 or ks.find("紮根") >= 0 or ks.find("construction") >= 0:
+				rec_root += int(Probe.counts[k])
+	lines.append("  ③紮根執行型失敗進記憶 = %d　(全部 recorded 分佈: %s)" % [rec_root, str(rec_keys)])
+	if rec_root == 0:
+		lines.append("     ⚠ 0 有兩種可能，★這份報告分不出來，要看 ③b：")
+		lines.append("       (a) 接線斷（記錄側沒接到擲出點） (b) 這輪世界【真的沒有】紮根執行型失敗")
+	lines.append("  ③b 前提型 failure.blocked_total = %d　(★>0 表示紮根【有在嘗試】只是被擋)" % int(Probe.counts.get("failure.blocked_total", 0)))
+	for k2 in Probe.counts.keys():
+		if String(k2).begins_with("failure.blocked."):
+			lines.append("       %-34s = %d" % [String(k2), int(Probe.counts[k2])])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
