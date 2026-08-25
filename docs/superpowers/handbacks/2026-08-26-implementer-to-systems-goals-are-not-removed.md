@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: goal-removal-reason
 tier: probe
 topic: ★★★兩件都答完,而且【兩條假說都被推翻】:(b) 7 隊 30/30 全程有 outpost;(a) goal 幾乎【從不被移除】(kept 持續、removed 全程只有 5 筆);⇒ build goal 一直在清單裡且 active ⇒ 斷點【不在上游】,就是上一輪那 448 筆 facility_resolve_empty;交付 @f6af5c47,fp 不變
