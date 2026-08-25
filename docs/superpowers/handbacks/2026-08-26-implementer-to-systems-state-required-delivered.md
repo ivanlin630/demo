@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: local-value-state-required
 tier: full
 topic: ★交付 @03fdf03c:九個 default + _stock fallback + _calc_reserve 全刪,四個呼叫端(A/B/C5處/D3處)接住;★★驗收①②③④逐條綠(fp 逐位相同=本票要的方向);★★★但語法逼我多刪了兩個 leader_values default——不是我擴 scope,理由在內

@@ -30,6 +30,26 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 —— ★★**這正是 [[project_economy_arc]] 的 meta-pattern（world-level 夠、local/team-level 不夠）**，
 **別在沒分辨這兩者之前先調 cost。**
 
+### ⏳★baseline 機制只蓋 `headless_test.gd` 一張床，其餘床的紅是【不可判讀】的（2026-08-26）
+
+**現況**：`docs/test-baseline-failures.txt` ＋ `test-ran-floor.sh` 只服務 `headless_test.gd`。
+**其他 debug 床沒有 baseline** ⇒ 每次有人動到它們，只能**手動跟 main 比對**才知道紅是新的還是既有的。
+
+★**血證（本輪）**：`state`-required 交付時，`survival_layer_unify_test` 與 `tools_demand_test` **各 1 條 FAIL**：
+```
+[FAIL] 中性 reserve = target×pop×日耗
+[FAIL] armorsmith material 仍 80（僅 weaponsmith 動，got 70.0）
+```
+★**implementer 手動跑 main 對照證明兩條都是既有** —— **他做對了，但那是【每次都要重做一遍】的人力。**
+
+★★**這正是「恆假式」的近親**：**一張永遠有紅、而紅的意義要靠人記憶的床，等於沒有閘。**
+
+★**修法很便宜**（沒開票，因為要先決定哪幾張床值得）：
+`test-ran-floor.sh` **本來就是床無關的**（吃「輸出檔 ＋ baseline 檔」兩個參數）
+⇒ **每張要當閘的床各生一份 baseline 就好**，不需要改工具。
+★**開票前要先答**：**哪幾張床是【閘】、哪幾張只是【診斷用】？** —— 診斷床不需要 baseline，
+★★**把診斷床也納入，只會製造第二份會 drift 的真相。**
+
 ### ★material-need bootstrap gap（code-provable，reviewer R² 2026-07-30 揭）
 `NeedOracle.need_keep(material)` 對**無 outpost 隊結構性恆 0**：`_self_use(material)` material∈`PURE_INTERMEDIATE`(need_oracle:100,111)→0；`_supply_chain` 無設施→0；`_construction_facility_need` `_find_own_outpost==(-1,-1)`(need_oracle:38-40)→0。∴ `goal_resolver:197` `holding>=need_keep(0)` 恆真→吐空、**founding 分支(:206-219「★A1 founding」)碰不到**。**⇒ 雞生蛋 bootstrap gap**：無 outpost 隊永不「想要」material（need_keep≡0）→永不因缺料立國拿料；material-founding 動機**只對已有 outpost + 缺料設施需求的隊**存在（established 隊建 secondary forest outpost 供設施）。**fresh 隊 settle-motive 走 settle_fit（上述三段①，已知 flat/broken）非 material。** 這是 A1「缺料→立國」假設的 code-provable 修正：該動機對 fresh 隊不存在（bootstrap gap）、對 established 隊 gated on need_keep>0。折入 means-end 全系統（need 沿依賴鏈上傳 chaining 該讓「想建設施→缺料→缺 outpost→想 found」串起來）。連 [[project_food_flow_runway]] measure-first Step0（①fixture 據此修＝established 隊測 live secondary-founding，非 fresh 隊死 fixture）。**用戶兩原則**（memory `feedback_whole_system_first`）：①健全系統才有價值模擬結果 ②整個系統做完當 whole 才 measure，非邊建邊 patch。**∴ material 全 PARK**（settle-motive/伐木場/regen/初始庫存/gate②/BUY 弱閥）until **means-end/長程計畫全系統**（2026-07-19-long-range-planning-brainstorm.md，scope=B 全四塊：慾望 registry × means-end 依賴圖 × applicability 湧現順序 × 折現/承諾）設計+建完當一個 whole。L1 大功能，brainstorm（用戶主導）→spec→plan→implement。★架構 orientation：機制大半已在（`option.applicable`=前置 gate、`rank_scored`=湧現順序、`NeedOracle`=need 傳播），缺口=(a)need 沿依賴鏈上傳 chaining (b)goal-as-chainable-option → 實作=擴非新引擎。
 
