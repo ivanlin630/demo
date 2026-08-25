@@ -1,0 +1,28 @@
+{
+  "slice": "failure-memory-structural-identity",
+  "ticket": "systems票 2026-08-26：failure-memory ①獨立重跑（maker側 implementer 20天39/39 不算驗收，measurer 需獨立一份）",
+  "measured_at_commit": "feat/failure-memory-structural-identity @43d5da55（.worktrees/failure-memory-structural-identity，--path 跑、main dir 未 checkout）",
+  "seed_config_days": "LW_CONFIG=peaceful_economy PERF_SEED=1337 ADHOC_DAYS=30, bed=scripts/debug/failure_feedback_measure_bed.gd",
+
+  "★★★結果(day30終值,判準依 implementer 提/systems 認、寫死在票裡的版本)": {
+    "①集合型_A差集B": {
+      "A_被折價的結構身分(folded,10)": ["build_apothecary:resource","build_workshop:resource","maintain_food:resource","survival","求和","覓食","買糧","貿易","返家補給","駐守"],
+      "B_本輪被選過的option(正規化去:delegate,17)": ["build_apothecary:resource","build_stable:resource","build_workshop:facility","build_workshop:location","build_workshop:resource","deliver_material","maintain_food:resource","maintain_material:resource","survival","備戰","求和","自救建田","覓食","買糧","貿易","返家補給","駐守"],
+      "A∖B(沒被選過卻被折價=連坐嫌疑)": [],
+      "陽性對照(failure.suppressed.買糧 ∈ A)": "true（failure.suppressed.買糧=13,>0,未回歸0）",
+      "判": "★通過——A∖B=∅ 且陽性對照成立"
+    },
+    "②方向_買糧折價生效量": {
+      "failure.suppressed.買糧": 13,
+      "判": "maker側(implementer)也是13,未回歸0——★方向通過"
+    },
+    "day10中途讀值(供對照,不當結論)": "day10 陽性對照未成立(買糧=0)——★但票明寫『不得因 day10=0 就判沒量到』，day30 才是判定窗",
+    "母體大小(day30)": "A=10個structural_id / B=17個option，皆非0"
+  },
+
+  "landed_paths": {
+    "raw_output": "docs/measurements/breed-deathcause/failure-memory-face1-independent-30d.txt"
+  },
+
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='30'; $env:GODOT_TIMEOUT='600'; .\\tools\\godot.ps1 --path 'A:\\GDS\\demo\\.worktrees\\failure-memory-structural-identity' --headless --script scripts/debug/failure_feedback_measure_bed.gd"
+}

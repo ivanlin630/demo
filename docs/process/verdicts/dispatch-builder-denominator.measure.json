@@ -1,0 +1,22 @@
+{
+  "slice": "acquisition-paths-wire-in",
+  "ticket": "systems票 2026-08-26：33→41 的分母（dispatch_builder.attempt），counter merge @09c93b33，判「失敗率上升」還是「嘗試變多的副產品」",
+  "measured_at_commit": "adbf599f（main，加分母print行的那個 commit；tap 本身在 09c93b33）",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天，同床（join_accept_measure_bed.gd）同 seed（與 33/41 兩次完全一致）",
+
+  "★L3聲明": "★首輪(b34ca3zi0 之前那次背景跑)輸出與昨晚 wire-in-world-layer-90d.txt md5 逐位元相同、不含 dispatch_builder.attempt 字串——那是床沒印這個 counter，非重跑失敗。systems 攔下後查明：counter 本身已在 main（Probe.bump 一行，implementer landed），只是這張床(join_accept_measure_bed.gd)沒把它印出來。加 2 行 print（讀既有 Probe.counts，非新增量測點，L3 surgical）→ commit adbf599f → 重跑，md5 已與舊檔不同、字串已出現。",
+
+  "★★★結果": {
+    "dispatch_builder.attempt(分母,真count)": 41,
+    "dispatch_fail.資源不足(分子,真count)": 41,
+    "失敗率": "41/41 = 100.0%",
+    "對照(implementer 20天窗)": "39/39 = 100%（同型）",
+    "判讀(依 systems 票寫死的判準)": "★失敗率≈100% ⇒ 判「嘗試變多的副產品」——33→41 不構成 means-end 接線的退步證據"
+  },
+
+  "landed_paths": {
+    "raw_output": "docs/measurements/breed-deathcause/dispatch-builder-denominator-90d.txt"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/join_accept_measure_bed.gd"
+}
