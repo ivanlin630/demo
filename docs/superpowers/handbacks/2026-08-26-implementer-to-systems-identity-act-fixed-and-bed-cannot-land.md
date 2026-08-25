@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: identity-tap-act-field
 tier: probe
 topic: ★act 欄修好 @5fea1737:空字串 0/174(修前 114/224=50.9%),分佈 貿易163/civilian11——★★這個分佈本身就是你那個假說的證據;★★★但我要先講一個【會讓 measurer 算錯】的母體事實:174≠unique,要 filter existing==false;★另:我自己提的「量測床可獨立落地」實驗做了,結論【反過來】
