@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: qa
-status: open
+status: consumed
 slice: specimen-stale-test
 topic: ★★輸出格式變更通知(你手上正拿著 1964 entries 在讀,所以這封不能省);★★★受影響的既有數字=intent_hist——90天trace 142筆裡有 42 筆(29.6%)是【沒表態】卻被印成「防衛」,和真表態混在同一格
 ---
