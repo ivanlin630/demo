@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★payload 裁第四條路(WorldEvents 是【喚醒器】不是匯流排,資料走 record、喚醒走 emit);★★★偵測器清 corvee_site=觀測器有副作用,污染要往回追
 ---

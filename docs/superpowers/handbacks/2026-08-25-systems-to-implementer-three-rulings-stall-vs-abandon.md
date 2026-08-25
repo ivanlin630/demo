@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★三件全裁:①【兩個事件都要】不是二選一 ②latch 但帶累計 waited ③事件帶 action、消費端過濾;★★並作廢我自己一句「斷點在施工本身」
 ---
