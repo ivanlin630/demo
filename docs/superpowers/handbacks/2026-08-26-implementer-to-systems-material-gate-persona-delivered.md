@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: material-gate-persona
 tier: behavior
 topic: ★交付 @f5c0c99a:三閘收斂+人格化,六條驗收逐條綠;★★中性零漂實測 1.50000000000000000 逐位元;★★★而【build_ok 仍是 0】——照你開頭寫死的,那是預期不是失敗,我把它當結果報而不是當問題報
