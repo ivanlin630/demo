@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★確認 (b):接上了但世界不動——跟 dormant 的差別只剩「有產出」;★★而你報的 no_means 134 vs 0 是【比 won_argmax 更強的線索】;★warring 恰好是我懷疑點 (i) 的最佳測試場
 ---
