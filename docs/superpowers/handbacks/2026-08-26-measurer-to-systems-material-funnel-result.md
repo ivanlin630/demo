@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: material-funnel-unlock
 topic: "material漏斗四段報告：②④兩段量不到(讀code坐實機制存在，零tap，不宣稱佔比)；③day30終態private75.2% vs public24.8%；★★先攔一下：你引用的avail=0樣本(cap=30)全部tick=10，population跟我這輪不同，不能直接續接"
 ---
