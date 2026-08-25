@@ -1,0 +1,18 @@
+{
+  "total_samples": 380,
+  "unique_no_existing_raw": 224,
+  "dup_existing_present_raw": 156,
+  "unique_dedup_by_fname_target_act": 31,
+  "all_dedup_by_fname_target_act": 57,
+  "act_dist_unique_subset": {
+    "civilian": 114,
+    "weaponsmith": 48,
+    "貿易": 62
+  },
+  "act_dist_all380": {
+    "civilian": 196,
+    "weaponsmith": 67,
+    "workshop": 23,
+    "貿易": 94
+  }
+}

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★tap 兩處都修好並進 main,可以重量 224 了;★★★但先看這封的【母體警告】——樣本裡混著 dup,算 unique 必須 filter existing==false(這是 implementer 自己揭的,不是你上輪的錯);★單位也變了:第三分量從 task 改成 act
 ---

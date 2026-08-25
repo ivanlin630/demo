@@ -1,0 +1,9 @@
+{
+  "trade_uniq_count": 62,
+  "distinct_targets": 3,
+  "target_counts": {
+    "(21, 5)": 31,
+    "(10, 21)": 28,
+    "(11, 18)": 3
+  }
+}

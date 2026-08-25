@@ -1,0 +1,42 @@
+{
+  "slice": "acquisition-paths-wire-in",
+  "ticket": "systems票2026-08-26:224重量(tap修好兩處:act欄fallback補build_type@13f7cc91、sample key改名means_end.candidate_identity@144a71bd)——母體=樣本174(unique125+dup49)非我這輪讀到的380/224，見下說明",
+
+  "★★★母體澄清(依票要求,不要只寫一個數字)": {
+    "說明": "票裡引 implementer 數字『樣本174=unique125+dup49』是 implementer 在他自己30天peaceful_economy床上量到的；我這輪維持與上一輪相同的參數(warring_states 10天 seed1337main)以求可比，本輪讀到的是【本床本參數】的母體，非套用他的174/125/49。",
+    "本輪母體": "means_end.candidate_identity 樣本總數=380（cap500，未截斷）＝ unique_no_existing(existing=false)224 ＋ dup_existing_present(existing=true)156，224+156=380零殘差"
+  },
+
+  "measured_at_commit": "main（HEAD含13f7cc91+144a71bd兩處tap修）",
+  "seed_config_days": "LW_CONFIG=warring_states PERF_SEED=1337 ADHOC_DAYS=10（沿用上一輪同參數以求兩輪可比，非套用implementer的30天peaceful_economy）",
+
+  "★★★結果": {
+    "unique_no_existing_去重前(filter existing==false)": 224,
+    "dup_existing_present_去重前": 156,
+    "★去重後(按 fname[=build_type] + target + act 三元組)": {
+      "unique_no_existing去重後": 31,
+      "全部380去重後": 57,
+      "備註": "與上一輪(舊task欄，114筆空字串誤判)數字相同——因為那114筆原本就在同一組(fname,target)分組內被空字串一致標記，改名後同一批全部落到act=civilian，分組結構未變，dedup計數剛好沒變（巧合，非驗證失敗）"
+    },
+    "★act 分佈(unique_no_existing子集,224筆)": {
+      "civilian": 114,
+      "weaponsmith": 48,
+      "貿易": 62,
+      "合計": 224,
+      "★對照上一輪": "上輪空字串114 ⇒ 本輪全部現形為 act=civilian 114（人數完全對應）——證實那是【真的要蓋東西(新建outpost)的提案】，不是儀器洞，如systems判讀"
+    },
+    "★上一票假說坐實條件(同tick同市集)": {
+      "act=貿易的62筆(unique子集)去重target": "62筆只落在3個distinct target",
+      "target分佈": {"(21, 5)": 31, "(10, 21)": 28, "(11, 18)": 3},
+      "★限制(誠實揭露)": "tap欄位無tick/team,無法直接驗證『同一tick內』——只能證實『這62筆action高度收斂到極少數市集座標(3個)』，與『同一真實行動穿多件facility戲服』一致，但不是嚴格的同tick證明。若要坐實同tick需要implementer再加tick/team欄位。"
+    }
+  },
+
+  "landed_paths": {
+    "raw_output": "docs/measurements/breed-deathcause/means-end-224-dedup-v2-warring10d.txt",
+    "dedup計算": "docs/measurements/breed-deathcause/means-end-224-dedup-v2-RESULT.json",
+    "trade市集收斂計算": "docs/measurements/breed-deathcause/means-end-224-dedup-v2-tradecheck.json"
+  },
+
+  "repro": "$env:LW_CONFIG='warring_states'; $env:ADHOC_DAYS='10'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/goal_delegate_diag_bed.gd"
+}
