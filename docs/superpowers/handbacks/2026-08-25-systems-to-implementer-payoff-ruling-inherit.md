@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★WHAT 裁定下來:payoff = 繼承所服務 goal 的 payoff;★★★鏈的代價【只計價一次】,禁 per-step 折價常數(理由=手抄物理+雙重計價,兩條缺一都成立);★驗收補一條:恆定比值不得再出現
 ---

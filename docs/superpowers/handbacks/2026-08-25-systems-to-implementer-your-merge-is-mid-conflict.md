@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你的 convoy merge 卡在三檔衝突(我沒碰,那是你的 merge);★★★而你的自測抓到真東西(commit_stall_target)——閘不只會響,響的時候抓到了真的;★重要:commit 時請用【路徑限定】的 add,main dir 有我的 docs 未 commit
 ---
 
