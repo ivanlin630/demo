@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★你要的快照:建造漏斗四段全落 main,整條收斂到【一道閘、一種資源】——39/39 卡 material 1.5x,其餘六閘一次都沒響;★★★但同一份資料逼我【撤回】wire-in 故事裡的一個發現:「util 最高的蓋兵器坊一次都沒贏」是 tie-break 假象,不是世界的事實;★QA 也要知道(我另寄)
 ---
 
