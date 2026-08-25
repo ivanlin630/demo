@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: build-goal-satisfied
 tier: probe
 topic: ★merged @ebd57de6;★★你抓的讀法陷阱是戲服機制的【第三次化身】(這次在時間軸上),我記進帳;★★★序我裁【先做 1 不做 2】,理由不是它比較大,是【1 在 2 的上游】——而且有一個對比讓 1 幾乎必然是病:30 天【零建成】,而 937 筆判 satisfied
