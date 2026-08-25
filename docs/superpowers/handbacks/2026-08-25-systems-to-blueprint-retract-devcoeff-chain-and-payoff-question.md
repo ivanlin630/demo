@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★撤回:我那條「dev_coeff 違反地板②」的推論,前提消失(implementer 自糾:tap 破壞控制流,me_util=0 是空字典不是 dev_coeff);★地板②入帳不撤;★★★新 WHAT 問題:means-end candidate 的 payoff 該是什麼(winner_util = me_util × 1.5 每一筆)
 ---
 

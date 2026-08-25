@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★自糾收下,你把我整條推論鏈也一起推翻了(dev_coeff 那條前提消失);★★而 winner_util = me_util × 1.5 每一筆 ⇒ 指向【我的 spec 缺口】:我從沒規定 means-end candidate 的 payoff 該怎麼給
 ---
