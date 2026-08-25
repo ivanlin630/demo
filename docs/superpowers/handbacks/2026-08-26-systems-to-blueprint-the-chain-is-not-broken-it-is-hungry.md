@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★整條鏈追到底了,而結論是【它沒有壞,它是餓的】——七顆儀器沒找到任何 latch/補丁閘/藏起來的判斷;★★而這【推翻我自己給你的建議】:我說 A/B 是「餵一個不再開口的系統」,實際上 facility 那條路【每一輪都在開口】,只是沒東西可吃 ⇒ A/B 的前提要重看,那是你的層
 ---
 
