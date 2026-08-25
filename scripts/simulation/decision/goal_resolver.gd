@@ -46,6 +46,16 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 	var otile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 	var fai := FactionAISystem.new()
 	var kept: Array = []
+	# ★★★build goal 的【歸宿】逐筆記（systems 派 2026-08-26）：
+	#   ★上一顆 tap 迭代 `goal_state` ⇒ 被移除的 goal 不在裡面 ⇒ ★★母體本身把答案排除在外（我造的盲點）。
+	#   ★★★所以這次母體【不是 goal_state】，是 `BUILD_FACILITY_GOALS` 常數全集（8 個）：
+	#     每輪每隊每個 build goal 恰好落進一個歸宿 ⇒ 加總 == 8 × 檢視輪數。
+	#     ★「goal 不在清單裡」本身也成為一個【被數到的歸宿】，而不是消失在母體外。
+	#   ★壞掉會長什麼樣：日後在這兩個迴圈加 `continue` 而不加歸宿 ⇒ 加總少一個，
+	#     而那個差額會被當成正常（＝「習慣了的異常」）。
+	var _bday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	if Probe.enabled:
+		Probe.bump("goal.build_fate.seen" + _bday, GoalRegistry.BUILD_FACILITY_GOALS.size())
 	for g in team.goal_state:
 		var gt: String = String(g.get("goal_type", ""))
 		if not GoalRegistry.BUILD_FACILITY_GOALS.has(gt):
@@ -54,13 +64,30 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 		var f: String = String(GoalRegistry.BUILD_FACILITY_GOALS[gt])
 		var fdef: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
 		# 退判定：無合適 outpost / 已建成 / desire 掉 below threshold → 移除。
-		if otile == null or not (otile.outpost_type in fdef.get("allowed_outpost", [])) \
-				or int(otile.get(fdef.get("current_level_key", ""))) > 0 \
-				or fai._facility_deficit(state, team, f, otile) < NeedOracle.CONSTRUCTION_DESIRE_MIN:
+		# ★四個條件【逐一分開判】才數得出是哪一個（原本一條 `or` 鏈 ⇒ 只知道「被退了」）。
+		var _why: String = ""
+		if otile == null:
+			_why = "no_otile"
+		elif not (otile.outpost_type in fdef.get("allowed_outpost", [])):
+			_why = "wrong_outpost_type"
+		elif int(otile.get(fdef.get("current_level_key", ""))) > 0:
+			_why = "already_built"
+		elif fai._facility_deficit(state, team, f, otile) < NeedOracle.CONSTRUCTION_DESIRE_MIN:
+			_why = "desire_below_min"
+		if _why != "":
+			if Probe.enabled:
+				Probe.bump("goal.build_fate.removed_" + _why + _bday)
+				Probe.bump("goal.build_fate.removed_" + _why + ".gt." + gt)
 			continue   # ★退（不 append=移除）
+		if Probe.enabled: Probe.bump("goal.build_fate.kept" + _bday)
 		kept.append(g)   # desire 仍高+未建→留
 	team.goal_state = kept
 	# 掛：desire≥threshold+未建+未在 goal_state → 新掛 build_F goal（決定性 REGISTRY key 序）。
+	if otile == null and Probe.enabled:
+		# ★沒有自家 outpost ⇒ 整個重掛迴圈不跑 ⇒ 不在清單裡的 goal 全落這個歸宿（要數，否則母體不平）
+		for _gt3 in GoalRegistry.BUILD_FACILITY_GOALS:
+			if not have.has(_gt3):
+				Probe.bump("goal.build_fate.readd_blocked_no_otile" + _bday)
 	if otile != null:
 		for gt2 in GoalRegistry.BUILD_FACILITY_GOALS:
 			if have.has(gt2):
@@ -68,12 +95,17 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 			var f2: String = String(GoalRegistry.BUILD_FACILITY_GOALS[gt2])
 			var fdef2: Dictionary = OutpostSystem.FACILITY_DEF.get(f2, {})
 			if not (otile.outpost_type in fdef2.get("allowed_outpost", [])):
+				if Probe.enabled: Probe.bump("goal.build_fate.readd_wrong_outpost_type" + _bday)
 				continue
 			if int(otile.get(fdef2.get("current_level_key", ""))) > 0:
+				if Probe.enabled: Probe.bump("goal.build_fate.readd_already_built" + _bday)
 				continue
 			if fai._facility_deficit(state, team, f2, otile) >= NeedOracle.CONSTRUCTION_DESIRE_MIN:
+				if Probe.enabled: Probe.bump("goal.build_fate.readded" + _bday)
 				team.goal_state.append({"goal_type": gt2, "target": null,
 					"created_tick": state.world.current_tick, "status": "active"})
+			elif Probe.enabled:
+				Probe.bump("goal.build_fate.readd_desire_below_min" + _bday)
 
 static func frontier_candidates(state: WorldState, team: TeamData, ctx: DecisionContext) -> Array:
 	if state == null or team == null or ctx == null:
