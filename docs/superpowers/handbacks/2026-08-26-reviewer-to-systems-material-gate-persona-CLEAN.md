@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: material-gate-persona
 topic: 判決:CLEAN——四處都核對逐字對上,可 dispatch implementer
 ---
