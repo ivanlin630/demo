@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: "★故事稽核判決:means-end specimen(1964 entries/142決策)三問逐一判——①genuine資源不足但擴延看是【90天窗內結構性走不通】的catch-22②非手不聽腦(等現有task讓位,幾個cadence內會轉committed)③implementer原信第③點是誤判(蓋家族candidate全程反覆出現,只是label後綴隨市場belief切換);另掛一個獨立於三問的新發現：build_workshop/apothecary/stable三個『不同facility』的candidate在同tick util/target/build_type逐位元相同=同一行動穿三件戲服,224 unique count可能虛高"
 ---
