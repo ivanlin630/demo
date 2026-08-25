@@ -4815,6 +4815,9 @@ func _run_sim_test() -> void:
 	_test_indep_found_to_faction()
 	_test_indep_full_menu_anchors()
 	_test_gift_alliance()
+	_test_meansend_facility_vs_material()
+	_test_meansend_recurses_into_subrecipe()
+	_test_meansend_cycle_terminates_loudly()
 
 	print("=== DONE ===")
 
@@ -16581,3 +16584,82 @@ func _test_observer_event_text() -> void:
 	m2.description = "某事發生"
 	assert("某事發生" in ObserverEventText.render(state, m2), "fallback 失效")
 	print("observer event text OK")
+
+# ── means-end 磚：取得手段鏈（B 型＝製造品）──
+# ★第一顆測試就是 spec 指定的那條：「缺設施」與「缺原料」必須分得開。
+#   ★理由（spec §交付閘1）：兩者的解法完全相反——一個要【蓋工坊】、一個要【去採料】。
+#   分不開就等於沒做：means-end 的全部價值就在於指出【下一步該做什麼】。
+func _test_meansend_facility_vs_material() -> void:
+	print("--- means-end：缺設施 vs 缺原料要分得開 ---")
+	var state := WorldState.new()
+	var pos := Vector2i(3, 3)
+	_p2a_place_tile(state, pos)
+	var team := _mk_unified_desperate_team(state, pos, {"勤奮": 0.6})
+	var tile: HexTileData = state.world.tiles[pos.x * 1000 + pos.y]
+	tile.outpost_level = 2
+
+	# 情境甲：有工坊、但沒 material ⇒ 缺的是【原料】
+	tile.manufacturing_level = 1
+	team.resources["material"] = 0.0
+	var blocked_a: Array = []
+	for p in AcquisitionPaths.for_resource(state, team, "tools"):
+		blocked_a.append(String(p.get("blocked_on", "")))
+	assert(not blocked_a.is_empty(), "有工坊缺料 → 應產生取得路徑，得到 0 條")
+	assert("material" in blocked_a, "有工坊缺料 → 應指向【缺原料 material】，得到 %s" % str(blocked_a))
+	assert(not ("manufacturing_level" in blocked_a), "有工坊時不該說缺設施，得到 %s" % str(blocked_a))
+
+	# 情境乙：沒工坊、料充足 ⇒ 缺的是【設施】
+	tile.manufacturing_level = 0
+	team.resources["material"] = 999.0
+	var blocked_b: Array = []
+	for p2 in AcquisitionPaths.for_resource(state, team, "tools"):
+		blocked_b.append(String(p2.get("blocked_on", "")))
+	assert(not blocked_b.is_empty(), "沒工坊 → 應產生取得路徑，得到 0 條")
+	assert("manufacturing_level" in blocked_b, "沒工坊 → 應指向【缺設施 manufacturing_level】，得到 %s" % str(blocked_b))
+	print("[OK] _test_meansend_facility_vs_material")
+
+# ★鏈深 ≥3 不是我設計的深度，是【資料逼出來的】：
+#   weapon_melee_high 需 ore_steel ⇒ ore_steel 本身是 smelter 的 out ⇒ 它又需 ore_iron + material。
+#   ⇒ 遞迴必須真的往下走，否則對這條鏈只會回一句「缺 ore_steel」，那是【症狀不是下一步】。
+func _test_meansend_recurses_into_subrecipe() -> void:
+	print("--- means-end：遞迴進子配方（鏈深由資料決定）---")
+	var state := WorldState.new()
+	var pos := Vector2i(4, 4)
+	_p2a_place_tile(state, pos)
+	var team := _mk_unified_desperate_team(state, pos, {"勤奮": 0.6})
+	var tile: HexTileData = state.world.tiles[pos.x * 1000 + pos.y]
+	tile.outpost_level = 2
+	tile.weaponsmith_level = 1     # 有兵器坊
+	tile.smelter_level = 1         # 也有熔爐 ⇒ ore_steel 可自產
+	team.resources["material"] = 999.0
+	team.resources["ore_steel"] = 0.0
+	team.resources["ore_iron"] = 0.0
+
+	var seen: Array = []
+	for p in AcquisitionPaths.for_resource(state, team, "weapon_melee_high"):
+		seen.append("%s/%s" % [String(p.get("res", "")), String(p.get("blocked_on", ""))])
+	# 第一層：缺 ore_steel
+	assert("weapon_melee_high/ore_steel" in seen, "第一層應指向缺 ore_steel，得到 %s" % str(seen))
+	# ★第二層：遞迴進 ore_steel 的配方，指出它缺 ore_iron
+	assert("ore_steel/ore_iron" in seen, "★遞迴應往下指出 ore_steel 缺 ore_iron，得到 %s" % str(seen))
+	print("[OK] _test_meansend_recurses_into_subrecipe")
+
+# ★環偵測：配方表未來可能出現 A→B→A。必須終止，且【不得靜默】（tap 非零即紅）。
+func _test_meansend_cycle_terminates_loudly() -> void:
+	print("--- means-end：環必須終止且留痕 ---")
+	var state := WorldState.new()
+	var pos := Vector2i(5, 5)
+	_p2a_place_tile(state, pos)
+	var team := _mk_unified_desperate_team(state, pos, {"勤奮": 0.6})
+	var tile: HexTileData = state.world.tiles[pos.x * 1000 + pos.y]
+	tile.outpost_level = 2
+	tile.manufacturing_level = 1
+	team.resources["material"] = 0.0
+	# 同一個 res 已在走訪集合裡 ⇒ 必須立刻回空，並記 tap
+	Probe.enabled = true
+	var before: int = int(Probe.counts.get("means_end.cycle_detected", 0))
+	var r: Array = AcquisitionPaths.for_resource(state, team, "tools", {"tools": true})
+	var after: int = int(Probe.counts.get("means_end.cycle_detected", 0))
+	assert(r.is_empty(), "環應回空陣列，得到 %d 條" % r.size())
+	assert(after == before + 1, "★環偵測必須留痕（tap 未加 1：%d → %d）" % [before, after])
+	print("[OK] _test_meansend_cycle_terminates_loudly")
