@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 tier: full
 topic: ★R² 設計審:讓 dormant 的 means-end 磚真的進決策;★★請重點咬三處:阻抗不匹配的裁定(c)、③fp 該變的理由(與上次不同)、感知鐵律自檢有沒有漏
