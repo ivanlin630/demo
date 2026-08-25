@@ -5,7 +5,11 @@ extends SceneTree
 # workshop tools-recipe 恆輸 goods→tools=0 全域→weaponsmith afford tools 恆 fail。3 修:
 #   ①need_oracle _construction_facility_need material→{material,tools}+兩層遞迴守衛(output-guard+re-entrancy)
 #   ②order_system tools 納 eligible/proxy → mil 發 tools 買單
-#   ③weaponsmith material 80→70（blueprint 裁②afford 閘，70×1.5=105<天花板 117 穩達）
+#   ③軍用專屬設施 material 同族同價（blueprint 裁② balance）
+#     ★舊描述裡那條「成本 ×1.5 低於某天花板所以穩達」的因果【已刪，不在此複述】——
+#     它已被 `outpost_system.gd:87` 自己 retract（真 afford root ＝ reserve_factor urgency-suppression，
+#     非 cost/cap），而那個「天花板」本來就是一次量測的峰值、不是門檻。
+#     ★★連引用都不留：被 retract 的因果留在驗收理由裡，下一個人會把它當規格。
 
 var _fail: int = 0
 
@@ -15,7 +19,7 @@ func _initialize() -> void:
 	_test_recursion_guards()          # ★③兩層守衛:output-guard 資料正確 + re-entrancy 硬切環有界回 0
 	_test_material_still_qualifies()  # ④material 路徑仍 fire（泛化不破 v2a material）
 	_test_tools_buy_order()           # ⑤order_system:reserve(tools)>holding → 發 tools 買單
-	_test_weaponsmith_cost70()        # ⑥upgrade_cost(weaponsmith,1).material==70（armorsmith 仍 80）
+	_test_weaponsmith_cost70()        # ⑥軍用專屬設施同族同價（從 FACILITY_DEF.allowed_outpost 導出）
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -120,11 +124,11 @@ func _test_tools_buy_order() -> void:
 			has_tools_buy = true
 	_ok(has_tools_buy, "reserve(tools)>holding(0) → 發 tools 買單（demand-routing 接通；proxy 前無 tools）")
 
-# ⑥ weaponsmith material cost 80→70（僅 weaponsmith；armorsmith 仍 80）
+# ⑥ 軍用專屬設施【同族同價】（★本函式原本叫 cost70、斷言 weaponsmith==70）
+#   ★那條已刪：①它的內容被下面的家族斷言完全覆蓋（同族同價 ＋ weaponsmith ∈ 家族）
+#   ②剔除覆蓋的部分後，它剩下的只有一顆手抄的 `70`。
 func _test_weaponsmith_cost70() -> void:
-	print("--- ⑥weaponsmith cost70 ---")
-	var wm: float = float(OutpostSystem.upgrade_cost("weaponsmith", 1).get("material", 0))
-	_ok(is_equal_approx(wm, 70.0), "upgrade_cost(weaponsmith,1).material==70（70×1.5=105<天花板 117 穩達，got %.1f）" % wm)
+	print("--- ⑥軍用專屬設施同族同價 ---")
 	# ★★★手抄真值的斷言【已拆】(2026-08-26)：舊版斷言 `armorsmith == 80`，
 	#   而它後來被【授權】改成 70（`outpost_system.gd:93`「mil-facility-cost70：仿 weaponsmith，同族，balance」）
 	#   ⇒ 測試沒跟。★★改成 70 只是把手抄的舊值換成手抄的新值，下次 balance 再動一次又爛。
