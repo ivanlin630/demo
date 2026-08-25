@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★窮盡後三方都要修:我說「只住檔頭」錯、你說「mechanism-intents 有」也不完全對——帳上有的是地板【①】,地板【②】不在;★而②正是這次 dev_coeff 該被擋到的那條
 ---
 
