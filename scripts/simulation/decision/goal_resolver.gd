@@ -450,7 +450,16 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 	if own_tile == null or not (own_tile.outpost_type in allowed):
 		# ★A1 裁②：same-tile founding（隊站空 tile 建 new outpost）無母隊就地 outpost-build 路 → 移除 candidate，靜默。
 		# 屬 facility-type-mismatch known_issues followup（non-A1-core），前置未滿=靜默（whole-system-first，不造假）。
-		if Probe.enabled: Probe.bump("resolver.empty_wrong_outpost_type" + _rday)
+		# ★★★這裡原本是【一個桶裝兩個條件】（我第一版就犯了自己一直在挑的病）：
+		#   `own_tile == null`（根本沒有自家 outpost）與 `type 不合`（有但型別不對）處置完全不同，
+		#   ⇒ 拆開。★壞掉會長什麼樣：合著數的話，「沒有據點」會被讀成「據點型別不對」，
+		#     而後者會把人帶去改 `allowed_outpost`，那是改錯地方。
+		if Probe.enabled:
+			if own_tile == null:
+				Probe.bump("resolver.empty_no_own_outpost" + _rday)
+			else:
+				Probe.bump("resolver.empty_wrong_outpost_type" + _rday)
+				Probe.bump("resolver.empty_wrong_outpost_type.have." + String(own_tile.outpost_type) + ".need." + str(allowed))
 		return {}
 	# 前置 3：manpower pop（既有 build pop 門檻）——不足→靜默（S4 最小，passive 繁殖增，無主動 recruit task）。
 	if team.population < GoalRegistry.FACILITY_BUILD_POP_MIN:
