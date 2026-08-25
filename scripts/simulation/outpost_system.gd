@@ -528,20 +528,35 @@ func start_upgrade_manufacturing(state: WorldState, team: TeamData) -> bool:
 
 # 共用 gate + 扣款 + 排程（呼叫端先驗 owner/faction 與 construction 空檔）
 func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTileData, facility: String) -> bool:
+	# ★同上：六條拒絕逐一具名 ＋ 標【物理 vs 判斷】（★這一層才是真正的拒絕大宗）
+	var _wday2: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	if Probe.enabled: Probe.bump("wall.begin_entry" + _wday2)
 	if not FACILITY_DEF.has(facility):
+		if Probe.enabled: Probe.bump("wall.reject_no_def" + _wday2)            # 物理：沒這種設施
 		return false
 	var def: Dictionary = FACILITY_DEF[facility]
 	if not (tile.outpost_type in def["allowed_outpost"]):
+		if Probe.enabled: Probe.bump("wall.reject_outpost_type" + _wday2)      # 物理：據點型別不合
 		return false
 	if def.has("required_terrain") and tile.terrain != def["required_terrain"]:
+		if Probe.enabled: Probe.bump("wall.reject_terrain" + _wday2)           # 物理：地形不合
 		return false
 	var cur: int = int(tile.get(def["current_level_key"]))
 	if cur >= 3:
+		if Probe.enabled: Probe.bump("wall.reject_max_level" + _wday2)         # 物理：已滿級
 		return false
 	if cur == 0 and slots_used(tile) >= slot_cap(tile):
+		if Probe.enabled:
+			Probe.bump("wall.reject_no_slot" + _wday2)                         # ★★物理？還是判斷？slot_cap 是設計上限
+			Probe.bump("wall.reject_no_slot.used_%d_cap_%d" % [slots_used(tile), slot_cap(tile)])
 		return false   # 新設施要空 slot；升級不佔
 	var cost: Dictionary = upgrade_cost(facility, cur + 1)
 	if not _can_afford(team, tile, cost):
+		if Probe.enabled:
+			Probe.bump("wall.reject_cannot_afford" + _wday2)                   # 物理：付不起（1.0×，非緩衝）
+			for _ck in cost:
+				if String(_ck) != "ticks":
+					Probe.bump("wall.reject_cannot_afford.res." + String(_ck))
 		return false
 	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
@@ -549,7 +564,9 @@ func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTi
 	tile.construction_target    = { "action": "upgrade_facility", "facility": facility }
 	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	_tap_build_start(state, team, tile, "upgrade_facility")
-	if Probe.enabled: Probe.bump("village.build_fired")   # ★復甦 R2 §6 tap（驗執行端：村端建設真 fire、料到→蓋）
+	if Probe.enabled:
+		Probe.bump("village.build_fired")   # ★復甦 R2 §6 tap（驗執行端：村端建設真 fire、料到→蓋）
+		Probe.bump("wall.accepted" + _wday2)   # ★成功端：沒有它，九條拒絕加不回 begin_entry
 	print("[Outpost] Team%d 設施施工 %s → Lv%d at (%d,%d)" % [
 		team.team_id, facility, cur + 1, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -703,9 +720,23 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	return true
 
 func _subteam_upgrade_facility(state: WorldState, team: TeamData, tile: HexTileData, facility: String) -> bool:
+	# ★★★這面牆的拒絕理由（systems 派 2026-08-26，第七顆）：
+	#   infra path 每輪選好設施、去就地開工，而【180/336（53.6%）被這裡拒絕】，
+	#   ★而整段原本是裸 `return false`，零 counter ⇒ 讀 code 時看起來像交接，量出來是牆。
+	#   ★★每一條都標【物理 vs 判斷】：物理＝真的做不到（沒地方、沒料、型別不合）；
+	#     ★★★判斷＝「覺得不划算／時機不對」⇒ 那是決策，不該藏在裸 return false 裡（照妖鏡判準）。
+	#   ★壞掉會長什麼樣：只數「被拒幾次」而不分類 ⇒ 一個【該由人格秤的決策】會被當成物理限制接受，
+	#     而它會永遠擋著同一批隊（latch），沒有人會去看它。
+	var _wday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	if Probe.enabled: Probe.bump("wall.entry" + _wday)
 	if tile.outpost_level == 0:
+		if Probe.enabled: Probe.bump("wall.reject_outpost_level0" + _wday)   # 物理：沒有據點可擴建
 		return false
-	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
+	if not _faction_owns(state, team, tile):
+		if Probe.enabled: Probe.bump("wall.reject_not_owner" + _wday)        # 物理：不是自己的地
+		return false
+	if tile.construction_team_id != -1:
+		if Probe.enabled: Probe.bump("wall.reject_busy_construction" + _wday)  # 物理：一格一次只能蓋一件
 		return false
 	return _begin_facility_construction(state, team, tile, facility)
 
