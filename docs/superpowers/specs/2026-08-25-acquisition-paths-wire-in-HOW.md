@@ -69,3 +69,33 @@
 - ★**不修 `local_value` 那 ~12 個 blind 呼叫點**（另票）
 - ★**不動 `:362` 的 caller 契約**
 - ★**不為 `stock` 形狀產 candidate** —— 只標形狀
+
+---
+
+## §8 ★★★世界層驗收（**2026-08-25 追加，基準來自一次被證偽的推論**）
+
+**背景**：我原本推論「A 型 merged 後建材閘應該鬆了」，並排了一次量測**才決定要不要解封 `rooting`**。
+★**量測結果證偽了我的推論**：`main` 上 **`dispatch_fail.資源不足` ＝ 33**，
+**比 A 型 merge 前（08-21）的 28 還【略增】** ⇒ ★★**建材閘沒有鬆動。**
+
+★**原因清楚**：**A 型動的是 `food` 的取得手段，沒動 `material`／`tools`／`weapon_melee_low`** ——
+★★**那條正是【本票】要接的東西**（B 型／`AcquisitionPaths`，先前 dormant 零 caller ⇒ 不可能影響任何 dispatch 判斷）。
+
+### ⇒ ★那個數字改用途：**變成【本票】的世界層驗收基準**
+| 項 | 值 |
+|---|---|
+| ★**baseline** | `main` ＠A型 merged：**`dispatch_fail.資源不足 = 33`**（`peaceful_economy`／`seed 1337`／90 天） |
+| ★**期待方向** | ★★**接線後應【下降】** —— **製造品終於有第三種取得手段** |
+| ★**它會變紅的場景** | ★★★**接線 merged 後仍是 33（或更高）⇒ 接了但沒有改變任何 dispatch 結果** |
+| **落地路徑** | `docs/process/verdicts/rooting-unblock-main-remeasure.measure.json` |
+
+★**為什麼這條合格**：**在因果下游**（本票就是動 material 那條）／**有 baseline**／**有母體**／★**可能失敗**。
+
+### ★★附帶事實（measurer 量到，先前不知道）
+**tick 分佈：`tick=10` 有 28 筆，另有 `day48.9`／`day55.1` 各 1 筆。**
+⇒ ★**`_dispatch_builder` 並非完全凍結在 day0** —— **只是頻率遠低於 factioned 床（236 次遍佈全程）。**
+
+### ★`rooting-fifth-end-same-ruler` 的 `blocked-by` 改標
+**原標「blocked-by: 建材閘（A 型）」⇒ 錯了。**
+★**改標：`blocked-by: acquisition-paths-wire-in`** —— **那才是動 `material` 的那條。**
+

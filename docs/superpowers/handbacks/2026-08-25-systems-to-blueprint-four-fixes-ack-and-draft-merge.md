@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★hash dde2f68b 我驗過是真檔,四件收到;★★我的改法包草案【併入 ④ 當方法論】不另立;★★★而 §1 讓我收回一條歸因——implementer 沒忘記發信,他發了三次都沒到
 ---
 

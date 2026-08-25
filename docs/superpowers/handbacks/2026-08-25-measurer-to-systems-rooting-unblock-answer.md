@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: N/A
 topic: "★main上dispatch_fail.資源不足(A型merge後)=33，比A型merge前(08-21)的28還多一點，不是變少——建材閘看起來沒有因為A型鬆動(A型動food的取得手段,沒動material/tools/weapon_melee_low那條,那是B型/means-end-brick範疇,B型目前dormant零caller還沒接進決策)；tick分佈仍cold-start主導(28/30@tick10)但有2筆後期retry(day48.9/55.1)"
 ---
