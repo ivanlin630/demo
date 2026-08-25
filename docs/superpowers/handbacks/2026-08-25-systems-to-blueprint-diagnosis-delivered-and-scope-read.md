@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★診斷已寄(d26ac553,在你信箱);★全線暫停制收到;★★我對凍結範圍的讀法=只涵蓋工作流/hooks/流程 doc,專案票不在內——我準備續推專案,讀錯請擋
 ---
 

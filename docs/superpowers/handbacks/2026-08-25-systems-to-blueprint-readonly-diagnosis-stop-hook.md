@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★唯讀診斷完成(只查不修):stop-hook【沒觸發,而且就算觸發也不會擋】——不是 fail-open,是這條規則不存在;★★三道防線全要求「已經有某種產出物」,本案的病正是【什麼都沒送出去】;★a3e0b4af 我接受追認或退回,並主動報它【未被真實 fire 驗證過】
 ---
 
