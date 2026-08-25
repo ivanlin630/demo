@@ -29,7 +29,10 @@ func _run() -> void:
 	seed(sd)
 	# ★Probe 必須開：不開的話執行證明 counter 永遠是 0，
 	#   而我就會拿那個 0 去證明「沒執行」——★儀器沒開不等於事情沒發生。
-	Probe.enabled = true
+	# ★自測開關：故意不開 Probe ⇒ 對照應該【大叫 VOID】。
+	#   ★一個從沒 fire 過的守衛，跟沒有守衛一樣 —— 所以對照本身也要被驗过。
+	var selftest: bool = OS.get_environment("FALSIFIER_SELFTEST") == "1"
+	Probe.enabled = not selftest
 	Probe.reset()
 	WorldState.driver_ledger_enabled = true
 	WorldState.clear_driver_ledger()
@@ -59,6 +62,26 @@ func _run() -> void:
 	lines.append("=== resource-shape falsifier: config=%s days=%d seed=%d ===" % [cfg, days, sd])
 	lines.append("  ★產率權威的執行證明 manufacture.rate_via_authority = %d%s" % [exec_n,
 		"　★非零＝新接線真的被跑到" if exec_n > 0 else "　⚠ 0 ＝這段 code 從未執行，fp 不變毫無意義"])
+	# ★★★陽性對照（systems 立法 2026-08-25）：證據型的 0／空必須配一個【已知必然非零】的對照量。
+	#   對照也是 0 ⇒ 儀器問題，【整份作廢】——不是「PASS」也不是「FAIL」。
+	#   ★三種 0 長得一模一樣：真的沒發生／母體塌陷／★儀器沒開。
+	#   ★兩個對照是因為 ledger 與 Probe 是【兩套獨立儀器】，各自可能沒開。
+	var ctrl_probe: int = int(Probe.counts.get("collect.gather_ran", 0))
+	if _ledger_seen <= 0 or ctrl_probe <= 0:
+		lines.append("★★VOID 儀器對照失效，本輪【整份作廢】（不得讀成 PASS）")
+		lines.append("    ledger 對照 _ledger_seen = %d　(0 ⇒ driver_ledger 沒開/沒抽乾)" % _ledger_seen)
+		lines.append("    Probe  對照 collect.gather_ran = %d　(0 ⇒ Probe 沒開)" % ctrl_probe)
+		var vtext: String = "
+".join(PackedStringArray(lines))
+		print("
+" + vtext)
+		if out_path != "":
+			var vf := FileAccess.open(out_path, FileAccess.WRITE)
+			if vf != null:
+				vf.store_string(vtext + "
+"); vf.close()
+		return
+	lines.append("  陽性對照 ledger=%d / probe(collect.gather_ran)=%d　★兩者非零＝儀器確實在跑" % [_ledger_seen, ctrl_probe])
 	var unknown: Array = []
 	var by_shape: Dictionary = {}
 	for res in pairs.keys():
@@ -84,6 +107,7 @@ func _run() -> void:
 		if f != null:
 			f.store_string(text + "\n"); f.close()
 
+var _ledger_seen: int = 0   # ★陽性對照（ledger 側）：任何會跑的世界都必然 > 0
 func _drain(pairs: Dictionary) -> void:
 	for e in WorldState.driver_ledger:
 		if String(e.get("kind", "")) != "resource":
@@ -95,6 +119,7 @@ func _drain(pairs: Dictionary) -> void:
 		#   `regen_wild_game`（harvest_system）與 `regen_wildgame`（resource_system:141）。
 		#   按 reason 字面分群 ⇒ 一個資源算成兩條路徑；更糟的是分類表登記了其中一個拼法，
 		#   另一個【靜默漏掉】⇒ ★falsifier 自己變成盲點來源。
+		_ledger_seen += 1
 		var _res: String = String(e.get("field", ""))
 		if not pairs.has(_res):
 			pairs[_res] = {}
