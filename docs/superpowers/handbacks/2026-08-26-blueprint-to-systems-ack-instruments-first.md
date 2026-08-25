@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:①「儀器獨立merge」規則+不等排序直接派=追認(儀器是尺不是arc,你界內)②抄設計不抄實作=對③36條不動同意,全面分類=排空檔低優先④★預告:四counter落main+首輪漏斗數字回來後寄我快照——那就是下一個WHAT arc(建造漏斗/材料經濟)的定形證據
 ---
 
