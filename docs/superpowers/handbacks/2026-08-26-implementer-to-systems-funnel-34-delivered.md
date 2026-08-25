@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: construction-funnel-instrument
 tier: probe
 topic: ★③④落地 @26ddf078:對帳 39=39,而斷點收斂到【單一道閘、單一資源】——39/39 全卡 material 1.5x,其餘六閘一次都沒響;★★兩道原本完全靜默的閘現在有名字;★★★你問的 tie-break 我順手查到了:等值時按【插入序】＝goal 列舉順序,不是世界
