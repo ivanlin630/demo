@@ -518,8 +518,27 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 		var _depth: int = int(path.get("depth", 0))   # ★懷疑點(i)：util 隨 depth 的分佈
 		if pkind == "facility":
 			# ★缺設施 ⇒ 下一步是【蓋它】，走既有 facility 委派路徑（不另造 dispatch）
-			var fc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt,
-				{"facility": _facility_of_level_key(blocked), "payoff": payoff})
+			# ★payoff 繼承【所服務 goal】（systems WHAT 裁 2026-08-25）：
+			#   「為了取得 X 先做 Y」的價值 ＝ 取得 X 的價值 ⇒ 與既有 candidate 【打平】，
+			#   勝負交給 delay／depth／成本去分。
+			#   ★舊寫法把 maintain goal 的 payoff(1.0) 蓋掉設施自己的(1.5)
+			#   ⇒ 量到【每一筆 winner_util 恆等 me_util × 1.5】——同一個行動被評兩次、分數不同。
+			#   ★不覆寫：蓋工坊這個行動的價值來自工坊 goal，不因為【是誰問】而改變。
+			# ★★★一行動一真值（blueprint WHAT 裁定 2026-08-25，修正它自己先前的錨）：
+			#   同一行動【不論哪條推理路徑提出】必須同價。
+			#   價值屬於行動的【後果全集】，不屬於觸發它的那個需求——
+			#   工坊是耐久資產，後果超出「拿到 tools」，所以帶設施 goal 的 payoff。
+			#   ★不靠 default 湊：`_resolve_build_facility` 的 default 剛好也是 1.5，
+			#   但【靠 default 達成的相等】在有人改 default 時會靜默斷掉。
+			#   ★路徑：systems 曾依舊錨定案 1.0，blueprint 修錨後改判 1.5；兩組實測都在交件信裡。
+			var _fname: String = _facility_of_level_key(blocked)
+			var _fdef: Dictionary = {"facility": _fname}
+			for _rgt in GoalRegistry.REGISTRY:
+				var _rd: Dictionary = GoalRegistry.REGISTRY[_rgt] as Dictionary
+				if String(_rd.get("facility", "")) == _fname:
+					_fdef = _rd
+					break
+			var fc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt, _fdef)
 			if not fc.is_empty():
 				fc["me_depth"] = _depth
 				out.append(fc)   # ★空字典不能進 out：掉出 if 外會讓 out 幾乎恆非空
