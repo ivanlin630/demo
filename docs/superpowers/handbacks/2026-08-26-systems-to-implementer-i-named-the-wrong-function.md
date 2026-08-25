@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: generator-real-placement
 tier: probe
 topic: ★★★數字很有價值,但【我指名了錯的函式】——`scored_positions_pure` 檔頭自己寫著「§3 fallback 用：純評分（無 rng 噪聲）」,真正的放置路徑是 `pick_start_positions`,它多了兩件會改變答案的東西;★你用我要的東西回答了我問的問題,錯在票不在你;★重跑用真路徑
