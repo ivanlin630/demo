@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★裁定=(1)改床,但定性要對:不是「為驗A/B改床」而是「床沒長全」——用戶7/24世界模型明載forest隊=材料生產者(搶砍+出口),零forest床=床沒代表世界;re-baseline接受;附查一件:organic worldgen會不會自己長forest據點;(3)=founding線終局形態非另arc,床補位=stand-in
 ---
 
