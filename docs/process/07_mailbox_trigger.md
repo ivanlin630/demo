@@ -121,6 +121,13 @@ watchdog v4 不再問「有沒有東西在動」（v3 病：量測跑半天＝�
 
 **七類分類器**（`DEAD-ROLE` / `RUNNING` / `RUNAWAY` / `UNRESPONSIVE` / `COMMIT-NO-LETTER` / `CHAIN-BROKEN` / `OK`）：
 - `DEAD-ROLE` **獨立於 RUNNING**——信給一個沒開的角色，不管別人在不在忙，都是 bug。
+- ★★`COMMIT-NO-LETTER` **也獨立於 RUNNING**（2026-08-25 修，用戶問「怎麼還會停頓」才挖出）：
+  ★**病**：`elif [ -n "$running" ]; then class="OK"` 把它連同 `UNRESPONSIVE`/`CHAIN-BROKEN` 一起跳過。
+  ★**實況**：implementer **在跑背景 job（`running` 非空）★同時★ commit 了卻沒發信** ⇒ **watchdog 判 `OK` 靜默，而鏈確實斷了。**
+  ★★★**根因：`RUNNING` 只證明【有人在忙】，不證明【鏈沒斷】—— 兩者可以同時為真。**
+  ★**判準同 `DEAD-ROLE`**：**「出貨了沒推鏈」是【已完成的事實】，跟他現在忙不忙無關。**
+  （`T_IDLE` 門檻保留 ⇒ **跑 job 期間剛 commit 還沒寫信的正常中間態不會誤報**。）
+  ★`UNRESPONSIVE`/`CHAIN-BROKEN` **維持在 RUNNING 之後** —— 那兩類「正在忙所以還沒回」是合理解釋，本類不是。
 - `RUNNING`（beacon／godot 進程／檔案活動任一為真）→ **靜默，不管跑多久**，除非撞 `RUNAWAY`。
 - 同一 class 連續成立 → **`RE_ARM`(4h) 內只響一次**（v3 病：fire 後重置 ⇒ 每 5h 重響）。
 - ★`COMMIT-NO-LETTER` 與 `CHAIN-BROKEN` 用的 git 信號**不可混**：前者只看 `main`，後者看全 ref。

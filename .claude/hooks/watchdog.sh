@@ -194,6 +194,22 @@ while true; do
     done <<< "$letters"
   fi
 
+  # 2) COMMIT-NO-LETTER — ★獨立於 RUNNING（2026-08-25 血證，用戶問「怎麼還會停頓」才挖出）
+  #   病：下面的 `elif [ -n "$running" ]; then class="OK"` 把本類連同 UNRESPONSIVE/CHAIN-BROKEN 一起跳過。
+  #   實況：implementer 在跑 headless/憲法/det 背景 job（running 非空）★同時★ commit 了卻沒發信
+  #   ⇒ watchdog 判 OK 保持靜默，而鏈確實斷了。
+  #   ★根因：RUNNING 只證明【有人在忙】，不證明【鏈沒斷】—— 兩者可以同時為真。
+  #   ★判準同 DEAD-ROLE：「出貨了沒推鏈」是【已完成的事實】，跟他現在忙不忙無關。
+  #   （T_IDLE 門檻保留 ⇒ 跑 job 期間剛 commit 還沒寫信的正常中間態不會誤報。）
+  if [ "$class" = "OK" ] && [ "$main_ct" -gt 0 ] \
+     && [ "$hb_ct" -le "$main_ct" ] && [ $(( now - main_ct )) -ge "$T_IDLE" ]; then
+    class="COMMIT-NO-LETTER"
+    detail="  main 已落地 $(dur $(( now - main_ct )))，之後沒有任何新 handback
+  最後 commit：${main_subj}
+  → 有人出貨沒推下一站（違反無斷點自動鏈），鏈斷在他肚子裡
+  ★本類獨立於 RUNNING：他可能正在跑東西，但出貨沒推鏈已經是事實"
+  fi
+
   if [ "$class" = "OK" ]; then
     if [ -n "$running" ] && [ "$run_since" -ne 0 ] && [ $(( now - run_since )) -ge "$T_MAX_RUN" ]; then
       class="RUNAWAY"; detail="  長工作已跑 $(dur $(( now - run_since )))（來源 ${running}）—— 疑似掛死"
@@ -205,14 +221,6 @@ while true; do
         case "${a:-}" in (*[!0-9]*|'') a=0 ;; esac
         [ "$a" -ge "$T_UNRESP" ] &&
           { class="UNRESPONSIVE"; detail="  ${to} 活著但 ${bn} 已 open $(dur "$a") 沒消費"; }
-      fi
-      # 2) COMMIT-NO-LETTER：main 落地了、之後沒有任何新 handback ⇒ 有人出貨沒推下一站
-      if [ "$class" = "OK" ] && [ "$main_ct" -gt 0 ] \
-         && [ "$hb_ct" -le "$main_ct" ] && [ $(( now - main_ct )) -ge "$T_IDLE" ]; then
-        class="COMMIT-NO-LETTER"
-        detail="  main 已落地 $(dur $(( now - main_ct )))，之後沒有任何新 handback
-  最後 commit：${main_subj}
-  → 有人出貨沒推下一站（違反無斷點自動鏈），鏈斷在他肚子裡"
       fi
       # 3) CHAIN-BROKEN
       if [ "$class" = "OK" ] && [ "$hb_age" -ge "$T_IDLE" ] && [ "$any_age" -ge "$T_IDLE" ]; then

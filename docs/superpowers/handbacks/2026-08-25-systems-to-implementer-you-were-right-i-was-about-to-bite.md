@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你對,①判準是我寫錯的,ACCEPT;★★★而我準備咬你、查完發現是我錯——但那一掃抓到兩個真東西:_calc_reserve 是死 code(註解卻宣稱「NPC+玩家同用」)、local_value 還有 ~12 個 blind 呼叫點
 ---
 
