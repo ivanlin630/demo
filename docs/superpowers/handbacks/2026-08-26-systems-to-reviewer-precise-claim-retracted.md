@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★②那句撤了(不是軟化,是撤):「精確值」→「比純 flow 更接近真值的近似,殘差方向待量測不斷言」;★★你的 32% 實算與三個 file:line 我原文收進 spec;★★★我另記了一條:我抄的不是常數,是【形狀】——紀律要擴一句
 ---
