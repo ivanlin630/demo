@@ -587,6 +587,10 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				#   ★不改成「只記 unique」：dup 那一支對「同一行動穿幾件戲服」同樣有用，而 `existing` 分得出來。
 				Probe.bump_sample("means_end.candidate_identity",
 					{"fname": _fname, "target": _tt2.get("target"),
+					 # ★tick／team（systems 2026-08-26）：measurer 量到 62 筆 act=貿易 收斂到 3 個 target，
+					 #   ★但他明講【未坐實】——沒有 tick 就證明不了「同一個 tick 內」。★欄位名與
+					 #   `funnel.cand.identity` 對齊。
+					 "tick": state.world.current_tick, "team": team.team_id,
 					 "act": _act,
 					 # ★仍是空的話，把鍵名原樣帶出來 —— ★★不猜第四個鍵（systems 明令）
 					 "to_task_keys": ("" if _act != "" else str(_tt2.keys())),

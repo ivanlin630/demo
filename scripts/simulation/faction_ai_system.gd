@@ -4050,10 +4050,14 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
 	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
+		# ★★施工漏斗 ②段（2026-08-26）：`delegate.entry` 只說「進來幾次」，說不出【走了哪一條】
+		#   ⇒ 四個分支各一顆，四顆相加必須 == entry（★分支計數自帶對帳式）。
+		if Probe.enabled: Probe.bump("funnel.delegate.branch_convoy")
 		return _dispatch_convoy(state, team, td)   # distribute.dispatch tap 已在 _dispatch_convoy:3353（免雙計）
 	# ★資訊網 Part2 (a)：求援/偵察 已脫離主 argmax/delegate → 移到 _info_side_dispatch 平行步（此處無 help/scout 分支）。
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
+		if Probe.enabled: Probe.bump("funnel.delegate.branch_build")
 		var _ok: bool = _dispatch_builder(state, team, target, String(td["build_type"]), 1)
 		if Probe.enabled: Probe.bump("delegate.build_" + ("ok" if _ok else "fail"))
 		return _ok
@@ -4061,14 +4065,24 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	# same-tile(owner 在場)facility 已在 _resolve_build_facility defer 給 infra path（infra desire-based
 	# _pick_facility 選最想建的+就地建=較 goal REGISTRY-order 聰明+單一 build slot 不撞），此處不再生同格 candidate。
 	if td.has("facility"):
-		return _dispatch_facility_builder(state, team, target, String(td["facility"]))   # owner 遠離 own outpost → remote 子隊真移動→抵達→建
+		# ★這條分支【原本零 counter】：成功與失敗都靜默 ⇒ 「蓋設施為什麼沒發生」問到這裡就斷了。
+		var _fok: bool = _dispatch_facility_builder(state, team, target, String(td["facility"]))   # owner 遠離 own outpost → remote 子隊真移動→抵達→建
+		if Probe.enabled:
+			Probe.bump("funnel.delegate.branch_facility")
+			Probe.bump("funnel.delegate.facility_" + ("ok" if _fok else "fail"))
+		return _fok
 	# 既有 build/settle 委派（S5）→ generic subteam dispatch。
+	if Probe.enabled: Probe.bump("funnel.delegate.branch_generic")
 	var advisor_id: int = _pick_or_promote_advisor(state, team)
 	if advisor_id == -1:
+		# ★這個 return false 原本【完全靜默】——決策贏了、路由對了，掉在「沒人可派」而沒有人看得見。
+		if Probe.enabled: Probe.bump("funnel.delegate.generic_drop_no_advisor")
 		return false
 	var settler: int = int(td.get("settler", clampi(team.population / 4, 2, 5)))
 	var action_task: String = String(td.get("task", TeamData.TASK_BUILD))
 	var sub_id: int = SubteamSystem.new().dispatch(state, team.team_id, advisor_id, settler, action_task, target)
+	if Probe.enabled:
+		Probe.bump("funnel.delegate.generic_" + ("ok" if sub_id != -1 else "fail"))
 	return sub_id != -1
 
 # ★後勤 SLICE A（spec 2026-07-31 訂正版 §3）：派 porter 子隊送 surplus 到 demand 市場（FETCH cargo=exact load，conserving）。

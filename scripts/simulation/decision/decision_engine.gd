@@ -106,6 +106,31 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				if _ctt.has("build_type"):
 					Probe.bump("goal.cand_build_emitted")
 					Probe.bump("goal.cand_build_day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY))
+				# ★★施工漏斗 ①段【分母】(2026-08-26)：既有的 `cand_build_emitted` 只數 build 那一類
+				#   ⇒ 「贏了幾次」沒有可比的母數。★這裡數【所有】goal candidate 的產出。
+				#   ★key 有界：goal_type（`GoalRegistry` 有限），不是 label（label 帶 target 會爆 key）。
+				Probe.bump("funnel.cand.emitted")
+				# ★goal_type 在 `source_goal` 裡，不在 candidate 頂層（`_mk_candidate` 回
+				#   {util,to_task,source_goal,label,delegate}）——★第一版我讀頂層，結果 845 筆全部落到 "?"。
+				#   ★★那正是我這兩天一直在替別人修的那顆病（欄位讀空→key 說謊），這次是我自己造的。
+				# ★★仍有一類【本來就沒有 source_goal】：後勤那兩支 candidate 不走 `_mk_candidate`
+				#   （`goal_resolver:222 distribute_food` / `:312 deliver_<res>`）⇒ 它們的 `?` 是【真實類別】
+				#   不是讀錯層。★用 label 當它們的名字，不要讓兩種不同的原因共用同一個 "?"。
+				var _sg: Dictionary = (cand.get("source_goal", {}) as Dictionary)
+				var _gt_key: String = String(_sg.get("goal_type", ""))
+				if _gt_key == "":
+					_gt_key = "no_source_goal:" + String(cand.get("label", "?"))
+				Probe.bump("funnel.cand.by_goal." + _gt_key)
+				# ★★★逐筆樣本帶 `tick` 與 `team`（systems 併進本段 2026-08-26）：
+				#   ★counter 說得出「發生幾次」，說不出【是誰】在【第幾 tick】
+				#   ⇒ 「同一支隊在同一 tick 提了多個 candidate」（一個行動穿多件戲服）
+				#     與「不同隊各提一次」在計數上長得一模一樣，而意義完全不同。
+				#   ★欄位名與 `means_end.candidate_identity` 對齊，免得下游寫兩套解析。
+				Probe.bump_sample("funnel.cand.identity", {
+					"tick": state.world.current_tick, "team": team.team_id,
+					"goal": _gt_key, "label": String(cand.get("label", "")),
+					"target": (cand.get("to_task", {}) as Dictionary).get("target"),
+					"util": snappedf(float(cand.get("util", 0.0)), 0.0001)}, 500)
 			scored.append({"u": float(cand.get("util", 0.0)), "i": idx, "opt": String(cand.get("label", "")), "cand": cand})
 			idx += 1
 	scored.sort_custom(func(a, b):
@@ -118,6 +143,36 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		var _w: Dictionary = (scored[0].get("cand", {}) as Dictionary)
 		if bool(_w.get("means_end", false)):
 			Probe.bump("means_end.won_argmax")
+		# ★★★施工漏斗 ①段【贏了沒／排第幾】(2026-08-26)：
+		#   ★勝負要有【成對】的分母：winner 是 candidate 還是 static option，兩邊都數
+		#     ⇒ 只有「贏了 N 次」而沒有「總共決策幾次」，正是 33→41 那個坑。
+		#   ★★「排第幾」比「贏沒贏」多一個維度：差一名與差二十名是不同的病
+		#     ——bucket 化（有界 key），不是每個名次一個 counter。
+		Probe.bump("funnel.decide.total")
+		if _w.is_empty():
+			Probe.bump("funnel.decide.winner_static")
+		else:
+			Probe.bump("funnel.decide.winner_cand")
+			Probe.bump("funnel.decide.winner_cand.by_goal." + String((_w.get("source_goal", {}) as Dictionary).get("goal_type", "?")))
+		var _best_rank: int = -1
+		for _ri in range(scored.size()):
+			if not (scored[_ri].get("cand", {}) as Dictionary).is_empty():
+				_best_rank = _ri
+				break
+		if _best_rank >= 0:
+			var _bucket: String = "0_won" if _best_rank == 0 else \
+				("1_2" if _best_rank <= 2 else ("3_5" if _best_rank <= 5 else "6plus"))
+			Probe.bump("funnel.cand.best_rank." + _bucket)
+			# ★贏不了的時候，【輸給誰、差多少】才是可行動的資訊（鏡射既有 camp.lost_to 形狀）
+			if _best_rank > 0:
+				Probe.bump_sample("funnel.cand.lost_to", {
+					"cand": String(scored[_best_rank].get("opt", "")),
+					"cand_util": snappedf(float(scored[_best_rank].get("u", 0.0)), 0.0001),
+					"winner": String(scored[0].get("opt", "")),
+					"winner_util": snappedf(float(scored[0].get("u", 0.0)), 0.0001),
+					"rank": _best_rank,
+					"team": team.team_id if team != null else -1,
+					"tick": state.world.current_tick}, 200)
 		# ★★per-option util dump（systems 派）：要的是【對照】不是一個數字。
 		#   ★差 2 倍 vs 差 100 倍 是完全不同的病；而【贏的那一次】是唯一真改變世界的案例。
 		#   ★懷疑點(i) depth 指數衰減／(ii) payoff 恆等 —— 兩欄都 dump，讓數字自己分。
