@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★你自報的覆蓋缺口:母體我數出來是 4,你掛 3 ⇒ 報 3/4 並指出缺的是誰;★同一張票裡你用了兩種標準(承諾欄位機械稽核 16-16、entry 手數 3)
 ---
