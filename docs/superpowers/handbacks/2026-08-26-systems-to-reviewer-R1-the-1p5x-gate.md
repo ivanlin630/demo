@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: material-funnel-unlock
 topic: R①(新概念大框,前提含未驗 code 斷言):blueprint 定的 D 件把「1.5× 成本閘」當成【一個死常數】要照妖鏡人格化——★而我 grep 的結果是【它不是一個常數,是散在 5 處的字面量,其中一處被命名且宣稱鏡射其他處】;★★要你先驗這個前提,再驗那道閘擋的到底是什麼
 ---
