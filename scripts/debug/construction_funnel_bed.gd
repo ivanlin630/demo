@@ -131,6 +131,33 @@ func _run() -> void:
 		lines.append("  ★實例（原始樣本，未加工）：")
 		for e in example:
 			lines.append("      %s" % str(e))
+	# ★★★「誰在嘗試」vs「誰有料」（systems 2026-08-26：這決定 arc 的方向）
+	#   ★三種可能的處置完全不同：沒料的隊在嘗試＝分配／輸送問題；有料的隊也過不了＝閘或位置的問題；
+	#     混合＝兩件事同時發生要分開處理。★本床只把兩邊【並排】，不替它選。
+	lines.append("--- ★誰在嘗試 vs 誰有料（★並排，不下結論）---")
+	var atts: Array = Probe.samples.get("dispatch_builder.attempt", []) as Array
+	var per_team: Dictionary = {}
+	var ticks_seen: Dictionary = {}
+	for a in atts:
+		var tid: int = int(a.get("team", -1))
+		per_team[tid] = int(per_team.get(tid, 0)) + 1
+		ticks_seen[int(a.get("tick", -1))] = true
+	lines.append("  attempt 樣本 %d 筆（cap 100，母體 counter = %d）★涵蓋 %d 個不同 tick" % [
+		atts.size(), _c("dispatch_builder.attempt"), ticks_seen.size()])
+	if ticks_seen.size() <= 1:
+		lines.append("  ★★★只有 1 個 tick ⇒ 這批樣本【不能】當成整段時間的分布（上一輪就是這樣誤讀的）")
+	var tkeys: Array = per_team.keys(); tkeys.sort()
+	for tk in tkeys:
+		var hi_avail: float = -1.0
+		var lo_avail: float = -1.0
+		for a2 in atts:
+			if int(a2.get("team", -1)) != int(tk): continue
+			var av: float = float(a2.get("mat_avail", 0.0))
+			if lo_avail < 0.0 or av < lo_avail: lo_avail = av
+			if av > hi_avail: hi_avail = av
+		lines.append("      Team%-3d 嘗試 %2d 次｜★嘗試【當下】material avail %.0f–%.0f" % [
+			int(tk), int(per_team[tk]), lo_avail, hi_avail])
+	lines.append("  ★★右欄是【嘗試當下】的公庫＋私產，不是期末存量 —— 兩者不可互換。")
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
