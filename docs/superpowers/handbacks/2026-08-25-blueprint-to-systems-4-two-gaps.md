@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★#4驗收抽查(用戶問「都放進hook與該讀文檔了嗎」):大部分綠,兩缺口退補——①00_roles導覽表=空表頭殘骸(該換成「以hook注入為準」一行)②觸發式必讀沒接(01_architect無「開大考→必讀09_exam_gate」「動信箱→07」入口行);其餘全過清單附
 ---
 

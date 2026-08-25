@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★你照判讀表第三格只呈事實=做對了;★★而我【不解釋】,我要一個分母——「嘗試總數」有沒有一起上升;★★★那正是我自己立的「分母本身也是結果」
 ---

@@ -1053,3 +1053,188 @@ cand_build_emitted 28 = branch.build 28 = build_fail 28
 ★**答案是第三種**：★★**編譯期常數 `false` ⇒ hang 到逾時；執行期條件 ⇒ 印錯誤後繼續。**
 
 > ★詳 → `detail/01_architect-cases.md`
+
+## ★★★互斥證據 ＝ 框架訊號（2026-08-25，`assert` 案）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★spec 紀律三條（2026-08-25 從 `invariants.md` 搬入並壓縮）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★觀測路徑與決策路徑的**失敗處置相反**（2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★列舉要挑【收斂】的那一類（2026-08-25，同型第四次）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★恆假式：**永遠紅的閘 ＝ 沒有閘**（2026-08-25，我自己做了一個）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★訂正我自己：**出處分類消滅【碰撞】，但取代不了【語意判斷】**（2026-08-25，falsifier 第一次跑就打臉）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★手工分類表無法避免時：**允許表，但必須配【機械 falsifier】**（2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★問真相源要問「它涵蓋哪個【物理】」，不是「它是不是【權威】」（2026-08-25 血證）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★「移除一個過嚴的閘」**不是零風險操作**（2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★「窮盡」保證覆蓋率，**不保證判準正確**（2026-08-25，我自己最貴的一次）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★而這次驗證的價值：**不在推翻，在於【知道】**
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★證據的**維度**要對上主張的**維度**（implementer 自糾 2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★另記：一條**被完整交叉驗證**的儀器鏈（罕見，值得標）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★不只結論會建立在錯誤前提上，**「問題怎麼問」也會**（2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★事件的身分要在**事件開始時凍結**，不能在**偵測到時反查**（2026-08-25，一天內第 4 個同形）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★修 bug 後 `652 → 0`：**擺動太大要當心修過頭**
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★造一個新機制時，**先問「它會 fire 嗎」** —— 死水兩欄要【前移】（2026-08-25，一天內第三次）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★`seam-gate` 綠 **≠** acceptance 過（2026-08-25 第一次咬到）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★引用站點用**語意錨**，不用行號（implementer 補正 2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★被推翻的猜測要**明確作廢**，否則它會變成下一輪的隱性前提（2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★★決策層與仲裁層是**兩個互不相通的閘**（reviewer 親驗，systems 立 2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★前置量測 vs 事後驗收欄：**有資格否決一張票的量測，必須擋在動工前**（reviewer 指正，systems 立 2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★「假設不靜默」的完整形狀 ＝ **偵測 ＋ 主動告知**（reviewer 指出，systems 立 2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★`tier` 的判準：**「會不會改變世界行為」，不是「工程大小」**（systems 自糾 2026-08-25）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★P9 交接縫：派工單必帶 `slice:` 與 `tier:`（2026-08-21 用戶核）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★裁定：`plans/` 停用，HOW spec 就是唯一產物（systems 裁 2026-08-21）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★★spec 鎖在長跑因果 = QA-verdict 機械閘（2026-08-04 用戶定，治 QA-hook 連漏）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★spec/plan 鎖後直接 dispatch，別問用戶（2026-07-09 定死）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## 設計 checklist（spec 前必過）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## ★兩道對抗閘（reviewer，spec 前後各一——不可省，2026-07-10 釘死）
+
+
+> ★詳 → `detail/01_architect-cases.md`
+
+
+## 3 層流程（依規模選，主 session 第一句需求即判層級）
+
+
+> ★詳 → `detail/01_architect-cases.md`

@@ -12,6 +12,19 @@ brainstorm → spec → plan 設計，不實作。
 必須先閱讀：
 - docs/invariants.md
 
+## ★★★觸發式必讀（開場【不】讀，★做到那件事的當下【必】讀）
+
+| 你要做這件事 | ★**動手前必讀** |
+|---|---|
+| ★**開驗收考／診斷考** | ★**`docs/process/09_exam_gate.md`**（★半成品禁跑驗收考） |
+| ★**動信箱／Monitor／watchdog** | ★**`docs/process/07_mailbox_trigger.md`** |
+| **動機器軌（orchestrator）** | `docs/process/08_machine_workflow_v2.md` |
+| ★**改既有機制** | ★★**`docs/mechanism-intents.md`**（WHAT 權威帳：★code 服從表、表服從用戶） |
+| **要引用某條被搬走的規則** | `docs/process/detail/*-cases.md`（同標題節） |
+> ★★**這張表本身要短** —— **它的用途是「知道有這個入口」，不是取代那些檔。**
+
+> ★★**本節【不得被切】** —— 它的用途是「在動手的那一刻看見入口」，移到 `detail` 等於廢掉它。
+
 ## 3 層流程（依規模選，主 session 第一句需求即判層級）
 
 | 層 | 規模 | 流程 | 主 session 可否直接動 code |
