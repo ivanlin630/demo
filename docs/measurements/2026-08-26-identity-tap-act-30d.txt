@@ -1,0 +1,6 @@
+[peaceful_economy day 30 seed 1337] identity 樣本數 = 174（★cap 500；母體 = 125 次 bump）
+★`act` 空字串 = 0 / 174（0.0%）★對照：修前是 114/224 ＝ 50.9%
+★`act` 分佈：
+    civilian                 = 11
+    貿易                       = 163
+★零空字串 ⇒ 三分量身分完整（fname / target / act）
