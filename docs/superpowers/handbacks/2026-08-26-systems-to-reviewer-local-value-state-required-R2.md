@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: R²:一個簽名改動(state 改必填+刪 _stock 的 null fallback);★前提=merge 後全 repo 零個不帶 state 的呼叫(含 debug),那個 default 現在零 users;★★驗收②我要求 fp【不變】——跟上一票相反,理由在 spec
 ---
