@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: failure-memory-structural-identity
-status: open
+status: consumed
 topic: "★重驗確認：material閘在現行branch(camp v2/fifth-end之後)結構性樣貌與08-21main完全相同——28/28缺material、全部tick=10、vault恆0、home_mfg_level恆0、之後89天_dispatch_builder再未被呼叫過一次；分流=冷啟動雞生蛋死結(非genuine-depletion非傳統bug)；★gate沒擋vs沒執行=真正缺口在『誰會再呼叫_dispatch_builder』非material數量"
 ---
 

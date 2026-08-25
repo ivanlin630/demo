@@ -57,7 +57,10 @@ topic: ★修法驗證形狀完全如預測(blocked_total 0→28、no_identity 2
 ## §4 閘況（跑在已 commit 樹 `833d9239`，期間不改 code）
 | 閘 | 結果 |
 |---|---|
-| headless／憲法／det×3 | ★**跑中**，出來我補報 |
+| headless | **8 ＝ baseline，0-new** ✅（3 `[FAIL]` ＋ 5 `Assertion failed`，`=== DONE ===` 有出）|
+| 憲法 | **PASS (sites=74, removed=1)** ✅ |
+| det×3 | `c1e3f7c5db444fc06c6a826efa77b146` ×3 穩定（＝base；照 `03b §④k` 不當生效訊號）|
+| `estimator-lineage-scan` | **PASS**（無域外手抄換算）|
 | 床（三面） | 見上 |
 
 ★**照我自己收緊的規矩**：**要當證據的 run 一律跑已 commit 的樹，跑的期間不改 code。**

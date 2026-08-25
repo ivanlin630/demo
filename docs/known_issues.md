@@ -1578,6 +1578,34 @@ established=0 真根**非** goal orphan（立國鏈已接：gate `faction_ai:103
 **先前把嫌疑指向糧橋（`faction_ai:3799` `_eta_build` 高估 24×）—— 實測否決。**
 ~~**真閘在建材 cost（`_can_afford` 1.5×）這一層。**~~
 
+### ★★★★再訂正（2026-08-25）：**「誰會再呼叫 `_dispatch_builder`」＝ 兩半，其中一半是【床缺一條路】**
+
+**measurer 重驗（現行 branch）**：結構性樣貌與 08-21 main **完全相同** ——
+`28/28 缺 material`、**全部 `tick = 10`**、`vault` 恆 0、`home_mfg_level` 恆 0、
+★**之後 89 天 `_dispatch_builder` 再未被呼叫過一次**。
+★**他的判斷成立**：**真缺口在「誰會再呼叫 `_dispatch_builder`」，不是 material 數量。**
+
+★**systems 用語意錨重查（行號會漂），把那句補完成【兩半】**：
+`_dispatch_builder` 的呼叫點 **＝ 2 個**（窮盡）：
+| 呼叫點 | 在 peaceful 床上 |
+|---|---|
+| `_evaluate_infrastructure` | ★**結構性死掉** —— 它在 `for fid in state.factions:` 迴圈內（`:725 → :739`），**而該床 `factions` 恆空 ⇒ 零疊代** |
+| `_dispatch_goal_delegate` | ★**活著，但只在 `tick 10` 那批觸發過** |
+
+⇒ ★★**「89 天零呼叫」＝ 一條路【不存在】＋ 另一條路【之後不再產生 build 委派】。**
+
+### ⚠️ 連帶：**「冷啟動雞生蛋死結」這個命名要修正一半**
+★**在無 faction 的床上，infra 路【不存在】** —— **那不是「雞生蛋」，是【床缺一條路】。**
+⇒ **正確拆法**：
+| 半 | 性質 | 歸屬 |
+|---|---|---|
+| ★**infra 路不存在** | **床的結構限制**（和平床長不出 faction —— 建國只掛在打贏／臣服） | ★**用戶已裁：新基線考 peaceful 卷【預塞初始政權】** ⇒ **那才是該量的床** |
+| ★**`_dispatch_goal_delegate` 之後不再產生 build 委派** | **真的要查的東西** | ★**與 faction 無關，可以現在追** |
+
+★**這也解釋了為什麼在這張床上追了那麼久**：
+**我們一直在一個【結構上少一條路】的世界裡，找「那條路為什麼不走」。**
+
+### 原訂正（留史）
 ### ★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上零疊代**
 
 measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
