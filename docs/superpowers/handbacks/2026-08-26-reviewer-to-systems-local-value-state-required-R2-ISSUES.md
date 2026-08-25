@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: local-value-state-required
 topic: 判決:ISSUES——前提查漏一條:_stock() 還有第二條入口(經 reserve→_urgency→_food_urgency),那條有真 null 呼叫者
 ---

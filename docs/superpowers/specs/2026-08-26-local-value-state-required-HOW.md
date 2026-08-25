@@ -27,26 +27,52 @@ scripts/ 全域（含 debug/test）不帶 state 的呼叫       = 0   ← 9 個 
 | 只有錯的 users | 陷阱 ⇒ 刪 |
 | 真收益＋真風險 | **不用 default，改用兩個入口**（`flow_utility` / `stock_utility` 就是這樣做的） |
 
-## ★★scope（2026-08-26 裁定；implementer 窮盡 grep 後提出，我採納）
+## ★★★scope（2026-08-26 **二訂**：我第一版的切法是錯的，reviewer R² 打回）
 
-`state: WorldState = null` 這個 default **不只在 `local_value` 上，共 8 處**：
+### 我原本怎麼切、為什麼錯
+**我切「①`local_value` ＋ ⑧包裝層 先做，②–⑦ 另開票」，理由是「零 users 要各自驗」。**
+★**理由本身沒錯，切法錯了** —— ★★**我用【函式】當單位，而安全性質的單位是【`_stock(null, …)` 到不到得了】。**
 
-| # | 函式 | 檔 | 本票 |
+reviewer 找到 `_stock()` 的**第二條入口**（我的前提檢查完全沒掃到，因為我只掃了 `local_value(`）：
+```
+reserve(team,res,leader_values,state=null)      ← 自己也有 default
+  → _reserve_factor(…, state)
+  → _urgency(team, state=null)                   ← 自己也有 default
+  → _food_urgency(team, state=null)              ← 自己也有 default
+  → _stock(state, team, "food")                  ← ★同一個 fallback
+```
+★**而 `ask_price`（⑦）也到得了**：`_urgency(seller, state)` ＋ `local_value(seller, res, state)`（`:127-132`）。
+⇒ ★★★**②–⑦ 不是「另一票」，它們是【同一個 fallback 的其他入口】。
+只刪 `local_value` 那個 default，`_stock(null,…)` 照樣到得了 —— 病沒被關掉，只是關了一扇門。**
+
+### ⇒ 正確的 scope：**`trade_valuation.gd` ＋ `interaction_system.gd` 內【全部 8 個 default】一起刪**
+| # | 函式 | 檔:行 |
+|---|---|---|
+| ① | `local_value` | `trade_valuation.gd:136` |
+| ② | `reserve` | `:85` |
+| ③ | `_reserve_factor` | `:102` |
+| ④ | `_reserve_factor_food_only` | `:109` |
+| ⑤ | `_food_urgency` | `:115` |
+| ⑥ | `_urgency` | `:121` |
+| ⑦ | `ask_price` | `:127` |
+| ⑧ | `InteractionSystem.local_value`（包裝層） | `interaction_system.gd:662` |
+
+★**範圍外（各自需要自己的 caller 窮盡，不併入）**：
+`decision_engine.gd:58 rank_scored_ctx`、`player_trade_system.gd:19` —— **記在這裡，不做。**
+
+## ★★動工前必須先接住的兩個呼叫端（reviewer 找到，缺一就會崩）
+| # | 位置 | 現況 | 處置 |
 |---|---|---|---|
-| ① | `local_value` | `trade_valuation.gd:136` | ★**做** |
-| ⑧ | `InteractionSystem.local_value`（**包裝層**） | `interaction_system.gd:662` | ★**做** |
-| ②–⑦ | `reserve`／`_reserve_factor`／`_reserve_factor_food_only`／`_food_urgency`／`_urgency`／`ask_price` | `trade_valuation.gd:85-127` | ★**不做，另開票** |
+| A | ★**`scripts/debug/slice_a_observe.gd:45`（★同一行【兩個】呼叫）** | `TradeValuation.reserve(t, "weapon_melee_low")` —— `leader_values` 與 `state` **兩個 default 都省**，而 `state` 就在同函式 scope（`:35`） | ★**補成 `reserve(t, res, {}, state)`** |
+| B | `interaction_system.gd:667-669 _calc_reserve`（wrapper，簽名自己就沒有 `state`） | ★**零 caller ＝ 死碼**；它自己的註解已點名「**不崩但更隱密：靜默給出錯的估值。崩會被看見，這個不會**」 | ★★**刪掉**（零 users ＝ 純負債；不要「補參數讓它活」——沒人要它活） |
 
-★**①⑧ 一起做的理由**：**同一條鏈**。**只刪 `TradeValuation` 那個、留著包裝層的 ⇒ 病往上搬一層**
-（包裝層的 caller 忘記傳 ⇒ 包裝層傳 `null` 下去 ⇒ 一樣靜默走 fallback）。
-**兩者都已驗證零 users**（⑧ 唯一 caller `headless_test.gd:11631` 有傳 state）。
+★**`weapon_melee_low` 不在 `SURVIVAL_GOODS(["food","medicine"])`** ⇒ 走 generic 分支 ⇒ 一路打到 `_stock(null,…)`
+⇒ **刪 fallback 後，`godot --headless --script scripts/debug/slice_a_observe.gd` 會在
+`resource_system.gd:438 own_granary_tile(null,…)` 當場崩。**
 
-★★**②–⑦ 不做的理由（這條是本票的安全根據，不是保守）**：
-> **「零 users」必須【對每一個函式各自成立】，不能從①推廣到②–⑦。**
-> **沒窮盡追過 caller 就刪 default ＝ 把【靜默 fallback】換成【執行期崩潰】—— 那不是同一件事。**
-
-⇒ **另一票的形狀**：**先逐個窮盡 caller，再對每一個套 default 三分類**
-（零 users ⇒ 刪／只有錯的 users ⇒ 刪／真收益＋真風險 ⇒ 拆兩個入口）。★**逐個判，不批次刪。**
+> ★**這不是第一次**：`scripts/debug/own_granary_null_caller_test.gd` 的檔頭就寫著
+> 「**根修＝呼點補傳 state（非 own_granary 頭加 guard）**」——★★**同一個病已經修過一輪，而 default 讓它長回來。**
+> ★★★**這正是本票存在的理由：修實例會長回來，刪掉 default 才不會。**
 
 ## 修法（★零數值改動）
 1. `local_value(team, res, state)` —— **`state` 必填**（刪 `= null`）。
@@ -60,7 +86,14 @@ scripts/ 全域（含 debug/test）不帶 state 的呼叫       = 0   ← 9 個 
 > **這票是同一條規則用在既有函式上。**
 
 ## 驗收
-1. ★**結構型**：`grep -rn 'state: WorldState = null' scripts/simulation/trade_valuation.gd` **＝ 零命中**。
+1. ★★**結構型，錨在【定義側】不是【呼叫側】**：
+   `grep -c 'state: WorldState = null' scripts/simulation/trade_valuation.gd scripts/simulation/interaction_system.gd` **＝ 0**
+   ★**為什麼錨在定義側**：**default 不存在 ⇒ blind 呼叫【不可代表】⇒ 根本不需要列舉呼叫點。**
+   ★★**血證（同一票裡犯的）**：我上一版的「結構型」判準是
+   `grep -o 'TradeValuation\.local_value([^)]*)' | grep -v ', state)'` ——
+   ★★★**它把母體定義成「有 `TradeValuation.` 前綴的呼叫」，於是看不見包裝層那條
+   `InteractionSystem.new().local_value(t, res, state)`** ⇒ **我報 9、reviewer 報 10，他對。**
+   **我以為我把判準從【計數】換成了【結構】，其實只是把數錯換成了掃錯 —— 母體還是我畫的。**
 2. ★★**`fp` 必須【不變】** —— ★**這票與上一票相反**：所有呼叫者本來就都傳 state，
    ⇒ **刪 default 不改變任何一次呼叫的實際引數** ⇒ **fp 變了就是有人被改到，是紅不是綠。**
    （★**「該不該變」由【這次改動會不會改到任何一次呼叫的引數】決定，不是由 tier 決定。**）
