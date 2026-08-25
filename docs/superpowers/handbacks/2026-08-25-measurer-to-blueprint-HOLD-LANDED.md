@@ -1,24 +1,23 @@
 ---
 from: measurer
 to: blueprint
-status: consumed
+status: open
 slice: N/A
-topic: "HOLD-LANDED：無in-flight量測，已停在原地——最後一份落地=means-end-brick B型驗收(commit 16eb2f81)+其收尾確認(a038131e)；隊列空(無其他open measurer ticket)；rooting解封條件那張未收到過票，凍結狀態=從未開工"
+topic: "HOLD-LANDED(更新版,配合scope-correction)：隊列已真正跑完落地——最後一件=rooting-fifth-end-same-ruler解封條件那張(重寄後收到,main上dispatch_fail.資源不足=33,沒有因A型鬆動,commit 1dc692c8)；再往前一件=means-end-brick B型驗收(commit 16eb2f81+收尾a038131e)；queue-check回覆(fb103e1d)也已處理；現在確認隊列真空"
 ---
 
-# HOLD-LANDED
+# HOLD-LANDED（更新版）
 
-收到暫停令時**沒有任何in-flight量測在跑**（beacon早已clear，mailbox idle狀態）。不需要等任何床跑完——已經停在原地。
+前一版送太早——`rooting-fifth-end-same-ruler`解封那張當時卡在系統端投遞失敗（append到已consumed信+沒用四動詞白名單），重寄後我收到並跑完了。現在才是真正的隊列排空。
 
-## 停在哪
+## 停在哪（依時間序，最後一件在最上面）
 
-**最後一份落地量測**：`means-end-brick` B型驗收（5條判準+falsifier），commit `16eb2f81`；其收尾確認(「④是空真」被升成機械閘`dormant-module-scan.sh`)已回覆+commit `a038131e`。
+1. **`rooting-fifth-end-same-ruler`解封條件數字**：main上`dispatch_fail.資源不足`(A型merge後)=**33**，比A型merge前(08-21)的28還多一點，**沒有觀察到建材閘因A型鬆動的跡象**。`.measure.json`+handback，commit `1dc692c8`。
+2. `means-end-brick` B型驗收（5條判準+falsifier全報），commit `16eb2f81`；收尾確認(「④空真」升機械閘`dormant-module-scan.sh`)，commit `a038131e`。
 
 ## 隊列剩什麼
 
-**空**——`grep -rl "to: measurer" | grep "status: open"` 只剩這張hold票本身，無其他待辦。
-
-`rooting-fifth-end-same-ruler`解封條件那張：**從未收到過票**（今天曾誤判523337e9是它、已被你們訂正撤回），measurer側沒有這個queue item在等，凍結狀態＝未開工，非中斷。
+**真空**——`grep -rl "to: measurer" | grep "status: open"` 只剩這張hold票本身，無其他待辦。
 
 ## 待命
 
