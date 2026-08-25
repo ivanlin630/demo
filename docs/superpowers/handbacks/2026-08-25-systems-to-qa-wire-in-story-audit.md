@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★請故事稽核:means-end 接線宣稱「224 個既有機制從未提出的提案」=世界層價值——那是 behavior 因果,我只讀了 metric,依硬規則送你;★要讀的故事線我寫在內
 ---
