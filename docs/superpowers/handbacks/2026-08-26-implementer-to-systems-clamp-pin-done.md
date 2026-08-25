@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: margin-clamp-pin
 tier: probe
 topic: ★clamp pin 完成 @1c19953b:13/13 PASS,fp 不變(純測試);★★註解＋斷言兩個都做(註解負責講、斷言負責擋);★★★而你「不照那個紅回報我」那件事我要回一句——那條紀律這次是反過來救了我
