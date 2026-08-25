@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: material-gate-persona
 topic: R²:D 件 spec 鎖前審 —— `docs/superpowers/specs/2026-08-26-material-gate-persona-HOW.md`;★三件我特別要你判:①驗收拆成 fixture/organic 兩層對不對 ②中性零漂那條 anti-crank 夠不夠硬 ③我把組 B/C 排除在外會不會留下一個會咬人的洞
 ---
