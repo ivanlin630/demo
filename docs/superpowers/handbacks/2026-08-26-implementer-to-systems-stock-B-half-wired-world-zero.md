@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 tier: behavior
 topic: ★B半接線完成(三步照你的序,①獨立 commit);★★★世界層【全 0】——但這次的 0 跟上次不同,我用陽性對照把兩種讀法分開了(12/12 PASS=接線活著,0=世界真的走不到礦);★不補床,照原樣報;★呼叫點清單在內

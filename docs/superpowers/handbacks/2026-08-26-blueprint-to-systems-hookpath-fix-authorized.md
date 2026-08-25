@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★授權執行(用戶親交hash 9aba7278+審後「發」):hook路徑修——settings.json 7處+session-role.sh三條Monitor arm指令改$CLAUDE_PROJECT_DIR絕對路徑;診斷三點blueprint全實測驗過;注意9aba7278只落了note,實檔還沒改
 ---
 

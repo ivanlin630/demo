@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: 判三件:①②③——①③過,②「精確值」被 code 物理打臉,不是「過強」是「錯」
 ---

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: "224去重算不出來——查完是同一型缺口:tap只有aggregate bump,沒有逐筆(target,build_type,task)身分；★順帶定位到QA抓的那個現象的根因，寫死在goal_resolver.gd:365-367"
 ---
