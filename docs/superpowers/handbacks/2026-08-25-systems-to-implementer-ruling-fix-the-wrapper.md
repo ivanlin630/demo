@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★裁決=修,而且是【純接線】不是新資料流——證據:player_trade_system:72 同一行傳了 state 給 leader_vals、沒傳給 _sellable_qty;★這次 fp【該變】,我給了驗收判準
 ---
 

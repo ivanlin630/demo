@@ -1710,3 +1710,23 @@ measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
 
 > ★★**一個 default 若只有【錯誤的使用者】，那它不是方便，是陷阱。**
 
+## ★★★註解描述了一個【不存在】的事實 —— `_calc_reserve`（2026-08-25，我當場被它騙到）
+`interaction_system.gd:667-669`：
+```
+func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
+	# 留底邏輯收進 TradeValuation.reserve（單一源），★NPC + 玩家路徑同用。
+	return TradeValuation.reserve(team, res, leader_values)
+```
+★**窮盡 grep `_calc_reserve`（扣定義行）＝【零 caller】。它是死 code。**
+⇒ ★★**那句「NPC + 玩家路徑同用」描述的是一個不存在的事實。**
+
+★★★**而我當場被它騙到**：我看到「沒傳 `state`」＋「NPC 路徑同用」，
+**準備裁定「NPC 側留底還沒修、所以 `fp` 該變」—— 查 caller 才發現那支根本沒人呼叫。**
+⇒ ★**註解 drift 最危險的形態：它不是描述錯，是【讓讀者相信某條路徑存在】。**
+★★**`dormant-module-scan` 掃 `class_name` 層級，抓不到【函式層級】的死 code —— 這是掃描的已知覆蓋缺口。**
+
+## ★`local_value` 仍有 ~12 個 blind 呼叫點（2026-08-25，窮盡掃出，★不在當前票範圍）
+**已傳 `state`（granary-aware）**：`interaction_system` 主撮合路徑 `:826/:866/:968/:993/:1000`、`order_system`、`goal_resolver`、`coin_treasury`。
+★**仍 blind**：`faction_ai_system:3475`（商隊自評值）、`interaction_system:952/996/1002/1004/1005`（易貨估值）、`player_trade_system:46/85/88/137/139`、`player_api_mapper:864/866/876/879`。
+⇒ ★★**同族 blind-view，但屬另一張票 —— 列管，不擴張當前 slice。**
+
