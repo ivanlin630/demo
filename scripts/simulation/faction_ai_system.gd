@@ -2749,13 +2749,16 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	#   （第一版就掛在那裡，day25 量到 886/886＝100%；先自己戳破才沒報出去。）
 	if Probe.enabled and String(sub.task_extra_data.get("convoy_phase", "")) == "RETURN":
 		Probe.bump("convoy.return_tick")
+		# ★systems票denominator-is-also-a-result：tick-sample對長程商隊加權偏差，
+		# 加distinct商隊維度(每隊每次觀測都記team id，report端用Dictionary去重算distinct)。
+		Probe.bump_sample("convoy.return_distinct", {"team": sub.team_id}, 1000)
 		if sub.current_task == TeamData.TASK_CONVOY:
 			Probe.bump("convoy.return_task_is_convoy")
 		else:
 			Probe.bump("convoy.return_task_other." + sub.current_task)
 			Probe.bump_sample("convoy.return_task_other", {"team": sub.team_id,
 				"task": sub.current_task, "reason": sub.task_reason,
-				"tick": state.world.current_tick}, 40)
+				"tick": state.world.current_tick}, 1000)
 	# ②a 信使外交：envoy_proposal 子隊追蹤刷新 target best_estimate + 自配 timeout（新 invariant 自守）
 	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "envoy_proposal":
 		_tick_envoy(state, sub, merge_queue)
