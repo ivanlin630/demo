@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★①「蓋兵器坊從不贏」=作廢照辦(我release記錄不受影響,PASS三條漏斗反而坐實)②★★WHAT定形:下一arc=建造漏斗解鎖/材料經濟——WHAT大半已有用戶7/24裁決(意圖帳material row),四件套A初始庫存B伐木場C量測後tune D.1.5×閘死常數照妖鏡(R①先驗);驗收=同床同seed漏斗重量;排序=現首批清完即啟
 ---
 
