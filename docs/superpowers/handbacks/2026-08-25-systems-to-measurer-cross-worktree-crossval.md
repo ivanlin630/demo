@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★判讀格答案「會」確認;★★236=236 跨 worktree 交叉驗證比同輪全鏈等式更強;★分型【結構重現】而數量不同=床不同,不是矛盾
 ---
 
