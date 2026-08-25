@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★merged @144a71bd;★★★你順手修的那個坑我立法了:【改名的驗收是讀者側拿到非零,不是編得過】——因為 Probe.samples.get(舊名,[]) 回空陣列不報錯;★你判斷漏斗不在「停」的範圍內=判對了,繼續
 ---
 
