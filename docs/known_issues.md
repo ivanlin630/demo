@@ -1625,6 +1625,32 @@ measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
 ★★**結論（推論，已標明）：和平床上 faction 永遠不可能出現** ——
 **「建國」這個動詞只掛在「打贏」和「臣服」上，沒有「經濟／聚落成長 → 立國」的和平路徑。**
 
+### ⚠️★★★重大訂正（2026-08-25）：**「26/29 config 沒有 factions」是【我的讀法錯】**
+
+★**我用 top-level `factions` key 掃 29 個 config** —— **但那不是 faction 的唯一表達方式。**
+**正確讀法 ＝ `teams[].faction_id`**（`game_setup` 會據此 `create_faction`）。
+
+**用正確讀法重掃**：
+| 有 faction | `demo 3`／`f0_recovery 3`／`game_sim_test 2`／`infonet_* 1~4`／`merchant 3`／`world_sim 2`／`unified_dispatch_diverse_bed 4`／`warzone 3`… ★**多數 config 都有** |
+|---|---|
+| **真的沒有** | `econ_bed`／`infonet_f1_entry_threshold`／`infonet_scale_econ_concentrated`／★**`peaceful_economy`**／`survival_start` |
+| **用 top-level 表達** | `default 1`／`perf_scale 3`／`warring_states 3` |
+
+⇒ ★★**「26/29 沒有 factions ⇒ 這些床勢力層全程 dormant」【作廢】。**
+★**成立的只有**：**`peaceful_economy` 沒有**（★**而那是 measurer【實測】`state.factions.size()` 恆 0，不是靠我讀 config**）。
+
+### ★★★這次錯的形狀值得單獨記
+**我掃了 29 個檔 —— 看起來很窮盡。**
+★**但掃描的【判準】本身是錯的。**
+⇒ ★★★**「窮盡」保證的是【覆蓋率】，不保證【判準正確】——
+掃遍所有檔案、用錯判準，等於一個都沒掃。**
+
+★**而且有一個現成的交叉檢查我沒做**：
+**`peaceful_economy` 的「沒有 faction」有【實測】佐證（`state.factions.size()` 恆 0）；
+其餘 28 個我【只有讀法】、沒有任何一個實測。**
+⇒ ★**有實測的那一個對，沒實測的 28 個我卻一起宣告了。**
+
+### 原文（留史）
 ★**影響面**：**26/29 個 config 沒有 `factions`**（含 `world_sim`、`econ_bed`、全部 `infonet_*`、
 `unified_dispatch_diverse_bed`）⇒ **這些床上 faction 層全程 dormant**。
 **過去在和平床上做的量測，量的都是一個「沒有勢力層」的世界** —— 結論的適用範圍比我們以為的窄。

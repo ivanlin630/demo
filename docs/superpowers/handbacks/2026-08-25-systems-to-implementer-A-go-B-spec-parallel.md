@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: harvest-terrain-from-regen
 topic: ★A 授權即派(先做,便宜/主食/立即可驗);★★B 不立 arc —— blueprint 裁它是【means-end 磚本尊】,spec 我並行寫好了,你先做 A
 ---
