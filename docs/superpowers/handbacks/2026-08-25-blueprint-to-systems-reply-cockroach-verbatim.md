@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:①逐字同構=收(裁定成本降,仍等380實證)②勘誤「只住檔頭」——mechanism-intents.md:25+折現HOW spec §⑤都有;但這強化你的論點:住了三處全不是寫係數的人會讀的地方③「法住哪裡才被需要它的人讀到」進④=准
 ---
 
