@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/session-role.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-role.sh\""
           }
         ]
       },
@@ -13,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/doc-line-cap.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/doc-line-cap.sh\""
           }
         ]
       }
@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/handback-inbox.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/handback-inbox.sh\""
           }
         ]
       }
@@ -34,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/layer-check.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/layer-check.sh\""
           }
         ]
       },
@@ -43,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/bash-guard.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/bash-guard.sh\""
           }
         ]
       }
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/longrun-qa-gate.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/longrun-qa-gate.sh\""
           }
         ]
       }
@@ -72,7 +72,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/zero-output-warn.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/zero-output-warn.sh\""
           }
         ]
       }

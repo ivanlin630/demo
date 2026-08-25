@@ -15,24 +15,40 @@ BEGIN { ORS=""; printf "\"" }
   '
 }
 
+# ★★★arm 指令用 ${_MAIN_REPO} 展開後的【字面絕對路徑】，★不要改成 $CLAUDE_PROJECT_DIR（2026-08-26 實測）：
+#   settings.json 的 hook command 由 Claude Code 執行，$CLAUDE_PROJECT_DIR 有值；
+#   ★但這裡注入的是【給 agent 之後自己跑的 Monitor 指令】，跑在 agent 的 shell —— 那裡它是【空的】。
+#   實測 `echo "[${CLAUDE_PROJECT_DIR:-<UNSET>}]"` → `[<UNSET>]`
+#   ⇒ 若用它，指令會變成 `bash "/.claude/hooks/inbox-watch.sh"` ＝ ★比相對路徑更糟（相對至少在 main dir 能跑）。
+#   ⇒ 這裡在 hook 執行當下就把 ${_MAIN_REPO} 展開成字面路徑，worktree session 也指得回 main 那份。
+
 # ★唯一信箱 = main repo 的 handbacks（worktree session 也指這，共用實體資料夾）。
 _MAIN_REPO="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" 2>/dev/null)"
 HANDBACK_DIR="${_MAIN_REPO:-${CLAUDE_PROJECT_DIR:-.}}/docs/superpowers/handbacks"
 
 # 掃 to:<role> + status:open 的 handback（並行 session 不能直接對話，靠開頭掃 dir 不漏訊）
+# ★★★2026-08-26 perf 修（同一個病的第二處化身）：
+#   舊版每檔 spawn `sed` + 2×`grep`（3 進程/檔）。**信箱現在有 911 封**
+#   ⇒ 光 `sed` 那一圈實測 **49.8s**，全流程 >2min ⇒ ★**SessionStart hook 直接 timeout**
+#   ⇒ ★★**角色 context 與 📬 未讀清單【整段消失，而且沒有任何錯誤訊息】** —— 靜默失效。
+#   ★`handback-inbox.sh` 2026-07-05 就在 326 封時踩過同一顆（33s 撞 30s timeout）並改成單次 awk，
+#     ★★**但同型的這一處沒有跟著改** —— 於是它安靜地隨信箱長大而劣化，直到今天才被量到。
+#   ⇒ 改單次 awk（1 進程、只讀每檔前 10 行，成本與檔數幾乎無關）。
 scan_handbacks() {
-  local role="$1" out="" f head topic
+  local role="$1"
   shopt -s nullglob
-  for f in "$HANDBACK_DIR"/*.md; do
-    head=$(sed -n '1,10p' "$f")
-    if printf '%s\n' "$head" | grep -qiE "^to:[[:space:]]*${role}([[:space:]]|$)" \
-       && printf '%s\n' "$head" | grep -qiE "^status:[[:space:]]*open([[:space:]]|$)"; then
-      topic=$(printf '%s\n' "$head" | grep -iE '^topic:' | head -n1 | sed 's/^[Tt]opic:[[:space:]]*//')
-      out="${out}
-- $(basename "$f"): ${topic}"
-    fi
-  done
-  printf '%s' "$out"
+  local files=("$HANDBACK_DIR"/*.md)
+  [ "${#files[@]}" -eq 0 ] && return 0
+  awk -v role="$role" '
+    FNR==1 { n=split(FILENAME, P, "/"); fname=P[n] }
+    FNR<=10 {
+      low=tolower($0)
+      if (low ~ ("^to:[[:space:]]*" role "([[:space:]]|$)")) to[FILENAME]=1
+      if (low ~ "^status:[[:space:]]*open([[:space:]]|$)")   st[FILENAME]=1
+      if ($0 ~ /^[Tt]opic:/) { t=$0; sub(/^[Tt]opic:[[:space:]]*/,"",t); tp[FILENAME]=t; bn[FILENAME]=fname }
+    }
+    END { for (f in to) if (st[f]) print "- " bn[f] ": " tp[f] }
+  ' "${files[@]}"
 }
 
 CTX=""
@@ -62,6 +78,8 @@ esac
 
 if [ -n "$ROLE_KEY" ]; then
   UNREAD="$(scan_handbacks "$ROLE_KEY")"
+  [ -n "$UNREAD" ] && UNREAD="
+${UNREAD}"
   if [ -n "$UNREAD" ]; then
     CTX="${CTX}
 
@@ -74,7 +92,7 @@ if [ -n "$ROLE_KEY" ]; then
       CTX="${CTX}
 
 ★★本 session（含 /clear·/compact 後重觸）的**第一個動作必須**是 arm 常駐信箱 Monitor——**先於任何其他回應/工作**，不等用戶打「arm」，免人肉轉述：
-Monitor(command=\"bash .claude/hooks/inbox-watch.sh\", persistent=true, description=\"${ROLE_KEY} 信箱\")
+Monitor(command=\"bash \\\"${_MAIN_REPO}/.claude/hooks/inbox-watch.sh\\\"\", persistent=true, description=\"${ROLE_KEY} 信箱\")
 arm 完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 的信會主動喚醒你。詳 docs/process/07_mailbox_trigger.md。
 
 ★★剛開場（含 /clear·/compact 重觸）：arm Monitor 後、動工前，**先重讀你那格 docs**（00_roles §文檔導覽表 map role→doc）。/compact 洗掉 active 記憶，別靠殘存印象動工——最容易忘的規則就在那幾份 md，動工前塞回。
@@ -92,11 +110,11 @@ arm 完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 
 
 ★★blueprint 專屬:arm 信箱 Monitor 後,**再 arm 這兩個常駐 Monitor**（同屬開場必做，重開/compact 後也要）:
 ① Telegram 進站（遠端用戶驅動 blueprint、免盯 CLI；只 blueprint 一 session poll）:
-Monitor(command=\"source tools/telegram/config.local.sh && python tools/telegram/tg_poll.py\", persistent=true, description=\"Telegram 進站(用戶訊息喚醒 blueprint)\")
+Monitor(command=\"source \\\"${_MAIN_REPO}/tools/telegram/config.local.sh\\\" && python \\\"${_MAIN_REPO}/tools/telegram/tg_poll.py\\\"\", persistent=true, description=\"Telegram 進站(用戶訊息喚醒 blueprint)\")
 ② watchdog v4 停滯分類器（不是計時器：長工作在跑=靜默;信給沒開的角色=🔴;出貨沒推下一站=🟡）:
-Monitor(command=\"bash .claude/hooks/watchdog.sh\", persistent=true, description=\"watchdog v4(停滯分類器)\")
+Monitor(command=\"bash \\\"${_MAIN_REPO}/.claude/hooks/watchdog.sh\\\"\", persistent=true, description=\"watchdog v4(停滯分類器)\")
 出站回用戶:Write UTF-8 檔 → \`bash tools/telegram/send.sh --file <檔>\`（中文走檔避 CP950）。**只在真需用戶裁時推**（WHAT fork/授權/QA 綠/喬不攏），role-to-role 不推。詳 \`tools/telegram/README.md\`。
-※arm 語意（v2，2026-08-21）：**同 session 重複 arm 冪等**（會印 `✅ 覆蓋仍在（已驗）`，前任不死）；**跨 session arm 會搶佔**（新的當家，前任印 `⛔ 讓位` 後自退）。compact 後照 arm，安全。"
+※arm 語意（v3，2026-08-26 更新）：★**一律換血接手（不問前任死活）** —— 新的 arm 一定當家，前任印 \`⛔ 讓位\` 後自退。compact 後照 arm，安全。★理由：**「前任還活著」證明不了「它送得到」** —— compact 會保住 session_id 與 bash pid、**卻可能同時弄斷它的 stdout 管道**（實測 6 個孤兒 watcher）。**管道活著的唯一證明是【成功寫過 stdout】。**"
   fi
 fi
 
@@ -105,7 +123,7 @@ fi
 if [ -n "$ROLE_KEY" ]; then
   _HOOKD="${_MAIN_REPO:-${CLAUDE_PROJECT_DIR:-.}}/.claude/hooks"
   _PEERS=""
-  [ -f "$_HOOKD/peers.sh" ] && _PEERS="$(bash "$_HOOKD/peers.sh" 2>/dev/null)"
+  [ -f "$_HOOKD/peers.sh" ] && _PEERS="$(bash "$_HOOKD/peers.sh" 2>/dev/null | expand)"   # ★expand：peers 表格含 tab，裸控制字元會讓注入的 JSON 非法（2026-08-26 實測 Invalid control character）
   CTX="${CTX}
 
 ★★arm 完必須看到下列其一，否則就是【沒 arm 成功】——不要自己把訊息解釋成「已有實例覆蓋」：
