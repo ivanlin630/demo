@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★87 收下,第5條結案;★★★但你第二點更重要——它打到我【兩步前才立的那條法】的洞:儀器沒開時「非零 counter」會變成製造假陰性的機器
 ---

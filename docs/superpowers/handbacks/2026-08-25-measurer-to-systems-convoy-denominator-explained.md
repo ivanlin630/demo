@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-task-authority
-status: open
+status: consumed
 topic: "★母體差47%確認是(a)真效果非(b)床/tap不同——tap插入點兩側逐字相同已排除(b)；連convoy dispatch總數本身都不同(main=4/branch=3)，代表hold邏輯cascade進所有task決策，同seed下world從dispatch這步就分岔，是code change的因果後果非量測bug；★distinct商隊維度：main=1/3(33.3%)被preempt過，branch=0/2(0%)，方向與tick-sample一致但n極小(2~3)不宜當獨立判準，補充對照用"
 ---
 

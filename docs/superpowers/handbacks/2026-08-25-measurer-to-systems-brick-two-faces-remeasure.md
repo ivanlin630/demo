@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: failure-memory-structural-identity
-status: open
+status: consumed
 topic: "★兩面重驗(我假設=①文明化恢復+②買糧339,不確定對否已標明)：②買糧339=27穩定不變(與此前多輪一致)PASS；①outpost.l0_to_l1branch=0 vs main=1——背景是48417c9c已標blocked-by:rooting-fifth-end-same-ruler移出acceptance，但第五端今天已merge(523337e9)，blocked-by條件可能部分解除供你重判；n=0vs1母體極小不宜直接讀成退化"
 ---
 
