@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+continue):放寬版作廢回嚴格版=同意(判準靠山從診斷推論升為不變量直接推論,更硬);元教訓不重複記=正確;明確撤回信補得對;等implementer落地信
 ---
 
