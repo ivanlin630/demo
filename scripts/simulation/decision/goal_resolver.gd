@@ -98,7 +98,10 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 			var kind: String = String(prereq.get("kind", ""))
 			var cand: Dictionary = {}
 			if kind == GoalRegistry.PREREQ_RESOURCE:
-				cand = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, prereq)   # S2 買 + S3 採@地形
+				# ★接線（spec §3）：這個 caller 本來就在收集多個 candidate 進 rank 池
+				#   ⇒ 改 append_array，讓 means-end 的候選與既有手段【同池競爭】，不特別待遇。
+				out.append_array(_resource_prereq_candidates(state, team, ctx, g, gt, payoff, prereq))
+				continue
 			elif kind == GoalRegistry.PREREQ_LOCATION:
 				cand = _resolve_location_prereq(state, team, ctx, g, gt, payoff, prereq)   # S3 定位型
 			# manpower/facility/subgoal = S4-S6（無 candidate，stub 邊界）
@@ -493,6 +496,77 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 	elif Probe.enabled:
 		Probe.bump("goal.harvest.not_terrain_produced." + res)   # ★B 型：地形本來就不產（缺的是【製造】那條手段）
 	return {}   # S3 無取得手段（產=S4 設施 / same-tile founding=followup）
+
+# ★★把 means-end 磚接進決策（systems 裁 2026-08-25，spec §3）。
+#   ★磚在上一票已完成但【零 production caller】＝ dormant ⇒「為了取得 X 先做 Y」從來沒進過隊伍的腦。
+#   ★新增這支、【不改】既有 `_resolve_resource_prereq` 簽名（:362 的 caller 維持不動）。
+#   ⇒ 舊行為（買／採@地形）原樣保留，製造那條是【追加】的候選，由 argmax 自己比。
+static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: DecisionContext,
+		g: Dictionary, gt: String, payoff: float, prereq: Dictionary) -> Array:
+	var out: Array = []
+	var first: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, prereq)
+	if not first.is_empty():
+		out.append(first)
+		return out   # 買／採@地形已給出手段 ⇒ 不必再問製造（既有優先序不變）
+	# ★走到這裡＝既有兩條手段都沒有 ⇒ 問 means-end：「這東西誰產、我缺什麼」
+	var res: String = String(prereq.get("res", ""))
+	if res == "":
+		return out
+	for path in AcquisitionPaths.for_resource(state, team, res):
+		var blocked: String = String(path.get("blocked_on", ""))
+		var pkind: String = String(path.get("kind", ""))
+		var _depth: int = int(path.get("depth", 0))   # ★懷疑點(i)：util 隨 depth 的分佈
+		if pkind == "facility":
+			# ★缺設施 ⇒ 下一步是【蓋它】，走既有 facility 委派路徑（不另造 dispatch）
+			var fc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt,
+				{"facility": _facility_of_level_key(blocked), "payoff": payoff})
+			if not fc.is_empty():
+				fc["me_depth"] = _depth
+				out.append(fc)   # ★空字典不能進 out：掉出 if 外會讓 out 幾乎恆非空
+		elif pkind == "material":
+			# ★缺原料 ⇒ 遞迴結果各自成 candidate：把「缺什麼」變成一個真的可選行動
+			var sub: Dictionary = {"kind": GoalRegistry.PREREQ_RESOURCE, "res": blocked}
+			var subc: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, sub)
+			if not subc.is_empty():
+				subc["me_depth"] = _depth
+				out.append(subc)   # ★空字典不能進 out：掉出 if 外會讓 out 幾乎恆非空
+		elif pkind == "ready":
+			# ★前置全滿 ⇒ 直接製造
+			var _rc: Dictionary = _mk_candidate(team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx,
+				{"task": TeamData.TASK_MANUFACTURE, "target": team.tile_pos})
+			_rc["me_depth"] = _depth
+			out.append(_rc)
+		# ★stock 形狀【不進價值比較】（systems 裁）：只發 tap，不生 candidate。
+		#   拿流的尺量存量會系統性高估，而且錯成一個看起來正常的數字。
+		elif String(path.get("shape", "")) == "stock":
+			if Probe.enabled: Probe.bump("means_end.stock_seen." + res)
+	# ★標記來源：【產出】與【贏】是兩件事，要分開量才分得出
+	#   「接上了、有產出、但從不改變結果」這個最危險的解釋。
+	for _c in out:
+		var _cd: Dictionary = _c as Dictionary
+		_cd["means_end"] = true
+		_cd["me_res"] = res
+		_cd["me_payoff"] = payoff   # ★懷疑點(ii)：同 goal 下各 candidate 的 payoff 是否一模一樣
+	if Probe.enabled and not out.is_empty():
+		Probe.bump("means_end.candidates_emitted")
+		Probe.bump("means_end.candidates_emitted." + res)
+		# ★★分辨（systems 派）：【發展型】還是【求生型】被 dev_coeff 歸零？
+		#   ★dev_coeff = food_days / DESPERATION_DAYS ⇒ 絕境時【所有】goal-derived candidate 都歸 0。
+		#   ★快餓死不該想擴張 ＝ 正確；但「為了活下去而必須先做的事」也被壓死 ＝ 可能錯。
+		#   ★所以要同時記【服務哪個 goal】與【當下是不是絕境】。
+		Probe.bump("means_end.by_goal." + gt)
+		if ctx != null and ctx.food_days < DecisionTerms.DESPERATION_DAYS:
+			Probe.bump("means_end.desperate_by_goal." + gt)
+			Probe.bump_sample("means_end.desperate", {"gt": gt, "res": res,
+				"food_days": snappedf(ctx.food_days, 0.01), "team": team.team_id}, 60)
+	return out
+
+# ★設施欄位 key → FACILITY_DEF 名（真相源反查，不建對照表）。
+static func _facility_of_level_key(level_key: String) -> String:
+	for fname in OutpostSystem.FACILITY_DEF:
+		if String((OutpostSystem.FACILITY_DEF[fname] as Dictionary).get("current_level_key", "")) == level_key:
+			return String(fname)
+	return ""
 
 # ★S3 定位型前置 handler（組件 C）：{kind:location, terrain, control?}。查隊在/有滿足 tile，未滿→tile frontier candidate。
 static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: DecisionContext,
