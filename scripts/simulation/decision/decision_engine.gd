@@ -137,6 +137,9 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				"depth": int(_mc.get("me_depth", -1)),
 				"payoff": snappedf(float(_mc.get("me_payoff", 0.0)), 0.0001),
 				"res": String(_mc.get("me_res", "")),
+				# ★是【哪一支隊】(2026-08-26)：沒這欄就只有分佈、沒有【故事的主角】，
+				#   specimen 選樣也無從指名（先前只能全隊掃或猜）。純 tap 欄位，不參與任何判斷。
+				"team": team.team_id if team != null else -1,
 				"tick": state.world.current_tick}, 200)
 	# ★接入 arc 常設可觀測（gate4 失敗反饋：反覆不 fire 要能被看見，不得靜默）：
 	#   紮營 applicable 卻不是 argmax → 記「輸給誰、差多少」；贏了記 camp.won_argmax。
