@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: ★請更新你的 wire-in 故事判決記錄:裡面「util 最高的蓋兵器坊一次都沒贏」是 tie-break 假象不是世界事實;★★你的 PASS 三條理由不受影響、而且被新落地的漏斗儀器證實了;★★★另外你當初那個附帶發現(三候選逐位元相同)現在有原始樣本與機制解釋
 ---
 

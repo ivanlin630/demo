@@ -13,12 +13,23 @@ topic: "★故事稽核判決:means-end specimen(1964 entries/142決策)三問�
 
 ## ★①「util 最高的蓋工坊候選，為什麼一次都沒贏」
 
+> **★★2026-08-26 訂正（systems 用漏斗儀器指出）：「一次都沒贏」這句作廢，見本節末【訂正】區塊。
+> 下面原文保留(劃記非刪除，供對照)，判決結論(⚠部分可解釋)不變，只換敘述。**
+
 **判：⚠ 部分可解釋，且擴延看揭出更大現象。**
 
 **tick 10 那一格是 genuine 資源不足**，非隱藏 pre-empt：
 - `maintain_weapons:location:delegate`／`build_workshop`／`build_apothecary`／`build_stable`（util 1.272，全場最高）走的是 `goal_resolver.gd:493-495` 的**「地形產地找不到手段→就地建 civilian outpost 採料」**分支，`to_task` 產出 `{build_type:"civilian", target:...}`。
 - 派工經 `faction_ai_system.gd:4056-4059` → `_dispatch_builder`（同檔 3791），成本查 `OutpostSystem.OUTPOST_COST["civilian"][0] = {material:50}`（`outpost_system.gd:11-14`）；`avail < cost*1.5`（`faction_ai_system.gd:3819`）才准派。
 - **team 三隊 tick10 `material=0`**（且尚無 own outpost，`vault` 也是 0）⇒ `0 < 75` 恆假 ⇒ 派工失敗 → `continue` 落到次佳 `駐守`。**這是【蓋一個沒設施的據點去採料】本身要 50 material，而隊伍手上是 0 —— 一個自我指涉的 catch-22。**
+
+**★【訂正】**（systems `2026-08-26-systems-to-qa-retract-the-never-won-finding.md`，漏斗儀器已落地 main）：
+「util 最高的候選一次都沒贏」這句**不是世界事實，是我從單一 tick 樣本（tick10）過度概化**。
+真相：`decision_engine` 的 argmax **tie-break 是插入序**（`return a["i"] < b["i"]`），四個 util 逐位元相同(1.2721)
+的候選「贏的是哪個名字」本來就任意；**build candidate 其實贏了 argmax 39 次**（漏斗②段 `branch_build=39`），
+**只是【贏了之後】全部（39/39）死在 `material < 1.5×cost` 這道閘**（漏斗③④段）。
+**正確敘述＝「它贏了，然後付不起」，不是「它從不贏」。** 兩種敘述指向不同地方：前者（我原本寫的）暗示決策層有鬼；
+後者（訂正後）純指材料經濟——**這正好是我原本結論『擴延看是結構性 catch-22』的更精確版本，判決方向不變，只是『從不贏』這個具體措辭要撤**。
 
 **但擴延到 90 天全窗看（team0 逐 tick `material` 軌跡，見 `scratchpad_material.txt`）**：
 - **全程 material 在 0～35 之間震盪，從未接近 50（更別說 1.5× 的 75）**。
