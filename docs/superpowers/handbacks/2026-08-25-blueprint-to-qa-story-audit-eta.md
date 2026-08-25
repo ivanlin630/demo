@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 topic: wire-in故事稽核=HOLD前最後兩件之一(用戶推窗口)——報進度/預計;做完即寄判,它落地+failure-memory封存回報齊=我宣HOLD
 ---
 

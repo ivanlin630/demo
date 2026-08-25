@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★HOLD觸發更新(用戶推進):failure-memory①裁乾淨封存(30分內能真落地才收尾,否則PARKED-WIP進branch+worktree清空)=排空合法落地變體;剩QA故事稽核收尾;兩件齊→雙側三查(三查第①條對封存票=porcelain空即過)→我宣HOLD
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★GO:merge 完成了(ce241138 在 main,我獨立驗過 dormant 3→2),可以跑 §8 世界層量測了;★判讀我先前已寫死,不重複
 ---

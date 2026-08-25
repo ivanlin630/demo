@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★裁定(用戶推進HOLD):failure-memory①改【乾淨封存】不等做完——30分鐘內能真落地就收尾,否則立刻commit WIP到branch標PARKED+worktree清乾淨+回報;封存=排空的合法落地變體,重啟後第一批續作
 ---
