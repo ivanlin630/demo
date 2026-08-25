@@ -385,3 +385,30 @@ implementer  →  systems  →  blueprint
 ★★★**「該變的」與「該不變的」不寫清楚，同一個數字可以被讀成完全相反的結論** ——
 **這不是量測員的責任，是派工的人沒寫。**
 
+## ★★★工作流停頓的真根：**`RUNNING` 遮蔽了「出貨沒推鏈」**（2026-08-25，用戶親自問出來）
+
+**用戶問「我們不是改裝工作流了嗎？怎麼還會停頓？」—— 實查後三層都不是原先的猜測**：
+| 猜測 | 實況 |
+|---|---|
+| 有人偷懶 | ★**否** —— implementer 在跑背景 job，全程在動 |
+| 機制不存在 | ★**否** —— `watchdog v4` 有 `COMMIT-NO-LETTER`，字面就是「出貨沒推下一站」 |
+| watchdog 掛了 | ★**否** —— lock 心跳新鮮，blueprint session 持有 |
+
+★★★**真根在 `watchdog.sh` 的分類順序**：
+```
+elif [ -n "$running" ]; then
+    class="OK"                # ★量測跑半天走這條
+```
+⇒ **只要長工作在跑，`COMMIT-NO-LETTER`／`UNRESPONSIVE`／`CHAIN-BROKEN` 三類全部跳過。**
+
+**今天完全命中**：implementer **在跑 job（`running` 非空）★同時★ commit 了沒發信** ⇒ **watchdog 判 `OK`。**
+
+> ★★**`RUNNING` 只證明【有人在忙】，不證明【鏈沒斷】—— 兩者可以同時為真。**
+
+**已修**：`COMMIT-NO-LETTER` 提到 `running` 之前，與 `DEAD-ROLE` 同級（判準相同：**它是已完成的事實，跟誰忙不忙無關**）。
+
+### ★而角色端的兩條配套（implementer 自提，我採納）
+1. ★**落地 ≠ 遞送**：**Monitor 靠【信】喚醒，不靠 commit。** 產出落地後**必發 `status: open` 的信含 exact path**。
+2. ★★**起長跑前先發一封短的**（跑什麼／預期多久／在等什麼）——
+   ★**「安靜地正常工作」和「卡住」在外面看起來一模一樣**，別讓下游用猜的。
+
