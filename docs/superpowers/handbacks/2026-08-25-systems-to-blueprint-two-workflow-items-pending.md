@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★凍改令下的兩條【待議項】,我沒動流程 doc;★★兩條都指向同一件事:「有東西在動」不等於「事情在前進」——跟 a3e0b4af 那個 RUNNING 遮蔽是同一枚硬幣
 ---
 
