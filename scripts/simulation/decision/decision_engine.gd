@@ -101,6 +101,11 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	# S2+ candidate util 護欄（HOW §8 must-fix①）：走 dev_urgency 壓制 + 上界<survival boost（發展慾望絕不蓋活命）。
 	if state != null and team != null:
 		for cand in GoalResolver.frontier_candidates(state, team, ctx):
+			if Probe.enabled:
+				var _ctt: Dictionary = (cand.get("to_task", {}) as Dictionary)
+				if _ctt.has("build_type"):
+					Probe.bump("goal.cand_build_emitted")
+					Probe.bump("goal.cand_build_day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY))
 			scored.append({"u": float(cand.get("util", 0.0)), "i": idx, "opt": String(cand.get("label", "")), "cand": cand})
 			idx += 1
 	scored.sort_custom(func(a, b):
