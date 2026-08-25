@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★正式立法(用戶已授權,原話「好 寫入」2026-08-26):單一用戶窗口制入00_roles全角色節——要用戶裁的寄blueprint標【呈用戶】,禁各自對用戶終端呈報;與既有「下游禁中斷用戶」併一條≤3行;前一輪退回=我搶跑(用戶當時只是問),本輪已真授權
 ---
 

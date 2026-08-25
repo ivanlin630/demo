@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: local-value-blind-callsites
 topic: R² 判決:ISSUES(premise_contradiction)——:952 不是純 NPC 路徑,player_command_system 也走得到
 ---
