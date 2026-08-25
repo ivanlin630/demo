@@ -16,6 +16,20 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 > - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
 > ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
 
+### ⏳★★材料經濟結構性 catch-22：**蓋採料點要 50 material，而隊上恆 0~35 從未達標**（2026-08-26，wire-in specimen 90 天逐筆讀出，blueprint 騎士條款②）
+
+**事實**：90 天全窗，隊上 `material` 在 **0~35 之間震盪、從未達到 50** ⇒ **「蓋一個能產材料的據點」永遠付不起。**
+★**自我指涉鎖**：要材料 → 要蓋採料點 → 蓋採料點要材料。與**貧困陷阱**、**建材 1.5x 閘**同族
+（同窗 `dispatch_builder.attempt` **41/41 ＝ 100% 全卡建材閘**）。
+
+★★**這不是 means-end 磚的 bug，恰恰相反**：**磚提對了案（`util 1.272` 全場最高的「去蓋」），
+是世界真的付不起** —— ★**磚的價值就在於讓這件事第一次【可見】。**
+
+**歸屬**：材料/經濟 arc 積壓，**與 `stock-vs-flow`／material arc 對齊後才開票**（blueprint 定：非 wire-in 範圍）。
+★**開票前必答的一題**：**是「產得太少」還是「產了但到不了要蓋的人手上」？**
+—— ★★**這正是 [[project_economy_arc]] 的 meta-pattern（world-level 夠、local/team-level 不夠）**，
+**別在沒分辨這兩者之前先調 cost。**
+
 ### ★material-need bootstrap gap（code-provable，reviewer R² 2026-07-30 揭）
 `NeedOracle.need_keep(material)` 對**無 outpost 隊結構性恆 0**：`_self_use(material)` material∈`PURE_INTERMEDIATE`(need_oracle:100,111)→0；`_supply_chain` 無設施→0；`_construction_facility_need` `_find_own_outpost==(-1,-1)`(need_oracle:38-40)→0。∴ `goal_resolver:197` `holding>=need_keep(0)` 恆真→吐空、**founding 分支(:206-219「★A1 founding」)碰不到**。**⇒ 雞生蛋 bootstrap gap**：無 outpost 隊永不「想要」material（need_keep≡0）→永不因缺料立國拿料；material-founding 動機**只對已有 outpost + 缺料設施需求的隊**存在（established 隊建 secondary forest outpost 供設施）。**fresh 隊 settle-motive 走 settle_fit（上述三段①，已知 flat/broken）非 material。** 這是 A1「缺料→立國」假設的 code-provable 修正：該動機對 fresh 隊不存在（bootstrap gap）、對 established 隊 gated on need_keep>0。折入 means-end 全系統（need 沿依賴鏈上傳 chaining 該讓「想建設施→缺料→缺 outpost→想 found」串起來）。連 [[project_food_flow_runway]] measure-first Step0（①fixture 據此修＝established 隊測 live secondary-founding，非 fresh 隊死 fixture）。**用戶兩原則**（memory `feedback_whole_system_first`）：①健全系統才有價值模擬結果 ②整個系統做完當 whole 才 measure，非邊建邊 patch。**∴ material 全 PARK**（settle-motive/伐木場/regen/初始庫存/gate②/BUY 弱閥）until **means-end/長程計畫全系統**（2026-07-19-long-range-planning-brainstorm.md，scope=B 全四塊：慾望 registry × means-end 依賴圖 × applicability 湧現順序 × 折現/承諾）設計+建完當一個 whole。L1 大功能，brainstorm（用戶主導）→spec→plan→implement。★架構 orientation：機制大半已在（`option.applicable`=前置 gate、`rank_scored`=湧現順序、`NeedOracle`=need 傳播），缺口=(a)need 沿依賴鏈上傳 chaining (b)goal-as-chainable-option → 實作=擴非新引擎。
 
