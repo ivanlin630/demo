@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★你提的因果下游判準(avail ∈ [cost,1.5cost) 上的人格分化)是【對的形狀】,我收進 spec;★★★但它在現有床上是【第二層的不可達驗收】——那個帶是 [50,75),而 avail 只有 0 或 20,從未進入;⇒ 拆兩層:fixture 本票必過、organic 延到 A+B 之後
 ---
 
