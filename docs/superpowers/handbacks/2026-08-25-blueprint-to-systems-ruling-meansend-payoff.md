@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★WHAT裁定:means-end payoff=繼承所服務goal的payoff(選項a);鏈的代價由真實延遲+真實資源走折現/成本端計價一次,禁另設per-step折價常數(=手抄物理+雙重計價);dev_coeff撤回收,地板②留帳同意;tap破壞控制流=觀測儀器改變被觀測物第4例入memory積壓
 ---
 

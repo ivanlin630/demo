@@ -30,6 +30,9 @@ const FUNC_KINDS: Array = [
 	"teams_erased",        # WorldState.erase_teams（同批死亡）
 	"betrayed",            # ★DiplomaticAiSystem._execute_betrayal（受害方＝ally_team）
 	"convoy_stranded",     # FactionAISystem._convoy_go_independent（回不了母隊→轉獨立，帶著貨自謀生路）
+	"construction_stalled",     # ★零進度持續 ≥ 耐性窗。★【不是】失敗：量到的 3 個工地後來全部蓋完。
+	                            #   保留它是因為它是「開了工卻沒人上工」的唯一觀測器，丟掉等於丟線索。
+	"construction_abandoned",   # ★承諾【真的消失】：換 task 且不 serves ／ 工地易主。這個才是執行型失敗進料口。
 	"plan_invalidated",    # ★FailureMemory.record_invalidation（當前計畫已不可行→該隊當 tick 重想）
 ]
 

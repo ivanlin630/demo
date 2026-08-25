@@ -40,11 +40,9 @@ const NON_PROGRESSIVE: Array = [TeamData.TASK_IDLE, TeamData.TASK_FLEE]
 # 否則腳下（remote founding 子隊 on-site / 其他 build）。修「團離開→persist 查 team.tile_pos 錯 tile→floor miss→
 # abandoned corvee stall forever」根（self-knowledge corvee_site 非 god-view）。
 static func _build_tile(state: WorldState, team: TeamData) -> HexTileData:
-	if team.corvee_site != Vector2i(-1, -1):
-		var ct: HexTileData = state.world.tiles.get(team.corvee_site.x * 1000 + team.corvee_site.y)
-		if ct != null and ct.construction_team_id == team.team_id and ct.construction_ticks_left > 0:
-			return ct   # 自己未完 corvee 工地（離開仍認得）
-	return state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	# ★單一定義：收斂到 `CommitmentFields.build_tile`（原本這裡與 unfinished() 各有一份，
+	#   窄的那份看不到「沒經過 commit-hook 就在蓋」的隊 ⇒ 承諾對 hold/stall 隱形）。
+	return CommitmentFields.build_tile(state, team)
 
 # 算持守強度 + 寫 team.persist_strength（決策層 rank cadence 呼）。純算術零 RNG。
 static func compute(state: WorldState, team: TeamData) -> float:

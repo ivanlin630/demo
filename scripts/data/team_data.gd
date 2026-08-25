@@ -172,6 +172,20 @@ var info_eval_next_tick: int = 0          # ★資訊網 Part2 side-action:下�
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻
 # ② 絕境階梯失敗回饋（stall→硬排除換格）。committed=_trigger_survival 蓋章真 option 字串(分辨掠奪/佔村皆TASK_ATTACK)。
+# ★承諾停滯偵測 baseline（convoy-return-task-authority v2 建設版 stall-detector 2026-08-25）：
+#   讀的是【進度事實】（工地 person-ticks 有沒有在減少／convoy 有沒有接近終點），
+#   不是「有沒有被折價」——決策層與仲裁層互不相通，那條已由 R² 打掉。
+var commit_stall_kind: String = ""
+var commit_stall_site: String = ""   # ★baseline 綁在【哪一個工地】上（換工地＝換 episode）
+var commit_stall_tick: int = 0
+var commit_stall_progress: float = 0.0
+var commit_stall_latched: bool = false   # ★同一工地發過 stalled 就不再發，直到進度真的動過（次數不膨脹）
+var commit_stall_episode_tick: int = 0   # ★episode 起點：latch 不重置它，事件才帶得出【累計】等待
+# ★★身分【在 episode 開始時快照】（systems 裁 2026-08-25）：
+#   放棄是【過去事件】，偵測到它的那一刻隊多半已改派 ⇒ 讀 current_dispatch_id 會記成新任務的失敗。
+#   判準：「我讀的這個欄位，從事件發生到我讀它，會不會被別人改？」——會 ⇒ 必須快照。
+var commit_stall_id: String = ""       # 開工當下的結構身分（帶下來的，不反解）
+var commit_stall_target: String = ""   # 開工當下的目標
 var survival_committed_option: String = ""   # 現承諾的 survival option 字串（"" = 未承諾/待重蓋）
 var survival_committed_tick: int = 0         # 蓋章 tick（stall 計時 baseline）
 var survival_committed_food: float = 0.0     # 蓋章時 food_days baseline（relief before/after 比基準）

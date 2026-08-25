@@ -52,6 +52,23 @@ static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
 # 嘗試設 task。優先權嚴格大於現任才搶得動（同層先到先得）。
 # state 供抗命判定讀 leader；回 true = 已設；false = 被現任擋下。
 # 呼叫端必須處理 false：被擋時不得執行配套副作用（prosperity_target_id 等）。
+# ★convoy 票儀器（2026-08-25，純觀測、Probe-gated、零 RNG）：
+#   ★第一趟只要一格分佈：RETURN 期間 `current_task` 被改寫時【走哪一條路】。
+#   窮盡確認（`grep -rn "current_task = " --include=*.gd scripts/simulation/`）：
+#   對一支【已存在】的 porter 而言，寫入路只有 `try_set` / `release` / `transition` 三條
+#   （其餘命中是「新隊建立豁免」與 recruit_tutorial，寫的是別的隊；decision_context 那筆是【讀】）。
+#   ⇒ 這三顆掛滿 ＝ 母體完整，沒有「其他」那一格。
+static func _note_convoy_rewrite(team: TeamData, path: String, new_task: String) -> void:
+	if String(team.task_extra_data.get("convoy_phase", "")) != "RETURN":
+		return
+	if new_task == team.current_task:
+		return   # 同 task（更新 target）不算改寫
+	Probe.bump("convoy.rewrite." + path)
+	Probe.bump("convoy.rewrite.%s.%s" % [path, new_task])
+	Probe.bump_sample("convoy.rewrite", {"team": team.team_id, "path": path,
+		"from": team.current_task, "to": new_task, "from_prio": team.task_priority,
+		"reason": team.task_reason, "persist": snappedf(team.persist_strength, 0.001)}, 40)
+
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "") -> bool:
 	if team.combat_target != -1:
@@ -67,12 +84,26 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 	# 同 task（target 更新非搶班）不擋。persist_strength progressive-only 已保證只 progressive committed 動作有值（FLEE/IDLE=0）。
 	# ★latch 反例：單點門檻 return false（非 skip reeval 硬鎖）——被擋者下 tick 照評、危機/玩家照打斷、committed 隊自跑決策、
 	#   完成/timeout 就釋放 persist 歸 0 → 世界照演化不凍。
+	# ★★v2（2026-08-25）：hold 讀【未完成的承諾】這個事實，不再只讀 `current_task` 這個
+	#   會被 `release()` 清掉的代理 —— 否則任何肯先 release 的 caller 都無條件通過。
+	#   ⛔ 59 個 caller 不改、`release-first` idiom 保留：正當退場照走，
+	#   ★但「先 release 再換去做別的」不再自動繞過持守。
+	#   ★服務同一承諾的 task（復工）不擋 —— 見 CommitmentFields.serves。
+	var _commit: Dictionary = CommitmentFields.unfinished(state, team)
+	var _held_commit: bool = not _commit.is_empty() \
+			and not CommitmentFields.serves(String(_commit.get("kind", "")), new_task)
 	if new_task != team.current_task \
-			and team.current_task in PROGRESSIVE_HOLD_TASKS \
+			and (_held_commit or team.current_task in PROGRESSIVE_HOLD_TASKS) \
 			and priority < PRIO_THREAT and team.task_priority < PRIO_THREAT \
 			and priority != PRIO_PLAYER \
 			and team.persist_strength > PERSIST_HOLD_THRESHOLD:
-		if Probe.enabled: Probe.bump("persist.hold")
+		if Probe.enabled:
+			Probe.bump("persist.hold")
+			# ★§N 兩欄之②：被 hold 擋下的次數（【該】上升）。與①合法退場分開報 ——
+			#   只看「被卸除次數下降」的話，「誤擋正當退場」會長得跟成功一模一樣。
+			if _held_commit:
+				Probe.bump("commit.hold_blocked")
+				Probe.bump("commit.hold_blocked." + String(_commit.get("kind", "")))
 		return false
 	if team.current_task == TeamData.TASK_IDLE or priority > team.task_priority:
 		# 漏斗站4探針（純觀測）：TRADE 在途被搶 → 記誰搶走（new_task|source）
@@ -83,6 +114,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
+		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
 		team.task_start_tick = state.world.current_tick
 		return true
 	# A1a source-gated equal-priority self-replace：引擎每 cadence 的 rank[0] 同層換掉
@@ -103,6 +135,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
+		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
 		team.task_start_tick = state.world.current_tick
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
@@ -113,6 +146,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			team.current_task = new_task
 			team.move_target = move_target
 			team.task_priority = priority
+			if Probe.enabled: _note_convoy_rewrite(team, "try_set_defy", new_task)
 			team.task_reason = "defy_" + _source
 			team.task_start_tick = state.world.current_tick
 			return true
@@ -125,6 +159,20 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 
 # task 完成 / 取消 / 釋放條件達成 → 回 idle + priority 歸 0
 static func release(team: TeamData) -> void:
+	# ★§N 兩欄之①：【合法退場】次數（不該下降）。判準用欄位 proxy（release 拿不到 state）：
+	#   身上沒有任何未完成承諾標記 ＝ 這次卸任務沒有丟下任何東西。
+	#   ★①掉 ＝ 正當退場被誤擋 ＝ 回歸（latch 前兆）；②升 ＝ 想換 task 被擋住 ＝ 正是要的。
+	if Probe.enabled:
+		# ★逐標記分開數：`order` 是【沒有進度事實】的那一類（見 CommitmentFields.measurable），
+		#   把它和工地／convoy 混在一個「帶著承諾」總數裡，會讓 ① 這一欄無法據以行動。
+		var _m_corvee: bool = team.corvee_site != Vector2i(-1, -1)
+		var _m_convoy: bool = String(team.task_extra_data.get("convoy_phase", "")) != ""
+		var _m_order: bool = team.order_target_id != -1
+		if _m_corvee: Probe.bump("commit.release_with.corvee")
+		if _m_convoy: Probe.bump("commit.release_with.convoy")
+		if _m_order: Probe.bump("commit.release_with.order")
+		Probe.bump("commit.release_with_commitment" if (_m_corvee or _m_convoy or _m_order) else "commit.release_clean")
+	if Probe.enabled: _note_convoy_rewrite(team, "release", TeamData.TASK_IDLE)
 	team.current_task = TeamData.TASK_IDLE
 	team.move_target = Vector2i(-1, -1)
 	team.task_priority = 0
@@ -146,6 +194,7 @@ static func transition(state: WorldState, team: TeamData, new_task: String, prio
 		return                                                # crisis-免疫（補 transition 洩漏，對齊 try_set:45）
 	if team.task_priority >= PRIO_THREAT and priority < team.task_priority:
 		return                                                # emergency-respect：擋外部低 prio in-place stomp
+	if Probe.enabled: _note_convoy_rewrite(team, "transition", new_task)
 	team.current_task = new_task
 	team.task_priority = priority
 	team.task_reason = _source

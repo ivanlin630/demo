@@ -4820,6 +4820,8 @@ func _run_sim_test() -> void:
 	_test_meansend_cycle_terminates_loudly()
 
 	_test_sellable_reads_granary()
+	_test_convoy_return_holds_against_routine()
+	_test_convoy_return_yields_to_crisis()
 
 	# ★失敗計數的總結：讓【程式】知道，不是讓【人眼】知道。
 	if _hard_fail_count > 0:
@@ -16727,3 +16729,75 @@ func _hard_fail(msg: String) -> void:
 	_hard_fail_count += 1
 	push_error(msg)   # ★吐到 stderr：掃描抓得到，且不中止
 	print(msg)
+# ★convoy RETURN 不被搶班 —— ★單元測試而非長跑 A/B（systems 裁 2026-08-25）。
+#   ★理由：hold 改動會 cascade 進【每一個】task 決策 ⇒ 同 seed 也從 dispatch 那步就分岔
+#   （main 4 支 / branch 3 支）⇒ 下游任何聚合指標都不可比。
+#   ⇒ 驗「邏輯本身」而不是「世界統計」：n 由列舉競爭 task 決定，
+#     ★不用求世界剛好產生 2~3 支商隊。
+#
+# ★★每一例都配【陽性對照】：同一個 fixture 關掉 hold 時【必須真的被 preempt】。
+#   ★否則這個測試是在測空氣 —— 它會通過，但通過的原因可能是「這個 fixture 根本不會發生 preempt」。
+func _mk_returning_convoy(state: WorldState, pos: Vector2i) -> TeamData:
+	var team := _mk_unified_desperate_team(state, pos, {"勤奮": 0.6})
+	team.current_task = TeamData.TASK_CONVOY
+	# ★真實的搶班路徑是【同層 self-replace】：`priority > task_priority` 那條在這裡永遠不成立
+	#   （routine 不會帶更高優先序），所以 production 裡 convoy 被搶走是走
+	#   `priority == task_priority 且兩側 source 都在 ENGINE_SOURCES` 那一支。
+	#   ★血證：我第一版 fixture 把競爭者放在 PRIO_FACTION(30)、convoy 在 50
+	#   ⇒ 被優先序擋住、根本輪不到 hold ⇒ 那個 PASS 是【因為錯的理由】通過的，
+	#   而這件事是【陽性對照】当場拓出來的。
+	team.task_priority = TaskArbiter.PRIO_DISPATCH
+	team.task_reason = "unified"       # ★現任也必須是 engine-owned，self-replace 才適用
+	team.task_extra_data = {"convoy_phase": "RETURN", "home_pos": Vector2i(9, 9)}
+	team.persist_strength = 0.9      # 高於 PERSIST_HOLD_THRESHOLD
+	team.combat_target = -1
+	return team
+
+func _test_convoy_return_holds_against_routine() -> void:
+	print("--- convoy RETURN：routine 搶不走（每種競爭 task 各一例 + 陽性對照）---")
+	# ★母體＝會來搶的 routine task 種類，逐一列舉（不是抽樣）
+	var competitors: Array = [TeamData.TASK_TRADE, TeamData.TASK_BUILD,
+		TeamData.TASK_FORAGE, TeamData.TASK_CONSTRUCT]
+	var held: int = 0
+	var control_preempted: int = 0
+	for i in competitors.size():
+		var comp: String = String(competitors[i])
+		var state := WorldState.new()
+		var pos := Vector2i(2 + i, 2)
+		_p2a_place_tile(state, pos)
+		var team := _mk_returning_convoy(state, pos)
+		# ①hold 生效：routine 優先序搶不走 RETURN 中的 convoy
+		TaskArbiter.try_set(state, team, comp, pos, TaskArbiter.PRIO_DISPATCH, "unified")
+		assert(team.current_task == TeamData.TASK_CONVOY,
+			"★%s 搶走了 RETURN 中的 convoy（current_task=%s）" % [comp, team.current_task])
+		held += 1
+
+		# ★★②陽性對照：同一 fixture 關掉 hold（persist 低於門檻）⇒ 必須【真的】被 preempt。
+		#   ★這一格才證明上面那個 assert 有意義 —— 否則它可能只是「這個 task 本來就搶不動」。
+		var state2 := WorldState.new()
+		_p2a_place_tile(state2, pos)
+		var team2 := _mk_returning_convoy(state2, pos)
+		team2.persist_strength = 0.0   # ＜ PERSIST_HOLD_THRESHOLD ⇒ hold 不生效
+		TaskArbiter.try_set(state2, team2, comp, pos, TaskArbiter.PRIO_DISPATCH, "unified")
+		assert(team2.current_task == comp,
+			"★★陽性對照失效：關掉 hold 後 %s 仍搶不走 ⇒ 上面那個 PASS 是在測空氣（current_task=%s）"
+				% [comp, team2.current_task])
+		control_preempted += 1
+	assert(held == competitors.size() and control_preempted == competitors.size(),
+		"覆蓋不全：held=%d control=%d / 母體=%d" % [held, control_preempted, competitors.size()])
+	print("[OK] _test_convoy_return_holds_against_routine（%d 種競爭 task，每種都有陽性對照）" % competitors.size())
+
+# ★反面：hold 不是硬鎖 —— 危機軸（≥PRIO_THREAT）與玩家命令仍搶得走。
+#   ★這條是「防修回頭」：若有人為了讓上面那個測試更綠而把 hold 改成無條件，這裡會紅。
+func _test_convoy_return_yields_to_crisis() -> void:
+	print("--- convoy RETURN：危機/玩家仍搶得走（hold 不是硬鎖）---")
+	for lvl in [TaskArbiter.PRIO_THREAT, TaskArbiter.PRIO_SURVIVAL, TaskArbiter.PRIO_PLAYER]:
+		var state := WorldState.new()
+		var pos := Vector2i(7, 7)
+		_p2a_place_tile(state, pos)
+		var team := _mk_returning_convoy(state, pos)
+		TaskArbiter.try_set(state, team, TeamData.TASK_FORAGE, pos, int(lvl), "unit_test_crisis")
+		assert(team.current_task == TeamData.TASK_FORAGE,
+			"★priority=%d 應該搶得走 RETURN convoy（hold 不得是硬鎖），實際 current_task=%s"
+				% [int(lvl), team.current_task])
+	print("[OK] _test_convoy_return_yields_to_crisis")

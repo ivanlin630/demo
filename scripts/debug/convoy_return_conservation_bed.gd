@@ -142,11 +142,43 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 			residual[f] = acc
 	lines.append("  下場分佈：%s" % str(fates))
 	lines.append("  ★殘留（未回母隊、還在 porter 身上）：%s" % str(residual))
-	# ★measurer L3 tap(2026-08-25,convoy-return-task-authority票main baseline對照欄)：純report,零production改動
+	# ★systems票(two-stale-remeasures)：§N兩欄重量(現在的commit,RNG副作用已修)
+	var _rel_clean: int = int(Probe.counts.get("commit.release_clean", 0))
+	var _rel_with: int = int(Probe.counts.get("commit.release_with_commitment", 0))
+	lines.append("★★★§N兩欄（現在commit重量）：")
+	lines.append("  ①合法退場總次數(release()呼叫總數,不該下降) = %d (clean=%d + with_commitment=%d)" % [_rel_clean + _rel_with, _rel_clean, _rel_with])
+	lines.append("    帶承諾標記細分：corvee=%d convoy=%d order=%d" % [
+		int(Probe.counts.get("commit.release_with.corvee", 0)), int(Probe.counts.get("commit.release_with.convoy", 0)),
+		int(Probe.counts.get("commit.release_with.order", 0))])
+	lines.append("  ②被hold擋下總次數(commit.hold_blocked,該上升) = %d" % int(Probe.counts.get("commit.hold_blocked", 0)))
+	lines.append("    persist.hold(母口徑,含PROGRESSIVE_HOLD_TASKS非承諾型) = %d" % int(Probe.counts.get("persist.hold", 0)))
+	var _hold_kinds: Dictionary = {}
+	for hk in Probe.counts.keys():
+		var hks: String = String(hk)
+		if hks.begins_with("commit.hold_blocked."):
+			_hold_kinds[hks.trim_prefix("commit.hold_blocked.")] = int(Probe.counts[hk])
+	lines.append("    hold_blocked依承諾kind分佈 = %s" % str(_hold_kinds))
 	var _ret_tick: int = int(Probe.counts.get("convoy.return_tick", 0))
 	var _ret_is_convoy: int = int(Probe.counts.get("convoy.return_task_is_convoy", 0))
-	lines.append("★main baseline：RETURN期間task=運輸佔比 = %d/%d = %s" % [
-		_ret_is_convoy, _ret_tick, ("%.1f%%" % (100.0 * float(_ret_is_convoy) / float(_ret_tick)) if _ret_tick > 0 else "無母體")])
+	lines.append("  ★主指標-convoy：RETURN期間task=運輸佔比 = %d/%d = %s" % [
+		_ret_is_convoy, _ret_tick, ("%.1f%%" % (100.0 * float(_ret_is_convoy) / float(_ret_tick)) if _ret_tick > 0 else "無母體(RETURN期間0次採樣)")])
+	var _ret_other: Dictionary = {}
+	for rk in Probe.counts.keys():
+		var rks: String = String(rk)
+		if rks.begins_with("convoy.return_task_other."):
+			_ret_other[rks.trim_prefix("convoy.return_task_other.")] = int(Probe.counts[rk])
+	lines.append("    RETURN期間被搶去做別的task分佈 = %s" % str(_ret_other))
+	lines.append("  ★主指標-建設：開工後工地被自己隊放掉(construction_abandoned)事件數 = %d" % int(Probe.counts.get("commit.abandon_fire", 0)))
+	var _abandon_reasons: Dictionary = {}
+	for ak in Probe.counts.keys():
+		var aks: String = String(ak)
+		if aks.begins_with("commit.abandon_fire."):
+			_abandon_reasons[aks.trim_prefix("commit.abandon_fire.")] = int(Probe.counts[ak])
+	lines.append("    abandon_fire依reason分佈 = %s" % str(_abandon_reasons))
+	lines.append("  ★latch監測(stall-detector觸發率,假設不靜默)：")
+	lines.append("    commit.stall_fire(有觸發) = %d" % int(Probe.counts.get("commit.stall_fire", 0)))
+	lines.append("    commit.stall_latched_suppressed(觸發被latch壓下) = %d" % int(Probe.counts.get("commit.stall_latched_suppressed", 0)))
+	lines.append("    commit.stall_skip_unmeasurable = %d" % int(Probe.counts.get("commit.stall_skip_unmeasurable", 0)))
 	# ★systems票denominator-is-also-a-result：distinct商隊維度(至少被preempt一次的商隊數/總商隊數)
 	var _all_convoys: Dictionary = {}
 	if Probe.samples.has("convoy.return_distinct"):
