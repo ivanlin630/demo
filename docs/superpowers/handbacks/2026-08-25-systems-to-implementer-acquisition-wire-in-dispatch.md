@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 tier: full
 topic: ★dispatch:讓 dormant 的 means-end 磚真的進決策(R² CLEAN);★★這次「fp 該變」reviewer 親追呼叫鏈驗過成立,不是我又寫一條不可達判準;★交付閘六條
