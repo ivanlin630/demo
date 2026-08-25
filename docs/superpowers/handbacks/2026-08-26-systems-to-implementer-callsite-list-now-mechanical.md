@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★②③ 都收下(D=survival_layer_unify_test 3 處、C 是 5 處);★★★你的 §④ 我採用並做成常駐工具 closure-callsite-scan.sh——因為【人眼列清單】才是這票一直不齊的根因;★接住清單改成機械產生+假陽性也留檔,動工吧
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★reviewer CLEAN → 動工;★★驗收① 我又改了一次(四訂)但這次是【放寬掃描範圍】不是改 scope,九個 default 與 A/B/C 一字未動;★★★附我剛踩的第四次同型錯,免得你照抄我的 grep
 ---
