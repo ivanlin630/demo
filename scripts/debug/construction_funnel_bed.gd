@@ -300,6 +300,35 @@ func _run() -> void:
 	lines.append("  ★扣除：military-only 3（smeltery／weaponsmith／armorsmith）——本床 11 座 outpost 全 civilian")
 	lines.append("     證據：resolver.empty_wrong_outpost_type.have.civilian.need.[\"military\"] = %d（單一組合）" % 		_c("resolver.empty_wrong_outpost_type.have.civilian.need.[\"military\"]"))
 	lines.append("  ⇒ ★可達母體 = 5（farming／workshop／apothecary／mint／stable）")
+	# ★★★那面牆的拒絕理由（★兩層各自對帳：wall.entry 三條、begin_entry 六條＋成功）
+	lines.append("--- ★牆的拒絕理由（★物理 vs 判斷，兩層各自對帳）---")
+	var w1: Array = ["reject_outpost_level0", "reject_not_owner", "reject_busy_construction"]
+	var w2: Array = ["reject_no_def", "reject_outpost_type", "reject_terrain", "reject_max_level",
+		"reject_no_slot", "reject_cannot_afford", "accepted"]
+	var we: int = 0
+	var w1s: int = 0
+	var be: int = 0
+	var w2s: int = 0
+	for d6 in range(31):
+		var sf6: String = ".day.%03d" % d6
+		we += _c("wall.entry" + sf6)
+		be += _c("wall.begin_entry" + sf6)
+		for a1 in w1: w1s += _c("wall." + String(a1) + sf6)
+		for a2 in w2: w2s += _c("wall." + String(a2) + sf6)
+	lines.append("  第一層 wall.entry = %d ⇒ 三條拒絕合計 %d ＋ 進入第二層 %d ⇒ %s" % [
+		we, w1s, be, ("✅一致" if w1s + be == we else "❌差 %d" % (we - w1s - be))])
+	lines.append("  第二層 begin_entry = %d ⇒ 六條拒絕＋成功合計 %d ⇒ %s" % [
+		be, w2s, ("✅一致" if w2s == be else "❌差 %d" % (be - w2s))])
+	lines.append("  ★逐條（30 天合計）：")
+	for a3 in (w1 + w2):
+		var tt3: int = 0
+		for d7 in range(31):
+			tt3 += _c("wall." + String(a3) + ".day.%03d" % d7)
+		lines.append("      %-30s = %d" % [String(a3), tt3])
+	for kw in Probe.counts.keys():
+		var kws: String = String(kw)
+		if kws.begins_with("wall.reject_no_slot.used_") or kws.begins_with("wall.reject_cannot_afford.res."):
+			lines.append("      %-44s = %d" % [kws, int(Probe.counts[kw])])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
