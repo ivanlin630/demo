@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★convoy 整票 ACCEPT(production 面讀完);★★一個邊界問題不自裁:merge 會讓 main 在凍改期間多一個 hook(該 hook 做於凍改前 07:29,非違令)——「排空」與「凍改」在這裡碰頭
 ---
 

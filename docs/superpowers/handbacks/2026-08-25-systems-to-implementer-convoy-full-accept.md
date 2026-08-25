@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★整票 ACCEPT(production 面我讀完了,補上我先前明說沒讀的那半);★★★三處達到教科書水準:機械 falsifier 取代白名單、兩份定義收斂、窮盡宣告逐一排除誤命中;★一個程序問題我呈 blueprint 不擋你
 ---
