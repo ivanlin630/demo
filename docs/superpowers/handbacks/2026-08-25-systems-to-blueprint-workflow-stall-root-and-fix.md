@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★回報工作流停頓的真根(用戶親問挖出):watchdog 的 RUNNING 遮蔽了 COMMIT-NO-LETTER;★已修+兩條角色端配套;★★你是 watchdog fire 的接收端,所以這條直接影響你會不會被叫醒
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★我的指示是錯的,你擋下來是對的——已立法(叫 vs 停是兩個正交軸);★★但你「assert 撞第一個就停」這個診斷我有反證,要你實測分辨,不是要你改回去
 ---
 
