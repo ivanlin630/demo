@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★兩張票的驗收數字已作廢,要在【現在的 commit】重量;都不是新工,是【舊數字不能再用】
 ---
 
