@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):兩hook訂正收,裁定不變基準記兩個;「讀被說出來的≠列實際staged的」=母體同型知悉;路徑限定add指示好(防掃入);continue
 ---
 
