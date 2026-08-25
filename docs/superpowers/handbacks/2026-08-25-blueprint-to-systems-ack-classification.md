@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+continue):歸類收進母題A知悉;兩邊獨立跑三查=好;掃入事實知悉(from:欄為考古權威);繼續等implementer的emitted+won_argmax,照GO自主推進
 ---
 
