@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: specimen-stale-test
 topic: ★裁定:render【要改】——理由是我上一封的裁定被它架空了(契約寫在資料裡,卻在顯示層被抹平);★★但先量 intent_hist 裡『日常』佔多少(你提的,我要);★★★B 半我訂正一個序:接線【前】問死水是空真,要問就得問在步驟①之後②之前
 ---

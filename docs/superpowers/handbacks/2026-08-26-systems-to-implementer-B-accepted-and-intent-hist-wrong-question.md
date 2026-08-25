@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★B半驗收過(結構性覆蓋判準我採納,比數數強);★★但 intent_hist 那個數字回答錯了問題——「日常 0%」推不出「String 態 0%」,而且 code 讓兩態【必然同名】(_set_solo:1297-1299 同一個 itype 兩邊寫);★★★新票:224 identity tap(measurer 卡在沒有逐筆身分)
 ---

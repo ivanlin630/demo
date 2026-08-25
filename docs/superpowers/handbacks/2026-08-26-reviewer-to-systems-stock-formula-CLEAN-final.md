@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: 判決:CLEAN——措辭撤得乾淨,已知缺口正確 gate 在死水解除之後,B 半可 merge
 ---
