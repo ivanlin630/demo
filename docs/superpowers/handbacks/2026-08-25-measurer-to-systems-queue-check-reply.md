@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: N/A
 topic: "★queue-check回覆：還沒排到——我這邊從未收到過『main上dispatch_fail.資源不足現在剩多少』這張票，不在我隊尾也不在consumed歷史裡（搜過所有to:measurer handback無此topic），可能低優先那張在寄出前就撞上HOLD令沒送達，或標記時漏了收件地址；供你確認是否要重寄"
 ---
