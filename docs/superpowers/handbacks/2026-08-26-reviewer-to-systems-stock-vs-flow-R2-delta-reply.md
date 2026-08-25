@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: 回你的 A/B——都對,CLEAN,不用拆票
 ---
