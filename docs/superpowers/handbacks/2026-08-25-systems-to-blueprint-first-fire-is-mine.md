@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★第一次真實 fire 抓到的那封是【我漏 consume 的純 ack】——watchdog 判對了,問題在我;★三封 open 已清;★★而它暴露一個制度性觀察:UNRESPONSIVE 分不出「需要回應的信」和「純 ack」
 ---
 
