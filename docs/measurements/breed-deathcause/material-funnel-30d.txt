@@ -1,0 +1,27 @@
+[peaceful_economy day 30 seed 1337] teams=12
+--- ①有沒有人去採（★不是 material 專屬——collect.gather_ran 是「有據點隊該 cadence 整批採集路徑跑了」，material 是同一迴圈裡的其中一種 res，file:line=resource_system.gd:83+299）---
+  collect.gather_ran(有據點隊跑gather的次數，非material專屬) = 791
+  collect.no_outpost_no_camp_zero_food(無據點無camp，不會採material) = 95
+  ★缺口：沒有 material 專屬的『嘗試採集』計數——gather_ran 是全資源共用閘，不能單獨拆出 material 那一支跑了幾次
+--- ②採了多少（★缺口：resource_system.gd:306-346 的 gain 從未被 tap，carry_space 硬限(:341-344)也沒有 tap）---
+  ★★這段完全量不到：沒有 material gain 的 add_amount、也沒有 carry_space 擋下次數的 bump
+  ★鄰近可用信號(不是這段本身，不當替代)：manufacture.noop_no_material(下面④) 是【製造端缺料】不是【採集端沒採到】，兩者不可互推
+--- ③採到的進了哪裡（private vs public，讀最終快照，非tap，不受 Probe 影響）---
+  private(team.resources.material，母隊層級) 加總 = 811.9，跨 12 隊（11 隊非零）
+  public(有outpost tile.public_storage.material) 加總 = 267.7，跨 11 個outpost（9 個非零）
+  ⇒ private 佔比 = 75.2%（811.9 / 1079.5）
+  ★tile 側池存量(world_generator 初始80-220+regen)不在這欄——這欄只算『已經被採集離開tile的material』落在私產還是公庫
+--- ★tile 側原始池（世界層還剩多少沒被採走，佐證『世界不缺』那句）---
+  全圖 tile.resources.material 加總 = 14769.0（69 個forest tile 佔 10406.0）
+--- ④進來的又出去多少（outflow，★逐個標明有沒有現成tap）---
+  manufacture.input_consumed(add_amount，★跨所有原料混算，非material單獨) = 0.4
+    ★缺口：這個是 ore_iron/ore_steel/gem/horses/material/tools 全部混一個總量，量不出 material 單獨吃掉多少
+  manufacture.noop_no_material(想生產但material不夠、次數) = 11
+    ★這是需求側信號（有設施+人力但material不足），不是流出量
+  manufacture.fired(製造真的RUN的次數，母體) = 79
+  order.placed.sell_material(貼material賣單次數，非數量) = 27
+  order.placed.buy_material(貼material買單次數，非數量) = 42
+    ★這是【訂單次數】不是【成交量】，order.filled 沒有拆到per-resource，量不出material真的透過交易流出/流入多少
+  ★★兩個完全沒 tap 的流出點（讀code確認存在，file:line坐實機制存在，不宣稱佔比）：
+      resource_system.gd:353 _apply_normal_tax — private→public 稅收轉移(material在NORMAL_TAX_RES內)，零tap
+      faction_ai_system.gd:4226 _fund_subteam_from_vault — 建造子隊出發時從private+public扣material付cost，零tap

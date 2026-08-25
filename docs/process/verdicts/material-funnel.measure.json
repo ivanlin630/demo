@@ -1,0 +1,59 @@
+{
+  "slice": "material-funnel-unlock",
+  "ticket": "systems票2026-08-26:森林material採不到/被消耗/沒進公庫 三選一——寫死判準,每段要分母",
+  "measured_at_commit": "main（新床 scripts/debug/material_funnel_bed.gd，純讀既有Probe.counts/amounts+WorldState最終快照，零新增production tap，零動控制流）",
+  "seed_config_days": "LW_CONFIG=peaceful_economy PERF_SEED=1337 ADHOC_DAYS=30（同建造漏斗床參數，可比）",
+
+  "★★★母體/樣本警告(先講,再報四段)": {
+    "問題描述引用的avail=0(21筆)/20(9筆)": "這組數字來自另一輪跑(90天denominator ticket，dispatch_fail.material_detail樣本，cap=30 first-N)，population=19隊/90天，跟我這輪(12隊/30天)不是同一個population，不能直接接續比較",
+    "★★重要發現": "那30筆material_detail樣本(cap=30)【全部tick=10】(即遊戲開局極早期，day≈0.04)——cap被同一批早期失敗打滿，樣本對『後續90天內其餘失敗長什麼樣』零可見度。真count(dispatch_fail.資源不足)=41，但樣本只窺見最早30筆，其餘11筆(41-30)發生在哪個tick、avail多少，現有樣本看不到，需拉高cap或改採樣策略才看得到"
+  },
+
+  "★★★四段結果(本輪12隊/30天/peaceful_economy)": {
+    "①有沒有人去採": {
+      "collect.gather_ran": 791,
+      "collect.no_outpost_no_camp_zero_food": 95,
+      "缺口": "無material專屬嘗試計數——gather_ran是全資源共用閘(resource_system.gd:83+299 for迴圈跑所有res)，material只是同迴圈裡其中一種，量不到『material那一支單獨跑幾次』"
+    },
+    "②採了多少": {
+      "缺口": "完全量不到——resource_system.gd:306-346 的gain(採集量)從未被tap，:341-344的carry_space硬限(滿載時material直接continue不採、tile也不扣)也沒有計數",
+      "不當替代警告": "manufacture.noop_no_material是製造端缺料信號，跟採集端『採到多少』是兩件事，不互推"
+    },
+    "③採到的進了哪裡(day30終態快照,非tap，讀WorldState)": {
+      "private(team.resources.material,母隊層級加總)": 811.9,
+      "private跨隊": "12隊，11隊非零",
+      "public(有outpost的tile.public_storage.material加總)": 267.7,
+      "public跨outpost": "11個，9個非零",
+      "private佔比": "75.2%（811.9 / 1079.5）",
+      "備註": "這是day30終態存量，不是『當下dispatch判定avail那一刻』的快照——跟①②③問題描述引用的avail=0樣本population不同，見上方警告"
+    },
+    "tile側原始池(佐證世界不缺)": {
+      "全圖tile.resources.material加總": 14769.0,
+      "其中forest_tile(69個)佔": 10406.0
+    },
+    "④進來的又出去多少(outflow)": {
+      "manufacture.input_consumed(add_amount)": 0.4,
+      "缺口": "這個total混算ore_iron/ore_steel/gem/horses/material/tools全部原料，量不出material單獨吃掉多少",
+      "manufacture.noop_no_material(次數)": 11,
+      "manufacture.fired(母體)": 79,
+      "order.placed.sell_material(次數非量)": 27,
+      "order.placed.buy_material(次數非量)": 42,
+      "order缺口": "只有訂單次數tap，order.filled沒拆per-resource，量不出material真實成交量",
+      "完全零tap的兩個真實流出點(讀code確認存在,不宣稱佔比)": [
+        "resource_system.gd:353 _apply_normal_tax — private→public 稅收轉移(material在NORMAL_TAX_RES內)",
+        "faction_ai_system.gd:4226 _fund_subteam_from_vault — 建造子隊出發時扣material付cost"
+      ]
+    }
+  },
+
+  "★三選一(不下結論,只列可用/不可用證據)": {
+    "採不到": "②段完全量不到，無法證實或證偽",
+    "採到了被消耗掉": "④段manufacture.input_consumed混算無法拆material；_apply_normal_tax/_fund_subteam_from_vault零tap，無法量出流出量",
+    "採到了但沒進公庫": "③段確實顯示private(75.2%)>>public(24.8%)——但這是day30終態全隊聚合，不是avail=0那個瞬間的population，不能直接當『這就是avail=0的成因』"
+  },
+
+  "landed_paths": {
+    "raw_output": "docs/measurements/breed-deathcause/material-funnel-30d.txt"
+  },
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='30'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/material_funnel_bed.gd"
+}

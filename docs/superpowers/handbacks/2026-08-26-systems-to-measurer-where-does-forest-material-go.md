@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: material-funnel-unlock
 tier: probe
 topic: ★★★一個三選一的問題:森林 material 每格初始 80-220、再生 12/日,而隊手上 0-20 —— 它是【採不到】、【採到了被消耗掉】、還是【採到了但沒進公庫】?;★這題會決定下一個 arc 的 A 件該不該做,所以判準寫死在票裡
