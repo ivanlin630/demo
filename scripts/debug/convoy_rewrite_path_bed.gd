@@ -111,6 +111,30 @@ func _dump(out_path: String, day_now: int, days: int, sd: int, cfg: String, stat
 		lines.append("  convoy.eta_vs_actual 平均 = %.3f（sum/n；1.0=兩模型同步）"
 			% (Probe.amount("convoy.eta_vs_actual_sum") / float(eta_n)))
 
+	lines.append("--- ★★§N 兩欄（必須分開報：只看總數的話，誤擋正當退場會長得跟成功一樣）---")
+	var rc: int = _c("commit.release_clean")
+	var rw: int = _c("commit.release_with_commitment")
+	lines.append("  ①合法退場 commit.release_clean            = %d   ★【不該】下降（掉＝正當退場被誤擋＝回歸）" % rc)
+	lines.append("  ①帶著未完成承諾被卸 release_with_commitment = %d" % rw)
+	for km in Probe.counts.keys():
+		if String(km).begins_with("commit.release_with."):
+			lines.append("      %-42s = %d" % [String(km), _c(String(km))])
+	lines.append("  ②被 hold 擋下 commit.hold_blocked          = %d   ★【該】上升" % _c("commit.hold_blocked"))
+	for kh in Probe.counts.keys():
+		if String(kh).begins_with("commit.hold_blocked."):
+			lines.append("    %-44s = %d" % [String(kh), _c(String(kh))])
+	lines.append("--- ★latch 解藥在不在跑（假設不靜默）---")
+	lines.append("  commit.stall_fire = %d" % _c("commit.stall_fire"))
+	for ks in Probe.counts.keys():
+		if String(ks).begins_with("commit.stall_fire."):
+			lines.append("    %-44s = %d" % [String(ks), _c(String(ks))])
+	if Probe.samples.has("commit.stall_fire"):
+		for es in (Probe.samples["commit.stall_fire"] as Array).slice(0, 10):
+			lines.append("    %s" % str(es))
+	if _c("commit.stall_fire") == 0 and rc == 0:
+		lines.append("  ★★紅燈判準：解藥零觸發 ＋ ①合法退場也是 0 ⇒ latch 已發生而沒人知道")
+	lines.append("  construction_abandoned 事件（紮根執行型失敗進料口）= %d" % _c("commit.stall_fire.construction"))
+
 	var text: String = "\n".join(PackedStringArray(lines))
 	if out_path != "":
 		var f := FileAccess.open(out_path, FileAccess.WRITE)   # 覆寫＝最新快照

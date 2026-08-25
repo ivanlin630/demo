@@ -5177,6 +5177,11 @@ func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 	if c.is_empty():
 		team.commit_stall_kind = ""   # 沒有未完成承諾 → 沒有可偵的東西
 		return
+	# ★沒有可讀的進度事實 ⇒ 不判。「量不到」不等於「沒進展」——
+	#   把量不到當成停滯，就是拿儀器的缺口當世界的事實。
+	if not bool(c.get("measurable", false)):
+		if Probe.enabled: Probe.bump("commit.stall_skip_unmeasurable")
+		return
 	var kind: String = String(c.get("kind", ""))
 	var prog: float = float(c.get("progress", 0.0))
 	var now: int = state.world.current_tick
@@ -5209,6 +5214,10 @@ func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 				Probe.bump_sample("commit.stall_fire", {"team": team.team_id, "kind": kind,
 					"waited_ticks": now - team.commit_stall_tick, "progress": prog,
 					"baseline": team.commit_stall_progress, "tick": now}, 30)
+			# ★開火後【一律重置 baseline】：否則同一段承諾每 cadence 重判 STALLED ⇒ 計數暴衝
+			#   （血證：order 那類 652 次，waited_ticks 單調變大＝同一段一直重放）。
+			team.commit_stall_tick = now
+			team.commit_stall_progress = prog
 			if kind == "construction":
 				WorldEvents.emit(state, "construction_abandoned", [team.team_id])
 				# ★放棄 ＝ 卸下這個工地（否則它會永遠掛在隊身上，偵測器每輪重放）

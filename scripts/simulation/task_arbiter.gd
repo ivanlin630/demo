@@ -163,9 +163,15 @@ static func release(team: TeamData) -> void:
 	#   身上沒有任何未完成承諾標記 ＝ 這次卸任務沒有丟下任何東西。
 	#   ★①掉 ＝ 正當退場被誤擋 ＝ 回歸（latch 前兆）；②升 ＝ 想換 task 被擋住 ＝ 正是要的。
 	if Probe.enabled:
-		var _dirty: bool = team.corvee_site != Vector2i(-1, -1) \
-			or String(team.task_extra_data.get("convoy_phase", "")) != "" or team.order_target_id != -1
-		Probe.bump("commit.release_with_commitment" if _dirty else "commit.release_clean")
+		# ★逐標記分開數：`order` 是【沒有進度事實】的那一類（見 CommitmentFields.measurable），
+		#   把它和工地／convoy 混在一個「帶著承諾」總數裡，會讓 ① 這一欄無法據以行動。
+		var _m_corvee: bool = team.corvee_site != Vector2i(-1, -1)
+		var _m_convoy: bool = String(team.task_extra_data.get("convoy_phase", "")) != ""
+		var _m_order: bool = team.order_target_id != -1
+		if _m_corvee: Probe.bump("commit.release_with.corvee")
+		if _m_convoy: Probe.bump("commit.release_with.convoy")
+		if _m_order: Probe.bump("commit.release_with.order")
+		Probe.bump("commit.release_with_commitment" if (_m_corvee or _m_convoy or _m_order) else "commit.release_clean")
 	if Probe.enabled: _note_convoy_rewrite(team, "release", TeamData.TASK_IDLE)
 	team.current_task = TeamData.TASK_IDLE
 	team.move_target = Vector2i(-1, -1)

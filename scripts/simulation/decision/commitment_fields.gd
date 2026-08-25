@@ -55,7 +55,7 @@ static func unfinished(state: WorldState, team: TeamData) -> Dictionary:
 		var t: HexTileData = state.world.tiles.get(site.x * 1000 + site.y)
 		if t != null and t.construction_team_id == team.team_id and t.construction_ticks_left > 0:
 			var total: int = OutpostSystem.construction_ticks_total(t)
-			return {"kind": "construction", "progress": float(maxi(total - t.construction_ticks_left, 0)),
+			return {"kind": "construction", "measurable": true, "progress": float(maxi(total - t.construction_ticks_left, 0)),
 				"tick": t.construction_started_tick}
 	# ②convoy 在途（任何 phase 都是未結案：貨還在身上或人還沒歸建）
 	var phase: String = String(team.task_extra_data.get("convoy_phase", ""))
@@ -64,11 +64,14 @@ static func unfinished(state: WorldState, team: TeamData) -> Dictionary:
 		var prog: float = 0.0
 		if home is Vector2i and home != Vector2i(-1, -1):
 			prog = -float(FactionAISystem._hex_dist(team.tile_pos, home))   # 越近家越大（負距離）
-		return {"kind": "convoy", "progress": prog,
+		return {"kind": "convoy", "measurable": true, "progress": prog,
 			"tick": int(team.task_extra_data.get("return_start_tick", team.task_start_tick))}
 	# ③上級指派且對象還在
 	if team.order_target_id != -1 and state.teams.has(team.order_target_id):
-		return {"kind": "order", "progress": 0.0, "tick": team.task_start_tick}
+		# ★`order` 沒有進度事實可讀（上級指派只有「對象還在」這個布林）
+		#   ⇒ measurable:false ★沒有事實就【不給判決】，不是把「量不到」當成「沒進展」。
+		#   血證：沒有這欄時，stall-detector 對 order 每 cadence 判 STALLED ⇒ 652 次假觸發。
+		return {"kind": "order", "measurable": false, "progress": 0.0, "tick": team.task_start_tick}
 	return {}
 
 static func has_unfinished(state: WorldState, team: TeamData) -> bool:
