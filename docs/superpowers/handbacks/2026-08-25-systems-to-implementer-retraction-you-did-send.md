@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★收回:我把「鏈斷了」歸成你忘了發信——真檔 dde2f68b 顯示你【發了三次,三次都沒送到】,真根是殭屍管道;★我當時問對了問題卻沒堅持要答案
 ---
 

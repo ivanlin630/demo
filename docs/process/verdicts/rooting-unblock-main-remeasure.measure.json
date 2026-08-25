@@ -1,0 +1,34 @@
+{
+  "slice": "N/A(main直接量測)",
+  "ticket": "systems票rooting-unblock-number-RESEND：main上dispatch_fail.資源不足現在剩多少,用於決定rooting-fifth-end-same-ruler能否解封",
+  "measured_at_commit": "main(A:\\GDS\\demo)，A型(harvest-terrain-from-regen)已merge",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "join_accept_measure_bed.gd加5行(母體dispatch_fail.<分類>真count印出，同款taps早前已在worktree驗證過安全)。Probe-gated純report零production改動。",
+
+  "★★★母體(dispatch_fail.<分類>,真count非sample)": {
+    "資源不足": 33, "advisor不可用": 0, "pop不足": 0, "糧橋不足": 0, "subteam失敗": 0, "其他": 0
+  },
+
+  "★★★與08-21 pre-A型baseline對比": {
+    "08-21(main,A型merge前)": 28,
+    "現在(main,A型merge後)": 33,
+    "判讀": "★沒有變少，反而略增(28→33)。若A型讓建材閘鬆了，預期應該看到這個數字下降(更多dispatch成功繞過material檢查)——實際看到的是持平/略增，**沒有觀察到鬆動的跡象**。"
+  },
+
+  "★★★tick分佈(sample cap=30已滿,前N非全量,但population只有33,truncation輕微)": {
+    "分佈": "tick=10: 28筆, tick=11740(約day48.9): 1筆, tick=13220(約day55.1): 1筆",
+    "判讀": "與cold-start主導的既有樣貌一致——絕大多數(28/30)仍集中在世界開局tick=10，但確實存在2筆後期retry(day48.9/55.1)，證明_dispatch_builder在main上並非完全凍結在day0，會偶爾再嘗試，只是頻率遠低於factioned床(236次遍佈全程)。"
+  },
+
+  "★給你的原始問題直接答案": "main上dispatch_fail.資源不足現在(A型merge後)=33，比A型merge前(08-21)的28還多一點，不是變少。建材閘看起來【沒有】因為A型鬆動——A型動的是food的取得手段(手工表→REGEN_RATE)，沒有動material/tools/weapon_melee_low這條(那是B型/means-end-brick的範疇，而B型你們已判定目前是dormant零caller，還沒真正接進決策路徑)。",
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/rooting-unblock-main-90d.txt"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/join_accept_measure_bed.gd",
+
+  "cleanup": "busy beacon清除。"
+}
