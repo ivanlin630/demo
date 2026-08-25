@@ -547,3 +547,31 @@ cand_build_emitted 28 = branch.build 28 = build_fail 28
 `horses` 存在 **`tile.public_storage`**，不在 `tile.resources` ⇒
 ★**只查 `tile.resources` 的 means-end 會對 `horses` 永遠回「無手段」而【靜默終止】。**
 
+## ★★★手工分類表無法避免時：**允許表，但必須配【機械 falsifier】**（2026-08-25）
+
+**判準不是「這是不是一張表」，是**：
+> ★★**「這張表變錯的時候，誰會發現？」——有機械答案才准留表。**
+
+| | 手工對照表（列管病） | ★**配 falsifier 的分類表** |
+|---|---|---|
+| 來源 | 人腦 | **可以也是人腦** |
+| ★**變錯時** | ★**沒人發現，悄悄腐爛** | ★★**當場紅** |
+
+**⇒ 差別不在【誰寫的】，在【壞掉會不會被發現】。**
+
+### ★本例的 falsifier：`WorldState.record_driver` 驅動帳
+**5 個 bank（`tile`/`resource`/`anon_treasury`/`unrest`/`loyalty`）全部收斂到同一個記帳點**，
+**每筆帶 `{tick, entity, field(=res), delta, reason}`**（`world_state.gd:126`，**37 個 caller**）。
+⇒ ★**「誰會增加資源 X」＝ `delta > 0` 的紀錄按 `reason` 分群 —— 零手工表，新路徑自動現形。**
+
+### ★★但它**不能**當 runtime 決策資料源 —— 三個硬限制（都要誠實標）
+| # | 限制 | 後果 |
+|---|---|---|
+| 1 | ★**`driver_ledger_enabled = false` 預設關** | **正常 run 不記** ⇒ **決策讀不到** |
+| 2 | ★**ring-buffer `cap = 4096`，標 `TEST VALUE`** | ★**開了也只有尾窗** ⇒ **母體三問①的現成陷阱** |
+| 3 | ★**冷啟動** | **沒發生過就記不到** ⇒ **事前判斷不能只靠它** |
+
+**⇒ 正確用法：★【離線稽核】不是【線上決策】。**
+**跑一輪開 ledger 的 bed → 掃所有 `delta > 0` 的 `(res, reason)` 對 → ★出現任何【未分類】的組合 ＝ 紅。**
+★★**表照留，但它從此無法悄悄變錯。**
+

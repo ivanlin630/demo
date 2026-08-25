@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★★你抓對了但【低估了】——不是第四條,是第四五六條、三種物理;★★★推論:別列舉手段要問【形狀】,而 stock 不是 flow(咬到 flow_utility)
 ---

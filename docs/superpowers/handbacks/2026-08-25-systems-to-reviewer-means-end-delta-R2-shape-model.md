@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★delta R²:手段模型從【列舉】改成【問形狀】;實測缺口 4 個資源、三種物理(stock/capped-regen/掠奪);★★請咬 stock 用 flow 尺會不會系統性算錯
 ---
