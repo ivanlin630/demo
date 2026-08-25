@@ -6,29 +6,29 @@ class_name AnonTreasuryBank
 static func deposit(team: TeamData, amt: float, reason: String = "") -> void:
 	var m: float = maxf(amt, 0.0)
 	team.anon_treasury += m
-	WorldState.record_driver(team, "anon_treasury", m, reason)
+	WorldState.record_driver(team, "anon_treasury", m, reason, "treasury")
 
 static func withdraw(team: TeamData, amt: float, reason: String = "") -> float:
 	var m: float = clampf(amt, 0.0, team.anon_treasury)
 	team.anon_treasury -= m
-	WorldState.record_driver(team, "anon_treasury", -m, reason)
+	WorldState.record_driver(team, "anon_treasury", -m, reason, "treasury")
 	return m
 
 static func transfer(src: TeamData, dst: TeamData, amt: float, reason: String = "") -> void:
 	var m: float = clampf(amt, 0.0, src.anon_treasury)
 	src.anon_treasury -= m
 	dst.anon_treasury += m
-	WorldState.record_driver(src, "anon_treasury", -m, reason)
-	WorldState.record_driver(dst, "anon_treasury", m, reason)
+	WorldState.record_driver(src, "anon_treasury", -m, reason, "treasury")
+	WorldState.record_driver(dst, "anon_treasury", m, reason, "treasury")
 
 static func transfer_all(src: TeamData, dst: TeamData, reason: String = "") -> void:
 	var m: float = src.anon_treasury
 	dst.anon_treasury += m
 	src.anon_treasury = 0.0
-	WorldState.record_driver(src, "anon_treasury", -m, reason)
-	WorldState.record_driver(dst, "anon_treasury", m, reason)
+	WorldState.record_driver(src, "anon_treasury", -m, reason, "treasury")
+	WorldState.record_driver(dst, "anon_treasury", m, reason, "treasury")
 
 static func reset(team: TeamData, reason: String = "") -> void:
-	WorldState.record_driver(team, "anon_treasury", -team.anon_treasury, reason)
+	WorldState.record_driver(team, "anon_treasury", -team.anon_treasury, reason, "treasury")
 	team.anon_treasury = 0.0
 	Probe.bump("g1.treasury_reset")

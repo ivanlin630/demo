@@ -38,34 +38,34 @@ static func get_stored(tile: HexTileData, res: String) -> float:
 	return float(tile.public_storage.get(res, 0))
 
 # 原始 set（呼叫端已算好目標值，含已 clamp / 已扣的結果）。delta 記絕對值（同 ResourceBank.set_amt 慣例）。
-static func set_amt(tile: HexTileData, res: String, amt: float, reason: String = "") -> void:
+static func set_amt(tile: HexTileData, res: String, amt: float, reason: String) -> void:
 	tile.public_storage[res] = amt
-	WorldState.record_driver(tile, res, amt, reason)
+	WorldState.record_driver(tile, res, amt, reason, "resource")
 
 # capped add（cap 單點）→ 回實際入庫量。溢出 = sink（呼叫端另處理殘量：私產留 / 落地面）。
-static func deposit(tile: HexTileData, res: String, amt: float, reason: String = "") -> float:
+static func deposit(tile: HexTileData, res: String, amt: float, reason: String) -> float:
 	var cur: float = float(tile.public_storage.get(res, 0))
 	var newv: float = minf(cur + amt, cap(tile, res))
 	tile.public_storage[res] = newv
-	WorldState.record_driver(tile, res, newv - cur, reason)
+	WorldState.record_driver(tile, res, newv - cur, reason, "resource")
 	return newv - cur
 
 # clamp 到現量的提領 → 回實際取出量。
-static func withdraw(tile: HexTileData, res: String, amt: float, reason: String = "") -> float:
+static func withdraw(tile: HexTileData, res: String, amt: float, reason: String) -> float:
 	var cur: float = float(tile.public_storage.get(res, 0))
 	var m: float = clampf(amt, 0.0, cur)
 	tile.public_storage[res] = cur - m
-	WorldState.record_driver(tile, res, -m, reason)
+	WorldState.record_driver(tile, res, -m, reason, "resource")
 	return m
 
 # ── 自然池 tile.resources（uncapped；cap 由呼叫端各自套 resource_cap / WILD_*）──
 static func pool_get(tile: HexTileData, res: String) -> float:
 	return float(tile.resources.get(res, 0))
 
-static func pool_set(tile: HexTileData, res: String, amt: float, reason: String = "") -> void:
+static func pool_set(tile: HexTileData, res: String, amt: float, reason: String) -> void:
 	tile.resources[res] = amt
-	WorldState.record_driver(tile, res, amt, reason)
+	WorldState.record_driver(tile, res, amt, reason, "resource")
 
-static func pool_add(tile: HexTileData, res: String, amt: float, reason: String = "") -> void:
+static func pool_add(tile: HexTileData, res: String, amt: float, reason: String) -> void:
 	tile.resources[res] = float(tile.resources.get(res, 0)) + amt
-	WorldState.record_driver(tile, res, amt, reason)
+	WorldState.record_driver(tile, res, amt, reason, "resource")
