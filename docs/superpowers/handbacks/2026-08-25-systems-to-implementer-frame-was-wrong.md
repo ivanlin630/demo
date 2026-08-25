@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★你戳破的不是一個數字,是【我的問題框架】——「為什麼之後不再產生」預設錯了;真問題=「為什麼總量只有 28」;★四個 28 全等=罕見的乾淨鏈
 ---
 
