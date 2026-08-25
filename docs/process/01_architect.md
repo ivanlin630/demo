@@ -561,7 +561,7 @@ cand_build_emitted 28 = branch.build 28 = build_fail 28
 
 ### ★本例的 falsifier：`WorldState.record_driver` 驅動帳
 **5 個 bank（`tile`/`resource`/`anon_treasury`/`unrest`/`loyalty`）全部收斂到同一個記帳點**，
-**每筆帶 `{tick, entity, field(=res), delta, reason}`**（`world_state.gd:126`，**37 個 caller**）。
+**每筆帶 `{tick, entity, field(=res), delta, reason}`**（`world_state.gd:126`，★**29 個真呼叫點**——我初報 37 是**把 8 行註解算進去了**，reviewer 抓到）。
 ⇒ ★**「誰會增加資源 X」＝ `delta > 0` 的紀錄按 `reason` 分群 —— 零手工表，新路徑自動現形。**
 
 ### ★★但它**不能**當 runtime 決策資料源 —— 三個硬限制（都要誠實標）
@@ -574,4 +574,18 @@ cand_build_emitted 28 = branch.build 28 = build_fail 28
 **⇒ 正確用法：★【離線稽核】不是【線上決策】。**
 **跑一輪開 ledger 的 bed → 掃所有 `delta > 0` 的 `(res, reason)` 對 → ★出現任何【未分類】的組合 ＝ 紅。**
 ★★**表照留，但它從此無法悄悄變錯。**
+
+### ★★★但重數那 29 個呼叫點時，看到更嚴重的東西：**`field` 欄位是混雜的**
+**`record_driver` 的 `field` 不只裝資源**：`tags` / `readiness` / `solo_intent` / `loyalty` / `unrest_turns` / `outpost_owner` / `coin` / `*resources*` **全混在同一欄**。
+⇒ ★**falsifier 若直接掃「`delta > 0` 的 `(field, reason)` 對」，會把 `tags`/`readiness` 當成資源** ——
+**這正是 `constitution_gate` fingerprint 踩過的【混雜命中 collision】同型。**
+
+★**而「哪些 `field` 是資源」——那又是一張表。falsifier 自己需要 falsifier ＝ 遞迴失敗。**
+
+### ⇒ ★正解：**分類由【誰記的】決定，不是由【名字長怎樣】決定**
+**`resource_bank` / `tile_bank` 的 `res` 參數天生就是資源**（呼叫端傳什麼就是什麼）。
+⇒ ★★**`record_driver` 多帶一個 `kind`，由【bank 自己填死】（不是呼叫端填）** ⇒
+**零手工表，來源即分類，新 bank 出現時它自己宣告自己記的是什麼。**
+
+★★**這是「改接線非改數值」的同族**：★**用【出處】分類，不用【字面】分類 —— 字面會碰撞，出處不會。**
 

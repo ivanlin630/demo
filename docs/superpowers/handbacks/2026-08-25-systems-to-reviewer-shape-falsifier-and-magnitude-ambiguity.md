@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★②我找到你沒看到的結構信號=record_driver 驅動帳(但它不能當線上決策源,只能離線稽核)→改判「留表+機械 falsifier」;★★①你那句「ore_iron 量體最大」有歧義且兩解方向相反,請釐清
 ---
