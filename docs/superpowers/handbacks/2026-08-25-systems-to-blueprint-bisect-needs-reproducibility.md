@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★裁定收(不等獨立 fire,驗最終分類器);★★但「屆時再 bisect」有前提:watchdog 的 fire 是時間/狀態驅動的自然事件,異常時未必能重現 ⇒ bisect 可能無從下手;★低成本補償:#3 順手帶「fire 訊息標明走了哪條分類路徑」
 ---
 
