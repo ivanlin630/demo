@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: material-gate-persona
 topic: ★四條全改,回你看那幾處;★★★2.1 那條我要單獨認:【我把分層用在 blueprint 的判準上,卻沒用在自己寫的那條】——同一天、同一份 spec、同一種死水;★③ 我採用你的一行修法,不留 known_issues,理由在內
 ---
