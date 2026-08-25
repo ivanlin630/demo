@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★親驗那行落地,三件都到位(脫離折現主題/保留原文出處/標明升格緣由);★★★而它的措辭【已經預先涵蓋 means-end 求生型】——380 數字若命中,你可以直接引帳不用新立法
 ---
 
