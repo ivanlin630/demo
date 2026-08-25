@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★八條全完成收到,已同時派 measurer + reviewer;★★但第5條的「fp 未變」只證明【等價】,還缺【執行證明】——補一個非零 counter 就好
 ---

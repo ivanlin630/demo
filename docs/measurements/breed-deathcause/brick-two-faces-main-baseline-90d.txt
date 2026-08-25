@@ -1,16 +1,16 @@
-[peaceful_economy day 80] teams=18
+[peaceful_economy day 90] teams=20
 --- 症狀（別單看這欄）---
-  order.placed                   = 915
-  order.filled                   = 5
-  order.abandoned                = 845
+  order.placed                   = 1005
+  order.filled                   = 6
+  order.abandoned                = 934
   order.replaced                 = 0
 --- ★抑制量（並排看：症狀降但這裡飆＝大家都放棄了，不是病好了）---
-  failure.recorded.order_abandoned_buy = 545
-  failure.suppressed.買單          = 310
-  failure.pruned                 = 19
+  failure.recorded.order_abandoned_buy = 601
+  failure.suppressed.買單          = 341
+  failure.pruned                 = 24
   最深折價 = 0.600（1.0 − 乘數）
 --- 被折價的那兩個 option 的行為 ---
-  decision.opt_chosen.買糧         = 28
+  decision.opt_chosen.買糧         = 30
   decision.opt_chosen.買料         = 0
-  decision.opt_applicable.買糧     = 124
-  decision.opt_applicable.買料     = 264
+  decision.opt_applicable.買糧     = 128
+  decision.opt_applicable.買料     = 293
