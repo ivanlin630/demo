@@ -31,7 +31,7 @@ func _run() -> void:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
 		if state.teams.is_empty(): break
 	var lines: Array = []
-	var samples: Array = Probe.samples.get("means_end.unique_no_existing.identity", [])
+	var samples: Array = Probe.samples.get("means_end.candidate_identity", [])
 	lines.append("[%s day %d seed %d] identity 樣本數 = %d（★cap 500；母體 = %d 次 bump）" % [
 		cfg, days, sd, samples.size(), int(Probe.counts.get("means_end.unique_no_existing", 0))])
 	var blank: int = 0
