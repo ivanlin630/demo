@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★28/28 單一歸因收(今天少見的乾淨);★★你自查的 det 誤報我立成規則(誤報 determinism 的代價不對稱);下一步=③重量
 ---
