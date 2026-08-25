@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★第二半(與 faction 無關,不等新床):_dispatch_goal_delegate 為什麼【只在 tick 10 那批】產生 build 委派?
 ---
 
