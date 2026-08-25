@@ -167,9 +167,13 @@ func _test_layer5_buyfood_gap() -> void:
 func _test_candidate1_food_reserve() -> void:
 	print("--- 候選1 賣糧 food reserve 人格化 ---")
 	var t := TeamData.new(); AnonCohort.add(t.anon_cohorts, "平民", "healthy", 10)   # population 是 cohort 衍生 getter
-	var r_caut: float = TradeValuation.reserve(t, "food", {"慎重": 1.0, "野心": 0.0})   # target≈8
-	var r_gamb: float = TradeValuation.reserve(t, "food", {"慎重": 0.0, "野心": 1.0})   # target≈2
-	var r_neut: float = TradeValuation.reserve(t, "food", {})                            # target=4
+	# ★state 改必填（2026-08-26）：這三處原本吃 default 省略 state，而 food 走 SURVIVAL 分支
+	#   → NeedOracle.need_keep(null, …) → own_granary_tile(null, …) 會崩。★這裡的隊沒有糧倉，
+	#   給一個空世界即可（與原本 null 的語意相同：私產以外什麼都沒有），斷言值不變。
+	var s := WorldState.new(); s.world = WorldData.new()
+	var r_caut: float = TradeValuation.reserve(t, "food", {"慎重": 1.0, "野心": 0.0}, s)   # target≈8
+	var r_gamb: float = TradeValuation.reserve(t, "food", {"慎重": 0.0, "野心": 1.0}, s)   # target≈2
+	var r_neut: float = TradeValuation.reserve(t, "food", {}, s)                            # target=4
 	_ok(r_caut > r_neut and r_neut > r_gamb, "food reserve：謹慎(%.0f) > 中性(%.0f) > 賭徒(%.0f)" % [r_caut, r_neut, r_gamb])
 	# 中性 = target(4) × pop(10) × FOOD_PER_PERSON_PER_DAY(0.8) = 32
 	_ok(absf(r_neut - 4.0 * 10.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY) < 0.01, "中性 reserve = target×pop×日耗")

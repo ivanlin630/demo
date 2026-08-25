@@ -42,7 +42,7 @@ func _observe_fix3c_barter() -> void:
 	var ctx: DecisionContext = DecisionContext.gather(state, t)
 	print("  武備隊 has_specie = %s （Fix3c 前=false 機械餓死；後應 true）" % ctx.has_specie)
 	print("  weapon reserve(10pop) = %.1f，持有 30 → 超留底 %.1f 可變現" % \
-		[TradeValuation.reserve(t, "weapon_melee_low"), 30.0 - TradeValuation.reserve(t, "weapon_melee_low")])
+		[TradeValuation.reserve(t, "weapon_melee_low", {}, state), 30.0 - TradeValuation.reserve(t, "weapon_melee_low", {}, state)])
 	# barter：對手糧多缺武器
 	var b := TeamData.new(); b.team_id = 1; b.leader_id = 101; b.tile_pos = Vector2i(5, 5)
 	AnonCohort.add(b.anon_cohorts, "平民", "healthy", 10)
