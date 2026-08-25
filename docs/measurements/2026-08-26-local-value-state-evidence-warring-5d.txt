@@ -1,0 +1,9 @@
+[warring_states day 5 seed 1337] teams=65
+  local_value.calls               = 3194   （分母：這條估值路有在跑嗎）
+  local_value.calls_with_state    = 3194   （接線後的呼叫；★blind 呼叫 = 0）
+  local_value.state_changes_stock = 21   （★其中真的看到不一樣的庫存）
+  ⇒ 接線覆蓋率 = 100.0%（with_state / calls）
+  ⇒ ★真改變估值的比例 = 0.7%（changes / with_state）
+      local_value.state_changes_stock.food     = 21
+--- 判讀 ---
+  ★接線真的改變了估值 ⇒ fp 應該要變；若 fp 沒變，要另外解釋

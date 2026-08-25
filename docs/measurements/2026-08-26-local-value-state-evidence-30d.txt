@@ -1,0 +1,10 @@
+[peaceful_economy day 30 seed 1337] teams=12
+  local_value.calls               = 2562   （分母：這條估值路有在跑嗎）
+  local_value.calls_with_state    = 2562   （接線後的呼叫；★blind 呼叫 = 0）
+  local_value.state_changes_stock = 339   （★其中真的看到不一樣的庫存）
+  ⇒ 接線覆蓋率 = 100.0%（with_state / calls）
+  ⇒ ★真改變估值的比例 = 13.2%（changes / with_state）
+      local_value.state_changes_stock.food     = 106
+      local_value.state_changes_stock.material = 233
+--- 判讀 ---
+  ★接線真的改變了估值 ⇒ fp 應該要變；若 fp 沒變，要另外解釋

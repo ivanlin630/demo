@@ -949,7 +949,7 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		var inv_copy: Array = seller.merchant_inventory.duplicate()
 		for item in inv_copy:
 			if int(item.get("bought_from", -1)) == buyer.team_id: continue
-			var inv_bid: float = TradeValuation.local_value(buyer, item["grade"])
+			var inv_bid: float = TradeValuation.local_value(buyer, item["grade"], state)
 			if inv_bid <= float(item["bought_at"]): continue
 			var inv_qty: int = mini(int(item["qty"]), int(buyer_coin / inv_bid))
 			inv_qty = mini(inv_qty, ms.carry_space_for_res(buyer, item["grade"]))   # WS-3 carry 限
@@ -993,16 +993,16 @@ func _attempt_barter(state: WorldState, a: TeamData, b: TeamData) -> void:
 		var a_surplus: float = maxf(float(a.resources.get(give_res, 0)) - TradeValuation.reserve(a, give_res, TradeValuation.leader_vals(state, a), state), 0.0)
 		if a_surplus <= 0.0: continue
 		# b 是否想要（b 對該 res 估值 > a 對該 res 估值,即 b 較缺）
-		if TradeValuation.local_value(b, give_res) <= TradeValuation.local_value(a, give_res): continue
+		if TradeValuation.local_value(b, give_res, state) <= TradeValuation.local_value(a, give_res, state): continue
 		# 找 b 能回付的（b surplus 且 a 想要）
 		for pay_res in TradeValuation.BASE_PRICE.keys():
 			if pay_res == "coin" or pay_res == give_res: continue
 			var b_surplus: float = maxf(float(b.resources.get(pay_res, 0)) - TradeValuation.reserve(b, pay_res, TradeValuation.leader_vals(state, b), state), 0.0)
 			if b_surplus <= 0.0: continue
-			if TradeValuation.local_value(a, pay_res) <= TradeValuation.local_value(b, pay_res): continue
+			if TradeValuation.local_value(a, pay_res, state) <= TradeValuation.local_value(b, pay_res, state): continue
 			# 等值互換：以雙方各自估值算可換量,取較小值的一筆
-			var give_val: float = TradeValuation.local_value(b, give_res)   # b 願付的單價
-			var pay_val: float  = TradeValuation.local_value(a, pay_res)    # a 願收的單價
+			var give_val: float = TradeValuation.local_value(b, give_res, state)   # b 願付的單價
+			var pay_val: float  = TradeValuation.local_value(a, pay_res, state)    # a 願收的單價
 			var give_qty: int = int(minf(a_surplus, b_surplus * pay_val / maxf(give_val, 0.001)))
 			if give_qty <= 0: continue
 			var pay_qty: int = int(round(give_qty * give_val / maxf(pay_val, 0.001)))
