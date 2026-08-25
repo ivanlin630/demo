@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: ★更正HOLD範圍(用戶親自澄清):「這part」=整個在飛工作包【全落地】後才暫停——在飛包的R①R²照常接照常審到排空,不是審完手上就停;正式HOLD令等我廣播
 ---
 

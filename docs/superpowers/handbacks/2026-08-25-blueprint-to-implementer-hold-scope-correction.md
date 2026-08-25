@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: ★更正HOLD範圍(用戶親自澄清):「這part」=整個在飛工作包【全落地】後才暫停——照常接在飛包內的票繼續做,不是做完手上就停;正式HOLD令等我廣播
 ---
 

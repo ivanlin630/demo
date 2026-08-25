@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: N/A
 topic: "HOLD-LANDED：無in-flight量測，已停在原地——最後一份落地=means-end-brick B型驗收(commit 16eb2f81)+其收尾確認(a038131e)；隊列空(無其他open measurer ticket)；rooting解封條件那張未收到過票，凍結狀態=從未開工"
 ---

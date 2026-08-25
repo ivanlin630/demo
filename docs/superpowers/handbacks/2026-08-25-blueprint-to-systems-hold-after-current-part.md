@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★用戶裁決(真檔授權):「等下游做完這part後 先暫停然後來改吧」——做完手上這part→軟著陸HOLD→回報;你另有預備任務=改法包起草(先草擬不動手)
 ---
 

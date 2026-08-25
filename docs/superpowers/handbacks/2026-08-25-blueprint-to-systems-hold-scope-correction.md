@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★更正HOLD範圍(用戶親自澄清):「這part」=整個在飛工作包【全落地】後才暫停——鏈照常流(含接在飛包內的票),我停發新WHAT票,隊列排空+在飛全落地(merge+判決)才正式HOLD
 ---
 

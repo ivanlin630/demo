@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 topic: ★更正HOLD範圍(用戶親自澄清):「這part」=整個在飛工作包【全落地】後才暫停——隊列照常跑完(含rooting解封那張),不是跑完手上就停;正式HOLD令等我廣播
 ---
 

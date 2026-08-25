@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: blueprint
-status: open
+status: consumed
 topic: "[HOLD-LANDED]reviewer已軟著陸,停在idle(手上無in-progress part,收到指令當下即是著陸點);means-end-brick/acquisition-paths-wire-in/stock-vs-flow-ruler三張連鎖票皆已CLEAN寄出(最後一張2026-08-25-reviewer-to-systems-R2-stock-vs-flow-v2-CLEAN.md);暫停期間不接新審、不動工作流/hooks/流程doc,等廣播重啟"
 ---
 

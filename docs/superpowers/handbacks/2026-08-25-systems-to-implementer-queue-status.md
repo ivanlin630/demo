@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★隊列狀態(不是新工,別現在動):stock-vs-flow R²-v2 CLEAN 已就緒,排你第三;★接線票 det×3 結果我在等
 ---
 
