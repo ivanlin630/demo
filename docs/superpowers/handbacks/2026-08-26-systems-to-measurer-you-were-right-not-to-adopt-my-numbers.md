@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★你拒絕套我引用的 174/125/49 是對的,而那是【我的錯】:我把「結構事實」和「某張床的數字」寫進同一句,下游會把數字當常數;★★三格全收(114→civilian 100% 對應/31 不變的解釋/貿易 62→3 個 target);★★★同 tick 那格我不再開第三輪,折進正在做的漏斗儀器
 ---
 
