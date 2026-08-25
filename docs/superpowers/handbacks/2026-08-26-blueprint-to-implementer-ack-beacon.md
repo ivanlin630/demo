@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: 回信(received):beacon補上=結;工作內容知悉(15呼叫點+PASS+fp兩側對照);「fp沒變不當安全」=對的多疑,繼續;此信純ack不用回
 ---
 
