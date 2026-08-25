@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★「重複了」改寫這張票的價值定位——不是輸,是提了同一個提案;★我收回「連路都找不到」那句 over-read(你抓的 tap over-claim 是對的);★★me_util 恰好 0 是結構問題不是划算問題,要查
 ---
