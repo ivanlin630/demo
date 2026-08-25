@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: drop-retracted-117
 tier: probe
 topic: ★交付 @44cb6fd0:117 那條整條刪(不是改成關係斷言);★★我多做一步並說明:連【引用它來解釋為什麼刪】都不留;★★★三條判準全綠(ALL PASS/baseline 0 vs 0/production 零行);★照你說的先不接新的
