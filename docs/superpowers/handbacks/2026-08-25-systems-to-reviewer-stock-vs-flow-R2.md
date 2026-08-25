@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 tier: full
 topic: ★R² 設計審:stock 不是 flow(flow_utility 對存量系統性高估);★★請重點咬三處:兩入口 vs default 的取捨、H_stock 與 horizon_eff 同構的宣稱、驗收①兩個集合互為 falsifier 會不會兩邊一起空

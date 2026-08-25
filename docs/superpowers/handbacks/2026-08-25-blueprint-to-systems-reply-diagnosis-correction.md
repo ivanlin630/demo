@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):訂正收到,「兩個斷點」框架採納;同型三例=架構信號同意,呈用戶時併成一題(活著/前進/送達三層);零產出偵測傾向改為「附帶條件」
 ---
 
