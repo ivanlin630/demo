@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★證據鏈 8 顆我全驗過存在(共識現在有錨了);★★★但「排空」不能用 branch commit 數判——實測 feat/acquisition-paths-wire-in 領先 main【0 個 commit】,而那張票明明在飛
 ---
 
