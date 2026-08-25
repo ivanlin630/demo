@@ -350,7 +350,7 @@ static func _print_entry(e: Dictionary) -> void:
 	# ★讀者一眼分兩層：strategic_intent＝慢 cadence 戰略姿態；motive＝本 tick 這個 winner 為何贏。
 	var _m: Dictionary = w.get("本tick動機", {})
 	print("[Specimen T%d] tick=%d strategic_intent=%s | motive=%s(util=%.2f) | winner=%s task=%s tgt=%s" % [
-		e["team_id"], e["tick"], str(w.get("strategic_intent", w.get("intent", "?"))),
+		e["team_id"], e["tick"], intent_render(w),
 		str(_m.get("主需求層", "?")), float(_m.get("winner_util", 0.0)),
 		d["winner_opt"], d["task"], str(d["target"])])
 	print("    candidates: %s" % cand_str.strip_edges())
@@ -364,3 +364,12 @@ static func _print_entry(e: Dictionary) -> void:
 		print("    leader: 野心=%.2f 慎重=%.2f 求生欲=%.2f 好戰=%.2f 貪婪=%.2f → food_sec_target=%.1f天" % [
 			_tr.get("野心", 0.5), _tr.get("慎重", 0.5), _tr.get("求生欲", 0.5),
 			_tr.get("好戰", 0.5), _tr.get("貪婪", 0.5), _tr.get("food_sec_target", 4.0)])
+
+# ★★`strategic_intent` 的 render —— 抽出來【只為了可被測】，★輸出字串與先前逐字元相同
+#   （原本是 inline 的 `str(w.get("strategic_intent", w.get("intent", "?")))`）。
+#   ★兩態是有意義的（systems 裁定 2026-08-26，不統一）：
+#     Dictionary ＝ 戰略層【真的表態了】；String ＝ capture_intent 這輪【沒跑】的 fallback。
+#   ★★契約：兩態都必須印得出東西、都不得 crash。★★★兩態在輸出上【看不看得出差別】＝ 另一個問題，
+#     已回報 systems 待裁（★本函式現在【不區分】，這是【照原樣保留】不是我認為它對）。
+static func intent_render(w: Dictionary) -> String:
+	return str(w.get("strategic_intent", w.get("intent", "?")))
