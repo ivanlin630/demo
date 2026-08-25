@@ -45,7 +45,24 @@ for _tn in ResourceSystem.REGEN_RATE:
         _from_terrain = true; break
 ```
 ★**直接問真相源** —— **`RES_HARVEST_TERRAIN` 只是它的手抄本，判斷不該拄手抄本。**
-（機械 A/B 計數跑中，會把上表的手算改成 code 自己數的。）
+★**機械 A/B 已跑完，與我手算完全一致**：
+```
+A_table_gap.food = 133 / B_not_terrain.tools = 625 / B_not_terrain.weapon_melee_low = 1303
+```
+⇒ **手算那一欄現在由 code 自己數，不靠我讀表。**
+
+★**已 commit `f4ef6631`（`feat/goal-delegate-build-diag`，已 push）——純 tap，零 production 行為改動。**
+★**det×3 出來了**：`c1e3f7c5db444fc06c6a826efa77b146` **×3，＝base** ⇒ ★**tap 沒有動世界**。
+**headless 8 ＝ baseline，0-new。**
+
+★**這組 fp 值得對照著看**：
+| | 觀測器有沒有寫世界 | fp |
+|---|---|---|
+| 本 branch（純 tap） | 沒有 | ★**與 base 相同** |
+| convoy 舊 `STALLED` 分支（清 `corvee_site`） | ★**有** | ★**也與 base 相同**（事件在 tick 2500 後，a4 只跑 1000）|
+
+⇒ ★**fp 相同【不能】反證乾淨，fp 不同【也不能】證明原因** —— **它只回答「有沒有差異」。**
+**乾淨與否要靠讀 code（那行寫入白紙黑字），這兩邊合起來剛好是一組正反例。**
 
 ## §4 ⇒ 兩條修法**互相獨立**，我列給你裁（⛔ 不自己動）
 

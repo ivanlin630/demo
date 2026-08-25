@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★A 型=food 是【教科書實例】,我用真相源坐實了:三種地形全產 food、plains 8.0 全表最高之一;★B 佔 92% 我的懷疑成立但那不是重點
 ---
 

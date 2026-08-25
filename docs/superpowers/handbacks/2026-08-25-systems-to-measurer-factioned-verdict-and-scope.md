@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★床造對了(第一格判讀真的擋住);★★你作廢自己那條我幫你【界定範圍】別過度作廢;★★★兩條線合流:236 次卡建材 = 供給鏈 2089 卡點的下游
 ---
 
