@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★33 收下,我的推論被你證偽;★★而「不用推論開票」那條紀律這次真的救了我;★★★那個數字我改用途:變成接線票的世界層驗收基準(baseline=33)
 ---
 
