@@ -65,29 +65,27 @@ reserve(team,res,leader_values,state=null)      ← 自己也有 default
 
 ★**真正的範圍外（reviewer 複驗過與 `_stock` 無關）**：`decision_engine.gd:58 rank_scored_ctx`。
 
-## ★★動工前必須先接住的【三個】呼叫端（reviewer 逐條找到，缺一就會崩）
-| # | 位置 | 現況 | 處置 |
-|---|---|---|---|
-| A | ★**`scripts/debug/slice_a_observe.gd:45`（★同一行【兩個】呼叫）** | `TradeValuation.reserve(t, "weapon_melee_low")` —— `leader_values` 與 `state` **兩個 default 都省**，而 `state` 就在同函式 scope（`:35`） | ★**補成 `reserve(t, res, {}, state)`** |
-| B | `interaction_system.gd:667-669 _calc_reserve`（wrapper，簽名自己就沒有 `state`） | ★**零 caller ＝ 死碼**；它自己的註解已點名「**不崩但更隱密：靜默給出錯的估值。崩會被看見，這個不會**」 | ★★**刪掉**（零 users ＝ 純負債；不要「補參數讓它活」——沒人要它活） |
+## ★★★動工前必須先接住的呼叫端 —— **【機械產生】的完整清單（五訂，2026-08-26）**
 
-★**`weapon_melee_low` 不在 `SURVIVAL_GOODS(["food","medicine"])`** ⇒ 走 generic 分支 ⇒ 一路打到 `_stock(null,…)`
-⇒ **刪 fallback 後，`godot --headless --script scripts/debug/slice_a_observe.gd` 會在
-`resource_system.gd:438 own_granary_tile(null,…)` 當場崩。**
+★**前四版都是【人眼列】，每一版都說「這次齊了」，每一版都不齊**：
+`2 個 → +1 個檔 → +1 檔 +1 行`。★★**用人眼列，就是在賭有沒有想到。**
+⇒ **改用機械窮盡**：`bash .claude/hooks/closure-callsite-scan.sh state reserve ask_price _sellable_qty local_value _urgency _food_urgency _reserve_factor _reserve_factor_food_only`
+（★**27 條原始命中，逐條判過，真需要處置的如下**）
 
-| # | 位置 | 現況 | 處置 |
-|---|---|---|---|
-| ★**C** | ★★**`scripts/debug/headless_test.gd:11657/11658/11660/11665`（4 處，同一支 `_test_trade_reserve_no_drain`）** | `pts._sellable_qty(t, "material")` 省 `state`，而 `state` 就在 `:11652` 手上 | 補成 `pts._sellable_qty(t, "material", {}, state)` |
+| # | 位置 | 處置 |
+|---|---|---|
+| **A** | `scripts/debug/slice_a_observe.gd:45` —— ★**同一行 2 個呼叫** | `reserve(t, res, {}, state)`（`state` 在 `:35`） |
+| **B** | `interaction_system.gd:667-669 _calc_reserve` | ★**整支刪**（零 caller ＝ 純負債） |
+| **C** | ★`scripts/debug/headless_test.gd:11657 / 11658 / 11660 / **11666** / 11665` —— ★★**5 處不是 4 處** | `pts._sellable_qty(t, "material", {}, state)`（`state` 在 `:11652`） |
+| ★**D** | ★★`scripts/debug/survival_layer_unify_test.gd:170 / 171 / 172` —— **3 處 `reserve(t,"food",{…})` 省 `state`** | 補 `, state`；★`res=="food"` 走 `SURVIVAL_GOODS` ⇒ `NeedOracle.need_keep(null,…)` **會崩** |
 
-★★★**C 比 A 嚴重**：**它在 `headless_test.gd`（baseline-7 主測試檔）裡**
-⇒ **不是「以後有人跑才炸」，是【這票一 merge，下一次例行 headless 就炸】。**
-★**而 `:11652` 的註解是這個測試自己寫的自認證詞**：
-> 「reserve 的 state default 讓漏傳編得過」
-⇒ **寫那行的人早就知道自己在吃 default 的便宜。** ★★**那正是 default 的真正代價：它讓「知道不對」也能過關。**
+★**C 漏掉 `:11666` 的漏法**：`:11665` 與 `:11666` 是**同一個 assert 的兩行**（斷言行 ＋ 訊息行），
+★★**訊息字串裡的呼叫一樣會執行。**
+★**D 兩支都是活的**（`extends SceneTree` 可跑；`slice_a_observe` 還產過被 verdict 引用的量測 log）⇒ **接住，不刪。**
 
-> ★**這不是第一次**：`scripts/debug/own_granary_null_caller_test.gd` 的檔頭就寫著
-> 「**根修＝呼點補傳 state（非 own_granary 頭加 guard）**」——★★**同一個病已經修過一輪，而 default 讓它長回來。**
-> ★★★**這正是本票存在的理由：修實例會長回來，刪掉 default 才不會。**
+### ★判過是假陽性的（**留在這裡，因為「判過沒事」和「沒看到」必須分得開**）
+- `material_hold_test.gd`（多處）：**有傳 state，變數叫 `w[0]`／`w_rich[0]`** ⇒ 掃描器看不出來。
+- `tools_demand_test.gd:17/112`、`slice_a_observe.gd:44`、`material_hold_test.gd:64/74`：**字串或註解裡的函式名**。
 
 ## 修法（★零數值改動）
 1. `local_value(team, res, state)` —— **`state` 必填**（刪 `= null`）。

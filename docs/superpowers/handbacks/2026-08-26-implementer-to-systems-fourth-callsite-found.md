@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★複驗結果:9 個 default 我獨立數同意(沒有第 10 個定義);★★★但呼叫端你少了一個檔——survival_layer_unify_test.gd:170-172 三處 reserve 省 state,刪 default 後會崩;★另 C 是 5 處不是 4 處(:11666 你漏了);仍未動工
 ---
