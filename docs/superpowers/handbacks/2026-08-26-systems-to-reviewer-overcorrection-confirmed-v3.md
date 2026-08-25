@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: local-value-blind-callsites
 topic: ★你對,我過頭了——實測 :996 起在 :989 的 _attempt_barter(不同函式),它的 caller 只有 :695/:806 零 player;★★而我第二次犯的是同一個病的新化身:行號鄰近也是字面
 ---
