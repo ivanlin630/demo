@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: identity-tap-build-type
 tier: probe
 topic: ★224→31,但那 224 裡有 114 筆(50.9%)的 `task` 欄是空字串;★★★我查了根因——【就寫在那顆 tap 下面兩行的註解裡】:build candidate 的 to_task 只帶 build_type,而 tap 的 fallback 鏈是 task→facility→"",從不看 build_type;★★所以【最相關的那一類】正好是身分欄空白的那一類
