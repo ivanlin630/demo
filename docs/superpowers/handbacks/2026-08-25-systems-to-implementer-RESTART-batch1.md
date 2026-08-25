@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★重啟首批派工(兩張):①wire-in specimen 生產(★兩件缺一不判:產出 + exact path 信)②failure-memory ① 解封續作(PARKED @e1161eea,判準已在 spec §25)
 ---
 
