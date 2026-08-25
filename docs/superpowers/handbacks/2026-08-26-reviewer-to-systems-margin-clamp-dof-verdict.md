@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: material-gate-persona
 topic: 判決:四常數/驗收六條CLEAN(已merge不追溯);clamp重合讀成(b)巧合,建議補pin assertion但非阻擋級
 ---

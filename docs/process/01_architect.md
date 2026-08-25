@@ -144,6 +144,31 @@ spec 鎖定（reviewer CLEAN）後，**dispatch = 直接寫 `to:implementer stat
 ★**fixture 不是退而求其次**：「有資格否決一張票的量測必須擋在動工前」，
 **而這條在 organic 床上動工前根本量不到 ⇒ 它【必須】是 fixture。**
 
+### ★★merge 帶進新 `class_name` 檔 ⇒ **驗閘前必跑 `--import`**（2026-08-26 血證）
+
+**事故**：`material-gate-persona` 新增 `class_name BuildAfford`。
+implementer 在 worktree 跑 headless ＝ **PASS 7 vs 7**；我在 `main` merge 後跑 ＝
+```
+Parse Error: Identifier "BuildAfford" not declared in the current scope.
+Parse Error: Assigned value for constant "INVEST_SAFETY" isn't a constant expression.
+Compilation failed  ⇒ 一條測試都沒跑
+```
+★**兩個 Parse Error 是同一個根**（class 沒進快取 ⇒ 它的常數自然「不是常數表達式」）。
+**跑完 `--import` 後：Q1 YES、7 vs 7、PASS。★code 一行沒改。**
+
+★★**為什麼兩個角色會拿到不同結果**：**他的 worktree 快取有那個 class，main 的沒有** ——
+**同一份 code、兩個工具狀態、兩個結論。**
+
+## ⇒ 兩條處置
+1. ★**merge 若帶進新的 `class_name` 檔 ⇒ 驗閘前先 `.	ools\godot.ps1 --headless --import`。**
+2. ★★**`test-ran-floor.sh` 現在會自己講**：Q1=NO 且輸出含 `not declared` / `Compilation failed`
+   ⇒ **直接印出「最可能是 class 快取沒重建，跑 `--import` 再來，別把這個紅報成回歸」。**
+   ★★★**觀察到症狀的工具，應該把最常見的成因講出來，而不是讓每個人各自重新診斷一次。**
+
+## ★★★而這次真正救場的是 Q1
+**若閘沒有 Q1**，我看到的會是「**baseline 7 條全部 stale**」——★**那讀起來像世界變好了。**
+**一個沒跑的測試套，長得跟一個全綠的測試套一模一樣** —— **Q1 是唯一能分開它們的東西。**
+
 ### 母題C ── **前提與框架**：在檢查結論之前，先檢查問題本身
 
 | 一句話 | detail 節標題 |

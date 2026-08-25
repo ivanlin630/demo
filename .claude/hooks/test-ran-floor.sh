@@ -56,6 +56,15 @@ if grep -qaF "$marker" "$work" 2>/dev/null; then
 else
   echo "[test-floor] Q1 跑完了嗎 → ★NO（無結尾標記）⇒ 這份輸出【沒有資格談綠不綠】"
   echo "[test-floor]    ★注意：這不是「測試失敗」，是「不知道跑了多少」。"
+  # ★★最常見的成因先講出來（2026-08-26 血證）：新增 class_name 檔後沒重建 class 快取
+  #   ⇒ `Identifier "X" not declared` ＋ 由它衍生的 `isn't a constant expression`
+  #   ⇒ 整份 compile 失敗、一條測試都沒跑，而 baseline 會顯示【全部 stale】——★讀起來像世界變好了。
+  #   ★★★觀察到症狀的工具，應該把最常見的成因講出來，而不是讓每個人各自重新診斷一次。
+  if grep -qa 'not declared in the current scope\|Compilation failed' "$work" 2>/dev/null; then
+    echo "[test-floor] ★★最可能的成因：**新增了 class_name 檔案但沒重建 class 快取**"
+    echo "[test-floor]    ⇒ 先跑：.\tools\godot.ps1 --headless --import   然後再跑一次測試"
+    echo "[test-floor]    ★在跑完 --import 之前，不要把這個紅回報成程式碼回歸。"
+  fi
   rc=1
 fi
 
