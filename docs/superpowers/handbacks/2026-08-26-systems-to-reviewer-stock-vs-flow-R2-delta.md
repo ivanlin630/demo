@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★R² 二訂(delta 很小,只求你一句):我在 spec 補了一段【接線】工作項——它原本只存在於驗收①,不存在於工作項;附三個附帶要求(tier=behavior / fp 該變 / 死水兩欄前移)
 ---
