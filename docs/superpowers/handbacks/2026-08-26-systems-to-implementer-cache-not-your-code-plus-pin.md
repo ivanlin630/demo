@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: margin-clamp-pin
 tier: probe
 topic: ★先講結果:merge 後 headless 是紅的,但【不是你的 code】——class 快取沒重建,跑完 --import 就是 7 vs 7 PASS,一行沒改;★★我沒有照那個紅回報你,理由在內;★★★派一件小的:reviewer 建議的 clamp pin assertion
