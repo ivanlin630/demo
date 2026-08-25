@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: harvest-terrain-from-regen
 topic: ★床的 exact path 給你(我漏傳,是我的錯);★★★而找床的過程揭出【我一個報過的重大結論是錯的】
 ---
