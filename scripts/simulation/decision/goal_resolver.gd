@@ -80,12 +80,28 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 		return []   # harness 無 state/team → 無 goal frontier（安全）
 	var out: Array = []
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	# ★★★被跳過的 goal 逐一記【原因】（systems 派 2026-08-26）：
+	#   ★問題：`build` 類 candidate day0 生 39 個、day1 起永遠 0，而其他三欄持續到 day30
+	#     ⇒ 斷點在這一段，但 counter 分不出是【goal 不在清單了】／【在但非 active】／
+	#       【active 但解不出候選】—— ★三者的處置完全不同。
+	#   ★★判準（systems 加）：這批 reason 必須【互斥且窮盡】——
+	#     逐日 reason 加總 == 該日檢視過的 goal 數。★加不回去 ＝ 有一條 skip 路徑沒被列舉，
+	#     而那條大概率就是答案。
+	#   ★★★壞掉會長什麼樣（不是「別亂改」）：日後有人在這個迴圈裡加一個新的 `continue`
+	#     而沒加對應的 reason ⇒ ★對帳式會差一個數，而【差額會被當成正常】——
+	#     那正是「習慣了的異常」，比沒有對帳更難發現。⇒ 加 `continue` 就要加 reason。
+	var _sday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
 	for g in team.goal_state:
+		if Probe.enabled: Probe.bump("goal.skip.seen" + _sday)   # ★分母：該日檢視過的 goal 數
 		if String(g.get("status", "")) != "active":
+			if Probe.enabled:
+				Probe.bump("goal.skip.not_active" + _sday)
+				Probe.bump("goal.skip.not_active.status." + String(g.get("status", "?")))
 			continue
 		var gt: String = String(g.get("goal_type", ""))
 		var def: Dictionary = GoalRegistry.REGISTRY.get(gt, {})
 		if def.is_empty():
+			if Probe.enabled: Probe.bump("goal.skip.no_def" + _sday)
 			continue
 		var payoff: float = float(def.get("payoff", 1.0))
 		# ★S4 設施發展 goal（build_F）：walk build-cost/facility-type/manpower 前置→frontier or build_F action。
@@ -93,20 +109,35 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 			var bc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt, def)
 			if not bc.is_empty():
 				out.append(bc)
+				if Probe.enabled: Probe.bump("goal.skip.emitted_facility" + _sday)
+			elif Probe.enabled:
+				# ★「active、有 def、是 build 類，卻解不出候選」—— 這一格若是主因，
+				#   答案在 `_resolve_build_facility` 裡面，不在這個迴圈。
+				Probe.bump("goal.skip.facility_resolve_empty" + _sday)
+				Probe.bump("goal.skip.facility_resolve_empty.gt." + gt)
 			continue
+		var _emitted_any: bool = false
 		for prereq in def.get("prereqs", []):
 			var kind: String = String(prereq.get("kind", ""))
 			var cand: Dictionary = {}
 			if kind == GoalRegistry.PREREQ_RESOURCE:
 				# ★接線（spec §3）：這個 caller 本來就在收集多個 candidate 進 rank 池
 				#   ⇒ 改 append_array，讓 means-end 的候選與既有手段【同池競爭】，不特別待遇。
-				out.append_array(_resource_prereq_candidates(state, team, ctx, g, gt, payoff, prereq))
+				var _rc2: Array = _resource_prereq_candidates(state, team, ctx, g, gt, payoff, prereq)
+				out.append_array(_rc2)
+				if not _rc2.is_empty(): _emitted_any = true
 				continue
 			elif kind == GoalRegistry.PREREQ_LOCATION:
 				cand = _resolve_location_prereq(state, team, ctx, g, gt, payoff, prereq)   # S3 定位型
 			# manpower/facility/subgoal = S4-S6（無 candidate，stub 邊界）
 			if not cand.is_empty():
 				out.append(cand)
+				_emitted_any = true
+		if Probe.enabled:
+			if _emitted_any:
+				Probe.bump("goal.skip.emitted_prereq" + _sday)
+			else:
+				Probe.bump("goal.skip.prereq_all_empty" + _sday)
 	# ★S5 委派 peer option（組件 D）：build/settle 型 candidate 產「派子隊做」變體並列 rank 池（跟自己做競 util）。
 	var delegated: Array = []
 	for c in out:
