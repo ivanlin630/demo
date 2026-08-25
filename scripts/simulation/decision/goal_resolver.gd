@@ -591,6 +591,15 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 					 #   ★但他明講【未坐實】——沒有 tick 就證明不了「同一個 tick 內」。★欄位名與
 					 #   `funnel.cand.identity` 對齊。
 					 "tick": state.world.current_tick, "team": team.team_id,
+					 # ★★★戲服假說的【判定用鍵】(systems 2026-08-26，明說是為這個問題加的【最後一欄】)：
+					 #   ★問題已三次停在「強烈支持、未坐實」（QA 逐位元相同 → measurer 62→3 target →
+					 #     funnel 四胞胎樣本），每次都差一個欄位 ⇒ 這次把【是非題答得完】的三鍵一起帶。
+					 #   ★★只帶判定用的三鍵（task／target／build_type），★不是整包 to_task
+					 #     —— 整包會把無關欄位的差異也算進「不同行動」。
+					 #   ★★★這一欄是為【單一問題】加的：戲服假說坐實或推翻之後，這三鍵可以拆掉。
+					 #     （加的時候就寫下它什麼時候該死，否則它會變成沒有人敢刪的常設欄位。）
+					 "k_task": String(_tt2.get("task", "")),
+					 "k_build_type": String(_tt2.get("build_type", "")),
 					 "act": _act,
 					 # ★仍是空的話，把鍵名原樣帶出來 —— ★★不猜第四個鍵（systems 明令）
 					 "to_task_keys": ("" if _act != "" else str(_tt2.keys())),

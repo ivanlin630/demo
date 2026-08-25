@@ -1,0 +1,11 @@
+[peaceful_economy day 30 seed 1337] identity 樣本數 = 174（★cap 500；母體 = 125 次 bump）
+★`act` 空字串 = 0 / 174（0.0%）★對照：修前是 114/224 ＝ 50.9%
+★`act` 分佈：
+    civilian                 = 11
+    貿易                       = 163
+★零空字串 ⇒ 三分量身分完整（fname / target / act）
+--- ★戲服假說：同 tick 同 team 的多筆，判定三鍵是否全同 ---
+  同 tick 同 team 且多筆的組數 = 50 ⇒ 三鍵全同 50 組／不全同 0 組
+  ★【三鍵全同】實例（原始樣本，未加工）：
+      { "fname": "workshop", "target": (4, 9), "tick": 10, "team": 6, "k_task": "", "k_build_type": "civilian", "act": "civilian", "to_task_keys": "", "existing": true }
+      { "fname": "weaponsmith", "target": (4, 9), "tick": 10, "team": 6, "k_task": "", "k_build_type": "civilian", "act": "civilian", "to_task_keys": "", "existing": false }

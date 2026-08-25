@@ -55,6 +55,45 @@ func _run() -> void:
 			lines.append("    %-40s = %d" % [String(k2), int(keys_hist[k2])])
 	else:
 		lines.append("★零空字串 ⇒ 三分量身分完整（fname / target / act）")
+	# ★★★戲服假說的【是非題】(systems 2026-08-26)：同 tick 同 team 的多筆 candidate，
+	#   判定用三鍵（target／k_task／k_build_type）是不是【全同】？
+	#   ★全同 ⇒ 同一個行動穿多件戲服（坐實）；★★不全同 ⇒ 推翻假說，照原樣報，不美化。
+	lines.append("--- ★戲服假說：同 tick 同 team 的多筆，判定三鍵是否全同 ---")
+	var grp: Dictionary = {}
+	for smp2 in samples:
+		var gk: String = "%d|%d" % [int(smp2.get("tick", -1)), int(smp2.get("team", -1))]
+		if not grp.has(gk): grp[gk] = []
+		(grp[gk] as Array).append(smp2)
+	var same_all: int = 0
+	var diff_all: int = 0
+	var multi_grp: int = 0
+	var ex_same: Array = []
+	var ex_diff: Array = []
+	for gk2 in grp:
+		var arr: Array = grp[gk2] as Array
+		if arr.size() < 2: continue
+		multi_grp += 1
+		var k0: String = _kkey(arr[0])
+		var all_same: bool = true
+		for a in arr:
+			if _kkey(a) != k0: all_same = false
+		if all_same:
+			same_all += 1
+			if ex_same.is_empty(): ex_same = arr
+		else:
+			diff_all += 1
+			if ex_diff.is_empty(): ex_diff = arr
+	lines.append("  同 tick 同 team 且多筆的組數 = %d ⇒ 三鍵全同 %d 組／不全同 %d 組" % [multi_grp, same_all, diff_all])
+	if multi_grp == 0:
+		lines.append("  ★★零組 ⇒ 這三個鍵在本輪【回答不了】它們被加進來要回答的問題（照原樣報）")
+	if not ex_same.is_empty():
+		lines.append("  ★【三鍵全同】實例（原始樣本，未加工）：")
+		for e2 in ex_same:
+			lines.append("      %s" % str(e2))
+	if not ex_diff.is_empty():
+		lines.append("  ★★【三鍵不全同】實例 —— ★這一類會【推翻】戲服假說，照原樣列出：")
+		for e3 in ex_diff:
+			lines.append("      %s" % str(e3))
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
@@ -66,3 +105,7 @@ func _run() -> void:
 func _env(key: String, dflt: String) -> String:
 	var v: String = OS.get_environment(key)
 	return v if v != "" else dflt
+
+
+func _kkey(smp) -> String:
+	return "%s|%s|%s" % [str(smp.get("target")), String(smp.get("k_task", "")), String(smp.get("k_build_type", ""))]
