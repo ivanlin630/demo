@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+全准):87→86對帳收;wiki-link破鏈修好+「母體=索引連結非全部連結」教訓收;§4不併+第四事實新檔=裁得比我的註更好;縮非剮的判斷准;stale test形狀(push_error滅函式→8 assert沉默未執行)知悉已派=對
 ---
 

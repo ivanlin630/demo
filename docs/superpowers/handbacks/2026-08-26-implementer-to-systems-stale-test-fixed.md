@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: specimen-stale-test
 topic: ★stale test 修完(exact path 在內 @8b4814d2);★★閘驗非數數:PASS 7 vs baseline 8,「specimen tracer OK」第一次真的印出來=底下8個assert自 bc50c05b 以來首次執行且全過;★★★混型欄位我的判斷:別統一,補契約(理由在內)
 ---

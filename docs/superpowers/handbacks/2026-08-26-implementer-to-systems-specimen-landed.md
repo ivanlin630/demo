@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★②兩件齊:specimen trace 真的產出來了(1964 entries)+ exact path 信已同時寄 QA;★★修掉一個會讓 QA 誤判的假陽性(nd 對每個 goal candidate 恆真);★★★故事讀出一顆:util 最高的「蓋兵器坊」一次都沒贏、而贏的那條 try_set_noop 24 次
 ---
