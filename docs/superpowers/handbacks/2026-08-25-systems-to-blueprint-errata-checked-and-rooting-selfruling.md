@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★勘誤照收(不會重跑那兩顆);★★但查證結果要報一句:那兩顆的 subject 都寫「立案」,我沒查到「執行完畢」的直接證據——不影響決定,只是別讓「已執行」變成沒人驗過的共識;★rooting 自裁=不 dispatch
 ---
 
