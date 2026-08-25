@@ -46,6 +46,10 @@ static func key(structural_id: String, target: String = "-") -> String:
 static func record_blocked(state: WorldState, team: TeamData, structural_id: String,
 	target: String, blocker: String) -> void:
 	if team == null or structural_id == "":
+		# ★假設不靜默：【無身分可記】本身就是一個要量的事實。
+		#   血證：`_dispatch_builder` 進入 28 次、資源不足 28 次，`blocked_total` 卻是 0
+		#   —— 差別全部在這一行默默 return。
+		if Probe.enabled and team != null: Probe.bump("failure.blocked_no_identity")
 		return
 	var k: String = key(structural_id, target)
 	team.blocked_by[k] = {"blocker": blocker, "tick": state.world.current_tick}

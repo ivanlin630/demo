@@ -86,6 +86,14 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 	for k2 in Probe.counts.keys():
 		if String(k2).begins_with("failure.blocked."):
 			lines.append("       %-34s = %d" % [String(k2), int(Probe.counts[k2])])
+	lines.append("  ③c ★這支函式【有沒有被呼叫】—— 沒有這欄，③b 的 0 分不出「接線斷」與「根本沒走到」")
+	for k3 in ["dispatch.builder_entry", "dispatch.builder_skip_busy"]:
+		lines.append("       %-34s = %d" % [k3, int(Probe.counts.get(k3, 0))])
+	for k4 in Probe.counts.keys():
+		if String(k4).begins_with("dispatch_fail."):
+			lines.append("       %-34s = %d" % [String(k4), int(Probe.counts[k4])])
+	lines.append("       %-34s = %d" % ["failure.blocked_no_identity", int(Probe.counts.get("failure.blocked_no_identity", 0))])
+	lines.append("         ★>0 ＝ 走到了記錄站但【身分是空的】⇒ 接線斷（不是世界沒發生）")
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":

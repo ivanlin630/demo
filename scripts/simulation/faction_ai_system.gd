@@ -2598,7 +2598,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			continue   # 起建失敗（料被消耗/slot 滿）→ 試次佳（覓食…、失敗案留）
 		# ★means-end S5 委派：delegate candidate 贏 → 派子隊執行 action，母隊留守（本 cadence 畢）；派失敗→試次佳。
 		if td.get("delegate", false):
-			if _dispatch_goal_delegate(state, team, td):
+			if _dispatch_goal_delegate(state, team, td, _goal_cand_id(e)):
 				team.current_option = String(e["opt"])   # 承諾追蹤(label:delegate)
 				return
 			continue
@@ -3158,7 +3158,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
 		# ★means-end S5 委派（solo）：delegate candidate 贏 → 派子隊，母隊留守。
 		if td.get("delegate", false):
-			if _dispatch_goal_delegate(state, team, td):
+			if _dispatch_goal_delegate(state, team, td, _goal_cand_id(e)):
 				team.current_option = String(e["opt"])
 				return
 			continue
@@ -3771,14 +3771,29 @@ func _pick_advisor(team: TeamData) -> int:
 
 # 派建造子隊前往 target_pos，task="建造"，附 build_type/level。
 # 資源以 1.5x 安全餘量檢查（子隊抵達後 start_build 才實際扣款）。
+# ★【夾帶者是呼叫端】（systems 裁 2026-08-25，同 (B) 裁定的形狀）：
+#   `_dispatch_builder` 的失敗發生在【派遣之前】，此時 `current_dispatch_id` 還沒被蓋上
+#   ⇒ 在被呼叫端讀當下值拿身分，時序上必然拿到空。血證：進來 28 次、記下 0 次。
+static func _goal_cand_id(e: Dictionary) -> String:
+	var cand: Dictionary = (e.get("cand", {}) as Dictionary)
+	var gt: String = String(cand.get("goal_type", ""))
+	if gt == "":
+		return ""
+	return "%s:%s" % [gt, String(cand.get("frontier_kind", ""))]
+
 func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vector2i,
-		outpost_type: String, level: int) -> bool:
+		outpost_type: String, level: int, fail_id: String = "", fail_target: String = "") -> bool:
 	# S4 防重複派遣：leader_team 已有 TASK_CONSTRUCT 子隊（在途或施工）→ 跳過
 	# 移動中子隊 tile_pos ≠ 目的地，故用「任一 CONSTRUCT 子隊存在」gate 代替精確目標比對
+	# ★假設不靜默：【這支函式有沒有被呼叫】本身就是一個要量的事實。
+	#   沒它的話，`failure.blocked_total = 0` 分不出「接線斷」與「根本沒走到這裡」。
+	if Probe.enabled: Probe.bump("dispatch.builder_entry")
 	for cid in leader_team.subteam_ids:
 		var ct: TeamData = state.teams.get(cid)
 		if ct == null: continue
 		if ct.current_task == TeamData.TASK_CONSTRUCT or ct.current_task == TeamData.TASK_BUILD:
+			# ★這個 early-return 在所有 record_blocked 【之前】，且原本完全靜默。
+			if Probe.enabled: Probe.bump("dispatch.builder_skip_busy")
 			return false
 	# 也檢查 tile.construction_team_id（已抵達且施工中）
 	var target_tile: HexTileData = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
@@ -3802,8 +3817,7 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 					"home_mfg_level": (home_tile.manufacturing_level if home_tile != null else -1),
 					"tick": state.world.current_tick}, 30)
 			# ★前提型（blueprint 裁 2026-08-25）：這是「計畫好、世界沒備妥」——★不折價，記 blocked_by。
-			FailureMemory.record_blocked(state, leader_team, leader_team.current_dispatch_id,
-				leader_team.current_dispatch_target, "material_" + k)
+			FailureMemory.record_blocked(state, leader_team, fail_id, fail_target, "material_" + k)
 			_log_dispatch_fail(leader_team.faction_id,
 				"資源不足 1.5x: %s 有 %.0f(公庫%.0f+私%.0f)" % [k, avail,
 				float(vault.get(k, 0)), float(leader_team.resources.get(k, 0))], cost)
@@ -3811,15 +3825,13 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
 	if advisor_id == -1:
 		# ★前提型（blueprint 裁 2026-08-25）：這是「計畫好、世界沒備妥」——★不折價，記 blocked_by。
-		FailureMemory.record_blocked(state, leader_team, leader_team.current_dispatch_id,
-			leader_team.current_dispatch_target, "no_advisor")
+		FailureMemory.record_blocked(state, leader_team, fail_id, fail_target, "no_advisor")
 		_log_dispatch_fail(leader_team.faction_id, "無 advisor 可派可升", cost)
 		return false
 	var pop: int = maxi(6, level * 4)   # TEST VALUE — 建造隊最小 6 人；pop*2 門檻=12(lv1)
 	if leader_team.population < pop * 2:
 		# ★前提型（blueprint 裁 2026-08-25）：這是「計畫好、世界沒備妥」——★不折價，記 blocked_by。
-		FailureMemory.record_blocked(state, leader_team, leader_team.current_dispatch_id,
-			leader_team.current_dispatch_target, "pop")
+		FailureMemory.record_blocked(state, leader_team, fail_id, fail_target, "pop")
 		_log_dispatch_fail(leader_team.faction_id,
 			"pop 不足: %d < %d" % [leader_team.population, pop * 2], cost)
 		return false
@@ -3835,8 +3847,7 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	var _avail_food: float = float(vault.get("food", 0)) + float(leader_team.resources.get("food", 0))
 	if _avail_food < _need_food:
 		# ★前提型（blueprint 裁 2026-08-25）：這是「計畫好、世界沒備妥」——★不折價，記 blocked_by。
-		FailureMemory.record_blocked(state, leader_team, leader_team.current_dispatch_id,
-			leader_team.current_dispatch_target, "food_bridge")
+		FailureMemory.record_blocked(state, leader_team, fail_id, fail_target, "food_bridge")
 		_log_dispatch_fail(leader_team.faction_id,
 			"糧橋不足: food %.0f < 需 %.0f(burn×ETA %.1f 天)" % [_avail_food, _need_food, _eta_travel + _eta_build], cost)
 		if Probe.enabled: Probe.bump("bridge.no_go_food")
@@ -4035,7 +4046,7 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 
 # ★means-end S5 委派：goal delegate candidate 贏 → 派子隊執行其 action（build/settle），母隊留守本業。
 # 接既有 SubteamSystem.dispatch（advisor+settler pop+action task/target）。回 true=派出成功。
-func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) -> bool:
+func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary, fail_id: String = "") -> bool:
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
 	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
@@ -4043,7 +4054,8 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	# ★資訊網 Part2 (a)：求援/偵察 已脫離主 argmax/delegate → 移到 _info_side_dispatch 平行步（此處無 help/scout 分支）。
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
-		return _dispatch_builder(state, team, target, String(td["build_type"]), 1)
+		return _dispatch_builder(state, team, target, String(td["build_type"]), 1,
+			fail_id, ("%d,%d" % [target.x, target.y]) if target != Vector2i(-1, -1) else "")
 	# ★A1 裁①(二裁意圖「接 infra path 非另立子隊路」)：facility 分支只走 owner-不在場 remote 子隊。
 	# same-tile(owner 在場)facility 已在 _resolve_build_facility defer 給 infra path（infra desire-based
 	# _pick_facility 選最想建的+就地建=較 goal REGISTRY-order 聰明+單一 build slot 不撞），此處不再生同格 candidate。
@@ -4507,7 +4519,10 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	# S4.4：ore 機會已融入 _pick_outpost_type 人格秤（傳 loc_tile），移除硬 civilian override。
 	var outpost_type: String = _pick_outpost_type(state, leader_team, leader, loc.get("tile", null))
 	if Probe.enabled: Probe.bump("infra.stop.3_reached_dispatch_builder")   # ★measurer L3 tap(T3票)：段(3)真的呼叫到_dispatch_builder
-	_dispatch_builder(state, leader_team, loc.pos, outpost_type, 1)
+	# ★infra 路徑不經 goal candidate，身分由【它真正在做的事】組出（不反解 label）。
+	#   ★名稱是我定的，已列給 systems 可改。
+	_dispatch_builder(state, leader_team, loc.pos, outpost_type, 1,
+			"infra_new_outpost:" + outpost_type, "%d,%d" % [loc.pos.x, loc.pos.y])
 
 # ──────── 設施需求迴路（score = 地利 × (1+缺口) × 個性）────────
 
