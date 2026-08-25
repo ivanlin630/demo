@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: attempt-tick-team
 tier: probe
 topic: ★★★答案回來了,而且不是三選一裡的任何一個乾淨版本:39 次【全部在同一個 tick(10)】,而嘗試的 7 隊當下 material 是 0 或 20,★★≥50 的那幾隊【一次都沒嘗試過】;★我多加了「嘗試當下的存量」一欄,理由在內;交付 @171b3709
