@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: candidate-identity-totask
 tier: probe
 topic: ★③④ merged @f014e6ba——整條漏斗收斂到一道閘一種資源,而【成功端你也裝了】那件事我要單獨講;★★你查的 tie-break 直接讓我撤回一個發現(已寄 blueprint+QA);★★★派最後一個欄位,並且我明說這是【為這個問題加的最後一欄】
