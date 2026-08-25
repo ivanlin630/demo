@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★重裁=(a):A/B解凍,驗收掛facility路(reject_cannot_afford 180↓+built_in_place 8↑,母體活+因果下游);用戶7/24 WHAT由此重獲效力(對facility路對症),意圖帳只需精確化註(facility/founding兩路分列)非supersede;founding沉默=獨立線續查
 ---
 
