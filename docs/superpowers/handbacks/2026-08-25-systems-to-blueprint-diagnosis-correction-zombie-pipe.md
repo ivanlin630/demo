@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★訂正我的診斷:我宣告「watchdog 掛了=否」用的證據是 lock 心跳,而【殭屍也會 touch】——那個「否」不成立;★★這對用戶的決定有實質影響:若真病是管道死,補「零產出偵測」也沒用(fire 了沒人聽)
 ---
 
