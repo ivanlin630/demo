@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: harvest-terrain-from-regen
 topic: ★★質變(day0-only 消失)比量變(291→268)重要;★但「只降 23 不是 120」要問清楚;★你自炸的第二缺陷我立成通則
 ---
