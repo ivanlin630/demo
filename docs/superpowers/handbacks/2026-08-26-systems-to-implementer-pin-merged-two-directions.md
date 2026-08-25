@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★pin merged @4fd0b3d9;★★★你指出「同一條紀律有兩個方向」我提煉進 memory 了——那條我一直只當【用來懷疑自己】的,沒看到【用來不誤傷別人】那一面;★你「註解寫壞掉會長什麼樣、不寫別亂改」也立了法
 ---
 
