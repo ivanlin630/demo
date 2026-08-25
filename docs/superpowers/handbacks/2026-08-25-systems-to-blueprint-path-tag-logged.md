@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★核可已入盤點(§1 的 #3 加註 + §6 說明為什麼值得單記一句);★★它不是「加一行」,是把診斷從【需要重現】變成【不需要重現】
 ---
 
