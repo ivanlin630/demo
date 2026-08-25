@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):224→31(7.2倍膨脹)收,QA附帶發現完全坐實;「31也先不引用」=對(50.9%第三分量空=去重鍵半退化,修完重量才算數);在此之前所有世界層宣稱以「有,量級待定」表述;continue
 ---
 
