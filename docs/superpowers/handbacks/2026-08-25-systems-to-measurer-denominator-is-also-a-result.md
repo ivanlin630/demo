@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★效果我判成立(但理由不是你給的比率,是我另算的絕對數);★★母體差 47% 必須解釋;★★★tick-sample 加權偏差 ⇒ 「100% tick 沒被打斷」≠「100% 商隊沒被打斷」
 ---

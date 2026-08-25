@@ -147,6 +147,15 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 	var _ret_is_convoy: int = int(Probe.counts.get("convoy.return_task_is_convoy", 0))
 	lines.append("★main baseline：RETURN期間task=運輸佔比 = %d/%d = %s" % [
 		_ret_is_convoy, _ret_tick, ("%.1f%%" % (100.0 * float(_ret_is_convoy) / float(_ret_tick)) if _ret_tick > 0 else "無母體")])
+	# ★systems票denominator-is-also-a-result：distinct商隊維度(至少被preempt一次的商隊數/總商隊數)
+	var _all_convoys: Dictionary = {}
+	if Probe.samples.has("convoy.return_distinct"):
+		for s1 in (Probe.samples["convoy.return_distinct"] as Array): _all_convoys[int(s1["team"])] = true
+	var _preempted_convoys: Dictionary = {}
+	if Probe.samples.has("convoy.return_task_other"):
+		for s2 in (Probe.samples["convoy.return_task_other"] as Array): _preempted_convoys[int(s2["team"])] = true
+	lines.append("★distinct商隊維度：至少被preempt一次的商隊數/總RETURN過的商隊數 = %d/%d，distinct隊id清單=%s，被preempt過的隊id清單=%s" % [
+		_preempted_convoys.size(), _all_convoys.size(), str(_all_convoys.keys()), str(_preempted_convoys.keys())])
 	# 逐隻明細（少量、值得逐隻看）
 	for pid in _rec:
 		var r: Dictionary = _rec[pid]

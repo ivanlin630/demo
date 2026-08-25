@@ -1,17 +1,17 @@
-[peaceful_economy day 55] teams=19 porters_tracked=2
+[peaceful_economy day 90] teams=17 porters_tracked=2
   convoy: dispatch=3 attempt=13 deliver=2 settled=2 return=3
   convoy.dispatch_attempt                        = 13
   convoy.drop.inflight_convoy                    = 10
   convoy.rehome                                  = 8
-  persist.hold                                   = 9
+  persist.hold                                   = 21
   下場分佈：{ "merged_home": 2 }
   ★殘留（未回母隊、還在 porter 身上）：{  }
 ★★★§N兩欄（現在commit重量）：
-  ①合法退場總次數(release()呼叫總數,不該下降) = 106 (clean=46 + with_commitment=60)
-    帶承諾標記細分：corvee=0 convoy=1 order=59
-  ②被hold擋下總次數(commit.hold_blocked,該上升) = 9
-    persist.hold(母口徑,含PROGRESSIVE_HOLD_TASKS非承諾型) = 9
-    hold_blocked依承諾kind分佈 = { "construction": 9 }
+  ①合法退場總次數(release()呼叫總數,不該下降) = 185 (clean=67 + with_commitment=118)
+    帶承諾標記細分：corvee=0 convoy=1 order=117
+  ②被hold擋下總次數(commit.hold_blocked,該上升) = 11
+    persist.hold(母口徑,含PROGRESSIVE_HOLD_TASKS非承諾型) = 21
+    hold_blocked依承諾kind分佈 = { "construction": 11 }
   ★主指標-convoy：RETURN期間task=運輸佔比 = 174/174 = 100.0%
     RETURN期間被搶去做別的task分佈 = {  }
   ★主指標-建設：開工後工地被自己隊放掉(construction_abandoned)事件數 = 0
@@ -19,11 +19,11 @@
   ★latch監測(stall-detector觸發率,假設不靜默)：
     commit.stall_fire(有觸發) = 3
     commit.stall_latched_suppressed(觸發被latch壓下) = 7
-    commit.stall_skip_unmeasurable = 359
+    commit.stall_skip_unmeasurable = 804
 ★distinct商隊維度：至少被preempt一次的商隊數/總RETURN過的商隊數 = 0/2，distinct隊id清單=[12, 13]，被preempt過的隊id清單=[]
    porter=12 parent=5 dispatch@2400 出發帶={ "food": 17, "material": 64, "coin": 133.333333333333, "tools": 5 } ｜脫離@-1 task= phase= 身上={  } ｜結局=merged_home 現持={ "food": 13, "material": 31, "coin": 223.34867296268, "tools": 5 }
      ★結案 tick=4500（出發後 2100 tick = 8.8 日）
-     母隊 5：dispatch 當下={ "food": 85, "material": 266, "coin": 666.666666666667, "tools": 25 } ｜現在={ "material": 65.0767054429205, "coin": 1111.38439502275, "tools": 30 } ｜現在公庫={ "material": 200, "horses": 10 }
+     母隊 5：dispatch 當下={ "food": 85, "material": 266, "coin": 666.666666666667, "tools": 25 } ｜現在={ "food": 3.66666666666667, "material": 65.0767054429205, "coin": 1071.38439502275, "tools": 30 } ｜現在公庫={  }
    porter=13 parent=3 dispatch@6800 出發帶={ "food": 6.2310136336768, "material": 41, "coin": 133.333333333333, "tools": 4.66666666666667 } ｜脫離@-1 task= phase= 身上={  } ｜結局=merged_home 現持={  }
      ★結案 tick=7100（出發後 300 tick = 1.3 日）
-     母隊 3：dispatch 當下={ "food": 31.155068168384, "material": 219, "coin": 666.666666666667, "tools": 23.3333333333333 } ｜現在={ "material": 246, "coin": 889.966872651681, "tools": 28 } ｜現在公庫={ "material": 1.27182096963721 }
+     母隊 3：dispatch 當下={ "food": 31.155068168384, "material": 219, "coin": 666.666666666667, "tools": 23.3333333333333 } ｜現在={ "food": 92.2340071180962, "material": 166, "coin": 889.966872651681, "tools": 28 } ｜現在公庫={  }
