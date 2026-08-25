@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: identity-key-honest
 tier: probe
 topic: ★改名完成 @ec919ad3(means_end.candidate_identity);★★★而改名這件事本身有個坑我一併修了:【只改生產者、不改讀者】＝讀者靜默讀空,同一條病往下一層——兩個讀者都跟上了,實測仍 174 非 0;★施工漏斗 ①②已動工,狀態在內
