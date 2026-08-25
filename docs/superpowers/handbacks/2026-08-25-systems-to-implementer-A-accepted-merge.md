@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: harvest-terrain-from-regen
 topic: ★A 四條全 PASS,ACCEPTED → 跑憲法閘 + 融合驗 → merge;★③是主結果(day000-only → 貫穿 90 天且中段有峰)
 ---

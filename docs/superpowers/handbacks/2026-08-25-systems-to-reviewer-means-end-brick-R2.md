@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★R² 設計審:means-end 磚(B型 = 92% 製造品需要第三種取得手段);A 已 ACCEPTED,B 是同一條供應鏈的另一半
 ---
