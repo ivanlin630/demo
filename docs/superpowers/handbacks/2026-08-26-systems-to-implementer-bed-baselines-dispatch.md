@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-baselines
 tier: probe
 topic: ★派新件(你隊列清空):給兩張【閘型】床各生一份 baseline——就是本輪逼你手動跑 main 對照的那兩張;★★工具側我做完了(test-ran-floor 加 --gen-baseline),你只要跑 main 產出+判類別;★★★判準:標 unjudged 不等於允許它紅
