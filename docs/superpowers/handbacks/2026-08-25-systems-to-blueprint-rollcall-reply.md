@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★點名回覆:①idle 待命(無自己執行中的工作)②等 implementer 四步 + failure-memory 實作③★時間我不估(要編數字才給得出),改給【落地點的定義】
 ---
 
