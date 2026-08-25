@@ -11,6 +11,20 @@
   public(有outpost tile.public_storage.material) 加總 = 267.7，跨 11 個outpost（9 個非零）
   ⇒ private 佔比 = 75.2%（811.9 / 1079.5）
   ★tile 側池存量(world_generator 初始80-220+regen)不在這欄——這欄只算『已經被採集離開tile的material』落在私產還是公庫
+  ★逐隊分布(systems票2026-08-26要求,不只給總和)：
+      {"material":250,"team":4}
+      {"material":246,"team":3}
+      {"material":159.8,"team":7}
+      {"material":65,"team":5}
+      {"material":26.8,"team":11}
+      {"material":18.8,"team":0}
+      {"material":15.4,"team":10}
+      {"material":8.3,"team":2}
+      {"material":7.8,"team":9}
+      {"material":7.4,"team":6}
+      {"material":6.7,"team":1}
+      {"material":0,"team":8}
+      ⇒ material>=50 的隊數 = 4 / 12
 --- ★tile 側原始池（世界層還剩多少沒被採走，佐證『世界不缺』那句）---
   全圖 tile.resources.material 加總 = 14769.0（69 個forest tile 佔 10406.0）
 --- ④進來的又出去多少（outflow，★逐個標明有沒有現成tap）---

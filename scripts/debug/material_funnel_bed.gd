@@ -58,6 +58,7 @@ func _run() -> void:
 	var pub_total: float = 0.0
 	var priv_nonzero_teams: int = 0
 	var priv_teams: int = 0
+	var per_team_material: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
 		if team.parent_team_id != -1:
@@ -66,6 +67,7 @@ func _run() -> void:
 		var m: float = float(team.resources.get("material", 0))
 		priv_total += m
 		if m > 0.0: priv_nonzero_teams += 1
+		per_team_material.append({"team": team.team_id, "material": snappedf(m, 0.1)})
 	var pub_tiles: int = 0
 	var pub_nonzero_tiles: int = 0
 	for tid2 in state.world.tiles:
@@ -81,6 +83,13 @@ func _run() -> void:
 	if priv_total + pub_total > 0.0:
 		lines.append("  ⇒ private 佔比 = %.1f%%（%.1f / %.1f）" % [100.0 * priv_total / (priv_total + pub_total), priv_total, priv_total + pub_total])
 	lines.append("  ★tile 側池存量(world_generator 初始80-220+regen)不在這欄——這欄只算『已經被採集離開tile的material』落在私產還是公庫")
+	lines.append("  ★逐隊分布(systems票2026-08-26要求,不只給總和)：")
+	per_team_material.sort_custom(func(a, b): return float(a["material"]) > float(b["material"]))
+	var ge50: int = 0
+	for pt in per_team_material:
+		if float(pt["material"]) >= 50.0: ge50 += 1
+		lines.append("      %s" % JSON.stringify(pt))
+	lines.append("      ⇒ material>=50 的隊數 = %d / %d" % [ge50, priv_teams])
 
 	lines.append("--- ★tile 側原始池（世界層還剩多少沒被採走，佐證『世界不缺』那句）---")
 	var tile_pool_total: float = 0.0

@@ -1,0 +1,38 @@
+{
+  "slice": "material-funnel-unlock",
+  "ticket": "systems票2026-08-26追加:兩個小量測定生死——①39次dispatch_builder.attempt的tick分布②day30 private material逐隊分布(非只總和)",
+  "measured_at_commit": "main（改自己的床 material_funnel_bed.gd 加逐隊dump，純觀測、零新tap、零動控制流）",
+  "seed_config_days": "同前一輪：LW_CONFIG=peaceful_economy PERF_SEED=1337 ADHOC_DAYS=30",
+
+  "①tick分布": {
+    "狀態": "★缺口——dispatch_builder.attempt(faction_ai_system.gd:3803)是plain Probe.bump()，無tick欄，無現成替代(funnel.build_gate.*同樣全是plain bump，同段零tick sample)",
+    "需要": "implementer在faction_ai_system.gd:3803加一行bump_sample帶tick(state.world.current_tick已是函式內可讀變數)，cap建議>=100(遠大於attempt真count,避免first-N截斷)",
+    "備註": "不自己加(scripts/simulation/屬implementer territory)、不用鄰近counter推"
+  },
+
+  "②day30 private material逐隊分布(非只總和,12隊實際跑出來,無sample無cap問題——這是全量非first-N)": [
+    {"team": 4, "material": 250},
+    {"team": 3, "material": 246},
+    {"team": 7, "material": 159.8},
+    {"team": 5, "material": 65},
+    {"team": 11, "material": 26.8},
+    {"team": 0, "material": 18.8},
+    {"team": 10, "material": 15.4},
+    {"team": 2, "material": 8.3},
+    {"team": 9, "material": 7.8},
+    {"team": 6, "material": 7.4},
+    {"team": 1, "material": 6.7},
+    {"team": 8, "material": 0}
+  ],
+
+  "★★★核心發現": {
+    "material>=50的隊數": "4 / 12",
+    "均值(誤導性對照)": "74（811.9/11）",
+    "真實形狀": "前3隊(team4/3/7)持有250+246+159.8=655.8，佔全部811.9的80.8%；其餘9隊只分到156.1，其中1隊(team8)=0，另4隊個位數(6.7~8.3)",
+    "判讀(只列事實,不下結論)": "『均分74』與『大部分隊<50』是兩件事——這批12隊裡material高度集中在少數隊，多數隊(8/12)手上material不足50，接近或等於0"
+  },
+
+  "landed_paths": {
+    "raw_output": "docs/measurements/breed-deathcause/material-funnel-30d.txt"
+  }
+}

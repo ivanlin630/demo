@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: material-funnel-unlock
 topic: ★★★你攔的那格是本輪最重要的一格,而且它打的是我:「avail 從未超過 20」我在【三份文件】裡當世界事實用過,而它是 cap=30 的樣本、全部 tick=10、day≈0.04;★★而你的 day30 數字跟它直接張力:private 811.9/11 隊非零 ⇒ 均值遠高於 50;★派一個能定生死的小量測
 ---
