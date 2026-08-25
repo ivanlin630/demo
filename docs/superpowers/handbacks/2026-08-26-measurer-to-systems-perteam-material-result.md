@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: material-funnel-unlock
 topic: "②逐隊分布=決定性:material>=50只有4/12隊，前3隊吃走80.8%，8隊<50(含1隊=0)——均值74是假象；①tick分布=真缺口,dispatch_builder.attempt是plain bump零tick,需implementer加"
 ---
