@@ -383,37 +383,115 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 
 # ★S2/S3 資源型前置 resolution：未滿→取得 candidate（S2 買 / S3 採@地形定位）。
 const SEEK_TILE_RANGE: int = 30   # TEST VALUE — belief-reachable 上界（bounded seek，非全知 PathSystem live）
-# ★資源→採集地形（material←forest 核心缺口鏈，arc 原始動機）。S3 只 material；他 res 採集地形=後續。
-const RES_HARVEST_TERRAIN: Dictionary = {"material": "forest"}
+# ★★「哪種地形產哪種資源」的【唯一真相源】＝ `ResourceSystem.REGEN_RATE`（2026-08-25）。
+#   ★手抄本 `RES_HARVEST_TERRAIN = {"material": "forest"}` 已刪 —— 它與真相源【直接矛盾】：
+#   表說 food 不可採，而 REGEN_RATE 裡【三種地形全都產 food】，且 plains 的 food(8.0)
+#   是全表最高之一（比它產 material 的 0.5 多 16 倍）。
+#   ⇒ 「缺糧 → 去平原建據點採」這條取得手段【整條靜默不存在】：
+#     它連「找不到地形」都不會記，在 has(res) 那一行就被判定為「沒有這種手段」。
+#   ★量測：2089 次落到本手段，2061 次死在那一行（food 133 / tools 625 / weapon 1303）。
+#   ⛔ 修法【不是】把 food 補進表 —— 那是同一個病的延續（〈估算器禁手抄物理〉）。
+# ★僅觀測用去重帳（Probe.enabled 才寫）：答【單位】那一問，不影響決策。
+static var _fall_seen: Dictionary = {}
+
+static func harvest_terrains(res: String) -> Array:
+	var out: Array = []
+	for tn in ResourceSystem.REGEN_RATE:   # Dictionary 保持插入序 ⇒ determinism 安全
+		var y: float = float((ResourceSystem.REGEN_RATE[tn] as Dictionary).get(res, 0.0))
+		if y > 0.0:
+			out.append({"terrain": String(tn), "yield": y})
+	return out
+# ★「產多少才算可採」沒有門檻常數：★>0 就是候選，孰優孰劣交給折現值比。
+#   （mountain 的 food 0.5 不需要被一個我拍的門檻擋掉 —— 它會自己輸給 plains 的 8.0。
+#    加門檻＝新旋鈕＝把比較的工作換成猜一個數。）
 
 static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: DecisionContext,
 		g: Dictionary, gt: String, payoff: float, prereq: Dictionary) -> Dictionary:
 	var res: String = String(prereq.get("res", ""))
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 組件 E 泛化：qty 走通用 need_keep（任 res）。
+	if Probe.enabled: Probe.bump("goal.res_prereq.entry")
 	if ResourceSystem.effective_holding(state, team, res) >= NeedOracle.need_keep(state, team, res, lv):
+		if Probe.enabled: Probe.bump("goal.res_prereq.satisfied")
 		return {}   # 前置滿
 	# ── 取得手段 1：買（S2，市場取得不需定位；belief-gated）──
+	if not ctx.has_specie:
+		if Probe.enabled: Probe.bump("goal.res_prereq.no_specie")
 	if ctx.has_specie:
 		var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, res)
 		if mp != Vector2i(-1, -1):
+			if Probe.enabled: Probe.bump("goal.res_prereq.buy_wins")
 			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
-	# ── 取得手段 2：採@地形（S3，買不到→定位取得）★material 缺口鏈：需該地形 outpost 採。
-	# ★湧現閉環：缺料→(a)移動到 forest→(b)到了建 outpost→own.terrain==forest→採 satisfied。
-	if RES_HARVEST_TERRAIN.has(res):
-		var terrain: String = String(RES_HARVEST_TERRAIN[res])
+		if Probe.enabled: Probe.bump("goal.res_prereq.no_market")
+	# ── 取得手段 2：採@地形（S3，買不到→定位取得）——★地形集合由真相源導出，不查表。
+	# ★湧現閉環：缺料→(a)移動到產地→(b)到了建 outpost→own.terrain 產該資源→採 satisfied。
+	if Probe.enabled:
+		# ★母體三問（systems 立 2026-08-25）：多大／是不是 0／【單位是什麼】。
+		#   血證：同一 team+tick 重複 4 次（一支隊多個 active goal 各問一次同一資源）
+		#   ⇒ 這個數是【前置解析次數】，不是【獨立機會數】。
+		#   ★兩個都報，不替換：拿哪一個當分母是量測語意的決定，不是我的。
+		Probe.bump("goal.res_fall.%s" % res)
+		var _dk: String = "%d|%d|%s" % [team.team_id, state.world.current_tick, res]
+		if not _fall_seen.has(_dk):
+			_fall_seen[_dk] = true
+			Probe.bump("goal.res_fall_distinct.%s" % res)
+	var terr_cands: Array = harvest_terrains(res)
+	if not terr_cands.is_empty():
 		var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 		var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
-		if own_tile != null and own_tile.terrain == terrain:
-			return {}   # ★閉環完成:已有該地形 outpost → 採 satisfied（既有 harvest 供給）
-		# ★A1 founding：缺料+無該地形 outpost → 派子隊到最近該地形 tile 建 civilian outpost（複用 _dispatch_builder consumer）。
-		# 移除舊 in-place TASK_BUILD + TASK_MIGRATE frontier（TASK_BUILD 無 consumer=死路;founding 本質派子隊,合 WHAT §4）。
-		var pos: Vector2i = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)   # 純地形=公共地理
-		# ★A1 裁③：remote forest founding（異格）→ 派子隊（子隊真移動→抵達→建，正常）。
-		# ★裁② guard：pos == team.tile_pos（隊已站該地形）= same-tile founding，無母隊就地 outpost-build 路 → 靜默（followup）。
-		if pos != Vector2i(-1, -1) and pos != team.tile_pos:
+		# ★★【已滿足】不是布林，是同一個比較（血證 2026-08-25）：
+		#   改成從真相源導出之後，「自家地形有產這個資源」幾乎恆真
+		#   （material 三種地形全產，plains 只有 0.5 但 > 0）
+		#   ⇒ material 的候選全掉進 satisfied，舊行為退化（量到：emitted.material 28 → 0）。
+		#   ★修法不是補一個「產多少才算數」門檻常數（那是新旋鈕），
+		#   而是把這個布林也收進【同一個折現值比較】：
+		#   ★【自家產地的值 ≥ 任何替代產地的值（含路程折現）】⇒ 沒必要再跑一趟 = 已滿足。
+		#   這樣 plains(0.5) 的小產地擋不住 forest(12.0)，而真正夠好的自家產地仍然會止住從軍。
+		var own_yield: float = 0.0
+		if own_tile != null:
+			own_yield = float((ResourceSystem.REGEN_RATE.get(own_tile.terrain, {}) as Dictionary).get(res, 0.0))
+		# ★多地形產同一資源時挑哪個：★折現值比較（產量 × 距離延遲），不是新的排序表。
+		#   value = pv(產量) × δ^(路程天數) —— 遠的產地被等待折現天然懲罰，近而少產的可能反勝。
+		#   ★h 用【隊自己的存續視野】而非逐候選重算：本資源未必是食物，
+		#   把 material 產量加進 food 淨流去算視野是量綱錯誤。h 對所有候選相同 ⇒ 排序由 產量×δ^delay 決定。
+		var d: float = DiscountedFlow.delta_of(ctx.leader_values)
+		var h: float = DiscountedFlow.horizon_eff(ctx.net_food_flow, ctx.food_stock)
+		var best_pos: Vector2i = Vector2i(-1, -1)
+		var best_v: float = -1.0
+		for tc in terr_cands:
+			var p: Vector2i = find_nearest_terrain_tile(state, team, String(tc["terrain"]), SEEK_TILE_RANGE)   # 純地形=公共地理
+			if p == Vector2i(-1, -1) or p == team.tile_pos:
+				continue
+			var delay: float = float(FactionAISystem._hex_dist(team.tile_pos, p)) / FactionAISystem.FOOD_BRIDGE_MOVE_PER_DAY
+			var v: float = DiscountedFlow.option_value(float(tc["yield"]), 0.0, 0.0, d, h) \
+				* pow(clampf(d, DiscountedFlow.DELTA_FLOOR, DiscountedFlow.DELTA_CAP), maxf(delay, 0.0))
+			if v > best_v:
+				best_v = v
+				best_pos = p
+		# ★自家產地的值：delay = 0（人已經在那裡），同一支 option_value。
+		var own_v: float = DiscountedFlow.option_value(own_yield, 0.0, 0.0, d, h) if own_yield > 0.0 else -1.0
+		if own_v >= best_v and own_v > 0.0:
+			if Probe.enabled:
+				Probe.bump("goal.harvest.satisfied_own_terrain")
+				# ★把【判定的依據】也寫出來：帳平只證明沒漏算，不證明每一案判斷正確。
+				Probe.bump_sample("goal.harvest.satisfied_own_terrain", {"team": team.team_id, "res": res,
+					"own_terrain": own_tile.terrain, "own_yield": own_yield,
+					"own_v": snappedf(own_v, 0.001), "best_alt_v": snappedf(best_v, 0.001),
+					"tick": state.world.current_tick}, 30)
+			return {}   # ★自家產地已經不輸給任何替代 ⇒ 再跑一趟無益
+		if Probe.enabled:
+			if best_pos == Vector2i(-1, -1):
+				Probe.bump("goal.harvest.no_reachable_site")
+			else:
+				Probe.bump("goal.harvest.emitted")
+				Probe.bump("goal.harvest.emitted." + res)
+		# ★A1 裁③：remote founding（異格）→ 派子隊（子隊真移動→抵達→建，正常）。
+		# ★裁② guard：pos == team.tile_pos（隊已站產地）= same-tile founding，無母隊就地 outpost-build 路 → 已於上面 continue（followup）。
+		if best_pos != Vector2i(-1, -1):
 			return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx,
-				{"build_type": "civilian", "target": pos})
+				{"build_type": "civilian", "target": best_pos})
+	elif Probe.enabled:
+		Probe.bump("goal.harvest.not_terrain_produced." + res)   # ★B 型：地形本來就不產（缺的是【製造】那條手段）
 	return {}   # S3 無取得手段（產=S4 設施 / same-tile founding=followup）
 
 # ★S3 定位型前置 handler（組件 C）：{kind:location, terrain, control?}。查隊在/有滿足 tile，未滿→tile frontier candidate。
