@@ -123,7 +123,15 @@ static var driver_ledger_enabled: bool = false
 static var driver_ledger_cap: int = 4096      # TEST VALUE
 static var driver_tick_hint: int = 0          # sim_runner 開 ledger 時填當前 tick；off 不動
 
-static func record_driver(entity, field: String, delta: float, reason: String) -> void:
+# ★`kind` 由【呼叫端的身分】填，不由字面推（systems 裁 2026-08-25）：
+#   `field` 是混雜欄——`tags`/`readiness`/`solo_intent`/`loyalty`/`coin` 跟真資源名同欄。
+#   直接掃 `field` 會把 `tags` 當成資源（同 constitution_gate fingerprint 踩過的混雜命中）。
+#   ★用【出處】分類不用【字面】分類 —— 字面會碰撞，出處不會。
+#   `resource_bank`/`tile_bank` 的 `res` 參數天生就是資源 ⇒ 由它們填 `"resource"`。
+# ★`kind` 【必填、無 default】：default 存在的唯一效果是讓【下一個忘記填的人】靜默通過。
+#   實證：bank 的 `reason: String = ""` 有 default，而 208/208 個呼叫點全都有傳
+#   ⇒ 那個 default 從來沒被用過，它只能防到未來的錯誤——而「防到」的方式是讓它靜默。
+static func record_driver(entity, field: String, delta: float, reason: String, kind: String) -> void:
 	if not driver_ledger_enabled:
 		return
 	driver_ledger.append({
@@ -132,6 +140,7 @@ static func record_driver(entity, field: String, delta: float, reason: String) -
 		"field":  field,
 		"delta":  delta,
 		"reason": reason,
+		"kind":   kind,
 	})
 	while driver_ledger.size() > driver_ledger_cap:
 		driver_ledger.pop_front()
@@ -340,15 +349,15 @@ func set_leader(team: TeamData, pid: int, old_leader_action: String = "none") ->
 #   → 除 world_state.gd / outpost_system.gd 應為 0。
 func set_team_tags(team: TeamData, tags: Array, reason: String = "") -> void:
 	team.tags = tags
-	record_driver(team, "tags", 0.0, reason)
+	record_driver(team, "tags", 0.0, reason, "trait")
 
 func add_tag(team: TeamData, tag, reason: String = "") -> void:
 	team.tags.append(tag)
-	record_driver(team, "tags", 1.0, reason)
+	record_driver(team, "tags", 1.0, reason, "trait")
 
 func remove_tag(team: TeamData, tag, reason: String = "") -> void:
 	team.tags.erase(tag)
-	record_driver(team, "tags", -1.0, reason)
+	record_driver(team, "tags", -1.0, reason, "trait")
 
 # ── S6 高風險無主欄 chokepoint（本波收 readiness + solo_intent，非全欄）──────
 # readiness：戰鬥/恢復多系統寫 → 單寫者 + reason。值計算留呼叫端（此只賦值+記，pointwise 不變）。
@@ -357,13 +366,13 @@ func remove_tag(team: TeamData, tag, reason: String = "") -> void:
 #   → 除 world_state.gd / npc_combat_system.gd 應為 0。
 func set_readiness(team: TeamData, val: float, reason: String = "") -> void:
 	team.readiness = val
-	record_driver(team, "readiness", 0.0, reason)
+	record_driver(team, "readiness", 0.0, reason, "state")
 
 # solo_intent：獨立隊戰略 intent struct（type/why/mode，driver-complete）。faction_ai._set_solo 升格呼此（消旁寫）。
 # CI-scan: grep -nE '\.solo_intent *=' scripts → 除 world_state.gd 應為 0。
 func set_solo_intent(team: TeamData, itype: String, why: String, mode: String, reason: String = "") -> void:
 	team.solo_intent = {"type": itype, "why": why, "mode": mode}
-	record_driver(team, "solo_intent", 0.0, reason)
+	record_driver(team, "solo_intent", 0.0, reason, "state")
 
 # 單一 team 建立 chokepoint（S9，erase_team 對稱）：teams 註冊 + known/discovered row init。
 # 所有 `state.teams[id] = team` 直寫（世界gen/beast/subteam/manpower/population/reaction/split/tutorial）改走此，

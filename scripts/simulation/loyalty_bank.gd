@@ -5,8 +5,8 @@ class_name LoyaltyBank
 # reason → WorldState.record_driver（driver-ledger；預設 off 零成本）。
 static func adjust(p: PersonData, delta: float, reason: String = "", cap: float = 1.0) -> void:
 	p.loyalty = clampf(p.loyalty + delta, 0.0, cap)
-	WorldState.record_driver(p, "loyalty", delta, reason)
+	WorldState.record_driver(p, "loyalty", delta, reason, "state")
 
 static func set_baseline(p: PersonData, value: float, reason: String = "") -> void:
 	p.loyalty = clampf(value, 0.0, 1.0)
-	WorldState.record_driver(p, "loyalty", value, reason)
+	WorldState.record_driver(p, "loyalty", value, reason, "state")

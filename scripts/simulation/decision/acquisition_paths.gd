@@ -33,6 +33,63 @@ static func producers_of(res: String) -> Array:
 				})
 	return out
 
+# ★★資源的【形狀】—— 決定「夠不夠」要怎麼問（systems 裁 2026-08-25）。
+#   rate（流）   ⇒ 量 ÷ 率 ＝ 多久湊到
+#   stock（存量）⇒ 存量比較，且【採完就沒】
+#   ⛔ 拿流的尺量存量 ＝ 系統性【高估】且不對稱（只會高估或打平，不會低估）
+#      ⇒ 本磚對 stock【不做價值比較】，只回報「有此手段 + 形狀 + tap」。
+#      ★寧可缺一個數字，不要一個錯的數字 —— 錯的會被下游當真，缺的不會。
+#
+# ★三段判定，能導的先導、導不出來的才查表：
+#   ①`RECIPE_GROUPS` 的 out  ⇒ manufactured（真相源導出）
+#   ②`REGEN_RATE` 有正產出   ⇒ rate（真相源導出）
+#   ③其餘 ⇒ 查下表。★這張表【准留】的唯一理由是它配了機械 falsifier
+#     （`resource_shape_falsifier.gd`：掃 driver_ledger 裡所有 delta>0 的 (資源,reason)，
+#      出現未分類組合就紅）——★判準是「這張表變錯的時候，誰會發現？」有機械答案才准留表。
+const SHAPE_TABLE: Dictionary = {
+	"ore_iron":  "stock",         # world_generator 初始鋪設；resource_system:347 明寫「ore/gem 有限」
+	"ore_gold":  "stock",
+	"ore_silver": "stock",
+	"gem":       "stock",
+	"herb":        "capped_regen",  # harvest_system:_regen_herb，受 resource_cap 限（★不在 REGEN_RATE）
+	"wild_game":   "capped_regen",  # harvest_system:_regen_wild_game
+	"wild_horses": "capped_regen",  # harvest_system:_regen_wild_horses
+	"horses":    "loot_or_collect", # harvest_horse_store + encounter loot_horses_out（★存 public_storage 不是 resources）
+	"mounts":    "loot_or_collect",
+	"coin":      "trade_only",      # 鑄幣/交易，不從地裡長
+	# ★falsifier 第一次跑就拓到這顆（未分類）——它走 TileBank 所以 kind=resource，
+	#   但它【不是可取得物】而是地格上的猛獸數。明寫出來，不靠「沒人會想去採它」這種默認。
+	"predator_density": "not_acquirable",   # 地格威脅計數（regen_predator），靜待量非取得目標
+}
+
+static func shape_of(res: String) -> String:
+	if not producers_of(res).is_empty():
+		return "manufactured"
+	for tn in ResourceSystem.REGEN_RATE:
+		if float((ResourceSystem.REGEN_RATE[tn] as Dictionary).get(res, 0.0)) > 0.0:
+			return "rate"
+	return String(SHAPE_TABLE.get(res, "unknown"))
+
+# ★stock 形狀的資源：回報【有這條手段】與【形狀】，但不算價值。
+static func stock_sources(state: WorldState, team: TeamData, res: String) -> Array:
+	var out: Array = []
+	if state == null or team == null:
+		return out
+	for tid in state.world.tiles:   # gate-ok: 地理/礦脈=公共知識（同 find_nearest_terrain_tile 先例）
+		var t: HexTileData = state.world.tiles[tid]
+		if t == null:
+			continue
+		# ★兩個位置都要看：`horses` 在 public_storage 不在 resources
+		#   ⇒ 只查 resources 的 means-end 會對它永遠回「無手段」而靜默終止。
+		var amt: float = float(t.resources.get(res, 0)) + float(t.public_storage.get(res, 0))
+		if amt <= 0.0:
+			continue
+		out.append({"means": "harvest_stock", "res": res, "shape": "stock",
+			"pos": t.tile_pos, "amount": amt,
+			"blocked_on": "", "kind": "stock_site",
+			"value_compared": false})   # ★明示：本票不對 stock 做價值比較
+	return out
+
 # ★「製造」這條手段的候選路徑：回傳每條路徑【卡在哪一格】（blocked_on）。
 #   ★缺設施 與 缺原料 必須分得開 —— 兩者的解法相反（蓋工坊 vs 去採料）。
 #   `blocked_on` == "" ⇒ 前置全滿，可以直接產。

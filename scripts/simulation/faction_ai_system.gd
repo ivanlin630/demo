@@ -3668,7 +3668,7 @@ func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 			# 地圖全無有效格(radius 12) → coin 無處落地 → 記顯性 off-map sink（守恆閉合，非靜默丟失）。
 			var lost_coin: float = team.anon_treasury + float(team.resources.get("coin", 0))
 			state.offmap_extinct_coin += lost_coin
-			WorldState.record_driver(team, "coin", -lost_coin, "extinct_no_tile")
+			WorldState.record_driver(team, "coin", -lost_coin, "extinct_no_tile", "resource")
 			AnonTreasuryBank.reset(team, "extinct_no_tile")
 			ResourceBank.clear_all(team, "extinct_no_tile")
 			return
