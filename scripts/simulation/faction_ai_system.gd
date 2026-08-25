@@ -3801,10 +3801,14 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		var ct: TeamData = state.teams.get(cid)
 		if ct == null: continue
 		if ct.current_task == TeamData.TASK_CONSTRUCT or ct.current_task == TeamData.TASK_BUILD:
+			# ★★漏斗③段（2026-08-26）：這道閘原本【完全靜默】——「已經有子隊在蓋」與
+			#   「資源不夠」在外面長得一樣（都是 return false），而它們的處置完全相反。
+			if Probe.enabled: Probe.bump("funnel.build_gate.busy_subteam")
 			return false
 	# 也檢查 tile.construction_team_id（已抵達且施工中）
 	var target_tile: HexTileData = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
 	if target_tile != null and target_tile.construction_team_id != -1:
+		if Probe.enabled: Probe.bump("funnel.build_gate.tile_occupied")   # ★同上：原本靜默
 		return false
 	var cost: Dictionary = OutpostSystem.OUTPOST_COST[outpost_type][level - 1]
 	# 腳下公庫 caravan-load：leader 站自家 outpost → 公庫+私產合併池 gate（W4 B）
@@ -3826,15 +3830,21 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 			_log_dispatch_fail(leader_team.faction_id,
 				"資源不足 1.5x: %s 有 %.0f(公庫%.0f+私%.0f)" % [k, avail,
 				float(vault.get(k, 0)), float(leader_team.resources.get(k, 0))], cost)
+			# ★逐【資源種類】分開：「缺料」與「缺糧」是不同的病，合成一個 counter 就分不出
+			if Probe.enabled:
+				Probe.bump("funnel.build_gate.cost")
+				Probe.bump("funnel.build_gate.cost." + String(k))
 			return false
 	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
 	if advisor_id == -1:
 		_log_dispatch_fail(leader_team.faction_id, "無 advisor 可派可升", cost)
+		if Probe.enabled: Probe.bump("funnel.build_gate.no_advisor")
 		return false
 	var pop: int = maxi(6, level * 4)   # TEST VALUE — 建造隊最小 6 人；pop*2 門檻=12(lv1)
 	if leader_team.population < pop * 2:
 		_log_dispatch_fail(leader_team.faction_id,
 			"pop 不足: %d < %d" % [leader_team.population, pop * 2], cost)
+		if Probe.enabled: Probe.bump("funnel.build_gate.pop")
 		return false
 	# ★糧流 Slice B1 糧橋 go/no-go（解 A1 子隊餓死真 victim）：子隊遠地跋涉+建程需糧 burn×ETA_total。
 	# 母隊(公庫+私產)food 撥得起才派→出發配糧到夠（下方 top-up）；不豐→no-go（別派餓死途中 dissolve）。
@@ -3849,12 +3859,15 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	if _avail_food < _need_food:
 		_log_dispatch_fail(leader_team.faction_id,
 			"糧橋不足: food %.0f < 需 %.0f(burn×ETA %.1f 天)" % [_avail_food, _need_food, _eta_travel + _eta_build], cost)
-		if Probe.enabled: Probe.bump("bridge.no_go_food")
+		if Probe.enabled:
+			Probe.bump("bridge.no_go_food")
+			Probe.bump("funnel.build_gate.food_bridge")   # ★併進同一族，讓六道閘可以直接相加對帳
 		return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, leader_team.team_id, advisor_id, pop, TeamData.TASK_CONSTRUCT, target_pos)
 	if sub_id == -1:
 		_log_dispatch_fail(leader_team.faction_id, "subteam dispatch 失敗", cost)
+		if Probe.enabled: Probe.bump("funnel.build_gate.subteam_dispatch")
 		return false
 	_last_dispatch_fail.erase(leader_team.faction_id)
 	# caravan-load：從腳下公庫優先撥付，差額補私產（守恆：公庫減 == 子隊增）
@@ -3909,6 +3922,8 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 					ResourceBank.add(sub, rname, rfrom_owner, "mine_bootstrap_owner_in")
 	print("[Infra] Team%d 派建造子隊 Team%d → (%d,%d) %s Lv%d" % [
 		leader_team.team_id, sub_id, target_pos.x, target_pos.y, outpost_type, level])
+	# ★成功端也要計：沒有它，六道閘相加對不上 attempt ⇒ 對帳式失效
+	if Probe.enabled: Probe.bump("funnel.build_gate.dispatched")
 	return true
 
 # 派升級子隊（task="升級"，附 target_level）

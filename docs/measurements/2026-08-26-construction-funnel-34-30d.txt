@@ -1,0 +1,79 @@
+[peaceful_economy day 30 seed 1337] teams=12
+--- ①段 candidate → winner（★每格都有分母）---
+  funnel.cand.emitted                = 845
+  funnel.decide.total                = 323
+  funnel.decide.winner_cand          = 115
+  funnel.decide.winner_static        = 208
+  ⇒ candidate 贏得 argmax 的比例 = 35.6%（115 / 323）
+  ★贏不了時排第幾（bucket）：
+      funnel.cand.best_rank.0_won            = 115
+      funnel.cand.best_rank.1_2              = 13
+      funnel.cand.best_rank.3_5              = 15
+      funnel.cand.best_rank.6plus            = 51
+      （四桶合計 = 194 ＝ 有 candidate 參與的決策次數）
+      funnel.cand.by_goal.maintain_material  = 125
+      funnel.cand.by_goal.maintain_weapons   = 125
+      funnel.cand.by_goal.build_workshop     = 107
+      funnel.cand.by_goal.build_apothecary   = 125
+      funnel.cand.by_goal.build_stable       = 117
+      funnel.cand.by_goal.maintain_tools     = 94
+      funnel.cand.by_goal.maintain_food      = 90
+      funnel.cand.by_goal.no_source_goal:deliver_material = 26
+      funnel.cand.by_goal.no_source_goal:deliver_tools = 4
+      funnel.cand.by_goal.build_farming      = 25
+      funnel.cand.by_goal.no_source_goal:deliver_food = 7
+--- ②段 delegate 路由（★對帳：四分支相加 == entry）---
+  funnel.delegate.branch_convoy      = 12
+  funnel.delegate.branch_build       = 39
+  funnel.delegate.branch_facility    = 0
+  funnel.delegate.branch_generic     = 0
+  delegate.entry（分母）                 = 51
+  ⇒ ★對帳：四分支合計 51 vs entry 51 ⇒ ✅一致
+  各分支結果：
+      delegate.build_ok                      = 0
+      delegate.build_fail                    = 39
+      funnel.delegate.facility_ok            = 0
+      funnel.delegate.facility_fail          = 0
+      funnel.delegate.generic_ok             = 0
+      funnel.delegate.generic_fail           = 0
+      funnel.delegate.generic_drop_no_advisor = 0
+--- ★非零證據（判準③）---
+  ★以下 counter 在本輪為 0（15 顆）——★兩種可能，這裡不替它選：
+      funnel.delegate.branch_facility
+      funnel.delegate.branch_generic
+      delegate.build_ok
+      funnel.delegate.facility_ok
+      funnel.delegate.facility_fail
+      funnel.delegate.generic_ok
+      funnel.delegate.generic_fail
+      funnel.delegate.generic_drop_no_advisor
+      funnel.build_gate.busy_subteam
+      funnel.build_gate.tile_occupied
+      funnel.build_gate.no_advisor
+      funnel.build_gate.pop
+      funnel.build_gate.food_bridge
+      funnel.build_gate.subteam_dispatch
+      funnel.build_gate.dispatched
+  (a) 掛錯位置（那段 code 有跑但 counter 沒接到）
+  (b) 那條路在這張床上不可達（例：無 convoy 需求／無 facility 委派）
+  ★分辨法：看它【同段的分母】—— 分母非零而它為 0 ⇒ 偏向 (b)；分母也是 0 ⇒ 先查 (a)
+--- ③④段 build dispatch 的七道閘（★對帳：七閘＋成功 == attempt）---
+  funnel.build_gate.busy_subteam           = 0
+  funnel.build_gate.tile_occupied          = 0
+  funnel.build_gate.cost                   = 39
+  funnel.build_gate.no_advisor             = 0
+  funnel.build_gate.pop                    = 0
+  funnel.build_gate.food_bridge            = 0
+  funnel.build_gate.subteam_dispatch       = 0
+  funnel.build_gate.dispatched             = 0
+      funnel.build_gate.cost.material      = 39
+  dispatch_builder.attempt（分母）             = 39
+  ⇒ ★對帳：七閘＋成功 39 vs attempt 39 ⇒ ✅一致
+--- ★`tick`/`team` 欄位的實例證明（同 tick 同 team 多 candidate）---
+  樣本 500 筆 → (tick,team) 組合 130 個，其中【同組多 candidate】= 97 組
+  ★實例（原始樣本，未加工）：
+      { "tick": 10, "team": 0, "goal": "maintain_material", "label": "maintain_material:location:delegate", "target": (5, 8), "util": 0.8481 }
+      { "tick": 10, "team": 0, "goal": "maintain_weapons", "label": "maintain_weapons:location:delegate", "target": (5, 8), "util": 1.2721 }
+      { "tick": 10, "team": 0, "goal": "build_workshop", "label": "build_workshop:location:delegate", "target": (5, 8), "util": 1.2721 }
+      { "tick": 10, "team": 0, "goal": "build_apothecary", "label": "build_apothecary:location:delegate", "target": (5, 8), "util": 1.2721 }
+      { "tick": 10, "team": 0, "goal": "build_stable", "label": "build_stable:location:delegate", "target": (5, 8), "util": 1.2721 }
