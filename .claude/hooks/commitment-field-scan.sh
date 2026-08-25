@@ -29,6 +29,13 @@ REG="scripts/simulation/decision/commitment_fields.gd"
 [ -f "$REG" ]  || { echo "[commitment-scan] missing $REG"; exit 1; }
 
 # --- derive candidates: field names whose shape suggests "something started / something aimed at"
+# ★KNOWN LIMIT (state it, do not let the ratio imply more than it proves):
+#   candidates come from a NAME-SHAPE regex, not from semantics. A commitment field
+#   named without one of these suffixes (say `escort_of`) is never even a candidate,
+#   so "17/17" means "every candidate the shape rule found is classified" --
+#   NOT "every commitment field in TeamData is classified".
+#   Widen the regex when a new naming style appears; a gate that overstates its own
+#   reach is the kind of gate people trust exactly once.
 CAND="$(grep -oE '^var [a-z_0-9]+' "$TEAM" | sed 's/^var //' \
   | grep -E '(_site|_target|_target_id|_phase|committed_|corvee|pending_|_cache|_task)$|^(corvee_site|task_extra_data|goal_state)$' \
   | sort -u)"

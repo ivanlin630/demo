@@ -41,22 +41,34 @@ const NOT_COMMITMENT: Dictionary = {
 	"pending_proposal": "等對方回覆的提案，未開始執行",
 	"pending_owner_change_tick": "偵測緩衝倒數，與本隊承諾無關",
 	"current_task": "★它【就是】被 release 清掉的那個代理 —— v2 的整個重點是不再靠它當判準",
+	"commit_stall_site": "stall-detector 的 baseline 綁在哪個工地（偵測器自己的記帳），承諾事實在 tile 上不在這欄",
 	"order_task": "上級指派的【型別標籤】；判未完成看的是對象還在不在（order_target_id 已在 READS）",
 }
 
 # ★回傳這支隊【未完成的承諾】：{} ＝ 沒有。
 #   `progress` ＝ 越大越接近完成（供 stall-detector 用同一支 `stall_verdict`：上升＝有進展）。
+# ★「我的工地」的【單一定義】（2026-08-25）：`corvee_site` 優先，否則腳下。
+#   ★這段原本在 `persist_strength._build_tile`，而 `unfinished()` 當時只看 `corvee_site`
+#   ⇒ 兩處對「我的工地」有兩個定義，窄的那個看不到「沒經過 commit-hook 就在蓋」的隊
+#   ⇒ 那種隊的承諾對 hold 與 stall-detector 【完全隱形】。收斂成一份，persist 改呼這裡。
+static func build_tile(state: WorldState, team: TeamData) -> HexTileData:
+	if team.corvee_site != Vector2i(-1, -1):
+		var ct: HexTileData = state.world.tiles.get(team.corvee_site.x * 1000 + team.corvee_site.y)
+		if ct != null and ct.construction_team_id == team.team_id and ct.construction_ticks_left > 0:
+			return ct   # 自己未完 corvee 工地（離開仍認得）
+	return state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+
 static func unfinished(state: WorldState, team: TeamData) -> Dictionary:
 	if state == null or team == null:
 		return {}
-	# ①自己起的工地（corvee_site / 腳下）——讀 tile 的真實進度，不是讀 task 欄位
-	var site: Vector2i = team.corvee_site
-	if site != Vector2i(-1, -1):
-		var t: HexTileData = state.world.tiles.get(site.x * 1000 + site.y)
-		if t != null and t.construction_team_id == team.team_id and t.construction_ticks_left > 0:
-			var total: int = OutpostSystem.construction_ticks_total(t)
-			return {"kind": "construction", "measurable": true, "progress": float(maxi(total - t.construction_ticks_left, 0)),
-				"tick": t.construction_started_tick}
+	# ①自己的工地 —— 讀 tile 的真實進度，不是讀 task 欄位。
+	#   ★用共用的 `build_tile()`（corvee_site 優先、否則腳下）：
+	#   只看 corvee_site 的話，「沒經過 commit-hook 就在蓋」的隊會完全隱形。
+	var t: HexTileData = build_tile(state, team)
+	if t != null and t.construction_team_id == team.team_id and t.construction_ticks_left > 0:
+		var total: int = OutpostSystem.construction_ticks_total(t)
+		return {"kind": "construction", "site": "%d,%d" % [t.tile_pos.x, t.tile_pos.y], "measurable": true, "progress": float(maxi(total - t.construction_ticks_left, 0)),
+			"tick": t.construction_started_tick}
 	# ②convoy 在途（任何 phase 都是未結案：貨還在身上或人還沒歸建）
 	var phase: String = String(team.task_extra_data.get("convoy_phase", ""))
 	if phase != "":
@@ -64,14 +76,14 @@ static func unfinished(state: WorldState, team: TeamData) -> Dictionary:
 		var prog: float = 0.0
 		if home is Vector2i and home != Vector2i(-1, -1):
 			prog = -float(FactionAISystem._hex_dist(team.tile_pos, home))   # 越近家越大（負距離）
-		return {"kind": "convoy", "measurable": true, "progress": prog,
+		return {"kind": "convoy", "site": "convoy", "measurable": true, "progress": prog,
 			"tick": int(team.task_extra_data.get("return_start_tick", team.task_start_tick))}
 	# ③上級指派且對象還在
 	if team.order_target_id != -1 and state.teams.has(team.order_target_id):
 		# ★`order` 沒有進度事實可讀（上級指派只有「對象還在」這個布林）
 		#   ⇒ measurable:false ★沒有事實就【不給判決】，不是把「量不到」當成「沒進展」。
 		#   血證：沒有這欄時，stall-detector 對 order 每 cadence 判 STALLED ⇒ 652 次假觸發。
-		return {"kind": "order", "measurable": false, "progress": 0.0, "tick": team.task_start_tick}
+		return {"kind": "order", "site": str(team.order_target_id), "measurable": false, "progress": 0.0, "tick": team.task_start_tick}
 	return {}
 
 static func has_unfinished(state: WorldState, team: TeamData) -> bool:

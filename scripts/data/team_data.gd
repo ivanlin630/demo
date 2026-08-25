@@ -176,6 +176,7 @@ var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } �
 #   讀的是【進度事實】（工地 person-ticks 有沒有在減少／convoy 有沒有接近終點），
 #   不是「有沒有被折價」——決策層與仲裁層互不相通，那條已由 R² 打掉。
 var commit_stall_kind: String = ""
+var commit_stall_site: String = ""   # ★baseline 綁在【哪一個工地】上（換工地＝換 episode）
 var commit_stall_tick: int = 0
 var commit_stall_progress: float = 0.0
 var survival_committed_option: String = ""   # 現承諾的 survival option 字串（"" = 未承諾/待重蓋）

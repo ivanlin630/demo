@@ -133,7 +133,32 @@ func _dump(out_path: String, day_now: int, days: int, sd: int, cfg: String, stat
 			lines.append("    %s" % str(es))
 	if _c("commit.stall_fire") == 0 and rc == 0:
 		lines.append("  ★★紅燈判準：解藥零觸發 ＋ ①合法退場也是 0 ⇒ latch 已發生而沒人知道")
-	lines.append("  construction_abandoned 事件（紮根執行型失敗進料口）= %d" % _c("commit.stall_fire.construction"))
+	# ★★母體改成【直接普查】，不再由別人的計數器推導。
+	#   血證（同一輪犯兩次）：先用「紮根子集」當所有 construction 的母體；改對之後又用
+	#   `construct.start − complete` ＝ 0 去比 10 次開火 —— 但那兩顆計數器涵蓋的是哪些施工路徑，
+	#   我【從來沒有驗過】。★從沒驗過定義的計數器，不能拿來當母體。
+	#   ⇒ 收盤時掃全圖 tile，數「真的還沒蓋完」的工地，那是構造性的事實，不是推導。
+	var unfinished_sites: Array = []
+	for _k in state.world.tiles:
+		var _t = state.world.tiles[_k]
+		if _t != null and _t.construction_ticks_left > 0:
+			unfinished_sites.append("%d,%d(team=%d,left=%d)" % [_t.tile_pos.x, _t.tile_pos.y,
+				_t.construction_team_id, _t.construction_ticks_left])
+	lines.append("  ★普查·收盤仍未完工的 tile = %d  %s" % [unfinished_sites.size(),
+		str(unfinished_sites).substr(0, 300)])
+	lines.append("--- ★預期母體【同一輪算，且元素要對齊】---")
+	# ★血證：第一版母體用 settlement.l0_to_l1_start − complete_crude_camp（只涵蓋【紮根】），
+	#   但偵測器涵蓋的是【所有 construction】（含 upgrade_facility）⇒ 母體 0 vs 實際 10 是
+	#   「拿錯母體比」不是「偵測器爆掉」。★數母體前要先對齊母體的元素是什麼。
+	var cs_all: int = _c("construct.start")
+	var cc_all: int = _c("construct.complete")
+	var root_s: int = _c("settlement.l0_to_l1_start")
+	var root_c: int = _c("construct.complete_crude_camp")
+	lines.append("  【所有 construction】start = %d / complete = %d ⇒ 未完工母體 = %d" % [cs_all, cc_all, maxi(cs_all - cc_all, 0)])
+	lines.append("  【紮根 crude_camp 子集】start = %d / complete = %d ⇒ 未完工母體 = %d" % [root_s, root_c, maxi(root_s - root_c, 0)])
+	lines.append("  ⇒ ★實際 stall_fire.construction = %d" % _c("commit.stall_fire.construction"))
+	lines.append("     ★判讀：遠高於【所有 construction】母體 ⇒ 同一工地重複開火；遠低於 ⇒ 偵測不到")
+	lines.append("     ★另注意：typed 事件目前對【所有 construction】發，而磚的 acceptance 只問紮根 —— 兩者範圍不同")
 
 	var text: String = "\n".join(PackedStringArray(lines))
 	if out_path != "":

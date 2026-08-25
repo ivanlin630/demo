@@ -5189,7 +5189,11 @@ func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 	var patience: float = DecisionEngine.stall_patience_factor(leader.values if leader != null else {})
 	var stall_ticks: int = int(DecisionEngine.STALL_BASE_DAYS * patience * float(WorldState.TICKS_PER_DAY))
 	# 換了承諾種類（例：工地做完換 convoy）⇒ 新 episode
-	if team.commit_stall_kind != kind:
+	# ★★site 也要比：`build_tile` 會在 corvee_site 與腳下之間切換 ⇒ 兩個 cadence 可能看的是【不同工地】。
+	#   血證：progress 從 54 掉到 0 不是停滯，是換了一塊地；母體 0 卻開火 10 次就是這樣來的。
+	var site: String = String(c.get("site", ""))
+	if team.commit_stall_kind != kind or team.commit_stall_site != site:
+		team.commit_stall_site = site
 		team.commit_stall_kind = kind
 		team.commit_stall_tick = now
 		team.commit_stall_progress = prog
@@ -5211,7 +5215,7 @@ func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 			if Probe.enabled:
 				Probe.bump("commit.stall_fire")
 				Probe.bump("commit.stall_fire." + kind)
-				Probe.bump_sample("commit.stall_fire", {"team": team.team_id, "kind": kind,
+				Probe.bump_sample("commit.stall_fire", {"team": team.team_id, "kind": kind, "site": site,
 					"waited_ticks": now - team.commit_stall_tick, "progress": prog,
 					"baseline": team.commit_stall_progress, "tick": now}, 30)
 			# ★開火後【一律重置 baseline】：否則同一段承諾每 cadence 重判 STALLED ⇒ 計數暴衝
