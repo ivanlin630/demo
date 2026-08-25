@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★★merge 順序【翻轉】:磚先、convoy 後(API 依賴 > 事件依賴);★你「作廢不是打折」立成規;★污染界定我照收
 ---
