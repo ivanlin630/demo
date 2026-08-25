@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: material-gate-persona
 tier: behavior
 topic: ★R² CLEAN → 動工:三個 1.5x 建造閘收斂成一個共用判斷 + 人格化;★★★先講最重要的一件:【這張票不會讓任何一次建造成功,而那是預期不是失敗】——cost 50 而 avail 從未超過 20,拔掉緩衝也過不了;★驗收因此驗【形狀】不驗【解鎖】
