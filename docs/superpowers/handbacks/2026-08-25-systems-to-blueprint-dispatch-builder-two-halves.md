@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★「誰會再呼叫 _dispatch_builder」＝兩半:一半是【床缺一條路】(用戶已裁預塞政權那條),一半可以現在追;附「冷啟動雞生蛋」命名的修正
 ---
 
