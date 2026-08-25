@@ -248,9 +248,9 @@ func _run() -> void:
 	#   ③empty_*＝各種回空。★三者加總必須 == entry（分母＝進入函式次數）。
 	lines.append("--- ★_resolve_build_facility 三種歸宿（逐日，★分母=entry）---")
 	var ex: Array = ["build_candidate", "resource_candidate",
-		"empty_no_fdef", "empty_already_built", "empty_wrong_outpost_type",
+		"empty_no_fdef", "empty_already_built", "empty_no_own_outpost", "empty_wrong_outpost_type",
 		"empty_pop_below_min", "empty_defer_infra"]
-	lines.append("  day | entry | ★build ★res | noFdef built wrongType popLow deferInfra | 對帳")
+	lines.append("  day | entry | ★build ★res | noFdef built noOwnOp wrongType popLow deferInfra | 對帳")
 	var bad3: int = 0
 	for d4 in range(31):
 		var sf4: String = ".day.%03d" % d4
@@ -262,13 +262,13 @@ func _run() -> void:
 			var q: int = _c("resolver." + String(ek) + sf4)
 			vv4.append(q); sm4 += q
 		if sm4 != ent: bad3 += 1
-		lines.append("  %3d | %5d | %6d %5d | %6d %5d %9d %6d %10d | %s" % [d4, ent,
-			int(vv4[0]), int(vv4[1]), int(vv4[2]), int(vv4[3]), int(vv4[4]), int(vv4[5]), int(vv4[6]),
+		lines.append("  %3d | %5d | %6d %5d | %6d %5d %7d %9d %6d %10d | %s" % [d4, ent,
+			int(vv4[0]), int(vv4[1]), int(vv4[2]), int(vv4[3]), int(vv4[4]), int(vv4[5]), int(vv4[6]), int(vv4[7]),
 			"✅" if sm4 == ent else "❌差 %d" % (ent - sm4)])
 	lines.append("  ★★★%s" % ("三種歸宿互斥且窮盡：每天都加得回 entry" if bad3 == 0 else "%d 天對不起來 ⇒ 還有一條出口沒被列舉" % bad3))
 	for kr in Probe.counts.keys():
 		var krs: String = String(kr)
-		if krs.begins_with("resolver.resource_candidate.res.") or krs.begins_with("resolver.resource_candidate.task."):
+		if krs.begins_with("resolver.resource_candidate.res.") or krs.begins_with("resolver.resource_candidate.task.") or krs.begins_with("resolver.empty_wrong_outpost_type.have."):
 			lines.append("      %-50s = %d" % [krs, int(Probe.counts[kr])])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
