@@ -327,6 +327,7 @@ static func _delegate_variant(state: WorldState, team: TeamData, ctx: DecisionCo
 	var pop: int = team.population
 	var settler: int = clampi(pop / 4, 2, 5)
 	if pop - settler < FactionAISystem.MIN_PARENT_POP_AFTER_DISPATCH:
+		if Probe.enabled: Probe.bump("goal.deleg.pop_gate_block")
 		return {}   # 餘力不足 → 無委派變體（只自己做，pop-guard 擋=多線無委派恆贏）
 	var base_u: float = float(self_cand.get("util", 0.0))
 	var deleg_u: float = clampf(base_u + DELEGATE_MULTILINE_BONUS - DELEGATE_COST, 0.0, GOAL_UTIL_CAP)   # must-fix① clamp 沿用
@@ -391,26 +392,62 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 	var res: String = String(prereq.get("res", ""))
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 組件 E 泛化：qty 走通用 need_keep（任 res）。
+	# ★【採@地形】是取得手段 2，它前面還有兩個出口會先 return。
+	#   血證：採@地形分支四個出口 emitted=28、其餘全 0
+	#   ⇒ 分支本身沒過濾任何東西，【閘在更上游】——所以這一層也要逐出口計。
+	if Probe.enabled: Probe.bump("goal.res_prereq.entry")
 	if ResourceSystem.effective_holding(state, team, res) >= NeedOracle.need_keep(state, team, res, lv):
+		if Probe.enabled: Probe.bump("goal.res_prereq.satisfied")
 		return {}   # 前置滿
 	# ── 取得手段 1：買（S2，市場取得不需定位；belief-gated）──
+	if not ctx.has_specie:
+		if Probe.enabled: Probe.bump("goal.res_prereq.no_specie")
 	if ctx.has_specie:
 		var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, res)
 		if mp != Vector2i(-1, -1):
+			# ★買得到 ⇒ 直接 return，【永遠走不到採@地形】。
+			if Probe.enabled: Probe.bump("goal.res_prereq.buy_wins")
 			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
+		if Probe.enabled: Probe.bump("goal.res_prereq.no_market")
 	# ── 取得手段 2：採@地形（S3，買不到→定位取得）★material 缺口鏈：需該地形 outpost 採。
 	# ★湧現閉環：缺料→(a)移動到 forest→(b)到了建 outpost→own.terrain==forest→採 satisfied。
+	# ★落到這裡 = 2089 次（no_specie 459 + no_market 1630），但採@地形只進去 28 次
+	#   ⇒ 2061 次消失在這一行。★按【資源種類】分，才知道缺的到底是什麼。
+	if Probe.enabled:
+		Probe.bump("goal.res_fall.%s" % res)
+		# ★A/B 分辨（systems 裁）：【表漏列】與【本來就不從地形產】修法相反。
+		#   ★判斷不拄第二份手抄表：直接問【地形產出真相源】ResourceSystem.REGEN_RATE
+		#   —— 那才是「哪種地形產哪種資源」的權威，`RES_HARVEST_TERRAIN` 只是它的手抄本。
+		if not RES_HARVEST_TERRAIN.has(res):
+			var _from_terrain: bool = false
+			for _tn in ResourceSystem.REGEN_RATE:
+				if float((ResourceSystem.REGEN_RATE[_tn] as Dictionary).get(res, 0.0)) > 0.0:
+					_from_terrain = true
+					break
+			# A = 真的從地形產、卻不在表上 ⇒ 表漏列；B = 地形本來就不產 ⇒ 缺的是【製造】這條手段
+			Probe.bump("goal.res_nonharvest.%s.%s" % [("A_table_gap" if _from_terrain else "B_not_terrain"), res])
 	if RES_HARVEST_TERRAIN.has(res):
 		var terrain: String = String(RES_HARVEST_TERRAIN[res])
 		var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 		var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 		if own_tile != null and own_tile.terrain == terrain:
+			# ★build 候選的【真正產地】就是這一支，三個出口逐個計——
+			#   因為「day 0 之後不再產生」的原因必定是其中一個，而它們的意思完全不同。
+			if Probe.enabled: Probe.bump("goal.harvest.satisfied_own_terrain")
 			return {}   # ★閉環完成:已有該地形 outpost → 採 satisfied（既有 harvest 供給）
 		# ★A1 founding：缺料+無該地形 outpost → 派子隊到最近該地形 tile 建 civilian outpost（複用 _dispatch_builder consumer）。
 		# 移除舊 in-place TASK_BUILD + TASK_MIGRATE frontier（TASK_BUILD 無 consumer=死路;founding 本質派子隊,合 WHAT §4）。
 		var pos: Vector2i = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)   # 純地形=公共地理
 		# ★A1 裁③：remote forest founding（異格）→ 派子隊（子隊真移動→抵達→建，正常）。
 		# ★裁② guard：pos == team.tile_pos（隊已站該地形）= same-tile founding，無母隊就地 outpost-build 路 → 靜默（followup）。
+		if Probe.enabled:
+			if pos == Vector2i(-1, -1):
+				Probe.bump("goal.harvest.no_terrain_tile")
+			elif pos == team.tile_pos:
+				# ★這個出口 code 自己寫著「靜默（followup）」——靜默就是量不到。
+				Probe.bump("goal.harvest.same_tile_silent")
+			else:
+				Probe.bump("goal.harvest.emitted")
 		if pos != Vector2i(-1, -1) and pos != team.tile_pos:
 			return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx,
 				{"build_type": "civilian", "target": pos})

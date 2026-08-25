@@ -100,7 +100,28 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	# ★S1 骨架：GoalResolver.frontier_candidates stub 回 []→此迴圈 no-op→byte-identical。harness 無 state/team(null)→skip。
 	# S2+ candidate util 護欄（HOW §8 must-fix①）：走 dev_urgency 壓制 + 上界<survival boost（發展慾望絕不蓋活命）。
 	if state != null and team != null:
-		for cand in GoalResolver.frontier_candidates(state, team, ctx):
+		var _cands: Array = GoalResolver.frontier_candidates(state, team, ctx)
+		# ★母體：【resolver 有沒有被呼叫】與【回了幾個】是兩件事。
+		#   沒這兩欄，build 候選 = 0 分不出「resolver 沒跑」與「跑了但不產 build」。
+		if Probe.enabled:
+			Probe.bump("goal.frontier_calls")
+			if _cands.is_empty(): Probe.bump("goal.frontier_empty")
+			else: Probe.bump("goal.cand_total_batches")
+		for cand in _cands:
+			# ★上游分佈（第二半診斷）：【有沒有產生 build 候選】與【有沒有贏】是兩件事。
+			#   只看 dispatch 端的 0，分不出「上游不再產生」與「產生了但每次輸掉」。
+			if Probe.enabled:
+				var _ctt: Dictionary = (cand.get("to_task", {}) as Dictionary)
+				if _ctt.has("build_type"):
+					Probe.bump("goal.cand_build_emitted")
+					# ★時間分佈要用【逐日計數】，不能用樣本：
+					#   bump_sample 是 first-N，它【天生只會顯示最早那批】——
+					#   拿它證明「只在 tick 10」等於拿取樣偏差當結論。
+					Probe.bump("goal.cand_build_day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY))
+					Probe.bump_sample("goal.cand_build_emitted", {"team": team.team_id,
+						"label": String(cand.get("label", "")), "delegate": _ctt.get("delegate", false),
+						"util": snappedf(float(cand.get("util", 0.0)), 0.0001),
+						"tick": state.world.current_tick}, 40)
 			scored.append({"u": float(cand.get("util", 0.0)), "i": idx, "opt": String(cand.get("label", "")), "cand": cand})
 			idx += 1
 	scored.sort_custom(func(a, b):

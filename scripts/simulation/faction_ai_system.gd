@@ -4021,22 +4021,36 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 # ★means-end S5 委派：goal delegate candidate 贏 → 派子隊執行其 action（build/settle），母隊留守本業。
 # 接既有 SubteamSystem.dispatch（advisor+settler pop+action task/target）。回 true=派出成功。
 func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) -> bool:
+	# ★診斷 tap（systems 派第二半）：先報分佈、不開藥。
+	#   ★分支逐個計，因為「沒產生 build 委派」可能是【走了別的分支】而不是【沒進來】。
+	if Probe.enabled:
+		Probe.bump("delegate.entry")
+		Probe.bump_sample("delegate.entry", {"team": team.team_id, "kind": String(td.get("kind", "")),
+			"has_build": td.has("build_type"), "has_facility": td.has("facility"),
+			"task": String(td.get("task", "")), "tick": state.world.current_tick}, 40)
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
 	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
+		if Probe.enabled: Probe.bump("delegate.branch.convoy")
 		return _dispatch_convoy(state, team, td)   # distribute.dispatch tap 已在 _dispatch_convoy:3353（免雙計）
 	# ★資訊網 Part2 (a)：求援/偵察 已脫離主 argmax/delegate → 移到 _info_side_dispatch 平行步（此處無 help/scout 分支）。
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
-		return _dispatch_builder(state, team, target, String(td["build_type"]), 1)
+		if Probe.enabled: Probe.bump("delegate.branch.build")
+		var _ok: bool = _dispatch_builder(state, team, target, String(td["build_type"]), 1)
+		if Probe.enabled: Probe.bump("delegate.build_" + ("ok" if _ok else "fail"))
+		return _ok
 	# ★A1 裁①(二裁意圖「接 infra path 非另立子隊路」)：facility 分支只走 owner-不在場 remote 子隊。
 	# same-tile(owner 在場)facility 已在 _resolve_build_facility defer 給 infra path（infra desire-based
 	# _pick_facility 選最想建的+就地建=較 goal REGISTRY-order 聰明+單一 build slot 不撞），此處不再生同格 candidate。
 	if td.has("facility"):
+		if Probe.enabled: Probe.bump("delegate.branch.facility")
 		return _dispatch_facility_builder(state, team, target, String(td["facility"]))   # owner 遠離 own outpost → remote 子隊真移動→抵達→建
 	# 既有 build/settle 委派（S5）→ generic subteam dispatch。
+	if Probe.enabled: Probe.bump("delegate.branch.generic")
 	var advisor_id: int = _pick_or_promote_advisor(state, team)
 	if advisor_id == -1:
+		if Probe.enabled: Probe.bump("delegate.generic_no_advisor")
 		return false
 	var settler: int = int(td.get("settler", clampi(team.population / 4, 2, 5)))
 	var action_task: String = String(td.get("task", TeamData.TASK_BUILD))
