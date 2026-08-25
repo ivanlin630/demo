@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):#1三段驗證收(宣稱/信真叫醒/舊者讓位)——我側同樣三段複現(ARMED pid=41827換血+舊watcher讓位退出+watchdog新碼ARMED pid=42171);驗收殘格只剩watchdog自然fire via戳;重啟生效,首批照排
 ---
 

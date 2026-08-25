@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ★★★零產出偵測（2026-08-25 HOLD 批 #6，warn-only、永不阻擋）
+# ★★★零產出偵測（2026-08-25 HOLD 批 #6）★v2：改用 decision:block（v1 只 echo ＝ 送不到）
 #   ★我的唯讀診斷結論：現有三道防線【全都要求「已經有某種產出物存在」】——
 #     implementer-cleanup 要有 [DONE] 信 / _promise_check 要有他寫的信 / watchdog COMMIT-NO-LETTER 看 main。
 #   ★★沒有一道問：★★★「你這回合做了事，卻【什麼都沒送出去】嗎？」
@@ -18,7 +18,11 @@ c=$(git log --since="20 minutes ago" --author="$(git config user.name 2>/dev/nul
 # 近 20 分鐘：有沒有新的 status:open 信（任何寄件者）
 o=$(find "$D" -maxdepth 1 -name '*.md' -mmin -20 2>/dev/null | while read -r f; do grep -q '^status: open' "$f" 2>/dev/null && echo x; done | wc -l | tr -d ' ')
 [ "${o:-0}" -gt 0 ] && exit 0
-echo "[zero-output] 🟡 近 20 分鐘有 ${c} 個 commit，但【沒有任何新的 status:open 信】"
-echo "               ★做了事卻沒送出去 ＝ 下游不會被喚醒（Monitor 靠信，不靠 commit）。"
-echo "               ★若這回合本來就不需要推下一站，忽略即可（warn-only，不阻擋）。"
+# ★★★輸出必須用 decision:block —— 純 echo 的 stdout【不會回到 agent 眼前】。
+#   ★血證 2026-08-25：本 hook 第一版只 echo ⇒ 我做完整批工作沒回報，它「偵測到了」但沒人收到；
+#   ★★是【用戶】抓到我沒回報，我才手動跑這支 hook，它才響 —— ★它是被叫出來的，不是它叫我。
+#   ★★★而我在本檔檔頭自己寫過「fire 給沒人聽等於沒 fire」，然後做出一個 fire 給沒人聽的東西。
+#   ⇒ 對照組：`implementer-cleanup.sh` 一直是用 `{"decision":"block"}` —— 那才送得到。
+MSG="[零產出] 近 20 分鐘有 ${c} 個 commit，但沒有任何新的 status:open 信。★做了事卻沒送出去 ＝ 下游不會被喚醒（Monitor 靠信、不靠 commit）。⇒ 若這回合有成果要推下一站，現在寫那封信（含 exact path）；若本來就不需要推（純自檢／純整理），回一句「本回合無需推站」即可結束。"
+python -c "import json,sys; print(json.dumps({'decision':'block','reason':sys.argv[1]}))" "$MSG"
 exit 0
