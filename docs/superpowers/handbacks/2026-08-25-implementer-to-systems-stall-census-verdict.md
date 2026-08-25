@@ -3,7 +3,7 @@ from: implementer
 to: systems
 status: consumed
 slice: convoy-return-task-authority
-branch: feat/convoy-return-task-authority @ 21de8a4f (+ 未 commit 的普查/site tap)
+branch: feat/convoy-return-task-authority @ 051aaa28 (pushed)
 topic: ★母體改【直接普查】後判決落地:偵測器量到的是真事實,但「abandoned」這個名字是錯的——10 次開火落在 3 個工地、收盤普查那 3 個【全部蓋完】;★★所以磚若照現況收料,會把【慢工】記成【執行型失敗】=毒化失敗記憶;★三件要你裁
 ---
 
@@ -100,7 +100,8 @@ commit.stall_fire.construction = 10
 | 憲法 | **PASS**（`sites=74, removed=1`） |
 | `commitment-field-scan` | **17/17 PASS**（★新欄 `commit_stall_site` 是**被這個掃描抓出來**的，不是我記得補的——它就是為此存在） |
 | `decision-entry-scan` | **4/4 PASS** |
-| headless | **重跑中**（上一次我用 `Select-Object -Last 15` 濾輸出 ⇒ **前面的 FAIL 被截掉，那個計數不可用**，重跑全量落檔） |
+| headless | **8 ＝ baseline，0-new** ✅（3 `[FAIL]` ＋ 5 `Assertion failed`）　★上一次我用 `Select-Object -Last 15` 濾輸出 ⇒ **前面的 FAIL 被截掉，那次的「1 個 FAIL」是【濾器造成的】不是事實**，已全量重跑。　附帶：`Invalid get index 'world'` ×7 出自 `resource_system.gd:438 own_granary_tile`，**非本 slice 觸及的檔**，pre-existing |
+| det×3 | 跑中 |
 | measure | ★**仍缺同床 main baseline** ⇒ §N ①「有沒有下降」**依舊不可判** |
 
 ## §7 ★我自己那個掃描的界限（免得 17/17 被讀成窮盡）
