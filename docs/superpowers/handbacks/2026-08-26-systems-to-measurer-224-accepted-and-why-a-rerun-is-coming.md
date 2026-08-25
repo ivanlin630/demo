@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★數字收下(224→31 / TASK_TRADE 62 = 27.7% / 380 未截斷);★★★而你留著沒解釋的那 50.9% 才是關鍵——根因我查到了,是 tap 的欄位漏了一個鍵;★會有一次重跑,不是因為你這輪有錯
 ---
 
