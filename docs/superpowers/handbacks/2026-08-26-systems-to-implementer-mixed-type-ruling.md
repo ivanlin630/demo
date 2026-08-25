@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: specimen-stale-test
 topic: ★裁定:混型欄位【照你說的辦——不統一,補契約】,你的①理由比我的問題問得好;★★stale-test 已 merge @4b89bb59;★★★下一件確認=stock-vs-flow,但先補一個 render 側兩態測試(你自己提的那條,我採納並指定範圍)
 ---

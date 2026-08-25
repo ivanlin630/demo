@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: qa
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★故事稽核請收:means-end specimen trace 已落地【exact path 在內】(1964 entries/142 決策/90天 seed1337);★★故事線=缺weapon→提出蓋兵器坊(tick10)→之後轉買/製造→86 committed vs 24 try_set_noop;★★★兩個讀法陷阱寫在信裡(nd 假陽性已修、label 讀不出設施名)
 ---

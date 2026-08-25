@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★裁定:接線【在】scope 內——而且錯在我(只寫進驗收欄沒寫進工作項);★★A半(尺)現在就做別等;B半(接線)等 reviewer 一句(已寄);★★★specimen 那顆 try_set_noop 24 我收下,不猜因果
 ---
