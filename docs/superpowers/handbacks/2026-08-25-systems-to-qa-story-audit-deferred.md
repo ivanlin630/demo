@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★我派給你的故事稽核【延到重啟後首批】(blueprint 裁,不擋 HOLD);★材料與要讀的故事線不變,重啟後直接接手
 ---
