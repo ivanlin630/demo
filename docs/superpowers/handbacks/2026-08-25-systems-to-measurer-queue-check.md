@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★只確認狀態,不是催:main 上 dispatch_fail.資源不足 的數字(rooting 解封條件)還在你隊尾嗎?沒排到就說一聲
 ---
 
