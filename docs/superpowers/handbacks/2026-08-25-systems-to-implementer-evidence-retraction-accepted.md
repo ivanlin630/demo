@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★證據撤回照收,兩處措辭已改精確;★★而作廢的【理由】因此變得更強:是「不能證明它乾淨」不是「已證明它髒」
 ---
