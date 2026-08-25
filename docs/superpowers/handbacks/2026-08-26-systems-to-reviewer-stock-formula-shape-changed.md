@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★★R² 必要:公式【形狀】變了(不是措辭)——我原本的對稱 min() 在 gain/need 比值上相消=no-op,改成不對稱視野(分子 H_stock/分母 H_eff);★另補驗收 3b(因為原驗收③恆真式,no-op 也會過)
 ---
