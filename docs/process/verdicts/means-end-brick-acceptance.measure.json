@@ -1,0 +1,65 @@
+{
+  "slice": "means-end-brick",
+  "ticket": "systems票means-end-brick-acceptance：B型驗收五條,全走集合型/分佈型零計數型",
+  "measured_at_branch": "feat/means-end-brick(.worktrees/means-end-brick)",
+  "measured_date": "2026-08-25",
+
+  "★重大前提聲明(讀其他四條前先看)": "★★窮盡grep`scripts/`(排除`debug/`)：`AcquisitionPaths`目前只被`headless_test.gd`單元測試呼叫，caller總數=0。這個模組尚未接進任何production決策路徑。這件事影響④的判讀方式，詳見④。",
+
+  "★L3聲明": "新增`scripts/debug/means_end_acceptance_bed.gd`(純新debug script,直接呼叫`AcquisitionPaths.for_resource()`掃描12種manufactured資源在兩種情境下的路徑分佈，不改動任何production code)。",
+
+  "★★★①「缺設施」桶與「缺原料」桶【都非空且不重疊】": {
+    "facility桶size": 13, "material桶size": 30,
+    "都非空": true,
+    "不重疊(逐筆驗證每個path只認1個kind值)": true,
+    "判讀": "PASS。兩桶都非空且結構性不重疊(程式碼each append call只設一個kind值，逐筆驗證無異常)。"
+  },
+
+  "★★★②依賴鏈深度分佈(主結果,不只最大深度)": {
+    "depth=1": 25, "depth=2": 9, "depth=3": 5, "depth=4": 4,
+    "出現深度≥2": true,
+    "判讀": "PASS。43筆path裡18筆(42%)深度≥2——遞迴是常態不是孤例，資料驅動(weapon_melee_high→ore_steel→ore_iron→material這條鏈天然produces depth4)。"
+  },
+
+  "★★★③「無手段可取得」桶的成員不再包含製造品": {
+    "means_end.no_means母體(真count)": 21,
+    "no_means成員清單": ["gem", "herb", "horses", "material", "ore_iron"],
+    "製造品仍在no_means桶裡的成員(應為空)": [],
+    "判讀": "PASS，乾淨的空。no_means桶裡的5個成員全是原料級資源(gem/herb/horses/material/ore_iron這些是配方的輸入端而非任何配方的輸出，在本輪測試情境下團隊沒有這些原料的初始stock/來源，這是預期的『原料也缺』而非manufactured resource被誤判無手段)，沒有一個manufactured resource落在這個桶裡。"
+  },
+
+  "★★★④stock資源『有手段但不進flow_utility輸入』——結構性檢查,非runtime數字": {
+    "stock_sources()回傳每筆path": "顯式帶value_compared:false(acquisition_paths.gd:90)",
+    "★★★關鍵限定": "窮盡grep確認AcquisitionPaths目前0個production caller ⇒ 目前【沒有任何呼叫路徑】會把stock_sources()的輸出餵進DiscountedFlow.flow_utility。",
+    "判讀": "★這條判準現在是【空真】(vacuously true)——不是『驗證通過』，是『還沒有機會違反』。value_compared:false這個標記本身是對的設計(明確拒絕做價值比較)，但因為模組還沒接線，這個防線目前無人測試。★若你要的是『這條判準已生效防護』的信心，現在還沒有——要等模組真正被某個決策路徑呼叫、且那個呼叫端遵守value_compared標記，才談得上『驗證』。這正是ticket要求的『若造不出會變紅的場景就回報』——我造不出，因為連『會被違反的路徑』都還不存在。"
+  },
+
+  "★★★⑤反向：food不退化": {
+    "AcquisitionPaths.shape_of('food')": "rate",
+    "food在SHAPE_TABLE裡": false,
+    "判讀": "PASS。food正確經REGEN_RATE路徑導出rate形狀，沒有意外落入SHAPE_TABLE手工表分支。"
+  },
+
+  "★falsifier輸出(未分類的(kind,資源名)組合清單)": {
+    "陽性對照": "ledger=59481, probe(collect.gather_ran)=799，兩者非零，儀器確實在跑",
+    "執行證明": "manufacture.rate_via_authority=87，非零=新接線真的被跑到",
+    "掃到真的會增加的資源": "8種：rate=2/capped_regen=2/loot_or_collect=1/manufactured=1/trade_only=1/not_acquirable=1",
+    "未分類清單": "空——PASS，形狀表覆蓋所有真的會增加的資源",
+    "備註": "本輪只跑30天peaceful_economy單一config/seed，manufactured類只掃到1種(該config活動量小)，若要更完整覆蓋建議之後也在warring_states或更長天數跑一輪，供你裁要不要追。"
+  },
+
+  "★無手段終止的tap有沒有帶資源名": {
+    "判讀": "PASS(結構檢查)。acquisition_paths.gd:143 `Probe.bump(\"means_end.no_means.\" + res)`——tap key本身就帶資源名，不是只知道『有終止』的裸counter。"
+  },
+
+  "landed_paths": {
+    "bed": "scripts/debug/means_end_acceptance_bed.gd(worktree,未commit)",
+    "report_5criteria": "docs/measurements/breed-deathcause/means-end-acceptance.txt",
+    "report_falsifier": "docs/measurements/breed-deathcause/means-end-falsifier-30d.txt"
+  },
+
+  "repro_5criteria": "$env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\means-end-brick --script scripts/debug/means_end_acceptance_bed.gd",
+  "repro_falsifier": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='30'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\means-end-brick --script scripts/debug/resource_shape_falsifier.gd",
+
+  "cleanup": "busy beacon清除。"
+}

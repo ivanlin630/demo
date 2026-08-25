@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★B 型驗收五條,★★每一條我都附了【它會變紅的場景】(新法:寫不出來的不准當主指標);判準全走集合型/分佈型,零計數型
 ---
