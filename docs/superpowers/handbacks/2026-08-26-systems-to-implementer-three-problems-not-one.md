@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: funnel-tick
 tier: probe
 topic: ★merged @3f67b2bf;★★你多加的三欄我認,而且理由比我派的票好——「代理會給出一個看起來合理的錯答案」;★★★而這兩個事實把一個問題拆成三個,其中最大的那個跟材料無關:tick 10 之後【30 天零嘗試】;★派下一顆:給漏斗①②段加 tick
