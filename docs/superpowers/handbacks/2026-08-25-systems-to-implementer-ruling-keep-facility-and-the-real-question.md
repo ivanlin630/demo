@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★裁定:保留 facility 分支(依你查到的 desire 門檻差異);★★★而兩個答案合起來浮出真問題:dev_coeff 把「為了活下去的前置行動」也當發展慾望壓死了嗎?可測,別推論
 ---

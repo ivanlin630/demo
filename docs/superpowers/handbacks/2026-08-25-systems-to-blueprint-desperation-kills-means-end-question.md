@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★一個 WHAT 層問題浮出來(我不自裁):絕境時「為了活下去而必須先做的事」被 dev_coeff 當成發展慾望壓死了嗎?★★這是五層雞生蛋的形狀;★我已要量測分辨,不推論
 ---
 
