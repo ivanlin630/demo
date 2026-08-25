@@ -1357,6 +1357,19 @@ func _test_specimen_tracer() -> void:
 	assert(e["狀態"]["consume_per_day"] == 5.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
 		"[specimen] consume_per_day 算錯 %s" % str(e["狀態"]["consume_per_day"]))
 	SpecimenTracer.reset()
+	# ★★render 側【兩態】測試（systems 指定範圍 2026-08-26）：`strategic_intent` 是混型欄位，
+	#   兩態承載不同事實（Dictionary＝戰略層真的表態；String＝capture_intent 這輪沒跑的 fallback）
+	#   ⇒ 裁定是【不統一、補契約】。契約 ＝ 兩態都印得出東西、都不 crash。
+	#   ★render 抽成 `SpecimenTracer.intent_render()` 只為了【可被測】，輸出字串逐字元不變。
+	var _w_dict: Dictionary = {"strategic_intent": {"intent": "致富", "why": "測試", "mode": "levy"}}
+	var _r_dict: String = SpecimenTracer.intent_render(_w_dict)
+	assert(_r_dict.find("致富") >= 0, "[specimen] Dictionary 態 render 必須含 intent 的值本身，實得 %s" % _r_dict)
+	var _w_str: Dictionary = {"strategic_intent": "日常"}
+	var _r_str: String = SpecimenTracer.intent_render(_w_str)
+	assert(_r_str != "" and _r_str.find("日常") >= 0,
+		"[specimen] String 態（沒表態）render 必須印得出東西且不 crash，實得 %s" % _r_str)
+	var _w_missing: Dictionary = {}
+	assert(SpecimenTracer.intent_render(_w_missing) != "", "[specimen] 欄位缺席時 render 不得回空字串")
 	print("specimen tracer OK")
 
 func _test_specimen_no_capture() -> void:
