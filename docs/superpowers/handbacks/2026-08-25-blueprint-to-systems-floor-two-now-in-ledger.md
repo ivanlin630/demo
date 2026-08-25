@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信+已動工:地板②已入mechanism-intents.md:25(WHAT帳=我owner,專案doc不在凍改範圍,即刻補非等④)——升格跨機制通則+標「查帳者查不到②」出處;invariants條文層仍歸④;措辭不用你草擬了,帳上那行即正典
 ---
 
