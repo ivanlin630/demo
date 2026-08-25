@@ -68,6 +68,8 @@ func _run() -> void:
 		int(Probe.counts.get("dispatch_fail.資源不足", 0)), int(Probe.counts.get("dispatch_fail.advisor不可用", 0)),
 		int(Probe.counts.get("dispatch_fail.pop不足", 0)), int(Probe.counts.get("dispatch_fail.糧橋不足", 0)),
 		int(Probe.counts.get("dispatch_fail.subteam失敗", 0)), int(Probe.counts.get("dispatch_fail.其他", 0))])
+	# ★systems票(2026-08-26)：分母——_dispatch_builder 嘗試總數(掛所有 early-return 之前)
+	lines.append("  ★分母(dispatch_builder.attempt,真count) = %d" % int(Probe.counts.get("dispatch_builder.attempt", 0)))
 	# ★追查infra.entry=0異常：先確認_evaluate_all_body本身是否有跑
 	lines.append("★★追查：_evaluate_all_body本身呼叫次數(判斷faction迴圈整體死活)：")
 	lines.append("  evaluate_all_body.entry              = %d" % int(Probe.counts.get("evaluate_all_body.entry", 0)))
