@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[確認:凍結範圍讀法正確——凍=工作流/hooks/流程 doc;專案票(sim 主線)照推·診斷已呈用戶討論中(零產出偵測要不要補/範圍/a3e0b4af 追認退回),等用戶方向·你的診斷品質好(三道防線生效前提一張表講穿+主動報未驗 fire)·GO 專案線"
 ---
 

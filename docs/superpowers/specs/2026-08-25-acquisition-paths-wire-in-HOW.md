@@ -1,0 +1,71 @@
+# means-end 接線：讓 `AcquisitionPaths` 真的進決策（HOW）
+
+`from: systems` ｜ `slice: acquisition-paths-wire-in` ｜ `tier: full`（改決策行為、`fp` 會變）
+
+## §1 病
+**`AcquisitionPaths` 已 merged，但 `dormant-module-scan` 列它為【零 production caller】** ——
+★**它算得出「為了取得 X 要先做 Y」，但沒有任何決策讀它 ⇒ 對遊戲行為【零影響】。**
+★★**B 型驗收的 ④ 之所以是「空真」，正是這個原因**（被測對象不在場）。
+
+## §2 接入點（★已定位到行）
+`goal_resolver.gd:494-496` —— `_resolve_resource_prereq` 的**最後 fallthrough**：
+```
+	elif Probe.enabled:
+		Probe.bump("goal.harvest.not_terrain_produced." + res)   # ★B 型：地形本來就不產（缺的是【製造】那條手段）
+	return {}   # S3 無取得手段
+```
+★**這行既有註解自己就寫著「缺的是【製造】那條手段」** ⇒ **接入點不是我發明的，是前一票留下的接口。**
+★★**而既有 tap `goal.harvest.not_terrain_produced.<res>` 已經在數 B 型母體** ⇒ **驗收的前後對照有現成基準。**
+
+## §3 ★★★核心決策點：**阻抗不匹配**（本 spec 唯一的設計選擇）
+| | 回傳 |
+|---|---|
+| `_resolve_resource_prereq` | ★**單一 `Dictionary`**（一個 candidate） |
+| `AcquisitionPaths.for_resource` | ★**`Array`**（多條 path） |
+
+**三個選項與裁定**：
+| 選項 | 問題 | 裁 |
+|---|---|---|
+| (a) 在這裡挑一條最划算的回傳 | ★**違反本磚紀律**「只產候選、argmax 由決策層選」 | ✗ |
+| (b) 挑【最淺】的一條回傳 | ★不違反紀律（最淺 ≠ 最划算），但★★**丟掉其他路徑 ⇒ 最淺那條不划算時隊伍就什麼都不做** | ✗ |
+| ★(c) **回傳多條，全部進 rank 池** | 要動 caller | ★★**採用** |
+
+**(c) 的具體形狀（★最小改動）**：
+- ★**新增** `_resource_prereq_candidates(...) -> Array`，**不改** `_resolve_resource_prereq` 的簽名。
+- `:101` 的 caller 改 `out.append_array(...)` —— ★**它本來就在收集多個 candidate 進 rank 池，天生相容。**
+- `:362` 的 caller（`first-unsatisfied → return c`）**維持不動** —— ★**不為第三種手段去改兩個 caller 的契約**（那是 scope 擴張）。
+
+★★**為什麼多條才對**：**讓 argmax 真的看到「蓋工坊」vs「去採礦」vs「買」在同一個池子裡競爭 —— 那正是這塊磚的價值。**
+
+## §4 三種 `kind` → 三種 candidate
+`for_resource` 回傳的 path 有三種 `kind`（★**由那塊磚決定，我不重新定義**）：
+| `kind` | 意義 | 對應 candidate |
+|---|---|---|
+| `facility` | **缺設施**（`blocked_on` ＝ facility_key） | **蓋設施** —— 走既有 build/delegate 路徑 |
+| `material` | **缺原料**（`blocked_on` ＝ 資源名） | ★**遞迴結果已在同一個 Array 裡** ⇒ 各自成 candidate |
+| `ready` | **可做**（帶 `shape:"rate"` ＋ `gain_daily`） | ★**`TeamData.TASK_MANUFACTURE`** |
+
+★**`stock` 形狀的 path 依既有裁定【不進價值比較】** —— 只標形狀、發 tap（`stock-vs-flow` 另票）。
+
+## §5 感知鐵律（★寫 spec 前重讀，本節是自檢）
+- ★**`for_resource` 讀的是 `team.resources`（自己的）＋ `tile.<facility_key>`（腳下的）** ⇒ **自身狀態，非 god-view。**
+- ★★**買那條手段（手段 1）本來就 belief-gated**（`ctx.has_specie` ＋ `_nearest_market_outpost_with`）—— **本票不動它。**
+- ★**不得**為了 means-end 去掃「世界上哪裡有這個資源」——**那會是新的 god-view。**
+
+## §6 驗收（★`fp` 該變；★★每條附「會變紅的場景」）
+| # | 判準 | ★**它會變紅的場景** |
+|---|---|---|
+| ★① | **`AcquisitionPaths` 從 `dormant-module-scan` 的清單消失** | **仍在清單上 ⇒ 根本沒接** |
+| ★★② | **`goal.harvest.not_terrain_produced.<res>` 的隊伍，開始出現 `TASK_MANUFACTURE` / 蓋設施 candidate** | ★**該 tap 非零但 candidate 仍為零 ⇒ 接了但沒產出** |
+| ★③ | ★**`fp` 改變** | ★★**`fp` 不變 ⇒ 這條路徑沒被執行**（★**本票與 `_sellable_qty` 那次不同：這條在 NPC 主決策路徑上，a4 一定會跑到**） |
+| ④ | **反向：`food`／`material` 的既有行為不退化** | 既有 `emitted.<res>` 掉下來 |
+| ★⑤ | **「無手段可取得」桶【縮小】且成員可列舉** | ★**桶變空 ⇒ 可疑（`gem`/`ore_iron` 是 stock，本來就該留在裡面）** |
+
+★★**陽性對照**：**同一次跑要有一個【已知必然非零】的量**（否則儀器沒開時①②⑤會一起「通過」）。
+★**報母體四問**：多大／是不是 0／**單位**／**它是哪個問題的母體**。
+
+## §7 明確不做（★列出來免得被當漏列）
+- ★**不改 `flow_utility` 的 stock 語意**（另票）
+- ★**不修 `local_value` 那 ~12 個 blind 呼叫點**（另票）
+- ★**不動 `:362` 的 caller 契約**
+- ★**不為 `stock` 形狀產 candidate** —— 只標形狀
