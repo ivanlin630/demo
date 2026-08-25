@@ -62,6 +62,24 @@ const SHAPE_TABLE: Dictionary = {
 	"predator_density": "not_acquirable",   # 地格威脅計數（regen_predator），靜待量非取得目標
 }
 
+# ★這格【一天採得到多少】——★物理同源推導，不是手抄一個數字（`feedback_no_handcopied_physics`）：
+#   真相源 ＝ `ResourceSystem._collect_from_tile:306`
+#     `gain = tile.productivity × current × COLLECT_RATE × day_fraction × outpost_mult × labor × morale × skill`
+#   本函式只取**與地格有關的那三項**（`productivity × current × COLLECT_RATE`，常數直接讀 `ResourceSystem`），
+#   ★**刻意不含 outpost/labor/morale/skill 乘數** —— 它們都 ≥ 1 或 ≤ 1 依隊而異，
+#   在【決策時】它們是「派誰去、蓋不蓋據點」的下游選擇，不是這個礦本身的物理。
+#   ⇒ ★**這是保守估（偏低），不是精確值** —— 而 stock 這條票要防的是【高估】，偏低不會把病放回來。
+# ★★另註（誠實標）：真實採集是【比例式】（採量 ∝ 現量）⇒ 存量是指數衰減、不是線性採完。
+#   `S / gain_daily` 因此是【特徵時間】不是「還能挖幾天」的精確值；它仍然是正確的**上界方向**
+#   （比例式衰減比線性慢 ⇒ 用線性算出的天數偏短 ⇒ 保守）。
+static func extraction_rate(tile: HexTileData, res: String) -> float:
+	if tile == null:
+		return 0.0
+	var current: float = float(tile.resources.get(res, 0)) + float(tile.public_storage.get(res, 0))
+	if current <= 0.0:
+		return 0.0
+	return tile.productivity * current * ResourceSystem.COLLECT_RATE
+
 static func shape_of(res: String) -> String:
 	if not producers_of(res).is_empty():
 		return "manufactured"
@@ -87,7 +105,10 @@ static func stock_sources(state: WorldState, team: TeamData, res: String) -> Arr
 		out.append({"means": "harvest_stock", "res": res, "shape": "stock",
 			"pos": t.tile_pos, "amount": amt,
 			"blocked_on": "", "kind": "stock_site",
-			"value_compared": false})   # ★明示：本票不對 stock 做價值比較
+			# ★★2026-08-26：`value_compared` 由 false → true。當初標 false 的理由只有一個
+			#   ——【沒有正確的尺】；`stock_utility` 落地後那個理由消失。
+			"gain_daily": extraction_rate(t, res),
+			"value_compared": true})
 	return out
 
 # ★「製造」這條手段的候選路徑：回傳每條路徑【卡在哪一格】（blocked_on）。
@@ -107,6 +128,16 @@ static func for_resource(state: WorldState, team: TeamData, res: String,
 	_visited[res] = true
 
 	var paths: Array = []
+	# ★★★存量形狀的資源（`ore_*`／`gem`）：把【去採】這條手段納進來（2026-08-26，B 半接線）。
+	#   ★先前 `stock_sources` 零 caller ⇒ `goal_resolver` 那個 `elif shape == "stock"` 分支
+	#     【結構上不可達】⇒ `means_end.stock_seen.*` 恆 0。★那個 0 是【分支到不了】，
+	#     不是【世界沒走到】—— 兩者不可互換，實測 4 個成員全 0 而 means-end 本身活著（219 candidates）。
+	#   ★當初封起這條出口的理由是【沒有正確的尺】；`DiscountedFlow.stock_utility` 就是那把尺。
+	if shape_of(res) == "stock":
+		for src in stock_sources(state, team, res):
+			var sp: Dictionary = (src as Dictionary).duplicate()
+			sp["depth"] = _visited.size()
+			paths.append(sp)
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	for prod in producers_of(res):
 		var fk: String = String(prod["facility_key"])

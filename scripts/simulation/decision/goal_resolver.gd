@@ -573,10 +573,46 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				{"task": TeamData.TASK_MANUFACTURE, "target": team.tile_pos})
 			_rc["me_depth"] = _depth
 			out.append(_rc)
-		# ★stock 形狀【不進價值比較】（systems 裁）：只發 tap，不生 candidate。
-		#   拿流的尺量存量會系統性高估，而且錯成一個看起來正常的數字。
+		# ★★★stock 形狀：出口【解封】（2026-08-26）。當初裁「不進價值比較」的理由只有一個
+		#   ——【沒有正確的尺】（拿流的尺量存量＝系統性高估，且錯成一個看起來正常的數字）。
+		#   `DiscountedFlow.stock_utility` 就是那把尺 ⇒ 這裡開始生 candidate。
 		elif String(path.get("shape", "")) == "stock":
 			if Probe.enabled: Probe.bump("means_end.stock_seen." + res)
+			var _spos: Vector2i = path.get("pos", Vector2i(-1, -1))
+			var _sgain: float = float(path.get("gain_daily", 0.0))
+			var _samt: float = float(path.get("amount", 0.0))
+			if _spos != Vector2i(-1, -1) and _sgain > 0.0 and _samt > 0.0:
+				var _sdelay: float = float(FactionAISystem._hex_dist(team.tile_pos, _spos)) \
+					/ FactionAISystem.FOOD_BRIDGE_MOVE_PER_DAY
+				# ★★用【兩把尺的比值】而不是直接拿 stock_utility 當 util —— 理由是【量綱】：
+				#   兄弟 candidate 的 util 都出自 `_candidate_util(payoff, ctx, delay)`（payoff 尺），
+				#   `stock_utility` 出的是「相當於幾倍餬口」（食物尺）。混在同一個 argmax 裡比大小
+				#   ＝ 拿兩把不同單位的尺量同一件事。
+				#   ⇒ 這裡只取 stock_utility ÷ flow_utility ＝ ★【有限存量讓這條流的價值剩下幾成】，
+				#     它是無量綱的、∈(0,1]，把「礦會挖完」這件事乘進既有尺裡。
+				#   ★★驗收③直接落在這裡：存量撐得滿視野 ⇒ 比值 ＝ 1 ⇒ 與「當成流」逐位相同。
+				# 日需求＝人口 × 每人日耗（同 `terms.gd:231` 的取法，★同一個真相源不另造）
+				var _need_d: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+				var _flow_v: float = DiscountedFlow.flow_utility(_sgain, 0.0, _need_d,
+					ctx.leader_values, ctx.net_food_flow, ctx.food_stock, 0.0, _sdelay)
+				var _stock_v: float = DiscountedFlow.stock_utility(_sgain, 0.0, _need_d,
+					ctx.leader_values, ctx.net_food_flow, ctx.food_stock, _samt, 0.0, _sdelay)
+				var _finite_ratio: float = clampf(_stock_v / _flow_v, 0.0, 1.0) if _flow_v > 0.0 else 0.0
+				var _sc: Dictionary = _mk_candidate(team, g, gt, "stock_site", payoff, ctx,
+					{"task": TeamData.TASK_PRODUCE, "target": _spos})
+				_sc["util"] = float(_sc.get("util", 0.0)) * _finite_ratio
+				_sc["me_depth"] = int(path.get("depth", 0))
+				_sc["me_stock"] = _samt
+				_sc["me_finite_ratio"] = _finite_ratio
+				out.append(_sc)   # ★空字典不能進 out（同上，那行註解是上一顆 bug 的墓碑）
+				if Probe.enabled:
+					Probe.bump("means_end.stock_candidate." + res)
+					Probe.bump_sample("means_end.stock_priced", {"team": team.team_id, "res": res,
+						"stock": snappedf(_samt, 0.1), "gain_daily": snappedf(_sgain, 0.001),
+						"days_of_stock": snappedf(_samt / maxf(_sgain, 0.001), 0.01),
+						"finite_ratio": snappedf(_finite_ratio, 0.0001),
+						"flow_u": snappedf(_flow_v, 0.0001), "stock_u": snappedf(_stock_v, 0.0001),
+						"tick": state.world.current_tick}, 60)
 	# ★標記來源：【產出】與【贏】是兩件事，要分開量才分得出
 	#   「接上了、有產出、但從不改變結果」這個最危險的解釋。
 	for _c in out:

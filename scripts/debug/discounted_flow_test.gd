@@ -82,4 +82,30 @@ func _run() -> void:
 	var u_delayed: float = DiscountedFlow.flow_utility(need, 0.0, need, vals, 0.0, 100.0, 0.0, 30.0)
 	_ok(u_delayed < u_sub, "gate6 delay 30 天仍被折價（%.3f < %.3f）" % [u_delayed, u_sub])
 
+	# ★★★stock vs flow：同一把尺要分得出【流】和【存量】（spec 2026-08-25）。
+	#   `flow_utility` 假設 gain_daily 在整段 h 天都持續 —— ★對再生資源成立、對礦不成立（採完就沒）。
+	#   ⇒ `stock_utility` 多一個上界：H_stock = min(H_eff, S / max(gain_daily, 0.001))。
+	var S_need: float = 8.0
+	var S_vals: Dictionary = {"慎重": 0.5}
+	# ①【存量夠撐滿視野 ⇒ 兩把尺必須打平】（reviewer「只高估或打平」的直接可測推論）
+	var h_full: float = DiscountedFlow.horizon_eff(S_need, 100.0)   # 正淨流 ⇒ 滿視野
+	var u_flow_big: float = DiscountedFlow.flow_utility(S_need, 0.0, S_need, S_vals, 0.0, 100.0)
+	var u_stock_big: float = DiscountedFlow.stock_utility(S_need, 0.0, S_need, S_vals, 0.0, 100.0,
+		S_need * h_full * 2.0)   # S 大到 S/gain ≥ H_eff
+	_ok(is_equal_approx(u_stock_big, u_flow_big),
+		"★存量撐得滿視野 → stock_utility ≡ flow_utility（%.4f vs %.4f）" % [u_stock_big, u_flow_big])
+	# ②【存量撐不滿 ⇒ 必須【低於】流的估值】（病＝系統性高估，方向不對稱）
+	var u_stock_small: float = DiscountedFlow.stock_utility(S_need, 0.0, S_need, S_vals, 0.0, 100.0, S_need * 3.0)
+	_ok(u_stock_small < u_flow_big and u_stock_small > 0.0,
+		"★礦只夠挖 3 天 → 估值低於把它當流（%.4f < %.4f）且仍為正" % [u_stock_small, u_flow_big])
+	# ③【S 越小越低，單調】（不是一刀切，是連續的）
+	var u_stock_1d: float = DiscountedFlow.stock_utility(S_need, 0.0, S_need, S_vals, 0.0, 100.0, S_need * 1.0)
+	_ok(u_stock_1d < u_stock_small, "★存量越少估值越低（1 天 %.4f < 3 天 %.4f）" % [u_stock_1d, u_stock_small])
+	# ④★epsilon guard 是【同構的一部分】不是防呆：gain_daily = 0 ⇒ S/0 = inf ⇒ 上界消失 ⇒ 病原封不動。
+	var u_stock_zero: float = DiscountedFlow.stock_utility(0.0, 0.0, S_need, S_vals, 0.0, 100.0, 50.0)
+	_ok(is_finite(u_stock_zero), "★gain_daily=0 不得產生 inf/NaN（實得 %s）" % str(u_stock_zero))
+	# ⑤★`flow_utility` 的既有行為不得被這票動到（上面 gate6 四條就是它的 byte-identical 見證）
+	_ok(is_equal_approx(DiscountedFlow.flow_utility(S_need, 0.0, S_need, S_vals, 0.0, 100.0), 1.0),
+		"★flow_utility 既有行為不變（gain==need → 1.0）")
+
 	print("=== %s（fail=%d）===" % ["ALL PASS" if _fail == 0 else "HAS FAILURE", _fail])
