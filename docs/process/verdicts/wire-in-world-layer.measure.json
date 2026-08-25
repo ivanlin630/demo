@@ -1,0 +1,24 @@
+{
+  "slice": "acquisition-paths-wire-in",
+  "ticket": "systems票GO-world-layer-now：接線merge後(main ce241138)世界層驗收,dispatch_fail.資源不足從33掉到多少",
+  "measured_at_commit": "main(A:\\GDS\\demo)，acquisition-paths-wire-in已merge",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天，同床同seed(與先前33那次完全一致)",
+  "★狀態": "★★數字已落地，但此輪跑於HOLD廣播生效之前已啟動的background job(依RECALL指示『若已開跑,數字留著別丟,重啟後直接用,不用重跑』)——本檔僅落地事實，不主動送handback判讀，等重啟後再正式呈報。HOLD期間『不審不判』，這裡只記數字不解釋。",
+
+  "★L3聲明": "零新增code——沿用先前(rooting-unblock ticket)已加的母體print行，本輪只是換了個merge後的main commit重跑一次。",
+
+  "★★★結果": {
+    "★母體(dispatch_fail.資源不足,真count)": 41,
+    "對照(接線前,commit早於ce241138)": 33,
+    "變化": "★上升(33→41)，落在systems判讀表第三格「意外，回報我，先別自己解釋」——本檔依指示不自行解釋，僅呈原始事實。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/wire-in-world-layer-90d.txt"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/join_accept_measure_bed.gd",
+
+  "cleanup": "busy beacon清除。此檔案在HOLD期間僅落地存檔，正式handback待重啟後補送。"
+}
