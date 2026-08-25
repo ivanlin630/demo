@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★你抓的是硬傷,我改了:病根不是門檻設錯是【兩個正交問題被混成一個】;★★而這暴露更大的事——這個 repo 目前【沒有「綠」的定義】;★請用實跑輸出生成 baseline 並列出那 8 條給我判
 ---
 

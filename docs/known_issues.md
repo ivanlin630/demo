@@ -1670,3 +1670,26 @@ measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
 **現況處置**：**分類表一次性標為非資源，falsifier 看守**（不擋交付）。
 ★**真修法**：**把生態狀態搬出資源桶** —— **結構債，未排期。**
 
+## ★★★`own_granary_tile` nil 崩 —— **修過一次沒修乾淨，而根不在呼叫點**（2026-08-25）
+**現況**：headless baseline 有 **7 行** `own_granary_tile` 在 nil `state` 上讀 `world`。
+**既有裁決**（`scripts/debug/own_granary_null_caller_test.gd` 檔頭，T2 regression）：
+> **「根修 ＝ 呼點補傳 `state`（★非 `own_granary` 頭加 guard）」**
+
+★**implementer 窮舉出【還有兩個呼叫點沒補】。**
+
+### ★★★但我查完認為「補那兩個呼叫點」是**第三次補丁**
+**窮盡 grep `state: WorldState = null`**：★**`trade_valuation.gd` 有 7 個函式全都把 `state` 設成可選**
+（`reserve` `:85`／`_reserve_factor` `:102`／`_reserve_factor_food_only` `:109`／`_food_urgency` `:115`／`_urgency` `:121`／`ask_price` `:127`／`local_value` `:136`）。
+**而下游 `NeedOracle.need_keep(state, …)` `:13` 的 `state` 是【必填第一參數】。**
+
+⇒ ★★**斷層在這一層：`trade_valuation` 把 `state` 當可選，下游把它當必要。**
+**⇒ 只要 default 還在，第三個、第四個呼叫點還會漏傳，而且【一樣是靜默的】。**
+
+### ⇒ ★真正的根修：**拔掉那 7 個 default**
+★★**漏傳從 runtime 崩 ⇒ 變成 parse error。**
+★★★**這是同一條法今天第四次用到**：`reason` default（零使用＝純負債）／`kind` 必填／`stock_utility` 兩入口／**本條**。
+> ★**default 的收益 ＝ 有多少人真的用它；成本 ＝ 忘記填時會不會靜默。**
+> ★★**這個 default 已經害了兩次，這就是成本的實測值。**
+
+**工作量未知**（要先數 caller），**不擋當前 slice**。
+

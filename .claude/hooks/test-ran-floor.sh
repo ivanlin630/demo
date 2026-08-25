@@ -7,6 +7,9 @@
 #     ★「FAIL=0」只說【沒有失敗的】，沒說【有跑過】。
 #   ②我的前一版把 Q1/Q2 混在一起 ⇒ baseline 有 8 個已知失敗 ⇒ 閘【永遠紅】。
 #     ★★永遠紅的閘 ＝ 沒有閘（恆假式，跟恆真式一樣沒有資訊量）。
+#   ③我第一版只 grep 'Assertion failed'，實測失敗有【三類共 16 行】，閘只看到 5。
+#     ★★★病根同型：我列舉了【錯誤】的形式，而錯誤形式會發散。
+#     ⇒ 改為列舉【正常輸出前綴】（收斂、由我們自己控制），其餘一律進 baseline 比對。
 # 用法：bash .claude/hooks/test-ran-floor.sh <實跑輸出檔> [baseline檔]
 set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
@@ -24,8 +27,10 @@ else
 fi
 
 # ---- Q2：有沒有【新】失敗（★與 baseline 比，不是與 0 比）----
+# ★不列舉【錯誤】的形式（發散：Godot 能吐任何錯，實測三類 16 行，只掃 assert 只看到 5）
+# ★改列舉【正常】的形式（收斂：都是我們自己寫的 print 前綴）—— 其餘一律視為可疑。
 cur="$(mktemp)"
-grep -o 'Assertion failed: .*' "$out" 2>/dev/null | sed 's/[[:space:]]*$//' | sort -u > "$cur"
+grep -vE '^[[:space:]]*($|\[TEST\]|\[OK\]|\[bed\]|\[PopMgmt\]|\[CONSTITUTION|\[dormant|\[test-floor|---|===|Godot Engine|--- Debug|Using |[0-9]+ PASS)' "$out" 2>/dev/null   | sed 's/[[:space:]]*$//' | grep -v '^$' | sort -u > "$cur"
 n_cur="$(wc -l < "$cur" | tr -d ' ')"
 if [ ! -f "$base" ]; then
   echo "[test-floor] Q2 → ★無 baseline（$base）⇒ 無法分辨【已知】與【新增】"
