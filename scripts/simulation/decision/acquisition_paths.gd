@@ -123,8 +123,13 @@ static func for_resource(state: WorldState, team: TeamData, res: String,
 			if float(team.resources.get(inp, 0)) < need:
 				lacking.append(String(inp))
 		if lacking.is_empty():
+			# ★【多久湊得到】問產線自己（`ManufacturingSystem.daily_output`），
+			#   ⛔不在這裡寫 `var rate := 3.0  # GOODS_RATE` —— 那是手抄物理。
+			#   ★這是 rate（流）形狀：量 ÷ 率 ＝ 多久，與 stock 形狀走不同分支。
 			paths.append({"means": "manufacture", "res": res, "blocked_on": "",
-				"kind": "ready", "depth": _visited.size()})
+				"kind": "ready", "shape": "rate", "depth": _visited.size(),
+				"gain_daily": ManufacturingSystem.daily_output(state, team, tile, fk, res),
+				"value_compared": true})
 			continue
 		for miss in lacking:
 			paths.append({"means": "manufacture", "res": res, "blocked_on": miss,

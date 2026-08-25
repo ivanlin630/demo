@@ -59,6 +59,37 @@ const RECIPE_GROUPS: Dictionary = {
 	],
 }
 
+# ★產率的【單一權威】（systems 裁：估工時禁手抄 rate，2026-08-25）。
+#   原本這行 inline 在 tick 迴圈裡 ⇒ means-end 要問「做出來要多久」只能自己再寫一份
+#   ⇒ 那就是第二份手抄物理。★修法形狀：改接線，不改數值（同 build-eta-single-source）。
+static func worker_rate_of(state: WorldState, team: TeamData, tile: HexTileData, level_key: String) -> float:
+	var level: int = int(tile.get(level_key))
+	if level <= 0:
+		return 0.0
+	var pool: float = LaborSystem.pool_of(state, tile)
+	var labor_share: float = LaborSystem.labor_pop(team) / pool if pool > 0.0 else 0.0
+	var avg_skill: float = _avg_skill(state, team, "製造")
+	return float(level) * LaborSystem.labor_mult(tile, "mfg:" + level_key) * labor_share * (0.5 + avg_skill * 0.5)
+
+# ★一天跑幾次：產線在 NEAR pass（`shape: teams`）⇒ 次數 ＝ TICKS_PER_DAY / NEAR_CADENCE。
+#   ★從真常數導出，不拍數字（同 `OutpostSystem.build_ticks_per_day()` 的形狀）。
+static func runs_per_day() -> float:
+	return float(WorldState.TICKS_PER_DAY) / maxf(float(SimRunner.NEAR_CADENCE), 1.0)
+
+# ★【這個設施一天能產多少 out】——means-end 問「多久湊得到」就該問這支。
+#   ★rate 一律從 `RATES` 讀（`rate_const` 是字串名），⛔禁在呼叫端寫 `var rate := 3.0  # GOODS_RATE`。
+static func daily_output(state: WorldState, team: TeamData, tile: HexTileData,
+		level_key: String, out_res: String) -> float:
+	var wr: float = worker_rate_of(state, team, tile, level_key)
+	if wr <= 0.0:
+		return 0.0
+	var best: float = 0.0
+	for recipe in (RECIPE_GROUPS.get(level_key, []) as Array):
+		if String(recipe.get("out", "")) != out_res:
+			continue
+		best = maxf(best, wr * float(RATES[recipe["rate_const"]]) * runs_per_day())
+	return best
+
 func tick_all(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
 		if not state.teams.has(tid):
@@ -94,7 +125,7 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 			if level <= 0:
 				continue   # 無此設施（下方統一 no_facility tap，避免每 group bump 灌數）
 			any_facility = true
-			var worker_rate: float = float(level) * LaborSystem.labor_mult(tile, "mfg:" + level_key) * labor_share * (0.5 + avg_skill * 0.5)
+			var worker_rate: float = worker_rate_of(state, team, tile, level_key)
 			var ran_recipe: String = _run_recipe_group(state, team, tile, level_key, worker_rate)
 			if ran_recipe != "":
 				ran_any = true
@@ -173,7 +204,8 @@ func _can_consume_scaled(team: TeamData, inputs: Dictionary, q: float) -> bool:
 			return false
 	return true
 
-func _avg_skill(state: WorldState, team: TeamData, skill: String) -> float:
+# ★改 static：tick 路徑與 means-end 共讀同一支，不複製第二份。
+static func _avg_skill(state: WorldState, team: TeamData, skill: String) -> float:
 	var total: float = 0.0
 	var count: int   = 0
 	for pid in ([team.leader_id] as Array) + team.named_members:
