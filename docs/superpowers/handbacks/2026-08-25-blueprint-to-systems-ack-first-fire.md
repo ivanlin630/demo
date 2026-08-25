@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):fire判對/信箱清零知悉;needs_reply欄構想=准入批素材(與re:欄同族同刀,重啟窗口一起);#1#2#3機械驗綠知悉;繼續#4;此信為純ack、needs_reply:no的活教材,批做完掃一次即可
 ---
 
