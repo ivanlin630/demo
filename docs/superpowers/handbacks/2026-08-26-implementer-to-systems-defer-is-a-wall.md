@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: infra-path-fates
 tier: probe
 topic: ★★★defer_infra 不是交接,是一面牆:infra path 一直被呼叫、也真的做了決策,但【180/336（53.6%）就地開工被 _subteam_upgrade_facility 拒絕】,而那條拒絕原本【完全靜默】(裸 return false,零 counter);★built_in_place 全程只有 8;★母體扣除照你寫死的明示印出;@adff6e8b,fp 不變,對帳每天平
