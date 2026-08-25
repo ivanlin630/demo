@@ -158,6 +158,30 @@ func _run() -> void:
 		lines.append("      Team%-3d 嘗試 %2d 次｜★嘗試【當下】material avail %.0f–%.0f" % [
 			int(tk), int(per_team[tk]), lo_avail, hi_avail])
 	lines.append("  ★★右欄是【嘗試當下】的公庫＋私產，不是期末存量 —— 兩者不可互換。")
+	# ★★★沉默從哪一段開始（systems 2026-08-26）：總數說不出時間軸。
+	#   ★四條並排看同一天：候選生不生 → 有沒有 build 類 → winner 是不是 candidate → 進不進 build 分支。
+	#   ★★哪一欄先變 0，沉默就是從那一段開始的。
+	lines.append("--- ★時間軸：沉默從哪一段開始（逐日，四欄並排）---")
+	lines.append("  day |  cand  build |  decide  win_cand |  deleg  br_build")
+	var maxd: int = 0
+	for kd in Probe.counts.keys():
+		var kds: String = String(kd)
+		if kds.begins_with("funnel.decide.day."):
+			maxd = maxi(maxd, int(kds.substr(kds.length() - 3)))
+	for d in range(maxd + 1):
+		var sfx: String = ".day.%03d" % d
+		var c_all: int = _c("funnel.cand" + sfx)
+		var c_bld: int = _c("funnel.cand.build" + sfx)
+		var d_all: int = _c("funnel.decide" + sfx)
+		var d_cand: int = _c("funnel.decide.winner_cand" + sfx)
+		var g_ent: int = _c("funnel.delegate.entry" + sfx)
+		var g_bld: int = _c("funnel.delegate.branch_build" + sfx)
+		if c_all + d_all + g_ent == 0:
+			continue   # ★整天完全沒有決策 → 不印（省版面，非隱藏：下面有總計對帳）
+		lines.append("  %3d | %5d %5d | %6d %8d | %5d %8d" % [d, c_all, c_bld, d_all, d_cand, g_ent, g_bld])
+	lines.append("  ★★對帳：逐日 decide 合計 %d vs funnel.decide.total %d ⇒ %s" % [
+		_sum_days("funnel.decide.day."), _c("funnel.decide.total"),
+		"✅一致" if _sum_days("funnel.decide.day.") == _c("funnel.decide.total") else "❌不一致（有日桶漏記）"])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
@@ -172,3 +196,10 @@ func _c(k: String) -> int:
 func _env(key: String, dflt: String) -> String:
 	var v: String = OS.get_environment(key)
 	return v if v != "" else dflt
+
+
+func _sum_days(prefix: String) -> int:
+	var t: int = 0
+	for k in Probe.counts.keys():
+		if String(k).begins_with(prefix): t += int(Probe.counts[k])
+	return t

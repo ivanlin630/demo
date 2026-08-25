@@ -4092,7 +4092,9 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 # ★means-end S5 委派：goal delegate candidate 贏 → 派子隊執行其 action（build/settle），母隊留守本業。
 # 接既有 SubteamSystem.dispatch（advisor+settler pop+action task/target）。回 true=派出成功。
 func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) -> bool:
-	if Probe.enabled: Probe.bump("delegate.entry")
+	if Probe.enabled:
+		Probe.bump("delegate.entry")
+		Probe.bump("funnel.delegate.entry.day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY))
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
 	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
@@ -4103,7 +4105,9 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	# ★資訊網 Part2 (a)：求援/偵察 已脫離主 argmax/delegate → 移到 _info_side_dispatch 平行步（此處無 help/scout 分支）。
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
-		if Probe.enabled: Probe.bump("funnel.delegate.branch_build")
+		if Probe.enabled:
+			Probe.bump("funnel.delegate.branch_build")
+			Probe.bump("funnel.delegate.branch_build.day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY))
 		var _ok: bool = _dispatch_builder(state, team, target, String(td["build_type"]), 1)
 		if Probe.enabled: Probe.bump("delegate.build_" + ("ok" if _ok else "fail"))
 		return _ok

@@ -1,0 +1,124 @@
+[peaceful_economy day 30 seed 1337] teams=12
+--- ①段 candidate → winner（★每格都有分母）---
+  funnel.cand.emitted                = 845
+  funnel.decide.total                = 323
+  funnel.decide.winner_cand          = 115
+  funnel.decide.winner_static        = 208
+  ⇒ candidate 贏得 argmax 的比例 = 35.6%（115 / 323）
+  ★贏不了時排第幾（bucket）：
+      funnel.cand.best_rank.0_won            = 115
+      funnel.cand.best_rank.1_2              = 13
+      funnel.cand.best_rank.3_5              = 15
+      funnel.cand.best_rank.6plus            = 51
+      （四桶合計 = 194 ＝ 有 candidate 參與的決策次數）
+      funnel.cand.by_goal.maintain_material  = 125
+      funnel.cand.by_goal.maintain_weapons   = 125
+      funnel.cand.by_goal.build_workshop     = 107
+      funnel.cand.by_goal.build_apothecary   = 125
+      funnel.cand.by_goal.build_stable       = 117
+      funnel.cand.by_goal.maintain_tools     = 94
+      funnel.cand.by_goal.maintain_food      = 90
+      funnel.cand.by_goal.no_source_goal:deliver_material = 26
+      funnel.cand.by_goal.no_source_goal:deliver_tools = 4
+      funnel.cand.by_goal.build_farming      = 25
+      funnel.cand.by_goal.no_source_goal:deliver_food = 7
+--- ②段 delegate 路由（★對帳：四分支相加 == entry）---
+  funnel.delegate.branch_convoy      = 12
+  funnel.delegate.branch_build       = 39
+  funnel.delegate.branch_facility    = 0
+  funnel.delegate.branch_generic     = 0
+  delegate.entry（分母）                 = 51
+  ⇒ ★對帳：四分支合計 51 vs entry 51 ⇒ ✅一致
+  各分支結果：
+      delegate.build_ok                      = 0
+      delegate.build_fail                    = 39
+      funnel.delegate.facility_ok            = 0
+      funnel.delegate.facility_fail          = 0
+      funnel.delegate.generic_ok             = 0
+      funnel.delegate.generic_fail           = 0
+      funnel.delegate.generic_drop_no_advisor = 0
+--- ★非零證據（判準③）---
+  ★以下 counter 在本輪為 0（15 顆）——★兩種可能，這裡不替它選：
+      funnel.delegate.branch_facility
+      funnel.delegate.branch_generic
+      delegate.build_ok
+      funnel.delegate.facility_ok
+      funnel.delegate.facility_fail
+      funnel.delegate.generic_ok
+      funnel.delegate.generic_fail
+      funnel.delegate.generic_drop_no_advisor
+      funnel.build_gate.busy_subteam
+      funnel.build_gate.tile_occupied
+      funnel.build_gate.no_advisor
+      funnel.build_gate.pop
+      funnel.build_gate.food_bridge
+      funnel.build_gate.subteam_dispatch
+      funnel.build_gate.dispatched
+  (a) 掛錯位置（那段 code 有跑但 counter 沒接到）
+  (b) 那條路在這張床上不可達（例：無 convoy 需求／無 facility 委派）
+  ★分辨法：看它【同段的分母】—— 分母非零而它為 0 ⇒ 偏向 (b)；分母也是 0 ⇒ 先查 (a)
+--- ③④段 build dispatch 的七道閘（★對帳：七閘＋成功 == attempt）---
+  funnel.build_gate.busy_subteam           = 0
+  funnel.build_gate.tile_occupied          = 0
+  funnel.build_gate.cost                   = 39
+  funnel.build_gate.no_advisor             = 0
+  funnel.build_gate.pop                    = 0
+  funnel.build_gate.food_bridge            = 0
+  funnel.build_gate.subteam_dispatch       = 0
+  funnel.build_gate.dispatched             = 0
+      funnel.build_gate.cost.material      = 39
+  dispatch_builder.attempt（分母）             = 39
+  ⇒ ★對帳：七閘＋成功 39 vs attempt 39 ⇒ ✅一致
+--- ★`tick`/`team` 欄位的實例證明（同 tick 同 team 多 candidate）---
+  樣本 500 筆 → (tick,team) 組合 130 個，其中【同組多 candidate】= 97 組
+  ★實例（原始樣本，未加工）：
+      { "tick": 10, "team": 0, "goal": "maintain_material", "label": "maintain_material:location:delegate", "target": (5, 8), "util": 0.8481 }
+      { "tick": 10, "team": 0, "goal": "maintain_weapons", "label": "maintain_weapons:location:delegate", "target": (5, 8), "util": 1.2721 }
+      { "tick": 10, "team": 0, "goal": "build_workshop", "label": "build_workshop:location:delegate", "target": (5, 8), "util": 1.2721 }
+      { "tick": 10, "team": 0, "goal": "build_apothecary", "label": "build_apothecary:location:delegate", "target": (5, 8), "util": 1.2721 }
+      { "tick": 10, "team": 0, "goal": "build_stable", "label": "build_stable:location:delegate", "target": (5, 8), "util": 1.2721 }
+--- ★誰在嘗試 vs 誰有料（★並排，不下結論）---
+  attempt 樣本 39 筆（cap 100，母體 counter = 39）★涵蓋 1 個不同 tick
+  ★★★只有 1 個 tick ⇒ 這批樣本【不能】當成整段時間的分布（上一輪就是這樣誤讀的）
+      Team0   嘗試  5 次｜★嘗試【當下】material avail 0–0
+      Team1   嘗試  5 次｜★嘗試【當下】material avail 0–0
+      Team2   嘗試  5 次｜★嘗試【當下】material avail 0–0
+      Team6   嘗試  6 次｜★嘗試【當下】material avail 0–0
+      Team9   嘗試  6 次｜★嘗試【當下】material avail 20–20
+      Team10  嘗試  6 次｜★嘗試【當下】material avail 20–20
+      Team11  嘗試  6 次｜★嘗試【當下】material avail 20–20
+  ★★右欄是【嘗試當下】的公庫＋私產，不是期末存量 —— 兩者不可互換。
+--- ★時間軸：沉默從哪一段開始（逐日，四欄並排）---
+  day |  cand  build |  decide  win_cand |  deleg  br_build
+    0 |    72    39 |     27       13 |    39       39
+    1 |    49     0 |     16        9 |     0        0
+    2 |     0     0 |     11        0 |     0        0
+    3 |     1     0 |      7        1 |     0        0
+    4 |     1     0 |      8        1 |     0        0
+    5 |     0     0 |      6        0 |     0        0
+    6 |    15     0 |      9        3 |     0        0
+    7 |    15     0 |     12        3 |     0        0
+    8 |    21     0 |     11        3 |     0        0
+    9 |     9     0 |      8        1 |     0        0
+   10 |    22     0 |     12        7 |     3        0
+   11 |    22     0 |     11        5 |     2        0
+   12 |    12     0 |      9        3 |     2        0
+   13 |     7     0 |      6        1 |     1        0
+   14 |    21     0 |     11        4 |     2        0
+   15 |    12     0 |      9        2 |     1        0
+   16 |    25     0 |      9        3 |     0        0
+   17 |    34     0 |     11        4 |     0        0
+   18 |    17     0 |      8        2 |     0        0
+   19 |    11     0 |      5        1 |     0        0
+   20 |    19     0 |      6        3 |     0        0
+   21 |    28     0 |      8        5 |     0        0
+   22 |    25     0 |      8        4 |     0        0
+   23 |    23     0 |      9        4 |     0        0
+   24 |    40     0 |     11        7 |     0        0
+   25 |    66     0 |     13        5 |     0        0
+   26 |    61     0 |     14        6 |     0        0
+   27 |    85     0 |     18        5 |     0        0
+   28 |    50     0 |     11        4 |     1        0
+   29 |    75     0 |     18        6 |     0        0
+   30 |     7     0 |      1        0 |     0        0
+  ★★對帳：逐日 decide 合計 323 vs funnel.decide.total 323 ⇒ ✅一致

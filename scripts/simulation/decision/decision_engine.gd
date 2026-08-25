@@ -110,6 +110,14 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				#   ⇒ 「贏了幾次」沒有可比的母數。★這裡數【所有】goal candidate 的產出。
 				#   ★key 有界：goal_type（`GoalRegistry` 有限），不是 label（label 帶 target 會爆 key）。
 				Probe.bump("funnel.cand.emitted")
+				# ★★★時間軸（systems 派 2026-08-26）：30 天的總數說不出【沉默從哪一天開始】。
+				#   ★壞掉會長什麼樣：`by_goal.maintain_material = 125` 讀起來像「30 天都在生」，
+				#     而實際可能全部集中在開局那一個 tick —— ★attempt 那顆就是這樣（39 次全在 tick 10）。
+				#   ★key 有界：按【日】分桶（30 天 → 30 個 key），不是每個 tick 一個。
+				var _day: int = int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+				Probe.bump("funnel.cand.day.%03d" % _day)
+				if (cand.get("to_task", {}) as Dictionary).has("build_type"):
+					Probe.bump("funnel.cand.build.day.%03d" % _day)   # ★build 類還生不生得出來
 				# ★goal_type 在 `source_goal` 裡，不在 candidate 頂層（`_mk_candidate` 回
 				#   {util,to_task,source_goal,label,delegate}）——★第一版我讀頂層，結果 845 筆全部落到 "?"。
 				#   ★★那正是我這兩天一直在替別人修的那顆病（欄位讀空→key 說謊），這次是我自己造的。
@@ -149,10 +157,14 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		#   ★★「排第幾」比「贏沒贏」多一個維度：差一名與差二十名是不同的病
 		#     ——bucket 化（有界 key），不是每個名次一個 counter。
 		Probe.bump("funnel.decide.total")
+		var _dday: int = int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+		Probe.bump("funnel.decide.day.%03d" % _dday)   # ★分母也要有時間軸，否則比例算不出來
 		if _w.is_empty():
 			Probe.bump("funnel.decide.winner_static")
+			Probe.bump("funnel.decide.winner_static.day.%03d" % _dday)
 		else:
 			Probe.bump("funnel.decide.winner_cand")
+			Probe.bump("funnel.decide.winner_cand.day.%03d" % _dday)
 			Probe.bump("funnel.decide.winner_cand.by_goal." + String((_w.get("source_goal", {}) as Dictionary).get("goal_type", "?")))
 		var _best_rank: int = -1
 		for _ri in range(scored.size()):
