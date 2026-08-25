@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: local-value-blind-callsites
 tier: full
 topic: ★R² v3 CLEAN → dispatch(排你隊尾第五件,不急);★★三類驗收要求不同,別混;★★★而分類本身我錯了兩次,教訓寫在裡面——判準只有【函式邊界+caller 窮盡】
