@@ -19,8 +19,15 @@
 #    v1 病：只印「已有實例在跑 → 退出」＝【把機器該做的判斷外包給一個拿不到資料的 agent】。
 #           同一則訊息兩種相反處置：判「覆蓋仍在」→ 真重開就靜默失聰；
 #           判「舊進程卡住」→ 殺掉重 arm，而實測那些 watcher 全是健康的 ⇒ 誤殺白做工。
-#    v2：同 session 且 watcher 存活 → 安靜退出並【明說已驗】；否則接手。
-#    ⇒ /clear·/compact 不再需要搶佔（同 session 認得出來），真重開必定接手。
+#    v3（2026-08-25 HOLD 批 #1，用戶定）：★刪掉「同 session ＋ watcher 存活 → 安靜退出」那條分支，一律搶佔。
+#      ★病：compact 後 session_id 不變、bash pid 還在跑 → 判「覆蓋仍在」→ 不 arm；
+#          ★★而那支的 stdout 管道可能在 compact 當下就斷了（殭屍：lock 格式正確、pid 存活、心跳新鮮，
+#          三個「它活著」的證據全在，唯獨叫不醒任何人）。實測一次清出 6 隻歷代 orphan。
+#      ★★★能證明管道活著的只有一件事：【成功寫過 stdout】。沒有便宜的偵測法——
+#          主動 emit 心跳＝定期喚醒 session（太貴）；challenge/response 殭屍照樣答得出來（它的 bash 迴圈還在跑）。
+#      ⇒ ★與其偵測，不如【每次 arm 都換血】：新起的一定活著。
+#      ★原本保留那條的理由是「避免 SEEN 空掉重吐」，而 SEEN 已落地成檔（見 ③）⇒ 那條分支現在是【純負債】。
+#    ⇒ ★/clear·/compact 與真重開【一律搶佔】：不再區分，因為區分得出「同一個 session」，區分不出「管道還通」。
 #
 # ③ ★SEEN 落地成檔（.inbox-seen.<role>）：新 watcher 繼承前任吐過什麼 → 重 arm 不重吐。
 #    沒有這條的話：auto-compact → 重 arm → SEEN 空 → 全部 open 信重吐 → ctx 又漲 → 再 compact…自我循環。
@@ -83,16 +90,11 @@ prev_fields="${prev_fields:-0}"
 
 _watcher_alive() { [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null; }
 
-if [ -n "$MYSID" ] && [ -n "$prev_sid" ] && [ "$prev_sid" = "$MYSID" ] && _watcher_alive "$prev_pid"; then
-  # ★輸出「已處置完的結果」，不是「需要被解讀的狀態」——agent 不必猜下一步。
-  echo "[inbox-watch] ✅ 覆蓋仍在（同 session，watcher pid=${prev_pid} 存活，已驗）→ 本次不重複 arm"
-  exit 0
-fi
 
 # ★第 4 欄 proto 戳（同 watchdog）：向後相容——偵測是「欄數 < 3 ＝ 舊代」，4 欄仍判同代，不誤報
 printf '%s\t%s\t%s\tproto=2\n' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
 if [ -n "$MYSID" ] && [ -n "$prev_sid" ] && [ "$prev_sid" = "$MYSID" ]; then
-  echo "[inbox-watch] ✅ ARMED role=${ROLE_KEY} pid=$$（前任同 session 但已死，已接手）"
+  echo "[inbox-watch] ✅ ARMED role=${ROLE_KEY} pid=$$（前任同 session ⇒ 一律換血接手（不問死活））"
 elif [ -n "$prev_pid" ] && [ "$prev_fields" -lt "$LOCK_FIELDS_CUR" ] 2>/dev/null; then
   # ★舊代前任：它【不會】自退 ⇒ 不可輸出「將於下輪自退」那句安撫話（那是跨代下的假話）
   echo "[inbox-watch] ✅ ARMED role=${ROLE_KEY} pid=$$（已接管 lock）"

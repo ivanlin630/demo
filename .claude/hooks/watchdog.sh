@@ -93,6 +93,16 @@ open_letters() {
     done | sort -rn
 }
 
+# ── ★★★RUNNING 豁免清單（2026-08-25 HOLD 批 #3，用戶定）★預設【不豁免】 ─────────────
+#   ★只有 `CHAIN-BROKEN` 被 `RUNNING` 無條件豁免 —— 它的語意就是「全靜」，有人在跑就不成立。
+#   ★`UNRESPONSIVE` 只有【精準豁免】：`running` ＝ `beacon:<R>` 且未消費的信正是給 R。
+#   ★`DEAD-ROLE` / `COMMIT-NO-LETTER` / `RUNAWAY`：★★不豁免（它們是【已完成的事實】或【上限】，
+#     跟誰在不在忙無關）。
+#   ★★★新增分類【預設不豁免】—— 要豁免必須在這張表上寫明並附理由。
+#     （血證 2026-08-25：`COMMIT-NO-LETTER` 被 `elif [ -n "$running" ]` 默默吞掉，
+#      而它是唯一能抓「出貨沒推鏈」的分類 ⇒ 鏈斷了四小時沒人知道。）
+#   ★fire 訊息帶 `via:<路徑>` ⇒ 異常時【一次輸出即足診斷】，不必重現（自然事件重現不了）。
+
 # ── S3 長工作在跑？（★分層：便宜的先問，貴的最後且有 timeout 護欄）──
 #    beacon 只壓警報、不造警報，帶死線自動過期（忘了刪 → 8h 後失效；忘了寫 → 只多響一次）。
 long_running() {
@@ -181,7 +191,7 @@ while true; do
   hb_ct=$(stat -c %Y "$newest_hb" 2>/dev/null || echo 0)
   hb_age=$(( now - hb_ct ))
 
-  class="OK"; detail=""
+  class="OK"; via=""; detail=""
 
   # 1) DEAD-ROLE — ★獨立於 RUNNING（信給沒開的角色，不管別人在不在忙都是 bug）
   if [ -n "$letters" ]; then
@@ -190,7 +200,7 @@ while true; do
       case "${age:-}" in (*[!0-9]*|'') continue ;; esac
       [ "$age" -lt "$T_DEAD" ] && continue
       case " $alive " in *" $to "*) continue ;; esac
-      class="DEAD-ROLE"; detail="  ${to} 沒開，最老的信 open $(dur "$age")：${bn}"; break
+      class="DEAD-ROLE"; via="pre-RUNNING"; detail="  ${to} 沒開，最老的信 open $(dur "$age")：${bn}"; break
     done <<< "$letters"
   fi
 
@@ -203,28 +213,46 @@ while true; do
   #   （T_IDLE 門檻保留 ⇒ 跑 job 期間剛 commit 還沒寫信的正常中間態不會誤報。）
   if [ "$class" = "OK" ] && [ "$main_ct" -gt 0 ] \
      && [ "$hb_ct" -le "$main_ct" ] && [ $(( now - main_ct )) -ge "$T_IDLE" ]; then
-    class="COMMIT-NO-LETTER"
+    class="COMMIT-NO-LETTER"; via="pre-RUNNING"
     detail="  main 已落地 $(dur $(( now - main_ct )))，之後沒有任何新 handback
   最後 commit：${main_subj}
   → 有人出貨沒推下一站（違反無斷點自動鏈），鏈斷在他肚子裡
   ★本類獨立於 RUNNING：他可能正在跑東西，但出貨沒推鏈已經是事實"
   fi
 
+  # 3) UNRESPONSIVE — ★獨立於 RUNNING，但保留【精準豁免】（2026-08-25 HOLD 批 #2）
+  #   ★病：原本它跟 CHAIN-BROKEN 一起被 `elif [ -n "$running" ]; then class="OK"` 吞掉
+  #        ⇒ ★★【任何人】在跑長工，就能讓【另一個人】的未回信被豁免。
+  #   ★★★正解不是「不豁免」，是【只豁免該豁免的那一個】：
+  #        只有 `running` ＝ `beacon:<R>` 且【那封沒被消費的信正是給 R】時才靜默
+  #        —— 那才是「他在忙所以還沒回」的唯一合法解釋。
+  #        （`godot-proc` / `file-activity` / `beacon:<別人>` 都不算：它們證明不了「R 在忙」。）
+  if [ "$class" = "OK" ] && [ -n "$letters" ]; then
+    IFS=$'	' read -r a to bn <<< "$(head -1 <<< "$letters")"
+    case "${a:-}" in (*[!0-9]*|'') a=0 ;; esac
+    if [ "$a" -ge "$T_UNRESP" ]; then
+      _busy_role=""
+      case "${running:-}" in beacon:*) _busy_role="${running#beacon:}" ;; esac
+      if [ -n "$_busy_role" ] && [ "$_busy_role" = "$to" ]; then
+        :   # ★該角色自己掛了 beacon 且信正是給他 ⇒ 合法豁免，靜默
+      else
+        class="UNRESPONSIVE"; via="pre-RUNNING/beacon-exempt-checked"
+        detail="  ${to} 活著但 ${bn} 已 open $(dur "$a") 沒消費"
+        [ -n "${running:-}" ] && detail="${detail}
+  ★有長工作在跑（${running}），但它不是 ${to} 的 beacon ⇒ 不構成豁免"
+      fi
+    fi
+  fi
+
   if [ "$class" = "OK" ]; then
     if [ -n "$running" ] && [ "$run_since" -ne 0 ] && [ $(( now - run_since )) -ge "$T_MAX_RUN" ]; then
-      class="RUNAWAY"; detail="  長工作已跑 $(dur $(( now - run_since )))（來源 ${running}）—— 疑似掛死"
+      class="RUNAWAY"; via="running-maxrun"; detail="  長工作已跑 $(dur $(( now - run_since )))（來源 ${running}）—— 疑似掛死"
     elif [ -n "$running" ]; then
       class="OK"                                   # ★量測跑半天走這條
     else
-      if [ -n "$letters" ]; then
-        IFS=$'\t' read -r a to bn <<< "$(head -1 <<< "$letters")"
-        case "${a:-}" in (*[!0-9]*|'') a=0 ;; esac
-        [ "$a" -ge "$T_UNRESP" ] &&
-          { class="UNRESPONSIVE"; detail="  ${to} 活著但 ${bn} 已 open $(dur "$a") 沒消費"; }
-      fi
       # 3) CHAIN-BROKEN
       if [ "$class" = "OK" ] && [ "$hb_age" -ge "$T_IDLE" ] && [ "$any_age" -ge "$T_IDLE" ]; then
-        class="CHAIN-BROKEN"
+        class="CHAIN-BROKEN"; via="post-RUNNING(唯一被豁免者)"
         detail="  無 open 信、無長工作、全靜 $(dur "$hb_age")
   最後一封：$(basename "${newest_hb:-無}") —— 該有人接手卻沒有"
       fi
@@ -235,7 +263,7 @@ while true; do
     last_class="OK"
   elif [ "$class" != "$last_class" ] || [ $(( now - last_fire )) -ge "$RE_ARM" ]; then
     case "$class" in DEAD-ROLE) icon="🔴" ;; RUNAWAY) icon="🟠" ;; *) icon="🟡" ;; esac
-    echo "${icon} STALL / ${class}"
+    echo "${icon} STALL / ${class}${via:+ via:${via}}"
     echo "$detail"
     echo "  活著：${alive:-（無）}"
     echo "  長工作：${running:-無}"
