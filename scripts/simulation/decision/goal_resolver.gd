@@ -391,6 +391,9 @@ const SEEK_TILE_RANGE: int = 30   # TEST VALUE — belief-reachable 上界（bou
 #     它連「找不到地形」都不會記，在 has(res) 那一行就被判定為「沒有這種手段」。
 #   ★量測：2089 次落到本手段，2061 次死在那一行（food 133 / tools 625 / weapon 1303）。
 #   ⛔ 修法【不是】把 food 補進表 —— 那是同一個病的延續（〈估算器禁手抄物理〉）。
+# ★僅觀測用去重帳（Probe.enabled 才寫）：答【單位】那一問，不影響決策。
+static var _fall_seen: Dictionary = {}
+
 static func harvest_terrains(res: String) -> Array:
 	var out: Array = []
 	for tn in ResourceSystem.REGEN_RATE:   # Dictionary 保持插入序 ⇒ determinism 安全
@@ -422,7 +425,16 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		if Probe.enabled: Probe.bump("goal.res_prereq.no_market")
 	# ── 取得手段 2：採@地形（S3，買不到→定位取得）——★地形集合由真相源導出，不查表。
 	# ★湧現閉環：缺料→(a)移動到產地→(b)到了建 outpost→own.terrain 產該資源→採 satisfied。
-	if Probe.enabled: Probe.bump("goal.res_fall.%s" % res)   # ★母體：落到手段 2 的逐資源數
+	if Probe.enabled:
+		# ★母體三問（systems 立 2026-08-25）：多大／是不是 0／【單位是什麼】。
+		#   血證：同一 team+tick 重複 4 次（一支隊多個 active goal 各問一次同一資源）
+		#   ⇒ 這個數是【前置解析次數】，不是【獨立機會數】。
+		#   ★兩個都報，不替換：拿哪一個當分母是量測語意的決定，不是我的。
+		Probe.bump("goal.res_fall.%s" % res)
+		var _dk: String = "%d|%d|%s" % [team.team_id, state.world.current_tick, res]
+		if not _fall_seen.has(_dk):
+			_fall_seen[_dk] = true
+			Probe.bump("goal.res_fall_distinct.%s" % res)
 	var terr_cands: Array = harvest_terrains(res)
 	if not terr_cands.is_empty():
 		var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)

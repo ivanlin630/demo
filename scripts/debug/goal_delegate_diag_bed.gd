@@ -80,16 +80,19 @@ func _dump(cfg: String, days: int, sd: int, state: WorldState, out_path: String)
 		lines.append("    %-38s = %d" % [kr, _c(kr)])
 	lines.append("  ★落到【取得手段 2】時缺的是哪種資源（分類維度）")
 	var fall: Array = []
-	var nonh: Array = []
 	for kf in Probe.counts.keys():
 		var kfs: String = String(kf)
 		if kfs.begins_with("goal.res_fall."):
 			fall.append("%s=%d" % [kfs.substr(14), _c(kfs)])
-		elif kfs.begins_with("goal.res_nonharvest."):
-			nonh.append("%s=%d" % [kfs.substr(20), _c(kfs)])
-	fall.sort(); nonh.sort()
-	lines.append("    落下來的：" + str(fall))
-	lines.append("    其中【不可採】：" + str(nonh))
+	fall.sort()
+	var dist: Array = []
+	for kk in Probe.counts.keys():
+		if String(kk).begins_with("goal.res_fall_distinct."):
+			dist.append("%s=%d" % [String(kk).substr(23), _c(String(kk))])
+	dist.sort()
+	lines.append("    落下來的【解析次數】：" + str(fall))
+	lines.append("    落下來的【獨立 (team,tick,res)】：" + str(dist))
+	lines.append("      ★兩個都報：前者是解析器承受的壓力，後者才是【機會數】。拿錯分母比率會被墊高。")
 	lines.append("  ★build 候選的【真正產地】：採@地形分支的三個出口（意思完全不同）")
 	for kh in ["goal.harvest.emitted", "goal.harvest.satisfied_own_terrain",
 			"goal.harvest.no_reachable_site", "goal.deleg.pop_gate_block"]:
