@@ -1,0 +1,16 @@
+# [FAIL] print 清單 —— 從實跑輸出擷取，未改寫
+# 來源: headless_test.gd 實跑（main @ 77b58a15）
+#
+## 實跑吐出的 3 行（原文）
+  [FAIL] Team23 task=建設 order=-1
+  [FAIL] Team23 task=建設 order=-1
+  [FAIL] 弱目標未加入攻擊 goal
+
+## 對應的 print 位置
+3016:		print("  [FAIL] Team23 task=%s order=%d" % [fb.current_task, fb.order_target_id])
+3026:		print("  [FAIL] Team23 task=%s order=%d" % [fb.current_task, fb.order_target_id])
+3326:		print("  [FAIL] 弱目標未加入攻擊 goal")
+
+## ★盲區規模：全檔 [FAIL] print 共 31 處
+## 形態：if 條件: print [OK] else: print [FAIL] —— 沒有一個 assert
+## ⇒ 失敗時程式不知道、不停、不吐 SCRIPT ERROR，掃 assert 的工具全看不到
