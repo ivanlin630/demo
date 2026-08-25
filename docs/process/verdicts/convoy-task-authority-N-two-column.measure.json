@@ -1,0 +1,36 @@
+{
+  "slice": "convoy-return-task-authority",
+  "ticket": "systems票N-needs-second-column-and-falsifiable-metric：補main對照欄+母體四問+construction_abandoned降級為背景事實",
+  "measured_at_branch": "feat/convoy-return-task-authority(.worktrees/convoy-return-task-authority) vs main(A:\\GDS\\demo)",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天，同床同seed",
+
+  "★L3聲明": "main端port同一段9行純觀測tap(convoy.return_tick/return_task_is_convoy/return_task_other.<task>)到faction_ai_system.gd:_evaluate_subteam入口，位置與branch對齊(早於所有current_task早退,避免同型tautology bug)；main端convoy_return_conservation_bed.gd加1行report。皆Probe-gated零行為改動，窮盡grep確認main無同款tap才需要port(非重複)。",
+
+  "★★★兩欄到齊：main=93.3%，branch=100.0%": {
+    "main(無hold-v2)": "306/328 = 93.3%",
+    "branch(有hold-v2)": "174/174 = 100.0%",
+    "判讀": "★非恆真式——main本身就有22/328(6.7%)的RETURN期間被搶走task，證明『preempt』在這個確切config/seed下真實存在，不是零競爭的結構性保證。branch把它壓到0，是真實改善，不是同一結果的兩種讀法。"
+  },
+
+  "★★★母體四問(174/328/185/11/3/7)": {
+    "多大": "branch側174；main側328",
+    "是不是0": "都不是0",
+    "★單位": "★★tick-sample事件數，非distinct convoy數——`convoy.return_tick`掛在`_evaluate_subteam`(每個subteam每tick呼叫一次)，凡`convoy_phase==RETURN`的那個(subteam,tick)組合就bump一次。同一支convoy在RETURN階段若持續多個tick，會被算多次。185(合法退場)/11(hold擋下)則是`release()`/`try_set`呼叫次數，同樣是事件數非distinct隊數。",
+    "它是哪個問題的母體": "174/328是『RETURN階段這個狀態總共被觀測到幾次』——分母是『RETURN期間存在的tick數』，不是『有幾支convoy走過RETURN』。若要distinct convoy數需要另外用`convoy.return`(歸建計數,離散事件非逐tick)當分母，那是不同的問題(結案率而非持續率)。"
+  },
+
+  "★construction_abandoned降級：收下，不當判決依據": {
+    "備註": "同意你的判讀——前後皆0=零鑑別力，已降級為背景事實(僅供對照，不當通過依據)，不再列入本票成敗判準。"
+  },
+
+  "landed_paths": {
+    "branch_report": "docs/measurements/breed-deathcause/convoy-task-authority-N-90d.txt",
+    "main_baseline_report": "docs/measurements/breed-deathcause/convoy-task-authority-N-main-baseline-90d.txt"
+  },
+
+  "repro_main": "$env:GODOT_TIMEOUT='1800'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/convoy_return_conservation_bed.gd",
+  "repro_branch": "同上但 --path A:\\GDS\\demo\\.worktrees\\convoy-return-task-authority",
+
+  "cleanup": "busy beacon清除。"
+}

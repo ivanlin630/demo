@@ -142,6 +142,11 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 			residual[f] = acc
 	lines.append("  下場分佈：%s" % str(fates))
 	lines.append("  ★殘留（未回母隊、還在 porter 身上）：%s" % str(residual))
+	# ★measurer L3 tap(2026-08-25,convoy-return-task-authority票main baseline對照欄)：純report,零production改動
+	var _ret_tick: int = int(Probe.counts.get("convoy.return_tick", 0))
+	var _ret_is_convoy: int = int(Probe.counts.get("convoy.return_task_is_convoy", 0))
+	lines.append("★main baseline：RETURN期間task=運輸佔比 = %d/%d = %s" % [
+		_ret_is_convoy, _ret_tick, ("%.1f%%" % (100.0 * float(_ret_is_convoy) / float(_ret_tick)) if _ret_tick > 0 else "無母體")])
 	# 逐隻明細（少量、值得逐隻看）
 	for pid in _rec:
 		var r: Dictionary = _rec[pid]

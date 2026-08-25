@@ -59,6 +59,8 @@ func _report(cfg: String, state: WorldState, day: int, out_path: String) -> void
 	for k in ["decision.opt_chosen.買糧", "decision.opt_chosen.買料",
 			"decision.opt_applicable.買糧", "decision.opt_applicable.買料"]:
 		lines.append("  %-30s = %d" % [k, int(Probe.counts.get(k, 0))])
+	# ★measurer L3 tap(2026-08-25,failure-memory-structural-identity票main baseline對照欄)：純report,零production改動
+	lines.append("★main baseline：outpost.l0_to_l1 = %d" % int(Probe.counts.get("outpost.l0_to_l1", 0)))
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":

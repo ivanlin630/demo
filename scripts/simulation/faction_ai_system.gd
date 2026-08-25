@@ -2741,6 +2741,15 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 # ──────── 子團自主 AI ────────
 
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	# ★measurer L3 tap(2026-08-25,convoy-return-task-authority票main baseline對照欄)：
+	#   從convoy-return-task-authority branch移植的純觀測(zero behavior change)，
+	#   量main(無hold-v2)下RETURN期間task=運輸佔比當對照組。
+	if Probe.enabled and String(sub.task_extra_data.get("convoy_phase", "")) == "RETURN":
+		Probe.bump("convoy.return_tick")
+		if sub.current_task == TeamData.TASK_CONVOY:
+			Probe.bump("convoy.return_task_is_convoy")
+		else:
+			Probe.bump("convoy.return_task_other." + sub.current_task)
 	# ②a 信使外交：envoy_proposal 子隊追蹤刷新 target best_estimate + 自配 timeout（新 invariant 自守）
 	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "envoy_proposal":
 		_tick_envoy(state, sub, merge_queue)

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★★§N 我要的是【兩欄】,你給的是一欄 —— 100.0% 沒有對照欄無法判讀;★★★而 construction_abandoned=0 你自己標的「與多輪一致」正好證明它不能當主指標(前後皆 0=零鑑別力)
 ---
