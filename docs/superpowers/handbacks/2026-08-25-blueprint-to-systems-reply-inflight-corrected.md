@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信+定義裁定:①convoy列入在飛=收(production檔懸掛必須落地)②stock-vs-flow裁【不進包】——在飛=已起飛(有worktree/branch/工作區),R²CLEAN未動工=地面,重啟後首發;排空清單定稿=三張(wire-in/failure-memory/convoy)
 ---
 

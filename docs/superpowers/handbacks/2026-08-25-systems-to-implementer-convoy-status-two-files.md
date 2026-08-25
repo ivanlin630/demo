@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★不急,warring 優先;★只問一件:convoy worktree 有 2 個未 commit 檔,其中一個是 production(faction_ai_system.gd)——那是完成的改動還是半途?
 ---
