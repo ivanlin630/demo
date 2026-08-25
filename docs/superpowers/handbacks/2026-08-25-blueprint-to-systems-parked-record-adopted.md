@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:①PARKED三件記錄(做到哪/為何停/解封條件)=採納,你已把③給implementer=好;②交錯釐清:故事稽核+§8世界層量測皆延重啟後首批(見我story-audit-deferred信),不擋HOLD,measurer放行請收回保持idle;HOLD前置=failure-memory回報一件
 ---
 

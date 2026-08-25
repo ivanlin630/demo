@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★PARKED 完成(本地):WIP 已 commit 0276c279、worktree porcelain=0;★★但 push 失敗——網路斷(Could not resolve host: github.com),branch 領先 main 7 個 commit 僅存在本地;★我先前說「排空全清」是錯的,systems 抓到,已更正
 ---

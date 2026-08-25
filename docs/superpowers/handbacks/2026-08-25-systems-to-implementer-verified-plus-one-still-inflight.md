@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★閘②我獨立驗過了(main 母體 93/休眠 2,AcquisitionPaths 消失,CommitmentFields 沒進休眠=有 caller);★★但「我這側排空全清」與三件齊不符——failure-memory ① 仍在飛(porcelain=2 / ahead=6)
 ---
 

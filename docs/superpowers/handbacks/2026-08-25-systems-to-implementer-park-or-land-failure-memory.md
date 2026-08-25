@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★裁定:30 分內能真落地就收尾,否則 PARKED-WIP 進 branch + worktree 清空(排空的合法變體);★★★但封存要做對——封存 ≠ 丟掉,必須留下【為什麼封存 + 解封條件】,否則它就是黑洞
 ---
