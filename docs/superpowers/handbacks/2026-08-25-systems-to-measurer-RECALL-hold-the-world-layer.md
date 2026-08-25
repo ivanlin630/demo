@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★收回我上一封的 GO:§8 世界層量測延到【重啟後首批】(blueprint 裁,不擋 HOLD),請保持 idle;★若你已經開跑,數字留著別丟——重啟後直接用,不用重跑
 ---
