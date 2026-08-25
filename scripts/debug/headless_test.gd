@@ -2757,13 +2757,13 @@ func _run_sim_test() -> void:
 				print("  [OK] 靜態 API 晉升 Person%d name=%s team=%d role=%s" % [
 					_np.id, _np.person_name, _np.team_id, _np.role])
 			else:
-				print("  [FAIL] 晉升資料錯誤 name=%s team=%d role=%s stored=%s" % [
+				_hard_fail("  [FAIL] 晉升資料錯誤 name=%s team=%d role=%s stored=%s" % [
 					_np.person_name, _np.team_id, _np.role,
 					str(state.persons.has(gen_team.leader_id))])
 		else:
-			print("  [FAIL] new_leader 不在 state.persons")
+			_hard_fail("  [FAIL] new_leader 不在 state.persons")
 	else:
-		print("  [FAIL] gen_ok=false or leader_id unchanged")
+		_hard_fail("  [FAIL] gen_ok=false or leader_id unchanged")
 	state.persons.erase(30)   # 清理「假死」leader（模擬 _kill_named_npc 後段）
 	if gen_team.leader_id != 30:
 		state.persons.erase(gen_team.leader_id)
@@ -2794,7 +2794,7 @@ func _run_sim_test() -> void:
 			state.persons.size() == _persons_before_empty:
 		print("  [OK] 無匿名人口時不晉升")
 	else:
-		print("  [FAIL] 無匿名人口仍晉升 ok=%s leader=%d persons=%d(before=%d)" % [
+		_hard_fail("  [FAIL] 無匿名人口仍晉升 ok=%s leader=%d persons=%d(before=%d)" % [
 			str(_gen_empty_ok), gen_team_empty.leader_id,
 			state.persons.size(), _persons_before_empty])
 	state.persons.erase(31)
@@ -2812,7 +2812,7 @@ func _run_sim_test() -> void:
 	if helper_a != null and helper_a.team_id == 15 and helper_state_a.persons.has(helper_a.id):
 		print("  [OK] helper 寫回 team_id 與 state.persons")
 	else:
-		print("  [FAIL] helper 未正確寫回 team/state")
+		_hard_fail("  [FAIL] helper 未正確寫回 team/state")
 
 	var helper_state_b := WorldState.new()
 	var helper_team_b := TeamData.new()
@@ -2826,7 +2826,7 @@ func _run_sim_test() -> void:
 			and is_equal_approx(helper_a.skills["統領"], helper_b.skills["統領"]):
 		print("  [OK] helper 對相同 state/team 決定性一致")
 	else:
-		print("  [FAIL] helper 非決定性或產出不一致")
+		_hard_fail("  [FAIL] helper 非決定性或產出不一致")
 
 	var helper_state_empty := WorldState.new()
 	var helper_team_empty := TeamData.new()
@@ -2842,7 +2842,7 @@ func _run_sim_test() -> void:
 	if PersonGenerator.generate_for_team(helper_state_empty, helper_team_empty, "member") == null:
 		print("  [OK] helper 無匿名人口時回傳 null")
 	else:
-		print("  [FAIL] helper 無匿名人口仍生成")
+		_hard_fail("  [FAIL] helper 無匿名人口仍生成")
 
 	# ── merge_teams 驗證 ──
 	var ma := TeamData.new()
@@ -2878,17 +2878,17 @@ func _run_sim_test() -> void:
 		if ma.named_members.has(41):
 			print("  [OK] MB_leader(41) 加入 Team11 named_members")
 		else:
-			print("  [FAIL] MB_leader(41) 未進入 named_members")
+			_hard_fail("  [FAIL] MB_leader(41) 未進入 named_members")
 		if ma.named_members.has(42):
 			print("  [OK] MB_member(42) 加入 Team11 named_members")
 		else:
-			print("  [FAIL] MB_member(42) 未進入 named_members")
+			_hard_fail("  [FAIL] MB_member(42) 未進入 named_members")
 		if ma.population == 8:  # 5 + 3
 			print("  [OK] Team11 pop=8（含 1 匿民）")
 		else:
 			print("  [WARN] Team11 pop=%d（預期 8）" % ma.population)
 	else:
-		print("  [FAIL] Team12 未被刪除（pop=%d）" % mb.population)
+		_hard_fail("  [FAIL] Team12 未被刪除（pop=%d）" % mb.population)
 
 	# 追加：transfer_anon=0 測試（只移記名 NPC，匿民留下）
 	var mc := TeamData.new()
@@ -2907,9 +2907,9 @@ func _run_sim_test() -> void:
 		if mc.parent_team_id == 11:
 			print("  [OK] Team13.parent_team_id=11")
 		else:
-			print("  [FAIL] Team13.parent_team_id=%d" % mc.parent_team_id)
+			_hard_fail("  [FAIL] Team13.parent_team_id=%d" % mc.parent_team_id)
 	else:
-		print("  [FAIL] Team13 pop=%d（預期 3）" % mc.population)
+		_hard_fail("  [FAIL] Team13 pop=%d（預期 3）" % mc.population)
 	# 清理
 	state.teams.erase(11); state.teams.erase(12); state.teams.erase(13)
 	state.team_known.erase(11); state.team_known.erase(12); state.team_known.erase(13)
@@ -2941,11 +2941,11 @@ func _run_sim_test() -> void:
 			print("  [OK] Team%d 子隊建立 pop=%d" % [_t.team_id, _t.population])
 			break
 	if not _ov1_subteam_found:
-		print("  [FAIL] 未建立子隊")
+		_hard_fail("  [FAIL] 未建立子隊")
 	if ov1.population <= 1:
 		print("  [OK] Team20 pop 降至 %d（≤cap=1）" % ov1.population)
 	else:
-		print("  [FAIL] Team20 pop=%d 仍超額" % ov1.population)
+		_hard_fail("  [FAIL] Team20 pop=%d 仍超額" % ov1.population)
 
 	# 場景 2：超額 + 無 advisor → 獨立流亡 team
 	var ov2 := TeamData.new()
@@ -2973,14 +2973,14 @@ func _run_sim_test() -> void:
 					print("  [OK] Team%d 流亡 pop=%d leader_id=%d name=%s" % [
 						_t.team_id, _t.population, _t.leader_id, _ov2_leader_person.person_name])
 				else:
-					print("  [FAIL] 流亡 leader 錯誤 team=%d leader=%d person=%s stored=%s" % [
+					_hard_fail("  [FAIL] 流亡 leader 錯誤 team=%d leader=%d person=%s stored=%s" % [
 						_t.team_id, _t.leader_id,
 						str(_ov2_leader_person), str(state.persons.has(_t.leader_id))])
 				break
 		if not _ov2_found:
-			print("  [FAIL] 未找到流亡 team 詳情")
+			_hard_fail("  [FAIL] 未找到流亡 team 詳情")
 	else:
-		print("  [FAIL] 未建立流亡 team")
+		_hard_fail("  [FAIL] 未建立流亡 team")
 
 	# 場景 3：FactionAI 閾值合併（小隊 pop 過小）
 	var fac99 = state.create_faction(22)
@@ -3013,7 +3013,7 @@ func _run_sim_test() -> void:
 	if fb.current_task == TeamData.TASK_MERGE and fb.order_target_id == 22:
 		print("  [OK] Team23 收到 TASK_MERGE → Team22")
 	else:
-		print("  [FAIL] Team23 task=%s order=%d" % [fb.current_task, fb.order_target_id])
+		_hard_fail("  [FAIL] Team23 task=%s order=%d" % [fb.current_task, fb.order_target_id])
 
 	# 場景 4：FactionAI 戰前集結
 	_f99.goals = ["攻擊"]
@@ -3023,7 +3023,7 @@ func _run_sim_test() -> void:
 	if fb.current_task == TeamData.TASK_MERGE and fb.order_target_id == 22:
 		print("  [OK] Team23（dist=2）收到 TASK_MERGE → 主力Team22（戰前集結）")
 	else:
-		print("  [FAIL] Team23 task=%s order=%d" % [fb.current_task, fb.order_target_id])
+		_hard_fail("  [FAIL] Team23 task=%s order=%d" % [fb.current_task, fb.order_target_id])
 
 	# 清理
 	for _tid in [20, 21, 22, 23]:
@@ -3090,14 +3090,14 @@ func _run_sim_test() -> void:
 	if _snap_b.get("food_est", -1.0) == 50.0:
 		print("  [OK] known_member_states[31].food_est=50.0（bridge 正確）")
 	else:
-		print("  [FAIL] known_member_states[31].food_est=%s" % str(_snap_b.get("food_est", "missing")))
+		_hard_fail("  [FAIL] known_member_states[31].food_est=%s" % str(_snap_b.get("food_est", "missing")))
 
 	# 場景2：_richest_member 讀快照（Team31 food=50 > Team32 food=30）
 	var _rm: int = _ks_fai._richest_member(state, state.factions[ks_fac])
 	if _rm == 31:
 		print("  [OK] _richest_member 返回 Team31（快照 food=50）")
 	else:
-		print("  [FAIL] _richest_member 返回 %d（預期 31）" % _rm)
+		_hard_fail("  [FAIL] _richest_member 返回 %d（預期 31）" % _rm)
 
 	# 場景3：直接改 Team31 food 但不刷新快照 → _richest_member 仍讀舊值
 	ks_b.resources["food"] = 5.0  # 繞過快照直接改
@@ -3105,7 +3105,7 @@ func _run_sim_test() -> void:
 	if _rm2 == 31:
 		print("  [OK] 快照未更新 → _richest_member 仍返回 Team31（介面隔離正確）")
 	else:
-		print("  [FAIL] _richest_member 返回 %d（預期 31，快照應仍為 food=50）" % _rm2)
+		_hard_fail("  [FAIL] _richest_member 返回 %d（預期 31，快照應仍為 food=50）" % _rm2)
 
 	# 清理
 	for _tid2 in [30, 31, 32]:
@@ -3149,14 +3149,14 @@ func _run_sim_test() -> void:
 	if _it_snap0.get("tier", -1) == 0:
 		print("  [OK] tier=0")
 	else:
-		print("  [FAIL] tier=%s（預期 0）" % str(_it_snap0.get("tier", "missing")))
+		_hard_fail("  [FAIL] tier=%s（預期 0）" % str(_it_snap0.get("tier", "missing")))
 	# 偵查=0（觀察者）→ G3c-2 observation_noise 疊滿技能噪（base+0.5）→ pop20 估值封套放寬到 [1,40]。
 	# 原 10–30 帶未含 G3c-2 skill 噪 → unseeded 序偶破 31（flaky）。band 對齊 G3c-2 噪封套（非 RNG juggling）。
 	var _pop_est: int = int(_it_snap0.get("population_est", -1))
 	if _pop_est >= 1 and _pop_est <= 40:
 		print("  [OK] population_est=%d（偵查=0 噪封套 1–40）" % _pop_est)
 	else:
-		print("  [FAIL] population_est=%d（預期 1–40）" % _pop_est)
+		_hard_fail("  [FAIL] population_est=%d（預期 1–40）" % _pop_est)
 
 	# Tier 1：Team70 移到 (5,4)，dist=1；Team71 total_res=110 → bucket=1，±1 → 0–2
 	_it_a.tile_pos = Vector2i(5, 4)
@@ -3166,12 +3166,12 @@ func _run_sim_test() -> void:
 	if _it_snap1.get("tier", -1) >= 1:
 		print("  [OK] tier≥1（dist=1 近接觸）")
 	else:
-		print("  [FAIL] tier=%s（預期 ≥1）" % str(_it_snap1.get("tier", "missing")))
+		_hard_fail("  [FAIL] tier=%s（預期 ≥1）" % str(_it_snap1.get("tier", "missing")))
 	var _rscale: int = int(_it_snap1.get("resource_scale", -1))
 	if _rscale >= 0 and _rscale <= 2:
 		print("  [OK] resource_scale=%d（預期 0–2，total=110→bucket1±1）" % _rscale)
 	else:
-		print("  [FAIL] resource_scale=%d（預期 0–2）" % _rscale)
+		_hard_fail("  [FAIL] resource_scale=%d（預期 0–2）" % _rscale)
 
 	# 快照持久：Team71 移出視野（dist=10），team_intel 應仍保留舊值
 	var _last_pop: int = int(BeliefSystem.best_estimate(state, 70, 71).get("population_est", -1))
@@ -3182,7 +3182,7 @@ func _run_sim_test() -> void:
 	if int(_it_snap_p.get("population_est", -1)) == _last_pop and _last_pop > 0:
 		print("  [OK] 快照保留（population_est=%d 不變）" % _last_pop)
 	else:
-		print("  [FAIL] 快照被清除（got=%s）" % str(_it_snap_p.get("population_est", "missing")))
+		_hard_fail("  [FAIL] 快照被清除（got=%s）" % str(_it_snap_p.get("population_est", "missing")))
 
 	# 清理
 	state.teams.erase(70); state.teams.erase(71)
@@ -3225,7 +3225,7 @@ func _run_sim_test() -> void:
 	if _snap73.get("tier", -1) == 2:
 		print("  [OK] tier=2")
 	else:
-		print("  [FAIL] tier=%s（預期 2）" % str(_snap73.get("tier", "missing")))
+		_hard_fail("  [FAIL] tier=%s（預期 2）" % str(_snap73.get("tier", "missing")))
 	var _food73: float = float(_snap73.get("food_est", -1.0))
 	# 高信義不應高報 food（偽裝平民時 food × 1.5–2.5）；直接值應為 100.0
 	if _food73 >= 80.0:
@@ -3235,7 +3235,7 @@ func _run_sim_test() -> void:
 	if _snap73.has("coin_est"):
 		print("  [OK] coin_est=%.1f（Tier 2 欄位存在）" % float(_snap73.get("coin_est", 0.0)))
 	else:
-		print("  [FAIL] coin_est 欄位缺少")
+		_hard_fail("  [FAIL] coin_est 欄位缺少")
 
 	# 低信義軍隊 Team74（高 deceive_chance → 偽裝平民）
 	var _it_low := TeamData.new()
@@ -3309,7 +3309,7 @@ func _run_sim_test() -> void:
 	if not state.factions[_ad_fid].goals.has("攻擊"):
 		print("  [OK] 未知目標（armed_est=999）→ 無攻擊 goal")
 	else:
-		print("  [FAIL] 未知目標仍加入攻擊 goal（應檢查 _update_goals 實力比較邏輯）")
+		_hard_fail("  [FAIL] 未知目標仍加入攻擊 goal（應檢查 _update_goals 實力比較邏輯）")
 
 	# 場景 2：寫入弱目標 snap（armed_est=2）→ own_armed≥2×0.8=1.6 → 應加入攻擊 goal
 	if not state.team_intel.has(80):
@@ -3323,7 +3323,7 @@ func _run_sim_test() -> void:
 	if state.factions[_ad_fid].goals.has("攻擊"):
 		print("  [OK] 弱目標（armed_est=2）→ 加入攻擊 goal")
 	else:
-		print("  [FAIL] 弱目標未加入攻擊 goal")
+		_hard_fail("  [FAIL] 弱目標未加入攻擊 goal")
 
 	# 清理
 	state.teams.erase(80); state.teams.erase(81)
@@ -4821,6 +4821,9 @@ func _run_sim_test() -> void:
 
 	_test_sellable_reads_granary()
 
+	# ★失敗計數的總結：讓【程式】知道，不是讓【人眼】知道。
+	if _hard_fail_count > 0:
+		print("[TEST-SUITE-HARD-FAILS] %d" % _hard_fail_count)
 	print("=== DONE ===")
 	# ★結尾標記（systems 裁 2026-08-25）：回答【有沒有跑完】，不是【有沒有失敗】。
 	#   血證：parse error 時輸出是 `FAIL=0`——跟全綠長得一模一樣。
@@ -16711,3 +16714,16 @@ func _test_sellable_reads_granary() -> void:
 	assert(sell_nomad > 0.0,
 		"★★無糧倉、私產充足的隊也不可賣 ⇒ 改過頭（變成一律不賣），實際 %.1f" % sell_nomad)
 	print("[OK] _test_sellable_reads_granary（糧倉隊 %.1f / 遊牧隊 %.1f）" % [sell_settled, sell_nomad])
+
+# ★★[FAIL] print → 可被機械偵測的失敗（systems 裁 2026-08-25）。
+#   ★為什麼不是 `assert(false, …)`：GDScript 的 assert 會【中止腳本】——
+#   31 個 assert 讓套件撞到第一個失敗就停，後面全不跑。
+#   ★血證：轉成 assert 後 `[TEST-SUITE-COMPLETE]` 標記消失、ASSERT 從 8 變 5
+#   ⇒ 看起來像「沒有新增失敗」，實際是【整個套件死在第 3016 行】。
+#   ★★沒有那行結尾標記，我會把它報成轉換成功。
+#   ⇒ 形態改為：記錄 + 繼續 + 收尾總結，讓失敗【可數】而不是【致命】。
+var _hard_fail_count: int = 0
+func _hard_fail(msg: String) -> void:
+	_hard_fail_count += 1
+	push_error(msg)   # ★吐到 stderr：掃描抓得到，且不中止
+	print(msg)

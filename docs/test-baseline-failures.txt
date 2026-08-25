@@ -13,3 +13,7 @@ unjudged	FORCE(任rung)→ambient_train_drive 0.5
 unjudged	rung 擴張+武力 未選擴張 intent, got={ "type": "防衛", "target_id": -1, "why": "慎重/威脅驅動，備戰守土" }
 unjudged	戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve
 unjudged	紮營=1.0
+# ★★hard-fail 類（原 [FAIL] print，2026-08-25 轉成可數失敗）：
+unjudged	[FAIL] Team23 task=建設 order=-1　(×2，systems 初判可能落在建材閘 arc，優先查)
+unjudged	[FAIL] 弱目標未加入攻擊 goal
+
