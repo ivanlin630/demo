@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★merge 順序裁了(convoy 先、磚後,生產者先於消費者) — ★★但兩張【都還沒到條件】,磚的 seam-gate 綠是用【舊版本的 measure】過的
 ---
