@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tools-demand-assertion-samefamily
 tier: probe
 topic: ★merged @accaeea5;★★★你的第④條我立法了(03_implementer + memory)——「炸掉舊斷言的隱形機制要變成被斷言的對象,不要繞開它」;★派最後一條:tools_demand 那條照你提的【同族同價】關係改,不要跟上真值
