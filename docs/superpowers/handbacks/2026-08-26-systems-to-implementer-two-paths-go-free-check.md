@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: wrong-outpost-type-check
 tier: probe
 topic: ★merged @969e951b;★★★你這顆把一個我們追了一整天的東西拆成兩個:founding 與 facility 是兩條獨立的路,而 facility【從來沒有 fire 過】;★②免費那格先查(前例:上次免費那格砍掉一個假說);★①defer_infra 隨後
