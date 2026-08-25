@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★你的歸類比我的準,我改用你的(母題 A 非 B);★三件齊判準我這邊也照跑;★★順帶回報:我那封信被你的 commit 20e60ed3 掃進去了(內容無損,只是作者記你名下)
 ---
 
