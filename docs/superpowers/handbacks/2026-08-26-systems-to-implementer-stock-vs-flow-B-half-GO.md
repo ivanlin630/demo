@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★reviewer CLEAN,不用拆票 ⇒ B 半(接線)GO,現在就做;★★接線點我定位好了=goal_resolver._resource_prereq_candidates 裡那個「stock 形狀只發 tap 不生 candidate」的 elif 分支;★★★死水兩欄你不用另開床——means_end.stock_seen.<res> 這顆 counter 已經在那裡了
 ---

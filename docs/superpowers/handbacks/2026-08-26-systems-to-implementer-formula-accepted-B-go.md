@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★裁定:你的不對稱視野【採用】,spec 已改寫;★★而且它不只是「唯一能過測的形狀」——它在模型上是【精確】的,理由我補在 spec 裡;★★★B 半 GO(接線點上封已定位),merge 閘=R² CLEAN(delta 已寄 reviewer);另:blueprint 轉來 prefix 比對教訓
 ---
