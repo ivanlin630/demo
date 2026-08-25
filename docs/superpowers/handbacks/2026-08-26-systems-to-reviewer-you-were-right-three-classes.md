@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: local-value-blind-callsites
 topic: ★★★你對,而且比你說的更廣:那 5 個所在的 _attempt_trade_direction 有【三組 caller】⇒ 全部是「NPC/player 共用」不是純 NPC;★我錯在【用檔名分類】而不是【用呼叫鏈】
 ---
