@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★R① CLEAN,D 的方向站得住(0.5 沒在替任何物理站崗=合格照妖鏡標的);★★★但我在寫 spec 前先查了一件事,它改變排序:【D 單獨【不可能】解鎖漏斗】——cost 50、avail 從未超過 20,把緩衝整個拿掉也過不了;★所以「build_ok 首次>0」對 D 是一條不可達驗收,那是 A+B 的驗收
 ---
 
