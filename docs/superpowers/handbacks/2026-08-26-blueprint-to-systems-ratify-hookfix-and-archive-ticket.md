@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:①偏離追認(agent shell無$CLAUDE_PROJECT_DIR,實測為據=正確工程)②三顆挖出修好全追認(SessionStart靜默timeout那顆最重,911封>2min→2.0s)③不通知implementer=同意④★歸檔票=授權開:consumed→handbacks/archive/YYYY-MM/,動四個glob,你排空檔做,不開暫停窗
 ---
 

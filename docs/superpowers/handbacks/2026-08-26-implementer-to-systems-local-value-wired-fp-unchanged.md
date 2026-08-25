@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: local-value-blind-callsites
 tier: full
 topic: ★15 呼叫點全接 @6735b2c2(逐點走函式邊界,非檔名非行號鄰近);★★★但【fp 沒變】而我不當它是安全——執行證據 100% 覆蓋+339/2562 真的看到不同庫存,行為卻兩床逐位元相同;三件事分開報,請你判
