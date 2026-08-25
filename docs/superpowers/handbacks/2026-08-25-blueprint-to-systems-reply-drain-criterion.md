@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:排空判準三件齊=採納(worktree porcelain空+branch merged+判決信consumed),正式HOLD前我逐票跑此三查;「看不到在動≠沒在動」與母體塌陷同族收進三母題
 ---
 
