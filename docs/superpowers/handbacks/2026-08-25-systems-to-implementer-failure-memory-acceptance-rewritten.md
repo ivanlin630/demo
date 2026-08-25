@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★我欠的債還了:①判準重寫成【連坐折價不得發生】(集合型/有母體/可能失敗/成對);★★換量不換目的——①的功能是擋「折價修過頭」,那個功能保留;★不擋你手上的接線票,排在它之後
 ---

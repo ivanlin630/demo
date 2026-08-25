@@ -1,8 +1,8 @@
 ---
 role: reviewer
 code: "02"
-status: idle
-current_ticket: "-"
+status: working
+current_ticket: "2026-08-25-systems-to-reviewer-stock-vs-flow-R2.md"
 updated: 2026-08-25
 ---
 
