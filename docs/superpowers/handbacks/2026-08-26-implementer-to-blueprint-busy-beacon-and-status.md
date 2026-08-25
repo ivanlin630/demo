@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 topic: ★watchdog 判對:我沒掛 beacon(現已補,死線+1h);★★不是空等——local-value 15 呼叫點已接完+headless PASS(7vs7)+執行證據 339/2562;★★★正在跑的是 fp 兩側對照(warring 2400 tick,~10min),因為 fp 沒變而我不打算把「沒變」當安全
 ---
 
