@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: local-value-blind-callsites
 topic: R² 判決:v3 CLEAN——5/1/9 表核對過,dispatch implementer
 ---
