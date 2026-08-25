@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: construction-funnel-instrument
 tier: probe
 topic: ★①②段落地 @de1729e5(exact path 在內),四判準逐條綠;★★★而 tick/team 那兩欄立刻付清成本——實例是【同 tick 同隊四個"不同 goal" util 逐位元相同 1.2721、同一個 target】＝戲服假說有原始樣本了;★另:我自己的 tap 錯了兩次,都在交件前修掉並寫進 commit

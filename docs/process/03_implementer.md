@@ -123,3 +123,17 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 ★**同族**：`state` 改必填那票的「編譯即驗收」也有一樣的洞 ——
 **自己有 default 的轉送者用完整引數傳 `null`，編得過、執行期才崩。**
 ⇒ ★★**兩者的共同形狀：語言幫你擋的，只有【它看得見的那一種錯】。**
+
+## ★★`"?"`／`unknown` 這一格【必須可分解】—— 兩個不同原因不得共用一個標籤（implementer 立 2026-08-26）
+
+**血證（他自己造的、自己抓的）**：`funnel.cand.by_goal` 讀錯層（`goal_type` 在 `source_goal` 裡、不在 candidate 頂層）
+⇒ **845 筆全落 `"?"`**。修完**仍有 37 筆 `"?"`** ——
+★**而那 37 筆是【真實類別】**：後勤那兩支 candidate（`distribute_food`／`deliver_*`）**不走 `_mk_candidate`、沒有 `source_goal`**。
+
+⇒ ★★**同一個 `"?"` 底下同時住著「儀器讀錯層」與「這類本來就沒有那個欄位」** ——
+**兩者的處置完全相反（一個要修、一個要具名），而它們長得一模一樣。**
+⇒ **他把後者具名成 `no_source_goal:<label>`**（實測 `deliver_material 26 / deliver_food 7 / deliver_tools 4`）。
+
+★★★**通則**：**任何 catch-all 分類（`"?"`／`other`／`unknown`／空字串）都要能回答
+「它裡面是不是只有一種東西」** —— **答不出來，它就不是一個分類，是一個垃圾桶。**
+★**而垃圾桶的特徵是：它【不會變成 0】，所以你永遠不知道它修好了沒。**
