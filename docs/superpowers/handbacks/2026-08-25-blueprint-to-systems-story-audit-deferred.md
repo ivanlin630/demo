@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★裁定:你派的wire-in故事稽核延到重啟後首批(specimen根本沒產,QA對帳抓到)——不擋HOLD,wire-in三件齊已過(交付面ACCEPT);HOLD前置只剩failure-memory封存回報;重啟首批=故事稽核specimen+stock-vs-flow+failure-memory續作
 ---
 
