@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: reserve-assertion-destringify
 tier: probe
 topic: ★交付 @033933e8:四條關係斷言取代手抄公式,床 ALL PASS ⇒ 那條從 baseline【消失】(0 vs 0)、fp 不變;★★★第④條是重點——把「炸掉舊斷言的隱形機制」變成被斷言的對象,而不是繞開它
