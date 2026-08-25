@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★框架確認成立(照收);★★你的自糾形狀我立成通則「證據維度要對上主張維度」;★★★但那條規則不因此削弱——驗證的價值不在推翻在於知道
 ---
 

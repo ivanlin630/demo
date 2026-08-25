@@ -244,6 +244,7 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 | `PROGRESSIVE_HOLD_TASKS` | `task_arbiter.gd:22` | 7 個 task | ★**漏過兩次**：CONVOY（27.9 日漂流）、TASK_CAMP（89% 棄營） |
 | ★`OPTION_FAIL_KEY` | `failure_memory.gd` | ★**2 個 option**（買糧／買料） | 失敗反饋律**對其餘 option 零行為**；`build_workshop` 連贏 45 次 |
 | ★**「四端同秤」的那張表** | `terms.gd` ／ 我寫的 spec | ★**4 / 21** | ★**漏列紮根**（第五端）—— 詳下方 |
+| ★`RES_HARVEST_TERRAIN` | `goal_resolver.gd` | ★**1 筆**（`{"material": "forest"}`） | ★**2061／2089 次卡在 `has(res)`** —— 表上沒有的資源，「採@地形」這條取得手段**對它靜默不存在** |
 | （新增請續列） | | | |
 
 #### ★★「我改了 N 個」≠「該改的是 N 個」（systems 自糾 2026-08-25，blueprint 裁入負斷言帳）
