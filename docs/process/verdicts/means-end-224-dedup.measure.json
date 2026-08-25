@@ -1,0 +1,43 @@
+{
+  "slice": "acquisition-paths-wire-in",
+  "ticket": "systems票2026-08-26:224去重(blueprint騎士條款)——按(target,build_type,task)三元組去重前後兩個數；附驗『task=TASK_TRADE穿facility label』假說",
+  "measured_at_commit": "main @9ec8c936（identity tap merge在598b2f4f；本輪只加床print行，跑main非worktree——票允許二選一，本輪選main）",
+  "seed_config_days": "LW_CONFIG=warring_states PERF_SEED=1337 ADHOC_DAYS=10（與 implementer 原 224 交件同參數，可比）",
+
+  "★L3聲明": "床(goal_delegate_diag_bed.gd)加一段 print 讀既有 Probe.samples['means_end.unique_no_existing.identity']（implementer 已 landed 該 tap，本輪只把它印出來），無新增量測點、無動控制流。SCRIPT ERROR=0。",
+
+  "★★★結果": {
+    "identity_samples_原始筆數": 380,
+    "cap": 500,
+    "是否被first_N截斷": false,
+    "備註": "380 < 500 ⇒ 這是母體全量，不是截斷樣本",
+
+    "means_end.unique_no_existing_去重前(原224)": 224,
+    "means_end.dup_existing_present_去重前(原156)": 156,
+    "224+156=380_零殘差確認": true,
+
+    "★去重後(按 fname[=build_type]+target+task 三元組)": {
+      "unique_no_existing去重後": 31,
+      "dup_existing_present+unique_no_existing_全部380去重後": 57,
+      "單位聲明": "一個 (target, build_type, task) 三元組；build_type 由現有欄位 fname 承接（implementer 命名，即『要蓋/涉及的 facility 名』）；不是一次提案次數，不是一個 label"
+    },
+
+    "★224子集內 task 欄位分佈(raw,不解釋)": {
+      "task=貿易(TASK_TRADE,即去買材料穿著蓋facility的label)": 62,
+      "task=weaponsmith(與fname同名)": 48,
+      "task=空字串": 114,
+      "合計": 224
+    },
+
+    "★系統要驗的假說回答": "224筆裡 task=TASK_TRADE(去買材料穿著蓋label) 的筆數 = 62/224 = 27.7%。★這個欄位在資料構造上 task=TASK_TRADE ⟺ target=市場位置（買料candidate的to_task本身就是{task:TASK_TRADE,target:市場}），所以這一個數字同時回答『task是TASK_TRADE多少筆』與『target指向市場多少筆』兩問。★另有50.9%(114筆)task=空字串，不屬這個假說能解釋的範圍，如實列出、不強行歸因。",
+
+    "去重後掉很多(224→31)": "照原樣回報，不解釋掉了什麼——那是你的活"
+  },
+
+  "landed_paths": {
+    "raw_output": "docs/measurements/breed-deathcause/means-end-224-dedup-warring10d.txt",
+    "dedup計算結果json": "docs/measurements/breed-deathcause/means-end-224-dedup-RESULT.json"
+  },
+
+  "repro": "$env:LW_CONFIG='warring_states'; $env:ADHOC_DAYS='10'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/goal_delegate_diag_bed.gd"
+}

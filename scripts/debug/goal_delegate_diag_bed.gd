@@ -96,6 +96,14 @@ func _dump(cfg: String, days: int, sd: int, state: WorldState, out_path: String)
 		if String(ku2).begins_with("means_end.unique_no_existing."):
 			lines.append("      %-36s = %d" % [String(ku2), _c(String(ku2))])
 	lines.append("      ★unique>0 ⇒ 本票有世界層價值；＝0 ⇒ 機制正確但這兩床沒那種情境（也是有效結論）")
+	# systems2026-08-26 224 dedup identity dump, cap 500
+	if Probe.samples.has("means_end.unique_no_existing.identity"):
+		var _idarr: Array = Probe.samples["means_end.unique_no_existing.identity"] as Array
+		lines.append("  identity samples count=%d (cap=500; ==500 means first-N truncation not full population)" % _idarr.size())
+		for _ie in _idarr:
+			lines.append("    " + JSON.stringify(_ie))
+	else:
+		lines.append("  identity samples: key missing (tap disabled or unique_no_existing==0 this run)")
 	lines.append("  ★no_means 逐資源（warring 134 vs peaceful 0，差異本身是線索）")
 	for knm in Probe.counts.keys():
 		if String(knm).begins_with("means_end.no_means."):

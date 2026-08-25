@@ -1,0 +1,20 @@
+{
+  "total_identity_samples": 380,
+  "cap": 500,
+  "is_full_population_not_truncated": true,
+  "unique_no_existing_count_raw": 224,
+  "dup_existing_present_count_raw": 156,
+  "unique_no_existing_dedup_by_fname_target_task": 31,
+  "all380_dedup_by_fname_target_task": 57,
+  "unique_no_existing_task_distribution": {
+    "": 114,
+    "weaponsmith": 48,
+    "貿易": 62
+  },
+  "all380_task_distribution": {
+    "": 196,
+    "weaponsmith": 67,
+    "workshop": 23,
+    "貿易": 94
+  }
+}

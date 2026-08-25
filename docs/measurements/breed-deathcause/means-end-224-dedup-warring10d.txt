@@ -1,0 +1,468 @@
+[warring_states day 10/10 seed 1337] teams=79   ★窗尾標記（讀之前先確認這行）
+--- ①上游：有沒有【產生】build 委派候選 ---
+  goal.cand_build_emitted = 590
+  （★一筆都沒有 ⇒ 上游【從未產生】build 候選 —— 那 dispatch 端的 0 就不是 dispatch 的問題）
+  goal.frontier_calls              = 0
+  goal.frontier_empty              = 0
+  goal.cand_total_batches          = 0
+  ★逐日分佈（這才能回答「是不是只在早期」，樣本不行）：
+    ["day000=127", "day001=45", "day002=74", "day003=74", "day004=71", "day005=67", "day006=33", "day007=35", "day008=22", "day009=38", "day010=4"]
+  ★按資源分：哪些真的產出了候選 / 哪些地形本來就不產（B 型）
+    ★產出候選的（A 修後應該多出 food）：["food=24", "material=566"]
+    地形不產（B 型，本票不處理）：[".tools=2112", ".weapon_melee_low=1040"]
+  ★satisfied 逐案依據（own_v 應 ≥ best_alt_v，否則就是誤判）：
+    {"best_alt_v":227.763,"own_terrain":"forest","own_v":233.476,"own_yield":12,"res":"material","team":10,"tick":10}
+    {"best_alt_v":227.763,"own_terrain":"forest","own_v":233.476,"own_yield":12,"res":"material","team":10,"tick":10}
+    {"best_alt_v":227.763,"own_terrain":"forest","own_v":233.476,"own_yield":12,"res":"material","team":10,"tick":10}
+    {"best_alt_v":227.763,"own_terrain":"forest","own_v":233.476,"own_yield":12,"res":"material","team":10,"tick":10}
+    {"best_alt_v":227.763,"own_terrain":"forest","own_v":233.476,"own_yield":12,"res":"material","team":10,"tick":10}
+    {"best_alt_v":30.305,"own_terrain":"forest","own_v":187.538,"own_yield":12,"res":"material","team":17,"tick":10}
+    {"best_alt_v":30.305,"own_terrain":"forest","own_v":187.538,"own_yield":12,"res":"material","team":17,"tick":10}
+    {"best_alt_v":30.305,"own_terrain":"forest","own_v":187.538,"own_yield":12,"res":"material","team":17,"tick":10}
+    {"best_alt_v":30.305,"own_terrain":"forest","own_v":187.538,"own_yield":12,"res":"material","team":17,"tick":10}
+    {"best_alt_v":30.305,"own_terrain":"forest","own_v":187.538,"own_yield":12,"res":"material","team":17,"tick":10}
+  ★★means-end：【產出】與【贏】分開報——emitted>0 且 fp 不變 可同時為真
+    means_end.candidates_emitted           = 380
+    means_end.won_argmax                   = 187
+    means_end.no_means                     = 134
+    means_end.cycle_detected               = 0
+      means_end.candidates_emitted.tools   = 177
+      means_end.candidates_emitted.weapon_melee_low = 203
+  ★★emitted 按【服務哪個 goal】分（發展型 vs 求生型）
+    maintain_tools                     = 177　(其中絕境中 0)
+    maintain_weapons                   = 203　(其中絕境中 0)
+      ★絕境中那一欄＝dev_coeff 歸零的那批。maintain_food 系 ⇒ 求生型被誤殺的候選人
+  ★★★世界層價值：means-end 補上【既有機制沉默處】的提案有幾個
+    means_end.unique_no_existing           = 224
+    means_end.dup_existing_present         = 156
+      means_end.unique_no_existing.weaponsmith = 184
+      means_end.unique_no_existing.workshop = 40
+      ★unique>0 ⇒ 本票有世界層價值；＝0 ⇒ 機制正確但這兩床沒那種情境（也是有效結論）
+  identity samples count=380 (cap=500; ==500 means first-N truncation not full population)
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(10, 27)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(13, 22)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 22)","task":""}
+    {"existing":true,"fname":"workshop","target":"(21, 4)","task":""}
+    {"existing":true,"fname":"workshop","target":"(11, 17)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(8, 11)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(13, 22)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 22)","task":""}
+    {"existing":true,"fname":"workshop","target":"(21, 4)","task":""}
+    {"existing":true,"fname":"workshop","target":"(11, 17)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(13, 22)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 22)","task":""}
+    {"existing":true,"fname":"workshop","target":"(21, 4)","task":""}
+    {"existing":true,"fname":"workshop","target":"(11, 17)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(19, 7)","task":"weaponsmith"}
+    {"existing":false,"fname":"workshop","target":"(20, 5)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 5)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(12, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 24)","task":""}
+    {"existing":true,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(11, 17)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(12, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 24)","task":""}
+    {"existing":true,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(11, 17)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(12, 22)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 22)","task":""}
+    {"existing":true,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(9, 19)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(19, 2)","task":"workshop"}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(9, 19)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(12, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 24)","task":""}
+    {"existing":true,"fname":"workshop","target":"(10, 10)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 10)","task":""}
+    {"existing":true,"fname":"workshop","target":"(9, 19)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(10, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 24)","task":""}
+    {"existing":true,"fname":"workshop","target":"(11, 19)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(12, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(9, 12)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(9, 12)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(11, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(11, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 16)","task":""}
+    {"existing":true,"fname":"workshop","target":"(9, 12)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(9, 12)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(12, 22)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 22)","task":""}
+    {"existing":true,"fname":"workshop","target":"(23, 4)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(23, 4)","task":""}
+    {"existing":true,"fname":"workshop","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(9, 12)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(9, 12)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(12, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(23, 4)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(23, 4)","task":""}
+    {"existing":true,"fname":"workshop","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(10, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 24)","task":""}
+    {"existing":true,"fname":"workshop","target":"(23, 4)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(23, 4)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(23, 4)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(23, 4)","task":""}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(10, 10)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 10)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(11, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(11, 24)","task":""}
+    {"existing":true,"fname":"workshop","target":"(12, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(12, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(23, 4)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(23, 4)","task":""}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 22)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(13, 24)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 24)","task":""}
+    {"existing":true,"fname":"workshop","target":"(23, 4)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(23, 4)","task":""}
+    {"existing":true,"fname":"workshop","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(13, 16)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"weaponsmith","target":"(16, 5)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(9, 12)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(9, 12)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 10)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(8, 11)","task":""}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(2, 21)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 10)","task":"workshop"}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 10)","task":"workshop"}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(11, 18)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(11, 18)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(8, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(8, 11)","task":""}
+    {"existing":true,"fname":"workshop","target":"(11, 18)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(11, 18)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":true,"fname":"workshop","target":"(8, 10)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(8, 8)","task":"workshop"}
+    {"existing":false,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(13, 12)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(8, 10)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 11)","task":""}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(11, 18)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(11, 18)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(20, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(20, 6)","task":""}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(13, 12)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(18, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(18, 6)","task":""}
+    {"existing":true,"fname":"workshop","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(25, 15)","task":""}
+    {"existing":false,"fname":"workshop","target":"(10, 21)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 21)","task":"貿易"}
+    {"existing":true,"fname":"workshop","target":"(8, 10)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(10, 11)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(12, 27)","task":"weaponsmith"}
+    {"existing":true,"fname":"weaponsmith","target":"(10, 15)","task":"weaponsmith"}
+    {"existing":true,"fname":"workshop","target":"(13, 12)","task":"workshop"}
+    {"existing":true,"fname":"workshop","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"weaponsmith","target":"(21, 5)","task":"貿易"}
+    {"existing":false,"fname":"workshop","target":"(19, 6)","task":""}
+    {"existing":false,"fname":"weaponsmith","target":"(19, 6)","task":""}
+  ★no_means 逐資源（warring 134 vs peaceful 0，差異本身是線索）
+    means_end.no_means.material            = 130
+    means_end.no_means.food                = 4
+  ★★per-option util 對照（me_util vs winner_util / depth / payoff）
+    {"depth":1,"me_util":1.1722,"me_won":true,"payoff":1,"res":"tools","team":0,"tick":10,"winner_opt":"maintain_tools:location:delegate","winner_util":1.1722}
+    {"depth":1,"me_util":0.4486,"me_won":true,"payoff":1,"res":"weapon_melee_low","team":5,"tick":10,"winner_opt":"maintain_weapons:facility:delegate","winner_util":0.4486}
+    {"depth":1,"me_util":0.601,"me_won":true,"payoff":1,"res":"tools","team":10,"tick":10,"winner_opt":"maintain_tools:facility:delegate","winner_util":0.601}
+    {"depth":1,"me_util":1.0769,"me_won":true,"payoff":1,"res":"tools","team":17,"tick":10,"winner_opt":"maintain_tools:facility:delegate","winner_util":1.0769}
+    {"depth":1,"me_util":1.1983,"me_won":true,"payoff":1,"res":"tools","team":22,"tick":10,"winner_opt":"maintain_tools:location:delegate","winner_util":1.1983}
+    {"depth":1,"me_util":1.1282,"me_won":true,"payoff":1,"res":"tools","team":26,"tick":10,"winner_opt":"maintain_tools:location:delegate","winner_util":1.1282}
+    {"depth":1,"me_util":1.1382,"me_won":true,"payoff":1,"res":"tools","team":29,"tick":10,"winner_opt":"maintain_tools:location:delegate","winner_util":1.1382}
+    {"depth":1,"me_util":1.4379,"me_won":true,"payoff":1,"res":"tools","team":37,"tick":10,"winner_opt":"maintain_tools:location:delegate","winner_util":1.4379}
+    {"depth":1,"me_util":1.1722,"me_won":true,"payoff":1,"res":"tools","team":0,"tick":90,"winner_opt":"maintain_tools:location:delegate","winner_util":1.1722}
+    {"depth":1,"me_util":1.1983,"me_won":true,"payoff":1,"res":"tools","team":22,"tick":90,"winner_opt":"maintain_tools:location:delegate","winner_util":1.1983}
+    {"depth":1,"me_util":1.1282,"me_won":true,"payoff":1,"res":"tools","team":26,"tick":100,"winner_opt":"maintain_tools:location:delegate","winner_util":1.1282}
+    {"depth":1,"me_util":1.1382,"me_won":true,"payoff":1,"res":"tools","team":29,"tick":100,"winner_opt":"maintain_tools:location:delegate","winner_util":1.1382}
+  ★更上游：資源前置的出口表（採@地形只是取得手段 2）
+    goal.res_prereq.entry                  = 6357
+    goal.res_prereq.satisfied              = 1601
+    goal.res_prereq.no_specie              = 120
+    goal.res_prereq.buy_wins               = 249
+    goal.res_prereq.no_market              = 4387
+  ★落到【取得手段 2】時缺的是哪種資源（分類維度）
+    落下來的【解析次數】：["food=24", "material=1331", "tools=2112", "weapon_melee_low=1040"]
+    落下來的【獨立 (team,tick,res)】：["food=24", "material=245", "tools=1063", "weapon_melee_low=1029"]
+      ★兩個都報：前者是解析器承受的壓力，後者才是【機會數】。拿錯分母比率會被墊高。
+  ★build 候選的【真正產地】：採@地形分支的三個出口（意思完全不同）
+    goal.harvest.emitted                   = 590
+    goal.harvest.satisfied_own_terrain     = 765
+    goal.harvest.no_reachable_site         = 0
+    goal.deleg.pop_gate_block              = 0
+--- ②委派入口：有沒有【贏】並走到委派 ---
+  delegate.entry                   = 736
+  delegate.branch.convoy           = 0
+  delegate.branch.build            = 0
+  delegate.branch.facility         = 0
+  delegate.branch.generic          = 0
+  delegate.generic_no_advisor      = 0
+--- ③派遣結果：走到了有沒有派成功 ---
+  delegate.build_ok                = 0
+  delegate.build_fail              = 513
+  dispatch_fail.pop不足              = 22
+  dispatch_fail.資源不足               = 552
+--- ★對照：紮根有沒有真的完成 ---
+  outpost.l0_to_l1                 = 2
+  construct.start                  = 9
+  construct.complete               = 9

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★你卡住的那顆 tap【已經進 main】(598b2f4f)——`means_end.unique_no_existing.identity` 逐筆帶 (fname,target,task,existing);★★可以重跑去重了,判準與單位照原票寫死;★★★另外我要你順便回答一個【你當初挖到的機制】能不能被這份資料證實
 ---
