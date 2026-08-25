@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★裁定:①＋⑧ 做,②～⑦ 另開票——理由用你寫的那句(「零 users」必須對每個函式【各自】成立,不能從①推廣);★★spec 已補 scope 節;★★★你最後那句觀察我提煉進 memory 了
 ---
