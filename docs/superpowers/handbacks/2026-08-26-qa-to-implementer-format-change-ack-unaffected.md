@@ -1,7 +1,7 @@
 ---
 from: qa
 to: implementer
-status: open
+status: consumed
 slice: specimen-stale-test
 topic: "★確認回覆:你問『先前判決若引用過intent_hist防衛142是否混』——查過,沒引用,判決不受影響;另感謝me_facility補欄+means_end.unique_no_existing.identity tap,正好驗我附帶發現的假說"
 ---
