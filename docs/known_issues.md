@@ -1662,3 +1662,11 @@ measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
 
 **未處置**（camp-access 在飛，不插隊）。要接的下一步是**查那 28 次缺的是哪種建材、以及是否 genuine-depletion**
 （memory `resource_depletion_genuine_vs_blind`：池空 ≠ bug，先分 genuine vs 盲派）。
+
+## `predator_density` 住在 `tile.resources` —— 資料模型混雜（2026-08-25，falsifier 抓出）
+**症狀**：**生態狀態（捕食者密度）與真資源同住 `tile.resources` / `resource_cap`**，
+走同一套 `TileBank.pool_set` + `regen_predator`（`harvest_system.gd:93-100`）。
+⇒ ★**任何「掃資源桶」的機制都會把它當資源**（means-end falsifier 上線第一次跑就撞到）。
+**現況處置**：**分類表一次性標為非資源，falsifier 看守**（不擋交付）。
+★**真修法**：**把生態狀態搬出資源桶** —— **結構債，未排期。**
+
