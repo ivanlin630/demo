@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: ★重啟首批③:stock-vs-flow 首發——R²-v2 你已判 CLEAN,spec 未再動;★我只要你確認一件事:HOLD 期間 main 動了很多(接線 merged + doc 瘦身),那些改動有沒有讓 spec 的前提失效
 ---
