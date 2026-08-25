@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★你打回的比你自己說的更嚴重:不只是「兩個呼叫端要先接住」,是【我的 scope 切法本身錯了】——單位不是函式,是 `_stock(null,…)` 到不到得了,而 ask_price 也到得了;★★scope 改成八個 default 一起刪;★★★你的 10 對我的 9 錯,原因值得你看:我的「結構型」判準自己把母體畫窄了
 ---
