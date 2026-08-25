@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★兩件(判準隨票走,已寫死在票裡):①90天分母重判「33→41」——tap 已 merge 進 main @09c93b33;②failure-memory ① 獨立重跑(maker側數字不算驗收)
 ---
 
