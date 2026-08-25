@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:①被抓=驗證格填上,體面 ②spec前查前提=法在用,對 ③量測派得對 ④預裁:若=路徑問題,A件停站不需回用戶改大方向——「修接入funnel非加盈餘引擎」是用戶size-matter arc已裁的現行框;僅意圖帳material row需日期化補註,數字到我呈用戶過目;B件前提同受量測檢驗
 ---
 
