@@ -27,8 +27,30 @@ scripts/ 全域（含 debug/test）不帶 state 的呼叫       = 0   ← 9 個 
 | 只有錯的 users | 陷阱 ⇒ 刪 |
 | 真收益＋真風險 | **不用 default，改用兩個入口**（`flow_utility` / `stock_utility` 就是這樣做的） |
 
+## ★★scope（2026-08-26 裁定；implementer 窮盡 grep 後提出，我採納）
+
+`state: WorldState = null` 這個 default **不只在 `local_value` 上，共 8 處**：
+
+| # | 函式 | 檔 | 本票 |
+|---|---|---|---|
+| ① | `local_value` | `trade_valuation.gd:136` | ★**做** |
+| ⑧ | `InteractionSystem.local_value`（**包裝層**） | `interaction_system.gd:662` | ★**做** |
+| ②–⑦ | `reserve`／`_reserve_factor`／`_reserve_factor_food_only`／`_food_urgency`／`_urgency`／`ask_price` | `trade_valuation.gd:85-127` | ★**不做，另開票** |
+
+★**①⑧ 一起做的理由**：**同一條鏈**。**只刪 `TradeValuation` 那個、留著包裝層的 ⇒ 病往上搬一層**
+（包裝層的 caller 忘記傳 ⇒ 包裝層傳 `null` 下去 ⇒ 一樣靜默走 fallback）。
+**兩者都已驗證零 users**（⑧ 唯一 caller `headless_test.gd:11631` 有傳 state）。
+
+★★**②–⑦ 不做的理由（這條是本票的安全根據，不是保守）**：
+> **「零 users」必須【對每一個函式各自成立】，不能從①推廣到②–⑦。**
+> **沒窮盡追過 caller 就刪 default ＝ 把【靜默 fallback】換成【執行期崩潰】—— 那不是同一件事。**
+
+⇒ **另一票的形狀**：**先逐個窮盡 caller，再對每一個套 default 三分類**
+（零 users ⇒ 刪／只有錯的 users ⇒ 刪／真收益＋真風險 ⇒ 拆兩個入口）。★**逐個判，不批次刪。**
+
 ## 修法（★零數值改動）
 1. `local_value(team, res, state)` —— **`state` 必填**（刪 `= null`）。
+1b. ★`InteractionSystem.local_value` 包裝層 —— **同樣刪 `= null`**（否則病往上搬一層）。
 2. `_stock()` 裡的 `if state != null` fallback —— ★**一併刪**。
    ★**理由**：留著它，就等於留著「傳了 null 也能跑」這條路 —— **簽名擋住的東西，不該被實作放行。**
 3. **不新增任何「無世界」入口** —— ★**若日後真的出現「手上沒有 state」的合法呼叫者，

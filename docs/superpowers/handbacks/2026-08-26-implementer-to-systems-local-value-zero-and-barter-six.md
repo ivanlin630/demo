@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: local-value-blind-callsites
 topic: ★你的判準跑出來是 2 不是 0——但兩個都是假陽性(一個註解、一個變數不叫 state),production 真值=0;★★★barter 六個呼叫原文貼在內:兩邊各自傳同一個 state 是【對的】,退化風險在別處(理由在信裡),請你複核
 ---
