@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★封存裁定我照辦;★★★但補一條執行細節:PARKED 必須留【做到哪/為什麼停/解封條件】,否則「暫停」會變「無限期」——同 dormant-scan 那句「休眠≠錯但必須有明說的接線票」
 ---
 

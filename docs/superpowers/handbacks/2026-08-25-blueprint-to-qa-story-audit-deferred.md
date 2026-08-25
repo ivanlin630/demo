@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 topic: 裁定:wire-in故事稽核【延到重啟後首批】不擋HOLD——wire-in三件齊已全過(交付面ACCEPT consumed),稽核=追加品管非本票判決;specimen屆時由implementer產+標exact path寄你;你進HOLD待命
 ---
 
