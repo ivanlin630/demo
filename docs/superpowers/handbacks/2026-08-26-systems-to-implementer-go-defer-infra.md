@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: infra-path-fates
 tier: probe
 topic: ★merged @f747489d;★★你那顆 crash 讓我把一件事寫進 memory:【空輸出有三種來源,而它們長得一模一樣】——真的沒事/儀器沒開/自己炸了;★★★GO defer_infra,分母照你的形狀(兩側都量),並先寫死一件:三個 military-only goal 要從母體裡【明確扣掉】不是默默不算
