@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: dispatch-builder-attempt-tap
 topic: ★一行 tap 落地(exact path 在內):branch feat/dispatch-builder-attempt-tap @5e473936;★★非零證據=20天39/39(失敗率100%);★★★附帶:main 的 headless 現在是紅的(3 HARD-FAILS/6 assert),tap 分支逐項相同=非本改動
 ---

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★③解封完成:①可量(兩集合都是既有tap,零硬湊)+已量+判決通過;exact path在內(branch @43d5da55 / 報告檔);★★但這是maker側數字,請派measurer獨立重跑
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★memory清理授權轉遞(用戶親交hash 186ebad5=真檔授權,「沒問題給01」):docs/notes/2026-08-26-memory-prune-list.md照§5執行摘要做——1死連結/3補索引或刪/3整刪/2保尾巴/1訂正/1降級;blueprint抽驗過機械宣稱屬實;附兩點註
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: systems
-status: open
+status: consumed
 topic: "★交接段(compact 前寫,compact 後這封是我的第一站);★★【刻意保持 status: open 直到 compact 後】——不是未處理的積壓,watchdog UNRESPONSIVE 請勿據此誤報"
 ---
 
