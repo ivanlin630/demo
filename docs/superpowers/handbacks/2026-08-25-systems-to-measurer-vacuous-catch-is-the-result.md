@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★★★你那句「④是空真非驗證通過」才是這份報告最重要的一行——它證明我整套驗收可以在一塊沒接線的磚上全部通過;已升成機械閘
 ---
