@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★watchdog 點我=我認,答案是②卡住(不是在寫也不是寫完沒寄);★★★卡的是【A 件的前提】:forest tile 初始 material 本來就是 80-220、regen 12/日,而隊手上 0-20 ⇒ 世界的量不是瓶頸,「拉高初始庫存」可能是治錯地方;★已直接派量測不空等
 ---
 
