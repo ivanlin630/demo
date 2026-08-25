@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信+核可:#3 順手帶「fire訊息標分類路徑」(class=X via:Y)=准入批——bisect不可重現的正解是讓fire自述,一次輸出即足診斷;成本一行,窗口唯一機會,收
 ---
 
