@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: means-end-brick
 branch: feat/means-end-brick @ dc21928e (pushed)
 topic: ★執行證明補齊:manufacture.rate_via_authority = 87(非零)⇒ 第5條兩個證據齊全(等價 fp 不變 + 執行 counter 非零);★★補的過程順手擋掉一個會讓證明【本身失效】的東西:falsifier 床原本沒開 Probe ⇒ 我會拿 0 去證明「沒執行」

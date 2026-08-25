@@ -1,0 +1,16 @@
+[peaceful_economy day 55] teams=18 porters_tracked=2
+  convoy: dispatch=3 attempt=12 deliver=2 settled=2 return=3
+  convoy.dispatch_attempt                        = 12
+  convoy.drop.inflight_convoy                    = 9
+  convoy.rehome                                  = 7
+  persist.hold                                   = 11
+  下場分佈：{ "merged_home": 2 }
+  ★殘留（未回母隊、還在 porter 身上）：{  }
+★main baseline：RETURN期間task=運輸佔比 = 197/219 = 90.0%
+★distinct商隊維度：至少被preempt一次的商隊數/總RETURN過的商隊數 = 1/2，distinct隊id清單=[12, 14]，被preempt過的隊id清單=[14]
+   porter=12 parent=5 dispatch@2400 出發帶={ "food": 17, "material": 64, "coin": 133.333333333333, "tools": 5 } ｜脫離@-1 task= phase= 身上={  } ｜結局=merged_home 現持={ "food": 13, "material": 31, "coin": 223.34867296268, "tools": 5 }
+     ★結案 tick=4600（出發後 2200 tick = 9.2 日）
+     母隊 5：dispatch 當下={ "food": 85, "material": 266, "coin": 666.666666666667, "tools": 25 } ｜現在={ "food": 1.625, "material": 60, "coin": 930.753406007227, "tools": 7 } ｜現在公庫={  }
+   porter=14 parent=5 dispatch@7300 出發帶={ "food": 2.78053583717, "material": 59, "coin": 149.505829006928, "tools": 5 } ｜脫離@7900 task=投靠 phase=RETURN 身上={ "food": 2.33333333333333, "material": 7, "coin": 465.445053601451, "tools": 5 } ｜結局=merged_home 現持={  }
+     ★結案 tick=8100（出發後 800 tick = 3.3 日）
+     母隊 5：dispatch 當下={ "food": 13.90267918585, "material": 37, "coin": 747.529145034639, "tools": 25 } ｜現在={ "food": 1.625, "material": 60, "coin": 930.753406007227, "tools": 7 } ｜現在公庫={  }

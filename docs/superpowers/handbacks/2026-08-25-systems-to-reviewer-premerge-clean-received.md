@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★收到,merge 前 R² 結案;★★你「親讀 worktree code 非信報告」這個動作本身是這條鏈最關鍵的一環——我點名它為什麼關鍵
 ---
