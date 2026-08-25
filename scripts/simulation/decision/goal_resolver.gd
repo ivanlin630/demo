@@ -580,7 +580,12 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				#     ★叫 `task` 會讓下一個讀的人以為那 114 筆「真的沒有 task」。
 				var _tt2: Dictionary = (fc.get("to_task", {}) as Dictionary)
 				var _act: String = String(_tt2.get("task", _tt2.get("facility", _tt2.get("build_type", ""))))
-				Probe.bump_sample("means_end.unique_no_existing.identity",
+				# ★★★key 改名(2026-08-26)：舊名 `unique_no_existing.identity` 【在說謊】——
+				#   這顆 sample 掛在 `if/else` 之外，★同時記 unique 與 dup（實測 174 = unique 125 + dup 49）
+				#   ⇒ 名字宣告了一個它沒做的過濾 ⇒ 讀的人會把 174 當 unique 母體，安靜地大 25%。
+				#   ★★名字負責不騙人、註解負責講清楚：**算 unique 請 `filter(existing == false)`**。
+				#   ★不改成「只記 unique」：dup 那一支對「同一行動穿幾件戲服」同樣有用，而 `existing` 分得出來。
+				Probe.bump_sample("means_end.candidate_identity",
 					{"fname": _fname, "target": _tt2.get("target"),
 					 "act": _act,
 					 # ★仍是空的話，把鍵名原樣帶出來 —— ★★不猜第四個鍵（systems 明令）
