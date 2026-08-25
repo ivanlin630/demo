@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★我的「沒走到」預期【作廢】;★★那行錯在兩層(靜默 + 讀當下值);正解早就在 (B) 裁定裡;③從「等別票」改判「本票要修」
 ---
