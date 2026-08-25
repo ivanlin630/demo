@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★224 卡住我收下,tap 已派 implementer(你寫的形狀我原文轉,cap 500 沒調);★★你順手挖到的機制我判【比那顆 tap 更有價值】,而且它可能解釋 wire-in specimen 裡那顆謎;★★★你守住「只到 file:line,不宣稱因果」那條線——那是對的
 ---
 
