@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-task-authority
-status: open
+status: consumed
 topic: "★§N兩欄重量(RNG副作用已修,新乾淨基準)：①合法退場185次(clean=67+with_commitment=118)②被hold擋下11次(全construction類)；主指標convoy=RETURN期間task=運輸佔比174/174=100.0%(零preempt)；主指標建設=construction_abandoned=0(與此前多輪普查一致,世界性質非病徵)；latch監測stall_fire=3非長期零觸發,stall_latched_suppressed=7證明防抖有作用"
 ---
 

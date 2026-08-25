@@ -1,0 +1,45 @@
+[peaceful_economy day 30] teams=14
+--- 症狀（別單看這欄）---
+  order.placed                   = 357
+  order.filled                   = 2
+  order.abandoned                = 283
+  order.replaced                 = 0
+--- ★抑制量（並排看：症狀降但這裡飆＝大家都放棄了，不是病好了）---
+  failure.blocked.material_material = 28
+  failure.blocked_total          = 28
+  failure.recorded.order_abandoned_buy = 169
+  failure.entries_written        = 169
+  failure.structural_key_used    = 169
+  failure.key_fallback_no_dispatch_id = 8
+  failure.suppressed.貿易          = 8
+  failure.suppressed.駐守          = 9
+  failure.suppressed.求和          = 66
+  failure.suppressed.build_workshop:resource = 23
+  failure.suppressed.maintain_food:resource = 7
+  failure.suppressed.survival    = 22
+  failure.pruned                 = 21
+  failure.suppressed.返家補給        = 7
+  failure.suppressed.買糧          = 13
+  failure.suppressed.build_apothecary:resource = 27
+  failure.suppressed.覓食          = 10
+  最深折價 = 0.585（1.0 − 乘數）
+--- 被折價的那兩個 option 的行為 ---
+  decision.opt_chosen.買糧         = 40
+  decision.opt_chosen.買料         = 0
+  decision.opt_applicable.買糧     = 56
+  decision.opt_applicable.買料     = 63
+--- ★★三面 acceptance ---
+  ①文明化恢復 outpost.l0_to_l1 = 0
+     ★這一面【要同床 main baseline 才可判】：絕對值不告訴你有沒有恢復。
+  ②買糧 339 型仍咬 failure.suppressed.買糧 = 13
+  ③紮根執行型失敗進記憶 = 0　(全部 recorded 分佈: ["order_abandoned_buy=169"])
+     ⚠ 0 有兩種可能，★這份報告分不出來，要看 ③b：
+       (a) 接線斷（記錄側沒接到擲出點） (b) 這輪世界【真的沒有】紮根執行型失敗
+  ③b 前提型 failure.blocked_total = 28　(★>0 表示紮根【有在嘗試】只是被擋)
+       failure.blocked.material_material  = 28
+  ③c ★這支函式【有沒有被呼叫】—— 沒有這欄，③b 的 0 分不出「接線斷」與「根本沒走到」
+       dispatch.builder_entry             = 28
+       dispatch.builder_skip_busy         = 0
+       dispatch_fail.資源不足                 = 28
+       failure.blocked_no_identity        = 0
+         ★>0 ＝ 走到了記錄站但【身分是空的】⇒ 接線斷（不是世界沒發生）

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★★★falsifier 抓到的第一個東西正好是【它所依賴的分類法的反例】(predator_density 住在 tile.resources)——自指驗證,最強的有效性證據;★我訂正自己:出處分類消滅碰撞但取代不了語意判斷
 ---
