@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★#1 拿到真實驗證(不是冒煙):re-arm 輸出「前任同 session ⇒ 一律換血接手(不問死活)」+ 它【立刻叫醒我收信】——那正是 #1 專屬的驗收格「信真叫醒 session」
 ---
 
