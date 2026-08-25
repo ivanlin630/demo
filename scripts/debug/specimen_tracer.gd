@@ -118,6 +118,8 @@ static func capture_options(state: WorldState, team: TeamData, scored: Array, ct
 			_cd["means_end"] = true
 			_cd["me_res"] = String(_cand.get("me_res", ""))       # 為了取得哪個資源
 			_cd["me_depth"] = int(_cand.get("me_depth", -1))      # 推理鏈第幾層
+			if _cand.has("me_facility"):
+				_cd["me_facility"] = String(_cand["me_facility"])  # ★要蓋的是【哪一種設施】（QA：build_type 只說 outpost 類型）
 		# ★候選【真正要做什麼】(2026-08-26)：goal candidate 的 label ＝ `goal_type:frontier_kind`，
 		#   ★設施名不在 label 裡（在 `to_task`）⇒ 只看 label 讀不出「提議蓋【兵器坊】」，
 		#   故事會停在「maintain_weapons:location:delegate」這種讀不懂的字串。純讀，零 re-query。

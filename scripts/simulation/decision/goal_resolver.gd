@@ -563,8 +563,26 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				Probe.bump_sample("means_end.facility_proposed", {
 					"team": team.team_id, "facility": _fname, "res": res,
 					"dup": _existing, "tick": state.world.current_tick}, 200)
+				# ★★★逐筆身分（measurer 卡住的那顆，systems 派 2026-08-26）：
+				#   `means_end.unique_no_existing.<fname>` 只有【加總】bump，沒有身分
+				#   ⇒ ★`224` 這個數從落地那天起就沒有可去重的原始資料。
+				#   ★★而 `_resolve_build_facility` 在缺料時回的是【去市場買 material】的 candidate
+				#     （`task=TASK_TRADE`、target=市場），不是蓋那個 facility 的 —— 外層卻按觸發它的
+				#     `_fname` 分開 bump ⇒ 同一個真實行動被計成好幾個不同 facility 的「新提案」。
+				#     ⇒ 有了 target/task 就一比就知道。★cap 500（母體 380；小於它會被 first-N 截成假窮盡）。
+				#   ★★★加在 `if` 區塊【內】、不動任何控制流（上一次 tap 把 `out.append` 推出 `if` 外，
+				#     `emitted 380→2116`，同時作廢了建在那批數字上的整條推論）。
+				Probe.bump_sample("means_end.unique_no_existing.identity",
+					{"fname": _fname, "target": fc.get("to_task", {}).get("target"),
+					 "task": fc.get("to_task", {}).get("task", fc.get("to_task", {}).get("facility", "")),
+					 "existing": _existing}, 500)
 			if not fc.is_empty():
 				fc["me_depth"] = _depth
+				# ★設施【具名】(2026-08-26，QA 故事稽核抓的)：candidate 的 label ＝ `goal_type:frontier_kind`，
+				#   `to_task` 只帶 `build_type`（`civilian` 是 outpost 類型，不是設施名）
+				#   ⇒ ★自建分支在 trace 裡【讀不出它到底要蓋什麼】，故事停在「蓋某個東西」。
+				#   純資料欄，只被 tracer 讀，不參與任何判斷。
+				fc["me_facility"] = _fname
 				out.append(fc)   # ★空字典不能進 out：掉出 if 外會讓 out 幾乎恆非空
 		elif pkind == "material":
 			# ★缺原料 ⇒ 遞迴結果各自成 candidate：把「缺什麼」變成一個真的可選行動
