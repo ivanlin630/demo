@@ -73,6 +73,45 @@ static func flow_utility(gain_daily: float, baseline_daily: float, daily_need: f
 	var d: float = delta_of(values)
 	var post_net: float = net_flow + (gain_daily - baseline_daily)
 	var h: float = horizon_eff(post_net, food_stock)
+	return _utility_over(gain_daily, baseline_daily, daily_need, d, h, cost, delay_days)
+
+# ★★★存量（stock）用的入口：**有限存量，`source_stock` 必填**（spec 2026-08-25）。
+#   ★病：`flow_utility` 假設 `gain_daily` 在整段 `h` 天【都持續】—— 對再生資源成立，
+#     ★對 `ore_iron`/`gem` 這種【採完就沒】的不成立 ⇒ 系統性高估，且不對稱（只會高估或打平）。
+#   ★修：有效天數多一個上界 —— **這個礦還能挖多久**。
+#         H_stock = min(H_eff, S / maxf(gain_daily, 0.001))
+#   ★★與既有 `horizon_eff`（「我還能活多久」＝ food_stock / drain）**完全同構**：不是新公式，
+#     是同一個形狀用在另一端。★★★連它的 epsilon guard 一起抄 —— 那不是防呆，是同構的一部分：
+#     `gain_daily = 0` ⇒ `S/0.0 = inf` ⇒ 上界消失 ⇒ **病原封不動、只換了個入口**。
+#   ★★為什麼是【兩個入口】而不是 `flow_utility(..., source_stock := INF)`：
+#     **忘記傳 ⇒ 存量被當流 ⇒ 靜默高估。** 用【入口】區分，不用【參數值】區分
+#     ——★忘記選的話，根本沒有函式可以呼叫。
+static func stock_utility(gain_daily: float, baseline_daily: float, daily_need: float,
+		values: Dictionary, net_flow: float, food_stock: float, source_stock: float,
+		cost: float = 0.0, delay_days: float = 0.0) -> float:
+	var d: float = delta_of(values)
+	var post_net: float = net_flow + (gain_daily - baseline_daily)
+	var h_eff: float = horizon_eff(post_net, food_stock)
+	var h_stock: float = minf(h_eff, maxf(source_stock, 0.0) / maxf(gain_daily, 0.001))   # ★同構：S / 消耗率
+	# ★★★兩段視野【不對稱】——這是本票的關鍵，也是我與 spec 字面寫法的差異（已回報 systems）：
+	#   ★spec 寫 `H_stock = min(H_eff, S/gain)` 然後【整條算式都用 H_stock】。
+	#     照字面做 ＝ **no-op**：`flow_utility` 的分母是 `pv(daily_need, d, h)` ——
+	#     ★同一個 h 在分子分母相消（那正是 gate6 立的性質「視野長短不改變倍數」）
+	#     ⇒ 兩邊一起縮 ⇒ 比值不動 ⇒ **存量與流分不出來，病原封不動。**
+	#   ★★正確的不對稱在世界本身：**礦會挖完（分子的流在 H_stock 就斷），
+	#     但【人還是要繼續吃】（分母的需求延續整個 H_eff）。**
+	#   ⇒ 分子用 `h_stock`、分母用 `h_eff`。★這也是唯一能同時滿足 spec 自己驗收 ②③ 的形狀：
+	#     S 撐滿視野 ⇒ h_stock == h_eff ⇒ 與 flow_utility 逐位相同（③）；
+	#     S 撐不滿   ⇒ 分子縮、分母不縮 ⇒ 嚴格低於流（②「只會高估或打平」的另一面）。
+	if h_eff <= 0.0:
+		return 0.0
+	var wait_mult: float = pow(clampf(d, DELTA_FLOOR, DELTA_CAP), maxf(delay_days, 0.0))
+	var value: float = pv(gain_daily, d, h_stock) * wait_mult - pv(baseline_daily, d, h_eff) - cost
+	return value / maxf(pv(daily_need, d, h_eff), 0.001)
+
+# 兩個入口共用的算式（★同一把尺：只有【視野怎麼算】不同，值怎麼算完全一樣）。
+static func _utility_over(gain_daily: float, baseline_daily: float, daily_need: float,
+		d: float, h: float, cost: float, delay_days: float) -> float:
 	if h <= 0.0:
 		return 0.0
 	# 等待期折現：delay 天後才開始領 → 整段流乘 δ^delay（現成的流天然贏要等的流）
