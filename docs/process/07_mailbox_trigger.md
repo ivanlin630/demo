@@ -292,3 +292,21 @@ ls docs/superpowers/handbacks/<你聲稱的檔名>     # 收件端簽收動作�
 ★**不為它要求全員重 arm** —— 但**必須明說**，
 **否則「修好了」會被默認成「生效了」，那正是這條法條要防的事。**
 
+## ★信箱歸檔（2026-08-26，blueprint 授權；`.claude/hooks/handback-archive.sh`）
+
+**熱目錄只放「還要動作的」＋「今天的」**，其餘 → `handbacks/archive/YYYY-MM/`（`git mv`，保 history）。
+
+★**為什麼要有**：熱目錄長到 **911 封** ⇒ `SessionStart` hook 掃描 **>2 分鐘** ⇒ 被殺 ⇒
+★★**所有角色開場【靜默】失去角色 context 與未讀清單，沒有任何錯誤訊息。**
+掃描已改單次 awk（2.0s），★**但「沒有人負責讓東西變少」沒解 —— 這支解它。** 911 → 60。
+
+★**三條規則**：
+1. ★**列舉 `open`，不列舉「完成的各種說法」** —— 實測有五種 status
+   （`consumed`／`open`／`superseded`／`superseded-by-qa`／`withdrawn`）。
+   ★★**「完成」的講法會長大，「還要動作」的講法只有一個。列舉不會長大的那一邊。**
+2. ★**今天的信一律不動** —— `handback-inbox.sh` 的 `_promise_check` 掃 `${today}-${me}-to-*.md`
+   判「宣稱已通知但沒寄信」；今天的被搬走那道檢查就失效。
+3. 沒有日期前綴的檔名不動（不猜）。
+
+★**四個 glob 那個目錄的東西**（`inbox-watch`／`watchdog`／`handback-inbox`／`session-role`）
+**都是 `dir/*.md` maxdepth-1** ⇒ 搬進子目錄它們就看不到 —— ★**這是目的，不是副作用。**
