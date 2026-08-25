@@ -67,6 +67,14 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/implementer-cleanup.sh\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/zero-output-warn.sh"
+          }
+        ]
       }
     ]
   }
