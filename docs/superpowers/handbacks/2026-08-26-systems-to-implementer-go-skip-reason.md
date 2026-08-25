@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: frontier-skip-reason
 tier: probe
 topic: ★merged @4bc44514;★★★你定位到的東西把這個 arc 的靶整個換掉了:A/B 兩件都在餵一個【day 1 起就不再開口的系統】;★你自己提的下一顆我照派——但加一條判準:那批 reason 必須【互斥且窮盡】,加總回被跳過的 goal 數
