@@ -1,12 +1,15 @@
 # headless_test 已知失敗 baseline——★從【實跑輸出】生成，不手寫。
-# 產生方式：grep "Assertion failed: " <輸出> | sed 's/.*Assertion failed: //' | sort -u
-# ★登記於此 ≠ 可以不修：這張表只是讓【新增】失敗看得見，
-#   每一條都要被判 stale test（改測試）或真 regression（開票修）。
-# ★這張表不涵蓋另外兩類（見 handback）：
-#   ①非-assert 的 SCRIPT ERROR 8 行（其中 7 行 own_granary_tile nil）
-#   ②`[FAIL]` print 3 行（不經 assert，掃不到）
-[p2a] join weight 太低 0.41
-FORCE(任rung)→ambient_train_drive 0.5
-rung 擴張+武力 未選擴張 intent, got={ "type": "防衛", "target_id": -1, "why": "慎重/威脅驅動，備戰守土" }
-戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve
-紮營=1.0
+# ★★每一條必須帶【類別】：stale-test / real-regression / unjudged。
+#   理由（systems 立 2026-08-25）：★沒有類別的 baseline ＝垃圾桶——
+#   它只會單向長大，而每一條都在稀釋「綠」的意義。
+# ★登記於此 ≠ 可以不修；stale-test 修完必須從本檔【消失】。
+# 格式：<類別>	<實跑原文>
+#
+# ★已修待驗（本輪）：own_granary_tile nil ×7 —— stale-test（測試漏傳 state，9 個呼叫點已補）
+#   ★它們本來就不在本檔（本檔只收 assert 原文）——這正是「只認一類」的盲點。
+
+unjudged	[p2a] join weight 太低 0.41
+unjudged	FORCE(任rung)→ambient_train_drive 0.5
+unjudged	rung 擴張+武力 未選擴張 intent, got={ "type": "防衛", "target_id": -1, "why": "慎重/威脅驅動，備戰守土" }
+unjudged	戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve
+unjudged	紮營=1.0

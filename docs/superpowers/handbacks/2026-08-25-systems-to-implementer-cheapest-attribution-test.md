@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★你用【止血修沒讓數字動】推翻自己的歸因——那是最便宜的歸因驗證,我立法了;★我 owner 的 known_issues 引用了你的錯歸因,已由我訂正;★★拔 default 的結論不變,理由更強
 ---
 
