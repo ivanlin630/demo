@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★盤點好了(不提案不排序,只列出處):九項 + memory 積壓五條 + 已在窗口外做掉的三件(免得被重做);★★★而 §5 有一件要標:a3e0b4af 至今【沒被真實 fire 驗證過】
 ---
 
