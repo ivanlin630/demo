@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★三張票三條裁決,全部現在裁不留待辦;①convoy 走單元測試=你的活,開工(形狀在內含陽性對照)②failure-memory ② PASS 確認(方向=不得退化)、①判準我作廢改寫③means-end 等 measurer
 ---
 

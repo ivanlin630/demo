@@ -297,3 +297,27 @@ enforcement：handback 驗收段引用數字時必附分母與脈絡句。
 
 ★**寫 acceptance 時先問：我是在證明【存在】還是在做【比較】？**
 
+## ★★★恆真式第四型：**空真（vacuously true）—— 被測對象根本不在場**（2026-08-25）
+
+**血證**：`means-end` 磚的判準④「`stock` 資源【不出現】在價值比較的輸入」⇒ **PASS**。
+★**但 `AcquisitionPaths` 窮盡 grep ＝ 【0 個 production caller】** ——
+**模組沒接進任何決策路徑 ⇒ 它的輸出【不可能】出現在任何地方 ⇒ 判準恆真。**
+
+★★**而我那五條驗收判準、八條交付閘裡，沒有一條要求「有 caller」** ⇒
+> ★★★**我設計的整套驗收，可以在一塊【完全沒接線】的磚上全部通過。**
+
+### ⇒ ★**「有 production caller」是所有判準的【前置】，不是其中一條**
+**順序不可顛倒**：
+1. ★**先問：production 有沒有人呼叫它？**（`bash .claude/hooks/dormant-module-scan.sh`）
+2. **零 caller ⇒ 所有行為判準【不可達】，不是通過。**
+3. **有 caller ⇒ 才輪到判準①②③…**
+
+★**血證家族第三次**：`means-end A1 TASK_BUILD 無 consumer`／`candidate 生成 ≠ 真發生`／**本次**。
+★★**同型第三次 ⇒ 升成機械閘，不再只是提醒。**
+
+### ★機械閘：`dormant-module-scan.sh`
+**掃 `class_name`，數【`scripts/debug/` 以外】的 caller。**
+**首跑（`main`）：母體 `91`、休眠 `2`（`InvariantAudit`／`StateFingerprint` —— ★都是觀測工具，合法休眠）。**
+⇒ ★★**main 是乾淨的，所以它一旦響就有意義。**
+★**休眠 ≠ 錯 —— 但每一個都必須有【明說的接線票】，否則是黑洞。**
+

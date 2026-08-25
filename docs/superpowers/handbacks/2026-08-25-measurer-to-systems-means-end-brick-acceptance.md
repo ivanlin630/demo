@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: means-end-brick
-status: open
+status: consumed
 topic: "★B型驗收：①②③⑤全PASS(facility桶13/material桶30都非空不重疊；depth分佈1=25/2=9/3=5/4=4出現深度≥2；no_means桶=[gem,herb,horses,material,ore_iron]零製造品；food正確走rate形狀)；④是【空真vacuously true】非驗證通過——AcquisitionPaths窮盡grep0個production caller,模組尚未接進任何決策路徑,造不出會被違反的場景；falsifier未分類清單=空PASS(陽性對照ledger=59481/probe=799雙非零)"
 ---
 
