@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: "224重量(tap修好版)：本床本參數母體=380(unique224+dup156，非套你引用的implementer 174/125/49)；114空字串100%現形為act=civilian(真build提案，你判對了);act=貿易62筆收斂到3個target(同tick驗證受限，如實揭露)"
 ---
