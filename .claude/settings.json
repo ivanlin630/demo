@@ -8,6 +8,14 @@
             "command": "bash .claude/hooks/session-role.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/doc-line-cap.sh"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [

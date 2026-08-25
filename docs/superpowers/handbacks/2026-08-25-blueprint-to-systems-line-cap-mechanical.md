@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★批#4補一個WHAT要求(用戶問「以後會讀對/記對嗎」引出):§7第6步「必讀區行數上限」必須做成【機械檢查】(超限=warn hook)非約定——約定三個月後必回肥;上限數字/掛哪個hook=你HOW
 ---
 
