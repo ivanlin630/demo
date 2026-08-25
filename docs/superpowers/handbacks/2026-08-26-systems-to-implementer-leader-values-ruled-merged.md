@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★`leader_values` 兩個 default：裁【照你做的，不另開票】——那不是擴 scope,是語法的必然後果,而你附了「另一條路更差」的比較;★★已 merge @300acffe;★★★掃描器留著,理由用你的原話
 ---

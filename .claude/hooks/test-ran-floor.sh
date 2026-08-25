@@ -24,6 +24,13 @@
 set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
 out="${1:-}"; base="${2:-docs/test-baseline-failures.txt}"; marker='[TEST-SUITE-COMPLETE]'
+# ★--gen-baseline：從【實跑輸出】生成 baseline（2026-08-26 加）
+#   ★動機：baseline 機制原本只服務 headless_test 一張床；其他床沒有 baseline ⇒
+#   ★★它們的紅【不可判讀】，每次都要有人手動跑 main 對照一次（implementer 本輪真的做了一次）。
+#   ★★★工具本來就是床無關的（吃「輸出檔＋baseline 檔」兩參數），缺的只是「怎麼生第一份」。
+#   ★生成的每一條類別一律標 `unjudged` —— **標 unjudged 不等於允許它紅**，
+#     只是「還沒有人判過它是 stale-test 還是 real-regression」。★沒有類別的 baseline ＝垃圾桶。
+GEN=0; [ "${3:-}" = "--gen-baseline" ] && GEN=1
 { [ -z "$out" ] || [ ! -f "$out" ]; } && { echo "[test-floor] ★FAIL 沒給實跑輸出檔"; exit 2; }
 rc=0
 
@@ -54,6 +61,18 @@ grep -aE '^(SCRIPT ERROR|ERROR|USER ERROR|USER SCRIPT ERROR|FATAL):' "$work" 2>/
         -e 's/^SCRIPT ERROR: *//' -e 's/[[:space:]]*$//' \
   | grep -v '^$' | sort -u > "$cur"
 n_cur="$(wc -l < "$cur" | tr -d ' ')"
+if [ "$GEN" = 1 ]; then
+  { echo "# 由 test-ran-floor.sh --gen-baseline 從【實跑輸出】生成，★不要手寫。"
+    echo "# 來源：$out"
+    echo "# 格式：<類別>	<原文>[	<註>]  類別＝stale-test / real-regression / unjudged"
+    echo "# ★每一條都是 unjudged ＝【還沒有人判過】，不是【允許它紅】。判過就把類別改掉。"
+    echo ""
+    sed 's/^/unjudged	/' "$cur"
+  } > "$base"
+  echo "[test-floor] ★已生成 baseline：$base（$n_cur 條，全部 unjudged）"
+  echo "[test-floor] ★★下一步是【判】那 $n_cur 條，不是把它當綠燈。"
+  rm -f "$cur" "$work"; exit 0
+fi
 if [ ! -f "$base" ]; then
   echo "[test-floor] Q2 → ★無 baseline（$base）⇒ 無法分辨【已知】與【新增】"
   echo "[test-floor]    ★現況失敗 $n_cur 條。請用實跑輸出生成 baseline，★不要憑印象手寫。"
