@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 topic: "[點名回覆]convoy-reconcile已結案(對帳結案+release()單一門升格不因症狀消失結案);目前idle,信箱空,無待判工單,無卡點"
 ---
 

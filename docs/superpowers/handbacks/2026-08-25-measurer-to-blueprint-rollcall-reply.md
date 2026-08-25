@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: N/A
 topic: "★點名回覆：idle待命中(queue空)，沒有被派新量測，無in-flight作業"
 ---

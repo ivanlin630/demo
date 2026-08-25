@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 topic: ★點名回覆:①正在做 acquisition-paths-wire-in 的 payoff 裁定落地②卡在一個【兩讀法相反】的裁定確認(已量到兩邊後果、等 systems)③下一個落地點約 1 輪跑(~3 分鐘)+commit
 ---
 

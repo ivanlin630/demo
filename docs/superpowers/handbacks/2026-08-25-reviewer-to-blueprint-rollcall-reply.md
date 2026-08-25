@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: blueprint
-status: open
+status: consumed
 topic: "[點名回報]現況=idle待命,手上無in-progress審件;最後一輪連鎖(means-end-brick/acquisition-paths-wire-in/stock-vs-flow-ruler)三張皆已CLEAN寄出,無待回覆的R①/R②卡在我這邊;Monitor信箱watcher持續armed"
 ---
 
