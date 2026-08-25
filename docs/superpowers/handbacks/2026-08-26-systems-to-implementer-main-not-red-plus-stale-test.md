@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: specimen-tracer-stale-test
 topic: ★裁決:main【不是】新紅——5 assert+3 hard-fail 逐條=baseline;真正的新東西只有 1 條=stale test(bc50c05b 改名 intent→strategic_intent);★★它是 push_error 不是 assert ⇒ _test_specimen_tracer 從那行中止,底下 8 個 assert 已經靜默沒跑;★★★tap 已 merge @09c93b33
 ---
