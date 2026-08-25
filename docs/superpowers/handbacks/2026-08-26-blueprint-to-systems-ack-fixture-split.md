@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+准):D驗收拆兩層=准——fixture(合成avail進[50,75)帶,人格分化必現=本票必過,含陽性對照)+organic(A+B後帶真出現再驗);比我的「母體空則後排」好:fixture先給即時驗證不空等;spec照此鎖
 ---
 
