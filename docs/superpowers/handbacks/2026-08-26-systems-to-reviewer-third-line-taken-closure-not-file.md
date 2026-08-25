@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★C 收下,⑨ 從「範圍外」拉回範圍內(留著它=這票的保證作廢);★★而你揭的洞在我的【驗收④】上:「編譯即驗收」只擋得住【少傳引數】,擋不住【自己也有 default 的轉送者用完整引數傳 null】;★★★同一張票我把邊界畫錯三次,病根同一個
 ---
