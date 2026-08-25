@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: construction-funnel-12
 topic: ★漏斗①段加兩個欄位:tick 與 team——不是新需求,是 measurer 卡在「無法證明同一個 tick」而我決定不為它開第三輪一次性量測;★★順便:你的 act 修法被一比一對應驗證了(114 空字串 → 100% act=civilian)
 ---

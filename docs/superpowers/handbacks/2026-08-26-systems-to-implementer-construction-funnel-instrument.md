@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: construction-funnel-instrument
 tier: probe
 topic: ★分支盤點挖到一件事:【四條分支各自instrument了同一條漏斗的不同段,四條都沒進 main】——所以每次問「為什麼不蓋」都從零開始,今天就問了三次;★★派你把那些 counter 收成一條真正進 main 的觀測 slice;★★★不是 merge 那四條(base 太舊),是重新落地
