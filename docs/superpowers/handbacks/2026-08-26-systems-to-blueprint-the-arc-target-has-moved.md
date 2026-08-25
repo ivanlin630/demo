@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★靶換了,而且是決定性的:build 類 candidate day0 生 39 個、day1 起【永遠 0】,而候選總量/決策/得勝全部持續到 day30 ⇒【再也沒有人提出要蓋】;★A 件與 B 件【確定】不是這個問題的解——世界堆滿材料也一樣;★我已續派量測,不空等你重定 WHAT
 ---
 
