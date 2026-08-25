@@ -1671,6 +1671,11 @@ measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
 ★**真修法**：**把生態狀態搬出資源桶** —— **結構債，未排期。**
 
 ## ★★★`own_granary_tile` nil 崩 —— **修過一次沒修乾淨，而根不在呼叫點**（2026-08-25）
+**★★★訂正（2026-08-25，同日）：歸因錯了，真來源是【測試自己】。**
+**implementer 補了 `decision_context:472` 之後，nil 仍是 7 行 ⇒ 止血修沒讓數字動 ⇒ 歸因不對。**
+**真來源 ＝ `headless_test.gd` 自己有 7 個呼叫點沒傳 `state`（如 `:11618` `TradeValuation.reserve(t, "material")`）⇒ ★7:7 完全對上。**
+⇒ ★**這是 `stale test`，不是 production bug。**（★**本節原本寫「production 呼叫點漏傳」—— 那是我引用了錯誤歸因，我 owner 這份檔，由我訂正。**）
+
 **現況**：headless baseline 有 **7 行** `own_granary_tile` 在 nil `state` 上讀 `world`。
 **既有裁決**（`scripts/debug/own_granary_null_caller_test.gd` 檔頭，T2 regression）：
 > **「根修 ＝ 呼點補傳 `state`（★非 `own_granary` 頭加 guard）」**
@@ -1692,4 +1697,16 @@ measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
 > ★★**這個 default 已經害了兩次，這就是成本的實測值。**
 
 **工作量未知**（要先數 caller），**不擋當前 slice**。
+
+### ★★★而「拔 default」的結論**不變，理由更強了**
+★**如果 `state` 是必填，那 7 個測試呼叫點會是 parse error —— 測試作者當場就知道。**
+⇒ ★★**這個 default 不只害 production，它【也害測試】：它讓人可以寫出一個【看起來對、其實沒建好世界】的測試。**
+
+★★★**而它的使用者【全部都是錯的使用者】** —— 對照 `reason: String = ""`：
+| default | 使用者 | 結論 |
+|---|---|---|
+| `reason = ""` | ★**208/208 沒人用** | **零使用 ⇒ 純負債** |
+| ★`state = null` | ★★**只有【漏傳的人】在用** | ★★★**只有錯誤使用者 ⇒ 比零使用更糟** |
+
+> ★★**一個 default 若只有【錯誤的使用者】，那它不是方便，是陷阱。**
 
