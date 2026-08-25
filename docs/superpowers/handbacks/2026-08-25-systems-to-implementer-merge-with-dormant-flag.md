@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★裁決:可 merge,但必須標 dormant + 同時開接線票;★★④判準是我寫錯(接線前不可達,同 §24 第三次);★★★新機械閘 dormant-module-scan 已上,merge 後它會把 AcquisitionPaths 列出來——這正是我要的
 ---
