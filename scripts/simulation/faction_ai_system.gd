@@ -2233,7 +2233,13 @@ func _try_self_relocate(state: WorldState, team: TeamData) -> void:
 # ★雙 survival bound：①村端 ROI（facility_roi 值不值、survival-bounded 治 HORIZON 自打臉）②領主端 source-constraint
 #   （領主出料+porter 後自身仍在求生線、絕境先自救不投＝鏡射 R1 _try_migrant_side floor pattern）。
 # 送料 = reuse _dispatch_convoy 母體 + convoy_kind="invest" DELIVER deposit 入村公庫（非賣）→ 村端既有建設消耗真蓋。
-const INVEST_SAFETY: float = 1.5   # 送料安全餘量（鏡射 _dispatch_builder cost×1.5，確保村端 _can_afford 過）
+# ★★送料安全餘量：★改讀組 A 閘的【上界】（2026-08-26）。
+#   ①舊註解在說謊：它宣稱「鏡射 _dispatch_builder cost×1.5，確保村端 _can_afford 過」，
+#     而 `_can_afford`（`outpost_system.gd:812`）只吃 1.0×——那條耦合不存在。
+#   ②★★人格化【新產生】的失效模式：閘的 margin 現在可到 MARGIN_MAX，固定送 1.5× 會變得不夠。
+#     ⇒ 送貨量取【最高可能門檻】，永遠 ≥ 任何領袖的閘。零新常數。
+#   ★現況陳述（不複述那條錯的耦合）：送料用組 A 上界，村端 `_can_afford` 檢查用 1.0×。
+const INVEST_SAFETY: float = BuildAfford.MARGIN_MAX
 func _try_invest_side(state: WorldState, team: TeamData) -> void:
 	if team.faction_id == -1:
 		return
@@ -3817,24 +3823,26 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	var vault: Dictionary = {}
 	if home_tile != null and home_tile.outpost_owner == leader_team.team_id:
 		vault = home_tile.public_storage
-	for k in cost:
-		if k == "ticks": continue
-		var avail: float = float(vault.get(k, 0)) + float(leader_team.resources.get(k, 0))
-		if avail < float(cost[k]) * 1.5:
-			if Probe.enabled:   # ★measurer L3 tap(2026-08-21,blueprint建材depletion trace票)：短缺資源種類+周邊生產中性trace
-				Probe.bump_sample("dispatch_fail.material_detail", {"team": leader_team.team_id,
-					"resource": k, "need_1.5x": float(cost[k]) * 1.5, "avail": avail,
-					"vault": float(vault.get(k, 0)), "private": float(leader_team.resources.get(k, 0)),
-					"home_mfg_level": (home_tile.manufacturing_level if home_tile != null else -1),
-					"tick": state.world.current_tick}, 30)
-			_log_dispatch_fail(leader_team.faction_id,
-				"資源不足 1.5x: %s 有 %.0f(公庫%.0f+私%.0f)" % [k, avail,
-				float(vault.get(k, 0)), float(leader_team.resources.get(k, 0))], cost)
-			# ★逐【資源種類】分開：「缺料」與「缺糧」是不同的病，合成一個 counter 就分不出
-			if Probe.enabled:
-				Probe.bump("funnel.build_gate.cost")
-				Probe.bump("funnel.build_gate.cost." + String(k))
-			return false
+	# ★★三閘收斂（2026-08-26）：緩衝倍率不再是全域 1.5，改由領袖人格連續調變（★中性零漂＝1.5）。
+	var _lv: Dictionary = TradeValuation.leader_vals(state, leader_team)
+	var _short: Dictionary = BuildAfford.shortfall(cost, [vault, leader_team.resources], _lv)
+	if not _short.is_empty():
+		var k: String = String(_short["res"])
+		var avail: float = float(_short["avail"])
+		if Probe.enabled:   # ★measurer L3 tap(2026-08-21,blueprint建材depletion trace票)：短缺資源種類+周邊生產中性trace
+			Probe.bump_sample("dispatch_fail.material_detail", {"team": leader_team.team_id,
+				"resource": k, "need": float(_short["need"]), "margin": float(_short["margin"]), "avail": avail,
+				"vault": float(vault.get(k, 0)), "private": float(leader_team.resources.get(k, 0)),
+				"home_mfg_level": (home_tile.manufacturing_level if home_tile != null else -1),
+				"tick": state.world.current_tick}, 30)
+		_log_dispatch_fail(leader_team.faction_id,
+			"資源不足 %.2fx: %s 有 %.0f(公庫%.0f+私%.0f)" % [float(_short["margin"]), k, avail,
+			float(vault.get(k, 0)), float(leader_team.resources.get(k, 0))], cost)
+		# ★逐【資源種類】分開：「缺料」與「缺糧」是不同的病，合成一個 counter 就分不出
+		if Probe.enabled:
+			Probe.bump("funnel.build_gate.cost")
+			Probe.bump("funnel.build_gate.cost." + String(k))
+		return false
 	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
 	if advisor_id == -1:
 		_log_dispatch_fail(leader_team.faction_id, "無 advisor 可派可升", cost)
@@ -3935,10 +3943,10 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 	if tile.construction_team_id != -1: return false
 	var cost: Dictionary = OutpostSystem.OUTPOST_COST[tile.outpost_type][target_level - 1]
 	# 公庫+私產合併池（升級在自有 tile，公庫本地可用 → W4 解）
-	for k in cost:
-		if k == "ticks": continue
-		var avail: float = float(tile.public_storage.get(k, 0)) + float(owner_team.resources.get(k, 0))
-		if avail < float(cost[k]) * 1.5: return false
+	# ★三閘收斂：同一支 BuildAfford（人格化緩衝，中性零漂 1.5）
+	if not BuildAfford.can_afford(cost, [tile.public_storage, owner_team.resources],
+			TradeValuation.leader_vals(state, owner_team)):
+		return false
 	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1: return false
 	if owner_team.population < 10: return false
@@ -4243,10 +4251,10 @@ func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost
 	var cur_lvl: int = int(tile.get(def["current_level_key"]))
 	var cost: Dictionary = OutpostSystem.upgrade_cost(facility_type, cur_lvl + 1)
 	# 公庫+私產合併池（擴建在自有 tile，公庫本地可用 → W4 解）
-	for k in cost:
-		if k == "ticks": continue
-		var avail: float = float(tile.public_storage.get(k, 0)) + float(owner_team.resources.get(k, 0))
-		if avail < float(cost[k]) * 1.5: return false
+	# ★三閘收斂：同上
+	if not BuildAfford.can_afford(cost, [tile.public_storage, owner_team.resources],
+			TradeValuation.leader_vals(state, owner_team)):
+		return false
 	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1: return false
 	if owner_team.population < 6: return false
