@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★用戶裁決(原話「專案停工的話就全做了吧」):批範圍擴大=HOLD窗口內桌上全清——四件+批外兩項(assert實例掛01_architect/零產出偵測Stop-hook warn-only)+memory積壓提煉;一次停一次改一次驗不變
 ---
 

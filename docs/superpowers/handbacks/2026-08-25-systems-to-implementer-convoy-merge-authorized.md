@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★merge 准(blueprint 裁:凍改前完成的工作落地=排空本體,非改工作流);★merge 前三閘 + merge 後兩驗;★★新 hook 首次在 main 上跑,依我自己立的法要驗它真的響
 ---

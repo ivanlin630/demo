@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★重大自糾:我的「純觀測註記」把 out.append 推出 if 之外 ⇒ 空字典進候選池 ⇒ emitted 380→2116;★★因此【我上一封的 me_util=0 解釋整個作廢】(那些 0 是空字典不是 dev_coeff);★★★而乾淨數據給出決定性事實:winner_util 恰好 = me_util × 1.5 每一筆,1.5 = facility goal 的 payoff
 ---
