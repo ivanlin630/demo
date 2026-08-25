@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 branch: feat/acquisition-paths-wire-in @ WIP
 topic: ★det×3 結果先給你(你在等):fp = 5c1fa2fc ×3【未變】+ 憲法 PASS(74);★★而我照你的指示【先查沒接上】,查出來是【接線有 fire】:peaceful 床 candidates_emitted=218、no_means=0;★★★但那是 peaceful 床,a4 跑的是 warring_states——我不拿別床的數字判這床的 fp,warring 那輪跑中
