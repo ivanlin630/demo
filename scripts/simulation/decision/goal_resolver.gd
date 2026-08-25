@@ -572,9 +572,19 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				#     ⇒ 有了 target/task 就一比就知道。★cap 500（母體 380；小於它會被 first-N 截成假窮盡）。
 				#   ★★★加在 `if` 區塊【內】、不動任何控制流（上一次 tap 把 `out.append` 推出 `if` 外，
 				#     `emitted 380→2116`，同時作廢了建在那批數字上的整條推論）。
+				#   ★★★欄位改名 `task` → `act`（2026-08-26）：它裝的【已經不是 task】——
+				#     build／founding candidate 的 `to_task` 既沒有 `task` 也沒有 `facility`，
+				#     它有的是 `build_type` ⇒ 舊 fallback 鏈 `task → facility → ""` 一律落到空字串
+				#     ⇒ ★量到 114/224（50.9%）身分欄空白，★★而那正是【真的要去蓋東西】的那一類
+				#       —— 這顆 tap 想給身分的對象，剛好是它看不見的對象。
+				#     ★叫 `task` 會讓下一個讀的人以為那 114 筆「真的沒有 task」。
+				var _tt2: Dictionary = (fc.get("to_task", {}) as Dictionary)
+				var _act: String = String(_tt2.get("task", _tt2.get("facility", _tt2.get("build_type", ""))))
 				Probe.bump_sample("means_end.unique_no_existing.identity",
-					{"fname": _fname, "target": fc.get("to_task", {}).get("target"),
-					 "task": fc.get("to_task", {}).get("task", fc.get("to_task", {}).get("facility", "")),
+					{"fname": _fname, "target": _tt2.get("target"),
+					 "act": _act,
+					 # ★仍是空的話，把鍵名原樣帶出來 —— ★★不猜第四個鍵（systems 明令）
+					 "to_task_keys": ("" if _act != "" else str(_tt2.keys())),
 					 "existing": _existing}, 500)
 			if not fc.is_empty():
 				fc["me_depth"] = _depth
