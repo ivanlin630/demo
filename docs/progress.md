@@ -1048,3 +1048,84 @@ measurer：warring 床拿 **T3 gate 9** 的第一個真樣本。
 
 ★ **共同形狀（今天出現六次）**：**用「當下枚舉」代替「規則涵蓋」**——
 而**過期的枚舉／少算的儀器／半死的機制，看起來都跟正常運作一模一樣**。
+
+---
+
+## [搬自 game-design.md 2026-08-25] A2 arc：faction 權威折入引擎（進度 2026-07-09）
+
+### ★ A2 arc：faction 權威折入引擎（進度 2026-07-09）
+
+reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權威」）逐條折入統一秤：
+- **A2b**（leader 隊戰術意圖）merged。
+- **A2c-1**（整併/consolidate）merged 2026-07-09（`c047241`）：舊 pre-gate `continue` bypass（可併隊直接跳過引擎、不被重評）→ 折成 rank_scored option「整併」競秤。整併現與攻擊/生產/貿易一起被秤，非繞過腦。
+- **教訓**：A2c-1 fold 曾疑「變靜 regression」→ upgrade 實驗（生存零改善）+ 多 seed（方向不一致=seed-1337 幽靈）雙破 → 純 fold ship、survival-value 撤。**相關≠因果、單 seed≠真、先量再斷。**
+
+
+## [搬自 game-design.md 2026-08-25] 決策模型接線現況（2026-07-06 盤點）
+
+### 決策模型接線現況（方向鎖了、線沒接完，2026-07-06 盤點）
+
+> **★段落狀態(2026-08-21)**:2026-07-06 盤點快照,現況欄已過期(例:記憶腳已部分接通——site_memory 讀用中、失敗記憶=失敗反饋律 slice 落地中)。現況以 **2026-08-21 模型完工清單** 為準;本節留作接線脊椎的原始定義。
+
+模型是北極星，但實作只接了部分腳。**這是一條 post-arc 的「接線」脊椎，非零散 bug**：
+
+| 腳 | 現況 |
+|---|---|
+| **人格** | ✅ 已接（weight() 讀 leader_values） |
+| **現況／感知** | ⚠️ 接了但**讀真值**：評估別隊的 finder（`_find_weakest_prey` 等）讀 `state.teams` 真戰力，未走 `BeliefSystem.best_estimate` → 破感知鐵律（偽裝/虛張對它無效）。**自己狀態讀真值 OK**，違規僅限「別隊隱藏狀態」。 |
+| **記憶** | ❌ **只寫不讀**：reaction 寫 memory(intensity)，但引擎 DecisionContext/Terms 完全不讀 → 「記憶染價值」腳空接（寫入無回饋迴路）。 |
+| **情緒** | 🔨 序7 起步（stress→team_panic→survival FLEE，首次接線）。 |
+
+**接線脊椎（post-arc，待排）**：①感知改讀 belief（訊息真融進決策；信念層 team_intel 已建，缺決策消費它 + 補戰力估計欄位）②記憶腳接進引擎（經驗→claim→決策自然讀，零新學習系統，承「經驗=自己的 claim」）③情緒腳續接。三者=同一條「決策模型完成」，非各修各的。第一步＝掃清「哪些 finder/ctx 讀別隊真值」清單。
+
+**★感知腳＝征服可達性的唯一真閘（2026-07-06 measure 收斂）**：多 seed 揭征服 winner_prosperity=0 全 seed。曾疑兩閘（感知 + combat 結算），但 dogfood 診斷證 **combat 結算閘=量測假象**（`combat_decisive`/`win_absorbed` 只計全殲支，實戰走 retreat→`_try_subjugate` 捕獲、探針沒量那條；征服其實悄悄發生 capture.total 1-11）。
+
+**★再翻案（2026-07-06 戰力欄實作 measure）**：戰力欄 fog-fallback 修對了（埋死常數 `armed_est=pop_est`→人格化 helper，合三個家），**但不解鎖征服**——兩因：①`winner_prosperity` **也是量測假象**（征服隊選攻擊時引擎在 faction_ai:1485 return，沒跑到 :1506 計數器；與 combat_decisive 同款）②弱點公式 `1−對方武裝/我自己武裝` **相對攻擊者自身武裝**——早期隊自己武裝弱→看誰都不夠弱→不攻擊。**∴ 征服真閘＝攻擊者武裝化（militarization），且這是正確設計（武裝完成才想征服，征服本來就晚）。** fog-fallback＝latent-correct 衛生修（攻擊者武裝夠才生效）。**征服儀表壞了（winner_prosperity+combat_decisive 皆假象）＝一直在鬼影上診斷**；建 per-cohort 活動/武裝化時序觀測（`militarization_arc_bed.gd`，誠實漏斗 want→committed→executing→capture）。gen readiness／food＝駁倒。
+
+**★三閘定論（2026-07-06，3 seed×8 月 arc bed）**：儀表跑出征服卡在**三個上游閘**（漏斗每 seed 都塌在「want」；隊任何 seed 都不武裝，self_armed 平 ~0.20 無人選訓練）：
+1. **dispatch veto**（`_commit_conquest_attack` 後的 continue-override）：引擎排攻擊#1 但驗證攻擊 scaffolding 未 dispatch 時，舊碼 continue 掉去用低選項（建設）替代＝dispatch 層推翻秤#1。**已溶解 merged**（continue→return，保子隊閘+scout scaffolding；`_is_prosperity_candidate` 實為子隊閘非 readiness veto，讀 code 更正）。憲法 prerequisite，但**當前經濟下 dormant**（隊太餓→攻擊從不排#1→分支不 fire）。→ ①了結。
+2. **世界苦→意圖餓死**：die-off seed（pop 腰斬、forage+flee 主導）野心 2 月塌成求生。＝世界 harshness param（孿生條），defer。
+3. **★意圖不點火（主閘）**：**seed 7＝健康繁榮世界照樣零征服意圖**。樣本驗證：seed 7 **確有 2 真霸主**（T23 野心0.92好戰1.0、T40 野心0.87，archetype=武力）但被閘住 → ③是真閘非抽樣。**機制＝死鎖**：想征服←需看見弱獵物←需武裝←需選訓練←`ambient_train_drive`平頭0.5太弱沒人選；且 `_intent_scores` viability 層在「無可見獵物」時把霸主 intent 降級成致富→去貿易→永不武裝→死鎖。
+   **裁定（2026-07-06，破鎖）**：**霸主野心直接驅動 proactive 建軍**（不等可見目標；真軍閥先建軍再找目標）。`ambient_train_drive` 隨野心/好戰調製（照妖鏡：平頭常數→人格化），**狂者強到刪民生擴軍**（train util 壓過產/建）。湧現迴路：過度軍事化→餓自己民→饑民流串（串起③②）。「無可見目標」的反應該是「備戰+派斥候找目標」非「降級致富」。
+
+
+## [搬自 game-design.md 2026-08-25] 大戰略校準（2026-07-16）
+
+#### ★★大戰略校準：統一大半已完成 + 零殘留閘 = 框架硬驗收（2026-07-16）
+- **稽核「各算」系統性 over-count（R① 三次打臉）**：need→2 軸+僅 1 真 de-patch(facility_deficit,Arc 1 已修)、dispatch→已統一(cosmetic)、threat→已統一(ThreatAssessment 單源)。**「憲法溶解」統一工作早統一大半 → 散亂 oracle 統一不用 grind Arc 2-7,那些不是漏的閘。** ∴ **剩項(valuation/emotion/prisoner/死常數/內政)先 R①-verify 真缺否才做,別假設稽核。**
+- **★★用戶原則（2026-07-16）：只要剩一個非框架閘,模擬結果就變垃圾。** 整 arc 的垃圾結果正是隱藏閘（恆-hungry/執行鎖/`_threat_recent`）靜默汙染。∴ **框架驗收標準＝零殘留非框架閘,無「小可略過」取捨。**
+- **∴ 真工作重新校準**：不是統一散亂 oracle（大半已完成），是**殲滅每一個殘留非框架閘**（稽核 section A：`_threat_recent`/`_evaluate_threat` 門檻/tribute override/紮營獵食硬門檻/applicable DESPERATION 天閾/diplomatic RNG 閘… + exhaustive 補漏）。每個都是汙染源,全殲。
+- **★零殘留要機器證得出**：`constitution_gate.gd` 現只抓一閘型（禁引擎外 task 指派）→ 強化抓全閘型（硬門檻/override/continue/絕對閾/RNG 決策閘）→ **跑綠＝證零殘留 + 擋新閘。** 非人肉拍胸脯。
+- **框架「做好」＝兩硬條件綠**：①零殘留非框架閘（殲滅+constitution_gate 抓全閘型跑綠）②可擴充（加新系統乾淨,擴充性稽核證）。**兩條硬綠才談 behavior/經濟（用戶定序：框架先，行為後）。**
+- **★★god-view 後門＝殘留非框架閘的一種，屬「框架先」殲滅範圍（用戶戳「框架沒統一就看合理性」，藍圖認漂移 2026-07-18）**：god-view（讀真值繞過 belief）違感知鐵律＝汙染源，同 hidden-gate 家族。清單：`has_food_market` 掃全圖（`known_issues:35`）、**創世全知 `game_setup:569-578`**、near/far LOD 非中性。＝awareness/掃近隊 arc 的 belief-gate 部分（`line 577-585`）**是框架工作、非行為**。
+  - **∴ 改序（認錯先前 economy-first 漂移）**：**框架 god-view 殲滅（slice2 感知 + awareness belief-gate）先 → 零殘留閘綠 → 才 economy balance。** 先前把 economy 排 awareness 前＝把行為排框架前＝違「框架先」。
+  - **★硬理由（非只原則）**：`has_food_market` god-view **直接汙染 economy 決策**（隊全知所有市場位置）→ **28% doom / 貿易為何不流 在 god-view 髒基底上診斷不可信** → god-view 殲滅必須先於 economy 診斷。
+  - **economy arc 第一動作＝補丁閘優先查**（28% doom ＝殘留閘造的 or 真稀缺？）→ 不假設 balance 問題就 tune。屬「先量測+先查閘」非「先調參」。
+
+
+## [搬自 game-design.md 2026-08-25] 當前路線圖總覽（2026-08-03 起、blueprint owner、live 前瞻視圖）
+
+## 📍 當前路線圖總覽（2026-08-03，blueprint owner）
+> **scale-econ 量測線 CLOSED(2026-08-11)**:①survival 層 size 不 matter(鎖)②production 層答案卡 broken production pipeline(=size-matter production 本體)③anon drain 真源=deliberate scout dispatch+機械升格(已由統一派遣 arc 修)。serial over-claim ×4 的逐版訂正=git 史,教訓=measure-first 仲裁。
+> **絕境排序 arc = MERGED**:求援(低成本可逆)先於叛離(劇烈不可逆)由 util 真值湧現,非腳本階梯;餓叛≠野心叛。
+> **★下階段序（用戶定 2026-08-07）：① 規模經濟力（讓樞紐/集中自然湧現、genuine 非 crank）→ ② 军民混编/民兵動員 → ③ 驗證長期故事邏輯合理（活世界長跑敘事 coherence、非單機制測、連 believability 種子床）。** 框架收尾 C 路線結構批已收（②operational），Track②A（決策核抽引擎）= incremental backlog。
+> **★③ 長期故事驗證 = 執行完畢、根收口（2026-08-13、全鏈 closed-account 實測）**：世界富（tile 池 -0.04%/倉 +2.5%）但「接入斷」→ 餓死碎裂零興衰。根鏈=①紮營/進駐/建設三接入動詞各斷（分數/從未派出/執行 noop）②安家後 labor cache lag+material 排擠 food（B4+B5 MERGED 修）③**crisis-lock**：97.6% settle/build 被**genuine 正確**的求生優先仲裁擋（團忙逃命/覓食、永無回合建家）= 貧困陷阱真引擎=**純反應式決策的結構極限**。生存經濟 arc 在飛（A1 merged correctness/A2 invite-widen merged groundwork/crisis-density 兩 probe 跑:參數死鎖[覓食封頂5天 vs survival 退出門檻]+threat over-trigger）。perf 收口：faction_ai rank_scored 93.7%（快取/剪枝=獨立 byte-identical arc、排 12/24 月驗收跑前）。
+> **★★下一主軸 = 長程計劃脊椎（用戶定 2026-08-13、由 crisis-lock 發現催熟）**：`notes/2026-07-19-long-range-planning-brainstorm.md` 從 parked 升 next-in-line——「有守得住（commitment hysteresis 已在）、缺**看得遠**（延遲價值折現）和**拆得開**（means-end 依賴圖）」。設計已定向：泛化立國 pattern 非復活 plan-layer S2、順序從「前置依賴+applicability gate」湧現非腳本、淺有界圖、危機打斷不壞。**持守統一 arc（2026-07-27 核可 parked）折入此傘**（其「持守強度=人格加權沉沒+前瞻」= 守得住半邊的泛化）。= 反應式→有承諾有前瞻=「像人」的真答案、安家/建設等長期行為的存活土壤。序：生存經濟 arc 收（含 crisis-density 判）→ 效能 arc → 12/24 月驗收跑 → 長程計劃脊椎。
+> **★戰爭之路=雙重堵(2026-08-14、(b)已被用戶記憶訂正)**:(a)intent 從不選征服(survival-mode 守成、經濟修好部分自解)+(b)**訂正版**:capture 非 encounter-only(npc_combat:391/500 能佔村、over-claim 被用戶抓)——真問題=**全年僅 2 次戰鬥發生在據點格**(capture 要 decisive win at tile)=戰鬥地點/頻率問題。**★順帶挖到現成認領機制:佔領計時器(faction_ai:5095、站無主據點滿 N 天自動接管)**——被 S1a 死不釋放 bug 餓死、settlement S1a 修好即活=S1b 可能再縮。戰爭之路 arc 排考後(★2026-08-21 用戶裁:考前豁免、新基線考戰爭欄廢考;capture/intent/結盟三斷屆時一併)。
+> **★經濟 Story Audit 四科目(2026-08-18 定、settlement 後 12mo 大考具名科目)**:A 富農正循環/B 製造樞紐湧現/C 戰爭經濟(guns-vs-butter 長窗)/D 需求不足型衰退(新鏡頭)。總判準=**「剩餘→交易→利潤→投資→產能」正回饋自然形成否**——不能才議 market/capital layer(先觀察禁預建);附加觀察:饑荒糧價 5× 放大是否令所有經濟故事變糧食故事。
+> `docs/roadmap.md` 已 stale（2026-06-15 UI 時代、未回填整個 economy/統一/size-matter 程序）→ 本節為 live 前瞻視圖；細節 arc 記憶見 memory `project_*`。
+- **傘：統一決策框架 / 統一矩陣**——NPC 行為全走 genuine utility DecisionEngine（憲法溶解 done）。禁 scripted gate / crank。
+- **★復甦路徑 arc = CLOSED/MERGED（2026-08-06）**：三動詞全收——R1 移民 `53907687`＋R2 投資 `71415ea6`＋R3 遷村令 `73b2a943`，共讀 `MarginalEconomy`、**terrain 三態湧現零查表**（禁地型腳本命門守住）。R3 領主令用領主自己視角（清一個 god-view 後門=不讀村戀土）+ 村自願遷（讀自己戀土）+ 兩層從抗人格秤（傲村抗命/忠村從帶怨）。= cohesion ①natural 深根（村經濟可持續）解、charity→自己站起來三動詞全備。誠實限（記著、非阻塞）：三 slice 一致 measurement-tooling fixture gap → clean organic 敘事 demo = narrative-polish follow-up（fixture-fix 已診斷 = holding-ledger resident/is_resident_static radius）。連 [[project_recovery_path_arc]]。
+- **★框架收尾兩硬綠 = C 路線結構批收（2026-08-07）**：①硬綠 **F1 死常數人格化 done**（DESPERATION entry + MINING_GREED soft weight）+ ②硬綠 **F2 treasury/F3 subteam-messenger/F4 統一註冊表**（三刀、全 F0 fp byte-identical、`1cd5cfbf`）= **擴充性 operational**（加東西=動一「註冊」處 machine-verified f4_test）。★誠實非 premature：**full no-god-object 未達**（faction_ai 決策核 ~5248 行、新行為與決策核互動仍碰 faction_ai）= **Track②A（26 決策 func 抽引擎、fp 變 intended、per-slice blueprint 裁）= incremental backlog**（用戶 C 路線=收結構→回玩法→Track②A 漸進、不宣稱 done）。F0 安全網 program 全程雙用途生效（①intended 分化 / ②byte-identical）。連 [[project_unification_matrix]]（Track②A=統一決策框架 arc 延續）。
+- **★★玩家鏡頭/可讀性 = 全專案最弱環（用戶 2026-08-07 戳、未來 arc 候選）**：功能=世界自主行為、玩家=situated 參與者/鏡頭（非 65 系統操作員、錨=世界本活著）。玩家碰=一角色/隊 scoped 動作（player_*_api 已框:移動/行動/交易/談判/回應/裝備/派子隊）、深系統當劇情+後果體驗。★未做兩塊：①可讀性（玩家看懂 NPC 為何/發生啥、史書/敘事可見 parked note）②動作呈現;UI stale（2026-06 UI 時代未維護）。刻意「先有好沙盒」但功能越堆缺口越顯 → 候選未來 arc「玩家鏡頭/可讀性」。——用戶問架構耦合（faction_ai 5018 行/引用 35 系統/62 系統共讀 WorldState）引出，裁「行為統一 + 結構模組化 兩個都要完成」。★完成標準=用戶早定的**兩硬綠**（本 doc §大戰略校準 l.358）：**①零殘留非框架閘**（殲滅 god-view 後門/死常數/隱藏硬閘 §殲滅清單 A + **強化 `constitution_gate.gd` 抓全閘型跑綠＝機器證非人肉**）**②可擴充**（加新系統乾淨、擴充性稽核證）。★兩線撞同一象＝`faction_ai_system`（5018 行）：**序＝先行為（抽該進引擎的邏輯出來→自然瘦一大圈）再結構（剩下切有邊界模組＋定乾淨對接介面）**，反序＝兩次白工。誠實：大工程/動核心有風險/過程零新玩法→**故必在 arc 邊界整段做、不與半成品 arc 對撞**（用戶拍 A＝復甦先收）。結構模組化同時服務「對接別人程式」（API 層 `player_*_api`/`observer_query_api` 已鋪 Dictionary DTO 半座橋，缺序列化+進程邊界）。連 [[project_unification_matrix]]（行為線）+ [[project_framework_seams]]（結構線/所有權圖）。spec/brainstorm 待復甦收後於 arc 邊界啟。
+- **★活躍前線：有大有小 / size-matter arc**（真根 CASE B：model 不獎勵 size → 加真規模好處、兩軸 大隊=領導 / 大勢力=集團）：
+  - **維度① 生產（統一勞力池）**：mechanism MERGED `506aaa64` ✓、組織軸 works（ratio~1）✓；**領導軸 → B MVP（idle-labor→建設 genuine）在飛 systems** → §8 重量領導軸 ratio 追平（誠實 measured 才宣稱）。
+  - **維度② 軍力**：backlog——combat 上 time-scale wave（NPC 結算戰 / 玩家遭遇戰 tick 一致）+ 反應式互援；排生產驗收後。
+  - **军民混编 / 民兵動員**：candidate——統一 3 個散落 pop-fraction 旋鈕 + 團型軍民比 + 威脅動員（guns-vs-butter）；audit done；排 B MVP 後。
+- **支援 / 已完**：後勤 SLICE A（供給移動 flow）merged+用戶 accepted；持守統一 released；時間統一 wave slice A merged。
+- **★遷移找糧 affinity semantic gap（F4 eval 揭、2026-08-07、future behavior slice）**：`遷移找糧` ∈ SURVIVAL_OPTION_SET 卻 affinity=uniform（疑該 survival-heavy 如覓食 0.9）= 語意 gap;F4 統一註冊**保 uniform（byte-identical）**、proper affinity = 另 behavior slice（fp 變 intended、候選併入漸進 Track②A 或玩法 arc 順修）。同類:AFFINITY 現漏列 24 中 2 REGISTRY-only opt 亦 uniform（F4 保序、proper 值另 slice）。
+- **遞延 backlog**：material/伐木供給側、established chain、遭遇戰收斂（舊 P6）、perf O(N²) scaling(**已升主線=效能 arc「事件比例計算」(用戶拍 2026-08-20):模擬層零 LOD——計算跟隨事件密度、不跟隨任何觀察者;玩家距離近/遠分班刪除;禁降真實禁凍結不變。世界全域自轉=本專案 vs DF/RW 立身差異**)、**L3 隔格循環貿易**（商人巡市集讀外板+跑商路；**★guardrail 用戶定 2026-08-05：禁寫死巡邏路線——「去某市集看看」=資訊價值(板子多舊+套利期望) vs 路程成本的引擎決策，人格加權（重商勤跑/膽小近跑），巡迴=湧現 pattern 非 waypoint 清單**；同 scout「資訊值不值得收集」家族）、economy-balance（救濟量級/timing、系統性餓死底線）。
+  - **信使損耗模型（已定，資訊網 arc）**：信使死**不通知**寄件方（死訊瞬回=god-view）——寄件方只知「派了、沒回音」，**沉默本身是資訊**；再派=湧現（需求仍在→mini-util 續 fire→人格秤再派，實測 T1 連派 8 信使）；每信使=真抽 1 人力（信使一直死=村失血=真悲劇螺旋）；進階候選：預期回程逾時→belief 推斷凶多吉少（非 god-view）。
+  - **★失聯感知＝通例（用戶定 2026-08-05，資訊網 follow-up、排現 arc 收完後）**：**所有派出單位共用一個系統**（信使/斥候/商隊/賑濟隊/子隊/開墾隊…）——母隊記**預期回報時間**（依距離/任務估）；逾時→belief 標「失聯」→**進思考層人格反應**（務實再派·派查/多疑防備/重情派救/冷酷註銷；領主對遠方村莊久無音訊=同系統）。零 god-view（全建於「自己派過誰+過了多久」的自我記憶推理）。「派信使查」決策=此系統反應端、信使逾時推斷=其一 case——統一成**一張預期聯絡帳本**、非各處特例。
+- **infra**：Telegram 雙向 bridge（遠端驅動 blueprint）done（`reference_telegram_bridge`）。
+- **★資訊網核心 arc = CLOSED/ACCEPTED（2026-08-05，用戶裁 A、QA CONFIRM-with-revisions）**：**bank（機制全真）**＝letter-carrier 物理信使／side-action 家族（herald·scout·distribute，人格 mini-util）／act-on-belief（de-scan×2 移 god-view 殘留）／賑濟＝免費 gift／同格交易＋看板 relay（商業 +72% 多床）／人格分化真湧現（務實 8 vs 傲 0）／T1 fixture 全鏈救活／T3 真故事（defect 叛離孤死）。**誠實限制（QA 強制）**＝relief 鏈僅 fixture 證、一般 49 隊經濟 distribute 仍 0（禁 resolved 字樣）；T1 回升＝間歇投糧非穩定復甦；cascade=PLAUSIBLE；anomaly 因果未 story-audited。**→ 資訊網補完批（下一批）**：①relief 通用化（settled faction bed 診斷 general distribute=0 根）＋economy-balance（救濟量級/timing/餓死底線）②L3 循環貿易（guardrail 已定：路線＝湧現非 waypoint）③失聯帳本（預期聯絡通例）④小項（seed-cascade 因果補／DEFECT_HONOR_THRESHOLD 死常數人格化照妖鏡／scout 人格 demo／anomaly story-audit 補檔）。

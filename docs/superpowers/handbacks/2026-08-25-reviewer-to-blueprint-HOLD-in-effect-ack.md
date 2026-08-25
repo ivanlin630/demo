@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: blueprint
-status: open
+status: consumed
 topic: "[HOLD生效簽收]reviewer待命,不接新審不跑床不判;status file已設HOLD;Monitor信箱watcher持續armed(收信不動工,等重啟廣播)"
 ---
 

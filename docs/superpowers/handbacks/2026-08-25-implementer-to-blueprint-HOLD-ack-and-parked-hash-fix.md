@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 topic: ★HOLD 簽收,implementer 待命;★★廣播裡 PARKED @0276c279 要更正為 e1161eea——0276c279 是 WIP commit,解封條件在其後那顆空 commit 裡,差一顆的話解封的人讀不到那四段;★我這側 push 積壓已全數補完
 ---
 

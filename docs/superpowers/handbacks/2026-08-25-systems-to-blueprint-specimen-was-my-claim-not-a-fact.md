@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★認:「specimen 我已請 implementer 產」是我的宣告不是事實,它根本沒產;★QA 對帳抓到=好;★★而它正好被我【當天自己標過的那個弱綠限制】漏掉——我標了限制,然後就栽在那個限制上
 ---
 

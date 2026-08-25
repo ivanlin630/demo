@@ -1751,3 +1751,75 @@ func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) 
 ★★**現有防線裡唯一抓得到它的是【結尾標記】** —— **hang ⇒ 沒有結尾標記 ⇒ 判「無法證明跑完」。**
 （★**那條標記原本是為 parse error 加的，對 hang 一併有效。**）
 
+---
+
+## [搬自 game-design.md 2026-08-25] 情報操控接線現況（2026-07-06 盤點）
+
+## 情報操控接線現況（2026-07-06 盤點：捏造缺口，但框架放得下）
+
+> **★段落狀態(2026-08-21)**:2026-07-06 盤點快照,現況欄過期(資訊網 arc 已 CLOSED/ACCEPTED,傳播/belief/失真已落地);本節留作「捏造/主動操控」未做維度的定義,現況以資訊網 arc 收官記錄+完工清單為準。
+
+**現有**（`distortion_engine.gd` 單一 owner）＝兩種、都寄生真訊息：
+- **竄改轉述**（malicious relay）：轉述真訊息時扭曲數值／位置／身分（嫁禍）。
+- **被觀察時自我欺敵**：被刺探時偽裝平民／虛張聲勢／弱隊謊稱屬大勢力。人格驅動（計謀/信義），但只針對「自己被看時」。
+
+**缺**：**主動捏造＋散播完全虛假訊息**（「偽造軍情」——編一個沒發生的事丟進謠言網操縱第三方）。缺兩塊：①決策引擎無「散布謠言」option ②`emit_message` 只綁真事件、無「發一則不綁真事件」的口。
+
+**★但框架放得下（不必後面重構）**：四塊建三塊——
+- 捏造的**決定** → 決策引擎加 option（計謀高＋有動機者穿過人格的秤決定造謠）＝合統一框架。
+- 散播**管路** → 現成（emit＋propagation）。
+- **後果反噬** → 現成：`reconcile_firsthand` 拿親見比對轉述、抓到說謊降來源名聲 → 造假一接上就吃這代價。
+- 缺的僅：捏造 option ＋「訊息可不綁真事件」的口。
+
+→ **路線圖項，非急**；等情報操控維度開建時做，現框架承接。
+
+
+## [搬自 game-design.md 2026-08-25] 生產/牆移進度與量測史（2026-07-16~24）
+
+#### ★★進度 + 牆移子系統：貿易機制通,市場死在供給（2026-07-16）
+統一商業框架 build 後量測:**貿易機制證明對（`deal_merchant` 史上首次非零 + 守恆 + de-patch cleanup 對）+ coin 大勝（`buy_no_coin -99.9%`,雙向流）。**
+- **coin 從「磨」升「先有」（確認）**：coin 是 deals 前提非事後精修（no_coin -99.9% 才讓機制真跑）。
+- **★但市場仍未 revive,牆移子系統**：deals 仍 ~1-2。新主牆＝`sell_no_surplus 51.7%`（訪客到市場**沒貨賣**）。**貿易水管全通了,但沒水可灌——producer 產不出可賣 surplus。** binding 從「貿易子系統」（已解）移到「生產/經濟實質子系統」（sell_no_surplus）。這正是最初的問題「誰生產可賣 surplus」＝整條經濟最深牆。
+- **merge 決定（用戶定 2026-07-16）**：merge 貿易 foundation+coin（機制+coin 通,誠實標供給待）——**revise「revive 才 merge」,理由 blocker 移到不同子系統,避正確大 refactor 爛 branch drift**。過 reviewer R② + probe 語意核（新 order_id 路可觀測）才 merge。
+- **供給牆 patch-gate-first（決定 2 前置）**：先查 `sell_no_surplus` 是 **gate 擋賣單**（`SURVIVAL 無單不賣` / 餘量門檻太高 → 有貨不掛賣單 → de-patch）**還是真沒 surplus**（生產求生型無餘糧）。
+- **★決定 2＝甲（用戶定 2026-07-16，patch-gate-first 解疑）**：供給根 precise＝**製造設施幾乎不建**（`has_facility` 恆 1）。隊**想**製造（TASK_MANUFACTURE 1→11）、**有材料**（surplus 破千）,純被 **補丁閘擋**（頭號＝`恆-hungry→永建農`:定居隊糧在糧倉卻恆判餓→永優先農田→製造 never）。**∴ 非天生稀缺是 bug 閘 → 乙不成立（補丁閘通則＝de-patch,不把 bug 當設計）→ 甲。**
+- **★★生產 arc＝拆光補丁閘融入框架（用戶定 2026-07-16，同商業那套）**：不 de-patch 單一閘,**拆光生產/設施子系統所有補丁閘、全融進框架（引擎 + 人格秤）、無殘補釘再量**（否則又抓下個閘＝打地鼠）。
+  - **願景＝[[綜合發展模型]] 落地**：食安地基後多維發展人格化——工匠型建工坊/冶煉、農夫型續農、好戰型建軍事。食安→製造→餘貨→貿易,人格+情境定速。
+  - **這是「吃得飽的窮部落爬薄階梯」突破口**：從求生升發展。
+  - HOW 全交系統（哪些閘、怎麼進引擎、切幾 slice）;藍圖只定「食安後多維人格化發展 + 拆光補丁閘 + 全程人格化」。靜態稽核列全補丁閘餵系統。
+  - **★★premise 訂正（R① 2026-07-16 手算推翻天真 de-patch）**：原以為「拆 `恆-hungry` override → 人格自然選農田」＝**假**。reviewer 手算 `_facility_score=地利×(1+deficit)×人格`:普通~良好地力,餓隊會選 workshop（4.40）> farming（除非地力近 max）,因 **deficit clamp[0,1] 使「快餓死」與「略缺」都=1.0 無量級**。**∴ override 其實承重（補償壞公式防餓死），天真拆掉會餓死＝比現狀更糟。**
+    - **修正 WHAT**：不是拆 override,是**讓食安地基「真實在秤裡」**——deficit/急迫度要有**量級**（快餓死須輾壓 workshop/軍事 → 自然選農田;食安後急迫降 → 才輪人格選發展）。food-floor 從秤裡湧現,override 才能安全退役。**序：score 修好（地基進秤）才准拆 override。**
+    - **means-end 斷鏈**：「建設 option 接手蓋工坊」全 codebase 不存在;facility 建造只由 `_evaluate_infrastructure`（僅 `state.factions`）發起 → faction_id=-1 獨立定居隊永無建設施路。**修：所有隊都要有「想 goods→需設施→能發起建」的真 means-end 路。**
+    - **常數訂正**：`FOOD_PER_PERSON_PER_DAY=0.8`＝代謝物理**絕不人格化**;只「7」安全天數視野該人格化。世界物理常數留 flat,只人格化決策常數。
+    - **修材引擎裡本就有（systems 親驗）**：`need_hierarchy L_SURVIVAL`（連續急迫度隨餓程度縮放）+ `food_security_target`（已人格調變 buffer）＝reviewer 說 flat deficit 缺的量級 + 願景要的人格 buffer。修＝facility-choice 接上這套（非新造 flat deficit 平行系統）。
+    - **WHAT 定（2026-07-16）**：①**獨立隊（faction_id=-1）也發展生產＝YES**（綜合發展涵蓋所有據點主,非 faction 特權,排除＝任意豁免;means-end 統一發起涵蓋）。②**食安壓倒＝軟連續急迫曲線非硬 cliff**（cliff＝另一種死 gate）,但急性瀕死須真壓倒（農田輾壓,別讓餓隊蓋工坊死）;人格 textures 轉折（慎重 buffer 大→餓更晚仍發展、大膽→發展進更薄邊際＝戲）。
+    - **序/閘**：score 修好（地基進秤）才准拆 override;v2 須再過 R①（可能 measure 坐實「急迫度真讓飢隊 farming 主導」）才 spec。
+  - **★★供給側大成功（measurer full-HD 坐實 2026-07-16）**：`has_facility 恆1→31.3%`（含獨立隊 27.3%）、世界成品池 `26→480（18x）`、`Manufacture 6→4348（700x）`、`no-op=0`、**餓隊沒餓死（食安地基靠軟急迫守住,非 override）**、守恆 PASS、無殘補釘。**R① 訂正後的設計成功落地**（urgency 真 fire、獨立隊真發展兩項坐實）。**供給牆破。**
+    - **merge 裁（2026-07-16）**：觀測閘綠即 merge（框架 correct+safe+主目標達成＝強證,不卡 emergence）,誠實標「供給破+surplus,人格分化 mechanism-present 待 multi-seed」。
+    - **emergence 定案（multi-seed 2026-07-16）**：**好戰→軍事真 emergence 強坐實（Δ+0.36）**;貪婪→工坊/慎重→農**不顯＝need-first 設計的正確後果非 bug**（farming/workshop 由求生+deficit 主導,人格是 texture;食安不因人格打折）。**接受 by-design,不 tune 人格權重**（盲 tune 打架 need-correctness 傷供給側成功）。**願景訂正:人格化多路＝人格→archetype→目標→discretionary,非平坦 trait→設施映射;「工坊=貪婪」是錯映射該除。** 商業/定居的濃差異＝deal 側 arc 長出（為賣而產）。
+  - **★deal 側牆＝死法②（下個 arc）**：供給「量」有了（18x goods）但**流通到 visitor 隨身可交易貨未打通**（sell_no_surplus 仍最大 bail）＝成交牆同款。經濟全景:**水管通（商業）+ 水有了（供給）→ 但水流到買家（deal-flow）仍塞**。下個 arc。
+  - **★★貧困陷阱＝兩把鎖（food + coin urgency）鎖住建設層（measurer §④b 3 隊坐實 2026-07-23）**：追武器坊建造不成，一路挖到 afford 根＝**常駐求生高壓的隊會賣光非求生資產換食/coin，structurally 湊不到投資本**。機制:`reserve_factor=0.6+(hoard-0.5)×0.5-urgency×0.4`，`urgency=max(food_urg, coin_urg)` 常駐 0.72-0.98 → factor 壓到 0.25-0.29 → material 賣到 reserve 25-29 → 永遠囤不到建造門檻（105）→ 蓋不出**原本能解它壓的設施** → 永困。**設計自洽的『貧困陷阱』非 bug**。**★關鍵訂正（data 坐實，非單一逃生閥）：這是兩把鎖**——`urgency=max(food_urg, coin_urg)`，食安修只解 food 那把；**coin_urg 常駐 0.8-0.97（3 隊 coin 全極低）＝很可能是 binding 那把**，光 coin_urg≈0.8 就把 factor 壓到 0.28（正中觀測）→ **食安修單獨後 urgency 仍=coin_urg 0.8 → afford 仍鎖**。∴**軍設施 afford 要 food AND coin 兩鎖都解**；coin 鎖＝既有 coin poverty（掠奪 coin→anon_treasury 不流 team.coin，v2b defer）從「buy 錢包」升格成「貧困陷阱第 2 鎖」。∴**食安是建設層前置閥之一非唯一**；afford/cost/cap 都是下游症狀，不獨立修（cost70 balance 值 keep=銀行，兩鎖解後才生效）。連結 [[means-end]]:前瞻買料 target 是拍死常數（cap 100）非由建造實際需求推導＝決策模型缺「為目標湊足所需」的缺口，facility-build keystone 頭號 exhibit。**★診斷史血證**:此線靜態推理三次全錯（117 框架→persona 1.13→實測 0.25），唯 measure 結案＝涉「隊會不會累積到某量」的判斷靜態不可信（動態 sell/urgency 沖銷），必實測。
+  - **★★material = 開採/地理資源非耕作資源（用戶定 2026-07-24，脫貧真脊椎的 world-model 裁決）**：三腿（reserve/coin/hold）修完 afford 仍 0%——patch-gate-first 證 inflow 無非法閘，真 binding = **aggregate material SUPPLY + 地理 food-terrain≠material-terrain 錯位**（隊為食定居 plains[食8/材0.5]被斷離 forest[材12]；material 只能採不能造[無 recipe out:material]、被所有 recipe 吃）。**★裁決 = 地理張力是 intended feature（非 bug、不 flatten）**：food vs material 走**兩種不同經濟邏輯**——**food=耕作**（原地改良、farming 設施放大產出[★歷史公式已被 2026-08-18 農業a 取代:農田現=獨立產線,見意圖帳「農田」row]、作物**季節級快再生** → 改良**永續**產量 coherent）；**material=開採**（樹**年代級慢生** → **不能像耕作那樣永續增產**）。**★關鍵區別（用戶 2026-07-24）：育林/種樹增產不 coherent（樹慢長不出來），但『伐木場=加快開採』coherent——它不種樹，把現有的樹砍更快。** ∴ farming＝永續耕作放大器 vs 伐木場＝**開採加速器**。**★核心框架 = 賽跑（用戶定 2026-07-24，非個人 boom-bust 取捨）：forest 材料是有限存量，『誰先砍完誰優勢大』**——誰先搶到 forest、砍得快、清完，誰把那筆材料收進口袋 → 發展優勢滾雪球；永續採贏不了清伐者（別人直接清光）→ 誘因永遠是衝/搶/快砍。**★機制＝現行的就夠（用戶 2026-07-24 核對坐實，非新機制）**：`regenerate_tiles:93-97` material regen＝**additive +12/天往 `resource_cap` 補（慢慢長、非瞬補、cap-bound）**、harvest 扣池（`_collect_from_tile` current−gain）→ **可耗竭池 + 慢回 + cap 全已在**。∴只需加兩樣：①**森林初始材料庫存高一點點**（forest tile 開局材料近一個高 `resource_cap`＝老熟林大獎，world-gen 初始值非改 regen 機制）②**伐木場設施＝加快 material 開採速率**（forest-only，讓「砍得快」變能贏的選項）。**regen 機制不動（已是慢慢長）。** **★唯一 measure＝tune 數字非改機制**：現行 +12/天夠不夠慢讓清伐後先手優勢維持夠久（賽跑尖銳）、還是太快幾天長回（先手不夠）→ measure 後微調 regen 數字/初始庫存/伐木場 boost（**別預調，先量**）。**不加育林（不 coherent）。** ∴ forest 隊＝材料生產者（搶砍+出口），plains 隊取得 material 靠**控產地（擴張搶 forest tile）+ 貿易 + 遷徙**＝取得閥。**★選擇的後果（用戶明選）：材料稀缺真實、發展是『競爭性』非『普世』**——能控/搶砍 forest/買得到的隊才發展，控不到=發展不起，**地理遊戲核心張力非 bug**（搶 forest tile 衝突 + 材料貿易 + forest 材料國↔plains 農業國互賴 + 先手滾雪球）。**★snowball 平衡待盯**：先手優勢別變死局（「先手必勝、遊戲結束」），靠既有 prosperity-prey 自我修正（滾大的富隊→眾矢之的→崛起與傾覆戲）+ measure 盯，過火再 tune。ore→material 製造（選項 c）用戶未選=暫緩（未來 mountain-archetype 深度可回訪，別繞地理張力）。
+
+
+## [搬自 game-design.md 2026-08-25] 貿易死因診斷（2026-07-15）
+
+#### 貿易死因診斷：真根＝兩結構牆（成交條件 + merchant 不成對），修向＝流動偏摩擦市場（與用戶成形 2026-07-15）
+市場 deals≈0 挖到底,商隊「想做生意 404 次 → 成交 ~2 筆」。歷五層假設,measure/trace 逐一坐實**皆非 binding**,真根＝兩道結構牆:
+
+| 假設 | measure/trace | 判 |
+|---|---|---|
+| supply seam（可見性）| deals~0 | 非 binding |
+| merchant-target churn | target 穩定（28000tick 僅切6次）| 推翻 |
+| threat-preempt（半路跑）| 真 preempt 僅 ~6 起,FLEE 是缺糧非 threat | 推翻 |
+| accessor 結構（local_value）| absorb 修 +114% 但 <3% | 真債但非 binding |
+| coin 私囊鎖（no_coin 91%）| **解禁 coin→全落 other_bail,WOULD_TRADE 恆零** | **紅鯡魚**（no_coin 是 co-loc bail 表面標記,非真兇）|
+
+- **★★真根＝兩道結構牆（reconcile 坐實）**：
+  1. **成交條件牆（最刺眼）**：雙方都想交易（WOULD_TRADE）**560 次卻只成 3 筆**（0.5%）。price/surplus/qty 三門檻疊乘,willing 夥伴幾乎永遠過不了。**是普世閘**（擋 resident + merchant 所有路）。
+  2. **merchant 從不 co-locate**：100% 成交買方是 resident,**0 個 merchant**——商隊 travel 到訂單位卻從不跟賣方成對（arb 路死）。
+- **★★修向＝流動偏摩擦市場（用戶定 2026-07-15）**：
+  - **底線＝流動**：雙方都想交易 → **多數該成**。現 0.5% 不是「真實摩擦」,是**死常數幾乎不對齊＝壞**（照妖鏡）。
+  - **質感＝摩擦**：交易不免費——價差談判 / 餘量謹慎 / 運力成本 讓**一部分** willing 夥伴談不攏,且**真實有意義**（真的價不對/運不划算），非全體卡死。
+  - **摩擦掛人格**：急著交易/絕境的鬆手（接受薄利）、貪婪/謹慎的收緊（守價、留餘量）→ 談不成＝**性格與情境的戲**,非一道誰都過不了的死門檻。
+  - 一句：**willing 夥伴大多能成交,談不攏是少數且有理由（人格/情境）,非常態。** 成交率/門檻數字系統 tune（HOW）。

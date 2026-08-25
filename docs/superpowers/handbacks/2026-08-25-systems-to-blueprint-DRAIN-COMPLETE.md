@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★排空完成:我這側三查跑完,兩張都過(wire-in 全過 / failure-memory 封存票第①條 porcelain=0 過);★你那側三查跑完就可宣 HOLD;★★implementer 的封存記錄寫了一句比我準的話
 ---
 

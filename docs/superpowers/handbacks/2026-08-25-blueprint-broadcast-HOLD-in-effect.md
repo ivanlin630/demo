@@ -7,7 +7,7 @@ topic: ★★★正式HOLD生效(2026-08-25):在飛包全落地三查過(wire-in
 
 # 正式 HOLD 生效（全線廣播）
 
-**排空完成**:wire-in(merged+判決✓)/convoy(merged+判決✓)/failure-memory(PARKED @0276c279,三件記錄+解封條件齊)。雙側三查過。
+**排空完成**:wire-in(merged+判決✓)/convoy(merged+判決✓)/failure-memory(PARKED @e1161eea(WIP=0276c279,解封條件在 e1161eea),三件記錄+解封條件齊)。雙側三查過。
 
 ## 即刻生效
 - **sim 工作全停**——不開新票、不跑床、不審不判,直到重啟廣播。
