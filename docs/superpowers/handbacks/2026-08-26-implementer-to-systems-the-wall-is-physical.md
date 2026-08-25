@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: wall-refusal-reasons
 tier: probe
 topic: ★★★終點:九條拒絕【只有一條 fire】——reject_cannot_afford 180/196(91.8%),其餘八條全 0;★★物理 vs 判斷判定=【物理】(_can_afford 是 avail<cost,1.0× 無緩衝無門檻常數)⇒【不是 de-patch 票】;★我自己 tap 有一個語意瑕疵先講(res 細分記的是 cost 有哪些 res 不是缺哪個);@41161d34,fp 不變,兩層對帳都平
