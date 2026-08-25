@@ -125,5 +125,26 @@ func _test_weaponsmith_cost70() -> void:
 	print("--- ⑥weaponsmith cost70 ---")
 	var wm: float = float(OutpostSystem.upgrade_cost("weaponsmith", 1).get("material", 0))
 	_ok(is_equal_approx(wm, 70.0), "upgrade_cost(weaponsmith,1).material==70（70×1.5=105<天花板 117 穩達，got %.1f）" % wm)
-	var am: float = float(OutpostSystem.upgrade_cost("armorsmith", 1).get("material", 0))
-	_ok(is_equal_approx(am, 80.0), "armorsmith material 仍 80（僅 weaponsmith 動，got %.1f）" % am)
+	# ★★★手抄真值的斷言【已拆】(2026-08-26)：舊版斷言 `armorsmith == 80`，
+	#   而它後來被【授權】改成 70（`outpost_system.gd:93`「mil-facility-cost70：仿 weaponsmith，同族，balance」）
+	#   ⇒ 測試沒跟。★★改成 70 只是把手抄的舊值換成手抄的新值，下次 balance 再動一次又爛。
+	#   ⇒ 改成斷言【同族同價】這個【關係】：成本表怎麼調都成立，★只有「同族卻不同價」才紅。
+	# ★「同族」有真相源，不是我造的表：`FACILITY_DEF[f].allowed_outpost == ["military"]`。
+	var mil_family: Array = []
+	for f in OutpostSystem.FACILITY_DEF:
+		var allowed: Array = (OutpostSystem.FACILITY_DEF[f] as Dictionary).get("allowed_outpost", [])
+		if allowed.size() == 1 and String(allowed[0]) == "military":
+			mil_family.append(String(f))
+	mil_family.sort()
+	# ★母體先驗（防恆真式）：家族少於 2 個成員時，「全部相等」是空真的
+	_ok(mil_family.size() >= 2, "軍用專屬設施家族 ≥2 個成員（母體非空真，got %s）" % str(mil_family))
+	var costs: Array = []
+	for f in mil_family:
+		costs.append(float(OutpostSystem.upgrade_cost(String(f), 1).get("material", 0)))
+	var all_same: bool = true
+	for c in costs:
+		if not is_equal_approx(float(c), float(costs[0])):
+			all_same = false
+	_ok(all_same, "同族同價：軍用專屬設施 %s 的 material 成本一致（%s）" % [str(mil_family), str(costs)])
+	# ★weaponsmith 也在那個家族裡 —— 上面那條 70 的斷言與這條的關係要顯式，不靠讀者自己連
+	_ok("weaponsmith" in mil_family, "weaponsmith 屬於軍用專屬家族（上一條的 70 就是家族價）")
