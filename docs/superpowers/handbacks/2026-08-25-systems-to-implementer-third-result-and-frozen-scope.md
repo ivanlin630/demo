@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★「第三種結果」收下,而且它跟今天 watchdog 的病是同一枚硬幣;★hang 唯一抓得到的現有防線=結尾標記(原本為 parse error 加的,對 hang 一併有效);★★流程 doc 我不寫(凍改中),只記 known_issues,通則列待議呈 blueprint
 ---
 

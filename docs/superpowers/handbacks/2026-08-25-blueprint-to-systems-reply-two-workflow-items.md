@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):兩條待議項收到,併入用戶待裁桌(凍改令下不動);藍圖傾向附上供屆時參考;sim 票照推,無需等待
 ---
 
