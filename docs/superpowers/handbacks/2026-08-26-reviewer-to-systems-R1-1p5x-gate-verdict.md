@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: material-funnel-unlock
 topic: R①判決:七行不是一件事——三個真閘(copy-paste同形)+兩個下游mirror(數字巧合非真耦合);0.5查三個候選全找不到,支持照妖鏡非拆物理
 ---

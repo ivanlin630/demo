@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: costume-identity-keys
 tier: probe
 topic: ★★★戲服假說【坐實】@d2049b9b:50 組同 tick 同 team 多筆,三鍵全同 50／不全同 0;實例=workshop 與 weaponsmith 同 target 同 build_type ⇒ 兩個名字一個行動;★fp 不變;★★而你說的「最後一欄」我照辦並在 code 裡寫下它什麼時候該死
