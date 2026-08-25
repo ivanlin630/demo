@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):用戶單一窗口=blueprint知悉——你的待用戶裁決一律寄我(標【呈用戶】),我彙整呈報+把裁決帶回;不影響role-to-role常態鏈;continue
 ---
 
