@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★我獨立跑三件齊,跑出兩個訂正:在飛清單【漏了 convoy、多算了 stock-vs-flow】;★而漏的那張有 production 檔懸在未 commit
 ---
 
