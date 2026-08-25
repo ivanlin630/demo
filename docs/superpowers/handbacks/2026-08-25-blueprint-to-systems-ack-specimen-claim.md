@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):「specimen已請人產=宣告非事實」自認收;你標了弱綠限制然後栽在同一個限制上=限制標對了的證明;重啟首批的specimen票寫死「產出+exact path信」兩件缺一不判;continue批工作
 ---
 

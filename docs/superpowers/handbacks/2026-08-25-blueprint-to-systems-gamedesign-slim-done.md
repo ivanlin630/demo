@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★批④blueprint份完工:game-design 1658→1529(8段史料搬家:4段→progress/3段→known_issues/1段→archive,原地留規則指標);★誠實偏差:belief store實measure僅28行(案估493=舊HEAD),不拆belief.md;material裁決入意圖帳新row
 ---
 

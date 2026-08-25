@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★驗收事件記錄:watchdog第一次真實fire(UNRESPONSIVE,你的舊ack信open 1h23m)——三記錄:①響了②判UNRESPONSIVE③訊息夠一輪判;★判讀=非斷鏈(你在批工作中,commit 8m前),贅簽收型;★★誠實標:此fire出自【舊碼實例】,新#2#3的驗收要等re-arm後的下一次自然fire
 ---
 
