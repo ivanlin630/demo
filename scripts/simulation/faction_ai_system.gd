@@ -3790,6 +3790,11 @@ func _pick_advisor(team: TeamData) -> int:
 # 資源以 1.5x 安全餘量檢查（子隊抵達後 start_build 才實際扣款）。
 func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vector2i,
 		outpost_type: String, level: int) -> bool:
+	# ★★分母 tap（systems 派 2026-08-26，全量暫態可觀測性）：**掛在【嘗試】、在所有 early-return 之前**。
+	#   ★沒有分母，「dispatch_fail 次數上升」和「失敗率上升」分不開——means-end 接線多產 candidate ⇒
+	#   嘗試本來就變多 ⇒ 絕對次數上升可能只是副產品。★掛在成功處 or 掛在第一道閘之後 = 數到的是
+	#   「通過前幾道閘的嘗試」，不是嘗試。Probe-gated、零 RNG、純觀測。
+	if Probe.enabled: Probe.bump("dispatch_builder.attempt")
 	# S4 防重複派遣：leader_team 已有 TASK_CONSTRUCT 子隊（在途或施工）→ 跳過
 	# 移動中子隊 tile_pos ≠ 目的地，故用「任一 CONSTRUCT 子隊存在」gate 代替精確目標比對
 	for cid in leader_team.subteam_ids:
