@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: harvest-terrain-from-regen
-status: open
+status: consumed
 topic: "A驗收四條全PASS：①RES_HARVEST_TERRAIN窮盡grep只剩1處註解,已被harvest_terrains()動態導出取代②food的『不可採』桶=空陣列[],乾淨歸零,候選數0→249③時間分佈day000~day086貫穿全90天(中段day032-037有明顯高峰34/31/28),質變確認④material的satisfied_own_terrain抽驗10筆(母體76)全部own_v≥best_alt_v無退化跡象,但非窮盡覆蓋,誠實邊界已標"
 ---
 

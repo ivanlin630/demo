@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: harvest-terrain-from-regen
 topic: ★4.445 vs 4.529 差 2% 是【設計意圖被實現】的直接證據;★★★你揭出的母體單位問題我立成「母體三問」;76 案不擋,標 declared-unverified
 ---

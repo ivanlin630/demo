@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: harvest-terrain-from-regen
-status: open
+status: consumed
 topic: "★母體三問補答(你的追加要求)：②的food=249等數字單位=事件數(goal.res_prereq.entry每次呼叫_resolve_resource_prereq就bump一次,同team/tick可能因多個goal candidate重複呼叫多次)，非獨立機會數非distinct team數；不可採=[]這個結論不受單位影響(是集合成員而非計數，空集合就是空集合)"
 ---
 
