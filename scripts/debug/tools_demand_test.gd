@@ -20,6 +20,9 @@ func _initialize() -> void:
 		print("=== DONE === ALL PASS")
 	else:
 		print("=== DONE === %d FAIL" % _fail)
+	# ★完成標記：沒有它，閘的 Q1 只能答「不知道跑了多少」——
+	#   而「不知道」與「跑完且沒紅」在輸出上長得一樣。
+	print("[TEST-SUITE-COMPLETE]")
 	quit()
 
 func _ok(cond: bool, msg: String) -> void:
@@ -27,6 +30,12 @@ func _ok(cond: bool, msg: String) -> void:
 		print("  [PASS] %s" % msg)
 	else:
 		_fail += 1
+		# ★★走【引擎 severity 通道】(2026-08-26)：`test-ran-floor.sh` 的列舉軸是 Godot 自己的
+		#   severity 前綴，只用 `print` 的失敗它一條都看不見 ⇒ 對這張床生出來的 baseline 會是
+		#   【0 條】，而 0 條讀起來像綠。★這是「儀器沒開，0 被當成沒發生」那一型。
+		# ★失敗處置兩軸：`push_error` ＝【會叫、不會停】——正是這裡要的（可數不致命）；
+		#   `assert` 會停，撞第一條之後的都不跑。
+		push_error("[FAIL] %s" % msg)
 		print("  [FAIL] %s" % msg)
 
 func _mk(outpost_type: String, armed: float, martial: float) -> Array:

@@ -1,0 +1,6 @@
+# 由 test-ran-floor.sh --gen-baseline 從【實跑輸出】生成，★不要手寫。
+# 來源：C:/Users/I12/AppData/Local/Temp/claude/A--GDS-demo/64259579-db0d-4024-9302-37e77a7faa12/scratchpad/bed_survival_v2.txt
+# 格式：<類別>	<原文>[	<註>]  類別＝stale-test / real-regression / unjudged
+# ★每一條都是 unjudged ＝【還沒有人判過】，不是【允許它紅】。判過就把類別改掉。
+
+stale-test	[FAIL] 中性 reserve = target×pop×日耗	測試手抄了一條公式(4×pop×FOOD_PER_PERSON_PER_DAY=32)，但 reserve(food) 早已委派 NeedOracle.need_keep；實得 96=32×3，差的正是 _self_use 的 famine_escalation(need_oracle:115，該隊 food=0 ⇒ food_days=0 ⇒ ×(1+FAMINE_NEED_GAIN=2))。★同一支測試的相對斷言(謹慎192>中性96>賭徒48)仍 PASS ⇒ 它要保護的不變量(人格化排序)沒破，破的是編碼。★修法屬另一票：把數值斷言改成相對/結構斷言(禁手抄物理)。
