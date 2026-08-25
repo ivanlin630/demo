@@ -3,17 +3,17 @@
 #   理由（systems 立 2026-08-25）：★沒有類別的 baseline ＝垃圾桶——
 #   它只會單向長大，而每一條都在稀釋「綠」的意義。
 # ★登記於此 ≠ 可以不修；stale-test 修完必須從本檔【消失】。
-# 格式：<類別>	<實跑原文>
 #
-# ★已修待驗（本輪）：own_granary_tile nil ×7 —— stale-test（測試漏傳 state，9 個呼叫點已補）
-#   ★它們本來就不在本檔（本檔只收 assert 原文）——這正是「只認一類」的盲點。
+# 格式：<類別>	<原文>	<註（可省）>
+# ★★★註【必須自成一欄】——2026-08-26 血證：有一條把「(×2，優先查)」黏在原文尾巴，
+#   ⇒ 那條永遠對不上實跑輸出 ＝ 同時產生【一條 stale】＋【一條假新增】。
+# ★原文＝已剝掉 severity 前綴後的訊息本體（閘會剝 `SCRIPT ERROR: Assertion failed: ` / `ERROR: `）。
 
 unjudged	[p2a] join weight 太低 0.41
 unjudged	FORCE(任rung)→ambient_train_drive 0.5
 unjudged	rung 擴張+武力 未選擴張 intent, got={ "type": "防衛", "target_id": -1, "why": "慎重/威脅驅動，備戰守土" }
 unjudged	戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve
 unjudged	紮營=1.0
-# ★★hard-fail 類（原 [FAIL] print，2026-08-25 轉成可數失敗）：
-unjudged	[FAIL] Team23 task=建設 order=-1　(×2，systems 初判可能落在建材閘 arc，優先查)
+unjudged	[FAIL] Team23 task=建設 order=-1	×2；systems 初判可能落在建材閘 arc，優先查
 unjudged	[FAIL] 弱目標未加入攻擊 goal
-
+stale-test	Invalid get index 'intent' (on base: 'Dictionary').	headless_test.gd:1339 讀 e["想什麼"]["intent"]，但 bc50c05b 已改名為 strategic_intent；★這不是 assert 而是 push_error ⇒ _test_specimen_tracer 從該行【中止】，其後 8 個 assert 從此沒跑過＝靜默覆蓋洞
