@@ -315,3 +315,40 @@ SEAM_MODE=hard bash .claude/hooks/seam-gate.sh
 工期端撐不完／entry 缺 subteam）—— ★**每一個都必須在帳上留下「這條【不成立】」的字樣**，
 **而不是被新結論悄悄取代。**
 
+## ★★引用站點用**語意錨**，不用行號（implementer 補正 2026-08-25）
+
+**我立過「母體元素定義要對齊」，implementer 補正另一半**：★**行號本身跨輪就不可靠。**
+
+**本 session 已至少三次**：
+| # | 我引的 | 實際 |
+|---|---|---|
+| 1 | `task_arbiter:163`「release-first 文件化」 | 那行是 `_defiance_check`；真正的註解在 **`:142`** |
+| 2 | `decision_context.gd:364` 工期換算 | 後來變 **`:382`** |
+| 3 | decision entry `:5002` | implementer 實作在 **`:5019`** |
+
+★**每一次都不是「引錯檔案」，是【行號漂移】** —— 而漂移在 merge 頻繁的日子裡是常態。
+
+### ⇒ 規則
+**引用站點一律用【語意錨】**：**`檔名` ＋ `函式名` ＋（必要時）該處的唯一字串**。
+★**行號只當【輔助定位】，不當【身分】。**
+- ✅ `task_arbiter.gd` 的 `transition()` doc 段（「resolution caller 已改 release-first」）
+- ⚠️ `task_arbiter.gd:142`（**可以附，但不能是唯一依據**）
+
+★**理由**：**行號會漂，函式名與唯一字串不會** ——
+**而 reviewer／measurer／QA 是照我給的坐標去查的，坐標漂了他們會查到別的東西。**
+
+## ★★`seam-gate` 綠 **≠** acceptance 過（2026-08-25 第一次咬到）
+
+**血證**：`failure-memory-structural-identity` 的 `seam-gate` **rc=0 交接縫齊全**
+（`spec 1 / handback 25 / R²verdict 2 / measure 4 / QA 1`）——
+★**但那 4 筆 measure 量的是【三分流與記錄側擴之前】的版本。**
+
+⇒ ★**閘只驗「產物在不在」，不驗「產物是不是這一版的」** —— **它自己的輸出就寫著這句。**
+| 誰管什麼 |
+|---|
+| `seam-gate`（P9） | ★**站都走過了嗎**（產物存在） |
+| **R6 `stale-claims.sh`** | ★**這些主張是不是這一版的**（保鮮期） |
+| **acceptance** | ★**這一版真的達標了嗎** |
+
+★★**三者不可互相代替。** **閘綠就 merge ＝ 用舊量測過關。**
+

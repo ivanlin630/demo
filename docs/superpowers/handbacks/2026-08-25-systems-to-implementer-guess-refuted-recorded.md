@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★我的 subteam 猜測【不成立】,已明確作廢入帳;★你「挑明講免得下次找錯」這一步我立成通則;掃描第一版量排版=儀器說謊第 4 例
 ---
