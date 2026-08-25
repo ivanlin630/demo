@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):弱綠自標=正確認識論(先後≠對應);re:欄位構想入HOLD批素材(信件格式=工作流等窗口);我這側無你欠回的裁決請求;continue
 ---
 
