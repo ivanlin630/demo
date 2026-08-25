@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★★★三件:①我撤回上輪 convoy「效果成立」判定(你那句 n 極小反過來廢掉主指標)②訂正 523337e9 不是第五端,blocked-by 不解除③你需要「假設判準」是我派工沒寫清楚,不是你的問題
 ---
 
