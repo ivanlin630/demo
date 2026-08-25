@@ -16,39 +16,36 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 > - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
 > ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
 
-### ⏳★★材料經濟結構性 catch-22：**蓋採料點要 50 material，而隊上恆 0~35 從未達標**（2026-08-26，wire-in specimen 90 天逐筆讀出，blueprint 騎士條款②）
+### ⏳★★★建造從 day 1 起【不再被提出】（2026-08-26 定位；★本條原標題是「材料 catch-22」，**已訂正**，舊讀法保留在下方以免它借屍還魂）
 
-**事實**：90 天全窗，隊上 `material` 在 **0~35 之間震盪、從未達到 50** ⇒ **「蓋一個能產材料的據點」永遠付不起。**
-★**自我指涉鎖**：要材料 → 要蓋採料點 → 蓋採料點要材料。與**貧困陷阱**、**建材 1.5x 閘**同族
-（同窗 `dispatch_builder.attempt` **41/41 ＝ 100% 全卡建材閘**）。
-
-★★**這不是 means-end 磚的 bug，恰恰相反**：**磚提對了案（`util 1.272` 全場最高的「去蓋」），
-是世界真的付不起** —— ★**磚的價值就在於讓這件事第一次【可見】。**
-
-**歸屬**：材料/經濟 arc 積壓，**與 `stock-vs-flow`／material arc 對齊後才開票**（blueprint 定：非 wire-in 範圍）。
-★**開票前必答的一題**：**是「產得太少」還是「產了但到不了要蓋的人手上」？**
-—— ★★**這正是 [[project_economy_arc]] 的 meta-pattern（world-level 夠、local/team-level 不夠）**，
-**別在沒分辨這兩者之前先調 cost。**
-
-### ⏳★baseline 機制只蓋 `headless_test.gd` 一張床，其餘床的紅是【不可判讀】的（2026-08-26）
-
-**現況**：`docs/test-baseline-failures.txt` ＋ `test-ran-floor.sh` 只服務 `headless_test.gd`。
-**其他 debug 床沒有 baseline** ⇒ 每次有人動到它們，只能**手動跟 main 比對**才知道紅是新的還是既有的。
-
-★**血證（本輪）**：`state`-required 交付時，`survival_layer_unify_test` 與 `tools_demand_test` **各 1 條 FAIL**：
+★**逐日分桶的漏斗（`main`，`peaceful_economy`／`seed 1337`／30 天）**：
 ```
-[FAIL] 中性 reserve = target×pop×日耗
-[FAIL] armorsmith material 仍 80（僅 weaponsmith 動，got 70.0）
+day |  cand  build |  decide  win_cand |  deleg  br_build
+  0 |    72    39  |     27       13   |    39       39
+  1 |    49     0  |     16        9   |     0        0
+ 29 |    75     0  |     18        6   |     0        0
 ```
-★**implementer 手動跑 main 對照證明兩條都是既有** —— **他做對了，但那是【每次都要重做一遍】的人力。**
+★★**候選總量越後面越多（49 → 75）、決策每天在跑、candidate 每天在贏 —— 只有 `build` 那一欄 day 1 起永遠 0。**
+⇒ ★★★**斷點在 `frontier_candidates`（提案生成），不在 argmax、也不在 dispatch。**
 
-★★**這正是「恆假式」的近親**：**一張永遠有紅、而紅的意義要靠人記憶的床，等於沒有閘。**
+**待答（tap 已派，判準＝reason 互斥且窮盡、逐日加總 ＝ 該日被跳過的 goal 數）**：
+> **`build` 類 goal 在 day 1 之後，是【不在清單裡了】、【在但被判 satisfied】、還是【在且 active 但解不出候選】？**
 
-★**修法很便宜**（沒開票，因為要先決定哪幾張床值得）：
-`test-ran-floor.sh` **本來就是床無關的**（吃「輸出檔 ＋ baseline 檔」兩個參數）
-⇒ **每張要當閘的床各生一份 baseline 就好**，不需要改工具。
-★**開票前要先答**：**哪幾張床是【閘】、哪幾張只是【診斷用】？** —— 診斷床不需要 baseline，
-★★**把診斷床也納入，只會製造第二份會 drift 的真相。**
+## ★★被這份資料【作廢】的三個舊讀法（★保留原文，因為它們每一個都曾經看起來很有道理）
+| 舊讀法 | 為什麼廢 |
+|---|---|
+| ★**「蓋採料點要 50 material，而隊上恆 0~35 從未達標」＝ catch-22** | ★**材料確實會累積**：day30 有 3 隊持 250／246／160、tile 池還有 14769 ⇒ **不是「永遠達不到」，是【達到了也沒有人來拿去蓋】** |
+| 「`avail` 從未超過 20」 | ★★**證據是 `cap = 30` 的樣本，而那 30 筆【全部同一個 tick】** —— 那不是分布，是一個時刻的快照 |
+| 「有料的隊從不嘗試」 | ★★★**它們 day 1 之後根本沒有 build 候選可選** —— **不是不想，是沒東西可想** |
+
+★**而「均值」那一格也要記**：day30 private 總和 811.9 / 12 隊 ⇒ 均值 74 > 閘要的 50，
+**但逐隊分布是 `≥50` 只有 4/12、前 3 隊吃走 80.8%、一隊是 0** —— ★★**均值在高度集中的分布上不代表任何東西。**
+
+## ★arc 狀態（blueprint 裁 2026-08-26）
+- ★**A（拉高 forest 初始庫存）／B（伐木場加速）＝ 停站** —— **世界堆滿材料也一樣沒人提要蓋。**
+- **B ＝ 帶條件封存**（不拆出去）：**若「賽跑」框裡開採速率日後真的成為 binding，再回來。**
+- **用戶深層 WHAT（開採／賽跑／地理張力）不動**；**意圖帳 material row 的補註，等 day 1 謎底一起寫、由 blueprint 呈用戶。**
+- ★**D（`cost × 1.5` 閘人格化）已 merged** —— ★★**它從來就不是解鎖用的，驗的是形狀不是解鎖，這點在票裡先寫死過。**
 
 ### ★material-need bootstrap gap（code-provable，reviewer R² 2026-07-30 揭）
 `NeedOracle.need_keep(material)` 對**無 outpost 隊結構性恆 0**：`_self_use(material)` material∈`PURE_INTERMEDIATE`(need_oracle:100,111)→0；`_supply_chain` 無設施→0；`_construction_facility_need` `_find_own_outpost==(-1,-1)`(need_oracle:38-40)→0。∴ `goal_resolver:197` `holding>=need_keep(0)` 恆真→吐空、**founding 分支(:206-219「★A1 founding」)碰不到**。**⇒ 雞生蛋 bootstrap gap**：無 outpost 隊永不「想要」material（need_keep≡0）→永不因缺料立國拿料；material-founding 動機**只對已有 outpost + 缺料設施需求的隊**存在（established 隊建 secondary forest outpost 供設施）。**fresh 隊 settle-motive 走 settle_fit（上述三段①，已知 flat/broken）非 material。** 這是 A1「缺料→立國」假設的 code-provable 修正：該動機對 fresh 隊不存在（bootstrap gap）、對 established 隊 gated on need_keep>0。折入 means-end 全系統（need 沿依賴鏈上傳 chaining 該讓「想建設施→缺料→缺 outpost→想 found」串起來）。連 [[project_food_flow_runway]] measure-first Step0（①fixture 據此修＝established 隊測 live secondary-founding，非 fresh 隊死 fixture）。**用戶兩原則**（memory `feedback_whole_system_first`）：①健全系統才有價值模擬結果 ②整個系統做完當 whole 才 measure，非邊建邊 patch。**∴ material 全 PARK**（settle-motive/伐木場/regen/初始庫存/gate②/BUY 弱閥）until **means-end/長程計畫全系統**（2026-07-19-long-range-planning-brainstorm.md，scope=B 全四塊：慾望 registry × means-end 依賴圖 × applicability 湧現順序 × 折現/承諾）設計+建完當一個 whole。L1 大功能，brainstorm（用戶主導）→spec→plan→implement。★架構 orientation：機制大半已在（`option.applicable`=前置 gate、`rank_scored`=湧現順序、`NeedOracle`=need 傳播），缺口=(a)need 沿依賴鏈上傳 chaining (b)goal-as-chainable-option → 實作=擴非新引擎。

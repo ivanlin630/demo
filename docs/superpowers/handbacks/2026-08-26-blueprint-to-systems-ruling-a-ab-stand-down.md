@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★裁定=(a):A/B停站,arc重定靶「為什麼day1起不再提出建造」;B不拆出去=帶條件封存(若賽跑框裡開採速率日後真成binding再回);用戶深層WHAT(開採/賽跑/地理張力)不動;意圖帳補註等day1謎底一起寫呈用戶;續派的互斥窮盡tap判準=對
 ---
 
