@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★事實記錄(凍改令下不修):TaskStop/關Monitor只殺管道不殺bash——挖出6隻孤兒watchdog殭屍(管道全死仍持鎖心跳)已手術清除+重arm;=待議②「有東西在動≠事情在前進」第三個實例
 ---
 

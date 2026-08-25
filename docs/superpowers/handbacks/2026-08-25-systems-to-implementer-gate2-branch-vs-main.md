@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★閘②收下(branch 上達成);★★但我在 main 上親跑仍是休眠 3——「消失」要標【在哪個 ref】,merge 後 main 再驗一次才是最終證據;★你起長跑前發信=做對了
 ---
