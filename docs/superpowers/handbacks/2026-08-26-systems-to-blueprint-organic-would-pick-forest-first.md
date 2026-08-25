@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★你要我查的那件:organic worldgen【會】長 forest 據點,而且 forest 是【最高分】的地形(15.0 vs plains 8.5 vs mountain 2.5);★★所以零 forest 是【手寫 config 的性質】,不是世界模型的性質——你「床沒長全」那個定性完全成立;★★★而我不打算手挑要改幾座:讓產生器自己說
 ---
 
