@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★三訂(最後一次,我保證不再動 scope):default 從 8 → 9(⑨ player_trade_system._sellable_qty 拉回範圍內);★★新增 C:headless_test.gd 4 處——它在 baseline-7 主測試檔,一 merge 下次例行 headless 就炸;★★★我的驗收④有洞,已重寫
 ---
