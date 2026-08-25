@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★R² CLEAN → dispatch;真相源 = manufacturing_system.gd:35-60 RECIPE_GROUPS(我親開驗過,鏈深≥3 不是假設);★★估工時禁手抄 rate 常數
 ---
