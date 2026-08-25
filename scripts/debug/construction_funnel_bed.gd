@@ -182,6 +182,37 @@ func _run() -> void:
 	lines.append("  ★★對帳：逐日 decide 合計 %d vs funnel.decide.total %d ⇒ %s" % [
 		_sum_days("funnel.decide.day."), _c("funnel.decide.total"),
 		"✅一致" if _sum_days("funnel.decide.day.") == _c("funnel.decide.total") else "❌不一致（有日桶漏記）"])
+	# ★★★被跳過的 goal：原因逐日（systems 判準：互斥且窮盡，加總 == 該日 seen）
+	#   ★六類：not_active／no_def／facility_resolve_empty／prereq_all_empty／emitted_facility／emitted_prereq
+	#   ★★加不回去 ⇒ 有一條 skip 路徑沒被列舉，而那條大概率就是答案。
+	lines.append("--- ★goal 為什麼沒生候選（逐日，★互斥且窮盡對帳）---")
+	lines.append("  day | seen | notAct noDef facEmpty preqEmpty | emitFac emitPreq | 對帳")
+	var kinds: Array = ["not_active", "no_def", "facility_resolve_empty", "prereq_all_empty",
+		"emitted_facility", "emitted_prereq"]
+	var bad_days: int = 0
+	for d2 in range(31):
+		var sfx2: String = ".day.%03d" % d2
+		var seen: int = _c("goal.skip.seen" + sfx2)
+		if seen == 0: continue
+		var vals: Array = []
+		var sum2: int = 0
+		for kd2 in kinds:
+			var v2: int = _c("goal.skip." + String(kd2) + sfx2)
+			vals.append(v2)
+			sum2 += v2
+		var okmark: String = "✅" if sum2 == seen else "❌差 %d" % (seen - sum2)
+		if sum2 != seen: bad_days += 1
+		lines.append("  %3d | %4d | %6d %5d %8d %9d | %7d %8d | %s" % [d2, seen,
+			int(vals[0]), int(vals[1]), int(vals[2]), int(vals[3]), int(vals[4]), int(vals[5]), okmark])
+	if bad_days > 0:
+		lines.append("  ★★★%d 天對不起來 ⇒ 【有一條 skip 路徑沒被列舉】——那條大概率就是答案" % bad_days)
+	else:
+		lines.append("  ★★六類互斥且窮盡：每一天都加得回 seen")
+	# ★status 與 goal_type 的細分（★不分桶逐日，避免 key 爆；只看總分佈）
+	for k9 in Probe.counts.keys():
+		var ks9: String = String(k9)
+		if ks9.begins_with("goal.skip.not_active.status.") or ks9.begins_with("goal.skip.facility_resolve_empty.gt."):
+			lines.append("      %-46s = %d" % [ks9, int(Probe.counts[k9])])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
