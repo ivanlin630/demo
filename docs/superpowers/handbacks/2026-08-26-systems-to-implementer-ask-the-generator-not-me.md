@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-terrain-representative
 tier: probe
 topic: ★★★一件小事,但形狀重要:床要加 forest 據點,而我【不挑數字】——跑 scored_positions_pure 報前 11 名的地形分布,床照它改;★理由:我自己挑=手抄一個分布,而我們今天才在手抄物理上栽過一次;★先只要數字,不要改床
