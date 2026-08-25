@@ -1,0 +1,27 @@
+[peaceful_economy] tiles=217，★真路徑 pick_start_positions 回 11 個（min_spacing=2、含 scatter 噪聲）
+--- ★母體：全圖地形分布 ---
+  forest     =  62（28.6%）
+  mountain   =  50（23.0%）
+  plains     = 105（48.4%）
+--- ★★產生器【前 11 名】的地形分布（★這才是「產生器會選什麼」）---
+  forest     =  7（前 N 佔 63.6%｜全圖佔 28.6%｜★偏好倍數 2.23×）
+  plains     =  4（前 N 佔 36.4%｜全圖佔 48.4%｜★偏好倍數 0.75×）
+--- ★前 11 名逐格（座標／地形／分數序）---
+  # 1 ( 4,15) forest    
+  # 2 ( 3,13) forest    
+  # 3 ( 7, 2) forest    
+  # 4 ( 9, 4) forest    
+  # 5 (10,12) plains    
+  # 6 ( 3, 9) forest    
+  # 7 ( 5,11) forest    
+  # 8 ( 8, 3) plains    
+  # 9 ( 5,13) plains    
+  #10 ( 7,15) plains    
+  #11 ( 1, 9) forest    
+--- ★對照組：純評分版 scored_positions_pure（★無噪聲無間距＝上界，非實況）---
+      forest     = 11
+--- ★對照：這張床現有據點的地形分布 ---
+  現有據點 11 座：
+      mountain   = 3
+      plains     = 8
+  ★★兩表並排＝【產生器會選的】vs【手寫床實際擺的】—— ★差異多大由你判，我不挑數字。
