@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★重寄(第一次根本沒投遞成功,原因是我的);★工作內容:main 上 dispatch_fail.資源不足 現在剩多少 —— 用來決定 rooting 第五端能不能解封
 ---
 

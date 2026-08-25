@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★改法包定案(用戶親交hash=真檔授權):dde2f68b四件攢一批(①inbox-watch刪同session安靜退出改一律搶佔=急件②UNRESPONSIVE移出RUNNING③豁免清單明寫④doc瘦身整案)+驗收=等自然fire不人工製造;排空後一次停一次改一次驗
 ---
 

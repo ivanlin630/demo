@@ -1,0 +1,139 @@
+[peaceful_economy day 90 seed 1337] teams=20
+★★accept.join_accept=4｜accept.join_reject=4｜合計=8｜實際收容率=50.0%
+★join_drive term只讀host_rep(名聲)不讀food——逐筆對照(host_rep vs feed_ok vs accepted)：
+    { "host": 2, "joiner": 14, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }
+    { "host": 1, "joiner": 16, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }
+    { "host": 3, "joiner": 18, "host_rep": 0.5, "feed_ok": 0.18326313210758, "accept_util": 0.07697051548519, "accepted": false }
+    { "host": 3, "joiner": 11, "host_rep": 0.5, "feed_ok": 0.07641981489598, "accept_util": 0.03209632225631, "accepted": false }
+    { "host": 9, "joiner": 19, "host_rep": 0.5, "feed_ok": 0, "accept_util": 0, "accepted": false }
+    { "host": 8, "joiner": 3, "host_rep": 0.5, "feed_ok": 0.0034921456868, "accept_util": 0.0017460728434, "accepted": false }
+    { "host": 2, "joiner": 9, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }
+    { "host": 2, "joiner": 5, "host_rep": 0.5, "feed_ok": 1, "accept_util": 0.42, "accepted": true }
+  ★估錯方向1(高名聲卻被拒,估算器過度樂觀的案例)=0
+  ★估錯方向2(低/中性名聲但食力夠也是收的,估算器可能低估的案例)=4
+★★T1建材depletion逐筆(資源種類/需求/庫存/私產/腳下manufacturing_level)：
+    { "team": 0, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 0, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 0, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 0, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 1, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 1, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 1, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 1, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 2, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 2, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 2, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 2, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 6, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 6, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 6, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 6, "resource": "material", "need_1.5x": 75, "avail": 0, "vault": 0, "private": 0, "home_mfg_level": 0, "tick": 10 }
+    { "team": 9, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 9, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 9, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 9, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 10, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 10, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 10, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 10, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 11, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 11, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 11, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 11, "resource": "material", "need_1.5x": 75, "avail": 20, "vault": 0, "private": 20, "home_mfg_level": 0, "tick": 10 }
+    { "team": 18, "resource": "material", "need_1.5x": 75, "avail": 0.05213984227795, "vault": 0, "private": 0.05213984227795, "home_mfg_level": 0, "tick": 11740 }
+    { "team": 18, "resource": "material", "need_1.5x": 75, "avail": 0.05213984227795, "vault": 0, "private": 0.05213984227795, "home_mfg_level": 0, "tick": 13220 }
+  ★短缺資源種類分佈(sample,cap=30,注意樣本數若=cap則為前N非全量)={ "material": 30 }
+  ★母體(dispatch_fail.<分類>,真count非sample,03b§④e)：資源不足=33 advisor不可用=0 pop不足=0 糧橋不足=0 subteam失敗=0 其他=0
+★★追查：_evaluate_all_body本身呼叫次數(判斷faction迴圈整體死活)：
+  evaluate_all_body.entry              = 2376
+  evaluate_all_body.factions_size_sum   = 0
+  evaluate_all_body.last_tick(最後一次呼叫時的tick) = 21600
+  前5筆tick樣本：
+    { "tick": 10, "mod_infra": 10, "n_factions": 0 }
+    { "tick": 20, "mod_infra": 20, "n_factions": 0 }
+    { "tick": 30, "mod_infra": 30, "n_factions": 0 }
+    { "tick": 40, "mod_infra": 40, "n_factions": 0 }
+    { "tick": 50, "mod_infra": 50, "n_factions": 0 }
+★★T3 infra entry四格停駐分佈：
+  infra.entry(呼叫總次數)                    = 0
+  infra.stop.guard(guard早退,非決策閘)         = 0
+  infra.stop.1_upgrade(段1升級return)         = 0 (0.0%)
+  infra.stop.2_facility(段2擴建return)        = 0 (0.0%)
+  infra.stop.3_loc_empty(段3 loc.is_empty return) = 0 (0.0%)
+  infra.stop.3_reached_dispatch_builder(真呼叫到) = 0 (0.0%)
+  ★驗算：guard+四格總和(0) 應等於 entry(0)
+★★C6-#3 求生蓋田閘：呼叫頻率+輸入變異性(÷240估算vs÷24真物理對照)：
+  food_rescue.entry(呼叫總次數) = 3760
+    { "team": 3, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 3, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 4, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 4, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 5, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 5, "food_days": 31.25, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 7, "food_days": 8.33333333333333, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 7, "food_days": 8.33333333333333, "build_eta_days": 0.5, "passed": true, "tick": 10 }
+    { "team": 3, "food_days": 31.1203280596887, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 3, "food_days": 31.1203280596887, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 4, "food_days": 31.1849266438154, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 4, "food_days": 31.1849266438154, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 5, "food_days": 31.1119156020612, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 5, "food_days": 31.1119156020612, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 7, "food_days": 7.97779236602585, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 7, "food_days": 7.97779236602585, "build_eta_days": 1, "passed": true, "tick": 130 }
+    { "team": 7, "food_days": 7.21304518171111, "build_eta_days": 1, "passed": true, "tick": 300 }
+    { "team": 7, "food_days": 7.21304518171111, "build_eta_days": 1, "passed": true, "tick": 300 }
+    { "team": 3, "food_days": 30.3882735142466, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 3, "food_days": 30.3882735142466, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 4, "food_days": 30.5214667680808, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 4, "food_days": 30.5214667680808, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 5, "food_days": 30.5901932664793, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 7, "food_days": 6.84418376823645, "build_eta_days": 1, "passed": true, "tick": 400 }
+    { "team": 7, "food_days": 6.84418376823645, "build_eta_days": 1, "passed": true, "tick": 480 }
+    { "team": 7, "food_days": 6.84418376823645, "build_eta_days": 1, "passed": true, "tick": 480 }
+    { "team": 3, "food_days": 29.9345457713891, "build_eta_days": 1.5, "passed": true, "tick": 640 }
+    { "team": 3, "food_days": 29.9345457713891, "build_eta_days": 1.5, "passed": true, "tick": 640 }
+    { "team": 4, "food_days": 29.7578729699447, "build_eta_days": 1.5, "passed": true, "tick": 640 }
+    { "team": 4, "food_days": 29.7578729699447, "build_eta_days": 1.5, "passed": true, "tick": 640 }
+  ★用bug公式(÷240)通過閘的次數 = 0 / 30樣本
+  ★★假通過(bug通過但用真物理÷24重算會fail的) = 0 ——這些是真正『蓋不完卻通過』的案例
+★★CAMP_MARGINAL_CAP(=1.5) saturation率：
+  discount.camp_evaluated(camp_drive term被評估總次數) = 720
+  discount.camp_capped(raw_ratio>=CAP次數)     = 329 (45.7%)
+  raw_ratio分佈(取樣200筆,不受first-N影響因eval/saturated是plain counter)：min=-13.67 max=4.47 median=1.50
+★★C6-#1棄工抖動：construct.progress vs construct.stall(既有tap,無新增)：
+  construct.progress(有隊在場真的在推進) = 579
+  construct.stall(有工地但無隊在場推進)   = 6121
+  ★stall樣本(前若干筆，含施工隊當下task/reason，判斷『棄』的樣貌)：
+    { "tick": 510, "tile": [10, 6], "ct_id": 5, "ct_task": "外交", "ct_pos": [10, 6], "ct_reason": "unified", "ticks_left": 336 }
+    { "tick": 520, "tile": [10, 6], "ct_id": 5, "ct_task": "外交", "ct_pos": [10, 6], "ct_reason": "unified", "ticks_left": 336 }
+    { "tick": 530, "tile": [10, 6], "ct_id": 5, "ct_task": "外交", "ct_pos": [10, 6], "ct_reason": "unified", "ticks_left": 336 }
+    { "tick": 540, "tile": [10, 6], "ct_id": 5, "ct_task": "外交", "ct_pos": [10, 6], "ct_reason": "unified", "ticks_left": 336 }
+    { "tick": 550, "tile": [10, 6], "ct_id": 5, "ct_task": "外交", "ct_pos": [10, 6], "ct_reason": "unified", "ticks_left": 336 }
+    { "tick": 560, "tile": [10, 6], "ct_id": 5, "ct_task": "外交", "ct_pos": [10, 6], "ct_reason": "unified", "ticks_left": 336 }
+    { "tick": 570, "tile": [10, 6], "ct_id": 5, "ct_task": "外交", "ct_pos": [10, 6], "ct_reason": "unified", "ticks_left": 336 }
+    { "tick": 580, "tile": [10, 6], "ct_id": 5, "ct_task": "外交", "ct_pos": [10, 6], "ct_reason": "unified", "ticks_left": 336 }
+★★★outpost普查(最高優先一個數字)：
+  day0(config開局自帶) owned outpost數 = 11
+    { "tile_id": 5009, "pos": [5, 9], "owner": 6, "level": 1 }
+    { "tile_id": 6006, "pos": [6, 6], "owner": 9, "level": 1 }
+    { "tile_id": 6008, "pos": [6, 8], "owner": 0, "level": 1 }
+    { "tile_id": 6010, "pos": [6, 10], "owner": 4, "level": 1 }
+    { "tile_id": 7011, "pos": [7, 11], "owner": 11, "level": 1 }
+    { "tile_id": 8006, "pos": [8, 6], "owner": 2, "level": 1 }
+    { "tile_id": 8010, "pos": [8, 10], "owner": 3, "level": 1 }
+    { "tile_id": 10006, "pos": [10, 6], "owner": 5, "level": 1 }
+    { "tile_id": 10008, "pos": [10, 8], "owner": 1, "level": 1 }
+    { "tile_id": 10010, "pos": [10, 10], "owner": 10, "level": 1 }
+    { "tile_id": 11009, "pos": [11, 9], "owner": 7, "level": 1 }
+  day90(全期結束) owned outpost數 = 10
+    { "tile_id": 5009, "pos": [5, 9], "owner": 6, "level": 1 }
+    { "tile_id": 6008, "pos": [6, 8], "owner": 0, "level": 1 }
+    { "tile_id": 6010, "pos": [6, 10], "owner": 4, "level": 1 }
+    { "tile_id": 7011, "pos": [7, 11], "owner": 11, "level": 1 }
+    { "tile_id": 8006, "pos": [8, 6], "owner": 2, "level": 1 }
+    { "tile_id": 8010, "pos": [8, 10], "owner": 3, "level": 1 }
+    { "tile_id": 10008, "pos": [10, 8], "owner": 1, "level": 1 }
+    { "tile_id": 10010, "pos": [10, 10], "owner": 10, "level": 1 }
+    { "tile_id": 11009, "pos": [11, 9], "owner": 7, "level": 1 }
+    { "tile_id": 13006, "pos": [13, 6], "owner": 8, "level": 1 }
+  ★遊戲中途新增的outpost數 = 1 ([{ "tile_id": 13006, "pos": [13, 6], "owner": 8, "level": 1 }])

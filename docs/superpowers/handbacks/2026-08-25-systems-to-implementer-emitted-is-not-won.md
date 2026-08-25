@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★你不拿別床數字判這床=對的,我沒交代你自己抓到;★★★但 warring 那輪請【同時報 won_argmax】——「emitted 218」和「fp 不變」可以同時為真,而最危險的解釋是「接上了、有產出、但從不改變結果」
 ---
