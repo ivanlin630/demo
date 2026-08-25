@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: harvest-terrain-from-regen
 topic: A 驗收(四條,★其中一條是【撤換過】的);★★注意:原本那條「236 掉多少」已撤下 —— 它不在 A 的因果下游
 ---

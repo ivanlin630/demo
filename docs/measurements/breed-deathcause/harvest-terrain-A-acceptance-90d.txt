@@ -1,0 +1,54 @@
+[peaceful_economy_factioned day 90/90 seed 1337] teams=30   ★窗尾標記（讀之前先確認這行）
+--- ①上游：有沒有【產生】build 委派候選 ---
+  goal.cand_build_emitted = 337
+  （★一筆都沒有 ⇒ 上游【從未產生】build 候選 —— 那 dispatch 端的 0 就不是 dispatch 的問題）
+  goal.frontier_calls              = 0
+  goal.frontier_empty              = 0
+  goal.cand_total_batches          = 0
+  ★逐日分佈（這才能回答「是不是只在早期」，樣本不行）：
+    ["day000=28", "day001=2", "day002=6", "day003=5", "day004=8", "day005=7", "day006=5", "day007=5", "day008=3", "day009=2", "day010=3", "day011=1", "day012=2", "day013=2", "day014=1", "day015=2", "day016=3", "day017=2", "day018=2", "day019=1", "day020=1", "day022=1", "day024=2", "day025=2", "day026=11", "day027=11", "day028=5", "day029=1", "day031=1", "day032=13", "day033=9", "day034=28", "day035=34", "day036=31", "day037=28", "day038=2", "day039=2", "day040=15", "day041=11", "day042=8", "day043=1", "day045=1", "day046=2", "day047=1", "day048=1", "day050=1", "day051=1", "day054=1", "day057=2", "day058=3", "day059=2", "day060=1", "day061=2", "day062=3", "day065=2", "day071=1", "day072=2", "day077=1", "day080=1", "day083=1", "day086=1"]
+  ★按資源分：哪些真的產出了候選 / 哪些地形本來就不產（B 型）
+    ★產出候選的（A 修後應該多出 food）：["food=249", "material=88"]
+    地形不產（B 型，本票不處理）：[".tools=2154", ".weapon_melee_low=3425"]
+  ★satisfied 逐案依據（own_v 應 ≥ best_alt_v，否則就是誤判）：
+    {"best_alt_v":4.445,"own_terrain":"mountain","own_v":4.529,"own_yield":2,"res":"material","team":10,"tick":8900}
+    {"best_alt_v":4.445,"own_terrain":"mountain","own_v":4.529,"own_yield":2,"res":"material","team":10,"tick":8900}
+    {"best_alt_v":4.445,"own_terrain":"mountain","own_v":4.529,"own_yield":2,"res":"material","team":10,"tick":8900}
+    {"best_alt_v":4.445,"own_terrain":"mountain","own_v":4.529,"own_yield":2,"res":"material","team":10,"tick":8900}
+    {"best_alt_v":4.134,"own_terrain":"mountain","own_v":4.213,"own_yield":2,"res":"material","team":10,"tick":9000}
+    {"best_alt_v":4.134,"own_terrain":"mountain","own_v":4.213,"own_yield":2,"res":"material","team":10,"tick":9000}
+    {"best_alt_v":4.134,"own_terrain":"mountain","own_v":4.213,"own_yield":2,"res":"material","team":10,"tick":9000}
+    {"best_alt_v":4.134,"own_terrain":"mountain","own_v":4.213,"own_yield":2,"res":"material","team":10,"tick":9000}
+    {"best_alt_v":3.621,"own_terrain":"mountain","own_v":3.69,"own_yield":2,"res":"material","team":10,"tick":9100}
+    {"best_alt_v":3.621,"own_terrain":"mountain","own_v":3.69,"own_yield":2,"res":"material","team":10,"tick":9100}
+  ★更上游：資源前置的出口表（採@地形只是取得手段 2）
+    goal.res_prereq.entry                  = 9060
+    goal.res_prereq.satisfied              = 478
+    goal.res_prereq.no_specie              = 4192
+    goal.res_prereq.buy_wins               = 2590
+    goal.res_prereq.no_market              = 1800
+  ★落到【取得手段 2】時缺的是哪種資源（分類維度）
+    落下來的：["food=249", "material=164", "tools=2154", "weapon_melee_low=3425"]
+    其中【不可採】：[]
+  ★build 候選的【真正產地】：採@地形分支的三個出口（意思完全不同）
+    goal.harvest.emitted                   = 337
+    goal.harvest.satisfied_own_terrain     = 76
+    goal.harvest.no_reachable_site         = 0
+    goal.deleg.pop_gate_block              = 0
+--- ②委派入口：有沒有【贏】並走到委派 ---
+  delegate.entry                   = 135
+  delegate.branch.convoy           = 0
+  delegate.branch.build            = 0
+  delegate.branch.facility         = 0
+  delegate.branch.generic          = 0
+  delegate.generic_no_advisor      = 0
+--- ③派遣結果：走到了有沒有派成功 ---
+  delegate.build_ok                = 0
+  delegate.build_fail              = 68
+  dispatch_fail.資源不足               = 268
+  dispatch_fail.advisor不可用         = 19
+  dispatch_fail.pop不足              = 2
+--- ★對照：紮根有沒有真的完成 ---
+  outpost.l0_to_l1                 = 4
+  construct.start                  = 29
+  construct.complete               = 30

@@ -1,0 +1,44 @@
+{
+  "slice": "harvest-terrain-from-regen",
+  "ticket": "systems票A驗收(四條,原「236掉多少」條已撤下換成③時間分佈質變)",
+  "measured_at_branch": "feat/harvest-terrain-from-regen(.worktrees/harvest-terrain-from-regen)",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy_factioned(.worktrees/failure-memory-structural-identity/config/peaceful_economy_factioned.json的逐字拷貝,本worktree已內建), 90天",
+
+  "★L3聲明": "零code改動——沿用worktree既有tap(goal.cand_build_day.<day>/goal.harvest.*/goal.res_prereq.*/dispatch_fail.*)與既有bed(goal_delegate_diag_bed.gd)，只是換掉config跑一次。",
+
+  "★★★①手工表RES_HARVEST_TERRAIN已消失(結構,讀code)": {
+    "判讀": "PASS。全scripts/樹下窮盡grep`RES_HARVEST_TERRAIN`只剩1處，且是goal_resolver.gd:387的說明性註解(講它已被刪)，非活symbol。取而代之：`harvest_terrains(res)`(goal_resolver.gd:394-400)動態掃`ResourceSystem.REGEN_RATE`當場算哪些地形產這個資源，零手抄表。"
+  },
+
+  "★★★②food型has(res)卡點歸零(直接下游,factioned床基準food=120)": {
+    "判讀": "PASS，乾淨的零。",
+    "數字": "落到取得手段2(採@地形)時缺的資源分類：[\"food=249\", \"material=164\", \"tools=2154\", \"weapon_melee_low=3425\"]——其中【不可採】(地形本來就不產這個資源，A修前food就卡在這裡)清單＝**空陣列[]**。food不再落入這個桶。",
+    "對照": "★產出候選的(A修後應該多出food)：[\"food=249\", \"material=88\"]——food從A修前的0候選變成249，符合預期方向。"
+  },
+
+  "★★★③build候選時間分佈：day000-only → 全90天都有(質變,行為層,本票主要成果)": {
+    "判讀": "PASS，質變明確。",
+    "逐日分佈(真count,非sample)": "day000=28(冷啟動批,與修前一致) → day001~day020持續有1~8的小批次不間斷 → day026/027各11 → day032=13/day033=9/day034=28/day035=34/day036=31/day037=28(一段明顯的中段高峰) → day038之後持續有1~15的小批次 → 一路延伸到day086=1(接近窗尾仍有活動)。",
+    "定性描述": "不是day0之後歸零——90天視窗內幾乎每隔幾天就有新的build候選產生，中段(day032-037)有一波明顯的活動高峰，這是A型修法帶來的行為層質變：從『一次性凍結』變成『持續產生候選』。"
+  },
+
+  "★★★④反面：material既有行為不得退化(防修回頭)": {
+    "判讀": "本輪抽驗未見退化跡象，但非窮盡母體驗證，見誠實邊界。",
+    "抽驗證據": "goal.harvest.satisfied_own_terrain=76(母體真count)，report附帶10筆逐案dump(全為team10/material/mountain)，每一筆own_v都≥best_alt_v(4.529≥4.445、4.213≥4.134、3.69≥3.621等)——這正是判定沒有變寬鬆的訊號(若變寬鬆會出現own_v<best_alt_v卻仍被判satisfied的案例，本輪10筆抽驗零違例)。",
+    "★誠實邊界": "這10筆是bed既有report的sample dump(非我這輪新增)，不是76筆母體的窮盡覆蓋——只能說『抽驗到的10筆沒有退化跡象』，不能說『76筆全部沒有退化』。若要坐實全部76筆，需要另一輪把這個tap的sample cap拉到≥76或改用逐案counter，供你裁要不要追。"
+  },
+
+  "★併報(非本票成敗,供參)": {
+    "outpost.l0_to_l1": 4, "construct.start": 29, "construct.complete": 30,
+    "備註": "比factionless/factioned兩張前床都高，但B型(tools/weapon_melee_low佔92%)仍在、已標blocked-by，文明化數字不是本票的判準。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/harvest-terrain-A-acceptance-90d.txt"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:LW_CONFIG='peaceful_economy_factioned'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\harvest-terrain-from-regen --script scripts/debug/goal_delegate_diag_bed.gd",
+
+  "cleanup": "busy beacon清除。"
+}
