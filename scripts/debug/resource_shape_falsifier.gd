@@ -27,6 +27,10 @@ func _run() -> void:
 	var sd: int = int(OS.get_environment("PERF_SEED")) if OS.get_environment("PERF_SEED") != "" else 1337
 	var out_path: String = OS.get_environment("PERF_OUT")
 	seed(sd)
+	# ★Probe 必須開：不開的話執行證明 counter 永遠是 0，
+	#   而我就會拿那個 0 去證明「沒執行」——★儀器沒開不等於事情沒發生。
+	Probe.enabled = true
+	Probe.reset()
 	WorldState.driver_ledger_enabled = true
 	WorldState.clear_driver_ledger()
 	var state := WorldState.new()
@@ -47,9 +51,14 @@ func _run() -> void:
 			_drain(pairs)
 	_drain(pairs)
 	WorldState.driver_ledger_enabled = false
+	# ★第 5 條的【執行證明】：fp 不變只證等價，這個非零才證明新接線真的跑過。
+	var exec_n: int = int(Probe.counts.get("manufacture.rate_via_authority", 0))
+	Probe.enabled = false
 
 	var lines: Array = []
 	lines.append("=== resource-shape falsifier: config=%s days=%d seed=%d ===" % [cfg, days, sd])
+	lines.append("  ★產率權威的執行證明 manufacture.rate_via_authority = %d%s" % [exec_n,
+		"　★非零＝新接線真的被跑到" if exec_n > 0 else "　⚠ 0 ＝這段 code 從未執行，fp 不變毫無意義"])
 	var unknown: Array = []
 	var by_shape: Dictionary = {}
 	for res in pairs.keys():

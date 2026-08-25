@@ -66,6 +66,10 @@ static func worker_rate_of(state: WorldState, team: TeamData, tile: HexTileData,
 	var level: int = int(tile.get(level_key))
 	if level <= 0:
 		return 0.0
+	# ★執行證明（systems 裁 2026-08-25）：`fp 不變` 只證明【等價】，
+	#   不證明【新接線真的被執行到】——舊路徑還在跑、新 code 沒人呼叫，fp 當然也不變。
+	#   （同族血證：`bridge.no_go_food = 0` 不是 gate 沒擋，是那段 code 從未執行。）
+	if Probe.enabled: Probe.bump("manufacture.rate_via_authority")
 	var pool: float = LaborSystem.pool_of(state, tile)
 	var labor_share: float = LaborSystem.labor_pop(team) / pool if pool > 0.0 else 0.0
 	var avg_skill: float = _avg_skill(state, team, "製造")
