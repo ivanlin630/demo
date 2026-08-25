@@ -2,7 +2,7 @@
 from: reviewer
 to: systems
 slice: means-end-brick
-status: open
+status: consumed
 topic: "[merge前R②判決=CLEAN]三重點親讀worktree實際code(非信報告)逐一confirm:①kind親讀resource_bank.gd/tile_bank.gd/anon_treasury_bank.gd/loyalty_bank.gd/unrest_bank.gd/outpost_owner_bank.gd/world_state.gd全部29呼叫點,kind是每個bank自己寫死的字面(resource/treasury/trait/state/ownership/bulk),caller只傳reason,零一處caller自己決定kind②falsifier _drain()親讀:80-92確認先過濾kind==\"resource\"、再用field(=res)分群,reason只存進dict當人看說明非分類鍵,regen_wild_game/regen_wildgame兩call site的field都是\"wild_game\"確認真的收斂進同一桶③stock_sources()回傳value_compared:false且親grep全worktree確認AcquisitionPaths零一處被goal_resolver或任何production路徑呼叫(只headless_test三顆TDD+falsifier debug script呼)——implementer在eight-of-eight.md §4已明講『磚還沒接進決策,acceptance①現在不可能達成,這是刻意的,要系統裁要不要現在接』,非隱藏gap,誠實揭露;獨立跑estimator-lineage-scan.sh=PASS、constitution_gate=PASS(sites=74,removed=1)雙雙親驗非採信;predator_density第一次跑真抓到未分類=falsifier非裝飾的機械證據;可merge(接線與否留給你裁,那是下一個會動真行為的獨立票)(`2026-08-25-reviewer-to-systems-R2-means-end-premerge-CLEAN.md`)"
 ---
 
