@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★手段模型定案(delta R² CLEAN)——四條裁決:①stock 不進價值比較只報形狀+tap ②形狀表准留但配機械 falsifier ③falsifier 要按【出處】分類非【字面】④比值那題留給量測不推理
 ---

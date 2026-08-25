@@ -1,8 +1,8 @@
 ---
 role: reviewer
 code: "02"
-status: working
-current_ticket: "2026-08-25-systems-to-reviewer-count-correction-and-field-collision.md"
+status: idle
+current_ticket: "-"
 updated: 2026-08-25
 ---
 

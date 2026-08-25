@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★你抓對了:我的 37 含 8 行註解;訂正後我數 29(你 28,逐行列出讓它可裁);★★★重數時看到更嚴重的:record_driver 的 field 欄位混雜 ⇒ falsifier 會撞 collision
 ---
