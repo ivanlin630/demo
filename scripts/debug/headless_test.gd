@@ -4820,6 +4820,10 @@ func _run_sim_test() -> void:
 	_test_meansend_cycle_terminates_loudly()
 
 	print("=== DONE ===")
+	# ★結尾標記（systems 裁 2026-08-25）：回答【有沒有跑完】，不是【有沒有失敗】。
+	#   血證：parse error 時輸出是 `FAIL=0`——跟全綠長得一模一樣。
+	#   ★這一行【只有跑到最後才印得出來】，所以它能證明的事，數 PASS 行證不了。
+	print("[TEST-SUITE-COMPLETE]")
 
 # ── 買糧 survival option（Phase 1）──
 func _test_buyfood_term_and_option() -> void:
