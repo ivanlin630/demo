@@ -90,12 +90,45 @@ static func capture_options(state: WorldState, team: TeamData, scored: Array, ct
 		# 可派性標記（arg­max 疑點結案 follow-up①）：util 最高 ≠ 可派。鏡射 dispatch 迴圈跳過條件
 		# （faction_ai :1844 task==IDLE / :1846 target==(-1,-1) 非 FLEE）→ 標 ✗，免再誤判 argmax。
 		# 只讀 to_task（lookup 無 state 變更），specimen-gated → 零非-specimen 成本。
-		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
-		var _task = td.get("task", TeamData.TASK_IDLE)
-		var _tgt: Vector2i = td.get("target", Vector2i(-1, -1))
-		var nd: bool = (_task == TeamData.TASK_IDLE) \
-			or (_tgt == Vector2i(-1, -1) and _task != TeamData.TASK_FLEE)
-		cands.append({"opt": opt, "util": float(e.get("u", 0.0)), "nd": nd})
+		# ★★假陽性修（2026-08-26）：`DecisionOptions.to_task` 只認得【靜態 option】，
+		#   goal candidate 的 label 不在 `REGISTRY` ⇒ `options.gd:539-540` 一律回 IDLE/(-1,-1)
+		#   ⇒ **每一個 means-end／goal 候選都會被標成「✗ 不可派」**，而同一批 entry 的 winner
+		#   其實 `committed` 了 —— QA 讀故事會誤判成「提了但不可派」。
+		#   ⇒ candidate 手上自己就帶 `to_task`，用它算；靜態 option 維持原路（行為不變）。
+		var _c0: Dictionary = (e.get("cand", {}) as Dictionary)
+		var _ctt0: Dictionary = (_c0.get("to_task", {}) as Dictionary)
+		var nd: bool
+		if not _ctt0.is_empty():
+			# ★candidate：dispatch 走 `_dispatch_goal_delegate` 型別分支，不是 task 表
+			#   ⇒ 這一層唯一有意義的「派不出去」訊號 ＝【沒有目標】。
+			var _ct: Vector2i = _ctt0.get("target", Vector2i(-1, -1))
+			nd = (_ct == Vector2i(-1, -1))
+		else:
+			var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+			var _task = td.get("task", TeamData.TASK_IDLE)
+			var _tgt: Vector2i = td.get("target", Vector2i(-1, -1))
+			nd = (_task == TeamData.TASK_IDLE) \
+				or (_tgt == Vector2i(-1, -1) and _task != TeamData.TASK_FLEE)
+		var _cd: Dictionary = {"opt": opt, "util": float(e.get("u", 0.0)), "nd": nd}
+		# ★means-end 出身標記（2026-08-26，QA 故事稽核要）：同一個「蓋工坊」候選，
+		#   既有機制提的 vs means-end 補的【長得一樣】——不標就讀不出「誰提的」，故事線斷在這。
+		#   ★純讀 scored 元素既有的 cand（decision_engine :106 塞進去的），零 re-query／零 RNG／零副作用。
+		var _cand: Dictionary = (e.get("cand", {}) as Dictionary)
+		if bool(_cand.get("means_end", false)):
+			_cd["means_end"] = true
+			_cd["me_res"] = String(_cand.get("me_res", ""))       # 為了取得哪個資源
+			_cd["me_depth"] = int(_cand.get("me_depth", -1))      # 推理鏈第幾層
+		# ★候選【真正要做什麼】(2026-08-26)：goal candidate 的 label ＝ `goal_type:frontier_kind`，
+		#   ★設施名不在 label 裡（在 `to_task`）⇒ 只看 label 讀不出「提議蓋【兵器坊】」，
+		#   故事會停在「maintain_weapons:location:delegate」這種讀不懂的字串。純讀，零 re-query。
+		var _tt: Dictionary = (_cand.get("to_task", {}) as Dictionary)
+		if not _tt.is_empty():
+			var _do: Dictionary = {}
+			for _k in ["facility", "build_type", "task"]:
+				if _tt.has(_k): _do[_k] = _tt[_k]
+			if _tt.has("target"): _do["target"] = _tt["target"]
+			if not _do.is_empty(): _cd["要做的事"] = _do
+		cands.append(_cd)
 	_end_observe(_obs)
 	_scratch(team.team_id)["candidates"] = cands
 	# 威脅來源（純讀 ctx）：QA 判 survival/flee 空鎖有無真威脅驅動（threat_id=-1+react≈0=無威脅空鎖=慢版 thrash 嫌疑）。

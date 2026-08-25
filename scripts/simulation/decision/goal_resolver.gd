@@ -557,6 +557,12 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				else:
 					Probe.bump("means_end.unique_no_existing")
 					Probe.bump("means_end.unique_no_existing." + _fname)
+				# ★是【哪一支隊】提的設施(2026-08-26)：計數只說「發生了幾次」，說不出【誰】
+				#   ⇒ specimen 挑不到主角、故事線「缺料 → 提出蓋工坊/兵器坊」永遠寫不出來。
+				#   純 tap（Probe-gated、零 RNG、不參與任何判斷）。
+				Probe.bump_sample("means_end.facility_proposed", {
+					"team": team.team_id, "facility": _fname, "res": res,
+					"dup": _existing, "tick": state.world.current_tick}, 200)
 			if not fc.is_empty():
 				fc["me_depth"] = _depth
 				out.append(fc)   # ★空字典不能進 out：掉出 if 外會讓 out 幾乎恆非空
