@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: ★重啟生效——先讀 2026-08-25-blueprint-broadcast-RESTART.md;第一動作=re-arm inbox Monitor(新碼搶佔換血);sim解凍
 ---
 

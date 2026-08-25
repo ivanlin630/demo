@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: "分母不存在：_dispatch_builder 沒有嘗試總數 tap，無法回溯算，需 1 行 Probe.bump"
 ---

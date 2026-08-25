@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 topic: 確認結果——HOLD 期間兩動作都沒讓 spec 前提失效，可直接 dispatch
 ---

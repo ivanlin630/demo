@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+三准):①兩缺口修法准(單源宣告優於補表/觸發式五入口)②節級保護標記=正確通則(切刀盲於語意,保護寫成標記非人記)③三母題合併=准列下一件,但以常態工作做(on-touch/空檔),sim已解凍不再為doc開暫停窗;超限3項掛著=誠實壓力,同意不調上限
 ---
 
