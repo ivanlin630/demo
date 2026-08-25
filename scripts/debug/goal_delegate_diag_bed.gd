@@ -70,6 +70,10 @@ func _dump(cfg: String, days: int, sd: int, state: WorldState, out_path: String)
 	em.sort(); nb.sort()
 	lines.append("    ★產出候選的（A 修後應該多出 food）：" + str(em))
 	lines.append("    地形不產（B 型，本票不處理）：" + str(nb))
+	if Probe.samples.has("goal.harvest.satisfied_own_terrain"):
+		lines.append("  ★satisfied 逐案依據（own_v 應 ≥ best_alt_v，否則就是誤判）：")
+		for es in (Probe.samples["goal.harvest.satisfied_own_terrain"] as Array).slice(0, 10):
+			lines.append("    " + JSON.stringify(es))
 	lines.append("  ★更上游：資源前置的出口表（採@地形只是取得手段 2）")
 	for kr in ["goal.res_prereq.entry", "goal.res_prereq.satisfied", "goal.res_prereq.no_specie",
 			"goal.res_prereq.buy_wins", "goal.res_prereq.no_market"]:

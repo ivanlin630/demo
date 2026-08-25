@@ -459,7 +459,13 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		# ★自家產地的值：delay = 0（人已經在那裡），同一支 option_value。
 		var own_v: float = DiscountedFlow.option_value(own_yield, 0.0, 0.0, d, h) if own_yield > 0.0 else -1.0
 		if own_v >= best_v and own_v > 0.0:
-			if Probe.enabled: Probe.bump("goal.harvest.satisfied_own_terrain")
+			if Probe.enabled:
+				Probe.bump("goal.harvest.satisfied_own_terrain")
+				# ★把【判定的依據】也寫出來：帳平只證明沒漏算，不證明每一案判斷正確。
+				Probe.bump_sample("goal.harvest.satisfied_own_terrain", {"team": team.team_id, "res": res,
+					"own_terrain": own_tile.terrain, "own_yield": own_yield,
+					"own_v": snappedf(own_v, 0.001), "best_alt_v": snappedf(best_v, 0.001),
+					"tick": state.world.current_tick}, 30)
 			return {}   # ★自家產地已經不輸給任何替代 ⇒ 再跑一趟無益
 		if Probe.enabled:
 			if best_pos == Vector2i(-1, -1):
