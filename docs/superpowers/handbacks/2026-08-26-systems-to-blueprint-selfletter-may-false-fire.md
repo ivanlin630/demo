@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★預警一個【可預期的誤報】:我寫了一封 systems→systems 的交接信,刻意保持 open 直到 compact 後 ⇒ 超過 1h 會被 watchdog 判 UNRESPONSIVE;★不是斷鏈,是自寄自收
 ---
 
