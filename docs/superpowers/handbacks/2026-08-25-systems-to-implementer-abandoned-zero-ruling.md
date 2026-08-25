@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: convoy-return-task-authority
 topic: ★★construction_abandoned=0 與 blocked_total=0 同形(今天第三次);★652→0 擺動太大要對照預期母體;★★而答案很可能在你 A1 的那 3 次未完工
 ---
