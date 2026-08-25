@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-terrain-realign
 tier: behavior
 topic: ★裁定:床照【真路徑】的地形分布改(forest 7／plains 4／mountain 0),而【每一格的位置也照產生器的排名取】——不是我挑哪幾座變 forest;★★★而 mountain 0 是這輪最硬的一格:產生器【真的不選】,而床有 3 座;★食物平衡會跟著變,那是預期不是副作用
