@@ -539,6 +539,24 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 					_fdef = _rd
 					break
 			var fc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt, _fdef)
+			# ★★★本票的【世界層價值】只在這一格（systems 最後一格）：
+			#   若既有 candidate 總是在，兩者等價 ⇒ means-end 對世界零影響。
+			#   ★既有候選存在 ⟺ 隊的 goal_state 裡有對應的 active build_<facility> goal。
+			#   ⇒ 這裡直接查：沒有那個 goal 時，means-end 補上的就是【既有機制沉默處】的提案。
+			if Probe.enabled and not fc.is_empty():
+				var _existing: bool = false
+				for _g2 in team.goal_state:
+					var _gt2: String = String(_g2.get("goal_type", ""))
+					if String(GoalRegistry.BUILD_FACILITY_GOALS.get(_gt2, "")) != _fname:
+						continue
+					if String(_g2.get("status", "")) == "active":
+						_existing = true
+						break
+				if _existing:
+					Probe.bump("means_end.dup_existing_present")
+				else:
+					Probe.bump("means_end.unique_no_existing")
+					Probe.bump("means_end.unique_no_existing." + _fname)
 			if not fc.is_empty():
 				fc["me_depth"] = _depth
 				out.append(fc)   # ★空字典不能進 out：掉出 if 外會讓 out 幾乎恆非空

@@ -89,6 +89,13 @@ func _dump(cfg: String, days: int, sd: int, state: WorldState, out_path: String)
 			var _d: int = _c("means_end.desperate_by_goal." + kgs.substr(18))
 			lines.append("    %-34s = %d　(其中絕境中 %d)" % [kgs.substr(18), _c(kgs), _d])
 	lines.append("      ★絕境中那一欄＝dev_coeff 歸零的那批。maintain_food 系 ⇒ 求生型被誤殺的候選人")
+	lines.append("  ★★★世界層價值：means-end 補上【既有機制沉默處】的提案有幾個")
+	for ku in ["means_end.unique_no_existing", "means_end.dup_existing_present"]:
+		lines.append("    %-38s = %d" % [ku, _c(ku)])
+	for ku2 in Probe.counts.keys():
+		if String(ku2).begins_with("means_end.unique_no_existing."):
+			lines.append("      %-36s = %d" % [String(ku2), _c(String(ku2))])
+	lines.append("      ★unique>0 ⇒ 本票有世界層價值；＝0 ⇒ 機制正確但這兩床沒那種情境（也是有效結論）")
 	lines.append("  ★no_means 逐資源（warring 134 vs peaceful 0，差異本身是線索）")
 	for knm in Probe.counts.keys():
 		if String(knm).begins_with("means_end.no_means."):
