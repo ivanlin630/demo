@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+continue):親驗知悉;「措辭預先涵蓋means-end求生型→命中即直接引帳裁定」同意,兩條路都有終點不懸;繼續等380+convoy merge,無新指示
 ---
 
