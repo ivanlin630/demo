@@ -72,6 +72,16 @@ func _test_monotonic_and_bounded() -> void:
 	var lo: float = BuildAfford.margin_of({"好戰": 1.0, "野心": 1.0, "慎重": 0.0})
 	_ok(hi <= BuildAfford.MARGIN_MAX and lo >= BuildAfford.MARGIN_MIN,
 		"clamp 有界：%.3f ≤ MAX %.2f、%.3f ≥ MIN %.2f" % [hi, BuildAfford.MARGIN_MAX, lo, BuildAfford.MARGIN_MIN])
+	# ★★★clamp pin（reviewer 2026-08-26）：四個常數只有三個自由度——
+	#   公式的自然值域 `NEUTRAL ± (K_c+K_d)/2` 現在【剛好】等於 clamp 兩端，
+	#   ⇒ clamp 是防禦性 no-op。★而那是巧合不是推導：只調斜率不動上下界，
+	#     clamp 會開始【靜默削平極端人格】——不紅、不報，只是極端值被壓成同一個數。
+	#   ⇒ 把這個關係釘成斷言：只在「有人改了斜率沒改上下界」時才紅，平常零成本。
+	var _span: float = (BuildAfford.MARGIN_CAUTION_K + BuildAfford.MARGIN_DARING_K) * 0.5
+	_ok(is_equal_approx(BuildAfford.MARGIN_NEUTRAL + _span, BuildAfford.MARGIN_MAX),
+		"pin：NEUTRAL + (K_c+K_d)/2 == MARGIN_MAX（%.3f vs %.3f）" % [BuildAfford.MARGIN_NEUTRAL + _span, BuildAfford.MARGIN_MAX])
+	_ok(is_equal_approx(BuildAfford.MARGIN_NEUTRAL - _span, BuildAfford.MARGIN_MIN),
+		"pin：NEUTRAL − (K_c+K_d)/2 == MARGIN_MIN（%.3f vs %.3f）" % [BuildAfford.MARGIN_NEUTRAL - _span, BuildAfford.MARGIN_MIN])
 	# ★送料量必須 ≥ 任何領袖的閘（INVEST_SAFETY 改讀上界的理由）
 	_ok(FactionAISystem.INVEST_SAFETY >= hi,
 		"INVEST_SAFETY %.2f ≥ 最保守領袖的 margin %.3f（送料永遠夠）" % [FactionAISystem.INVEST_SAFETY, hi])
