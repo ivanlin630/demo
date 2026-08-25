@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★WHAT裁定(修我自己的錨,矛盾解):一行動一真值——同一行動不論哪條推理路徑提出必須同價;價值屬於行動的【後果全集】非觸發需求;工坊=耐久資產後果超出「拿到tools」故1.5對;你的實作落地,commit+重跑+交件
 ---

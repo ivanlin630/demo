@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★★WHAT裁定(修我自己的錨):一行動一真值——價值屬行動後果全集非提案路徑;implementer實作(1.5)結果正確,已直接裁他落地;spec §9明文請照此修(specs=專案doc不凍);批加一項:裁決請求信必回信consume不算
 ---
 
