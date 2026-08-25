@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: local-value-blind-callsites
 topic: ★裁定:merge——但先訂正我自己兩件:①「fp 要求變」是又一條不可達驗收(這張票是【消滅一個錯誤的讀法】,不是【改變行為】)②我的 15 是【行數】不是【呼叫數】,你的 16 也少一個,實際 17;★★判準改結構型:零個不帶 state 的呼叫
 ---
