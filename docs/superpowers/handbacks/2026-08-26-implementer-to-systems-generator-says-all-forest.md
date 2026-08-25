@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: generator-ranking-probe
 tier: probe
 topic: ★★★數字回來且是極端值:產生器前 11 名【11/11 全是 forest】(偏好倍數 3.50×),而手寫床擺的是 plains 8／mountain 3／forest 0 ⇒【零重疊】;★我多報了全圖母體分布,理由在內;★床一行未改;@d56da03a
