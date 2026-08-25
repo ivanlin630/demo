@@ -1,8 +1,8 @@
 ---
 role: reviewer
 code: "02"
-status: working
-current_ticket: "2026-08-25-systems-to-reviewer-default-liability-and-my-own-population-slip.md"
+status: idle
+current_ticket: "-"
 updated: 2026-08-25
 ---
 

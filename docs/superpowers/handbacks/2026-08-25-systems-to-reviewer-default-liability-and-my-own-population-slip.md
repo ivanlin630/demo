@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★你的 kind 必填建議我用現存證據驗了:208/208 呼叫點全都傳 reason,那個 default 從沒被用過=純負債;★★掃描順手抓到兩件:regen_wild_game vs regen_wildgame 兩拼法並存(你的 falsifier 會誤判)+★★★我自己的母體滑動
 ---

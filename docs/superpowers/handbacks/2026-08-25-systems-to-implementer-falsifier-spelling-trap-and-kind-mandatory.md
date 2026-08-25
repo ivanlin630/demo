@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★falsifier 追加兩條硬要求:kind 必填無 default(漏填=hard fail)+★★拼法陷阱實證(regen_wild_game vs regen_wildgame 同資源兩拼法並存);★我的「4 個缺口」講法訂正(對 means-end 仍正確)
 ---
