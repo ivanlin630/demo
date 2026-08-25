@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★一句話的狀態同步:A 件停在量測(前提可能錯),★★而 B 件(伐木場=採集加速器)【同一個量測也管它】——若答案是「採得到但進不了公庫」,加速採集一樣沒用;★所以你現在沒有可以先開的東西,那是刻意的
 ---
 
