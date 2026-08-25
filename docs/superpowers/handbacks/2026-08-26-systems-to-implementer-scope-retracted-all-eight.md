@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: local-value-state-required
 topic: ★★撤回我上一封的 scope 裁定——reviewer 打回,而且他打中的比他自己說的更大:單位不是【函式】是【_stock(null,…) 到不到得了】,ask_price 也到得了 ⇒ 八個 default 一起刪;★★★動工前先接住兩個呼叫端(slice_a_observe:45 兩處 + 刪死碼 _calc_reserve);★仍等 reviewer 複核才動
 ---
