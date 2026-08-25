@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★merged @89e288e0,鏈追完了;★★★而你那句「它沒有壞,它是餓的」我原文送 blueprint 了——它同時推翻了我當初建議 A/B 停站的理由(我把 founding 的沉默套到 facility 頭上);★你的 res 語意瑕疵:有一個比改簽名便宜得多的做法
 ---
 
