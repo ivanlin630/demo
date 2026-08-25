@@ -213,6 +213,36 @@ func _run() -> void:
 		var ks9: String = String(k9)
 		if ks9.begins_with("goal.skip.not_active.status.") or ks9.begins_with("goal.skip.facility_resolve_empty.gt."):
 			lines.append("      %-46s = %d" % [ks9, int(Probe.counts[k9])])
+	# ★★★build goal 的歸宿（★母體＝BUILD_FACILITY_GOALS 常數全集，不是 goal_state）
+	#   ★上一顆的盲點就是母體被削：被移除的 goal 不在 goal_state 裡 ⇒ 永遠數不到。
+	#   ★★這裡八類加總必須 == seen(= 8 × 檢視輪數)。
+	lines.append("--- ★build goal 的歸宿（逐日，★母體是常數全集）---")
+	var fates: Array = ["kept", "readded",
+		"removed_no_otile", "removed_wrong_outpost_type", "removed_already_built", "removed_desire_below_min",
+		"readd_blocked_no_otile", "readd_wrong_outpost_type", "readd_already_built", "readd_desire_below_min"]
+	lines.append("  day | seen | kept readd | rm:noOp rm:type rm:built rm:desire | ra:noOp ra:type ra:built ra:desire | 對帳")
+	var bad2: int = 0
+	for d3 in range(31):
+		var sf: String = ".day.%03d" % d3
+		var seen2: int = _c("goal.build_fate.seen" + sf)
+		if seen2 == 0: continue
+		var vs: Array = []
+		var sm: int = 0
+		for fk in fates:
+			var vv: int = _c("goal.build_fate." + String(fk) + sf)
+			vs.append(vv); sm += vv
+		if sm != seen2: bad2 += 1
+		lines.append("  %3d | %4d | %4d %5d | %6d %7d %8d %9d | %7d %7d %8d %9d | %s" % [d3, seen2,
+			int(vs[0]), int(vs[1]), int(vs[2]), int(vs[3]), int(vs[4]), int(vs[5]),
+			int(vs[6]), int(vs[7]), int(vs[8]), int(vs[9]),
+			"✅" if sm == seen2 else "❌差 %d" % (seen2 - sm)])
+	if bad2 > 0:
+		lines.append("  ★★★%d 天對不起來 ⇒ 還有一條歸宿沒被列舉" % bad2)
+	else:
+		lines.append("  ★★十類互斥且窮盡：每天都加得回 seen（母體＝常數全集，不會被削）")
+	for kf in Probe.counts.keys():
+		if String(kf).begins_with("goal.build_fate.removed_") and String(kf).find(".gt.") > 0:
+			lines.append("      %-52s = %d" % [String(kf), int(Probe.counts[kf])])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
