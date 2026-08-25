@@ -3800,7 +3800,30 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	#   ★沒有分母，「dispatch_fail 次數上升」和「失敗率上升」分不開——means-end 接線多產 candidate ⇒
 	#   嘗試本來就變多 ⇒ 絕對次數上升可能只是副產品。★掛在成功處 or 掛在第一道閘之後 = 數到的是
 	#   「通過前幾道閘的嘗試」，不是嘗試。Probe-gated、零 RNG、純觀測。
-	if Probe.enabled: Probe.bump("dispatch_builder.attempt")
+	if Probe.enabled:
+		Probe.bump("dispatch_builder.attempt")
+		# ★★★逐筆身分（systems 派 2026-08-26）：counter 說得出「嘗試 39 次」，說不出
+		#   ★【誰】在嘗試 —— 而逐隊分布顯示 material≥50 的只有 4/12 隊、前 3 隊吃走 80.8%、一隊是 0
+		#   ⇒ 「39 次來自沒料的那 8 隊」與「來自有料的那 3-4 隊」是【完全不同的 arc 方向】
+		#     （分配／輸送問題 vs 有料也過不了閘），而只有 counter 一種都分不出來。
+		# ★★壞掉會長什麼樣（不是「別亂改」）：
+		#   ①**沒有 `tick`** ⇒ 30 筆可能全部來自同一個 tick，而讀的人會把它當成整段時間的分布
+		#     —— ★上一輪就是這樣用 `avail 從未超過 20` 推了三份文件的結論，被 measurer 攔下。
+		#   ②**cap 太小** ⇒ first-N 截斷把「開局那幾筆」冒充成全貌。★cap 100 > 母體 39。
+		#   ③★**只有 `team` 沒有【當下存量】** ⇒ 只能拿「期末 material」當代理，
+		#     而期末與嘗試當下不是同一個數 ⇒ 「誰在嘗試 vs 誰有料」會答成一個看起來合理的錯答案。
+		#     ⇒ 這裡直接讀當下的（公庫＋私產），★純讀、零判斷、不影響控制流。
+		var _ht: HexTileData = state.world.tiles.get(
+			leader_team.tile_pos.x * 1000 + leader_team.tile_pos.y)
+		var _vault_mat: float = 0.0
+		if _ht != null and _ht.outpost_owner == leader_team.team_id:
+			_vault_mat = float(_ht.public_storage.get("material", 0))
+		Probe.bump_sample("dispatch_builder.attempt", {
+			"tick": state.world.current_tick, "team": leader_team.team_id,
+			"type": outpost_type, "level": level, "target": target_pos,
+			"mat_vault": _vault_mat,
+			"mat_private": float(leader_team.resources.get("material", 0)),
+			"mat_avail": _vault_mat + float(leader_team.resources.get("material", 0))}, 100)
 	# S4 防重複派遣：leader_team 已有 TASK_CONSTRUCT 子隊（在途或施工）→ 跳過
 	# 移動中子隊 tile_pos ≠ 目的地，故用「任一 CONSTRUCT 子隊存在」gate 代替精確目標比對
 	for cid in leader_team.subteam_ids:
