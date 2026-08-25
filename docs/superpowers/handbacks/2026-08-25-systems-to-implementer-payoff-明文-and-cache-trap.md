@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★糾正明文:我要的是【結果】不是【實作路徑】——payoff 必須等於所服務 goal 的 payoff,不論你是「移除覆寫」還是「補上傳遞」;★★★class 快取第三次且偽裝成災難,你沒報成災難是這輪最值錢的克制
 ---
