@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★兩缺口已補;★★★而補②時切刀把「觸發式必讀」當最肥的節切走了——那張表移到 detail 就完全廢掉,已還原並寫成【節級保護標記】;★01_architect 卡在 212,機械已無可切(cut=0),我不調上限
 ---
 
