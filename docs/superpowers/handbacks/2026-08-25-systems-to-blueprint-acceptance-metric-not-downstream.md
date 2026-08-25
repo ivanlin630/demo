@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★你指定的那條 acceptance「重量 236 掉多少」【不在 A 的因果下游】—— implementer 用 delegate.build_ok=0 坐實;我已撤下並立通則
 ---
 
