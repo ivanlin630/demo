@@ -1,0 +1,49 @@
+{
+  "slice": "convoy-return-task-authority",
+  "ticket": "systems票two-stale-remeasures之①：§N兩欄在【現在的commit】(RNG副作用已修)重量",
+  "measured_at_branch": "feat/convoy-return-task-authority(.worktrees/convoy-return-task-authority)",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+
+  "★L3聲明": "convoy_return_conservation_bed.gd的_report()加一段§N兩欄report(純report,零production code改動)。已窮盡grep確認舊corvee_site清除side-effect已被implementer移除、我自己新增的觀測碼也零randf/randi呼叫——本輪數字為RNG-safe/中性世界量測。",
+
+  "★★★①合法退場總次數(release()呼叫總數,不該下降)": {
+    "總數": 185, "clean(無殘留承諾)": 67, "with_commitment(帶承諾標記退場)": 118,
+    "帶承諾標記細分": {"corvee": 0, "convoy": 1, "order": 117},
+    "備註": "這是本輪(post-RNG-fix)第一次乾淨量測,沒有舊乾淨基準可比對『有沒有掉』——本次數字本身即為新基準,供未來比對用。"
+  },
+
+  "★★★②被hold擋下總次數(commit.hold_blocked,該上升)": {
+    "commit.hold_blocked": 11,
+    "persist.hold(母口徑,含PROGRESSIVE_HOLD_TASKS非承諾型)": 21,
+    "hold_blocked依kind分佈": {"construction": 11},
+    "判讀": "PASS，>0，機制確實在攔阻construction類的承諾中斷嘗試。"
+  },
+
+  "★★★主指標-convoy：RETURN期間task=運輸佔比": {
+    "數字": "174/174 = 100.0%",
+    "被搶去做別的task分佈": "{}(空,零筆)",
+    "判讀": "PASS，滿分。RETURN階段的convoy在本輪90天內沒有一次被搶走task——與spec要求的『不得只看stranded計數』一致，這是直接行為證據非計數代理。"
+  },
+
+  "★★★主指標-建設：construction_abandoned事件數(與①分開)": {
+    "commit.abandon_fire": 0,
+    "reason分佈": "{}(空)",
+    "備註": "與此前多輪(64823f30/5cabb3f7等)獨立普查一致——peaceful_economy這個世界配置下施工從不被放棄，是世界性質非病徵，本輪重跑重現同樣的0。"
+  },
+
+  "★★★latch監測(stall-detector觸發率,假設不靜默)": {
+    "commit.stall_fire(有觸發)": 3,
+    "commit.stall_latched_suppressed(觸發被latch壓下)": 7,
+    "commit.stall_skip_unmeasurable": 804,
+    "判讀": "非長期零觸發(3>0)——排除『latch已發生而沒人知道』的紅燈情境。stall_latched_suppressed=7證明latch防抖確實在運作(壓下重複觸發)。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/convoy-task-authority-N-90d.txt"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\convoy-return-task-authority --script scripts/debug/convoy_return_conservation_bed.gd",
+
+  "cleanup": "busy beacon清除。"
+}
