@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★★立【factioned peaceful 床】為本線量測環境(blueprint 裁,現在就上);★faction 數量我【不拍】—— 沿用既有先例,理由寫在裡面
 ---
 

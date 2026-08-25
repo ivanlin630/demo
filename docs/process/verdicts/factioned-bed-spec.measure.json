@@ -1,0 +1,67 @@
+{
+  "slice": "failure-memory-structural-identity",
+  "ticket": "systems票(factioned-bed-spec)：立peaceful_economy_factioned為本線量測環境,先驗①_evaluate_infrastructure是否真活,再重估三條證據鏈(argmax秤輸/dispatch卡建材/失敗記憶)+outpost普查",
+  "measured_at_branch": "feat/failure-memory-structural-identity(.worktrees/failure-memory-structural-identity)",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy_factioned(新床,見下), 90天",
+
+  "★新床建法(peaceful_economy_factioned.json,config-only,零sim-code改)": {
+    "基底": "peaceful_economy.json原樣12隊explicit teams(id/tile_pos/resources/leader不動)",
+    "加factions方法": "explicit mode讀每隊`faction_id`+恰一隊`is_faction_leader:true`(game_setup.gd:_setup_explicit_teams:562-582)，非warring_states的生成式factions block(那是mode:random專用,explicit不讀)。",
+    "team→faction分派": "★依team id序切3個等分block：faction0={0,1,2,3}(leader=0) faction1={4,5,6,7}(leader=4) faction2={8,9,10,11}(leader=8)——機械切法,零敘事介入,可重現。落在warring_states.json自身`teams_per_faction_range:[2,5]`區間內(12/3=4)。",
+    "★誠實勘誤(你的理由列裡有一處事實不符,不影響指令,但我讀了原始檔要報)": "你說『沿用既有先例warring_states的faction結構(factions=3)』——但實際讀`config/warring_states.json:21`，該檔`factions.count=8`不是3。faction數=3看起來是你自己拍的一個新數字，不是warring_states現有值。我仍照你的明確指令(factions=3)建床，只是把這個對不上的地方報給你，你裁要不要修理由措辭。",
+    "landed": "config/peaceful_economy_factioned.json(worktree內,尚未commit)"
+  },
+
+  "★★★第一格判讀(先驗此床是否真活)：_evaluate_infrastructure真的跑了": {
+    "n_factions(evaluate_all_body樣本前5筆)": 3,
+    "evaluate_all_body.entry": 2376,
+    "infra.entry(真呼叫總次數)": 258,
+    "infra.stop.2_facility": "8(3.1%)",
+    "infra.stop.3_reached_dispatch_builder(真呼叫到_dispatch_builder)": "250(96.9%)",
+    "判讀": "★★不是第一格(仍0次⇒床沒造對)——床造對了，這條路在factioned床上真的活著(對照factionless床這幾個counter全部=0)。"
+  },
+
+  "★★★三條證據鏈重估": {
+    "①argmax秤輸(紮根 vs 紮營，母體+分佈，非只peak)": {
+      "母體(decision.opt_applicable.<opt>)": {"覓食": 871, "遷移找糧": 124, "佔村": 0, "併入": 401, "紮營": 1601, "紮根": 303},
+      "分佈變化(factionless→factioned)": {
+        "紮根(rooting.u_sample.u)": "median 0.307(n=90)→0.093(n=200,母體303,sample前N非全量)——★差距不是縮小是變更大",
+        "紮營(discount.camp_ratio_sample.raw_ratio)": "median 1.585→2.236——同向拉開",
+        "紮根vs紮營倍率": "3.7~5.2倍(factionless) → 約24倍(factioned,2.236/0.093)——★尺不同的方向在factioned床上更明顯，不是被稀釋",
+        "覓食(flow.forage_u_sample.u)": "★median 0.0000→1.0000——完全反轉，factioned世界下覓食變成常態高值選項(母體從749升到871+124=995，樣本仍cap=200前N)",
+        "佔村(flow.occupy_u_sample.u)": "★母體仍=0——兩張床都測不到，非faction數量問題，是has_occupy_target這個gate在兩種peaceful世界設定下都沒被滿足過"
+      }
+    },
+    "②dispatch卡建材(母體真count,非只30筆sample)": {
+      "★★母體(dispatch_fail.<分類>,真count)": {"資源不足": 236, "advisor不可用": 71, "pop不足": 2, "糧橋不足": 0, "subteam失敗": 0, "其他": 0},
+      "material_detail sample(cap=30,已滿,前N非全量)": "28筆tick=10 + 2筆tick=500(team0: avail從0→4.68仍遠低於need 75；team8仍avail=0)",
+      "★★★自我作廢(依01_architect『被推翻的猜測要明確作廢』)": "我在material-gate-priority-remeasure票(commit 7b6702d0)講的『_dispatch_builder本身90天只在tick=10附近被呼叫過這28次，之後89天再也沒被呼叫過一次』——★這句在factioned床上不成立，作廢，別再往那方向找。真相是：母體236次資源不足失敗，遠不只tick=10那28筆(那是sample cap=30先到先錄的假象，剛好卡在cap上讓我誤以為只有28次)。factioned床下這條路持續被走、持續失敗，不是一次性凍結。",
+      "判讀": "★接近你判讀表第二格『它有跑、但_dispatch_builder仍卡建材⇒建材閘是真的閘,與faction無關⇒建材線繼續』——236次真嘗試裡多數仍卡在material，但不是『89天零呼叫』的凍結故事，是『236次持續嘗試、236次(扣掉最終1次成功)幾乎都被material擋下』的持續拉鋸故事。★outpost普查顯示中途新增1個(見下)——代表這236次失敗裡至少有1次(或另一條路徑)最終突破了。"
+    },
+    "③失敗記憶(suppressed分佈)": {
+      "紮根": "★仍未出現在suppressed分佈裡(build_apothecary=122/build_workshop=145/紮營=56/求和=30等18類，紮根0次)——與factionless床一致，紮根從未被折價這件事在factioned床上重現，不是factionless特有的假象。"
+    }
+  },
+
+  "★★★outpost普查(day0/day90/中途新增)": {
+    "day0": 11, "day90": 11,
+    "中途新增": "1({tile_id:13004, pos:[13,4], owner:5, level:1})",
+    "outpost.l0_to_l1": 1,
+    "root.won_argmax→settlement.l0_to_l1_start→construct.complete_crude_camp→outpost.l0_to_l1": "2 → 4 → 1 → 1",
+    "對照factionless": "0→0→0→0(全鏈路乾)。factioned床上這條漏斗至少走通一次(2贏→4次開工→1次完工→1次晉級)，比factionless活躍。"
+  },
+
+  "landed_paths": {
+    "reports": [
+      "docs/measurements/breed-deathcause/factioned-bed-90d.txt(camp_access_diag_bed.gd,診斷①②③+outpost普查+失敗記憶)",
+      "docs/measurements/breed-deathcause/factioned-bed-infra-material-v2-90d.txt(join_accept_measure_bed.gd,infra+evaluate_all_body+dispatch_fail母體+T1 material sample)"
+    ],
+    "config": "config/peaceful_economy_factioned.json(worktree,未commit)",
+    "code_diff": "join_accept_measure_bed.gd加2行(dispatch_fail母體true-count印出)，Probe-gated純report,零行為改動"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy_factioned'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\failure-memory-structural-identity --script scripts/debug/camp_access_diag_bed.gd  (第二輪跑 scripts/debug/join_accept_measure_bed.gd 取infra/dispatch_fail母體)",
+
+  "cleanup": "busy beacon清除。新config peaceful_economy_factioned.json + join_accept_measure_bed.gd的2行diff 尚未commit,留worktree供你/implementer裁是否連同其他今日改動一起入正式commit。"
+}

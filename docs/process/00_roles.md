@@ -244,7 +244,7 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 | `PROGRESSIVE_HOLD_TASKS` | `task_arbiter.gd:22` | 7 個 task | ★**漏過兩次**：CONVOY（27.9 日漂流）、TASK_CAMP（89% 棄營） |
 | ★`OPTION_FAIL_KEY` | `failure_memory.gd` | ★**2 個 option**（買糧／買料） | 失敗反饋律**對其餘 option 零行為**；`build_workshop` 連贏 45 次 |
 | ★**「四端同秤」的那張表** | `terms.gd` ／ 我寫的 spec | ★**4 / 21** | ★**漏列紮根**（第五端）—— 詳下方 |
-| ★`RES_HARVEST_TERRAIN` | `goal_resolver.gd` | ★**1 筆**（`{"material": "forest"}`） | ★**2061／2089 次卡在 `has(res)`** —— 表上沒有的資源，「採@地形」這條取得手段**對它靜默不存在** |
+| ★★`RES_HARVEST_TERRAIN` | `goal_resolver.gd` | ★**1 筆**（`{"material": "forest"}`） | ★★★**與真相源【直接矛盾】的教科書實例** —— 見下 |
 | （新增請續列） | | | |
 
 #### ★★「我改了 N 個」≠「該改的是 N 個」（systems 自糾 2026-08-25，blueprint 裁入負斷言帳）
@@ -259,6 +259,21 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 
 ★**判準**：**寫「全部／四端／唯一」之前，先問「這個數字是從哪裡數出來的？」** ——
 **若答案是「我列的」而不是「掃出來的」，那就不是窮盡。**
+
+#### ★★★教科書實例：**表說不能採，真相源說三種地形全都產**（2026-08-25）
+```gdscript
+# goal_resolver.gd —— 手工表
+const RES_HARVEST_TERRAIN = {"material": "forest"}        # ★food 不在表上 ⇒「不可採」
+
+# resource_system.gd —— 真相源
+const REGEN_RATE = {
+  "plains":   {"food": 8.0,  "material": 0.5 },           # ★food 8.0 —— 全表最高之一
+  "forest":   {"food": 3.0,  "material": 12.0},
+  "mountain": {"food": 0.5,  "material": 2.0 },
+}                                                          # ★★三種地形【全都產 food】
+```
+⇒ ★★**最該被採的資源（`plains` 的 food 8.0），恰恰是手工表上沒有的那個。**
+⇒ ★**這不是「表過期了」，是【表從來沒有跟真相源對齊過】。**
 
 ★**處置原則**：**手工對照表是暫時形態，不是終態。**
 **能由【結構身分】機械導出的，一律改導出**（覆蓋 ＝ 構造性 100%、**無表可漏**）——

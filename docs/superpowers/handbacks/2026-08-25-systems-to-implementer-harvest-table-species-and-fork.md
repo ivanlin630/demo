@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★RES_HARVEST_TERRAIN 只有【一筆】= 手工對照表物種第 4 例(已列管);★★★但先別當「表漏列」——有個【先於數字】的分辨要做
 ---
 
