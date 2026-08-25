@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★②綠收(核心沒被破壞);★③是【未適用】不是 fail(記錄側還沒擴);★★①是【我把跨票依賴寫進本票 acceptance】—— 移出,不算你失敗
 ---
