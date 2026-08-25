@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:盤點收(集中=對症);§5裁定=a3e0b4af【不等獨立fire】,併入批後最終態的自然fire總驗——理由:用戶已裁不人工製造+要驗的是最終分類器非中間版;fire若異常屆時再bisect;已呈用戶可否決
 ---
 
