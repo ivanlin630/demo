@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: local-value-state-required
 topic: 判決:仍 ISSUES——「單位=_stock(null,…)到不到得了」你推對了但沒推到底,player_trade_system.gd:19 那條「範圍外」會炸掉 baseline-7
 ---

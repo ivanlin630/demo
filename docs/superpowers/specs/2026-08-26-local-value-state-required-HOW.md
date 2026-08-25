@@ -57,10 +57,15 @@ reserve(team,res,leader_values,state=null)      ← 自己也有 default
 | ⑦ | `ask_price` | `:127` |
 | ⑧ | `InteractionSystem.local_value`（包裝層） | `interaction_system.gd:662` |
 
-★**範圍外（各自需要自己的 caller 窮盡，不併入）**：
-`decision_engine.gd:58 rank_scored_ctx`、`player_trade_system.gd:19` —— **記在這裡，不做。**
+★**⑨`player_trade_system.gd:19 _sellable_qty`（2026-08-26 三訂：從「範圍外」拉回【範圍內】）**
+我原本標它「範圍外，各自要自己的 caller 窮盡」——★**但我沒做那個窮盡，reviewer 做了，結果不安全**：
+它**自己也有 `state: WorldState = null`**，而且**直接轉送**給 `TradeValuation.reserve(team,res,leader_values,state)`
+⇒ ★★**它在同一條可達鏈上，只是入口多疊一層、而且跨了檔案。**
+⇒ **留著它 ＝ 這票的保證作廢**（見下方「④ 的洞」）。**⑨ 併入。**
 
-## ★★動工前必須先接住的兩個呼叫端（reviewer 找到，缺一就會崩）
+★**真正的範圍外（reviewer 複驗過與 `_stock` 無關）**：`decision_engine.gd:58 rank_scored_ctx`。
+
+## ★★動工前必須先接住的【三個】呼叫端（reviewer 逐條找到，缺一就會崩）
 | # | 位置 | 現況 | 處置 |
 |---|---|---|---|
 | A | ★**`scripts/debug/slice_a_observe.gd:45`（★同一行【兩個】呼叫）** | `TradeValuation.reserve(t, "weapon_melee_low")` —— `leader_values` 與 `state` **兩個 default 都省**，而 `state` 就在同函式 scope（`:35`） | ★**補成 `reserve(t, res, {}, state)`** |
@@ -69,6 +74,16 @@ reserve(team,res,leader_values,state=null)      ← 自己也有 default
 ★**`weapon_melee_low` 不在 `SURVIVAL_GOODS(["food","medicine"])`** ⇒ 走 generic 分支 ⇒ 一路打到 `_stock(null,…)`
 ⇒ **刪 fallback 後，`godot --headless --script scripts/debug/slice_a_observe.gd` 會在
 `resource_system.gd:438 own_granary_tile(null,…)` 當場崩。**
+
+| # | 位置 | 現況 | 處置 |
+|---|---|---|---|
+| ★**C** | ★★**`scripts/debug/headless_test.gd:11657/11658/11660/11665`（4 處，同一支 `_test_trade_reserve_no_drain`）** | `pts._sellable_qty(t, "material")` 省 `state`，而 `state` 就在 `:11652` 手上 | 補成 `pts._sellable_qty(t, "material", {}, state)` |
+
+★★★**C 比 A 嚴重**：**它在 `headless_test.gd`（baseline-7 主測試檔）裡**
+⇒ **不是「以後有人跑才炸」，是【這票一 merge，下一次例行 headless 就炸】。**
+★**而 `:11652` 的註解是這個測試自己寫的自認證詞**：
+> 「reserve 的 state default 讓漏傳編得過」
+⇒ **寫那行的人早就知道自己在吃 default 的便宜。** ★★**那正是 default 的真正代價：它讓「知道不對」也能過關。**
 
 > ★**這不是第一次**：`scripts/debug/own_granary_null_caller_test.gd` 的檔頭就寫著
 > 「**根修＝呼點補傳 state（非 own_granary 頭加 guard）**」——★★**同一個病已經修過一輪，而 default 讓它長回來。**
@@ -98,8 +113,12 @@ reserve(team,res,leader_values,state=null)      ← 自己也有 default
    ⇒ **刪 default 不改變任何一次呼叫的實際引數** ⇒ **fp 變了就是有人被改到，是紅不是綠。**
    （★**「該不該變」由【這次改動會不會改到任何一次呼叫的引數】決定，不是由 tier 決定。**）
 3. **headless 閘**：`bash .claude/hooks/test-ran-floor.sh <實跑輸出>` PASS（baseline 7）。
-4. ★**編譯即驗收**：改完若有任何呼叫點少傳 `state`，**GDScript 會直接報錯** ——
-   ★★**這正是本票的目的：把「靜默讀錯」換成「根本編不過」。**
+4. ★★★**「編譯即驗收」有一個洞，寫清楚**（reviewer 2026-08-26 揭，我原版④是錯的）：
+   **少傳引數** ⇒ 編譯錯 ✅；★**但【自己也有 default 的轉送者】會用完整引數個數傳一個 `null` 下去**
+   ⇒ **編得過、執行期才崩。** 血證：`pts._sellable_qty(t, "material")`（`headless_test.gd:11657` 等 4 處）
+   —— `_sellable_qty` 用自己的 `null` default 補齊，再以**完整 4 引數**呼叫 `reserve(team,res,{},null)`。
+   ⇒ ★★**真正的驗收是「可達閉包上的 default 數 ＝ 0」，編譯過只是它的【結果】，不是檢查本身。**
+   ⇒ **所以 ⑨ 必須併入** —— 閉包上少關一個門，這票的保證就不存在。
 
 ## ★誠實限
 **本票不會讓任何行為變好** —— 它讓**同一種 bug 以後長不出來**。
