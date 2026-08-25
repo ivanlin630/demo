@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★A/B 解凍收到,而我在動筆前又查了一次前提——★★★這張床上【零座 forest outpost】(8 plains + 3 mountain),而 A 是「forest 初始庫存拉高」、B 是「伐木場 forest-only」;★★兩件都會變成【結構性不可能】,跟那 3 個 military-only goal 同一型;★這次我不停,附三條可走的路給你選
 ---
 
