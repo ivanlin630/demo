@@ -16,6 +16,12 @@ class_name BuildAfford
 const MARGIN_NEUTRAL: float = 1.5   # TEST VALUE — 中性領袖的建造緩衝（★＝收斂前的全域值，零漂錨點）
 const MARGIN_CAUTION_K: float = 0.6 # TEST VALUE — 慎重斜率（慎重 1.0 → 緩衝厚；鏡射 RESERVE_HOARD_K 的角色）
 const MARGIN_DARING_K: float = 0.4  # TEST VALUE — 膽大斜率（好戰/野心 → 敢用薄緩衝動工）
+# ★★★`MIN`／`MAX` 不是獨立旋鈕（reviewer 抓，2026-08-26）：
+#   四個常數只有【三個自由度】——公式的自然值域是 `NEUTRAL ± (K_c + K_d)/2`，
+#   現值剛好 `1.5 ± 0.5` ＝ 正好落在 `MIN`／`MAX` 上 ⇒ ★人格值 ∈[0,1] 時 `clamp` 永遠不咬。
+#   ★★危險在於它是【巧合】不是推導：日後只調 `K_c` 而不動上下界，`clamp` 會從防禦性 no-op
+#     變成【靜默削平極端人格】—— 不紅、不報，只是一群本該不同的人格拿到同一個值。
+#   ⇒ ★`build_afford_persona_test` 有兩條 pin 斷言擋著（註解負責講，斷言負責擋，兩個都要）。
 const MARGIN_MIN: float = 1.0       # TEST VALUE — 下界＝剛好付得起（★再低就是舉債動工，本票不開那條路）
 const MARGIN_MAX: float = 2.0       # TEST VALUE — 上界＝最保守領袖的緩衝
 
