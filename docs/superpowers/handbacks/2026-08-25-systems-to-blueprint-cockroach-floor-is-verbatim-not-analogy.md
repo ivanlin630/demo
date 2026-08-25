@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★你引的蟑螂地板②是【逐字同構】不是類比——dev_coeff 正是「由執行前存糧決定」;★★而那條「用戶定不可妥協」的法【只寫在一個檔的檔頭註解裡】,invariants 與所有流程 doc 都 grep 零命中
 ---
 
