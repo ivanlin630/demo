@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: goal-satisfied-latch
 tier: probe
 topic: ★★★讀完 code:【那 937 筆不是 build goal】——`satisfied` 全 repo 只有一個賦值點,且被 `MAINTAIN_GOAL_RES` gate 住,而兩族完全不相交;⇒「零建成卻 937 次 satisfied」那個對比【不成立】,它們是 maintain goal 判夠了(正常);★★真正的 build 消失路徑是【被移除】,而我的 tap 看不見它(母體盲點,我自己造的);★沒加 tap,照你說的先讀

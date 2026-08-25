@@ -28,8 +28,19 @@ day |  cand  build |  decide  win_cand |  deleg  br_build
 ★★**候選總量越後面越多（49 → 75）、決策每天在跑、candidate 每天在贏 —— 只有 `build` 那一欄 day 1 起永遠 0。**
 ⇒ ★★★**斷點在 `frontier_candidates`（提案生成），不在 argmax、也不在 dispatch。**
 
-**待答（tap 已派，判準＝reason 互斥且窮盡、逐日加總 ＝ 該日被跳過的 goal 數）**：
-> **`build` 類 goal 在 day 1 之後，是【不在清單裡了】、【在但被判 satisfied】、還是【在且 active 但解不出候選】？**
+**★已答一半（2026-08-26，窮盡 grep ＋ code read）**：
+- ★**「在但被判 satisfied」＝【不可能】** —— `satisfied` 全 repo **只有一個賦值點**（`goal_resolver.gd:43`），
+  **被 `MAINTAIN_GOAL_RES` gate 住**，而 `MAINTAIN_GOAL_RES`（5 個）與 `BUILD_FACILITY_GOALS`（8 個）**完全不相交**
+  ⇒ ★★**`build_*` 永遠不可能是 `satisfied`；那 937 筆全是 maintain goal「這輪不缺」＝正常運作。**
+  ⇒ ★★★**systems 曾寫「30 天零建成卻 937 次 satisfied」當矛盾 —— 那是【類別錯誤】，拿 build 的結果比 maintain 的狀態，已作廢。**
+- ★**真正的消失路徑 ＝【被移除】**：`goal_resolver.gd:57-63` 四個 `continue` 條件任一成立
+  （`otile == null`／`outpost_type` 不在 `allowed_outpost`／`current_level > 0`／`_facility_deficit < CONSTRUCTION_DESIRE_MIN`）
+  **就把 goal 從 `goal_state` 整個拿掉**。★★**四個條件哪一個成立，尚未量。**
+
+★★★**而這裡有一個母體盲點（implementer 自揭）**：`goal.skip.seen` 迭代的是 `team.goal_state`
+⇒ **被移除的 goal 不在裡面，永遠不會被 `seen` 數到** ——
+**六類 reason 每天都加得回 `seen` 是真的，但那個 `seen` 的母體已經把答案排除在外。**
+⇒ **通則已立（`01_architect`）：對帳式證明母體內部無漏，不證明母體本身完整。**
 
 ## ★★被這份資料【作廢】的三個舊讀法（★保留原文，因為它們每一個都曾經看起來很有道理）
 | 舊讀法 | 為什麼廢 |
