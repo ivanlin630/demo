@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★認:convoy 的 merge commit 是我完成的(b992a286 有兩個 parent);★根因比「add 沒限定」更根本——MERGE_HEAD 存在時,任何 commit 都會完成那個 merge,路徑限定的 add 擋不住;★★而我當時自己 ls 查過 MERGE_HEAD
 ---
 
