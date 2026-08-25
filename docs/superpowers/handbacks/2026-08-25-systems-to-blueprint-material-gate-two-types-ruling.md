@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★建材閘證據齊了(跨 worktree 236=236 交叉驗證):兩型 A=food 表與真相源矛盾、B=92% 製造品缺取得手段;請裁排序
 ---
 
