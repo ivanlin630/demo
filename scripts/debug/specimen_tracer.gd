@@ -213,7 +213,11 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 	_last_entry_tick[team.team_id] = state.world.current_tick   # Fix 2：更新最後 entry tick（heartbeat 補洞判據）
 	# 聚合（跨 flush 存活，供 summary 診斷 錨→行為）
 	winner_hist[winner_opt] = int(winner_hist.get(winner_opt, 0)) + 1
-	var intent_key: String = str(intent["intent"]) if intent is Dictionary else str(intent)
+	# ★★key 跟著 render 走（systems 裁 2026-08-26）：String 態 ＝【沒表態】，
+	#   不是一個叫那個名字的意圖類別 —— 否則 histogram 把兩件事加在同一個 bucket 裡，
+	#   而它們【必然同名】（`_set_solo` 把同一個 itype 同時寫進 solo_intent 與 capture_intent）。
+	#   ★實測：90 天 trace 142 筆 ＝ Dictionary 100 ／ String 42，過去全部記在 `防衛` 這一格。
+	var intent_key: String = str(intent["intent"]) if intent is Dictionary else "(未表態)"
 	intent_hist[intent_key] = int(intent_hist.get(intent_key, 0)) + 1
 	decision_count += 1
 	_pending.erase(team.team_id)   # 本決策已成 entry，清 scratch
@@ -407,4 +411,21 @@ static func _print_entry(e: Dictionary) -> void:
 #   ★★契約：兩態都必須印得出東西、都不得 crash。★★★兩態在輸出上【看不看得出差別】＝ 另一個問題，
 #     已回報 systems 待裁（★本函式現在【不區分】，這是【照原樣保留】不是我認為它對）。
 static func intent_render(w: Dictionary) -> String:
-	return str(w.get("strategic_intent", w.get("intent", "?")))
+	# ★★★三態必須在【輸出上】互相分得開（systems 裁 2026-08-26，形狀由他定死）：
+	#   Dictionary（真的表態）→ `致富(levy)`
+	#   String（capture_intent 沒跑，值是 fallback）→ `(未表態)` —— ★fallback 的字串不進輸出
+	#   欄位缺席 → `(缺欄)`
+	# ★為什麼要改：上一版把三態全印成同一個樣子（`str()`），
+	#   ⇒ 契約寫在資料結構裡、卻在顯示層被抹平 ⇒「兩態要留」如果讀的人分不出來，就等於沒留。
+	# ★★而 String 態的值【必然與 Dictionary 態同名】（`faction_ai_system._set_solo:1296-1299`
+	#   把同一個 `itype` 同時寫進 `solo_intent` 與 `capture_intent`）
+	#   ⇒ 實測 90 天 trace：142 筆裡 Dictionary 100 / String 42，而 42 筆全印成 `防衛`
+	#   —— **看起來就像 42 次真的表了態。**
+	if not w.has("strategic_intent") and not w.has("intent"):
+		return "(缺欄)"
+	var si = w.get("strategic_intent", w.get("intent", null))
+	if si is Dictionary:
+		var _it: String = String((si as Dictionary).get("intent", "?"))
+		var _mode: String = String((si as Dictionary).get("mode", ""))
+		return "%s(%s)" % [_it, _mode] if _mode != "" else _it
+	return "(未表態)"   # ★String 態＝沒表態；不把 fallback 的值印成一個具名意圖

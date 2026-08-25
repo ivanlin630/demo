@@ -1361,15 +1361,21 @@ func _test_specimen_tracer() -> void:
 	#   兩態承載不同事實（Dictionary＝戰略層真的表態；String＝capture_intent 這輪沒跑的 fallback）
 	#   ⇒ 裁定是【不統一、補契約】。契約 ＝ 兩態都印得出東西、都不 crash。
 	#   ★render 抽成 `SpecimenTracer.intent_render()` 只為了【可被測】，輸出字串逐字元不變。
+	# ★★★三態必須【互相分得開】—— 這是本次改動的唯一驗收（systems 定死形狀）。
+	#   ★兩態在資料上同名是必然的（`_set_solo` 同一個 itype 兩邊寫），所以只驗「印得出東西」不夠：
+	#     那正是舊版的洞 —— String 態印成 `防衛`，讀起來就是一次真的表態。
 	var _w_dict: Dictionary = {"strategic_intent": {"intent": "致富", "why": "測試", "mode": "levy"}}
 	var _r_dict: String = SpecimenTracer.intent_render(_w_dict)
-	assert(_r_dict.find("致富") >= 0, "[specimen] Dictionary 態 render 必須含 intent 的值本身，實得 %s" % _r_dict)
-	var _w_str: Dictionary = {"strategic_intent": "日常"}
+	assert(_r_dict == "致富(levy)", "[specimen] Dictionary 態應印 `致富(levy)`，實得 %s" % _r_dict)
+	var _w_str: Dictionary = {"strategic_intent": "防衛"}   # ★與 Dictionary 態【同名】的 fallback
 	var _r_str: String = SpecimenTracer.intent_render(_w_str)
-	assert(_r_str != "" and _r_str.find("日常") >= 0,
-		"[specimen] String 態（沒表態）render 必須印得出東西且不 crash，實得 %s" % _r_str)
+	assert(_r_str == "(未表態)", "[specimen] String 態應印 `(未表態)`，實得 %s" % _r_str)
+	assert(_r_str.find("防衛") < 0, "[specimen] ★fallback 的值不得進輸出（否則沒表態偽裝成表了態）")
 	var _w_missing: Dictionary = {}
-	assert(SpecimenTracer.intent_render(_w_missing) != "", "[specimen] 欄位缺席時 render 不得回空字串")
+	assert(SpecimenTracer.intent_render(_w_missing) == "(缺欄)",
+		"[specimen] 欄位缺席應印 `(缺欄)`，實得 %s" % SpecimenTracer.intent_render(_w_missing))
+	assert(_r_dict != _r_str and _r_str != SpecimenTracer.intent_render(_w_missing),
+		"[specimen] ★三態必須兩兩不同")
 	print("specimen tracer OK")
 
 func _test_specimen_no_capture() -> void:
