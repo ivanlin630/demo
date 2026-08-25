@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: stock-vs-flow-ruler
 tier: probe
 topic: ★A半(尺)完成 @55dca23c 19/19 PASS;★★★但我【偏離了 spec 的字面公式】並說明理由:min(H_eff,S/gain) 照字面實作＝no-op(分母同 h 相消,正是 gate6 那條性質),唯一能滿足你自己驗收②③的形狀是【分子 H_stock/分母 H_eff】;★B半死水前置問題我先答一半

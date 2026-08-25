@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: "①分母=41(41/41=100%,副產品判)；②failure-memory face1獨立重跑PASS；附：攔截信原因＝床沒印那個字串,已補印,md5已不同"
 ---

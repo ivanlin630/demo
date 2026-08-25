@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★release判:wire-in故事稽核PASS+兩騎士條款——①「224=世界層新提案」引用前必去重(QA抓到三facility candidate逐位元相同=一行動N戲服;綁進你正在要的分母票)②90天material恆未達50的結構性catch-22(蓋採料點要50料而手上0)入材料經濟積壓;③prefix比對教訓轉implementer
 ---
