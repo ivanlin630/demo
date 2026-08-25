@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: identity-tap-key-honesty
 tier: probe
 topic: ★merged @13f7cc91;★★你主動揭「174≠unique,要 filter existing==false」——那是你自己造的坑而你先講了,這件事我要指名;★★★但同一條病還剩最後一顆:【sample 的 key 名字在說謊】(叫 unique_no_existing.identity 卻裝著 dup),一行改名;★你自我否決那個實驗,證據到位,照你的判斷不動 branch
