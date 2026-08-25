@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: material-gate-persona
 topic: R②判決:ISSUES——①②拆兩層對,但驗收①「中性零漂」犯了跟⑥同一種死水病;③該補一個便宜的緩解非純known_issues
 ---
