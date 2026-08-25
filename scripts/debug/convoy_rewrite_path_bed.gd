@@ -124,6 +124,15 @@ func _dump(out_path: String, day_now: int, days: int, sd: int, cfg: String, stat
 		if String(kh).begins_with("commit.hold_blocked."):
 			lines.append("    %-44s = %d" % [String(kh), _c(String(kh))])
 	lines.append("--- ★latch 解藥在不在跑（假設不靜默）---")
+	lines.append("  ★latch 抑下的重複開火 commit.stall_latched_suppressed = %d" % _c("commit.stall_latched_suppressed"))
+	lines.append("  ★★真·放棄 commit.abandon_fire = %d　(這個才是失敗記憶的進料口)" % _c("commit.abandon_fire"))
+	for ka in Probe.counts.keys():
+		if String(ka).begins_with("commit.abandon_fire."):
+			lines.append("    %-44s = %d" % [String(ka), _c(String(ka))])
+	lines.append("  蓋完了(非失敗) commit.site_completed = %d" % _c("commit.site_completed"))
+	if Probe.samples.has("commit.abandon_fire"):
+		for ea in (Probe.samples["commit.abandon_fire"] as Array).slice(0, 10):
+			lines.append("    " + JSON.stringify(ea))
 	lines.append("  commit.stall_fire = %d" % _c("commit.stall_fire"))
 	for ks in Probe.counts.keys():
 		if String(ks).begins_with("commit.stall_fire."):

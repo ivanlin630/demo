@@ -5172,10 +5172,68 @@ func _stamp_survival_commit(state: WorldState, team: TeamData, opt: String) -> v
 #   ★recover-restarve 邊界：baseline 太舊 ⇒ 視為新 episode 重置，不把「曾好轉又變糟」誤判成同一段。
 #   ★STALLED ⇒ 發 `construction_abandoned` typed 事件 —— 那是紮根【執行型失敗】的進料口
 #     （systems 窮盡查過：production 本來沒有任何「施工放棄」事件；`camp.abandoned` 是 L0 無人衰減，不是這個）。
+# ★episode 重置的【單一入口】：latch 與 episode 起點必須跟 baseline 同時處理。
+#   分散寫會出現「重置了 baseline 卻忘了解 latch」這種只在長跑才看得見的洞。
+func _reset_stall_episode(state: WorldState, team: TeamData, kind: String, site: String, prog: float) -> void:
+	team.commit_stall_kind = kind
+	team.commit_stall_site = site
+	team.commit_stall_tick = state.world.current_tick
+	team.commit_stall_episode_tick = state.world.current_tick
+	team.commit_stall_progress = prog
+	team.commit_stall_latched = false
+	# ★身分與 site 在【同一刻】取，才保證兩者講的是同一件事。
+	#   （`current_dispatch_id` 是 dispatch 當下蓋的正解，★但只有在【現在】取才是這個 episode 的。）
+	# ⛔ `current_dispatch_id` / `current_dispatch_target` 是【磚 branch 的欄位】，本 branch 還沒有
+	#   ⇒ ★這兩行在 rebase 到 merged main（磚先進）之後才接得上，現在接＝編不過。
+	#   ★這正是 systems 裁「API 依賴 > 事件依賴 ⇒ 磚先 merge」的具體形狀。
+	#   TODO(rebase-after-brick): team.commit_stall_id = team.current_dispatch_id
+	#   TODO(rebase-after-brick): team.commit_stall_target = team.current_dispatch_target
+
+# ★★承諾【真的消失】才叫放棄（systems 裁 ①）——這是失敗記憶的進料口，`stalled` 不是。
+#   ★三分：蓋完（不是失敗）／工地易主／隊自己丟下。★只有後兩者發 abandoned。
+#   ★不清任何欄位：世界已經自己變了，偵測器不補刀（原本 stalled 分支清 corvee_site 的那行是反例）。
+func _check_commitment_abandoned(state: WorldState, team: TeamData) -> void:
+	if team.commit_stall_kind != "construction" or team.commit_stall_site == "":
+		return
+	var parts: PackedStringArray = team.commit_stall_site.split(",")
+	if parts.size() != 2:
+		return
+	var t: HexTileData = state.world.tiles.get(int(parts[0]) * 1000 + int(parts[1]))
+	if t == null:
+		return
+	if t.construction_ticks_left <= 0:
+		if Probe.enabled: Probe.bump("commit.site_completed")
+		return   # ★蓋完了 —— 這【不是】失敗，別餵進記憶
+	var reason: String = "taken_over" if t.construction_team_id != team.team_id else "dropped"
+	var action: String = String(t.construction_target.get("action", ""))
+	if Probe.enabled:
+		Probe.bump("commit.abandon_fire")
+		Probe.bump("commit.abandon_fire." + reason)
+		Probe.bump_sample("commit.abandon_fire", {"team": team.team_id, "site": team.commit_stall_site,
+			"reason": reason, "action": action,
+			"waited_total": state.world.current_tick - team.commit_stall_episode_tick,
+			"tick": state.world.current_tick}, 30)
+	# ★★資料走記憶、喚醒走事件（systems 裁 2026-08-25 第四條路）。
+	#   `WorldEvents.emit(state, kind, subjects)` 只做「標 pending_rethink ＋ 計數」——
+	#   ★它是【T0 喚醒器】不是匯流排。把 action 塞進事件名或給 emit 加 payload，
+	#   都是把資料編進喚醒通道。既有寫法（`record_invalidation` → `plan_invalidated`）就是這個形狀。
+	# ★TTL 用【這種工程自己的總工時】當錨（相對錨定，不是手抄常數）：
+	#   「這件事要多久」由物理決定，不由我拍板。
+	# ★用 episode 起點的快照，不是偵測到那一刻的當下值（systems 裁 2026-08-25）：
+	#   `abandoned` 是【過去事件】，而偵測總是晚於發生 ⇒ 當下值早就往前走了。
+	#   （對比 `stalled` ＝【持續狀態】，那個用當下值才對。★兩者連身分取法都不同，所以分家。）
+	# TODO(rebase-after-brick)：身分快照到位後才記帳。★現在【故意不記】——
+	#   寧可少一筆，也不要用錯身分記到無辜選項頭上（那要事後從記憶裡挖出來，比沒記更貴）。
+	#   FailureMemory.record(state, team, team.commit_stall_id, team.commit_stall_target,
+	#       OutpostSystem.construction_ticks_total(t), "construction_abandoned_" + reason)
+	WorldEvents.emit(state, "construction_abandoned", [team.team_id])
+
 func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 	var c: Dictionary = CommitmentFields.unfinished(state, team)
 	if c.is_empty():
-		team.commit_stall_kind = ""   # 沒有未完成承諾 → 沒有可偵的東西
+		# ★承諾不見了 ⇒ 分辨【蓋完】與【真的放棄】（systems 裁 ①：兩個事件都要）
+		_check_commitment_abandoned(state, team)
+		_reset_stall_episode(state, team, "", "", 0.0)
 		return
 	# ★沒有可讀的進度事實 ⇒ 不判。「量不到」不等於「沒進展」——
 	#   把量不到當成停滯，就是拿儀器的缺口當世界的事實。
@@ -5193,15 +5251,14 @@ func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 	#   血證：progress 從 54 掉到 0 不是停滯，是換了一塊地；母體 0 卻開火 10 次就是這樣來的。
 	var site: String = String(c.get("site", ""))
 	if team.commit_stall_kind != kind or team.commit_stall_site != site:
-		team.commit_stall_site = site
-		team.commit_stall_kind = kind
-		team.commit_stall_tick = now
-		team.commit_stall_progress = prog
+		# ★換 episode 前先問：舊的那個【是蓋完了還是被丟下】——丟下就是放棄。
+		_check_commitment_abandoned(state, team)
+		_reset_stall_episode(state, team, kind, site, prog)
 		return
 	# recover-restarve 邊界：baseline 太舊＝必為 stale 再進 → 重置視為新 episode
 	if now - team.commit_stall_tick > stall_ticks + DecisionEngine.STALL_EXCLUDE_WINDOW:
-		team.commit_stall_tick = now
-		team.commit_stall_progress = prog
+		_reset_stall_episode(state, team, kind, site, prog)   # ★走單一入口：這裡宣稱「視為新 episode」，
+		#   舊寫法卻只重置 baseline、沒解 latch 也沒挪 episode 起點 ⇒ 宣稱與行為不一致。
 		return
 	# relief_min ＝ 1.0 ＝【至少推進過一個 person-tick】（真值那行每次扣 maxi(pop,1) ≥ 1）
 	#   —— 不是我拍的門檻，是進度的最小單位。
@@ -5211,21 +5268,32 @@ func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 		DecisionEngine.STALL_RESOLVING:
 			team.commit_stall_tick = now      # 有進展 → 重置 baseline，繼續等
 			team.commit_stall_progress = prog
+			team.commit_stall_latched = false   # ★進度真的動過 ⇒ 解 latch，之後再停才算新的一次
 		DecisionEngine.STALL_STALLED:
+			# ★per-site latch（systems 裁 ②）：同一件事被數四次，任何靠它算比率的下游都會被墊高。
+			#   ★但 latch 會丟掉「持續多久」⇒ 事件/樣本帶【累計】waited（episode 起點不被 latch 重置）。
+			if team.commit_stall_latched:
+				if Probe.enabled: Probe.bump("commit.stall_latched_suppressed")
+				team.commit_stall_tick = now
+				team.commit_stall_progress = prog
+				return
+			team.commit_stall_latched = true
+			var waited_total: int = now - team.commit_stall_episode_tick
 			if Probe.enabled:
 				Probe.bump("commit.stall_fire")
 				Probe.bump("commit.stall_fire." + kind)
 				Probe.bump_sample("commit.stall_fire", {"team": team.team_id, "kind": kind, "site": site,
-					"waited_ticks": now - team.commit_stall_tick, "progress": prog,
+					"waited_ticks": now - team.commit_stall_tick, "waited_total": waited_total, "progress": prog,
 					"baseline": team.commit_stall_progress, "tick": now}, 30)
 			# ★開火後【一律重置 baseline】：否則同一段承諾每 cadence 重判 STALLED ⇒ 計數暴衝
 			#   （血證：order 那類 652 次，waited_ticks 單調變大＝同一段一直重放）。
 			team.commit_stall_tick = now
 			team.commit_stall_progress = prog
 			if kind == "construction":
-				WorldEvents.emit(state, "construction_abandoned", [team.team_id])
-				# ★放棄 ＝ 卸下這個工地（否則它會永遠掛在隊身上，偵測器每輪重放）
-				team.corvee_site = Vector2i(-1, -1)
+				# ★★stalled ≠ 放棄（systems 裁 ①）：量到的 3 個工地【後來全部蓋完】。
+				#   ★原本這裡會清 `corvee_site` —— 那不是觀測，那是【偵測器自己把工地卸掉】。
+				#   觀測儀器不得改變被觀測物；卸工地是世界的行為，不是偵測器的職權。已移除。
+				WorldEvents.emit(state, "construction_stalled", [team.team_id])
 		_:
 			pass   # STALL_WAITING：耐性未耗盡，續等
 	

@@ -179,6 +179,13 @@ var commit_stall_kind: String = ""
 var commit_stall_site: String = ""   # ★baseline 綁在【哪一個工地】上（換工地＝換 episode）
 var commit_stall_tick: int = 0
 var commit_stall_progress: float = 0.0
+var commit_stall_latched: bool = false   # ★同一工地發過 stalled 就不再發，直到進度真的動過（次數不膨脹）
+var commit_stall_episode_tick: int = 0   # ★episode 起點：latch 不重置它，事件才帶得出【累計】等待
+# ★★身分【在 episode 開始時快照】（systems 裁 2026-08-25）：
+#   放棄是【過去事件】，偵測到它的那一刻隊多半已改派 ⇒ 讀 current_dispatch_id 會記成新任務的失敗。
+#   判準：「我讀的這個欄位，從事件發生到我讀它，會不會被別人改？」——會 ⇒ 必須快照。
+var commit_stall_id: String = ""       # 開工當下的結構身分（帶下來的，不反解）
+var commit_stall_target: String = ""   # 開工當下的目標
 var survival_committed_option: String = ""   # 現承諾的 survival option 字串（"" = 未承諾/待重蓋）
 var survival_committed_tick: int = 0         # 蓋章 tick（stall 計時 baseline）
 var survival_committed_food: float = 0.0     # 蓋章時 food_days baseline（relief before/after 比基準）
