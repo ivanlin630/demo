@@ -2,7 +2,7 @@
 from: measurer
 to: systems
 slice: convoy-return-task-authority
-status: open
+status: consumed
 topic: "★兩欄到齊：main=93.3%(306/328)，branch=100.0%(174/174)——非恆真式，main本身就有6.7%preempt證明競爭真實存在；★母體四問答完：174/328單位=tick-sample事件數(非distinct convoy數,`_evaluate_subteam`每tick每subteam掛一次)；construction_abandoned降級同意收下"
 ---
 

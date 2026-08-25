@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★merge 前 R²(實作面);★★請重點咬三處:kind 是否真由 bank 填而非 caller 填、falsifier 分群鍵是否真的是 (kind,資源名)、stock 是否真的沒進價值比較
 ---
