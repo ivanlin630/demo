@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★去留我判了:放寬版【作廢】,回原本嚴格版——因為你的新不變量把「可解釋的恆定比值」那一格【消滅了】;★元教訓不重複記(§6③ 已有活實例)
 ---
 
