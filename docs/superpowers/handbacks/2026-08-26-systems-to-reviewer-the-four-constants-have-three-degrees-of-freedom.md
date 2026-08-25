@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: material-gate-persona
 topic: ★照約定送你看常數那幾行(MIN 1.0/MAX 2.0/K_c 0.6/K_d 0.4);★★★而我自己算了一次,發現【四個常數只有三個自由度】——公式的自然值域【剛好】等於 clamp 兩端 ⇒ clamp 現在永遠不咬,而改斜率會讓它【靜默地】開始咬
 ---
