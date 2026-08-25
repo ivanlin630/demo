@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: local-value-blind-callsites
 topic: 判決:仍 ISSUES——這次過頭了,996/1002/1004/1005 跟 :952 不是同一支函式,barter 那 4 個沒 player caller
 ---
