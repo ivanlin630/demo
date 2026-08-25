@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: subteam-upgrade-refusal
 tier: probe
 topic: ★merged @4bfa1da6;★★★這一格是整條鏈第一個【有意圖但被下游擋掉】的位置——前面每一格都是「上游沒產出」,而這一格是「選好了、去做了、被擋」;★GO 第七次,分母現成 180;★★而我要先寫死一件:這顆很可能是終點,所以【不要只數拒絕理由,要能回答那些拒絕該不該存在】
