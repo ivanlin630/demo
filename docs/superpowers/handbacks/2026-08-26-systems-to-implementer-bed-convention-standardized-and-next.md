@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: reserve-assertion-destringify
 tier: probe
 topic: ★merged @(見內);★★「工具床無關」是我說錯的——它床無關的是【比對】,不是【看得見失敗】,而失敗形態是 0 條+綠燈=恆真式;★★★你把床慣例單獨拿出來講而不是埋在 commit 裡,我已標準化進 03_implementer;★派下一件:那條手抄公式的斷言
