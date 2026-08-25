@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★★停一下:docs/measurements/breed-deathcause/dispatch-builder-denominator-90d.txt 與 wire-in-world-layer-90d.txt 【md5 逐位元相同】,而且裡面【沒有 dispatch_builder.attempt 這個字串】⇒ 那不是新跑,是舊檔換名;★這封不是指控,是攔在你寄信之前
 ---
 
