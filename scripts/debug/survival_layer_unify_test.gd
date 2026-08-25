@@ -184,5 +184,26 @@ func _test_candidate1_food_reserve() -> void:
 	var r_gamb: float = TradeValuation.reserve(t, "food", {"慎重": 0.0, "野心": 1.0}, s)   # target≈2
 	var r_neut: float = TradeValuation.reserve(t, "food", {}, s)                            # target=4
 	_ok(r_caut > r_neut and r_neut > r_gamb, "food reserve：謹慎(%.0f) > 中性(%.0f) > 賭徒(%.0f)" % [r_caut, r_neut, r_gamb])
-	# 中性 = target(4) × pop(10) × FOOD_PER_PERSON_PER_DAY(0.8) = 32
-	_ok(absf(r_neut - 4.0 * 10.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY) < 0.01, "中性 reserve = target×pop×日耗")
+	# ★★★手抄公式的斷言【已拆】(2026-08-26)：舊版寫死 `4 × pop 10 × 0.8 = 32`，
+	#   而 `reserve(food)` 早已委派 `NeedOracle.need_keep` ⇒ 實得 96 ＝ 32 × 3，
+	#   多的那個 3 是 `_self_use` 的 famine escalation（need_oracle:115，該隊 food=0）。
+	#   ★★改成 96 只是把手抄的舊值換成手抄的新值 —— `FAMINE_NEED_GAIN` 一動又爛。
+	#   ⇒ 以下四條全部斷言【關係】：零魔數、公式怎麼改都成立、公式【被繞過】才會紅。
+	# ①單一源：reserve(food) 必須就是 need_keep 本人（不是「約等於」）
+	_ok(is_equal_approx(r_neut, NeedOracle.need_keep(s, t, "food", {})),
+		"reserve(food) 委派 NeedOracle.need_keep（單一源，非自己算一份）")
+	# ②對人口線性：同人格、人口 ×2 ⇒ reserve ×2（★不寫每人日耗是多少）
+	var t2 := TeamData.new(); AnonCohort.add(t2.anon_cohorts, "平民", "healthy", 20)
+	var r_pop2: float = TradeValuation.reserve(t2, "food", {}, s)
+	_ok(is_equal_approx(r_pop2, r_neut * 2.0), "reserve 對人口線性（pop 10→20 ⇒ %.0f→%.0f）" % [r_neut, r_pop2])
+	# ③人格比例＝安全存量目標比例：兩邊的常數在比值裡相消（★這才是「人格化」的定義）
+	var tgt_caut: float = DecisionTerms.food_security_target({"慎重": 1.0, "野心": 0.0})
+	var tgt_neut: float = DecisionTerms.food_security_target({})
+	_ok(is_equal_approx(r_caut / maxf(r_neut, 0.001), tgt_caut / maxf(tgt_neut, 0.001)),
+		"reserve 比值 ＝ food_security_target 比值（%.3f vs %.3f）" % [r_caut / maxf(r_neut, 0.001), tgt_caut / maxf(tgt_neut, 0.001)])
+	# ④★飢餓升壓【存在且有方向】：同人格同人口，餓的隊留底必須【高於】飽的隊
+	#   （舊斷言之所以炸，就是因為它假裝這個機制不存在 ⇒ 現在把它變成被斷言的對象）
+	var t_fed := TeamData.new(); AnonCohort.add(t_fed.anon_cohorts, "平民", "healthy", 10)
+	t_fed.resources["food"] = 9999.0
+	var r_fed: float = TradeValuation.reserve(t_fed, "food", {}, s)
+	_ok(r_fed < r_neut, "飢餓升壓：餓隊留底(%.0f) > 飽隊留底(%.0f)" % [r_neut, r_fed])
