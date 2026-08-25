@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: means-end-brick
 topic: ★對照裝好且【被證明會叫】——自測吐 VOID 是關鍵;★★「兩個對照分開」我立成通則:一個對照只說「有東西壞了」,分套的說「壞在哪」
 ---

@@ -1,0 +1,35 @@
+=== means-end-brick(B型)驗收床 ===
+manufactured資源清單(12種) = ["armor_high", "armor_low", "arrows", "goods", "medicine", "ore_steel", "tools", "wagons", "weapon_melee_high", "weapon_melee_low", "weapon_ranged_high", "weapon_ranged_low"]
+★★★①「缺設施」桶與「缺原料」桶：
+  facility桶size=13, material桶size=30
+  兩桶都非空 = true
+  不重疊(每筆path只認1個kind,逐筆驗證無同時符合兩者的異常) = true
+  facility桶樣本(前5筆)：
+    { "means": "manufacture", "res": "armor_high", "blocked_on": "armorsmith_level", "kind": "facility", "depth": 1, "_test_res": "armor_high" }
+    { "means": "manufacture", "res": "armor_low", "blocked_on": "armorsmith_level", "kind": "facility", "depth": 1, "_test_res": "armor_low" }
+    { "means": "manufacture", "res": "arrows", "blocked_on": "manufacturing_level", "kind": "facility", "depth": 1, "_test_res": "arrows" }
+    { "means": "manufacture", "res": "goods", "blocked_on": "manufacturing_level", "kind": "facility", "depth": 1, "_test_res": "goods" }
+    { "means": "manufacture", "res": "goods", "blocked_on": "manufacturing_level", "kind": "facility", "depth": 1, "_test_res": "goods" }
+  material桶樣本(前5筆)：
+    { "means": "manufacture", "res": "armor_high", "blocked_on": "ore_steel", "kind": "material", "depth": 1, "_test_res": "armor_high" }
+    { "means": "manufacture", "res": "ore_steel", "blocked_on": "ore_iron", "kind": "material", "depth": 2, "_test_res": "armor_high" }
+    { "means": "manufacture", "res": "ore_steel", "blocked_on": "material", "kind": "material", "depth": 3, "_test_res": "armor_high" }
+    { "means": "manufacture", "res": "armor_high", "blocked_on": "material", "kind": "material", "depth": 4, "_test_res": "armor_high" }
+    { "means": "manufacture", "res": "armor_low", "blocked_on": "ore_iron", "kind": "material", "depth": 1, "_test_res": "armor_low" }
+★★★②依賴鏈深度分佈(主結果,不要只看最大深度)：
+  depth=1 : 25 筆
+  depth=2 : 9 筆
+  depth=3 : 5 筆
+  depth=4 : 4 筆
+  出現深度≥2 = true
+★★★③「無手段可取得」桶(means_end.no_means.*)的成員：
+  no_means母體(means_end.no_means總計) = 21
+  no_means成員清單 = ["gem", "herb", "horses", "material", "ore_iron"]
+  ★製造品仍在no_means桶裡的成員(應為空) = []
+★★★④stock資源『有手段但不進flow_utility輸入』：結構性檢查(非runtime數字)
+  stock_sources()回傳的每筆path都顯式帶value_compared:false —— 見acquisition_paths.gd:90
+  ★窮盡grep scripts/(排除debug/)AcquisitionPaths caller總數=0 —— 本模組尚未接進任何production決策路徑，
+    ⇒ 目前【沒有任何呼叫路徑】會把stock_sources()的輸出餵進DiscountedFlow.flow_utility——
+    這條判準現在是【空真】(vacuously true)：不是『驗證通過』，是『還沒有機會違反』。
+★★★⑤反向：food不退化 = rate
+  food在SHAPE_TABLE裡 = false (應為false,food走REGEN_RATE導出的rate分支)

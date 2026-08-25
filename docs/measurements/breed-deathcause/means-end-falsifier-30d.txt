@@ -1,0 +1,11 @@
+=== resource-shape falsifier: config=peaceful_economy days=30 seed=1337 ===
+  ★產率權威的執行證明 manufacture.rate_via_authority = 87　★非零＝新接線真的被跑到
+  陽性對照 ledger=59481 / probe(collect.gather_ran)=799　★兩者非零＝儀器確實在跑
+  掃到【真的會增加】的資源 = 8 種（★按資源分群，不按 reason 字面）
+    rate             = 2 種
+    capped_regen     = 2 種
+    loot_or_collect  = 1 種
+    manufactured     = 1 種
+    trade_only       = 1 種
+    not_acquirable   = 1 種
+★PASS 形狀表覆蓋所有【真的會增加】的資源
