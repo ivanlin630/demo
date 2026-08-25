@@ -1,20 +1,44 @@
 #!/usr/bin/env bash
-# ★測試框架自身的陽性對照 —— 回答「有沒有跑完」，不是「有沒有失敗」。
-# 血證 2026-08-25：headless 因 parse error 沒跑，輸出 FAIL=0 —— 跟全綠長得一模一樣。
-#   ★「FAIL=0」只說【沒有失敗的】，沒說【有跑過】。
-# ★為什麼不數 PASS 行：headless_test 有 2043 個 assert，但只有 40 條 [TEST] print
-#   ⇒ 數印出來的行＝數冰山露出水面的部分，會隨測試增減而 drift。
-#   ⇒ 唯一穩健的是【結尾標記】：跑到最後一行才印得出來。
-# 用法：bash .claude/hooks/test-ran-floor.sh <實跑輸出檔> [結尾標記]
+# ★兩個【正交】的問題，分開問、分開判 —— 混在一起就兩個都答不了。
+#   Q1 跑完了嗎？   → 結尾標記（只有跑到最後才印得出來）
+#   Q2 有沒有新失敗？→ 與 baseline 比對（★不是「非零即紅」）
+# 血證 2026-08-25：
+#   ①headless 因 parse error 沒跑，輸出 FAIL=0 —— 跟全綠長得一模一樣。
+#     ★「FAIL=0」只說【沒有失敗的】，沒說【有跑過】。
+#   ②我的前一版把 Q1/Q2 混在一起 ⇒ baseline 有 8 個已知失敗 ⇒ 閘【永遠紅】。
+#     ★★永遠紅的閘 ＝ 沒有閘（恆假式，跟恆真式一樣沒有資訊量）。
+# 用法：bash .claude/hooks/test-ran-floor.sh <實跑輸出檔> [baseline檔]
 set -u
-out="${1:-}"; marker="${2:-[TEST-SUITE-COMPLETE]}"
+cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
+out="${1:-}"; base="${2:-docs/test-baseline-failures.txt}"; marker='[TEST-SUITE-COMPLETE]'
 [ -z "$out" ] || [ ! -f "$out" ] && { echo "[test-floor] ★FAIL 沒給實跑輸出檔"; exit 2; }
-errs="$(grep -c 'SCRIPT ERROR\|Parse Error\|Assertion failed' "$out" 2>/dev/null || echo 0)"
-done_n="$(grep -cF "$marker" "$out" 2>/dev/null || echo 0)"
-echo "[test-floor] 錯誤行=$errs  結尾標記=$done_n"
-[ "$errs" -gt 0 ] && { echo "[test-floor] ★FAIL 有 $errs 行錯誤/assert"; grep -m5 'SCRIPT ERROR\|Assertion failed' "$out"; exit 1; }
-[ "$done_n" -eq 0 ] && {
-  echo "[test-floor] ★FAIL 沒有結尾標記 '$marker' ⇒ 【無法證明跑完】"
-  echo "[test-floor]   ★這【不是】「測試失敗」，是「這份輸出沒有資格說它綠」。"
-  echo "[test-floor]   ★若標記尚未實作 ⇒ 該補 code，不是放寬這個閘。"; exit 1; }
-echo "[test-floor] ★PASS 跑完且零錯誤"
+rc=0
+
+# ---- Q1：跑完了嗎（★這題的答案不受 Q2 影響）----
+if grep -qF "$marker" "$out" 2>/dev/null; then
+  echo "[test-floor] Q1 跑完了嗎 → ★YES（見結尾標記）"
+else
+  echo "[test-floor] Q1 跑完了嗎 → ★NO（無結尾標記）⇒ 這份輸出【沒有資格談綠不綠】"
+  echo "[test-floor]    ★注意：這不是「測試失敗」，是「不知道跑了多少」。"
+  rc=1
+fi
+
+# ---- Q2：有沒有【新】失敗（★與 baseline 比，不是與 0 比）----
+cur="$(mktemp)"
+grep -o 'Assertion failed: .*' "$out" 2>/dev/null | sed 's/[[:space:]]*$//' | sort -u > "$cur"
+n_cur="$(wc -l < "$cur" | tr -d ' ')"
+if [ ! -f "$base" ]; then
+  echo "[test-floor] Q2 → ★無 baseline（$base）⇒ 無法分辨【已知】與【新增】"
+  echo "[test-floor]    ★現況失敗 $n_cur 條。請用實跑輸出生成 baseline，★不要憑印象手寫。"
+  rm -f "$cur"; exit 2
+fi
+n_base="$(grep -cv '^[[:space:]]*#' "$base" 2>/dev/null || echo 0)"
+newf="$(comm -23 "$cur" <(grep -v '^[[:space:]]*#' "$base" | sed 's/[[:space:]]*$//' | sort -u))"
+gone="$(comm -13 "$cur" <(grep -v '^[[:space:]]*#' "$base" | sed 's/[[:space:]]*$//' | sort -u))"
+echo "[test-floor] Q2 新失敗？ → baseline=$n_base 實測=$n_cur"
+[ -n "$newf" ] && { echo "[test-floor] ★FAIL 新增失敗："; printf '%s\n' "$newf" | sed 's/^/      + /'; rc=1; }
+# ★baseline falsifier：登記了卻沒出現 ⇒ 條目 stale（修好了或測試改名），表會悄悄腐爛
+[ -n "$gone" ] && { echo "[test-floor] ★baseline stale（登記了但沒出現，請刪或查）："; printf '%s\n' "$gone" | sed 's/^/      - /'; }
+rm -f "$cur"
+[ "$rc" = 0 ] && echo "[test-floor] ★PASS 跑完 ＋ 無新增失敗"
+exit $rc

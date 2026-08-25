@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★「FAIL=0」是三種 0 之外的第四種,而且最險;★我做的閘要你補一行結尾標記才能用;★★你的陽性對照第二次立功——這次抓的是【假陽性】(方向跟第一次相反)
 ---
 
