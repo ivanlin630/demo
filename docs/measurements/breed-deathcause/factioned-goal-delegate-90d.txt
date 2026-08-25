@@ -1,0 +1,65 @@
+[peaceful_economy_factioned day 90/90 seed 1337] teams=29   ★窗尾標記（讀之前先確認這行）
+--- ①上游：有沒有【產生】build 委派候選 ---
+  goal.cand_build_emitted = 236
+  ★樣本是 first-N（不是均勻取樣）—— 只能看【最早那批】，不能拿來推分佈
+    {"delegate":true,"label":"maintain_material:location:delegate","team":0,"tick":10,"util":0.8481}
+    {"delegate":true,"label":"build_workshop:location:delegate","team":0,"tick":10,"util":1.2721}
+    {"delegate":true,"label":"build_apothecary:location:delegate","team":0,"tick":10,"util":1.2721}
+    {"delegate":true,"label":"build_stable:location:delegate","team":0,"tick":10,"util":1.2721}
+    {"delegate":true,"label":"maintain_material:location:delegate","team":1,"tick":10,"util":0.8481}
+    {"delegate":true,"label":"build_workshop:location:delegate","team":1,"tick":10,"util":1.2721}
+    {"delegate":true,"label":"build_apothecary:location:delegate","team":1,"tick":10,"util":1.2721}
+    {"delegate":true,"label":"build_stable:location:delegate","team":1,"tick":10,"util":1.2721}
+    {"delegate":true,"label":"maintain_material:location:delegate","team":2,"tick":10,"util":0.8481}
+    {"delegate":true,"label":"build_workshop:location:delegate","team":2,"tick":10,"util":1.2721}
+    {"delegate":true,"label":"build_apothecary:location:delegate","team":2,"tick":10,"util":1.2721}
+    {"delegate":true,"label":"build_stable:location:delegate","team":2,"tick":10,"util":1.2721}
+  goal.frontier_calls              = 2438
+  goal.frontier_empty              = 938
+  goal.cand_total_batches          = 1500
+  ★逐日分佈（這才能回答「是不是只在早期」，樣本不行）：
+    ["day000=28", "day026=4", "day027=4", "day029=4", "day030=8", "day031=12", "day032=4", "day033=8", "day034=4", "day035=4", "day036=8", "day037=4", "day040=4", "day043=8", "day044=4", "day045=12", "day046=4", "day047=4", "day048=4", "day049=8", "day050=4", "day051=8", "day052=4", "day053=8", "day054=12", "day055=4", "day056=8", "day057=12", "day058=4", "day059=4", "day060=8", "day061=4", "day062=4", "day063=12"]
+  ★更上游：資源前置的出口表（採@地形只是取得手段 2）
+    goal.res_prereq.entry                  = 7751
+    goal.res_prereq.satisfied              = 494
+    goal.res_prereq.no_specie              = 1165
+    goal.res_prereq.buy_wins               = 3812
+    goal.res_prereq.no_market              = 2280
+  ★落到【取得手段 2】時缺的是哪種資源（分類維度）
+    落下來的：["food=120", "material=256", "tools=631", "weapon_melee_low=2438"]
+    其中【不可採】：["A_table_gap.food=120", "B_not_terrain.tools=631", "B_not_terrain.weapon_melee_low=2438"]
+  ★build 候選的【真正產地】：採@地形分支的三個出口（意思完全不同）
+    goal.harvest.emitted                   = 236
+    goal.harvest.satisfied_own_terrain     = 0
+    goal.harvest.no_terrain_tile           = 0
+    goal.harvest.same_tile_silent          = 20
+    goal.deleg.pop_gate_block              = 0
+--- ②委派入口：有沒有【贏】並走到委派 ---
+  delegate.entry                   = 163
+  delegate.branch.convoy           = 75
+  delegate.branch.build            = 88
+  delegate.branch.facility         = 0
+  delegate.branch.generic          = 0
+  delegate.generic_no_advisor      = 0
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":0,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":0,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":0,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":0,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":1,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":1,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":1,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":1,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":2,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":2,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":2,"tick":10}
+    {"has_build":true,"has_facility":false,"kind":"","task":"","team":2,"tick":10}
+--- ③派遣結果：走到了有沒有派成功 ---
+  delegate.build_ok                = 0
+  delegate.build_fail              = 88
+  dispatch_fail.資源不足               = 291
+  dispatch_fail.advisor不可用         = 15
+  dispatch_fail.pop不足              = 2
+--- ★對照：紮根有沒有真的完成 ---
+  outpost.l0_to_l1                 = 2
+  construct.start                  = 27
+  construct.complete               = 26

@@ -1,0 +1,40 @@
+{
+  "slice": "goal-delegate-build-diag(借跑,非failure-memory-structural-identity)",
+  "ticket": "systems票factioned-bed-spec的追加判讀格：infra路活了之後,cand_build_emitted會不會>28？",
+  "measured_at_branch": "feat/goal-delegate-build-diag(.worktrees/goal-delegate-build-diag)——implementer的獨立診斷worktree,借用peaceful_economy_factioned.json config(從failure-memory-structural-identity worktree複製過去,data-only)跑他既有的goal_delegate_diag_bed.gd",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy_factioned, 90天",
+
+  "★L3聲明": "零code改動——直接沿用implementer既有tap(goal.cand_build_emitted/goal.cand_build_day.<day>/goal.frontier_calls/goal.frontier_empty/delegate.*/dispatch_fail.*)，只是換掉config跑一次。新增的只有把peaceful_economy_factioned.json複製進這個worktree的config/(data-only)。",
+
+  "★★★答案：會，遠超過28": {
+    "goal.cand_build_emitted": 236,
+    "與material dispatch_fail的關係": "★恰好=236，與dispatch_fail.資源不足(failure-memory-structural-identity worktree量到236)完全相等——兩個獨立worktree、獨立tap、獨立bed，同一個seed+config下量到同一個數字，交叉驗證吻合。",
+    "逐日分佈(goal.cand_build_day.<day>,真分佈非sample)": "day000=28（冷啟動那批，與factionless床一致），之後day026/027/029/030...一路到day063持續有4/8/12的小批次——★不是一次性凍結在day0，是持續整個90天反覆嘗試",
+    "判讀落點": "你判讀表『會⇒供給確實被faction層卡住⇒與預期一致』——本輪測到的是這一格。"
+  },
+
+  "★★★意外收穫：獨立重現implementer的A/B分型": {
+    "goal.res_prereq逐關(entry→satisfied→no_specie→buy_wins→no_market)": {"entry": 7751, "satisfied": 494, "no_specie": 1165, "buy_wins": 3812, "no_market": 2280},
+    "缺口分佈": {"food": 120, "material": 256, "tools": 631, "weapon_melee_low": 2438},
+    "不可解子集(與implementer的A/B分型獨立吻合)": {"A_table_gap.food": 120, "B_not_terrain.tools": 631, "B_not_terrain.weapon_melee_low": 2438},
+    "備註": "這段是bed既有report自帶的分類標籤(implementer自己命名的A_table_gap/B_not_terrain)，我只是換config重跑後照樣印出來——不是我獨立分類，是implementer的分型在新config下依然重現同樣的形狀(120/631/2438這三個數字與他原本factionless床上的結果同構)。"
+  },
+
+  "★funnel(這個branch自己的漏斗，與failure-memory-structural-identity不可比,不同code不同世界)": {
+    "goal.cand_build_emitted": 236, "delegate.entry": 163, "delegate.branch.convoy": 75, "delegate.branch.build": 88,
+    "delegate.build_ok": 0, "delegate.build_fail": 88,
+    "dispatch_fail.資源不足": 291, "dispatch_fail.advisor不可用": 15, "dispatch_fail.pop不足": 2,
+    "outpost.l0_to_l1": 2, "construct.start": 27, "construct.complete": 26,
+    "備註": "236→163在delegate.entry這一關有掉量(~31%)——與factionless床上implementer量到的『四個28完全相等、零損耗』不同，這個branch在factioned config下漏斗出現了損耗，但★這是這個branch自己的code path(非failure-memory-structural-identity)，不宜跨branch比較，僅供你參考漏斗形狀。"
+  },
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/factioned-goal-delegate-90d.txt",
+    "config_copied_to": ".worktrees/goal-delegate-build-diag/config/peaceful_economy_factioned.json(未commit,data-only)"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:LW_CONFIG='peaceful_economy_factioned'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\goal-delegate-build-diag --script scripts/debug/goal_delegate_diag_bed.gd （★這個bed印很多逐tick console log,跑很久,GODOT_TIMEOUT建議拉高到1800）",
+
+  "cleanup": "busy beacon清除。"
+}
