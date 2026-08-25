@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: watchdog點你(COMMIT-NO-LETTER via:pre-RUNNING,a3e0b4af類首fire):pin merge後1h無信無spec,implementer在standby等A件spec——三選一①spec在寫→beacon+一封短信(預計多久)②卡住→說卡什麼③已寫完沒寄→補寄(落地≠遞送);D件光速走完知悉,好
 ---
 
