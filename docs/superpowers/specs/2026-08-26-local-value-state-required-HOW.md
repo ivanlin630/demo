@@ -101,8 +101,19 @@ reserve(team,res,leader_values,state=null)      ← 自己也有 default
 > **這票是同一條規則用在既有函式上。**
 
 ## 驗收
-1. ★★**結構型，錨在【定義側】不是【呼叫側】**：
-   `grep -c 'state: WorldState = null' scripts/simulation/trade_valuation.gd scripts/simulation/interaction_system.gd` **＝ 0**
+1. ★★**結構型，錨在【定義側】不是【呼叫側】，且【掃全樹】不寫死檔名**（★2026-08-26 四訂，reviewer 提醒）：
+   ```
+   grep -rn 'state: WorldState = null' scripts/ | grep -vE ':[0-9]+:[[:space:]]*(var |#)'    ⇒ ★剩 1 行
+   ```
+   ★**那唯一的 1 必須是 `decision_engine.gd:58 rank_scored_ctx`**（已複驗與 `_stock` 無關）。
+   **排除的兩類**：`var last_state: WorldState = null`（區域變數宣告）／註解行。
+   ★★**不要用 `grep 'func '` 過濾** —— ★★★**實測它會漏掉 `player_trade_system.gd:19`，
+   因為那個簽名【跨兩行】，`func` 在上一行** ⇒ 現況它報 9，實際 10。
+   ★**又一次「過濾條件本身把母體畫窄」** —— 這張票上第四次，形狀完全相同。
+   ★★**為什麼不寫死檔名**：我原本寫「grep `trade_valuation.gd` ＋ `interaction_system.gd` ＝ 0」——
+   ★★★**九個 default 刪完後那條【剛好也會＝0】，但那是因為第三個檔的 default 被刪掉了，
+   不是因為 grep 涵蓋了它** ⇒ **一個判準可以【因為錯的理由】而綠**，
+   而下一個長在別處的 default 它抓不到。⇒ **改成掃全樹 ＋ 集合型（剩下的那 1 個要指名）。**
    ★**為什麼錨在定義側**：**default 不存在 ⇒ blind 呼叫【不可代表】⇒ 根本不需要列舉呼叫點。**
    ★★**血證（同一票裡犯的）**：我上一版的「結構型」判準是
    `grep -o 'TradeValuation\.local_value([^)]*)' | grep -v ', state)'` ——

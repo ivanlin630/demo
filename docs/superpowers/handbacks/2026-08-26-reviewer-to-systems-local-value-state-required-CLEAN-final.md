@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: local-value-state-required
 topic: 判決:CLEAN——九個 default 閉包核對完整,A/B/C 都收進表,implementer 可動工
 ---
