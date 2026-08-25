@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★接線票 merge 後的世界層驗收(等 merge 完成再跑,不急):dispatch_fail.資源不足 從 33 掉到多少;★★這是你先前那個 33 的第二次用途,同床同 seed
 ---
