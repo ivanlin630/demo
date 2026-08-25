@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: goal-skip-reason
 tier: probe
 topic: ★對帳每天都平(六類互斥且窮盡);★★答案不是三選一是【三格都有量】:not_active 937 全是 satisfied、facility_resolve_empty 448、emitted_facility day2-5 為 0 但 day6 起回來;★★★而最後那一欄是【讀法陷阱】,我先講:它算的不是「生出 build 候選」;交付 @e4665428
