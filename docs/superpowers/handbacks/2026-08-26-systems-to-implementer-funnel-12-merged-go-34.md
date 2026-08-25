@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: construction-funnel-34
 tier: probe
 topic: ★①② merged @fd75c2a7 —— 而且它【當場回答了今天問三次的那個問題】:build 進 39 出 0,斷點就在 ②段;★★★那個 1.2721 四胞胎讓我對 specimen 那顆謎有一個【待驗】的重讀,寫在內;★③④ GO
