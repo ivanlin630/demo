@@ -1,38 +1,47 @@
-[peaceful_economy day 30] teams=14
+[peaceful_economy day 90] teams=15
 --- 症狀（別單看這欄）---
-  order.placed                   = 357
-  order.filled                   = 2
-  order.abandoned                = 283
+  order.placed                   = 977
+  order.filled                   = 11
+  order.abandoned                = 896
   order.replaced                 = 0
 --- ★抑制量（並排看：症狀降但這裡飆＝大家都放棄了，不是病好了）---
   failure.blocked.material_material = 28
   failure.blocked_total          = 28
-  failure.recorded.order_abandoned_buy = 169
-  failure.entries_written        = 169
-  failure.structural_key_used    = 169
-  failure.key_fallback_no_dispatch_id = 8
-  failure.suppressed.貿易          = 8
+  failure.recorded.order_abandoned_buy = 569
+  failure.entries_written        = 569
+  failure.structural_key_used    = 569
+  failure.key_fallback_no_dispatch_id = 9
+  failure.suppressed.貿易          = 21
   failure.suppressed.駐守          = 9
-  failure.suppressed.求和          = 66
-  failure.suppressed.build_workshop:resource = 23
-  failure.suppressed.maintain_food:resource = 7
-  failure.suppressed.survival    = 22
-  failure.pruned                 = 21
-  failure.suppressed.返家補給        = 7
-  failure.suppressed.買糧          = 13
-  failure.suppressed.build_apothecary:resource = 27
-  failure.suppressed.覓食          = 10
-  最深折價 = 0.585（1.0 − 乘數）
+  failure.suppressed.求和          = 92
+  failure.suppressed.build_workshop:resource = 140
+  failure.suppressed.maintain_food:resource = 12
+  failure.suppressed.survival    = 67
+  failure.pruned                 = 119
+  failure.suppressed.返家補給        = 64
+  failure.suppressed.買糧          = 27
+  failure.suppressed.build_apothecary:resource = 134
+  failure.suppressed.覓食          = 58
+  failure.suppressed.建設          = 10
+  failure.suppressed.maintain_material:resource = 3
+  failure.suppressed.紮營          = 47
+  failure.suppressed.遷移找糧        = 23
+  failure.suppressed.掠奪          = 5
+  failure.suppressed.build_farming:resource = 8
+  failure.suppressed.build_stable:resource = 35
+  failure.suppressed.乞食          = 1
+  failure.suppressed.併入          = 4
+  最深折價 = 0.600（1.0 − 乘數）
 --- 被折價的那兩個 option 的行為 ---
-  decision.opt_chosen.買糧         = 40
+  decision.opt_chosen.買糧         = 79
   decision.opt_chosen.買料         = 0
-  decision.opt_applicable.買糧     = 56
-  decision.opt_applicable.買料     = 63
+  decision.opt_applicable.買糧     = 123
+  decision.opt_applicable.買料     = 213
 --- ★★三面 acceptance ---
   ①文明化恢復 outpost.l0_to_l1 = 0
      ★這一面【要同床 main baseline 才可判】：絕對值不告訴你有沒有恢復。
-  ②買糧 339 型仍咬 failure.suppressed.買糧 = 13
-  ③紮根執行型失敗進記憶 = 0　(全部 recorded 分佈: ["order_abandoned_buy=169"])
+  ②買糧 339 型仍咬 failure.suppressed.買糧 = 27
+  ③紮根執行型失敗進記憶 = 0　(全部 recorded 分佈: ["order_abandoned_buy=569"])
      ⚠ 0 有兩種可能，★這份報告分不出來，要看 ③b：
        (a) 接線斷（記錄側沒接到擲出點） (b) 這輪世界【真的沒有】紮根執行型失敗
   ③b 前提型 failure.blocked_total = 28　(★>0 表示紮根【有在嘗試】只是被擋)
