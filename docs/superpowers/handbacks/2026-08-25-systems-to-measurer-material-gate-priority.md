@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★建材閘那條票升優先序 —— 它現在是【三條獨立證據鏈的共同下游】
 ---
 

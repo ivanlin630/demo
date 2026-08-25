@@ -1,0 +1,32 @@
+{
+  "slice": "failure-memory-structural-identity",
+  "ticket": "systems票(material-gate-priority)：blueprint原T1票(28次dispatch_fail缺哪種建材+genuine-depletion vs bug分流)升優先序,要求重驗是否在現行branch仍成立",
+  "measured_at_branch": "feat/failure-memory-structural-identity(.worktrees/failure-memory-structural-identity)",
+  "measured_date": "2026-08-25",
+  "seed_config_days": "seed=1337, peaceful_economy, 90天",
+  "baseline_for_comparison": "2026-08-21 main@bbc0a3d0同題(docs/process/verdicts/T1-material-depletion-trace.measure.json)",
+
+  "★L3聲明": "無新增code——dispatch_fail.material_detail tap(faction_ai_system.gd:3814)已存在於本branch,08-21就掛上,本輪只是重跑取新讀數。零改動。",
+
+  "★★★核心結論：與08-21main baseline完全相同的結構性樣貌，camp v2/fifth-end改動沒有動到這條路徑": {
+    "短缺資源種類分佈": {"material": 28},
+    "逐筆關鍵欄位": "全部28筆tick=10(世界開局第1小時)，90天內僅此一波之後從未再嘗試；vault(公庫)全部=0；private(私產)只有0或20兩種值；need_1.5x固定75；home_mfg_level全部=0(沒有一隊建過manufacturing)——與08-21main測到的數字逐位相同(唯一差異是這輪28筆對應team id集合{0,1,2,6,9,10,11}，因branch上camp v2改了決策路徑、世界演化不同，但『缺哪種資源+何時發生+為何缺』的結構性樣貌不變)。",
+    "分流判讀(維持08-21判定，本輪重驗未推翻)": "★不是genuine-depletion(沒有『消費耗竭』這回事，vault從第一刻就是0，不是被榨乾的)。★也不是傳統bug(沒被榨乾，是從未被填過)。★★第三種：冷啟動貧窮/雞生蛋死結——世界起始沒有team有75 material，manufacturing(material唯一生產管道)本身需要material去建，且home_mfg_level全部=0(從未有team建成manufacturing)⇒沒有material→蓋不了manufacturing→沒有material來源→永遠蓋不了outpost，結構性死結。"
+  },
+
+  "★★★『gate沒擋vs沒執行』(比material數量本身更值得關注,08-21已提，本輪重申未變)": {
+    "判讀": "_dispatch_builder本身90天內只在tick=10附近被呼叫過這28次，之後89天再也沒被呼叫過一次。不是『被material擋住89天持續失敗』，是『呼叫這個函式的上游判斷只在世界剛開局觸發一輪，之後不再觸發』。就算material之後補上，若呼叫路徑已不會再走到這裡，修material本身不會讓dispatch重新發生——真正缺口可能在『誰、什麼條件下會再次呼叫_dispatch_builder』，不是material數量。",
+    "★誠實邊界(沿用08-21，本輪未新增查證)": "沒有逐行追呼叫路徑的上游判斷條件——這是從tick分佈全部=10反推的結構性推論，信心中等偏高，『為什麼上游不再呼叫』仍需另一輪code-read或tap才能坐實，非本輪已驗證結論。"
+  },
+
+  "★對你三條證據鏈的定位": "②③(dispatch/失敗記憶)這條瓶頸本輪確認在camp v2/fifth-end之後仍原樣存在、未被順手解掉——不是被新改動意外修好，也沒被新改動弄壞，是一個獨立、仍活著的blocker，與你『第五端修好之後下一個一定會撞上的東西』的定位吻合。",
+
+  "landed_paths": {
+    "report": "docs/measurements/breed-deathcause/material-gate-priority-90d.txt",
+    "prior_baseline_report": "docs/measurements/breed-deathcause/join-material-90d.txt(08-21 main)"
+  },
+
+  "repro": "$env:GODOT_TIMEOUT='900'; $env:LW_CONFIG='peaceful_economy'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='90'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\failure-memory-structural-identity --script scripts/debug/join_accept_measure_bed.gd",
+
+  "cleanup": "busy beacon清除。"
+}
