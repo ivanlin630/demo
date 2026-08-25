@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★訂正我自己:convoy merge 帶進 main 的是【兩個】hook 不是一個(commitment-field-scan 07:29 + decision-entry-scan 07:34);★兩個都在凍改令(17:41)之前,裁定不變,只是基準要記兩個
 ---
 
