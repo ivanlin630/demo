@@ -63,7 +63,11 @@ func _run() -> void:
 			lines.append("    %s" % str(smp2))
 			var rk: String = String(smp2.get("resource", "?"))
 			mat_tally[rk] = int(mat_tally.get(rk, 0)) + 1
-	lines.append("  ★短缺資源種類分佈=%s" % str(mat_tally))
+	lines.append("  ★短缺資源種類分佈(sample,cap=30,注意樣本數若=cap則為前N非全量)=%s" % str(mat_tally))
+	lines.append("  ★母體(dispatch_fail.<分類>,真count非sample,03b§④e)：資源不足=%d advisor不可用=%d pop不足=%d 糧橋不足=%d subteam失敗=%d 其他=%d" % [
+		int(Probe.counts.get("dispatch_fail.資源不足", 0)), int(Probe.counts.get("dispatch_fail.advisor不可用", 0)),
+		int(Probe.counts.get("dispatch_fail.pop不足", 0)), int(Probe.counts.get("dispatch_fail.糧橋不足", 0)),
+		int(Probe.counts.get("dispatch_fail.subteam失敗", 0)), int(Probe.counts.get("dispatch_fail.其他", 0))])
 	# ★追查infra.entry=0異常：先確認_evaluate_all_body本身是否有跑
 	lines.append("★★追查：_evaluate_all_body本身呼叫次數(判斷faction迴圈整體死活)：")
 	lines.append("  evaluate_all_body.entry              = %d" % int(Probe.counts.get("evaluate_all_body.entry", 0)))
