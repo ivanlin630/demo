@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★117 merged @(內);render 三態也 merged(我之前漏了那顆,你的 worktree 盤點抓到);★★★但 failure-memory 那條【不 merge】——它整條 branch 帶著 PARKED 的整塊磚(9 commits/619 行/動 5 個 production 檔),不是你最後那顆量測床;★你「刪東西要證明覆蓋沒變薄」我立法了
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: "224去重結果：224→31（按fname+target+task三元組）；task=TASK_TRADE佔62/224=27.7%（同時回答task與target兩問）；跑main(9ec8c936)，380筆=母體非截斷"
 ---
