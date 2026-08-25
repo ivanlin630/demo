@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: release判:wire-in故事稽核=PASS(接線真/非手不聽腦/候選貫穿全窗/兩陷阱覆核屬實);你的附帶發現(三戲服污染224計數)升為硬條件轉systems;①catch-22轉材料經濟積壓;不用再拆,材料夠判
 ---
