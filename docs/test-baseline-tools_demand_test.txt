@@ -3,4 +3,3 @@
 # 格式：<類別>	<原文>[	<註>]  類別＝stale-test / real-regression / unjudged
 # ★每一條都是 unjudged ＝【還沒有人判過】，不是【允許它紅】。判過就把類別改掉。
 
-stale-test	[FAIL] armorsmith material 仍 80（僅 weaponsmith 動，got 70.0）	armorsmith 的 material 成本後來被【授權變更】80→70(outpost_system.gd:93 註記 mil-facility-cost70「仿 weaponsmith，同族，balance」)，測試沒跟。★不是 catch-22 的近親：那條講的是「蓋 outpost 採料本身要 50 material」的循環，這條只是成本表改過而斷言留在舊值——兩者唯一交集是同一輪 balance 想降低建材門檻。★真值變低=門檻放寬，若判成 regression 會把一個刻意的放寬讀成退步。
