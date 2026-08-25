@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★分支盤點的結果比我預期的有用:四條分支各 instrument 了【同一條建造漏斗的相鄰段】,四條都沒進 main;★★所以今天同一個問題問了三次、每次從零推,而尺早就有人做過;★★★儀器我已直接派(不等你排序),arc 排序仍在你手上
 ---
 
