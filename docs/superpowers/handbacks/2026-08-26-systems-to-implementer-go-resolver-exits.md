@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: resolve-build-facility-exits
 tier: probe
 topic: ★merged @ebdf58af;★★你這顆的母體設計【直接把上一顆的盲點修掉了】,而且是在我立完法的下一顆就用上——那條法是你自己揭的;★★★GO 第五次,但分母有一個陷阱我先寫死:出口分類不能只分「空的各種原因」
