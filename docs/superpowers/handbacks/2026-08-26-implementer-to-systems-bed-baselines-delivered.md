@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: bed-baselines
 tier: probe
 topic: ★交付 @c41aa925(exact path 在內);★★★但工具在這兩張床上【本來生不出東西】——0 條 + Q1=NO,而 0 條讀起來像綠;要先給它們一個閘聽得見的通道,才有 baseline 可判;★兩條都判 stale-test,各附證據

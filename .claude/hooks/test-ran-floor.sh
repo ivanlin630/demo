@@ -2,7 +2,14 @@
 # ★兩個【正交】的問題，分開問、分開判 —— 混在一起就兩個都答不了。
 #   Q1 跑完了嗎？   → 結尾標記（只有跑到最後才印得出來）
 #   Q2 有沒有新失敗？→ 與 baseline 比對（★不是「非零即紅」）
-# 用法：bash .claude/hooks/test-ran-floor.sh <實跑輸出檔> [baseline檔]
+# 用法：bash .claude/hooks/test-ran-floor.sh <實跑輸出檔> [baseline檔] [--gen-baseline]
+#
+# ★★★這支【不是】床無關的 —— 我原本這樣宣稱過，錯了（implementer 2026-08-26 實測打回）：
+#   ★它床無關的是【比對】那一半；★★【看得見失敗】那一半依賴兩個 `headless_test` 的慣例：
+#     ①結尾標記 `[TEST-SUITE-COMPLETE]`（Q1 靠它）
+#     ②失敗走 Godot 的 severity 通道（Q2 的列舉軸靠它）—— ★純 `print` 的失敗它【看不見】
+#   ⇒ 一張沒有這兩件的床跑起來會是：★★★**0 條 baseline ＋ 綠燈，而床實際是紅的**（恆真式）。
+#   ⇒ **所以「閘型床」有慣例要遵守**，見 `docs/process/03_implementer.md §閘型床的兩個必要條件`。
 #
 # ── 血證（同一個病，四次化身）────────────────────────────────────────────
 #   ①headless 因 parse error 沒跑，輸出 FAIL=0 —— 跟全綠長得一模一樣。
