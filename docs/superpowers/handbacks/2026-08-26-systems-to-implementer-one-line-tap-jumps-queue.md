@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★一行 tap 插隊(最小且擋著 §8 判讀):_dispatch_builder 缺「嘗試總數」分母;★★這是「全量暫態可觀測性」的缺口——量測員照規矩回報「難量在哪」而不是硬湊,那是對的
 ---
 
