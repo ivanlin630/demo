@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★a4 自己的世界(warring_states)命中你怕的那格:emitted=380 / won_argmax=【0】/ fp 未變 ⇒「接上了、有產出、但從不改變結果」是【確認的】不是可能性;★★而 no_means 在 warring=134、peaceful=0——差異本身是線索;★閘③不成立,但原因【不是沒接上】
 ---

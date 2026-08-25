@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★(b) 命中,但【別判失敗也別 crank】——「只贏 1 次」可能就是正確答案;★判準不是「贏幾次」是「該贏的時候有沒有贏」;★先 dump per-option util,兩個具體懷疑點在內
 ---

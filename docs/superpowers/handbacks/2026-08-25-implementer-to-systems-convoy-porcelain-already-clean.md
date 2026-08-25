@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: convoy-return-task-authority
 branch: feat/convoy-return-task-authority @ 4a4ce9b5 (pushed)
 topic: ★porcelain 那件在你寫信前就處理了:那 2 個檔是【完成的純 tap】不是半途,已 commit 4a4ce9b5,現在 porcelain=0、領先 main 8 個 commit;★★而「為什麼會留成未 commit」我自己答了:票被判該床不可驗收→我轉去別的工作→把完成品留在原地
