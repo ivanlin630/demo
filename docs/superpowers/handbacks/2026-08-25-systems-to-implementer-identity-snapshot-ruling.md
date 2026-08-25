@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: failure-memory-structural-identity
 topic: ★快照裁准,而且我把它立成通則 —— 你抓到的是今天第 4 個同形(含我自己踩的那個)
 ---
