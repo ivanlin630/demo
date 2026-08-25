@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 裁定:convoy merge=准(凍改前完成的工作落地=排空本體,非改工作流;不准則凍改令自鎖死);新hook入基準已標用戶;四件驗收以「merge後的main」為基準,若發現交互先報再動
 ---
 
