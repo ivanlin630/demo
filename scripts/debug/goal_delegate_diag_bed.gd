@@ -74,6 +74,36 @@ func _dump(cfg: String, days: int, sd: int, state: WorldState, out_path: String)
 		lines.append("  ★satisfied 逐案依據（own_v 應 ≥ best_alt_v，否則就是誤判）：")
 		for es in (Probe.samples["goal.harvest.satisfied_own_terrain"] as Array).slice(0, 10):
 			lines.append("    " + JSON.stringify(es))
+	lines.append("  ★★means-end：【產出】與【贏】分開報——emitted>0 且 fp 不變 可同時為真")
+	for km in ["means_end.candidates_emitted", "means_end.won_argmax",
+			"means_end.no_means", "means_end.cycle_detected"]:
+		lines.append("    %-38s = %d" % [km, _c(km)])
+	for kk in Probe.counts.keys():
+		var kks: String = String(kk)
+		if kks.begins_with("means_end.candidates_emitted.") or kks.begins_with("means_end.stock_seen."):
+			lines.append("      %-36s = %d" % [kks, _c(kks)])
+	lines.append("  ★★emitted 按【服務哪個 goal】分（發展型 vs 求生型）")
+	for kg in Probe.counts.keys():
+		var kgs: String = String(kg)
+		if kgs.begins_with("means_end.by_goal."):
+			var _d: int = _c("means_end.desperate_by_goal." + kgs.substr(18))
+			lines.append("    %-34s = %d　(其中絕境中 %d)" % [kgs.substr(18), _c(kgs), _d])
+	lines.append("      ★絕境中那一欄＝dev_coeff 歸零的那批。maintain_food 系 ⇒ 求生型被誤殺的候選人")
+	lines.append("  ★★★世界層價值：means-end 補上【既有機制沉默處】的提案有幾個")
+	for ku in ["means_end.unique_no_existing", "means_end.dup_existing_present"]:
+		lines.append("    %-38s = %d" % [ku, _c(ku)])
+	for ku2 in Probe.counts.keys():
+		if String(ku2).begins_with("means_end.unique_no_existing."):
+			lines.append("      %-36s = %d" % [String(ku2), _c(String(ku2))])
+	lines.append("      ★unique>0 ⇒ 本票有世界層價值；＝0 ⇒ 機制正確但這兩床沒那種情境（也是有效結論）")
+	lines.append("  ★no_means 逐資源（warring 134 vs peaceful 0，差異本身是線索）")
+	for knm in Probe.counts.keys():
+		if String(knm).begins_with("means_end.no_means."):
+			lines.append("    %-38s = %d" % [String(knm), _c(String(knm))])
+	if Probe.samples.has("means_end.util_vs_winner"):
+		lines.append("  ★★per-option util 對照（me_util vs winner_util / depth / payoff）")
+		for eu in (Probe.samples["means_end.util_vs_winner"] as Array).slice(0, 12):
+			lines.append("    " + JSON.stringify(eu))
 	lines.append("  ★更上游：資源前置的出口表（採@地形只是取得手段 2）")
 	for kr in ["goal.res_prereq.entry", "goal.res_prereq.satisfied", "goal.res_prereq.no_specie",
 			"goal.res_prereq.buy_wins", "goal.res_prereq.no_market"]:

@@ -111,6 +111,33 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])   # tiebreak：applicable 順序
+	# ★★won_argmax（systems 要）：【產出】≠【贏】。
+	#   emitted > 0 且 fp 不變 可以同時為真，而最危險的解釋是
+	#   「接上了、有產出、但【從不改變結果】」——沒這顆 tap 就分不出來。
+	if Probe.enabled and not scored.is_empty():
+		var _w: Dictionary = (scored[0].get("cand", {}) as Dictionary)
+		if bool(_w.get("means_end", false)):
+			Probe.bump("means_end.won_argmax")
+		# ★★per-option util dump（systems 派）：要的是【對照】不是一個數字。
+		#   ★差 2 倍 vs 差 100 倍 是完全不同的病；而【贏的那一次】是唯一真改變世界的案例。
+		#   ★懷疑點(i) depth 指數衰減／(ii) payoff 恆等 —— 兩欄都 dump，讓數字自己分。
+		var _best_me: Dictionary = {}
+		for _e in scored:
+			var _c2: Dictionary = (_e.get("cand", {}) as Dictionary)
+			if bool(_c2.get("means_end", false)):
+				_best_me = {"u": float(_e.get("u", 0.0)), "cand": _c2}
+				break
+		if not _best_me.is_empty():
+			var _mc: Dictionary = (_best_me["cand"] as Dictionary)
+			Probe.bump_sample("means_end.util_vs_winner", {
+				"me_util": snappedf(float(_best_me["u"]), 0.0001),
+				"winner_util": snappedf(float(scored[0].get("u", 0.0)), 0.0001),
+				"winner_opt": String(scored[0].get("opt", "")),
+				"me_won": bool(_w.get("means_end", false)),
+				"depth": int(_mc.get("me_depth", -1)),
+				"payoff": snappedf(float(_mc.get("me_payoff", 0.0)), 0.0001),
+				"res": String(_mc.get("me_res", "")),
+				"tick": state.world.current_tick}, 200)
 	# ★接入 arc 常設可觀測（gate4 失敗反饋：反覆不 fire 要能被看見，不得靜默）：
 	#   紮營 applicable 卻不是 argmax → 記「輸給誰、差多少」；贏了記 camp.won_argmax。
 	if Probe.enabled and not scored.is_empty() and team != null:

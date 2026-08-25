@@ -4818,6 +4818,7 @@ func _run_sim_test() -> void:
 	_test_meansend_facility_vs_material()
 	_test_meansend_recurses_into_subrecipe()
 	_test_meansend_cycle_terminates_loudly()
+	_test_meansend_wired_into_candidates()
 
 	_test_sellable_reads_granary()
 	_test_convoy_return_holds_against_routine()
@@ -16801,3 +16802,41 @@ func _test_convoy_return_yields_to_crisis() -> void:
 			"★priority=%d 應該搶得走 RETURN convoy（hold 不得是硬鎖），實際 current_task=%s"
 				% [int(lvl), team.current_task])
 	print("[OK] _test_convoy_return_yields_to_crisis")
+# ★means-end 接進決策後：缺設施 vs 缺原料要產出【不同的 candidate】。
+#   ★分不開等於沒做（同上一票）：兩者的下一步相反——蓋工坊 vs 去採料。
+#   ★★陽性對照（交付閘⑤）：同一次跑必須有【已知必然非零】的量，
+#     否則儀器沒開時「兩邊都空」會一起「通過」。
+func _test_meansend_wired_into_candidates() -> void:
+	print("--- means-end 接線：缺設施 vs 缺原料產出不同 candidate ---")
+	var pos := Vector2i(6, 6)
+	var state := WorldState.new()
+	_p2a_place_tile(state, pos)
+	var team := _mk_unified_desperate_team(state, pos, {"勤奮": 0.6})
+	var tile: HexTileData = state.world.tiles[pos.x * 1000 + pos.y]
+	tile.outpost_level = 2
+	tile.outpost_owner = team.team_id
+
+	# ★陽性對照：磚本身在這個 fixture 上必須有輸出，否則下面兩格的「不同」毫無意義
+	tile.manufacturing_level = 0
+	team.resources["material"] = 0.0
+	var probe: Array = AcquisitionPaths.for_resource(state, team, "tools")
+	assert(not probe.is_empty(),
+		"★陽性對照失效：磚對 tools 零輸出 ⇒ 下面的比較沒有分母")
+
+	# 甲：沒工坊 ⇒ 應出現【設施】型
+	var kinds_a: Array = []
+	for p in AcquisitionPaths.for_resource(state, team, "tools"):
+		kinds_a.append(String(p.get("kind", "")))
+	assert("facility" in kinds_a, "沒工坊時應出現 facility 型路徑，得到 %s" % str(kinds_a))
+
+	# 乙：有工坊、缺料 ⇒ 應出現【原料】型，且不再是設施型
+	tile.manufacturing_level = 1
+	var kinds_b: Array = []
+	for p2 in AcquisitionPaths.for_resource(state, team, "tools"):
+		kinds_b.append(String(p2.get("kind", "")))
+	assert("material" in kinds_b, "有工坊缺料時應出現 material 型，得到 %s" % str(kinds_b))
+	assert(not ("facility" in kinds_b), "有工坊時不該再說缺設施，得到 %s" % str(kinds_b))
+
+	# ★★兩者確實不同（這一條才是「分得開」的直接斷言）
+	assert(kinds_a != kinds_b, "★缺設施與缺原料產出相同 ⇒ 沒分開")
+	print("[OK] _test_meansend_wired_into_candidates（%s vs %s）" % [str(kinds_a), str(kinds_b)])
