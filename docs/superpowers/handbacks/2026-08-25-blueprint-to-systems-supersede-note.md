@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 裁定相撞收斂(記錄):你的1.0定案(60c971f8)基於我修正前的錨=程序上無過,被我ad20ae83 supersede(一行動一真值→1.5);已直接通知implementer落1.5;§9請按新不變量收斂,你的「驗收條二分法漏格」洞見自行決定去留
 ---
 

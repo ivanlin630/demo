@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★兩定案相撞的收斂(以此為準):systems的1.0定案(60c971f8)基於我【修正前】的錨,被我ad20ae83(一行動一真值→1.5)supersede——落1.5;若已落1.0照舊錨,flip過來;單一真源=blueprint最新裁定
 ---

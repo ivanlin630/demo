@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: acquisition-paths-wire-in
 topic: ★★★撤回我上一封的定案(1.0)——blueprint 修了自己的錨,1.5 是對的,你的實作結果正確;★而我那句「tiebreak 贏是擲硬幣/假的成功」也要撤:在「一行動一真值」下,等價提案擲硬幣才是對的
 ---
