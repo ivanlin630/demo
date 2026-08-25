@@ -270,6 +270,36 @@ func _run() -> void:
 		var krs: String = String(kr)
 		if krs.begins_with("resolver.resource_candidate.res.") or krs.begins_with("resolver.resource_candidate.task.") or krs.begins_with("resolver.empty_wrong_outpost_type.have."):
 			lines.append("      %-50s = %d" % [krs, int(Probe.counts[kr])])
+	# ★★★infra path 的歸宿（★分母＝entry；九類加總 == entry）
+	#   ★`defer_infra` 把候選交給這條路 ⇒ 這裡才看得出「交過去之後發生了什麼」。
+	lines.append("--- ★infra path 歸宿（逐日，★分母=entry）---")
+	var ik: Array = ["guard_in_combat", "guard_player", "guard_no_leader", "guard_no_own_outpost",
+		"guard_tile_null", "guard_outpost_level0", "guard_under_construction",
+		"pick_empty", "built_in_place", "in_place_failed", "dispatch_builder"]
+	lines.append("  day | entry | combat player noLdr noOp tileNull lvl0 underCon | pickEmpty | ★built inPlaceFail dispatch | 對帳")
+	var bad4: int = 0
+	for d5 in range(31):
+		var sf5: String = ".day.%03d" % d5
+		var ie: int = _c("infra.entry" + sf5)
+		if ie == 0: continue
+		var iv: Array = []
+		var is5: int = 0
+		for k5 in ik:
+			var q5: int = _c("infra." + String(k5) + sf5)
+			iv.append(q5); is5 += q5
+		if is5 != ie: bad4 += 1
+		lines.append("  %3d | %5d | %6d %6d %5d %4d %8d %4d %8d | %9d | %5d %11d %8d | %s" % [d5, ie,
+			int(iv[0]), int(iv[1]), int(iv[2]), int(iv[3]), int(iv[4]), int(iv[5]), int(iv[6]),
+			int(iv[7]), int(iv[8]), int(iv[9]), int(iv[10]),
+			"✅" if is5 == ie else "❌差 %d" % (ie - is5)])
+	lines.append("  ★★★%s" % ("infra 歸宿互斥且窮盡：每天都加得回 entry" if bad4 == 0 else "%d 天對不起來 ⇒ 還有一條出口沒被列舉" % bad4))
+	# ★★★母體的【明確扣除】(systems 寫死)：三個 military-only goal 在這張床上結構性不可能，
+	#   ★要【扣掉並印出來】，不是默默不算 —— 有正當理由的削，也必須留下記錄。
+	lines.append("--- ★母體扣除（★明示，不默默不算）---")
+	lines.append("  BUILD_FACILITY_GOALS 全集 = 8")
+	lines.append("  ★扣除：military-only 3（smeltery／weaponsmith／armorsmith）——本床 11 座 outpost 全 civilian")
+	lines.append("     證據：resolver.empty_wrong_outpost_type.have.civilian.need.[\"military\"] = %d（單一組合）" % 		_c("resolver.empty_wrong_outpost_type.have.civilian.need.[\"military\"]"))
+	lines.append("  ⇒ ★可達母體 = 5（farming／workshop／apothecary／mint／stable）")
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
