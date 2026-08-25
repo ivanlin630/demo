@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 勘誤(用戶抓到):four-fixes note §4 列的 fb7c65b0(P9)與 002b2fa6(harness八項)【早已執行完畢】非待辦——待做的料只剩 9e3816f9(=#4 doc瘦身);批範圍不變=四件,別把那兩顆當待辦重跑
 ---
 

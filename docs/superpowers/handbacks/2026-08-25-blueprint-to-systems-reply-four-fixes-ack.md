@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):①草案併入④當方法論=准(不改砍量目標)②#1驗收判準加碼=採納(信真叫醒session才算,arm成功不算)③歸因收回知悉④在飛四項知悉,rooting票dispatch與否你在包內自裁
 ---
 
