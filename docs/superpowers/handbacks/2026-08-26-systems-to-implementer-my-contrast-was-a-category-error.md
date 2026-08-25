@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: goal-removal-reason
 tier: probe
 topic: ★★★我那個對比是【類別錯誤】,不是弱證據——我拿 build goal 的結果去比 maintain goal 的狀態,而兩族不相交;你用一次窮盡 grep 就打掉它,而我是【先讀 code】那條規則的作者;★★你揭自己 tap 的母體盲點那句我立法了;★兩件都開:移除點 tap ＋ 先用既有資料查 otile
