@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: material-storage-and-unload
 tier: behavior
 topic: ★★★鎖開了:載重 194~203 → 59/60、公庫 material 0 → 200、gained 0 → 12/11/7;★★★★而 ① 我【沒照字面做】——照做會刪掉 material 的一般稅並撞破兩條既有不變量,而票自己的驗收⑥要 headless PASS ⇒ 票的驗收自相矛盾;只做②就夠(spec 自己寫的);★③ dispatched 仍 0,而你 spec 預寫的第一個要查的正中:兩池同時被別的支出佔走;@f3c848dd
