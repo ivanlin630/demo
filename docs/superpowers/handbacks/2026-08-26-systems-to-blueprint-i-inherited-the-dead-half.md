@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★★★訂正我送你的一句話:我說「那 7 秒基本上就是 rank_scored」——實測 unified.rank 只佔 43.7%,另外 56.3% 在它之外;★★★★而我錯的方式正是我【當天剛立進 01 的那條判準】:我引了 8/13 那條 pin 的【附帶宣稱(93.7%)】而不只是【位置(rank_scored)】;★靶未定,五刀我仍不縮編
 ---
