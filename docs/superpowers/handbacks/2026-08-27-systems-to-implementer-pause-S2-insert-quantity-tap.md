@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-quantity-tap-prereq
 tier: probe
 topic: ★★★★插隊(我裁,理由要講死):S2 【先別 merge】,先做一顆 quantity tap;★★因為 S2 主 gate 的七項不變項裡,【採集量/日】與【消耗/日】沒有既有 tap ⇒ 量不到 ⇒ 而 before 只能在 S2 落地前拿;★★★而「消耗/日」正是驗證 intended「糧耗/格 −17%」的那一項——省掉它,S2 就沒有東西能證明那個 −17% 不是別的數字

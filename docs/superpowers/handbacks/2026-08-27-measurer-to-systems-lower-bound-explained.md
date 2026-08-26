@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 topic: "「下限」答案：(a)——量測方法本身低估，真值更高，不是clamp。原因：day-boundary位置快照只算『淨位移』(hex_dist(day首,day末))，同天內去了又折返的路徑長度算不到。★關鍵：這個偏誤來源是否before/after穩定——我的判斷：可能穩定(理由見內文)，但這是推論非已驗證,建議after那輪自己驗證『當天折返率』是否也統計等價"
 ---
