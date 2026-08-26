@@ -2,7 +2,7 @@
 
 `from: systems`｜`tier: behavior`｜`arc: 建造漏斗解鎖／材料經濟`
 `WHAT 出處`：用戶 2026-07-24 意圖帳 material row（「forest 初始材料庫存拉高，老熟林大獎，近 `resource_cap`」）
-`狀態`：★**骨架** —— **機制段可審；★床那一格【留空】，等 `scored_positions_pure` 的地形分布回來。**
+`狀態`：★**床那一格【已填】**（2026-08-26）—— **床已照產生器的真路徑重擺，spec 可送 R²。**
 
 ## 病（★量出來的，不是設計臆測）
 ```
@@ -46,8 +46,29 @@ elif rng.randf() < HERB_FOREST_CHANCE: tile.resources["herb"] = rng.randi_range(
 4. **`fp` 會變**（worldgen 改動 ⇒ 世界不同）—— ★**照那條判準：改動改到了實際引數/世界，該變**
 5. **零裸魔數**：`estimator-lineage-scan.sh` 綠
 
+## ★床（★已定，2026-08-26；★★數字沒有一個出自我）
+**`peaceful_economy` 的 11 座 outpost 已照產生器【真路徑】重擺**
+（`pick_start_positions`：score × `SCATTER_NOISE ±35%` ＋ `min_sep` 硬保，**不是 `scored_positions_pure` 那支 fallback**）：
+```
+新床：forest 7 ／ plains 4 ／ ★mountain 0      （舊床：plains 8 ／ mountain 3 ／ forest 0）
+母體：plains 105（48.4%）／forest 62（28.6%）／mountain 50（23.0%）⇒ forest 偏好 2.23×
+```
+★**位置逐格取自產生器的回傳順序，地形是【位置的性質】** ——**「哪幾座變 forest」這個問題不存在。**
+★★**`mountain = 0` 是真的不選**：**真路徑有 4 座 plains 進榜，卻一座 mountain 都沒有。**
+
+### ★新基線（七顆儀器已在新床重取，對帳全綠）
+```
+decide.total 323→289 ｜ delegate.entry 51→12 ｜ attempt 39→12
+wall.entry 196→186 ｜ reject_cannot_afford 180→163 ｜ ★accepted 16→23
+```
+★★**`reject_cannot_afford 163` 與 `accepted 23` 就是 A 件驗收的新基線** —— **母體是活的。**
+★★★**但 `attempt 39→12` 與 `accepted 16→23` 方向相反，且【尚未經 QA 故事稽核】** ——
+**本 spec 不引用它們的因果，只用它們當基線數字。**
+
 ## ★誠實限
-- ★**床那一格留空**：**老熟林要放幾格、forest 據點要幾座，等 `scored_positions_pure` 的前 11 名地形分布回來再定。**
-  ★★**我不手挑分布**（手挑一張床 ＝ 手抄一個常數）。
-- ★**改床之後，前七顆儀器的數字全部要重取基線** —— **它們不會失效，但【不能跨床比】。**
+- ★**食物產能下降是【預期】**（plains food 8.0／forest 3.0，而 plains 8 座 → 4 座）——
+  ★★**`tile_food_init` 刻意不補償**：**補償 ＝ 為了讓床好看而手抄一個數字。**
+  ⇒ **若後續餓死率上升，那是【床照世界造之後才看得見的真問題】，不是本票或改床做壞了。**
+- ★**舊床基線標 `OLDBED` 留著，跨床不可比** —— **但兩張並排本身就是「床換了多少」的證據。**
+- ★★**B 件（伐木場）與本票共用「床上要有 forest 據點」這個前提** —— **現在那個前提成立了（forest 7 座）。**
 - ★★**B 件（伐木場）與本票共用「床上要有 forest 據點」這個前提** —— **兩件的順序由 blueprint 排，但前提是同一個。**

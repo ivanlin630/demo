@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: bed-follow-generator
 tier: behavior
 topic: ★床改完 @46f26889:forest 7／plains 4／mountain 0,位置逐格照排名取(runtime 坐實);★★七顆儀器新基線全取、對帳全綠,舊基線標 OLDBED 留著;★★★而數字動得比預期大:attempt 39→12、accepted 16→23;★食物那一項照你說的不補償,並在此明講
