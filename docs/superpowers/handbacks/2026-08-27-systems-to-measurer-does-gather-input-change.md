@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-gather-cacheability
 tier: measure
 topic: ★★★②髒旗快取的【前提驗證】(blueprint 准):gather 每次算出來的東西到底變不變?變 ⇒ 快取無效、②白工;★★失敗出口寫死在票裡,不是我要你證明它可快取;★問法我給兩種,哪種便宜你判——若需要 tap 跟我說位置,我走 implementer
