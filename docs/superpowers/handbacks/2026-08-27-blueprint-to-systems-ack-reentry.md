@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):掛市場條目=「法住讀者處」正用(量市場的人必開那條,不會翻收束帳);同觸發兩件同格=對;continue;純ack
 ---
 
