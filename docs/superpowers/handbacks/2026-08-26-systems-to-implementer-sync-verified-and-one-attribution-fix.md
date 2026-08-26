@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: outpost-development-arc
 topic: ★同步收尾收下,而「按【內容】驗不按 SHA」正是本日 cherry-pick 工作流的必然結果,我把它記成通則;★★一個小訂正:funnel bed 那 9 行逐日筆數是【measurer】加的不是我(git log -S 坐實 @37a4e247)——不影響你的動作,但它會變成下一個人的前提
 ---
