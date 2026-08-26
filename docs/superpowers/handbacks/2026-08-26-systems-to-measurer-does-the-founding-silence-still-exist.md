@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: founding-silence-recheck
 tier: probe
 topic: ★一個【可能已經溶解的謎】,查它比查它的原因便宜:「founding day1 起零嘗試」是舊床的發現,而新床 attempt 12→81;★★★所以先問「它還在嗎」,不要直接去查「為什麼」;★零新 tap,欄位都在 main

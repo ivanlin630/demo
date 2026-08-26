@@ -1,0 +1,42 @@
+{
+  "slice": "founding-silence-recheck",
+  "ticket": "systems票2026-08-26:39次(舊床)/81次(新main)dispatch_builder.attempt的沉默是否還在——先問還在不在,不查為什麼",
+  "measured_at_commit": "main（`construction_funnel_bed.gd` 加一段逐日筆數dump，讀既有 dispatch_builder.attempt sample，零新tap、零動控制流）",
+  "seed_config_days": "LW_CONFIG=peaceful_economy PERF_SEED=1337 ADHOC_DAYS=30",
+
+  "★母體/樣本確認": {
+    "counter": 81,
+    "sample數": 81,
+    "cap": 100,
+    "是否截斷": false,
+    "結論": "81=81，全量非first-N，自己確認過不是照抄票裡那句"
+  },
+
+  "★★★①tick分布 —— 涵蓋15個不同tick": {
+    "涵蓋tick數": 15,
+    "判讀": "既非『只有1個tick』(舊床那種)，也非『橫跨30天平均分布』——是第三種形狀，見下逐日筆數"
+  },
+
+  "★逐日筆數(day=tick/240，非0的天)": {
+    "day0": 13,
+    "day3": 7, "day6": 7, "day9": 7, "day12": 7, "day15": 7,
+    "day18": 7, "day21": 7, "day24": 7, "day27": 7,
+    "day22": 1, "day23": 1, "day28": 2, "day29": 1,
+    "其餘day(1,2,4,5,7,8,10,11,13,14,16,17,19,20,25,26)": 0,
+    "★形狀(照原樣報,不歸類)": "day0一次性13筆 + 之後每隔3天固定7筆(day3/6/9/12/15/18/21/24/27，週期性、數字完全相同) + day22/23/28/29零星幾筆。這不是『集中在前幾天』——每3天那批一路延伸到day27，橫跨了幾乎整個30天窗，但不是連續分布，是離散週期"
+  },
+
+  "★team分布": {
+    "Team1": "3次，嘗試當下material avail 76",
+    "Team6": "70次（81筆的86.4%），嘗試當下material avail 0–49",
+    "Team9": "6次，嘗試當下material avail 20",
+    "Team10": "2次，嘗試當下material avail 21–24",
+    "共4支隊在嘗試（12隊裡）": true,
+    "對照舊票提及": "舊床7支隊，本輪4支——如實列出，不解釋差異"
+  },
+
+  "landed_paths": {
+    "raw_output": "docs/measurements/founding-silence-recheck-30d.txt"
+  },
+  "repro": "$env:LW_CONFIG='peaceful_economy'; $env:ADHOC_DAYS='30'; $env:PERF_SEED='1337'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/construction_funnel_bed.gd"
+}
