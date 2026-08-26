@@ -37,6 +37,9 @@ func _run() -> void:
 		_mk("current_tick\\s*-\\s*([0-9]{2,})", "a_change", "★真裸 tick：`current_tick - <字面量>` 沒有經過任何具名時間常數 ⇒ 根旋鈕一改它就静默偏移", true),
 		# ── (b) 延後 ──
 		_mk("const TICKS_PER_TURN:", "b_defer", "24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2"),
+		# ── (c) 白名單：S2 重錨引入的兩顆新形狀 ──
+		_mk("const TICKS_PER_HOUR:", "c_whitelist", "★新的根常數本身（S2 把自由參數從 TICKS_PER_DAY 換成它）：其他時間量由它導出，改成 hours() 會循環定義"),
+		_mk("TICKS_PER_HOUR / 6", "c_whitelist", "★單位結構：遭遇動作＝10 分鐘＝1/6 小時。★★這個 6 不隨小時縮放——根怎麼改，一小時永遠是六個十分鐘"),
 		# ── (c) 白名單：根常數本身 ──
 		_mk("const TICKS_PER_DAY:", "c_whitelist", "根常數本身：hours()/days() 由它導出，改成 hours() 會循環定義"),
 		_mk("const TICKS_PER_SECOND:", "c_whitelist", "★播放速率：每【真實秒】渲染幾個 world tick —— 量的是現實時間，不隨小時縮放"),

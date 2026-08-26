@@ -1,6 +1,8 @@
 class_name FactionAISystem
 
-const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+# ★S2 intended-change：征收 30h → T2 戰術層 1 天（LOCKED §5 逐項清單）。
+#   ★人格調變的 0.5~2.25 倍率形狀保留（:1247 不動）—— 改的是【基準週期】不是人格。
+const COLLECT_INTERVAL:        int = WorldState.TICKS_PER_DAY  # T2：每 1 天
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
 # ★T0-A2 輪詢退場：A1 讓事件能瞬醒後，「沒事發生也每天想一次」的輪詢就是純空轉。
 # 這個倍率把輪詢拉長；★保留【慢心跳】＝拉長後的 cadence 本身（零事件時仍會最終重新思考，

@@ -1,15 +1,21 @@
 class_name WorldState
 
 # ── 時間基底 ──────────────────────────────────────────────────
-# ★S1b 白名單(c)：★這是【根常數本身】——`TimeScale.hours()/days()` 由它導出，
-#   改成 hours() 會變成循環定義。★★不是「特例」，是【被導出的那一端】。
-const TICKS_PER_DAY:    int   = 240          # 10 ticks/hour
+# ★★★S2 根旋鈕（重錨 2026-08-27）：【唯一自由參數】從 TICKS_PER_DAY 改成 TICKS_PER_HOUR。
+#   ★世界以【時間】思考，tick 是推導值 —— 要換 tick 粒度只改這一顆。
+#   ★★初值 60 ⇒ 1 tick 恰好＝1 分鐘，而那是【推導結果】不是寫死的身分。
+#   ★★★下限守衛：遭遇動作＝10 分鐘＝TICKS_PER_HOUR/6，而它必須 >= 10 tick
+#     （速度差檔位的解析度地板）⇒ 本顆不得小於 60。assert 在 debug/time_const_check.gd。
+# ★裸 tick 守衛 (c) 白名單：它【就是根】—— hours()/days() 由它導出，改成 hours() 會循環定義。
+#   ★★而【它的值】由 debug/time_const_check.gd 的根值凍結哨兵看著：改了會紅，
+#     紅了的處置是【確認有意並更新那一格】，不是拿掉守衛。
+const TICKS_PER_HOUR:   int   = 60           # ★唯一自由參數（1 tick = 1 分鐘，推導值）
 # ★S1b 白名單(c)：24 ＝【一天幾小時】的曆法結構，★不隨 tick 縮放 ——
-#   根從 240 改成別的值時，這個 24 必須【維持 24】，否則「小時」就不是小時了。
-const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 10
-const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 7200 ticks
-const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 21600 ticks
-const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 86400 ticks
+#   根旋鈕改成別的值時，這個 24 必須【維持 24】，否則「小時」就不是小時了。
+const TICKS_PER_DAY:    int   = TICKS_PER_HOUR * 24   # = 1440
+const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 43200 ticks
+const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 129600 ticks
+const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 518400 ticks
 const SECONDS_PER_TICK: float = 86400.0 / float(TICKS_PER_DAY)
 
 var world: WorldData = WorldData.new()

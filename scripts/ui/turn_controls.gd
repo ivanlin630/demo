@@ -3,7 +3,9 @@ extends HBoxContainer
 
 # ★★S1b 白名單(c)：這是【播放速率】—— 每【真實秒】渲染幾個 world tick。
 #   ★它量的是【現實時間】不是【世界時間】⇒ 世界的小時變長變短都不該動它。
-const TICKS_PER_SECOND: int = 4   # TEST VALUE — world ticks rendered per second
+const TICKS_PER_SECOND: int = 24  # ★S2：×6 同步根旋鈕（LOCKED §1）—— 看起來的世界速度不變
+#   ★這一顆量的是【現實時間】：每真實秒渲染幾個 world tick。
+#   ★★根旋鈕×6 後，同一段【世界時間】有 6 倍 tick ⇒ 這顆不跟著×6 就會變成慢動作 6 倍。
 const SKIP_OPTIONS: Array   = [10, 50, 100]
 
 var _bridge: SimBridge

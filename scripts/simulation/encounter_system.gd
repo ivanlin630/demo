@@ -10,7 +10,13 @@ const ESCORT_MAX_NEARBY_ENEMIES: int = 1 # TEST VALUE
 const PRISONER_CHECK_INTERVAL: int = 5   # TEST VALUE — 待校正
 const MESSENGER_RANGE: int        = 5    # TEST VALUE
 
-const BASE_ACTION_TICKS: int  = 10
+# ★★S2：遭遇動作＝【10 分鐘】（時間宣告），tick 數是推導值 —— 不再是裸值 10。
+#   ★重錨前：10 tick @ 10 tick/小時 ＝ 1 小時（與「10 分鐘」不符，舊根下的語意落差）
+#   ★★重錨後：10 tick @ 60 tick/小時 ＝ 10 分鐘 ⇒ 【值不變，而語意終於對了】。
+#   ★★★它同時是速度差檔位的解析度地板：< 10 tick 就分不出檔位（守衛見 time_const_check）。
+# ★裸 tick 守衛 (c) 白名單：這個 6 是【單位結構】—— 一小時永遠是六個十分鐘。
+#   ★根旋鈕怎麼改它都不變；改成 hours() 表達不了「十分鐘」（只吃整數小時）。
+const BASE_ACTION_TICKS: int  = WorldState.TICKS_PER_HOUR / 6
 const BLOCK_WINDOW: int       = 8
 const BLOCK_PENALTY: int      = 5
 const STAMINA_REGEN_PER_TICK: float = 0.003  # TEST VALUE — 體力每 tick 恢復量
