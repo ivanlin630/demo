@@ -60,6 +60,16 @@ date: 2026-08-20 ／ owner: systems ／ WHAT ＝ `2026-08-20-time-reanchor-tier-
 
 - ~~同 seed/config，**現制 vs 6× 制**各跑 3 遊戲日~~，比 **每遊戲日 wall time**（非每 tick——tick 定義變了，比 per-tick 會自欺）。
 - 判準：**每遊戲日 wall 增幅 < 15%** → S2 可直接做；**≥ 15%** → **先做 S4（T0×LOD arc）再回頭做 S2**（T0 取消輪詢正好抵銷 tick 密度）。
+> ## ★★★S0 已裁決（2026-08-27）：**走路 A**
+> ```
+> ★實測增幅 0.018% ≪ 15% ⇒ ★★壓倒性通過（與紙上估算的量級一致）
+> ★★★而 measurer 報了一個【方法上的訂正】：「no-op tick」這個定義本身失效 —— 0/720
+>    根因：captives_cleanup 的 phase marker【每 tick 無條件寫入】⇒「完全空的 tick」測不出東西
+>    ⇒ 改用 719/720 個【安靜 tick】的實測中位數（25us）當 no-op 成本【代理】
+> ★而那個代理是【上界】（安靜 tick 仍含那顆 marker 的成本）⇒ ★★結論方向只會更硬，不會更軟
+> ```
+> ★**誠實限**：**S0 量到的不是「完全空的 tick」，是「最安靜的那類 tick」** —— **定義換了，判準與結論沒換。**
+
 ∴ **順序有兩條路，由 S0 的數字選**：
 - **路 A（增幅小）**：S1 → S2 → S3 → S5 → S6 → S7 → **S4（T0×LOD）**
 - **路 B（增幅大）**：S1 → **S4（T0×LOD）** → S2 → S3 → S5 → S6 → S7
@@ -72,6 +82,13 @@ date: 2026-08-20 ／ owner: systems ／ WHAT ＝ `2026-08-20-time-reanchor-tier-
 
 ## §4 規約守衛（`debug/time_const_check.gd` 擴充）
 - **新增裸 tick 字面量 ＝ FAIL**。「裸 tick」定義：**時間語意**的 int 字面量出現在 `%`／比較／加減 tick 的位置，而非經 `TimeScale.hours()/days()`。
+> ## RETRACTED — 不得引用（systems 註記 2026-08-27，blueprint 准）
+> ~~`debug/time_const_check.gd` ＝ 審計入口、**擴充**成規約守衛~~ —— ★**「擴充」是死前提。**
+> ★**實測**：**該檔 25 行，內容是硬編 10 顆具名常數的數值比對表（`["INDEP_STRATEGY_CADENCE", …, 720]`），
+> ★★【沒有任何一行在掃描原始碼】** ⇒ ★★★**掃描能力是【從零建】，不是擴充。**
+> ★**該引哪一段**：`docs/superpowers/specs/2026-08-27-S1-bare-tick-and-guard-HOW.md`（S1 spec 誠實限）。
+> ★★**設計未動**：§1 slice 分解、§2 判準與兩條路、§3／§5／§6 一字未改；只訂正這一句的事實。
+
 - **既有豁免白名單**：`TICKS_PER_DAY`/`TICKS_PER_HOUR` 本身、fp/序列化用的純計數、debug 床。**白名單必須逐條寫理由**（否則守衛會被當成「加進白名單就好」的橡皮圖章）。
 - ★守衛**與 constitution_gate 同級**：merge 前跑、新增違規即 FAIL。
 

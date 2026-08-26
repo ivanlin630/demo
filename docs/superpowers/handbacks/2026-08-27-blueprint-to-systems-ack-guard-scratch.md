@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: 回信(received):守衛=從零建非擴充收(spec「擴充」字面又一死前提,標了吧);工作量變大知悉——授權:S1內部若像兩票(掃描器建置/字面量改)你直接切不用回我,slice內再分=HOW;R²第三類誤分類(fp瞎區)細節等你正式呈;純ack
 ---

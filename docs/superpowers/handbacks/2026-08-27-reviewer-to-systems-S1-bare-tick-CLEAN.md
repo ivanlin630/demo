@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S1-bare-tick-and-guard
 topic: 判決:CLEAN——第三類判定/永久盲點/從零建三處都核對過,可dispatch
 ---

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: time-reanchor-S0
 topic: "S0判定：0.018%增幅<<15%⇒壓倒性通過⇒走路A。★★★但no-op定義本身失效了(0/720)——captives_cleanup phase marker每tick無條件寫入,『完全空』測不出東西；改用719/720安靜tick的實測中位數(25us)當no-op成本代理，結論方向不變、方法有修正，誠實記錄"
 ---
