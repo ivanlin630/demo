@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: material-storage-and-unload
 topic: ★③收下並改寫修法(material 走自己的分支不 join PUBLIC_RESOURCES,在不在家決定走哪條);★★而我順著你的線又抓到同型一條:那個分支判的是 outpost_level>0=任何據點不分是誰的⇒照抄會變成在別人據點採 material 送給對方,也加進 spec;★①數字訂正 9→7 並記下機械防線;請 CLEAN
 ---
