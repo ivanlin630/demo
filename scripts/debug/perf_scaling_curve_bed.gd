@@ -36,9 +36,10 @@ func _run() -> void:
 		"config", "regime", "teams", "teams_cfg_knobs", "median_us", "mean_us", "p99_us", "max_us", "tps@median"])
 	var rows: Array = []
 	for cfg in configs:
+		var cp_path: String = (out_path + ".checkpoint.%s.txt" % cfg) if out_path != "" else ""
 		var lod: Dictionary = {} if hd_only else _run_one(cfg, world_seed, ticks, false, false)
 		if not hd_only and lod.is_empty(): continue
-		var hd: Dictionary = _run_one(cfg, world_seed, ticks, true, true)   # 全高清那趟才拆phase(★零LOD目標regime)
+		var hd: Dictionary = _run_one(cfg, world_seed, ticks, true, true, cp_path)   # 全高清那趟才拆phase(★零LOD目標regime)+checkpoint
 		if hd.is_empty(): continue
 		if not hd_only: _print_row(lines, cfg, "LOD", lod)
 		_print_row(lines, cfg, "full-HD", hd)
@@ -101,7 +102,7 @@ func _run() -> void:
 	print("=== perf_scaling_curve_bed DONE ===")
 
 
-func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, want_phase: bool) -> Dictionary:
+func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, want_phase: bool, checkpoint_path: String = "") -> Dictionary:
 	var path: String = "res://config/%s.json" % cfg_name
 	if not FileAccess.file_exists(path):
 		print("[FAIL] config 不存在：%s" % path)
@@ -135,15 +136,28 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 	var phase_count: Dictionary = {}
 	var wall_t0: int = Time.get_ticks_usec()
 	var n_ticks_ran: int = 0
+	# ★checkpoint：長窗會被外部timeout砍掉、砍掉時只在跑完才寫檔的東西會整批丟失(已踩兩次)。
+	#   有尖峰(>1s)或每500tick，當場append一行+flush()——就算被砍，磁碟上已經有東西。
+	var cp: FileAccess = null
+	if checkpoint_path != "":
+		cp = FileAccess.open(checkpoint_path, FileAccess.WRITE)
+		if cp != null:
+			cp.store_line("=== checkpoint start：config跑法見PERF_LADDER/PERF_TICKS env，teams=%d ===" % teams_start)
+			cp.flush()
 	for tick in range(ticks):
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(state, no_player)
-		dts.append(Time.get_ticks_usec() - t0)
+		var dt: int = Time.get_ticks_usec() - t0
+		dts.append(dt)
 		n_ticks_ran += 1
 		if want_phase:
 			for ph in runner._ph:
 				phase_sum[ph] = int(phase_sum.get(ph, 0)) + int(runner._ph[ph])
 				phase_count[ph] = int(phase_count.get(ph, 0)) + 1
+		if cp != null and (dt > 1_000_000 or tick % 500 == 0):
+			var wall_so_far: float = float(Time.get_ticks_usec() - wall_t0) / 1e6
+			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d" % [tick, dt, wall_so_far, state.teams.size()])
+			cp.flush()
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
 		if state.teams.is_empty():
@@ -151,6 +165,9 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 	var wall_total: int = Time.get_ticks_usec() - wall_t0
 	SimRunner.force_full_hd = false
 	SimRunner.phase_timing = false
+	if cp != null:
+		cp.store_line("=== checkpoint end：n_ticks_ran=%d wall_total=%.1fs ===" % [n_ticks_ran, float(wall_total) / 1e6])
+		cp.close()
 	if dts.is_empty():
 		return {}
 	var sum: int = 0
