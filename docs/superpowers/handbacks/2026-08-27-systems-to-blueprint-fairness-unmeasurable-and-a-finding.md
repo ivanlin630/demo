@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★★★兩把刀都落地了,而我要報的是【兩個誠實的空手】:①效能收益 −7.0% 落在雜訊帶⇒不宣稱加速②公平性行為面【現在測不了】,而測不了的原因本身有意義;★★★★而順手挖到一件【不屬於效能 arc】但你會想知道的:專為貿易設計的 merchant 床也是 0 成交
 ---
