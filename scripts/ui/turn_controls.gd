@@ -1,6 +1,8 @@
 # scripts/ui/turn_controls.gd
 extends HBoxContainer
 
+# ★★S1b 白名單(c)：這是【播放速率】—— 每【真實秒】渲染幾個 world tick。
+#   ★它量的是【現實時間】不是【世界時間】⇒ 世界的小時變長變短都不該動它。
 const TICKS_PER_SECOND: int = 4   # TEST VALUE — world ticks rendered per second
 const SKIP_OPTIONS: Array   = [10, 50, 100]
 

@@ -1,6 +1,9 @@
 # scripts/ui/sim_bridge.gd
 class_name SimBridge
 
+# ★S1b 延後(b)：24 tick ＝ 2.4 小時（現制 10 tick/小時）——
+#   ★`TimeScale.hours()` 只吃【整數小時】⇒ 無法精確表達 ⇒ ★★原樣不動，交 S2。
+#   ★★★不是忘了改，是【改了就會偏移】：hours(2)=20、hours(3)=30，都不是 24。
 const TICKS_PER_TURN: int = 24
 
 var _runner: SimRunner

@@ -753,8 +753,13 @@ func _build_state_str() -> String:
 
 func _build_debug_str() -> String:
 	var tick: int  = _bridge.get_current_tick()
+	# ★S1b 白名單(c)：以下 24 / 30 / 12 全是【曆法結構】，不是 tick 量 ——
+	#   ★分子都已由具名時間常數導出（TICKS_PER_HOUR/DAY/MONTH，隨根縮放），
+	#   ★★這幾個除數【不隨小時縮放】：一天永遠 24 小時、一月 30 天、一年 12 月；
+	#   把 TICKS_PER_DAY 從 240 改掉，它們仍須維持原值，否則單位就不是那個單位了。
 	var hour: int  = (tick / WorldState.TICKS_PER_HOUR) % 24
 	var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
+	# ★S1b 白名單(c)：12 ＝【一年幾月】的曆法結構，理由同 world_state 的 24。
 	var month: int = (tick / WorldState.TICKS_PER_MONTH) % 12
 	var season_names: Array = ["春","春","春","夏","夏","夏","秋","秋","秋","冬","冬","冬"]
 	var season: String = season_names[month]
