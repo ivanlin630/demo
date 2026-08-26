@@ -4570,52 +4570,40 @@ func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> 
 			else:
 				Probe.bump_pt("infra.guard_under_construction", _iday, team.team_id)
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
-	# ★★★據點發展統一（spec 2026-08-26）：先評【升級】再評【設施】——★順序照 faction 版現況，不改。
-	#   ★這條路以前【整段不存在】於獨立隊：faction 版有段(1)升級+段(2)設施，獨立版只有段(2)
-	#   ⇒ 獨立隊 slot 滿了就永遠卡住（L1 只有 2 格，而多一格的唯一出口是升級）。
-	#   ★★共用體吃「一格＋一隊」，獨立隊天生只有自己這一格 ⇒ 不迭代，直接餵。
-	# ★`upg.eval_entry` 的語意＝【進入升級評估一次】，兩個入口都要記 ——
-	#   否則獨立隊這條的分母是空的，而「沒被走到」與「走到了但每次都跳過」又會長得一樣。
-	if Probe.enabled: Probe.bump_pt("upg.eval_entry", ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY), team.team_id)
-	# ★★★階梯 vs 同一把秤（systems 派 2026-08-26 / slice facility-vs-upgrade-scale）：
-	#   ★要答：升級與設施是【同一次決策一起秤】，還是【升級不合格就落到設施】(first-match 階梯)？
-	#   ★★做法：同一次評估內，把「升級結果」與「設施結果」配成【一格】，分母＝infra.entry。
-	#     成對出現（升級因 afford 落空 ＋ 同一次設施成交）⇒ 階梯坐實。
-	#   ★★★純觀測：升級落空的原因用【既有 counter 的前後差】判，★不改 evaluate_upgrade 的簽名、
-	#     也不新增任何決策狀態 —— 觀測不得參與決策。
-	var _lad_bef: int = 0
+	# ★★★階梯溶解（spec 2026-08-26 infra-ladder-dissolve）：原本這裡先獨立評一次升級、
+	#   不合格才落到設施 ＝ first-match 階梯，兩者從不比較（實測 257/258 都是這條路）。
+	#   ★★現在升級收進 `_pick_facility` 當第三個 `ok_*` —— 同一把秤、同一次決策。
+	#   ★`allow_upgrade = true`：獨立隊站在自己那一格，正是段(1) 原本涵蓋的範圍。
+	# ★★配對 tap（`ladder.<upg>__<fac>`）已【退役】：它量的是 first-match 階梯那個結構，
+	#   而本票把那個結構溶掉了 ⇒ 留著只會產出一組【描述不存在之物】的數字。
+	#   ★保留 `ladder.pool.*`：決策當下兩池 material 分桶，與結構無關，仍然回答「有沒有機會買得起」。
 	if Probe.enabled:
-		_lad_bef = int(Probe.counts.get("upgd.reject_cannot_afford.team.%d" % team.team_id, 0))
-	if evaluate_upgrade(state, team, tile):
-		if Probe.enabled: Probe.bump_pt("infra.upgrade_dispatched", _iday, team.team_id)   # ★成功端：新增歸宿，對帳式要含它
-		if Probe.enabled: Probe.bump("ladder.upg_dispatched__fac_not_reached")   # ★升級成交＝根本走不到設施那段（配對要窮盡）
-		return
-	var _lad_upg: String = "n/a"
-	if Probe.enabled:
-		_lad_upg = "afford" if int(Probe.counts.get("upgd.reject_cannot_afford.team.%d" % team.team_id, 0)) > _lad_bef else "other"
 		# ★決策當下【兩池】material 總量分桶：直接回答「它有沒有機會買得起」
 		var _pool: float = float(tile.public_storage.get("material", 0)) + float(team.resources.get("material", 0))
 		var _cost_up: float = float(OutpostSystem.OUTPOST_COST[tile.outpost_type][1].get("material", 0))
 		Probe.bump("ladder.pool." + ("lt_cost" if _pool < _cost_up else ("cost_to_margin" if _pool < _cost_up * BuildAfford.MARGIN_NEUTRAL else "ge_margin")))
-	var pick: Dictionary = _pick_facility(state, team, tile, leader, "infra")   # 同 faction 隊 argmax 決策
+	var pick: Dictionary = _pick_facility(state, team, tile, leader, "infra", true)   # 同 faction 隊 argmax 決策
 	if pick.is_empty():
 		if Probe.enabled: Probe.bump_pt("infra.pick_empty", _iday, team.team_id)   # ★走到決策了，但沒有想建的
-		if Probe.enabled: Probe.bump("ladder.%s__fac_none" % _lad_upg)   # ★配對格：升級落空＋設施也沒得建
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if bool(pick.get("upgrade_first", false)):
+		# ★升級贏了這一把秤 ⇒ 走既有的升級執行體（★執行端一行沒改，只是誰決定它變了）
+		if evaluate_upgrade(state, team, tile):
+			if Probe.enabled: Probe.bump_pt("infra.upgrade_dispatched", _iday, team.team_id)
+			return
+		if Probe.enabled: Probe.bump_pt("infra.upgrade_failed", _iday, team.team_id)   # ★贏了秤但執行端拒絕（原本會靜默）
+		return
 	if pick.has("demolish_first"):
 		OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
 	# owner 在場就地開工，否則派 builder（同 _evaluate_infrastructure 施工路徑）
 	if team.tile_pos == tile.tile_pos and team.current_task != TeamData.TASK_BUILD:
 		if OutpostSystem.new()._subteam_upgrade_facility(state, team, tile, pick["facility"]):
 			if Probe.enabled: Probe.bump_pt("infra.built_in_place", _iday, team.team_id)   # ★★唯一「真的開工」之一
-			if Probe.enabled: Probe.bump("ladder.%s__fac_built" % _lad_upg)   # ★★成對：升級買不起、設施【同一次】成交
 			return
 		if Probe.enabled: Probe.bump_pt("infra.in_place_failed", _iday, team.team_id)   # ★就地開工被拒（原本靜默）
-		if Probe.enabled: Probe.bump("ladder.%s__fac_failed" % _lad_upg)
 	else:
 		if Probe.enabled:
 			Probe.bump_pt("infra.dispatch_builder", _iday, team.team_id)
-			Probe.bump("ladder.%s__fac_dispatch" % _lad_upg)
 		_dispatch_facility_builder(state, team, tile.tile_pos, pick["facility"])
 
 func _evaluate_infrastructure(state: WorldState, faction) -> void:
@@ -4644,20 +4632,11 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	#     而那跟「呼叫了但每次都在第一道閘掉頭」長得一模一樣（★同 infra.entry 那次的教訓）。
 	var _uday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
 	if Probe.enabled: Probe.bump_pt("upg.eval_entry", _uday, leader_team.team_id)
-	# (1) 升級既有 outpost
-	# ★★★迭代權留在【入口】，單格判斷交共用體（spec 2026-08-26 §分解）：
-	#   ★迭代順序【不得改】——全地圖字典 + 第一次成功就 return
-	#   ⇒ 「哪一格先被掃到」決定「哪一格先升級」。★★不得改成先收集再排序或換資料結構，
-	#     否則邏輯即使完全正確，`fp` 也會因為「先升的那格不同」而假紅。
-	for tile_id in state.world.tiles:
-		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.outpost_owner != leader_team.team_id:
-			continue   # ★不是自家地：不計入母體（母體＝自有據點-次）
-		if evaluate_upgrade(state, leader_team, tile):
-			if Probe.enabled: Probe.bump("infra.stop.1_upgrade")   # ★measurer L3 tap(T3票)：段(1)升級return
-			if SimRunner.phase_timing: _fai_pht("infra.upgrade", _ti)
-			return
-	if SimRunner.phase_timing: _ti = _fai_pht("infra.upgrade", _ti)
+	# ★★★段(1) 那條獨立的升級迴圈【已刪除】（spec 2026-08-26 infra-ladder-dissolve）：
+	#   它是 first-match 階梯的來源 —— 先評升級、不合格就落到段(2)，兩者從不比較。
+	#   ⇒ ★升級現在是段(2) 逐 tile `_pick_facility` 裡的第三個 `ok_*`，與 slot_free／demolish 同一把秤。
+	#   ★★迭代順序的 pin【仍然有效、不解除】：`for tile_id in state.world.tiles:` 一行沒動、
+	#     first-success `return` 也沒動 —— pin 保護「哪一格先被掃到」，本票改的是「同一格上兩個選項誰先被考慮」。
 	# (2) 擴建設施（faction 內所有 outpost；owner 以自身 local 資料評估，
 	#     就地施工優先：owner 在場 > 居民團 > 派擴建子隊）
 	for tile_id in state.world.tiles:
@@ -4676,9 +4655,16 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		# 玩家 team 不自動決策
 		if owner_team.leader_id == state.player_id and state.player_id != -1: continue
 		var owner_leader: PersonData = state.persons.get(owner_team.leader_id)
+		# ★`allow_upgrade` 只對【leader 自有】的 tile 開 —— 段(1) 原本就只掃那些；
+		#   段(2) 掃的是 faction 內所有 owner，全開會憑空多出「屬下升級自己的據點」(D fixture 釘這條)。
 		if owner_leader == null: continue
-		var pick: Dictionary = _pick_facility(state, owner_team, tile, owner_leader, "lord_scan")
+		var pick: Dictionary = _pick_facility(state, owner_team, tile, owner_leader, "lord_scan", owner_team.team_id == leader_team.team_id)
 		if pick.is_empty(): continue
+		if bool(pick.get("upgrade_first", false)):
+			if evaluate_upgrade(state, owner_team, tile):
+				if Probe.enabled: Probe.bump("infra.stop.1_upgrade")   # ★沿用既有 tap 名（段(1) 的語意搬到這裡）
+				return
+			continue   # ★贏了秤但執行端拒絕 ⇒ 換下一格，不吃掉這一輪
 		if pick.has("demolish_first"):
 			OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
 		# owner 在場 → 就地開工（居民村長 / 領主駐地）
@@ -4733,7 +4719,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 #   （`:4517` infra 自家據點／`:4581` 領主掃 owner 據點）。
 #   ⇒ ★沒有 site 的話，`pick.* 加總 == infra.entry` 這條對帳式當場是假的 —— 只有 `infra` 那一族對得上。
 func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
-		leader: PersonData, site: String = "other") -> Dictionary:
+		leader: PersonData, site: String = "other", allow_upgrade: bool = false) -> Dictionary:
 	var _pday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
 	if Probe.enabled: Probe.bump_pt("pick.%s.entry" % site, _pday, team.team_id)
 	var slot_full: bool = OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile)
@@ -4782,6 +4768,23 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 	if not slot_full:
 		if Probe.enabled: Probe.bump_pt("pick.%s.ok_slot_free" % site, _pday, team.team_id)
 		return { "facility": best }
+	# ★★★升級收進【同一把秤】（spec 2026-08-26 infra-ladder-dissolve）：
+	#   三者想蓋的是【同一座設施】best，差別只在【怎麼騰出那一格】的代價 ⇒ 共用 best 的 `_facility_score`，
+	#   尺度天然可比 —— ★不造新秤（原稿寫 argmax 卻沒定義升級的分數，R² 抓到）：
+	#     `ok_slot_free` 有空位（代價：無）／`ok_demolish` 拆掉 lowest（代價：失去 lowest）
+	#     ★`ok_upgrade`  擴建多一格（代價：升級全費；★afford 仍是 applicability gate 不是分數）
+	#   ★★不打折 ⇒ 兩者同分，而拆建還要多過 lowest × DEMOLISH_MARGIN 一關 ⇒ ★upgrade 恆先贏。
+	#     ★那是本票的直接後果不是巧合。★誠實限：不打折偏強／未計入倉容+250 與駐軍上限偏弱，兩者照原樣留著。
+	# ⚠️★★★`allow_upgrade` 由【呼叫端】決定，不是本函式自己判 —— 為了【不擴大範圍】：
+	#   段(1) 升級原本只掃 leader 自有的 tile；段(2) 設施掃 faction 內【所有 owner】（寬得多）。
+	#   ⇒ ★★若在此只判 `outpost_owner == team.team_id`，lord_scan 傳的是 `owner_team`，
+	#     就會憑空多出「屬下升級自己的據點」——★★★不在 WHAT 授權內，而症狀是「多了一件好事」，不會有人報 bug。
+	var _can_upg: bool = allow_upgrade and tile.outpost_owner == team.team_id and tile.outpost_level < 3 and tile.construction_team_id == -1   # gate-ok: world-mechanic: outpost level cap (>=3)（★與 evaluate_upgrade 內那條同一個世界機制，非新門檻）
+	if _can_upg:
+		var _ucost: Dictionary = OutpostSystem.OUTPOST_COST[tile.outpost_type][tile.outpost_level]
+		if BuildAfford.can_afford(_ucost, [tile.public_storage, team.resources], TradeValuation.leader_vals(state, team)):
+			if Probe.enabled: Probe.bump_pt("pick.%s.ok_upgrade" % site, _pday, team.team_id)
+			return { "facility": best, "upgrade_first": true }
 	# S4 demolish 泛化（全設施通用，非 farming 專屬）：slot 滿→best 遠勝最低 score 設施則拆建。
 	# ★farming 受規則保護不列拆遷候選（_lowest_score_facility 排除）＝命脈食物設施不拆（§R² 補裁 2）。
 	var lowest: String = _lowest_score_facility(state, team, tile, leader)
