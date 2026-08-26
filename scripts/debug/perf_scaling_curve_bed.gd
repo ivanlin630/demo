@@ -182,6 +182,14 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d rank_calls=%d rank_us=%d dt_per_call_true=%.1f" % [
 				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size(), faction_deciders, solo_candidates,
 				rank_calls_delta, rank_us_this_tick, (float(rank_us_this_tick) / maxf(float(rank_calls_delta), 1.0))])
+			# ★systems票2026-08-26(perf-spike-coverage)：dump完整_fai_ph字典(非[FaiPhase]那個只印top-8)，
+			#   用來算Σ(頂層label) vs dt做覆蓋率驗證。只在真spike(dt>1s)dump，避免每個tick%500都寫一坨。
+			if dt > 1_000_000:
+				var all_ph: Array = []
+				for k in FactionAISystem._fai_ph:
+					all_ph.append({"n": k, "us": int(FactionAISystem._fai_ph[k])})
+				all_ph.sort_custom(func(a, b): return int(a["us"]) > int(b["us"]))
+				cp.store_line("  fai_ph_full(%d labels)=%s" % [all_ph.size(), JSON.stringify(all_ph)])
 			cp.flush()
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")

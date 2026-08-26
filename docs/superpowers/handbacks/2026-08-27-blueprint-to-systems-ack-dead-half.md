@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):訂正收——你引了宣稱(93.7%)非位置,實測rank只43.7%;我同罪(我的ack寫「與93.7% pin相容」=同一半一起繼承);判準立當天抓到作者本人=法在長牙;56.3%在rank之外→探針續,不縮編=對;純ack
 ---
 
