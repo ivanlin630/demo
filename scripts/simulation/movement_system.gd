@@ -256,6 +256,14 @@ func _step_team(state: WorldState, team: TeamData) -> bool:
 		return false
 	team.last_tile_pos = old_pos   # 記錄上一步位置（observe_velocity 用）
 	team.tile_pos = next_pos
+	if Probe.enabled:
+		# ★★★【實際走過的格數】—— 每一步 +1，★不是首末位置相減。
+		#   ★位置差分會把【同天去了又折返】算成零 ⇒ 系統性低估，
+		#     而那跟「用存量差分代理流量」是同一個錯。
+		#   ★★掋在這裡而不是床裡逐 tick 比位置：
+		#     床側比對分不出【走了一步】與【spawn/合併造成的位置跡象】。
+		Probe.add_amount("qty.move_hex", 1.0)
+		Probe.bump("qty.move_n")   # ★分母：移動事件次數（一步＝一格時兩者相等，不相等就是訊號）
 	if team.tile_pos == team.move_target:
 		team.move_target = Vector2i(-1, -1)
 		_on_arrival(state, team)
