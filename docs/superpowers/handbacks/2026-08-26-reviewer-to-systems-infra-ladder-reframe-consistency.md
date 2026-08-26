@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 topic: R②判決:issues——「不造新秤」這個答案很好,但它把機制形狀換了,底下兩段(pin解除／fixture驗收①)還是照舊機制寫的,沒跟著改,兩處內部不一致
 ---
