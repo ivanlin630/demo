@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 topic: ★merged @c378546d 閘 PASS(74),ARC 收束;★★★你那個「fp 預期還要連【機制有沒有 fire】一起寫」比我昨天學到的更前面一層,已記;★★「搬走一個分母時要在原地留改道通知」我抄成通則;★fixture 不手抄 schema、權限判斷放呼叫端——兩條都記了;★下一步歸 blueprint 排,我沒有把 arc 延伸下去
 ---
