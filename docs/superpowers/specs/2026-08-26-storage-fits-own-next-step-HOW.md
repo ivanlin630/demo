@@ -22,7 +22,24 @@ military L2→L3： cap 800  vs  need material 750      OK
 ★**失敗訊息要寫【壞掉會長什麼樣】，不是「請勿修改」**：
 > 例：`civilian L1 倉容 200 < 升級全費 225 ⇒ 該級據點永遠存不滿升級所需 ⇒ upgd.dispatched 恆 0（不是平衡問題，是尺寸沒對齊）`
 
-★★**它必須對【兩邊】敏感**：改 `OUTPOST_STORAGE_CAP`、改 `OUTPOST_COST`、改 `MARGIN_NEUTRAL` **任一個**都要能紅。
+### ★★★寫法（R² 給的形狀，2026-08-26 —— ★不得各寫一份邏輯）
+```gdscript
+# ★唯一真值：真閘與三組陽性對照【都呼叫這一支】，不得各寫一份
+static func storage_fits(cap: float, cost: float, margin: float) -> bool:
+    return cap >= cost * margin
+```
+| | |
+|---|---|
+| **真閘** | `assert(storage_fits(真cap, 真cost, MARGIN_NEUTRAL))` —— **讀真常數** |
+| **對照 A（cap 敏感？）** | `assert(not storage_fits(真cap * 0.5, 真cost, 真margin))` |
+| **對照 B（cost 敏感？）** | `assert(not storage_fits(真cap, 真cost * 3.0, 真margin))` |
+| **對照 C（margin 敏感？）** | `assert(not storage_fits(真cap, 真cost, 真margin * 3.0))` |
+
+★★**「不是自我證明」的關鍵**：**三組對照與真閘呼叫【同一支函式】，只是餵扭曲的引數**
+—— ★**不是另外寫三段紅色斷言去說服自己，是【同一份判斷邏輯】在三種扭曲輸入下必須翻臉。**
+★★★**而它可證偽**：**若 `storage_fits` 內部退化成只比 `cap >= cost`（沒真的用上 `margin`），對照 C 就不會紅** —— **對照抓得到它。**
+
+★★**它必須對【三邊】敏感**：改 `OUTPOST_STORAGE_CAP`、改 `OUTPOST_COST`、改 `MARGIN_NEUTRAL` **任一個**都要能紅。
 ★★★**這正是四常數那顆的做法**——**pin 關係，不 pin 數字。**
 
 ### ②數字（★HOW 的判斷，理由寫在這裡供推翻）
@@ -41,7 +58,7 @@ OUTPOST_STORAGE_CAP.military : 不動
 ★★★**我沒有把它一起改掉，因為 blueprint 給的關係式是 `≥`，而把它墊高是我自己加的平衡判斷 —— 那要另外過 WHAT。**
 
 ## 驗收
-1. ★**assert 存在且【對三邊都敏感】**：分別把 `cap`／`cost`／`MARGIN_NEUTRAL` 各動一次 ⇒ **三次都要紅**（★陽性對照，三組都要跑）
+1. ★**assert 存在且【對三邊都敏感】**：★★**照上面那個「同一支純函式＋三組扭曲引數」的形狀**（★**不得各寫一份邏輯**）—— **A/B/C 三組都要跑、都要紅**
 2. **改完 assert 綠**（civilian 兩級皆過）
 3. ★**`matunload.vault_full` 下降**（現況 Team5 = 72/72 每次都卸不下）
 4. ★**`upgd.dispatched`**：★★**照原樣回報，不預測** —— **本票只解「裝不下」，不解「存不住」**（見誠實限）

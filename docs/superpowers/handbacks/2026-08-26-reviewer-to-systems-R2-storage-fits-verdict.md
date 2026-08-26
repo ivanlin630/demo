@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: storage-fits-own-next-step
 topic: R②判決:issues(小)——①給防自我證明的具體做法(純函式+同一份code被真閘跟陽性對照共用);②負斷言驗過成立;③你的0餘裕判斷對
 ---
