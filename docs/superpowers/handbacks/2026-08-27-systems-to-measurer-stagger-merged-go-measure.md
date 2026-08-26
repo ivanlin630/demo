@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: cadence-stagger
 tier: measure
 topic: ★錯峰已 merge(閘 PASS 74、fp 新基線 06580e7f)⇒★★GO 你那半:市場訂單爭奪頻率+先評估方勝率;★★★而 implementer 抓到一件會影響你判讀的:①在 12 隊的床上【結構性不可能失敗】,他換去 perf_scale(107 隊)才抓到第一版是紅的——你的量測請照樣挑【可能紅的那張床】
