@@ -1,0 +1,83 @@
+{
+  "slice": "S2-statistical-equivalence-before",
+  "ticket": "systems急件2026-08-27:S2落地前抓before快照，implementer補齊quantity tap(採集/消耗/移動皆真flow非存量差分)後最終落地版",
+  "★這份取代S2-before-5items.measure.json的移動/製造兩欄——同名key來源不同,見下方★★★方法論差異",
+
+  "測到的commit/方法": {
+    "採集量/消耗量/移動格": {
+      "worktree": "A:\\GDS\\demo\\.worktrees\\old-growth",
+      "commit": "0ab34123",
+      "bed": "scripts/debug/qty_tap_bed.gd",
+      "★機械檢查(implementer提醒活工作樹風險,已照做)": {
+        "peaceful_economy_跑前後HEAD": "0ab34123 / 0ab34123",
+        "warring_states_跑前後HEAD": "0ab34123 / 0ab34123",
+        "跑完後git_status": "空(乾淨)——兩輪都驗證過，工作樹全程未被動過"
+      }
+    },
+    "決策次數/starve/訊息/mkfill嘗試": "同一顆qty_tap_bed.gd@0ab34123一次跑完(見rows清單)，不是另一床"
+  },
+
+  "★★★方法論差異(別跟S2-before-5items.measure.json的同名欄位互相減，不是同一個tap)": {
+    "移動格": "舊5項床=day-boundary淨位移快照(下限,系統已判定before/after偏誤方向不穩定不可用) ⇒ 新qty_tap_bed=movement_system.gd:265-266真落點flow tap(每步+1)，這份取代舊的",
+    "製造產出": "舊5項床讀Probe.amounts『manufacture.output.*』前綴(資源產出量) ⇒ 新qty_tap_bed讀Probe.counts『manufacture.fired』(觸發次事，不是量)——兩者單位不同，不能互相對照，這份是新增的次數口徑非取代"
+  },
+
+  "★★★peaceful_economy(teams 12→12, persons_end=24)": {
+    "採集量_日": {
+      "food":       {"taken": 24.04, "credited": 23.91, "溢出": 0.13, "分母入帳次數": 1273, "次日": 42.4},
+      "material":   {"taken": 34.01, "credited": 34.01, "溢出": 0.00, "分母入帳次數": 329,  "次日": 11.0},
+      "ore_silver": {"taken": 0.22,  "credited": 0.22,  "溢出": 0.00, "分母入帳次數": 72,   "次日": 2.4}
+    },
+    "消耗量_日": {
+      "food":     {"amount": 55.52, "分母扣款次數": 864, "次日": 28.8},
+      "material": {"amount": 0.07,  "分母扣款次數": 215, "次日": 7.2}
+    },
+    "移動格_日": {"tap": 0.10, "tap分母事件次數": 3, "床側": 0.10, "床側分母樣本": 86500, "差": 0, "★一致無mismatch訊號"},
+    "決策次數_日": 10.23, "決策次數_總": 307,
+    "製造觸發次數_日": 7.17, "製造觸發次數_總": 215,
+    "訊息發出_日": 11.80, "訊息發出_總": 354,
+    "訊息送達_日": 0.17, "訊息送達_總": 5,
+    "餓死(named/minor/anon)": "★key不存在，Probe是ON⇒這件事從未發生(不是沒儀器)",
+    "撮合嘗試_日": {"buy": 0.07, "buy總": 2, "sell": 0.20, "sell總": 6}
+  },
+
+  "★★★warring_states(teams 49→112, persons_end=164)": {
+    "★母體變化提醒": "跟S2-before-5items.measure.json的teams_end=119不是同一輪(那份用main分支舊commit跑，這份用worktree 0ab34123跑)——不同code base下的種子確定性成長軌跡不保證一致，別拿119跟112對算差值",
+    "採集量_日": {
+      "food":       {"taken": 57.44, "credited": 19.84, "溢出": 37.59, "分母入帳次數": 1402, "次日": 46.7, "★溢出極大(倉滿sink)——世界事實非bug，跟已知經濟arc(local分配瓶頸)同型"},
+      "material":   {"taken": 1.85,  "credited": 1.85,  "溢出": 0.00,  "分母入帳次數": 240,  "次日": 8.0},
+      "ore_iron":   {"taken": 0.00,  "credited": 0.00,  "溢出": 0.00,  "分母入帳次數": 151,  "次日": 5.0, "★次數非0量為0——事情發生了但量太小或全被溢出，非儀器沒開"},
+      "ore_silver": {"taken": 0.00,  "credited": 0.00,  "溢出": 0.00,  "分母入帳次數": 19,   "次日": 0.6}
+    },
+    "消耗量_日": {
+      "food": {"amount": 354.27, "分母扣款次數": 6253, "次日": 208.4},
+      "material": "★key不存在，Probe是ON⇒這輪warring全程material消耗事件從未發生(跟peaceful不同，peaceful有0.07/日)"
+    },
+    "移動格_日": {
+      "tap": 98.17, "tap分母事件次數": 2945,
+      "床側": 84.07, "床側分母樣本": 634253,
+      "差": -423,
+      "★兩者不等=implementer預告的訊號——差額極可能是spawn/合併造成的位置跡象，tap為準(真正落點)，床側低估"
+    },
+    "決策次數_日": 64.93, "決策次數_總": 1948,
+    "製造觸發次數": "★key不存在，Probe是ON⇒這件事從未發生(跟peaceful的7.17/日不同——peaceful有製造，warring這輪沒有)",
+    "訊息發出_日": 46.53, "訊息發出_總": 1396,
+    "訊息送達_日": 335.40, "訊息送達_總": 10062,
+    "餓死(named/minor/anon)": "★key不存在，Probe是ON⇒這件事從未發生",
+    "撮合嘗試_日": {"buy": 21.87, "buy總": 656, "sell": 31.33, "sell總": 940}
+  },
+
+  "★gate實際上建立在哪幾項(七項現況一次講清楚)": {
+    "有解析度可裁決": ["採集量/日(三源分開)", "消耗量/日(實扣非應扣)", "移動格/日(真flow tap，tap為準)", "決策次數/日", "訊息發出+送達/日"],
+    "無解析度_世界狀態結論非缺陷": ["starve/日——兩床全程皆0，7200 tick窗口沒有解析度", "製造觸發次數——peaceful有(7.17/日)warring全無，是否30日窗不足看after輪能否長出"],
+    "不列入S2裁決_口徑不同於原『交易成交』": "撮合嘗試(buy/sell)次數≠訂單成交數，是mkfill.attempt.*非mkfill.order，供參考不裁決"
+  },
+
+  "landed_paths": {
+    "peaceful_economy_qty": "docs/measurements/before-S2-qty-peaceful_economy-30d.txt",
+    "warring_states_qty": "docs/measurements/before-S2-qty-warring_states-30d.txt",
+    "peaceful_economy_5items(舊,決策/starve/訊息仍有效，移動/製造已被本檔取代)": "docs/measurements/before-S2-peaceful_economy-seed1337-30d.txt",
+    "warring_states_5items(舊,同上)": "docs/measurements/before-S2-warring_states-seed1337-30d.txt"
+  },
+  "repro": "$env:BED_CONFIG='<peaceful_economy|warring_states>'; $env:BED_DAYS='30'; $env:GODOT_TIMEOUT='3600'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\old-growth --script scripts/debug/qty_tap_bed.gd"
+}
