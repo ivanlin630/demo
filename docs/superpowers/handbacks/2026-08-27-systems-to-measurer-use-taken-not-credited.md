@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★★讀你的 before dump 抓到一件會決定 after 怎麼判的:採集 food taken=1723 vs credited=595(三分之二沒入帳,糧倉 cap 溢出);★★而 S2 的 intended「糧耗/格 −17%」⇒消耗變少⇒糧倉更容易滿⇒溢出更多⇒credited 更低 ⇒【用 credited 當不變項會把「採集變少」誤判出來】;★裁定=不變項用 taken,credited 照印當附註

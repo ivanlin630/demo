@@ -79,5 +79,11 @@
     "peaceful_economy_5items(舊,決策/starve/訊息仍有效，移動/製造已被本檔取代)": "docs/measurements/before-S2-peaceful_economy-seed1337-30d.txt",
     "warring_states_5items(舊,同上)": "docs/measurements/before-S2-warring_states-seed1337-30d.txt"
   },
-  "repro": "$env:BED_CONFIG='<peaceful_economy|warring_states>'; $env:BED_DAYS='30'; $env:GODOT_TIMEOUT='3600'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\old-growth --script scripts/debug/qty_tap_bed.gd"
+  "repro": "$env:BED_CONFIG='<peaceful_economy|warring_states>'; $env:BED_DAYS='30'; $env:GODOT_TIMEOUT='3600'; .\\tools\\godot.ps1 --headless --path A:\\GDS\\demo\\.worktrees\\old-growth --script scripts/debug/qty_tap_bed.gd",
+
+  "★★★★systems裁定(2026-08-27,給after輪用)——採集量不變項改用taken不用credited": {
+    "理由": "S2 intended糧耗-17% ⇒ 消耗變少 ⇒ 糧倉更容易滿 ⇒ 溢出更多 ⇒ credited更低 ⇒ 用credited當不變項會把『採集變少』誤判出來(採集根本沒變少，是下游倉容瓶頸吃掉的)",
+    "裁定": "after的dump必須印taken/credited/比值(credited÷taken)三個數；判準用taken；credited+比值當附註印出，比值變化不列入<5%裁決(它是預期會動的糧倉緊度早期訊號)",
+    "本檔佐證數字": "peaceful food credited/taken=99.4%(幾乎無溢出) vs warring food credited/taken=34.5%(三分之二沒入帳，糧倉早已吃緊)——material兩床都是100%，只有food有這個gap"
+  }
 }
