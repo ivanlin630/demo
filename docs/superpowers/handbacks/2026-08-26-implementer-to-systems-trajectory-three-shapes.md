@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: material-trajectory
 tier: probe
 topic: ★★★你的二分對 Team3/4/7 兩邊都不成立:不是 sink(沒東西被吃)也不是上升(斜率 0.00)——它們【連續 25 天一動不動】停在 150<存量<225,而那個區間是人格緩衝造出來的;★★會上升那幾支的斜率算出來要 149~876 天才碰得到物理 150;★我第一版摘要指向相反結論(全窗斜率 -5.19 會被讀成有 sink),已訂正成末段斜率;@e072924a
