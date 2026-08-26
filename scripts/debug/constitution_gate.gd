@@ -118,8 +118,17 @@ func _scan_file(path: String, res: Array, out: Dictionary) -> void:
 	var is_decision: bool = dfile.search(rel) != null
 	var is_gv_file: bool = gvfile.search(rel) != null
 	var cur_func: String = "<global>"
+	# ★跨行 Probe 呼叫的括號結轉（★對照組實測抓到的缺陷 2026-08-26）：
+	#   `Probe.bump("...%s" % [site,` 換行後，★續行上【一個 `Probe.` 字樣都沒有】
+	#   ⇒ 只看單行的剝離會剝不到它，而那正是本次誤報的第二條。
+	var probe_carry: int = 0
 	while not f.eof_reached():
 		var line: String = f.get_line()
+		# ★★★剝離必須【每行無條件跑】——下面有多個 `continue`（非決策檔／gate-ok 行／非 dfunc），
+		#   任何一個跳過都會讓跨行括號結轉失步 ⇒ ★之後每一行的剝離結果都是錯的，而且不會有症狀。
+		var _sr: Array = _strip_observation(line, probe_carry)
+		var probe_free: String = String(_sr[0])
+		probe_carry = int(_sr[1])
 		var fm := func_re.search(line)
 		if fm != null:
 			cur_func = fm.get_string(1)
@@ -145,16 +154,81 @@ func _scan_file(path: String, res: Array, out: Dictionary) -> void:
 		var in_dfunc: bool = dfunc.search(cur_func) != null
 		if not in_dfunc:
 			continue
+		# ★★★觀測剝離（systems 派 2026-08-26 / slice constitution-gate-unblock）：
+		#   ★病：閘分不出兩種比較 —— ①【決定的比較】`if x < THRESHOLD: return false`（該抓）
+		#     ②【替已發生之事命名的比較】`Probe.bump("a" if x >= 3 else "b")`（不該抓）。
+		#   ★★而我們正在【系統性地】加②：每一顆漏斗 tap 的核心工作就是「把一個出口分類」，
+		#     而分類就是比較 ⇒ ★這個誤報會隨著儀器做得越好而越常出現。
+		#
+		# ★★★為什麼不是「整行含 `Probe.` 就跳過」（systems 的建議，我改了形狀）：
+		#   `if x > SOME_THRESHOLD and Probe.enabled:` 這種行會被整行跳過 ⇒ ★真門檻被放行，
+		#   而它【不會有任何症狀】——閘還是綠的。★★「跳過一整行」是用可能漏抓換不誤報。
+		#   ⇒ 改成【把觀測呼叫從該行剝掉，再拿剩下的去測】：
+		#     剝完沒東西剩 ⇒ 那個比較本來就在 Probe 的引數裡 ⇒ 不是決策；
+		#     剝完還命中 ⇒ 決策在觀測【之外】⇒ 照抓不誤。
+		#   ★★★而 systems 提的那個更嚴重的情況（把決策寫進 Probe 的回傳值，如 `if Probe.check(x>5): return`）
+		#     在這個形狀下【自動保留】：剝掉 `Probe.check(...)` 後剩下 `if : return`，early_return 仍命中。
 		# 值閘 B：硬門檻
-		if thr.search(line) != null:
+		if thr.search(probe_free) != null:
 			out["%s::%s::threshold" % [rel, cur_func]] = true
 		# 值閘 C：override early-return
-		if early.search(line) != null:
+		if early.search(probe_free) != null:
 			out["%s::%s::early_return" % [rel, cur_func]] = true
 		# 控制流閘 E：手派 route
-		if route.search(line) != null:
+		if route.search(probe_free) != null:
 			out["%s::%s::route" % [rel, cur_func]] = true
 	f.close()
+
+# ★把該行的觀測呼叫剝掉（`Probe.xxx(...)` 連同括號內全部，含巢狀）。
+# ★保留 `Probe.enabled` 這種【無括號】的旗標讀取——它若出現在條件裡，剩下的部分仍會被測到。
+# ★★純字串處理、零 regex 遞迴：找 "Probe."，往後找第一個 "("，配對到對應的 ")"，整段刪掉。
+# ★把該行的觀測呼叫剝掉（`Probe.xxx(...)` 連同括號內全部，含巢狀與【跨行】）。
+# ★保留 `Probe.enabled` 這種【無括號】的旗標讀取——它若出現在條件裡，剩下的部分仍會被測到。
+# 回傳 [剝完的字串, 結轉的未閉合括號深度]。
+func _strip_observation(line: String, carry: int) -> Array:
+	var s2: String = line
+	var depth: int = carry
+	# ①先處理【上一行帶下來的未閉合 Probe 呼叫】：吃掉本行屬於那個呼叫的部分
+	if depth > 0:
+		var cut: int = s2.length()
+		for k in range(s2.length()):
+			var ch0: String = s2[k]
+			if ch0 == "(": depth += 1
+			elif ch0 == ")":
+				depth -= 1
+				if depth == 0:
+					cut = k + 1
+					break
+		s2 = ("" if depth > 0 else s2.substr(cut))
+		if depth > 0:
+			return ["", depth]
+	# ②本行自己的 Probe 呼叫
+	var guard: int = 0
+	while true:
+		guard += 1
+		if guard > 16: break   # ★防呆上限：一行不會有 16 個 Probe 呼叫
+		var p: int = s2.find("Probe.")
+		if p == -1: break
+		var op: int = s2.find("(", p)
+		if op == -1:
+			# 無括號（例：`Probe.enabled`）⇒ 只去掉 token，繼續找下一個
+			s2 = s2.substr(0, p) + s2.substr(p + 6)
+			continue
+		var d2: int = 0
+		var close: int = -1
+		for k2 in range(op, s2.length()):
+			var ch: String = s2[k2]
+			if ch == "(": d2 += 1
+			elif ch == ")":
+				d2 -= 1
+				if d2 == 0:
+					close = k2
+					break
+		if close == -1:
+			# 括號沒閉合＝跨行呼叫的第一行 ⇒ 砍到行尾並把深度結轉給下一行
+			return [s2.substr(0, p), d2]
+		s2 = s2.substr(0, p) + s2.substr(close + 1)
+	return [s2, 0]
 
 func _load_baseline() -> Dictionary:
 	var out: Dictionary = {}
