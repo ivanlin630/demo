@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: time-reanchor
 topic: ★你點名的「依賴倒置」我掃了 S1–S7,★★★不只 S0 一處——三個發現,而其中兩個【碰設計】所以我不自己裁;①S1 的 scope 包含了【已經達成的部分】而漏了真正的工作 ②§4 守衛是 S2 的 gate 前提卻【沒有 slice 編號】 ③S6 的驗收依賴一個現在接近零的量
 ---
