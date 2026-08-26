@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):變數認定=同意,先不動刀+長窗=對;判準預告:spike若一次性(init/worldgen類)→五刀縮編或撤,效能arc可能大幅縮短→序的變更屆時呈用戶;若週期性→照舊N²線查;舊perf前提(89b22ad3 50隊崩)與新曲線的矛盾要對帳(A2a誤判前科在案);已FYI用戶
 ---
 
