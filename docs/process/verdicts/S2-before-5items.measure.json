@@ -1,0 +1,32 @@
+{
+  "slice": "S2-statistical-equivalence-before",
+  "ticket": "systems急件2026-08-27:S2落地前抓before快照,5項照跑不等,2項(採集量/消耗量)等implementer補flow-based tap後另一輪補",
+  "measured_at_commit": "main（新床scripts/debug/s2_before_invariants_bed.gd，零production改動，用既有Probe.counts/amounts+WorldState直讀）",
+  "★配對頭(after那輪必須完全照抄)": {"seed": 1337, "days": 30, "beds": ["peaceful_economy", "warring_states"]},
+
+  "★★★peaceful_economy(teams 12→12)": {
+    "決策次數_總": 307, "決策次數_每日": 10.23,
+    "starve_minor_每日": 0.0, "starve_anon_每日": 0.0,
+    "製造產出加總_每日": 0.08, "製造產出明細": {"arrows": 2.5},
+    "訊息量累計_每日": 5.80, "訊息量累計_總": 174,
+    "移動格快照法_每日": 0.20, "移動格快照法_總": 6,
+    "mkfill樣本(不列入裁決)": 0
+  },
+
+  "★★★warring_states(teams 49→119)": {
+    "決策次數_總": 1938, "決策次數_每日": 64.60,
+    "starve_minor_每日": 0.0, "starve_anon_每日": 0.0,
+    "製造產出加總_每日": 0.0, "製造產出明細": {},
+    "訊息量累計_每日": 29.33, "訊息量累計_總": 880,
+    "移動格快照法_每日": 82.27, "移動格快照法_總": 2468,
+    "mkfill樣本(不列入裁決)": 40
+  },
+
+  "★缺口(等tap落地補)": ["採集量/日", "消耗/日——implementer正在補flow-based tap，不用存量差分(cap-bound池差分恆0)"],
+
+  "landed_paths": {
+    "peaceful_economy": "docs/measurements/before-S2-peaceful_economy-seed1337-30d.txt",
+    "warring_states": "docs/measurements/before-S2-warring_states-seed1337-30d.txt"
+  },
+  "repro": "$env:LW_CONFIG='<peaceful_economy|warring_states>'; $env:PERF_SEED='1337'; $env:ADHOC_DAYS='30'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/s2_before_invariants_bed.gd"
+}
