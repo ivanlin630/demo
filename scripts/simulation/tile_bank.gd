@@ -14,9 +14,26 @@ class_name TileBank
 
 # ── 公庫容量（單點；OutpostSystem._get_storage_cap / storage_cap 委派此）──
 const OUTPOST_STORAGE_CAP: Dictionary = {
-	"civilian": [200.0, 500.0, 1500.0],
+	# ★★★civilian 兩級由 [200, 500] → [250, 650]（spec 2026-08-26 storage-fits-own-next-step）：
+	#   ★病：L1 倉容 200 < 升級全費 150 × 緩衝 1.5 = 225
+	#     ⇒ 該級據點【永遠存不滿升級所需】⇒ `upgd.dispatched` 恆 0 —— 那是【尺寸沒對齊】不是平衡。
+	#   ★★動 cap 不動 cost 的理由：cap 的所有 production 呼叫端都是「還能裝多少」的夾限算術，
+	#     沒有一個把 cap 當【決策輸入】；而 `OUTPOST_COST` 被 founding／facility／afford 多處
+	#     拿去做「蓋不蓋得起」的判斷 ⇒ 動 cost 會同時改掉三處語意。
+	#   ★L3 的 1500 不動（1500 ≥ 400×1.5＝600，本來就過）。
+	"civilian": [250.0, 650.0, 1500.0],
+	# ⚠️★military L1 `cap 300 == 全費 200×1.5 = 300`（★餘裕 0，關係式是 `≥` 所以成立）——
+	#   ★★刻意不墊高：墊高是平衡判斷，要另外過 WHAT。
+	#   ★日後 military 若出現「存得到但永遠差一點」，第一個看這一格。
 	"military": [300.0, 800.0, 2500.0],
 }
+
+# ★★★倉容是否裝得下「升到下一級所需的全費」——★單一真值，閘與對照組共用同一支。
+#   ★不得在別處各寫一份 `cap >= cost * margin` 的邏輯（那樣兩份會各自漂）。
+#   ★★對照組把引數扭曲後必須紅；★★★其中「margin × 3」那組同時在驗
+#     【實作有沒有真的用上 margin】—— 若本函式退化成 `cap >= cost`，那組就不會紅而閘看起來仍綠。
+static func storage_fits(cap_amt: float, cost_amt: float, margin: float) -> bool:
+	return cap_amt >= cost_amt * margin
 const MOUNT_STORAGE_CAP: Array = [10.0, 30.0, 80.0]
 # 食物公庫專屬容量（比通用大 → 避免定居隊數天餓死）。
 const FOOD_STORAGE_CAP: Dictionary = {
