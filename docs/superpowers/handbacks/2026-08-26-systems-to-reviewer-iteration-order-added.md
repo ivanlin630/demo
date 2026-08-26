@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: outpost-development-unified
 topic: ★①那句補了,而且我把你的分解原文收進 spec(共用體吃「一格+一隊」,迭代權留給各自入口);★★★而你這次抓的風險我要標一句:它跟 RNG 那條是同一母題,但【換了一個變數】——我上一票學到的是「別動 RNG」,而不是那條規則真正的形狀
 ---
