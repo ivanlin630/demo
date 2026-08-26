@@ -3960,22 +3960,47 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 # 派升級子隊（task="升級"，附 target_level）
 func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Vector2i,
 		target_level: int) -> bool:
+	# ★★★八個歸宿（互斥且窮盡，分母＝`upg.call`）—— ★六道靜默 return false 原本一顆 tap 都沒有。
+	#   ★壞掉會長什麼樣：只看「有沒有升級成功」⇒ 六種失敗全長成同一個 0，
+	#     而它們的修法完全不同（沒料 vs 沒顧問 vs 人不夠 vs 派不出子隊）。
+	var _uday2: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
 	var tile: HexTileData = state.world.tiles.get(outpost_pos.x * 1000 + outpost_pos.y)
-	if tile == null or tile.outpost_owner != owner_team.team_id: return false
-	if target_level <= tile.outpost_level or target_level > 3: return false
-	if tile.construction_team_id != -1: return false
+	if tile == null or tile.outpost_owner != owner_team.team_id:
+		if Probe.enabled: Probe.bump_pt("upgd.reject_not_owner", _uday2, owner_team.team_id)
+		return false
+	if target_level <= tile.outpost_level or target_level > 3:
+		if Probe.enabled: Probe.bump_pt("upgd.reject_level_bounds", _uday2, owner_team.team_id)
+		return false
+	if tile.construction_team_id != -1:
+		if Probe.enabled: Probe.bump_pt("upgd.reject_busy_construction", _uday2, owner_team.team_id)
+		return false
 	var cost: Dictionary = OutpostSystem.OUTPOST_COST[tile.outpost_type][target_level - 1]
 	# 公庫+私產合併池（升級在自有 tile，公庫本地可用 → W4 解）
 	# ★三閘收斂：同一支 BuildAfford（人格化緩衝，中性零漂 1.5）
 	if not BuildAfford.can_afford(cost, [tile.public_storage, owner_team.resources],
 			TradeValuation.leader_vals(state, owner_team)):
+		if Probe.enabled:
+			Probe.bump_pt("upgd.reject_cannot_afford", _uday2, owner_team.team_id)
+			# ★缺的是哪一顆（★同 afford.short 那顆：分開記，別記成「成本含哪些 res」）
+			for _uk in cost:
+				if String(_uk) == "ticks": continue
+				var _uav: float = float(tile.public_storage.get(_uk, 0)) + float(owner_team.resources.get(_uk, 0))
+				if _uav < float(cost[_uk]):
+					Probe.bump("upgd.short." + String(_uk))
 		return false
 	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
-	if advisor_id == -1: return false
-	if owner_team.population < 10: return false
+	if advisor_id == -1:
+		if Probe.enabled: Probe.bump_pt("upgd.reject_no_advisor", _uday2, owner_team.team_id)
+		return false
+	if owner_team.population < 10:
+		if Probe.enabled: Probe.bump_pt("upgd.reject_pop", _uday2, owner_team.team_id)
+		return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, owner_team.team_id, advisor_id, 5, TeamData.TASK_UPGRADE, outpost_pos)
-	if sub_id == -1: return false
+	if sub_id == -1:
+		if Probe.enabled: Probe.bump_pt("upgd.reject_subteam_dispatch", _uday2, owner_team.team_id)
+		return false
+	if Probe.enabled: Probe.bump_pt("upgd.dispatched", _uday2, owner_team.team_id)   # ★成功端：沒有它八類加不回分母
 	_fund_subteam_cost(owner_team, state.teams[sub_id], tile, cost)
 	state.teams[sub_id].task_extra_data = { "target_level": target_level }
 	# S5 升級子隊 bootstrap food：升 Lv2 需 720 ticks=30天，比例分配食物不足撐完工
@@ -4549,11 +4574,25 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if Probe.enabled: Probe.bump("infra.stop.guard")
 		return
 	var _ti: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	# ★★★升級路徑的分母（systems 派 2026-08-26 / slice outpost-upgrade-path）：
+	#   ★L1 civilian 只有 2 個 slot、L2 有 3 個 ⇒ **「多一格」的唯一出口就是升級據點**。
+	#   ★★而床跑 30 天後仍然 L1×11 ⇒ 要分出【沒被提出】／【提出了沒贏】／【贏了倒在哪】。
+	#   ★★★三段各自要有分母：本函式被走到幾次 → 掃到幾格自有據點 → 真的呼叫 _dispatch_upgrader 幾次。
+	#   ★壞掉會長什麼樣：只量 _dispatch_upgrader 的出口 ⇒ 「這個函式從沒被呼叫」會印成一片 0，
+	#     而那跟「呼叫了但每次都在第一道閘掉頭」長得一模一樣（★同 infra.entry 那次的教訓）。
+	var _uday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	if Probe.enabled: Probe.bump_pt("upg.eval_entry", _uday, leader_team.team_id)
 	# (1) 升級既有 outpost
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.outpost_owner != leader_team.team_id: continue
-		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue   # gate-ok: world-mechanic: outpost level cap (>=3)
+		if tile.outpost_owner != leader_team.team_id:
+			continue   # ★不是自家地：不計入母體（母體＝自有據點-次，見下）
+		if Probe.enabled: Probe.bump_pt("upg.own_tile_seen", _uday, leader_team.team_id)
+		if tile.outpost_level >= 3 or tile.construction_team_id != -1:
+			if Probe.enabled:
+				Probe.bump_pt("upg.skip_max_level" if tile.outpost_level >= 3 else "upg.skip_busy_construction", _uday, leader_team.team_id)
+			continue   # gate-ok: world-mechanic: outpost level cap (>=3)
+		if Probe.enabled: Probe.bump_pt("upg.call", _uday, leader_team.team_id)
 		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
 			if Probe.enabled: Probe.bump("infra.stop.1_upgrade")   # ★measurer L3 tap(T3票)：段(1)升級return
 			if SimRunner.phase_timing: _fai_pht("infra.upgrade", _ti)
