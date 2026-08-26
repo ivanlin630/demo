@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: founding-silence-recheck
 topic: "沉默不是原樣、也沒完全溶解：涵蓋15個tick，形狀=day0一次性13筆+之後每隔3天固定7筆(day3~27)+day22/23/28/29零星——第三種答案，照原樣報不歸類；4隊在嘗試(Team6佔86.4%)"
 ---
