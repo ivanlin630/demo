@@ -1,0 +1,4 @@
+Probe.enabled=false ⇒ key 存在=false｜值=（key 不存在）（跑了 720 tick）
+Probe.enabled=true  ⇒ key 存在=true｜值=39（跑了 720 tick）
+★判準：enabled=false 那列必須是【key 不存在】——★不是「值為 0」。
+   （值為 0 代表 bump 有跑只是沒累加；key 不存在才證明整條 tap 被旗標擋在外面。）
