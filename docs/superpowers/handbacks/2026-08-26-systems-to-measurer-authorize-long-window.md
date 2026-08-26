@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-arc-slice0-longwindow
 tier: measure
 topic: ★★★曲線收下,而你那個 caveat 是【整個效能 arc 的樞紐】不是註腳:一次性 vs 週期性,兩個答案指向完全相反的結論(前者=幾乎沒有 perf 問題、後者=真正的長跑變因);★授權跑長窗,而且這是我要的唯一一件事;★★你不擅自跑長窗是對的——那不是跑法細節,是範圍決定
