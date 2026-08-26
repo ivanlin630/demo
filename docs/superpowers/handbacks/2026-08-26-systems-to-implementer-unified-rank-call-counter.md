@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: perf-spike-denominator
 tier: probe
 topic: ★一行 tap(measurer 提位置、我驗過並【修正一行】);★★★陷阱:他寫「:2559 前一行」,而 :2558 就是 phase_timing 的計時起點 ⇒ 放在 2558 與 2559 之間會把 bump 的成本記進 unified.rank 本身——而那正是我們要歸因的那個數字;★要求放在 :2558【之前】;★★背景=效能 arc 的定靶最後一顆
