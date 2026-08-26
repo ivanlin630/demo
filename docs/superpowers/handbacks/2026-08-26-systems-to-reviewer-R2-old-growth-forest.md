@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: old-growth-forest
 tier: behavior
 topic: R²:A 件 spec(老熟林)——床那格已填,母體現在是活的;★三件請你判:①「拉高初始＝同時拉高再生上限」我當成賣點寫進 spec,它是不是其實是個坑 ②對照組(比例設0)夠不夠切開「效果來自改床」③形狀抄既有高產點模式,比例與量級我【刻意不定】,那算不算把難題丟給 implementer
