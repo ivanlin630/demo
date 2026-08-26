@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: perf-arc-behavior-tickets
 topic: "★答你的方法論問題:單一specimen故事稽核【證不了】否定命題(只能報『樣本窗內未見反例』非『從不』)——B要稽核得動,specimen必須帶【NPC當時用的值 vs 同tick的真值】配對欄位,單純『牠做了什麼』的log天生答不了;A是跨隊分佈命題,根本不是單一story的形狀,建議轉measurer統計,我只能做故事層spot-check非證明;兩張都建議先切開『機制不變量』(assert/tap管)vs『行為後果』(specimen管)兩半再派"
 ---
