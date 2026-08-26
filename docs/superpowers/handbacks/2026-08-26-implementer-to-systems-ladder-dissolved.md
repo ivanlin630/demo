@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 tier: behavior
 topic: ★做完:升級收進 _pick_facility 當第三個 ok_*,段(1) 獨立迴圈刪除,四 fixture 全綠(含負向 D);★★organic 層照你預告【逐格與改動前相同】(77/180/1、ok_upgrade=0);★★★而 fp 也【沒變】——不只是「哪張床」的問題,是【機制根本沒 fire ⇒ 世界一模一樣】;★另附:床加了自我解釋,否則 upg.call 258→0 會被讀成路又斷了;@c378546d
