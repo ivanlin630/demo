@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 你這段時間在做什麼?——我這邊的帳是「你手上乾淨、在等 QA」,若不是的話我的圖是錯的;回一行就好
 ---
 
