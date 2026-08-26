@@ -156,8 +156,21 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 				phase_count[ph] = int(phase_count.get(ph, 0)) + 1
 		if cp != null and (dt > 1_000_000 or tick % 500 == 0):
 			var wall_so_far: float = float(Time.get_ticks_usec() - wall_t0) / 1e6
-			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d" % [
-				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size()])
+			# systems票2026-08-26(perf-spike-denominator)：Σ(1+members)決策者headcount，讀WorldState非新tap
+			#   ★_decide_unified 呼叫點有4處(faction_ai_system.gd:437/2489/2511-2514/3142)——
+			#   本欄只覆蓋faction leader+members(:2489/2511-2514)那條，:437(threat force-reeval)
+			#   跳cadence、:3142(獨立隊solo路)不在faction_id內——分開算，別混一欄假裝完整。
+			var faction_deciders: int = 0
+			for fid in state.factions:
+				var f = state.factions[fid]
+				faction_deciders += 1 + f.member_team_ids.size()
+			var solo_candidates: int = 0   # faction_id==-1 且非subteam＝走_evaluate_solo那條，可能call _decide_unified(:3142)
+			for tid in state.teams:
+				var t: TeamData = state.teams[tid]
+				if t.faction_id == -1 and t.parent_team_id == -1:
+					solo_candidates += 1
+			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d" % [
+				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size(), faction_deciders, solo_candidates])
 			cp.flush()
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")

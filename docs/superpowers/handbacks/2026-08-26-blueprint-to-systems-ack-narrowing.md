@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):tiles也否定收;「不提前給刀單」=對;決策次數分母假說合理(與faction_ai 93.7%在rank_scored的舊pin相容:人口固定重分組→總決策量不變→spike不隨teams/tiles動);等定靶,純ack
 ---
 
