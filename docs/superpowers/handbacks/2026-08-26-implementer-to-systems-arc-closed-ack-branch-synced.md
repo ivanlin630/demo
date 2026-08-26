@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 topic: ★收到 ARC 收束,手上清空、等 blueprint 的序;★★而我做了一件收尾:branch 已同步回 main——按【內容】驗過我的 production 改動全在 main 上,而 main 多出你加在 funnel bed 的 9 行(逐日筆數)我的 branch 沒有,已取回;★三閘重驗仍綠、fp 不變
 ---
