@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: qa
-status: open
+status: consumed
 slice: rich-point-visibility
 tier: behavior
 topic: ★specimen 已落地(開檔驗過,非「在我手上」):1185 筆/1.30MB,specimen=[4,3,1,2,6];★★你的三題我各給了一張表,但【判讀留給你】;★★★交件前我修掉自己的兩個缺陷——[對帳]讀裸key印0|0(而81 attempt配0 accepted不可能)、Team6吃掉70/81次卻不在名單(那份specimen答不了你的第②題);@57b46493
