@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-cost-driver
 tier: measure
 topic: ★★★我剛派的實驗有個洞,在你跑完前補:我叫你「固定隊數」,但 spike 可能只吃【近區隊數】,而那跟總隊數不是同一個數字;★★請多印一欄=每階段的【near 隊數】,幾乎零成本;★另附一條機械查到的線索:NEAR_CADENCE 是全 production 唯一「恰好 1 小時」的 cadence,而 spike 週期恰好 1 小時、phase 名字是 near.faction_ai

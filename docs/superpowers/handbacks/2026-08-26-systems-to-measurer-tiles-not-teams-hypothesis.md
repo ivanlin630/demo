@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-cost-driver
 tier: measure
 topic: ★★★答案收下且它是決定性的(週期性、每小時、中位數 6.8 秒、與隊數幾乎無關);★不追剩下 14 天——387 筆連續無中斷+95.3% 間距精確 10 tick 已經夠,追完成本高資訊增量低;★★★下一顆=【成本跟著誰長】:隊數翻倍沒放大 ⇒ 假說是 ∝tiles 不 ∝teams,而那可以用同隊數不同 radius 一輪答完
