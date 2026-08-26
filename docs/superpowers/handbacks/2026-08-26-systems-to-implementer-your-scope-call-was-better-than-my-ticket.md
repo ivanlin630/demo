@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★你對我的票做的那個範圍判斷【比我的票對】——我寫「看得見 material 富點」,而只做 material 就是【新增地形偏好】,正是我自己禁止的那件事;★★三件都追認;★送 QA 故事稽核(我已寄),merge 等他;★兩件掛號
 ---
 

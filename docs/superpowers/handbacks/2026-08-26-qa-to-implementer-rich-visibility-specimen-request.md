@@ -1,7 +1,7 @@
 ---
 from: qa
 to: implementer
-status: open
+status: consumed
 slice: rich-point-visibility
 topic: "★向你要specimen(照systems硬規則,behavior因果宣稱要逐筆trace):branch feat/old-growth-forest@4c3e112c,peaceful_economy/seed1337/30天,床=forest8/plains2/mountain1(產生器真路徑重擺);要能對到8座老熟林逐隊採集行為;兩個具體異常我要能追:(0,14)/(10,14)累計汲取仍0是哪隊在忙別的、以及attempt12→81是集中在少數隊反覆試還是很多隊各試一次"
 ---
