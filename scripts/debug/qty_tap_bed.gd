@@ -21,8 +21,21 @@ func _initialize() -> void:
 	Probe.enabled = not probe_off
 	var ticks: int = days * WorldState.TICKS_PER_DAY
 	var runner := SimRunner.new()
+	# ★【移動格/日】是七項裡唯一沒有 production tap 的 —— 而它不需要：
+	#   位置是世界狀態，床自己逐 tick 比對就量得到，不必為了量測去改 production。
+	var prev_pos: Dictionary = {}
+	var hex_moves: int = 0
+	var team_tick_samples: int = 0
+	for tid0 in state.teams:
+		prev_pos[tid0] = (state.teams[tid0] as TeamData).tile_pos
 	for _t in range(ticks):
 		runner.advance_tick(state, Vector2i(-1, -1))
+		for tid in state.teams:
+			var tm: TeamData = state.teams[tid]
+			team_tick_samples += 1
+			if prev_pos.has(tid) and prev_pos[tid] != tm.tile_pos:
+				hex_moves += 1
+			prev_pos[tid] = tm.tile_pos
 
 	print("=== qty_tap_bed === config=%s days=%d ticks=%d TICKS_PER_DAY=%d probe=%s"
 		% [cfg, days, ticks, WorldState.TICKS_PER_DAY, "OFF" if probe_off else "ON"])
@@ -75,6 +88,44 @@ func _initialize() -> void:
 		var n2: int = int(Probe.counts.get("qty.consume_n." + r2, 0))
 		print("  %-10s %.2f/日  ｜分母(扣款次數)=%d（%.1f 次/日）" % [r2, amt / dayf, n2, float(n2) / dayf])
 
+	print("
+── 其餘五項不變項/遊戲日（★均帶分母）──")
+	# ★key 可能帶 .day.NNN / .team.N 後綴 ⇒ 【用前綴加總】，不可讀裸 key。
+	#   血證：讀裸 key 永遠是 0，而那看起來跟【事情沒發生】一模一樣。
+	var tap_hex: float = Probe.amount("qty.move_hex")
+	var tap_n: int = int(Probe.counts.get("qty.move_n", 0))
+	print("  移動格(tap)   %.2f/日  ｜分母(移動事件次數)=%d" % [tap_hex / dayf, tap_n])
+	print("  移動格(床側) %.2f/日  ｜分母(team×tick 樣本)=%d" % [float(hex_moves) / dayf, team_tick_samples])
+	if tap_n > 0 and hex_moves != int(tap_hex):
+		# ★兩個獨立數字不合 ＝ 訊號，不是噪音：
+		#   床側逐 tick 比位置會把 spawn/合併的位置跡象算成移動，tap 不會。
+		print("  ★兩者差 %d 步 ⇒ 差額極可能是 spawn/合併造成的位置跡象（tap 為準）" % (hex_moves - int(tap_hex)))
+	var rows: Array = [
+		["決策次數", "unified.rank.calls"],
+		["製造產出", "manufacture.fired"],
+		["訊息發出", "msg.sent"],
+		["訊息送達", "msg.delivered"],
+		["餓死(named)", "death.starve_named_hunger"],
+		["餓死(minor)", "death.starve_minor"],
+		["餓死(anon)", "death.starve_anon"],
+		["擮合嘗試(buy)", "mkfill.attempt.buy"],
+		["擮合嘗試(sell)", "mkfill.attempt.sell"],
+	]
+	for row in rows:
+		var total: int = 0
+		var nkeys: int = 0
+		for kk in Probe.counts:
+			var kss: String = String(kk)
+			if kss == String(row[1]) or kss.begins_with(String(row[1]) + "."):
+				total += int(Probe.counts[kk]); nkeys += 1
+		if nkeys == 0:
+			# ★★這裡的語意跟 qty.* 【相反】，別搞混：
+			#   qty.* 是我這輪新掛的 ⇒ PROBE_OFF 對照證明「key 不存在＝儀器沒開」。
+		#   ★而這幾顆是【既有的 production tap】，Probe 現在是 ON
+		#     ⇒ key 不存在只能是【這件事從未發生】，不是「沒有儀器」。
+			print("  %-14s ★key 不存在，而 Probe 是 ON ⇒ 【這件事從未發生】（tap 在，只是沒 fire）" % row[0])
+		else:
+			print("  %-14s %.2f/日  ｜總數=%d（累加了 %d 條 key）" % [row[0], float(total) / dayf, total, nkeys])
 	print("
 ── 原始總量（★先看未除以天數的值，別讓 %.2f 把小數字吐成 0）──")
 	for k9 in Probe.amounts:
