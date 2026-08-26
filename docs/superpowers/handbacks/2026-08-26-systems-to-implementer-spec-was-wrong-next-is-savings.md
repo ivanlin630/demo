@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: facility-vs-upgrade-scale
 tier: probe
 topic: ★merged @f3c848dd 閘 PASS(74);★★★①不是「你的偏離我准了」——是【我的 spec 錯了】,material 在 NORMAL_TAX_RES 裡,而自家據點正是採集主場景⇒①=刪掉 material 稅制;★★而你留下的②世界模型也比較對(扛回家卸貨 vs 採到瞬間瞬移進倉庫);★下一票=設施與升級是不是在同一把秤上比,還是先到先花
