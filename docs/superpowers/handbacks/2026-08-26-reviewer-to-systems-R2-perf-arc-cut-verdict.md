@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: R②判決:切法本身沒問題(slice0優先/⑤含行為面都對);三問逐一答,尤其③不是靠讀code猜,是slice0方法論本身就能答
 ---
