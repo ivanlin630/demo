@@ -1,0 +1,14 @@
+{"days":3,"final":{"coin":0,"levels":{"apothecary":0,"armorsmith":0,"farming":2,"mint":0,"outpost_L":1,"smeltery":0,"stable":0,"weaponsmith":0,"workshop":0},"material":30,"mint_level":0,"vault_ore":4.98722364779416},"kind":"meta","n_candidates":6,"n_traj":5,"n_winners":2,"ticks_per_day":1440,"ticks_per_hour":60,"取樣規則":"candidate/winner 逐筆（cap 4000）｛material/coin 寫變化時＋每日邊界（非逐 tick，但不漏異動）"}
+{"day":2,"facility":"workshop","kind":"candidate","site":"lord_scan","team":800,"team_material":30,"team_tools":20,"tick":3000,"tile":2000,"util":2.32}
+{"day":2,"facility":"apothecary","kind":"candidate","site":"lord_scan","team":800,"team_material":30,"team_tools":20,"tick":3000,"tile":2000,"util":0}
+{"day":2,"facility":"mint","kind":"candidate","site":"lord_scan","team":800,"team_material":30,"team_tools":20,"tick":3000,"tile":2000,"util":8.64}
+{"day":2,"facility":"workshop","kind":"candidate","site":"lord_scan","team":800,"team_material":30,"team_tools":20,"tick":3000,"tile":2000,"util":2.32}
+{"day":2,"facility":"apothecary","kind":"candidate","site":"lord_scan","team":800,"team_material":30,"team_tools":20,"tick":3000,"tile":2000,"util":0}
+{"day":2,"facility":"mint","kind":"candidate","site":"lord_scan","team":800,"team_material":30,"team_tools":20,"tick":3000,"tile":2000,"util":8.64}
+{"best_seen":8.64,"day":2,"kind":"winner","n_eligible":3,"site":"lord_scan","team":800,"team_material":30,"tick":3000,"tile":2000,"win_util":8.64,"winner":"mint"}
+{"best_seen":8.64,"day":2,"kind":"winner","n_eligible":3,"site":"lord_scan","team":800,"team_material":30,"tick":3000,"tile":2000,"win_util":8.64,"winner":"mint"}
+{"coin":0,"day":0.000694444444444444,"kind":"traj","material":200,"reason":"changed","tick":1,"vault_ore":0}
+{"coin":0,"day":0.0416666666666667,"kind":"traj","material":30,"reason":"changed","tick":60,"vault_ore":0.0729166666666667}
+{"coin":0,"day":1,"kind":"traj","material":30,"reason":"day_edge","tick":1440,"vault_ore":1.72096252335115}
+{"coin":0,"day":2,"kind":"traj","material":30,"reason":"day_edge","tick":2880,"vault_ore":3.38269080656672}
+{"coin":0,"day":3,"kind":"traj","material":30,"reason":"day_edge","tick":4320,"vault_ore":4.98722364779416}

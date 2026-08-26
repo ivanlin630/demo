@@ -4597,6 +4597,13 @@ func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array
 
 const INFRA_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時評估一次
 
+# ★★★決策 trace（QA 要求 2026-08-27）：【逐次決策的 candidate/util/winner】。
+#   ★預設關 ⇒ 一般跑零成本；只有 specimen 床會把它打開。
+#   ★★純觀測：不參與選擇、不耗 RNG、不在計時區間內。
+#   ★★★而【每一個候選】都要記，不只記贏家 ——
+#     只記贏家的話，「鑄幣坊輸在哪裡」這個問題天生答不了。
+static var trace_infra: bool = false
+
 const ORE_CIVILIAN_PULL: float = 1.0   # S4.4 TEST VALUE：礦脈→貪婪領袖偏採礦村(mint)的人格加分
 
 # leader values 決定新據點傾向（軍用 vs 民用）。S4.4：ore 機會融入人格秤（非硬 override）。
@@ -4841,6 +4848,15 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 			continue
 		elig += 1
 		var s: float = _facility_score(state, team, tile, leader, f)
+		if trace_infra and Probe.enabled:
+			Probe.bump_sample("infra.cand", {
+				"tick": state.world.current_tick,
+				"day": int(state.world.current_tick / WorldState.TICKS_PER_DAY),
+				"team": team.team_id, "tile": tile.tile_id, "site": site,
+				"facility": String(f), "util": s,
+				"team_material": float(team.resources.get("material", 0)),
+				"team_tools": float(team.resources.get("tools", 0)),
+			}, 4000)
 		best_seen = maxf(best_seen, s)
 		if s > best_score:
 			best_score = s
@@ -4848,6 +4864,15 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		else:
 			n_below += 1
 			if Probe.enabled: Probe.bump("pick.%s.below_threshold.%s" % [site, f])
+	if trace_infra and Probe.enabled:
+		Probe.bump_sample("infra.winner", {
+			"tick": state.world.current_tick,
+			"day": int(state.world.current_tick / WorldState.TICKS_PER_DAY),
+			"team": team.team_id, "tile": tile.tile_id, "site": site,
+			"winner": best, "win_util": best_score, "best_seen": best_seen,
+			"n_eligible": elig,
+			"team_material": float(team.resources.get("material", 0)),
+		}, 4000)
 	if best == "":   # gate-ok: guard: best empty
 		if Probe.enabled:
 			# ★★①與③分開：「一個候選都沒有」vs「有候選但分數都不夠」——修法完全相反
