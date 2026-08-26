@@ -176,9 +176,12 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 			var rank_calls_total: int = int(Probe.counts.get("unified.rank.calls", 0))
 			var rank_calls_delta: int = rank_calls_total - last_rank_calls
 			last_rank_calls = rank_calls_total
-			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d rank_calls=%d dt_per_call=%.1f" % [
+			# ★systems訂正(2026-08-26)：分子分母同母體——用FactionAISystem._fai_ph(該tick的unified.rank自己計時,
+			#   每次evaluate_all呼叫時clear重填,非累計)，不是整tick dt(dt含gather.*/loop1.factions等其他一切)。
+			var rank_us_this_tick: int = int(FactionAISystem._fai_ph.get("unified.rank", 0))
+			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d rank_calls=%d rank_us=%d dt_per_call_true=%.1f" % [
 				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size(), faction_deciders, solo_candidates,
-				rank_calls_delta, (float(dt) / maxf(float(rank_calls_delta), 1.0))])
+				rank_calls_delta, rank_us_this_tick, (float(rank_us_this_tick) / maxf(float(rank_calls_delta), 1.0))])
 			cp.flush()
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
