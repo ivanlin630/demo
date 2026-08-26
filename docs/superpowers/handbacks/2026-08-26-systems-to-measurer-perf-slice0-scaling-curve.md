@@ -38,7 +38,10 @@ topic: ★★★效能 arc 開了(用戶裁),而第一件不是刀是【分母�
 # ★★⑤而有一件我特別想知道，但【不要為了它挑數字】
 ```
 world_state.gd:25  team_discovered: Dictionary   # int team_id → Array[int]
-★production 讀者：48 處、跨 13 個檔（faction_ai 16／vision 7／message 4／strategic_ai 4／player_query 4／…）
+★production 讀者：**55 處、15 個檔**（★**訂正 2026-08-26：原寫 48／13 是錯的**）
+    `grep -rno "team_discovered" scripts/simulation/ | wc -l`  → 55
+    `grep -rl  "team_discovered" scripts/simulation/ | wc -l`  → 15
+  （★**未排除任何檔**；含 `scripts/data/world_state.gd` 定義處則為 60／16）
 ```
 ★★★**N² 的成本不是「它存在」，是【誰在每 tick 走它】。**
 ⇒ ★**若分解能指出「這 48 個讀者裡，實際吃掉時間的是哪幾個」，那會直接決定第三刀怎麼切。**

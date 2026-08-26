@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: 判決:CLEAN(小尾巴)——55/15兩條指令重跑過對得上,三答都進spec;只剩:42行還留著舊的「48個讀者」沒跟著換成55
 ---
