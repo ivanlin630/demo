@@ -110,6 +110,7 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 	seed(world_seed)
 	SimRunner.force_full_hd = force_hd
 	SimRunner.phase_timing = want_phase
+	Probe.enabled = true; Probe.reset()   # systems票2026-08-26(perf-spike-denominator)：unified.rank.calls真呼叫次數tap需要這個開關
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config(path)
@@ -144,6 +145,7 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 		if cp != null:
 			cp.store_line("=== checkpoint start：config跑法見PERF_LADDER/PERF_TICKS env，teams=%d ===" % teams_start)
 			cp.flush()
+	var last_rank_calls: int = 0   # systems票(perf-spike-denominator)：unified.rank.calls是累計counter,取逐tick delta
 	for tick in range(ticks):
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(state, no_player)
@@ -171,8 +173,12 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 				var t: TeamData = state.teams[tid]
 				if t.faction_id == -1 and t.parent_team_id == -1:
 					solo_candidates += 1
-			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d" % [
-				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size(), faction_deciders, solo_candidates])
+			var rank_calls_total: int = int(Probe.counts.get("unified.rank.calls", 0))
+			var rank_calls_delta: int = rank_calls_total - last_rank_calls
+			last_rank_calls = rank_calls_total
+			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d rank_calls=%d dt_per_call=%.1f" % [
+				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size(), faction_deciders, solo_candidates,
+				rank_calls_delta, (float(dt) / maxf(float(rank_calls_delta), 1.0))])
 			cp.flush()
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
