@@ -121,6 +121,7 @@ func _initialize() -> void:
 	_test_dispatch_builder()
 	_test_evaluate_outpost_location()
 	_test_evaluate_infrastructure()
+	_test_storage_fits_upgrade_cost()
 	_test_subteam_arrival_triggers_build()
 	_test_dispatch_upgrader_and_facility()
 	_test_auto_settle_after_build()
@@ -7808,6 +7809,35 @@ func _test_evaluate_outpost_location() -> void:
 	assert(not best.is_empty(), "應找到 candidate")
 	print("Infra Task4 OK (best=%s)" % str(best.pos))
 
+# ★★★倉容 vs 升級全費的關係式（spec 2026-08-26 storage-fits-own-next-step）：
+#   `STORAGE_CAP[type][L-1] >= OUTPOST_COST[type][L][res] * MARGIN_NEUTRAL`（逐 res）
+#   ★壞掉會長什麼樣：該級據點【永遠存不滿升級所需】⇒ `upgd.dispatched` 恆 0,
+#     而那看起來像「平衡問題／NPC 不想升級」，實際是【尺寸沒對齊】。
+#   ★★三組對照與真閘呼叫【同一支 `TileBank.storage_fits`】，只是引數被扭曲 ——
+#     ★★★不是另外寫三段紅色斷言說服自己；其中 margin×3 那組同時在驗
+#     【實作有沒有真的用上 margin】：若退化成 `cap >= cost`，那一組不會紅而閘仍看起來綠。
+func _test_storage_fits_upgrade_cost() -> void:
+	print("--- 倉容 vs 升級全費：關係式 pin ---")
+	var margin: float = BuildAfford.MARGIN_NEUTRAL
+	# ★真閘：civilian 兩級（升到 L 需在 L-1 的倉容裡存滿全費）
+	for otype in ["civilian"]:
+		for lv in [2, 3]:
+			var cap_amt: float = float(TileBank.OUTPOST_STORAGE_CAP[otype][lv - 2])
+			var cost: Dictionary = OutpostSystem.OUTPOST_COST[otype][lv - 1]
+			for res in cost:
+				var need: float = float(cost[res])
+				if need <= 0.0: continue
+				assert(TileBank.storage_fits(cap_amt, need, margin),
+					"%s L%d 倉容 %.0f < 升 L%d 的 %s 全費 %.0f×%.2f=%.0f ⇒ 該級據點永遠存不滿升級所需 ⇒ upgd.dispatched 恆 0（尺寸沒對齊，不是平衡）" % [
+					otype, lv - 1, cap_amt, lv, String(res), need, margin, need * margin])
+	# ★對照 A/B/C：同一支函式，引數扭曲 ⇒ 必須紅（★否則這個閘是恆真式）
+	var c0: float = float(TileBank.OUTPOST_STORAGE_CAP["civilian"][0])
+	var n0: float = float(OutpostSystem.OUTPOST_COST["civilian"][1]["material"])
+	assert(not TileBank.storage_fits(c0 * 0.5, n0, margin), "對照A：倉容砍半仍判 fits ⇒ 閘沒在看 cap")
+	assert(not TileBank.storage_fits(c0, n0 * 3.0, margin), "對照B：成本 ×3 仍判 fits ⇒ 閘沒在看 cost")
+	assert(not TileBank.storage_fits(c0, n0, margin * 3.0), "對照C：緩衝 ×3 仍判 fits ⇒ ★storage_fits 根本沒用到 margin")
+	print("storage_fits OK（真閘 civilian L1/L2 + 對照 A/B/C 皆紅）")
+
 func _test_evaluate_infrastructure() -> void:
 	print("--- Infra Task5: _evaluate_infrastructure ---")
 	var state := WorldState.new()
@@ -8408,7 +8438,7 @@ func _test_storage_cap() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
 	var os := OutpostSystem.new()
 	# WS-1：food 改用 FOOD_STORAGE_CAP（staple 放大）；通用 cap 改驗 material
-	assert(os._get_storage_cap(tile, "material") == 200.0, "civilian L1 material 應 200")
+	assert(os._get_storage_cap(tile, "material") == float(TileBank.OUTPOST_STORAGE_CAP["civilian"][0]), "civilian L1 material cap 應等於 TileBank 單一真值（★原本手抄 200；cap 是設計常數，手抄會在它改動時假紅）")
 	tile.outpost_level = 3
 	assert(os._get_storage_cap(tile, "material") == 1500.0, "civilian L3 material 應 1500")
 	tile.outpost_type = "military"; tile.outpost_level = 2
@@ -8685,7 +8715,7 @@ func _test_mint_cap_no_ore_burn() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_level = 2; tile.mint_level = 1
 	state.world.tiles[0] = tile   # 入池，CoinAudit.total 才算得到此 tile coin
 	var cap: float = TileBank.cap(tile, "coin")
-	assert(cap == 500.0, "coin cap=500，實際=%.1f" % cap)
+	assert(cap == float(TileBank.OUTPOST_STORAGE_CAP["civilian"][1]), "civilian L2 coin cap 應等於 TileBank 單一真值，實際=%.1f（★原本手抄 500）" % cap)
 	# Case A：coin 滿 cap → 不鑄不燒 ore（守恆，修 off-ledger burn）
 	tile.public_storage = { "coin": cap, "ore_gold": 100.0 }
 	os._tick_mint(state, tile, null)
@@ -12391,15 +12421,17 @@ func _test_normal_tax_owner_vault() -> void:
 
 func _test_normal_tax_vault_cap() -> void:
 	print("--- Fief Task1c: 公庫 cap 不溢出 ---")
-	# civilian Lv1 material cap = 200；預存 199.5 → 空間 0.5；tax 1.5 → 只進 0.5
-	var state := _fief_make_tax_state(0, 0, 0.3, 100.0, 199.5)
+	# ★cap 與預存量都【讀單一真值】：原本手抄「civilian Lv1 cap = 200／預存 199.5」，
+	#   cap 一改就假紅，而它驗的是【溢出會卡住】這個行為，不是那個數字。
+	var _cap0: float = float(TileBank.OUTPOST_STORAGE_CAP["civilian"][0])
+	var state := _fief_make_tax_state(0, 0, 0.3, 100.0, _cap0 - 0.5)   # 空間留 0.5；tax 1.5 → 只進 0.5
 	var tile: HexTileData = state.world.tiles[0]
 	var team: TeamData = state.teams[0]
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
 	var pub: float = float(tile.public_storage.get("material", 0))
 	var priv: float = float(team.resources.get("material", 0))
-	assert(absf(pub - 200.0) < 0.01, "公庫應卡 cap 200，實際=%.3f" % pub)
+	assert(absf(pub - _cap0) < 0.01, "公庫應卡在 cap %.0f，實際=%.3f" % [_cap0, pub])
 	# gain 5.0，只課 0.5 進公庫 → 私產 4.5
 	assert(absf(priv - 4.5) < 0.01, "溢出部分留私產 4.5，實際=%.3f" % priv)
 	print("Fief Task1c OK (公庫=%.2f 私產=%.2f)" % [pub, priv])

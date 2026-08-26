@@ -157,14 +157,19 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		#   ★★「排第幾」比「贏沒贏」多一個維度：差一名與差二十名是不同的病
 		#     ——bucket 化（有界 key），不是每個名次一個 counter。
 		Probe.bump("funnel.decide.total")
-		var _dday: int = int(state.world.current_tick / WorldState.TICKS_PER_DAY)
-		Probe.bump("funnel.decide.day.%03d" % _dday)   # ★分母也要有時間軸，否則比例算不出來
+		# ★★★`state` 是【預設 null 的參數】（本函式簽名 :58）——單元測試就有不傳的呼叫端。
+		#   ★我這顆 tap 原本無條件寫 `state.world.current_tick` ⇒ 那些呼叫端一旦 Probe.enabled 就【崩潰】。
+		#     實測：`Invalid get index 'world' (on base: 'Nil')` —— ★★觀測把被觀測的世界弄掛了。
+		#   ★★★而修法【不是靜靜跳過】：跳過會讓日桶少計、而總量照計 ⇒ 我自己建的對帳式無聲變不平。
+		#     ⇒ 給它一個【看得見的桶】`.day.no_state`：對帳仍然平，而異常自己會冒出來。
+		var _dsuf: String = (".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)) if state != null else ".day.no_state"
+		Probe.bump("funnel.decide%s" % _dsuf)   # ★分母也要有時間軸，否則比例算不出來
 		if _w.is_empty():
 			Probe.bump("funnel.decide.winner_static")
-			Probe.bump("funnel.decide.winner_static.day.%03d" % _dday)
+			Probe.bump("funnel.decide.winner_static%s" % _dsuf)
 		else:
 			Probe.bump("funnel.decide.winner_cand")
-			Probe.bump("funnel.decide.winner_cand.day.%03d" % _dday)
+			Probe.bump("funnel.decide.winner_cand%s" % _dsuf)
 			Probe.bump("funnel.decide.winner_cand.by_goal." + String((_w.get("source_goal", {}) as Dictionary).get("goal_type", "?")))
 		var _best_rank: int = -1
 		for _ri in range(scored.size()):
