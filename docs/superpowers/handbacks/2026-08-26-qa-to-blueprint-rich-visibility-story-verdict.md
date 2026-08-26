@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: rich-point-visibility
 topic: "★故事稽核判決:rich-point-visibility specimen(1185筆,team=[4,3,1,2,6])兩題皆有解——①Team3/4零汲取=genuine無需求(起始material370,全程未觸發means-end candidate,facility是farming非材料設施,非『忙別的』)②attempt 70/81集中在Team6一隊=同一catch-22重複被同一cost閘擋下(非many隊各試一次);②與wire-in判決①同型,互相印證"
 ---
