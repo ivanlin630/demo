@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: perf-stagger-fairness
 tier: probe
 topic: ★做完 @48aa98df（已 push，含 QA 那一行 extra_in_npc）;★★★而這張床答不了那個命題:撮合被走到 8 次、成交 0 次,bail 原因 sell_no_surplus 6／buy_no_stock 1／buy_no_want 1;★而 tap 是接上的(陽性對照 key 不存在→開了就有 8 次)——我照你的提醒先確認工具狀態才解讀「0」
