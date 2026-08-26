@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 tier: measure
 topic: ★★★★急件(不是因為難,是因為【會來不及】):S2 的主 gate 是「不變項相對差 < 5%」,而【before 只能在 S2 落地之前量】;★★S2 現在正在 implementer 手上做——他一 merge,before 就永遠拿不到了;★★★這正是我昨天才認過的「第五種不可達驗收:沒有 before」,而這次我想在它發生之前擋住
