@@ -368,6 +368,58 @@ func _run() -> void:
 		lines.append("  ★其餘呼叫點（★不入上面的對帳，只是別讓它們隱形）：")
 		for k11 in ok9:
 			lines.append("      %-24s = %d" % [String(k11), int(_other[k11])])
+	# ★★★per-team 切片（systems 派 2026-08-26 / slice per-team-funnel-slice）：
+	#   ★病：漏斗只有總量 ⇒ Team6 一支佔 70/81（86%）把其餘 11 隊蓋掉，
+	#     而「attempt 12→81」被讀成「大家變活躍」。★真問題是【為什麼只有 4 支隊會嘗試】。
+	#   ★★★母體＝【全隊名冊】(state.teams)，不是 tap 印出來的那幾隊 ——
+	#     否則「這隊那一段沒發生」與「這隊被漏記」長得一模一樣，而兩者的下一步完全相反。
+	#     ⇒ 沒出現的隊【照樣印一行、全 0】，不是留白。
+	lines.append("")
+	lines.append("═══ ★★per-team 切片（★母體＝全隊名冊 %d 支；沒出現的隊印 0 不留白）═══" % state.teams.size())
+	var FAMS: Array = [
+		["goal 歸宿", "goal.build_fate.", ["seen", "kept", "readded", "readd_blocked_no_otile",
+			"readd_wrong_outpost_type", "readd_already_built", "readd_desire_below_min"]],
+		["resolver", "resolver.", ["entry", "build_candidate", "resource_candidate", "empty_defer_infra",
+			"empty_no_own_outpost", "empty_wrong_outpost_type", "empty_pop_below_min",
+			"empty_no_fdef", "empty_already_built"]],
+		["infra", "infra.", ["entry", "guard_no_own_outpost", "guard_in_combat", "guard_no_leader",
+			"guard_tile_null", "guard_outpost_level0", "guard_under_construction",
+			"pick_empty", "built_in_place", "in_place_failed", "dispatch_builder"]],
+		["wall", "wall.", ["begin_entry", "accepted", "reject_cannot_afford", "reject_no_slot",
+			"reject_max_level", "reject_terrain", "reject_outpost_type", "reject_no_def"]],
+	]
+	var roster: Array = state.teams.keys(); roster.sort()
+	for fam in FAMS:
+		var fname: String = String(fam[0])
+		var fpre: String = String(fam[1])
+		var cols: Array = fam[2]
+		lines.append("")
+		lines.append("--- ★%s（%s*.team.<id>）---" % [fname, fpre])
+		var hdr: String = "   team  "
+		for cc in cols: hdr += "%14s" % String(cc).substr(0, 14)
+		lines.append(hdr)
+		var silent: Array = []
+		var col_sum: Dictionary = {}
+		for tid_r in roster:
+			var row: String = "   %-6d" % int(tid_r)
+			var any: int = 0
+			for cc2 in cols:
+				var v: int = int(Probe.counts.get("%s%s.team.%d" % [fpre, String(cc2), int(tid_r)], 0))
+				any += v
+				col_sum[String(cc2)] = int(col_sum.get(String(cc2), 0)) + v
+				row += "%14d" % v
+			if any == 0: silent.append(int(tid_r))
+			lines.append(row + ("   ←★★這一段【整段沒出現】" if any == 0 else ""))
+		# ★★對帳：per-team 加總 == 原本的逐日總量（★這是本批唯一的自證）
+		for cc3 in cols:
+			var pt: int = int(col_sum.get(String(cc3), 0))
+			var day_tot: int = _sum_days("%s%s.day." % [fpre, String(cc3)])
+			if pt != day_tot:
+				lines.append("  ❌對帳不平：%s%s per-team %d vs 逐日 %d（★tap 有一處沒改成 bump_pt）" % [
+					fpre, String(cc3), pt, day_tot])
+		lines.append("  ★整段沒出現的隊 = %s（%d / %d 支）" % [str(silent), silent.size(), roster.size()])
+	lines.append("")
+	lines.append("★★對帳式：上面每一欄的 per-team 加總都應 == 該欄逐日加總；不平會在該欄下方印 ❌。")
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":

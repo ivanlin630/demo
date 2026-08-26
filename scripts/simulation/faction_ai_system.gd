@@ -4488,47 +4488,47 @@ func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> 
 	#   ★★★壞掉會長什麼樣：只量「有沒有建成」⇒ 「沒被呼叫」與「被呼叫但每次都在第一道 guard 掉頭」
 	#     長得一模一樣，而它們的修法完全相反（接線 vs 解 guard）。
 	var _iday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
-	if Probe.enabled: Probe.bump("infra.entry" + _iday)
+	if Probe.enabled: Probe.bump_pt("infra.entry", _iday, team.team_id)
 	if team.combat_target != -1:
-		if Probe.enabled: Probe.bump("infra.guard_in_combat" + _iday)
+		if Probe.enabled: Probe.bump_pt("infra.guard_in_combat", _iday, team.team_id)
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	if team.leader_id == state.player_id and state.player_id != -1:
-		if Probe.enabled: Probe.bump("infra.guard_player" + _iday)
+		if Probe.enabled: Probe.bump_pt("infra.guard_player", _iday, team.team_id)
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null:
-		if Probe.enabled: Probe.bump("infra.guard_no_leader" + _iday)
+		if Probe.enabled: Probe.bump_pt("infra.guard_no_leader", _iday, team.team_id)
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var own_pos: Vector2i = _find_own_outpost(state, team)
 	if own_pos == Vector2i(-1, -1):
-		if Probe.enabled: Probe.bump("infra.guard_no_own_outpost" + _iday)
+		if Probe.enabled: Probe.bump_pt("infra.guard_no_own_outpost", _iday, team.team_id)
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
 	if tile == null or tile.outpost_level == 0 or tile.construction_team_id != -1:
 		# ★三個條件分開記：「沒有 tile」「outpost 等級 0」「正在施工」是三種不同的世界狀態
 		if Probe.enabled:
 			if tile == null:
-				Probe.bump("infra.guard_tile_null" + _iday)
+				Probe.bump_pt("infra.guard_tile_null", _iday, team.team_id)
 			elif tile.outpost_level == 0:
-				Probe.bump("infra.guard_outpost_level0" + _iday)
+				Probe.bump_pt("infra.guard_outpost_level0", _iday, team.team_id)
 			else:
-				Probe.bump("infra.guard_under_construction" + _iday)
+				Probe.bump_pt("infra.guard_under_construction", _iday, team.team_id)
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var pick: Dictionary = _pick_facility(state, team, tile, leader)   # 同 faction 隊 argmax 決策
 	if pick.is_empty():
-		if Probe.enabled: Probe.bump("infra.pick_empty" + _iday)   # ★走到決策了，但沒有想建的
+		if Probe.enabled: Probe.bump_pt("infra.pick_empty", _iday, team.team_id)   # ★走到決策了，但沒有想建的
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	if pick.has("demolish_first"):
 		OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
 	# owner 在場就地開工，否則派 builder（同 _evaluate_infrastructure 施工路徑）
 	if team.tile_pos == tile.tile_pos and team.current_task != TeamData.TASK_BUILD:
 		if OutpostSystem.new()._subteam_upgrade_facility(state, team, tile, pick["facility"]):
-			if Probe.enabled: Probe.bump("infra.built_in_place" + _iday)   # ★★唯一「真的開工」之一
+			if Probe.enabled: Probe.bump_pt("infra.built_in_place", _iday, team.team_id)   # ★★唯一「真的開工」之一
 			return
-		if Probe.enabled: Probe.bump("infra.in_place_failed" + _iday)   # ★就地開工被拒（原本靜默）
+		if Probe.enabled: Probe.bump_pt("infra.in_place_failed", _iday, team.team_id)   # ★就地開工被拒（原本靜默）
 	else:
 		if Probe.enabled:
-			Probe.bump("infra.dispatch_builder" + _iday)
+			Probe.bump_pt("infra.dispatch_builder", _iday, team.team_id)
 		_dispatch_facility_builder(state, team, tile.tile_pos, pick["facility"])
 
 func _evaluate_infrastructure(state: WorldState, faction) -> void:

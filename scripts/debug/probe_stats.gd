@@ -15,6 +15,20 @@ static func bump(event: String, n: int = 1) -> void:
 	if not enabled: return
 	counts[event] = int(counts.get(event, 0)) + n
 
+# ★★★per-team 維度（systems 派 2026-08-26 / slice per-team-funnel-slice）：
+#   ★病：漏斗只有【總量】⇒ 一支隊佔了 86%（Team6 70/81）就把其餘 11 隊蓋掉，
+#     而「總數上升」被讀成「大家都變活躍」——★★今天第二次踩同型（material 均值 74 而實際只有 4/12 隊 ≥50）。
+#   ★修：同一個事件同時記兩份 —— `event+day_suffix`（原樣不動）與 `event+".team.<id>"`（★總量，不逐日）。
+#   ★★為什麼 per-team 不逐日：12 隊 × 十幾類 × 30 天 ⇒ key 爆炸而且沒人讀得完。
+#   ★★★壞掉會長什麼樣：若有人只呼 `bump` 不呼 `bump_pt`，per-team 那一格【不會報錯，只會少一隊】，
+#     而少掉的那一隊看起來就像「這隊那一段沒發生」——★與「這隊在那一段被漏記」完全同形。
+#     ⇒ 讀的人必須拿【全隊名冊】當母體去對，不能只看 tap 印出來的那幾隊（床已照做）。
+static func bump_pt(event: String, day_suffix: String, team_id: int, n: int = 1) -> void:
+	if not enabled: return
+	counts[event + day_suffix] = int(counts.get(event + day_suffix, 0)) + n
+	var k: String = event + ".team." + str(team_id)
+	counts[k] = int(counts.get(k, 0)) + n
+
 static func note(event: String, value: float) -> void:
 	if not enabled: return
 	peaks[event] = maxf(float(peaks.get(event, 0.0)), value)
