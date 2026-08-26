@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 topic: "急件動工中：兩床(peaceful_economy+warring_states)30天平行跑(理由:量事件率非計時,seed決定性,CPU爭用不影響數字正確性,跟perf計時案例不同不受『勿並行』限制)；④窗長判斷=接受30天不覆議；★先報兩個缺口：採集量/日、消耗/日 沒有既有quantity tap，答不出來"
 ---

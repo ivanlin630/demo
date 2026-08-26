@@ -1,0 +1,23 @@
+=== S2-before dump ===
+★配對頭(after那輪必須完全照抄才能比)：config=peaceful_economy seed=1337 days=30 teams_start=12 wall_s=66.4
+teams_end=12
+
+--- ①決策次數/日(有tap,但只涵蓋unified.rank/rank_scored那條路徑,不含rank_survival) ---
+  unified.rank.calls(母體=whole window) = 307 ⇒ /日 = 10.23
+--- ②starve/日(有tap) ---
+  death.starve_minor = 0 ⇒ /日 = 0.000
+  death.starve_anon  = 0 ⇒ /日 = 0.000
+--- ③製造產出/日(有tap,add_amount每種resource分開,這裡加總) ---
+  manufacture.output.*加總 = 2.5 ⇒ /日 = 0.08　明細=["arrows=2.5"]
+--- ④訊息量/日(讀state.global_messages.size(),非tap,WorldState直讀) ---
+  global_messages總量(累計非清空) = 174 ⇒ /日 = 5.80　★caveat:若訊息會被prune清除,這是『累計產生量』非『存量』
+--- ⑤移動格/日(WorldState day-boundary位置快照代理,非精確tap) ---
+  Σhex距離(day-boundary快照法) = 6 ⇒ /日 = 0.20　★★caveat:低估——同一天內移動又折返的距離不會被day-boundary快照法算到，這是下限不是真值
+--- ⑥採集量/日：★缺口，沒有既有quantity tap ---
+  collect.gather_ran/collect.l0_forage_ran 只是【事件次數】(有沒有跑gather迴圈)，不是【採集數量】
+  現有code沒有Probe.add_amount記錄實際採集到的資源量——這格答不出來，需要implementer在resource_system.gd的_collect_from_tile加tap才能量
+--- ⑦消耗/日：★缺口，沒有既有quantity tap ---
+  resolve_consumption(resource_system.gd)扣糧邏輯沒有掛Probe.add_amount記錄總消耗量
+  這格答不出來，需要implementer加tap才能量
+--- ⑧交易成交/日(照印,不列入裁決——4床只12筆,無解析度) ---
+  mkfill.order樣本數(cap受限,非真count) = 0　★不列入S2裁決
