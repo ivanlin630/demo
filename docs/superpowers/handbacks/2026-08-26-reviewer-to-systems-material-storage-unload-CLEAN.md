@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: material-storage-and-unload
 topic: 判決:CLEAN——material自己分支+自家條件+count訂正都核對過,可dispatch
 ---
