@@ -1,0 +1,34 @@
+[peaceful_economy seed 1337 days 10] 跑了 2400 tick
+★母體/樣本：stagger.fired 樣本 = 468（cap 20000）
+
+★★①單一 tick 過閘 ≥100 隊的 tick 數 = 0（★最大同批 = 5 隊）
+
+★★②沒有任何 burst tick（依 ①的定義）⇒ ★比值無法計算 —— 而那正是①要的結果，不是缺資料。
+   ★所以本欄改印【最大同批那個 tick】的 dt 與整體中位數對照：
+      最大同批 tick 2400（5 隊）dt = （該 tick 不在 dt 取樣範圍內） μs｜全體中位數 dt = 11 μs
+   ★這是【同一次跑內】burst vs non-burst 的相對比較，★★不是改動前後的 wall-clock 加速宣稱。
+
+★★★⑥同隊相鄰思考間隔（★MIN_GAP 讀 CadenceStagger.min_gap_of，不自己抄 cadence/2）：
+   ambition  cadence  100｜MIN_GAP   50｜★最小實測間隔 50（Team0）｜違規 0 / 242 組   ✅
+   order     cadence  120｜MIN_GAP   60｜★最小實測間隔 60（Team0）｜違規 0 / 202 組   ✅
+
+═══ ★★④offset 分桶原始資料（★給 measurer 做統計；★★本床不下判決）═══
+   ★窗 = 2400 tick（10 天）｜隊數 = 12
+   ★★offset 逐 cycle 輪轉 ⇒ 下面印的是【末 tick 那個 cycle】的相位，不是終身相位。
+   ★★★行為面欄位（存活／資源／據點數）【已移除】——systems 2026-08-27 定案：
+      measurer 判那個量不出來（16 天內 team 101→202，戰鬥／飢荒／立國／分裂的量級遠大於 offset），
+      ★而這題的雜訊與效應是【同一條通道】⇒ 不能靠控制事件降噪，只能靠樣本量，而樣本量沒有底。
+      ⇒ ★本床只落地 offset；印出行為面數字只會邀請一個判不了的比較。
+   team   offset(ambition)   offset(order)
+   0                   21              93
+   1                   49              14
+   2                   57              79
+   3                   99              78
+   4                    1              40
+   5                    7              68
+   6                   78              64
+   7                   46              90
+   8                   38              68
+   9                   60              73
+   10                  42              95
+   11                  13              18
