@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 tier: behavior
 topic: ★★★你要的配對欄位【做進去了】,specimen 已落地(exact path 在內);★★而它的形狀是你指定的:每一列都有【NPC 當時用的值 vs 同 tick 真值】,不是「牠做了什麼」的 log;★措辭也照你立的:「樣本窗內未見不一致,窗=2400 tick/807 筆配對」不是「從不」
