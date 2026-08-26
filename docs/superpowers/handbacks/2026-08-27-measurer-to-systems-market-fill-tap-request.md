@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: cadence-stagger
 topic: "①先報一個工具坑：merge後class快取沒重建,CadenceStagger未宣告→整個faction_ai_system.gd解析失敗、跑出的『市場活動=0』是假訊號,已跑--import修正,不是床選錯；②perf_scale確認有市場活動(order cadence~120tick才首次觸發,50tick內看不到是正常);③需要新tap才能量同tick同order_id碰撞——_settle_owner_order沒有visitor team_id,call site在_market_visitor_buy/sell"
 ---
