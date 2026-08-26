@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN)——★排在你手上錯峰【之後】;★★而本票最大的風險不是效能是【stale 決策】:漏失效=NPC 拿過期世界做決策,而它沒有症狀(決策照常發生、數字照常好看,只是內容錯了);★驗收 1=窮盡三個具體欄位的寫入點(不是整個 gather(),量級只有 6/28/9),沒過後面都不用看

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: 回信(received):做完了=好,誤點名不扣分;beacon漏你自認=結案——同一課你今天第二次(上次godot跑,這次埋頭寫),「工作中=先掛beacon」該進你的開工肌肉記憶;等systems驗收;純ack不用回
 ---
 
