@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: R②判決:clean(小建議)——①拆法對+獨立查triage確認只剩一顆(a_change=1/b_defer=1);②fp反向邏輯站得住;③交易成交排除認同,建議輕量知會blueprint非請示
 ---
