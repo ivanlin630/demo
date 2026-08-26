@@ -473,7 +473,7 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 		push_warning("[Outpost] start_build: 距離限制違規")
 		return false
 	var cost: Dictionary = OUTPOST_COST[type][level - 1]
-	if not _can_afford(team, tile, cost):
+	if not _can_afford(team, tile, cost, "start_build"):
 		push_warning("[Outpost] start_build: 資源不足")
 		return false
 	_deduct_cost(team, tile, cost)
@@ -497,7 +497,7 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 		return false
 	var new_level: int = tile.outpost_level + 1
 	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][new_level - 1]
-	if not _can_afford(team, tile, cost):
+	if not _can_afford(team, tile, cost, "upgrade_level"):
 		return false
 	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
@@ -551,7 +551,7 @@ func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTi
 			Probe.bump("wall.reject_no_slot.used_%d_cap_%d" % [slots_used(tile), slot_cap(tile)])
 		return false   # 新設施要空 slot；升級不佔
 	var cost: Dictionary = upgrade_cost(facility, cur + 1)
-	if not _can_afford(team, tile, cost):
+	if not _can_afford(team, tile, cost, "wall"):
 		if Probe.enabled:
 			Probe.bump("wall.reject_cannot_afford" + _wday2)                   # 物理：付不起（1.0×，非緩衝）
 			for _ck in cost:
@@ -705,7 +705,7 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
 		return false
 	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][target_level - 1]
-	if not _can_afford(team, tile, cost):
+	if not _can_afford(team, tile, cost, "subteam_upgrade"):
 		return false
 	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
@@ -840,13 +840,30 @@ func _get_team_tile(state: WorldState, team: TeamData) -> HexTileData:
 	return state.world.tiles.get(tid)
 
 # 建造付款：腳下 tile 公庫 + 施工團私產 合併池，優先扣公庫（本地）。
-func _can_afford(team: TeamData, tile: HexTileData, cost: Dictionary) -> bool:
+# ★★★`afford.short.<site>.<res>` tap（systems 派 2026-08-26 / slice afford-short-res）：
+#   ★問題：`wall.reject_cannot_afford` 降到 64 了，但我們不知道那 64 次【缺的是什麼】。
+#     舊欄位 `wall.reject_cannot_afford.res.*` 對該次 cost 的【每一個】res 都 bump
+#     ⇒ 它記的是「這次成本包含哪些資源」，不是「缺哪一個」（material 180／tools 180 同數就是證據）。
+#   ★修：在【失敗分支之內】bump —— 那是 `return false` 之前的最後一個判斷
+#     ⇒ 記到的必然是【真正讓這次失敗的那一個】。
+#
+# ★★★壞掉會長什麼樣（★這段是本 tap 的護欄，別刪）：
+#   ①若有人把 bump 挪到迴圈外、或改成對每個 res 都 bump ⇒ 它退回成「cost 含哪些 res」，
+#     ★而數字看起來一樣合理（每格都有值、總和也像樣）——沒有任何症狀會提醒你它壞了。
+#   ②若有人拿掉 `site` 只留 `afford.short.<res>` ⇒ ★★五個呼叫點的數字會被混在一起
+#     （start_build／start_upgrade_level／_begin_facility_construction／_subteam_upgrade_level／
+#      faction_ai_system:4705 的 self-rescue 候選檢查）
+#     ⇒ ★★★`afford.short.wall.* 加總 == wall.reject_cannot_afford` 這條對帳式當場變假，
+#       而它是這顆 tap 唯一的驗收判準。★能對帳的是 `wall` 那一族，不是全部。
+func _can_afford(team: TeamData, tile: HexTileData, cost: Dictionary, site: String = "other") -> bool:
 	for res in cost:
 		if res == "ticks":
 			continue
 		var avail: float = float(tile.public_storage.get(res, 0)) \
 			+ float(team.resources.get(res, 0))
 		if avail < float(cost.get(res, 0)):
+			# ★就在這裡、就是這個 res —— 迴圈內、return 前，一次失敗只記一顆。
+			if Probe.enabled: Probe.bump("afford.short.%s.%s" % [site, String(res)])
 			return false
 	return true
 
