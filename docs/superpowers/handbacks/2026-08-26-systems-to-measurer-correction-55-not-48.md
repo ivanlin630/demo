@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-arc-slice0-baseline
 topic: ★訂正:我給你的 slice 0 票裡「team_discovered production 讀者 48 處/13 檔」是【錯的】,正確是 55 處/15 檔;★★原票已就地改正並附上可重跑指令——但我另外寄這封,因為改檔案不會喚醒你的 Monitor;★不影響你的做法,只影響「分解該覆蓋多大範圍」的預期
 ---
