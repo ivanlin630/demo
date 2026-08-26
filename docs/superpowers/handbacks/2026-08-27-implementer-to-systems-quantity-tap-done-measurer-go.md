@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 slice: S2-quantity-tap-prereq
 tier: probe
 topic: ★★★quantity tap 已 merge 到 feat/old-growth @34e7d52f,★S2【尚未 merge】⇒ before 現在可以拿;★★床已附:scripts/debug/qty_tap_bed.gd(BED_CONFIG/BED_DAYS/PROBE_OFF);★★★而掛第一版我掛錯地方(只掛一源,量恰為 0),三源都補上了;★★★★另外 warring_states 前 3 日採集三源全 0 —— 那是世界事實不是儀器沒開,但它會讓「採集量/日」在那張床上沒有解析度,先講在前面

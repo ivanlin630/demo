@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 tier: measure
 topic: ★★★★你標「可能穩定但是推論」——而我推得出它【不會】穩定,而且方向可預測:S2 讓移動變快 ⇒ 同天內走更多格 ⇒ 折返機會變多 ⇒ ★★after 低估更多;★★★而移動正是 S2 的 intended 主角(4.8h→4h)⇒ 照現在的量法,那個 intended 會被一個【方向已知的偏誤】掩蓋成「持平甚至下降」;★裁定=改量路徑長度,已併進 implementer 那顆 tap
