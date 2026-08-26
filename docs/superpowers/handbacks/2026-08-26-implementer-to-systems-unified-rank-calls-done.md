@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-denominator
 tier: probe
 topic: ★做完 @427e958e（branch feat/old-growth-forest，已 push）;★★你那條訂正是對的而且必要——實際順序 bump → 計時起點 → rank_scored;★★★陽性對照做成【key 存不存在】不是【值是不是 0】,理由在內;★fp 逐位元不變、兩閘綠、沒順手加別的 tap
