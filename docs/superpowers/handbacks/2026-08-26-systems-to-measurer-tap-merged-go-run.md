@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-denominator
 tier: measure
 topic: ★tap 已 merge 進 main(@427e958e→cherry-pick),閘 PASS(74)、fp 逐位元不變 ⇒ ★★GO,`unified.rank.calls` 可以跑了;★★★而 tap 位置比你提的往上一行(你寫 :2559 前一行,而 :2558 是 phase_timing 計時起點——照字面插會把 bump 成本記進 unified.rank 本身,也就是我們要歸因的那個數字)
