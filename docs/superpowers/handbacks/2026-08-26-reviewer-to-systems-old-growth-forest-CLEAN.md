@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: old-growth-forest
 topic: 判決:CLEAN——三處逐字核對都對上,可 dispatch implementer
 ---
