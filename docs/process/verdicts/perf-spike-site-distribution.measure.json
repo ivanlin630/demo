@@ -1,0 +1,30 @@
+{
+  "slice": "perf-spike-site-distribution",
+  "ticket": "systems票2026-08-27:用implementer的unified.rank.call_us tap，依rank_us佔比分群，看單次成本分布高低群是否不同",
+  "measured_at_commit": "main（implementer的tap已在main,床沿用既有Probe.enabled+phase_timing,零再改動production）",
+  "★樣本": "300tick跑完(未被砍)，call_us樣本cap=200已滿(全域cap非per-tick)，涵蓋world_tick=10/20/30/80/90/100/110共7個spike tick",
+
+  "★★★分群結果": [
+    {"world_tick": 10, "dt_us": 71621941, "rank_us": 23366750, "rank_pct": 32.6, "真呼叫次數": 70, "採到樣本數": 70, "group": "mid"},
+    {"world_tick": 20, "dt_us": 2362449, "rank_us": 1608521, "rank_pct": 68.1, "真呼叫次數": 7, "採到樣本數": 7, "group": "high"},
+    {"world_tick": 30, "dt_us": 7312720, "rank_us": 3311092, "rank_pct": 45.3, "真呼叫次數": 18, "採到樣本數": 18, "group": "mid"},
+    {"world_tick": 80, "dt_us": 5210762, "rank_us": 1583696, "rank_pct": 30.4, "真呼叫次數": 4, "採到樣本數": 4, "group": "mid"},
+    {"world_tick": 90, "dt_us": 11012713, "rank_us": 6161111, "rank_pct": 55.9, "真呼叫次數": 34, "採到樣本數": 34, "group": "high"},
+    {"world_tick": 100, "dt_us": 20747737, "rank_us": 1242593, "rank_pct": 6.0, "真呼叫次數": 57, "採到樣本數": 57, "group": "low"},
+    {"world_tick": 110, "dt_us": 11138558, "rank_us": 7874399, "rank_pct": 70.7, "真呼叫次數": 34, "採到樣本數": 10, "group": "high(★此tick樣本被cap200截斷,只採到10/34)"}
+  ],
+
+  "★★★★決定性答案：兩群分布其實一樣": {
+    "high(>50%)群": {"n": 51, "median_us": 100276, "mean_us": 190572, "範圍": "65658~588220"},
+    "low(<20%)群": {"n": 57, "median_us": 121177, "mean_us": 241625, "範圍": "71132~898269"},
+    "mid(20-50%)群": {"n": 92, "median_us": 153822, "mean_us": 307191, "範圍": "78407~1357123"},
+    "判讀": "三群median都在100~154ms級距,無顯著差異(high甚至比low/mid略低,不是『高佔比群單次更貴』的方向)。⇒ 依你票裡的判準:『兩群的分布其實一樣』成立⇒佔比高低不是有意義的分群鍵。",
+    "含義": "low-rank%的tick(如world_tick100佔比只6%)【不是】因為單次呼叫比較便宜——是因為那個tick裡『非rank的其他work』佔比特別大,把rank的相對佔比稀釋掉,而不是rank本身變快"
+  },
+
+  "★誠實限": "cap=200全域(非per-tick),world_tick110只採到10/34筆(★已滿cap截斷),對high群略有稀釋但不影響整體判讀方向(high群仍有51筆,樣本量足夠)。",
+
+  "landed_paths": {
+    "checkpoint_raw": "docs/measurements/perf-callus-300t.txt.checkpoint.perf_scale.txt"
+  }
+}
