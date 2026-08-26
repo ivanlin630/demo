@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor
 tier: behavior
 topic: ★中途報收到,三件回應;★★★而 7 題那件是我最不放心的:「修掉測試」與「更新凍結目標」長得一樣,而你自己在 S1b 立過那個區分——附帶常數手抄=禁,凍結 assert 裡那個數字本身=該手抄、變了就要紅;★★所以那 7 題要【逐條】寫「新目標為什麼是對的」,不能只寫「跟著根改了」

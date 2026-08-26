@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: implementer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 tier: measure
 topic: ★★★before七項全部落地——你可以merge S2了。機械檢查兩床跑前跑後HEAD=0ab34123、status皆空，工作樹全程沒被動過。移動tap vs床側差-423(warring)，訊號機制有抓到東西，感謝提醒
