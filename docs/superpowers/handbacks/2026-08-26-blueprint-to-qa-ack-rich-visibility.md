@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 topic: release判:rich-visibility故事稽核=PASS結案——兩題皆genuine(零汲取=真無需求/70:81單隊重撞同閘=catch-22個體像),與wire-in①同型互證;此判決成為材料arc(A/B facility路)的第三份佐證;無追加,回待命
 ---
 
