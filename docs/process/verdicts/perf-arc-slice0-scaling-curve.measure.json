@@ -1,0 +1,60 @@
+{
+  "slice": "perf-arc-slice0-baseline",
+  "ticket": "systems票2026-08-26:效能arc slice0——scaling曲線+熱點分解(分母),零production code改動",
+  "measured_at_commit": "main（新增：4個config-only階梯config/perf_scale_r{1,2,3,5}.json + 新床scripts/debug/perf_scaling_curve_bed.gd，讀既有SimRunner.phase_timing/force_full_hd，零production sim code改動）",
+  "seed": 1337,
+  "★方法": "五階梯(r1~r5+現況perf_scale)、每階跑LOD與full-HD兩regime、seed固定，判準用median(沿用reference_hob_perf_protocol，不撞絕對門檻)。full-HD那趟額外拆phase_timing、記每phase被走到幾個tick(分母)。★因單一tick可能燒到120秒,五階梯逐一分開跑(非一次性跑完,避免像第一次那樣被砍掉零輸出)，per-rung ticks數不同(見下)，如實標明。",
+
+  "★★★①scaling曲線(median，五階梯全量)": [
+    {"config": "perf_scale_r1", "teams_actual": 35, "teams_cfg_knobs": "fac=6×[2,3]+rov=[4,6]", "ticks": 15, "LOD_median_us": 20, "HD_median_us": 22, "HD_tps": 45455},
+    {"config": "perf_scale_r2", "teams_actual": 58, "teams_cfg_knobs": "fac=12×[2,4]+rov=[8,10]", "ticks": 15, "LOD_median_us": 16, "HD_median_us": 31, "HD_tps": 32258},
+    {"config": "perf_scale_r3", "teams_actual": 80, "teams_cfg_knobs": "fac=16×[3,4]+rov=[10,14]", "ticks": 15, "LOD_median_us": 19, "HD_median_us": 26, "HD_tps": 38462},
+    {"config": "perf_scale(現況)", "teams_actual": 101, "teams_cfg_knobs": "fac=20×[3,5]+rov=[12,18]", "ticks": 15, "LOD_median_us": 26, "HD_median_us": 17, "HD_tps": 58824},
+    {"config": "perf_scale_r5", "teams_actual": 143, "teams_cfg_knobs": "fac=28×[4,6]+rov=[16,22]", "ticks": 12, "LOD_median_us": 18, "HD_median_us": 27, "HD_tps": 37037}
+  ],
+
+  "★母體vs config期望(如實列出不解釋差多少)": {
+    "r1": "actual=35 vs 期望16~24(fac=6×[2,3]+rov=[4,6])——超出期望上限46%",
+    "r2": "actual=58 vs 期望32~58——貼齊期望上限",
+    "r3": "actual=80 vs 期望58~78——略超期望上限",
+    "現況perf_scale": "actual=101 vs 期望72~118——在期望範圍內",
+    "r5": "actual=143 vs 期望128~190——在期望範圍內",
+    "備註": "小規模階梯(r1)實際生成隊數大幅超出我用『factions×tpf+roving』推的期望——那條公式本身可能就不完整(未算進outposts也會播種隊)，只列數字不解釋"
+  },
+
+  "★★★②50+隊到了沒(不可達驗收現在答得出來了)": "全部五階梯(35~143隊)在non-spike的一般tick，median都在16~31us級距——遠低於任何實務門檻，✅『50+隊』在baseline(非spike)狀態下早就到了、綽綽有餘。真正的問題不在baseline，在下面的spike。",
+
+  "★★★③熱點分解——同一顆巨型尖峰主導所有規模，幾乎100%在near.faction_ai": {
+    "現象": "每個階梯在測試窗內(12~15tick)，near.faction_ai 這個phase group 都只【被走到1個tick】(★分母=1，不是常態被走多次)，但那1次的成本极端巨大、且吃掉全部phase累積時間的99.6~99.9%。其餘所有phase(near.vision/near.messages/near.economy/near.consume等)合計不到0.5%，完全是雜訊。",
+    "各階梯那1次spike的絕對成本(us)": {
+      "r1(35隊)": 43326447,
+      "r2(58隊)": 55644564,
+      "r3(80隊)": 80171907,
+      "現況(101隊)": 99052338,
+      "r5(143隊)": 120919433
+    },
+    "★★★關鍵發現——spike成本隨隊數呈次線性成長,不是N²": {
+      "35→143隊(4.09倍)": "43.3M→120.9M us，只漲了2.79倍——遠低於4.09倍(線性)，更遠低於16.7倍(若是N²)",
+      "us/team換算": {"r1": 1237898, "r2": 959389, "r3": 1002149, "現況": 980716, "r5": 845590},
+      "判讀(只列數字不下結論)": "每隊的邊際成本隨規模擴大反而略降，這批數字本身不支持『N²炸開』的假說——但這只是這一顆spike的成本曲線，不是整個tick成本，且不知道這顆spike是什麼機制(見下caveat)"
+    }
+  },
+
+  "★★★④誠實caveat——這是不是唯一一次、會不會週期性重來，我這輪答不出來": {
+    "問題": "每階梯只在測試窗內(12~15 tick，遊戲內約1.2~1.5小時)看到這顆spike出現【恰好1次】(都在tick=10附近，疑似faction成立/首次全量評估觸發的一次性成本)——但我沒有跑夠長的窗，不能排除它是【某個更長週期】會重複發生的成本(例如每N天一次)。若是週期性，那才是真正決定『能不能長跑』的變因；若是純一次性(僅開局那次)，那對長跑吞吐量幾乎零影響。",
+    "需要": "若要坐實『一次性 vs 週期性』，需要跑更長窗(例如1個月=7200tick)看這顆spike還會不會再出現第二次——這個我沒做(runtime成本會非常高，未經授權不擅自跑長窗)"
+  },
+
+  "★⑤team_discovered讀者粒度(systems想知道,不強求)": "現有phase_timing只到SYSTEMS registry分組粒度(near.faction_ai等)，讀不到48/55個讀者裡哪幾個實際吃時間——零production code改動的本床做不到這麼細。附帶一提：既有[FaiPhase]print(非我的tap，遊戲自帶)在spike tick時額外印出near.faction_ai內部子項(loop1.factions/loop2.solo/unified.rank等)，這是免費的額外細節，已在raw log裡，但仍非讀者級。",
+
+  "landed_paths": {
+    "raw_r1": "docs/measurements/perf-scaling-r1.txt",
+    "raw_r2": "docs/measurements/perf-scaling-r2.txt",
+    "raw_r3": "docs/measurements/perf-scaling-r3.txt",
+    "raw_current": "docs/measurements/perf-scaling-current.txt",
+    "raw_r5": "docs/measurements/perf-scaling-r5.txt",
+    "新床": "scripts/debug/perf_scaling_curve_bed.gd",
+    "新config階梯": "config/perf_scale_r1.json, config/perf_scale_r2.json, config/perf_scale_r3.json, config/perf_scale_r5.json（perf_scale.json本身即現況那階，未改動）"
+  },
+  "repro": "$env:GODOT_TIMEOUT='1200'; $env:PERF_LADDER='<config名>'; $env:PERF_SEED='1337'; $env:PERF_TICKS='15'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/perf_scaling_curve_bed.gd"
+}

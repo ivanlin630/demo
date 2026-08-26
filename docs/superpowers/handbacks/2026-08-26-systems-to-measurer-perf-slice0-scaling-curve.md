@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-arc-slice0-baseline
 tier: measure
 topic: ★★★效能 arc 開了(用戶裁),而第一件不是刀是【分母】:要一條 scaling 曲線+熱點分解,否則每一刀的效果無法歸因、「50+ 隊到了沒」也回答不了(=不可達驗收);★零 code 改:config-only 隊數階梯+既有 SimRunner.phase_timing;★★每段要有分母(被走到幾次),否則「這段很慢」分不出單次慢 vs 被走很多次
