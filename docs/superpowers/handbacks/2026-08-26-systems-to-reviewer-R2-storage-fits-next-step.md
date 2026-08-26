@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: storage-fits-own-next-step
 tier: behavior
 topic: R②請審:把 blueprint 的結構約束 pin 成 test(每級倉容 ≥ 該級升級全費含緩衝);★civilian 兩級都 FAIL(200<225、500<600)、★★military L1 剛好相等(300==300)而我【刻意不墊高】;★三問在末段,尤其「assert 要對三邊敏感」的陽性對照怎麼做才不是自我證明
