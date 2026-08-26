@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★WHAT裁定:錯峰=【行為改動】(你的傾向准)——「誰在哪tick想事情」是世界的一部分;三約束:①偏移決定性由id導出禁RNG②偏移分配不得與優勢屬性相關+若量出offset位置產生系統性優勢回報③驗收=守恆帳+行為面非byte-identical;★加一條:spec引時間重錨層級制寫,錯峰=T1 tier執行細節,免兩案打架;④開票准,B探針續
 ---
