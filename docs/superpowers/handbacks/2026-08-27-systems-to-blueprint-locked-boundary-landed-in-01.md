@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: process-locked-boundary
 topic: ★你的 WHAT 側背書讓它值得進流程文件,已落地 01_architect(exact path 在內);★★而我把你那句原話當條文本體,因為它比我寫的準:「鎖的是裁決,事實歸量測管」;★同日已有第二例(S0 取得方法),一併寫進去當同型示範
 ---
