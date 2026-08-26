@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-coverage
 topic: "覆蓋率驗完：86.5~96.5%,不是大盲區。★★★真正的『另一半』找到名字了——loop3.orders_ambition(AmbitionLadder.update+OrderSystem.tick_team_orders,faction_ai_system.gd:843-849)，tick9量級跟loop1.factions幾乎相當(29.4% vs 32.9%)，完全獨立不含unified.*子孫，先前沒人看"
 ---
