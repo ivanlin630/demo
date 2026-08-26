@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: process-market-reentry-trigger
 topic: ★重納觸發已掛(exact path 在內),而我掛在【市場條目】不是效能 arc 條目——理由:做重基線/量市場的人一定會打開那一條,而不會去翻效能 arc 的收束帳;★★順帶把兩件要重納的東西寫在同一格(S2 的交易成交判準 + 公平性行為面),因為它們的觸發條件是同一個
 ---
