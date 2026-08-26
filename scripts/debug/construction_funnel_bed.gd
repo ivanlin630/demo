@@ -368,6 +368,61 @@ func _run() -> void:
 		lines.append("  ★其餘呼叫點（★不入上面的對帳，只是別讓它們隱形）：")
 		for k11 in ok9:
 			lines.append("      %-24s = %d" % [String(k11), int(_other[k11])])
+	# ★★★pick 出口分類（systems 派 2026-08-26 / slice infra-pick-empty-reason）：
+	#   `infra.pick_empty` 那句「沒有想建的」底下有三件不同的事，本段把它拆開。
+	#   ★分母＝`pick.infra.entry`（★不是 `infra.entry`：`_pick_facility` 有兩個呼叫點，
+	#     `lord_scan` 那條不經過 infra 漏斗，混進來對帳式就假——同 `_can_afford` 那顆的教訓）。
+	#   ★★六類互斥且窮盡，逐日加總必須 == 分母。
+	lines.append("")
+	lines.append("═══ ★★`_pick_facility` 出口分類（六類，分母＝pick.<site>.entry）═══")
+	var PICK_FATES: Array = ["empty_no_eligible", "empty_all_below_threshold", "ok_slot_free",
+		"empty_slot_full_no_lowest", "empty_slot_full_margin", "ok_demolish"]
+	for site in ["infra", "lord_scan"]:
+		var ent: int = _sum_days("pick.%s.entry.day." % site)
+		lines.append("")
+		lines.append("--- ★site=%s（entry＝%d）---" % [site, ent])
+		if ent == 0:
+			lines.append("  ★零筆 —— ★★這是【這條路沒被走過】，不是【tap 沒接上】：兩者靠 entry 本身分開")
+			continue
+		var ssum: int = 0
+		for ft in PICK_FATES:
+			var v: int = _sum_days("pick.%s.%s.day." % [site, String(ft)])
+			ssum += v
+			lines.append("      %-28s = %4d（%.1f%%）%s" % [String(ft), v, 100.0 * v / maxf(float(ent), 1.0),
+				"   ←★恆 0" if v == 0 else ""])
+		lines.append("  ★★對帳：六類合計 %d vs entry %d ⇒ %s" % [ssum, ent,
+			"✅一致" if ssum == ent else "❌不一致（★有出口沒被分類）"])
+		# ★被過濾掉的設施（★不入上面的對帳：它是 per-facility 不是 per-call）
+		lines.append("  ★三道過濾各擋掉幾個【設施-次】（per-facility，不入上面的對帳）：")
+		for fr in ["outpost_type", "terrain", "already_built"]:
+			lines.append("      filtered.%-16s = %d" % [String(fr), _c("pick.%s.filtered.%s" % [site, String(fr)])])
+		# ★分數不夠時：離門檻多遠 + 是哪幾個設施
+		var nb: Array = []
+		for k12 in Probe.counts:
+			var ks12: String = String(k12)
+			if ks12.begins_with("pick.%s.below_threshold." % site):
+				nb.append("%s=%d" % [ks12.substr(("pick.%s.below_threshold." % site).length()), int(Probe.counts[k12])])
+		if not nb.is_empty():
+			nb.sort()
+			lines.append("  ★★被評分但分數不夠的設施：%s" % " ".join(PackedStringArray(nb)))
+		var sb: Array = []
+		for k13 in Probe.counts:
+			var ks13: String = String(k13)
+			if ks13.begins_with("pick.%s.below.score_bucket." % site):
+				sb.append("%s=%d" % [ks13.substr(("pick.%s.below.score_bucket." % site).length()), int(Probe.counts[k13])])
+		if not sb.is_empty():
+			sb.sort()
+			lines.append("  ★★★離門檻多遠：%s（zero＝分數 0／lt_half_floor＝不到門檻一半／near_floor＝差一點）" % " ".join(PackedStringArray(sb)))
+			lines.append("      ★最高分（分數不夠那些輪）＝ %.4f｜門檻 0.05" % float(Probe.peaks.get("pick.%s.best_seen_when_below" % site, 0.0)))
+		var en: Array = []
+		for k14 in Probe.counts:
+			var ks14: String = String(k14)
+			if ks14.begins_with("pick.%s.below.n_eligible." % site):
+				en.append("%s=%d" % [ks14.substr(("pick.%s.below.n_eligible." % site).length()), int(Probe.counts[k14])])
+		if not en.is_empty():
+			en.sort()
+			lines.append("  ★分數不夠那些輪，手上有幾個候選：%s" % " ".join(PackedStringArray(en)))
+
 	# ★★★per-team 切片（systems 派 2026-08-26 / slice per-team-funnel-slice）：
 	#   ★病：漏斗只有總量 ⇒ Team6 一支佔 70/81（86%）把其餘 11 隊蓋掉，
 	#     而「attempt 12→81」被讀成「大家變活躍」。★真問題是【為什麼只有 4 支隊會嘗試】。
@@ -387,6 +442,8 @@ func _run() -> void:
 			"pick_empty", "built_in_place", "in_place_failed", "dispatch_builder"]],
 		["wall", "wall.", ["begin_entry", "accepted", "reject_cannot_afford", "reject_no_slot",
 			"reject_max_level", "reject_terrain", "reject_outpost_type", "reject_no_def"]],
+		["pick(infra)", "pick.infra.", ["entry", "empty_no_eligible", "empty_all_below_threshold",
+			"ok_slot_free", "empty_slot_full_no_lowest", "empty_slot_full_margin", "ok_demolish"]],
 	]
 	var roster: Array = state.teams.keys(); roster.sort()
 	for fam in FAMS:

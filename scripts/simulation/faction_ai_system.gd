@@ -4514,7 +4514,7 @@ func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> 
 			else:
 				Probe.bump_pt("infra.guard_under_construction", _iday, team.team_id)
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
-	var pick: Dictionary = _pick_facility(state, team, tile, leader)   # 同 faction 隊 argmax 決策
+	var pick: Dictionary = _pick_facility(state, team, tile, leader, "infra")   # 同 faction 隊 argmax 決策
 	if pick.is_empty():
 		if Probe.enabled: Probe.bump_pt("infra.pick_empty", _iday, team.team_id)   # ★走到決策了，但沒有想建的
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
@@ -4578,7 +4578,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if owner_team.leader_id == state.player_id and state.player_id != -1: continue
 		var owner_leader: PersonData = state.persons.get(owner_team.leader_id)
 		if owner_leader == null: continue
-		var pick: Dictionary = _pick_facility(state, owner_team, tile, owner_leader)
+		var pick: Dictionary = _pick_facility(state, owner_team, tile, owner_leader, "lord_scan")
 		if pick.is_empty(): continue
 		if pick.has("demolish_first"):
 			OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
@@ -4620,32 +4620,79 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 # ──────── 設施需求迴路（score = 地利 × (1+缺口) × 個性）────────
 
 # 回傳 { "facility": name, "demolish_first"?: name }；{} = 不蓋
+# ★★★`pick.*` 出口分類（systems 派 2026-08-26 / slice infra-pick-empty-reason）：
+#   ★問題：`infra.pick_empty` 多數隊 22〜24 ——「走到決策了，但【沒有想建的】」，
+#     而那句話底下有三件完全不同的事：①候選清單本來就空 ②有候選但全被過濾 ③有候選但分數都不夠。
+#     ★★三者處置完全不同，★而它跟「材料不夠」是【不同的病】（材料線 163→64 解不了它）。
+#
+# ★★★出口不是只有「空」——本函式有【六個】出口（★上一次在 `_resolve_build_facility` 就是漏了非空出口）：
+#   ①`best == ""`（沒有任何設施過門檻）②slot 沒滿 → 成功
+#   ③slot 滿且無可拆 ④slot 滿但差距不足 ⑤slot 滿且可拆 → 成功（帶 demolish）
+#   ⇒ ★六類逐日加總必須 == `pick.entry`。
+#
+# ★★`site` 參數（★上一顆 `_can_afford` 的教訓直接套用）：本函式有【兩個】呼叫點
+#   （`:4517` infra 自家據點／`:4581` 領主掃 owner 據點）。
+#   ⇒ ★沒有 site 的話，`pick.* 加總 == infra.entry` 這條對帳式當場是假的 —— 只有 `infra` 那一族對得上。
 func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
-		leader: PersonData) -> Dictionary:
+		leader: PersonData, site: String = "other") -> Dictionary:
+	var _pday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	if Probe.enabled: Probe.bump_pt("pick.%s.entry" % site, _pday, team.team_id)
 	var slot_full: bool = OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile)
 	# S4：移除飢餓 override——S2 survival-crush 已讓餓隊 farming score 主導(S2 gate 驗過)，override 冗餘。
 	# 統一 argmax：未建設施中 _facility_score 最高者（farming 餓時經 survival-crush 自然勝出）。
 	var best: String = ""
 	var best_score: float = 0.05   # 門檻：score 太低不蓋（TEST VALUE）
+	# ★門檻【讀上面那一行的值】，不手抄 0.05（手抄的話門檻改了這裡會靜默不同步）
+	var floor0: float = best_score
+	var elig: int = 0        # ★通過三道過濾的設施數（＝真正被評分的候選）
+	var n_below: int = 0     # ★被評分但分數 <= 門檻的個數
+	var best_seen: float = 0.0
 	for f in OutpostSystem.FACILITY_DEF:
 		var def: Dictionary = OutpostSystem.FACILITY_DEF[f]
-		if not (tile.outpost_type in def["allowed_outpost"]): continue
-		if def.has("required_terrain") and tile.terrain != def["required_terrain"]: continue
-		if int(tile.get(def["current_level_key"])) > 0: continue   # 已有 → 升級走另一路徑   # gate-ok: guard: 已有設施→升級 skip(selection)
+		if not (tile.outpost_type in def["allowed_outpost"]):
+			if Probe.enabled: Probe.bump("pick.%s.filtered.outpost_type" % site)
+			continue
+		if def.has("required_terrain") and tile.terrain != def["required_terrain"]:
+			if Probe.enabled: Probe.bump("pick.%s.filtered.terrain" % site)
+			continue
+		if int(tile.get(def["current_level_key"])) > 0:
+			if Probe.enabled: Probe.bump("pick.%s.filtered.already_built" % site)   # gate-ok: guard: 已有設施→升級 skip(selection)
+			continue
+		elig += 1
 		var s: float = _facility_score(state, team, tile, leader, f)
+		best_seen = maxf(best_seen, s)
 		if s > best_score:
 			best_score = s
 			best = f
-	if best == "": return {}   # gate-ok: guard: best empty
+		else:
+			n_below += 1
+			if Probe.enabled: Probe.bump("pick.%s.below_threshold.%s" % [site, f])
+	if best == "":   # gate-ok: guard: best empty
+		if Probe.enabled:
+			# ★★①與③分開：「一個候選都沒有」vs「有候選但分數都不夠」——修法完全相反
+			if elig == 0:
+				Probe.bump_pt("pick.%s.empty_no_eligible" % site, _pday, team.team_id)
+			else:
+				Probe.bump_pt("pick.%s.empty_all_below_threshold" % site, _pday, team.team_id)
+				Probe.bump("pick.%s.below.n_eligible.%d" % [site, elig])
+				# ★分數離門檻多遠（★只有這個能分出「差一點」與「差十萬八千里」）
+				Probe.note("pick.%s.best_seen_when_below" % site, best_seen)
+				Probe.bump("pick.%s.below.score_bucket.%s" % [site,
+					("zero" if best_seen <= 0.0 else ("lt_half_floor" if best_seen < floor0 * 0.5 else "near_floor"))])
+		return {}
 	if not slot_full:
+		if Probe.enabled: Probe.bump_pt("pick.%s.ok_slot_free" % site, _pday, team.team_id)
 		return { "facility": best }
 	# S4 demolish 泛化（全設施通用，非 farming 專屬）：slot 滿→best 遠勝最低 score 設施則拆建。
 	# ★farming 受規則保護不列拆遷候選（_lowest_score_facility 排除）＝命脈食物設施不拆（§R² 補裁 2）。
 	var lowest: String = _lowest_score_facility(state, team, tile, leader)
 	if lowest == "":
+		if Probe.enabled: Probe.bump_pt("pick.%s.empty_slot_full_no_lowest" % site, _pday, team.team_id)
 		return {}
 	if best_score > _facility_score(state, team, tile, leader, lowest) * DEMOLISH_MARGIN:
+		if Probe.enabled: Probe.bump_pt("pick.%s.ok_demolish" % site, _pday, team.team_id)
 		return { "facility": best, "demolish_first": lowest }
+	if Probe.enabled: Probe.bump_pt("pick.%s.empty_slot_full_margin" % site, _pday, team.team_id)
 	return {}
 
 # S2 survival-crush（TEST VALUE）：餓→農田 score 壓過發展設施。urgency² 軟連續(非 cliff/binary tier)。
