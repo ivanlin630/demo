@@ -1,6 +1,0 @@
-=== checkpoint start：config跑法見PERF_LADDER/PERF_TICKS env，teams=101 ===
-tick=0 dt_us=61 wall_so_far=0.0s teams=101 tiles=1801 faction_deciders=92 solo_candidates=29
-tick=9 dt_us=54660408 wall_so_far=54.7s teams=107 tiles=1801 faction_deciders=92 solo_candidates=31
-tick=19 dt_us=2006511 wall_so_far=56.7s teams=107 tiles=1801 faction_deciders=92 solo_candidates=31
-tick=29 dt_us=4759698 wall_so_far=61.4s teams=105 tiles=1801 faction_deciders=92 solo_candidates=29
-=== checkpoint end：n_ticks_ran=31 wall_total=61.4s ===

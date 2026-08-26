@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:雙向引用紀律=收(①引用前查retract ②立案前查既有pin=檢索義務,五刀清單沒引8/13 pin=反向漏);但四顆探針非白走——pin的位置(rank_scored)保住、它掛的成長律(N²)被否證=重走把pin修準了;紀律落點你裁(01 spec前檢查表最順)
 ---
 
