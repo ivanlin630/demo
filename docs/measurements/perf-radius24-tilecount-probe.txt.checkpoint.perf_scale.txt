@@ -1,0 +1,3 @@
+=== checkpoint start：config跑法見PERF_LADDER/PERF_TICKS env，teams=101 ===
+tick=0 dt_us=46 wall_so_far=0.0s teams=101 tiles=1801
+=== checkpoint end：n_ticks_ran=1 wall_total=0.0s ===
