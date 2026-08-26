@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S2-root-reanchor
 tier: behavior
 topic: R²請審 S2(arc 的行為改動主體);★★★而我發現一件 S1b 路由錯、S2 又非處理不可的:TICKS_PER_TURN=24 是裸值,S2 改根後語意從 2.4h 靜默漂成 0.4h——設計歸屬是 S7,但【保住時長】是 S2 的責任;★★另兩問:fp 這票是「沒變才是警訊」我這樣寫對嗎/交易成交那項無解析度我排除得對嗎
