@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-per-call
 tier: measure
 topic: ★★★三個假說全死,我的也死了——收下;★★但在鑽 gather.* 之前有一件【必須先修】:dt_per_call 的分子是【整個 tick 的 dt】、分母是【只有 rank 的次數】⇒分子分母不同母體,而我自己立過那條法;★★★而真正驚人的數字是 median 9 次呼叫 × 0.5 秒/次——0.5 秒做【一次】決策,那不是 tuning 是演算法層
