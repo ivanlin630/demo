@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: material-storage-and-unload
 tier: behavior
 topic: R②請審:material 採集入庫+回家卸貨;★★★根=兩條沒接的線(白名單漏 material、且不存在卸貨路徑⇒已超載的隊永遠解不開);★我把算術先講死防第五次不可達驗收(公庫200+載重60=260 vs 緩衝225,餘裕只有35);★★三問在末段
