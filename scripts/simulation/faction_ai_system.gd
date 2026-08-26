@@ -2555,6 +2555,17 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	_detect_commitment_stall(state, team)   # ★承諾停滯偵測（同 entry，讀進度事實）
 	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
+	# ★★★每小時做了幾次決策 —— 效能 arc 定靶的最後一個自變數（systems 派 2026-08-26）。
+	#   ★位置有兩個條件，缺一都會量錯：
+	#     ①在 `_should_reeval` gate【之後】⇒ 只計【真的執行到這裡】的次數；
+	#       被 cadence 節流擋掉的不算 ⇒ ★這是「真呼叫次數」不是「候選數」
+	#       （`Σ(1+members)` 只是上限：`member_team_ids` 含子隊，而 `_assign_member_tasks` 會 continue 跳過）。
+	#     ★★②在下一行的計時起點【之前】—— 放在計時起點與 `rank_scored` 之間，
+	#       bump 的成本會被記進 `unified.rank` 這個 label，★★★而那正是本輪要歸因的那個數字，
+	#       且它每個 spike tick 被呼叫數萬～數十萬次 ⇒ 觀測會把被觀測的【時間】本身墊高。
+	#   ★一個 bump 點涵蓋全部四個入口（leader_unified／member.unified ×2／threat force-reeval／獨立隊 solo）
+	#     —— 它們最終都匯入本函式體。★不要四處插。
+	if Probe.enabled: Probe.bump("unified.rank.calls")
 	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
