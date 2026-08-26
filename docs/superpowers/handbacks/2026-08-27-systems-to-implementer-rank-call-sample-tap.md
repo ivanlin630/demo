@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: perf-spike-per-call-distribution
 tier: probe
 topic: ★一顆 bump_sample:每次 unified.rank 的【單次耗時】,要分辨「均攤地慢」還是「少數極貴」;★★★位置陷阱同上次:必須用【既有的那對計時】不要另外呼叫 Time.get_ticks_usec(),否則你新加的量測本身會被算進 unified.rank;★母體/取樣偏差要寫死(bump_sample 是 first-N,必報母體 vs 樣本)
