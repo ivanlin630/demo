@@ -300,7 +300,17 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 		if res == "wild_horses" or res == "wild_game":
 			continue   # 活物不走 generic 採集（野馬日捕在 HarvestSystem；野味走 HuntSystem）
 		var current: float = float(src_tile.resources.get(res, 0))
+		# ★★★material 進帳的出口分類（systems 派 2026-08-26 / slice material-income-zero）：
+		#   ★病：Team3/4/7 的 material 存量【25 天一個數字都沒動】＝ 收入為零，
+		#     而 `reject_cannot_afford` 把「賺得不夠快」與「完全沒有收入」印成同一個字。
+		#   ★★本組 tap 只認 `material` 一種 res（★不是全 res —— key 會爆而且問題不在別的 res）。
+		#   ★★★四個出口互斥且窮盡，分母＝`matin.call`：池空／載重滿／算出來就是 0／真的進帳。
+		var _is_mat: bool = (res == "material")
+		if _is_mat and Probe.enabled:
+			Probe.bump_pt("matin.call", "", team.team_id)
 		if current <= 0.0:
+			if _is_mat and Probe.enabled:
+				Probe.bump_pt("matin.pool_empty", "", team.team_id)   # ★腳下這格沒有料可採
 			continue
 		# R1：harvest 乘 day_fraction（與 consumption 同 cadence 基準，修 24× 供給不對稱）
 		var gain: float = src_tile.productivity * current * COLLECT_RATE * day_fraction
@@ -339,9 +349,16 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 			# WS-3：移動無 outpost 隊 intake 受 carry 空間硬限（超額留 tile = conservation-safe）。
 			# weight 0 的 res（mounts/wagons）→ carry_space_for_res 回大數 → 不誤限。
 			var space_qty: int = MovementSystem.new().carry_space_for_res(team, res)
+			var _pre_gain: float = gain
 			gain = minf(gain, float(space_qty))
 			if gain <= 0.0:
+				# ★兩種零【分開】：載重滿（算得出量但裝不下）vs 算出來本來就是 0（勞力/池/士氣）
+				if _is_mat and Probe.enabled:
+					Probe.bump_pt("matin.carry_full" if _pre_gain > 0.0 else "matin.zero_gain_other", "", team.team_id)
 				continue   # 滿載不採 → 留 tile，tile 不扣
+			if _is_mat and Probe.enabled:
+				Probe.bump_pt("matin.gained", "", team.team_id)
+				Probe.add_amount("matin.amount.team.%d" % team.team_id, gain)
 			ResourceBank.add(team, res, gain, "harvest_carry")
 			gained[res] = float(gained.get(res, 0)) + gain   # 私產所得 → 一般稅基數
 		# 從 tile 扣除（food/material 最終由 regenerate_tiles 補回；ore/gem 有限）
