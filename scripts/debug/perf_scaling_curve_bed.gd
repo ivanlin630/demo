@@ -10,7 +10,9 @@ extends SceneTree
 # env:
 #   PERF_LADDER   config 逗號集（default "perf_scale_r1,perf_scale_r2,perf_scale_r3,perf_scale,perf_scale_r5"）
 #   PERF_SEED     world seed（default 1337，全階梯固定）
-#   PERF_TICKS    每趟(每regime)跑幾 tick（default 720＝3天；不用月級，O(N^2)在大隊數階梯會爆時間）
+#   PERF_TICKS    每趟(每regime)跑幾 tick（default 200；不用月級，O(N^2)疑似熱點在大隊數階梯會爆時間；
+#                 ★smoke test 實測：35隊/20tick/full-HD 就吃了 33.8s 真牆鐘，其中單一 tick(tick10)
+#                 燒了 32.4M us=32.4s——判準用 median 才不被這種尖峰污染，見下 median 欄）
 #   PERF_OUT      落地路徑
 
 func _initialize() -> void:
@@ -19,7 +21,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var ladder_raw: String = OS.get_environment("PERF_LADDER") if OS.has_environment("PERF_LADDER") else "perf_scale_r1,perf_scale_r2,perf_scale_r3,perf_scale,perf_scale_r5"
 	var world_seed: int = int(OS.get_environment("PERF_SEED")) if OS.has_environment("PERF_SEED") else 1337
-	var ticks: int = int(OS.get_environment("PERF_TICKS")) if OS.has_environment("PERF_TICKS") else 720
+	var ticks: int = int(OS.get_environment("PERF_TICKS")) if OS.has_environment("PERF_TICKS") else 200
 	var out_path: String = OS.get_environment("PERF_OUT") if OS.has_environment("PERF_OUT") else ""
 	var configs: Array = []
 	for c in ladder_raw.split(",", false):
@@ -29,8 +31,8 @@ func _run() -> void:
 	lines.append("=== perf_scaling_curve_bed：seed=%d ticks/regime=%d ladder=%s ===" % [world_seed, ticks, str(configs)])
 	print(lines[-1])
 
-	lines.append("%-16s %-8s %6s %8s %10s %10s %10s %8s" % [
-		"config", "regime", "teams", "teams_cfg", "mean_us", "p99_us", "max_us", "tps"])
+	lines.append("%-16s %-8s %6s %20s %10s %10s %10s %10s %8s" % [
+		"config", "regime", "teams", "teams_cfg_knobs", "median_us", "mean_us", "p99_us", "max_us", "tps@median"])
 	var rows: Array = []
 	for cfg in configs:
 		var lod: Dictionary = _run_one(cfg, world_seed, ticks, false, false)
@@ -41,17 +43,17 @@ func _run() -> void:
 		_print_row(lines, cfg, "full-HD", hd)
 		rows.append({"config": cfg, "lod": lod, "hd": hd})
 
-	lines.append("\n────────── ①scaling 曲線摘要（full-HD＝零LOD目標regime的成本；mean=攤銷吞吐） ──────────")
-	lines.append("%-16s %6s %6s %13s %13s %9s %10s %10s" % [
-		"config", "teams", "cfg期望", "LOD_mean_us", "HD_mean_us", "HD/LOD", "HD_tps", "HD_max_us"])
+	lines.append("\n────────── ①scaling 曲線摘要（判準用 median，沿用 reference_hob_perf_protocol，比 per-tick 不撞絕對門檻） ──────────")
+	lines.append("%-16s %6s %20s %13s %13s %8s %10s" % [
+		"config", "teams", "teams_cfg_knobs", "LOD_median_us", "HD_median_us", "HD/LOD", "HD_tps"])
 	for r in rows:
-		var lm: int = int(r["lod"]["mean"])
-		var hm: int = int(r["hd"]["mean"])
-		var tps: float = 1_000_000.0 / maxf(float(hm), 1.0)
-		lines.append("%-16s %6d %6s %13d %13d %8.1fx %10.0f %10d" % [
-			r["config"], int(r["hd"]["teams"]), str(r["hd"]["teams_expect"]), lm, hm,
-			float(hm) / maxf(float(lm), 1.0), tps, int(r["hd"]["max"])])
-	lines.append("注：★母體=實際生成隊數(teams)，非config期望值(cfg期望)——兩者會差，逐行標出。")
+		var lmed: int = int(r["lod"]["median"])
+		var hmed: int = int(r["hd"]["median"])
+		var tps: float = 1_000_000.0 / maxf(float(hmed), 1.0)
+		lines.append("%-16s %6d %20s %13d %13d %7.1fx %10.0f" % [
+			r["config"], int(r["hd"]["teams"]), str(r["hd"]["teams_expect"]), lmed, hmed,
+			float(hmed) / maxf(float(lmed), 1.0), tps])
+	lines.append("注：★母體=實際生成隊數(teams)，非config期望值(teams_cfg_knobs，只是原樣列出config輸入旋鈕，非我推導的期望值)——兩者常有落差，逐行標出、不自己解釋差多少。")
 
 	lines.append("\n────────── ②熱點分解（每階full-HD那趟，phase 累積us + 分母=被走到幾個tick） ──────────")
 	for r in rows:
@@ -109,11 +111,14 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 	config["seed"] = world_seed
 	GameSetup.setup(state, config)
 	state.player_id = -1
-	var teams_expect: String = "%d~%d" % [
-		int(config.get("factions", {}).get("count", 0)) * int(config.get("factions", {}).get("teams_per_faction_range", [0,0])[0]) \
-			+ int(config.get("independent_teams", {}).get("roving_count_range", [0,0])[0]),
-		int(config.get("factions", {}).get("count", 0)) * int(config.get("factions", {}).get("teams_per_faction_range", [0,0])[1]) \
-			+ int(config.get("independent_teams", {}).get("roving_count_range", [0,0])[1])]
+	# ★不自推「期望隊數」公式（factions×tpf+roving 漏算 outposts 也會播種隊，公式本身可能就是錯的）——
+	#   原樣列 config 輸入旋鈕，讓讀者自己跟 teams(實際生成) 對照，不幫他們算一個可能是錯的期望值。
+	var teams_expect: String = "fac=%d×[%d,%d]+rov=[%d,%d]" % [
+		int(config.get("factions", {}).get("count", 0)),
+		int(config.get("factions", {}).get("teams_per_faction_range", [0,0])[0]),
+		int(config.get("factions", {}).get("teams_per_faction_range", [0,0])[1]),
+		int(config.get("independent_teams", {}).get("roving_count_range", [0,0])[0]),
+		int(config.get("independent_teams", {}).get("roving_count_range", [0,0])[1])]
 	var teams_start: int = state.teams.size()
 
 	var no_player := Vector2i(-1, -1)
@@ -155,6 +160,7 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 
 
 func _print_row(lines: Array, cfg: String, regime: String, r: Dictionary) -> void:
-	var tps: float = 1_000_000.0 / maxf(float(r["mean"]), 1.0)
-	lines.append("%-16s %-8s %6d %8s %10d %10d %10d %8.0f" % [
-		cfg, regime, int(r["teams"]), str(r["teams_expect"]), int(r["mean"]), int(r["p99"]), int(r["max"]), tps])
+	var tps: float = 1_000_000.0 / maxf(float(r["median"]), 1.0)
+	lines.append("%-16s %-8s %6d %20s %10d %10d %10d %10d %8.0f" % [
+		cfg, regime, int(r["teams"]), str(r["teams_expect"]), int(r["median"]), int(r["mean"]),
+		int(r["p99"]), int(r["max"]), tps])
