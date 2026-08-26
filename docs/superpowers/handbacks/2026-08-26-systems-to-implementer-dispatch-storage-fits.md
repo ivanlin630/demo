@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: storage-fits-own-next-step
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN):倉容關係式 pin 成 test;★★而先講你上一票——你把我的結論打薄了一半:「先到先花」只有 13/258=5%,180 次(70%)是【留著但沒出口】⇒我用一個 5% 的機制解釋了 100% 的現象,而那個結論是要送去當 roadmap 排程依據的;★你補基線+對照組那件我單獨記
