@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-gather-cacheability
 topic: "決定性：多數時候沒變(94.3%)⇒②開票。配對總數666(同隊連續兩次真呼叫gather()的配對,零新tap用既有decision_eval_next_tick pre/post偵測)，same=628/diff=38；★變化100%集中在burst tick(order/ambition cadence觸發時)，non-burst tick是0變化——符合relay harvest讀team_known訊息的機制"
 ---
