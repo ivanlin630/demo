@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: infra-pick-empty-reason
 tier: probe
 topic: ★★★你的三選一【三個都不是】:empty_no_eligible=0、empty_all_below_threshold=0,而 empty_slot_full_margin=180(69.8%);★★pick_empty 不是「沒有想建的」是【蓋不下了】——L1 civilian 只有 2 個 slot,已滿,而拆建門檻 1.5× 擋住;★★★per-team 乾淨分成兩群:8 支 slot-bound(材料再多也不蓋)+2 支 material-bound;★六類對帳 258==258、fp 逐位元不變;@ec43d878
