@@ -124,6 +124,8 @@ func _initialize() -> void:
 	_test_storage_fits_upgrade_cost()
 	_test_pick_facility_upgrade_scale()
 	_test_cadence_stagger()
+	_test_market_known_cache_invalidation()
+	_test_market_known_msg_immutable_premise()
 	_test_subteam_arrival_triggers_build()
 	_test_dispatch_upgrader_and_facility()
 	_test_auto_settle_after_build()
@@ -7829,6 +7831,84 @@ func _test_evaluate_outpost_location() -> void:
 #   ★★★所以這一段【刻意手抄數字】—— 與前面那些「改讀單一真值」的 assert 相反：
 #     那些手抄的是【附帶的】設計常數（cap），改了不該紅；
 #     ★這裡手抄的就是【凍結本身】—— 數字變了就是要紅，那正是 assert 的內容。
+# ★★★market-known 快取的 stale 防線（spec 2026-08-27 gather-dirty-flag-cache 驗收 2）：
+#   ★每一個【窮盡清單上的事件源】各一格 —— 事實變動後【下一次】決策必須讀到新值。
+#   ★★本票最大的風險不是效能是【stale 決策】：漏失效＝NPC 拿過期世界做決策，
+#     而它【沒有症狀】——決策照常發生、數字照常好看，只是內容錯了。
+#   ★★★所以這幾格不是「測快取有沒有加速」，是【測它有沒有騙人】。
+func _test_market_known_cache_invalidation() -> void:
+	print("--- market-known 快取：三個事件源各一格失效 ---")
+	for src in ["tile_pos", "outpost_level", "team_known"]:
+		var state := WorldState.new()
+		state.world = WorldData.new()
+		var fai := FactionAISystem.new()
+		# 世界：兩格，(0,0) 是本隊位置、(1,0) 之後才會長出 outpost
+		for pos in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)]:
+			var tl := HexTileData.new()
+			tl.tile_pos = pos; tl.tile_id = pos.x * 1000 + pos.y
+			tl.terrain = "plains"; tl.outpost_type = "civilian"
+			state.world.tiles[tl.tile_id] = tl
+		var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+		state.teams[0] = team
+		# 第一次：建立快取（此時世界上沒有任何 outpost ⇒ known 應為空）
+		fai._harvest_market_known(state, team)
+		var before: int = (state.team_market_known.get(0, {}) as Dictionary).size()
+		assert(before == 0, "前置：初始應無已知市集，實際=%d" % before)
+		# ★事實變動（每個事件源一種）
+		match src:
+			"outpost_level":
+				var t1: HexTileData = state.world.tiles[1000]   # (1,0)
+				t1.outpost_level = 1; t1.outpost_owner = 99
+				state.outpost_epoch += 1   # ★production 的 6 個寫入點做的就是這件事
+			"tile_pos":
+				var t2: HexTileData = state.world.tiles[2000]   # (2,0)：vision 外，移動過去才看得到
+				t2.outpost_level = 1; t2.outpost_owner = 99
+				state.outpost_epoch += 1
+				fai._harvest_market_known(state, team)   # 讓它先把「新 outpost」吃進去，隔離出 tile_pos 這一項
+				team.tile_pos = Vector2i(2, 0)           # ★只動位置
+			"team_known":
+				var t3: HexTileData = state.world.tiles[2000]
+				t3.outpost_level = 1; t3.outpost_owner = 99
+				var msg := MessageData.new()
+				msg.type = "outpost_built"; msg.source_pos = Vector2i(2, 0)
+				state.team_known[0] = [msg]   # ★只動 relay 訊息（★不 bump epoch，驗第③把鑰匙自己有效）
+		# ★下一次決策必須讀到新值
+		fai._harvest_market_known(state, team)
+		var after: int = (state.team_market_known.get(0, {}) as Dictionary).size()
+		assert(after > before,
+			"★★事件源【%s】變動後快取沒失效：known 仍是 %d ⇒ NPC 會拿過期世界做決策，而這個錯【沒有症狀】" % [src, after])
+	print("market-known 失效 OK（tile_pos／outpost_level／team_known 三源各一格）")
+
+# ★★★釘住快取的【前提】：訊息一旦入列就不被原地改動。
+#   ★快取的第③把鑰匙是 `team_known.size()` —— 若有人日後【原地】改一則已入列訊息的 params/type/source_pos，
+#     長度不變、鍵不變 ⇒ ★★快取安靜地回舊值。
+#   ★★★我用窮盡 grep 驗過現況零處（18 處賦值全在建構時或 copy 上），而 grep 擋不住未來 ——
+#     這一格擋得住：它直接驗「改了內容但長度不變」時快取【必須】看得見。
+func _test_market_known_msg_immutable_premise() -> void:
+	print("--- market-known 快取前提：入列訊息不得原地改動 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	for pos in [Vector2i(0, 0), Vector2i(3, 0), Vector2i(4, 0)]:
+		var tl := HexTileData.new()
+		tl.tile_pos = pos; tl.tile_id = pos.x * 1000 + pos.y
+		tl.terrain = "plains"; tl.outpost_type = "civilian"
+		tl.outpost_level = 1; tl.outpost_owner = 99
+		state.world.tiles[tl.tile_id] = tl
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = team
+	var msg := MessageData.new()
+	msg.type = "outpost_built"; msg.source_pos = Vector2i(3, 0)
+	state.team_known[0] = [msg]
+	var fai := FactionAISystem.new()
+	fai._harvest_market_known(state, team)
+	var k1: Dictionary = (state.team_market_known.get(0, {}) as Dictionary).duplicate()
+	# ★原地改動（★production 現在【不會】這樣做——本格是在說「若這樣做，快取會看不見」）
+	msg.source_pos = Vector2i(4, 0)
+	fai._harvest_market_known(state, team)
+	var k2: Dictionary = state.team_market_known.get(0, {})
+	assert(k1.hash() == k2.hash(),
+		"★本格記錄的是【已知的限制】：原地改訊息，快取看不見（長度沒變）。若這裡變成不相等，表示有人加了更強的鍵——那是好事，請更新本註解與 spec。")
+	print("前提已釘住（原地改動 ⇒ 快取看不見；★production 目前零處這樣做，窮盡 grep 見 handback）")
+
 func _test_cadence_stagger() -> void:
 	print("--- cadence 錯峰：常數凍結 + 錯峰性質 ---")
 	# ⑤★常數逐位元凍結（★不得靠改 cadence 長度來「達成」錯峰）

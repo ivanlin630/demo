@@ -681,6 +681,19 @@ func _auto_withdraw_mounts(state: WorldState, team: TeamData) -> void:
 
 # ── evaluate_all 子相位計時（opt-in 掛 SimRunner.phase_timing;cadence spike 歸因 zoom）──
 static var _fai_ph: Dictionary = {}
+# ★★★market-known 命中率的【路徑標記】（spec 2026-08-27 驗收 3：兩條路徑分開報）。
+#   ★兩條路徑共用同一支 `_harvest_market_known`，而真正的分辨點在【上游呼叫堆疊】，不在 helper ——
+#     `DecisionContext.gather` 兩條都會走，所以在 helper 加參數答不了這題。
+#   ★★純觀測：只有 `Probe.enabled` 時才寫，★決策端一行都不讀它。
+static var _mk_path: String = "other"
+# ★★★快取的【消費當下】自我稽核旗標（QA 2026-08-27 要求的配對欄位）。
+#   ★只有 specimen 床會開；★★平常 false ⇒ 零成本、零行為影響。
+#   ★★★為什麼一定要在【命中的當下】比對，而不是在 tick 結束後比對存著的值：
+#     「存著的值是舊的」≠「有決策讀到了舊的」——★該隊那個 tick 可能根本沒呼叫。
+#     ★我第一版的床就是後者，於是把 8 筆「沒人讀過的舊值」報成了不一致。
+static var _mk_verify: bool = false
+static var _mk_verify_rows: Array = []
+
 func _fai_pht(name: String, t0: int) -> int:
 	var now: int = Time.get_ticks_usec()
 	_fai_ph[name] = int(_fai_ph.get(name, 0)) + (now - t0)
@@ -2584,6 +2597,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	#   ★一個 bump 點涵蓋全部四個入口（leader_unified／member.unified ×2／threat force-reeval／獨立隊 solo）
 	#     —— 它們最終都匯入本函式體。★不要四處插。
 	if Probe.enabled: Probe.bump("unified.rank.calls")
+	if Probe.enabled: _mk_path = "rank_scored"
 	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	# ★★★單次耗時取自【既有的那對計時】——★純複製一個 int，不呼叫 Time.get_ticks_usec()。
 	#   在起點與終點之間再呼叫一次時鐘 ＝ 把新加的量測算進 `unified.rank`，
@@ -3479,6 +3493,40 @@ func _nearest_market_outpost_with(state: WorldState, team: TeamData, res: String
 # ②relay harvest（team_known 的 order/outpost_built 訊息 market pos，★濾 outpost_level>0 避無 outpost 隊 live pos noise）。
 # 創世-nearby 源在 game_setup（開局 seed）。
 func _harvest_market_known(state: WorldState, team: TeamData) -> void:
+	# ★★★快取失效鍵（spec 2026-08-27 gather-dirty-flag-cache）——★三個【讀到的】輸入各一項：
+	#   ①`team.tile_pos`      掃描中心（★in-sim 唯一變動點：movement_system.gd 那一處）
+	#   ②`state.outpost_epoch` 世界任一格 outpost_level 變動就 +1（★6 個世界 tile 寫入點，窮盡見 handback）
+	#   ③`team_known` 的長度   relay 訊息進出（★append/erase/整包換 都會改長度）
+	#
+	# ★★③用 size() 是【有前提】的：**訊息一旦入列就不被原地改動**。
+	#   ★我用窮盡 grep 驗過（18 處 msg.params/type/source_pos 賦值全在建構時或 copy 上，零處改動已入列的訊息），
+	#   ★★而那個前提由 headless 的 `_test_market_known_msg_immutable` 釘住 —— 沒有它，日後有人原地改一則訊息，
+	#     快取會【安靜地】回舊值，而症狀是「決策照常發生、數字照常好看，只是內容錯了」。
+	#
+	# ★★★保守方向是刻意的：任一格 outpost 變動就讓【所有隊】失效 ⇒ 命中率偏低，★但絕不 stale。
+	#   ★本票最大的風險不是效能，是【拿過期世界做決策】——那個方向的錯【沒有症狀】。
+	var _mk_key: Array = [team.tile_pos, state.outpost_epoch,
+		(state.team_known.get(team.team_id, []) as Array).size()]
+	if state.team_market_known_key.get(team.team_id, null) == _mk_key:
+		if Probe.enabled: Probe.bump("mk.cache_hit." + _mk_path)
+		if _mk_verify:
+			# ★命中的當下：把【NPC 即將使用的值】與【同 tick 真值】配對記下來。
+			#   真值＝清鍵後用【同一支 production 函式】重算 ⇒ ★不自己抄一份掃描邏輯（抄錯會產生假的一致或假的不一致）。
+			var _used: Dictionary = (state.team_market_known.get(team.team_id, {}) as Dictionary).duplicate()
+			state.team_market_known_key.erase(team.team_id)
+			_mk_verify = false   # ★防遞迴：重算會再進來一次
+			_harvest_market_known(state, team)
+			_mk_verify = true
+			var _truth: Dictionary = (state.team_market_known.get(team.team_id, {}) as Dictionary).duplicate()
+			var _miss: Array = []
+			for _k in _truth:
+				if not _used.has(_k): _miss.append(int(_k))
+			_mk_verify_rows.append({"tick": state.world.current_tick, "team": team.team_id,
+				"path": _mk_path, "same": _used.hash() == _truth.hash(),
+				"npc_used_n": _used.size(), "truth_n": _truth.size(), "missing_in_npc": _miss})
+			return
+		return
+	if Probe.enabled: Probe.bump("mk.cache_miss." + _mk_path)
 	var known: Dictionary = state.team_market_known.get(team.team_id, {})
 	# ① 直接親見：vision 半徑內 outpost tile（bounded=vision，非全圖 god-view）
 	var vr: int = VisionSystem.VISION_RADIUS
@@ -3501,6 +3549,7 @@ func _harvest_market_known(state: WorldState, team: TeamData) -> void:
 		if mt != null and mt.outpost_level > 0:   # ★濾無 outpost 隊 fallback live pos noise
 			known[mtid] = true
 	state.team_market_known[team.team_id] = known
+	state.team_market_known_key[team.team_id] = _mk_key   # ★寫回鍵：與上面的比對是同一組值
 
 # 從 relay 訊息取市集 pos：order_buy/sell → params.origin_pos（下單隊市集）；outpost_built → source_pos（outpost tile）。
 func _msg_market_pos(msg) -> Vector2i:
@@ -5129,6 +5178,7 @@ func _richest_member(state: WorldState, f) -> int:
 	return best_tid
 
 func _evaluate_survival(state: WorldState, team: TeamData) -> void:
+	if Probe.enabled: _mk_path = "rank_survival"   # ★路徑標記（純觀測，決策端不讀）
 	if team.leader_id == state.player_id and state.player_id != -1:
 		return
 	# 紮營到達結算（W1 hoist）：在 TASK_CAMP 途中，腳下若為無主可農地即立 crude camp + 釋放。

@@ -22,6 +22,16 @@ var in_transit_letters: Array = []
 # observer channel 純度（此 channel sim 零讀、僅 observer UI 消費）。
 var observer_messages: Array = []
 var team_known: Dictionary = {}
+# ★★★market-known 快取的失效鍵之一（spec 2026-08-27 gather-dirty-flag-cache）：
+#   ★世界上任何一格 outpost_level 變動就 +1 —— ★★只在【世界 tile】的寫入點 bump（6 處，窮盡見 handback）。
+#   ★★★為什麼是全域計數器而不是逐 tile 版本：快取要問的是「我 vision 範圍內有沒有變」，
+#     而逐 tile 比對＝重掃 vision＝正是要省掉的那筆開銷（R² 已分析，換機制迴避不了窮盡工作量）。
+#   ★保守面：任何一格變動都會讓【所有隊】失效一次 ⇒ 命中率偏低，★但絕不 stale。
+#     ★★這個方向是刻意選的：漏失效＝NPC 拿過期世界做決策，而它【沒有症狀】。
+var outpost_epoch: int = 0
+# ★market-known 快取的鍵（team_id → [tile_pos, outpost_epoch, team_known.size()]）。
+#   ★★純觀測不了的東西：它是【快取狀態】不是世界事實 ⇒ 存檔／重播時可安全丟棄（重算一次即可）。
+var team_market_known_key: Dictionary = {}
 var team_discovered: Dictionary = {}   # int team_id → Array[int] 已知 team_id 清單
 # god-view Slice C：market-discovery belief store（team_id → Dictionary{tile_id:int→true} 已知市集 outpost tile）。
 # 三源習得：創世-nearby(game_setup) / 直接親見(vision 半徑內 outpost) / relay harvest(team_known order/outpost_built 訊息)。

@@ -1,0 +1,17 @@
+[peaceful_economy seed 1337 days 10]
+★分母＝真呼叫次數 = 860（hit 0 + miss 860）★不是隊數／tick 數
+★★命中率 = 0.0%（0 / 860）
+
+★★★兩條路徑分開報（★分辨點在【上游呼叫堆疊】不在 helper：`DecisionContext.gather` 兩條都走，
+   ⇒ 在 helper 加參數答不了這題；改在兩個 rank 入口設純觀測標記）：
+   rank_scored    hit      0｜miss    650｜合計    650｜命中率 0.0%
+   rank_survival  hit      0｜miss    210｜合計    210｜命中率 0.0%
+
+★gather.* 佔相位合計：23.1%（gather 84996270 μs / 全相位合計 367964451 μs）★這是相位佔比，不是 wall-clock 加速宣稱
+
+★★★而【gather.* 不是這顆快取該影響的相位】—— 這是查出來的，不是猜的：
+   `decision_context.gd:453/458`（在 gather.market 裡）兩處都傳 `skip_refresh = true`
+   ⇒ ★它們【根本不呼叫】`_harvest_market_known`。
+   真正的 refresh 在 `_merchant_trade_target` / `options.gd` / `goal_resolver.gd` ——
+   ⇒ ★★省下來的時間落在 `unified.rank`，不在 `gather.*`。
+★unified.rank 佔相位合計：24.2%（unified.rank 88982430 μs / 全相位合計 367964451 μs）★這是相位佔比，不是 wall-clock 加速宣稱
