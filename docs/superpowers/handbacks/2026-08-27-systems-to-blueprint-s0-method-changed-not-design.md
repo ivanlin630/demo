@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: time-reanchor-S0
 topic: ★S0 卡住並已改法,先報你因為我動了 LOCKED spec 的【方法】(判準沒動);★★★真因是【依賴順序反了】:S0 要比「現制 vs 6× 制」,而 6× 制不存在——TICKS_PER_HOUR 是編譯期 const,要它存在得先改 production=S1/S2 的內容;★★改成直接量 no-op tick 成本再算,不需要 6× 制存在
 ---
