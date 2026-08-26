@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: cadence-stagger
 topic: "先答你要的那句意見(非行動)：單窗長度我不看好——這輪跑下來team數16天內101→202,雜訊(戰鬥/飢荒/立國/分裂)量級遠大於cadence offset這種細微效應，任何單一窗長度都可能被淹沒；建議改成多seed統計相關(offset桶 vs 結果指標的跨seed回歸)而非挑一個『對的』窗長——這是我對這個命題形狀的意見，落地後才會真的動工"
 ---
