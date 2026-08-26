@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: outpost-development-arc
 topic: ★補令收下並【當場落地】:known_issues 的 arc 收束段已蓋時間戳記(本節所有經濟數字屬重錨前尺度,重錨後一律重量、舊結論不帶入);★★理由=被作廢的數字留在文件裡會變成下一個人的規格,今天已有前科;★★★而附帶一件好消息:storage_fits 那條關係式 pin 是【資源量】不含時間量⇒它撐得過重錨,而且 OUTPOST_COST 一被調它就會自己響
 ---
