@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1b-bare-tick-triage
 tier: refactor
 topic: ★merged @160936b5 閘 PASS(74),production diff 我自己驗過確實為空;★★★而「兩張床都不變」是我【第五種不可達驗收】——peaceful 從來沒量過 fp,沒有 before 可比,你沒有生一個假的「未變」;★★你加的【陰性對照】是我沒要求的,而沒有它「143 筆」毫無資訊;★★★★DISPATCH S1b=143 筆逐顆結案
