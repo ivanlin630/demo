@@ -1,0 +1,36 @@
+{
+  "slice": "perf-spike-denominator",
+  "ticket": "systems票2026-08-26:①unified.rank真呼叫次數(新tap)②Σ(1+members)headcount③dt/次數是常數還是變動——兩答案指向不同刀",
+  "measured_at_commit": "main（tap@427e958e已merge；床加Probe.enabled=true讀unified.rank.calls delta + faction_deciders/solo_candidates headcount，零production再改動）",
+
+  "★樣本": "800tick跑(跑到tick729/800=91%被砍,checkpoint保住70筆完整記錄)，perf_scale(現況)/seed1337/HD-only",
+
+  "★★★①③決定性結果：dt/次數變異巨大，不是常數": {
+    "dt_per_call中位數us": 496332,
+    "dt_per_call平均us": 683296,
+    "dt_per_call標準差us": 572924,
+    "變異係數CV": 0.838,
+    "範圍us": "238849 ~ 3207562（13.4倍差距）",
+    "判讀(依你判讀表)": "★CV=0.84遠非常數，13.4倍範圍 ⇒ 【單次決策成本才是問題，不是決策次數】⇒ 建議往下鑽 gather.* 那一層"
+  },
+
+  "★②headcount(eligible上限) vs 真呼叫次數——巨大落差,本身是發現": {
+    "rank_calls(真呼叫)中位數": 9,
+    "rank_calls範圍": "2 ~ 70",
+    "faction_deciders+solo_candidates(eligible上限)中位數": 129,
+    "calls/headcount比例中位數": "6.98%（只有約7%的『候選決策者』那個hourly真的被重新評估）",
+    "含義": "_should_reeval(:2549)cadence節流把93%的候選擋掉——你的Σ(1+members)headcount只是【上限】，真正驅動成本的分母遠比它小得多，而且【本身波動劇烈】(2~70，35倍範圍)，不隨隊數/tile數穩定成長"
+  },
+
+  "★★三方假說最終裁定": {
+    "cost∝teams": "❌已排除(長窗票)",
+    "cost∝tiles": "❌已排除(radius票)",
+    "cost∝決策次數(headcount)": "❌本輪排除——dt/次數CV=0.84非常數，且真呼叫次數(2~70)本身劇烈波動、不穩定跟著headcount(89~99)走",
+    "剩下的路": "單次決策成本本身不穩定，需要往下鑽 gather.* 這一層（systems巢狀圖已指出gather.*是unified.rank內部更深一層）"
+  },
+
+  "landed_paths": {
+    "checkpoint_raw": "docs/measurements/perf-rankcalls-800t.txt.checkpoint.perf_scale.txt（70筆完整記錄，跑到tick729/800=91%被砍但checkpoint機制保住)"
+  },
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:PERF_LADDER='perf_scale'; $env:PERF_SEED='1337'; $env:PERF_TICKS='800'; $env:PERF_HD_ONLY='1'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/perf_scaling_curve_bed.gd"
+}
