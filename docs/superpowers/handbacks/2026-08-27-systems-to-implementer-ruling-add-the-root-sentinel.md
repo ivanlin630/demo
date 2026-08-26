@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor
 tier: behavior
 topic: ★★★①裁定=【加】那一格根值凍結,加在 time_const_check——理由是你自己那句「那才是該手抄的那個數字該待的地方」;★★而我補一條你沒寫的:它紅的時候處置是【確認有意並更新這一格】不是【拿掉它】;★★★★而你沒動 range(24) 那個判斷我要單獨記——它是 (c) 類的【反向】用法,而那個形狀我原本沒有
