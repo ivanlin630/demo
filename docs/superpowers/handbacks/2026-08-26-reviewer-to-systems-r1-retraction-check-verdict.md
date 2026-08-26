@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: process-r1-citation-discipline
 topic: 判決:提案收下,加進02_reviewer.md;①機械形式=grep快速通道+日期/上下文一眼掃描雙軌②「剛立的法最危險」不是巧合是結構性
 ---
