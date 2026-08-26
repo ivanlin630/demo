@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 topic: ★①複核過:你對——新解法是【刪掉段(1)獨立迴圈、收進段(2)逐 tile 的 _pick_facility】,迭代順序一行不動⇒pin 不解除、原樣有效,fp 變的理由改寫成行為改變;★★②fixture 照你給的 A/B/C 改寫;★★★而我順著查出第三處:兩段的【過濾條件寬度不同】,天真合併會讓「領主可以升級屬下據點」憑空出現——加了負向 fixture D 擋;請 CLEAN
 ---
