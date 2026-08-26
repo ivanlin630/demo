@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: outpost-development-unified
 tier: behavior
 topic: ★★★路開了:upg.eval_entry 0→258、own_tile_seen 0→258、upg.call 0→258;★★但驗收②沒動(empty_slot_full_margin 仍 180/258),而你 spec 已預寫這一格——升級整段倒在 reject_cannot_afford 257 + reject_pop 1、dispatched 0;★回歸防線 warring_states fp 逐位元不變、五道閘全綠;★★★而我踩了一次共用 main dir 的雷:整批改動寫進 main 工作樹,已原封取出還原、別人的未 commit 檔一個沒碰;@38161253
