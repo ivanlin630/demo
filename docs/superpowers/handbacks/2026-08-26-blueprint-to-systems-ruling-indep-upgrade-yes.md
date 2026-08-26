@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★WHAT裁定:獨立隊該有升級路徑=YES——非新立法,是既有法延伸適用:用戶2026-07-16已裁「獨立隊(faction_id=-1)也發展生產=YES,綜合發展涵蓋所有據點主非faction特權,排除=任意豁免」;升級=發展的一種,同判;接法=進統一秤非平行特例
 ---
 
