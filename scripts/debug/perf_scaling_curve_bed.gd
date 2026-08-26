@@ -147,6 +147,14 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 			cp.flush()
 	var last_rank_calls: int = 0   # systems票(perf-spike-denominator)：unified.rank.calls是累計counter,取逐tick delta
 	for tick in range(ticks):
+		# ★systems票2026-08-27(perf-spike-coverage②)：對齊假說——比對tick前後ambition/order_eval_next_tick
+		#   有沒有被推進，即知道『真的執行了』幾次(非headcount/非eligible)，讀WorldState非新tap。
+		var pre_ambition: Dictionary = {}
+		var pre_order: Dictionary = {}
+		for tid0 in state.teams:
+			var t0team: TeamData = state.teams[tid0]
+			pre_ambition[tid0] = t0team.ambition_eval_next_tick
+			pre_order[tid0] = t0team.order_eval_next_tick
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(state, no_player)
 		var dt: int = Time.get_ticks_usec() - t0
@@ -179,9 +187,18 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 			# ★systems訂正(2026-08-26)：分子分母同母體——用FactionAISystem._fai_ph(該tick的unified.rank自己計時,
 			#   每次evaluate_all呼叫時clear重填,非累計)，不是整tick dt(dt含gather.*/loop1.factions等其他一切)。
 			var rank_us_this_tick: int = int(FactionAISystem._fai_ph.get("unified.rank", 0))
-			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d rank_calls=%d rank_us=%d dt_per_call_true=%.1f" % [
+			# ★systems票2026-08-27：真的執行次數＝eval_next_tick被推進的隊數(非headcount非eligible)
+			var ambition_fired: int = 0
+			var order_fired: int = 0
+			for tid1 in state.teams:
+				if not pre_ambition.has(tid1): continue   # 本tick新增的隊(founding等)無pre值,略過
+				var t1team: TeamData = state.teams[tid1]
+				if t1team.ambition_eval_next_tick != int(pre_ambition[tid1]): ambition_fired += 1
+				if t1team.order_eval_next_tick != int(pre_order[tid1]): order_fired += 1
+			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d rank_calls=%d rank_us=%d dt_per_call_true=%.1f ambition_fired=%d order_fired=%d" % [
 				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size(), faction_deciders, solo_candidates,
-				rank_calls_delta, rank_us_this_tick, (float(rank_us_this_tick) / maxf(float(rank_calls_delta), 1.0))])
+				rank_calls_delta, rank_us_this_tick, (float(rank_us_this_tick) / maxf(float(rank_calls_delta), 1.0)),
+				ambition_fired, order_fired])
 			# ★systems票2026-08-26(perf-spike-coverage)：dump完整_fai_ph字典(非[FaiPhase]那個只印top-8)，
 			#   用來算Σ(頂層label) vs dt做覆蓋率驗證。只在真spike(dt>1s)dump，避免每個tick%500都寫一坨。
 			if dt > 1_000_000:
