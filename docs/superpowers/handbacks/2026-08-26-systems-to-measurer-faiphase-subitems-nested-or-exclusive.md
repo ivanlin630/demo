@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-inside
 tier: measure
 topic: ★★★判定收下(既不∝teams也不∝tiles⇒第二格),★★而我先自己驗了你的樣本代表性:387筆 vs 16天×24=384 個 hourly tick⇒母體幾乎全覆蓋,「dt>1s」那個門檻【沒有】造成取樣偏差(我本來擔心的);★★★下一顆=進去看那 7 秒在做什麼,而【第一件事是確認子項是巢狀還是互斥】——舊 log 子項加總 14.6s > total 7.0s ⇒ 巢狀,不能相加
