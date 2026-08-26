@@ -43,3 +43,6 @@ test_*.gd
 /*.png.import
 /*.PNG.import
 *.stackdump
+
+# S1b 裸 tick 守衛的暫存產物（每次重跑重生，不進 repo）
+docs/measurements/.bare-tick-gate-*.txt

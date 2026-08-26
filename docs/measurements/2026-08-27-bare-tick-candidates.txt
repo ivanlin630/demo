@@ -38,11 +38,11 @@ scripts/data/team_data.gd|171|0|info_eval_next_tick|decl_init|var info_eval_next
 scripts/data/tile_data.gd|34|0|labor_eval_next_tick|decl_init|var labor_eval_next_tick: int = 0   # per-tile cadence gate（lazy-on-cadence rebalance）
 scripts/data/tile_data.gd|37|0|idle_employ_next_tick|decl_init|var idle_employ_next_tick: int = 0   # per-tile cadence gate（同 LABOR_CADENCE；避每決策重算 NeedOracle 遞迴）
 scripts/data/world_data.gd|4|0|current_tick|decl_init|var current_tick: int = 0
-scripts/data/world_state.gd|4|240|TICKS_PER_DAY|const_def|const TICKS_PER_DAY:    int   = 240          # 10 ticks/hour
-scripts/data/world_state.gd|5|24|TICKS_PER_HOUR|const_def|const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 10
-scripts/data/world_state.gd|6|30|TICKS_PER_MONTH|const_def|const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 7200 ticks
-scripts/data/world_state.gd|7|90|TICKS_PER_SEASON|const_def|const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 21600 ticks
-scripts/data/world_state.gd|8|360|TICKS_PER_YEAR|const_def|const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 86400 ticks
+scripts/data/world_state.gd|6|240|TICKS_PER_DAY|const_def|const TICKS_PER_DAY:    int   = 240          # 10 ticks/hour
+scripts/data/world_state.gd|9|24|TICKS_PER_HOUR|const_def|const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 10
+scripts/data/world_state.gd|10|30|TICKS_PER_MONTH|const_def|const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 7200 ticks
+scripts/data/world_state.gd|11|90|TICKS_PER_SEASON|const_def|const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 21600 ticks
+scripts/data/world_state.gd|12|360|TICKS_PER_YEAR|const_def|const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 86400 ticks
 scripts/simulation/ambition_ladder.gd|13|10|TICKS_PER_HOUR|const_def|const LADDER_EVAL_CADENCE: int = 10 * WorldState.TICKS_PER_HOUR
 scripts/simulation/belief_system.gd|9|3|TICKS_PER_DAY|const_def|const BELIEF_STALE_TICKS: int = WorldState.TICKS_PER_DAY * 3   # TEST VALUE — 位置 belief 超此視同未知(過期)→防永久 threat/pursuit loop
 scripts/simulation/belief_system.gd|16|30|TICKS_PER_DAY|const_def|const CRED_AGE_FULL_DECAY := WorldState.TICKS_PER_DAY * 30  # TEST VALUE
@@ -109,12 +109,12 @@ scripts/simulation/faction_ai_system.gd|6168|2|TICKS_PER_DAY|-|return dist * Mov
 scripts/simulation/faction_ai_system.gd|6251|1|TICKS_PER_DAY|decl_init|var expected_days: int = maxi((expected - disp) / WorldState.TICKS_PER_DAY, 1)
 scripts/simulation/faction_ai_system.gd|6296|3|TICKS_PER_DAY|const_def|const CONTACT_VIGILANCE_DURATION: int = WorldState.TICKS_PER_DAY * 3   # 失聯警覺期（defensive 反應→暫時警覺）
 scripts/simulation/game_setup.gd|698|1|current_tick|-|if int(entry.get("tick", -1)) != current_tick:
-scripts/simulation/harvest_system.gd|10|4|current_tick|-|var season: int  = (state.world.current_tick / SEASON_LENGTH) % 4
-scripts/simulation/harvest_system.gd|25|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
-scripts/simulation/harvest_system.gd|54|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
-scripts/simulation/harvest_system.gd|70|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
-scripts/simulation/harvest_system.gd|87|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
-scripts/simulation/harvest_system.gd|104|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+scripts/simulation/harvest_system.gd|13|4|current_tick|-|var season: int  = (state.world.current_tick / SEASON_LENGTH) % 4
+scripts/simulation/harvest_system.gd|28|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+scripts/simulation/harvest_system.gd|57|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+scripts/simulation/harvest_system.gd|73|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+scripts/simulation/harvest_system.gd|90|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+scripts/simulation/harvest_system.gd|107|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
 scripts/simulation/inquiry_system.gd|90|0|current_tick|-|if int(BeliefSystem.best_estimate(state, player_team.team_id, tid).get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
 scripts/simulation/inquiry_system.gd|90|10|current_tick|-|if int(BeliefSystem.best_estimate(state, player_team.team_id, tid).get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
 scripts/simulation/interaction_system.gd|863|20000|current_tick|-|"qty": q, "seq": _mf_next_seq(state.world.current_tick, oid), "kind": "buy"}, 20000)
@@ -160,9 +160,9 @@ scripts/ui/observer_event_text.gd|17|1|TICKS_PER_MONTH|decl_init|var day: int = 
 scripts/ui/observer_main.gd|79|6|TICKS_PER_MONTH|-|_end_tick = 6 * WorldState.TICKS_PER_MONTH
 scripts/ui/observer_main.gd|254|1|TICKS_PER_MONTH|decl_init|var month: int = tick / WorldState.TICKS_PER_MONTH + 1
 scripts/ui/observer_main.gd|255|1|TICKS_PER_MONTH|decl_init|var day: int = (tick % WorldState.TICKS_PER_MONTH) / WorldState.TICKS_PER_DAY + 1
-scripts/ui/sim_bridge.gd|4|24|TICKS_PER_TURN|const_def|const TICKS_PER_TURN: int = 24
-scripts/ui/text_ui_main.gd|756|24|TICKS_PER_HOUR|-|var hour: int  = (tick / WorldState.TICKS_PER_HOUR) % 24
-scripts/ui/text_ui_main.gd|757|30|TICKS_PER_DAY|-|var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
-scripts/ui/text_ui_main.gd|757|1|TICKS_PER_DAY|-|var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
-scripts/ui/text_ui_main.gd|758|12|TICKS_PER_MONTH|decl_init|var month: int = (tick / WorldState.TICKS_PER_MONTH) % 12
-scripts/ui/turn_controls.gd|4|4|TICKS_PER_SECOND|const_def|const TICKS_PER_SECOND: int = 4   # TEST VALUE — world ticks rendered per second
+scripts/ui/sim_bridge.gd|7|24|TICKS_PER_TURN|const_def|const TICKS_PER_TURN: int = 24
+scripts/ui/text_ui_main.gd|760|24|TICKS_PER_HOUR|-|var hour: int  = (tick / WorldState.TICKS_PER_HOUR) % 24
+scripts/ui/text_ui_main.gd|761|30|TICKS_PER_DAY|-|var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
+scripts/ui/text_ui_main.gd|761|1|TICKS_PER_DAY|-|var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
+scripts/ui/text_ui_main.gd|763|12|TICKS_PER_MONTH|decl_init|var month: int = (tick / WorldState.TICKS_PER_MONTH) % 12
+scripts/ui/turn_controls.gd|6|4|TICKS_PER_SECOND|const_def|const TICKS_PER_SECOND: int = 4   # TEST VALUE — world ticks rendered per second

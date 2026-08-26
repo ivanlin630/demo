@@ -1,0 +1,160 @@
+# ★S1b 分類（triage）：母體 ＝ S1a 的 143 筆候選
+# ★★對帳式：所有 disposition 相加必須 == 母體，★一筆都不准無處置。
+#
+# ★★★而我加了票上沒有的第四類 (d) 不是時間量 —— 理由：
+#   掃描器是【同一行有 tick 符號就報】，而同一行的整數常常根本不是 tick
+#   （取樣 cap／`% X == 0` 的 0／`get(k,-1)` 哨兵／曆法單位 24-30-4…）。
+#   ★把它們硬塞進 (a)/(b)/(c) 會讓白名單灌水成一份沒人讀的清單 ——
+#     而白名單的價值全在「每一條都有人真的想過」。
+#
+# ★分類保守：只有形狀明確吻合才判 (d)；認不出來一律 NEEDS_HUMAN。
+# 欄位：disposition|reason|path|line|literal|symbol|source
+#
+# b_defer        = 1
+# c_whitelist    = 8
+# d_not_time     = 134
+# ★合計 143 vs 母體 143 ⇒ 一致
+#
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/faction_data.gd|17|0|intent_eval_next_tick|var intent_eval_next_tick: int = 0   # 下次 intent 重選 tick（cadence，A2b #3；鏡射 team threat/subteam_eval_next_tick）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|135|0|expand_eval_next_tick|var expand_eval_next_tick: int = 0
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|145|0|prosperity_eval_next_tick|var prosperity_eval_next_tick: int = 0   # 下次 prosperity 評估 tick（cadence + 事件重評）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|150|0|ambition_eval_next_tick|var ambition_eval_next_tick: int = 0
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|159|0|order_eval_next_tick|var order_eval_next_tick: int = 0   # 下次訂單 cadence 評估 tick
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|161|0|threat_eval_next_tick|var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|162|0|decision_eval_next_tick|var decision_eval_next_tick: int = 0     # 重評 cadence 重構：下次決策重評 tick（週期閘，非-unified 解 IDLE-lock）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|165|0|subteam_eval_next_tick|var subteam_eval_next_tick: int = 0      # 下次子隊決策 tick（cadence，鏡射 threat_eval_next_tick，A2a）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|168|0|consolidate_eval_next_tick|var consolidate_eval_next_tick: int = 0  # S-A：下次整併 target 評估 tick（cadence，鏡射 subteam_eval_next_tick）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|169|0|residency_eval_next_tick|var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|170|0|goal_eval_next_tick|var goal_eval_next_tick: int = 0         # ★means-end S7:下次 goal 生成/掛退評估 tick（cadence-gate,鏡射 residency_eval_next_tick;goal_state 持久不需每 decide 重算）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/team_data.gd|171|0|info_eval_next_tick|var info_eval_next_tick: int = 0          # ★資訊網 Part2 side-action:下次求援/偵察 side-dispatch 評估 tick（cadence-gate,per-team 錯開,herald/scout 慢策略不需每 tick）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/tile_data.gd|34|0|labor_eval_next_tick|var labor_eval_next_tick: int = 0   # per-tile cadence gate（lazy-on-cadence rebalance）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/tile_data.gd|37|0|idle_employ_next_tick|var idle_employ_next_tick: int = 0   # per-tile cadence gate（同 LABOR_CADENCE；避每決策重算 NeedOracle 遞迴）
+d_not_time|decl_init：`= 0` 是「尚未排程」的初值，不是一段時間|scripts/data/world_data.gd|4|0|current_tick|var current_tick: int = 0
+c_whitelist|根常數本身：hours()/days() 由它導出，改成 hours() 會循環定義|scripts/data/world_state.gd|6|240|TICKS_PER_DAY|const TICKS_PER_DAY:    int   = 240          # 10 ticks/hour
+c_whitelist|曆法結構：24＝一天幾小時，不隨 tick 縮放（改根時它必須維持 24）|scripts/data/world_state.gd|9|24|TICKS_PER_HOUR|const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 10
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/data/world_state.gd|10|30|TICKS_PER_MONTH|const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 7200 ticks
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/data/world_state.gd|11|90|TICKS_PER_SEASON|const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 21600 ticks
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/data/world_state.gd|12|360|TICKS_PER_YEAR|const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 86400 ticks
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/ambition_ladder.gd|13|10|TICKS_PER_HOUR|const LADDER_EVAL_CADENCE: int = 10 * WorldState.TICKS_PER_HOUR
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/belief_system.gd|9|3|TICKS_PER_DAY|const BELIEF_STALE_TICKS: int = WorldState.TICKS_PER_DAY * 3   # TEST VALUE — 位置 belief 超此視同未知(過期)→防永久 threat/pursuit loop
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/belief_system.gd|16|30|TICKS_PER_DAY|const CRED_AGE_FULL_DECAY := WorldState.TICKS_PER_DAY * 30  # TEST VALUE
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/belief_system.gd|32|3|TICKS_PER_DAY|const SCOUT_TIMEOUT := WorldState.TICKS_PER_DAY * 3   # TEST VALUE：斥候逾時未收斂 → 釋放回常規（防永 scout）
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/belief_system.gd|158|3|TICKS_PER_MONTH|elif age < 3 * WorldState.TICKS_PER_MONTH: Probe.bump("bel.claim_mid")
+d_not_time|increment：+1 是「下一個」不是一段時間|scripts/simulation/cadence_stagger.gd|42|1|current_tick|return current_tick + 1   # ★退化保護：cadence 非法時不製造無限迴圈（不靜默吞掉）
+d_not_time|increment：+1 是「下一個」不是一段時間|scripts/simulation/cadence_stagger.gd|50|1|current_tick|candidate = current_tick + 1
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/decision/decision_context.gd|543|0|current_tick|var _age: int = state.world.current_tick - int(_be.get("last_tick", 0))
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/decision/decision_context.gd|673|0|current_tick|and state.world.current_tick - int(_m.get("tick", 0)) < JOIN_REJECT_COOLDOWN_TICKS:
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/decision/decision_engine.gd|23|20|TICKS_PER_DAY|const STALL_EXCLUDE_WINDOW: int = WorldState.TICKS_PER_DAY * 20   # TEST VALUE — 硬排除窗(> STALL_DAYS max 防 A 太快回來 ping-pong)
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/decision/decision_engine.gd|192|200|current_tick|"tick": state.world.current_tick}, 200)
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/decision/decision_engine.gd|215|200|current_tick|"tick": state.world.current_tick}, 200)
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/decision/failure_memory.gd|77|0|current_tick|var age: int = state.world.current_tick - int(e.get("tick", 0))
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/decision/goal_resolver.gd|576|30|current_tick|"tick": state.world.current_tick}, 30)
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/decision/goal_resolver.gd|658|200|current_tick|"dup": _existing, "tick": state.world.current_tick}, 200)
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/decision/goal_resolver.gd|760|60|current_tick|"tick": state.world.current_tick}, 60)
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/diplomatic_ai_system.gd|4|50|TICKS_PER_HOUR|const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/diplomatic_ai_system.gd|5|7|TICKS_PER_DAY|const REJECT_COOLDOWN: int = WorldState.TICKS_PER_DAY * 7   # 被拒後同對象冷卻 7 天
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/diplomatic_ai_system.gd|139|0|current_tick|if state.world.current_tick < int(self_team.diplomacy_reject_cooldown.get(other.team_id, 0)):
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|3|30|TICKS_PER_HOUR|const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|4|20|TICKS_PER_HOUR|const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/faction_ai_system.gd|88|2|TICKS_PER_DAY|const CRISIS_IMMUNITY: int = WorldState.TICKS_PER_DAY * 2   # TEST VALUE — release 後禁重委派同 task 窗（橋接到 survival @80 commit，防 instant-recommit）
+d_not_time|sentinel：`< 0` 是「從未發生」的哨兵比較|scripts/simulation/faction_ai_system.gd|309|0|current_tick|var stale: bool = last_tick < 0 or (state.world.current_tick - last_tick) > BeliefSystem.BELIEF_STALE_TICKS
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/faction_ai_system.gd|643|0|current_tick|if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/faction_ai_system.gd|653|4|current_tick|team.invite_cooldown[tid] = state.world.current_tick + RESIDENCY_COOLDOWN * 4   # 等 settle 流程
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/faction_ai_system.gd|735|5|current_tick|"mod_infra": state.world.current_tick % INFRA_INTERVAL, "n_factions": state.factions.size()}, 5)
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/faction_ai_system.gd|751|0|current_tick|if state.world.current_tick % INFRA_INTERVAL == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/faction_ai_system.gd|755|0|current_tick|if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/faction_ai_system.gd|761|0|current_tick|if state.world.current_tick % DiplomaticAiSystem.BETRAY_CHECK_INTERVAL == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/faction_ai_system.gd|798|0|current_tick|if state.world.current_tick % INFRA_INTERVAL == 0:
+d_not_time|zero_compare：與 0 比較是「未排程」判斷|scripts/simulation/faction_ai_system.gd|862|1|ambition_eval_next_tick|if team.leader_id != -1 and team.ambition_eval_next_tick == 0:
+d_not_time|zero_compare：與 0 比較是「未排程」判斷|scripts/simulation/faction_ai_system.gd|862|0|ambition_eval_next_tick|if team.leader_id != -1 and team.ambition_eval_next_tick == 0:
+d_not_time|zero_compare：與 0 比較是「未排程」判斷|scripts/simulation/faction_ai_system.gd|865|1|order_eval_next_tick|if team.leader_id != -1 and team.order_eval_next_tick == 0:
+d_not_time|zero_compare：與 0 比較是「未排程」判斷|scripts/simulation/faction_ai_system.gd|865|0|order_eval_next_tick|if team.leader_id != -1 and team.order_eval_next_tick == 0:
+d_not_time|sentinel：-1 是無效值哨兵|scripts/simulation/faction_ai_system.gd|868|1|current_tick|if team.leader_id != -1 and state.world.current_tick >= team.ambition_eval_next_tick:
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/faction_ai_system.gd|872|20000|current_tick|"tick": state.world.current_tick, "team": team.team_id, "kind": "ambition"}, 20000)
+d_not_time|sentinel：-1 是無效值哨兵|scripts/simulation/faction_ai_system.gd|875|1|current_tick|if team.leader_id != -1 and state.world.current_tick >= team.order_eval_next_tick:
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/faction_ai_system.gd|877|20000|current_tick|"tick": state.world.current_tick, "team": team.team_id, "kind": "order"}, 20000)
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/faction_ai_system.gd|943|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/faction_ai_system.gd|1248|0|current_tick|if state.world.current_tick % effective_interval == 0 and _richest_member(state, f) != -1:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/faction_ai_system.gd|1248|1|current_tick|if state.world.current_tick % effective_interval == 0 and _richest_member(state, f) != -1:
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/faction_ai_system.gd|1351|0|current_tick|if state.world.current_tick - int(pp.get("issued_tick", 0)) > int(pp.get("timeout", 2 * WorldState.TICKS_PER_DAY)):
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/faction_ai_system.gd|1351|2|current_tick|if state.world.current_tick - int(pp.get("issued_tick", 0)) > int(pp.get("timeout", 2 * WorldState.TICKS_PER_DAY)):
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|1548|2|TICKS_PER_DAY|var budget: int = int(envoy.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|1586|2|TICKS_PER_DAY|var budget: int = int(letter.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/faction_ai_system.gd|1587|0|current_tick|if state.world.current_tick - int(letter.get("spawn_tick", 0)) > budget:
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|1711|2|TICKS_PER_DAY|"origin_pos": team.tile_pos, "expire_tick": spawn_tick + 2 * WorldState.TICKS_PER_DAY,
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|1726|2|TICKS_PER_DAY|var budget: int = int(scout.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|1755|2|current_tick|"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY}
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/faction_ai_system.gd|2105|0|current_tick|var over: bool = state.world.current_tick - int(v.task_extra_data.get("relocate_spawn", 0)) \
+d_not_time|speed_mult：速度倍率，不是 tick|scripts/simulation/faction_ai_system.gd|2209|1|current_tick|"spawn_tick": state.world.current_tick, "timeout": SubteamSystem.founding_timeout(dist), "speed": 1,
+d_not_time|speed_mult：速度倍率，不是 tick|scripts/simulation/faction_ai_system.gd|2358|1|current_tick|"spawn_tick": state.world.current_tick, "timeout": SubteamSystem.founding_timeout(dist), "speed": 1,
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/faction_ai_system.gd|2470|0|current_tick|st = clampf(float(state.world.current_tick - int(be.get("last_tick", 0))) / maxf(norm, 1.0), 0.0, 1.0)
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/faction_ai_system.gd|2614|200|current_tick|"us": _tr - _tr0, "team": team.team_id, "tick": state.world.current_tick}, 200)
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/faction_ai_system.gd|2820|1000|current_tick|"tick": state.world.current_tick}, 1000)
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|2840|10|TICKS_PER_DAY|const CONSTRUCT_TRANSIT_TIMEOUT: int = 10 * WorldState.TICKS_PER_DAY  # TEST VALUE — 10 天
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/faction_ai_system.gd|2984|1|current_tick|"tick": state.world.current_tick, "eta": int(xd.get("return_eta", -1)),
+d_not_time|sentinel：重設為「未排程」|scripts/simulation/faction_ai_system.gd|3413|0|labor_eval_next_tick|tile.labor_eval_next_tick = 0
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/faction_ai_system.gd|3954|30|current_tick|"tick": state.world.current_tick}, 30)
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/faction_ai_system.gd|4596|50|TICKS_PER_HOUR|const INFRA_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時評估一次
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/faction_ai_system.gd|4960|30|current_tick|"tick": state.world.current_tick}, 30)
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/faction_ai_system.gd|5565|30|current_tick|"tick": state.world.current_tick}, 30)
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/faction_ai_system.gd|6168|2|TICKS_PER_DAY|return dist * MovementSystem.BASE_MOVE_TICKS * 2 + WorldState.TICKS_PER_DAY
+d_not_time|floor：末位 1 是下限保護|scripts/simulation/faction_ai_system.gd|6251|1|TICKS_PER_DAY|var expected_days: int = maxi((expected - disp) / WorldState.TICKS_PER_DAY, 1)
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/faction_ai_system.gd|6296|3|TICKS_PER_DAY|const CONTACT_VIGILANCE_DURATION: int = WorldState.TICKS_PER_DAY * 3   # 失聯警覺期（defensive 反應→暫時警覺）
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/game_setup.gd|698|1|current_tick|if int(entry.get("tick", -1)) != current_tick:
+c_whitelist|曆法結構：4＝一年幾季 —— ★是時間量，但不隨 tick 縮放|scripts/simulation/harvest_system.gd|13|4|current_tick|var season: int  = (state.world.current_tick / SEASON_LENGTH) % 4
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/harvest_system.gd|28|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/harvest_system.gd|57|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/harvest_system.gd|73|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/harvest_system.gd|90|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/harvest_system.gd|107|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/inquiry_system.gd|90|0|current_tick|if int(BeliefSystem.best_estimate(state, player_team.team_id, tid).get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/inquiry_system.gd|90|10|current_tick|if int(BeliefSystem.best_estimate(state, player_team.team_id, tid).get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/interaction_system.gd|863|20000|current_tick|"qty": q, "seq": _mf_next_seq(state.world.current_tick, oid), "kind": "buy"}, 20000)
+d_not_time|sample_cap：字典後接的整數是 cap|scripts/simulation/interaction_system.gd|913|20000|current_tick|"qty": q, "seq": _mf_next_seq(state.world.current_tick, oid), "kind": "sell"}, 20000)
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/manpower_system.gd|268|0|current_tick|if state.world.current_tick % CAPTIVE_CADENCE != 0:
+d_not_time|floor：`maxi(1, …)` 的 1 是下限保護，不是一段時間|scripts/simulation/movement_system.gd|101|1|elapsed_ticks|var max_steps: int = maxi(1, elapsed_ticks / MIN_MOVE_TICKS)
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/order_system.gd|3|5|TICKS_PER_DAY|const ORDER_LIFETIME: int = 5 * WorldState.TICKS_PER_DAY    # 訂單壽命
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/order_system.gd|4|12|TICKS_PER_HOUR|const ORDER_POST_CADENCE: int = 12 * WorldState.TICKS_PER_HOUR
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/order_system.gd|134|0|current_tick|"age_ticks": state.world.current_tick - int(o.get("created_tick", 0)),
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/order_system.gd|249|0|current_tick|if int(e.get("expire_tick", 0)) <= state.world.current_tick:
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/order_system.gd|303|0|current_tick|if int(m.params.get("expire_tick", 0)) <= state.world.current_tick:
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/outpost_system.gd|30|30|TICKS_PER_DAY|const CONSTRUCTION_TIMEOUT: int = 30 * WorldState.TICKS_PER_DAY
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/path_system.gd|106|1|current_tick|if cached and int(cached.get("tick", -1)) == state.world.current_tick:
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/path_system.gd|177|1|current_tick|return int(BeliefSystem.best_estimate(state, observer.team_id, target_id).get("last_tick", -1)) == state.world.current_tick
+d_not_time|hash_mult：31 是雜湊乘數|scripts/simulation/person_generator.gd|144|31|current_tick|base = base * 31 + state.world.current_tick
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/player_trade_system.gd|103|0|current_tick|if int(mem.get("event_id", 0)) < state.world.current_tick - 1000:
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/player_trade_system.gd|103|1000|current_tick|if int(mem.get("event_id", 0)) < state.world.current_tick - 1000:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/population_system.gd|8|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/reaction_system.gd|3|10|TICKS_PER_HOUR|const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/reaction_system.gd|48|0|current_tick|if state.world.current_tick % GOAL_CHECK_INTERVAL == 0:
+d_not_time|derived_mult：已由具名時間常數導出，倍數不是裸 tick|scripts/simulation/salary_system.gd|3|7|TICKS_PER_DAY|const SALARY_INTERVAL: int = WorldState.TICKS_PER_DAY * 7   # 1週/次
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/salary_system.gd|15|0|current_tick|if state.world.current_tick % SALARY_INTERVAL != 0:
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/settlement_memory.gd|47|0|TICKS_PER_DAY|var days: float = float(now - int(m.get("tick", 0))) / float(WorldState.TICKS_PER_DAY)
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/sim_runner.gd|4|10|TICKS_PER_HOUR|const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|108|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|108|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|235|0|current_tick|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|245|0|current_tick|if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|253|0|current_tick|if state.world.current_tick % NEAR_CADENCE == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|294|4|current_tick|if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|294|0|current_tick|if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|299|0|current_tick|if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
+d_not_time|increment：tick 前進 1 步＝時間軸本身的定義|scripts/simulation/sim_runner.gd|336|1|current_tick|state.world.current_tick += 1
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|340|4|current_tick|if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/sim_runner.gd|340|0|current_tick|if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/strategic_ai_system.gd|3|10|TICKS_PER_HOUR|const STRATEGIC_INTERVAL:      int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/simulation/strategic_ai_system.gd|4|30|TICKS_PER_HOUR|const ALLIANCE_CHECK_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/strategic_ai_system.gd|27|0|current_tick|if state.world.current_tick % STRATEGIC_INTERVAL != 0: return
+d_not_time|zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量|scripts/simulation/strategic_ai_system.gd|37|0|current_tick|if state.world.current_tick % ALLIANCE_CHECK_INTERVAL == 0:
+d_not_time|sentinel_default：`get(k, 0/-1)` 的預設值是哨兵|scripts/simulation/threat_assessment.gd|24|1|current_tick|if int(BeliefSystem.best_estimate(state, self_team.team_id, other.team_id).get("last_tick", -1)) != state.world.current_tick:
+d_not_time|increment：+1 是「下一個」不是一段時間|scripts/ui/observer_event_text.gd|16|1|TICKS_PER_MONTH|var month: int = msg.origin_tick / WorldState.TICKS_PER_MONTH + 1
+d_not_time|increment：+1 是「下一個」不是一段時間|scripts/ui/observer_event_text.gd|17|1|TICKS_PER_MONTH|var day: int = (msg.origin_tick % WorldState.TICKS_PER_MONTH) / WorldState.TICKS_PER_DAY + 1
+d_not_time|derived_mult：`N * TICKS_PER_*` 已隨根縮放|scripts/ui/observer_main.gd|79|6|TICKS_PER_MONTH|_end_tick = 6 * WorldState.TICKS_PER_MONTH
+d_not_time|increment：+1 是「下一個」不是一段時間|scripts/ui/observer_main.gd|254|1|TICKS_PER_MONTH|var month: int = tick / WorldState.TICKS_PER_MONTH + 1
+d_not_time|increment：+1 是「下一個」不是一段時間|scripts/ui/observer_main.gd|255|1|TICKS_PER_MONTH|var day: int = (tick % WorldState.TICKS_PER_MONTH) / WorldState.TICKS_PER_DAY + 1
+b_defer|24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2|scripts/ui/sim_bridge.gd|7|24|TICKS_PER_TURN|const TICKS_PER_TURN: int = 24
+c_whitelist|曆法結構：24＝一天幾小時 —— ★是時間量，但不隨 tick 縮放（根改了它仍須是 24）|scripts/ui/text_ui_main.gd|760|24|TICKS_PER_HOUR|var hour: int  = (tick / WorldState.TICKS_PER_HOUR) % 24
+c_whitelist|曆法結構：30＝一月幾天 —— ★是時間量，但不隨 tick 縮放|scripts/ui/text_ui_main.gd|761|30|TICKS_PER_DAY|var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
+c_whitelist|曆法結構：30＝一月幾天 —— ★是時間量，但不隨 tick 縮放|scripts/ui/text_ui_main.gd|761|1|TICKS_PER_DAY|var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
+c_whitelist|曆法結構：12＝一年幾月|scripts/ui/text_ui_main.gd|763|12|TICKS_PER_MONTH|var month: int = (tick / WorldState.TICKS_PER_MONTH) % 12
+c_whitelist|★播放速率：每【真實秒】渲染幾個 world tick —— 不是世界時間，不隨小時縮放|scripts/ui/turn_controls.gd|6|4|TICKS_PER_SECOND|const TICKS_PER_SECOND: int = 4   # TEST VALUE — world ticks rendered per second

@@ -7,6 +7,9 @@ const SEASON_NAMES: Array = ["春", "夏", "秋", "冬"]
 var _last_season: int = -1   # diff print：季節變化才印
 
 func tick_all(state: WorldState) -> void:
+	# ★S1b 白名單(c)：4 ＝【一年幾季】的曆法結構 ——
+	#   ★分子已由 SEASON_LENGTH 導出（會隨根縮放），★★這個 4 不隨小時縮放：
+	#   一年永遠四季，tick 密度改了它仍須是 4。
 	var season: int  = (state.world.current_tick / SEASON_LENGTH) % 4
 	var base: float  = SEASON_BASE[season]
 	for tile_id in state.world.tiles:

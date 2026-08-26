@@ -1,7 +1,11 @@
 class_name WorldState
 
 # ── 時間基底 ──────────────────────────────────────────────────
+# ★S1b 白名單(c)：★這是【根常數本身】——`TimeScale.hours()/days()` 由它導出，
+#   改成 hours() 會變成循環定義。★★不是「特例」，是【被導出的那一端】。
 const TICKS_PER_DAY:    int   = 240          # 10 ticks/hour
+# ★S1b 白名單(c)：24 ＝【一天幾小時】的曆法結構，★不隨 tick 縮放 ——
+#   根從 240 改成別的值時，這個 24 必須【維持 24】，否則「小時」就不是小時了。
 const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 10
 const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 7200 ticks
 const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 21600 ticks
