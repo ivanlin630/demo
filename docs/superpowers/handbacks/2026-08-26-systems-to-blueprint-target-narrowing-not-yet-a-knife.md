@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★進度報:tiles 探針【也是否定的】(tile 數 3.84× 而 spike 中位數不單調,tile 最多那階反而最低)⇒既不∝teams 也不∝tiles;★★靶在收窄但【還沒定】,我不會提前給你刀單;★★★而巢狀拆解指出真正缺的是【決策次數】這個分母——成本可能 ∝ 每小時做幾次 rank_scored,而那不隨隊數變因為人只是被重新分組
 ---
