@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-arc-slice0-baseline
 topic: "分母交了：五階梯(35~143隊)baseline全在16~31us級距,50+隊早就到了；★但真正的成本是一顆spike——只在near.faction_ai,每階梯測試窗內只出現1次,絕對成本隨隊數次線性成長(4.09倍隊數只漲2.79倍,不像N²)；★誠實caveat=不知道是不是週期性重來"
 ---
