@@ -25,11 +25,13 @@ func _run() -> void:
 		var n: int = _run_arm(cfg, days, sd)
 		var has_key: bool = Probe.counts.has("unified.rank.calls")
 		var has_smp: bool = Probe.samples.has("unified.rank.call_us")
+		var has_mkf: bool = Probe.samples.has("mkfill.order") or Probe.counts.has("mkfill.attempt.buy")
 		lines.append("Probe.enabled=%-5s phase_timing=%-5s ⇒ calls key 存在=%-5s 值=%-6s｜★call_us 樣本存在=%-5s 筆數=%s（跑了 %d tick）" % [
 			str(bool(arm[0])), str(bool(arm[1])), str(has_key),
 			str(int(Probe.counts.get("unified.rank.calls", -1))) if has_key else "—",
 			str(has_smp),
 			str((Probe.samples["unified.rank.call_us"] as Array).size()) if has_smp else "（key 不存在）", n])
+		lines.append("      ★mkfill.*（市場撮合 tap）key 存在=%s" % str(has_mkf))
 		Probe.enabled = false
 		SimRunner.phase_timing = false
 	lines.append("★判準①：enabled=false 那列必須是【key 不存在】——★不是「值為 0」。")

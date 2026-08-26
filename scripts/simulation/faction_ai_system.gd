@@ -3521,9 +3521,15 @@ func _harvest_market_known(state: WorldState, team: TeamData) -> void:
 			var _miss: Array = []
 			for _k in _truth:
 				if not _used.has(_k): _miss.append(int(_k))
+			# ★★★QA 建議：`stale_extra_in_npc` 才是【stale 方向】——NPC 以為有、truth 已經沒有。
+			#   ★而它是真的可能：`team_known.erase()`（world_state.gd）會讓 truth【變少】。
+			#   ★★`same` 已對稱抓得到「有沒有不一致」，這一欄補的是【出事時分得出方向】。
+			var _extra: Array = []
+			for _k2 in _used:
+				if not _truth.has(_k2): _extra.append(int(_k2))
 			_mk_verify_rows.append({"tick": state.world.current_tick, "team": team.team_id,
 				"path": _mk_path, "same": _used.hash() == _truth.hash(),
-				"npc_used_n": _used.size(), "truth_n": _truth.size(), "missing_in_npc": _miss})
+				"npc_used_n": _used.size(), "truth_n": _truth.size(), "missing_in_npc": _miss, "stale_extra_in_npc": _extra})
 			return
 		return
 	if Probe.enabled: Probe.bump("mk.cache_miss." + _mk_path)

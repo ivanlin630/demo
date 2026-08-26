@@ -1,8 +1,8 @@
-{"missing_in_npc":[],"npc_used_n":3,"path":"rank_survival","same":true,"team":9,"tick":100,"truth_n":3}
-{"missing_in_npc":[],"npc_used_n":3,"path":"rank_survival","same":true,"team":9,"tick":490,"truth_n":3}
-{"missing_in_npc":[],"npc_used_n":2,"path":"rank_survival","same":true,"team":7,"tick":730,"truth_n":2}
-{"missing_in_npc":[],"npc_used_n":2,"path":"rank_scored","same":true,"team":8,"tick":1030,"truth_n":2}
-{"missing_in_npc":[],"npc_used_n":2,"path":"rank_scored","same":true,"team":11,"tick":1280,"truth_n":2}
-{"missing_in_npc":[],"npc_used_n":1,"path":"rank_scored","same":true,"team":1,"tick":1620,"truth_n":1}
-{"missing_in_npc":[],"npc_used_n":1,"path":"rank_scored","same":true,"team":10,"tick":1960,"truth_n":1}
-{"missing_in_npc":[],"npc_used_n":2,"path":"rank_scored","same":true,"team":4,"tick":2280,"truth_n":2}
+{"missing_in_npc":[],"npc_used_n":3,"path":"rank_survival","same":true,"stale_extra_in_npc":[],"team":9,"tick":100,"truth_n":3}
+{"missing_in_npc":[],"npc_used_n":3,"path":"rank_survival","same":true,"stale_extra_in_npc":[],"team":9,"tick":490,"truth_n":3}
+{"missing_in_npc":[],"npc_used_n":2,"path":"rank_survival","same":true,"stale_extra_in_npc":[],"team":7,"tick":730,"truth_n":2}
+{"missing_in_npc":[],"npc_used_n":2,"path":"rank_scored","same":true,"stale_extra_in_npc":[],"team":8,"tick":1030,"truth_n":2}
+{"missing_in_npc":[],"npc_used_n":2,"path":"rank_scored","same":true,"stale_extra_in_npc":[],"team":11,"tick":1280,"truth_n":2}
+{"missing_in_npc":[],"npc_used_n":1,"path":"rank_scored","same":true,"stale_extra_in_npc":[],"team":1,"tick":1620,"truth_n":1}
+{"missing_in_npc":[],"npc_used_n":1,"path":"rank_scored","same":true,"stale_extra_in_npc":[],"team":10,"tick":1960,"truth_n":1}
+{"missing_in_npc":[],"npc_used_n":2,"path":"rank_scored","same":true,"stale_extra_in_npc":[],"team":4,"tick":2280,"truth_n":2}

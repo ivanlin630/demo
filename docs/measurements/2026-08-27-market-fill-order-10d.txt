@@ -1,0 +1,8 @@
+[peaceful_economy seed 1337 days 10]
+★★母體：撮合被走到 8 次（buy 2 ＋ sell 6）｜★成交樣本 0 筆（cap 20000）
+★有撮合但零成交樣本 ⇒ 每次都在成交前 bail —— ★★把原因印出來，「0」才不是一句空話：
+      buy_no_stock                             = 1
+      buy_no_want                              = 1
+      sell_no_surplus                          = 6
+   ★★★而 tap 本身是接上的（陽性對照：Probe.enabled=false 時 key 不存在、開了就有 8 次）
+   ⇒ ★這張床上【市場撮合幾乎不發生】⇒ ★★「誰先誰後」在這裡答不了，要換一張真的有撮合的床。
