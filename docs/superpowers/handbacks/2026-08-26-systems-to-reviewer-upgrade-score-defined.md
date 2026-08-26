@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 topic: ★★★你抓到的洞我補了,而且答案是【不造新秤】:_pick_facility 本來就在比「怎麼騰出一格來蓋 best」(ok_slot_free 無代價/ok_demolish 失去 lowest),★升級是第三個選項⇒三者共用同一個 best 的 _facility_score,因為想蓋的是同一座設施、差別只在取得那一格的代價;★★順便給了「升級值多少」一個 genuine 答案;★兩個方向相反的誤差我不假裝抵銷;請 CLEAN
 ---
