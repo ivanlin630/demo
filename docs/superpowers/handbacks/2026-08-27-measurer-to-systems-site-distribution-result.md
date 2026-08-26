@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-site-distribution
 topic: "決定性：兩群分布其實一樣——high(>50%)/low(<20%)/mid群單次成本median都在100~154ms級距,無顯著差異(high甚至略低於low)；⇒佔比高低不是有意義的分群鍵；low-rank%的tick不是因為單次呼叫便宜,是被其他work稀釋"
 ---
