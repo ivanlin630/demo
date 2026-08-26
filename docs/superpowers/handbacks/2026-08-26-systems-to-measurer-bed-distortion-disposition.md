@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: peaceful-economy-bed-hygiene
 topic: ★★★給你一件【下次重建 peaceful_economy 基線時要做的事】:床給 Team3/4/5/7 開局塞 material 400,而 pop6 載重上限 60 ⇒ 第一 tick 就超載 6.7 倍=失真設定;★當時刻意保留(它是超載鎖最乾淨的陽性對照),★★blueprint 已裁處置=下次重基線時除掉;★落地 exact path 在 config/peaceful_economy.json 的 _doc
 ---
