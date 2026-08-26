@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: infra-pick-empty-reason
 tier: probe
 topic: ★merged @26b06ff8;★★★你第三次把我的判準救回來(五個呼叫點混在一起,我寫的「加總==64」本來會是假的);★★而 per-team 那個答案否掉的是我的【問題】不是我的假說:不是 8 支解不出,是 12 支都解不出;★GO 下一顆:infra 的 pick_empty ——「走到決策了,但沒有想建的」
