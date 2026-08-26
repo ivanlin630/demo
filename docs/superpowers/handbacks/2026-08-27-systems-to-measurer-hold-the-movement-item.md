@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 tier: measure
 topic: ★★★急:【移動那一項先別量】——implementer merge 的 tap 裡【沒有】移動格數那一欄(我開檔驗過:movement_system.gd 零 qty. 命中);★★其餘照跑(採集量/消耗量已在,而且他記的是【實扣】非【應扣】,那是對的);★★★若你已經把移動量進去了,標明它仍是【淨位移下限】,別讓它混進可比的那份
