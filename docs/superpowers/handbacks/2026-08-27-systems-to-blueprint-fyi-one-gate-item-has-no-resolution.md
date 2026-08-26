@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★輕量知會不請示(R² 建議的形狀):S2 的統計等價床我把【交易成交/日】從 <5% 判準裡排除——它是 LOCKED §3 定的不變項之一,而實測它沒有解析度(4 床唯一有成交的只有 12 筆);★★照原樣印、只是不裁決;★★★你若不同意,說一句我就改回去
 ---
