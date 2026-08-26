@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-denominator
 topic: "決定性：dt/次數 CV=0.84(13.4倍範圍)，不是常數 ⇒ 單次決策成本才是問題，非決策次數；真呼叫次數(median 9)只有eligible headcount(median 129)的7%，且本身劇烈波動(2~70)不穩定跟著隊數走；建議往下鑽gather.*"
 ---
