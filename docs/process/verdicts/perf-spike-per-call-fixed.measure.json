@@ -1,0 +1,33 @@
+{
+  "slice": "perf-spike-per-call",
+  "ticket": "systems訂正票2026-08-26:修分子分母同母體(用FactionAISystem._fai_ph['unified.rank']同tick計時,非整tick dt)再算dt_per_call",
+  "measured_at_commit": "main（床用FactionAISystem._fai_ph靜態讀取,同一輪同時開phase_timing+Probe.enabled,零production再改動）",
+  "★樣本": "800tick完整跑完(未被砍)，77筆checkpoint記錄，75筆有效(calls>0)，perf_scale(現況)/seed1337/HD-only",
+
+  "★★★修正後結果": {
+    "dt_per_call_true中位數us": 220795,
+    "dt_per_call_true平均us": 230014,
+    "CV(變異係數)": 0.435,
+    "範圍us": "16921 ~ 560060（33倍）",
+    "calls中位數": 9,
+    "rank_us(unified.rank自己計時)中位數": 2117569,
+    "rank_us佔整tick_dt的比例中位數": "43.7%"
+  },
+
+  "★★★關鍵新發現：unified.rank只佔整tick的43.7%": "另外56.3%的spike成本發生在unified.rank之外——可能是loop1.factions其他子階段(member_snap/update_goals/infra/diplo/betray)、或迴圈本身的迭代開銷、或phase_timing完全沒接到的部分。修正前的0.97s/次是被這部分『污染』放大的假象；真正單次rank_scored()成本是0.22s，仍然不小，但沒有之前想的那麼誇張。",
+
+  "★對照修正前(錯誤分子)": {
+    "修正前dt_per_call": "median 496332us, CV=0.838",
+    "修正後dt_per_call_true": "median 220795us, CV=0.435",
+    "差異": "修正後中位數降56%、CV降48%——同你預期『可能影響不大但未驗』，實測影響顯著，這條法沒白立"
+  },
+
+  "★單次呼叫成本分布(top-1集中度)——需新production tap，本輪拿不到": {
+    "缺口": "現有機制(_fai_pht)只累加總量，沒有記錄『每一次』unified.rank呼叫各花多少——要拿到top-1佔比，需要在faction_ai_system.gd:2561那個_fai_pht呼叫點旁加一個bump_sample(記每次呼叫的us)，本輪零production code改動做不到",
+    "建議tap": "faction_ai_system.gd:2561附近: if Probe.enabled: Probe.bump_sample(\"unified.rank.call_us\", {\"us\": (單次elapsed), \"team\": team.team_id}, cap建議>=100)"
+  },
+
+  "landed_paths": {
+    "checkpoint_raw": "docs/measurements/perf-ratiofixed-800t.txt.checkpoint.perf_scale.txt"
+  }
+}
