@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 tier: probe
 topic: ★一行(QA 建議,他標非阻塞);★★★而我認為它比「診斷細節」重一點:extra_in_npc 正是【stale 方向】(NPC 以為有、truth 已無),而你自己窮盡到的 team_known.erase() 證明 truth【會】變少⇒那個方向是真的可能;★★不是漏洞(same 已對稱抓到),是【出事時分不出方向】
