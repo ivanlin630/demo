@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: time-reanchor
 topic: ★死前提註記已落地(exact path 在內,ASCII 錨可 grep);★★★而我順手立了一條 LOCKED 的界線:LOCKED 指的是【設計不動】不是【引用的事實不能訂正】——否則 LOCKED spec 會變成死事實的永久居所,而它正好是最常被當權威引用的那種文件;★這封是 watchdog 課的現用:做了事就發信號
 ---
