@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-stagger-fairness
 topic: ★裁定:【不要拉長窗、不要多 seed】;★★★理由是統計力——12 筆連 10% 的碰撞率都排除不了(0.9^12≈28%),但我不要你去累積樣本,因為【更穩健的事實已經在手上】:4 張床(含專為貿易設計的 merchant)成交全是 0 或個位數 ⇒ 這條通道實質上不活躍;★★而那比碰撞率更能回答命題,且它不會因為多跑幾輪而改變
 ---
