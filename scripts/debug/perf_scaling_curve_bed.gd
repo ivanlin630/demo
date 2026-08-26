@@ -146,20 +146,57 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 			cp.store_line("=== checkpoint start：config跑法見PERF_LADDER/PERF_TICKS env，teams=%d ===" % teams_start)
 			cp.flush()
 	var last_rank_calls: int = 0   # systems票(perf-spike-denominator)：unified.rank.calls是累計counter,取逐tick delta
+	# systems票2026-08-27(perf-gather-cacheability)：每隊上次『真的呼叫gather()』時的team_market_known指紋
+	var last_market_fp: Dictionary = {}   # team_id -> fingerprint String
+	var pair_same: int = 0
+	var pair_diff: int = 0
+	var pair_same_burst: int = 0   # burst tick(ambition/order_fired>50)子群
+	var pair_diff_burst: int = 0
+	var pair_same_nonburst: int = 0
+	var pair_diff_nonburst: int = 0
 	for tick in range(ticks):
 		# ★systems票2026-08-27(perf-spike-coverage②)：對齊假說——比對tick前後ambition/order_eval_next_tick
 		#   有沒有被推進，即知道『真的執行了』幾次(非headcount/非eligible)，讀WorldState非新tap。
 		var pre_ambition: Dictionary = {}
 		var pre_order: Dictionary = {}
+		var pre_decision: Dictionary = {}   # systems票2026-08-27(perf-gather-cacheability)：decision_eval_next_tick pre/post=真的呼叫gather()的隊(經unified.rank那條路)
 		for tid0 in state.teams:
 			var t0team: TeamData = state.teams[tid0]
 			pre_ambition[tid0] = t0team.ambition_eval_next_tick
 			pre_order[tid0] = t0team.order_eval_next_tick
+			pre_decision[tid0] = t0team.decision_eval_next_tick
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(state, no_player)
 		var dt: int = Time.get_ticks_usec() - t0
 		dts.append(dt)
 		n_ticks_ran += 1
+		# systems票2026-08-27(perf-gather-cacheability)：每tick(非只spike)掃一次——team_market_known
+		#   只被_harvest_market_known(faction_ai_system.gd:3485)寫,只在該隊gather()真的跑時才變。
+		#   用decision_eval_next_tick pre/post抓『這隊這tick真的呼叫了gather()』(經unified.rank/rank_scored那條路)，
+		#   跟上次抓到的同隊指紋比對，配對數=連續兩次真呼叫的樣本數(不是隊數不是tick數)。
+		var _burst_this_tick: bool = false
+		for tid2 in state.teams:
+			var t2team: TeamData = state.teams[tid2]
+			if pre_ambition.get(tid2, -1) != t2team.ambition_eval_next_tick \
+					or pre_order.get(tid2, -1) != t2team.order_eval_next_tick:
+				_burst_this_tick = true; break
+		for tid3 in state.teams:
+			if not pre_decision.has(tid3): continue
+			var t3team: TeamData = state.teams[tid3]
+			if t3team.decision_eval_next_tick == int(pre_decision[tid3]): continue   # 這隊這tick沒真呼叫
+			var known3: Dictionary = state.team_market_known.get(tid3, {})
+			var keys3: Array = known3.keys(); keys3.sort()
+			var fp: String = str(keys3)
+			if last_market_fp.has(tid3):
+				if last_market_fp[tid3] == fp:
+					pair_same += 1
+					if _burst_this_tick: pair_same_burst += 1
+					else: pair_same_nonburst += 1
+				else:
+					pair_diff += 1
+					if _burst_this_tick: pair_diff_burst += 1
+					else: pair_diff_nonburst += 1
+			last_market_fp[tid3] = fp
 		if want_phase:
 			for ph in runner._ph:
 				phase_sum[ph] = int(phase_sum.get(ph, 0)) + int(runner._ph[ph])
@@ -195,10 +232,10 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 				var t1team: TeamData = state.teams[tid1]
 				if t1team.ambition_eval_next_tick != int(pre_ambition[tid1]): ambition_fired += 1
 				if t1team.order_eval_next_tick != int(pre_order[tid1]): order_fired += 1
-			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d rank_calls=%d rank_us=%d dt_per_call_true=%.1f ambition_fired=%d order_fired=%d" % [
+			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d faction_deciders=%d solo_candidates=%d rank_calls=%d rank_us=%d dt_per_call_true=%.1f ambition_fired=%d order_fired=%d ★MARKETFP_cumulative_same=%d diff=%d(burst same=%d diff=%d/nonburst same=%d diff=%d)" % [
 				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size(), faction_deciders, solo_candidates,
 				rank_calls_delta, rank_us_this_tick, (float(rank_us_this_tick) / maxf(float(rank_calls_delta), 1.0)),
-				ambition_fired, order_fired])
+				ambition_fired, order_fired, pair_same, pair_diff, pair_same_burst, pair_diff_burst, pair_same_nonburst, pair_diff_nonburst])
 			# ★systems票2026-08-26(perf-spike-coverage)：dump完整_fai_ph字典(非[FaiPhase]那個只印top-8)，
 			#   用來算Σ(頂層label) vs dt做覆蓋率驗證。只在真spike(dt>1s)dump，避免每個tick%500都寫一坨。
 			if dt > 1_000_000:
