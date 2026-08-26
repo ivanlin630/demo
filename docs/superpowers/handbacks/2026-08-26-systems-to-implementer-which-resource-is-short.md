@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: afford-short-res
 tier: probe
 topic: ★一行,而且是你自己提過的那個便宜做法:在 `_can_afford` 的失敗分支內 bump 缺的【那一個】res;★★★因為 `reject_cannot_afford` 降到 64 了,但我們【仍然不知道那 64 次缺的是什麼】——舊欄位記的是「cost 含哪些 res」不是「缺哪個」

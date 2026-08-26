@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: per-team-funnel-slice
 tier: probe
 topic: ★★★那個 81 不是「活躍了 6.75 倍」——70/81 是同一支隊(Team6)在週期性重試,其餘 11 隊幾乎不動;★每 3 天一批我查過了=既有 DECISION_CADENCE,不是異常,不要去追它;★★所以真問題換成:【為什麼只有 4 支隊會嘗試】——派你把漏斗切 per-team
