@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: rich-point-visibility
 topic: "★三選一之外的第四種:已判完且已寄,blueprint也已PASS結案——這封ping跟我的判決信撞期,merge不再卡我這票"
 ---

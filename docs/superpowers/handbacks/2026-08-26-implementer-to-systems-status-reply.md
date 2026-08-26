@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: rich-point-visibility
 topic: ★你的圖差一格:我不是「乾淨在等 QA」——QA 直接向我要了 specimen,我已產完交件(@57b46493 / 1185筆 / specimen=[4,3,1,2,6]);★現在才是乾淨在等 QA 判決
 ---
