@@ -26,6 +26,13 @@ const WILD_HORSE_PLAINS_CHANCE: float = 0.01
 const WILD_HORSE_FOREST_CHANCE: float = 0.005
 const HERB_FOREST_CHANCE: float = 0.30      # TEST VALUE
 const HERB_RICH_CHANCE: float = 0.05        # 藥草林（先 roll rich 再 roll 一般）TEST VALUE
+# ★老熟林（forest 高產材料點）：形狀比照上面兩層 herb roll。
+#   ★量級錨【算出來的，不是挑的】：herb rich 中值 15 ÷ normal 中值 4 ＝ 3.75×
+#     ⇒ forest material normal `[80,220]` 中值 150 × 3.75 ＝ 562.5 ⇒ 區間取 [450,675]（中值 562.5）。
+#   ★★用同一個比例而不是同一個數字：兩者量綱不同（株數 vs 木材量），能搬的是【倍率】。
+const OLD_GROWTH_CHANCE: float = 0.05     # TEST VALUE — 比照 HERB_RICH_CHANCE（同為「稀有高產點」）
+const OLD_GROWTH_MATERIAL_MIN: int = 450    # TEST VALUE — 見上：normal 中值 ×3.75 的區間下界
+const OLD_GROWTH_MATERIAL_MAX: int = 675    # TEST VALUE — 同上，上界
 const WILD_HORSE_RICH_CHANCE: float = 0.03  # 野馬草原 TEST VALUE
 const WILD_GAME_PLAINS_CHANCE: float = 0.20   # TEST VALUE — 平原帶獵物機率
 const WILD_GAME_FOREST_CHANCE: float = 0.30   # TEST VALUE — 森林獵物更多
@@ -98,6 +105,13 @@ func _apply_resources(tile, rng: RandomNumberGenerator, mult: float = 1.0) -> vo
 			tile.resources["herb"] = rng.randi_range(10, 20)
 		elif rng.randf() < HERB_FOREST_CHANCE:
 			tile.resources["herb"] = rng.randi_range(2, 6)
+	# 老熟林（高產點）：森林 5% 材料覆寫為 450-675。同上計入 resource_cap（月再生上限 = 初始值）
+	# ★★★`OLD_GROWTH_CHANCE > 0.0 and` 這個短路是【必須的】，不是防呆：
+	#   `rng.randf() < 0.0` 仍然【消耗一次 RNG】（只是恆假）⇒ seeded 序列整條往後平移
+	#   ⇒ 下游每一格的生成都會變 ⇒ ★「比例設 0」就不再等於「沒有這張票」，
+	#     而驗收③（對照組 fp 逐位元相同）正是靠那個等式。
+	if tile.terrain == "forest" and OLD_GROWTH_CHANCE > 0.0 and rng.randf() < OLD_GROWTH_CHANCE:
+		tile.resources["material"] = int(rng.randi_range(OLD_GROWTH_MATERIAL_MIN, OLD_GROWTH_MATERIAL_MAX) * mult)
 	tile.resource_cap = tile.resources.duplicate()
 	# 野馬：平原 1% 1-2 隻 / 森林 0.5% 1 隻（活物不被 generic collect 採集，再生由 HarvestSystem 處理）
 	# 野馬草原（高產點）：平原 3% 帶 4-8，resource_cap["wild_horses"]=8 標記富點（僅供再生 cap 判定）
