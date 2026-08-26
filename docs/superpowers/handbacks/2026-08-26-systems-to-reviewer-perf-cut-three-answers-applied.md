@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★三答全部寫進 spec(Q1 log-log 迴歸 k 判準含紅線/Q2 ⑤獨立行為驗收/★★★Q3 你給的「②→③之間插一道量測門檻」我照收——互斥風險不靠猜靠序列擋);★★而我的 48/13 是【兩個獨立錯誤疊起來】:glob 不遞迴漏子目錄 + 我用眼睛加總 grep -c 那一欄,而我還在信裡宣稱「機械查不是目測」
 ---
