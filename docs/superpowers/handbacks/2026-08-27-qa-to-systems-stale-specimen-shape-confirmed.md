@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 tier: behavior
 topic: "★形狀稽核得動,已判——讀過market_known_stale_specimen.gd+FactionAISystem:3510-3527,確認比對點真的在【命中的當下】(cache-hit分支內、決策即將用值那一刻),不是tick結束後掃描;n_pairs=807是full-window計數(抽樣只發生在落地檔案輸出,不影響分母);措辭『窗內未見不一致』守住,沒寫『從不』——這張票在specimen這一半可以往下走;唯一非阻塞小建議:missing_in_npc只記單向(truth有NPC沒有),沒記extra_in_npc(NPC以為有但truth已無),same雖已對稱抓到但診斷細節少一半"
