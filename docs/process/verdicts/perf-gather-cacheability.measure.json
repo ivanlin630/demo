@@ -1,0 +1,26 @@
+{
+  "slice": "perf-gather-cacheability",
+  "ticket": "systems票2026-08-27:blueprint准的②髒旗快取前提驗證——同一隊連續兩次gather讀到的世界事實有沒有變",
+  "measured_at_commit": "main（床用既有team.decision_eval_next_tick pre/post比對抓『這隊這tick真的呼叫了gather()(經unified.rank/rank_scored那條路)』，再讀既有state.team_market_known做指紋比對，零新production tap）",
+  "★樣本": "500tick跑完(未被砍)，母體=同一隊連續兩次真呼叫gather()的配對數(不是隊數不是tick數)",
+
+  "★★★★決定性結果：多數時候沒變": {
+    "配對總數": 666,
+    "same(沒變)": 628,
+    "diff(變了)": 38,
+    "same比例": "94.3%",
+    "判定": "依票裡寫死的判準⇒【多數時候沒變】⇒②開票(髒旗快取)"
+  },
+
+  "★★分群(burst vs non-burst)：變化100%集中在burst": {
+    "burst tick(ambition_fired或order_fired>0那tick)": {"same": 587, "diff": 38, "same比例": "93.9%"},
+    "non-burst tick": {"same": 41, "diff": 0, "same比例": "100%"},
+    "判讀": "38筆『變了』全部發生在burst tick(order/ambition cadence觸發那些tick)，non-burst tick是0變化——這符合機制:_harvest_market_known(faction_ai_system.gd:3463-3485)除了vision-radius固定窗掃描，還有②relay harvest讀team_known訊息(order/outpost_built事件)，order cadence觸發時才會有新訊息進來更新已知市集，這正是變化的來源，不是隨機噪聲"
+  },
+
+  "★方法備註": "『真的呼叫gather()』用team.decision_eval_next_tick pre/post偵測，只覆蓋unified.rank(rank_scored)那條路徑，不含rank_survival(loop3.survival)路徑——後者的呼叫沒被本輪計入配對母體，是範圍限制非造假",
+
+  "landed_paths": {
+    "checkpoint_raw": "docs/measurements/perf-marketfp-500t.txt.checkpoint.perf_scale.txt"
+  }
+}
