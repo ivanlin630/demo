@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 topic: R②判決:issues(小)——Q1窮盡是可行的,但要重新劃scope(讀`_harvest_market_known`本體非整個gather());Q2寫法不算太硬(fp變被接受只求解釋);Q3不算開太早
 ---
