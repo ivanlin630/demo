@@ -72,12 +72,28 @@ func _run() -> void:
 			if d < best: best = d
 		dist0[oid] = best
 
-	# ===== ② 跑 N 天，再看那幾格 =====
+	# ===== ② 跑 N 天，逐 tick 累加【真實汲取量】 =====
+	# ★★★判準訂正（implementer 2026-08-26 實測打回自己的第一版）：
+	#   ★第一版用「30 天後的 material 變化量 Δ」判有沒有人碰過 —— ★★那個判準是壞的。
+	#     池子是 cap-bound 且每日 regen（forest material 12/日，`resource_system.gd:130-134`），
+	#     ⇒ 只要日採 ≤ 12，池子隔天就被補回滿，★Δ 恆為 0 —— 而材料【其實一直在流進隊裡】。
+	#   ⇒ ★★Δ 分不出「沒人採」與「採得比再生慢」，而這兩件的下一步完全相反。
+	#   ★正確做法：逐 tick 比前後值，把【每一次下降】加起來 ＝ 真實累計汲取量（regen 只會讓值上升，不入帳）。
 	var no_player := Vector2i(-1, -1)
+	var drawn: Dictionary = {}     # tile_id -> 累計汲取量
+	var prev: Dictionary = {}
+	for oid_p in og_ids:
+		prev[oid_p] = float(state.world.tiles[oid_p].resources.get("material", 0))
+		drawn[oid_p] = 0.0
 	for _t in range(days * WorldState.TICKS_PER_DAY):
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
+		for oid_t in og_ids:
+			var cur_m: float = float(state.world.tiles[oid_t].resources.get("material", 0))
+			if cur_m < float(prev[oid_t]):
+				drawn[oid_t] = float(drawn[oid_t]) + (float(prev[oid_t]) - cur_m)
+			prev[oid_t] = cur_m
 		if state.teams.is_empty(): break
 
 	if og_ids.is_empty():
@@ -91,13 +107,15 @@ func _run() -> void:
 			var m0: float = float(og_init[oid2])
 			var m1: float = float(tt.resources.get("material", 0))
 			var delta: float = m1 - m0
-			if absf(delta) > 0.001: touched += 1
+			if float(drawn[oid2]) > 0.001: touched += 1   # ★用累計汲取判，不用 Δ（見上方訂正）
 			if tt.outpost_level > 0: became_outpost += 1
-			lines.append("  (%2d,%2d) material %4.0f → %4.0f（Δ %+.0f）｜開場離最近據點 %d｜%d 天後 outpost_level=%d camp_level=%d" % [
-				tt.tile_pos.x, tt.tile_pos.y, m0, m1, delta, int(dist0[oid2]),
+			lines.append("  (%2d,%2d) material %4.0f → %4.0f（Δ %+.0f）｜★累計汲取 %6.1f｜開場離最近據點 %d｜%d 天後 outpost_level=%d camp_level=%d" % [
+				tt.tile_pos.x, tt.tile_pos.y, m0, m1, delta, float(drawn[oid2]), int(dist0[oid2]),
 				days, tt.outpost_level, tt.camp_level])
-		lines.append("  ⇒ ★material 有變動的 = %d / %d 座｜★★上面長出據點的 = %d 座" % [
-			touched, og_ids.size(), became_outpost])
+		var drawn_sum: float = 0.0
+		for oid3 in og_ids: drawn_sum += float(drawn[oid3])
+		lines.append("  ⇒ ★★真的被採過的 = %d / %d 座｜★★★累計汲取合計 = %.1f｜上面長出據點的 = %d 座" % [
+			touched, og_ids.size(), drawn_sum, became_outpost])
 		# ★收尾等級分布：有沒有人升到 L3（★L3 才吃得到鄰格）
 		var lvl2: Dictionary = {}
 		for tid3 in state.world.tiles:
@@ -109,7 +127,7 @@ func _run() -> void:
 		for L2 in lk2: l2s.append("L%d×%d" % [int(L2), int(lvl2[L2])])
 		lines.append("  ★收尾據點等級：%s ——【L3 是鄰格採集的唯一開關】(resource_system:95-100)" % " ".join(PackedStringArray(l2s)))
 		if touched == 0:
-			lines.append("  ★★★全部一動不動 ⇒ **老熟林生出來了、沒有任何一隊碰得到** ——")
+			lines.append("  ★★★累計汲取【真的是 0】⇒ **老熟林生出來了、沒有任何一隊碰得到** ——")
 			lines.append("     這不是量級不夠（660 材料就擺在那），是【接不上】。")
 
 	var text: String = "\n".join(PackedStringArray(lines))

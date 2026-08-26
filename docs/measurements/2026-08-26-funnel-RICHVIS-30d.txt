@@ -1,0 +1,265 @@
+[peaceful_economy day 30 seed 1337] teams=12
+--- ①段 candidate → winner（★每格都有分母）---
+  funnel.cand.emitted                = 286
+  funnel.decide.total                = 305
+  funnel.decide.winner_cand          = 43
+  funnel.decide.winner_static        = 262
+  ⇒ candidate 贏得 argmax 的比例 = 14.1%（43 / 305）
+  ★贏不了時排第幾（bucket）：
+      funnel.cand.best_rank.0_won            = 43
+      funnel.cand.best_rank.1_2              = 5
+      funnel.cand.best_rank.3_5              = 22
+      funnel.cand.best_rank.6plus            = 19
+      （四桶合計 = 89 ＝ 有 candidate 參與的決策次數）
+      funnel.cand.by_goal.maintain_material  = 41
+      funnel.cand.by_goal.maintain_tools     = 38
+      funnel.cand.by_goal.maintain_weapons   = 41
+      funnel.cand.by_goal.build_workshop     = 32
+      funnel.cand.by_goal.build_apothecary   = 24
+      funnel.cand.by_goal.build_mint         = 10
+      funnel.cand.by_goal.build_stable       = 41
+      funnel.cand.by_goal.maintain_food      = 58
+      funnel.cand.by_goal.build_farming      = 1
+--- ②段 delegate 路由（★對帳：四分支相加 == entry）---
+  funnel.delegate.branch_convoy      = 0
+  funnel.delegate.branch_build       = 81
+  funnel.delegate.branch_facility    = 0
+  funnel.delegate.branch_generic     = 0
+  delegate.entry（分母）                 = 81
+  ⇒ ★對帳：四分支合計 81 vs entry 81 ⇒ ✅一致
+  各分支結果：
+      delegate.build_ok                      = 0
+      delegate.build_fail                    = 81
+      funnel.delegate.facility_ok            = 0
+      funnel.delegate.facility_fail          = 0
+      funnel.delegate.generic_ok             = 0
+      funnel.delegate.generic_fail           = 0
+      funnel.delegate.generic_drop_no_advisor = 0
+--- ★非零證據（判準③）---
+  ★以下 counter 在本輪為 0（16 顆）——★兩種可能，這裡不替它選：
+      funnel.delegate.branch_convoy
+      funnel.delegate.branch_facility
+      funnel.delegate.branch_generic
+      delegate.build_ok
+      funnel.delegate.facility_ok
+      funnel.delegate.facility_fail
+      funnel.delegate.generic_ok
+      funnel.delegate.generic_fail
+      funnel.delegate.generic_drop_no_advisor
+      funnel.build_gate.busy_subteam
+      funnel.build_gate.tile_occupied
+      funnel.build_gate.no_advisor
+      funnel.build_gate.pop
+      funnel.build_gate.food_bridge
+      funnel.build_gate.subteam_dispatch
+      funnel.build_gate.dispatched
+  (a) 掛錯位置（那段 code 有跑但 counter 沒接到）
+  (b) 那條路在這張床上不可達（例：無 convoy 需求／無 facility 委派）
+  ★分辨法：看它【同段的分母】—— 分母非零而它為 0 ⇒ 偏向 (b)；分母也是 0 ⇒ 先查 (a)
+--- ③④段 build dispatch 的七道閘（★對帳：七閘＋成功 == attempt）---
+  funnel.build_gate.busy_subteam           = 0
+  funnel.build_gate.tile_occupied          = 0
+  funnel.build_gate.cost                   = 81
+  funnel.build_gate.no_advisor             = 0
+  funnel.build_gate.pop                    = 0
+  funnel.build_gate.food_bridge            = 0
+  funnel.build_gate.subteam_dispatch       = 0
+  funnel.build_gate.dispatched             = 0
+      funnel.build_gate.cost.material      = 81
+  dispatch_builder.attempt（分母）             = 81
+  ⇒ ★對帳：七閘＋成功 81 vs attempt 81 ⇒ ✅一致
+--- ★`tick`/`team` 欄位的實例證明（同 tick 同 team 多 candidate）---
+  樣本 286 筆 → (tick,team) 組合 88 個，其中【同組多 candidate】= 42 組
+  ★實例（原始樣本，未加工）：
+      { "tick": 10, "team": 6, "goal": "maintain_material", "label": "maintain_material:location:delegate", "target": (0, 12), "util": 0.8481 }
+      { "tick": 10, "team": 6, "goal": "maintain_tools", "label": "maintain_tools:location:delegate", "target": (0, 12), "util": 1.2721 }
+      { "tick": 10, "team": 6, "goal": "maintain_weapons", "label": "maintain_weapons:location:delegate", "target": (0, 12), "util": 1.2721 }
+      { "tick": 10, "team": 6, "goal": "build_workshop", "label": "build_workshop:location:delegate", "target": (0, 12), "util": 1.2721 }
+      { "tick": 10, "team": 6, "goal": "build_apothecary", "label": "build_apothecary:location:delegate", "target": (0, 12), "util": 1.2721 }
+      { "tick": 10, "team": 6, "goal": "build_mint", "label": "build_mint:location:delegate", "target": (0, 12), "util": 1.2721 }
+      { "tick": 10, "team": 6, "goal": "build_stable", "label": "build_stable:location:delegate", "target": (0, 12), "util": 1.2721 }
+--- ★誰在嘗試 vs 誰有料（★並排，不下結論）---
+  attempt 樣本 81 筆（cap 100，母體 counter = 81）★涵蓋 15 個不同 tick
+      Team1   嘗試  3 次｜★嘗試【當下】material avail 76–76
+      Team6   嘗試 70 次｜★嘗試【當下】material avail 0–49
+      Team9   嘗試  6 次｜★嘗試【當下】material avail 20–20
+      Team10  嘗試  2 次｜★嘗試【當下】material avail 21–24
+  ★★右欄是【嘗試當下】的公庫＋私產，不是期末存量 —— 兩者不可互換。
+--- ★時間軸：沉默從哪一段開始（逐日，四欄並排）---
+  day |  cand  build |  decide  win_cand |  deleg  br_build
+    0 |    19    13 |     18        3 |    13       13
+    1 |    12     0 |     10        2 |     0        0
+    2 |    15     0 |     11        3 |     0        0
+    3 |    17     7 |     15        3 |     7        7
+    4 |     0     0 |      9        0 |     0        0
+    5 |    13     0 |     14        3 |     0        0
+    6 |    13     7 |     12        3 |     7        7
+    7 |     0     0 |      6        0 |     0        0
+    8 |     6     0 |     10        1 |     0        0
+    9 |     8     7 |     10        2 |     7        7
+   10 |     1     0 |      7        0 |     0        0
+   11 |     2     0 |      9        0 |     0        0
+   12 |     9     7 |     10        1 |     7        7
+   13 |     1     0 |      8        0 |     0        0
+   14 |     1     0 |      8        0 |     0        0
+   15 |    19     7 |     13        3 |     7        7
+   16 |     7     0 |      9        1 |     0        0
+   17 |     7     0 |      9        1 |     0        0
+   18 |     9     7 |     10        1 |     7        7
+   19 |     3     0 |      9        2 |     0        0
+   20 |     2     0 |      9        1 |     0        0
+   21 |    10     7 |     12        2 |     7        7
+   22 |     1     1 |      6        1 |     1        1
+   23 |     9     3 |      9        2 |     1        1
+   24 |    15    10 |     12        2 |     7        7
+   25 |     3     3 |      8        0 |     0        0
+   26 |    25    14 |     11        1 |     0        0
+   27 |    28    22 |     13        2 |     7        7
+   28 |     9     9 |      7        2 |     2        2
+   29 |    16    16 |     10        1 |     1        1
+   30 |     6     6 |      1        0 |     0        0
+  ★★對帳：逐日 decide 合計 305 vs funnel.decide.total 305 ⇒ ✅一致
+--- ★goal 為什麼沒生候選（逐日，★互斥且窮盡對帳）---
+  day | seen | notAct noDef facEmpty preqEmpty | emitFac emitPreq | 對帳
+    0 |  144 |     58     0       44        23 |      10        9 | ✅
+    1 |   76 |     30     0       20        14 |       6        6 | ✅
+    2 |   83 |     35     0       19        14 |       9        6 | ✅
+    3 |  114 |     45     0       31        21 |       8        9 | ✅
+    4 |   68 |     31     0       23        14 |       0        0 | ✅
+    5 |  102 |     42     0       28        19 |       4        9 | ✅
+    6 |   86 |     35     0       20        18 |       6        7 | ✅
+    7 |   42 |     19     0       12        11 |       0        0 | ✅
+    8 |   71 |     30     0       18        17 |       3        3 | ✅
+    9 |   72 |     30     0       18        16 |       4        4 | ✅
+   10 |   49 |     20     0       14        14 |       0        1 | ✅
+   11 |   63 |     26     0       18        17 |       0        2 | ✅
+   12 |   70 |     30     0       16        15 |       4        5 | ✅
+   13 |   55 |     22     0       15        17 |       0        1 | ✅
+   14 |   56 |     24     0       16        15 |       0        1 | ✅
+   15 |   89 |     36     0       17        17 |       7       12 | ✅
+   16 |   62 |     24     0       15        16 |       2        5 | ✅
+   17 |   66 |     26     0       18        15 |       3        4 | ✅
+   18 |   73 |     30     0       19        15 |       4        5 | ✅
+   19 |   60 |     24     0       15        18 |       0        3 | ✅
+   20 |   63 |     26     0       18        17 |       0        2 | ✅
+   21 |   83 |     34     0       19        20 |       4        6 | ✅
+   22 |   43 |     17     0       13        12 |       0        1 | ✅
+   23 |   63 |     23     0       16        15 |       2        7 | ✅
+   24 |   84 |     32     0       19        18 |       5       10 | ✅
+   25 |   55 |     20     0       15        17 |       0        3 | ✅
+   26 |   75 |     27     0       12        11 |       8       17 | ✅
+   27 |   91 |     34     0       15        14 |      11       17 | ✅
+   28 |   48 |     17     0       11        11 |       2        7 | ✅
+   29 |   66 |     25     0       12        13 |       4       12 | ✅
+   30 |    7 |      1     0        0         0 |       2        4 | ✅
+  ★★六類互斥且窮盡：每一天都加得回 seen
+      goal.skip.not_active.status.satisfied          = 873
+      goal.skip.facility_resolve_empty.gt.build_workshop = 194
+      goal.skip.facility_resolve_empty.gt.build_apothecary = 123
+      goal.skip.facility_resolve_empty.gt.build_stable = 224
+      goal.skip.facility_resolve_empty.gt.build_farming = 5
+--- ★build goal 的歸宿（逐日，★母體是常數全集）---
+  day | seen | kept readd | rm:noOp rm:type rm:built rm:desire | ra:noOp ra:type ra:built ra:desire | 對帳
+    0 |   96 |    0    35 |      0       0        0         0 |       8      33        0        20 | ✅
+    3 |   80 |   25     0 |      0       0        4         0 |       8      27        3        13 | ✅
+    5 |    8 |    2     0 |      0       0        1         0 |       0       3        0         2 | ✅
+    6 |   64 |   18     0 |      0       0        3         0 |       8      21        7         7 | ✅
+    8 |    8 |    3     0 |      0       0        0         0 |       0       3        0         2 | ✅
+    9 |   48 |   14     0 |      0       0        0         0 |       8      15        6         5 | ✅
+   10 |    8 |    2     0 |      0       0        0         0 |       0       3        2         1 | ✅
+   12 |   40 |   11     0 |      0       0        0         0 |       8      12        5         4 | ✅
+   13 |   16 |    4     0 |      0       0        1         0 |       0       6        3         2 | ✅
+   15 |   64 |   15     1 |      0       0        2         0 |       8      21        9         8 | ✅
+   16 |   24 |    6     0 |      0       0        0         0 |       0       9        6         3 | ✅
+   17 |    8 |    3     0 |      0       0        0         0 |       0       3        0         2 | ✅
+   18 |   40 |   13     0 |      0       0        0         0 |       0      15        7         5 | ✅
+   19 |   24 |    4     0 |      0       0        0         0 |       8       6        4         2 | ✅
+   21 |   32 |   11     0 |      0       0        0         0 |       0      12        5         4 | ✅
+   22 |   16 |    4     0 |      0       0        0         0 |       0       6        4         2 | ✅
+   23 |   16 |    1     1 |      0       0        1         0 |       8       3        1         1 | ✅
+   24 |   48 |   14     0 |      0       0        0         0 |       0      18        9         7 | ✅
+   25 |   16 |    4     0 |      0       0        0         0 |       0       6        4         2 | ✅
+   26 |    8 |    2     0 |      0       0        0         0 |       0       3        2         1 | ✅
+   27 |   56 |   16     0 |      0       0        0         0 |       8      18        7         7 | ✅
+   28 |    8 |    2     0 |      0       0        0         0 |       0       3        2         1 | ✅
+   29 |    8 |    2     0 |      0       0        0         0 |       0       3        2         1 | ✅
+  ★★十類互斥且窮盡：每天都加得回 seen（母體＝常數全集，不會被削）
+      goal.build_fate.removed_already_built.gt.build_farming = 2
+      goal.build_fate.removed_already_built.gt.build_apothecary = 6
+      goal.build_fate.removed_already_built.gt.build_workshop = 4
+--- ★_resolve_build_facility 三種歸宿（逐日，★分母=entry）---
+  day | entry | ★build ★res | noFdef built noOwnOp wrongType popLow deferInfra | 對帳
+    0 |    78 |      0    16 |      0     1       2        14      0         45 | ✅
+    1 |    42 |      0    10 |      0     2       4         6      0         20 | ✅
+    2 |    42 |      0    12 |      0     1       4         6      0         19 | ✅
+    3 |    62 |      0    14 |      0     0       2        11      0         35 | ✅
+    4 |    35 |      0     0 |      0     0       2         8      0         25 | ✅
+    5 |    51 |      0     7 |      0     5       4         9      0         26 | ✅
+    6 |    44 |      0     9 |      0     0       2         9      0         24 | ✅
+    7 |    21 |      0     0 |      0     0       2         5      0         14 | ✅
+    8 |    37 |      0     5 |      0     0       4         7      0         21 | ✅
+    9 |    37 |      0     6 |      0     0       2         8      0         21 | ✅
+   10 |    25 |      0     0 |      0     0       2         6      0         17 | ✅
+   11 |    32 |      0     0 |      0     1       4         7      0         20 | ✅
+   12 |    35 |      0     6 |      0     1       4         7      0         17 | ✅
+   13 |    28 |      0     0 |      0     0       2         7      0         19 | ✅
+   14 |    28 |      0     0 |      0     0       2         7      0         19 | ✅
+   15 |    43 |      0    11 |      0     0       4         8      0         20 | ✅
+   16 |    31 |      0     3 |      0     0       2         7      0         19 | ✅
+   17 |    35 |      0     5 |      0     0       0         8      0         22 | ✅
+   18 |    38 |      0     6 |      0     0       0         9      0         23 | ✅
+   19 |    30 |      0     0 |      0     0       4         7      0         19 | ✅
+   20 |    32 |      0     0 |      0     0       2         8      0         22 | ✅
+   21 |    42 |      0     6 |      0     0       4         9      0         23 | ✅
+   22 |    22 |      0     0 |      0     0       0         6      0         16 | ✅
+   23 |    32 |      0     4 |      0     0       2         7      0         19 | ✅
+   24 |    42 |      0     8 |      0     0       2         9      0         23 | ✅
+   25 |    28 |      0     0 |      0     0       2         7      0         19 | ✅
+   26 |    37 |      0    15 |      0     0       4         5      0         13 | ✅
+   27 |    47 |      0    19 |      0     0       4         7      0         17 | ✅
+   28 |    24 |      0     4 |      0     0       2         5      0         13 | ✅
+   29 |    32 |      0     8 |      0     0       6         5      0         13 | ✅
+   30 |     4 |      0     4 |      0     0       0         0      0          0 | ✅
+  ★★★三種歸宿互斥且窮盡：每天都加得回 entry
+      resolver.empty_wrong_outpost_type.have.civilian.need.["military"] = 224
+      resolver.resource_candidate.res.material           = 178
+      resolver.resource_candidate.task.(無task欄)          = 97
+      resolver.resource_candidate.task.貿易                = 81
+--- ★infra path 歸宿（逐日，★分母=entry）---
+  day | entry | combat player noLdr noOp tileNull lvl0 underCon | pickEmpty | ★built inPlaceFail dispatch | 對帳
+    2 |    24 |      0      0     0    2        0    0       10 |         0 |     4           8        0 | ✅
+    4 |    24 |      0      0     0    2        0    0        8 |         2 |     6           6        0 | ✅
+    6 |    24 |      0      0     0    2        0    0        3 |        12 |     1           6        0 | ✅
+    8 |    24 |      0      0     0    2        0    0        4 |        12 |     0           6        0 | ✅
+   10 |    24 |      0      0     0    2        0    0        3 |        14 |     1           4        0 | ✅
+   12 |    24 |      0      0     0    2        0    0        2 |        16 |     0           4        0 | ✅
+   14 |    24 |      0      0     0    2        0    0        2 |        16 |     0           4        0 | ✅
+   16 |    24 |      0      0     0    2        0    0        2 |        16 |     0           4        0 | ✅
+   18 |    24 |      0      0     0    2        0    0        2 |        16 |     0           4        0 | ✅
+   20 |    24 |      0      0     0    2        0    0        4 |        14 |     0           4        0 | ✅
+   22 |    24 |      0      0     0    2        0    0        3 |        14 |     1           4        0 | ✅
+   25 |    24 |      0      0     0    2        0    0        2 |        16 |     0           4        0 | ✅
+   27 |    24 |      0      0     0    2        0    0        2 |        16 |     0           4        0 | ✅
+   29 |    24 |      0      0     0    2        0    0        3 |        16 |     1           2        0 | ✅
+  ★★★infra 歸宿互斥且窮盡：每天都加得回 entry
+--- ★母體扣除（★明示，不默默不算）---
+  BUILD_FACILITY_GOALS 全集 = 8
+  ★扣除：military-only 3（smeltery／weaponsmith／armorsmith）——本床 11 座 outpost 全 civilian
+     證據：resolver.empty_wrong_outpost_type.have.civilian.need.["military"] = 224（單一組合）
+  ⇒ ★可達母體 = 5（farming／workshop／apothecary／mint／stable）
+--- ★牆的拒絕理由（★物理 vs 判斷，兩層各自對帳）---
+  第一層 wall.entry = 92 ⇒ 三條拒絕合計 0 ＋ 進入第二層 92 ⇒ ✅一致
+  第二層 begin_entry = 92 ⇒ 六條拒絕＋成功合計 92 ⇒ ✅一致
+  ★逐條（30 天合計）：
+      reject_outpost_level0          = 0
+      reject_not_owner               = 0
+      reject_busy_construction       = 0
+      reject_no_def                  = 0
+      reject_outpost_type            = 0
+      reject_terrain                 = 0
+      reject_max_level               = 0
+      reject_no_slot                 = 0
+      reject_cannot_afford           = 64
+      accepted                       = 28
+      wall.reject_cannot_afford.res.material       = 64
+      wall.reject_cannot_afford.res.tools          = 64

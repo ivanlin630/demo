@@ -21,6 +21,11 @@ func _run() -> void:
 	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg)
 	if config.is_empty():
 		print("[FAIL] config 載入失敗"); return
+	# ★★★世界必須跟【量測床跑的那個】是同一個（implementer 2026-08-26 實測踩到）：
+	#   本檔原本用 config 自帶的 `seed`(70730)，而 funnel／reach 床一律 `config["seed"] = PERF_SEED`(1337)
+	#   ⇒ ★排名算出來的「前 11 名」屬於世界 A，床卻要拿去量世界 B ⇒ **座標對不到同一批富點**。
+	#   ★★症狀長什麼樣：床照排名重擺完，老熟林仍然 Δ+0 —— 看起來像「機制沒用」，實際是【比錯世界】。
+	config["seed"] = int(_env("PERF_SEED", "1337"))
 	GameSetup.setup(state, config)
 	var wg = load("res://scripts/simulation/world_generator.gd").new()   # ★無 class_name，照既有 caller 的載法（game_setup:93）
 	# ★★★用【真正的放置路徑】(systems 訂正 2026-08-26)：`scored_positions_pure` 檔頭自己寫著
@@ -65,11 +70,25 @@ func _run() -> void:
 		var top_pct: float = 100.0 * float(cnt) / maxf(float(n), 1.0)
 		lines.append("  %-10s = %2d（前 N 佔 %.1f%%｜全圖佔 %.1f%%｜★偏好倍數 %.2f×）" % [
 			String(k2), cnt, top_pct, base_pct, top_pct / maxf(base_pct, 0.001)])
-	lines.append("--- ★前 %d 名逐格（座標／地形／分數序）---" % n)
+	# ★★★富點命中：前 N 名裡有幾座是【老熟林】——★這是「設點端看不看得見富點」的直接答案，
+	#   ★不是我用眼睛比座標。母體(全圖老熟林座數)一起印，否則命中數讀不出意思。
+	var og_all: Array = []
+	for tid_og in state.world.tiles:
+		var t_og: HexTileData = state.world.tiles[tid_og]
+		if t_og.terrain == "forest" and float(t_og.resources.get("material", 0)) >= float(wg.OLD_GROWTH_MATERIAL_MIN):
+			og_all.append(t_og.tile_pos)
+	var og_hit: int = 0
+	lines.append("--- ★前 %d 名逐格（座標／地形／★是否老熟林）---" % n)
 	for i2 in range(n):
 		var p2: Vector2i = ranked[i2]
 		var t2: HexTileData = state.world.tiles.get(p2.x * 1000 + p2.y)
-		lines.append("  #%2d (%2d,%2d) %-10s" % [i2 + 1, p2.x, p2.y, (t2.terrain if t2 != null else "?")])
+		var is_og: bool = p2 in og_all
+		if is_og: og_hit += 1
+		lines.append("  #%2d (%2d,%2d) %-10s%s" % [i2 + 1, p2.x, p2.y,
+			(t2.terrain if t2 != null else "?"), ("   ←★★老熟林(material %d)" % int(t2.resources.get("material", 0))) if is_og else ""])
+	lines.append("  ⇒ ★★★前 %d 名【命中老熟林 %d 座】／全圖共 %d 座（隨機期望 ≈ %.2f 座）" % [
+		n, og_hit, og_all.size(),
+		float(n) * float(og_all.size()) / maxf(float(state.world.tiles.size()), 1.0)])
 	# ★對照組：純評分版（無噪聲無間距）——★標明它是【上界】，不是世界實況
 	var pure_terr: Dictionary = {}
 	for i3 in range(mini(top_n, ranked_pure.size())):

@@ -1,6 +1,6 @@
 {
   "_doc": "和平經濟觀測床 (measure-first Step0, spec 2026-07-30-peaceful-economy-bed-HOW). explicit/seeded/好戰=0 全獨立. 4 類 sharp 缺口各對一問. ★零 sim-code 改, config-only. ①/③established+缺料設施 need_keep(material)>0=LIVE (apothecary medicine=0→deficit 0.5≥DESIRE_MIN, food-decoupled). radius 8/richness 5 → 有 unowned forest tile (founding 靶). 位置皆 hex_dist≤8 of center(8,8).",
-  "seed": 70730,
+  "seed": 1337,
   "mode": "explicit",
   "max_ticks": 50000,
   "map": {
@@ -12,8 +12,8 @@
       "id": 0,
       "name": "①立國A_平原缺料",
       "tile_pos": [
-        4,
-        15
+        7,
+        6
       ],
       "population": 6,
       "tags": [
@@ -67,8 +67,8 @@
       "id": 1,
       "name": "①立國B_平原缺料",
       "tile_pos": [
-        3,
-        13
+        2,
+        7
       ],
       "population": 6,
       "tags": [
@@ -122,8 +122,8 @@
       "id": 2,
       "name": "①立國C_平原缺料",
       "tile_pos": [
-        7,
-        2
+        15,
+        6
       ],
       "population": 6,
       "tags": [
@@ -177,8 +177,8 @@
       "id": 3,
       "name": "②發展A_料足",
       "tile_pos": [
-        9,
-        4
+        10,
+        14
       ],
       "population": 6,
       "tags": [
@@ -232,8 +232,8 @@
       "id": 4,
       "name": "②發展B_料足",
       "tile_pos": [
-        10,
-        12
+        0,
+        14
       ],
       "population": 6,
       "tags": [
@@ -279,7 +279,7 @@
       "outpost": {
         "type": "civilian",
         "level": 1,
-        "terrain": "plains",
+        "terrain": "forest",
         "tile_food_init": 200
       }
     },
@@ -287,8 +287,8 @@
       "id": 5,
       "name": "②發展C_料足",
       "tile_pos": [
-        3,
-        9
+        9,
+        3
       ],
       "population": 6,
       "tags": [
@@ -334,7 +334,7 @@
       "outpost": {
         "type": "civilian",
         "level": 1,
-        "terrain": "forest",
+        "terrain": "plains",
         "tile_food_init": 200
       }
     },
@@ -342,8 +342,8 @@
       "id": 6,
       "name": "③貿易_糧富料窮",
       "tile_pos": [
-        5,
-        11
+        1,
+        12
       ],
       "population": 6,
       "tags": [
@@ -389,7 +389,7 @@
       "outpost": {
         "type": "civilian",
         "level": 1,
-        "terrain": "forest",
+        "terrain": "mountain",
         "tile_food_init": 400
       }
     },
@@ -398,7 +398,7 @@
       "name": "③貿易_料富糧窮",
       "tile_pos": [
         8,
-        3
+        2
       ],
       "population": 6,
       "tags": [
@@ -445,7 +445,7 @@
       "outpost": {
         "type": "civilian",
         "level": 1,
-        "terrain": "plains",
+        "terrain": "forest",
         "tile_food_init": 30
       }
     },
@@ -500,8 +500,8 @@
       "id": 9,
       "name": "④糧坡A_山地",
       "tile_pos": [
-        5,
-        13
+        10,
+        4
       ],
       "population": 6,
       "tags": [
@@ -555,8 +555,8 @@
       "id": 10,
       "name": "④糧坡B_山地",
       "tile_pos": [
-        7,
-        15
+        6,
+        10
       ],
       "population": 6,
       "tags": [
@@ -602,7 +602,7 @@
       "outpost": {
         "type": "civilian",
         "level": 1,
-        "terrain": "plains",
+        "terrain": "forest",
         "tile_food_init": 60
       }
     },
@@ -610,8 +610,8 @@
       "id": 11,
       "name": "④糧坡C_山地",
       "tile_pos": [
-        1,
-        9
+        13,
+        5
       ],
       "population": 6,
       "tags": [

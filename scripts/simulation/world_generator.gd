@@ -76,6 +76,8 @@ func generate(state: WorldState, config: Dictionary) -> void:
 			state.world.tiles[tile.tile_id] = tile
 	# S1 礦脈保證：全圖無金礦 tile 時，挑一座山地注入（消小圖 RNG 槓龜，保 mint 魂有燃料）
 	_ensure_min_ore(state.world.tiles, rng, "ore_gold", 5, 30, mult)
+	# 猛獸保證：全圖零猛獸時挑一座森林/山地注入（消小圖 RNG 槓龜，形狀比照上面的礦脈保證）
+	_ensure_min_predator(state.world.tiles, rng)
 	# 產馬帶：集中一「帶」撒戰略牧地（在 per-tile rng 流之後 draw → 不擾既有 seeded 期望）
 	_apply_horse_band(state.world.tiles, rng, radius, mult)
 
@@ -159,6 +161,25 @@ func _ensure_min_ore(tiles_ref: Dictionary, rng: RandomNumberGenerator, res: Str
 	pick.resources[res] = amt
 	pick.resource_cap[res] = amt
 
+# ★猛獸保證（systems 裁定 2026-08-26）——與上面 `_ensure_min_ore` 是【同一個形狀】：
+#   ★病：`predator_density` 是機率灑點，母體小的圖會槓龜。實測掃 40 個 seed，
+#     整圖零猛獸的有 1 個（2.5%），而 `headless_test.gd:2232` 寫死的 seed 11 正好是那一個
+#     ⇒ 那個 assert 斷的是一件 97.5% 的機率事件（`docs/measurements/2026-08-26-predator-seed-fragility.txt`）。
+#   ★★礦脈早就有這個保證、猛獸沒有 ⇒ **同型只做了一半**，補齊而已，不是新機制。
+#   ★★★注意 rng：已有猛獸就【提前 return，一次 draw 都不耗】
+#     ⇒ 正常世界的 seeded 序列【完全不動】，只有槓龜的圖才會走到 draw。
+func _ensure_min_predator(tiles_ref: Dictionary, rng: RandomNumberGenerator) -> void:
+	var hosts: Array = []
+	for tid in tiles_ref:
+		var t = tiles_ref[tid]
+		if t.terrain == "forest" or t.terrain == "mountain": hosts.append(t)
+		if int(t.resources.get("predator_density", 0)) > 0: return   # 已有，不動（且不耗 rng）
+	if hosts.is_empty(): return   # 無森林也無山地（極端小圖）→ 跳過
+	var pick = hosts[rng.randi() % hosts.size()]
+	var amt: int = rng.randi_range(1, PREDATOR_MAX)
+	pick.resources["predator_density"] = amt
+	pick.resource_cap["predator_density"] = amt
+
 # 產馬帶：挑一條 tile_pos.x 帶（seeded），帶內 plains 依密度撒 resource_cap["mounts"] + wild_horses。
 # 集中成帶 = 戰略不對稱地基（非均撒）。至少保底一格（極端 RNG 全 miss 時補一格，保 slice 有源）。
 func _apply_horse_band(tiles_ref: Dictionary, rng: RandomNumberGenerator, radius: int, mult: float) -> void:
@@ -199,6 +220,7 @@ func _random_terrain(rng: RandomNumberGenerator) -> String:
 # world-gen variety §1：評分 + seeded 熵散布（棄 key-order 貪婪；rng 全 seeded=per-seed determinism）。
 # 高分區(貼資源+腹地)優先，score×rng 噪聲=每 seed 有機不同、非格狀 re-regularize。min_sep 硬保。
 func pick_start_positions(state: WorldState, n: int, min_sep: int, rng: RandomNumberGenerator) -> Array:
+	_build_terrain_norms(state)   # ★顯式重建：同一個 instance 換了世界不吃舊快取
 	var scored: Array = []
 	for tid in state.world.tiles:
 		var tile = state.world.tiles[tid]
@@ -222,6 +244,7 @@ func pick_start_positions(state: WorldState, n: int, min_sep: int, rng: RandomNu
 # 據點起點評分：資源價值(terrain 產能+wild_game) × W_RES + 戰略(鄰格資源和=補給腹地) × W_STRAT。
 # §3 fallback 用：純評分（無 rng 噪聲）全 tile 位置降序。deterministic（同 seed 同序）。
 func scored_positions_pure(state: WorldState) -> Array:
+	_build_terrain_norms(state)   # ★同上：對照組入口也要看得見富點，否則兩個入口的世界觀不同
 	var scored: Array = []
 	for tid in state.world.tiles:
 		var tile = state.world.tiles[tid]
@@ -234,6 +257,10 @@ func scored_positions_pure(state: WorldState) -> Array:
 	return out
 
 func _tile_start_score(state: WorldState, tile, pos: Vector2i) -> float:
+	# ★backstop：常態基準沒建起來時 `rich` 恆 0 ⇒ 富點又變回隱形，而且【安靜】。
+	#   兩個入口都會顯式重建（避免同一個 instance 換了世界還吃舊快取），這裡只兜住漏網的呼叫點。
+	if _terrain_norm.is_empty():
+		_build_terrain_norms(state)
 	var res_val: float = _tile_res_value(tile)
 	var strat: float = 0.0
 	for d in ResourceSystem.HEX_DIRS:
@@ -245,8 +272,62 @@ func _tile_start_score(state: WorldState, tile, pos: Vector2i) -> float:
 
 func _tile_res_value(tile) -> float:
 	var rates: Dictionary = ResourceSystem.REGEN_RATE.get(tile.terrain, { "food": 2.0, "material": 1.0 })
-	return float(rates.get("food", 0.0)) + float(rates.get("material", 0.0)) \
+	var base: float = float(rates.get("food", 0.0)) + float(rates.get("material", 0.0)) \
 		+ float(tile.resources.get("wild_game", 0)) * WILD_GAME_W
+	# ★富點可見性：只加【超出這張圖同地形常態的那一份】——常態格 ≈ 不變（見 _build_terrain_norms）
+	var norms: Dictionary = _terrain_norm.get(tile.terrain, {})
+	var rich: float = 0.0
+	for res in norms:
+		rich += _stock_to_daily(float(tile.resources.get(res, 0)) - float(norms[res]))
+	return base + rich
+
+# ★★★富點可見性（systems 裁定 2026-08-26）——修的是一個【內部不一致】，不是新增偏好：
+#   原本 `_tile_res_value` 只讀【地形再生常數】＋`wild_game` 這一種 tile 實際資源
+#   ⇒ 一座 material 648 的老熟林，跟旁邊一座普通森林【分數完全一樣】
+#   ⇒ 沒有人會為了它設點；而不站上去就採不到（`resource_system.gd:95-103`：L1 只採腳下、鄰格要 L3）
+#   ⇒ ★實測：8 座老熟林跑 30 天 material 全部 Δ+0（`docs/measurements/2026-08-26-old-growth-reach.txt`）。
+#
+# ★常態基準【讀這張圖自己的中位數】，★不手抄 `RESOURCE_PROFILE` 的區間常數：
+#   ①`resource_multiplier` 自動消掉 —— 手抄常數的話，mult≠1 的圖會【每一格都看起來很富】
+#   ②中位數對「5% 富點」穩健（少數極端值拉不動中位數）
+#   ③這是「讀自身狀態」而非手抄物理量（估算器血統②禁手抄）
+#
+# ★★為什麼算【超出常態的那一份】而不是整份存量：
+#   整份存量下去 ⇒ 平原（food 存量中值 200）與森林（material 中值 150）會被重新排序
+#   ⇒ ★那是【新增一個地形偏好】，正是這張票說不要做的事。
+#   只算超額 ⇒ 普通格幾乎不動、富點才跳出來 ⇒ ★這才是「看見富點」。
+var _terrain_norm: Dictionary = {}   # terrain -> { res -> 這張圖同地形的中位數 }
+
+func _build_terrain_norms(state: WorldState) -> void:
+	_terrain_norm.clear()
+	var by_terrain: Dictionary = {}
+	for tid in state.world.tiles:
+		var t = state.world.tiles[tid]
+		var bucket: Dictionary = by_terrain.get(t.terrain, {})
+		for res in RESOURCE_PROFILE.get(t.terrain, {}):
+			var arr: Array = bucket.get(res, [])
+			arr.append(float(t.resources.get(res, 0)))
+			bucket[res] = arr
+		by_terrain[t.terrain] = bucket
+	for terr in by_terrain:
+		var norms: Dictionary = {}
+		var per_res: Dictionary = by_terrain[terr]
+		for res2 in per_res:
+			var vals: Array = per_res[res2]
+			vals.sort()
+			norms[res2] = float(vals[vals.size() / 2]) if not vals.is_empty() else 0.0
+		_terrain_norm[terr] = norms
+
+# ★存量 → 日流的換算，用【專案既有的那把尺】(`DiscountedFlow`)，★不新增係數：
+#   現成存量 S 的現值就是 S；一條日流 f 的現值是 `pv(f, δ, H)`
+#   ⇒ 與 S 等值的日流 ＝ `S / pv(1, δ, H)`。
+# ★δ 取【中性人格】(`delta_of({})` ⇒ 慎重 0.5) —— 產生器是替【不特定的人】挑地，沒有人格可讀。
+# ★★H 沿用 `DiscountedFlow.HORIZON_DAYS`（＝ `MarginalEconomy.PLANNING_HORIZON_DAYS`）——同樣不新增常數。
+static func _stock_to_daily(stock_excess: float) -> float:
+	if stock_excess <= 0.0:
+		return 0.0
+	var d: float = DiscountedFlow.delta_of({})
+	return stock_excess / maxf(DiscountedFlow.pv(1.0, d, DiscountedFlow.HORIZON_DAYS), 0.001)
 
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x
