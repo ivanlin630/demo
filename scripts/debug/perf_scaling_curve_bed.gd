@@ -23,6 +23,7 @@ func _run() -> void:
 	var world_seed: int = int(OS.get_environment("PERF_SEED")) if OS.has_environment("PERF_SEED") else 1337
 	var ticks: int = int(OS.get_environment("PERF_TICKS")) if OS.has_environment("PERF_TICKS") else 200
 	var out_path: String = OS.get_environment("PERF_OUT") if OS.has_environment("PERF_OUT") else ""
+	var hd_only: bool = OS.get_environment("PERF_HD_ONLY") == "1"   # systems授權長窗票：省LOD那趟，長窗risk已夠高
 	var configs: Array = []
 	for c in ladder_raw.split(",", false):
 		configs.append(c.strip_edges())
@@ -35,24 +36,31 @@ func _run() -> void:
 		"config", "regime", "teams", "teams_cfg_knobs", "median_us", "mean_us", "p99_us", "max_us", "tps@median"])
 	var rows: Array = []
 	for cfg in configs:
-		var lod: Dictionary = _run_one(cfg, world_seed, ticks, false, false)
-		if lod.is_empty(): continue
+		var lod: Dictionary = {} if hd_only else _run_one(cfg, world_seed, ticks, false, false)
+		if not hd_only and lod.is_empty(): continue
 		var hd: Dictionary = _run_one(cfg, world_seed, ticks, true, true)   # 全高清那趟才拆phase(★零LOD目標regime)
 		if hd.is_empty(): continue
-		_print_row(lines, cfg, "LOD", lod)
+		if not hd_only: _print_row(lines, cfg, "LOD", lod)
 		_print_row(lines, cfg, "full-HD", hd)
 		rows.append({"config": cfg, "lod": lod, "hd": hd})
 
-	lines.append("\n────────── ①scaling 曲線摘要（判準用 median，沿用 reference_hob_perf_protocol，比 per-tick 不撞絕對門檻） ──────────")
+	if hd_only:
+		lines.append("\n────────── ①scaling 曲線摘要（★PERF_HD_ONLY=1，跳過LOD那趟，只有full-HD） ──────────")
+	else:
+		lines.append("\n────────── ①scaling 曲線摘要（判準用 median，沿用 reference_hob_perf_protocol，比 per-tick 不撞絕對門檻） ──────────")
 	lines.append("%-16s %6s %20s %13s %13s %8s %10s" % [
 		"config", "teams", "teams_cfg_knobs", "LOD_median_us", "HD_median_us", "HD/LOD", "HD_tps"])
 	for r in rows:
-		var lmed: int = int(r["lod"]["median"])
+		var lmed: int = -1 if (r["lod"] as Dictionary).is_empty() else int(r["lod"]["median"])
 		var hmed: int = int(r["hd"]["median"])
 		var tps: float = 1_000_000.0 / maxf(float(hmed), 1.0)
-		lines.append("%-16s %6d %20s %13d %13d %7.1fx %10.0f" % [
-			r["config"], int(r["hd"]["teams"]), str(r["hd"]["teams_expect"]), lmed, hmed,
-			float(hmed) / maxf(float(lmed), 1.0), tps])
+		if lmed < 0:
+			lines.append("%-16s %6d %20s %13s %13d %8s %10.0f" % [
+				r["config"], int(r["hd"]["teams"]), str(r["hd"]["teams_expect"]), "n/a(skip)", hmed, "n/a", tps])
+		else:
+			lines.append("%-16s %6d %20s %13d %13d %7.1fx %10.0f" % [
+				r["config"], int(r["hd"]["teams"]), str(r["hd"]["teams_expect"]), lmed, hmed,
+				float(hmed) / maxf(float(lmed), 1.0), tps])
 	lines.append("注：★母體=實際生成隊數(teams)，非config期望值(teams_cfg_knobs，只是原樣列出config輸入旋鈕，非我推導的期望值)——兩者常有落差，逐行標出、不自己解釋差多少。")
 
 	lines.append("\n────────── ②熱點分解（每階full-HD那趟，phase 累積us + 分母=被走到幾個tick） ──────────")
