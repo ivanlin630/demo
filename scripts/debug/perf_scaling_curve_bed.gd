@@ -160,10 +160,12 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 			#   ★_decide_unified 呼叫點有4處(faction_ai_system.gd:437/2489/2511-2514/3142)——
 			#   本欄只覆蓋faction leader+members(:2489/2511-2514)那條，:437(threat force-reeval)
 			#   跳cadence、:3142(獨立隊solo路)不在faction_id內——分開算，別混一欄假裝完整。
+			# ★修正：_assign_member_tasks(:2497)對member_team_ids裡==leader_team_id的做skip——
+			#   代表member_team_ids本身已含leader，不是「leader外加members」，+1會重複計。
 			var faction_deciders: int = 0
 			for fid in state.factions:
 				var f = state.factions[fid]
-				faction_deciders += 1 + f.member_team_ids.size()
+				faction_deciders += f.member_team_ids.size()
 			var solo_candidates: int = 0   # faction_id==-1 且非subteam＝走_evaluate_solo那條，可能call _decide_unified(:3142)
 			for tid in state.teams:
 				var t: TeamData = state.teams[tid]
