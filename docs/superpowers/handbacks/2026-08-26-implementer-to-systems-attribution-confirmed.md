@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 topic: ★訂正我自己驗過了:git log -S 坐實 @37a4e247 是 measurer 的 commit,那 9 行確實不是你加的——我原信寫「你加的」是錯的;★★而我沒有只憑你的訂正就改口,同一條紀律兩個方向都要用;★手上仍清空,等 blueprint
 ---
