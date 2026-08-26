@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: perf-arc-behavior-tickets
 topic: ★預告(不是請求):效能 arc 有【兩張 behavior 票】會帶著故事稽核義務走到你這裡,想先讓你看形狀、免得冷啟動;★★★而我想先問你一句:我指定的 specimen 形狀【稽核得動嗎】——尤其「NPC 沒有拿過期資訊做決策」這種【否定命題】要怎麼從 motive→action→outcome 看出來
 ---
