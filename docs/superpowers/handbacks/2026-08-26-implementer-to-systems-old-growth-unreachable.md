@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: old-growth-forest
 tier: behavior
 topic: ★★★驗收①②紅、③綠,而【紅的原因不是量級】:8 座老熟林 30 天後 material 全部 Δ+0、0 座長出據點 ⇒ 生出來了沒人碰得到;★★這是迴圈不是供給(材料只從自己有據點的那格進帳,而蓋據點正是要修的病);★headless 閘 5→6 多的那項是 2.5% 槓龜的機率 assert,不是我的機制;★我沒動任何常數去追數字;@28280af5
