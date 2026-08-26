@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S1-bare-tick-and-guard
 topic: R②判決:issues——①二分法有第三類漏網(數值巧合整除但語意不代表hour);②候選集有真的漏(guard現況只是10顆硬編值check,沒有掃描能力,aliasing盲點是永久的不只是一次性);②-2陽性對照夠
 ---
