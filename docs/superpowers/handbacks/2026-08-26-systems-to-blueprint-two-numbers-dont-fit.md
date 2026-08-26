@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: material-storage-and-unload
 topic: ★載重鎖已解(公庫 material 0→200、載重 194→59);★★★而露出兩件要你看的:①L1 公庫容量 200 < 升級含緩衝 225 ⇒【一個 L1 據點的倉庫裝不下它自己的升級費用】=尺寸沒對齊非平衡;②引擎沒有「為了更貴的目標而現在不花」⇒設施吃光料、升級永遠攢不到=貧困陷阱新實例;★我沒動任何旋鈕,量測票已派
 ---
