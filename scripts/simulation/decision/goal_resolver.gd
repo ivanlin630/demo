@@ -55,7 +55,7 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 	#     而那個差額會被當成正常（＝「習慣了的異常」）。
 	var _bday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
 	if Probe.enabled:
-		Probe.bump("goal.build_fate.seen" + _bday, GoalRegistry.BUILD_FACILITY_GOALS.size())
+		Probe.bump_pt("goal.build_fate.seen", _bday, team.team_id, GoalRegistry.BUILD_FACILITY_GOALS.size())
 	for g in team.goal_state:
 		var gt: String = String(g.get("goal_type", ""))
 		if not GoalRegistry.BUILD_FACILITY_GOALS.has(gt):
@@ -79,7 +79,7 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 				Probe.bump("goal.build_fate.removed_" + _why + _bday)
 				Probe.bump("goal.build_fate.removed_" + _why + ".gt." + gt)
 			continue   # ★退（不 append=移除）
-		if Probe.enabled: Probe.bump("goal.build_fate.kept" + _bday)
+		if Probe.enabled: Probe.bump_pt("goal.build_fate.kept", _bday, team.team_id)
 		kept.append(g)   # desire 仍高+未建→留
 	team.goal_state = kept
 	# 掛：desire≥threshold+未建+未在 goal_state → 新掛 build_F goal（決定性 REGISTRY key 序）。
@@ -87,7 +87,7 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 		# ★沒有自家 outpost ⇒ 整個重掛迴圈不跑 ⇒ 不在清單裡的 goal 全落這個歸宿（要數，否則母體不平）
 		for _gt3 in GoalRegistry.BUILD_FACILITY_GOALS:
 			if not have.has(_gt3):
-				Probe.bump("goal.build_fate.readd_blocked_no_otile" + _bday)
+				Probe.bump_pt("goal.build_fate.readd_blocked_no_otile", _bday, team.team_id)
 	if otile != null:
 		for gt2 in GoalRegistry.BUILD_FACILITY_GOALS:
 			if have.has(gt2):
@@ -95,17 +95,17 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 			var f2: String = String(GoalRegistry.BUILD_FACILITY_GOALS[gt2])
 			var fdef2: Dictionary = OutpostSystem.FACILITY_DEF.get(f2, {})
 			if not (otile.outpost_type in fdef2.get("allowed_outpost", [])):
-				if Probe.enabled: Probe.bump("goal.build_fate.readd_wrong_outpost_type" + _bday)
+				if Probe.enabled: Probe.bump_pt("goal.build_fate.readd_wrong_outpost_type", _bday, team.team_id)
 				continue
 			if int(otile.get(fdef2.get("current_level_key", ""))) > 0:
-				if Probe.enabled: Probe.bump("goal.build_fate.readd_already_built" + _bday)
+				if Probe.enabled: Probe.bump_pt("goal.build_fate.readd_already_built", _bday, team.team_id)
 				continue
 			if fai._facility_deficit(state, team, f2, otile) >= NeedOracle.CONSTRUCTION_DESIRE_MIN:
-				if Probe.enabled: Probe.bump("goal.build_fate.readded" + _bday)
+				if Probe.enabled: Probe.bump_pt("goal.build_fate.readded", _bday, team.team_id)
 				team.goal_state.append({"goal_type": gt2, "target": null,
 					"created_tick": state.world.current_tick, "status": "active"})
 			elif Probe.enabled:
-				Probe.bump("goal.build_fate.readd_desire_below_min" + _bday)
+				Probe.bump_pt("goal.build_fate.readd_desire_below_min", _bday, team.team_id)
 
 static func frontier_candidates(state: WorldState, team: TeamData, ctx: DecisionContext) -> Array:
 	if state == null or team == null or ctx == null:
@@ -419,18 +419,18 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 	#   ★分母＝進入本函式的次數（不是 `facility_resolve_empty`，那只是三種歸宿之一）；
 	#     三種歸宿逐日各自加總 == 分母。
 	var _rday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
-	if Probe.enabled: Probe.bump("resolver.entry" + _rday)
+	if Probe.enabled: Probe.bump_pt("resolver.entry", _rday, team.team_id)
 	var f: String = String(def.get("facility", ""))
 	var fdef: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
 	if fdef.is_empty():
-		if Probe.enabled: Probe.bump("resolver.empty_no_fdef" + _rday)
+		if Probe.enabled: Probe.bump_pt("resolver.empty_no_fdef", _rday, team.team_id)
 		return {}
 	var payoff: float = float(def.get("payoff", 1.5))
 	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 	var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 	# F 已建 → satisfied（無 candidate）。
 	if own_tile != null and int(own_tile.get(fdef.get("current_level_key", ""))) > 0:
-		if Probe.enabled: Probe.bump("resolver.empty_already_built" + _rday)
+		if Probe.enabled: Probe.bump_pt("resolver.empty_already_built", _rday, team.team_id)
 		return {}
 	# 前置 1：resource build-cost（material/tools）——缺→接 S2/S3 資源鏈（need_keep 已含 construction need）。
 	var cost: Dictionary = OutpostSystem.upgrade_cost(f, 1)
@@ -441,7 +441,7 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 				# ★★★非空【但不是 build】：這是那條騙過我們一次的路（`task` 多半是貿易/製造）。
 				#   ⇒ 單獨一格，★不得跟真 build candidate 合計。
 				if Probe.enabled:
-					Probe.bump("resolver.resource_candidate" + _rday)
+					Probe.bump_pt("resolver.resource_candidate", _rday, team.team_id)
 					Probe.bump("resolver.resource_candidate.res." + String(res))
 					Probe.bump("resolver.resource_candidate.task." + String((c.get("to_task", {}) as Dictionary).get("task", "(無task欄)")))
 				return c   # first-unsatisfied resource → 取得 frontier（買/採）
@@ -456,24 +456,24 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 		#     而後者會把人帶去改 `allowed_outpost`，那是改錯地方。
 		if Probe.enabled:
 			if own_tile == null:
-				Probe.bump("resolver.empty_no_own_outpost" + _rday)
+				Probe.bump_pt("resolver.empty_no_own_outpost", _rday, team.team_id)
 			else:
-				Probe.bump("resolver.empty_wrong_outpost_type" + _rday)
+				Probe.bump_pt("resolver.empty_wrong_outpost_type", _rday, team.team_id)
 				Probe.bump("resolver.empty_wrong_outpost_type.have." + String(own_tile.outpost_type) + ".need." + str(allowed))
 		return {}
 	# 前置 3：manpower pop（既有 build pop 門檻）——不足→靜默（S4 最小，passive 繁殖增，無主動 recruit task）。
 	if team.population < GoalRegistry.FACILITY_BUILD_POP_MIN:
-		if Probe.enabled: Probe.bump("resolver.empty_pop_below_min" + _rday)
+		if Probe.enabled: Probe.bump_pt("resolver.empty_pop_below_min", _rday, team.team_id)
 		return {}
 	# ★A1 全滿 → facility 建：
 	# owner 在場（team 站 own outpost）→ **defer 給 infra path**（不生 candidate）。infra desire-based _pick_facility
 	# 選最想建 facility 就地建（較 goal REGISTRY-order 聰明；單一 build slot 不撞），忠於二裁意圖「接 infra path 非另立子隊路」。
 	# （goal REGISTRY-order 就地建會壟斷 build slot→礦村建 workshop 非 mint→15360 regression；量測坐實。）
 	if team.tile_pos == own_tile.tile_pos:
-		if Probe.enabled: Probe.bump("resolver.empty_defer_infra" + _rday)   # ★不是失敗：交給 infra path 就地建
+		if Probe.enabled: Probe.bump_pt("resolver.empty_defer_infra", _rday, team.team_id)   # ★不是失敗：交給 infra path 就地建
 		return {}
 	# owner 不在場（own outpost 在別格）→ facility candidate（派子隊 remote 真移動→抵達→建，_dispatch_facility_builder）。
-	if Probe.enabled: Probe.bump("resolver.build_candidate" + _rday)   # ★★唯一算「成功」的那種
+	if Probe.enabled: Probe.bump_pt("resolver.build_candidate", _rday, team.team_id)   # ★★唯一算「成功」的那種
 	return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
 		{"facility": f, "target": own_tile.tile_pos})
 
