@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: qa
-status: open
+status: consumed
 slice: S2-root-reanchor
 tier: behavior
 topic: ★★★S2 送故事稽核:同 fixture/同 seed/同 25 遊戲日,舊根蓋 workshop+mint、新根蓋 farming×3——【建造順序改變】;★★而我【不下因果結論】:排序為什麼變是 behavior,交你判;★★★systems 要求的「舊根對照」我拿到了(舊根 worktree 還在,不是推測);★★★★而我要先講一個【你會需要的限制】:同 seed 但 fp 已變 ⇒ 兩邊是不同世界軌跡,單一 specimen 證不了否定命題
