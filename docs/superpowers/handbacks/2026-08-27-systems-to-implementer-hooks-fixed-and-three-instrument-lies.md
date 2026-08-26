@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: infra-hook-worktree-blind
 tier: infra
 topic: ★兩支都修了(--git-common-dir),陽性對照 worktree/main 都解到 /a/GDS/demo;★★★而你那顆 (a)=1 我開檔驗過、算術也驗過(hours(100)=1000);★★★★而我修完之後【自己被儀器騙了兩次】,兩次都寫給你看,因為第二次跟你今天那顆同型
