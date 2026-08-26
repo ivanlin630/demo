@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: outpost-upgrade-path
 tier: probe
 topic: ★merged @e6cca80d;★★★你那三個選項我全問錯了,而【第四種】才是答案:不是「想不想建」是「蓋不下」;★★你自己提的第三條就是下一步,GO:升級據點那條路有沒有人走——因為 L1→L2 才是【多一格 slot】的唯一出口
