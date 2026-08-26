@@ -1,0 +1,33 @@
+{
+  "slice": "perf-spike-coverage",
+  "ticket": "systems票2026-08-26:先驗覆蓋率——Σ(頂層phase labels) vs dt_us，別把巢狀子項一起加",
+  "measured_at_commit": "main（床dump完整FactionAISystem._fai_ph字典(34個label,非[FaiPhase]只印top-8)，零production改動）",
+
+  "★★★頂層label分類(讀call graph,file:line坐實,非猜)": {
+    "頂層(互斥,不巢狀,直接加總)": ["loop1.factions(:760,包含底下assign_tasks/unified.*/gather.*全部子孫)", "loop2.solo(:780)", "loop2.indep_strategy(:778,包含indep.weakest_prey子孫)", "loop2.member_strategy(:797)", "loop2b.merge(:827)", "loop3.orders_ambition(:850)", "loop3.survival(:857)", "loop3.prosperity(:865)", "loop3.pursuit(:868)", "loop3.threat(:871,可能巢狀含unified.*,因_evaluate_threat內部條件式呼叫_decide_unified)", "loop3.outpost(:923)", "loop3.misc(:950)"],
+    "巢狀(排除,已計入loop1.factions或loop2.indep_strategy)": ["loop1.assign_tasks/member_snap/update_goals/infra/diplo/betray", "assign.player_cmd/leader_lifecycle/leader_unified/members", "unified.rank/prosp/to_task", "member.unified", "gather.*(8種)", "indep.weakest_prey"]
+  },
+
+  "★★★三個真實spike tick的覆蓋率(頂層加總 vs dt_us)": [
+    {"tick": 9, "dt_us": 79185958, "top_level_sum_us": 68727310, "coverage_pct": 86.8, "gap_pct": 13.2},
+    {"tick": 19, "dt_us": 2731163, "top_level_sum_us": 2362060, "coverage_pct": 86.5, "gap_pct": 13.5},
+    {"tick": 29, "dt_us": 5755175, "top_level_sum_us": 5553290, "coverage_pct": 96.5, "gap_pct": 3.5}
+  ],
+
+  "★★★判定：不是大盲區，是86.5~96.5%都有名有姓": "剩下3.5~13.5%的gap可能是loop間的迴圈迭代開銷/beast-kind檢查/extinct清理等未加_fai_pht的小段，不是『一大塊看不見的成本』。",
+
+  "★★★★真正的『另一半』找到了：loop3.orders_ambition跟loop1.factions量級相當": {
+    "tick9範例": {
+      "loop1.factions(含unified.rank等全部子孫)": "26,082,520us = 32.9%整tick",
+      "loop3.orders_ambition(完全獨立,不含任何unified.*子孫)": "23,294,211us = 29.4%整tick",
+      "loop2.solo": "13,211,187us = 16.7%整tick",
+      "loop3.threat": "5,086,665us = 6.4%整tick(可能含條件式unified.*子孫)"
+    },
+    "loop3.orders_ambition是什麼(file:line坐實)": "faction_ai_system.gd:843-849——AmbitionLadder.update(state,team) + OrderSystem.new().tick_team_orders(state,team)，對【每一個team.leader_id!=-1】在cadence到期時執行，跟unified.rank完全不同的程式碼路徑",
+    "結論": "56.3%的『另一半』不是儀器盲區，主要是loop3.orders_ambition(訂單cadence+野心階梯更新)跟loop2.solo(獨立隊策略評估)——這兩個完全獨立、已有名字、已在計時，只是先前沒人看"
+  },
+
+  "landed_paths": {
+    "raw完整dict": "docs/measurements/perf-coverage-smoketest.txt.checkpoint.perf_scale.txt（含tick9/19/29三筆完整34-label dump）"
+  }
+}

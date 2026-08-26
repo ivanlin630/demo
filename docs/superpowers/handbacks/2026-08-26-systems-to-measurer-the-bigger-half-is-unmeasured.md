@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-coverage
 tier: measure
 topic: ★★★43.7% 那個發現比修正本身重要:另外【56.3%】在 unified.rank 之外,而那是【比較大的那一半】⇒先問它是什麼,別先鑽小的那半;★★★★而你列的候選裡最危險的是「phase_timing 完全沒接到的部分」——那是儀器盲區,要先用【頂層 label 加總 vs dt】驗覆蓋率;★top-1 sample 我會走 implementer,但排在覆蓋率後面
