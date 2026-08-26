@@ -121,7 +121,8 @@ static func update(state: WorldState, team: TeamData) -> void:
 			team.rung_stall_count = 0
 			Probe.bump("g2.ambition_crash_bypass")
 		team.rung_pop_last = pop_now
-		team.ambition_eval_next_tick = state.world.current_tick + LADDER_EVAL_CADENCE
+		team.ambition_eval_next_tick = CadenceStagger.next_tick(
+		state.world.current_tick, state.world.current_tick, team.team_id, LADDER_EVAL_CADENCE)   # ★錯峰：單一真值
 		return   # 劇變當 cadence 只做 bypass，不再走正常升降
 	team.rung_pop_last = pop_now
 	var old: int = team.ambition_rung
@@ -150,7 +151,8 @@ static func update(state: WorldState, team: TeamData) -> void:
 				Probe.bump("g2.ambition_demote")
 		else:
 			team.rung_stall_count = 0   # 仍夠格 → 撐住
-	team.ambition_eval_next_tick = state.world.current_tick + LADDER_EVAL_CADENCE
+	team.ambition_eval_next_tick = CadenceStagger.next_tick(
+		state.world.current_tick, state.world.current_tick, team.team_id, LADDER_EVAL_CADENCE)   # ★錯峰：單一真值
 	if team.ambition_rung != old:
 		print("[Ambition] Team%d rung %d→%d (%s cap=%d)" % [
 			team.team_id, old, team.ambition_rung, team.ambition_archetype, team.ambition_cap])

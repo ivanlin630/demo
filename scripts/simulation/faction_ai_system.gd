@@ -841,12 +841,30 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if team.leader_id == -1:
 			EventSystem.new().on_leader_death(state, team)
 		# G2b：野心階梯狀態更新（cadence）
+		# ★★★開場那一批：`ambition_eval_next_tick` / `order_eval_next_tick` 的預設值是 0
+		#   ⇒ ★所有隊在 tick 0 同時過閘 —— 而錯峰只管【排下一次】，管不到這一次。
+		#   ★★實測（perf_scale 1 天）：只做「排下一次」的版本仍有 2 個 tick ≥100 隊、最大同批 104。
+		#   ⇒ ★★★開場那批必須【種】進去：第一次遇到就先排一個錯開的 tick，而不是當場 fire。
+		#   ★用同一支 `CadenceStagger`（單一真值），不另外發明開場專用的散布法。
+		if team.leader_id != -1 and team.ambition_eval_next_tick == 0:
+			team.ambition_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, team.team_id, AmbitionLadder.LADDER_EVAL_CADENCE)
+		if team.leader_id != -1 and team.order_eval_next_tick == 0:
+			team.order_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, team.team_id, OrderSystem.ORDER_POST_CADENCE)
 		if team.leader_id != -1 and state.world.current_tick >= team.ambition_eval_next_tick:
+			# ★★驗收 tap（誰在哪個 tick 過閘）：①「單一 tick ≥100 隊」的 tick 數 ⑥同隊相鄰間隔
+			#   ★cap 給大：本票要數的是【每個 tick 幾隊】，樣本被截斷會讓「最大同批」失真成偏小。
+			if Probe.enabled: Probe.bump_sample("stagger.fired", {
+				"tick": state.world.current_tick, "team": team.team_id, "kind": "ambition"}, 20000)
 			AmbitionLadder.update(state, team)
 		# G1b：訂單 cadence（餘發賣盤 / 過期清）
 		if team.leader_id != -1 and state.world.current_tick >= team.order_eval_next_tick:
+			if Probe.enabled: Probe.bump_sample("stagger.fired", {
+				"tick": state.world.current_tick, "team": team.team_id, "kind": "order"}, 20000)
 			OrderSystem.new().tick_team_orders(state, team)
-			team.order_eval_next_tick = state.world.current_tick + OrderSystem.ORDER_POST_CADENCE
+			team.order_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, team.team_id, OrderSystem.ORDER_POST_CADENCE)   # ★錯峰：單一真值
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.orders_ambition", _t3)
 		# ★A4 solo-convert：被邀 settle 的獨立團(非子隊)抵達 target outpost→就地轉居民
 		#   （非等 pairwise interaction 有 co-located 對手；鏡射 _settle_relocated_village solo 三分支）。

@@ -123,6 +123,7 @@ func _initialize() -> void:
 	_test_evaluate_infrastructure()
 	_test_storage_fits_upgrade_cost()
 	_test_pick_facility_upgrade_scale()
+	_test_cadence_stagger()
 	_test_subteam_arrival_triggers_build()
 	_test_dispatch_upgrader_and_facility()
 	_test_auto_settle_after_build()
@@ -7822,6 +7823,53 @@ func _test_evaluate_outpost_location() -> void:
 #     ★★不自己重寫一份比較邏輯再斷言 —— 那樣驗的是我抄得對不對，不是 code 對不對。
 #   ★★★D 是【負向】的：faction 內、非 leader 自有 ⇒ 不得升級。
 #     沒有 D，範圍擴大會【靜默通過】—— 因為它的症狀是「多了一件好事」，不會有人來報 bug。
+# ★★★cadence 錯峰（spec 2026-08-27）：⑤機械 guard ＋ 錯峰函式的性質。
+#   ★★⑤與③⑥是【配套】：若 `CADENCE` 可被偷偷改長度繞過，本票就能靠「峰值下降」的表面改善
+#     ＋「spike 中位數不保證下降」的免責，交出一張看起來合格實則空的票。
+#   ★★★所以這一段【刻意手抄數字】—— 與前面那些「改讀單一真值」的 assert 相反：
+#     那些手抄的是【附帶的】設計常數（cap），改了不該紅；
+#     ★這裡手抄的就是【凍結本身】—— 數字變了就是要紅，那正是 assert 的內容。
+func _test_cadence_stagger() -> void:
+	print("--- cadence 錯峰：常數凍結 + 錯峰性質 ---")
+	# ⑤★常數逐位元凍結（★不得靠改 cadence 長度來「達成」錯峰）
+	assert(AmbitionLadder.LADDER_EVAL_CADENCE == 10 * WorldState.TICKS_PER_HOUR,
+		"★LADDER_EVAL_CADENCE 被改了（實際=%d，凍結值=10h）—— 錯峰票不得靠改 cadence 長度達成" % AmbitionLadder.LADDER_EVAL_CADENCE)
+	assert(OrderSystem.ORDER_POST_CADENCE == 12 * WorldState.TICKS_PER_HOUR,
+		"★ORDER_POST_CADENCE 被改了（實際=%d，凍結值=12h）—— 同上" % OrderSystem.ORDER_POST_CADENCE)
+	var C: int = AmbitionLadder.LADDER_EVAL_CADENCE
+	var gap: int = CadenceStagger.min_gap_of(C)
+	assert(gap == maxi(1, C / CadenceStagger.MIN_GAP_DIVISOR), "MIN_GAP 必須由 cadence 導出，不是獨立常數")
+	# ①★純函式：同輸入恆同輸出（★沒有隱藏計數器）
+	for t in [0, 7, 999, 100000]:
+		assert(CadenceStagger.next_tick(t, t, 42, C) == CadenceStagger.next_tick(t, t, 42, C),
+			"next_tick 必須是純函式（同輸入同輸出）—— 若不成立表示有人加了持久狀態")
+	# ②★★wrap clamp：掃一整個週期，同隊相鄰間隔【永不】小於 MIN_GAP
+	#   ★這正是「offset C−1 → 0 那次差值 −(C−1)」會塌成 1 tick 的那個邊界。
+	var worst: int = 1 << 30
+	for tm in [0, 1, 2, 7, 13, 42, 101]:
+		var cur: int = 0
+		for _k in range(40):
+			var nxt: int = CadenceStagger.next_tick(cur, cur, tm, C)
+			worst = mini(worst, nxt - cur)
+			cur = nxt
+	assert(worst >= gap, "★★wrap clamp 失效：實測最小間隔 %d < MIN_GAP %d ⇒ 同隊會在相鄰 tick 連思" % [worst, gap])
+	# ③★打散：offset 不得與 team_id 順序相關（相鄰 id 不該落在相鄰相位）
+	var phases: Array = []
+	for tm2 in range(0, 24):
+		phases.append(CadenceStagger.next_tick(0, 0, tm2, C) % C)
+	var adjacent_run: int = 0
+	for i2 in range(1, phases.size()):
+		if absi(int(phases[i2]) - int(phases[i2 - 1])) <= 1: adjacent_run += 1
+	assert(adjacent_run < phases.size() / 2,
+		"★打散失效：%d/%d 組相鄰 id 的相位也相鄰 ⇒ 等於沒 hash（直接 %% cadence 就會長這樣）" % [adjacent_run, phases.size() - 1])
+	# ④★★輪轉：同一隊在不同 cycle 的相位必須會變（否則「誰抽到好位置」會複利成優勢）
+	var ph: Dictionary = {}
+	for cyc in range(12):
+		ph[CadenceStagger.next_tick(cyc * C, cyc * C, 5, C) % C] = true
+	assert(ph.size() >= 6, "★★輪轉失效：同一隊 12 個 cycle 只出現 %d 種相位 ⇒ offset 幾乎是終身固定的" % ph.size())
+	assert(CadenceStagger.next_tick(100, 100, 3, 0) > 100, "cadence<=0 的退化保護：不得回到過去或原地")
+	print("cadence 錯峰 OK（常數凍結／純函式／wrap clamp／打散／輪轉／退化保護）")
+
 func _test_pick_facility_upgrade_scale() -> void:
 	print("--- 升級收進同一把秤：A/B/C/D fixture ---")
 	var fai := FactionAISystem.new()
