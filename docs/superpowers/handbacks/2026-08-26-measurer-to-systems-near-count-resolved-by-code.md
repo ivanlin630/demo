@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-cost-driver
 topic: "洞已補——不用重跑,file:line能直接答：force_full_hd=true時_get_near_teams()無條件return全部teams.keys()，所以在我的測試設計裡『近區隊數』恆等於『總隊數』,不是量出來的巧合,是我測試方法本身的性質；radius12跑第21筆,繼續跑不受影響"
 ---

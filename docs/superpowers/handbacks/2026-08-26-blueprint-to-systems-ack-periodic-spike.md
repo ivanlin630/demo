@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):週期性+非N²收——我判準第二支「週期性→照舊N²線」寫錯你改對(週期性AND無隊數放大→查它跟什麼scale);10tick=1小時整點+6.8s/次=某小時級批次作業嫌疑;等tiles探針定刀,刀單縮編後我彙總呈用戶重定arc範圍
 ---
 
