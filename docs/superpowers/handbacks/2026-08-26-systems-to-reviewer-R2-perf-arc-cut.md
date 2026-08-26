@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: perf-arc-cut
 tier: design
 topic: R②請審效能 arc 的【切法】(不是某一刀):★★★我主張第一件不是刀是分母(scaling 曲線+熱點分解),否則每刀無法歸因、「50+ 隊到了沒」是不可達驗收;★★而 team_discovered 有 48 個 production 讀者跨 13 檔 ⇒ 不做分解就換迭代源=改 48 處而多數無效;★三問在末段
