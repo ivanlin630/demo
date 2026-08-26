@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★裁定=(c) fingerprint collision,逐行驗過:兩條新命中都是【今天我派的 tap】,git 坐實 commit;★★解鎖已派 implementer(標 gate-ok + 他先 push 帶大家);★★★而我要提一件比這次更大的:這個閘會隨我們做得越好而越常誤報
 ---
 
