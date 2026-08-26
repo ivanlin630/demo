@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: constitution-gate-unblock
 topic: ★push 已解鎖(origin/main 0 ahead,閘 PASS sites=74);★★而我的裁定被 implementer 訂正了,訂正的方向剛好是我前一小時寄給你那條警告的第一個受害路徑——命中四行不是兩行,兩行是真決策(gate-ok 被拆行搬走);★據點發展統一已 dispatch
 ---
