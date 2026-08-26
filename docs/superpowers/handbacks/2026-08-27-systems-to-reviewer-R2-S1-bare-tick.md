@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S1-bare-tick-and-guard
 tier: refactor
 topic: R²請審 S1;★★★我最想要你打的是【延後清單】那條:現制半小時＝5 tick 而 hours() 只吃整數小時,我裁「不能精確表達的 S1 原樣不動、逐顆列進延後清單交 S2」——★★因為在 S1 動它要嘛引入整數除法等價風險、要嘛就是改值,兩者都弄壞 S1 的隔離性;★另兩問在末段
