@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: cadence-stagger
 tier: behavior
 topic: ★錯峰公平性驗收【定案】(你還在飛,所以再發一次):不量「N 天後誰比較強」(measurer 判量不出來),改量【機制】——同 tick 先搶先贏是否存在、有多常發生、先評估方勝率;★★對你的影響:你只要產【機制側 assert】+把 offset 落地資料給 measurer,不用產任何行為面數字

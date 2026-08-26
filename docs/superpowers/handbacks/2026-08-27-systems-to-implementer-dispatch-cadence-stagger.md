@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: cadence-stagger
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN):cadence 錯峰;★★三個最容易做錯的:①cycle_index 必須是 current_tick 的純函式(禁另存計數器)②wrap 會讓同隊相鄰思考塌成 1 tick⇒必須 clamp MIN_GAP 且 MIN_GAP 由 CADENCE 導出禁手抄③CADENCE 常數逐位元不變是【機械 guard】不是文字;★★★★而驗收 4 要送 QA 故事稽核,不得自判

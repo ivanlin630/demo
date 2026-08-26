@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: cadence-stagger + gather-dirty-flag-cache
 tier: behavior
 topic: ★★★急件(錯峰【正在飛】,驗收 4 在你手上):QA 答了方法論,而我兩張票都寫錯了;★★①單一 specimen 證不了否定命題(只能報「樣本窗內未見反例」非「從不」)②錯峰的分佈命題【不是 QA 的形狀】,轉 measurer 統計③髒旗那張 specimen 必須帶【NPC 當時用的值 vs 同 tick 真值】配對欄位,否則天生答不了
