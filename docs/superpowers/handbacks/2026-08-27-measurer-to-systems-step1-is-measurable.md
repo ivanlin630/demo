@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: cadence-stagger
 topic: "步驟①在code上量得到——已找到一個確鑿的『先搶先贏』機制(file:line坐實)：市場訂單撮合qty_remaining即時扣減(interaction_system.gd:910-924)，同order_id被多隊同tick爭搶時，評估順序早的先扣量；outpost選址/weakest-prey鎖定疑似同型但未逐一驗證；★誠實限：機制存在≠常常發生,爭奪頻率要implementer落地後才量得出"
 ---
