@@ -19,39 +19,52 @@ var _rules: Array = []
 func _initialize() -> void:
 	_run(); quit()
 
-func _mk(re: String, disp: String, reason: String) -> Dictionary:
+func _mk(re: String, disp: String, reason: String, lit_bound: bool = false) -> Dictionary:
 	var r := RegEx.new(); r.compile(re)
-	return {"re": r, "disp": disp, "reason": reason}
+	return {"re": r, "disp": disp, "reason": reason, "src": re, "hits": 0, "lit_bound": lit_bound}
 
 func _run() -> void:
 	# ★規則順序即優先序；每條都要寫【為什麼它不是時間量】
+	# ★★★規則順序即優先序：【專用 / 是時間量】的全部排在【寬規則】之前。
+	#   ★血證（規則自審第一次跑就抓到，而這張票本來已經結案）：
+	#     ① `TICKS_PER_DAY / 4`（sim_runner:294/340，註解「每 6 小時」）被 `% … == 0` 吃掉
+	#     ② `current_tick - 1000`（player_trade_system:103）被 `get(k, 0)` 吃掉
+	#        ★★而那一顆是【真的裸 tick】—— 我原本的結論「(a) = 0」因此是錯的。
+	#   ⇒ ★★★寬規則排在前面會【安靜地】吐掉真答案，而它的症狀只有一個：
+	#     專用規則命中 0。【那就是【印每條命中數】這條防線在抓的東西。】
 	_rules = [
-		_mk("Probe\\.(bump_sample|note)\\(", "d_not_time", "sample_cap：bump_sample 末位是【樣本上限】不是 tick"),
-		# ── ★(b)/(c) 逐筆釘死（★file:line 當錨，理由寫在這裡也寫在 code 註記裡）──
-		_mk("const TICKS_PER_DAY:", "c_whitelist", "根常數本身：hours()/days() 由它導出，改成 hours() 會循環定義"),
-		_mk("TICKS_PER_DAY / 24", "c_whitelist", "曆法結構：24＝一天幾小時，不隨 tick 縮放（改根時它必須維持 24）"),
-		_mk("TICKS_PER_MONTH\\) % 12", "c_whitelist", "曆法結構：12＝一年幾月"),
-		_mk("const TICKS_PER_SECOND:", "c_whitelist", "★播放速率：每【真實秒】渲染幾個 world tick —— 不是世界時間，不隨小時縮放"),
+		# ── (a) 改：真裸 tick 字面量 ──
+		_mk("current_tick\\s*-\\s*([0-9]{2,})", "a_change", "★真裸 tick：`current_tick - <字面量>` 沒有經過任何具名時間常數 ⇒ 根旋鈕一改它就静默偏移", true),
+		# ── (b) 延後 ──
 		_mk("const TICKS_PER_TURN:", "b_defer", "24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2"),
-		# ── ★分類器缺口（第一版沒涵蓋的機械形狀，實測 11 筆待人判時發現）──
-		_mk("< 0\\b", "d_not_time", "sentinel：`< 0` 是「從未發生」的哨兵比較"),
-		_mk("maxi\\(1,", "d_not_time", "floor：`maxi(1, …)` 的 1 是下限保護，不是一段時間"),
-		_mk(", 1\\)$", "d_not_time", "floor：末位 1 是下限保護"),
-		_mk("\"speed\": 1", "d_not_time", "speed_mult：速度倍率，不是 tick"),
-		_mk("_next_tick = 0", "d_not_time", "sentinel：重設為「未排程」"),
-		_mk("\\}\\s*,\\s*[0-9]+\\s*\\)\\s*$", "d_not_time", "sample_cap：字典後接的整數是 cap"),
-		_mk("%[^=]*(==|!=)\\s*0", "d_not_time", "zero_compare：`% INTERVAL == 0` 的 0 是餘數判準，不是時間量"),
-		_mk("get\\([^)]*,\\s*-?[0-9]+\\s*\\)", "d_not_time", "sentinel_default：`get(k, 0/-1)` 的預設值是哨兵"),
-		_mk("current_tick\\s*\\+=\\s*1", "d_not_time", "increment：tick 前進 1 步＝時間軸本身的定義"),
-		_mk("TICKS_PER_HOUR\\)\\s*%\\s*24", "c_whitelist", "曆法結構：24＝一天幾小時 —— ★是時間量，但不隨 tick 縮放（根改了它仍須是 24）"),
-		_mk("TICKS_PER_DAY\\)\\s*%\\s*30", "c_whitelist", "曆法結構：30＝一月幾天 —— ★是時間量，但不隨 tick 縮放"),
-		_mk("SEASON_LENGTH\\)\\s*%\\s*4", "c_whitelist", "曆法結構：4＝一年幾季 —— ★是時間量，但不隨 tick 縮放"),
-		_mk("TICKS_PER_DAY\\s*/\\s*4", "c_whitelist", "曆法結構：/4＝一天四等分 —— ★分母是 TICKS_PER_DAY，已隨根自動縮放，改寫成 hours() 只是換寫法"),
+		# ── (c) 白名單：根常數本身 ──
+		_mk("const TICKS_PER_DAY:", "c_whitelist", "根常數本身：hours()/days() 由它導出，改成 hours() 會循環定義"),
+		_mk("const TICKS_PER_SECOND:", "c_whitelist", "★播放速率：每【真實秒】渲染幾個 world tick —— 量的是現實時間，不隨小時縮放"),
+		# ── (c) 白名單：曆法結構（是時間量，但不隨 tick 縮放）──
+		_mk("TICKS_PER_DAY / 24", "c_whitelist", "曆法結構：24＝一天幾小時（改根時它必須維持 24）"),
+		_mk("TICKS_PER_HOUR\\)\\s*%\\s*24", "c_whitelist", "曆法結構：24＝一天幾小時（顯示端）"),
+		_mk("TICKS_PER_DAY\\)\\s*%\\s*30", "c_whitelist", "曆法結構：30＝一月幾天"),
+		_mk("TICKS_PER_MONTH\\) % 12", "c_whitelist", "曆法結構：12＝一年幾月"),
+		_mk("SEASON_LENGTH\\)\\s*%\\s*4", "c_whitelist", "曆法結構：4＝一年幾季"),
+		# ── (c) 白名單：已由具名時間常數導出（★是時間量，但已隨根自動縮放）──
+		#   ★這一組原本被我誤標成 (d)。它們確實是時間量（「每 50 小時」「2 天」），
+		#   ★★只是不需要改 —— 而【不需要改】是 (c)，不是【不是時間量】。
+		_mk("TICKS_PER_DAY\\s*/\\s*4", "c_whitelist", "已導出：/4＝一天四等分（每 6 小時），分母是 TICKS_PER_DAY ⇒ 已隨根縮放"),
+		_mk("[0-9]+\\s*\\*\\s*(WorldState\\.)?TICKS_PER_", "c_whitelist", "已導出：`N * TICKS_PER_*`（例「每 50 小時」「2 天」）—— 是時間量，但已隨根縮放"),
+		_mk("[A-Z_]{3,}\\s*\\*\\s*[0-9]+", "c_whitelist", "已導出：具名時間常數 × 倍數 ⇒ 已隨根縮放"),
+		# ── (d) 不是時間量：★每條必須寫【為什麼它不是時間量】──
 		_mk("base\\s*\\*\\s*31", "d_not_time", "hash_mult：31 是雜湊乘數"),
-		_mk("^\\s*var\\s+\\w+:\\s*int\\s*=\\s*0", "d_not_time", "decl_init：`= 0` 是「尚未排程」的初值，不是一段時間"),
+		_mk("\"speed\": 1", "d_not_time", "speed_mult：速度倍率，不是 tick"),
+		_mk("maxi\\(1,", "d_not_time", "floor：`maxi(1, …)` 的 1 是下限保護"),
+		_mk(", 1\\)$", "d_not_time", "floor：末位 1 是下限保護"),
+		_mk("_next_tick = 0", "d_not_time", "sentinel：重設為「未排程」"),
+		_mk("current_tick\\s*\\+=\\s*1", "d_not_time", "increment：tick 前進 1 步＝時間軸本身的定義"),
+		_mk("< 0\\b", "d_not_time", "sentinel：`< 0` 是「從未發生」的哨兵比較"),
+		_mk("\\}\\s*,\\s*[0-9]+\\s*\\)\\s*$", "d_not_time", "sample_cap：字典後接的整數是 cap"),
+		_mk("%[^=]*(==|!=)\\s*0", "d_not_time", "zero_compare：`% INTERVAL == 0` 的 0 是餘數判準"),
+		_mk("get\\([^)]*,\\s*-?[0-9]+\\s*\\)", "d_not_time", "sentinel_default：`get(k, 0/-1)` 的預設值是哨兵"),
+		_mk("^\\s*var\\s+\\w+:\\s*int\\s*=\\s*0", "d_not_time", "decl_init：`= 0` 是「尚未排程」的初值"),
 		_mk("==\\s*0\\b", "d_not_time", "zero_compare：與 0 比較是「未排程」判斷"),
-		_mk("[A-Z_]{3,}\\s*\\*\\s*[0-9]+", "d_not_time", "derived_mult：已由具名時間常數導出，倍數不是裸 tick"),
-		_mk("[0-9]+\\s*\\*\\s*(WorldState\\.)?TICKS_PER_", "d_not_time", "derived_mult：`N * TICKS_PER_*` 已隨根縮放"),
 		_mk("\\+\\s*1\\b", "d_not_time", "increment：+1 是「下一個」不是一段時間"),
 		_mk("-\\s*1\\b", "d_not_time", "sentinel：-1 是無效值哨兵"),
 	]
@@ -75,8 +88,17 @@ func _run() -> void:
 		var disp: String = "NEEDS_HUMAN"
 		var reason: String = "★形狀認不出來 ⇒ 交人判（★保守：漏判表現成「要人看的變多」，不是悄悄歸類掉）"
 		for r in _rules:
-			if (r["re"] as RegEx).search(src) != null:
-				disp = String(r["disp"]); reason = String(r["reason"]); break
+			var m: RegExMatch = (r["re"] as RegEx).search(src)
+			if m == null:
+				continue
+			# ★規則是【逐行】比對，而列是【逐字面量】—— 同一行的別顆字面量會被沾到。
+			#   ★★lit_bound 的規則要求【捕捉到的數字必須就是這一列的字面量】，
+			#   否則 `current_tick - 1000` 那行的 `get(k, 0)` 的 0 也會被報成 (a)＝1 個站點虛胖成 2 列。
+			if bool(r["lit_bound"]) and m.get_group_count() >= 1 and m.get_string(1) != parts[2]:
+				continue
+			disp = String(r["disp"]); reason = String(r["reason"])
+			r["hits"] = int(r["hits"]) + 1
+			break
 		tally[disp] = int(tally.get(disp, 0)) + 1
 		rows.append("%s|%s|%s|%s|%s|%s|%s" % [disp, reason, parts[0], parts[1], parts[2], parts[3], src])
 	f.close()
@@ -100,6 +122,24 @@ func _run() -> void:
 		sum += int(tally[k])
 	head.append("# ★合計 %d vs 母體 %d ⇒ %s" % [sum, total, "一致" if sum == total else "★不一致"])
 	head.append("#")
+	# ★★★規則表自審（systems 2026-08-27 加的第三條防線）：每條規則印【它命中幾筆】。
+	#   ★理由：規則會【腐爛】—— 一條為 `bump_sample(..., 200)` 寫的規則，
+	#     日後可能命中一個【真的是時間量】的東西。
+	#   ★★命中數異常大 ＝ 這條太寬；★★★命中 0 ＝ 這條已死（它守的形狀不在了，或從來沒對過）。
+	#   ⇒ 這兩個訊號讓「規則表」本身可審計，而不必每次重新人工審全表。
+	head.append("# ── 規則命中數（★太寬／已死 都在這欄看得見）──")
+	var _wide: int = 0
+	for r2 in _rules:
+		var h: int = int(r2["hits"])
+		var flag: String = ""
+		if h == 0:
+			flag = "   ★已死：命中 0 —— 它守的形狀不在了，或從來沒對過"
+		elif h >= 20:
+			flag = "   ★★太寬？命中 >=20，值得回頭看它有沒有吃到真的時間量"
+		if h >= 20:
+			_wide += 1
+		head.append("#   %-12s %3d  %s%s" % [String(r2["disp"]), h, String(r2["src"]), flag])
+	head.append("#")
 	var of := FileAccess.open(out_path, FileAccess.WRITE)
 	if of != null:
 		of.store_string("\n".join(PackedStringArray(head)) + "\n" + "\n".join(PackedStringArray(rows)) + "\n")
@@ -107,6 +147,11 @@ func _run() -> void:
 	print("\n[S1b-triage] 母體 %d｜合計 %d｜%s" % [total, sum, "對帳一致" if sum == total else "★對帳不一致"])
 	for k2 in tk:
 		print("   %-14s = %d" % [String(k2), int(tally[k2])])
+	print("   ── 規則自審（★太寬/已死）──")
+	for r3 in _rules:
+		var h3: int = int(r3["hits"])
+		if h3 == 0 or h3 >= 20:
+			print("   %s 命中 %d：%s" % ["★已死" if h3 == 0 else "★太寬?", h3, String(r3["src"])])
 	print("[S1b-triage] 落地：%s" % out_path)
 	print("=== bare_tick_triage DONE ===")
 
