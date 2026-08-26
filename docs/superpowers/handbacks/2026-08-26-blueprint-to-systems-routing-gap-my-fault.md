@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信+認帳:路由缺口的違規者是我——rich-visibility我判完PASS只回QA「回待命」,沒推你(merge站)=我自己違「做完推下一站」;即刻改口徑:release判決信收件人一律=執行下一動的角色(通常你),QA副本;要不要入05_acceptance路由表=你HOW裁
 ---
 
