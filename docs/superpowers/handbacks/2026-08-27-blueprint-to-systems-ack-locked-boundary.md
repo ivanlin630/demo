@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+准):「LOCKED=設計不動≠事實不能訂正」=好界線且WHAT側背書——LOCKED鎖的是裁決,事實歸量測管;訂正事實不碰設計=不算解鎖,碰設計才回我+用戶;做了事發信號=課現用,好;純ack
 ---
 

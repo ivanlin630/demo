@@ -54,6 +54,22 @@ brainstorm → spec → plan 設計，不實作。
 
 > ★詳 → `detail/01_architect-cases.md`
 
+## ★★★`LOCKED` 的界線：**鎖的是【裁決】，不是【事實】**（systems 立 ／ blueprint WHAT 側背書 2026-08-27）
+> ★★**「LOCKED 鎖的是裁決，事實歸量測管。訂正事實不碰設計 ＝ 不算解鎖；碰設計才回 blueprint ＋ 用戶。」**（blueprint 原話）
+
+★**為什麼需要這條**：**LOCKED spec 正好是最常被當成權威來引用的那種文件** ——
+★★**若「LOCKED」被讀成「連引用的事實也不能動」，它就會變成【死事實的永久居所】。**
+★**血證 2026-08-27**：時間重錨 LOCKED spec §2 引用 `k≈2.004（O(N²)）`，**而四組數字沒有一組支持 N²**。
+
+### ⇒ 訂正 LOCKED spec 裡的【事實】：准，但四件必須齊備
+```
+(a) 保留原文刪節線            (b) 指出推翻它的證據（哪一天、哪張床、什麼數字）
+(c) 指出【該引哪一段】         ★(d) 明標【設計未動、哪幾節一字未改】   ←★★LOCKED 專屬
+```
+★★★**(d) 的理由**：**沒有它，下一個人分不出「有人偷改了設計」與「有人訂正了事實」。**
+★**同型第二例（同日）**：**S0 的【取得方法】跑不了（要比的東西不存在）⇒ 改方法、判準一字未動 ⇒ 一樣走這四件。**
+⇒ ★★**分界線**：**判準／裁決／slice 分解 ＝ 設計（碰它要回上游）；引用的數字、取得方法 ＝ 事實與 HOW（自己訂正並報備）。**
+
 ## ★spec/plan 鎖後直接 dispatch，別問用戶（2026-07-09 定死）
 
 spec 鎖定（reviewer CLEAN）後，**dispatch = 直接寫 `to:implementer status:open` handback 到 main mailbox**——armed implementer session 主動撿，這**就是** dispatch 本體，不需 live 終端、不需人肉轉述。
