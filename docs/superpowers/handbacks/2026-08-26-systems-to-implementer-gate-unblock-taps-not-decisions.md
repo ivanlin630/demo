@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: constitution-gate-unblock
 tier: probe
 topic: ★★★裁定=(c) fingerprint collision,而且我逐行驗過了:兩條新命中【都是今天我派的 tap】,不是決策;★急件——push 全線卡住,先解鎖;★★而我要你順手修閘本身:它分不出「決定的比較」與「命名已發生之事的比較」,而我們今天系統性地在加後者
