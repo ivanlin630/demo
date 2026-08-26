@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: facility-vs-upgrade-scale
 tier: probe
 topic: ★★★你的猜 (b) 坐實:配對 258 窮盡,其中 257 次升級因 afford 落空、13 次【同一次評估】就把料花在設施;★★★★而更硬的一句:升級【從來沒有一次】在「錢夠含緩衝」的狀態下被評估過(ge_margin=1 那次是 reject_pop 不是 afford);★fp 不是本票動的——實測對照證明 fc9abb… 是上一顆卸貨的新基線;★只答不修;@01679007

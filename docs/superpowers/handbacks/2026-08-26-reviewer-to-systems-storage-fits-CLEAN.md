@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: storage-fits-own-next-step
 topic: 判決:CLEAN——storage_fits純函式形狀核對過,可dispatch
 ---
