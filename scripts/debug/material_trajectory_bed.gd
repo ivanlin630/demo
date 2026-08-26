@@ -139,6 +139,37 @@ func _run() -> void:
 		lines.append("   私產逐日：%s" % " ".join(PackedStringArray(s_priv)))
 		lines.append("   公庫逐日：%s" % " ".join(PackedStringArray(s_vault)))
 		lines.append("   當日拒絕：%s" % " ".join(PackedStringArray(s_rej)))
+	# ═══ ★★★material 進帳的出口分類（systems 派 2026-08-26 / slice material-income-zero）═══
+	#   ★四個出口互斥且窮盡，分母＝`matin.call`（該隊的採集迴圈走到 material 幾次）。
+	#   ★★分母缺了就分不出「這隊沒收入」與「這隊根本沒被採集迴圈走到」。
+	lines.append("")
+	lines.append("═══ ★★material 進帳出口（分母＝matin.call；★零 ≠ 沒接上，看 call 本身）═══")
+	lines.append("   team      call  pool_empty  carry_full  zero_other    gained      進帳量   載重/上限")
+	var mv := MovementSystem.new()
+	for tid3 in roster:
+		var c_all: int = int(Probe.counts.get("matin.call.team.%d" % int(tid3), 0))
+		var c_pe: int = int(Probe.counts.get("matin.pool_empty.team.%d" % int(tid3), 0))
+		var c_cf: int = int(Probe.counts.get("matin.carry_full.team.%d" % int(tid3), 0))
+		var c_zo: int = int(Probe.counts.get("matin.zero_gain_other.team.%d" % int(tid3), 0))
+		var c_g: int = int(Probe.counts.get("matin.gained.team.%d" % int(tid3), 0))
+		var amt: float = Probe.amount("matin.amount.team.%d" % int(tid3))
+		var tt2: TeamData = state.teams.get(tid3)
+		var wgt: String = "—"
+		if tt2 != null:
+			wgt = "%.0f/%.0f" % [mv.calc_total_weight(tt2), mv.get_carry_capacity(tt2)]
+		var mark: String = ""
+		if c_all > 0 and c_pe + c_cf + c_zo + c_g != c_all:
+			mark = "   ❌四類加不回 call"
+		elif c_all == 0:
+			mark = "   ←★★採集迴圈【從沒走到 material】"
+		lines.append("   %-6d %6d %11d %11d %11d %9d %11.1f %11s%s" % [
+			int(tid3), c_all, c_pe, c_cf, c_zo, c_g, amt, wgt, mark])
+	lines.append("  ★★★載重/上限：`carry_full` 只有在【上限被吃滿】時才成立 —— 兩欄要一起讀。")
+	# ★需求端（買料）那條【是另一條鏈】：採集是被動的，買料才是被決策的
+	lines.append("")
+	lines.append("═══ ★需求端（買料）＝另一條鏈：採集是【被動】的，沒有 goal/argmax 這一段 ═══")
+	lines.append("   resolver.resource_candidate.res.material = %d（★「為了取得 material 而提的 candidate」）" % 		int(Probe.counts.get("resolver.resource_candidate.res.material", 0)))
+	lines.append("   ★systems 的 (a)(b)(c)(d) 四格【只適用這一條】——★★被動採集沒有「有沒有提出」這個問題。")
 	lines.append("")
 	lines.append("★★兩條線【對齊看】：存量爬升的那幾天，當日拒絕有沒有跟著減少。")
 	lines.append("★★★判讀留給 systems —— 本床只給軌跡，不說是 sink 還是窗長。")
