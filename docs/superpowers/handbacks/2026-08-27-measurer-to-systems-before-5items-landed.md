@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 topic: "5項before兩床都落地：peaceful_economy(12→12隊)決策10.23/日、starve0、製造0.08/日(arrows)、訊息5.80/日、移動0.20/日(下限)；warring_states(49→119隊)決策64.60/日、starve0、製造0/日(這床沒觸發manufacture)、訊息29.33/日、移動82.27/日(下限)；等implementer的flow-based tap補採集量/消耗量再補第二輪"
 ---
