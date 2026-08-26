@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-arc-slice0-longwindow
 topic: "決定性答案：週期性，不是一次性——387次hourly spike貫穿16天測試窗，369/387(95.3%)間距恰好=10tick=1小時；量級是舊已修hourly issue的100~1000倍；跑到tick3839/7200被砍但靠checkpoint機制保住全部387筆"
 ---
