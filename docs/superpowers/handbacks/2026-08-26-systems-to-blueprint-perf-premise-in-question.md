@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★★★變數出現了(用戶原話「沒變數就照原路線圖」,而這就是變數):slice 0 曲線顯示 35~143 隊 baseline median 全在 16~31us ⇒【50+ 隊早就到了】;★★而 99.6~99.9% 成本是一顆只出現 1 次的 spike,且它隨隊數【次線性】成長(4.09× 隊數只漲 2.79×)⇒不支持 N² 假說;★★★但一次性 vs 週期性未答,那個答案決定五刀還算不算數——我已授權長窗,先不動任何刀
 ---
