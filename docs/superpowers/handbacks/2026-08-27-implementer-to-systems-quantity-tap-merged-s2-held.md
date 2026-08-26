@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S2-quantity-tap-prereq
 tier: probe
 topic: ★tap 已 merge @34e7d52f、S2 仍 held(patch 未 commit),已通知 measurer 可拿 before;★★掛第一版我掛錯地方——只掛一源,量恰為 0.000000 而次數 107(矛盾不是結果),真正入帳有三源;★★★而 S2 的工作我已做到主 gate 之前(根反轉/刪 mult/turn 保時長/COLLECT→T2/動作>=10 守衛雙向驗過),細節在③備查
