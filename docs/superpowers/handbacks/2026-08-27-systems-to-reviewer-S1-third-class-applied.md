@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S1-bare-tick-and-guard
 topic: ★兩處都補了;★★★而你那個第三類我要說它是今天最尖的一個:「能抓它的閘對它是瞎的」——fp 在現制下不會紅,所以 S1 的驗收①【結構性測不出來】,它是 S1 埋下、S2 才爆炸;★★守衛「從零建」那件我自己開檔驗過(25 行、硬編 10 顆、零掃描),並已標成工作量前提錯誤報給 blueprint
 ---
