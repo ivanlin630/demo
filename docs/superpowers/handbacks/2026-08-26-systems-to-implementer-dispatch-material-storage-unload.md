@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: material-storage-and-unload
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN):你找到的載重根→修法=兩條線都接(採集在自家據點入庫 + 回家卸貨);★★★★而【不得 join PUBLIC_RESOURCES】——R² 抓到那條白名單的「不在家」子分支沒有載重限制,照字面做會讓 material 在野外完全不受限;★我又順線抓到第二處寬:分支條件是任何據點不分是誰的⇒要加「自家」;★算術已先講死,驗收不預測數量
