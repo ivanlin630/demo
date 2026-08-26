@@ -4702,7 +4702,7 @@ func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
 		if cur >= 3: continue
 		if cur == 0 and OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile): continue
 		var cost: Dictionary = OutpostSystem.upgrade_cost(f, cur + 1)
-		if not os._can_afford(team, tile, cost):
+		if not os._can_afford(team, tile, cost, "self_rescue"):
 			continue   # 料未備（公庫+私產不足）→ 非 self-rescue 候選（禁掏空、genuine）
 		# ★genuine P(survive_to_harvest)：建工期(person-ticks / pop / 日tick) < 餓死窗(food_days) 才蓋得完。
 		# ★工期單一真相源（2026-08-25）：舊式除的是整日 tick(240) 而非每日推進窗數(24)

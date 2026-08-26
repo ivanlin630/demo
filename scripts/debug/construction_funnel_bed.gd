@@ -329,6 +329,36 @@ func _run() -> void:
 		var kws: String = String(kw)
 		if kws.begins_with("wall.reject_no_slot.used_") or kws.begins_with("wall.reject_cannot_afford.res."):
 			lines.append("      %-44s = %d" % [kws, int(Probe.counts[kw])])
+	# ★★★afford-short-res（systems 派 2026-08-26）：那些「付不起」到底缺的是【哪一個】res。
+	#   ★分母＝`wall.reject_cannot_afford`（★只能用 `wall` 那一族對帳——`_can_afford` 有五個呼叫點，
+	#     其餘四處的失敗不會 bump `wall.reject_cannot_afford`，混進來對帳式就假）。
+	#   ★一次失敗只記一顆（迴圈內、return 前）⇒ 逐項加總必須【等於】分母。
+	lines.append("--- ★★缺的是哪一個 res（afford.short.wall.*）---")
+	var _short: Dictionary = {}
+	var _short_sum: int = 0
+	var _other: Dictionary = {}
+	for k9 in Probe.counts:
+		var ks9: String = String(k9)
+		if ks9.begins_with("afford.short.wall."):
+			_short[ks9.substr(18)] = int(Probe.counts[k9])
+			_short_sum += int(Probe.counts[k9])
+		elif ks9.begins_with("afford.short."):
+			_other[ks9.substr(13)] = int(Probe.counts[k9])
+	var _rej: int = _sum_days("wall.reject_cannot_afford.day.")
+	if _short.is_empty():
+		lines.append("  ★零筆 —— ★★分不出【沒有這種失敗】還是【tap 沒接上】；分母 wall.reject_cannot_afford = %d" % _rej)
+	else:
+		var sk9: Array = _short.keys(); sk9.sort()
+		for k10 in sk9:
+			lines.append("      %-14s = %d（%.1f%%）" % [String(k10), int(_short[k10]),
+				100.0 * float(_short[k10]) / maxf(float(_short_sum), 1.0)])
+		lines.append("  ★★對帳：逐項合計 %d vs wall.reject_cannot_afford %d ⇒ %s" % [
+			_short_sum, _rej, "✅一致" if _short_sum == _rej else "❌不一致（★tap 或分母有一個錯了）"])
+	if not _other.is_empty():
+		var ok9: Array = _other.keys(); ok9.sort()
+		lines.append("  ★其餘呼叫點（★不入上面的對帳，只是別讓它們隱形）：")
+		for k11 in ok9:
+			lines.append("      %-24s = %d" % [String(k11), int(_other[k11])])
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
 	if out_path != "":
