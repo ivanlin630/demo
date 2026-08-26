@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 tier: behavior
 topic: ★merged @fb1a3d8d 閘 PASS(74)、--import 已跑;★★★兩個錯是我的:①驗收 4 我挑錯相位標籤(gather.market 兩處都 skip_refresh=true,根本不呼叫 _harvest_market_known)②我 spec 寫「fp 會變」是錯的——快取正確就【該】不變,你量到不變是【對的】不是異常;★★★★而你的窮盡口徑比 R² 寬,而那個寬度【救了它】:R² 只數 append,而 erase 也會改 size

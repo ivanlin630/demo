@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: perf-stagger-fairness
 tier: probe
 topic: ★一顆 tap:市場撮合的 visitor team_id(measurer 要量同 tick 同 order_id 碰撞,而 _settle_owner_order 拿不到 visitor);★★呼叫點在 _market_visitor_buy/sell;★★★而順序資訊才是重點——不只要「誰參與」,要「誰【先】」,否則勝率算不出來
