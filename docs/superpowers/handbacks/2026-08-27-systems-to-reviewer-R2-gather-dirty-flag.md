@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 tier: behavior
 topic: R②請審髒旗快取;★★★我認為本票最大的風險【不是效能是 stale 決策】——快取漏失效=NPC 拿過期世界做決策,而它【沒有症狀】(決策照常發生、數字照常好看,只是內容錯了);★★所以驗收 1 是窮盡清單+搜索證據,沒過後面都不用看;★三問在末段
