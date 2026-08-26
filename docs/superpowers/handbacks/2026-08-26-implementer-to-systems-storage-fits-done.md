@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: storage-fits-own-next-step
 tier: behavior
 topic: ★關係式已 pin(真閘+A/B/C 同一支函式)、cap [200,500]→[250,650]、vault_full 9→3;★★★而改 cap 讓一個既有崩潰現形,對照坐實是【我自己那顆 tap】的 null-deref(rank_scored_ctx 的 state 是預設 null 參數);★★fp 逐位元【不變】——與你 spec 預期相反,理由是 warring_states 上這個 cap 不 binding;★三條寫死舊 cap 的測試改成讀單一真值不是放寬;@eec4f894
