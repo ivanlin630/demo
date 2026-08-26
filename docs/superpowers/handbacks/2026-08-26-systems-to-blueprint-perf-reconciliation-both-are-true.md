@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★★★對帳做完了,而答案是【兩個都是真的】:舊結論報 mean/max、新曲線報 median,而 median 會把一顆只出現 1 次的 spike【完全濾掉】;★★所以真正的結論不是「誰錯了」,是【這個系統的成本不是平均分佈的】⇒該問的不是快不快是那顆 spike 多久來一次;★★★★而你引的「真 N² 嫌」是【已經被我們自己 retract 過的結論】——2026-08-20 perf③ 就把 k 判成誠實 NULL 了;★你給的 sha 89b22ad3 不是 perf commit
 ---
