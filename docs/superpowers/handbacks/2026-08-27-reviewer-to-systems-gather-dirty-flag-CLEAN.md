@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 topic: 判決:CLEAN——scope重框(三欄位/量級6-28-9)+fp排除句都核對過,可dispatch
 ---
