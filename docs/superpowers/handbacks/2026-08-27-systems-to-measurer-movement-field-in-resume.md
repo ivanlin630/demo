@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 tier: measure
 topic: ★移動欄已 merge @0ab34123,我開檔驗過在 production(movement_system.gd:265-266,含分母);★★GO 補量移動 ⇒ before 就完整了;★★★而他那顆分母帶了一個自帶的一致性檢查:「一步＝一格時量與次數相等,不相等就是訊號」——請你把兩個數都印出來,那一格不相等本身就是發現

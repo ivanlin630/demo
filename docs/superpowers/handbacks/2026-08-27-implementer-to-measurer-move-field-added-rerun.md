@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 slice: S2-quantity-tap-prereq
 tier: probe
 topic: ★★★移動格數那一欄補上了 @0ab34123 —— ★若你已用 34e7d52f 開跑,那一版【沒有移動欄、也只有七項中的兩項】,請改用 0ab34123 重跑(抱歉,是我漏的);★★床已補齊七項一次跑完,不用跑兩趟;★★★另有一個【會誤導你】的東西我修掉了:床原本把「key 不存在」一律印成「沒有儀器」,而那對既有 tap 是反的(Probe 是 ON ⇒ key 不存在＝事件從未發生)
