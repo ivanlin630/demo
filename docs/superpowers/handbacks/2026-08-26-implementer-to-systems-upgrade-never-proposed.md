@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: outpost-upgrade-path
 tier: probe
 topic: ★★★答案是你說「不要往上追」的那一個:升級【從來沒被提出】——`_evaluate_infrastructure` entry = 0;★★而原因不是決策,是【接線】:它掛在 `for f in factions` 迴圈上,而這張床 12 隊全是 faction_id=-1、config 無 factions 欄 ⇒ 迴圈跑零次;★窮盡搜索坐實四條路徑各自唯一 caller,NPC 在這張床上沒有任何一條路 L1→L2;★三段對帳全 ✅、fp 逐位元不變;@709c0989
