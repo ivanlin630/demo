@@ -164,6 +164,18 @@ func _run() -> void:
 			mark = "   ←★★採集迴圈【從沒走到 material】"
 		lines.append("   %-6d %6d %11d %11d %11d %9d %11.1f %11s%s" % [
 			int(tid3), c_all, c_pe, c_cf, c_zo, c_g, amt, wgt, mark])
+	# ★★卸貨那一半的出口（分母＝matunload.call）：★沒有它，「公庫有料」分不出是採來的還是卸下來的
+	lines.append("  ★卸貨出口（分母 matunload.call）：")
+	for tid4 in roster:
+		var u_all: int = int(Probe.counts.get("matunload.call.team.%d" % int(tid4), 0))
+		if u_all == 0:
+			continue
+		lines.append("      Team%-3d call %4d｜不需要 %4d｜卸下 %4d（%.1f）｜★倉滿卸不完 %4d" % [
+			int(tid4), u_all,
+			int(Probe.counts.get("matunload.none_needed.team.%d" % int(tid4), 0)),
+			int(Probe.counts.get("matunload.moved.team.%d" % int(tid4), 0)),
+			Probe.amount("matunload.amount.team.%d" % int(tid4)),
+			int(Probe.counts.get("matunload.vault_full.team.%d" % int(tid4), 0))])
 	lines.append("  ★★★載重/上限：`carry_full` 只有在【上限被吃滿】時才成立 —— 兩欄要一起讀。")
 	# ★需求端（買料）那條【是另一條鏈】：採集是被動的，買料才是被決策的
 	lines.append("")

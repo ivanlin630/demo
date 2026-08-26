@@ -102,6 +102,11 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 
 		_apply_normal_tax(state, team, tile, gained)
 
+		# ★★②回家卸貨：隊站在【自家】據點上時，超出載重的私產 material 卸進公庫。
+		#   ★只做①的話，那 4 支開局塞的 400 還是卡在私產、`carry_full` 仍然 72/72 ——
+		#     ★★②才是打開那個自我維持鎖的那一把（採不到料 ← 超載 ← 料在身上 ← 採不到料）。
+		_unload_excess_material(state, team, tile)
+
 		# ★農業a：農田獨立生產線（drift 正位、farming 從 gather 乘數改獨立產出）——owner 隊每日產農田糧入自家糧倉。
 		# 產出=farming_level × FARM_UNIT_YIELD × farm_labor工位(勞力池競爭 gather/mfg=guns-vs-butter) × harvest_factor(季節)。
 		# owner-gate：一 tile 一次（owner 隊觸發、非每共址隊重產）。⑤無 farming_level→產出 0（無田不產）。
@@ -330,6 +335,16 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 				gain *= (1.0 + eng_skill * 0.3)
 			"ore_gold", "ore_silver":
 				gain *= (1.0 + eng_skill * 0.5)
+		# ★★★①（spec 的第一半）我【沒有照字面做】，理由講死：
+		#   spec 寫「採集所得的 material 在自家據點上 → TileBank.deposit 進公庫」。
+		#   ★照做的話 material 就【繞過一般稅】(`NORMAL_TAX_RES` 含 material) ——
+		#     那不是「多一條入庫路」，是【把 material 的稅制整個刪掉】，而自家據點正是它的主要場景。
+		#   ★★實測撞破兩條既有不變量測試（headless）：
+		#     `公庫應 1.5，實際=5.000`／`溢出部分留私產 4.5，實際=0.000`
+		#     ⇒ 而票自己的驗收⑥要求 headless baseline 7 PASS ⇒ ★照字面做，票的驗收自相矛盾。
+		#   ★★★而【②卸貨】單獨就足以打開那個鎖（spec 自己寫的：「②才是解鎖那一半」）：
+		#     採集照舊走 carry-limited 私產路（稅制不動），超載的部分在自家據點卸進公庫。
+		#   ⇒ 保留稅制、保留兩條不變量、鎖照樣開。★要不要改回①是 systems 的裁決，我只呈報。
 		if res in PUBLIC_RESOURCES or res == "food":
 			# 礦/主糧進腳下 outpost 公庫（糧倉），over-cap drop = sink。
 			# food 進糧倉 = 等義「自己存自己村庫」（採集者即 owner→自存村庫），
@@ -367,6 +382,39 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 # 一般稅：採集所得按 owner tax_rate 撥腳下 tile 公庫（守恆轉移：私產減=公庫增）。
 # 公庫滿 cap → 多的留採集者私產（不溢出）。稅率 = tile owner 的 tax_rate；
 # 採集者即 owner（自立村）→ 自己存自己村庫。
+# ★★★回家卸貨（spec 2026-08-26 material-storage-and-unload §②）：
+#   隊在【自家】據點上、且私產總重超過載重上限 ⇒ 把超出的部分以 material 卸進公庫。
+#   ★守恆：只扣掉【公庫真的收下的量】（`TileBank.deposit` 是 capped 的）——
+#     若倉滿只收一半，私產就只減一半。★★倉滿的溢出走既有 `harvest.vault_overflow_drop` tap。
+#   ★★★壞掉會長什麼樣：若照「算出超額就直接從私產扣」寫，倉滿那次會【憑空蒸發】，
+#     而守恆稽核要到下一次全帳對帳才看得出來 —— 那時已經分不清是誰弄丟的。
+func _unload_excess_material(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	if tile == null or tile.outpost_level == 0:
+		return
+	if not (tile.outpost_owner == team.team_id or (team.parent_team_id != -1 and tile.outpost_owner == team.parent_team_id)):
+		return   # ★別人的據點不卸（否則等於把料送給對方）
+	var have: float = float(team.resources.get("material", 0))
+	if have <= 0.0:
+		return
+	var mv := MovementSystem.new()
+	var excess_w: float = mv.calc_total_weight(team) - mv.get_carry_capacity(team)
+	if Probe.enabled: Probe.bump_pt("matunload.call", "", team.team_id)
+	if excess_w <= 0.0:
+		if Probe.enabled: Probe.bump_pt("matunload.none_needed", "", team.team_id)
+		return
+	# material 每單位重 1.0（`_resource_weight`）⇒ 要卸的單位數 ＝ 超額重量，夾在手上的量之內
+	var want: float = minf(excess_w, have)
+	var dep: float = TileBank.deposit(tile, "material", want, "material_unload_vault")
+	if dep > 0.0:
+		ResourceBank.add(team, "material", -dep, "material_unload_out")
+	if Probe.enabled:
+		if dep > 0.0:
+			Probe.bump_pt("matunload.moved", "", team.team_id)
+			Probe.add_amount("matunload.amount.team.%d" % team.team_id, dep)
+		if want - dep > 0.001:
+			Probe.bump_pt("matunload.vault_full", "", team.team_id)
+			Probe.bump("harvest.vault_overflow_drop")
+
 func _apply_normal_tax(state: WorldState, team: TeamData, tile: HexTileData,
 		gained: Dictionary) -> void:
 	if tile.outpost_level == 0:
