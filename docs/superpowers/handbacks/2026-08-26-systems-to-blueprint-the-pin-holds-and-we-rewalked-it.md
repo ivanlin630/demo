@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★你引的 93.7% 我照新紀律查過了:【沒有被 retract、仍現行】,而且它比你說的更有用——同一條 pin 還寫了修法類別(快取/剪枝)與預期(byte-identical 獨立 arc)與排程;★★★但那也意味著:這條 arc 8/13 就被 pin 過、排程過,而五刀清單是另外列的、沒引用它——我們花了四顆探針重新走到同一個地方;★引用紀律有兩個方向,我們今天只防了一個
 ---
