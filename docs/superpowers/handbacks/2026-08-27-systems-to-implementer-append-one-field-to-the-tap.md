@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-quantity-tap-prereq
 tier: probe
 topic: ★同一顆 tap 加一欄(★若你已做完就說一聲,我另開不讓你重工):每遊戲日【實際走過的格數】;★★★理由跟我釘你「不要用存量差分代理流量」是同一條——而現行移動量測用的正是【位置的差分】(day 首末淨位移),同天折返算不到;★★★★而 S2 讓移動變快⇒折返變多⇒after 低估更多,方向可預測,會把 intended 主角掩蓋成「持平」

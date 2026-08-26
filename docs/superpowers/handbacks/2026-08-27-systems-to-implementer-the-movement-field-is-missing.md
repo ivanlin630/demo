@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-quantity-tap-prereq
 tier: probe
 topic: ★★★tap merged @34e7d52f 兩閘綠,但【移動格數那一欄沒做】——我開檔驗過 movement_system.gd 零 qty. 命中;★★我不追究是沒收到還是漏了,補一欄就好,而我已攔住 measurer 別先量移動;★★★而你「量 0.000000 而次數 107」那件我要單獨講:那是【分母抓出來的矛盾】,沒有分母它會被讀成「這世界沒有採集」

@@ -1,0 +1,1716 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=127 —— 該世界仍帶玩家中心行為（豁免 gate 生效、玩家隊 leader 死可凍世界）。觀察者長跑請於 setup 後清 state.player_id=-1（見 exam_12mo_bed._strip_player）。
+[Outpost] Team0 設施施工 farming → Lv1 at (0,20)
+[Sub] Team10 派出子隊 Team49 leader=P28 advisors=[] (pop=3 cap=7 task=擴建)
+[Infra] Team10 派擴建子隊 Team49 → (3,14) stable
+[Sub] Team12 派出子隊 Team50 leader=P32 advisors=[] (pop=3 cap=9 task=擴建)
+[Infra] Team12 派擴建子隊 Team50 → (18,1) stable
+[Outpost] Team17 設施施工 farming → Lv1 at (19,11)
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 80(公庫0+私80) (需 { "material": 50, "tools": 0 })
+[Outpost] Team22 設施施工 farming → Lv1 at (19,2)
+[Outpost] Team26 設施施工 farming → Lv1 at (22,4)
+[Site] Faction7 派工失敗: pop 不足: 8 < 12 (需 { "material": 50, "tools": 0 })
+[Outpost] Team29 設施施工 farming → Lv1 at (2,21)
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team33 → 建設 (自救建田)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team35 → 貿易 (囤貨)
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team37 → 建設 (自救建田)
+[SoloAI] Team38 → 建設 (自救建田)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 治理 (駐守)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team44 → 貿易 (囤貨)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team46 → 紮營 (紮營)
+[SoloAI] Team47 → 覓食 (覓食)
+[CampL0] Team1 紮營 L0 @(23,3)
+[CampL0] Team4 紮營 L0 @(14,18)
+[CampL0] Team13 紮營 L0 @(20,7)
+[CampL0] Team14 紮營 L0 @(18,9)
+[CampL0] Team20 紮營 L0 @(10,6)
+[CampL0] Team23 紮營 L0 @(3,28)
+[CampL0] Team46 紮營 L0 @(15,19)
+[Harvest] Tick60 季節=春 base=1.1
+[Outpost] 設施完工 farming Lv1 at (0,20)
+[Outpost] 設施完工 farming Lv1 at (19,2)
+[Outpost] 設施完工 farming Lv1 at (19,11)
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 50(公庫0+私50) (需 { "material": 50, "tools": 0 })
+[Outpost] 設施完工 farming Lv1 at (2,21)
+[Outpost] 設施完工 farming Lv1 at (22,4)
+[Site] Faction7 派工失敗: 資源不足 1.43x: material 有 50(公庫0+私50) (需 { "material": 50, "tools": 0 })
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×3
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×2
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team11 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team13 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×2
+[Equip] Team15 裝備 melee_low ×2
+[Equip] Team16 裝備 melee_low ×2
+[Equip] Team17 裝備 melee_low ×3
+[Equip] Team18 裝備 melee_low ×2
+[Equip] Team19 裝備 melee_low ×2
+[Equip] Team20 裝備 melee_low ×2
+[Equip] Team21 裝備 melee_low ×2
+[Equip] Team22 裝備 melee_low ×3
+[Equip] Team23 裝備 melee_low ×2
+[Equip] Team24 裝備 melee_low ×2
+[Equip] Team25 裝備 melee_low ×2
+[Equip] Team26 裝備 melee_low ×2
+[Equip] Team27 裝備 melee_low ×2
+[Equip] Team28 裝備 melee_low ×2
+[Equip] Team29 裝備 melee_low ×2
+[Equip] Team30 裝備 melee_low ×2
+[Equip] Team31 裝備 melee_low ×2
+[Equip] Team42 裝備 melee_low ×1
+[Equip] Team43 裝備 melee_low ×1
+[Equip] Team44 裝備 melee_low ×1
+[Equip] Team45 裝備 melee_low ×1
+[Equip] Team46 裝備 melee_low ×1
+[Equip] Team47 裝備 melee_low ×1
+[Equip] Team48 裝備 melee_low ×2
+[Equip] Team49 裝備 melee_low ×1
+[Equip] Team50 裝備 melee_low ×1
+[Move] Team 1 抵達 (23,3)
+[Move] Team 2 抵達 (21,9)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (14,18)
+[Move] Team 6 抵達 (4,17)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 8 抵達 (4,21)
+[Move] Team 9 抵達 (17,17)
+[Move] Team 11 抵達 (5,13)
+[Move] Team 13 抵達 (20,7)
+[Move] Team 14 抵達 (18,9)
+[Move] Team 15 抵達 (24,14)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 21 抵達 (24,0)
+[Move] Team 23 抵達 (3,28)
+[Move] Team 24 抵達 (18,3)
+[Move] Team 27 抵達 (21,4)
+[Move] Team 28 抵達 (22,6)
+[Move] Team 29 抵達 (2,21)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 37 抵達 (8,8)
+[Move] Team 38 抵達 (12,17)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 46 抵達 (14,20)
+[Move] Team 47 抵達 (15,16)
+[Move] Team 48 抵達 (16,10)
+[Combat Start] Team-1000000 vs Team37
+[Ambush] NPC Team37 被 boar 伏擊
+[Combat Start] Team-1000001 vs Team42
+[Ambush] NPC Team42 被 bear 伏擊
+[CorveeL1] Team20 L0→L1 紮根工期 @(10,6) military (720 person-ticks)
+[CorveeL1] Team23 L0→L1 紮根工期 @(3,28) military (720 person-ticks)
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team41 → 治理 (駐守)
+[SoloAI] Team43 → 迎戰 (迎戰)
+[SoloAI] Team44 → 迎戰 (迎戰)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team46 → 迎戰 (迎戰)
+[StrategicAI] Faction3 首要目標: defend target=50
+[Tick 100] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.84
+[Tick 100] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.75
+[Tick 100] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 100] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.82
+[Tick 100] Person 7 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 8 (member/team3) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 100] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 100] Person 10 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 11 (member/team4) → P1_comply | stress=0.00 loyalty=0.77
+[Tick 100] Person 12 (member/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 14 (member/team5) → P4_expand | stress=0.00 loyalty=0.97
+[Tick 100] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 18 (member/team6) → P1_comply | stress=0.00 loyalty=0.98
+[Tick 100] Person 19 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 100] Person 21 (member/team7) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 100] Person 22 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 23 (member/team8) → P1_comply | stress=0.00 loyalty=0.77
+[Tick 100] Person 24 (member/team8) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 100] Person 25 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 26 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 100] Person 27 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Reaction] Person129 離團自立流亡 Team51 at (18,18)
+[Tick 100] Person 129 (leader/team51) → N1_flee | stress=0.15 loyalty=0.42
+[Tick 100] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 100] Person 31 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Reaction] Person130 離團自立流亡 Team52 at (19,8)
+[Tick 100] Person 130 (leader/team52) → N1_flee | stress=0.15 loyalty=0.36
+[Tick 100] Person 33 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 34 (member/team13) → P1_comply | stress=0.00 loyalty=0.80
+[Tick 100] Person 35 (member/team13) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 100] Person 36 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 37 (member/team14) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 100] Person 38 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 39 (member/team15) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 100] Person 40 (leader/team16) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 41 (member/team16) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 100] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 100] Person 43 (leader/team17) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 44 (member/team17) → P4_expand | stress=0.00 loyalty=0.72
+[Tick 100] Person 45 (member/team17) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 46 (leader/team18) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 47 (member/team18) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 100] Person 48 (member/team18) → P4_expand | stress=0.00 loyalty=0.89
+[Tick 100] Person 49 (leader/team19) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 50 (member/team19) → P1_comply | stress=0.00 loyalty=0.99
+[Tick 100] Person 51 (member/team19) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 100] Person 52 (leader/team20) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 53 (member/team20) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 54 (member/team20) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 100] Person 55 (leader/team21) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 56 (member/team21) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 57 (member/team21) → P1_comply | stress=0.00 loyalty=0.88
+[Tick 100] Person 58 (leader/team22) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 59 (member/team22) → P4_expand | stress=0.00 loyalty=0.83
+[Tick 100] Person 60 (member/team22) → P4_expand | stress=0.00 loyalty=0.59
+[Tick 100] Person 61 (leader/team23) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 62 (member/team23) → P1_comply | stress=0.00 loyalty=0.80
+[Tick 100] Person 63 (member/team23) → P1_comply | stress=0.00 loyalty=0.99
+[Tick 100] Person 64 (leader/team24) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 65 (member/team24) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 66 (leader/team25) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 67 (member/team25) → P1_comply | stress=0.00 loyalty=0.62
+[Tick 100] Person 68 (leader/team26) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 69 (member/team26) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 100] Person 70 (leader/team27) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 71 (member/team27) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 100] Person 72 (member/team27) → P1_comply | stress=0.00 loyalty=0.68
+[Tick 100] Person 73 (leader/team28) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 74 (member/team28) → P4_expand | stress=0.00 loyalty=0.68
+[Tick 100] Person 75 (member/team28) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 100] Person 76 (leader/team29) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 77 (member/team29) → P4_expand | stress=0.00 loyalty=0.65
+[Tick 100] Person 78 (leader/team30) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 79 (member/team30) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 100] Person 80 (member/team30) → P1_comply | stress=0.00 loyalty=0.71
+[Tick 100] Person 81 (leader/team31) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 82 (member/team31) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 100] Person 83 (member/team31) → P1_comply | stress=0.00 loyalty=0.68
+[Tick 100] Person 84 (leader/team32) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 85 (member/team32) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 100] Person 86 (member/team32) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 100] Person 87 (leader/team33) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 88 (member/team33) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 100] Person 89 (leader/team34) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 90 (member/team34) → P1_comply | stress=0.00 loyalty=0.65
+[Tick 100] Person 91 (member/team34) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 100] Person 92 (leader/team35) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 93 (member/team35) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 100] Person 94 (member/team35) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 95 (leader/team36) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 96 (member/team36) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 97 (member/team36) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 100] Person 98 (leader/team37) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 99 (member/team37) → P1_comply | stress=0.00 loyalty=0.82
+[Tick 100] Person 100 (member/team37) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 100] Person 101 (leader/team38) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 102 (member/team38) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 100] Person 103 (member/team38) → P1_comply | stress=0.00 loyalty=0.62
+[Tick 100] Person 104 (leader/team39) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 105 (member/team39) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 100] Person 106 (leader/team40) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 107 (member/team40) → P4_expand | stress=0.00 loyalty=0.71
+[Tick 100] Person 108 (member/team40) → P1_comply | stress=0.00 loyalty=0.88
+[Tick 100] Person 109 (leader/team41) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 110 (member/team41) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 100] Person 111 (leader/team42) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 112 (member/team42) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 113 (member/team42) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 100] Person 114 (leader/team43) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 115 (member/team43) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 100] Person 116 (member/team43) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 100] Person 117 (leader/team44) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 118 (member/team44) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 100] Person 119 (leader/team45) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 120 (member/team45) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 100] Person 121 (member/team45) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 122 (leader/team46) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 100] Person 123 (member/team46) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 124 (leader/team47) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 125 (member/team47) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 126 (member/team47) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 127 (leader/team48) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 128 (member/team48) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 28 (member/team49) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 32 (member/team50) → P1_comply | stress=0.00 loyalty=0.78
+[Tag] Team20 +軍隊 -生產
+[Tag] Team21 +軍隊 -生產
+[Tag] Team23 +軍隊 -生產
+[Tag] Team27 +軍隊 -生產
+[Tag] Team28 +軍隊 -生產
+[Tag] Team32 +軍隊 -生產
+[Tag] Team33 +軍隊 -生產
+[Tag] Team35 +軍隊 -生產
+[Tag] Team44 +軍隊 -生產
+[Tag] Team46 +軍隊 -生產
+[SoloAI] Team51 → 紮營 (紮營)
+[SoloAI] Team52 → 紮營 (紮營)
+[Order] Team0 sell food ×1262 (oid=1)
+[Order] Team0 buy weapon_melee_low ×2 (oid=2)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=3)
+[Order] Team0 buy material ×14 (oid=4)
+[Order] Team0 buy tools ×3 (oid=5)
+[Order] Team3 sell material ×30 (oid=6)
+[Order] Team3 buy weapon_melee_low ×2 (oid=7)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=8)
+[Order] Team3 buy tools ×1 (oid=9)
+[Order] Team13 sell material ×30 (oid=10)
+[Order] Team13 buy weapon_melee_low ×2 (oid=11)
+[Order] Team13 buy weapon_ranged_low ×1 (oid=12)
+[Order] Team13 buy tools ×1 (oid=13)
+[Order] Team16 sell material ×30 (oid=14)
+[Order] Team16 buy weapon_melee_low ×2 (oid=15)
+[Order] Team16 buy weapon_ranged_low ×1 (oid=16)
+[Order] Team16 buy tools ×1 (oid=17)
+[Order] Team19 sell material ×30 (oid=18)
+[Order] Team19 buy weapon_melee_low ×2 (oid=19)
+[Order] Team19 buy weapon_ranged_low ×1 (oid=20)
+[Order] Team19 buy tools ×1 (oid=21)
+[Order] Team26 sell food ×1276 (oid=22)
+[Order] Team26 buy weapon_ranged_low ×2 (oid=23)
+[Order] Team26 buy material ×4 (oid=24)
+[Order] Team26 buy tools ×2 (oid=25)
+[Order] Team28 sell material ×30 (oid=26)
+[Order] Team28 buy weapon_melee_low ×2 (oid=27)
+[Order] Team28 buy weapon_ranged_low ×1 (oid=28)
+[Order] Team28 buy tools ×1 (oid=29)
+[Order] Team38 sell food ×1083 (oid=30)
+[Order] Team38 buy weapon_melee_low ×2 (oid=31)
+[Order] Team38 buy weapon_ranged_low ×2 (oid=32)
+[Order] Team38 buy tools ×1 (oid=33)
+[Order] Team4 sell material ×30 (oid=34)
+[Order] Team4 buy weapon_melee_low ×3 (oid=35)
+[Order] Team4 buy weapon_ranged_low ×2 (oid=36)
+[Order] Team4 buy tools ×1 (oid=37)
+[Order] Team6 sell material ×30 (oid=38)
+[Order] Team6 buy weapon_melee_low ×2 (oid=39)
+[Order] Team6 buy weapon_ranged_low ×2 (oid=40)
+[Order] Team6 buy tools ×1 (oid=41)
+[Order] Team10 sell material ×12 (oid=42)
+[Order] Team10 sell food ×1091 (oid=43)
+[Order] Team10 buy weapon_ranged_low ×1 (oid=44)
+[Order] Team10 buy tools ×2 (oid=45)
+[Order] Team11 sell material ×30 (oid=46)
+[Order] Team11 buy weapon_melee_low ×2 (oid=47)
+[Order] Team11 buy weapon_ranged_low ×1 (oid=48)
+[Order] Team11 buy tools ×1 (oid=49)
+[Order] Team37 sell food ×1068 (oid=50)
+[Order] Team37 buy weapon_melee_low ×3 (oid=51)
+[Order] Team37 buy weapon_ranged_low ×2 (oid=52)
+[Order] Team37 buy material ×8 (oid=53)
+[Order] Team37 buy tools ×2 (oid=54)
+[Order] Team39 sell food ×1092 (oid=55)
+[Order] Team39 buy weapon_melee_low ×2 (oid=56)
+[Order] Team39 buy weapon_ranged_low ×2 (oid=57)
+[Order] Team39 buy material ×2 (oid=58)
+[Order] Team39 buy tools ×1 (oid=59)
+[Order] Team9 sell material ×30 (oid=60)
+[Order] Team9 buy weapon_melee_low ×2 (oid=61)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=62)
+[Order] Team9 buy tools ×1 (oid=63)
+[Order] Team12 sell weapon_melee_low ×1 (oid=64)
+[Order] Team12 sell material ×19 (oid=65)
+[Order] Team12 sell food ×1094 (oid=66)
+[Order] Team12 buy weapon_ranged_low ×1 (oid=67)
+[Order] Team12 buy tools ×1 (oid=68)
+[Order] Team22 sell food ×1252 (oid=69)
+[Order] Team22 buy weapon_melee_low ×1 (oid=70)
+[Order] Team22 buy weapon_ranged_low ×3 (oid=71)
+[Order] Team22 buy material ×8 (oid=72)
+[Order] Team22 buy tools ×2 (oid=73)
+[Order] Team27 sell material ×30 (oid=74)
+[Order] Team27 buy weapon_melee_low ×2 (oid=75)
+[Order] Team27 buy weapon_ranged_low ×2 (oid=76)
+[Order] Team27 buy tools ×1 (oid=77)
+[Order] Team33 sell food ×1104 (oid=78)
+[Order] Team33 buy weapon_melee_low ×2 (oid=79)
+[Order] Team33 buy weapon_ranged_low ×1 (oid=80)
+[Order] Team33 buy tools ×1 (oid=81)
+[Order] Team35 sell material ×3 (oid=82)
+[Order] Team35 buy weapon_melee_low ×2 (oid=83)
+[Order] Team35 buy weapon_ranged_low ×1 (oid=84)
+[Order] Team35 buy tools ×2 (oid=85)
+[Order] Team42 buy weapon_melee_low ×2 (oid=86)
+[Order] Team42 buy weapon_ranged_low ×2 (oid=87)
+[Order] Team42 buy tools ×1 (oid=88)
+[Order] Team44 buy weapon_melee_low ×2 (oid=89)
+[Order] Team44 buy weapon_ranged_low ×1 (oid=90)
+[Order] Team44 buy tools ×1 (oid=91)
+[Order] Team1 sell material ×30 (oid=92)
+[Order] Team1 buy weapon_melee_low ×2 (oid=93)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=94)
+[Order] Team1 buy tools ×1 (oid=95)
+[Order] Team7 sell material ×30 (oid=96)
+[Order] Team7 buy weapon_melee_low ×1 (oid=97)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=98)
+[Order] Team14 sell material ×30 (oid=99)
+[Order] Team14 buy weapon_melee_low ×3 (oid=100)
+[Order] Team14 buy weapon_ranged_low ×2 (oid=101)
+[Order] Team14 buy tools ×1 (oid=102)
+[Order] Team20 buy weapon_melee_low ×2 (oid=103)
+[Order] Team20 buy weapon_ranged_low ×1 (oid=104)
+[Order] Team20 buy tools ×1 (oid=105)
+[Order] Team34 sell material ×35 (oid=106)
+[Order] Team34 buy weapon_melee_low ×3 (oid=107)
+[Order] Team34 buy weapon_ranged_low ×2 (oid=108)
+[Order] Team34 buy tools ×1 (oid=109)
+[Order] Team43 buy weapon_melee_low ×2 (oid=110)
+[Order] Team43 buy weapon_ranged_low ×1 (oid=111)
+[Order] Team43 buy tools ×1 (oid=112)
+[Order] Team46 buy weapon_melee_low ×2 (oid=113)
+[Order] Team46 buy weapon_ranged_low ×1 (oid=114)
+[Order] Team46 buy tools ×1 (oid=115)
+[Order] Team2 buy weapon_melee_low ×2 (oid=116)
+[Order] Team2 buy weapon_ranged_low ×2 (oid=117)
+[Order] Team2 buy tools ×1 (oid=118)
+[Order] Team21 sell material ×30 (oid=119)
+[Order] Team21 buy weapon_melee_low ×2 (oid=120)
+[Order] Team21 buy weapon_ranged_low ×1 (oid=121)
+[Order] Team21 buy tools ×1 (oid=122)
+[Order] Team24 sell material ×30 (oid=123)
+[Order] Team24 buy weapon_melee_low ×2 (oid=124)
+[Order] Team24 buy weapon_ranged_low ×1 (oid=125)
+[Order] Team24 buy tools ×1 (oid=126)
+[Order] Team45 buy weapon_melee_low ×2 (oid=127)
+[Order] Team45 buy weapon_ranged_low ×1 (oid=128)
+[Order] Team45 buy tools ×1 (oid=129)
+[Order] Team51 buy food ×3 (oid=130)
+[Order] Team18 sell material ×30 (oid=131)
+[Order] Team18 buy weapon_melee_low ×2 (oid=132)
+[Order] Team18 buy weapon_ranged_low ×2 (oid=133)
+[Order] Team18 buy tools ×1 (oid=134)
+[Order] Team23 buy weapon_melee_low ×2 (oid=135)
+[Order] Team23 buy weapon_ranged_low ×2 (oid=136)
+[Order] Team23 buy tools ×1 (oid=137)
+[Order] Team25 sell material ×30 (oid=138)
+[Order] Team25 buy weapon_melee_low ×2 (oid=139)
+[Order] Team25 buy weapon_ranged_low ×2 (oid=140)
+[Order] Team25 buy tools ×1 (oid=141)
+[Order] Team30 sell material ×30 (oid=142)
+[Order] Team30 buy weapon_melee_low ×2 (oid=143)
+[Order] Team30 buy weapon_ranged_low ×2 (oid=144)
+[Order] Team30 buy tools ×1 (oid=145)
+[Order] Team31 sell material ×30 (oid=146)
+[Order] Team31 buy weapon_melee_low ×2 (oid=147)
+[Order] Team31 buy weapon_ranged_low ×2 (oid=148)
+[Order] Team31 buy tools ×1 (oid=149)
+[Order] Team50 buy weapon_ranged_low ×1 (oid=150)
+[Order] Team52 buy food ×2 (oid=151)
+[Order] Team5 sell material ×56 (oid=152)
+[Order] Team5 sell food ×1268 (oid=153)
+[Order] Team5 buy weapon_melee_low ×1 (oid=154)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=155)
+[Order] Team5 buy tools ×1 (oid=156)
+[Order] Team8 sell material ×30 (oid=157)
+[Order] Team8 buy weapon_melee_low ×2 (oid=158)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=159)
+[Order] Team8 buy tools ×1 (oid=160)
+[Order] Team32 sell food ×1097 (oid=161)
+[Order] Team32 buy weapon_melee_low ×3 (oid=162)
+[Order] Team32 buy weapon_ranged_low ×2 (oid=163)
+[Order] Team32 buy material ×2 (oid=164)
+[Order] Team32 buy tools ×2 (oid=165)
+[Order] Team36 sell material ×37 (oid=166)
+[Order] Team36 buy weapon_melee_low ×2 (oid=167)
+[Order] Team36 buy weapon_ranged_low ×1 (oid=168)
+[Order] Team36 buy tools ×1 (oid=169)
+[Order] Team40 sell material ×36 (oid=170)
+[Order] Team40 buy weapon_melee_low ×2 (oid=171)
+[Order] Team40 buy weapon_ranged_low ×1 (oid=172)
+[Order] Team40 buy tools ×1 (oid=173)
+[Move] Team 0 抵達 (0,20)
+[Move] Team 5 抵達 (6,14)
+[Move] Team 6 抵達 (4,17)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 8 抵達 (4,21)
+[Move] Team 10 抵達 (20,17)
+[Move] Team 13 抵達 (19,7)
+[Move] Team 16 抵達 (20,7)
+[Move] Team 17 抵達 (19,11)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 21 抵達 (24,0)
+[Move] Team 22 抵達 (18,3)
+[Move] Team 23 抵達 (3,28)
+[Move] Team 25 抵達 (6,26)
+[Move] Team 26 抵達 (23,4)
+[Move] Team 27 抵達 (21,4)
+[Move] Team 28 抵達 (22,6)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 33 抵達 (26,5)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 36 抵達 (24,15)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 41 抵達 (17,8)
+[Move] Team 43 抵達 (19,2)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 45 抵達 (3,23)
+[Move] Team 46 抵達 (13,20)
+[Move] Team 51 抵達 (18,19)
+[Barter] Team12 1xarmor_low <-> Team14 6xmaterial
+[Market] Team12 <-> Team14 巧遇成交
+[Combat Start] Team-1000002 vs Team10
+[Ambush] NPC Team10 被 boar 伏擊
+[Diplomacy] Team10 → Team39: demand_tribute
+[Diplomacy] Team39 回應: refuse
+[Diplomacy] Team39 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05
+[Site] Faction7 派工失敗: 資源不足 1.43x: material 有 45(公庫0+私45) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team33 → 建設 (自救建田)
+[SoloAI] Team34 → 貿易 (囤貨)
+[Sub] Team35 派出子隊 Team53 leader=P93 advisors=[] (pop=1 cap=13 task=信使)
+[Sub] Team35 派出子隊 Team54 leader=P94 advisors=[] (pop=1 cap=7 task=信使)
+[IndepStrategy] Team35 野心建國→派信使結盟 Team33 (野心=0.86)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team36 → 覓食 (覓食)
+[SoloAI] Team37 → 建設 (自救建田)
+[SoloAI] Team38 → 建設 (自救建田)
+[SoloAI] Team39 → 建設 (自救建田)
+[Sub] Team40 派出子隊 Team55 leader=P107 advisors=[] (pop=3 cap=37 task=擴建)
+[Infra] Team40 派擴建子隊 Team55 → (10,25) stable
+[SoloAI] Team41 → 治理 (駐守)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 掠奪 (掠奪)
+[SoloAI] Team44 → 迎戰 (迎戰)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team46 → 迎戰 (迎戰)
+[SoloAI] Team47 → 覓食 (覓食)
+[SoloAI] Team51 → 覓食 (覓食)
+[SoloAI] Team52 → 紮營 (紮營)
+[Tick 200] Person 129 (leader/team51) → P1_comply | stress=0.25 loyalty=0.50
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team33 → 逃跑 (survival)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team36 → 覓食 (覓食)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team46 → 迎戰 (迎戰)
+[SoloAI] Team47 → 掠奪 (掠奪)
+[Order] Team17 sell material ×27 (oid=174)
+[Order] Team17 sell food ×1265 (oid=175)
+[Order] Team17 buy weapon_melee_low ×1 (oid=176)
+[Order] Team17 buy weapon_ranged_low ×2 (oid=177)
+[Order] Team17 buy tools ×1 (oid=178)
+[Order] Team29 buy weapon_ranged_low ×2 (oid=179)
+[Order] Team29 buy material ×13 (oid=180)
+[Order] Team29 buy tools ×2 (oid=181)
+[Order] Team15 sell material ×30 (oid=182)
+[Order] Team15 buy weapon_melee_low ×2 (oid=183)
+[Order] Team15 buy weapon_ranged_low ×1 (oid=184)
+[Order] Team15 buy tools ×1 (oid=185)
+[Ambition] Team14 rung 0→1 (定居 cap=3)
+[Order] Team41 sell material ×38 (oid=186)
+[Order] Team41 sell food ×1080 (oid=187)
+[Order] Team41 buy weapon_melee_low ×1 (oid=188)
+[Order] Team41 buy weapon_ranged_low ×1 (oid=189)
+[Order] Team48 buy weapon_melee_low ×2 (oid=190)
+[Order] Team48 buy weapon_ranged_low ×3 (oid=191)
+[Order] Team48 buy tools ×1 (oid=192)
+[DayNight] Day 1 開始
+[Sub] Team43 派出子隊 Team56 leader=P115 advisors=[] (pop=2 cap=17 task=idle)
+[PopMgmt] Team43 超額 2 人，advisor Team115 帶走
+[Split] Team56 回歸失敗（母團滿員），獨立為新分團
+[Order] Team47 buy weapon_melee_low ×2 (oid=193)
+[Order] Team47 buy weapon_ranged_low ×2 (oid=194)
+[Order] Team47 buy tools ×1 (oid=195)
+[Order] Team49 buy weapon_ranged_low ×1 (oid=196)
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (11, 26) 捕野馬 +1
+[Horse] Outpost (12, 17) 捕野馬 +1
+[Horse] Outpost (13, 19) 捕野馬 +1
+[Horse] Outpost (13, 23) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (15, 13) 捕野馬 +1
+[Horse] Outpost (16, 17) 捕野馬 +1
+[Horse] Outpost (22, 9) 捕野馬 +1
+[TickPerf] day=1 avg=116855 us max=7615619 us ticks=240 teams=58 factions=8
+[SoloAI] Team56 → 覓食 (覓食)
+[Ambition] Team20 rung 0→4 (武力 cap=4)
+[Ambition] Team23 rung 0→4 (武力 cap=4)
+[Order] Team33 sell material ×2 (oid=197)
+[Order] Team35 buy material ×10 (oid=198)
+[Order] Team40 buy material ×3 (oid=199)
+[Ambition] Team16 rung 0→1 (商業 cap=2)
+[Order] Team54 sell material ×6 (oid=200)
+[Move] Team 1 抵達 (22,2)
+[Move] Team 2 抵達 (21,9)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (13,20)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 12 抵達 (16,10)
+[Move] Team 14 抵達 (16,10)
+[Move] Team 15 抵達 (24,14)
+[Move] Team 17 抵達 (19,11)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 23 抵達 (3,28)
+[Move] Team 26 抵達 (23,6)
+[Move] Team 29 抵達 (2,20)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,5)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 36 抵達 (24,14)
+[Move] Team 37 抵達 (8,8)
+[Move] Team 38 抵達 (12,17)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (9,23)
+[Move] Team 41 抵達 (17,8)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 45 抵達 (3,23)
+[Move] Team 46 抵達 (13,20)
+[Move] Team 51 抵達 (19,19)
+[Move] Team 52 抵達 (20,8)
+[Move] Team 53 抵達 (26,5)
+[Move] Team 54 抵達 (26,5)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team41 → 治理 (駐守)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 逃跑 (survival)
+[SoloAI] Team45 → 逃跑 (survival)
+[SoloAI] Team46 → 逃跑 (survival)
+[SoloAI] Team52 → 紮營 (紮營)
+[SoloAI] Team56 → 逃跑 (survival)
+[CampL0] Team52 紮營 L0 @(20,8)
+[PlayerCmd] forced_event 超時自動拒絕: { "from_id": 12, "action": "diplomacy", "proposal": "tribute_offer" }
+[Order] Team53 sell material ×6 (oid=201)
+[Order] Team12 buy material ×48 (oid=202)
+[Ambition] Team14 rung 1→2 (定居 cap=3)
+[Order] Team10 buy material ×61 (oid=203)
+[Ambition] Team16 rung 1→2 (商業 cap=2)
+[SoloAI] Team37 → 逃跑 (survival)
+[SoloAI] Team38 → 建設 (自救建田)
+[SoloAI] Team44 → 迎戰 (迎戰)
+[SoloAI] Team32 → 建設 (自救建田)
+[Sub] Team33 派出子隊 Team57 leader=P88 advisors=[] (pop=3 cap=18 task=擴建)
+[Infra] Team33 派擴建子隊 Team57 → (26,5) stable
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team36 → 逃跑 (survival)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team47 → 掠奪 (掠奪)
+[Move] Team 0 抵達 (2,21)
+[Move] Team 1 抵達 (22,2)
+[Move] Team 2 抵達 (21,9)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (11,22)
+[Move] Team 9 抵達 (15,19)
+[Move] Team 13 抵達 (17,9)
+[Move] Team 17 抵達 (19,11)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,5)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 38 抵達 (12,17)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (9,23)
+[Move] Team 41 抵達 (17,8)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 52 抵達 (20,8)
+[Move] Team 55 抵達 (10,25)
+[Combat Start] Team-1000003 vs Team26
+[Ambush] NPC Team26 被 bear 伏擊
+[Combat Start] Team-1000004 vs Team34
+[Ambush] NPC Team34 被 boar 伏擊
+[Combat Start] Team-1000005 vs Team40
+[Ambush] NPC Team40 被 bear 伏擊
+[SoloAI] Team33 → 逃跑 (survival)
+[SoloAI] Team41 → 外交 (求和)
+[SoloAI] Team43 → 逃跑 (survival)
+[SoloAI] Team46 → 逃跑 (survival)
+[SoloAI] Team47 → 掠奪 (掠奪)
+[SoloAI] Team52 → 逃跑 (survival)
+[SoloAI] Team56 → 逃跑 (survival)
+[Reaction] Person131 離團自立流亡 Team58 at (20,17)
+[Tick 400] Person 131 (leader/team58) → N1_flee | stress=0.15 loyalty=0.40
+[Reaction] Person132 離團自立流亡 Team59 at (16,10)
+[Tick 400] Person 132 (leader/team59) → N1_flee | stress=0.15 loyalty=0.40
+[Tag] Team52 -流亡（恢復）
+[SoloAI] Team58 → 覓食 (覓食)
+[SoloAI] Team59 → 覓食 (覓食)
+[Order] Team10 sell weapon_melee_low ×1 (oid=204)
+[Ambition] Team14 rung 2→3 (定居 cap=3)
+[Order] Team34 buy material ×2 (oid=205)
+[Ambition] Team52 rung 0→1 (商業 cap=3)
+[DayNight] Day 2 開始
+[Sub] Team0 派出子隊 Team60 leader=P1 advisors=[] (pop=2 cap=13 task=idle)
+[PopMgmt] Team0 超額 2 人，advisor Team1 帶走
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team45 → 紮營 (紮營)
+[Split] Team60 回歸失敗（母團滿員），獨立為新分團
+[Order] Team33 buy material ×37 (oid=206)
+[CampL0] Team45 紮營 L0 @(4,24)
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (12, 17) 捕野馬 +1
+[Horse] Outpost (13, 19) 捕野馬 +1
+[Horse] Outpost (13, 23) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (15, 13) 捕野馬 +1
+[Horse] Outpost (16, 17) 捕野馬 +1
+[TickPerf] day=2 avg=66404 us max=2978932 us ticks=240 teams=64 factions=8
+[Site] 選址 (22, 7) score=482 周邊資源={ "ore_silver": 81, "herb": 20, "ore_iron": 161 } terrain=mountain
+[Site] Faction0 派工失敗: 資源不足 1.60x: material 有 39(公庫0+私39) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (22, 7) score=473 周邊資源={ "ore_silver": 81, "herb": 20, "ore_iron": 161 } terrain=mountain
+[Site] Faction1 派工失敗: 資源不足 1.41x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (17, 22) score=310 周邊資源={ "ore_gold": 15, "ore_iron": 124, "ore_silver": 60, "wild_horses": 7 } terrain=mountain
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 3(公庫0+私3) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (22, 7) score=381 周邊資源={ "ore_silver": 81, "herb": 20, "ore_iron": 161 } terrain=mountain
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 9(公庫0+私9) (需 { "material": 50, "tools": 0 })
+[Diplomacy] Team13 背叛 Team12
+[Site] 選址 (22, 7) score=466 周邊資源={ "ore_silver": 81, "herb": 20, "ore_iron": 161 } terrain=mountain
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 50(公庫0+私50) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (16, 1) score=326 周邊資源={ "ore_gold": 21, "ore_iron": 48, "ore_silver": 44, "wild_horses": 10 } terrain=mountain
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (22, 7) score=471 周邊資源={ "ore_silver": 81, "herb": 20, "ore_iron": 161 } terrain=mountain
+[Move] Team 0 抵達 (2,21)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 33 抵達 (28,5)
+[Move] Team 41 抵達 (18,8)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 45 抵達 (4,24)
+[Move] Team 56 抵達 (22,0)
+[Move] Team 57 抵達 (26,5)
+[Move] Team 59 抵達 (16,9)
+[Move] Team 60 抵達 (2,22)
+[Combat Start] Team-1000006 vs Team55
+[Ambush] NPC Team55 被 boar 伏擊
+[Site] 選址 (22, 7) score=488 周邊資源={ "ore_silver": 81, "herb": 20, "ore_iron": 161 } terrain=mountain
+[Site] Faction6 派工失敗: 資源不足 1.26x: material 有 6(公庫0+私6) (需 { "material": 50, "tools": 0 })
+[Sub] Team13 派出子隊 Team61 leader=P34 advisors=[] (pop=2 cap=19 task=運輸)
+[Convoy] Team13 派運輸子隊 Team61 送 material×30 → demand 市場(19,8)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team41 → 外交 (求和)
+[SoloAI] Team42 → 外交 (求和)
+[SoloAI] Team44 → 迎戰 (迎戰)
+[SoloAI] Team46 → 逃跑 (survival)
+[SoloAI] Team47 → 掠奪 (掠奪)
+[SoloAI] Team52 → 逃跑 (survival)
+[SoloAI] Team58 → 覓食 (覓食)
+[SoloAI] Team59 → 覓食 (覓食)
+[Tick 500] Person 2 (member/team0) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 500] Person 1 (member/team60) → P1_comply | stress=0.00 loyalty=0.94
+[Order] Team58 buy food ×4 (oid=207)
+[SoloAI] Team37 → 覓食 (覓食)
+[SoloAI] Team38 → 建設 (自救建田)
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team36 → 逃跑 (survival)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team33 → 逃跑 (survival)
+[SoloAI] Team43 → 逃跑 (survival)
+[Order] Team59 buy food ×3 (oid=208)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Move] Team 0 抵達 (4,21)
+[Move] Team 1 抵達 (22,2)
+[Move] Team 2 抵達 (21,9)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (13,20)
+[Move] Team 9 抵達 (17,17)
+[Move] Team 17 抵達 (19,11)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 26 抵達 (22,5)
+[Move] Team 30 抵達 (16,17)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,5)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 38 抵達 (12,17)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 42 抵達 (11,22)
+[Move] Team 43 抵達 (21,0)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 53 stuck at (26,5) target=(29,5), task=信使, sa={  }
+[Move] Team 54 stuck at (26,5) target=(30,4), task=信使, sa={  }
+[Move] Team 56 抵達 (22,0)
+[Move] Team 58 抵達 (21,17)
+[Move] Team 59 抵達 (15,9)
+[Market] Team0 <-> Team8 巧遇成交
+[Combat Start] Team-1000007 vs Team10
+[Ambush] NPC Team10 被 boar 伏擊
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team37 → 覓食 (覓食)
+[SoloAI] Team38 → 建設 (自救建田)
+[SoloAI] Team41 → 外交 (求和)
+[SoloAI] Team47 → 掠奪 (掠奪)
+[SoloAI] Team52 → 逃跑 (survival)
+[SoloAI] Team56 → 逃跑 (survival)
+[SoloAI] Team59 → 覓食 (覓食)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Tick 600] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 600] Person 129 (leader/team51) → N2_riot | stress=0.65 loyalty=0.72
+[Order] Team60 sell material ×11 (oid=209)
+[CorveeL1] Team45 L0→L1 紮根工期 @(4,24) civilian (720 person-ticks)
+[SoloAI] Team45 → 建設 (紮根)
+[Order] Team61 sell material ×30 (oid=210)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team42 → 外交 (求和)
+[SoloAI] Team44 → 迎戰 (迎戰)
+[Move] Team 13 抵達 (16,10)
+[Move] Team 17 抵達 (19,11)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 33 抵達 (28,5)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 36 抵達 (28,14)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 40 抵達 (9,24)
+[Move] Team 42 抵達 (11,22)
+[Move] Team 43 抵達 (21,0)
+[Move] Team 45 抵達 (4,24)
+[Move] Team 59 抵達 (15,9)
+[Combat Start] Team-1000008 vs Team10
+[Ambush] NPC Team10 被 boar 伏擊
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team41 → 外交 (求和)
+[SoloAI] Team42 → 掠奪 (掠奪)
+[Sub] Team12 派出子隊 Team62 leader=P133 advisors=[] (pop=1 cap=4 task=偵查)
+[Order] Team48 buy food ×5 (oid=211)
+[DayNight] Day 3 開始
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (13, 19) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (16, 17) 捕野馬 +1
+[TickPerf] day=3 avg=84896 us max=3784929 us ticks=240 teams=64 factions=8
+[Ambition] Team61 rung 0→1 (定居 cap=2)
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team33 → 逃跑 (survival)
+[SoloAI] Team43 → 逃跑 (survival)
+[Ambition] Team45 rung 0→1 (定居 cap=1)
+[SoloAI] Team37 → 覓食 (覓食)
+[SoloAI] Team38 → 逃跑 (survival)
+[SoloAI] Team46 → 逃跑 (survival)
+[SoloAI] Team47 → 掠奪 (掠奪)
+[Order] Team62 sell material ×2 (oid=212)
+[Order] Team38 sell material ×1 (oid=213)
+[Move] Team 0 抵達 (2,21)
+[Move] Team 1 抵達 (22,2)
+[Move] Team 2 抵達 (21,9)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (11,22)
+[Move] Team 13 抵達 (16,10)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 26 抵達 (20,7)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,5)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 41 抵達 (20,7)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 50 抵達 (18,1)
+[Move] Team 53 stuck at (26,5) target=(29,5), task=信使, sa={  }
+[Move] Team 54 stuck at (26,5) target=(30,4), task=信使, sa={  }
+[Move] Team 61 抵達 (19,8)
+[Combat Start] Team-1000009 vs Team9
+[Ambush] NPC Team9 被 boar 伏擊
+[Combat Start] Team-1000010 vs Team50
+[Ambush] NPC Team50 被 boar 伏擊
+[Sub] Team38 派出子隊 Team63 leader=P102 advisors=[] (pop=3 cap=4 task=擴建)
+[Infra] Team38 派擴建子隊 Team63 → (12,17) stable
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team42 → 掠奪 (掠奪)
+[SoloAI] Team43 → 掠奪 (掠奪)
+[SoloAI] Team46 → 逃跑 (survival)
+[SoloAI] Team56 → 逃跑 (survival)
+[Market@(19, 8)] Team61  outpost owner Team12 成交
+[Sub] Team10 派出子隊 Team64 leader=P134 advisors=[] (pop=1 cap=9 task=偵查)
+[SoloAI] Team56 → 逃跑 (survival)
+[Ambition] Team59 rung 0→1 (商業 cap=2)
+[CrudeCamp] Team23 玩家紮營完工 @(3,28) → military
+[Site] Faction5 派工失敗: 資源不足 1.27x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[Order] Team61 buy weapon_melee_low ×1 (oid=214)
+[Ambition] Team14 rung 3→2 (定居 cap=3)
+[Sub] Team17 派出子隊 Team65 leader=P44 advisors=[] (pop=2 cap=29 task=運輸)
+[Convoy] Team17 派運輸子隊 Team65 送 food×2 → demand 市場(19,8)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 迎戰 (迎戰)
+[SurvivalCamp] team=Team65 → 紮營 @(18,11)
+[Survival] Team65 warning days_left=1.3 運輸→紮營
+[SurvivalCamp] team=Team65 → 紮營 @(18,11)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[CrudeCamp] Team20 玩家紮營完工 @(10,6) → military
+[Site] Faction4 派工失敗: 資源不足 1.25x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[Order] Team23 sell food ×333 (oid=215)
+[Order] Team23 buy material ×30 (oid=216)
+[Move] Team 2 抵達 (21,9)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 13 抵達 (16,10)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 33 抵達 (28,5)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 38 抵達 (15,14)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 47 抵達 (14,17)
+[Move] Team 53 stuck at (26,5) target=(29,5), task=信使, sa={  }
+[Move] Team 54 stuck at (26,5) target=(30,4), task=信使, sa={  }
+[Merge] Team12 ← Team62 完全合併 (pop=3)
+[SoloAI] Team38 → 覓食 (覓食)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team47 → 貿易 (囤貨)
+[StrategicAI] Faction2 首要目標: defend target=64
+[StrategicAI] Faction4 首要目標: defend target=65
+[Reaction] Person133 離團自立流亡 Team66 at (18,8)
+[Tick 900] Person 133 (leader/team66) → N1_flee | stress=0.05 loyalty=0.33
+[Tick 900] Person 130 (leader/team52) → P1_comply | stress=0.05 loyalty=0.42
+[Tick 900] Person 44 (member/team65) → P1_comply | stress=0.00 loyalty=0.82
+[SoloAI] Team66 → 紮營 (紮營)
+[CampL0] Team66 紮營 L0 @(18,8)
+[SoloAI] Team51 → 覓食 (覓食)
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team33 → 覓食 (覓食)
+[Order] Team38 buy material ×38 (oid=217)
+[DayNight] Day 4 開始
+[SoloAI] Team37 → 覓食 (覓食)
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=4 avg=72856 us max=3828203 us ticks=240 teams=66 factions=8
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team42 → 逃跑 (survival)
+[SoloAI] Team43 → 掠奪 (掠奪)
+[SoloAI] Team56 → 逃跑 (survival)
+[Ambition] Team51 rung 0→1 (商業 cap=2)
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 2(公庫0+私2) (需 { "material": 50, "tools": 0 })
+[Diplomacy] Team11 背叛 Team10
+[Site] 選址 (21, 8) score=368 周邊資源={ "ore_iron": 107, "ore_silver": 93, "herb": 20 } terrain=mountain
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[Order] Team20 sell food ×256 (oid=218)
+[Order] Team20 buy material ×27 (oid=219)
+[Order] Team66 buy food ×3 (oid=220)
+[Move] Team 0 抵達 (0,21)
+[Move] Team 2 抵達 (21,9)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 10 抵達 (21,17)
+[Move] Team 11 抵達 (5,13)
+[Move] Team 17 抵達 (19,11)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 26 抵達 (20,9)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,4)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 38 抵達 (15,14)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (11,22)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 47 抵達 (14,15)
+[Move] Team 50 抵達 (18,0)
+[Move] Team 51 抵達 (20,18)
+[Move] Team 52 抵達 (23,11)
+[Move] Team 53 stuck at (26,5) target=(29,5), task=信使, sa={  }
+[Move] Team 54 stuck at (26,5) target=(30,4), task=信使, sa={  }
+[Move] Team 65 抵達 (18,11)
+[Move] Team 66 抵達 (18,8)
+[Merge] Team10 ← Team64 完全合併 (pop=3)
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 3(公庫0+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction4 派工失敗: 資源不足 1.25x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Diplomacy] Team27 背叛 Team26
+[SoloAI] Team27 → 覓食 (覓食)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team58 → 逃跑 (survival)
+[SoloAI] Team59 → 逃跑 (survival)
+[SoloAI] Team66 → 外交 (求和)
+[CampL0] Team65 紮營 L0 @(18,11)
+[Sub] Team12 派出子隊 Team67 leader=P135 advisors=[] (pop=1 cap=5 task=偵查)
+[Sub] Team17 派出子隊 Team68 leader=P45 advisors=[] (pop=1 cap=17 task=偵查)
+[Sub] Team22 派出子隊 Team69 leader=P59 advisors=[] (pop=1 cap=28 task=偵查)
+[Tick 1000] Person 134 (member/team58) → N1_flee | stress=0.05 loyalty=0.40
+[Tick 1000] Person 134 (member/team58) → P1_comply | stress=0.05 loyalty=0.50
+[Tick 1000] Person 133 (leader/team66) → P1_comply | stress=0.00 loyalty=0.43
+[Tag] Team66 -流亡（恢復）
+[CorveeL1] Team65 L0→L1 紮根工期 @(18,11) civilian (720 person-ticks)
+[SubAI] Team65 引擎→建設 (紮根)
+[Order] Team65 buy food ×6 (oid=221)
+[SurvivalForage] team=Team65 pop=2 → 覓食 @(17,12)
+[Survival] Team65 urgent days_left=0.4 建設→覓食
+[Takeover] Team34 接管無人 outpost (9,14)
+[SoloAI] Team34 → 建設 (自救建田)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 迎戰 (迎戰)
+[Ambition] Team58 rung 0→1 (定居 cap=1)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team38 → 覓食 (覓食)
+[Order] Team69 sell material ×3 (oid=222)
+[Move] Team 0 抵達 (0,21)
+[Move] Team 2 抵達 (21,9)
+[Move] Team 9 抵達 (19,15)
+[Move] Team 13 抵達 (16,10)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 27 抵達 (21,4)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 36 抵達 (24,14)
+[Move] Team 38 抵達 (15,14)
+[Move] Team 43 抵達 (20,0)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 47 抵達 (14,15)
+[Move] Team 50 抵達 (18,0)
+[Move] Team 53 stuck at (26,5) target=(29,5), task=信使, sa={  }
+[Move] Team 54 stuck at (26,5) target=(30,4), task=信使, sa={  }
+[Move] Team 61 抵達 (17,9)
+[Move] Team 63 抵達 (12,17)
+[Move] Team 65 抵達 (17,12)
+[Move] Team 66 抵達 (18,8)
+[Market] Team36 <-> Team15 巧遇成交
+[Site] Faction5 派工失敗: 資源不足 1.27x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team36 → 貿易 (貿易)
+[SoloAI] Team38 → 逃跑 (survival)
+[Sub] Team41 派出子隊 Team70 leader=P110 advisors=[] (pop=2 cap=6 task=運輸)
+[Convoy] Team41 派運輸子隊 Team70 送 material×18 → demand 市場(19,8)
+[SoloAI] Team42 → 逃跑 (survival)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team44 → 迎戰 (迎戰)
+[SoloAI] Team45 → 建設 (紮根)
+[SoloAI] Team56 → 逃跑 (survival)
+[SoloAI] Team66 → 外交 (求和)
+[Sub] Team10 派出子隊 Team71 leader=P136 advisors=[] (pop=1 cap=10 task=偵查)
+[Tick 1100] Person 59 (member/team69) → P1_comply | stress=0.00 loyalty=0.93
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team33 → 覓食 (覓食)
+[Order] Team65 sell material ×10 (oid=223)
+[Order] Team34 sell food ×239 (oid=224)
+[SoloAI] Team37 → 覓食 (覓食)
+[Order] Team67 sell material ×4 (oid=225)
+[SoloAI] Team11 → 逃跑 (survival)
+[SoloAI] Team40 → 外交 (求和)
+[Ambition] Team66 rung 0→1 (商業 cap=2)
+[Order] Team68 sell weapon_melee_low ×1 (oid=226)
+[Order] Team68 sell material ×2 (oid=227)
+[SoloAI] Team27 → 覓食 (覓食)
+[SoloAI] Team47 → 貿易 (囤貨)
+[DayNight] Day 5 開始
+[StrategicAI] Faction2 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Equip] Team68 裝備 melee_low ×1
+[Equip] Team69 裝備 melee_low ×1
+[Move] Team 0 抵達 (0,21)
+[Move] Team 1 抵達 (22,2)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 14 抵達 (15,7)
+[Move] Team 17 抵達 (19,8)
+[Move] Team 27 抵達 (21,4)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,4)
+[Move] Team 36 抵達 (24,14)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (11,22)
+[Move] Team 44 抵達 (19,11)
+[Move] Team 45 抵達 (4,24)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 47 抵達 (14,15)
+[Move] Team 50 抵達 (18,0)
+[Move] Team 53 stuck at (26,5) target=(29,5), task=信使, sa={  }
+[Move] Team 54 stuck at (26,5) target=(30,4), task=信使, sa={  }
+[Move] Team 58 抵達 (24,17)
+[Move] Team 59 抵達 (12,9)
+[Move] Team 61 抵達 (16,10)
+[Move] Team 65 抵達 (19,9)
+[Move] Team 66 抵達 (18,8)
+[Move] Team 67 抵達 (18,7)
+[Market@(19, 8)] Team17  outpost owner Team12 成交
+[Merge] Team13 ← Team61 完全合併 (pop=9)
+[Combat Start] Team-1000011 vs Team69
+[Ambush] NPC Team69 被 boar 伏擊
+[Sub] Team13 派出子隊 Team72 leader=P35 advisors=[] (pop=2 cap=7 task=運輸)
+[Convoy] Team13 派運輸子隊 Team72 送 material×25 → demand 市場(19,8)
+[SoloAI] Team38 → 逃跑 (survival)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team42 → 掠奪 (掠奪)
+[SoloAI] Team44 → 紮營 (紮營)
+[SoloAI] Team66 → 外交 (求和)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[TickPerf] day=5 avg=96907 us max=6406469 us ticks=240 teams=71 factions=8
+[SoloAI] Team34 → 建設 (自救建田)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[Ambition] Team13 rung 0→1 (商業 cap=2)
+[Order] Team71 sell material ×1 (oid=228)
+[Order] Team70 sell material ×18 (oid=229)
+[SoloAI] Team36 → 外交 (求和)
+[SoloAI] Team46 → 逃跑 (survival)
+[SoloAI] Team56 → 逃跑 (survival)
+[CampL0] Team18 紮營 L0 @(12,5)
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team33 → 覓食 (覓食)
+[Move] Team 0 抵達 (0,21)
+[Move] Team 17 抵達 (19,8)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 26 抵達 (20,11)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,4)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 36 抵達 (24,14)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (11,22)
+[Move] Team 43 抵達 (19,2)
+[Move] Team 44 抵達 (18,11)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 50 抵達 (18,0)
+[Move] Team 52 抵達 (26,11)
+[Move] Team 58 抵達 (25,17)
+[Move] Team 60 抵達 (9,16)
+[Move] Team 65 抵達 (19,8)
+[Move] Team 66 抵達 (18,8)
+[Merge] Team17 ← Team65 完全合併 (pop=9)
+[Sub] Team17 派出子隊 Team73 leader=P44 advisors=[] (pop=2 cap=29 task=運輸)
+[Convoy] Team17 派運輸子隊 Team73 送 food×6 → demand 市場(18,11)
+[Site] Faction4 派工失敗: 資源不足 1.25x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team38 → 逃跑 (survival)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 逃跑 (survival)
+[SoloAI] Team44 → 逃跑 (survival)
+[SoloAI] Team47 → 外交 (求和)
+[SoloAI] Team52 → 逃跑 (survival)
+[SoloAI] Team59 → 逃跑 (survival)
+[Reaction] Person137 離團自立流亡 Team74 at (19,8)
+[Tick 1300] Person 137 (leader/team74) → N1_flee | stress=0.15 loyalty=0.38
+[SoloAI] Team74 → 紮營 (紮營)
+[Order] Team69 sell weapon_melee_low ×1 (oid=230)
+[SoloAI] Team37 → 覓食 (覓食)
+[Order] Team2 sell material ×30 (oid=231)
+[SoloAI] Team11 → 逃跑 (survival)
+[Order] Team11 sell material ×30 (oid=232)
+[Order] Team11 buy weapon_melee_low ×2 (oid=233)
+[Order] Team11 buy weapon_ranged_low ×1 (oid=234)
+[Order] Team11 buy tools ×1 (oid=235)
+[SoloAI] Team27 → 覓食 (覓食)
+[Order] Team16 sell material ×30 (oid=236)
+[Order] Team16 buy weapon_melee_low ×2 (oid=237)
+[Order] Team16 buy weapon_ranged_low ×1 (oid=238)
+[Order] Team16 buy tools ×1 (oid=239)
+[Order] Team33 buy weapon_melee_low ×1 (oid=240)
+[Order] Team33 buy weapon_ranged_low ×1 (oid=241)
+[Order] Team33 buy tools ×1 (oid=242)
+[Order] Team44 buy weapon_melee_low ×2 (oid=243)
+[Order] Team44 buy weapon_ranged_low ×1 (oid=244)
+[Order] Team44 buy tools ×1 (oid=245)
+[SoloAI] Team42 → 覓食 (覓食)
+[Order] Team10 buy tools ×1 (oid=246)
+[Order] Team19 sell material ×30 (oid=247)
+[Order] Team19 buy weapon_melee_low ×2 (oid=248)
+[Order] Team19 buy weapon_ranged_low ×1 (oid=249)
+[Order] Team19 buy tools ×1 (oid=250)
+[Order] Team34 buy weapon_melee_low ×3 (oid=251)
+[Order] Team34 buy weapon_ranged_low ×2 (oid=252)
+[Order] Team34 buy tools ×2 (oid=253)
+[Order] Team72 sell material ×25 (oid=254)
+[Order] Team73 sell material ×9 (oid=255)
+[Order] Team4 sell material ×30 (oid=256)
+[Order] Team4 buy weapon_melee_low ×3 (oid=257)
+[Order] Team4 buy weapon_ranged_low ×2 (oid=258)
+[Order] Team4 buy tools ×1 (oid=259)
+[Order] Team23 buy weapon_melee_low ×2 (oid=260)
+[Order] Team23 buy weapon_ranged_low ×2 (oid=261)
+[Order] Team23 buy tools ×2 (oid=262)
+[Order] Team26 buy weapon_ranged_low ×2 (oid=263)
+[Order] Team26 buy material ×48 (oid=264)
+[Order] Team26 buy tools ×2 (oid=265)
+[Order] Team27 sell material ×30 (oid=266)
+[Order] Team27 buy weapon_melee_low ×2 (oid=267)
+[Order] Team27 buy weapon_ranged_low ×2 (oid=268)
+[Order] Team27 buy tools ×1 (oid=269)
+[Order] Team35 buy weapon_melee_low ×1 (oid=270)
+[Order] Team35 buy weapon_ranged_low ×1 (oid=271)
+[Order] Team35 buy tools ×2 (oid=272)
+[Ambition] Team59 rung 1→0 (商業 cap=2)
+[SoloAI] Team34 → 建設 (自救建田)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[Order] Team36 sell material ×37 (oid=273)
+[Order] Team36 buy weapon_melee_low ×1 (oid=274)
+[Order] Team36 buy weapon_ranged_low ×1 (oid=275)
+[Order] Team74 buy food ×3 (oid=276)
+[Equip] Team69 裝備 melee_low ×1
+[Move] Team 0 抵達 (0,21)
+[Move] Team 2 抵達 (19,10)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (16,21)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 13 抵達 (16,10)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 27 抵達 (21,4)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (11,22)
+[Move] Team 42 抵達 (12,24)
+[Move] Team 44 抵達 (15,14)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 50 抵達 (18,0)
+[Move] Team 52 抵達 (28,9)
+[Move] Team 58 抵達 (25,17)
+[Move] Team 70 抵達 (19,8)
+[Market] Team17 <-> Team66 巧遇成交
+[Sub] Team2 派出子隊 Team75 leader=P6 advisors=[] (pop=2 cap=15 task=運輸)
+[Convoy] Team2 派運輸子隊 Team75 送 material×30 → demand 市場(12,17)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team36 → 紮營 (紮營)
+[SoloAI] Team38 → 逃跑 (survival)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team44 → 覓食 (覓食)
+[SoloAI] Team47 → 貿易 (貿易)
+[SoloAI] Team56 → 逃跑 (survival)
+[SoloAI] Team66 → 外交 (求和)
+[Market@(19, 8)] Team70  outpost owner Team12 成交
+[SoloAI] Team74 → 紮營 (紮營)
+[CampL0] Team36 紮營 L0 @(24,14)
+[Tick 1400] Person 132 (leader/team59) → P1_comply | stress=0.10 loyalty=0.44
+[Tick 1400] Person 137 (leader/team74) → P4_expand | stress=0.25 loyalty=0.36
+[Order] Team12 sell weapon_melee_low ×1 (oid=277)
+[Order] Team13 buy weapon_melee_low ×2 (oid=278)
+[Order] Team13 buy weapon_ranged_low ×2 (oid=279)
+[Order] Team13 buy tools ×1 (oid=280)
+[Order] Team22 buy weapon_melee_low ×1 (oid=281)
+[Order] Team22 buy weapon_ranged_low ×2 (oid=282)
+[Order] Team22 buy material ×31 (oid=283)
+[Order] Team22 buy tools ×2 (oid=284)
+[Order] Team28 sell material ×30 (oid=285)
+[Order] Team28 buy weapon_melee_low ×2 (oid=286)
+[Order] Team28 buy weapon_ranged_low ×1 (oid=287)
+[Order] Team28 buy tools ×1 (oid=288)
+[Order] Team39 sell food ×1057 (oid=289)
+[Order] Team39 buy weapon_melee_low ×2 (oid=290)
+[Order] Team39 buy weapon_ranged_low ×2 (oid=291)
+[Order] Team39 buy material ×2 (oid=292)
+[Order] Team39 buy tools ×1 (oid=293)
+[Order] Team7 sell material ×30 (oid=294)
+[Order] Team7 buy weapon_melee_low ×1 (oid=295)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=296)
+[Order] Team20 buy weapon_melee_low ×2 (oid=297)
+[Order] Team20 buy weapon_ranged_low ×1 (oid=298)
+[Order] Team20 buy tools ×2 (oid=299)
+[Order] Team38 buy weapon_melee_low ×1 (oid=300)
+[Order] Team38 buy weapon_ranged_low ×1 (oid=301)
+[Order] Team38 buy tools ×1 (oid=302)
+[Order] Team42 buy weapon_melee_low ×2 (oid=303)
+[Order] Team42 buy weapon_ranged_low ×2 (oid=304)
+[Order] Team42 buy tools ×1 (oid=305)
+[Order] Team43 buy weapon_melee_low ×1 (oid=306)
+[Order] Team43 buy weapon_ranged_low ×1 (oid=307)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=308)
+[Order] Team0 buy material ×25 (oid=309)
+[Order] Team0 buy tools ×1 (oid=310)
+[DayNight] Day 6 開始
+[Order] Team1 sell material ×30 (oid=311)
+[Order] Team1 buy weapon_melee_low ×2 (oid=312)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=313)
+[Order] Team1 buy tools ×1 (oid=314)
+[Order] Team3 sell material ×30 (oid=315)
+[Order] Team3 buy weapon_melee_low ×2 (oid=316)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=317)
+[Order] Team3 buy tools ×1 (oid=318)
+[Order] Team6 sell material ×30 (oid=319)
+[Order] Team6 buy weapon_melee_low ×2 (oid=320)
+[Order] Team6 buy weapon_ranged_low ×2 (oid=321)
+[Order] Team6 buy tools ×1 (oid=322)
+[Order] Team15 sell material ×30 (oid=323)
+[Order] Team15 buy weapon_melee_low ×2 (oid=324)
+[Order] Team15 buy weapon_ranged_low ×2 (oid=325)
+[Order] Team15 buy tools ×1 (oid=326)
+[Order] Team41 sell material ×20 (oid=327)
+[Order] Team41 buy weapon_melee_low ×1 (oid=328)
+[Order] Team41 buy weapon_ranged_low ×1 (oid=329)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=6 avg=75621 us max=4847346 us ticks=240 teams=72 factions=8
+[Order] Team8 sell material ×30 (oid=330)
+[Order] Team8 buy weapon_melee_low ×3 (oid=331)
+[Order] Team8 buy weapon_ranged_low ×3 (oid=332)
+[Order] Team8 buy tools ×1 (oid=333)
+[Residency] Team10 邀請 Team58 安頓 outpost (3,14)
+[Ambition] Team20 rung 4→3 (武力 cap=4)
+[Order] Team32 sell food ×1054 (oid=334)
+[Order] Team32 buy weapon_melee_low ×3 (oid=335)
+[Order] Team32 buy weapon_ranged_low ×2 (oid=336)
+[Order] Team32 buy material ×2 (oid=337)
+[Order] Team32 buy tools ×2 (oid=338)
+[Order] Team47 buy weapon_melee_low ×2 (oid=339)
+[Order] Team47 buy weapon_ranged_low ×2 (oid=340)
+[Order] Team47 buy tools ×1 (oid=341)
+[Order] Team50 buy weapon_ranged_low ×1 (oid=342)
+[CrudeCamp] Team45 玩家紮營完工 @(4,24) → civilian
+[Order] Team29 buy weapon_ranged_low ×2 (oid=343)
+[Order] Team29 buy material ×13 (oid=344)
+[Order] Team29 buy tools ×2 (oid=345)
+[Order] Team31 sell material ×30 (oid=346)
+[Order] Team31 buy weapon_melee_low ×2 (oid=347)
+[Order] Team31 buy weapon_ranged_low ×2 (oid=348)
+[Order] Team31 buy tools ×1 (oid=349)
+[SoloAI] Team32 → 建設 (自救建田)
+[Order] Team37 buy weapon_melee_low ×3 (oid=350)
+[Order] Team37 buy weapon_ranged_low ×2 (oid=351)
+[Order] Team37 buy material ×8 (oid=352)
+[Order] Team37 buy tools ×2 (oid=353)
+[SoloAI] Team33 → 覓食 (覓食)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team43 → 逃跑 (survival)
+[Order] Team21 sell material ×30 (oid=354)
+[Order] Team21 buy weapon_melee_low ×2 (oid=355)
+[Order] Team21 buy weapon_ranged_low ×1 (oid=356)
+[Order] Team21 buy tools ×1 (oid=357)
+[Order] Team49 buy weapon_ranged_low ×1 (oid=358)
+[Order] Team45 sell food ×162 (oid=359)
+[Order] Team45 buy weapon_melee_low ×2 (oid=360)
+[Order] Team45 buy weapon_ranged_low ×1 (oid=361)
+[Order] Team45 buy material ×62 (oid=362)
+[Order] Team45 buy tools ×1 (oid=363)
+[Ambition] Team58 rung 1→0 (定居 cap=1)
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (22, 7) score=361 周邊資源={ "ore_silver": 81, "herb": 20, "ore_iron": 161 } terrain=mountain
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 4(公庫0+私4) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (21, 8) score=452 周邊資源={ "ore_iron": 107, "ore_silver": 93, "herb": 20 } terrain=mountain
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 34(公庫0+私34) (需 { "material": 50, "tools": 0 })
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 27(公庫0+私27) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team37 → 覓食 (覓食)
+[Order] Team5 sell material ×6 (oid=364)
+[Order] Team5 buy weapon_melee_low ×1 (oid=365)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=366)
+[Order] Team5 buy tools ×1 (oid=367)
+[Order] Team40 buy weapon_melee_low ×1 (oid=368)
+[Order] Team40 buy weapon_ranged_low ×1 (oid=369)
+[Order] Team40 buy material ×3 (oid=370)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[Move] Team 0 抵達 (0,21)
+[Move] Team 4 抵達 (16,21)
+[Move] Team 13 抵達 (16,10)
+[Move] Team 14 抵達 (13,7)
+[Move] Team 17 抵達 (19,8)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,4)
+[Move] Team 36 抵達 (24,14)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (11,22)
+[Move] Team 43 抵達 (21,0)
+[Move] Team 44 抵達 (15,14)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 49 抵達 (3,14)
+[Move] Team 50 抵達 (18,0)
+[Move] Team 52 抵達 (28,9)
+[Move] Team 60 抵達 (10,15)
+[Move] Team 66 抵達 (19,8)
+[Move] Team 73 抵達 (18,11)
+[Move] Team 74 抵達 (20,8)
+[Market@(19, 8)] Team17  outpost owner Team12 成交
+[Combat Start] Team-1000012 vs Team55
+[Ambush] NPC Team55 被 boar 伏擊
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team32 → 建設 (自救建田)
+[Sub] Team38 派出子隊 Team76 leader=P103 advisors=[] (pop=2 cap=3 task=運輸)
+[Convoy] Team38 派運輸子隊 Team76 送 food×3 → demand 市場(19,8)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team44 → 覓食 (覓食)
+[SoloAI] Team47 → 貿易 (貿易)
+[SoloAI] Team59 → 逃跑 (survival)
+[SoloAI] Team66 → 外交 (求和)
+[SoloAI] Team74 → 紮營 (紮營)
+[CampL0] Team74 紮營 L0 @(20,8)
+[SurvivalCamp] team=Team76 → 紮營 @(19,10)
+[Survival] Team76 warning days_left=1.9 運輸→紮營
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Tick 1500] Person 129 (leader/team51) → P1_comply | stress=0.50 loyalty=0.78
+[Tick 1500] Person 135 (member/team67) → P1_comply | stress=0.20 loyalty=0.51
+[Tick 1500] Person 136 (member/team71) → P1_comply | stress=0.25 loyalty=0.53
+[Order] Team18 buy weapon_melee_low ×2 (oid=371)
+[Order] Team18 buy weapon_ranged_low ×2 (oid=372)
+[Order] Team18 buy tools ×1 (oid=373)
+[CampL0] Team76 紮營 L0 @(19,10)
+[Merge] Team38 ← Team76 完全合併 (pop=7)
+[Order] Team2 buy weapon_melee_low ×1 (oid=374)
+[Order] Team2 buy weapon_ranged_low ×1 (oid=375)
+[Order] Team30 sell material ×30 (oid=376)
+[Order] Team30 buy weapon_melee_low ×2 (oid=377)
+[Order] Team30 buy weapon_ranged_low ×2 (oid=378)
+[Order] Team30 buy tools ×1 (oid=379)
+[Order] Team9 sell material ×30 (oid=380)
+[Order] Team9 buy weapon_melee_low ×2 (oid=381)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=382)
+[Order] Team9 buy tools ×1 (oid=383)
+[Order] Team14 buy weapon_melee_low ×2 (oid=384)
+[Order] Team14 buy weapon_ranged_low ×2 (oid=385)
+[Order] Team14 buy tools ×1 (oid=386)
+[Order] Team17 sell material ×11 (oid=387)
+[Order] Team17 buy weapon_ranged_low ×1 (oid=388)
+[Order] Team17 buy tools ×1 (oid=389)
+[SoloAI] Team27 → 逃跑 (survival)
+[Order] Team24 sell material ×30 (oid=390)
+[Order] Team24 buy weapon_melee_low ×2 (oid=391)
+[Order] Team24 buy weapon_ranged_low ×1 (oid=392)
+[Order] Team24 buy tools ×1 (oid=393)
+[Order] Team35 buy material ×10 (oid=394)
+[Order] Team75 sell material ×30 (oid=395)
+[Order] Team25 sell material ×30 (oid=396)
+[Order] Team25 buy weapon_melee_low ×2 (oid=397)
+[Order] Team25 buy weapon_ranged_low ×2 (oid=398)
+[Order] Team25 buy tools ×1 (oid=399)
+[SoloAI] Team42 → 覓食 (覓食)
+[Order] Team46 buy weapon_melee_low ×2 (oid=400)
+[Order] Team46 buy weapon_ranged_low ×1 (oid=401)
+[Order] Team46 buy tools ×1 (oid=402)
+[Order] Team48 sell material ×5 (oid=403)
+[Order] Team48 buy weapon_ranged_low ×1 (oid=404)
+[Site] Faction4 派工失敗: 資源不足 1.25x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team34 → 建設 (自救建田)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[CorveeL1] Team36 L0→L1 紮根工期 @(24,14) civilian (720 person-ticks)
+[SoloAI] Team36 → 建設 (紮根)
+[SoloAI] Team56 → 逃跑 (survival)
+[Ambition] Team73 rung 0→1 (商業 cap=2)
+[Order] Team14 sell material ×24 (oid=405)
+[Move] Team 0 抵達 (0,21)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (16,21)
+[Move] Team 11 抵達 (0,14)
+[Move] Team 17 抵達 (17,8)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 26 抵達 (20,13)
+[Move] Team 27 抵達 (18,7)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 36 抵達 (24,14)
+[Move] Team 38 抵達 (20,9)
+[Move] Team 40 抵達 (9,22)
+[Move] Team 42 抵達 (12,24)
+[Move] Team 44 抵達 (15,14)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 47 抵達 (19,11)
+[Move] Team 50 抵達 (18,0)
+[Move] Team 56 抵達 (22,0)
+[Move] Team 66 抵達 (20,8)
+[Move] Team 67 抵達 (16,7)
+[Move] Team 70 抵達 (18,11)
+[Move] Team 71 抵達 (18,18)
+[Move] Team 72 抵達 (19,8)
+[Move] Team 74 抵達 (20,8)
+[Market@(17, 8)] Team17  outpost owner Team41 成交
+[Merge] Team2 ← Team75 完全合併 (pop=8)
+[Sub] Team2 派出子隊 Team77 leader=P6 advisors=[] (pop=2 cap=15 task=運輸)
+[Convoy] Team2 派運輸子隊 Team77 送 material×30 → demand 市場(12,17)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[Sub] Team38 派出子隊 Team78 leader=P103 advisors=[] (pop=2 cap=3 task=運輸)
+[Convoy] Team38 派運輸子隊 Team78 送 food×3 → demand 市場(19,8)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team44 → 覓食 (覓食)
+[SoloAI] Team47 → 逃跑 (survival)
+[SoloAI] Team59 → 覓食 (覓食)
+[SoloAI] Team66 → 外交 (求和)
+[SoloAI] Team74 → 逃跑 (survival)
+[SurvivalCamp] team=Team78 → 紮營 @(21,9)
+[Survival] Team78 warning days_left=1.9 運輸→紮營
+[Tick 1600] Person 138 (member/team17) → P4_expand | stress=0.45 loyalty=0.40
+[Tag] Team74 -流亡（恢復）
+[SurvivalCamp] team=Team78 → 紮營 @(21,9)
+[Order] Team10 buy material ×63 (oid=406)
+[SoloAI] Team46 → 紮營 (紮營)
+[SoloAI] Team51 → 覓食 (覓食)
+[CampL0] Team46 紮營 L0 @(6,28)
+[Ambition] Team36 rung 0→1 (商業 cap=1)
+[SoloAI] Team33 → 覓食 (覓食)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team43 → 掠奪 (掠奪)
+[Order] Team12 buy material ×53 (oid=407)
+[Order] Team54 sell material ×6 (oid=408)
+[Order] Team53 sell material ×6 (oid=409)
+[DayNight] Day 7 開始
+[SoloAI] Team32 → 建設 (自救建田)
+[SoloAI] Team37 → 覓食 (覓食)
+[SoloAI] Team40 → 外交 (求和)
+[TickPerf] day=7 avg=87397 us max=5023527 us ticks=240 teams=73 factions=8
+[ProsperityAttack] attacker=Team11 prey=Team5
+[Order] Team33 buy material ×37 (oid=410)
+[Ambition] Team74 rung 0→1 (定居 cap=3)
+[Order] Team77 sell material ×30 (oid=411)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (16,21)
+[Move] Team 13 抵達 (17,9)
+[Move] Team 18 抵達 (12,5)
+[Move] Team 19 抵達 (8,6)
+[Move] Team 26 抵達 (20,15)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 32 抵達 (13,23)
+[Move] Team 33 抵達 (28,4)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (9,22)
+[Move] Team 44 抵達 (15,14)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 49 抵達 (1,14)
+[Move] Team 50 抵達 (18,0)
+[Move] Team 51 抵達 (21,17)
+[Move] Team 56 抵達 (22,0)
+[Move] Team 59 抵達 (12,12)
+[Move] Team 60 抵達 (11,14)
+[Move] Team 66 抵達 (19,10)
+[Barter] Team17 39xfood <-> Team41 20xmaterial
+[Barter] Team17 22xmaterial <-> Team41 79xfood
+[Barter] Team17 1xarmor_low <-> Team41 16xmaterial
+[Market] Team17 <-> Team41 巧遇成交
+[Market] Team41 <-> Team17 巧遇成交
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team27 → 覓食 (覓食)
+[SoloAI] Team33 → 覓食 (覓食)
+[SoloAI] Team38 → 逃跑 (survival)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team47 → 掠奪 (掠奪)
+[SoloAI] Team51 → 覓食 (覓食)
+[SoloAI] Team58 → 乞食 (乞食)
+[SoloAI] Team66 → 逃跑 (survival)
+[SoloAI] Team74 → 逃跑 (survival)
+[Sub] Team26 派出子隊 Team79 leader=P69 advisors=[] (pop=1 cap=11 task=偵查)
+[Order] Team48 buy weapon_melee_low ×1 (oid=412)
+[Order] Team48 buy tools ×1 (oid=413)
+[Order] Team34 buy material ×2 (oid=414)
+[SoloAI] Team42 → 覓食 (覓食)
+[Ambition] Team15 rung 0→1 (商業 cap=1)
+[SoloAI] Team34 → 建設 (自救建田)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[SoloAI] Team36 → 建設 (紮根)
+[SoloAI] Team56 → 逃跑 (survival)
+[Ambition] Team72 rung 0→1 (商業 cap=3)
+[Order] Team17 buy weapon_melee_low ×1 (oid=415)
+[Order] Team18 sell material ×30 (oid=416)
+[Order] Team58 buy food ×9 (oid=417)
+[SoloAI] Team44 → 逃跑 (survival)
+[Ambition] Team51 rung 1→0 (商業 cap=2)
+[Order] Team78 sell material ×5 (oid=418)
+[Order] Team78 buy food ×4 (oid=419)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[Move] Team 0 抵達 (2,21)
+[Move] Team 3 抵達 (24,4)
+[Move] Team 4 抵達 (16,21)
+[Move] Team 9 抵達 (19,17)
+[Move] Team 13 抵達 (18,7)
+[Move] Team 14 抵達 (14,8)
+[Move] Team 27 抵達 (16,9)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 33 抵達 (28,4)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 36 抵達 (24,14)
+[Move] Team 42 抵達 (12,24)
+[Move] Team 51 抵達 (21,17)
+[Move] Team 56 抵達 (22,0)
+[Move] Team 70 抵達 (19,8)
+[Move] Team 73 抵達 (19,8)
+[Move] Team 78 抵達 (21,9)
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team27 → 覓食 (覓食)
+[SoloAI] Team38 → 逃跑 (survival)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team58 → 紮營 (紮營)
+[SoloAI] Team66 → 逃跑 (survival)
+[SoloAI] Team74 → 逃跑 (survival)
+[CampL0] Team58 紮營 L0 @(22,17)
+[CampL0] Team78 紮營 L0 @(21,9)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[StrategicAI] Faction6 首要目標: defend target=79
+[CorveeL1] Team78 L0→L1 紮根工期 @(21,9) civilian (720 person-ticks)
+[SubAI] Team78 引擎→建設 (紮根)
+[SurvivalMergeIn] team=Team78 → 併入 Team13
+[Survival] Team78 warning days_left=1.0 建設→投靠
+[Order] Team79 sell weapon_melee_low ×1 (oid=420)
+[SoloAI] Team46 → 建設 (建設)
+[Order] Team59 buy food ×2 (oid=421)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team43 → 掠奪 (掠奪)
+[SoloAI] Team32 → 逃跑 (survival)
+[SoloAI] Team37 → 覓食 (覓食)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team33 → 覓食 (覓食)
+[SoloAI] Team47 → 紮營 (紮營)
+[Order] Team60 sell material ×11 (oid=422)
+[Move] Team 4 抵達 (16,21)
+[Move] Team 13 抵達 (18,7)
+[Move] Team 20 抵達 (12,6)
+[Move] Team 27 抵達 (16,9)
+[Move] Team 30 抵達 (18,15)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 33 抵達 (28,4)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 40 抵達 (9,22)
+[Move] Team 56 抵達 (22,0)
+[Move] Team 70 抵達 (18,9)
+[Move] Team 73 抵達 (18,9)
+[Merge] Team17 ← Team73 完全合併 (pop=8)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team27 → 逃跑 (survival)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team66 → 逃跑 (survival)
+[StrategicAI] Faction5 首要目標: defend target=69
+[Tick 1900] Person 44 (member/team17) → P4_expand | stress=0.00 loyalty=1.00
+[DayNight] Day 8 開始
+[MsgPrune] 刪除過期訊息 global=3 known=0
+[SoloAI] Team42 → 覓食 (覓食)
+[TickPerf] day=8 avg=95518 us max=4938099 us ticks=240 teams=73 factions=8
+[SoloAI] Team34 → 建設 (自救建田)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[SoloAI] Team56 → 逃跑 (survival)
+[SoloAI] Team44 → 覓食 (覓食)
+[ProsperityAttack] attacker=Team11 prey=Team49
+[Sub] Team38 派出子隊 Team80 leader=P139 advisors=[] (pop=2 cap=8 task=運輸)
+[Convoy] Team38 派運輸子隊 Team80 送 food×6 → demand 市場(18,11)
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 58(公庫0+私58) (需 { "material": 50, "tools": 0 })
+[Site] Faction6 派工失敗: 資源不足 1.26x: material 有 5(公庫0+私5) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team46 → 建設 (建設)
+[Order] Team48 buy food ×32 (oid=423)
+[Move] Team 0 抵達 (4,21)
+[Move] Team 4 抵達 (16,21)
+[Move] Team 9 抵達 (19,19)
+[Move] Team 13 抵達 (18,9)
+[Move] Team 17 抵達 (19,10)
+[Move] Team 20 抵達 (12,6)
+[Move] Team 26 抵達 (20,17)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 39 抵達 (20,17)
+[Move] Team 42 抵達 (12,24)
+[Move] Team 43 抵達 (22,2)
+[Move] Team 44 抵達 (13,15)
+[Move] Team 46 抵達 (6,28)
+[Move] Team 48 抵達 (22,4)
+[Move] Team 56 抵達 (22,0)
+[Move] Team 58 抵達 (22,17)
+[Move] Team 68 抵達 (12,9)
+[Move] Team 70 抵達 (17,9)
+[Move] Team 72 抵達 (16,10)
+[Market@(22, 4)] Team48  outpost owner Team26 成交
+[Market] Team0 <-> Team8 巧遇成交
+[Extort] Team43 勒索 Team1，Team1 妥協給付
+[Site] Faction4 派工失敗: 資源不足 1.25x: material 有 30(公庫0+私30) (需 { "material": 50, "tools": 0 })
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 58(公庫0+私58) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team32 → 覓食 (覓食)
+[SoloAI] Team38 → 覓食 (覓食)
+[SoloAI] Team39 → 建設 (自救建田)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 迎戰 (迎戰)
+[SoloAI] Team59 → 逃跑 (survival)
+[SoloAI] Team66 → 逃跑 (survival)
+[SoloAI] Team74 → 逃跑 (survival)
+[CampL0] Team47 紮營 L0 @(19,12)
+[Tick 2000] Person 140 (member/team26) → P4_expand | stress=0.45 loyalty=0.36
+[Tick 2000] Person 139 (member/team80) → P1_comply | stress=0.00 loyalty=1.00
+[SoloAI] Team37 → 覓食 (覓食)
+[SoloAI] Team40 → 紮營 (紮營)
+[CampL0] Team40 紮營 L0 @(9,22)
+[Ambition] Team52 rung 1→0 (商業 cap=3)
+[Ambition] Team43 rung 0→1 (商業 cap=2)
+[SoloAI] Team33 → 覓食 (覓食)
+[Order] Team43 sell material ×7 (oid=424)
+[Order] Team43 buy tools ×1 (oid=425)
+[SoloAI] Team42 → 覓食 (覓食)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[Equip] Team26 裝備 melee_low ×1
+[Equip] Team69 裝備 melee_low ×1
+[Equip] Team79 裝備 melee_low ×1
+[Move] Team 13 抵達 (18,9)
+[Move] Team 20 抵達 (12,6)
+[Move] Team 23 抵達 (12,17)
+[Move] Team 27 抵達 (13,9)
+[Move] Team 32 抵達 (16,21)
+[Move] Team 33 抵達 (28,4)
+[Move] Team 37 抵達 (7,10)
+[Move] Team 42 抵達 (12,24)
+[Move] Team 47 抵達 (19,11)
+[Move] Team 48 抵達 (22,4)
+[Move] Team 56 抵達 (22,0)
+[Move] Team 70 抵達 (18,9)
+[Barter] Team23 59xfood <-> Team63 20xmaterial
+[Market@(12, 17)] Team23  outpost owner Team38 成交
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team27 → 逃跑 (survival)
+
