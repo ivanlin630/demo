@@ -2567,9 +2567,19 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	#     —— 它們最終都匯入本函式體。★不要四處插。
 	if Probe.enabled: Probe.bump("unified.rank.calls")
 	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	# ★★★單次耗時取自【既有的那對計時】——★純複製一個 int，不呼叫 Time.get_ticks_usec()。
+	#   在起點與終點之間再呼叫一次時鐘 ＝ 把新加的量測算進 `unified.rank`，
+	#   ★而 `unified.rank` 正是本輪要歸因的那個數字（同上一顆 tap 的陷阱，只是這次是「量測自己的量測」）。
+	var _tr0: int = _tr
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
 	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank", _tr)
+	# ★取樣放在計時【終點之後】⇒ `bump_sample` 自己的成本不進 `unified.rank`。
+	# ★★依賴 `phase_timing`：關掉時 `_tr/_tr0` 都是 0 ⇒ 本 sample 不運作（★這個前提寫進 dump，
+	#   否則有人只開 `Probe.enabled` 會拿到空的而以為「沒有慢的呼叫」）。
+	if Probe.enabled and SimRunner.phase_timing:
+		Probe.bump_sample("unified.rank.call_us", {
+			"us": _tr - _tr0, "team": team.team_id, "tick": state.world.current_tick}, 200)
 	# 征服名實探針（純觀測）：solo_intent=征服 的隊在此實際 winner 分類（想征服 vs 做掠奪）。
 	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
 	if _conq: Probe.bump("conq.intent")

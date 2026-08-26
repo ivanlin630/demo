@@ -1,0 +1,25 @@
+[peaceful_economy seed 1337 days 10] ★前提：SimRunner.phase_timing = true（本 sample 的單次耗時取自既有那對計時；
+   ★只開 Probe.enabled 而沒開 phase_timing 會拿到【空樣本】—— 那不是「沒有慢的呼叫」。）
+
+★★母體（unified.rank.calls）= 116｜★樣本 = 116｜cap = 200
+   ★樣本涵蓋 tick 10〜2400（全程 2400 tick）
+
+★單次耗時分布（μs，樣本內）：
+   min 9865｜p50 52971｜p90 84180｜max 115188｜合計 6345965
+   ★★top-1 佔樣本總耗時 1.8%｜top-5 佔 8.7%
+   ★★★讀法：top-1 過半 ⇒ 要找的是【那一兩個特定決策】；分布平坦 ⇒ 是【均攤地慢】。
+   ★我不替 systems 選 —— 兩個數字都在上面。
+
+★逐隊耗時合計（樣本內）：
+   Team0      263147 μs
+   Team1      795140 μs
+   Team2      284308 μs
+   Team3      845147 μs
+   Team4      602932 μs
+   Team5      756826 μs
+   Team6      355952 μs
+   Team7      514872 μs
+   Team8      191343 μs
+   Team9      319904 μs
+   Team10    1104982 μs
+   Team11     311412 μs

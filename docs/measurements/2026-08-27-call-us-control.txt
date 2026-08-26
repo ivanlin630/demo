@@ -1,0 +1,9 @@
+Probe.enabled=false phase_timing=true  ⇒ calls key 存在=false 值=—     ｜★call_us 樣本存在=false 筆數=（key 不存在）（跑了 720 tick）
+Probe.enabled=true  phase_timing=true  ⇒ calls key 存在=true  值=39    ｜★call_us 樣本存在=true  筆數=39（跑了 720 tick）
+Probe.enabled=true  phase_timing=false ⇒ calls key 存在=true  值=39    ｜★call_us 樣本存在=false 筆數=（key 不存在）（跑了 720 tick）
+★判準①：enabled=false 那列必須是【key 不存在】——★不是「值為 0」。
+★★判準②：enabled=true 但 phase_timing=false 那列，★call_us 樣本【必須不存在】——
+   它的單次耗時取自既有那對計時，關掉 phase_timing 就沒有時間可取。
+   ★★★把這個依賴印成一列事實，而不是寫在註解裡等人記得 ——
+   否則有人只開 Probe 會拿到空樣本，並讀成【沒有慢的呼叫】。
+   （值為 0 代表 bump 有跑只是沒累加；key 不存在才證明整條 tap 被旗標擋在外面。）

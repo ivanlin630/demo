@@ -16,16 +16,27 @@ func _run() -> void:
 	var days: int = int(_env("ADHOC_DAYS", "3"))
 	var sd: int = int(_env("PERF_SEED", "1337"))
 	var lines: Array = []
-	for arm in [false, true]:
+	# ★三臂（第三臂 2026-08-27 加：sample tap 依賴 phase_timing，要把那個依賴變成【可看見的事實】）
+	#   [probe_on, timing_on]
+	for arm in [[false, true], [true, true], [true, false]]:
 		Probe.reset()
-		Probe.enabled = arm
+		Probe.enabled = bool(arm[0])
+		SimRunner.phase_timing = bool(arm[1])
 		var n: int = _run_arm(cfg, days, sd)
 		var has_key: bool = Probe.counts.has("unified.rank.calls")
-		lines.append("Probe.enabled=%-5s ⇒ key 存在=%s｜值=%s（跑了 %d tick）" % [
-			str(arm), str(has_key),
-			str(int(Probe.counts.get("unified.rank.calls", -1))) if has_key else "（key 不存在）", n])
+		var has_smp: bool = Probe.samples.has("unified.rank.call_us")
+		lines.append("Probe.enabled=%-5s phase_timing=%-5s ⇒ calls key 存在=%-5s 值=%-6s｜★call_us 樣本存在=%-5s 筆數=%s（跑了 %d tick）" % [
+			str(bool(arm[0])), str(bool(arm[1])), str(has_key),
+			str(int(Probe.counts.get("unified.rank.calls", -1))) if has_key else "—",
+			str(has_smp),
+			str((Probe.samples["unified.rank.call_us"] as Array).size()) if has_smp else "（key 不存在）", n])
 		Probe.enabled = false
-	lines.append("★判準：enabled=false 那列必須是【key 不存在】——★不是「值為 0」。")
+		SimRunner.phase_timing = false
+	lines.append("★判準①：enabled=false 那列必須是【key 不存在】——★不是「值為 0」。")
+	lines.append("★★判準②：enabled=true 但 phase_timing=false 那列，★call_us 樣本【必須不存在】——")
+	lines.append("   它的單次耗時取自既有那對計時，關掉 phase_timing 就沒有時間可取。")
+	lines.append("   ★★★把這個依賴印成一列事實，而不是寫在註解裡等人記得 ——")
+	lines.append("   否則有人只開 Probe 會拿到空樣本，並讀成【沒有慢的呼叫】。")
 	lines.append("   （值為 0 代表 bump 有跑只是沒累加；key 不存在才證明整條 tap 被旗標擋在外面。）")
 	var text: String = "\n".join(PackedStringArray(lines))
 	print("\n" + text)
