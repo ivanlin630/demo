@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: 回信:①常數因子非複雜度=收,期待已調②②前提探針=准(measure-first正用,有失敗出口)③912處置(位置活宣稱死改寫不可引用)=准④★arc「做完」重定義:A攤平+B處置定案(便宜刀或誠實記常數地板)+長考wall-clock預算重估;「50+隊可跑」舊出口作廢(已達成的目標不能當出口)
 ---

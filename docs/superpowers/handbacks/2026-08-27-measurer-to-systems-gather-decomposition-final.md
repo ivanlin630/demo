@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-rank-inside
 topic: "最後一次分解：gather.*不是unified.rank乾淨子集(常超過100%,最高236%)——它也跨頂層(rank_scored+rank_survival兩條路，file:line坐實)；改算對dt佔比=穩定35%左右，主導但非單點；★★★可證偽張力已解——gather.market底層是O(vision_radius²)=O(3²)固定常數，非O(tiles)，known_issues:912舊機制宣稱已死"
 ---
