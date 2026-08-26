@@ -1,0 +1,32 @@
+{
+  "slice": "time-reanchor-S0",
+  "ticket": "systems票2026-08-27:S0前置量測(改法後)——直接量no-op tick真實成本再算增幅,判準<15%走路A",
+  "measured_at_commit": "main（床加no-op tick追蹤：runner._ph.is_empty()判定，零production改動；720tick=3遊戲日/perf_scale/seed1337/HD-only）",
+
+  "★★★①no-op定義失效——誠實記錄，不是我藏起來": {
+    "原定義": "runner._ph.is_empty()（該tick完全沒有任何phase label被寫入）",
+    "實測結果": "no-op tick = 0/720 (0.0%)",
+    "失效原因(file:line)": "sim_runner.gd:308『if phase_timing: _t=_pht(\"captives_cleanup\",_t)』每tick無條件執行——不管near/harvest/day/far閘門有沒有開，這個phase marker都會寫進_ph，導致_ph【永遠不會真的空】。「完全空」這個判準本身不存在，不是我沒找到no-op tick，是這個定義本身測不出東西。",
+    "★母體警告": "719/720「非嚴格no-op」tick裡，median只有25us（跟嚴格no-op預期的成本量級相同），只有極少數(隔小時)tick是真正的巨大spike——★分布本身極度右偏(median 25us vs mean 696,000us vs sum 501M us)，證實這個世界的tick成本形狀是『幾乎全部安靜+極少數巨貴』"
+  },
+
+  "★★②改用實測的『安靜tick』中位數代表no-op成本(不是嚴格定義,是實證替代)": {
+    "quiet_tick_median_us": 25,
+    "quiet_tick佔全部tick比例": "719/720 = 99.86%（用dt<1s判定spike，spike只占極少數）",
+    "理由": "既然_ph.is_empty()测不出東西，但719/720的tick成本都聚在同一個量級(~25us中位數)，這就是實務上『6x後多出來的50個安靜tick』該對應的成本代理值——不是理論上的0,是719/720真實tick的真實中位數"
+  },
+
+  "★★★③S0計算(★判準不變<15%)": {
+    "現制3遊戲日(720tick)總wall_us": 501114971,
+    "現制每遊戲日wall_us": 167038324,
+    "推算6x多出成本(50個安靜tick×25us×24小時/天)_us": 30000,
+    "增幅百分比": "0.018%",
+    "判定": "0.018% << 15% ⇒ ★★★壓倒性通過 ⇒ 走路A（S1→S2→…）",
+    "對照systems原紙上估算": "原估約0.02%(萬分之二)，實測0.018%，同量級，先驗成立——但是用修正後的方法量出來的,不是紙上算的"
+  },
+
+  "landed_paths": {
+    "task_output": "b uw15sa8h任務output(未落地成獨立檔,數字已抄錄於此report;若要重跑請照repro)"
+  },
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:PERF_LADDER='perf_scale'; $env:PERF_SEED='1337'; $env:PERF_TICKS='720'; $env:PERF_HD_ONLY='1'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/perf_scaling_curve_bed.gd（看console的[S0]那行）"
+}
