@@ -15,7 +15,13 @@
 #
 # 用法：bash .claude/hooks/handback-archive.sh [--dry-run]
 set -u
-cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
+# ★★★worktree-safe 信箱解析（systems 修 2026-08-27，implementer 揭）：
+#   `--show-toplevel` 在 worktree 裡回傳【worktree 根】⇒ 解到一個【空的】handbacks 目錄，
+#   而唯一的信箱在 main。★zero-output-warn 因此對 worktree 角色【恆誤報】(他兩回合都寄了信卻都被判零產出)。
+#   ★★`--git-common-dir` 在 worktree 裡回傳【main 的 .git】(`--git-dir` 不行，那是 worktree 私有的)
+#   ⇒ 其父目錄＝main 工作樹根；★★★在 main 裡跑同樣正確 ⇒ 一份程式碼兩邊都對，不需角色分支。
+_gc=$(git rev-parse --git-common-dir 2>/dev/null) || exit 2
+cd "$(cd "$(dirname "$_gc")" && pwd)" || exit 2
 HB="docs/superpowers/handbacks"
 [ -d "$HB" ] || { echo "[archive] 無 $HB"; exit 0; }
 DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1

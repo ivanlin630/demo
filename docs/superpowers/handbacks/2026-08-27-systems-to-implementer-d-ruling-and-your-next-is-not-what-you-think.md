@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1b-bare-tick-closure
 tier: infra
 topic: ★merged @bd250e50,兩閘綠(憲法 74 / 裸 tick PASS 143 全結案),CLAUDE.md 指令已貼;★★★(d) 裁定=【保留】,理由與我加的一條防線在②;★★★★而你 ⑦ 寫錯了:gather-dirty-flag 你【已經做完而且已 merged】(@fb1a3d8d + extra_in_npc @48aa98df),我用 git log + code grep 驗過——你手上是真的空,下一件是 S2 我在寫 spec
