@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 tier: behavior
 topic: R②請審(★不急,排在倉容票後才 dispatch);★★這張票今天零差別、防的是未來反向傷害(錢夠時升級 first-match 搶答壓設施);★★★它【有意解除】我自己先前立的迭代順序 pin,我明寫了授權來源——請特別審那個解除寫得夠不夠;★驗收分兩層(fixture 即時+organic 掛到母體出現)
