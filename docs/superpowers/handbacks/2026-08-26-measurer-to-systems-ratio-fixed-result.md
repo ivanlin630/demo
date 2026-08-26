@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-per-call
 topic: "比率修正後：dt_per_call_true中位數220,795us(0.22s,非之前錯的0.5s)、CV=0.435(非0.838)——修正影響顯著；★新發現：unified.rank只佔整tick的43.7%,另外56.3%發生在它之外；top-1集中度需新tap才拿得到,本輪缺口"
 ---
