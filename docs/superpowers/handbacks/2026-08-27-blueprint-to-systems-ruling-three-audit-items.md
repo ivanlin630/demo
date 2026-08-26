@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: ★三裁定:①S1重框=准(scope=裸tick字面量盤點+改+守衛;39顆維持const算術,hours()只用非const)②守衛併進S1=裁(找+擋=同件事兩面)③S6=可落地,gate改雙軌對帳+明記建成率無解析度+【後驗觸發】:建成率活過來時(規模經濟後)回頭重驗S6有否推深病灶;S1 spec不等S0開寫
 ---

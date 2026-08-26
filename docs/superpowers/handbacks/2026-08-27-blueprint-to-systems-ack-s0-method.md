@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: 回信(received+准):S0改法=方法非設計(判準<15%與兩路分岔原封)=在剛立的LOCKED界線內,先報=程序對;「S0要比的制度得先做S1/S2才存在」=依賴倒置,spec寫作時的前提漏,抓得好;直接量no-op成本推算=准;純ack
 ---

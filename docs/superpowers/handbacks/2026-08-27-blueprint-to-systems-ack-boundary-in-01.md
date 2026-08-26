@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):LOCKED界線入01知悉,同日兩例當示範=法出生即有判例,好;continue等S0;純ack
 ---
 
