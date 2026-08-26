@@ -1,0 +1,168 @@
+# ★S1a 裸 tick 候選清單（scanner: scripts/debug/bare_tick_scanner.gd）
+# ★★本票【一顆字面量都沒改】——本清單是 S1b 的母體。
+#
+# ★★★誠實限（永久盲點，不是本票能關的洞）：
+#   本掃描器是【文字比對】，看不到「把 tick 存進改名變數後再比裸值」：
+#       var t = current_tick     ← 看不到
+#       if t % 5 == 0:           ← 這顆裸 5 逃掉
+#   ⇒ ★清單【不是完備的】。讀的人請不要把它當成「全部」。
+#
+# 掃描範圍：res://scripts｜★排除：["res://scripts/debug"]（床與測試）
+# 走訪檔案數：118｜候選筆數：143
+# 比對前先剝掉：註解（#之後）＋字串字面量（避免 "%03d" 之類誤報）
+#
+# 欄位（★ASCII | 分隔，可 grep；★emoji 不得當欄位錨）：path|line|literal|symbol|note|source
+# ★note 是【標籤不是過濾】——★★一筆都沒有被丟掉，母體完整；標籤只是讓 S1b 的分流便宜一點。
+#   decl_init = `var x: int = 0` 這種宣告初值（機械形狀，多半不是要改的那種裸值）
+#
+# ── 陽性/陰性對照（走同一支 _scan_line，只是輸入被構造）──
+# CONTROL|mod|hits=2|if current_tick % 5 == 0:
+# CONTROL|cmp|hits=1|if team.order_eval_next_tick > 120:
+# CONTROL|addsub|hits=1|var n: int = state.world.current_tick + 240
+# CONTROL|negative|hits=0|var hp: int = 100 + 5
+# ★對照判準：mod／cmp／addsub 三種【各至少 1 hit】，negative【必須 0 hit】
+# ★★實測：陽性 3/3 ；陰性 0 hit
+#
+scripts/data/faction_data.gd|17|0|intent_eval_next_tick|decl_init|var intent_eval_next_tick: int = 0   # 下次 intent 重選 tick（cadence，A2b #3；鏡射 team threat/subteam_eval_next_tick）
+scripts/data/team_data.gd|135|0|expand_eval_next_tick|decl_init|var expand_eval_next_tick: int = 0
+scripts/data/team_data.gd|145|0|prosperity_eval_next_tick|decl_init|var prosperity_eval_next_tick: int = 0   # 下次 prosperity 評估 tick（cadence + 事件重評）
+scripts/data/team_data.gd|150|0|ambition_eval_next_tick|decl_init|var ambition_eval_next_tick: int = 0
+scripts/data/team_data.gd|159|0|order_eval_next_tick|decl_init|var order_eval_next_tick: int = 0   # 下次訂單 cadence 評估 tick
+scripts/data/team_data.gd|161|0|threat_eval_next_tick|decl_init|var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
+scripts/data/team_data.gd|162|0|decision_eval_next_tick|decl_init|var decision_eval_next_tick: int = 0     # 重評 cadence 重構：下次決策重評 tick（週期閘，非-unified 解 IDLE-lock）
+scripts/data/team_data.gd|165|0|subteam_eval_next_tick|decl_init|var subteam_eval_next_tick: int = 0      # 下次子隊決策 tick（cadence，鏡射 threat_eval_next_tick，A2a）
+scripts/data/team_data.gd|168|0|consolidate_eval_next_tick|decl_init|var consolidate_eval_next_tick: int = 0  # S-A：下次整併 target 評估 tick（cadence，鏡射 subteam_eval_next_tick）
+scripts/data/team_data.gd|169|0|residency_eval_next_tick|decl_init|var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
+scripts/data/team_data.gd|170|0|goal_eval_next_tick|decl_init|var goal_eval_next_tick: int = 0         # ★means-end S7:下次 goal 生成/掛退評估 tick（cadence-gate,鏡射 residency_eval_next_tick;goal_state 持久不需每 decide 重算）
+scripts/data/team_data.gd|171|0|info_eval_next_tick|decl_init|var info_eval_next_tick: int = 0          # ★資訊網 Part2 side-action:下次求援/偵察 side-dispatch 評估 tick（cadence-gate,per-team 錯開,herald/scout 慢策略不需每 tick）
+scripts/data/tile_data.gd|34|0|labor_eval_next_tick|decl_init|var labor_eval_next_tick: int = 0   # per-tile cadence gate（lazy-on-cadence rebalance）
+scripts/data/tile_data.gd|37|0|idle_employ_next_tick|decl_init|var idle_employ_next_tick: int = 0   # per-tile cadence gate（同 LABOR_CADENCE；避每決策重算 NeedOracle 遞迴）
+scripts/data/world_data.gd|4|0|current_tick|decl_init|var current_tick: int = 0
+scripts/data/world_state.gd|4|240|TICKS_PER_DAY|const_def|const TICKS_PER_DAY:    int   = 240          # 10 ticks/hour
+scripts/data/world_state.gd|5|24|TICKS_PER_HOUR|const_def|const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 10
+scripts/data/world_state.gd|6|30|TICKS_PER_MONTH|const_def|const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 7200 ticks
+scripts/data/world_state.gd|7|90|TICKS_PER_SEASON|const_def|const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 21600 ticks
+scripts/data/world_state.gd|8|360|TICKS_PER_YEAR|const_def|const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 86400 ticks
+scripts/simulation/ambition_ladder.gd|13|10|TICKS_PER_HOUR|const_def|const LADDER_EVAL_CADENCE: int = 10 * WorldState.TICKS_PER_HOUR
+scripts/simulation/belief_system.gd|9|3|TICKS_PER_DAY|const_def|const BELIEF_STALE_TICKS: int = WorldState.TICKS_PER_DAY * 3   # TEST VALUE — 位置 belief 超此視同未知(過期)→防永久 threat/pursuit loop
+scripts/simulation/belief_system.gd|16|30|TICKS_PER_DAY|const_def|const CRED_AGE_FULL_DECAY := WorldState.TICKS_PER_DAY * 30  # TEST VALUE
+scripts/simulation/belief_system.gd|32|3|TICKS_PER_DAY|const_def|const SCOUT_TIMEOUT := WorldState.TICKS_PER_DAY * 3   # TEST VALUE：斥候逾時未收斂 → 釋放回常規（防永 scout）
+scripts/simulation/belief_system.gd|158|3|TICKS_PER_MONTH|-|elif age < 3 * WorldState.TICKS_PER_MONTH: Probe.bump("bel.claim_mid")
+scripts/simulation/cadence_stagger.gd|42|1|current_tick|-|return current_tick + 1   # ★退化保護：cadence 非法時不製造無限迴圈（不靜默吞掉）
+scripts/simulation/cadence_stagger.gd|50|1|current_tick|-|candidate = current_tick + 1
+scripts/simulation/decision/decision_context.gd|543|0|current_tick|decl_init|var _age: int = state.world.current_tick - int(_be.get("last_tick", 0))
+scripts/simulation/decision/decision_context.gd|673|0|current_tick|-|and state.world.current_tick - int(_m.get("tick", 0)) < JOIN_REJECT_COOLDOWN_TICKS:
+scripts/simulation/decision/decision_engine.gd|23|20|TICKS_PER_DAY|const_def|const STALL_EXCLUDE_WINDOW: int = WorldState.TICKS_PER_DAY * 20   # TEST VALUE — 硬排除窗(> STALL_DAYS max 防 A 太快回來 ping-pong)
+scripts/simulation/decision/decision_engine.gd|192|200|current_tick|-|"tick": state.world.current_tick}, 200)
+scripts/simulation/decision/decision_engine.gd|215|200|current_tick|-|"tick": state.world.current_tick}, 200)
+scripts/simulation/decision/failure_memory.gd|77|0|current_tick|decl_init|var age: int = state.world.current_tick - int(e.get("tick", 0))
+scripts/simulation/decision/goal_resolver.gd|576|30|current_tick|-|"tick": state.world.current_tick}, 30)
+scripts/simulation/decision/goal_resolver.gd|658|200|current_tick|-|"dup": _existing, "tick": state.world.current_tick}, 200)
+scripts/simulation/decision/goal_resolver.gd|760|60|current_tick|-|"tick": state.world.current_tick}, 60)
+scripts/simulation/diplomatic_ai_system.gd|4|50|TICKS_PER_HOUR|const_def|const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
+scripts/simulation/diplomatic_ai_system.gd|5|7|TICKS_PER_DAY|const_def|const REJECT_COOLDOWN: int = WorldState.TICKS_PER_DAY * 7   # 被拒後同對象冷卻 7 天
+scripts/simulation/diplomatic_ai_system.gd|139|0|current_tick|-|if state.world.current_tick < int(self_team.diplomacy_reject_cooldown.get(other.team_id, 0)):
+scripts/simulation/faction_ai_system.gd|3|30|TICKS_PER_HOUR|const_def|const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+scripts/simulation/faction_ai_system.gd|4|20|TICKS_PER_HOUR|const_def|const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
+scripts/simulation/faction_ai_system.gd|88|2|TICKS_PER_DAY|const_def|const CRISIS_IMMUNITY: int = WorldState.TICKS_PER_DAY * 2   # TEST VALUE — release 後禁重委派同 task 窗（橋接到 survival @80 commit，防 instant-recommit）
+scripts/simulation/faction_ai_system.gd|309|0|current_tick|-|var stale: bool = last_tick < 0 or (state.world.current_tick - last_tick) > BeliefSystem.BELIEF_STALE_TICKS
+scripts/simulation/faction_ai_system.gd|643|0|current_tick|-|if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
+scripts/simulation/faction_ai_system.gd|653|4|current_tick|-|team.invite_cooldown[tid] = state.world.current_tick + RESIDENCY_COOLDOWN * 4   # 等 settle 流程
+scripts/simulation/faction_ai_system.gd|735|5|current_tick|-|"mod_infra": state.world.current_tick % INFRA_INTERVAL, "n_factions": state.factions.size()}, 5)
+scripts/simulation/faction_ai_system.gd|751|0|current_tick|-|if state.world.current_tick % INFRA_INTERVAL == 0:
+scripts/simulation/faction_ai_system.gd|755|0|current_tick|-|if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
+scripts/simulation/faction_ai_system.gd|761|0|current_tick|-|if state.world.current_tick % DiplomaticAiSystem.BETRAY_CHECK_INTERVAL == 0:
+scripts/simulation/faction_ai_system.gd|798|0|current_tick|-|if state.world.current_tick % INFRA_INTERVAL == 0:
+scripts/simulation/faction_ai_system.gd|862|1|ambition_eval_next_tick|-|if team.leader_id != -1 and team.ambition_eval_next_tick == 0:
+scripts/simulation/faction_ai_system.gd|862|0|ambition_eval_next_tick|-|if team.leader_id != -1 and team.ambition_eval_next_tick == 0:
+scripts/simulation/faction_ai_system.gd|865|1|order_eval_next_tick|-|if team.leader_id != -1 and team.order_eval_next_tick == 0:
+scripts/simulation/faction_ai_system.gd|865|0|order_eval_next_tick|-|if team.leader_id != -1 and team.order_eval_next_tick == 0:
+scripts/simulation/faction_ai_system.gd|868|1|current_tick|-|if team.leader_id != -1 and state.world.current_tick >= team.ambition_eval_next_tick:
+scripts/simulation/faction_ai_system.gd|872|20000|current_tick|-|"tick": state.world.current_tick, "team": team.team_id, "kind": "ambition"}, 20000)
+scripts/simulation/faction_ai_system.gd|875|1|current_tick|-|if team.leader_id != -1 and state.world.current_tick >= team.order_eval_next_tick:
+scripts/simulation/faction_ai_system.gd|877|20000|current_tick|-|"tick": state.world.current_tick, "team": team.team_id, "kind": "order"}, 20000)
+scripts/simulation/faction_ai_system.gd|943|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+scripts/simulation/faction_ai_system.gd|1248|0|current_tick|-|if state.world.current_tick % effective_interval == 0 and _richest_member(state, f) != -1:
+scripts/simulation/faction_ai_system.gd|1248|1|current_tick|-|if state.world.current_tick % effective_interval == 0 and _richest_member(state, f) != -1:
+scripts/simulation/faction_ai_system.gd|1351|0|current_tick|-|if state.world.current_tick - int(pp.get("issued_tick", 0)) > int(pp.get("timeout", 2 * WorldState.TICKS_PER_DAY)):
+scripts/simulation/faction_ai_system.gd|1351|2|current_tick|-|if state.world.current_tick - int(pp.get("issued_tick", 0)) > int(pp.get("timeout", 2 * WorldState.TICKS_PER_DAY)):
+scripts/simulation/faction_ai_system.gd|1548|2|TICKS_PER_DAY|decl_init|var budget: int = int(envoy.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+scripts/simulation/faction_ai_system.gd|1586|2|TICKS_PER_DAY|decl_init|var budget: int = int(letter.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+scripts/simulation/faction_ai_system.gd|1587|0|current_tick|-|if state.world.current_tick - int(letter.get("spawn_tick", 0)) > budget:
+scripts/simulation/faction_ai_system.gd|1711|2|TICKS_PER_DAY|-|"origin_pos": team.tile_pos, "expire_tick": spawn_tick + 2 * WorldState.TICKS_PER_DAY,
+scripts/simulation/faction_ai_system.gd|1726|2|TICKS_PER_DAY|decl_init|var budget: int = int(scout.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+scripts/simulation/faction_ai_system.gd|1755|2|current_tick|-|"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY}
+scripts/simulation/faction_ai_system.gd|2105|0|current_tick|-|var over: bool = state.world.current_tick - int(v.task_extra_data.get("relocate_spawn", 0)) \
+scripts/simulation/faction_ai_system.gd|2209|1|current_tick|-|"spawn_tick": state.world.current_tick, "timeout": SubteamSystem.founding_timeout(dist), "speed": 1,
+scripts/simulation/faction_ai_system.gd|2358|1|current_tick|-|"spawn_tick": state.world.current_tick, "timeout": SubteamSystem.founding_timeout(dist), "speed": 1,
+scripts/simulation/faction_ai_system.gd|2470|0|current_tick|-|st = clampf(float(state.world.current_tick - int(be.get("last_tick", 0))) / maxf(norm, 1.0), 0.0, 1.0)
+scripts/simulation/faction_ai_system.gd|2614|200|current_tick|-|"us": _tr - _tr0, "team": team.team_id, "tick": state.world.current_tick}, 200)
+scripts/simulation/faction_ai_system.gd|2820|1000|current_tick|-|"tick": state.world.current_tick}, 1000)
+scripts/simulation/faction_ai_system.gd|2840|10|TICKS_PER_DAY|const_def|const CONSTRUCT_TRANSIT_TIMEOUT: int = 10 * WorldState.TICKS_PER_DAY  # TEST VALUE — 10 天
+scripts/simulation/faction_ai_system.gd|2984|1|current_tick|-|"tick": state.world.current_tick, "eta": int(xd.get("return_eta", -1)),
+scripts/simulation/faction_ai_system.gd|3413|0|labor_eval_next_tick|-|tile.labor_eval_next_tick = 0
+scripts/simulation/faction_ai_system.gd|3954|30|current_tick|-|"tick": state.world.current_tick}, 30)
+scripts/simulation/faction_ai_system.gd|4596|50|TICKS_PER_HOUR|const_def|const INFRA_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時評估一次
+scripts/simulation/faction_ai_system.gd|4960|30|current_tick|-|"tick": state.world.current_tick}, 30)
+scripts/simulation/faction_ai_system.gd|5565|30|current_tick|-|"tick": state.world.current_tick}, 30)
+scripts/simulation/faction_ai_system.gd|6168|2|TICKS_PER_DAY|-|return dist * MovementSystem.BASE_MOVE_TICKS * 2 + WorldState.TICKS_PER_DAY
+scripts/simulation/faction_ai_system.gd|6251|1|TICKS_PER_DAY|decl_init|var expected_days: int = maxi((expected - disp) / WorldState.TICKS_PER_DAY, 1)
+scripts/simulation/faction_ai_system.gd|6296|3|TICKS_PER_DAY|const_def|const CONTACT_VIGILANCE_DURATION: int = WorldState.TICKS_PER_DAY * 3   # 失聯警覺期（defensive 反應→暫時警覺）
+scripts/simulation/game_setup.gd|698|1|current_tick|-|if int(entry.get("tick", -1)) != current_tick:
+scripts/simulation/harvest_system.gd|10|4|current_tick|-|var season: int  = (state.world.current_tick / SEASON_LENGTH) % 4
+scripts/simulation/harvest_system.gd|25|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+scripts/simulation/harvest_system.gd|54|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+scripts/simulation/harvest_system.gd|70|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+scripts/simulation/harvest_system.gd|87|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+scripts/simulation/harvest_system.gd|104|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+scripts/simulation/inquiry_system.gd|90|0|current_tick|-|if int(BeliefSystem.best_estimate(state, player_team.team_id, tid).get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
+scripts/simulation/inquiry_system.gd|90|10|current_tick|-|if int(BeliefSystem.best_estimate(state, player_team.team_id, tid).get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
+scripts/simulation/interaction_system.gd|863|20000|current_tick|-|"qty": q, "seq": _mf_next_seq(state.world.current_tick, oid), "kind": "buy"}, 20000)
+scripts/simulation/interaction_system.gd|913|20000|current_tick|-|"qty": q, "seq": _mf_next_seq(state.world.current_tick, oid), "kind": "sell"}, 20000)
+scripts/simulation/manpower_system.gd|268|0|current_tick|-|if state.world.current_tick % CAPTIVE_CADENCE != 0:
+scripts/simulation/movement_system.gd|101|1|elapsed_ticks|decl_init|var max_steps: int = maxi(1, elapsed_ticks / MIN_MOVE_TICKS)
+scripts/simulation/order_system.gd|3|5|TICKS_PER_DAY|const_def|const ORDER_LIFETIME: int = 5 * WorldState.TICKS_PER_DAY    # 訂單壽命
+scripts/simulation/order_system.gd|4|12|TICKS_PER_HOUR|const_def|const ORDER_POST_CADENCE: int = 12 * WorldState.TICKS_PER_HOUR
+scripts/simulation/order_system.gd|134|0|current_tick|-|"age_ticks": state.world.current_tick - int(o.get("created_tick", 0)),
+scripts/simulation/order_system.gd|249|0|current_tick|-|if int(e.get("expire_tick", 0)) <= state.world.current_tick:
+scripts/simulation/order_system.gd|303|0|current_tick|-|if int(m.params.get("expire_tick", 0)) <= state.world.current_tick:
+scripts/simulation/outpost_system.gd|30|30|TICKS_PER_DAY|const_def|const CONSTRUCTION_TIMEOUT: int = 30 * WorldState.TICKS_PER_DAY
+scripts/simulation/path_system.gd|106|1|current_tick|-|if cached and int(cached.get("tick", -1)) == state.world.current_tick:
+scripts/simulation/path_system.gd|177|1|current_tick|-|return int(BeliefSystem.best_estimate(state, observer.team_id, target_id).get("last_tick", -1)) == state.world.current_tick
+scripts/simulation/person_generator.gd|144|31|current_tick|-|base = base * 31 + state.world.current_tick
+scripts/simulation/player_trade_system.gd|103|0|current_tick|-|if int(mem.get("event_id", 0)) < state.world.current_tick - 1000:
+scripts/simulation/player_trade_system.gd|103|1000|current_tick|-|if int(mem.get("event_id", 0)) < state.world.current_tick - 1000:
+scripts/simulation/population_system.gd|8|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+scripts/simulation/reaction_system.gd|3|10|TICKS_PER_HOUR|const_def|const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+scripts/simulation/reaction_system.gd|48|0|current_tick|-|if state.world.current_tick % GOAL_CHECK_INTERVAL == 0:
+scripts/simulation/salary_system.gd|3|7|TICKS_PER_DAY|const_def|const SALARY_INTERVAL: int = WorldState.TICKS_PER_DAY * 7   # 1週/次
+scripts/simulation/salary_system.gd|15|0|current_tick|-|if state.world.current_tick % SALARY_INTERVAL != 0:
+scripts/simulation/settlement_memory.gd|47|0|TICKS_PER_DAY|-|var days: float = float(now - int(m.get("tick", 0))) / float(WorldState.TICKS_PER_DAY)
+scripts/simulation/sim_runner.gd|4|10|TICKS_PER_HOUR|const_def|const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
+scripts/simulation/sim_runner.gd|108|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:
+scripts/simulation/sim_runner.gd|108|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:
+scripts/simulation/sim_runner.gd|235|0|current_tick|-|if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+scripts/simulation/sim_runner.gd|245|0|current_tick|-|if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
+scripts/simulation/sim_runner.gd|253|0|current_tick|-|if state.world.current_tick % NEAR_CADENCE == 0:
+scripts/simulation/sim_runner.gd|294|4|current_tick|-|if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
+scripts/simulation/sim_runner.gd|294|0|current_tick|-|if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
+scripts/simulation/sim_runner.gd|299|0|current_tick|-|if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
+scripts/simulation/sim_runner.gd|336|1|current_tick|-|state.world.current_tick += 1
+scripts/simulation/sim_runner.gd|340|4|current_tick|-|if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
+scripts/simulation/sim_runner.gd|340|0|current_tick|-|if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
+scripts/simulation/strategic_ai_system.gd|3|10|TICKS_PER_HOUR|const_def|const STRATEGIC_INTERVAL:      int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+scripts/simulation/strategic_ai_system.gd|4|30|TICKS_PER_HOUR|const_def|const ALLIANCE_CHECK_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+scripts/simulation/strategic_ai_system.gd|27|0|current_tick|-|if state.world.current_tick % STRATEGIC_INTERVAL != 0: return
+scripts/simulation/strategic_ai_system.gd|37|0|current_tick|-|if state.world.current_tick % ALLIANCE_CHECK_INTERVAL == 0:
+scripts/simulation/threat_assessment.gd|24|1|current_tick|-|if int(BeliefSystem.best_estimate(state, self_team.team_id, other.team_id).get("last_tick", -1)) != state.world.current_tick:
+scripts/ui/observer_event_text.gd|16|1|TICKS_PER_MONTH|decl_init|var month: int = msg.origin_tick / WorldState.TICKS_PER_MONTH + 1
+scripts/ui/observer_event_text.gd|17|1|TICKS_PER_MONTH|decl_init|var day: int = (msg.origin_tick % WorldState.TICKS_PER_MONTH) / WorldState.TICKS_PER_DAY + 1
+scripts/ui/observer_main.gd|79|6|TICKS_PER_MONTH|-|_end_tick = 6 * WorldState.TICKS_PER_MONTH
+scripts/ui/observer_main.gd|254|1|TICKS_PER_MONTH|decl_init|var month: int = tick / WorldState.TICKS_PER_MONTH + 1
+scripts/ui/observer_main.gd|255|1|TICKS_PER_MONTH|decl_init|var day: int = (tick % WorldState.TICKS_PER_MONTH) / WorldState.TICKS_PER_DAY + 1
+scripts/ui/sim_bridge.gd|4|24|TICKS_PER_TURN|const_def|const TICKS_PER_TURN: int = 24
+scripts/ui/text_ui_main.gd|756|24|TICKS_PER_HOUR|-|var hour: int  = (tick / WorldState.TICKS_PER_HOUR) % 24
+scripts/ui/text_ui_main.gd|757|30|TICKS_PER_DAY|-|var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
+scripts/ui/text_ui_main.gd|757|1|TICKS_PER_DAY|-|var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
+scripts/ui/text_ui_main.gd|758|12|TICKS_PER_MONTH|decl_init|var month: int = (tick / WorldState.TICKS_PER_MONTH) % 12
+scripts/ui/turn_controls.gd|4|4|TICKS_PER_SECOND|const_def|const TICKS_PER_SECOND: int = 4   # TEST VALUE — world ticks rendered per second
