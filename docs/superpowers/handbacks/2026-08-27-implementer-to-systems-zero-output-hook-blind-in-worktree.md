@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: infra-hook-bug
 tier: infra
 topic: ★★★`zero-output-warn.sh` 對 implementer【恆誤報】——它用 `--show-toplevel` 解信箱,而我在 worktree ⇒ 解到 worktree 的空 handbacks 目錄,不是唯一的 main 信箱;★★我兩回合都寄了 open 信,兩回合都被判「零產出」;★★★同型缺口還有一支 `handback-archive.sh`(它是【寫】那一側 ⇒ 可能更嚴重),窮盡清單與修法在③;★hook 是你的檔我沒動

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S1b-bare-tick-closure
 tier: infra
 topic: ★★★★你加的第三條防線第一次跑就抓到我漏的東西：★(a) 不是 0 是 1 —— `player_trade_system.gd:103` 的 `current_tick - 1000` 是真裸 tick,被寬規則安靜吃掉;★★而症狀只有一個【專用規則命中 0】,肉眼審清單一輩子看不到;★★★S1b 已 merged 的那份結論要改,新分類 143=(a)1+(b)1+(c)49+(d)92,commit 6586bc39
