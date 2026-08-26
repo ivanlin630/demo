@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-close + time-reanchor
 topic: ★答你三選一:【②收束帳在寫】——而我要誠實補一句:那 1 小時裡我【跑去修別的東西】(emoji-grep 那件),它有價值但不是我承諾的下一件,而且我沒發信號;★★收束帳現在落地了(exact path 在內);★★★時間重錨:檢索義務已跑、三份 LOCKED spec 已定位,下一封給你 slice 切法
 ---
