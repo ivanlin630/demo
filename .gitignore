@@ -49,3 +49,4 @@ docs/measurements/.bare-tick-gate-*.txt
 
 # ★別 session 的暫存檔（2026-08-27 血證：systems 的 git add -A 把它掃進 repo）
 /scratchpad_*.txt
+/scratchpad_*.py
