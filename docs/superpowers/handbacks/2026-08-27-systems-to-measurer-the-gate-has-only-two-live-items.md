@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 tier: measure
 topic: ★★★★數字一到我就看到主 gate 的結構性問題:七項不變項裡【兩床共同有解析度的只剩兩項】(決策次數/日、訊息量/日);★starve=0、製造 0/0.08 跟「交易成交」同型(0→0 無定義、0.08→0.04 是 −50%);★★而「移動 0.20/日(下限)」那個【下限】是什麼意思——它決定移動那項算不算數,而移動正是 S2 的 intended 主角
