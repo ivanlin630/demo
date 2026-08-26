@@ -4588,9 +4588,9 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if tile.outpost_owner != leader_team.team_id:
 			continue   # ★不是自家地：不計入母體（母體＝自有據點-次，見下）
 		if Probe.enabled: Probe.bump_pt("upg.own_tile_seen", _uday, leader_team.team_id)
-		if tile.outpost_level >= 3 or tile.construction_team_id != -1:
+		if tile.outpost_level >= 3 or tile.construction_team_id != -1:   # gate-ok: world-mechanic: outpost level cap (>=3)（★原為單行含此標，2026-08-26 拆行加 tap 時標記留在 continue 行 → 搬回）
 			if Probe.enabled:
-				Probe.bump_pt("upg.skip_max_level" if tile.outpost_level >= 3 else "upg.skip_busy_construction", _uday, leader_team.team_id)
+				Probe.bump_pt("upg.skip_max_level" if tile.outpost_level >= 3 else "upg.skip_busy_construction", _uday, leader_team.team_id)   # gate-ok: observation-only — 替【已發生的 skip】命名，決策在上一行的 if
 			continue   # gate-ok: world-mechanic: outpost level cap (>=3)
 		if Probe.enabled: Probe.bump_pt("upg.call", _uday, leader_team.team_id)
 		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
@@ -4694,7 +4694,7 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		if def.has("required_terrain") and tile.terrain != def["required_terrain"]:
 			if Probe.enabled: Probe.bump("pick.%s.filtered.terrain" % site)
 			continue
-		if int(tile.get(def["current_level_key"])) > 0:
+		if int(tile.get(def["current_level_key"])) > 0:   # gate-ok: guard: 已有設施→升級 skip(selection)（★同上：拆行時標記留在 continue 行 → 搬回）
 			if Probe.enabled: Probe.bump("pick.%s.filtered.already_built" % site)   # gate-ok: guard: 已有設施→升級 skip(selection)
 			continue
 		elig += 1
@@ -4717,7 +4717,7 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 				# ★分數離門檻多遠（★只有這個能分出「差一點」與「差十萬八千里」）
 				Probe.note("pick.%s.best_seen_when_below" % site, best_seen)
 				Probe.bump("pick.%s.below.score_bucket.%s" % [site,
-					("zero" if best_seen <= 0.0 else ("lt_half_floor" if best_seen < floor0 * 0.5 else "near_floor"))])
+					("zero" if best_seen <= 0.0 else ("lt_half_floor" if best_seen < floor0 * 0.5 else "near_floor"))])   # gate-ok: observation-only — 診斷分桶，不參與 _pick_facility 的選擇
 		return {}
 	if not slot_full:
 		if Probe.enabled: Probe.bump_pt("pick.%s.ok_slot_free" % site, _pday, team.team_id)
