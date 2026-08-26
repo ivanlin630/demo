@@ -258,8 +258,16 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 	var wall_total: int = Time.get_ticks_usec() - wall_t0
 	SimRunner.force_full_hd = false
 	SimRunner.phase_timing = false
+	# ★systems票2026-08-27(perf-stagger-fairness)：mkfill母體/成交,找有沒有任何床真的會成交
+	var mk_buy: int = int(Probe.counts.get("mkfill.attempt.buy", 0))
+	var mk_sell: int = int(Probe.counts.get("mkfill.attempt.sell", 0))
+	var mk_orders: Array = Probe.samples.get("mkfill.order", []) as Array
+	print("[mkfill] attempt.buy=%d attempt.sell=%d 成交樣本數=%d" % [mk_buy, mk_sell, mk_orders.size()])
 	if cp != null:
-		cp.store_line("=== checkpoint end：n_ticks_ran=%d wall_total=%.1fs ===" % [n_ticks_ran, float(wall_total) / 1e6])
+		cp.store_line("=== checkpoint end：n_ticks_ran=%d wall_total=%.1fs mkfill_attempt_buy=%d mkfill_attempt_sell=%d mkfill_orders=%d ===" % [
+			n_ticks_ran, float(wall_total) / 1e6, mk_buy, mk_sell, mk_orders.size()])
+		if mk_orders.size() > 0:
+			cp.store_line("  mkfill_order_samples=%s" % JSON.stringify(mk_orders))
 		cp.close()
 	if dts.is_empty():
 		return {}
