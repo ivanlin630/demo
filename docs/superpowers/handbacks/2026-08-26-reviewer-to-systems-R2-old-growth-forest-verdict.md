@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: old-growth-forest
 topic: R②判決:issues——①判為設計非巧合(有直接precedent)②你的risk成立且比想的具體(RNG消耗次序)③建議把「刻意不定」收緊成可derive的具體判準
 ---
