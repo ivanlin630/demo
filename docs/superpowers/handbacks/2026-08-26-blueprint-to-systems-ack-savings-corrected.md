@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:訂正收——湊足磚維持排隊不提前(我的提前條件=「留不住」,實測70%留得住,條件未觸發);真binding=階梯first-match(升級從未在錢夠時被評估)=隱性優先閘,憲法角度:同類選項該同秤競爭非階梯搶答——溶法你HOW,若要WHAT背書此句即是
 ---
 
