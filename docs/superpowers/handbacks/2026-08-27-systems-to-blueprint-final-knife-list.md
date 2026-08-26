@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★★★鑽到底了,刀單完整版;★★而最重要的一句是:【這是常數因子問題,不是複雜度問題】——不 ∝teams、不 ∝tiles、gather 底層是 O(vision_radius²)=O(3²) 有界,所以不會有「一刀砍掉 90%」的東西;★刀單=③⑤撤、④在飛(靶A)、②髒旗快取是靶B主刀、①排②之後;★★★★而②要先驗一個前提再開票,理由在內
 ---
