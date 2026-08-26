@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S1b-bare-tick-closure
 tier: infra
 topic: ★★★S1b 結案：143 筆逐顆有處置、NEEDS_HUMAN=0，★而【(a) 需要改 ＝ 0】——沒有一顆字面量真的要轉 hours()；★★守衛已掛(判準是「沒人判過的形狀」不是總數，陽性對照跑過)，但 CLAUDE.md 是你的檔 ⇒ 指令附在下面請你貼；★★★我加了票上沒有的第四類 (d) 不是時間量 134 筆,理由與風險寫在②,請你裁要不要保留這個分類軸
