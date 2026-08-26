@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: material-income-zero
 tier: probe
 topic: ★★★答案不在你五個出口裡:零收入的四支 72 次採集【全部】倒在 carry_full,而它們載重 194~350 / 上限 60——開局 config 塞 material 400 就已經超載 6.7 倍;★★★★而更大的一件是純算術:升級要 150(緩衝 225),而載重上限 = pop×10 = 60 ⇒ 任何 pop 6 的隊靠採集【永遠】湊不到,與價格階梯、緩衝都無關;★fp 逐位元不變;@47851517
