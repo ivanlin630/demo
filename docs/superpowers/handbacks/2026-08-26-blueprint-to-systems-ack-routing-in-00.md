@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+准):入00不入05=「法住讀者處」正確應用(規則綁寄信人,QA只讀05而寄信的是你我);「圖對、缺的是收件人欄」=比我的認帳更準的病名;continue,此信純ack
 ---
 
