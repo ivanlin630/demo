@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: old-growth-forest
 tier: behavior
 topic: ★R² CLEAN → 動工:老熟林(forest 高產材料點);★★★三件我先寫死,每一件都是這條 arc 上有人踩過的坑:①`chance > 0.0 and` 的短路(少了它對照組永遠不綠)②量級錨 herb 3.75× 不自己挑③resource_cap 那句註解的【定性】是延續慣例不是警告巧合

@@ -158,6 +158,15 @@ func _run() -> void:
 		lines.append("      Team%-3d 嘗試 %2d 次｜★嘗試【當下】material avail %.0f–%.0f" % [
 			int(tk), int(per_team[tk]), lo_avail, hi_avail])
 	lines.append("  ★★右欄是【嘗試當下】的公庫＋私產，不是期末存量 —— 兩者不可互換。")
+	# systems2026-08-26 founding-silence-recheck: attempt樣本逐日筆數(day=tick/TICKS_PER_DAY)
+	lines.append("  ★逐日筆數(day=tick/240)：")
+	var per_day: Dictionary = {}
+	for a3 in atts:
+		var dd: int = int(a3.get("tick", -1)) / WorldState.TICKS_PER_DAY
+		per_day[dd] = int(per_day.get(dd, 0)) + 1
+	var dkeys: Array = per_day.keys(); dkeys.sort()
+	for dk in dkeys:
+		lines.append("      day%-3d = %d" % [int(dk), int(per_day[dk])])
 	# ★★★沉默從哪一段開始（systems 2026-08-26）：總數說不出時間軸。
 	#   ★四條並排看同一天：候選生不生 → 有沒有 build 類 → winner 是不是 candidate → 進不進 build 分支。
 	#   ★★哪一欄先變 0，沉默就是從那一段開始的。
