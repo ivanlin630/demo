@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: facility-vs-upgrade-scale
 topic: ★★★訂正我上一封:我說「設施把料花光⇒永遠攢不到⇒引擎沒有儲蓄概念」——實測「先到先花」只有 13/258=5%,而 180 次(70%)是【留著但沒出口】;★★★★所以湊足磚【不該因為本案提前】:那 70% 的料本來就在留著,binding 不是儲蓄;★階梯 first-match 你要的坐實有了,升級從來沒有一次在錢夠的狀態下被 afford 評估過
 ---
