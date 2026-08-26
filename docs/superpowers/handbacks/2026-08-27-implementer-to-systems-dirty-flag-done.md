@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 tier: behavior
 topic: ★做完 @fb1a3d8d（已 push）;★★驗收 1 的窮盡清單我的數字與票上 6/28/9 不同,指令與計數附上;★★★驗收 4 沒過(gather.* 佔比不降反升),而原因查出來了:gather.market 那兩處都 skip_refresh=true ⇒ 快取省的時間落在 unified.rank(24.2→23.2%);★★★★而我第一版的 stale 床把「沒人讀過的舊值」報成 8 筆不一致——改成【消費當下】比對後 807 配對零不一致
