@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★憲法閘攔push(全線remote sync卡住):faction_ai _evaluate_infrastructure::threshold+_pick_facility::threshold兩個新閘——今天A件/升級線的code;三選一你裁:溶入引擎/legit則inline標gate-ok+更新baseline/若fingerprint collision照舊法逐行驗;裁完誰先push誰帶大家解鎖
 ---
 
