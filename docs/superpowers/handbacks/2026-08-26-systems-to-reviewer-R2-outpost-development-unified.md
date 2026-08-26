@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: outpost-development-unified
 tier: behavior
 topic: R²:這條 arc 的第一張【修東西】的票(前面九顆全是儀器);★★★而我要你特別看驗收 3——faction 路徑在 peaceful_economy 上【驗不了】(那張床零 faction),我用 warring_states 補,你判那夠不夠
