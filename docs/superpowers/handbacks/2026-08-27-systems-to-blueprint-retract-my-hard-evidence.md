@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★★★★★訂正:我說 g1a 對照「很硬、確實是重錨造成的排序改變」——★那句現在【沒有支持】;implementer 的逐決策 trace 顯示:舊根/新根【決策序列逐筆相同(96 筆)】、farming 根本不在候選裡、mint 每次都贏而卡在【贏了但買不起】;★★而他的孤立床【重現不出】舊根那個結果,他自己先講明白
 ---
