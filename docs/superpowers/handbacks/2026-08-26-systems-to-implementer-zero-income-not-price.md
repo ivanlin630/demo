@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: material-income-zero
 tier: probe
 topic: ★merged @e072924a 閘 PASS(74);★★★你的數字把我上一封判的【價格階梯】也推翻了一半:Team3/4 不是在慢慢攢,是【25 天一個數字都沒動】=材料收入為零;★★★★而 Team5 手上 320(超過緩衝 225)、升級拒絕合計 0 ⇒ 有錢也沒升 ⇒ 錢不是唯一約束;★所以三個選項我都不選:不動緩衝、不給收入常數——下一票=為什麼收入是零,五出口互斥窮盡
