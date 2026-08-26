@@ -477,6 +477,7 @@ static func _build_outpost_tile(state: WorldState, pos: Vector2i,
 	if tile == null: return
 	tile.outpost_type  = type_str
 	tile.outpost_level = level
+	state.outpost_epoch += 1   # ★market-known 快取失效鍵（★我第一版漏了這兩處，specimen 在 tick 1 抓到 8 筆「NPC 看不到自己那一格」）
 	OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（初始佈點）
 	OutpostOwnerBank.set_owner(tile, owner_team_id, "init")
 	# 開局糧倉 buffer（緩坡旋鈕，TEST VALUE）：注入公庫 food（effective_food 讀 own granary
@@ -644,6 +645,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 				tile.terrain = String(op_cfg["terrain"])   # explicit 場景可釘地形（如村莊放可農平原）
 			tile.outpost_type = op_cfg.get("type", "civilian")
 			tile.outpost_level = int(op_cfg.get("level", 1))
+			state.outpost_epoch += 1   # ★market-known 快取失效鍵（★我第一版漏了這兩處，specimen 在 tick 1 抓到 8 筆「NPC 看不到自己那一格」）
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（初始佈點）
 			OutpostOwnerBank.set_owner(tile, team.team_id, "init")
 			if op_cfg.has("tile_food_init"):

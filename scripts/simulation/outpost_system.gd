@@ -363,6 +363,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 		"build":
 			tile.outpost_type  = tile.construction_target["type"]
 			tile.outpost_level = tile.construction_target["level"]
+			state.outpost_epoch += 1   # ★market-known 快取失效鍵（世界 tile 的 outpost_level 變了）
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（完工 0→>0；set_owner 可能因 owner 未變而 early-return，不能依賴它）
 			OutpostOwnerBank.set_owner(tile, tile.construction_team_id, "construct")
 			var n: String = get_outpost_name(tile.outpost_type, tile.outpost_level)
@@ -386,6 +387,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				_auto_settle_builder(state, team, tile)
 		"upgrade_level":
 			tile.outpost_level = tile.construction_target["level"]
+			state.outpost_epoch += 1   # ★market-known 快取失效鍵（世界 tile 的 outpost_level 變了）
 			# ★§4c 反饋（成功掛點）：據點升級完工＝這塊地養得起發展 → 寫該 tile owner 隊 leader 的選址記憶。
 			var _owner_team: TeamData = state.teams.get(tile.outpost_owner) if tile.outpost_owner != -1 else null
 			if _owner_team != null:
@@ -403,6 +405,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			# 玩家紮營完工（Y 版）：免材料,只抬 food cap（regen 才產糧）,絕不送即時糧（去剝削）
 			tile.outpost_type  = str(tile.construction_target.get("type", "civilian"))
 			tile.outpost_level = 1
+			state.outpost_epoch += 1   # ★market-known 快取失效鍵（世界 tile 的 outpost_level 變了）
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（紮營完工 0→1）
 			OutpostOwnerBank.set_owner(tile, int(tile.construction_target.get("owner", team.team_id)), "construct")
 			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
@@ -424,6 +427,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				tile.tile_pos.x, tile.tile_pos.y])
 			tile.outpost_type  = ""
 			tile.outpost_level = 0
+			state.outpost_epoch += 1   # ★market-known 快取失效鍵（世界 tile 的 outpost_level 變了）
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（拆除 >0→0）
 			OutpostOwnerBank.set_owner(tile, -1, "demolish")
 			# ★god-view Slice C：市集拆了(outpost_level→0，唯一真消失路)→清所有隊 team_market_known 對此 tile 的
