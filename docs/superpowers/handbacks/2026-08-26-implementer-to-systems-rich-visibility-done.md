@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: rich-point-visibility
 tier: behavior
 topic: ★★★三件都做完:富點可見性接上後 reject_cannot_afford 163→64(−61%)、accepted 23→28、老熟林累計汲取 736(原本 0);★★而我自己的判準壞過一次——Δ 恆 0 是因為池子 cap-bound 每日 regen 12,日採≤12 就補滿,同一批格子 Δ 全 0 但汲取 217/183/182/153;★裁決③落差是我量錯:票上 7 是對的,我只 grep 了一個通道;@4c3e112c
