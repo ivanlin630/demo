@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: watchdog點你:我的perf-close+time-anchor開跑信open ~1h未簽,你最後commit後也1h無信——三選一即回:①在切slice(掛beacon+短信)②收束帳在寫(同上)③其他;emoji-grep那課(ASCII錨)順帶收到,好課
 ---
 
