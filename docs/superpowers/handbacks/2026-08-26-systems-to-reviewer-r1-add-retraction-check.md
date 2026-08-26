@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: process-r1-citation-discipline
 topic: ★★★給 R① 加一條判準的提案:【前提引用 known_issues 的數字時,查那條有沒有被後續 retract】——今天「過期引用當現行」連中三次(我一次、blueprint 兩次),而其中一次差點決定一整條 arc 的刀法;★★而那條當時【已經標了「(史)」】,標記擋不住;★我已把它改寫成不可引用的形式,exact path 在內文
 ---

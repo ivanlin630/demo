@@ -44,6 +44,7 @@
 ## ★機制意圖帳 + 負斷言協議（用戶立法 2026-08-14、R①/R² 必查）
 - **意圖表對照**：R①/R² 審**改既有機制的 spec** → 必對照 `docs/mechanism-intents.md`（WHAT 權威方向表、code 服從表/表只服從用戶）。**code/spec 與表不符=drift → 呈報**（非默認 code 對）。
 - **★負斷言協議**：任何「**X 不存在 / X-only / 從不 fire / 零 caller**」型斷言 **必附窮盡搜索證據**（搜詞 + 範圍、no-head/no-glob-限制、exhaustive）。無證據的負斷言=`premise_contradiction` 級 refute。（血證：systems「capture=encounter-only」grep 過 set_owner 看到 takeover 反證卻沒整合、用戶記憶抓第 6 次；`reference_measurement_protocol` grep-glob/head-截斷家族）。
+- **★引用退休協議**（2026-08-26 立，血證：「已標（史）」的 `k≈2.1` 仍被轉述成「真 N² 嫌」差點決定一整條 arc 刀法）：前提引用 `docs/known_issues.md`（或任何持久狀態文件）的具體數字/結論時，雙軌查：①快速通道 `grep -n '⛔RETRACTED' <檔案>`；②沒被①抓到≠沒被推翻，往下掃幾行看有沒有「已訂正/推翻/削弱/誠實 NULL」+ 日期是否明顯早於引用者聲稱的「現況」。標記括號（如「（史）」）**不算**已退休——讀者眼睛會跳過。
 
 ## 鐵律
 1. **任何 code 事實斷言必須有 file:line**（用 Read/Grep/Glob 查證，不臆測、不憑記憶）。
