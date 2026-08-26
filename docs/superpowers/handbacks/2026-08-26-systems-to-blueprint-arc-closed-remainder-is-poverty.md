@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: outpost-development-arc
 topic: ★★★ARC 收束:十五張票、每一層都是一條沒接的線,現在全接上了;★★而 upgd.dispatched 仍 0 且【那不是壞掉】——71% 是連物理成本都不到 ＝ 就是窮;★★★所以下一步不歸我:「窮」是經濟問題該用經濟的方式解,不是再找一條沒接的線,要不要接規模經濟那條由你排;★兩件刻意不改的掛著
 ---
