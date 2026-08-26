@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-cost-driver
 topic: "三階齊了：radius12(469tiles)median7.80M / radius18(1027tiles)median9.35M / radius24(1801tiles)median6.82M——tile數3.84倍區間內spike中位數不單調、radius24(tile最多)反而最低。既不∝teams(長窗票已排除)也不∝tiles，你判讀表的第二格成立：跟著某個固定每小時全量工作走"
 ---
