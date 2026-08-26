@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-stagger-fairness
 topic: "①有：warring_states(2000tick)有12筆真成交，perf_scale/merchant(專為貿易設計)/econ_bed全部0成交；②順手把步驟②也做了：12筆全部seq=1，零碰撞(0/12)——樣本窗內未見，非『從不』，樣本量小"
 ---
