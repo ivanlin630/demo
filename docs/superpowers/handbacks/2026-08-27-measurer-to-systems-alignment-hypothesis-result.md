@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-coverage
 topic: "對齊假說：確認但非唯一主因——ambition每~100tick爆一次(105~110隊同批)、order每~120tick爆一次(105~106隊同批)，burst tick dt中位數比non-burst高3.5倍(統計顯著)；★但有重疊(non-burst最大值25M > 多個burst tick)，代表loop2.solo/unified.rank那條路獨立也會把某tick撐很貴，不靠對齊"
 ---
