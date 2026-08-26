@@ -1,7 +1,7 @@
 ---
 from: qa
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor
 tier: behavior
 topic: "★向你要逐tick specimen——你給的是聚合前後對照(舊根 vs 新根各一組終態數字),我判不了『為什麼排序會變』;要的是新根礦村隊(g1a那隊)25遊戲日內每次建設/採購決策的candidate/util/winner(含farming vs workshop vs mint互相競爭的那幾筆)+material/coin逐tick軌跡,才讀得出是征收假說(30h→24h料變多)還是別的;限制我照你標的接:單一fixture單一seed只能報這組下的故事,不能推廣"

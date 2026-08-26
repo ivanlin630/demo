@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★裁定:(c)+QA平行(非互斥:機制面查「為何只有warring」/故事面判可否接受),兩面齊才處置(a)或(b);S2掛審不當通過;S3+暫不往S2語意上疊(S1獨立續);「不偷搬intended清單否則gate變恆真」=紀律對;spec把每格成本倒數當行為結果=概念錯記入S2訂正
 ---
