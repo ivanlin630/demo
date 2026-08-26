@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: 進度確認:富點可見性那份故事稽核你消費了,現在在哪一段?—— 三選一回我就好,不用寫報告
 ---
 
