@@ -399,6 +399,10 @@ func _run() -> void:
 	var ots: int = _sum_days("upg.own_tile_seen.day.")
 	var ucall: int = _sum_days("upg.call.day.")
 	lines.append("  ①`_evaluate_infrastructure` 走到幾次（faction 路徑）= %d" % ev)
+	if ev == 0 and int(Probe.counts.get("pick.infra.entry", 0)) + _sum_days("pick.infra.entry.day.") > 0:
+		lines.append("     ★★★注意：本段【全 0 是預期的】——階梯溶解之後，升級不再有獨立的評估迴圈，")
+		lines.append("        它變成 `_pick_facility` 的第三個出口 `ok_upgrade`（見下面那張表）。")
+		lines.append("        ★沒有這一行，下一個人會把「upg.call 258 → 0」讀成【升級路徑又斷了】。")
 	if ev == 0:
 		lines.append("     ★★★恆 0 ⇒ **這條函式從來沒被走到** —— 而它是【faction 路徑】；")
 		lines.append("        這張床的隊若是 faction_id = -1（獨立），走的是 `_evaluate_independent_infrastructure`。")
@@ -438,7 +442,8 @@ func _run() -> void:
 	lines.append("")
 	lines.append("═══ ★★`_pick_facility` 出口分類（六類，分母＝pick.<site>.entry）═══")
 	var PICK_FATES: Array = ["empty_no_eligible", "empty_all_below_threshold", "ok_slot_free",
-		"empty_slot_full_no_lowest", "empty_slot_full_margin", "ok_demolish"]
+		"empty_slot_full_no_lowest", "empty_slot_full_margin", "ok_demolish",
+		"ok_upgrade"]   # ★第七格（階梯溶解）：不加它，出口分類會少一項而合計看起來仍合理
 	for site in ["infra", "lord_scan"]:
 		var ent: int = _sum_days("pick.%s.entry.day." % site)
 		lines.append("")
@@ -452,7 +457,7 @@ func _run() -> void:
 			ssum += v
 			lines.append("      %-28s = %4d（%.1f%%）%s" % [String(ft), v, 100.0 * v / maxf(float(ent), 1.0),
 				"   ←★恆 0" if v == 0 else ""])
-		lines.append("  ★★對帳：六類合計 %d vs entry %d ⇒ %s" % [ssum, ent,
+		lines.append("  ★★對帳：%d 類合計 %d vs entry %d ⇒ %s" % [PICK_FATES.size(), ssum, ent,
 			"✅一致" if ssum == ent else "❌不一致（★有出口沒被分類）"])
 		# ★被過濾掉的設施（★不入上面的對帳：它是 per-facility 不是 per-call）
 		lines.append("  ★三道過濾各擋掉幾個【設施-次】（per-facility，不入上面的對帳）：")
@@ -502,11 +507,12 @@ func _run() -> void:
 		["infra", "infra.", ["entry", "guard_no_own_outpost", "guard_in_combat", "guard_no_leader",
 			"guard_tile_null", "guard_outpost_level0", "guard_under_construction",
 			"pick_empty", "built_in_place", "in_place_failed", "dispatch_builder",
-			"upgrade_dispatched"]],   # ★新歸宿（據點發展統一）：不加它對帳式會少一項而看起來仍合理
+			"upgrade_dispatched", "upgrade_failed"]],   # ★新歸宿（據點發展統一）：不加它對帳式會少一項而看起來仍合理
 		["wall", "wall.", ["begin_entry", "accepted", "reject_cannot_afford", "reject_no_slot",
 			"reject_max_level", "reject_terrain", "reject_outpost_type", "reject_no_def"]],
 		["pick(infra)", "pick.infra.", ["entry", "empty_no_eligible", "empty_all_below_threshold",
-			"ok_slot_free", "empty_slot_full_no_lowest", "empty_slot_full_margin", "ok_demolish"]],
+			"ok_slot_free", "empty_slot_full_no_lowest", "empty_slot_full_margin", "ok_demolish",
+			"ok_upgrade"]],
 	]
 	var roster: Array = state.teams.keys(); roster.sort()
 	for fam in FAMS:

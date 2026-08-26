@@ -122,6 +122,7 @@ func _initialize() -> void:
 	_test_evaluate_outpost_location()
 	_test_evaluate_infrastructure()
 	_test_storage_fits_upgrade_cost()
+	_test_pick_facility_upgrade_scale()
 	_test_subteam_arrival_triggers_build()
 	_test_dispatch_upgrader_and_facility()
 	_test_auto_settle_after_build()
@@ -7816,6 +7817,62 @@ func _test_evaluate_outpost_location() -> void:
 #   ★★三組對照與真閘呼叫【同一支 `TileBank.storage_fits`】，只是引數被扭曲 ——
 #     ★★★不是另外寫三段紅色斷言說服自己；其中 margin×3 那組同時在驗
 #     【實作有沒有真的用上 margin】：若退化成 `cap >= cost`，那一組不會紅而閘仍看起來綠。
+# ★★★升級 × 拆建 × 空位：同一把秤（spec 2026-08-26 infra-ladder-dissolve）四 fixture。
+#   ★四格都呼叫【真正的 production 決策函式】`_pick_facility`，
+#     ★★不自己重寫一份比較邏輯再斷言 —— 那樣驗的是我抄得對不對，不是 code 對不對。
+#   ★★★D 是【負向】的：faction 內、非 leader 自有 ⇒ 不得升級。
+#     沒有 D，範圍擴大會【靜默通過】—— 因為它的症狀是「多了一件好事」，不會有人來報 bug。
+func _test_pick_facility_upgrade_scale() -> void:
+	print("--- 升級收進同一把秤：A/B/C/D fixture ---")
+	var fai := FactionAISystem.new()
+	for fx in ["A", "B", "C", "D"]:
+		var state := WorldState.new()
+		state.world = WorldData.new()
+		var tile := HexTileData.new()
+		tile.tile_pos = Vector2i(0, 0); tile.tile_id = 0
+		tile.terrain = "plains"; tile.outpost_type = "civilian"; tile.outpost_level = 1
+		tile.outpost_owner = 0
+		state.world.tiles[0] = tile
+		var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+		team.population = 20; team.work_morale = 1.0
+		var leader := PersonData.new(); leader.id = 1; leader.person_name = "L"
+		state.persons[1] = leader; team.leader_id = 1
+		state.teams[0] = team
+		# ★slot 狀態：A 留空位；B/C/D 塞滿（civilian L1 cap = 2 格）
+		# ★把 slot 塞滿：★不手抄欄位名 —— 從 `FACILITY_DEF[f].current_level_key` 讀（單一真值），
+		#   這樣日後新增/改名設施時 fixture 不會 stale 成假綠。
+		if fx != "A":
+			var _filled: int = 0
+			for f in OutpostSystem.FACILITY_DEF:
+				var fdef: Dictionary = OutpostSystem.FACILITY_DEF[f]
+				if not ("civilian" in fdef["allowed_outpost"]): continue
+				if fdef.has("required_terrain") and tile.terrain != fdef["required_terrain"]: continue
+				tile.set(fdef["current_level_key"], 1)
+				_filled += 1
+				if _filled >= OutpostSystem.slot_cap(tile): break
+			assert(OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile),
+				"fixture %s 前置：slot 應該被塞滿（used=%d cap=%d）" % [fx, OutpostSystem.slots_used(tile), OutpostSystem.slot_cap(tile)])
+		# ★升級費：B/D 給足（含緩衝）；C 刻意不足
+		var ucost: float = float(OutpostSystem.OUTPOST_COST["civilian"][1]["material"]) * BuildAfford.MARGIN_NEUTRAL
+		team.resources["material"] = (ucost + 50.0) if fx in ["B", "D"] else 1.0
+		# ★D：tile 不是本隊自有（模擬「faction 內、非 leader 自有」）⇒ 呼叫端不給 allow_upgrade
+		var allow: bool = (fx != "D")
+		var pick: Dictionary = fai._pick_facility(state, team, tile, leader, "fixture_" + fx, allow)
+		match fx:
+			"A":
+				assert(not pick.is_empty() and not pick.has("upgrade_first") and not pick.has("demolish_first"),
+					"fixture A：有空位就該直接蓋，不該考慮 upgrade/demolish，實際=%s" % str(pick))
+			"B":
+				assert(bool(pick.get("upgrade_first", false)),
+					"fixture B：slot 滿＋升級買得起 ⇒ upgrade 該贏過 demolish（不打折 ⇒ 同分，而拆建還要多過 ×%.1f 一關），實際=%s" % [FactionAISystem.DEMOLISH_MARGIN, str(pick)])
+			"C":
+				assert(not bool(pick.get("upgrade_first", false)),
+					"fixture C：升級買不起時不得選 upgrade（舊行為須原封不動），實際=%s" % str(pick))
+			"D":
+				assert(not bool(pick.get("upgrade_first", false)),
+					"★fixture D（負向）：非 leader 自有的 tile 不得升級 —— 範圍擴大了。症狀是「多了一件好事」，不會有人報 bug，只有這一格擋得住。實際=%s" % str(pick))
+	print("pick_facility 同一把秤 OK（A 直建／B upgrade 贏／C 退回舊行為／D 範圍未擴大）")
+
 func _test_storage_fits_upgrade_cost() -> void:
 	print("--- 倉容 vs 升級全費：關係式 pin ---")
 	var margin: float = BuildAfford.MARGIN_NEUTRAL
