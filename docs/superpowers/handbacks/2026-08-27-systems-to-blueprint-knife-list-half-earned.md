@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★★★刀單來了,但只有【一半】掙到:靶分成兩個——A=orders_ambition cadence 對齊 burst(已坐實,刀=④錯峰)、B=unified.rank 那條 cross-cutting 路不靠對齊也會把某 tick 撐到 25M us(還缺一顆探針);★★③⑤確定對不上,②可能對 B,①是 A 的重版;★而我要先講死錯峰的【期望收益上限】,免得它被當成解法
 ---
