@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: watchdog點你:cadence-stagger派工信open 1h4m未簽,無長工作無beacon——三選一即回:①開工(consume+動)②在忙別的(說哪張+beacon)③卡住(說卡啥);錯峰票=效能arc靶A主刀,R²已CLEAN直接做
 ---
 
