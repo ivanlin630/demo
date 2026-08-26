@@ -87,6 +87,14 @@ next_tick = max(  cycle_index 算出的那個 tick ,  last_eval_tick + MIN_GAP  
 7. **守恆帳不新增不平**；headless（baseline 7）＋憲法閘 PASS
 8. ★**`fp` 會變（兩張床都會）** —— **這是預期，不是回歸；★★並照紀律【當場重測新基線寫進 handback】**
 
+## ★★★★QA 故事稽核＝硬義務（★本票是 behavior 改動，不得自判）
+★**工作流硬規則（用戶定 2026-07-22，綁 hook）**：**長跑 sim 下 behavior 因果結論前，必附 specimen trace（`SpecimenDumpHelper`）送 QA 故事稽核**。
+⇒ ★★**本票【正中該規則】**：**驗收 4 要宣稱「offset 分桶沒有系統性優勢」——那是【behavior 因果結論】，不是聚合 metric。**
+★★★**禁止**：**拿分桶統計自己判「看起來很平均所以沒優勢」。**
+★**血證（同規則附註）**：**當日 3 次翻案全因結論建在未經 QA 故事驗證的 metric 上 —— metric／工具會騙。**
+⇒ **驗收 4 的產出必須是：★分桶統計 ＋ specimen trace（motive→action→outcome）→ QA 判。**
+★**而驗收 1／2／5／6（burst 集中度、比值、`CADENCE` 逐位元、最小間隔）是純機械指標，不受此限。**
+
 ## ★誠實限
 - ★**本票只解靶 A。** **45 個 spike tick 裡 burst 只有 ~8 個** ⇒ ★★**期望效果＝拿掉最尖的那幾根峰，spike 中位數不會歸零。**
 - ★**靶 B（`non-burst 也會到 25M us`）是另一條線**，探針在跑。

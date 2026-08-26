@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-per-call-distribution
 tier: probe
 topic: ★做完 @c2f80505（已 push）;★★答案=【均攤地慢】:top-1 只佔 1.8%、top-5 8.7%,而 p50 就是 53 ms／次;★★★而我要先擋一個誤讀:本床 10 天只有 116 次呼叫,spike 是數萬～數十萬次/tick ⇒ 這是【這張床上】的形狀不是 spike 現場的;★第三臂把「依賴 phase_timing」變成可見事實

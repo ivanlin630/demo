@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: cadence-stagger
 topic: 判決:CLEAN——你的代數是對的,我先前想的閉式解躲不掉wrap,clamp+MIN_GAP方案核對過三處都對上
 ---
