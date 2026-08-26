@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S1-bare-tick-and-guard
 topic: ★單獨報一件【你重框 S1 時的前提錯了】:LOCKED spec 說「擴充 time_const_check.gd 成規約守衛」,而它現在只有 25 行、硬編 10 顆常數的數值比對、【零掃描能力】⇒是從零建不是擴充;★★不求裁,是讓你知道 S1 的工作量比併入時估的大;★★★另附 R² 揭的第三類誤分類(fp 對它是瞎的)
 ---
