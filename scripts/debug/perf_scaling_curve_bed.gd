@@ -133,6 +133,8 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 
 	var no_player := Vector2i(-1, -1)
 	var dts: Array = []
+	var noop_dts: Array = []   # systems票2026-08-27(time-reanchor-S0)
+	var nonop_dts: Array = []
 	var phase_sum: Dictionary = {}
 	var phase_count: Dictionary = {}
 	var wall_t0: int = Time.get_ticks_usec()
@@ -170,6 +172,13 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 		var dt: int = Time.get_ticks_usec() - t0
 		dts.append(dt)
 		n_ticks_ran += 1
+		# ★systems票2026-08-27(time-reanchor-S0)：no-op tick=該tick runner._ph完全空(沒有任何cadence命中)。
+		#   _ph每tick在advance_tick開頭清空(sim_runner.gd:223)、只在near/harvest/day/far真的執行時才寫入。
+		if want_phase:
+			if (runner._ph as Dictionary).is_empty():
+				noop_dts.append(dt)
+			else:
+				nonop_dts.append(dt)
 		# systems票2026-08-27(perf-gather-cacheability)：每tick(非只spike)掃一次——team_market_known
 		#   只被_harvest_market_known(faction_ai_system.gd:3485)寫,只在該隊gather()真的跑時才變。
 		#   用decision_eval_next_tick pre/post抓『這隊這tick真的呼叫了gather()』(經unified.rank/rank_scored那條路)，
@@ -258,6 +267,22 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 	var wall_total: int = Time.get_ticks_usec() - wall_t0
 	SimRunner.force_full_hd = false
 	SimRunner.phase_timing = false
+	# ★systems票2026-08-27(time-reanchor-S0)：no-op tick統計(母體占比+dt分布,不只中位數)
+	if noop_dts.size() > 0 or nonop_dts.size() > 0:
+		var _nd: Array = noop_dts.duplicate(); _nd.sort()
+		var _od: Array = nonop_dts.duplicate(); _od.sort()
+		var _total: int = noop_dts.size() + nonop_dts.size()
+		var _noop_sum: int = 0
+		for v in noop_dts: _noop_sum += int(v)
+		var _nonop_sum: int = 0
+		for v in nonop_dts: _nonop_sum += int(v)
+		print("[S0] no-op tick=%d/%d(%.1f%%) median=%d mean=%.1f min/max=%d/%d sum=%d us | non-noop=%d median=%d sum=%d us | 現制每遊戲日wall(以本窗按比例推算,若窗=1天則直接是)=%d us" % [
+			noop_dts.size(), _total, 100.0*noop_dts.size()/_total,
+			(int(_nd[_nd.size()/2]) if not _nd.is_empty() else 0),
+			(float(_noop_sum)/maxf(float(noop_dts.size()),1.0)),
+			(int(_nd[0]) if not _nd.is_empty() else 0), (int(_nd[-1]) if not _nd.is_empty() else 0), _noop_sum,
+			nonop_dts.size(), (int(_od[_od.size()/2]) if not _od.is_empty() else 0), _nonop_sum,
+			_noop_sum + _nonop_sum])
 	# ★systems票2026-08-27(perf-stagger-fairness)：mkfill母體/成交,找有沒有任何床真的會成交
 	var mk_buy: int = int(Probe.counts.get("mkfill.attempt.buy", 0))
 	var mk_sell: int = int(Probe.counts.get("mkfill.attempt.sell", 0))
