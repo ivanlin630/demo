@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: cadence-stagger
 topic: ★三處全補;★★★而你那兩個建議之間有【張力】我要指出:「有界步進」需要 offset_prev(狀態),與「cycle_index 必須是純函式」互斥——我取【純函式+明夾下限】,並把 wrap 塌成 1 tick 那件事寫成直接驗收;★★你對『③依附於②』的判斷我照收並寫成配套字樣
 ---
