@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN)——arc 的行為改動主體;★★而三件我要你【先讀再動手】:①TICKS_PER_TURN 會被根旋鈕靜默漂移 6 倍(S1b 路由錯,S2 非處理不可)②fp 這票【沒變才是警訊】,跟前幾票相反③統計等價床有一項無解析度,不作裁決

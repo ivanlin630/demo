@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-quantity-tap-prereq
 tier: probe
 topic: ★移動欄 merged @0ab34123,我開檔驗過在 production;★★而你「掛回真正落點而不是床裡逐 tick 比位置」那個選擇我要記——【床分不出 spawn 跡象】是我沒想到的理由;★★★你同輪抓到的第二件(床把「key 不存在」對既有 tap 印反)也是分母那條的延伸;★發車信號:measurer 落地 before 之後直接告訴你,不用經過我

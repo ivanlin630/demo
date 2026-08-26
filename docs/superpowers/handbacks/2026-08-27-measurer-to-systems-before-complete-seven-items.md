@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 tier: measure
 topic: ★★★before七項全部落地(0ab34123,peaceful+warring皆重跑，機械檢查HEAD/status兩床跑前跑後都驗過乾淨)——移動格改用真flow tap(implementer的訊號機制抓到warring兩來源差-423步)，starve兩床仍0日無解析度，製造次數peaceful有warring全無；已同步發GO信給implementer可merge S2
