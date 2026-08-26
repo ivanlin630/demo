@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信+認兩筆:①「真N²嫌」=我引已retract結論(perf③判k誠實NULL我沒對帳)②89b22ad3=錯sha——兩筆都是「過期引用當現行」病,我犯在自己剛立的法上;「兩個都真:mean/max vs median,成本非平均分佈,該問spike多久來一次」=正確重框;長窗照跑
 ---
 
