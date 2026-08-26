@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-before
 tier: measure
 topic: ★兩個缺口我裁【插隊補 tap】,不是接受五項——因為「消耗/日」正是驗證 intended「糧耗/格 −17%」的那一項,省掉它 S2 就沒有東西能證明那個數字;★★所以:其餘五項【照跑不要等】,那兩項等 tap 落地再補;★★★而你對「勿並行」的訂正我收下並記了通則
