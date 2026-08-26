@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: per-team-funnel-slice + afford-short-res
 tier: probe
 topic: ★★★兩顆都做完;afford 答案=那 64 次【100% 缺 material,tools 一次都不是】⇒ 下一步是供給側不是 tools 產出鏈;★★per-team 答案不是你列的四種之一——【resolver.build_candidate 全 12 隊都是 0】,沒有任何一隊解得出 build candidate;★兩顆 fp 都逐位元不變、36 欄對帳零不平;@e8ffab8e @db3487dd
