@@ -1,0 +1,32 @@
+{
+  "slice": "perf-arc-slice0-longwindow",
+  "ticket": "systems授權票2026-08-26:跑長窗(~1個月/7200tick)看那顆spike會不會再出現第二次——一次性vs週期性,決定整個效能arc的方向",
+  "measured_at_commit": "main（床加checkpoint機制：spike當下即time flush落地，前兩次30分鐘/1小時長跑被外部timeout砍掉輸出全丟失，這輪靠checkpoint保住387筆）",
+  "seed": 1337,
+  "config": "perf_scale（現況,101隊起步）,HD-only(force_full_hd=true,零LOD目標regime)",
+
+  "★★★決定性答案：不是一次性，是每小時(每10 tick)都發生——貫穿整個測試窗": {
+    "跑到哪": "tick=3839 / 7200 requested（53.3%）被外部GODOT_TIMEOUT=3600s砍掉，未跑完，但checkpoint保住387筆spike紀錄",
+    "spike週期": "checkpoint記錄間距387筆裡369筆(95.3%)間距恰好=10 tick=1小時（WorldState.TICKS_PER_HOUR=10），只有8筆間距9、7筆間距1、1筆50、1筆20——★★★這是每小時穩定重複，不是隨機零星",
+    "涵蓋範圍": "從tick=9(遊戲第0天)一路到tick=3839(遊戲第16天)，387次都在，沒有中斷過",
+    "與known_issues:910對照": "當年(2026-07-02)修過的faction_ai hourly spike被壓到50-70ms；本輪量到的hourly spike是幾百萬到幾千萬us(3~44秒)，量級大100~1000倍——★這不是舊issue的殘留,是新的/不同的東西(systems的預判被坐實)"
+  },
+
+  "★★★統計摘要(387筆全量,非樣本)": {
+    "dt_us中位數": 6817496,
+    "dt_us平均": 9218152,
+    "前10筆中位數": 10670154,
+    "後10筆中位數": 8488361,
+    "前10筆teams": "101~112",
+    "後10筆teams": "202(穩定)",
+    "備註": "隊數從101翻倍到202,但spike中位數沒有等比例放大(前10:1067萬 vs 後10:849萬us,反而略降)——與slice0曲線票的次線性發現一致,不支持『隊數越多spike越誇張』的簡單假說，本輪不強行解釋，只列數字"
+  },
+
+  "★母體/未完成聲明": "本輪因外部timeout在tick3839被砍，387筆是【已發生的全量記錄】非抽樣(checkpoint條件=dt>1s或tick%500==0，凡符合都記，不是random sample)，但【整個月的後半段(tick3840~7200)完全沒量到】——若後半段行為系統性不同(例如隊數再漲、spike再變大)，本輪答不出來。",
+
+  "landed_paths": {
+    "checkpoint_raw": "docs/measurements/perf-longwindow-current-1month.txt.checkpoint.perf_scale.txt（387行，未完成runid但已是決定性樣本）",
+    "final_report": "本輪因未跑完，床結尾的彙整報告(perf-longwindow-current-1month.txt)沒有寫出——那個檔只在跑完才產生，checkpoint才是這輪的真數據來源"
+  },
+  "repro": "$env:GODOT_TIMEOUT='3600'; $env:PERF_LADDER='perf_scale'; $env:PERF_SEED='1337'; $env:PERF_TICKS='7200'; $env:PERF_HD_ONLY='1'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/perf_scaling_curve_bed.gd（checkpoint自動寫到 <path>.txt.checkpoint.<config>.txt）"
+}
