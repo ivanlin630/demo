@@ -28,6 +28,24 @@ var _skill_sys: SkillSystem
 var _combat:    NpcCombatSystem
 var _npc_ai:    NpcAiSystem
 
+# ★★★同 tick 同 order_id 的【碰撞序號】（systems 派 2026-08-27 / slice perf-stagger-fairness）：
+#   ★要答的命題是「先被評估的一方是否較常勝出」⇒ ★★只記「誰參與了」算不出勝率，
+#     每筆必須能還原【該 tick 內第幾個碰到這個 order_id】。
+#   ★★★key 只活一個 tick：`_mf_tick` 一變就整包清掉 ⇒ key space 有界（同 tick 的 order 數），
+#     ★不會隨跑多久而長大。
+#   ★純觀測：只有 `Probe.enabled` 時才維護；決策端一行都不讀它。
+static var _mf_tick: int = -1
+static var _mf_seq: Dictionary = {}
+
+# ★回傳「這是本 tick 內第幾個碰到 `oid` 的」（1-based）。★同 tick 第一個回 1。
+static func _mf_next_seq(cur_tick: int, oid: int) -> int:
+	if cur_tick != _mf_tick:
+		_mf_tick = cur_tick
+		_mf_seq.clear()   # ★整包清：序號只在同一個 tick 內有意義
+	var n: int = int(_mf_seq.get(oid, 0)) + 1
+	_mf_seq[oid] = n
+	return n
+
 func _init() -> void:
 	_msg       = SimMessageSystem.new()
 	_vision    = VisionSystem.new()
@@ -812,6 +830,7 @@ func _market_peer_trade(state: WorldState, visitor: TeamData, tile: HexTileData,
 # 可購量 = min(單餘量, 現貨, 買得起, 缺口, carry)；withdraw 實量計價（禁信 board 鏡像）。
 func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
 		oid: int, res: String, order_rem: int, commerce: float, owner_lv: Dictionary) -> bool:
+	if Probe.enabled: Probe.bump("mkfill.attempt.buy")   # ★母體：撮合被走到幾次（沒有它，「碰撞 12 次」分不出很少還是幾乎每次）
 	var vcoin: float = float(visitor.resources.get("coin", 0))
 	if vcoin <= 0.0: Probe.bump("trade.market_bail.buy_no_coin"); return false
 	var ask: float = TradeValuation.ask_price(owner, res, commerce, owner_lv, state) if owner != null \
@@ -837,6 +856,11 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 	ResourceBank.add(visitor, "coin", -(q * ask), "market_buy_coin_out")
 	_credit_owner_coin(state, owner, tile, q * ask)
 	_settle_owner_order(owner, tile, oid, q)
+	if Probe.enabled:
+		# ★成交後記錄：★★「誰【先】」才是重點——`seq` 是同 tick 同 order_id 的第幾個。
+		Probe.bump_sample("mkfill.order", {
+			"tick": state.world.current_tick, "order_id": oid, "team": visitor.team_id,
+			"qty": q, "seq": _mf_next_seq(state.world.current_tick, oid), "kind": "buy"}, 20000)
 	return true
 
 # 訪客賣：向 owner buy 單賣 → 貨入 public_storage、owner.coin → visitor.coin（套利閉合,coin 雙向）。
@@ -846,6 +870,7 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
 		oid: int, res: String, order_rem: int, owner_lv: Dictionary, deliver_cargo: float = -1.0,
 		override_ask: float = -1.0) -> bool:
+	if Probe.enabled: Probe.bump("mkfill.attempt.sell")   # ★母體：撮合被走到幾次（沒有它，「碰撞 12 次」分不出很少還是幾乎每次）
 	# ★SLICE B override_ask: >=0=distribute 領主注入 ask（=local_value×price_factor）；==0=免費(仁君)跳 owner-coin/bid bail;
 	#   <0=現行 local_value 內算（normal trade + deliver 零變、guard 全不動）。付費端(>0)保留 affordability cap。
 	var free_dist: bool = override_ask == 0.0   # 仁君免費分配（gift、無 owner-coin 交易）
@@ -881,6 +906,11 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 	if owner != null:
 		ResourceBank.add(owner, "coin", -(q * bid), "market_sell_coin_out")   # 付費端居民付 coin→領主收（coin 守恆）；免費 gift bid=0 no-op；無主據點 owner=null 略過
 	_settle_owner_order(owner, tile, oid, q)
+	if Probe.enabled:
+		# ★成交後記錄：★★「誰【先】」才是重點——`seq` 是同 tick 同 order_id 的第幾個。
+		Probe.bump_sample("mkfill.order", {
+			"tick": state.world.current_tick, "order_id": oid, "team": visitor.team_id,
+			"qty": q, "seq": _mf_next_seq(state.world.current_tick, oid), "kind": "sell"}, 20000)
 	# ★cohesion P4 地基：distribute relief 真送達 resident（settle 成功）→ resident leader 寫 benefactor memory
 	#   （benefactor=領主=convoy 母隊 visitor.parent_team_id）＝「領主救了我」自我記憶、stay_benefit 的地基。零 RNG。
 	if override_ask >= 0.0 and owner != null and state.persons.has(owner.leader_id):
