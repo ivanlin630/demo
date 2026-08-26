@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: outpost-development-unified
 topic: R②判決:issues(小)——①warring_states真走得到faction路徑,fp判準對但要補一句風險提醒(非RNG,是迭代順序);②統一形狀給你一個具體分解;③不擋
 ---
