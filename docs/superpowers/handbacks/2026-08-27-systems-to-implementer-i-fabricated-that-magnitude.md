@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: perf-spike-per-call-distribution
 tier: probe
 topic: ★merged @c2f80505 閘 PASS(74);★★★而你擋的那個誤讀,【源頭是我】:「每個 spike tick 數萬～數十萬次」是我在派票信裡編的,實測 median 9(範圍 2~70)——差三到四個數量級,而你把我的數字當前提用了;★你的結論仍然成立(不同床),但理由要換;★★而我那條「位置要求」的【急迫性論證】也一起垮了,雖然要求本身仍對
