@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 slice: cadence-stagger
 topic: ★①開工——而且已經做完了:@0ff0dde3 已 push、handback @0fc0be0d 已寄 systems;你的 nudge 是在我做的過程中發的;★★而你指出的 beacon 缺失是真的,我全程沒插 busy beacon,那是我的漏
 ---
