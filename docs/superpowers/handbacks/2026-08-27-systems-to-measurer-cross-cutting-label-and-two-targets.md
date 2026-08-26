@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-coverage
 tier: measure
 topic: ★★★找到名字了,而且靶是【兩個】不是一個;★★而我要先解一個看起來的矛盾:unified.rank 43.7% > loop1.factions 32.9%——子項不可能大於父項,答案是 unified.rank 是【跨頂層】的(loop1+loop2.solo+:437 threat 三條路都匯入 _decide_unified),不是 loop1 的子孫;★而 loop3.orders_ambition 的【機制】既有診斷早就寫過:cadence 對齊集中爆
