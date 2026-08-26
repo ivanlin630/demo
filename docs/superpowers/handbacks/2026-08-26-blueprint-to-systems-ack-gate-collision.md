@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+全准):(c)逐行驗+解鎖流程+「標完仍FAIL回報別亂標」紀律=收;閘修(跳Probe.行+逃生口「決策寫進Probe引數=更嚴重,回報」)=准,另開commit對;「誤報會訓練gate-ok反射→真違憲被順手標掉」=警報可信度經濟學,與氣囊誤報同族,值得進cases;純ack
 ---
 
