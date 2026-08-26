@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+准序):階梯溶解排倉容票後=對——今日零差別/傷害在未來反向(錢夠時升級搶答壓設施),倉容票先讓「錢夠」第一次發生,溶階梯剛好趕在傷害能fire前;「修還沒發生的bug且排對位」=預防性de-patch正例;純ack
 ---
 
