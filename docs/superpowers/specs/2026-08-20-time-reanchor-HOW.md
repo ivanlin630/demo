@@ -40,7 +40,25 @@ date: 2026-08-20 ／ owner: systems ／ WHAT ＝ `2026-08-20-time-reanchor-tier-
 
 **先查到的事實（systems code-read）**：no-op tick 只跑 `_step1_advance_time`（+1 與兩個 modulo）＋幾個 `%` 判斷＋`cleanup_extinct_teams`（空即 return）＋`ManpowerSystem.tick_all`（**自帶 `CAPTIVE_CADENCE` 早退**）→ **固定開銷本身很小** → 6× 放大的是一個小常數，**多半可承受**。
 ★**但「多半」不是數字** → **S0 前置量測**（便宜、短窗）：
-- 同 seed/config，**現制 vs 6× 制**各跑 3 遊戲日，比 **每遊戲日 wall time**（非每 tick——tick 定義變了，比 per-tick 會自欺）。
+
+> ## ★★★S0 取得方法【已改】（systems 裁 2026-08-27）—— ★判準未動，只換取得同一個數字的方式
+> ★**原方法「現制 vs 6× 制各跑 3 遊戲日」【跑不了】**：
+> **`world_state.gd:4-5` `const TICKS_PER_DAY = 240` 是【編譯期常數】，沒有 runtime 覆寫路徑**（我自己開檔驗過）
+> ⇒ ★★**「6× 制」現在【不存在任何可跑的版本】** —— **要它存在就得先改 production，而那正是 S1/S2 的內容。**
+> ⇒ ★★★**依賴順序原本是反的**：**S0 需要 S1 的產物，而 spec 把 S0 排在 S1 前面。**
+>
+> ### ⇒ 改成【直接量被乘的那個東西】，不需要 6× 制存在
+> ```
+> ★量：現制下【no-op tick】的真實成本（＝該 tick 沒有任何 cadence 命中）
+> ★★算：增幅 ≈ (50 × no-op 單 tick 成本) ／ (現制每遊戲日 wall)
+>        （★10→60 ⇒ 每遊戲小時多出 50 個 tick，而那 50 個【全是 no-op】：真實工作量不變、cadence 以小時宣告）
+> ★★★判準不變：每遊戲日 wall 增幅 < 15% ⇒ 路 A；≥ 15% ⇒ 路 B
+> ```
+> ★**而這正好修掉我先前紙上估算的那個缺陷**：**我當時拿 `baseline median` 當 no-op 成本，
+> 而 baseline 含真正在跑的系統 —— ★★現在量的是【真正的那個東西】。**
+> ★**LOCKED 界線**：**§2 的判準（<15%）、兩條路、§1 slice 分解、§3~§6 一字未動；只改 S0 的取得方法。**
+
+- ~~同 seed/config，**現制 vs 6× 制**各跑 3 遊戲日~~，比 **每遊戲日 wall time**（非每 tick——tick 定義變了，比 per-tick 會自欺）。
 - 判準：**每遊戲日 wall 增幅 < 15%** → S2 可直接做；**≥ 15%** → **先做 S4（T0×LOD arc）再回頭做 S2**（T0 取消輪詢正好抵銷 tick 密度）。
 ∴ **順序有兩條路，由 S0 的數字選**：
 - **路 A（增幅小）**：S1 → S2 → S3 → S5 → S6 → S7 → **S4（T0×LOD）**

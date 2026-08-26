@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: time-reanchor-S0
 topic: "S0跑不了——『6×制』現在沒有任何可跑的版本存在：TICKS_PER_HOUR是world_state.gd:5的const(編譯期常數,TICKS_PER_DAY=240寫死於:4)，我的量測床沒辦法在runtime覆寫它；也沒有既有worktree/branch已經landed這個改動；這是要真的改production常數的機制實作，不是我能自己動的量測任務"
 ---
