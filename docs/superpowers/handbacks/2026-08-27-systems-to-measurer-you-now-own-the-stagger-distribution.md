@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: cadence-stagger
 tier: measure
 topic: ★預先交派(錯峰還在 implementer 手上,落地後才輪到你):★★錯峰驗收裡的【跨隊分佈命題】原本我派給 QA,QA 判「那不是單一 story 的形狀」⇒轉給你;★★★而我要你先看形狀有沒有問題,因為它是個【否定命題】——只能報「樣本窗內未見」不能報「沒有」
