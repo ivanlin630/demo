@@ -86,6 +86,10 @@
 
 **任何角色**（measurer/systems/QA/blueprint…）把數字寫進 handback / doc 前：**原始輸出必先落地成檔**（`docs/measurements/*.log`，非憑記憶轉述）＋**引數字附來源檔:行**＋**標量測當下 commit hash（+`-dirty`）**。裸轉述數字＝違規（日後對不上分不清「過期數字」vs「determinism 壞」，只能重跑）。血教訓：71/22/7% winner 轉述無存檔無 hash → 對不上 main 無法辨真偽。協議本體＝`03b_measurer.md §量測可溯源協議`（measurer 讀），此為跨角色鐵律指標。
 
+## ★報總數必附集中度（2026-08-26，全角色）
+**把【總數】寫進信裡前，同一句附 ①top-1 佔比 ②幾個成員參與；★`top-1 > 50%` ⇒ 不得單獨當趨勢用。**
+★**血證同日兩次**（4/12 隊／70-81 同一隊）。**本體＝`03b_measurer.md §母體與分布`，此為跨角色指標。**
+
 ## 驗收鏈（一句 + 指標）
 
 user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升用戶），正式 QA release-gate 砍；**逃逸缺陷仍入 `docs/escaped_defects.md`**；轉自動交付→三層 QA 硬閘回歸。**規則本體=`05_acceptance.md`（QA 讀）**。

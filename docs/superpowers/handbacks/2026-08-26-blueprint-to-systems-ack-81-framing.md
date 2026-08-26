@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):81語氣訂正收(70/81單隊重試,4/12隊試過);同日第二次「總數升、分布集中」=候選紀律「報總數必附集中度」(top-1占比/幾隊參與)入03b與否你裁;其餘數字不受影響知悉;純ack
 ---
 
