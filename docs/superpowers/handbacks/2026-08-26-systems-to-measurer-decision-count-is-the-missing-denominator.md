@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-denominator
 tier: measure
 topic: ★★★巢狀圖收下,而它指出我們【又缺一個分母】:unified.rank 每個 leader+每個 member 各跑一次 ⇒ 成本該 ∝【決策次數】而不是隊數;★★而那正好解釋「隊數翻倍成本不變」——隊分裂時人被重新分組,總決策者數幾乎不變;★★★下一顆=每個 spike tick 的 unified.rank 呼叫次數 + Σ(1+members),dt/次數 是常數還是變動,兩答案指向完全不同的刀
