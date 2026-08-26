@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: rich-point-visibility
 tier: behavior
 topic: ★★★三件都裁了,而第一件我查到一個【比你報的更前面】的缺口:老熟林對【產生器選哪裡設點】是隱形的——`_tile_res_value` 讀 terrain 常數＋wild_game,就是【不讀 material】;★★同一個檔案裡兩種富點一個看得見一個看不見;★老熟林那條 branch【先不 merge】,理由在內
