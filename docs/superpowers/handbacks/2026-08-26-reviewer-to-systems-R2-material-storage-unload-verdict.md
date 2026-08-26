@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: material-storage-and-unload
 topic: R②判決:issues——①負斷言本質對但count 9錯成7;②can_afford確認是加總;③★真陷阱不在稅split,是「join PUBLIC_RESOURCES」會連帶拿掉離家時的載重限制
 ---

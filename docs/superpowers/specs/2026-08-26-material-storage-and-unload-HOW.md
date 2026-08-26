@@ -26,13 +26,32 @@ Team0/1/2/11 stuck at 59/60，44~49 次被擋   ⇒ ★那個 +0.5/日 不是慢
 | ① | **採集所得的 material 不入公庫** | 只能背在身上 ⇒ 撞載重 |
 | ★② | **不存在「回家卸貨」** | ★★**已超載的隊【永遠】解不開** —— 只修①，那 400 還是卡在私產，`carry_full` 仍 72/72 |
 
-★**②的負斷言已窮盡坐實**：`TileBank.deposit` 全 codebase **9 個 caller，逐條看過**（`invest_material_in`／`gen_seed`×2／`market_buy_in`／`manufacture_output`／`farm_yield`／`harvest_intake_vault`…）
+★**②的負斷言已窮盡坐實**：`TileBank.deposit` 全 codebase **7 個 caller，逐條看過**（★**原寫 9 是我數錯，R² 訂正；`grep -c` 實測 7**）（`invest_material_in`／`gen_seed`×2／`market_buy_in`／`manufacture_output`／`farm_yield`／`harvest_intake_vault`…）
 —— ★★**沒有任何一個是「隊回到自家據點把私產卸進公庫」。無 head、無 glob。**
 
 ★**而 `invest_material_in`（faction_ai:2839）證明 material 進公庫在機制上完全 OK** —— **只是採集那條路把它排除了。**
 
 ## 修法
-① **把 material 納入 `resource_system.gd:323` 那條既有入庫路**（★**沿用 `TileBank.deposit` 的 cap／溢出語意，不新造**）
+### ★★★①【訂正版】material 走**自己的分支**，★**不得 join `PUBLIC_RESOURCES`**（R② 揭，2026-08-26）
+★**我原本寫「納入 :323 那條既有入庫路」——那個字面寫法會連帶造成一個我沒要的副作用。**
+`:343-347`（白名單的「不在家」子分支）★**完全沒有呼叫 `carry_space_for_res`** ——
+**載重限制只存在於最外層那個 `else`（`:348` 起，＝ material 現在走的路）。**
+⇒ ★★**單純 join 白名單 ＝ material 在野外【完全不受載重上限】**，
+★★★**那不是「鬆一點」，是「不在家的時候載重限制不存在」** —— **與我自己誠實限寫的「小隊搬得少仍然成立」直接矛盾。**
+
+**⇒ 要的形狀（在不在家決定走哪條，不是在不在白名單）**：
+```
+material：
+  ★在【自家】據點上  → TileBank.deposit(dst_tile, "material", gain, ...)
+                       （★不受載重是【對的】——人就站在自己倉庫上，東西不用背）
+  ★否則（含站在【別人】據點上）→ ★★走原 else 的 carry-limited 私產路，一行不改
+                       （★含既有「兩種零分開」的 tap：載重滿 vs 算出來本來就是 0）
+```
+★★**「自家」這個條件是我加的，R² 沒提，理由**：現成分支的判斷是 `dst_tile.outpost_level > 0` ——
+★**任何據點，不分是誰的** ⇒ **照抄會變成「在別人據點上採 material ＝ 送給對方」。**
+★★★**ore 現在就是這個行為（既有、不在本票範圍）；但對 material 那會是一條新的漏，不得順手套進來。**
+
+★**沿用 `TileBank.deposit` 的 cap／溢出語意，不新造**
 ② ★**隊在自家據點時，超出載重的私產 material 卸進公庫**（★**同一條 `TileBank.deposit`，溢出照既有 sink 語意**）
 
 ★★★**禁止**：**改 `MARGIN_NEUTRAL`／改 `OUTPOST_COST`／改床 config／給 mounts-wagons 當解法** ——
