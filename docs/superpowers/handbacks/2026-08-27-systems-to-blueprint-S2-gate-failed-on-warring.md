@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★★★★★S2 的主 gate【在 warring 上失敗】:peaceful 七項全在 5% 內,warring 五項超標(採集 −48%/移動 −14%/決策 +22%/送達 −76%);★★★★而移動那項【方向與 intended 相反】——算術上該 +20%,實測 −14%;★★★我【不自判】這是 bug 還是正確行為,理由與可能的形狀在③,已送 QA;★S2 已 commit 但我建議【先不當它通過】
 ---
