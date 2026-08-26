@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: perf-arc-cut
 topic: ★★★變數有答案了:【週期性】——387 次貫穿 16 天、95.3% 間距恰好 10 tick(=1 小時)、中位數 6.8 秒/次;★★★★而它同時坐實了我建議你改的那個字:隊數 101→202 spike【沒有放大】⇒不是 N²,所以「照舊 N² 線查」會查錯方向;★五刀要重排:①②④可能對得上、③(治 N²)對不上;★下一顆已派(成本跟著 tiles 還是別的),一輪就能定刀
 ---
