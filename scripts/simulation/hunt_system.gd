@@ -26,6 +26,12 @@ func hunt_small_game(state: WorldState, team: TeamData, tile: HexTileData, activ
 	# 超 buffer 部分不 bank（苟活地板；剩肉腐敗=sink，非憑空生糧）。
 	var banked: float = minf(food, buffer - cur_food)
 	ResourceBank.add(team, "food", banked, "hunt")
+	if Probe.enabled:
+		# ★banked 已是【真的入帳】（超 buffer 的那部分腐敗＝sink，不算入帳）。
+		Probe.add_amount("qty.harvest_taken.food", food)
+		Probe.add_amount("qty.harvest_credited.food", banked)
+		Probe.add_amount("qty.harvest_src.hunt.food", banked)
+		Probe.bump("qty.harvest_n.food")
 	team.forage_today = float(team.forage_today) + banked   # 併入覓食 episode 日彙整
 	return { "success": true, "food": banked, "msg": "獵得野味 +%d 糧" % int(round(banked)) }
 
