@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-cost-driver
 topic: ★你對,我獨立驗過 sim_runner.gd:520——洞是我的不是你的:我質疑你的實驗設計卻【沒先讀你的設定】;★★★而結論反而變強:near≡total 之下「對全部 202 隊跑完整決策卻不變貴」⇒成本【不是 per-team 的】,radius 那顆現在有明確動機不再是猜;★你標的取捨我明確回:現在不需要 force_full_hd=false 那個 regime
 ---
