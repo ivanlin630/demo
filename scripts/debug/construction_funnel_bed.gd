@@ -368,6 +368,46 @@ func _run() -> void:
 		lines.append("  ★其餘呼叫點（★不入上面的對帳，只是別讓它們隱形）：")
 		for k11 in ok9:
 			lines.append("      %-24s = %d" % [String(k11), int(_other[k11])])
+	# ★★★升級據點那條路（systems 派 2026-08-26 / slice outpost-upgrade-path）：
+	#   ★L1 civilian 只有 2 個 slot、L2 有 3 個 ⇒【多一格】的唯一出口就是升級據點，
+	#     而床跑 30 天後仍然 L1×11。★★三段分母鏈，缺一段就分不出「沒被提出」與「提出了倒下」。
+	lines.append("")
+	lines.append("═══ ★★升級據點路徑（三段分母鏈）═══")
+	var ev: int = _sum_days("upg.eval_entry.day.")
+	var ots: int = _sum_days("upg.own_tile_seen.day.")
+	var ucall: int = _sum_days("upg.call.day.")
+	lines.append("  ①`_evaluate_infrastructure` 走到幾次（faction 路徑）= %d" % ev)
+	if ev == 0:
+		lines.append("     ★★★恆 0 ⇒ **這條函式從來沒被走到** —— 而它是【faction 路徑】；")
+		lines.append("        這張床的隊若是 faction_id = -1（獨立），走的是 `_evaluate_independent_infrastructure`。")
+		lines.append("     ★這一格是【沒被提出】，不是【提出了倒下】—— 兩者靠 ① 本身分開。")
+	lines.append("  ②掃到自有據點-次 = %d" % ots)
+	var smax: int = _sum_days("upg.skip_max_level.day.")
+	var sbusy: int = _sum_days("upg.skip_busy_construction.day.")
+	lines.append("      skip_max_level = %d｜skip_busy_construction = %d｜→ ③呼叫 _dispatch_upgrader = %d" % [
+		smax, sbusy, ucall])
+	lines.append("      ★對帳：%d + %d + %d = %d vs own_tile_seen %d ⇒ %s" % [
+		smax, sbusy, ucall, smax + sbusy + ucall, ots,
+		"✅一致" if smax + sbusy + ucall == ots else "❌不一致"])
+	lines.append("  ③`_dispatch_upgrader` 八個歸宿（分母 = upg.call = %d）：" % ucall)
+	var UPGD: Array = ["reject_not_owner", "reject_level_bounds", "reject_busy_construction",
+		"reject_cannot_afford", "reject_no_advisor", "reject_pop", "reject_subteam_dispatch", "dispatched"]
+	var usum: int = 0
+	for uf in UPGD:
+		var uv: int = _sum_days("upgd.%s.day." % String(uf))
+		usum += uv
+		lines.append("      %-26s = %4d%s" % [String(uf), uv, "   ←★恆 0" if uv == 0 else ""])
+	lines.append("      ★★對帳：八類合計 %d vs upg.call %d ⇒ %s" % [usum, ucall,
+		"✅一致" if usum == ucall else "❌不一致（★有出口沒被分類）"])
+	var ush: Array = []
+	for k15 in Probe.counts:
+		var ks15: String = String(k15)
+		if ks15.begins_with("upgd.short."):
+			ush.append("%s=%d" % [ks15.substr(11), int(Probe.counts[k15])])
+	if not ush.is_empty():
+		ush.sort()
+		lines.append("      ★付不起時缺的是哪一顆：%s" % " ".join(PackedStringArray(ush)))
+
 	# ★★★pick 出口分類（systems 派 2026-08-26 / slice infra-pick-empty-reason）：
 	#   `infra.pick_empty` 那句「沒有想建的」底下有三件不同的事，本段把它拆開。
 	#   ★分母＝`pick.infra.entry`（★不是 `infra.entry`：`_pick_facility` 有兩個呼叫點，
