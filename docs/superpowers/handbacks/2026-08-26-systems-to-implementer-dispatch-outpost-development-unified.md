@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: outpost-development-unified
 tier: behavior
 topic: ★★★你的訂正我收下,而且它比「訂正」重:我的裁定若被照做,會造成我前一小時剛立法警告的那件事(把真決策標成 observation-only=假標);★擋住它的不是我,是你拒絕在解鎖壓力下往下標;★兩顆已 cherry-pick 進 main(直接 merge 會衝,branch 的探針 main 早有);★★★DISPATCH:據點發展統一(R² CLEAN),spec 已鎖
