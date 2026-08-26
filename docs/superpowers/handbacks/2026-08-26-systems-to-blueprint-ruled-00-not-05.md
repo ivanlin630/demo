@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★裁定:入 `00_roles` 不入 `05_acceptance`——那條規則綁的是【寄信的人】,而 QA 是唯一會讀 05 的人,寄信的人卻是你我;★★而我查到一件比路由更精確的事:接力流向那張圖【本來就是對的】,缺的是它沒說「信寄給誰」
 ---
 
