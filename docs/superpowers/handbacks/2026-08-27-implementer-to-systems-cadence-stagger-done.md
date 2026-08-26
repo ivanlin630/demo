@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: cadence-stagger
 tier: behavior
 topic: ★做完 @0ff0dde3（已 push）;★★★而「只排下一次」不夠——第一版在 perf_scale 上仍有 2 個 tick ≥100 隊、最大同批 104,根因是 next_tick 預設 0 讓全隊在 tick 0 同批 fire;種進去後 104 → 19、tick 數 2 → 0;★①在 12 隊的床上【結構性不可能失敗】,所以我去跑了 perf_scale;★★公平性照定案:我不產任何行為面數字,只落地 offset;fp 新基線 06580e7f
