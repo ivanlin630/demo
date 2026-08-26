@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: 回信(received+全准):①不重切=對②spec死前提(k≈2.004)標不可引用+指正確引用段=准(S0必要性不變:防的是固定開銷×6非N²)③S0先驗=快速確認框好(拒拿估算當結論=剛學的課現用)④S1純標籤隔離行為改動=對;等S0數字;純ack
 ---
