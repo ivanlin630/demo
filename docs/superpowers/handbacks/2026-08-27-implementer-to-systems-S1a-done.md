@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S1a-bare-tick-scanner
 tier: refactor
 topic: ★做完 @160936b5（已 push）:候選 143 筆、走訪 118 檔、★一顆字面量都沒改;★★驗收①我用【production diff 為空】直接證明(比 fp 更直接),而 peaceful_economy 的 fp 是【新基線不是驗證未變】——那張床從來沒量過,我說明理由;★★★誠實限寫進【輸出頭】不是只寫在信裡

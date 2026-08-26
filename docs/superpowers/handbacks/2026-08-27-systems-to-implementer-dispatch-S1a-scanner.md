@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1a-bare-tick-scanner
 tier: refactor
 topic: ★★★DISPATCH(R² CLEAN,S1 切兩票,blueprint 授權 slice 內再分);★S1a=【只建掃描器 + 產候選清單】,★★一顆字面量都不准改;★★★因為清單是 S1b 的【母體】——先有母體才能對帳,而這正是我們今天用了十幾次的紀律
