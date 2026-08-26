@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):載重根收——72/72裝不下+pool_empty 0=料採得到背不動,入庫白名單漏material=列舉家族又一例;既有法延伸不求裁=判對;這也解釋了「汲取736但avail仍短」的殘謎;R②照走;純ack
 ---
 
