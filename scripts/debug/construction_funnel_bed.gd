@@ -370,6 +370,37 @@ func _run() -> void:
 			lines.append("      %-24s = %d" % [String(k11), int(_other[k11])])
 	# ★★★升級據點那條路（systems 派 2026-08-26 / slice outpost-upgrade-path）：
 	#   ★L1 civilian 只有 2 個 slot、L2 有 3 個 ⇒【多一格】的唯一出口就是升級據點，
+	# ★★★階梯 vs 同一把秤（systems 派 2026-08-26 / slice facility-vs-upgrade-scale）
+	#   ★每一次 infra 評估配成【一格】：升級結果 × 設施結果。分母＝該路徑的評估次數。
+	#   ★★「升級因 afford 落空 ＋ 同一次設施成交」成對出現 ⇒ 階梯 first-match 坐實。
+	lines.append("")
+	lines.append("═══ ★★升級 × 設施：同一次評估的配對（分母＝infra 評估次數）═══")
+	var lad: Dictionary = {}
+	var lad_sum: int = 0
+	var pool: Dictionary = {}
+	for k20 in Probe.counts:
+		var ks20: String = String(k20)
+		if ks20.begins_with("ladder.pool."):
+			pool[ks20.substr(12)] = int(Probe.counts[k20])
+		elif ks20.begins_with("ladder."):
+			lad[ks20.substr(7)] = int(Probe.counts[k20])
+			lad_sum += int(Probe.counts[k20])
+	if lad.is_empty():
+		lines.append("  ★零筆 —— 這條路沒被走過（★不是 tap 沒接上：infra.entry 見上）")
+	else:
+		var lk20: Array = lad.keys(); lk20.sort()
+		for k21 in lk20:
+			lines.append("      %-34s = %4d（%.1f%%）" % [String(k21), int(lad[k21]),
+				100.0 * float(lad[k21]) / maxf(float(lad_sum), 1.0)])
+		lines.append("  ★配對合計 = %d" % lad_sum)
+		lines.append("  ★★讀法：`afford__fac_built` / `afford__fac_dispatch` 就是【升級買不起→同一次把料花在設施】")
+	if not pool.is_empty():
+		var pk: Array = pool.keys(); pk.sort()
+		var ps: Array = []
+		for k22 in pk: ps.append("%s=%d" % [String(k22), int(pool[k22])])
+		lines.append("  ★決策當下兩池 material 總量分桶：%s" % " ".join(PackedStringArray(ps)))
+		lines.append("     （lt_cost＝連物理成本都不到｜cost_to_margin＝夠物理不夠緩衝｜ge_margin＝夠）")
+
 	#     而床跑 30 天後仍然 L1×11。★★三段分母鏈，缺一段就分不出「沒被提出」與「提出了倒下」。
 	lines.append("")
 	lines.append("═══ ★★升級據點路徑（三段分母鏈）═══")

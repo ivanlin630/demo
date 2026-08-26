@@ -4577,12 +4577,30 @@ func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> 
 	# ★`upg.eval_entry` 的語意＝【進入升級評估一次】，兩個入口都要記 ——
 	#   否則獨立隊這條的分母是空的，而「沒被走到」與「走到了但每次都跳過」又會長得一樣。
 	if Probe.enabled: Probe.bump_pt("upg.eval_entry", ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY), team.team_id)
+	# ★★★階梯 vs 同一把秤（systems 派 2026-08-26 / slice facility-vs-upgrade-scale）：
+	#   ★要答：升級與設施是【同一次決策一起秤】，還是【升級不合格就落到設施】(first-match 階梯)？
+	#   ★★做法：同一次評估內，把「升級結果」與「設施結果」配成【一格】，分母＝infra.entry。
+	#     成對出現（升級因 afford 落空 ＋ 同一次設施成交）⇒ 階梯坐實。
+	#   ★★★純觀測：升級落空的原因用【既有 counter 的前後差】判，★不改 evaluate_upgrade 的簽名、
+	#     也不新增任何決策狀態 —— 觀測不得參與決策。
+	var _lad_bef: int = 0
+	if Probe.enabled:
+		_lad_bef = int(Probe.counts.get("upgd.reject_cannot_afford.team.%d" % team.team_id, 0))
 	if evaluate_upgrade(state, team, tile):
 		if Probe.enabled: Probe.bump_pt("infra.upgrade_dispatched", _iday, team.team_id)   # ★成功端：新增歸宿，對帳式要含它
+		if Probe.enabled: Probe.bump("ladder.upg_dispatched__fac_not_reached")   # ★升級成交＝根本走不到設施那段（配對要窮盡）
 		return
+	var _lad_upg: String = "n/a"
+	if Probe.enabled:
+		_lad_upg = "afford" if int(Probe.counts.get("upgd.reject_cannot_afford.team.%d" % team.team_id, 0)) > _lad_bef else "other"
+		# ★決策當下【兩池】material 總量分桶：直接回答「它有沒有機會買得起」
+		var _pool: float = float(tile.public_storage.get("material", 0)) + float(team.resources.get("material", 0))
+		var _cost_up: float = float(OutpostSystem.OUTPOST_COST[tile.outpost_type][1].get("material", 0))
+		Probe.bump("ladder.pool." + ("lt_cost" if _pool < _cost_up else ("cost_to_margin" if _pool < _cost_up * BuildAfford.MARGIN_NEUTRAL else "ge_margin")))
 	var pick: Dictionary = _pick_facility(state, team, tile, leader, "infra")   # 同 faction 隊 argmax 決策
 	if pick.is_empty():
 		if Probe.enabled: Probe.bump_pt("infra.pick_empty", _iday, team.team_id)   # ★走到決策了，但沒有想建的
+		if Probe.enabled: Probe.bump("ladder.%s__fac_none" % _lad_upg)   # ★配對格：升級落空＋設施也沒得建
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	if pick.has("demolish_first"):
 		OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
@@ -4590,11 +4608,14 @@ func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> 
 	if team.tile_pos == tile.tile_pos and team.current_task != TeamData.TASK_BUILD:
 		if OutpostSystem.new()._subteam_upgrade_facility(state, team, tile, pick["facility"]):
 			if Probe.enabled: Probe.bump_pt("infra.built_in_place", _iday, team.team_id)   # ★★唯一「真的開工」之一
+			if Probe.enabled: Probe.bump("ladder.%s__fac_built" % _lad_upg)   # ★★成對：升級買不起、設施【同一次】成交
 			return
 		if Probe.enabled: Probe.bump_pt("infra.in_place_failed", _iday, team.team_id)   # ★就地開工被拒（原本靜默）
+		if Probe.enabled: Probe.bump("ladder.%s__fac_failed" % _lad_upg)
 	else:
 		if Probe.enabled:
 			Probe.bump_pt("infra.dispatch_builder", _iday, team.team_id)
+			Probe.bump("ladder.%s__fac_dispatch" % _lad_upg)
 		_dispatch_facility_builder(state, team, tile.tile_pos, pick["facility"])
 
 func _evaluate_infrastructure(state: WorldState, faction) -> void:
