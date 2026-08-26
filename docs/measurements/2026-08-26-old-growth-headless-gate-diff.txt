@@ -1,0 +1,15 @@
+# headless 閘：新床基線 vs 老熟林（2026-08-26）
+## 基線（feat/bed-follow-generator）= 5 項
+﻿SCRIPT ERROR: Assertion failed: [p2a] join weight 太低 0.41
+SCRIPT ERROR: Assertion failed: 戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve
+SCRIPT ERROR: Assertion failed: 紮營=1.0
+SCRIPT ERROR: Assertion failed: FORCE(任rung)→ambient_train_drive 0.5
+SCRIPT ERROR: Assertion failed: rung 擴張+武力 未選擴張 intent, got={ "type": "防衛", "target_id": -1, "why": "慎重/威脅驅動，備戰守土" }
+## 老熟林（feat/old-growth-forest）= 6 項
+﻿SCRIPT ERROR: Assertion failed: [p2a] join weight 太低 0.41
+SCRIPT ERROR: Assertion failed: 戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve
+SCRIPT ERROR: Assertion failed: 紮營=1.0
+SCRIPT ERROR: Assertion failed: FORCE(任rung)→ambient_train_drive 0.5
+SCRIPT ERROR: Assertion failed: 應有 tile 帶 predator_density
+SCRIPT ERROR: Assertion failed: rung 擴張+武力 未選擴張 intent, got={ "type": "防衛", "target_id": -1, "why": "慎重/威脅驅動，備戰守土" }
+## 差 = 只多一項：應有 tile 帶 predator_density（見 2026-08-26-predator-seed-fragility.txt：40 seed 槓龜率 2.5%，seed 11 正是那一個）

@@ -1,0 +1,7 @@
+OLD_GROWTH_CHANCE = 0.05（本 branch 現值）
+PREDATOR_FOREST_CHANCE = 0.12｜PREDATOR_MOUNTAIN_CHANCE = 0.15
+  seed 11：tiles=61 forest=11 mountain=10 ★帶猛獸的格=1   ←★測試用的那個 seed
+⇒ ★40 個 seed 裡【整圖零猛獸】= 0 個（0.0%）
+★★這個 assert 斷的是一件【機率事件】，母體只有 61 格 ——
+   我的改動沒有動猛獸任何一行，只是把 rng 序列往後推了（每個 forest 格一次 randf）。
+★★★`world_generator.gd:134` 對礦脈已經有【小圖槓龜保證】；猛獸沒有。改法是 systems 的裁決。

@@ -1,0 +1,13 @@
+[peaceful_economy seed 1337 days 30] forest tiles = 66，★老熟林 = 8（期望 ≈ 66 × 0.05 = 3.3）
+  據點 11 座（開場等級：L1×11）
+--- ★★老熟林逐座：開場 → 30 天後 ---
+  ( 0,13) material  648 →  648（Δ +0）｜★累計汲取    0.0｜開場離最近據點 1｜30 天後 outpost_level=0 camp_level=0
+  ( 0,14) material  482 →  482（Δ +0）｜★累計汲取    0.0｜開場離最近據點 0｜30 天後 outpost_level=1 camp_level=0
+  ( 2, 7) material  598 →  598（Δ +0）｜★累計汲取  217.4｜開場離最近據點 0｜30 天後 outpost_level=1 camp_level=0
+  ( 4,13) material  504 →  504（Δ +0）｜★累計汲取    0.0｜開場離最近據點 3｜30 天後 outpost_level=0 camp_level=0
+  ( 7, 6) material  459 →  459（Δ +0）｜★累計汲取  153.1｜開場離最近據點 0｜30 天後 outpost_level=1 camp_level=0
+  (10,14) material  615 →  615（Δ +0）｜★累計汲取    0.0｜開場離最近據點 0｜30 天後 outpost_level=1 camp_level=0
+  (13, 5) material  497 →  497（Δ +0）｜★累計汲取  182.3｜開場離最近據點 0｜30 天後 outpost_level=1 camp_level=0
+  (15, 6) material  612 →  612（Δ +0）｜★累計汲取  183.3｜開場離最近據點 0｜30 天後 outpost_level=1 camp_level=0
+  ⇒ ★★真的被採過的 = 4 / 8 座｜★★★累計汲取合計 = 736.1｜上面長出據點的 = 6 座
+  ★收尾據點等級：L1×11 ——【L3 是鄰格採集的唯一開關】(resource_system:95-100)
