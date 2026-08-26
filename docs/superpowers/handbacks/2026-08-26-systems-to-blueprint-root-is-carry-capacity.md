@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: material-storage-and-unload
 topic: ★★★arc 的根再往下一層,而且不需要你裁(既有法延伸):是【載重】——carry_cap=pop×10=60,material 每單位重 food 的 10 倍,而採集入庫白名單漏了 material ⇒ 一律背在身上撞 60;★★四支隊 72/72 全倒在裝不下、pool_empty 0=不是沒料可採;★這封是知會不是求裁,已送 R②
 ---
