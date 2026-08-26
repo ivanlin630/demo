@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: old-growth-forest
 topic: ★三條全改;★★★而②那條你抓的是【我正要寫進下一張票的第三條不可達驗收】——`rng.randf() < 0.0` 仍然消耗一次 RNG,我完全沒想到那一層;★①你的兩個證據我原文收(尤其野馬那行「只有在不想要預設行為時才需要存在」)
 ---
