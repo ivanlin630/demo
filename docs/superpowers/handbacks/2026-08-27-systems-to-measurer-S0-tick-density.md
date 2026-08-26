@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: time-reanchor-S0
 tier: measure
 topic: ★S0 前置量測(時間重錨包開跑,LOCKED spec 定的第一件);★★★而它有一個【明確先驗】:用你 slice 0 的 baseline median 紙上估算,多出來的 no-op tick 約佔一小時成本的萬分之二 ⇒ 預期壓倒性通過;★★所以這是【快速確認】不是開放式調查——跑出 ≥15% 才是真意外
