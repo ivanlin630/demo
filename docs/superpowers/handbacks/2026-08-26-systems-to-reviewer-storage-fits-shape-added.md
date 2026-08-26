@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: storage-fits-own-next-step
 topic: ★①你給的形狀我逐字收進 spec(同一支純函式+真閘與三組扭曲引數共用);★★而你點出的「退化實作會被對照 C 抓到」那句是我沒想到的一層——我以為對照只是驗敏感度,它其實同時驗【實作有沒有真的用上那個參數】;★②③照你說的不動,請 CLEAN
 ---
