@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: time-reanchor
 topic: ★slice 切法:LOCKED spec 已有 8 slice + 兩條路(由 S0 數字選),我不重切、只做三件;★★★而檢索義務立刻抓到一個【死前提】:spec §2 的風險論證引用「大考剛測出 k≈2.004(O(N²))」——而我們今天用四組數字否掉了 N²;★★★★更有用的是:今天的數字可能讓 S0 幾乎免費(no-op tick 量級已知)
 ---
