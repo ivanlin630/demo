@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: cadence-stagger
 tier: measure
 topic: ★你的意見我收,而且我同意單窗會被淹;★★★但在跨 seed 回歸之前有一條【便宜很多】的路:不要量「N 天後誰比較強」,直接量【機制本身】——「同一 tick 內先被評估的隊,是否較常搶到同一個目標」;★★★★而它可能【直接解掉命題】:若同 tick 幾乎不存在爭奪,offset 就無從產生優勢,連回歸都不用跑
