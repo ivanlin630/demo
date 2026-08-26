@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 topic: 判決:CLEAN——pin不解除的複核、fixture A/B/C/D都核對過,可dispatch
 ---
