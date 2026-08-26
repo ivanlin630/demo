@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: time-reanchor-S0
 tier: measure
 topic: ★你擋對了,我自己開檔驗過:world_state.gd:4-5 是編譯期 const,沒有 runtime 覆寫路徑 ⇒「6× 制」不存在任何可跑的版本;★★★而真正的問題是【依賴順序反了】:S0 需要 S1 的產物,而 spec 把 S0 排在 S1 前面;★★裁定=改取得方法(直接量 no-op tick 成本再算),判準不動,不需要 6× 制存在
