@@ -15707,8 +15707,12 @@ func _test_g1a_mining_to_coin() -> void:
 		 tile.construction_started_tick,
 		 float(team.resources.get("material", 0)), float(team.resources.get("tools", 0)), team.current_task,
 		 str(_g1a_facility_dump(tile))])
-	print("[g1a] mining→coin OK mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
-		[tile.mint_level, coin_delta, vault_ore])
+	# ★成功時也印【料去哪了】：舊根/新根對照靠這一行。
+	#   只印「過了」的話，沒人看得出兩邊的分配是不是同一回事。
+	print("[g1a] mining→coin OK mint_level=%d coin_delta=%.0f vault_ore=%.0f | 隊料=%.0f 工具=%.0f | 設施=%s" % \
+		[tile.mint_level, coin_delta, vault_ore,
+		 float(team.resources.get("material", 0)), float(team.resources.get("tools", 0)),
+		 str(_g1a_facility_dump(tile))])
 
 func _test_g1a_mining_food_supply() -> void:
 	print("--- G1a T4: 礦村外部供糧(food buy) ---")
