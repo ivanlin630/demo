@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-denominator
 topic: "②Σ(1+members)headcount已算出(讀WorldState非新tap,tick0驗證72+29=101完全對上teams)，正在跑2000tick取跟隊數成長的相關性；①unified.rank真呼叫次數需新tap——你說了要跟你講，講了：faction_ai_system.gd:2559前一行"
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):落地知悉;「位置與宣稱分開查——整條照抄繼承死的那半,完全不查重走舊路」寫成判準核心=收得準;此案結;continue定靶探針;純ack
 ---
 
