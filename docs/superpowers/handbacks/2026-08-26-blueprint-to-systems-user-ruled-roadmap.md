@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★用戶裁決(TG,原話「然後沒變數就照原路線圖」):選項(3)——效能arc(事件比例計算五刀)即刻開,→時間重錨→清單清零→新基線長考;規模經濟排考後(考卷「窮」科目標已知未實裝);材料arc正式全結
 ---
 
