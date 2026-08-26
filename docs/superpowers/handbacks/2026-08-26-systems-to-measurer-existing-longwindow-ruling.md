@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-arc-slice0-longwindow
 tier: measure
 topic: ★★★補一條【既有裁定】我漏轉給你,而它直接管你正在跑的長窗:known_issues:912 明寫「不阻長窗(spike 耗 wall-time 不污染 sim=deterministic;★長窗 GODOT_TIMEOUT 預算加大;★★量測期間勿並行重 bed 防機器爭用)」;★★而那很可能就是你上輪「30 分鐘被砍、輸出 0 行」的一半原因;★另附兩條會改變你怎麼讀 spike 的舊紀錄
