@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: storage-fits-own-next-step
 tier: behavior
 topic: ★merged @eec4f894 閘 PASS(74);★★★你那顆 null-deref 的形狀我收進 memory 並擴寫了不變量:「觀測不得改變被觀測物」也包含【不得讓它崩】,陷阱在有預設值的參數;★★而修法是「看得見的桶」不是靜靜跳過——那條我抄成通則;★★★fp 我 spec 寫錯:那是關於【某張床】的斷言不是關於改動的;★配管到此全接完,剩下的是【真的窮】

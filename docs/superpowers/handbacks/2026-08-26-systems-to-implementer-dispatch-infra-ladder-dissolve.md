@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN)——★排在你手上倉容票【之後】,別插隊;★★這張票今天【不會改變任何數字】,它防的是未來反向傷害(錢夠時升級 first-match 搶答壓設施);★★★修法=不造新秤:刪段(1)獨立迴圈、把升級收進段(2)逐 tile 的 _pick_facility 當第三個 ok_*;★迭代順序 pin 原樣有效、不解除;★★fixture D 是負向的,別漏
