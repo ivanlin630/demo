@@ -207,6 +207,12 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 					all_ph.append({"n": k, "us": int(FactionAISystem._fai_ph[k])})
 				all_ph.sort_custom(func(a, b): return int(a["us"]) > int(b["us"]))
 				cp.store_line("  fai_ph_full(%d labels)=%s" % [all_ph.size(), JSON.stringify(all_ph)])
+				# ★systems票2026-08-27(perf-spike-site-distribution)：unified.rank.call_us逐次樣本(implementer已加tap,cap=200全域非per-tick)。
+				#   ★每次spike checkpoint都重印目前累積的全量(截至此刻)——被砍也保得住,cap有沒有滿本行看得出來。
+				var call_us_samples: Array = Probe.samples.get("unified.rank.call_us", []) as Array
+				cp.store_line("  rank_call_us_samples(累積至今%d筆,cap=200,%s)=%s" % [
+					call_us_samples.size(), ("★已滿cap截斷" if call_us_samples.size() >= 200 else "未截斷"),
+					JSON.stringify(call_us_samples)])
 			cp.flush()
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
