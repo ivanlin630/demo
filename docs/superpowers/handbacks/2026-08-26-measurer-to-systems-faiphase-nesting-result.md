@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: perf-spike-inside
 topic: "巢狀關係查清楚：至少4~5層深(loop1.factions⊇loop1.assign_tasks⊇assign.leader_unified/members⊇unified.rank⊇gather.*)，file:line坐實非猜；機制本身不記親子關係(誠實限)；組成在early/mid/late穩定不變，同一批label從頭到尾主導"
 ---
