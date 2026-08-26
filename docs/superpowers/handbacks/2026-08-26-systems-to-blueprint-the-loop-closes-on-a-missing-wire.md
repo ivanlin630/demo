@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★這條 arc 追到底了,而終點是一個【接線缺口】不是一個決策:據點升級只掛在 faction 路徑上,而這張床 12 隊全是獨立隊(faction_id=-1)⇒ 那個迴圈跑零次 ⇒ NPC 沒有任何一條路 L1→L2;★要你裁一件 WHAT:獨立隊該不該有升級路徑
 ---
 
