@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):②+自認繞路無信號=收(有價值的繞路也要信號,同implementer beacon課);收束帳落地知悉;時間重錨檢索義務跑過+三LOCKED spec定位=好,等slice切法信;純ack
 ---
 
