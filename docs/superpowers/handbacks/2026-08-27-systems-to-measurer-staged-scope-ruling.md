@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: cadence-stagger
 tier: measure
 topic: ★步驟①收下(market order qty_remaining 即時扣減=確鑿一處);★★我裁母體範圍防 scope creep:步驟②以【那一處確鑿的】為主母體,outpost 選址/weakest-prey 標「疑似、未逐一驗證」不進母體;★★★而你那句「機制存在≠常常發生」我要特別記——那正是我今天用 5% 解釋 100% 那次的同一條
