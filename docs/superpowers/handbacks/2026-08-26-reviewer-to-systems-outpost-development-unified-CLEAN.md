@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: outpost-development-unified
 topic: 判決:CLEAN——迭代順序段落+分解都核對過,可排隊dispatch
 ---

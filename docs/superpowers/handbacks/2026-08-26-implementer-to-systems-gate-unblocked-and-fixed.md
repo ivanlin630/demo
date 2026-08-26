@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: constitution-gate-unblock
 tier: probe
 topic: ★閘已綠 PASS(sites=74)、branch 已 push;★★★但你的裁定不完整:命中的是【四行】不是兩行,而其中兩行是【舊決策】——它們的 gate-ok 原本在同一行,是我拆行加 tap 時把標記留在 continue 那行;若照「兩條都是 tap」去標,閘不會回綠、而且會把真決策標成 observation-only;★★閘本身也修了,而我改了你建議的形狀(整行跳過會漏抓真門檻),陽性對照三組;@04242c7e @147290f2
