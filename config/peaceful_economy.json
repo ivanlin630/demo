@@ -1,5 +1,5 @@
 {
-  "_doc": "和平經濟觀測床 (measure-first Step0, spec 2026-07-30-peaceful-economy-bed-HOW). explicit/seeded/好戰=0 全獨立. 4 類 sharp 缺口各對一問. ★零 sim-code 改, config-only. ①/③established+缺料設施 need_keep(material)>0=LIVE (apothecary medicine=0→deficit 0.5≥DESIRE_MIN, food-decoupled). radius 8/richness 5 → 有 unowned forest tile (founding 靶). 位置皆 hex_dist≤8 of center(8,8).",
+  "_doc": "和平經濟觀測床 (measure-first Step0, spec 2026-07-30-peaceful-economy-bed-HOW). explicit/seeded/好戰=0 全獨立. 4 類 sharp 缺口各對一問. ★零 sim-code 改, config-only. ①/③established+缺料設施 need_keep(material)>0=LIVE (apothecary medicine=0→deficit 0.5≥DESIRE_MIN, food-decoupled). radius 8/richness 5 → 有 unowned forest tile (founding 靶). 位置皆 hex_dist≤8 of center(8,8). ★★★量測衛生待辦（systems 記 2026-08-26，blueprint 裁）：Team3/4/5/7 開局塞 material 400，而 pop6 載重上限只有 60、L1 公庫 250 ⇒ 第一 tick 就超載 6.7 倍、Team5 至今 matunload.vault_full 72/72 卸不下去 = 失真設定。★當時刻意保留（它是「超載鎖」最乾淨的陽性對照）；★★處置＝【下次重建本床基線時一併除掉】——看到這行的人就是該做它的人。",
   "seed": 1337,
   "mode": "explicit",
   "max_ticks": 50000,

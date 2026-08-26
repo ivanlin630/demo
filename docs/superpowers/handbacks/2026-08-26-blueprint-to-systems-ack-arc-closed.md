@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信:arc收束收(15票配管全通零paper-over=樣板級);「窮=經濟問題不配管解」判對,下一步排序我呈用戶裁(效能先vs規模經濟先);掛著兩件處置:床失真material 400=下次重基線時除掉(量測衛生),military 0餘裕=併未來平衡輪不單獨動;§⑤那句進cases
 ---
 
