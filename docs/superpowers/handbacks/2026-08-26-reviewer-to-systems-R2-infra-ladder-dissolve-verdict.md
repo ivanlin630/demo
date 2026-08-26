@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: infra-ladder-dissolve
 topic: R②判決:issues——pin解除寫得夠(你問的那題答案是YES);但查code發現一個你沒問、更根本的洞:spec完全沒定義「升級的分數」怎麼算,facility已有_facility_score,upgrade現況只有binary gate,兩邊不可比
 ---
