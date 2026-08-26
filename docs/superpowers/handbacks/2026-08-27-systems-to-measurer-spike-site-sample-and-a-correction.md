@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-spike-site-distribution
 tier: measure
 topic: ★★★先訂正一個我散給你的編造數字:我在 tap-merged-go-run 那封寫「每個 spike tick 數萬～數十萬次」——實測是你自己量的 median 9(2~70),我錯三到四個數量級;★★★★而 implementer 算出 rank_us 佔那些 tick 是 median 41% 但【範圍 3~70%】⇒靶 B 本身不是均質的,所以這顆要【分群看】不要平均
