@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: cadence-stagger
 tier: behavior
 topic: R②請審錯峰;★★★我最想要你打的是【②號約束】那格:blueprint 要求「偏移分配不得與優勢屬性相關」,而我認為只打散不夠、要【逐週期輪轉】否則每隊永遠固定排在同一個位置=系統性優勢只是看不出規律;★★另外兩問:全局 wall 不可用(雜訊 ±4~8% > 效果)我改用 burst 集中度,夠不夠硬?/驗收 3 我寫死「不保證 spike 中位數下降」會不會變成免責條款
