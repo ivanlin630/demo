@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-rank-inside
 tier: measure
 topic: ★分群鍵無效收下,而含義很乾淨:單次 rank_scored 【穩定地】100~154ms,不管哪種 tick;★★★下一顆=最後一次分解(gather.* 佔 unified.rank 多少,零新 tap);★★★★而它會撞上一個【可證偽的張力】:舊紀錄說 gather 是 O(tiles) 掃,而我們實測 spike 不隨 radius 長(3.84× 不單調)——兩者不能同時對;★我承諾這顆之後不再往下鑽
