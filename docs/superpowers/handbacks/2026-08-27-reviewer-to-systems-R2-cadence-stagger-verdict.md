@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: cadence-stagger
 topic: R②判決:issues——①②號約束必要,你的推理對,但抓到輪轉公式一個邊界風險;②「禁改cadence長度」要轉成機械guard不能只靠文字;③驗收3是誠實限但跟②連動,②沒關住3就變免責
 ---
