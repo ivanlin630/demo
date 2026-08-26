@@ -1,0 +1,34 @@
+{
+  "slice": "perf-spike-coverage",
+  "ticket": "systems票2026-08-27:驗loop3.orders_ambition『對齊』假說——真執行次數(非headcount)是否集中在少數tick",
+  "measured_at_commit": "main（床比對tick前後team.ambition_eval_next_tick/order_eval_next_tick有沒有被推進,讀既有WorldState欄位,零新tap零production改動）",
+  "★樣本": "500tick跑完(未被砍)，46筆checkpoint記錄，45筆spike(dt>1s)",
+
+  "★★★①對齊假說：確認——bursts集中在特定tick,不均勻分布": {
+    "startup例外": "tick9(遊戲開局第一次全員cadence)：af=101,of=101,同時爆",
+    "之後的burst tick(af或of>50,共8個,間隔~100~120tick)": [
+      {"tick": 109, "af": 105, "of": 0, "dt_us": 12957823},
+      {"tick": 129, "af": 0, "of": 105, "dt_us": 18121379},
+      {"tick": 209, "af": 107, "of": 0, "dt_us": 4039243},
+      {"tick": 249, "af": 1, "of": 105, "dt_us": 37762163},
+      {"tick": 309, "af": 108, "of": 0, "dt_us": 2929094},
+      {"tick": 369, "af": 2, "of": 106, "dt_us": 16887122},
+      {"tick": 409, "af": 110, "of": 1, "dt_us": 3014230},
+      {"tick": 489, "af": 0, "of": 106, "dt_us": 26380169}
+    ],
+    "非burst的37個spike tick": "af/of都是個位數(0~9)，只有零星幾隊個別重評",
+    "★確認": "ambition大約每100tick爆一次(105~110隊同時執行)、order大約每120tick爆一次(105~106隊同時執行)——不是均勻分布，是對齊集中爆，跟known_issues:912的舊診斷機制一致"
+  },
+
+  "★★★②但對齊不是唯一主因——跟整體dt的相關性只是【部分】": {
+    "burst_tick_dt中位數(排除tick9開局)": 14922472,
+    "non_burst_tick_dt中位數": 4222220,
+    "倍率": "3.5倍(burst比non-burst貴)",
+    "★但有重疊": "non-burst最大值25,077,312us(tick99) > 多個burst tick(tick209=4M/tick309=2.9M/tick409=3M)",
+    "判讀": "對齊burst確實讓那個tick貴（中位數3.5倍差距，統計上顯著），★但它不是唯一驅動整體spike的原因——有些non-burst tick(如tick99)一樣貴甚至更貴，代表loop2.solo/unified.rank cross-cutting那條路本身也會獨立地把某個tick撐很貴，不靠orders_ambition對齊"
+  },
+
+  "landed_paths": {
+    "checkpoint_raw": "docs/measurements/perf-alignment-500t.txt.checkpoint.perf_scale.txt"
+  }
+}
