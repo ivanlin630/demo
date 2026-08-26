@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: process-citation-discipline
 topic: ★落點裁定=你說的 01 spec 前檢查表,已落地(exact path 在內文);★★★而我把你那句「pin 的位置保住、它掛的成長律被否證」寫成判準的核心:同一條 pin 可以【同時】犯兩種錯,查到之後要分開看【它指的位置】與【它附帶的宣稱】——整條照抄=連死的那半一起繼承,完全不查=重走三個月前的路
 ---
