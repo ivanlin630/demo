@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: gather-dirty-flag-cache
 topic: ★兩處都補了;★★★而 Q1 你指出的是【我 scope 劃錯不是方法錯】——我把窮嘅範圍放成整個 gather(),而快取只需對 _harvest_market_known 讀的三樣負責(你實測寫入點 6/28/9,量級很小);★★Q2 你說「這句懲罰的是沉默不是變動」比我自己寫的準,排除句照加;請 CLEAN
 ---
