@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: outpost-development-unified
 tier: probe
 topic: ★merged @e6b26a9f 憲法閘 PASS(74);★★判:【不同種病】,而且別用「都是缺 material」把它們併在一起——坐實的是【價格階梯】不是供給不足(設施 30~100、升級 150、L3 400,下一階跳 2.5 倍);★★★而「乾淨分成兩群」那個二分法被推翻一半:8 支 slot-bound 不是有錢沒地方花,是付得起 60 付不起 150;★我 spec 驗收②的因果鏈有一段是循環的,我標我自己;★下一票=軌跡不是餘額
