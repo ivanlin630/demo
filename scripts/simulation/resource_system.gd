@@ -117,7 +117,14 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 			var flabor: float = LaborSystem.farm_labor(tile)
 			var fyield: float = float(tile.farming_level) * FARM_UNIT_YIELD * flabor * tile.harvest_factor * day_fraction
 			if fyield > 0.0:
-				TileBank.deposit(tile, "food", fyield, "farm_yield")
+				var _fy: float = TileBank.deposit(tile, "food", fyield, "farm_yield")
+				if Probe.enabled:
+					# ★入帳量分【來源】：野地採集/農田/狩獵 三源混在一欄的話，
+					#   「採集量變了」就分不出是哪一源在動。
+					Probe.add_amount("qty.harvest_taken.food", fyield)
+					Probe.add_amount("qty.harvest_credited.food", _fy)
+					Probe.add_amount("qty.harvest_src.farm.food", _fy)
+					Probe.bump("qty.harvest_n.food")
 
 func regenerate_tiles(state: WorldState, cadence_ticks: int = WorldState.TICKS_PER_DAY) -> void:
 	# R1：food regen 乘 day_fraction（與 consumption 同 cadence 基準）→ REGEN_RATE 值成真 per-day
@@ -158,12 +165,18 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 		var em: int = ms.get_effective_mounts(team)
 		if em > 0:
 			var mount_food: float = float(em) * FOOD_PER_MOUNT_PER_DAY * day_fraction
-			ResourceBank.remove(team, "food", mount_food, "mount_feed")
+			var _mf: float = ResourceBank.remove(team, "food", mount_food, "mount_feed")
+			if Probe.enabled:
+				Probe.add_amount("qty.consume.food", _mf)   # ★記【實扣】非【應扣】：remove 會 clamp 到庫存
+				Probe.bump("qty.consume_n.food")
 		# 馴馬（horses）草料：×0.5/day，馴馬不騎 → 不受 effective（pop）限制
 		var horses_n: float = float(team.resources.get("horses", 0))
 		if horses_n > 0.0:
 			var horse_food: float = horses_n * FOOD_PER_MOUNT_PER_DAY * day_fraction
-			ResourceBank.remove(team, "food", horse_food, "horse_feed")
+			var _hf: float = ResourceBank.remove(team, "food", horse_food, "horse_feed")
+			if Probe.enabled:
+				Probe.add_amount("qty.consume.food", _hf)
+				Probe.bump("qty.consume_n.food")
 		var total_pop: int = team.population + team.minor_population
 		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY * day_fraction
 		# WS-1：定居隊 food 在自家糧倉（public_storage）。消耗從「team.resources + 自家糧倉」
@@ -173,6 +186,11 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 		var granary_food: float = float(granary.public_storage.get("food", 0)) if granary != null else 0.0
 		var food_available: float = team_food + granary_food
 
+		# ★實際吃到的＝ min(available, needed) —— 池耗盡分支兩者不同，
+		#   而【消耗/日】要的是真的扣掉的那個數，不是需求量。
+		if Probe.enabled:
+			Probe.add_amount("qty.consume.food", minf(food_available, food_needed))
+			Probe.bump("qty.consume_n.food")
 		if food_available >= food_needed:
 			# 先扣 team.resources，不足再扣糧倉
 			var from_team: float = minf(team_food, food_needed)
@@ -335,6 +353,7 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 				gain *= (1.0 + eng_skill * 0.3)
 			"ore_gold", "ore_silver":
 				gain *= (1.0 + eng_skill * 0.5)
+		var _qty_credited: float = 0.0   # ★實際入帳量（公庫滿時 < gain）
 		# ★★★①（spec 的第一半）我【沒有照字面做】，理由講死：
 		#   spec 寫「採集所得的 material 在自家據點上 → TileBank.deposit 進公庫」。
 		#   ★照做的話 material 就【繞過一般稅】(`NORMAL_TAX_RES` 含 material) ——
@@ -353,11 +372,13 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 			if dst_tile != null and dst_tile.outpost_level > 0:
 				# S5：第二 sink 記帳——自然資源 over-cap 是 legit 倉容上限(落自然池會撞 regen cap-clamp 故不落地)，補 tap 使可觀測。
 					var _dep: float = TileBank.deposit(dst_tile, res, gain, "harvest_intake_vault")   # capped，over-cap = legit 倉滿
+					_qty_credited = _dep
 					if gain - _dep > 0.001:
 						Probe.bump("harvest.vault_overflow_drop")   # S5 tap：糧倉滿溢出可觀測(S5 閘對此資源不假)
 			else:
 				# 無 outpost fallback 進 team（小隊；food 仍記 gained 供一般稅）
 				ResourceBank.add(team, res, gain, "harvest_intake")
+				_qty_credited = gain
 				if res == "food":
 					gained[res] = float(gained.get(res, 0)) + gain
 		else:
@@ -375,7 +396,18 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 				Probe.bump_pt("matin.gained", "", team.team_id)
 				Probe.add_amount("matin.amount.team.%d" % team.team_id, gain)
 			ResourceBank.add(team, res, gain, "harvest_carry")
+			_qty_credited = gain
 			gained[res] = float(gained.get(res, 0)) + gain   # 私產所得 → 一般稅基數
+		# ★★★S2 前置 quantity tap（純觀測）：【量】不是【次數】，且是【流量】不是存量差分。
+		#   ★換句話：cap-bound 且會回補的池子，存量差分恆為 0 而流量一直在跑。
+		#   ★★這一行是兩條入帳路（公庫 / 私產）【都會經過】的唯一點。
+		#   ★★★taken 與 credited 分開：公庫滿時 tile 照扣而入庫比較少，
+		#     合成一欄會把【倉滿溢出】這個 sink 藏起來。
+		if Probe.enabled:
+			Probe.add_amount("qty.harvest_taken." + res, gain)
+			Probe.add_amount("qty.harvest_credited." + res, _qty_credited)
+			Probe.add_amount("qty.harvest_src.wild." + res, _qty_credited)
+			Probe.bump("qty.harvest_n." + res)   # ★分母：入帳次數（沒分母的量不可信）
 		# 從 tile 扣除（food/material 最終由 regenerate_tiles 補回；ore/gem 有限）
 		TileBank.pool_set(src_tile, res, maxf(current - gain, 0.0), "harvest_deplete")
 

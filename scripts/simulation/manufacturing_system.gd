@@ -195,7 +195,12 @@ func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, lev
 			continue
 		for res in recipe["in"]:
 			ResourceBank.add(team, res, -(float(recipe["in"][res]) * q), "manufacture_input")     # 投入隨產量縮放（in = 每單位成品原料）；原無 clamp 保可負
-			Probe.add_amount("manufacture.input_consumed", float(recipe["in"][res]) * q)   # ★de-patch 驗:材料消耗總量（was 0.000=facility 從不 RUN）
+			Probe.add_amount("manufacture.input_consumed", float(recipe["in"][res]) * q)
+			if Probe.enabled:
+				# ★既有那顆是【聚合】的（所有原料加總）⇒ 分不出 food/material，
+				#   而「糧耗 -17%」要驗得出來就必須分得出來。
+				Probe.add_amount("qty.consume." + str(res), float(recipe["in"][res]) * q)
+				Probe.bump("qty.consume_n." + str(res))   # ★de-patch 驗:材料消耗總量（was 0.000=facility 從不 RUN）
 		_add_output(team, tile, recipe["out"], q)
 		Probe.bump("manufacture.fired")                                    # ★de-patch 驗:facility 真 RUN 次數（per-labor-allocation）
 		Probe.add_amount("manufacture.output." + String(recipe["out"]), q)  # ★de-patch 驗:各產物產出量
