@@ -3958,6 +3958,29 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	return true
 
 # 派升級子隊（task="升級"，附 target_level）
+# ★★★據點發展：共用「一格＋一隊」的升級評估（spec 2026-08-26 outpost-development-unified）。
+#   ★病（四層閉環，量出來的）：蓋不了設施 ← slot 滿（L1 civilian 只有 2 格）
+#     ← 據點永遠不升級 ← ★升級只掛在 faction 路徑，而獨立隊走的是 `_evaluate_independent_infrastructure`，
+#       那條【只有段(2) 擴建設施，沒有段(1) 升級】⇒ 獨立隊拿不到第 3 格的唯一出口。
+#   ★★實測：`upg.eval_entry = 0`（faction 迴圈跑零次，peaceful_economy 12 隊全 faction_id=-1）。
+#
+# ★★★本函式【不知道】呼叫者是 faction 還是獨立 —— 這是刻意的：
+#   **在共用體裡寫 `if faction_id == -1` 就是 WHAT 明令排除的「平行特例」。**
+#   ⇒ 兩條路徑的差異只剩【怎麼找到那支隊、掃哪些格】，而那留在各自入口：
+#     faction＝多隊結構（leader＋居民／子隊／其他 owner tile）⇒ 掃全地圖過濾自家；
+#     獨立隊＝天生只有自己那一格 ⇒ 單格。★這不是實作偏好，是結構性事實。
+#
+# ★回傳 true ＝【這一格真的派出升級】（呼叫端據此 return，維持「第一次成功就停」）。
+func evaluate_upgrade(state: WorldState, leader_team: TeamData, tile: HexTileData) -> bool:
+	var _uday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	if Probe.enabled: Probe.bump_pt("upg.own_tile_seen", _uday, leader_team.team_id)
+	if tile.outpost_level >= 3 or tile.construction_team_id != -1:   # gate-ok: world-mechanic: outpost level cap (>=3)
+		if Probe.enabled:
+			Probe.bump_pt("upg.skip_max_level" if tile.outpost_level >= 3 else "upg.skip_busy_construction", _uday, leader_team.team_id)   # gate-ok: observation-only — 替【已發生的 skip】命名，決策在上一行的 if
+		return false
+	if Probe.enabled: Probe.bump_pt("upg.call", _uday, leader_team.team_id)
+	return _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1)
+
 func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Vector2i,
 		target_level: int) -> bool:
 	# ★★★八個歸宿（互斥且窮盡，分母＝`upg.call`）—— ★六道靜默 return false 原本一顆 tap 都沒有。
@@ -3982,11 +4005,19 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 		if Probe.enabled:
 			Probe.bump_pt("upgd.reject_cannot_afford", _uday2, owner_team.team_id)
 			# ★缺的是哪一顆（★同 afford.short 那顆：分開記，別記成「成本含哪些 res」）
+			# ★★★這裡的重檢是【1.0× 物理量】，而上面的 `BuildAfford.can_afford` 吃的是【人格緩衝倍率】
+			#   ⇒ 兩者的數字【本來就不會相等】：緩衝擋掉的比物理擋掉的多。
+			#   ★若不把差額命名，讀的人會看到「257 次付不起、卻只有 182 次缺料」而以為 tap 漏記。
+			#   ⇒ 一次都沒短缺（＝物理上買得起，只是不夠緩衝）記成 `margin_only`。
+			var _any_short: bool = false
 			for _uk in cost:
 				if String(_uk) == "ticks": continue
 				var _uav: float = float(tile.public_storage.get(_uk, 0)) + float(owner_team.resources.get(_uk, 0))
 				if _uav < float(cost[_uk]):
+					_any_short = true
 					Probe.bump("upgd.short." + String(_uk))
+			if not _any_short:
+				Probe.bump("upgd.short.margin_only")   # ★物理上夠，只是沒過人格緩衝
 		return false
 	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1:
@@ -4539,6 +4570,16 @@ func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> 
 			else:
 				Probe.bump_pt("infra.guard_under_construction", _iday, team.team_id)
 		return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	# ★★★據點發展統一（spec 2026-08-26）：先評【升級】再評【設施】——★順序照 faction 版現況，不改。
+	#   ★這條路以前【整段不存在】於獨立隊：faction 版有段(1)升級+段(2)設施，獨立版只有段(2)
+	#   ⇒ 獨立隊 slot 滿了就永遠卡住（L1 只有 2 格，而多一格的唯一出口是升級）。
+	#   ★★共用體吃「一格＋一隊」，獨立隊天生只有自己這一格 ⇒ 不迭代，直接餵。
+	# ★`upg.eval_entry` 的語意＝【進入升級評估一次】，兩個入口都要記 ——
+	#   否則獨立隊這條的分母是空的，而「沒被走到」與「走到了但每次都跳過」又會長得一樣。
+	if Probe.enabled: Probe.bump_pt("upg.eval_entry", ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY), team.team_id)
+	if evaluate_upgrade(state, team, tile):
+		if Probe.enabled: Probe.bump_pt("infra.upgrade_dispatched", _iday, team.team_id)   # ★成功端：新增歸宿，對帳式要含它
+		return
 	var pick: Dictionary = _pick_facility(state, team, tile, leader, "infra")   # 同 faction 隊 argmax 決策
 	if pick.is_empty():
 		if Probe.enabled: Probe.bump_pt("infra.pick_empty", _iday, team.team_id)   # ★走到決策了，但沒有想建的
@@ -4583,17 +4624,15 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	var _uday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
 	if Probe.enabled: Probe.bump_pt("upg.eval_entry", _uday, leader_team.team_id)
 	# (1) 升級既有 outpost
+	# ★★★迭代權留在【入口】，單格判斷交共用體（spec 2026-08-26 §分解）：
+	#   ★迭代順序【不得改】——全地圖字典 + 第一次成功就 return
+	#   ⇒ 「哪一格先被掃到」決定「哪一格先升級」。★★不得改成先收集再排序或換資料結構，
+	#     否則邏輯即使完全正確，`fp` 也會因為「先升的那格不同」而假紅。
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_owner != leader_team.team_id:
-			continue   # ★不是自家地：不計入母體（母體＝自有據點-次，見下）
-		if Probe.enabled: Probe.bump_pt("upg.own_tile_seen", _uday, leader_team.team_id)
-		if tile.outpost_level >= 3 or tile.construction_team_id != -1:   # gate-ok: world-mechanic: outpost level cap (>=3)（★原為單行含此標，2026-08-26 拆行加 tap 時標記留在 continue 行 → 搬回）
-			if Probe.enabled:
-				Probe.bump_pt("upg.skip_max_level" if tile.outpost_level >= 3 else "upg.skip_busy_construction", _uday, leader_team.team_id)   # gate-ok: observation-only — 替【已發生的 skip】命名，決策在上一行的 if
-			continue   # gate-ok: world-mechanic: outpost level cap (>=3)
-		if Probe.enabled: Probe.bump_pt("upg.call", _uday, leader_team.team_id)
-		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
+			continue   # ★不是自家地：不計入母體（母體＝自有據點-次）
+		if evaluate_upgrade(state, leader_team, tile):
 			if Probe.enabled: Probe.bump("infra.stop.1_upgrade")   # ★measurer L3 tap(T3票)：段(1)升級return
 			if SimRunner.phase_timing: _fai_pht("infra.upgrade", _ti)
 			return

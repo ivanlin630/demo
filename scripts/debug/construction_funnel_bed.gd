@@ -479,7 +479,8 @@ func _run() -> void:
 			"empty_no_fdef", "empty_already_built"]],
 		["infra", "infra.", ["entry", "guard_no_own_outpost", "guard_in_combat", "guard_no_leader",
 			"guard_tile_null", "guard_outpost_level0", "guard_under_construction",
-			"pick_empty", "built_in_place", "in_place_failed", "dispatch_builder"]],
+			"pick_empty", "built_in_place", "in_place_failed", "dispatch_builder",
+			"upgrade_dispatched"]],   # ★新歸宿（據點發展統一）：不加它對帳式會少一項而看起來仍合理
 		["wall", "wall.", ["begin_entry", "accepted", "reject_cannot_afford", "reject_no_slot",
 			"reject_max_level", "reject_terrain", "reject_outpost_type", "reject_no_def"]],
 		["pick(infra)", "pick.infra.", ["entry", "empty_no_eligible", "empty_all_below_threshold",
