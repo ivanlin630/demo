@@ -156,7 +156,8 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 				phase_count[ph] = int(phase_count.get(ph, 0)) + 1
 		if cp != null and (dt > 1_000_000 or tick % 500 == 0):
 			var wall_so_far: float = float(Time.get_ticks_usec() - wall_t0) / 1e6
-			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d" % [tick, dt, wall_so_far, state.teams.size()])
+			cp.store_line("tick=%d dt_us=%d wall_so_far=%.1fs teams=%d tiles=%d" % [
+				tick, dt, wall_so_far, state.teams.size(), state.world.tiles.size()])
 			cp.flush()
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
