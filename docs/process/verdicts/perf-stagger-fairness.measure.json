@@ -1,0 +1,36 @@
+{
+  "slice": "perf-stagger-fairness",
+  "ticket": "systems票2026-08-27:有沒有任何一張床市場撮合真的會成交？若有就跑步驟②",
+  "measured_at_commit": "main（implementer的mkfill tap@48aa98df已merge；床讀mkfill.attempt.{buy,sell}+mkfill.order樣本，零再新增production改動）",
+
+  "★★★①窮盡試了4張床，只有warring_states有真成交": {
+    "perf_scale(seed1337,2000tick)": {"buy": "見另票", "sell": "見另票", "成交": 0, "備註": "首輪連class快取都沒重建過(已修正),重跑後仍0成交"},
+    "merchant(seed100,2000tick,專為貿易設計的config)": {"buy": 93, "sell": 260, "成交": 0, "備註": "即使teams帶coin/goods/商隊tag專門設計，一樣0成交"},
+    "econ_bed(seed1337,2000tick)": {"buy": 0, "sell": 0, "成交": 0, "備註": "連撮合都沒被走到"},
+    "★warring_states(seed1337,2000tick)": {"buy": 95, "sell": 325, "成交": 12, "備註": "★唯一有真成交的床"}
+  },
+
+  "★★★②warring_states的12筆真成交——全部seq=1，零碰撞": {
+    "原始樣本": [
+      {"tick":260,"order_id":1,"kind":"sell","team":29,"seq":1},
+      {"tick":260,"order_id":168,"kind":"buy","team":29,"seq":1},
+      {"tick":400,"order_id":60,"kind":"sell","team":59,"seq":1},
+      {"tick":770,"order_id":170,"kind":"sell","team":57,"seq":1},
+      {"tick":880,"order_id":194,"kind":"buy","team":0,"seq":1},
+      {"tick":1030,"order_id":153,"kind":"sell","team":53,"seq":1},
+      {"tick":1310,"order_id":60,"kind":"sell","team":12,"seq":1},
+      {"tick":1400,"order_id":49,"kind":"sell","team":72,"seq":1},
+      {"tick":1700,"order_id":297,"kind":"sell","team":70,"seq":1},
+      {"tick":1840,"order_id":329,"kind":"sell","team":76,"seq":1},
+      {"tick":1920,"order_id":215,"kind":"buy","team":0,"seq":1},
+      {"tick":1980,"order_id":329,"kind":"sell","team":79,"seq":1}
+    ],
+    "碰撞數(同tick同order_id出現seq>=2)": 0,
+    "碰撞頻率": "0/12 = 0%（樣本窗內未見，2000tick窗）",
+    "★依判準表": "頻率≈0 ⇒ offset無從產生優勢 ⇒ 命題(在此窗內)解決——但★樣本量小(僅12筆)，是『樣本窗內未見』不是『從不』"
+  },
+
+  "landed_paths": {
+    "warring_states_raw": "docs/measurements/perf-warring-fillcheck.txt.checkpoint.warring_states.txt"
+  }
+}

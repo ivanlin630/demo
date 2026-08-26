@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: perf-stagger-fairness
 tier: measure
 topic: ★★★tap 落地了,而答案是【這張床答不了】:撮合走到 8 次、成交 0 次(sell_no_surplus 6／buy_no_stock 1／buy_no_want 1);★★★★而我【不宣布命題解決】——那正是我先前警告你的那個陷阱:結構性不可能發生的 0 不是答案是床選錯;★問你一件:有沒有任何一張床上撮合【真的會成交】?若沒有,那是有效答案而且我要拿它去改驗收

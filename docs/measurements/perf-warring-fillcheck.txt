@@ -1,0 +1,35 @@
+=== perf_scaling_curve_bed：seed=1337 ticks/regime=2000 ladder=["warring_states"] ===
+config           regime    teams      teams_cfg_knobs  median_us    mean_us     p99_us     max_us tps@median
+warring_states   full-HD      49 fac=8×[2,5]+rov=[6,10]         18     145988    2636505    7186567    55556
+
+────────── ①scaling 曲線摘要（★PERF_HD_ONLY=1，跳過LOD那趟，只有full-HD） ──────────
+config            teams      teams_cfg_knobs LOD_median_us  HD_median_us   HD/LOD     HD_tps
+warring_states       49 fac=8×[2,5]+rov=[6,10]     n/a(skip)            18      n/a      55556
+注：★母體=實際生成隊數(teams)，非config期望值(teams_cfg_knobs，只是原樣列出config輸入旋鈕，非我推導的期望值)——兩者常有落差，逐行標出、不自己解釋差多少。
+
+────────── ②熱點分解（每階full-HD那趟，phase 累積us + 分母=被走到幾個tick） ──────────
+  --- warring_states（teams=49, n_ticks=2000）---
+     phase                    total_us   %phase    被走幾tick         us/次 us/tick(全窗)
+     near.faction_ai         251896956    86.3%        200    1259484.8   125948.5
+     far.total                16659810     5.7%       2000       8329.9     8329.9
+     near.messages             6312429     2.2%        200      31562.1     3156.2
+     near.interact             3578544     1.2%        200      17892.7     1789.3
+     near.move                 2987837     1.0%        200      14939.2     1493.9
+     near.vision               2987368     1.0%        200      14936.8     1493.7
+     near.reactions            2648909     0.9%        200      13244.5     1324.5
+     near.economy              2261160     0.8%        200      11305.8     1130.6
+     near.consume              1473924     0.5%        200       7369.6      737.0
+     near.events_emit           362935     0.1%        200       1814.7      181.5
+     near.equip                 293398     0.1%        200       1467.0      146.7
+     near.outpost_ambush        279496     0.1%        200       1397.5      139.7
+     harvest                     63746     0.0%       2000         31.9       31.9
+     near.strategic_ai           56602     0.0%        200        283.0       28.3
+     day_boundary                19137     0.0%       2000          9.6        9.6
+     captives_cleanup             9296     0.0%       2000          4.6        4.6
+     near.forced_event            2270     0.0%        200         11.4        1.1
+     總計時 291.89s = 100% of wall（餘為未計時膠水/loop開銷）
+
+────────── ③team_discovered 讀者粒度回報（systems想知道,不強求）──────────
+  現有 phase_timing 只分到 SYSTEMS registry 分組粒度（如 near.vision/near.messages/near.faction_ai…），
+  讀不到『48個讀者裡哪幾個實際吃時間』這麼細——那需要函式級或呼叫點級 tap，本床零production code改動做不到。
+  ★如實回報：分解不到那個粒度，是本輪的有效答案，不是我沒查。
