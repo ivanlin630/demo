@@ -197,6 +197,4 @@
    這個挑【不要的】並負舉證(漏了只是多醒一次)⇒ 沉默的預設落在安全那一邊
 ★新增決策支 ⇒ 必須在 cadence 閘【前】讀 is_pending;新增突發事件 ⇒ 必須進 WorldEvents
 ```
-★**現況（S4b）**：**九個閘位已接、覆蓋 210/210、閘上 kind 過濾 0 處（零例外）。**
-★★**已具名的例外**：**`LADDER` 的 cadence 重排寫在 callee ⇒ 事件喚醒那一次【也會】把週期往後排**
-（其餘八支不會）—— ★★★**而「哪一邊才對」未定，見 `known_issues`。**
+> ★現況／已具名例外（`LADDER` 重排不對稱）→ `process/detail/invariants-cases.md`（同標題節）＋ `known_issues.md`。
