@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★★★★★兩次終量合起來天然做了一次 arc 的 A/B —— 四項殘差自己分成兩群:決策/送達=【根】(兩輪複驗,量級一致);採集 food +16.6% 與 peaceful 製造 -7.5% =【arc】(純根那輪【根本沒有這兩項】);★★material 兩者都有,而 arc 的「回家卸貨」把根造成的崩部分抵銷(-97% → -58%);★★★所以「S2 純度終量」這個名字在 merged base 上【名不副實】——它量的是 arc+根
 ---
