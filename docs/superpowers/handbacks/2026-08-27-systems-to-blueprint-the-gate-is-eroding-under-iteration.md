@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★★★★★我答應要呈的那件:統計等價 gate【在多次迭代下正在失效】——TTL 修好後五項【全部更偏】(送達 −76.4% 翻成 +55.4%),而母體隊數 125 vs 112;★★而母體差【不是混淆是效應】⇒不能控制掉;★★★三條路我列了但不替你選,我傾向 (a) 並講了它的代價
 ---
