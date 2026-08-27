@@ -432,6 +432,22 @@ func _run() -> void:
 		out.append("## ⑧b 純cadence rung變化｜樣本=%d|中位=%d|平均=%.1f|最大=%d|無更早事件喚醒=%d"
 			% [gaps.size(), int(gaps[gaps.size() / 2]), float(gs) / float(gaps.size()), int(gaps[-1]), no_prior])
 
+	# ── ⑨【旗子命運】精確量（需求①「不得消失」的字面量）──
+	#   ★它跟 ⑦ 的 buffer_expired 不同：⑦ 問【窗內有沒有被走訪】，
+	#     而那個問法【分不出走訪在 emit 之前還是之後】⇒ 只能當上界。
+	#   ★★這一欄問的是【旗子死掉時，有沒有人讀過它】——與順序無關，讀過就是讀過。
+	#   ★★★lost 歸零 = 需求①達成；非 0 就是還有喚醒在消失。
+	var f_lost: int = int(Probe.counts.get("t0.flag_lost", 0))
+	var f_cons: int = int(Probe.counts.get("t0.flag_consumed", 0))
+	var f_tot: int = f_lost + f_cons
+	print("\n⑨ 旗子命運（★需求①的字面量，與 tick 內順序無關）")
+	print("   被讀過 = %d｜★沒人讀過就死掉 = %d｜合計 = %d｜消失率 = %s"
+		% [f_cons, f_lost, f_tot, ("%.2f%%" % (100.0 * float(f_lost) / float(f_tot))) if f_tot > 0 else "n/a"])
+	out.append("#")
+	out.append("## ⑨ 旗子命運｜被讀過=%d|沒人讀過=%d|合計=%d|消失率=%s"
+		% [f_cons, f_lost, f_tot, ("%.2f%%" % (100.0 * float(f_lost) / float(f_tot))) if f_tot > 0 else "n/a"])
+	out.append("# ★這一欄才是需求①的字面量；⑦ 的 buffer_expired 因為分不出 tick 內順序，只是上界")
+
 	print("\n[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
 		% [guard, ("%d(%s)" % [stopped_at, stop_reason]) if stopped_at != -1 else "none", eff, ticks])
 	out.append("# [BedSelfCheck] observer_guard=%s first_nonadvance=%s effective_window=%d/%d"
