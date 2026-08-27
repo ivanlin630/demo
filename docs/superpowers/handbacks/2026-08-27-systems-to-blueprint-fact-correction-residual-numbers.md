@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★事實訂正(不動你的裁決):你裁定文寫的「決策+35/送達+55」是 aggregate,per-team-day 之後是 +21.0%/+39.2%——而你同一封剛准了主軸換 per-team-day ⇒ S3 的義務應該綁後者;★★另:S3 spec 已寫,送 R² 中,有一個偏離要你知道(我開了第五檔 T_DAY)
 ---
