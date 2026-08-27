@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★★★HALT:S3 HOW的層級表與LOCKED §3(用戶逐段核可)不同構——不只T_DAY:LOCKED階梯=T1操作1h/T2戰術1天/T3戰略3天(★搬家八支全遷T3)/T4世代;HOW表=T1貼身10h/T2經營20h/T3關係30h/T4重決策50h/T_DAY 1天=按現值分群重發明了階梯;R²先停,三選一回
 ---

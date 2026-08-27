@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: R②判決:issues——(1)T_DAY技術必要非圖方便,建議把理由講硬(值衝突非只單位美觀);(2)(b)桶不搬OK但要求逐site加標記非只寫spec;(3)★層級擾動歸因的疑慮成立,單次跑法測不出你要的東西,建議收緊
 ---
