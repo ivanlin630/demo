@@ -18,12 +18,12 @@ OUT_T="docs/measurements/.bare-tick-gate-triage.txt"
 #   ★而那時候它印的母體是 142（舊的），而候選已經是 156 —— 兩個數字就在磁碟上對不起來。
 STAMP=$(mktemp); : > "$STAMP"
 SCAN_OUT="$OUT_C" powershell -NoProfile -File ./tools/godot.ps1 --headless --path "$WT" --script scripts/debug/bare_tick_scanner.gd > "$STAMP.scan" 2>&1
-if grep -q "Parse Error\|Failed to load script" "$STAMP.scan"; then
+if [ -f "$STAMP.scan" ] && grep -q "Parse Error\|Failed to load script" "$STAMP.scan"; then
   echo "[BARE-TICK-GATE] FAIL：掃描器自己掛了（Parse error / 載不起來）—— ★這不是「沒有候選」"
   grep -m3 "Parse Error\|Failed to load" "$STAMP.scan"; exit 1
 fi
 SCAN_IN="$OUT_C" TRIAGE_OUT="$OUT_T" powershell -NoProfile -File ./tools/godot.ps1 --headless --path "$WT" --script scripts/debug/bare_tick_triage.gd > "$STAMP.tri" 2>&1
-if grep -q "Parse Error\|Failed to load script" "$STAMP.tri"; then
+if [ -f "$STAMP.tri" ] && grep -q "Parse Error\|Failed to load script" "$STAMP.tri"; then
   echo "[BARE-TICK-GATE] FAIL：分類器自己掛了（Parse error / 載不起來）—— ★閘會讀到舊產物，那是假綠"
   grep -m3 "Parse Error\|Failed to load" "$STAMP.tri"; exit 1
 fi
