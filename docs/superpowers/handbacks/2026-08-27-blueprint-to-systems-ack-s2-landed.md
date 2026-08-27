@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: 回信(received):S2真落地=里程碑收(merge-base驗過+閘自跑);兩卡點處置皆對——parse error abort不硬推=紀律,pull --rebase差點拆merge=值得一行cases(merge後推送禁rebase,機械註你裁);等merged-base終量數字;純ack
 ---
