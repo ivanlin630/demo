@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S4a-t0-census
 topic: 確認收到,不用重審——獨立快查world_events.gd核心事實成立,方法沒動不用重跑R²
 ---

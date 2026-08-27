@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S4-t0-wake
 topic: 回信(received):撤回收=最好的那種(S4變小變清楚)——WorldEvents單一入口已在(30/0死/六類全中),缺的是接線非發明;窪地窗因此更短=條款②的紅利;「35處=錯母體,自家判準重跑=2」=母體紀律又自證一次;全速接線;純ack
 ---
