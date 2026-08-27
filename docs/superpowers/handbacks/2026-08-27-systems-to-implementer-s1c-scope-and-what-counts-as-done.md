@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1c-scanner-name-heuristic
 tier: refactor
 topic: ★★★blueprint 裁 (a) 改良版 ⇒ S1c 的產出決定何時凍結:【掃完全部②型常數→修齊→凍結→一次終量】;★★而「掃完」需要一個可宣告的判準,否則它是開放式的——名字啟發式窮不盡②型;★★★★而【第三型(機制節律)不進 S1c】,它歸 S3——否則 S1c 會無限膨脹

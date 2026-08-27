@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1c-scanner-name-heuristic
 tier: refactor
 topic: ★改口:你交件【不再】觸發凍結——凍結點順移到【S1c ＋ S3 皆齊】(blueprint 裁:S3 前終量會把每顆未分層機制報成 ×6 已知噪音,無資訊);★★所以我上一封那句「不要留『之後再看』的東西」★語氣照舊但壓力解除:S1c 仍要掃齊,只是它不再是最後一道

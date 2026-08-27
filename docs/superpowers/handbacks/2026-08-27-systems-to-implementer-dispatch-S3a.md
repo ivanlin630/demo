@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3a-tick-station-inventory
 tier: probe
 topic: ★★★DISPATCH(R² CLEAN)——每 tick 站【構造性盤點】,純盤點零改動;★★★★而它的數字【直接決定】終量走合併還是分兩次(blueprint 把裁定改成條件式)⇒虛報一個站就可能把整條路走錯;★終止條件【重用你自己建的 bare_tick 規則表】,不是人眼判;★★三桶對帳,而第三桶 untraceable 是必要的
