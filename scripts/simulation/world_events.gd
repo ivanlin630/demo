@@ -89,8 +89,10 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 #   ★★is_pending 由它導出，不另寫一份判斷（否則兩份會漂）。
 static func pending_source(state: WorldState, team_id: int) -> String:
 	if state.pending_rethink.has(team_id):
+		if Probe.enabled: state.pending_seen[team_id] = true
 		return "cur"
 	if state.pending_prev.has(team_id):
+		if Probe.enabled: state.pending_seen[team_id] = true
 		return "prev"
 	return ""
 
@@ -109,14 +111,18 @@ static func pending_source_faction(state: WorldState, faction) -> String:
 	#   否則「某隊 prev 有、另一隊 cur 有」會依成員順序回不同答案（★同一世界兩種結果）。
 	var lead: int = int(faction.leader_team_id)
 	if state.pending_rethink.has(lead):
+		if Probe.enabled: state.pending_seen[lead] = true
 		return "cur"
 	for mid in faction.member_team_ids:
 		if state.pending_rethink.has(int(mid)):
+			if Probe.enabled: state.pending_seen[int(mid)] = true
 			return "cur"
 	if state.pending_prev.has(lead):
+		if Probe.enabled: state.pending_seen[lead] = true
 		return "prev"
 	for mid2 in faction.member_team_ids:
 		if state.pending_prev.has(int(mid2)):
+			if Probe.enabled: state.pending_seen[int(mid2)] = true
 			return "prev"
 	return ""
 
@@ -135,5 +141,15 @@ static func consume_and_clear(state: WorldState) -> void:
 		Probe.bump("t0.consumed", state.pending_rethink.size())
 	if state.pending_rethink.is_empty() and state.pending_prev.is_empty():
 		return
+	# ★★★換頁【之前】結算上一批的命運：pending_prev 裡即將被丟掉的旗子，
+	#   有沒有人讀過它？★沒人讀過 ⇒ 這一發喚醒【真的消失了】。
+	#   ★★這是需求①的字面量測，而且與 tick 內順序無關（讀過就是讀過）。
+	if Probe.enabled:
+		for lid in state.pending_prev:
+			if state.pending_seen.has(lid):
+				Probe.bump("t0.flag_consumed")
+			else:
+				Probe.bump("t0.flag_lost")
+		state.pending_seen = {}
 	state.pending_prev = state.pending_rethink
 	state.pending_rethink = {}
