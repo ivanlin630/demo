@@ -91,10 +91,10 @@ static func pending_source(state: WorldState, team_id: int) -> String:
 	# ★不管結果如何都記：這一隊【被查看過】。順序無關，「查過」就是查過。
 	if Probe.enabled: state.pending_visit[team_id] = state.world.current_tick
 	if state.pending_rethink.has(team_id):
-		if Probe.enabled: state.pending_seen[team_id] = true
+		if Probe.enabled: state.pending_seen[team_id] = state.world.current_tick
 		return "cur"
 	if state.pending_prev.has(team_id):
-		if Probe.enabled: state.pending_seen[team_id] = true
+		if Probe.enabled: state.pending_seen[team_id] = state.world.current_tick
 		return "prev"
 	return ""
 
@@ -120,18 +120,18 @@ static func pending_source_faction(state: WorldState, faction) -> String:
 		for mv in faction.member_team_ids:
 			state.pending_visit[int(mv)] = state.world.current_tick
 	if state.pending_rethink.has(lead):
-		if Probe.enabled: state.pending_seen[lead] = true
+		if Probe.enabled: state.pending_seen[lead] = state.world.current_tick
 		return "cur"
 	for mid in faction.member_team_ids:
 		if state.pending_rethink.has(int(mid)):
-			if Probe.enabled: state.pending_seen[int(mid)] = true
+			if Probe.enabled: state.pending_seen[int(mid)] = state.world.current_tick
 			return "cur"
 	if state.pending_prev.has(lead):
-		if Probe.enabled: state.pending_seen[lead] = true
+		if Probe.enabled: state.pending_seen[lead] = state.world.current_tick
 		return "prev"
 	for mid2 in faction.member_team_ids:
 		if state.pending_prev.has(int(mid2)):
-			if Probe.enabled: state.pending_seen[int(mid2)] = true
+			if Probe.enabled: state.pending_seen[int(mid2)] = state.world.current_tick
 			return "prev"
 	return ""
 
@@ -159,14 +159,18 @@ static func consume_and_clear(state: WorldState) -> void:
 		#   ①b lost_not_visited 旗子死時，消費者【窗內根本沒查它】⇒ ★★雙緩衝修不掉
 		#      （消費者 600 tick 才走訪一次，而旗子只活 2 tick）⇒ ★★★照實報，不算失敗
 		#   ★窗 = {C-1, C}：此刻 pending_prev 裝的是上一 tick 的旗子，本 tick 結尾丟掉。
+		# ★★★off-by-one 血證（第一版）：pending_seen 存 bool 並在【每次換頁清空】，
+		#   而旗子活【兩個 tick】⇒ ★在第一個 tick 被讀到的，結算前就被我清掉了
+		#   ⇒ ★★量出「被讀過 = 0 ／ 消失率 100%」——而同一份輸出的 dw4 欄同時顯示
+		#      GOAL 事件醒了 3289 次。★★★兩欄打架才抓到，不是我自己看出來的。
+		#   ⇒ 改存【最後一次被讀到的 tick】並比對窗，不再清空（dict 以隊數為界）。
 		var _win_lo: int = state.world.current_tick - 1
 		for lid in state.pending_prev:
-			if state.pending_seen.has(lid):
+			if int(state.pending_seen.get(lid, -999999)) >= _win_lo:
 				Probe.bump("t0.flag_consumed")
 			elif int(state.pending_visit.get(lid, -999999)) >= _win_lo:
 				Probe.bump("t0.lost_ordering")
 			else:
 				Probe.bump("t0.lost_not_visited")
-		state.pending_seen = {}
 	state.pending_prev = state.pending_rethink
 	state.pending_rethink = {}
