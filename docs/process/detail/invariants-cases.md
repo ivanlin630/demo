@@ -754,3 +754,35 @@ GOAL 595:63｜LADDER 303:19｜勢力五支 72:4｜INDEP_INFRA 103:16｜INTENT 72
 ★**已具名例外**：**`LADDER` 的 cadence 重排寫在 callee ⇒ 事件喚醒那次【也會】把週期往後排**（其餘八支不會）。
 ★★**排除的假風險**：**廣播事件同時重置 ⇒ 會恢復 lockstep？不會** —— `CadenceStagger` 的 offset 是 `_mix(team_id, cycle_index)`，**同刻重置仍各自錯開** ⇒ **爭點只剩【評估次數】。**
 ★**未定**：**「事件醒過之後，還該不該照原 cadence 再醒一次」** —— 見 `known_issues`。
+
+## ★★★感知鐵律的**鏡像**：決策也不得【讀不到自己的狀態】（2026-08-25）
+
+**既有鐵律**：★**決策只能吃 belief，不得 god-view 讀世界真值。**
+★★**本條是它的另一端**：★★★**決策也不得【連自己的狀態都讀不到】。**
+
+| ★**god-view**（既有） | ★**blind-view**（本條） |
+|---|---|
+| **讀了不該讀的**（別人的真值） | ★★**讀不到該讀的**（自己的糧倉） |
+| ⇒ **神目決策** | ⇒ ★**手不聽腦的另一種**：**腦沒有眼睛** |
+
+**血證**：`TradeValuation.reserve(team, res, leader_values, state = null)` ——
+**包裝層 `InteractionSystem.local_value(team, res)`（`:660`）／`PlayerTradeSystem._sellable_qty(team, res, leader_values)`（`:13`）簽名裡【沒有 `state`】**
+⇒ ★**留底估值讀不到自家糧倉** ⇒ **定居隊（糧在糧倉、私產 0）會誤判自己沒糧。**
+
+★★**而 `state` 明明在呼叫端手上**：`player_trade_system.gd:72` **同一行**裡
+`TradeValuation.leader_vals(state, tgt)` **傳了 `state`**、`_sellable_qty(tgt, res, …)` **沒傳**。
+⇒ ★★★**不是「拿不到」，是【簽名沒開那個口】—— 純接線可達，不需要新增資料流。**
+
+★**同源**：`resource_system.gd:443-445` 早已寫明「**WS-1 把定居隊糧搬進糧倉只改了消耗，漏改決策讀者 → 定居隊/商隊 AI 誤判餓**」。
+⇒ ★★**`reserve` 正是那批「漏改的決策讀者」之一 —— 這不是新設計，是既有裁決還沒走完。**
+
+### ★★第二例（2026-08-27，S4 期間抓到並修）：**製造投入端只讀私產**
+```
+manufacturing_system.gd:179-180  產出【檢查】= team.resources + tile.public_storage   ←讀兩池
+_add_output                       產出【寫入】= TileBank.deposit(tile,…)              ←寫公庫
+:212                              ★投入【檢查】= team.resources 只有這個
+:197                              ★★投入【扣款】= ResourceBank.add(team, res, -(cost))
+```
+★**修法四件**：**同池集／以實扣為準＋loud-fail／走單寫者 `TileBank.withdraw`／所有權複用 `_team_works_tile`。**
+★★**而【半修比原病更糟】**：**檢查讀兩池、扣款只扣私產 ⇒ `add` 負數不保證 clamp ⇒ 私產扣成負數＝憑空造材料。**
+★★★**誠實限**：**修完【不等於】那個殘差被解釋** —— **公庫路徑 `tried = 0` ⇒ 這條 blind-view 在該床從未綁**（因果已撤回）。
