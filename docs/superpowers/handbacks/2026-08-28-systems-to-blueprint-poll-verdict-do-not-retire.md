@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: poll-retire-precondition
 topic: ★★★★★輪詢【不退場】,而理由是一格數字:GOAL 有 147 筆「之後再也沒有事件喚醒」——它直接反駁「砍掉只是慢一點」;★★而你的兩分支判準需要第三支(貢獻率≈0 但延遲量大 ⇒ 兜底),那正是我加的第四欄才看得見的;★★★你的完備化路徑在這條路上【走完了】:唯一成因是 rung 升降,而它已經接了 T0
 ---
