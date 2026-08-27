@@ -25,6 +25,7 @@ const EXCLUDE_DIRS: Array = ["res://scripts/debug"]   # ★床與測試；★排
 var _sym_re: RegEx
 var _num_re: RegEx
 var _str_re: RegEx
+var _name_re: RegEx
 
 func _initialize() -> void:
 	_run(); quit()
@@ -34,6 +35,16 @@ func _run() -> void:
 	_sym_re.compile("(current_tick|[A-Za-z_]+_next_tick|[A-Za-z_]+_eval_tick|TICKS_PER_[A-Z_]+|elapsed_ticks|\btick\b)")
 	_num_re = RegEx.new(); _num_re.compile("(?<![A-Za-z0-9_.])([0-9]+)(?![0-9.])")
 	_str_re = RegEx.new(); _str_re.compile("\"[^\"]*\"|'[^']*'")
+
+	# ★★★第二軸（盲點修補 2026-08-27，systems 揭）：
+	#   ★第一軸是【同行有 tick 符號】—— 它找的是【引用者】。
+	#   ★★而 `const MSG_TTL_SHORT: int = 1680` 【自己就是那個值】，不引用任何 tick 符號
+	#     ⇒ 【找引用者】永遠抓不到【定義者】，而那一族真的出事了（30 天靜默變 5 天）。
+	#   ★★★所以第二軸換一個問法：【名字像時長 ＋ 值是裸整數】。
+	#   ★它會誤報（例：MAX_MESSAGES 之類不在名單上，但 WINDOW/CADENCE 可能是次數）
+	#     ★★而誤報的代價是【多一筆要人判】，漏報的代價是【靜默變 1/6】—— 不對稱，往吵的那邊倒。
+	_name_re = RegEx.new()
+	_name_re.compile("const\\s+([A-Z_]*(TTL|TIMEOUT|COOLDOWN|DURATION|DELAY|LIFETIME|EXPIRE|GRACE|WINDOW|CADENCE|INTERVAL|TICKS)[A-Z_]*)\\s*:\\s*int\\s*=\\s*[0-9]+\\s*$")
 
 	# ── ★陽性對照：三種位置各一，走【同一支 `_scan_line`】，只是輸入被構造 ──
 	var ctrl: Array = [
@@ -100,9 +111,15 @@ func _scan_line(raw: String) -> Array:
 		line = line.substr(0, h)          # 剝註解
 	line = _str_re.sub(line, "\"\"", true)  # 剝字串字面量
 	var sm := _sym_re.search(line)
-	if sm == null:
-		return out
-	var sym: String = sm.get_string(1)
+	var sym: String = ""
+	if sm != null:
+		sym = sm.get_string(1)
+	else:
+		# ★第二軸：沒有引用 tick 符號，但名字像時長且值是裸整數
+		var nmm := _name_re.search(line)
+		if nmm == null:
+			return out
+		sym = "name:" + nmm.get_string(1)
 	for nm in _num_re.search_all(line):
 		out.append({"literal": nm.get_string(1), "symbol": sym})
 	return out
