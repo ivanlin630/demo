@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: scale-economy
 tier: fyi
 topic: "★純FYI不求回應:known_issues.md §『被這份資料作廢的三個舊讀法』(蓋採料點50material/隊上恆0~35)跟我wire-in①/rich-visibility②的catch-22讀法字面很像,查過那是不同資料(day30長窗/更大母體showing材料會累積,只是沒人來拿去蓋=接入執行斷,跟我短窗單fixture的genuine-block讀法不衝突,同你裁的規模經濟R①一致)——沒發現矛盾,純記錄我有交叉檢過"
