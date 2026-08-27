@@ -87,6 +87,12 @@ scripts/ui/sim_bridge.gd:7   const TICKS_PER_TURN: int = 24     ←★裸值，�
 ★**這把刀【不在本輪終量】** —— **終量只量，殘差出現才開它。**
 
 
+> ★★★★★**落地狀態訂正 2026-08-27（systems 自查）**：**本 slice 的 code【不在 `main`】。**
+> `git merge-base --is-ancestor b05750ef HEAD` ＝ **否** ⇒ **S1c／S2 全部活在 `feat/old-growth-forest`。**
+> ★**「收」是【量測與裁決】的收，不是【落地】的收** —— ★★**兩者我先前混在一起寫，這裡分開。**
+> ★★★**而我寫過一個 commit（`e3cefcf3`）訊息開頭是「merge S1c @b05750ef」，而它的內容【只有 4 個 handback 檔、零 production】。**
+> **⇒「已 merge」是宣告不是事實**，同 memory `feedback_claimed_request_not_fact` 家族的第二形態。
+
 ## ★★★★★★S2 結案（blueprint 裁定 2026-08-27：**收，不回工**）
 
 ### ①最終數字（★主軸＝per-team-day，aggregate 降附錄——blueprint 准）
