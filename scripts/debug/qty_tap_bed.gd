@@ -17,6 +17,20 @@ func _initialize() -> void:
 	seed(1337)
 	var state := WorldState.new()
 	GameSetup.setup(state, GameSetup.load_config("res://config/%s.json" % cfg))
+	# ★拆玩家的特權（照 exam_12mo_bed._strip_player 既有形狀，不自己發明）：
+	#   warring config 帶 player 區塊 ⇒ 那支【沒人操作的】隊 leader 一死且無 named 繼承人
+	#   ⇒ game_over ⇒ 世界凍結，而循環照跑 ⇒ ★量到的是【凍結後的死 tick】。
+	#   ★★不摘 config 的 player 區塊：那會少一支隊＝改世界組成。清 player_id 只是拿掉特權。
+	var _stripped: bool = false
+	if state.player_id != -1:
+		_stripped = true
+		state.player_id = -1
+		state.player_forced_event = {}
+		state.player_forced_event_id = ""
+		state.player_pending_targets = []
+		state.player_hostile_teams = []
+		state.player_pre_encounter = {}
+		state.player_state = {}
 	Probe.reset()
 	Probe.enabled = not probe_off
 	var ticks: int = days * WorldState.TICKS_PER_DAY
@@ -28,8 +42,12 @@ func _initialize() -> void:
 	var team_tick_samples: int = 0
 	for tid0 in state.teams:
 		prev_pos[tid0] = (state.teams[tid0] as TeamData).tile_pos
+	var _first_nonadv: int = -1
+	var _nonadv_reason: String = ""
 	for _t in range(ticks):
-		runner.advance_tick(state, Vector2i(-1, -1))
+		var _r: String = runner.advance_tick(state, Vector2i(-1, -1))
+		if _first_nonadv == -1 and (_r == "game_over" or _r == "awaiting_heir"):
+			_first_nonadv = state.world.current_tick; _nonadv_reason = _r
 		for tid in state.teams:
 			var tm: TeamData = state.teams[tid]
 			team_tick_samples += 1
@@ -52,7 +70,14 @@ func _initialize() -> void:
 			print("[OK] PROBE_OFF：qty.* key 【完全不存在】(0 條) ⇒ tap 真的受 Probe.enabled 閘住")
 		else:
 			print("[FAIL] PROBE_OFF 卻有 %d 條 qty.* key：%s" % [leaked.size(), str(leaked.slice(0, 8))])
-		print("=== qty_tap_bed DONE ===")
+		# ★★床自檢欄位（systems 定為慣例 2026-08-27）：
+	#   守衛要輸出【已處置的結果】不是【要被解讀的狀態】——
+	#   ★一行 print 淹在 log 裡等於沒有，而一個欄位會被交件帶走。
+	print("[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
+		% ["stripped" if _stripped else "none",
+		   ("%d(%s)" % [_first_nonadv, _nonadv_reason]) if _first_nonadv != -1 else "none",
+		   (_first_nonadv if _first_nonadv != -1 else ticks), ticks])
+	print("=== qty_tap_bed DONE ===")
 		quit(); return
 
 	var dayf: float = float(days)

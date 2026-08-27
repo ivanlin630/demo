@@ -8,11 +8,29 @@ func _initialize() -> void:
 	seed(1337)
 	var state := WorldState.new()
 	GameSetup.setup(state, GameSetup.load_config("res://config/%s.json" % cfg))
+	# ★拆玩家的特權（照 exam_12mo_bed._strip_player 既有形狀，不自己發明）：
+	#   warring config 帶 player 區塊 ⇒ 那支【沒人操作的】隊 leader 一死且無 named 繼承人
+	#   ⇒ game_over ⇒ 世界凍結，而循環照跑 ⇒ ★量到的是【凍結後的死 tick】。
+	#   ★★不摘 config 的 player 區塊：那會少一支隊＝改世界組成。清 player_id 只是拿掉特權。
+	var _stripped: bool = false
+	if state.player_id != -1:
+		_stripped = true
+		state.player_id = -1
+		state.player_forced_event = {}
+		state.player_forced_event_id = ""
+		state.player_pending_targets = []
+		state.player_hostile_teams = []
+		state.player_pre_encounter = {}
+		state.player_state = {}
 	Probe.reset(); Probe.enabled = true
 	var ticks: int = days * WorldState.TICKS_PER_DAY
 	var runner := SimRunner.new()
+	var _first_nonadv: int = -1
+	var _nonadv_reason: String = ""
 	for _t in range(ticks):
-		runner.advance_tick(state, Vector2i(-1, -1))
+		var _r: String = runner.advance_tick(state, Vector2i(-1, -1))
+		if _first_nonadv == -1 and (_r == "game_over" or _r == "awaiting_heir"):
+			_first_nonadv = state.world.current_tick; _nonadv_reason = _r
 	var day_t: float = float(WorldState.TICKS_PER_DAY)
 	print("=== s3_tier_interval === cfg=%s days=%d ticks=%d T3=%d tick (%.2f 天)"
 		% [cfg, days, ticks, DecisionTier.T3_STRATEGIC, float(DecisionTier.T3_STRATEGIC) / day_t])
@@ -89,5 +107,12 @@ func _initialize() -> void:
 		print("  %-22s %d" % [String(pn), c])
 	print("  %-22s %d（未走到任何標記出口＝跑完全程）" % ["其餘", entry - sum])
 	print("  ★entry = %d ｜四出口合計 %d ⇒ %s" % [entry, sum, "★對帳一致" if sum <= entry else "★★對帳異常"])
+	# ★★床自檢欄位（systems 定為慣例 2026-08-27）：
+	#   守衛要輸出【已處置的結果】不是【要被解讀的狀態】——
+	#   ★一行 print 淹在 log 裡等於沒有，而一個欄位會被交件帶走。
+	print("[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
+		% ["stripped" if _stripped else "none",
+		   ("%d(%s)" % [_first_nonadv, _nonadv_reason]) if _first_nonadv != -1 else "none",
+		   (_first_nonadv if _first_nonadv != -1 else ticks), ticks])
 	print("=== s3_tier_interval DONE ===")
 	quit()
