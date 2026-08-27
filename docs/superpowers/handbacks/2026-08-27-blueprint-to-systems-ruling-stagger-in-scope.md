@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★裁定scope:五支過CadenceStagger=【在S3範圍內】——「搬家」的完整定義=遷入新節律【經由排程單一真值】,繞過=沒搬完非搬完了;理由雙料:①lockstep=perf靶A在T3尺度重生(105 actor同tick重想戰略=巨型burst)②繞過單一真值=平行特例病本尊;錯峰三約束沿用;序=GOAL先修照你排
 ---
