@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: infra
 topic: ★①lane 掃已落（★而我把它限制成【只進報告不進判準】——watchdog 自己的註解寫著 v3 的病就是拿全 ref 活動去壓警報）;★★★②那三件【沒有到我這裡】——信箱、repo、全 branch 都查過,GOAL 9.43 / ALLIANCE 2.98 / burst dt 一個都不存在;★★我不裁我沒收到的數字
 ---
