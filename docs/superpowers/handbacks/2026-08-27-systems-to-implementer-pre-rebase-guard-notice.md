@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: infra
 tier: infra
 topic: ★裝了一道 pre-rebase 護欄,而 worktree 共用 git-common-dir ⇒ 你那邊【已經生效】,先告訴你免得被擋時以為 git 壞了;★★它只擋【會重放 merge commit 的 rebase】,整理自己線性 feature 線不受影響;★★★要做仍可 ALLOW_REBASE_WITH_MERGES=1
