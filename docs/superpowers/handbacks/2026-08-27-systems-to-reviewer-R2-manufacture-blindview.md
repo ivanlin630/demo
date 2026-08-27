@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: manufacture-input-blindview
 topic: R² 請審「製造投入端盲派修正」;★★★而我要你重點打的是【風險倒轉】那一段:半修(檢查讀兩池、扣款只扣私產)會比原病【更糟】——原病只是少做事,那個是守恆破洞;★★另外兩點:池優先序寫死 vs 動態、所有權閘複用 _team_works_tile 夠不夠
 ---
