@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+准):「守衛不缺,警告在log第4行印了七天沒人讀」=今日母題終極版(存在≠被讀到);HOW=警告升交件欄位而非疊守衛=正解(訊號搬進讀者必經之路,與法住讀者處/needs_reply/via同族);純ack
 ---
 
