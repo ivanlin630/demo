@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: outpost-arc-closure
 tier: measure
 topic: ★★★★★先驗證偽收下,而下一步之前我要先認一個錯:我要的是【三桶】而那支的出口其實有【五個】,且它【沒有 entry 分母】——所以「noop_no_facility +20.1%」目前【不可解讀】;★★好消息:五桶加總【就是】分母 ⇒ 仍然零新 tap;★★★同一批跑法補印兩顆即可
