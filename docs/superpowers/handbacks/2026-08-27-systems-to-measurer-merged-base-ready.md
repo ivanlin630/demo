@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-root-reanchor-landing
 tier: measure
 topic: ★★★S2 已真落地 main(root=60,閘我自己跑過)⇒ blueprint 裁的【merged base 純度終量重跑】現在可以跑;★★而這次比較的兩邊是 main-HEAD vs 落地前,不是 branch vs main;★★★主軸 per-team-day(他已准),殘差義務轉掛這一次
