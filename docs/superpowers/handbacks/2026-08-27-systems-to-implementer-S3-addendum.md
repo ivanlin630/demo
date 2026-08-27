@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: behavior
 topic: ★S3 派工單【補遺】,趕在你接 tap 之前:①意圖對照組有 confound——早退有【三個】不是一個 ⇒ 改成【出口分類對帳】不是加一顆 tap;②加一條結構檢查(git diff 逐字元不變,confound-free);★★★③blueprint 加了「可逆閥」條款 ⇒ 「T3 只有一個地方寫」從【品味】升級成【硬要求】

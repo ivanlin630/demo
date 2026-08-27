@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN)——七支節律遷入 T3(3 天),意圖留 1 天當【內建對照組】;★★這是 intended-change 不是同值換來源:週期全部變長、fp 必變、事件率必降;★★★主判準是【觸發間隔】不是【事件率】(改節律讓世界分岔,而分岔後聚合不可比是我們 S2 才立的規矩)
