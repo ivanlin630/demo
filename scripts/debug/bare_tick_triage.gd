@@ -37,6 +37,13 @@ func _run() -> void:
 		_mk("current_tick\\s*-\\s*([0-9]{2,})", "a_change", "★真裸 tick：`current_tick - <字面量>` 沒有經過任何具名時間常數 ⇒ 根旋鈕一改它就静默偏移", true),
 		# ── (b) 延後 ──
 		_mk("const TICKS_PER_TURN:", "b_defer", "24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2"),
+		# ── 盲點修補後新出現的 "ticks" 族 ──
+		_mk("[=!]=\s*\"ticks\"", "d_not_time", "key_filter：`if k == \"ticks\"` 是【欄位名比對】，同行的數字不是時間量"),
+		_mk("\"ticks\"\s*:\s*[0-9]+", "c_whitelist", "★person-ticks：建造成本是【工量】不是【時長】—— _tick_construction 每呼叫扣 maxi(pop,1)，而每日呼叫次數已由 TICKS_PER_DAY/NEAR_CADENCE 導出 ⇒ 不隨根旋鈕縮放"),
+		_mk("cost\.get\(\"ticks\"", "c_whitelist", "★同上族：預設的建造工量（person-ticks）"),
+		# ── (c) 白名單：S2 重錨引入的兩顆新形狀 ──
+		_mk("const TICKS_PER_HOUR:", "c_whitelist", "★新的根常數本身（S2 把自由參數從 TICKS_PER_DAY 換成它）：其他時間量由它導出，改成 hours() 會循環定義"),
+		_mk("TICKS_PER_HOUR / 6", "c_whitelist", "★單位結構：遭遇動作＝10 分鐘＝1/6 小時。★★這個 6 不隨小時縮放——根怎麼改，一小時永遠是六個十分鐘"),
 		# ── (c) 白名單：根常數本身 ──
 		_mk("const TICKS_PER_DAY:", "c_whitelist", "根常數本身：hours()/days() 由它導出，改成 hours() 會循環定義"),
 		_mk("const TICKS_PER_SECOND:", "c_whitelist", "★播放速率：每【真實秒】渲染幾個 world tick —— 量的是現實時間，不隨小時縮放"),
