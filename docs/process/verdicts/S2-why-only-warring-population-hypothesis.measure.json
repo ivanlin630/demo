@@ -1,0 +1,37 @@
+{
+  "slice": "S2-why-only-warring",
+  "ticket": "systems假說(c):warring隊數在窗內從49長到119(before)/59長到112(after)，若S2改變了隊數成長曲線，五項per-day率的母體都在動⇒一次解釋五項超標",
+  "裁決": "★假說死——before/after的隊數逐日曲線幾乎重疊，population-day積分只差-2.5%(遠在<5%內)；per-team-day重算後五項相對差幾乎不變，母體變化解釋不了五項超標",
+
+  "★①逐日隊數曲線(獨立驗證,兩輪皆重跑非沿用舊資料)": {
+    "before": {
+      "worktree_commit": "0ab34123（S2合併前）",
+      "day1到day30_teams": [58,64,64,66,71,72,73,73,74,76,77,78,78,81,88,93,96,98,99,102,105,104,107,106,111,109,111,112,111,112],
+      "population_day積分(Σteams每日)": 2669
+    },
+    "after": {
+      "worktree_commit": "960648c9（S2+g1a合併後,獨立乾淨worktree測，非沿用implementer自報）",
+      "day1到day30_teams": [59,64,68,66,69,72,73,74,74,75,74,81,89,86,90,90,90,93,94,95,96,95,96,99,100,103,108,107,111,112],
+      "population_day積分(Σteams每日)": 2603
+    },
+    "★曲線比較": "population-day積分差 = (2603-2669)/2669 = -2.5%——遠在<5%內，兩條曲線基本上是同一條，S2沒有改變隊數成長軌跡"
+  },
+
+  "★②per-team-day重算(用原始總數÷population-day積分，不需重跑)": {
+    "採集food_taken": {"before_perTeamDay": 0.6456, "after_perTeamDay": 0.3427, "相對差": "-46.9%（原始per-day是-48.2%，幾乎沒變）"},
+    "採集material_taken": {"before_perTeamDay": 0.02086, "after_perTeamDay": 0.001045, "相對差": "-95.0%（原始-95.1%，沒變）"},
+    "移動格tap": {"before_perTeamDay": 1.1035, "after_perTeamDay": 0.9704, "相對差": "-12.1%（原始-14.2%，沒變）"},
+    "決策次數": {"before_perTeamDay": 0.7298, "after_perTeamDay": 0.9143, "相對差": "+25.3%（原始+22.2%，沒變）"},
+    "訊息送達": {"before_perTeamDay": 3.770, "after_perTeamDay": 0.9135, "相對差": "-75.8%（原始-76.4%，沒變）"}
+  },
+
+  "★★★③結論(照系統自己定的證偽判準)": "『若曲線相同而五項仍超標⇒假說死，回頭一項一項追』——曲線相同(差2.5%)，五項per-team-day重算後相對差跟原始per-day幾乎一樣（沒有收斂進5%），符合證偽條件。母體本身不是變數，五項超標需要個別找原因，不是同一個母體效應。",
+
+  "★交叉驗證(順便做的)": "after跑的原始數字跟implementer自報的S2-landed-full-report一致(food taken 29.73≈891.93/30、material 0.09、移動84.20、決策79.33、訊息送達79.27、starve_anon 0.23/日n=7)——兩邊獨立測到同一組數字，量測本身沒有分歧",
+
+  "landed_paths": {
+    "after_warring_raw": "docs/measurements/after-S2-qty-warring_states-30d.txt",
+    "before_warring_raw(沿用既有)": "docs/measurements/before-S2-qty-warring_states-30d.txt"
+  },
+  "★機械檢查": "獨立乾淨worktree A:/GDS/demo/.worktrees/measure-s2-after，detached HEAD=960648c9(implementer原worktree old-growth當時有未commit的faction_ai_system.gd WIP，怕污染另開一份跑，跑前跑後status皆空)"
+}

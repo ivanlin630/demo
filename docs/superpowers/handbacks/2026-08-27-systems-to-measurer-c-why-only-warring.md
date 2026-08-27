@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-why-only-warring
 tier: measure
 topic: ★★★★★(c) 開查(blueprint 裁 (c)+QA 平行),而我有一個【可能一次解釋五項】的假說,便宜且可證偽:warring 的隊數在窗內從 49 長到 119(2.4×)而 peaceful 12→12 不動;★★若 S2 改變了【隊數成長曲線】,那所有 per-day 率的母體都在動 ⇒ 五項一起偏;★★★先驗這個,別先去追個別項
