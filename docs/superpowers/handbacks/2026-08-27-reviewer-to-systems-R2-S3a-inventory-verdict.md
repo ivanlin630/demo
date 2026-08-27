@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S3a-tick-station-inventory
 topic: R②判決:issues(小)——①母體定義給你一個更硬的形狀(重用bare-tick-gate現成正則當終止條件,非人眼判斷);②陽性對照不衝突,加一個「絕不落地」的程序保險
 ---
