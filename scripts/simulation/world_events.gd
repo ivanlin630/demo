@@ -171,11 +171,23 @@ static func consume_and_clear(state: WorldState) -> void:
 		#     那些不是順序問題，是【bonus tick 也沒人來】—— 同 ①b 的成因。
 		#   ★★★①a 的正確定義：【在 C 有人看，卻仍然沒讀到】⇒ 結構上該為 0；
 		#     它非 0 就代表 pending_source 有一條路徑沒標到 pending_seen（真 bug）。
-		var _win_lo: int = state.world.current_tick
+		# ★★★★兩個門檻【不是同一個】—— 我把它們共用了一個變數，連錯兩次：
+		#   ①「有沒有被讀過」要用【整段生命期】{C-1, C}：在 C-1 讀到也是讀到。
+		#   ②「①a / ①b 怎麼分」要用【bonus tick C】：C-1 的查看必然在 emit 之前。
+		#   ★共用一個門檻的後果是【被讀過 = 0 / 消失率 100%】——★★而那個數字我量出來兩次，
+		#     兩次都是同一份輸出裡別的欄位（dw4 事件醒 3289 次）把它打掉的。
+		var _life_lo: int = state.world.current_tick - 1   # 旗子的整段生命期
+		var _bonus: int = state.world.current_tick         # 雙緩衝多買的那一 tick
 		for lid in state.pending_prev:
-			if int(state.pending_seen.get(lid, -999999)) >= _win_lo:
+			if int(state.pending_seen.get(lid, -999999)) >= _life_lo:
 				Probe.bump("t0.flag_consumed")
-			elif int(state.pending_visit.get(lid, -999999)) >= _win_lo:
+				# ★★★效果量【在同一跑內算得出來】，不必拿舊 code 再跑一次：
+				#   若這面旗子是【在 bonus tick 才被讀到】的 ⇒ ★沒有雙緩衝它就死了。
+				#   ★★這是本票的直接效果，而且它與「消失率」互補：
+				#      saved 是【救回來的】，lost_not_visited 是【還沒救到的】。
+				if int(state.pending_seen[lid]) >= _bonus:
+					Probe.bump("t0.saved_by_bonus")
+			elif int(state.pending_visit.get(lid, -999999)) >= _bonus:
 				Probe.bump("t0.lost_ordering")
 			else:
 				Probe.bump("t0.lost_not_visited")
