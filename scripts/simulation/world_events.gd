@@ -88,6 +88,8 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 #   而那一欄從 0 變正數【就是本票的效果量】。
 #   ★★is_pending 由它導出，不另寫一份判斷（否則兩份會漂）。
 static func pending_source(state: WorldState, team_id: int) -> String:
+	# ★不管結果如何都記：這一隊【被查看過】。順序無關，「查過」就是查過。
+	if Probe.enabled: state.pending_visit[team_id] = state.world.current_tick
 	if state.pending_rethink.has(team_id):
 		if Probe.enabled: state.pending_seen[team_id] = true
 		return "cur"
@@ -110,6 +112,13 @@ static func pending_source_faction(state: WorldState, faction) -> String:
 	# ★★先掃一輪 cur，再掃一輪 prev —— ★不可以逐隊比對兩格就早退，
 	#   否則「某隊 prev 有、另一隊 cur 有」會依成員順序回不同答案（★同一世界兩種結果）。
 	var lead: int = int(faction.leader_team_id)
+	if Probe.enabled:
+		# ★勢力層查的是【成員隊】⇒ 這些隊都算被查看過。
+		#   ★★早退（命中就 return）的情況不影響判斷：命中代表旗子【被讀到】，
+		#     那面旗子本來就不會進 lost。
+		state.pending_visit[lead] = state.world.current_tick
+		for mv in faction.member_team_ids:
+			state.pending_visit[int(mv)] = state.world.current_tick
 	if state.pending_rethink.has(lead):
 		if Probe.enabled: state.pending_seen[lead] = true
 		return "cur"
@@ -145,11 +154,19 @@ static func consume_and_clear(state: WorldState) -> void:
 	#   有沒有人讀過它？★沒人讀過 ⇒ 這一發喚醒【真的消失了】。
 	#   ★★這是需求①的字面量測，而且與 tick 內順序無關（讀過就是讀過）。
 	if Probe.enabled:
+		# ★★★needs①「不得消失」拆兩件（systems 訂正：需求本身包含兩個成因）：
+		#   ①a lost_ordering    旗子死時，消費者【在窗內查看過這一隊】⇒ ★雙緩衝的責任，必須歸零
+		#   ①b lost_not_visited 旗子死時，消費者【窗內根本沒查它】⇒ ★★雙緩衝修不掉
+		#      （消費者 600 tick 才走訪一次，而旗子只活 2 tick）⇒ ★★★照實報，不算失敗
+		#   ★窗 = {C-1, C}：此刻 pending_prev 裝的是上一 tick 的旗子，本 tick 結尾丟掉。
+		var _win_lo: int = state.world.current_tick - 1
 		for lid in state.pending_prev:
 			if state.pending_seen.has(lid):
 				Probe.bump("t0.flag_consumed")
+			elif int(state.pending_visit.get(lid, -999999)) >= _win_lo:
+				Probe.bump("t0.lost_ordering")
 			else:
-				Probe.bump("t0.flag_lost")
+				Probe.bump("t0.lost_not_visited")
 		state.pending_seen = {}
 	state.pending_prev = state.pending_rethink
 	state.pending_rethink = {}

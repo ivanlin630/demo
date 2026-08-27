@@ -437,16 +437,25 @@ func _run() -> void:
 	#     而那個問法【分不出走訪在 emit 之前還是之後】⇒ 只能當上界。
 	#   ★★這一欄問的是【旗子死掉時，有沒有人讀過它】——與順序無關，讀過就是讀過。
 	#   ★★★lost 歸零 = 需求①達成；非 0 就是還有喚醒在消失。
-	var f_lost: int = int(Probe.counts.get("t0.flag_lost", 0))
 	var f_cons: int = int(Probe.counts.get("t0.flag_consumed", 0))
-	var f_tot: int = f_lost + f_cons
+	var l_ord: int = int(Probe.counts.get("t0.lost_ordering", 0))
+	var l_nv: int = int(Probe.counts.get("t0.lost_not_visited", 0))
+	var f_tot: int = f_cons + l_ord + l_nv
 	print("\n⑨ 旗子命運（★需求①的字面量，與 tick 內順序無關）")
-	print("   被讀過 = %d｜★沒人讀過就死掉 = %d｜合計 = %d｜消失率 = %s"
-		% [f_cons, f_lost, f_tot, ("%.2f%%" % (100.0 * float(f_lost) / float(f_tot))) if f_tot > 0 else "n/a"])
+	print("   被讀過 = %d" % f_cons)
+	print("   ★①a lost_ordering    = %d  ← ★★雙緩衝的責任，【必須歸零】" % l_ord)
+	print("   ★①b lost_not_visited = %d  ← ★★消費者窗內根本沒走訪，雙緩衝修不掉（照實報，不算失敗）" % l_nv)
+	print("   合計 = %d｜消失率 = %s"
+		% [f_tot, ("%.2f%%" % (100.0 * float(l_ord + l_nv) / float(f_tot))) if f_tot > 0 else "n/a"])
+	print("   %s" % ("★★★①a 歸零 ⇒ 雙緩衝把【順序造成的丟失】修掉了" if l_ord == 0
+		else "★★★①a 非 0 ⇒ 仍有【順序造成的】丟失，雙緩衝沒做完"))
 	out.append("#")
-	out.append("## ⑨ 旗子命運｜被讀過=%d|沒人讀過=%d|合計=%d|消失率=%s"
-		% [f_cons, f_lost, f_tot, ("%.2f%%" % (100.0 * float(f_lost) / float(f_tot))) if f_tot > 0 else "n/a"])
-	out.append("# ★這一欄才是需求①的字面量；⑦ 的 buffer_expired 因為分不出 tick 內順序，只是上界")
+	out.append("## ⑨ 旗子命運｜被讀過=%d|①a lost_ordering=%d|①b lost_not_visited=%d|合計=%d|消失率=%s"
+		% [f_cons, l_ord, l_nv, f_tot,
+		   ("%.2f%%" % (100.0 * float(l_ord + l_nv) / float(f_tot))) if f_tot > 0 else "n/a"])
+	out.append("# ★①a＝旗子死時消費者【在窗內查看過這一隊】⇒ 雙緩衝的責任，必須歸零")
+	out.append("# ★★①b＝旗子死時消費者【窗內根本沒查它】⇒ 走訪間隔 >> 2 tick 壽命，雙緩衝修不掉")
+	out.append("# ★★★①b 的大小決定下一票要不要做 per-actor 消費（旗子活到被讀為止）")
 
 	print("\n[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
 		% [guard, ("%d(%s)" % [stopped_at, stop_reason]) if stopped_at != -1 else "none", eff, ticks])
