@@ -53,6 +53,12 @@ func _run() -> void:
 	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "warring_states"
 	var warm: int = int(OS.get_environment("BED_WARM")) if OS.has_environment("BED_WARM") else WorldState.TICKS_PER_DAY * 5
 	var kinds: Array = WorldEvents.all_kinds()
+	# ★BED_KINDS_LIMIT：只跑前 N 個 kind。★用途【限定】於「既有 tap 的行為佐證」那一問
+	#   （那一問不需要 30 個 kind，一個 burst 就答完）——★★覆蓋對帳【不准】用它，
+	#   否則 210 格會變成「我只跑了前 N 格」而輸出看起來一模一樣。
+	var klimit: int = int(OS.get_environment("BED_KINDS_LIMIT")) if OS.has_environment("BED_KINDS_LIMIT") else 0
+	if klimit > 0 and klimit < kinds.size():
+		kinds = kinds.slice(0, klimit)
 	var out: Array = []
 	var state := _mk_world(cfg)
 	var runner := SimRunner.new()
@@ -89,6 +95,15 @@ func _run() -> void:
 	#   ⇒ 窗長取 NEAR_CADENCE（一小時），窗內【每 tick 都重新 emit】維持 pending。
 	var win: int = int(OS.get_environment("BED_WIN")) if OS.has_environment("BED_WIN") else WorldState.TICKS_PER_HOUR
 
+	# ── ★★★既有 tap 那一欄（票明文要求：behavioural evidence 用【既有】reeval.event，不加新 tap）──
+	#   `reeval.event`（無後綴）是 faction_ai:3213 `_should_reeval` 本來就有的那顆，量的是
+	#   【決策支（_decide_unified）】的事件瞬醒 —— 它在這一刀之前就存在、這一刀沒碰它。
+	#   ★它跟我加的 `reeval.event.<支>` 是【兩件事】：那七支本來一個喚醒路徑都沒有，
+	#     沒有既有 tap 可以重用；而死水【分支別】三欄也非有後綴不可。
+	#   ⇒ 這一欄的用途：用一顆【完全沒被我動過】的儀器獨立佐證「注 burst ⇒ 當 tick 真的醒」。
+	var legacy_ctrl: int = 0
+	var legacy_burst: int = 0
+
 	# ── C 相：陰性對照（不注射，同樣窗長）★沒有這欄，B 相恆綠 ──
 	var ctrl: Dictionary = {}
 	var ctrl_ran: Dictionary = {}
@@ -100,6 +115,8 @@ func _run() -> void:
 		var k3: String = String(s3["k"])
 		ctrl[k3] = int(Probe.counts.get("reeval.event." + k3, 0))
 		ctrl_ran[k3] = int(Probe.counts.get("reeval.event." + k3, 0)) 			+ int(Probe.counts.get("reeval.both." + k3, 0)) + int(Probe.counts.get("reeval.cadence." + k3, 0))
+
+	legacy_ctrl = int(Probe.counts.get("reeval.event", 0))
 
 	# ── B 相：逐 kind 注 burst 到【全部隊】，窗內每 tick 重注，跑 win tick ──
 	var cells: Dictionary = {}   # kind -> support -> bucket
@@ -122,6 +139,7 @@ func _run() -> void:
 			elif ev + bo + ca == 0: b = "no_run"          # ★這支整個窗都沒被走訪 ⇒ 儀器沒開，不是醒不了
 			else: b = "NOT_WOKEN"                          # ★有跑、有 actor、有 pending，就是沒醒 ⇒ 真訊號
 			row[k4] = {"bucket": b, "event": ev, "both": bo}
+		legacy_burst += int(Probe.counts.get("reeval.event", 0))
 		cells[String(kind)] = row
 
 	# ── 靜態軌：閘裡有沒有 kind 判斷（③的機械檢查）──
@@ -172,6 +190,12 @@ func _run() -> void:
 		out.append("ctrl|%s|%d|%d" % [k6, int(ctrl[k6]), int(ctrl_ran[k6])])
 
 	out.append("#")
+	out.append("## ②b 既有 tap（reeval.event，無後綴＝_should_reeval 的決策支，這一刀沒碰過它）")
+	out.append("# 對照(不注射,%d tick)=%d ｜ 注射(%d kind × %d tick)=%d" % [win, legacy_ctrl, kinds.size(), win, legacy_burst])
+	print("
+②b 既有 tap reeval.event（★沒加新儀器的獨立佐證）：對照=%d ｜ 注射=%d" % [legacy_ctrl, legacy_burst])
+
+	out.append("#")
 	out.append("## ③ 靜態：閘上有沒有 kind 過濾（例外必須寫理由）")
 	out.append("# is_pending 那幾行提到 kind 字面量的次數 = %d" % filter_hits.size())
 	for fh in filter_hits: out.append("filter|%s" % fh)
@@ -179,7 +203,9 @@ func _run() -> void:
 		"⇒ 預設全通、零例外" if filter_hits.is_empty() else "★有例外，逐條要有寫下的理由"])
 
 	out.append("#")
-	out.append("## ④ 270 格（9 支 × 30 kind）；★核心 7 支 = 210 格單獨對帳")
+	out.append("## ④ %d 格（9 支 × %d kind）；★核心 7 支 = %d 格單獨對帳%s"
+		% [9 * kinds.size(), kinds.size(), 7 * kinds.size(),
+		"  ★★★BED_KINDS_LIMIT 生效 ⇒ 這【不是】完整覆蓋對帳" if kinds.size() < WorldEvents.all_kinds().size() else ""])
 	out.append("# 欄位：kind|support|bucket|event|both")
 	var tally: Dictionary = {}
 	var tally_core: Dictionary = {}
