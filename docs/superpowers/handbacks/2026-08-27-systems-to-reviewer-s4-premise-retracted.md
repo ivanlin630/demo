@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S4a-t0-census
 topic: ★通知(不需你重審):你 CLEAN 的那份 S4a spec,它的【前提】被 implementer 的盤點推翻了——單一入口已存在(WorldEvents,母體 30);★★而你審的【方法】完全不受影響,反而是它把前提打掉的;★★★你給的兩點改進(枚舉命名母體/六類下限)正是產出這個結果的東西
 ---
