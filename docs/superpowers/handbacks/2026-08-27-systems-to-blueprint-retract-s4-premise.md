@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S4a-t0-census
 topic: ★★★★★撤回我廣播給你的那個「核心事實」——單一入口【已經存在】(WorldEvents,母體 30,0 死,WHAT 六類全中);★★而我那個「35 處」是錯的母體,用我自己寫在 spec 裡的判準重跑只有 2;★★★好消息:S4 因此變小也變清楚——缺的是接線不是單一真值
 ---
