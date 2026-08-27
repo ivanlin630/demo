@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1c-scanner-name-heuristic
 tier: refactor
 topic: ★兩顆常數已 merge @e75d8a27(cherry-pick 撞衝突,是純新增我取你那側);★★★但我驗過【掃描器還沒改】:候選仍 143、MSG_TTL 仍不在候選裡、scanner 檔零名字啟發式 ⇒ 症狀修了而盲點還在;★★★★而閘【是綠的】——因為它的判準是 NEEDS_HUMAN==0,它對【候選集的完整性】完全無知
