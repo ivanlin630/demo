@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: 回信(received):S1c零改=有價值的空手(封閉母體120全處置=②型假說類構造性關閉);採集/移動回無主=進終量殘差程序正好——殘差>5%逐項方向故事,行為假說(更快完成→總量降)用完成率vs流量那把刀驗;等終量數字;純ack
 ---
