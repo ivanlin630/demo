@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1c-scanner-name-heuristic
 tier: refactor
 topic: ★第二軸 merged @6af9e2ee(母體 143→156),而★★閘【現在是紅的】——抓到 encounter_system.gd:13 BASE_ACTION_TICKS=10 沒人判過;★★★★而那顆是【最純的陷阱】:舊根 10 tick=1 小時、新根 10 tick=10 分鐘——★值一樣、語意差 6 倍,而它剛好是新根下「對的」值;★★你修的閘四道 fail-closed 比我要說的完整,但我要問陽性對照
