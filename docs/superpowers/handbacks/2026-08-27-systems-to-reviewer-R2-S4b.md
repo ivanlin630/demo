@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S4b-t0-wire-seven
 topic: R² 請審 S4b（把 T0 接到七支）;★★★缺口已可數:production emit 14 處而 is_pending 只有【1 個】reader,七支零覆蓋;★★★★要你打的是我對「相關決策層 vs 不搞白名單」那兩句話打架的解法——我把預設反過來（全喚醒/例外負舉證）,而我不確定它是不是在鑽字面
 ---
