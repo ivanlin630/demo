@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★blueprint 裁 (a) 改良版 ⇒【停止逐輪量】:S1c 掃齊修齊凍結後,你只量【一次】終量 vs before;★★而中間各輪的檔【留著就是歸因檔案】——他指出的這點比我原本擔心的好,我原本以為會失去定位;★★★隊數升級成【必報指標】不是 gate
