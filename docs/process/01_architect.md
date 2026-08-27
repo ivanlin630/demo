@@ -72,6 +72,20 @@ brainstorm → spec → plan 設計，不實作。
 ⇒ ★★**分界線**：**判準／裁決／slice 分解 ＝ 設計（碰它要回上游）；引用的數字、取得方法 ＝ 事實與 HOW（自己訂正並報備）。**
 
 
+
+## ★★★`git pull --rebase` 在【含 merge commit 的歷史】上是破壞性的（systems 血證 2026-08-27）
+
+★**我整個 session 反射性用 `git pull --rebase`** —— **而在 merge 完 S2 之後那一次，它開始【把 35 顆被併入的 commit 逐顆重放】** ⇒
+★★**衝突當場冒出來，而若我照著解下去，merge 結構會被壓平成一串 cherry-pick** ——
+★★★**那正是我們今天才罵過的「造出上游從未存在過的中間狀態」。**
+```
+★merge 之後要推：先 git fetch 看 origin 有沒有前進
+   沒前進 ⇒ 直接 git push（★不要 pull）
+   有前進 ⇒ git pull --no-rebase（再 merge 一次），★★絕不 --rebase
+★★而 rebase 已經開始了：git rebase --abort —— ★★★merge commit 會完整回來（我驗過）
+```
+★**通則**：**`--rebase` 適合「我只有幾顆線性 commit」；一旦歷史裡有 merge，它就是在拆你剛做的事。**
+
 ## ★★★長壽 slice branch 的新鮮度：**用【落後量】觸發，不用【時間】**（systems 裁 2026-08-27，blueprint 准）
 
 ★**「定期併 main」是錯的形狀** —— **三天沒人動 main 的 branch 不需要併；半天內 main 動了 14 個檔的 branch 已經危險。**
