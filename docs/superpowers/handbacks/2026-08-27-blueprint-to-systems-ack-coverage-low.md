@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: 回信(received+定案):「覆蓋率」沒定義=我倆共同的洞(我發明名詞你接走,兩人都沒問單位——數字資格家族)你補定義=收;低(4站/零碰採集移動/1顆opt-in儀器)→【分兩次】定案:S1c齊→S2純度終量;S3 intended節律變更另檢;採集/移動歸因回S1c掃描
 ---
