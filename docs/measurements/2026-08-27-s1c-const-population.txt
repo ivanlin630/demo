@@ -1,0 +1,131 @@
+# S1c 封閉母體分類：全部 `const <NAME>: int = <裸字面量>`（排除 scripts/debug）
+# ★枚舉指令（別人重跑得出同一個數）：
+#   grep -rnE '^[[:space:]]*const [A-Z_][A-Z0-9_]*[[:space:]]*:[[:space:]]*int[[:space:]]*=[[:space:]]*-?[0-9]+[[:space:]]*(#.*)?$' \
+#     --include=*.gd scripts/ | grep -v '^scripts/debug/' | wc -l
+# ★★『掃完』是【對當下母體的宣告】，不是永久狀態：新 code 會讓母體長大，
+#   而判準是 NEEDS_HUMAN == 0（不綁會隨 code 長大的量）。
+# 欄位：disposition|reason|name|value|path:line
+# c_whitelist      = 16
+# d_not_time       = 104
+# 母體               = 120
+#
+d_not_time|門檻／代價／版面／步數等純量，非時間|AI_ETA_LIMIT|1200|scripts/simulation/path_system.gd:15
+d_not_time|上下限／數量／層級，非時間|ANON_UNIT_CAP|30|scripts/simulation/encounter_system.gd:4
+d_not_time|門檻／代價／版面／步數等純量，非時間|ARROW_COST_PER_SHOT|1|scripts/data/item_attributes.gd:122
+d_not_time|門檻／代價／版面／步數等純量，非時間|BLOCK_PENALTY|5|scripts/simulation/encounter_system.gd:21
+c_whitelist|★遭遇軸：比對 encounter_tick 不是 world tick ⇒ 不隨根旋鈕變|BLOCK_WINDOW|8|scripts/simulation/encounter_system.gd:20
+d_not_time|上下限／數量／層級，非時間|BOARD_RELAY_CAP|32|scripts/simulation/order_system.gd:18
+d_not_time|距離／半徑（格數）|BREAKOUT_DIST|2|scripts/simulation/strategic_ai_system.gd:5
+d_not_time|門檻／代價／版面／步數等純量，非時間|BREAKOUT_NEAREST_THRESHOLD|3|scripts/simulation/strategic_ai_system.gd:7
+c_whitelist|★person-ticks【工量】非【時長】：每次呼叫扣，而每日呼叫數由 TICKS_PER_DAY/NEAR_CADENCE 導出|CAMP_BUILD_TICKS|240|scripts/simulation/player_command_system.gd:9
+d_not_time|門檻／代價／版面／步數等純量，非時間|COL_WIDTH|26|scripts/ui/team_ui_helper.gd:6
+d_not_time|距離／半徑（格數）|CONSOLIDATE_MAX_DIST|3|scripts/simulation/faction_ai_system.gd:36
+c_whitelist|★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退|CONTACT_TIMEOUT_DAYS|30|scripts/simulation/faction_ai_system.gd:102
+d_not_time|人數|CONVOY_MIN_PARENT_POP|4|scripts/simulation/faction_ai_system.gd:4303
+d_not_time|人數|CONVOY_PORTER_POP|2|scripts/simulation/faction_ai_system.gd:4302
+d_not_time|上下限／數量／層級，非時間|COUNT_CAP|3|scripts/simulation/decision/failure_memory.gd:24
+d_not_time|距離／半徑（格數）|CREATION_KNOW_RADIUS|3|scripts/simulation/game_setup.gd:34
+d_not_time|倍數：×TICK_PER_DAY 的乘數，本身不是時間量|DECISION_CADENCE_MULT|3|scripts/simulation/faction_ai_system.gd:10
+d_not_time|門檻／代價／版面／步數等純量，非時間|DEFECT_UNREST_THRESHOLD|20|scripts/simulation/events/event_faction_defect.gd:3
+d_not_time|距離／半徑（格數）|DISPATCH_DIST_THRESHOLD|2|scripts/simulation/faction_ai_system.gd:12
+d_not_time|批次大小：observer 一塊跑幾 tick，是【分塊粒度】不是【時長】|DUMP_CHUNK_TICKS|300|scripts/ui/observer_main.gd:12
+d_not_time|距離／半徑（格數）|ENCIRCLE_DIST|1|scripts/simulation/strategic_ai_system.gd:6
+c_whitelist|★遭遇軸：比對 encounter_tick 不是 world tick ⇒ 不隨根旋鈕變|ENCOUNTER_STUCK_TICKS|800|scripts/ui/observer_bridge.gd:9
+d_not_time|人數|ENVOY_POP|1|scripts/simulation/faction_ai_system.gd:62
+d_not_time|同族純量（數量／距離／門檻），非時間|ENVOY_REDUNDANCY_FOUNDING|2|scripts/simulation/faction_ai_system.gd:63
+d_not_time|距離／半徑（格數）|ESCORT_DETECT_RANGE|3|scripts/simulation/encounter_system.gd:8
+d_not_time|同族純量（數量／距離／門檻），非時間|ESCORT_MAX_NEARBY_ENEMIES|1|scripts/simulation/encounter_system.gd:9
+d_not_time|人數|EXPAND_MIN_POP|8|scripts/simulation/ambition_ladder.gd:19
+d_not_time|人數|FACILITY_BUILD_POP_MIN|6|scripts/simulation/decision/goal_registry.gd:55
+d_not_time|列舉／層級索引／地圖尺度，非時間|FAC_MAX|4|scripts/simulation/game_setup.gd:31
+d_not_time|列舉／層級索引／地圖尺度，非時間|FAC_MIN|2|scripts/simulation/game_setup.gd:30
+d_not_time|列舉／層級索引／地圖尺度，非時間|FAC_SHARE_MAX|4|scripts/simulation/game_setup.gd:33
+d_not_time|列舉／層級索引／地圖尺度，非時間|FAC_SHARE_MIN|1|scripts/simulation/game_setup.gd:32
+c_whitelist|★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退|FAMINE_GRACE_DAYS|7|scripts/simulation/resource_system.gd:34
+d_not_time|門檻／代價／版面／步數等純量，非時間|FLEE_STEP|3|scripts/simulation/movement_system.gd:317
+d_not_time|上下限／數量／層級，非時間|FLOOR_CONNECT_MAX|12|scripts/simulation/game_setup.gd:37
+d_not_time|門檻／代價／版面／步數等純量，非時間|FLOOR_RETRY_MAX|8|scripts/simulation/game_setup.gd:36
+d_not_time|人數|FORAGE_VIABLE_POP|15|scripts/simulation/faction_ai_system.gd:91
+c_whitelist|★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退|FOUNDING_TIMEOUT_FLOOR_DAYS|12|scripts/simulation/subteam_system.gd:9
+d_not_time|上下限／數量／層級，非時間|GOVERN_SURVIVE_MIN|3|scripts/simulation/npc_combat_system.gd:27
+d_not_time|同族純量（數量／距離／門檻），非時間|HEGEMON_MIN_FACTION_TEAMS|4|scripts/simulation/ambition_ladder.gd:21
+d_not_time|門檻／代價／版面／步數等純量，非時間|HORSE_BAND_CAP_MAX|12|scripts/simulation/world_generator.gd:53
+d_not_time|門檻／代價／版面／步數等純量，非時間|HORSE_BAND_CAP_MIN|6|scripts/simulation/world_generator.gd:52
+d_not_time|門檻／代價／版面／步數等純量，非時間|HORSE_BAND_HALF_WIDTH|2|scripts/simulation/world_generator.gd:50
+d_not_time|門檻／代價／版面／步數等純量，非時間|HORSE_BAND_SIGNAL_WILD_MAX|3|scripts/simulation/world_generator.gd:55
+d_not_time|門檻／代價／版面／步數等純量，非時間|HORSE_BAND_SIGNAL_WILD_MIN|1|scripts/simulation/world_generator.gd:54
+d_not_time|距離／半徑（格數）|INVITE_RANGE|8|scripts/simulation/faction_ai_system.gd:633
+c_whitelist|★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退|L0_DECAY_DAYS|3|scripts/simulation/resource_system.gd:15
+c_whitelist|★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退|L0_TO_L1_CORVEE_DAYS|3|scripts/simulation/faction_ai_system.gd:96
+d_not_time|列舉／層級索引／地圖尺度，非時間|LOD_BOTH|1|scripts/simulation/sim_runner.gd:142
+d_not_time|列舉／層級索引／地圖尺度，非時間|LOD_NEAR|0|scripts/simulation/sim_runner.gd:141
+d_not_time|列舉／層級索引／地圖尺度，非時間|LOD_NEAR_RADIUS|3|scripts/simulation/sim_runner.gd:3
+d_not_time|列舉／層級索引／地圖尺度，非時間|L_ACTUAL|4|scripts/simulation/decision/need_hierarchy.gd:12
+d_not_time|列舉／層級索引／地圖尺度，非時間|L_BELONGING|2|scripts/simulation/decision/need_hierarchy.gd:10
+d_not_time|列舉／層級索引／地圖尺度，非時間|L_ESTEEM|3|scripts/simulation/decision/need_hierarchy.gd:11
+d_not_time|列舉／層級索引／地圖尺度，非時間|L_SAFETY|1|scripts/simulation/decision/need_hierarchy.gd:9
+d_not_time|列舉／層級索引／地圖尺度，非時間|L_SURVIVAL|0|scripts/simulation/decision/need_hierarchy.gd:8
+d_not_time|列舉／層級索引／地圖尺度，非時間|MAP_RADIUS|12|scripts/simulation/encounter_system.gd:180
+d_not_time|列舉／層級索引／地圖尺度，非時間|MAP_RADIUS_VIEW|12|scripts/ui/encounter_view.gd:7
+d_not_time|上下限／數量／層級，非時間|MAX_ENTRIES|500|scripts/ui/observer_ticker_panel.gd:6
+d_not_time|上下限／數量／層級，非時間|MAX_MESSAGES|50|scripts/ui/bottom_bar.gd:4
+d_not_time|同族純量（數量／距離／門檻），非時間|MAX_OPTIONS|5|scripts/simulation/inquiry_system.gd:3
+d_not_time|上下限／數量／層級，非時間|MEMORY_MAX|20|scripts/simulation/npc_ai_system.gd:4
+d_not_time|距離／半徑（格數）|MERCHANT_MAX_RANGE|20|scripts/simulation/order_system.gd:9
+d_not_time|人數|MERGEIN_DISSOLVE_MAX_POP|3|scripts/simulation/interaction_system.gd:18
+d_not_time|距離／半徑（格數）|MESSENGER_RANGE|5|scripts/simulation/encounter_system.gd:11
+d_not_time|批量大小／迭代次數／配裝比，都是【次數】不是【時長】|MIGRANT_BATCH|3|scripts/simulation/faction_ai_system.gd:1987
+d_not_time|距離／半徑（格數）|MIN_DIST_ANY|2|scripts/simulation/outpost_system.gd:166
+d_not_time|距離／半徑（格數）|MIN_DIST_SAME|11|scripts/simulation/outpost_system.gd:167
+d_not_time|上下限／數量／層級，非時間|MIN_GAP_DIVISOR|2|scripts/simulation/cadence_stagger.gd:28
+d_not_time|同族純量（數量／距離／門檻），非時間|MIN_PARENT_POP_AFTER_DISPATCH|10|scripts/simulation/faction_ai_system.gd:157
+d_not_time|人數|MORTAL_EFF_POP|3|scripts/simulation/npc_combat_system.gd:20
+d_not_time|負重（named 成員算幾單位重量）|NAMED_WEIGHT|3|scripts/simulation/movement_system.gd:8
+d_not_time|需求層級的層數（結構尺寸）|N_LAYERS|5|scripts/simulation/decision/need_hierarchy.gd:13
+d_not_time|上下限／數量／層級，非時間|OBSERVER_MSG_CAP|2000|scripts/simulation/message_system.gd:71
+d_not_time|人數|OCCUPY_MIN_POP|6|scripts/simulation/decision/terms.gd:73
+d_not_time|上下限／數量／層級，非時間|OLD_GROWTH_MATERIAL_MAX|675|scripts/simulation/world_generator.gd:35
+d_not_time|上下限／數量／層級，非時間|OLD_GROWTH_MATERIAL_MIN|450|scripts/simulation/world_generator.gd:34
+d_not_time|距離／半徑（格數）|ORE_MOUNTAIN_MAX_DIST|7|scripts/simulation/faction_ai_system.gd:4459
+d_not_time|上下限／數量／層級，非時間|OUTPOST_MAX|14|scripts/simulation/game_setup.gd:28
+d_not_time|上下限／數量／層級，非時間|OUTPOST_MIN|8|scripts/simulation/game_setup.gd:27
+c_whitelist|★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退|OUTPOST_TAKEOVER_DAYS|3|scripts/simulation/faction_ai_system.gd:5991
+d_not_time|批量大小／迭代次數／配裝比，都是【次數】不是【時長】|OVERFLOW_ITERS|8|scripts/simulation/labor_system.gd:14
+c_whitelist|★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退|OWNER_CHANGE_BUFFER_DAYS|7|scripts/simulation/faction_ai_system.gd:103
+d_not_time|上下限／數量／層級，非時間|PLAYER_INVENTORY_MAX_SLOTS|6|scripts/simulation/player_system.gd:4
+d_not_time|上下限／數量／層級，非時間|PREDATOR_MAX|2|scripts/simulation/world_generator.gd:43
+d_not_time|任務優先序分數（TaskArbiter 比大小用），與時間無關|PRIO_AMBIENT|10|scripts/simulation/task_arbiter.gd:14
+d_not_time|任務優先序分數（TaskArbiter 比大小用），與時間無關|PRIO_COMBAT|100|scripts/simulation/task_arbiter.gd:7
+d_not_time|任務優先序分數（TaskArbiter 比大小用），與時間無關|PRIO_DISPATCH|50|scripts/simulation/task_arbiter.gd:12
+d_not_time|任務優先序分數（TaskArbiter 比大小用），與時間無關|PRIO_FACTION|30|scripts/simulation/task_arbiter.gd:13
+d_not_time|任務優先序分數（TaskArbiter 比大小用），與時間無關|PRIO_PLAYER|60|scripts/simulation/task_arbiter.gd:10
+d_not_time|任務優先序分數（TaskArbiter 比大小用），與時間無關|PRIO_SURVIVAL|80|scripts/simulation/task_arbiter.gd:8
+d_not_time|任務優先序分數（TaskArbiter 比大小用），與時間無關|PRIO_THREAT|70|scripts/simulation/task_arbiter.gd:9
+d_not_time|任務優先序分數（TaskArbiter 比大小用），與時間無關|PRIO_VENDETTA|55|scripts/simulation/task_arbiter.gd:11
+c_whitelist|★遭遇軸：比對 encounter_tick 不是 world tick ⇒ 不隨根旋鈕變|PRISONER_CHECK_INTERVAL|5|scripts/simulation/encounter_system.gd:10
+d_not_time|晉升時保留的人數額度|PROMOTE_DESPERATE_SPARE|0|scripts/simulation/faction_ai_system.gd:1822
+d_not_time|上下限／數量／層級，非時間|PURSUIT_KILL_CAP|3|scripts/simulation/npc_combat_system.gd:9
+c_whitelist|★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退|RELOCATE_TIMEOUT_DAYS|25|scripts/simulation/faction_ai_system.gd:2072
+d_not_time|列舉／層級索引／地圖尺度，非時間|RUNG_ACCUMULATE|1|scripts/simulation/ambition_ladder.gd:4
+d_not_time|列舉／層級索引／地圖尺度，非時間|RUNG_EXPAND|2|scripts/simulation/ambition_ladder.gd:5
+d_not_time|列舉／層級索引／地圖尺度，非時間|RUNG_HEGEMON|4|scripts/simulation/ambition_ladder.gd:7
+d_not_time|列舉／層級索引／地圖尺度，非時間|RUNG_STALL_K|3|scripts/simulation/ambition_ladder.gd:22
+d_not_time|列舉／層級索引／地圖尺度，非時間|RUNG_STATE|3|scripts/simulation/ambition_ladder.gd:6
+d_not_time|列舉／層級索引／地圖尺度，非時間|RUNG_SURVIVE|0|scripts/simulation/ambition_ladder.gd:3
+d_not_time|距離／半徑（格數）|SEEK_TILE_RANGE|30|scripts/simulation/decision/goal_resolver.gd:481
+d_not_time|距離／半徑（格數）|SOUND_RANGE|3|scripts/ui/encounter_view.gd:526
+d_not_time|距離／半徑（格數）|SPAWN_RADIUS|8|scripts/simulation/encounter_system.gd:7
+d_not_time|隊數門檻（立國最低團數）|STATE_MIN_FACTION_TEAMS|2|scripts/simulation/ambition_ladder.gd:20
+c_whitelist|★person-ticks【工量】非【時長】：每次呼叫扣，而每日呼叫數由 TICKS_PER_DAY/NEAR_CADENCE 導出|SURVIVAL_BUILD_MAX_TICKS|120|scripts/simulation/faction_ai_system.gd:4927
+c_whitelist|★根常數本身：其他時間量由它導出，改成 hours() 會循環定義|TICKS_PER_HOUR|60|scripts/data/world_state.gd:12
+c_whitelist|★播放速率：量的是【現實時間】（每真實秒渲染幾 tick），不隨世界小時縮放|TICKS_PER_SECOND|24|scripts/ui/turn_controls.gd:6
+c_whitelist|★時間宣告用【分鐘】：2.4 小時整數小時表達不了，而分鐘可以|TURN_MINUTES|144|scripts/ui/sim_bridge.gd:9
+d_not_time|批量大小／迭代次數／配裝比，都是【次數】不是【時長】|UNITS_PER_EQUIP|2|scripts/simulation/equipment_system.gd:4
+d_not_time|門檻／代價／版面／步數等純量，非時間|UNREST_REPLACE_THRESHOLD|20|scripts/simulation/events/event_unrest_replace.gd:3
+d_not_time|門檻／代價／版面／步數等純量，非時間|UNREST_SPLIT_THRESHOLD|30|scripts/simulation/events/event_unrest_split.gd:3
+d_not_time|距離／半徑（格數）|VIEW_RADIUS|5|scripts/ui/text_map_renderer.gd:5
+d_not_time|距離／半徑（格數）|VISION_RADIUS|3|scripts/simulation/vision_system.gd:3
+d_not_time|上下限／數量／層級，非時間|WILD_GAME_MAX|6|scripts/simulation/world_generator.gd:40
+d_not_time|上下限／數量／層級，非時間|WILD_GAME_MIN|2|scripts/simulation/world_generator.gd:39
+d_not_time|上下限／數量／層級，非時間|WILD_HORSE_TILE_CAP|3|scripts/simulation/harvest_system.gd:52
+d_not_time|單格野馬上限（數量）|WILD_HORSE_TILE_CAP_RICH|8|scripts/simulation/harvest_system.gd:53
