@@ -164,7 +164,14 @@ static func consume_and_clear(state: WorldState) -> void:
 		#   ⇒ ★★量出「被讀過 = 0 ／ 消失率 100%」——而同一份輸出的 dw4 欄同時顯示
 		#      GOAL 事件醒了 3289 次。★★★兩欄打架才抓到，不是我自己看出來的。
 		#   ⇒ 改存【最後一次被讀到的 tick】並比對窗，不再清空（dict 以隊數為界）。
-		var _win_lo: int = state.world.current_tick - 1
+		# ★★★分界要畫在【雙緩衝多買的那個 tick】上，不是整個 {C-1, C} 窗：
+		#   旗子在存活期內【只要被看一眼就會被消費】（is_pending 讀的就是那兩格）
+		#   ⇒ ★未被讀的旗子，必然【在 C 這個 bonus tick 沒人看】。
+		#   ★★所以第一版把「C-1 看過（而那是 emit 之前）」算成 lost_ordering 是【錯的】：
+		#     那些不是順序問題，是【bonus tick 也沒人來】—— 同 ①b 的成因。
+		#   ★★★①a 的正確定義：【在 C 有人看，卻仍然沒讀到】⇒ 結構上該為 0；
+		#     它非 0 就代表 pending_source 有一條路徑沒標到 pending_seen（真 bug）。
+		var _win_lo: int = state.world.current_tick
 		for lid in state.pending_prev:
 			if int(state.pending_seen.get(lid, -999999)) >= _win_lo:
 				Probe.bump("t0.flag_consumed")

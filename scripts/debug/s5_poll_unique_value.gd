@@ -443,8 +443,8 @@ func _run() -> void:
 	var f_tot: int = f_cons + l_ord + l_nv
 	print("\n⑨ 旗子命運（★需求①的字面量，與 tick 內順序無關）")
 	print("   被讀過 = %d" % f_cons)
-	print("   ★①a lost_ordering    = %d  ← ★★雙緩衝的責任，【必須歸零】" % l_ord)
-	print("   ★①b lost_not_visited = %d  ← ★★消費者窗內根本沒走訪，雙緩衝修不掉（照實報，不算失敗）" % l_nv)
+	print("   ★①a lost_ordering    = %d  ← ★★bonus tick 有人看卻仍沒讀到 ⇒ 【結構上該為 0】，非 0 = 真 bug" % l_ord)
+	print("   ★①b lost_not_visited = %d  ← ★★bonus tick 沒人來 ⇒ 走訪間隔 >> 2 tick 壽命，雙緩衝修不掉（照實報）" % l_nv)
 	print("   合計 = %d｜消失率 = %s"
 		% [f_tot, ("%.2f%%" % (100.0 * float(l_ord + l_nv) / float(f_tot))) if f_tot > 0 else "n/a"])
 	print("   %s" % ("★★★①a 歸零 ⇒ 雙緩衝把【順序造成的丟失】修掉了" if l_ord == 0
@@ -453,8 +453,8 @@ func _run() -> void:
 	out.append("## ⑨ 旗子命運｜被讀過=%d|①a lost_ordering=%d|①b lost_not_visited=%d|合計=%d|消失率=%s"
 		% [f_cons, l_ord, l_nv, f_tot,
 		   ("%.2f%%" % (100.0 * float(l_ord + l_nv) / float(f_tot))) if f_tot > 0 else "n/a"])
-	out.append("# ★①a＝旗子死時消費者【在窗內查看過這一隊】⇒ 雙緩衝的責任，必須歸零")
-	out.append("# ★★①b＝旗子死時消費者【窗內根本沒查它】⇒ 走訪間隔 >> 2 tick 壽命，雙緩衝修不掉")
+	out.append("# ★①a＝旗子死時，消費者【在 bonus tick 查看過這一隊】卻仍沒讀到 ⇒ 結構上該為 0，非 0 = 真 bug")
+	out.append("# ★★①b＝【bonus tick 沒人來】⇒ 走訪間隔 >> 2 tick 壽命，雙緩衝修不掉（第一版把 C-1 看過的誤歸這裡的對立面）")
 	out.append("# ★★★①b 的大小決定下一票要不要做 per-actor 消費（旗子活到被讀為止）")
 
 	print("\n[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
