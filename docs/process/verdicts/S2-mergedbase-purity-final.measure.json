@@ -1,0 +1,67 @@
+{
+  "slice": "S2-root-reanchor-landing",
+  "★★★這是merged base純度終量——比較main落地前(746ff6e7^=49d25911)vs main落地後(746ff6e7)，不是branch vs main": true,
+  "測法": {
+    "worktree": "A:/GDS/demo/.worktrees/measure-s2-after（獨立乾淨worktree）",
+    "before_commit": "49d25911（舊根TICKS_PER_DAY=240）",
+    "after_commit": "746ff6e7（新根TICKS_PER_DAY=1440，main真落地）",
+    "seed": 1337, "days": 30, "beds": ["peaceful_economy", "warring_states"],
+    "★床是儀器不是被測物(systems裁定)": "before側用的是after側(746ff6e7)的新qty_tap_bed.gd覆寫上去跑的，只動scripts/debug/qty_tap_bed.gd一個檔，遊戲邏輯保持49d25911原樣不動——這樣兩邊才是用同一把尺量，不是拿舊尺比新尺"
+  },
+  "機械檢查": {
+    "四床跑前跑後HEAD都驗過": "after兩床=746ff6e7/746ff6e7；before兩床=49d25911/49d25911(唯一diff是預期中的qty_tap_bed.gd覆寫)",
+    "[BedSelfCheck]三欄": {
+      "after_peaceful": "observer_guard=none first_nonadvance=none effective_window=43200/43200(100%)",
+      "after_warring":  "observer_guard=stripped first_nonadvance=none effective_window=43200/43200(100%)",
+      "before_peaceful":"observer_guard=none first_nonadvance=none effective_window=7200/7200(100%)",
+      "before_warring": "observer_guard=stripped first_nonadvance=none effective_window=7200/7200(100%)"
+    },
+    "★四床全部100%有效窗口，沒有任何一邊提早game_over(advance_tick回傳值偵測沒觸發)"
+  },
+
+  "★★★peaceful_economy(teams 12→12，母體不變，per-team-day=raw per-day，無需重算)": {
+    "採集food_taken":     {"before": 24.04, "after": 25.18, "相對差": "+4.7%"},
+    "採集material_taken": {"before": 34.01, "after": 34.71, "相對差": "+2.1%"},
+    "採集ore_silver_taken":{"before": 0.22, "after": 0.22, "相對差": "0%"},
+    "消耗food":           {"before": 55.52, "after": 55.17, "相對差": "-0.6%"},
+    "消耗material":       {"before": 0.07, "after": 0.06, "相對差": "-14.3%（分母n=215→196，絕對值極小，低解析度）"},
+    "移動格tap":          {"before": "0.10(n=3)", "after": "0.33(n=10)", "相對差": "+230%（兩輪n<10，低統計力，同starve族不裁決）"},
+    "決策次數":           {"before": 10.23, "after": 10.67, "相對差": "+4.3%"},
+    "製造觸發次數":       {"before": "7.17(n=215)", "after": "6.63(n=199)", "相對差": "-7.5%（n夠大不算低解析度，超5%，列入殘差）"},
+    "訊息發出":           {"before": 11.80, "after": 11.67, "相對差": "-1.1%"},
+    "訊息送達":           {"before": "0.17(n=5)", "after": "0.97(n=29)", "相對差": "+471%（兩輪n<30，低統計力，不裁決）"},
+    "隊數(必報)": {"before": 12, "after": 12, "相對差": "0%"},
+    "★超5%且n夠大的真殘差": ["製造觸發次數 -7.5%"],
+    "★超5%但低解析度不裁決": ["移動格 +230%(n<10)", "訊息送達 +471%(n<30)"]
+  },
+
+  "★★★warring_states(teams 119→117，-1.7%，母體本輪幾乎不變，per-team-day與raw per-day走勢一致)": {
+    "採集food_taken":     {"before每隊每日": 0.4843, "after每隊每日": 0.5649, "相對差": "+16.6%", "判讀": "真殘差"},
+    "採集material_taken": {"before每隊每日": 0.00672, "after每隊每日": 0.00282, "相對差": "-58.0%", "判讀": "真殘差，同一族的『material持續萎縮』趨勢延續"},
+    "消耗food":           {"before每隊每日": 2.9739, "after每隊每日": 3.0235, "相對差": "+1.7%", "判讀": "5%內"},
+    "移動格tap":          {"before每隊每日": 0.7328, "after每隊每日": 0.7562, "相對差": "+3.2%", "判讀": "★5%內，母體效應收掉了（跟前一輪b05750ef的-2.0%同方向：per-team-day後移動這項一路都在5%內）"},
+    "決策次數":           {"before每隊每日": 0.5429, "after每隊每日": 0.6718, "相對差": "+23.7%", "判讀": "真殘差(跟前幾輪+21%~+35%同量級，穩定存在)"},
+    "製造觸發次數":       {"before": "未發生(0)", "after": "0.67/日(n=20)", "判讀": "新出現，n=20不算太小但也不算有力，標記觀察不裁決"},
+    "訊息發出":           {"before每隊每日": 0.3922, "after每隊每日": 0.3934, "相對差": "+0.3%", "判讀": "5%內，上游穩定"},
+    "訊息送達":           {"before每隊每日": 1.8336, "after每隊每日": 2.7274, "相對差": "+48.7%", "判讀": "真殘差(跟前幾輪+39%~+55%同量級，穩定存在)"},
+    "credited/taken(food)比值": {"before": "34.3%", "after": "25.9%", "備註": "持續下滑，糧倉緊度延續加劇趨勢"},
+    "隊數(必報非裁決)": {"before": 119, "after": 117, "相對差": "-1.7%（跟b05750ef那輪的+11.6%方向相反——母體軌跡本身不穩定，每個commit都不一樣）"},
+    "★超5%真殘差(per-team-day後仍成立)": ["採集food_taken +16.6%", "採集material_taken -58.0%", "決策次數 +23.7%", "訊息送達 +48.7%"],
+    "★5%內(母體效應/穩定)": ["消耗food +1.7%", "移動格tap +3.2%", "訊息發出 +0.3%"]
+  },
+
+  "★★★★跨輪一致性觀察(warring，比對這輪與先前S1c/b05750ef那輪)": {
+    "移動格per-team-day": "b05750ef輪-2.0% → 這輪+3.2%，兩輪都在5%內，這項【穩定收斂】",
+    "決策次數per-team-day": "b05750ef輪+21.0% → 這輪+23.7%，量級一致，這項【穩定存在真殘差】",
+    "訊息送達per-team-day": "b05750ef輪+39.2% → 這輪+48.7%，量級一致，這項【穩定存在真殘差】",
+    "隊數": "b05750ef輪112→125(+11.6%) vs 這輪119→117(-1.7%)——★★隊數本身在不同commit間方向都不同，證實隊數是【易變的效應鏈產物】不是穩定基準，跟systems先前判斷一致",
+    "採集food_taken": "這是第一次做per-team-day版本(先前輪只做過raw per-day)，新增的+16.6%真殘差"
+  },
+
+  "landed_paths": {
+    "after_peaceful": "docs/measurements/mergedbase-after-qty-peaceful_economy-30d.txt",
+    "after_warring": "docs/measurements/mergedbase-after-qty-warring_states-30d.txt",
+    "before_peaceful": "docs/measurements/mergedbase-before-qty-peaceful_economy-30d.txt",
+    "before_warring": "docs/measurements/mergedbase-before-qty-warring_states-30d.txt"
+  }
+}
