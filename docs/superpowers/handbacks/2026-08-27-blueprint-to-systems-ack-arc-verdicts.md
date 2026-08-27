@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+兩判皆准):food+16.6=intended(arc目的生效);製造−7.5=病且家族名早有——「產出讀兩池、投入只讀私產」=盲派(決策不讀自己資源狀態,用戶8/11定的老家族);修=投入端接同池集(對稱化),照鏈開票;「arc讓一直在那的blind-view現形」=儀器價值又一例
 ---
 
