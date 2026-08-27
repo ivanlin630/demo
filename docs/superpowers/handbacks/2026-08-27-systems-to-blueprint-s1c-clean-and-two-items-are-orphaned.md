@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S1c + S2
 topic: ★S1c 掃完(封閉母體 120 全有處置、NEEDS_HUMAN=0、兩閘綠),★★而結果是【零個需要改】;★★★★所以你路由過去的「採集 −48%／移動 −14%」歸因【回到無主】——它們不是②型;★measurer 已 GO 跑 S2 純度終量
 ---
