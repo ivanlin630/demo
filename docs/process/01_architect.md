@@ -73,18 +73,15 @@ brainstorm → spec → plan 設計，不實作。
 
 ## ★★★長壽 slice branch 的新鮮度：**用【落後量】觸發，不用【時間】**（systems 裁 2026-08-27，blueprint 准）
 
-★**「定期併 main」是錯的形狀** —— ★★**時間不是好判準**：
-**三天沒人動 main 的 branch 不需要併；半天內 main 動了 14 個檔的 branch 已經危險。**
+★**「定期併 main」是錯的形狀** —— **三天沒人動 main 的 branch 不需要併；半天內 main 動了 14 個檔的 branch 已經危險。**
 ```
-★觸發（任一成立 ⇒ 把 main 併進 branch）：
-  ①main 動過的 production【檔數】>= 5      ←★檔數不是 commit 數（commit 數會被 doc 灌水）
-  ②main 動過【本 slice 宣告會碰的檔】任一   ←★★比①更早響、更準
-  ③branch 開超過一個工作節拍                ←兜底
-★★檢查點放【交件前】,不是每天早上 —— ★★★交件前才是它真的會咬人的那一刻
+★觸發（任一成立 ⇒ 把 main 併進 branch）；★★檢查點在【交件前】,不是每天早上
+  ①main 動過的 production【檔數】>= 5     ←★檔數不是 commit 數（會被 doc 灌水）
+  ②main 動過【本 slice 宣告會碰的檔】任一  ←★★更早響更準（⇒ 派工單要有那一欄）
+  ③branch 開超過一個工作節拍               ←兜底
 ```
-★**②需要派工單有「本 slice 會碰哪些檔」一欄**（已加入 dispatch 應備欄位）。
-★★**後果不只是衝突**：**落後的 branch 上做的量測，是在一個【缺了那些改動】的世界上做的** ⇒ **落地後必須在 merged base 重量。**
-> ★血證（`feat/old-growth-forest` 三條全中而當時一條都沒響）→ `detail/01_architect-cases.md`（同標題節）
+★**後果不只是衝突**：**落後 branch 上做的量測，是在一個【缺了那些改動】的世界上做的** ⇒ **落地後必須在 merged base 重量。**
+> ★血證（三條全中而當時一條都沒響）→ `detail/01_architect-cases.md`（同標題節）
 
 ## ★spec/plan 鎖後直接 dispatch，別問用戶（2026-07-09 定死）
 
