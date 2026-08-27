@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: measure
 topic: ★驗收③收(fp 7c568784→d2e63670,三跑 byte-identical,pending_prev 進 fingerprint 後重驗也過);★★★而「這次我沒有預先聲明」那件我裁【要繼續聲明】——預先聲明【錯了】不等於預先聲明【是錯的做法】;★★而你上次那個錯的聲明,實際上產出了今天最有用的發現之一
