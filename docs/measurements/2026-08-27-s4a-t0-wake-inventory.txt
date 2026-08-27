@@ -1,0 +1,59 @@
+# S4a：T0 喚醒點與突發事件【封閉母體盤點】（純盤點，零 production 改動）
+#
+# ★★★而本盤點推翻了派工單的一個前提，先講：
+#   票寫「喚醒散在 7 檔 35 處【沒有單一入口】」。
+#   ★實測：36/7 是【對 *_next_tick 賦值】的母體，不是【喚醒】的母體 ——
+#     其中 19 走 CadenceStagger、11 是 current_tick + CADENCE（排未來）、1 是 = 0（未排程）,
+#     ★★真正「賦值當前 tick 即叫醒」的只有【1 處】：faction_ai_system.gd:458
+#   ★★★而【單一入口已經存在】：scripts/simulation/world_events.gd（WorldEvents）,
+#     它有一份【已宣告的封閉母體】all_kinds() = MESSAGE 18 + FUNC 9 + STATE 3 = 30。
+#
+# ★來源逐一列名（照票要求，不宣稱『全部找到了』）：
+#   ①WorldEvents.all_kinds() 的宣告清單（封閉、可枚舉）
+#   ②WorldEvents.emit 直呼站點（字面量）
+#   ③emit_message 的 type（★含【字串串接】: order_system.gd:54 "order_" + kind）
+#   ④*_next_tick 賦值站點（36 處 / 7 檔）
+#   ⑤命名枚舉 _detect_/_crisis/_stall/_latch（36 處，票給的機械來源）
+#   ★而【完整性無法證明】—— 能證明的是【沒有漏掉已經點名的六類】，見文末。
+#
+# 欄位：bucket|kind|來源|site
+#
+a_already_wired|aid_given|message|scripts/simulation/interaction_system.gd:1235
+a_already_wired|aid_refused|message|scripts/simulation/interaction_system.gd:1216
+a_already_wired|betrayed|direct|scripts/simulation/diplomatic_ai_system.gd:337
+a_already_wired|combat_end|message|scripts/simulation/npc_combat_system.gd:381
+a_already_wired|combat_engaged|direct|scripts/simulation/npc_combat_system.gd:107
+a_already_wired|combat_start|message|scripts/simulation/npc_combat_system.gd:112
+a_already_wired|construction_abandoned|direct|scripts/simulation/faction_ai_system.gd:5663
+a_already_wired|construction_stalled|direct|scripts/simulation/faction_ai_system.gd:5730
+a_already_wired|convoy_stranded|direct|scripts/simulation/faction_ai_system.gd:3036
+a_already_wired|diplomacy|message|scripts/simulation/interaction_system.gd:451
+a_already_wired|extortion|message|scripts/simulation/interaction_system.gd:395
+a_already_wired|faction_defect|message|scripts/simulation/events/event_faction_defect.gd:51
+a_already_wired|faction_establish|message|scripts/simulation/faction_ai_system.gd:6038
+a_already_wired|famine_crossed|direct|scripts/simulation/resource_system.gd:215
+a_already_wired|famine_warning|message|scripts/simulation/harvest_system.gd:167
+a_already_wired|intel_arrived|direct|scripts/simulation/belief_system.gd:208
+a_already_wired|labor_crisis|direct|scripts/simulation/labor_system.gd:27
+a_already_wired|leader_death|direct|scripts/simulation/event_system.gd:32
+a_already_wired|order_buy|message(concat)|order_system.gd:54 ("order_"+kind)
+a_already_wired|order_delivered|message|scripts/simulation/interaction_system.gd:667
+a_already_wired|order_sell|message(concat)|order_system.gd:54 ("order_"+kind)
+a_already_wired|outpost_built|message|scripts/simulation/outpost_system.gd:371
+a_already_wired|plan_invalidated|direct|scripts/simulation/decision/failure_memory.gd:63
+a_already_wired|replace|message|scripts/simulation/events/event_unrest_replace.gd:17
+a_already_wired|split|message|scripts/simulation/events/event_unrest_split.gd:26
+a_already_wired|subjugate|message|scripts/simulation/npc_combat_system.gd:798
+a_already_wired|team_extinct|direct|scripts/simulation/faction_ai_system.gd:3784
+a_already_wired|teams_erased|direct|scripts/data/world_state.gd:439
+a_already_wired|trade_done|message|scripts/simulation/player_trade_system.gd:187
+a_already_wired|tribute|message|scripts/simulation/interaction_system.gd:587
+#
+# a_already_wired = 30 / 宣告 30
+# ★b_declared_no_source = 0
+#
+# ★★而我原本報過兩個【假陽性】，記在這裡免得下次再犯：
+#   ①第一版 regex 要求 emit 的 kind 是【字串字面量】⇒ 18 個 MESSAGE_KINDS 全被判成『沒有 emit』,
+#     而它們走 message_system.gd:58 的 WorldEvents.emit(state, type, ...)（type 是變數）。
+#   ②修好之後 order_buy/order_sell 仍判『無來源』,而真相是 order_system.gd:54 用【字串串接】。
+#   ★兩次都是【枚舉的形狀配不上機制】—— 而抓到它們的是『未宣告』那一欄（order_ 出現在那裡）。

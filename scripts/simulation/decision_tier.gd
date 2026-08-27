@@ -46,3 +46,22 @@ const C_ALLIANCE_CHECK: int  = T3_STRATEGIC   # 舊值 30 * TICKS_PER_HOUR
 const C_BETRAY_CHECK: int    = T3_STRATEGIC   # 舊值 50 * TICKS_PER_HOUR
 const C_INFRA: int           = T3_STRATEGIC   # 舊值 50 * TICKS_PER_HOUR
 const C_FACTION_UPDATE: int  = T3_STRATEGIC   # 舊值 20 * TICKS_PER_HOUR
+# ★S4b：意圖併遷 T3。blueprint 當初扣住它的理由是【危機 T0 接管不存在】，
+#   而 S4b ①做完之後它存在了 ⇒ 前提消失（reviewer 獨立確認過）。
+const C_INTENT: int          = T3_STRATEGIC   # 舊值 TimeScale.TICK_PER_DAY * 1
+
+# ★★★S4b 死水三欄（互斥、相加 = 該支的 fire 次數）：
+#   reeval.event.<K>   ＝【事件把它提早叫醒】——★T0 接管【真的有作用】的唯一證據
+#   reeval.both.<K>    ＝ 事件來了，但這 tick 本來就到期 ⇒ ★保守記在 both，不記給事件
+#   reeval.cadence.<K> ＝ 純週期到期
+# ★為什麼要 both 這一欄：只印 event/cadence 兩欄的話，「事件來了但反正也要跑」會被
+#   算進 event ⇒ ★★T0 的功勞被灌水。分出來才知道【少了事件會不會真的漏掉】。
+static func tap_wake(k: String, woke: bool, due: bool) -> void:
+	if not Probe.enabled:
+		return
+	if woke and due:
+		Probe.bump("reeval.both." + k)
+	elif woke:
+		Probe.bump("reeval.event." + k)
+	else:
+		Probe.bump("reeval.cadence." + k)

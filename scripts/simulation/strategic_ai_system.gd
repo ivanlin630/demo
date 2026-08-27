@@ -30,9 +30,15 @@ func tick(state: WorldState, faction: FactionData) -> void:
     if faction.strategic_eval_next_tick == 0:
         faction.strategic_eval_next_tick = CadenceStagger.next_tick(
             state.world.current_tick, state.world.current_tick, faction.faction_id, STRATEGIC_INTERVAL)
-    if state.world.current_tick < faction.strategic_eval_next_tick: return
-    faction.strategic_eval_next_tick = CadenceStagger.next_tick(
-        state.world.current_tick, state.world.current_tick, faction.faction_id, STRATEGIC_INTERVAL)
+    # ★★★S4b T0：事件瞬醒短路（形狀照抄 faction_ai `_should_reeval`）。
+    #   ★這支是【早退式】⇒ 短路寫成「兩個都不成立才 return」。
+    var _strat_due: bool = state.world.current_tick >= faction.strategic_eval_next_tick
+    var _strat_woke: bool = WorldEvents.is_pending_faction(state, faction)
+    if not (_strat_due or _strat_woke): return
+    DecisionTier.tap_wake("STRATEGIC", _strat_woke, _strat_due)
+    if _strat_due:
+        faction.strategic_eval_next_tick = CadenceStagger.next_tick(
+            state.world.current_tick, state.world.current_tick, faction.faction_id, STRATEGIC_INTERVAL)
     if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "STRATEGIC", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
     _update_faction_goals(state, faction)
     if faction.strategic_goals.size() > 0:
@@ -47,9 +53,14 @@ func tick(state: WorldState, faction: FactionData) -> void:
     if faction.alliance_eval_next_tick == 0:
         faction.alliance_eval_next_tick = CadenceStagger.next_tick(
             state.world.current_tick, state.world.current_tick, faction.faction_id, ALLIANCE_CHECK_INTERVAL)
-    if state.world.current_tick >= faction.alliance_eval_next_tick:
-        faction.alliance_eval_next_tick = CadenceStagger.next_tick(
-            state.world.current_tick, state.world.current_tick, faction.faction_id, ALLIANCE_CHECK_INTERVAL)
+    # ★S4b T0：事件瞬醒短路（同上）。
+    var _alli_due: bool = state.world.current_tick >= faction.alliance_eval_next_tick
+    var _alli_woke: bool = WorldEvents.is_pending_faction(state, faction)
+    if _alli_due or _alli_woke:
+        DecisionTier.tap_wake("ALLIANCE", _alli_woke, _alli_due)
+        if _alli_due:
+            faction.alliance_eval_next_tick = CadenceStagger.next_tick(
+                state.world.current_tick, state.world.current_tick, faction.faction_id, ALLIANCE_CHECK_INTERVAL)
         if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "ALLIANCE", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
         _evaluate_alliance_need(state, faction)
 
