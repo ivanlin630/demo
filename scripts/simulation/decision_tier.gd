@@ -88,34 +88,28 @@ static func actor_scope(k: String) -> String:
 		return "T"
 	return "F"
 
-# ★★★死水改四分（互斥、相加 = 該支 fire 次數）—— t0-emit-ordering 加了第四欄：
-#   reeval.cadence.<K>      純週期到期
-#   reeval.event.<K>        本 tick 的 emit 就看到了（cur）
-#   ★reeval.delayed.<K>     【上一 tick 的 emit，延到這一 tick 才看到】（prev）
-#                           ★★這一欄從 0 變正數【就是本票的效果量】——
-#                              它每一筆，在雙緩衝之前都是【消失】不是延遲。
-#   reeval.both.<K>         事件來了但本 tick 本來就到期 ⇒ 保守記 both，不記給事件
-# ★★★「這一支這 tick 有沒有被走訪」——★答 systems 的 unseen 二分：
-#   buffer_expired（走訪了但沒看到）／ not_visited（2 tick 窗內根本沒走訪）。
-#
-# ★★便宜的關鍵：這幾支的迴圈【一跑就掃全部 actor】（_evaluate_all_body 掃 state.factions
-#   與 state.teams、reaction 掃全部隊）⇒ ★「有沒有被走訪」只取決於 (支, tick)，與 actor 無關
-#   ⇒ 記 key 而不是逐 actor 樣本：43200 tick 裡真正跑的只有幾百次 ⇒ 幾千個 key，不是幾十萬筆。
-#   ★★★這跟我先前拆掉的那顆【不是同一件事】：那顆問的是「已經評估過了嗎」（有序、會被
-#     同 tick 第二遍推翻）；這顆問的是「這 tick 有沒有評估過」（集合成員，無序，不會被推翻）。
+# ★★★「這一支這 tick 有沒有被走訪」——★⑦ 的 buffer_expired / not_visited 二分要用。
+#   ★★便宜的關鍵：這幾支的迴圈【一跑就掃全部 actor】⇒「有沒有被走訪」只取決於 (支, tick)
+#   ⇒ 記 key 而不是逐 actor 樣本（幾千個 key，不是幾十萬筆）。
+#   ★★★而它【只能當上界】：它分不出走訪在 emit 之前還是之後。
+#     真正與順序無關的量在 ⑨（旗子命運：死掉時有沒有人讀過）。
 static func mark_gate(k: String, tick: int) -> void:
 	if not Probe.enabled:
 		return
 	Probe.bump("gate.tick." + k + "|" + str(tick))
 
+# ★★死水三分（互斥、相加 = 該支 fire 次數）：
+#   reeval.cadence.<K>  純週期到期
+#   reeval.event.<K>    事件喚醒
+#   reeval.both.<K>     事件來了但本 tick 本來就到期 ⇒ 保守記 both，不記給事件
+# ★曾有第四欄 delayed（上一 tick 的 emit 才看到）—— 隨雙緩衝一起回滾了：
+#   ★★雙緩衝實測救回 0 面旗子，而「不留下不做事的機制」是我們今天立的規矩。
 static func tap_wake(k: String, actor: int, tick: int, src: String, due: bool) -> void:
 	if not Probe.enabled:
 		return
 	var woke: bool = src != ""
 	if woke and due:
 		Probe.bump("reeval.both." + k)
-	elif src == "prev":
-		Probe.bump("reeval.delayed." + k)
 	elif woke:
 		Probe.bump("reeval.event." + k)
 		# ★★★④延遲欄要用的：每一次【事件喚醒】的 (支, actor, tick)。

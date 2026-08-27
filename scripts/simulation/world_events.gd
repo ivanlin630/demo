@@ -3,14 +3,17 @@ class_name WorldEvents
 # ★T0-A1 事件匯流排：突發事件 → 相關隊【當 tick 就能重新思考】，不必等 cadence。
 # 這一刀【只加不減】：cadence 輪詢照舊，pending 只是額外的喚醒來源（A2 輪詢退場是另一票）。
 #
-# ★★★【已失效的舊前提】（t0-emit-ordering 推翻，留著是因為它解釋了現在的形狀）：
-#   舊：「pending_rethink 不入 state_fingerprint 的正當性基礎＝單 tick 內清空。」
-#   ★而那個「單 tick 內清空」本身就是 bug 的成因：
-#     排在消費者【之後】才 emit 的，在被讀到前就被清掉 ——
-#     實測 warring 30 日：★★【消失 28,385 次嗚醒】（整體落空 12.5%）。
-#   ★★★現在：雙緩衝（pending_prev ∪ pending_rethink）⇒ 跨 tick 存活
-#     ⇒ ★pending_prev 【已經進 state_fingerprint】。兩件必須同進退。
-#   ★禁分批消費這條不變：換頁是【整批】搞，不是一顆一顆消。
+# ★pending_rethink 不入 state_fingerprint 的正當性基礎＝【單 tick 內清空】（★此前提現在仍成立）。
+#
+# ★★★而【喚醒會消失】這件事是真的，成因【不是順序】（2026-08-28 實測定案）：
+#   實測 warring 30 日：★旗子命運 被讀過 2770 ／ ★★沒人讀過就死掉 406（12.78%）；
+#   peaceful 30 日更極端：被讀過 32 ／ 沒人讀過 122（79.22%）。
+#   ★★而【全部】是 lost_not_visited：消費者那一 tick 根本沒走訪該隊。
+#     消費者的走訪節奏是 60（near）／600（far）tick，而旗子只活 1 tick。
+#   ★★★曾試過雙緩衝（讓旗子多活一個 tick）⇒ 【救回 0 面旗子】，已回滾：
+#     任何【固定壽命】都在賭「消費者剛好在窗內來」——而間隔差 60～600 倍，賭不贏。
+#     ⇒ ★真修法是 per-actor 消費（旗子活到被讀為止），那是另一票。
+#   ★禁分批消費這條不變。
 #
 # ★掛點表（T4 對帳守衛讀這裡）：三類——
 #   ①訊息型（emit_message 為 chokepoint、逐 type 掛）
@@ -83,9 +86,11 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 			Probe.bump_sample("t0.emit_ctx", {"k": kind, "t": state.world.current_tick,
 				"team": id2, "fid": int(_tm.faction_id), "leader": int(_tm.leader_id)}, 40000)
 
-# ★★★可見集合的【單一真值】：pending_prev ∪ pending_rethink。
-#   回傳來源而不只是 bool —— ★死水要能分「本 tick 就看到」與「延到下一 tick 才看到」，
-#   而那一欄從 0 變正數【就是本票的效果量】。
+# ★可見集合的【單一真值】（雙緩衝回滾後只剩 pending_rethink）。
+#   ★★回傳 String 而不是 bool 的形狀留著：它讓【旗子命運】那組儀器不必再改，
+#   而 per-actor 消費那一票還會用到。★★★現在它只會回 "cur" 或 ""。
+#   ★同時在這裡記【誰查看過這一隊】—— 旗子命運要靠它分
+#   「有走訪過卻沒讀到」與「這一 tick 根本沒走訪」。
 #   ★★is_pending 由它導出，不另寫一份判斷（否則兩份會漂）。
 static func pending_source(state: WorldState, team_id: int) -> String:
 	# ★不管結果如何都記：這一隊【被查看過】。順序無關，「查過」就是查過。
@@ -93,9 +98,6 @@ static func pending_source(state: WorldState, team_id: int) -> String:
 	if state.pending_rethink.has(team_id):
 		if Probe.enabled: state.pending_seen[team_id] = state.world.current_tick
 		return "cur"
-	if state.pending_prev.has(team_id):
-		if Probe.enabled: state.pending_seen[team_id] = state.world.current_tick
-		return "prev"
 	return ""
 
 static func is_pending(state: WorldState, team_id: int) -> bool:
@@ -126,70 +128,35 @@ static func pending_source_faction(state: WorldState, faction) -> String:
 		if state.pending_rethink.has(int(mid)):
 			if Probe.enabled: state.pending_seen[int(mid)] = state.world.current_tick
 			return "cur"
-	if state.pending_prev.has(lead):
-		if Probe.enabled: state.pending_seen[lead] = state.world.current_tick
-		return "prev"
-	for mid2 in faction.member_team_ids:
-		if state.pending_prev.has(int(mid2)):
-			if Probe.enabled: state.pending_seen[int(mid2)] = state.world.current_tick
-			return "prev"
 	return ""
 
 static func is_pending_faction(state: WorldState, faction) -> bool:
 	return pending_source_faction(state, faction) != ""
 
-# ★★★tick 結尾【換頁】（不再是清空）：本 tick 的整批 → prev，供【下一 tick 的完整一輪】看到。
-#   ★舊註解說「不跨 tick 存活，這是不入 fingerprint 的正當性基礎」——★★那個前提現在【失效了】，
-#     所以 pending_prev 已經加進 state_fingerprint。兩件事必須同進退，不能只改一邊。
-#   ★★★代價寫明：一發 emit 現在【最多被看到兩個 tick】（本 tick + 下一 tick）
-#     ⇒ 同一顆事件可能喚醒同一支兩次。那是這個形狀的固有成本，不是 bug，
-#     而它可量（死水的 delayed 欄）。★用「消失 28,385 次」換「可能重醒一次」。
-#   ★誠實界定不變：本函式不提供消費【順序】保證——那由既有 team 迴圈決定。
+# ★★★tick 結尾清空（★雙緩衝已回滾，2026-08-28）：
+#   ★回滾理由（systems 裁）：雙緩衝【救回 0 面旗子】(bonus 救回 = 0，兩張床)，
+#     而代價是真的 —— pending_prev 進了 state_fingerprint ⇒ 往後每一次「fp 變了」
+#     都要先排除「是不是指紋定義又變了」＝ ★★汙染主要偵測器。
+#   ★★★真成因不是【順序】是【走訪間隔】：消費者 60／600 tick 才走訪一次，
+#     而任何【固定壽命】都在賭「消費者剛好在窗內來」—— 賭不贏。
+#     ⇒ 真修法是 per-actor 消費（旗子活到被讀為止），那是另一票。
+#
+# ★而【旗子命運結算】留著：單緩衝下它量的就是【每 tick 有多少喚醒沒人讀到】——
+#   ★★那正是 per-actor 那一票要用的基線，而且它現在量的是【真實現況】不是某個修法的效果。
 static func consume_and_clear(state: WorldState) -> void:
-	if Probe.enabled and not state.pending_rethink.is_empty():
-		Probe.bump("t0.consumed", state.pending_rethink.size())
-	if state.pending_rethink.is_empty() and state.pending_prev.is_empty():
+	if state.pending_rethink.is_empty():
+		if Probe.enabled: state.pending_seen = {}
 		return
-	# ★★★換頁【之前】結算上一批的命運：pending_prev 裡即將被丟掉的旗子，
-	#   有沒有人讀過它？★沒人讀過 ⇒ 這一發喚醒【真的消失了】。
-	#   ★★這是需求①的字面量測，而且與 tick 內順序無關（讀過就是讀過）。
 	if Probe.enabled:
-		# ★★★needs①「不得消失」拆兩件（systems 訂正：需求本身包含兩個成因）：
-		#   ①a lost_ordering    旗子死時，消費者【在窗內查看過這一隊】⇒ ★雙緩衝的責任，必須歸零
-		#   ①b lost_not_visited 旗子死時，消費者【窗內根本沒查它】⇒ ★★雙緩衝修不掉
-		#      （消費者 600 tick 才走訪一次，而旗子只活 2 tick）⇒ ★★★照實報，不算失敗
-		#   ★窗 = {C-1, C}：此刻 pending_prev 裝的是上一 tick 的旗子，本 tick 結尾丟掉。
-		# ★★★off-by-one 血證（第一版）：pending_seen 存 bool 並在【每次換頁清空】，
-		#   而旗子活【兩個 tick】⇒ ★在第一個 tick 被讀到的，結算前就被我清掉了
-		#   ⇒ ★★量出「被讀過 = 0 ／ 消失率 100%」——而同一份輸出的 dw4 欄同時顯示
-		#      GOAL 事件醒了 3289 次。★★★兩欄打架才抓到，不是我自己看出來的。
-		#   ⇒ 改存【最後一次被讀到的 tick】並比對窗，不再清空（dict 以隊數為界）。
-		# ★★★分界要畫在【雙緩衝多買的那個 tick】上，不是整個 {C-1, C} 窗：
-		#   旗子在存活期內【只要被看一眼就會被消費】（is_pending 讀的就是那兩格）
-		#   ⇒ ★未被讀的旗子，必然【在 C 這個 bonus tick 沒人看】。
-		#   ★★所以第一版把「C-1 看過（而那是 emit 之前）」算成 lost_ordering 是【錯的】：
-		#     那些不是順序問題，是【bonus tick 也沒人來】—— 同 ①b 的成因。
-		#   ★★★①a 的正確定義：【在 C 有人看，卻仍然沒讀到】⇒ 結構上該為 0；
-		#     它非 0 就代表 pending_source 有一條路徑沒標到 pending_seen（真 bug）。
-		# ★★★★兩個門檻【不是同一個】—— 我把它們共用了一個變數，連錯兩次：
-		#   ①「有沒有被讀過」要用【整段生命期】{C-1, C}：在 C-1 讀到也是讀到。
-		#   ②「①a / ①b 怎麼分」要用【bonus tick C】：C-1 的查看必然在 emit 之前。
-		#   ★共用一個門檻的後果是【被讀過 = 0 / 消失率 100%】——★★而那個數字我量出來兩次，
-		#     兩次都是同一份輸出裡別的欄位（dw4 事件醒 3289 次）把它打掉的。
-		var _life_lo: int = state.world.current_tick - 1   # 旗子的整段生命期
-		var _bonus: int = state.world.current_tick         # 雙緩衝多買的那一 tick
-		for lid in state.pending_prev:
-			if int(state.pending_seen.get(lid, -999999)) >= _life_lo:
+		Probe.bump("t0.consumed", state.pending_rethink.size())
+		# ★旗子只活這一 tick ⇒ 沒被讀過就是【消失】。與 tick 內順序無關（讀過就是讀過）。
+		var _now: int = state.world.current_tick
+		for lid in state.pending_rethink:
+			if int(state.pending_seen.get(lid, -999999)) >= _now:
 				Probe.bump("t0.flag_consumed")
-				# ★★★效果量【在同一跑內算得出來】，不必拿舊 code 再跑一次：
-				#   若這面旗子是【在 bonus tick 才被讀到】的 ⇒ ★沒有雙緩衝它就死了。
-				#   ★★這是本票的直接效果，而且它與「消失率」互補：
-				#      saved 是【救回來的】，lost_not_visited 是【還沒救到的】。
-				if int(state.pending_seen[lid]) >= _bonus:
-					Probe.bump("t0.saved_by_bonus")
-			elif int(state.pending_visit.get(lid, -999999)) >= _bonus:
-				Probe.bump("t0.lost_ordering")
+			elif int(state.pending_visit.get(lid, -999999)) >= _now:
+				Probe.bump("t0.lost_ordering")      # 有走訪過這一隊卻沒讀到 ⇒ 走訪在 emit 之前
 			else:
-				Probe.bump("t0.lost_not_visited")
-	state.pending_prev = state.pending_rethink
-	state.pending_rethink = {}
+				Probe.bump("t0.lost_not_visited")   # 這一 tick 根本沒走訪這一隊
+		state.pending_seen = {}
+	state.pending_rethink.clear()
