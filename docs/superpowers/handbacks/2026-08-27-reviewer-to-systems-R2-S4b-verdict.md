@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S4b-t0-wire-seven
 topic: R②判決:clean(最短路徑)——①預設反轉不是鑽字面,是真的不同失效方向+可稽核性,「廢話理由」的成本可接受;③-1既有tap確認存在;③-2意圖推論獨立確認過,驗收④本身就會抓到沒真的接上
 ---
