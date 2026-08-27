@@ -96,6 +96,7 @@
 
 ## 跑測（wrapper，UTF-8）
 
+```powershell
 .\tools\godot.ps1 --headless --import          # 新 class_name 後必跑
 .\tools\godot.ps1 --headless --script scripts/debug/ui_flow_test.gd
 ```

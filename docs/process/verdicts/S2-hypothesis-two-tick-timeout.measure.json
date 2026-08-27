@@ -1,0 +1,37 @@
+{
+  "slice": "S2-why-only-warring",
+  "ticket": "systems假說二:有一批「語意是時間但以tick為單位」的量沒跟著S2重錨⇒實際時長被除以6，逼出訊息送達-76%",
+  "裁決": "★★★★★假說二成立——直接code證據(file:line)，不是推論；訊息TTL是硬編tick字面量，S2重錨後實際時長真的變成1/6",
+
+  "①核心證據(message_system.gd)": {
+    "舊(0ab34123,S2前)": "world_state.gd: TICKS_PER_DAY=240(10 ticks/hour)",
+    "新(960648c9,S2後)": "world_state.gd: TICKS_PER_DAY=1440(60 ticks/hour，唯一自由參數TICKS_PER_HOUR 10→60)",
+    "message_system.gd:3-5": {
+      "MSG_TTL_SHORT":  "= 1680   # 註解寫死『7天 × 240 ticks/day』——字面量,不是WorldState.TICKS_PER_DAY推導 ⇒ 現在=1680/1440=1.17天(本該7天)",
+      "MSG_TTL_MEDIUM": "= 3360   # 現在=3360/1440=2.33天(本該14天)",
+      "MSG_TTL_LONG":   "= 7200   # 註解寫『30天=TICKS_PER_MONTH』但沒真的引用TICKS_PER_MONTH常數,是複製舊值的字面量 ⇒ 現在=7200/1440=5天(本該30天)"
+    },
+    "★關鍵": "這三個都是【已經是具名常數，但常數的值本身是舊root算出來的tick字面量】——正是systems預告的S1盲點形狀：S1的(c)類判定抓不到「看起來像已經derived但其實沒有」的常數"
+  },
+
+  "②MsgPrune計數佐證(runtime count，兩輪獨立seed=1337跑warring_states 30日)": {
+    "before(0ab34123)": {"global_prune_總和": 889, "known_prune_總和": 16039, "有記錄的天數行": 22},
+    "after(960648c9)":  {"global_prune_總和": 1694, "known_prune_總和": 3939, "有記錄的天數行": 29},
+    "global_prune變化": "+90.6%——過期刪除事件暴增，方向與假說二一致(TTL變短⇒更快被剪)",
+    "known_prune下降的解釋(不是反證)": "known_prune下降是因為msg.delivered本身就先崩了(-76%)——訊息還沒傳到team_known就先在global層被剪掉，下游自然少東西可剪，跟假說二不衝突"
+  },
+
+  "③額外抓到的同型漏網常數(不在本次ticket範圍內，但同一個盲點形狀，供systems判斷要不要一起補)": [
+    "path_system.gd:15 AI_ETA_LIMIT=1200，註解『5 day plains等量(5×240)』——字面量非WorldState.TICKS_PER_DAY推導",
+    "player_command_system.gd:9 CAMP_BUILD_TICKS=240，TEST VALUE字面量",
+    "decision_context.gd:127 JOIN_REJECT_COOLDOWN_TICKS=480，TEST VALUE字面量"
+  ],
+  "★對照組(已正確跟根，不是漏網，列出來避免systems誤以為全部都壞)": [
+    "outpost_system.gd:30 CONSTRUCTION_TIMEOUT = 30*WorldState.TICKS_PER_DAY（derived✓）",
+    "belief_system.gd:32 SCOUT_TIMEOUT = WorldState.TICKS_PER_DAY*3（derived✓）",
+    "faction_ai_system.gd:108 FLEE_TIMEOUT = TimeScale.TICK_PER_DAY*5，註解『修硬編240,跟根』——這條已經被修過一次了",
+    "faction_ai_system.gd:134/145/151 TRADE_TIMEOUT/STATION_TIMEOUT/JOIN_TIMEOUT 皆用TimeScale.TICK_PER_DAY（derived✓）"
+  ],
+
+  "④驗法完整性聲明": "只查了scripts/simulation下const定義的timeout/TTL類常數(grep模式:tick數字面量+天/小時/day/hour註解)，沒有窮舉整個codebase——若systems要窮盡驗證需要更廣的掃描"
+}

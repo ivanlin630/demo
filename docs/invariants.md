@@ -182,3 +182,9 @@
 
 > ★**搬家不是廢止**：**每一條都在 `detail` 檔裡完整保留，原文在 `git log`。**
 > ★★**要引用時查 `detail`；★開場只需要記得憲法級那幾條。**
+
+## ★★★床必須接 `advance_tick` 的回傳值 —— **「有效窗」≠「請求窗」**（systems 立 2026-08-27）
+
+★**規則**：**任何跑 tick 的床，必須接 `advance_tick` 回傳值，並印【首次非推進的 tick 與原因】。**
+★★**沒有 game_over 也要印 `無`**（「沒印」與「沒接」長得一樣）；★★★**per-day／per-window 的分母必須是【有效窗】不是【請求窗】。**
+> ★**血證／現況統計 → `detail/invariants-cases.md`（同標題節）**；★★交件欄位形狀見 `process/03b_measurer.md §BedSelfCheck`。

@@ -1129,3 +1129,22 @@ reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權�
   - **★失聯感知＝通例（用戶定 2026-08-05，資訊網 follow-up、排現 arc 收完後）**：**所有派出單位共用一個系統**（信使/斥候/商隊/賑濟隊/子隊/開墾隊…）——母隊記**預期回報時間**（依距離/任務估）；逾時→belief 標「失聯」→**進思考層人格反應**（務實再派·派查/多疑防備/重情派救/冷酷註銷；領主對遠方村莊久無音訊=同系統）。零 god-view（全建於「自己派過誰+過了多久」的自我記憶推理）。「派信使查」決策=此系統反應端、信使逾時推斷=其一 case——統一成**一張預期聯絡帳本**、非各處特例。
 - **infra**：Telegram 雙向 bridge（遠端驅動 blueprint）done（`reference_telegram_bridge`）。
 - **★資訊網核心 arc = CLOSED/ACCEPTED（2026-08-05，用戶裁 A、QA CONFIRM-with-revisions）**：**bank（機制全真）**＝letter-carrier 物理信使／side-action 家族（herald·scout·distribute，人格 mini-util）／act-on-belief（de-scan×2 移 god-view 殘留）／賑濟＝免費 gift／同格交易＋看板 relay（商業 +72% 多床）／人格分化真湧現（務實 8 vs 傲 0）／T1 fixture 全鏈救活／T3 真故事（defect 叛離孤死）。**誠實限制（QA 強制）**＝relief 鏈僅 fixture 證、一般 49 隊經濟 distribute 仍 0（禁 resolved 字樣）；T1 回升＝間歇投糧非穩定復甦；cascade=PLAUSIBLE；anomaly 因果未 story-audited。**→ 資訊網補完批（下一批）**：①relief 通用化（settled faction bed 診斷 general distribute=0 根）＋economy-balance（救濟量級/timing/餓死底線）②L3 循環貿易（guardrail 已定：路線＝湧現非 waypoint）③失聯帳本（預期聯絡通例）④小項（seed-cascade 因果補／DEFECT_HONOR_THRESHOLD 死常數人格化照妖鏡／scout 人格 demo／anomaly story-audit 補檔）。
+
+### ★S2 根旋鈕重錨 —— **收**（blueprint 裁 2026-08-27，不回工）
+★★★**訂正 2026-08-27（systems 自查）**：~~`TICKS_PER_HOUR 10→60` 已在 `main`（`b05750ef`）~~ ——
+★**那是假的。`git merge-base --is-ancestor b05750ef HEAD` ＝ 否** ⇒ ★★**S1c／S2 從未 merge 進 `main`。**
+★**真實狀態**：**根旋鈕、S1c 掃描、S3a 盤點、S3 搬遷，全部活在 `feat/old-growth-forest`（現 `3b8ed2a3`）。**
+★★**`main` 的根仍是 `TICKS_PER_DAY = 240`** —— ★★★**而 `main` 是【自洽】的**（`MSG_TTL_*` 已改成 `7 * TICKS_PER_DAY` 等推導式）⇒ **沒有活的缺陷，只有帳記錯。**
+★**危害在哪**：**任何人在 `main` 上量測、以為自己在新根上 ⇒ 拿到舊根數字。**
+（`S1c` 封閉母體 120 顆全處置、`NEEDS_HUMAN=0` —— 這個【量測結論】仍然成立，它在 `b05750ef` 上做的。）
+**終量（主軸 per-team-day）**：`peaceful` 七項全過；`warring` **移動 −2.0%＝母體效應結案**、
+★**決策 +21.0%／送達 +39.2% ＝ 具名開放殘差 → 路由 S3（★★blueprint 硬條款：以一次為限，S3 終量必須給【歸因或收編判決】；殘差老化上限一次，二次＝回工）**。
+★**採集 material −97% 已具名**（嫌疑犯＝`MSG_TTL` 修復同 commit）→ `known_issues`。
+★**判準形狀變更（blueprint 准）**：**S3 終量主軸 ＝ per-team-day／率，aggregate 降附錄**
+（理由：世界必然分岔 ⇒ aggregate 對母體量級偏差無解析力）。
+**下一站**：**S3 本體 —— ★七支節律搬家遷入 T3（3 天）＋ 分層骨架**（spec 已寫，R² 審中）。
+★**scope 是 7＋1 不是 8**：**意圖 `INTENT_CADENCE` 留 1 天不搬**（blueprint 裁 2026-08-27）——
+★★**它與「危機 T0 接管」在用戶原文是成對設計（同一格），拆開＝3 天不重想意圖的反應性空窗＝壞故事級退化** ⇒ 與 T0 綁同票在 S4。
+★**已知倒退（誠實記，不留在 spec 裡）**：**七支遷 T3 後，危機時這七支沒有任何一支會加速**
+（現有 `_decision_crisis` 的 `/4` 加速只活在 `faction_ai_system.gd:2583` 那一條，八支逐支查過都沒掛）
+—— ★★**收口在 S4 的 T0「所有突發事件全入、不搞白名單」，不需要 S3 自己造一套。**

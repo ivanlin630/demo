@@ -1,0 +1,29 @@
+{
+  "slice": "perf-spike-cost-driver",
+  "ticket": "systems票2026-08-26:成本跟著誰長——固定隊數只動map.radius(12/18/24)一輪答完",
+  "measured_at_commit": "main（同床perf_scaling_curve_bed.gd，config加perf_scale_radius{12,18}.json，radius24沿用perf_scale.json既有數據+補1tick tile數探針）",
+  "seed": 1337,
+
+  "★★★三階比較(hourly spike, dt_us>1s判定, HD-only/force_full_hd=true, near≡total已由code file:line確認)": [
+    {"radius": 12, "tiles": 469, "teams_range": "115~178", "spike_count": 96, "median_us": 7804772, "mean_us": 9112718},
+    {"radius": 18, "tiles": 1027, "teams_range": "113~151", "spike_count": 96, "median_us": 9347444, "mean_us": 11034929},
+    {"radius": 24, "tiles": 1801, "teams_range": "101~202", "spike_count": 387, "median_us": 6817496, "mean_us": 9218152}
+  ],
+
+  "★★★判定：既不∝teams也不∝tiles": {
+    "tiles倍率(相對radius12)": "1x / 2.19x / 3.84x",
+    "spike中位數倍率(相對radius12)": "1x / 1.20x / 0.87x",
+    "結論": "tile數橫跨3.84倍區間，spike中位數不但沒有單調成長，radius24(tile數最多)反而是三階裡最低的。這不是雜訊範圍內的持平——若真是∝tiles，radius24應該明顯是三者裡最高，結果相反。",
+    "★對照systems判讀表": "『spike不隨radius長』⇒兩個候選(teams/tiles)都不是⇒它跟著某個固定的每小時全量工作走(非隨規模伸縮)，不是掃描規模問題"
+  },
+
+  "★誠實限": "radius12/18各只跑1000tick(~96個hourly樣本)，radius24有387個樣本(完整16天)——樣本數不對等，但96個樣本的median已經足夠穩定判斷「有沒有明顯趨勢」這個問題(趨勢若存在,3.84倍的tile差理應在96樣本內就看得出來，而沒看到)。",
+
+  "landed_paths": {
+    "radius12_checkpoint": "docs/measurements/perf-radius12-1000t.txt.checkpoint.perf_scale_radius12.txt",
+    "radius18_checkpoint": "docs/measurements/perf-radius18-1000t.txt.checkpoint.perf_scale_radius18.txt",
+    "radius24_checkpoint(來自longwindow票)": "docs/measurements/perf-longwindow-current-1month.txt.checkpoint.perf_scale.txt",
+    "新config": "config/perf_scale_radius12.json, config/perf_scale_radius18.json"
+  },
+  "repro": "$env:GODOT_TIMEOUT='1800'; $env:PERF_LADDER='perf_scale_radius{12|18}'; $env:PERF_SEED='1337'; $env:PERF_TICKS='1000'; $env:PERF_HD_ONLY='1'; $env:PERF_OUT='<path>.txt'; .\\tools\\godot.ps1 --headless --script scripts/debug/perf_scaling_curve_bed.gd"
+}

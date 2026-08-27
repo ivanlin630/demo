@@ -101,6 +101,8 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 
 ## 文檔導覽（★單一權威源 + 各角色開場只讀自己那格，降 CTX）
 
+| 你是 | 開場只讀 | 該格權威 topic |
+
 **規則**：本 doc（00）= 全角色共讀的**唯一共享脊椎**（角色/owner/邊界/接力流向/3 通則）。其餘每 topic **只有一個權威 doc**，別處只指標不重描。
 
 ★**開場該讀哪一格 ＝ 以 `SessionStart` hook 注入為準**（`session-role.sh`）——

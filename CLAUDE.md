@@ -20,6 +20,10 @@ Godot 4.2.2 GDScript 世界模擬器。
 
 # 憲法 site-freeze 防閘（merge-gate：禁新增引擎外 task 指派；新增違憲=FAIL）——orchestrator merge 前跑
 .\tools\godot.ps1 --headless --script scripts/debug/constitution_gate.gd
+
+# 裸 tick 守衛（merge-gate，與憲法閘同級）——★判準=「沒人判過的形狀」(NEEDS_HUMAN=0)，★★不是總數
+#   （總數會隨 code 長大而長大 ⇒ 用總數當閘＝恆紅＝沒有閘）
+bash .claude/hooks/bare-tick-gate.sh .
 ```
 
 不用 wrapper 直接呼叫 Godot exe 的 print 輸出會是 CP950 → grep 中文亂碼。

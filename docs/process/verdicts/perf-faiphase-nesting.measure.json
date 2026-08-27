@@ -1,0 +1,34 @@
+{
+  "slice": "perf-spike-inside",
+  "ticket": "systems票2026-08-26:進去看那7秒在做什麼——先確認[FaiPhase]子項是巢狀還是互斥",
+  "measured_at_commit": "main（零production改動，[FaiPhase]是既有print，phase_timing是既有opt-in；本輪只讀code+落地既有跑出來的log）",
+
+  "★★★機制本身不記巢狀關係(誠實限,直接回答)": "_fai_pht/_fai_pht_s(faction_ai_system.gd:684-693)只是flat Dictionary累加(label→us)，沒有parent/child metadata。巢狀關係是我讀call graph手動推出來的,不是機制自己告訴我的。",
+
+  "★★★巢狀關係(讀code，file:line坐實，非猜)": {
+    "第0層(整個evaluate_all_body)": "for fid in state.factions: 迴圈本身(faction_ai_system.gd:725起)",
+    "第1層": "loop1.factions(:760) = 整個per-faction迴圈總時長，包含以下第2層全部",
+    "第2層(loop1.factions內,per-faction順序鏈)": ["loop1.member_snap(:732)", "loop1.update_goals(:734)", "loop1.assign_tasks(:736)★通常佔loop1.factions幾乎全部", "loop1.infra(:740)", "loop1.diplo(:746)", "loop1.betray(:758)"],
+    "第3層(loop1.assign_tasks內,因為loop1.assign_tasks計時的_assign_tasks()函式本體就是下面這條鏈)": ["assign.player_cmd(:2480)", "assign.leader_lifecycle(:2485)", "assign.leader_unified(:2490)", "assign.members(:2492/2464)"],
+    "第4層(assign.leader_unified 和 assign.members 各自呼叫 _decide_unified()，_decide_unified內部另有一條獨立鏈)": {
+      "assign.leader_unified呼叫_decide_unified(:2489)一次(leader)": true,
+      "assign.members呼叫_assign_member_tasks(:2491)→每個member各呼叫一次_decide_unified，計時為member.unified(:2494-2512)，member.unified本身幾乎=assign.members全部": true,
+      "_decide_unified內部鏈(faction_ai_system.gd:2558-2595)": ["unified.rank(:2561)★DecisionEngine.rank_scored()", "unified.prosp(:2586,條件式)", "unified.to_task(:2595)"]
+    },
+    "第5層(unified.rank內，DecisionEngine.rank_scored極可能呼叫DecisionContext.gather())": ["gather.head/threat/weak_prey/strong_farm/aid/market/home_food/readiness_prey（decision_context.gd各行，用_fai_pht_s獨立_tg鏈，非caller的_tr/_ta/_t chain）"],
+    "★★★結論": "至少4~5層巢狀：loop1.factions ⊇ loop1.assign_tasks ⊇ (assign.leader_unified ∪ assign.members⊇member.unified) ⊇ unified.rank ⊇ gather.*。unified.rank每個team(leader+每個member)都會跑一次，是全鏈裡被呼叫次數最多的葉層之一，gather.*更深一層，兩者都被loop1.factions重複計了好幾層。"
+  },
+
+  "★★★對「加總=14.6M > total=7.0M」的解釋": "不是取樣或印錯，是【同一段工作被不同深度的label各記一次】——例如某個team的unified.rank在loop1.factions、loop1.assign_tasks、assign.leader_unified(或member.unified)、unified.rank本身，這4個bucket裡都貢獻了同一段us。加總=雙/三/四重計數，不能拿來對帳，只能當『指向哪個方向』的線索。",
+
+  "★★★組成穩定性(early/mid/late各3個spike tick,共9個,取自radius24/perf_scale長窗跑)": {
+    "早(tick10/20/30)": "loop1.factions≈loop1.assign_tasks(幾乎相等,差<0.1%) 恆居前2；unified.rank穩定前3~4；gather.market/gather.home_food交替出現在前5~8",
+    "中(tick1940/1950/1960)": "同樣組成：loop1.factions≈loop1.assign_tasks前2、unified.rank前3、assign.leader_unified前4、gather.home_food常見",
+    "晚(tick3820/3830/3840)": "同樣組成：loop1.factions≈loop1.assign_tasks、unified.rank、assign.leader_unified、gather.market/home_food、assign.members≈member.unified",
+    "結論": "組成在早/中/晚三段【穩定不變】——不是「開局特殊、後期換了別的東西」，同一組label(loop1.assign_tasks/unified.rank/gather.*/assign.leader_unified)從頭到尾都是主導者，只是絕對量隨tick波動(6.8M中位數那個分佈)"
+  },
+
+  "landed_paths": {
+    "全部419筆[FaiPhase]raw": "docs/measurements/perf-faiphase-all419-radius24.txt"
+  }
+}

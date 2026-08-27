@@ -69,6 +69,84 @@ empty_already_built / empty_no_fdef / empty_pop_low = 少量
 ★**而「均值」那一格也要記**：day30 private 總和 811.9 / 12 隊 ⇒ 均值 74 > 閘要的 50，
 **但逐隊分布是 `≥50` 只有 4/12、前 3 隊吃走 80.8%、一隊是 0** —— ★★**均值在高度集中的分布上不代表任何東西。**
 
+## ✅⚡效能 arc（事件比例計算）收束（2026-08-27，blueprint 點頭）
+### ★出口用的是【重定義後】的那組，不是原本那組
+★**原出口「零 LOD、50+ 隊可跑」在 slice 0 一量就已達成**（35~143 隊 baseline median 全在 16~31us）
+⇒ ★★**blueprint 裁：已達成的目標不能當出口** —— **重定義為「A 攤平 ＋ B 處置定案 ＋ 長考 wall-clock 預算重估」。**
+
+### ★★真正的病（五顆探針換來的）
+```
+spike ＝ 每小時一次（間距恰好 = TICKS_PER_HOUR）｜中位數 ~6.8 秒／次
+★不 ∝teams（101→202 沒放大）｜★不 ∝tiles（radius 3.84× 不單調）｜★★★是【常數因子】問題不是複雜度問題
+靶 A：loop3.orders_ambition cadence 對齊 burst（~8/45 個 spike tick，burst/non-burst ＝ 3.5×）
+靶 B：整條決策路徑穩定地貴（單次 rank_scored 100~150ms、均攤，top-1 只佔 1.8%）
+      └ gather.* 對 dt ≈ 35%（★跨頂層：rank_scored ＋ rank_survival 兩條路）
+```
+
+### ★★★落地
+| 刀 | sha | 結果 |
+|---|---|---|
+| ★**④ 錯峰**（靶 A） | `0ff0dde3` | **「≥100 隊」的 tick 數 2 → 0**｜最大同批 104 → 19｜**最小間隔違規 0** |
+| ★**② 髒旗快取**（靶 B） | `fb1a3d8d` ＋ `48aa98df` | **命中率 93.8%**（`rank_scored` 96.0%／`rank_survival` 87.1%）｜**零 stale**（807 配對）｜QA specimen 半 PASS |
+| ★③⑤ | — | ★★**撤**（不 ∝teams／不 ∝tiles；⑤ 減隊數不會變快還犧牲世界內容） |
+| ① T0 事件驅動 | — | **未做**（②的更徹底版，②之後沒有剩餘價值可圖） |
+`fp` 新基線 `06580e7fbaaa4dedc184cb721ffe24f6`｜headless 7 vs 7｜憲法閘 PASS(74)
+
+### ★★★★兩個【誠實的空手】—— ★這是收束帳的主體，不是附註
+1. ★**效能收益不宣稱加速**：**全相位合計 −7.0%，落在既有紀錄的雜訊帶（±4~8%）內。**
+   ★★**兩把刀都做對了它們該做的事，而總量沒有可宣稱的改善** —— **常數因子問題的正常結果。**
+2. ★★**公平性行為面【未驗】**（非「已驗證公平」，也非「有問題」）：
+   **`warring_states` 12 筆成交、碰撞 0/12，而 `0.9¹² ≈ 28%` ⇒ 連 10% 的碰撞率都排除不了。**
+   ★**拒絕拉長窗湊樣本** —— **更穩健的事實是那條通道實質不活躍（見下一節 4 床證據）。**
+   ★★**另兩條疑似通道（`outpost` 選址／`weakest-prey`）從未驗過。**
+   ⇒ ★★★**再驗觸發條件：市場成交量到達可統計量級時。**
+
+### ★出口第三項【未做，且刻意】
+**長考 wall-clock 預算重估 ⇒ ★排在【時間重錨之後】**（blueprint 准）——
+★★**重錨會改所有 tick 語意，現在估的是【作廢數字】，不留。**
+
+## ⏳ g1a 舊根/新根差異＝【未歸因】，但帶著三條已排除的路徑（2026-08-27，S2 重錨）
+**現象**：同 fixture、同 seed，**舊根 headless 蓋 `workshop`＋`mint`；新根蓋 `farming`×3**。
+★**而「這是重錨造成的排序改變」這個因果解釋【已被撤回】** —— 逐決策 trace 打掉它。
+
+### ★★已排除的三條（★寫下來是為了下一個人【不要重走】）
+| # | 排除的路徑 | 證據 |
+|---|---|---|
+| ① | **「重錨改了決策排序」** | ★**舊根／新根【決策序列逐筆相同】（96 筆）**；`farming` **根本不在候選清單裡**；`mint` **每一次都贏（util 8.64）** ⇒ ★★**卡點是【贏了但買不起】，不是【選了別的】** |
+| ② | **「孤立 fixture 能重現」** | ★**孤立床【重現不出】原觀測** ⇒ ★★**該 trace 只證明「在這條孤立路徑上重錨不動決策」，不涵蓋 headless 那個差異** |
+| ③ | **「RNG 流位置被重錨位移」** | ★**兩根在 g1a 前都 `seed(1337)`，結果仍分歧**（舊根 `mint=1` ／ 新根 `mint=0`） |
+
+### ⇒ ★★★狀態：**未歸因**，而它【不是空白】
+★**差異真實存在（兩份 headless 結果不同），而三條最可信的解釋都被打掉了。**
+★★**刻意不再往下追的理由**：**繼續加東西進孤立床去重現 ＝ 把 headless 的複雜度一點一點搬進來 ——
+搬到重現為止的那一刻，手上就是另一個 headless，不是一個可解釋的 fixture。**
+★★★**再開的觸發**：**若日後有【別的】症狀指到同一段（`mint` 買不起／設施選序），把這條翻出來一起看。**
+
+## 🏪 市場撮合幾乎不發生（2026-08-27，效能 arc 公平性量測【順手】挖到，★歸經濟線非效能 arc）
+量「先搶先贏是否給 offset 優勢」時窮盡試了 4 張床，挖到一件跟效能無關但經濟線該知道的事：
+| config | buy 嘗試 | sell 嘗試 | ★成交 |
+|---|---|---|---|
+| `perf_scale` | — | — | **0** |
+| ★**`merchant`**（★**專為貿易設計**：商隊 tag ＋ coin/goods） | 93 | 260 | ★★**0** |
+| `econ_bed` | 0 | 0 | **0**（★連撮合都沒被走到） |
+| `warring_states`（2000 tick） | 95 | 325 | ★**12** |
+★**bail 原因（`peaceful_economy`）**：`sell_no_surplus 6`／`buy_no_stock 1`／`buy_no_want 1` —— **賣方沒餘糧。**
+⇒ ★★**連「專為貿易設計」的床都是 0 成交** —— **這不是床沒調好，是【世界沒有可交易的剩餘】。**
+★★★**與材料 arc 收束的「世界就是窮」（`lt_cost 182/257 ＝ 71% 連物理成本都不到）完全一致。**
+★**歸屬**：**經濟線／規模經濟 arc**（blueprint roadmap）。**此處只記事實不開藥，效能 arc 未碰它。**
+### ★★★重納觸發（blueprint 命 2026-08-27）—— ★掛在這裡，因為做重基線／量市場的人一定會打開這一條
+```
+★觸發條件：市場【成交量】活過來（到達可統計量級）時
+★★要重納的兩件：
+   ①S2 統計等價床的「交易成交/日」—— 現被排除在 <5% 判準之外（12 筆無解析度，照印不裁決）
+   ②效能 arc 的公平性行為面（先搶先贏的爭奪頻率＋先評估方勝率）—— 現為【未驗】
+★★★而「活過來」由誰宣告：★量到市場成交進入兩位數以上且跨床可複現的那個人，不是等有人想起來
+```
+★**共同形狀**（blueprint 已在 S6／公平性上裁過同一形狀）：**照印、不裁決、不假裝**。
+
+★**連帶後果**：**效能 arc 的公平性行為面因此【現在測不了】** —— `warring_states` 那 12 筆碰撞 0/12，
+**而 `0.9¹² ≈ 28%` ⇒ 連 10% 的碰撞率都排除不了** ⇒ **明記未驗，再驗觸發條件＝市場成交量到可統計量級。**
+
 ## ★arc 狀態（blueprint 裁 2026-08-26）
 - ★**A（拉高 forest 初始庫存）／B（伐木場加速）＝ 停站** —— **世界堆滿材料也一樣沒人提要蓋。**
 - **B ＝ 帶條件封存**（不拆出去）：**若「賽跑」框裡開採速率日後真的成為 binding，再回來。**
@@ -172,8 +250,19 @@ QA 稽核 labor-v2 死亡分類時揭：`food_flow_avg` 是 **5 日 EMA**（`res
 ### ⏳~~per-team tick 成本 +34%~~ → ★推論已被 bisect 削弱（2026-08-20 訂正）
 **②slice 歸因 bisect（同床同 seed 同窗 10 天、三 commit 嚴格序列跑）**：`94e2f826`(pre-L0) / `3d30b3ed`(post-S2b) / 現 main 在 **49→56-73 團**範圍 per-team 成本**幾乎重合**（2415 / 2463 / **2209** us per team——現 main 甚至略快）、end_teams 也幾乎一樣 → **此規模窗內沒有單一 slice 可歸因的加價**。
 **★∴ systems 先前「+34%=三 slice 疊加真開銷」的推論削弱**：那 +34% 來自 **670.6ms/152 隊 vs 793ms/242 隊**，但兩點來自**不同 run/不同 config/不同 day-in-run**、**非同方法論控制**（measurer 標 confound 警訊）；且低 N 區間走勢與那兩點**方向相反**。→ **改判：規模驅動（superlinear）為主、slice 疊加未坐實**。若要鎖定高 N 的真實加價，需 **100-200 團區間同方法論 bisect**（systems 裁：**先不做**、已知非 slice 驅動、優先做 ③scaling 曲線正式版）。
+**★★★★三次量測對帳（systems 2026-08-26，slice 0 後補）**：`k≈2.1`（2026-07-05，★**mean**）／`k=0.636` 誠實 NULL（2026-08-20，30 點）／**次線性**（2026-08-26 slice 0：隊數 4.09× ⇒ spike 成本僅 2.79×，**每隊邊際成本略降**）—— ★★**三次沒有一次真正支持 N²，其中兩次是我們自己做的。**
+★★★**而「舊結論 50 隊崩」與「新曲線 16~31us」不矛盾**：**舊報 `mean`／`max`，新報 `median`，而 `median` 會把一顆【只出現 1 次】的 spike 完全濾掉**（spike 絕對值 43M~121M us，攤進 12~15 tick 的 mean 正好落回舊量級）。
+⇒ ★**真正的結論不是「誰錯了」，是【這個系統的成本不是平均分佈的】** —— **用 median 說沒問題、用 mean 說崩了，兩者都是真的** ⇒ ★★**該問的不是「快不快」，是【那顆 spike 多久來一次】**（長窗待答）。
+★**同一顆 spike 這是第三次遇到**：`:846②` 早記過 `near.faction_ai` spike「pre-existing、main 早有」。
+⚠️★★**引用紀律**：`:176` 那條 `k≈2.1` **已標「（史）」，但仍被轉述成「真 N² 嫌」** —— ★★★**「標了（史）」擋不住它變成下一個人的規格。**
+
 **★★k 值正式版=誠實 NULL（2026-08-20 perf③）**：30 點 log-log 回歸 **k=0.636/R²=0.567（弱擬合）**、分段劇烈擺動（1.58/0.47/0.71）、與兩高 N 觀測點交叉驗證**都對不上**（N=152 低估 23%、N=242 高估 40% **方向相反**）→ **現單 run 單 seed 方法論不足以定 O(N) vs O(N²)、不該外推 12mo**；measurer 誠實揭露本輪有跨 session **CPU contention**（比率型結論穩健、絕對 us 可能偏高）。**systems 判：不再為 k 單開一輪**（止損準則）、「撞不撞牆」**併 12mo 大考本身觀察**。
-（史）低 N 冪次擬合 **k≈2.1**（各 commit 2.1/2.7/2.9、noise 大僅方向性）=**超線性、疑 O(N²) 量級**→ 12mo 大考規模會更惡化。
+⛔**RETRACTED — 不得引用**（systems 2026-08-26 改寫；★原本只標「（史）」，而**它仍在 2026-08-26 被轉述成「真 N² 嫌」並差點決定一整條 arc 的刀法**）
+> ~~低 N 冪次擬合 **k≈2.1**（各 commit 2.1/2.7/2.9、noise 大僅方向性）＝超線性、疑 O(N²) 量級 → 12mo 大考規模會更惡化。~~
+> ★**推翻它的是**：**2026-08-20 perf③**（30 點回歸 `k=0.636`、弱擬合、交叉驗證方向相反 ⇒ **方法論不足以定 O(N) vs O(N²)**）
+> ＋ **2026-08-26 slice 0**（隊數 4.09× ⇒ spike 成本僅 2.79×，**次線性**）。
+> ★★**保留原文的理由**：**它曾經看起來很有道理，而知道我們錯在哪比刪掉它有用。**
+> ★★★**但它不再是可引用的斷言** —— **要引用 N² 的人，請引上面那條對帳段，不要引這一行。**
 
 
 day90 `avg=670.6ms / max=17.37s @152 隊`（農業b+labor-v2+churn-fix 疊加）vs 原輪 `793ms / 20.2s @242 隊`。**絕對值略優、但 per-team=4.41ms vs 3.28ms=重約 34%**。★**可疑點**：O(N²) 總成本下 per-team 應 ∝N、隊數**變少**(242→152)時 per-team 該**降**才對、卻升 34% → 指向三 slice 疊加**真的加了 per-team 開銷**（labor-v2 per-labor yield 計算 / 農業b `effective_pop_cap` per overflow check / churn-fix JOIN timeout 塊）。**但**本輪無 phase breakdown、世界組成/faction/encounter 未控制 → **粗量測非定罪**。perf arc 已依止損準則收官（blueprint re-open 條件=**長局跑出新明確熱點**）→ 此條為 **re-open candidate**、需先一輪 phase profile（Phase1 那套 6 階段）才算「明確熱點」。排 §4 之後 / 12mo 大考一併看。
@@ -898,7 +987,11 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 > LOD infra 存在且對 movement/economy 正確,但重認知系統 defeat LOD → O(N²)/hr。沙盒長跑須加固(否則大戲跑不到)。非重寫,P0 三項 targeted。
 - **★compute top:`faction_ai_system.gd:625 evaluate_all` 忽略 LOD 參數 → O(N²)（2026-07-05 lod_perf_bed 量化坐實）**：`evaluate_all(state, _team_ids)` 的 subset 被 `_` 忽略、`_evaluate_all_body:644` 對**全 factions×全 member_team_ids** 跑（非 near subset）→ faction AI 成本隨總隊數長,LOD 沒 gate。**perf 曲線（seed1337,2月,mean 攤銷）**:21隊 LOD 2994us(334tps)/full-HD 9035us / 41隊 7295us(137tps)/23659us / 107隊 49260us(20tps,max 6.7s)/137747us(7tps,max 7.4s)。**指數~2.0=O(N²) 鐵證;LOD 僅 3× 常數因子（movement/vision LOD-gate 給的,O(N²) 大頭沒 gate）。41隊(warring 自然上限)LOD 已 137tps<240+1s hitch;107隊(強塞 config)兩 regime 全垮**。修=bound faction AI（honor-LOD / 空間分區 / cadence 攤）=獨立 perf arc,規模野心大才值(藍圖裁目標規模,報 `2026-07-05-systems-to-blueprint-lod-perf-data`)。~~`_has_hostile_within` 每隊掃全隊~~ **已修（用 `state.teams_within` 空間索引,此條 stale 劃除）**。
 - **★LOD「疏非慢非笨」重定義（2026-07-05,與上 throughput 正交）**：far 移速10×慢/思考10×低頻=遠隊行為錯（物流癱=trade/envoy 一修雙解）。修=elapsed 積分（movement process 收 elapsed_ticks + faction cadence）。**與 O(N²) throughput 是兩回事**:此修行為對(遠隊正常活)但不改 throughput;throughput 修才決定 full-HD 拿不拿掉 LOD。B 修可先開軌(不卡規模裁定)。
-- ~~★compute:`world_state.gd erase_team` O(N)/erase → die-off O(K·N)~~ **✅ 批次化 done（2026-07-02 merged,`erase_teams` 單趟 sweep O(N+K),pointwise CLEAN×3 seed=零行為變,scaling 2.1-3.0× 隨 N 放大）**。**cadence spike 接棒案 ✅ 已收（2026-07-02 merged `cadence-spike-fix`）**:量測鏈 PhaseSpike→FaiPhase→call 級定罪（DecisionContext.gather finders A\* fan-out ~65%+_find_weakest_prey ~30%+infra new_loc O(tiles²)）→ 修全行為不變（**SSSP Dijkstra 永續 cache**（terrain 靜態,以 world iid 分層;runtime 改地形須呼 `PathSystem.clear_sssp()`,已留 API）+trusted param 跳 O(n) has+infra 敵 outpost hoist）。**pointwise IDENTICAL×3 seed**。faction_ai hourly 1.2-1.6s→常態 50-70ms(~20×)、早晚曲線平、K 分桶無惡化。⚠ 實作正確擋掉 plan 兩修法:濾先行/memoize 會位移 `observe_velocity` randf 流→pointwise dirty（**教訓:濾鏈含 RNG 副作用,「純 AND 濾可重排」假設要先驗 RNG**）。**→ 殘餘 perf 案（quantified,per-tick 不變量現行違反者,queue）**:①`far.total` LOD far batch 0.45-0.83s/500tick=現 top violator（pre-existing,top-15 spike 全是它）②`loop3.orders_ambition` ~300-330ms（OrderSystem order-cadence 對齊 tick 集中爆）③`unified.rank` 殘餘 gather.market/home_food O(tiles) 掃 <100ms 級。**裁定:不阻長窗**（spike 耗 wall-time 不污染 sim 數據=deterministic;長窗 GODOT_TIMEOUT 預算加大;量測期間勿並行重 bed 防機器爭用）。
+- ~~★compute:`world_state.gd erase_team` O(N)/erase → die-off O(K·N)~~ **✅ 批次化 done（2026-07-02 merged,`erase_teams` 單趟 sweep O(N+K),pointwise CLEAN×3 seed=零行為變,scaling 2.1-3.0× 隨 N 放大）**。**cadence spike 接棒案 ✅ 已收（2026-07-02 merged `cadence-spike-fix`）**:量測鏈 PhaseSpike→FaiPhase→call 級定罪（DecisionContext.gather finders A\* fan-out ~65%+_find_weakest_prey ~30%+infra new_loc O(tiles²)）→ 修全行為不變（**SSSP Dijkstra 永續 cache**（terrain 靜態,以 world iid 分層;runtime 改地形須呼 `PathSystem.clear_sssp()`,已留 API）+trusted param 跳 O(n) has+infra 敵 outpost hoist）。**pointwise IDENTICAL×3 seed**。faction_ai hourly 1.2-1.6s→常態 50-70ms(~20×)、早晚曲線平、K 分桶無惡化。⚠ 實作正確擋掉 plan 兩修法:濾先行/memoize 會位移 `observe_velocity` randf 流→pointwise dirty（**教訓:濾鏈含 RNG 副作用,「純 AND 濾可重排」假設要先驗 RNG**）。**→ 殘餘 perf 案（quantified,per-tick 不變量現行違反者,queue）**:①`far.total` LOD far batch 0.45-0.83s/500tick=現 top violator（pre-existing,top-15 spike 全是它）②`loop3.orders_ambition` ~300-330ms（OrderSystem order-cadence 對齊 tick 集中爆）③⛔**RETRACTED — 不得引用**（systems 2026-08-27，blueprint 准）：~~`unified.rank` 殘餘 `gather.market`／`home_food` **O(tiles) 掃** <100ms 級~~
+   ★**推翻它的是**：**2026-08-27 measurer 讀 production code file:line** —— `faction_ai_system.gd:3463-3475` 迭代的是 `VisionSystem.VISION_RADIUS`（**＝3，`vision_system.gd:3`**）的**固定窗**；`:3440-3458` 迭代的是 `team_market_known` **每隊自己的快取** ⇒ ★★**都不是 `state.world.tiles` 全圖，是 O(vision_radius²)＝O(3²) 有界掃描。**
+   ＋ **radius 12/18/24（tiles 3.84×）spike 中位數不單調、tile 最多階反而最低**（若真是 O(tiles) 就該單調長）。
+   ★**位置活**（`gather.*` 確實是大宗：**對 `dt` 佔比穩定 ~35%**）；★★**機制宣稱死**（不是 O(tiles)）；**數值死**（`<100ms 級` 是別的時候）。
+   ⇒ ★★★**要引用 `gather` 成本的人，請引這一段，不要引上面那句。****裁定:不阻長窗**（spike 耗 wall-time 不污染 sim 數據=deterministic;長窗 GODOT_TIMEOUT 預算加大;量測期間勿並行重 bed 防機器爭用）。
 - compute 其他 O(N²)/O(N·T)/hr：`_evaluate_outpost_residency:419`(全 tile/隊)、`vision_system.gd:22 tick_discovery`(inner 全 N)、`interaction_system.gd:74`(co-location 全掃,修 pattern 已存 `sim_runner.gd:247` pos_map)、`outpost_system.gd:168 tick_all`。
 - **★memory top leak:`world_state.gd:17 team_intel` observer rows O(世界年齡無界)**：`erase_team` 從不 prune team_intel → 每個曾存在的隊留永久 observer dict + 死 target claim rows。per-obs 200 claim cap 有、observer row 無。修=erase_team 加 `team_intel.erase(tid)` + 掃 observer 清死 target（同 create_faction chokepoint）。
 - memory 其他：`player_alerts` headless 無 poll leak(diplomatic 未 dedup)、`person_data.gd:54 memory` 繞過 `_trim_memory` 路徑(reaction:369/diplomacy/trade/command)可超 MEMORY_MAX=20。其餘結構全有 cap/TTL/erase-prune 界住。
@@ -1653,6 +1746,13 @@ established=0 真根**非** goal orphan（立國鏈已接：gate `faction_ai:103
 
 ⇒ ★★**「89 天零呼叫」＝ 一條路【不存在】＋ 另一條路【之後不再產生 build 委派】。**
 
+> ## ⏳★★★時間戳記（用戶補令 2026-08-26：「經濟等時間弄完再議 應該會變很多」）
+> ★**本節【所有經濟數字】屬於【時間重錨前】的尺度**（`lt_cost 182`／`cost_to_margin 75`／`258`／`71%`／收入 `12/11/7`／`vault_full` 各值…）。
+> ★★**重錨會改動經濟數字的地基**（收成曲線／工期 4–8×／飢餓減半／T0–T4 頻率）
+> ⇒ ★★★**重錨完成後一律以新尺度重量，舊尺度結論【不帶入】、不得直接引用。**
+> ★**留著它們是為了保留【推理過程】與【機制結論】**（「裝不下」「沒有出口」「就是窮」這類**與時間尺度無關**的形狀），
+> **不是為了保留那些數值。**
+
 ### ✅★★★★★★★ARC 收束（2026-08-26 夜）：**配管全部接完，剩下的是【真的窮】**
 
 **十五張票，每一層都是【一條沒接的線】，而它們現在全接上了**：
@@ -1674,10 +1774,14 @@ lt_cost 182（71%：連物理成本 150 都不到）｜cost_to_margin 75（29%�
 **它該用經濟的方式解（產能／規模／交易），不是再找一條沒接的線。**
 ★**下一步歸 blueprint 的 roadmap（規模經濟／有大有小），不由本 arc 延伸。**
 
-## ⚠️仍掛著的兩件（★都刻意不改，理由已記）
-- ★**床 config 給 Team3/4/5/7 塞 `material 400`** ＝ 失真設定；**Team5 `vault_full` 仍 72/72**（私產 120，cap 250 仍裝不下）。
-- ★**`military` L1 `cap 300 == 全費 300`（0 餘裕）** —— 關係式 `≥` 成立，**墊高是平衡判斷，要另過 WHAT。**
-  ★★**日後 military 若出現「存得到但永遠差一點」，第一個看這格。**
+## ⚠️仍掛著的兩件（★blueprint 2026-08-26 已各給處置與【觸發條件】）
+| 項 | 處置 | ★觸發條件寫在哪 |
+|---|---|---|
+| ★**床 config 給 Team3/4/5/7 塞 `material 400`**（失真；**Team5 `vault_full` 仍 72/72**，私產 120、cap 250 仍裝不下） | **下次重建本床基線時一併除掉**（量測衛生） | ★★**已寫進 `config/peaceful_economy.json` 的 `_doc`** —— **打開那個檔的人就是該做它的人** |
+| ★**`military` L1 `cap 300 == 全費 300`（0 餘裕）** | **併入未來平衡輪，不單獨動**（關係式 `≥` 成立；墊高是平衡判斷） | ★**日後 military 若出現「存得到但永遠差一點」，第一個看這格** |
+
+★★★**為什麼要寫觸發條件而不是只列在這裡**：**「等某天再做」的項目會靜默失效** ——
+**唯一能活下來的寫法是把它掛在【那天那個人一定會打開的檔】上。**（連 memory `feedback_nobody_owns_shrinking`。）
 
 ### ★★★★★★再收口（2026-08-26 晚）：**根再往下一層 —— 是【載重】，而閉環變成五層**
 
@@ -1967,3 +2071,36 @@ func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) 
   - **質感＝摩擦**：交易不免費——價差談判 / 餘量謹慎 / 運力成本 讓**一部分** willing 夥伴談不攏,且**真實有意義**（真的價不對/運不划算），非全體卡死。
   - **摩擦掛人格**：急著交易/絕境的鬆手（接受薄利）、貪婪/謹慎的收緊（守價、留餘量）→ 談不成＝**性格與情境的戲**,非一道誰都過不了的死門檻。
   - 一句：**willing 夥伴大多能成交,談不攏是少數且有理由（人格/情境）,非常態。** 成交率/門檻數字系統 tune（HOW）。
+
+## ★採集 material 在 warring 塌掉 −97%（具名，2026-08-27 S2 終量抓到）
+
+```
+before 0ab34123 = 1.85/日 (n=240)  →  bcbfb6f3 = 0.09/日 (n=7)  →  b05750ef = 0 (key 不存在)
+                                    ↑ ★★★-97% 在這一格
+```
+★**要解釋的事件是 `240 → 7`，不是 `7 → 0`**（後者是已塌量的尾巴，n=7 本來就在雜訊層）。
+★★**嫌疑犯已鎖定在 `0ab34123 → bcbfb6f3` ＝【`MSG_TTL` 修復那個 commit】** ——
+★★★**同一個 commit 上：訊息送達 +55.4%／採集 material −97%。★不宣稱因果，但它有同 commit 的鄰居。**
+★**已排除**：`bcbfb6f3 → b05750ef` 的純觀測 tap commit（`fp` 逐位元相同 `4f1c0eda…`）。
+★**peaceful 那床 material 採集健康**（34.35/日，+1.0%）⇒ **這是 warring-bed-specific 的塌陷。**
+**下一步**：**先看 S3 終量**（決策/送達同源嫌疑）；★**別在沒有 S3 數字前開它。**
+出處：`docs/process/verdicts/S2-purity-final.measure.json`、`docs/superpowers/specs/2026-08-27-S2-root-reanchor-HOW.md §S2 結案`
+
+## ★★★★S3 搬遷（七支→T3 3 天）讓 `warring_states` 提前 `game_over`（2026-08-27，★可逆閥 A/B 實測）
+
+```
+                   T3(3 天)      ★閥回滾(10/20/30/50h)
+game_over          tick 8160     ★★從未
+結束時 teams        69            89
+_evaluate_all_body  144 次        316 次
+```
+★**同 seed 同床，唯一差異＝七支 cadence** ⇒ ★★**世界是【結束】，不是【變慢】。**
+★★★**這超出 blueprint「有界窪地窗」條款①的前提**（該條款說窗內「隊反應慢」＝已知態非 bug）——
+**「世界在 5.7 天內結束」不是「反應慢」。**
+
+★**下一步已定：先查 `game_over` 的【原因】，不調 T3 值。**
+★★**理由**：**兩種原因的下一步完全相反** ——
+①**某一支的評估是某個維生迴路的必要前提**（＝執行層缺陷，修好後 3 天可能可行）
+②**決策普遍太慢導致崩潰**（＝3 天真的太慢，`provisional` 值該調，而那是 blueprint 的權）
+★★★**在分清楚之前調 cadence ＝ 把質地訊號調掉**（同「不 fire 就 crank 到會 fire ＝ 廢引擎」那族）。
+出處：`docs/superpowers/specs/2026-08-27-S3-tiered-cadence-HOW.md`、implementer commit `b149b5fb`
