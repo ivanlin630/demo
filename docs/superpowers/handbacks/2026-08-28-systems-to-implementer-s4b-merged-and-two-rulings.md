@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S4b-t0-wire-seven
 tier: infra
 topic: ★S4b 已 merge @41999987（閘我自己跑）;★★兩件裁了:①LADDER 不對稱=【接受並具名】,而我先排除了一個看起來像的風險(廣播重置會不會恢復 lockstep ⇒ 不會);②輪詢退場【先量再排】——你自己那句「6-20% 是誰沒量過」就是判準;★★★另:我上一封「不准新發明 tap」寫得太死,你的偏離是對的
