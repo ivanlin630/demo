@@ -46,11 +46,21 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 			var person: PersonData = state.persons[pid]
 			if person.team_id != tid:
 				continue
-			if state.world.current_tick % GOAL_CHECK_INTERVAL == 0:
+			# ★★★S3：從 `% == 0` 改成【錯峰排程】—— 而不是自己寫累加器。
+			#   ★層級表決定【多久想一次】(C)｜CadenceStagger 決定【什麼時候輪到我】(相位)
+			#   ★★兩件事各有其單一真值，而自己寫累加器 = 又長出第三個排程實作。
+			#   ★★★開場那一批：預設 0 代表未排程 ⇒ 先種一次（同 faction_ai 的 ambition_eval 形狀）。
+			if person.goal_eval_next_tick == 0:
+				person.goal_eval_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick, person.id, GOAL_CHECK_INTERVAL)
+			if state.world.current_tick >= person.goal_eval_next_tick:
 				if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "GOAL", "team": person.id, "tick": state.world.current_tick}, 6000)
 				_update_goals(person)
 				var alignment: float = _npc_ai.check_goal_alignment(person, team.current_task)
 				LoyaltyBank.adjust(person, alignment, "goal_alignment")
+				# ★排下一次（同一支 helper）—— 不手寫 next = tick + C，那正是同批到期的病根。
+				person.goal_eval_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick, person.id, GOAL_CHECK_INTERVAL)
 			var reaction: String = _evaluate_person(state, person, team)
 			if reaction != "none":
 				_apply_reaction(state, person, team, reaction, trials)
