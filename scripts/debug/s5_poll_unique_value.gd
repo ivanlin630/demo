@@ -62,8 +62,36 @@ func _run() -> void:
 			stopped_at = state.world.current_tick; stop_reason = r
 	var eff: int = stopped_at if stopped_at != -1 else ticks
 
+	# ★★★actor 母體：判準①要分【分母=0 因為輪詢沒觸發】與【分母=0 因為根本沒有 actor】。
+	#   ★這兩件在輸出上长得一模一樣，而結論完全不同：
+	#     前者是【這張床量不到】，後者是【這張床沒有這種東西】。
+	#   ★★實例：peaceful_economy 的 config 沒有 factions 鍵、全程也沒形成勢力
+	#     ⇒ 勢力層六支的分母 0 是【沒有 actor】。
+	#   ★★★讓床自己分，不靠我在交付單裡口頭斷言。
+	var n_fac_end: int = state.factions.size()
+	var n_indep_end: int = 0
+	var n_lead_end: int = 0
+	for tid_c in state.teams:
+		var t_c: TeamData = state.teams[tid_c]
+		if t_c.beast_kind != "":
+			continue
+		if t_c.faction_id == -1 and t_c.parent_team_id == -1:
+			n_indep_end += 1
+		if t_c.leader_id != -1:
+			n_lead_end += 1
+	var actor_have: Dictionary = {
+		"GOAL": state.persons.size(), "LADDER": n_lead_end,
+		"STRATEGIC": n_fac_end, "ALLIANCE": n_fac_end, "BETRAY": n_fac_end,
+		"INFRA": n_fac_end, "FACTION_UPDATE": n_fac_end, "INTENT": n_fac_end,
+		"INDEP_INFRA": n_indep_end,
+	}
+
 	var out: Array = []
 	out.append("# 輪詢獨特貢獻率｜cfg=%s days=%d ticks=%d 有效窗=%d" % [cfg, days, ticks, eff])
+	out.append("# actor 母體(收尾)：persons=%d factions=%d 獨立隊=%d 有領袖隊=%d"
+		% [state.persons.size(), n_fac_end, n_indep_end, n_lead_end])
+	print("actor 母體(收尾)：persons=%d factions=%d 獨立隊=%d 有領袖隊=%d"
+		% [state.persons.size(), n_fac_end, n_indep_end, n_lead_end])
 	print("\n=== s5_poll_unique_value ｜cfg=%s days=%d ===" % [cfg, days])
 
 	# ── ①②③：分母 / 分子 / 第三類 ──
@@ -77,6 +105,12 @@ func _run() -> void:
 	for k in SUPPORTS:
 		var denom: int = int(Probe.counts.get("reeval.cadence." + k, 0))
 		tot_denom += denom
+		if denom == 0:
+			# ★判準①：分母 0 不拿來當「貢獻率 ≈ 0」，而且要分兩種。
+			var why: String = "NO_ACTOR(這張床沒有這種 actor，數量=0)" if int(actor_have.get(k, 0)) == 0 				else "NEVER_FIRED(有 %d 個 actor，但純 cadence 觸發從未發生)" % int(actor_have.get(k, 0))
+			print("   %-16s %8d  ★分母=0 ⇒ %s" % [k, denom, why])
+			out.append("%s|0|—|—|—|—|n/a|★分母=0 ⇒ %s" % [k, why])
+			continue
 		if not DecisionTier.poll_measurable(k):
 			# ★量不到 ≠ 0：0 會被讀成「輪詢對它沒貢獻」，而真相是【沒有儀器】。
 			print("   %-16s %8d %8s %8s %10s %10s %10s" % [k, denom, "量不到", "量不到", "量不到", "量不到", "—"])
