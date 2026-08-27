@@ -126,6 +126,21 @@ func _initialize() -> void:
 			print("  %-14s ★key 不存在，而 Probe 是 ON ⇒ 【這件事從未發生】（tap 在，只是沒 fire）" % row[0])
 		else:
 			print("  %-14s %.2f/日  ｜總數=%d（累加了 %d 條 key）" % [row[0], float(total) / dayf, total, nkeys])
+	# ── ★傳播節律（S3 前置）：單位是【每遊戲小時】，不是每 tick ──
+	#   ★因為要回答的問題是「它是不是 1 小時心跳」—— 比 per-tick 永遠看不出來。
+	var hours: float = float(ticks) / float(WorldState.TICKS_PER_HOUR)
+	var p_call: int = int(Probe.counts.get("prop.call", 0))
+	var p_arr: int = int(Probe.counts.get("prop.arrivals", 0))
+	var p_pair: int = int(Probe.counts.get("prop.colocated_pair", 0))
+	print("
+── 傳播節律/遊戲小時（★S3 前置）──")
+	if p_call == 0:
+		print("  ★prop.* key 不存在或為 0（Probe 是 ON）⇒ 【這件事從未發生】")
+	else:
+		print("  呼叫次數      %.2f/小時  ｜總 %d（★若掛每 tick ⇒ 此值應 = TICKS_PER_HOUR = %d）"
+			% [float(p_call) / hours, p_call, WorldState.TICKS_PER_HOUR])
+		print("  arrival 事件  %.2f/小時  ｜總 %d（分母）" % [float(p_arr) / hours, p_arr])
+		print("  同格對數      %.2f/小時  ｜總 %d（真的有機會交換的）" % [float(p_pair) / hours, p_pair])
 	print("
 ── 原始總量（★先看未除以天數的值，別讓 %.2f 把小數字吐成 0）──")
 	for k9 in Probe.amounts:
