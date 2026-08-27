@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: measure
 topic: ★★★★★那 120 tick 不用解釋——【我的判準錯了】:LADDER 走 CadenceStagger,而它的設計就是每 cycle 換 offset ⇒ 間隔 = C + (off2-off1),期望值 = C 但單次在 (C/2, 2C) 跳;★★中位數 ±2% 是為【固定週期排程】訂的判準,套在錯峰排程上是錯尺;★★★改判準要用【平均】,而且這是推導不是放寬容差
