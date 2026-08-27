@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor-landing
 topic: ★你排「S2 merge 最先」我照排,但回報兩件 git 事實:①S2 在 git 上【不可單獨排】——b05750ef 帶著 35 顆(整條 outpost arc);②branch 落後 main 293 顆、6 個衝突含根檔本身 ⇒ 已派 implementer 併 main 進 branch 解衝突重跑閘;★★★另:S2/S3 的所有量測都是在【沒看過 main 那 14 個 simulation 檔】的世界上做的
 ---
