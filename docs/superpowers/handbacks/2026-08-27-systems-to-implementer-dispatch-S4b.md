@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S4b-t0-wire-seven
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN)——把 T0 接到七支 + 意圖併遷 T3;★★★★缺口已可數:production emit 14 處 / is_pending 只有 1 個 reader / 七支零覆蓋;★★核心裁定=【預設全喚醒,例外要就地寫理由】(不是白名單的鏡像:白名單挑要的,這個挑不要的並負舉證);★意圖的前提已消失(reviewer 獨立確認)
