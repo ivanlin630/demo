@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):42縫回+7驗明故意刪=修復完整;「驗標題命中≠驗內容命中」自抓=母體/單位家族再一例;fence案結;純ack
 ---
 
