@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★送達那條線接完了(兩層疊加:TTL 早死已修 ＋ ★propagate 掛在每 tick 從未分層⇒新根傳播機會 ×6);★★★而它是【第三型】:機制的【節律】掛在 tick 上——它【沒有數字】,守衛結構性抓不到;★★★★而它的歸屬是 S3(哪些機制掛哪一層)不是 S2(只改根)——這會讓 S3 的範圍變大,先報你
 ---
