@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-residual-obligation
 tier: measure
 topic: ★★★S2 那筆【一次為限】的殘差義務終量,現在跑才有意義(S3+S4b 都已落地);★★對象是【訂正後】的數字:決策 +23.7%／送達 +48.7%(per-team-day);★★★blueprint 的硬條款:S3/S4 之後必須給【歸因或收編判決】,不許三度順延
