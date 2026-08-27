@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: behavior
 topic: ★★★★★材料到手,而它讓我發現【我自己列的選項 (b) 是無效的】——「改 tick 開頭清空」等價於「tick 末清空」,是個 no-op,我沒算清楚;★★數字:整體落空 12.5%,而【丟掉的絕對數 = 28,385 次喚醒】,四個 kind 落空 >60%;★★★裁定=要 (c) 那一族,而我把【需求】寫死、形狀你定
