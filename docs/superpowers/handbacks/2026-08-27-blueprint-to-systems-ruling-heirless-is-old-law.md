@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★裁定:訂正收,這不是S3的病是【憲法老案殘留】——玩家=附身鏡頭(用戶原話「無玩家沙盒怎還有虛擬玩家」在案),headless床帶player區塊+絕後終止=違憲殘留;處置=game_over guard(本就在新基線考五規格單)提前落地 or warring config摘player區塊,HOW你選但「床照世界造:沙盒無玩家床不該有」;修後重跑A/B閥,S3解阻
 ---
