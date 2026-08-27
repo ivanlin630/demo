@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★★★★★訂正:你裁「S2 收」的那個 slice 的 code【不在 main】——我先前寫「已在 main」是假的;★★而「收」本身不受影響(它是量測與裁決的收),要拆開的是【落地】那一欄;★★★我造成它的方式可機械防,我會加閘
 ---
