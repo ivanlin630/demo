@@ -113,26 +113,12 @@
 
 ## ★★★感知鐵律的**鏡像**：決策也不得【讀不到自己的狀態】（2026-08-25）
 
-**既有鐵律**：★**決策只能吃 belief，不得 god-view 讀世界真值。**
-★★**本條是它的另一端**：★★★**決策也不得【連自己的狀態都讀不到】。**
-
+**既有鐵律**：★**決策只能吃 belief，不得 god-view 讀世界真值。** ★★**本條是它的另一端。**
 | ★**god-view**（既有） | ★**blind-view**（本條） |
 |---|---|
-| **讀了不該讀的**（別人的真值） | ★★**讀不到該讀的**（自己的糧倉） |
-| ⇒ **神目決策** | ⇒ ★**手不聽腦的另一種**：**腦沒有眼睛** |
-
-**血證**：`TradeValuation.reserve(team, res, leader_values, state = null)` ——
-**包裝層 `InteractionSystem.local_value(team, res)`（`:660`）／`PlayerTradeSystem._sellable_qty(team, res, leader_values)`（`:13`）簽名裡【沒有 `state`】**
-⇒ ★**留底估值讀不到自家糧倉** ⇒ **定居隊（糧在糧倉、私產 0）會誤判自己沒糧。**
-
-★★**而 `state` 明明在呼叫端手上**：`player_trade_system.gd:72` **同一行**裡
-`TradeValuation.leader_vals(state, tgt)` **傳了 `state`**、`_sellable_qty(tgt, res, …)` **沒傳**。
-⇒ ★★★**不是「拿不到」，是【簽名沒開那個口】—— 純接線可達，不需要新增資料流。**
-
-★**同源**：`resource_system.gd:443-445` 早已寫明「**WS-1 把定居隊糧搬進糧倉只改了消耗，漏改決策讀者 → 定居隊/商隊 AI 誤判餓**」。
-⇒ ★★**`reserve` 正是那批「漏改的決策讀者」之一 —— 這不是新設計，是既有裁決還沒走完。**
-
-
+| **讀了不該讀的**（別人的真值） ⇒ 神目決策 | ★★**讀不到該讀的**（自己的糧倉） ⇒ ★**腦沒有眼睛** |
+★**判準**：**同一支流程裡，「產出／檢查」與「投入／扣款」若讀【不同的池集】，那就是它。**
+> ★血證兩例（`TradeValuation.reserve` 讀不到自家糧倉／製造投入只讀私產而產出讀兩池）→ `process/detail/invariants-cases.md`（同標題節）
 
 ## ★其餘不變量 → 索引（2026-08-25 #4：本檔只留【憲法級】）
 
@@ -188,3 +174,13 @@
 ★**規則**：**任何跑 tick 的床，必須接 `advance_tick` 回傳值，並印【首次非推進的 tick 與原因】。**
 ★★**沒有 game_over 也要印 `無`**（「沒印」與「沒接」長得一樣）；★★★**per-day／per-window 的分母必須是【有效窗】不是【請求窗】。**
 > ★**血證／現況統計 → `detail/invariants-cases.md`（同標題節）**；★★交件欄位形狀見 `process/03b_measurer.md §BedSelfCheck`。
+
+## ★★★T0 事件瞬醒：**任何突發即喚醒相關決策層**（用戶原則性裁定；S4b 落地 2026-08-28）
+```
+★單一真值:喚醒 = WorldEvents（emit / is_pending / consume_and_clear;封閉母體 all_kinds() = 30）
+          排程 = CadenceStagger（★兩邊都別長第三個）
+★★預設【全喚醒】,例外要【就地寫理由】——★★★白名單挑【要的】(漏了靜默失效),
+   這個挑【不要的】並負舉證(漏了只是多醒一次)⇒ 沉默的預設落在安全那一邊
+★新增決策支 ⇒ 必須在 cadence 閘【前】讀 is_pending;新增突發事件 ⇒ 必須進 WorldEvents
+```
+> ★現況／已具名例外（`LADDER` 重排不對稱）→ `process/detail/invariants-cases.md`（同標題節）＋ `known_issues.md`。

@@ -1160,3 +1160,15 @@ reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權�
 ★★★**intended-change 要記一條**：`WORLD_SPEED_MULT` 移除 ⇒ **移動 4.8 → 4.0 小時／hex（快 17%）** ——
 **不是原註解警告的「5 倍慢＝餓死潮」，因為根同時換了。**
 **未落地、明記**：★**S3 本體留在 branch（5/7，`GOAL`／`LADDER` 未驗）**；★★**純度終量要在 merged base 重跑**（blueprint 裁，殘差義務轉掛那次）；★**相位混疊掃描 spec 已立未派**。
+
+### ★★★★S4b 事件瞬醒 —— **已落地 main**（2026-08-28，merge `41999987`）
+```
+★九個閘位接上 WorldEvents.is_pending ＋ 意圖併遷 T3;覆蓋對帳 210/210,閘上 kind 過濾 0 處(零例外)
+★★行為證據(注射 vs 對照):勢力五支/INTENT ~12×、GOAL ~4×、INDEP_INFRA ~47×、LADDER ~44×
+★★★fp f7f09077 → 2ede39b1,三跑 byte-identical ⇒ 預期分岔不是不確定性
+```
+★★★★**而死水三欄給了一個沒預期的結論**：**正常世界裡每一支都是 event >> cadence**
+（GOAL 595:63／LADDER 303:19／勢力五支 72:4）⇒
+**S3 把七支拉到 3 日之所以還能反應，不是「慢了但可接受」，是【慢的那條路只佔 6–20%】。**
+**未完成**：★**T0 只做了一半 —— LOD 同體（輪詢退場）沒做，這一刀是【只加不減】**；
+★★**210 格只涵蓋已宣告的 30 kind**；★**`LADDER` 重排不對稱已具名（`known_issues`）**。
