@@ -5,16 +5,34 @@
 > —— systems 全量盤點事件型別，★★任何突發即喚醒相關決策層，【不搞白名單挑食】；新增突發事件必掛 T0。**
 **公平三保證第三條**：**T0 人人瞬醒（鐘慢不害死人）** ⇒ ★**S3 七支遷 T3 之後，這條是【安全前提】** —— 窪地窗條款②③正在計時。
 
-## ★★★核心發現（★這改變了 S4 的形狀）：**喚醒【已經存在】，只是沒有名字**
+## ★★★~~核心發現：喚醒【已經存在】，只是沒有名字~~ ⛔**RETRACTED 2026-08-27（前提被推翻）**
+
+> ★**被什麼推翻**：implementer 的 S4a 盤點 —— ★★**單一入口【已經存在】：`scripts/simulation/world_events.gd`
+> （`class_name WorldEvents`／`MESSAGE_KINDS`＋`FUNC_KINDS`＋`STATE_KINDS`／`all_kinds()` ＝ 30 種／
+> `emit()`／`is_pending()`／`consume_and_clear()`）。★★★對帳：30 種宣告全部有來源、0 死、WHAT 六類全中。**
+> ★**該引哪一段**：**下面的〈★★★★★★訂正後的核心事實〉。** ★**設計未動**：S4a/S4b 切法、四桶、下限、驗收**一字未改**。
+>
+> ### ★★★★而我錯在哪（★要記，因為它是今天同一個形狀的第 N 次）
+> ★**我在 spec 裡寫的機械定義是對的**：「**對任何 `*_eval_next_tick` 賦值【當前 tick 或更早】的站點**」。
+> ★★**而我報出去的 `35` 是另一個查詢的結果** —— **我 grep 的是 `_eval_next_tick *=`（所有賦值），沒有套上「＝ current_tick」那個條件。**
+> ```
+> ★用我自己寫的判準重跑：grep -rnE "_eval_next_tick *= *state\.world\.current_tick *$"
+>    ⇒ ★★2 處（faction_ai:458 decision／faction_ai:523 prosperity）—— 不是 35
+> ★★★而 implementer 獨立盤出的分解是：19 走 CadenceStagger ／ 11 排未來 ／ 真正叫醒的 1 處
+>    （我多算到的 :523 是 prosperity 級,與他的 decision 級口徑差異,以他的盤點為準）
+> ```
+> ★**形狀**：**我【寫對了判準】，然後【報了一個不同查詢的數字】** ——
+> ★★**同「驗標題命中 ≠ 驗內容命中」、同 `head -3` 那次的假窮盡：判準與執行判準的查詢脫節。**
+> ★★★**而這次它被廣播成「核心事實」給了 reviewer／blueprint／implementer，是今天代價最大的一次。**
+
+## ★★★★★★訂正後的核心事實（★它讓 S4 更小、也更清楚）
 ```
-faction_ai_system.gd:458   team.decision_eval_next_tick = state.world.current_tick
-★而它上面的註解逐字寫著：「force reeval：threat 觸發即反應（繞 _decide_unified cadence 節流）」
-⇒ ★★那【就是】T0 的雛形 —— 一個真實存在、已經在跑的「事件把它叫醒」
-★★★而它散在 7 個檔、35 個賦值點,沒有單一入口：
-   faction_ai 23 / strategic_ai 6 / reaction 3 / decision_context 2 / ambition_ladder 2 / labor 1 / goal_resolver 1
+★基礎設施【已經健康】：WorldEvents 是單一入口,封閉母體 all_kinds() = 30,0 死,WHAT 六類全中
+★★而【真正把人叫醒】的站點只有 1〜2 處
+⇒ ★★★缺的不是「單一真值」,是【事件 → 喚醒】那一段【接線】
 ```
-> ★★**病的形狀與 S3 完全相同**：**動作是對的，而它【繞過了本該有的單一真值】** ——
-> **S3 是「排程」沒有單一真值（已修：`CadenceStagger`）；S4 是「喚醒」沒有單一真值。**
+★**所以 S4b 不是「建一個 `Wake`」** —— ★★**是把已經宣告的 30 種事件接到喚醒上**（＝盤點的 (b) 桶）。
+★**而這比原本的設計【小得多、也可驗得多】**：**母體已知（30）、入口已知（`WorldEvents`）、缺口在 (b) 桶裡逐項列著。**
 
 ## ★scope：**切兩片**（★理由：母體未知時不設計接線）
 | | 內容 | 產物 |

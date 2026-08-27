@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S4a-t0-census
 tier: probe
 topic: ★★★DISPATCH(R² CLEAN)——T0 喚醒點與突發事件的【封閉母體盤點】,純盤點零改動;★★★★核心事實先給你:喚醒【已經存在】(faction_ai:458 的註解自己寫著「force reeval:threat 觸發即反應,繞 cadence 節流」)而它散在 7 檔 35 處沒有單一入口;★★而「不搞白名單」是用戶原則性裁定 ⇒ 候選來源要【枚舉】不是【想】
