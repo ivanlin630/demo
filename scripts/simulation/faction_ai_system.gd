@@ -771,16 +771,23 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if SimRunner.phase_timing: _tf = _fai_pht("loop1.assign_tasks", _tf)
 		# C: 每 INFRA_INTERVAL 評估一次基建（蓋/升級/擴建）
 		if state.world.current_tick % INFRA_INTERVAL == 0:
+			# ★★常駐節律 tap（Probe-gated，關掉零成本）：
+			#   ★【什麼時候評一次】今天沒有任何儀器 ⇒ 每次要量都要重新掛臨時 tap（我已經掛撤三次）。
+			#   ★★而「新 decision 必接 tap」是不變量：節律 fire 就是一個 decision 事件。
+			#   ★★★它同時是 S3/S4 的驗收依據：觸發間隔量不出來，層級制就無法被驗證。
+			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "INFRA", "team": f.faction_id if f != null else -1, "tick": state.world.current_tick}, 6000)
 			_evaluate_infrastructure(state, f)
 		if SimRunner.phase_timing: _tf = _fai_pht("loop1.infra", _tf)
 		# 每 20 小時評估一次主動外交
 		if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
+			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "FACTION_UPDATE", "team": f.faction_id if f != null else -1, "tick": state.world.current_tick}, 6000)
 			var _leader_team: TeamData = state.teams.get(f.leader_team_id)
 			if _leader_team != null:
 				DiplomaticAiSystem.new().try_proactive_diplomacy(state, _leader_team)
 		if SimRunner.phase_timing: _tf = _fai_pht("loop1.diplo", _tf)
 		# 每 BETRAY_CHECK_INTERVAL tick 評估結盟 team 背叛
 		if state.world.current_tick % DiplomaticAiSystem.BETRAY_CHECK_INTERVAL == 0:
+			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "BETRAY", "team": f.faction_id if f != null else -1, "tick": state.world.current_tick}, 6000)
 			var leader_team_b: TeamData = state.teams.get(f.leader_team_id)
 			if leader_team_b == null: continue
 			for tid in f.member_team_ids.duplicate():  # duplicate: _execute_betrayal may erase during iteration

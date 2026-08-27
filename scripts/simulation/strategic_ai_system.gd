@@ -27,6 +27,7 @@ static func _nearest_valid_tile(state: WorldState, target: Vector2i, fallback: V
 
 func tick(state: WorldState, faction: FactionData) -> void:
     if state.world.current_tick % STRATEGIC_INTERVAL != 0: return
+    if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "STRATEGIC", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
     _update_faction_goals(state, faction)
     if faction.strategic_goals.size() > 0:
         var top: Dictionary = faction.strategic_goals[0]
@@ -37,6 +38,7 @@ func tick(state: WorldState, faction: FactionData) -> void:
         var t: TeamData = state.teams.get(tid)
         if t: _assign_breakout(state, t)
     if state.world.current_tick % ALLIANCE_CHECK_INTERVAL == 0:
+        if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "ALLIANCE", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
         _evaluate_alliance_need(state, faction)
 
 func _update_faction_goals(state: WorldState, faction: FactionData) -> void:

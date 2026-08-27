@@ -47,6 +47,7 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 			if person.team_id != tid:
 				continue
 			if state.world.current_tick % GOAL_CHECK_INTERVAL == 0:
+				if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "GOAL", "team": person.id, "tick": state.world.current_tick}, 6000)
 				_update_goals(person)
 				var alignment: float = _npc_ai.check_goal_alignment(person, team.current_task)
 				LoyaltyBank.adjust(person, alignment, "goal_alignment")
