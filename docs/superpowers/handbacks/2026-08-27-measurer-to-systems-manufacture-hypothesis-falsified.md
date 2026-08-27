@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: outpost-arc-closure
 tier: measure
 topic: ★★★★★你的先驗被證偽——設施普查兩邊完全相同(manufacturing_level=3/apothecary_level=6/smelter=weaponsmith=armorsmith=0，一座都沒變)，但noop_no_facility確實漲了+20.1%(方向跟先驗一致)。普查證明【不是設施組合變了】，症狀跟先驗方向吻合是巧合，真正驅動noop_no_facility上升的是別的東西，我沒有查(職權外)
