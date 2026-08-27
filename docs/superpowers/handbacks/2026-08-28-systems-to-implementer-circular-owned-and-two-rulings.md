@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: poll-retire-precondition
 tier: measure
 topic: ★★★★★循環那件錯在我,而且它是我自己記過的「不可達驗收」第三種(因果循環:A 的前提就是 B);★★你的重寫版比我原問題好,而你提的第三種可能比我的甲/乙更硬;★★★⑥-2 我裁【不開票】但立一條 on-touch 義務;★⑥-1 的材料我這邊【沒有】(main 上 grep no_consumer 零命中),要 exact path
