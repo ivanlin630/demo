@@ -314,15 +314,22 @@ func _run() -> void:
 				elif wake_key.has(s3 + "#" + akey + "|" + str(tk + 1)):
 					b3 = "seen_next"
 				else:
-					b3 = "unseen"
+					# ★★★systems 改的判準：unseen 拆兩類（互斥且窮盡）
+					#   buffer_expired  該支在 2 tick 窗內【有走訪】該 actor 卻沒看到 ⇒ ★必須歸零
+					#   not_visited     該支在窗內【根本沒走訪】⇒ ★★不是雙緩衝的責任，
+					#                   它是【壽命 < 走訪間隔】的結構事實
+					# ★★結構上 buffer_expired 應該恆為 0（窗內任何一次評估都會讀到那兩格），
+					#   ★★★但我不用論證交差 —— 印出來，非 0 就是我的結構推論錯了。
+					var vis: bool = Probe.counts.has("gate.tick." + s3 + "|" + str(tk)) 						or Probe.counts.has("gate.tick." + s3 + "|" + str(tk + 1))
+					b3 = "buffer_expired" if vis else "not_visited"
 			if not per_kind.has(kn3):
-				per_kind[kn3] = {"seen": 0, "seen_next": 0, "unseen": 0, "no_consumer": 0}
+				per_kind[kn3] = {"seen": 0, "seen_next": 0, "buffer_expired": 0, "not_visited": 0, "no_consumer": 0}
 			if not per_sup.has(s3):
-				per_sup[s3] = {"seen": 0, "seen_next": 0, "unseen": 0, "no_consumer": 0}
+				per_sup[s3] = {"seen": 0, "seen_next": 0, "buffer_expired": 0, "not_visited": 0, "no_consumer": 0}
 			(per_kind[kn3] as Dictionary)[b3] = int((per_kind[kn3] as Dictionary)[b3]) + 1
 			(per_sup[s3] as Dictionary)[b3] = int((per_sup[s3] as Dictionary)[b3]) + 1
 	print("\n⑦ emit 有沒有被看到（★分母排除 no_consumer —— 那些不是落空，是這一支對它不存在）")
-	print("   %-24s %8s %10s %8s %12s %10s" % ["kind", "seen", "★seen_next", "unseen", "no_consumer", "落空率"])
+	print("   %-22s %8s %9s %9s %9s %10s %8s" % ["kind", "seen", "seen_next", "★buf_exp", "not_visited", "no_consumer", "落空率"])
 	out.append("#")
 	out.append("## ⑦ emit 被看到與否｜kind|seen|unseen|no_consumer|落空率(unseen/(seen+unseen))")
 	out.append("# ★歸因界限：pending 是每隊一個布林、不記誰標的 ⇒ 同 tick 同隊多 kind 都記 seen，無法歸因")
@@ -332,12 +339,13 @@ func _run() -> void:
 		var d4: Dictionary = per_kind[kn4]
 		var sn: int = int(d4["seen"])
 		var snx: int = int(d4["seen_next"])
-		var un: int = int(d4["unseen"])
+		var be: int = int(d4["buffer_expired"])
+		var nv: int = int(d4["not_visited"])
 		var nc4: int = int(d4["no_consumer"])
-		var dn: int = sn + snx + un
-		var mr: String = "%.1f%%" % (100.0 * float(un) / float(dn)) if dn > 0 else "n/a"
-		print("   %-24s %8d %10d %8d %12d %10s" % [String(kn4), sn, snx, un, nc4, mr])
-		out.append("seen|%s|%d|%d|%d|%d|%s" % [String(kn4), sn, snx, un, nc4, mr])
+		var dn: int = sn + snx + be + nv
+		var mr: String = "%.1f%%" % (100.0 * float(be + nv) / float(dn)) if dn > 0 else "n/a"
+		print("   %-22s %8d %9d %9d %9d %10d %8s" % [String(kn4), sn, snx, be, nv, nc4, mr])
+		out.append("seen|%s|%d|%d|%d|%d|%d|%s" % [String(kn4), sn, snx, be, nv, nc4, mr])
 	print("\n   ── 逐支彙總（誰最常落空）──")
 	out.append("#")
 	out.append("## ⑦b 逐支彙總｜支別|seen|★seen_next|unseen|no_consumer|落空率")
@@ -347,12 +355,14 @@ func _run() -> void:
 		var d5: Dictionary = per_sup[sk4]
 		var sn5: int = int(d5["seen"])
 		var snx5: int = int(d5["seen_next"])
-		var un5: int = int(d5["unseen"])
+		var be5: int = int(d5["buffer_expired"])
+		var nv5: int = int(d5["not_visited"])
 		var nc5: int = int(d5["no_consumer"])
-		var dn5: int = sn5 + snx5 + un5
-		var mr5: String = "%.1f%%" % (100.0 * float(un5) / float(dn5)) if dn5 > 0 else "n/a"
-		print("   %-16s seen=%-7d seen_next=%-7d unseen=%-7d no_consumer=%-7d 落空率=%s" % [sk4, sn5, snx5, un5, nc5, mr5])
-		out.append("seenS|%s|%d|%d|%d|%d|%s" % [sk4, sn5, snx5, un5, nc5, mr5])
+		var dn5: int = sn5 + snx5 + be5 + nv5
+		var mr5: String = "%.1f%%" % (100.0 * float(be5 + nv5) / float(dn5)) if dn5 > 0 else "n/a"
+		print("   %-16s seen=%-7d next=%-7d ★buf_exp=%-6d not_visited=%-7d no_cons=%-7d 落空=%s"
+			% [sk4, sn5, snx5, be5, nv5, nc5, mr5])
+		out.append("seenS|%s|%d|%d|%d|%d|%d|%s" % [sk4, sn5, snx5, be5, nv5, nc5, mr5])
 	print("   ★母體 vs 樣本：t0.emit_ctx %d 筆（cap 40000）%s"
 		% [ctxs.size(), "  ★★撞 cap ⇒ 前 N 筆不是全部" if ctxs.size() >= 40000 else ""])
 	out.append("# t0.emit_ctx 樣本 %d（cap 40000）" % ctxs.size())

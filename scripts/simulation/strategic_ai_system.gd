@@ -33,6 +33,7 @@ func tick(state: WorldState, faction: FactionData) -> void:
     # ★★★S4b T0：事件瞬醒短路（形狀照抄 faction_ai `_should_reeval`）。
     #   ★這支是【早退式】⇒ 短路寫成「兩個都不成立才 return」。
     var _strat_due: bool = state.world.current_tick >= faction.strategic_eval_next_tick
+    DecisionTier.mark_gate("STRATEGIC", state.world.current_tick)
     var _strat_src: String = WorldEvents.pending_source_faction(state, faction)
     var _strat_woke: bool = _strat_src != ""
     if not (_strat_due or _strat_woke): return
@@ -61,6 +62,7 @@ func tick(state: WorldState, faction: FactionData) -> void:
             state.world.current_tick, state.world.current_tick, faction.faction_id, ALLIANCE_CHECK_INTERVAL)
     # ★S4b T0：事件瞬醒短路（同上）。
     var _alli_due: bool = state.world.current_tick >= faction.alliance_eval_next_tick
+    DecisionTier.mark_gate("ALLIANCE", state.world.current_tick)
     var _alli_src: String = WorldEvents.pending_source_faction(state, faction)
     var _alli_woke: bool = _alli_src != ""
     if _alli_due or _alli_woke:

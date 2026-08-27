@@ -58,6 +58,7 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 			# ★★只有 _due 才重排下一次：事件喚醒【不動 cadence 時鐘】。
 			#   否則事件密集的隊會被自己的事件一路把週期往後推 ⇒ 反而【更少】想。
 			var _goal_due: bool = state.world.current_tick >= person.goal_eval_next_tick
+			DecisionTier.mark_gate("GOAL", state.world.current_tick)
 			var _goal_src: String = WorldEvents.pending_source(state, person.team_id)
 			var _goal_woke: bool = _goal_src != ""
 			if _goal_due or _goal_woke:

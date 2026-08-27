@@ -784,6 +784,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# ★★★S4b T0：cadence 閘【前】的事件瞬醒短路（形狀照抄本檔 `_should_reeval`）。
 		#   ★★事件喚醒【不重排 cadence】（只有 _due 才排）。
 		var _infra_due: bool = state.world.current_tick >= f.infra_eval_next_tick
+		DecisionTier.mark_gate("INFRA", state.world.current_tick)
 		var _infra_src: String = WorldEvents.pending_source_faction(state, f)
 		var _infra_woke: bool = _infra_src != ""
 		if _infra_due or _infra_woke:
@@ -807,6 +808,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 				state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
 		# ★S4b T0：事件瞬醒短路（同 INFRA）。
 		var _fupd_due: bool = state.world.current_tick >= f.faction_update_next_tick
+		DecisionTier.mark_gate("FACTION_UPDATE", state.world.current_tick)
 		var _fupd_src: String = WorldEvents.pending_source_faction(state, f)
 		var _fupd_woke: bool = _fupd_src != ""
 		if _fupd_due or _fupd_woke:
@@ -828,6 +830,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 				state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
 		# ★S4b T0：事件瞬醒短路（同 INFRA）。
 		var _betr_due: bool = state.world.current_tick >= f.betray_eval_next_tick
+		DecisionTier.mark_gate("BETRAY", state.world.current_tick)
 		var _betr_src: String = WorldEvents.pending_source_faction(state, f)
 		var _betr_woke: bool = _betr_src != ""
 		if _betr_due or _betr_woke:
@@ -880,6 +883,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 					state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
 			# ★S4b T0：事件瞬醒短路。★這一站的 actor 是【隊】⇒ 用 team 版 is_pending（不是 faction 版）。
 			var _iinf_due: bool = state.world.current_tick >= team.indep_infra_next_tick
+			DecisionTier.mark_gate("INDEP_INFRA", state.world.current_tick)
 			var _iinf_src: String = WorldEvents.pending_source(state, team.team_id)
 			var _iinf_woke: bool = _iinf_src != ""
 			if _iinf_due or _iinf_woke:
@@ -963,6 +967,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		#   ★★沒有伸手進 callee 去壓它：那等於在 AmbitionLadder 外面長出第二條排程路徑，
 		#     而「只能有一條排程路徑」正是 S3 整支的前提。⇒ 記在這裡、進交付單，不假裝對稱。
 		var _ladd_due: bool = state.world.current_tick >= team.ambition_eval_next_tick
+		DecisionTier.mark_gate("LADDER", state.world.current_tick)
 		var _ladd_src: String = WorldEvents.pending_source(state, team.team_id)
 		var _ladd_woke: bool = _ladd_src != ""
 		if team.leader_id != -1 and (_ladd_due or _ladd_woke):
@@ -1336,6 +1341,7 @@ func _rebuild_goals(state: WorldState, f) -> void:
 	#     （`應該有 intent, got={}`）—— 我先照抄別支種了，被測試打掉才發現契約不同。
 	#   ⇒ 預設 0 ⇒ tick 0 全體 fire 一次（單一 tick 的開場批），之後立刻各自錯峰散開。
 	var _intent_due: bool = state.world.current_tick >= f.intent_eval_next_tick
+	DecisionTier.mark_gate("INTENT", state.world.current_tick)
 	var _intent_src: String = WorldEvents.pending_source_faction(state, f)
 	var _intent_woke: bool = _intent_src != ""
 	if _intent_due or _intent_woke:
