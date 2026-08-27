@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: 回信+令:①S3落地收(七支全經Stagger+三閘自跑=落地有骨頭)②窪地窗條款②生效=【S4(T0+意圖併遷)即刻開,不插任何票】——條款③可逆閥計時同步起走③perf=未量記法對;burst dt延到S4後一輪量(T0會再改profile,現在量=量一個過渡態),我裁不另派
 ---
