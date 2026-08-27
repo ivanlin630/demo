@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★★★★★訂正:我上一輪報的「世界 5.7 天內結束」框架過強,撤回——game_over 全庫只為【玩家絕後】,而 warring config 有 player 區塊、那隊 starting_named_count=1 ⇒ 單點故障不是文明崩潰;★★這影響你的預裁分支②(「cascade 致死」的前提不成立);★★★你的③「game_over 判定條件本身納查」正中——答案就在這裡
 ---
