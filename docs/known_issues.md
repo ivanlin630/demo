@@ -2071,3 +2071,17 @@ func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) 
   - **質感＝摩擦**：交易不免費——價差談判 / 餘量謹慎 / 運力成本 讓**一部分** willing 夥伴談不攏,且**真實有意義**（真的價不對/運不划算），非全體卡死。
   - **摩擦掛人格**：急著交易/絕境的鬆手（接受薄利）、貪婪/謹慎的收緊（守價、留餘量）→ 談不成＝**性格與情境的戲**,非一道誰都過不了的死門檻。
   - 一句：**willing 夥伴大多能成交,談不攏是少數且有理由（人格/情境）,非常態。** 成交率/門檻數字系統 tune（HOW）。
+
+## ★採集 material 在 warring 塌掉 −97%（具名，2026-08-27 S2 終量抓到）
+
+```
+before 0ab34123 = 1.85/日 (n=240)  →  bcbfb6f3 = 0.09/日 (n=7)  →  b05750ef = 0 (key 不存在)
+                                    ↑ ★★★-97% 在這一格
+```
+★**要解釋的事件是 `240 → 7`，不是 `7 → 0`**（後者是已塌量的尾巴，n=7 本來就在雜訊層）。
+★★**嫌疑犯已鎖定在 `0ab34123 → bcbfb6f3` ＝【`MSG_TTL` 修復那個 commit】** ——
+★★★**同一個 commit 上：訊息送達 +55.4%／採集 material −97%。★不宣稱因果，但它有同 commit 的鄰居。**
+★**已排除**：`bcbfb6f3 → b05750ef` 的純觀測 tap commit（`fp` 逐位元相同 `4f1c0eda…`）。
+★**peaceful 那床 material 採集健康**（34.35/日，+1.0%）⇒ **這是 warring-bed-specific 的塌陷。**
+**下一步**：**先看 S3 終量**（決策/送達同源嫌疑）；★**別在沒有 S3 數字前開它。**
+出處：`docs/process/verdicts/S2-purity-final.measure.json`、`docs/superpowers/specs/2026-08-27-S2-root-reanchor-HOW.md §S2 結案`

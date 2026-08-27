@@ -1129,3 +1129,12 @@ reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權�
   - **★失聯感知＝通例（用戶定 2026-08-05，資訊網 follow-up、排現 arc 收完後）**：**所有派出單位共用一個系統**（信使/斥候/商隊/賑濟隊/子隊/開墾隊…）——母隊記**預期回報時間**（依距離/任務估）；逾時→belief 標「失聯」→**進思考層人格反應**（務實再派·派查/多疑防備/重情派救/冷酷註銷；領主對遠方村莊久無音訊=同系統）。零 god-view（全建於「自己派過誰+過了多久」的自我記憶推理）。「派信使查」決策=此系統反應端、信使逾時推斷=其一 case——統一成**一張預期聯絡帳本**、非各處特例。
 - **infra**：Telegram 雙向 bridge（遠端驅動 blueprint）done（`reference_telegram_bridge`）。
 - **★資訊網核心 arc = CLOSED/ACCEPTED（2026-08-05，用戶裁 A、QA CONFIRM-with-revisions）**：**bank（機制全真）**＝letter-carrier 物理信使／side-action 家族（herald·scout·distribute，人格 mini-util）／act-on-belief（de-scan×2 移 god-view 殘留）／賑濟＝免費 gift／同格交易＋看板 relay（商業 +72% 多床）／人格分化真湧現（務實 8 vs 傲 0）／T1 fixture 全鏈救活／T3 真故事（defect 叛離孤死）。**誠實限制（QA 強制）**＝relief 鏈僅 fixture 證、一般 49 隊經濟 distribute 仍 0（禁 resolved 字樣）；T1 回升＝間歇投糧非穩定復甦；cascade=PLAUSIBLE；anomaly 因果未 story-audited。**→ 資訊網補完批（下一批）**：①relief 通用化（settled faction bed 診斷 general distribute=0 根）＋economy-balance（救濟量級/timing/餓死底線）②L3 循環貿易（guardrail 已定：路線＝湧現非 waypoint）③失聯帳本（預期聯絡通例）④小項（seed-cascade 因果補／DEFECT_HONOR_THRESHOLD 死常數人格化照妖鏡／scout 人格 demo／anomaly story-audit 補檔）。
+
+### ★S2 根旋鈕重錨 —— **收**（blueprint 裁 2026-08-27，不回工）
+`TICKS_PER_HOUR 10→60` 已在 `main`（`b05750ef`）。★**S1c 封閉母體 120 顆全處置、`NEEDS_HUMAN=0`。**
+**終量（主軸 per-team-day）**：`peaceful` 七項全過；`warring` **移動 −2.0%＝母體效應結案**、
+★**決策 +21.0%／送達 +39.2% ＝ 具名開放殘差 → 路由 S3（★★blueprint 硬條款：以一次為限，S3 終量必須給【歸因或收編判決】；殘差老化上限一次，二次＝回工）**。
+★**採集 material −97% 已具名**（嫌疑犯＝`MSG_TTL` 修復同 commit）→ `known_issues`。
+★**判準形狀變更（blueprint 准）**：**S3 終量主軸 ＝ per-team-day／率，aggregate 降附錄**
+（理由：世界必然分岔 ⇒ aggregate 對母體量級偏差無解析力）。
+**下一站**：**S3 本體（八支節律搬家 ＋ 分層）** —— ★spec 未寫。

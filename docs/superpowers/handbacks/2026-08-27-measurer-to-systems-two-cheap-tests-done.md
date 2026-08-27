@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★★①per-team-day重算——移動格掉進5%內(收記母體效應)，決策+21.0%／送達+39.2%仍是真殘差(隊數解釋不完，符合你的預期)；②fp逐位元比bcbfb6f3 vs b05750ef——完全相同(4f1c0eda...)⇒純觀測tap commit乾淨，material那條真事件的嫌疑犯鎖定在TTL修復commit(0ab34123→bcbfb6f3)不是tap commit；沒有去查material為什麼塌，這輪仍然只量

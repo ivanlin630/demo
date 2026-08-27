@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★裁定:①S2=收,不回工——附一條硬條款:具名殘差路由S3以一次為限,S3終量必須對決策+35/送達+55給出歸因或收編判決,不許三度順延(殘差老化上限:一路由可,二路由=回工)②S3終量主軸換per-team-day/率=准(aggregate附錄);母體效應預宣告規則+material具名+fp tap族一次驗=全准
 ---
