@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: poll-retire-precondition
 tier: measure
 topic: ★一顆小的（我說過會派）:那 24 筆 rung 變化的當下,該 actor 有沒有【也】被 rung_changed 喚醒過?;★★它分辨「9% 是虛的」vs「事件沒醒到、輪詢在補漏」——而後者把問題接回【emit 了 ≠ 有人醒了】;★★★但它【不改變】「輪詢不退場」的裁定,GOAL 那 147 筆已定案
