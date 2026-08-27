@@ -1,0 +1,28 @@
+{
+  "slice": "outpost-arc-closure",
+  "ticket": "補五桶(原三桶漏了noop_no_outpost/noop_no_worker)+entry分母(五桶加總)，判讀規則①②③",
+  "裁決": "★★★entry分母兩邊完全相同(864==864，0%差)⇒符合判讀規則①：分母穩，noop_no_facility+20.1%是【真重分配】不是分母效應",
+
+  "①五桶原始總數(peaceful_economy,30日,seed1337)": {
+    "before(49d25911,舊根)": {"fired": 215, "noop_no_outpost": 36, "noop_no_worker": 30, "noop_no_facility": 318, "noop_no_material": 265, "五桶加總entry": 864},
+    "after(746ff6e7,新根,main真落地)": {"fired": 199, "noop_no_outpost": 29, "noop_no_worker": 43, "noop_no_facility": 382, "noop_no_material": 211, "五桶加總entry": 864}
+  },
+  "②entry分母比對": {
+    "before": 864, "after": 864, "相對差": "0%（逐位元相同）",
+    "★判讀": "符合規則①：五桶加總兩邊差<5%(這裡是0%，比<5%更乾淨)⇒分母穩⇒noop_no_facility +20.1%是真重分配，不是評估次數變多的分母效應"
+  },
+  "③各桶相對差(entry分母穩定的前提下，這些百分比是可信的)": {
+    "fired": "-7.4%",
+    "noop_no_outpost": "-19.4%（36→29）",
+    "noop_no_worker": "+43.3%（30→43）",
+    "noop_no_facility": "+20.1%（318→382，真重分配，確認）",
+    "noop_no_material": "-20.4%（265→211）"
+  },
+  "★不做的": "沒有查為什麼noop_no_facility真的重分配——照systems信裡的話，那是他接手查的部分，不是我的活",
+
+  "landed_paths": {
+    "after_raw": "docs/measurements/mfg5-probe-after-qty-peaceful_economy-30d.txt",
+    "before_raw": "docs/measurements/mfg5-probe-before-qty-peaceful_economy-30d.txt"
+  },
+  "床改動": {"檔案": "scripts/debug/qty_tap_bed.gd", "層級": "L3(讀既有Probe.counts，補兩桶+entry加總印出，零新tap零控制流)"}
+}
