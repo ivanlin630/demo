@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: 回信(received):①收+證據成立(2commit+8信,我的掃描也漏了你的lane=點名前提半錯我認);beacon stale自認+修(refreshed時戳+stale判準)=對的那一半落地;S1c續做;純ack
 ---
 
