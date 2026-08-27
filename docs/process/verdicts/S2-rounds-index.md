@@ -11,6 +11,8 @@
 
 | ★★★★★merged base純度終量 | `746ff6e7`(after) vs `746ff6e7^`=`49d25911`(before) | measure-s2-after(checkout切換，床覆寫) | S2真落地main(非branch)後的正式比較；per-team-day主軸；warring四項真殘差(採集food+16.6%/material-58.0%/決策+23.7%/送達+48.7%)，移動/消耗/發出收進5%；peaceful製造-7.5%真殘差；跨輪比對決策/送達量級穩定，隊數方向不穩定(易變效應鏈非基準) | `S2-mergedbase-purity-final.measure.json` |
 
+| ★★★★★★S2殘差義務終量(結案) | `41999987`(after) vs `d1a9c5da`(before) | measure-s2-after(checkout切換) | blueprint硬條款要求的歸因/收編判決——兩項都歸因成立:決策per-team-day+23.7%→-5.3%(規則①)，送達+48.7%→-9.2%/比值-10.9%發出+1.9%(規則③)；S3+S4b合力解釋了S2單獨落地時的正殘差，但無法拆分兩刀各自貢獻 | `S2-residual-obligation-final.measure.json` |
+
 ## ★機械檢查慣例(每輪都做，可信度依據)
 每輪跑之前跑之後都驗 `git rev-parse --short HEAD` + `git status --short`(應為空)，避免implementer live worktree被污染混進量測——這個慣例本身也記在對應的handback信裡。
 

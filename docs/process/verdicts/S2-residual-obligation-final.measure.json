@@ -1,0 +1,61 @@
+{
+  "slice": "S2-residual-obligation",
+  "★★★這是S2那筆一次為限殘差義務的終量——比較S4b落地前(41999987^=d1a9c5da)vs落地後(41999987=main HEAD行為等價)，S3+S4b都已落地，這是blueprint硬條款要求的歸因或收編判決那一次": true,
+  "測法": {
+    "worktree": "A:/GDS/demo/.worktrees/measure-s2-after（獨立乾淨worktree）",
+    "before_commit": "d1a9c5da（S4b落地前一個commit）",
+    "after_commit": "41999987（S4b merge，跟main目前HEAD行為等價，兩者間無scripts/變動）",
+    "seed": 1337, "days": 30, "beds": ["peaceful_economy", "warring_states"],
+    "床是儀器": "兩邊都用同一份床(41999987的qty_tap_bed.gd，跟d1a9c5da的床內容逐位元相同，不用覆寫)"
+  },
+  "機械檢查": {
+    "四床跑前跑後HEAD都驗過": "after=41999987/41999987；before=d1a9c5da/d1a9c5da",
+    "[BedSelfCheck]四床effective_window全100%": "43200/43200，沒有一邊提早game_over"
+  },
+
+  "★★★對象殘差(來自S2-mergedbase-purity-final.measure.json，這次的比較對象)": {
+    "決策次數per-team-day": "+23.7%（S2單獨落地那輪）",
+    "訊息送達per-team-day": "+48.7%（S2單獨落地那輪）"
+  },
+
+  "★★★peaceful_economy(teams 12→12，母體不變，無信號)": {
+    "決策次數": {"before": 10.77, "after": 10.83, "相對差": "+0.6%"},
+    "訊息發出": {"before": 11.73, "after": 11.73, "相對差": "0%（完全相同）"},
+    "訊息送達": {"before": 0.90, "after": 0.90, "相對差": "0%（完全相同）"},
+    "隊數": {"before": 12, "after": 12}
+  },
+
+  "★★★★warring_states(teams 112→109，-2.7%，per-team-day為主軸)": {
+    "決策次數":   {"before每隊每日": 0.7161, "after每隊每日": 0.6783, "相對差": "-5.3%"},
+    "訊息送達":   {"before每隊每日": 2.8786, "after每隊每日": 2.6147, "相對差": "-9.2%"},
+    "訊息發出":   {"before每隊每日": 0.4012, "after每隊每日": 0.4089, "相對差": "+1.9%（5%內，上游穩）"},
+    "送達/發出比值": {"before": 7.175, "after": 6.395, "相對差": "-10.9%"},
+    "移動格tap":  {"before每隊每日": 0.8134, "after每隊每日": 0.7327, "相對差": "-9.9%"},
+    "採集food_taken": {"before每隊每日": 0.5436, "after每隊每日": 0.4331, "相對差": "-20.3%"},
+    "隊數": {"before": 112, "after": 109, "相對差": "-2.7%"}
+  },
+
+  "★★★★★判讀(照systems事前宣告的規則①②③④逐條套)": {
+    "決策次數": {
+      "規則①命中": "S3/S4之後【大幅下降】——從merged-base那輪的+23.7%正殘差，翻成這輪-5.3%（超過閾值且變號）",
+      "判決": "★歸因成立：決策次數的殘差是【節律驅動的】，S3(CadenceStagger全走)+S4b(T0接七支+意圖)糾正了它，不只是收斂回5%內，是完全逆轉並略為過頭到負值"
+    },
+    "訊息送達": {
+      "規則③套用": "送達本身-9.2%、比值-10.9%都是負的，而發出+1.9%在5%內——完成率跟流量同向下降、上游穩定，不是『發出更多拖上去』（那會是比值持平流量升的形狀，這裡是相反：兩者一起降）",
+      "判決": "★歸因成立：從merged-base那輪的+48.7%正殘差，翻成這輪-9.2%，同一族的逆轉——S3+S4b的事件時序調整解釋了這個殘差"
+    },
+    "★④出口": "兩項都給出『歸因成立』判決——不是『不是我們造成的』那一種收編，是正面歸因：S3與S4b合力解釋了S2單獨落地時看到的決策/送達正殘差"
+  },
+
+  "★systems先講在前面的兩個限制(照實保留)": {
+    "無法拆分S3與S4b各自貢獻": "before/after之間夾著兩刀，歸因只能到『這條arc』(S3+S4b合併效果)，分不開單一刀的貢獻，要拆需要再跑一個中間點，這次沒派",
+    "fp已變": "世界必然不同(f7f09077→2ede39b1)，per-team-day仍是主軸的理由不變(母體本身會漂移)"
+  },
+
+  "landed_paths": {
+    "after_peaceful": "docs/measurements/s2residual-after-qty-peaceful_economy-30d.txt",
+    "after_warring": "docs/measurements/s2residual-after-qty-warring_states-30d.txt",
+    "before_peaceful": "docs/measurements/s2residual-before-qty-peaceful_economy-30d.txt",
+    "before_warring": "docs/measurements/s2residual-before-qty-warring_states-30d.txt"
+  }
+}
