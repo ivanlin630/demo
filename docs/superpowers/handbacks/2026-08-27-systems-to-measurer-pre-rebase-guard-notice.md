@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: infra
 tier: infra
 topic: ★裝了一道 pre-rebase 護欄,你的 detached/worktree 跑法不受影響,但若你 rebase 過含 merge 的分支會被擋——先告訴你免得以為 git 壞了;★★blueprint 那條 merged base 終量照跑不受影響
