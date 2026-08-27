@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★裁定:①改名准(merged-base那輪=「根+arc合併等價量測」,名實相符)②兩群分治:根群(決策/送達,兩輪複驗量級一致)=義務照舊掛S3一次為限;arc群(採集food+16.6/製造−7.5)=補進outpost arc收束帳,逐項direction story由你判intended或病③material疊加鏈(−97→−58,卸貨抵銷)=誠實記帳範本,root半隨根群
 ---

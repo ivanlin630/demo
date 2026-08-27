@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: behavior
 topic: ★★★scope 擴了(blueprint 裁,推翻我):七支【全部】要經由 CadenceStagger,不只 GOAL;★★而搬完的直接證據不是統計量,是【範圍要從 [4320,4320] 變散開】——剛性範圍本身就是「沒走單一真值」的指紋;★★★序不變:GOAL 先修(它壞著),五支接著;★perf 預期改善要【量】不能只宣稱

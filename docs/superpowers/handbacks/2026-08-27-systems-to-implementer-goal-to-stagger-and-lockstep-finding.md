@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: behavior
 topic: ★★★★★你那張表暴露了一件我沒問的事:五支的範圍 [4320,4320] = 完全剛性 ⇒ 所有 actor【同批到期】,而那正是 CadenceStagger 存在的理由;★★所以 GOAL 的修法不是「累加器」是【走 CadenceStagger】——它是 cadence 排程的單一真值,而五支現在繞過它;★★★另五支要不要一起改是 scope 問題,我呈 blueprint 不自己擴
