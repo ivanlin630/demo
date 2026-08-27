@@ -17,6 +17,20 @@ func _initialize() -> void:
 	seed(1337)
 	var state := WorldState.new()
 	GameSetup.setup(state, GameSetup.load_config("res://config/%s.json" % cfg))
+	# ★拆玩家的特權（照 exam_12mo_bed._strip_player 既有形狀，不自己發明）：
+	#   warring config 帶 player 區塊 ⇒ 那支【沒人操作的】隊 leader 一死且無 named 繼承人
+	#   ⇒ game_over ⇒ 世界凍結，而循環照跑 ⇒ ★量到的是【凍結後的死 tick】。
+	#   ★★不摘 config 的 player 區塊：那會少一支隊＝改世界組成。清 player_id 只是拿掉特權。
+	var _stripped: bool = false
+	if state.player_id != -1:
+		_stripped = true
+		state.player_id = -1
+		state.player_forced_event = {}
+		state.player_forced_event_id = ""
+		state.player_pending_targets = []
+		state.player_hostile_teams = []
+		state.player_pre_encounter = {}
+		state.player_state = {}
 	Probe.reset()
 	Probe.enabled = not probe_off
 	var ticks: int = days * WorldState.TICKS_PER_DAY
@@ -28,8 +42,12 @@ func _initialize() -> void:
 	var team_tick_samples: int = 0
 	for tid0 in state.teams:
 		prev_pos[tid0] = (state.teams[tid0] as TeamData).tile_pos
+	var _first_nonadv: int = -1
+	var _nonadv_reason: String = ""
 	for _t in range(ticks):
-		runner.advance_tick(state, Vector2i(-1, -1))
+		var _r: String = runner.advance_tick(state, Vector2i(-1, -1))
+		if _first_nonadv == -1 and (_r == "game_over" or _r == "awaiting_heir"):
+			_first_nonadv = state.world.current_tick; _nonadv_reason = _r
 		for tid in state.teams:
 			var tm: TeamData = state.teams[tid]
 			team_tick_samples += 1
@@ -52,6 +70,13 @@ func _initialize() -> void:
 			print("[OK] PROBE_OFF：qty.* key 【完全不存在】(0 條) ⇒ tap 真的受 Probe.enabled 閘住")
 		else:
 			print("[FAIL] PROBE_OFF 卻有 %d 條 qty.* key：%s" % [leaked.size(), str(leaked.slice(0, 8))])
+		# ★★床自檢欄位（systems 定為慣例 2026-08-27）：
+		#   守衛要輸出【已處置的結果】不是【要被解讀的狀態】——
+		#   ★一行 print 淹在 log 裡等於沒有，而一個欄位會被交件帶走。
+		print("[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
+		% ["stripped" if _stripped else "none",
+		   ("%d(%s)" % [_first_nonadv, _nonadv_reason]) if _first_nonadv != -1 else "none",
+		   (_first_nonadv if _first_nonadv != -1 else ticks), ticks])
 		print("=== qty_tap_bed DONE ===")
 		quit(); return
 
@@ -126,10 +151,29 @@ func _initialize() -> void:
 			print("  %-14s ★key 不存在，而 Probe 是 ON ⇒ 【這件事從未發生】（tap 在，只是沒 fire）" % row[0])
 		else:
 			print("  %-14s %.2f/日  ｜總數=%d（累加了 %d 條 key）" % [row[0], float(total) / dayf, total, nkeys])
+	# ── ★傳播節律（S3 前置）：單位是【每遊戲小時】，不是每 tick ──
+	#   ★因為要回答的問題是「它是不是 1 小時心跳」—— 比 per-tick 永遠看不出來。
+	var hours: float = float(ticks) / float(WorldState.TICKS_PER_HOUR)
+	var p_call: int = int(Probe.counts.get("prop.call", 0))
+	var p_arr: int = int(Probe.counts.get("prop.arrivals", 0))
+	var p_pair: int = int(Probe.counts.get("prop.colocated_pair", 0))
+	print("
+── 傳播節律/遊戲小時（★S3 前置）──")
+	if p_call == 0:
+		print("  ★prop.* key 不存在或為 0（Probe 是 ON）⇒ 【這件事從未發生】")
+	else:
+		print("  呼叫次數      %.2f/小時  ｜總 %d（★若掛每 tick ⇒ 此值應 = TICKS_PER_HOUR = %d）"
+			% [float(p_call) / hours, p_call, WorldState.TICKS_PER_HOUR])
+		print("  arrival 事件  %.2f/小時  ｜總 %d（分母）" % [float(p_arr) / hours, p_arr])
+		print("  同格對數      %.2f/小時  ｜總 %d（真的有機會交換的）" % [float(p_pair) / hours, p_pair])
 	print("
 ── 原始總量（★先看未除以天數的值，別讓 %.2f 把小數字吐成 0）──")
 	for k9 in Probe.amounts:
 		if String(k9).begins_with("qty."):
 			print("  %-34s = %.6f" % [String(k9), float(Probe.amounts[k9])])
+	print("[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
+		% ["stripped" if _stripped else "none",
+		   ("%d(%s)" % [_first_nonadv, _nonadv_reason]) if _first_nonadv != -1 else "none",
+		   (_first_nonadv if _first_nonadv != -1 else ticks), ticks])
 	print("=== qty_tap_bed DONE ===")
 	quit()

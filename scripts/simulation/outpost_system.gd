@@ -27,6 +27,7 @@ const BUILD_TICKS: Dictionary = {
 }
 
 # 工地無實際進度逾此時長 → 取消退料（防永久卡死黑洞）
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const CONSTRUCTION_TIMEOUT: int = 30 * WorldState.TICKS_PER_DAY
 
 # 馬廄各等級每日產出 mounts / 消耗 food（index = level-1）

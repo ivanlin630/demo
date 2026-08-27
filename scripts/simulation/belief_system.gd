@@ -6,6 +6,7 @@ class_name BeliefSystem
 
 const MAX_CLAIMS_PER_TARGET := 4      # TEST VALUE
 const MAX_CLAIMS_PER_OBSERVER := 200  # TEST VALUE
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const BELIEF_STALE_TICKS: int = WorldState.TICKS_PER_DAY * 3   # TEST VALUE — 位置 belief 超此視同未知(過期)→防永久 threat/pursuit loop
 
 # 類型基準表（TEST VALUE，序遵 game-design：親見>隊友>商旅>流民）。

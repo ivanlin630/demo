@@ -1,5 +1,6 @@
 class_name PopulationSystem
 
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const OVERFLOW_CHECK_INTERVAL: int = WorldState.TICKS_PER_DAY   # 每天檢查
 const MATURE_RATE: float = 0.1   # TEST VALUE — 每月 minor 轉成人比例（簡版，無性別/個體年齡）
 

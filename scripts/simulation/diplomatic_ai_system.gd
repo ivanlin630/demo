@@ -1,7 +1,9 @@
 # scripts/simulation/diplomatic_ai_system.gd
 class_name DiplomaticAiSystem
 
-const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
+# ★S3 搬入 T3：【背叛傾向】同結盟，是關係層的戰略重估。
+const BETRAY_CHECK_INTERVAL: int = DecisionTier.C_BETRAY_CHECK
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const REJECT_COOLDOWN: int = WorldState.TICKS_PER_DAY * 7   # 被拒後同對象冷卻 7 天
 # G3-E Task3：背叛 belief 驅動化常數（TEST VALUE）
 const BETRAY_ADVANTAGE_GAIN: float = 0.6   # belief「盟弱我利」→ 背叛動機加成

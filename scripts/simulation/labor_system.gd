@@ -9,6 +9,7 @@ const K_MFG: float = 3.0                 # TEST VALUE — 每設施 level 要 3 
 const K_GATHER: float = 5.0              # TEST VALUE — 每採集線 5 手飽和
 const K_FARM: float = 5.0                # TEST VALUE — 每 farming_level 5 手飽和（★農業a 農田工位、與 gather/mfg 競爭同池）
 const LABOR_SCALE: float = 1.0           # TEST VALUE — 校準:pop5 單隊單工位 fill=1→labor_mult=1.0=現 pop_mult@pop5
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const LABOR_CADENCE: int = TimeScale.TICK_PER_DAY * 3   # 常駐慢 cadence（非每 tick 抖）
 const LABOR_CRISIS_FOOD_DAYS: float = 2.0              # 共址任一隊 food_days<此→即時重算(危機搶勞力)
 const OVERFLOW_ITERS: int = 8           # demand-cap 溢出串聯迭代上限（deterministic 防無限）

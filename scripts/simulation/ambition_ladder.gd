@@ -10,7 +10,9 @@ const ARCHETYPE_FORCE: String = "武力"
 const ARCHETYPE_TRADE: String = "商業"
 const ARCHETYPE_SETTLE: String = "定居"
 
-const LADDER_EVAL_CADENCE: int = 10 * WorldState.TICKS_PER_HOUR
+# ★S3 搬入 T3：【野心階梯】是「我現在該圖多大」—— rung 升降是戰略判斷，
+#   而它的輸入（pop/團數/milestone）本來就以天為單位變化。
+const LADDER_EVAL_CADENCE: int = DecisionTier.C_LADDER_EVAL
 # 安全門檻 proxy（TEST VALUE）
 const SURPLUS_DAYS: float = 7.0
 # R2 flow-not-stock：積累 rung 讀持續淨食物流盈餘（食物/天），非 stale 滿倉 stock。

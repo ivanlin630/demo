@@ -1,10 +1,13 @@
 # scripts/ui/sim_bridge.gd
 class_name SimBridge
 
-# ★S1b 延後(b)：24 tick ＝ 2.4 小時（現制 10 tick/小時）——
-#   ★`TimeScale.hours()` 只吃【整數小時】⇒ 無法精確表達 ⇒ ★★原樣不動，交 S2。
-#   ★★★不是忘了改，是【改了就會偏移】：hours(2)=20、hours(3)=30，都不是 24。
-const TICKS_PER_TURN: int = 24
+# ★★★S2：這顆不跟隨根旋鈕 ⇒ 重錨會讓它【靜默漂移 6 倍】（舊 24/10＝2.4h → 24/60＝0.4h）。
+#   ★本票只做一件事：【保住它現在的真實時長 2.4 小時】—— 不做不是延後，是 S2 自己引入一個 bug。
+#   ★★「一個 turn 該多長」（turn 定義統一 60t vs 24t）是 S7 的設計題，不在本票。
+#   ★★★這也收掉了 S1b 唯一那顆 (b) 延後：hours() 只吃整數小時表達不了 2.4h，
+#     而重錨後分鐘可用：144 分 ＝ 2.4 小時，且 144 = 2.4 × 60 【整數無餘】。
+const TURN_MINUTES: int = 144   # ＝ 2.4 小時（時間宣告；tick 數是推導值）
+const TICKS_PER_TURN: int = TURN_MINUTES * TimeScale.TICK_PER_MINUTE
 
 var _runner: SimRunner
 var _state: WorldState

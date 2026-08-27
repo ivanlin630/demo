@@ -3528,7 +3528,10 @@ func _run_sim_test() -> void:
 	assert("player_id" in state, "WorldState 缺少 player_id")
 	assert(state.player_id == -1, "player_id 預設應為 -1")
 	assert("ticks_per_day" in state, "WorldState 缺少 ticks_per_day")
-	assert(state.ticks_per_day == 240, "ticks_per_day 應為 240")
+	# ★S2：這些測試凍的是【舊根下的 tick 數】，而不是它們真正要抓的東西。
+	#   改成對【具名常數】斷言 ⇒ 重錨不必再改這裡，而它仍然抳得住。
+	assert(state.ticks_per_day == WorldState.TICKS_PER_DAY,
+		"state.ticks_per_day 應接根旋鈕（%d），實際=%d" % [WorldState.TICKS_PER_DAY, state.ticks_per_day])
 	print("[DataStruct] WorldState 新欄位驗證通過")
 
 	print("--- TimeConstants ---")
@@ -3549,12 +3552,13 @@ func _run_sim_test() -> void:
 		"TimeScale.TICK_PER_DAY 應承 WorldState.TICKS_PER_DAY")
 	assert(TimeScale.ENCOUNTER_MAP_SCALE == EncounterSystem.MAP_DIAMETER,
 		"TimeScale.ENCOUNTER_MAP_SCALE 應承 EncounterSystem.MAP_DIAMETER(錨②)")
-	# A1（×5 先留,零行為）：MOVE = BASE_ACTION × MAP_SCALE / WORLD_SPEED_MULT = 240/5 = 48。
-	# A2（×5→1,綁補給+FOOD+gen）拿掉 mult 後終值 = 240 = 1天/hex（屆時改此 assert）。
-	assert(TimeScale.MOVE_TICKS_PER_HEX == TimeScale.BASE_ACTION_TICKS * TimeScale.ENCOUNTER_MAP_SCALE / TimeScale.WORLD_SPEED_MULT,
-		"MOVE_TICKS_PER_HEX 必為 BASE_ACTION × ENCOUNTER_MAP_SCALE / WORLD_SPEED_MULT 連動（錨①）")
-	assert(TimeScale.MOVE_TICKS_PER_HEX == 48,
-		"A1：MOVE_TICKS_PER_HEX 應 = 48（×5 先留;A2 拿掉 mult→240）")
+	# ★S2：WORLD_SPEED_MULT 已刪 ⇒ 公式無係數（LOCKED §0 命門）。
+	assert(TimeScale.MOVE_TICKS_PER_HEX == TimeScale.BASE_ACTION_TICKS * TimeScale.ENCOUNTER_MAP_SCALE,
+		"MOVE_TICKS_PER_HEX 必為 BASE_ACTION × ENCOUNTER_MAP_SCALE 連動（錨①，無係數）")
+	# ★★凍結的是【時長】不是【tick 數】—— tick 數會隨根旋鈕變，而 4 小時不該變。
+	#   ★舊版凍的是 `== 48`，那就是「每次重錨都要改一次 assert」的形狀。
+	assert(TimeScale.MOVE_TICKS_PER_HEX == TimeScale.hours(4),
+		"S2：世界格移動應 = 4 小時（平原）")
 	assert(MovementSystem.BASE_MOVE_TICKS == TimeScale.MOVE_TICKS_PER_HEX,
 		"MovementSystem.BASE_MOVE_TICKS 唯一讀站應走 TimeScale 連動式")
 	assert(TimeScale.days(3) == 3 * WorldState.TICKS_PER_DAY,
@@ -3648,15 +3652,17 @@ func _run_sim_test() -> void:
 	# ── DayNightSystem 驗證 ──
 	var _dns := DayNightSystem.new()
 	var _saved_tick: int = state.world.current_tick
-	# tick=0, ticks_per_day=240 → time_of_day=0.0 → "dawn"
+	# ★S2：晝夜是【一天中的比例】，不是【第幾個 tick】——
+	#   舊版寫死 25 / 220（舊根的 0.104 / 0.917）⇒ 重錨後 25/1440 掉回 dawn。
+	#   ★改用比例表達：測的是【早上是 day、晚上是 night】，不是那兩個數字。
+	var _tpd: int = WorldState.TICKS_PER_DAY
 	state.world.current_tick = 0
-	assert(_dns.get_time_period(state) == "dawn", "tick 0 應為 dawn")
-	# 驗證 tick 25 → day（25/240=0.104 > 0.1）
-	state.world.current_tick = 25
-	assert(_dns.get_time_period(state) == "day", "tick 25 應為 day")
+	assert(_dns.get_time_period(state) == "dawn", "一日之始應為 dawn")
+	state.world.current_tick = int(_tpd * 0.104)
+	assert(_dns.get_time_period(state) == "day", "一日的 10.4%% 處應為 day（tick=%d/%d）" % [state.world.current_tick, _tpd])
 	assert(_dns.get_fatigue_mult(state) == 1.0, "白天疲勞乘數應為 1.0")
-	state.world.current_tick = 220   # 220/240=0.917 → "night"
-	assert(_dns.get_time_period(state) == "night", "tick 220 應為 night")
+	state.world.current_tick = int(_tpd * 0.917)
+	assert(_dns.get_time_period(state) == "night", "一日的 91.7%% 處應為 night（tick=%d/%d）" % [state.world.current_tick, _tpd])
 	assert(_dns.get_speed_mult(state) == 0.5, "夜間速度乘數應為 0.5")
 	state.world.current_tick = _saved_tick
 	print("[DayNight] 時間計算驗證通過")
@@ -6243,9 +6249,10 @@ func _test_food_consumption_total() -> void:
 	team.resources["food"] = 2400.0
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
-	# 模擬跑 1 天（240 tick），每 NEAR_CADENCE=10 call 一次 → 24 calls
+	# 模擬跑 1 天：每 NEAR_CADENCE（＝1 小時）call 一次 → 24 calls（不隨根旋鈕變）
 	for _i in range(24):
-		rs.resolve_consumption(state, [0], 10)
+		# ★S2：同上 —— 10 是舊根下的 NEAR_CADENCE，寫死在測試裡。
+		rs.resolve_consumption(state, [0], SimRunner.NEAR_CADENCE)
 	# 預期消耗：10 × FOOD_PER_PERSON/天 → 剩 2400 − 10×const
 	var expected_rem: float = 2400.0 - 10.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	var remaining: float = float(team.resources["food"])
@@ -6271,7 +6278,10 @@ func _test_fatigue_accumulation() -> void:
 	var sr := SimRunner.new()
 	# 模擬跑 1 天（24 calls）
 	for _i in range(24):
-		sr._step6d_fatigue(state, [0], 10)
+		# ★S2：這個 10 是【舊根下的 NEAR_CADENCE】（＝1 小時），寫死在測試裡。
+		#   ★重錨後 NEAR_CADENCE = 60，而這裡仍傳 10 ⇒ 每次呼叫只代表 1/6 個小時
+		#     ⇒ 實測 0.0096 vs 預期 0.048。★★行為沒變，是【測試自己拿錯尺】。
+		sr._step6d_fatigue(state, [0], SimRunner.NEAR_CADENCE)
 	# 預期：0.048/day → ≈ 0.048
 	assert(team.fatigue >= 0.04 and team.fatigue <= 0.06,
 		"1 天行軍後 fatigue 應 ~0.048，實際=%s" % str(team.fatigue))
@@ -6295,7 +6305,10 @@ func _test_fatigue_recovery() -> void:
 	var sr := SimRunner.new()
 	# 跑 1 天紮營
 	for _i in range(24):
-		sr._step6d_fatigue(state, [0], 10)
+		# ★S2：這個 10 是【舊根下的 NEAR_CADENCE】（＝1 小時），寫死在測試裡。
+		#   ★重錨後 NEAR_CADENCE = 60，而這裡仍傳 10 ⇒ 每次呼叫只代表 1/6 個小時
+		#     ⇒ 實測 0.0096 vs 預期 0.048。★★行為沒變，是【測試自己拿錯尺】。
+		sr._step6d_fatigue(state, [0], SimRunner.NEAR_CADENCE)
 	# 預期：fatigue -= 0.24/day → ≈ 0.76
 	assert(team.fatigue >= 0.74 and team.fatigue <= 0.78,
 		"1 天紮營後 fatigue 應 ~0.76，實際=%s" % str(team.fatigue))
@@ -7914,9 +7927,14 @@ func _test_market_known_msg_immutable_premise() -> void:
 
 func _test_cadence_stagger() -> void:
 	print("--- cadence 錯峰：常數凍結 + 錯峰性質 ---")
-	# ⑤★常數逐位元凍結（★不得靠改 cadence 長度來「達成」錯峰）
-	assert(AmbitionLadder.LADDER_EVAL_CADENCE == 10 * WorldState.TICKS_PER_HOUR,
-		"★LADDER_EVAL_CADENCE 被改了（實際=%d，凍結值=10h）—— 錯峰票不得靠改 cadence 長度達成" % AmbitionLadder.LADDER_EVAL_CADENCE)
+	# ⑤★常數凍結（★不得靠改 cadence 長度來「達成」錯峰）
+	#   ★★S3 更新凍結目標（而這是【需要理由】的動作，理由寫在這）：
+	#   舊目標是 `== 10h`，而它凍的其實是【錯峰票沒有偷改 cadence】——
+	#   ★★★而 S3 是【有 spec 授權的搬家】（七支遷入 T3），不是錯峰票在作弊。
+	#   ⇒ 新目標改凍【它來自層級來源】：有人在別處寫死一個數字仍然會紅，
+	#     而【改 T3 該多長】不會紅 —— ★那正是可逆閥要求的（回滾改一個檔）。
+	assert(AmbitionLadder.LADDER_EVAL_CADENCE == DecisionTier.C_LADDER_EVAL,
+		"★LADDER_EVAL_CADENCE 不再來自層級來源（實際=%d，DecisionTier.C_LADDER_EVAL=%d）" % [AmbitionLadder.LADDER_EVAL_CADENCE, DecisionTier.C_LADDER_EVAL])
 	assert(OrderSystem.ORDER_POST_CADENCE == 12 * WorldState.TICKS_PER_HOUR,
 		"★ORDER_POST_CADENCE 被改了（實際=%d，凍結值=12h）—— 同上" % OrderSystem.ORDER_POST_CADENCE)
 	var C: int = AmbitionLadder.LADDER_EVAL_CADENCE
@@ -9129,7 +9147,8 @@ func _test_eta_ticks() -> void:
 	_seed_pop(team, 5); team.fatigue = 0.0
 	var eta = PathSystem.eta_ticks(team, 5.0)
 	# A1：BASE_MOVE_TICKS = 48（×5 留）, speed_mult = 1.0 → eta = 5 * 48 = 240（A2 ×5→1 後 = 1200）
-	assert(eta == 240, "eta 應 240，實際=%d" % eta)
+	assert(eta == 5 * TimeScale.MOVE_TICKS_PER_HEX,
+		"eta 應 = 5 格 × 每格 %d tick = %d，實際=%d" % [TimeScale.MOVE_TICKS_PER_HEX, 5 * TimeScale.MOVE_TICKS_PER_HEX, eta])
 	team.fatigue = 0.5   # speed reduced
 	var eta2 = PathSystem.eta_ticks(team, 5.0)
 	assert(eta2 > eta, "fatigue 應延長 ETA")
@@ -10808,7 +10827,8 @@ func _test_evaluate_threat_finds_hostile() -> void:
 	var fai := FactionAISystem.new()
 	fai._evaluate_threat(state, team)
 	assert(team.current_task != TeamData.TASK_IDLE, "應觸發反應，task=%s" % team.current_task)
-	assert(team.threat_eval_next_tick == 240, "cadence 應設 240，實際=%d" % team.threat_eval_next_tick)
+	assert(team.threat_eval_next_tick == FactionAISystem.THREAT_CADENCE,
+		"cadence 應設 THREAT_CADENCE=%d，實際=%d" % [FactionAISystem.THREAT_CADENCE, team.threat_eval_next_tick])
 	print("Engagement Task4a OK (→ %s)" % team.current_task)
 
 func _test_evaluate_threat_cadence() -> void:
@@ -10816,19 +10836,21 @@ func _test_evaluate_threat_cadence() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
 	team.current_task = TeamData.TASK_IDLE
-	team.threat_eval_next_tick = 240
+	# ★S2：全用 THREAT_CADENCE 表達 —— 測的是【週期行為】不是【240 這個數】。
+	var _tc: int = FactionAISystem.THREAT_CADENCE
+	team.threat_eval_next_tick = _tc
 	_eng_make_leader(state, team, { "慎重": 0.0 })
 	state.teams[0] = team
 	state.team_discovered[0] = []
 	var fai := FactionAISystem.new()
-	# tick 120 < 240 → 跳過，不改 next_tick
-	state.world.current_tick = 120
+	# 半個 cadence → 跳過，不改 next_tick
+	state.world.current_tick = _tc / 2
 	fai._evaluate_threat(state, team)
-	assert(team.threat_eval_next_tick == 240, "120 不應評，next 仍 240，實際=%d" % team.threat_eval_next_tick)
-	# tick 240 → 評，next = 480
-	state.world.current_tick = 240
+	assert(team.threat_eval_next_tick == _tc, "半個 cadence 不應評，next 仍 %d，實際=%d" % [_tc, team.threat_eval_next_tick])
+	# 滿一個 cadence → 評，next = 2×cadence
+	state.world.current_tick = _tc
 	fai._evaluate_threat(state, team)
-	assert(team.threat_eval_next_tick == 480, "240 應評，next=480，實際=%d" % team.threat_eval_next_tick)
+	assert(team.threat_eval_next_tick == 2 * _tc, "滿 cadence 應評，next=%d，實際=%d" % [2 * _tc, team.threat_eval_next_tick])
 	print("Engagement Task4b OK")
 
 # 序1 threat 溶入：_eng_dispatch_setup + 4 _test_dispatch_* 已退役（直呼已刪的 _dispatch_threat_response）。
@@ -15668,8 +15690,10 @@ func _test_g1a_mining_to_coin() -> void:
 	var coin0: float = _team_coin_total(state)
 	# 用 player_pos = pos 讓 mining tile 在近區（才跑 outpost tick + collect）
 	var runner := SimRunner.new()
-	# 跑 6000 ticks（約 25 天）——採礦需幾天累積 >10 ore 才觸發 mint 建造
-	for _i in range(6000):
+	# ★S2：跑【25 遊戲日】—— 舊版寫 `range(6000)` 並註「約 25 天」，
+	#   而 6000 是【舊根下】的 25 天；重錨後它只剩 4.2 天 ⇒ 來不及累礦建鑄幣坊。
+	#   ★★測的是【二十五天內鑄得出錢】，不是【6000 個 tick】。
+	for _i in range(25 * WorldState.TICKS_PER_DAY):
 		runner.advance_tick(state, pos)
 	# 中間斷言 1：礦石必須已從 mountain 採進 vault（resource_cap 初始 50 → 有採集才使 vault>0）
 	var vault_ore: float = float(tile.public_storage.get("ore_gold", 0)) \
@@ -15683,11 +15707,20 @@ func _test_g1a_mining_to_coin() -> void:
 		"[g1a] 礦石未被採集: vault=%.0f ground=%.0f cap=%.0f" % [vault_ore, ground_ore, ore_cap_total])
 	# 最終斷言：mint 建成 OR coin 增加（鏈末端）
 	var coin_delta: float = _team_coin_total(state) - coin0
+	# ★失敗訊息要講【卡在哪一站】：沒料、沒決定建、還是建到一半，是三件不同的事。
 	assert(tile.mint_level > 0 or coin_delta > 0, \
-		"[g1a] 礦村未鑄幣: mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
-		[tile.mint_level, coin_delta, vault_ore])
-	print("[g1a] mining→coin OK mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
-		[tile.mint_level, coin_delta, vault_ore])
+		"[g1a] 礦村未鑄幣: mint_level=%d coin_delta=%.0f vault_ore=%.0f | 施工隊=%d 餘工期=%d 目標=%s 開工tick=%d | 隊料=%.0f 工具=%.0f task=%s | 設施=%s" % \
+		[tile.mint_level, coin_delta, vault_ore,
+		 tile.construction_team_id, tile.construction_ticks_left, str(tile.construction_target),
+		 tile.construction_started_tick,
+		 float(team.resources.get("material", 0)), float(team.resources.get("tools", 0)), team.current_task,
+		 str(_g1a_facility_dump(tile))])
+	# ★成功時也印【料去哪了】：舊根/新根對照靠這一行。
+	#   只印「過了」的話，沒人看得出兩邊的分配是不是同一回事。
+	print("[g1a] mining→coin OK mint_level=%d coin_delta=%.0f vault_ore=%.0f | 隊料=%.0f 工具=%.0f | 設施=%s" % \
+		[tile.mint_level, coin_delta, vault_ore,
+		 float(team.resources.get("material", 0)), float(team.resources.get("tools", 0)),
+		 str(_g1a_facility_dump(tile))])
 
 func _test_g1a_mining_food_supply() -> void:
 	print("--- G1a T4: 礦村外部供糧(food buy) ---")
@@ -17090,3 +17123,14 @@ func _test_meansend_wired_into_candidates() -> void:
 	# ★★兩者確實不同（這一條才是「分得開」的直接斷言）
 	assert(kinds_a != kinds_b, "★缺設施與缺原料產出相同 ⇒ 沒分開")
 	print("[OK] _test_meansend_wired_into_candidates（%s vs %s）" % [str(kinds_a), str(kinds_b)])
+
+
+# ★不手抄欄位名（今天已經踩過一次 workshop_level 不存在）：
+#   設施清單的真值在 OutpostSystem.FACILITY_DEF，欄位名就是它的 current_level_key。
+func _g1a_facility_dump(tile) -> Dictionary:
+	var out: Dictionary = {"outpost_L": tile.outpost_level}
+	for f in OutpostSystem.FACILITY_DEF:
+		var key: String = String(OutpostSystem.FACILITY_DEF[f].get("current_level_key", ""))
+		if key != "":
+			out[String(f)] = tile.get(key)
+	return out

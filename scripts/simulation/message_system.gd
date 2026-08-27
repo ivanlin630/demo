@@ -7,8 +7,11 @@ class_name SimMessageSystem
 #   ★★★而裸 tick 守衛抓不到它：守衛靠【同行有 tick 符號】找，
 #     而這一類【自己就是那個值】，不需要引用任何 tick 符號
 #     ⇒ 「找引用者」抳不到「定義者」。
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const MSG_TTL_SHORT:  int = 7 * WorldState.TICKS_PER_DAY    # 7 天
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const MSG_TTL_MEDIUM: int = 14 * WorldState.TICKS_PER_DAY   # 14 天
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const MSG_TTL_LONG:   int = WorldState.TICKS_PER_MONTH      # 30 天
 
 const MSG_TTL_BY_TYPE: Dictionary = {
@@ -87,6 +90,14 @@ func emit_ambient(state: WorldState, type: String, description: String,
 	return msg
 
 func propagate_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Array) -> void:
+	# ★★★S3 前置 tap（systems 派 2026-08-27，純觀測）：【每遊戲小時】傳播的節律。
+	#   ★這不是常數問題而是【機制的節律】：本函式掛在每 tick 的 arrival 事件上，
+	#     一個字面量都沒有 ⇒ ★★裸 tick 守衛結構性抳不到它（守衛找的是數字）。
+	#   ★★★三個數都要：呼叫次數（節律）／arrival 事件數（分母）／真的交換次數（結果）。
+	#     只有呼叫次數的話，【跑得勤】與【真的傳得多】分不出來。
+	if Probe.enabled:
+		Probe.bump("prop.call")
+		Probe.bump("prop.arrivals", arrived_ids.size())
 	for arrived_id in arrived_ids:
 		if not state.teams.has(arrived_id):
 			continue
@@ -99,6 +110,7 @@ func propagate_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: A
 				continue
 			var leader_arrived: PersonData = state.persons.get(arrived_team.leader_id)
 			var leader_other: PersonData = state.persons.get(other_team.leader_id)
+			if Probe.enabled: Probe.bump("prop.colocated_pair")   # ★分母的下一層：真的同格的對數
 			if leader_arrived != null:
 				_exchange_one_way(state, arrived_id, other_id, leader_arrived)
 			if leader_other != null:
