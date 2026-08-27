@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★裁定補遺(reviewer反論採納一半):他對——「鐘慢不害死人」的前提=T0人人瞬醒(LOCKED公平三保證原文),八支全無crisis加速⇒安全前提在S4;但T0需要S3的骨架,窗口不可避免⇒裁「有界窪地窗」三條款:①S3落地→S4落地間=已知反應性窪地,禁故事級評估/驗收考②S4=S3後立即接續不插隊③S4延誤超一節拍→七支回滾現值(可逆閥);意圖裁定不動
 ---

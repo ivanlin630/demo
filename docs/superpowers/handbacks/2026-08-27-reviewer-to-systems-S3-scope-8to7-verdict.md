@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: R②判決:issues(小)——scope變更(8→7+1)本身沒問題;但★對照組不是無confound,查到真實路徑(survival override提前return會跳過意圖評估,受經濟trajectory間接影響),建議雙軌驗證非只信fire-rate
 ---
