@@ -56,12 +56,55 @@ const C_INTENT: int          = T3_STRATEGIC   # 舊值 TimeScale.TICK_PER_DAY * 
 #   reeval.cadence.<K> ＝ 純週期到期
 # ★為什麼要 both 這一欄：只印 event/cadence 兩欄的話，「事件來了但反正也要跑」會被
 #   算進 event ⇒ ★★T0 的功勞被灌水。分出來才知道【少了事件會不會真的漏掉】。
-static func tap_wake(k: String, woke: bool, due: bool) -> void:
+# ★★★actor id 要帶【命名空間前綴】—— 這是實測抓到的，不是潔癖：
+#   person.id / team_id / faction_id 是三個【不同的命名空間，但數字重疊】。
+#   ★第一版我用裸 int 做 join，rung_changed 跑出 100% 同 tick 命中 ——
+#     ★★而那有可能是【person 3 醒了】被當成【team 3 醒了】。撞號撞出來的綠是最難看見的綠。
+#   ⇒ 前綴由【支別】決定（單一真值在這裡），呼叫端不必各自記得自己是哪個 scope。
+static func actor_scope(k: String) -> String:
+	if k == "GOAL":
+		return "P"
+	if k in ["LADDER", "INDEP_INFRA"]:
+		return "T"
+	return "F"
+
+static func tap_wake(k: String, actor: int, tick: int, woke: bool, due: bool) -> void:
 	if not Probe.enabled:
 		return
 	if woke and due:
 		Probe.bump("reeval.both." + k)
 	elif woke:
 		Probe.bump("reeval.event." + k)
+		# ★★★④延遲欄要用的：每一次【事件喚醒】的 (支, actor, tick)。
+		#   ★這裡只記【發生過的事實】，不預測未來 —— 「下一次事件喚醒在多久之後」
+		#     是床事後把這份跟 poll.same 對接算出來的，★★production 不准偷看未來。
+		Probe.bump_sample("poll.eventwake", {"k": k, "a": actor_scope(k) + str(actor), "t": tick}, 40000)
 	else:
 		Probe.bump("reeval.cadence." + k)
+
+# ★★★輪詢獨特貢獻率的分子（blueprint 判準，systems 轉述時寫死了邊界）：
+#   「改變」＝ 該次重評之後，該 actor 的【選擇】與重評前不同
+#     ⇒ ★不是「跑了」，也不是「分數變了」，是【選出來的東西變了】。
+#   ★★而「維持原選擇」【獨立成第三類】（poll.same），★★★不併進分子。
+#     理由（票裡寫死的）：維持承諾也可能是貢獻，但那要單獨判，不能混進「改變了決策」。
+#
+# ★只在【純 cadence 觸發】時呼叫（due 且 not woke）—— 事件喚醒的那些不進這個分母，
+#   因為要量的是【輪詢】的獨特貢獻，不是「重評」的貢獻。
+static func tap_poll_outcome(k: String, actor: int, tick: int, before: String, after: String) -> void:
+	if not Probe.enabled:
+		return
+	if before == after:
+		Probe.bump("poll.same." + k)
+		Probe.bump_sample("poll.same", {"k": k, "a": actor_scope(k) + str(actor), "t": tick}, 40000)
+	else:
+		Probe.bump("poll.changed." + k)
+		# ★成因分類（③欄）要靠 before/after 逐筆人判 —— ★★所以這裡【存原文】不存摘要，
+		#   摘要會把「是什麼變了」這個唯一有用的資訊丟掉。
+		Probe.bump_sample("poll.changed", {"k": k, "a": actor_scope(k) + str(actor), "t": tick, "b": before, "f": after}, 20000)
+
+# ★★這一支的存在本身就是一條【誠實界限】：
+#   有些支的「選擇」不落在任何可比較的持久欄位上（產出是一次性動作）。
+#   ⇒ ★那些支【不呼叫 tap_poll_outcome】，而床要把它們印成「量不到」，
+#     ★★不是印成 0 —— 0 會被讀成「輪詢對它沒貢獻」，而真相是【沒有儀器】。
+static func poll_measurable(k: String) -> bool:
+	return k in ["GOAL", "LADDER", "STRATEGIC", "INTENT"]

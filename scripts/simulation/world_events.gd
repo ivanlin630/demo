@@ -34,6 +34,12 @@ const FUNC_KINDS: Array = [
 	                            #   保留它是因為它是「開了工卻沒人上工」的唯一觀測器，丟掉等於丟線索。
 	"construction_abandoned",   # ★承諾【真的消失】：換 task 且不 serves ／ 工地易主。這個才是執行型失敗進料口。
 	"plan_invalidated",    # ★FailureMemory.record_invalidation（當前計畫已不可行→該隊當 tick 重想）
+	"rung_changed",        # ★AmbitionLadder.update 升/降野心階（ambition_ladder.gd）
+	                       #   ★★這一顆【不是「我們沒想到的事件」，是我們自己 S3 開的洞】：
+	                       #     rung 是意圖資格的閘（faction_ai_system.gd:1181
+	                       #     `ambition_rung >= RUNG_EXPAND` 才選得了擴張），
+	                       #   ★★★而 S3 把 INTENT 從 10 小時搬到 T3=3 日 ⇒ 升階最多 3 日才反映到意圖。
+	                       #     S3 之前這個延遲是 10 小時，所以當時看不見。
 ]
 
 # ③狀態跨線型（本刀新增偵測點）
@@ -58,6 +64,18 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 	if Probe.enabled:
 		Probe.bump("t0.emit")
 		Probe.bump("t0.emit." + kind)
+		# ★★★真 emit 站的【時序】樣本（kind, 主體隊, tick）。
+		#   ★動機是我自己驗收的一個盲點：S4b 的 210 格是把 burst 注在 advance_tick【之前】，
+		#     所以那些格子永遠看得到 pending ⇒ ★★它證的是【閘會不會醒】，
+		#     ★★★不是【真 emit 站有沒有趕在消費者那一 pass 之前】。
+		#   而 pending_rethink 是【tick 結尾清空】⇒ 在消費者 pass【之後】才 emit 的那些，
+		#   ★會在被讀到前就被清掉 ——「emit 了」與「有人醒了」是兩件事。
+		#   ⇒ 這顆樣本要跟 poll.eventwake 對接，才答得出【哪些 kind 的真 emit 真的叫醒了誰】。
+		for tid2 in subjects:
+			var id2: int = int(tid2)
+			if state.teams.has(id2):
+				# ★emit 的 subjects 一律是隊 id ⇒ 前綴 "T"（與 DecisionTier.actor_scope 同一套）
+				Probe.bump_sample("t0.emit_at", {"k": kind, "a": "T" + str(id2), "t": state.world.current_tick}, 40000)
 
 static func is_pending(state: WorldState, team_id: int) -> bool:
 	return state.pending_rethink.has(team_id)

@@ -127,6 +127,12 @@ const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 # ★★S4b ②：意圖併遷 T3（單一真值在 DecisionTier；舊值寫在那一行的註解裡，回滾改一個檔）。
 const INTENT_CADENCE: int = DecisionTier.C_INTENT
+
+# ★意圖的「選擇」簽章＝(型別, 目標)。★target 要進去：同型別換目標也是【選擇變了】。
+static func _intent_sig(f: FactionData) -> String:
+	if not (f.intent is Dictionary) or f.intent.is_empty():
+		return ""
+	return "%s:%s" % [String(f.intent.get("type", "")), str(f.intent.get("target_id", -1))]
 # A2a 子隊決策 cadence（效能：全框架 gather+rank 非逐 tick，攤平 O(N²) LOD 成本，鏡射 THREAT_CADENCE）。
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const SUBTEAM_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 子隊決策一次（TEST VALUE，平衡 pass 調）
@@ -780,7 +786,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		var _infra_due: bool = state.world.current_tick >= f.infra_eval_next_tick
 		var _infra_woke: bool = WorldEvents.is_pending_faction(state, f)
 		if _infra_due or _infra_woke:
-			DecisionTier.tap_wake("INFRA", _infra_woke, _infra_due)
+			# ★沒有 tap_poll_outcome：這一支的「選擇」不落在可比較的持久欄位上（產出是一次性動作）
+			#   ⇒ ★床要把它印成【量不到】，不是印成 0。0 會被讀成「輪詢對它沒貢獻」。
+			DecisionTier.tap_wake("INFRA", f.faction_id, state.world.current_tick, _infra_woke, _infra_due)
 			if _infra_due:
 				f.infra_eval_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, f.faction_id, INFRA_INTERVAL)
@@ -800,7 +808,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		var _fupd_due: bool = state.world.current_tick >= f.faction_update_next_tick
 		var _fupd_woke: bool = WorldEvents.is_pending_faction(state, f)
 		if _fupd_due or _fupd_woke:
-			DecisionTier.tap_wake("FACTION_UPDATE", _fupd_woke, _fupd_due)
+			# ★沒有 tap_poll_outcome：這一支的「選擇」不落在可比較的持久欄位上（產出是一次性動作）
+			#   ⇒ ★床要把它印成【量不到】，不是印成 0。0 會被讀成「輪詢對它沒貢獻」。
+			DecisionTier.tap_wake("FACTION_UPDATE", f.faction_id, state.world.current_tick, _fupd_woke, _fupd_due)
 			if _fupd_due:
 				f.faction_update_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
@@ -818,7 +828,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		var _betr_due: bool = state.world.current_tick >= f.betray_eval_next_tick
 		var _betr_woke: bool = WorldEvents.is_pending_faction(state, f)
 		if _betr_due or _betr_woke:
-			DecisionTier.tap_wake("BETRAY", _betr_woke, _betr_due)
+			# ★沒有 tap_poll_outcome：這一支的「選擇」不落在可比較的持久欄位上（產出是一次性動作）
+			#   ⇒ ★床要把它印成【量不到】，不是印成 0。0 會被讀成「輪詢對它沒貢獻」。
+			DecisionTier.tap_wake("BETRAY", f.faction_id, state.world.current_tick, _betr_woke, _betr_due)
 			if _betr_due:
 				f.betray_eval_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
@@ -867,7 +879,8 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			var _iinf_due: bool = state.world.current_tick >= team.indep_infra_next_tick
 			var _iinf_woke: bool = WorldEvents.is_pending(state, team.team_id)
 			if _iinf_due or _iinf_woke:
-				DecisionTier.tap_wake("INDEP_INFRA", _iinf_woke, _iinf_due)
+				# ★同上：量不到（產出是一次性動作，不是可比較的選擇欄位）。
+				DecisionTier.tap_wake("INDEP_INFRA", team.team_id, state.world.current_tick, _iinf_woke, _iinf_due)
 				if _iinf_due:
 					team.indep_infra_next_tick = CadenceStagger.next_tick(
 						state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
@@ -948,7 +961,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		var _ladd_due: bool = state.world.current_tick >= team.ambition_eval_next_tick
 		var _ladd_woke: bool = WorldEvents.is_pending(state, team.team_id)
 		if team.leader_id != -1 and (_ladd_due or _ladd_woke):
-			DecisionTier.tap_wake("LADDER", _ladd_woke, _ladd_due)
+			DecisionTier.tap_wake("LADDER", team.team_id, state.world.current_tick, _ladd_woke, _ladd_due)
+			var _ladd_pure: bool = _ladd_due and not _ladd_woke
+			var _ladd_before: String = str(team.ambition_rung) if _ladd_pure else ""
 			# ★LADDER 走的是【排程式】（CadenceStagger.next_tick）不是 `% == 0`，
 			#   ★★所以它的 fire 要在這裡記 —— 先前它【根本沒有 tap】，
 			#   而我差點把那個「零資料】當成【從未 fire】去查。
@@ -958,6 +973,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			if Probe.enabled: Probe.bump_sample("stagger.fired", {
 				"tick": state.world.current_tick, "team": team.team_id, "kind": "ambition"}, 20000)
 			AmbitionLadder.update(state, team)
+			if _ladd_pure:
+				DecisionTier.tap_poll_outcome("LADDER", team.team_id, state.world.current_tick,
+					_ladd_before, str(team.ambition_rung))
 		# G1b：訂單 cadence（餘發賣盤 / 過期清）
 		if team.leader_id != -1 and state.world.current_tick >= team.order_eval_next_tick:
 			if Probe.enabled: Probe.bump_sample("stagger.fired", {
@@ -1298,8 +1316,13 @@ func _rebuild_goals(state: WorldState, f) -> void:
 	var _intent_due: bool = state.world.current_tick >= f.intent_eval_next_tick
 	var _intent_woke: bool = WorldEvents.is_pending_faction(state, f)
 	if _intent_due or _intent_woke:
-		DecisionTier.tap_wake("INTENT", _intent_woke, _intent_due)
+		DecisionTier.tap_wake("INTENT", f.faction_id, state.world.current_tick, _intent_woke, _intent_due)
+		var _int_pure: bool = _intent_due and not _intent_woke
+		var _int_before: String = _intent_sig(f) if _int_pure else ""
 		f.intent = _select_intent(state, f)
+		if _int_pure:
+			DecisionTier.tap_poll_outcome("INTENT", f.faction_id, state.world.current_tick,
+				_int_before, _intent_sig(f))
 		if _intent_due:
 			f.intent_eval_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick, f.faction_id, INTENT_CADENCE)

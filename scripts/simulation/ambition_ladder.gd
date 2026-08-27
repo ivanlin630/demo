@@ -143,6 +143,12 @@ static func update(state: WorldState, team: TeamData) -> void:
 			team.ambition_rung = next_rung
 		team.rung_stall_count = 0
 		Probe.bump("g2.ambition_promote")
+		# ★S4 收口：升階＝意圖資格變了 ⇒ 當 tick 喚醒（不等 T3 那 3 日）。
+		WorldEvents.emit(state, "rung_changed", [team.team_id])
+		# ★驗收要的精確 join：rung 變動當下【那支隊屬於哪個勢力】。
+		#   ★★沒有這一筆就只能拿 team id 去猜 faction，而那正是撞號的來源。
+		if Probe.enabled: Probe.bump_sample("rung_changed_at",
+			{"f": team.faction_id, "team": team.team_id, "t": state.world.current_tick}, 20000)
 	# 降：連續 K 次失守當前 rung milestone（遲滯，瞬時跌不降；含 plateau-below-threshold）
 	elif old > RUNG_SURVIVE:
 		if not milestone_met(state, team, old):
@@ -151,6 +157,13 @@ static func update(state: WorldState, team: TeamData) -> void:
 				team.ambition_rung = old - 1
 				team.rung_stall_count = 0
 				Probe.bump("g2.ambition_demote")
+				# ★降階同樣要喚醒：資格【收回】跟資格【取得】一樣是決策輸入變了。
+				#   ★★只接升不接降＝挑食，而票寫死「不搞白名單挑食」。
+				WorldEvents.emit(state, "rung_changed", [team.team_id])
+				# ★驗收要的精確 join：rung 變動當下【那支隊屬於哪個勢力】。
+				#   ★★沒有這一筆就只能拿 team id 去猜 faction，而那正是撞號的來源。
+				if Probe.enabled: Probe.bump_sample("rung_changed_at",
+					{"f": team.faction_id, "team": team.team_id, "t": state.world.current_tick}, 20000)
 		else:
 			team.rung_stall_count = 0   # 仍夠格 → 撐住
 	team.ambition_eval_next_tick = CadenceStagger.next_tick(
