@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: measure
 topic: ★★★★★flag_lost 收 —— 它是需求①的【字面量】,而我前兩版都是【代理】;★★而這條判準的演化路徑本身值得記:需求 → 我的代理① (結構上不可達) → 我的代理② (只是上界) → 你的字面量;★★★通則:量【需求的字面量】,不要量【與需求相關的代理】—— 每一層代理都會引入一個「它分不出的東西」
