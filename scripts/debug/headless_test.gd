@@ -7927,9 +7927,14 @@ func _test_market_known_msg_immutable_premise() -> void:
 
 func _test_cadence_stagger() -> void:
 	print("--- cadence 錯峰：常數凍結 + 錯峰性質 ---")
-	# ⑤★常數逐位元凍結（★不得靠改 cadence 長度來「達成」錯峰）
-	assert(AmbitionLadder.LADDER_EVAL_CADENCE == 10 * WorldState.TICKS_PER_HOUR,
-		"★LADDER_EVAL_CADENCE 被改了（實際=%d，凍結值=10h）—— 錯峰票不得靠改 cadence 長度達成" % AmbitionLadder.LADDER_EVAL_CADENCE)
+	# ⑤★常數凍結（★不得靠改 cadence 長度來「達成」錯峰）
+	#   ★★S3 更新凍結目標（而這是【需要理由】的動作，理由寫在這）：
+	#   舊目標是 `== 10h`，而它凍的其實是【錯峰票沒有偷改 cadence】——
+	#   ★★★而 S3 是【有 spec 授權的搬家】（七支遷入 T3），不是錯峰票在作弊。
+	#   ⇒ 新目標改凍【它來自層級來源】：有人在別處寫死一個數字仍然會紅，
+	#     而【改 T3 該多長】不會紅 —— ★那正是可逆閥要求的（回滾改一個檔）。
+	assert(AmbitionLadder.LADDER_EVAL_CADENCE == DecisionTier.C_LADDER_EVAL,
+		"★LADDER_EVAL_CADENCE 不再來自層級來源（實際=%d，DecisionTier.C_LADDER_EVAL=%d）" % [AmbitionLadder.LADDER_EVAL_CADENCE, DecisionTier.C_LADDER_EVAL])
 	assert(OrderSystem.ORDER_POST_CADENCE == 12 * WorldState.TICKS_PER_HOUR,
 		"★ORDER_POST_CADENCE 被改了（實際=%d，凍結值=12h）—— 同上" % OrderSystem.ORDER_POST_CADENCE)
 	var C: int = AmbitionLadder.LADDER_EVAL_CADENCE
