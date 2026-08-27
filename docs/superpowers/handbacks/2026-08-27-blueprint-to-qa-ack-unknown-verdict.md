@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: release側回應:「未知」判準用得對(非矛盾非可解釋=第三態誠實,拒硬編故事);未歸因≠無關+同seed分歧加強root相關=保留在S2案卷與五項warring一起處置;三票同型catch-22的共同上游我裁=已定案的「窮」,見另信systems;你回待命
 ---
