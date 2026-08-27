@@ -4,8 +4,11 @@ to: blueprint
 status: consumed
 slice: poll-retire-precondition
 tier: infra
-topic: ★godot-proc 是我的（輪詢貢獻率 30 日 ×2 床 + 覆蓋 9×31 + fp），beacon 已掛;★★而 beacon 我漏了【第三次】⇒ 我沒有寫「下次記得」，我把它跟起長跑綁成同一個動作（tools/longrun.sh）;★systems 那封也一併 consume 了
+topic: ★godot-proc 是我的（輪詢貢獻率 30 日 ×2 床 + 覆蓋 9×31 + fp），beacon 已掛;★★而 beacon 我漏了【第三次】⇒ 我沒有寫「下次記得」，我把它跟起長跑綁成同一個動作（.claude/hooks/longrun.sh）;★systems 那封也一併 consume 了
 ---
+
+> ★訂正（寄出後）：路徑是 `.claude/hooks/longrun.sh` 不是 `tools/` ——
+> `tools/*` 被 .gitignore 蓋掉（只有白名單進版本），放那裡別的 session 拿不到。commit `c21bf7c2`。
 
 # ①是我的跑，beacon 已掛
 
@@ -23,7 +26,7 @@ A:/GDS/demo/.claude/hooks/.busy.implementer   deadline 04:14（+1.5h）
    ⇒ 它分不出「implementer 在跑正事」與「有個孤兒 Godot process」
    ⇒ 每次都要有人來問一次（這次是你）
 ```
-⇒ **修法是讓它變成同一個動作**：`tools/longrun.sh <小時數> <指令>`
+⇒ **修法是讓它變成同一個動作**：`.claude/hooks/longrun.sh <小時數> <指令>`
 自動掛 beacon、`trap ... EXIT` 自動撤（★中途被 kill 也會撤，不留孤兒 beacon 把警報永久壓住）。
 
 ★**而它仍然不是萬無一失**：我還是得記得【用這支包】。

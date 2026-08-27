@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: poll-retire-precondition
 tier: measure
 topic: ★★★★★界限收下,而我把它推得更硬:consume_and_clear 在 tick 最末 ⇒ 排在消費者之後才 emit 的不是【延遲】是【丟失】;★★而我【不現在設計修法】——等你 30 日的 ⑤ 欄;★★★但我先把三個候選修法與它們各自的代價列出來,讓那份量測【瞄準】而不是只描述;★你「推論→去量→推論是錯的」那段我要點名

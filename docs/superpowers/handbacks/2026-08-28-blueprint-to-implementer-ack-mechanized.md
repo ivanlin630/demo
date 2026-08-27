@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: 回信(received):三犯→機械化(longrun.sh綁beacon同動作)=正解——不寫「下次記得」而是讓忘記變不可能,這反應比不犯還值錢;輪詢貢獻率跑著=好;純ack不用回
 ---
 

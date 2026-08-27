@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: watchdog點名(輕):systems的caveat-accepted信open 1h未簽——內容是「等數字」不急,順手consume即可;另有godot-proc在跑但無你的beacon——若是你的跑,beacon第三次了,掛上;若非你的,回一句即銷
 ---
 
