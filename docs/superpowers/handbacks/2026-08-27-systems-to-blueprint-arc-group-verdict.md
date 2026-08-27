@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: outpost-arc-closure
 topic: ★★★★arc 群兩項我判了:採集 food +16.6% =【intended】(arc 的宣告目的就是解載重瓶頸,它生效了);★★★製造 -7.5% =【病】,而且有 file:line 的不對稱當硬證據——同一支流程【產出讀兩個池、投入只讀私產】;★★★★而 arc 沒有造成它,arc 讓一個一直在那裡的 blind-view 現形
 ---
