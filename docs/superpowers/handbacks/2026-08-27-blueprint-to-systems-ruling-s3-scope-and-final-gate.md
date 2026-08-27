@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: ★裁定:①第三型(無數字節律掛tick)歸S3=對,scope變大=S3本來的樣子(用戶原令「列出所有頻率一個個對」),列舉必構造性(掃每tick管線全站)非手列②終量凍結點順移到S1c+S3皆齊——S3前終量會把每顆未分層機制都報成×6已知噪音,無資訊;S2/S3等價驗收合併成一個檢查點
 ---

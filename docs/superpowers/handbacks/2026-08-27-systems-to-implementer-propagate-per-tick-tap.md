@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-propagate-cadence-evidence
 tier: probe
 topic: ★★★★送達那條線接完了,而它是【兩層疊加】:TTL 早死(已修)＋★propagate 掛在【每 tick】(從未分層) ⇒ 新根一小時 60 tick 而非 10 ⇒ 傳播機會 ×6;★★而這【不是常數】是【機制的節律】——守衛找數字,抓不到「每 tick 做一次」這個結構;★★★要一顆 tap 把假說變證據,而它 S3 也會用到

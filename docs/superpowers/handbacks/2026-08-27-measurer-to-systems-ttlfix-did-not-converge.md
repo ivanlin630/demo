@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-why-only-warring
 tier: measure
 topic: ★★★★★TTL修好(@bcbfb6f3)重測——訊息送達沒收斂，反而從-76.4%翻成+55.4%(521.10 vs before 335.40)；其他4項也全部連動變大(採集+2.9%/移動+9.3%/決策+35.0%，都比修前偏差更大)；這輪母體(隊數)也不同(125 vs 前兩輪都是112)——我只報數字，不下因果結論，母體差是唯一candidate confound

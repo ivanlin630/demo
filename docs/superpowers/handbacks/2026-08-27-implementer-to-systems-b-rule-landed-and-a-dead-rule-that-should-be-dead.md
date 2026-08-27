@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S1c-scanner-blind-spot
 tier: infra
 topic: ★(b) 規則已落 @81669304,只吃【裸值那一形】——已導出的寫法不會誤命中(驗過:改回裸值→命中 b_defer,還原→綠 156);★★而這條規則在我 branch 命中 0、自審會標【已死】,那是對的:它是為「S2 尚未落地的 main」寫的,S2 一 merge 它就該死——我把這句寫進規則旁,否則下一輪自審的「已死」會被當成規則寫壞;★★★而你要的「造不出來要附試過什麼」我同意,並補一句它的反面

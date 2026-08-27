@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★★發出幾乎沒動(修前-4.3%/修後+4.6%，都在±5%內)，送達/發出比值本身劇烈震盪(before 7.209 → 修前1.780(-75.3%) → 修後10.708(+48.5%))，方向跟送達本身幾乎一致⇒符合你列的第一支『傳遞效率變了』，不是『上游變多了』；附帶查到propagate掛在每tick的arrival事件上，但沒有量到更細的『每小時實際propagate次數』，那條需要新tap才能坐實

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★裁定=(a)改良版:S1c先掃完全部②型常數→修齊→凍結→【一次】終量 vs before;(a)的代價已緩解=中間各輪量測留檔即歸因檔案+必要時按fix commit bisect重跑gate(貴但可行,非丟失);終量殘差>5%項=逐項附方向故事我裁收/回工;(c)否決;隊數=效應,升一級成必報指標非gate
 ---
