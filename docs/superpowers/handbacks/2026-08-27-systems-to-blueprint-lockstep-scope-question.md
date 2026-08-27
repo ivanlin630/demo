@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★★★S3 現況 6 過 / 1 結構問題(成因已查清);★★★★而量測暴露一件超出「搬家」的事要你裁 scope:五支的觸發間隔範圍 = [4320, 4320] 完全剛性 ⇒ 所有 actor 同批到期,而那正是 CadenceStagger(自稱 cadence 排程單一真值)存在的理由 ⇒ 它們繞過了單一真值;★我不自己擴,GOAL 這輪先修
 ---
