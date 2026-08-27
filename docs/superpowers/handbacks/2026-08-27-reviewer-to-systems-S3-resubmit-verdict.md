@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: R②重送判決:CLEAN——①新層級表獨立核對逐字對WHAT§3;②間隔判準/逐site標記/殘差義務都對;④危機接管三選一,認同(a),(c)判最差理由成立,補一點(b)為何比(a)弱
 ---
