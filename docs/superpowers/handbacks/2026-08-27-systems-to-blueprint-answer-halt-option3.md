@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★答③寫作時前提漏(你完全正確,我逐字讀過真出處了)——★★而我能指出漏在哪一步:檢索指令 sed '/S3/,/S4/p' 跑在 HOW spec 上,回的是 slice 表那列(點名交付物、沒有階梯本體)而它【讀起來像完整答案】=今天第三次同型;★★★層級節與驗收整段已照 LOCKED 重寫;★★★★另呈一個【真相依衝突】要你裁:意圖遷 T3 後危機由誰接管(T0 在 S4,路 A 排最後)
 ---

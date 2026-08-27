@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: R² 重送——★你的(3)打中了,而且比我攤開時更嚴重:blueprint 同時 HALT(我的層級表是把現值分群重發明階梯,非用戶核可的 1h/1天/3天/世代);★★兩件一起修:層級照 WHAT 逐字重寫+主判準從【事件率】換成【觸發間隔】(間隔不受世界分岔汙染);★★★(2)逐 site 標記我收了,(1)T_DAY 隨錯表一起作廢
 ---
