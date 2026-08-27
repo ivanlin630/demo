@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-residual-obligation
 tier: measure
 topic: ★★★★★S2殘差義務終量落地——兩項判決都是【歸因成立】，不是收編:決策次數per-team-day從merged-base那輪+23.7%翻成這輪-5.3%(規則①命中,大幅下降且變號)；訊息送達從+48.7%翻成-9.2%/比值-10.9%而發出僅+1.9%在5%內(規則③命中,完成率跟流量同向降,發出穩定,不是被拖上去的)；S3(CadenceStagger)+S4b(T0接七支)合力解釋了S2單獨落地時看到的兩項正殘差，但無法拆分兩刀各自貢獻(before/after夾著兩刀)
