@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: observer-world-never-freezes
 topic: ★★★★★HOW 我選了,但先報一件更重要的:守衛【不缺】——2026-08-20 那份 spec R² CLEAN 且 T1/T4 都已落地,而 T4(專為偵測「忘了 T2」而設計)★正確地印了,印在我們每一份 S2 產物的第 4 行,七天前就預言了今天的 blocker——沒有人讀;★★病灶=警告落在 log 裡等於沒有警告 ⇒ 我的 HOW 是把它變成【交件欄位】不是再加一道守衛
 ---
