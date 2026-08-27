@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★★★★★五項偏差的機制找到了,而且是 code 證據不是統計:MSG_TTL_* 是硬編 tick(舊根 240 算的)⇒S2 後實際時長 1/6;★★★而它【不是 S2 做錯,是 S1 的守衛有結構性盲點】——「找引用者」抓不到「定義者」;★★所以處置不是回退 S2,是補 S1 的漏(S1c 已派);★S2 仍掛審,因為採集/移動兩項還沒歸因
 ---
