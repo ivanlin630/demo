@@ -113,6 +113,14 @@ static func tap_wake(k: String, actor: int, tick: int, woke: bool, due: bool) ->
 static func tap_poll_outcome(k: String, actor: int, tick: int, before: String, after: String) -> void:
 	if not Probe.enabled:
 		return
+	# ★★★【首次賦值】要獨立成一桶，不准算進分子 —— 這是 30 日實測抓到的假陽性：
+	#   INTENT 的 8 筆「改變」逐筆看全是 `"" -> X`，而 8 == 勢力數
+	#   ⇒ 那是 f.intent 初值為空的【第一次填上】，不是【選擇變了】。
+	#   ★★併進分子的話，輪詢貢獻率會虛報成 10.3%（真值 0%），
+	#     ★★★而那個數字正好落在「>0 ⇒ 不退場」的判準上 —— 假陽性會直接改變裁決。
+	if before == "" and after != "":
+		Probe.bump("poll.first." + k)
+		return
 	if before == after:
 		Probe.bump("poll.same." + k)
 		Probe.bump_sample("poll.same", {"k": k, "a": actor_scope(k) + str(actor), "t": tick}, 40000)

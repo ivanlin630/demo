@@ -12,12 +12,16 @@ extends SceneTree
 #   而砍掉輪詢會讓它【晚很久】才發生。沒有這一欄，≈0 會被讀成「可以砍」，
 #   ★而真相可能是「可以砍，但反應延遲會從小時級變成天級」。
 #
-# ★★★★⑤是我自己加的一欄，動機是【我自己驗收的盲點】：
-#   S4b 的 210 格把 burst 注在 advance_tick【之前】⇒ 那些格子永遠看得到 pending。
+# ★★★★【首次賦值】獨立成第四桶（不併進分子）—— 30 日實測抓到的假陽性：
+#   INTENT 的 8 筆「改變」逐筆看全是 `"" -> X`，而 8 == 勢力數
+#   ⇒ 那是 f.intent 初值為空的【第一次填上】，不是【選擇變了】。
+#   ★併進分子的話，輪詢貢獻率會虛報成 10.3%%（真值 0%%），
+#   ★★而那個數字正好落在「>0 ⇒ 不退場」的判準上 —— ★★★假陽性會直接改變裁決。
+#
+# ★★★★★⑦ 是我自己加的一欄，動機是【我自己驗收的盲點】：
+#   S4b 的覆蓋格把 burst 注在 advance_tick【之前】⇒ 那些格子永遠看得到 pending。
 #   ★它證的是【閘會不會醒】，★★不是【真 emit 站有沒有趕在消費者那一 pass 之前】。
-#   而 pending_rethink 是【tick 結尾清空】⇒ 在消費者 pass【之後】才 emit 的，
-#   ★★★會在被讀到前就被清掉。⇒ 這一欄把 t0.emit_at 跟 poll.eventwake 對接，
-#   問「真 emit 到底叫醒了誰」。★這一欄可能會推翻 S4b 的一部分結論，那也要照印。
+#   ⇒ ⑦ 用【結果導向的精確 join】問：seen / unseen / no_consumer。
 #
 # ★判準（systems 寫死，我不改）：
 #   ①分母 = 0 ⇒ 停，回報「這張床上輪詢根本沒觸發過」——不拿 0/0 當「≈0」
@@ -64,8 +68,9 @@ func _run() -> void:
 
 	# ── ①②③：分母 / 分子 / 第三類 ──
 	print("\n① 分母（純 cadence 觸發）｜② 分子（選擇變了）｜第三類（維持原選擇）")
-	print("   %-16s %10s %10s %10s %12s" % ["支別", "分母", "改變", "維持", "貢獻率"])
-	out.append("## ①②③ 支別|分母(cadence)|改變|維持|貢獻率|備註")
+	print("   %-16s %10s %10s %10s %10s %12s" % ["支別", "分母", "改變", "維持", "首次賦值", "貢獻率"])
+	out.append("## ①②③ 支別|分母(cadence)|改變|維持|首次賦值|貢獻率|備註")
+	out.append("# ★貢獻率的分母 = 改變+維持，【排除首次賦值】——它既不是改變也不是維持")
 	var tot_denom: int = 0
 	var tot_num: int = 0
 	for k in SUPPORTS:
@@ -73,20 +78,23 @@ func _run() -> void:
 		tot_denom += denom
 		if not DecisionTier.poll_measurable(k):
 			# ★量不到 ≠ 0：0 會被讀成「輪詢對它沒貢獻」，而真相是【沒有儀器】。
-			print("   %-16s %10d %10s %10s %12s" % [k, denom, "量不到", "量不到", "—"])
-			out.append("%s|%d|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)" % [k, denom])
+			print("   %-16s %10d %10s %10s %10s %12s" % [k, denom, "量不到", "量不到", "量不到", "—"])
+			out.append("%s|%d|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)" % [k, denom])
 			continue
 		var ch: int = int(Probe.counts.get("poll.changed." + k, 0))
 		var sm: int = int(Probe.counts.get("poll.same." + k, 0))
+		# ★首次賦值獨立成桶：before 是空的那些不是「選擇變了」，是「第一次填上」。
+		var fs: int = int(Probe.counts.get("poll.first." + k, 0))
 		tot_num += ch
-		var seen: int = ch + sm
-		var rate: String = "%.1f%%" % (100.0 * float(ch) / float(seen)) if seen > 0 else "n/a"
+		var seen: int = ch + sm + fs
+		# ★分母排除首次賦值：它既不是「改變」也不是「維持」，把它留在分母會把貢獻率壓低。
+		var rate: String = "%.1f%%" % (100.0 * float(ch) / float(ch + sm)) if (ch + sm) > 0 else "n/a"
 		var note: String = ""
 		if seen != denom:
 			# ★對帳：比對過的次數應該 = 分母。不等就是有一條路沒被比到，要講出來。
 			note = "★對帳不符：比對過 %d ≠ 分母 %d" % [seen, denom]
-		print("   %-16s %10d %10d %10d %12s %s" % [k, denom, ch, sm, rate, note])
-		out.append("%s|%d|%d|%d|%s|%s" % [k, denom, ch, sm, rate, note])
+		print("   %-16s %10d %10d %10d %10d %12s %s" % [k, denom, ch, sm, fs, rate, note])
+		out.append("%s|%d|%d|%d|%d|%s|%s" % [k, denom, ch, sm, fs, rate, note])
 
 	if tot_denom == 0:
 		print("\n★★★停：分母 = 0 —— 這張床上輪詢【根本沒觸發過】。")
