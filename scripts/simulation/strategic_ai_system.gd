@@ -26,7 +26,13 @@ static func _nearest_valid_tile(state: WorldState, target: Vector2i, fallback: V
     return fallback
 
 func tick(state: WorldState, faction: FactionData) -> void:
-    if state.world.current_tick % STRATEGIC_INTERVAL != 0: return
+    # ★S3：`% == 0` → 錯峰排程（同 GOAL）—— 而這一支是【早退式】，排程要在 return 之前做完。
+    if faction.strategic_eval_next_tick == 0:
+        faction.strategic_eval_next_tick = CadenceStagger.next_tick(
+            state.world.current_tick, state.world.current_tick, faction.faction_id, STRATEGIC_INTERVAL)
+    if state.world.current_tick < faction.strategic_eval_next_tick: return
+    faction.strategic_eval_next_tick = CadenceStagger.next_tick(
+        state.world.current_tick, state.world.current_tick, faction.faction_id, STRATEGIC_INTERVAL)
     if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "STRATEGIC", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
     _update_faction_goals(state, faction)
     if faction.strategic_goals.size() > 0:
@@ -37,7 +43,13 @@ func tick(state: WorldState, faction: FactionData) -> void:
     for tid in faction.member_team_ids:
         var t: TeamData = state.teams.get(tid)
         if t: _assign_breakout(state, t)
-    if state.world.current_tick % ALLIANCE_CHECK_INTERVAL == 0:
+    # ★S3：`% == 0` → 錯峰排程（同 GOAL）—— 範圍從剛性變散開就是搬完的證據。
+    if faction.alliance_eval_next_tick == 0:
+        faction.alliance_eval_next_tick = CadenceStagger.next_tick(
+            state.world.current_tick, state.world.current_tick, faction.faction_id, ALLIANCE_CHECK_INTERVAL)
+    if state.world.current_tick >= faction.alliance_eval_next_tick:
+        faction.alliance_eval_next_tick = CadenceStagger.next_tick(
+            state.world.current_tick, state.world.current_tick, faction.faction_id, ALLIANCE_CHECK_INTERVAL)
         if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "ALLIANCE", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
         _evaluate_alliance_need(state, faction)
 

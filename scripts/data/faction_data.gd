@@ -14,6 +14,15 @@ var strategy: String = "idle"
 
 # commander-v2 means-end：意圖驅動 + 每令 driver（北極星：named 意圖必有可解釋驅動）
 var intent: Dictionary = {}        # {type:String, target_id:int, why:String} 承諾追蹤（hysteresis）
+# ★★S3：五支 faction 級節律的【下次評估 tick】—— 全部改走 CadenceStagger。
+#   ★舊實作是 `current_tick % C == 0` ⇒ 所有 faction 【同一批 tick 到期】
+#     （實測指紋：間隔範圍 [4320, 4320] 完全剛性）—— 而那正是 CadenceStagger 存在的理由。
+#   ★★搬完的直接證據不是統計量，是【範圍要散開】。
+var infra_eval_next_tick: int = 0
+var faction_update_next_tick: int = 0
+var betray_eval_next_tick: int = 0
+var strategic_eval_next_tick: int = 0
+var alliance_eval_next_tick: int = 0
 var intent_eval_next_tick: int = 0   # 下次 intent 重選 tick（cadence，A2b #3；鏡射 team threat/subteam_eval_next_tick）
 var goal_drivers: Dictionary = {}  # goal(String) → {intent:String, why:String, mode:String} 每令連回意圖
 
