@@ -60,7 +60,7 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 			var _goal_due: bool = state.world.current_tick >= person.goal_eval_next_tick
 			var _goal_woke: bool = WorldEvents.is_pending(state, person.team_id)
 			if _goal_due or _goal_woke:
-				DecisionTier.tap_wake("GOAL", person.id, state.world.current_tick, _goal_woke, _goal_due)
+				DecisionTier.tap_wake("GOAL", person.team_id, state.world.current_tick, _goal_woke, _goal_due)
 				# ★輪詢獨特貢獻率：只有【純 cadence】那批要比對前後選擇（事件喚醒的不進分母）。
 				var _poll_pure: bool = _goal_due and not _goal_woke
 				var _sel_before: String = ",".join(PackedStringArray(person.goals)) if _poll_pure else ""
@@ -70,7 +70,7 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 				#   不用猜，直接量。（systems：不接受候選解釋直接用）
 				_update_goals(person)
 				if _poll_pure:
-					DecisionTier.tap_poll_outcome("GOAL", person.id, state.world.current_tick,
+					DecisionTier.tap_poll_outcome("GOAL", person.team_id, state.world.current_tick,
 						_sel_before, ",".join(PackedStringArray(person.goals)))
 				var alignment: float = _npc_ai.check_goal_alignment(person, team.current_task)
 				LoyaltyBank.adjust(person, alignment, "goal_alignment")

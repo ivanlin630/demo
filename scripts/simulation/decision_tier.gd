@@ -61,10 +61,30 @@ const C_INTENT: int          = T3_STRATEGIC   # 舊值 TimeScale.TICK_PER_DAY * 
 #   ★第一版我用裸 int 做 join，rung_changed 跑出 100% 同 tick 命中 ——
 #     ★★而那有可能是【person 3 醒了】被當成【team 3 醒了】。撞號撞出來的綠是最難看見的綠。
 #   ⇒ 前綴由【支別】決定（單一真值在這裡），呼叫端不必各自記得自己是哪個 scope。
-static func actor_scope(k: String) -> String:
+# ★九支的名冊（單一真值）—— emit 端要逐支問「這一發對你來說是趕上了還是輸了」。
+const SUPPORT_KEYS: Array = ["GOAL", "LADDER", "STRATEGIC", "ALLIANCE", "BETRAY",
+	"INFRA", "FACTION_UPDATE", "INDEP_INFRA", "INTENT"]
+
+# ★這一發 emit 的主體隊，對這一支來說【存不存在消費者】。
+#   ★★這是 systems ② 的另一半：「比例低」要能分成
+#      【順序輸了】(消費者存在但已經評估過了) vs 【本來就沒有消費者】。
+#   ★★★沒有這一分，兩者的修法會被混成同一個 —— 而它們完全不同。
+static func has_consumer(state: WorldState, team, k: String) -> bool:
+	if team == null:
+		return false
+	if k == "INDEP_INFRA":
+		return int(team.faction_id) == -1        # 只跑獨立隊
+	if k == "LADDER":
+		return int(team.leader_id) != -1         # 無領袖不評野心階
 	if k == "GOAL":
-		return "P"
-	if k in ["LADDER", "INDEP_INFRA"]:
+		return true                              # 隊裡有人就有 person 走 reaction
+	return int(team.faction_id) != -1            # 其餘皆勢力層：獨立隊沒有這一支
+
+# ★GOAL 也用【隊】粒度：它的閘其實是逐 person，但 emit 的 subjects 是隊 id
+#   ⇒ ★★要 join 得起來，兩邊必須在同一個命名空間。
+#   ★★★代價寫明：GOAL 的 ④延遲欄因此是【隊粒度】不是【人粒度】。
+static func actor_scope(k: String) -> String:
+	if k in ["GOAL", "LADDER", "INDEP_INFRA"]:
 		return "T"
 	return "F"
 

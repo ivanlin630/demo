@@ -64,18 +64,19 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 	if Probe.enabled:
 		Probe.bump("t0.emit")
 		Probe.bump("t0.emit." + kind)
-		# ★★★真 emit 站的【時序】樣本（kind, 主體隊, tick）。
-		#   ★動機是我自己驗收的一個盲點：S4b 的 210 格是把 burst 注在 advance_tick【之前】，
-		#     所以那些格子永遠看得到 pending ⇒ ★★它證的是【閘會不會醒】，
-		#     ★★★不是【真 emit 站有沒有趕在消費者那一 pass 之前】。
-		#   而 pending_rethink 是【tick 結尾清空】⇒ 在消費者 pass【之後】才 emit 的那些，
-		#   ★會在被讀到前就被清掉 ——「emit 了」與「有人醒了」是兩件事。
-		#   ⇒ 這顆樣本要跟 poll.eventwake 對接，才答得出【哪些 kind 的真 emit 真的叫醒了誰】。
+		# ★★★emit 當下把【主體隊 + 它的勢力 + 有沒有領袖】一起記下來。
+		#   ★為什麼要記 faction：勢力層那五支的 actor 是【勢力】而 subjects 是【隊】
+		#     ⇒ 不帶 faction 就 join 不起來，★★而 join 不起來會被誤讀成「沒人醒」。
+		#   ★★★為什麼記在 emit 當下而不是跑完回頭查：30 日內隊會換勢力、領袖會死 ——
+		#     拿收尾狀態回頭判，會把【當時存在的消費者】判成不存在。
+		#   ★seen / unseen 由床【事後】對接 poll.eventwake 算，production 不做判斷。
 		for tid2 in subjects:
 			var id2: int = int(tid2)
-			if state.teams.has(id2):
-				# ★emit 的 subjects 一律是隊 id ⇒ 前綴 "T"（與 DecisionTier.actor_scope 同一套）
-				Probe.bump_sample("t0.emit_at", {"k": kind, "a": "T" + str(id2), "t": state.world.current_tick}, 40000)
+			if id2 == -1 or not state.teams.has(id2):
+				continue
+			var _tm = state.teams[id2]
+			Probe.bump_sample("t0.emit_ctx", {"k": kind, "t": state.world.current_tick,
+				"team": id2, "fid": int(_tm.faction_id), "leader": int(_tm.leader_id)}, 40000)
 
 static func is_pending(state: WorldState, team_id: int) -> bool:
 	return state.pending_rethink.has(team_id)

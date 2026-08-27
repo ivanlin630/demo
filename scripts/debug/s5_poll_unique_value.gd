@@ -157,44 +157,13 @@ func _run() -> void:
 	print("   ★單位是 tick（%d tick = 1 日）" % WorldState.TICKS_PER_DAY)
 	out.append("# 單位 tick；%d tick = 1 日" % WorldState.TICKS_PER_DAY)
 
-	# ── ⑤真 emit 站的時序：emit 了 ≠ 有人醒了 ──
-	var emits: Array = Probe.samples.get("t0.emit_at", [])
-	var wake_at: Dictionary = {}   # "actor#tick" -> true（任一支在該 tick 因事件醒）
-	for w2 in Probe.samples.get("poll.eventwake", []):
-		wake_at[str(w2["a"]) + "#" + str(w2["t"])] = true
-	var ek: Dictionary = {}
-	for e in emits:
-		var kk: String = String(e["k"])
-		if not ek.has(kk): ek[kk] = {"n": 0, "hit": 0}
-		(ek[kk] as Dictionary)["n"] = int((ek[kk] as Dictionary)["n"]) + 1
-		if wake_at.has(str(e["a"]) + "#" + str(e["t"])):
-			(ek[kk] as Dictionary)["hit"] = int((ek[kk] as Dictionary)["hit"]) + 1
-	print("\n⑤ 真 emit 站時序：emit 了 ≠ 有人醒了（★S4b 的 210 格證不到這件）")
-	print("   ★注意：命中的分母是【該 kind 的 emit 主體隊】，而『醒』是【任一支在同 tick 因事件醒】。")
-	print("   ★★命中 0 的那些 = 該 kind 的 emit 站【排在所有消費者之後】⇒ 本 tick 結尾就被清掉。")
-	print("   %-26s %8s %8s %8s" % ["kind", "emit", "同tick醒", "命中率"])
-	out.append("#")
-	out.append("## ⑤ 真 emit 站時序｜kind|emit|同tick有人醒|命中率")
-	var eks: Array = ek.keys(); eks.sort()
-	for kk2 in eks:
-		var d: Dictionary = ek[kk2]
-		var n: int = int(d["n"]); var hit: int = int(d["hit"])
-		print("   %-26s %8d %8d %7.1f%%" % [String(kk2), n, hit, 100.0 * float(hit) / float(n)])
-		out.append("%s|%d|%d|%.1f%%" % [String(kk2), n, hit, 100.0 * float(hit) / float(n)])
-	var declared: Array = WorldEvents.all_kinds()
-	var never_emitted: Array = []
-	for dk in declared:
-		if not ek.has(String(dk)): never_emitted.append(String(dk))
-	print("   ★宣告 %d 種，本輪實際 emit 過 %d 種；★★沒 emit 過的 %d 種【不是命中 0】而是【沒發生過】："
-		% [declared.size(), ek.size(), never_emitted.size()])
-	print("     %s" % ", ".join(PackedStringArray(never_emitted)))
-	out.append("# 宣告 %d｜實際 emit 過 %d｜沒發生過 %d：%s"
-		% [declared.size(), ek.size(), never_emitted.size(), ", ".join(PackedStringArray(never_emitted))])
-	print("   ★母體 vs 樣本：t0.emit_at 寫入 %d 筆（cap 40000）%s"
-		% [emits.size(), "  ★★撞 cap ⇒ 前 N 筆不是全部" if emits.size() >= 40000 else ""])
-	out.append("# t0.emit_at 樣本 %d（cap 40000）" % emits.size())
+	# ── ⑤已移除：它跟 ⑦ 問的是同一件事，而 ⑦ 是精確的 ──
+	#   ★舊 ⑤ 的 join 只比對 "T<隊>"，而勢力層五支的 actor 是勢力
+	#     ⇒ 它會把【勢力醒了】算成 miss，把落空率吐高。
+	#   ★★而我今天已經被【兩個儀器答同一問】咬過一次（⑦ 與 ⑥ 打架）——
+	#     ★★★留著一個較鬆的版本只會讓人引到錯的那個數字，所以直接拆掉。
 
-	# ── ⑥ rung_changed → INTENT 的【精確】驗收欄（票的行為證據那一條）──
+	# ── ⑥ rung_changed → INTENT 的【精確】驗收欄（#3 那票的行為證據）──
 	#   ★用 rung_changed_at 帶下來的 faction_id 做 join，★★不是拿 team id 去猜 faction。
 	#   ★★★三分：同 tick 醒 / 之後才醒（幾 tick）/ 從此沒醒過 —— 三個是不同結論，不准合併。
 	var rcs: Array = Probe.samples.get("rung_changed_at", [])
@@ -236,17 +205,98 @@ func _run() -> void:
 			ls += int(v2)
 		print("   之後才醒的延遲：中位 %d ／ 平均 %.1f ／ 最大 %d tick"
 			% [int(later[later.size() / 2]), float(ls) / float(later.size()), int(later[-1])])
-	print("   ★★判準：%s" % ("★同 tick 成立" if same_tick > 0 and never_woke == 0 else
-		"★★★不成立 —— 而那正是要報的：pending_rethink【tick 結尾清空】，若 emit 站排在消費者那一 pass【之後】，這一顆會在被讀到前就被清掉"))
 	out.append("#")
 	out.append("## ⑥ rung_changed → INTENT｜同tick=%d|之後才醒=%d|從此沒醒=%d|獨立隊無勢力=%d|樣本=%d"
 		% [same_tick, later.size(), never_woke, no_faction, rcs.size()])
+
+	# ── ⑦ 逐 kind × 逐支：這一發 emit 【有沒有真的被看到】（★結果導向的精確 join）──
+	#   seen        該支在【同一 tick】為【對應 actor】因事件醒過 ⇒ 這顆 pending 真的被讀到
+	#   unseen      消費者存在，但整個 tick 沒有為它醒 ⇒ ★這顆在 tick 末被清掉＝【消失】不是延遲
+	#   no_consumer 這一支對這個主體隊不存在（獨立隊沒有勢力層／無領袖不評野心階）
+	#
+	# ★★★第一版我用「這支這 tick 的閘評估過了沒有」來判，★那是【錯的】：
+	#   `_run_systems` 一個 tick 會跑兩次（near 60 tick 的 pass ＋ far 600 tick 的 pass），
+	#   而 `_evaluate_all_body` 的勢力／隊迴圈【不吃 team_ids】⇒ 同 tick 會被全掃兩遍。
+	#   ⇒ ★★「已評估過」不等於「不會再評估」——那個定義會把「後來又看到了」記成「輸掉順序」。
+	#   ★★★是兩個儀器互相打架把它抓出來的（那版說 INTENT 100% 輸、⑥ 說同 tick 醒 6/6，
+	#     不可能同時成立 ⇒ 去查，錯的是我新加的那個，不是 ⑥）。
+	#
+	# ★★歸因界限（寫在這裡，不藏）：pending_rethink 是【每隊一個布林】、不記是誰標的
+	#   ⇒ 同一 tick 同一隊有兩個 kind emit 時，兩個都會被記成 seen，★無法歸因給其中一個。
+	#     ⇒ 「seen」要讀成【這一發沒有落空】，不是【這一發是喚醒的原因】。
+	var wake_key: Dictionary = {}
+	for w3 in Probe.samples.get("poll.eventwake", []):
+		wake_key[String(w3["k"]) + "#" + String(w3["a"]) + "|" + str(w3["t"])] = true
+	var ctxs: Array = Probe.samples.get("t0.emit_ctx", [])
+	var per_kind: Dictionary = {}
+	var per_sup: Dictionary = {}
+	for c2 in ctxs:
+		var kn3: String = String(c2["k"])
+		var tk: int = int(c2["t"])
+		for sk3 in DecisionTier.SUPPORT_KEYS:
+			var s3: String = String(sk3)
+			var b3: String
+			if not _consumer_ok(s3, int(c2["fid"]), int(c2["leader"])):
+				b3 = "no_consumer"
+			else:
+				var akey: String = ("T" + str(c2["team"])) if DecisionTier.actor_scope(s3) == "T" else ("F" + str(c2["fid"]))
+				b3 = "seen" if wake_key.has(s3 + "#" + akey + "|" + str(tk)) else "unseen"
+			if not per_kind.has(kn3):
+				per_kind[kn3] = {"seen": 0, "unseen": 0, "no_consumer": 0}
+			if not per_sup.has(s3):
+				per_sup[s3] = {"seen": 0, "unseen": 0, "no_consumer": 0}
+			(per_kind[kn3] as Dictionary)[b3] = int((per_kind[kn3] as Dictionary)[b3]) + 1
+			(per_sup[s3] as Dictionary)[b3] = int((per_sup[s3] as Dictionary)[b3]) + 1
+	print("\n⑦ emit 有沒有被看到（★分母排除 no_consumer —— 那些不是落空，是這一支對它不存在）")
+	print("   %-24s %8s %8s %12s %10s" % ["kind", "seen", "unseen", "no_consumer", "落空率"])
+	out.append("#")
+	out.append("## ⑦ emit 被看到與否｜kind|seen|unseen|no_consumer|落空率(unseen/(seen+unseen))")
+	out.append("# ★歸因界限：pending 是每隊一個布林、不記誰標的 ⇒ 同 tick 同隊多 kind 都記 seen，無法歸因")
+	var kns2: Array = per_kind.keys()
+	kns2.sort()
+	for kn4 in kns2:
+		var d4: Dictionary = per_kind[kn4]
+		var sn: int = int(d4["seen"])
+		var un: int = int(d4["unseen"])
+		var nc4: int = int(d4["no_consumer"])
+		var dn: int = sn + un
+		var mr: String = "%.1f%%" % (100.0 * float(un) / float(dn)) if dn > 0 else "n/a"
+		print("   %-24s %8d %8d %12d %10s" % [String(kn4), sn, un, nc4, mr])
+		out.append("seen|%s|%d|%d|%d|%s" % [String(kn4), sn, un, nc4, mr])
+	print("\n   ── 逐支彙總（誰最常落空）──")
+	out.append("#")
+	out.append("## ⑦b 逐支彙總｜支別|seen|unseen|no_consumer|落空率")
+	for sk4 in SUPPORTS:
+		if not per_sup.has(sk4):
+			continue
+		var d5: Dictionary = per_sup[sk4]
+		var sn5: int = int(d5["seen"])
+		var un5: int = int(d5["unseen"])
+		var nc5: int = int(d5["no_consumer"])
+		var dn5: int = sn5 + un5
+		var mr5: String = "%.1f%%" % (100.0 * float(un5) / float(dn5)) if dn5 > 0 else "n/a"
+		print("   %-16s seen=%-8d unseen=%-8d no_consumer=%-8d 落空率=%s" % [sk4, sn5, un5, nc5, mr5])
+		out.append("seenS|%s|%d|%d|%d|%s" % [sk4, sn5, un5, nc5, mr5])
+	print("   ★母體 vs 樣本：t0.emit_ctx %d 筆（cap 40000）%s"
+		% [ctxs.size(), "  ★★撞 cap ⇒ 前 N 筆不是全部" if ctxs.size() >= 40000 else ""])
+	out.append("# t0.emit_ctx 樣本 %d（cap 40000）" % ctxs.size())
 
 	print("\n[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
 		% [guard, ("%d(%s)" % [stopped_at, stop_reason]) if stopped_at != -1 else "none", eff, ticks])
 	out.append("# [BedSelfCheck] observer_guard=%s first_nonadvance=%s effective_window=%d/%d"
 		% [guard, ("%d(%s)" % [stopped_at, stop_reason]) if stopped_at != -1 else "none", eff, ticks])
 	_land(out, cfg)
+
+# ★消費者判定用【emit 當下的快照】(fid/leader)，不是跑完之後的狀態 ——
+#   30 日內隊會換勢力、領袖會死，拿收尾狀態回頭判會把當時存在的消費者判成不存在。
+func _consumer_ok(k: String, fid: int, leader: int) -> bool:
+	if k == "INDEP_INFRA":
+		return fid == -1
+	if k == "LADDER":
+		return leader != -1
+	if k == "GOAL":
+		return true
+	return fid != -1
 
 func _land(out: Array, cfg: String) -> void:
 	var path: String = OS.get_environment("POLL_OUT") if OS.has_environment("POLL_OUT") \
