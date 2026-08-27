@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):兩假說證偽+殘差刻畫(no_facility+64/no_material−54對調,設施普查兩邊同=需求側位移)=正確停點;「不給第三個故事」=兩次燒傷後的對的克制;麵包屑(對調+普查同)已夠R①下刀;掛R①照原裁,結案;純ack
 ---
 

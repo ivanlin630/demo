@@ -2123,3 +2123,28 @@ invariants-cases.md     節  60 / 相異 39  ⇒ 重複率 35%
 **單純的 `grep -c 標題` 在有重複副本的檔案上是【恆真式】。**
 
 **下一步（未排期）**：**逐節 union 合併**（不是保留最長），**做之前要先有「合併後不得失落任何非空行」的機械驗證**（本次那個守衛就是它）。
+
+## ★★★製造觸發 −7.5%（peaceful）—— **未歸因【但已刻畫】**（2026-08-27 結案掛 R①）
+
+★**麵包屑（R① 重看時從這裡下刀，不必從零開始）**：
+```
+桶              before  after       Δ        （entry 加總 864 == 864，Δ 加總 0，對帳成立）
+fired             215    199     -16
+no_outpost         36     29      -7
+no_worker          30     43     +13
+★no_facility      318    382     +64   ←★★主戲
+★no_material      265    211     -54   ←★★近乎【對調】
+```
+★**出口語意**（`manufacturing_system.gd:127-142`）：
+`no_facility` ＝「**我想做的東西，一個都沒有對應設施**」；`no_material` ＝「**有設施，但料不夠**」。
+★★**而設施普查兩邊【完全相同】**（`manufacturing_level=3 / apothecary_level=6 / smelter=weaponsmith=armorsmith=0`）
+⇒ ★★★**設施沒變，而「想做什麼」變了 ⇒ 【需求側】位移，不是供給側** ⇒ 指向 `NeedOracle.need_keep / demand`（`:182`）。
+
+### ★兩個【已死】的假說（★寫下來免得下一輪重走）
+```
+①★「blind-view（投入只讀私產）造成」⇒ 死：修完後公庫路徑 tried = 0 ⇒ 那機制從未綁
+   ★★（而 blind-view 本身是真缺陷、已修、陽性對照 v3 證明接得上——只是與這個殘差無關）
+②★★「arc 打開據點漏斗 ⇒ 稀釋」⇒ 死：|Δno_outpost| = 7 撐不起下游 39（差 5.6 倍）
+```
+★★★**兩次都有 file:line、有機制、方向也吻合，而兩次都錯** ⇒ **這個殘差抗拒顯而易見的解釋，第三個故事不要憑機制猜。**
+出處：`docs/process/verdicts/S2-manufacture-arithmetic-falsify.measure.json`
