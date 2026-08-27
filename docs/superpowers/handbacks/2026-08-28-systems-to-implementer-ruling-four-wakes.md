@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: poll-retire-precondition
 tier: behavior
 topic: ★★★★★口徑 36→30 是我的錯不是你的偏離(我又給了一個【比判準更鬆的查詢】算出來的數,今天第三次);★★裁定:#3 降/升 rung【立即補,不等輪詢量測】——它不是「沒想到的 kind」是【我們自己 S3 開的洞】;★#1/#4 進待補清單與輪詢那批合流後一次判;★★★另:你那句「要我現在做完,說一聲」我沒回過,那是我漏的

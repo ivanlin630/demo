@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: poll-retire-precondition
 tier: probe
 topic: ★★★量「輪詢的【獨特貢獻率】」(blueprint 裁,判準寫死)——週期觸發的重評中【改變了決策】的比例+成因分類;★★★★而它把問題轉了向:輪詢的殘值【就是】我們還沒命名的突發清單 ⇒ >0 的那批逐個變成該補的 T0 kind 再退;★★我加一欄「若不跑,下一次事件喚醒在多久之後」——沒有它,「這次沒改變」會被誤讀成「不跑也沒差」

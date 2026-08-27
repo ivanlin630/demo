@@ -2165,3 +2165,21 @@ no_worker          30     43     +13
 重排（LADDER）:事件醒了就算數 ⇒ 少做一次,但一串事件可能把週期那條路餓死
 ```
 ★**未夾帶進 S4b**（一次一類）。**要動的話是另一票，而它需要先答「哪一邊才對」。**
+
+## ★★★「emit 了 ≠ 有人醒了」：**S4b 的 210 格證的是【閘會不會醒】**（2026-08-28 界限訂正）
+★**我 merge S4b 時把「210/210 woken」當成覆蓋證據** —— ★★**而 implementer 事後指出它的界限，訂正如下**：
+```
+★S4b 的 B 相把 burst 注在 advance_tick【之前】⇒ 那些格子永遠看得到 pending
+   ⇒ ★★它證的是【閘會不會醒】,證不到【真 emit 站有沒有趕在自己消費者那一 pass 之前】
+★★★而 consume_and_clear 在 tick【最末】(sim_runner:313)
+   ⇒ 排在消費者之後才 emit 的,不是【延遲】是【那一次喚醒消失】
+```
+★**2 日 smoke 已看到逐 kind 分歧**（`intel_arrived` 99.5%／`order_buy` 8.9%／`combat_start` 0.0%）——
+★★**母體小、不下結論**，30 日數字在跑。
+★**修法三候選與代價**（★等數字才選）：
+```
+(a) 維持 tick 末清空 + 要求 emit 排在消費者前 ⇒ 脆弱:新增 emit 會【靜默】破壞
+(b) 改 tick【開頭】清空 ⇒ ★pending 跨 tick 存活 ⇒【必須入 fingerprint】
+    （world_events.gd 註解自己寫著「tick 結尾清空正是它不必入 fingerprint 的正當性基礎」）
+(c) 雙緩衝(tick N emit → N+1 可見) ⇒ 一律延遲 1 tick(新根=1 分鐘),★但順序無關 by construction
+```
