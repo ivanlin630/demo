@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★HALT 解除,而 scope 變了:8 支→7＋1(blueprint 裁「意圖不隨 S3 搬」,與 T0 綁同票在 S4);★★而這個裁定意外給了我們一個【內建對照組】——七支變、意圖不變,若意圖也動了就是搬家漏到別人身上;R² 請就新 scope 續審
 ---
