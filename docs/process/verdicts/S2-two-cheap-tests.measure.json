@@ -1,0 +1,22 @@
+{
+  "slice": "S2-statistical-equivalence-after",
+  "ticket": "systems重框異常(真事件240→7在TTL修復commit,不是7→0)+要求兩個便宜的量：①per-team-day重算②fp逐位元比bcbfb6f3vs b05750ef",
+
+  "①per-team-day重算(warring_states，用簡單隊數而非population-day積分：before112隊×30日=3360team-days，after125隊×30日=3750team-days)": {
+    "移動格tap": {"before每隊每日": 0.8765, "after每隊每日": 0.8587, "相對差": "-2.0%", "判讀": "★掉進5%內⇒改記【母體效應】，原始+9.3%的殘差被隊數差(+11.6%)解釋掉了"},
+    "決策次數":   {"before每隊每日": 0.5798, "after每隊每日": 0.7013, "相對差": "+21.0%", "判讀": "仍>5%⇒真殘差(原始+35.0%↓+21.0%，隊數解釋掉一部分但沒解釋完)"},
+    "訊息送達":   {"before每隊每日": 2.9946, "after每隊每日": 4.1688, "相對差": "+39.2%", "判讀": "仍>5%⇒真殘差(原始+55.4%↓+39.2%，同上)"},
+    "★系統預期符合": "systems預期決策+送達不會被隊數解釋掉(量級差太多)——量出來確實如此"
+  },
+
+  "②fp逐位元比對(a4_determinism_check.gd, warring_states, seed=1337, ticks=1000)": {
+    "bcbfb6f3": "4f1c0edaa9cdeecb9b07beeea3503717",
+    "b05750ef": "4f1c0edaa9cdeecb9b07beeea3503717",
+    "★結果": "完全相同",
+    "判讀": "★★★bcbfb6f3→b05750ef之間的純觀測tap commit(message_system.gd+9行/qty_tap_bed.gd+15行的Probe.bump)沒有改變世界狀態，這是儀器側乾淨的直接證據(不是四捨五入的每日均值，是真bit-identity指紋)⇒material harvest那條『真事件』的嫌疑犯鎖定在0ab34123→bcbfb6f3(TTL修復commit)那一段，跟這個tap commit無關"
+  },
+
+  "★不做的": "沒有去查material為什麼塌——照你信裡的指示，這輪仍然只量",
+
+  "跑法": {"worktree": "A:/GDS/demo/.worktrees/measure-s2-after", "checkout順序": "bcbfb6f3(fp)→b05750ef(fp，同時也是①用的既有原始總數所在的commit)"}
+}

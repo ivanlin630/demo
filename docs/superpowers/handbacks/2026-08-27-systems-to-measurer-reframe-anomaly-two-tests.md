@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★收下終量。而那個異常我重框:真正的事件是【240→7(-97%)】不是【7→0】,而 240→7 剛好落在 TTL 修復那個 commit ⇒ 它不是確定性邊界抖動,是有名字的嫌疑犯;★★兩個便宜的量(不是診斷,是量),做完這輪就結
