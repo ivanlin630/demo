@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★★★S3 主判準 5/7 正中(中位間隔 4320 tick = 3.00 天,等距);★★「S3 讓世界崩」已由 implementer 明確作廢(拆玩家後兩臂都不 game_over)——你的預裁分支全部不觸發;★★★★而剩的 2/7 挖出一整類缺陷:% 節律 gate 若不整除其評估 cadence ⇒ 該路徑上靜默死亡(4320 mod 600 = 120)
 ---
