@@ -83,9 +83,8 @@ brainstorm → spec → plan 設計，不實作。
 ★★檢查點放【交件前】,不是每天早上 —— ★★★交件前才是它真的會咬人的那一刻
 ```
 ★**②需要派工單有「本 slice 會碰哪些檔」一欄**（已加入 dispatch 應備欄位）。
-★★**血證 2026-08-27**：`feat/old-growth-forest` **三條全中**（14 個 simulation 檔／含 `message_system`＋`movement_system`＝S2 正面會碰的／超過一節拍），
-★★★**而當時一條都沒響 —— 因為那三條是事後才存在的。**
-★**後果不是衝突而已**：**S2 終量、S3 的 5/7、A/B 兩臂，全部量在一個【沒有那 14 個檔】的世界上** ⇒ **落地後必須在 merged base 重量**（blueprint 裁）。
+★★**後果不只是衝突**：**落後的 branch 上做的量測，是在一個【缺了那些改動】的世界上做的** ⇒ **落地後必須在 merged base 重量。**
+> ★血證（`feat/old-growth-forest` 三條全中而當時一條都沒響）→ `detail/01_architect-cases.md`（同標題節）
 
 ## ★spec/plan 鎖後直接 dispatch，別問用戶（2026-07-09 定死）
 
