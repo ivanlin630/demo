@@ -85,6 +85,9 @@ brainstorm → spec → plan 設計，不實作。
 ★★而 rebase 已經開始了：git rebase --abort —— ★★★merge commit 會完整回來（我驗過）
 ```
 ★**通則**：**`--rebase` 適合「我只有幾顆線性 commit」；一旦歷史裡有 merge，它就是在拆你剛做的事。**
+★★**已機械化**：`.claude/hooks/pre-rebase.sh`（★判準＝「這次 rebase 會不會【重放 merge commit】」，不是「你有沒有 merge 過」；`ALLOW_REBASE_WITH_MERGES=1` 可明示放行）。
+★**新 clone 要裝一次**（`.git/hooks` 不進版控）：`cp .claude/hooks/pre-rebase.sh "$(git rev-parse --git-common-dir)/hooks/pre-rebase"`
+★★**三對照跑過（走 `git rebase` 真實路徑）**：含 merge ⇒ 擋（exit 128）／不含 ⇒ 靜默放行／override ⇒ 放行並提醒。
 
 ## ★★★長壽 slice branch 的新鮮度：**用【落後量】觸發，不用【時間】**（systems 裁 2026-08-27，blueprint 准）
 
