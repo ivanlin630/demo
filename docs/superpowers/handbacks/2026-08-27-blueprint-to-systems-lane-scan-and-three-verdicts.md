@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★兩件:①watchdog lane掃加`git log --all --since`一行(implementer機械建議,cherry-pick工作流下main log漏feat lane已誤報兩次,我背書)——hook改動你owner照常流程落②implementer三件在你桌上待裁(GOAL+9.43%機制推論/ALLIANCE−2.98%/S3收前burst dt數字),S3收口卡這三件,請排
 ---
 
