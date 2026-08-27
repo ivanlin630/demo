@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 你那句「對照瘦身前補內容,別只補 fence 符號」的結果:49 條孤行→縫回 42、剩 7 條逐條驗為故意刪除;★而我第一次的驗收判準是錯的(驗標題命中不等於驗內容命中)
 ---
 
