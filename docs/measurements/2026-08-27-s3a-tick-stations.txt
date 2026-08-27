@@ -1,0 +1,44 @@
+# S3a 每 tick 站盤點（靜態）
+# 三桶：gated / true_candidate / untraceable ——★相加 = 分支總數，一筆都不准無處置
+# ★untraceable 必須出現在【輸出裡】：它的真實深度是未知，不是『確認沒 gate』
+# 欄位：bucket|reason|path|line|target|via
+# gated            = 18
+# leaf_util        = 2
+# true_candidate   = 11
+# untraceable      = 3
+# 分支總數             = 34
+#
+untraceable|變數持有的呼叫，型別解析不出（鴨子定型）|res://scripts/simulation/sim_runner.gd|223|_ph.clear|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/encounter_system.gd|226|advance_encounter_tick|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/encounter_system.gd|228|resolve_encounter_end|_advance_tick_body
+gated|呼叫點未閘，但函式【內部】自己有 cadence 閘|res://scripts/simulation/sim_runner.gd|229|_step1_advance_time|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/sim_runner.gd|230|_pht|_advance_tick_body
+untraceable|變數持有的呼叫，型別解析不出（鴨子定型）|res://scripts/simulation/sim_runner.gd|130|_ph.get|_advance_tick_body>_pht
+leaf_util|頂層呼叫的是索引外/內建函式（不是一個站）|res://scripts/simulation/sim_runner.gd|231|consume_and_clear|_advance_tick_body
+gated|呼叫點未閘，但函式【內部】自己有 cadence 閘|res://scripts/simulation/sim_runner.gd|233|_step1_advance_time|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:235）|res://scripts/simulation/sim_runner.gd|237|prune_old_messages|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:235）|res://scripts/simulation/sim_runner.gd|240|check_starvation_deaths|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:235）|res://scripts/simulation/sim_runner.gd|242|flush_forage_episodes|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:245）|res://scripts/simulation/sim_runner.gd|246|_step1d_overflow|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/sim_runner.gd|247|_pht|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/day_night_system.gd|249|get_speed_mult|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/day_night_system.gd|250|get_vision_mult|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|254|_get_near_teams|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|265|_get_player_team_sr|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|267|emit_message|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|271|new|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|277|release|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|278|try_set|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|281|release|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|286|_pht|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:253）|res://scripts/simulation/sim_runner.gd|288|_run_systems|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:294）|res://scripts/simulation/sim_runner.gd|295|_step4c_harvest_tick|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/sim_runner.gd|296|_pht|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:299）|res://scripts/simulation/sim_runner.gd|300|_get_far_teams|_advance_tick_body
+gated|呼叫點就在 cadence 閘內（sim_runner.gd:299）|res://scripts/simulation/sim_runner.gd|303|_run_systems|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/sim_runner.gd|305|_pht|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/sim_runner.gd|306|_step_captives|_advance_tick_body
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/sim_runner.gd|307|_step_cleanup_extinct_teams|_advance_tick_body
+untraceable|變數持有的呼叫，型別解析不出（鴨子定型）|res://scripts/simulation/sim_runner.gd|326|_faction_ai_system.cleanup_extinct_teams|_advance_tick_body>_step_cleanup_extinct_teams
+true_candidate|呼叫點未閘、函式內部也沒有 cadence 閘 ⇒ ★待實測複驗|res://scripts/simulation/sim_runner.gd|308|_pht|_advance_tick_body
+leaf_util|頂層呼叫的是索引外/內建函式（不是一個站）|res://scripts/simulation/sim_runner.gd|311|consume_and_clear|_advance_tick_body
