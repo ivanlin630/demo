@@ -1,8 +1,15 @@
 class_name SimMessageSystem
 
-const MSG_TTL_SHORT:  int = 1680   # 7天  × 240 ticks/day
-const MSG_TTL_MEDIUM: int = 3360   # 14天
-const MSG_TTL_LONG:   int = 7200   # 30天 = TICKS_PER_MONTH
+# ★★★S2 修（2026-08-27，systems 揭）：這三顆原本是【硬編 tick】，而那些數字是用舊根
+#   240 tick/天 算出來的（舊註解自己寫著「7天 × 240 ticks/day」）。
+#   ★重錨後根變成 1440 tick/天 ⇒ 這三顆的【實際時長剩 1/6】：30 天 → 5 天。
+#   ★★而它【沒有症狀】：訊息照常發、照常傳，只是提早過期。
+#   ★★★而裸 tick 守衛抓不到它：守衛靠【同行有 tick 符號】找，
+#     而這一類【自己就是那個值】，不需要引用任何 tick 符號
+#     ⇒ 「找引用者」抳不到「定義者」。
+const MSG_TTL_SHORT:  int = 7 * WorldState.TICKS_PER_DAY    # 7 天
+const MSG_TTL_MEDIUM: int = 14 * WorldState.TICKS_PER_DAY   # 14 天
+const MSG_TTL_LONG:   int = WorldState.TICKS_PER_MONTH      # 30 天
 
 const MSG_TTL_BY_TYPE: Dictionary = {
 	"combat_start":      MSG_TTL_SHORT,

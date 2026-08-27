@@ -124,7 +124,10 @@ var can_send_scout: bool = false    # named_members>=2 有 spare named（leader 
 # Fix A-2 v2（rejection-learning）：有可達且未近期被拒的 host 才把併入當出路——破「餓世界恆拒→重選併入→又拒」loop。
 # host 鏡射 to_task:200 優先序（strong_neighbor else consolidate，非 OR）；cooldown 過期可再試（非永久黑名單）。
 var has_acceptable_join_host: bool = false
-const JOIN_REJECT_COOLDOWN_TICKS: int = 480   # TEST VALUE — 被拒後 N tick 內不重選此 host（跨多 cadence 破 loop，過期再試）
+# ★S2 修（同 MSG_TTL 那一族）：480 是【舊根下的 2 天】（480/240），而它比對的是 world tick
+#   （decision_context.gd:673 `current_tick - _m["tick"] < 本常數`）
+#   ⇒ 重錨後實際只剩 8 小時，而【沒有症狀】：cooldown 照常運作，只是太快過期。
+const JOIN_REJECT_COOLDOWN_TICKS: int = 2 * WorldState.TICKS_PER_DAY   # TEST VALUE — 被拒後 2 天內不重選此 host（跨多 cadence 破 loop，過期再試）
 # 經濟底：自家糧倉 food（含遠端家，team 不在家也讀得到）→ 返家補給 home-empty gate 用。
 var home_food: float = 0.0
 # ★GATE-A 食糧 keystone：家 outpost tile 食物再生≥燃燒率 = 產糧家（返家可採飽脫餓，非空 granary trap）。

@@ -4646,7 +4646,10 @@ func _run_sim_test() -> void:
 	_old_msg.id          = 99990
 	state.global_messages.append(_old_msg)
 	var _before_g: int = state.global_messages.size()
-	_msg_prune_sys.prune_old_messages(state, 9999)
+	# ★S2：9999 是【舊根下】比 MSG_TTL_SHORT(1680) 大的一個 tick 數。
+	#   重錨後 TTL_SHORT = 7 天 = 10080 tick > 9999 ⇒ 訊息還沒過期，測試假紅。
+	#   ★測的是【超過 TTL 就該被 prune】，不是【9999 這個數】⇒ 直接從常數導出。
+	_msg_prune_sys.prune_old_messages(state, SimMessageSystem.MSG_TTL_SHORT + 1)
 	assert(state.global_messages.size() < _before_g,
 		"[MsgPruneTest] expired message must be pruned from global_messages")
 	print("[MsgPruneTest] message TTL prune ok")
