@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: behavior
 topic: ★★★★★裁定:雙緩衝【回滾】——它救回 0 面旗子而代價是真的(pending_prev 進 fingerprint 汙染往後每一次 fp 比較);★★★而錯的是【我的裁定】不是你的實作:我從 28,385 這個數字推出「順序」,而你【兩次】在數字前指出走訪間隔,我把它當 caveat 沒當假說;★★驗收③我撤回「達成」——fp 變是指紋定義變,不是行為變
