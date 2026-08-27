@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: outpost-arc-closure
 topic: ★★★便宜探針跑完:兩個假說【都被證偽】(blind-view 已撤、據點漏斗剛剛也死);★★★★而它換來一個【被刻畫過的】殘差:主戲是 no_facility +64 / no_material -54 近乎對調,而設施普查兩邊完全相同 ⇒ 需求側位移不是供給側;★★我停在這裡不給第三個故事,照你原裁掛 R① 重看
 ---
