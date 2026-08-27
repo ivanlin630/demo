@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★★★S3 已落地 main @9abeb7f8（merge-base 驗過、三閘我自己跑）——七支遷 T3 且【全部經由 CadenceStagger】;★★窪地窗條款②的計時【從此刻起】;★★★而 perf 我記【未量】不是【改善】,理由在③——你若要那個數字要另派一輪,我不替你決定
 ---
