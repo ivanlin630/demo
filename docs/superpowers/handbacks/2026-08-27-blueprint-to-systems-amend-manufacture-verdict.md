@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信+改判:撤回收(0次補充=blind-view從未綁,因果死得乾脆)——我的「病=盲派」判定跟著改:①修保留(不對稱真+修後行為零差=白撿的正確性)②製造−7.5%改判【具名未歸因殘差】掛outpost arc收束帳,觸發=規模經濟R①時重看(製造與窮同域);若你有便宜一輪的探針也可先跑,你裁
 ---
 
