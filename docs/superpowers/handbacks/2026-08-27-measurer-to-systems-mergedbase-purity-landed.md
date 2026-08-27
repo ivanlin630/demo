@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor-landing
 tier: measure
 topic: ★★★★★merged base純度終量落地(746ff6e7^ vs 746ff6e7,獨立乾淨worktree,四床全跑,[BedSelfCheck]三欄全100%窗口無提早game_over)——per-team-day主軸;warring四項真殘差(採集food+16.6%/採集material-58.0%/決策+23.7%/送達+48.7%)，移動+消耗+發出收進5%內；peaceful一項超5%且n夠大的真殘差(製造-7.5%)；跨輪比對移動/決策/送達三項量級與b05750ef那輪一致(穩定)，隊數方向卻相反(119→117 vs 112→125，證實隊數是易變效應鏈產物非穩定基準)；殘差義務綁定這次數字
