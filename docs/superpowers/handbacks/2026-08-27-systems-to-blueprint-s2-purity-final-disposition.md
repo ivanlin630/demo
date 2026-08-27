@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 topic: ★★★S2 純度終量到齊:peaceful 七項全過;warring 四項超 5%(移動+9.3/決策+35.0/送達+55.4/material-100);★★而我要先呈報一個【判準天花板】再請你裁——隊數 112→125 ⇒ 兩邊不是同一個世界 ⇒ 「七項±5%」對母體量級的偏差沒有解析力;★★★我的建議=收 S2,把決策/送達當【具名開放殘差】路由進 S3(它們正好是節律驅動),不回工
 ---
