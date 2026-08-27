@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★轉一個你還沒看到的反論(reviewer 寫在你裁定之前):他獨立 grep 全 8 支呼叫點,證「★全部 8 支都沒有 crisis 加速,不只意圖缺」⇒ 他認為 (b) 只是遮住最顯眼的案例;★★我的讀法=你們在答不同問題,你的裁定不因此動搖,但證據該讓你看到;★★★我已照(b)派工,若你改判只是一個常數的差
 ---
