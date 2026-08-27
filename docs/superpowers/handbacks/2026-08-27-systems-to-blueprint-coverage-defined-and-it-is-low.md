@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3a-tick-station-inventory
 topic: ★★★★先認一個我的洞:你的條件式裁定綁在「覆蓋率」上,而【我從來沒定義過它】;★★我補上可操作定義並用它裁:★★★覆蓋率【低】⇒ 走「分兩次」——S1c 齊即可先跑 S2 純度終量;★數字:4 顆真每 tick 站,而【沒有一顆碰採集或移動】,其中一顆還是 opt-in 儀器
 ---
