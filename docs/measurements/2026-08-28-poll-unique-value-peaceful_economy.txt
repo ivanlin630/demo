@@ -1,0 +1,48 @@
+# 輪詢獨特貢獻率｜cfg=peaceful_economy days=30 ticks=43200 有效窗=43200
+# actor 母體(收尾)：persons=24 factions=0 獨立隊=12 有領袖隊=12
+## ①②③ 支別|分母(cadence)|①改變|②維持|③首次賦值|④無選擇產出|貢獻率|備註
+# ★四類互斥且窮盡：①+②+③+④ 必須 == 分母；④ 是殘差，它非 0 就是還有第五種情況
+# ★貢獻率的分母 = 改變+維持，【排除首次賦值】——它既不是改變也不是維持
+GOAL|181|0|181|0|0|0.0%|
+LADDER|94|2|92|0|0|2.1%|
+STRATEGIC|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+ALLIANCE|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+BETRAY|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+INFRA|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+FACTION_UPDATE|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+INDEP_INFRA|107|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)
+INTENT|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+#
+## ③ 成因池｜母體 2 樣本 2
+cause|2|LADDER｜0 → 1
+#
+## ④ 延遲｜支別|樣本|中位|平均|最大|之後再也沒醒
+GOAL|91|7800|10582.4|33000|90
+LADDER|45|6420|8306.7|25920|47
+# 單位 tick；1440 tick = 1 日
+#
+## ⑥ rung_changed → INTENT｜同tick=0|之後才醒=0|從此沒醒=0|獨立隊無勢力=3|樣本=3
+#
+## ⑦ emit 被看到與否｜kind|seen|unseen|no_consumer|落空率(unseen/(seen+unseen))
+# ★歸因界限：pending 是每隊一個布林、不記誰標的 ⇒ 同 tick 同隊多 kind 都記 seen，無法歸因
+seen|combat_engaged|3|2|13|40.0%
+seen|combat_start|0|2|7|100.0%
+seen|construction_stalled|2|1|6|33.3%
+seen|famine_crossed|9|0|18|0.0%
+seen|intel_arrived|36|0|72|0.0%
+seen|order_buy|126|1248|2748|90.8%
+seen|order_sell|90|642|1464|87.7%
+seen|rung_changed|3|6|18|66.7%
+#
+## ⑦b 逐支彙總｜支別|seen|unseen|no_consumer|落空率
+seenS|GOAL|89|635|0|87.7%
+seenS|LADDER|90|632|2|87.5%
+seenS|STRATEGIC|0|0|724|n/a
+seenS|ALLIANCE|0|0|724|n/a
+seenS|BETRAY|0|0|724|n/a
+seenS|INFRA|0|0|724|n/a
+seenS|FACTION_UPDATE|0|0|724|n/a
+seenS|INDEP_INFRA|90|634|0|87.6%
+seenS|INTENT|0|0|724|n/a
+# t0.emit_ctx 樣本 724（cap 40000）
+# [BedSelfCheck] observer_guard=none first_nonadvance=none effective_window=43200/43200

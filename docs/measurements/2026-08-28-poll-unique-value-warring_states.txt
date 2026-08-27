@@ -1,0 +1,58 @@
+# 輪詢獨特貢獻率｜cfg=warring_states days=30 ticks=43200 有效窗=43200
+# actor 母體(收尾)：persons=159 factions=8 獨立隊=42 有領袖隊=105
+## ①②③ 支別|分母(cadence)|①改變|②維持|③首次賦值|④無選擇產出|貢獻率|備註
+# ★四類互斥且窮盡：①+②+③+④ 必須 == 分母；④ 是殘差，它非 0 就是還有第五種情況
+# ★貢獻率的分母 = 改變+維持，【排除首次賦值】——它既不是改變也不是維持
+GOAL|779|0|779|0|0|0.0%|
+LADDER|266|24|242|0|0|9.0%|
+STRATEGIC|67|0|67|0|0|0.0%|
+ALLIANCE|67|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)
+BETRAY|72|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)
+INFRA|72|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)
+FACTION_UPDATE|72|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)
+INDEP_INFRA|281|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)
+INTENT|78|0|70|8|0|0.0%|
+#
+## ③ 成因池｜母體 24 樣本 24
+cause|17|LADDER｜0 → 1
+cause|4|LADDER｜1 → 0
+cause|1|LADDER｜1 → 2
+cause|1|LADDER｜2 → 0
+cause|1|LADDER｜4 → 0
+#
+## ④ 延遲｜支別|樣本|中位|平均|最大|之後再也沒醒
+GOAL|632|2400|4408.9|28200|147
+LADDER|200|3000|5040.6|24300|42
+STRATEGIC|66|360|536.4|3900|1
+INTENT|69|420|813.9|12840|1
+# 單位 tick；1440 tick = 1 日
+#
+## ⑥ rung_changed → INTENT｜同tick=44|之後才醒=3|從此沒醒=0|獨立隊無勢力=89|樣本=136
+#
+## ⑦ emit 被看到與否｜kind|seen|unseen|no_consumer|落空率(unseen/(seen+unseen))
+# ★歸因界限：pending 是每隊一個布林、不記誰標的 ⇒ 同 tick 同隊多 kind 都記 seen，無法歸因
+seen|betrayed|56|8|8|12.5%
+seen|combat_engaged|99|37|188|27.2%
+seen|combat_start|7|35|120|83.3%
+seen|construction_stalled|22|6|26|21.4%
+seen|convoy_stranded|18|30|6|62.5%
+seen|extortion|48|0|51|0.0%
+seen|famine_crossed|46|1|79|2.1%
+seen|intel_arrived|194321|18972|124882|8.9%
+seen|order_buy|2442|6676|5066|73.2%
+seen|order_sell|904|2620|1498|74.3%
+seen|rung_changed|368|67|375|15.4%
+seen|teams_erased|816|0|102|0.0%
+#
+## ⑦b 逐支彙總｜支別|seen|unseen|no_consumer|落空率
+seenS|GOAL|30348|9652|0|24.1%
+seenS|LADDER|34982|4792|226|12.0%
+seenS|STRATEGIC|21558|7|18435|0.0%
+seenS|ALLIANCE|21558|7|18435|0.0%
+seenS|BETRAY|20414|1151|18435|5.3%
+seenS|INFRA|20414|1151|18435|5.3%
+seenS|FACTION_UPDATE|20414|1151|18435|5.3%
+seenS|INDEP_INFRA|9479|8956|21565|48.6%
+seenS|INTENT|19980|1585|18435|7.3%
+# t0.emit_ctx 樣本 40000（cap 40000）
+# [BedSelfCheck] observer_guard=stripped first_nonadvance=none effective_window=43200/43200

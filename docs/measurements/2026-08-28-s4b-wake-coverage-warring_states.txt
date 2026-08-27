@@ -25,10 +25,13 @@ ctrl|FACTION_UPDATE|7|9
 ctrl|INDEP_INFRA|7|10
 ctrl|INTENT|7|9
 #
+## ②b 既有 tap（reeval.event，無後綴＝_should_reeval 的決策支，這一刀沒碰過它）
+# 對照(不注射,600 tick)=15 ｜ 注射(31 kind × 600 tick)=19490
+#
 ## ③ 靜態：閘上有沒有 kind 過濾（例外必須寫理由）
 # is_pending 那幾行提到 kind 字面量的次數 = 0
 #
-## ④ 270 格（9 支 × 30 kind）；★核心 7 支 = 210 格單獨對帳
+## ④ 279 格（9 支 × 31 kind）；★核心 7 支 = 217 格單獨對帳
 # 欄位：kind|support|bucket|event|both
 combat_start|GOAL|woken|119|18
 combat_start|LADDER|woken|748|0
@@ -273,33 +276,42 @@ plan_invalidated|INFRA|woken|85|3
 plan_invalidated|FACTION_UPDATE|woken|85|3
 plan_invalidated|INDEP_INFRA|woken|357|6
 plan_invalidated|INTENT|woken|86|2
-famine_crossed|GOAL|woken|125|20
-famine_crossed|LADDER|woken|1069|0
+rung_changed|GOAL|woken|125|20
+rung_changed|LADDER|woken|1069|0
+rung_changed|STRATEGIC|woken|87|1
+rung_changed|ALLIANCE|woken|87|1
+rung_changed|BETRAY|woken|87|1
+rung_changed|INFRA|woken|87|1
+rung_changed|FACTION_UPDATE|woken|87|1
+rung_changed|INDEP_INFRA|woken|355|8
+rung_changed|INTENT|woken|87|1
+famine_crossed|GOAL|woken|128|20
+famine_crossed|LADDER|woken|1072|0
 famine_crossed|STRATEGIC|woken|87|1
 famine_crossed|ALLIANCE|woken|87|1
 famine_crossed|BETRAY|woken|87|1
 famine_crossed|INFRA|woken|87|1
 famine_crossed|FACTION_UPDATE|woken|87|1
-famine_crossed|INDEP_INFRA|woken|355|8
+famine_crossed|INDEP_INFRA|woken|358|5
 famine_crossed|INTENT|woken|87|1
-labor_crisis|GOAL|woken|128|20
-labor_crisis|LADDER|woken|1072|0
-labor_crisis|STRATEGIC|woken|87|1
-labor_crisis|ALLIANCE|woken|87|1
-labor_crisis|BETRAY|woken|87|1
-labor_crisis|INFRA|woken|87|1
-labor_crisis|FACTION_UPDATE|woken|87|1
-labor_crisis|INDEP_INFRA|woken|358|5
-labor_crisis|INTENT|woken|87|1
-intel_arrived|GOAL|woken|135|12
-intel_arrived|LADDER|woken|1074|0
-intel_arrived|STRATEGIC|woken|88|0
-intel_arrived|ALLIANCE|woken|88|0
-intel_arrived|BETRAY|woken|88|0
-intel_arrived|INFRA|woken|88|0
-intel_arrived|FACTION_UPDATE|woken|88|0
-intel_arrived|INDEP_INFRA|woken|359|4
-intel_arrived|INTENT|woken|87|0
-# woken            全=270 核心=210
-# 合計               全=270 核心=210
-# ★PASS：核心 210 格全部有處置，NOT_WOKEN=0
+labor_crisis|GOAL|woken|135|12
+labor_crisis|LADDER|woken|1074|0
+labor_crisis|STRATEGIC|woken|88|0
+labor_crisis|ALLIANCE|woken|88|0
+labor_crisis|BETRAY|woken|88|0
+labor_crisis|INFRA|woken|88|0
+labor_crisis|FACTION_UPDATE|woken|88|0
+labor_crisis|INDEP_INFRA|woken|359|4
+labor_crisis|INTENT|woken|87|0
+intel_arrived|GOAL|woken|139|11
+intel_arrived|LADDER|woken|1107|0
+intel_arrived|STRATEGIC|woken|87|1
+intel_arrived|ALLIANCE|woken|87|1
+intel_arrived|BETRAY|woken|87|1
+intel_arrived|INFRA|woken|87|1
+intel_arrived|FACTION_UPDATE|woken|87|1
+intel_arrived|INDEP_INFRA|woken|360|3
+intel_arrived|INTENT|woken|76|1
+# woken            全=279 核心=217
+# 合計               全=279 核心=217
+# ★PASS：核心 217 格全部有處置，NOT_WOKEN=0
