@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S3a-tick-station-inventory
 tier: probe
 topic: R²請審 S3a(每 tick 站構造性盤點,純盤點零改動);★★★而它現在是【前置決策輸入】:blueprint 把「終量合併還是分兩次」的裁定改成【由本票的覆蓋率數字決定】;★★兩問:①我的「可宣告母體」定義夠不夠構造性 ②陽性對照(拿掉一個已知 gate)會不會太危險
