@@ -9,7 +9,12 @@
 # 用法：bash tools/longrun.sh <小時數> <powershell 指令...>
 #   例：bash tools/longrun.sh 1.5 ".\tools\godot.ps1 --headless --script scripts/debug/x.gd"
 #
-# ★beacon 帶死線自動過期（忘了撤 → 到點失效），所以最壞情況是「多響一次」不是「永久靜音」。
+# ★★★誠實界限（★我先前對 blueprint 講過頭，這裡訂正）：
+#   我寫過「中途被 Ctrl-C / kill 也會撤」—— ★★【那句是錯的】。
+#   `trap ... EXIT` 對 SIGKILL 【不會 fire】，而 2026-08-28 這一輪就碰到了：
+#   背景工作被殺掉 ⇒ Godot 進程還活著，而 beacon 留在原地。
+#   ⇒ ★★★真正的安全網是【死線】不是 trap：忘了撤 → 到點自動失效。
+#   最壞情況是「這段期間警報被壓住」，不是「永久靜音」—— ★所以死線要給緊，別給 8h。
 set -u
 ROOT="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"
 BEACON="$ROOT/.claude/hooks/.busy.implementer"
@@ -18,5 +23,6 @@ DEADLINE=$(( $(date +%s) + $(awk -v h="$HOURS" 'BEGIN{printf "%d", h*3600}') ))
 echo "$DEADLINE" > "$BEACON"
 echo "[longrun] beacon 掛上 → $BEACON (deadline $(date -d @"$DEADLINE" '+%F %H:%M'))"
 # ★撤 beacon 綁在 EXIT 上：★★中途被 Ctrl-C / kill 也會撤，不留孤兒 beacon 把警報永久壓住。
-trap 'rm -f "$BEACON"; echo "[longrun] beacon 已撤"' EXIT
+# ★INT/TERM 也接（EXIT 單獨接不到訊號中斷）；★★SIGKILL 接不到，靠死線。
+trap 'rm -f "$BEACON"; echo "[longrun] beacon 已撤"' EXIT INT TERM
 "$@"
