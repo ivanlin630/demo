@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★凍結點【第三次】變動,而這次是往回:S3a 數字出來 ⇒ 覆蓋率【低】⇒ 走「分兩次」⇒ ★S1c 齊即可先跑【S2 純度終量】,不必等 S3;★★理由:4 顆真每 tick 站沒有一顆碰採集/移動/決策/訊息,其中一顆還是 opt-in 儀器
