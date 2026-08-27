@@ -68,8 +68,9 @@ func _run() -> void:
 
 	# ── ①②③：分母 / 分子 / 第三類 ──
 	print("\n① 分母（純 cadence 觸發）｜② 分子（選擇變了）｜第三類（維持原選擇）")
-	print("   %-16s %10s %10s %10s %10s %12s" % ["支別", "分母", "改變", "維持", "首次賦值", "貢獻率"])
-	out.append("## ①②③ 支別|分母(cadence)|改變|維持|首次賦值|貢獻率|備註")
+	print("   %-16s %8s %8s %8s %10s %10s %10s" % ["支別", "分母", "①改變", "②維持", "③首次賦值", "④無選擇產出", "貢獻率"])
+	out.append("## ①②③ 支別|分母(cadence)|①改變|②維持|③首次賦值|④無選擇產出|貢獻率|備註")
+	out.append("# ★四類互斥且窮盡：①+②+③+④ 必須 == 分母；④ 是殘差，它非 0 就是還有第五種情況")
 	out.append("# ★貢獻率的分母 = 改變+維持，【排除首次賦值】——它既不是改變也不是維持")
 	var tot_denom: int = 0
 	var tot_num: int = 0
@@ -78,8 +79,8 @@ func _run() -> void:
 		tot_denom += denom
 		if not DecisionTier.poll_measurable(k):
 			# ★量不到 ≠ 0：0 會被讀成「輪詢對它沒貢獻」，而真相是【沒有儀器】。
-			print("   %-16s %10d %10s %10s %10s %12s" % [k, denom, "量不到", "量不到", "量不到", "—"])
-			out.append("%s|%d|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)" % [k, denom])
+			print("   %-16s %8d %8s %8s %10s %10s %10s" % [k, denom, "量不到", "量不到", "量不到", "量不到", "—"])
+			out.append("%s|%d|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)" % [k, denom])
 			continue
 		var ch: int = int(Probe.counts.get("poll.changed." + k, 0))
 		var sm: int = int(Probe.counts.get("poll.same." + k, 0))
@@ -89,12 +90,16 @@ func _run() -> void:
 		var seen: int = ch + sm + fs
 		# ★分母排除首次賦值：它既不是「改變」也不是「維持」，把它留在分母會把貢獻率壓低。
 		var rate: String = "%.1f%%" % (100.0 * float(ch) / float(ch + sm)) if (ch + sm) > 0 else "n/a"
+		# ★★★④無選擇產出：該次重評沒有產生可比較的選擇。
+		#   ★它是【對帳的殘差】而不是獨立量到的 —— ★★而那正是它的用處：
+		#   systems 寫死「四欄加總必須 == 分母，不等就是還有第五種情況沒被列】。
+		#   ⇒ ★★★把殘差印出來，它非 0 就是【我的四類不窮盡】的機械證據，不靠人看。
+		var nz: int = denom - (ch + sm + fs)
 		var note: String = ""
-		if seen != denom:
-			# ★對帳：比對過的次數應該 = 分母。不等就是有一條路沒被比到，要講出來。
-			note = "★對帳不符：比對過 %d ≠ 分母 %d" % [seen, denom]
-		print("   %-16s %10d %10d %10d %10d %12s %s" % [k, denom, ch, sm, fs, rate, note])
-		out.append("%s|%d|%d|%d|%d|%s|%s" % [k, denom, ch, sm, fs, rate, note])
+		if nz != 0:
+			note = "★★四類不窮盡：殘差 %d（分母 %d ≠ %d+%d+%d）⇒ 還有第五種情況" % [nz, denom, ch, sm, fs]
+		print("   %-16s %8d %8d %8d %10d %10d %10s %s" % [k, denom, ch, sm, fs, nz, rate, note])
+		out.append("%s|%d|%d|%d|%d|%d|%s|%s" % [k, denom, ch, sm, fs, nz, rate, note])
 
 	if tot_denom == 0:
 		print("\n★★★停：分母 = 0 —— 這張床上輪詢【根本沒觸發過】。")
