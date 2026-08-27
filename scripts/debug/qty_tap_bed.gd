@@ -71,13 +71,13 @@ func _initialize() -> void:
 		else:
 			print("[FAIL] PROBE_OFF 卻有 %d 條 qty.* key：%s" % [leaked.size(), str(leaked.slice(0, 8))])
 		# ★★床自檢欄位（systems 定為慣例 2026-08-27）：
-	#   守衛要輸出【已處置的結果】不是【要被解讀的狀態】——
-	#   ★一行 print 淹在 log 裡等於沒有，而一個欄位會被交件帶走。
-	print("[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
+		#   守衛要輸出【已處置的結果】不是【要被解讀的狀態】——
+		#   ★一行 print 淹在 log 裡等於沒有，而一個欄位會被交件帶走。
+		print("[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
 		% ["stripped" if _stripped else "none",
 		   ("%d(%s)" % [_first_nonadv, _nonadv_reason]) if _first_nonadv != -1 else "none",
 		   (_first_nonadv if _first_nonadv != -1 else ticks), ticks])
-	print("=== qty_tap_bed DONE ===")
+		print("=== qty_tap_bed DONE ===")
 		quit(); return
 
 	var dayf: float = float(days)
@@ -171,5 +171,9 @@ func _initialize() -> void:
 	for k9 in Probe.amounts:
 		if String(k9).begins_with("qty."):
 			print("  %-34s = %.6f" % [String(k9), float(Probe.amounts[k9])])
+	print("[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
+		% ["stripped" if _stripped else "none",
+		   ("%d(%s)" % [_first_nonadv, _nonadv_reason]) if _first_nonadv != -1 else "none",
+		   (_first_nonadv if _first_nonadv != -1 else ticks), ticks])
 	print("=== qty_tap_bed DONE ===")
 	quit()
