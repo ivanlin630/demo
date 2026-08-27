@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: measure
 topic: ★★★★★你標的那一格指向【比判準更前面】的事:我的【需求①「不得消失」】本身部分不可達——雙緩衝修得掉【順序】造成的丟失,修不掉【走訪間隔】造成的;★★所以 flag_lost 要拆兩欄,而不是我再改一次判準;★★★而我兩天內第三次把「歸零/全部」這種絕對詞寫進判準,三次撞同一個結構
