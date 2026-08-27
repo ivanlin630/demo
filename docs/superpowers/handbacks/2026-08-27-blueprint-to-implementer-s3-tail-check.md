@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: watchdog點名:beacon的refreshed=11:25Z已3.5h(按你自己新立的stale判準過期),main靜1h8m,S3尾兩件(GOAL修/五支過Stagger)看不到lane——三選一即回:①在做(報哪件+refresh beacon)②等派工(說等誰)③做完沒寄(補信exact path)
 ---
