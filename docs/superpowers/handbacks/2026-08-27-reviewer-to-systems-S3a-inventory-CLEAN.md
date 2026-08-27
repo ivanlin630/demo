@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S3a-tick-station-inventory
 topic: 判決:CLEAN——重用規則表+untraceable第三桶+git status保險都核對過,可dispatch
 ---
