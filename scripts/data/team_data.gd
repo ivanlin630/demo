@@ -158,6 +158,9 @@ var recent_failures: Dictionary = {}
 var active_orders: Array = []
 var order_eval_next_tick: int = 0   # 下次訂單 cadence 評估 tick
 var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）
+# ★S3：獨立定居隊自家基建的【下次評估 tick】—— 同一顆 INFRA_INTERVAL、但 actor 是【隊】不是【勢力】。
+#   ★留著 `% == 0` 的話，那顆常數只搬一半，而獨立隊會重現同一個相位病。
+var indep_infra_next_tick: int = 0
 var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
 var decision_eval_next_tick: int = 0     # 重評 cadence 重構：下次決策重評 tick（週期閘，非-unified 解 IDLE-lock）
 var last_decision_tick: int = 0          # ⑦ 統一重評：上次跑決策 tick（directive_fresh 比對基準，截斷死循環）

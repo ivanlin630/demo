@@ -60,8 +60,21 @@ func _initialize() -> void:
 		var med: float = 0.0
 		if gaps.size() > 0:
 			med = float(gaps[gaps.size() / 2])
-		print("  %-16s 中位間隔 %8.1f tick = %5.2f 天 ｜分母：fire %d 次 / %d 個行為者 / 間隔樣本 %d"
-			% [kk, med, med / day_t, int(agg[kk]["fires"]), (agg[kk]["actors"] as Dictionary).size(), gaps.size()])
+		# ★★★兩個統計量都印，因為【哪一個才是對的尺】取決於排程形狀（systems 訂正 2026-08-27）：
+		#   ★固定週期（`% == 0`）⇒ 間隔恆為 C ⇒ 【中位】就是 C，±2% 合理
+		#   ★★錯峰排程（CadenceStagger）⇒ 每 cycle 換 offset ⇒ 間隔 = C + (off2 - off1)
+		#     ⇒ 期望值 = C，而單次在 (C/2, 2C) 跳 ⇒ ★★★要看【平均】不是中位
+		#   ★把兩個都印：只印一個的話，下一個人看不出這支是哪種排程。
+		var mean: float = 0.0
+		for g in gaps:
+			mean += float(g)
+		if gaps.size() > 0:
+			mean /= float(gaps.size())
+		var lo: float = float(gaps[0]) if gaps.size() > 0 else 0.0
+		var hi: float = float(gaps[gaps.size() - 1]) if gaps.size() > 0 else 0.0
+		print("  %-16s 平均 %8.1f (%.2f 天) ｜中位 %8.1f (%.2f 天) ｜範圍 [%d, %d] ｜分母：fire %d / %d 行為者 / 間隔 %d"
+			% [kk, mean, mean / day_t, med, med / day_t, int(lo), int(hi),
+			   int(agg[kk]["fires"]), (agg[kk]["actors"] as Dictionary).size(), gaps.size()])
 	var br: Array = Probe.samples.get("body.tick", [])
 	var bt: Array = []
 	for b in br: bt.append(int(b["t"]))
@@ -69,6 +82,33 @@ func _initialize() -> void:
 	var aligned: int = 0
 	for t2 in bt:
 		if t2 % DecisionTier.T3_STRATEGIC == 0: aligned += 1
+	# ── ★GOAL 專區：量化誤差（due → 實際 fire）＋逐筆間隔 ──
+	var dl: Array = []
+	for r9 in rows:
+		if String(r9["k"]) == "GOAL" and r9.has("due"):
+			dl.append(int(r9["tick"]) - int(r9["due"]))
+	if not dl.is_empty():
+		dl.sort()
+		var dm: float = 0.0
+		for d0 in dl: dm += float(d0)
+		dm /= float(dl.size())
+		var mult600: int = 0
+		for d1 in dl:
+			if int(d1) % 600 == 0: mult600 += 1
+		print("
+── ★GOAL 量化誤差（實際 fire − 排程目標）──")
+		print("  平均 %.1f tick｜中位 %d｜範圍 [%d, %d]｜樣本 %d"
+			% [dm, int(dl[dl.size() / 2]), int(dl[0]), int(dl[dl.size() - 1]), dl.size()])
+		print("  ★其中是 600 整數倍的：%d / %d（★★量化假說成立的話這一欄應該很高）" % [mult600, dl.size()])
+		var gg2: Array = agg.get("GOAL", {}).get("gaps", [])
+		if not gg2.is_empty():
+			var g600: int = 0
+			for g3 in gg2:
+				if int(g3) % 600 == 0: g600 += 1
+			print("  ★逐筆間隔是 600 整數倍的：%d / %d" % [g600, gg2.size()])
+			var sample: Array = []
+			for gi2 in range(mini(16, gg2.size())): sample.append(int(gg2[gi2]))
+			print("  逐筆（前 16）：%s" % str(sample))
 	print("
 ── ★外層評估 _evaluate_all_body 跑了幾次──")
 	print("  共 %d 次｜其中 %d 次落在 T3 的整數倍上（%% %d == 0）" % [bt.size(), aligned, DecisionTier.T3_STRATEGIC])

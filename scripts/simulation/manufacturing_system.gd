@@ -191,10 +191,35 @@ func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, lev
 		var q: float = worker_rate * rate          # 本 tick 產量
 		if q <= 0.0:
 			continue
-		if not _can_consume_scaled(team, recipe["in"], q):
+		if not _can_consume_scaled(state, team, tile, recipe["in"], q):
 			continue
 		for res in recipe["in"]:
-			ResourceBank.add(team, res, -(float(recipe["in"][res]) * q), "manufacture_input")     # 投入隨產量縮放（in = 每單位成品原料）；原無 clamp 保可負
+			var need: float = float(recipe["in"][res]) * q
+			# ★池優先序【寫死】：私產先、公庫後。
+			#   ★★理由是「誰的成本」不是效率 ⇒ ★★★明文禁「哪個多用哪個」
+			#     （那會讓同一情境出現兩種結果）。
+			var from_team: float = ResourceBank.remove(team, res, need, "manufacture_input")
+			var rem: float = need - from_team
+			var from_vault: float = 0.0
+			if rem > 0.001:
+				if Probe.enabled: Probe.bump("manufacture.vault_path.tried")   # ★死水欄①
+				if tile != null and _team_works_tile(state, team, tile):
+					# ★單寫者：禁直接寫 tile.public_storage ⇒ 走 TileBank
+					#   （cap / 溢出落地 / audit 都掛在 TileBank 上）
+					from_vault = TileBank.withdraw(tile, res, rem, "manufacture_input_vault")
+					if from_vault > 0.0 and Probe.enabled:
+						Probe.bump("manufacture.vault_path.ok")                     # ★死水欄②
+						Probe.add_amount("manufacture.input_from_vault." + str(res), from_vault)
+			# ★★★以【實扣】為準，而不等的處置是 loud-fail 不是静默修補：
+			#   R²：單執行緒同 tick 下，檢查與扣款之間沒有任何東西能改那兩個池
+			#   ⇒ 【不等】不是需要被處理的情況，是【不可能發生】的情況
+			#   ⇒ ★它一旦發生就是缺陷，而缺陷要吵。静默回滾/夾住/湊數會把
+			#     「不變量被違反」的訊號變成一次正常運作。
+			if absf((from_team + from_vault) - need) > 0.001:
+				push_error("[manufacture] 實扣 %.4f (私產 %.4f + 公庫 %.4f) != 應扣 %.4f res=%s team=%d"
+					% [from_team + from_vault, from_team, from_vault, need, str(res), team.team_id])
+				if Probe.enabled: Probe.bump("manufacture.debit_mismatch")
+				return ""
 			Probe.add_amount("manufacture.input_consumed", float(recipe["in"][res]) * q)
 			if Probe.enabled:
 				# ★既有那顆是【聚合】的（所有原料加總）⇒ 分不出 food/material，
@@ -207,9 +232,22 @@ func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, lev
 		return recipe["out"]
 	return ""
 
-func _can_consume_scaled(team: TeamData, inputs: Dictionary, q: float) -> bool:
+# ★★★病是【四處不對稱】：產出檢查讀兩池、產出寫入寫公庫，
+#   而投入檢查只讀私產、投入扣款只扣私產。
+#   ★outpost arc 把 material 私產→公庫 ⇒ 材料還在，製造看不到也拿不到。
+#   ★★而 arc 沒有造成它 —— blind-view 一直在， arc 只是把材料搬到它看不見的那一側。
+#
+# ★★★★而【只改檢查不改扣款】比原病更糟：
+#   檢查說「夠」而扣款只扣私產 ⇒ add 負數不保證 clamp ⇒ 私產扣成負數 ＝【憑空造材料】。
+#   ⇒ 原病只是少做事；那個是守恆破洞。所以檢查與扣款【必須同時改】。
+func _can_consume_scaled(state: WorldState, team: TeamData, tile: HexTileData, inputs: Dictionary, q: float) -> bool:
+	# ★所有權閥：只有這支隊真的在這格幹活才讀得到它的公庫（複用既有閥，不新增概念）
+	var can_vault: bool = tile != null and _team_works_tile(state, team, tile)
 	for res in inputs:
-		if float(team.resources.get(res, 0)) < float(inputs[res]) * q:
+		var have: float = float(team.resources.get(res, 0))
+		if can_vault:
+			have += float(tile.public_storage.get(res, 0))
+		if have < float(inputs[res]) * q:
 			return false
 	return true
 

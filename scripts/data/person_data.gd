@@ -59,6 +59,13 @@ var salary: float = 0.0
 var coin: float = 0.0
 var blood: float = 100.0
 var hunger: float = 0.0   # 個人飢餓累積 [0,1]；跟人走不跟團（中途加入不繼承團時鐘）；飢餓致死鏈用
+# ★★S3：個人目標的【下次評估 tick】—— 錯峰排程用（CadenceStagger）。
+#   ★舊實作是 `current_tick % GOAL_CHECK_INTERVAL == 0`，而它有兩個病：
+#     ①【相位】：它能不能命中取決於宿主 pass 的 cadence 整不整除 C
+#       （實測：far pass 600、C=4320 ⇒ 4320 mod 600 = 120 ⇒ far 隊【永遠不命中】）
+#     ②【同批到期】：所有 actor 在同一批 tick 到期 ⇒ burst
+#   ★★CadenceStagger 一次解掛兩個：無相位（不管宿主多常呼叫）＋逐 actor 錯開。
+var goal_eval_next_tick: int = 0
 var relations: Dictionary = {}
 var relation_edges: Array = []   # G2 typed-edge 關係圖（feud/killed/protect/gratitude；見 RelationGraph）
 

@@ -770,7 +770,13 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		_assign_tasks(state, f)
 		if SimRunner.phase_timing: _tf = _fai_pht("loop1.assign_tasks", _tf)
 		# C: 每 INFRA_INTERVAL 評估一次基建（蓋/升級/擴建）
-		if state.world.current_tick % INFRA_INTERVAL == 0:
+		# ★S3：`% == 0` → 錯峰排程（同 GOAL）—— 範圍從剛性變散開就是搬完的證據。
+		if f.infra_eval_next_tick == 0:
+			f.infra_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, f.faction_id, INFRA_INTERVAL)
+		if state.world.current_tick >= f.infra_eval_next_tick:
+			f.infra_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, f.faction_id, INFRA_INTERVAL)
 			# ★★常駐節律 tap（Probe-gated，關掉零成本）：
 			#   ★【什麼時候評一次】今天沒有任何儀器 ⇒ 每次要量都要重新掛臨時 tap（我已經掛撤三次）。
 			#   ★★而「新 decision 必接 tap」是不變量：節律 fire 就是一個 decision 事件。
@@ -779,14 +785,26 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			_evaluate_infrastructure(state, f)
 		if SimRunner.phase_timing: _tf = _fai_pht("loop1.infra", _tf)
 		# 每 20 小時評估一次主動外交
-		if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
+		# ★S3：`% == 0` → 錯峰排程（同 GOAL）—— 範圍從剛性變散開就是搬完的證據。
+		if f.faction_update_next_tick == 0:
+			f.faction_update_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
+		if state.world.current_tick >= f.faction_update_next_tick:
+			f.faction_update_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
 			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "FACTION_UPDATE", "team": f.faction_id if f != null else -1, "tick": state.world.current_tick}, 6000)
 			var _leader_team: TeamData = state.teams.get(f.leader_team_id)
 			if _leader_team != null:
 				DiplomaticAiSystem.new().try_proactive_diplomacy(state, _leader_team)
 		if SimRunner.phase_timing: _tf = _fai_pht("loop1.diplo", _tf)
 		# 每 BETRAY_CHECK_INTERVAL tick 評估結盟 team 背叛
-		if state.world.current_tick % DiplomaticAiSystem.BETRAY_CHECK_INTERVAL == 0:
+		# ★S3：`% == 0` → 錯峰排程（同 GOAL）—— 範圍從剛性變散開就是搬完的證據。
+		if f.betray_eval_next_tick == 0:
+			f.betray_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
+		if state.world.current_tick >= f.betray_eval_next_tick:
+			f.betray_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
 			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "BETRAY", "team": f.faction_id if f != null else -1, "tick": state.world.current_tick}, 6000)
 			var leader_team_b: TeamData = state.teams.get(f.leader_team_id)
 			if leader_team_b == null: continue
@@ -824,7 +842,13 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 				_evaluate_independent_strategy(state, team)
 				_evaluate_solo(state, team)
 			# S3 means-end 統一：獨立定居隊自家 outpost 建設施（同 _pick_facility argmax，閉合想 goods→需設施→去蓋）。
-			if state.world.current_tick % INFRA_INTERVAL == 0:
+			# ★S3：`% == 0` → 錯峰排程（actor = 隊）。
+			if team.indep_infra_next_tick == 0:
+				team.indep_infra_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
+			if state.world.current_tick >= team.indep_infra_next_tick:
+				team.indep_infra_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
 				_evaluate_independent_infrastructure(state, team)
 		else:
 			# faction 成員（非子隊，斷①C「入勢力不換腦」）：個人戰略層對每個 leader 永遠跑——
@@ -895,6 +919,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			team.order_eval_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick, team.team_id, OrderSystem.ORDER_POST_CADENCE)
 		if team.leader_id != -1 and state.world.current_tick >= team.ambition_eval_next_tick:
+			# ★LADDER 走的是【排程式】（CadenceStagger.next_tick）不是 `% == 0`，
+			#   ★★所以它的 fire 要在這裡記 —— 先前它【根本沒有 tap】，
+			#   而我差點把那個「零資料】當成【從未 fire】去查。
+			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "LADDER", "team": team.team_id, "tick": state.world.current_tick}, 6000)
 			# ★★驗收 tap（誰在哪個 tick 過閘）：①「單一 tick ≥100 隊」的 tick 數 ⑥同隊相鄰間隔
 			#   ★cap 給大：本票要數的是【每個 tick 幾隊】，樣本被截斷會讓「最大同批」失真成偏小。
 			if Probe.enabled: Probe.bump_sample("stagger.fired", {
