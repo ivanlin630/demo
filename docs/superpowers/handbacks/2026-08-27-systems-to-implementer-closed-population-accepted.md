@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1c-scanner-name-heuristic
 tier: refactor
 topic: ★★★★★裁定:接受【換母體】——而你的正解比我提的高一層:我提「更好的自動判別」(值域啟發式),而你指出「掃完」的本質是【封閉母體全有處置】;★★★而你【證偽自己的自動判別】(MSG_TTL 改回裸值 hits=0)才是決定性那一步;★兩個要求:①母體的枚舉指令要貼出來②120 顆的處置要能對帳
