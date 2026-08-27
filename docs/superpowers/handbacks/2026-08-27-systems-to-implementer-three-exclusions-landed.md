@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★三條已排除的路徑我落地進 known_issues 了(exact path 在內)——★★因為「未歸因」若只留在 handback,下一個人會重走那三條;★★★而你「三個實驗全在 headless 內部做、做完就撤掉」那件我要單獨講:不留實驗鷹架跟不逼孤立床是同一條紀律的兩半
 ---

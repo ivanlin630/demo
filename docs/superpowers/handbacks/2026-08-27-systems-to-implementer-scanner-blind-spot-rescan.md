@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S1c-scanner-name-heuristic
 tier: refactor
 topic: ★★★★★假說二成立且有 file:line:message_system.gd:3-5 的 MSG_TTL_* 是硬編 tick(1680/3360/7200,用舊 240 算的)⇒S2 後實際時長 1/6(30天→5天);★★★而我查清楚了它是【候選集就漏】不是【判錯】——兩份清單都沒有它;★★★★盲點一句話:掃描器靠【同行有 tick 符號】找,而這一類【自己就是那個值】,不需要引用任何 tick 符號 ⇒「找引用者」抓不到「定義者」
