@@ -210,6 +210,23 @@ func _run() -> void:
 	#   ★★而我今天已經被【兩個儀器答同一問】咬過一次（⑦ 與 ⑥ 打架）——
 	#     ★★★留著一個較鬆的版本只會讓人引到錯的那個數字，所以直接拆掉。
 
+	# ── ⑥b 【延到下一 tick 才被看到】（t0-emit-ordering 的效果量）──
+	#   ★這一欄每一筆，在雙緩衝之前都是【消失】不是延遲。
+	#   ★★它從 0 變正數是【預期】，不是變差。
+	print("
+⑥b 四分死水（cadence / event(本 tick) / ★delayed(上一 tick) / both）")
+	print("   %-16s %10s %10s %10s %10s %10s" % ["支別", "cadence", "event", "★delayed", "both", "合計"])
+	out.append("#")
+	out.append("## ⑥b 四分死水｜支別|cadence|event|delayed|both|合計")
+	out.append("# ★delayed = 【上一 tick 的 emit，延到這一 tick 才被看到】——雙緩衝之前這些是【消失】")
+	for sk5 in SUPPORTS:
+		var c_cad: int = int(Probe.counts.get("reeval.cadence." + sk5, 0))
+		var c_evt: int = int(Probe.counts.get("reeval.event." + sk5, 0))
+		var c_dly: int = int(Probe.counts.get("reeval.delayed." + sk5, 0))
+		var c_bth: int = int(Probe.counts.get("reeval.both." + sk5, 0))
+		print("   %-16s %10d %10d %10d %10d %10d" % [sk5, c_cad, c_evt, c_dly, c_bth, c_cad + c_evt + c_dly + c_bth])
+		out.append("dw4|%s|%d|%d|%d|%d|%d" % [sk5, c_cad, c_evt, c_dly, c_bth, c_cad + c_evt + c_dly + c_bth])
+
 	# ── ⑥ rung_changed → INTENT 的【精確】驗收欄（#3 那票的行為證據）──
 	#   ★用 rung_changed_at 帶下來的 faction_id 做 join，★★不是拿 team id 去猜 faction。
 	#   ★★★三分：同 tick 醒 / 之後才醒（幾 tick）/ 從此沒醒過 —— 三個是不同結論，不准合併。
@@ -287,15 +304,25 @@ func _run() -> void:
 				b3 = "no_consumer"
 			else:
 				var akey: String = ("T" + str(c2["team"])) if DecisionTier.actor_scope(s3) == "T" else ("F" + str(c2["fid"]))
-				b3 = "seen" if wake_key.has(s3 + "#" + akey + "|" + str(tk)) else "unseen"
+				# ★★★可見窗是【兩個 tick】不是一個（t0-emit-ordering 雙緩衝）：
+				#   tick N 的 emit ⇒ 本 tick 在 pending_rethink、下一 tick 在 pending_prev。
+				#   ★只比對同 tick 的話，「晚到但下一 tick 被看到」會被錯記成 unseen
+				#     ⇒ ★★那正是這一票要消滅的那個數字，量錯等於自己把成果藏起來。
+				#   ★★★seen_next 獨立成一欄：它【就是】被救回來的那批。
+				if wake_key.has(s3 + "#" + akey + "|" + str(tk)):
+					b3 = "seen"
+				elif wake_key.has(s3 + "#" + akey + "|" + str(tk + 1)):
+					b3 = "seen_next"
+				else:
+					b3 = "unseen"
 			if not per_kind.has(kn3):
-				per_kind[kn3] = {"seen": 0, "unseen": 0, "no_consumer": 0}
+				per_kind[kn3] = {"seen": 0, "seen_next": 0, "unseen": 0, "no_consumer": 0}
 			if not per_sup.has(s3):
-				per_sup[s3] = {"seen": 0, "unseen": 0, "no_consumer": 0}
+				per_sup[s3] = {"seen": 0, "seen_next": 0, "unseen": 0, "no_consumer": 0}
 			(per_kind[kn3] as Dictionary)[b3] = int((per_kind[kn3] as Dictionary)[b3]) + 1
 			(per_sup[s3] as Dictionary)[b3] = int((per_sup[s3] as Dictionary)[b3]) + 1
 	print("\n⑦ emit 有沒有被看到（★分母排除 no_consumer —— 那些不是落空，是這一支對它不存在）")
-	print("   %-24s %8s %8s %12s %10s" % ["kind", "seen", "unseen", "no_consumer", "落空率"])
+	print("   %-24s %8s %10s %8s %12s %10s" % ["kind", "seen", "★seen_next", "unseen", "no_consumer", "落空率"])
 	out.append("#")
 	out.append("## ⑦ emit 被看到與否｜kind|seen|unseen|no_consumer|落空率(unseen/(seen+unseen))")
 	out.append("# ★歸因界限：pending 是每隊一個布林、不記誰標的 ⇒ 同 tick 同隊多 kind 都記 seen，無法歸因")
@@ -304,29 +331,96 @@ func _run() -> void:
 	for kn4 in kns2:
 		var d4: Dictionary = per_kind[kn4]
 		var sn: int = int(d4["seen"])
+		var snx: int = int(d4["seen_next"])
 		var un: int = int(d4["unseen"])
 		var nc4: int = int(d4["no_consumer"])
-		var dn: int = sn + un
+		var dn: int = sn + snx + un
 		var mr: String = "%.1f%%" % (100.0 * float(un) / float(dn)) if dn > 0 else "n/a"
-		print("   %-24s %8d %8d %12d %10s" % [String(kn4), sn, un, nc4, mr])
-		out.append("seen|%s|%d|%d|%d|%s" % [String(kn4), sn, un, nc4, mr])
+		print("   %-24s %8d %10d %8d %12d %10s" % [String(kn4), sn, snx, un, nc4, mr])
+		out.append("seen|%s|%d|%d|%d|%d|%s" % [String(kn4), sn, snx, un, nc4, mr])
 	print("\n   ── 逐支彙總（誰最常落空）──")
 	out.append("#")
-	out.append("## ⑦b 逐支彙總｜支別|seen|unseen|no_consumer|落空率")
+	out.append("## ⑦b 逐支彙總｜支別|seen|★seen_next|unseen|no_consumer|落空率")
 	for sk4 in SUPPORTS:
 		if not per_sup.has(sk4):
 			continue
 		var d5: Dictionary = per_sup[sk4]
 		var sn5: int = int(d5["seen"])
+		var snx5: int = int(d5["seen_next"])
 		var un5: int = int(d5["unseen"])
 		var nc5: int = int(d5["no_consumer"])
-		var dn5: int = sn5 + un5
+		var dn5: int = sn5 + snx5 + un5
 		var mr5: String = "%.1f%%" % (100.0 * float(un5) / float(dn5)) if dn5 > 0 else "n/a"
-		print("   %-16s seen=%-8d unseen=%-8d no_consumer=%-8d 落空率=%s" % [sk4, sn5, un5, nc5, mr5])
-		out.append("seenS|%s|%d|%d|%d|%s" % [sk4, sn5, un5, nc5, mr5])
+		print("   %-16s seen=%-7d seen_next=%-7d unseen=%-7d no_consumer=%-7d 落空率=%s" % [sk4, sn5, snx5, un5, nc5, mr5])
+		out.append("seenS|%s|%d|%d|%d|%d|%s" % [sk4, sn5, snx5, un5, nc5, mr5])
 	print("   ★母體 vs 樣本：t0.emit_ctx %d 筆（cap 40000）%s"
 		% [ctxs.size(), "  ★★撞 cap ⇒ 前 N 筆不是全部" if ctxs.size() >= 40000 else ""])
 	out.append("# t0.emit_ctx 樣本 %d（cap 40000）" % ctxs.size())
+
+	# ── ⑧ LADDER 的 rung 變化按【觸發源】分割（systems 的小問題）──
+	#   ★他問的字面版本在結構上不可能：那 24 筆【依定義】是純 cadence
+	#     （tap_poll_outcome 只在 _due and not _woke 呼叫），而 rung_changed 是那次 fire 的
+	#     【結果】不是原因 ⇒ 照字面問會循環。★★這裡答可答的版本。
+	#   ★★★分母也印：只看分子的話，「事件那條變得多」有可能只是因為它 fire 得多。
+	print("\n⑧ LADDER rung 變化 × 觸發源（★分子分母都印）")
+	print("   %-10s %10s %10s %10s" % ["觸發源", "fire 次數", "rung 變了", "變化率"])
+	out.append("#")
+	out.append("## ⑧ LADDER rung 變化×觸發源｜觸發源|fire|rung變了|變化率")
+	out.append("# ★systems 問的字面版本結構上不可能（那批依定義是純 cadence；rung_changed 是 fire 的結果非原因）")
+	out.append("# ⇒ 這裡答：所有 rung 變化裡，各觸發源各佔多少")
+	var trig_tot: int = 0
+	var trig_chg: int = 0
+	for tg in ["cadence", "event", "both"]:
+		var fr: int = int(Probe.counts.get("rung.fire." + tg, 0))
+		var cg: int = int(Probe.counts.get("rung.chg." + tg, 0))
+		trig_tot += fr
+		trig_chg += cg
+		var rr: String = "%.1f%%" % (100.0 * float(cg) / float(fr)) if fr > 0 else "n/a"
+		print("   %-10s %10d %10d %10s" % [tg, fr, cg, rr])
+		out.append("rungtrig|%s|%d|%d|%s" % [tg, fr, cg, rr])
+	print("   %-10s %10d %10d" % ["合計", trig_tot, trig_chg])
+	out.append("rungtrig|合計|%d|%d|—" % [trig_tot, trig_chg])
+
+	# ★純 cadence 那批：事件【上一次】醒到同一隊是多久以前？
+	#   ★★答的是「事件路徑到底有沒有在動」——若從未醒過，那是另一種結論（事件根本沒到它）。
+	var lad_wakes: Dictionary = {}
+	for w4 in Probe.samples.get("poll.eventwake", []):
+		if String(w4["k"]) != "LADDER":
+			continue
+		var ak2: String = String(w4["a"])
+		if not lad_wakes.has(ak2):
+			lad_wakes[ak2] = []
+		(lad_wakes[ak2] as Array).append(int(w4["t"]))
+	var gaps: Array = []
+	var no_prior: int = 0
+	for rc2 in Probe.samples.get("rung.chg_at", []):
+		if String(rc2["trig"]) != "cadence":
+			continue
+		var tt: int = int(rc2["t"])
+		var prev: int = -1
+		for tv3 in (lad_wakes.get("T" + str(rc2["team"]), []) as Array):
+			if int(tv3) < tt:
+				prev = int(tv3)
+			else:
+				break
+		if prev == -1:
+			no_prior += 1
+		else:
+			gaps.append(tt - prev)
+	print("\n   ── 純 cadence 的 rung 變化：事件上一次醒到同一隊是多久以前 ──")
+	out.append("#")
+	if gaps.is_empty():
+		print("   ★樣本 %d 筆【全部】沒有更早的 LADDER 事件喚醒 ⇒ 事件路徑從未醒到它們" % no_prior)
+		out.append("## ⑧b 純cadence rung變化｜無更早事件喚醒=%d｜有=0" % no_prior)
+	else:
+		gaps.sort()
+		var gs: int = 0
+		for g in gaps:
+			gs += int(g)
+		print("   樣本 %d ｜中位 %d ｜平均 %.1f ｜最大 %d tick ｜★完全沒有更早事件喚醒的 = %d 筆"
+			% [gaps.size(), int(gaps[gaps.size() / 2]), float(gs) / float(gaps.size()), int(gaps[-1]), no_prior])
+		out.append("## ⑧b 純cadence rung變化｜樣本=%d|中位=%d|平均=%.1f|最大=%d|無更早事件喚醒=%d"
+			% [gaps.size(), int(gaps[gaps.size() / 2]), float(gs) / float(gaps.size()), int(gaps[-1]), no_prior])
 
 	print("\n[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
 		% [guard, ("%d(%s)" % [stopped_at, stop_reason]) if stopped_at != -1 else "none", eff, ticks])

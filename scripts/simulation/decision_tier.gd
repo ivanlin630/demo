@@ -88,11 +88,21 @@ static func actor_scope(k: String) -> String:
 		return "T"
 	return "F"
 
-static func tap_wake(k: String, actor: int, tick: int, woke: bool, due: bool) -> void:
+# ★★★死水改四分（互斥、相加 = 該支 fire 次數）—— t0-emit-ordering 加了第四欄：
+#   reeval.cadence.<K>      純週期到期
+#   reeval.event.<K>        本 tick 的 emit 就看到了（cur）
+#   ★reeval.delayed.<K>     【上一 tick 的 emit，延到這一 tick 才看到】（prev）
+#                           ★★這一欄從 0 變正數【就是本票的效果量】——
+#                              它每一筆，在雙緩衝之前都是【消失】不是延遲。
+#   reeval.both.<K>         事件來了但本 tick 本來就到期 ⇒ 保守記 both，不記給事件
+static func tap_wake(k: String, actor: int, tick: int, src: String, due: bool) -> void:
 	if not Probe.enabled:
 		return
+	var woke: bool = src != ""
 	if woke and due:
 		Probe.bump("reeval.both." + k)
+	elif src == "prev":
+		Probe.bump("reeval.delayed." + k)
 	elif woke:
 		Probe.bump("reeval.event." + k)
 		# ★★★④延遲欄要用的：每一次【事件喚醒】的 (支, actor, tick)。

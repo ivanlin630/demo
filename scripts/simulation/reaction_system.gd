@@ -58,9 +58,10 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 			# ★★只有 _due 才重排下一次：事件喚醒【不動 cadence 時鐘】。
 			#   否則事件密集的隊會被自己的事件一路把週期往後推 ⇒ 反而【更少】想。
 			var _goal_due: bool = state.world.current_tick >= person.goal_eval_next_tick
-			var _goal_woke: bool = WorldEvents.is_pending(state, person.team_id)
+			var _goal_src: String = WorldEvents.pending_source(state, person.team_id)
+			var _goal_woke: bool = _goal_src != ""
 			if _goal_due or _goal_woke:
-				DecisionTier.tap_wake("GOAL", person.team_id, state.world.current_tick, _goal_woke, _goal_due)
+				DecisionTier.tap_wake("GOAL", person.team_id, state.world.current_tick, _goal_src, _goal_due)
 				# ★輪詢獨特貢獻率：只有【純 cadence】那批要比對前後選擇（事件喚醒的不進分母）。
 				var _poll_pure: bool = _goal_due and not _goal_woke
 				var _sel_before: String = ",".join(PackedStringArray(person.goals)) if _poll_pure else ""

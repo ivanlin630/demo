@@ -128,9 +128,16 @@ static func _emit_tiles(state: WorldState, buf: PackedStringArray) -> void:
 			_dict_canon(t.public_storage)])
 
 static func _emit_world(state: WorldState, buf: PackedStringArray) -> void:
-	buf.append("W|tick=%d|letters=%d|teams=%d|persons=%d|factions=%d|pending_erase=%d" % [
+	# ★★★pending_prev 必入：t0-emit-ordering 把 pending 從【單 tick 內】改成【跨一個 tick 存活】，
+	#   而 world_events.gd 的舊註解自己寫過「不跨 tick 存活＝不入 fingerprint 的正當性基礎」
+	#   ⇒ ★前提改了，這一欄就必須跟著進來，否則 determinism／存讀檔會【靜默】壞掉。
+	#   ★★排序後再入：Dictionary 的 key 順序不保證，不排會讓 fp 隨插入順序漂。
+	var pp: Array = state.pending_prev.keys()
+	pp.sort()
+	buf.append("W|tick=%d|letters=%d|teams=%d|persons=%d|factions=%d|pending_erase=%d|pending_prev=%s" % [
 		state.world.current_tick, state.in_transit_letters.size(),
-		state.teams.size(), state.persons.size(), state.factions.size(), state.teams_pending_erase.size()])
+		state.teams.size(), state.persons.size(), state.factions.size(), state.teams_pending_erase.size(),
+		_arr_canon(pp)])
 	# in_transit_letters canonical（kind/origin/target/relocate_to sorted、真送達漂移偵測）。
 	var ls: Array = []
 	for l in state.in_transit_letters:

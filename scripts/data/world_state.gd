@@ -104,6 +104,16 @@ var next_order_id: int = 1
 # ★不入 state_fingerprint：因為它【單 tick 內清空】（tick 結尾 WorldEvents.consume_and_clear），
 #   不跨 tick 存活＝非持久狀態。分批消費會讓這個正當性失效。
 var pending_rethink: Dictionary = {}
+# ★★★雙緩衝的第二格（t0-emit-ordering）：【上一 tick 的完整集合】。
+#   ★問題：pending_rethink 在 tick 末清空 ⇒ 排在消費者【之後】才 emit 的那些
+#     在被讀到前就消失了。實測 warring 30 日【28,385 次喚醒沒有發生】（整體落空 12.5%）。
+#   ★★而「改成 tick 開頭清空」是 no-op（「N 開頭清」＝「N-1 結尾清」，同一個時點）
+#     ⇒ 真正的需求是【生命期要跨過一整輪消費者】，只有雙緩衝做得到。
+#   ★★★可見集合 = pending_prev ∪ pending_rethink：
+#     ①tick N 晚到的 emit ⇒ 進 rethink，tick 末整批移到 prev ⇒ tick N+1 全程看得到（★不消失）
+#     ②tick N 早到的 emit ⇒ 當下就在 rethink ⇒ 同 tick 仍然醒得到（★同 tick 能力不退化）
+#   ★而它【跨 tick 存活】⇒ 必須進 state_fingerprint（見該檔 W| 那行）。
+var pending_prev: Dictionary = {}
 var player_state: Dictionary = {}
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []

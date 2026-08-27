@@ -784,11 +784,12 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# ★★★S4b T0：cadence 閘【前】的事件瞬醒短路（形狀照抄本檔 `_should_reeval`）。
 		#   ★★事件喚醒【不重排 cadence】（只有 _due 才排）。
 		var _infra_due: bool = state.world.current_tick >= f.infra_eval_next_tick
-		var _infra_woke: bool = WorldEvents.is_pending_faction(state, f)
+		var _infra_src: String = WorldEvents.pending_source_faction(state, f)
+		var _infra_woke: bool = _infra_src != ""
 		if _infra_due or _infra_woke:
 			# ★沒有 tap_poll_outcome：這一支的「選擇」不落在可比較的持久欄位上（產出是一次性動作）
 			#   ⇒ ★床要把它印成【量不到】，不是印成 0。0 會被讀成「輪詢對它沒貢獻」。
-			DecisionTier.tap_wake("INFRA", f.faction_id, state.world.current_tick, _infra_woke, _infra_due)
+			DecisionTier.tap_wake("INFRA", f.faction_id, state.world.current_tick, _infra_src, _infra_due)
 			if _infra_due:
 				f.infra_eval_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, f.faction_id, INFRA_INTERVAL)
@@ -806,11 +807,12 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 				state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
 		# ★S4b T0：事件瞬醒短路（同 INFRA）。
 		var _fupd_due: bool = state.world.current_tick >= f.faction_update_next_tick
-		var _fupd_woke: bool = WorldEvents.is_pending_faction(state, f)
+		var _fupd_src: String = WorldEvents.pending_source_faction(state, f)
+		var _fupd_woke: bool = _fupd_src != ""
 		if _fupd_due or _fupd_woke:
 			# ★沒有 tap_poll_outcome：這一支的「選擇」不落在可比較的持久欄位上（產出是一次性動作）
 			#   ⇒ ★床要把它印成【量不到】，不是印成 0。0 會被讀成「輪詢對它沒貢獻」。
-			DecisionTier.tap_wake("FACTION_UPDATE", f.faction_id, state.world.current_tick, _fupd_woke, _fupd_due)
+			DecisionTier.tap_wake("FACTION_UPDATE", f.faction_id, state.world.current_tick, _fupd_src, _fupd_due)
 			if _fupd_due:
 				f.faction_update_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
@@ -826,11 +828,12 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 				state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
 		# ★S4b T0：事件瞬醒短路（同 INFRA）。
 		var _betr_due: bool = state.world.current_tick >= f.betray_eval_next_tick
-		var _betr_woke: bool = WorldEvents.is_pending_faction(state, f)
+		var _betr_src: String = WorldEvents.pending_source_faction(state, f)
+		var _betr_woke: bool = _betr_src != ""
 		if _betr_due or _betr_woke:
 			# ★沒有 tap_poll_outcome：這一支的「選擇」不落在可比較的持久欄位上（產出是一次性動作）
 			#   ⇒ ★床要把它印成【量不到】，不是印成 0。0 會被讀成「輪詢對它沒貢獻」。
-			DecisionTier.tap_wake("BETRAY", f.faction_id, state.world.current_tick, _betr_woke, _betr_due)
+			DecisionTier.tap_wake("BETRAY", f.faction_id, state.world.current_tick, _betr_src, _betr_due)
 			if _betr_due:
 				f.betray_eval_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
@@ -877,10 +880,11 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 					state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
 			# ★S4b T0：事件瞬醒短路。★這一站的 actor 是【隊】⇒ 用 team 版 is_pending（不是 faction 版）。
 			var _iinf_due: bool = state.world.current_tick >= team.indep_infra_next_tick
-			var _iinf_woke: bool = WorldEvents.is_pending(state, team.team_id)
+			var _iinf_src: String = WorldEvents.pending_source(state, team.team_id)
+			var _iinf_woke: bool = _iinf_src != ""
 			if _iinf_due or _iinf_woke:
 				# ★同上：量不到（產出是一次性動作，不是可比較的選擇欄位）。
-				DecisionTier.tap_wake("INDEP_INFRA", team.team_id, state.world.current_tick, _iinf_woke, _iinf_due)
+				DecisionTier.tap_wake("INDEP_INFRA", team.team_id, state.world.current_tick, _iinf_src, _iinf_due)
 				if _iinf_due:
 					team.indep_infra_next_tick = CadenceStagger.next_tick(
 						state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
@@ -959,10 +963,19 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		#   ★★沒有伸手進 callee 去壓它：那等於在 AmbitionLadder 外面長出第二條排程路徑，
 		#     而「只能有一條排程路徑」正是 S3 整支的前提。⇒ 記在這裡、進交付單，不假裝對稱。
 		var _ladd_due: bool = state.world.current_tick >= team.ambition_eval_next_tick
-		var _ladd_woke: bool = WorldEvents.is_pending(state, team.team_id)
+		var _ladd_src: String = WorldEvents.pending_source(state, team.team_id)
+		var _ladd_woke: bool = _ladd_src != ""
 		if team.leader_id != -1 and (_ladd_due or _ladd_woke):
-			DecisionTier.tap_wake("LADDER", team.team_id, state.world.current_tick, _ladd_woke, _ladd_due)
+			DecisionTier.tap_wake("LADDER", team.team_id, state.world.current_tick, _ladd_src, _ladd_due)
 			var _ladd_pure: bool = _ladd_due and not _ladd_woke
+			# ★★★systems 的小問題要的分割：把【所有】rung 變化按【那一次 fire 的觸發源】分開。
+			#   ★他問的字面版本（「那 24 筆當下有沒有也被 rung_changed 喚醒」）在結構上不可能：
+			#     ①那 24 筆【依定義】就是 _due and not _woke（tap_poll_outcome 只在純 cadence 呼叫）
+			#     ②rung_changed 是這次 fire 的【結果】不是原因 —— 照字面問會循環。
+			#   ⇒ ★★可答的版本：rung 變化【總共】幾次、其中幾次發生在事件喚醒的 fire 上。
+			#     事件那條若佔多數 ⇒ 事件確實醒得到 LADDER，而純 cadence 那批是【它漏掉的殘量】。
+			var _ladd_trig: String = "both" if (_ladd_woke and _ladd_due) else ("event" if _ladd_woke else "cadence")
+			var _ladd_rung0: int = team.ambition_rung
 			var _ladd_before: String = str(team.ambition_rung) if _ladd_pure else ""
 			# ★LADDER 走的是【排程式】（CadenceStagger.next_tick）不是 `% == 0`，
 			#   ★★所以它的 fire 要在這裡記 —— 先前它【根本沒有 tap】，
@@ -973,6 +986,15 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			if Probe.enabled: Probe.bump_sample("stagger.fired", {
 				"tick": state.world.current_tick, "team": team.team_id, "kind": "ambition"}, 20000)
 			AmbitionLadder.update(state, team)
+			if Probe.enabled:
+				# ★分母也要記：不只記「變了幾次」，也記「fire 了幾次」——
+				#   ★★只有分子的話，「事件那條變得多」有可能只是因為它 fire 得多。
+				Probe.bump("rung.fire." + _ladd_trig)
+				if team.ambition_rung != _ladd_rung0:
+					Probe.bump("rung.chg." + _ladd_trig)
+					# ★逐筆存 tick/隊：要回答「純 cadence 那批，事件上一次醒到它是多久以前」
+					Probe.bump_sample("rung.chg_at", {"trig": _ladd_trig, "team": team.team_id,
+						"t": state.world.current_tick}, 20000)
 			if _ladd_pure:
 				DecisionTier.tap_poll_outcome("LADDER", team.team_id, state.world.current_tick,
 					_ladd_before, str(team.ambition_rung))
@@ -1314,9 +1336,10 @@ func _rebuild_goals(state: WorldState, f) -> void:
 	#     （`應該有 intent, got={}`）—— 我先照抄別支種了，被測試打掉才發現契約不同。
 	#   ⇒ 預設 0 ⇒ tick 0 全體 fire 一次（單一 tick 的開場批），之後立刻各自錯峰散開。
 	var _intent_due: bool = state.world.current_tick >= f.intent_eval_next_tick
-	var _intent_woke: bool = WorldEvents.is_pending_faction(state, f)
+	var _intent_src: String = WorldEvents.pending_source_faction(state, f)
+	var _intent_woke: bool = _intent_src != ""
 	if _intent_due or _intent_woke:
-		DecisionTier.tap_wake("INTENT", f.faction_id, state.world.current_tick, _intent_woke, _intent_due)
+		DecisionTier.tap_wake("INTENT", f.faction_id, state.world.current_tick, _intent_src, _intent_due)
 		var _int_pure: bool = _intent_due and not _intent_woke
 		var _int_before: String = _intent_sig(f) if _int_pure else ""
 		f.intent = _select_intent(state, f)

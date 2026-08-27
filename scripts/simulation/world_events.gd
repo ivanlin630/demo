@@ -3,9 +3,14 @@ class_name WorldEvents
 # ★T0-A1 事件匯流排：突發事件 → 相關隊【當 tick 就能重新思考】，不必等 cadence。
 # 這一刀【只加不減】：cadence 輪詢照舊，pending 只是額外的喚醒來源（A2 輪詢退場是另一票）。
 #
-# ★pending_rethink 不入 state_fingerprint 的正當性基礎＝【單 tick 內清空】：
-#   emit 在本 tick 標記 → 本 tick 的決策迴圈讀 → 本 tick 結尾 consume_and_clear 清空。
-#   ★禁分批消費（跨 tick 存活＝determinism 盲點；而且 byte-identical 抓不到「三跑都一樣殘留」的偽陰性）。
+# ★★★【已失效的舊前提】（t0-emit-ordering 推翻，留著是因為它解釋了現在的形狀）：
+#   舊：「pending_rethink 不入 state_fingerprint 的正當性基礎＝單 tick 內清空。」
+#   ★而那個「單 tick 內清空」本身就是 bug 的成因：
+#     排在消費者【之後】才 emit 的，在被讀到前就被清掉 ——
+#     實測 warring 30 日：★★【消失 28,385 次嗚醒】（整體落空 12.5%）。
+#   ★★★現在：雙緩衝（pending_prev ∪ pending_rethink）⇒ 跨 tick 存活
+#     ⇒ ★pending_prev 【已經進 state_fingerprint】。兩件必須同進退。
+#   ★禁分批消費這條不變：換頁是【整批】搞，不是一顆一顆消。
 #
 # ★掛點表（T4 對帳守衛讀這裡）：三類——
 #   ①訊息型（emit_message 為 chokepoint、逐 type 掛）
@@ -78,31 +83,57 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 			Probe.bump_sample("t0.emit_ctx", {"k": kind, "t": state.world.current_tick,
 				"team": id2, "fid": int(_tm.faction_id), "leader": int(_tm.leader_id)}, 40000)
 
+# ★★★可見集合的【單一真值】：pending_prev ∪ pending_rethink。
+#   回傳來源而不只是 bool —— ★死水要能分「本 tick 就看到」與「延到下一 tick 才看到」，
+#   而那一欄從 0 變正數【就是本票的效果量】。
+#   ★★is_pending 由它導出，不另寫一份判斷（否則兩份會漂）。
+static func pending_source(state: WorldState, team_id: int) -> String:
+	if state.pending_rethink.has(team_id):
+		return "cur"
+	if state.pending_prev.has(team_id):
+		return "prev"
+	return ""
+
 static func is_pending(state: WorldState, team_id: int) -> bool:
-	return state.pending_rethink.has(team_id)
+	return pending_source(state, team_id) != ""
 
 # ★★faction 層的查詢：pending_rethink 是【team_id 索引】，而五支 T3 節律是 faction 級。
 #   ★這不是第二套機制 —— 它讀的是同一份 pending_rethink，只是換一個 scope 問。
 #   ★★語意寫死：【任一成員隊被喚醒 ⇒ 該勢力本 tick 重想】
 #     理由：勢力層的決策吃的就是成員隊的狀態，成員出事而勢力不重想，
 #     正是【手不聽腦】的另一型。
-static func is_pending_faction(state: WorldState, faction) -> bool:
+static func pending_source_faction(state: WorldState, faction) -> String:
 	if faction == null:
-		return false
-	if state.pending_rethink.has(int(faction.leader_team_id)):
-		return true
+		return ""
+	# ★★先掃一輪 cur，再掃一輪 prev —— ★不可以逐隊比對兩格就早退，
+	#   否則「某隊 prev 有、另一隊 cur 有」會依成員順序回不同答案（★同一世界兩種結果）。
+	var lead: int = int(faction.leader_team_id)
+	if state.pending_rethink.has(lead):
+		return "cur"
 	for mid in faction.member_team_ids:
 		if state.pending_rethink.has(int(mid)):
-			return true
-	return false
+			return "cur"
+	if state.pending_prev.has(lead):
+		return "prev"
+	for mid2 in faction.member_team_ids:
+		if state.pending_prev.has(int(mid2)):
+			return "prev"
+	return ""
 
-# ★單 tick 清空（sim_runner tick 結尾呼一次）：不分批、不跨 tick 存活
-#（這是 pending_rethink 不入 state_fingerprint 的正當性基礎）。
-# ★誠實界定：本函式【只負責清空】——決策的消費順序由既有 team 迴圈決定
-#   （那本來就是 deterministic 的）；這裡不提供、也不需要順序保證。
+static func is_pending_faction(state: WorldState, faction) -> bool:
+	return pending_source_faction(state, faction) != ""
+
+# ★★★tick 結尾【換頁】（不再是清空）：本 tick 的整批 → prev，供【下一 tick 的完整一輪】看到。
+#   ★舊註解說「不跨 tick 存活，這是不入 fingerprint 的正當性基礎」——★★那個前提現在【失效了】，
+#     所以 pending_prev 已經加進 state_fingerprint。兩件事必須同進退，不能只改一邊。
+#   ★★★代價寫明：一發 emit 現在【最多被看到兩個 tick】（本 tick + 下一 tick）
+#     ⇒ 同一顆事件可能喚醒同一支兩次。那是這個形狀的固有成本，不是 bug，
+#     而它可量（死水的 delayed 欄）。★用「消失 28,385 次」換「可能重醒一次」。
+#   ★誠實界定不變：本函式不提供消費【順序】保證——那由既有 team 迴圈決定。
 static func consume_and_clear(state: WorldState) -> void:
-	if state.pending_rethink.is_empty():
-		return
-	if Probe.enabled:
+	if Probe.enabled and not state.pending_rethink.is_empty():
 		Probe.bump("t0.consumed", state.pending_rethink.size())
-	state.pending_rethink.clear()
+	if state.pending_rethink.is_empty() and state.pending_prev.is_empty():
+		return
+	state.pending_prev = state.pending_rethink
+	state.pending_rethink = {}
