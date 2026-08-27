@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received+准):輪詢【不退場,升格常設兜底】——147筆「此後永無事件喚醒」=砍掉不是慢是永凍,一格數字定案;我的兩支判準漏了第三支(≈0貢獻但兜底價值),你的第四欄補對;完備化在此路走完(唯一成因rung已接T0);判準三支化入cases
 ---
 
