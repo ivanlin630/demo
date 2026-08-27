@@ -895,6 +895,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			team.order_eval_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick, team.team_id, OrderSystem.ORDER_POST_CADENCE)
 		if team.leader_id != -1 and state.world.current_tick >= team.ambition_eval_next_tick:
+			# ★LADDER 走的是【排程式】（CadenceStagger.next_tick）不是 `% == 0`，
+			#   ★★所以它的 fire 要在這裡記 —— 先前它【根本沒有 tap】，
+			#   而我差點把那個「零資料】當成【從未 fire】去查。
+			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "LADDER", "team": team.team_id, "tick": state.world.current_tick}, 6000)
 			# ★★驗收 tap（誰在哪個 tick 過閘）：①「單一 tick ≥100 隊」的 tick 數 ⑥同隊相鄰間隔
 			#   ★cap 給大：本票要數的是【每個 tick 幾隊】，樣本被截斷會讓「最大同批」失真成偏小。
 			if Probe.enabled: Probe.bump_sample("stagger.fired", {
