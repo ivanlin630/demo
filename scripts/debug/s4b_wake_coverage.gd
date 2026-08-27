@@ -1,6 +1,6 @@
 extends SceneTree
 # @observe-pure
-# ★★★S4b 驗收床：七支 cadence 的【事件瞬醒】覆蓋對帳（7×30 = 210 格，+ INDEP_INFRA/INTENT 共 270）。
+# ★★★S4b 驗收床：七支 cadence 的【事件瞬醒】覆蓋對帳（7 × all_kinds() 格，+ INDEP_INFRA/INTENT 共 9 支；★格數由宣告集導出不寫死）。
 #
 # ★兩軌【都要】，因為它們回答的不是同一個問題：
 #   靜態軌：這支閘【有沒有把某個 kind 排除掉】？（＝③「預設全通、例外要寫理由」的機械檢查）
@@ -55,7 +55,7 @@ func _run() -> void:
 	var kinds: Array = WorldEvents.all_kinds()
 	# ★BED_KINDS_LIMIT：只跑前 N 個 kind。★用途【限定】於「既有 tap 的行為佐證」那一問
 	#   （那一問不需要 30 個 kind，一個 burst 就答完）——★★覆蓋對帳【不准】用它，
-	#   否則 210 格會變成「我只跑了前 N 格」而輸出看起來一模一樣。
+	#   否則核心那組格子會變成「我只跑了前 N 格」而輸出看起來一模一樣。
 	var klimit: int = int(OS.get_environment("BED_KINDS_LIMIT")) if OS.has_environment("BED_KINDS_LIMIT") else 0
 	if klimit > 0 and klimit < kinds.size():
 		kinds = kinds.slice(0, klimit)
@@ -221,7 +221,15 @@ func _run() -> void:
 	var sum_all: int = 0
 	var sum_core: int = 0
 	print("\n④ 覆蓋對帳")
-	print("   %-16s %8s %8s" % ["bucket", "全 270", "核心 210"])
+	# ★★★格數【由 all_kinds() 導出】不寫死 —— 這是實測打回來的：
+	#   加了 rung_changed（30→31 種）之後，硬編碼的 210 讓判決句印出
+	#   「★FAIL：NOT_WOKEN=0 合計=217（應為 210）」——★資料是滿分而判決句說 FAIL。
+	#   ★★印 FAIL 的合格結果 ＝ 恆假式，跟恆真式一樣零資訊，而且更糟：
+	#     它會讓人以為要去修一個沒壞的東西。
+	#   ⇒ 任何綁在【會隨宣告集長大的量】上的閘，都必須從那個集合導出。
+	var need_core: int = 7 * WorldEvents.all_kinds().size()
+	var need_all: int = SUPPORTS.size() * WorldEvents.all_kinds().size()
+	print("   %-16s %8s %8s" % ["bucket", "全 %d" % need_all, "核心 %d" % need_core])
 	for k8 in keys:
 		print("   %-16s %8d %8d" % [String(k8), int(tally[k8]), int(tally_core.get(k8, 0))])
 		out.append("# %-16s 全=%d 核心=%d" % [String(k8), int(tally[k8]), int(tally_core.get(k8, 0))])
@@ -231,8 +239,9 @@ func _run() -> void:
 	var nw: int = int(tally_core.get("NOT_WOKEN", 0))
 	var na: int = int(tally_core.get("no_actor", 0))
 	var nr: int = int(tally_core.get("no_run", 0))
-	var verdict: String = "★PASS：核心 210 格全部有處置，NOT_WOKEN=0" if (nw == 0 and sum_core == 210) \
-		else "★FAIL：NOT_WOKEN=%d 合計=%d（應為 210）" % [nw, sum_core]
+	var verdict: String = "★PASS：核心 %d 格全部有處置，NOT_WOKEN=0" % need_core \
+		if (nw == 0 and sum_core == need_core) \
+		else "★FAIL：NOT_WOKEN=%d 合計=%d（宣告集 %d 種 ⇒ 核心應為 %d）" % [nw, sum_core, WorldEvents.all_kinds().size(), need_core]
 	print("   %s%s" % [verdict, "  ★no_actor=%d / no_run=%d ⇒ 那幾格是【儀器沒開】不是【醒不了】" % [na, nr] if (na + nr) > 0 else ""])
 	out.append("# %s" % verdict)
 
