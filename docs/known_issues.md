@@ -2085,3 +2085,22 @@ before 0ab34123 = 1.85/日 (n=240)  →  bcbfb6f3 = 0.09/日 (n=7)  →  b05750e
 ★**peaceful 那床 material 採集健康**（34.35/日，+1.0%）⇒ **這是 warring-bed-specific 的塌陷。**
 **下一步**：**先看 S3 終量**（決策/送達同源嫌疑）；★**別在沒有 S3 數字前開它。**
 出處：`docs/process/verdicts/S2-purity-final.measure.json`、`docs/superpowers/specs/2026-08-27-S2-root-reanchor-HOW.md §S2 結案`
+
+## ★★★★S3 搬遷（七支→T3 3 天）讓 `warring_states` 提前 `game_over`（2026-08-27，★可逆閥 A/B 實測）
+
+```
+                   T3(3 天)      ★閥回滾(10/20/30/50h)
+game_over          tick 8160     ★★從未
+結束時 teams        69            89
+_evaluate_all_body  144 次        316 次
+```
+★**同 seed 同床，唯一差異＝七支 cadence** ⇒ ★★**世界是【結束】，不是【變慢】。**
+★★★**這超出 blueprint「有界窪地窗」條款①的前提**（該條款說窗內「隊反應慢」＝已知態非 bug）——
+**「世界在 5.7 天內結束」不是「反應慢」。**
+
+★**下一步已定：先查 `game_over` 的【原因】，不調 T3 值。**
+★★**理由**：**兩種原因的下一步完全相反** ——
+①**某一支的評估是某個維生迴路的必要前提**（＝執行層缺陷，修好後 3 天可能可行）
+②**決策普遍太慢導致崩潰**（＝3 天真的太慢，`provisional` 值該調，而那是 blueprint 的權）
+★★★**在分清楚之前調 cadence ＝ 把質地訊號調掉**（同「不 fire 就 crank 到會 fire ＝ 廢引擎」那族）。
+出處：`docs/superpowers/specs/2026-08-27-S3-tiered-cadence-HOW.md`、implementer commit `b149b5fb`

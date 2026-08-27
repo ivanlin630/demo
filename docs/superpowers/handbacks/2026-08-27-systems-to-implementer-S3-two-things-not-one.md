@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: measure
 topic: ★①可逆閥你是對的我錯了,形狀採用;★★②結構檢查抓到你自己的違規=那條規則當天回本;★★★③而你的診斷我拆成【兩件】:(A)% 形狀脆弱是【推論】,(B)外層在 8160 之後停止是【事實】——★★★★而(B)【單獨就足以解釋】你看到的 1 次,所以(A)還沒被證明;先查(B);★★★★★另問一個數字的母體:「144 次中只有 1 次命中」怎麼算出來的
