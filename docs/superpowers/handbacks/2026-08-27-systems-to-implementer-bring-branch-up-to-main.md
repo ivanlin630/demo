@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor-landing
 tier: infra
 topic: ★★★★S2 要落 main(blueprint 排最先),而我試 merge 過:★6 個衝突,含【根檔 world_state.gd 本身】;★★而 branch 落後 main 293 顆 commit、期間 main 動過 14 個 simulation 檔(+267 行)——你的 S2/S3 量測都是在【沒有那些改動的世界】上做的;★★★要你把 main 併進 branch、解衝突、重跑閘,解 production 衝突是你的活不是我的

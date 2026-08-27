@@ -25,17 +25,18 @@ brainstorm → spec → plan 設計，不實作。
 
 > ★★**本節【不得被切】** —— 它的用途是「在動手的那一刻看見入口」，移到 `detail` 等於廢掉它。
 
-## 3 層流程（依規模選，主 session 第一句需求即判層級）
+## ★★流程六條（★2026-08-27 收攏：六個殘骸壓成一張表 —— ★★N 個殘骸＝N 個入口）
 
-| 層 | 規模 | 流程 | 主 session 可否直接動 code |
+| 一句話（操作性的部分留在這裡） | detail 節標題（逐字） |
+|---|---|
+| **3 層流程依規模選**，主 session 第一句需求即判層級 | 3 層流程（依規模選，主 session 第一句需求即判層級） |
+| ★**無斷點自動鏈 ≠ 跳站**：reviewer 是鏈上的站。**R² 每 slice 必過；R① 只新概念大框才啟用** | ★兩道對抗閘（reviewer，spec 前後各一——不可省，2026-07-10 釘死） |
+| ★**spec 鎖後 dispatch ＝ 直接寫 `to:implementer status:open` 到 main mailbox**（不需 live 終端、不需人肉轉述），★★別問用戶 | ★spec/plan 鎖後直接 dispatch，別問用戶（2026-07-09 定死） |
+| ★★**hook 提醒 ≠ gate**：**gate 要裝在【執行點】（鎖／merge），advisory 放上游必漏**（compact 會洗掉記憶） | ★★spec 鎖在長跑因果 = QA-verdict 機械閘（2026-08-04 用戶定，治 QA-hook 連漏） |
+| **`plans/` 停用 —— HOW spec 就是唯一產物** | ★裁定：`plans/` 停用，HOW spec 就是唯一產物（systems 裁 2026-08-21） |
+| ★**派工單必帶 `slice:` 與 `tier:`** ＋★★**「本 slice 會碰哪些檔」**（新鮮度②要用） | ★P9 交接縫：派工單必帶 `slice:` 與 `tier:`（2026-08-21 用戶核） |
 
-> ★詳 → `detail/01_architect-cases.md`
-
-## ★兩道對抗閘（reviewer，spec 前後各一——不可省，2026-07-10 釘死）
-
-**無斷點自動鏈 ≠ 跳站**：reviewer 是鏈上的站。**R② 每 slice 必過；R① 只新概念大框才啟用**。
-
-> ★詳 → `detail/01_architect-cases.md`
+> ★**全部血證／原文 → `detail/01_architect-cases.md`（同標題節，字串逐字保留）**
 
 ## 設計 checklist（spec 前必過）
 
@@ -70,29 +71,35 @@ brainstorm → spec → plan 設計，不實作。
 ★**同型第二例（同日）**：**S0 的【取得方法】跑不了（要比的東西不存在）⇒ 改方法、判準一字未動 ⇒ 一樣走這四件。**
 ⇒ ★★**分界線**：**判準／裁決／slice 分解 ＝ 設計（碰它要回上游）；引用的數字、取得方法 ＝ 事實與 HOW（自己訂正並報備）。**
 
-## ★spec/plan 鎖後直接 dispatch，別問用戶（2026-07-09 定死）
 
-spec 鎖定（reviewer CLEAN）後，**dispatch = 直接寫 `to:implementer status:open` handback 到 main mailbox**——armed implementer session 主動撿，這**就是** dispatch 本體，不需 live 終端、不需人肉轉述。
 
-> ★詳 → `detail/01_architect-cases.md`
+## ★★★`git pull --rebase` 在【含 merge commit 的歷史】上是破壞性的（systems 血證 2026-08-27）
 
-## ★★spec 鎖在長跑因果 = QA-verdict 機械閘（2026-08-04 用戶定，治 QA-hook 連漏）
+★**我整個 session 反射性用 `git pull --rebase`** —— **而在 merge 完 S2 之後那一次，它開始【把 35 顆被併入的 commit 逐顆重放】** ⇒
+★★**衝突當場冒出來，而若我照著解下去，merge 結構會被壓平成一串 cherry-pick** ——
+★★★**那正是我們今天才罵過的「造出上游從未存在過的中間狀態」。**
+```
+★merge 之後要推：先 git fetch 看 origin 有沒有前進
+   沒前進 ⇒ 直接 git push（★不要 pull）
+   有前進 ⇒ git pull --no-rebase（再 merge 一次），★★絕不 --rebase
+★★而 rebase 已經開始了：git rebase --abort —— ★★★merge commit 會完整回來（我驗過）
+```
+★**通則**：**`--rebase` 適合「我只有幾顆線性 commit」；一旦歷史裡有 merge，它就是在拆你剛做的事。**
+★★**已機械化**：`.claude/hooks/pre-rebase.sh`（★判準＝「這次 rebase 會不會【重放 merge commit】」，不是「你有沒有 merge 過」；`ALLOW_REBASE_WITH_MERGES=1` 可明示放行）。
+★**新 clone 要裝一次**（`.git/hooks` 不進版控）：`cp .claude/hooks/pre-rebase.sh "$(git rev-parse --git-common-dir)/hooks/pre-rebase"`
+★★**三對照跑過（走 `git rebase` 真實路徑）**：含 merge ⇒ 擋（exit 128）／不含 ⇒ 靜默放行／override ⇒ 放行並提醒。
 
-**病 root（結構、非個站失職）**：`.claude/hooks/longrun-qa-gate.sh`（7/22）提醒**打在跑床站（量測）**，但因果結論在**下游鎖**（systems verdict→spec-lock / blueprint 鎖 WHAT），**鎖點零 gate**＝提醒與執行點錯位；advisory 靠記憶+compact 洗 context 必漏（血證 §5/饑荒-flee/anomaly 三因果沒過 QA 就鎖 spec）。**通則：hook 提醒 ≠ gate；gate 要裝在執行點（鎖/merge），advisory 在上游必漏**（memory `feedback_self_approve_gate` 2026-08-04）。
+## ★★★長壽 slice branch 的新鮮度：**用【落後量】觸發，不用【時間】**（systems 裁 2026-08-27，blueprint 准）
 
-> ★詳 → `detail/01_architect-cases.md`
-
-## ★裁定：`plans/` 停用，HOW spec 就是唯一產物（systems 裁 2026-08-21）
-
-**背景**：blueprint 在 P9 工單裡把「`plans/` 空目錄＝plan 還欠不欠」交給 systems 前置定。
-
-> ★詳 → `detail/01_architect-cases.md`
-
-## ★P9 交接縫：派工單必帶 `slice:` 與 `tier:`（2026-08-21 用戶核）
-
-**背景**：前作那八項 harness 是「**漏了會被發現**」，不是「**不會漏**」——
-
-> ★詳 → `detail/01_architect-cases.md`
+★**「定期併 main」是錯的形狀** —— **三天沒人動 main 的 branch 不需要併；半天內 main 動了 14 個檔的 branch 已經危險。**
+```
+★觸發（任一成立 ⇒ 把 main 併進 branch）；★★檢查點在【交件前】,不是每天早上
+  ①main 動過的 production【檔數】>= 5     ←★檔數不是 commit 數（會被 doc 灌水）
+  ②main 動過【本 slice 宣告會碰的檔】任一  ←★★更早響更準（⇒ 派工單要有那一欄）
+  ③branch 開超過一個工作節拍               ←兜底
+```
+★**後果不只是衝突**：**落後 branch 上做的量測，是在一個【缺了那些改動】的世界上做的** ⇒ **落地後必須在 merged base 重量。**
+> ★血證（三條全中而當時一條都沒響）→ `detail/01_architect-cases.md`（同標題節）
 
 ## ★★★三母題（2026-08-26 收攏：24 節壓成 3 節）
 
@@ -106,7 +113,7 @@ spec 鎖定（reviewer CLEAN）後，**dispatch = 直接寫 `to:implementer stat
 
 | 一句話 | detail 節標題 |
 |---|---|
-| ★★★**驗「搬家有沒有掉東西」時，母體是【搬家前的全文】，不是【搬家後的標題清單】**（我驗了節標題命中就宣告安全，抽樣 6 條血證 5 條不在 ⇒ 標題在 ≠ 內容在） | ★驗【標題命中】≠ 驗【內容命中】（2026-08-27） |
+| ★★★**驗「搬家有沒有掉東西」時，母體是【搬家前的全文】，不是【搬家後的標題清單】**（標題在 ≠ 內容在；★★而 `detail` 檔有 4× 重複副本 ⇒ `grep -c 標題` 在那裡是【恆真式】，還要問「在哪一份」） | ★驗【標題命中】≠ 驗【內容命中】（2026-08-27） |
 | ★**「窮盡」保證覆蓋率，不保證判準正確**（掃了 29 個 config、判準本身是錯的） | 「窮盡」保證覆蓋率，**不保證判準正確** |
 | ★**問真相源要問「它涵蓋哪個【物理】」，不是「它是不是【權威】」** | 問真相源要問「它涵蓋哪個【物理】」 |
 | ★**出處分類消滅【碰撞】，但取代不了【語意判斷】**（兩層，互不替代） | 訂正我自己：**出處分類消滅【碰撞】** |

@@ -183,6 +183,11 @@ while true; do
   any_ct=$(git -C "$ROOT" for-each-ref --sort=-committerdate --count=1 --format='%(committerdate:unix)' 2>/dev/null || echo 0)
   main_ct=$(git -C "$ROOT" log -1 --format=%ct main 2>/dev/null || echo 0)
   main_subj=$(git -C "$ROOT" log -1 --format=%s main 2>/dev/null)
+  # ★lane 掃（implementer 建議、blueprint 背書 2026-08-27）：cherry-pick／feat lane 工作流下，
+  #   ★★「main 沒有新 commit」不等於「那個人沒在動」——已誤報兩次。
+  #   ★★★而它【只進報告不進判準】：v3 的病正是拿全 ref 活動去【壓住】警報（見上一行註解）。
+  #   ⇒ 我們要的是「讓讀警報的人看見他在別的 lane 動」，不是「因為他在動就不報」。
+  lane_line=$(git -C "$ROOT" log --all --since="2 hours ago" --not main                   --pretty='%h %ad %s' --date=format:'%H:%M' 2>/dev/null | head -1)
   case "${any_ct:-0}"  in (*[!0-9]*|'') any_ct=0 ;;  esac
   case "${main_ct:-0}" in (*[!0-9]*|'') main_ct=0 ;; esac
   any_age=$(( now - any_ct ))
@@ -269,6 +274,12 @@ while true; do
     echo "  長工作：${running:-無}"
     if [ "$main_ct" -gt 0 ]; then
       echo "  最後 commit(main)：$(dur $(( now - main_ct ))) 前 — ${main_subj}"
+    fi
+    if [ -n "$lane_line" ]; then
+      echo "  ★feat lane（近 2h，不在 main 上）：${lane_line}"
+      echo "    ⇒ ★★他【有】在動，只是沒進 main／沒寫信 —— 判準不因此放行，但別把它讀成「人不見了」。"
+    else
+      echo "  ★feat lane（近 2h，不在 main 上）：無"
     fi
     echo "  → 處置準則見 07_mailbox_trigger §stall。只有「開終端／WHAT 裁決／授權」才推用戶。"
     last_class="$class"; last_fire=$now

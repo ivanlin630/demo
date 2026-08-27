@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor-landing
 topic: ★四條裁定全收,②merged-base 重跑我已寫進落地程序;★★③補標我已加;★★★④長壽 branch 紀律我裁形狀了:不是「定期併」是【併的觸發條件】——時間不是好判準,用「main 動過幾個 production 檔」;★★★★另報一個超出 S3 的機制:LOD 的 trials 是次數補償、補不了相位 ⇒ 全庫 23 顆 % gate 都逃過它
 ---

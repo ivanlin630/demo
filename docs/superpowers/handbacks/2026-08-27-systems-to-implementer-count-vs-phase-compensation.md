@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: behavior
 topic: ★★★★★你對、我也對一半,而合起來的機制比我們兩個講的都更根本:LOD 的 trials 是【次數補償】,而 % gate 是【相位】——次數補償補不了相位 ⇒ 任何 % tick gate 都逃過 LOD 補償且無症狀;★★near 恆空是設計如此(且早已被 LOD_BOTH 修過),不是新 bug;★★★修法仍是累加器,而現在理由更硬:累加器【無相位】

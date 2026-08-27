@@ -1148,3 +1148,15 @@ reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權�
 ★**已知倒退（誠實記，不留在 spec 裡）**：**七支遷 T3 後，危機時這七支沒有任何一支會加速**
 （現有 `_decision_crisis` 的 `/4` 加速只活在 `faction_ai_system.gd:2583` 那一條，八支逐支查過都沒掛）
 —— ★★**收口在 S4 的 T0「所有突發事件全入、不搞白名單」，不需要 S3 自己造一套。**
+
+### ★★★★S2 根旋鈕 —— **已落地 main**（2026-08-27，merge `746ff6e7`）
+```
+★TICKS_PER_HOUR = 60（唯一自由參數，1 tick = 1 分鐘）；TICKS_PER_DAY = TICKS_PER_HOUR * 24 = 1440
+★★origin/main 已驗（本地與遠端都查過根值）
+```
+**同批落地**：S1b／S1c 封閉母體掃描／S3a 每 tick 站盤點／床修（`strip_player`＋`advance_tick` 回傳值＋`[BedSelfCheck]`）／整條 outpost arc。
+★**merge 前逐條機械驗**：衝突標記 0／根 const 恰好各一／main production 被刪的 15 行逐行確認是正當改寫／main 自分岔零 production 改動／staged 39 檔非空。
+★★**閘（我自己跑，不沿用 branch 的）**：`--import` 乾淨／`CONSTITUTION-GATE PASS (sites=74, removed=1)`／`BARE-TICK-GATE PASS (母體 161, NEEDS_HUMAN=0)`。
+★★★**intended-change 要記一條**：`WORLD_SPEED_MULT` 移除 ⇒ **移動 4.8 → 4.0 小時／hex（快 17%）** ——
+**不是原註解警告的「5 倍慢＝餓死潮」，因為根同時換了。**
+**未落地、明記**：★**S3 本體留在 branch（5/7，`GOAL`／`LADDER` 未驗）**；★★**純度終量要在 merged base 重跑**（blueprint 裁，殘差義務轉掛那次）；★**相位混疊掃描 spec 已立未派**。
