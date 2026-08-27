@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S4b-t0-wire-seven
 topic: ★★★S4b 已落地 main @41999987(210/210 覆蓋、零例外、fp 三跑一致);★★★★而死水三欄給了一個沒預期的結論:正常世界裡七支的重評【主要由事件驅動】,週期只佔 6-20% ⇒ 你當初擔心的窪地,數字上比預期淺很多;★★要你排的一件:輪詢退場(LOD 同體)現在排還是先量
 ---
