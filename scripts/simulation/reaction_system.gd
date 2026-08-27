@@ -53,7 +53,14 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 			if person.goal_eval_next_tick == 0:
 				person.goal_eval_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, person.id, GOAL_CHECK_INTERVAL)
-			if state.world.current_tick >= person.goal_eval_next_tick:
+			# ★★★S4b T0：cadence 閘【前】的事件瞬醒短路 —— 形狀照抄 faction_ai `_should_reeval`
+			#   （`WorldEvents.is_pending` → 記一筆 → 當作可以跑）。★不發明第二種寫法。
+			# ★★只有 _due 才重排下一次：事件喚醒【不動 cadence 時鐘】。
+			#   否則事件密集的隊會被自己的事件一路把週期往後推 ⇒ 反而【更少】想。
+			var _goal_due: bool = state.world.current_tick >= person.goal_eval_next_tick
+			var _goal_woke: bool = WorldEvents.is_pending(state, person.team_id)
+			if _goal_due or _goal_woke:
+				DecisionTier.tap_wake("GOAL", _goal_woke, _goal_due)
 				if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "GOAL", "team": person.id, "tick": state.world.current_tick,
 					"due": person.goal_eval_next_tick}, 6000)   # ★due = 【排程目標】，tick = 【實際 fire】
 				#   ★★兩者的差就是【宿主 pass 粒度造成的量化誤差】本身 ——
@@ -62,8 +69,9 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 				var alignment: float = _npc_ai.check_goal_alignment(person, team.current_task)
 				LoyaltyBank.adjust(person, alignment, "goal_alignment")
 				# ★排下一次（同一支 helper）—— 不手寫 next = tick + C，那正是同批到期的病根。
-				person.goal_eval_next_tick = CadenceStagger.next_tick(
-					state.world.current_tick, state.world.current_tick, person.id, GOAL_CHECK_INTERVAL)
+				if _goal_due:
+					person.goal_eval_next_tick = CadenceStagger.next_tick(
+						state.world.current_tick, state.world.current_tick, person.id, GOAL_CHECK_INTERVAL)
 			var reaction: String = _evaluate_person(state, person, team)
 			if reaction != "none":
 				_apply_reaction(state, person, team, reaction, trials)

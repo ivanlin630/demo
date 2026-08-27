@@ -125,7 +125,8 @@ const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score
 const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威脅
 # A2b intent 重選 cadence（藍圖 #3：戰略每 tick 重秤=雜訊；1 日重評，cadence 內沿用 f.intent）。TEST VALUE。
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
-const INTENT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日
+# ★★S4b ②：意圖併遷 T3（單一真值在 DecisionTier；舊值寫在那一行的註解裡，回滾改一個檔）。
+const INTENT_CADENCE: int = DecisionTier.C_INTENT
 # A2a 子隊決策 cadence（效能：全框架 gather+rank 非逐 tick，攤平 O(N²) LOD 成本，鏡射 THREAT_CADENCE）。
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const SUBTEAM_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 子隊決策一次（TEST VALUE，平衡 pass 調）
@@ -774,9 +775,15 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if f.infra_eval_next_tick == 0:
 			f.infra_eval_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick, f.faction_id, INFRA_INTERVAL)
-		if state.world.current_tick >= f.infra_eval_next_tick:
-			f.infra_eval_next_tick = CadenceStagger.next_tick(
-				state.world.current_tick, state.world.current_tick, f.faction_id, INFRA_INTERVAL)
+		# ★★★S4b T0：cadence 閘【前】的事件瞬醒短路（形狀照抄本檔 `_should_reeval`）。
+		#   ★★事件喚醒【不重排 cadence】（只有 _due 才排）。
+		var _infra_due: bool = state.world.current_tick >= f.infra_eval_next_tick
+		var _infra_woke: bool = WorldEvents.is_pending_faction(state, f)
+		if _infra_due or _infra_woke:
+			DecisionTier.tap_wake("INFRA", _infra_woke, _infra_due)
+			if _infra_due:
+				f.infra_eval_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick, f.faction_id, INFRA_INTERVAL)
 			# ★★常駐節律 tap（Probe-gated，關掉零成本）：
 			#   ★【什麼時候評一次】今天沒有任何儀器 ⇒ 每次要量都要重新掛臨時 tap（我已經掛撤三次）。
 			#   ★★而「新 decision 必接 tap」是不變量：節律 fire 就是一個 decision 事件。
@@ -789,9 +796,14 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if f.faction_update_next_tick == 0:
 			f.faction_update_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
-		if state.world.current_tick >= f.faction_update_next_tick:
-			f.faction_update_next_tick = CadenceStagger.next_tick(
-				state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
+		# ★S4b T0：事件瞬醒短路（同 INFRA）。
+		var _fupd_due: bool = state.world.current_tick >= f.faction_update_next_tick
+		var _fupd_woke: bool = WorldEvents.is_pending_faction(state, f)
+		if _fupd_due or _fupd_woke:
+			DecisionTier.tap_wake("FACTION_UPDATE", _fupd_woke, _fupd_due)
+			if _fupd_due:
+				f.faction_update_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick, f.faction_id, FACTION_UPDATE_INTERVAL)
 			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "FACTION_UPDATE", "team": f.faction_id if f != null else -1, "tick": state.world.current_tick}, 6000)
 			var _leader_team: TeamData = state.teams.get(f.leader_team_id)
 			if _leader_team != null:
@@ -802,9 +814,14 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if f.betray_eval_next_tick == 0:
 			f.betray_eval_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
-		if state.world.current_tick >= f.betray_eval_next_tick:
-			f.betray_eval_next_tick = CadenceStagger.next_tick(
-				state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
+		# ★S4b T0：事件瞬醒短路（同 INFRA）。
+		var _betr_due: bool = state.world.current_tick >= f.betray_eval_next_tick
+		var _betr_woke: bool = WorldEvents.is_pending_faction(state, f)
+		if _betr_due or _betr_woke:
+			DecisionTier.tap_wake("BETRAY", _betr_woke, _betr_due)
+			if _betr_due:
+				f.betray_eval_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick, f.faction_id, DiplomaticAiSystem.BETRAY_CHECK_INTERVAL)
 			if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "BETRAY", "team": f.faction_id if f != null else -1, "tick": state.world.current_tick}, 6000)
 			var leader_team_b: TeamData = state.teams.get(f.leader_team_id)
 			if leader_team_b == null: continue
@@ -846,9 +863,14 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			if team.indep_infra_next_tick == 0:
 				team.indep_infra_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
-			if state.world.current_tick >= team.indep_infra_next_tick:
-				team.indep_infra_next_tick = CadenceStagger.next_tick(
-					state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
+			# ★S4b T0：事件瞬醒短路。★這一站的 actor 是【隊】⇒ 用 team 版 is_pending（不是 faction 版）。
+			var _iinf_due: bool = state.world.current_tick >= team.indep_infra_next_tick
+			var _iinf_woke: bool = WorldEvents.is_pending(state, team.team_id)
+			if _iinf_due or _iinf_woke:
+				DecisionTier.tap_wake("INDEP_INFRA", _iinf_woke, _iinf_due)
+				if _iinf_due:
+					team.indep_infra_next_tick = CadenceStagger.next_tick(
+						state.world.current_tick, state.world.current_tick, team.team_id, INFRA_INTERVAL)
 				_evaluate_independent_infrastructure(state, team)
 		else:
 			# faction 成員（非子隊，斷①C「入勢力不換腦」）：個人戰略層對每個 leader 永遠跑——
@@ -918,7 +940,15 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if team.leader_id != -1 and team.order_eval_next_tick == 0:
 			team.order_eval_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick, team.team_id, OrderSystem.ORDER_POST_CADENCE)
-		if team.leader_id != -1 and state.world.current_tick >= team.ambition_eval_next_tick:
+		# ★★★S4b T0：事件瞬醒短路。
+		# ★★【已知不對稱・不遮蓋】：LADDER 的重排寫在 callee 裡（ambition_ladder.gd:126/156），
+		#   不像別支寫在這裡 ⇒ ★事件喚醒的那一次【也會】把 cadence 往後排。
+		#   ★★沒有伸手進 callee 去壓它：那等於在 AmbitionLadder 外面長出第二條排程路徑，
+		#     而「只能有一條排程路徑」正是 S3 整支的前提。⇒ 記在這裡、進交付單，不假裝對稱。
+		var _ladd_due: bool = state.world.current_tick >= team.ambition_eval_next_tick
+		var _ladd_woke: bool = WorldEvents.is_pending(state, team.team_id)
+		if team.leader_id != -1 and (_ladd_due or _ladd_woke):
+			DecisionTier.tap_wake("LADDER", _ladd_woke, _ladd_due)
 			# ★LADDER 走的是【排程式】（CadenceStagger.next_tick）不是 `% == 0`，
 			#   ★★所以它的 fire 要在這裡記 —— 先前它【根本沒有 tap】，
 			#   而我差點把那個「零資料】當成【從未 fire】去查。
@@ -1255,9 +1285,24 @@ func _rebuild_goals(state: WorldState, f) -> void:
 			_emit_goal(state, f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
 
 	# ── 步驟 2：意圖選擇（cadence-gate，藍圖 #3：1 日重選，cadence 內沿用 f.intent）──
-	if state.world.current_tick >= f.intent_eval_next_tick:
+	# ★★★S4b：①事件瞬醒短路 + ②cadence 遷 T3。★★兩件必須同時 —— 只做②＝把重選拉長到 3 日
+	#   而沒有任何東西能把它提早叫醒，那正是 blueprint 當初扣住②的理由。
+	# ★順手改掉裸 `current_tick + CADENCE`：那是【同批到期】的寫法（S3 已判過的病根），
+	#   換成同一支 CadenceStagger（單一相位真值）。
+	# ★★★而 INTENT【不種開場那批】——別支都種，這支【刻意不種】：
+	#   ★f.intent 的初值是空字典，而下游（strategic_ai 讀 f.intent 映射空間 goal、f.strategy）
+	#     每 tick 都在讀它 ⇒ 種下去等於「開局最多 3 日沒有意圖」，下游整段吃 fallback 守成。
+	#   ★★這是實測抓到的，不是推理：headless `_test_strategic_reads_ladder` 直接紅
+	#     （`應該有 intent, got={}`）—— 我先照抄別支種了，被測試打掉才發現契約不同。
+	#   ⇒ 預設 0 ⇒ tick 0 全體 fire 一次（單一 tick 的開場批），之後立刻各自錯峰散開。
+	var _intent_due: bool = state.world.current_tick >= f.intent_eval_next_tick
+	var _intent_woke: bool = WorldEvents.is_pending_faction(state, f)
+	if _intent_due or _intent_woke:
+		DecisionTier.tap_wake("INTENT", _intent_woke, _intent_due)
 		f.intent = _select_intent(state, f)
-		f.intent_eval_next_tick = state.world.current_tick + INTENT_CADENCE
+		if _intent_due:
+			f.intent_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, f.faction_id, INTENT_CADENCE)
 	# else：沿用上次 f.intent（committed hysteresis 已在 _select_intent，cadence 再加穩定層）
 	var intent: Dictionary = f.intent if f.intent is Dictionary and not f.intent.is_empty() \
 		else {"type": "守成", "target_id": -1, "why": ""}

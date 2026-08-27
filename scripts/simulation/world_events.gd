@@ -62,6 +62,21 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 static func is_pending(state: WorldState, team_id: int) -> bool:
 	return state.pending_rethink.has(team_id)
 
+# ★★faction 層的查詢：pending_rethink 是【team_id 索引】，而五支 T3 節律是 faction 級。
+#   ★這不是第二套機制 —— 它讀的是同一份 pending_rethink，只是換一個 scope 問。
+#   ★★語意寫死：【任一成員隊被喚醒 ⇒ 該勢力本 tick 重想】
+#     理由：勢力層的決策吃的就是成員隊的狀態，成員出事而勢力不重想，
+#     正是【手不聽腦】的另一型。
+static func is_pending_faction(state: WorldState, faction) -> bool:
+	if faction == null:
+		return false
+	if state.pending_rethink.has(int(faction.leader_team_id)):
+		return true
+	for mid in faction.member_team_ids:
+		if state.pending_rethink.has(int(mid)):
+			return true
+	return false
+
 # ★單 tick 清空（sim_runner tick 結尾呼一次）：不分批、不跨 tick 存活
 #（這是 pending_rethink 不入 state_fingerprint 的正當性基礎）。
 # ★誠實界定：本函式【只負責清空】——決策的消費順序由既有 team 迴圈決定
