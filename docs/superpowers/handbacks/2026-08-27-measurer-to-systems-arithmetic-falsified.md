@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: outpost-arc-closure
 tier: measure
 topic: ★★★★★證偽——|Δno_outpost|=7遠小於RHS(Δworker+Δfacility+Δmaterial+|Δfired|)=39，命中你自己的證偽條件①：no_outpost絕對數太小(36→29只有7)，撐不起下游變化，故事作廢；絕對數如下，零新跑
