@@ -9,6 +9,8 @@
 | after(TTL修復版) | `bcbfb6f3` | measure-s2-after(同一worktree checkout切過去) | 修MSG_TTL_*+JOIN_REJECT_COOLDOWN後重測；沒收斂，送達從-76.4%翻成+55.4%，隊數125(vs前兩輪112) | `S2-hypothesis-two-tick-timeout.measure.json`（假說二code證據）／`S2-ttlfix-remeasure-warring.measure.json`（沒收斂的數字）／`S2-delivered-sent-ratio.measure.json`（比值） |
 | ★★★S2純度終量(一次性，非逐輪) | `b05750ef` | measure-s2-after(checkout切過去) | S1c封閉母體120全處置(NEEDS_HUMAN=0)後的正式終量；peaceful七項低解析度內、warring四項超5%(移動+9.3%/決策+35.0%/送達+55.4%/採集material消失-100%)+隊數+11.6%必報；warring其餘六項與bcbfb6f3 bit-identical，唯material harvest異常消失(n=7→0)未診斷；附propagate節律tap反駁「盲目×6 tick密度」最簡假說 | `S2-purity-final.measure.json` |
 
+| ★★★★★merged base純度終量 | `746ff6e7`(after) vs `746ff6e7^`=`49d25911`(before) | measure-s2-after(checkout切換，床覆寫) | S2真落地main(非branch)後的正式比較；per-team-day主軸；warring四項真殘差(採集food+16.6%/material-58.0%/決策+23.7%/送達+48.7%)，移動/消耗/發出收進5%；peaceful製造-7.5%真殘差；跨輪比對決策/送達量級穩定，隊數方向不穩定(易變效應鏈非基準) | `S2-mergedbase-purity-final.measure.json` |
+
 ## ★機械檢查慣例(每輪都做，可信度依據)
 每輪跑之前跑之後都驗 `git rev-parse --short HEAD` + `git status --short`(應為空)，避免implementer live worktree被污染混進量測——這個慣例本身也記在對應的handback信裡。
 
