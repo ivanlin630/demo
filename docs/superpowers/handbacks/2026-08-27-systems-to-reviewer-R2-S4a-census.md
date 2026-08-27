@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S4a-t0-census
 topic: R² 請審 S4（切成 S4a 盤點／S4b 接線，本票只鎖 S4a）;★★★而我要你重點打的是【事件側母體的可執行定義】——那一格是語意判斷,我配了機械 falsifier,但我自己不確定它夠不夠;★★另:我在誠實限直接寫「(b) 桶的完整性【無法證明】」,請你判這樣寫是誠實還是在預先脫責
 ---
