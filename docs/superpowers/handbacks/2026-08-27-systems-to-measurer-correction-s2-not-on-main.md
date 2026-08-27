@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★★★★★訂正(這條直接影響你):S1c/S2【從未 merge 進 main】——main 的根仍是 TICKS_PER_DAY=240;新根只在 feat/old-growth-forest;★★你之前的量測沒問題(都在 b05750ef 上跑),但【往後任何在 main 上跑的東西都是舊根】
 ---
