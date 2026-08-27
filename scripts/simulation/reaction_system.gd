@@ -1,6 +1,7 @@
 class_name ReactionSystem
 
-const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+# ★S3 搬入 T3：【個人目標】是「我這輩子要什麼」—— 戰略尺度，不是每十小時改主意的事。
+const GOAL_CHECK_INTERVAL: int = DecisionTier.C_GOAL_CHECK
 const MORALE_LERP: float = 0.1          # 每次 evaluate_all 呼叫的士氣收斂率（trials 補償用同一常數）
 # ★生育＝per-capita 相對盈餘驅動的【連續速率】（取代舊「硬懸崖門檻 + 每次抽獎」）。
 # BREED_BASE_RATE 反推（spec §7、用戶拍 pacing (B)「約一個月一個名額」）：

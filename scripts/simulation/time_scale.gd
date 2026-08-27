@@ -14,7 +14,9 @@ class_name TimeScale
 #   ★★而 S2 同時把根旋鈕 10→60 tick/小時 ⇒ 240 tick ＝【 4 小時】，不是 24 小時。
 #   ⇒ ★★★移動實際從 4.8h 只變成 4h（-17%），餓死潮的前提不存在，
 #     沿途補給/FOOD 重校/承載力重校三件因此出列（非延後，是前提消失）。
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const TICK_PER_HOUR: int       = WorldState.TICKS_PER_HOUR   # ★S2：根旋鈕本身
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const TICK_PER_DAY: int        = WorldState.TICKS_PER_DAY
 const BASE_ACTION_TICKS: int   = EncounterSystem.BASE_ACTION_TICKS
 const ENCOUNTER_MAP_SCALE: int = EncounterSystem.MAP_DIAMETER

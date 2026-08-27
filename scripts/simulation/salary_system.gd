@@ -1,5 +1,6 @@
 class_name SalarySystem
 
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const SALARY_INTERVAL: int = WorldState.TICKS_PER_DAY * 7   # 1週/次
 const SALARY_PER_SKILL_POINT: float = 2.0   # TEST VALUE
 const OVERPAY_BONUS: float     = 0.02  # TEST VALUE

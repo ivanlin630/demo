@@ -12,9 +12,13 @@ class_name WorldState
 const TICKS_PER_HOUR:   int   = 60           # ★唯一自由參數（1 tick = 1 分鐘，推導值）
 # ★S1b 白名單(c)：24 ＝【一天幾小時】的曆法結構，★不隨 tick 縮放 ——
 #   根旋鈕改成別的值時，這個 24 必須【維持 24】，否則「小時」就不是小時了。
+# TIER: n/a — 曆法基底（單位定義），不是節律
 const TICKS_PER_DAY:    int   = TICKS_PER_HOUR * 24   # = 1440
+# TIER: n/a — 曆法基底（單位定義），不是節律
 const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 43200 ticks
+# TIER: n/a — 曆法基底（單位定義），不是節律
 const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 129600 ticks
+# TIER: n/a — 曆法基底（單位定義），不是節律
 const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 518400 ticks
 const SECONDS_PER_TICK: float = 86400.0 / float(TICKS_PER_DAY)
 

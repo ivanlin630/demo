@@ -7,8 +7,11 @@ class_name SimMessageSystem
 #   ★★★而裸 tick 守衛抓不到它：守衛靠【同行有 tick 符號】找，
 #     而這一類【自己就是那個值】，不需要引用任何 tick 符號
 #     ⇒ 「找引用者」抳不到「定義者」。
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const MSG_TTL_SHORT:  int = 7 * WorldState.TICKS_PER_DAY    # 7 天
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const MSG_TTL_MEDIUM: int = 14 * WorldState.TICKS_PER_DAY   # 14 天
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const MSG_TTL_LONG:   int = WorldState.TICKS_PER_MONTH      # 30 天
 
 const MSG_TTL_BY_TYPE: Dictionary = {

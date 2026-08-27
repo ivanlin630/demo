@@ -16,6 +16,7 @@ const MORALE_HARSH: float   = -0.015 # 苛待每 tick morale −
 const MORALE_NEUTRAL: float = 0.0    # 釋放前中性
 const REVOLT_COMBAT_LOSS: float = 0.4   # 暴動脫離時戰損比例（鎮壓血腥，守恆=消滅非憑空）
 const FLEE_FRACTION: float  = 0.5    # 逃時脫離比例
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const CAPTIVE_CADENCE: int  = WorldState.TICKS_PER_DAY   # 每日決策/tick 一次（tick_all 用）
 # ③ asm 做深（全 TEST VALUE）
 const CAPTIVE_FOOD_RATE: float = 0.3   # 厚待每 captive/日撥糧（藍圖裁 0.5→0.3:俘虜吃稀=亂世真實,食貧狼付得起）

@@ -20,6 +20,7 @@ const THREAT_BOOST_MAX: float = 0.5       # TEST VALUE(S2 calibrate ↓1.2)— <
 enum { STALL_WAITING, STALL_RESOLVING, STALL_STALLED }
 const STALL_BASE_DAYS: float = 8.0        # TEST VALUE — 耐性基準天(× patience_factor;latch 33+天前介入升級)
 const STALL_RELIEF_MIN: float = 1.0       # TEST VALUE — food_days 較 baseline 回升 ≥此 才算 resolving(非「沒更低就算解」)
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const STALL_EXCLUDE_WINDOW: int = WorldState.TICKS_PER_DAY * 20   # TEST VALUE — 硬排除窗(> STALL_DAYS max 防 A 太快回來 ping-pong)
 const STALL_PATIENCE_MIN: float = 0.5     # patience clamp 下限(急換者)
 const STALL_PATIENCE_MAX: float = 1.5     # patience clamp 上限(撐久者)

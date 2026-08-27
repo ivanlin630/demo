@@ -16,6 +16,7 @@ const MESSENGER_RANGE: int        = 5    # TEST VALUE
 #   ★★★它同時是速度差檔位的解析度地板：< 10 tick 就分不出檔位（守衛見 time_const_check）。
 # ★裸 tick 守衛 (c) 白名單：這個 6 是【單位結構】—— 一小時永遠是六個十分鐘。
 #   ★根旋鈕怎麼改它都不變；改成 hours() 表達不了「十分鐘」（只吃整數小時）。
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const BASE_ACTION_TICKS: int  = WorldState.TICKS_PER_HOUR / 6
 const BLOCK_WINDOW: int       = 8
 const BLOCK_PENALTY: int      = 5

@@ -2,12 +2,15 @@ class_name FactionAISystem
 
 # ★S2 intended-change：征收 30h → T2 戰術層 1 天（LOCKED §5 逐項清單）。
 #   ★人格調變的 0.5~2.25 倍率形狀保留（:1247 不動）—— 改的是【基準週期】不是人格。
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const COLLECT_INTERVAL:        int = WorldState.TICKS_PER_DAY  # T2：每 1 天
-const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
+# ★S3 搬入 T3：【派系更新】是勢力層的重新盤點，尺度同勢力戰略。
+const FACTION_UPDATE_INTERVAL: int = DecisionTier.C_FACTION_UPDATE
 # ★T0-A2 輪詢退場：A1 讓事件能瞬醒後，「沒事發生也每天想一次」的輪詢就是純空轉。
 # 這個倍率把輪詢拉長；★保留【慢心跳】＝拉長後的 cadence 本身（零事件時仍會最終重新思考，
 # 禁「沒事件就永遠不想」＝思考餓死）。TEST VALUE，×3 / ×6 兩檔各量一次供 systems 裁。
 const DECISION_CADENCE_MULT: int = 3
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const DECISION_CADENCE: int = TimeScale.TICK_PER_DAY * DECISION_CADENCE_MULT   # TEST VALUE — 非-unified 週期重評（解 IDLE-lock）
 const DISPATCH_DIST_THRESHOLD: int   = 2
 # ★糧流 Slice B1 糧橋（解 A1 子隊餓死）：出發配糧 need=burn×ETA_total×safe_margin；母隊 food 撥得起才派。
@@ -50,6 +53,7 @@ const COMMANDER_COMMITMENT_BONUS: float = 0.15
 # 統一決策 arc 第三塊：野心是普世驅力，不被 faction-gate。獨立 ambitious leader 也秤戰略意圖。
 # 建國 = means-end 秤的 option（driver=野心），非「夠 pop→自動 create_faction」fiat。複用既有 create_faction
 # （結盟 interaction:333 / 吞併 npc_combat:524）。意圖集只 {建國,守成}（征服等成 faction 後 commander-v2 給）。
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const INDEP_STRATEGY_CADENCE: int = TimeScale.TICK_PER_DAY * 3   # 3 天評估一次（沿用 prosperity cadence 量級）
 const AMBITION_FOUND_MIN: float = 0.55          # TEST VALUE — 建國野心門檻（對齊 ambition_cap STATE 門檻 0.55）
 const FOUND_COMMITMENT_BONUS: float = 0.15      # TEST VALUE — 建國意圖承諾 hysteresis（mirror commander）
@@ -87,6 +91,7 @@ const SURVIVAL_TASKS: Array = [TeamData.TASK_RETURN_HOME, TeamData.TASK_BEG, Tea
 # crisis-override（跨線危機安全網，泛化 ②）：committed 任何 task 深餓未緩 → force re-rank。
 const CRISIS_FLOOR: float = 1.5   # TEST VALUE — 深餓門檻（★decouple SURVIVAL_BOOST_FLOOR 2.0，略深；避 boost tuning 誤動 crisis）
 const CRISIS_DAYS: float = 6.0    # TEST VALUE — committed 未緩 N 天才 crisis（給 task 工作時間，非急打斷）
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const CRISIS_IMMUNITY: int = WorldState.TICKS_PER_DAY * 2   # TEST VALUE — release 後禁重委派同 task 窗（橋接到 survival @80 commit，防 instant-recommit）
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
 # P2b-1：LOOT_GATE/JOIN_GATE/CAMP_GATE + _loot_pref/_join_pref/_camp_pref 已刪
@@ -105,19 +110,26 @@ const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
 const SURVIVAL_RECOVER_DAYS: float = 7.0   # 糧恢復到此 → 脫離 survival（hysteresis 防抖）
 const GRADUAL_DECLINE_FLOW: float = -0.5   # Fix2-v2 TEST VALUE — 慢性糧滑坡 crisis 門檻（DEEP -2.0 與 0 間，漸進安全網）
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const FLEE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 5   # 逃跑逾時 5 天（修硬編 240，跟根）→ 釋放重評，小地圖防永逃
 
 # ── Prosperity attack（野心驅動主動征服）──
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const PROSPERITY_CADENCE: int = TimeScale.TICK_PER_DAY * 3            # 3 天 評估一次
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const PROSPERITY_CADENCE_MILITARY: int = TimeScale.TICK_PER_DAY * 36 / 24  # 軍隊 tag 1.5 天 = 36h
 const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score +0.1
 
 # ── Threat response（被動威脅反應）──
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威脅
 # A2b intent 重選 cadence（藍圖 #3：戰略每 tick 重秤=雜訊；1 日重評，cadence 內沿用 f.intent）。TEST VALUE。
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const INTENT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日
 # A2a 子隊決策 cadence（效能：全框架 gather+rank 非逐 tick，攤平 O(N²) LOD 成本，鏡射 THREAT_CADENCE）。
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const SUBTEAM_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 子隊決策一次（TEST VALUE，平衡 pass 調）
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const CONSOLIDATE_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # S-A：整併 target 評估 cadence（鏡射 SUBTEAM_CADENCE，掐 churn）
 # preempt：忙碌隊只有「壓境能傷你」威脅才打斷進行中 task（門檻 = threat_threshold + 此加成）。
 # TEST VALUE=2.0（measured：逼近但弱敵 react≈1.5 須守住、壓境碾壓敵 react≈5.5 須觸發 → margin∈(1.1,5.2)，取 2.0 雙側留餘裕）。
@@ -131,9 +143,11 @@ const PREEMPTIBLE_TASKS: Array = [
     # TASK_PRODUCE：定居 resident 生產隊常態 task（interaction:1065 transition 進），非緊急可打斷（見
     # interruptible fai:2398）→ 藍圖「犁田遇劫匪放犁」核心 case 靠它接。
     # 註：無 TASK_MOVE 常數（移動走各 task 內 move_target）→ 不列（spec 誤列，實碼無此 task）。
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const TRADE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 6   # 貿易 task base timeout 6 日（防 zombie）
 # timeout 按距離估（invariants：timeout 別死常數——按距離/移速估合理往返時間）：
 # base + 殘距×per_hex。慢地形(forest 0.7×/mountain 0.4×)下 1 hex 最壞 ~0.7 日 → 0.5 日/hex 餘裕。TEST VALUE。
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const TRADE_TIMEOUT_PER_HEX: int = TimeScale.TICK_PER_DAY * 12 / 24  # 12h/hex
 # A1a 拆閥（spec 2026-07-07-A1a-arbiter-valve）：四 no-release 駐地 task timeout release——
 # 原永不 release=永久 latch（bed no_release_latch 桶）。駐地原地 task 無距離項 → 純 base 額度；
@@ -142,20 +156,26 @@ const TRADE_TIMEOUT_PER_HEX: int = TimeScale.TICK_PER_DAY * 12 / 24  # 12h/hex
 const STATION_TASKS: Array = [
 	TeamData.TASK_TRAIN, TeamData.TASK_MANUFACTURE, TeamData.TASK_GOVERN, TeamData.TASK_PRODUCE,
 ]
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const STATION_TIMEOUT: int = TimeScale.TICK_PER_DAY * 4
 # ★T2 churn 根修（mergein arrival-never）：committed JOIN 原本零 release/timeout 出路（TRADE/STATION 都有、
 # JOIN 沒有）→ 追不到的 host 讓隊卡在 JOIN 不朽、每 cadence 重 commit 同 target=698× SurvivalMergeIn churn。
 # 補上「到達或放棄」契約（hand-obeys-brain：腦承諾、手要嘛完成要嘛釋放），非在 resolve 端疊繞過。
 # 額度同 TRADE 款按殘距估（非死常數）：base + 殘距×per_hex；到期 release → 下 cadence 重 rank
 # （belief 還在→可能再派同 host；belief 死→to_task 自然退榜選別的 survival option）。TEST VALUE。
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const JOIN_TIMEOUT: int = TimeScale.TICK_PER_DAY * 6
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const JOIN_TIMEOUT_PER_HEX: int = TimeScale.TICK_PER_DAY * 12 / 24  # 12h/hex（鏡射 TRADE）
 
 # ── Outpost 居民派駐 AI ──
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const RESIDENCY_CADENCE: int = TimeScale.TICK_PER_DAY * 3    # 3 天 評估一次 outpost 居民派駐
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const RESIDENCY_COOLDOWN: int = TimeScale.TICK_PER_DAY * 7   # 7 天 邀請被拒後冷卻
 const MIN_PARENT_POP_AFTER_DISPATCH: int = 10
 # 佔村 target 濾（打得到+守得住，防自殺圍城）
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const OCCUPY_ETA_MAX: int = TimeScale.TICK_PER_DAY * 3   # TEST VALUE — 佔村目標最遠 eta（≈3 日；遠村久圍乾耗餓死→不選）
 const OCCUPY_POP_RATIO: float = 0.6  # TEST VALUE — 目標 believed pop 須 < 我方 ×此（明顯小才圍，防小狼打大村）
 const OCCUPY_WIN_MARGIN: float = 1.3        # TEST VALUE — 佔村勝算 margin：己方真 armed 須 ≥ 估村防下限 ×此
@@ -1809,6 +1829,7 @@ static func herald_hedge(severity: float, pmult: float) -> float:
 	var hedge_proximity: float = clampf((severity - HEDGE_ONSET) / (1.0 - HEDGE_ONSET), 0.0, 1.0)
 	return hedge_proximity * HEDGE_CATASTROPHE_MAG * pmult
 
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const INFO_DISPATCH_CADENCE: int = WorldState.TICKS_PER_DAY   # 求援/偵察=慢策略,每日評一次即可(per-team 錯開防每 tick O(teams²) 掃)
 
 # ★主動升匿名（統一派遣 §4 第 3 路 anon→named、named-scarcity genuine 出口）常數（TEST VALUE、measurer 校準）。
@@ -4595,7 +4616,8 @@ func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array
 
 # ──────── 基建主決策 ────────
 
-const INFRA_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時評估一次
+# ★S3 搬入 T3：【基建方向】是「這座城該往哪發展」—— 而建造本身以天計。
+const INFRA_INTERVAL: int = DecisionTier.C_INFRA
 
 # ★★★決策 trace（QA 要求 2026-08-27）：【逐次決策的 candidate/util/winner】。
 #   ★預設關 ⇒ 一般跑零成本；只有 specimen 床會把它打開。
@@ -6320,6 +6342,7 @@ func _pick_contact_reaction(overdue_ratio: float, lv: Dictionary) -> String:
 			best_u = float(util[k]); best_k = k
 	return best_k
 
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const CONTACT_VIGILANCE_DURATION: int = WorldState.TICKS_PER_DAY * 3   # 失聯警覺期（defensive 反應→暫時警覺）
 
 # 失聯單位 last-known pos（★零 god-view）：team-subject→belief best_estimate pos(fresher)、缺則 last_known_pos；letter→last_known_pos(dispatch target)。

@@ -1,6 +1,8 @@
 class_name OrderSystem
 
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const ORDER_LIFETIME: int = 5 * WorldState.TICKS_PER_DAY    # 訂單壽命
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const ORDER_POST_CADENCE: int = 12 * WorldState.TICKS_PER_HOUR
 
 const _ORDER_ELIGIBLE_RES: Array = ["goods", "weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel", "food", "mounts", "tools"]

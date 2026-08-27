@@ -17,6 +17,7 @@ const GOAL_UTIL_CAP: float = 1.5   # TEST VALUE — < DecisionEngine.SURVIVAL_BO
 
 # ★組件 A（S7 完整 lifecycle）：cadence-gate 每 GOAL_EVAL_CADENCE tick 呼一次（非每 decide=perf,known_issues A）。
 # 掛=desire>threshold;★退=build_F 建成 or desire 掉→移除(免 goal_state 無限累積);maintain 冪等持久留。純讀狀態+need_keep,零 randf。
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const GOAL_EVAL_CADENCE: int = TimeScale.TICK_PER_DAY * 3   # 3 天評估（鏡射 RESIDENCY_CADENCE）
 static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 	if state == null or team == null or state.world == null:

@@ -127,6 +127,7 @@ var has_acceptable_join_host: bool = false
 # ★S2 修（同 MSG_TTL 那一族）：480 是【舊根下的 2 天】（480/240），而它比對的是 world tick
 #   （decision_context.gd:673 `current_tick - _m["tick"] < 本常數`）
 #   ⇒ 重錨後實際只剩 8 小時，而【沒有症狀】：cooldown 照常運作，只是太快過期。
+# TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
 const JOIN_REJECT_COOLDOWN_TICKS: int = 2 * WorldState.TICKS_PER_DAY   # TEST VALUE — 被拒後 2 天內不重選此 host（跨多 cadence 破 loop，過期再試）
 # 經濟底：自家糧倉 food（含遠端家，team 不在家也讀得到）→ 返家補給 home-empty gate 用。
 var home_food: float = 0.0

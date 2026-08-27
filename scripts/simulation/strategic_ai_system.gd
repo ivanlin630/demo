@@ -1,7 +1,9 @@
 class_name StrategicAiSystem
 
-const STRATEGIC_INTERVAL:      int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
-const ALLIANCE_CHECK_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+# ★S3 搬入 T3：【勢力戰略】字面上就是戰略層。
+const STRATEGIC_INTERVAL:      int = DecisionTier.C_STRATEGIC
+# ★S3 搬入 T3：【結盟傾向】是對外關係的大方向，不是一天內會翻來翻去的事。
+const ALLIANCE_CHECK_INTERVAL: int = DecisionTier.C_ALLIANCE_CHECK
 const BREAKOUT_DIST: int = 2     # 原 5，縮為 2（radius 小地圖友善）
 const ENCIRCLE_DIST: int = 1     # 原 2，縮為 1
 const BREAKOUT_NEAREST_THRESHOLD: int = 3   # 鄰敵 > 此距不觸發 breakout

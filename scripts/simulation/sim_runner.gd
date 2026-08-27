@@ -1,7 +1,9 @@
 class_name SimRunner
 
 const LOD_NEAR_RADIUS: int = 3
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
+# TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更新頻率（1h，可調）
 
 const FATIGUE_PER_DAY: float          = 0.048   # TEST VALUE — 約 20.8 天疲勞滿（原 0.002×24）
