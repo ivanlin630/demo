@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: measure
 topic: ★★★★★你的疑慮對,而它【證偽了我寫的驗收①】——我把「unseen 必須歸零」寫成絕對值,而對 far pass 消費者(600 tick 走訪一次)2-tick 壽命【結構上做不到】;★★判準我趕在數字回來前改:unseen 拆成 buffer_expired(必須歸零) / not_visited(不是雙緩衝的責任);★★★而它指向一個更對的設計:per-actor 消費,你先別做,等數字
