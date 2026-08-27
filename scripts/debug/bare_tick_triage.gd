@@ -37,10 +37,20 @@ func _run() -> void:
 		_mk("current_tick\\s*-\\s*([0-9]{2,})", "a_change", "★真裸 tick：`current_tick - <字面量>` 沒有經過任何具名時間常數 ⇒ 根旋鈕一改它就静默偏移", true),
 		# ── (b) 延後 ──
 		_mk("const TICKS_PER_TURN:", "b_defer", "24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2"),
+		# ── ★第二軸（名字啟發式）新出現的候選 ──
+		#   ★這一批的共同問題是【名字像時長，但軸不一定是世界時間】。
+		_mk("const PRISONER_CHECK_INTERVAL", "c_whitelist", "★遭遇軸：比對的是 encounter_tick（:592 round_num %），不是 world tick ⇒ 不隨根旋鈕"),
+		_mk("const BLOCK_WINDOW", "c_whitelist", "★遭遇軸：格持視窗以【動作】計，而動作 tick 數不變"),
+		_mk("const ENCOUNTER_STUCK_TICKS", "c_whitelist", "★遭遇軸：observer_bridge:31 比對 state.encounter_tick"),
+		_mk("const DECISION_CADENCE_MULT", "d_not_time", "multiplier：3 是【倍數】（×TICK_PER_DAY），本身不是時間量"),
+		_mk("const [A-Z_]+_DAYS", "c_whitelist", "★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退"),
+		_mk("const SURVIVAL_BUILD_MAX_TICKS", "c_whitelist", "★person-ticks 工量：與 cost[\"ticks\"] 同單位，每呼叫扣，不是世界時間"),
+		_mk("const CAMP_BUILD_TICKS", "c_whitelist", "★person-ticks 工量（註解自述），同上"),
+		_mk("const DUMP_CHUNK_TICKS", "d_not_time", "批次大小：observer dump 一塊跑幾 tick，是【分塊粒度】不是【時長】（UI 側，不影響世界）"),
 		# ── 盲點修補後新出現的 "ticks" 族 ──
-		_mk("[=!]=\s*\"ticks\"", "d_not_time", "key_filter：`if k == \"ticks\"` 是【欄位名比對】，同行的數字不是時間量"),
-		_mk("\"ticks\"\s*:\s*[0-9]+", "c_whitelist", "★person-ticks：建造成本是【工量】不是【時長】—— _tick_construction 每呼叫扣 maxi(pop,1)，而每日呼叫次數已由 TICKS_PER_DAY/NEAR_CADENCE 導出 ⇒ 不隨根旋鈕縮放"),
-		_mk("cost\.get\(\"ticks\"", "c_whitelist", "★同上族：預設的建造工量（person-ticks）"),
+		_mk("[=!]=\\s*\"ticks\"", "d_not_time", "key_filter：`if k == \"ticks\"` 是【欄位名比對】，同行的數字不是時間量"),
+		_mk("\"ticks\"\\s*:\\s*[0-9]+", "c_whitelist", "★person-ticks：建造成本是【工量】不是【時長】—— _tick_construction 每呼叫扣 maxi(pop,1)，而每日呼叫次數已由 TICKS_PER_DAY/NEAR_CADENCE 導出 ⇒ 不隨根旋鈕縮放"),
+		_mk("cost\\.get\\(\"ticks\"", "c_whitelist", "★同上族：預設的建造工量（person-ticks）"),
 		# ── (c) 白名單：S2 重錨引入的兩顆新形狀 ──
 		_mk("const TICKS_PER_HOUR:", "c_whitelist", "★新的根常數本身（S2 把自由參數從 TICKS_PER_DAY 換成它）：其他時間量由它導出，改成 hours() 會循環定義"),
 		_mk("TICKS_PER_HOUR / 6", "c_whitelist", "★單位結構：遭遇動作＝10 分鐘＝1/6 小時。★★這個 6 不隨小時縮放——根怎麼改，一小時永遠是六個十分鐘"),
