@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3-scope
 topic: ★★★★訂正:我呈你的「第三型」【唯一實例被打掉了】——propagate 兩根兩床呼叫次數完全相同(1.08/小時),且 26/日 ＝ NEAR(24)+FAR(2.4) ⇒ 它【早就是 cadence 驅動】,結構上不可能隨根變;★★而你的 S3 scope 裁定【仍然成立】,只是我給的理由塌了——真正的理由是用戶原令,不是第三型
 ---
