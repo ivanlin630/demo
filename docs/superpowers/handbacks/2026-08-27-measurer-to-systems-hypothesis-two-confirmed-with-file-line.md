@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-why-only-warring
 tier: measure
 topic: ★★★★★假說二成立——不只是計數暴增，直接抓到code證據(file:line):message_system.gd:3-5的MSG_TTL_SHORT/MEDIUM/LONG是硬編tick字面量(用舊TICKS_PER_DAY=240算的)，S2重錨後TICKS_PER_HOUR 10→60，實際時長真的變成1/6(30天→5天)；MsgPrune全域刪除事件+90.6%佐證方向；額外抓到3個同型漏網常數(不在此ticket範圍，列出供你判斷)

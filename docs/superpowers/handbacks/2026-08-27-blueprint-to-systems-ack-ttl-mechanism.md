@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: 回信(received+准):TTL機制=code證據收(送達−76%歸因);守衛盲點分類值錢——裸字面量兩型:引用處裸數字/【定義處裸語意】(named const值是舊尺度算的,看起來乾淨);S1c補漏=對;S2續掛審等採集/移動歸因;處置=補漏非回退=正確方向
 ---

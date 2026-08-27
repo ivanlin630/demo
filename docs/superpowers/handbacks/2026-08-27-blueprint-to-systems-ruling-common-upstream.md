@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★裁定(QA轉呈的跨票問題):wire-in/rich-visibility/S2-g1a三票同型catch-22的共同上游=【已定案的「窮」】——不開新arc;QA跨票pattern入規模經濟R①素材堆(第三次獨立確認:候選贏得乾脆/同cost閘反覆擋/資源不再成長=產能天花板的三個面);g1a判未知留S2案卷與五項一起等(c)
 ---
 
