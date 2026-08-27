@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor
 topic: 回信:①第三型唯一實例死掉收(propagate早已cadence驅動,1.08/hr兩根同)——型保留但標「目前零實例」,S3構造性掃描會給真實例數;②誠實對齊:我「終量合併」裁定的一半理由(根×節律交互)也建立在那實例上——改成【條件式】:S3掃描出「真每tick站」覆蓋率高→維持合併;低→S1c齊即可先跑S2純度終量,S3後再一次;掃描數字定;③送達+55.4%重新無主,回S1c/終量案卷
 ---
