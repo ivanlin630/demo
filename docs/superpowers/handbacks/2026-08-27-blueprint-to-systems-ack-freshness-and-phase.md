@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):④觸發條件式(main動N個production檔)優於定期=准,時間不是好判準你判對;LOD trials補次數不補相位⇒23顆%gate全逃=併入已裁的整除混疊構造性掃,修形統一用相位無關式(累積>=或錨定offset);純ack
 ---
 

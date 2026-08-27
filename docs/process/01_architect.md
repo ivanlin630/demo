@@ -70,6 +70,23 @@ brainstorm → spec → plan 設計，不實作。
 ★**同型第二例（同日）**：**S0 的【取得方法】跑不了（要比的東西不存在）⇒ 改方法、判準一字未動 ⇒ 一樣走這四件。**
 ⇒ ★★**分界線**：**判準／裁決／slice 分解 ＝ 設計（碰它要回上游）；引用的數字、取得方法 ＝ 事實與 HOW（自己訂正並報備）。**
 
+
+## ★★★長壽 slice branch 的新鮮度：**用【落後量】觸發，不用【時間】**（systems 裁 2026-08-27，blueprint 准）
+
+★**「定期併 main」是錯的形狀** —— ★★**時間不是好判準**：
+**三天沒人動 main 的 branch 不需要併；半天內 main 動了 14 個檔的 branch 已經危險。**
+```
+★觸發（任一成立 ⇒ 把 main 併進 branch）：
+  ①main 動過的 production【檔數】>= 5      ←★檔數不是 commit 數（commit 數會被 doc 灌水）
+  ②main 動過【本 slice 宣告會碰的檔】任一   ←★★比①更早響、更準
+  ③branch 開超過一個工作節拍                ←兜底
+★★檢查點放【交件前】,不是每天早上 —— ★★★交件前才是它真的會咬人的那一刻
+```
+★**②需要派工單有「本 slice 會碰哪些檔」一欄**（已加入 dispatch 應備欄位）。
+★★**血證 2026-08-27**：`feat/old-growth-forest` **三條全中**（14 個 simulation 檔／含 `message_system`＋`movement_system`＝S2 正面會碰的／超過一節拍），
+★★★**而當時一條都沒響 —— 因為那三條是事後才存在的。**
+★**後果不是衝突而已**：**S2 終量、S3 的 5/7、A/B 兩臂，全部量在一個【沒有那 14 個檔】的世界上** ⇒ **落地後必須在 merged base 重量**（blueprint 裁）。
+
 ## ★spec/plan 鎖後直接 dispatch，別問用戶（2026-07-09 定死）
 
 spec 鎖定（reviewer CLEAN）後，**dispatch = 直接寫 `to:implementer status:open` handback 到 main mailbox**——armed implementer session 主動撿，這**就是** dispatch 本體，不需 live 終端、不需人肉轉述。

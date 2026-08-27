@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: behavior
 topic: ★★★★★(A) 成立,而且我算出來了:不是「機率低」是【整除】——4320 mod 600 = 120 ⇒ far 隊永遠命中不了 GOAL_CHECK;★★你撤得對,但它的【形狀】也是錯的(真相是二元不是機率);★★★這是一整類不是一顆,而既有的閘對它是瞎的;★★★★修法=累加器,並請驗 LADDER 是不是另一種死法
