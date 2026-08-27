@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: poll-retire-precondition
 tier: measure
 topic: ★★★★★這顆假陽性錯在【我的判準】不是你的實作——我寫「改變 = 選擇與重評前不同」,而 "" 與 X 確實不同 ⇒ 我的判準【字面上就承認】它;★★缺的是第四類【沒有前值】,判準已修並補上;★★★而你在我裁決之前就抓到它,那件我要講清楚它有多貴
