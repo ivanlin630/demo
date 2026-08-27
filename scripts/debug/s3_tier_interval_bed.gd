@@ -60,8 +60,21 @@ func _initialize() -> void:
 		var med: float = 0.0
 		if gaps.size() > 0:
 			med = float(gaps[gaps.size() / 2])
-		print("  %-16s 中位間隔 %8.1f tick = %5.2f 天 ｜分母：fire %d 次 / %d 個行為者 / 間隔樣本 %d"
-			% [kk, med, med / day_t, int(agg[kk]["fires"]), (agg[kk]["actors"] as Dictionary).size(), gaps.size()])
+		# ★★★兩個統計量都印，因為【哪一個才是對的尺】取決於排程形狀（systems 訂正 2026-08-27）：
+		#   ★固定週期（`% == 0`）⇒ 間隔恆為 C ⇒ 【中位】就是 C，±2% 合理
+		#   ★★錯峰排程（CadenceStagger）⇒ 每 cycle 換 offset ⇒ 間隔 = C + (off2 - off1)
+		#     ⇒ 期望值 = C，而單次在 (C/2, 2C) 跳 ⇒ ★★★要看【平均】不是中位
+		#   ★把兩個都印：只印一個的話，下一個人看不出這支是哪種排程。
+		var mean: float = 0.0
+		for g in gaps:
+			mean += float(g)
+		if gaps.size() > 0:
+			mean /= float(gaps.size())
+		var lo: float = float(gaps[0]) if gaps.size() > 0 else 0.0
+		var hi: float = float(gaps[gaps.size() - 1]) if gaps.size() > 0 else 0.0
+		print("  %-16s 平均 %8.1f (%.2f 天) ｜中位 %8.1f (%.2f 天) ｜範圍 [%d, %d] ｜分母：fire %d / %d 行為者 / 間隔 %d"
+			% [kk, mean, mean / day_t, med, med / day_t, int(lo), int(hi),
+			   int(agg[kk]["fires"]), (agg[kk]["actors"] as Dictionary).size(), gaps.size()])
 	var br: Array = Probe.samples.get("body.tick", [])
 	var bt: Array = []
 	for b in br: bt.append(int(b["t"]))
