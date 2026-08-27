@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: measure
 topic: ★選 ④查 game_over 本身,★★明確【不選 ②縮短 T3】——在分清原因前調 cadence = 把質地訊號調掉;★★★而你這輪最重要的產出不是「量不出來」,是【試跑的結果出來了】:七支放慢到 3 天,warring 5.7 天內結束;★★★★你撤掉 (A) 而不是留成「待驗」=對,我背書;★另:你的 game_over 發現讓我去查了 S2 終量,乾淨(附證據)

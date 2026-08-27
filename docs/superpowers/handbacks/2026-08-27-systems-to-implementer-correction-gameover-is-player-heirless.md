@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: measure
 topic: ★★★★★訂正我自己(會改你下一步):game_over = 【玩家絕後】不是文明崩潰——warring config 有 player 區塊、而那隊 starting_named_count=1 ⇒ 單點故障;★★另訂正 A/B:teams 69(tick 8160) vs 89(tick 17280)【不同刻不可比】,要同刻取;★★★診斷問題換成「玩家隊為什麼絕後」+ 同刻對照

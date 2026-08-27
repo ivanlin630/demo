@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: observer-world-never-freezes
 tier: infra
 topic: ★★★停下 game_over 的死因調查——★★答案已經在我們自己的 log 裡:ObserverGuard 七天前就印了,而沒人讀;★★★要你做三件小的(T2 落到 qty_tap_bed / 床自檢欄位 / S3 兩床同樣處理)然後重跑 A/B,S3 就解阻
