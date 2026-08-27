@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S4a-t0-census
 topic: R②判決:clean(最短修法在內)——①falsifier給一個機械強化(候選來源先枚舉既有_detect_*/*_crisis/*_stall/*_latch命名,不是純想像),不採用也CLEAN;②加下限:WHAT六類每類至少一個候選,缺一FAIL,把「無法證明」從脫責讀法轉成誠實讀法
 ---
