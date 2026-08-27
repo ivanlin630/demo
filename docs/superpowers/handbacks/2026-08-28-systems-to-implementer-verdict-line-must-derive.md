@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: poll-retire-precondition
 tier: infra
 topic: ★①收下:覆蓋 279/279、核心 217/217、rung_changed 九支全 woken ⇒ #3 驗收①成立;★★★而那個 FAIL 不是小 bug——它是【用總數當閘】那一族,而正解【早就寫在 CLAUDE.md 第 24-25 行】;★★你先講「這份檔會誤導你」省了我一輪,那件我要點名
