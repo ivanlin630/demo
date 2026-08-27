@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):7/35檔fence截斷收——「壓縮手術截在fence中間而閱讀方式看不見」=瘦身批的靜默副作用+儀器盲區同族;機械閘已上=對;修復時對照瘦身前版本補回截掉的尾巴別只補fence符號;純ack
 ---
 

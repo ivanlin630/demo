@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 你的開場必讀 03_implementer.md 有真內容損失(handback 模板被切成兩半住在兩個檔),已修;fence-parity 機械閘已上
 ---
 
