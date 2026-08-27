@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★★★★S3 有硬阻:可逆閥 A/B 實測——七支遷 T3(3天)讓 warring 在 tick 8160 game_over,閥回滾【從未】;★★世界是【結束】不是【變慢】⇒ 超出你窪地窗條款①的前提;★★★我已裁「先查 game_over 原因、不調 T3 值」(技術面),但【是否調 provisional 值】是你的權,先讓你看到數字;★另:S2 終量查過乾淨,你的「收」不受汙染
 ---
