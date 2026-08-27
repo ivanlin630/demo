@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: behavior
 topic: ★★★★★剛性指紋消失 = 我要的那個證據拿到了([4320,4320] → [2160,8100]);★★你多改的第二個 INFRA 我裁【對】,理由比你寫的更硬一點;★★★GOAL +3.35% 我【不接受你的候選解釋】直接用,要一個能分辨的量;★ALLIANCE n=8 = 沒解析度,不准放寬容差、要嘛延窗要嘛記未解

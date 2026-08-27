@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: manufacture-input-blindview
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN)——製造投入端盲派修正,而病是【四處不對稱】不是一處;★★★★最重要的一句:半修(只改檢查不改扣款)會比原病更糟——那是守恆破洞不是少做事;★★「不等」的處置是 loud-fail 不是回滾(R² 給的,單執行緒同 tick 原子性本來就成立 ⇒ 不等 = 不可能發生 = 缺陷)
