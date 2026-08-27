@@ -89,7 +89,7 @@ func _run() -> void:
 		_mk("_next_tick = 0", "d_not_time", "sentinel：重設為「未排程」"),
 		_mk("current_tick\\s*\\+=\\s*1", "d_not_time", "increment：tick 前進 1 步＝時間軸本身的定義"),
 		_mk("< 0\\b", "d_not_time", "sentinel：`< 0` 是「從未發生」的哨兵比較"),
-		_mk("\\}\\s*,\\s*[0-9]+\\s*\\)\\s*$", "d_not_time", "sample_cap：字典後接的整數是 cap"),
+		_mk("\\}\\s*,\\s*[0-9]+\\s*\\)", "d_not_time", "sample_cap：字典後接的整數是 cap（★錨拿掉行尾 $：尾巴有註解時 $ 會沒命中，而那是【規則自己的盲點】不是新形狀）"),
 		_mk("%[^=]*(==|!=)\\s*0", "d_not_time", "zero_compare：`% INTERVAL == 0` 的 0 是餘數判準"),
 		_mk("get\\([^)]*,\\s*-?[0-9]+\\s*\\)", "d_not_time", "sentinel_default：`get(k, 0/-1)` 的預設值是哨兵"),
 		_mk("^\\s*var\\s+\\w+:\\s*int\\s*=\\s*0", "d_not_time", "decl_init：`= 0` 是「尚未排程」的初值"),

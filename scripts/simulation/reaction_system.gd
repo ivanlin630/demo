@@ -54,7 +54,10 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 				person.goal_eval_next_tick = CadenceStagger.next_tick(
 					state.world.current_tick, state.world.current_tick, person.id, GOAL_CHECK_INTERVAL)
 			if state.world.current_tick >= person.goal_eval_next_tick:
-				if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "GOAL", "team": person.id, "tick": state.world.current_tick}, 6000)
+				if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "GOAL", "team": person.id, "tick": state.world.current_tick,
+					"due": person.goal_eval_next_tick}, 6000)   # ★due = 【排程目標】，tick = 【實際 fire】
+				#   ★★兩者的差就是【宿主 pass 粒度造成的量化誤差】本身 ——
+				#   不用猜，直接量。（systems：不接受候選解釋直接用）
 				_update_goals(person)
 				var alignment: float = _npc_ai.check_goal_alignment(person, team.current_task)
 				LoyaltyBank.adjust(person, alignment, "goal_alignment")

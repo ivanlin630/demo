@@ -166,6 +166,19 @@ func _initialize() -> void:
 			% [float(p_call) / hours, p_call, WorldState.TICKS_PER_HOUR])
 		print("  arrival 事件  %.2f/小時  ｜總 %d（分母）" % [float(p_arr) / hours, p_arr])
 		print("  同格對數      %.2f/小時  ｜總 %d（真的有機會交換的）" % [float(p_pair) / hours, p_pair])
+	# ── ★製造投入的【公庫路徑】死水兩欄 ──
+	#   ★零次要當場分【沒有人有公庫材料】vs【接線沒接上】—— 而 key 存不存在就是那把尺。
+	print("
+── ★製造投入→公庫路徑（死水兩欄）──")
+	for vk in ["manufacture.vault_path.tried", "manufacture.vault_path.ok", "manufacture.debit_mismatch"]:
+		print("  %-34s %s" % [vk, (str(int(Probe.counts[vk])) if Probe.counts.has(vk) else "★key 不存在（Probe 是 ON ⇒ 這件事從未發生）")])
+	var vfrom: float = 0.0
+	for ak in Probe.amounts:
+		if String(ak).begins_with("manufacture.input_from_vault."):
+			vfrom += float(Probe.amounts[ak])
+			print("  %-34s %.2f" % [String(ak), float(Probe.amounts[ak])])
+	if vfrom == 0.0:
+		print("  ★從公庫扣的總量 = 0")
 	print("
 ── 原始總量（★先看未除以天數的值，別讓 %.2f 把小數字吐成 0）──")
 	for k9 in Probe.amounts:
