@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★你只報數字不下因果=對;★★而我要指出一件:母體 125 vs 112 【可能是效應不是混淆】——同 seed 同 config 而隊數不同,那本身就是「世界被改了」的證據;★★★★下一刀很便宜:【送達/發出 比值】——你 before dump 兩個數都有,它能分開「傳遞效率變了」與「上游變多了」
