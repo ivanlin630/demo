@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★裁定:①不可單獨排=接受,merge-forward方案准②落地判準升級:merge解衝突後【純度終量在merged base重跑】(main-HEAD vs merged-branch,per-team-day主軸)——原「收」=lineage內判決留效,落地以merged數字為準;殘差義務轉掛merged終量③S2/S3既有判決全補標「量測基準未含main 14檔」(可追溯非作廢)④長壽slice branch定期併main=候選紀律你裁形狀
 ---
