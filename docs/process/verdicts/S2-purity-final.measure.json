@@ -1,0 +1,56 @@
+{
+  "slice": "S2-statistical-equivalence-after",
+  "★★★這是S2純度終量——S1c(封閉母體120顆全處置,NEEDS_HUMAN=0)之後的一次性終量vs before。S3之後還會有第二次終量(分層效果本身有價值),這不是最終那次": true,
+  "commit": "b05750ef",
+  "測法": {"worktree": "A:/GDS/demo/.worktrees/measure-s2-after（獨立乾淨worktree,非implementer的old-growth）", "seed": 1337, "days": 30, "beds": ["peaceful_economy", "warring_states"]},
+  "機械檢查": {"跑前跑後HEAD": "b05750ef / b05750ef（兩床皆驗）", "status跑後": "空（乾淨）", "warring首輪跑到一半被外部中斷(status killed非我主動停,原因不明,可能是session層級動作)重跑一次拿到完整版"},
+
+  "★★★peaceful_economy(teams 12→12，跟before一致，人口穩定世界)": {
+    "採集food_taken_每日":     {"before": 24.04, "after": 24.80, "相對差": "+3.2%"},
+    "採集material_taken_每日": {"before": 34.01, "after": 34.35, "相對差": "+1.0%"},
+    "採集ore_silver_taken_每日":{"before": 0.22, "after": 0.22, "相對差": "0%"},
+    "消耗food_每日":           {"before": 55.52, "after": 55.10, "相對差": "-0.8%"},
+    "消耗material_每日":       {"before": 0.07, "after": 0.06, "相對差": "-14.3%（分母n=215兩輪相同，絕對值極小，低解析度）"},
+    "移動格tap_每日":          {"before": "0.10(n=3)", "after": "0.30(n=9)", "相對差": "+200%（兩輪n都<10，低統計力，不當真實訊號）"},
+    "決策次數_每日":           {"before": 10.23, "after": 10.33, "相對差": "+1.0%"},
+    "製造觸發次數_每日":       {"before": 7.17, "after": 7.17, "相對差": "0%（完全相同）"},
+    "訊息發出_每日":           {"before": 11.80, "after": 11.87, "相對差": "+0.6%"},
+    "訊息送達_每日":           {"before": "0.17(n=5)", "after": "1.30(n=39)", "相對差": "+665%（兩輪n都<40，低統計力，peaceful本身活動量太小，同交易成交/starve那族的『無解析度』問題）"},
+    "credited/taken(food)比值": {"before": "99.5%", "after": "98.7%"},
+    "隊數(必報非裁決)": {"before": 12, "after": 12, "相對差": "0%"},
+    "★超5%殘差判定": "移動格與訊息送達技術上超5%，但兩者n都<40（低統計力/無解析度），跟starve/製造/交易成交同族處理：照印不裁決"
+  },
+
+  "★★★warring_states(teams 112→125，母體本身變化，見下方候選解釋)": {
+    "採集food_taken_每日":     {"before": 57.44, "after": 59.09, "相對差": "+2.9%"},
+    "採集material_taken_每日": {"before": "1.85(n=240)", "after": "★key不存在,n=0(這件事這輪從未發生)", "相對差": "-100%（異常，見下方★★★anomaly段）"},
+    "採集ore_iron_taken_每日": {"before": "0(n=151)", "after": "0(n=28)", "備註": "兩輪量都是0，分母n差很大(151→28)但都是『發生了但被溢出/量太小』"},
+    "消耗food_每日":           {"before": 354.27, "after": 348.79, "相對差": "-1.5%"},
+    "移動格tap_每日":          {"before": "98.17(n=2945)", "after": "107.33(n=3220)", "相對差": "+9.3%"},
+    "決策次數_每日":           {"before": 64.93, "after": 87.67, "相對差": "+35.0%"},
+    "製造觸發次數":            {"before": "未發生", "after": "未發生", "相對差": "一致（兩輪都0）"},
+    "訊息發出_每日":           {"before": 46.53, "after": 48.67, "相對差": "+4.6%"},
+    "訊息送達_每日":           {"before": 335.40, "after": 521.10, "相對差": "+55.4%"},
+    "餓死anon_每日":           {"before": "未發生", "after": "0.13(n=4)", "備註": "新出現，n=4太小不足以判斷是否為穩定機制"},
+    "credited/taken(food)比值": {"before": "34.5%", "after": "29.8%（持續下滑，糧倉緊度加劇）"},
+    "隊數(必報非裁決)": {"before": 112, "after": 125, "相對差": "+11.6%"},
+    "★超5%殘差項(排除低解析度候選)": ["移動格tap +9.3%", "決策次數 +35.0%", "訊息送達 +55.4%", "採集material -100%(異常見下)"]
+  },
+
+  "★★★★決策/移動/送達三項的方向故事(描述性，不是因果診斷，診斷權在systems/blueprint)": {
+    "訊息送達+55.4%": "本輪同時測到新增的『傳播節律』tap：propagate呼叫次數僅1.10/小時(若盲目掛每tick應=TICKS_PER_HOUR=60)，遠低於60⇒propagate不是盲目跟tick數走，是被arrival事件閘住的；這件事本身直接反駁『propagate單純因為tick密度×6而被多呼叫60倍』的最簡單假說，但不足以解釋送達為何仍多55%——那個問號還開著，交S3階段查",
+    "決策次數+35.0%": "在TTL修復前的中間輪(bcbfb6f3)決策已經是+22.2%，這輪+35.0%更大；本session稍早的假說二信裡systems提過『逾時觸發重評』會拉高決策次數，這輪送達暴增(更多訊息在傳)若真的連帶觸發更多重評，方向是吻合的，但這是描述性連結不是驗證過的因果鏈",
+    "移動格tap+9.3%": "本輪隊數比before多11.6%(125 vs 112)，更多隊伍在移動本身就會拉高移動事件總數，這項的偏移量級跟隊數偏移量級相近，候選解釋是母體變大的自然結果而非移動機制本身變快/變慢——但沒有做per-team-day重算驗證這個猜測，需要的話下一輪可以加"
+  },
+
+  "★★★★★採集material完全消失的異常(warring)": {
+    "事實": "before(0ab34123)=1.85/日(n=240)，中間輪ttlfix(bcbfb6f3)=0.09/日(n=7)，本輪最終(b05750ef)=0/日(n=0,key不存在)",
+    "★詭異之處": "bcbfb6f3→b05750ef之間的diff只加了純觀測Probe.bump tap(message_system.gd+9行、qty_tap_bed.gd+15行)，沒有碰任何遊戲邏輯/RNG消耗路徑——理論上這兩輪的模擬軌跡應該bit-identical(其餘所有七項數字確實逐位元相同：food_taken 59.09、move_hex 107.33、決策87.67、送達521.10、隊數125全部一致)",
+    "★我沒有診斷的部分": "material harvest是全部數字裡唯一不同的一項，而且是從『稀有事件n=7』掉到『完全不發生n=0』——這可能是(a)極稀有事件在確定性邊界上的正常抖動(n=7本來就在雜訊層級)，也可能是(b)某個我沒抓到的真實差異；我沒有能力/職權判斷是哪一種，照實標記給systems"
+  },
+
+  "landed_paths": {
+    "peaceful_raw": "docs/measurements/after-S2-purity-qty-peaceful_economy-30d.txt",
+    "warring_raw": "docs/measurements/after-S2-purity-qty-warring_states-30d.txt"
+  }
+}
