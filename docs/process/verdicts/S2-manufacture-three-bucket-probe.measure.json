@@ -1,0 +1,33 @@
+{
+  "slice": "outpost-arc-closure",
+  "ticket": "systems強先驗(設施組合變了⇒沒設施那桶變多)要求證偽——製造-7.5%三桶切分+設施普查",
+  "裁決": "★★★先驗被直接證偽——設施普查兩邊完全相同(3/6/0/0/0)，facility數量與類型一顆都沒變；即使noop_no_facility表面上真的漲了+20.1%(方向跟先驗預測一致)，普查證明那不是【設施組合改變】造成的，是別的東西",
+
+  "①三桶原始總數(peaceful_economy,30日,seed1337)": {
+    "before(49d25911,舊根)": {"fired": 215, "noop_no_facility": 318, "noop_no_material": 265},
+    "after(746ff6e7,新根,main真落地)": {"fired": 199, "noop_no_facility": 382, "noop_no_material": 211}
+  },
+  "②三桶相對差": {
+    "fired": "-7.4%（跟前一輪算出的-7.5%殘差一致，同一個訊號）",
+    "noop_no_facility": "+20.1%（漲了，方向跟systems先驗一致）",
+    "noop_no_material": "-20.4%（跌了）"
+  },
+  "③設施普查(state.world.tiles逐格讀ManufacturingSystem.RECIPE_GROUPS.keys()對應等級欄位>0的tile數)": {
+    "before": {"manufacturing_level": 3, "apothecary_level": 6, "smelter_level": 0, "weaponsmith_level": 0, "armorsmith_level": 0},
+    "after":  {"manufacturing_level": 3, "apothecary_level": 6, "smelter_level": 0, "weaponsmith_level": 0, "armorsmith_level": 0},
+    "★結果": "完全相同，一座都沒多沒少，等級分布也沒變(沒印等級分布細節但座數完全一致已經是強證據)"
+  },
+
+  "★★★★證偽結論": {
+    "systems的先驗": "arc動過設施升級路徑的commit ⇒ 蓋出來的設施組合變了 ⇒ 沒設施那桶變多",
+    "★普查直接推翻": "設施數量/類型兩邊【完全相同】(3/6/0/0/0)⇒【設施組合沒有變】——先驗的機制假設不成立",
+    "★但症狀(noop_no_facility+20.1%)確實存在，方向巧合跟先驗預測一致": "這正是systems擔心的『有file:line+有機制故事+方向量級吻合』陷阱的鏡像版——這次是先驗被『表面同方向』的症狀誘導，而普查這個更直接的量戳穿了它：設施沒少，但『判定成無設施』的事件變多了，代表問題出在別處(例如哪些隊有沒有跟哪座設施共址、勞力池分配、tile_pos指派——這些我沒有查，職權外)",
+    "★不下的結論": "三桶+設施普查已經回答了『是不是設施組合變了』這個問題(不是)，但沒有回答『那noop_no_facility為什麼漲』——那是下一輪，需要先有人決定往哪個方向查"
+  },
+
+  "landed_paths": {
+    "after_raw": "docs/measurements/mfg-probe-after-qty-peaceful_economy-30d.txt",
+    "before_raw": "docs/measurements/mfg-probe-before-qty-peaceful_economy-30d.txt"
+  },
+  "床改動": {"檔案": "scripts/debug/qty_tap_bed.gd", "層級": "L3(讀既有Probe.counts+讀state.world.tiles，零新tap零控制流)", "★兩邊都用after側746ff6e7的床覆寫跑(床是儀器)"}
+}
