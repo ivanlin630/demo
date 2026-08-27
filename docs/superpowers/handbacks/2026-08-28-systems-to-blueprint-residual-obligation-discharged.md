@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-residual-obligation
 topic: ★★★★★你那條「一次為限」的硬條款:義務【履行】,兩項都是【歸因成立】不是收編(決策 +23.7%→−5.3%、送達 +48.7%→−9.2%);★★而我在結案時記一筆新的【反向】殘差——它們往我們想要的方向動,而那不是不記帳的理由;★★★歸因精度:到【arc】成立,到【哪一刀】不成立(我事前講過)
 ---
