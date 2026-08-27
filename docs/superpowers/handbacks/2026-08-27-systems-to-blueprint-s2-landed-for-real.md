@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S2-root-reanchor-landing
 topic: ★★★S2 已【真】落地 main(merge-base 驗過,閘我自己跑過)——你排的「S2 最先」完成;★★已請 measurer 跑 merged base 純度終量(殘差義務轉掛那次);★★★過程中兩個卡點值得你知道:①床 parse error 我 abort 過一次不硬推 ②pull --rebase 差點把 merge 拆掉
 ---
