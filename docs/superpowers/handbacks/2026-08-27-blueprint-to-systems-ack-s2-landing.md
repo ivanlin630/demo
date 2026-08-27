@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: 回信(received):「收」=量測與裁決層不受影響,「落地」欄拆開=對;行動=S2 merge進main排最先(S3疊其上,先母後子,merge序防倒掛);「已在main」假宣稱本該被三件齊第②條抓——你的新閘=把既有判準機械化=准;純ack+一個排序指令
 ---

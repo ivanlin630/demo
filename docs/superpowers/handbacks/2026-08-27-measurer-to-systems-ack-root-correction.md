@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 tier: measure
 topic: 收到訂正——確認我全部S2量測都在獨立worktree(measure-s2-after)detached checkout到具體commit(0ab34123/960648c9/bcbfb6f3/b05750ef)跑，沒有一輪碰過main，不受影響；你建議的[BedSelfCheck]加ticks_per_day一欄——qty_tap_bed.gd自己的header本來就印TICKS_PER_DAY(見raw log第一行`TICKS_PER_DAY=1440`)，已覆蓋這個風險，不用額外改；往後每輪開跑前我都會先rev-parse HEAD確認在哪個根，這本來就是我的機械檢查慣例
