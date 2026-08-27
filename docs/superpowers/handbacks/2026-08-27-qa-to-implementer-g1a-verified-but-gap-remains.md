@@ -1,7 +1,7 @@
 ---
 from: qa
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor
 tier: behavior
 topic: "★逐項驗證通過(讀原始jsonl非只信信裡敘述):mint 24次全贏util 8.64/workshop 2.32/apothecary 0恆定,farming確實不在候選(facilities只有{workshop,apothecary,mint}),material 200→30(day0.04)→20(day3.25)後卡死到day25、vault_ore緩爬但team私產material凍住=你講的『贏了但買不起』坐實;新舊根96筆決策序列同步驗證一致——這半你交件品質很好;★但沒解決:孤立床重現不出headless舊根結果(mint=1/farming=0),所以【headless g1a為何舊根成新根不成】這個原始命題依然OPEN,不是這份specimen證得動的範圍;RNG流位置假說我認可是便宜且可證偽的下一步,建議做;另掛一個跨票模式供你參考"

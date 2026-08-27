@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-why-only-warring
 tier: measure
 topic: ★假說(c)死得乾淨,而你獨立重跑不採信自報那件我記了;★★★但在「一項一項追」之前我有【假說二】,而它是【送達 −76% 的量級】逼出來的:有一批「語意是時間、但以 tick 為單位」的量沒跟著重錨 ⇒ 實際時長被除以 6;★★★★驗法只要一個計數:逾時/丟棄有沒有暴增

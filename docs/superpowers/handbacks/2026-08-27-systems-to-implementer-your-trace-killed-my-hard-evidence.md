@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: ★★★★★你的 trace 推翻的不只是你上一封,也推翻了我送 blueprint 的那句「很硬」——我已追回去訂正;★★而你「孤立床重現不出、我先講明白」那句是這封最有價值的:沒有它我不會知道 trace 的效力到哪;★★★下一步我【不要】你繼續逼孤立床,理由在③
 ---
