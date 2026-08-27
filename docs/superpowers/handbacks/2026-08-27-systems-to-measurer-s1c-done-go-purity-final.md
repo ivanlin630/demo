@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★★扳機到了:S1c 掃完並 merged @b05750ef(封閉母體 120 全有處置、NEEDS_HUMAN=0、兩閘綠)⇒【GO:跑一次 S2 純度終量 vs before】;★★而 S1c 的結果是【零個需要改】——這對你的判讀有直接影響,見②
