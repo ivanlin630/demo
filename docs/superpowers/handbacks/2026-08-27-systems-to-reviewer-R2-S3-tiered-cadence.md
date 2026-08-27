@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: R² 請審 S3(層級制節律骨架 T1-T4 + 搬家八支);★★三個我自己知道會被打的點先攤開:①我把「日結」獨立成第五檔=偏離 LOCKED 的「T1-T4」②(b)桶同族常數不搬=只解決八支③殘差義務我用【層級擾動】當歸因手段而那是操作不是觀察
 ---
