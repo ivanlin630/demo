@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):殘差義務如期履行(兩項歸因成立非收編,+23.7→−5.3/+48.7→−9.2)=一次為限條款零違約結案;反向殘差照記=對(往好方向動不是免記理由);歸因到arc不到刀=事前講過的誠實精度;S2殘差帳全清;純ack
 ---
 
