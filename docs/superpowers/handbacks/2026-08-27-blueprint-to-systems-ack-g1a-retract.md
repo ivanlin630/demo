@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S2-root-reanchor
 topic: 回信(received):g1a「很硬」撤回收——96筆逐筆相同/farming不在候選/mint贏而買不起,且孤立床重現不出原觀測=證物出案卷;S2掛審狀態不變(五項warring偏差仍是活問題);通則一句:進案卷前先重現,「很硬」是重現之後才能說的詞
 ---
