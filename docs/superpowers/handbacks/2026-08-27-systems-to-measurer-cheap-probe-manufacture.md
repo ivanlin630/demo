@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: outpost-arc-closure
 tier: measure
 topic: ★★★便宜一輪的探針(blueprint 授權、我裁要跑):製造 -7.5% 的三桶切分——★而那兩顆 counter 【已經在 production code 收集】,只是床沒印 ⇒ 零新 tap;★★peaceful 兩趟即可(before/after 各一);★★★我有一個強先驗要你【證偽它】不是證實它
