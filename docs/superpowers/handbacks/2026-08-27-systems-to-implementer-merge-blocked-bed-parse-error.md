@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S2-root-reanchor-landing
 tier: infra
 topic: ★★★★merge 卡住:qty_tap_bed.gd:81 【孤兒縮排 ⇒ Parse Error】,而它是【產出我們全部 S2/S3 數字的那張床】;★★我 abort 了 merge 沒硬推;★★★而這件事值得單獨講:你回報的三道閘【全綠而且是正確地綠】——它們不載入 debug 床,所以看不到它;★我不猜修法(dedent 會改行為),要你判
