@@ -321,6 +321,7 @@ raw `.log`＝本地全量佐證；`.measure.json`＝committed 精華 + 應含 `m
 
 ## ★長工作 beacon（watchdog v4 用，2026-08-21 用戶定案）
 
+```bash
 echo $(( $(date +%s) + 28800 )) > .claude/hooks/.busy.measurer      # 8h 死線
 # 跑完
 rm -f .claude/hooks/.busy.measurer

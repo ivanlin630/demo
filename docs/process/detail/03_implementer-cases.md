@@ -84,6 +84,7 @@ topic: <功能名稱> 實作交付 — <一句摘要>
 
 ## 待確認
 
+```
 ★**frontmatter 必帶 `from/to/status/topic`**——否則沒 `to:` = 信箱掃不到 = 下一站不會自動讀（舊式純 topic 已淘汰）。
 
 3. Commit hand-back 文件，不要直接 merge 到 main，等主 session 確認。

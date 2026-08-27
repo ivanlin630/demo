@@ -7,6 +7,7 @@
 
 > ★詳 → `detail/03_implementer-cases.md`
 
+```markdown
 ## 實作摘要
 - 改了哪些檔案（每檔一行說明）
 - 與 spec 的差異（若有）

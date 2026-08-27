@@ -49,10 +49,34 @@ for role in "${!ROLEDOC[@]}"; do
   [ "$tot" -gt "$CAP_PER_ROLE" ] && _w "$(printf '%-20s' "${role} 開場合計")${tot} > ${CAP_PER_ROLE}  ★（CLAUDE+invariants+00_roles+自己那份）"
 done
 
+# ★★★第二層檢查：**未閉合 code fence**（2026-08-27 systems 立，血證見下）
+#   ★病：把節「壓縮進 detail」的動作會截在 ``` 中間 —— 留下孤兒【開】或孤兒【閉】。
+#     孤兒【開】⇒ 從它到檔尾整段 render 成一坨 code；孤兒【閉】⇒ 位移整條 parity。
+#   ★★為什麼會拖這麼久沒人發現：**我們讀這些檔用 `cat`／`grep`／`sed`，而它壞掉的方式只在 render 時可見**
+#     —— ⇒ ★★★這種壞法對【我們的閱讀方式】天生隱形，所以只能機械檢查，不能靠「有人會注意到」。
+#   ★血證 2026-08-27：母體 35 檔裡 **7 檔** parity 是奇數，★全部集中在 `docs/process/`
+#     （＝正好是動過「壓縮進 detail」手術的那批），domain doc 零命中。
+#   ★★同一份 handback 模板甚至被切成兩半住在兩個檔（`03_implementer` 有尾、它的 cases 有頭）。
+_fence_pop() { ls docs/*.md docs/process/*.md docs/process/detail/*.md CLAUDE.md 2>/dev/null; }
+_odd=0; _oddlist=""
+while read -r f; do
+  [ -f "$f" ] || continue
+  # grep -c 無命中時 exit 1 但仍印 0 ⇒ 不可再接 || echo 0（會多印一行 0 ⇒ 算式炸掉）
+  c=$(grep -c '^```' "$f" 2>/dev/null); c=${c:-0}
+  if [ $((c % 2)) -ne 0 ]; then _odd=$((_odd+1)); _oddlist="${_oddlist}
+  ★未閉合 fence（n=${c}）  ${f}"; fi
+done < <(_fence_pop)
+if [ "$_odd" -gt 0 ]; then
+  warn=$((warn+_odd))
+  out="${out}${_oddlist}"
+fi
+
 if [ "$warn" -gt 0 ]; then
   echo "[doc-cap] 🟡 必讀區超限 ${warn} 項（warn-only，不阻擋）：${out}"
   echo "[doc-cap] ★上限不是品味問題：★★超限＝【開場就讀不完】＝規則存在但不會被用到。"
   echo "[doc-cap] ★處置＝搬到【按需讀】的地方（domain doc／spec／memory），不是刪掉。"
+  echo "[doc-cap] ★★而「搬走」只做了一半：★★★主檔留下的殘骸要【合併成一行表列】——否則 N 個殘骸＝N 個入口＝一樣讀不完。"
+  echo "[doc-cap] ★未閉合 fence 的修法＝補回被截掉的那一半（body 常常還活在對應的 detail 檔裡），不是刪掉那個 \`\`\`。"
 else
   echo "[doc-cap] ✅ 必讀區全部在上限內"
 fi
