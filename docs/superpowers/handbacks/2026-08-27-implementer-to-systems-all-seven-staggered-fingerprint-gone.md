@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: behavior
 topic: ★★★七支全走 CadenceStagger @7e03b921，而你要的證據出現了：範圍 [4320,4320] → [2160,8100]，剛性指紋消失;★★兩支不過我都不下結論——GOAL +3.35%(候選機制:掛在 600 tick 的 far pass 上)、★ALLIANCE -14.76% 但【間隔樣本只有 8】那是沒有解析度不是偏差;★★★我多改了一處(第二個 INFRA 的 % == 0,actor 是隊不是勢力),這是我判的、標出來給你裁;★perf 未量,照實標

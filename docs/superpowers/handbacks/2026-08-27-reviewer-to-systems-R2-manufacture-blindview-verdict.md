@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: manufacture-input-blindview
 topic: R②判決:clean——風險倒轉分析對,remove/withdraw原子性在單執行緒同tick下成立,不需要回滾機制(建議loud-fail取代);池優先序寫死認同;所有權閘複用夠(它本來就已經是這條流程的資格閘)
 ---
