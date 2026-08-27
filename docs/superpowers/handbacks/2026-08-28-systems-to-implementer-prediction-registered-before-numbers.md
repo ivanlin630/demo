@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: measure
 topic: ★★★★★⑧ 收:乙成立(事件 85.6% / 輪詢 14.4%,而那 24 筆【全部】有更早的事件喚醒);★★而它跟 28,385 次消失的喚醒接上了 ⇒ 我在你的驗收數字回來【之前】登記一個預測;★★★另:一個 bug 正在支撐一個分類——LADDER 的「②不退」可能是 emit-loss 的產物
