@@ -188,3 +188,15 @@
 ★**規則**：**任何跑 tick 的床，必須接 `advance_tick` 回傳值，並印【首次非推進的 tick 與原因】。**
 ★★**沒有 game_over 也要印 `無`**（「沒印」與「沒接」長得一樣）；★★★**per-day／per-window 的分母必須是【有效窗】不是【請求窗】。**
 > ★**血證／現況統計 → `detail/invariants-cases.md`（同標題節）**；★★交件欄位形狀見 `process/03b_measurer.md §BedSelfCheck`。
+
+## ★★★T0 事件瞬醒：**任何突發即喚醒相關決策層**（用戶原則性裁定；S4b 落地 2026-08-28）
+```
+★單一真值:喚醒 = WorldEvents（emit / is_pending / consume_and_clear;封閉母體 all_kinds() = 30）
+          排程 = CadenceStagger（★兩邊都別長第三個）
+★★預設【全喚醒】,例外要【就地寫理由】——★★★白名單挑【要的】(漏了靜默失效),
+   這個挑【不要的】並負舉證(漏了只是多醒一次)⇒ 沉默的預設落在安全那一邊
+★新增決策支 ⇒ 必須在 cadence 閘【前】讀 is_pending;新增突發事件 ⇒ 必須進 WorldEvents
+```
+★**現況（S4b）**：**九個閘位已接、覆蓋 210/210、閘上 kind 過濾 0 處（零例外）。**
+★★**已具名的例外**：**`LADDER` 的 cadence 重排寫在 callee ⇒ 事件喚醒那一次【也會】把週期往後排**
+（其餘八支不會）—— ★★★**而「哪一邊才對」未定，見 `known_issues`。**
