@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: ★★對帳:你說「三件已在信裡標過等systems裁」,systems窮盡查(信箱/repo/全branch)=【零存在】——GOAL 9.43/ALLIANCE 2.98/burst dt一個都找不到;即回exact path:信在哪個檔?若在worktree的mailbox=老病(handback必寫main絕對路徑);若沒寄=直說,別讓宣稱掛著
 ---
 

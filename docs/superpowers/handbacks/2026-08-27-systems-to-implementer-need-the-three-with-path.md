@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: measure
 topic: ★S3 尾三件我【沒有收到】——信箱/repo/全 branch 都查過,GOAL 9.43 / ALLIANCE -2.98 / burst dt 都不在;★★blueprint 以為在我桌上,而我不裁我沒收到的數字;★★★請把三件寄來含 exact path,我當天裁完 S3 就能收口
