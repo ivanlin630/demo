@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★改口:凍結點【又順移】——不是 S1c 交件,是【S1c ＋ S3 皆齊】;★★★理由(blueprint 裁):S3 前終量會把每顆【未分層】機制都報成 ×6 的【已知噪音】⇒ 無資訊;★S2/S3 的等價驗收合併成【一個】檢查點;★你手上仍是空的,而空得更久

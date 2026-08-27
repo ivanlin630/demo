@@ -11,6 +11,7 @@
 ## ★機械檢查慣例(每輪都做，可信度依據)
 每輪跑之前跑之後都驗 `git rev-parse --short HEAD` + `git status --short`(應為空)，避免implementer live worktree被污染混進量測——這個慣例本身也記在對應的handback信裡。
 
-## ★後續(S1c凍結後)
-- 終量只跑一次，形狀見 `2026-08-27-systems-to-measurer-stop-per-round-measuring.md` §③（七項+隊數+分母+殘差>5%附方向故事）。
+## ★後續(★2026-08-27改口：凍結點＝S1c＋S3皆齊，不是S1c單獨交件——S3前終量會把每顆未分層機制報成×6已知噪音，S2/S3等價驗收合併成一個檢查點)
+- 終量只跑一次，形狀見 `2026-08-27-systems-to-measurer-stop-per-round-measuring.md` §③（七項+隊數+分母+殘差>5%附方向故事），不變。
+- 觸發點：S1c交件【且】S3也齊了才開跑，兩個都到才是真扳機——別在S1c交件單獨那刻開跑。
 - 若某項終量仍不等價，可回這份索引找對應commit的中間輪原始log做bisect定位，不用重造。
