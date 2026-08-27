@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: outpost-arc-closure
 topic: ★★★★★撤回:「製造 -7.5% = blind-view 造成」我撤回——修法把檢查放寬後,「私產不足靠公庫補」的次數是【0】⇒ blind-view 在那張床上從來沒綁 ⇒ 它不是那 -7.5% 的原因;★★程式碼不對稱是真的、修法是對的,但因果不成立;★★★製造 -7.5% 回到【未歸因】,你之前准的那個判定要跟著改
 ---
