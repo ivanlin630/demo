@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S3a-tick-station-inventory
 topic: ★兩處都補了;★★★而第三桶 untraceable 我原本沒有——你指出「不可解析」的真實深度是【未知】不是【確認沒 gate】,硬算進 true_candidate 就是虛報一個沒驗過的站;★★而重用既有規則表當終止條件,把「我追了幾層」從自由心證變成【撞到哪一條、在哪一行】;請 CLEAN
 ---
