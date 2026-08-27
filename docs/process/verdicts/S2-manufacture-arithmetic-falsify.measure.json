@@ -1,0 +1,25 @@
+{
+  "slice": "outpost-arc-closure",
+  "ticket": "systems算術可證偽故事(no_outpost減少≈no_worker+no_facility增加+fired減少)——用絕對數打，不用百分比",
+  "裁決": "★★★證偽——|Δno_outpost|=7遠小於RHS=39，跟你自己寫的證偽條件①一致：no_outpost的絕對數太小(36→29只有7)，撐不起下游各桶的變化量",
+
+  "①絕對次數(peaceful_economy,30日,seed1337，不給百分比)": {
+    "before": {"fired": 215, "no_outpost": 36, "no_worker": 30, "no_facility": 318, "no_material": 265},
+    "after":  {"fired": 199, "no_outpost": 29, "no_worker": 43, "no_facility": 382, "no_material": 211}
+  },
+  "②Δ(after-before)": {
+    "fired": -16, "no_outpost": -7, "no_worker": 13, "no_facility": 64, "no_material": -54,
+    "Δ加總": 0
+  },
+  "③你的預測式": {
+    "LHS": "|Δno_outpost| = 7",
+    "RHS": "Δno_worker + Δno_facility + Δno_material + |Δfired| = 13+64+(-54)+16 = 39",
+    "★結果": "7 遠不等於 39（差5.6倍），不是約略相等"
+  },
+  "★★★證偽條件比對": {
+    "①命中": "Δno_outpost絕對數=-7，確實很小（跟你講的『62→50只有12次』同型），撐不起下游39這麼大的變化——★故事作廢",
+    "②不適用": "Δ加總=0，entry分母固定，沒有漏出口",
+    "③不適用(不需要判)": "①已經定案，不用再看③"
+  },
+  "landed_paths": "沿用既有 mfg5-probe-{after,before}-qty-peaceful_economy-30d.txt，零新跑"
+}

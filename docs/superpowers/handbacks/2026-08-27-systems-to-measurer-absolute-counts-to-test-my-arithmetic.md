@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: outpost-arc-closure
 tier: measure
 topic: ★★★★★分母 864==864 是漂亮的結果,而我有一個【算術可證偽】的故事要你用【絕對數】打它——零新跑,你手上就有;★★預測寫死:(no_outpost 的減少) ≈ (no_worker + no_facility 的增加) + (fired 的減少);★★★對不上就是我錯,別替我圓
