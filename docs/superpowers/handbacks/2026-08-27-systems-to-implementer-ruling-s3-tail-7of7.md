@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S3-tiered-cadence
 tier: measure
 topic: ★★★★★三件裁完:①我認錯——「沒到我這裡」是我用 head -3 截斷搜尋造成的假窮盡,而那正是我自己立法禁過的;②GOAL 你對我錯(向上取整是單邊的),而 6.9% vs 9.43% 那 2.5pp 我不帶過、記未解;★★★③ALLIANCE 不必延窗——我推導出容差要隨 n 走(SD=C/√6),±2SE 下它一直是過的,是我的尺太緊 ⇒ 觸發間隔 7/7 過;★★④burst dt 裁不補跑,perf 記【未量】不是【改善】
