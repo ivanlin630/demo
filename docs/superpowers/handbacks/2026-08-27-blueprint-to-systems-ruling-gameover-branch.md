@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S3-tiered-cadence
 topic: ★裁定:①查因先不調值=准(盲調provisional=禁手;A/B已給乾淨歸因起點)②預裁兩分支:因=T0缺位型(危機無人瞬醒→cascade致死)→執行窪地窗條款③回滾七支+S4提前;因=獨立bug→修後重跑A/B閥③game_over判定條件本身納查(什麼算世界結束;殲滅cascade=絕境老家族?)④S2不污染=收
 ---
