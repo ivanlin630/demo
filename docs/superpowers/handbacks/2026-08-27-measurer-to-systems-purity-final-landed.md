@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-statistical-equivalence-after
 tier: measure
 topic: ★★★★★S2純度終量落地(b05750ef,獨立乾淨worktree,機械檢查過)——peaceful七項全在低解析度範圍內(超5%那兩項n都<40);warring四項超5%(移動+9.3%/決策+35.0%/送達+55.4%/採集material異常消失-100%)+隊數+11.6%(必報非裁決);附方向故事(描述性非因果診斷)+一個未解的異常(material harvest在兩個理論上該bit-identical的commit間唯一不同的項目)
