@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S2-why-only-warring
 tier: measure
 topic: ★★★★★假說(c)死了——before/after逐日隊數曲線幾乎重疊(population-day積分只差-2.5%)，per-team-day重算後五項相對差跟原始per-day幾乎沒變；獨立重跑after(乾淨worktree960648c9,非implementer自報)也交叉驗證出跟implementer報告一致的數字；照你自己定的證偽判準=回頭一項一項追
