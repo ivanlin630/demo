@@ -104,6 +104,20 @@ var next_order_id: int = 1
 # ★不入 state_fingerprint：因為它【單 tick 內清空】（tick 結尾 WorldEvents.consume_and_clear），
 #   不跨 tick 存活＝非持久狀態。分批消費會讓這個正當性失效。
 var pending_rethink: Dictionary = {}
+# ★★★純觀測（Probe-gated 才寫）：這面旗子【有沒有人讀過】。
+#   ★動機：「窗內有沒有被走訪」這個問法會被 tick 內順序污染（走訪在 emit 之前 vs 之後
+#     長得一樣）——★★我已經在 pass_done 那顆上踩過同一個病一次。
+#   ★★★換成問【旗子死掉時有沒有人讀過它】：那是需求①「不得消失」的字面量，
+#     而且它與順序無關 —— 讀過就是讀過。
+#   ★不入 fingerprint：它是觀測欄，production 決策不讀它。
+var pending_seen: Dictionary = {}
+# ★★★純觀測：這一隊【最後一次被任何消費者查看】的 tick。
+#   ★用途：把「旗子死了」拆成 systems 要的兩件——
+#     ①a 因【順序】而丟（消費者在窗內查過它，只是那時還沒 emit）⇒ ★雙緩衝的責任，必須歸零
+#     ①b 因【走訪間隔】而丟（消費者在窗內根本沒查它）⇒ ★★雙緩衝修不掉，照實報
+#   ★★記在【逐 actor 的檢查點】上（pending_source / pending_source_faction 真的碰到這一隊時），
+#     ★★★不是逐支逐 tick 的粗標記 —— 那顆分不出「這一隊」有沒有被碰到，只能當上界。
+var pending_visit: Dictionary = {}
 var player_state: Dictionary = {}
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []

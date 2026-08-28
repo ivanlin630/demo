@@ -1,0 +1,47 @@
+# S4b 事件瞬醒覆蓋對帳｜cfg=warring_states warm=600 tick
+# actor 母體：person=131 team=55 faction=8 indep=20
+#
+## ① 死水三欄（A 相 600 tick 正常跑；三欄互斥、相加 = 該支 fire 次數）
+# 支別 | event(純事件提早) | both(事件+本來就到期) | cadence(純週期) | 合計
+GOAL|100|0|0|100
+LADDER|39|0|0|39
+STRATEGIC|8|0|0|8
+ALLIANCE|8|0|0|8
+BETRAY|8|0|0|8
+INFRA|8|0|0|8
+FACTION_UPDATE|8|0|0|8
+INDEP_INFRA|9|0|0|9
+INTENT|8|0|8|16
+#
+## ② 陰性對照（C 相 600 tick，不注射）：production 自己 emit 造成的 event 醒次數
+# ★『該窗共 fire』是分母：它 =0 代表這支整個窗沒被走訪（no_run），不是沒醒
+ctrl|GOAL|60|60
+ctrl|LADDER|27|27
+ctrl|STRATEGIC|25|25
+ctrl|ALLIANCE|25|25
+ctrl|BETRAY|8|8
+ctrl|INFRA|8|8
+ctrl|FACTION_UPDATE|8|8
+ctrl|INDEP_INFRA|10|10
+ctrl|INTENT|8|8
+#
+## ②b 既有 tap（reeval.event，無後綴＝_should_reeval 的決策支，這一刀沒碰過它）
+# 對照(不注射,600 tick)=23 ｜ 注射(1 kind × 600 tick)=525
+#
+## ③ 靜態：閘上有沒有 kind 過濾（例外必須寫理由）
+# is_pending 那幾行提到 kind 字面量的次數 = 0
+#
+## ④ 9 格（9 支 × 1 kind）；★核心 7 支 = 7 格單獨對帳  ★★★BED_KINDS_LIMIT 生效 ⇒ 這【不是】完整覆蓋對帳
+# 欄位：kind|support|bucket|event|both
+combat_start|GOAL|woken|129|0
+combat_start|LADDER|woken|623|0
+combat_start|STRATEGIC|woken|88|0
+combat_start|ALLIANCE|woken|88|0
+combat_start|BETRAY|woken|88|0
+combat_start|INFRA|woken|88|0
+combat_start|FACTION_UPDATE|woken|88|0
+combat_start|INDEP_INFRA|woken|227|0
+combat_start|INTENT|woken|88|0
+# woken            全=9 核心=7
+# 合計               全=9 核心=7
+# ★FAIL：NOT_WOKEN=0 合計=7（應為 210）

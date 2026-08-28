@@ -1,0 +1,31 @@
+# rung_changed 喚醒的 fp 對照：★before/after 完全相同 ⇒ 這一刀在本床【零分岔】
+#
+# ★背景：我在交件前【預先聲明「fp 必變」】（多一條喚醒路徑 ⇒ 決策時序變 ⇒ 世界分岔）。
+#   ★★量出來是【沒變】。這份檔案存在的理由就是把那個錯誤聲明釘在證據旁邊。
+#
+# 方法：同一顆 a4_determinism_check.gd，同 config/seed，只換 code base。
+#   before = 455db60f^（79cab05c，rung_changed 落地【之前】），臨時 worktree 跑完即刪
+#   after  = 本分支（rung_changed 已落地）
+#
+# ticks | before                            | after                             | 相同?
+# ------+-----------------------------------+-----------------------------------+------
+   1000 | (未取)                            | 2ede39b144a18f99f951af7aebbce821  | —
+   6000 | 6eb9bec6a5a0f06a99eb3b02bcba34d2  | 6eb9bec6a5a0f06a99eb3b02bcba34d2  | ★相同
+  20000 | 7c5687840c53a46f7b1dcff8df91d2d8  | 7c5687840c53a46f7b1dcff8df91d2d8  | ★相同
+#
+# ★★★而「沒 fire」這個解釋【已被排除】：
+#   rung_changed 在 2880 tick 的 smoke 就 emit 過 9 次；
+#   30 日 ⑦ 欄：rung_changed seen=57 / unseen=0 ⇒ 它【真的被看到】了。
+#   ⇒ 是【醒了但選一樣的東西】，不是【沒醒】。
+#
+# ★★與 30 日輪詢資料一致：INTENT 的重評【從不改變選擇】（①改變 0 / ②維持 70 / 貢獻率 0.0%）
+#   ⇒ 提早叫醒它，它還是選一樣的 ⇒ 世界不分岔。
+#
+# ★兩種讀法（★我不替 systems 選）：
+#   讀法甲：S3 開的反應性缺口【比想像小】—— 因為選擇函數本來就穩定。
+#   讀法乙：選擇函數【太不敏感】—— rung 資格變了而意圖不動，那是另一個問題。
+#   ★★★兩者用同一組數字，而它們指向完全不同的下一步 ⇒ 交 systems 裁。
+#
+# repro：
+#   $env:FP_CONFIG='warring_states'; $env:FP_TICKS='<n>';
+#   .\tools\godot.ps1 --headless --path <worktree> --script scripts/debug/a4_determinism_check.gd

@@ -1,0 +1,84 @@
+# 輪詢獨特貢獻率｜cfg=peaceful_economy days=30 ticks=43200 有效窗=43200
+# actor 母體(收尾)：persons=24 factions=0 獨立隊=12 有領袖隊=12
+## ①②③ 支別|分母(cadence)|①改變|②維持|③首次賦值|④無選擇產出|貢獻率|備註
+# ★四類互斥且窮盡：①+②+③+④ 必須 == 分母；④ 是殘差，它非 0 就是還有第五種情況
+# ★貢獻率的分母 = 改變+維持，【排除首次賦值】——它既不是改變也不是維持
+GOAL|181|0|181|0|0|0.0%|
+LADDER|94|2|92|0|0|2.1%|
+STRATEGIC|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+ALLIANCE|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+BETRAY|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+INFRA|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+FACTION_UPDATE|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+INDEP_INFRA|107|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|NOT_MEASURABLE|—|選擇不落在可比較的持久欄位上(產出是一次性動作)
+INTENT|0|—|—|—|—|n/a|★分母=0 ⇒ NO_ACTOR(這張床沒有這種 actor，數量=0)
+#
+## ③ 成因池｜母體 2 樣本 2
+cause|2|LADDER｜0 → 1
+#
+## ④ 延遲｜支別|樣本|中位|平均|最大|之後再也沒醒
+GOAL|91|7800|10582.4|33000|90
+LADDER|45|6420|8306.7|25920|47
+# 單位 tick；1440 tick = 1 日
+#
+## ⑥b 四分死水｜支別|cadence|event|delayed|both|合計
+# ★delayed = 【上一 tick 的 emit，延到這一 tick 才被看到】——雙緩衝之前這些是【消失】
+dw4|GOAL|181|53|0|9|243
+dw4|LADDER|94|32|0|0|126
+dw4|STRATEGIC|0|0|0|0|0
+dw4|ALLIANCE|0|0|0|0|0
+dw4|BETRAY|0|0|0|0|0
+dw4|INFRA|0|0|0|0|0
+dw4|FACTION_UPDATE|0|0|0|0|0
+dw4|INDEP_INFRA|107|32|0|0|139
+dw4|INTENT|0|0|0|0|0
+#
+## ⑥ rung_changed → INTENT｜同tick=0|之後才醒=0|從此沒醒=0|獨立隊無勢力=3|樣本=3
+#
+## ⑦ emit 被看到與否｜kind|seen|unseen|no_consumer|落空率(unseen/(seen+unseen))
+# ★歸因界限：pending 是每隊一個布林、不記誰標的 ⇒ 同 tick 同隊多 kind 都記 seen，無法歸因
+seen|combat_engaged|3|0|2|0|13|40.0%
+seen|combat_start|0|0|2|0|7|100.0%
+seen|construction_stalled|2|0|0|1|6|33.3%
+seen|famine_crossed|9|0|0|0|18|0.0%
+seen|intel_arrived|36|0|0|0|72|0.0%
+seen|order_buy|126|0|832|416|2748|90.8%
+seen|order_sell|90|0|428|214|1464|87.7%
+seen|rung_changed|3|0|4|2|18|66.7%
+#
+## ⑦b 逐支彙總｜支別|seen|★seen_next|unseen|no_consumer|落空率
+seenS|GOAL|89|0|2|633|0|87.7%
+seenS|LADDER|90|0|632|0|2|87.5%
+seenS|STRATEGIC|0|0|0|0|724|n/a
+seenS|ALLIANCE|0|0|0|0|724|n/a
+seenS|BETRAY|0|0|0|0|724|n/a
+seenS|INFRA|0|0|0|0|724|n/a
+seenS|FACTION_UPDATE|0|0|0|0|724|n/a
+seenS|INDEP_INFRA|90|0|634|0|0|87.6%
+seenS|INTENT|0|0|0|0|724|n/a
+# t0.emit_ctx 樣本 724（cap 40000）
+#
+## ⑧ LADDER rung 變化×觸發源｜觸發源|fire|rung變了|變化率
+# ★systems 問的字面版本結構上不可能（那批依定義是純 cadence；rung_changed 是 fire 的結果非原因）
+# ⇒ 這裡答：所有 rung 變化裡，各觸發源各佔多少
+rungtrig|cadence|94|2|2.1%
+rungtrig|event|32|1|3.1%
+rungtrig|both|0|0|n/a
+rungtrig|合計|126|3|—
+#
+## ⑧b 純cadence rung變化｜樣本=1|中位=6720|平均=6720.0|最大=6720|無更早事件喚醒=1
+#
+## ⑨ 旗子命運｜被讀過=32|①a lost_ordering=121|①b lost_not_visited=1|合計=154|消失率=79.22%
+# ★①a＝旗子死時，消費者【在 bonus tick 查看過這一隊】卻仍沒讀到 ⇒ 結構上該為 0，非 0 = 真 bug
+# ★★①b＝【bonus tick 沒人來】⇒ 走訪間隔 >> 2 tick 壽命，雙緩衝修不掉（第一版把 C-1 看過的誤歸這裡的對立面）
+# ★★★①b 的大小決定下一票要不要做 per-actor 消費（旗子活到被讀為止）
+# ⑩ 母體/樣本：丟掉母體=122 樣本=122｜poll.outcome 樣本=369 actor key=24
+#
+## ⑩ 丟掉的喚醒值不值得救｜丟掉樣本=122|改變=4|維持=232|之後沒被走訪=252|改變比例=1.69%
+# ★問法避開反事實：不問「若沒丟會怎樣」，改問【下一次真正被走訪時選擇有沒有變】
+# ★★分母排除「之後再也沒被走訪」——那些不是「沒改變」，是【沒有下一次可看】
+nextvisit|GOAL|0|120|2|0.00%
+nextvisit|LADDER|4|112|6|3.45%
+nextvisit|STRATEGIC|0|0|122|n/a
+nextvisit|INTENT|0|0|122|n/a
+# [BedSelfCheck] observer_guard=none first_nonadvance=none effective_window=43200/43200

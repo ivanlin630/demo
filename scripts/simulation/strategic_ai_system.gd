@@ -33,14 +33,20 @@ func tick(state: WorldState, faction: FactionData) -> void:
     # ★★★S4b T0：事件瞬醒短路（形狀照抄 faction_ai `_should_reeval`）。
     #   ★這支是【早退式】⇒ 短路寫成「兩個都不成立才 return」。
     var _strat_due: bool = state.world.current_tick >= faction.strategic_eval_next_tick
-    var _strat_woke: bool = WorldEvents.is_pending_faction(state, faction)
+    DecisionTier.mark_gate("STRATEGIC", state.world.current_tick)
+    var _strat_src: String = WorldEvents.pending_source_faction(state, faction)
+    var _strat_woke: bool = _strat_src != ""
     if not (_strat_due or _strat_woke): return
-    DecisionTier.tap_wake("STRATEGIC", _strat_woke, _strat_due)
+    DecisionTier.tap_wake("STRATEGIC", faction.faction_id, state.world.current_tick, _strat_src, _strat_due)
+    var _poll_pure: bool = _strat_due and not _strat_woke
+    var _sel_before: String = _goal_sig(faction)
     if _strat_due:
         faction.strategic_eval_next_tick = CadenceStagger.next_tick(
             state.world.current_tick, state.world.current_tick, faction.faction_id, STRATEGIC_INTERVAL)
     if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "STRATEGIC", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
     _update_faction_goals(state, faction)
+    DecisionTier.tap_poll_outcome("STRATEGIC", faction.faction_id, state.world.current_tick,
+        _sel_before, _goal_sig(faction), _poll_pure)
     if faction.strategic_goals.size() > 0:
         var top: Dictionary = faction.strategic_goals[0]
         match top["type"]:
@@ -55,14 +61,26 @@ func tick(state: WorldState, faction: FactionData) -> void:
             state.world.current_tick, state.world.current_tick, faction.faction_id, ALLIANCE_CHECK_INTERVAL)
     # ★S4b T0：事件瞬醒短路（同上）。
     var _alli_due: bool = state.world.current_tick >= faction.alliance_eval_next_tick
-    var _alli_woke: bool = WorldEvents.is_pending_faction(state, faction)
+    DecisionTier.mark_gate("ALLIANCE", state.world.current_tick)
+    var _alli_src: String = WorldEvents.pending_source_faction(state, faction)
+    var _alli_woke: bool = _alli_src != ""
     if _alli_due or _alli_woke:
-        DecisionTier.tap_wake("ALLIANCE", _alli_woke, _alli_due)
+        # ★ALLIANCE 沒有 tap_poll_outcome：它的「選擇」不落在任何可比較的持久欄位上
+        #   （_evaluate_alliance_need 的產出是一次性動作）。★床要把它印成【量不到】不是 0。
+        DecisionTier.tap_wake("ALLIANCE", faction.faction_id, state.world.current_tick, _alli_src, _alli_due)
         if _alli_due:
             faction.alliance_eval_next_tick = CadenceStagger.next_tick(
                 state.world.current_tick, state.world.current_tick, faction.faction_id, ALLIANCE_CHECK_INTERVAL)
         if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "ALLIANCE", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
         _evaluate_alliance_need(state, faction)
+
+# ★選擇簽章：戰略層【選出來的東西】＝ 目標清單的 (型別, 目標) 序列。
+#   ★取全部不只取第一條：換掉第二順位也是【選擇變了】。
+func _goal_sig(faction: FactionData) -> String:
+    var parts: Array = []
+    for g in faction.strategic_goals:
+        parts.append("%s:%s" % [String(g.get("type", "")), str(g.get("target_id", -1))])
+    return "|".join(PackedStringArray(parts))
 
 func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
     # F-D3：strategic_ai 降為**空間 affordance 層**——讀統一 intent(commander _select_intent 單一源，

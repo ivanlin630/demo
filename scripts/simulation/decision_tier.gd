@@ -56,12 +56,108 @@ const C_INTENT: int          = T3_STRATEGIC   # 舊值 TimeScale.TICK_PER_DAY * 
 #   reeval.cadence.<K> ＝ 純週期到期
 # ★為什麼要 both 這一欄：只印 event/cadence 兩欄的話，「事件來了但反正也要跑」會被
 #   算進 event ⇒ ★★T0 的功勞被灌水。分出來才知道【少了事件會不會真的漏掉】。
-static func tap_wake(k: String, woke: bool, due: bool) -> void:
+# ★★★actor id 要帶【命名空間前綴】—— 這是實測抓到的，不是潔癖：
+#   person.id / team_id / faction_id 是三個【不同的命名空間，但數字重疊】。
+#   ★第一版我用裸 int 做 join，rung_changed 跑出 100% 同 tick 命中 ——
+#     ★★而那有可能是【person 3 醒了】被當成【team 3 醒了】。撞號撞出來的綠是最難看見的綠。
+#   ⇒ 前綴由【支別】決定（單一真值在這裡），呼叫端不必各自記得自己是哪個 scope。
+# ★九支的名冊（單一真值）—— emit 端要逐支問「這一發對你來說是趕上了還是輸了」。
+const SUPPORT_KEYS: Array = ["GOAL", "LADDER", "STRATEGIC", "ALLIANCE", "BETRAY",
+	"INFRA", "FACTION_UPDATE", "INDEP_INFRA", "INTENT"]
+
+# ★這一發 emit 的主體隊，對這一支來說【存不存在消費者】。
+#   ★★這是 systems ② 的另一半：「比例低」要能分成
+#      【順序輸了】(消費者存在但已經評估過了) vs 【本來就沒有消費者】。
+#   ★★★沒有這一分，兩者的修法會被混成同一個 —— 而它們完全不同。
+static func has_consumer(state: WorldState, team, k: String) -> bool:
+	if team == null:
+		return false
+	if k == "INDEP_INFRA":
+		return int(team.faction_id) == -1        # 只跑獨立隊
+	if k == "LADDER":
+		return int(team.leader_id) != -1         # 無領袖不評野心階
+	if k == "GOAL":
+		return true                              # 隊裡有人就有 person 走 reaction
+	return int(team.faction_id) != -1            # 其餘皆勢力層：獨立隊沒有這一支
+
+# ★GOAL 也用【隊】粒度：它的閘其實是逐 person，但 emit 的 subjects 是隊 id
+#   ⇒ ★★要 join 得起來，兩邊必須在同一個命名空間。
+#   ★★★代價寫明：GOAL 的 ④延遲欄因此是【隊粒度】不是【人粒度】。
+static func actor_scope(k: String) -> String:
+	if k in ["GOAL", "LADDER", "INDEP_INFRA"]:
+		return "T"
+	return "F"
+
+# ★★★「這一支這 tick 有沒有被走訪」——★⑦ 的 buffer_expired / not_visited 二分要用。
+#   ★★便宜的關鍵：這幾支的迴圈【一跑就掃全部 actor】⇒「有沒有被走訪」只取決於 (支, tick)
+#   ⇒ 記 key 而不是逐 actor 樣本（幾千個 key，不是幾十萬筆）。
+#   ★★★而它【只能當上界】：它分不出走訪在 emit 之前還是之後。
+#     真正與順序無關的量在 ⑨（旗子命運：死掉時有沒有人讀過）。
+static func mark_gate(k: String, tick: int) -> void:
 	if not Probe.enabled:
 		return
+	Probe.bump("gate.tick." + k + "|" + str(tick))
+
+# ★★死水三分（互斥、相加 = 該支 fire 次數）：
+#   reeval.cadence.<K>  純週期到期
+#   reeval.event.<K>    事件喚醒
+#   reeval.both.<K>     事件來了但本 tick 本來就到期 ⇒ 保守記 both，不記給事件
+# ★曾有第四欄 delayed（上一 tick 的 emit 才看到）—— 隨雙緩衝一起回滾了：
+#   ★★雙緩衝實測救回 0 面旗子，而「不留下不做事的機制」是我們今天立的規矩。
+static func tap_wake(k: String, actor: int, tick: int, src: String, due: bool) -> void:
+	if not Probe.enabled:
+		return
+	var woke: bool = src != ""
 	if woke and due:
 		Probe.bump("reeval.both." + k)
 	elif woke:
 		Probe.bump("reeval.event." + k)
+		# ★★★④延遲欄要用的：每一次【事件喚醒】的 (支, actor, tick)。
+		#   ★這裡只記【發生過的事實】，不預測未來 —— 「下一次事件喚醒在多久之後」
+		#     是床事後把這份跟 poll.same 對接算出來的，★★production 不准偷看未來。
+		Probe.bump_sample("poll.eventwake", {"k": k, "a": actor_scope(k) + str(actor), "t": tick}, 40000)
 	else:
 		Probe.bump("reeval.cadence." + k)
+
+# ★★★輪詢獨特貢獻率的分子（blueprint 判準，systems 轉述時寫死了邊界）：
+#   「改變」＝ 該次重評之後，該 actor 的【選擇】與重評前不同
+#     ⇒ ★不是「跑了」，也不是「分數變了」，是【選出來的東西變了】。
+#   ★★而「維持原選擇」【獨立成第三類】（poll.same），★★★不併進分子。
+#     理由（票裡寫死的）：維持承諾也可能是貢獻，但那要單獨判，不能混進「改變了決策」。
+#
+# ★只在【純 cadence 觸發】時呼叫（due 且 not woke）—— 事件喚醒的那些不進這個分母，
+#   因為要量的是【輪詢】的獨特貢獻，不是「重評」的貢獻。
+static func tap_poll_outcome(k: String, actor: int, tick: int, before: String, after: String,
+		pure: bool = true) -> void:
+	if not Probe.enabled:
+		return
+	# ★★★所有 fire 都留一筆【選擇有沒有變】的樣本（不只純 cadence）——
+	#   ★用途：回答「旗子丟了的那個 actor，下一次真正被走訪時選擇有沒有改變」。
+	#   ★★而【貢獻率】那組計數器仍然只吃 pure ⇒ 原本的判準不受影響。
+	Probe.bump_sample("poll.outcome", {"k": k, "a": actor_scope(k) + str(actor), "t": tick,
+		"chg": (before != after and before != "")}, 40000)
+	if not pure:
+		return
+	# ★★★【首次賦值】要獨立成一桶，不准算進分子 —— 這是 30 日實測抓到的假陽性：
+	#   INTENT 的 8 筆「改變」逐筆看全是 `"" -> X`，而 8 == 勢力數
+	#   ⇒ 那是 f.intent 初值為空的【第一次填上】，不是【選擇變了】。
+	#   ★★併進分子的話，輪詢貢獻率會虛報成 10.3%（真值 0%），
+	#     ★★★而那個數字正好落在「>0 ⇒ 不退場」的判準上 —— 假陽性會直接改變裁決。
+	if before == "" and after != "":
+		Probe.bump("poll.first." + k)
+		return
+	if before == after:
+		Probe.bump("poll.same." + k)
+		Probe.bump_sample("poll.same", {"k": k, "a": actor_scope(k) + str(actor), "t": tick}, 40000)
+	else:
+		Probe.bump("poll.changed." + k)
+		# ★成因分類（③欄）要靠 before/after 逐筆人判 —— ★★所以這裡【存原文】不存摘要，
+		#   摘要會把「是什麼變了」這個唯一有用的資訊丟掉。
+		Probe.bump_sample("poll.changed", {"k": k, "a": actor_scope(k) + str(actor), "t": tick, "b": before, "f": after}, 20000)
+
+# ★★這一支的存在本身就是一條【誠實界限】：
+#   有些支的「選擇」不落在任何可比較的持久欄位上（產出是一次性動作）。
+#   ⇒ ★那些支【不呼叫 tap_poll_outcome】，而床要把它們印成「量不到」，
+#     ★★不是印成 0 —— 0 會被讀成「輪詢對它沒貢獻」，而真相是【沒有儀器】。
+static func poll_measurable(k: String) -> bool:
+	return k in ["GOAL", "LADDER", "STRATEGIC", "INTENT"]

@@ -1,0 +1,74 @@
+# S4a (b)(c)(d)：命名線索逐顆判決（S4a 當時只做了 (a)，這份把剩下三桶補完）
+#
+# ★★★這個母體【不是封閉的】，先講清楚：
+#   它是【名字看起來像突發事件】的線索表（票給的機械來源：detect / crisis / stall / latch）。
+#   ★S1c 已經判過同一件事：名字啟發式的母體永遠不知道有沒有漏。
+#   ⇒ 這份表的用途是【線索】不是【證明】。★★真正封閉的母體是 WorldEvents.all_kinds()=30，
+#     那份已經在 S4b 用 210 格對帳跑完（全 woken、NOT_WOKEN=0）。
+#   ⇒ 本表回答的是【那 30 種以外，還有沒有該喚醒卻沒接的狀態跨線】。
+#
+# ★枚舉指令（別人重跑得出同一個 30）：
+#   grep -rnE '^[[:space:]]*(func|var|const|signal) [a-z_A-Z]*(detect|crisis|stall|latch)[a-z_A-Z]*' \
+#     --include=*.gd scripts/ | grep -v '^scripts/debug/' | sort -u | wc -l
+#
+# ★★母體 30，而票寫的是 36 —— ★不是同一條規則：
+#   票那 36 是【任意識別字出現】；我用的是【定義層（func/var/const/signal）】。
+#   ★★我沒有把 36 湊出來：定義層是可重跑的規則，「任意出現」會把 stall_ticks 這種
+#     局部變數的每一次使用都算一顆。★★★兩個數字都對，量的不是同一件事——
+#     而我改口徑是因為【定義層才能逐顆判決】，出現次數不能。
+#
+# 桶：a_already_wired / b_should_wake_but_doesnt / c_not_t0 / d_untraceable
+# ★(c) 每一條都要回答【若不喚醒，最壞情況是什麼】——不能只寫「不是事件」。
+#
+# 對帳： a=10  b=4  c=16  d=0  合計=30
+#
+# 欄位：bucket|site|名稱|判決理由（(c) 含最壞情況）
+#
+# ══════════════════════════════════════════════════════════════════
+# (b) 該喚醒但沒有 —— ★真訊號，4 顆，全部附 file:line
+# ══════════════════════════════════════════════════════════════════
+b_should_wake_but_doesnt|scripts/simulation/faction_ai_system.gd:5779|_detect_survival_stall|★與同檔 _detect_commitment_stall(:5710) 【同型卻不對稱】：那支 STALL 時 emit "construction_stalled"，這支 STALL 時只 Probe.bump("survival.stall_exclude") 就把承諾清掉、把該 option 硬排除一個 window。零 WorldEvents.emit。最壞：求生選項被硬排除＝option 集合真的變了，而七支要等 cadence(現在 T3=3 日) 才知道。
+b_should_wake_but_doesnt|scripts/data/team_data.gd:195|survival_stall_cooldown|上一條的產物欄位（硬排除窗寫在這裡）。列出來是因為它是【那顆漏的可觀測面】，不是另一顆獨立的漏。
+b_should_wake_but_doesnt|scripts/simulation/ambition_ladder.gd:150|rung_stall_count >= RUNG_STALL_K → 降 rung|★降/升 rung 只有 Probe.bump("g2.ambition_demote"/"_promote") + print，零 emit。★★而 rung 是【意圖資格】的閘：faction_ai_system.gd:1181 用 `leader_team.ambition_rung >= RUNG_EXPAND` 決定能不能選擴張意圖。★★★S3 把 INTENT 拉到 T3(3 日) 之後，這變成【新暴露】：升到 RUNG_EXPAND 之後最多 3 日才會反映到意圖上。
+b_should_wake_but_doesnt|scripts/simulation/faction_ai_system.gd:5617|_famine_crisis|決策級 crisis 的【起點】零 emit。★注意不要跟已接的搞混：糧荒起點有 "famine_crossed"(resource_system.gd:215)，而這一顆是更後面的條件（committed N 天且未緩）。它餵 _decision_crisis → _should_reeval 的 crisis latch ⇒ 【決策支】會醒，★★但七支 T3 不會（它們只看 pending_rethink）。
+#
+# ══════════════════════════════════════════════════════════════════
+# (a) 已接 —— 10 顆（8 顆是 construction_stalled 的支撐欄位 + 2 顆是它的函式）
+# ══════════════════════════════════════════════════════════════════
+a_already_wired|scripts/data/team_data.gd:181|commit_stall_kind|construction_stalled 支撐欄位
+a_already_wired|scripts/data/team_data.gd:182|commit_stall_site|同上（baseline 綁哪個工地）
+a_already_wired|scripts/data/team_data.gd:183|commit_stall_tick|同上
+a_already_wired|scripts/data/team_data.gd:184|commit_stall_progress|同上
+a_already_wired|scripts/data/team_data.gd:185|commit_stall_latched|同上（同工地不重發）
+a_already_wired|scripts/data/team_data.gd:186|commit_stall_episode_tick|同上（episode 起點）
+a_already_wired|scripts/data/team_data.gd:190|commit_stall_id|同上
+a_already_wired|scripts/data/team_data.gd:191|commit_stall_target|同上
+a_already_wired|scripts/simulation/faction_ai_system.gd:5656|_reset_stall_episode|construction_stalled 的 episode 重置
+a_already_wired|scripts/simulation/faction_ai_system.gd:5710|_detect_commitment_stall|★直接 emit "construction_stalled"（:5775）＋ "construction_abandoned"（:5708）
+#
+# ══════════════════════════════════════════════════════════════════
+# (c) 不是 T0 —— 16 顆，★每條附【若不喚醒，最壞情況】
+# ══════════════════════════════════════════════════════════════════
+c_not_t0|scripts/data/team_data.gd:167|crisis_latched|它【就是】既有喚醒器的狀態（_should_reeval 的 crisis edge-trigger）。最壞：無——不喚醒它本身沒有意義，它是喚醒的實作。
+c_not_t0|scripts/data/team_data.gd:198|crisis_committed_food|crisis-override 的 baseline 記帳。最壞：無——它不跨線，跨線的是 _famine_crisis（見 (b)）。
+c_not_t0|scripts/data/team_data.gd:199|crisis_committed_tick|同上（蓋章對應的 task episode）。最壞：同上。
+c_not_t0|scripts/data/team_data.gd:202|crisis_released_task|release 後的免疫窗記錄。最壞：無——release 當下決策支已在跑（是它自己做的）。
+c_not_t0|scripts/data/team_data.gd:203|crisis_released_until|同上（免疫窗到期 tick）。最壞：同上。
+c_not_t0|scripts/simulation/ambush_system.gd:9|detect|伏擊【偵測】謂詞：偵測成功代表【沒被伏擊】。最壞：無——真正的 burst 走 _trigger_ambush → NpcCombatSystem.start_combat → 已 emit "combat_engaged"(npc_combat_system.gd:107)。
+c_not_t0|scripts/simulation/ambush_system.gd:46|_on_detected|偵測成功的後果只有長技能 + 玩家 print。最壞：無後果可漏——它本來就沒改變任何決策輸入。
+c_not_t0|scripts/simulation/belief_system.gd:82|var detect|局部機率值（技能 vs 城府）。最壞：無——真 burst 是情報抵達，已 emit "intel_arrived"(:208)。
+c_not_t0|scripts/simulation/decision/decision_context.gd:197|survival_stall_active|把 (b) 那顆 cooldown 讀進 context 的欄位。最壞：指向 (b) 那顆，不是獨立的漏。
+c_not_t0|scripts/simulation/decision/decision_context.gd:699|_stall_now|局部變數（當前 tick 別名）。最壞：無。
+c_not_t0|scripts/simulation/decision/options.gd:509|stalled_excluded|局部陣列（被 stall 排除的 option 清單）。最壞：無——排除【動作】在 (b) 那顆，這裡只是結果容器。
+c_not_t0|scripts/simulation/faction_ai_system.gd:3229|_decision_crisis|謂詞，餵 _should_reeval 的 crisis latch。最壞：決策支不會漏（它自己就是喚醒條件）；★七支會漏，而那一格記在 (b) 的 _famine_crisis。
+c_not_t0|scripts/simulation/faction_ai_system.gd:3268|in_crisis|局部布林。最壞：無。
+c_not_t0|scripts/simulation/faction_ai_system.gd:5727|stall_ticks|局部（耐性換算的 tick 數）。最壞：無。
+c_not_t0|scripts/simulation/faction_ai_system.gd:5785|stall_ticks|同上（求生版）。最壞：無。
+c_not_t0|scripts/simulation/vision_system.gd:59|_can_detect|視野謂詞。最壞：無——看見的後果走 belief 更新 → "intel_arrived" 已接。
+#
+# ══════════════════════════════════════════════════════════════════
+# (d) untraceable = 0
+# ══════════════════════════════════════════════════════════════════
+# ★30 顆全部追到定義與使用端，沒有型別解析不出來的。
+# ★★但【(d)=0 不等於這份表完整】——完整性的限制在檔頭：母體本身是名字啟發式。
+#   能講的是：這 30 顆線索全部有處置；不能講的是「世界上沒有別的 burst」。
