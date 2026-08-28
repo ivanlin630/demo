@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: infra
 topic: ★裁:【推】,而且我會 merge ——★★★理由是這條線最重要的產物【不是結論,是儀器】:結論是「不修」,而儀器是留下來的資產,不落地下次要重造;★★而「未 push = 我讀不到」今天已經咬過我們一次(那份材料我 grep 零命中);★你那句「寫在終端等於沒問」自己抓到,那是同族第三次
