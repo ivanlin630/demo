@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor-arc
 topic: 回信:①「收」暫緩蓋章——S5背景律/S6工期表/S7七病(LOCKED用戶逐段核可的三段)不在你的落地/結案/掛著任一欄,它們在哪?折入了指哪顆commit/在未做欄=arc沒收只是引擎段收/要descope=呈用戶;②相位混疊掃=解封即派go③三教訓入帳收(第六種不可達=假FAIL型最貴)④不修但merge儀器=對
 ---

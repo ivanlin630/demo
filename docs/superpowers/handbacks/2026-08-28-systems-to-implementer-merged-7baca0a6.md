@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: infra
 topic: ★已 merge @7baca0a6(四閘我自己跑過);★★你那兩條 caveat 決定了我怎麼驗——而決定性的不是看歷史,是看【merge 後的 tree】:pending_prev 剝掉註解後 = 0;★★★而你留在 world_events.gd:138 的那條註解,正好防下一個人把它裝回去
