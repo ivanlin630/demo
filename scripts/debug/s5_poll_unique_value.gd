@@ -459,6 +459,62 @@ func _run() -> void:
 	out.append("# ★★①b＝【bonus tick 沒人來】⇒ 走訪間隔 >> 2 tick 壽命，雙緩衝修不掉（第一版把 C-1 看過的誤歸這裡的對立面）")
 	out.append("# ★★★①b 的大小決定下一票要不要做 per-actor 消費（旗子活到被讀為止）")
 
+	# ── ⑩ 丟掉的喚醒【值不值得救】（systems 在派 per-actor 消費之前要的那一顆）──
+	#   ★問法避開反事實：不問「若沒丟會怎樣」（量不到），
+	#     ★★改問【該 actor 下一次真正被走訪時，選擇有沒有改變】——
+	#     因為丟掉的旗子代表「有事發生過」，而下一次走訪必然看得到它的後果（世界狀態已變）。
+	#   ★★★判準（systems 寫死）：改變比例 < 5% ⇒ 不派 per-actor 消費，把結論寫進帳。
+	var outcomes: Dictionary = {}   # "支#actor" -> Array[{t, chg}]（樣本天然升冪）
+	for oc in Probe.samples.get("poll.outcome", []):
+		var ok2: String = String(oc["k"]) + "#" + String(oc["a"])
+		if not outcomes.has(ok2):
+			outcomes[ok2] = []
+		(outcomes[ok2] as Array).append({"t": int(oc["t"]), "chg": bool(oc["chg"])})
+	var losts: Array = Probe.samples.get("t0.lost_at", [])
+	var nv_chg: int = 0
+	var nv_same: int = 0
+	var nv_none: int = 0
+	var per_k: Dictionary = {}
+	for lo in losts:
+		var lt: int = int(lo["t"])
+		for mk in ["GOAL", "LADDER", "STRATEGIC", "INTENT"]:
+			var ak3: String = ("T" + str(lo["team"])) if DecisionTier.actor_scope(mk) == "T" \
+				else ("F" + str(lo["fid"]))
+			var lst2: Array = outcomes.get(mk + "#" + ak3, [])
+			var hit2: int = -1
+			for row2 in lst2:
+				if int(row2["t"]) > lt:
+					hit2 = 1 if bool(row2["chg"]) else 0
+					break
+			if not per_k.has(mk):
+				per_k[mk] = {"chg": 0, "same": 0, "none": 0}
+			if hit2 == 1:
+				nv_chg += 1; (per_k[mk] as Dictionary)["chg"] = int((per_k[mk] as Dictionary)["chg"]) + 1
+			elif hit2 == 0:
+				nv_same += 1; (per_k[mk] as Dictionary)["same"] = int((per_k[mk] as Dictionary)["same"]) + 1
+			else:
+				nv_none += 1; (per_k[mk] as Dictionary)["none"] = int((per_k[mk] as Dictionary)["none"]) + 1
+	var nv_den: int = nv_chg + nv_same
+	print("\n⑩ 丟掉的喚醒值不值得救（★該 actor【下一次真正被走訪】時選擇有沒有改變）")
+	print("   丟掉的旗子樣本 = %d（cap 40000）｜可量測支別 4 支" % losts.size())
+	print("   ★改變 = %d ／ 維持 = %d ／ ★★之後再也沒被走訪過 = %d" % [nv_chg, nv_same, nv_none])
+	print("   改變比例 = %s（分母排除「再也沒被走訪」）"
+		% [("%.2f%%" % (100.0 * float(nv_chg) / float(nv_den))) if nv_den > 0 else "n/a"])
+	print("   ★★★判準（systems）：< 5% ⇒ 不派 per-actor 消費；>= 5% ⇒ 派")
+	out.append("#")
+	out.append("## ⑩ 丟掉的喚醒值不值得救｜丟掉樣本=%d|改變=%d|維持=%d|之後沒被走訪=%d|改變比例=%s"
+		% [losts.size(), nv_chg, nv_same, nv_none,
+		   ("%.2f%%" % (100.0 * float(nv_chg) / float(nv_den))) if nv_den > 0 else "n/a"])
+	out.append("# ★問法避開反事實：不問「若沒丟會怎樣」，改問【下一次真正被走訪時選擇有沒有變】")
+	out.append("# ★★分母排除「之後再也沒被走訪」——那些不是「沒改變」，是【沒有下一次可看】")
+	for mk2 in ["GOAL", "LADDER", "STRATEGIC", "INTENT"]:
+		if not per_k.has(mk2):
+			continue
+		var d6: Dictionary = per_k[mk2]
+		var dn6: int = int(d6["chg"]) + int(d6["same"])
+		out.append("nextvisit|%s|%d|%d|%d|%s" % [mk2, int(d6["chg"]), int(d6["same"]), int(d6["none"]),
+			("%.2f%%" % (100.0 * float(d6["chg"]) / float(dn6))) if dn6 > 0 else "n/a"])
+
 	print("\n[BedSelfCheck] observer_guard=%s  first_nonadvance=%s  effective_window=%d/%d ticks"
 		% [guard, ("%d(%s)" % [stopped_at, stop_reason]) if stopped_at != -1 else "none", eff, ticks])
 	out.append("# [BedSelfCheck] observer_guard=%s first_nonadvance=%s effective_window=%d/%d"

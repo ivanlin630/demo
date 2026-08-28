@@ -158,5 +158,11 @@ static func consume_and_clear(state: WorldState) -> void:
 				Probe.bump("t0.lost_ordering")      # 有走訪過這一隊卻沒讀到 ⇒ 走訪在 emit 之前
 			else:
 				Probe.bump("t0.lost_not_visited")   # 這一 tick 根本沒走訪這一隊
+				# ★留樣本：要回答「這一隊【下一次真正被走訪】時，選擇有沒有改變」。
+				#   ★★這是為了避開反事實（「若沒丟會怎樣」量不到）——
+				#   ★★★下一次走訪【必然】看得到那件事的後果（世界狀態已經變了）。
+				var _lt = state.teams.get(lid)
+				Probe.bump_sample("t0.lost_at", {"team": lid, "t": _now,
+					"fid": int(_lt.faction_id) if _lt != null else -1}, 40000)
 		state.pending_seen = {}
 	state.pending_rethink.clear()

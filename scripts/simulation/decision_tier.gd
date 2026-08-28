@@ -127,8 +127,16 @@ static func tap_wake(k: String, actor: int, tick: int, src: String, due: bool) -
 #
 # ★只在【純 cadence 觸發】時呼叫（due 且 not woke）—— 事件喚醒的那些不進這個分母，
 #   因為要量的是【輪詢】的獨特貢獻，不是「重評」的貢獻。
-static func tap_poll_outcome(k: String, actor: int, tick: int, before: String, after: String) -> void:
+static func tap_poll_outcome(k: String, actor: int, tick: int, before: String, after: String,
+		pure: bool = true) -> void:
 	if not Probe.enabled:
+		return
+	# ★★★所有 fire 都留一筆【選擇有沒有變】的樣本（不只純 cadence）——
+	#   ★用途：回答「旗子丟了的那個 actor，下一次真正被走訪時選擇有沒有改變」。
+	#   ★★而【貢獻率】那組計數器仍然只吃 pure ⇒ 原本的判準不受影響。
+	Probe.bump_sample("poll.outcome", {"k": k, "a": actor_scope(k) + str(actor), "t": tick,
+		"chg": (before != after and before != "")}, 40000)
+	if not pure:
 		return
 	# ★★★【首次賦值】要獨立成一桶，不准算進分子 —— 這是 30 日實測抓到的假陽性：
 	#   INTENT 的 8 筆「改變」逐筆看全是 `"" -> X`，而 8 == 勢力數

@@ -39,15 +39,14 @@ func tick(state: WorldState, faction: FactionData) -> void:
     if not (_strat_due or _strat_woke): return
     DecisionTier.tap_wake("STRATEGIC", faction.faction_id, state.world.current_tick, _strat_src, _strat_due)
     var _poll_pure: bool = _strat_due and not _strat_woke
-    var _sel_before: String = _goal_sig(faction) if _poll_pure else ""
+    var _sel_before: String = _goal_sig(faction)
     if _strat_due:
         faction.strategic_eval_next_tick = CadenceStagger.next_tick(
             state.world.current_tick, state.world.current_tick, faction.faction_id, STRATEGIC_INTERVAL)
     if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "STRATEGIC", "team": faction.faction_id if faction != null else -1, "tick": state.world.current_tick}, 6000)
     _update_faction_goals(state, faction)
-    if _poll_pure:
-        DecisionTier.tap_poll_outcome("STRATEGIC", faction.faction_id, state.world.current_tick,
-            _sel_before, _goal_sig(faction))
+    DecisionTier.tap_poll_outcome("STRATEGIC", faction.faction_id, state.world.current_tick,
+        _sel_before, _goal_sig(faction), _poll_pure)
     if faction.strategic_goals.size() > 0:
         var top: Dictionary = faction.strategic_goals[0]
         match top["type"]:

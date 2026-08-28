@@ -65,15 +65,14 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null, 
 				DecisionTier.tap_wake("GOAL", person.team_id, state.world.current_tick, _goal_src, _goal_due)
 				# ★輪詢獨特貢獻率：只有【純 cadence】那批要比對前後選擇（事件喚醒的不進分母）。
 				var _poll_pure: bool = _goal_due and not _goal_woke
-				var _sel_before: String = ",".join(PackedStringArray(person.goals)) if _poll_pure else ""
+				var _sel_before: String = ",".join(PackedStringArray(person.goals))
 				if Probe.enabled: Probe.bump_sample("tier.fire", {"k": "GOAL", "team": person.id, "tick": state.world.current_tick,
 					"due": person.goal_eval_next_tick}, 6000)   # ★due = 【排程目標】，tick = 【實際 fire】
 				#   ★★兩者的差就是【宿主 pass 粒度造成的量化誤差】本身 ——
 				#   不用猜，直接量。（systems：不接受候選解釋直接用）
 				_update_goals(person)
-				if _poll_pure:
-					DecisionTier.tap_poll_outcome("GOAL", person.team_id, state.world.current_tick,
-						_sel_before, ",".join(PackedStringArray(person.goals)))
+				DecisionTier.tap_poll_outcome("GOAL", person.team_id, state.world.current_tick,
+					_sel_before, ",".join(PackedStringArray(person.goals)), _poll_pure)
 				var alignment: float = _npc_ai.check_goal_alignment(person, team.current_task)
 				LoyaltyBank.adjust(person, alignment, "goal_alignment")
 				# ★排下一次（同一支 helper）—— 不手寫 next = tick + C，那正是同批到期的病根。

@@ -981,7 +981,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			#     事件那條若佔多數 ⇒ 事件確實醒得到 LADDER，而純 cadence 那批是【它漏掉的殘量】。
 			var _ladd_trig: String = "both" if (_ladd_woke and _ladd_due) else ("event" if _ladd_woke else "cadence")
 			var _ladd_rung0: int = team.ambition_rung
-			var _ladd_before: String = str(team.ambition_rung) if _ladd_pure else ""
+			var _ladd_before: String = str(team.ambition_rung)
 			# ★LADDER 走的是【排程式】（CadenceStagger.next_tick）不是 `% == 0`，
 			#   ★★所以它的 fire 要在這裡記 —— 先前它【根本沒有 tap】，
 			#   而我差點把那個「零資料】當成【從未 fire】去查。
@@ -1000,9 +1000,8 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 					# ★逐筆存 tick/隊：要回答「純 cadence 那批，事件上一次醒到它是多久以前」
 					Probe.bump_sample("rung.chg_at", {"trig": _ladd_trig, "team": team.team_id,
 						"t": state.world.current_tick}, 20000)
-			if _ladd_pure:
-				DecisionTier.tap_poll_outcome("LADDER", team.team_id, state.world.current_tick,
-					_ladd_before, str(team.ambition_rung))
+			DecisionTier.tap_poll_outcome("LADDER", team.team_id, state.world.current_tick,
+				_ladd_before, str(team.ambition_rung), _ladd_pure)
 		# G1b：訂單 cadence（餘發賣盤 / 過期清）
 		if team.leader_id != -1 and state.world.current_tick >= team.order_eval_next_tick:
 			if Probe.enabled: Probe.bump_sample("stagger.fired", {
@@ -1347,11 +1346,10 @@ func _rebuild_goals(state: WorldState, f) -> void:
 	if _intent_due or _intent_woke:
 		DecisionTier.tap_wake("INTENT", f.faction_id, state.world.current_tick, _intent_src, _intent_due)
 		var _int_pure: bool = _intent_due and not _intent_woke
-		var _int_before: String = _intent_sig(f) if _int_pure else ""
+		var _int_before: String = _intent_sig(f)
 		f.intent = _select_intent(state, f)
-		if _int_pure:
-			DecisionTier.tap_poll_outcome("INTENT", f.faction_id, state.world.current_tick,
-				_int_before, _intent_sig(f))
+		DecisionTier.tap_poll_outcome("INTENT", f.faction_id, state.world.current_tick,
+			_int_before, _intent_sig(f), _int_pure)
 		if _intent_due:
 			f.intent_eval_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick, f.faction_id, INTENT_CADENCE)
