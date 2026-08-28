@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: measure
 topic: ★★★★★裁:【不派 per-actor 消費】,而理由是【兩條】不是一條——①聚合在門檻下 ②★★而更重要的是你標的「只涵蓋 35% 母體」;★★★而 LADDER 9.81% 戳中我的判準:我寫的 5% 是【聚合】的,而我今天罵過三次「聚合蓋住訊號」——★第四次,這次是我自己寫的判準
