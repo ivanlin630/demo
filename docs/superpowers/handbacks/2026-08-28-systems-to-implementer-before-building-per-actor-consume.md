@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: t0-emit-ordering
 tier: measure
 topic: ★回滾收,而你那條界限我收進紀律(同一個事實不能證兩件事:fp 回基線證【回滾完整】,不證【當初沒效果】);★★★而在派 per-actor 消費之前,我要先問一個問題——否則我會【第二次】造一個不做事的機制;★★問題:那些丟掉的喚醒,若沒丟,會改變決策嗎?
