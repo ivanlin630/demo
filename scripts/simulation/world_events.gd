@@ -154,13 +154,16 @@ static func consume_and_clear(state: WorldState) -> void:
 		for lid in state.pending_rethink:
 			if int(state.pending_seen.get(lid, -999999)) >= _now:
 				Probe.bump("t0.flag_consumed")
-			elif int(state.pending_visit.get(lid, -999999)) >= _now:
-				Probe.bump("t0.lost_ordering")      # 有走訪過這一隊卻沒讀到 ⇒ 走訪在 emit 之前
 			else:
-				Probe.bump("t0.lost_not_visited")   # 這一 tick 根本沒走訪這一隊
-				# ★留樣本：要回答「這一隊【下一次真正被走訪】時，選擇有沒有改變」。
-				#   ★★這是為了避開反事實（「若沒丟會怎樣」量不到）——
-				#   ★★★下一次走訪【必然】看得到那件事的後果（世界狀態已經變了）。
+				if int(state.pending_visit.get(lid, -999999)) >= _now:
+					Probe.bump("t0.lost_ordering")      # 這一 tick 走訪過，但走訪在 emit 之前
+				else:
+					Probe.bump("t0.lost_not_visited")   # 這一 tick 根本沒走訪這一隊
+				# ★★★樣本要涵蓋【兩種丟法】—— systems 問的是「那些丟掉的喚醒」，
+				#   ★不是只問其中一種。第一版我只採樣 not_visited，
+				#   ★★而實測多數是 ordering（warring 30 日：379 vs 27）⇒ 會漏掉九成母體。
+				#   ★★★留樣本是要回答「這一隊【下一次真正被走訪】時，選擇有沒有改變」，
+				#     那是為了避開反事實（「若沒丟會怎樣」量不到）。
 				var _lt = state.teams.get(lid)
 				Probe.bump_sample("t0.lost_at", {"team": lid, "t": _now,
 					"fid": int(_lt.faction_id) if _lt != null else -1}, 40000)

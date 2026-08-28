@@ -442,8 +442,7 @@ func _run() -> void:
 	var l_nv: int = int(Probe.counts.get("t0.lost_not_visited", 0))
 	var f_tot: int = f_cons + l_ord + l_nv
 	print("\n⑨ 旗子命運（★需求①的字面量，與 tick 內順序無關）")
-	var f_saved: int = int(Probe.counts.get("t0.saved_by_bonus", 0))
-	print("   被讀過 = %d（★其中 %d 是【在 bonus tick 才被讀到】 = 沒有雙緩衝就死了）" % [f_cons, f_saved])
+	print("   被讀過 = %d" % f_cons)
 	print("   ★①a lost_ordering    = %d  ← ★★bonus tick 有人看卻仍沒讀到 ⇒ 【結構上該為 0】，非 0 = 真 bug" % l_ord)
 	print("   ★①b lost_not_visited = %d  ← ★★bonus tick 沒人來 ⇒ 走訪間隔 >> 2 tick 壽命，雙緩衝修不掉（照實報）" % l_nv)
 	print("   合計 = %d｜消失率 = %s"
@@ -451,10 +450,9 @@ func _run() -> void:
 	print("   %s" % ("★★★①a 歸零 ⇒ 雙緩衝把【順序造成的丟失】修掉了" if l_ord == 0
 		else "★★★①a 非 0 ⇒ 仍有【順序造成的】丟失，雙緩衝沒做完"))
 	out.append("#")
-	out.append("## ⑨ 旗子命運｜被讀過=%d|★bonus救回=%d|①a lost_ordering=%d|①b lost_not_visited=%d|合計=%d|消失率=%s"
-		% [f_cons, f_saved, l_ord, l_nv, f_tot,
+	out.append("## ⑨ 旗子命運｜被讀過=%d|①a lost_ordering=%d|①b lost_not_visited=%d|合計=%d|消失率=%s"
+		% [f_cons, l_ord, l_nv, f_tot,
 		   ("%.2f%%" % (100.0 * float(l_ord + l_nv) / float(f_tot))) if f_tot > 0 else "n/a"])
-	out.append("# ★bonus救回 = 在【雙緩衝多買的那一 tick】才被讀到的旗子 ⇒ 沒有這一票它們就死了（本票的直接效果量）")
 	out.append("# ★①a＝旗子死時，消費者【在 bonus tick 查看過這一隊】卻仍沒讀到 ⇒ 結構上該為 0，非 0 = 真 bug")
 	out.append("# ★★①b＝【bonus tick 沒人來】⇒ 走訪間隔 >> 2 tick 壽命，雙緩衝修不掉（第一版把 C-1 看過的誤歸這裡的對立面）")
 	out.append("# ★★★①b 的大小決定下一票要不要做 per-actor 消費（旗子活到被讀為止）")
@@ -496,7 +494,15 @@ func _run() -> void:
 				nv_none += 1; (per_k[mk] as Dictionary)["none"] = int((per_k[mk] as Dictionary)["none"]) + 1
 	var nv_den: int = nv_chg + nv_same
 	print("\n⑩ 丟掉的喚醒值不值得救（★該 actor【下一次真正被走訪】時選擇有沒有改變）")
-	print("   丟掉的旗子樣本 = %d（cap 40000）｜可量測支別 4 支" % losts.size())
+	# ★★★母體 vs 樣本，兩邊都要印 —— 否則「全部沒被走訪」分不出是【真的沒有】還是【join 沒接上】。
+	var lost_pop: int = int(Probe.counts.get("t0.lost_ordering", 0)) + int(Probe.counts.get("t0.lost_not_visited", 0))
+	var oc_n: int = Probe.samples.get("poll.outcome", []).size()
+	print("   丟掉的旗子：母體 %d ／ 樣本 %d（cap 40000）%s"
+		% [lost_pop, losts.size(), "  ★★樣本 ≠ 母體 ⇒ 採樣沒涵蓋全部丟法" if losts.size() != lost_pop else ""])
+	print("   poll.outcome 樣本 = %d｜不同 actor key = %d %s"
+		% [oc_n, outcomes.size(), "  ★★★outcome 樣本為 0 ⇒ join 必然全落空，那不是世界的答案" if oc_n == 0 else ""])
+	out.append("# ⑩ 母體/樣本：丟掉母體=%d 樣本=%d｜poll.outcome 樣本=%d actor key=%d"
+		% [lost_pop, losts.size(), oc_n, outcomes.size()])
 	print("   ★改變 = %d ／ 維持 = %d ／ ★★之後再也沒被走訪過 = %d" % [nv_chg, nv_same, nv_none])
 	print("   改變比例 = %s（分母排除「再也沒被走訪」）"
 		% [("%.2f%%" % (100.0 * float(nv_chg) / float(nv_den))) if nv_den > 0 else "n/a"])
