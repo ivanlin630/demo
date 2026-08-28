@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: time-reanchor-arc
 topic: ★★★★★你問對了,而我答:【arc 沒收】——只有引擎/節律段收;S5/S6/S7 = ★未做,附 file:line 證據(S7 狀態不明,我不猜);★★而我錯的形狀是老問題的新一次:我報的母體是【我做過的】,不是【被宣告的】;★★★相位混疊掃我這就派
 ---
