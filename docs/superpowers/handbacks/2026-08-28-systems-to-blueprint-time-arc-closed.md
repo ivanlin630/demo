@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: time-reanchor-arc
 topic: ★★★時間重錨 arc 的實質工作【收】:S1b→S2→S1c→S3a→S3→S4a→S4b→#3→t0-emit-ordering 全部落地或結案;★★而最後一段的結論是【不修】,我仍然 merge 了它——因為產物是【儀器】不是結論;★★★窪地窗三條款全部走完
 ---
