@@ -304,15 +304,11 @@ func _run() -> void:
 				b3 = "no_consumer"
 			else:
 				var akey: String = ("T" + str(c2["team"])) if DecisionTier.actor_scope(s3) == "T" else ("F" + str(c2["fid"]))
-				# ★★★可見窗是【兩個 tick】不是一個（t0-emit-ordering 雙緩衝）：
-				#   tick N 的 emit ⇒ 本 tick 在 pending_rethink、下一 tick 在 pending_prev。
-				#   ★只比對同 tick 的話，「晚到但下一 tick 被看到」會被錯記成 unseen
-				#     ⇒ ★★那正是這一票要消滅的那個數字，量錯等於自己把成果藏起來。
-				#   ★★★seen_next 獨立成一欄：它【就是】被救回來的那批。
+				# ★可見窗是【一個 tick】（雙緩衝已回滾 2026-08-28）。
+				#   ★★曾有 seen_next 欄（下一 tick 才看到）—— 隨雙緩衝一起拆掉：
+				#   回滾後它結構上恆為 0，而「不留下不做事的欄位」是這條線立的規矩。
 				if wake_key.has(s3 + "#" + akey + "|" + str(tk)):
 					b3 = "seen"
-				elif wake_key.has(s3 + "#" + akey + "|" + str(tk + 1)):
-					b3 = "seen_next"
 				else:
 					# ★★★systems 改的判準：unseen 拆兩類（互斥且窮盡）
 					#   buffer_expired  該支在 2 tick 窗內【有走訪】該 actor 卻沒看到 ⇒ ★必須歸零
@@ -323,13 +319,13 @@ func _run() -> void:
 					var vis: bool = Probe.counts.has("gate.tick." + s3 + "|" + str(tk)) 						or Probe.counts.has("gate.tick." + s3 + "|" + str(tk + 1))
 					b3 = "buffer_expired" if vis else "not_visited"
 			if not per_kind.has(kn3):
-				per_kind[kn3] = {"seen": 0, "seen_next": 0, "buffer_expired": 0, "not_visited": 0, "no_consumer": 0}
+				per_kind[kn3] = {"seen": 0, "buffer_expired": 0, "not_visited": 0, "no_consumer": 0}
 			if not per_sup.has(s3):
-				per_sup[s3] = {"seen": 0, "seen_next": 0, "buffer_expired": 0, "not_visited": 0, "no_consumer": 0}
+				per_sup[s3] = {"seen": 0, "buffer_expired": 0, "not_visited": 0, "no_consumer": 0}
 			(per_kind[kn3] as Dictionary)[b3] = int((per_kind[kn3] as Dictionary)[b3]) + 1
 			(per_sup[s3] as Dictionary)[b3] = int((per_sup[s3] as Dictionary)[b3]) + 1
 	print("\n⑦ emit 有沒有被看到（★分母排除 no_consumer —— 那些不是落空，是這一支對它不存在）")
-	print("   %-22s %8s %9s %9s %9s %10s %8s" % ["kind", "seen", "seen_next", "★buf_exp", "not_visited", "no_consumer", "落空率"])
+	print("   %-22s %8s %10s %12s %12s %8s" % ["kind", "seen", "★buf_exp", "not_visited", "no_consumer", "落空率"])
 	out.append("#")
 	out.append("## ⑦ emit 被看到與否｜kind|seen|unseen|no_consumer|落空率(unseen/(seen+unseen))")
 	out.append("# ★歸因界限：pending 是每隊一個布林、不記誰標的 ⇒ 同 tick 同隊多 kind 都記 seen，無法歸因")
@@ -338,31 +334,29 @@ func _run() -> void:
 	for kn4 in kns2:
 		var d4: Dictionary = per_kind[kn4]
 		var sn: int = int(d4["seen"])
-		var snx: int = int(d4["seen_next"])
 		var be: int = int(d4["buffer_expired"])
 		var nv: int = int(d4["not_visited"])
 		var nc4: int = int(d4["no_consumer"])
-		var dn: int = sn + snx + be + nv
+		var dn: int = sn + be + nv
 		var mr: String = "%.1f%%" % (100.0 * float(be + nv) / float(dn)) if dn > 0 else "n/a"
-		print("   %-22s %8d %9d %9d %9d %10d %8s" % [String(kn4), sn, snx, be, nv, nc4, mr])
-		out.append("seen|%s|%d|%d|%d|%d|%d|%s" % [String(kn4), sn, snx, be, nv, nc4, mr])
+		print("   %-22s %8d %10d %12d %12d %8s" % [String(kn4), sn, be, nv, nc4, mr])
+		out.append("seen|%s|%d|%d|%d|%d|%s" % [String(kn4), sn, be, nv, nc4, mr])
 	print("\n   ── 逐支彙總（誰最常落空）──")
 	out.append("#")
-	out.append("## ⑦b 逐支彙總｜支別|seen|★seen_next|unseen|no_consumer|落空率")
+	out.append("## ⑦b 逐支彙總｜支別|seen|buffer_expired|not_visited|no_consumer|落空率")
 	for sk4 in SUPPORTS:
 		if not per_sup.has(sk4):
 			continue
 		var d5: Dictionary = per_sup[sk4]
 		var sn5: int = int(d5["seen"])
-		var snx5: int = int(d5["seen_next"])
 		var be5: int = int(d5["buffer_expired"])
 		var nv5: int = int(d5["not_visited"])
 		var nc5: int = int(d5["no_consumer"])
-		var dn5: int = sn5 + snx5 + be5 + nv5
+		var dn5: int = sn5 + be5 + nv5
 		var mr5: String = "%.1f%%" % (100.0 * float(be5 + nv5) / float(dn5)) if dn5 > 0 else "n/a"
-		print("   %-16s seen=%-7d next=%-7d ★buf_exp=%-6d not_visited=%-7d no_cons=%-7d 落空=%s"
-			% [sk4, sn5, snx5, be5, nv5, nc5, mr5])
-		out.append("seenS|%s|%d|%d|%d|%d|%d|%s" % [sk4, sn5, snx5, be5, nv5, nc5, mr5])
+		print("   %-16s seen=%-8d ★buf_exp=%-7d not_visited=%-8d no_cons=%-8d 落空=%s"
+			% [sk4, sn5, be5, nv5, nc5, mr5])
+		out.append("seenS|%s|%d|%d|%d|%d|%s" % [sk4, sn5, be5, nv5, nc5, mr5])
 	print("   ★母體 vs 樣本：t0.emit_ctx %d 筆（cap 40000）%s"
 		% [ctxs.size(), "  ★★撞 cap ⇒ 前 N 筆不是全部" if ctxs.size() >= 40000 else ""])
 	out.append("# t0.emit_ctx 樣本 %d（cap 40000）" % ctxs.size())
