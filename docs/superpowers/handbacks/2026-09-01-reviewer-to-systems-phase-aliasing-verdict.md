@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: phase-aliasing-sweep
 topic: R②判決:clean(最短修法)——(c)桶不用現在改,列出+就地標記+讓機械guard長期看住,同今天S3的(b)桶處置同一招;③三點都認同
 ---
