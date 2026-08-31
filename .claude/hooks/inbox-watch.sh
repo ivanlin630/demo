@@ -139,31 +139,6 @@ while IFS= read -r _p; do [ -n "$_p" ] && SEEN_PATH["$_p"]=1; done < <(
   ' "${_f[@]}"
 )
 
-# ★★★未消費重提醒（systems 立 2026-09-01，血證：兩封 open 信擱置 90h）
-#   ★病：喚醒是【一次性】的 —— SEEN[path@mtime] 喊過就不再喊；錯過那一個 turn ＝ 永眠。
-#   ★★而修法【不是固定間隔洗版】：那會變成噪音，而噪音會被靜音（＝比沒有更糟）。
-#   ★★★退避階梯 15m → 1h → 4h → 12h（之後每 12h），★訊息帶【已擱置多久】：
-#     「有一封未讀」不可行動，「已擱置 90h」才可行動。
-declare -A FIRST_TS LAST_REMIND
-INBOX_REMIND_FAST="${INBOX_REMIND_FAST:-0}"   # ★陽性對照用：階梯縮成秒級
-_remind_gap() {   # $1=age(秒) → 下一次提醒該隔多久
-  local a="$1"
-  if [ "$INBOX_REMIND_FAST" = "1" ]; then
-    if   [ "$a" -lt 4 ]; then echo 2; elif [ "$a" -lt 8 ]; then echo 4; else echo 8; fi
-    return
-  fi
-  if   [ "$a" -lt 3600 ];  then echo 900
-  elif [ "$a" -lt 14400 ]; then echo 3600
-  elif [ "$a" -lt 43200 ]; then echo 14400
-  else echo 43200; fi
-}
-_fmt_age() {      # 秒 → 人看得懂（★不可行動的「有信」與可行動的「擱置 90h」差在這）
-  local a="$1"
-  if   [ "$a" -lt 3600 ];  then echo "$((a/60)) 分"
-  elif [ "$a" -lt 86400 ]; then echo "$((a/3600)) 小時"
-  else echo "$((a/86400)) 天 $(( (a%86400)/3600 )) 小時"; fi
-}
-
 while true; do
   # ★讓位檢查：lock 不是我 → 有更新的 watcher 當家，本實例自退（孤兒自己清自己）
   cur="$(cut -f1 "$LOCK" 2>/dev/null)"
@@ -191,18 +166,7 @@ while true; do
       fi
       if [ "$emit" = "1" ]; then
         SEEN[$key]=1
-        FIRST_TS[$key]=$(date +%s); LAST_REMIND[$key]=$(date +%s)
         echo "📬 收信 → ${ROLE_KEY}: $(basename "$fpath") | ${topic} —— 讀信+動工，完後改 status: consumed"
-      fi
-      # ★★重提醒：open 且【已經喊過】⇒ 依退避階梯再喊，訊息帶年齡
-      #   ★退出條件只有一個：status 變 consumed（那時 isopen=0，這段不會進來）
-      if [ "$isopen" = "1" ] && [ "$emit" != "1" ] && [ -n "${FIRST_TS[$key]:-}" ]; then
-        _now=$(date +%s); _age=$(( _now - ${FIRST_TS[$key]} ))
-        _since=$(( _now - ${LAST_REMIND[$key]:-${FIRST_TS[$key]}} ))
-        if [ "$_since" -ge "$(_remind_gap "$_age")" ]; then
-          LAST_REMIND[$key]=$_now
-          echo "⏰ 未消費 → ${ROLE_KEY}: $(basename "$fpath") | ★已擱置 $(_fmt_age "$_age") | ${topic} —— 它不會自己消失，讀完改 status: consumed"
-        fi
       fi
       SEEN_PATH[$fpath]=1
     done < <(

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: phase-aliasing-sweep
 topic: R² 請審相位混疊掃描(23 顆 current_tick % K gate 的構造性一次清);★★而要你重點打的是【(c) 桶】:我要求「恰好整除的也要改」,理由是它靠巧合活著——★★★而我不確定那是不是把 scope 撐得太大
 ---
