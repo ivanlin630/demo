@@ -6016,7 +6016,8 @@ func _test_hunger_accumulate_recover() -> void:
 	p.id = 100; p.team_id = 0
 	state.persons[100] = p
 	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # satisfaction 0 → +0.05/日
-	assert(absf(p.hunger - 0.05) < 0.001, "斷糧 1 天 hunger≈0.05，實際=%s" % str(p.hunger))
+	# ★S5c（2026-09-01）：HUNGER_GAIN_PER_DAY 0.05 → 0.10（本測試 value=0 ⇒ 深度因子 = 1）
+	assert(absf(p.hunger - 0.10) < 0.001, "斷糧 1 天 hunger≈0.10，實際=%s" % str(p.hunger))
 	# 吃飽 → 回復 0.1/日
 	state.teams[0].resources["food"] = 10000.0
 	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
@@ -6282,9 +6283,12 @@ func _test_fatigue_accumulation() -> void:
 		#   ★重錨後 NEAR_CADENCE = 60，而這裡仍傳 10 ⇒ 每次呼叫只代表 1/6 個小時
 		#     ⇒ 實測 0.0096 vs 預期 0.048。★★行為沒變，是【測試自己拿錯尺】。
 		sr._step6d_fatigue(state, [0], SimRunner.NEAR_CADENCE)
-	# 預期：0.048/day → ≈ 0.048
-	assert(team.fatigue >= 0.04 and team.fatigue <= 0.06,
-		"1 天行軍後 fatigue 應 ~0.048，實際=%s" % str(team.fatigue))
+	# ★S5c（2026-09-01）：FATIGUE_PER_DAY 0.048 → 0.096 ⇒ 期望值跟著 ×2。
+	#   ★推導寫在這裡，而【不從常數算】——★★從常數算會變恆真式（管線壞了也會過）。
+	#     0.096/day × terrain_mult × time_mult；本測試的 mult 合計 1.2 ⇒ 0.096 × 1.2 = 0.1152
+	#   ★★★而它【故意】在常數變動時紅 —— 那是要逼下一個改常數的人來看一眼，不是缺陷。
+	assert(team.fatigue >= 0.10 and team.fatigue <= 0.13,
+		"1 天行軍後 fatigue 應 ~0.1152（0.096×1.2），實際=%s" % str(team.fatigue))
 	print("Cadence Task3 OK")
 
 func _test_fatigue_recovery() -> void:
@@ -6309,9 +6313,10 @@ func _test_fatigue_recovery() -> void:
 		#   ★重錨後 NEAR_CADENCE = 60，而這裡仍傳 10 ⇒ 每次呼叫只代表 1/6 個小時
 		#     ⇒ 實測 0.0096 vs 預期 0.048。★★行為沒變，是【測試自己拿錯尺】。
 		sr._step6d_fatigue(state, [0], SimRunner.NEAR_CADENCE)
-	# 預期：fatigue -= 0.24/day → ≈ 0.76
-	assert(team.fatigue >= 0.74 and team.fatigue <= 0.78,
-		"1 天紮營後 fatigue 應 ~0.76，實際=%s" % str(team.fatigue))
+	# ★S5c（2026-09-01）：FATIGUE_RECOVERY_PER_DAY 0.24 → 0.48 ⇒ 1.0 - 0.48 = 0.52。
+	#   ★同上：期望值寫【字面值＋推導】，不從常數算。
+	assert(team.fatigue >= 0.50 and team.fatigue <= 0.54,
+		"1 天紮營後 fatigue 應 ~0.52（1.0-0.48），實際=%s" % str(team.fatigue))
 	print("Cadence Task4 OK")
 
 func _test_salary_interval_weekly() -> void:

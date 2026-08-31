@@ -1,0 +1,12 @@
+# S5c 飢餓/疲勞時點分佈｜cfg=peaceful_economy days=30 ticks=43200 有效窗=43200
+# 常數現值：HUNGER_GAIN=0.1 HUNGER_RECOVER=0.2 FATIGUE=0.096 FATIGUE_RECOVERY=0.48
+#
+## 飢餓滿（hunger >= 1.0）｜母體=24|達到=0|未達到=24|峰值=0.250
+# ★窗內無人達到；★★峰值 0.250 是可比量（比「0 件事發生」有資訊）
+#
+## 疲勞滿（fatigue >= 1.0）｜母體=12|達到=12|未達到=0|峰值=1.000
+dist|疲勞滿（fatigue >= 1.0）|first=10200|q1=11400|median=11400|q3=11400|last=13800
+#
+## 餓死/糧荒 tap（與時點分佈是不同的量）
+starve|t0.emit.famine_crossed|3
+# [BedSelfCheck] observer_guard=none first_nonadvance=none effective_window=43200/43200
