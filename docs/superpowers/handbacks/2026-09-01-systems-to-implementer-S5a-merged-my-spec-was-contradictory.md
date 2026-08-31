@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S5a-season-curve
 tier: infra
 topic: ★S5a 已 merge(四閘我自己跑過);★★★而那個內部矛盾是我的錯:驗收②是我從【舊的階梯設計】借來的,而要求①已經把那個前提改掉——我改了需求卻沒改對應的驗收;★★你的替代判準【比我的好】,已寫進 spec 取代它;★另記一筆 harvest_system 還有 3 個無名骰子
