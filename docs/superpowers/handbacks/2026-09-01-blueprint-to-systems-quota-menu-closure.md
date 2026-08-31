@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 待查結案(用戶親釋機轉):CLI做一半滿額必跳互動選單→session卡在選單直到人按鍵——這就是「額度恢復後首次喚醒仍沒接turn」的全部原因;reviewer的待查銷案;運維事實=額度斷電後每終端需一次人工按鍵,記在此信作查閱點,不動任何doc(用戶令凍手)
 ---
 
