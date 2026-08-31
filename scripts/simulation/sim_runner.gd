@@ -6,8 +6,12 @@ const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 =
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更新頻率（1h，可調）
 
-const FATIGUE_PER_DAY: float          = 0.048   # TEST VALUE — 約 20.8 天疲勞滿（原 0.002×24）
-const FATIGUE_RECOVERY_PER_DAY: float = 0.24    # TEST VALUE — 約 4.2 天回滿（原 0.01×24）
+# ★S5c（2026-09-01）：疲勞速度 ×2 —— 舊值 0.048 / 0.24（約 20.8 天滿 / 4.2 天回滿）。
+#   ★★「恢復比積累快」的比例 1:5 【不變】（同乘一個數）。
+#   ★★★而那兩個天數是【mult=1】的基準：累積另乘 terrain_mult × time_mult、
+#     恢復另乘 rest_mult ⇒ 減半對【任一固定 mult】都成立，但絕對天數隨地形/時段變。
+const FATIGUE_PER_DAY: float          = 0.096   # ★S5c ×2 — 約 10.4 天疲勞滿（mult=1）
+const FATIGUE_RECOVERY_PER_DAY: float = 0.48    # ★S5c ×2 — 約 2.1 天回滿（mult=1）
 const FATIGUE_LOYALTY_PENALTY: float = 0.005   # TEST VALUE
 
 const TERRAIN_FATIGUE_MULT: Dictionary = {

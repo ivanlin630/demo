@@ -1,0 +1,13 @@
+# S5c 飢餓/疲勞時點分佈｜cfg=warring_states days=30 ticks=43200 有效窗=43200
+# 常數現值：HUNGER_GAIN=0.1 HUNGER_RECOVER=0.2 FATIGUE=0.096 FATIGUE_RECOVERY=0.48
+#
+## 飢餓滿（hunger >= 1.0）｜母體=163|達到=1|未達到=162|峰值=1.000
+dist|飢餓滿（hunger >= 1.0）|first=42600|q1=42600|median=42600|q3=42600|last=42600
+#
+## 疲勞滿（fatigue >= 1.0）｜母體=105|達到=94|未達到=11|峰值=1.000
+dist|疲勞滿（fatigue >= 1.0）|first=11400|q1=13200|median=13800|q3=24600|last=43200
+#
+## 餓死/糧荒 tap（與時點分佈是不同的量）
+starve|resume.reject_starving|3744
+starve|t0.emit.famine_crossed|22
+# [BedSelfCheck] observer_guard=stripped first_nonadvance=none effective_window=43200/43200

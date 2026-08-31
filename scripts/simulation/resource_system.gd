@@ -35,8 +35,13 @@ const FAMINE_GRACE_DAYS: int = 7                    # 寬限期：grace 內不�
 const FAMINE_MINOR_DEATH_RATE: float = 0.10         # grace 後每日餓死 minor 比例
 const FAMINE_ANON_DEATH_RATE: float = 0.05          # minor 耗盡後每日餓死 anon 比例
 # 個人飢餓累積（named 用，跟人走不跟團）
-const HUNGER_GAIN_PER_DAY: float = 0.05
-const HUNGER_RECOVER_PER_DAY: float = 0.1
+# ★S5c（2026-09-01）：飢餓速度 ×2 —— 舊值 0.05 / 0.1（20 天滿 / 10 天回復）。
+#   ★★「恢復比積累快」的比例 1:2 【不變】（同乘一個數，數學上必然）。
+#   ★★★而「20 天滿」是【value=0 完全斷糧】的邊界值：實際累積另乘深度因子
+#     (FAMINE_SATISFACTION_THRESHOLD - value) / FAMINE_SATISFACTION_THRESHOLD（見下方使用處）
+#     ⇒ 典型情況比 20 天慢。減半對【任一固定深度】都成立。
+const HUNGER_GAIN_PER_DAY: float = 0.10
+const HUNGER_RECOVER_PER_DAY: float = 0.2
 
 # TEST VALUES — 平衡期需調整
 const REGEN_RATE: Dictionary = {
