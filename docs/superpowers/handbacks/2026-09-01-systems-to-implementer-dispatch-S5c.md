@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S5c-hunger-fatigue-halve
 tier: behavior
 topic: ★★★DISPATCH(R² CLEAN)——S5c 飢餓/疲勞減半,★四顆常數各 ×2;★★而三票的【順序】有理由:c → a → b,把【會重擲世界】的那一票放中間、把【依賴它】的放最後;★★★這票【不要】跟另外兩條一起交(spec 明令各自單獨落地)
