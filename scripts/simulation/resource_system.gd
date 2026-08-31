@@ -43,6 +43,14 @@ const FAMINE_ANON_DEATH_RATE: float = 0.05          # minor 耗盡後每日餓�
 const HUNGER_GAIN_PER_DAY: float = 0.10
 const HUNGER_RECOVER_PER_DAY: float = 0.2
 
+# ★★★S5b 唯一的新常數（★provisional，WHAT 自己標「試跑＋平衡警告」）：
+#   野地池再生的季節【擺幅】相對農田的比例。1.0 = 與農田同幅度（＝S5b 之前的行為）、
+#   0.0 = 野地完全不受季節影響。
+#   ★★選 0.5 的理由：WHAT 只說「比農田緩」而沒給數 ——
+#     0.5 ＝【一半的擺幅】是「緩」在不發明額外結構下最直接的讀法。
+#   ★★★回退＝改這一顆（改回 1.0 就完全回到 S5b 之前）。這一票沒有第二顆新常數。
+const WILD_SEASON_DAMPING: float = 0.5
+
 # TEST VALUES — 平衡期需調整
 const REGEN_RATE: Dictionary = {
 	"plains":   { "food": 8.0,  "material": 0.5  },
@@ -138,8 +146,20 @@ func regenerate_tiles(state: WorldState, cadence_ticks: int = WorldState.TICKS_P
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		var rates = REGEN_RATE.get(tile.terrain, { "food": 2.0, "material": 1.0 })
-		# food 再生受 harvest_factor 調節（季節性植物生長）
-		var food_regen: float = float(rates["food"]) * tile.harvest_factor * day_fraction
+		# ★★★S5b（2026-09-01）：野地池再生的季節【幅度比農田緩】。
+		#   ★現況（S5b 之前）：野地 food 再生直接乘 tile.harvest_factor
+		#     ⇒ 與農田產出（本檔 :123 farming_level × FARM_UNIT_YIELD × ... × harvest_factor）
+		#       【同幅度】—— 而 WHAT 要的是野生態有緩衝、擺盪比農田小。
+		#   ★★做法：把【偏離 1.0 的幅度】乘上阻尼係數，而【不是】把整個乘數乘上去：
+		#       wild = 1.0 + (harvest_factor - 1.0) × WILD_SEASON_DAMPING
+		#     ⇒ harvest_factor = 1.0 時 wild = 1.0（★位準不動），只有【擺幅】被壓。
+		#   ★★★而 spec 驗收①寫的是「農田 vs 野地的【季節乘數比】= 該係數」——
+		#     ★照字面（wild = harvest_factor × d）會讓 h=1 時 wild = d ≠ 1 ＝【整體位準位移】，
+		#       那與要求的「【幅度】比農田緩」矛盾。⇒ 我做幅度阻尼，
+		#       ★★而可驗的字面量改成：(wild - 1) / (harvest_factor - 1) 恆等於 WILD_SEASON_DAMPING。
+		#     ★★★這件已寄信 systems，兩種讀法都印在床裡。
+		var wild_season: float = 1.0 + (tile.harvest_factor - 1.0) * WILD_SEASON_DAMPING
+		var food_regen: float = float(rates["food"]) * wild_season * day_fraction
 		TileBank.pool_set(tile, "food", minf(
 			float(tile.resources.get("food", 0)) + food_regen,
 			float(tile.resource_cap.get("food", 0))
