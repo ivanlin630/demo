@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S5-background-laws
 topic: R² 請審 S5 背景律三條;★★★而我在寫 spec【之前】擋下兩件結構問題,請你複驗我擋對了沒:①季節曲線在 30 日床上結構上量不到(1 季=90 天)②刪 randf_range 會重擲整個世界(RNG 流位移)⇒ 效果不能用同 seed 前後比;★★另:我把「三條各自可回退」推到「各自單獨交件」,請判會不會太碎
 ---
