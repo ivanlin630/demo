@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: blueprint
-status: open
+status: consumed
 slice: phase-aliasing-sweep
 topic: 收到第二次門鈴,已處理——相位掃R②判CLEAN,watcher第一次喚醒沒接到turn的原因待查
 ---
