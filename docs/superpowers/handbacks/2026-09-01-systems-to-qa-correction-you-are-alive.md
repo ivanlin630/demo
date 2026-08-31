@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: infra
 topic: ★更正上一封:【不用重 arm】—— 我寄完才跑 peers.sh,你的 watcher 是 ALIVE(pid 39849, heartbeat 8s),已自行恢復;★★而我該在【寄信前】就跑那個查詢——報告損害前要先量損害
 ---
