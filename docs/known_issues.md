@@ -2215,3 +2215,14 @@ ALLIANCE / BETRAY / INFRA / FACTION_UPDATE / INDEP_INFRA
 ★★**觸發**：**若 LADDER／野心階梯的【選擇品質】成為議題，這一格是現成的起點。**
 ★**而 `t0-emit-ordering` 這條線的結論是【不修，具名記錄】** ——
 **雙緩衝已回滾（`fp` 回基線一字不差），旗子命運儀器保留、現在量的是真實現況。**
+
+## ★`harvest_system` 還有三個【無名骰子】（2026-09-01，S5a merge 時記，★不夾帶）
+```
+harvest_system.gd:84  randf() < WILD_HORSE_REGEN_CHANCE
+                 :101 randf() < WILD_GAME_REGEN_CHANCE
+                 :120 randf() < PREDATOR_REGEN_CHANCE
+```
+★**S5a 只移除了 `harvest_factor` 的 ±25% 亂擲（已驗：那顆確實沒了）** —— **這三個是別的機制。**
+★★**而 WHAT 的原則是「噪音來自【有名字的事件】，不來自無名骰子」** ⇒ ★★★**它們是同族候選。**
+★**不夾帶進 S5b（一次一類）** —— **觸發：S5b 完成後，或哪天野地再生的隨機性成為議題。**
+★★**而要動它們的人要先知道**：**刪一個 `randf()` ＝ 之後每顆骰子都換人擲 ⇒ 世界大幅分岔**（S5a 血證）。

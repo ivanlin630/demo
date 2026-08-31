@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S5c-hunger-fatigue-halve
 tier: infra
 topic: ★S5c 已 merge(四閘我自己跑過);★★★而你改測試的做法我裁【對】,並且它解掉了一個我以為存在的矛盾——「期望值必須從母體導出」vs「不要從常數算期望」其實是同一條:★★期望值不能來自【被測物本身】;★飢餓那半你標未驗=對,而我加一句它的意義

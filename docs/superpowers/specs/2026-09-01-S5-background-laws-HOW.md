@@ -45,7 +45,12 @@ harvest_system.gd:18  tile.harvest_factor = clampf(base + randf_range(-0.25, 0.2
 ```
 ①★函數層(不跑世界):給定 tick 序列 ⇒ ★★factor 必須【連續】(相鄰 tick 差 <= 一個可推導的上界)
    ★★★且【季界不得跳變】:t→1 與下一季 t→0 的值必須相等（★這是插值正確的字面量）
-②★世界層:同一 tile、同一季內、不同 tick ⇒ ★★factor 必須【相同】(亂擲移除的直接證據)
+②★~~世界層:同一 tile、同一季內、不同 tick ⇒ factor 必須【相同】~~ ⛔**RETRACTED 2026-09-01**
+   ★★**它與要求①【內部矛盾】**:插值就是要 factor 在季內變,而我從舊的階梯設計borrow了這條
+   ★**替代（implementer 提，我裁採用，而它比我的好）**:**同一 tick、不同 tile ⇒ factor 完全相同**
+      ⇒ ★★★舊寫法每 tile 獨立擲一次 randf ⇒ 同 tick 各 tile 必然不同
+        ⇒ 它是「亂擲移除」的【字面量】,而且與插值【相容】
+   ★**設計未動**:要求①③④⑤ 一字未改;動的只有這一條驗收
 ③★★fp 必變(RNG 流位移)⇒ ★★★而【不得】用世界層前後比較做效果量 —— 分岔了
 ④三跑 byte-identical（★刪 RNG 消費不影響決定性,但要驗）
 ```
