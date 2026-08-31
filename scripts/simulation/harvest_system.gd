@@ -12,10 +12,27 @@ func tick_all(state: WorldState) -> void:
 	#   ★分子已由 SEASON_LENGTH 導出（會隨根縮放），★★這個 4 不隨小時縮放：
 	#   一年永遠四季，tick 密度改了它仍須是 4。
 	var season: int  = (state.world.current_tick / SEASON_LENGTH) % 4
-	var base: float  = SEASON_BASE[season]
+	# ★★★S5a（2026-09-01）：季節曲線取代 6h 亂擲。
+	#   ★①刪 randf_range —— ★★舊寫法每 tile 獨立擲一次 ⇒ 同一 tick 相鄰兩格可以差 0.5，
+	#     那不是「季節」，是雜訊；而它同時是 RNG 流的大戶。
+	#   ★②base 改【平滑】：季內進度 t ∈ [0,1) 在【本季錨點】與【下季錨點】之間插值。
+	#   ★★★不引入新魔術常數：只用既有的 SEASON_BASE 四個值 ＋ t（4 是「一年四季」的曆法結構）。
+	#
+	# ★★季界連續性（這是插值正確的字面量）：
+	#     t → 1 時 base → SEASON_BASE[(s+1)%4]，而下一季 t = 0 時 base = SEASON_BASE[(s+1)%4]
+	#   ⇒ 兩者【相等】⇒ 季界不跳變。
+	#
+	# ★★★錨點語意寫明（我做的選擇，不是 spec 指定的）：
+	#   SEASON_BASE[s] 是【該季開始】的值，不是季中峰值 ——
+	#   ⇒ 夏的 1.5 落在【夏季第一天】，而夏季末已經在往秋的 1.2 走。
+	#   ★若要「峰值落在季中」，那是把錨點整體位移半季 —— ★★那是設計選擇，我沒有自己做。
+	var t: float     = float(state.world.current_tick % SEASON_LENGTH) / float(SEASON_LENGTH)
+	var base: float  = lerp(float(SEASON_BASE[season]), float(SEASON_BASE[(season + 1) % 4]), t)
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
-		tile.harvest_factor = clampf(base + randf_range(-0.25, 0.25), 0.1, 2.0)
+		# ★clamp 保留但【現在不會 binding】：插值落在 [0.3, 1.5] 內，而界是 [0.1, 2.0]。
+		#   留著是因為它守的是【欄位契約】（tile_data.gd:8 標 0.1–2.0），不是這條計算。
+		tile.harvest_factor = clampf(base, 0.1, 2.0)
 	if season != _last_season:
 		_last_season = season
 		print("[Harvest] Tick%d 季節=%s base=%.1f" % [
