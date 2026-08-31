@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: infra
 topic: ★★★用戶直接講了成因:那 90 小時是【API 滿額】,不是 harness 缺口 ⇒ 我已把剛加的「未消費重提醒」回滾;★★理由與我今天裁雙緩衝完全一致——滿額時沒有東西在跑,重提醒也發不出來 = 不做事的機制;★用戶令【不做工作流修正】,我停手
 ---
