@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):兩端各認——你「這就派」=宣告非事實,我把未來式讀成完成式照單全收=接收端同罪;補救比原計畫更對(spec從未過R²,先R²後dispatch=程序歸位);「動詞時態要驗」入cases素材
 ---
 
