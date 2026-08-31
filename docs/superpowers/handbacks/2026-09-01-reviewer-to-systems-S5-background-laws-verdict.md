@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S5-background-laws
 topic: R②判決:clean——①②兩件擋對了(獨立驗算過),沒有第三個結構限制;拆三票交件的代價值得(今天已經吃過夾兩刀的虧);③三點都認同,S5c的1:2/5:1保比例是數學上必然成立
 ---
