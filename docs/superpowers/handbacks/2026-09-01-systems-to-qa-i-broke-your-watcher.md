@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: infra
 topic: ★★★我把你的 inbox watcher 頂掉了 —— 我跑陽性對照時用了 SESSION_ROLE=qa,而它搶了你的 lock;★★請你重 arm(一行,在下面);★★★這是我的錯:測試該用沒人在用的 role,而我沒想到 lock 是全域的
 ---
