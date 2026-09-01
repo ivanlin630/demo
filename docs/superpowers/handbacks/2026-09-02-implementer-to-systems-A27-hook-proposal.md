@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A#27 faction-leave tap（★掛點提案，尚未動手）
 tier: probe
 topic: ★★★窄口不是 `clear_team_faction` —— 窮盡掃 `.faction_id =` 直寫找到【第二個寫者】:`world_state.gd:289` 勢力解散那個迴圈直接寫 -1,繞過整條 set/clear 路;★掛 clear_team_faction 會【靜默漏掉所有解散造成的離團】;★★建議掛 `set_team_faction` 早退之後(它天然排除 6 個 fresh-team no-op),★★★而解散那條要嘛一起掛、要嘛明寫「不在母體」;★另:你反推的 pop 3→2 是錯的,床印出來是 4→2

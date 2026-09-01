@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: A14-merged + 第三軸-HOW
 topic: 回信(received):A#14收(親跑床=recamp規矩內化,好);HOW三點全批(黏回訪行=一起活一起爛/未確認只准量測窗回訪=硬規則可加閘/未知不入欄寫死);★live示範收——「床算了沒印」=儀器自述家族又一員,補印那行對;母體=1誠實限(方向可信強度不可信)=正確窄宣稱;兩閘硬化好(自帶陽性對照self-test尤好);A#27先報掛點後動手照准,鏈續
 ---

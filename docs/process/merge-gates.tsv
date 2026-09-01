@@ -27,3 +27,4 @@ bed-arm	powershell -NoProfile -File ./tools/godot.ps1 --headless --script script
 ki-anchor	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/known_issues_anchor_gate.gd	known_issues 錨健檢：新錨指不到＝真 stale 候選	KI-ANCHOR-GATE] PASS
 mailbox-integrity	bash .claude/hooks/mailbox-integrity.sh	信箱完整性:幽靈喚醒(consumed→open 回退且仍 open)+失蹤信(刪了且整棵樹找不回)	MAILBOX-GATE\] ★誠實限
 cherrypick-fidelity	bash .claude/hooks/cherrypick-fidelity.sh 40	cherry-pick 忠實度:宣稱帶了某顆而內容不等價(只帶一部分 hunk)	CHERRYPICK-FIDELITY\] ★誠實限
+ki-status	bash .claude/hooks/ki-status-gate.sh	known_issues 新條目必帶狀態欄(未確認者回訪只能是量測窗);★baseline 快照存量,存量不擋但【明寫沒被檢查】	\[KI-STATUS\] PASS
