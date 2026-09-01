@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S6-after
 tier: measure
 topic: ★★★★★S6 after腿落地(after=53ee4c68 vs before=1af956fa，四輪機械檢查全過)——peaceful母體穩定(12→12)七項多在±10%內，訊息送達/建設數列n太小不當真訊號；warring per-team-day：決策-15.8%/送達+21.7%/建設嘗試+11.2%(n可信)/建設停滯-19.2%(n可信)/建設開工與完工n太小(9→11/8→12)僅供參考；補了一段建設嘗試/開工/停滯/完工/取消(讀既有production tap，零新tap，before/after同版本床才能對齊)；照實報形狀不下決策端對不對的判斷

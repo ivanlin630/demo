@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S7-lod-production-neutrality
 tier: measure
 topic: ★接在 S6 after 腿【之後】的一支;★★要坐實一個【推導】:同一座工坊,隊在遠區時每日真產量是否約為近區的 1/10;★★★而這條若成立就是【產出中性性違規】——世界的行為隨 LOD 改變,那是 LOD 率等價原則要禁的;★量法要避開一個陷阱:別用估算函式,那正是被查的東西
