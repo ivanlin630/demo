@@ -16,11 +16,12 @@ worker_rate==0  |0|0.0%
 配方判斷總次數  |3600
 #
 ## production 側 tap（★對帳用）
-manufacture.noop_no_material|486
+manufacture.noop_no_output|486
+★production 側 skip 三桶（改名票落地後）｜sated 3133｜rate0 0｜no_material 0
 manufacture.noop_no_facility|0
 manufacture.fired           |234
 #
-## ★對帳：床側「被擋窗數」486 vs production 的 noop_no_material 486 ⇒ 一致
+## ★對帳：床側「被擋窗數」486 vs production 的 noop_no_output 486 ⇒ 一致
 ## ★★成因占比：需求已滿 100.0%｜worker_rate==0 0.0%｜原料不足 0.0%｜混合 0.0%
 # ★★★誠實限：本床的分類是【複製品】，不是 production 本身。
 #   副本對不代表 production 對 ⇒ 所以上面那條對帳行是這份數字能不能用的前提。

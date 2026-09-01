@@ -133,7 +133,7 @@ func _run() -> void:
 		# ★跑真的那一步（讓 production tap 累計，才能與上面的分類對帳）
 		runner._step5b_manufacture(st, [1], cad)
 
-	var noop_mat: int = int(Probe.counts.get("manufacture.noop_no_material", 0))
+	var noop_mat: int = int(Probe.counts.get("manufacture.noop_no_output", 0))
 	var noop_fac: int = int(Probe.counts.get("manufacture.noop_no_facility", 0))
 	var fired: int = int(Probe.counts.get("manufacture.fired", 0))
 
@@ -157,13 +157,17 @@ func _run() -> void:
 	out.append("配方判斷總次數  |%d" % rtot)
 	out.append("#")
 	out.append("## production 側 tap（★對帳用）")
-	out.append("manufacture.noop_no_material|%d" % noop_mat)
+	out.append("manufacture.noop_no_output|%d" % noop_mat)
+	out.append("★production 側 skip 三桶（改名票落地後）｜sated %d｜rate0 %d｜no_material %d"
+		% [int(Probe.counts.get("manufacture.skip.sated", 0)),
+		   int(Probe.counts.get("manufacture.skip.rate0", 0)),
+		   int(Probe.counts.get("manufacture.skip.no_material", 0))])
 	out.append("manufacture.noop_no_facility|%d" % noop_fac)
 	out.append("manufacture.fired           |%d" % fired)
 	out.append("#")
 	var blocked: int = n_sated + n_rate0 + n_material + n_mixed
 	var recon: bool = blocked == noop_mat
-	out.append("## ★對帳：床側「被擋窗數」%d vs production 的 noop_no_material %d ⇒ %s"
+	out.append("## ★對帳：床側「被擋窗數」%d vs production 的 noop_no_output %d ⇒ %s"
 		% [blocked, noop_mat, "一致" if recon else "★不一致 —— 副本與 production 判斷不同，先修這個"])
 	if blocked > 0:
 		out.append("## ★★成因占比：需求已滿 %.1f%%｜worker_rate==0 %.1f%%｜原料不足 %.1f%%｜混合 %.1f%%"
