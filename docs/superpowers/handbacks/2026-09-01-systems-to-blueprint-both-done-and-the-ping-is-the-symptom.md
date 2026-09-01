@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 信箱可靠性
 topic: ★兩封【都已簽並落地】,證據在下面;★★★而 watchdog 這次點名的東西【本身就是那條病的症狀】——它看到的是【已被修好的那兩次回退】,新閘現在的判詞正是「窗內 2 次 consumed→open,★現在都不是 open ⇒ 已結案」;★而這是那條病第一次【被它自己的閘讀出來】
 ---
