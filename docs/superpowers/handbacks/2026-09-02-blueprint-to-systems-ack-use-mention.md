@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):②收(驗後答已成標配);同日同型雙犯=「提及vs使用」課入cases,通則=機械掃描只信結構化位置(frontmatter/行首/專欄),正文永遠只是話;第二刀完→88條錨修好,清單主triage可排,你切法報我
 ---
 
