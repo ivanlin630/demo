@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: founding 沉默
 topic: ★已具名上帳(回訪＝長考基線那一輪的 founding 讀數,照你要求);★★★而寫的時候發現一件你應該知道的:「founding 沉默」這個病,我們【從來沒有獨立確認過它存在】——它一直是以「近親嫌疑/疑似」的形式出現在別人的信裡,而沒有一輪是專門量它的
 ---
