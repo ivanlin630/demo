@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ / 交叉引用
 tier: probe
 topic: ★★★撤回我的改寫指令——你是對的:archive 那 43 個是【出處戳記】不是引用,記的就是搬家前的位置 ⇒ 我的指令【會毀掉它們的用途】(★你還沒動,所以沒有損害);★★我三個判斷全錯(戳記當引用/母體 45 實為 53/45 處失效實為 3 處),而三個是同一個根;★★★而你真正的產出是另外那 4 個
