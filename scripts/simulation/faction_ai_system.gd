@@ -267,9 +267,11 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		#   ⇒ ★★★那支函式從此【拿不到】TeamData，也就拿不到 live 值 —— 防線在型別上，不在紀律上。
 		var prey_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
 		if prey_pos == Vector2i(-1, -1):
-			# ★此處已過 has_belief 閘 ⇒ 理論上不會發生。★★這個桶【必須恆 0】：
-			#   非 0 ＝ has_belief 與 belief_pos 兩個 API 不一致（那是另一個 bug，不是本刀的）。
-			if Probe.enabled: Probe.bump("gv.borderadj_belief_pos_missing")
+			# ★★★這【不是】違規桶，是【合法的第三種結果】（systems 訂正 2026-09-02）：
+			#   `has_belief` ＝ claims 非空；`belief_pos` ＝ 需 claim 帶 tile_pos 且未過期 ⇒ 兩個不同條件
+			#   ⇒ ★★「知道它存在」不蘊含「知道它在哪」—— belief 有【欄位粒度】
+			#   ⇒ ★★★處置＝棄該 target 的位置相關評分（border 落 0.3），★絕不退回 live
+			if Probe.enabled: Probe.bump("belief.known_but_positionless")
 		var border: float = 1.0 if _is_border_adjacent(team.tile_pos, prey_pos) else 0.3
 		var eta_days: float = maxf(float(catch_result.eta) / float(WorldState.TICKS_PER_DAY), 1.0)
 		# R1b means-end logistics（②路程糧 × ③目標歸屬，單一連續因子乘進 score）
@@ -3745,14 +3747,11 @@ func _harvest_market_known(state: WorldState, team: TeamData) -> void:
 	state.team_market_known_key[team.team_id] = _mk_key   # ★寫回鍵：與上面的比對是同一組值
 
 # 從 relay 訊息取市集 pos：order_buy/sell → params.origin_pos（下單隊市集）；outpost_built → source_pos（outpost tile）。
+# ★★★本體已搬進 `belief_system.gd::msg_market_pos`（systems 裁 2026-09-02，seam 解相互引用）。
+#   ★它是【純解析】：只讀 msg dict，零 faction_ai 狀態 ⇒ 搬過去是零行為。
+#   ★★這裡留 delegate，既有 caller（:3741）零改動。
 func _msg_market_pos(msg) -> Vector2i:
-	if msg.type == "order_buy" or msg.type == "order_sell":
-		var op = msg.params.get("origin_pos", null)
-		if op is Vector2i:
-			return op
-	elif msg.type == "outpost_built":
-		return msg.source_pos
-	return Vector2i(-999, -999)
+	return BeliefSystem.msg_market_pos(msg)
 
 func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 	var best_id: int = -1
