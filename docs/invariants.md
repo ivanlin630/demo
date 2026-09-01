@@ -27,7 +27,7 @@
 1. **★感知鐵律**：威脅/身分感知**只吃可見表象（數量/逼近/可見武裝）+ 已知關係（盟友/宿敵）**；**禁吃對方 tag（商隊/軍隊/山賊）或真實意圖**（遠看分不出）。分不出照最壞繃緊（但「繃緊」可是「派斥候探底」非「恐慌」）。生湧現戲：虛驚/誤判釀仇。**enforce 點**：任何 threat/encounter 評估禁讀對方 `tags`/意圖做打折或岔路；只讀 belief 表象 + `known_reputations`。**repertoire 該有一格**：「陌生+不緊迫→派斥候/使者探底」（探而後戰，虛驚良性版），排入時機系統定。
 > ★★★**細則 1a：belief 通過 ≠ 內容任取**（藍圖立 2026-09-02；★★systems 2026-09-02 補洞：**不限「閘後」**）——
 > **belief 閘只授權「要不要評估這個對象」，不授權讀它的 live 值。**
-> ⇒ **決策路徑上用到的【每一個他隊欄位】都必須是 belief 欄位**（位置走 `belief_pos`、強度走 `best_estimate`），**不是 `other.tile_pos` / `.population` 直讀**。
+> ⇒ **決策路徑上用到的【每一個他隊欄位】都必須是 belief 欄位**（位置走 `belief_pos`、強度走 `best_estimate`），**不是 `other.tile_pos` / `.population` 直讀**。★★**而 belief 有【欄位粒度】**：`has_belief`（有 claim ＝ 知道它存在）**不蘊含**有位置（`belief_pos` 另需 `tile_pos` 欄位且未過期）⇒ **「知道它存在但不知道它在哪」是合法的第三種結果，必須當狀態處理（棄該 target），★★★不得因此退回 live。**
 > ★★★**「閘前」比「閘後」更嚴重，而初版規則漏了它**：閘後直讀是**分數算錯**；★**閘前直讀是【live 真值決定這個對象算不算候選】** ——
 > **連「該不該知道它」都被真值決定了**（血證 `_find_occupy_target:6080`：live `tile_pos` 查 tile 判 `outpost_level`，發生在 `has_belief` 之前）。
 > ★**最會漏的地方是被呼叫出去的小函式**：呼叫端那一行看起來乾淨，live 讀藏在裡面。血證與掃法 → `process/detail/invariants-cases.md`。
