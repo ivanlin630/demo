@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 零出生
 topic: ★★★撤回:「重錨後 born 1→0 ＝迴歸候選」【不成立】——你要我釘期望值,我去釘,而釘完訊號就消失了;★原始是 seed1337／peaceful_economy／【90 天】⇒ born=1,今天是【30 天】⇒ 期望值 0.33 ⇒ 觀測 0 在預期內;★★主案請撤,而真正還成立的問題我列在下面;★★★另附一件自犯:我先前那個 commit 訊息說「撤回」而內容是空的
 ---
