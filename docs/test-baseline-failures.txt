@@ -19,5 +19,5 @@ unjudged	[FAIL] 弱目標未加入攻擊 goal
 # ★★★2026-09-01 systems 裁定：本檔【每一行都必須帶三欄】——出處 file:line ／ 成因一句 ／ 待修票。
 #   ★理由：入 baseline ＝ 把紅洗成「預期」，而【沒有出處的預期】三個月後沒人能分辨
 #   它是「已知缺陷」還是「當初懶得修」。★★現有 8 行缺這三欄，補齊票見 known_issues。
-real-regression	[g1a] 礦村未鑄幣: mint_level=0 coin_delta=0 vault_ore=24 | 施工隊=-1 餘工期=0 目標={  } 開工tick=-1 | 隊料=0 工具=20 task=外交 | 設施={ "outpost_L": 1, "farming": 3, "workshop": 0, "apothecary": 0, "mint": 0, "stable": 0, "smeltery": 0, "weaponsmith": 0, "armorsmith": 0 }	★systems 裁為【復發】非新病｜出處 scripts/debug/headless_test.gd:15657 註解自述曾修過一次（`ldr.skills["統領"]=0.5`，:15658）｜待修票＝known_issues「g1a 礦村未鑄幣復發」｜★★原文含狀態 dump（vault_ore/隊料/設施）⇒ 世界一漂這條就 stale，見 handback
+real-regression	[g1a] 礦村未鑄幣: mint_level=0 coin_delta=0 vault_ore=24 | 施工隊=800 餘工期=1912 目標={ "action": "upgrade_facility", "facility": "mint", "start_pop": 4 } 開工tick=21540 | 隊料=0 工具=15 task=建設 | 設施={ "outpost_L": 1, "farming": 2, "workshop": 0, "apothecary": 0, "mint": 0, "stable": 0, "smeltery": 0, "weaponsmith": 0, "armorsmith": 0 }	★systems 裁為【復發】非新病｜出處 scripts/debug/headless_test.gd:15657｜★★2026-09-01 S6 phase2 後【原文變了、成因也變了】：那個村現在【真的在蓋鑄幣】（施工隊=800／task=建設／餘工期 1912），不再是 task=外交 ⇒ 決策端已經跟上錨；紅的新原因＝mint 工期 720→2880（錨×4）⇒ 床的視窗內蓋不完｜★★★而這條原文含狀態 dump ⇒ 每次世界一動就 stale+假新增，真正的修法是讓那張床把斷言訊息與狀態 dump 分兩行印（改床，另票）｜待修票＝known_issues「g1a 礦村未鑄幣復發」
 

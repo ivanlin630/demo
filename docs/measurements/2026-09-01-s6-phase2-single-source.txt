@@ -1,0 +1,31 @@
+# S6 phase2 驗收：工期單一真值｜錨 SETTLE_PERSON_HOURS = 720
+## ① 錨推四源｜kind|level|person_hours|÷錨|期望倍數|判
+A|camp|1|240|0.333333|0.333333|OK
+A|settle|1|720|1.000000|1.000000|OK
+A|civilian|1|720|1.000000|1.000000|OK
+A|civilian|2|2160|3.000000|3.000000|OK
+A|civilian|3|4320|6.000000|6.000000|OK
+A|military|1|720|1.000000|1.000000|OK
+A|military|3|4320|6.000000|6.000000|OK
+A|farming|1|360|0.500000|0.500000|OK
+A|workshop|1|720|1.000000|1.000000|OK
+A|apothecary|1|720|1.000000|1.000000|OK
+A|stable|1|1440|2.000000|2.000000|OK
+A|smeltery|1|1440|2.000000|2.000000|OK
+A|weaponsmith|1|1440|2.000000|2.000000|OK
+A|armorsmith|1|1440|2.000000|2.000000|OK
+A|mint|1|2880|4.000000|4.000000|OK
+## ② 倍數表涵蓋率｜設施數=8｜未登記=[]
+## ②b cost 表殘留工期副本｜[]
+## ②c upgrade_cost.person_hours=360｜入口=360
+## ③ C1｜farming=360｜門檻=600｜workshop=720｜farming過=true｜workshop擋=true
+## ④ 窄口｜camp=240｜settle=720（＝錨）
+## ⑤ timeout｜start_pop=1｜days=30.000｜CEIL=30.0｜FLOOR=5.0｜隊消失後=30.000｜取消=true
+B|camp|240|10|3.0000|5.0000|FLOOR
+B|settle|720|10|9.0000|9.0000|中段
+B|settle|720|1|90.0000|30.0000|CEIL
+## ⑥ 決策端｜civilian L1 = 720｜錨 = 720｜同源=true
+## ⑦ 非空 gate｜anchor=720｜期望=720（改錨必紅）
+# ★總判：PASS（fail=0）
+# ★誠實限：①「改錨等比例跟」本床證的是【值÷錨＝設計倍數】；真的動錨再跑是手動兩端對照
+#           ②fail-loud 接不住 ⇒ 改證結構前提（倍數表涵蓋率），那才是漏填真正踩到的那步

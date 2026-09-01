@@ -909,8 +909,9 @@ static func _estimate_delay_days(team: TeamData, to_task: Dictionary) -> float:
 	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE \
 			or to_task.has("build_type") or to_task.has("facility"):
 		# 代表性工期＝一級民用據點的 person-ticks，除以【這支隊自己的人力】（同一把尺）
+		# ★S6 phase2：改讀唯一入口（原本讀【另一張表】⇒ 錨推不動它）
 		days += OutpostSystem.build_eta_days(
-			int(OutpostSystem.BUILD_PERSON_HOURS["civilian"][0]), team.population if team != null else 1)
+			OutpostSystem.build_person_hours("civilian", 1), team.population if team != null else 1)
 	return days
 
 # ★人格折現率 rate（WHAT §6「人格=折現率」，權重非 gate）：絕境→高(短視,遠 candidate 折趨零不走遠路)/
