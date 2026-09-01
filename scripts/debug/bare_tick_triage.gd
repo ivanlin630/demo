@@ -51,8 +51,6 @@ func _run() -> void:
 		#   已導出的寫法（= WorldState.TICKS_PER_HOUR / 6）不會命中，它走第一軸白名單。
 		#   ★★所以在【本 branch】這條規則命中 0，規則自審會標它【已死】——
 		#     那是【對的】：它是為【S2 尚未落地的 main】寫的，S2 一 merge 它就該死。
-		_mk("const BASE_ACTION_TICKS[^=]*=\\s*[0-9]+", "b_defer", "★意圖是 1/6 小時（本質 (a)），但改法依賴 S2：舊根下 TICKS_PER_HOUR/6 = 10//6 = 1，整數除法把動作壓成 1 tick（快 10 倍、撞穿 >=10 地板）⇒ 必須與 S2 同時落地 defer_until: S2"),
-		_mk("const TICKS_PER_TURN:", "b_defer", "24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2 defer_until: S2"),
 		# ── ★第二軸（名字啟發式）新出現的候選 ──
 		#   ★這一批的共同問題是【名字像時長，但軸不一定是世界時間】。
 		_mk("const PRISONER_CHECK_INTERVAL", "c_whitelist", "★遭遇軸：比對的是 encounter_tick（:592 round_num %），不是 world tick ⇒ 不隨根旋鈕"),
