@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ 第二刀 / 錨形式改革
 tier: probe
 topic: ★blueprint 把第一刀重定性為【錨健檢】(非 stale 檢)——你那句限制被採納成定性;★★第二刀:88 條 DRIFT 的錨【改用 檔+符號名】,行號退成輔助;★★★而形式是【你提案、我套用】不是你直接改——known_issues 是我 own 的檔,而我今天才因為改別人 own 的檔(CLAUDE.md)被記一筆,對稱地我不該讓你直接改我的
