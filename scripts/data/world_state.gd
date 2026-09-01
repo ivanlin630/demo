@@ -496,6 +496,37 @@ func erase_teams(tids: Array) -> void:
 	#     specimen-gated（非 specimen ／ tracer 關 ⇒ 兩個 early-return）⇒ tracer off 時 byte-identical。
 	for _dtid2 in dead_list:
 		SpecimenTracer.capture_death(self, teams[_dtid2], "erase_teams")
+	# ★★★死隊的看板單隨它一起走（族④#6 改票，systems 2026-09-02）：
+	#   ★訂單生命週期是【owner 驅動】的（`order_system.gd:88` 原文：「他隊 entry 不動，由各自
+	#     tick_team_orders 維護」），而 `tick_team_orders` 只對【活著的隊】跑
+	#   ⇒ ★★隊死了 ⇒ 它的 board entry 在【任何活市集上永久掛著】，而那些 tile 的 outpost_level > 0
+	#     ⇒ 讀得到 ⇒ ★★★不需要拆除、也不需要易主就會發生
+	#   ★這【不是】capture/demolish 特判：藍圖禁的是「易主時特別清空」，
+	#     而「實體消失時清掉它留下的懸空引用」是通則。
+	#   ★★掃法：整批一趟（★不是每隊一趟）—— 沿用本函式既有的 O(N+K) 精神
+	if not dead_list.is_empty():
+		var _orders_seen: int = 0
+		var _orders_removed: int = 0
+		for _tk in world.tiles:
+			var _wt: HexTileData = world.tiles[_tk]
+			if _wt.market_orders.is_empty():
+				continue
+			_orders_seen += _wt.market_orders.size()
+			var _kept: Array = []
+			for _e in _wt.market_orders:
+				if dead.has(int(_e.get("origin_team", -1))):
+					_orders_removed += 1
+				else:
+					_kept.append(_e)
+			if _kept.size() != _wt.market_orders.size():
+				_wt.market_orders = _kept
+		if Probe.enabled:
+			# ★entry counter：沒有它，「殘留 0」與「這個窗裡根本沒隊死」長得一模一樣
+			Probe.bump("erase.batches")
+			Probe.add_amount("erase.teams_erased", float(dead_list.size()))
+			# ★★清之前【全世界看板上有幾筆】—— 沒有這個分母，「清了 N 筆」不知道是多是少
+			Probe.add_amount("erase.board_entries_seen", float(_orders_seen))
+			Probe.add_amount("erase.board_entries_removed", float(_orders_removed))
 	for tid in dead_list:
 		var team: TeamData = teams[tid]
 		# 1. 母子：脫離 parent + 孤兒化自己的子隊
