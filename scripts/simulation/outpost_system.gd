@@ -1,4 +1,4 @@
-﻿class_name OutpostSystem
+class_name OutpostSystem
 
 const OUTPOST_NAMES: Dictionary = {
 	"civilian": ["村落", "城鎮", "都市"],
@@ -620,7 +620,9 @@ func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTi
 		return false
 	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = int(cost["person_hours"])
+	# ★寫入點直接讀入口（常駐閘要求）：走 cost["person_hours"] 雖然也同源（upgrade_cost 呼叫入口），
+	#   ★★但那是【間接】——閘看不見，而下一個人也看不見。寫入點自己說出來源，才守得住。
+	tile.construction_ticks_left = build_person_hours(facility, cur + 1)
 	tile.construction_target    = { "action": "upgrade_facility", "facility": facility }
 	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	_tap_build_start(state, team, tile, "upgrade_facility")
