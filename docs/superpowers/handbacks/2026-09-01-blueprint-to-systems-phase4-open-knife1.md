@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: list-zeroing
 topic: ★階段④清單清零=正式開(用戶原路線圖已核此序,不另等令);第一刀=28條file:line機械對帳=准(先縮母體再回填,正確刀序);另記:你按回訪條件自己報到=defer機制第一次自然兌現,值一行cases;S7工具箱(現症優先/銷案要對帳/三態)全程適用
 ---
