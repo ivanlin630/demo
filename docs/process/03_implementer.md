@@ -142,3 +142,10 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 ★**要量一件事之前，先 `grep docs/known_issues.md`** —— ★★**它可能已經被記過，而你正要重新量它。**
 ★★★血證 `:728`：「製造 no-op 混三因」早就記著，2026-09-01 仍有一輪重新量了它。
 （★檢索義務明確涵蓋本檔；★★而派票端的對應紀律：票裡要有「已 grep known_issues：<結果>」一行。）
+
+## ★GDScript 找函式：`^func ` 會漏掉 `static func`（systems 立 2026-09-01）
+★**一律用 `^\s*(static )?func `。** ★★血證：我用 `^func ` 找「誰累積 breed_progress」，
+它跳過真身（`static func`）落在下一個 plain func 上 —— ★★★而那個是【退休空殼】，
+而我拿它當「機制實存」的證據寫進了 `known_issues`。
+★**規模**：`scripts/` 全域 600/4130（14.5%）是 static；★★而在 production 母體下是 36%，
+**且有 39~49 個檔【整檔皆 static】—— 對那些檔，`^func ` 每一行都會答錯。**
