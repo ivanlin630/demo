@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A 級族②（儀器）／兩條先查
 tier: probe
 topic: ★blueprint 批了五族序,而族②(儀器)先做——★★理由:用【已知有盲點的儀器】去驗收另外 11 條,就是今天數了一整天的形狀再演一次;★★★而這一票【只查兩條】:#36 的真實剩餘、#19 是否與今天修過的同根 —— 查完族②母體可能縮一半,再開真修票

@@ -3,7 +3,16 @@
 > 最後更新：2026-07-04 | **本檔只列開放項**。已修項（✅）移 `docs/archive/resolved_issues.md`（保留根因/修法/教訓,可搜尋）。
 > 來源：動態測試 + code review + QA harness 遍歷。
 >
-> ★★★**新條目必帶【回訪條件】**（blueprint 立 2026-09-01；★三選一，缺則不算合格條目）：
+> ★★★**新條目必帶【狀態】＋【回訪條件】同一行**（回訪＝blueprint 立 2026-09-01；★狀態欄＝systems 裁 2026-09-02）：
+> `**狀態：已知未修** ｜ **回訪：<三選一>**`  ／  `**狀態：未確認** ｜ **回訪：量測窗 <哪一輪會確認它>**`
+> ★**為什麼是「一行兩格」而不是新增一欄**：新欄會 rot（沒人維護的欄位＝裝飾）；而**回訪條件本來就必填**，
+> 把狀態黏在它前面 ⇒ **寫回訪的時候一定會看到狀態**，兩者一起腐爛或一起活。
+> ★★**硬規則（可機械檢查）**：**`狀態：未確認` 的條目，回訪條件只能是「量測窗」** ——
+> 因為能把「未確認」變成別的東西的**只有量測**，寫「到期 token」等於把它擱到沒有人會去量它的地方。
+> ★★★**為什麼要有這一欄**：清單的第三軸是「**被確認過嗎**」，而**把【未確認】寫成【已知未修】是在考卷上說謊的溫和版** ——
+> 後人會拿它當前提去修一個可能不存在的病。血證：`founding 沉默` 掛了整輪沒人發現它從未被獨立確認過。
+>
+> ★★★**舊三選一（回訪條件本體）**（blueprint 立 2026-09-01；★三選一，缺則不算合格條目）：
 > `回訪：到期 token <slice-id>` ／ `回訪：觸發事件 <某事發生時>` ／ `回訪：量測窗 <哪一輪量測會答它>`
 > ★**為什麼**：本檔【沒有到期機制】—— 條目寫下來，而沒有東西在該回來看的時候叫人。
 > ★★血證 `:728`：「製造 no-op 混三因」早就記在這裡，而 2026-09-01 有人花了一輪【重新量它】。
@@ -11,6 +20,28 @@
 > **仍有效真 backlog**：Bug2(salary floor 後果)、Bug5(休眠)、W4(NPC promote/train + leader 駐留)、W3(dist tune)。（P5 C-1~C-6 對稱缺口 ✅ 2026-06-16 reframe+實作,見下 P5 段。）
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
+
+### ⏳★★★SpecimenTracer 對【戰鬥整段】盲（2026-09-02 A#14 收，★systems 親跑確認）
+
+★**死亡那一刻已可見**（A#14 掛在 `WorldState.erase_teams`／mutation 之前，三把尺 on/off/off 逐位元同，且掛點真的 fire）。
+★★**盲的是死亡【之前】的整段戰鬥**：傷亡／負傷／撤退／追擊補刀，`SpecimenTracer` 一筆都沒有。
+
+**確認用的數字（`scripts/debug/specimen_combat_death_bed.gd`，systems 2026-09-02 親跑）**：
+```
+fixture：victim pop=3 無武器 ｜ killer pop=40 全武裝 ｜ 同格
+4000 round 後：specimen 還在世界裡=true、pop=2      ←★★3→2 ＝【真的有一筆人員傷亡】
+交戰前後 tracer entries：1 → 1（Δ=0）              ←★★★而 tracer 記了 0 筆
+erase 前後 tracer entries：1 → 2（Δ=1）            ←★死亡窄口本身是好的
+```
+★**「3→2」這一格是本條目從【未確認】變成【已知未修】的唯一理由** —— 在它之前，`Δ=0` 分不出
+「tracer 盲」與「這段根本沒事發生」。★★而床**早就算了** `var _casual := Probe.counts.get("combat.casualty",0)`
+**卻沒有印出來** ⇒ 已回信 implementer 補那一行（判準⑨：窗內那件事有沒有真的發生，要印在輸出上）。
+
+★★★**誠實限（寫死，別讓後人以為這是強證據）**：40 全武裝打 3 無武器、4000 round 只掉 1 人 ⇒
+**這個窗裡的事件母體 ＝ 1**。⇒ 「tracer 對戰鬥盲」是**用一個樣本**坐實的；方向可信（0 vs 1），
+**強度不可信**（分不出「全盲」與「漏記率高」）。要分，得先有一張傷亡率不是 1/4000 的床。
+
+**狀態：已知未修** ｜ **回訪：到期 token — 下一個「可見性／specimen」slice 開場時**（連同 A#27 faction-leave 四出口無 tap 一起排，兩者同族＝**引擎有事發生、儀器沒有窄口**）。
 
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
@@ -835,7 +866,7 @@ Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**comb
 
 **歸屬**：**full-HD live 觀察 slice 的獵物**（decision-model coherence，live 才現形）。observe slice 開時優先查此類。連 [[project_desperation_economy]] / 敗北出路家族。
 
-## ★reeval_attribution_bed 死亡偵測 false-positive（2026-07-14，量測可靠性）
+★~~## ★reeval_attribution_bed 死亡偵測 false-positive~~　⇒ ★★**已銷案（2026-09-02）**：`a67e9682`（2026-07-15）改了 `reeval_attribution_bed.gd` —— ★而本條寫於 07-14 ⇒ **隔天就被修了，而條目活了七週**（★我自驗過該 commit）。原文：（2026-07-14，量測可靠性）
 
 `reeval_attribution_bed.gd` 死亡偵測（`elif spec_death_tick==-1 and not spec_last.is_empty(): spec_death_tick=tick`，單次 `state.teams` dict 查無即判死）→ Team18 tick7239 **瞬間 remove-readd**（併入嘗試的 lifecycle）被**誤判永久死亡**。**影響**：measurer 找「團滅 specimen」時把沒死透的隊誤當死透。**修法（L3）**：改連續 N tick 查無才判死、或讀 `population==0` 事件而非 dict-membership 瞬態。**已 dispatch implementer 修**（execlock worktree，量測可靠性在關鍵路徑上）。
 
@@ -1844,6 +1875,17 @@ harvest_system.gd:84  randf() < WILD_HORSE_REGEN_CHANCE
 ★★★**而真正該問的不是「哪一顆 commit」，是【為什麼同一個症狀能復發而沒有人被通知】** ——
 **知識寫在註解裡，而閘不讀註解。**
 
+## ★★★★床的 setup 盲區 ⇒ **真盲 0 張**（2026-09-02 重定性；★原記「結構性盲區」）
+```
+★閘印：已遷移 5 ／ 未遷移 272 —— ★★而【272 不是盲區規模】（★★★閘那句話是錯的，已修）
+★真實剩餘：272 → 9（靜態篩出「arm 在 setup 之後」）⇒ ★★而 9 張【逐張讀完 0 張真盲】
+★★★成因：「arm 在 setup 之後」有【兩種相反的意思】，而它們在 code 上長得一模一樣
+   ①床先 setup 世界、再 arm ⇒ 真盲　②床 arm 之後又呼叫 setup（重置／多世界）⇒ 不盲
+★而 implementer 的第一版判準錯（把【註解裡】的 `GameSetup.setup()` 當成呼叫）—— ★★是【陽性對照】抓到的
+```
+★**所以本條的剩餘是【0】** —— ★★**而 helper／閘／runtime 自檢都已落地，防的是【未來】不是存量。**
+
+（以下為原始記錄，保留供溯源）
 ## ★★★床的結構性盲區：`Probe.reset()` 在 `GameSetup.setup()` 之後（2026-09-01，measurer 自揭）
 ```
 TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
@@ -2030,3 +2072,30 @@ TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
 ★★**機械防線（已開始做）**：★★★**consume 之後 grep 驗一次** ——
 **跟「commit 之後驗內容不驗退出碼」是同一條：【做了】與【留下痕跡】是兩件事。**
 ★**而這次是 hook 把它抓回來的** ⇒ 系統運作正常，只是我以為做完的事沒有痕跡。
+
+## ★recamp 那個病，在兩張床的 30 天窗內【從未被觸發】（2026-09-02 觀察，★不是「所以不重要」）
+> **回訪：觸發事件 —— 下一次有人問「recamp 這類 fixture-only 的病值不值得修」時。**
+```
+★founding-recheck A/B（`ce497d7a` → `afedb3c3`，相鄰兩顆）：
+   ★★整條 trace【byte-identical】（扣掉 TickPerf wall-clock，0 行內容差異）
+⇒ ★★★recamp 那一行在 peaceful／warring 的 30 天窗裡【根本沒有 fire】
+```
+★**兩個含意，而它們不同**：
+```
+①★founding 沉默與 recamp【不同根】⇒ 要另外查（本票不回答）
+②★★而 recamp 修的情境，目前只有【s2b 那張床】會走到
+   ⇒ ★★★而那【不推翻它的價值】：它修的是一個真的邏輯錯誤（用 owner 判 L0 有沒有主，天生無效）
+   ⇒ ★而「30 天沒走到」可能是【窗太短】（判準⑨）或【情境稀有】—— 兩者我沒有分開
+```
+
+## ★★founding 沉默 —— **具名上帳**（2026-09-02；★blueprint 要求：不得只寫「等它出現在某個群裡」）
+> **回訪：量測窗 —— 長考（驗收考）基線那一輪的 founding 讀數。**
+```
+★狀態：★★【與 recamp 不同根】已證（A/B `ce497d7a`→`afedb3c3` 整條 trace byte-identical）
+★★★而【它本身是否真存在】—— 我們今天【從來沒有獨立確認過】
+   ⇒ 它一直是以「近親嫌疑」「疑似」的形式出現在別人的信裡，而沒有一輪是專門量它的
+⇒ ★所以本條的內容是【一個未確認的病】，不是【一個已知的病】
+```
+★**而我原本寫的「等它出現在某個群裡再處理」不是回訪條件** —— ★★**那是【希望】**（blueprint 指出）。
+★★★**現在綁的是【長考基線那一輪】**：**那一輪本來就要量 founding，所以它是免費的觀測點。**
+★**而屆時要先答的是：【它存在嗎】—— 而不是【它為什麼發生】。**
