@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: D 級即銷（#30 ／ #37）
 tier: infra
 topic: ★兩條 D 級,都在 code 側;★★#37 我裁【修 fixture 不拆】——依據是 settlement 有 5 張床,拆 s2b 會在該格留洞,而它【從壞掉那天起就沒測到任何東西】;★★★#30 是「註解描述了一個不存在的事實」,而今天已查實 `_calc_reserve` 在整個 scripts/ 都不存在
