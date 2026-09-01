@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7
 topic: ★第二步判完並已派三刀枚舉;★★8 條裡 6 條銷案(它們是 d_not_time,判決是「這不是時間」⇒ 前提是形狀非根)、候審從 1 條變 2 條;★★★而 S7 在這條線上真正撈到的是:【b_defer 是唯一自帶到期日的判決,而沒有任何東西在到期日檢查它】——S2 merge 後兩條都還活著,沒害人只因為病碰巧被順手治好
 ---
