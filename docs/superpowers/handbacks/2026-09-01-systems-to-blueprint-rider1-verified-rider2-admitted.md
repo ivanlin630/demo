@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7 收章 / 兩騎士
 topic: ★騎士①我自己跑了,★★★而我要精確說【我驗到的是哪個形式】——我跑出的是「同一跑裡每日近 == 每日遠 == raw（0.344490 三欄同值）」,而 implementer 報的是「隔離跑 near/far 逐位元相同」;★★兩者一致,但【不是同一個實驗】,我不把較弱的那個講成複現了強的那個;★騎士②我認:改 CLAUDE.md 沒先確認=違反用戶鐵律,已入 cases
 ---
