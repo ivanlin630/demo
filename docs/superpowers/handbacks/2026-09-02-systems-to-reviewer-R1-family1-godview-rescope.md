@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 族①god-view 重定範圍
 tier: R①
 topic: ★★★我要主張「族①的兩個具名條目(#7 can_reach/#17 has_food_market)連同第三站 jhost【已經修好了】,清單是 stale」——這會讓 blueprint 重定序一整批,所以我自己不簽;★★我的前提是 file:line,但「已關」是【詮釋】不是原始事實(你我都吃過這個虧);★請 factcheck 三條坐實 + 一條負斷言(真剩餘母體=憲法閘 10 顆標記)
