@@ -12,11 +12,11 @@
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 | 建議意義 |
 |---|---|---|---|---|---|
-| `ticks_per_day` | `data/world_state.gd:4` | **240** | 基準，1天=240tick（10tick/小時×24小時） | — | 不動 |
-| `TICKS_PER_TURN` | `ui/sim_bridge.gd:4` | 24 | 按一次推進1天 | — | 不動 |
+| `TICKS_PER_DAY` | `data/world_state.gd`（★根＝`TICKS_PER_HOUR`） | **見 code** | 基準：1 天 ＝ 24 小時（由根導出） | — | 不動 |
+| `TICKS_PER_TURN` | `ui/sim_bridge.gd` | **見 code** | 按一次推進 ＝ **1 天** | — | 不動 |
 | `TICKS_PER_SECOND` | `ui/turn_controls.gd:4` | 4 | 自動跑速：4tick/秒=6小時/秒 | 視需求 | |
 | world_turn 間隔 | `sim_runner.gd:127` | 每 6 tick | 1 world_turn = 6小時 | — | 不動（顯示用） |
-| `SEASON_LENGTH` | `simulation/harvest_system.gd:3`（=`WorldState.TICKS_PER_SEASON`） | **21600**（=TICKS_PER_DAY×90） | 1季=90天、1年=360天 | — | — |
+| `SEASON_LENGTH` | `simulation/harvest_system.gd:3`（=`WorldState.TICKS_PER_SEASON`） | **見 code**（＝TICKS_PER_DAY×90 ⇒ **1 季＝90 天**） | 1季=90天、1年=360天 | — | — |
 | Harvest 更新頻率 | `sim_runner.gd:146` | 每 6 tick | 每6小時更新農業乘數 | — | 不動（技術性） |
 | `FAR_ZONE_INTERVAL` | `sim_runner.gd:6` | 10 | 遠區每10tick更新 | — | 不動（技術性） |
 | `OVERFLOW_CHECK_INTERVAL` | `simulation/population_system.gd:3` | 10 | 人口溢出每10tick檢查 | — | 不動 |
@@ -29,7 +29,7 @@
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 |
 |---|---|---|---|---|
-| `BASE_MOVE_TICKS` | `movement_system.gd:5` | **48**（= TimeScale.MOVE_TICKS_PER_HEX = 10×24/5）| 平原 speed_mult=1.0：48 tick/hex = 0.2 天（A1 ×5留;A2→240=1天）| A2 |
+| `BASE_MOVE_TICKS` | `movement_system.gd:5` | **見 code**（＝`TimeScale.MOVE_TICKS_PER_HEX`，由根導出）| 平原 speed_mult=1.0：48 tick/hex = 0.2 天（A1 ×5留;A2→240=1天）| A2 |
 | `MIN_MOVE_TICKS` | `movement_system.gd:6` | **16**（= BASE/3）| 最快：16 tick/hex | A2 |
 | `MAX_MOVE_TICKS` | `movement_system.gd:7` | **144**（= BASE×3）| 最慢：144 tick/hex | A2 |
 | `NAMED_WEIGHT` | `movement_system.gd:?` | **3** | named 個人 speed 在 team avg 中加權 ×3 | — |
@@ -74,7 +74,7 @@
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 | 建議意義 |
 |---|---|---|---|---|---|
-| `SALARY_INTERVAL` | `simulation/salary_system.gd:3` | **1680** | 每週發薪 | — | — |
+| `SALARY_INTERVAL` | `simulation/salary_system.gd` | **見 code** | 每週發薪（＝**7 天**） | — | — |
 | `SALARY_PER_SKILL_POINT` | `simulation/salary_system.gd:4` | 2.0 | 每點技能 = 2 coin/次 | — | |
 | `OVERPAY_BONUS` | `simulation/salary_system.gd:5` | 0.02 | 超薪忠誠 +0.02/次 | — | |
 | `SALARY_LOYALTY_PENALTY` | `simulation/salary_system.gd:6` | 0.03 | 欠薪忠誠 -0.03/次 | — | |
@@ -99,7 +99,7 @@
 | `RECRUIT_COST_NAMED` | `simulation/player_command_system.gd` | 150.0 | 招募記名 NPC 費用（coin） |
 | `TRAIN_COST_COIN` | `simulation/player_command_system.gd` | 30.0 | 玩家一次訓練 coin（守恆:餉銀入公庫 anon_treasury，2026-06-17） |
 | `TRAIN_EXP_GAIN` | `simulation/player_command_system.gd` | 20.0 | 一次訓練給最低 tier 的 exp |
-| `CAMP_BUILD_TICKS` | `simulation/player_command_system.gd` | 240 | 玩家紮營施工 ticks |
+| `CAMP_BUILD_PERSON_HOURS` | `simulation/player_command_system.gd` | **見 code**（＝錨 ÷ 3） | 玩家紮營工量（★單位＝person_hours 非 tick） |
 | `CAMP_FOOD_CAP` | `simulation/player_command_system.gd` | 40.0 | 玩家紮營抬 tile food cap（**非即時糧**） |
 | `JOIN_ONBOARD_MEAL` | `simulation/player_command_system.gd` | 0.8 | 收留 onboarding 食物/人 |
 
@@ -110,7 +110,7 @@
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 | 建議意義 |
 |---|---|---|---|---|---|
 | `STRATEGIC_INTERVAL` | `simulation/strategic_ai_system.gd:3` | 10 | 戰略AI每10tick（10小時）執行 | — | |
-| `ALLIANCE_CHECK_INTERVAL` | `simulation/strategic_ai_system.gd:4` | **30** | **每1.25天**檢查同盟 | **240** | 每10天 |
+| `ALLIANCE_CHECK_INTERVAL` | `simulation/strategic_ai_system.gd` | **見 code**（＝`DecisionTier.C_ALLIANCE_CHECK`，S3 已遷層級制節律） | 同盟檢查節律（★★2026-09-01 訂正：原寫「30 tick ＝每 1.25 天」—— ★值與描述【兩欄都過時】） | — | — |
 | `BETRAY_CHECK_INTERVAL` | `simulation/diplomatic_ai_system.gd:4` | **50** | **每2天**檢查叛盟 | **480** | 每20天 |
 | `PRISONER_CHECK_INTERVAL` | `simulation/encounter_system.gd:7` | 5 | 俘虜每5tick檢查（技術性） | — | |
 
@@ -143,7 +143,7 @@
 |---|---|---|
 | ~~季節/年份太短~~ | ✅ 已修 `SEASON_LENGTH=21600`（90天/季） | — |
 | ~~薪水太頻繁~~ | ✅ 已修 `SALARY_INTERVAL=1680`（7天/次） | — |
-| 同盟檢查太頻繁 | `ALLIANCE_CHECK_INTERVAL = 30` | 改 240（10天/次） |
+| ~~同盟檢查太頻繁~~ | `ALLIANCE_CHECK_INTERVAL` | ★**已由 S3 層級制節律接管**（見 `DecisionTier`）—— 本列作廢 |
 | NPC 消失（人口掉） | 暴露公式 + test setup 食物不足 | main.gd 加食物 or 降門檻 |
 | 食物/疲勞 1/10 速率 bug | 公式 /TICKS_PER_DAY 假設每 tick 跑，實際每 hour | ✅ 已修（2026-06-07，cadence-aware）|
 
