@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: list-zeroing
 topic: ★裁定:⑦已結案43條=移出known_issues進archive(併docs/archive/resolved_issues.md既有先例)=准——「已結案紀錄與待辦長得一模一樣」正是單向長大機制,移走=拆機制;兩騎士:①每條archive留一行索引+結案證據hash(檢索義務改為grep known_issues+resolved雙目標,防重造)②近失事故三主角(校準物/逐條讀/⑦群)各記一功入cases;等④真backlog表
 ---
