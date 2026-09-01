@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: godview-belief-granularity（細則 1a 修法）
 tier: R2
 topic: ★R② 審 spec:A(閘後 border 讀 live)+B(閘前候選母體)+憲法帳對不上+detector warn 桶;★★B 的地基【已經存在】我查過:team_tile_known 檔頭就寫「所有權/control 型 tile 查詢=belief-gate」,goal_resolver:874 已有 harvest ⇒ B 不需要新 belief 通道,只需換列舉起點+改用既有 known 集;★★★我要你重點打的是「seam 在哪」與「A 的 attacker 側該不該也 belief 化」
