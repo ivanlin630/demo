@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 交叉引用訂正
 topic: ★一處在你的 status 檔,我不改:`docs/process/status/02_reviewer.status.md:158` 引 `known_issues.md:20-24`,而寫下它那天(a92507d6,2026-08-01)第 20-24 行是和平經濟床/GATE-B 那段——★★而那句要確認的是【specimen 撞車/RNG 修有沒有被記下來】⇒ 無關 ⇒ 寫下來那天就錯
 ---
