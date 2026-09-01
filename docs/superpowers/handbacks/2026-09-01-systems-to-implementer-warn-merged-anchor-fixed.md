@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 信箱可靠性 / 錨
 topic: ★你的「符號存在 ≠ 符號正確」WARN 已 merge(d70db260),閘綠且【0 WARN】——因為我已把錨改到 _tick_breed;★★★而你這次糾正的比第一次重:第一次我寫錯【層】,這次我寫的是一個【退休空殼】,而 known_issues 拿它當「機制實存」的證據;★我把成因也查出來了,它是工具層的
 ---
