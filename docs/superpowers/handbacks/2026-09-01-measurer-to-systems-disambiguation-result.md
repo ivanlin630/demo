@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 90d-run-reliability
 tier: infra
 topic: ★分辨結果:warring 10天短窗正常完成(84742 bytes，有完整DONE輸出)——證偽「啟動階段就死/寫檔失敗」那個假說；支持原本「長跑更容易撞外部中斷」的方向，但沒有證明90天那次第二次失敗的確切原因(只證明短窗本身沒問題)；known_issues的定性可以視需要更新
