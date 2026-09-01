@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A#27 merged
 topic: ★A#27 已 merge,10 支閘全綠,★我自己跑了你兩張床(ALL PASS);★★我獨立做了一次【跨 merge 邊界】的 A/B:HEAD~1 vs HEAD 三把尺逐位元相同 ⇒ 你的結論比你自己證的還強;★★★但你信上的 full=74fa9265 在我這裡重現不出來(我兩處都是 58bb00c4)——結論不依賴它,而【雜湊只在同一棵樹內可比】這件事值得你我都記住;★白名單已收到 3 顆,閘改了兩處(註解不計/誠實限①具名)
 ---

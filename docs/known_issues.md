@@ -74,15 +74,85 @@ erase 前後 tracer entries：1 → 2（Δ=1）            ←★死亡窄口本
 **狀態：未確認** ｜ **回訪：量測窗 — 下一次有人跑 `specimen_combat_death_bed` 或任何用 `_mk_team` 的床時，順手印 `population` 與傳入 `pop`**
 （★不值得為它單開一輪；★★但它會讓**每一張用 `_mk_team` 的床**的母體數字都偏，所以不能不記。）
 
-## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
+### ⏳★★族①god-view：**真剩餘母體 ＝ 憲法閘的 10 顆豁免標記**（2026-09-02 systems 定位）
 
-material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
+★**血證**：blueprint 依清單把族①定序成「修 #7 `can_reach` / #17 `has_food_market`」，
+★★**而這兩條連同第三站（jhost）在複驗時【全部已經修好了】** —— 清單描述的是 2026-07 的現場。
 
-> ★**狀態標記三態慣例（2026-08-21 立、blueprint 認可）**——**禁一律標「已修」**：
-> - **✅ 真結案**：機制已修 **且** 影響面已清（可直接不再讀）。
-> - **⚠ 機制已修、歷史資料仍污染**：修法已 merge，但**舊量測/舊結論仍受影響** → 必附**自查方法**（如 signature）。
-> - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
-> ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
+★**真母體在憲法閘的標記裡**（`scripts/debug/constitution_baseline_v2.txt`，11 顆，其中 `_find_own_outpost` 本輪已 de-patch ⇒ **現存 10**）：
+```
+gv_mapscan (9)：decision_context.gd::_home_granary_food ／ faction_ai::_check_ore_surplus ／
+  _enemy_outpost_positions ／ _evaluate_infrastructure ／ _evaluate_new_outpost_location ／
+  _evaluate_outpost_residency ／ _faction_has_workshop ／ need_oracle::_team_has_facility ／
+  strategic_ai::_find_trade_partner
+gv_teamstate (1)：faction_ai::consolidate_target_of
+```
+★★★**而「被標記」≠「違憲」**：標記＝**豁免**，逐顆要判「這個 mapscan 是不是決策在讀 god-view」——
+**有些可能是合法的自有物查詢**。⇒ **族①的第一步是【逐顆分類】，不是【逐顆修】。**
+
+★★★**2026-09-02 當日撤回**：本條目原本主張「除這 10 顆外沒有已知的 god-view 決策點」——
+★**reviewer R① 抽查 76 個候選裡的【前 40 個】就翻掉它**（`premise_contradiction: TRUE`）。
+
+## ★★★而漏掉的那顆有一個【名字】——detector 天生看不見的形狀
+```
+faction_ai_system.gd:246-250  ★belief 閘：if not BeliefSystem.has_belief(...): continue
+faction_ai_system.gd:265      var border := 1.0 if _is_border_adjacent(team, prey) else 0.3   ← 乘進 score
+faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
+                                  prey.tile_pos.x - attacker.tile_pos.x   ←★★★live 真位
+⇒ ★belief 閘只管【要不要評估這個目標】，★★而【評估本身】讀 live 真值
+⇒ ★★★「有情報」被當成「情報內容任我取用」——而 belief 只說了【知道它存在】
+```
+★**為什麼 detector 抓不到**：它的分類是 `gv_mapscan`（讀一整個集合）／`gv_teamstate`，
+★★**而這顆是「讀一個【已經知道存在】的實體的 live 欄位」** —— **不掃集合，所以不長得像 god-view。**
+★★★**這比原本記的「間接 local-var 存取」盲點更嚴重**：那條是**寫法**上的規避，這條是**類別**上的缺席。
+
+★**母體現況（2026-09-02 掃完後更新）**：**兩顆真漏洞**（`_is_border_adjacent` 閘後／`_find_occupy_target` 閘前，見上方新條目）
+＋ 10 顆既有標記。★**其餘抽查的 belief 函式確認乾淨**：`_find_weakest_prey`／`_find_absorb_target`／
+`_find_strong_neighbor`／`_find_aid_target`／`_resolve_scout_target`／`_commit_conquest_attack`／`_conquest_viable`＋relocate/migrant 族。
+
+★★★**殘留（reviewer 自述，我照收不美化）**：**非 100% 逐行覆蓋 76 處** ——
+覆蓋了**全部 43 個 belief 呼叫點所在函式** ＋ relocate 族，★**未逐行查三個 tile-scan cluster：`4335-4400`／`4652-4699`／`5370-5382`**。
+★★**我判這個殘留可接受，理由要寫出來**：那三個是 **tile-scan**，★★★**而 tile-scan 正是 detector 現有 `gv_mapscan` 桶【看得見】的類別**
+——**漏掉的新形狀（讀已知實體的 live 欄位）不長在 tile-scan 裡**。⇒ **不是「懶得查」，是「那一段有另一道防線」。**
+
+**狀態：已知未修** ｜ **回訪：到期 token — 族①god-view 批開工時（下一站）**
+
+### ⏳★★`constitution_gate` 必須為「belief 閘後讀 live 欄位」新開一個桶（2026-09-02 藍圖裁，★等掃完 36 顆）
+
+★**問題不是漏了一顆，是【閘沒有一個桶是給這類的】** ⇒ 這類永遠不會紅（現有桶：`gv_mapscan` 讀集合／`gv_teamstate`）。
+★★**藍圖裁定**：「閘沒有桶 ＝ 永不紅」不能留。⇒ **36 顆候選掃完、分類定案後，detector 開新桶。**
+★★★**為什麼要等掃完**：桶的判準要長成什麼樣，取決於那 36 顆裡真正的形狀有幾種——
+**現在開桶 ＝ 用 1 個樣本設計分類器。**
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — reviewer 交回 36 顆逐顆分類的那一刻**
+
+### ⏳★★★族①god-view 掃完：**兩顆真漏洞，而它們的【嚴重度不同】**（2026-09-02，reviewer 掃完候選）
+
+| # | 位置 | 形狀 | 嚴重度 |
+|---|---|---|---|
+| A | `faction_ai_system.gd:265` → `:316-317` `_is_border_adjacent` | **belief 閘【後】**，live `prey.tile_pos` 算 border **乘進 score** | ★**分數算錯** |
+| B | `faction_ai_system.gd:6080` `_find_occupy_target` | **belief 閘【前】**，live `t.tile_pos` 查 tile 判 `outpost_level` ⇒ **決定這格算不算可據目標** | ★★★**live 真值決定「算不算候選」** |
+
+★★**B 比 A 嚴重**：A 是評估算錯；★★★**B 是連「該不該把它納入考慮」都由真值決定** ——
+`has_belief` 在 `:6084`，**而 `:6080` 已經先用真值把候選篩過一輪了**。
+⇒ ★**因此 `invariants.md` 細則 1a 已補洞**：初版寫「閘**後**評估」，涵蓋不到 B。**現在寫的是「決策路徑上」。**
+
+**狀態：已知未修** ｜ **回訪：到期 token — 族①修法 slice（A/B 一起，因為同一條細則）**
+
+### ✅（撤回，存查）憲法閘「帳本身對不上」—— **不是缺陷，是我讀錯機制**（2026-09-02 當日自撤）
+
+★**原主張**：`_village_est:2187` 有 inline `# gate-ok:` 而不在 `constitution_baseline_v2.txt` ⇒「官方清單連 legit 那邊都漏」。
+★★**撤回理由（`constitution_gate.gd:6,8` 契約原文）**：
+```
+:6  指紋 = <relpath>::<func>::<type>。契約：current ⊆ baseline。added=FAIL。removed=PASS
+:8  ★源碼行含 `# gate-ok` = 明允豁免，【不入 current】
+⇒ ★★兩者是【不同機制】不是同一本帳的兩份：
+   inline gate-ok ＝「這行根本不算一個站點」；baseline ＝「這個【被偵測到的】站點被凍結承認」
+⇒ ★★★被 inline 豁免的東西【本來就不該出現在 baseline】—— _village_est 是【設計正確】
+```
+★**教訓（比這條目本身有用）**：我驗了**事實**（inline 有、baseline 沒有），**沒驗【詮釋】**（兩者本來就該一致嗎）——
+★★**而這個詮釋不是我自己想的，是從 reviewer 那裡照收的。** ★★★**上游給的詮釋一樣要驗。**
+（★我已據此撤回寄給 blueprint 的那一段，並砍掉為它寫到一半的 `gateok-reconcile` 閘 —— **錯前提上的守衛比沒有守衛更貴。**）
 
 ### ⏳★★★建造：**兩條路，兩個不同的病**（2026-08-26 三度訂正；★舊讀法全部保留在下方，因為每一個都曾經看起來很有道理）
 
@@ -810,11 +880,42 @@ god-view arc 收官後 re-baseline（main 9c084d3a，乾淨 doom **21.2/22.5/0.6
 
 team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍結 1 格 + food=0 餓死（team4/13 還逃跑↔建設 thrash）。**第 4 種 broken 家族（手不聽腦 finder-check classifier 看不到——不是「有 target 沒 dispatch」，是「dispatch 了但目標 null」）**。機制：個體 survival FLEE（`faction_ai:1595/1948` `flee_from_pos = _flee_threat_pos` = 威脅 **belief 位**）——belief 威脅**有存在感但無座標**（stale/positionless→`belief_pos` 回 `(-1,-1)`）→ `flee_from_pos=(-1,-1)` → 算不出逃離向量。`movement_system.gd`（★L2 錨：檔級） 說「(-1,-1) 不設 target 靠 release 收」**但 release 沒真發生** → 卡 task=逃跑 凍結不覓食餓死。**★PRE-EXISTING 確認（measurer baseline diff 2026-07-20：pre-E 8146c4a2 seed1337 此 signature 570 snapshots 跨 11 隊 16/38/56/57/58/63/64/66/68/92/93=凍結 pre-E 就大量在，非 E 引入）**——slice2 belief-化威脅位+缺 flee-release 引入，**每 belief-化 slice（E 已、D 更大）都暴露更多**。**★廣（11+ 隊）值得修。fix 已 build @28470932（applicability-gate：FLEE 威脅無座標 not applicable→轉覓食），measurer 量測中。****★Slice D 前必修**（否則 D doom-delta 被同款污染）。**修方向**（blueprint 認可，look-before-leap）：`flee_from_pos==(-1,-1)`（威脅無座標）→ **release FLEE → re-rank 轉覓食**，非凍結（FLEE 無座標=not applicable 不該卡死）。連 god-view arc（belief-化暴露）/[[feedback_fileline_vs_interpretation]]。
 
-## market_orders capture/demolish 不清（pre-existing 洩漏，2026-07-20，god-view Slice C v2 異質審撿）
+## market_orders capture/demolish 不清（★2026-09-02 systems 複驗：**斷言成立、錨錯**）
+
+★★★**錨訂正**：原文寫 `outpost_system.gd::slot_cap()`(capture) —— ★**`slot_cap()` 是設施格數函式，不是 capture**，
+而**整支 `outpost_system.gd` 對 `market_orders` 的參照數 ＝ 0**。★★真正的現場是：
+```
+outpost_system.gd:839  func capture(state, winner_id, tile, …)        ← ★零 market_orders 參照
+outpost_system.gd:636  func start_demolish(state, team, …)            ← ★零
+outpost_system.gd:825  func demolish_with_control(state, team, …)     ← ★零
+（唯一會動 tile.market_orders 的是 order_system.gd:112/:256/:330 的到期/撮合裁剪）
+⇒ ★★★易主與拆除【確實不清賣單看板】—— 斷言成立，只是先前指錯了門牌
+```
+
+## （原文，錨已於上方訂正）market_orders capture/demolish 不清（pre-existing 洩漏，2026-07-20，god-view Slice C v2 異質審撿）
 
 `tile.market_orders`（賣單看板）在 outpost **capture/demolish 零清理**：`outpost_system.gd::slot_cap()`(capture) 只改 owner 不動 market_orders；`:327/332`(demolish) 清 type/level/owner/facilities 但**不清 market_orders**；`_sync_board`(order:61-84) 只 prune 自家 origin_team 單、失主後沒人清該 tile → 易主/拆除市集殘留舊賣單 ghost（`received_*_orders` 可能 route 到）。**pre-existing**（非 Slice C 引入；C 的 team_market_known 走 demolish-only cleanup=正解示範不繼承此病）。**非急**（economy 診斷用；C harvest 濾 `outpost_level>0` 已擋部分 ghost）。修=capture/demolish 順帶清/標 stale market_orders。連 [[經濟 arc]]。
 
-## god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E measure 撿，下批 cleanup）
+## ⚠部分修 can_reach（2026-09-02 systems 逐行複驗：★god-view 那半【已關】，剩 `<999` vacuous）
+
+★★★**2026-09-02 訂正（三處，全部是本條目自己寫錯）**：
+```
+①★god-view 已關：faction_ai_system.gd:1432 "can_reach" 現在讀
+  `BeliefSystem.belief_pos(state, f.leader_team_id, target_id)`，無 belief 位 ⇒ return false
+  ⇒ ★★【不讀 live 他隊位】。本條目原文「決策 precondition 讀 live 他隊位」★已不成立。
+②★★錨錯：不在 :1115，在 :1432（可 grep `"can_reach":`）。
+③★★★本條目原有的負斷言【是錯的】：它寫「force_ge_target 該符號已不存在 ⇒ 錨指不到現場」，
+   而它存在於 :83（preconds 清單）／:1416／:1424（實作，讀 BeliefSystem.best_estimate）。
+   ⇒ ★一個【錯的負斷言】在帳上掛了一天，而負斷言協議要求附窮盡搜索證據 —— 那次沒附。
+```
+★**仍然開著的是另一個病**：`_hex_dist(...) < 999` **near-vacuous**（hex 距遠小於 999 ⇒ 恆真）
+⇒ ★★**以為任何 target 都可達即攻/追，`PathSystem` 真可達性從未查** ＝ **決策品質洞，不是 god-view**。
+（★code 自己的註解已寫「`<999` near-vacuous(真可達語意)=另評」。）
+
+**狀態：已知未修** ｜ **回訪：到期 token — 族①god-view 批的「逐顆分類」那一輪一併判**
+（★判什麼：`can_reach` 該不該改成 `PathSystem` 真可達 + belief 位 —— **一次治 vacuous，god-view 那半已經不用治了**。）
+
+## ✅（已關，存查）god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E measure 撿）
 
 `_check_precondition` 的 `"can_reach"`（`faction_ai_system.gd:1115`）：`_hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999` = **決策 precondition 讀 live 他隊位**（vs 同函式 `force_ge_target`（★★★真 stale 候選：2026-09-01 窮盡查 `scripts/**/*.gd`，**該符號已不存在** ⇒ 錨指不到現場；★不刪條目，標記待判） 用 `BeliefSystem.best_estimate` belief，**不一致**）= 真 god-view leak（違感知鐵律：決策憑 belief 非 live）。**但 `<999` 近-vacuous**（hex 距遠小於 999→恆真）→ god-view 效果近無害、**低優先**。**out god-view Slice E 4-site（E1/E2/E3/E5）**，歸下批 god-view cleanup（Slice E follow-up/D 批機械 belief_pos 化）。**★順帶疑（非 god-view，另類）**：若 `can_reach` 本該真 reachability gate，`<999` vacuous=**決策品質洞**（以為任 target 可達即攻/追，PathSystem 真可達性沒查）——可能 can_reach 該用 PathSystem 真可達 + belief 位一次治 god-view+vacuous。連 god-view audit（`docs/superpowers/handbacks/2026-07-19-systems-to-blueprint-godview-audit-scope.md`）。
 
@@ -822,7 +923,7 @@ team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍�
 
 `constitution_gate.gd` v3 加 god-view 偵測（gv_teamstate=indexed `state.teams[id].動態欄`；gv_mapscan=`for x in ...tiles` whole-map 掃）。enumerate 13 site，凍 baseline v2.txt（含分類註）。triage：7 legit（self/地理）+ 1119(_precond_met,修中)+ 1 gray(consolidate 同-faction own-member pop) + **3 候選 leak**：
 - **★`_enemy_outpost_positions`（`faction_ai:2912-2921`）掃全圖敵據點回位置陣列 = 瞬知全敵基建**（違感知鐵律，隊應只知看過/聞得的敵據點）。未記過，detector 新撿。**行為敏感**（改 belief 影響防禦/攻擊規劃）→ 待 R²+measure follow-up slice。
-- **★`decision_context.gd::gather`（`:373`）jhost live pos 入 `PathSystem.find_path` 算 join 可達**（jhost=strong_neighbor cross-faction 時=god-view，同 1119 can_reach 類）。未記過，detector 新撿。待 R²+follow-up（可與 1119 同範式 belief_pos-gate）。
+- **✅（已關，2026-09-02 複驗）~~`decision_context.gd::gather`（`:373`）jhost live pos~~** ⇒ 現為 `scripts/simulation/decision/decision_context.gd:675` `BeliefSystem.belief_pos(state, team.team_id, _jhost)`，★**檔案路徑也變了**（`decision/` 子目錄）。原文：**`decision_context.gd::gather`（`:373`）jhost live pos 入 `PathSystem.find_path` 算 join 可達**（jhost=strong_neighbor cross-faction 時=god-view，同 1119 can_reach 類）。未記過，detector 新撿。待 R²+follow-up（可與 1119 同範式 belief_pos-gate）。
 - `_find_trade_partner`（strategic_ai）partner discovered(belief) 但 outpost pos 讀 live = 半漏——**已知**（本檔「finder 濾鏈 C 類候選」+ invariants「team_discovered fallback 最終應刪」）。
 - **detector 限制**：靜態 regex 分不出 loop var 自/他 → 不抓 `for t in teams: t.tile_pos`（DROP gv_teamscan 噪音），是回歸閘非證明；細粒度靠 review。
 - **狀態 ✅ RESOLVED（2026-07-21）**：reviewer R² 判 2 新候選**皆真 leak**（半公共/需知位 REFUTED）→ **followup slice merged 63d93aab**（jhost=belief_pos 同 1119 / enemy_outpost=belief-about-owner store-free proxy，全圖 loop 保留只避已知敵）。baseline 訂正：jhost gv_teamstate 移除、enemy_outpost gv_mapscan re-classify gate-ok(belief-filtered)。gate PASS sites=75 **零 CANDIDATE-LEAK 剩=真 zero-untracked-god-view**。`_find_trade_partner`(strategic C 類候選)續掛 team_discovered fallback「最終應刪」（非 god-view 本 arc，另軌）。god-view belief-化 arc 全收官。
@@ -881,7 +982,14 @@ Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**comb
 
 `handle_diplomacy_message` 無「求和/息兵/tribute_offer」case（只 propose_alliance/propose_trade/demand_tribute/offer_surrender/invite_settle）→ 求和一直被 `_try_diplomacy` 硬寫成 propose_alliance（求盟）。**diplomacy-grounded 刀只讓求和 grounded**（fire→release+cooldown no-op，不 loop 不偽裝求盟）。**真息兵行為＝backlog（WHAT 待 blueprint）**：求和是否獨立行為（納貢息兵讓威脅 de-escalate 退兵）vs 該併外交；要做則建 `sue_for_peace` handler（威脅退兵機制）。
 
-## has_food_market god-view 既有債（2026-07-15，desperation-food-seeking R② advisory）
+## ✅has_food_market god-view 既有債 —— **已關**（2026-09-02 systems 複驗）
+
+★`_nearest_market_outpost`（`faction_ai_system.gd:3626`）**現在只掃 `state.team_market_known`**
+（三源習得：創世／親見／relay），**不是 `state.world.tiles` 全圖** ⇒ ★★**belief-gate，非 god-view。**
+★同函式群的 `_nearest_market_outpost_with`（`:3647`）同範式。
+⇒ **本條目下方原文保留存查**（它描述的是 2026-07-15 的現場，已被 Slice C 修掉）。
+
+## ✅（已關，存查）has_food_market god-view 既有債（2026-07-15，desperation-food-seeking R② advisory）
 
 `decision_context.gd` 的 `has_food_market`（`faction_ai_system.gd:2024-2037 _nearest_market_outpost`）**掃全圖**找最近市集 outpost＝god-view 既有債（違感知鐵律，隊不該全知所有市集位置）。非 desperation-food-seeking 刀範圍（該刀新增的 has_buyable_food/food_seek 已守鐵律），但既有 has_food_market 未修。**修向**：改讀隊已知市集（探索過/傳播聞得）而非全圖掃。**優先序**：低（既有行為，非本刀 blocker），感知鐵律稽核 slice 一併掃。
 
@@ -1882,7 +1990,11 @@ ALLIANCE / BETRAY / INFRA / FACTION_UPDATE / INDEP_INFRA
 ★**而 `t0-emit-ordering` 這條線的結論是【不修，具名記錄】** ——
 **雙緩衝已回滾（`fp` 回基線一字不差），旗子命運儀器保留、現在量的是真實現況。**
 
-## ★`harvest_system` 還有三個【無名骰子】（2026-09-01，S5a merge 時記，★不夾帶）
+## ★`harvest_system` 還有三個【無名骰子】（2026-09-01 記；★2026-09-02 systems 複驗：**錨精準、數目相符**）
+
+★複驗：`harvest_system.gd:84`／`:101`／`:120` 三顆 `randf()`（野馬／野味／掠食者 regen），**不多不少三顆** ⇒ 條目可直接開票，不必再查。
+
+## （原文）★`harvest_system` 還有三個【無名骰子】（2026-09-01，S5a merge 時記，★不夾帶）
 ```
 harvest_system.gd:84  randf() < WILD_HORSE_REGEN_CHANCE
                  :101 randf() < WILD_GAME_REGEN_CHANCE

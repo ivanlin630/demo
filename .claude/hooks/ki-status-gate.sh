@@ -22,6 +22,7 @@ fail=0; new=0; old=0; title=""; sect=""
 
 check_sect() {
   [ -z "$title" ] && return 0
+  case "$title" in *'✅'*) old=$((old+1)); return 0;; esac   # ★已關/已撤回條目不要求狀態欄：那一欄是給【開放】條目的
   if grep -Fxq "$title" "$BASE"; then old=$((old+1)); return 0; fi
   new=$((new+1))
   st=$(printf '%s' "$sect" | grep -oE '狀態：(已知未修|未確認)' | head -1)

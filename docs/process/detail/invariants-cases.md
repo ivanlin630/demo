@@ -840,3 +840,31 @@ _add_output                       產出【寫入】= TileBank.deposit(tile,…)
 ★**判準**：★★**文件寫「＝2 天，值見 code」；不寫 tick 字面數。**
 ★★★**理由與「估算器禁手抄物理」同源：改接線，不是改數值** —— **把 480 更新成 2880，下一次換根它會再爛一次。**
 
+
+---
+
+# ★感知鐵律細則 1a「belief 通過 ≠ 內容任取」的血證（2026-09-02）
+
+**發現經過**：systems 主張「族①god-view 只剩憲法閘那 10 顆標記」，送 reviewer R① factcheck，
+★**reviewer 抽 76 個候選裡的【前 40 個】就翻掉它**（`premise_contradiction: TRUE`）。
+
+```
+faction_ai_system.gd:246-250  belief 閘：if not BeliefSystem.has_belief(state, team.team_id, tid): continue
+faction_ai_system.gd:265      var border := 1.0 if _is_border_adjacent(team, prey) else 0.3   ←★乘進 target score
+faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
+                                  prey.tile_pos.x - attacker.tile_pos.x …                    ←★★★live 真位
+```
+★**「有情報」被當成「情報內容任我取用」** —— 而 `has_belief` 只說了【知道它存在】。
+
+## ★★為什麼 `constitution_gate` 天生看不見它
+detector 的分類是 `gv_mapscan`（讀一整個集合）／`gv_teamstate`。★**這顆不掃集合 ⇒ 不長得像 god-view。**
+★★★**這比帳上原記的「間接 local-var 存取」盲點嚴重一級**：那條是**寫法**上的規避，
+**這條是【類別】上的缺席 —— 閘沒有一個桶是給它的，所以它永遠不會紅。**
+⇒ **藍圖已裁：36 顆掃完分類定案後，detector 必須為這類新開桶。**
+
+## ★掃法（給後來的人）
+```
+找：同一函式裡 has_belief()/best_estimate()/belief_pos() 出現【之後】，
+    仍有 <他隊物件>.tile_pos / .population / .resources / .armed 之類的直讀
+★★特別查【被呼叫出去的小函式】—— 本顆就躲在 _is_border_adjacent(team, prey) 裡，呼叫端那一行完全乾淨
+```
