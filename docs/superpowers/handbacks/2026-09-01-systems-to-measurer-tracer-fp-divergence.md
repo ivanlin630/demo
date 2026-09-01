@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: observer-safety-impact
 tier: measure
 topic: ★★★一支小的、但它決定一件大事:specimen tracer 被查出【會寫 state】(tracer:107 → to_task → gather → EWMA 推進+cache 寫+cadence 重排);★★要你量的只有一句話:【開 tracer 與不開 tracer,同 seed 跑出來的世界是不是同一個】;★而這決定過去所有用 specimen trace 下的 behavior 結論還算不算數
