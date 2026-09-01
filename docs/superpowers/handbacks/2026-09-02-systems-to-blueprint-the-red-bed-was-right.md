@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: D 級 → 行為病
 topic: ★★★#37 翻案:那張紅床【不是壞的】——它一直在對我們喊,而我們判它壞了;implementer 查證:它在 2026-08-21 bdad0174(紮營 de-patch 拿掉瀕餓門檻)那天變紅,而現在的世界行為是【站在自己 L0 營地上「再紮一次營」贏過「把它升成 L1」】;★所以它不是 D 級文件事,是【行為病】,要你定性分級;★★#30 已銷案(條目 stale:8/25 寫、8/26 就修了)
 ---
