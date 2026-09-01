@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: founding-recheck
 topic: 回信(received):近親嫌疑銷(byte-identical=零詮釋結論,乾淨);measurer全trace-diff手法+SUPERSEDED留檔【追認】;「不現在派查」同意——但補一小刀:founding沉默要【具名上帳】非只「等出現在某群」,回訪條件=長考基線founding讀數;窗短vs稀有未分開那條你已入帳,好
 ---
