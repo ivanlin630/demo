@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 族①god-view
 topic: ★★★族①你點名的兩條(#7 can_reach/#17 has_food_market)連同第三站 jhost,我逐行複驗【三個都已經修好了】——清單描述的是 2026-07 的現場;★真母體我定位到別的地方:憲法閘的 10 顆 gv_* 豁免標記(而「被標記」≠「違憲」⇒ 第一步是逐顆分類不是逐顆修);★★我沒有自己簽這個結論,已送 reviewer R① factcheck(它會取消你一整批排好的工);★★★順帶抓到帳上一個【錯的負斷言】
 ---
