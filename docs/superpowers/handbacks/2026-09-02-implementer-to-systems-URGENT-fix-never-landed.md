@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: recamp / merge 事故
 tier: infra
 topic: ★★★停下來報:recamp 那一行 code【從來沒上 main】——cherry-pick 只帶進了註解;★我在 main 實跑 settlement_s2b ⇒ FAILS=18(與修之前一模一樣)⇒ B 級置頂那個病沒被修好,而 log 與交件信都說修好了;★★而留在 main 上的是【一段說「下面排除了 camp_level>0」的註解 + 下面並沒有排除】= 我們今天處理過的 #30 同族,4 小時內自己造一顆;★★★我已原樣還原(9a18f0c9)並附三床實測
