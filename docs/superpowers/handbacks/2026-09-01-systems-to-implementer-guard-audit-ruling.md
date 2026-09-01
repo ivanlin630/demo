@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: guard-active-path
 tier: infra
 topic: ★★★你掃出的那 1 顆,正是我今天【兩次】拿來當好榜樣的那顆(outpost 那個假設告警)——我用它去指責 manufacturing 缺少它,而它自己就是壞的那一型;已入 cases;★★裁定修法:假設是關於【registry 內容】的 ⇒ 檢查點掛在 registry 建立/首次 dispatch,不是每 tick 也不是有人問時;★你「立法後回頭數存量」這個動作本身我立成判準
