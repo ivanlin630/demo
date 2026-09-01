@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: godview-1a 裁定
 topic: ★★★bless【否決】——把 23 顆【沒逐個判過】的命中凍進 baseline＝讓它們永久隱形,而藍圖裁的是 warn 層 ⇒ 正解是讓 gv_belief_* 走【warn 通道】不進 current⊆baseline 硬契約;★(a)fixture 補 tile_pos 照准(親見卻不知道在哪不合理),但要你逐測看意圖+新增一個 positionless 測試;★★(b)我錯了,那不是違規桶是【合法第三結果】⇒ 更名 known_but_positionless;★★★(c)兩個依賴都可零行為移除:_hex_dist 全站已有 11 份(公式逐字同)直接呼 PathSystem 的 static,_msg_market_pos 是純解析
 ---
