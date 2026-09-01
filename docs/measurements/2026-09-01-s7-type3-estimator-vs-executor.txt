@@ -1,0 +1,192 @@
+# S7 型③【同量多源對帳】：估算端 ↔ 執行端
+#
+# ★★★母體【先寫死再數】（紀律：否則數字隨樣式變）——本檔的兩個判準，逐字：
+#
+# 母體B（估算端）＝ scripts/simulation/**.gd 的函式定義，名字以底線切開後
+#   ①任一段 ∈ {eta, est, estimate, forecast, predict, runway, expected, expect}
+#   ②或名字結尾 ∈ {_days, _per_day, per_day, _rate}
+#   ⇒ 命中 25
+#   ★★對照：只用【子字串】比對會得到 88 —— 多出來的 53 全是誤抓
+#     （nearest / best / establish / request / richest / weakest / invest / harvest…）
+#     ⇒ ★★★這是本輪第二次證明【名字列舉會發散】：判準要落在 token 邊界，不是子字串。
+#     53 條誤抓清單見文末，可複驗。
+#
+# 母體A（執行端）＝【真的改變世界狀態的那一行】。★不用 -= 當軸：實查 61 處 -=
+#   幾乎全是區域累加器（score / base / remaining）⇒ ★★它不是「消耗」的軸。
+#   ⇒ 改為【逐個估算端反查它宣稱在預測的那個量，誰真的在改它】（file:line）。
+
+═══════════════════════════════════════════════════════════════════
+★★★命中①：食物 burn —— 估算端與執行端【母體不同】
+═══════════════════════════════════════════════════════════════════
+執行端｜resource_system.gd:205-206
+        var total_pop: int = team.population + team.minor_population
+        var food_needed  = total_pop * FOOD_PER_PERSON_PER_DAY * day_fraction
+      ★★同一函式 :198-200 另外還扣【馬匹草料】horses × FOOD_PER_MOUNT_PER_DAY
+
+估算端｜機械分類 55 處 FOOD_PER_PERSON_PER_DAY 使用點（排除常數宣告與註解）：
+  ★含 minor_population（與執行端同母體）＝ 4
+     food_flow.gd:19 ／ resource_system.gd:206（＝執行端自己）
+     resource_system.gd:272 ／ decision/goal_resolver.gd:295
+  ★★只用 team.population（漏 minor）＝ 51
+     其中最直接的 food_days／runway 估算：
+       faction_ai_system.gd:229 / 2441 / 2486 / 2851 / 2945 / 4331 / 5122-5123 / 5202 / 5620
+       decision/decision_context.gd:213 / 504｜decision/need_oracle.gd:112 / 114
+       decision/terms.gd:118 / 199 / 212 / 231 / 268
+       coin_treasury.gd:53 / 55｜order_system.gd:175｜trade_valuation.gd:119
+       player_api_mapper.gd:147 / 157｜reaction_system.gd:259
+       events/event_faction_defect.gd:34｜inquiry_system.gd:102
+     ★誠實標：這 51 條我【沒有逐條】判它是不是 burn 估算——
+       其中少數是「每人份」常數（如 marginal_economy.gd:11 MIGRANT_UPKEEP、
+       player_command_system.gd:6 JOIN_ONBOARD_MEAL），minor 對它們不適用。
+       ⇒ ★★所以「51」是【上界】，不是「51 個 bug」。逐條分類本輪沒做。
+
+判：★★★不同源 —— 而且分岔【就在估算端自己內部】：
+    同一個量（每日食耗）在同一個 codebase 有兩種算法，4 vs 51。
+方向：估算端偏【低估 burn】⇒ food_days 偏【高估】⇒ ★隊以為自己撐得比實際久。
+      ★★而馬匹草料【沒有任何估算端算進去】⇒ 有馬的隊高估更多。
+
+═══════════════════════════════════════════════════════════════════
+★★★命中②：移動速度 —— 【三個獨立來源】，共用的只有一顆常數
+═══════════════════════════════════════════════════════════════════
+執行端｜movement_system.gd:170-195 _move_cost
+        speed = _compute_team_speed（base × mount_bonus × wagon_penalty）
+              × time_mult × TERRAIN_SPEED_MULT[terrain]
+              × 分段疲勞（fatigue ≥1.0 → ×0.3；>0.5 → ×(1 − fatigue×0.4)）
+              × 超載（weight > cap → ×cap/weight）
+              × 車輛地形懲罰
+        cost  = clamp(BASE_MOVE_TICKS / speed, MIN_MOVE_TICKS, MAX_MOVE_TICKS)
+        扣減  = movement_system.gd:108   team.move_tick_acc -= cost
+
+估算端①｜path_system.gd:158 eta_ticks
+        speed_mult = clampf(1.0 − team.fatigue, 0.1, 1.0)   ★就這一項
+        eta        = path_cost × BASE_MOVE_TICKS / speed_mult   ★無 clamp
+        ⇒ 與執行端【只共用 BASE_MOVE_TICKS】；mount／wagon／terrain／超載【全部沒有】
+        ⇒ ★疲勞模型也不同：fatigue=0.6 時 估 0.40 vs 執行 0.76 ⇒ 估算悲觀約 1.9×
+        呼叫端：faction_ai_system.gd:5984 _estimate_eta_to → :3105 _stamp_return_eta
+                ★而 _return_is_hopeless 用「已耗時 > MULT × 預期 ETA」判放棄
+                ⇒ ★★估算偏悲觀 ⇒ 放棄門檻被推高 ⇒ 該放棄的更晚放棄
+
+估算端②｜path_system.gd:209 estimate_catch_up ／ :256 predict_intercept
+        同樣走 BASE_MOVE_TICKS / relative_speed（:236），同族、同缺項
+
+估算端③｜decision/goal_resolver.gd:896  MOVE_TILES_PER_DAY = 2.0  # TEST VALUE
+        用於 :906   days += hex_dist / MOVE_TILES_PER_DAY
+        ⇒ ★★★這是【第三個】移速來源，且是手寫常數
+        物理真值：TimeScale.MOVE_TICKS_PER_HEX = 240 tick/hex ⇒ 1440/240 = 6 hex/日
+        ⇒ 2.0 vs 6.0 ＝ 3×（★已知＝S7 病3，systems 說另票；
+          本表記在這裡是為了說明【它是三源之一】，不是孤立的一顆爛數字）
+
+判：★★★不同源（三源）。★而修法形狀不是「把 2.0 改成 6.0」——
+    那是手抄物理（用戶立法禁）；正解是估算端讀執行端的同一條算式。
+
+═══════════════════════════════════════════════════════════════════
+★★★命中③：製造 runs_per_day —— 估算端宣稱的 cadence 與 registry 不符
+═══════════════════════════════════════════════════════════════════
+估算端｜manufacturing_system.gd:78-81
+        註解自述：「★一天跑幾次：產線在 NEAR pass ⇒ 次數 ＝ TICKS_PER_DAY / NEAR_CADENCE」
+        runs_per_day() = 1440 / 60 = 24
+執行端｜sim_runner.gd:164 registry
+        {"name":"manufacture", "fn":"_step5b_manufacture", "lod": LOD_BOTH, "shape":"teams"}
+        ★lod = LOD_BOTH（不是 LOD_NEAR）⇒ far 隊在 far pass 也跑
+          near pass：sim_runner.gd:294  每 NEAR_CADENCE = 60 tick   ⇒ 24 次/日
+          far  pass：sim_runner.gd:305  每 FAR_ZONE_INTERVAL = 600  ⇒ ★2.4 次/日
+        ★★shape = "teams"（不是 "teams_cadence"）⇒ sim_runner.gd:199 呼叫時【不傳 cadence】
+          ⇒ 每次呼叫產固定量，不因間隔變長而補回
+
+判：★★★不同源。
+  ①估算面：runs_per_day() 對 far 隊【高估 10×】（24 vs 2.4）
+  ②世界面：★★同一座工坊，隊在遠區時【每日真產量只有近區的 1/10】
+     —— 而這不是估算誤差，是世界本身的行為隨 LOD 改變。
+  ★對照組（證明這是【漏做】不是【設計】）：同一張 registry 上
+     collect / consumption / fatigue / reactions 四個都是 "teams_cadence"，
+     而 reactions 更在 sim_runner.gd:515-517 明寫「far pass 用 trials 補回被跳過的窗次」。
+     ⇒ ★★★補回機制存在、被別人用了、manufacture 沒用。
+  ★對照組②：outpost_tick 是 LOD_NEAR，而 build_ticks_per_day() 還多帶一顆
+     _outpost_tick_runs_in_near_pass() 假設告警（outpost_system.gd:163-165）
+     ⇒ manufacturing 沒有那顆告警，所以它的假設【壞了也不會叫】。
+
+★★誠實限：①是靜態讀 registry 推出來的，②的「1/10」是【推導】不是量測。
+   要坐實②需要一支床：同一座工坊、同一組人，near vs far 各跑 N 日比產量。
+   ⇒ 我沒跑（本票只盤不修，且世界層數字是量測員的線）。
+
+═══════════════════════════════════════════════════════════════════
+★★★命中④：可持續 inflow —— 手抄鏡像，而且【已經開始分岔】
+═══════════════════════════════════════════════════════════════════
+執行端／權威｜food_flow.gd:39-50 _sustainable_inflow（讀 live tile）
+估算端      ｜marginal_economy.gd:15-30 _inflow_est（讀 VillageEstimate struct）
+  ★常數鏡像：food_flow.gd:12        OUTPOST_MULT = [1.0, 1.4, 2.0]
+             marginal_economy.gd:10 OUTPOST_MULT = [1.0, 1.4, 2.0]  # 鏡射 FoodFlow.OUTPOST_MULT
+             ⇒ ★★兩份常數，靠一句註解同步
+  ★★而公式【已經不完全一樣】：
+             food_flow.gd:49        farm_contribution 用 LaborSystem.farm_labor(tile)
+             marginal_economy.gd:26 farm_contribution 用【inline 重算】的 est_farm_labor
+             ⇒ ★★★同一條式子的勞力項，一邊呼函式、一邊自己算 —— 分岔已經發生
+
+判：★不同源（鏡像）。★★但這一顆【有正當的架構理由】並且寫在 code 裡：
+    marginal_economy.gd:4-7 明寫「禁呼 FoodFlow._sustainable_inflow(state, live_target)
+    —— 結構上只吃純 struct，拿不到 state.teams[target] → 結構上不可能違憲」
+    ⇒ ★★★這是【憲法（感知鐵律）】與【單一真值】的真實衝突，不是疏忽。
+    ⇒ 我不建議直接合併。可行形狀：把公式抽成一支【只吃純數值參數】的函式，
+      兩邊各自把自己的來源餵進去 —— 憲法防線保住，而公式只有一份。
+      （★這是建議不是裁定。）
+
+═══════════════════════════════════════════════════════════════════
+★其餘配對（逐列，含【不適用】與【設計上該不同源】）
+═══════════════════════════════════════════════════════════════════
+outpost_system.gd:175 build_eta_days            ↔ outpost_system.gd:399 ticks_left -= maxi(pop,1) ｜★同源（S6 phase2 剛統一）
+outpost_system.gd:159 build_ticks_per_day       ↔ registry lod=LOD_NEAR + NEAR_CADENCE            ｜★同源（且帶假設告警 :163）
+outpost_system.gd:71  construction_timeout_days ↔ :671 逾時判定（同檔同值）                        ｜★同源
+decision/goal_resolver.gd:902 _estimate_delay_days ↔ 移動 + 建設兩端                              ｜★★半同源：建設那半已同源（讀入口）、移動那半是命中②的第三源
+decision/goal_resolver.gd:291 _resident_food_runway ↔ resource_system.gd:206                      ｜★同源（含 minor）
+faction_ai_system.gd:5199 _facility_food_days   ↔ resource_system.gd:206                          ｜★★不同源（漏 minor，命中①）
+faction_ai_system.gd:5616 _survival_food_days   ↔ resource_system.gd:206                          ｜★★不同源（漏 minor，命中①）
+player_api_mapper.gd:156 _food_days             ↔ resource_system.gd:206                          ｜★★不同源（漏 minor，命中①）
+faction_ai_system.gd:5984 _estimate_eta_to      ↔ movement_system.gd:108 / :170                   ｜★★不同源（命中②）
+faction_ai_system.gd:3105 _stamp_return_eta     ↔ 同上（轉呼 _estimate_eta_to）                    ｜★★不同源（命中②）
+path_system.gd:158 / :209 / :256                ↔ movement_system.gd:108 / :170                   ｜★★不同源（命中②）
+manufacturing_system.gd:80 runs_per_day         ↔ sim_runner.gd:164 registry                      ｜★★★不同源（命中③）
+marginal_economy.gd:15 _inflow_est              ↔ food_flow.gd:39                                 ｜★★不同源-鏡像（命中④）
+faction_ai_system.gd:2183 _village_est          ↔ 餵給 _inflow_est（同命中④鏈）                    ｜★同④
+decision/acquisition_paths.gd:75 extraction_rate ↔ resource_system.gd:364 gain 式                 ｜★不同源【但已宣告】：
+    :67-68 自述「真式有 7 項，本函式只取與地格有關的 3 項 ⇒ 保守偏低」—— ★方向明寫且偏保守
+belief_system.gd:43 expected_armed_fraction     ↔ npc_combat_system.gd:196 calc_armed             ｜★★【設計上該不同源】：
+    憲法（感知鐵律）要求 belief ≠ god-view 真值。★但 prior 0.35 是手設常數，
+    ★★而世界真實 armed_anon_ratio 的分佈【沒有人量過】⇒ 這個 prior 有沒有系統性偏差是【可量而未量】。
+belief_system.gd:53 estimate_armed              ↔ 同上                                            ｜★同上
+belief_system.gd:144 best_estimate              ↔ 真 pop ／ distortion_engine.gd:84               ｜★同上（belief 存取器）
+diplomatic_ai_system.gd:33 ／ strategic_ai_system.gd:151 _get_pop_est ↔ team.population           ｜★同上
+faction_ai_system.gd:6359 _contact_elapsed_days ↔ （讀時鐘，量【過去】不是預測）                   ｜◆不適用
+player_command_system.gd:443 _action_set_tribute_rate ↔ （玩家指令，非估算）                       ｜◆不適用（被 _rate 後綴誤收）
+decision/goal_resolver.gd:919 _discount_rate    ↔ （人格折現旋鈕，非量的預測）                     ｜◆不適用（同上）
+
+═══════════════════════════════════════════════════════════════════
+★★★「查不到執行端」欄 —— systems 說這一格最重要
+═══════════════════════════════════════════════════════════════════
+★本輪【沒有】任何一列落在「查不到執行端」。
+★★而這件事本身要標成【本輪判準的限制】而不是好消息：
+   母體B 是【從估算端出發】的，而「估算一個不存在的量」這種病，
+   ★★★在【名字像估算器】的函式裡不一定看得到 —— 它更可能長成
+   「一個 ctx 欄位被算出來、被讀、而世界上沒有對應的執行」。
+   ⇒ 要真的掃那一格，母體要換成【decision ctx／terms 的每一個欄位】，
+     判準＝「這個欄位影響 util ⇒ 對應的世界動作真的存在嗎」。
+   ⇒ ★那是另一票（母體不同、判準不同），我不在本票裡假裝掃過。
+
+═══════════════════════════════════════════════════════════════════
+★母體B 的 53 條【子字串誤抓】（可複驗，證明判準要落在 token 邊界）
+═══════════════════════════════════════════════════════════════════
+milestone_met, add_exp, detach_captives, _biggest_established_faction,
+_get_nearest_enemy_index, _nearest_visible_enemy_index, _nearest_edge_pos,
+_commit_conquest_attack, _tick_conquest_scout, _conquest_viable, _detach_one_anon,
+_best_candidate_quality, _best_relocate_target, _try_invest_side,
+_nearest_market_outpost, _nearest_market_outpost_with, _harvest_market_known,
+_nearest_independent(×2), _nearest_valid_tile(×2), _tick_resident_unrest,
+_lowest_score_facility, _richest_member, establish_crude_camp, _find_weakest_prey,
+_maybe_request_join_player, _declare_established, _find_weakest_faction,
+_setup_explicit_teams, _build_explicit_team, _best_skill, _resolve_aid_request,
+_best_medicine, best_arbitrage_order, map_snapshot_meta, map_members_detail,
+_action_establish_faction_cmd, _accept_join_request, _action_respond_aid_request,
+establish_faction, get_team_details, get_member_details, _score_expand, strongest,
+_apply_chronic_tax_unrest, _step4c_harvest_tick, _find_weakest_member, _get_exposure,
+harvest_terrains, find_nearest_terrain_tile, find_nearest_known_tile, _harvest_tile_known
+
+# ★只盤不修：production diff = 0 行。
