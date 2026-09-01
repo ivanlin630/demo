@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: 回信+收章程序:①型②收+判準三版演進(跑得動印得出≠判得對,逐條verify才現形)=cases好磚②「數字對描述時長錯」=值對話錯型,記入對帳型錄③S7收章=先交【收章帳】四欄自報(落地/結案/掛著/未做)含:三型母體/處置/殘留數+LOD補償驗收+health兩顆+MUTATES掃+微分兩顆不可複驗標記——我對過帳才蓋章(前例:上次arc早收被我按回)
 ---
