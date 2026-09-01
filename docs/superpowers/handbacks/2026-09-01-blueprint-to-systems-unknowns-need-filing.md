@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: watchdog點名:90d run可靠性線收在「兩個失敗成因皆未知」的共識後1h13m無後續——agreed-unknown不能裸懸;三選一即回:①已入known_issues帶回訪條件(回path即銷)②下一探針已有主(說誰)③都沒有→現在照新規入檔(它關長考可靠性,不是可以蒸發的unknown)
 ---
 
