@@ -490,6 +490,16 @@ porter 整趟**不進任何決策路徑**。specimen 佐證（追逐窗 tick 360
 
 ### 👶★★生育 merge 後世界層級幾乎沒生效：90 天 `breed.born = 1`（2026-08-21 D1 短跑；**根因在 systems 的設計，非實作**）
 **實測** `breed.born=1 · reaction.breed=1 · n_persons 24→24 凍結（每 10 天取樣皆 24）` **@70a792b3 2026-08-21** · repro: `EXAM_CONFIG=peaceful EXAM_MONTHS=3 EXAM_SEED=1337 .\tools\godot.ps1 --headless --script scripts/debug/exam_12mo_bed.gd` （正本 `docs/process/verdicts/d1-pop-vs-cap.measure.json`）。specimen 側證：`breed.rate_sample` 顯示 `breed_progress` **有在累加**（0.001→0.084）＝**機制路徑是通的、只是極慢**。
+  ★★★**2026-09-01 重錨 arc（S0~S7）之後複測 —— 更極端**：兩床（peaceful＋warring）、30 日窗、
+  **3060 個 team-day（361＋2699）** ⇒ `minor_population` 佔比**逐位元 0.0000**。
+  ★**不是母體空**：分母 `population + minor` 從未為 0；★★**不是死碼**：累積機制 `reaction_system.gd::breed_progress` 實存。
+  ⇒ ★★★**30 日窗內【全隊全程沒有任何一次 `breed_progress` 累積到 1.0】**。
+  ★★★★**當日訂正（★這是我自己製造的假訊號）**：我原本寫「從 `born=1` 變成 `born=0`」並當【重錨後迴歸候選】呈報
+  —— ★**而兩個數字的窗長不同**：原始 `docs/process/verdicts/breed-verify-and-deathcause.measure.json`
+  ＝ seed 1337 ／ peaceful_economy ／ **90 天** ⇒ born = 1；今天 ＝ **30 天**。
+  ★★**期望值 ＝ 1 × 30/90 ＝ 0.33 ⇒ 觀測到 0【完全在預期內】** ⇒ ★★★**「1→0 迴歸」不成立。**
+  ★**真正還成立的是**：**90 天只生 1 個** ＝ 長期低速率，不是迴歸。
+  ★**效力邊界（量測員自標）**：本結論**只覆蓋 30 日窗**；更長窗未量。
 **★★根因（systems code-read + 算術，兩條疊乘）**：
 1. **`BASE_RATE` 的推導假設在這個世界不成立**：我用「健康村 `f≈0.5` × **5 名適齡成人** → 1 名額/30 日」反推 `0.0133`；**實測 24 named / 17 隊 ≈ 1.4 名/隊** → **光此一項就慢 ~3.5×**；而多數隊 `rel_surplus ≤ 0` → **`f = 0` ＝ 完全不生**（p90 才 0.148、`f≈0.5` 只在最頂十分位）。頂級村配 1 名 named：`0.0133 × 0.5 × 1 ≈ 0.00665/日` → **~150 天/名額**（設計目標 30 天）。
 2. **★named/anon 不對稱（merged code 實證）**：`breed_rel_surplus` 分母用 **`t.population`**（`team_data.gd:55` ＝ leader + named + **anon 全部**），但適齡迴圈只跑 **`state.persons`（named only）** → **anon 吃飯拉低 `rel_surplus`、卻不能生 ＝ 雙重懲罰**；anon 越多、越不可能生。
@@ -916,7 +926,7 @@ Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**comb
 | `encounter:251/252/1080` armed spawn | one-shot | 驗 ARMED_RATIO_FLOOR 是否已護；否則 floor |
 | `reaction_system.gd`（★L2 錨：檔級。原為行號錨，而行號跟著編輯走） minor_cap | one-shot | 視語意 floor |
 | `subteam_system.gd`（★L2 錨：檔級） anon_xfer | one-shot round | floor/累積 |
-**已安全（有 `maxi(1,)`）**：`population_system.gd`（★L2 錨：檔級）、`reaction_system.gd`（★L2 錨：檔級。原為行號錨，而行號跟著編輯走）、`interaction_system.gd`（★L2 錨：檔級）。**比較用非病**：`faction_ai_system.gd`（★L2 錨：檔級。原為行號錨，而行號跟著編輯走）/`player_command_system.gd`（★★★內容待驗 systems 2026-09-01：本條宣稱它「已安全（有 `maxi(1,)`）」—— ★而 `player_command_api.gd` 與 `player_command_system.gd` 【兩個都沒有 `maxi(1,`】⇒ ★★那個安全憑據找不到了 ⇒ 這不是錨的問題，是【條目內容】待驗）/`player_query_api.gd`（★L2 錨：檔級）（`int(pop*1.5)` threshold）。
+**已安全（有 `maxi(1,)`）**：`population_system.gd`（★L2 錨：檔級）、`reaction_system.gd`（★L2 錨：檔級。原為行號錨，而行號跟著編輯走）、`interaction_system.gd`（★L2 錨：檔級）。**比較用非病**：`faction_ai_system.gd`（★L2 錨：檔級。原為行號錨，而行號跟著編輯走）/`player_command_system.gd`（★L2 錨。★★★2026-09-01 我的「內容待驗」標記【撤回】：我用 `grep "maxi(1,"` 去否證，而真實寫法是 `maxi(int(...), 1)` —— ★參數順序相反。★★自驗：`maxi(1,` 11 處 vs `maxi(…,1)` 66 處 ⇒ **我的搜尋式漏掉 86%**。★★★本條的「已安全」【成立】，是我判錯）/`player_query_api.gd`（★L2 錨：檔級）（`int(pop*1.5)` threshold）。
 - **★TASK_MERGE 0/8333 真根=combat_target 早退（2026-07-11，S-A merge-blocker）**：`interaction_system.gd`（★L2 錨：檔級） `if combat_target != -1: return` 早退，先於 MERGE resolver(:261) → absorber 常戰鬥 → merger 到格早退 → `_try_merge` 從沒 call（實證 merge_accept=0 且 reject=0）→ 0/8333。**= known_issues:18 BEG/JOIN 早退死路同案**（code :216 自註）。修=:214 豁免 social/merge 到達（S-A 折入 `merge-seam-real-fix`）。**★systems 首判「order_target 漏接」=錯**（order_target 早已三路 wired via `faction_ai_system.gd::_wire_threat_task()`，首判是不完整讀漏 :1529 helper 呼叫；implementer 框外挑框+實證翻案）→ 教訓 [[feedback_structural_audit_complement]]（characterize dispatch/seam 要讀完整條路含 helper 呼叫，別停在第一塊）。
 → **清償 slice（另開，fix 異質不塞 S1）**：per-event=累積器、one-shot=floor/機率化（決定性）。掛 memory [[feedback_structural_audit_complement]]。
 **★更廣結構債（blueprint 2026-07-10 擴，pursuit 3 次失敗揭）**：不只捨入——**`pop-% × 小效果` 在小隊世界普遍失效**（organic 全小隊 → 任何 `pop*小rate` 恆~0，累積器也救不了因每 entity 只觸一次）。sweep 同看**模型選擇**：該量是「敗方 pop 百分比」還是「絕對小數（軍閥砍尾型）」？pursuit=絕對正解（rev3）。與**殲滅不可見同根**（隊太小）=consolidation 腿另一症狀。各站標「pop-% vs 絕對」宜哪個。
@@ -2294,3 +2304,48 @@ TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
 ⇒ ★**候選修法（同形）**：條目帶【什麼事發生時該回來看】的 token，而那件事發生時閘要紅。
 ⇒ ★★**尚未動工**：它會動到 132 條的格式，且與 `b_defer` 到期閘可能共用機制 —— **呈 blueprint 排序。**
 
+## ★★★44 處團級 burn 估算漏算 `minor_population`（2026-09-01，型③ 對帳所得）
+> **回訪：量測窗 —— 世界平均 `minor_population / population` 佔比量出來的那一輪。**
+```
+★執行端 `resource_system.gd`：`total_pop = population + minor_population`（★另扣馬匹草料）
+★★而估算端【44 處】只用 `population` ⇒ 低估 burn ⇒ `food_days` 高估
+⇒ ★★★隊【以為自己撐得比實際久】
+★而馬匹草料【沒有任何估算端算進去】⇒ 有馬的隊高估更多
+分類（implementer 逐條分完，★非上界）：團級漏 minor 44 ／ 含 minor 4 ／ 每人份 7（總 55）
+```
+★**形狀 ＝【手不聽腦的鏡像】**：**執行端正確、估算端系統性樂觀** ——
+★★**而它不會 crash、不會有測試紅，只會表現成「隊一直誤判自己撐得住」。**
+
+### ★嚴重度：**中高，但先量再開票**（systems judge 2026-09-01）
+```
+★44 處逐處改是大工；★★而偏差幅度【取決於 minor 佔人口的比例】—— 而那個沒人量過
+⇒ ★★★若 minor 佔比很小 ⇒ 偏差可忽略 ⇒ 44 處改法不划算
+   若佔比可觀（例如 >15%）⇒ 所有糧食決策系統性樂觀 ⇒ 值得開票
+⇒ ★所以回訪條件綁【量測窗】而不是「下次有空」
+```
+★★**而這一條【不准躺回「上界」裡】**（blueprint 明令）——★★★**它現在有分類數字、有形狀、有回訪條件。**
+
+## ★44 處 burn 漏 minor —— **裁定不開票**（systems 2026-09-01）
+> **回訪：觸發事件 —— 若日後量到 `minor_population` 佔比 > 5%（見上「30 日窗零出生」條）。**
+```
+★量測結果：30 日窗內 minor 佔比【逐位元 0.0000】⇒ ★★那 44 處的偏差在這個窗內【恰好為零】
+⇒ ★★★裁定：不開票（44 處逐處改的成本，換不到任何當下的正確性）
+★★而【效力邊界】必須跟裁定寫在一起：★★★這只說「30 日窗內沒差」，不說「那 44 處是對的」
+   —— 它們仍然是【估算端與執行端不同母體】，而那個結構性錯誤還在
+```
+★**所以這條不是「已修」也不是「不是問題」** —— ★★**是【它的傷害目前為 0，而傷害為 0 的原因是另一個病】**（世界沒有新生兒）。
+★★★**若繁殖那條被修好，這 44 處會【同時】變成真的錯** —— 而回訪條件正是綁在那裡。
+
+## ★人口不成長：**90 天只生 1 個**（2026-09-01 正式記；★不是迴歸，是長期低速率）
+> **回訪：觸發事件 —— blueprint 裁定「這個世界的人口該不該成長」之後。**
+```
+★實測 A：seed 1337 ／ peaceful_economy ／【90 天】⇒ `breed.born = 1`
+   出處 `docs/process/verdicts/breed-verify-and-deathcause.measure.json`
+★實測 B：兩床（peaceful＋warring）／【30 天】／3060 個 team-day ⇒ minor 佔比【逐位元 0.0000】
+   ★★而 B 與 A【一致】：30 天的期望值 ＝ 1×30/90 ＝ 0.33 ⇒ 觀測 0 在預期內
+★★★機制實存（`reaction_system.gd::breed_progress`）、分母從未為 0 ⇒ **不是死碼、不是母體空**
+```
+★**曾被我誤讀成【重錨後迴歸】並升成主案 —— 而那是【窗長沒對齊】造成的假訊號，已撤。**
+★★**所以這一條【不是「誰弄壞了它」】，是【它本來就這麼慢】** ——
+★★★**而「這麼慢算不算病」是願景問題**：一個 90 天生 1 個的世界，可能是設計，也可能是斷掉。
+⇒ ★**在 blueprint 裁定之前，不派任何歸因票** —— **歸因的前提是「它應該是別的樣子」，而那還沒有人說過。**

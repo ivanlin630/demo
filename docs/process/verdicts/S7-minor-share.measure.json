@@ -1,0 +1,30 @@
+{
+  "slice": "minor-share",
+  "問題": "minor_population佔population+minor_population的比例——決定44處團級burn估算漏算minor的票開不開",
+  "測法": "零新tap(直讀TeamData.population/minor_population既有欄位)，peaceful_economy+warring_states，seed=1337，30日，每日逐隊取樣(pooled team-day)+期末逐隊快照(隊間差異)",
+  "床": "scripts/debug/s7_minor_share_bed.gd(新檔，純觀測，走MeasureBedHelper.arm_and_setup)",
+
+  "★①結果：兩床、所有樣本、全部是0.0000": {
+    "peaceful_economy": {"pooled樣本數": 361, "mean": 0.0, "median": 0.0, "Q1": 0.0, "Q3": 0.0, "min": 0.0, "max": 0.0, "denom恆0樣本數": 0, "day1~10": 0.0, "day21~30": 0.0, "期末12隊逐隊分佈": "全部0.0(mean/median/Q1/Q3/min/max皆0)"},
+    "warring_states": {"pooled樣本數": 2699, "mean": 0.0, "median": 0.0, "Q1": 0.0, "Q3": 0.0, "min": 0.0, "max": 0.0, "denom恆0樣本數": 0, "day1~10": 0.0, "day21~30": 0.0, "期末114隊逐隊分佈": "全部0.0(mean/median/Q1/Q3/min/max皆0)"}
+  },
+
+  "★★②誠實限判讀——denom恆0樣本數=0，所以不是『母體空』；但要另外查是不是『機制沒觸發』": {
+    "denom(population+minor)本身": "從未為0——每個team-day樣本都有真實population，分母正常，不是無法算比例的情況",
+    "★numerator(minor_population)恆為0的原因，我查了production code": {
+      "機制存在且非死碼": "reaction_system.gd:309-310  while team.breed_progress>=1.0 and team.minor_population<cap: team.minor_population+=1（繁殖機制，累積breed_progress到1.0才生一個minor）",
+      "★判讀": "30日窗口內兩床全部team、全部樣本，breed_progress從未累積到1.0過一次——這比較像【機制存在但30日窗太短沒觸發】，不是【機制死碼】或【母體空】——是第三種情況，跟本session之前starve/交易成交『無解析度』同族"
+    }
+  },
+
+  "★★★③對44處票判準的回答(照你定的三分岔)": {
+    "測到的量級": "0%（30日窗內，兩床、所有隊、所有天，一致）",
+    "★裁決": "佔比<5%⇒偏差可忽略⇒44處逐處改不划算——這條在【30日窗】內成立且證據很硬(2699+361個樣本零例外)",
+    "★★但這個結論的效力邊界": "只覆蓋『30日內的糧食估算偏差』，不覆蓋長線(例如3個月/1年)——若某些關卡設計是長期經營，breed累積可能在更長窗口跨過閾值，那時佔比會從0開始爬升，44處的偏差不會永遠是0。這是我加的效力邊界，不是我下的『要不要開票』的最終判斷"
+  },
+
+  "landed_paths": {
+    "peaceful": "docs/measurements/s7minorshare-peaceful_economy-30d.txt",
+    "warring": "docs/measurements/s7minorshare-warring_states-30d.txt"
+  }
+}

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S7-type3 前置 / 食物 burn 母體
 tier: probe
 topic: ★你剛立「【已經查過而沒有答案】也要記」——★★★而我回頭關掉我自己留的一個【更糟的版本】:我當時寫「51 是上界,逐條分類本輪沒做」,那看起來【像有答案】,而下一個人會拿 51 當母體;★真數字是 44(含 minor 4／團級漏 minor 44／每人份 7,總 55);★★判準第二版是抽驗抓到的:接續行的人口乘數在【前一行】,只看本行會把它誤分成「每人份」
