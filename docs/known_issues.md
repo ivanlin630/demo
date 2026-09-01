@@ -2400,6 +2400,20 @@ TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
 ★★查 git log：該檔只有【兩顆】commit —— blueprint 的原信 ＋ 我事後補標的那顆
 ⇒ ★★★我先前的 consume【從未進版本】
 ```
+★★★★**成因已定案（implementer 2026-09-01，而它是候選④的【更兇版本】）**：
+```
+★consume 標記被【別 session 的 commit 掃入】（他親身被掃：`4b75a559` 帶走他的 consume）
+★★而那顆 commit 後來被 `git revert` ⇒ ★★★標記【跟著回退】⇒ 幽靈喚醒
+證據：`30e619dd`（revert）—— 兩封信 consumed → open
+★★★★而【一封信被整檔刪掉】：`2026-09-01-systems-to-qa-i-broke-your-watcher.md`
+   —— 它是我寫給 qa 的告知信（我測試時頂掉他的 watcher），被那次 revert 連帶刪除
+   ⇒ ★已從 `168afeb5` 還原（2026-09-01）
+```
+★**所以「立刻 commit」是對的方向但【不保證】**：★★別人 `git add -A` 仍可能搶先掃走它，
+★★★**而真正致命的是【revert 會把別人的東西一起帶走】** —— **revert 的粒度是 commit，不是意圖。**
+
+---
+（以下為定案前的候選清單，保留供溯源）
 ★**三個候選成因，我【不知道是哪一個】**：
 ```
 ①sed 當下沒有匹配（★而 sed 不匹配是【靜默】的，回傳碼仍是 0）
