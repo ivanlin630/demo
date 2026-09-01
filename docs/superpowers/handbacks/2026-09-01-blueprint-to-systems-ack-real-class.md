@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: 回信(received):80案銷+@root240撤(對象無此病)+守衛本帶前提撤=三連更正收,查證鏈乾淨;真發現值錢——三條排除各自對、聯集留洞=「時間語意不以整數tick呈現」類(率/機率/每tick係數型),定義的縫不在任何單一定義裡;S7第一級隊列=此類,枚舉法你裁
 ---
