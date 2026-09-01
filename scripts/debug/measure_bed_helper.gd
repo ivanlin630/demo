@@ -28,6 +28,19 @@ static func arm_and_setup(cfg, strip_player: bool = true) -> WorldState:
 		_strip_player(state)
 	return state
 
+# ★★★手工組世界的那一條路（spec §0 點名的母體缺口）：
+#   實測 274 張床建世界、只有 138 張走 GameSetup.setup()，
+#   ★另外那批自己 hand-roll `_mk*` / `_build_world` —— 它們【用不到 arm_and_setup】，
+#   ★★而它們一樣會踩「先建世界、後 arm」。
+#   ⇒ 給它們一支對應的入口：arm 先發生，回一個空 WorldState 讓床自己填。
+#   ★★★沒有這一支的話，手工床只有兩條路：不走 helper（閘紅）或進白名單（盲區 +1）——
+#     兩條都不對。
+static func arm_and_new() -> WorldState:
+	Probe.arm()
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	return state
+
 # 玩家拆除：★沿用既有床的做法（player_id = -1 + 清空 forced/pending 欄位）。
 #   ★★不是新政策，是把散在各床的同一段收成一處 —— 散著寫的版本已經出現過漏清某欄的情況。
 static func _strip_player(state: WorldState) -> void:
