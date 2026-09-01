@@ -1,0 +1,17 @@
+# S6 前置：一座 mint 工地實際花幾個遊戲日（★量字面量，非估算器）
+# ★複驗所需的全部參數（★★否則『3 天』三個月後沒人能複驗）：
+#   facility=mint  cost.ticks=720  ★pop（【讀來的】真值分佈 pop→窗數）={ 1: 720 }
+#   ★每窗扣掉多少（delta→窗數）={ 1: 720 }  ★★這一欄是【真相源那行 ticks_left -= maxi(pop,1)】的字面觀測
+#   TICKS_PER_HOUR=60  TICKS_PER_DAY=1440  NEAR_CADENCE=60
+#   起 tick=0  訖 tick=43200  經過 world tick=43200  outpost_tick 執行次數=720
+#
+## ★答案：30.0000 遊戲日
+#
+# ★對照兩個預期（systems 給的，★我不往任一邊靠）：
+#   ≈3 天   ⇒ cost.ticks 的單位是 person-hour ⇒ S6 表的「舊」欄低估 10 倍
+#   ≈0.3 天 ⇒ S6 表是對的
+#   ★★其他值 ⇒ 照實報
+# ★★★而估算器怎麼說（★只當對照，不當答案）：build_eta_days = 30.0000 天
+# ★誠實界限：本床直接驅動 outpost_tick，假設施工隊全程在崗
+#   ⇒ 答的是【工期本身】，不是【實際上多久蓋完】（隊會不會跑掉是另一條線）
+# construct tap：progress=720  stall=0
