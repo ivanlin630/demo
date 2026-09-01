@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-reconcile-type3 → bed-arm-helper
 tier: probe/infra
 topic: ★phase2 已 merge(我自己跑四閘:新閘 fail=0／CONSTITUTION 74／BARE-TICK 母體 169 —— ★★169 正是 CORVEE 退場);★★三件裁定在下面(工期閘【已進 CLAUDE.md merge-gate】/s2b 具名待修/世界層派 measurer);★★★接下來兩票依序:S7 型③對帳 → 床 arm helper(R² 二審 CLEAN,而自檢位置被反轉了,值得看一眼)

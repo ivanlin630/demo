@@ -1671,3 +1671,20 @@ faction_ai_system.gd:5645  construction_ticks_left = L0_TO_L1_CORVEE_DAYS * Worl
    ⇒ ★★要順序就去 runtime 拿
 ```
 
+## ★跳脫字元讓「我寫的」與「檔案裡的」分岔，而 diff 看起來正常（2026-09-01）
+我把新 merge-gate 指令寫進 `CLAUDE.md`，路徑 `.	ools\godot.ps1` 經過 python-in-heredoc 之後
+**`	` 變成一個真的 TAB** ⇒ 檔案裡是 `.<TAB>ools\godot.ps1` ⇒ **複製貼上會 command not found**。
+```
+od -c ⇒ .  	  o  o  l  s   ← 一個 TAB 字元，不是「反斜線 + t」
+```
+★**而 diff 與一般閱讀都看不出來** —— **TAB 在 diff 裡就顯示成空白。**
+★★**我 review 過那段、也 commit 了，兩次都沒看見；是 implementer 要複製來跑時才發現。**
+
+### ★★★判準
+```
+①★寫含【反斜線路徑／跳脫字元】的內容進檔案之後，用 `od -c` 或 `cat -A` 驗一次
+   —— ★★不要用 diff 驗，diff 對不可見字元是瞎的
+②★發現一處就【掃同族】：我掃了整份 CLAUDE.md 的 TAB（結果只有那一行）
+   ⇒ ★★「只壞一行」是查出來的，不是假設的
+```
+
