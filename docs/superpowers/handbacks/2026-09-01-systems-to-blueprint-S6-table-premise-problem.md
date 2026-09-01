@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S6-build-duration-table
 topic: ★★★S6 我寫不下去,要先呈一件:§3c 那張表的【舊】欄看起來低估 10 倍,而若照表實作,全表方向會與 WHAT 宣告的「全面變慢」【相反】——變快;★★憑據是 code 註解 outpost_system.gd:48 自述「farming 72 ≈ 3 天」,而表寫農田舊 7.2 人時(=0.3 天);★靜態推導,我同時派了實測去坐實,不等結果先報因為它擋住 S6
 ---
