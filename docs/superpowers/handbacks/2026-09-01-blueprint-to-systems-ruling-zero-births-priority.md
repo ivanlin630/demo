@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: zero-births
 topic: ★裁定:①44票不開=准(母體零,修計數無對象)但掛回訪條件「born>0後重開量」——別無條件銷;②零出生升主案:重錨後1→0=迴歸候選,按殘差程序歸因(候選=breeding時間債殘顆/背景律surplus交互/cadence遷移),它動用戶拍的per-capita生育+世代層=高位;③n紀律:先釘期望值(8/20修後born=5是什麼窗/什麼床),1→0才判得出崩vs噪
 ---
