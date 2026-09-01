@@ -1,0 +1,236 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[Manufacture] Team1 arrows worker_rate=1.00
+[Site] 選址 (4, 4) score=126 周邊資源={  } terrain=plains
+[Sub] Team1 派出子隊 Team2 leader=P11 advisors=[] (pop=2 cap=2 task=擴建)
+[Infra] Team1 派擴建子隊 Team2 → (5,5) farming
+[SurvivalCamp] team=Team2 → 紮營 @(6,5)
+[Survival] Team2 urgent days_left=0.0 擴建→紮營
+[Tick 60] Person 10 (civilian/team1) → P1_comply | stress=0.10 loyalty=0.99
+[Manufacture] Team1 arrows worker_rate=1.00
+[SurvivalMergeIn] team=Team2 → 併入 Team1
+[Tick 120] Person 11 (member/team2) → P1_comply | stress=0.10 loyalty=0.89
+[Manufacture] Team1 arrows worker_rate=1.00
+[Manufacture] Team1 arrows worker_rate=1.00
+[Manufacture] Team1 arrows worker_rate=1.00
+[Manufacture] Team1 arrows worker_rate=1.01
+[Harvest] Tick360 季節=春 base=1.1
+[Manufacture] Team1 arrows worker_rate=1.01
+[Tick 420] Person 10 (civilian/team1) → P2_produce | stress=0.70 loyalty=0.92
+[Manufacture] Team1 arrows worker_rate=1.01
+[Tick 480] Person 11 (member/team2) → N1_flee | stress=0.40 loyalty=0.82
+[Manufacture] Team1 arrows worker_rate=1.01
+[SurvivalMergeIn] team=Team2 → 併入 Team1
+[Tick 540] Person 11 (member/team2) → P1_comply | stress=0.50 loyalty=0.81
+[Manufacture] Team1 arrows worker_rate=1.01
+[SurvivalMergeIn] team=Team2 → 併入 Team1
+[Tick 600] Person 10 (civilian/team1) → N2_riot | stress=1.00 loyalty=0.86
+[SurvivalMergeIn] team=Team2 → 併入 Team1
+[Manufacture] Team1 arrows worker_rate=1.01
+[SurvivalMergeIn] team=Team2 → 併入 Team1
+[Manufacture] Team1 arrows worker_rate=1.01
+[SurvivalMergeIn] team=Team2 → 併入 Team1
+[Tick 720] Person 11 (member/team2) → N2_riot | stress=0.80 loyalty=0.76
+[Move] Team 2 抵達 (5,5)
+[Manufacture] Team1 arrows worker_rate=1.01
+[Merge] Team1 ← Team2 完全合併 (pop=10)
+[Manufacture] Team1 arrows worker_rate=1.01
+[Manufacture] Team1 arrows worker_rate=1.01
+[Manufacture] Team1 arrows worker_rate=1.02
+[Manufacture] Team1 arrows worker_rate=1.02
+[Manufacture] Team1 arrows worker_rate=1.02
+[Manufacture] Team1 arrows worker_rate=1.02
+[Order] Team1 buy weapon_melee_low ×1 (oid=1)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=2)
+[Order] Team1 buy food ×38 (oid=3)
+[Manufacture] Team1 arrows worker_rate=1.02
+[Manufacture] Team1 arrows worker_rate=1.02
+[Manufacture] Team1 arrows worker_rate=1.02
+[Manufacture] Team1 arrows worker_rate=1.03
+[DayNight] Day 1 開始
+[Manufacture] Team1 arrows worker_rate=1.03
+[TickPerf] day=1 avg=336 us max=159312 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=1.03
+[Manufacture] Team1 arrows worker_rate=1.03
+[Manufacture] Team1 arrows worker_rate=1.03
+[Manufacture] Team1 arrows worker_rate=1.03
+[Manufacture] Team1 arrows worker_rate=1.03
+[Manufacture] Team1 arrows worker_rate=1.03
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.04
+[Reaction] Person11 離團自立流亡 Team3 at (5,5)
+[Tick 2220] Person 11 (leader/team3) → N1_flee | stress=0.70 loyalty=0.26
+[Manufacture] Team1 arrows worker_rate=1.04
+[SoloAI] Team3 → 投靠 (併入)
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.04
+[Manufacture] Team1 arrows worker_rate=1.05
+[Manufacture] Team1 arrows worker_rate=1.05
+[Tick 2580] Person 10 (civilian/team1) → N1_flee | stress=0.70 loyalty=0.20
+[Manufacture] Team1 arrows worker_rate=1.05
+[Manufacture] Team1 arrows worker_rate=1.05
+[Manufacture] Team1 arrows worker_rate=1.05
+[Manufacture] Team1 arrows worker_rate=1.05
+[Tick 2820] Person 10 (civilian/team1) → P2_produce | stress=0.20 loyalty=0.12
+[DayNight] Day 2 開始
+[Move] Team 3 抵達 (5,5)
+[Manufacture] Team1 arrows worker_rate=1.05
+[Order] Team1 sell material ×999978 (oid=4)
+[Order] Team1 sell tools ×999999 (oid=5)
+[Tick 2880] Person 10 (civilian/team1) → N1_flee | stress=0.00 loyalty=0.10
+[TickPerf] day=2 avg=380 us max=123478 us ticks=1440 teams=2 factions=0
+[Manufacture] Team1 arrows worker_rate=1.05
+[Tick 2940] Person 10 (civilian/team1) → P2_produce | stress=0.10 loyalty=0.08
+[Manufacture] Team1 arrows worker_rate=1.06
+[Move] Team 3 抵達 (5,5)
+[Manufacture] Team1 arrows worker_rate=1.06
+[Tick 3060] Person 10 (civilian/team1) → N1_flee | stress=0.00 loyalty=0.04
+[Manufacture] Team1 arrows worker_rate=1.06
+[Tick 3120] Person 10 (civilian/team1) → P2_produce | stress=0.10 loyalty=0.02
+[Manufacture] Team1 arrows worker_rate=1.06
+[Manufacture] Team1 wagons worker_rate=1.06
+[Tick 3240] Person 10 (civilian/team1) → N1_flee | stress=0.00 loyalty=0.00
+[Manufacture] Team1 wagons worker_rate=1.06
+[Order] Team3 buy food ×3 (oid=6)
+[Tick 3300] Person 10 (civilian/team1) → P2_produce | stress=0.10 loyalty=0.00
+[Manufacture] Team1 wagons worker_rate=1.06
+[Move] Team 3 抵達 (5,5)
+[Manufacture] Team1 wagons worker_rate=1.06
+[Tick 3420] Person 10 (civilian/team1) → N1_flee | stress=0.00 loyalty=0.00
+[Tick 3480] Person 10 (civilian/team1) → P2_produce | stress=0.10 loyalty=0.00
+[Move] Team 3 抵達 (5,5)
+[DayNight] Day 3 開始
+[Move] Team 3 抵達 (5,5)
+[TickPerf] day=3 avg=335 us max=96244 us ticks=1440 teams=2 factions=0
+[Move] Team 3 抵達 (5,5)
+[Move] Team 3 抵達 (5,5)
+[Move] Team 3 抵達 (5,5)
+[DayNight] Day 4 開始
+[Move] Team 3 抵達 (5,5)
+[TickPerf] day=4 avg=295 us max=93754 us ticks=1440 teams=2 factions=0
+[Move] Team 3 抵達 (5,5)
+[Outpost] Team1 設施施工 farming → Lv1 at (5,5)
+[Move] Team 3 抵達 (5,5)
+[SoloAI] Team3 → 投靠 (併入)
+[Move] Team 3 抵達 (5,5)
+[DayNight] Day 5 開始
+[Move] Team 3 抵達 (5,5)
+[TickPerf] day=5 avg=358 us max=104401 us ticks=1440 teams=2 factions=0
+[Move] Team 3 抵達 (5,5)
+[Move] Team 3 抵達 (5,5)
+[DayNight] Day 6 開始
+[TickPerf] day=6 avg=318 us max=58103 us ticks=1440 teams=2 factions=0
+[Order] Team1 buy food ×3 (oid=7)
+[DayNight] Day 7 開始
+[Salary] Team3 薪水結算 coin=0.0
+[TickPerf] day=7 avg=301 us max=79252 us ticks=1440 teams=2 factions=0
+[SoloAI] Team3 → 紮營 (紮營)
+[Order] Team3 buy food ×3 (oid=8)
+[Outpost] 設施完工 farming Lv1 at (5,5)
+[DayNight] Day 8 開始
+[Move] Team 3 抵達 (6,5)
+[CampL0] Team3 紮營 L0 @(6,5)
+[TickPerf] day=8 avg=330 us max=90446 us ticks=1440 teams=2 factions=0
+[Order] Team1 sell material ×999948 (oid=9)
+[Order] Team1 sell tools ×999999 (oid=10)
+[Move] Team 3 抵達 (6,5)
+[DayNight] Day 9 開始
+[TickPerf] day=9 avg=268 us max=54041 us ticks=1440 teams=2 factions=0
+[DayNight] Day 10 開始
+[TickPerf] day=10 avg=241 us max=45197 us ticks=1440 teams=2 factions=0
+[SoloAI] Team3 → 紮營 (紮營)
+[DayNight] Day 11 開始
+[TickPerf] day=11 avg=303 us max=100711 us ticks=1440 teams=2 factions=0
+[Move] Team 3 抵達 (6,5)
+[Order] Team1 buy food ×3 (oid=11)
+[Outpost] Team1 設施施工 stable → Lv1 at (5,5)
+[DayNight] Day 12 開始
+[TickPerf] day=12 avg=273 us max=47125 us ticks=1440 teams=2 factions=0
+[Order] Team3 buy food ×3 (oid=12)
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=294 us max=44809 us ticks=1440 teams=2 factions=0
+[SoloAI] Team3 → 紮營 (紮營)
+[Order] Team1 sell material ×999908 (oid=13)
+[Order] Team1 sell tools ×999999 (oid=14)
+[DayNight] Day 14 開始
+[Salary] Team3 薪水結算 coin=0.0
+[TickPerf] day=14 avg=395 us max=117847 us ticks=1440 teams=2 factions=0
+[Move] Team 3 抵達 (6,5)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=15 avg=336 us max=80324 us ticks=1440 teams=2 factions=0
+[DayNight] Day 16 開始
+[TickPerf] day=16 avg=318 us max=67504 us ticks=1440 teams=2 factions=0
+[Order] Team1 buy food ×3 (oid=15)
+[DayNight] Day 17 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=17 avg=453 us max=127582 us ticks=1440 teams=2 factions=0
+[Move] Team 3 抵達 (6,5)
+[DayNight] Day 18 開始
+[TickPerf] day=18 avg=363 us max=59559 us ticks=1440 teams=2 factions=0
+[Order] Team3 buy food ×3 (oid=16)
+[DayNight] Day 19 開始
+[TickPerf] day=19 avg=287 us max=47299 us ticks=1440 teams=2 factions=0
+[Order] Team1 sell material ×999908 (oid=17)
+[Order] Team1 sell tools ×999999 (oid=18)
+[CorveeL1] Team3 L0→L1 紮根工期 @(6,5) civilian (4320 person-ticks)
+[SoloAI] Team3 → 建設 (紮根)
+[DayNight] Day 20 開始
+[TickPerf] day=20 avg=446 us max=151375 us ticks=1440 teams=2 factions=0
+[Move] Team 3 抵達 (6,5)
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Salary] Team3 薪水結算 coin=0.0
+[TickPerf] day=21 avg=316 us max=60231 us ticks=1440 teams=2 factions=0
+[Order] Team1 buy food ×3 (oid=19)
+[DayNight] Day 22 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=22 avg=305 us max=51620 us ticks=1440 teams=2 factions=0
+[SoloAI] Team3 → 建設 (紮根)
+[DayNight] Day 23 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=23 avg=390 us max=111704 us ticks=1440 teams=2 factions=0
+[Move] Team 3 抵達 (6,5)
+[Order] Team3 buy food ×3 (oid=20)
+[DayNight] Day 24 開始
+[TickPerf] day=24 avg=331 us max=80723 us ticks=1440 teams=2 factions=0
+[DayNight] Day 25 開始
+[TickPerf] day=25 avg=337 us max=83138 us ticks=1440 teams=2 factions=0
+[Order] Team1 sell material ×999908 (oid=21)
+[Order] Team1 sell tools ×999999 (oid=22)
+[SoloAI] Team3 → 建設 (紮根)
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=26 avg=720 us max=110752 us ticks=1440 teams=2 factions=0
+[DayNight] Day 27 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Death] Person11 (team3) 餓死
+[Order] Team1 buy food ×3 (oid=23)
+[Extinct] Team3 滅團清除（遺財已路由）
+[TickPerf] day=27 avg=908 us max=95633 us ticks=1440 teams=1 factions=0
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=28 avg=254 us max=43082 us ticks=1440 teams=1 factions=0
+[DayNight] Day 29 開始
+[TickPerf] day=29 avg=378 us max=174465 us ticks=1440 teams=1 factions=0
+[DayNight] Day 30 開始
+[TickPerf] day=30 avg=291 us max=64363 us ticks=1440 teams=1 factions=0
+=== s7_lod_neutrality_bed === mode=near days=30 ticks=43200 player_pos=(5, 5) team_pos=(5, 5)
+母體：population=1｜manufacturing_level=2｜material剩餘=999274.4
+── manufacture.output.* 原始總量+每日 ──
+  manufacture.output.arrows      總量=5.4571  每日=0.1819
+  manufacture.output.wagons      總量=0.2123  每日=0.0071
+── 輔助診斷(manufacture三桶，看是no_facility/no_material/fired哪一種) ──
+  fired                總數=57
+  noop_no_outpost      總數=457
+  noop_no_worker       總數=166
+  noop_no_facility     總數=0
+  noop_no_material     總數=663
+=== s7_lod_neutrality_bed DONE ===
+

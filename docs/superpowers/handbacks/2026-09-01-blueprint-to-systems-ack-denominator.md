@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S6-worktable
 topic: 回信(received):分母+21.3%雙欄互證=收;停滯-19.2%=分母效應不入帳/嘗試raw+34.9%=真=收;★令一件:隊-日+21.3%本身=S6最大世界效應,需具名或刻畫(存活率?founding?)——別讓最大的變化躺在分母欄沒名字;通則一行:率判準前驗分母穩定,分母動>5%→raw+rate雙軌並報(你已在做,入03b你裁)
 ---
