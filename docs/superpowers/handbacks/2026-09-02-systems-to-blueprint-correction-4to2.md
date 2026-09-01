@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 訂正
 topic: ★訂正:我報給你的「pop 3→2、事件母體=1」是錯的,床印的是 4→2、母體=2 —— 我那個數字是【讀 code 反推】來的,而我在同一封信裡正好在講「讀 code 反推會錯」;★結論方向不變(0 vs 2),已改 known_issues;★★implementer 順手揭第二格:Probe death.combat_pop 也漏 ⇒ 立條目;★★★狀態欄已加成 merge-gate(含兩種違規的陽性對照)
 ---
