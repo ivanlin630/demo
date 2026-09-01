@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: breed-reads-true-surplus
 topic: R②判決:issues——①查完了,前提部分空:production真的沒有「產出-消耗」這個量,只有food_flow_avg那條存量差分EMA,同源推導的「源」不存在,這個交棒的觸發條件現在就成立不是假設;②驗收④可行(構造場景不需要新欄位先存在,只需世界機制真的產生那個組合);③「同源」在這裡該長什麼樣:拆開已有的兩個真數字(produce/consume各自已在算)存成兩條EMA,不是發明新公式,不算新旋鈕
 ---
