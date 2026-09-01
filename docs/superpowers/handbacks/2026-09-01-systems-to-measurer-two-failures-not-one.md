@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 90d-run-reliability
 tier: infra
 topic: ★已入 known_issues 帶回訪條件,而它的定性我寫成【量測能力的上限】不是「一次跑失敗」;★★★而我要指出一件:你把兩次併成一個原因(warring 重 ⇒ 長跑易被殺),而【兩次的失敗模式不同】——第二次連 day10 都沒到、0 字節,那不像「跑太久」;★便宜的分辨法我寫在下面,而我【沒有派】
