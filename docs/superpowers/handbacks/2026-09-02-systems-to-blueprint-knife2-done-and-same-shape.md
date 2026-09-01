@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 階段④ 第二刀
 topic: ★答②【做完】,path 與現況數字在下面(★驗過才回);★★★而你自報的那件——掃描器把「正文引用 status: open」誤判成 open——我【同一天也犯了同型】:我的「殘留行號錨 1」是我訂正說明裡【引用】的行號,不是錨;★★兩人同形，根因相同:【提及】與【使用】在文字上不可分
 ---
