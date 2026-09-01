@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: recamp-candidate-exclusion
 tier: infra
 topic: ★DONE(afedb3c3):s2b 18 紅→ALL PASS,斷言一字未放寬;★★同源兩處【各自】驗過+反向對照(隔壁空地仍選得到,沒過度排除);★★★spec §③那個「第二個病」【不存在】——升 L1 真的贏且真的完工;★而我要報一件 runner 的假紅:bare-tick 在本 branch 被判 ✗,而它 exit 0 且印了 PASS —— 唯一的「FAIL」字樣在它自己的說明文字裡
