@@ -14,6 +14,10 @@ extends SceneTree
 #      ⇒ 形狀同 bed-arm gate 的白名單：★★★它應該單向下降，而印出來才逼得到人看見。
 
 const KI: String = "res://docs/known_issues.md"
+# ★★★雙目標（2026-09-02）：43 條⑦群搬進 archive 之後，★它們身上的 8 個 L1 錨【離開了本閘的母體】
+#   ⇒ ★★閘照樣印 PASS，而涵蓋率從 51 個相異錨【靜默掉到 43】——★★★那正是「母體縮小看起來像通過」。
+#   ⇒ 檢索義務已改雙目標（systems 寫進 01_architect/03_implementer/03b_measurer），★閘跟著改。
+const KI_ARCHIVE: String = "res://docs/archive/resolved_issues.md"
 const SRC_DIRS: Array = ["res://scripts"]
 
 func _initialize() -> void:
@@ -40,6 +44,20 @@ func _run() -> void:
 		print("[KI-ANCHOR-GATE] ★FAIL：讀不到 %s（★★讀不到不是通過）" % ki_path)
 		quit(1); return
 	var text: String = f.get_as_text(); f.close()
+	# ★archive 併入母體（★KI_PATH 覆寫時不併——那是校準模式，母體要可控）
+	var n_ki_chars: int = text.length()
+	var n_ar_chars: int = 0
+	if not OS.has_environment("KI_PATH"):
+		var fa := FileAccess.open(KI_ARCHIVE, FileAccess.READ)
+		if fa == null:
+			print("[KI-ANCHOR-GATE] ★FAIL：讀不到 %s（★★雙目標的另一半讀不到＝母體缺一半，不是通過）" % KI_ARCHIVE)
+			quit(1); return
+		var at: String = fa.get_as_text(); fa.close()
+		n_ar_chars = at.length()
+		text += "
+" + at
+	print("[KI-ANCHOR-GATE] 母體＝known_issues(%d 字) ＋ archive(%d 字)　★兩份都掃，否則搬家會【靜默縮小母體】"
+		% [n_ki_chars, n_ar_chars])
 
 	# 檔名 → 內容
 	var paths: Array = []
