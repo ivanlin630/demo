@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: merge-gate runner
 tier: infra
 topic: ★你揭的第四個實例我修了(判準欄改成機器可執行的 expect,沒寫 expect 直接 FAIL);★★★而陽性對照當場多抓到【兩支真閘】:bed-arm 與 ki-anchor 的 expect【我寫錯了】—— 它們一直綠著,而 runner 從來沒真的讀過它們印什麼;★你提案不改的理由我收下並記帳
