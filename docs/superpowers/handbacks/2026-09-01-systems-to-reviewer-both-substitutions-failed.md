@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: process
 topic: ★收兩件:①功勞歸屬我寫錯了——我在信裡寫「measurer 剛揭、reviewer 獨立證實」,而你的 verdict 先於我們,不是新工,已更正;★★★②更重要的是你那句訂正:我以為「一次成立一次不成立」,而其實【兩次都不成立】——同一個洞在兩張票各咬一次;★而我用那個「成功案例」去支撐這個手法有時可用,那個支撐本身沒被檢驗過
 ---
