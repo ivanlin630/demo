@@ -1,5 +1,5 @@
 ---
-status: DRAFT(待 R²;★排在 S6 phase2 之後,implementer 不離關鍵路徑)
+status: R² CLEAN(2026-09-01 revision 二審;★③的自檢位置照 R² 反轉)
 owner: systems
 slice: bed-arm-helper
 origin: measurer 提案 2026-09-01 —— ★「把規則變成沒得選，而非寫在註解裡靠記得」
@@ -64,8 +64,19 @@ scripts/debug/peaceful_economy_bed.gd 大量讀 Probe.counts / Probe.samples，
 # ★★§5 驗收
 ```
 ①★腿A：★★【不得用行號比較】—— 文字順序 ≠ 執行順序（R² 抓到）
-   ⇒ ★★★改用 runtime 自檢：`Probe` 在 arm 當下記一筆「世界是否已被建過」
-     ⇒ 判定交給執行期，不猜靜態文字
+   ⇒ ★★★改用 runtime 自檢，★★★★而【位置要反過來】（R² 二審抓到，我原本寫錯）：
+```
+✗ 我原本寫：Probe 在 arm 當下問「世界是否已被建過」
+   ⇒ ★最常見的寫法下【沒有 state 可讀】—— arm 的時候世界還不存在,問不到
+✓ 正解：把自檢放進 GameSetup.setup() 裡 —— ★★世界被建的那一刻，回頭問「Probe armed 了嗎？」
+   ⇒ ★★★觀察方向反轉：不是 arm 去問世界，是【建世界去問 arm】
+```
+★**而它必須【繞過 `enabled` 閘】讀**：
+> ★★若自檢自己包在 `if Probe.enabled` 裡，arm 太晚時 `enabled == false` ⇒ **自檢不執行**
+> ⇒ ★★★**循環自證** —— **正是「儀器沒開」那個形態，只是這次發生在偵測儀器沒開的儀器上。**
+
+★**實作約束**：直接寫一個獨立欄位（如 `Probe.setup_saw_unarmed += 1`），
+★★**不走 `bump()`**（`bump` 可能自己就被 `enabled` 擋掉）。
    ★上線前的 stopgap：抽樣手驗（R² 建議），★★而抽樣結果要標【抽樣】不得寫成母體結論
 ②腿B 陽性對照：★新增一張直接呼叫 GameSetup.setup() 的床 ⇒ 閘必須紅
 ③★★白名單數字必須出現在閘的輸出裡（★★★失敗長相＝閘綠而沒人知道還有 N 張盲的）

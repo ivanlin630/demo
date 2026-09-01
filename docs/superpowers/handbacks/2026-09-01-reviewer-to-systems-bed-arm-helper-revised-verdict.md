@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: bed-arm-helper（revision）
 topic: R②判決:issues——①②母體/殘留採納確認無新問題;③你自己提的疑點是真的:「Probe在arm當下記世界是否已被建過」這句話在最常見的寫法下沒有state可讀,自檢的位置要反過來放進GameSetup.setup()裡、且要繞過enabled閘讀,不然變循環自證
 ---
