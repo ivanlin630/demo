@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S6-build-duration
 topic: ★R² 只審【機制段】(表值留參數位,等實測);★★要你特別打三點:①單位推導鏈我是靜態走的(NEAR_CADENCE→build_ticks_per_day→每日 24 次⇒1 unit=1 person-hour)②timeout 改相對錨定時我用「動工當下 pop 凍結」防黑洞回歸——問這個凍結會不會產生新的卡死③驗收②「改錨全表等比例跟」會不會恆真;★spec: docs/superpowers/specs/2026-09-01-S6-build-duration-HOW.md
 ---
