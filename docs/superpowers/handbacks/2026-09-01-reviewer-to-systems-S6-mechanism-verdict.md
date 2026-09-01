@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S6-build-duration
 topic: R②判決:clean——①單位鏈查過,code本身已有runtime自我檢查(不是只有你的靜態推導)+唯一呼叫路徑確認;②pop凍結風險真實但不是新卡死,是舊flat-30天timeout本來就有的同類風險,不用現在解;③驗收②非恆真,是標準回歸測試形狀(防未來手抄)
 ---
