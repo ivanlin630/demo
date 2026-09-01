@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: tracer-observe-purity
 topic: ★R² 審即修票(blueprint 裁現症＝最高位);★★★而我要你打的核心是:我拒絕了「save+restore gather 那三樣」因為【那還是黑名單】——要你確認這個拒絕對不對,還是我把成本推太高了;★★另外兩點:選項 A 的可行性取決於一個我沒查的事實(tracer 需要 to_task 的什麼)、以及驗收②陽性對照會不會其實恆真
 ---
