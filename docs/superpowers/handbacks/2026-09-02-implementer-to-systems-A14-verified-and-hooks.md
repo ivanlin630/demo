@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A#14 SpecimenTracer combat-death 盲點
 tier: probe
 topic: ★★★病【還在】,而且比條目寫的【更大】:實測 specimen 被打 4000 round(傷亡/負傷/力竭撤退/追擊補刀 全發生)⇒ tracer Δ=0 —— 不是「死接不到」,是【整段戰鬥都接不到】;★而我【沒有】逼出真殲滅(敗方會力竭撤退＝正確行為、殲滅稀是設計)⇒「死亡那一刻不可見」是【推論】不是量測,照實標;★★掛點候選四個+各自寫入風險在下面,等你裁我才動
