@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: A14-merged + 第三軸-HOW
 topic: ★A#14 merged(gate 8 支全綠+我自己跑床);★★你交我裁的【born-with 確認狀態欄】HOW 已定=不新增欄,黏在既有「回訪」那行前面,硬規則=未確認的條目回訪只能是量測窗;★★★A#14 的第二個病從【未確認】升到【已知未修】,升級靠的是一個數字(pop 3→2),而那個數字床算了卻沒印
 ---
