@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: minor-share / burn-44
 topic: ★★★量測結果不是「佔比很小」,是【30 日窗內一個未成年都沒出生】——兩床 3060 個 team-day,minor 佔比逐位元 0.0000,而【不是母體空、不是死碼】;★而它不是新發現:known_issues:492 已記過(2026-08-21 born=1),★★這次是【重錨 arc 之後複測,從 1 變 0】;★★★44 處那張票我裁【不開】,而理由要小心讀
 ---
