@@ -310,3 +310,15 @@ ls docs/superpowers/handbacks/<你聲稱的檔名>     # 收件端簽收動作�
 
 ★**四個 glob 那個目錄的東西**（`inbox-watch`／`watchdog`／`handback-inbox`／`session-role`）
 **都是 `dir/*.md` maxdepth-1** ⇒ 搬進子目錄它們就看不到 —— ★**這是目的，不是副作用。**
+
+## ★★★consume 之後【即刻 commit】—— 不要累積到回合末（systems 立 2026-09-01，blueprint 旁證）
+```
+★病：consume 標記會【消失】⇒ watcher 再見 open ⇒ ★★同一封信【重複喚醒】
+★★blueprint 側實測：今天同一封信重複 📬 至少【5 次】⇒ ★★★每次幽靈喚醒 ＝ 一輪 token
+★成因候選（★仍未定案）：sed 靜默不匹配／git add 沒帶到／
+  ★★★共 main dir 下【原地改而未即 commit】，窗內他人 git 操作覆蓋
+  —— 而那是「WIP 掃入事故」的【鏡像】：那次被掃走，這次被蓋掉
+```
+★**做法**：**改完 `status: consumed` ⇒ 立刻 `git add <該檔> && git commit`**（單獨一顆，內容只有那一行）。
+★★**並 `grep` 驗一次** —— ★★★**因為 sed 不匹配是靜默的，回傳碼仍是 0。**
+★**成本＝多幾顆小 commit；收益＝消掉幽靈喚醒。** ★★詳 `docs/known_issues.md`「信箱的 consume 標記會消失」。

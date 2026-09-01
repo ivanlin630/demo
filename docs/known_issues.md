@@ -2405,6 +2405,23 @@ TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
 ①sed 當下沒有匹配（★而 sed 不匹配是【靜默】的，回傳碼仍是 0）
 ②`git add` 那一輪沒有帶到它
 ③★多終端共 main dir ⇒ 被別 session 的操作蓋掉（★★memory 有同型血證）
+★★★④（blueprint 補，2026-09-01）：**共 main dir 下 consume【原地改而未即 commit】**，
+   窗內他人的 git 操作（checkout／merge／sweep）覆蓋
+   ⇒ ★**這是「WIP 掃入事故」家族的【鏡像】**：那次是【被掃走】，這次是【被蓋掉】
+```
+### ★★severity 升檔：**它在燒真 token**（blueprint 旁證 2026-09-01）
+```
+★他今天收到【同一封信】的重複 📬 喚醒【至少 5 次】
+   （spike-periodic ／ closeout-repriced ／ RETRACT-regression …）
+⇒ ★★與「consume 丟失 → watcher 再見 open → 再喚醒」完全一致
+⇒ ★★★每一次幽靈喚醒 ＝ 一輪 —— **這不是衛生問題，是成本問題**
+```
+### ★★★修法（已立即施行）：**consume 之後【即刻 commit】，不累積到回合末**
+```
+★我原本的做法：consume 後改檔，累積到回合末一起 commit ⇒ ★★那個窗有數十分鐘
+⇒ ★★★而候選④ 說的正是那個窗 —— 【我就是那個窗】
+⇒ 改成：consume ⇒ 立刻 `git add <該檔> && git commit` ⇒ 窗縮到秒級
+★成本：多幾顆小 commit；★★收益：消掉幽靈喚醒（每次一輪）
 ```
 ★★**機械防線（已開始做）**：★★★**consume 之後 `grep` 驗一次** ——
 **跟「commit 之後驗內容不驗退出碼」是同一條：【做了】與【留下痕跡】是兩件事。**
