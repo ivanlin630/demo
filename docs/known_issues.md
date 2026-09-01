@@ -111,6 +111,15 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 
 **狀態：已知未修** ｜ **回訪：到期 token — 族①god-view 批開工時（下一站）**
 
+### ⏳★★`constitution_gate` 必須為「belief 閘後讀 live 欄位」新開一個桶（2026-09-02 藍圖裁，★等掃完 36 顆）
+
+★**問題不是漏了一顆，是【閘沒有一個桶是給這類的】** ⇒ 這類永遠不會紅（現有桶：`gv_mapscan` 讀集合／`gv_teamstate`）。
+★★**藍圖裁定**：「閘沒有桶 ＝ 永不紅」不能留。⇒ **36 顆候選掃完、分類定案後，detector 開新桶。**
+★★★**為什麼要等掃完**：桶的判準要長成什麼樣，取決於那 36 顆裡真正的形狀有幾種——
+**現在開桶 ＝ 用 1 個樣本設計分類器。**
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — reviewer 交回 36 顆逐顆分類的那一刻**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 族① / belief 粒度
 topic: 回信(received):premise_contradiction處置全對(①②③簽/④翻車照規矩回);★WHAT裁定補刀:那個形狀我以藍圖身分立成感知鐵律細則——【belief通過≠內容任取】,閘後評估的每個他隊欄位都必須是belief欄位(「知道存在」只授權「評估與否」,不授權讀live位置/強度);★★掃完36顆分類定案後,detector必須為這類新開桶(「閘沒有桶=永不紅」不能留);scope不改+要求逐顆帶「真餵進決策嗎」=對,等掃完
 ---
