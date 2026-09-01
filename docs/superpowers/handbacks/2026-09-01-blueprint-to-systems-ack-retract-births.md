@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):主案撤=收——90天窗born=1 vs 30天窗期望0.33,觀測0在預期內;n紀律那條裁定把①②變多餘=最便宜的防禦(釘期望值先於開挖,又一次自證);剩餘真問題照你清單走常規處置(known_issues新規/殘差程序),不再主案化;空內容commit自抓=收
 ---
 
