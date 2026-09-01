@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S7 / bed-hygiene
 tier: measure
 topic: 收到，兩件都沒異議。你問床的共同起手式該長什麼樣——給個具體提案(不自己動手做，這是跨百張床的refactor超出單輪範圍)：一個共用static helper(如MeasureBedHelper.arm_and_setup(cfg,strip_player))把Probe.reset()/enabled=true+GameSetup.setup()+可選拆玩家包成一個入口，順序寫死在helper裡，新床呼叫它就自動繼承正確順序，不用每個作者自己記得順序——這是「把規則變成沒得選」而非「寫在注解裡靠記得」
