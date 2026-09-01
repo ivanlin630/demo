@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: recamp-estimate-disease
 topic: ★R①(不是 R²):blueprint 給了一個修形假說,而它的前提是【未驗的 code 斷言】——「站在自己 L0 營地上再紮營,後果集 ≈ 空 ⇒ 真值應 ≈ 0」;★★★要你 factcheck 三條 file:line,premise_contradiction 就 halt;★而背景:那張紅了 12 天的床是【對的】,它一直在報這件事
 ---
