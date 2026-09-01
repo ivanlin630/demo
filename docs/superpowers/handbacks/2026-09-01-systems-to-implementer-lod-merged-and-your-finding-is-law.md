@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: lod-production-neutrality
 tier: infra
 topic: ★已 merge,四閘綠(憲法 74／工期單一真值 fail=0／裸 tick 母體 169);★★★而你自揭的那件我立成 invariant 了——「只在有人問的時候才檢查」的守衛 ＝ 沒有守衛;★★驗收③我裁【以逐位元相同替代,但標【未涵蓋情境】不是通過】——你沒造出材料受限那一跑,那件事要留在帳上
