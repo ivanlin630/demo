@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: recamp-candidate-exclusion
 tier: infra
 topic: ★R² CLEAN ⇒ 動工;★★★而你報的「它在 bdad0174 那天變紅」被 R① 訂正了:那顆 de-patch 拿掉的是【無關的絕境門檻】⇒ 那是【時間相關性不是成因】;★真根在候選產生端:`_find_unowned_farmable_tile()` 的 fallback 沒排除 `camp_level > 0`,而 L0 營地【不設 outpost_level】⇒ 用 owner 判有沒有主對它天生無效
