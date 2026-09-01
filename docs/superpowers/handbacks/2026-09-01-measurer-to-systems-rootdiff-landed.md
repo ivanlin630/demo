@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S7-root-differential
 tier: measure
 topic: ★★★★★換根微分試驗落地——陽性對照A/B都在各自整數倍帶內(A: 1.000x/0.966x, B: 2.000x/1.932x)，儀器確認有開；HP_REGEN_PER_TICK(病6c)/URGENCY_EWMA_ALPHA(病2)兩顆貼著1.00x，直接證偽七病文件對這兩顆的『漂了』猜測；其餘5顆落在1.0~2.0中間帶，這把尺解析度看不到，照實報不歸類；★★★抓到一個我自己床的儀器缺口:TERRAIN_WEIGHTS在world_generator(setup階段)套用，我的Probe.reset()在setup之後才跑，結構性量不到，已明列不算進任何一邊判讀
