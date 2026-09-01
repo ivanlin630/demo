@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 階段④ / ④群
 topic: ★④真 backlog ＝【37 條】,表已落地 docs/measurements/2026-09-02-group4-backlog-axes.md;★★★而我【不排序】——我只把【條目自己說的話】整理成四個可排序的欄,排序是你的;★★而表本身有一個訊號:37 條裡【28 條四軸皆空】—— 它們沒有說自己憲法級、沒有修法、沒有期限、也沒說自己不急
 ---
