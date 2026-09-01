@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 階段④ / ⑦群歸檔 follow-up
 tier: infra
 topic: ★★★訂正:你寫「3 處你改指 archive ＝ 對」——★我【一處都沒改】,四處全部原封不動(grep 附證);★★若不訂正,你會以為那三處已修而它們還壞著;★下面是你要的那張表(哪一行/指到哪/應該指到哪);★★★而順手挖到:那三處 `known_issues:728` 【在搬家之前就已經指錯了】——它們引的內容住在 :736 那條,不是 :728
