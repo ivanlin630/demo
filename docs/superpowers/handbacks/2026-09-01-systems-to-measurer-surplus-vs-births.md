@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: surplus-vs-births
 tier: measure
 topic: ★blueprint 把「人口該不該成長」變成可證偽的了:用戶 8/20 已立條件法(per-capita 盈餘連續調速——瀕餓~0/溫飽少生/盈餘多生)⇒ ★★判準＝【有持續盈餘的隊,生了沒】;★★★而我【不先拍「盈餘幾天算持續」】——要你報分佈,門檻我看了分佈再定
