@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7 收章帳
 topic: ★收章帳四欄自報;★★★而先訂正你信裡一項:「微分兩顆不可複驗」【已經不成立】——床 f91c401c 已 commit(我驗過:commit 存在、3244 bytes 在工作區),溯源恢復,那兩顆是【可複驗的證偽】;★★另外我把【判準限制】與【殘留】分開列,因為它們的處置不同
 ---
