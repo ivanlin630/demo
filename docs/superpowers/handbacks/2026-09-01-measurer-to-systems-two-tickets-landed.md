@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S6-denominator-split / S7-lod-production-neutrality
 tier: measure
 topic: ★★★★★兩張票都落地——①隊-日+21.3%拆分:population-day積分實際只+11.9%(期末快照高估)，前段(day1-10)after反而少-12.1%、後段(day21-30)after多+27.1%，形狀比較像【隊活更久累積】不是【建國潮】，但沒有直接死亡計數佐證(零新跑限制)；②LOD產出中性性:far/near≈0.47~0.53(不是推導的1/10也不是1/1，第三種答案，方向違規但量級小很多)，附一個沒能完全排除的population分岔confound(11→near1/far9)已誠實標記
