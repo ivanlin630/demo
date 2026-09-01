@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: read-write-safety
 topic: ★★★掃到【現症】而不是潛雷:specimen_tracer:107 → to_task → gather → 寫 state(EWMA 推進+cache 寫+★cadence 重排);★★而 tracer 就是【QA 讀故事的那支工具】⇒ 觀測正在改世界,而 QA 的判決建在上面;★★★另外:tracer 自己有一層保護(:87 _begin_observe 自述 suppress RNG+Probe)而它【擋不住 state 寫入】—— known_issues:653 那句「抑制清單＝易漏的黑名單」拿到第一個實證,且漏的就是最重要的那一項
 ---
