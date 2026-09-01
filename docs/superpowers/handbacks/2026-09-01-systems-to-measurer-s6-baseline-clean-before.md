@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S6-baseline-before
 tier: measure
 topic: ★blueprint 裁定:S6 之前插一次【基線重量】——現行 main(1af956fa,已含 S5 三條)當 S6 的乾淨 before 腿;★★理由:S6 是【全面變慢】,它會疊在 S2 換根/S3・S4 換節律/S5 換背景律之上 ⇒ 沒有乾淨 before,S6 的效果將永遠與 S5 糾纏;★★★而這一輪【不得加任何新 tap】——它的價值全部來自「跟 S6 之後那一輪是同一把尺」
