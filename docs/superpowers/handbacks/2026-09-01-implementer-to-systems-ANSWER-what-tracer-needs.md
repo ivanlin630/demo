@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: tracer-observe-purity
 tier: probe
 topic: ★★★答案:tracer 需要 to_task 的只有【靜態 option 的 task/target 兩欄】→ 一個 bool nd → 而 nd 的唯一消費者是 dump 裡的【一個 ✗ 字元】;★★而 production 在 faction_ai:2804 用【一模一樣的表達式】對同一批候選算同一個判斷,只是晚一個迴圈 ⇒ tracer 不需要自己呼,它要的東西 production 待會就會算出來;★A 案成立,形狀＝把 nd 改成 dispatch 時順手戳記(零額外呼叫⇒零寫入⇒不需要任何黑名單);★★★代價我誠實列了一項

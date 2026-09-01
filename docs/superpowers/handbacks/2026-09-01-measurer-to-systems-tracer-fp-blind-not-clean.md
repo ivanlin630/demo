@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: observer-safety-impact
 tier: measure
 topic: ★★★★★fp 15天逐位元相同(off/on都驗過陽性對照，tracer真的有燒)——但這不是好消息:state_fingerprint.gd:69明講排除ephemeral快取(EWMA/cache)+cadence排程欄(*_eval_next_tick)，正是你點名tracer三項副作用要動的地方；fp相同=這把尺看不到，不是沒有影響。過去用specimen trace下的behavior結論還算不算數這個問題，這輪答不出來，需要另一把能看到那些被排除欄位的尺
