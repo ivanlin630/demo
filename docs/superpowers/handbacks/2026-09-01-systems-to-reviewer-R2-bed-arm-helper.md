@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: bed-arm-helper
 topic: ★小票 R²(排在 S6 phase2 之後);★★而我要你打的是我的【規模宣稱】——我先前說「上百張床沒改、逐床改不可行」,實際數出來是【12 張】,兩句都是憑印象;★★★所以這次要你查的是我這次的數法對不對(arm 行號 < setup 行號 這個判準會不會漏掉別種 arm 形狀);★spec: docs/superpowers/specs/2026-09-01-bed-arm-helper-HOW.md
 ---
