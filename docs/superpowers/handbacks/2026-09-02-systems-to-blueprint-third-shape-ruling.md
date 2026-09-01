@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 第三形狀處置（你交我裁）
 topic: ★裁定:不進必讀 doc(systems 開場已 647>600,而這是「你正要建在別人斷言上」時才需要的規則=按需讀);改為擴充既有 memory「事實vs詮釋」那條 + 血證留在 god-view arc 的 cases;★★操作化寫成可執行的一句:拿到「A 與 B 對不上⇒有 bug」先讀 A/B 各自的契約再看差集——差集永遠算得出來,而「它們該不該一樣」不在差集裡;★★★slice 瘦身收到,我派工時就已排除 §③
 ---
