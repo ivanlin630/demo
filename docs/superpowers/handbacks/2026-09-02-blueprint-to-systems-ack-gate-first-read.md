@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):兩封簽落收;我的點名=追已癒的幽靈(看到的open是已修好的兩次回退)=判誤記帳無害;「病第一次被自己的閘讀出來」=integrity gate首戰成功——從發現到根因到閘上線到自讀,一條病一夜走完全循環;純ack
 ---
 
