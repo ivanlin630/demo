@@ -6,7 +6,8 @@ const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
 const JOIN_ONBOARD_MEAL:  float = 0.8    # 一餐 ≈ FOOD_PER_PERSON_PER_DAY/3 (TEST VALUE)
 const TRAIN_COST_COIN: float = 30.0      # TEST VALUE — 一次訓練 coin（守恆:餉銀入公庫,非 sink）
 const TRAIN_EXP_GAIN:  float = 20.0      # TEST VALUE — 一次訓練給最低非菁英 tier 的 exp
-const CAMP_BUILD_TICKS: int   = 240      # TEST VALUE — 紮營 person-ticks（免材料但限時施工）
+const CAMP_BUILD_PERSON_HOURS: int   = 240      # TEST VALUE — 紮營 person-hours（免材料但限時施工）
+# ★★S6 §4 標記：與 BUILD_PERSON_HOURS 同屬【表以外的表】⇒ FACILITY_DEF 的錨推不動它。
 const CAMP_FOOD_CAP:    float = 40.0     # TEST VALUE — 紮營只抬 food cap（regen 產糧）,不送即時糧
 const AID_GIVE_DEFAULT: float = 5.0      # TEST VALUE — forced aid_request give 預設量（一餐量,免新增數值輸入 UI）
 
@@ -236,10 +237,10 @@ func _action_camp(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int)
 	if not os._check_distance(state, tile.tile_pos, camp_type):
 		return { "ok": false, "msg": "離既有據點太近,無法紮營" }
 	tile.construction_target = { "action": "crude_camp", "type": camp_type, "level": 1, "owner": pt.team_id }
-	tile.construction_ticks_left = CAMP_BUILD_TICKS
+	tile.construction_ticks_left = CAMP_BUILD_PERSON_HOURS
 	tile.construction_started_tick = -1
 	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_camp")
-	return { "ok": true, "msg": "開始紮營 %s（%d ticks,免材料）" % [camp_type, CAMP_BUILD_TICKS] }
+	return { "ok": true, "msg": "開始紮營 %s（%d 人時,免材料）" % [camp_type, CAMP_BUILD_PERSON_HOURS] }
 
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))

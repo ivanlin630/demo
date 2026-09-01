@@ -58,8 +58,13 @@ func _run() -> void:
 		_mk("const ENCOUNTER_STUCK_TICKS", "c_whitelist", "★遭遇軸：observer_bridge:31 比對 state.encounter_tick"),
 		_mk("const DECISION_CADENCE_MULT", "d_not_time", "multiplier：3 是【倍數】（×TICK_PER_DAY），本身不是時間量"),
 		_mk("const [A-Z_]+_DAYS", "c_whitelist", "★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退"),
-		_mk("const SURVIVAL_BUILD_MAX_TICKS", "c_whitelist", "★person-ticks 工量：與 cost[\"ticks\"] 同單位，每呼叫扣，不是世界時間"),
-		_mk("const CAMP_BUILD_TICKS", "c_whitelist", "★person-ticks 工量（註解自述），同上"),
+		_mk("const SURVIVAL_BUILD_MAX_TICKS", "c_whitelist", "★person-hours 工量：與 cost[\"person_hours\"] 同單位，每小時扣，不是世界時間（★名字仍說 TICKS：S6 §1 清單沒列它，已在 handback flag）"),
+		# ★退休（S6 §1 改名）：CAMP_BUILD_TICKS → CAMP_BUILD_PERSON_HOURS 之後，
+		#   它不再落入本 triage 的 *TICK* 母體 ⇒ 這條規則【零命中】＝死規則＝盲點。
+		#   ★分類沒有遺失：const_time_triage 的母體較廣，仍涵蓋它
+		#     （docs/measurements/2026-08-27-s1c-const-population.txt 有它的 c_whitelist 行）。
+		# ★★而【改名會靜默殺死 triage 規則】這件事本身，目前只有 b_defer 的零命中會被閘抓到；
+		#   c_whitelist 的零命中不會 —— 已在 handback flag 給 systems。
 		_mk("const DUMP_CHUNK_TICKS", "d_not_time", "批次大小：observer dump 一塊跑幾 tick，是【分塊粒度】不是【時長】（UI 側，不影響世界）"),
 		# ── 盲點修補後新出現的 "ticks" 族 ──
 		_mk("[=!]=\\s*\"ticks\"", "d_not_time", "key_filter：`if k == \"ticks\"` 是【欄位名比對】，同行的數字不是時間量"),

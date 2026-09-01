@@ -26,7 +26,7 @@ func _sole_pop(pop_seen: Dictionary) -> int:
 func _run() -> void:
 	var pop: int = int(OS.get_environment("BED_POP")) if OS.has_environment("BED_POP") else 1
 	var facility: String = OS.get_environment("BED_FACILITY") if OS.has_environment("BED_FACILITY") else "farming"
-	var cost: int = int((OutpostSystem.FACILITY_DEF[facility]["cost"] as Dictionary)["ticks"])
+	var cost: int = int((OutpostSystem.FACILITY_DEF[facility]["cost"] as Dictionary)["person_hours"])
 
 	var state := WorldState.new()
 	GameSetup.setup(state, GameSetup.load_config("res://config/peaceful_economy.json"))
