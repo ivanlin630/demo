@@ -1,15 +1,19 @@
 # docs/process/merge-gates.tsv —— ★merge-gate 註冊表（用戶裁「搬」2026-09-01；位置/格式 systems HOW 裁）
 #
 # ★★★這份檔【不是給人照著跑的清單】—— 是給 `.claude/hooks/merge-gates.sh` 讀的。
-#   ★理由：「要人照著跑的清單」會單向長大，然後沒人跑完整份（今天整天在數這個形狀）。
-#   ★★搬完之後【長大沒關係】，因為沒有人需要讀它 —— runner 讀。
+#   ★「要人照著跑的清單」會單向長大，然後沒人跑完整份。搬完之後長大沒關係 —— runner 讀。
 #
-# ★誠實限：runner 讓「跑」變便宜，★★但【跑得久】仍會讓人跳過 ⇒ runner 必須報【每支耗時與總時】。
+# ★★★★2026-09-01 補正（implementer 揭）：本表原本有一欄【判準】而 runner【從來沒有執行它】
+#   ⇒ ★一支「跑了、exit 0、什麼都不斷言」的閘會拿到 ✓ 並讓總結印 PASS
+#   ⇒ ★★那正是「工具崩潰的長相 ＝ 陰性結果的長相」的【第四個實例】，
+#      ★★★而它就長在【為了防漏跑而蓋的那個 runner】裡。
+#   ⇒ 修法：判準欄改成【機器可執行的 expect pattern】，★runner 必須看到它才算過；
+#      ★★沒有 expect 的行 ＝ FAIL（★★★不能有「沒有判準也算過」的路徑）。
 #
-# 欄位：id 	 指令 	 用途（一句） 	 判準（怎樣算過）
-constitution	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/constitution_gate.gd	憲法 site-freeze：禁新增引擎外 task 指派	印出 [CONSTITUTION-GATE] PASS
-bare-tick	bash .claude/hooks/bare-tick-gate.sh .	裸 tick：擋【新出現而沒人判過】的形狀	NEEDS_HUMAN=0（★不是總數——總數會隨 code 長大＝恆紅＝沒有閘）
-build-duration	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd	工期單一真值：擋「有人再開第二張工期表」	fail=0（母體＝construction_ticks_left 的真寫入點）
-bed-parse	bash .claude/hooks/bed-parse-gate.sh .	床可載入：擋 parse error 的床（★壞掉的床＝假守衛）	印出 [BED-PARSE-GATE] PASS
-bed-arm	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/bed_arm_gate.gd	床 arm 順序：擋 setup 之後才 arm（那段世界的 tap 是盲的）	對帳成立（總數＝已遷移＋未遷移＋盲）
-ki-anchor	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/known_issues_anchor_gate.gd	known_issues 錨健檢:新錨指不到=真 stale 候選	新錨全部指得到(★舊錨數不 FAIL 但必印,應單向下降)
+# 欄位：id 	 指令 	 用途（一句） 	 ★expect（必須出現在輸出裡的 regex）
+constitution	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/constitution_gate.gd	憲法 site-freeze：禁新增引擎外 task 指派	CONSTITUTION-GATE\] PASS
+bare-tick	bash .claude/hooks/bare-tick-gate.sh .	裸 tick：擋【新出現而沒人判過】的形狀（NEEDS_HUMAN=0，★不是總數）	BARE-TICK-GATE\] PASS
+build-duration	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd	工期單一真值：擋「有人再開第二張工期表」	construction_duration_source_gate DONE
+bed-parse	bash .claude/hooks/bed-parse-gate.sh .	床可載入：擋 parse error 的床（★壞掉的床＝假守衛）	BED-PARSE-GATE\]
+bed-arm	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/bed_arm_gate.gd	床 arm 順序：擋 setup 之後才 arm（那段世界的 tap 是盲的）	BED-ARM-GATE] PASS
+ki-anchor	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/known_issues_anchor_gate.gd	known_issues 錨健檢：新錨指不到＝真 stale 候選	KI-ANCHOR-GATE] PASS
