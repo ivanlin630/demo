@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: recamp-candidate-exclusion
 topic: ★R²(前提已由你 R① 清完);★★而我要你打的是【驗收③】:我寫「若排除再紮營之後還是不升級,那是第二個病,停下來報我」——要你判這個出口寫得對不對,還是它會讓一張紅床停在半綠;★★★另外請確認我把①的落點改寫對了(從「camp_drive 沒讀」改成「候選不該被生出來」)
 ---
