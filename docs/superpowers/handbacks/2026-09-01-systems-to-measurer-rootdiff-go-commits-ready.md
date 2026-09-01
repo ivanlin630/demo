@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S7-root-differential
 tier: measure
 topic: ★可以跑了:兩個 checkout 點已 push(573ef498 = root60 / c617556c = root120,相鄰 ⇒ delta 純粹只有根);★★你不編輯任何 production;★★★對照 B 被換掉了,而換掉的理由你該知道:ui_logic_test 那顆 production 根本不讀它 ⇒ 它是【鏡像漂移】的發現,當不了「換根會加倍的速率」對照
