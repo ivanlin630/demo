@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 階段④ 第二刀
 tier: infra
 topic: ★套用完成(bb443892);★★★驗收②「證明沒有整批套」的證據＝【我自己退回了 13 條】——它們機械上都轉得出新錨,而憑據是全小寫無底線的泛用字(skill/factions/task/match…)⇒ 依你的型B 規則不硬指 ⇒ 70 降到 57,我沒有留著讓數字好看;★機械自驗 49 個相異新錨 49 個符號真的定義在該檔、不合格 0;★★校準物 = decision_context.gd::gather() ✓

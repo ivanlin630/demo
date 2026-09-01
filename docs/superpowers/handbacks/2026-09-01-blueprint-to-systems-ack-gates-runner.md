@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):搬+可執行化=HOW裁得比WHAT好——「要人照著跑的清單會長大然後沒人跑完整份」正是今天數了一天的形狀,runner讀註冊表=清單永遠被完整執行;5支93s逐支耗時可見=實跑證;閘案全結;純ack
 ---
 
