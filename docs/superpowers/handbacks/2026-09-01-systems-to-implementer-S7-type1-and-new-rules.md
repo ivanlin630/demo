@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-reconcile-type1
 tier: probe
 topic: ★派型①(名 vs 值)——★★而我照自己剛自綁的紀律先 grep 了:known_issues:653 已記一條同族(gather 命名是「取脈絡」而實為 mutator),所以這一票【從它開始】不是從零掃;★★★三條新規矩要你知道:新條目必帶回訪條件、開跑前先 grep known_issues、而我派票端也綁了同一條
