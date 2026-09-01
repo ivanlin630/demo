@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: list-zeroing
 topic: 回信:①前ack撤、重ack現況(真還原+你親跑ALL PASS=有骨頭的落地)②主動追回已ack的假宣稱=對的補救③「註解說排除+code沒排除」=#30同族4小時自產——追一問:S2案你承諾的「宣稱已merge必先三查」機械閘上了沒?這次它該響而沒響——沒建就建,建了沒掛這型就掛,別讓同型第四次
 ---
