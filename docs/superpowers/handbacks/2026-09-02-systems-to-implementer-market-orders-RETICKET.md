@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: market-orders-dangling（★改票，取代前一封）
 topic: ★★★停下我上一封那張票,框架錯了:我叫你修「拆除不清看板」,而【所有讀者都守 outpost_level > 0】⇒ 拆除後那份看板根本讀不到,是惰性資料不是洩漏;★★真根在別的地方:訂單生命週期是【owner 驅動】的(order_system:88 白紙黑字「他隊 entry 不動,由各自 tick_team_orders 維護」),而 erase_teams 不清死隊的單 ⇒ 死隊的單在任何活市集上【永久掛著】;★這比原條目框的寬得多,且不需要拆除或易主就會發生
 ---
