@@ -1,0 +1,93 @@
+# ★★★關掉我自己留的那個誠實限 —— 型③ 當時寫「51 是【上界】，逐條分類本輪沒做」
+#   ⇒ 現在做了：★真數字是 44，不是 51。
+#
+# ★★而這件事本身值得記：【已經查過而沒有答案】會被重複查（systems 今天剛立的主題）——
+#   ★★★但我留下的是【查過而答案不完整】，那更糟：它看起來像有答案（51），
+#     而那個數字會被下一個人拿去當母體。
+#
+# ═══ 判準演進（★兩版，第二版是抽驗抓到的）═══
+# v1 只看【本行】有沒有乘上人口類量（population/pop/pop_eff/total_pop）
+#    ⇒ 含minor 4／團級 burn 43／每人份 8
+#    ★而抽驗發現 `faction_ai_system.gd:1564` 被誤分成「每人份」——
+#      ★★它是【接續行】，人口乘數在【前一行】
+# v2 ＋往前一行也納入判斷窗
+#    ⇒ ★含minor 4／★★團級 burn 44／每人份 7
+#
+# ═══ 誠實限 ═══
+# ①★`subteam_system.gd:130` `float(k) * FPPPD * MIGRANT_RATION_DAYS` 我歸在「每人份」——
+#   ★★而 k 是移民人數 ⇒ 它其實是團級的，只是那個團【還沒成立、還沒有 minor】
+#   ⇒ ★★★歸類可辯，我標出來而不是靜默決定
+# ②★母體排除 scripts/debug（床不是 production 判斷點）
+# ③★★這仍然只回答「哪些漏算 minor」，★★★不回答「漏算會不會改變決策」——
+#   後者要量（minor_population 佔比多少？），而那是另一票
+#
+# FOOD_PER_PERSON_PER_DAY 使用點【逐條分類】—— 關掉型③ 我自己留的『51 是上界』
+# 判準：★①附近 6 行有 minor_population ⇒ 與執行端同母體
+#       ★★②否則：本行有乘上人口類量（population/pop/pop_eff/total_pop）⇒【團級 burn 估算】⇒ 漏 minor
+#       ★★★③否則 ⇒【每人份常數/單位值】⇒ minor 不適用（不是 bug）
+# 母體：scripts/**（★排除 debug；床不是 production 判斷點）
+
+含 minor（同母體）＝ 4
+★團級 burn 但漏 minor ＝ 44
+◆每人份/單位值（minor 不適用）＝ 7
+
+── ★團級 burn 但漏 minor（這一格才是「要不要修」的母體）──
+  coin_treasury.gd:53  var food_days: float = eff_food / (pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY)
+  coin_treasury.gd:55  var food_short: float = maxf(DecisionTerms.DESPERATION_DAYS * pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY - e
+  faction_ai_system.gd:229  / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:269  var trip_need: float = eta_days * float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  faction_ai_system.gd:1564  * ResourceSystem.FOOD_PER_PERSON_PER_DAY * FOUND_FOOD_SURPLUS_DAYS
+  faction_ai_system.gd:1669  var reserve: float = float(mother.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * FOUND_FOOD_SURPLUS_DA
+  faction_ai_system.gd:1864  var need: float = DecisionTerms.DESPERATION_DAYS * float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER
+  faction_ai_system.gd:1895  var _vburn: float = maxf(float(target.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:2441  / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:2486  / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:2857  / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:2951  / maxf(float(t.population + mt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:4161  var _need_food: float = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
+  faction_ai_system.gd:4314  var up_need: float = float(up_sub.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
+  faction_ai_system.gd:4353  / maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:5144  / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:5145  var burn: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  faction_ai_system.gd:5224  var burn: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)   # ×0.8 flat 代
+  faction_ai_system.gd:5337  var target: float = pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 14.0
+  faction_ai_system.gd:5451  var food_per_day: float = float(pop_eff) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  faction_ai_system.gd:5642  / maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  inquiry_system.gd:102  var daily: float  = float(player_team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  interaction_system.gd:1197  var need: float = float(beggar.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 3.0 \
+  interaction_system.gd:1200  < float(beggar.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  interaction_system.gd:1201  var mercy_amount: float = float(beggar.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 1 天份
+  interaction_system.gd:1207  var reserve: float = float(target.population) * reserve_days * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  order_system.gd:175  var burn: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  player_api_mapper.gd:147  "food_burn_per_day": float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
+  player_api_mapper.gd:157  var burn: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  reaction_system.gd:259  var need: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  resource_system.gd:262  if food_after < float(team.population) * FOOD_PER_PERSON_PER_DAY \
+  resource_system.gd:571  return float(team.population) * FOOD_PER_PERSON_PER_DAY * FORAGE_FLOOR_DAYS
+  trade_valuation.gd:119  var food_days: float = _stock(state, team, "food") / (pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY)
+  decision/decision_context.gd:226  c.food_days = ef / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+  decision/decision_context.gd:517  var _burn: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  decision/goal_resolver.gd:741  var _need_d: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  decision/need_oracle.gd:112  var base: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY * pop * DecisionTerms.food_security_target(leader_val
+  decision/need_oracle.gd:114  var food_days: float = ResourceSystem.effective_food(state, team) / maxf(pop * ResourceSystem.FOOD_PER_PERSON_
+  decision/terms.gd:118  float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
+  decision/terms.gd:199  float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
+  decision/terms.gd:212  float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
+  decision/terms.gd:231  var daily_need: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  decision/terms.gd:268  var _daily_need: float = float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  events/event_faction_defect.gd:34  / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+
+── ◆每人份/單位值（minor 不適用）──
+  faction_ai_system.gd:1952  const INFO_RELIEF_EXPECT: float = DecisionTerms.DESPERATION_DAYS * ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 
+  faction_ai_system.gd:1953  const INFO_ANON_COST: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 1 anon 邊際成本≈其每日食耗/產出 proxy（0.8）
+  interaction_system.gd:1278  var fpd: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  marginal_economy.gd:11  const MIGRANT_UPKEEP: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 每移民日食耗（DERIVED 食物常數、非 fire-crank）
+  player_command_system.gd:6  const JOIN_ONBOARD_MEAL:  float = 0.8    # 一餐 ≈ FOOD_PER_PERSON_PER_DAY/3 (TEST VALUE)
+  subteam_system.gd:130  var rations: float = float(k) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * MIGRANT_RATION_DAYS
+  decision/goal_resolver.gd:198  const DISTRIB_RELIEF_NORM: float = DecisionTerms.DESPERATION_DAYS * ResourceSystem.FOOD_PER_PERSON_PER_DAY * D
+
+── 含 minor ──
+  food_flow.gd:19  var burn: float = float(team.population + team.minor_population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+  resource_system.gd:206  var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY * day_fraction
+  resource_system.gd:272  * FOOD_PER_PERSON_PER_DAY * PROVISION_DAYS
+  decision/goal_resolver.gd:295  var burn: float = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
