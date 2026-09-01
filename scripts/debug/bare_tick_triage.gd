@@ -169,6 +169,24 @@ func _run() -> void:
 			_wide += 1
 		head.append("#   %-12s %3d  %s%s" % [String(r2["disp"]), h, String(r2["src"]), flag])
 	head.append("#")
+	# ★★★機器可讀的逐規則命中數（閘要 parse 它）——
+	#   ★上面那一塊是【給人看】的，而人看的格式會因為排版而變；
+	#   ★★閘去 parse 人看的格式，就是把【排版】變成【契約】。
+	#   ⇒ ★★★另開一行帶固定前綴的：欄位固定、不對齊、不加旗標文字。
+	# ★★★★而它們必須以 `# ` 開頭：閘用 `grep -vc '^#'` 數【資料列】，
+	#   不加 `# ` 會讓這幾行被當成候選⇒ 【候選 vs 分類筆數】那條對帳假紅。
+	for r4 in _rules:
+		head.append("# RULEHIT|%s|%d|%s" % [String(r4["disp"]), int(r4["hits"]), String(r4["src"])])
+	# ★逐規則命中數合計 + NEEDS_HUMAN == 母體
+	#   ★★因為比對迴圈命中就 break ⇒ 每筆候選【最多】命中一條規則，
+	#   ★★★不平 = 有東西被靜默吐掉（而那在舊格式下看不見）。
+	var _rh: int = 0
+	for r5 in _rules:
+		_rh += int(r5["hits"])
+	var _nh: int = int(tally.get("NEEDS_HUMAN", 0))
+	head.append("# RULEHITSUM|%d|%d|%d|%s" % [_rh, _nh, total,
+		"OK" if _rh + _nh == total else "MISMATCH"])
+	head.append("#")
 	var of := FileAccess.open(out_path, FileAccess.WRITE)
 	if of != null:
 		of.store_string("\n".join(PackedStringArray(head)) + "\n" + "\n".join(PackedStringArray(rows)) + "\n")

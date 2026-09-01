@@ -52,4 +52,27 @@ if [ "$N" -gt 0 ]; then
   echo "★逐顆判成 (a)改／(b)延後／(c)白名單，理由寫進 code 註記，再把形狀加進 bare_tick_triage.gd 的規則表"
   exit 1
 fi
+# ★★★延後判決的到期檢查（deferred-judgement-expiry）：
+#   `b_defer` 是唯一【自帶到期日】的判決（「延到 S2」），
+#   ★而在這之前沒有任何東西在到期日檢查它 —— S2 merge 後兩條都還活著。
+#   ⇒ 命中 0 = 它守的形狀不在了 ⇒ ★★讓人回來看【病好了】還是【regex 靜默失效】。
+#
+# ★★★誠實限（reviewer 找到的反例，寫在閘裡而不只寫在信裡）：
+#   本檢查只看得見【碰運氣被治好】那一半。
+#   「延到里程碑 X」型的判決，X 發生後若沒人主動去改那個物件，
+#   物件會原封不動留著 ⇒ 命中數依然 > 0 ⇒ ★本閘照樣綠。
+#   ⇒ ★★【被彻底遺忘】那一半仍然不可見 —— 而那才是本來要防的。
+DEFER0=$(grep '^# RULEHIT|b_defer|0|' "$WT/$OUT_T" 2>/dev/null || :)
+if [ -n "$DEFER0" ]; then
+  echo "[BARE-TICK-GATE] FAIL：有 b_defer 規則命中數 = 0 ⇒ ★延後判決已到期而沒人回來看"
+  echo "$DEFER0" | sed 's/^# RULEHIT|/  /'
+  echo "★處置：人回來判它是【病好了、規則該退場】還是【regex 靜默失效、規則該修】"
+  echo "★★退場票的硬條款：必附【目標常數現況的 file:line】—— 0 命中有兩種讀法"
+  exit 1
+fi
+# ★逐規則命中數合計 + NEEDS_HUMAN == 母體（不平 = 有東西被靜默吐掉）
+RHS=$(grep '^# RULEHITSUM|' "$WT/$OUT_T" 2>/dev/null || :)
+case "$RHS" in
+  *"|MISMATCH") echo "[BARE-TICK-GATE] FAIL：逐規則命中數對帳不平 → $RHS"; exit 1 ;;
+esac
 echo "[BARE-TICK-GATE] PASS：母體 $TOT，全部已結案（NEEDS_HUMAN=0）"
