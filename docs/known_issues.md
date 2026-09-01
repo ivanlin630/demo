@@ -74,6 +74,27 @@ erase 前後 tracer entries：1 → 2（Δ=1）            ←★死亡窄口本
 **狀態：未確認** ｜ **回訪：量測窗 — 下一次有人跑 `specimen_combat_death_bed` 或任何用 `_mk_team` 的床時，順手印 `population` 與傳入 `pop`**
 （★不值得為它單開一輪；★★但它會讓**每一張用 `_mk_team` 的床**的母體數字都偏，所以不能不記。）
 
+### ⏳★★族①god-view：**真剩餘母體 ＝ 憲法閘的 10 顆豁免標記**（2026-09-02 systems 定位）
+
+★**血證**：blueprint 依清單把族①定序成「修 #7 `can_reach` / #17 `has_food_market`」，
+★★**而這兩條連同第三站（jhost）在複驗時【全部已經修好了】** —— 清單描述的是 2026-07 的現場。
+
+★**真母體在憲法閘的標記裡**（`scripts/debug/constitution_baseline_v2.txt`，11 顆，其中 `_find_own_outpost` 本輪已 de-patch ⇒ **現存 10**）：
+```
+gv_mapscan (9)：decision_context.gd::_home_granary_food ／ faction_ai::_check_ore_surplus ／
+  _enemy_outpost_positions ／ _evaluate_infrastructure ／ _evaluate_new_outpost_location ／
+  _evaluate_outpost_residency ／ _faction_has_workshop ／ need_oracle::_team_has_facility ／
+  strategic_ai::_find_trade_partner
+gv_teamstate (1)：faction_ai::consolidate_target_of
+```
+★★★**而「被標記」≠「違憲」**：標記＝**豁免**，逐顆要判「這個 mapscan 是不是決策在讀 god-view」——
+**有些可能是合法的自有物查詢**。⇒ **族①的第一步是【逐顆分類】，不是【逐顆修】。**
+
+★**誠實限**：以上是 **detector 看得見的**母體。`constitution_gate` 有已記在案的盲點
+（間接 local-var 存取，見本檔同名條目）⇒ **10 顆是下限不是全部。**
+
+**狀態：已知未修** ｜ **回訪：到期 token — 族①god-view 批開工時（下一站）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
@@ -814,7 +835,26 @@ team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍�
 
 `tile.market_orders`（賣單看板）在 outpost **capture/demolish 零清理**：`outpost_system.gd::slot_cap()`(capture) 只改 owner 不動 market_orders；`:327/332`(demolish) 清 type/level/owner/facilities 但**不清 market_orders**；`_sync_board`(order:61-84) 只 prune 自家 origin_team 單、失主後沒人清該 tile → 易主/拆除市集殘留舊賣單 ghost（`received_*_orders` 可能 route 到）。**pre-existing**（非 Slice C 引入；C 的 team_market_known 走 demolish-only cleanup=正解示範不繼承此病）。**非急**（economy 診斷用；C harvest 濾 `outpost_level>0` 已擋部分 ghost）。修=capture/demolish 順帶清/標 stale market_orders。連 [[經濟 arc]]。
 
-## god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E measure 撿，下批 cleanup）
+## ⚠部分修 can_reach（2026-09-02 systems 逐行複驗：★god-view 那半【已關】，剩 `<999` vacuous）
+
+★★★**2026-09-02 訂正（三處，全部是本條目自己寫錯）**：
+```
+①★god-view 已關：faction_ai_system.gd:1432 "can_reach" 現在讀
+  `BeliefSystem.belief_pos(state, f.leader_team_id, target_id)`，無 belief 位 ⇒ return false
+  ⇒ ★★【不讀 live 他隊位】。本條目原文「決策 precondition 讀 live 他隊位」★已不成立。
+②★★錨錯：不在 :1115，在 :1432（可 grep `"can_reach":`）。
+③★★★本條目原有的負斷言【是錯的】：它寫「force_ge_target 該符號已不存在 ⇒ 錨指不到現場」，
+   而它存在於 :83（preconds 清單）／:1416／:1424（實作，讀 BeliefSystem.best_estimate）。
+   ⇒ ★一個【錯的負斷言】在帳上掛了一天，而負斷言協議要求附窮盡搜索證據 —— 那次沒附。
+```
+★**仍然開著的是另一個病**：`_hex_dist(...) < 999` **near-vacuous**（hex 距遠小於 999 ⇒ 恆真）
+⇒ ★★**以為任何 target 都可達即攻/追，`PathSystem` 真可達性從未查** ＝ **決策品質洞，不是 god-view**。
+（★code 自己的註解已寫「`<999` near-vacuous(真可達語意)=另評」。）
+
+**狀態：已知未修** ｜ **回訪：到期 token — 族①god-view 批的「逐顆分類」那一輪一併判**
+（★判什麼：`can_reach` 該不該改成 `PathSystem` 真可達 + belief 位 —— **一次治 vacuous，god-view 那半已經不用治了**。）
+
+## ✅（已關，存查）god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E measure 撿）
 
 `_check_precondition` 的 `"can_reach"`（`faction_ai_system.gd:1115`）：`_hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999` = **決策 precondition 讀 live 他隊位**（vs 同函式 `force_ge_target`（★★★真 stale 候選：2026-09-01 窮盡查 `scripts/**/*.gd`，**該符號已不存在** ⇒ 錨指不到現場；★不刪條目，標記待判） 用 `BeliefSystem.best_estimate` belief，**不一致**）= 真 god-view leak（違感知鐵律：決策憑 belief 非 live）。**但 `<999` 近-vacuous**（hex 距遠小於 999→恆真）→ god-view 效果近無害、**低優先**。**out god-view Slice E 4-site（E1/E2/E3/E5）**，歸下批 god-view cleanup（Slice E follow-up/D 批機械 belief_pos 化）。**★順帶疑（非 god-view，另類）**：若 `can_reach` 本該真 reachability gate，`<999` vacuous=**決策品質洞**（以為任 target 可達即攻/追，PathSystem 真可達性沒查）——可能 can_reach 該用 PathSystem 真可達 + belief 位一次治 god-view+vacuous。連 god-view audit（`docs/superpowers/handbacks/2026-07-19-systems-to-blueprint-godview-audit-scope.md`）。
 
@@ -822,7 +862,7 @@ team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍�
 
 `constitution_gate.gd` v3 加 god-view 偵測（gv_teamstate=indexed `state.teams[id].動態欄`；gv_mapscan=`for x in ...tiles` whole-map 掃）。enumerate 13 site，凍 baseline v2.txt（含分類註）。triage：7 legit（self/地理）+ 1119(_precond_met,修中)+ 1 gray(consolidate 同-faction own-member pop) + **3 候選 leak**：
 - **★`_enemy_outpost_positions`（`faction_ai:2912-2921`）掃全圖敵據點回位置陣列 = 瞬知全敵基建**（違感知鐵律，隊應只知看過/聞得的敵據點）。未記過，detector 新撿。**行為敏感**（改 belief 影響防禦/攻擊規劃）→ 待 R²+measure follow-up slice。
-- **★`decision_context.gd::gather`（`:373`）jhost live pos 入 `PathSystem.find_path` 算 join 可達**（jhost=strong_neighbor cross-faction 時=god-view，同 1119 can_reach 類）。未記過，detector 新撿。待 R²+follow-up（可與 1119 同範式 belief_pos-gate）。
+- **✅（已關，2026-09-02 複驗）~~`decision_context.gd::gather`（`:373`）jhost live pos~~** ⇒ 現為 `scripts/simulation/decision/decision_context.gd:675` `BeliefSystem.belief_pos(state, team.team_id, _jhost)`，★**檔案路徑也變了**（`decision/` 子目錄）。原文：**`decision_context.gd::gather`（`:373`）jhost live pos 入 `PathSystem.find_path` 算 join 可達**（jhost=strong_neighbor cross-faction 時=god-view，同 1119 can_reach 類）。未記過，detector 新撿。待 R²+follow-up（可與 1119 同範式 belief_pos-gate）。
 - `_find_trade_partner`（strategic_ai）partner discovered(belief) 但 outpost pos 讀 live = 半漏——**已知**（本檔「finder 濾鏈 C 類候選」+ invariants「team_discovered fallback 最終應刪」）。
 - **detector 限制**：靜態 regex 分不出 loop var 自/他 → 不抓 `for t in teams: t.tile_pos`（DROP gv_teamscan 噪音），是回歸閘非證明；細粒度靠 review。
 - **狀態 ✅ RESOLVED（2026-07-21）**：reviewer R² 判 2 新候選**皆真 leak**（半公共/需知位 REFUTED）→ **followup slice merged 63d93aab**（jhost=belief_pos 同 1119 / enemy_outpost=belief-about-owner store-free proxy，全圖 loop 保留只避已知敵）。baseline 訂正：jhost gv_teamstate 移除、enemy_outpost gv_mapscan re-classify gate-ok(belief-filtered)。gate PASS sites=75 **零 CANDIDATE-LEAK 剩=真 zero-untracked-god-view**。`_find_trade_partner`(strategic C 類候選)續掛 team_discovered fallback「最終應刪」（非 god-view 本 arc，另軌）。god-view belief-化 arc 全收官。
@@ -881,7 +921,14 @@ Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**comb
 
 `handle_diplomacy_message` 無「求和/息兵/tribute_offer」case（只 propose_alliance/propose_trade/demand_tribute/offer_surrender/invite_settle）→ 求和一直被 `_try_diplomacy` 硬寫成 propose_alliance（求盟）。**diplomacy-grounded 刀只讓求和 grounded**（fire→release+cooldown no-op，不 loop 不偽裝求盟）。**真息兵行為＝backlog（WHAT 待 blueprint）**：求和是否獨立行為（納貢息兵讓威脅 de-escalate 退兵）vs 該併外交；要做則建 `sue_for_peace` handler（威脅退兵機制）。
 
-## has_food_market god-view 既有債（2026-07-15，desperation-food-seeking R② advisory）
+## ✅has_food_market god-view 既有債 —— **已關**（2026-09-02 systems 複驗）
+
+★`_nearest_market_outpost`（`faction_ai_system.gd:3626`）**現在只掃 `state.team_market_known`**
+（三源習得：創世／親見／relay），**不是 `state.world.tiles` 全圖** ⇒ ★★**belief-gate，非 god-view。**
+★同函式群的 `_nearest_market_outpost_with`（`:3647`）同範式。
+⇒ **本條目下方原文保留存查**（它描述的是 2026-07-15 的現場，已被 Slice C 修掉）。
+
+## ✅（已關，存查）has_food_market god-view 既有債（2026-07-15，desperation-food-seeking R② advisory）
 
 `decision_context.gd` 的 `has_food_market`（`faction_ai_system.gd:2024-2037 _nearest_market_outpost`）**掃全圖**找最近市集 outpost＝god-view 既有債（違感知鐵律，隊不該全知所有市集位置）。非 desperation-food-seeking 刀範圍（該刀新增的 has_buyable_food/food_seek 已守鐵律），但既有 has_food_market 未修。**修向**：改讀隊已知市集（探索過/傳播聞得）而非全圖掃。**優先序**：低（既有行為，非本刀 blocker），感知鐵律稽核 slice 一併掃。
 

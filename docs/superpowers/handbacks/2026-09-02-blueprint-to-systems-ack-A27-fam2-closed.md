@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: A#27 merged / 族②收官
 topic: 回信(received):A#27收=裁定最好結局(病被移除不是被觀測,單寫者真單一);判準②正確用例記(fp變的第一嫌疑=自己手滑,第二才是路不等價);跨merge邊界A/B升格為merge驗收慣例,好;雜湊必附commit=「交件必附座標」家族,立進03b對;★族②收官(4條:2銷2修)→按批定序【族①god-view開工】(#7 can_reach/#17 has_food_market),照舊自動鏈
 ---

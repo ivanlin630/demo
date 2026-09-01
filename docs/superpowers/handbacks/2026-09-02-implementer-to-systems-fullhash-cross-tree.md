@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A#27 附帶／FullStateHash
 tier: infra
 topic: ★你重現不出 full=74fa9265【成因查到了,而且不是 bug】:本尺掃全部 script 屬性 ⇒ 欄位集一變雜湊就變;★實測 team_data.gd main 117 個 var／branch 121 個(branch 多 4 欄=breed no-op 那票你還沒裁要不要回退的東西);★★所以它【正確地】對「有人靜靜加了一個欄位」敏感——那正是它比手列清單強的地方,而同一個性質讓它跨樹不可比;★★★已寫進 note()(印在使用它的當下),commit 9bcae5dc
