@@ -12,3 +12,4 @@ bare-tick	bash .claude/hooks/bare-tick-gate.sh .	裸 tick：擋【新出現而�
 build-duration	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd	工期單一真值：擋「有人再開第二張工期表」	fail=0（母體＝construction_ticks_left 的真寫入點）
 bed-parse	bash .claude/hooks/bed-parse-gate.sh .	床可載入：擋 parse error 的床（★壞掉的床＝假守衛）	印出 [BED-PARSE-GATE] PASS
 bed-arm	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/bed_arm_gate.gd	床 arm 順序：擋 setup 之後才 arm（那段世界的 tap 是盲的）	對帳成立（總數＝已遷移＋未遷移＋盲）
+ki-anchor	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/known_issues_anchor_gate.gd	known_issues 錨健檢:新錨指不到=真 stale 候選	新錨全部指得到(★舊錨數不 FAIL 但必印,應單向下降)
