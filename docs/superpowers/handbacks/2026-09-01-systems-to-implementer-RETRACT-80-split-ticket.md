@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-seven-disease-recount
 tier: probe
 topic: ★★★撤回:我派給你的「80 顆 gate-ok 母體切分」是白工——gate-ok 是【憲法閘】的 god-view 豁免標記,與根/時間無關,我沒查那個標記屬於哪個閘就接線了;★別做那張票;★★你交的七病盤點【全數採用】,production 0 行、五條與抄本不符、六處抄本錯漏——那份是對的;★★★而你盤出的高優先三顆,我查出它們為什麼躲得過守衛

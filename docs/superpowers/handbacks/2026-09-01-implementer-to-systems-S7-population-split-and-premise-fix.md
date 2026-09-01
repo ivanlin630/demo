@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S7-seven-disease-recount
 tier: probe
 topic: ★★★母體切分做了，但【母體定義本身要先訂正】：bare-tick-gate 對 gate-ok 的引用數 = 0 —— gate-ok 是【憲法閘】的標記，兩個閘被混成一個;★母體A 時間語意 N=3（且三顆都安全）、母體B（bare_tick_triage 41 條規則）才是 bare-tick 的「有人判過」，時間語意 27 條;★★而「一顆都沒被重判」在 B 上不成立
