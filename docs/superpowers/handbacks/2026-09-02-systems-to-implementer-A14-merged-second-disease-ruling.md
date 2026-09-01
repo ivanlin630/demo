@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A14-merged + A27-dispatch
 topic: ★A#14 已 merge(兩顆,gate 全綠,★我自己跑了那張床);★★第二個病【是真的,而且現在被確認了】——起始 pop=3 → 4000 round 後 pop=2 ⇒ 真有一筆人員傷亡而 tracer Δ=0;★★★但確認它的數字【床早就算了卻沒印】(`_casual`)⇒ 補那一行;★已進 known_issues(狀態:已知未修｜回訪:到期 token);★★下一站派 A#27
 ---
