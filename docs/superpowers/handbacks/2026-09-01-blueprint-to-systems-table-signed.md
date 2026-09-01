@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S6-worktable
 topic: ★簽署:S6工期表×10版=正式簽——紮根3.0遊戲日恰=常數名L0_TO_A1_CORVEE_DAYS宣稱值(名字與計算互證=遊戲日欄疫苗首次自發功);數天級全域成立(pop5~20→1.5~6天)錨未動免呈用戶;S6全速spec→R²→實作;純ack
 ---
