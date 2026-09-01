@@ -13,6 +13,7 @@ static var _pending: Dictionary = {}    # team_id → { candidates:[{opt,util}],
 static var winner_hist: Dictionary = {}   # winner_opt → count（做了什麼）
 static var intent_hist: Dictionary = {}   # intent str → count（想什麼）
 static var decision_count: int = 0
+static var death_count: int = 0   # ★A#14：死亡 entry 計數（summary 用；與 decision_count 分開，別混進同一格）
 # Fix 2 時間維 heartbeat：team_id→最後 entry tick（capture_decision/heartbeat 更新）→ 補洞判據。
 static var _last_entry_tick: Dictionary = {}
 const HEARTBEAT_CADENCE: int = WorldState.TICKS_PER_DAY / 4   # TEST VALUE — 6h；specimen 無決策超此→補心跳(timeline 無洞、有界)
@@ -72,6 +73,7 @@ static func reset() -> void:
 	winner_hist.clear()
 	intent_hist.clear()
 	decision_count = 0
+	death_count = 0   # ★A#14：新計數器也要跟著 reset —— 漏一個就會跨 run 累加
 	_last_entry_tick.clear()
 	_ever_in_scope.clear()   # ★黏著表隨 reset 清（跨 run 不殘留）
 
@@ -221,6 +223,52 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 	intent_hist[intent_key] = int(intent_hist.get(intent_key, 0)) + 1
 	decision_count += 1
 	_pending.erase(team.team_id)   # 本決策已成 entry，清 scratch
+
+# ★★★A#14：死亡可見（2026-09-02，systems 裁掛點①＝`WorldState.erase_teams` 這個唯一窄口）。
+#
+# ★病（實測，非讀出來的）：specimen 被打 4000 round —— 傷亡／負傷／力竭撤退／追擊補刀全發生 ——
+#   而 tracer entries 【Δ=0】。★★所以不是「死接不到」，是【整段戰鬥都接不到】，死亡是那條盲線的終點。
+#
+# ★★★而【無污染的保證是形狀，不是抑制清單】（systems 2026-09-02 裁）：
+#   ★`_begin_observe()` 只 suppress `Probe.enabled` 與 `PathSystem.suppress_observe_noise`
+#     ⇒ ★★它是【黑名單】：擋得住那兩個，擋不住 state 寫入
+#   ⇒ ★★★所以本函式【不呼叫任何會寫的東西】——
+#     ★不呼叫 `_snapshot()`（它會呼 `AmbitionLadder.target_rung` / `ResourceSystem.*`，那些可能寫快取）
+#     ★★只做【欄位直讀】。要驗這一點不必讀我的註解：看下面有沒有 `.` 後面接括號就知道。
+static func capture_death(state: WorldState, team: TeamData, reason: String) -> void:
+	if not enabled:
+		return
+	if not is_specimen(state, team.team_id):
+		return
+	var entry: Dictionary = {
+		"tick": state.world.current_tick,
+		"team_id": team.team_id,
+		"kind": "death",
+		"想什麼": {"strategic_intent": "(已死，無決策)"},
+		"做什麼": {"winner_opt": "death", "task": team.current_task,
+			"target": [team.tile_pos.x, team.tile_pos.y], "result": reason},
+		# ★純欄位直讀的最後一眼（★★不是 _snapshot：那支會呼叫可能寫快取的東西）
+		"狀態": {
+			"task": team.current_task,
+			"task_reason": team.task_reason,
+			"tile_pos": [team.tile_pos.x, team.tile_pos.y],
+			"pop": team.population,
+			"minor_population": team.minor_population,
+			"famine_days": team.famine_days,
+			"readiness": team.readiness,
+			"combat_target": team.combat_target,
+			"faction_id": team.faction_id,
+			"leader_id": team.leader_id,
+			"parent_team_id": team.parent_team_id,
+			"food_private": float(team.resources.get("food", 0)),
+			"coin": float(team.resources.get("coin", 0)),
+			"material": float(team.resources.get("material", 0)),
+		},
+	}
+	entries.append(entry)
+	_archive.append(entry)
+	_last_entry_tick[team.team_id] = state.world.current_tick
+	death_count += 1
 
 # Fix 2 時間維 heartbeat sweep（evaluate_all 末尾呼）：specimen 隊本 tick 無決策 entry 且距上次 entry 超
 # HEARTBEAT_CADENCE → append 輕 heartbeat entry（_snapshot 純讀，無候選/belief 重算）→ timeline 無 >6h 洞、不膨脹。
