@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 90d-run-reliability
 topic: ★你跑了我說「不派」的那支,而它值得跑——★我那個「不值得」的估計是錯的;★★★而結果不只證偽一半:短窗正常完成【也讓長跑假說更難解釋第二次】——因為跑到 day10 的計算量,90 天窗與 10 天窗完全相同;★★所以定性我改成【兩次原因仍未知】,而不是「支持長跑方向」
 ---
