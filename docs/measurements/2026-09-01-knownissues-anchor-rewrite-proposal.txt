@@ -1,0 +1,128 @@
+# 階段④ 第二刀：known_issues 錨形式改革【提案】—— ★提案不改（known_issues.md 一行未動）
+#
+# ★形式（systems 定）：我提案、systems 審核後套用。★★known_issues 是 systems own 的檔，
+#   而他今天才因為改別人 own 的檔沒先確認被記一筆 ⇒ 對稱地他不讓我直接改他的。
+#
+# ═══ 新錨形式 ═══
+# 舊：`檔:行號`      ⇒ ★行號跟著【編輯】走 ⇒ 這就是第一刀 88 條 DRIFT 的成因
+# 新：★【檔 + 符號名】⇒ 符號名跟著【語意】走；行號退成輔助（錯了不算 DRIFT）
+#
+# ═══ 判準演進（★每一版都對校準物 `known_issues:653`（gather）跑過）═══
+# v1 同行符號 → 取【定義在該檔的那一個】
+#    ⇒ 校準物得 `decision_context.gd + need_urgency` —— ★對，但【不是最有用的那個】：
+#      need_urgency 是【被寫的欄位】，而條目講的是【gather 這個函式會寫 state】
+# v2 ★把 doc 引的符號在檔裡【實際找到】，再取【它所在的函式】當錨
+#    ⇒ 校準物得 `decision_context.gd + gather()` ✓ —— ★★正是 systems 指定的那個
+#    ⇒ ★★★這一版的關鍵不是更嚴，是【錨要指向行為所在的層級】：函式，不是欄位
+# v3 ＋符號索引排除 scripts/debug（床不是 production 錨的落點）
+#    ＋MOVED 只採有辨識度符號（v2 出過 `dist` 撞到床檔的假 MOVED）
+#    ⇒ ★最終：OK 53 ／ PROPOSE 66 ／ MOVED 8 ／ NEED_HUMAN 11 ／ UNRESOLVED 7
+#
+# ═══ 四態（★不壓成二態）═══
+# PROPOSE     ＝ 機械可轉：同行符號在該檔找得到，取其所在函式 ⇒ ★新錨已填，附【憑哪個字】可複驗
+# MOVED       ＝ ★真 stale 候選：符號在【別的檔】⇒ 疑搬家/改名（★仍不下 stale 判定）
+# NEED_HUMAN  ＝ 同行沒有任何可定位符號 ⇒ ★★要讀懂內容才知道該指哪個 ⇒ 不猜，列給 systems
+# UNRESOLVED  ＝ 連檔都解析不到（含 `known_issues:17` 這種自我引用）
+#
+# ═══ 誠實限 ═══
+# ①★「憑哪個字」那一欄是【可複驗的憑據】—— 而它也暴露了弱項：
+#   例 `goal_resolver:197` 憑的是 `NeedOracle`，而 NeedOracle 在該檔多處出現
+#   ⇒ ★★我取【第一個出現處】的所在函式 ⇒ 那一格的信心低於憑獨特符號的那些
+#   ⇒ ★★★所以請照「憑哪個字」逐條看，不要整批套用
+# ②★MOVED 的 8 條我【不下 stale 判定】—— 符號在別的檔可能是搬家，也可能是同名不同物
+# ③★★NEED_HUMAN 11 + UNRESOLVED 7 ＝ 18 條【我沒有答案】，★★★而把它們壓成 0 才是危險的
+#
+ANCHORS=145  {'OK': 53, 'PROPOSE': 66, 'NEED_HUMAN': 11, 'MOVED': 8, 'UNRESOLVED': 7}
+
+[PROPOSE] known_issues.md:163 ｜舊錨 `goal_resolver:197` ｜新錨 goal_resolver.gd + `ensure_maintain_goals()` ｜憑同行字 `NeedOracle`（現於 goal_resolver.gd:44，位於 ensure_maintain_goals() 內，函式起 :22） ｜(★material-need bootstrap gap（code-provable，reviewer R² )
+[NEED_HUMAN] known_issues.md:187 ｜舊錨 `goal_resolver:154` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribute-ze)
+[MOVED] known_issues.md:193 ｜舊錨 `message_system:79` ｜新錨 order_system.gd + `read_market_board` ｜★符號在【別的檔】：order_system.gd:244（func）⇒ 疑搬家/改名 ｜(★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribute-ze)
+[PROPOSE] known_issues.md:193 ｜舊錨 `read_market_board:194` ｜新錨 order_system.gd + `read_market_board()` ｜憑同行字 `read_market_board`（現於 order_system.gd:244，位於 read_market_board() 內，函式起 :244） ｜(★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribute-ze)
+[PROPOSE] known_issues.md:230 ｜舊錨 `faction_ai:4863` ｜新錨 faction_ai_system.gd + `_trigger_survival()` ｜憑同行字 `SurvivalMergeIn`（現於 faction_ai_system.gd:5625，位於 _trigger_survival() 內，函式起 :5561） ｜(⏳JOIN 在途重申 CPU + ★pair-print 非有效 churn 指標（2026-08-19 農業)
+[PROPOSE] known_issues.md:230 ｜舊錨 `decision_context:530` ｜新錨 decision_context.gd + `gather()` ｜憑同行字 `join_rejected`（現於 decision_context.gd:694，位於 gather() 內，函式起 :219） ｜(⏳JOIN 在途重申 CPU + ★pair-print 非有效 churn 指標（2026-08-19 農業)
+[PROPOSE] known_issues.md:249 ｜舊錨 `faction_ai_system:712` ｜新錨 faction_ai_system.gd + `evaluate_all()` ｜憑同行字 `_evaluate_all_body`（現於 faction_ai_system.gd:747，位於 evaluate_all() 內，函式起 :741） ｜(⏳★★perf 真兇=`near.faction_ai` 決策核心（2026-08-20 perf 線索包①②)
+[PROPOSE] known_issues.md:428 ｜舊錨 `movement_system:193` ｜新錨 movement_system.gd + `process()` ｜憑同行字 `_move_cost`（現於 movement_system.gd:105，位於 process() 內，函式起 :35） ｜(🧭★「走一格要多久」全站有**五套**算法（2026-08-21 R² 親查 + systems 窮盡確認）)
+[PROPOSE] known_issues.md:431 ｜舊錨 `faction_ai:5612` ｜新錨 faction_ai_system.gd + `_round_trip_ticks()` ｜憑同行字 `_round_trip_ticks`（現於 faction_ai_system.gd:6391，位於 _round_trip_ticks() 內，函式起 :6391） ｜(🧭★「走一格要多久」全站有**五套**算法（2026-08-21 R² 親查 + systems 窮盡確認）)
+[NEED_HUMAN] known_issues.md:432 ｜舊錨 `subteam_system:12` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(🧭★「走一格要多久」全站有**五套**算法（2026-08-21 R² 親查 + systems 窮盡確認）)
+[MOVED] known_issues.md:515 ｜舊錨 `interaction:781` ｜新錨 order_system.gd + `ORDER_LIFETIME` ｜★符號在【別的檔】：order_system.gd:4（const）⇒ 疑搬家/改名 ｜(📋 訂單簿健康度：成交率 0.7%、壽命是硬常數牆、churn 0%（2026-08-21 世界級數字、用戶追)
+[UNRESOLVED] known_issues.md:523 ｜舊錨 `headless_test:12842` ｜新錨 — ｜ ｜(🩺 生育不給「醫療」技能 XP（既有、非新引入；2026-08-20 生育 slice merge-gate )
+[PROPOSE] known_issues.md:530 ｜舊錨 `faction_ai:725` ｜新錨 faction_ai_system.gd + `find_prosperity_prey()` ｜憑同行字 `factions`（現於 faction_ai_system.gd:288，位於 find_prosperity_prey() 內，函式起 :238） ｜(⚠️★★回溯標注：以下 peaceful 卷結論**全部缺一個章節**——「**這張卷沒有勢力層**」（202)
+[PROPOSE] known_issues.md:544 ｜舊錨 `faction_ai:4394` ｜新錨 faction_ai_system.gd + `_evaluate_all_body()` ｜憑同行字 `_evaluate_independent_infrastructure`（現於 faction_ai_system.gd:899，位於 _evaluate_all_body() 內，函式起 :763） ｜(★★★ 但由此浮出一條可能統一今天所有線的鏈（**假說，一個數字可定案**）)
+[UNRESOLVED] known_issues.md:597 ｜舊錨 `known_issues:17` ｜新錨 — ｜ ｜(🏭 沒有人蓋 workshop ＝ 設施鏈斷的真上游（2026-08-20、mint 0% 追根時發現）)
+[PROPOSE] known_issues.md:620 ｜舊錨 `team_data:117` ｜新錨 team_data.gd + `pop_cap_from_leadership()` ｜憑同行字 `work_morale`（現於 team_data.gd:123，位於 pop_cap_from_leadership() 內，函式起 :48） ｜(✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線修；rate-equ)
+[PROPOSE] known_issues.md:624 ｜舊錨 `sim_runner:109` ｜新錨 sim_runner.gd + `_record_tick_perf()` ｜憑同行字 `force_full_hd`（現於 sim_runner.gd:126，位於 _record_tick_perf() 內，函式起 :98） ｜(✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線修；rate-equ)
+[UNRESOLVED] known_issues.md:650 ｜舊錨 `specimen_tracer:62` ｜新錨 — ｜ ｜(⚠️`DecisionContext.gather` 有寫副作用 —— **部分修**（`need_urgen)
+[PROPOSE] known_issues.md:651 ｜舊錨 `decision_context:602` ｜新錨 decision_context.gd + `gather()` ｜憑同行字 `need_urgency`（現於 decision_context.gd:705，位於 gather() 內，函式起 :219） ｜(⚠️`DecisionContext.gather` 有寫副作用 —— **部分修**（`need_urgen)
+[UNRESOLVED] known_issues.md:659 ｜舊錨 `_calc_reserve:667` ｜新錨 — ｜ ｜(🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 pin 定案、fix)
+[PROPOSE] known_issues.md:659 ｜舊錨 `decision_context:335` ｜新錨 decision_context.gd + `gather()` ｜憑同行字 `own_granary_tile`（現於 decision_context.gd:242，位於 gather() 內，函式起 :219） ｜(🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 pin 定案、fix)
+[PROPOSE] known_issues.md:696 ｜舊錨 `_try_dispatch_or_invite:567` ｜新錨 faction_ai_system.gd + `_evaluate_outpost_residency()` ｜憑同行字 `_try_dispatch_or_invite`（現於 faction_ai_system.gd:621，位於 _evaluate_outpost_residency() 內，函式起 :611） ｜(gate② settle attempt-gate 矛盾（flagged 不一致，DEFER 進 means-)
+[NEED_HUMAN] known_issues.md:708 ｜舊錨 `resource_system:57` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(★★★食糧地方安全 arc = session keystone：兩分配閘（2026-07-23，measur)
+[PROPOSE] known_issues.md:740 ｜舊錨 `faction_ai:2801` ｜新錨 faction_ai_system.gd + `_dispatch_goal_delegate()` ｜憑同行字 `_dispatch_facility_builder`（現於 faction_ai_system.gd:4449，位於 _dispatch_goal_delegate() 內，函式起 :4424） ｜(★weaponsmith 真牆 = 兩 build 閘（非 trade，2026-07-23，material)
+[PROPOSE] known_issues.md:741 ｜舊錨 `order_system:121` ｜新錨 order_system.gd + `tick_team_orders()` ｜憑同行字 `tools`（現於 order_system.gd:166，位於 tick_team_orders() 內，函式起 :115） ｜(★weaponsmith 真牆 = 兩 build 閘（非 trade，2026-07-23，material)
+[MOVED] known_issues.md:758 ｜舊錨 `trade_valuation:97` ｜新錨 faction_ai_system.gd + `urgency` ｜★符號在【別的檔】：faction_ai_system.gd:5215（var）⇒ 疑搬家/改名 ｜(★cost70 診斷訂正 + construction cap 100 脫鉤 afford 門檻 = mean)
+[PROPOSE] known_issues.md:767 ｜舊錨 `_dispatch_facility_builder:2780` ｜新錨 faction_ai_system.gd + `_dispatch_goal_delegate()` ｜憑同行字 `_dispatch_facility_builder`（現於 faction_ai_system.gd:4449，位於 _dispatch_goal_delegate() 內，函式起 :4424） ｜(dispatch afford buffer ×1.5 承重（G1a mint 依賴，不能為 weaponsm)
+[PROPOSE] known_issues.md:767 ｜舊錨 `_dispatch_upgrader:2637` ｜新錨 faction_ai_system.gd + `_dispatch_goal_delegate()` ｜憑同行字 `_dispatch_facility_builder`（現於 faction_ai_system.gd:4449，位於 _dispatch_goal_delegate() 內，函式起 :4424） ｜(dispatch afford buffer ×1.5 承重（G1a mint 依賴，不能為 weaponsm)
+[PROPOSE] known_issues.md:771 ｜舊錨 `faction_ai_system:1858` ｜新錨 faction_ai_system.gd + `_decide_unified()` ｜憑同行字 `_decision_crisis`（現於 faction_ai_system.gd:2740，位於 _decide_unified() 內，函式起 :2735） ｜(crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 fire，2026-0)
+[PROPOSE] known_issues.md:771 ｜舊錨 `resource_system:208` ｜新錨 resource_system.gd + `_update_food_flow()` ｜憑同行字 `food_flow_avg`（現於 resource_system.gd:299，位於 _update_food_flow() 內，函式起 :290） ｜(crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 fire，2026-0)
+[PROPOSE] known_issues.md:795 ｜舊錨 `outpost_system:606` ｜新錨 outpost_system.gd + `slot_cap()` ｜憑同行字 `outpost_level`（現於 outpost_system.gd:183，位於 slot_cap() 內，函式起 :181） ｜(market_orders capture/demolish 不清（pre-existing 洩漏，2026-)
+[PROPOSE] known_issues.md:799 ｜舊錨 `faction_ai_system:1115` ｜新錨 faction_ai_system.gd + `_precond_met()` ｜憑同行字 `can_reach`（現於 faction_ai_system.gd:1432，位於 _precond_met() 內，函式起 :1422） ｜(god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice )
+[UNRESOLVED] known_issues.md:799 ｜舊錨 `force_ge_target:1109` ｜新錨 — ｜ ｜(god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice )
+[PROPOSE] known_issues.md:812 ｜舊錨 `beast_system:16` ｜新錨 beast_system.gd + `build_beast_team()` ｜憑同行字 `beast_kind`（現於 beast_system.gd:25，位於 build_beast_team() 內，函式起 :17） ｜(★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，cri)
+[PROPOSE] known_issues.md:814 ｜舊錨 `faction_ai:3314` ｜新錨 faction_ai_system.gd + `try_hunt_predator()` ｜憑同行字 `BeastSystem`（現於 faction_ai_system.gd:5498，位於 try_hunt_predator() 內，函式起 :5485） ｜(★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，cri)
+[PROPOSE] known_issues.md:814 ｜舊錨 `encounter:1232` ｜新錨 encounter_system.gd + `_spawn_beast_units()` ｜憑同行字 `BeastSystem`（現於 encounter_system.gd:1112，位於 _spawn_beast_units() 內，函式起 :1111） ｜(★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，cri)
+[PROPOSE] known_issues.md:820 ｜舊錨 `sim_runner:259` ｜新錨 sim_runner.gd + `_advance_tick_body()` ｜憑同行字 `TaskArbiter`（現於 sim_runner.gd:302，位於 _advance_tick_body() 內，函式起 :247） ｜(★TaskArbiter.transition = 無條件 raw 覆寫後門（手不聽腦，2026-07-19，)
+[NEED_HUMAN] known_issues.md:822 ｜舊錨 `faction_ai:3876` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(★TaskArbiter.transition = 無條件 raw 覆寫後門（手不聽腦，2026-07-19，)
+[PROPOSE] known_issues.md:867 ｜舊錨 `faction_ai_system:3448` ｜新錨 faction_ai_system.gd + `_find_aid_target()` ｜憑同行字 `_find_aid_target`（現於 faction_ai_system.gd:6148，位於 _find_aid_target() 內，函式起 :6148） ｜(★乞食死 rung——引擎幾乎不選乞食（2026-07-15，desperation QA 複判抓，絕境階梯斷)
+[NEED_HUMAN] known_issues.md:914 ｜舊錨 `npc_combat:551` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint)
+[PROPOSE] known_issues.md:917 ｜舊錨 `reaction:166` ｜新錨 reaction_system.gd + `evaluate_all()` ｜憑同行字 `reaction`（現於 reaction_system.gd:82，位於 evaluate_all() 內，函式起 :35） ｜(★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint)
+[PROPOSE] known_issues.md:919 ｜舊錨 `faction_ai:3252` ｜新錨 faction_ai_system.gd + `calc_readiness()` ｜憑同行字 `population`（現於 faction_ai_system.gd:225，位於 calc_readiness() 內，函式起 :224） ｜(★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint)
+[PROPOSE] known_issues.md:962 ｜舊錨 `faction_ai:1753` ｜新錨 faction_ai_system.gd + `cleanup_extinct_teams()` ｜憑同行字 `_route_extinct_assets`（現於 faction_ai_system.gd:3943，位於 cleanup_extinct_teams() 內，函式起 :3936） ｜(燒進度（2026-07-01 首三軌 merged）)
+[PROPOSE] known_issues.md:968 ｜舊錨 `beast:30` ｜新錨 beast_system.gd + `reward_and_cleanup()` ｜憑同行字 `beast`（現於 beast_system.gd:40，位於 reward_and_cleanup() 內，函式起 :39） ｜(第二批燒進度（2026-07-01 三軌 merged）)
+[PROPOSE] known_issues.md:981 ｜舊錨 `event_faction_defect:21` ｜新錨 event_faction_defect.gd + `execute()` ｜憑同行字 `clear_team_faction`（現於 event_faction_defect.gd:45，位於 execute() 內，函式起 :42） ｜(第三批燒進度（2026-07-02 means-end + slice3 merged）)
+[PROPOSE] known_issues.md:982 ｜舊錨 `faction_ai:3479` ｜新錨 faction_ai_system.gd + `_find_strong_neighbor()` ｜憑同行字 `known_reputations`（現於 faction_ai_system.gd:6130，位於 _find_strong_neighbor() 內，函式起 :6120） ｜(第三批燒進度（2026-07-02 means-end + slice3 merged）)
+[PROPOSE] known_issues.md:994 ｜舊錨 `_evaluate_all_body:644` ｜新錨 faction_ai_system.gd + `evaluate_all()` ｜憑同行字 `evaluate_all`（現於 faction_ai_system.gd:741，位於 evaluate_all() 內，函式起 :741） ｜(後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/20)
+[PROPOSE] known_issues.md:1001 ｜舊錨 `_evaluate_outpost_residency:419` ｜新錨 faction_ai_system.gd + `_evaluate_outpost_residency()` ｜憑同行字 `_evaluate_outpost_residency`（現於 faction_ai_system.gd:611，位於 _evaluate_outpost_residency() 內，函式起 :611） ｜(後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/20)
+[MOVED] known_issues.md:1001 ｜舊錨 `interaction_system:74` ｜新錨 faction_ai_system.gd + `_evaluate_outpost_residency` ｜★符號在【別的檔】：faction_ai_system.gd:611（func）⇒ 疑搬家/改名 ｜(後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/20)
+[PROPOSE] known_issues.md:1001 ｜舊錨 `sim_runner:247` ｜新錨 sim_runner.gd + `_step1b_update_vision()` ｜憑同行字 `tick_discovery`（現於 sim_runner.gd:369，位於 _step1b_update_vision() 內，函式起 :367） ｜(後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/20)
+[PROPOSE] known_issues.md:1009 ｜舊錨 `faction_ai:994` ｜新錨 faction_ai_system.gd + `calc_readiness()` ｜憑同行字 `effective_food`（現於 faction_ai_system.gd:228，位於 calc_readiness() 內，函式起 :224） ｜(後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/20)
+[UNRESOLVED] known_issues.md:1022 ｜舊錨 `headless_test:2010` ｜新錨 — ｜ ｜(讀B/G3 Phase E backlog（2026-07-01 平行軌）)
+[UNRESOLVED] known_issues.md:1022 ｜舊錨 `headless_test:14475` ｜新錨 — ｜ ｜(讀B/G3 Phase E backlog（2026-07-01 平行軌）)
+[PROPOSE] known_issues.md:1023 ｜舊錨 `resource_system:433` ｜新錨 resource_system.gd + `resolve_consumption()` ｜憑同行字 `own_granary_tile`（現於 resource_system.gd:209，位於 resolve_consumption() 內，函式起 :182） ｜(讀B/G3 Phase E backlog（2026-07-01 平行軌）)
+[PROPOSE] known_issues.md:1110 ｜舊錨 `erase_team:147` ｜新錨 world_state.gd + `erase_team()` ｜憑同行字 `erase_team`（現於 world_state.gd:429，位於 erase_team() 內，函式起 :429） ｜(G3 殘缺情報進度)
+[PROPOSE] known_issues.md:1132 ｜舊錨 `event_faction_defect:21` ｜新錨 event_faction_defect.gd + `execute()` ｜憑同行字 `clear_team_faction`（現於 event_faction_defect.gd:45，位於 execute() 內，函式起 :42） ｜(G1 供應鏈進度)
+[MOVED] known_issues.md:1139 ｜舊錨 `resource_system:213` ｜新錨 faction_ai_system.gd + `_merchant_trade_target` ｜★符號在【別的檔】：faction_ai_system.gd:3615（func）⇒ 疑搬家/改名 ｜(G1 供應鏈進度)
+[PROPOSE] known_issues.md:1160 ｜舊錨 `npc_combat:456` ｜新錨 npc_combat_system.gd + `_kill_named_npc()` ｜憑同行字 `event_system`（現於 npc_combat_system.gd:731，位於 _kill_named_npc() 內，函式起 :726） ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[PROPOSE] known_issues.md:1165 ｜舊錨 `faction_ai:2050` ｜新錨 faction_ai_system.gd + `_evaluate_all_body()` ｜憑同行字 `on_leader_death`（現於 faction_ai_system.gd:955，位於 _evaluate_all_body() 內，函式起 :763） ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[MOVED] known_issues.md:1165 ｜舊錨 `ambush:66` ｜新錨 npc_combat_system.gd + `_apply_casualties` ｜★符號在【別的檔】：npc_combat_system.gd:678（func）⇒ 疑搬家/改名 ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[PROPOSE] known_issues.md:1167 ｜舊錨 `encounter_system:1184` ｜新錨 encounter_system.gd + `_check_prisoners()` ｜憑同行字 `leader_id`（現於 encounter_system.gd:615，位於 _check_prisoners() 內，函式起 :594） ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[PROPOSE] known_issues.md:1167 ｜舊錨 `npc_combat:456` ｜新錨 npc_combat_system.gd + `tick_critical_npcs()` ｜憑同行字 `leader_id`（現於 npc_combat_system.gd:82，位於 tick_critical_npcs() 內，函式起 :75） ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[NEED_HUMAN] known_issues.md:1188 ｜舊錨 `faction_ai:2105` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(P5 QA批（2026-06-16 QA session harness 系統遍歷，stage2 驗收抓）)
+[PROPOSE] known_issues.md:1204 ｜舊錨 `faction_ai:1058` ｜新錨 faction_ai_system.gd + `_intent_why()` ｜憑同行字 `match`（現於 faction_ai_system.gd:1206，位於 _intent_why() 內，函式起 :1205） ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）)
+[PROPOSE] known_issues.md:1204 ｜舊錨 `health_system:221` ｜新錨 health_system.gd + `tick_status_effects()` ｜憑同行字 `match`（現於 health_system.gd:98，位於 tick_status_effects() 內，函式起 :92） ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）)
+[PROPOSE] known_issues.md:1205 ｜舊錨 `interaction_system:836` ｜新錨 interaction_system.gd + `_resolve_aid_request()` ｜憑同行字 `aid_request`（現於 interaction_system.gd:1180，位於 _resolve_aid_request() 內，函式起 :1171） ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）)
+[PROPOSE] known_issues.md:1205 ｜舊錨 `sim_runner:102` ｜新錨 sim_runner.gd + `_advance_tick_body()` ｜憑同行字 `aid_request`（現於 sim_runner.gd:285，位於 _advance_tick_body() 內，函式起 :247） ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）)
+[MOVED] known_issues.md:1206 ｜舊錨 `encounter_system:1301` ｜新錨 encounter_view.gd + `_post_combat_hint` ｜★符號在【別的檔】：encounter_view.gd:594（func）⇒ 疑搬家/改名 ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）)
+[PROPOSE] known_issues.md:1207 ｜舊錨 `person_generator:46` ｜新錨 person_generator.gd + `generate_for_team()` ｜憑同行字 `persons`（現於 person_generator.gd:101，位於 generate_for_team() 內，函式起 :86） ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）)
+[PROPOSE] known_issues.md:1207 ｜舊錨 `faction_ai:389` ｜新錨 faction_ai_system.gd + `_dispatch_subteam_settle()` ｜憑同行字 `sub_leader_id`（現於 faction_ai_system.gd:646，位於 _dispatch_subteam_settle() 內，函式起 :643） ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）)
+[PROPOSE] known_issues.md:1321 ｜舊錨 `try_proactive_diplomacy:68` ｜新錨 diplomatic_ai_system.gd + `try_proactive_diplomacy()` ｜憑同行字 `try_proactive_diplomacy`（現於 diplomatic_ai_system.gd:126，位於 try_proactive_diplomacy() 內，函式起 :126） ｜(Bug5. DiplomacyAI demand_tribute 恆負)
+[PROPOSE] known_issues.md:1374 ｜舊錨 `movement:138` ｜新錨 movement_system.gd + `_move_cost()` ｜憑同行字 `_compute_team_speed`（現於 movement_system.gd:171，位於 _move_cost() 內，函式起 :170） ｜(Movement)
+[PROPOSE] known_issues.md:1419 ｜舊錨 `faction_ai_system:45` ｜新錨 faction_ai_system.gd + `calc_readiness()` ｜憑同行字 `FOOD_PER_PERSON_PER_DAY`（現於 faction_ai_system.gd:229，位於 calc_readiness() 內，函式起 :224） ｜(重複值 / magic numbers)
+[PROPOSE] known_issues.md:1503 ｜舊錨 `_evaluate_solo:1876` ｜新錨 faction_ai_system.gd + `_evaluate_threat()` ｜憑同行字 `_decide_unified`（現於 faction_ai_system.gd:470，位於 _evaluate_threat() 內，函式起 :421） ｜(★FLEE 從不移動（dead flee-movement，序1 dissolution 遺留，2026-07)
+[PROPOSE] known_issues.md:1511 ｜舊錨 `_tick_food_granary_sell:138` ｜新錨 order_system.gd + `settle_orders()` ｜憑同行字 `resources`（現於 order_system.gd:378，位於 settle_orders() 內，函式起 :371） ｜(★經濟供給鏈斷點:非糧賣單查錯 storage(framework seam,2026-07-15 full-)
+[PROPOSE] known_issues.md:1587 ｜舊錨 `faction_ai:18` ｜新錨 faction_ai_system.gd + `GOVERN_MATERIAL_TARGET` ｜憑同行字 `GOVERN_MATERIAL_TARGET`（const，現在 faction_ai_system.gd:30） ｜(生產框架 arc follow-up（2026-07-16,供給側成功後殘項）)
+[NEED_HUMAN] known_issues.md:1602 ｜舊錨 `need_oracle:35` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(Arc1 need oracle S6 + 終端消耗品 known-deferred（2026-07-16）)
+[PROPOSE] known_issues.md:1676 ｜舊錨 `event_faction_defect:16` ｜新錨 event_faction_defect.gd + `check()` ｜憑同行字 `honor`（現於 event_faction_defect.gd:25，位於 check() 內，函式起 :15） ｜(★faction 成員資格 fragility＝結構 confound（2026-08-05，measurer)
+[PROPOSE] known_issues.md:1677 ｜舊錨 `faction_ai:4571` ｜新錨 faction_ai_system.gd + `_evaluate_uprising()` ｜憑同行字 `clear_team_faction`（現於 faction_ai_system.gd:6257，位於 _evaluate_uprising() 內，函式起 :6211） ｜(★faction 成員資格 fragility＝結構 confound（2026-08-05，measurer)
+[PROPOSE] known_issues.md:1683 ｜舊錨 `faction_ai:590` ｜新錨 faction_ai_system.gd + `_ledger_record()` ｜憑同行字 `contact`（現於 faction_ai_system.gd:6403，位於 _ledger_record() 內，函式起 :6395） ｜(★失聯帳本 subteam 記帳缺口＝WHAT-mandated completion（下批完成、非無限期 p)
+[PROPOSE] known_issues.md:1689 ｜舊錨 `_detach_one_anon:1542` ｜新錨 faction_ai_system.gd + `_detach_one_anon()` ｜憑同行字 `_detach_one_anon`（現於 faction_ai_system.gd:1833，位於 _detach_one_anon() 內，函式起 :1833） ｜(anon-exhaustion=caring 成本真但 distressed 世界無回補（2026-08-05)
+[PROPOSE] known_issues.md:1689 ｜舊錨 `reaction_system:199` ｜新錨 reaction_system.gd + `breed_rel_surplus()` ｜憑同行字 `food_flow_avg`（現於 reaction_system.gd:260，位於 breed_rel_surplus() 內，函式起 :258） ｜(anon-exhaustion=caring 成本真但 distressed 世界無回補（2026-08-05)
+[MOVED] known_issues.md:1689 ｜舊錨 `population_system:18` ｜新錨 faction_ai_system.gd + `_detach_one_anon` ｜★符號在【別的檔】：faction_ai_system.gd:1833（func）⇒ 疑搬家/改名 ｜(anon-exhaustion=caring 成本真但 distressed 世界無回補（2026-08-05)
+[PROPOSE] known_issues.md:1709 ｜舊錨 `faction_ai:5152` ｜新錨 faction_ai_system.gd + `_evaluate_uprising()` ｜憑同行字 `clear_team_faction`（現於 faction_ai_system.gd:6257，位於 _evaluate_uprising() 內，函式起 :6211） ｜(★CONFIRMED tap-gap：faction-leave 4 出口無 Probe tap（2026-0)
+[PROPOSE] known_issues.md:1715 ｜舊錨 `faction_ai:248` ｜新錨 faction_ai_system.gd + `find_prosperity_prey()` ｜憑同行字 `is_established`（現於 faction_ai_system.gd:293，位於 find_prosperity_prey() 內，函式起 :238） ｜(★★founding 降級 park（2026-08-13、blueprint WHAT 裁+用戶框挑戰「為啥)
+[PROPOSE] known_issues.md:1718 ｜舊錨 `faction_ai:1039` ｜新錨 faction_ai_system.gd + `_assign_tasks()` ｜憑同行字 `_declare_established`（現於 faction_ai_system.gd:2672，位於 _assign_tasks() 內，函式起 :2644） ｜(★founding never-establish 真根定案（2026-08-12、③story-audit )
+[PROPOSE] known_issues.md:1718 ｜舊錨 `_declare_established:5070` ｜新錨 faction_ai_system.gd + `_assign_tasks()` ｜憑同行字 `_declare_established`（現於 faction_ai_system.gd:2672，位於 _assign_tasks() 內，函式起 :2644） ｜(★founding never-establish 真根定案（2026-08-12、③story-audit )
+[PROPOSE] known_issues.md:1736 ｜舊錨 `faction_ai:3799` ｜新錨 faction_ai_system.gd + `_dispatch_builder()` ｜憑同行字 `_eta_build`（現於 faction_ai_system.gd:4159，位於 _dispatch_builder() 內，函式起 :4070） ｜(★建造隊派遣的真閘 ＝ 建材，不是糧（2026-08-21 實測，lead 非結論）)
+[NEED_HUMAN] known_issues.md:1875 ｜舊錨 `npc_combat_system:784` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上零疊代**)
+[NEED_HUMAN] known_issues.md:1876 ｜舊錨 `diplomatic_ai_system:251` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上零疊代**)
+[NEED_HUMAN] known_issues.md:1929 ｜舊錨 `decision_context:472` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(★★★`own_granary_tile` nil 崩 —— **修過一次沒修乾淨，而根不在呼叫點**（202)
+[NEED_HUMAN] known_issues.md:1984 ｜舊錨 `faction_ai_system:3475` ｜新錨 — ｜同行沒有任何可定位的符號 ⇒ 要讀懂內容才知道該指哪個 ｜(★`local_value` 仍有 ~12 個 blind 呼叫點（2026-08-25，窮盡掃出，★不在當前)
