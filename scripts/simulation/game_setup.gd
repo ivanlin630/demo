@@ -37,6 +37,15 @@ const FLOOR_RETRY_MAX: int = 8             # §3 地板 retry 上限（同 rng �
 const FLOOR_CONNECT_MAX: int = 12          # §3② 領土非孤島軟上界（同 faction outpost 最近距離 hex）
 
 static func setup(state: WorldState, config: Dictionary) -> void:
+	# ★★★arm 順序自檢（bed-arm-helper §5①）：世界被建的這一刻，回頭問「Probe armed 了嗎」。
+	#   ★方向是反的（不是 arm 去問世界）—— 因為 arm 當下世界還不存在，問不到。
+	#   ★★而這裡【不能】包進 `if Probe.enabled`：arm 太晚時 enabled 正好是 false
+	#     ⇒ 自檢自己不執行 ⇒ ★★★循環自證。所以它無條件跑，並走獨立欄位不走 bump()。
+	#   ★誠實限：它只答「setup 當下 armed 沒有」，答不出「是哪一張床」——
+	#     所以順便記一行 hint 給人回頭找。
+	if not Probe.enabled:
+		Probe.note_setup_unarmed(str(config.get("name", config.get("mode", "?"))))
+		print("[ARM-ORDER] ★GameSetup.setup() 執行時 Probe 尚未 armed —— 這一段世界的 tap 是【盲的】")
 	var mode: String = config.get("mode", "random")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(config.get("seed", 42))
