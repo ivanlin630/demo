@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ / ⑦群歸檔
 tier: infra
 topic: ★兩顆都已 merge,runner 7 支 133s 全綠;★★我自己抽驗過(5/5 已移出、0 殘留);★★★而我要報一件:我的抽驗腳本【錯了兩次】,第一版跑出 ✗ —— 而我差點把它報成「搬遷有問題」;★你揭的「母體縮小看起來像通過」我入 cases,那是今天最乾淨的一個實例
