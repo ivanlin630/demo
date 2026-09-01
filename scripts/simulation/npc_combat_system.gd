@@ -717,6 +717,7 @@ func _random_part() -> String:
 	var roll: float = randf()
 	var acc: float = 0.0
 	for part in HIT_WEIGHTS:
+		if Probe.enabled: Probe.bump("rootdiff.HIT_WEIGHTS")
 		acc += HIT_WEIGHTS[part]
 		if roll < acc:
 			return part

@@ -805,8 +805,10 @@ func resolve_attack(attacker: Dictionary, target: Dictionary,
 	var drain_mult: float = HealthSystem.get_weight_stamina_drain_mult(attacker, state)
 	attacker["stamina"] = maxf(float(attacker.get("stamina", 1.0)) - 0.05 * drain_mult, 0.0)
 	if float(attacker.get("stamina", 1.0)) <= 0.0:
+		if Probe.enabled: Probe.bump("rootdiff.STAMINA_EXHAUSTED_ATK_MULT")
 		raw_dmg *= STAMINA_EXHAUSTED_ATK_MULT
 	if is_ranged:
+		if Probe.enabled: Probe.bump("rootdiff.STANCE_RANGED_DMG_MULT")
 		raw_dmg *= STANCE_RANGED_DMG_MULT.get(target.get("stance", "walk"), 1.0)
 	var armor: String    = _get_armor_grade_at(target, state, target_part)
 	var reduction: float = ItemAttributes.get_damage_reduction(armor)

@@ -172,6 +172,7 @@ func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> in
 	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 	if state.world.tiles.has(tile_id):
 		var terrain: String = (state.world.tiles[tile_id] as HexTileData).terrain
+		if Probe.enabled: Probe.bump("rootdiff.TERRAIN_SPEED_MULT")
 		speed *= TERRAIN_SPEED_MULT.get(terrain, 1.0)
 	# 疲勞懲罰
 	if team.fatigue >= 1.0:
@@ -189,6 +190,7 @@ func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> in
 		var tile_id2: int = team.tile_pos.x * 1000 + team.tile_pos.y
 		var tile2 = state.world.tiles.get(tile_id2)
 		var terrain2: String = tile2.terrain if tile2 else "plains"
+		if Probe.enabled: Probe.bump("rootdiff.WAGON_TERRAIN_MULT")
 		speed *= WAGON_TERRAIN_MULT.get(terrain2, 1.0)
 	return clamp(int(round(float(BASE_MOVE_TICKS) / maxf(speed, 0.01))), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
 
@@ -223,6 +225,7 @@ func _compute_base_team_speed(state: WorldState, team: TeamData) -> float:
 	for pid in named_ids:
 		var p = state.persons.get(pid)
 		if p != null:
+			if Probe.enabled: Probe.bump("rootdiff.NAMED_WEIGHT")
 			total_speed += p.get_effective_speed() * NAMED_WEIGHT
 			total_count += NAMED_WEIGHT
 			named_found += 1

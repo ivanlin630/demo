@@ -93,9 +93,15 @@ static func tick_status_effects(unit: Dictionary, state: WorldState) -> void:
 	var bp: Dictionary = _get_body_parts(unit, state)
 	var blood_drain: float = 0.0
 	for part in bp:
+		# ★S7 tap：★★match 分支【不能】在 pattern 之間插語句（我第一版就是這樣插的，
+		#   Godot 直接 Parse Error）⇒ tap 放進分支【內部】，與原式同一個 block。
 		match bp[part].get("bleeding", "none"):
-			"minor": blood_drain += BLEEDING_MINOR_DRAIN
-			"major": blood_drain += BLEEDING_MAJOR_DRAIN
+			"minor":
+				if Probe.enabled: Probe.bump("rootdiff.BLEEDING_MINOR_DRAIN")
+				blood_drain += BLEEDING_MINOR_DRAIN
+			"major":
+				if Probe.enabled: Probe.bump("rootdiff.BLEEDING_MAJOR_DRAIN")
+				blood_drain += BLEEDING_MAJOR_DRAIN
 		if bp[part].get("poisoned", false):
 			bp[part]["hp"] = maxf(bp[part]["hp"] - POISON_HP_DRAIN, 0.0)
 			bp[part]["status"] = _calc_status(
@@ -212,6 +218,7 @@ static func tick_natural_regen(state: WorldState) -> void:
 			var bp = p.body_parts[part]
 			var regen: float = HP_REGEN_FRACTURE if bp.get("fracture", false) \
 							   else HP_REGEN_PER_TICK
+			if Probe.enabled: Probe.bump("rootdiff.HP_REGEN_PER_TICK")
 			bp["hp"] = minf(bp["hp"] + regen, bp["max_hp"])
 			bp["status"] = _calc_status(bp["hp"], bp["max_hp"], part)
 

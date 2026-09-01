@@ -79,12 +79,14 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# 極低糧時 survival-class 加法超量級破頂，隨 food→0 線性放大，奪回 argmax。全 SURVIVAL_OPTION_SET 等量加
 		# (不改 survival-class 內部相對序，只集體破頂)。food_days=FLOOR 時加成=0 平滑銜接無 flip-flop。
 		if ctx.food_days < SURVIVAL_BOOST_FLOOR and DecisionOptions.is_in_set(opt, "survival"):
+			if Probe.enabled: Probe.bump("rootdiff.SURVIVAL_BOOST_MAX")
 			u += SURVIVAL_BOOST_MAX * (SURVIVAL_BOOST_FLOOR - ctx.food_days) / SURVIVAL_BOOST_FLOOR
 			if Probe.enabled: Probe.bump("survival.boost_fire")   # 觸發頻率=健康指標(measurer 要)
 		# ★threat-oracle S2 break-top boost（解 skeptic finding3 單 term-多 term 不匹配）：severity≥FLOOR 時
 		# threat option 加法破頂 ∝ severity（鏡射 survival，全 THREAT_OPTION_SET 等量加，保內部序）
 		# ★capped 且 < survival boost(2.5)：threat=belief→survival(存亡)保序不破；blueprint② 非偽裝硬閘。
 		if ctx.threat_react >= THREAT_BOOST_FLOOR and DecisionOptions.is_in_set(opt, "threat"):
+			if Probe.enabled: Probe.bump("rootdiff.THREAT_BOOST_MAX")
 			u += THREAT_BOOST_MAX * clampf((ctx.threat_react - THREAT_BOOST_FLOOR) / (DecisionTerms.SEVERITY_MAX - THREAT_BOOST_FLOOR), 0.0, 1.0)
 			if Probe.enabled: Probe.bump("threat.boost_fire")
 		if Probe.enabled and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
