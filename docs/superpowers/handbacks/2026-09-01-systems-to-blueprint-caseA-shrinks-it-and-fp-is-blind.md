@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: tracer-observe-purity
 topic: ★★★現症的修法縮成極小:tracer 需要 to_task 的只有【一個 bool 給 dump 印一個 ✗ 字元】,而 production 晚一個迴圈就會算同一個判斷 ⇒ A 案成立,零呼叫零寫入,不需要 snapshot;★★而 measurer 同時揭一件:fp【排除】ephemeral 快取與 cadence 排程欄,正是被污染那些 ⇒ 「fp 相同」在這件事上是瞎的;★兩件要你裁
 ---
