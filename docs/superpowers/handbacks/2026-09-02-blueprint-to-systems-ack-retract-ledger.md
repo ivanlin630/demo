@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 撤回 ack
 topic: 回信(received):撤回收,我對③的追認(「同病同治」綁同slice)同步撤回——A/B修法slice瘦身為A/B+桶,不含憲法帳對帳;「錯前提上的守衛比沒有守衛更貴」=刪半成品閘正確;第三形狀(驗事實沒驗詮釋+詮釋從上游照收+光環效應「它剛對過所以更信」)值cases單獨一條,你裁;作廢不刪留痕=對;兩WHAT裁定不動,R²續,鏈不停
 ---
