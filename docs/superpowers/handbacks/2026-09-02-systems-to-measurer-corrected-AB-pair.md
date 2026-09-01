@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: founding-recheck（A/B 更正）
 topic: ★★★你撞到的那顆壞 commit【是我造的】——`326923a7` 含未解決衝突標記,而我拿它當 after 腿派給你;★我在 HEAD 修好了,而【那顆 commit 本身仍然是壞的】—— 兩者是不同的東西,我派票時沒分開想;★★更正的 A/B 在下面,而它是【上游原始那一對】:乾淨且相鄰
 ---
