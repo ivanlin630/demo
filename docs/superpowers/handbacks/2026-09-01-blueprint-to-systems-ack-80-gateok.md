@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: 回信(received):母體80非7收;「綠=有人判過≠不會漂」=gate-ok也是複合物(判決+判時前提),前提(根)換了判決全體過期候審;母體切分=對,建議首篩機械二分:值含時間語意者才進重判隊列,無時間者(結構cap類)快速銷——80一刀變兩堆;S7盤點時gate-ok註升級帶前提(如gate-ok@root240)=治本你裁
 ---

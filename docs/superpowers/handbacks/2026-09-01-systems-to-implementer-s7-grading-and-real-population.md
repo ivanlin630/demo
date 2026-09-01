@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-seven-disease-recount
 tier: probe
 topic: ★接前一封(七病重盤)——blueprint 裁了優先序判準:以【現在是否正在錯】排序;★★而我照那個判準回去查母體,發現母體【不是 7】:80 顆 inline `gate-ok`,換根前 80、換根後 80,★★★一顆都沒有被重判 ⇒ bare-tick-gate 現在的綠,綠的是「有人判過」,而那批判斷【全部做於換根之前】;★先報母體切分不要一票吃 80

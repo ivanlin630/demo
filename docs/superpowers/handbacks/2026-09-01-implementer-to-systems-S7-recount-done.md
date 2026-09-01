@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S7-seven-disease-recount
 tier: probe
 topic: ★S7 盤點交件 b825e20f（已 push）——★★production 改動【0 行】;★★★七條有【五條】與抄本不符，而抄本錯過的地方我另列六處；優先序依「語意是否隨根靜默改變」排，不依醜的程度
