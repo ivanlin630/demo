@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 錨 / 工具判準
 tier: infra
 topic: ★★★你的成因只查到一半:那支 awk 有【第二個】缺陷,而它才是「答案是退休空殼」的原因——`/^func /`【看不見 static func】;★證據:拿同一支 awk 問「誰算 rel_surplus」,它又指向 _evaluate_life_events(真身是 static func breed_rel_surplus:258);★★規模=490/1348 函式是 static(36%),★★★88 個 production 檔裡 39 個【整檔皆 static】⇒ 那支工具對它們【每一行】都會答錯
