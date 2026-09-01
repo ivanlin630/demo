@@ -1,0 +1,136 @@
+# S7 七病【現狀盤點】—— ★只盤不修，一行 production 都沒改
+#
+# 抄本：docs/superpowers/specs/2026-08-20-time-frequency-inventory.md §盤點抓到的病
+# ★★抄本寫於 2026-08-20（S2 換根【之前】，TICKS_PER_DAY = 240）
+#   現況根：TICKS_PER_HOUR = 60 ⇒ TICKS_PER_DAY = 1440 ⇒ ★★★換算係數 6×
+#   ⇒ 任何【寫死的 tick 數】現在代表的時間 = 舊語意 ÷ 6
+#
+# 欄位：病號｜①現況（還在／已修／變形）｜②file:line（★現值）｜③★★換根後的現值語意
+# ★★★第③欄是這張票的內容：語意變了的排前面，只是醜的排後面。
+# ★抄本與現況衝突處【以現況為準】並明列（見文末「抄本錯過的地方」）。
+
+═══════════════════════════════════════════════════════════════════
+★A 群：換根後【語意靜默改變】—— 優先序最高
+═══════════════════════════════════════════════════════════════════
+
+病7｜debug 鏡像 drift｜★還在，而【病的大小變了 6 倍】
+  ②scripts/debug/ui_logic_test.gd:77   const TICKS_PER_DAY := 24.0
+  ③★真值 1440 ⇒ drift 從抄本時代的 10×（240/24）變成 ★★60×（1440/24）
+    :78 用它算「食物撐幾天」⇒ 這支床算出來的天數是真值的 60 倍
+    ★★★而它不會報錯：它是 debug 自己的 local const，沒有任何東西比對它與真值
+  ★抄本說「food_ledger_bed 鏡常數 ×2 處」⇒ ★★實查該檔鏡的是
+    FOOD_PER_PERSON_PER_DAY / PROVISION_DAYS（:14/:15，兩顆都是【per-day 語意】）
+    ⇒ 它們【不隨根縮放】⇒ ★★★不是同一種病，抄本把兩種混成一條
+
+病6a｜PRISONER_CHECK_INTERVAL 單位說謊｜★還在
+  ②scripts/simulation/encounter_system.gd:10  const PRISONER_CHECK_INTERVAL: int = 5
+    使用：:595  if round_num % PRISONER_CHECK_INTERVAL != 0
+  ③名字說 INTERVAL（tick 語意），★而它比對的是 round_num（遭遇回合）
+    ⇒ ★★換根【不影響】它（遭遇軸不吃世界 tick）—— 但正因如此，
+      ★★★下一個讀名字的人會以為它跟著根走，而它不會。這是【命名誤導】不是【語意漂移】
+
+病6b｜FOOD_RESERVE_TICKS 名為 TICKS 實為係數｜★還在
+  ②scripts/simulation/trade_valuation.gd:54  const FOOD_RESERVE_TICKS: float = 20.0（單一源）
+    鏡：scripts/simulation/interaction_system.gd:6（★已收成單一源，不是副本）
+  ③公式是 pop × 0.1 × N ⇒ N 是【量係數】不是時間
+    ⇒ ★換根後它【沒有】跟著變（正確），★★但名字讓人以為它該變
+    ★★★危險點：若有人「順手把它乘 6 對齊新根」，會把儲備量放大 6 倍而測試不會紅
+
+病6c｜HP_REGEN_PER_TICK 實為 per-cadence｜★還在
+  ②scripts/simulation/health_system.gd:12  const HP_REGEN_PER_TICK: float = 0.5（使用 :214）
+  ③★真語意是【每次 cadence 呼叫回 0.5】，不是每 tick
+    ⇒ ★★換根後每日呼叫次數變了 ⇒ 【每日回復量靜默改變】而名字說它是 per-tick
+    ★★★這一顆是 A 群裡【真的漂了】的：名字騙人 ＋ 語意隨根變，兩病疊加
+
+═══════════════════════════════════════════════════════════════════
+★★B 群：接線病（★不是數值病）—— systems 已先裁掉錯的修法
+═══════════════════════════════════════════════════════════════════
+
+病3｜決策端移動信念與物理不同源｜★還在，★★行號從抄本的 :525 → 現值 :896
+  ②scripts/simulation/decision/goal_resolver.gd:896
+      const MOVE_TILES_PER_DAY: float = 2.0   # TEST VALUE
+    使用：:906  days += _hex_dist(...) / MOVE_TILES_PER_DAY
+  ③物理真值：TimeScale.MOVE_TICKS_PER_HEX = 240 tick/hex ⇒ 1440/240 = ★6 hex/天
+    ⇒ 信念 2.0 vs 物理 6.0 ⇒ ★★誤差從抄本時代的 2.5× 變成 3×
+  ★★★而修法【不是把 2.0 改成 6.0】（systems 已先裁，我照記）：
+    那是【手抄物理常數】＝血統②，用戶立法禁止（feedback_no_handcopied_physics）
+    ⇒ 修法形狀＝【改接線】：從 TimeScale.MOVE_TICKS_PER_HEX 導出，或讀自身移動狀態
+    ⇒ ★標為【接線病】不是【數值病】
+
+═══════════════════════════════════════════════════════════════════
+★★★C 群：已修／已收斂 —— 抄本與現況不符，以現況為準
+═══════════════════════════════════════════════════════════════════
+
+病1｜「回合」定義打架｜★★已修（S2 收掉）
+  ②scripts/ui/sim_bridge.gd:9-10
+      const TURN_MINUTES: int = 144            # ★時間宣告用【分鐘】
+      const TICKS_PER_TURN: int = TURN_MINUTES * TimeScale.TICK_PER_MINUTE
+  ③★現在由根導出 ⇒ 換根自動跟隨，2.4 小時的語意【保住】
+    ★★而 sim_runner 那半：全檔已無 turn 概念（grep 'turn' 只剩 return/sort_custom 等無關字串）
+    ⇒ ★★★兩個 turn 不同長的病【不存在了】
+
+病2｜EWMA cadence 相依｜★變形（★★不再是 near/far 不等價，而是「未宣告的時間常數」）
+  ②scripts/simulation/decision/need_hierarchy.gd:19  const URGENCY_EWMA_ALPHA: float = 0.25
+    使用：:124-131 ewma_update；唯一 production 呼叫端 decision_context.gd:686
+  ③★呼叫端只有一處，且掛在 decision 的 cadence 上（不再有 near/far 兩條路各跑一次）
+    ⇒ ★★抄本說的「near(4h)/far(40h) 不等價」【前提已不成立】
+    ★★★但 α=0.25 仍是【隱含時間常數】：平滑的半衰期 = f(α, 呼叫頻率)
+      ⇒ 換根改變呼叫頻率時，★平滑窗的【真實時長】靜默改變 —— 病沒消失，換了形狀
+
+病4｜manufacturing 率未 ×day_fraction｜★已收斂（★★抄本標「[?] 須核對」，現況答案是「不必」）
+  ②scripts/simulation/manufacturing_system.gd:78-81
+      static func runs_per_day() -> float:
+          return float(WorldState.TICKS_PER_DAY) / maxf(float(SimRunner.NEAR_CADENCE), 1.0)
+  ③★產線只在 NEAR pass 跑（:78 註解明寫）⇒ 沒有 near/far 兩條路 ⇒ 不等價問題不存在
+    ★★而【每日產量估算】已從根導出（不是拍數字）⇒ 換根自動跟隨
+    ⇒ ★★★這條可以從清單移除，而不是「還沒查」
+
+病5｜裸魔法數週期｜★部分已修、部分還在 —— 逐項拆
+  5a harvest 6h inline ×2 ｜★還在，★★但【已導出】不是裸數
+     ②sim_runner.gd:300 / :346   `% (WorldState.TICKS_PER_DAY / 4)`
+     ③分母是根 ⇒ 換根自動跟隨；★「/4」＝一天四等分（曆法結構，不該隨根變）
+       ⇒ ★★它是【重複】不是【漂移】：同一個表達式寫兩次，改一處會漏另一處
+  5b player_trade 1000t ｜★★★已不存在（抄本錯過的地方之一）
+     ②scripts/simulation/player_trade_system.gd 全檔已無 1000 的時間常數；
+       :103 用的是 TimeScale.hours(100) ⇒ ★已從根導出
+     ③★換根自動跟隨 ⇒ 這條已修
+  5c 日夜段界 0.1 / 0.75 / 0.9 ｜★還在
+     ②scripts/simulation/day_night_system.gd:10-12（dawn/day/dusk 邊界）
+     ③★它們是【一天內的比例】(t ∈ [0,1)) ⇒ ★★換根【不影響】語意
+       ⇒ 歸「只是醜」那一類，優先序低
+  5d 月長 30 硬編（UI）｜★已修
+     ②scripts/ui/text_ui_main.gd:758 註解明寫「一天永遠 24 小時、一月 30 天」
+     ③★已標為曆法結構（刻意不隨根縮放）⇒ 不是病，是【被誤判成病】
+  5e 危機除數 4 三處重複｜★還在（三處，窮盡確認）
+     ②faction_ai_system.gd:2736 / :3355 / :5429
+        `+ (DECISION_CADENCE / 4 if _decision_crisis(...) else DECISION_CADENCE)`
+     ③★分子是 DECISION_CADENCE（已導出）⇒ 換根自動跟隨
+       ⇒ ★★病是【三處重複】：「危機時想快 4 倍」這個決定寫了三遍，改一處會漏兩處
+  5f 「2 天 timeout」6 處裸寫｜★★已修（抄本錯過的地方之二）
+     ②窮盡搜索 480 / 2880：production 只剩 decision_context.gd:127 的【註解】
+        （「480 是舊根下的 2 天」——★S2 修完留下的說明，不是活的裸數）
+     ③★已無裸寫的 2 天 timeout ⇒ 這條已修
+
+═══════════════════════════════════════════════════════════════════
+★★★★抄本錯過的地方（★下次會再錯的地方）
+═══════════════════════════════════════════════════════════════════
+1. 病1 已修一半（sim_bridge 那半在 S2 收掉）—— 抄本仍列為「打架」
+2. 病4 標「[?] 須 systems 核對」—— 現況答案是【不必 ×day_fraction】，可移除
+3. 病5b（player_trade 1000t）已修 —— 抄本仍列
+4. 病5d（月長 30）本來就是曆法結構 —— ★抄本把【刻意不縮放】誤判成病
+5. 病5f（2 天 timeout 6 處）已修，只剩註解
+6. 病7 抄本說「food_ledger_bed 鏡常數 ×2 處」—— ★實查那兩顆是 per-day 語意、不隨根縮放
+   ⇒ ★★與 ui_logic_test 那顆【不是同一種病】，抄本把兩種混成一條
+   ⇒ ★★★而這正是 systems 抽驗時打掉的那個「×2 處」——同一族的錯又出現一次
+
+═══════════════════════════════════════════════════════════════════
+★★★★★優先序建議（依第③欄，不依「醜的程度」）
+═══════════════════════════════════════════════════════════════════
+高（語意隨根靜默改變）：病6c HP_REGEN_PER_TICK ／ 病7 ui_logic_test（60× drift）／ 病2 α 的隱含時間窗
+中（接線錯，且誤差隨根放大）：病3 MOVE_TILES_PER_DAY（2 vs 6，★接線病非數值病）
+低（重複但已導出，改一處會漏）：病5a（2 處）／ 病5e（3 處）
+最低（不隨根變，純命名/美觀）：病6a PRISONER_CHECK_INTERVAL ／ 病6b FOOD_RESERVE_TICKS ／ 病5c 日夜段界
+已可移除：病1 ／ 病4 ／ 病5b ／ 病5d ／ 病5f
+
+# ★窮盡搜索紀律：本盤點的每一條都用全域 grep（無 head / 無 glob 截斷），
+#   計數先跑過 `| wc -l` 再列項；抄本的「×2 處」型錯誤已在文末明列。
