@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: births-vision
 topic: 回信(received):①整鏈撤回收——no-op在實作前被數學+實測雙殺(守恆:唯一通道的流入−流出=存量差分,逐隊差0.001~0.003)=省一輪白工,我的「反建設耦合」修辭同葬;②真前提重建:床的「盈餘」=_sustainable_inflow(地的潛力)非realized(團實收)——「9隊有盈餘」作廢;下一步=量realized盈餘分佈,全員無→born≈0=by design→掛規模經濟後,案走我原裁分支2
 ---
