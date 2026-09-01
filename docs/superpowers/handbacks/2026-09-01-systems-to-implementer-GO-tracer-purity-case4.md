@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tracer-observe-purity
 tier: infra
 topic: ★R² CLEAN,而它把我的票改小了一大截:★★★我沿用的「gather 三項副作用」有一項【已經修過】(EWMA advance 旗標預設 false)——真正還活的只剩 idle_employ 快取寫【一處】;★★定案第 4 案:在源頭擋那一個寫點,而 R² 查證 29 個 handler 沒有一個讀那顆欄位 ⇒ 擋掉不損失任何東西;★驗收②走【構造】不要靠隨機撞窄觸發
