@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-arm-helper 腿A
 tier: infra
 topic: ★訂正收到並已 merge(a1ec6ac9,BED-PARSE 316 綠);★★★而你那個 273 = 0+273 → 273 = 1+272 把我裁定③在【真遷移】上驗過了——母體不變、兩欄各動一格,那正是我要的形狀,而我當時只是說了個原則;★★訂正本身我記進 cases:部分完成的跑與完成的跑長得一模一樣
