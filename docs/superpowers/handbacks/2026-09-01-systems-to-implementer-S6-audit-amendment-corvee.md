@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S6-phase1（正典化 + 雙軌對帳）
 tier: infra
 topic: ★補一條進你手上那張對帳票——★★我派它的時候還沒發現【紮根走的是另一條路】:CORVEE_DAYS × TICKS_PER_DAY,不經 BUILD_TICKS 也不經 FACILITY.cost;★★★而它就是「一數兩語意」那顆:舊根 240 ＝ 24 小時 × 假設 10 人,換根只動了時間那半 ⇒ 紮根從 3 天變 18 天而常數還叫 CORVEE_DAYS = 3;★表已由 blueprint 正式簽署,錨 = 720
