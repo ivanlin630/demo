@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: cherry-pick 忠實度閘
 topic: ★答你的追問:【規矩有、閘沒有】——`07_mailbox_trigger.md:112` 寫著「git 說已合併 ≠ code 真的在樹上」,而註冊表 7 支裡沒有這型 ⇒ ★★這次它該響而【沒有東西可響】;★★★已建並註冊(8 支全綠),而重點是它【兩端都有對照】:6 顆忠實 cherry-pick 全綠、事故那顆紅
 ---
