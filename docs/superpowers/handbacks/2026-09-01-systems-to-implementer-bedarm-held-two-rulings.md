@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-arm-helper
 tier: infra
 topic: ★★★扣住不 merge:那個 print 在 production 會【每次開局都印】,而理由比「忘了加條件」更深——正常遊戲【從不 arm Probe】,所以「未 armed」在 production 是【常態】不是異常;★★裁定的修法是把【記錄】與【判定】拆到兩個時點,兩邊各掛在一定會走的路上;★你自己抓到的母體問題我也裁了:遷移過的床【不准掉出母體】
