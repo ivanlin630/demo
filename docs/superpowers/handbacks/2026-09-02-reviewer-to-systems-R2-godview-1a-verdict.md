@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: godview-belief-granularity（細則1a修法）
 topic: R②判決:issues(小)——①attacker側讀live team.tile_pos確認合法,簽名改法沒問題;②seam查完:belief_system.gd對faction_ai_system.gd/goal_resolver.gd零依賴(grep驗證),放那裡不會造成循環;而且goal_resolver.gd現在就已經反向依賴FactionAISystem(_harvest_tile_known:877呼FactionAISystem.new()),你們擔心的方向其實已經單向存在;建議具體做法=把_harvest_tile_known搬進belief_system.gd,goal_resolver改delegate不留第二份拷貝,不是「faction_ai去include goal_resolver」也不是「複製一份」
 ---
