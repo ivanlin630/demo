@@ -1,0 +1,81 @@
+# 守衛掛在哪條路上 —— invariant「守衛不掛被動路徑」的存量稽核（只盤不修）
+#
+# ★起因：LOD 那一票我自己踩到 —— 假設告警放在 runs_per_day() 裡，
+#   跑對照時 registry 已經改壞而告警印 0，因為那一跑【沒人呼叫估算器】。
+#   ⇒ systems 已立成 invariant：守衛要掛在【一定會發生的事】上，不是掛在【有人來問】上。
+# ★★這份是回頭問：既有的守衛，有幾顆也犯同一個病？
+#
+# ═══ 母體【先寫死再數】═══
+# 母體 ＝ scripts/simulation/**.gd 裡的「守衛型輸出」，兩類：
+#   A 類：assumption / stale 型告警（grep `stale|assumption` ∩ `bump|push_`）⇒ 4 處
+#   B 類：loud-fail（push_error 4 處 ／ push_warning 9 處）⇒ 13 處
+# ★判準（每一列都要能指出【誰呼叫它】）：
+#   主動 ＝ 掛在每 tick／每 dispatch 一定會走的路上
+#   被動 ＝ 只有「有人來查詢」時才走（估算器、accessor、deprecated API）
+#   ◆不適用 ＝ 它不是守衛（是量測 tap、或是動作結果回報）
+
+═══════════════════════════════════════════════════════════════════
+★A 類：assumption / stale 告警（4 處）
+═══════════════════════════════════════════════════════════════════
+manufacturing_system.gd:130  manufacture.cadence_assumption_stale
+  呼叫路徑：tick_all() —— 每次 manufacture step 都走
+  判：★主動 ✓（本輪剛從被動搬過來的那一顆）
+
+manufacturing_system.gd:88   manufacture.cadence_assumption_stale
+  呼叫路徑：runs_per_day() —— 估算器，有人問才走
+  判：★被動 —— ★★但它是【重複】不是漏洞：同一顆告警在 :130 已有主動版
+     ⇒ 留著無害（同一個 counter），移除也可以。★★★列在這裡是為了帳完整，不是要修。
+
+outpost_system.gd:163        build_eta.cadence_assumption_stale
+  呼叫路徑：build_ticks_per_day() ← build_eta_days() ← 六個決策估值點
+  判：★★★被動，而且【沒有主動版】—— 這是本稽核唯一的真命中。
+  ★具體壞法：它守的假設是「outpost_tick 仍掛在 near pass」。
+    若有人改了 registry 的 lod，而那一段時間【沒有任何隊在評估建設】
+    ⇒ 沒人呼叫 build_eta_days ⇒ 告警不叫 ⇒ 假設壞了而世界照跑。
+  ★★而主動版該掛哪：OutpostSystem.tick_all()（每 near pass 一定走，
+    且它就是 _tick_construction 的入口＝那個假設真正生效的地方）。
+  ★★★我【沒有改】—— systems 的「不順手改，列出來」還在效期內；這一列就是那張清單。
+
+belief_system.gd:160         bel.claim_stale
+  判：◆不適用 —— 它是【量測 tap】（claim 年齡分佈 fresh/mid/stale 三桶），不是守衛。
+     ★名字裡有 stale 但語意是「這筆情報很舊」，不是「我的假設過期了」。
+
+═══════════════════════════════════════════════════════════════════
+★★B 類：loud-fail（13 處）
+═══════════════════════════════════════════════════════════════════
+主動 ✓（setup / 每次動作一定走）：
+  game_setup.gd:88   Config not found
+  game_setup.gd:93   Config JSON parse error
+  game_setup.gd:569  explicit mode 但 teams 陣列為空
+  game_setup.gd:398 / :424 / :427 / :698  faction/join_mode/player.team_id fallback 告警
+  manufacturing_system.gd:269  ★實扣 != 應扣（守恆不變量）——在 _run_recipe_group 內，每次生產都走
+
+◆不適用（不是守衛，是動作結果回報）：
+  outpost_system.gd:527 / :530 / :533 / :537  start_build 的四種拒絕理由
+     ★它們回報的是「這次動作沒成」，不是「某個假設過期了」——
+       ★★而動作沒成【本來就會被呼叫端處理】（回傳 false），不需要守衛語意。
+
+◆不適用（deprecated API 通知）：
+  encounter_system.gd:912  advance_round is deprecated
+     ★它【本來就該】只在有人呼叫舊 API 時才響 —— 那是它的用途，不是漏洞。
+
+═══════════════════════════════════════════════════════════════════
+★★★對帳
+═══════════════════════════════════════════════════════════════════
+母體 17（A 類 4 ＋ B 類 13）
+  主動 ✓        ： 9（manufacturing ×2 ／ game_setup ×7）
+  被動-真命中   ： ★1（outpost_system.gd:163）
+  被動-重複無害 ： 1（manufacturing_system.gd:88）
+  ◆不適用       ： 6（belief tap 1 ／ start_build 4 ／ deprecated 1）
+  ─────────────────────────────
+  合計          ：17 ✓（母體 ＝ 各欄之和）
+
+★★誠實限（★三條，都不是小事）：
+ ①本稽核的母體是【用名字抓的】（stale / assumption / push_*）——
+   ★而今天已經兩次證明名字列舉會發散或漏。
+   ⇒ ★★「守衛」若不含這些字（例如某個 if 判斷後 return 而不出聲），本稽核【看不到它】。
+   ⇒ ★★★真正的母體應該是「所有假設」，而那不可枚舉 —— 所以這是【下界不是全集】。
+ ②「主動/被動」我是讀呼叫鏈判的，不是跑出來的。
+   ★被動那一顆（:163）我有直接證據（本輪 LOD 對照時同型告警確實沒叫）；
+   ★★其餘只有靜態證據。
+ ③本稽核【零 production 改動】——git status -- scripts/simulation 為空。
