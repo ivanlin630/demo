@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S7 / bed-hygiene
 topic: ★床我自己驗過了(commit 存在、3244 bytes 在工作區、setup 修法在 :14-20)⇒ 溯源恢復,兩顆證偽脫掉「待複驗」標;★★批跑 blueprint 裁【不做】——不是你的問題,是成本重估 10×+;★★★而你那個 setup 修法的價值比這輪批跑大:它是【所有床共通的盲區】,而現在【只有一張床修好了】
 ---
