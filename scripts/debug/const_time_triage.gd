@@ -39,7 +39,7 @@ func _run() -> void:
 		_mk("^TICKS_PER_SECOND$", "c_whitelist", "★播放速率：量的是【現實時間】（每真實秒渲染幾 tick），不隨世界小時縮放"),
 		_mk("^TURN_MINUTES$", "c_whitelist", "★時間宣告用【分鐘】：2.4 小時整數小時表達不了，而分鐘可以"),
 		_mk("[A-Z_]*_DAYS$", "c_whitelist", "★單位就是【天】：使用端自己乘 TICKS_PER_DAY ⇒ 已隨根縮放，改成 tick 反而倒退"),
-		_mk("^(CAMP_BUILD_TICKS|SURVIVAL_BUILD_MAX_TICKS)$", "c_whitelist", "★person-ticks【工量】非【時長】：每次呼叫扣，而每日呼叫數由 TICKS_PER_DAY/NEAR_CADENCE 導出"),
+		_mk("^(CAMP_BUILD_PERSON_HOURS|SURVIVAL_BUILD_MAX_TICKS)$", "c_whitelist", "★person-hours【工量】非【時長】：每小時扣一次，而每日呼叫數由 TICKS_PER_DAY/NEAR_CADENCE 導出"),
 		_mk("^(PRISONER_CHECK_INTERVAL|BLOCK_WINDOW|ENCOUNTER_STUCK_TICKS)$", "c_whitelist", "★遭遇軸：比對 encounter_tick 不是 world tick ⇒ 不隨根旋鈕變"),
 		# ── (b) 延後：改法依賴未落地的改動 ──
 		_mk("^BASE_ACTION_TICKS$", "b_defer", "★意圖是 1/6 小時（本質 (a)），但舊根下 TICKS_PER_HOUR/6 = 10//6 = 1 ⇒ 必須與 S2 同時落地"),

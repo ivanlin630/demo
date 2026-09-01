@@ -2448,7 +2448,7 @@ func _try_invest_side(state: WorldState, team: TeamData) -> void:
 	# upgrade_cost_value = Σ cost[res] × 領主 local_value（純表×領主估值、共單位；MarginalEconomy 收 float 保純算術零 god-view）。
 	var cost_value: float = 0.0
 	for k in cost:
-		if k == "ticks": continue
+		if k == "person_hours": continue
 		cost_value += float(cost[k]) * TradeValuation.local_value(team, k, state)
 	# 掃 holding 村找 facility_roi 最高正（belief est 結構防線、只評無 farming 村＝R2 新建 scope）。
 	var best_v: int = -1; var best_roi: float = 0.0; var best_pos: Vector2i = Vector2i(-1, -1)
@@ -4126,11 +4126,11 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		return false
 	# ★糧流 Slice B1 糧橋 go/no-go（解 A1 子隊餓死真 victim）：子隊遠地跋涉+建程需糧 burn×ETA_total。
 	# 母隊(公庫+私產)food 撥得起才派→出發配糧到夠（下方 top-up）；不豐→no-go（別派餓死途中 dissolve）。
-	# ★ETA_total=去程(dist/移速)+建程(BUILD_TICKS/pop)（§5）；純算術零 RNG。收編取代礦山 ad-hoc food bootstrap。
+	# ★ETA_total=去程(dist/移速)+建程(BUILD_PERSON_HOURS/pop)（§5）；純算術零 RNG。收編取代礦山 ad-hoc food bootstrap。
 	var _eta_travel: float = float(_hex_dist(leader_team.tile_pos, target_pos)) / FOOD_BRIDGE_MOVE_PER_DAY
 	# ★工期單一真相源（2026-08-25）：舊式漏除每日推進窗數 ⇒ 高估 24× ⇒ 糧橋門檻過嚴。
 	var _eta_build: float = OutpostSystem.build_eta_days(
-		int(OutpostSystem.BUILD_TICKS[outpost_type][level - 1]), pop)
+		int(OutpostSystem.BUILD_PERSON_HOURS[outpost_type][level - 1]), pop)
 	var _need_food: float = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
 		* (_eta_travel + _eta_build) * FOOD_BRIDGE_SAFE_MARGIN
 	var _avail_food: float = float(vault.get("food", 0)) + float(leader_team.resources.get("food", 0))
@@ -4258,7 +4258,7 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 			#   ⇒ 一次都沒短缺（＝物理上買得起，只是不夠緩衝）記成 `margin_only`。
 			var _any_short: bool = false
 			for _uk in cost:
-				if String(_uk) == "ticks": continue
+				if String(_uk) == "person_hours": continue
 				var _uav: float = float(tile.public_storage.get(_uk, 0)) + float(owner_team.resources.get(_uk, 0))
 				if _uav < float(cost[_uk]):
 					_any_short = true
@@ -4542,7 +4542,7 @@ func _load_convoy_cargo(owner: TeamData, sub: TeamData, home_tile: HexTileData, 
 # tile 可能為 null（無 outpost 目標格）→ 退化為純 owner 私產補足。
 func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, tile, cost: Dictionary) -> void:
 	for k in cost:
-		if k == "ticks": continue
+		if k == "person_hours": continue
 		var vault: float = float(tile.public_storage.get(k, 0)) if tile != null else 0.0
 		var have: float = vault + float(sub.resources.get(k, 0))
 		var need: float = maxf(float(cost[k]) - have, 0.0)
@@ -4558,7 +4558,7 @@ func _fund_subteam_from_vault(_state: WorldState, owner: TeamData, sub: TeamData
 	var vault: Dictionary = home_tile.public_storage if (home_tile != null \
 		and home_tile.outpost_owner == owner.team_id) else {}
 	for k in cost:
-		if k == "ticks": continue
+		if k == "person_hours": continue
 		var need: float = maxf(float(cost[k]) - float(sub.resources.get(k, 0)), 0.0)
 		if need <= 0.0: continue
 		var from_vault: float = minf(need, float(vault.get(k, 0)))
@@ -5083,7 +5083,7 @@ func _is_food_facility_short(facility: String) -> bool:
 	if not (facility in FOOD_FACILITIES):
 		return false
 	var cost: Dictionary = OutpostSystem.FACILITY_DEF.get(facility, {}).get("cost", {})
-	return int(cost.get("ticks", 9999)) <= SURVIVAL_BUILD_MAX_TICKS
+	return int(cost.get("person_hours", 9999)) <= SURVIVAL_BUILD_MAX_TICKS
 
 # ★復甦 R2 §2B.1（build-as-survival self-rescue、blueprint 裁 YES genuine util、非死常數）：飢餓村在自家 outpost、
 # 料備妥產糧設施 → 自救建設 option（解 delivered 料被覓食壓過永不蓋的 Catch-22）。純函式評估（無副作用、供 ctx）。
@@ -5130,7 +5130,7 @@ func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
 		# ★工期單一真相源（2026-08-25）：舊式除的是整日 tick(240) 而非每日推進窗數(24)
 		#   ⇒ 低估 10× ⇒ 這道「蓋得完才蓋」的閘放行了蓋不完的案子。修好後【會變嚴】——intended-change。
 		var build_eta_days: float = OutpostSystem.build_eta_days(
-			int(cost.get("ticks", 72)), team.population)
+			int(cost.get("person_hours", 72)), team.population)
 		if Probe.enabled:   # ★measurer L3 tap(2026-08-21,C6-#3票)：輸入變異性(閘核心兩值)+真物理對照(÷24非÷240)
 			Probe.bump_sample("food_rescue.gate_check", {"team": team.team_id, "food_days": food_days,
 				# ★舊 key 名把 bug 寫在裡面（÷240 低估／÷24 真值對照）——已收斂到單一源，只留真值與結果。

@@ -42,7 +42,7 @@ func _test_neutral_zero_drift() -> void:
 # ②★★同 cost、同池，只換人格 ⇒ 結果必須不同
 func _test_persona_changes_outcome() -> void:
 	print("--- ②分化真的改變結果 ---")
-	var cost: Dictionary = {"material": 50.0, "ticks": 336}
+	var cost: Dictionary = {"material": 50.0, "person_hours": 336}
 	var caut: Dictionary = {"慎重": 1.0, "好戰": 0.0, "野心": 0.0}
 	var bold: Dictionary = {"慎重": 0.0, "好戰": 1.0, "野心": 1.0}
 	var m_c: float = BuildAfford.margin_of(caut)

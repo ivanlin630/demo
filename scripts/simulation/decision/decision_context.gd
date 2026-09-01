@@ -386,10 +386,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			# ★D 裁定（§4c 反饋同一品質層、不新增 term 線）：擴點選址也乘自己 leader 的選址記憶乘子
 			# （同紮根/紮營）——去過的失敗地折價、興旺地加分、線性衰減過期歸零。
 			c.expand_site_marginal = MarginalEconomy._inflow_est(_site_est) * SettlementMemory.quality_multiplier(state, team, _cand.tile_id)
-			# 建置成本：工期期間分點零產出，用既有規劃視野攤提（既有 BUILD_TICKS + PLANNING_HORIZON_DAYS，零新常數）
+			# 建置成本：工期期間分點零產出，用既有規劃視野攤提（既有 BUILD_PERSON_HOURS + PLANNING_HORIZON_DAYS，零新常數）
 			# ★工期單一真相源（2026-08-25）：舊式除的是整日 tick、而且連 pop 都沒除 ⇒ 與真值差一個量級。
 			var _build_days: float = OutpostSystem.build_eta_days(
-				int(OutpostSystem.BUILD_TICKS["civilian"][0]), _settler)
+				int(OutpostSystem.BUILD_PERSON_HOURS["civilian"][0]), _settler)
 			c.expand_build_cost = c.expand_site_marginal 				* clampf(_build_days / MarginalEconomy.PLANNING_HORIZON_DAYS, 0.0, 1.0)
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)

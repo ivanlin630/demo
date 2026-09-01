@@ -1,0 +1,180 @@
+# S6 §4 雙軌對帳：★窮盡列出所有讀工期的地方，逐處標【新表／舊制／不適用】
+#
+# ★窮盡紀律：全域 grep，無 head 無 glob 截斷；每 token 先 `| wc -l` 再列項。
+#   token 與命中數：BUILD_TICKS 21｜CAMP_BUILD_TICKS 5｜"ticks" 31｜build_eta_days 24
+#                   build_ticks_per_day 5｜construction_ticks_total 4｜construction_ticks_left 73
+#
+# ★★票給的起點清單【不是全部】：它漏了 12 處（見 D 群與 A2/A3），這一欄就是 §4 存在的理由。
+
+═══════════════════════════════════════════════════════════════════
+★★★頭條：工期表【不只一張】，而 §2 的錨只推得動其中一張
+═══════════════════════════════════════════════════════════════════
+A1  FACILITY_DEF[*].cost.ticks            ← ★S6 那八項就是這張（錨推得動）
+    outpost_system.gd:51 farming 72｜:57 workshop 168｜:63 apothecary 168｜:69 mint 720
+                        :75 stable 336｜:82 smeltery 336｜:88 weaponsmith 336｜:94 armorsmith 336
+    ⇒ 【新表】8 顆，恰好八項，對得上。
+
+A2  ★BUILD_TICKS                          ← ★★【舊制】另一張工期表，★★★不在八項裡
+    outpost_system.gd:24-27  { "civilian": [100,300,600], "military": [100,300,600] }
+    自述註解 :23「建造所需 person-ticks（除以 team.population = 實際 ticks）」⇒ 同單位、同語意
+    ⇒ ★改 SETTLE_PERSON_HOURS 錨，這 6 顆【不會跟】，而且【不會紅】。
+
+A3  ★CAMP_BUILD_TICKS                     ← ★★【舊制】第三張，★★★也不在八項裡
+    player_command_system.gd:9  const CAMP_BUILD_TICKS: int = 240   # TEST VALUE
+    ⇒ 同上：不會跟、不會紅。
+
+★★★⇒ §2 驗收若寫成「改錨 ⇒ 全表八項等比例跟」，它會【綠】，
+   而 A2 的 6 顆 + A3 的 1 顆共 7 顆工期【原地不動】⇒ 世界裡蓋 outpost 與紮營的相對成本靜默位移。
+   ⇒ ★這就是 §3 問的那個答案：不會跟的地方有 7 顆，全在【表以外的表】。
+
+═══════════════════════════════════════════════════════════════════
+B 群｜讀 A1（FACILITY_DEF 工期）—— ★【新表】，改錨會跟
+═══════════════════════════════════════════════════════════════════
+outpost_system.gd:568   tile.construction_ticks_left = int(cost["ticks"])      （upgrade_facility 動工）
+outpost_system.gd:622   return int(c.get("ticks", 0))                          （construction_ticks_total）
+faction_ai_system.gd:5133  int(cost.get("ticks", 72))                          ★見 C 群，有問題
+
+═══════════════════════════════════════════════════════════════════
+C 群｜★★「拿工期當門檻」的兩顆 —— ★我只標，判定是 systems 的
+═══════════════════════════════════════════════════════════════════
+C1  faction_ai_system.gd:5079 / :5086
+    const SURVIVAL_BUILD_MAX_TICKS: int = 120
+    return int(cost.get("ticks", 9999)) <= SURVIVAL_BUILD_MAX_TICKS
+    現況語意：「求生期蓋得起的東西」＝ 工期 ≤ 120 person-hour
+      註解自述：「farming 72 符合；workshop 168 / mint 更高不符 → 照常中斷」
+    ★它與 cost.ticks 【同單位】⇒ 錨一改，這條線的【收容範圍】就位移：
+      farming 72 → 若錨推到 288（×4），120 就把 farming 也擋掉 ⇒ 求生自救建設【整個關掉】
+    ★★而【沒有任何測試會紅】：它是規則常數，不是被斷言的量。
+    ★★★我的標記建議 = 【該跟著錨走】—— 理由：它的判準寫的是「哪些設施算短工期」，
+       那是【相對於表的位置】不是絕對時長；錨動而它不動 ⇒ 語意從「farming 過、workshop 不過」
+       悄悄變成「全部不過」。⇒ ★形狀該是 `farming 的工期 × 某倍數`（接線）而非死值 120。
+       ★★但這是判定不是事實 —— 我只標，systems 裁。
+
+C2  faction_ai_system.gd:5133
+    int(cost.get("ticks", 72))
+    ★那個 72 是 FACILITY_DEF farming 工期的【手抄副本】當預設值。
+    ★★錨一改，副本不跟 ⇒ 兩個 72 分家，而 fallback 路徑靜默用舊值。
+    ★★★我的標記建議 = 【bug 不是設計】：預設值該從 FACILITY_DEF 讀，或乾脆讓缺鍵爆掉。
+       （現況這個 default 只在 cost 沒有 "ticks" 鍵時才用到 —— 而表上八顆都有 ⇒ 目前是死路徑，
+         ★但它是【會醒過來的死路徑】：新增設施漏填 ticks 就吃到它。）
+
+═══════════════════════════════════════════════════════════════════
+D 群｜★【不適用】—— "ticks" 只當「要跳過的非資源鍵」用，不讀工期值
+═══════════════════════════════════════════════════════════════════
+（★票的起點清單一顆都沒列到這群 —— 共 10 處）
+outpost_system.gd:563   Probe 迴圈 `if String(_ck) != "ticks"`（記短缺資源，排除工期鍵）
+outpost_system.gd:652   退料迴圈 `if k == "ticks": continue`
+outpost_system.gd:865   _can_afford  `if res == "ticks": continue`
+outpost_system.gd:877   _deduct_cost `if res == "ticks": continue`
+decision/build_afford.gd:44   can_afford  `if k == "ticks": continue`
+decision/build_afford.gd:57   shortfall   `if k == "ticks": continue`
+faction_ai_system.gd:2451 / :4261 / :4545 / :4561   同形狀（付得起判定／料備妥判定）
+⇒ ★這 10 處【不讀工期值】，改名會全部要改字串，但語意零影響。
+⇒ ★★而它們正是「改名不是美觀」的代價面：`"ticks"` 這個字串鍵散在 6 個檔。
+
+═══════════════════════════════════════════════════════════════════
+E 群｜讀 A2（BUILD_TICKS）—— ★【舊制】，改錨不會跟
+═══════════════════════════════════════════════════════════════════
+outpost_system.gd:486   tile.construction_ticks_left = BUILD_TICKS[type][level-1]           （start_build）
+outpost_system.gd:509   同上（start_upgrade_level）
+outpost_system.gd:586   BUILD_TICKS[...]/2                                                  （start_demolish，拆＝一半）
+outpost_system.gd:615 / :617 / :625   construction_ticks_total 的三個 match 分支
+outpost_system.gd:717   _subteam_upgrade_level
+outpost_system.gd:770   demolish_with_control（/2）
+decision/decision_context.gd:392   BUILD_TICKS["civilian"][0]   ← ★決策端：分點建置成本攤提
+decision/goal_resolver.gd:913       BUILD_TICKS["civilian"][0]   ← ★決策端：紮根 ETA
+faction_ai_system.gd:4133           BUILD_TICKS[outpost_type][level-1]  ← ★決策端：收編 ETA
+debug/build_eta_single_source_test.gd:58   BUILD_TICKS["civilian"][0]
+★★注意：三個【決策端】讀的都是 A2 不是 A1 ⇒ ★★★NPC 心裡的「蓋一座要多久」走的是舊制那張表。
+   ⇒ 錨推 A1 而不推 A2 ⇒ 決策端的工期認知【完全不動】。
+
+═══════════════════════════════════════════════════════════════════
+F 群｜讀 CAMP_BUILD_TICKS（A3）
+═══════════════════════════════════════════════════════════════════
+player_command_system.gd:239   tile.construction_ticks_left = CAMP_BUILD_TICKS
+player_command_system.gd:242   訊息字串 "%d ticks"        ← ★玩家看得到的字面說「ticks」，而它是 person-hour
+
+═══════════════════════════════════════════════════════════════════
+G 群｜工期【換算層】—— 不含表值，改名影響參數名不影響語意
+═══════════════════════════════════════════════════════════════════
+outpost_system.gd:111  build_ticks_per_day()  = TICKS_PER_DAY / NEAR_CADENCE = 24   ★已從根導出
+outpost_system.gd:127  build_eta_days(ticks_left, pop)                              ★參數名說謊
+outpost_system.gd:131  分母用 build_ticks_per_day()
+呼叫端（production）：decision_context.gd:360 / :391｜goal_resolver.gd:912
+                      persist_strength.gd:95｜faction_ai_system.gd:4132 / :5132
+呼叫端（debug）：build_eta_single_source_test 6 處｜headless_test.gd:9147｜join_accept_measure_bed:107-108
+                 s6_build_days_truth.gd:112
+construction_ticks_total 呼叫端：commitment_fields.gd:70｜persist_strength.gd:111
+                                （faction_ai_system.gd:5757 是註解掉的）
+
+═══════════════════════════════════════════════════════════════════
+★★★★對帳總數
+═══════════════════════════════════════════════════════════════════
+工期【表】       ：3 張（A1 八顆＝新表 ／ A2 六顆＝舊制 ／ A3 一顆＝舊制）
+讀表值的地方     ：B 群 3 處（新表）＋ E 群 11 處（舊制）＋ F 群 2 處（舊制）
+拿工期當門檻     ：C 群 2 處（★★都不會紅）
+不適用（跳過鍵） ：D 群 10 處
+換算層           ：G 群 1 個函式 + 12 個呼叫端（不含表值）
+─────────────────────────────────────────────
+★★★會跟著 §2 錨走的：A1 八顆 + B 群 3 處
+★★★不會跟、也不會紅的：A2 六顆 + A3 一顆 + E 群 11 處讀它們 + C 群 2 顆門檻
+
+═══════════════════════════════════════════════════════════════════
+★★★★★增補（systems amendment）：★上面那份「窮盡」漏了最大的一顆
+═══════════════════════════════════════════════════════════════════
+★**漏的是什麼**：`L0_TO_L1_CORVEE_DAYS × TICKS_PER_DAY`（紮根工期）
+★★**為什麼會漏**：我的搜索是從【兩張表】出發的（token = BUILD_TICKS / "ticks" / build_eta_days）
+   ⇒ ★★★而 CORVEE 這條**不經任何一張表**，它自己有一條換算 ⇒ **我走的管道裡它天生不存在**。
+   （＝「缺陷躲在我們不走的管道」的字面重演：檢查管道 vs 失效管道不同軸。）
+
+★**改用真正的窄口重掃**：任何工期要生效，都得寫進 `tile.construction_ticks_left`
+   ⇒ 列舉它【所有賦值點】＝ 25 處，其中 `= 0`（清除）17 處、**真正寫入工期的 8 處**：
+```
+outpost_system.gd:488   BUILD_PERSON_HOURS[type][level-1]            【舊制表 A2】
+outpost_system.gd:511   BUILD_PERSON_HOURS[...][new_level-1]         【舊制表 A2】
+outpost_system.gd:570   int(cost["person_hours"])                    【新表 A1】
+outpost_system.gd:588   BUILD_PERSON_HOURS[...]/2（拆）              【舊制表 A2】
+outpost_system.gd:719   BUILD_PERSON_HOURS[...][target_level-1]      【舊制表 A2】
+outpost_system.gd:772   BUILD_PERSON_HOURS[...]/2（拆）              【舊制表 A2】
+player_command_system.gd:240  CAMP_BUILD_PERSON_HOURS               【舊制表 A3】
+★faction_ai_system.gd:5645  L0_TO_L1_CORVEE_DAYS * TICKS_PER_DAY   【★第三種：自己另有換算】
+```
+★★**這個列舉才是收斂的**：它是引擎決定的窄口（不寫進這個欄位就不會成為工期），
+   不像 token 列舉會隨著別人怎麼命名而發散。
+
+───────────────────────────────────────────────────────────────────
+H 群｜★★★第三種：CORVEE —— 【不是新表、不是舊制，是自己另有一條換算】
+───────────────────────────────────────────────────────────────────
+faction_ai_system.gd:101   const L0_TO_L1_CORVEE_DAYS: int = 3
+faction_ai_system.gd:5645  tile.construction_ticks_left = L0_TO_L1_CORVEE_DAYS * WorldState.TICKS_PER_DAY
+decision/decision_context.gd:357-361  settle_eta_days 讀同一條式子（★決策端）
+decision/decision_context.gd:404      camp_flow_delay_days 直接把 3 當【天數】加（★★第二種讀法）
+debug/settlement_s2b_test.gd:61 / :131   ★★★床鏡了同一條式子
+
+★**「一數兩語意」的字面**：
+```
+舊根 TICKS_PER_DAY = 240 ＝【一天 24 小時】×【假設 10 人】
+⇒ 一個乘號同時承擔「時間換算」與「人力假設」
+⇒ ★換根只動了時間那半（240 → 1440）⇒ 人力假設被連帶放大 6×
+⇒ ★★現值：3 × 1440 = 4320 person-hours ⇒ pop=10 時 = 4320/(10×24) = ★18.0 天
+   而常數叫 CORVEE_DAYS = 3。★★★名字說 3、行為是 18、沒有東西報錯。
+```
+★**我實測過同一條路徑**：4320 person-hours ÷ (pop×24) —— 與 farming 72 ⇒ 3.0 天同一個換算，
+  同一支床（`s6_build_days_truth.gd`）改 cost 即可複驗；本輪未另跑，是算術不是量測，**標成推導**。
+
+★★**`decision_context.gd:404` 那一處要單獨標**：它把 `L0_TO_L1_CORVEE_DAYS` 直接當【天】相加
+  （`camp_flow_delay_days = dist + 3`），而 :361 把同一顆當【person-hours 的來源】。
+  ⇒ ★★★**同一顆常數在同一個檔裡被當成兩種單位用** —— 這比「名字說謊」更進一步。
+
+★★★**床也鏡了式子**（`settlement_s2b_test.gd:61/131`）⇒ phase2 改法時床會【綠著說謊】：
+  它斷言的是「等於那條式子」，不是「等於某個工期」⇒ 式子改了它跟著改，永遠 PASS。
+  ⇒ ★建議 phase2 把該斷言換成【對著錨的絕對值】，否則這道 gate 是空的。
+
+───────────────────────────────────────────────────────────────────
+★★★★對帳總數（訂正版）
+───────────────────────────────────────────────────────────────────
+工期【來源】共 4 種：A1 FACILITY_DEF 八顆（新表）／A2 BUILD_PERSON_HOURS 六顆（舊制）
+                     A3 CAMP_BUILD_PERSON_HOURS 一顆（舊制）／★H CORVEE 一顆（第三種）
+寫入工期的窄口       ：8 處（上列）
+★會跟著 §2 錨走的     ：A1 八顆 + outpost:570
+★★不會跟、也不會紅的  ：A2 六顆 + A3 一顆 + ★H CORVEE 一顆 + 讀它們的 13 處 + C 群 2 顆門檻

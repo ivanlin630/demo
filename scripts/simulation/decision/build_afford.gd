@@ -41,7 +41,7 @@ static func margin_of(leader_values: Dictionary) -> float:
 static func can_afford(cost: Dictionary, pools: Array, leader_values: Dictionary) -> bool:
 	var margin: float = margin_of(leader_values)
 	for k in cost:
-		if k == "ticks":
+		if k == "person_hours":
 			continue
 		var avail: float = 0.0
 		for p in pools:
@@ -54,7 +54,7 @@ static func can_afford(cost: Dictionary, pools: Array, leader_values: Dictionary
 static func shortfall(cost: Dictionary, pools: Array, leader_values: Dictionary) -> Dictionary:
 	var margin: float = margin_of(leader_values)
 	for k in cost:
-		if k == "ticks":
+		if k == "person_hours":
 			continue
 		var avail: float = 0.0
 		for p in pools:
