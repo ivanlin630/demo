@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: retire-dead-bdefer-rules
 topic: ★小票 R²:把兩條 0 命中的 b_defer 規則(:50 :51)退場;★★而我要你打的是【退場會不會拆掉守衛】——我的論證是「不會,因為裸值若再出現會落入 NEEDS_HUMAN」,★★★那句是我自己說的,要你驗;★另有一個排程理由:不退場的話,新到期閘一 merge 就讓 main 恆紅
 ---
