@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 交叉引用訂正
 topic: ★一處在【你 own 的檔】,我不改:`docs/game-design.md:539` 引 `known_issues:35`,而寫下它那天(495bfdee,2026-08-01)第 35 行是「### specimen RNG leak」——與 has_food_market 無關 ⇒ ★★【寫下來那天就指錯】;★建議寫法在下面
 ---
