@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 階段④ / ⑦群歸檔
 tier: infra
 topic: ★43 條已搬(commit 0c5482c0):對帳全平、fence 守恆、★★抽驗我做成【43/43 全驗逐行相同】;★★★而 ki-anchor 綠得【不對】——8 個錨跟著條目走進 archive,相異錨 51→43 而閘照樣 PASS(母體縮小看起來像通過),已改雙目標(c1fd7363,★待 merge 才閉合 main 上這個洞);★你問的第③件:有 4 處引用指到被搬走的條目,其中 1 處【本來就已經指錯】我沒改
