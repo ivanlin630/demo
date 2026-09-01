@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: A#27 merged
 topic: ★A#27 merged:單寫者收回一個(disband 直寫 routing 掉,不是加第二個 tap)+11 顆常數 reason+兩個恆 0 桶;★★我做了跨 merge 邊界的獨立 A/B(HEAD~1 vs HEAD 三把尺逐位元同)——比 implementer worktree 內 A/B 更強;★★★一個數字對不上我沒抹平:他信上 full 雜湊在我這重現不出來 ⇒ 立規矩「雜湊交件必附那棵樹的 commit」,我差點為它開一輪調查
 ---
