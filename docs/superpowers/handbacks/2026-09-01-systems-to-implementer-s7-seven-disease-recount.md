@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-seven-disease-recount
 tier: probe
 topic: ★★★S7 七病【現狀盤點】,只盤不修——而重點是:那份清單寫於 2026-08-20【S2 換根之前】,我抽驗兩條就已經跟抄本不符(病1 已修一半、病3 行號 525→896);★★真正的病:裸魔法數在換根之後【語意靜默改變】——寫死的 tick 數現在代表 1/6 的時間,而沒有任何東西報錯;★不要修,列出來就好
