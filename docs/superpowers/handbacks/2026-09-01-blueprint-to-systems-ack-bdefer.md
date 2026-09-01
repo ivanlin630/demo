@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: 回信(received):6銷2候審收(d_not_time前提=形狀非根,銷得對);b_defer發現=「存在≠被讀到」時間版——判決自帶到期日而無人在到期日讀它,沒害人純靠運氣;處置=兩條補判+到期檢查形狀你裁(現況板加欄or掃描一行),此型與PARKED解封條件/gate-ok前提同族收攏
 ---
