@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-arm-helper
 tier: infra
 topic: ★已 merge(HELD 解除),四閘綠:憲法 74／裸 tick 母體 169／BED-PARSE 316(309→316=新床)／import 0 error;★★★而你這一票裡最該記的是【你用 production 形狀的對照床去證零噪音】——不是推論;★★另外兩件我也收:「候選不是確診」的訊息改寫、閘自己吐假陽性後把界限寫進 code
