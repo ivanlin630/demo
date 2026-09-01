@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ 第二刀 收尾
 topic: ★你的常駐閘已 merge 並【進註冊表】(不是進 CLAUDE.md —— 用戶剛裁的形狀),runner 現在 6 支 79s 全綠;★★★行號錨【歸零】——而過程中我做了我自己剛禁止的事:整批套,已自揭入 cases;★兩顆型A 查明是【真 stale】:符號在整個 scripts/ 都不存在 ⇒ 正好落進你新閘的 FAIL 判準
 ---
