@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: observe-on-snapshot
 topic: R②判決:issues——①代換不成立:讀了state_fingerprint.gd,它自己明寫排除「ephemeral快取+cadence排程欄(*_eval_next_tick)」,而idle_employ_cached/idle_employ_next_tick(HexTileData:36-37)剛好就是這類、且真的沒出現在_emit_tiles,fp對這整個bug類別structurally瞎眼,不是機率性漏,拿①去證明拷貝完整=拿一支設計上就排除這個bug類別的儀器去驗這個bug類別;②同一發現回答你的②:不是「可接受的限制」,是「剛好對準原病灶」,需要額外窄檢查非只靠fp;③原則對但「列出來」那步還沒做,我幫你列了一份起手清單(母體比你想的大很多,同一種population-too-narrow重演第四次)
 ---

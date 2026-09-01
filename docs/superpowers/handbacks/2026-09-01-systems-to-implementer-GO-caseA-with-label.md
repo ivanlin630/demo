@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tracer-observe-purity
 tier: infra
 topic: ★A 案採用,動工;★★★而你列的那項代價我判【可接受】,理由是它落在「不影響決策解釋」的那一半——但有一個條件:dump 必須標明 ✗ 的【有效範圍】,否則「沒有 ✗」會被讀成「可派」,而那是【反的】;★另外 measurer 剛揭一件會影響驗收的事:fp 對這件事是瞎的
