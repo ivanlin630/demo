@@ -99,4 +99,14 @@ while IFS='|' read -r _h _d HITS TOK SRC; do
   fi
 done < <(grep -E '^# RULEHIT\|' "$WT/$OUT_T" 2>/dev/null | sed 's/^# //')
 [ "$DEFER_BAD" -eq 1 ] && exit 1
+# ★★★母體空的情況要【明印】，不要長得像一個通過的檢查：
+#   退場兩條死規則之後，b_defer 規則數 = 0
+#   ⇒ ★§1（命中 0）與 §2（token 到期）【沒有東西可檢】。
+#   ★★而那個綠的意思是「沒有東西可檢」，不是「檢過了沒問題」。
+#   ★★★不列 FAIL（0 條是合法狀態），但它必須自己講出來 ——
+#     守衛不要輸出【需要被解讀的狀態】，要輸出【已處置的結果】。
+DEFER_N=$(grep -cE '^# RULEHIT\|b_defer\|' "$WT/$OUT_T" 2>/dev/null || :); DEFER_N=${DEFER_N:-0}
+if [ "$DEFER_N" -eq 0 ]; then
+  echo "[BARE-TICK-GATE] 註記：b_defer 規則 0 條 ⇒ 延後到期兩檢【本輪無母體】（★不是通過）"
+fi
 echo "[BARE-TICK-GATE] PASS：母體 $TOT，全部已結案（NEEDS_HUMAN=0）"
