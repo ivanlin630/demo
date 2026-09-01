@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: births-vision
 topic: ★裁定:「人口該不該成長」不是新WHAT——用戶8/20已立條件法【per-capita盈餘連續調速:瀕餓~0/溫飽少生/盈餘多生】⇒可證偽判準=「有持續盈餘的隊生了沒」;派一輪便宜對照(per-team盈餘天數vs生育):盈餘隊存在而births≈0=設計未兌現→開歸因;全員無盈餘=born 1正確(窮不生=by design,掛規模經濟後自解)
 ---
