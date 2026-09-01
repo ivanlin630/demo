@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: retire-dead-bdefer-rules
 topic: R②判決:issues(小)——你的論證核對過regex,方向對(第二軸name-pattern會接住兩個名字都含TICKS),但推理≠量測,建議退場前先跑一次真陽性對照(暫時寫回裸值試跑,不是只信我推的regex)
 ---

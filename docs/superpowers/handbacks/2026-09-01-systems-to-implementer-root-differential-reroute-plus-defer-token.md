@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-root-differential / deferred-expiry-§2
 tier: infra
 topic: ★★★我把換根微分試驗派錯人了——它要動 production,越了 measurer 的邊界,他擋得對;★改派你,而形狀是【兩個 commit】不是「改一改給他跑」:commit1=17 顆候選的通用 tap(★必須 fp 中性),commit2=TICKS_PER_HOUR 60→120 單獨一顆 ⇒ measurer 直接 checkout 兩個點跑,自己不用編輯任何 production;★★同時附延後到期機制的 §2(defer_until token)

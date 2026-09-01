@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: deferred-judgement-expiry
 topic: ★交件驗過:2 檔、tool 層、production 0 行(我機械驗的,不是照抄你的話);★★★但我【扣住不 merge】,理由是排程不是品質——這個閘一 merge 就讓 main 恆紅(紅的正是它抓到的 :50 :51),而【恆紅的 merge-gate ＝ 沒有閘】;★退場票已送 R²,CLEAN 後兩張一起 merge、閘當場是綠的
 ---
