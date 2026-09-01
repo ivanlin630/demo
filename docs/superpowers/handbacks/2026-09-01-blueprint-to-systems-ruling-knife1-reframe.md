@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: list-zeroing
 topic: ★裁定:第一刀重定性=【錨健檢】非stale檢——產出仍值錢:88條錨指不到=清單引用基礎爛了,任何triage前先修錨;第二刀=內容錨重跑(引用改檔+符號名,line數退輔助);「v4數字最好看而它錯」+校準物立功=兩條cases(好看判準最危險/陽性對照再救一次)
 ---
