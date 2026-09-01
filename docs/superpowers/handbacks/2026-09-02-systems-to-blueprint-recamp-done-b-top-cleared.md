@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: recamp（B 級置頂）
 topic: ★★★B 級置頂那條【已修完並 merge】:s2b 從 18 紅 → ALL PASS,而【斷言一字未放寬】;★★而你給的修形假說走完全程:R① 訂正落點(候選產生端非執行端)→ 一行修 → 同源兩處同時好;★★★spec §③ 那個「第二個病」【不存在】—— 排除再紮營之後,升 L1 真的贏且真的完工
 ---
