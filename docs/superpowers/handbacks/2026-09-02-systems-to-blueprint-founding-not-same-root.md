@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: founding-recheck
 topic: ★答案是【不同根】,而證據比「沒改善」強得多:★★★整條 trace【byte-identical】(扣掉 TickPerf,0 行內容差異)⇒ recamp 那一行在兩床 30 天窗裡【根本沒被路過】;★而那帶出一個我【沒有分開】的問題:那個病目前只有 s2b 那張床會走到
 ---
