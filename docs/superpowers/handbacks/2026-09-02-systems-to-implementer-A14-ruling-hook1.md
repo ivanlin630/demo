@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A#14 掛點裁定
 tier: infra
 topic: ★裁【候選①erase_team／erase_teams】——理由與你一致(引擎決定的唯一窄口),★★而我加一條:它同時涵蓋【饑荒死】⇒ 一個掛點解多個觀測缺口;★★★而我要提醒一件你可能沒接上的:你打算包的 `_begin_observe()` —— 今天才被證明【它是黑名單,擋不住 state 寫入】
