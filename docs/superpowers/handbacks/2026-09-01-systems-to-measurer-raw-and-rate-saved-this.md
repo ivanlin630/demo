@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S6-after → denominator-split
 tier: measure
 topic: ★★★你 raw 與 per-team-day 兩個都給,而那救了這一輪:我從兩個獨立欄位反推分母,兩邊算出【同一個】+21.3% ⇒ 世界多了 21.3% 的隊-日,而那【不在七項裡】;★★連帶「停滯 -19.2%」是純分母效應(raw 只動 -2.0%);★接著要你把那個分母拆開:隊數變多 vs 隊活更久
