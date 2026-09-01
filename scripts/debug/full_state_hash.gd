@@ -9,6 +9,15 @@ class_name FullStateHash
 #     ★★這是「用形狀判，不用名單判」的同一條紀律（systems 2026-09-02 裁 `_begin_observe` 是黑名單時立的）。
 #
 # ★涵蓋：state.teams / state.world.tiles / state.persons / state.factions 的【全部 script 屬性】
+# ★★★【只在同一棵樹內可比】—— 2026-09-02 血證，而它是【設計的直接後果】不是 bug：
+#   ★systems 在 main 上重現我 branch 的數字，得到不同值（我 74fa9265 ／ 他 58bb00c4）。
+#   ★★成因：本尺掃的是【全部 script 屬性】⇒ 兩棵樹的欄位集不同就必然不同雜湊。
+#     實測：`team_data.gd` main 117 個 `var` ／ branch 121 個（branch 多 4 個食物流量欄）。
+#   ⇒ ★★★所以它【正確地】對「有人靜靜加了一個欄位」敏感 —— 那正是它比手列清單強的地方，
+#     ★而同一個性質讓它【跨 commit／跨分支不可比】。
+#   ⇒ ★用法：只在【同一棵樹、同一份 code】內做 A/B（tracer 開/關、掛點有/無）；
+#     ★★要跨 merge 邊界比，兩邊各自在自己的樹上跑，比【各自的 before/after】，不是比絕對值。
+#
 # ★★不涵蓋（誠實限，印在輸出旁邊）：
 #   ①WorldState 自己的頂層欄（pending_* 等）——它們是 tick 內暫態，另議
 #   ②Object reference 型欄位只取其 to_string（不遞迴展開）
@@ -63,4 +72,5 @@ static func compute(state: WorldState) -> String:
 # ★輸出時必附（invariant：盲區要出現在【使用它的當下】）
 static func note() -> String:
 	return "[FULL-HASH] 涵蓋 teams/tiles/persons/factions 的【全部 script 屬性】（get_property_list，非手列清單）" \
+		+ "｜★★★【只在同一棵樹內可比】：欄位集一變雜湊就變（設計如此，非 bug）——跨 commit/分支請比各自的 before/after，不要比絕對值" \
 		+ "｜★不含 WorldState 頂層暫態欄；★★Object 參考不遞迴；★★★float 不量化（要抓「有沒有被碰過」）"
