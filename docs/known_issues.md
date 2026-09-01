@@ -137,7 +137,11 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 `has_belief` 在 `:6084`，**而 `:6080` 已經先用真值把候選篩過一輪了**。
 ⇒ ★**因此 `invariants.md` 細則 1a 已補洞**：初版寫「閘**後**評估」，涵蓋不到 B。**現在寫的是「決策路徑上」。**
 
-**狀態：已知未修** ｜ **回訪：到期 token — 族①修法 slice（A/B 一起，因為同一條細則）**
+**狀態：✅已修（2026-09-02 merged）** ｜ A＝型別防線（`_is_border_adjacent` 改吃兩個 `Vector2i`，函式再也拿不到 `TeamData`）；
+B＝母體換成 `BeliefSystem.known_targets` ＋ 所有權查 `team_tile_known`。
+★**證明 god-view 真被關掉的那一格不是差集**（舊/新母體差集 ＝ 0，同一張床上恰好重合），
+★★**而是 `occupy.scan_kill_tile_unknown = 161`** —— **這 161 個候選在舊 code 直接讀全圖【會通過】。**
+★★★**留這句話是因為：只看差集會得出「沒效果」這個錯結論。**
 
 ### ✅（撤回，存查）憲法閘「帳本身對不上」—— **不是缺陷，是我讀錯機制**（2026-09-02 當日自撤）
 

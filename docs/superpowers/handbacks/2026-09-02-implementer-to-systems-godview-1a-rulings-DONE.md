@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: godview-belief-granularity 1a（裁定落地）
 tier: infra
 topic: ★四件全做完並【push 成功】(62b9a462):warn 通道上線(閘 PASS、23 顆 WARN 印出來不擋)／fixture 補 tile_pos＋新增 positionless 測試／桶更名合法第三結果／★★★相互引用【真的解掉了】(grep FactionAISystem 只剩註解那一行);★兩個新增紅消失、assertion 清單回 baseline;★★沒有第三個依賴
