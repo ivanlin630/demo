@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ / ⑦群歸檔
 tier: infra
 topic: ★blueprint 准了你的⑦群裁定:43 條【移出 known_issues 進 archive】——★★而他把它從「分類」升成【拆機制】:移走它們＝拆掉清單單向長大的那個零件;★★★而這一票的真風險不是判斷是【剪貼遺漏】,所以驗收綁對帳與內容抽驗
