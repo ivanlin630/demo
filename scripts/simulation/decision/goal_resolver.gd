@@ -871,26 +871,11 @@ static func find_nearest_known_tile(state: WorldState, team: TeamData, terrain: 
 			best_d = d; best_id = int(tid); best = t.tile_pos
 	return best
 
-# ★team_tile_known belief harvest（鏡射 _harvest_market_known）：兩源=bounded vision + relay。禁 RNG。
+# ★★★seam（systems R² 定案 2026-09-02）：本體已搬進 `belief_system.gd::harvest_tile_known`。
+#   ★理由：faction_ai 也要用它，而【不留第二份拷貝】——兩份會漂，這是今天反覆吃虧的形狀。
+#   ★★這裡保留 delegate 而不是刪掉：既有 caller（含 `means_end_s3_test.gd:117`）照舊叫得到。
 static func _harvest_tile_known(state: WorldState, team: TeamData) -> void:
-	var known: Dictionary = state.team_tile_known.get(team.team_id, {})
-	var fai := FactionAISystem.new()
-	var vr: int = VisionSystem.VISION_RADIUS
-	for dx in range(-vr, vr + 1):   # bounded=vision（非全圖 god-view）
-		for dy in range(-vr, vr + 1):
-			var p: Vector2i = team.tile_pos + Vector2i(dx, dy)
-			if FactionAISystem._hex_dist(team.tile_pos, p) > vr:   # ★perf cut1 A：static
-				continue
-			var tid: int = p.x * 1000 + p.y
-			if state.world.tiles.has(tid):
-				known[tid] = true
-	# relay：team_known tile 訊息 pos（reuse market pos extractor）→ known
-	for msg in state.team_known.get(team.team_id, []):
-		var mpos: Vector2i = fai._msg_market_pos(msg)
-		if mpos == Vector2i(-999, -999):
-			continue
-		known[mpos.x * 1000 + mpos.y] = true
-	state.team_tile_known[team.team_id] = known
+	BeliefSystem.harvest_tile_known(state, team)
 
 # ★S6 折現（組件 F，HOW §7）：delay-based discount（連續，符憲法 utility 連續）。
 const MOVE_TILES_PER_DAY: float = 2.0   # TEST VALUE — 移速估（淺啟發，delay 有界）
