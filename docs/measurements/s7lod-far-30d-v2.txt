@@ -1,0 +1,199 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[DIAG] population@tick0=11 anon_cohorts={ "平民|healthy": 10 }
+[Site] 選址 (4, 4) score=126 周邊資源={  } terrain=plains
+[Harvest] Tick360 季節=春 base=1.1
+[Manufacture] Team1 arrows worker_rate=1.00
+[Tick 600] Person 10 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Order] Team1 sell food ×791620 (oid=1)
+[Order] Team1 buy weapon_melee_low ×1 (oid=2)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=3)
+[Manufacture] Team1 arrows worker_rate=1.00
+[DayNight] Day 1 開始
+[TickPerf] day=1 avg=232 us max=135368 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=1.00
+[Manufacture] Team1 arrows worker_rate=1.00
+[DayNight] Day 2 開始
+[TickPerf] day=2 avg=184 us max=72949 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=1.00
+[Outpost] Team1 設施施工 farming → Lv1 at (5,5)
+[Manufacture] Team1 arrows worker_rate=1.01
+[Order] Team1 buy food ×42 (oid=4)
+[Manufacture] Team1 arrows worker_rate=1.01
+[DayNight] Day 3 開始
+[TickPerf] day=3 avg=193 us max=85496 us ticks=1440 teams=1 factions=0
+[Site] 選址 (4, 4) score=126 周邊資源={  } terrain=plains
+[Outpost] 設施完工 farming Lv1 at (5,5)
+[Manufacture] Team1 arrows worker_rate=1.01
+[Order] Team1 sell material ×999949 (oid=5)
+[Order] Team1 sell tools ×999998 (oid=6)
+[Manufacture] Team1 arrows worker_rate=0.97
+[DayNight] Day 4 開始
+[TickPerf] day=4 avg=226 us max=85757 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.97
+[Outpost] Team1 設施施工 stable → Lv1 at (5,5)
+[Manufacture] Team1 arrows worker_rate=0.97
+[DayNight] Day 5 開始
+[Manufacture] Team1 arrows worker_rate=0.98
+[TickPerf] day=5 avg=181 us max=54003 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.98
+[Tick 7800] Person 10 (civilian/team1) → P2_produce | stress=0.65 loyalty=0.98
+[Manufacture] Team1 arrows worker_rate=0.98
+[DayNight] Day 6 開始
+[TickPerf] day=6 avg=159 us max=60347 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.98
+[Order] Team1 buy weapon_melee_low ×1 (oid=7)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=8)
+[Manufacture] Team1 arrows worker_rate=0.98
+[Tick 9600] Person 10 (civilian/team1) → N2_riot | stress=0.79 loyalty=0.92
+[DayNight] Day 7 開始
+[TickPerf] day=7 avg=165 us max=81027 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.98
+[Manufacture] Team1 arrows worker_rate=0.98
+[Manufacture] Team1 arrows worker_rate=0.98
+[DayNight] Day 8 開始
+[TickPerf] day=8 avg=113 us max=50295 us ticks=1440 teams=1 factions=0
+[Order] Team1 buy food ×42 (oid=9)
+[Manufacture] Team1 arrows worker_rate=0.98
+[Order] Team1 sell material ×999908 (oid=10)
+[Order] Team1 sell tools ×999998 (oid=11)
+[Manufacture] Team1 arrows worker_rate=0.99
+[Famine] Team1 餓死 anon 1 (famine=7天)
+[DayNight] Day 9 開始
+[TickPerf] day=9 avg=122 us max=75637 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.99
+[Manufacture] Team1 arrows worker_rate=0.99
+[DayNight] Day 10 開始
+[Manufacture] Team1 arrows worker_rate=0.82
+[Famine] Team1 餓死 anon 1 (famine=8天)
+[TickPerf] day=10 avg=117 us max=50257 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.82
+[Manufacture] Team1 arrows worker_rate=0.82
+[DayNight] Day 11 開始
+[TickPerf] day=11 avg=174 us max=67549 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.82
+[Order] Team1 buy weapon_melee_low ×1 (oid=12)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=13)
+[Manufacture] Team1 arrows worker_rate=0.82
+[DayNight] Day 12 開始
+[TickPerf] day=12 avg=148 us max=58539 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.83
+[Manufacture] Team1 arrows worker_rate=0.83
+[Manufacture] Team1 arrows worker_rate=0.83
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=170 us max=80659 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.66
+[Manufacture] Team1 arrows worker_rate=0.66
+[Order] Team1 sell material ×999908 (oid=14)
+[Order] Team1 sell tools ×999998 (oid=15)
+[Order] Team1 buy food ×34 (oid=16)
+[DayNight] Day 14 開始
+[TickPerf] day=14 avg=163 us max=54325 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.66
+[Manufacture] Team1 arrows worker_rate=0.66
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[Manufacture] Team1 arrows worker_rate=0.66
+[TickPerf] day=15 avg=133 us max=59723 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.66
+[Manufacture] Team1 arrows worker_rate=0.66
+[DayNight] Day 16 開始
+[TickPerf] day=16 avg=130 us max=61597 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.66
+[Order] Team1 buy weapon_melee_low ×1 (oid=17)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=18)
+[Manufacture] Team1 arrows worker_rate=0.66
+[DayNight] Day 17 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=17 avg=137 us max=65371 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.67
+[Manufacture] Team1 arrows worker_rate=0.67
+[Manufacture] Team1 arrows worker_rate=0.67
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=18 avg=112 us max=50317 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.67
+[Manufacture] Team1 arrows worker_rate=0.67
+[DayNight] Day 19 開始
+[TickPerf] day=19 avg=98 us max=57642 us ticks=1440 teams=1 factions=0
+[Order] Team1 sell material ×999908 (oid=19)
+[Order] Team1 sell tools ×999998 (oid=20)
+[Order] Team1 buy food ×34 (oid=21)
+[Manufacture] Team1 arrows worker_rate=0.67
+[Manufacture] Team1 arrows worker_rate=0.67
+[DayNight] Day 20 開始
+[Manufacture] Team1 arrows worker_rate=0.67
+[TickPerf] day=20 avg=135 us max=90314 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.67
+[Manufacture] Team1 arrows worker_rate=0.67
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=21 avg=94 us max=38892 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.67
+[Manufacture] Team1 arrows worker_rate=0.67
+[Order] Team1 buy weapon_melee_low ×1 (oid=22)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=23)
+[DayNight] Day 22 開始
+[TickPerf] day=22 avg=116 us max=49080 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.67
+[Manufacture] Team1 arrows worker_rate=0.67
+[Manufacture] Team1 arrows worker_rate=0.68
+[DayNight] Day 23 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=23 avg=203 us max=115918 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.68
+[Outpost] 設施完工 stable Lv1 at (5,5)
+[Manufacture] Team1 arrows worker_rate=0.70
+[Tick 34200] Person 11 (member/team1) → P1_comply | stress=0.03 loyalty=0.60
+[DayNight] Day 24 開始
+[TickPerf] day=24 avg=157 us max=86133 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.70
+[Order] Team1 sell material ×999907 (oid=24)
+[Order] Team1 sell tools ×999998 (oid=25)
+[Order] Team1 buy food ×34 (oid=26)
+[Manufacture] Team1 arrows worker_rate=0.70
+[DayNight] Day 25 開始
+[Manufacture] Team1 arrows worker_rate=0.70
+[TickPerf] day=25 avg=199 us max=84504 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.70
+[Tick 36600] Person 10 (civilian/team1) → P2_produce | stress=1.00 loyalty=0.76
+[Manufacture] Team1 arrows worker_rate=0.70
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=26 avg=144 us max=56645 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.70
+[Manufacture] Team1 arrows worker_rate=0.70
+[DayNight] Day 27 開始
+[Order] Team1 buy weapon_melee_low ×1 (oid=27)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=28)
+[TickPerf] day=27 avg=123 us max=43873 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.71
+[Manufacture] Team1 arrows worker_rate=0.71
+[Manufacture] Team1 arrows worker_rate=0.71
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=28 avg=197 us max=84815 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.71
+[Manufacture] Team1 arrows worker_rate=0.71
+[DayNight] Day 29 開始
+[TickPerf] day=29 avg=115 us max=55941 us ticks=1440 teams=1 factions=0
+[Manufacture] Team1 arrows worker_rate=0.71
+[Order] Team1 sell material ×999906 (oid=29)
+[Order] Team1 sell tools ×999998 (oid=30)
+[Order] Team1 buy food ×34 (oid=31)
+[Manufacture] Team1 arrows worker_rate=0.71
+[DayNight] Day 30 開始
+[Manufacture] Team1 arrows worker_rate=0.71
+[TickPerf] day=30 avg=113 us max=37741 us ticks=1440 teams=1 factions=0
+=== s7_lod_neutrality_bed === mode=far days=30 ticks=43200 player_pos=(105, 105) team_pos=(5, 5)
+母體：population=9｜manufacturing_level=2｜material剩餘=999275.4
+── manufacture.output.* 原始總量+每日 ──
+  manufacture.output.arrows      總量=5.7277  每日=0.1909
+── 輔助診斷(manufacture三桶，看是no_facility/no_material/fired哪一種) ──
+  fired                總數=72
+  noop_no_outpost      總數=0
+  noop_no_worker       總數=0
+  noop_no_facility     總數=0
+  noop_no_material     總數=0
+=== s7_lod_neutrality_bed DONE ===
+

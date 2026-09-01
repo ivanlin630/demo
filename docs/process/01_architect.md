@@ -174,3 +174,11 @@ brainstorm → spec → plan 設計，不實作。
 ★**搬家理由**：**它們是【我們怎麼做事】，不是【世界怎麼運作】** —— ★★**放在 `invariants.md` 等於沒人在對的時機讀到。**
 
 > ★詳 → `detail/01_architect-cases.md`
+
+## ★銷案也要對帳，自述不算證據（用戶側 blueprint 立法 2026-09-01）
+★**把一條病標成「已修／不適用／healed」時，證據標準與「待修」【相同】** ——
+★★**而【被查對象自己的註解】不算證據。**
+★★★血證：病4 因 `manufacturing_system.gd:78-81` 註解自述「產線只在 NEAR pass」而銷案；
+型③對帳查 `sim_runner.gd:164` registry ⇒ 實為 `LOD_BOTH + shape "teams"` ⇒ **註解說謊**。
+⇒ ★**銷案之後它從清單上消失 —— 沒有人會再看它** ⇒ **銷案的錯比未修的錯貴。**
+（這是「宣告 vs 實態」在 code 層的版本；詳 `detail/01_architect-cases.md`。）

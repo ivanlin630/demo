@@ -28,7 +28,7 @@ bash .claude/hooks/bare-tick-gate.sh .
 # 工期單一真值閘（merge-gate，systems 裁定 2026-09-01）——★母體=construction_ticks_left 的真寫入點
 #   ★它綁【引擎決定的窄口】(工期要生效就得寫進那個欄位)⇒ 改名/換表都不會漏
 #   ★★它擋的是「有人再開第二張工期表」——而那正是 S6 拆掉的病
-.	ools\godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd
+.\tools\godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd
 ```
 
 不用 wrapper 直接呼叫 Godot exe 的 print 輸出會是 CP950 → grep 中文亂碼。

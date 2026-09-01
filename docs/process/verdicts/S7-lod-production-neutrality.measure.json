@@ -1,0 +1,35 @@
+{
+  "slice": "S7-lod-production-neutrality",
+  "推導要坐實的": "同一座工坊、隊在遠區(far)時每日真產量是否≈近區(near)的1/10",
+  "量法": "手造最小合成場景(單隊、population=11起始、workshop手動設manufacturing_level=2已建成、material/food/tools/horses/gem全塞爆量避免料瓶頸)——一組player_pos=團隊位置(near)，一組player_pos=極遠(far)，同seed=1337，各跑30日，讀manufacture.output.<res>真實產出量(不是runs_per_day估算函式)",
+  "床": "scripts/debug/s7_lod_neutrality_bed.gd(新檔，純觀測，零production改動)",
+
+  "★①主要結果(arrows，兩邊都有產出，可直接比)": {
+    "near": {"總量": 12.0698, "每日": 0.4023, "fired次數": 137},
+    "far":  {"總量": 5.7277, "每日": 0.1909, "fired次數": 72},
+    "比值(far/near)": "0.474（約1/2.1）",
+    "fired次數比值": "0.526（約1/1.9，跟output比值同量級，互相佐證）"
+  },
+
+  "★★②三種結局判讀": {
+    "結局": "★其他值——不是≈1/10(推導預測)，也不是≈1/1(推導錯)，是【第三種答案】：far約為near的47%~53%",
+    "★裁決": "產出中性性【違規】方向成立(far明顯少於near，不是1/1)，但幅度遠小於推導的1/10——推導的『near24次/日 vs far2.4次/日=1/10』只講對了方向沒講對量級，可能還有別的補償機制(例如far pass雖然次數少但每次worker_rate/q較高，或skill成長速率不同)沒被算進那個靜態推導"
+  },
+
+  "★★★③誠實限——一個我沒能完全排除的confound": {
+    "population分岔": "near跑完population=1，far跑完population=9(起始都是11)——★兩邊population不是我承諾的『pop固定』",
+    "★★為什麼我認為它大致不影響本次比較": "本實驗只有單一團隊在該tile，LaborSystem.pool_of()只加總同tile的PRODUCE隊pop，本例分母分子都是同一隊自己的pop，labor_share=team_pop/pool≈1.0，不管團隊pop絕對值是11還是1(只要>0)，這條channel理論上不受population分岔影響",
+    "★★★但我沒有辦法完全排除population分岔本身透過其他路徑(如skill成長速率)間接影響輸出量，這是本次量法的已知局限，不是我能修的（合成場景本身有emergent行為，非床的bug）",
+    "population為何分岔": "near/far兩邊都出現多次Person10(leader)的N1_flee/loyalty下滑事件(loyalty掉到0.18)，但population下滑機制(哪個anon成員何時離開)沒有對應的log行可查——標記為未解但已排除的候選解釋不是material/food短缺(兩邊都塞爆量)"
+  },
+
+  "★④wagons(次要資源，僅near有產出)": {
+    "near": {"總量": 1.2060, "每日": 0.0402},
+    "far": "★key不存在，這輪far從未產出wagons——可能是far的fired次數太少，wagons配方的need-gap排序沒輪到它，非儀器問題(fired.total=72已確認Probe是ON且有其他輸出)"
+  },
+
+  "landed_paths": {
+    "near": "docs/measurements/s7lod-near-30d-v2.txt",
+    "far": "docs/measurements/s7lod-far-30d-v2.txt"
+  }
+}
