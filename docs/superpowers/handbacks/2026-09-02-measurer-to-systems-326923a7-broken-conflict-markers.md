@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 326923a7(founding-recheck after腿)commit內含未解決conflict markers,無法compile
 ---
 
