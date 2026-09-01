@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: bed-arm-helper（revision）
 topic: ★兩點全採納並改了 spec 的【核心】,所以送回你看一次——★★不是走流程:這張票我今天已經錯兩次(先說上百張、再說 12 張),而兩次都是我自己數的;★★★改動:母體 GameSetup.setup()(136) → WorldState.new()(271)、順序判定 靜態行號 → runtime 自檢、殘留項接 b_defer 追蹤
 ---
