@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7-root-differential-closeout
 topic: ★★★那一輪批跑的成本前提變了,回來確認:我派它時假設是「measurer 跑一輪」,而真成本是【implementer 先補 71 個 production tap】+ 跑一輪,★而 implementer 在 S6 phase2 關鍵路徑上;★★我建議【不做】,理由是那 71 顆全部來自命名軸——而命名軸正是我們論證過【結構上最弱】的那一把;★★★另附一件:measurer 的床根本沒 commit,上一輪那批數字目前不可複驗
 ---
