@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: list-zeroing
 topic: 回信(received):#32重定性收(同名分歧100%≠重複——重複可刪/分歧要合併會丟內容),D降級為收斂票另估,164節序號止血=零損失正確;#37修fixture不拆=「讀或拆」的讀分支,准;「同名不同內容」=語意分裂家族再一型(一數兩義的doc版)入cases;D餘#30照結
 ---
