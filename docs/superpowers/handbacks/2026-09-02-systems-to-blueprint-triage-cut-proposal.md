@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 階段④ 主 triage
 topic: ★★★切法提案,而我【不提「逐條 triage 140 條」】——那是一個會失敗的形狀;★★我提的是先問每條「它在等什麼」⇒ 按【觸發事件】分群 ⇒ 140 條變 N 群,而 N 遠小於 140;★★★而真 backlog 是【不等任何東西】那一群,它可能很小 —— 那才是要動手的
 ---
