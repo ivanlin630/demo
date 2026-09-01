@@ -1,0 +1,60 @@
+{
+  "slice": "S6-after",
+  "★after commit": "53ee4c68（main HEAD，含S6 phase1+phase2）",
+  "★before基準": "docs/process/verdicts/S6-baseline-before.measure.json（commit 1af956fa）",
+  "★這輪判讀方向與平常相反(systems明講)": "S6是intended-change:工期全面變慢4~8×，『建設變少變慢』是成功不是回歸；核心問題是【決策端行為有沒有跟上】，不是好壞判斷（該不該建是blueprint的事）",
+
+  "測法": {
+    "worktree": "A:/GDS/demo/.worktrees/measure-s2-after（獨立乾淨worktree）",
+    "床": "qty_tap_bed.gd——★七項本體完全照before腿(零改動)；★★另外補了一段【建設嘗試/開工/停滯/完工/逾時取消/村端fire】——這6行是L3新增(讀既有production tap:dispatch_builder.attempt/construct.start/stall/complete/timeout_cancel/village.build_fired，零新tap)，因為before腿當初沒印這段，這輪before/after兩邊都用【同一份含建設欄位的床】補跑，才能對齊比較",
+    "seed": 1337, "days": 30, "beds": ["peaceful_economy", "warring_states"]
+  },
+  "機械檢查": {
+    "四輪HEAD跑前跑後皆驗": "after(53ee4c68)兩床/before補建設版(1af956fa)兩床，皆一致",
+    "[BedSelfCheck]四輪effective_window皆100%": "43200/43200，無提早game_over"
+  },
+
+  "★peaceful_economy(teams 12→12不變，母體穩定，raw per-day即per-team-day)": {
+    "採集food_taken": {"before": 25.79, "after": 25.99, "相對差": "+0.8%"},
+    "採集material_taken": {"before": 34.60, "after": 33.83, "相對差": "-2.2%"},
+    "消耗food": {"before": 55.86, "after": 54.63, "相對差": "-2.2%"},
+    "決策次數": {"before": 10.47, "after": 11.37, "相對差": "+8.6%"},
+    "製造觸發次數": {"before": 7.00, "after": 4.10, "相對差": "-41.4%"},
+    "訊息發出": {"before": 11.60, "after": 11.07, "相對差": "-4.6%"},
+    "訊息送達": {"before": "0.20(n=6)", "after": "0.83(n=25)", "相對差": "+315%（兩輪n都<30，低統計力，不當真訊號）"},
+    "建設嘗試(dispatch)": {"before": "0.60(n=18)", "after": "0.47(n=14)", "相對差": "-21.7%（n小，僅供參考）"},
+    "建設開工(start)": {"before": "1.00(n=30)", "after": "0.97(n=29)", "相對差": "-3.3%"},
+    "建設停滯(stall)": {"before": 19.60, "after": 15.30, "相對差": "-21.9%（n=588→459，較可信）"},
+    "建設完工(complete)": {"before": "0.93(n=28)", "after": "0.90(n=27)", "相對差": "-3.6%"},
+    "村端建設fire": {"before": "1.00(n=30)", "after": "0.97(n=29)", "相對差": "-3.3%"},
+    "隊數/人口": {"before": "12/24", "after": "12/24", "不變": true}
+  },
+
+  "★★warring_states(teams 94→114，per-team-day為主軸)": {
+    "決策次數": {"before每隊每日": 0.8720, "after每隊每日": 0.7345, "相對差": "-15.8%"},
+    "訊息送達": {"before每隊每日": 2.4642, "after每隊每日": 3.0000, "相對差": "+21.7%"},
+    "訊息發出": {"before每隊每日": 0.4589, "after每隊每日": 0.4132, "相對差": "-10.0%"},
+    "採集food_taken": {"before每隊每日": 0.4374, "after每隊每日": 0.4640, "相對差": "+6.1%"},
+    "建設嘗試(dispatch_builder.attempt)": {"before每隊每日": 0.2167, "after每隊每日": 0.2409, "相對差": "+11.2%（raw:611→824，n夠大可信）"},
+    "建設開工(construct.start)": {"before每隊每日": "0.00319(raw n=9)", "after每隊每日": "0.00322(raw n=11)", "相對差": "+0.8%（★n極小(9→11)，僅供參考不可信）"},
+    "建設停滯(construct.stall)": {"before每隊每日": 1.2879, "after每隊每日": 1.0409, "相對差": "-19.2%（raw:3632→3560，n夠大可信）"},
+    "建設完工(construct.complete)": {"before每隊每日": "0.00284(raw n=8)", "after每隊每日": "0.00351(raw n=12)", "相對差": "+23.7%（★n極小(8→12)，僅供參考不可信）"},
+    "建設逾時取消(construct.timeout_cancel)": {"before": "★key不存在，這件事這輪從未發生(n=0)", "after": "0.03/日(raw n=1)", "備註": "n=1，噪音層級，不足以判斷取消模式是否真的改變"},
+    "村端建設fire": {"before每隊每日": "0.00319(raw n=9)", "after每隊每日": "0.00322(raw n=11)", "相對差": "同construct.start(1:1綁定)"},
+    "credited/taken(food)比值": {"before": "31.0%", "after": "31.1%", "備註": "幾乎不變，糧倉緊度持平"},
+    "隊數(必報)": {"before": 94, "after": 114, "相對差": "+21.3%"}
+  },
+
+  "★★★決策端有沒有跟上——照實報形狀，不歸類好壞": {
+    "warring觀察": "建設嘗試(attempt)per-team-day上升+11.2%(n可信)，同時建設停滯(stall)per-team-day下降-19.2%(n可信)——嘗試次數沒有因為工期變慢而減少，反而略升；stall總量下降的方向跟『工期變慢應該讓更多工地處於進行中/停滯狀態』的直覺預期相反",
+    "peaceful觀察": "建設嘗試/開工/停滯/完工全部small個位數變化，方向一致向下(-3%~-22%)，但n本身就小(peaceful世界活動量低)，這個方向本身可能只是母體正常抖動",
+    "★我沒有下的判斷": "『嘗試次數該不該隨工期變慢而減少』是decision-end邏輯正不正確的問題，那是behavior因果判斷，不是我的職權——只照實報形狀給你/blueprint判讀"
+  },
+
+  "landed_paths": {
+    "after_peaceful": "docs/measurements/s6after-qty-peaceful_economy-30d.txt",
+    "after_warring": "docs/measurements/s6after-qty-warring_states-30d.txt",
+    "before補建設_peaceful": "docs/measurements/s6before-construction-qty-peaceful_economy-30d.txt",
+    "before補建設_warring": "docs/measurements/s6before-construction-qty-warring_states-30d.txt"
+  }
+}
