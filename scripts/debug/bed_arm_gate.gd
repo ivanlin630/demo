@@ -18,9 +18,16 @@ extends SceneTree
 const ROOT: String = "res://scripts/debug"
 const WHITELIST_PATH: String = "res://docs/process/bed-arm-whitelist.txt"
 const HELPER_CALL: String = "MeasureBedHelper.arm_and_setup"
+# ★機制本身不是床 —— 這三檔不進母體。
+# ★★probe_stats.gd 是本輪【當場撞到】才加的：它的 print 字串裡提到 helper 名字，
+#   而本閘只跳過【整行是註解】的行，跳不過【字串字面值裡的同名 token】
+#   ⇒ 它被算成「已遷移 1」。★★★誠實限：本閘讀的是文字不是語法樹，
+#     所以「字串裡提到 helper」與「真的呼叫 helper」它分不出來。
+#     ⇒ 目前用白名單/豁免處理；若日後誤判變多，才值得換成真的 parse。
 const SELF_EXEMPT: Array = [
 	"scripts/debug/measure_bed_helper.gd",   # helper 自己
 	"scripts/debug/bed_arm_gate.gd",         # 本閘自己
+	"scripts/debug/probe_stats.gd",          # Probe 自己（訊息字串提到 helper 名字）
 ]
 
 func _initialize() -> void:
@@ -113,8 +120,17 @@ func _run() -> void:
 		else:
 			bad.append(rel)
 
-	print("=== 床 arm 順序閘（母體＝WorldState.new() 的呼叫檔）===")
-	print("母體 %d｜用 helper %d｜白名單 %d｜★未涵蓋 %d" % [pop.size(), ok.size(), listed.size(), bad.size()])
+	print("=== 床 arm 順序閘（母體＝【全部建世界的床】，遷移的與未遷移的都在）===")
+	# ★★★systems 裁定 2026-09-01：遷移過的床【不准掉出母體】。
+	#   ⇒ 已遷移 / 未遷移【兩個數字都印】：遷移數上升、未遷移數下降，
+	#     ★兩邊都看得見，才分得出【修好了】與【不見了】。
+	print("母體 %d ＝ 已遷移(helper) %d ＋ 未遷移(白名單) %d ＋ ★未涵蓋 %d"
+		% [pop.size(), ok.size(), listed.size(), bad.size()])
+	var acct_ok: bool = pop.size() == (ok.size() + listed.size() + bad.size())
+	print("[BED-ARM-GATE] 對帳：%s（母體 ＝ 三欄之和）%s"
+		% ["OK" if acct_ok else "★MISMATCH", "" if acct_ok else " ⇒ ★有東西被靜默吐掉，先修這個"])
+	print("[BED-ARM-GATE] 已遷移 %d ／ 未遷移 %d ⇒ ★遷移進度看的是【兩個數字一起動】，不是單看一個"
+		% [ok.size(), listed.size()])
 	# ★★★白名單數字必印 —— 它就是盲區規模，而它應該單向下降。
 	print("[BED-ARM-GATE] ★白名單 %d 張 ⇒ 這就是【還沒治好的盲區規模】（★不是通過，是還沒做）"
 		% listed.size())

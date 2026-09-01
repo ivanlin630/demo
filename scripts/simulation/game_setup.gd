@@ -43,9 +43,12 @@ static func setup(state: WorldState, config: Dictionary) -> void:
 	#     ⇒ 自檢自己不執行 ⇒ ★★★循環自證。所以它無條件跑，並走獨立欄位不走 bump()。
 	#   ★誠實限：它只答「setup 當下 armed 沒有」，答不出「是哪一張床」——
 	#     所以順便記一行 hint 給人回頭找。
+	#   ★★★而這裡【只記錄，不輸出】（systems 裁定 2026-09-01）：
+	#     正常遊戲從不 arm Probe ⇒「未 armed」在 production 是【常態】不是異常
+	#     ⇒ 在這裡印＝條件恆真＝每次開局都印＝污染所有人的 log（bed-parse-gate 還讀 stdout）
+	#     ⇒ ★判定搬到 arm 那一刻（Probe.reset() / 首次 bump），production 走不到那裡。
 	if not Probe.enabled:
 		Probe.note_setup_unarmed(str(config.get("name", config.get("mode", "?"))))
-		print("[ARM-ORDER] ★GameSetup.setup() 執行時 Probe 尚未 armed —— 這一段世界的 tap 是【盲的】")
 	var mode: String = config.get("mode", "random")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(config.get("seed", 42))

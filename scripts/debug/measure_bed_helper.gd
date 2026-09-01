@@ -17,9 +17,10 @@ class_name MeasureBedHelper
 # cfg：`res://config/xxx.json` 路徑，或已載入的 Dictionary。
 # strip_player：拆掉玩家（多數量測床要中性世界，不要玩家 forced_event 干擾）。
 static func arm_and_setup(cfg, strip_player: bool = true) -> WorldState:
-	# ★順序寫死：reset → enabled → setup。★★三行的先後就是這支存在的全部理由。
-	Probe.reset()
-	Probe.enabled = true
+	# ★順序寫死：arm → setup。★★先後就是這支存在的全部理由。
+	#   ★★★Probe.arm() ＝ reset + enabled + 【arm 順序判定】三合一
+	#     （判定放在 arm 那一刻，不放在 setup —— production 從不 arm，所以那裡判定＝恆真噪音）。
+	Probe.arm()
 	var state := WorldState.new()
 	var conf: Dictionary = cfg if cfg is Dictionary else GameSetup.load_config(str(cfg))
 	GameSetup.setup(state, conf)
@@ -44,6 +45,6 @@ static func _strip_player(state: WorldState) -> void:
 #   ★★床應該把這個印出來 —— 否則自檢有值而沒人看得到，等於沒有自檢。
 static func arm_order_report() -> String:
 	if Probe.setup_saw_unarmed == 0:
-		return "[ARM-ORDER] OK：setup 執行時 Probe 已 armed（%d 次未 armed）" % Probe.setup_saw_unarmed
+		return "[ARM-ORDER] OK：setup 執行時 Probe 已 armed（0 次未 armed）"
 	return "[ARM-ORDER] ★未 armed 就 setup ×%d ⇒ 那幾段世界的 tap 是盲的｜線索=%s" \
 		% [Probe.setup_saw_unarmed, str(Probe.setup_unarmed_sites)]
