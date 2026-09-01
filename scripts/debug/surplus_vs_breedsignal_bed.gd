@@ -105,14 +105,36 @@ func _run() -> void:
 	out.append("#   ★★★而若同一列的糧倉飽和度也接近 1.0 ⇒ 假說成立：存量到 cap ⇒ 差分歸零 ⇒ 訊號歸零")
 	out.append("#")
 	out.append("## ★★★四段斷點分辨（★rate_sample 只在 daily>0 時 fire ⇒ 它分得開 A/B/C 與 D）")
-	out.append("breed.rate_sample 次數 = %d｜breed.born = %d"
-		% [int(Probe.counts.get("breed.rate_sample", 0)), born])
+	# ★★★這行我上一版寫錯了：_tick_breed 只呼叫 bump_sample，【從不】bump counts
+	#   ⇒ counts["breed.rate_sample"] 恆為 0 ⇒ ★「次數 = 0」是我自己的儀器造的假陰性。
+	#   ★★真的計數在 samples.size()（而它有 cap 24 ⇒ 只是【下界】，不是次數）。
+	out.append("breed.rate_sample 樣本 = %d（★cap 24 ⇒ 這是下界不是次數；counts 恆 0 是儀器假象）｜breed.born = %d"
+		% [(Probe.samples.get("breed.rate_sample", []) as Array).size(), born])
 	var smp: Array = Probe.samples.get("breed.rate_sample", []) as Array
 	out.append("樣本數 = %d（cap 24）" % smp.size())
 	for i in range(mini(8, smp.size())):
 		out.append("  " + str(smp[i]))
-	out.append("# ★讀法：rate_sample = 0 ⇒ 斷在 A(名額滿)/B(f<=0)/C(無適齡) 三者之一")
-	out.append("#        rate_sample > 0 而 born = 0 ⇒ ★★斷在 D：★★★速率太低，progress 到不了 1.0")
+	out.append("# ★讀法：樣本 = 0 ⇒ 斷在 A(名額滿)/B(f<=0)/C(無適齡) 三者之一")
+	out.append("#        樣本 > 0 而 born = 0 ⇒ ★★斷在 D：★★★速率低，progress 還沒到 1.0")
+	out.append("#        ★★★而【progress 逼近 1.0】與【機制壞了】長得一樣 —— 只有上面那張 progress 表分得開")
+	# ★★★D 段直讀：breed_progress 是持久欄 ⇒ 跑完直接讀，不必推。
+	#   ★這回答的是「rate_sample 看不到的那一半」：progress 到底走了多遠。
+	out.append("#")
+	out.append("## ★★★終局 breed_progress（★1.0 ＝ 一名額；★★它是持久欄，直讀非推導）")
+	out.append("team|breed_progress|pop|minor|名額 cap|realized rel_surplus(終值)")
+	var tids2: Array = state.teams.keys(); tids2.sort()
+	var pos_n: int = 0
+	var neg_n: int = 0
+	for tid2 in tids2:
+		var tm: TeamData = state.teams[tid2]
+		if tm.beast_kind != "":
+			continue
+		var rs: float = ReactionSystem.breed_rel_surplus(tm)
+		if rs > 0.0: pos_n += 1
+		else: neg_n += 1
+		out.append("%d|%.4f|%d|%d|%d|%+.4f" % [int(tid2), tm.breed_progress, tm.population,
+			tm.minor_population, maxi(1, int(tm.population * 0.25)), rs])
+	out.append("# ★正負分佈（終值）：正 %d 隊／負 %d 隊" % [pos_n, neg_n])
 	out.append("# ★誠實限：①用 FoodFlow._sustainable_inflow（★與 breed 讀的是不同的量，那正是本表要證的）")
 	out.append("#   ★★而『盈餘』的口徑若換成別的（例如含狩獵/交易），這張表的左欄會變 —— 口徑寫在這裡")
 	for l in out:

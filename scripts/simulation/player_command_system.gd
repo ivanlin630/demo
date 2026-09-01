@@ -259,7 +259,7 @@ func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData
 	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
 	var stored: float = float(tile.public_storage.get(res, 0))
 	if stored < amount: return { "ok": false, "msg": "公庫不足" }
-	tile.public_storage[res] = stored - amount
+	TileBank.set_amt(tile, res, stored - amount, "player_withdraw_storage")   # ★單寫者（值不變）
 	ResourceBank.add(pt, res, amount, "withdraw_storage")
 	return { "ok": true, "msg": "取 %s × %.0f" % [res, amount] }
 
@@ -274,7 +274,7 @@ func _action_deposit_to_storage(state: WorldState, _target: int, pt: TeamData, p
 	var cap: float = OutpostSystem.new()._get_storage_cap(tile, res)
 	var stored: float = float(tile.public_storage.get(res, 0))
 	if stored + amount > cap: return { "ok": false, "msg": "公庫已滿" }
-	tile.public_storage[res] = stored + amount
+	TileBank.set_amt(tile, res, stored + amount, "player_deposit_storage")   # ★單寫者（值不變；cap 已在上面自行檢查過）
 	ResourceBank.set_amt(pt, res, have - amount, "deposit_storage")
 	return { "ok": true, "msg": "存 %s × %.0f" % [res, amount] }
 

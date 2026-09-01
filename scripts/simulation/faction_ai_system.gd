@@ -4558,7 +4558,8 @@ func _load_convoy_cargo(owner: TeamData, sub: TeamData, home_tile: HexTileData, 
 			var v: float = float(home_tile.public_storage.get(res, 0))
 			var from_vault: float = minf(delta, v)
 			if from_vault > 0.0:
-				home_tile.public_storage[res] = v - from_vault
+				# ★單寫者：改走 TileBank（值不變，換來 tally + record_driver）——直寫會讓糧倉流出【看不見】
+				TileBank.set_amt(home_tile, res, v - from_vault, "convoy_load_vault_out")
 				ResourceBank.add(sub, res, from_vault, "convoy_load_vault_in")
 	elif delta < 0.0:
 		ResourceBank.add(sub, res, delta, "convoy_unload_excess_out")       # delta<0 → 減 porter

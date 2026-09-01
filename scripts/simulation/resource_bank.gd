@@ -33,6 +33,8 @@ static func set_amt(team: TeamData, res: String, amt: float, reason: String) -> 
 	WorldState.record_driver(team, res, amt, reason, "resource")
 
 static func clear_all(team: TeamData, reason: String) -> void:
+	# ★清空也是【流出】：不記＝這批食物憑空消失在流量帳上
+	_tally_food(team, "food", -float(team.resources.get("food", 0.0)))
 	team.resources.clear()
 	WorldState.record_driver(team, "*resources*", 0.0, reason, "bulk")
 
