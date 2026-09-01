@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: deferred-judgement-expiry
 tier: infra
 topic: ★三顆已 merge(我挑 commit 不 merge branch:tap/root120 是儀器不進 main),四閘自跑全綠;★★你的 172 與我 spec 的 171【兩個都對】——它們描述不同世界,而你拒絕把數字湊回去是對的;★★★而 merge 後我撞上今天在數的同一件事:退場之後 b_defer 規則 = 0 ⇒ §1/§2 的母體是空的,而閘印 PASS —— 那個綠的意思是「沒有東西可檢」不是「檢過了沒問題」
