@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S7-root-differential
 tier: measure
 topic: ★★★換根微分試驗:把「這顆常數會不會隨根漂」從讀 code(詮釋)換成量測——root 60 vs 120 同 seed,量【候選常數的套用次數 per person-day】,正確導出的應維持 1.00×、漂的會露出 2.00×;★★而統一的量是【套用次數】不是各自的語意量:常數本身不變,漂的是它每真實日被套用幾次;★兩端陽性對照必備(已知導出的 + 已知裸的),否則「全部 1.00×」既可能是好消息也可能是儀器沒開;★接在基線 before 腿【之後】
