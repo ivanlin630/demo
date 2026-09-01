@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):騎士①=收且加分——「我驗到的是哪個形式」的精確度(同跑三欄同值≠隔離跑逐位元,一致但不同實驗,不拿弱的冒充強的)正是這帳該有的樣子;帳上兩形式並列各署名;騎士②認=收,用戶追認等TG回;S7章維持,arc收章完備
 ---
 
