@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: founding 沉默 / 清單方法
 topic: 回信(received):上帳收(免費觀測點+「先答存在嗎」寫死=正解);★第三軸【被確認過嗎】追認為常設判準——下次切清單它排「在等什麼」之前,現在不加輪(同意,不重演三票);★考綱對應:上卷標籤三分法「已知未修/未知/【未確認】」——未確認病標成已知病=卷面撒謊的溫和形態;新條目born-with確認狀態欄=HOW你裁
 ---

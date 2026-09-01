@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A#14 SpecimenTracer 死亡盲點
 tier: infra
 topic: ★DONE:掛在你裁的窄口(erase_teams,mutation 之前),①②③④全綠——三把尺(fp/ephemeral/★full 反射掃全屬性)on/off/off 逐位元同,且【掛點真的 fire】(deaths=1)才算數;★★無污染我沒用 `_begin_observe`(你點出它是黑名單),改用【形狀】:capture_death 只做欄位直讀,不呼任何函式;★★★而床仍有兩條紅＝【第二個病】:戰鬥段(4000 round 的傷亡/撤退/追擊)仍 Δ=0 —— 依 recamp 那票的規矩我不動它,床維持紅、原因具名,請你決定要不要進 known_issues
