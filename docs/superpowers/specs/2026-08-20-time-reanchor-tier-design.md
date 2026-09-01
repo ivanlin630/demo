@@ -73,7 +73,11 @@ turn 定義統一(60t vs 24t)/EWMA cadence 相依修(need_hierarchy α 未除 da
 中  接線錯且誤差隨根放大：3 MOVE_TILES_PER_DAY(goal_resolver:896) ★接線病,修法禁改數值(手抄物理)
 低  重複但已導出(改一處會漏)：5a(sim_runner:300/346 2 處) ／ 5e(faction_ai:2736/3355/5429 3 處)
 最低 不隨根變,純命名：6a encounter_system:10 ／ 6b trade_valuation:54 ／ 5c day_night_system:10-12
-★healed 銷案：病1(S2 收) ／ 病4(產線只在 NEAR pass,不等價問題不存在) ／ 病5b(已用 TimeScale.hours(100))
+★healed 銷案：病1(S2 收) ／ ★★★病4【銷案撤回 2026-09-01】 ／ 病5b(已用 TimeScale.hours(100))
+   ★★病4 撤回理由：型③對帳查 registry ⇒ `sim_runner.gd:164` manufacture 是 **LOD_BOTH + shape "teams"**
+     ⇒ far 隊也跑，且不吃 cadence ⇒ ★同一座工坊在遠區每日真產量約為近區的 1/10（★★推導待量測坐實）
+   ★★★而當初銷案的依據是【manufacturing_system.gd:78-81 的註解自述】「產線在 NEAR pass」
+     —— **註解說謊，registry 才是真的**
 ★抄本誤判：病5d 月長 30 = 刻意不縮放的曆法結構,非病 ／ 病5f「2 天 ×6 處」production 只剩一行註解
        ／ 病7「×2 處」的第二處是 per-day 語意,與 ui_logic_test 不同族(抄本把兩種混成一條)
 ```

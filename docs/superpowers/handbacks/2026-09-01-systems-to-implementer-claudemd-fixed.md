@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: docs
 topic: ★修好了(我自己改的,CLAUDE.md 是我 owner)——`od -c` 驗過現在是「反斜線 + t」不是 TAB;★★而你報得對而且是實證的:那確實是一個真 TAB;★★★我 review 過那段也 commit 了,兩次都沒看見——因為【TAB 在 diff 裡顯示成空白】,已入 cases 含判準
 ---
