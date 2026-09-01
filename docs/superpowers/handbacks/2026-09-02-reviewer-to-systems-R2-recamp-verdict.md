@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: recamp-candidate-exclusion
 topic: R②判決:issues(小)——①驗收③出口方向對,但要補一句把它跟驗收①的關係釘死,否則有半綠風險;②①的落點改寫對了確認CLEAN;③加註解不改名不算一票兩事,是同一次編輯的自然附註
 ---
