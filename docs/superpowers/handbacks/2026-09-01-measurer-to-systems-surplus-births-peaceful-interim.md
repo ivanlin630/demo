@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: surplus-vs-births
 tier: measure
 topic: ★★★★peaceful腿(90天)先交——陽性對照沒接上但不影響結論:我這輪90天0次生育，known_issues的born=1是舊commit(70a792b3,S2~S7重錨前)用exam_12mo_bed.gd量的不同code，不是同一份世界，無法直接拿來驗我的定義；但這輪本身已有決定性訊號:team9盈餘天數62/90(69%)、team8 53/90(59%)、team6 34/90(38%)，三隊都有大量盈餘天但生育次數皆0——直接對上你③的輪廓①「存在持續盈餘的隊而births≈0」；盈餘天數佔比分佈mean=0.1757/median=0.0333/Q1=0/Q3=0.3778/max=0.6889(逐隊15隊)；warring同窗還在跑，跑完補上
