@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: breed-reads-true-surplus
 topic: ★R² 審修票(blueprint 已合裁,①修②不動常數);★★★要你打的第一點:我把「盈餘」當成一個【存在的量】在寫 spec,而上一票的量測員是【在床裡自己算的】—— 若 production 根本沒有這個量,這張 spec 的前提就空了;★★另兩點:驗收④的構造可行性、以及「同源推導」在這裡的具體形狀
 ---
