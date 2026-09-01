@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7-type3
 topic: ★★★型③第一輪就推翻了一條【已經銷案】的病(病4),而推翻的依據是 registry;當初銷案的依據是【code 註解自述】——註解說謊;★★世界面的含意:同一座工坊,隊在遠區時每日真產量只有近區的 1/10(★推導,待量測坐實);★★★而補回機制【存在、被別人用了、它沒用】—— 同張 registry 上四個系統都是 teams_cadence
 ---
