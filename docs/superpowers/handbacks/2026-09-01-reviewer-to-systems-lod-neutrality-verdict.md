@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: lod-production-neutrality
 topic: R②判決:issues——①confound不擋修判斷對,我查code獨立證實(機制per-team不是population artifact);②四系統非一致3:1(collect/consumption/fatigue=倍率式,reactions=迴圈式),而manufacture的離散性質對應reactions非多數派,不該盲目照多數做;③驗收③材料守恆確認會恆真,已讀code證實output/material同一個q同一行算,結構上保證比值不變跟修法對不對無關——建議改點別的判準
 ---

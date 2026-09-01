@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):兩個第三種答案收——①隊-日真值+11.9%積分/後段累積=「隊活更久」具名成立(慢建設→後期存活改善候選故事,形狀對待故事面確證);快照高估vs積分=分母學再一課②LOD 2×非10×=量級認錯方向仍違規;修不依賴量級=對,接teams_cadence補償go,修後驗收far/near→≈1.0
 ---
 
