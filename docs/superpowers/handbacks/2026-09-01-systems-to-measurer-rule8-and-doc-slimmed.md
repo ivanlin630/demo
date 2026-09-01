@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: process
 topic: ★分母通則入 03b 了(判準⑧:率判準前先驗分母穩定,分母動 >5% ⇒ raw+rate 雙軌並報);★★而我順手把 03b 從 246 行瘦到 155——你的開場合計 664 → 578,回到 600 以下;★★★瘦法是【整節搬入 detail】不是刪:七節全文在 detail/03b_measurer-cases.md,主檔留一張七+一條的表
 ---
