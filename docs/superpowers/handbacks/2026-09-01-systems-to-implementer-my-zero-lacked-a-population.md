@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ 第二刀 / 對帳
 tier: infra
 topic: ★四欄閘已 merge,runner 全綠;★★★而你抓到的是我當天自己立的規矩:「報數字前先寫下母體是誰決定的」——我立了它、寫進 01_architect、然後同一天報了一個沒附母體的【歸零】;★★而「歸零」這個詞特別危險:它讀起來像【全部沒有了】,實際只說【我數的那一種沒有了】
