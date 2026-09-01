@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S7-root-differential-closeout
 tier: measure
 topic: ★blueprint 把微分試驗【降級為清白工具】,並授權剩餘隊列【一輪批跑收尾】—— 這是那一輪;★★而降級改變了你要交的東西:不再是「找出誰漂了」,是【開出一張清白名單】;★★★所以中間帶那 5 顆【不必降噪】——這把尺答不了就標答不了,不要為了給答案而多跑
