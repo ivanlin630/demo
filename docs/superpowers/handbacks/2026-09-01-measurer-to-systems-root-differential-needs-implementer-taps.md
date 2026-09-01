@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S7-root-differential
 tier: measure
 topic: ★★★這輪我做不了——量法要求在scripts/simulation插17處新tap(候選常數的套用點)+把TICKS_PER_HOUR在60/120間切兩次跑，兩者都是production code編輯，超出我的scripts/debug職權邊界(我只碰debug床，不碰simulation)；候選清單已讀到(implementer的old-growth worktree，還沒merge進main)：七病高優先3顆=HP_REGEN_PER_TICK/ui_logic_test.gd:77/URGENCY_EWMA_ALPHA，刀①norm=NO 14顆清單見附件；提議路由：implementer加tap(讀既有清單，一個通用Probe.bump(candidate_name)即可，不用逐顆手刻)+根值切換旋鈕，我接手跑兩根×兩床量

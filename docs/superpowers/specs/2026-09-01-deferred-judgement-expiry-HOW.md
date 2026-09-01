@@ -72,3 +72,43 @@ scope: 工具層（.claude/hooks + scripts/debug/bare_tick_triage.gd 輸出）�
    （0 命中有兩種讀法,不附證據的退場＝把守衛拆掉而不知道）
 ★不動 NEEDS_HUMAN 判準（它是對的：擋「沒人判過的形狀」,不擋總數）
 ```
+
+---
+
+# ★★★§2 第二段：`defer_until` token（blueprint 2026-09-01 裁 ②做，成本砍半）
+
+## ①機制
+```
+b_defer 規則的理由必須帶具名 token：defer_until: <slice_id>
+閘：token 命中【已落地清單】⇒ ★FAIL（延後的那一站已經到了，而判決還在）
+資料來源：docs/process/landed-slices.tsv
+```
+
+## ★★②而登記檔【由 git log 機械生成】，不是手工 append
+blueprint 的設計是「merge 時順手 append 一行」。★**我改成生成式**，理由：
+> ★★**「merge 時順手 append」＝靠人記得，而【靠人記得】正是延後判決這個病的成因本身。**
+
+★**merge message 已有一致形狀** `merge <token> … @<hash>`（實查 55 筆可抽出）
+⇒ **少一個可以忘的步驟**；`landed-slices.tsv` 仍然存在、閘仍然讀它，只是它是**產物**不是**手稿**。
+★★生成指令寫在該檔檔頭（可隨時重跑覆蓋）。
+
+## ★★★③三條誠實限（★都寫進 tsv 檔頭，跟資料一起讀）
+```
+①高召回低精度（會混進 act/key/clamp 雜項）⇒ ★精度不重要:閘只查 defer_until 出現過的 token
+②★失效方向是【漏紅】不是【假紅】:merge message 沒照慣例寫 ⇒ 該 slice 不在檔裡 ⇒ 閘錯過一次到期
+  ⇒ ★★本檔的偵測力上限 ＝ merge message 慣例的遵守率
+③★★★本檔記的是「有人宣稱 merge」不是「真的落地」
+  血證:S1c e3cefcf3 的 message 寫 merge,而該 commit 含 4 份 handback、production 0 行,
+  git merge-base --is-ancestor 為否。★沒有任何機制能修這一條,只能具名。
+```
+
+## ④範圍（照 blueprint 裁）
+★**只收 slice-token 型的延後**。★★**事件條件型延後（規模 R①／成交量級…）不入此閘**，照現況板錨定。
+
+## ★⑤驗收
+```
+①★真資料：現行 main 跑 ⇒ :50 :51 兩條（defer_until: S2，而 S2 在清單裡）必須紅
+②★★陰性：把 token 改成一個不在清單裡的 slice ⇒ 必須綠
+③★★★缺 token 的 b_defer 規則 ⇒ 也要紅（★否則「不寫 token」變成繞過閘的方法）
+```
+

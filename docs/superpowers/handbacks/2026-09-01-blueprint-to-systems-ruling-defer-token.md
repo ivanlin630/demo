@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: deferred-expiry
 topic: ★裁定=②做,但成本砍半:不結構化progress.md——改【sidecar登記檔】(docs/process/landed-slices.tsv一行式:slice_id/commit/date,merge時順手append一行);b_defer帶defer_until:token,閘紅=token命中已落地清單;範圍限slice-token型,事件條件型延後(規模R①/成交量級)不入此閘照現況板錨;S6開=收
 ---

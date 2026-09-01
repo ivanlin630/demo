@@ -1,0 +1,73 @@
+# docs/process/landed-slices.tsv —— ★已落地 slice 登記檔（延後判決到期閘的資料來源）
+# ★★這份檔【由 git log 機械生成】，不是手工維護 —— 因為「merge 時順手 append 一行」＝靠人記得，
+#   而「靠人記得」正是延後判決這個病的成因本身。
+# 生成指令（merge 後跑，或任何時候重跑；輸出可直接覆蓋本檔 body）：
+#   git log --format="%H|%ad|%s" --date=short --all \
+#     | grep -E "\|merge [A-Za-z0-9][A-Za-z0-9._-]*( |$)" \
+#     | awk -F'|' '{split($3,a," "); print a[2]"\t"substr($1,1,8)"\t"$2}' | sort -u -k1,1
+#
+# ★誠實限（★必須跟這份檔一起讀）：
+#  ①★高召回低精度：token 取「merge」後第一個字 ⇒ 會混進 act/key/clamp 這類雜項。
+#    ★★而精度【不重要】：閘只查 `defer_until:` 出現過的 token，雜項永遠不會被查到。
+#  ②★失效方向是【漏紅】不是【假紅】：merge message 沒照 `merge <token>` 寫 ⇒ 該 slice 不在檔裡
+#    ⇒ 閘【錯過】一次到期，而不會誤報。★★所以本檔的偵測力上限＝ merge message 慣例的遵守率。
+#  ③★★★本檔記的是「有人宣稱 merge」，不是「真的落地」——
+#    血證：`S1c e3cefcf3` 的 commit message 寫著 merge，而該 commit 含 4 份 handback、
+#    production 0 行，`git merge-base --is-ancestor` 為否。★沒有任何機制能修這一條，只能具名。
+#
+# slice_id	commit	date
+117	f0f84469	2026-08-26
+act	abaf519b	2026-08-26
+attempt	38d1d98a	2026-08-26
+B	dbc31952	2026-08-03
+cadence	d5fbd6de	2026-07-13
+cadence-stagger	b57df261	2026-08-27
+call_us	5c4c8b52	2026-08-27
+care-loop	a575c4fa	2026-08-11
+clamp	82e554f3	2026-08-26
+convoy	c0bad05e	2026-08-21
+EWMA	a0a9ae0a	2026-08-20
+F0	8df7d33d	2026-08-07
+F1	b677e0b5	2026-08-07
+F2	5950ce65	2026-08-07
+F3	11429026	2026-08-07
+F4	1cd5cfbf	2026-08-07
+gather-dirty-flag	a47c07c3	2026-08-27
+goal-fate	0bdb0cd9	2026-08-26
+iii	e74ce5ce	2026-08-11
+infra	c6d0d12b	2026-08-26
+key	b9bac234	2026-08-26
+labor-slice	eb20531d	2026-08-19
+ladder	e8744da4	2026-08-26
+ladder-dissolve	6d6ccd60	2026-08-26
+local-value	6e39995a	2026-08-26
+market-fill	ef846435	2026-08-27
+material-trajectory	1958f645	2026-08-26
+mfg	2c25a82c	2026-08-03
+observer-no-global-RNG	26a4f8b9	2026-07-29
+own_granary	e210c00a	2026-08-15
+pick_empty	1e392747	2026-08-26
+quantity	0d9343dd	2026-08-27
+recovery-path	73b2a943	2026-08-06
+reserve-assertion	0829d04e	2026-08-26
+resolver	9f551096	2026-08-26
+S1a	4d30073a	2026-08-27
+S1b	c26c5ca4	2026-08-27
+S1c	e3cefcf3	2026-08-27
+S2	746ff6e7	2026-08-27
+S3	9abeb7f8	2026-08-27
+S4b	41999987	2026-08-28
+S5a	dbd18b6a	2026-09-01
+S5b	9fb63ebe	2026-09-01
+S5c	acbb425d	2026-09-01
+settlement	f003ebe5	2026-08-20
+skip-reason	ff66bf2e	2026-08-26
+slice	5b8d6c00	2026-08-14
+SLICE	2fef2081	2026-08-01
+stale-test	900bb952	2026-08-26
+storage-fits	22a5f237	2026-08-26
+t0-emit-ordering	7baca0a6	2026-08-28
+tools-family	02f28a55	2026-08-26
+unified.rank.calls	4830aa9b	2026-08-26
+unload	64de9feb	2026-08-26
+wire-in-specimen-trace	228d54e9	2026-08-26
