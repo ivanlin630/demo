@@ -55,8 +55,21 @@ const GV_DYNFIELD_RE := "\\.(tile_pos|population|resources|armed|food|coin|moral
 func _initialize() -> void:
 	var current: Dictionary = _scan()
 	var baseline: Dictionary = _load_baseline()
+	# ★★★warn 通道（systems 裁 2026-09-02，★bless 否決的正解）：
+	#   `gv_belief_pre` / `gv_belief_post` ★不進 `current ⊆ baseline` 硬契約。
+	#   ★理由：baseline 的語意是【已凍結承認】⇒ 把 23 顆【沒逐顆判過】的命中塞進去
+	#     ＝ 讓它們【永久不再紅】＝ 把未確認寫成已知。
+	#   ★★藍圖裁的是【warn 層】：印出來、計數、不 FAIL。
+	#   ★★★升 hard 的條件（寫死在這裡，免得下一個人只看到「它不 FAIL」就以為它不重要）：
+	#     23 顆逐顆判過之後 —— legit 的標 inline `# gate-ok`（不入 current）、真違規的修掉，
+	#     ★剩下的才凍進 baseline。★★那時 baseline 才是【判過的】而不是【沒看過的】。
+	const WARN_TYPES: Array = ["gv_belief_pre", "gv_belief_post"]
+	var warn_hits: Array = []
 	var added: Array = []
 	for fp in current.keys():
+		if String(fp).split("::")[-1] in WARN_TYPES:
+			if not baseline.has(fp): warn_hits.append(fp)
+			continue
 		if not baseline.has(fp): added.append(fp)
 	var removed: Array = []
 	for fp in baseline.keys():
@@ -70,6 +83,14 @@ func _initialize() -> void:
 	for fp in removed:
 		print("[gate] removed (de-patch 進度): %s" % fp)
 	print("[gate] 類型分布: %s" % str(by_type))
+	# ★warn 通道：印出來、計數、★不 FAIL（升 hard 的條件見上方 WARN_TYPES 註解）
+	warn_hits.sort()
+	if not warn_hits.is_empty():
+		print("[gate] ⚠ WARN（不擋 merge）：gv_belief_* %d 顆 —— ★【沒有逐顆判過是否 legit】" % warn_hits.size())
+		for fp in warn_hits:
+			print("[gate]    ⚠ %s" % fp)
+		print("[gate] ★★這個數字要【印出來】才不會靜靜長大；★★★而它不是「%d 個違憲」，是【%d 顆待判】。"
+			% [warn_hits.size(), warn_hits.size()])
 	if baseline.is_empty():
 		# 首跑：無 baseline → 印全 enumerate 供產 baseline 檔（不判 pass/fail）
 		print("[gate] ★baseline 空——enumerate %d 閘（下印全清單供凍結）：" % current.size())

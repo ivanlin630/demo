@@ -195,6 +195,7 @@ func _initialize() -> void:
 	_test_occupy_force()
 	_test_conquest_flip_governance()
 	_test_conquest_margin_gate()
+	_test_belief_known_but_positionless()
 	_test_conquest_collection_loop()
 	_test_attack_defeat_reaction()
 	# ── Combat Engagement ──
@@ -9516,8 +9517,13 @@ func _test_prosperity_prey_personality_weight() -> void:
 	state.teams[2] = border
 	state.team_discovered[0] = [1, 2]
 	# G3-targeting：選擇讀 belief，鏡射真值（rich 富、border 窮）
-	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "armed_est": 5, "coin_est": 300}, 1.0, false)
-	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 5, "armed_est": 5}, 1.0, false)
+	# ★★★fixture 補 tile_pos（systems 裁 2026-09-02）：一個「親見」的 claim 記了 pop 與 armed
+	#   卻【不知道對方在哪】—— 那個 fixture 本身不合理，★它是 god-view 的既得利益者
+	#   （舊 code 直接讀 `prey.tile_pos` live，所以 claim 不帶位置也能算接壤）。
+	# ★意圖確認（systems 要求逐測看）：本測的意圖是【野心偏好接壤 prey】＝★本質上是位置問題
+	#   ⇒ 補 fixture 是讓它變合理，★★不是翻斷言。
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "armed_est": 5, "coin_est": 300, "tile_pos": rich.tile_pos}, 1.0, false)
+	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 5, "armed_est": 5, "tile_pos": border.tile_pos}, 1.0, false)
 	var greedy := PersonData.new()
 	greedy.values = { "貪婪": 1.0, "野心": 0.0, "殘忍": 0.0 }
 	assert(FactionAISystem.find_prosperity_prey(state, team, greedy) == 1,
@@ -9729,6 +9735,26 @@ func _test_conquest_margin_gate() -> void:
 		"壯狼(armed 夠)應選佔村目標")
 	print("Conquest Task2 OK")
 
+# ★★★positionless belief 測試（systems 裁 2026-09-02 的准的條件之二）：
+#   ★本輪【新發現的合法第三結果】：`has_belief` ＝ claims 非空；`belief_pos` ＝ 要 claim 帶 tile_pos 且未過期
+#   ⇒ ★★「知道它存在」不蘊含「知道它在哪」。★★★而在此之前，全站【沒有任何一個測試釘住它】。
+#   契約：has_belief=true 而無 tile_pos ⇒ ★該 target 必須被棄，★★【絕不得退回 live 位置】。
+func _test_belief_known_but_positionless() -> void:
+	print("--- belief 欄位粒度：知道它存在、但不知道它在哪 ---")
+	var state := _occupy_margin_state(0.6)
+	# ★把位置從 claim 裡拿掉（其餘欄位不動）⇒ 製造 positionless belief
+	state.team_intel[0] = {}
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見",
+		{"population_est": 10, "armed_est": 3}, 1.0, false)   # ★刻意不帶 tile_pos
+	assert(BeliefSystem.has_belief(state, 0, 1),
+		"前提：has_belief 應為 true（有 claim）—— 沒有這條，下面的 -1 證明不了任何事")
+	assert(BeliefSystem.belief_pos(state, 0, 1) == Vector2i(-1, -1),
+		"belief_pos 應回 (-1,-1)（claim 沒帶位置）")
+	var fa := FactionAISystem.new()
+	assert(fa._find_occupy_target(state, state.teams[0]) == -1,
+		"★★★知道存在但不知道在哪 → 該 target 必須被棄（★絕不得退回 live 位置）")
+	print("[OK] belief_known_but_positionless")
+
 func _occupy_margin_state(wolf_armed_ratio: float) -> WorldState:
 	var state := WorldState.new()
 	state.world = WorldData.new()
@@ -9753,8 +9779,10 @@ func _occupy_margin_state(wolf_armed_ratio: float) -> WorldState:
 	OutpostOwnerBank.set_owner(vtile, 1, "test")
 	state.team_discovered[0] = [1]
 	# belief：pop_est 10（過 pop_ratio）、armed_est 3（過 armed_est gate 3<9）
+	# ★同上：補 tile_pos。★意圖確認：本測的意圖是【margin gate：弱狼不圍/壯狼圍】，
+	#   ★★位置只是基礎設施不是被測的東西 ⇒ 補 fixture，不翻斷言。
 	BeliefSystem.record_claim(state, 0, 1, 0, "親見",
-		{"population_est": 10, "armed_est": 3}, 1.0, false)
+		{"population_est": 10, "armed_est": 3, "tile_pos": village.tile_pos}, 1.0, false)
 	return state
 
 func _test_conquest_collection_loop() -> void:

@@ -35,9 +35,11 @@ func _init() -> void:
 	else:
 		print("  ★★★god-view 真的被關掉了：那 %.0f 個是【舊 code 看得到、新 code 看不到】的目標" % only)
 
-	print("── ②恆 0 桶 ──")
-	var z: int = int(Probe.counts.get("gv.borderadj_belief_pos_missing", 0))
-	print("  gv.borderadj_belief_pos_missing = %d（★必須 0；非 0 ＝ has_belief 與 belief_pos 不一致）" % z)
+	print("── ②「知道它存在、但不知道它在哪」（★合法第三結果，非違規桶）──")
+	var z: int = int(Probe.counts.get("belief.known_but_positionless", 0))
+	print("  belief.known_but_positionless = %d" % z)
+	print("    ★語意：has_belief=true 而 belief_pos 無效 ⇒ ★★棄該 target 的位置相關評分，【絕不退回 live】")
+	print("    ★★★它【不必是 0】—— 我原本把它寫成「必須恆 0」，那是錯的（systems 2026-09-02 訂正）")
 
 	print("── ③占村掃描逐段殺法（互斥）──")
 	for k in ["occupy.scan_kill_nopos", "occupy.scan_kill_tile_unknown", "occupy.scan_outpost_target",
