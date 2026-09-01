@@ -451,6 +451,13 @@ func erase_teams(tids: Array) -> void:
 			for _mid in factions[_dt.faction_id].member_team_ids:
 				if not dead.has(_mid): _notify.append(_mid)
 	WorldEvents.emit(self, "teams_erased", _notify)
+	# ★★★A#14 死亡可見（systems 裁 2026-09-02，掛點＝這個唯一窄口）：
+	#   ★所有死法（戰鬥／饑荒／併入／滅族）都得經過 erase_teams ⇒ 一個掛點解多個觀測缺口。
+	#   ★★掛在【mutation 開始之前】：下面那個 for 會 detach/清 ref，這裡的 team 還是完整的。
+	#   ★★★純觀測：`capture_death` 只做欄位直讀（不呼 `_snapshot`、不呼任何會寫的東西）、零 RNG、
+	#     specimen-gated（非 specimen ／ tracer 關 ⇒ 兩個 early-return）⇒ tracer off 時 byte-identical。
+	for _dtid2 in dead_list:
+		SpecimenTracer.capture_death(self, teams[_dtid2], "erase_teams")
 	for tid in dead_list:
 		var team: TeamData = teams[tid]
 		# 1. 母子：脫離 parent + 孤兒化自己的子隊

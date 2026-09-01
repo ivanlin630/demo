@@ -87,10 +87,31 @@ func _init() -> void:
 			has_combat_marker = true; break
 	_ok(has_combat_marker, "★【新增的】記錄裡認得出戰鬥/死亡（不只是多了一筆）")
 
+	# ── ★★★死亡本身（systems 2026-09-02 裁：用 `erase` 那一刻當觸發）─────────
+	#   ★理由（他的）：erase 就是死亡的【定義點】；而「戰鬥致死的殲滅」是更窄的情境，
+	#   ★★而我實測過【殲滅稀是設計】（敗方會力竭撤退）⇒ 要求它會讓驗收【不可達】。
+	var before_erase: int = SpecimenTracer.entries.size()
+	if state.teams.has(1):
+		state.erase_team(1)
+	var after_erase: int = SpecimenTracer.entries.size()
+	print("  erase 前後 tracer entries：%d → %d（Δ=%d）" % [before_erase, after_erase, after_erase - before_erase])
+	_ok(after_erase - before_erase == 1, "★★★死亡被 tracer 記到【剛好一筆】（不是 0、也不是重複記）")
+	var death_ok: bool = false
+	for i2 in range(before_erase, SpecimenTracer.entries.size()):
+		var d: Dictionary = SpecimenTracer.entries[i2]
+		if String(d.get("kind", "")) == "death":
+			death_ok = true
+			print("    記到的內容：tick=%s pop=%s famine_days=%s task=%s reason=%s"
+				% [str(d.get("tick")), str(d["狀態"]["pop"]), str(d["狀態"]["famine_days"]),
+				   str(d["狀態"]["task"]), str(d["做什麼"]["result"])])
+	_ok(death_ok, "★記錄認得出這是【死亡】（kind=death，不是又一筆決策）")
+	_ok(SpecimenTracer.death_count == 1, "★death_count 獨立計數（沒混進 decision_count）")
+
 	print("  ★誠實限：")
 	print("    ①本床走 NpcCombatSystem 真路徑；若某天 combat 改走別的路，本床會【綠著】而病回來")
-	print("    ②★★本床【沒有】逼出真殲滅 —— 它證的是「戰鬥全段不可見」，")
-	print("      ★★★而「死亡那一刻不可見」是它的推論（同一條路上沒有任何 tap），不是它的量測")
+	print("    ②★★本床【沒有】逼出真殲滅：戰鬥段證的是「戰鬥全段不可見」，")
+	print("      ★★★而死亡段用的是 erase（死亡的定義點，systems 裁准）——")
+	print("      ★『戰鬥致死那一刻可見』仍【未直接驗】，這是本票【較弱但可達】的形式")
 	if _fail == 0: print("ALL PASS")
 	else: print("FAILS=%d" % _fail)
 	quit()
