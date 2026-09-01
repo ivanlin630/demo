@@ -284,17 +284,55 @@ func disband_faction(faction_id: int) -> void:
 	if not factions.has(faction_id):
 		return
 	var f = factions[faction_id]
-	for tid in f.member_team_ids:
+	# ★★★A#27 routing（systems 裁 2026-09-02，★否決「加第二個 tap」）：
+	#   ★病是【單寫者其實不單一】——這裡原本直寫 `teams[tid].faction_id = -1`，繞過 set_team_faction
+	#   ⇒ 加第二個 tap ＝ 把病留著，並把「記得同時維護兩處」的責任交給未來的人（而他不會知道）
+	#   ⇒ ★★正解是把寫者收回一個。
+	# ★★★而 `.duplicate()` 是必要的，不是保險：set_team_faction 會
+	#   `factions[old].member_team_ids.erase(team_id)` ⇒ 直接迭代原陣列＝【邊走邊刪】會跳過元素。
+	for tid in f.member_team_ids.duplicate():
 		if teams.has(tid):
-			teams[tid].faction_id = -1
+			set_team_faction(teams[tid], -1, LEAVE_FACTION_DISSOLVED)
 	factions.erase(faction_id)
 	print("[Faction] 勢力%d 解散" % faction_id)
 
+# ★★★A#27 離團理由的【一處定義常數集】（systems 2026-09-02 裁，這是授權的條件）：
+#   ★不准九個呼叫站各寫字串字面值 —— ★★打錯一個字 ⇒ 多一個桶、總數照樣對得起來，
+#   ★★★而那個桶【永遠是 0】⇒ 看起來就像「這個出口沒發生」。那正是本票要修的病的完全同形。
+const LEAVE_UNSET: String = "unset"                       # ★呼叫端沒標 ⇒ 這個桶非 0 就是有人漏標
+const LEAVE_UPRISING_INDEPENDENT: String = "uprising_independent"   # 起義自立脫離
+const LEAVE_UPRISING_EXILE: String = "uprising_exile"               # 起義流亡脫離
+const LEAVE_DEFECT_SURRENDER_FAIL: String = "defect_surrender_fail" # defection path B：投靠強鄰失敗 → clear
+const LEAVE_DEFECT_INDEPENDENT: String = "defect_independent"       # defection path C：獨立
+const LEAVE_DEFECT_EVENT: String = "defect_event"                   # event_faction_defect 正常脫離
+const LEAVE_DEFECT_FACTION_MISSING: String = "defect_faction_missing" # event_faction_defect：faction 已不存在的防禦路徑
+const LEAVE_BETRAYAL: String = "betrayal"                           # 外交背叛離團
+const LEAVE_PLAYER: String = "player_leave"                         # 玩家主動離團
+const LEAVE_PLAYER_BETRAY: String = "player_betray"                 # 玩家背叛離團
+const LEAVE_FACTION_DISSOLVED: String = "faction_dissolved"         # ★勢力解散（原本直寫，A#27 導回窄口）
+const LEAVE_REASONS: Array = [
+	LEAVE_UNSET, LEAVE_UPRISING_INDEPENDENT, LEAVE_UPRISING_EXILE,
+	LEAVE_DEFECT_SURRENDER_FAIL, LEAVE_DEFECT_INDEPENDENT, LEAVE_DEFECT_EVENT,
+	LEAVE_DEFECT_FACTION_MISSING, LEAVE_BETRAYAL, LEAVE_PLAYER, LEAVE_PLAYER_BETRAY,
+	LEAVE_FACTION_DISSOLVED,
+]
+
 # 雙向單一入口：team.faction_id ↔ faction.member_team_ids 一處同維護（規則3）。
 # 換 faction 自動退舊團、入新團；idempotent。
-func set_team_faction(team: TeamData, fid: int) -> void:
+# ★★A#27 tap：掛在【早退之後】—— 早退擋掉 6 顆 `set_team_faction(t, -1)` 的 fresh-team no-op
+#   ⇒ ★不會把「本來就沒 faction」記成一次離團。
+#   ★★分母與被數的東西在【同一個地方】產生：join / leave 同一個窄口分流。
+func set_team_faction(team: TeamData, fid: int, reason: String = LEAVE_UNSET) -> void:
 	if team.faction_id == fid:
 		return
+	if Probe.enabled:
+		Probe.bump("faction.change_total")
+		if fid == -1:
+			Probe.bump("faction.leave_total")
+			# ★不在常數集裡 ⇒ 有人打錯字或新增了沒登記的理由。★★這個桶【必須恆 0】。
+			Probe.bump("faction.leave." + (reason if reason in LEAVE_REASONS else "unknown_reason"))
+		else:
+			Probe.bump("faction.join")
 	if team.faction_id != -1 and factions.has(team.faction_id):
 		factions[team.faction_id].member_team_ids.erase(team.team_id)
 	team.faction_id = fid
@@ -302,8 +340,8 @@ func set_team_faction(team: TeamData, fid: int) -> void:
 		if not factions[fid].member_team_ids.has(team.team_id):
 			factions[fid].member_team_ids.append(team.team_id)
 
-func clear_team_faction(team: TeamData) -> void:
-	set_team_faction(team, -1)
+func clear_team_faction(team: TeamData, reason: String = LEAVE_UNSET) -> void:
+	set_team_faction(team, -1, reason)
 
 # 雙向單一入口：child.parent_team_id ↔ parent.subteam_ids 一處同維護（規則3）。
 # 換 parent 自動退舊母、入新母；idempotent。
