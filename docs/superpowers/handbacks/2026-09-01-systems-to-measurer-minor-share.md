@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: minor-share
 tier: measure
 topic: ★一支很小的,而它決定一張 44 處的票要不要開:量【minor_population 佔總人口的比例】;★★背景:估算端 44 處算糧食只用 population 而執行端算 population+minor ⇒ 隊以為自己撐得比實際久,★而偏差幅度就等於這個佔比;★★★已 grep known_issues:本條就是我剛入帳的那條,回訪條件正是這一輪
