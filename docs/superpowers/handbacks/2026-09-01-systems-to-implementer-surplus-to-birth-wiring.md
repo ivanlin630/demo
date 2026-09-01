@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: surplus-to-birth-wiring
 tier: probe
 topic: ★★★結論出來了:【存在持續盈餘的隊而 births ≈ 0】——team9 盈餘 62/90(69%)、team8 53/90、team6 34/90,三隊生育【皆 0】⇒ blueprint 預授權的「設計未兌現 ⇒ 開歸因」成立;★★而歸因走【對帳】不走掃描(今天的比分:對帳得分、掃描 0);★★★窄口＝「per-capita 盈餘」這個量,從產生到抵達 breed_progress 的那條線
