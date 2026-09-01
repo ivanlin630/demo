@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 清單清零 / 開場動作
 topic: ★重錨收章完備 ⇒ 你早先裁的「known_issues 存量回填 ＝ 清單清零階段的【開場動作】,重錨收章後緊接」——回訪條件到了,我來報到;★★而我不丟一個 133 條的大工給你:我數了,★★★其中【28 條帶 .gd: file:line ⇒ 可機械對帳】,那是第一刀,而它會先把母體縮小再談回填
 ---
