@@ -497,6 +497,17 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.stable_progress = 0.0
 			tile.garrison.clear()
 			tile.prisoners.clear()
+			# ★★★市集看板隨宿主一起消失（族④ #6，2026-09-02）：
+			#   ★病：outpost 拆掉了而 `tile.market_orders` 還留著 ⇒ 隊站上去 `read_market_board`
+			#     （order_system:238）會讀到【一個不存在的市集】的單 ＝ dangling state
+			#   ★★這不是設計選擇，是結構問題：宿主沒了，看板不該還在
+			#   ★★★而【易主】那一半（capture）★不在本票：看板是隨 outpost 轉手的設施、
+			#     還是舊主該清的私產 ＝ WHAT，systems 已去問 blueprint ⇒ 這裡不替它選。
+			# ★entry counter：沒有它，「dangling = 0」與「根本沒拆過」長得一模一樣（母體塌陷）
+			if Probe.enabled:
+				Probe.bump("demolish.completed")
+				Probe.add_amount("demolish.market_orders_cleared", float(tile.market_orders.size()))
+			tile.market_orders.clear()
 	tile.construction_ticks_left = 0
 	tile.construction_team_id   = -1
 	tile.construction_target     = {}
