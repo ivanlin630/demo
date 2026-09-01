@@ -62,17 +62,41 @@ fi
 #   「延到里程碑 X」型的判決，X 發生後若沒人主動去改那個物件，
 #   物件會原封不動留著 ⇒ 命中數依然 > 0 ⇒ ★本閘照樣綠。
 #   ⇒ ★★【被彻底遺忘】那一半仍然不可見 —— 而那才是本來要防的。
-DEFER0=$(grep '^# RULEHIT|b_defer|0|' "$WT/$OUT_T" 2>/dev/null || :)
+# ★§1 與 §2 【兩檢都跑完再退】—— ★★不要抓到第一個就 exit：
+#   那會變成【修一個、再跑、再冒出下一個】，而人會以為只剩一個問題。
+DEFER_BAD=0
+DEFER0=$(grep -E '^# RULEHIT\|b_defer\|0\|' "$WT/$OUT_T" 2>/dev/null || :)
 if [ -n "$DEFER0" ]; then
   echo "[BARE-TICK-GATE] FAIL：有 b_defer 規則命中數 = 0 ⇒ ★延後判決已到期而沒人回來看"
   echo "$DEFER0" | sed 's/^# RULEHIT|/  /'
   echo "★處置：人回來判它是【病好了、規則該退場】還是【regex 靜默失效、規則該修】"
   echo "★★退場票的硬條款：必附【目標常數現況的 file:line】—— 0 命中有兩種讀法"
-  exit 1
+  DEFER_BAD=1
 fi
 # ★逐規則命中數合計 + NEEDS_HUMAN == 母體（不平 = 有東西被靜默吐掉）
 RHS=$(grep '^# RULEHITSUM|' "$WT/$OUT_T" 2>/dev/null || :)
 case "$RHS" in
   *"|MISMATCH") echo "[BARE-TICK-GATE] FAIL：逐規則命中數對帳不平 → $RHS"; exit 1 ;;
 esac
+# ★★★§2 延後到期：token 已落地 ⇒ FAIL（§1 抓【對象消失】，§2 抓【milestone 已過】）
+#   ★兩檢並存不是替代：reviewer 的反例（對象還在、理由已過期）由 §2 覆蓋一部分。
+#   ★★而【缺 token 也要紅】：否則「不寫 token」就成了繞過閘的方法。
+LANDED="$WT/docs/process/landed-slices.tsv"
+if [ ! -f "$LANDED" ]; then
+  echo "[BARE-TICK-GATE] FAIL：找不到已落地清單 $LANDED ⇒ §2 無法判（★不静默放行）"
+  exit 1
+fi
+while IFS='|' read -r _h _d HITS TOK SRC; do
+  [ "$_d" = "b_defer" ] || continue
+  if [ "$TOK" = "MISSING" ]; then
+    echo "[BARE-TICK-GATE] FAIL：b_defer 規則【沒寫 defer_until token】⇒ $SRC"
+    echo "  ★缺 token 也算紅：否則「不寫」就成了繞過到期檢查的方法"
+    DEFER_BAD=1
+  elif grep -qE "^${TOK}\s" "$LANDED"; then
+    echo "[BARE-TICK-GATE] FAIL：b_defer 的 defer_until: $TOK 【已落地】而規則還在 ⇒ $SRC"
+    echo "  ★處置：回來判它【病好了⇒退場】還是【理由仍成立⇒改 token】"
+    DEFER_BAD=1
+  fi
+done < <(grep -E '^# RULEHIT\|' "$WT/$OUT_T" 2>/dev/null | sed 's/^# //')
+[ "$DEFER_BAD" -eq 1 ] && exit 1
 echo "[BARE-TICK-GATE] PASS：母體 $TOT，全部已結案（NEEDS_HUMAN=0）"

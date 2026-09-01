@@ -15,8 +15,12 @@ extends SceneTree
 # 欄位：disposition|reason|path|line|literal|symbol|source
 
 var _rules: Array = []
+# ★§2：從 b_defer 的理由文字抽出 `defer_until: <slice_id>`。
+#   ★★slice_id 的形狀與 landed-slices.tsv 第一欄同一個字彙。
+var _defer_re: RegEx = RegEx.new()
 
 func _initialize() -> void:
+	_defer_re.compile("defer_until:\\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
 	_run(); quit()
 
 func _mk(re: String, disp: String, reason: String, lit_bound: bool = false) -> Dictionary:
@@ -47,8 +51,8 @@ func _run() -> void:
 		#   已導出的寫法（= WorldState.TICKS_PER_HOUR / 6）不會命中，它走第一軸白名單。
 		#   ★★所以在【本 branch】這條規則命中 0，規則自審會標它【已死】——
 		#     那是【對的】：它是為【S2 尚未落地的 main】寫的，S2 一 merge 它就該死。
-		_mk("const BASE_ACTION_TICKS[^=]*=\\s*[0-9]+", "b_defer", "★意圖是 1/6 小時（本質 (a)），但改法依賴 S2：舊根下 TICKS_PER_HOUR/6 = 10//6 = 1，整數除法把動作壓成 1 tick（快 10 倍、撞穿 >=10 地板）⇒ 必須與 S2 同時落地"),
-		_mk("const TICKS_PER_TURN:", "b_defer", "24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2"),
+		_mk("const BASE_ACTION_TICKS[^=]*=\\s*[0-9]+", "b_defer", "★意圖是 1/6 小時（本質 (a)），但改法依賴 S2：舊根下 TICKS_PER_HOUR/6 = 10//6 = 1，整數除法把動作壓成 1 tick（快 10 倍、撞穿 >=10 地板）⇒ 必須與 S2 同時落地 defer_until: S2"),
+		_mk("const TICKS_PER_TURN:", "b_defer", "24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2 defer_until: S2"),
 		# ── ★第二軸（名字啟發式）新出現的候選 ──
 		#   ★這一批的共同問題是【名字像時長，但軸不一定是世界時間】。
 		_mk("const PRISONER_CHECK_INTERVAL", "c_whitelist", "★遭遇軸：比對的是 encounter_tick（:592 round_num %），不是 world tick ⇒ 不隨根旋鈕"),
@@ -176,7 +180,14 @@ func _run() -> void:
 	# ★★★★而它們必須以 `# ` 開頭：閘用 `grep -vc '^#'` 數【資料列】，
 	#   不加 `# ` 會讓這幾行被當成候選⇒ 【候選 vs 分類筆數】那條對帳假紅。
 	for r4 in _rules:
-		head.append("# RULEHIT|%s|%d|%s" % [String(r4["disp"]), int(r4["hits"]), String(r4["src"])])
+		# ★★★§2：把理由裡的 `defer_until: <slice_id>` 拉成一個欄位。
+		#   ★閘拿它比【已落地清單】——命中 = 里程碑已過而判決還在 ⇒ FAIL。
+		#   ★★而【缺 token 也要紅】：否則「不寫 token」就成了繞過閘的方法。
+		var _tok: String = "-"
+		if String(r4["disp"]) == "b_defer":
+			var _tm: RegExMatch = _defer_re.search(String(r4["reason"]))
+			_tok = _tm.get_string(1) if _tm != null else "MISSING"
+		head.append("# RULEHIT|%s|%d|%s|%s" % [String(r4["disp"]), int(r4["hits"]), _tok, String(r4["src"])])
 	# ★逐規則命中數合計 + NEEDS_HUMAN == 母體
 	#   ★★因為比對迴圈命中就 break ⇒ 每筆候選【最多】命中一條規則，
 	#   ★★★不平 = 有東西被靜默吐掉（而那在舊格式下看不見）。
