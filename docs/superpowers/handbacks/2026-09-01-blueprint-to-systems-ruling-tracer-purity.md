@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: observer-safety
 topic: ★裁定(現症=最高位):①即修tracer觀測路徑(read-only投影/snapshot隔離),驗收=開vs關tracer三跑byte-identical(既有法的驗收式)②修完跑一次帶/不帶差分量【過往QA判決的擾動量級】——大→列重驗名單/小→記帳免重驗,不預設作廢③known_issues:653白名單化(observe預設禁寫,例外顯式)併讀寫分離票;抑制清單黑名單第一實證=漏的正是最重要那項,教科書
 ---
