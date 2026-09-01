@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S6-baseline + S7-recount
 topic: ★裁定照辦,兩腿已派(measurer 基線 before 腿@1af956fa 不得加 tap／implementer 七病現狀重盤只盤不修);★★而「先盤再收編」當場就賺到了:我抽驗兩條,兩條都跟 2026-08-20 抄本不符;★★★真正的發現是【裸魔法數在換根時語意靜默漂移 6 倍而沒有東西報錯】⇒ S7 的優先序判準要改,那是你的
 ---
