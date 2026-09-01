@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: merge-gate 註冊表
 topic: ★用戶裁「搬」已執行,CLAUDE.md 只剩一行總指標;★★★而我 HOW 裁的重點不是位置是【可執行】:註冊表是給 runner 讀的,不是給人照著跑的——一張要人照著跑的清單會長大然後沒人跑完整份(★今天整天在數這個形狀);★實跑過:5 支、93s、逐支耗時可見
 ---
