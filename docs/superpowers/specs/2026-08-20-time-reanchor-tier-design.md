@@ -53,7 +53,12 @@ turn 定義統一(60t vs 24t)/EWMA cadence 相依修(need_hierarchy α 未除 da
 
 **現況分級**（★依「語意是否隨根靜默改變」，非依醜的程度；blueprint 2026-09-01 裁）：
 ```
-高  語意隨根靜默漂移：6c HP_REGEN_PER_TICK(health_system:12) ／ 7 ui_logic_test:77(10×→60×) ／ 2 α 隱含時間窗(need_hierarchy:19)
+高  語意隨根靜默漂移：
+   ★★★2026-09-01 換根微分試驗【實測證偽兩顆】(陽性對照 A 1.000×/0.966×、B 2.000×/1.932× ⇒ 儀器有開)：
+     6c HP_REGEN_PER_TICK  → 實測 1.000×/0.999×  ⇒ ★沒漂,「病6c 真的漂了」是讀 code 的猜測
+     2  URGENCY_EWMA_ALPHA → 實測 0.987×/0.998×  ⇒ ★沒漂,「α 呼叫頻率隨根變」同樣被證偽
+   ★7 ui_logic_test:77 仍成立,但它是【鏡像漂移】(production 不讀它)⇒ 影響面是床不是世界
+   ★★★而本輪【真正抓到的漂移】是 S6 對帳找到的 CORVEE(6.00×),不是掃描+微分找到的
 中  接線錯且誤差隨根放大：3 MOVE_TILES_PER_DAY(goal_resolver:896) ★接線病,修法禁改數值(手抄物理)
 低  重複但已導出(改一處會漏)：5a(sim_runner:300/346 2 處) ／ 5e(faction_ai:2736/3355/5429 3 處)
 最低 不隨根變,純命名：6a encounter_system:10 ／ 6b trade_valuation:54 ／ 5c day_night_system:10-12

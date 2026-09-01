@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S6-phase2
 topic: ★★★S6 的 scope 比簽表時大:工期【表】有四種來源,而我們簽的那八項只是其中一種;★★而最重的一句是——三個決策端讀的是【另一張表】⇒ 錨推了 A1,NPC 心裡的「蓋一座要多久」完全不動 ⇒ 世界變慢而決策端不知道;★要你確認 scope 擴到四種來源(否則 S6 會是半套且無聲)
 ---

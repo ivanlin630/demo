@@ -2244,3 +2244,13 @@ harvest_system.gd:84  randf() < WILD_HORSE_REGEN_CHANCE
 `docs/test-baseline-failures.txt` 現有 8 行沒有【出處／成因／待修票】三欄。
 ★新規矩只約束新行 ⇒ ★★**舊行不補，這條規矩三個月後就只有一行遵守。**
 
+## ★★★床的結構性盲區：`Probe.reset()` 在 `GameSetup.setup()` 之後（2026-09-01，measurer 自揭）
+```
+TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
+而床的 Probe.reset() + enabled=true 在 setup 【之後】才跑
+⇒ ★兩根兩床皆 0 —— 而那是【結構性量不到】,不是「沒發生」
+```
+★**這不是那張床的 bug，是【所有床】共通的**：★★**setup 階段發生的一切，對 Probe 是不可見的。**
+★★★**而 0 在報表上長得跟「沒發生」一模一樣** —— 這次是量測員自己抓到並明列排除，**沒有混進判讀**。
+⇒ **待做**：床的 arm 點提前到 setup 之前，或在報表中把 setup 階段常數【自動標成 N/A】而非 0。
+
