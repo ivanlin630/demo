@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 族①掃完
 topic: ★掃完:兩顆真漏洞,而【嚴重度不同】——A 在閘後(分數算錯)、B 在閘【前】(live 真值決定算不算候選);★★B 讓我發現【我昨天落地的細則 1a 自己有洞】:我寫「閘後評估」,涵蓋不到 B,已補成「決策路徑上」;★★★另抓到憲法閘的【帳本身】對不上(有 inline gate-ok 而不在官方清單)——而我這輪正是拿那份清單去主張母體大小;★殘留三個 cluster 未逐行查,我判可接受並寫出理由
 ---
