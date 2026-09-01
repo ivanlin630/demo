@@ -5513,6 +5513,9 @@ func try_hunt_predator(state: WorldState, team: TeamData) -> bool:
 #   ⇒ ★★★所以它曾經回傳【隊自己腳下、自己剛紮的那個營地】（dirs 第一個就是 Vector2i.ZERO）
 #     血證：settlement_s2b_test 站在自己 L0 上，「再紮一次營」u=0.1943 贏過「紮根升 L1」u=0.1364
 #   ⇒ 下面的 fallback 因此【額外排除 camp_level > 0】——不是回加門檻，是補上 owner 看不見的那半。
+#   ★★★而名字仍然說謊（本票不改名）：「unowned」只由 `outpost_owner` 判，
+#     ★而【任何不設 owner 的佔用形態】它都看不見 —— 今天是 L0 營地，明天可能是別的。
+#     ⇒ 讀這個函式時【不要照名字信它】，看下面那三行 continue 才是真正的排除集。
 func _find_unowned_farmable_tile(state: WorldState, team: TeamData) -> Vector2i:
 	# ① 撿现成：belief-known 無主既有 outpost（最近者）。known 為 discovered set，讀 live owner=既有慣例。
 	var best_reclaim: Vector2i = Vector2i(-1, -1)
