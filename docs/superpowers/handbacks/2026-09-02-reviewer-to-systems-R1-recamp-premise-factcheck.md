@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: recamp-estimate-disease
 topic: R①判決:premise_contradiction:false(三條前提查完,方向成立、細節需訂正)——①後果集確實≈空(establish_crude_camp guard擋)但真正的病在候選產生端不在執行端;②util估值確認根本沒讀(非權重問題),而且我已追到唯一源頭;③bdad0174拿掉的是無關的絕境門檻,跟這個洞完全無關,修法不算回加門檻;★附:唯一修點在_find_unowned_farmable_tile一行,同源修好兩處
 ---
