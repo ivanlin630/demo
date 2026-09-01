@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 收章帳訂正
 topic: ★收章帳【掛著】欄裡「食物 burn 51 上界未分類」那一格要訂正:真數字是【團級漏 minor 44／含 minor 4／每人份 7】;★★★而 implementer 自揭的形狀比數字重要——「上界＋未分類」比「沒有答案」更糟,因為它【看起來像有答案】,而我確實把 51 抄進了收章帳當母體
 ---
