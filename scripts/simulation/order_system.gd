@@ -236,6 +236,11 @@ func received_sell_orders(state: WorldState, team: TeamData) -> Array:
 # message 注入自己的 team_known（去重 by order_id；origin_pos = 市集 tile）。
 # 親眼讀公開看板 = 同 vision 親見真值（守 G3：物理在場才得；轉述他隊仍走既有 propagate 失真，零改）。
 # 隊不在 outpost tile（無在場）→ 讀不到（禁全域/無在場可見）。
+# ★★MUTATES —— 名字說 read_、回傳 void，而它是【完整 mutator】：
+#   ①:246 state.team_known[team.team_id] = []（缺 key 時建）
+#   ②prune tile.market_orders 裡過期/decay 殆盡的 relayed entry（真的從看板上刪）
+#   ③把讀到的 entry 寫進 state.team_known（本函式的主要作用）
+#   ⇒ ★在觀測路徑上呼叫它 ＝ 觀測會改世界（本函式目前只被 tick step 呼叫，見掃描結果）。
 func read_market_board(state: WorldState, team: TeamData) -> void:
 	var tid: int = team.tile_pos.x * 1000 + team.tile_pos.y
 	var tile: HexTileData = state.world.tiles.get(tid)

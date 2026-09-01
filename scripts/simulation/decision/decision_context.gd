@@ -203,6 +203,19 @@ var survival_stall_active: Array = []
 # 並改寫衍生的 plan_phase → 同 tick 同隊被推進幾次＝走過幾條路徑、且取決於哪個選項贏＝既存缺陷
 # （tracer 只是把它照出來）。現在預設 advance=false（純讀），只有【真正的一次決策評估】傳 true。
 # ★零新結構：不加 *_advanced_tick 欄／不加 TeamData 旗標，推進與否由 caller 語意決定。
+# ★★★MUTATES —— 名字說「取脈絡」，而它【會寫 state】。標記寫清楚改了什麼（不是只寫「有副作用」）：
+#   ①:602 team.need_urgency = NeedHierarchy.ewma_update(...)   ★非冪等：呼一次就推進一格
+#   ②:233 LaborSystem.ensure_fresh → rebalance 寫 tile.labor_alloc ＋ labor_eval_next_tick
+#   ③:243-247 idle_employ_cached / idle_employ_next_tick
+#   ④:369-371 expand_eval_next_tick / expand_site_cached（§4b 同族）
+#   ⑤:546-549 consolidate/absorb_target_cache ＋ consolidate_eval_next_tick
+#   ★★★而【第②④⑤ 是 cadence 重排】—— 那表示【呼叫次數本身】會改變後續排程，
+#     ⇒ 與呼叫者無關的耦合：多呼一次，世界的評估時程就不一樣。
+# ★後果（known_issues:653）：觀測器不可能「只看不碰」；任何 what-if／預演／UI 預覽
+#   呼 DecisionOptions.to_task 都會走到這裡而改世界。
+# ★★修法方向已定（:653，本檔不動）：拆 pure-read vs commit 兩段
+#   —— 而【不是】給 observe-mode 抑制寫：抑制清單＝易漏的黑名單（本輪已證：
+#   specimen_tracer 的 _begin_observe 只擋 RNG 與 Probe，擋不住這裡）。
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
 	var c := DecisionContext.new()
 	var _tg: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
