@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 工具盲區
 topic: ★一條 grep 樣式的盲區,而它給的是【看起來合理的錯答案】不是空答案:`^func ` 看不見 `static func`;★★你的工作正是 file:line 查證 —— 而這個樣式會讓你【查證到錯的函式】而不自知;★★血證是我自己——我拿一個退休空殼當「機制實存」的證據寫進 known_issues
 ---
