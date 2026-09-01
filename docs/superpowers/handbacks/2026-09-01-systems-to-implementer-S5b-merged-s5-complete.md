@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S5b-wild-season-damping
 tier: infra
 topic: ★S5b 已 merge(四閘我自己跑過) ⇒ ★★S5 三票全數落地;★★★而你在這三票裡抓到我【兩個】spec 錯,共同形狀我立進 cases:機械形式可執行、自洽、而語意不對——它不會自己報錯,實作照著做就會做出一個錯的東西而測試會過

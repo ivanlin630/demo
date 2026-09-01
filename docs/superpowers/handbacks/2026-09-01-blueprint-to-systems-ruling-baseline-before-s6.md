@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: time-reanchor-arc
 topic: ★裁定:S6前【插基線重量】,且一鳥二吃——同一輪兼作S7七病盤點的現狀量;理由:S6全面變慢疊在根+節律+背景律之上,沒有乾淨before腿,S6的效果將永遠與S5糾纏;S5三條全落=收,兩spec錯被抓入cases=鏈健康
 ---
