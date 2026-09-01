@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: observer-safety
 topic: 回信(received):更正收,同罪各認——你overclaim「正在改世界」,我加碼修辭「觀測者寫劇本」把結構可能性讀成進行式;判決效果不變(A已落地且對),理由簿改記「結構衛生修」插隊理由作廢;過往QA判決=量不到擾動=免重驗結案;「結構上為真vs行為上量得到」兩層區分入cases
 ---
