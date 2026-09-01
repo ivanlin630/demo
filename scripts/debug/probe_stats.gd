@@ -22,15 +22,53 @@ static var setup_saw_unarmed: int = 0
 static var setup_unarmed_sites: Array = []   # 呼叫端線索（stack 頂幾層），給人回頭找是哪張床
 
 # ★由 GameSetup.setup() 呼叫；★★不檢查 enabled（見上），★★★不進 counts（reset 會清）。
+# ★★★★而它【只記錄、不判定、不輸出】（systems 裁定 2026-09-01）：
+#   ★正常遊戲【從不 arm Probe】⇒「setup 時未 armed」在 production 是【常態】不是異常
+#   ⇒ ★★在這裡輸出＝條件恆真＝每次開局都印＝污染所有人的 log（且 bed-parse-gate 讀 stdout）
+#   ⇒ ★★★所以【記錄】留在這裡（掛在一定會走的路），【判定】搬到 arm 那一刻。
 static func note_setup_unarmed(hint: String = "") -> void:
 	setup_saw_unarmed += 1
 	if setup_unarmed_sites.size() < 20 and hint != "":
 		setup_unarmed_sites.append(hint)
 
+# ────────── 判定：arm 那一刻才發生 ──────────
+# ★為什麼判定要在這裡而不是在 setup：
+#   ★★production 沒有人 arm ⇒ 【判定根本不發生】⇒ 零噪音、零風險
+#   ★★★床一 arm 就【立刻】知道自己晚了 —— 而 arm 是床一定會做的事
+#   ⇒ 兩個時點各自掛在【該情境下一定會走】的路上，而不是掛在「有人來問」。
+# ★實測前提：production（scripts/ui/*、scripts/simulation/*）零處呼叫 Probe.reset()
+#   或寫 Probe.enabled = true —— 全域 grep 為空，所以這裡輸出對 production 是不可達的。
+static var _late_arm_reported: bool = false
+
+static func check_arm_order() -> void:
+	if _late_arm_reported or setup_saw_unarmed == 0:
+		return
+	_late_arm_reported = true
+	print("[ARM-ORDER] ★候選：本進程有 %d 次 GameSetup.setup() 在 Probe armed 之前跑過"
+		% setup_saw_unarmed)
+	print("[ARM-ORDER]   ⇒ 若那個世界【是】要被量的那個，它的 tap 是盲的，")
+	print("[ARM-ORDER]     而少掉的數字與「那段沒發生」長得一模一樣。")
+	print("[ARM-ORDER]   ★★這是【候選不是確診】：旗標是 process 全域的，")
+	print("[ARM-ORDER]     ⇒ 多段床若有一段【完全不用 Probe】地建了世界，也會在這裡出現")
+	print("[ARM-ORDER]     （血證 seam3_sysreg_test：第一段不用 Probe、第二段自己 arm 得好好的）。")
+	print("[ARM-ORDER]   ★★★過度回報是【刻意的方向】：漏判會長得跟正常一模一樣，誤判只是多一次人判。")
+	print("[ARM-ORDER]   ⇒ 處置：要量的那段改用 MeasureBedHelper.arm_and_setup()｜線索=%s"
+		% str(setup_unarmed_sites))
+
+# ★便利入口：床用它 arm 就自動帶判定（helper 走這條）。
+static func arm() -> void:
+	reset()
+	enabled = true
+	check_arm_order()
+
 const AMBUSH_UNDEREST := 0.5   # TEST VALUE：belief 武力低估 < 真值 50% → 視為被誤導
 
 static func bump(event: String, n: int = 1) -> void:
 	if not enabled: return
+	# ★判定時點②（catch-all）：有些床只寫 `Probe.enabled = true` 而不呼 reset()（實測 195 vs 218）
+	#   ⇒ 光靠 reset() 會漏掉那一族。★★而「arm 了之後一定會寫至少一筆」是床的定義本身。
+	#   ★★★成本＝兩個 bool 讀（_late_arm_reported 短路），只在真的晚 arm 時才走進去。
+	if not _late_arm_reported and setup_saw_unarmed > 0: check_arm_order()
 	counts[event] = int(counts.get(event, 0)) + n
 
 # ★★★per-team 維度（systems 派 2026-08-26 / slice per-team-funnel-slice）：
@@ -73,6 +111,8 @@ static func reset() -> void:
 	# ★★★setup_saw_unarmed / setup_unarmed_sites 【刻意不清】——
 	#   盲床的順序就是「先 setup、後 reset+arm」⇒ 清掉的話證據會被它要抓的那個 bug 抹掉。
 	counts = {}; peaks = {}; amounts = {}; samples = {}
+	# ★判定時點①：reset() 是床 arm 時一定會走的路（218 處呼叫），而 production 零處。
+	check_arm_order()
 
 static func ambush_check(state: WorldState, attacker_id: int, defender_id: int) -> void:
 	if not enabled: return
