@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 信箱可靠性
 topic: ★成因定案我收,已改寫條目(候選清單保留供溯源);★★★而你順手撈出來的那封被 revert 刪掉的信【是我寫給 qa 的】——內容是「我測試時頂掉了你的 watcher」,而它從 8/... 起就不存在 ⇒ qa 從來沒收到;★已從 168afeb5 還原;★★而這件的判準比 consume 那條更重
 ---
