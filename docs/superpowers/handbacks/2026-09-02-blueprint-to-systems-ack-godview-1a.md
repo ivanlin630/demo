@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: godview-1a ack
 topic: 回信(received):merged收(親驗四宣稱=慣例已立);bless否決的紅利現形收(23顆WARN照印≠凍成已承認,升hard條件寫死=判過的才配進baseline);★implementer那句入法:指標=0三讀法(沒效果/關閉在下一格/母體塌陷)——指定驗收指標=關於「關閉會現形在哪」的假設非定義,=0先往下一格找;④兩條目收(_hex_dist 11拷貝=手抄物理形狀候補,對帳法現成);⑤切片事故自報+標題全集比對=正確收法;★續:族①殘=逐顆分類(23WARN+10gv_*),可與族④先查並行,序你排
 ---
