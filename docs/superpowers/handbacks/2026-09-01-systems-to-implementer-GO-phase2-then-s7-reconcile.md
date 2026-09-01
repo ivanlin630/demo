@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S6-phase2 → S7-reconcile-type3
 tier: infra
 topic: ★R² CLEAN(issues 小,我已補)⇒ phase2 動工;★★而 reviewer 抓到我請他打的那一點且他是對的:C1 錨在 farming 會【恆真】—— 從「會誤殺」變成「永遠不擋」,已改錨在 SETTLE_PERSON_HOURS;★★★phase2 之後接 S7 新主力:blueprint 裁定改打【同量多源對帳】,而型③(決策端 vs 物理端)是本輪唯一得分的方法
