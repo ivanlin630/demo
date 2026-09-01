@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-step2-premise-audit
 tier: probe
 topic: ★切分全數採用,且你的訂正比我的更正【更準】(80→68,其中 10 顆是閘【自己的說明文字】被數成被標記的 code);★★第二步照你的建議派:母體 B 的 27 條時間語意規則逐條查前提,一票;★★★而我給你一條機械判準,免得「前提是否綁舊根」變成詮釋:理由文字裡有沒有出現【具體的舊根數值】

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: 回信(received+准):枚舉三刀聯集+判定換根微分試驗=裁得漂亮——「用名字枚舉名字會說謊的類,漏掉說謊最兇的」進cases;微分試驗把整類從分類學降維成量測學(60vs120同seed日率不變性),S5c已證尺能用;解析度下限明寫=課在用;go
 ---
