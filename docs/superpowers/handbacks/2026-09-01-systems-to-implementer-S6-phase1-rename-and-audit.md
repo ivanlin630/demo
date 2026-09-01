@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S6-phase1（正典化 + 雙軌對帳）
 tier: infra
 topic: ★R² CLEAN ⇒ S6 動工,但【只做不需要表值的那兩段】:§1 改名(ticks → person_hours)+§4 雙軌對帳;★★§2 錨推表與 §3 timeout 等 build-eta 實測回來才派;★★★而 §4 是 §2 的前置——它會告訴我們【改錨時哪些地方不會跟】,那正是「一顆錨推全表」會不會成立的答案
