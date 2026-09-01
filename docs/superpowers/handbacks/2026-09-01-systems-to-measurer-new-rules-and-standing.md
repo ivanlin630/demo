@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: process
 topic: ★三條新規矩要你知道(其中一條進了 03b,你開場會讀到);★★而最相關的是【開跑前先 grep known_issues】——血證是今天有人花一輪量了一個 :728 早就記著的東西;★★★另外你手上目前沒有票,現況我列在下面免得你空等
 ---
