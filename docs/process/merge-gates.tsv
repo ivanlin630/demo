@@ -10,6 +10,14 @@
 #   ⇒ 修法：判準欄改成【機器可執行的 expect pattern】，★runner 必須看到它才算過；
 #      ★★沒有 expect 的行 ＝ FAIL（★★★不能有「沒有判準也算過」的路徑）。
 #
+# ★★★總時約 78s，其中 `bed-parse` 佔 ~70s（90%）—— ★★【已量過，沒有便宜解】（2026-09-01）：
+#   ★啟動只 0.5s，69s 全是實工；★★分佈是【長尾】——前 12 名只佔 18.6%
+#     ⇒ 把最貴的 12 張全變成 0，也只省 18.6%
+#   ★★★快取那條路【不安全】：床會因為【它引用的 production class 改了】而壞、而床自己內容沒變
+#     ⇒ 要正確就得「production 一改就整份失效」⇒ 而 merge 時幾乎總是失效 ⇒ 快取等於沒有
+#   ⇒ ★裁定：**不優化，接受 78s** —— ★★一次 merge 值 78 秒。
+#   ⇒ ★★★而這條記在這裡，是為了【下一個覺得它太慢的人不用再量一次】。
+#
 # 欄位：id 	 指令 	 用途（一句） 	 ★expect（必須出現在輸出裡的 regex）
 constitution	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/constitution_gate.gd	憲法 site-freeze：禁新增引擎外 task 指派	CONSTITUTION-GATE\] PASS
 bare-tick	bash .claude/hooks/bare-tick-gate.sh .	裸 tick：擋【新出現而沒人判過】的形狀（NEEDS_HUMAN=0，★不是總數）	BARE-TICK-GATE\] PASS
