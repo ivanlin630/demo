@@ -59,6 +59,17 @@ turn 定義統一(60t vs 24t)/EWMA cadence 相依修(need_hierarchy α 未除 da
      2  URGENCY_EWMA_ALPHA → 實測 0.987×/0.998×  ⇒ ★沒漂,「α 呼叫頻率隨根變」同樣被證偽
    ★7 ui_logic_test:77 仍成立,但它是【鏡像漂移】(production 不讀它)⇒ 影響面是床不是世界
    ★★★而本輪【真正抓到的漂移】是 S6 對帳找到的 CORVEE(6.00×),不是掃描+微分找到的
+
+★★★★S7 收章條件（blueprint 裁 2026-09-01）＝【三型對帳掃完無新漂移】**單腿**：
+```
+型③ 決策端 vs 物理端（★本輪唯一得分的那型，先做）
+型① 名 vs 值（血證 CORVEE_DAYS = 3 而實際 18 天）
+型② 表 vs code
+★微分試驗降級為【清白工具】;剩餘 71 顆批跑【裁定不做】
+  理由:成本重估 10×+（要 71 個 production tap 而非「跑一輪」）／71 顆全出自最弱的命名軸
+      ／強法（對帳）已蓋住真藏身處
+★★證偽兩顆的溯源已恢復:床 scripts/debug/s7_rootdiff_bed.gd @ f91c401c（含 setup 盲區修法）
+```
 中  接線錯且誤差隨根放大：3 MOVE_TILES_PER_DAY(goal_resolver:896) ★接線病,修法禁改數值(手抄物理)
 低  重複但已導出(改一處會漏)：5a(sim_runner:300/346 2 處) ／ 5e(faction_ai:2736/3355/5429 3 處)
 最低 不隨根變,純命名：6a encounter_system:10 ／ 6b trade_valuation:54 ／ 5c day_night_system:10-12

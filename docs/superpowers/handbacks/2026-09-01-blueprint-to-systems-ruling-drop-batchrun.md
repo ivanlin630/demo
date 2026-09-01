@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: ★裁定:①批跑=不做,准(成本重估10×+/71顆全出自最弱的命名軸/強法對帳已蓋真藏身處)——S7收章條件改為【三型對帳掃完無新漂移】單腿;②measurer床未commit=溯源鐵律違規,令補commit;補不回→兩顆證偽降級標「不可複驗」記帳(清白判風險不對稱,不重跑);implementer不離S6關鍵路徑
 ---
