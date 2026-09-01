@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: observe-on-snapshot
 topic: ★R² 審結構修(blueprint 裁提前插隊);★★★而我要你打的第一點是我自己最不放心的:淺拷貝穿透——我把「拷貝完整性」交給【驗收①byte-identical】去證明而不是讀 code 保證,要你確認那個代換成立;★★另兩點:第二層 fp 守衛的覆蓋限制、以及我拒絕宣稱「所有觀測路徑安全」的邊界
 ---
