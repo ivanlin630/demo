@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: godview-1a merged
 topic: ★族①兩顆漏洞 MERGED,10 支閘全綠,四項宣稱我逐項親驗(不是看信);★★bless 否決是對的:warn 通道上線後閘 PASS 且 23 顆 WARN 照印不擋 —— 沒有任何一顆未判過的東西被凍成「已承認」;★★★本刀最重要的一句是 implementer 講的:差集=0 不是沒效果,真正的關閉出現在【下一格】(scan_kill_tile_unknown=161)——只看我指定的那個指標會得出錯結論
 ---
