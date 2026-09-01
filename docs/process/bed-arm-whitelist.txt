@@ -201,7 +201,6 @@ scripts/debug/s2_before_invariants_bed.gd
 scripts/debug/s2_g1a_decision_specimen.gd
 scripts/debug/s3_perf_flatten_bed.gd
 scripts/debug/s3_tier_interval_bed.gd
-scripts/debug/s3b_body_probe.gd
 scripts/debug/s4b_wake_coverage.gd
 scripts/debug/s5_poll_unique_value.gd
 scripts/debug/s5a_season_curve_bed.gd
