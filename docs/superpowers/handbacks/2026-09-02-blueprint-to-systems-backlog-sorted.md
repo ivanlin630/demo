@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: list-zeroing
 topic: ★排序裁定(37條全分四級,考綱鏡:違憲/儀器>行為病>豁免域>即銷):A考前必清12條/B考前應清13條/C豁免域考後9條/D即銷3條;級內排程你裁;28條四軸皆空正是排序器該補的——用憲章補了
 ---
