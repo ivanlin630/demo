@@ -1,0 +1,863 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[Outpost] Team3 設施施工 farming → Lv1 at (10,14)
+[Outpost] Team4 設施施工 farming → Lv1 at (0,14)
+[Outpost] Team5 設施施工 farming → Lv1 at (9,3)
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Outpost] Team7 設施施工 farming → Lv1 at (8,2)
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 20(公庫0+私20) (需 { "material": 50, "tools": 0 })
+[Harvest] Tick60 季節=春 base=1.1
+[Combat Start] Team-1000000 vs Team11
+[Ambush] NPC Team11 被 boar 伏擊
+[Tick 100] Person 0 (leader/team0) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 1 (civilian/team0) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 100] Person 2 (leader/team1) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 3 (civilian/team1) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 100] Person 4 (leader/team2) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 5 (civilian/team2) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 100] Person 6 (leader/team3) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 7 (civilian/team3) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 100] Person 8 (leader/team4) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 9 (civilian/team4) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 100] Person 10 (leader/team5) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 11 (civilian/team5) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 100] Person 12 (leader/team6) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 13 (civilian/team6) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 100] Person 14 (leader/team7) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 15 (civilian/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 100] Person 16 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 100] Person 17 (civilian/team8) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 100] Person 18 (leader/team9) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 19 (civilian/team9) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 100] Person 20 (leader/team10) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 21 (civilian/team10) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 100] Person 22 (leader/team11) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 100] Person 23 (civilian/team11) → P2_produce | stress=0.00 loyalty=0.80
+[Order] Team0 sell food ×91 (oid=1)
+[Order] Team0 sell tools ×1 (oid=2)
+[Order] Team0 buy weapon_melee_low ×3 (oid=3)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=4)
+[Order] Team0 buy material ×56 (oid=5)
+[Outpost] 設施完工 farming Lv1 at (0,14)
+[Outpost] 設施完工 farming Lv1 at (8,2)
+[Outpost] 設施完工 farming Lv1 at (9,3)
+[Outpost] 設施完工 farming Lv1 at (10,14)
+[Outpost] Team3 設施施工 farming → Lv2 at (10,14)
+[Outpost] Team4 設施施工 farming → Lv2 at (0,14)
+[Outpost] Team7 設施施工 farming → Lv2 at (8,2)
+[Order] Team3 sell food ×122 (oid=6)
+[Order] Team3 buy weapon_melee_low ×3 (oid=7)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=8)
+[Order] Team4 sell food ×122 (oid=9)
+[Order] Team4 buy weapon_melee_low ×3 (oid=10)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=11)
+[Order] Team6 sell food ×323 (oid=12)
+[Order] Team6 buy weapon_melee_low ×3 (oid=13)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=14)
+[Order] Team6 buy material ×63 (oid=15)
+[Order] Team6 buy tools ×3 (oid=16)
+[Order] Team10 sell food ×71 (oid=17)
+[Order] Team10 buy weapon_melee_low ×3 (oid=18)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=19)
+[Order] Team10 buy material ×42 (oid=20)
+[Order] Team11 sell food ×71 (oid=21)
+[Order] Team11 buy weapon_melee_low ×3 (oid=22)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=23)
+[Order] Team11 buy material ×37 (oid=24)
+[Order] Team9 sell food ×71 (oid=25)
+[Order] Team9 buy weapon_melee_low ×3 (oid=26)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=27)
+[Order] Team9 buy material ×44 (oid=28)
+[Order] Team1 sell food ×91 (oid=29)
+[Order] Team1 sell tools ×1 (oid=30)
+[Order] Team1 buy weapon_melee_low ×3 (oid=31)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=32)
+[Order] Team1 buy material ×54 (oid=33)
+[Order] Team7 sell food ×11 (oid=34)
+[Order] Team7 buy weapon_melee_low ×3 (oid=35)
+[Order] Team7 buy weapon_ranged_low ×3 (oid=36)
+[Order] Team2 sell food ×92 (oid=37)
+[Order] Team2 sell tools ×1 (oid=38)
+[Order] Team2 buy weapon_melee_low ×3 (oid=39)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=40)
+[Order] Team2 buy material ×55 (oid=41)
+[Order] Team5 sell material ×305 (oid=42)
+[Order] Team5 sell food ×122 (oid=43)
+[Order] Team5 sell tools ×26 (oid=44)
+[Order] Team5 buy weapon_melee_low ×3 (oid=45)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=46)
+[Order] Team8 sell goods ×80 (oid=47)
+[Order] Team8 buy weapon_melee_low ×4 (oid=48)
+[Order] Team8 buy weapon_ranged_low ×3 (oid=49)
+[Order] Team8 buy tools ×2 (oid=50)
+[DayNight] Day 1 開始
+[Horse] Outpost (2, 7) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Horse] Outpost (7, 6) 捕野馬 +1
+[TickPerf] day=1 avg=11302 us max=1295812 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,10)
+[Outpost] 設施完工 farming Lv2 at (0,14)
+[Outpost] 設施完工 farming Lv2 at (8,2)
+[Outpost] 設施完工 farming Lv2 at (10,14)
+[Outpost] Team3 設施施工 farming → Lv3 at (10,14)
+[Outpost] Team4 設施施工 farming → Lv3 at (0,14)
+[Outpost] Team7 設施施工 farming → Lv3 at (8,2)
+[Move] Team 8 抵達 (6,10)
+[DayNight] Day 2 開始
+[Horse] Outpost (2, 7) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Horse] Outpost (7, 6) 捕野馬 +1
+[TickPerf] day=2 avg=6530 us max=367660 us ticks=240 teams=12 factions=0
+[Outpost] Team1 設施施工 apothecary → Lv1 at (2,7)
+[Outpost] Team2 設施施工 apothecary → Lv1 at (15,6)
+[Outpost] Team5 設施施工 apothecary → Lv1 at (9,3)
+[Outpost] Team11 設施施工 apothecary → Lv1 at (13,5)
+[Order] Team11 buy tools ×2 (oid=51)
+[Move] Team 8 抵達 (6,10)
+[Ambition] Team6 rung 0→1 (定居 cap=2)
+[Move] Team 8 抵達 (6,10)
+[DayNight] Day 3 開始
+[Horse] Outpost (2, 7) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Horse] Outpost (7, 6) 捕野馬 +1
+[TickPerf] day=3 avg=6010 us max=269246 us ticks=240 teams=12 factions=0
+[Outpost] 設施完工 farming Lv3 at (0,14)
+[Outpost] 設施完工 farming Lv3 at (8,2)
+[Outpost] 設施完工 farming Lv3 at (10,14)
+[Order] Team3 sell material ×155 (oid=52)
+[Order] Team3 sell tools ×26 (oid=53)
+[Order] Team7 sell goods ×20 (oid=54)
+[Order] Team7 sell material ×155 (oid=55)
+[Order] Team7 sell tools ×1 (oid=56)
+[Outpost] 設施完工 apothecary Lv1 at (2,7)
+[Outpost] 設施完工 apothecary Lv1 at (13,5)
+[Outpost] 設施完工 apothecary Lv1 at (15,6)
+[Outpost] Team1 設施施工 farming → Lv1 at (2,7)
+[Order] Team4 sell material ×155 (oid=57)
+[Order] Team4 sell tools ×26 (oid=58)
+[Order] Team1 buy tools ×1 (oid=59)
+[Outpost] 設施完工 farming Lv1 at (2,7)
+[Move] Team 8 抵達 (6,10)
+[Order] Team7 buy food ×2 (oid=60)
+[Order] Team2 buy tools ×1 (oid=61)
+[DayNight] Day 4 開始
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Horse] Outpost (7, 6) 捕野馬 +1
+[TickPerf] day=4 avg=7756 us max=484987 us ticks=240 teams=12 factions=0
+[Outpost] Team0 設施施工 workshop → Lv1 at (7,6)
+[Outpost] Team2 設施施工 workshop → Lv1 at (15,6)
+[Outpost] Team3 設施施工 workshop → Lv1 at (10,14)
+[Outpost] Team4 設施施工 apothecary → Lv1 at (0,14)
+[Outpost] Team7 設施施工 apothecary → Lv1 at (8,2)
+[Outpost] Team11 設施施工 workshop → Lv1 at (13,5)
+[Outpost] Team10 設施施工 farming → Lv1 at (6,10)
+[DayNight] Day 5 開始
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Move] Team 8 抵達 (6,10)
+[TickPerf] day=5 avg=6532 us max=366734 us ticks=240 teams=12 factions=0
+[Outpost] 設施完工 farming Lv1 at (6,10)
+[Outpost] 設施完工 apothecary Lv1 at (0,14)
+[Outpost] 設施完工 workshop Lv1 at (7,6)
+[Outpost] 設施完工 apothecary Lv1 at (8,2)
+[Outpost] 設施完工 workshop Lv1 at (10,14)
+[Outpost] 設施完工 workshop Lv1 at (13,5)
+[Outpost] 設施完工 workshop Lv1 at (15,6)
+[Move] Team 8 抵達 (6,10)
+[Order] Team11 sell food ×53 (oid=62)
+[Order] Team11 buy weapon_melee_low ×3 (oid=63)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=64)
+[Order] Team11 buy material ×42 (oid=65)
+[Order] Team10 sell food ×55 (oid=66)
+[Order] Team10 buy weapon_melee_low ×3 (oid=67)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=68)
+[Order] Team10 buy material ×43 (oid=69)
+[Order] Team4 sell food ×113 (oid=70)
+[Order] Team4 buy weapon_melee_low ×3 (oid=71)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=72)
+[Order] Team7 buy weapon_melee_low ×3 (oid=73)
+[Order] Team7 buy weapon_ranged_low ×3 (oid=74)
+[Order] Team7 buy tools ×1 (oid=75)
+[Order] Team0 sell food ×84 (oid=76)
+[Order] Team0 buy weapon_melee_low ×3 (oid=77)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=78)
+[Order] Team0 buy material ×18 (oid=79)
+[DayNight] Day 6 開始
+[Order] Team1 sell food ×83 (oid=80)
+[Order] Team1 buy weapon_melee_low ×3 (oid=81)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=82)
+[Order] Team1 buy material ×5 (oid=83)
+[Order] Team3 sell food ×110 (oid=84)
+[Order] Team3 buy weapon_melee_low ×3 (oid=85)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=86)
+[Order] Team6 sell food ×331 (oid=87)
+[Order] Team6 buy weapon_melee_low ×3 (oid=88)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=89)
+[Order] Team6 buy material ×46 (oid=90)
+[Order] Team6 buy tools ×3 (oid=91)
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=6 avg=8443 us max=372285 us ticks=240 teams=12 factions=0
+[Order] Team8 sell goods ×80 (oid=92)
+[Order] Team8 buy weapon_melee_low ×4 (oid=93)
+[Order] Team8 buy weapon_ranged_low ×3 (oid=94)
+[Order] Team8 buy tools ×2 (oid=95)
+[Outpost] Team0 設施施工 farming → Lv1 at (7,6)
+[Order] Team5 sell material ×255 (oid=96)
+[Order] Team5 sell food ×101 (oid=97)
+[Order] Team5 sell tools ×24 (oid=98)
+[Order] Team5 buy weapon_melee_low ×3 (oid=99)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=100)
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team2 sell food ×82 (oid=101)
+[Order] Team2 buy weapon_melee_low ×3 (oid=102)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=103)
+[Order] Team2 buy material ×24 (oid=104)
+[Order] Team9 sell food ×54 (oid=105)
+[Order] Team9 buy weapon_melee_low ×3 (oid=106)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=107)
+[Order] Team9 buy material ×38 (oid=108)
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Outpost] 設施完工 farming Lv1 at (7,6)
+[DayNight] Day 7 開始
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=7 avg=9763 us max=491694 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team11 buy tools ×4 (oid=109)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[DayNight] Day 8 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[TickPerf] day=8 avg=6090 us max=257097 us ticks=240 teams=12 factions=0
+[Outpost] Team1 設施施工 farming → Lv2 at (2,7)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team3 sell material ×88 (oid=110)
+[Order] Team3 sell tools ×25 (oid=111)
+[Order] Team7 sell goods ×20 (oid=112)
+[Order] Team7 sell material ×118 (oid=113)
+[Order] Team8 buy food ×1 (oid=114)
+[Order] Team4 sell material ×112 (oid=115)
+[Order] Team4 sell tools ×23 (oid=116)
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team1 buy tools ×1 (oid=117)
+[DayNight] Day 9 開始
+[TickPerf] day=9 avg=6117 us max=284794 us ticks=240 teams=12 factions=0
+[Order] Team2 buy tools ×2 (oid=118)
+[Order] Team7 buy food ×16 (oid=119)
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Outpost] 設施完工 farming Lv2 at (2,7)
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[DayNight] Day 10 開始
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[TickPerf] day=10 avg=10173 us max=484153 us ticks=240 teams=12 factions=0
+[Order] Team1 sell material ×1 (oid=120)
+[Outpost] Team10 設施施工 apothecary → Lv1 at (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team10 sell food ×36 (oid=121)
+[Order] Team10 buy weapon_melee_low ×3 (oid=122)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=123)
+[Order] Team10 buy material ×48 (oid=124)
+[Order] Team10 buy tools ×2 (oid=125)
+[DayNight] Day 11 開始
+[TickPerf] day=11 avg=8291 us max=554987 us ticks=240 teams=12 factions=0
+[Order] Team7 buy weapon_melee_low ×2 (oid=126)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=127)
+[Order] Team3 sell food ×93 (oid=128)
+[Order] Team3 buy weapon_melee_low ×3 (oid=129)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=130)
+[Order] Team11 sell food ×32 (oid=131)
+[Order] Team11 buy weapon_melee_low ×3 (oid=132)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=133)
+[Order] Team11 buy material ×20 (oid=134)
+[Order] Team8 sell goods ×80 (oid=135)
+[Order] Team8 buy weapon_melee_low ×3 (oid=136)
+[Order] Team8 buy weapon_ranged_low ×2 (oid=137)
+[Order] Team8 buy tools ×1 (oid=138)
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team0 sell food ×67 (oid=139)
+[Order] Team0 buy weapon_melee_low ×3 (oid=140)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=141)
+[Order] Team0 buy material ×24 (oid=142)
+[Order] Team1 sell food ×61 (oid=143)
+[Order] Team1 buy weapon_melee_low ×3 (oid=144)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=145)
+[Order] Team5 sell material ×255 (oid=146)
+[Order] Team5 sell food ×78 (oid=147)
+[Order] Team5 sell tools ×24 (oid=148)
+[Order] Team5 buy weapon_melee_low ×3 (oid=149)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=150)
+[Order] Team4 sell food ×93 (oid=151)
+[Order] Team4 buy weapon_melee_low ×3 (oid=152)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=153)
+[Order] Team2 sell food ×68 (oid=154)
+[Order] Team2 buy weapon_melee_low ×3 (oid=155)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=156)
+[Order] Team2 buy material ×20 (oid=157)
+[Order] Team6 sell food ×338 (oid=158)
+[Order] Team6 buy weapon_melee_low ×3 (oid=159)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=160)
+[Order] Team6 buy material ×29 (oid=161)
+[Order] Team6 buy tools ×3 (oid=162)
+[Outpost] 設施完工 apothecary Lv1 at (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team9 sell food ×43 (oid=163)
+[Order] Team9 buy weapon_melee_low ×3 (oid=164)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=165)
+[Order] Team9 buy material ×32 (oid=166)
+[DayNight] Day 12 開始
+[TickPerf] day=12 avg=8028 us max=318996 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Move] Team 8 抵達 (6,10)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=10445 us max=677530 us ticks=240 teams=12 factions=0
+[Order] Team11 buy tools ×4 (oid=167)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team7 sell tools ×1 (oid=168)
+[Order] Team3 sell material ×90 (oid=169)
+[Order] Team3 sell tools ×25 (oid=170)
+[Order] Team8 buy food ×21 (oid=171)
+[Move] Team 8 抵達 (5,11)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team7 sell goods ×20 (oid=172)
+[Order] Team7 sell material ×151 (oid=173)
+[DayNight] Day 14 開始
+[TickPerf] day=14 avg=7004 us max=272577 us ticks=240 teams=12 factions=0
+[Order] Team4 sell material ×115 (oid=174)
+[Order] Team4 sell tools ×23 (oid=175)
+[Order] Team7 buy food ×26 (oid=176)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team1 buy tools ×1 (oid=177)
+[Order] Team2 buy tools ×2 (oid=178)
+[Move] Team 8 抵達 (5,11)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=50 known=58
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[TickPerf] day=15 avg=10010 us max=552100 us ticks=240 teams=12 factions=0
+[Order] Team1 sell material ×8 (oid=179)
+[Move] Team 8 抵達 (5,11)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Tick 3700] Person 14 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Tick 3800] Person 14 (leader/team7) → P2_produce | stress=0.00 loyalty=1.00
+[DayNight] Day 16 開始
+[TickPerf] day=16 avg=10260 us max=471740 us ticks=240 teams=12 factions=0
+[Order] Team10 sell food ×14 (oid=180)
+[Order] Team10 buy weapon_melee_low ×3 (oid=181)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=182)
+[Order] Team10 buy material ×14 (oid=183)
+[Order] Team10 buy tools ×3 (oid=184)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team1 sell food ×43 (oid=185)
+[Order] Team1 buy weapon_melee_low ×3 (oid=186)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=187)
+[Order] Team8 sell goods ×80 (oid=188)
+[Order] Team8 buy weapon_melee_low ×2 (oid=189)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=190)
+[Order] Team8 buy tools ×1 (oid=191)
+[Order] Team4 sell food ×77 (oid=192)
+[Order] Team4 buy weapon_melee_low ×3 (oid=193)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=194)
+[Order] Team0 sell food ×45 (oid=195)
+[Order] Team0 buy weapon_melee_low ×3 (oid=196)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=197)
+[Order] Team0 buy material ×21 (oid=198)
+[Order] Team2 sell food ×55 (oid=199)
+[Order] Team2 buy weapon_melee_low ×3 (oid=200)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=201)
+[Order] Team2 buy material ×17 (oid=202)
+[Order] Team7 buy weapon_melee_low ×1 (oid=203)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=204)
+[Order] Team11 sell food ×10 (oid=205)
+[Order] Team11 buy weapon_melee_low ×3 (oid=206)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=207)
+[Order] Team11 buy material ×18 (oid=208)
+[Order] Team3 sell food ×75 (oid=209)
+[Order] Team3 buy weapon_melee_low ×3 (oid=210)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=211)
+[Move] Team 8 抵達 (5,11)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team5 sell material ×255 (oid=212)
+[Order] Team5 sell food ×55 (oid=213)
+[Order] Team5 sell tools ×24 (oid=214)
+[Order] Team5 buy weapon_melee_low ×3 (oid=215)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=216)
+[Order] Team6 sell food ×344 (oid=217)
+[Order] Team6 buy weapon_melee_low ×3 (oid=218)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=219)
+[Order] Team6 buy material ×23 (oid=220)
+[Order] Team6 buy tools ×3 (oid=221)
+[DayNight] Day 17 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=17 avg=9005 us max=568379 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team9 sell food ×35 (oid=222)
+[Order] Team9 buy weapon_melee_low ×3 (oid=223)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=224)
+[Order] Team9 buy material ×27 (oid=225)
+[Move] Team 8 抵達 (5,11)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.11
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=10 known=10
+[TickPerf] day=18 avg=8849 us max=545074 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 8 抵達 (5,11)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team11 buy tools ×4 (oid=226)
+[Order] Team3 sell material ×94 (oid=227)
+[Order] Team3 sell tools ×25 (oid=228)
+[Outpost] Team10 設施施工 farming → Lv2 at (6,10)
+[Order] Team7 sell tools ×1 (oid=229)
+[Order] Team8 buy food ×5 (oid=230)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[DayNight] Day 19 開始
+[TickPerf] day=19 avg=9077 us max=523421 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team1 buy tools ×1 (oid=231)
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 7(公庫1+私5) (需 { "material": 50, "tools": 0 })
+[Order] Team7 sell goods ×20 (oid=232)
+[Order] Team7 sell material ×152 (oid=233)
+[Order] Team7 buy food ×26 (oid=234)
+[Order] Team2 buy tools ×2 (oid=235)
+[Order] Team11 buy food ×1 (oid=236)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Outpost] 設施完工 farming Lv2 at (6,10)
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 8(公庫2+私7) (需 { "material": 50, "tools": 0 })
+[Order] Team4 sell material ×119 (oid=237)
+[Order] Team4 sell tools ×23 (oid=238)
+[Order] Team10 buy food ×2 (oid=239)
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=18 known=18
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[TickPerf] day=20 avg=7799 us max=376483 us ticks=240 teams=12 factions=0
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 10(公庫2+私8) (需 { "material": 50, "tools": 0 })
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team1 sell material ×8 (oid=240)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Tick 5000] Person 14 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=29 known=29
+[TickPerf] day=21 avg=7506 us max=328416 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 14(公庫4+私11) (需 { "material": 50, "tools": 0 })
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team1 sell food ×23 (oid=241)
+[Order] Team1 buy weapon_melee_low ×3 (oid=242)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=243)
+[Order] Team8 sell goods ×80 (oid=244)
+[Order] Team8 buy weapon_melee_low ×3 (oid=245)
+[Order] Team8 buy weapon_ranged_low ×2 (oid=246)
+[Order] Team8 buy tools ×1 (oid=247)
+[Order] Team0 sell food ×23 (oid=248)
+[Order] Team0 buy weapon_melee_low ×3 (oid=249)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=250)
+[Order] Team0 buy material ×21 (oid=251)
+[Order] Team10 buy weapon_melee_low ×3 (oid=252)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=253)
+[Order] Team10 buy material ×48 (oid=254)
+[Order] Team10 buy tools ×3 (oid=255)
+[Order] Team7 buy weapon_melee_low ×1 (oid=256)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=257)
+[Order] Team11 buy weapon_melee_low ×3 (oid=258)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=259)
+[Order] Team11 buy material ×15 (oid=260)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Tick 5200] Person 14 (leader/team7) → P2_produce | stress=0.00 loyalty=1.00
+[Order] Team3 sell food ×56 (oid=261)
+[Order] Team3 buy weapon_melee_low ×3 (oid=262)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=263)
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Order] Team4 sell food ×59 (oid=264)
+[Order] Team4 buy weapon_melee_low ×3 (oid=265)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=266)
+[Order] Team2 sell food ×39 (oid=267)
+[Order] Team2 buy weapon_melee_low ×3 (oid=268)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=269)
+[Order] Team2 buy material ×17 (oid=270)
+[DayNight] Day 22 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[CampL0] Team8 紮營 L0 @(5,11)
+[TickPerf] day=22 avg=10088 us max=437072 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (5,11)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Order] Team6 sell food ×344 (oid=271)
+[Order] Team6 buy weapon_melee_low ×3 (oid=272)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=273)
+[Order] Team6 buy material ×19 (oid=274)
+[Order] Team6 buy tools ×3 (oid=275)
+[Order] Team5 sell material ×255 (oid=276)
+[Order] Team5 sell food ×31 (oid=277)
+[Order] Team5 sell tools ×24 (oid=278)
+[Order] Team5 buy weapon_melee_low ×3 (oid=279)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=280)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 22(公庫6+私16) (需 { "material": 50, "tools": 0 })
+[Order] Team9 sell food ×32 (oid=281)
+[Order] Team9 buy weapon_melee_low ×3 (oid=282)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=283)
+[Order] Team9 buy material ×21 (oid=284)
+[Site] Faction-1 派工失敗: 資源不足 1.56x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[CorveeL1] Team8 L0→L1 紮根工期 @(5,11) civilian (720 person-ticks)
+[Ambition] Team6 rung 1→0 (定居 cap=2)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Manufacture] Team11 arrows worker_rate=0.10
+[Outpost] 拆除設施 workshop at (13,5)
+[Outpost] Team11 設施施工 farming → Lv1 at (13,5)
+[DayNight] Day 23 開始
+[MsgPrune] 刪除過期訊息 global=8 known=8
+[TickPerf] day=23 avg=7869 us max=410485 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 8 抵達 (5,11)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Outpost] 設施完工 farming Lv1 at (13,5)
+[Order] Team3 sell material ×96 (oid=285)
+[Order] Team3 sell tools ×25 (oid=286)
+[Order] Team7 sell tools ×1 (oid=287)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Tick 5700] Person 14 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Order] Team11 sell material ×12 (oid=288)
+[Order] Team11 buy tools ×2 (oid=289)
+[DayNight] Day 24 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=24 avg=6606 us max=249101 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Tick 5800] Person 14 (leader/team7) → P2_produce | stress=0.00 loyalty=1.00
+[Order] Team2 buy tools ×2 (oid=290)
+[Order] Team1 buy tools ×1 (oid=291)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Tick 5900] Person 14 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Order] Team11 buy food ×22 (oid=292)
+[Order] Team7 sell goods ×20 (oid=293)
+[Order] Team7 sell material ×152 (oid=294)
+[Order] Team7 buy food ×26 (oid=295)
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=6 known=6
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.12
+[Tick 6000] Person 14 (leader/team7) → P2_produce | stress=0.00 loyalty=1.00
+[TickPerf] day=25 avg=9985 us max=482766 us ticks=240 teams=12 factions=0
+[Order] Team10 buy food ×22 (oid=296)
+[Order] Team4 sell material ×121 (oid=297)
+[Order] Team4 sell tools ×23 (oid=298)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Tick 6200] Person 14 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Order] Team10 sell material ×5 (oid=299)
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=41 known=41
+[TickPerf] day=26 avg=5888 us max=293959 us ticks=240 teams=12 factions=0
+[Order] Team1 sell material ×10 (oid=300)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Tick 6300] Person 14 (leader/team7) → P2_produce | stress=0.00 loyalty=1.00
+[Tick 6300] Person 22 (leader/team11) → P1_comply | stress=0.07 loyalty=0.98
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Tick 6400] Person 20 (leader/team10) → P1_comply | stress=0.05 loyalty=0.98
+[Order] Team10 buy weapon_melee_low ×1 (oid=301)
+[Order] Team10 buy weapon_ranged_low ×1 (oid=302)
+[Order] Team0 buy weapon_melee_low ×3 (oid=303)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=304)
+[Order] Team0 buy material ×18 (oid=305)
+[Order] Team11 buy weapon_melee_low ×1 (oid=306)
+[Order] Team11 buy weapon_ranged_low ×1 (oid=307)
+[Order] Team3 sell food ×39 (oid=308)
+[Order] Team3 buy weapon_melee_low ×3 (oid=309)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=310)
+[Order] Team1 sell food ×3 (oid=311)
+[Order] Team1 buy weapon_melee_low ×3 (oid=312)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=313)
+[Order] Team4 sell food ×42 (oid=314)
+[Order] Team4 buy weapon_melee_low ×3 (oid=315)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=316)
+[Order] Team7 buy weapon_melee_low ×1 (oid=317)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=318)
+[DayNight] Day 27 開始
+[Order] Team8 buy weapon_melee_low ×4 (oid=319)
+[Order] Team8 buy weapon_ranged_low ×3 (oid=320)
+[Order] Team8 buy tools ×2 (oid=321)
+[TickPerf] day=27 avg=8193 us max=315090 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Order] Team2 sell food ×25 (oid=322)
+[Order] Team2 buy weapon_melee_low ×3 (oid=323)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=324)
+[Order] Team2 buy material ×16 (oid=325)
+[Order] Team0 buy food ×1 (oid=326)
+[Order] Team5 sell material ×255 (oid=327)
+[Order] Team5 sell food ×9 (oid=328)
+[Order] Team5 sell tools ×24 (oid=329)
+[Order] Team5 buy weapon_melee_low ×3 (oid=330)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=331)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[CrudeCamp] Team8 玩家紮營完工 @(5,11) → civilian
+[Order] Team9 sell food ×29 (oid=332)
+[Order] Team9 buy weapon_melee_low ×3 (oid=333)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=334)
+[Order] Team9 buy material ×16 (oid=335)
+[Order] Team6 sell food ×345 (oid=336)
+[Order] Team6 buy weapon_melee_low ×3 (oid=337)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=338)
+[Order] Team6 buy material ×16 (oid=339)
+[Order] Team6 buy tools ×3 (oid=340)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=7 known=7
+[Order] Team8 sell goods ×80 (oid=341)
+[Order] Team8 sell food ×36 (oid=342)
+[Order] Team8 buy material ×70 (oid=343)
+[TickPerf] day=28 avg=11757 us max=510475 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 76(公庫23+私54) (需 { "material": 50, "tools": 0 })
+[Order] Team1 buy food ×2 (oid=344)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Tick 6900] Person 22 (leader/team11) → P2_produce | stress=0.42 loyalty=0.98
+[Order] Team11 sell material ×36 (oid=345)
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[Order] Team3 sell material ×97 (oid=346)
+[Order] Team3 sell tools ×25 (oid=347)
+[TickPerf] day=29 avg=4920 us max=253251 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Outpost] Team9 設施施工 apothecary → Lv1 at (10,4)
+[Tick 7000] Person 14 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Order] Team7 sell tools ×1 (oid=348)
+[Order] Team9 buy tools ×2 (oid=349)
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Tick 7100] Person 14 (leader/team7) → P2_produce | stress=0.00 loyalty=1.00
+[Order] Team2 buy tools ×2 (oid=350)
+[Order] Team5 buy food ×1 (oid=351)
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Site] Faction-1 派工失敗: 資源不足 1.70x: material 有 77(公庫23+私54) (需 { "material": 50, "tools": 0 })
+[Order] Team1 buy tools ×1 (oid=352)
+[Order] Team11 buy food ×26 (oid=353)
+[Horse] Outpost (2, 7) 捕野馬 +1
+[Horse] Outpost (10, 4) 捕野馬 +1
+[Manufacture] Team0 arrows worker_rate=0.12
+[Manufacture] Team2 arrows worker_rate=0.12
+[Manufacture] Team3 arrows worker_rate=0.13
+[Tick 7200] Person 14 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 7200] Person 20 (leader/team10) → P2_produce | stress=0.39 loyalty=0.98
+[TickPerf] day=30 avg=9369 us max=578956 us ticks=240 teams=12 factions=0
+=== qty_tap_bed === config=peaceful_economy days=30 ticks=7200 TICKS_PER_DAY=240 probe=ON
+母體：結束時隊數=12｜結束時人口(named)=24
+
+── 採集量/遊戲日（★taken=從池子取出｜credited=真的入帳，差額=倉滿溢出 sink）──
+  food       taken=24.04/日  credited=23.91/日  溢出=0.13/日  ｜分母(入帳次數)=1273（42.4 次/日）
+  material   taken=34.01/日  credited=34.01/日  溢出=0.00/日  ｜分母(入帳次數)=329（11.0 次/日）
+  ore_silver taken=0.22/日  credited=0.22/日  溢出=0.00/日  ｜分母(入帳次數)=72（2.4 次/日）
+
+── 消耗量/遊戲日（★實扣非應扣）──
+  food       55.52/日  ｜分母(扣款次數)=864（28.8 次/日）
+  material   0.07/日  ｜分母(扣款次數)=215（7.2 次/日）
+
+── 其餘五項不變項/遊戲日（★均帶分母）──
+  移動格(tap)   0.10/日  ｜分母(移動事件次數)=3
+  移動格(床側) 0.10/日  ｜分母(team×tick 樣本)=86500
+  決策次數           10.23/日  ｜總數=307（累加了 1 條 key）
+  製造產出           7.17/日  ｜總數=215（累加了 1 條 key）
+  訊息發出           11.80/日  ｜總數=354（累加了 1 條 key）
+  訊息送達           0.17/日  ｜總數=5（累加了 1 條 key）
+  餓死(named)      ★key 不存在，而 Probe 是 ON  【這件事從未發生】（tap 在，只是沒 fire）
+  餓死(minor)      ★key 不存在，而 Probe 是 ON  【這件事從未發生】（tap 在，只是沒 fire）
+  餓死(anon)       ★key 不存在，而 Probe 是 ON  【這件事從未發生】（tap 在，只是沒 fire）
+  合嘗試(buy)      0.07/日  ｜總數=2（累加了 1 條 key）
+  合嘗試(sell)     0.20/日  ｜總數=6（累加了 1 條 key）
+
+── 傳播節律/遊戲小時（★S3 前置）──
+  ★prop.* key 不存在或為 0（Probe 是 ON） 【這件事從未發生】
+
+── 製造三桶切分/總數（★互斥：fired／noop_no_facility／noop_no_material）──
+  fired(真的做了)         = 215
+  noop_no_facility(無設施) = 318
+  noop_no_material(無原料) = 265
+── 製造設施普查（有幾座，等級>0的tile數）──
+  manufacturing_level  = 3 座
+  apothecary_level     = 6 座
+  smelter_level        = 0 座
+  weaponsmith_level    = 0 座
+  armorsmith_level     = 0 座
+
+── 原始總量（★先看未除以天數的值，別讓 %.2f 把小數字吐成 0）──
+  qty.harvest_taken.food             = 721.180466
+  qty.harvest_credited.food          = 717.180466
+  qty.harvest_src.wild.food          = 454.391895
+  qty.harvest_taken.material         = 1020.433717
+  qty.harvest_credited.material      = 1020.433717
+  qty.harvest_src.wild.material      = 1020.433717
+  qty.harvest_taken.ore_silver       = 6.661331
+  qty.harvest_credited.ore_silver    = 6.661331
+  qty.harvest_src.wild.ore_silver    = 6.661331
+  qty.consume.food                   = 1665.673367
+  qty.move_hex                       = 3.000000
+  qty.harvest_src.farm.food          = 218.788570
+  qty.consume.material               = 1.993751
+  qty.harvest_src.hunt.food          = 44.000000
+[BedSelfCheck] observer_guard=none  first_nonadvance=none  effective_window=7200/7200 ticks
+=== qty_tap_bed DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+

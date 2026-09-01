@@ -48,6 +48,22 @@ owner: blueprint(WHAT)
 ## §4 七病同包清(盤點所得)
 turn 定義統一(60t vs 24t)/EWMA cadence 相依修(need_hierarchy α 未除 day_fraction=近遠不等價)/移動信念 2 格/日→追物理 5(估算器形狀家族)/manufacturing 率 day_fraction 核對(疑近遠不等價)/魔法數收編(「2 天」×6 處/harvest 6h/player_trade 1000t/日夜段界/危機除數 4)/命名說謊 3 顆/debug 鏡像 drift 2 處。
 
+★★★**本節已被 2026-09-01 重盤取代 —— 上面那份是 2026-08-20 的【歷史快照】，逐條重驗後才准引用。**
+重盤產出：`docs/measurements/2026-09-01-s7-seven-disease-recount.txt`（★production diff 0 行）。
+
+**現況分級**（★依「語意是否隨根靜默改變」，非依醜的程度；blueprint 2026-09-01 裁）：
+```
+高  語意隨根靜默漂移：6c HP_REGEN_PER_TICK(health_system:12) ／ 7 ui_logic_test:77(10×→60×) ／ 2 α 隱含時間窗(need_hierarchy:19)
+中  接線錯且誤差隨根放大：3 MOVE_TILES_PER_DAY(goal_resolver:896) ★接線病,修法禁改數值(手抄物理)
+低  重複但已導出(改一處會漏)：5a(sim_runner:300/346 2 處) ／ 5e(faction_ai:2736/3355/5429 3 處)
+最低 不隨根變,純命名：6a encounter_system:10 ／ 6b trade_valuation:54 ／ 5c day_night_system:10-12
+★healed 銷案：病1(S2 收) ／ 病4(產線只在 NEAR pass,不等價問題不存在) ／ 病5b(已用 TimeScale.hours(100))
+★抄本誤判：病5d 月長 30 = 刻意不縮放的曆法結構,非病 ／ 病5f「2 天 ×6 處」production 只剩一行註解
+       ／ 病7「×2 處」的第二處是 per-day 語意,與 ui_logic_test 不同族(抄本把兩種混成一條)
+```
+★★**而高優先那三顆【都不在裸 tick 守衛的候選集裡】**（各被 debug 排除／小數負向前瞻擋掉）——
+★★★**守衛按定義看不見「時間語意不以整數 tick 呈現」那一類，而那正是換根時最會漂的一類。**
+
 ## §5 驗收
 - **統計等價床**:不變項=各系統每遊戲日事件率/速率(重錨純標籤部分必須統計持平;RNG 模式變故不驗 byte)。
 - **intended-change 清單**:搬家八支+**徵收 30h→T2 24h(R² 補漏,人格調變 0.5~2.25 倍率形狀保留)**+T0 行為+移動 4.8→4h+糧/格 -17%+背景律三條+工期表——fp 標注、故事 QA 過。
