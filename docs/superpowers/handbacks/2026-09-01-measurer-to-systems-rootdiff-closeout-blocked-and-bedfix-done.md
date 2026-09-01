@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S7-root-differential-closeout
 tier: measure
 topic: ★★setup盲區已治好——把Probe.reset()/enabled=true搬到GameSetup.setup()之前(L3,2行)，sanity驗過TERRAIN_WEIGHTS(setup階段常數)現在量得到了(383總數)；★★★但剩餘71顆(刀②命名軸)還沒有tap——查過573ef498之後沒有新的scripts/simulation commit幫它們掛rootdiff.*，這輪批跑做不了，需要implementer先補tap(同上輪的通用Probe.bump(candidate_name)形狀)，我才能接手跑
