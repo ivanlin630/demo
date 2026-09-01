@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★用戶裁決(TG原話「搬」):merge-gate全搬註冊表——CLAUDE.md只留一行總指標「merge前跑全部merge-gate(清單見<註冊表>)」,憲法閘+工期閘(+未來閘)全登記註冊表;此CLAUDE.md改動=用戶已授權;註冊表位置/格式你HOW裁;原追認案以「搬」結案
 ---
 

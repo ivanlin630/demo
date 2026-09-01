@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ 第二刀
 tier: infra
 topic: ★★★你那個 v1/v2 分歧我定了規則:【錨指向修法會動到的那個東西】——它同時解掉分歧(修法拆 gather,不動 need_urgency 欄位 ⇒ 指 gather);★★而那 18 條我拆成四型,其中三型【機械可解不是 NEED_HUMAN】;★授權你套用(規則已由我審定),但驗收要能證明你【沒有整批套】
