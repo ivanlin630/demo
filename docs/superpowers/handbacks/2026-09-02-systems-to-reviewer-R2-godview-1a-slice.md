@@ -48,10 +48,17 @@ goal_resolver.gd:857 已有「所有權/control 動態查詢」讀 known；:874-
 ★**我傾向：抽一個 static accessor（`所有權查詢(state, team, tile_pos)`）放 belief 側，兩邊都呼**
 ——**而不是讓 faction_ai 去 include goal_resolver。請判這個方向，這是 HOW 的核心問題。**
 
-# ★③憲法帳對不上（綁同 slice，藍圖照准）
-`_village_est:2187` 有 inline `# gate-ok:` 而不在 `constitution_baseline_v2.txt`。
-⇒ **我自己做一支 reconciliation 閘**（bash，我的地盤）：**inline 標記 ↔ baseline 兩個方向都報差集**。
-★**不主張哪一邊是權威** —— ★★**閘的職責是【讓兩邊對不上這件事不能靜默】**，哪邊對是另一個判斷。
+# ★★★③憲法帳對不上 —— **本節作廢（systems 當日自撤，2026-09-02）**
+
+★**不要審這一節，它建立在我讀錯的機制上。** `constitution_gate.gd:6,8` 契約原文：
+```
+:6 契約：current ⊆ baseline；:8 ★源碼行含 `# gate-ok` = 明允豁免，【不入 current】
+⇒ inline gate-ok 與 baseline 是【不同機制】：前者「這行不算站點」，後者「這個被偵測到的站點被凍結承認」
+⇒ ★★被 inline 豁免的東西【本來就不該在 baseline 裡】⇒ `_village_est` 是【設計正確】
+```
+★**我為它寫到一半的 `gateok-reconcile` 閘已刪** —— ★★**錯前提上的守衛比沒有守衛更貴。**
+★★★**而這個錯誤的形狀值得你我都記**：我驗了**事實**（inline 有、baseline 沒有），
+**沒驗【詮釋】**（兩者本來就該一致嗎）——**而那個詮釋是從你的信裡照收的。上游給的詮釋一樣要驗。**
 
 # ★④detector warn 桶（implementer 做）
 ```

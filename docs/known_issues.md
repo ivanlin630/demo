@@ -139,27 +139,20 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 
 **狀態：已知未修** ｜ **回訪：到期 token — 族①修法 slice（A/B 一起，因為同一條細則）**
 
-### ⏳★★憲法閘的【帳本身】對不上：inline `gate-ok` ↔ `constitution_baseline_v2.txt`（2026-09-02 reviewer 撿）
+### ✅（撤回，存查）憲法閘「帳本身對不上」—— **不是缺陷，是我讀錯機制**（2026-09-02 當日自撤）
 
-★**坐實**：`faction_ai_system.gd:2187` `_village_est` **有 inline `# gate-ok:` 註解**，
-★★**而 `constitution_baseline_v2.txt` 裡【沒有】它**（`grep -c _village_est` ＝ 0）。
-★**兩邊的計數也對不上**：inline `gate-ok` 68 處（6 個檔）vs baseline 75 筆 `file::func::type`
-——★★**兩者粒度不同（一個註解可能對應多個 fingerprint），所以「差 7」不是結論，只有 `_village_est` 那一顆是坐實的。**
-
-★★★**為什麼要記**：**官方清單連【legit 那一邊】都漏** ⇒ 「清單就是母體」這個假設破了 ——
-**而我這一輪【正是】拿 baseline 的 10 顆去主張族①的母體大小。**（那條負斷言已另案撤回。）
-
-**狀態：已知未修** ｜ **回訪：到期 token — 與「detector 新開桶」同一個 slice（同一個病：閘的帳不可信）**
-
-## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
-
-material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
-
-> ★**狀態標記三態慣例（2026-08-21 立、blueprint 認可）**——**禁一律標「已修」**：
-> - **✅ 真結案**：機制已修 **且** 影響面已清（可直接不再讀）。
-> - **⚠ 機制已修、歷史資料仍污染**：修法已 merge，但**舊量測/舊結論仍受影響** → 必附**自查方法**（如 signature）。
-> - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
-> ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
+★**原主張**：`_village_est:2187` 有 inline `# gate-ok:` 而不在 `constitution_baseline_v2.txt` ⇒「官方清單連 legit 那邊都漏」。
+★★**撤回理由（`constitution_gate.gd:6,8` 契約原文）**：
+```
+:6  指紋 = <relpath>::<func>::<type>。契約：current ⊆ baseline。added=FAIL。removed=PASS
+:8  ★源碼行含 `# gate-ok` = 明允豁免，【不入 current】
+⇒ ★★兩者是【不同機制】不是同一本帳的兩份：
+   inline gate-ok ＝「這行根本不算一個站點」；baseline ＝「這個【被偵測到的】站點被凍結承認」
+⇒ ★★★被 inline 豁免的東西【本來就不該出現在 baseline】—— _village_est 是【設計正確】
+```
+★**教訓（比這條目本身有用）**：我驗了**事實**（inline 有、baseline 沒有），**沒驗【詮釋】**（兩者本來就該一致嗎）——
+★★**而這個詮釋不是我自己想的，是從 reviewer 那裡照收的。** ★★★**上游給的詮釋一樣要驗。**
+（★我已據此撤回寄給 blueprint 的那一段，並砍掉為它寫到一半的 `gateok-reconcile` 閘 —— **錯前提上的守衛比沒有守衛更貴。**）
 
 ### ⏳★★★建造：**兩條路，兩個不同的病**（2026-08-26 三度訂正；★舊讀法全部保留在下方，因為每一個都曾經看起來很有道理）
 
