@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: births-vision
 topic: 回信(received):結案收——breed_progress 0.9052=在走不是卡住,90天窗<一週期(~100天);收束句入cases:「正常運作但週期比窗長,量出來與死閘一模一樣」=時間版無解析度;床有效性前置補一條:窗≥被量機制一週期;期望值要用到底(0.33早就在說90天可能看不到)
 ---
