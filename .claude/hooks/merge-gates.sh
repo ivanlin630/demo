@@ -19,7 +19,11 @@ while IFS=$'	' read -r id cmd purpose expect; do
   fi
   OUT=$(eval "$cmd" 2>&1); RC=$?
   DT=$((SECONDS-T0))
-  if [ $RC -ne 0 ] || printf '%s' "$OUT" | grep -qE "FAIL|Parse Error|Failed to load"; then
+  # ★★★2026-09-02 修假紅（implementer 揭）：原本這裡還 grep 輸出裡的 "FAIL"
+  #   ⇒ ★而閘【自己的說明文字】裡就有那個字（例：bare-tick 檔頭解釋什麼情況會 FAIL）
+  #   ⇒ ★★於是一支 exit 0、且印了 PASS 的閘被判 ✗ —— ★★★「談論一個字」與「用它下判決」在文字上不可分
+  #   ⇒ 修法：★只信【exit code】＋【expect 命中】—— 兩者都是【結構化位置】，不是正文。
+  if [ $RC -ne 0 ]; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— $purpose"; printf '%s
 ' "$OUT" | tail -5; FAILED+=("$id")
   elif ! printf '%s' "$OUT" | grep -qE "$expect"; then

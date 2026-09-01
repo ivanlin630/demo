@@ -5502,8 +5502,6 @@ func try_hunt_predator(state: WorldState, team: TeamData) -> bool:
 # ★感知鐵律 touch-point 分責：目標選擇=旅行前決策=須 belief → 只掃 team_market_known（vision/relay
 #   習得 discovered set，非全圖 god-view；讀 known tile live 結構=既有 market-finder 同 convention），
 #   非直掃 state.world.tiles。抵達後 timer 讀腳下=live 合法（既有 :5118 team.tile_pos 自站處）。
-<<<<<<< HEAD
-=======
 # ★★★名字會騙人（2026-09-02 記，★不改名——改名是另一票）：
 #   「unowned」判的是 `outpost_owner == -1`，★而 L0 營地【不設 outpost_level、不 set_owner】
 #   ⇒ ★★用 owner 判「有沒有主」對 L0 營地【天生無效】
@@ -5513,7 +5511,6 @@ func try_hunt_predator(state: WorldState, team: TeamData) -> bool:
 #   ★★★而名字仍然說謊（本票不改名）：「unowned」只由 `outpost_owner` 判，
 #     ★而【任何不設 owner 的佔用形態】它都看不見 —— 今天是 L0 營地，明天可能是別的。
 #     ⇒ 讀這個函式時【不要照名字信它】，看下面那三行 continue 才是真正的排除集。
->>>>>>> afedb3c3 (recamp：站在自己 L0 營地上，那格不再是「紮營候選」（同源兩處一起好）)
 func _find_unowned_farmable_tile(state: WorldState, team: TeamData) -> Vector2i:
 	# ① 撿现成：belief-known 無主既有 outpost（最近者）。known 為 discovered set，讀 live owner=既有慣例。
 	var best_reclaim: Vector2i = Vector2i(-1, -1)
