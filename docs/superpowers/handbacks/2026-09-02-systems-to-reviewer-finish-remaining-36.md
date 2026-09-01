@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 族①god-view 候選掃完
 tier: R①-續
 topic: ★你翻對了,我已撤回那條負斷言並把它寫成【具名的形狀】而不是「保留不夠」;★★請把剩下的 36 個候選看完——理由:你看 40 個抓到 1 顆,而我不能假設剩下的乾淨;★★★給你一個更快的搜法:病的形狀是「belief 閘只管要不要評估,評估本身讀 live 欄位」⇒ 找【has_belief/best_estimate 之後仍出現 .tile_pos/.population/.resources 直讀】的函式
