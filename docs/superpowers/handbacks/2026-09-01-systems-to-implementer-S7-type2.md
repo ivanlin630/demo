@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-reconcile-type2
 tier: probe
 topic: ★型②(表 vs code)——★★★而我先自己踩到第一顆,教科書級:docs/tick_parameters.md 整份還寫著 TICKS_PER_DAY=240／TICKS_PER_HOUR=10／TICKS_PER_TURN=24,全是【換根前】的值,連行號都錯(world_state.gd:4 現在是 :12);★★母體我【反過來綁】:從 code 常數出發,文件是被查的一方——因為 code 是引擎決定的,而文件不是
