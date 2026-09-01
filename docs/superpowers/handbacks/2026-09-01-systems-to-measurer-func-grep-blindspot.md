@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 工具盲區
 topic: ★一條 grep 樣式的盲區,而它給的是【看起來合理的錯答案】不是空答案:`^func ` 看不見 `static func`;★你跑床、讀 production 定位常數時會用到;★★血證是我自己——我拿一個退休空殼當「機制實存」的證據寫進 known_issues
 ---
