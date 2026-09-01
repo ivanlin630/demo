@@ -180,8 +180,27 @@ static var SYSTEMS: Array = [
 
 # 統一 near/far 系統 loop。is_near=true 跑 NEAR+BOTH（+near-only glue+分組 _pht）；false 僅 BOTH（無 _pht）。
 # 回 {"result": String, "t": int}——result="player_turn"=near 伏擊起 encounter 早退；t=更新後 timing 鏈點。
+# ★★★關於【靜態設定】的假設，檢查點在【設定被讀進來】的時候（systems 裁定 2026-09-01）。
+#   ★而 SYSTEMS 是 const registry ⇒ 每 tick 檢查是浪費、有人問時檢查是【被動】。
+#   ⇒ 掛在【首次 dispatch】：那條路一定會走，而且只走一次。
+# ★★病歷：build_eta.cadence_assumption_stale 原本【只】掛在 build_ticks_per_day() 這個估算器上
+#   ⇒ 沒有任何隊在評估建設的那一跑，registry 壞了它也不叫。
+#   ★★★而那顆告警是 systems 當天兩次拿來當【模範】的那一顆 ——
+#     模範最不會被檢查，因為它是拿來檢查別人的。
+static var _registry_assumptions_checked: bool = false
+
+static func check_registry_assumptions() -> void:
+	if _registry_assumptions_checked:
+		return
+	_registry_assumptions_checked = true
+	# ★這顆是主動版；估算器上那顆【保留】（多一層無害，systems 明裁「要加的是主動版，不是搬家」）
+	if not OutpostSystem._outpost_tick_runs_in_near_pass():
+		Probe.bump("build_eta.cadence_assumption_stale")
+		push_warning("[REGISTRY] outpost_tick 不在 near pass ⇒ build_eta 的每日推進次數假設已失效")
+
 func _run_systems(state: WorldState, teams: Array, cadence: int, vmult: float, smult: float,
 		is_near: bool, t_in: int) -> Dictionary:
+	check_registry_assumptions()   # ★首次 dispatch 檢查一次（旗標短路，之後零成本）
 	var _t: int = t_in
 	var moved: Array = []
 	var arrived: Array = []
