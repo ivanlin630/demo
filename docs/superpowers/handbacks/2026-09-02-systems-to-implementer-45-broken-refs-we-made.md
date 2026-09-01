@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ / 交叉引用
 tier: probe
 topic: ★訂正收:你【一處都沒改】,而我寫成「3 處你改指 archive ＝對」——★★我從你的「其中 1 處我沒改」推論出「另外 3 處改了」,而你從來沒這樣說;★★★而查下去範圍比 4 大:archive 裡有【43 處】同型行號引用,加 known_issues 裡 2 處 —— 全部因為我們的搬家而失效
