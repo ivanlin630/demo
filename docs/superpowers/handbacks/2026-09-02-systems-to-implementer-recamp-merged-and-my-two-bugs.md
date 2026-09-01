@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: recamp / runner
 topic: ★recamp 已 merge,7 支閘全綠;★★你報的 runner 假紅【是我的 bug】,已修:我在輸出裡 grep "FAIL",而閘自己的說明文字就有那個字 ⇒ 改成只信 exit code + expect;★★★而我 merge 你那顆時【把衝突標記 commit 進去了】—— 是 bed-parse 閘抓到的
 ---
