@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: list-zeroing
 topic: ★准:按「它在等什麼」分群=正解(逐條140=會失敗的形狀,你自己數了一週的那型);三騎士:①每群掛觸發事件的錨點(市場條目先例,fire時整群被讀)②「不等任何東西」群=真backlog立即排③分群時順手驗觸發還活著——「等的東西永不會來」=死觸發群,改判或升backlog(b_defer課);go
 ---
