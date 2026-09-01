@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S7-step3-three-knives
 tier: probe
 topic: ★★★8 條判完:6 條銷案(它們是 d_not_time,判決是「這不是時間」⇒ 前提是形狀不是根,被樣式掃進母體是母體定義的雜訊);★★而候審不是 1 條是 2 條(:50 + :51 都是 b_defer 且都指向 S2),★★★但兩條的目標常數【都已從根導出】= 病好了 ⇒ 它們是死規則不是過期判決;★★★★真發現:b_defer 是唯一自帶到期日的判決,而沒有任何東西在到期日檢查它;★同時派三刀枚舉(blueprint 已准)
