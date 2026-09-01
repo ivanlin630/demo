@@ -53,12 +53,15 @@ func _init() -> void:
 func _t1_viable_starts_corvee() -> void:
 	print("--- ① viable L0 隊起工期 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := _mk_l0_team(state, Vector2i(5,5), 100.0, 5)   # food_days=100/(5*0.8)=25≥CORVEE
+	var team := _mk_l0_team(state, Vector2i(5,5), 100.0, 5)   # food_days=100/(5*0.8)=25，夠付工期
 	_engine_decide(state, team)
 	var tile: HexTileData = state.world.tiles[5005]
 	_ok(tile.construction_target.get("action", "") == "crude_camp", "設 construction_target action=crude_camp")
 	_ok(int(tile.construction_target.get("level", 0)) == 1 and int(tile.construction_target.get("owner", -1)) == team.team_id, "target level:1 + owner=team")
-	_ok(tile.construction_ticks_left == FactionAISystem.L0_TO_L1_CORVEE_DAYS * WorldState.TICKS_PER_DAY, "ticks_left=CORVEE×TICKS")
+	# ★★★S6 phase2 §7⑥：斷言改成【對著錨的絕對值】。
+	#   舊斷言是「等於那條式子」⇒ 式子改它跟著改 ⇒ ★這道 gate 什麼都沒守（綠著說謊）。
+	#   ★★現在寫錨的字面值：改錨 ⇒ 本床必須紅（那正是它該有的行為）。
+	_ok(tile.construction_ticks_left == 720, "ticks_left=720（錨 SETTLE_PERSON_HOURS 的絕對值，改錨此床必紅）")
 	_ok(team.current_task == TeamData.TASK_BUILD, "current_task=建設（in-place 自己施工）")
 	_ok(tile.camp_level == 1 and tile.outpost_level == 0, "工期中 camp_level 仍 1、outpost_level 仍 0（未完工）")
 
@@ -128,7 +131,7 @@ func _t6_abandoned_recovery() -> void:
 	# 模擬做一段後離開覓食（survival）：推一 tick 進度、team 離工地變 idle（他處）
 	OutpostSystem.new()._tick_construction(state, tile)
 	var progressed: int = tile.construction_ticks_left
-	_ok(progressed < FactionAISystem.L0_TO_L1_CORVEE_DAYS * WorldState.TICKS_PER_DAY, "工期有推進")
+	_ok(progressed < 720, "工期有推進（對照錨的絕對值 720，非對照式子）")
 	team.current_task = TeamData.TASK_IDLE   # 覓食完 release→idle
 	team.tile_pos = Vector2i(13,13)          # 已離工地（覓食走遠）
 	team.move_target = Vector2i(-1,-1)

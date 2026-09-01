@@ -1,4 +1,4 @@
-class_name OutpostSystem
+﻿class_name OutpostSystem
 
 const OUTPOST_NAMES: Dictionary = {
 	"civilian": ["村落", "城鎮", "都市"],
@@ -20,16 +20,62 @@ const OUTPOST_COST: Dictionary = {
 	],
 }
 
-# 建造所需 person-hours（除以 team.population = 實際小時數）
-# ★★★S6 §4 標記：這張表【不在】FACILITY_DEF 那八項裡 ⇒ 改 FACILITY_DEF 的錨【推不動它】。
-const BUILD_PERSON_HOURS: Dictionary = {
-	"civilian": [100, 300, 600],
-	"military": [100, 300, 600],
-}
+# ★★★工期單一真值（S6 phase2，2026-09-01）——★一顆錨 ＋ 一張倍數表，★★沒有第二個絕對值。
+#   錨 = 紮根 L0→L1 的工量，blueprint 2026-09-01 正式簽署；倍數＝WHAT §3c 設計（不動）。
+# ★★★被禁止的形狀（寫在這裡，因為它是最誘人的那個）：
+#   保留另一張工期表、然後在某處「讓它等於這裡」——
+#   ★那是【同步兩張表】，而同步關係沒有人維護，它只在寫下的那一天成立。
+#   ★★用戶原話：把 2 改成 5，三個月後又爛。修法形狀＝改接線，不是改數值。
+# ★本檔改制前有四種來源（據點表／設施表／紮營常數／CORVEE 天數×根），
+#   ★★而三個決策端讀的是其中【另一張】⇒ 只推一張＝世界變慢而 NPC 不知道（腦不知手）。
+const SETTLE_PERSON_HOURS: int = 720
 
-# 工地無實際進度逾此時長 → 取消退料（防永久卡死黑洞）
+# 倍數＝設計（WHAT §3c，用戶核可）。★這裡只有比例，絕對值只有錨那一顆。
+const BUILD_MULT_FACILITY: Dictionary = {
+	"farming": 0.5,
+	"workshop": 1.0, "apothecary": 1.0,
+	"stable": 2.0, "smeltery": 2.0, "weaponsmith": 2.0, "armorsmith": 2.0,
+	"mint": 4.0,
+}
+const BUILD_MULT_CAMP: float = 1.0 / 3.0                   # 紮營
+const BUILD_MULT_OUTPOST_LEVEL: Array = [1.0, 3.0, 6.0]    # 據點 L1/L2/L3（★L1 ＝ 紮根 ＝ 錨本身）
+
+# ★★★工期【唯一入口】：四種來源（據點／紮營／紮根／設施）全部走這一個查詢。
+#   ★kind 不認得就【爆】（fail loud，systems 裁定④）——
+#     ★★靜默 fallback 會給出一個「看起來合理的錯數字」，而沒有人在看它。
+static func build_person_hours(kind: String, level: int = 1) -> int:
+	if kind == "civilian" or kind == "military":
+		var li: int = clampi(level, 1, BUILD_MULT_OUTPOST_LEVEL.size()) - 1
+		return int(round(float(SETTLE_PERSON_HOURS) * float(BUILD_MULT_OUTPOST_LEVEL[li])))
+	if kind == "settle":
+		return SETTLE_PERSON_HOURS                              # L0→L1 紮根 ＝ 錨
+	if kind == "camp":
+		return int(round(float(SETTLE_PERSON_HOURS) * BUILD_MULT_CAMP))
+	# ★設施：未登記 kind 在下一行直接爆（Dictionary 缺鍵 = runtime error），assert 只是先給人話
+	assert(BUILD_MULT_FACILITY.has(kind), "build_person_hours: 未登記的 kind=%s ★新增設施必須登記倍數" % kind)
+	return int(round(float(SETTLE_PERSON_HOURS) * float(BUILD_MULT_FACILITY[kind]) * float(clampi(level, 1, 3))))
+
+# ★★★工地取消 ＝ k × 預期工期（相對錨定，S6 phase2 §5）——不再是絕對 30 天。
 # TIER: n/a — 語意時長非節律（某事多久算過期，不是多久評一次）
-const CONSTRUCTION_TIMEOUT: int = 30 * WorldState.TICKS_PER_DAY
+# ★動機：錨一改，世界工期跟著變，而絕對 30 天不會跟 ⇒ 大工地會被守衛誤殺。
+# ★★而這裡有一個會把守衛變成廢物的陷阱，寫死在這：
+#   若用【即時 pop】算預期工期 ⇒ pop 掉到 0 ⇒ 預期工期 → ∞ ⇒ timeout 永不觸發
+#   ⇒ ★★★而本守衛的職責自述就是「防永久卡死黑洞」—— 黑洞會原樣回來。
+#   ⇒ 硬條款：pop 取【動工當下】並凍結（存在 construction_target.start_pop）。
+# ★CEIL 必要（上界不得因工期變大而無限延後）；FLOOR 防短工地被秒取消。
+const CONSTRUCTION_TIMEOUT_K: float = 3.0            # 取消門檻 ＝ 3× 預期工期
+const CONSTRUCTION_TIMEOUT_FLOOR_DAYS: float = 5.0   # 下限：短工地也給 5 天停工寬限
+const CONSTRUCTION_TIMEOUT_CEIL_DAYS: float = 30.0   # ★上限 ＝ 改制前的絕對值（上界刻意不放寬）
+
+# 停工多久算逾時（天）。★pop 讀【動工當下凍結值】，不讀即時 pop（見上方陷阱）。
+static func construction_timeout_days(tile: HexTileData) -> float:
+	var pop0: int = int(tile.construction_target.get("start_pop", 0))
+	if pop0 <= 0:
+		# ★從來沒有工人上過工 ⇒ 算不出預期工期 ⇒ 用 CEIL（有界，不製造黑洞）
+		return CONSTRUCTION_TIMEOUT_CEIL_DAYS
+	var expected: float = build_eta_days(construction_ticks_total(tile), pop0)
+	return clampf(CONSTRUCTION_TIMEOUT_K * expected,
+		CONSTRUCTION_TIMEOUT_FLOOR_DAYS, CONSTRUCTION_TIMEOUT_CEIL_DAYS)
 
 # 馬廄各等級每日產出 mounts / 消耗 food（index = level-1）
 const STABLE_PRODUCE_PER_DAY: Array = [0.3, 0.7, 1.0]
@@ -50,50 +96,50 @@ const FACILITY_SLOTS: Dictionary = {
 #   （★實測非推導：docs/measurements/2026-09-01-s6-build-days-truth.txt，pop 與每窗 delta 都是讀來的）
 const FACILITY_DEF: Dictionary = {
 	"farming": {
-		"cost": { "material": 30, "tools": 0, "person_hours": 72 },
+		"cost": { "material": 30, "tools": 0 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "farming_level",
 		"leader_pref": { "慎重": 0.3 },
 	},
 	"workshop": {
-		"cost": { "material": 60, "tools": 0, "person_hours": 168 },
+		"cost": { "material": 60, "tools": 0 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "manufacturing_level",
 		"leader_pref": { "貪婪": 0.2 },
 	},
 	"apothecary": {
-		"cost": { "material": 50, "tools": 2, "person_hours": 168 },
+		"cost": { "material": 50, "tools": 2 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "apothecary_level",
 		"leader_pref": { "慎重": 0.2 },
 	},
 	"mint": {
-		"cost": { "material": 100, "tools": 5, "person_hours": 720 },
+		"cost": { "material": 100, "tools": 5 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "mint_level",
 		"leader_pref": { "貪婪": 0.4, "野心": 0.2 },
 	},
 	"stable": {
-		"cost": { "material": 40, "tools": 0, "person_hours": 336 },
+		"cost": { "material": 40, "tools": 0 },
 		"allowed_outpost": ["civilian", "military"],
 		"current_level_key": "stable_level",
 		"required_terrain": "plains",
 		"leader_pref": { "野心": 0.2, "好戰": 0.3 },
 	},
 	"smeltery": {
-		"cost": { "material": 70, "tools": 3, "person_hours": 336 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,同族,balance):afford margin。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency 非 cost,經食安化解;keep=無害。詳 known_issues cost70-trace
+		"cost": { "material": 70, "tools": 3 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,同族,balance):afford margin。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency 非 cost,經食安化解;keep=無害。詳 known_issues cost70-trace
 		"allowed_outpost": ["military"],
 		"current_level_key": "smelter_level",
 		"leader_pref": { "好戰": 0.2 },
 	},
 	"weaponsmith": {
-		"cost": { "material": 70, "tools": 3, "person_hours": 336 },   # material 80→70(blueprint balance 裁②):afford margin(cost×1.5 120→105)。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency-suppression(隊食/coin 壓賣掉 material)非 cost/cap/「117」,經食安化解;keep=無害 balance 值。詳 known_issues cost70-trace
+		"cost": { "material": 70, "tools": 3 },   # material 80→70(blueprint balance 裁②):afford margin(cost×1.5 120→105)。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency-suppression(隊食/coin 壓賣掉 material)非 cost/cap/「117」,經食安化解;keep=無害 balance 值。詳 known_issues cost70-trace
 		"allowed_outpost": ["military"],
 		"current_level_key": "weaponsmith_level",
 		"leader_pref": { "好戰": 0.4 },
 	},
 	"armorsmith": {
-		"cost": { "material": 70, "tools": 3, "person_hours": 336 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,同族,balance):afford margin。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency 非 cost,經食安化解;keep=無害。詳 known_issues cost70-trace
+		"cost": { "material": 70, "tools": 3 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,同族,balance):afford margin。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency 非 cost,經食安化解;keep=無害。詳 known_issues cost70-trace
 		"allowed_outpost": ["military"],
 		"current_level_key": "armorsmith_level",
 		"leader_pref": { "慎重": 0.3, "好戰": 0.2 },
@@ -150,6 +196,9 @@ static func upgrade_cost(facility: String, target_level: int) -> Dictionary:
 	var out: Dictionary = {}
 	for k in base:
 		out[k] = int(base[k]) * mult
+	# ★工期【不在 cost 表裡】了（S6 phase2）：它由唯一入口算，入口自己吃 level 倍數
+	#   ⇒ ★★不能再走上面那個 for（那會把工期當成又一顆料，且需要表裡先有一份副本）
+	out["person_hours"] = build_person_hours(facility, target_level)
 	return out
 
 const MINT_BASE_RATE: float = 10.0
@@ -343,6 +392,10 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	if tile.construction_started_tick == -1:
 		tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
+	# ★★★動工當下 pop 凍結（S6 phase2 §5 硬條款）：timeout 用它算預期工期。
+	#   ★取【真的有工人推進的第一個 tick】而不是 dispatch 當下 —— 派工的隊未必是施工的隊。
+	if not tile.construction_target.has("start_pop"):
+		tile.construction_target["start_pop"] = maxi(active_team.population, 1)
 	tile.construction_ticks_left -= maxi(active_team.population, 1)
 	# ★持守統一 Slice 2 新鮮度：construction 進度變 → 即重算施工隊 persist_strength（sunk 升），
 	# 執行層(Slice 3)讀時是當下進度值（非決策 cadence 舊值）。純算術零 RNG。
@@ -485,7 +538,7 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 		return false
 	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = BUILD_PERSON_HOURS[type][level - 1]
+	tile.construction_ticks_left = build_person_hours(type, level)
 	tile.construction_target    = { "action": "build", "type": type, "level": level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
@@ -508,7 +561,7 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 		return false
 	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = BUILD_PERSON_HOURS[tile.outpost_type][new_level - 1]
+	tile.construction_ticks_left = build_person_hours(tile.outpost_type, new_level)
 	tile.construction_target    = { "action": "upgrade_level", "level": new_level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
@@ -585,7 +638,7 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	if tile.outpost_owner != team.team_id or tile.construction_team_id != -1:
 		return false
 	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = BUILD_PERSON_HOURS[tile.outpost_type][tile.outpost_level - 1] / 2
+	tile.construction_ticks_left = build_person_hours(tile.outpost_type, tile.outpost_level) / 2
 	tile.construction_target    = { "action": "demolish" }
 	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
 	_tap_build_start(state, team, tile, "demolish")
@@ -614,9 +667,9 @@ static func construction_ticks_total(tile: HexTileData) -> int:
 	var action: String = str(tile.construction_target.get("action", ""))
 	match action:
 		"build":
-			return BUILD_PERSON_HOURS[str(tile.construction_target["type"])][int(tile.construction_target["level"]) - 1]
+			return build_person_hours(str(tile.construction_target["type"]), int(tile.construction_target["level"]))
 		"upgrade_level":
-			return BUILD_PERSON_HOURS[tile.outpost_type][int(tile.construction_target["level"]) - 1]
+			return build_person_hours(tile.outpost_type, int(tile.construction_target["level"]))
 		"upgrade_facility":
 			var fac: String = str(tile.construction_target.get("facility", ""))
 			if FACILITY_DEF.has(fac):
@@ -624,7 +677,11 @@ static func construction_ticks_total(tile: HexTileData) -> int:
 				return int(c.get("person_hours", 0))
 		"demolish":
 			if tile.outpost_level > 0:
-				return BUILD_PERSON_HOURS[tile.outpost_type][tile.outpost_level - 1] / 2
+				return build_person_hours(tile.outpost_type, tile.outpost_level) / 2
+		"crude_camp":
+			# ★紮根(faction_ai)與玩家紮營都叫 crude_camp 但工期不同 ⇒ 讀起工時記下的實付工量。
+			#   ★★改制前這裡沒有分支 ⇒ 兩者都回 0 ⇒ persist_strength/commitment 的 sunk 恆 0（既有 bug）。
+			return int(tile.construction_target.get("person_hours", 0))
 	return 0
 
 # 工地 30 天無實際進度 → 取消、退 50% 料給施工團、tile 釋放。回傳 true = 已取消。
@@ -637,7 +694,8 @@ func check_construction_timeout(state: WorldState, tile: HexTileData) -> bool:
 		if tile.construction_started_tick == -1:
 			tile.construction_started_tick = state.world.current_tick
 		return false
-	if state.world.current_tick - tile.construction_last_progress_tick <= CONSTRUCTION_TIMEOUT:
+	var _timeout_ticks: int = int(round(construction_timeout_days(tile) * float(WorldState.TICKS_PER_DAY)))
+	if state.world.current_tick - tile.construction_last_progress_tick <= _timeout_ticks:
 		return false
 	# ★timeout cancel tap（純觀測）：工地逾時取消（stall 未被召回→逾時=一階/二階失效證）。
 	if Probe.enabled:
@@ -716,7 +774,7 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 		return false
 	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = BUILD_PERSON_HOURS[tile.outpost_type][target_level - 1]
+	tile.construction_ticks_left = build_person_hours(tile.outpost_type, target_level)
 	tile.construction_target    = { "action": "upgrade_level", "level": target_level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
@@ -769,7 +827,7 @@ func demolish_with_control(state: WorldState, team: TeamData) -> bool:
 	if tile.construction_team_id != -1:
 		return false
 	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = BUILD_PERSON_HOURS[tile.outpost_type][tile.outpost_level - 1] / 2
+	tile.construction_ticks_left = build_person_hours(tile.outpost_type, tile.outpost_level) / 2
 	tile.construction_target    = { "action": "demolish" }
 	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	_tap_build_start(state, team, tile, "demolish")

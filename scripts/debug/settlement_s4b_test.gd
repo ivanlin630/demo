@@ -87,7 +87,7 @@ func _t2_marginal_only_no_coeff() -> void:
 	_ok(absf(c.expand_site_marginal - expect_site) < 1e-6,
 		"分點期望邊際＝_inflow_est(候選地 est)（camp_target_est pattern、%.3f）" % c.expand_site_marginal)
 	_ok(c.expand_build_cost >= 0.0 and c.expand_build_cost <= c.expand_site_marginal,
-		"建置成本＝工期零產出攤提（0 ≤ %.3f ≤ 分點邊際、用既有 BUILD_PERSON_HOURS+PLANNING_HORIZON）" % c.expand_build_cost)
+		"建置成本＝工期零產出攤提（0 ≤ %.3f ≤ 分點邊際、用工期唯一入口+PLANNING_HORIZON）" % c.expand_build_cost)
 	# util 本身：net ≤ 0 → 0（anti-crank，不為了 fire 而抬分）
 	var net: float = c.expand_site_marginal - c.expand_build_cost - c.expand_home_marginal
 	var util: float = DecisionTerms.eval("expand_drive", c, "擴點")

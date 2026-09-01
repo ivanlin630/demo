@@ -55,7 +55,7 @@ func _run() -> void:
 		"gate4 pop=0 夾到 1（同真值那行的 maxi(pop,1)）")
 
 	# ★gate5 舊公式的錯有多大——把「修法是改接線」講成可驗證的數字（不寫死倍數，現算）
-	var ticks5: int = int(OutpostSystem.BUILD_PERSON_HOURS["civilian"][0])
+	var ticks5: int = OutpostSystem.build_person_hours("civilian", 1)
 	var pop5: int = 5
 	var truth: float = OutpostSystem.build_eta_days(ticks5, pop5)
 	var old_hi: float = float(ticks5) / float(pop5)                                   # #3/#4：漏除每日窗數

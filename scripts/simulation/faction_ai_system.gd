@@ -98,7 +98,11 @@ const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算�
 # （survival 選擇統一委派 DecisionEngine.rank_survival → DecisionTerms weight，消雙 owner）
 const SOLO_COMMITMENT_BONUS: float = 0.15   # TEST VALUE — SoloAI 慣性加成（止 flip-flop，非鎖死）
 const CRUDE_CAMP_FOOD_SEED: float = 40.0   # TEST VALUE — 紮營種子糧（+同抬 cap）
-const L0_TO_L1_CORVEE_DAYS: int = 3        # TEST VALUE 單旋鈕 — L0→L1 紮根工期（person-ticks=此×TICKS_PER_DAY、pop 推進）
+# ★★★S6 phase2：L0_TO_L1_CORVEE_DAYS 退場。
+#   舊式 `CORVEE_DAYS × TICKS_PER_DAY` 的那個乘號同時承擔兩個語意
+#   （【一天幾小時】×【假設 10 人】）⇒ 換根只動了時間那半 ⇒ 紮根從 3 天變 18 天，
+#   ★而常數名字還說 3，沒有東西報錯。
+#   ⇒ ★★常數不存在，就沒有第二個語意可黏：紮根工期 = OutpostSystem.build_person_hours("settle", 1)。
 # stuck: task 仍是進攻型但 move_target 已被 movement 清掉（off-map / 無路徑）→ 視為 idle 允許重評
 const STUCK_TASKS: Array = [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
 
@@ -4126,11 +4130,12 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		return false
 	# ★糧流 Slice B1 糧橋 go/no-go（解 A1 子隊餓死真 victim）：子隊遠地跋涉+建程需糧 burn×ETA_total。
 	# 母隊(公庫+私產)food 撥得起才派→出發配糧到夠（下方 top-up）；不豐→no-go（別派餓死途中 dissolve）。
-	# ★ETA_total=去程(dist/移速)+建程(BUILD_PERSON_HOURS/pop)（§5）；純算術零 RNG。收編取代礦山 ad-hoc food bootstrap。
+	# ★ETA_total=去程(dist/移速)+建程(工期唯一入口/pop)（§5）；純算術零 RNG。收編取代礦山 ad-hoc food bootstrap。
 	var _eta_travel: float = float(_hex_dist(leader_team.tile_pos, target_pos)) / FOOD_BRIDGE_MOVE_PER_DAY
 	# ★工期單一真相源（2026-08-25）：舊式漏除每日推進窗數 ⇒ 高估 24× ⇒ 糧橋門檻過嚴。
+	# ★S6 phase2：改讀唯一入口（原本讀【另一張表】⇒ 錨推不動它）
 	var _eta_build: float = OutpostSystem.build_eta_days(
-		int(OutpostSystem.BUILD_PERSON_HOURS[outpost_type][level - 1]), pop)
+		OutpostSystem.build_person_hours(outpost_type, level), pop)
 	var _need_food: float = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
 		* (_eta_travel + _eta_build) * FOOD_BRIDGE_SAFE_MARGIN
 	var _avail_food: float = float(vault.get("food", 0)) + float(leader_team.resources.get("food", 0))
@@ -5076,14 +5081,24 @@ const SURVIVAL_CRUSH: float = 5.0
 const DEMOLISH_MARGIN: float = 1.5   # S4 TEST VALUE：slot 滿時 best 須 > 最低 score×此才拆建（避 thrash）
 # S4.5 rule（§R² 補裁 3）：產糧設施集合（規則層，未來新增產糧設施加此）+ 短工期門檻。
 const FOOD_FACILITIES: Array = ["farming"]   # 當前唯一產糧設施
-const SURVIVAL_BUILD_MAX_TICKS: int = 120    # 短工期(farming 72 符合;workshop 168/mint 更高不符→照常中斷)
+# ★★★C1 求生期「蓋得起什麼」的界線 —— ★接線非死值（S6 phase2）。
+#   ★★錨在 SETTLE_PERSON_HOURS，★★★【不得】錨在 farming 自己：
+#     門檻綁 farming、而被比的又常常是 farming ⇒ 恆真 ⇒ 從「會誤殺」變成「永遠不擋」。
+#   k 的來歷（★保留改制前的收容集合，不是拍的）：
+#     舊制 120 / 舊 farming 72 = 5/3 ⇒ 新門檻 = 5/3 × 新 farming(錨×0.5) = 錨 × 5/6
+#     ⇒ farming(0.5錨) 過、workshop/apothecary(1.0錨) 以上不過 —— 與註解自述的意圖一致。
+const SURVIVAL_BUILD_MAX_K: float = 5.0 / 6.0
 
 # S4.5：腳下正蓋產糧設施且短工期 → 建設即自救不中斷（means-end 規則，取代硬編 =="farming"）。
 func _is_food_facility_short(facility: String) -> bool:
 	if not (facility in FOOD_FACILITIES):
 		return false
 	var cost: Dictionary = OutpostSystem.FACILITY_DEF.get(facility, {}).get("cost", {})
-	return int(cost.get("person_hours", 9999)) <= SURVIVAL_BUILD_MAX_TICKS
+	# ★工期不在 cost 表裡了（S6 phase2）⇒ 讀唯一入口。
+	#   ★★若還寫 cost.get("person_hours", 9999)，改制後會【恆取 9999 ⇒ 恆 false】
+	#     ＝求生自救建設整條靜默關閉，而沒有測試會紅。
+	var ph: int = OutpostSystem.build_person_hours(facility, 1)
+	return float(ph) <= float(OutpostSystem.SETTLE_PERSON_HOURS) * SURVIVAL_BUILD_MAX_K
 
 # ★復甦 R2 §2B.1（build-as-survival self-rescue、blueprint 裁 YES genuine util、非死常數）：飢餓村在自家 outpost、
 # 料備妥產糧設施 → 自救建設 option（解 delivered 料被覓食壓過永不蓋的 Catch-22）。純函式評估（無副作用、供 ctx）。
@@ -5130,7 +5145,10 @@ func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
 		# ★工期單一真相源（2026-08-25）：舊式除的是整日 tick(240) 而非每日推進窗數(24)
 		#   ⇒ 低估 10× ⇒ 這道「蓋得完才蓋」的閘放行了蓋不完的案子。修好後【會變嚴】——intended-change。
 		var build_eta_days: float = OutpostSystem.build_eta_days(
-			int(cost.get("person_hours", 72)), team.population)
+			# ★C2（systems 裁定④）：缺鍵【直接爆】，不留 fallback 副本。
+			#   ★★舊式 fallback 72 是 farming 工期的手抄副本 ⇒ 錨一改就分家，
+			#     而它是【會醒過來的死路徑】：新增設施漏填就吃到它，且沒人在看它。
+			int(cost["person_hours"]), team.population)
 		if Probe.enabled:   # ★measurer L3 tap(2026-08-21,C6-#3票)：輸入變異性(閘核心兩值)+真物理對照(÷24非÷240)
 			Probe.bump_sample("food_rescue.gate_check", {"team": team.team_id, "food_days": food_days,
 				# ★舊 key 名把 bug 寫在裡面（÷240 低估／÷24 真值對照）——已收斂到單一源，只留真值與結果。
@@ -5641,8 +5659,13 @@ func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> v
 	var martial: float = float(leader.values.get("好戰", 0.5)) if leader else 0.5
 	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
 	var camp_type: String = "military" if (martial > 0.6 or ambition > 0.7) else "civilian"
-	tile.construction_target = {"action": "crude_camp", "type": camp_type, "level": 1, "owner": team.team_id}
-	tile.construction_ticks_left = L0_TO_L1_CORVEE_DAYS * WorldState.TICKS_PER_DAY
+	# ★person_hours 記進 target（S6 phase2）：紮根與玩家紮營【同叫 crude_camp 但工期不同】
+	#   ⇒ construction_ticks_total 分不出它們，改制前對兩者都回 0（既有 bug，sunk-cost 因此恆 0）。
+	#   ⇒ ★這裡記的是【實際扣了多少】，不是第二張表。
+	tile.construction_target = {"action": "crude_camp", "type": camp_type, "level": 1, "owner": team.team_id,
+		"person_hours": OutpostSystem.build_person_hours("settle", 1)}
+	# ★★★S6 phase2：CORVEE 常數退場 —— 常數不存在，就沒有第二個語意可黏
+	tile.construction_ticks_left = OutpostSystem.build_person_hours("settle", 1)
 	tile.construction_team_id = team.team_id
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
