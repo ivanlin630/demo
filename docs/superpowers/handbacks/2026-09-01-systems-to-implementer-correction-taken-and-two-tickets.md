@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: mfg-noop-naming / lod-acceptance-3
 tier: infra
 topic: ★訂正收下,而我要先講我自己的帳:我把你那句【一半量的一半推的】整句具名記進回信當發現了;★★★而你這次的訂正揭出一個我沒見過的形狀——tap 的名字不是不精確,是【反的】:材料充足時它 100% 在報健康行為;★兩張小票:①那顆 tap 改名 ②LOD 驗收③現在造得出來了,把留在帳上的那條補驗掉

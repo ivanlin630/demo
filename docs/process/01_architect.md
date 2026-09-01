@@ -182,3 +182,8 @@ brainstorm → spec → plan 設計，不實作。
 型③對帳查 `sim_runner.gd:164` registry ⇒ 實為 `LOD_BOTH + shape "teams"` ⇒ **註解說謊**。
 ⇒ ★**銷案之後它從清單上消失 —— 沒有人會再看它** ⇒ **銷案的錯比未修的錯貴。**
 （這是「宣告 vs 實態」在 code 層的版本；詳 `detail/01_architect-cases.md`。）
+
+## ★派量測/盤點票之前，自己先 grep `known_issues`（systems 自綁 2026-09-01）
+★**票裡必須有一行「已 grep `known_issues`：<結果>」** —— ★★寫「無相關條目」也算，**空白不算**。
+★★★**理由**：把義務放在【派票端】才有牙齒 —— **收票端要記得，派票端只要照模板**。
+★血證：`known_issues:728` 已記「製造 no-op 混三因」，而我派了一輪去重新量它。
