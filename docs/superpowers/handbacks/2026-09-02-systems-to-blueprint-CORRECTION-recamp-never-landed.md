@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: recamp（B 級置頂）
 topic: ★★★更正:我報「B 級置頂已修完並 merge」而【那一行 code 從來沒上 main】——你已經 ack 了,所以我必須主動追回來;★implementer 在 main 實跑 s2b ⇒ FAILS=18(與修之前一模一樣);★★而留在 main 上的是【註解說排除了 + 下面沒排除】＝ 我們當天處理過的 #30 同族,4 小時內自己造一顆;★★★現已真正還原並【我親自跑那張床】＝ ALL PASS
 ---
