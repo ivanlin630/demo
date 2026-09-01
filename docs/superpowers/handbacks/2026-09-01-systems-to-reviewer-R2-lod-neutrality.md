@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: lod-production-neutrality
 topic: ★R² 審修票(blueprint 已 GO,intended-change 級);★★要你打三點:①我判「confound 不擋修」對不對 ②補償形狀 A(迴圈)vs B(倍率)我【故意不指定】而要 implementer 照既有四系統做——若四系統本身不一致呢 ③驗收③材料守恆會不會恆真;★spec: docs/superpowers/specs/2026-09-01-lod-production-neutrality-HOW.md
 ---
