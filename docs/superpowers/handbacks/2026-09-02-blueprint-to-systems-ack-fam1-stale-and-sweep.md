@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 族①god-view / A級先查通則
 topic: 回信(received):族①三站已關收(清單=2026-07現場,錨錯/檔案不存在);送R①不自簽=對(「已關」是詮釋,取消整批工的結論更要);★預授權:R① CLEAN⇒族①scope改「10顆gv_*逐顆分類」照做不回報,premise_contradiction才回;★★通則化你的發現:A級已驗6條5條stale⇒【剩餘6條(#6#29#10#33#5#34)開票前一律先查】——先查刀從族②特例升成A級標配;錯負斷言訂正收
 ---

@@ -90,8 +90,24 @@ gv_teamstate (1)：faction_ai::consolidate_target_of
 ★★★**而「被標記」≠「違憲」**：標記＝**豁免**，逐顆要判「這個 mapscan 是不是決策在讀 god-view」——
 **有些可能是合法的自有物查詢**。⇒ **族①的第一步是【逐顆分類】，不是【逐顆修】。**
 
-★**誠實限**：以上是 **detector 看得見的**母體。`constitution_gate` 有已記在案的盲點
-（間接 local-var 存取，見本檔同名條目）⇒ **10 顆是下限不是全部。**
+★★★**2026-09-02 當日撤回**：本條目原本主張「除這 10 顆外沒有已知的 god-view 決策點」——
+★**reviewer R① 抽查 76 個候選裡的【前 40 個】就翻掉它**（`premise_contradiction: TRUE`）。
+
+## ★★★而漏掉的那顆有一個【名字】——detector 天生看不見的形狀
+```
+faction_ai_system.gd:246-250  ★belief 閘：if not BeliefSystem.has_belief(...): continue
+faction_ai_system.gd:265      var border := 1.0 if _is_border_adjacent(team, prey) else 0.3   ← 乘進 score
+faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
+                                  prey.tile_pos.x - attacker.tile_pos.x   ←★★★live 真位
+⇒ ★belief 閘只管【要不要評估這個目標】，★★而【評估本身】讀 live 真值
+⇒ ★★★「有情報」被當成「情報內容任我取用」——而 belief 只說了【知道它存在】
+```
+★**為什麼 detector 抓不到**：它的分類是 `gv_mapscan`（讀一整個集合）／`gv_teamstate`，
+★★**而這顆是「讀一個【已經知道存在】的實體的 live 欄位」** —— **不掃集合，所以不長得像 god-view。**
+★★★**這比原本記的「間接 local-var 存取」盲點更嚴重**：那條是**寫法**上的規避，這條是**類別**上的缺席。
+
+★**母體現況（誠實）**：`10 顆標記 ＋ 至少 1 顆新發現`，而 reviewer **只看了 76 個候選中的 40 個**
+⇒ ★★**剩 36 個未查**，★★★**且已證明「看 40 個就有 1 顆」** ⇒ **不能假設剩下的是乾淨的。**
 
 **狀態：已知未修** ｜ **回訪：到期 token — 族①god-view 批開工時（下一站）**
 
@@ -831,7 +847,19 @@ god-view arc 收官後 re-baseline（main 9c084d3a，乾淨 doom **21.2/22.5/0.6
 
 team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍結 1 格 + food=0 餓死（team4/13 還逃跑↔建設 thrash）。**第 4 種 broken 家族（手不聽腦 finder-check classifier 看不到——不是「有 target 沒 dispatch」，是「dispatch 了但目標 null」）**。機制：個體 survival FLEE（`faction_ai:1595/1948` `flee_from_pos = _flee_threat_pos` = 威脅 **belief 位**）——belief 威脅**有存在感但無座標**（stale/positionless→`belief_pos` 回 `(-1,-1)`）→ `flee_from_pos=(-1,-1)` → 算不出逃離向量。`movement_system.gd`（★L2 錨：檔級） 說「(-1,-1) 不設 target 靠 release 收」**但 release 沒真發生** → 卡 task=逃跑 凍結不覓食餓死。**★PRE-EXISTING 確認（measurer baseline diff 2026-07-20：pre-E 8146c4a2 seed1337 此 signature 570 snapshots 跨 11 隊 16/38/56/57/58/63/64/66/68/92/93=凍結 pre-E 就大量在，非 E 引入）**——slice2 belief-化威脅位+缺 flee-release 引入，**每 belief-化 slice（E 已、D 更大）都暴露更多**。**★廣（11+ 隊）值得修。fix 已 build @28470932（applicability-gate：FLEE 威脅無座標 not applicable→轉覓食），measurer 量測中。****★Slice D 前必修**（否則 D doom-delta 被同款污染）。**修方向**（blueprint 認可，look-before-leap）：`flee_from_pos==(-1,-1)`（威脅無座標）→ **release FLEE → re-rank 轉覓食**，非凍結（FLEE 無座標=not applicable 不該卡死）。連 god-view arc（belief-化暴露）/[[feedback_fileline_vs_interpretation]]。
 
-## market_orders capture/demolish 不清（pre-existing 洩漏，2026-07-20，god-view Slice C v2 異質審撿）
+## market_orders capture/demolish 不清（★2026-09-02 systems 複驗：**斷言成立、錨錯**）
+
+★★★**錨訂正**：原文寫 `outpost_system.gd::slot_cap()`(capture) —— ★**`slot_cap()` 是設施格數函式，不是 capture**，
+而**整支 `outpost_system.gd` 對 `market_orders` 的參照數 ＝ 0**。★★真正的現場是：
+```
+outpost_system.gd:839  func capture(state, winner_id, tile, …)        ← ★零 market_orders 參照
+outpost_system.gd:636  func start_demolish(state, team, …)            ← ★零
+outpost_system.gd:825  func demolish_with_control(state, team, …)     ← ★零
+（唯一會動 tile.market_orders 的是 order_system.gd:112/:256/:330 的到期/撮合裁剪）
+⇒ ★★★易主與拆除【確實不清賣單看板】—— 斷言成立，只是先前指錯了門牌
+```
+
+## （原文，錨已於上方訂正）market_orders capture/demolish 不清（pre-existing 洩漏，2026-07-20，god-view Slice C v2 異質審撿）
 
 `tile.market_orders`（賣單看板）在 outpost **capture/demolish 零清理**：`outpost_system.gd::slot_cap()`(capture) 只改 owner 不動 market_orders；`:327/332`(demolish) 清 type/level/owner/facilities 但**不清 market_orders**；`_sync_board`(order:61-84) 只 prune 自家 origin_team 單、失主後沒人清該 tile → 易主/拆除市集殘留舊賣單 ghost（`received_*_orders` 可能 route 到）。**pre-existing**（非 Slice C 引入；C 的 team_market_known 走 demolish-only cleanup=正解示範不繼承此病）。**非急**（economy 診斷用；C harvest 濾 `outpost_level>0` 已擋部分 ghost）。修=capture/demolish 順帶清/標 stale market_orders。連 [[經濟 arc]]。
 
@@ -1929,7 +1957,11 @@ ALLIANCE / BETRAY / INFRA / FACTION_UPDATE / INDEP_INFRA
 ★**而 `t0-emit-ordering` 這條線的結論是【不修，具名記錄】** ——
 **雙緩衝已回滾（`fp` 回基線一字不差），旗子命運儀器保留、現在量的是真實現況。**
 
-## ★`harvest_system` 還有三個【無名骰子】（2026-09-01，S5a merge 時記，★不夾帶）
+## ★`harvest_system` 還有三個【無名骰子】（2026-09-01 記；★2026-09-02 systems 複驗：**錨精準、數目相符**）
+
+★複驗：`harvest_system.gd:84`／`:101`／`:120` 三顆 `randf()`（野馬／野味／掠食者 regen），**不多不少三顆** ⇒ 條目可直接開票，不必再查。
+
+## （原文）★`harvest_system` 還有三個【無名骰子】（2026-09-01，S5a merge 時記，★不夾帶）
 ```
 harvest_system.gd:84  randf() < WILD_HORSE_REGEN_CHANCE
                  :101 randf() < WILD_GAME_REGEN_CHANCE

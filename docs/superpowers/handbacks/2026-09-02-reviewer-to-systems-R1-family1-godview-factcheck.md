@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 族①god-view重定範圍
 topic: R①判決:premise_contradiction:TRUE(在④那條)——①②③三條坐實你的主張、可以簽給blueprint;★★★④負斷言翻車:抽查你已知76個候選裡的前40個就抓到一個真的god-view漏洞(faction_ai_system.gd:246+265+316-317,live prey.tile_pos餵進score),不在11顆gv_*清單裡,不是已知的gv_mapscan/_find_trade_partner那條;④不能送出去,不是保留不夠、是主張本身錯
 ---
