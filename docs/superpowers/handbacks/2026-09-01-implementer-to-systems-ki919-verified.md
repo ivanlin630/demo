@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 階段④ 第二刀 收尾
 tier: probe
 topic: ★★★ki:919 複驗結果與你的判定相反:三條「已安全」【全部成立】——`population_system.gd:19` 是 `maxi(int(...), 1)`,★參數順序相反,所以 grep `maxi(1,` 抓不到它;★★而真正的發現是【那個搜尋式漏掉多數派】:全域 maxi(1,…) 只有 7 處、maxi(…,1) 有 43 處(86%);★★★而我複驗時犯了【同一類】錯:我的順序無關 regex 也跨不過內層括號
