@@ -1,0 +1,49 @@
+{
+  "slice": "S7-root-differential",
+  "測法": {
+    "worktree": "A:/GDS/demo/.worktrees/measure-s2-after（獨立乾淨worktree）",
+    "root60_commit": "573ef498", "root120_commit": "c617556c",
+    "seed": 1337, "days": 30, "beds": ["peaceful_economy", "warring_states"],
+    "床": "scripts/debug/s7_rootdiff_bed.gd（新床，純觀測，讀既有rootdiff.*/__CTRL_*tap，零新production改動）",
+    "機械檢查": "四輪跑前跑後HEAD都驗過(573ef498/573ef498、c617556c/c617556c)，[BedSelfCheck]四輪effective_window皆100%，無提早game_over"
+  },
+
+  "★★★①兩端陽性對照(硬條款——先驗這個才能讀後面的數字)": {
+    "對照A_期望1.00x(__CTRL_A_per_day,每遊戲日一次)": {"peaceful": 1.000, "warring": 0.966},
+    "對照B_期望2.00x(__CTRL_B_per_tick,每tick一次)":   {"peaceful": 2.000, "warring": 1.932},
+    "★判讀": "A貼著1.00x、B貼著2.00x，兩端都在各自的整數倍帶內（warring的0.966x/1.932x偏離是世界軌跡分岔的雜訊，不是儀器問題——見③誠實限①）——儀器有開，這批數字可以讀"
+  },
+
+  "★★★②候選常數套用次數/person-day 逐顆結果(ratio=root120/root60)": {
+    "HP_REGEN_PER_TICK(病6c)": {"peaceful": "1.000x", "warring": "0.999x", "判讀": "貼著1.00x——★★per-person-day套用次數沒有隨根改變。這直接證偽了S7七病文件裡『病6c真的漂了』的code-reading猜測——量出來它沒漂"},
+    "URGENCY_EWMA_ALPHA(病2)":  {"peaceful": "0.987x", "warring": "0.998x", "判讀": "貼著1.00x——套用次數(呼叫頻率)沒有隨根改變，跟七病文件『換根改變呼叫頻率』的猜測方向不符"},
+    "NAMED_WEIGHT":              {"peaceful": "1.576x", "warring": "1.014x", "判讀": "★兩床不一致(peaceful偏高、warring貼1.00x)——這把尺答不出整數倍判準，只能照實報，不歸類"},
+    "SURVIVAL_BOOST_MAX":        {"peaceful": "1.366x", "warring": "1.903x", "判讀": "warring接近但不到2.00x帶，peaceful在中間——同上，解析度看不到，照實報"},
+    "TERRAIN_SPEED_MULT":        {"peaceful": "1.576x", "warring": "1.060x", "判讀": "兩床不一致，中間帶，解析度看不到"},
+    "THREAT_BOOST_MAX":          {"peaceful": "1.336x", "warring": "1.181x", "判讀": "中間帶，兩床方向一致(都>1)但都不到2.00x，解析度看不到"},
+    "HEX_NEIGHBORS":              {"peaceful": "4.000x(n=1→4，樣本極小不可信)", "warring": "0.969x", "判讀": "peaceful樣本太小(root60總數僅1)不可信；warring貼1.00x"},
+    "POS_OFFSETS_FAR":            {"peaceful": "★key不存在，兩根都沒發生", "warring": "1.431x", "判讀": "只在warring有活動，中間帶"}
+  },
+
+  "★★★③這輪【沒有套用次數】的候選——逐一標明原因，不靜默省略": {
+    "STAMINA_EXHAUSTED_ATK_MULT／STANCE_RANGED_DMG_MULT／HIT_WEIGHTS": "encounter_system.gd/npc_combat_system.gd，兩根兩床皆0——★合理解讀=事情沒發生(這個seed/window沒觸發那個戰鬥子路徑)，不是儀器沒開(同批tap的其他常數在同一份log裡有計數，證明Probe.enabled=true)",
+    "BLEEDING_MAJOR_DRAIN／BLEEDING_MINOR_DRAIN": "health_system.gd，兩根兩床皆0——同上，這個seed/window沒有人進入流血狀態",
+    "INTENT_ARMY_KIND_BONUS": "manpower_system.gd，兩根兩床皆0——同上，決策沒有走到這個分支",
+    "WAGON_TERRAIN_MULT": "movement_system.gd，兩根兩床皆0——同上，這兩床config沒有隊伍配備wagon移動",
+    "★★★TERRAIN_WEIGHTS(world_generator.gd:215)": "★★這一顆是【儀器缺口】不是『沒發生』——我的床`Probe.reset()`+`Probe.enabled=true`是在`GameSetup.setup()`之後才執行，而world_generator的地形生成發生在setup階段內⇒它的套用被我的床結構性看不到。★這是我的床的timing bug，不是候選常數本身的訊號，必須排除在判讀外，不能算進『沒漂』或『漂了』任何一邊"
+  },
+
+  "★★★④誠實限(照原票要求跟數字一起印)": {
+    "①換根導致RNG序列分岔": "warring兩根隊數不同(94 vs 105, person_days 4209 vs 4358)——比的是率不是總量，兩床都看，已照做",
+    "②解析度下限": "這把尺只能分辨整數倍漂移(2.00x)，答不出『有沒有任何偏差』——NAMED_WEIGHT/SURVIVAL_BOOST_MAX/TERRAIN_SPEED_MULT/THREAT_BOOST_MAX/POS_OFFSETS_FAR落在1.0~2.0中間帶，這把尺看不到，不能讀成『沒漂』也不能讀成『漂了』，只能照實報數字",
+    "③刀①高召回低精度": "14顆候選裡有非時間量的可能，本輪沒有自行剔除任何一顆，照跑照報"
+  },
+
+  "landed_paths": {
+    "root60_peaceful": "docs/measurements/s7rootdiff-root60-peaceful_economy-30d.txt",
+    "root60_warring": "docs/measurements/s7rootdiff-root60-warring_states-30d.txt",
+    "root120_peaceful": "docs/measurements/s7rootdiff-root120-peaceful_economy-30d.txt",
+    "root120_warring": "docs/measurements/s7rootdiff-root120-warring_states-30d.txt"
+  },
+  "床改動": {"檔案": "scripts/debug/s7_rootdiff_bed.gd(新檔)", "性質": "純觀測，讀既有rootdiff.*/__CTRL_*tap，零production改動；已知limitation=setup期間的Probe.bump量不到，見③TERRAIN_WEIGHTS"}
+}

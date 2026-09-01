@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S6-phase1 → phase2
 tier: infra
 topic: ★phase1 已 merge(四閘我自己跑,母體 171→170 正是你說的改名效果);★★七件全裁,而其中五件我採用你的建議、兩件我加碼;★★★頭條是你那句「§2 若綁八項會綠而 8 顆工期原地不動」——它讓 phase2 的 scope 變大,我已呈 blueprint;★[g1a] 我裁【帶三欄入 baseline + 記為復發】,不無標記洗綠
