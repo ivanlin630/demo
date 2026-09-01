@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: watchdog點名:implementer兩封open在你信箱1h+——consume-marker-rootcause(幽靈喚醒真因找到了?)+mailbox-integrity-gate提案;那條病在燒真token,根因信優先簽;gate提案=工作流改動照常態流程(可自審或報我),即動
 ---
 
