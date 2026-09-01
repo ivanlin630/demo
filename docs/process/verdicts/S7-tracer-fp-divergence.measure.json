@@ -1,0 +1,36 @@
+{
+  "slice": "observer-safety-impact",
+  "問題": "開tracer與不開tracer,同seed跑出來的世界是不是同一個",
+  "測法": "warring_states,seed=1337,commit c78039e0,15遊戲日,逐日印state_fingerprint；specimen_team_ids=[0,9,19,29,39](確定性strided取樣，同SpecimenDumpHelper手法)",
+  "床": "scripts/debug/s7_tracer_fp_divergence_bed.gd(新檔，純觀測，零production改動，走MeasureBedHelper.arm_and_setup)",
+
+  "①逐日fp(off vs on)": {
+    "結果": "15天全部逐位元相同(day1~day15)",
+    "off_day1": "247a0693b84c424fafa1b9ac7415395e", "on_day1": "247a0693b84c424fafa1b9ac7415395e",
+    "off_day15": "3417207b12a17906cd4aa791c8043684", "on_day15": "3417207b12a17906cd4aa791c8043684",
+    "★完整15天序列兩邊逐位元相同，無任何分岔日"
+  },
+
+  "★★②兩端陽性對照(硬條款，先驗才能讀①)": {
+    "off對照": "[TracerFP] mode=off，log裡完全沒有SpecimenTracer相關行——確認tracer真的沒開",
+    "on對照": "[TracerFP] mode=on specimen_team_ids=[0,9,19,29,39]，15天內SpecimenTracer多次flush(單次flush 1~70 entries不等)——確認tracer真的開了且持續在燒(不是靜默no-op)",
+    "★判讀": "兩端都驗過，①的『15天全同』是真的量到的，不是儀器沒開造成的假陰性"
+  },
+
+  "★★★③但——這是本輪最重要的發現:state_fingerprint結構性排除了tracer三項副作用要動的欄位": {
+    "證據": "scripts/simulation/state_fingerprint.gd:69 註解明寫：『排除ephemeral快取(food_runway/persist_strength/food_flow_avg/need_urgency=recompute/EWMA)+cadence排程欄(*_eval_next_tick)+observer/probe』",
+    "★對照tracer的三項副作用": {
+      "EWMA推進": "被fp明確排除(『need_urgency=recompute/EWMA』)",
+      "cache寫": "被fp排除(『ephemeral快取』)",
+      "cadence重排": "被fp排除(『*_eval_next_tick』——這正是systems信裡特別點名『會改誰在哪個tick被評估』的那個欄)"
+    },
+    "★★★結論": "『fp相同』這個結果對『tracer會不會寫state』這個問題【答不出來】——不是因為tracer沒寫，是因為fp的設計本來就看不到tracer寫的那三個地方。這不是『沒有影響』的證據，是『這把尺看不到』的證據，跟你信裡④誠實限預告的『fp相同≠沒有影響』完全命中"
+  },
+
+  "★④我沒有做的(需要另一把尺才能回答)": "沒有直接比對*_eval_next_tick欄位或EWMA/cache欄位本身(off vs on)——那需要繞開fp、直接序列化/讀取那些被排除的具體欄位做比對，是下一輪的活，我沒有自己選一把新尺就下結論",
+
+  "landed_paths": {
+    "off": "docs/measurements/s7tracerfp-off-warring-15d.txt",
+    "on": "docs/measurements/s7tracerfp-on-warring-15d.txt"
+  }
+}

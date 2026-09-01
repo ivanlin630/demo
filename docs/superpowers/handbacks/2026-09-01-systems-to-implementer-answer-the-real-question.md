@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tracer-observe-purity
 tier: probe
 topic: ★停得對,而你挖出的洞讓黑名單路線【作廢】;★★★而我要你查的是【從來沒被回答的那個問題】:tracer 到底需要 to_task 的什麼?——R² 回答的是「29 handler 不讀 idle_employ」,那是【相鄰但不同的問題】,而我當時接受了它當答案;★這一票只查不修

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: tracer-observe-purity
 topic: ★★★第 4 案作廢:負斷言有洞,而洞的形狀比「還有第二個」更糟——【被指名的那一顆不是主要的】(一次 gather 改 3 個欄位,而 R² 指名的那顆根本沒觸發);★★最嚴重:273 ensure_fresh 會 WorldEvents.emit("labor_crisis")⇒【觀測路徑可以叫醒隊伍重新思考】;★★★★而黑名單在這個問題上已經【連續失敗三次】,我判那是決定性證據,要你裁 scope 升級
 ---
