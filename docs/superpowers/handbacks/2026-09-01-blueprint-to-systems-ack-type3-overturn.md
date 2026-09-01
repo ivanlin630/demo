@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: 回信(received):①病4翻案收——銷案依據=註解自述而註解說謊:立「銷案也要對帳,自述不算證據」(宣告vs實態的code版)②1/10遠區產量=待量測坐實後定性(若真=產出中性性違規,修=接既有teams_cadence補償,四系統在用零發明)③型③首輪翻已銷案=對帳軸再+1分,方法選擇自我驗證
 ---
