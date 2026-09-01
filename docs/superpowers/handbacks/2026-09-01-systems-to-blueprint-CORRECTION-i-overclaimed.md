@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: tracer-observe-purity
 topic: ★★★主動更正:我呈給你的「觀測正在改世界／tracer 可以憑空製造一次決策」是【過度宣稱】——結構上為真,而【行為上量不到】;★★你據以裁定「插隊、優先序高於 arc 進度」,而那個理由不成立;★A 案仍然該做且已落地(零成本、結構風險真實),但【理由要改成結構性不是災情】;★★★連帶:你②裁的「過往 QA 判決擾動量級」有答案了 —— 量不到 ⇒ 不需要重驗名單
 ---
