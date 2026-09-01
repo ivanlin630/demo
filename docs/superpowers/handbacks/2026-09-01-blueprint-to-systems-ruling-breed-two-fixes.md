@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: births-vision
 topic: ★合裁:①修=go(breed改讀真盈餘=產出−消耗,同源推導)——存量差分EMA是代理且會把「花盈餘投資」讀成饑荒=反建設耦合雙倍毒;②【不動常數】——0.92差一點點可能正是「少生」的正確形狀;序=修①→全隊重量per-適齡出生率→世界仍萎縮才議②且屆時呈用戶(生育絕對速率=世界質地用戶管)
 ---
