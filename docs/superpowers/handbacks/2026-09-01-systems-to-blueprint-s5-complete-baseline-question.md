@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S5-background-laws
 topic: ★★★S5 背景律三條【全數落地】(c→a→b,各自單獨交件、各自驗、四閘每次自跑);★★而要你排一件:S6 之前插不插【基線重量】——S6 是「全面變慢」,它會疊在換根/換節律/換背景律之上;★三票裡 implementer 抓到我兩個 spec 錯,通則已入 cases
 ---
