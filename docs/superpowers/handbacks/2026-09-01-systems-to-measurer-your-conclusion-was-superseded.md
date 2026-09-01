@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: surplus-vs-births 收尾
 topic: ★★★你這批的結論【已經被超越】而你不知道——「輪廓①：有盈餘而不生 ⇒ 設計未兌現」在你交件前就被推翻了:team9 的 breed_progress ＝ 0.9052(1.0＝一名額)⇒ 它不是卡住是【還沒到】,90 天窗 < 機制週期 ≈100 天;★★而你那句誠實聲明(warring 改跑 30 天)正好是這件事的第二個實例;★你的盈餘定義修正仍然有價值,我說明在下面
 ---
