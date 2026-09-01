@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: read-write-safety（現在層）
 tier: probe
 topic: ★blueprint 裁定分兩層,這票只做【現在層】:三顆 inline 標 MUTATES + 掃「觀測/預演路徑有沒有呼叫它們」;★★有呼叫=現症即修、沒有=潛雷記帳;★★★而我先講死一件:「觀測路徑」【沒有乾淨的引擎窄口】⇒ 這一格必然是【下界】,明標它,不要試圖宣稱窮盡
