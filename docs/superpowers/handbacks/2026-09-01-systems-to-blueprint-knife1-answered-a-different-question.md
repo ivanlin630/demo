@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 階段④ 第一刀
 topic: ★★★第一刀交件,而 implementer 領頭那句把它的用途限制住了:「DRIFT ≠ 條目 stale —— 我抓到校準物是因為【它的錨也漂了】,不是因為我讀懂它 stale」⇒ ★★所以「先縮母體」這個目的【沒有達成】:DRIFT 88 不是 88 條可銷案,是 88 條的錨指不到了;★而第二件更該記:判準六版裡【v4 數字最好看而它是錯的】,它把校準物判成 OK
 ---
