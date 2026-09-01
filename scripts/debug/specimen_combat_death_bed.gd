@@ -39,6 +39,7 @@ func _init() -> void:
 	seed(1337)
 	var victim := _mk_team(state, 1, Vector2i(5, 5), 3, 0)      # 弱：3 人無武器
 	var killer := _mk_team(state, 2, Vector2i(5, 5), 40, 40)    # 強：40 人全武裝
+	var pop_start: int = victim.population
 	state.specimen_team_ids = [1]
 	SpecimenTracer.reset()
 	SpecimenTracer.enabled = true
@@ -61,7 +62,11 @@ func _init() -> void:
 		state.world.current_tick += 1
 		rounds += 1
 	var victim_gone: bool = (not state.teams.has(1)) or state.teams[1].population <= 0
-	var _casual: int = int(Probe.counts.get("combat.casualty", 0))
+	# ★★★systems 2026-09-02：這個數字【床早就算了卻沒印】—— 而沒有它，Δ=0 分不出兩個解釋：
+	#   (a) tracer 對戰鬥盲   (b) 這 4000 round 根本沒事發生
+	#   ⇒ 判準⑨（床有效性）：★窗內那件事有沒有真的發生，要【印在輸出上】，不是靠讀 code 反推。
+	var deaths_combat: int = int(Probe.counts.get("death.combat_pop", 0))
+	var pop_end: int = state.teams[1].population if state.teams.has(1) else 0
 	print("  戰鬥 round=%d｜specimen 還在世界裡=%s｜pop=%s"
 		% [rounds, str(state.teams.has(1)),
 		   str(state.teams[1].population) if state.teams.has(1) else "已 erase"])
@@ -69,6 +74,15 @@ func _init() -> void:
 	#   fixture 打了上千 round 也沒把它打死 ⇒ ★把它寫成 FAIL 會變成一張【假紅】的床。
 	print("  ★註記：specimen 被打死了嗎 = %s（★殲滅稀＝設計如此，fixture 逼不出來是正常的）"
 		% str(victim_gone))
+	# ★★★窗內【真的發生了什麼】—— 這三個數字讓上面的 Δ=0 可解讀
+	print("  ★★事件母體：specimen pop %d → %d（★掉了 %d 人）｜Probe death.combat_pop=%d"
+		% [pop_start, pop_end, pop_start - pop_end, deaths_combat])
+	print("  ★★★所以 Δ=0 不是「什麼都沒發生」：★真有人員傷亡，而 tracer 一筆都沒記")
+	print("  ★誠實限（強度）：40 全武裝打 %d 無武器、4000 round 只掉 %d 人 ⇒ 【事件母體 ＝ %d】"
+		% [pop_start, pop_start - pop_end, pop_start - pop_end])
+	print("    ⇒ ★★「tracer 對戰鬥盲」是用【一個樣本】坐實的：方向可信（0 vs %d），★★★強度不可信"
+		% [pop_start - pop_end])
+	print("    ⇒ ★分不出【全盲】與【漏記率高】—— 要分，得先有一張傷亡率不是 1/4000 的床")
 
 	var after_death: int = SpecimenTracer.entries.size()
 	var delta: int = after_death - before_death
