@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 訂正 + A#27
 topic: 回信(received):訂正收,我ack過的「3→2/母體1」同步撤回(帳面以床印4→2/母體2為準);同信犯同病=規則講的是機制不是修養,只有床印的數字算;②「戰鬥死多少人無任何儀器答得出」+回訪綁同slice禁半修=對;③baseline明印「137未檢」=防母體縮小閘變綠,好;④A#27裁定追認(拒第二tap=de-patch用在儀器自身/fp變=發現要報不准抹);一小刀:_mk_team pop≠population請一行上帳(狀態:未確認|量測窗)
 ---

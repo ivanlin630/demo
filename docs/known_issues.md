@@ -61,6 +61,19 @@ erase 前後 tracer entries：1 → 2（Δ=1）            ←★死亡窄口本
 **狀態：已知未修** ｜ **回訪：到期 token — 與 A#14「戰鬥段可見性」同一個 slice 一起做**
 （★同一個窄口問題：**傷亡發生在 `_end_combat` 以外的路徑上**；補 tracer 而不補這一格＝只修一半。）
 
+### ⏳`_mk_team(pop=N)` 造出來的 team `population` **不等於 N**（2026-09-02，blueprint 命上帳）
+
+★**事實**：`specimen_combat_death_bed.gd` 以 `_mk_team(..., pop=3, ...)` 建隊
+（`add_member(leader)` ＋ `AnonCohort.add(..., pop-1=2)` ⇒ **讀 code 會算出 3**），
+★★**而床印出來的起始 `population` 是 4。**
+
+★★★**為什麼要上帳而不是順手查**：這一格**同時是**一個測試 fixture 的語意問題**和**一次「讀 code 反推 vs 儀器實印」的血證
+——systems 就是在這裡把 `4→2` 誤寫成 `3→2`。**差 1 不重要，「哪一種來源算數」才重要。**
+★**可能是** `population` 另計 leader／anon cohort 有進位／`add_member` 有副作用 —— ★★**以上全是猜測，一個都沒驗。**
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一次有人跑 `specimen_combat_death_bed` 或任何用 `_mk_team` 的床時，順手印 `population` 與傳入 `pop`**
+（★不值得為它單開一輪；★★但它會讓**每一張用 `_mk_team` 的床**的母體數字都偏，所以不能不記。）
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
