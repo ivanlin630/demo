@@ -285,3 +285,31 @@ static func _cap_observer(state: WorldState, obs_id: int) -> void:
 		arr2.remove_at(oldest_i)
 		if arr2.is_empty(): by_obs.erase(oldest_t)
 		total -= 1
+
+# ★★★從 `goal_resolver.gd` 搬過來（systems R² 定案 2026-09-02）：faction_ai 的佔村候選也要用它。
+#   ★不留第二份拷貝 —— 兩份會漂。goal_resolver 保留一個 delegate 給既有 caller。
+#   ★★誠實記一件【我沒有解掉的】：本函式用到 `FactionAISystem`（_hex_dist / _msg_market_pos），
+#     ⇒ ★★★belief_system 從此對 faction_ai 有依賴，而 faction_ai 本來就依賴 belief_system
+#       ＝【相互引用】。systems 的 seam 理由是「belief_system 對 faction_ai 零依賴」——★這一步之後不再成立。
+#       Godot 4 的 class_name 相互引用實測可解析（本檔跑得起來就是證據），而它是個結構債，已報 systems。
+# ★team_tile_known belief harvest（鏡射 _harvest_market_known）：兩源=bounded vision + relay。禁 RNG。
+static func harvest_tile_known(state: WorldState, team: TeamData) -> void:
+	var known: Dictionary = state.team_tile_known.get(team.team_id, {})
+	var fai := FactionAISystem.new()
+	var vr: int = VisionSystem.VISION_RADIUS
+	for dx in range(-vr, vr + 1):   # bounded=vision（非全圖 god-view）
+		for dy in range(-vr, vr + 1):
+			var p: Vector2i = team.tile_pos + Vector2i(dx, dy)
+			if FactionAISystem._hex_dist(team.tile_pos, p) > vr:   # ★perf cut1 A：static
+				continue
+			var tid: int = p.x * 1000 + p.y
+			if state.world.tiles.has(tid):
+				known[tid] = true
+	# relay：team_known tile 訊息 pos（reuse market pos extractor）→ known
+	for msg in state.team_known.get(team.team_id, []):
+		var mpos: Vector2i = fai._msg_market_pos(msg)
+		if mpos == Vector2i(-999, -999):
+			continue
+		known[mpos.x * 1000 + mpos.y] = true
+	state.team_tile_known[team.team_id] = known
+

@@ -40,6 +40,17 @@ const ROUTE_RE := "\\bif\\b.*(uses_unified|ambition_archetype\\s*==|current_task
 const GV_TEAMSTATE_RE := "state\\.teams\\[[^\\]]+\\]\\.(tile_pos|armed|food|coin|population|morale|troops|current_task)"
 # gv_mapscan：for x in <...>.tiles = whole-map tile 迭代（市集/資源瞬掃全圖；地理=公共知識 legit → # gate-ok）
 const GV_MAPSCAN_RE := "for\\s+\\w+\\s+in\\s+[^#]*\\.tiles\\b"
+# ★★★gv_belief_pre / gv_belief_post（藍圖裁「開」，warn 層，2026-09-02）：
+#   ★判準：決策檔裡，來自 `state.teams.get(<非自己>)` 的物件，其動態欄被【直讀】。
+#   ★★兩個子形要分得開（藍圖要求）：
+#      gv_belief_post ＝ 同函式內【已經】出現過 belief 呼叫之後才讀（過了閘還讀 live）
+#      gv_belief_pre  ＝ 在任何 belief 呼叫【之前】就讀（用 live 決定算不算候選，更嚴重）
+#   ★★★誠實限（實測逼出來的）：本判準只看得見【同一個函式裡】的直讀。
+#      Fix A 的 live 讀發生在【被呼叫的另一支函式】裡，而那支拿到的是【參數】
+#      ⇒ ★本偵測器【抓不到 Fix A】—— 那正是我把 Fix A 改成【型別防線】（簽名吃兩個 Vector2i）的理由。
+const GV_TVAR_RE := "var\\s+(\\w+)\\s*:?[^=]*=\\s*state\\.teams\\.get\\("
+const GV_BELIEF_CALL_RE := "BeliefSystem\\.(has_belief|belief_pos|best_estimate|known_targets)"
+const GV_DYNFIELD_RE := "\\.(tile_pos|population|resources|armed|food|coin|morale|current_task)\\b"
 
 func _initialize() -> void:
 	var current: Dictionary = _scan()
@@ -112,12 +123,18 @@ func _scan_file(path: String, res: Array, out: Dictionary) -> void:
 	var func_re: RegEx = res[3]; var rng: RegEx = res[4]; var ta: RegEx = res[5]
 	var thr: RegEx = res[6]; var early: RegEx = res[7]; var route: RegEx = res[8]
 	var gvfile: RegEx = res[9]; var gv_ts: RegEx = res[10]; var gv_map: RegEx = res[11]
+	var gv_tvar := RegEx.new(); gv_tvar.compile(GV_TVAR_RE)
+	var gv_bel := RegEx.new(); gv_bel.compile(GV_BELIEF_CALL_RE)
+	var gv_dyn := RegEx.new(); gv_dyn.compile(GV_DYNFIELD_RE)
 	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null: return
 	var rel: String = path.replace("res://", "")
 	var is_decision: bool = dfile.search(rel) != null
 	var is_gv_file: bool = gvfile.search(rel) != null
 	var cur_func: String = "<global>"
+	# ★gv_belief_* 的每函式狀態（換函式即重置——不重置會把上一支的 belief 呼叫算進來）
+	var tvars: Dictionary = {}
+	var seen_belief: bool = false
 	# ★跨行 Probe 呼叫的括號結轉（★對照組實測抓到的缺陷 2026-08-26）：
 	#   `Probe.bump("...%s" % [site,` 換行後，★續行上【一個 `Probe.` 字樣都沒有】
 	#   ⇒ 只看單行的剝離會剝不到它，而那正是本次誤報的第二條。
@@ -132,6 +149,7 @@ func _scan_file(path: String, res: Array, out: Dictionary) -> void:
 		var fm := func_re.search(line)
 		if fm != null:
 			cur_func = fm.get_string(1)
+			tvars.clear(); seen_belief = false
 			# 散落入口：dispatch 函式定義本身 = 一個閘（多決策入口）
 			if is_decision and disp.search(cur_func) != null:
 				out["%s::%s::dispatch_entry" % [rel, cur_func]] = true
@@ -144,6 +162,27 @@ func _scan_file(path: String, res: Array, out: Dictionary) -> void:
 				out["%s::%s::gv_teamstate" % [rel, cur_func]] = true
 			if gv_map.search(line) != null:
 				out["%s::%s::gv_mapscan" % [rel, cur_func]] = true
+			# ★gv_belief_*：先記「哪些變數是他隊物件」，再看它們的動態欄有沒有被直讀
+			# ★★★先剝註解 —— ★血證：我在 Fix A 的註解裡寫了 `prey.tile_pos`（在講它【原本】讀那個），
+			#   而偵測器把【我的註解】當成 live 讀 ⇒ 修好的函式照樣紅。
+			#   ★★這是今天第六次「註解自成一欄」，而這次是【我自己的偵測器被我自己的註解騙】。
+			var _hash: int = line.find("#")
+			var code_only: String = line if _hash == -1 else line.substr(0, _hash)
+			var tv := gv_tvar.search(code_only)
+			if tv != null:
+				# ★排除【自己】：`state.teams.get(team.team_id)` 這種是自讀，R² 已確認合法
+				#   ★★不排除的話這個桶會噴滿（實測未排除時 25 個命中，多數是自讀）
+				if line.find("team.team_id") == -1 and line.find("self") == -1:
+					tvars[tv.get_string(1)] = true
+			if gv_bel.search(code_only) != null:
+				seen_belief = true
+			for vn in tvars:
+				var _at: int = code_only.find(String(vn) + ".")
+				if _at == -1:
+					continue
+				if gv_dyn.search(code_only.substr(_at + String(vn).length())) != null:
+					out["%s::%s::%s" % [rel, cur_func, ("gv_belief_post" if seen_belief else "gv_belief_pre")]] = true
+					break
 		if not is_decision:
 			continue
 		if line.find("# gate-ok") != -1:

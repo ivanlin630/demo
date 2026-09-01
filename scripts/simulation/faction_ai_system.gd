@@ -262,7 +262,15 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		var weakness: float = clampf(
 			1.0 - armed_est / maxf(self_armed_f, 1.0),
 			0.0, 1.0)
-		var border: float = 1.0 if _is_border_adjacent(team, prey) else 0.3
+		# ★★★god-view 1a Fix A：border 這一格原本讀 `prey.tile_pos`（live 真位）餵進 score。
+		#   ★改成讀 belief_pos；★★而 `_is_border_adjacent` 的簽名同時改成吃【兩個 Vector2i】
+		#   ⇒ ★★★那支函式從此【拿不到】TeamData，也就拿不到 live 值 —— 防線在型別上，不在紀律上。
+		var prey_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
+		if prey_pos == Vector2i(-1, -1):
+			# ★此處已過 has_belief 閘 ⇒ 理論上不會發生。★★這個桶【必須恆 0】：
+			#   非 0 ＝ has_belief 與 belief_pos 兩個 API 不一致（那是另一個 bug，不是本刀的）。
+			if Probe.enabled: Probe.bump("gv.borderadj_belief_pos_missing")
+		var border: float = 1.0 if _is_border_adjacent(team.tile_pos, prey_pos) else 0.3
 		var eta_days: float = maxf(float(catch_result.eta) / float(WorldState.TICKS_PER_DAY), 1.0)
 		# R1b means-end logistics（②路程糧 × ③目標歸屬，單一連續因子乘進 score）
 		# ②路程糧：單程到 prey 的糧需 vs 有效糧；夠→1.0，緊→往下滑但絕不歸零（既有信號讀取）
@@ -312,9 +320,13 @@ static func _belief_richness(bel: Dictionary) -> float:
 		return float(bel.get("resource_scale", 0))
 	return 0.0
 
-static func _is_border_adjacent(attacker: TeamData, prey: TeamData) -> bool:
-	var dx: int = prey.tile_pos.x - attacker.tile_pos.x
-	var dy: int = prey.tile_pos.y - attacker.tile_pos.y
+# ★★★簽名吃【兩個 Vector2i】不是兩個 TeamData（god-view 1a Fix A，2026-09-02）：
+#   ★呼叫端負責決定那個位置從哪來（自己＝live 合法／他隊＝belief）；
+#   ★★本函式【拿不到 TeamData】⇒ 想讀 live 也讀不到。防線在型別上，不在「記得別讀」上。
+#   ★prey_pos 無效 (-1,-1) 時距離必然 > 2 ⇒ 自然回 false（不特判，讓無 belief 自然不算鄰接）。
+static func _is_border_adjacent(attacker_pos: Vector2i, prey_pos: Vector2i) -> bool:
+	var dx: int = prey_pos.x - attacker_pos.x
+	var dy: int = prey_pos.y - attacker_pos.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2 <= 2
 
 # 追擊：攻擊/掠奪 中每 tick 依 intel 最後已知位置刷新 move_target（移動目標會跑）
@@ -6071,13 +6083,49 @@ func _find_occupy_target(state: WorldState, team: TeamData) -> int:
 	var best_pop: float = 999999.0
 	var _occ_leader: PersonData = state.persons.get(team.leader_id)
 	var leader_values: Dictionary = _occ_leader.values if _occ_leader != null else {}
-	for tid in state.team_discovered.get(team.team_id, []):
+	# ★★★god-view 1a Fix B（藍圖 WHAT：★換【列舉起點】不是換欄位）：
+	#   ★舊：`state.team_discovered`（「發現過」≠「現在有 belief」）＋ 在 belief 閘【之前】就讀 live tile
+	#   ⇒ ★★那是「世界全集過 belief 濾網」——★★★而濾網之前那一步已經是 god-view 了
+	#   ⇒ 新：母體 ＝ `BeliefSystem.known_targets`（我知道的東西），位置讀 belief_pos，
+	#     所有權/control 查 `state.team_tile_known`（belief store）而不是 `state.world.tiles`（全圖）
+	# ★★belief tile store 要先 harvest —— 否則 team_tile_known 恆空、全部被 tile_unknown 殺掉
+	#   （★而那會長得像「god-view 修好了，佔村變 0」——★★★那是假的關閉，不是真的關閉）
+	BeliefSystem.harvest_tile_known(state, team)
+	# ★對帳桶（本 slice 唯一能證「god-view 真的關掉了」的東西）：兩個母體大小 + 差集
+	if Probe.enabled:
+		var _disc: Array = state.team_discovered.get(team.team_id, [])
+		var _kn: Array = BeliefSystem.known_targets(state, team.team_id)
+		var _kn_set: Dictionary = {}
+		for _k in _kn: _kn_set[_k] = true
+		var _only_disc: int = 0
+		for _d in _disc:
+			if not _kn_set.has(_d): _only_disc += 1
+		Probe.add_amount("gv.occupy_pool_discovered", float(_disc.size()))
+		Probe.add_amount("gv.occupy_pool_known", float(_kn.size()))
+		# ★★★差集：舊母體有、新母體沒有的那些 ＝【本刀真正關掉的 god-view 大小】
+		#   ★若它 = 0，那是個【真結果】（這張床上兩者恰好相同），★★但要說出來，不要當成「沒事」
+		Probe.add_amount("gv.occupy_pool_only_discovered", float(_only_disc))
+		Probe.bump("gv.occupy_scan_calls")
+	for tid in BeliefSystem.known_targets(state, team.team_id):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
 		if t.faction_id != -1 and t.faction_id == team.faction_id: continue
+		# ★位置讀 belief（不是 live）；無效 ⇒ 不選（fallback 鐵則：絕不退自身位置）
+		var tpos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
+		if tpos == Vector2i(-1, -1):
+			# ★continue 必須自成一行：寫成 `if Probe.enabled: bump; continue` 會讓 continue
+			#   跟著 Probe 開關走 ⇒ ★★關掉 Probe 時行為不同（觀測改變被觀測物的另一種形態）
+			if Probe.enabled: Probe.bump("occupy.scan_kill_nopos")
+			continue
+		# ★★所有權/control 查 belief store（team_tile_known），★★★不是 state.world.tiles 全圖
+		var _tk: Dictionary = state.team_tile_known.get(team.team_id, {})
+		var _tile_id: int = tpos.x * 1000 + tpos.y
+		if not _tk.has(_tile_id):
+			if Probe.enabled: Probe.bump("occupy.scan_kill_tile_unknown")
+			continue
 		# 可據=站在自家 outpost 的定居村（村格）；已是自己的不算
-		var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
+		var tile: HexTileData = state.world.tiles.get(_tile_id)
 		if tile == null or tile.outpost_level == 0 or tile.outpost_owner != tid: continue
 		if tile.outpost_owner == team.team_id: continue
 		Probe.bump("occupy.scan_outpost_target")   # DIAG：站自家 outpost 的候選
