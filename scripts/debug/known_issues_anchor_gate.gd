@@ -48,7 +48,7 @@ func _run() -> void:
 
 	# ①新錨
 	var re_new := RegEx.new()
-	re_new.compile("`([a-z_0-9]+\\.gd)::([A-Za-z0-9_]+)(\\(\\))?`")
+	re_new.compile("`([a-z_0-9]+[.]gd)::([A-Za-z0-9_]+)(\\(\\))?`")
 	var seen: Dictionary = {}
 	var bad: Array = []
 	var n_new: int = 0
@@ -66,15 +66,32 @@ func _run() -> void:
 		if defre.search(by_base[base]) == null:
 			bad.append("%s ★符號在該檔查無定義（★★這是【真 stale 候選】：符號不見了）" % key)
 
-	# ②舊錨（`名:行號`）
-	var re_old := RegEx.new()
-	re_old.compile("`([a-z_][a-z0-9_]*)(?:\\.gd)?:([0-9]+)`")
-	var n_old: int = re_old.search_all(text).size()
+	# ②其餘錨形式 —— ★★★四欄全印，因為【兩個人可以用兩個定義數同一件事】
+	#   血證（2026-09-01）：systems 說「行號錨歸零」而我的閘量到 37 ——
+	#   ★兩個數字都對：他數的是【簡稱:行號】（那批確實 0），我數的是【任何 名(.gd)?:行號】。
+	#   ★★而失效模式（行號跟著編輯走）對兩者一樣成立 ⇒ 兩個都要看得見。
+	#   ★★★所以這裡不挑一個定義，四個都印 —— 免得下次又要有人回頭對帳一次。
+	var re_abbrev := RegEx.new()
+	re_abbrev.compile("`([a-z_][a-z0-9_]*):([0-9]+)`")
+	var n_abbrev: int = 0
+	for m2 in re_abbrev.search_all(text):
+		if not m2.get_string(0).contains(".gd"): n_abbrev += 1
+	var re_fileline := RegEx.new()
+	re_fileline.compile("`([a-z_][a-z0-9_]*[.]gd):([0-9]+)`")   # ★[.] 取代 \. —— GDScript 字串不吃那個逃脫
+	var n_fileline: int = re_fileline.search_all(text).size()
+	var re_filelvl := RegEx.new()
+	re_filelvl.compile("`([a-z_][a-z0-9_]*[.]gd)`")
+	var n_filelvl: int = re_filelvl.search_all(text).size()
+	var n_old: int = n_abbrev + n_fileline
 
 	print("=== known_issues 錨健檢 ===")
-	print("新錨 `檔::符號`：%d 個（相異 %d）｜舊錨 `名:行號`：%d 個" % [n_new, seen.size(), n_old])
+	print("錨形式四欄（★兩個人可以用兩個定義數同一件事 ⇒ 這裡不挑一個）：")
+	print("  L1 `檔.gd::符號`  = %d（相異 %d）★最好：符號跟著語意走" % [n_new, seen.size()])
+	print("  L2 `檔.gd`（檔級） = %d ★可接受：不會因編輯指錯，但要人自己找" % n_filelvl)
+	print("  L3 `檔.gd:行號`    = %d ★★會漂：行號跟著編輯走" % n_fileline)
+	print("  L4 `簡稱:行號`     = %d ★★★最模糊：連是哪個檔都要猜" % n_abbrev)
 	# ★★舊錨數字必印 —— 它是【還沒遷移的規模】，而它應該單向下降。
-	print("[KI-ANCHOR-GATE] ★註記：舊錨 %d 個 ⇒ 那是【還沒遷移的規模】（★不是通過，是還沒做）" % n_old)
+	print("[KI-ANCHOR-GATE] ★註記：會漂的錨（L3+L4）%d 個 ⇒ 【還沒遷移的規模】（★不是通過，是還沒做）" % n_old)
 	print("   ★★行號跟著【編輯】走 ⇒ 每次 code 一改就可能再指錯；符號跟著【語意】走。")
 
 	if bad.is_empty():
