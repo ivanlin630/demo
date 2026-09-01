@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: ★裁定:①「名為讀實為寫」三例=架構信號成立,定性=觀測安全性(觀測不得改世界既有法的API版);處置分兩層——現在:三顆inline標MUTATES+掃「觀測/預演路徑有無呼叫」(有=現症即修,無=潛雷記帳);排隊:讀寫分離拆函式=獨立票排重錨後;②health兩顆PER_TICK補列隊列
 ---

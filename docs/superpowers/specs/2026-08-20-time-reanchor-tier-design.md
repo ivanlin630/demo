@@ -56,6 +56,9 @@ turn 定義統一(60t vs 24t)/EWMA cadence 相依修(need_hierarchy α 未除 da
 高  語意隨根靜默漂移：
    ★★★2026-09-01 換根微分試驗【實測證偽兩顆】(陽性對照 A 1.000×/0.966×、B 2.000×/1.932× ⇒ 儀器有開)：
      6c HP_REGEN_PER_TICK  → 實測 1.000×/0.999×  ⇒ ★沒漂,「病6c 真的漂了」是讀 code 的猜測
+     ★★★2026-09-01 型① 補列：`health_system` 有【三顆】PER_TICK 實為 per-cadence，清單原本只列一顆
+        ⇒ 另兩顆補進隊列（blueprint 裁）
+        ★★而真相寫在【同一個檔 :16 的註解】：「per-cadence 非 per-tick」—— 記著、沒人回來看
      2  URGENCY_EWMA_ALPHA → 實測 0.987×/0.998×  ⇒ ★沒漂,「α 呼叫頻率隨根變」同樣被證偽
    ★7 ui_logic_test:77 仍成立,但它是【鏡像漂移】(production 不讀它)⇒ 影響面是床不是世界
    ★★★而本輪【真正抓到的漂移】是 S6 對帳找到的 CORVEE(6.00×),不是掃描+微分找到的
