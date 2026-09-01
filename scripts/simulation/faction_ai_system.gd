@@ -3233,6 +3233,10 @@ func _stamp_return_eta(state: WorldState, sub: TeamData, home_pos: Vector2i, xd:
 	xd["return_eta"] = _estimate_eta_to(state, sub, home_pos)   # 無路 → 9999999 哨兵（下方判無路）
 
 # T3 判準：①母隊不在了 ②進 RETURN 當下就無路可回 ③已耗時 > MULT × 預期 ETA。
+# ★★MUTATES —— 名字是【述詞】（is_*），而它會寫【呼叫端傳進來的 dict】：
+#   xd["abandon_reason"] = "parent_gone" / "no_path" / "timeout"（僅在回 true 的三條路上）
+#   ⇒ ★讀的人會以為它可以安全地「問一次看看」，而預演／what-if 呼叫會留下痕跡。
+#   ⇒ ★★同 DecisionContext.gather 那一型，只是規模小。
 func _return_is_hopeless(state: WorldState, sub: TeamData, xd: Dictionary) -> bool:
 	if not state.teams.has(sub.parent_team_id):
 		xd["abandon_reason"] = "parent_gone"

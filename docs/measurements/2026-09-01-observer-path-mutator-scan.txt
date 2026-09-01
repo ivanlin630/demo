@@ -1,0 +1,76 @@
+# 觀測／預演路徑上有沒有呼叫那三顆 mutator（現在層，只盤不修）
+#
+# ★★★母體的性質先講死（systems 已裁）：
+#   「觀測路徑」【沒有乾淨的引擎窄口】—— 它不是一個被 dispatch 的東西，是一種【意圖】。
+#   ⇒ ★所以這份【必然是下界】：能說的是「在我們找得到的觀測路徑上有沒有」，
+#     ★★不能說「沒有問題」。而下界本身就是有用的答案。
+#
+# ★起點清單（systems 給的 + 我補的，逐條標查了什麼）：
+#   ①scripts/debug/ 的 specimen 系（17 檔：specimen_tracer / specimen_dump_helper / *_specimen_*）
+#   ②scripts/ui/ 的 observer 系（observer_main / observer_bridge / observer_inspect_panel /
+#     observer_event_text / observer_ticker_panel / world_map_view / encounter_view）
+#   ③截圖 harness（ObserverMain --obs-*）＝ ②的入口，不另列
+#   ④QA harness 遍歷路徑 ＝ 走 ①的 dump helper，不另列
+# ★★而【床（scripts/debug/*_test / *_bed）不算觀測路徑】：
+#   它們是【製造情境的人】，本來就該改世界 —— 混進來會把母體撐爆而且沒有意義。
+
+═══════════════════════════════════════════════════════════════════
+★★★結論：找到 1 個【現症】，2 個【潛雷】
+═══════════════════════════════════════════════════════════════════
+
+★現症①：specimen 擷取路徑會呼叫 gather（間接）
+```
+scripts/debug/specimen_tracer.gd:107   DecisionOptions.to_task(state, team, opt)
+   ↓（options.gd 的 7 個 to_task closure：:167 :185 :227 :245 :281 :413 :425）
+   DecisionContext.gather(state, team)
+   ↓
+   寫 EWMA／labor cache／★cadence 重排
+```
+★**而它有一層「保護」，那層保護擋不住這個**：
+```
+specimen_tracer.gd:87  var _obs: Array = _begin_observe()
+   註解自述：suppress RNG(observe_velocity) + Probe(to_task→finder bump) 污染
+⇒ ★★它擋了 RNG 與 Probe，★★★擋不住 gather 對 state 的寫入
+⇒ 這正是 known_issues:653 已經寫下的那句：【抑制清單＝易漏的黑名單】
+   —— ★而本輪是那句話的第一個實證：清單真的漏了，漏的就是最重要的那一項。
+```
+★**現症的字面後果**：每擷取一次 specimen，被擷取的那支隊的
+  `need_urgency` 就被推進一格、labor/expand/consolidate 的 cadence 就被重排一次
+  ⇒ ★★**擷取行為改變了後續評估時程** ⇒ 觀測改變被觀測物（同族第 5 例）。
+★★★**我沒有修**（systems 明裁：現症停下來報，修法屬排隊層那票）。
+
+◆潛雷②：`_return_is_hopeless`
+```
+唯一呼叫端：faction_ai_system.gd:3088（convoy T3 判定，production 決策路徑）
+★在我找得到的觀測路徑上【沒有】呼叫
+⇒ 潛雷：回訪條件＝【觸發事件】任何 what-if／預演／specimen 開始呼叫 convoy 判定時
+```
+
+◆潛雷③：`read_market_board`
+```
+production 呼叫端：sim_runner.gd:433（_step3c_read_market_board，tick step）
+其餘呼叫端全在【床】：headless_test ×4／infonet_prop_test ×6／unified_commerce_test
+★在我找得到的觀測路徑（specimen / observer UI）上【沒有】呼叫
+⇒ 潛雷：回訪條件＝【觸發事件】下次有人要在觀測路徑上呼叫 order_system 任一方法時
+```
+
+═══════════════════════════════════════════════════════════════════
+★UI observer 系：查了，沒有碰
+═══════════════════════════════════════════════════════════════════
+`scripts/ui/observer_*.gd` 與 `*view*.gd` 全域搜 `to_task` / `DecisionContext.gather` /
+`read_market_board` / `_return_is_hopeless` / `DecisionOptions` ⇒ ★零命中。
+⇒ ★★也就是說：UI 觀測層目前是乾淨的，而**乾淨的原因是它還沒做決策預覽**
+   —— ★★★那是【還沒踩到】不是【踩不到】：`:653` 已經點名「UI 預覽」是這顆雷的引信之一。
+
+═══════════════════════════════════════════════════════════════════
+★★★這份是下界 —— 明標，不宣稱窮盡
+═══════════════════════════════════════════════════════════════════
+★我能說的：**在上面列出的起點上，只有 specimen_tracer 一條會走到 mutator。**
+★★我不能說的：「沒有別的觀測路徑」——
+   因為「觀測」是意圖不是結構，★★★任何人寫一支新床、一個新面板、一個 what-if 按鈕，
+   都可以在不碰上面任何一個檔名的情況下呼到 `to_task`。
+⇒ ★真正的結構解在排隊層（`:653` 的「拆 pure-read vs commit」）——
+  ★★因為那個解【不需要枚舉呼叫端】：拆完之後，pure-read 那半怎麼呼都安全。
+  ★★★而這正是「抑制清單＝黑名單」與「拆兩段＝白名單」的差別。
+
+# ★紀律：本掃描零 production 邏輯改動（只加 inline MUTATES 註解）；fp 不變。
