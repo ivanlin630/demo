@@ -14,6 +14,7 @@ func _initialize() -> void:
 	var runner := SimRunner.new()
 	for _t in range(ticks):
 		runner.advance_tick(state, Vector2i(-1, -1))
+	print(StateFingerprint.blind_note())   # ★盲區印在使用它的當下（invariant 2026-09-01）
 	var fp: String = StateFingerprint.compute(state)
 	print("=== a4_determinism_check DONE === config=%s ticks=%d fp=%s" % [cfg, ticks, fp])
 	quit()

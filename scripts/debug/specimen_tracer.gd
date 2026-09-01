@@ -97,19 +97,19 @@ static func capture_options(state: WorldState, team: TeamData, scored: Array, ct
 		#   ⇒ candidate 手上自己就帶 `to_task`，用它算；靜態 option 維持原路（行為不變）。
 		var _c0: Dictionary = (e.get("cand", {}) as Dictionary)
 		var _ctt0: Dictionary = (_c0.get("to_task", {}) as Dictionary)
-		var nd: bool
+		# ★★★A 案（2026-09-01）：★tracer 不再呼叫 DecisionOptions.to_task。
+		#   ★理由不是「呼叫太貴」，是【那條路會寫 state】：to_task closure → DecisionContext.gather
+		#   ⇒ 一次呼叫就改 labor_alloc / cadence 排程，甚至 emit labor_crisis（＝觀測叫醒隊伍）。
+		#   ★★而修法【不是抑制那些寫入】—— 那是黑名單，這個問題上已經失敗三次。
+		#   ★★★正解是【不必走那條路】：production 的 dispatch 迴圈
+		#     （faction_ai_system.gd:2804 等）對同一批候選、用同一個表達式、算同一個判斷，
+		#     只是晚一個迴圈 ⇒ 讓它【順手戳記】即可（見 mark_dispatch_verdict）。
+		var _cd: Dictionary = {"opt": opt, "util": float(e.get("u", 0.0))}
 		if not _ctt0.is_empty():
-			# ★candidate：dispatch 走 `_dispatch_goal_delegate` 型別分支，不是 task 表
-			#   ⇒ 這一層唯一有意義的「派不出去」訊號 ＝【沒有目標】。
-			var _ct: Vector2i = _ctt0.get("target", Vector2i(-1, -1))
-			nd = (_ct == Vector2i(-1, -1))
-		else:
-			var td: Dictionary = DecisionOptions.to_task(state, team, opt)
-			var _task = td.get("task", TeamData.TASK_IDLE)
-			var _tgt: Vector2i = td.get("target", Vector2i(-1, -1))
-			nd = (_task == TeamData.TASK_IDLE) \
-				or (_tgt == Vector2i(-1, -1) and _task != TeamData.TASK_FLEE)
-		var _cd: Dictionary = {"opt": opt, "util": float(e.get("u", 0.0)), "nd": nd}
+			# ★candidate 自帶 to_task ⇒ 純讀、零呼叫（2026-08-26 起就是這條路）
+			_cd["nd"] = (_ctt0.get("target", Vector2i(-1, -1)) == Vector2i(-1, -1))
+			_cd["nd_judged"] = true
+		# ★靜態 option 這裡【不判】：nd 由 dispatch 戳回來；未戳到者保持【未判定】
 		# ★means-end 出身標記（2026-08-26，QA 故事稽核要）：同一個「蓋工坊」候選，
 		#   既有機制提的 vs means-end 補的【長得一樣】——不標就讀不出「誰提的」，故事線斷在這。
 		#   ★純讀 scored 元素既有的 cand（decision_engine :106 塞進去的），零 re-query／零 RNG／零副作用。
@@ -247,7 +247,14 @@ static func heartbeat_sweep(state: WorldState) -> void:
 # ── flush：印可讀 timeline（mirror warring per-month summary），tag [Specimen T<id>] ──
 static func flush() -> void:
 	if not enabled or entries.is_empty(): return
-	print("\n========== [SpecimenTracer] flush %d entries（候選 ✗=當下不可派/無target，util雖高仍fallthrough）==========" % entries.size())
+	print("
+========== [SpecimenTracer] flush %d entries ==========" % entries.size())
+	# ★★★✗ 的【有效範圍】必須寫死（systems 2026-09-01 的條件）：
+	#   A 案之後 nd 由 dispatch 迴圈戳記，而那個迴圈在【第一個可派候選】就 return
+	#   ⇒ 中選者【之後】的候選【沒有被判過】—— 而「沒有 ✗」很容易被讀成「可派」，那是【反的】。
+	print("  ★候選標記：✗ ＝當下不可派/無 target（util 雖高仍 fallthrough）｜? ＝【未判定】")
+	print("  ★★有效範圍：✗ 與空白只對排在【中選者之前】的候選有效；")
+	print("     其後的候選 production 根本沒考慮過 ⇒ 顯示 ? ＝未判定，★不是可派。")
 	for e in entries:
 		_print_entry(e)
 	print("=======================================================")
@@ -294,6 +301,19 @@ static func summary() -> void:
 	print("=======================================================")
 
 # ────────── 內部 ──────────
+
+# ★★★A 案：由 production 的 dispatch 迴圈把「這個候選可不可派」戳回來。
+#   ★呼叫端已經算好 td（faction_ai_system.gd:2804 等）⇒ 這裡【零重算、零呼叫、零寫世界】。
+#   ★★specimen-gated：非 specimen 隊直接 return（同其餘 capture_*）。
+#   ★★★戳不到的那些 ＝ dispatch 還沒走到就 return ⇒ 保持【未判定】，dump 印 ?（不是空白）。
+static func mark_dispatch_verdict(state: WorldState, team: TeamData, opt: String, nd: bool) -> void:
+	if not is_specimen(state, team.team_id): return
+	var sc: Dictionary = _scratch(team.team_id)
+	for c in (sc.get("candidates", []) as Array):
+		if String(c.get("opt", "")) == opt:
+			c["nd"] = nd
+			c["nd_judged"] = true
+			return
 
 static func _scratch(team_id: int) -> Dictionary:
 	if not _pending.has(team_id):
@@ -385,7 +405,10 @@ static func _print_entry(e: Dictionary) -> void:
 	var s: Dictionary = e["狀態"]
 	var cand_str: String = ""
 	for c in w["candidates"]:
-		cand_str += "%s=%.2f%s " % [c["opt"], c["util"], "✗" if c.get("nd", false) else ""]
+		var _mark: String = "?"                       # ★預設【未判定】—— 空白會被讀成「可派」
+		if bool(c.get("nd_judged", false)):
+			_mark = "✗" if bool(c.get("nd", false)) else ""
+		cand_str += "%s=%.2f%s " % [c["opt"], c["util"], _mark]
 	# ★讀者一眼分兩層：strategic_intent＝慢 cadence 戰略姿態；motive＝本 tick 這個 winner 為何贏。
 	var _m: Dictionary = w.get("本tick動機", {})
 	print("[Specimen T%d] tick=%d strategic_intent=%s | motive=%s(util=%.2f) | winner=%s task=%s tgt=%s" % [
