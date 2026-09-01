@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ 主 triage / 分群
 tier: probe
 topic: ★blueprint 准了切法:【不逐條判去留】,只問每條「它在等什麼」⇒ 按觸發事件分群;★★★而校準物我用【今天已經帶回訪條件的那 6 條】——它們是已知答案、同一份世界(★而我上次的校準物跨了 commit 與床,被 measurer 擋下);★三騎士其中一條是關鍵:分群時【順手驗觸發還活著】
