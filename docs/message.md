@@ -42,7 +42,7 @@ var is_distorted: bool     # 是否已被人為扭曲
 
 ```gdscript
 HOP_DECAY = 0.15           # 每次 hop 強度衰減
-TIME_DECAY_PER_TICK = 0.005 # 每 Tick 時間衰減
+TIME_DECAY_PER_TICK  # 每 tick 時間衰減（★值見 code —— 2026-09-01 訂正：原寫死 0.005，那是換根前的值；它隨根縮放）
 ```
 
 ### 強度衰減公式

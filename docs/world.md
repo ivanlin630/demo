@@ -33,10 +33,13 @@ var current_turn: int      # 每 6 Tick 推進 1 Turn
 
 ```gdscript
 # ── 時間常數 ──
-const TICKS_PER_DAY    = 240      # 10 ticks/hour
-const TICKS_PER_MONTH  = 7200     # 30 天
-const TICKS_PER_SEASON = 21600    # 90 天
-const TICKS_PER_YEAR   = 86400    # 360 天
+# ★2026-09-01 訂正：原本這裡寫死 240/7200/21600/86400 —— 那是【S2 換根前】的 tick 數。
+# ★★不變的是【時長】，會變的是【tick 數】⇒ 本檔只寫時長，值以 code 為準（world_state.gd）。
+const TICKS_PER_HOUR   = <根旋鈕,唯一自由參數>   # 1 天 = 24 小時
+const TICKS_PER_DAY    = TICKS_PER_HOUR * 24     # 1 天
+const TICKS_PER_MONTH  = TICKS_PER_DAY  * 30     # 30 天
+const TICKS_PER_SEASON = TICKS_PER_DAY  * 90     # 90 天
+const TICKS_PER_YEAR   = TICKS_PER_DAY  * 360    # 360 天
 
 # ── 核心資料 ──
 var world: WorldData

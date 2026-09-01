@@ -1,8 +1,10 @@
 # Tick 時間參數一覽
 
-> 基準：`ticks_per_day = 240`（`scripts/data/world_state.gd`）  
-> 1 tick = 6 分鐘遊戲時間（`TICKS_PER_HOUR = 10`，`TICKS_PER_DAY = 240`）  
-> 按一次 UI「推進」= `TICKS_PER_TURN = 24` tick = 1 天
+> ★★★2026-09-01 訂正：本檔原本整份寫死 S2 換根【前】的 tick 數（240／10／24…）。
+> ★**根旋鈕是 `TICKS_PER_HOUR`（`scripts/data/world_state.gd`），其餘由它導出** —— 值以 code 為準。
+> ★★**本檔只寫【時長】與【用途】，不寫 tick 字面數** ——
+> **不變的是時長，會變的是 tick 數；把數字更新一次，下次換根它會再爛一次。**
+> 基準：1 天 = 24 小時；按一次 UI「推進」= `TICKS_PER_TURN` = **1 天**
 
 ---
 
