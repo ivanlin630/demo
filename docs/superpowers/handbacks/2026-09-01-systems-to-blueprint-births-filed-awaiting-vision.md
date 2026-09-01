@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 人口不成長
 topic: ★照你說的走常規處置:「90 天只生 1 個」已正式入 known_issues 帶回訪條件(觸發事件＝你裁定人口該不該成長);★★★而我明寫了一件:【在你裁定之前不派任何歸因票】——歸因的前提是「它應該是別的樣子」,而那還沒有人說過
 ---
