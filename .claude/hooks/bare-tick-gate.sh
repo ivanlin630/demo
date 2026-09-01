@@ -109,4 +109,22 @@ DEFER_N=$(grep -cE '^# RULEHIT\|b_defer\|' "$WT/$OUT_T" 2>/dev/null || :); DEFER
 if [ "$DEFER_N" -eq 0 ]; then
   echo "[BARE-TICK-GATE] 註記：b_defer 規則 0 條 ⇒ 延後到期兩檢【本輪無母體】（★不是通過）"
 fi
+
+# ★★★§3 零命中【全 bucket】註記（systems 裁定②，2026-09-01）：
+#   ★動機（血證）：S6 §1 把 CAMP_BUILD_TICKS 改成 CAMP_BUILD_PERSON_HOURS
+#     ⇒ 它退出本 triage 的 *TICK* 母體 ⇒ 守它的那條 c_whitelist 規則變成【零命中死規則】。
+#   ★★而 §1 只看 b_defer ⇒ 這種死規則【靜默】—— 每一次改名都會製造一批。
+#   ★★★為什麼是【註記】不是 FAIL：規則退場是正常演化，用 FAIL 會恆紅＝沒有閘
+#     （同「總數當閘＝恆紅」那條）。要的是【看得見】，不是【擋下來】。
+#   ★誠實限：本註記只證明「這條規則現在沒守到任何東西」，
+#     ★★它分不出【病好了】與【regex 靜默失效】—— 那兩種讀法仍然要人判。
+ZERO_ALL=$(grep -E '^# RULEHIT\|' "$WT/$OUT_T" 2>/dev/null   | awk -F'|' '$3 == 0' | grep -v '^# RULEHIT|b_defer|' || :)
+if [ -n "$ZERO_ALL" ]; then
+  ZN=$(printf '%s
+' "$ZERO_ALL" | grep -c .)
+  echo "[BARE-TICK-GATE] 註記：零命中規則 $ZN 條（★b_defer 以外；b_defer 由 §1 判 FAIL）"
+  printf '%s
+' "$ZERO_ALL" | sed 's/^# RULEHIT|/  /'
+  echo "  ★意義＝這些規則現在【沒守到任何東西】；★★分不出「病好了」還是「regex 靜默失效」，要人判"
+fi
 echo "[BARE-TICK-GATE] PASS：母體 $TOT，全部已結案（NEEDS_HUMAN=0）"

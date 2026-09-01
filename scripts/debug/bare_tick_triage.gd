@@ -70,10 +70,15 @@ func _run() -> void:
 		_mk("const SETTLE_PERSON_HOURS", "c_whitelist",
 			"★person-hours【工量】非【世界時長】：_tick_construction 每小時扣 maxi(pop,1)，要幾天取決於有幾個人 ⇒ 它不隨根旋鈕縮放。★★而它是【全部四種工期來源的唯一錨】，改它＝改全世界工期（S6 phase2）"),
 		_mk("const DUMP_CHUNK_TICKS", "d_not_time", "批次大小：observer dump 一塊跑幾 tick，是【分塊粒度】不是【時長】（UI 側，不影響世界）"),
-		# ── 盲點修補後新出現的 "ticks" 族 ──
-		_mk("[=!]=\\s*\"ticks\"", "d_not_time", "key_filter：`if k == \"ticks\"` 是【欄位名比對】，同行的數字不是時間量"),
-		_mk("\"ticks\"\\s*:\\s*[0-9]+", "c_whitelist", "★person-ticks：建造成本是【工量】不是【時長】—— _tick_construction 每呼叫扣 maxi(pop,1)，而每日呼叫次數已由 TICKS_PER_DAY/NEAR_CADENCE 導出 ⇒ 不隨根旋鈕縮放"),
-		_mk("cost\\.get\\(\"ticks\"", "c_whitelist", "★同上族：預設的建造工量（person-ticks）"),
+		# ── 退休（S6 §1 改名，2026-09-01）：原「盲點修補後新出現的 "ticks" 族」三條 ──
+		#   [=!]="ticks" ／ "ticks":[0-9]+ ／ cost.get("ticks"
+		# ★不是 regex 壞了，是【對象整批離開母體】：ticks → person_hours 之後
+		#   那些行不再含 tick 字樣 ⇒ 掃描器不再收進候選（母體 person_hours 命中 = 0）
+		#   ⇒ ★★改寫成 person_hours 也仍是 0 命中 —— 修不回來，只能退場。
+		# ★★★而這留下一個【覆蓋洞】，已 flag systems（不是我一個人能裁的）：
+		#   FACILITY_DEF 那八顆工期值本來靠上面第二條被【看見並判過】，
+		#   改名後它們不在 bare-tick 母體、也不在 const_time 母體（那邊只收 const）
+		#   ⇒ ★現在【沒有任何母體涵蓋它們】，★★而 S6 phase2 要改的正是這八顆。
 		# ── (c) 白名單：S2 重錨引入的兩顆新形狀 ──
 		_mk("const TICKS_PER_HOUR:", "c_whitelist", "★新的根常數本身（S2 把自由參數從 TICKS_PER_DAY 換成它）：其他時間量由它導出，改成 hours() 會循環定義"),
 		_mk("TICKS_PER_HOUR / 6", "c_whitelist", "★單位結構：遭遇動作＝10 分鐘＝1/6 小時。★★這個 6 不隨小時縮放——根怎麼改，一小時永遠是六個十分鐘"),
