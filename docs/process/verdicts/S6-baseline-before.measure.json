@@ -1,0 +1,58 @@
+{
+  "slice": "S6-baseline-before",
+  "★★★commit: 1af956fa（現行main HEAD，已含S5a/S5b/S5c全落收）——這份數字描述的是這一個世界，S6落地後拿同一份床(qty_tap_bed.gd，零新tap，逐位元跟S2殘差終量那份相同)再跑一次比對": true,
+  "★硬條款": "這輪【沒有加任何新tap】——床是S2殘差終量那份的原封不動版本，是S6效果能否跟S5/S3/S4/S2乾淨分開的唯一保證",
+
+  "測法": {
+    "worktree": "A:/GDS/demo/.worktrees/measure-s2-after（獨立乾淨worktree）",
+    "commit": "1af956fa",
+    "seed": 1337, "days": 30, "beds": ["peaceful_economy", "warring_states"]
+  },
+  "機械檢查": {
+    "跑前跑後HEAD": "1af956fa / 1af956fa（兩床皆驗）",
+    "[BedSelfCheck]": {
+      "peaceful": "observer_guard=none first_nonadvance=none effective_window=43200/43200(100%)",
+      "warring":  "observer_guard=stripped first_nonadvance=none effective_window=43200/43200(100%)"
+    }
+  },
+
+  "★peaceful_economy(teams終=12, persons終=24)": {
+    "採集food_taken_每日": 25.79, "採集material_taken_每日": 34.60, "採集ore_silver_taken_每日": 0.22,
+    "消耗food_每日": 55.86, "消耗material_每日": 0.06,
+    "移動格tap_每日": 0.10, "移動格tap_分母事件次數": 3,
+    "決策次數_每日": 10.47, "決策次數_總": 314,
+    "製造觸發次數_每日": 7.00, "製造觸發次數_總": 210,
+    "訊息發出_每日": 11.60, "訊息發出_總": 348,
+    "訊息送達_每日": 0.20, "訊息送達_總": 6,
+    "餓死(named/minor/anon)": "未發生",
+    "撮合嘗試_日": {"buy": 0.07, "sell": 0.20},
+    "credited/taken(food)比值": "100.0%（溢出約0）",
+    "傳播節律": {"呼叫次數_每小時": 1.10, "arrival事件_每小時": 0.00, "同格對數_每小時": 0.00}
+  },
+
+  "★★warring_states(teams終=94, persons終=147)": {
+    "採集food_taken_每日": 41.12, "採集ore_iron_taken_每日": 0.00, "採集ore_silver_taken_每日": 0.00,
+    "消耗food_每日": 355.06,
+    "移動格tap_每日": 74.30, "移動格tap_分母事件次數": 2229,
+    "移動格床側_每日": 63.63, "★兩者差": "-320步(spawn/合併跡象，tap為準)",
+    "決策次數_每日": 81.97, "決策次數_總": 2459,
+    "製造觸發次數": "未發生（key不存在，Probe是ON）",
+    "訊息發出_每日": 43.13, "訊息發出_總": 1294,
+    "訊息送達_每日": 231.63, "訊息送達_總": 6949,
+    "送達/發出比值": 5.371,
+    "餓死(named/minor/anon)": "未發生",
+    "撮合嘗試_日": {"buy": 19.37, "sell": 28.70},
+    "credited/taken(food)比值": "31.0%（溢出28.39/日，糧倉緊度延續前幾輪的趨勢）",
+    "傳播節律": {"呼叫次數_每小時": 1.10, "arrival事件_每小時": 2.76, "同格對數_每小時": 1.13}
+  },
+
+  "★per-team-day原始輸入(給S6之後那輪直接算，不用回頭重挖raw)": {
+    "peaceful_teamdays": 360, "warring_teamdays": 2820,
+    "warring決策每隊每日": 0.8720, "warring訊息送達每隊每日": 2.4642, "warring移動tap每隊每日": 0.7904, "warring採集food_taken每隊每日": 0.4374
+  },
+
+  "landed_paths": {
+    "peaceful_raw": "docs/measurements/s6-baseline-qty-peaceful_economy-30d.txt",
+    "warring_raw": "docs/measurements/s6-baseline-qty-warring_states-30d.txt"
+  }
+}

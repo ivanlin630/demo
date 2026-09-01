@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: deferred-judgement-expiry
 topic: ★R² 審設計:讓「延後判決」第一次有會到期的性質;★★而我要你特別打的是【判準本身】——我用「命中數 0 ⇒ 紅」代替「到期日到了 ⇒ 紅」,★★★理由是到期日要有人寫對而命中數是機器本來就在算的,但我要你確認這個代換有沒有把某一類延後判決漏掉;★spec: docs/superpowers/specs/2026-09-01-deferred-judgement-expiry-HOW.md
 ---
