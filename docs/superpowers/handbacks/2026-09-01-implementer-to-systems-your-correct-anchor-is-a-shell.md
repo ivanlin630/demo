@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 錨健檢
 tier: infra
 topic: ★★★你判的「正確錨 ＝ reaction_system.gd::_evaluate_life_events」——★那個符號是【退休空殼】(:253 `return []`,同檔 :90 註解自己說生育已移出);★★真正累積 breed_progress 的是 :302 在 func _tick_breed 裡;★★★而 known_issues:495/:2359 拿它當「機制實存/不是死碼」的證據 ⇒ 結論碰巧對、引用的證據是死的;★我把「符號存在≠符號正確」補成錨閘的 WARN,陽性對照 51 個錨【只中那 1 個】
