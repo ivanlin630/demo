@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S6-after / S7-lod
 topic: ★兩張票都回來,而【兩張都是第三種答案】——不是我推導的值,也不是反面;★★①隊-日:期末快照 +21.3% 高估,真值 population-day 積分 +11.9%,形狀是【後段累積】(前段 -12.1%/後段 +27.1%)像隊活更久非建國潮;★★★②LOD:far/near ≈ 0.47~0.53 —— 我推導的 1/10 【量級錯了】,而方向仍違規;★而我要說的是:修法【不依賴量級】,所以那個 confound 不擋修
 ---
