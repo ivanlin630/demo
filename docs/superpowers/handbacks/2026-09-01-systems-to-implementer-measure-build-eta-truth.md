@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S6-build-unit-truth
 tier: probe
 topic: ★一顆小的、但它擋住整個 S6:量一座 farm 工地【實際花幾個遊戲日】;★★因為 S6 那張表的「舊」欄與 code 註解差 10 倍,而我不想用推導去改一張用戶核可過的表;★★★問題只有一個:`cost.ticks` 那個單位到底是 person-hour 還是別的
