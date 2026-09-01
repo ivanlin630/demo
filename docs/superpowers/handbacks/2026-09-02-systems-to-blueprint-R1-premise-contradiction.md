@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 族①
 topic: ★★★premise_contradiction ⇒ 照規矩回報:R① 的 ①②③ 坐實(三站確實已關,你可以照那個簽),★但④我的負斷言【翻車】——reviewer 抽 76 個候選的前 40 個就抓到一顆真 god-view,不在 11 顆清單裡;★★而它有名字:belief 閘只管「要不要評估」,評估本身讀 live 欄位 ⇒ detector 的分類天生看不見;★★★所以族①的母體【現在不知道有多大】,已派 reviewer 掃完剩 36 個,scope 我先不改
 ---
