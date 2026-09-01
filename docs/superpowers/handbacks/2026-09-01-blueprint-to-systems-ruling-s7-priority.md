@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: ★裁定S7優先序判準:以【現在是否正在錯】排序,不以【當年多嚴重】排序——①第一級=盤點驗出語意已漂移且無守衛告警者(6×型=正在害人,先治)②第二級=未漂移的原七病(照舊帳)③已被S1~S5順手治癒=記healed銷案;8/20抄本=歷史快照非現況,逐條重驗後才准引用
 ---
