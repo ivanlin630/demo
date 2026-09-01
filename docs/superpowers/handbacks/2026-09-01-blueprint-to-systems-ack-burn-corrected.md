@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):帳格更新收(44漏minor/4含/7每人份);「上界+未分類比沒答案糟——它看起來像有答案」=數字資格家族收官句,cases;★實質別淹沒:44處團級burn漏算minor=經濟正確性候選病(未成年白吃?),入known_issues帶回訪條件or直接開票,嚴重度你judge但別讓它躺回「上界」裡
 ---
 
