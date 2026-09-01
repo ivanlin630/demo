@@ -1,0 +1,67 @@
+# ★★★盈餘 → 生育 對帳：斷點【兩個，都量到了】
+#
+# ═══ 這條線的四段（母體先寫死）═══
+#   A 名額閘   `minor_population >= maxi(1, pop*0.25)` ⇒ return
+#   B 訊號閘   `f = breed_f(breed_rel_surplus(team))`，f<=0 ⇒ return
+#   C 適齡閘   逐人 needs.safety>0.7 且 needs.food>0.7 且 _breed_balance>0；daily<=0 ⇒ return
+#   D 累積     `progress += daily × elapsed_days`，跨 1.0 才生
+#
+# ═══ ★★★結論 ═══
+# ①【B 段斷】9/10 隊：★inflow−burn 有 74–90 個盈餘天，而 breed 讀的 rel_surplus【>0 的天數只有 0–10%】
+#    ⇒ ★★兩個量【連正負號都不同】：平均 rel_surplus 是 −0.08 ~ −0.36
+#    ⇒ ★★★原因在【它們是不同的量】：
+#         盈餘  ＝ FoodFlow._sustainable_inflow − burn        （產出 − 消耗）
+#         breed ＝ team.food_flow_avg ＝ effective_food 的【存量差分】EMA（resource_system.gd:291-300）
+#       ⇒ 存量會被【消耗以外的路】帶走（交易/給養/搬遷…），所以「產出>消耗」時存量仍可能在跌
+# ②【D 段慢】唯一讀得到盈餘的 team9：rel_surplus>0 佔 69%、均值 +0.192（>K=0.15）、名額從未滿
+#    ⇒ ★而它 90 天仍沒生：★★平均適齡人數 ＝ 2.00，而設計假設是【5 人】
+#      （reaction_system.gd:7-11：1/30 = 0.0133 × f(0.5) × eligible(5)）
+#    ⇒ ★★★速率 2.5× 慢 ⇒ 估算 90 天累積 ≈ 0.92 —— 【差一點點到 1.0】
+#
+# ═══ ★假說被推翻的紀錄（★留著，因為它是判準怎麼收斂的）═══
+#   我的第一個假說：「存量到 cap ⇒ 差分歸零 ⇒ 訊號歸零」
+#   ⇒ ★量到糧倉飽和度 0.000–0.026（離 cap 很遠）⇒ ★★假說錯
+#   ⇒ ★★★而錯的方式有意義：不是「存量滿了不動」，是【存量在跌】—— 方向相反
+#
+# ═══ 誠實限 ═══
+# ①★「盈餘」用 FoodFlow._sustainable_inflow 口徑（★不含狩獵/交易）—— 換口徑左欄會變
+# ②★★team9 的 0.92 是【估算】（0.0133 × f(均值) × 適齡 × 天數），★★★不是逐日累積的實測
+#    ⇒ 要坐實得逐日記 progress；本輪沒做，而它會影響「差一點」還是「差很多」
+# ③★名額閘與適齡閘都量了（0% / 0.16–2.00），★★所以 A 與 C 被排除【不是靠推論】
+#
+# 盈餘 → breed 訊號 對帳｜config=peaceful_economy days=90
+# ①盈餘＝_sustainable_inflow − burn｜②breed 讀的＝food_flow_avg｜③自家公庫飽和度
+# 全世界 breed.born 累計 = 0
+#
+# ★★★設計假設（reaction_system.gd:7-11 反推）：健康村 rel_surplus≈K=0.15 ⇒ f≈0.5，★適齡 5 人
+#   ⇒ 目標 births_per_day = 0.0133 × 0.5 × 5 = 0.0333（≈ 一個月一名額）
+team|①盈餘天|②平均 rel_surplus|★②>0 的天數|平均適齡|名額滿
+0|76|-0.3529|2(3%)|0.82|0(0%)
+1|84|-0.2848|0(0%)|0.71|0(0%)
+2|83|-0.2517|8(10%)|1.86|0(0%)
+3|87|-0.3554|0(0%)|2.00|0(0%)
+4|87|-0.3578|0(0%)|2.00|0(0%)
+5|90|-0.3355|3(3%)|1.27|0(0%)
+7|87|-0.0840|0(0%)|0.16|0(0%)
+9|90|0.1920|62(69%)|2.00|0(0%)
+10|83|-0.2212|0(0%)|0.46|0(0%)
+11|74|-0.2726|4(5%)|0.69|0(0%)
+#
+# ★讀法：★★「盈餘天多、而 food_flow_avg≈0 佔比高」＝ breed 看不到那個盈餘
+#   ★★★而若同一列的糧倉飽和度也接近 1.0 ⇒ 假說成立：存量到 cap ⇒ 差分歸零 ⇒ 訊號歸零
+#
+## ★★★四段斷點分辨（★rate_sample 只在 daily>0 時 fire ⇒ 它分得開 A/B/C 與 D）
+breed.rate_sample 次數 = 0｜breed.born = 0
+樣本數 = 24（cap 24）
+  { "team": 6, "rel_surplus": 0.018, "f": 0.108, "daily_rate": 0.0023, "progress": 0.001, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.04, "f": 0.211, "daily_rate": 0.0045, "progress": 0.003, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.062, "f": 0.291, "daily_rate": 0.0062, "progress": 0.005, "elapsed_days": 0.42 }
+  { "team": 4, "rel_surplus": 0.003, "f": 0.017, "daily_rate": 0.0004, "progress": 0, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.082, "f": 0.354, "daily_rate": 0.0075, "progress": 0.009, "elapsed_days": 0.42 }
+  { "team": 4, "rel_surplus": 0.007, "f": 0.045, "daily_rate": 0.001, "progress": 0.001, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.101, "f": 0.403, "daily_rate": 0.0086, "progress": 0.012, "elapsed_days": 0.42 }
+  { "team": 4, "rel_surplus": 0.011, "f": 0.07, "daily_rate": 0.0015, "progress": 0.001, "elapsed_days": 0.42 }
+# ★讀法：rate_sample = 0 ⇒ 斷在 A(名額滿)/B(f<=0)/C(無適齡) 三者之一
+#        rate_sample > 0 而 born = 0 ⇒ ★★斷在 D：★★★速率太低，progress 到不了 1.0
+# ★誠實限：①用 FoodFlow._sustainable_inflow（★與 breed 讀的是不同的量，那正是本表要證的）
+#   ★★而『盈餘』的口徑若換成別的（例如含狩獵/交易），這張表的左欄會變 —— 口徑寫在這裡
