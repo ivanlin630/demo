@@ -1,0 +1,35 @@
+{
+  "slice": "surplus-vs-births",
+  "問題": "有持續盈餘的隊,生了沒——判準用戶8/20條件法(瀕餓~0/溫飽少生/盈餘多生)",
+  "盈餘定義": "rel_surplus = team.food_flow_avg / max(population×FOOD_PER_PERSON_PER_DAY, 0.001)——直接讀reaction_system.gd::breed_rel_surplus同一個量(遊戲繁殖機制自己用的定義)，零新tap；不含馬匹草料(另記，未併入)",
+  "床": "scripts/debug/s7_surplus_births_bed.gd(新檔，零新tap，走MeasureBedHelper.arm_and_setup)",
+
+  "★窗長不對稱(誠實聲明)": {
+    "peaceful_economy": "90天(seed1337，跟known_issues的born=1原始窗長一致)",
+    "warring_states": "30天(★不是90天——warring 90天窗兩次被外部中斷(第一次GODOT_TIMEOUT 3600s、第二次被殺於0字節)，改跑可靠的30天窗，附checkpoint機制)",
+    "★影響": "兩床不能直接互相比較『天數尺度』上的東西，但各自的『盈餘天數vs生育次數』隊級對照表本身仍然有效——問題問的是『同一隊自己盈餘多但沒生』，不需要兩床窗長一致"
+  },
+
+  "★①peaceful_economy(90天，15隊)": {
+    "盈餘天數佔比分佈": {"mean": 0.1757, "median": 0.0333, "Q1": 0.0, "Q3": 0.3778, "min": 0.0, "max": 0.6889},
+    "總生育次數": 0,
+    "陽性對照": "本輪90天窗0次生育——known_issues記載的born=1是舊commit(70a792b3,S2~S7重錨前)用exam_12mo_bed.gd量的，不是同一份code/世界，無法直接驗證，已在前一封信說明",
+    "★輪廓①證據": "team9盈餘天數62/90(69%)、team8=53/90(59%)、team6=34/90(38%)——三隊都有大量盈餘天，生育次數皆0"
+  },
+
+  "★★②warring_states(30天，195隊，含短命NPC戰鬥實體)": {
+    "盈餘天數佔比分佈": {"mean": 0.2472, "median": 0.0, "Q1": 0.0, "Q3": 0.5, "min": 0.0, "max": 1.0},
+    "總生育次數": 0,
+    "★輪廓①證據": "分佈裡max=1.0——存在一支隊30天內天天有盈餘，而195隊全體生育次數合計=0；受限於床只印前20隊詳表，那支隊的確切team_id沒有被印出(在後段team_id範圍)，但分佈統計本身已足以確立『有隊持續盈餘卻無人生育』"
+  },
+
+  "★★★③對blueprint三分岔的回答": {
+    "輪廓①(存在持續盈餘的隊而births≈0⇒設計未兌現⇒開歸因票)": "兩床都命中——peaceful最高69%盈餘天(team9)、warring最高100%盈餘天，兩邊生育次數都是0，不是『全員無盈餘』(輪廓②不成立，因為確實有隊長期盈餘)",
+    "★裁決": "測到的形狀是輪廓①，不是②也不是③——盈餘存在且不算稀少(peaceful Q3=0.378、warring Q3=0.5，意味著超過1/4的隊-次樣本是盈餘狀態)，但90天/30天內生育次數合計仍是0，開票與否留給你/blueprint裁"
+  },
+
+  "landed_paths": {
+    "peaceful_90d": "docs/measurements/s7surplusbirths-peaceful_economy-90d.txt",
+    "warring_30d": "docs/measurements/s7surplusbirths-warring_states-30d.txt"
+  }
+}

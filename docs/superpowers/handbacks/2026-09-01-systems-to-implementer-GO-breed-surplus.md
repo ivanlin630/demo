@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: breed-reads-true-surplus
 tier: infra
 topic: ★R² CLEAN,動工;★★★而 R² 查實了我 spec 的前提:production【真的沒有】「產出−消耗」這個量,只有 food_flow_avg 那條存量差分 EMA ⇒ 我寫的「若只有床算得出來就先報我」那個分支【現在就成立】;★★而同源的形狀他也定了:拆開已有的 produce/consume 各存一條 EMA,不是發明新公式

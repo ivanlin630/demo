@@ -1097,7 +1097,7 @@ reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權�
 - **∴ 真工作重新校準**：不是統一散亂 oracle（大半已完成），是**殲滅每一個殘留非框架閘**（稽核 section A：`_threat_recent`/`_evaluate_threat` 門檻/tribute override/紮營獵食硬門檻/applicable DESPERATION 天閾/diplomatic RNG 閘… + exhaustive 補漏）。每個都是汙染源,全殲。
 - **★零殘留要機器證得出**：`constitution_gate.gd` 現只抓一閘型（禁引擎外 task 指派）→ 強化抓全閘型（硬門檻/override/continue/絕對閾/RNG 決策閘）→ **跑綠＝證零殘留 + 擋新閘。** 非人肉拍胸脯。
 - **框架「做好」＝兩硬條件綠**：①零殘留非框架閘（殲滅+constitution_gate 抓全閘型跑綠）②可擴充（加新系統乾淨,擴充性稽核證）。**兩條硬綠才談 behavior/經濟（用戶定序：框架先，行為後）。**
-- **★★god-view 後門＝殘留非框架閘的一種，屬「框架先」殲滅範圍（用戶戳「框架沒統一就看合理性」，藍圖認漂移 2026-07-18）**：god-view（讀真值繞過 belief）違感知鐵律＝汙染源，同 hidden-gate 家族。清單：`has_food_market` 掃全圖（`known_issues:35`）、**創世全知 `game_setup:569-578`**、near/far LOD 非中性。＝awareness/掃近隊 arc 的 belief-gate 部分（`line 577-585`）**是框架工作、非行為**。
+- **★★god-view 後門＝殘留非框架閘的一種，屬「框架先」殲滅範圍（用戶戳「框架沒統一就看合理性」，藍圖認漂移 2026-07-18）**：god-view（讀真值繞過 belief）違感知鐵律＝汙染源，同 hidden-gate 家族。清單：`has_food_market` 掃全圖（`見 known_issues「has_food_market god-view 既有債」（★2026-09-02 訂正：原寫 `known_issues:35`，而寫下它那天（f0bcfa3a）第 35 行無關 ⇒ **寫下來那天就指錯**）`）、**創世全知 `game_setup:569-578`**、near/far LOD 非中性。＝awareness/掃近隊 arc 的 belief-gate 部分（`line 577-585`）**是框架工作、非行為**。
   - **∴ 改序（認錯先前 economy-first 漂移）**：**框架 god-view 殲滅（slice2 感知 + awareness belief-gate）先 → 零殘留閘綠 → 才 economy balance。** 先前把 economy 排 awareness 前＝把行為排框架前＝違「框架先」。
   - **★硬理由（非只原則）**：`has_food_market` god-view **直接汙染 economy 決策**（隊全知所有市場位置）→ **28% doom / 貿易為何不流 在 god-view 髒基底上診斷不可信** → god-view 殲滅必須先於 economy 診斷。
   - **economy arc 第一動作＝補丁閘優先查**（28% doom ＝殘留閘造的 or 真稀缺？）→ 不假設 balance 問題就 tune。屬「先量測+先查閘」非「先調參」。
