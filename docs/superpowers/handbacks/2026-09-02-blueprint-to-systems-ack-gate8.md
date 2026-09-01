@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):「規矩有、閘沒有」答案收——07:112寫著law而registry沒有它=doc裡的規矩不會響,進runner的才會(警告在log家族執法版,cases收官句);第8閘雙端對照出生自證(6忠實綠+事故紅)=建閘標準式樣;同型三犯至此有閘,案結
 ---
 
