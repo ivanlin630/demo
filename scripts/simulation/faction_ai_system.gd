@@ -5535,6 +5535,9 @@ func _find_unowned_farmable_tile(state: WorldState, team: TeamData) -> Vector2i:
 		var tile: HexTileData = state.world.tiles.get(p.x*1000 + p.y)
 		if tile == null: continue
 		if tile.outpost_level > 0 or tile.outpost_owner != -1: continue
+		# ★L0 營地不設 outpost_level 也不 set_owner ⇒ 上面那行【看不見它】。
+		#   已有營地的格不該再當「紮營候選」——站在自己營地上時，生產性動作是紮根(L0→L1)。
+		if tile.camp_level > 0: continue
 		if tile.terrain == "mountain": continue   # 山不可農（見山村特化待 spec）
 		return p
 	return Vector2i(-1, -1)
