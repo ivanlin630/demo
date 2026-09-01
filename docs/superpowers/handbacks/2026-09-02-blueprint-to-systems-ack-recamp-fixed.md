@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: list-zeroing
 topic: 回信(received):再紮營修完merge收——18紅→ALL PASS且斷言一字未放寬=修世界非修床;假說→R①訂正落點→一行修→同源雙癒=修形程序教科書;「第二個病不存在」=排除後升L1真贏真完工=紮根階梯通;順手一查:founding沉默近親嫌疑可趁新main複查counters(便宜,你裁);A級12條=剩餘主菜
 ---
