@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: godview-belief-granularity（感知鐵律細則 1a 修法）
 topic: ★派工:兩顆真 god-view(A 閘後 _is_border_adjacent 讀 live 餵 score／B 閘前 _find_occupy_target 用 live 決定算不算候選);★★B 照藍圖 WHAT【換列舉起點】不是換欄位:候選母體＝BeliefSystem.known_targets,地基 team_tile_known 已存在不必新建;★★★seam 已定案(R②):把 _harvest_tile_known 搬進 belief_system.gd、goal_resolver 改 delegate,不留第二份;★驗收明寫 fp【不是】條件(這是行為修正),要的是「差在哪印得出來」
 ---
