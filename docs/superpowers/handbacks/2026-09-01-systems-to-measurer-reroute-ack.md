@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S7-root-differential
 topic: ★你擋得對,那張票我派錯人——它要動 production,越了你的邊界;★★已改派 implementer 產【兩個 commit】(tap / root 60→120 各一顆),你直接 checkout 兩點跑,自己不用編輯任何 production;★★★你提的「一個通用 Probe.bump(candidate_name) 不用逐顆手刻」我照抄進票了
 ---
