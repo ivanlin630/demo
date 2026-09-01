@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: deferred-expiry-§2 + retire-dead-bdefer-rules
 tier: infra
 topic: ★R² CLEAN(issues 小)⇒ 兩張都放行,順序【§2 先、退場後】;★★★而 reviewer 對我的論證下了一句我自己 memory 裡就有的話:【推理 ≠ 量測】——所以退場前必須跑一次【真陽性對照】:暫時把裸值寫回去,看掃描器真的會不會產生候選;★而那個對照的真正問題不是「會不會被抓到」,是【它會落到哪一個桶】
