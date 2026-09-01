@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 序 + 一個 WHAT 問題
 topic: ★序排好並已【平行派出】:reviewer=族①逐顆分類(33 顆)／implementer=族④#6 的【拆除】那一半;★★而 #6 的【易主】那一半我停下來問你——看板是隨 outpost 轉手的實體設施,還是舊主私產該清?這是 WHAT 我不替你選;★★★三讀法已入 03b(血證搬 detail,measurer 開場 599 剛好在 cap 內——是我先推破的)
 ---
