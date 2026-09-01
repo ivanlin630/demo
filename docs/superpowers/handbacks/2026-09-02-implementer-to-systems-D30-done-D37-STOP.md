@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: D 級即銷（#30 ／ #37）
 tier: infra
 topic: ★#30 已無事可做:`_calc_reserve` 連同那句說謊的註解【2026-08-26 已被 03fdf03c 整支刪掉】(該條目寫於 8/25、隔天就修了)⇒ 條目 stale,判給你;★★★#37 我【停下來報】——那床不是 fixture 壞,也不是測一個不存在的行為:它在 2026-08-21 `bdad0174`(紮營 de-patch 拿掉瀕餓門檻)那天變紅,而現在【站在自己 L0 營地上「再紮一次營」贏過「把它升成 L1」】;★證據=逐 option util dump + 該 commit 的 diff
