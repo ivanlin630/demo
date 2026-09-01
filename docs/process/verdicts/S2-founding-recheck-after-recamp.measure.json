@@ -1,0 +1,38 @@
+{
+  "slice": "founding-recheck-after-recamp",
+  "question": "recamp（afedb3c3：站在自己L0營地上，那格不再是紮營候選）有沒有連帶治好founding沉默？",
+  "commits": {
+    "before": "ce497d7a",
+    "after": "afedb3c3",
+    "adjacency": "afedb3c3的父commit就是ce497d7a，delta純粹只有recamp那一行（已用git log --format=%H %P驗證）"
+  },
+  "method": "同床(scripts/debug/qty_tap_bed.gd，founding-funnel 5行擴充：camp.built/settlement.camp_l0/settlement.l0_to_l1_start/settlement.l0_to_l1_resume/root.commit_drop.no_settle_site，零新tap)，兩scenario(peaceful_economy/warring_states)各BED_DAYS=30，逐checkout+--import後跑，byte-identical兩份log用diff核對",
+  "results": {
+    "peaceful_economy_30d": {
+      "before_ce497d7a": {"camp.built": 1, "settlement.camp_l0": 1, "settlement.l0_to_l1_start": 0, "settlement.l0_to_l1_resume": 0, "root.commit_drop.no_settle_site": 0},
+      "after_afedb3c3":   {"camp.built": 1, "settlement.camp_l0": 1, "settlement.l0_to_l1_start": 0, "settlement.l0_to_l1_resume": 0, "root.commit_drop.no_settle_site": 0},
+      "delta": "0（完全一致）"
+    },
+    "warring_states_30d": {
+      "before_ce497d7a": {"camp.built": 88, "settlement.camp_l0": 88, "settlement.l0_to_l1_start": 20, "settlement.l0_to_l1_resume": 17, "root.commit_drop.no_settle_site": 9},
+      "after_afedb3c3":   {"camp.built": 88, "settlement.camp_l0": 88, "settlement.l0_to_l1_start": 20, "settlement.l0_to_l1_resume": 17, "root.commit_drop.no_settle_site": 9},
+      "delta": "0（完全一致）"
+    }
+  },
+  "mechanical_check": {
+    "full_trace_diff": "diff before_warring_log vs after_warring_log 全檔案：僅30行TickPerf(wall-clock效能量測)差異，扣除TickPerf後【0行內容差異】——兩趟整條模擬軌跡（含所有team決策/事件順序）byte-identical，非只是這5個founding計數剛好一樣",
+    "population_not_empty": "before腿本身founding數字非0（peaceful camp.built=1、warring camp.built=88），排除「母體空所以after也是0證明不了什麼」的偽陽性"
+  },
+  "verdict": "③ recamp在這兩個窗口下對founding-funnel五個計數【零可觀測效果】——不是①好了、也不是②變壞，是【完全沒有進這條路徑】。",
+  "honest_limit": [
+    "recamp修的是「候選tile去重」（避免把自己腳下已佔用的L0營地誤判為unowned farmable候選），這是_find_unowned_farmable_tile內部的候選集合過濾，跟founding-funnel這5個tap（camp.built/L0 fire/L0→L1起步恢復/drop）量的是不同層——funnel tap量的是「有沒有紮營/升級成功」，recamp量的是「有沒有選錯候選格」。兩趟trace byte-identical，代表這兩個測試窗口裡，觸發recamp那個bug的具體情境（隊站在自己L0上被拿去當候選）根本沒在這輪unseeded run裡發生過，不是recamp修好了founding沉默——是這輪trace沒踩到recamp想修的那個情境。",
+    "因此本票答案＝【不是①(一修雙解)，也非純③形狀報告——是更精確的「這條funnel在這兩趟run裡recamp根本沒被路過」，founding沉默（若存在）跟recamp是不同根，需要另外查】"
+  ],
+  "raw_logs": [
+    "docs/measurements/foundingrecheck-before-ce497d7a-peaceful_economy-30d.txt",
+    "docs/measurements/foundingrecheck-before-ce497d7a-warring_states-30d.txt",
+    "docs/measurements/foundingrecheck-after-afedb3c3-peaceful_economy-30d.txt",
+    "docs/measurements/foundingrecheck-after-afedb3c3-warring_states-30d.txt",
+    "docs/measurements/foundingrecheck-before-a9d75222-SUPERSEDED-*.txt（★舊pair，326923a7含未解決conflict markers作廢，改用ce497d7a/afedb3c3後SUPERSEDED，留檔僅供對照不可引用）"
+  ]
+}
