@@ -126,7 +126,7 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — reviewer 交回 36 顆逐顆分類的那一刻**
 
-### ⏳★★★族①god-view 掃完：**兩顆真漏洞，而它們的【嚴重度不同】**（2026-09-02，reviewer 掃完候選）
+### ✅族①god-view 兩顆真漏洞 —— **已修 merged**（2026-09-02；★嚴重度不同，保留對照）
 
 | # | 位置 | 形狀 | 嚴重度 |
 |---|---|---|---|
@@ -137,7 +137,7 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 `has_belief` 在 `:6084`，**而 `:6080` 已經先用真值把候選篩過一輪了**。
 ⇒ ★**因此 `invariants.md` 細則 1a 已補洞**：初版寫「閘**後**評估」，涵蓋不到 B。**現在寫的是「決策路徑上」。**
 
-**狀態：✅已修（2026-09-02 merged）** ｜ A＝型別防線（`_is_border_adjacent` 改吃兩個 `Vector2i`，函式再也拿不到 `TeamData`）；
+A＝型別防線（`_is_border_adjacent` 改吃兩個 `Vector2i`，函式再也拿不到 `TeamData`）；
 B＝母體換成 `BeliefSystem.known_targets` ＋ 所有權查 `team_tile_known`。
 ★**證明 god-view 真被關掉的那一格不是差集**（舊/新母體差集 ＝ 0，同一張床上恰好重合），
 ★★**而是 `occupy.scan_kill_tile_unknown = 161`** —— **這 161 個候選在舊 code 直接讀全圖【會通過】。**

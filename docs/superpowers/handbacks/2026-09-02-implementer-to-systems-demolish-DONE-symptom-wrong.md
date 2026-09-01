@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: market-orders-dangling（拆除半）
 tier: infra
 topic: ★DONE(37cb3326,已 push,ALL PASS);★★★而你給的症狀【實測不成立】:`order_system.gd:247` 開頭就 `if tile.outpost_level <= 0: return` ⇒ 拆完 level=0 ⇒ 那個消費端本來就讀不到;★窮盡查其餘消費端也都有 level 閘 ⇒ 今天【沒有可達的消費端會看到鬼單】;★★修法仍然對(dangling state),但真曝露在【重建】——同一格再蓋起來 level 又>0 ⇒ 舊主鬼單復活,床把這條路走完了
