@@ -2,21 +2,15 @@ extends SceneTree
 func _initialize() -> void:
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 12
 	seed(1337)
-	var state := WorldState.new()
-	GameSetup.setup(state, GameSetup.load_config("res://config/warring_states.json"))
-	# ★★拆玩家（照 exam_12mo_bed 的既有慣例）：warring_states.json 帶 player 區塊，
-	#   而那支【沒人操作的】玩家隊 leader 一死且無 named 繼承人 ⇒ game_over ⇒ 世界凍結。
-	#   ★★★我先前三張床全都沒拆 ⇒ 量到的是【凍結後的死 tick】。
-	if state.player_id != -1:
-		print("[strip] player_id %d → -1（無人值守世界模擬）" % state.player_id)
-		state.player_id = -1
-		state.player_forced_event = {}
-		state.player_forced_event_id = ""
-		state.player_pending_targets = []
-		state.player_hostile_teams = []
-		state.player_pre_encounter = {}
-		state.player_state = {}
-	Probe.reset(); Probe.enabled = true
+	# ★★★腿A 修存量（2026-09-01）：本床原本是【先建世界、後 arm】——
+	#   `WorldState.new()` + `GameSetup.setup()` 在 `Probe.reset(); Probe.enabled = true` 【之前】
+	#   ⇒ 世界生成那一段的 tap 全部是盲的，★而它不會報錯、只會少一段數字，
+	#     ★★而「少一段」與「那一段沒發生」在輸出上長得一模一樣。
+	#   ⇒ 改用 helper：順序寫死（arm → new → setup），★★★沒得選錯。
+	#   ★拆玩家由 helper 統一做（warring_states.json 帶 player 區塊，
+	#     而那支沒人操作的玩家隊 leader 一死無繼承人 ⇒ game_over ⇒ 世界凍結 ⇒ 量到死 tick）。
+	var state := MeasureBedHelper.arm_and_setup("res://config/warring_states.json")
+	print(MeasureBedHelper.arm_order_report())
 	var ticks: int = days * WorldState.TICKS_PER_DAY
 	var runner := SimRunner.new()
 	var stopped_at: int = -1
