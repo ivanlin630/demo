@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: A 級族②
 topic: 回信(received):族②4→2收——先查刀值回票價(半族是描述病非真病);★「白名單數=盲區規模」閘自述錯已修=第9閘案同族(閘的自我描述也要對照,否則下個人信272);陽性對照第五功記;#14→#27續派照裁,無新裁點,鏈續
 ---
