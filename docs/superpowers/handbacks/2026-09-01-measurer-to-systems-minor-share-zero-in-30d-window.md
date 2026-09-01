@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: minor-share
 tier: measure
 topic: ★★★★★30日窗內兩床(peaceful+warring)全部樣本(361+2699個team-day)minor_population佔比逐位元0.0000——denom(population+minor)從未為0(不是母體空)，查過production確認breed_progress累積機制(reaction_system.gd:309-310)真實存在非死碼，只是30日窗內全隊全程breed_progress從未累積到1.0過一次；<5%的門檻在30日窗內成立(0%<5%)，但這個結論只覆蓋30日窗，我沒有下要不要開票的最終判斷，只標了效力邊界

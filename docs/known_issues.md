@@ -490,6 +490,11 @@ porter 整趟**不進任何決策路徑**。specimen 佐證（追逐窗 tick 360
 
 ### 👶★★生育 merge 後世界層級幾乎沒生效：90 天 `breed.born = 1`（2026-08-21 D1 短跑；**根因在 systems 的設計，非實作**）
 **實測** `breed.born=1 · reaction.breed=1 · n_persons 24→24 凍結（每 10 天取樣皆 24）` **@70a792b3 2026-08-21** · repro: `EXAM_CONFIG=peaceful EXAM_MONTHS=3 EXAM_SEED=1337 .\tools\godot.ps1 --headless --script scripts/debug/exam_12mo_bed.gd` （正本 `docs/process/verdicts/d1-pop-vs-cap.measure.json`）。specimen 側證：`breed.rate_sample` 顯示 `breed_progress` **有在累加**（0.001→0.084）＝**機制路徑是通的、只是極慢**。
+  ★★★**2026-09-01 重錨 arc（S0~S7）之後複測 —— 更極端**：兩床（peaceful＋warring）、30 日窗、
+  **3060 個 team-day（361＋2699）** ⇒ `minor_population` 佔比**逐位元 0.0000**。
+  ★**不是母體空**：分母 `population + minor` 從未為 0；★★**不是死碼**：累積機制 `reaction_system.gd::breed_progress` 實存。
+  ⇒ ★★★**30 日窗內【全隊全程沒有任何一次 `breed_progress` 累積到 1.0】** —— 從 `born=1` 變成 `born=0`。
+  ★**效力邊界（量測員自標）**：本結論**只覆蓋 30 日窗**；更長窗未量。
 **★★根因（systems code-read + 算術，兩條疊乘）**：
 1. **`BASE_RATE` 的推導假設在這個世界不成立**：我用「健康村 `f≈0.5` × **5 名適齡成人** → 1 名額/30 日」反推 `0.0133`；**實測 24 named / 17 隊 ≈ 1.4 名/隊** → **光此一項就慢 ~3.5×**；而多數隊 `rel_surplus ≤ 0` → **`f = 0` ＝ 完全不生**（p90 才 0.148、`f≈0.5` 只在最頂十分位）。頂級村配 1 名 named：`0.0133 × 0.5 × 1 ≈ 0.00665/日` → **~150 天/名額**（設計目標 30 天）。
 2. **★named/anon 不對稱（merged code 實證）**：`breed_rel_surplus` 分母用 **`t.population`**（`team_data.gd:55` ＝ leader + named + **anon 全部**），但適齡迴圈只跑 **`state.persons`（named only）** → **anon 吃飯拉低 `rel_surplus`、卻不能生 ＝ 雙重懲罰**；anon 越多、越不可能生。
@@ -2314,3 +2319,14 @@ TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
 ⇒ ★所以回訪條件綁【量測窗】而不是「下次有空」
 ```
 ★★**而這一條【不准躺回「上界」裡】**（blueprint 明令）——★★★**它現在有分類數字、有形狀、有回訪條件。**
+
+## ★44 處 burn 漏 minor —— **裁定不開票**（systems 2026-09-01）
+> **回訪：觸發事件 —— 若日後量到 `minor_population` 佔比 > 5%（見上「30 日窗零出生」條）。**
+```
+★量測結果：30 日窗內 minor 佔比【逐位元 0.0000】⇒ ★★那 44 處的偏差在這個窗內【恰好為零】
+⇒ ★★★裁定：不開票（44 處逐處改的成本，換不到任何當下的正確性）
+★★而【效力邊界】必須跟裁定寫在一起：★★★這只說「30 日窗內沒差」，不說「那 44 處是對的」
+   —— 它們仍然是【估算端與執行端不同母體】，而那個結構性錯誤還在
+```
+★**所以這條不是「已修」也不是「不是問題」** —— ★★**是【它的傷害目前為 0，而傷害為 0 的原因是另一個病】**（世界沒有新生兒）。
+★★★**若繁殖那條被修好，這 44 處會【同時】變成真的錯** —— 而回訪條件正是綁在那裡。
