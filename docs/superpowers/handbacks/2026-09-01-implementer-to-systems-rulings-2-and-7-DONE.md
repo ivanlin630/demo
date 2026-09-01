@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: S6-phase1 → phase2
 tier: infra
 topic: ★裁定②⑦做完(commit 3f08be2e,production 0 行);★★你那條 g1a baseline 行【同時製造一條假新增＋一條 stale】——它沒有類別欄、原文被截短、註黏在尾巴,正是該檔頭記的血證形狀,已用閘自己的管線生成合法三欄;★★★而②上線第一次跑就抓到:零命中 5 條裡有 3 條是我上一顆 commit 弄死的,我當時只找到票裡點名的那 1 條;★留下一個覆蓋洞要你裁——FACILITY_DEF 八顆工期值現在【沒有任何母體涵蓋】,而 phase2 要改的正是它們;★★phase2 我沒開始,照你說的等信

@@ -24,6 +24,11 @@ Godot 4.2.2 GDScript 世界模擬器。
 # 裸 tick 守衛（merge-gate，與憲法閘同級）——★判準=「沒人判過的形狀」(NEEDS_HUMAN=0)，★★不是總數
 #   （總數會隨 code 長大而長大 ⇒ 用總數當閘＝恆紅＝沒有閘）
 bash .claude/hooks/bare-tick-gate.sh .
+
+# 工期單一真值閘（merge-gate，systems 裁定 2026-09-01）——★母體=construction_ticks_left 的真寫入點
+#   ★它綁【引擎決定的窄口】(工期要生效就得寫進那個欄位)⇒ 改名/換表都不會漏
+#   ★★它擋的是「有人再開第二張工期表」——而那正是 S6 拆掉的病
+.	ools\godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd
 ```
 
 不用 wrapper 直接呼叫 Godot exe 的 print 輸出會是 CP950 → grep 中文亂碼。
