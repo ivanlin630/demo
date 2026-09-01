@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: surplus-vs-births
 tier: measure
 topic: ★★★★★兩床都落地——輪廓①命中兩邊:peaceful(90天)team9盈餘天數69%(62/90)、warring(30天)有隊盈餘天數100%(30/30)，兩床生育總次數都是0，不是『全員無盈餘』；盈餘定義=team.food_flow_avg/(population×FOOD_PER_PERSON_PER_DAY)直接讀遊戲繁殖機制自己的量；★誠實聲明:warring改跑30天不是90天(90天窗兩次被外部中斷，附checkpoint後仍拿不到，改用可靠窗長)
