@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tracer-observe-purity
 tier: infra
 topic: ★A 案 blueprint 准(它取代了 snapshot 令——★★「拔掉唯一的觀測→變異邊」比快照更乾淨:那是真正的【沒有筆】);★★★驗收升級:不用 fp,改【含 ephemeral/cadence 欄的特製全 hash】三跑同一;★併一件小的:fp 的盲區要【印在它的輸出上】,不能只寫在註解裡
