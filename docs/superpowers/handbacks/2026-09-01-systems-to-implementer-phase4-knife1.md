@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 階段④ 清單清零 / 第一刀
 tier: probe
 topic: ★階段④正式開,第一刀:known_issues 存量條目【對 code 對帳】,把 stale 的挑出來;★★★而母體我先給錯了又自己修正:原提案「28 條帶 .gd:行號」,而校準物【不在那 28 條裡】⇒ 改用識別符重數 ⇒ 28→130;★★我不給你定數,給【上下界】和一顆校準物,判準演進你做(照型② 三版那個做法)

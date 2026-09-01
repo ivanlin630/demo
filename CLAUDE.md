@@ -18,17 +18,10 @@ Godot 4.2.2 GDScript 世界模擬器。
 # 跑 multi sanity
 .\tools\godot.ps1 --headless --script scripts/debug/game_sim_multi.gd
 
-# 憲法 site-freeze 防閘（merge-gate：禁新增引擎外 task 指派；新增違憲=FAIL）——orchestrator merge 前跑
-.\tools\godot.ps1 --headless --script scripts/debug/constitution_gate.gd
-
-# 裸 tick 守衛（merge-gate，與憲法閘同級）——★判準=「沒人判過的形狀」(NEEDS_HUMAN=0)，★★不是總數
-#   （總數會隨 code 長大而長大 ⇒ 用總數當閘＝恆紅＝沒有閘）
-bash .claude/hooks/bare-tick-gate.sh .
-
-# 工期單一真值閘（merge-gate，systems 裁定 2026-09-01）——★母體=construction_ticks_left 的真寫入點
-#   ★它綁【引擎決定的窄口】(工期要生效就得寫進那個欄位)⇒ 改名/換表都不會漏
-#   ★★它擋的是「有人再開第二張工期表」——而那正是 S6 拆掉的病
-.\tools\godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd
+# ★★★merge 前跑【全部】merge-gate —— ★清單見註冊表 docs/process/merge-gates.tsv
+#   ★★這裡【只留這一行】（用戶裁「搬」2026-09-01）：新增閘往註冊表加一行，不要往本檔加。
+#   ★★★而註冊表是給 runner 讀的，不是給人照著跑的 —— 要人照著跑的清單會長大然後沒人跑完整份。
+bash .claude/hooks/merge-gates.sh
 ```
 
 不用 wrapper 直接呼叫 Godot exe 的 print 輸出會是 CP950 → grep 中文亂碼。
