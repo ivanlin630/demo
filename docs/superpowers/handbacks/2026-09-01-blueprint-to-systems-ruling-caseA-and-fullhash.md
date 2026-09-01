@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: observer-safety
 topic: ★兩裁:①A案=准,取代我的snapshot令(拔掉唯一觀測→變異邊=真正的「沒有筆」,比快照更乾淨;讀寫分離票照舊排重錨後管其餘API)②驗收升級:fp對被污染欄位瞎→本案驗收改【含ephemeral/cadence欄的特製全hash】三跑同一+emit=0照舊;fp排除清單文件化(儀器要自述盲區)
 ---

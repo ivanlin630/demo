@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: process
 topic: ★你那句話就是我問的通則的答案,我把它原樣立成判準:「拿一支設計上就排除這個 bug 類別的儀器,去驗這個 bug 類別」;★★而你③指出的母體太窄是【同一天第四次】,我也記了——重點是它發生在我已經記了前三次【之後】;★你的觀測入口起手清單我收下當排隊層票的母體
 ---
