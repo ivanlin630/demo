@@ -154,6 +154,40 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 ★★**而這個詮釋不是我自己想的，是從 reviewer 那裡照收的。** ★★★**上游給的詮釋一樣要驗。**
 （★我已據此撤回寄給 blueprint 的那一段，並砍掉為它寫到一半的 `gateok-reconcile` 閘 —— **錯前提上的守衛比沒有守衛更貴。**）
 
+## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
+
+material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
+
+> ★**狀態標記三態慣例（2026-08-21 立、blueprint 認可）**——**禁一律標「已修」**：
+> - **✅ 真結案**：機制已修 **且** 影響面已清（可直接不再讀）。
+> - **⚠ 機制已修、歷史資料仍污染**：修法已 merge，但**舊量測/舊結論仍受影響** → 必附**自查方法**（如 signature）。
+> - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
+> ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
+
+### ⏳★★`_hex_dist` 全站【11 份拷貝】＋兩個改名變體（2026-09-02，godview-1a seam 副產）
+
+★`faction_ai_system`／`game_setup`（★兩份：`_hex_dist` ＋ `_hex_dist_static`）／`movement_system`／`order_system`／
+`outpost_system`／`path_system`(static)／`strategic_ai_system`／`threat_assessment`(static)／`vision_system`／`world_generator`
+＋ `sim_runner::_hex_distance`（★**改名變體：grep `_hex_dist` 抓得到，而比對呼叫點時會漏**）。
+★★**抽查三份（faction_ai／path_system／threat_assessment）公式逐字相同** ⇒ 目前**沒有行為分歧**。
+★★★**同族**：memory 記過的「走一格要多久全站五套算法」——**今天沒分歧不代表明天沒有，而分歧會是靜默的。**
+（★本輪實際代價：seam 差點因為「要用 `_hex_dist`」而讓 `belief_system` 依賴 `faction_ai_system`。）
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — 下一次有人要在新檔裡用 hex 距離時（★直接呼既有 static，不要抄第 12 份）**
+
+### ⏳★★★`has_belief` 不蘊含「有位置」——**belief 有欄位粒度**（2026-09-02，implementer 實測翻掉 systems 的假設）
+
+★**systems 在 spec 裡寫**「過了 `has_belief` 閘 ⇒ 一定拿得到 `belief_pos`，開一個【必須恆 0】的桶」。
+★★**錯的**：`has_belief` ＝ claims 非空；`belief_pos` ＝ 需該 claim **帶 `tile_pos` 欄位**且**未過期**。
+⇒ **有 claim 不代表有位置。** 實測：`headless_test.gd:9510` 附近 `record_claim(..., {"population_est":…,"armed_est":…}, …)`
+**沒帶 `tile_pos`** ⇒ 兩個既有測試在 belief 化之後轉紅。
+
+★★★**處置（systems 裁）**：那個桶**不是違規桶，是【合法的第三種結果】** ⇒ 更名 `known_but_positionless`，
+**當狀態處理（棄該 target），★不得退回 live**。已寫進 `invariants.md` 細則 1a。
+★**未做**：**全站還有哪些 `belief_pos` 消費端假設了「過閘就有位置」，本輪沒查。**
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一輪任何跑 belief 路徑的床，順手 dump `known_but_positionless` 的計數與分佈**
+
 ### ⏳★★★建造：**兩條路，兩個不同的病**（2026-08-26 三度訂正；★舊讀法全部保留在下方，因為每一個都曾經看起來很有道理）
 
 ★★**我們一直把「建造」當成一件事在追，而它是【兩條獨立的路】**：

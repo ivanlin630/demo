@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: godview-belief-granularity 1a
 tier: infra
 topic: ★①②③④⑤全做完(commit 7b1381b8,★★但 push 被 pre-push constitution_gate 擋:新 detector 桶＝24 個新指紋不在凍結 baseline 裡,要你 bless);★★★三件要你裁:(a)兩個既有測試轉紅=真效果不是回歸(它們的 belief fixture 沒帶 tile_pos,靠的是 live)(b)我的「恆 0 桶」在那個 fixture 下【會非 0】⇒ has_belief 與 belief_pos 【真的不等價】,你說這種要報你(c)seam 造成 belief_system↔faction_ai 相互引用,你當初的理由不再成立
