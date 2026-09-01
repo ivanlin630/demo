@@ -1,5 +1,5 @@
 ---
-status: DRAFT(待 R²)
+status: R² CLEAN(2026-09-01 issues 小,①②③已補)
 owner: systems
 slice: S6-phase2（工期單一真值 + 錨推四源 + timeout 相對錨定）
 what: §3c 表（用戶核可）／表值 blueprint 正式簽署 2026-09-01（錨 = 720 person_hours）
@@ -51,7 +51,10 @@ debug/settlement_s2b_test.gd:61/131  ★斷言目前是「等於那條式子」�
 ```
 ★C1 faction_ai:5079/:5086  SURVIVAL_BUILD_MAX_TICKS = 120（死值）
    ⇒ 錨推後 farming = 360 ⇒ ★★120 連 farming 都擋掉 ⇒【求生自救建設整條靜默關閉】
-   ⇒ ★★★硬條款：改成接線（綁 farming 工期 × 倍數），不得留死值
+   ⇒ ★★★硬條款：改成接線，★但【錨在 SETTLE_PERSON_HOURS】不得錨在 farming 自己
+      ★★R² 抓到的（我請他打這點）：門檻綁 farming、而被比的又常常是 farming
+        ⇒ ★★★那會【恆真】—— 從「會誤殺」變成「永遠不擋」，兩個都不是要的
+      形狀：SURVIVAL_BUILD_MAX = SETTLE_PERSON_HOURS × k（k 為設計旋鈕，獨立於被比對象）
       ——★而那不是「平衡變了」，是【一整類行為消失】且沒有測試會紅
 ★C2 faction_ai:5133  int(cost.get("person_hours", 72))   ← 72 是 farming 工期的手抄副本
    ⇒ ★判 bug 非設計：改成缺鍵【直接爆】(fail loud)，不留 fallback 副本
@@ -79,7 +82,8 @@ CONSTRUCTION_TIMEOUT = 30 * TICKS_PER_DAY（絕對）
 ①★改錨 ⇒ 【tile.construction_ticks_left 的 8 個真寫入點】全部等比例跟
    ★★不綁「八項」——★★★綁八項的話 A2/A3/CORVEE 永遠在帳外（本輪的血證）
 ②★決策端一致性：decision_context:392／goal_resolver:913／faction_ai:4133
-   讀到的工期 == 執行端實際扣的工期（★同一顆錨，逐點比對）
+   ★★比較點【pin 死在轉換前的 person_hours 引數】，不是天數結果
+      ⇒ ★★★R² 指出：比天數的話兩邊量綱不同 ⇒ 這條驗收會變成【算不出來】（我自己列過的第一種不可達）
    ★★失敗長相＝世界慢了而估算沒跟 ⇒ 這條就是專門抓「腦不知手」的
 ③★C1：錨推後 farming 仍必須通過求生門檻（★失敗長相＝求生建設全滅且無人知）
 ④★C2：造一顆缺 person_hours 鍵的設施 ⇒ 必須【爆】,不得靜默吃 72

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: S6-phase2
 topic: R②判決:issues(小)——①窮盡grep過L0_TO_L1_CORVEE_DAYS,五個真用點spec§3全covered,你信裡「兩處」是recap不完整非真漏;②驗收②的比較點要pin死在轉換前的person_hours引數非天數結果,否則真的量綱不同;③★C1若接線成「farming工期×k」會真的變恆真,建議錨在SETTLE_PERSON_HOURS而不是farming自己
 ---

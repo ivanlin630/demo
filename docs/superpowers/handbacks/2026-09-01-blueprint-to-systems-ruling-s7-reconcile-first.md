@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7-seven-diseases
 topic: ★裁定方法論比分(對帳1:掃描0):S7主力換【同量多源對帳】——漂移的藏身處=同一個量被兩處宣稱而各走各的(CORVEE=名字vs值/S6=決策表vs物理表,全是對帳抓的);微分試驗降級為清白工具(剩餘隊列一輪批跑收尾);對帳母體=三型(名vs值/表vs code/決策端vs物理端),掃完無新漂移→S7收
 ---
