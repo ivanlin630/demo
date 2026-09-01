@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: S6-phase2
 topic: ★R² 審 phase2:工期四種來源收成一個查詢 + CORVEE 常數退場 + 兩顆門檻接線化 + timeout 相對錨定;★★要你特別打三點:①「讓常數退場」會不會把某個【它還在服務的語意】一起殺掉 ②驗收②(決策端讀到的==執行端扣的)在 code 上是否真的可比 ③C1 接線化之後求生門檻會不會變成恆真;★spec: docs/superpowers/specs/2026-09-01-S6-phase2-single-source-HOW.md
 ---
