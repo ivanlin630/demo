@@ -835,7 +835,7 @@ Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**comb
 
 **歸屬**：**full-HD live 觀察 slice 的獵物**（decision-model coherence，live 才現形）。observe slice 開時優先查此類。連 [[project_desperation_economy]] / 敗北出路家族。
 
-## ★reeval_attribution_bed 死亡偵測 false-positive（2026-07-14，量測可靠性）
+★~~## ★reeval_attribution_bed 死亡偵測 false-positive~~　⇒ ★★**已銷案（2026-09-02）**：`a67e9682`（2026-07-15）改了 `reeval_attribution_bed.gd` —— ★而本條寫於 07-14 ⇒ **隔天就被修了，而條目活了七週**（★我自驗過該 commit）。原文：（2026-07-14，量測可靠性）
 
 `reeval_attribution_bed.gd` 死亡偵測（`elif spec_death_tick==-1 and not spec_last.is_empty(): spec_death_tick=tick`，單次 `state.teams` dict 查無即判死）→ Team18 tick7239 **瞬間 remove-readd**（併入嘗試的 lifecycle）被**誤判永久死亡**。**影響**：measurer 找「團滅 specimen」時把沒死透的隊誤當死透。**修法（L3）**：改連續 N tick 查無才判死、或讀 `population==0` 事件而非 dict-membership 瞬態。**已 dispatch implementer 修**（execlock worktree，量測可靠性在關鍵路徑上）。
 
@@ -1844,6 +1844,17 @@ harvest_system.gd:84  randf() < WILD_HORSE_REGEN_CHANCE
 ★★★**而真正該問的不是「哪一顆 commit」，是【為什麼同一個症狀能復發而沒有人被通知】** ——
 **知識寫在註解裡，而閘不讀註解。**
 
+## ★★★★床的 setup 盲區 ⇒ **真盲 0 張**（2026-09-02 重定性；★原記「結構性盲區」）
+```
+★閘印：已遷移 5 ／ 未遷移 272 —— ★★而【272 不是盲區規模】（★★★閘那句話是錯的，已修）
+★真實剩餘：272 → 9（靜態篩出「arm 在 setup 之後」）⇒ ★★而 9 張【逐張讀完 0 張真盲】
+★★★成因：「arm 在 setup 之後」有【兩種相反的意思】，而它們在 code 上長得一模一樣
+   ①床先 setup 世界、再 arm ⇒ 真盲　②床 arm 之後又呼叫 setup（重置／多世界）⇒ 不盲
+★而 implementer 的第一版判準錯（把【註解裡】的 `GameSetup.setup()` 當成呼叫）—— ★★是【陽性對照】抓到的
+```
+★**所以本條的剩餘是【0】** —— ★★**而 helper／閘／runtime 自檢都已落地，防的是【未來】不是存量。**
+
+（以下為原始記錄，保留供溯源）
 ## ★★★床的結構性盲區：`Probe.reset()` 在 `GameSetup.setup()` 之後（2026-09-01，measurer 自揭）
 ```
 TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
