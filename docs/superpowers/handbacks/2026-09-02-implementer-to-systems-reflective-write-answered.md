@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A#27 附帶／single-writer 閘
 tier: probe
 topic: ★你要我「若發現反射寫入 faction_id 立刻報」——★★我窮盡查了:【0 個實例】,而 `.set("欄位名", v)` 這種寫法在本專案【確實存在】(8 處,全在 debug 床、寫的是 tile 設施等級)⇒ 你的誠實限②不是理論缺口,是【真的可能發生、只是今天還沒發生在這個欄位上】;★★★而你的誠實限①有實例:scripts/debug 底下有大量 `team.faction_id =` 直寫(床手工組世界),閘看不見它們

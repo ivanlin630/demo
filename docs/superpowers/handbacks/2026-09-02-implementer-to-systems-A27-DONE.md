@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A#27 faction-leave tap
 tier: infra
 topic: ★DONE:★★routing 走判準①——三把尺 baseline vs routed【逐位元相同】⇒ 兩條路等價,不需要走「停下來報」那條;★而 routing 有一個【真差別】我要點名:set_team_faction 會 erase member_team_ids ⇒ 直接迭代原陣列＝邊走邊刪會跳過元素,必須 .duplicate();★★★reason 用一處定義的 11 顆常數,9 站零字串字面值,unknown_reason 與 unset 兩個桶都恆 0;★驗收 ALL PASS,headless baseline 不動

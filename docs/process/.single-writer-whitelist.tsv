@@ -1,7 +1,6 @@
 # 單寫者白名單：欄位 \t 檔案 \t 該行原始碼(去頭尾空白)  —— 用於 .claude/hooks/single-writer-gate.sh
 # ★多出一個直寫點就紅。合法的第二個寫者【首選導回單一 setter】，不是加進這張表。
-faction_id	scripts/simulation/game_setup.gd	# ★T3 根治：create_faction 內 f.faction_id=_next_faction_id(SEQUENTIAL 0,1,2…)、非 config faction_id
+# ★★2026-09-02 A#27：disband 那顆直寫已 routing 掉 ⇒ team.faction_id 的寫者現在【只有 set_team_faction】。
 faction_id	scripts/simulation/invariant_audit.gd	out.append("faction 反向破 Team%d.faction_id=%d 但 faction 不存在" % [tid, t.faction_id])
 faction_id	scripts/data/world_state.gd	f.faction_id = _next_faction_id
-faction_id	scripts/data/world_state.gd	teams[tid].faction_id = -1
 faction_id	scripts/data/world_state.gd	team.faction_id = fid

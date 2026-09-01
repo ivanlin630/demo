@@ -30,6 +30,8 @@ while IFS= read -r field; do
     n=$((n+1))
     f=${h%%:*}; rest=${h#*:}; ln=${rest%%:*}; src=${rest#*:}
     src_trim=$(printf '%s' "$src" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+    # ★整行註解不是寫者：結構性排除，而不是把註解養進白名單（白名單會越養越大而沒人敢刪）
+    case "$src_trim" in "#"*) n=$((n-1)); continue;; esac
     if ! awk -F'\t' -v fd="$field" -v ff="$f" -v ss="$src_trim" \
          '$1==fd && $2==ff && $3==ss {found=1} END{exit !found}' /tmp/sw_wl.txt 2>/dev/null; then
       echo "[SINGLE-WRITER] ★FAIL：$field 有【不在白名單】的直寫 ⇒ $f:$ln"
@@ -44,8 +46,9 @@ EOF
 done < /tmp/sw_fields.txt
 
 echo "[SINGLE-WRITER] 受管欄位 $fields｜★白名單外總計 $fail"
-echo "[SINGLE-WRITER] ★誠實限①：只掃 scripts/simulation 與 scripts/data —— 別處的直寫本閘看不見"
+echo '[SINGLE-WRITER] ★誠實限①：只掃 scripts/simulation 與 scripts/data。scripts/debug 的直寫【刻意不入母體】——床手工組世界合法，但這代表「床繞過 setter」本閘不管'
 echo "[SINGLE-WRITER] ★誠實限②：只抓【字面直寫】—— 透過 set(\"field\", v) 之類的反射寫入本閘看不見"
+echo '[SINGLE-WRITER] ★誠實限④：整行註解(開頭 #)不計 —— 註解裡的 .field = 不是寫者，但【被註解掉的真寫者】也就此隱形'
 echo "[SINGLE-WRITER] ★誠實限③：白名單比對【整行原始碼】—— 改了縮排以外的字就會紅（保守方向）"
 [ "$fail" -gt 0 ] && { echo "[SINGLE-WRITER] FAIL"; exit 1; }
 echo "[SINGLE-WRITER] PASS"
