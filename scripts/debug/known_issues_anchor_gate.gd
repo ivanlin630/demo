@@ -33,9 +33,11 @@ func _gather(dir_path: String, out: Array) -> void:
 	d.list_dir_end()
 
 func _run() -> void:
-	var f := FileAccess.open(KI, FileAccess.READ)
+	# ★KI_PATH 覆寫：讓【陽性對照】可以指到別份 known_issues（★對照物不必住在本 repo 樹裡）
+	var ki_path: String = OS.get_environment("KI_PATH") if OS.has_environment("KI_PATH") else KI
+	var f := FileAccess.open(ki_path, FileAccess.READ)
 	if f == null:
-		print("[KI-ANCHOR-GATE] ★FAIL：讀不到 %s（★★讀不到不是通過）" % KI)
+		print("[KI-ANCHOR-GATE] ★FAIL：讀不到 %s（★★讀不到不是通過）" % ki_path)
 		quit(1); return
 	var text: String = f.get_as_text(); f.close()
 
@@ -94,11 +96,74 @@ func _run() -> void:
 	print("[KI-ANCHOR-GATE] ★註記：會漂的錨（L3+L4）%d 個 ⇒ 【還沒遷移的規模】（★不是通過，是還沒做）" % n_old)
 	print("   ★★行號跟著【編輯】走 ⇒ 每次 code 一改就可能再指錯；符號跟著【語意】走。")
 
+	# ★★★③【符號存在 ≠ 符號正確】—— 而這是本閘上線第一天就現形的洞。
+	#   血證（2026-09-01）：`reaction_system.gd::_evaluate_life_events` 這個錨
+	#     ·★符號【真的存在】（:253）⇒ ★★本閘的①會判它 PASS
+	#     ·★★★而它是【退休空殼】：`func _evaluate_life_events(_state, _p, _t, _trials) -> Array: return []`
+	#       生育早已搬去 `_tick_breed`（同檔 :90 的註解自己說了）
+	#   ⇒ ★所以 known_issues 拿它當「機制實存」的證據，★★而那個證據是死的。
+	# ★★判準（★heuristic，明說）：參數【全部】以 `_` 開頭（＝全不用）＋ 函式體只有一行 return/pass
+	#   ⇒ ★這是「退休空殼」的形狀。★★WARN 不 FAIL：形狀像空殼不代表錨就錯（判斷要人來）。
+	var shell: Array = []
+	for key2 in seen:
+		var parts: PackedStringArray = String(key2).split("::")
+		if parts.size() != 2 or not by_base.has(parts[0]):
+			continue
+		if _looks_retired_shell(String(by_base[parts[0]]), parts[1]):
+			shell.append(String(key2))
+	if not shell.is_empty():
+		print("[KI-ANCHOR-GATE] ★WARN：%d 個錨指向【看起來已退休的空殼】（符號在，但不做事了）" % shell.size())
+		for sh in shell: print("   ★ ", sh)
+		print("   ★判準＝參數全 `_` 開頭 ＋ 函式體只有一行 return/pass（★heuristic，會有偽陽）")
+		print("   ★★處置＝去看真正做那件事的符號是誰，把錨改指過去；★★★別把它當「機制實存」的證據")
+
 	if bad.is_empty():
-		print("[KI-ANCHOR-GATE] PASS：%d 個相異新錨全部指得到現場" % seen.size())
+		print("[KI-ANCHOR-GATE] PASS：%d 個相異新錨全部指得到現場（★WARN 不擋，見上）" % seen.size())
 		return
 	print("[KI-ANCHOR-GATE] ★FAIL：%d 個新錨指不到" % bad.size())
 	for b in bad: print("   ★ ", b)
 	print("★處置：符號真的沒了 ⇒ 該條目是【真 stale 候選】，回頭判它還成不成立；")
 	print("★★符號只是改名 ⇒ 更新錨。★★★兩者都【不是】把錨改回行號。")
 	quit(1)
+
+# ★★★「退休空殼」偵測（★heuristic —— 它的偽陰在檔尾明說）
+#   ★真空殼的兩個共同特徵：①參數全部沒被用到（GDScript 慣例前綴 `_`）②函式體只有一行 return/pass
+#   ★★偽陰：空殼但保留了一個真的參數 ⇒ 本判準看不到它
+#   ★★★偽陽：小型 accessor（`func _x(_a) -> int: return 0`）也會中 ⇒ 所以是 WARN 不是 FAIL
+static func _looks_retired_shell(src: String, sym: String) -> bool:
+	var lines: PackedStringArray = src.split("
+")
+	for i in range(lines.size()):
+		var ln: String = lines[i]
+		var t: String = ln.strip_edges()
+		if not (t.begins_with("func " + sym + "(") or t.begins_with("static func " + sym + "(")):
+			continue
+		# ★參數：取第一個 "(" 到【該行最後一個 ")"】之間（★不用 [^)]* —— 巢狀括號會咬）
+		var a: int = t.find("(")
+		var b: int = t.rfind(")")
+		if a < 0 or b <= a:
+			return false
+		var params: String = t.substr(a + 1, b - a - 1).strip_edges()
+		if params != "":
+			for pr in params.split(","):
+				var nm: String = String(pr).strip_edges()
+				if nm == "":
+					continue
+				if not nm.begins_with("_"):
+					return false   # ★有一個參數是真的在用 ⇒ 不判空殼
+		# ★函式體：往下找第一行【非空非註解】
+		for j in range(i + 1, mini(i + 8, lines.size())):
+			var bt: String = lines[j].strip_edges()
+			if bt == "" or bt.begins_with("#"):
+				continue
+			if not (bt == "pass" or bt.begins_with("return")):
+				return false
+			# ★★再往下一行：若還有函式體 ⇒ 不是「只有一行」
+			for k in range(j + 1, mini(j + 6, lines.size())):
+				var nt: String = lines[k].strip_edges()
+				if nt == "" or nt.begins_with("#"):
+					continue
+				return not lines[k].begins_with("	")   # ★縮排沒了 ⇒ 函式結束 ⇒ 真的只有一行
+			return true
+		return false
+	return false
