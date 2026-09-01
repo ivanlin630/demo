@@ -101,7 +101,9 @@ func _initialize() -> void:
 		"noop_no_outpost": int(Probe.counts.get("manufacture.noop_no_outpost", 0)),
 		"noop_no_worker": int(Probe.counts.get("manufacture.noop_no_worker", 0)),
 		"noop_no_facility": int(Probe.counts.get("manufacture.noop_no_facility", 0)),
-		"noop_no_material": int(Probe.counts.get("manufacture.noop_no_material", 0)),
+		"noop_no_output": int(Probe.counts.get("manufacture.noop_no_output", 0)),
+		"skip_sated": int(Probe.counts.get("manufacture.skip.sated", 0)),
+		"skip_no_material": int(Probe.counts.get("manufacture.skip.no_material", 0)),
 	}
 
 	print("\n───── demand注入後生產淨值帳總結 ─────")

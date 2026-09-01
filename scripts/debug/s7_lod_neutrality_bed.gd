@@ -35,18 +35,18 @@ func _mk() -> Array:
 	tile.manufacturing_level = 2   # ★工坊(workshop)直接手動已建成，繞開organic build-up的世界軌跡差異
 	# ★材料塞爆量：確保material/food永遠不是瓶頸——這輪要測的是LOD頻率不是料夠不夠
 	#   ★血證：第一版忘了塞food，團隊活活餓死+spawn子隊also餓死，30日窗中途崩潰，數字不可信
-	# ★BED_SCARCE=1：本想造【材料受限】情境（驗收③）——★★而它【沒有成功】，實測記在這裡：
-	#   工坊(manufacturing_level)全部配方的輸入只有 material / gem / horses / tools，
-	#   四種都塞到 1e6，而 manufacture.noop_no_material 仍然 486/720 窗。
-	#   ⇒ ★★★這個 fixture 的 binding constraint【不是原料】，是 need-gating / 勞力
-	#     （worker_rate == 0 時 _run_recipe_group 也回 ""）。
-	#   ⇒ ★而那也表示 tap 名字說謊：`manufacture.noop_no_material` 同時在數
-	#     「原料不足」與「worker_rate==0」兩種完全不同的事。
-	#   ⇒ ★★所以 material=30 這一跑產出幾乎不變（22.0303 vs 22.0305）—— 它證明的是
-	#     「material 不是瓶頸」，不是「受限下仍有部分產出」。★★★驗收③因此只有【弱證據】。
+	# ★BED_SCARCE=1：【材料受限】情境（驗收③）。
+	# ★★訂正紀錄（★上一輪我在這裡寫錯過兩件事，留著當帳）：
+	#   ①我先前寫「這個 fixture 的 binding 是 need-gating / 勞力」——
+	#     ★量出來 worker_rate==0 佔 0.0%，真 binding 是【需求已滿】（stock >= need_keep + demand）。
+	#     那句是【讀 code 推的】不是量的。
+	#   ②我先前用 material=30 說「造不出受限情境」——★★真因只是【不夠低】。
+	#     material=2 ⇒ 真原料不足佔 38.8%（逐配方粒度，manufacture_noop_cause_bed 實測，
+	#     且與 production 的 manufacture.skip.no_material 桶對帳一致）。
+	# ⇒ ★★★所以這裡用 2 不用 30。
 	var scarce: bool = OS.has_environment("BED_SCARCE") and OS.get_environment("BED_SCARCE") == "1"
 	team.resources["food"] = 1000000.0
-	team.resources["material"] = 30.0 if scarce else 1000000.0
+	team.resources["material"] = 2.0 if scarce else 1000000.0
 	team.resources["horses"] = 1000000.0
 	team.resources["tools"] = 1000000.0
 	team.resources["gem"] = 1000000.0
@@ -82,7 +82,12 @@ func _initialize() -> void:
 	print("=== s7_lod_neutrality_bed === mode=%s days=%d ticks=%d player_pos=%s team_pos=%s"
 		% [mode, days, ticks, str(player_pos), str(team.tile_pos)])
 	var _scarce: bool = OS.has_environment("BED_SCARCE") and OS.get_environment("BED_SCARCE") == "1"
-	print("材料：%s" % ("★受限(material=30)" if _scarce else "充足(1e6)"))
+	# ★★★【對照組已執行】—— systems 判準：陽性對照必須先證明它自己跑起來了。
+	#   ★血證（我自己踩的）：對照用了一個不存在的常數 ⇒ parse error ⇒ 床沒跑，
+	#     而輸出【只是少一行】⇒ 與「對照回答否」長得一模一樣。
+	print("[CONTROL-RAN] 本床已執行到參數段：mode=%s｜材料=%s｜天數=%d"
+		% [mode, ("★受限(material=2)" if _scarce else "充足(1e6)"), days])
+	print("材料：%s" % ("★受限(material=2)" if _scarce else "充足(1e6)"))
 	print("跑法：%s" % ("isolated（只驅動 manufacture，母體凍住）" if isolated else "world（整個 advance_tick，★帶 confound）"))
 	# ★★★母體雙軌（spec 判準⑧）：raw 總量會被【隊數/人口】的 confound 汙染，
 	#   而上一輪就是這樣（near 1 隊 / far 9 隊）⇒ ★不得靜默：兩軌都印，讓讀的人自己看得到。
@@ -109,7 +114,8 @@ func _initialize() -> void:
 	if not any_output:
 		print("  ★沒有任何manufacture.output.*——這件事本輪從未發生(Probe是ON)")
 	print("── 輔助診斷(manufacture三桶，看是no_facility/no_material/fired哪一種) ──")
-	for name in ["fired", "noop_no_outpost", "noop_no_worker", "noop_no_facility", "noop_no_material"]:
+	for name in ["fired", "noop_no_outpost", "noop_no_worker", "noop_no_facility", "noop_no_output",
+			"skip.sated", "skip.rate0", "skip.no_material"]:
 		var total2: int = int(Probe.counts.get("manufacture." + name, 0))
 		print("  %-20s 總數=%d" % [name, total2])
 	# ★★★驗收③：材料受限時必須出現【部分產出】0 < q < N

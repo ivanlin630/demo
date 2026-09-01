@@ -51,7 +51,7 @@ func _run() -> void:
 
 	lines.append("--- ②採了多少（★缺口：resource_system.gd:306-346 的 gain 從未被 tap，carry_space 硬限(:341-344)也沒有 tap）---")
 	lines.append("  ★★這段完全量不到：沒有 material gain 的 add_amount、也沒有 carry_space 擋下次數的 bump")
-	lines.append("  ★鄰近可用信號(不是這段本身，不當替代)：manufacture.noop_no_material(下面④) 是【製造端缺料】不是【採集端沒採到】，兩者不可互推")
+	lines.append("  ★鄰近可用信號(不是這段本身，不當替代)：manufacture.skip.no_material(下面④) 是【製造端缺料】不是【採集端沒採到】，兩者不可互推")
 
 	lines.append("--- ③採到的進了哪裡（private vs public，讀最終快照，非tap，不受 Probe 影響）---")
 	var priv_total: float = 0.0
@@ -107,7 +107,11 @@ func _run() -> void:
 	lines.append("--- ④進來的又出去多少（outflow，★逐個標明有沒有現成tap）---")
 	lines.append("  manufacture.input_consumed(add_amount，★跨所有原料混算，非material單獨) = %.1f" % _a("manufacture.input_consumed"))
 	lines.append("    ★缺口：這個是 ore_iron/ore_steel/gem/horses/material/tools 全部混一個總量，量不出 material 單獨吃掉多少")
-	lines.append("  manufacture.noop_no_material(想生產但material不夠、次數) = %d" % _c("manufacture.noop_no_material"))
+	lines.append("  manufacture.skip.no_material(★真的原料不足、逐配方次數) = %d" % _c("manufacture.skip.no_material"))
+	lines.append("  ★對照：manufacture.skip.sated(需求已滿=健康) = %d｜skip.rate0(勞力為零) = %d"
+		% [_c("manufacture.skip.sated"), _c("manufacture.skip.rate0")])
+	lines.append("  ★★舊 tap noop_no_material 已改名 noop_no_output（窗層「沒有產出」），
+	　　因為材料充足時它 100% 在報【需求已滿】＝健康行為，名字是【反的】")
 	lines.append("    ★這是需求側信號（有設施+人力但material不足），不是流出量")
 	lines.append("  manufacture.fired(製造真的RUN的次數，母體) = %d" % _c("manufacture.fired"))
 	lines.append("  order.placed.sell_material(貼material賣單次數，非數量) = %d" % _c("order.placed.sell_material"))

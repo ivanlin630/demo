@@ -1,0 +1,27 @@
+# manufacture.noop_no_material 的成因拆解（★只盤不修，production 0 行）
+# 材料：充足(1e6)｜天數 30｜窗數 720
+#
+## 床側分類（★複製 gate 的判斷，呼叫同一批 production 函式）
+★需求已滿／無需求（健康行為）|486
+worker_rate==0（與原料無關）|0
+真的原料不足              |0
+同窗兩種都有              |0
+有 recipe 做得起          |234
+#
+## ★★per-recipe 計數（★gate 是逐配方判的，這才是「卡在哪一關」的真粒度）
+需求已滿／無需求|3133|87.0%
+worker_rate==0  |0|0.0%
+★真的原料不足   |0|0.0%
+做得起          |467|13.0%
+配方判斷總次數  |3600
+#
+## production 側 tap（★對帳用）
+manufacture.noop_no_output|486
+★production 側 skip 三桶（改名票落地後）｜sated 3133｜rate0 0｜no_material 0
+manufacture.noop_no_facility|0
+manufacture.fired           |234
+#
+## ★對帳：床側「被擋窗數」486 vs production 的 noop_no_output 486 ⇒ 一致
+## ★★成因占比：需求已滿 100.0%｜worker_rate==0 0.0%｜原料不足 0.0%｜混合 0.0%
+# ★★★誠實限：本床的分類是【複製品】，不是 production 本身。
+#   副本對不代表 production 對 ⇒ 所以上面那條對帳行是這份數字能不能用的前提。

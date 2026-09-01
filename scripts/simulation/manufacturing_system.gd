@@ -182,7 +182,13 @@ func tick_all(state: WorldState, team_ids: Array, cadence: int = -1) -> void:
 			elif not any_facility:
 				Probe.bump("manufacture.noop_no_facility")   # S1 tap：A2 主病——無製造設施空轉
 			else:
-				Probe.bump("manufacture.noop_no_material")   # S1 tap：有設施+人力但原料不足每 tick 空轉
+				# ★★★改名（2026-09-01）：舊名 `noop_no_material` 說「原料不足」，
+				#   而實測【材料充足時它 100% 在報「需求已滿」】——那是健康行為，不是故障。
+				#   ⇒ ★不精確的名字讓人多查一層；★★【反的】名字讓人【停止查】，
+				#     因為他以為他已經知道答案了。
+				#   ⇒ ★★★窗層只說事實：這一窗沒有產出。為什麼，看下面 skip.* 三桶。
+				#   （★known_issues.md:728 早就把「混三因」記成 tap-gap，本輪只是把它量出來。）
+				Probe.bump("manufacture.noop_no_output")
 		if Probe.enabled and trials > 1:
 			if _ran_windows == 0:
 				Probe.bump("manufacture.batch_zero")
@@ -231,6 +237,8 @@ func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, lev
 		# 生產目標 = need_keep(自用+供應鏈) + demand(貿易)；per-recipe 停產：out 滿→跳(不燒 material)。
 		var target: float = NeedOracle.need_keep(state, team, out, lv) + NeedOracle.demand(state, team, out, lv)
 		if target <= 0.0 or stock >= target:
+			# ★成因①（實測占比最大）：需求已滿／無需求 —— ★★這是【健康行為】不是故障
+			if Probe.enabled: Probe.bump("manufacture.skip.sated")
 			continue   # ★per-recipe 停產：此 out 無 need+demand 或已滿 → 不產(逐配方 skip，非整設施停)
 		order.append({ "idx": i, "gap": target - stock })
 	# 缺口最大先（most needed first）——demand 加進 target→gap→demand 驅動選 recipe。
@@ -240,8 +248,13 @@ func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, lev
 		var rate: float = float(RATES[recipe["rate_const"]])
 		var q: float = worker_rate * rate          # 本 tick 產量
 		if q <= 0.0:
+			# ★成因②：worker_rate == 0（勞力／need-gating）——★★實測 0.0%，
+			#   而【恆 0 的欄位要留著】：它是「這條路不通」的證據，不是廢欄。
+			if Probe.enabled: Probe.bump("manufacture.skip.rate0")
 			continue
 		if not _can_consume_scaled(state, team, tile, recipe["in"], q):
+			# ★成因③：真的原料不足 —— ★★這一桶才是舊名字宣稱的東西
+			if Probe.enabled: Probe.bump("manufacture.skip.no_material")
 			continue
 		for res in recipe["in"]:
 			var need: float = float(recipe["in"][res]) * q

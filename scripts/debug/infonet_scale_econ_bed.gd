@@ -46,9 +46,9 @@ func _report(label: String, result: Dictionary) -> void:
 	print("final: teams=%d pop=%d attrition=%.1f%%" % [
 		int(result.get("final", {}).get("teams", 0)), int(result.get("end_pop", 0)),
 		float(result.get("attrition_pct", 0.0))])
-	print("★好處側(A)：manufacture.fired=%d manufacture.noop_no_worker=%d manufacture.noop_no_material=%d manufacture.noop_no_facility=%d" % [
+	print("★好處側(A)：manufacture.fired=%d manufacture.noop_no_worker=%d manufacture.noop_no_output=%d manufacture.noop_no_facility=%d" % [
 		int(p.get("manufacture.fired", 0)), int(p.get("manufacture.noop_no_worker", 0)),
-		int(p.get("manufacture.noop_no_material", 0)), int(p.get("manufacture.noop_no_facility", 0))])
+		int(p.get("manufacture.noop_no_output", 0)), int(p.get("manufacture.noop_no_facility", 0))])
 	print("construct.complete_upgrade_facility=%d construct.complete_upgrade_level=%d" % [
 		int(p.get("construct.complete_upgrade_facility", 0)), int(p.get("construct.complete_upgrade_level", 0))])
 	print("★運輸摩擦側(B)：convoy.dispatch=%d convoy.deliver=%d convoy.deliver_settled=%d convoy.return=%d" % [
