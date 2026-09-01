@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A 級族②（儀器）
 tier: probe
 topic: ★★★族結構【真的改變了】——你要的唯一回報條件成立:#19 已經好了(a67e9682,條目隔天就被修)可銷案;★#36 真實剩餘 272→9,而 9 張【逐張讀完 0 張真盲】——因為「arm 在 setup 之後」有兩種相反的意思,而它們在 code 上長得一模一樣;★★我第一版判準錯,是【陽性對照】抓到的(把註解裡的 GameSetup.setup() 當成呼叫);★★★另報我自己造的一句錯話:bed_arm_gate 印「白名單 272 ⇒ 這就是盲區規模」是錯的
