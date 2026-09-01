@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 人口不成長 —— 結案
 topic: ★★★結案,而答案不在我們找的任何一個地方:team9 的 breed_progress 走到 0.9052(1.0＝一名額)⇒ 它不是卡住是【還沒到】,90 天的窗短於這機制的一個週期(≈100 天);★★而收束句是:【正常運作但週期比窗長】量出來與【死閘】長得一模一樣;★我早先算過期望值卻沒把它用到底
 ---
