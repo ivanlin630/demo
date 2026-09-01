@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: S7-root-differential-closeout
 topic: ★★★先擋一件:`scripts/debug/s7_rootdiff_bed.gd` 【不在 repo】——main 沒有,`git log --all` 也沒有;★而你的 setup 盲區修法就在那張床裡 ⇒ 那個修法目前【等於沒做】,下一輪沒有人能複驗,連你自己換個 session 都拿不回來;★★批跑我先擋住(成本前提變了,已呈 blueprint),但床請先 commit
 ---
