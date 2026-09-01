@@ -1,0 +1,38 @@
+@@ -7,13 +7,23 @@
+ cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
+ REG="docs/process/merge-gates.tsv"
+ [ -f "$REG" ] || { echo "[MERGE-GATES] FAIL：註冊表不存在 $REG"; exit 1; }
+-FAILED=(); TOTAL0=$SECONDS; N=0
+-while IFS=$'	' read -r id cmd purpose crit; do
++FAILED=(); NOEXPECT=(); TOTAL0=$SECONDS; N=0
++while IFS=$'	' read -r id cmd purpose crit expect; do
+   case "$id" in ''|'#'*) continue;; esac
+   N=$((N+1)); T0=$SECONDS
+   OUT=$(eval "$cmd" 2>&1); RC=$?
+   DT=$((SECONDS-T0))
+-  if [ $RC -ne 0 ] || printf '%s' "$OUT" | grep -qE "FAIL|Parse Error|Failed to load"; then
++  # ★★★正向斷言（本補丁新增）：註冊表的【判準欄】以前只是給人看的字，沒有人執行它。
++  #   ★血證：一支 `echo ""`（跑了、exit 0、不下結論）在舊版拿到 ✓ 並讓總結印 PASS。
++  #   ⇒ ★★「工具崩潰的長相 ＝ 陰性結果的長相」—— 而那句話正好也寫在這個 runner 的檔頭家族裡。
++  MISSING=""
++  if [ -n "${expect:-}" ]; then
++    printf '%s' "$OUT" | grep -qF "$expect" || MISSING="1"
++  else
++    NOEXPECT+=("$id")
++  fi
++  if [ $RC -ne 0 ] || [ -n "$MISSING" ] || printf '%s' "$OUT" | grep -qE "FAIL|Parse Error|Failed to load"; then
++    [ -n "$MISSING" ] && echo "[MERGE-GATES] ★跑了但沒下結論：$id 沒印出「$expect」"
+     echo "[MERGE-GATES] ✗ $id （${DT}s）—— $purpose"
+     printf '%s
+ ' "$OUT" | tail -5
+@@ -24,6 +34,10 @@
+ done < "$REG"
+ echo "───────────────────────────────"
+ echo "[MERGE-GATES] 註冊表 $N 支｜總時 $((SECONDS-TOTAL0))s"
++if [ ${#NOEXPECT[@]} -gt 0 ]; then
++  echo "[MERGE-GATES] ★註記：${#NOEXPECT[@]} 支沒填【判準欄】（${NOEXPECT[*]}）⇒ 它們的綠【只代表 exit 0】"
++  echo "   ★★不 FAIL（舊格式列合法），但數字必印 —— ★★★它應單向下降。"
++fi
+ if [ ${#FAILED[@]} -gt 0 ]; then
+   echo "[MERGE-GATES] FAIL：${FAILED[*]}"
+   echo "★註冊表在 $REG —— ★★新增閘＝往那裡加一行，不是往 CLAUDE.md 加"
