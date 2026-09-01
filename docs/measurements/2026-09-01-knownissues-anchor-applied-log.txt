@@ -1,0 +1,97 @@
+# 錨改寫【已套用】紀錄（★known_issues 本體只留新錨，憑據留在這裡）
+# 套用 57 條｜★留給 systems 25 條（12 原生型D ＋ ★★13 條【我自己退回】）
+#
+# ★★★那 13 條退回，是驗收②「證明沒有整批套」的直接證據：
+#   它們機械上都成功轉出了新錨（符號確實定義在該檔），★而【憑據是全小寫無底線的泛用字】
+#   （skill／factions／tools／urgency／reaction／population／beast／task／match／persons／contact／lord）
+#   ⇒ 依 systems 的型B 規則「找不到對應 production 符號 ⇒ 留 NEED_HUMAN，別硬指」
+#   ⇒ ★我把它們退回，而不是留著讓數字好看。
+#
+# ★自驗（機械）：49 個相異新錨，49 個的符號【真的定義在該檔】，不合格 0。
+# ★★校準物：`decision_context.gd::gather()` —— 依裁定「錨指向修法會動到的那個東西」
+#   （修法＝拆 gather 成 pure-read + commit ⇒ 動的是 gather，不是 need_urgency 欄位）
+
+[PROPOSE] known_issues.md:163 ｜`goal_resolver:197` → `goal_resolver.gd::ensure_maintain_goals()` ｜憑同行字 `NeedOracle` ｜(★material-need bootstrap gap（code-provable，re)
+[A] known_issues.md:186 ｜`propagate_on_arrival:79` → `message_system.gd::propagate_on_arrival()` ｜型A 舊錨是符號名（func，message_system.gd:92） ｜(★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-dis)
+[MOVED] known_issues.md:193 ｜`message_system:79` → `order_system.gd::read_market_board()` ｜憑同行字 `read_market_board` ｜(★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-dis)
+[A] known_issues.md:193 ｜`read_market_board:194` → `order_system.gd::read_market_board()` ｜型A 舊錨是符號名（func，order_system.gd:244） ｜(★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-dis)
+[PROPOSE] known_issues.md:230 ｜`faction_ai:4863` → `faction_ai_system.gd::_trigger_survival()` ｜憑同行字 `SurvivalMergeIn` ｜(⏳JOIN 在途重申 CPU + ★pair-print 非有效 churn 指標（202)
+[PROPOSE] known_issues.md:230 ｜`decision_context:530` → `decision_context.gd::gather()` ｜憑同行字 `join_rejected` ｜(⏳JOIN 在途重申 CPU + ★pair-print 非有效 churn 指標（202)
+[MOVED] known_issues.md:515 ｜`interaction:781` → `order_system.gd::ORDER_LIFETIME` ｜憑同行字 `ORDER_LIFETIME` ｜(📋 訂單簿健康度：成交率 0.7%、壽命是硬常數牆、churn 0%（2026-08-21)
+[退回型D] known_issues.md:523 ｜`headless_test:12842` ｜★憑據 `skill` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[退回型D] known_issues.md:530 ｜`faction_ai:725` ｜★憑據 `factions` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[PROPOSE] known_issues.md:544 ｜`faction_ai:4394` → `faction_ai_system.gd::_evaluate_all_body()` ｜憑同行字 `_evaluate_independent_infrastructure` ｜(★★★ 但由此浮出一條可能統一今天所有線的鏈（**假說，一個數字可定案**）)
+[C] known_issues.md:597 ｜`known_issues:17` → 「★★★means-end/長程計畫全系統 = binding root（用戶定 」 ｜型C 自我引用 ⇒ 改指條目標題 ｜(🏭 沒有人蓋 workshop ＝ 設施鏈斷的真上游（2026-08-20、mint 0%)
+[A] known_issues.md:608 ｜`_get_near_teams:508` → `sim_runner.gd::_get_near_teams()` ｜型A 舊錨是符號名（func，sim_runner.gd:561） ｜(✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線)
+[A] known_issues.md:608 ｜`_run_systems:171` → `sim_runner.gd::_run_systems()` ｜型A 舊錨是符號名（func，sim_runner.gd:201） ｜(✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線)
+[PROPOSE] known_issues.md:620 ｜`team_data:117` → `team_data.gd::pop_cap_from_leadership()` ｜憑同行字 `work_morale` ｜(✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線)
+[PROPOSE] known_issues.md:624 ｜`sim_runner:109` → `sim_runner.gd::_record_tick_perf()` ｜憑同行字 `force_full_hd` ｜(✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線)
+[B] known_issues.md:650 ｜`specimen_tracer:62` → `options.gd::DecisionOptions` ｜憑同行字 `DecisionOptions` ｜(⚠️`DecisionContext.gather` 有寫副作用 —— **部分修**（`)
+[PROPOSE] known_issues.md:651 ｜`decision_context:602` → `decision_context.gd::gather()` ｜憑同行字 `need_urgency` ｜(⚠️`DecisionContext.gather` 有寫副作用 —— **部分修**（`)
+[PROPOSE] known_issues.md:659 ｜`decision_context:335` → `decision_context.gd::gather()` ｜憑同行字 `own_granary_tile` ｜(🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 )
+[A] known_issues.md:696 ｜`_try_dispatch_or_invite:567` → `faction_ai_system.gd::_try_dispatch_or_invite()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:624） ｜(gate② settle attempt-gate 矛盾（flagged 不一致，DEFE)
+[PROPOSE] known_issues.md:740 ｜`faction_ai:2801` → `faction_ai_system.gd::_dispatch_goal_delegate()` ｜憑同行字 `_dispatch_facility_builder` ｜(★weaponsmith 真牆 = 兩 build 閘（非 trade，2026-07-2)
+[退回型D] known_issues.md:741 ｜`order_system:121` ｜★憑據 `tools` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[退回型D] known_issues.md:758 ｜`trade_valuation:97` ｜★憑據 `urgency` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[A] known_issues.md:767 ｜`_dispatch_facility_builder:2780` → `faction_ai_system.gd::_dispatch_facility_builder()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:4602） ｜(dispatch afford buffer ×1.5 承重（G1a mint 依賴，不能)
+[A] known_issues.md:767 ｜`_dispatch_upgrader:2637` → `faction_ai_system.gd::_dispatch_upgrader()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:4258） ｜(dispatch afford buffer ×1.5 承重（G1a mint 依賴，不能)
+[PROPOSE] known_issues.md:771 ｜`resource_system:208` → `resource_system.gd::_update_food_flow()` ｜憑同行字 `food_flow_avg` ｜(crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 f)
+[PROPOSE] known_issues.md:795 ｜`outpost_system:606` → `outpost_system.gd::slot_cap()` ｜憑同行字 `outpost_level` ｜(market_orders capture/demolish 不清（pre-existin)
+[PROPOSE] known_issues.md:814 ｜`faction_ai:3314` → `faction_ai_system.gd::try_hunt_predator()` ｜憑同行字 `BeastSystem` ｜(★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026)
+[PROPOSE] known_issues.md:814 ｜`encounter:1232` → `encounter_system.gd::_spawn_beast_units()` ｜憑同行字 `BeastSystem` ｜(★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026)
+[PROPOSE] known_issues.md:820 ｜`sim_runner:259` → `sim_runner.gd::_advance_tick_body()` ｜憑同行字 `TaskArbiter` ｜(★TaskArbiter.transition = 無條件 raw 覆寫後門（手不聽腦，2)
+[退回型D] known_issues.md:917 ｜`reaction:166` ｜★憑據 `reaction` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[退回型D] known_issues.md:919 ｜`faction_ai:3252` ｜★憑據 `population` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[A] known_issues.md:920 ｜`_wire_threat_task:401` → `faction_ai_system.gd::_wire_threat_task()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:474） ｜(★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep)
+[PROPOSE] known_issues.md:962 ｜`faction_ai:1753` → `faction_ai_system.gd::cleanup_extinct_teams()` ｜憑同行字 `_route_extinct_assets` ｜(燒進度（2026-07-01 首三軌 merged）)
+[退回型D] known_issues.md:968 ｜`beast:30` ｜★憑據 `beast` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[PROPOSE] known_issues.md:981 ｜`event_faction_defect:21` → `event_faction_defect.gd::execute()` ｜憑同行字 `clear_team_faction` ｜(第三批燒進度（2026-07-02 means-end + slice3 merged）)
+[PROPOSE] known_issues.md:982 ｜`faction_ai:3479` → `faction_ai_system.gd::_find_strong_neighbor()` ｜憑同行字 `known_reputations` ｜(第三批燒進度（2026-07-02 means-end + slice3 merged）)
+[A] known_issues.md:994 ｜`_evaluate_all_body:644` → `faction_ai_system.gd::_evaluate_all_body()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:763） ｜(後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告)
+[A] known_issues.md:1001 ｜`_evaluate_outpost_residency:419` → `faction_ai_system.gd::_evaluate_outpost_residency()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:611） ｜(後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告)
+[PROPOSE] known_issues.md:1009 ｜`faction_ai:994` → `faction_ai_system.gd::calc_readiness()` ｜憑同行字 `effective_food` ｜(後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告)
+[退回型D] known_issues.md:1022 ｜`headless_test:14475` ｜★憑據 `task` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[A] known_issues.md:1110 ｜`erase_team:147` → `world_state.gd::erase_team()` ｜型A 舊錨是符號名（func，world_state.gd:429） ｜(G3 殘缺情報進度)
+[MOVED] known_issues.md:1139 ｜`resource_system:213` → `faction_ai_system.gd::_merchant_trade_target()` ｜憑同行字 `_merchant_trade_target` ｜(G1 供應鏈進度)
+[PROPOSE] known_issues.md:1160 ｜`npc_combat:456` → `npc_combat_system.gd::_kill_named_npc()` ｜憑同行字 `event_system` ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[PROPOSE] known_issues.md:1165 ｜`faction_ai:2050` → `faction_ai_system.gd::_evaluate_all_body()` ｜憑同行字 `on_leader_death` ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[MOVED] known_issues.md:1165 ｜`ambush:66` → `npc_combat_system.gd::_apply_casualties()` ｜憑同行字 `_apply_casualties` ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[PROPOSE] known_issues.md:1167 ｜`encounter_system:1184` → `encounter_system.gd::_check_prisoners()` ｜憑同行字 `leader_id` ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[PROPOSE] known_issues.md:1167 ｜`npc_combat:456` → `npc_combat_system.gd::tick_critical_npcs()` ｜憑同行字 `leader_id` ｜(P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）)
+[退回型D] known_issues.md:1204 ｜`faction_ai:1058` ｜★憑據 `match` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[退回型D] known_issues.md:1204 ｜`health_system:221` ｜★憑據 `match` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[PROPOSE] known_issues.md:1205 ｜`interaction_system:836` → `interaction_system.gd::_resolve_aid_request()` ｜憑同行字 `aid_request` ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間)
+[PROPOSE] known_issues.md:1205 ｜`sim_runner:102` → `sim_runner.gd::_advance_tick_body()` ｜憑同行字 `aid_request` ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間)
+[MOVED] known_issues.md:1206 ｜`encounter_system:1301` → `encounter_view.gd::_post_combat_hint()` ｜憑同行字 `_post_combat_hint` ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間)
+[退回型D] known_issues.md:1207 ｜`person_generator:46` ｜★憑據 `persons` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[PROPOSE] known_issues.md:1207 ｜`faction_ai:389` → `faction_ai_system.gd::_dispatch_subteam_settle()` ｜憑同行字 `sub_leader_id` ｜(🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間)
+[A] known_issues.md:1321 ｜`try_proactive_diplomacy:68` → `diplomatic_ai_system.gd::try_proactive_diplomacy()` ｜型A 舊錨是符號名（func，diplomatic_ai_system.gd:126） ｜(Bug5. DiplomacyAI demand_tribute 恆負)
+[PROPOSE] known_issues.md:1374 ｜`movement:138` → `movement_system.gd::_move_cost()` ｜憑同行字 `_compute_team_speed` ｜(Movement)
+[A] known_issues.md:1503 ｜`_decide_unified:1537` → `faction_ai_system.gd::_decide_unified()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:2735） ｜(★FLEE 從不移動（dead flee-movement，序1 dissolution )
+[A] known_issues.md:1503 ｜`_evaluate_solo:1876` → `faction_ai_system.gd::_evaluate_solo()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:3361） ｜(★FLEE 從不移動（dead flee-movement，序1 dissolution )
+[A] known_issues.md:1511 ｜`_tick_food_granary_sell:138` → `order_system.gd::_tick_food_granary_sell()` ｜型A 舊錨是符號名（func，order_system.gd:186） ｜(★經濟供給鏈斷點:非糧賣單查錯 storage(framework seam,2026-0)
+[MOVED] known_issues.md:1587 ｜`faction_ai:18` → `faction_ai_system.gd::GOVERN_MATERIAL_TARGET` ｜憑同行字 `GOVERN_MATERIAL_TARGET` ｜(生產框架 arc follow-up（2026-07-16,供給側成功後殘項）)
+[PROPOSE] known_issues.md:1677 ｜`faction_ai:4571` → `faction_ai_system.gd::_evaluate_uprising()` ｜憑同行字 `clear_team_faction` ｜(★faction 成員資格 fragility＝結構 confound（2026-08-0)
+[退回型D] known_issues.md:1683 ｜`faction_ai:590` ｜★憑據 `contact` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[A] known_issues.md:1689 ｜`_detach_one_anon:1542` → `faction_ai_system.gd::_detach_one_anon()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:1833） ｜(anon-exhaustion=caring 成本真但 distressed 世界無回補（)
+[PROPOSE] known_issues.md:1689 ｜`reaction_system:199` → `reaction_system.gd::breed_rel_surplus()` ｜憑同行字 `food_flow_avg` ｜(anon-exhaustion=caring 成本真但 distressed 世界無回補（)
+[退回型D] known_issues.md:1689 ｜`population_system:18` ｜★憑據 `lord` 是全小寫無底線的泛用字 ⇒ 依型B 規則「找不到對應 production 符號就別硬指」⇒ 不填，留給 systems
+[PROPOSE] known_issues.md:1709 ｜`faction_ai:5152` → `faction_ai_system.gd::_evaluate_uprising()` ｜憑同行字 `clear_team_faction` ｜(★CONFIRMED tap-gap：faction-leave 4 出口無 Probe )
+[PROPOSE] known_issues.md:1715 ｜`faction_ai:248` → `faction_ai_system.gd::find_prosperity_prey()` ｜憑同行字 `is_established` ｜(★★founding 降級 park（2026-08-13、blueprint WHAT )
+[PROPOSE] known_issues.md:1718 ｜`faction_ai:1039` → `faction_ai_system.gd::_assign_tasks()` ｜憑同行字 `_declare_established` ｜(★founding never-establish 真根定案（2026-08-12、③st)
+[A] known_issues.md:1718 ｜`_declare_established:5070` → `faction_ai_system.gd::_declare_established()` ｜型A 舊錨是符號名（func，faction_ai_system.gd:6174） ｜(★founding never-establish 真根定案（2026-08-12、③st)
+[PROPOSE] known_issues.md:1736 ｜`faction_ai:3799` → `faction_ai_system.gd::_dispatch_builder()` ｜憑同行字 `_eta_build` ｜(★建造隊派遣的真閘 ＝ 建材，不是糧（2026-08-21 實測，lead 非結論）)
+
+# ═══ 型D：一條都沒有自己填（systems 逐條判）═══
+known_issues.md:187  `goal_resolver:154`  ｜(★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribu)
+known_issues.md:659  `_calc_reserve:667`  ｜(🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 pin 定)
+known_issues.md:708  `resource_system:57`  ｜(★★★食糧地方安全 arc = session keystone：兩分配閘（2026-07-23，m)
+known_issues.md:799  `force_ge_target:1109`  ｜(god-view 殘留 can_reach（faction_ai:1115，2026-07-20，S)
+known_issues.md:822  `faction_ai:3876`  ｜(★TaskArbiter.transition = 無條件 raw 覆寫後門（手不聽腦，2026-0)
+known_issues.md:914  `npc_combat:551`  ｜(★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blue)
+known_issues.md:1188  `faction_ai:2105`  ｜(P5 QA批（2026-06-16 QA session harness 系統遍歷，stage2 驗)
+known_issues.md:1602  `need_oracle:35`  ｜(Arc1 need oracle S6 + 終端消耗品 known-deferred（2026-07)
+known_issues.md:1875  `npc_combat_system:784`  ｜(★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上)
+known_issues.md:1876  `diplomatic_ai_system:251`  ｜(★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上)
+known_issues.md:1929  `decision_context:472`  ｜(★★★`own_granary_tile` nil 崩 —— **修過一次沒修乾淨，而根不在呼叫點*)
+known_issues.md:1984  `faction_ai_system:3475`  ｜(★`local_value` 仍有 ~12 個 blind 呼叫點（2026-08-25，窮盡掃出，)
