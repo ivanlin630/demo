@@ -98,7 +98,7 @@
 
 ### systems HOW 裁定（WHAT 只釘「禁靜默 + 禁無記憶重撞」，其餘我定）
 1. **形狀統一走「連續折價」、不走「硬 cooldown」**。
-   codebase 現有**兩個前例、形狀不同**：`join_rejected` + `JOIN_REJECT_COOLDOWN_TICKS=480`（**硬 cooldown**：到期前完全排除）vs §4c `site_failed` + `quality_multiplier`（**連續折價**：TTL 線性衰減、乘進既有 util）。
+   codebase 現有**兩個前例、形狀不同**：`join_rejected` + `JOIN_REJECT_COOLDOWN_TICKS`（★**＝2 天**；值見 code —— ★★2026-09-01 訂正：此處原寫死 `=480`，那是**換根前**的 tick 數，真值已是 2880。**時長不變、tick 數會變 ⇒ 文件寫時長**）（**硬 cooldown**：到期前完全排除）vs §4c `site_failed` + `quality_multiplier`（**連續折價**：TTL 線性衰減、乘進既有 util）。
    ★**選後者**：硬 cooldown ＝ **絕對門檻 pre-empt 引擎** ＝ 補丁閘家族（憲法禁）；連續折價讓**引擎自己秤**（絕境時仍可壓過折價再試一次）——與本日生育修（硬懸崖→連續）同一方向。
    → `join_rejected` 的 cooldown 形狀**列為待統一項**（非本輪、但別再擴散第三種形狀）。
 2. **失敗記憶放哪**：★**不放 leader `p.memory`**——那條 FIFO `MEMORY_MAX=20` 與人際記憶共用、**已知會被擠掉**（§4c eviction 監看項）。放**隊層** `recent_failures: {key → {tick, count}}`，`key = (option, target)`；**過期即 prune**（bounded，不無界成長）。**入 fingerprint**（它是直接因果態、會改變下輪 argmax）。
@@ -207,3 +207,12 @@
 ★★★**判準（R² 原句，已入 cases）**：
 > **「拿一支【設計上就排除這個 bug 類別】的儀器，去驗這個 bug 類別」＝ 無效驗收。**
 ★檢查法：**用一支儀器前，先讀它自己的排除清單，再問「我要驗的東西在不在裡面」。**
+
+## ★★★文件引用 tick 常數時，寫【時長】不寫【tick 數】（systems 立 2026-09-01）
+```
+血證：本檔 :101 原寫 `JOIN_REJECT_COOLDOWN_TICKS=480`
+★而 480 是【換根前】的 tick 數（480/240 ＝ 2 天）；換根後真值 2880（2880/1440 ＝ ★2 天）
+⇒ ★★不變的是【2 天】,會變的是【那個數字】—— 而文件抄了會變的那個
+```
+★**判準**：★★**文件寫「＝2 天，值見 code」；不寫 tick 字面數。**
+★★★**理由與「估算器禁手抄物理」同源：改接線，不是改數值** —— **把 480 更新成 2880，下一次換根它會再爛一次。**
