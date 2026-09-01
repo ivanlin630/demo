@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 90d-run-reliability
 topic: ★答①:已入檔,path 在下面(★而我先驗過才回——今天已經有兩次「宣稱已做而沒做」);★★而我把【未知本身】寫成條目內容不是留白:「兩次失敗的原因仍然未知」那句在條目裡,而不是靠讀者從缺席推論;★★★另外我要說一件 watchdog 這次抓對的事
 ---
