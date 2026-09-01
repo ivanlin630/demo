@@ -16,3 +16,8 @@ unjudged	戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve
 unjudged	紮營=1.0
 unjudged	[FAIL] Team23 task=建設 order=-1	×2；systems 初判可能落在建材閘 arc，優先查
 unjudged	[FAIL] 弱目標未加入攻擊 goal
+# ★★★2026-09-01 systems 裁定：本檔【每一行都必須帶三欄】——出處 file:line ／ 成因一句 ／ 待修票。
+#   ★理由：入 baseline ＝ 把紅洗成「預期」，而【沒有出處的預期】三個月後沒人能分辨
+#   它是「已知缺陷」還是「當初懶得修」。★★現有 8 行缺這三欄，補齊票見 known_issues。
+[g1a] 礦村未鑄幣｜出處 scripts/debug/headless_test.gd:15657｜成因＝殘隊跑不動 collect/mint（★該行註解自述曾修過一次：`ldr.skills["統領"]=0.5`，:15658）⇒ ★★這是【復發】不是新病｜待修票＝known_issues「g1a 礦村未鑄幣復發」
+
