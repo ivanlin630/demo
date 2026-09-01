@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7-type1
 topic: ★型①交件,而其中一族到了【結構信號】門檻要你看:「名為讀、實為寫」現在有【三例】,而它不是命名問題是【觀測安全性】問題——任何在觀測/預演/UI 預覽路徑上呼叫它們的地方都會【改世界】;★★另一條:health_system 有三顆 PER_TICK 同病而七病清單只列一顆,真相就寫在【同一個檔往上三行】
 ---
