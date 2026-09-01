@@ -161,7 +161,7 @@ static var SYSTEMS: Array = [
 	{"name": "ambush",           "fn": "_step_ambush_check",        "lod": LOD_BOTH, "shape": "teams",         "tl": "near.outpost_ambush"},
 	{"name": "collect",          "fn": "_step5_collect_resources",  "lod": LOD_BOTH, "shape": "teams_cadence", "tl": ""},
 	{"name": "regen",            "fn": "_step5a_regenerate_tiles",  "lod": LOD_NEAR, "shape": "regen",         "tl": ""},
-	{"name": "manufacture",      "fn": "_step5b_manufacture",       "lod": LOD_BOTH, "shape": "teams",         "tl": "near.economy"},
+	{"name": "manufacture",      "fn": "_step5b_manufacture",       "lod": LOD_BOTH, "shape": "teams_cadence", "tl": "near.economy"},
 	{"name": "consumption",      "fn": "_step6_resolve_consumption","lod": LOD_BOTH, "shape": "teams_cadence", "tl": ""},
 	{"name": "salary",           "fn": "_step6c_salary",            "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
 	{"name": "fatigue",          "fn": "_step6d_fatigue",           "lod": LOD_BOTH, "shape": "teams_cadence", "tl": "near.consume"},
@@ -445,8 +445,11 @@ func _step5_collect_resources(state: WorldState, team_ids: Array, cadence_ticks:
 func _step5a_regenerate_tiles(state: WorldState, cadence_ticks: int) -> void:
 	_resource_system.regenerate_tiles(state, cadence_ticks)
 
-func _step5b_manufacture(state: WorldState, team_ids: Array) -> void:
-	_manufacturing_system.tick_all(state, team_ids)
+func _step5b_manufacture(state: WorldState, team_ids: Array, cadence: int) -> void:
+	# ★★★LOD 產出中性（2026-09-01）：shape 從 "teams" 改成 "teams_cadence"。
+	#   舊制不吃 cadence ⇒ far 隊每 FAR_ZONE_INTERVAL 才產一份、near 隊每 NEAR_CADENCE 產一份
+	#   ⇒ ★同一座工坊，隊遠離玩家時每日真產量只有近區的 1/10 —— 而那不是估算誤差，是世界本身變了。
+	_manufacturing_system.tick_all(state, team_ids, cadence)
 
 func _step6_resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
 	_resource_system.resolve_consumption(state, team_ids, cadence_ticks)

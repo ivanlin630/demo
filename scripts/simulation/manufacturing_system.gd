@@ -75,10 +75,27 @@ static func worker_rate_of(state: WorldState, team: TeamData, tile: HexTileData,
 	var avg_skill: float = _avg_skill(state, team, "製造")
 	return float(level) * LaborSystem.labor_mult(tile, "mfg:" + level_key) * labor_share * (0.5 + avg_skill * 0.5)
 
-# ★一天跑幾次：產線在 NEAR pass（`shape: teams`）⇒ 次數 ＝ TICKS_PER_DAY / NEAR_CADENCE。
-#   ★從真常數導出，不拍數字（同 `OutpostSystem.build_ticks_per_day()` 的形狀）。
+# ★一天跑幾次 ＝ TICKS_PER_DAY / NEAR_CADENCE。
+# ★★★而這句話在 2026-09-01 之前是【假的】：舊註解自述「產線在 NEAR pass」，
+#   但 registry 一直是 LOD_BOTH + shape "teams"（不吃 cadence）
+#   ⇒ far 隊每 FAR_ZONE_INTERVAL(600) 才跑一次 ⇒ 實際 2.4 次/日，而本函式回報 24。
+#   ⇒ ★病4 當初就是被這句自述標成 healed 銷案的 —— ★★自述不是證據。
+# ★現在它為真的【前提】：shape == "teams_cadence" 且 lod == LOD_BOTH
+#   ⇒ far pass 用 trials 迴圈把被跳過的窗次補回（同 reactions）
+#   ⇒ 前提壞掉時下面那顆告警會叫（★不靠人記得回來看）。
 static func runs_per_day() -> float:
+	if Probe.enabled and not _manufacture_is_cadence_compensated():
+		Probe.bump("manufacture.cadence_assumption_stale")
 	return float(WorldState.TICKS_PER_DAY) / maxf(float(SimRunner.NEAR_CADENCE), 1.0)
+
+# registry 上的 manufacture 是否仍【吃 cadence 且雙 LOD 都跑】（讀 registry，不手抄）。
+# ★對照 OutpostSystem._outpost_tick_runs_in_near_pass()：那顆守衛存在，而這裡本來沒有
+#   ⇒ ★★所以 manufacturing 的假設壞了也不會叫，一路撐到型③對帳才被抓到。
+static func _manufacture_is_cadence_compensated() -> bool:
+	for e in SimRunner.SYSTEMS:
+		if String(e.get("name", "")) == "manufacture":
+			return String(e.get("shape", "")) == "teams_cadence" 				and int(e.get("lod", -1)) == SimRunner.LOD_BOTH
+	return false   # 表裡找不到 ⇒ 假設已失效
 
 # ★【這個設施一天能產多少 out】——means-end 問「多久湊得到」就該問這支。
 #   ★rate 一律從 `RATES` 讀（`rate_const` 是字串名），⛔禁在呼叫端寫 `var rate := 3.0  # GOODS_RATE`。
@@ -94,7 +111,23 @@ static func daily_output(state: WorldState, team: TeamData, tile: HexTileData,
 		best = maxf(best, wr * float(RATES[recipe["rate_const"]]) * runs_per_day())
 	return best
 
-func tick_all(state: WorldState, team_ids: Array) -> void:
+# ★★★LOD 產出中性（2026-09-01）：cadence 補償＝【形狀 A 迴圈式，照 reactions】
+#   （sim_runner.gd:515-517 那型：trials = cadence / NEAR_CADENCE，far pass=10）。
+# ★為什麼不是倍率式（collect / consumption / fatigue 那三個用的形狀）：
+#   ★★它們是【連續量】，×N 有意義；而製造是【離散】的 —— 產一件吃一份材料。
+#   ★★★倍率式會變成「要一次湊齊 N 份材料才能產」＝【門檻抬高】＝一個新的行為。
+#   ⇒ 這一條是 R² 查出來的：四個同族系統本身就 3:1 不一致，「照同族做」沒有指向。
+func tick_all(state: WorldState, team_ids: Array, cadence: int = -1) -> void:
+	# cadence < 0 ＝ 舊呼叫端（測試/工具）⇒ 視同 near，一次一窗（不改既有行為）
+	var trials: int = 1 if cadence < 0 else maxi(cadence / SimRunner.NEAR_CADENCE, 1)
+	# ★★★假設告警放在【執行端】，不是只放在估算端 runs_per_day() 裡。
+	#   ★血證（本輪跑對照時抓到）：第一版只放在 runs_per_day()，
+	#     而那一跑【沒有任何人呼叫估算器】⇒ registry 已經被改壞、告警照樣 0。
+	#   ⇒ ★★「只在有人問的時候才檢查」的守衛，等於沒有守衛
+	#     —— 同一形態：偵測儀器沒開的儀器，自己也沒開。
+	#   ⇒ ★★★放在這裡：只要世界跑，它就被檢查。
+	if Probe.enabled and not _manufacture_is_cadence_compensated():
+		Probe.bump("manufacture.cadence_assumption_stale")
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue
@@ -122,24 +155,41 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 		var labor_share: float = LaborSystem.labor_pop(team) / LaborSystem.pool_of(state, tile)
 		var avg_skill: float  = _avg_skill(state, team, "製造")
 
-		var ran_any: bool = false
-		var any_facility: bool = false
-		for level_key in RECIPE_GROUPS:
-			var level: int = int(tile.get(level_key))
-			if level <= 0:
-				continue   # 無此設施（下方統一 no_facility tap，避免每 group bump 灌數）
-			any_facility = true
-			var worker_rate: float = worker_rate_of(state, team, tile, level_key)
-			var ran_recipe: String = _run_recipe_group(state, team, tile, level_key, worker_rate)
-			if ran_recipe != "":
-				ran_any = true
-				print("[Manufacture] Team%d %s worker_rate=%.2f" % [tid, ran_recipe, worker_rate])
-		if ran_any:
-			_grow_skills(state, team)
-		elif not any_facility:
-			Probe.bump("manufacture.noop_no_facility")   # S1 tap：A2 主病——無製造設施空轉
-		else:
-			Probe.bump("manufacture.noop_no_material")   # S1 tap：有設施+人力但原料不足每 tick 空轉
+		# ★迴圈式補償：far 隊每次呼叫代表 trials 個 near 窗 ⇒ 把那幾窗【真的各跑一遍】。
+		#   ★★所以 noop tap 也會各記一次 —— 那是對的：那幾窗真的各空轉了一次。
+		#   ★★★誠實限：labor_share / ensure_fresh 每次【呼叫】算一次，不是每 trial 算一次
+		#     ⇒ 同一批 trial 內勞力分配是凍結的；near 隊的 N 個窗之間它會變。
+		#     這是近似，不是等價 —— 驗收①的 far/near ≈1.0 就是在量這個近似夠不夠好。
+		# ★驗收③的量：一批 trials 裡【真的產出了幾窗】——用來看「部分產出」存不存在。
+		#   ★★倍率式的失敗長相是 {0, N} 雙峰（要湊齊 N 份料才產）；迴圈式該有 0<q<N。
+		var _ran_windows: int = 0
+		for _trial in range(trials):
+			var ran_any: bool = false
+			var any_facility: bool = false
+			for level_key in RECIPE_GROUPS:
+				var level: int = int(tile.get(level_key))
+				if level <= 0:
+					continue   # 無此設施（下方統一 no_facility tap，避免每 group bump 灌數）
+				any_facility = true
+				var worker_rate: float = worker_rate_of(state, team, tile, level_key)
+				var ran_recipe: String = _run_recipe_group(state, team, tile, level_key, worker_rate)
+				if ran_recipe != "":
+					ran_any = true
+					print("[Manufacture] Team%d %s worker_rate=%.2f" % [tid, ran_recipe, worker_rate])
+			if ran_any:
+				_ran_windows += 1
+				_grow_skills(state, team)
+			elif not any_facility:
+				Probe.bump("manufacture.noop_no_facility")   # S1 tap：A2 主病——無製造設施空轉
+			else:
+				Probe.bump("manufacture.noop_no_material")   # S1 tap：有設施+人力但原料不足每 tick 空轉
+		if Probe.enabled and trials > 1:
+			if _ran_windows == 0:
+				Probe.bump("manufacture.batch_zero")
+			elif _ran_windows == trials:
+				Probe.bump("manufacture.batch_full")
+			else:
+				Probe.bump("manufacture.batch_partial")
 
 # 生產權：owner 本人或同 faction（軍屯/派駐居民團代工）
 func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
