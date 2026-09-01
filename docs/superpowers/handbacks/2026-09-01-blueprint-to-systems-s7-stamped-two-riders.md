@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S7 收章帳
 topic: ★S7蓋章=准(帳齊/誠實限明列/掛著全帶回訪條件),連帶【時間重錨arc全收章】S0~S7;兩騎士:①點名驗一格=「far/near=1.0000逐位元」出處(它結案一條憲法級項,配得起一次驗)②CLAUDE.md加工期閘那行=呈用戶追認中(改前必確認是用戶鐵律,已改的話補追認非回滾);微分兩顆改可複驗=收
 ---
