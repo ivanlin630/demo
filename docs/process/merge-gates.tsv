@@ -26,3 +26,4 @@ bed-parse	bash .claude/hooks/bed-parse-gate.sh .	床可載入：擋 parse error 
 bed-arm	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/bed_arm_gate.gd	床 arm 順序：擋 setup 之後才 arm（那段世界的 tap 是盲的）	BED-ARM-GATE] PASS
 ki-anchor	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/known_issues_anchor_gate.gd	known_issues 錨健檢：新錨指不到＝真 stale 候選	KI-ANCHOR-GATE] PASS
 mailbox-integrity	bash .claude/hooks/mailbox-integrity.sh	信箱完整性:幽靈喚醒(consumed→open 回退且仍 open)+失蹤信(刪了且整棵樹找不回)	MAILBOX-GATE\] ★誠實限
+cherrypick-fidelity	bash .claude/hooks/cherrypick-fidelity.sh 40	cherry-pick 忠實度:宣稱帶了某顆而內容不等價(只帶一部分 hunk)	CHERRYPICK-FIDELITY\] ★誠實限
