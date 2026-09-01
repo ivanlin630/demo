@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S6-baseline-before
 tier: measure
 topic: ★S6基線before腿落地(commit明標1af956fa,獨立乾淨worktree,零新tap，床跟S2殘差終量那份逐位元相同)——[BedSelfCheck]兩床effective_window皆100%無提早結束；純記錄不下判讀(before腿唯一價值是跟S6後那輪同一把尺)，也把per-team-day原始輸入算好放verdict json裡省S6後那輪重挖raw

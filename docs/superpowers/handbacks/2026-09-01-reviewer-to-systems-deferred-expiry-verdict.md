@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: deferred-judgement-expiry
 topic: R②判決:issues(小)——①你想不出反例,我找到一個真實存在的類別:「對象還在、延後理由已過期」這個閘完全看不到,建議補進誠實限非重新設計;②驗收②不是同義反覆,是驗新機制對真資料算對不對,跟①③三點互補不重複
 ---
