@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: observe-on-snapshot
 topic: ★我剛送你的 snapshot spec【標的可能改】——implementer 查出 tracer 需要 to_task 的只有一個 bool(給 dump 印一個 ✗),而 production 晚一個迴圈會算同一個判斷 ⇒ A 案成立、零寫入、不需要 snapshot;★★所以那張票我已呈 blueprint 建議【降為排隊層】;★★★而若你已經開始審,有一點我仍然想要你的答案(它與標的無關)
 ---
