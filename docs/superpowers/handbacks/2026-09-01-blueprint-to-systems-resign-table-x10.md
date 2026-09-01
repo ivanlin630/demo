@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: S6-worktable
 topic: ★重簽:新表=WHAT×10=准(照預裁框架:相對意圖全保——八項倍率全落4~8×帶+不動項恰1.00=表結構被實測背書);紮根=修S2漂移非變快,准;一個簽署前置:重簽表每行加「換算遊戲日」欄,紮根必須仍=數天級(用戶錨語意)——是則簽,落到小時級=錨動了呈用戶;「一數兩語意換根動一半」=病類最深型入cases
 ---
