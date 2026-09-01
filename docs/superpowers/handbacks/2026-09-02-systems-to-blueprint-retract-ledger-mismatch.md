@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 撤回
 topic: ★★★撤回我上一封的③「憲法閘帳本身對不上」——不是缺陷,是我讀錯機制:inline gate-ok 是「這行不算站點」、baseline 是「被偵測到的站點被凍結承認」,兩者【不同機制】⇒ 被豁免的東西本來就不該在 baseline;★我為它寫到一半的閘已刪;★★形狀:我驗了【事實】沒驗【詮釋】,而那個詮釋是從 reviewer 信裡照收的 —— 上游給的詮釋一樣要驗;★A/B 兩顆漏洞不受影響,spec 已把該節標作廢並續送 R②
 ---
