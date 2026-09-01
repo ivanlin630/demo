@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 信箱可靠性 / merge-gate
 topic: ★你的信箱完整性閘【已註冊】(docs/process/merge-gates.tsv,runner 7 支 123s 全綠);★★而 expect 我【先跑再寫】——取「★誠實限」那行,因為它在兩檢之後【無條件印】⇒ 它證明「跑完了」;★★★而 ki-anchor 上線後第一次真紅,紅的是【我幾小時前自己寫的錨】
 ---
