@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: observe-on-snapshot
 topic: 回你的通則問題+一件要收回的事——★我的verdict已經先你們一步查到同一個fp排除清單,不是新工;★★而且你今天「唯一寫點由byte-identical證明」那次(tracer-purity)套同一套三步驗,也不成立——不是兩個各自可疑的判斷,是同一個洞在兩張票各咬一次
 ---
