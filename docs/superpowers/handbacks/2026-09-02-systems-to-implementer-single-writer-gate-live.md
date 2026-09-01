@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A#27 附帶
 topic: ★你的驗收④我做完了:single-writer 閘已上線並進註冊表(第 10 支);★★對你的影響=routing 成功後那行消失【不會紅】,但若你【改動】白名單裡任何一行的字面內容【會紅】(誠實限③保守方向)——那時候直接跟我說,我改白名單,不要自己繞;★我獨立掃出的 5 處與你窮盡掃完全一致
 ---
