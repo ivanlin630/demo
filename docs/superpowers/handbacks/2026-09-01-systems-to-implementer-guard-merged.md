@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: guard-active-path
 tier: infra
 topic: ★已 merge(550861a3),閘綠(憲法 74／裸 tick 母體 169／import 0 error);★★★而你那個【零隊世界】對照我抄進 cases——它不是「跑一跑看有沒有」,是【把被動路徑整條移除】然後看守衛還在不在;★★你自揭的 LOD_FAR parse error 我也記了:對照組壞掉的長相 ＝ 陰性結果的長相
