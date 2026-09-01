@@ -30,6 +30,10 @@ func _initialize() -> void:
 
 	var runner := SimRunner.new()
 	var ticks_per_day: int = WorldState.TICKS_PER_DAY
+	print("[CONTROL-RAN] s7_tracer_fp_divergence_bed 已執行到主迴圈前（★對照組自證已跑）")
+	print(StateFingerprint.blind_note())      # ★盲區印在使用它的當下
+	print(EphemeralStateHash.note())          # ★★而被排除的那半由這把尺量，它的邊界也一起印
+	# ★★★labor_crisis emit 計數（驗收②：觀測下必須 = 0，★直接數，不靠任何 hash）
 	print("=== s7_tracer_fp_divergence_bed === mode=%s config=%s days=%d TICKS_PER_DAY=%d" % [mode, cfg, days, ticks_per_day])
 	for d in range(days):
 		for _t in range(ticks_per_day):
@@ -37,6 +41,12 @@ func _initialize() -> void:
 		if mode == "on":
 			SpecimenTracer.flush()   # ★日邊界flush,同sim_runner.gd:244既有慣例
 		var fp: String = StateFingerprint.compute(state)
-		print("[FP] day=%d fp=%s" % [d + 1, fp])
+		var eh: String = EphemeralStateHash.compute(state)
+		print("[FP] day=%d fp=%s eph=%s" % [d + 1, fp, eh])
+	# ★★★驗收②：直接數 emit，★不靠任何 hash（tap key 見 world_events.gd:74 `t0.emit.<kind>`）
+	print("[EMIT] t0.emit.labor_crisis = %d｜t0.emit 總 = %d"
+		% [int(Probe.counts.get("t0.emit.labor_crisis", 0)), int(Probe.counts.get("t0.emit", 0))])
+	print("[EMIT] ★判準：tracer on 與 off 兩跑的 labor_crisis 必須【相同】——")
+	print("       ★★不是「= 0」（世界自己也會發），是【觀測沒有多發】。")
 	print("=== s7_tracer_fp_divergence_bed DONE ===")
 	quit()

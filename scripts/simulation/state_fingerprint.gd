@@ -7,6 +7,18 @@ class_name StateFingerprint
 
 const QUANT: float = 10000.0   # float 量化 1e-4（避浮點格式噪；round(x*QUANT) 整數化）
 
+# ★★★本尺【排除】什麼 —— 而它必須被【印在使用它的當下】，不能只寫在註解裡。
+#   血證（2026-09-01）：這段排除清單本來只存在於 :69 的一行註解裡，
+#   ⇒ ★於是有人（systems）拿 fp 當「tracer 沒有污染世界」的證據，
+#     ★★而 fp 對那個 bug 類別是【結構性地瞎的】——它不是量不到，是設計上就不看。
+#   ⇒ ★★★systems 已立成 invariant：凡輸出 fingerprint／比對結果的地方，
+#     同一段輸出要帶一行「本尺排除：…」。這個常數就是那一行的單一來源。
+const EXCLUDES: String = "ephemeral 快取(food_runway/persist_strength/food_flow_avg/need_urgency)" 	+ " ＋ cadence 排程欄(*_eval_next_tick) ＋ observer/probe"
+
+# ★輸出 fp 的地方請印這一行（單一來源，改一處全部跟）。
+static func blind_note() -> String:
+	return "[FP-BLIND] ★本尺排除：%s ⇒ ★★fp 相同【不等於】沒有污染（那半由 EphemeralStateHash 量）" % EXCLUDES
+
 # 全 state canonical hash（decision-and-lifecycle-affected state；純讀零 RNG）。
 static func compute(state: WorldState) -> String:
 	var buf: PackedStringArray = PackedStringArray()
