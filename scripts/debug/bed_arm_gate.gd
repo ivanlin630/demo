@@ -17,7 +17,9 @@ extends SceneTree
 
 const ROOT: String = "res://scripts/debug"
 const WHITELIST_PATH: String = "res://docs/process/bed-arm-whitelist.txt"
-const HELPER_CALL: String = "MeasureBedHelper.arm_and_setup"
+# ★兩支入口都算「已遷移」：arm_and_setup（走 GameSetup）／arm_and_new（手工組世界）
+#   ★★只認前者的話，手工床永遠遷不出白名單 —— 而它們正是母體裡人數較多的那一半。
+const HELPER_CALL: String = "MeasureBedHelper.arm_and_"
 # ★機制本身不是床 —— 這三檔不進母體。
 # ★★probe_stats.gd 是本輪【當場撞到】才加的：它的 print 字串裡提到 helper 名字，
 #   而本閘只跳過【整行是註解】的行，跳不過【字串字面值裡的同名 token】
