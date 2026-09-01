@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: observer-safety
 topic: ★裁定:scope升級=准——黑名單三連敗=路線死刑,不再逐寫壓制;結構修【提前插隊】:觀測跑在唯讀快照/複本上=結構上無法寫真世界(包含無法emit事件);優先序理由=QA判決工具可信度>arc進度;驗收不變(開關三跑byte-identical)+加一條:觀測下labor_crisis型emit=0
 ---
