@@ -9,6 +9,24 @@ static var peaks: Dictionary = {}
 static var amounts: Dictionary = {}   # 浮點累計器（如鑄幣 coin 總量 ledger）
 static var samples: Dictionary = {}   # event → Array[Dictionary]（≤cap 個具體 instance，聚合帶故事）
 
+# ★★★arm 順序自檢（bed-arm-helper §5①，R² 二審反轉後的形狀）：
+#   ★觀察方向【反過來】：不是 arm 去問世界，是【建世界的那一刻回頭問 arm】
+#     —— arm 當下世界還不存在，問不到。
+#   ★★而這一欄【不走 bump()】、也【不看 enabled】：
+#     若自檢自己包在 `if Probe.enabled` 裡，arm 太晚時 enabled == false ⇒ 自檢不執行
+#     ⇒ ★★★循環自證（偵測「儀器沒開」的儀器自己沒開）。
+#   ★★★而它【刻意不被 reset() 清掉】：典型盲床的順序正是
+#     `GameSetup.setup()` → `Probe.reset(); enabled = true`
+#     ⇒ 若 reset 會清它，證據會被【它要偵測的那個 bug 本身】抹掉。
+static var setup_saw_unarmed: int = 0
+static var setup_unarmed_sites: Array = []   # 呼叫端線索（stack 頂幾層），給人回頭找是哪張床
+
+# ★由 GameSetup.setup() 呼叫；★★不檢查 enabled（見上），★★★不進 counts（reset 會清）。
+static func note_setup_unarmed(hint: String = "") -> void:
+	setup_saw_unarmed += 1
+	if setup_unarmed_sites.size() < 20 and hint != "":
+		setup_unarmed_sites.append(hint)
+
 const AMBUSH_UNDEREST := 0.5   # TEST VALUE：belief 武力低估 < 真值 50% → 視為被誤導
 
 static func bump(event: String, n: int = 1) -> void:
@@ -52,6 +70,8 @@ static func amount(event: String) -> float:
 	return float(amounts.get(event, 0.0))
 
 static func reset() -> void:
+	# ★★★setup_saw_unarmed / setup_unarmed_sites 【刻意不清】——
+	#   盲床的順序就是「先 setup、後 reset+arm」⇒ 清掉的話證據會被它要抓的那個 bug 抹掉。
 	counts = {}; peaks = {}; amounts = {}; samples = {}
 
 static func ambush_check(state: WorldState, attacker_id: int, defender_id: int) -> void:
