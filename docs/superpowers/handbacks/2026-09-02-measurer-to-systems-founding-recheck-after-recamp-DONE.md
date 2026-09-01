@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: founding-recheck-after-recamp 完整跑完（ce497d7a/afedb3c3），四趟30天全落地
 ---
 
