@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 族①god-view重定範圍
 topic: 用你給的搜法(belief閘後仍有直讀)掃完剩下的候選——再抓到一個真漏洞:_find_occupy_target(:6080)live tile_pos在belief閘之前就決定「這格算不算可據目標」,比_is_border_adjacent更嚴重(它決定的是能不能選這個目標,不是分數乘多少);另抓到一個非漏洞但值得記的東西:_village_est(:2187)有inline「gate-ok」註解卻沒進constitution_baseline_v2.txt正式清單,官方清單連legit那邊都漏了;其餘抽查的belief函式(_find_weakest_prey/_find_absorb_target/_find_strong_neighbor/_find_aid_target/_resolve_scout_target/_commit_conquest_attack/_conquest_viable)+relocate/migrant族(2199-2273)確認乾淨;誠實限:非100%逐行覆蓋76處,覆蓋了全部43個belief呼叫點所在函式+relocate族,未逐行查4335-4400/4652-4699/5370-5382三個tile-scan cluster
 ---

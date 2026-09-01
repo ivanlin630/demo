@@ -106,8 +106,14 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 ★★**而這顆是「讀一個【已經知道存在】的實體的 live 欄位」** —— **不掃集合，所以不長得像 god-view。**
 ★★★**這比原本記的「間接 local-var 存取」盲點更嚴重**：那條是**寫法**上的規避，這條是**類別**上的缺席。
 
-★**母體現況（誠實）**：`10 顆標記 ＋ 至少 1 顆新發現`，而 reviewer **只看了 76 個候選中的 40 個**
-⇒ ★★**剩 36 個未查**，★★★**且已證明「看 40 個就有 1 顆」** ⇒ **不能假設剩下的是乾淨的。**
+★**母體現況（2026-09-02 掃完後更新）**：**兩顆真漏洞**（`_is_border_adjacent` 閘後／`_find_occupy_target` 閘前，見上方新條目）
+＋ 10 顆既有標記。★**其餘抽查的 belief 函式確認乾淨**：`_find_weakest_prey`／`_find_absorb_target`／
+`_find_strong_neighbor`／`_find_aid_target`／`_resolve_scout_target`／`_commit_conquest_attack`／`_conquest_viable`＋relocate/migrant 族。
+
+★★★**殘留（reviewer 自述，我照收不美化）**：**非 100% 逐行覆蓋 76 處** ——
+覆蓋了**全部 43 個 belief 呼叫點所在函式** ＋ relocate 族，★**未逐行查三個 tile-scan cluster：`4335-4400`／`4652-4699`／`5370-5382`**。
+★★**我判這個殘留可接受，理由要寫出來**：那三個是 **tile-scan**，★★★**而 tile-scan 正是 detector 現有 `gv_mapscan` 桶【看得見】的類別**
+——**漏掉的新形狀（讀已知實體的 live 欄位）不長在 tile-scan 裡**。⇒ **不是「懶得查」，是「那一段有另一道防線」。**
 
 **狀態：已知未修** ｜ **回訪：到期 token — 族①god-view 批開工時（下一站）**
 
@@ -119,6 +125,31 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 **現在開桶 ＝ 用 1 個樣本設計分類器。**
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — reviewer 交回 36 顆逐顆分類的那一刻**
+
+### ⏳★★★族①god-view 掃完：**兩顆真漏洞，而它們的【嚴重度不同】**（2026-09-02，reviewer 掃完候選）
+
+| # | 位置 | 形狀 | 嚴重度 |
+|---|---|---|---|
+| A | `faction_ai_system.gd:265` → `:316-317` `_is_border_adjacent` | **belief 閘【後】**，live `prey.tile_pos` 算 border **乘進 score** | ★**分數算錯** |
+| B | `faction_ai_system.gd:6080` `_find_occupy_target` | **belief 閘【前】**，live `t.tile_pos` 查 tile 判 `outpost_level` ⇒ **決定這格算不算可據目標** | ★★★**live 真值決定「算不算候選」** |
+
+★★**B 比 A 嚴重**：A 是評估算錯；★★★**B 是連「該不該把它納入考慮」都由真值決定** ——
+`has_belief` 在 `:6084`，**而 `:6080` 已經先用真值把候選篩過一輪了**。
+⇒ ★**因此 `invariants.md` 細則 1a 已補洞**：初版寫「閘**後**評估」，涵蓋不到 B。**現在寫的是「決策路徑上」。**
+
+**狀態：已知未修** ｜ **回訪：到期 token — 族①修法 slice（A/B 一起，因為同一條細則）**
+
+### ⏳★★憲法閘的【帳本身】對不上：inline `gate-ok` ↔ `constitution_baseline_v2.txt`（2026-09-02 reviewer 撿）
+
+★**坐實**：`faction_ai_system.gd:2187` `_village_est` **有 inline `# gate-ok:` 註解**，
+★★**而 `constitution_baseline_v2.txt` 裡【沒有】它**（`grep -c _village_est` ＝ 0）。
+★**兩邊的計數也對不上**：inline `gate-ok` 68 處（6 個檔）vs baseline 75 筆 `file::func::type`
+——★★**兩者粒度不同（一個註解可能對應多個 fingerprint），所以「差 7」不是結論，只有 `_village_est` 那一顆是坐實的。**
+
+★★★**為什麼要記**：**官方清單連【legit 那一邊】都漏** ⇒ 「清單就是母體」這個假設破了 ——
+**而我這一輪【正是】拿 baseline 的 10 顆去主張族①的母體大小。**（那條負斷言已另案撤回。）
+
+**狀態：已知未修** ｜ **回訪：到期 token — 與「detector 新開桶」同一個 slice（同一個病：閘的帳不可信）**
 
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
