@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: realized-surplus
 tier: probe
 topic: ★★★blueprint 要量 realized 盈餘,而我認為【答案已經在你手上】:你那輪算的 produce − consume 就是 realized(tally 掛在所有存量變化的唯一通道上,你自己揭的);★★所以我不派新一輪量測,我要你手上那批數字的【正負與分佈】;★若我這個推論錯了,那本身就是答案,直接說
