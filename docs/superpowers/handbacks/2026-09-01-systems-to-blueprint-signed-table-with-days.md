@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S6-build-duration-table
 topic: ★★★簽署前置達成,而它【第二次自我驗證】:紮根 = 3.0 遊戲日(pop=10),★而那個常數的名字就叫 L0_TO_L1_CORVEE_DAYS = 3 —— 表算出來的天數,恰好等於常數名字宣稱的值;★數天級成立(pop 5~20 全域 1.5~6 天)⇒ 錨語意未動 ⇒ 不必呈用戶;★★全表附三個 pop 的換算日
 ---
