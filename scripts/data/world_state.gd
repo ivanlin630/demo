@@ -9,7 +9,7 @@ class_name WorldState
 # ★裸 tick 守衛 (c) 白名單：它【就是根】—— hours()/days() 由它導出，改成 hours() 會循環定義。
 #   ★★而【它的值】由 debug/time_const_check.gd 的根值凍結哨兵看著：改了會紅，
 #     紅了的處置是【確認有意並更新那一格】，不是拿掉守衛。
-const TICKS_PER_HOUR:   int   = 120           # ★唯一自由參數（1 tick = 1 分鐘，推導值）
+const TICKS_PER_HOUR:   int   = 60           # ★唯一自由參數（1 tick = 1 分鐘，推導值）
 # ★S1b 白名單(c)：24 ＝【一天幾小時】的曆法結構，★不隨 tick 縮放 ——
 #   根旋鈕改成別的值時，這個 24 必須【維持 24】，否則「小時」就不是小時了。
 # TIER: n/a — 曆法基底（單位定義），不是節律
