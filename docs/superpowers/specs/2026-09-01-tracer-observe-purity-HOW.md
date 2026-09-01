@@ -1,5 +1,5 @@
 ---
-status: DRAFT(待 R²;★blueprint 裁【現症＝最高位】,即修)
+status: R² CLEAN(2026-09-01 issues→定案第 4 案;★R² 訂正了我沿用的舊描述)
 owner: systems
 slice: tracer-observe-purity
 law: ★用戶立法「觀測不得改變被觀測物」（`observer_no_global_rng`）—— 本例是它的第 5/6 例，且是【直接寫 state】
@@ -8,7 +8,10 @@ law: ★用戶立法「觀測不得改變被觀測物」（`observer_no_global_r
 # ★①現症
 ```
 specimen_tracer.gd:107 → to_task → gather → ★寫 state
-gather 三項副作用：EWMA 推進 ／ cache 寫 ／ ★★cadence 重排（★★★第三項會改「誰在哪個 tick 被評估」）
+~~gather 三項副作用：EWMA 推進 ／ cache 寫 ／ cadence 重排~~
+★★★**R² 訂正（2026-09-01）**：**EWMA 推進【已經修過】**（`advance` 旗標預設 false）
+⇒ ★**真正還活著的副作用只剩一處：`idle_employ` 快取寫**
+⇒ ★★而我沿用的「三項」來自 `known_issues:653` 的舊描述 —— **我照抄記錄當現況，傳了好幾封信**
 ★而 tracer 是【QA 讀 motive→action→outcome 故事】用的工具 ⇒ 觀測正在改世界
 ```
 ★★**且它有一層保護而擋不住**：`:87 _begin_observe` 自述 suppress RNG ＋ suppress Probe，**沒有** suppress state 寫入
@@ -29,14 +32,24 @@ B★【read-only 投影】：抽一個 pure 版本供觀測呼叫
 C★【整體 snapshot/restore】：★★白名單安全（連未知寫入都還原）
    ⇒ ★★★但代價是深拷貝 WorldState,且【restore 本身可能有洞】(引用型欄位)
 ```
-★★**要 implementer 先查【tracer 需要 to_task 的什麼】，再選** —— ★★★**選了要把理由寫進交件。**
-★**我不代選**：A 最好但可能不可行，而可不可行取決於一個我沒查的事實。
+## ★★★定案：**第 4 案 —— 在源頭擋那一個寫點**（R² 提出並查證）
+```
+★R² 查證：29 個 to_task handler【沒有一個真的讀 idle_employ_value】
+   ⇒ ★★所以那顆快取寫【對觀測路徑毫無用處】—— 擋掉它不損失任何東西
+★★★而它不是黑名單：★因為那是【唯一還活著的寫點】(EWMA 那項已修)
+   —— 而「唯一」這個負斷言【由驗收①自己證明】：若還有別的寫入，三跑 byte-identical 會失敗
+```
+★**A/B/C 全部作廢**：A 不必（不用避開 to_task）、B 太重、C 代價最高而現在沒必要。
+★★**而 R² 幫我查了我原本要交棒的那件事**（「tracer 需要 to_task 的什麼」）——
+★★★**答案是：不是全查 29 個，是查 7 個，而 7 個都不需要那顆髒欄位。**
 
 # ★★③驗收（★blueprint 定，既有法的驗收式）
 ```
 ①★★★開 tracer vs 關 tracer，★三跑 byte-identical（state_fingerprint）
    ★失敗長相＝任一跑不同 ⇒ 還有寫入沒擋住
-②★陽性對照：把修法拿掉 ⇒ 必須【不同】（★★否則這條驗收沒有偵測力 —— 可能它本來就相同）
+②★陽性對照：把修法拿掉 ⇒ 必須【不同】
+   ★★★而 R² 指出我的疑慮是真的 ⇒ **走【構造】，不要靠隨機跑撞到窄觸發**
+   （★`idle_employ` 快取寫的觸發條件窄 ⇒ 隨機跑可能整輪都沒踩到 ⇒ ★★那時「相同」是【沒觸發】不是【沒影響】）
 ③★★若選 B：需一顆守衛盯「pure 版有沒有長出副作用」
    ⇒ 而它必須掛在【一定會走】的路上（★★★今天剛立的 invariant）
 ```

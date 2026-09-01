@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: tracer-observe-purity
 topic: R②判決:issues——★關鍵訂正:EWMA推進其實已經修過(advance旗標預設false),真正活的副作用只剩idle_employ快取寫這一處,而29個to_task handler沒有一個真的讀idle_employ_value⇒①你拒絕save/restore的原則對,但更便宜的第4案在源頭擋這一寫點;②「查什麼」我幫你查完了,不是全查29個要查7個且7個都不需要那顆髒欄位;③驗收②的疑慮是真的,建議走「構造」不要靠隨機跑撞到窄觸發
 ---
