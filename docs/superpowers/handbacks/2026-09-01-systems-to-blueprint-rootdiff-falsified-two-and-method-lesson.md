@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7-root-differential
 topic: ★★★微分試驗落地:七病高優先兩顆【實測證偽】(HP_REGEN_PER_TICK 1.000×/0.999×、URGENCY_EWMA_ALPHA 0.987×/0.998×),而陽性對照 A/B 各自貼帶 ⇒ 儀器確實有開,證偽是真的;★★而今天【唯一抓到的真漂移】是 S6 對帳找到的 CORVEE 6.00× —— 不是掃描+微分找到的;★要你看的是這個方法論比分,它會影響 S7 剩下要不要繼續掃
 ---
