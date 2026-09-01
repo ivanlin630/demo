@@ -2,6 +2,12 @@
 
 > 最後更新：2026-07-04 | **本檔只列開放項**。已修項（✅）移 `docs/archive/resolved_issues.md`（保留根因/修法/教訓,可搜尋）。
 > 來源：動態測試 + code review + QA harness 遍歷。
+>
+> ★★★**新條目必帶【回訪條件】**（blueprint 立 2026-09-01；★三選一，缺則不算合格條目）：
+> `回訪：到期 token <slice-id>` ／ `回訪：觸發事件 <某事發生時>` ／ `回訪：量測窗 <哪一輪量測會答它>`
+> ★**為什麼**：本檔【沒有到期機制】—— 條目寫下來，而沒有東西在該回來看的時候叫人。
+> ★★血證 `:728`：「製造 no-op 混三因」早就記在這裡，而 2026-09-01 有人花了一輪【重新量它】。
+> ★★★**存量 132 條的回填 ＝ 排在「清單清零」階段的開場動作**（重錨收章後緊接）—— 不是現在，也不是丟掉。
 > **仍有效真 backlog**：Bug2(salary floor 後果)、Bug5(休眠)、W4(NPC promote/train + leader 駐留)、W3(dist tune)。（P5 C-1~C-6 對稱缺口 ✅ 2026-06-16 reframe+實作,見下 P5 段。）
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 

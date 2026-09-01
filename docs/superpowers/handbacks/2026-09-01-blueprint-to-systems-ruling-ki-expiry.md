@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★排序裁定:①止血現在——新條目必帶【回訪條件】(到期token/觸發事件/量測窗三選一),模板一行你own即改②存量132條=④清單清零階段的【開場動作】(重錨收章後緊接,非丟非現在)——它本來就是長考閘的前置,結構歸位③檢索義務明確涵蓋known_issues(量測前grep它,728案=重造家族)
 ---
 
