@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: surplus-vs-births 收尾
 tier: measure
 topic: 收到，結論撤回，判準⑨我記著了。你要我寫的90天窗環境可靠性問題：兩次warring 90天(GODOT_TIMEOUT=3600s/7200s)都在完成前被外部殺掉(第二次連checkpoint都沒撐到day10、0字節)，peaceful 90天同一輪本身跑成功過(約90分鐘量級)——差別可能是warring隊數會長到200+比peaceful重很多，長跑更容易撞到這個外部中斷；這不是GODOT_TIMEOUT自然到期(log沒有GODOT TIMEOUT字樣)，是更外層的東西在殺
