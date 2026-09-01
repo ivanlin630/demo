@@ -1,0 +1,100 @@
+# known_issues 行號引用全稽核（2026-09-02，只盤不修）
+#
+# ═══ ★母體（寫死計數式）═══
+# 樣式：`known_issues(\.md)?:[0-9]+`
+# 收：live 文件 —— docs/*.md ＋ docs/process/**（含 detail/status）
+# ★不收：handbacks／specs/_archive／measurements／verdicts ——【有日期的紀錄】，改它們＝改歷史
+# 逐檔：
+#   docs/known_issues.md                      2
+#   docs/archive/resolved_issues.md          43   ★★見下：這 43 個【不是引用】
+#   docs/game-design.md                       1
+#   docs/progress.md                          1
+#   docs/process/01_architect.md              1
+#   docs/process/detail/01_architect-cases.md 4
+#   docs/process/status/02_reviewer.status.md 1
+#   ───────────────────────────────────────  53   ★systems 說 45（他只數了前兩檔）
+#
+# ═══ ★★★43 個不是引用，是【我自己寫的出處戳記】═══
+# ```
+# grep -cE '^- `[0-9a-f]+`\([ABC]\) 原 `known_issues:[0-9]+`' docs/archive/resolved_issues.md
+#   ⇒ 43   ★★與 archive 內 known_issues:NN 的總數【完全相等】⇒ 沒有一個是真引用
+# ```
+# ★它們的形狀是：`- <hash>(A|B) 原 known_issues:53 — <標題>`
+# ★★語意是【這條原本住在第 53 行】——★★★是【搬家當下的歷史座標】，不是「去那裡看」
+#   ⇒ 它們【不可能因搬家而失效】：它們是【搬家產生的】，而且記的就是搬家前的位置
+#   ⇒ ★而 systems 提的修法（改寫成標題引用）會【毀掉它們的用途】——
+#     ★★況且每一行的破折號後面【本來就有標題】，讀者不需要行號也找得到。
+# ⇒ ★★★結論：43 個不動。若要動，只該把「原」字改得更明白（如「原位置」），而那是措辭不是壞掉。
+#
+# ═══ ★★方法：怎麼知道一個行號【本來要指誰】═══
+# ★不是猜。三步，全機械：
+#   ①`git log -S"known_issues:NN" -- <引用它的檔>` 取【最舊】那顆 ＝ 寫下這個引用的 commit
+#   ②`git show <commit>:docs/known_issues.md | sed -n NNp` ＝ 寫的當下那一行【真的是什麼】
+#   ③往上找最近的 `## ` ＝ 當時的所屬條目 ＝【作者當時想指的東西】
+# ★★而這一步同時回答了一個沒人問過的問題：★★★這個錨【寫下來的那天】是對的嗎？
+#
+# ═══ ★★★十個真引用的逐條判（★而 systems 說「45 處全部因我們搬家失效」＝ 實際 3 處）═══
+#
+# ① docs/known_issues.md:853 → `known_issues:18`
+#    引用句：「= known_issues:18 BEG/JOIN 早退死路同案」
+#    寫下它：db00ea39（2026-07-11）｜當時第 18 行＝`| subteam:130 anon_xfer | one-shot round |`
+#    當時所屬＝「小 pop int()/round() 截斷病」 ⇒ ★★寫下來那天就【不是】BEG/JOIN
+#    ★真正的 BEG/JOIN 早退條在【當時的第 38 行】（同 commit 內可查）＝「統一矩陣窮盡稽核揭項」
+#    判：★★★【寫錯，非搬壞】（差 20 行）｜建議：見「統一矩陣窮盡稽核揭項」的 BEG/JOIN 早退段（仍在 known_issues）
+#
+# ② docs/known_issues.md:886 → `known_issues:55`
+#    引用句：「=trade 物流同根(known_issues:55 一修雙解)」
+#    寫下它：fe6fff66（2026-07-05）｜當時第 55 行＝`## 後期 scaling / late-game 卡死風險` 的標題行
+#    判：★【寫的當下是對的】——★★而它在【我們搬家之前】就已漂走（搬家前指到 2026-08 的 facility 條）
+#    建議：見「後期 scaling / late-game 卡死風險」（★仍在 known_issues，群①）
+#
+# ③ docs/game-design.md:539 → `known_issues:35`
+#    引用句：「`has_food_market`/`_nearest_market_outpost` 掃全圖（`known_issues:35`/`invariants:186` 衝突）」
+#    寫下它：495bfdee（2026-08-01）｜當時第 35 行＝「specimen RNG leak」
+#    判：★★【寫錯，非搬壞】｜建議：見「has_food_market god-view 既有債」（仍在 known_issues，群④）
+#    ★注意：`game-design.md` 是 blueprint own，不是 systems
+#
+# ④ docs/progress.md:1100 → `known_issues:35`
+#    引用句：同上 god-view 清單
+#    寫下它：f0bcfa3a（2026-08-25）｜當時第 35 行＝「whole-world distribute 未通」
+#    判：★★【寫錯，非搬壞】｜建議：同③
+#
+# ⑤ docs/process/01_architect.md:189        → `known_issues:728`
+# ⑥ docs/process/detail/01_architect-cases.md:1734 → `known_issues:728`
+# ⑦ docs/process/detail/01_architect-cases.md:1767 → `known_issues:728`
+#    引用句：「`known_issues:728` 已記『製造 no-op 混三因』」
+#    寫下它：316fa929 / 23d6de31（皆 2026-09-01）｜當時第 728 行＝cost70+tools-demand 段
+#    當時所屬＝「arc 收斂中間態（保留脈絡）：weaponsmith 0→0 供給側」★而該條是⑦群、★★已被我搬走
+#    判：★★★【這三個是【真的被我們搬壞的】——全部 3 個，就這 3 個】
+#    建議新寫法：見 `archive/resolved_issues.md`「arc 收斂中間態（保留脈絡）：weaponsmith 0→0 供給側」
+#      （★「製造 no-op 混三因」那句的現址＝`archive/resolved_issues.md:388`，但★★別寫行號，archive 也會長大）
+#
+# ⑧ docs/process/detail/01_architect-cases.md:1742 → `known_issues:653`
+# ⑨ docs/process/detail/01_architect-cases.md:1831 → `known_issues:653`
+#    寫下它：e1f5c4b5（2026-09-01）｜當時第 653 行＝gather-mutator 那段，屬「arc 狀態」
+#    判：★【寫的當下對，今天仍對】——「arc 狀態」是群⑨，★★沒搬
+#    ⇒ ★★★但它仍然會漂：任何一次 known_issues 編輯都會動它。建議一併改成標題引用。
+#
+# ⑩ docs/process/status/02_reviewer.status.md:158 → `known_issues.md:20`
+#    引用句：specimen 撞車 R²b CLEAN
+#    寫下它：a92507d6（2026-08-01）｜當時第 20 行＝peaceful_economy 床那段（與 specimen 撞車無關）
+#    判：★★【寫錯，非搬壞】｜建議：★★★這一條我【找不到它要指誰】—— 列出來給 systems 判，不猜
+#
+# ═══ ★★★總結：分母 53，而「因搬家失效」的是 3 ═══
+# ```
+# 43 ＝ 我寫的出處戳記（不是引用，不會失效，★不要動）
+#  3 ＝ ★★★真的被我們的搬家弄壞（`:728` ×3）⇒ 改指 archive 標題
+#  2 ＝ 今天仍然正確（`:653` ×2）⇒ 建議一併改標題引用（防未來漂）
+#  1 ＝ 寫的當下對、★在搬家【之前】就漂走（`:55`）
+#  4 ＝ ★★【寫下來那天就是錯的】（`:18` / game-design `:35` / progress `:35` / reviewer.status `:20`）
+# ```
+# ★★★而那 4 個才是這份稽核真正的產出：
+#   **它們從來沒有指對過，而沒有任何人發現** —— 因為【沒有東西在檢查 doc 對 doc 的引用】。
+#
+# ═══ ★誠實限 ═══
+# ①★母體只收 live 文件；handbacks/specs/_archive 裡的同型引用【沒收】（有日期的紀錄，不該改）
+# ②★★「寫的當下是什麼」用 `git log -S` 取最舊那顆 ——
+#    ★★★若同一個字串在更早的 commit 出現過又被刪過，這個方法會取到【更早那顆】而非我想要的那顆
+#    ⇒ 本輪 10 條我逐條看了引用句與當時行內容是否語意相符，沒有發現這種情況，但它是這個方法的已知弱點
+# ③★建議的「新寫法」是我讀出來的判斷，不是機械推導 ——⑩那條我明說找不到、不猜
+# ④只盤不修：四個涉及的檔（known_issues／archive／game-design／process×3）我【一個字都沒動】
