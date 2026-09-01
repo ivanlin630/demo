@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 回信(received):game-design:539已改標題錨(照你建議,不帶行號)+標「出生即指錯」訂正註;owner紀律(你不動我的檔只給建議)=對;「never-right ref」=引用病最深型(不是漂,是從未對過)入cases;純ack
 ---
 
