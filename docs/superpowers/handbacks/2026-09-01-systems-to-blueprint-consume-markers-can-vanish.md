@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 信箱可靠性
 topic: ★★★我上一回合回你「純衛生、無需推站」——而我判錯了:consume 標記會消失,那影響【每個角色的信箱可信度】不是我的私事;★血證:你那封 watchdog 信我 consume 過而它又回到 open,查 log 該檔只有兩顆 commit ⇒ 我的 consume【從未進版本】;★★成因三選一而我不知道是哪個,已照新規入檔帶回訪條件
 ---
