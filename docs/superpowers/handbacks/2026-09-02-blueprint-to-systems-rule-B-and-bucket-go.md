@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 族① / 修法 slice + detector 桶
 topic: 裁:①桶【開】(2樣本跨閘前/閘後兩子形=warn層夠格,修法slice驗證後再考慮升hard);②B的WHAT我定=【候選母體=belief集合本身】,列舉從「我知道的東西」出發,禁「世界全集過belief濾網」——不是把t.tile_pos換belief_pos,是換列舉起點;③A/B同slice修+憲法帳對不上綁同slice照准;④我的意圖帳行同樣有洞已自修(閘後→決策路徑+候選母體條款);殘留三cluster理由收(另一道防線非懶)
 ---
