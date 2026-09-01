@@ -492,7 +492,7 @@ porter 整趟**不進任何決策路徑**。specimen 佐證（追逐窗 tick 360
 **實測** `breed.born=1 · reaction.breed=1 · n_persons 24→24 凍結（每 10 天取樣皆 24）` **@70a792b3 2026-08-21** · repro: `EXAM_CONFIG=peaceful EXAM_MONTHS=3 EXAM_SEED=1337 .\tools\godot.ps1 --headless --script scripts/debug/exam_12mo_bed.gd` （正本 `docs/process/verdicts/d1-pop-vs-cap.measure.json`）。specimen 側證：`breed.rate_sample` 顯示 `breed_progress` **有在累加**（0.001→0.084）＝**機制路徑是通的、只是極慢**。
   ★★★**2026-09-01 重錨 arc（S0~S7）之後複測 —— 更極端**：兩床（peaceful＋warring）、30 日窗、
   **3060 個 team-day（361＋2699）** ⇒ `minor_population` 佔比**逐位元 0.0000**。
-  ★**不是母體空**：分母 `population + minor` 從未為 0；★★**不是死碼**：累積機制 `reaction_system.gd::breed_progress` 實存。
+  ★**不是母體空**：分母 `population + minor` 從未為 0；★★**不是死碼**：累積機制 `reaction_system.gd::_evaluate_life_events` 實存。
   ⇒ ★★★**30 日窗內【全隊全程沒有任何一次 `breed_progress` 累積到 1.0】**。
   ★★★★**當日訂正（★這是我自己製造的假訊號）**：我原本寫「從 `born=1` 變成 `born=0`」並當【重錨後迴歸候選】呈報
   —— ★**而兩個數字的窗長不同**：原始 `docs/process/verdicts/breed-verify-and-deathcause.measure.json`
@@ -2356,7 +2356,7 @@ TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
    出處 `docs/process/verdicts/breed-verify-and-deathcause.measure.json`
 ★實測 B：兩床（peaceful＋warring）／【30 天】／3060 個 team-day ⇒ minor 佔比【逐位元 0.0000】
    ★★而 B 與 A【一致】：30 天的期望值 ＝ 1×30/90 ＝ 0.33 ⇒ 觀測 0 在預期內
-★★★機制實存（`reaction_system.gd::breed_progress`）、分母從未為 0 ⇒ **不是死碼、不是母體空**
+★★★機制實存（`reaction_system.gd::_evaluate_life_events`）、分母從未為 0 ⇒ **不是死碼、不是母體空**
 ```
 ★**曾被我誤讀成【重錨後迴歸】並升成主案 —— 而那是【窗長沒對齊】造成的假訊號，已撤。**
 ★★**所以這一條【不是「誰弄壞了它」】，是【它本來就這麼慢】** ——
