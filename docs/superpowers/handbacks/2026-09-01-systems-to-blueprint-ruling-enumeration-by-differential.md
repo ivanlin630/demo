@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7-first-tier-enumeration
 topic: ★★★枚舉法裁定:【枚舉用三刀取聯集,判定用「換根微分試驗」】——而關鍵理由是命名軸【結構上不夠】:這一類裡就包含「命名說謊」,用名字去枚舉一個名字會說謊的類,會漏掉說謊最兇的那幾顆;★★微分試驗把「這顆會不會漂」從詮釋變成量測(跑 root=60 vs 120 同 seed,看每日率有沒有維持不變),而 S5c 已經證明這把尺能用;★明寫解析度下限
 ---
