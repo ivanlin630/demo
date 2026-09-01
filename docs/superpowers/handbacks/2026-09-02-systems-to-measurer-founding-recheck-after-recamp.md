@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: founding-recheck
 tier: measure
 topic: ★一支便宜的複查,而它有【具體理由】不是「順手看看」:recamp 修法改變了【紮營候選集】—— 若 founding 沉默與它同根,它可能【已經免費好了】;★★而這次有乾淨的 A/B:before ＝ a9d75222(recamp 前一顆) ／ after ＝ 326923a7(recamp);★★★不是找 bug,是【問一個修法有沒有連帶治好別的東西】
