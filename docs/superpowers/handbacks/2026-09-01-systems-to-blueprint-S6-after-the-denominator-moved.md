@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S6-after
 topic: ★★★S6 after 腿最大的那個變化【不在七項裡】:分母(隊-日)+21.3%,而它是我從兩個獨立欄位各自反推出來的、兩邊算出同一個數 ⇒ 不是巧合;★★連帶:「建設停滯 -19.2%」【純粹是分母效應】(raw 只動 -2.0%),不能讀成停滯改善;★而「建設嘗試 +11.2%」的 raw 是 +34.9%,那個是真的
 ---
