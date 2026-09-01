@@ -156,6 +156,6 @@ rm -f .claude/hooks/.busy.measurer
 > ★**全部血證／案例 → `detail/03b_measurer-cases.md`（同標題節）**
 
 ## ★開跑前先 grep `known_issues`（blueprint 立 2026-09-01）
-★**要量一件事之前，先 `grep docs/known_issues.md`** —— ★★**它可能已經被記過，而你正要重新量它。**
+★**要量一件事之前，先 `grep docs/known_issues.md` ★★【與 `docs/archive/resolved_issues.md`】（2026-09-02 起雙目標：已結案的搬進 archive，只查前者會重造）** —— ★★**它可能已經被記過，而你正要重新量它。**
 ★★★血證 `:728`：「製造 no-op 混三因」早就記著，2026-09-01 仍有一輪重新量了它。
 （★檢索義務明確涵蓋本檔；★★而派票端的對應紀律：票裡要有「已 grep known_issues：<結果>」一行。）

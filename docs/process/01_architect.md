@@ -184,7 +184,7 @@ brainstorm → spec → plan 設計，不實作。
 （這是「宣告 vs 實態」在 code 層的版本；詳 `detail/01_architect-cases.md`。）
 
 ## ★派量測/盤點票之前，自己先 grep `known_issues`（systems 自綁 2026-09-01）
-★**票裡必須有一行「已 grep `known_issues`：<結果>」** —— ★★寫「無相關條目」也算，**空白不算**。
+★**票裡必須有一行「已 grep `known_issues` ＋ `docs/archive/resolved_issues.md`（★★2026-09-02 起【雙目標】：已結案的搬進 archive 了，只 grep 前者會【重造已解的問題】）：<結果>」** —— ★★寫「無相關條目」也算，**空白不算**。
 ★★★**理由**：把義務放在【派票端】才有牙齒 —— **收票端要記得，派票端只要照模板**。
 ★血證：`known_issues:728` 已記「製造 no-op 混三因」，而我派了一輪去重新量它。
 
