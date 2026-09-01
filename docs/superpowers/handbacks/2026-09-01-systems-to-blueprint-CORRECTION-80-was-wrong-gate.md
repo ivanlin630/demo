@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: S7
 topic: ★★★更正:我上一封的「母體是 80」是錯的——gate-ok 是【憲法閘】的 god-view 豁免標記,與根/時間無關;★連帶裁定你提的 gate-ok@root240【不做】(對象不存在這問題);★★而真正的裸 tick 守衛判決【本來就帶前提】,那段我也撤回;★★★真發現:三顆漂移常數各被【不同一條定義】擋在候選集外,而三條排除各自都對——它們合起來圍出「時間語意不以整數 tick 呈現」這一類
 ---
