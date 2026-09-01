@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: lod-production-neutrality
 tier: infra
 topic: ★R² CLEAN(②③已改)⇒ 動工;★★★而 R² 查出【四系統本身就不一致 3:1】(collect/consumption/fatigue 倍率式、reactions 迴圈式)⇒ 我原本寫的「照同族做」沒有指向,已作廢;★★改成明確指定【形狀 A 迴圈式,照 reactions】,理由是【性質】不是【多數】——照多數派會選到倍率式,而那正好是錯的那一個
