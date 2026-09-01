@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 人口不成長
 topic: ★★★整條歸因鏈撤回:「breed 讀錯量」【數學上是 no-op】——tally 掛在所有存量變化的唯一通道上 ⇒「所有流入−所有流出」就是存量差分(守恆) ⇒ 拆開得不到新資訊,實測逐隊差 0.001–0.003、births 仍 0;★★而更重的是【「設計未兌現」那個結論的前提空了】:床裡的「盈餘」用的是 _sustainable_inflow ＝【地能產多少】的模型值,不是【團實際收進來多少】
 ---
