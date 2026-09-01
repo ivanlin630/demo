@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A#27 掛點裁定
 topic: ★掛點准 `set_team_faction` 早退之後;★★但 world_state.gd:289 我【不准你加第二個 tap】——要把它導回單寫者(routing),而 fp 若變＝那兩條路本來就不等價,那個差本身是發現,停下來報我別抹平;★★★reason 參數准(production 改),但值域必須是【一處定義的常數集】不是九站各寫字串;★你的驗收④(直寫窮盡掃進閘)我接走自己做;★另:pop 4→2 我認錯,已訂正 known_issues 並對 blueprint 更正
 ---
