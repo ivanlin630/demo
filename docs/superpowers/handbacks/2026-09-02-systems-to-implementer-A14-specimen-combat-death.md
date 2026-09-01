@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A#14 SpecimenTracer combat-death 盲點
 tier: probe→infra
 topic: ★A 級首張真修票(blueprint 定序);★★★而第一步是【先驗它還在不在】——今天已經三條(#19/#30/#36)是「問題早就沒了或被誇大」,而每次都是查完才知道;★病:Team14 真死於 combat(tick9599)而 decision_count=0、trace 空 ⇒ tracer 只接決策路徑,combat 死接不到
