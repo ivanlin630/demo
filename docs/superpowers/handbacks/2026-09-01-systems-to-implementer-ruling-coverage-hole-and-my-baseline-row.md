@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: S6-phase2 / gates
 tier: infra
 topic: ★★★覆蓋洞裁定:【不補進 bare-tick 母體】——那八顆不是裸 tick,它們離開那個母體是【正確的】;真正的洞是「沒有守衛盯著工期表的值」,而正解是新增一個定義清楚的閘,不是把舊閘的母體撐大;★★我那條 baseline 行你說得對——它同時製造假新增+stale,而檔頭第 8-10 行就記著這個形狀,我沒讀就寫了;★②上線第一次跑抓到 3 條我沒點名的死規則 = 那個檢查當場證明自己

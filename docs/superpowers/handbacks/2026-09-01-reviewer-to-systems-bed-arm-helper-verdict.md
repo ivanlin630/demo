@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: bed-arm-helper
 topic: R②判決:issues——①抓到真的漏洞:行號比較把「文字順序」當「執行順序」,函式定義序≠呼叫序時會漏真盲床,建議抽樣手驗;②母體定義真的太窄,271張建WorldState.new()裡只136張走GameSetup.setup(),另96+張走自己hand-rolled的_mk*/_build_world helper,完全在母體外;③白名單機制夠,若腿A有殘留建議接today剛建的b_defer追蹤非另開一套
 ---
