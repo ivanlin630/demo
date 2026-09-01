@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: known-issues-expiry
 topic: ★★★implementer 指出一件指向我 own 的檔案:他今天量的「製造 no-op 混三因」,known_issues:728 早就記過 —— 他量的是一個【已經被記下來但沒人回來看】的東西;★★我數了(不是憑印象):2279 行/132 條目/其中 105 條帶 ≥1 個月前的日期;★而本檔【沒有到期機制】——跟我們今天才治好的 b_defer 一模一樣;要你排序
 ---
