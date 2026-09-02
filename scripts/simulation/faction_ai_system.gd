@@ -683,15 +683,24 @@ func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileDa
 		# ★A2 拓寬 invite 候選（佔據率主槓桿）：領主可邀「非生產非戰鬥的遊蕩團」進自家空 outpost。
 		#   排：已 settled 生產隊 / 子隊 / 戰鬥中(combat_target≠-1) / 攻擊掠奪中(active raider 語意 mismatch)。
 		#   ★設計選擇：含 idle merchant / ex-military drifter 皆可邀、最終 accept 靠 invitee diplomacy 決策(不適者自拒)、只硬排 active-raider。
+		# ★★★belief 閘【提到最前面】（god-view 真違規②修法，2026-09-02）：
+		#   ★病（reviewer 親驗）：下面四個篩選欄位在 belief 閘【之前】就讀 live
+		#     ⇒ ★★那是 `gv_belief_pre`：★★★用 live 決定「算不算候選」——閘還沒開就已經全知
+		#   ⇒ 先過 belief 閘 ⇒【看不到的隊，一個欄位都不讀】
+		#   ★結果集不變（兩邊都是 continue、中間無副作用）⇒ 本項改的是【讀不讀】不是【選不選】。
+		# A3 感知鐵律：邀請距離 gate 用 belief last-seen 非 live（跨圖不邀；無 belief/過期→belief_pos(-1,-1)→擋）。
+		# 禁 live t.tile_pos（用 live=修 god-view 卻讀 god-view=cosmetic，belief 該拒卻照發跨圖 settle）。
+		var _bp: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
+		if _bp == Vector2i(-1, -1) or _hex_dist(team.tile_pos, _bp) > INVITE_RANGE: continue
+		# ★★★而下面四個欄位【仍然是 live】—— belief 裡沒有它們
+		#   （vision 只記 population_est／tile_pos／last_tick／tier／resource_scale）
+		#   ⇒ ★要讓它們也走 belief，得【新增 belief 欄位】＝「觀察者看不看得出對方在幹嘛/是什麼團」
+		#     ★★那是 WHAT，★★★我不自己發明 —— 已報 systems。
 		if t.tags.has(TeamData.TAG_PRODUCE) or t.parent_team_id != -1 \
 				or t.combat_target != -1 or t.current_task == TeamData.TASK_ATTACK:
 			continue
 		if t.current_task == TeamData.TASK_SETTLE: continue   # 已在路上，不重邀
 		if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
-		# A3 感知鐵律：邀請距離 gate 用 belief last-seen 非 live（跨圖不邀；無 belief/過期→belief_pos(-1,-1)→擋）。
-		# 禁 live t.tile_pos（用 live=修 god-view 卻讀 god-view=cosmetic，belief 該拒卻照發跨圖 settle）。
-		var _bp: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
-		if _bp == Vector2i(-1, -1) or _hex_dist(team.tile_pos, _bp) > INVITE_RANGE: continue
 		var dipl := DiplomaticAiSystem.new()
 		var resp: String = dipl.handle_diplomacy_message(
 			state, t, team, "invite_settle")

@@ -148,8 +148,16 @@ func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
         if d < best_d: best_d = d; best_id = tid
     return best_id
 
-func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
-    return BeliefSystem.best_estimate(state, obs_id, tgt_id).get("population_est", fallback)
+# ★★★簽名【拿掉 fallback 參數】（god-view 真違規③修法，2026-09-02）：
+#   ★病（reviewer 親驗）：唯一呼叫端傳的是【敵方的 live 真實人口】當 fallback ——
+#     而同檔 :250 self_pop 走 `_faction_total_pop`（fallback 用【自己】的 live pop，對象是自己人＝legit）
+#   ⇒ ★★同一個寫法，一個對自己（合法）一個對敵人（違憲）：★★★複製時漏改了【觀察對象】
+#   ⇒ 修法照 Fix A 的前例做成【型別防線】：★把 fallback 參數拿掉，
+#     ★★這支函式從此【收不到任何外部值】⇒ 想拿 live 當退路也傳不進來。
+#   ★無 belief ⇒ 回 -1，由呼叫端決定（★而呼叫端的決定寫在它自己那裡，不藏在這裡）。
+func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int) -> int:
+    var _b: Dictionary = BeliefSystem.best_estimate(state, obs_id, tgt_id)
+    return int(_b.get("population_est", -1)) if not _b.is_empty() else -1
 
 func _find_weakest_member(state: WorldState, faction: FactionData) -> int:
     var weakest_id: int = -1; var weakest_pop: int = 9999
@@ -259,7 +267,13 @@ func _evaluate_alliance_need(state: WorldState, faction: FactionData) -> void:
         if t.faction_id == faction.faction_id or t.faction_id == -1: continue
         # T-02：讀目擊者 member 的 team_intel 估算值
         var obs_id: int = seen[tid]
-        var pop_est: int = _get_pop_est(state, obs_id, tid, t.population)
+        var pop_est: int = _get_pop_est(state, obs_id, tid)
+        if pop_est < 0:   # gate-ok: 這不是行為門檻，是【belief 缺席哨兵】——-1 是本函式自己約定的「無情報」值，不是一個可調的閾
+            # ★沒有 belief ⇒ ★★這一隊【不進威脅帳】——你不會被一個你毫無情報的東西威脅到。
+            #   ★★★沿用引擎既有先例（`find_prosperity_prey`：`if not has_belief: continue`），
+            #     不是新政策；★而它可見：非 0 代表這個窗裡有多少敵隊是「看得到但估不出」。
+            if Probe.enabled: Probe.bump("alliance.threat_skip_nobelief")
+            continue
         threat_map[t.faction_id] = threat_map.get(t.faction_id, 0) + pop_est
     for fid in threat_map:
         if threat_map[fid] > self_pop * 1.5:
@@ -283,18 +297,31 @@ func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
 # 下方 _find_trade_partner / _tile_has_resident 為純查詢 scaffolding（無 TaskArbiter 呼叫，非違憲），
 # 仍供 headless_test 覆蓋；god-view fallback 去留另歸 C 類 finder dedup（FI handback 已標）。
 # 回 { "team_id": int, "outpost_pos": Vector2i } 或空 dict 表無
+# ★★★god-view 真違規④修法（2026-09-02）：baseline :76 的 inline 註解【自己承認】是待修的 leak
+#   （"CANDIDATE-LEAK: partner discovered 但 outpost pos 讀 live(半漏,待 R²+follow-up)"）
+#   ⇒ ★★★「標記存在 ≠ 判過合法」——它從來不是核可，是「看過、知道有問題、先放著」。
+# ★修法照 A#27 Fix B 的同一個形狀（★不發明新的）：★★換【列舉起點】不是換欄位
+#   ①候選母體：`team_discovered` → `BeliefSystem.known_targets`（我知道的東西）
+#   ②outpost 位置：★不再掃 `state.world.tiles` 全圖，改掃 `state.team_tile_known`（belief tile store）
+#   ⇒ ★而 harvest 要先跑，否則 store 恆空、恆回 {} ＝【假關閉】（看起來像修好了）
 func _find_trade_partner(state: WorldState, trader: TeamData) -> Dictionary:
-    for tid in state.team_discovered.get(trader.team_id, []):
+    BeliefSystem.harvest_tile_known(state, trader)
+    var _known_tiles: Dictionary = state.team_tile_known.get(trader.team_id, {})
+    for tid in BeliefSystem.known_targets(state, trader.team_id):
+        if tid == trader.team_id: continue
         var t: TeamData = state.teams.get(tid)
         if t == null: continue
         if t.faction_id != -1 and t.faction_id == trader.faction_id: continue
         # W2: 對方有 outpost = 可交易（move_target 指 outpost tile，採購也可，不需對方有貨）
-        for tile_id in state.world.tiles:
-            var tile: HexTileData = state.world.tiles[tile_id]
+        # ★只掃【我知道的 tile】—— 不知道的據點對我不存在
+        for tile_id in _known_tiles:
+            var tile: HexTileData = state.world.tiles.get(tile_id)
+            if tile == null: continue
             if tile.outpost_owner != tid: continue
             # W2 修正：tile 上要有居民團（村長）才派 — trader 到了才有人成交
             if not _tile_has_resident(state, tile): continue
             return { "team_id": tid, "outpost_pos": tile.tile_pos }
+    if Probe.enabled: Probe.bump("trade.partner_none")
     return {}
 
 func _tile_has_resident(state: WorldState, tile: HexTileData) -> bool:

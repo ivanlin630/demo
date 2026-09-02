@@ -445,20 +445,33 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			c.forage_yield_target = _tile_forage_yield(_stile, _forage_rate)
 			c.food_seek_delay_days = float(FactionAISystem._hex_dist(team.tile_pos, _seek))
 	# ★投靠＝host 村的被動流（現成、無工期）；★佔村＝目標村的實際產能（非死常數）
-	if c.strong_neighbor_id != -1:
-		var _host: TeamData = state.teams.get(c.strong_neighbor_id)
-		if _host != null:
-			var _htile: HexTileData = state.world.tiles.get(_host.tile_pos.x * 1000 + _host.tile_pos.y)
+	# ★★★god-view 真違規①修法（2026-09-02，reviewer 親驗）：
+	#   ★病：`strong_neighbor_id` / `occupy_target_id` 的【選拔階段】已經 belief 化，
+	#     ★★而選中之後的【估值階段】直接讀 `_host.tile_pos/.population`、`_vt.tile_pos/.population`（live）
+	#   ⇒ ★★★同函式 :670 的 absorb_yield 是【正確做法】（has_belief 閘 ＋ population_est）
+	#     ⇒ 不是能力問題，是【漏改一格】——所以這裡照抄那個既有正確 idiom，不發明新的。
+	#   ★無 belief／無位置 ⇒ 該 flow 留 0（fallback 鐵則：★★絕不退回 live）。
+	if c.strong_neighbor_id != -1 and BeliefSystem.has_belief(state, team.team_id, c.strong_neighbor_id):
+		var _hpos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, c.strong_neighbor_id)
+		var _hpop: float = float(BeliefSystem.best_estimate(state, team.team_id, c.strong_neighbor_id).get("population_est", 0.0))
+		if _hpos != Vector2i(-1, -1) and _hpop > 0.0:
+			var _htile: HexTileData = state.world.tiles.get(_hpos.x * 1000 + _hpos.y)
 			if _htile != null and _htile.outpost_level > 0:
 				c.join_host_flow = MarginalEconomy._inflow_est(VillageEstimate.make(
-					_htile.terrain, _htile.outpost_level, 0, _host.population)) / maxf(float(_host.population), 1.0) 					* float(team.population)   # host 的人均流 × 我要帶過去的人數
-	if c.occupy_target_id != -1:
-		var _vt: TeamData = state.teams.get(c.occupy_target_id)
-		if _vt != null:
-			var _vtile: HexTileData = state.world.tiles.get(_vt.tile_pos.x * 1000 + _vt.tile_pos.y)
+					_htile.terrain, _htile.outpost_level, 0, int(_hpop))) / maxf(_hpop, 1.0) 					* float(team.population)   # host 的人均流 × 我要帶過去的人數
+		elif Probe.enabled:
+			# ★「知道它存在、但不知道它在哪/多大」＝合法第三結果（不是違規桶）
+			Probe.bump("belief.join_host_positionless")
+	if c.occupy_target_id != -1 and BeliefSystem.has_belief(state, team.team_id, c.occupy_target_id):
+		var _vpos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, c.occupy_target_id)
+		var _vpop: float = float(BeliefSystem.best_estimate(state, team.team_id, c.occupy_target_id).get("population_est", 0.0))
+		if _vpos != Vector2i(-1, -1) and _vpop > 0.0:
+			var _vtile: HexTileData = state.world.tiles.get(_vpos.x * 1000 + _vpos.y)
 			if _vtile != null:
 				c.occupy_target_flow = MarginalEconomy._inflow_est(VillageEstimate.make(
-					_vtile.terrain, maxi(_vtile.outpost_level, 1), 0, _vt.population))
+					_vtile.terrain, maxi(_vtile.outpost_level, 1), 0, int(_vpop)))
+		elif Probe.enabled:
+			Probe.bump("belief.occupy_target_positionless")
 	c.food_stock = ResourceSystem.effective_food(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.strong_farm", _tg)
 	var _aid: int = _fa._find_aid_target(state, team)
