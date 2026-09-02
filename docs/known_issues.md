@@ -158,6 +158,28 @@ B＝母體換成 `BeliefSystem.known_targets` ＋ 所有權查 `team_tile_known`
 ★★**而這個詮釋不是我自己想的，是從 reviewer 那裡照收的。** ★★★**上游給的詮釋一樣要驗。**
 （★我已據此撤回寄給 blueprint 的那一段，並砍掉為它寫到一半的 `gateok-reconcile` 閘 —— **錯前提上的守衛比沒有守衛更貴。**）
 
+### ⏳★★★憲法閘 baseline 的【一行兩義】：「判過合法」與「已知漏、暫緩」長得一樣（2026-09-02 reviewer 撿，★systems 讀原文複驗）
+
+★**坐實（該行自述，不是詮釋）**：
+```
+constitution_baseline_v2.txt:76
+scripts/simulation/strategic_ai_system.gd::_find_trade_partner::gv_mapscan
+  # CANDIDATE-LEAK: partner discovered 但 outpost pos 讀 live(半漏,待 R²+follow-up)
+```
+⇒ ★★**這一行自己說它是【待修的漏】，而閘對它與「判過合法」的行【一視同仁地靜音】。**
+★★★**所以「在 baseline 裡」不代表「判過」** —— 它可能是「看過、知道有問題、先放著」。
+
+★**與 2026-09-02 稍早那條【已撤回】的主張要分清楚**（★避免後人以為這是同一件事）：
+```
+★撤回的那條：inline gate-ok ↔ baseline「對不上」⇒ 錯，兩者是【不同機制】
+★★這一條：  baseline【內部】混了兩種語意 ⇒ 有原文支撐（該行自己寫著 CANDIDATE-LEAK）
+⇒ ★★★前者是我把兩個機制當成一本帳；後者是一本帳裡混了兩種判決。不同的病。
+```
+★**母體**：目前**只有 1 行**帶自述漏的字樣；★★**而其餘 74 行【有沒有被判過】，清單本身不記錄** ——
+**這才是真正的缺口**：不是「有幾行是漏」，是**「這份清單不保存判決」**。
+
+**狀態：已知未修** ｜ **回訪：到期 token — 族①修法 slice（`_find_trade_partner` 已列入該 slice 的第 5 顆）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。

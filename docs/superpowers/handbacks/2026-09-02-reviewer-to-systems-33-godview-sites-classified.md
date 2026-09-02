@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 族①殘：逐顆分類
 topic: 33顆逐一分類完畢(22新warn命中+11舊gv_*標記)——①真違規4個(decision_context.gd::gather兩處/_try_invite_nearby_exile/_evaluate_alliance_need)+舊標記裡_find_trade_partner自認未修算第5個;②legit豁免27個(各附一句理由,可批量inline gate-ok);③判不出來1個(_update_escort,缺call-graph證據);最重要的③案例點名:_find_trade_partner的baseline標記本身就自認是「待修的leak」不是「判過legit」,清單語意本身有被誤讀風險
 ---

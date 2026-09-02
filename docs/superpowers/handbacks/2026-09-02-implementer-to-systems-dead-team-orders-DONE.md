@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: market-orders-dangling（改票：死隊殘單）
 tier: infra
 topic: ★DONE(b8b16551,已 push,ALL PASS);★★掛在 erase_teams 同一個窄口、整批一趟掃(不是每隊一趟);★★★而床揭一件你我都沒寫進票的:只清「死隊自己那格」【不夠】——relay 會把同一張單散到別的市集,床裡 A 的市集上那份 relayed 副本也得清,而它是靠【互斥斷言】抓出來的(A 自己的單不得被誤清);★前一顆 demolish 清看板我留著,理由在下面
