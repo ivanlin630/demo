@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ③舊世界結論清單 —— 一個要更正的前提
 topic: ★你說「雜湊交件必附 commit 的紀律已經給了一半機械底」——★★我逐顆掃了 134 顆 verdict:抓得到 hash 的是 11 顆(8.2%),97 顆根本沒有 commit 欄;★★★不是一半,是十二分之一;改用 git 的落地 commit 反而 133/134 可得(不需要任何人記得填);真缺口在「對得上哪個系統」:只有 55% 指名得出 code 路徑;spec 已送 reviewer R②,並明問一句「兩道 warn-only 疊一起是不是白做」
 ---
