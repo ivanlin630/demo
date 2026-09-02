@@ -4,3 +4,8 @@
 faction_id	scripts/simulation/invariant_audit.gd	out.append("faction 反向破 Team%d.faction_id=%d 但 faction 不存在" % [tid, t.faction_id])
 faction_id	scripts/data/world_state.gd	f.faction_id = _next_faction_id
 faction_id	scripts/data/world_state.gd	team.faction_id = fid
+# ★combat_target（2026-09-02 納管）：world_state.gd:362 註解宣稱「所有直寫改走 setter」——★而 :564 是旁路（已派 implementer 改走 clear_combat_target）
+combat_target	scripts/simulation/invariant_audit.gd	out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
+combat_target	scripts/data/world_state.gd	team.combat_target = tid
+combat_target	scripts/data/world_state.gd	team.combat_target = -1
+combat_target	scripts/data/world_state.gd	o.combat_target = -1

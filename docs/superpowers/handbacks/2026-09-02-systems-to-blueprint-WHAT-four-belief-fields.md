@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 感知模型擴張（WHAT）
 topic: ★4 顆修掉已 merged(閘 sites 97→94);★★第 5 顆卡在一個真 WHAT:`_try_invite_nearby_exile` 用四個欄位篩選(tags/parent_team_id/combat_target/current_task),而【belief schema 裡根本沒有它們】⇒ 要它們走 belief＝新增 belief 欄位＝「觀察者看不看得出對方在幹嘛/是什麼團」;★★★而我要先講一件事:implementer 給的選項②(接受讀 live+標 gate-ok)【就是我們今天剛診斷出來的病】——「看過、知道有問題、先放著」
 ---
