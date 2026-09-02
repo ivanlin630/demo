@@ -12,7 +12,7 @@
 #     ★★★③**沒有 `-x` trailer 的 cherry-pick 本閘看不見**（手動 pick／squash 過的）。
 set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
-N="${1:-40}"; fail=0; checked=0; skipped=0
+N="${1:-40}"; fail=0; checked=0; warn=0; skipped=0
 # ★★★已知歷史事故白名單：★它是本閘的【陽性對照】,永遠會紅 ⇒ 若不排除,閘恆紅＝沒有閘
 #   ★★而排除它【不是洗綠】:那顆的損害已經修好(9a18f0c9 原樣還原 + s2b ALL PASS 親跑)
 KNOWN_INCIDENT="326923a7"   # recamp：只帶進註解、丟掉那一行 code（2026-09-02，已還原）
@@ -42,7 +42,21 @@ for c in $(git log -n "$N" --format=%H); do
       echo "   ⇒ ★成因通常是「來源改檔 vs 本地新建」（前面的 commit 沒撿）——不是遺失"
       continue
     fi
+    # ★★★第三關（2026-09-02）：第二關比的是【該 commit 當下】的樹（刻意不比 HEAD，免得後來的改動假紅）
+    #   ★而它的反面：當時 main 缺一顆【更早的】commit ⇒ 差異不是本次遺失，而【永久假紅】
+    #   ⇒ 若 HEAD 已與來源一致 ⇒ 降級成 WARN（★內容到了，只是晚到），不佔 FAIL
+    head_same=1
+    for f in $(git show --name-only --format="" "$src"); do
+      git cat-file -e "$src:$f" 2>/dev/null || continue
+      [ "$(git rev-parse "$src:$f" 2>/dev/null)" != "$(git rev-parse "HEAD:$f" 2>/dev/null)" ] && head_same=0 && break
+    done
+    if [ "$head_same" = "1" ]; then
+      echo "[CHERRYPICK-FIDELITY] ⚠WARN：${c:0:9} 在【該 commit 當下】與來源不同，而【HEAD 已一致】"
+      echo "   ⇒ ★成因通常是：撿這顆時 main 還缺一顆更早的 commit，之後補上了 ⇒ 非本次遺失"
+      warn=$((warn+1)); continue
+    fi
     echo "[CHERRYPICK-FIDELITY] ★FAIL：${c:0:9} 宣稱 cherry-pick 自 ${src:0:9}，而【內容不等價】"
+    echo "   ⇒ ★★已過第三關：HEAD 也【還是】不同 ⇒ 內容【真的沒到】"
     echo "   ⇒ ★已過第二關比對：不是 patch-id 假紅，是【檔案內容真的不同】"
     echo "   ⇒ ★★可能只帶進一部分 hunk ——【而 message 仍宣稱它帶了那顆】"
     echo "   ⇒ ★★★查法：git show ${src:0:9} 與 git show ${c:0:9} 逐 hunk 比"
@@ -51,7 +65,7 @@ for c in $(git log -n "$N" --format=%H); do
 done
 echo "[CHERRYPICK-FIDELITY] 掃 $N 顆｜比對 $checked 顆｜跳過(來源不可達) $skipped 顆｜★不等價 $fail"
 # ★★★self-test（2026-09-02）：白名單那顆通常【不在預設視窗內】⇒ 平常跑的那次不含陽性對照。
-#   ⇒ 每次都對它跑一遍第二關：★若它變綠＝【判準被調過頭】，閘要當場說自己壞了，而不是安靜地全綠。
+#   ⇒ 每次都對它跑一遍第二關：★若它【乾淨通過】(既非 FAIL 也非 WARN)＝判準被調過頭，閘要當場說自己壞了，而不是安靜地全綠。
 st_bad=0
 if git cat-file -e "${KNOWN_INCIDENT}^{commit}" 2>/dev/null; then
   st_src=$(git show -s --format=%B "$KNOWN_INCIDENT" | grep -oE 'cherry picked from commit [0-9a-f]{7,}' | grep -oE '[0-9a-f]{7,}' | tail -1)
@@ -69,6 +83,8 @@ if git cat-file -e "${KNOWN_INCIDENT}^{commit}" 2>/dev/null; then
 else
   echo "[CHERRYPICK-FIDELITY] ★★SELF-TEST 跳過：${KNOWN_INCIDENT} 不可達（★這代表本輪沒有陽性對照）"
 fi
+echo "[CHERRYPICK-FIDELITY] ★★★誠實限④：第三關(HEAD 已一致 ⇒ 降 WARN)【沒有陽性對照】——"
+echo "[CHERRYPICK-FIDELITY]    ⇒ self-test 驗的是第二關；若有人把第三關放寬到會吞掉真遺失，本閘【抓不到】"
 echo "[CHERRYPICK-FIDELITY] ★誠實限①：沒有 -x trailer 的 cherry-pick【本閘看不見】"
 echo "[CHERRYPICK-FIDELITY] ★誠實限③：來源【刪除】的檔，第二關跳過（只比來源留下內容的檔）"
 echo "[CHERRYPICK-FIDELITY] ★誠實限②：第二關比的是【來源動過的檔】——來源沒動、而我這邊被改壞的檔，本閘看不見"

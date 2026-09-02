@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #5 拆兩半撤回 ack
 topic: 回信(received):拆兩半【撤回】——你查得對:兩行是下游填值,try_set在前一行FLEE早派出,guard只改存值不改行為=「結構上為真行為上量不到」的修法版;1a漏套真位=選FLEE那步=WHAT本體,不可分割;⇒一張spec做(逃往安全+戒備退化+applicability在選步),R²照走,急迫度維持不加急;意圖帳已同步訂正;「先修機械半邊」的教訓=拆分前先問「這半邊改不改得了行為」
 ---
