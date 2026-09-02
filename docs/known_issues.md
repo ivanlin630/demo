@@ -398,6 +398,33 @@ self_power  = _team_power(self_team) ←★★真值（真實 combat skill）
 
 **狀態：已知未修** ｜ **回訪：到期 token — 待 blueprint 裁（★它會改變【所有】威脅評估，不該夾在別的刀裡）**
 
+### ✅★★★merge-gate 註冊表【漏了 headless_test】—— 已補（2026-09-03）
+
+★**發現方式**：implementer 跑 `headless_test` 才看到**兩顆【已 merge】的 slice 各弄紅了 fixture，而 merge-gates 十支全綠**。
+★★**原因**：`headless_test` **不在註冊表裡**；`bed-parse` **只解析不執行**。
+★★★**而 `CLAUDE.md` 寫「merge 前跑【全部】merge-gate —— 清單見註冊表」**
+⇒ **註冊表被當成【完整的】，而它不是** —— ★這是「檢查管道與失效管道不同軸」的又一次
+（同族：`known_issues` 錨 stale、`gv_belief_*` 沒有桶、fence 只在 render 現形）。
+
+★**已補**：第 12 支 `headless`，★★**而它比數量更進一步：逐條比對失敗【清單】**
+（`docs/process/.headless-baseline-list.txt`）—— ★★★**因為「只比數量」會被【一紅一綠抵消】**。
+★**代價誠實記**：merge-gates 總時 170s → **239s**。
+
+**狀態：✅已補** ｜ ★**而留下的問題不是這一支**：**註冊表【還漏了什麼】沒有人知道** ——
+★★**它自己不會說「我不完整」** ⇒ 見下方新條目。
+
+### ⏳★★註冊表的完整性【無人負責】（2026-09-03，補 headless 時撞出來）
+
+★**今天補了 `headless` 之後，沒有任何東西能回答「還漏了什麼」** ——
+★★**閘表是一份【只會被加東西】的清單，而它從不宣稱自己完整。**
+★★★**而 `CLAUDE.md` 那句「跑【全部】」讓讀者以為它完整** ⇒ **語氣與事實不符。**
+
+★**候選解（未定）**：①`CLAUDE.md` 那句改成「跑註冊表上的全部（★而註冊表不保證涵蓋一切）」
+②列一份「已知但【刻意不入閘】的檢查」清單（含理由）③定期用「哪些床/測試從沒被任何閘跑過」反查。
+★★**而 ③ 是唯一能【主動】發現漏的** —— ①②只是誠實化。
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — 下一次有人發現「閘全綠而東西是壞的」時（★屆時不要只補那一支，先問【還漏什麼】）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。

@@ -1,0 +1,2 @@
+4 [FAIL] Team23 task=建設 order=-1
+2 [FAIL] 弱目標未加入攻擊 goal

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 門檻整式換尺【已在 e2f1b598 做完】＋ ★★★一件更重要的事：測試套件被我弄紅了兩處而十支閘全綠
 topic: ★你要的「整個式子換尺」我在你信之前就做了(e2f1b598),人格佔比修前修後【都是 33.3333%】——你的驗收判準通過;★★★而我跑 headless_test 才發現:我今天兩顆【已 merge】的 slice 各弄紅了 fixture,而 merge-gates 十支【全綠】——因為 headless_test 不在那十支裡(bed-parse 只解析不執行);★★而我修好四個之後,剩一個 fixture B 我【沒有改】——改它等於替你決定「設施升級 vs 據點升級」誰優先
 ---
