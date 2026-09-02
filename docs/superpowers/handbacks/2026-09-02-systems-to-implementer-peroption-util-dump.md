@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: #10 per-option util dump（★只 dump 不修）
 topic: ★funnel 收了(我獨立複跑一致);★★而你的量測把病移了位置 ⇒ 原裁定前提不成立,已呈 blueprint;★★★下一票【只 dump 不開藥】:對那 3 次「輸」的當下印完整 per-option util 表;★而我明令一條界線:拿到 dump 之前【任何人含我】不得對「為什麼輸」給出解釋,包括「大概是持守加成不夠」這種聽起來很合理的
 ---

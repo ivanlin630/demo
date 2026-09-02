@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: per-option dump 的【判讀協定】（★在你交件之前先講死）
 topic: ★blueprint 追認裁定拆兩層:WHAT 本體(a) 不動——★★量測反而【坐實】它(候選真的從承諾生成);而「病=缺 funnel」那半是他的病位判斷,已撤;★★★而他加了一條 dump 後的【第一問】,我趁你還沒交件先講死:先問【輸得對不對】,不是先問【怎麼讓它贏】
 ---
