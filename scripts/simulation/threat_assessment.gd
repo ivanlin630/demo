@@ -28,6 +28,24 @@ static func score(state: WorldState, self_team: TeamData,
 	var dist: int = _hex_dist(self_team.tile_pos, other_pos)
 	# 距離脫離：dist≥5 → factor 0（逃出生天）。原 floor 0.1 → 遠敵永遠算威脅 → 逃跑永不釋放
 	var dist_factor: float = clampf(1.0 - float(dist) / 5.0, 0.0, 1.0)
+	# ★★★備戰 root-check tap（純觀測，systems／藍圖 2026-09-02）：
+	#   ★四份獨立量測、四個不同的病、同一個贏家（備戰）⇒ 先問它的 util 是不是被高估。
+	#   ★★而【逐項組成】才分得出高估在哪一項 —— 只看總分的話，
+	#     approach 高、hostility 高、power 高、門檻低 四種在輸出上長得一模一樣。
+	#   ★★★hostility 的【底】在這裡特別要看：`REPUTATION_NEUTRAL = 0.5` ⇒
+	#     一個【什麼也沒做過的陌生隊】hostility 恆為 0.5，而門檻是 0.3+慎重*0.3。
+	if Probe.enabled:
+		Probe.bump("threat.score_n")
+		Probe.add_amount("threat.comp.approach", approach)
+		Probe.add_amount("threat.comp.hostility", hostility)
+		Probe.add_amount("threat.comp.power_term", (power_ratio - 1.0) * 0.5)
+		Probe.add_amount("threat.comp.dist_factor", dist_factor)
+		Probe.add_amount("threat.comp.final", maxf(raw * dist_factor, 0.0))
+		# ★【沒有任何敌意行為】的那一群：名聲未知（吻合 NEUTRAL）且 approach<=0
+		#   ⇒ ★★它們的分數完全來自【陌生人底分】，而這一格是本查的核心候選。
+		if is_equal_approx(rep, REPUTATION_NEUTRAL) and approach <= 0.0:
+			Probe.bump("threat.stranger_only_n")
+			Probe.add_amount("threat.stranger_only_score", maxf(raw * dist_factor, 0.0))
 	return maxf(raw * dist_factor, 0.0)
 
 static func _approach_score(state: WorldState, self_team: TeamData,

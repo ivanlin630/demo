@@ -51,6 +51,39 @@ func _run() -> void:
 	var _ext: int = 0
 	for k10 in Probe.counts.keys():
 		if String(k10).begins_with("extinct.team."): _ext += 1
+	# ★★★驗收③（systems）：三個桶要分開印，而且加總要跟本刀前對得起來。
+	var _rej: int = 0
+	var _empA: int = 0
+	var _empOther: int = 0
+	var _wu: int = 0
+	var _wn: int = 0
+	var _tb: int = 0
+	for k11 in Probe.counts.keys():
+		var ks: String = String(k11)
+		# ★★★`bump_pt` 會寫【兩把鑰匙】：`event+.day.NNN` 與 `event+.team.<id>`（`probe_stats.gd:82`）
+		#   ⇒ ★兩個都數就是【整整多一倍】，而那個數字看起來完全合理。
+		#   ★★所以只數 `.team.` 那一家（它是總量、不逐日）。
+		if ks.begins_with("wall.reject_cannot_afford") and ks.contains(".team.") and not ks.contains(".res."):
+			_rej += int(Probe.counts[k11])
+		elif ks.contains(".empty_all_unaffordable") and ks.contains(".team."): _empA += int(Probe.counts[k11])
+		elif ks.contains(".team.") and (ks.contains(".empty_no_eligible") or ks.contains(".empty_all_below_threshold") or ks.contains(".empty_slot_full")): _empOther += int(Probe.counts[k11])
+		elif ks.ends_with(".win_upgrade"): _wu += int(Probe.counts[k11])
+		elif ks.ends_with(".win_new"): _wn += int(Probe.counts[k11])
+		elif ks.ends_with(".tiebreak_cheaper"): _tb += int(Probe.counts[k11])
+	print("  ★驗收③三桶：reject_cannot_afford=%d｜★★empty_all_unaffordable(新)=%d｜empty 其餘成因=%d"
+		% [_rej, _empA, _empOther])
+	print("  ★驗收⑤升級 vs 新建：win_upgrade=%d｜win_new=%d｜同分取便宜者 tiebreak_cheaper=%d"
+		% [_wu, _wn, _tb])
+	var _ws: Array = []
+	for k12 in Probe.counts.keys():
+		var k12s: String = String(k12)
+		if k12s.ends_with(".win_upgrade") or k12s.ends_with(".win_new") or k12s.ends_with(".filtered.unaffordable") or k12s.ends_with(".filtered.max_level"):
+			_ws.append("%s=%d" % [k12s.substr(5), int(Probe.counts[k12])])
+	_ws.sort()
+	print("  ★★逐 site 拆（★★★自救路與基建路是兩個不同的使用者，合起來看會互相掩蓋）：")
+	print("     %s" % ("｜".join(PackedStringArray(_ws)) if not _ws.is_empty() else "（零）"))
+	print("  ★建設總量（★★跨版本可比：這兩個桶本刀前後都存在）：construct.start=%d｜village.build_fired=%d"
+		% [int(Probe.counts.get("construct.start", 0)), int(Probe.counts.get("village.build_fired", 0))])
 	print("  真滅團隊數（cleanup_extinct_teams，★★消失≠死，這個桶只收真滅團）= %d" % _ext)
 	print("  ★讀法：★★滅團數要跟【修法前同窗】比，單看一邊的絕對值什麼都證不了。")
 	_report("beg.", "①絕境階梯路（rank_survival）")
