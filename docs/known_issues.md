@@ -232,6 +232,35 @@ decision_tier.gd:162-163
 
 **狀態：未確認** ｜ **回訪：量測窗 — 下一次有人在完成通知當下讀長跑輸出時（★順手記錄「立刻讀」與「隔一次再讀」的差異）**
 
+### ⏳★★★解承諾之後 `current_option` 不清 ⇒ **持守加成活過承諾**（2026-09-02，reviewer 問出來的、systems 查實）
+
+★**兩個欄位，設在同一條路上，清在不同地方**：
+```
+派出（faction_ai_system.gd:2884）：team.current_option = opt   # 註解原文「承諾追蹤實際派出」
+   ＋ 同路 _stamp_survival_commit 蓋 survival_committed_option
+★解承諾（:5944／:5948）：survival_committed_option = ""    ←★★而 current_option 【沒被清】
+★release()（task_arbiter.gd:161-181）：也【不清】current_option（grep 命中 0）
+★★★rank_scored（decision_engine.gd:96）：`if opt == current_option: u += _persist`
+⇒ ★被【明確解除承諾】的那個 option，仍然拿得到【持守加成】
+```
+★**當下影響有限**：`STALL_STALLED` 會把該 option 放進 `survival_stall_cooldown` 硬排除窗，
+排除期間有沒有加成都不影響結果。★★**但排除窗過期後，它帶著一個【已被解除的承諾】的加成回來。**
+
+★★★**要不要修是 WHAT 不是漏**：「**承諾被解除之後，持守加成該不該跟著消失**」——
+★這與 blueprint 今天裁的「承諾＝決策層狀態」直接相關，★★**但我不替他答**，已呈報。
+
+**狀態：已知未修** ｜ **回訪：到期 token — 承諾再派 funnel slice（同一刀會碰到這兩個欄位）**
+
+## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
+
+material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
+
+> ★**狀態標記三態慣例（2026-08-21 立、blueprint 認可）**——**禁一律標「已修」**：
+> - **✅ 真結案**：機制已修 **且** 影響面已清（可直接不再讀）。
+> - **⚠ 機制已修、歷史資料仍污染**：修法已 merge，但**舊量測/舊結論仍受影響** → 必附**自查方法**（如 signature）。
+> - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
+> ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
+
 ### ⏳★★`_hex_dist` 全站【11 份拷貝】＋兩個改名變體（2026-09-02，godview-1a seam 副產）
 
 ★`faction_ai_system`／`game_setup`（★兩份：`_hex_dist` ＋ `_hex_dist_static`）／`movement_system`／`order_system`／

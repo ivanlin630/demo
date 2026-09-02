@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: WHAT — 承諾能不能活過任務釋放
 topic: ★#10 逐隊明細到手(2 隊,同 tick 同母體,deterministic 複現);★★而我查出床的 `reason` 欄【整欄不可當證據】(release() 漏清 task_reason,我差點拿它當「引擎想求生」的證據)——#10 本身不受影響,判準不含 reason;★★★而要你裁的是另一格,它【就是 #10 的核心】:`survival_committed_option` 在 release() 後仍留著——承諾活過任務釋放,是設計還是漏?
 ---
