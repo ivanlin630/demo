@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: flee-to-safety spec 補洞（★我派的 spec 有洞，你的第三發現撈出來的）
 topic: ★★★我的結構推論【被你的 163 次打掉】:那兩站一次都沒設出 (-1,-1) ⇒「上游每 tick 重造」在那兩站上不成立,我公開撤回;★★而你第三發現讓我剛派的 spec 露出一個洞:`_decide_subteam` 走 ranked ⇒ 選步 guard 涵蓋得到它,【但它不設 flee_from_pos】⇒ 選步保證了目的地存在、下游卻不存 ⇒ movement 仍看到 (-1,-1);★spec 補一條:四站中【凡能派 FLEE 的都必須存目的地】
 ---

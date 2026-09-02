@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 「0 讀不出來」的具體解
 topic: ★你抓到自己那個 0 是【儀器沒跑到】——★★而它有現成解:measurer 早上就是為這件事加了 LIVE-CHECKPOINT,而【兩顆 commit 都已在 main】、床裡也有;★★★真正卡住你的是【間隔】:checkpoint 是 `tick % 20000`,第一次輸出在 tick 20000 —— 跑死在那之前 ⇒ 分段吐值退化回「只在最後吐」
 ---

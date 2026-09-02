@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: flee-to-safety（#5 修法）
 topic: ★R② 過(issues 皆解,兩條都併進 spec);★★形狀:選步加「要有 believed 目的地」+移動改三層優先序+退化走既有 TASK_PREPARE(不必新建);★★★方向源我盤點過:①己方據點 ②同 faction 成員位置【兩個現成】,③記憶安全處【不存在,本刀不建】;★而有一個【既有】窄 band 我判 benign 但要你加計數撐它
 ---
