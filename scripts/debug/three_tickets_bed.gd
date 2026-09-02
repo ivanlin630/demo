@@ -100,6 +100,8 @@ func _sec_12() -> void:
 			print("  平均 util：乞食 %.3f ／ 贏家 %.3f" % [
 				Probe.amount(pfx + "util_sum") / float(inc),
 				Probe.amount(pfx + "winner_util_sum") / float(inc)])
+	_sec_bands("begu.", "統一 rank")
+	_sec_bands("beg.", "絕境階梯")
 	print("  ★舊值（30 日，統一 rank）：候選 90、贏 6、食物門檻擋 4341、沒援助 178、輸給備戰 28")
 
 func _sec_prepare() -> void:
@@ -120,3 +122,37 @@ func _sec_prepare() -> void:
 	print("  ★舊值（12 日 warring，換尺【前】）：過門檻 82.5%%、贏/母體 37.7%%")
 	print("  ★★★三票的「輸給備戰」要跟這一格對讀 —— 備戰贏得多【本身不是病】，")
 	print("     ★而它若在【和平世界也一面倒】才是 util 高估的證據（那條腿另跑）")
+
+# ★★★按餓深分帶（blueprint 定刀型）—— ★判準寫死：
+#   【最深帶（food_days → 0）且施主可及】時，乞食贏不贏。
+#   ★★贏 ⇒ 引擎沒問題，低 util 是【對的】（它只在該乞食時才該贏）
+#   ★★★不贏 ⇒ 那才是病，而【那時才談要不要動它的 util】。
+# ★而【施主可及率】是「贏得 genuine」的另一半：
+#   ★★若最深帶的可及率也很低 ⇒ 「乞食不贏」不是決策病，是【世界裡沒有施主】。
+func _sec_bands(pfx: String, title: String) -> void:
+	print("═══ #12 按餓深分帶｜%s ═══" % title)
+	print("  帶界（印出來不手抄）：food_days ≥ 5 ／ 2–5 ／ 0.5–2 ／ ★< 0.5（最深帶）")
+	print("  帶｜母體｜施主可及｜applicable｜贏｜輸｜乞食 util｜贏家 util｜差距｜輸給誰")
+	for b in ["ge5", "2to5", "0.5to2", "deep"]:
+		var k: String = pfx + "band." + b + "."
+		var pop: int = int(Probe.counts.get(k + "pop", 0))
+		var don: int = int(Probe.counts.get(k + "donor_ok", 0))
+		var app: int = int(Probe.counts.get(k + "applicable", 0))
+		var won: int = int(Probe.counts.get(k + "won", 0))
+		var lost: int = int(Probe.counts.get(k + "lost", 0))
+		var bu: float = Probe.amount(k + "util_sum") / maxf(float(app), 1.0)
+		var wu: float = Probe.amount(k + "winner_util_sum") / maxf(float(app), 1.0)
+		var los: Array = []
+		for kk in Probe.counts.keys():
+			if String(kk).begins_with(k + "lost_to."):
+				los.append("%s=%d" % [String(kk).substr((k + "lost_to.").length()), int(Probe.counts[kk])])
+		los.sort()
+		print("  %-7s|%6d|%5d(%4.1f%%)|%5d|%4d|%4d|%7.3f|%7.3f|%7.3f| %s" % [b, pop, don,
+			100.0 * float(don) / maxf(float(pop), 1.0), app, won, lost, bu, wu, wu - bu,
+			"｜".join(PackedStringArray(los)) if not los.is_empty() else "-"])
+		if pop == 0:
+			print("        ★母體 0 ⇒ 這一帶【沒有隊落進來】，不是【乞食在這帶不贏】")
+		elif app == 0:
+			print("        ★★有隊但乞食【連候選都不是】⇒ 看施主可及率：低 ⇒ 世界沒施主；高 ⇒ 食物門檻擋的")
+	print("  ★★★判準：看【deep】那一列 —— 施主可及而乞食不贏，才是病；")
+	print("     ★施主可及率低 ⇒ 那是【世界太薄】，修法在關係密度不在秤。")

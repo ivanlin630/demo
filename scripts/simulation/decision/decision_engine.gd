@@ -405,6 +405,18 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 		return
 	Probe.bump(pfx + "rank_calls")                       # ★母體：這條路被呼叫的次數
 	Probe.bump(pfx + "rank_team.%d" % team.team_id)      # ★★母體：隣數（per-team 桶，無 cap）
+	# ★★★按餓深分帶（blueprint 定刀型 2026-09-03）：
+	#   ★泛問「乞食 util 是不是 genuine」會得到「平均而言合理」，
+	#     而那答不了【該乞食的時候它贏不贏】—— 0.495 對【還沒餓到極限的隊】可能完全正確。
+	#   ★★帶界印在床的輸出裡（不手抄）；★★★每帶母體必印 —— 某帶 0 要照三讀法報。
+	#   ★而【施主可及性】也逐帶記：「乞食不贏」可能是決策病，
+	#     ★★也可能是【世界裡沒有施主】—— 而兩者的修法完全不同。
+	var _bd: String = "deep"
+	if ctx.food_days >= 5.0: _bd = "ge5"
+	elif ctx.food_days >= 2.0: _bd = "2to5"
+	elif ctx.food_days >= 0.5: _bd = "0.5to2"
+	Probe.bump(pfx + "band." + _bd + ".pop")
+	if ctx.has_aid_target: Probe.bump(pfx + "band." + _bd + ".donor_ok")
 	var _food_ok: bool = ctx.food_days < ctx.desperation_entry_threshold
 	if _food_ok: Probe.bump(pfx + "gate.food_ok")
 	if ctx.has_aid_target: Probe.bump(pfx + "gate.aid_ok")
@@ -417,15 +429,22 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 		Probe.bump(pfx + "not_in_candidates")
 		return
 	Probe.bump(pfx + "in_candidates")
+	Probe.bump(pfx + "band." + _bd + ".applicable")
 	var _bu: float = float(scored[_bi]["u"])
 	var _wo: String = String(scored[0]["opt"])
 	var _wu: float = float(scored[0]["u"])
 	Probe.add_amount(pfx + "util_sum", _bu)
 	Probe.add_amount(pfx + "winner_util_sum", _wu)
+	# ★帶內 util 在【贏輸分流之前】記 —— ★★只記輸的那一半，平均值會偏
+	Probe.add_amount(pfx + "band." + _bd + ".util_sum", _bu)
+	Probe.add_amount(pfx + "band." + _bd + ".winner_util_sum", _wu)
 	if _wo == "乞食":
 		Probe.bump(pfx + "won")
+		Probe.bump(pfx + "band." + _bd + ".won")
 		return
 	Probe.bump(pfx + "lost_to." + _wo)
+	Probe.bump(pfx + "band." + _bd + ".lost")
+	Probe.bump(pfx + "band." + _bd + ".lost_to." + _wo)
 	# ★差距分桶：★★「差一點點」跟「從來不是對手」是兩種不同的事，
 	#   而它們在「輸了幾次」這個數字上長得一模一樣。
 	var _gap: float = _wu - _bu
