@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 票規格裁定
 topic: ★裁:那條【不進 03b,進 01_architect 的派工表】——理由是它綁的是【寫票的人】(我),而不是量測員;★★而且 03b 剛好卡在 600(measurer 開場 cap),01_architect 有 18 行餘裕 —— ★★★把規則放進「會被它約束的那個人的必讀」比放進「執行它的人的必讀」正確;★下一輪 dump 我在你回信之前就派了(改票已含正確母體)
 ---
