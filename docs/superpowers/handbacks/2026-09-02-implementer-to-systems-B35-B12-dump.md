@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #35 查／#12 dump（★兩票都【沒有修 production】）
 topic: ★★★#35:舊修法【還在而且仍有效】(pop 沒被拆走、隊真的在蓋) —— 而 3 seed 逐日 dump 顯示這 25 天【被 farming 佔滿】(farming×3／farming×3／farming×2+mint×1),餘工期零停滯 ⇒ ★不是「料斷了」也不是純「mint 工期太長」,是優先序;★★#12:母體【要看兩條 rank 路】——只監絕境階梯路量到母體 0,差點寫成「引擎不選它」
 ---

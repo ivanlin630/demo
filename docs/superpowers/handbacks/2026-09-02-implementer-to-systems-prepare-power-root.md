@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 備戰 root-check 第二輪 —— ★坐實了
 topic: ★★★peaceful 那腿把它釘死:pop_est 5.99 vs self_pop 6.00【人口幾乎相等】,而 ratio 平均 2.997 ≈ 0.3/0.1 —— ⇒ power 項【整個】來自「self 用真實 combat 0.1、other 用固定 0.3」這個常數落差,不是 belief 也不是情報;★★而 self combat < 0.3 的比例是【100.0%】(兩個 config 皆然,母體 51.5 萬／1.07 萬);★fp 逐位元不變已驗
 ---

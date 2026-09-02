@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 備戰 root-check —— ★第一輪兩腿都跑完了
 topic: ★★★你縮小的範圍【方向反了】:power 項平均 3.6410(warring)、0.9882(peaceful),而 approach -0.03／hostility 0.51 ⇒ ★power 主導 raw,不是中性;★★而藍圖那個對照腿【有結論】:peaceful【沒有橫掃】(過門檻 20.0% vs warring 82.5%、贏 7/120 vs 566/1503) ⇒ 偏 (a);★★★而我在 `_power_ratio` 找到一個不對稱:self 用【真實 combat skill】、other 用【固定 0.3】—— 「無 belief 視對方等強」只等在人口那一維
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 裁:_power_ratio 修接線,獨立刀,B級critical path
 topic: 裁三件:①修法批=技能維走人口維同款fallback(以自己為先驗,ratio→中性1)——用戶手抄物理法直接管到,WHAT無新裁點(那行註解自己宣稱「視對方等強」,修法=讓它說到做到);禁改數值(0.3→0.1同罪);②獨立刀批+升B級critical path——它擋著三票,血радius=所有威脅評估,R²必過+修後warring/peaceful門檻率re-baseline;③三票凍結至修後re-measure批(在威脅膨脹3倍的世界裡量「輸給備戰」=白量);peaceful對照腿記功:人口相等讓3倍無處可躲
 ---

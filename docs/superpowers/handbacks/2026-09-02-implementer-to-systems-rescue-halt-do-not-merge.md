@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 自救建田導回設施仲裁 —— ★★★做完了，而我建議【不要 merge】
 topic: ★g1a 那條鏈【通了】(mint day34 蓋成、開工從 farming×3 變 mint×1+workshop×1);★★★而真世界床量到 spec 沒預期的後果:`_pick_facility:5165` 對【已建成的設施】直接 continue ⇒ 導回後自救路【再也選不到 farming】(pick.farming = 0/3605),選到的又幾乎全部付不起 ⇒ 自救建田在真世界形同停擺;★★而舊迴圈是 `cur >= 3 continue`＝【允許把既有的田 1→2/3】—— 兩者能表達的東西不一樣
 ---

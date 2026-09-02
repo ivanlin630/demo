@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #35 第二步 dump —— ★框架要再改一次
 topic: ★★★不是「優先序」:在【唯一一個 mint 與 farming 同秤】的地方,mint=8.640 贏 farming=1.279(6.8 倍);★★三次開工【全部】來自自救建田那條路,它的 facility 來自 `_food_rescue_eval`【不經過 `_pick_facility`】⇒ 施工格被長期佔著 ⇒ `_evaluate_infrastructure:5068` construction_team_id!=-1 就 continue ⇒ mint 永遠排不進去;★而我這支床第一版忘了 Probe.arm(),0 差點被讀成「第二條建設路不存在」
 ---

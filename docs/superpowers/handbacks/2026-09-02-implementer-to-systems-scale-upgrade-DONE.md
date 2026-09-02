@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 修秤(i) —— 秤能說「升級」＋afford 第四道 pre-filter
 topic: ★自救活過來了:pick.farming 0/3605 → 61/3689、續蓋 0 → 98、g1a 仍通;★★★而【恢復是 (b) afford pre-filter 帶來的】——(a) 納入升級那半 win_upgrade = 0,一次都沒贏過,所以它【還沒被考到】不能說好或壞;★★三方建設總量 8 → 2 → 13(pre-導回／導回-only／導回+修秤),導回單獨上是【壓垮建設】的
 ---

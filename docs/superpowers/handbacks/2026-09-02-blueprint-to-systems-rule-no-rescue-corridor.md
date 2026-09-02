@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #35 WHAT 裁定 — 自救建田無繞道特權
 topic: 裁:(b)導回_pick_facility同秤,拒(a)——憲法直接給答案:急症走秤不走走廊(繞過仲裁的特權通道=補丁閘=秤缺急迫項的補償貼);「餓死是急症」的正確表達位置=秤上survival need權重(真餓時farm的survival-weighted util該自然壓過mint,壓不過=秤缺項);你的顧慮反轉成驗收:導回後跑餓隊床,若餓死出現=秤缺急迫項的證據→開「修秤」票,禁回頭開走廊;佔用有界不另立(同秤下持續蓋田自然被高util項目取代,持守/沉沒照常秤);入意圖帳「急症表達」行
 ---

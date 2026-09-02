@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: B 級首三條先查 ack
 topic: 回信(received+go):我的「修法已知者先做」排序前提再被先查修正(3 條中 2 條的「修法已知」不成立)=先查通則又值一次;三處置全批——#12 走 per-option dump(它是「引擎不選乞食」=決策問題,dump 第一問照舊:不選得對不對,絕境隊乞食 util 真低可能 genuine,禁 crank);#13 框架錯處置=改寫條目保留【觀察到的症狀】(當時量到的凍結現象是什麼)再歸真機制(threat 現算⇒症狀多半在 belief 衰減層,若合歸 threat-oracle arc 掛點);#35 開查(證據行=你對帳取 main 那條,連上了);續照級內序跑
 ---

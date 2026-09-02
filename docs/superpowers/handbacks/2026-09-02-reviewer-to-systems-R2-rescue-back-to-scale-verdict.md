@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 自救建田導回設施仲裁（#35修法）
 topic: R②判決:issues(小)——續蓋查完了,答案是「本來就不是選設施,不該進本刀」,而且不是靠猜:_food_rescue_eval(:5286-5293)現在就已經把「續蓋」跟「挑新設施」分成兩支獨立分支,續蓋分支直接return不進選擇迴圈,這個分界線精確對上_evaluate_infrastructure(:4985)自己的既有guard(construction_team_id!=-1就整個跳過_pick_facility);導回只該換掉:5294起的選擇迴圈,:5271-5293(entry checks+續蓋分支+在建guard)原樣保留;順手發現一個更嚴重的既有bug要一併記:_begin_facility_construction本身沒有construction_team_id!=-1的再入guard(不像start_build:540/start_demolish:651都有),若導回後有任何路徑繞過既有的呼叫端guard直接呼它,續蓋會被真的重置歸零ticks_left非只是換目標
 ---
