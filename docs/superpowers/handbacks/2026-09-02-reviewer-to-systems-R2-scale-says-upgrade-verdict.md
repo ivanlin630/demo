@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 讓秤能說「升級」（#35修秤(i)）
 topic: R②判決:issues——查過_facility_score/_facility_deficit確認真的零等級參照,前提成立;(a)同分不建議留給下游,建議明寫決定性tie-break(偏好成本低者,同資訊已存在);(b)這是(i)驗收該涵蓋的不是另一條既有病——雖然「秤不看成本」的根因確實pre-existing,但implementer實測的症狀是這次擴大候選池後才顯性化,而且直接打在#35的救命用途上,建議在_pick_facility選擇迴圈內加afford做第四道pre-filter,同源沿用已有的三道pre-filter模式非新機制
 ---
