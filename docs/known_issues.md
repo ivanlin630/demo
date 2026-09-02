@@ -905,7 +905,31 @@ outpost.l0_to_l1 = 0（實測）      ← 沒有隊靠紮根取得 outpost
 ### 👁 §4c 選址記憶可能被 `MEMORY_MAX` 擠掉（12mo 大考監看、非阻塞）
 site 記憶（TTL **30 天**）與人際記憶**共用 `p.memory`**、FIFO cap `MEMORY_MAX=20`（`npc_ai_system.gd`（★L2 錨：檔級））→ 社交活躍 leader 的選址記憶恐**未到期先被擠掉**＝反饋迴路靜默失效。故 merge-gate 要求補 tap（`site_memory.write` vs `site_memory.applied`），**兩者落差＝eviction 吞掉的量**；大考時若 applied≈0 → 此 slice 名存實亡、需獨立儲存或抬 cap（抬 cap＝全域行為改動、需 fp intended-change）。
 
-### 🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 pin 定案、fix in feat/own-granary-pin pending measurer 12mo confirm）
+### ✅own_granary_tile(state=Nil) SCRIPT ERROR —— **已修且已驗**（2026-09-02 收案）
+
+★**兩件先訂正**（原標題兩處都 stale）：
+```
+①「fix in feat/own-granary-pin」→ ★e8ad1cb8 已在 main（2026-08-15；`git log HEAD..origin/feat/own-granary-pin` ＝ 空）
+②「pending measurer 12mo confirm」→ ★★確認已完成,而【不需要 12mo】——見下面的判準
+```
+★**修法位置**：`interaction_system.gd` 兩行 —— `TradeValuation.reserve(a, …)` → 補傳 `state`。
+★★**修在【呼叫端】不是在 `own_granary_tile` 內加 null 守衛，而那是正確的**：
+**修呼叫端＝不讓 null 進來；在被呼叫端擋＝把錯誤吞掉。**
+
+★**證據（measurer 2026-09-02）**：
+```
+warring_states 30d ★完整跑完（自然 === DONE ===，非 timeout 砍）
+  機會母體 proxy `trade.meet` ＝ 275 ｜ trade.barter_deal ＝ 88 ｜ ★SCRIPT ERROR(own_granary/Nil) ＝ 0
+peaceful_economy 30d：`trade.meet` ＝ 1 ⇒ ★★systems 裁【不算證據】（母體 1 ＝ 幾乎沒母體）
+`own_granary_null_caller_test.gd`：ALL PASS（★systems 親跑）
+```
+★★★**母體對得上被修的那條鏈**（systems 複核）：修的兩行在 `_attempt_barter` 內，
+**而 `trade.meet` 正是該分支的計數** ⇒ **275 次機會走的就是被修的那條路，不是別條。**
+
+★**誠實限（照 measurer 原文，不美化）**：`trade.meet` 是**上界 proxy 非精確呼叫計數**；
+**275 次是抽樣不是窮舉，極低機率邊界 case 無法排除。**
+
+### （原文，存查）🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 pin 定案、fix in feat/own-granary-pin pending measurer 12mo confirm）
 **★★2026-08-15 根 pin 定案（implementer runtime trace get_stack seed1337）**：呼叫鏈=`own_granary_tile←effective_holding←effective_food←_self_use(food)←need_keep←TradeValuation.reserve:91←interaction_system._attempt_barter:990`。**根=`TradeValuation.reserve(...)` 有 `state=null` DEFAULT 參數 + `_attempt_barter` 兩呼點漏傳 state** → reserve 內 state=null → 一路傳到 own_granary_tile(null) → `state.world.tiles` 崩。**onset 實際 day0.8（tick199 首 barter）非 day15**、mid-sim barter 常態（非 Probe-gated、plain warring baseline 亦崩已驗）→ **teardown/specimen/tail-end 假說全推翻**。**穷尽（reserve 全 caller）**：`_calc_reserve`（★★★真 stale 候選：2026-09-01 窮盡查 `scripts/**/*.gd`，**該符號已不存在** ⇒ 錨指不到現場；★不刪條目，標記待判）=死碼、`decision_context.gd::gather()`=武器非食安全路不達 own_granary、`player_trade_system.gd`（★L2 錨：檔級）=無玩家非 live → **barter 唯一 live 源**（12mo measurer 再驗此負斷言）。**fix=補傳型根修**（interaction:990/997 `reserve(...,state)` 補傳第 4 arg、**own_granary 零改=非盲 guard**）；post-fix 1000t byte-identical（窗內 barter 多非自家糧倉格→own_granary 兩側 null；12mo 若 bartering 隊在自家糧倉才分岔=正確行為修）。**MERGED e210c00a（2026-08-15）**。**★★誠實：barter live-sim 源修好但 own_granary null-crash 非 100% 關閉**——measurer 12mo(seed1337 full horizon)=**0 SCRIPT ERROR**（barter 唯一 live 源對該 seed/scenario 坐實、arc 12mo 量測解封=goal 達成）；**但 systems merge-gate 親跑 headless_test 見 `world Nil` `~18→7` 減少非清零** → **headless_test 自身另有一 null-state 路殘留**（12mo seed1337 sim 沒撞、非新 test 檔[獨立 SceneTree 未被 headless_test 呼]、非 diff 引入[本 merge 只移 barter 源+加 test/tap]）=**pre-existing 第二源、未 pin**。∴ 12mo 量測不受阻（goal 達成）但**此條保持 OPEN**（別標 resolved）；第二源 pin=follow-up（likely reserve null-default trap enables headless-fixture/rare 路、runtime get_stack 定位）。★教訓：measurer「0 error」是特定 seed sim、merge-gate 親跑 headless 才接住殘留、禁盲信單一維度 green 標全綠。★**latent trap 順記**：`reserve` 的 `state=null` DEFAULT 是這 bug 的溫床（讓 caller 靜默漏傳）→ 未來 hardening 候選=state 改必填參數（現 barter 修後無 live null-caller、暫無害、非阻塞）。
 <!-- 原始 flag 紀錄（保留供溯源）: -->
 ### ⏳own_granary_tile(state=Nil) SCRIPT ERROR（原 flag、mid-sim onset、非 B4/B5）

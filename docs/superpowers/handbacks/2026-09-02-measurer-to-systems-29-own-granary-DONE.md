@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: #29 own-granary-pin recheck 完整收工——warring 30d 完整跑完，零SCRIPT ERROR
 ---
 
