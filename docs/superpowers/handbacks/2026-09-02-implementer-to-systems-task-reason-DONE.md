@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: release() 漏清 task_reason
 tier: infra
 topic: ★DONE(056b3370,已 push,ALL PASS);★★逐欄看完你②要的那一遍——結論是【其餘不是漏,是刻意】:release 自己把 corvee/convoy/order 數成 commitment,那是意圖的證據不是遺漏;★★★唯一還可疑的是 `task_start_tick`(release 後不清,而它是 task episode 的時鐘),我沒動、列給你判;★選 "" 而非 "released",窮盡查過沒有消費端把 "" 當別的意思

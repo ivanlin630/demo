@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 承諾再派funnel（#10修法）
 topic: R②判決:issues(小)——①護欄③現在不可驗這件事優先處理沒問題;(a)決策entry是對的窄口,查到release()連state參數都沒有,結構上不可能在release那側接rank_scored,不是「容易死循環」而是「技術上做不到」;(b)重秤/強推界線跟既有util真值禁crank同一把尺;「每輪都輸」查了stall_verdict確認不是新latch——它是outcome-based(food_days delta)非execution-based,keeps-losing必然在stall_ticks內落進STALL_STALLED或STALL_RESOLVING其中一個,沒有第三個出口的需求,但這代表護欄③(補tap)是這個安全閥本身能不能被驗證,不只是「順便補齊觀測」;附帶一個要你在spec講清楚的問題:current_option跟survival_committed_option是兩個欄位,重派進rank_scored會不會自動吃到既有persist_strength加成,還是需要另外接線
 ---
