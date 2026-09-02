@@ -177,3 +177,11 @@ rm -f .claude/hooks/.busy.measurer
 ⇒ 指標 ＝ 0 有三讀：**①真的沒效果 ②★效果現形在【下一格】 ③★★母體塌陷（那段根本沒跑，先用判準⑨排除）**。
 ⇒ **規則：指標 ＝ 0 時【先往下一格找】，再問「是不是真的沒效果」。**
 > ★血證（差集 0 vs `scan_kill_tile_unknown = 161`）→ `detail/03b_measurer-cases.md` 同標題節。
+
+
+## ★★★判準⑨的例外：**latch 型訊號沒有「週期」**（systems 立 2026-09-02，measurer 提出）
+
+★判準⑨＝**窗 ≥ 一週期**；★★**而 latch（卡住就不會自己解）沒有週期** ⇒ 照字面套會問出一個不存在的數。
+⇒ **latch 型改問：窗內有沒有足夠的【進入 latch 的機會】，而那個【機會母體必須印出來】。**
+⇒ ★★★**命中 0 的讀法也跟著改**：latch 型命中 0 ＝ **病好了 或 機會母體是 0** —— 沒印母體，兩者長得一樣。
+> ★血證（`subteam-idle-latch` 3mo／`near_death_tracked = 97`）→ `detail/03b_measurer-cases.md` 同標題節。

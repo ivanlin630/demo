@@ -207,6 +207,23 @@ decision_tier.gd:162-163
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — 下次動那五支任一支時（★白名單那一行就是入口）**
 
+### ⏳★★同機多 session 跑 Godot：長跑**0-byte 瞬殺**（2026-09-02 measurer 撞到，★systems 立條目）
+
+★**症狀**：8mo 全窗長跑**兩次**直接 0-byte 結束，**連 header 都沒印出來**，★★**不是 timeout 砍的**。
+★★★**而它看起來就像「床壞了」** —— 而同一張床 1mo smoke 乾淨執行、3mo 跑到 tick=30000 都正常。
+⇒ **疑同機多 session Godot 資源競爭**（本專案常態：6 個持久角色 session ＋ worktree）。
+
+★**已知規避**：**分段跑**（3mo 一段）可繞過。
+★★**判別法**（★寫下來因為它跟「床壞了」長得一樣）：
+```
+★0-byte【連 header 都沒有】 ⇒ 進程根本沒跑起來 ⇒ 先懷疑【環境】不是【床】
+★★有 header 而中途斷    ⇒ 才可能是 timeout／床自己的問題
+```
+★★★**這是「工具狀態偽裝成災難」的第 N 次**：若照報上游，會去修一張沒有壞的床。
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一次有人需要單跑 ≥6mo 全窗時（★屆時先試一次，確認是否仍需分段）**
+（★沒有單獨為它開一輪的價值：分段跑法已經可用，而根因要量的是【機器資源】不是【專案 code】。）
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。

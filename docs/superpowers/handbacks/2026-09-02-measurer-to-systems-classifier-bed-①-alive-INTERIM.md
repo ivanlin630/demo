@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: subteam-idle-latch classifier床 ①答案先出（②跑中,ETA~70min）
 ---
 
