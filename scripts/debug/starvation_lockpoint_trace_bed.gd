@@ -28,6 +28,23 @@ func _survival_finder_hits(state: WorldState, team: TeamData) -> bool:
 			return true   # 至少一 survival option finder 找到可達 target → 真能派得出（非 finder-miss famine）
 	return false
 
+# ★死因 3 分類抽成共用函式（2026-09-02，供「已死隊回溯」與「存活隊即時checkpoint」共用，
+#   邏輯零差異——只是後者讓中途被砍的長跑也能拿到即時分類數，不必等 vanished 迴圈）。
+func _classify_cause(snap: Dictionary) -> String:
+	var _food: float = snap["food_days"]
+	var _task: String = String(snap["task"])
+	var _committed: String = String(snap["survival_committed_option"])
+	var _would_dispatch: bool = bool(snap["would_survival_dispatch_succeed"])
+	var _finder_hits: bool = bool(snap.get("survival_finder_hits", false))
+	if _would_dispatch and _finder_hits and (_task == "idle" or _task == "等待新領主"):
+		return "手不聽腦"
+	elif not _finder_hits and _food < FactionAISystem.CRISIS_FLOOR:
+		return "famine"
+	elif _committed != "":
+		return "stuck-task"
+	else:
+		return "food-ok"
+
 func _run() -> void:
 	var seed_val: int = int(OS.get_environment("SPECIMEN_SEED")) if OS.has_environment("SPECIMEN_SEED") else 1337
 	var months: int = int(OS.get_environment("SPECIMEN_MONTHS")) if OS.has_environment("SPECIMEN_MONTHS") else 8
@@ -117,6 +134,13 @@ func _run() -> void:
 					h.pop_front()
 		if tick % 5000 == 0:
 			print("[progress] tick=%d teams=%d near_death_tracked=%d" % [tick, state.teams.size(), last_seen.size()])
+		if tick % 20000 == 0 and tick > 0 and not last_seen.is_empty():
+			var _tally: Dictionary = {"手不聽腦": 0, "famine": 0, "stuck-task": 0, "food-ok": 0}
+			for _tid2 in last_seen.keys():
+				var _c: String = _classify_cause(last_seen[_tid2])
+				_tally[_c] = _tally.get(_c, 0) + 1
+			print("[LIVE-CHECKPOINT] tick=%d 機會母體(near_death_tracked)=%d 分類={手不聽腦=%d famine=%d stuck-task=%d food-ok=%d}" % [
+				tick, last_seen.size(), _tally["手不聽腦"], _tally["famine"], _tally["stuck-task"], _tally["food-ok"]])
 		if state.teams.is_empty():
 			break
 
