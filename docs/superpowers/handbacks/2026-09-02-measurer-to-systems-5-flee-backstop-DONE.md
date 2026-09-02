@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: #5 flee-backstop recheck完整回報——不是0，signature部分複現
 ---
 

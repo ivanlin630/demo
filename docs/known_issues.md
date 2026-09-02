@@ -1034,7 +1034,31 @@ god-view arc 收官後 re-baseline（main 9c084d3a，乾淨 doom **21.2/22.5/0.6
 - **③ economy 入口 = GOODS 流動性/供給（blueprint 裁 2026-07-21）**：food-結構 arc 取消（food 豐產，starve=分配非產量，另議）。**★market-liquidize branch（`feat/b0cdf624` 降 goods reserve）HOLD 解除、重啟**（一直對著正確的靶=goods 流動性）。
 - **★決定性未決：goods「沒產夠 vs 產了瞬耗」**（measurer 拆分中）——定 fix 生產側（產出不足）vs 撮合/流動性側（產了賣不掉，market-liquidize 對）。**market-liquidize 全推進等此拆分**（blueprint「方向不明別走岔路」）。連 [[project_economy_arc]]/[[feedback-patch-gate-first]]。
 
-## ★null-belief-flee 凍結（個體 FLEE 對空氣逃，2026-07-20，Slice E QA 抽查撿，★Slice D 前必修）
+## ★null-belief-flee —— **2026-09-02 複驗：不是延遲，是【每 tick 重新製造】**
+
+★**量測（measurer，warring 30d 完整跑完）**：
+```
+flee 機會母體（曾進 TASK_FLEE）＝ 78 ｜ 續卡事件（FLEE+positionless 連續 2+ tick）＝ 1239
+★續卡隊數去重 ＝ 15 ｜ ★★而 15 隊【最終全部脫離】—— 沒有原始 signature 那種「凍死」結局
+```
+★★**成因（systems 坐實，不是猜）**：
+```
+①tick 階段序：… strategic_move → move → … → ★faction_ai …
+   ⇒ backstop 在 `move`，重新指派在 `faction_ai` ⇒ ★★同一 tick 內【先收尾、後重造】
+②TaskArbiter.release() 是純欄位賦值、無排程 ⇒ ★成因「release 延遲生效」【機械上排除】
+③faction_ai_system.gd:2973 與 :3539 兩處：`if task == FLEE: flee_from_pos = _flee_threat_pos(...)`
+   ★★★而 `_flee_threat_pos` 有【兩條路】回 (-1,-1)：best_id == -1（找不到威脅）
+      ／`BeliefSystem.belief_pos()` 回 (-1,-1)（positionless／過期）
+   ⇒ ★兩處【零 guard，回什麼寫什麼】
+```
+★★★**所以修法沒壞、也不是延遲**：**下游每 tick 收尾，上游每 tick 重造** —— 「手不聽腦」同族形狀。
+★**而它跟今天落地的 belief 三態直接相關**：`unknown` 現在是**合法的第三態**，
+★★而 `invariants` 細則 1a 寫的是「**篩選時 unknown 一律不通過**」——★★★**這裡沒有篩，是直接寫進欄位。**
+
+**狀態：已知未修** ｜ **回訪：到期 token — 待 blueprint 裁「怕、但不知道往哪逃」該做什麼**
+（★那是 WHAT：不選 FLEE？原地戒備？隨機遠離？—— ★★HOW 這邊三種都做得出來，而它們是不同的世界。）
+
+## （原文）★null-belief-flee 凍結（個體 FLEE 對空氣逃，2026-07-20，Slice E QA 抽查撿，★Slice D 前必修）
 
 team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍結 1 格 + food=0 餓死（team4/13 還逃跑↔建設 thrash）。**第 4 種 broken 家族（手不聽腦 finder-check classifier 看不到——不是「有 target 沒 dispatch」，是「dispatch 了但目標 null」）**。機制：個體 survival FLEE（`faction_ai:1595/1948` `flee_from_pos = _flee_threat_pos` = 威脅 **belief 位**）——belief 威脅**有存在感但無座標**（stale/positionless→`belief_pos` 回 `(-1,-1)`）→ `flee_from_pos=(-1,-1)` → 算不出逃離向量。`movement_system.gd`（★L2 錨：檔級） 說「(-1,-1) 不設 target 靠 release 收」**但 release 沒真發生** → 卡 task=逃跑 凍結不覓食餓死。**★PRE-EXISTING 確認（measurer baseline diff 2026-07-20：pre-E 8146c4a2 seed1337 此 signature 570 snapshots 跨 11 隊 16/38/56/57/58/63/64/66/68/92/93=凍結 pre-E 就大量在，非 E 引入）**——slice2 belief-化威脅位+缺 flee-release 引入，**每 belief-化 slice（E 已、D 更大）都暴露更多**。**★廣（11+ 隊）值得修。fix 已 build @28470932（applicability-gate：FLEE 威脅無座標 not applicable→轉覓食），measurer 量測中。****★Slice D 前必修**（否則 D doom-delta 被同款污染）。**修方向**（blueprint 認可，look-before-leap）：`flee_from_pos==(-1,-1)`（威脅無座標）→ **release FLEE → re-rank 轉覓食**，非凍結（FLEE 無座標=not applicable 不該卡死）。連 god-view arc（belief-化暴露）/[[feedback_fileline_vs_interpretation]]。
 
