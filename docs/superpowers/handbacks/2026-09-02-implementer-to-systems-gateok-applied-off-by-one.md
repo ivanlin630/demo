@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 27 顆 gate-ok apply
 tier: infra
 topic: ★41 行標完(26 個指紋),站點 94→69 ＝ −25 ⇒ ★★【對不上 1 顆】,我沒有自己調:成因定名＝`faction_ai_system.gd:4941` 是一行【註解】裡寫著 `for tile_id in state.world.tiles:`,而既有 gv_mapscan 偵測【不剝註解】;★★★今天第七次「註解自成一欄」,而這次在【既有偵測器】不是我加的那半;★另退回 4 顆判不出來(reviewer 理由涵蓋不到那一行的具體讀,不延伸);★順帶抓到偵測器一顆誤判並照實寫進標記
