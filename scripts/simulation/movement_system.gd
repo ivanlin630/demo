@@ -86,6 +86,9 @@ func process(state: WorldState, team_ids: Array,
 		# → release 回 IDLE re-rank（非下方 continue-freeze 卡 task=逃跑 餓死）。修 A applicability-gate 後正常
 		# 不會無座標選 FLEE；此為 timing 邊角 backstop（FLEE 設後 belief 過期成 positionless）。
 		if team.current_task == TeamData.TASK_FLEE and team.flee_from_pos == Vector2i(-1, -1):
+			# ★★★#5 tap：backstop 被走到幾次 —— ★而它要跟上游「設成 (-1,-1)」那兩個數比：
+			#   ★★後者 ≈ 前者 ⇒ 坐實【上游每 tick 重造】；★★★後者 ≪ 前者 ⇒ 結構推論錯，停下來報
+			if Probe.enabled: Probe.bump("flee.backstop_release")
 			TaskArbiter.release(team)
 			continue
 		# A2c-2 折入：戰略移動 move_target 改由 arbiter-owned set_strategic_move 於 movement 前設

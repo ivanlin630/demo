@@ -503,8 +503,20 @@ func _flee_threat_pos(state: WorldState, team: TeamData) -> Vector2i:
 		var t: float = ThreatAssessment.score(state, team, other)
 		if t > best_t:
 			best_t = t; best_id = tid
-	if best_id == -1: return Vector2i(-1, -1)
-	return BeliefSystem.belief_pos(state, team.team_id, best_id)
+	# ★★★#5 tap（純觀測，2026-09-02）：★兩條回 (-1,-1) 的路【意思完全不同】，要分開記
+	#   ★桶 A：找不到威脅 ⇒「沒有威脅卻在逃」
+	#   ★★桶 B：有威脅但 belief 給不出位置（positionless／過期）⇒「怕、但不知道往哪逃」
+	#   ⇒ ★★★修法方向會因為哪個佔多數而不同 —— 而修法本身【不在本票】
+	if best_id == -1:
+		if Probe.enabled: Probe.bump("flee.pos_none_no_threat")   # 桶 A
+		return Vector2i(-1, -1)
+	var _bp: Vector2i = BeliefSystem.belief_pos(state, team.team_id, best_id)
+	if Probe.enabled:
+		if _bp == Vector2i(-1, -1):
+			Probe.bump("flee.pos_none_positionless")   # 桶 B
+		else:
+			Probe.bump("flee.pos_ok")
+	return _bp
 
 # 序4 vendetta 溶入：引擎純血仇攻擊 dispatch → bump g2.vendetta_trigger（framework S2b 驗魂 + 融合驗率表）。
 # 純血仇 = feud 過門檻 且 非 faction directive 攻擊 且 非征服 intent（後二者有各自 driver，非私仇脫軌）。
@@ -2975,6 +2987,9 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _set_ok: _stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
+		# ★設進去的值【是不是 (-1,-1)】—— 逐站分開記（★兩站的上游條件不同）
+		if Probe.enabled and td["task"] == TeamData.TASK_FLEE:
+			Probe.bump("flee.set_invalid.decide_unified" if team.flee_from_pos == Vector2i(-1, -1) else "flee.set_ok.decide_unified")
 		if Probe.enabled and opt == "併入":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
 			Probe.bump("merge.set_ok" if _set_ok else "merge.set_fail")
 		# 漏斗站4探針（純觀測）：unified 路徑 TRADE 實派計數（分 opt）。
@@ -3545,6 +3560,9 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if opt == "攻擊": _probe_vendetta_dispatch(state, team)   # 序4：純血仇攻擊驗魂
 		_wire_threat_task(team, td)   # 迎戰/求和 aux target（prosperity/order）
 		if td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
+		# ★設進去的值【是不是 (-1,-1)】—— 逐站分開記（★兩站的上游條件不同）
+		if Probe.enabled and td["task"] == TeamData.TASK_FLEE:
+			Probe.bump("flee.set_invalid.solo" if team.flee_from_pos == Vector2i(-1, -1) else "flee.set_ok.solo")
 		team.solo_task_last = td["task"]   # F-D4：task 承諾記此槽（solo_intent 保留戰略 intent）
 		team.current_option = opt          # 承諾慣性：引擎 COMMITMENT_BONUS 讀
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
