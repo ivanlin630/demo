@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 三票解凍 re-measure（★換尺已 merged）
 topic: ★凍結條件已成立(換尺 merged)⇒ 三票解凍;★★而三票要在【同一輪、同一份跑】裡量——它們的共同變數就是備戰,分開跑會讓「誰變了」變成猜;★★★母體我逐票指定(那是我今天因為沒寫而吃過一次的地方);★而第一問不變:贏家贏得對不對,禁 crank
 ---
