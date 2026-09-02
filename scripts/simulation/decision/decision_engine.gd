@@ -58,6 +58,7 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 			and ctx.threat_react >= ctx.threat_threshold:
 		Probe.bump("flee.degrade.total")
 		Probe.bump("flee.degrade.top_" + (String(scored[0]["opt"]) if not scored.is_empty() else "NONE"))
+	_beg_tap(ctx, scored, team, "begu.")   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	return scored
 
@@ -337,6 +338,10 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])
+	# ★★★#12 乞食 dump（純觀測）—— ★兩條 rank 路都要記：
+	#   乞食 的 sets 是 `{survival, passive_survival}` ⇒ ★★它【同時】在 rank_survival 的子集裡，
+	#   也在 rank_scored 的全 pool 裡 ⇒ ★★★只監一條會把另一條的命中讀成 0。
+	_beg_tap(ctx, scored, team, "beg.")
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	var out: Array = []
 	for e in scored: out.append(e["opt"])
@@ -390,3 +395,41 @@ static func decide(state: WorldState, team: TeamData) -> String:
 	if r.is_empty(): return team.current_option
 	team.current_option = r[0]
 	return r[0]
+
+# ★★★#12 乞食 dump 的單一實作（純觀測，Probe-gated）——
+#   ★兩條 rank 路共用一份 ⇒ ★★定義不會分歧（兩份實作就會出現「兩邊數字不一致而沒人知道為什麼」）。
+#   ★★★prefix 分開两條路：`beg.`＝rank_survival（絕境階梯）、`begu.`＝rank_scored（統一全 pool）。
+static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: String) -> void:
+	if not Probe.enabled or team == null:
+		return
+	Probe.bump(pfx + "rank_calls")                       # ★母體：這條路被呼叫的次數
+	Probe.bump(pfx + "rank_team.%d" % team.team_id)      # ★★母體：隣數（per-team 桶，無 cap）
+	var _food_ok: bool = ctx.food_days < ctx.desperation_entry_threshold
+	if _food_ok: Probe.bump(pfx + "gate.food_ok")
+	if ctx.has_aid_target: Probe.bump(pfx + "gate.aid_ok")
+	if _food_ok and not ctx.has_aid_target: Probe.bump(pfx + "gate.blocked_by_no_aid")
+	if not _food_ok: Probe.bump(pfx + "gate.blocked_by_food_threshold")
+	var _bi: int = -1
+	for _n in range(scored.size()):
+		if String(scored[_n]["opt"]) == "乞食": _bi = _n; break
+	if _bi == -1:
+		Probe.bump(pfx + "not_in_candidates")
+		return
+	Probe.bump(pfx + "in_candidates")
+	var _bu: float = float(scored[_bi]["u"])
+	var _wo: String = String(scored[0]["opt"])
+	var _wu: float = float(scored[0]["u"])
+	Probe.add_amount(pfx + "util_sum", _bu)
+	Probe.add_amount(pfx + "winner_util_sum", _wu)
+	if _wo == "乞食":
+		Probe.bump(pfx + "won")
+		return
+	Probe.bump(pfx + "lost_to." + _wo)
+	# ★差距分桶：★★「差一點點」跟「從來不是對手」是兩種不同的事，
+	#   而它們在「輸了幾次」這個數字上長得一模一樣。
+	var _gap: float = _wu - _bu
+	if _gap < 0.1: Probe.bump(pfx + "gap.lt0.1")
+	elif _gap < 0.5: Probe.bump(pfx + "gap.0.1to0.5")
+	elif _gap < 1.0: Probe.bump(pfx + "gap.0.5to1")
+	elif _gap < 2.0: Probe.bump(pfx + "gap.1to2")
+	else: Probe.bump(pfx + "gap.ge2")
