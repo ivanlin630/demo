@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★量測窗關掉了：7 條的起紅點，一次跑全部答完
 topic: ★★★2026-08-25(357e7807) 就紅的是【5 條】——FORCE/p2a join/rung 擴張/197 擋/紮營=1.0;★這段期間才變紅的只有【2 條】:g1a(已登記 real-regression) 與 fixture B(我的、等 blueprint) ⇒ 那 5 條 unjudged【確實是老的】,不是誰最近弄紅的;★★而我第一次跑時拿到【0 條】—— 因為新 worktree 沒 class 快取,parse error 整支沒跑到;0 差一點被讀成「08-25 是乾淨的」
 ---
