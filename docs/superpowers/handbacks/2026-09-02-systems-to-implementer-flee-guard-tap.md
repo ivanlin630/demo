@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: #5 確認 tap（★純觀測、不修）
 topic: ★成因我查到結構那半了(tick 序 move→faction_ia、release 無排程 ⇒ 不是延遲,是【上游每 tick 重造】);★★而要坐實「哪一處、哪一條路」需要 tap,那是 measurer 明說跨他 scope 的地方;★★★這一票【只加 tap 不改行為】,修法等 blueprint 裁「怕但不知道往哪逃該做什麼」
 ---
