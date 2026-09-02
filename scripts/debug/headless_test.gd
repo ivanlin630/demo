@@ -227,6 +227,7 @@ func _initialize() -> void:
 	_test_predict_intercept_static()
 	_test_predict_intercept_moving()
 	_test_predict_intercept_out_of_sight()
+	_test_threat_threshold_same_scale()
 	_test_threat_score_out_of_sight()
 	_test_threat_score_high_hostile()
 	_test_threat_score_distance_decay()
@@ -8009,7 +8010,15 @@ func _test_pick_facility_upgrade_scale() -> void:
 				"fixture %s 前置：slot 應該被塞滿（used=%d cap=%d）" % [fx, OutpostSystem.slots_used(tile), OutpostSystem.slot_cap(tile)])
 		# ★升級費：B/D 給足（含緩衝）；C 刻意不足
 		var ucost: float = float(OutpostSystem.OUTPOST_COST["civilian"][1]["material"]) * BuildAfford.MARGIN_NEUTRAL
-		team.resources["material"] = (ucost + 50.0) if fx in ["B", "D"] else 1.0
+		# ★★★afford 成了 `_pick_facility` 的第四道 pre-filter（2026-09-02）之後，
+		#   ★【蓋得起】不再是下游檢查，而是【能不能成為候選】的前提。
+		#   ★★本 fixture 測的是【選哪一條分支】（slot_free／upgrade／demolish），
+		#     而 A 原本 material=1.0 ⇒ 什麼都蓋不起 ⇒ 回 {} ⇒ 測不到它要測的東西。
+		#   ★★★這不是「改測試來遷就 code」：測試本來就隐含【這隊蓋得起】，
+		#     只是舊實作把 afford 放到下游，所以那個前提從來沒被要求寫出來。
+		#   ★C 保持【刻意不足】—— 它測的就是付不起那條路。
+		team.resources["material"] = 1.0 if fx == "C" else (ucost + 500.0)
+		team.resources["tools"] = 0.0 if fx == "C" else 99.0
 		# ★D：tile 不是本隊自有（模擬「faction 內、非 leader 自有」）⇒ 呼叫端不給 allow_upgrade
 		var allow: bool = (fx != "D")
 		var pick: Dictionary = fai._pick_facility(state, team, tile, leader, "fixture_" + fx, allow)
@@ -10779,6 +10788,31 @@ func _test_predict_intercept_out_of_sight() -> void:
 	assert(p == Vector2i(-1, -1), "視野外+無 belief → sentinel(-1,-1)（非 fallback live），實際=%s" % str(p))
 	print("Engagement Task1c OK")
 
+# ★★★門檻【整個式子同一把尺】機械守衛（systems 通則 2026-09-02）：
+#   ★重新標定要把【整個式子】換到新尺，不能只換一項。
+#   ★★而只換一項的失效【沒有任何檢查會紅】—— 因為每一項【單獨看】都是對的；
+#   ★★★真正變的是【各項的相對權重】，而那只有拿它們互相比才看得到。
+#   ⇒ 本測試鎖的是【比例】不是【數值】：係數 K 以後再改都行，
+#     ★但三項必須一起動 —— 有一項漏掲這裡就紅。
+#   ★★舊尺的原始比例（本測試的度量衡）：BASE 0.3｜慎重 span 0.3｜vigilance drop 0.15
+func _test_threat_threshold_same_scale() -> void:
+	print("--- 門檻整式同尺 ---")
+	var base: float = ThreatAssessment.THREAT_BASE_THRESHOLD
+	var span: float = ThreatAssessment.THREAT_CAUTION_SPAN
+	var drop: float = DecisionContext.CONTACT_VIGILANCE_THREAT_DROP
+	assert(base > 0.0, "[threat-scale] BASE 不得為 0")
+	# 舊尺 BASE:span = 0.3:0.3 = 1.0
+	assert(is_equal_approx(span / base, 1.0),
+		"[threat-scale] 慎重 span 與 BASE 不在同一把尺：span/base=%.4f（應為 1.0）—— 只換了其中一項？" % (span / base))
+	# 舊尺 drop:BASE = 0.15:0.3 = 0.5
+	assert(is_equal_approx(drop / base, 0.5),
+		"[threat-scale] vigilance drop 與 BASE 不在同一把尺：drop/base=%.4f（應為 0.5）" % (drop / base))
+	# ★人格項佔門檻的比例（慎重=0.5 的代表點）—— 舊尺是 1/3
+	var share: float = (0.5 * span) / (base + 0.5 * span)
+	assert(absf(share - 1.0 / 3.0) < 0.0001,
+		"[threat-scale] 人格項佔門檻 %.4f（舊尺為 0.3333）—— 重新標定不該改變這個比例" % share)
+	print("[threat-scale] OK base=%.4f span=%.4f drop=%.4f｜人格佔比=%.4f" % [base, span, drop, share])
+
 func _test_threat_score_out_of_sight() -> void:
 	print("--- Engagement Task2a: 視野外 score = 0 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
@@ -12078,6 +12112,11 @@ func _test_hunger_override() -> void:
 	var state: WorldState = r[0]; var team: TeamData = r[1]
 	var tile: HexTileData = r[2]; var leader: PersonData = r[3]
 	team.resources["food"] = 0.0   # < pop×2.4×7
+	# ★afford pre-filter 之後，【蓋得起】是候選資格的一部分
+	#   ⇒ ★★本測試問的是「餓的時候誰最優先」，不是「付不付得起」
+	#   ⇒ 把【蓋得起】這個前提寫出來（舊實作將 afford 放在下游，所以不寫也能過）
+	team.resources["material"] = 999.0
+	team.resources["tools"] = 99.0
 	var fai := FactionAISystem.new()
 	var pick: Dictionary = fai._pick_facility(state, team, tile, leader)
 	assert(pick.get("facility", "") == "farming", "缺糧 → 農田最優先")
@@ -12098,7 +12137,8 @@ func _test_military_outpost_builds_weaponsmith() -> void:
 	var nb: HexTileData = state.world.tiles[1000]
 	nb.resources["ore_iron"] = 50   # 鄰格鐵礦
 	leader.values = { "好戰": 0.8, "慎重": 0.0 }
-	team.resources = { "food": 999.0, "armor_low": 10.0 }   # 不飢餓、護甲足
+	# ★material/tools 是 afford pre-filter 之後的候選前提（同族註解見上方）
+	team.resources = { "food": 999.0, "armor_low": 10.0, "material": 999.0, "tools": 99.0 }   # 不餓、護甲足、蓋得起
 	team.armed_anon_ratio = 0.0                              # 武裝缺口
 	team.known_reputations = { 9: 0.1 }                      # 近期威脅
 	var enemy := TeamData.new(); enemy.team_id = 9
@@ -14891,10 +14931,25 @@ func _test_decision_terms() -> void:
 func _test_decision_options() -> void:
 	print("--- 決策引擎 Task3: Option 表 ---")
 	var ctx := DecisionContext.new(); ctx.has_goods = true; ctx.has_arb = true; ctx.food_days = 20.0; ctx.is_merchant = true
-	ctx.threat_pos = Vector2i(3, 3)   # null-belief-flee 修：FLEE(survival) applicable 僅威脅有 belief 座標時（非恆候選）
+	# ★★★flee-to-safety（2026-09-02，藍圖裁）：FLEE 的 applicable 從【有威脅座標】
+	#   升級成【有威脅座標 且 有 believed 目的地】—— 「逃」的語意變成【逃往安全】。
+	#   ★所以這支 fixture 要跑到【survival 在候選裡】，兩個前提都要給；
+	#   ★★只給座標的話它現在【應該】不是候選 —— 而那正是修法的目的。
+	#   ★★★下一行同時鎖住【兩條都要】：少任一個就不該在候選裡，而那有單獨的斷言在下面。
+	ctx.threat_pos = Vector2i(3, 3)
+	ctx.flee_dest = Vector2i(7, 7)   # ★believed 安全處（自家據點／同 faction 成員）
 	var opts: Array = DecisionOptions.applicable(ctx)
 	assert("貿易" in opts, "商隊有貨+arb → 貿易候選")
-	assert("survival" in opts, "survival 候選（威脅有座標時；null-belief-flee 修後非恆候選）")
+	assert("survival" in opts, "survival 候選（★威脅有座標 且 有 believed 目的地時）")
+	# ★★★兩條都是必要條件 —— 分開斷，否則「少了一條還是候選」這種回歸不會紅。
+	var _ctx_no_dest := DecisionContext.new()
+	_ctx_no_dest.threat_pos = Vector2i(3, 3)   # 有座標、無目的地
+	assert(not ("survival" in DecisionOptions.applicable(_ctx_no_dest)),
+		"★無 believed 目的地時 FLEE 不該 applicable（逃＝逃往安全，沒安全處就不是逃）")
+	var _ctx_no_threat := DecisionContext.new()
+	_ctx_no_threat.flee_dest = Vector2i(7, 7)   # 有目的地、無威脅座標
+	assert(not ("survival" in DecisionOptions.applicable(_ctx_no_threat)),
+		"★無威脅座標時 FLEE 不該 applicable（舊的 null-belief-flee 閘仍在）")
 	var terms: Array = DecisionOptions.terms_of("貿易")
 	var has_eco := false
 	for tw in terms:
