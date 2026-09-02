@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: godview 真違規 5 顆
 tier: infra
 topic: ★4 顆修掉、★★第 5 顆(#2 invite)【只解一半】——belief 閘提前(pre→post 實測降級)但四個篩選欄位仍是 live,因為 belief schema 裡【根本沒有那些欄位】,補它們＝新增 belief 欄位＝WHAT,我不自己發明;★③用型別防線(拿掉 fallback 參數 ⇒ 那支函式從此收不到外部值);★★★27 顆 inline gate-ok 我【還沒做】,要先跟你確認標行做法(reviewer 給的是函式級理由,而 gate-ok 是逐行判斷)
