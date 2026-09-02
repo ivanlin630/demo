@@ -331,6 +331,25 @@ faction_ai_system.gd:5728 _trigger_survival   → ★❌ 不設（★implementer
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — 下一次新增 `_begin_facility_construction` 呼叫端時（★屆時補守衛，不要靠新呼叫端記得檢查）**
 
+### ⏳★★★跨 arc 訊號：**「備戰」是三個獨立漏斗的共同贏家/去向**（2026-09-02 systems 併看三份量測）
+
+```
+①#10 承諾再派 dump：★贏家【都是備戰】（util 0.8046／0.8742，而承諾那格 0.0967／0.1527）
+②#5 flee 退化去向：★★怕過門檻但無目的地 → 備戰，★30 日【2108 次】
+③#12 乞食輸家分析：★★★28 次【輸給備戰】（床裡刻意設的「贏家跟糧食無關」訊號）
+⇒ 三份【獨立】量測、三個不同的病，而【同一個贏家】
+```
+★**兩個讀法，而我不下結論**：
+```
+(a)★備戰【真的】該贏：它便宜、幾乎總是 applicable（`threat_react >= threshold`，無其他前置）
+   ⇒ 在 warring 世界裡多數隊過門檻 ⇒ ★★它一直在候選裡，而 util 0.8+ 高
+(b)★★備戰的 util【被高估】或 applicable【太鬆】⇒ 它排擠掉真正該做的事
+```
+★★★**為什麼值得單獨查**：**若是 (b)，它一次解釋三個看起來無關的病** ——
+**而我們現在正要為那三個病各開一張票。**
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一輪任何跑決策的床，順手 dump 備戰的 util 組成（各項貢獻）與 applicable 命中率**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
@@ -1288,7 +1307,23 @@ bed 3 分類 classifier 測出 **6 隊同款 broken**（team62/71/73/79/84/90）
 
 QA 讀 seed4201 specimen 時抓：**team48 死於另一個既有 task-priority-preempt 缺口**（survival 該 preempt 的 task 沒 preempt 到），**與 desperation-ladder ② branch 無關**（非 ② 引入，pre-existing）。① priority 單一源收了 5 dispatch 路的 survival 保序，但 team48 這型疑另一 preempt 路徑漏（待 code-locate）。**獨立票**：不擋 ②。修前先 grep locate team48 走哪條 dispatch + 為何 survival 沒 preempt（別假設=本 session 反覆 state-錯教訓）。連 [[project_desperation_economy]] ① single-source。
 
-## ★乞食死 rung——引擎幾乎不選乞食（2026-07-15，desperation QA 複判抓，絕境階梯斷階）
+## ★★★乞食 —— **框架訂正（2026-09-02，30 日實測）：「引擎從不選它」是假的**
+
+★**實測**：30 日**全 pool 路【贏 6 次】** ⇒ ★★**條目原文「6 specimen 全程從沒選過」不成立**（那是 specimen 樣本的事實，不是引擎的事實）。
+★★★**交叉驗證（今天最強的一格證據）**：這個 **6** 與 flee 那張表的 `top_乞食 = 6` **是兩支獨立的床、同一個數**。
+
+★**而擋住它的閘，兩條路【完全不同】**：
+```
+全 pool 路（統一 rank）  → ★食物門檻擋掉    4341 / 4519
+絕境階梯路（rank_survival）→ ★★沒有援助對象  199 / 209
+⇒ ★★★所以「乞食不 fire」不是一個問題，是【兩個】：一個是【還不夠餓】，一個是【沒人可乞】
+   —— 而它們的修法完全不同（前者動門檻／後者是「找得到對象嗎」）
+```
+★**輸的時候**：★★**28 次輸給【備戰】** —— 而那是床裡刻意設的「贏家跟糧食無關」訊號（見下方跨 arc 條目）。
+
+**狀態：已知未修** ｜ **回訪：到期 token — 兩條路要【分開】排（★不要當成一件事開一張票）**
+
+## （原文，框架已於上方訂正）★乞食死 rung——引擎幾乎不選乞食（2026-07-15，desperation QA 複判抓，絕境階梯斷階）
 
 desperation 複判 6 specimen **全程從沒選過乞食**、log 無 beg print → 不是「幻覺」（never-selected 不守幻覺），是**引擎幾乎不選它**。該乞食的謙卑窮隊從不乞食＝絕境階梯一個死 rung。**非 desperation A 刀 blocker**（A=不選幻覺；乞食沒被選無 A 問題）。**★根因坐實（2026-07-15 code-read，非 util 是 applicability 門檻太嚴）**：`_find_aid_target`（`faction_ai_system.gd:3448`）要求 belief 有 **`food_est` 具體糧估** + 信它有餘糧（`food_est > pop×14`）——這種私有針對性情報通常只在**先前交易過/派人打探過**該隊才形成。剛絕境的隊大機率對鄰居無此具體 belief → `has_aid_target` 常年 false → 乞食**連候選都進不去**（與 util 無關）。對比買糧只需「聽過市集廣播賣單」（公開）寬鬆得多。**乞食非幻覺**（`_resolve_aid_request` mercy floor 有完成路，code 雙證）。**★blueprint WHAT 裁定（2026-07-15）＝盲乞食**：乞討本質＝對**可見鄰居的絕望懇求**（非對已知富 patron 的針對性精算）→ 放寬門檻：絕境隊對可見鄰居**盲試乞食**（不需 `food_est`，`has_belief`/視野內有隊即可）→ 撲空 emergent（謙卑施主給、禽獸拒；mercy 路真能救命＝可選 rung）。**人格 gate**：高求生欲/謙卑/低野心→肯乞；驕傲→寧死不乞（接決策模型）。**backlog 非本刀 blocker**（乞食 dead≠coherence bug，隊有覓食/遷移/掠奪其他路不 limbo）→ 歸「絕境階梯完整性」arc（見 progress.md，與抱團+食物流通同做）。連 [[project_desperation_economy]]。
 
