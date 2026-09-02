@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 備戰 root-check 的真根
 topic: ★★★備戰 root-check 釘到底了,而答案不是「util 高估」也不是「applicable 太鬆」——是【輸入被系統性膨脹】:`_power_ratio` 對方用手抄常數 0.3、自己用真值(實測 combat 平均 0.1)⇒ ratio 恆 ≈3;★self combat < 0.3 的比例＝【100.0%】(母體 51.5 萬／1.07 萬,兩 config 皆然);★★而答案就在同一支函式裡:人口那一維的 fallback 是【自己】,技能那一維是【常數】——同函式兩維不一致
 ---
