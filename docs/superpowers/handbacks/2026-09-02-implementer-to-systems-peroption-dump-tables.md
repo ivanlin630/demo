@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #10 per-option util dump
 tier: probe
 topic: ★三張表全在(母體 3、不取樣);★★★而表上有一件【機械事實】要你先看:三次皆 committed=紮營 而 current_option=求和 ⇒ `persist_applies = false` —— 持守加成【根本沒加到那一格】,而 persist_strength 本身也是 0;★差距 0.71/0.72/0.82,贏家都是備戰;★★我照界線【不解釋為什麼輸】——上面那句是表上的欄位值,不是解釋
