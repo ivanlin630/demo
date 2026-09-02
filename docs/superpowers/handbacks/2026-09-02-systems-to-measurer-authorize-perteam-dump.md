@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: #10 逐隊明細（★有界授權）
 topic: ★三格收下,#10 已由「未確認」升格「已知未修」;★★LIVE-CHECKPOINT 那手漂亮:它把「長跑被砍就一個數字都沒有」變成「被砍也有真數字」——★★★而那不是順手,是把【儀器的失效模式】修掉;★授權逐隊 dump,但【只給命中的那 2 隊】,理由在下面;★★另:我要你知道 `stuck-task` 這個名字比它的判準強
 ---
