@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 族⑤ #5 先查後的量測票
 topic: ★先查結果先給你:#5 的修法【已經在位,而且是兩層】——修 A(applicability-gate,無座標不選 FLEE)＋修 B(movement_system.gd:85-90 backstop:FLEE 而 flee_from_pos=(-1,-1) ⇒ release 回 IDLE re-rank,不 continue-freeze);★★所以欠的是【確認】不是修,同 #29 那張票的形狀;★★★而這是行為病 ⇒ 母體我先指定給你:FLEE 隊數當機會母體(照今天統一後的判準⑨)
 ---
