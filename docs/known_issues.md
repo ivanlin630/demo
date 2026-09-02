@@ -444,7 +444,17 @@ self_power  = _team_power(self_team) ←★★真值（真實 combat skill）
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — breed 真盈餘那條 arc 重啟時（★屆時第一件事是讓那 5 條綠，不是繼續往上疊）**
 
-### ⏳★★★main 上有 **7 條 assert 失敗**，而【沒有任何人判過】（2026-09-03 第一次被閘看見）
+### ⏳★★★main 上有 **7 條 assert 失敗** —— **6 條已登記為 `unjudged`、1 條未登記**（2026-09-03；★本條目原文寫錯，已訂正）
+
+★★★**訂正（implementer 指出）**：原文寫「**沒有被任何清單登記**」——**錯的**。
+```
+`docs/test-baseline-failures.txt`：★7 條 `unjudged` ＋ 1 條 `real-regression`
+⇒ 那 7 條 assert 裡【6 條已登記】（5 條 unjudged ＋ g1a real-regression）
+⇒ ★★唯一沒登記的是 **fixture B**（★而那是 implementer 的、等 blueprint 裁「設施升級 vs 據點升級」）
+★★★而我怎麼寫錯的：我 grep 了「生育／breed」得 0 就下結論 —— ★那個 grep 答的是【條目裡有沒有那兩個字】，
+   不是【那些失敗有沒有被登記】。**負斷言用錯了鑰匙。**
+```
+★**而那個檔本來就有 `unjudged` 這個標記** —— ★★**專案早就有「未判」這一態，而我寫得像它沒有。**
 
 ★**它們一直都在**（`SCRIPT ERROR: Assertion failed: …`），★★**而沒有被任何清單登記**
 （`docs/test-baseline-failures.txt` 只登記 `[FAIL]` 那條管道的兩條）。
@@ -457,8 +467,10 @@ self_power  = _team_power(self_team) ←★★真值（真實 combat skill）
 ★**現況**：那 7 條已進 `headless` 閘的 baseline 清單 ——★★**目的是【擋住新的紅】，不是承認它們合理。**
 ★★★**每一條都欠一個判決**（自哪顆 commit 起紅／該修還是該登記）。
 
-**狀態：未確認** ｜ **回訪：量測窗 — 下一輪任何跑 `headless_test` 的人，順手用 `git log -S` 查其中一條的起紅點**
-（★不必一次判完 7 條；★★但每判掉一條就從「未判」那一欄劃掉一條。）
+**狀態：未確認** ｜ **回訪：量測窗 — 在【一個舊 commit】上跑一次 `headless_test`**
+★★★**（回訪方法也訂正了）**：原文寫「用 `git log -S` 查起紅點」——★**那正是 implementer 今天犯過並自我更正的錯**：
+**`git log -S` 答的是【那行何時被寫下】，不是【它何時開始紅】。** ★★**而我把他的錯誤方法寫進了我的回訪條件。**
+⇒ ★**更便宜的替代（他給的）**：**跑一個舊 commit，一次就同時得到 7 條的狀態**（★★二分幾次就能各自定位起紅點）。
 
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
