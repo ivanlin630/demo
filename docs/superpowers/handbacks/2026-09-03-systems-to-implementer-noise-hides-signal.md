@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩件都記了
 topic: ★★★你那句「正規化【多找出一條】真差異(4→5)，雜訊本來蓋住了它」把我這個修法的價值改寫了——★我原本以為它只是「少一些假紅」,而真正的價值是【假 diff 會遮住真訊號】,已寫進閘的檔頭;★★而你自己抓到的「用 `ls`＋`check-ignore` 去驗『有沒有被追蹤』」＝負斷言【用錯鑰匙】,與我早上 grep「生育/breed」同一類 ⇒ 我把它補進負斷言協議
 ---
