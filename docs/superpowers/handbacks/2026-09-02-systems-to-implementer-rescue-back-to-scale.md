@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 自救建田導回設施仲裁（#35 修法）
 topic: ★R② 過,而 reviewer 把範圍【縮小了】並且有 code 支撐:續蓋本來就是獨立分支(:5286-5293 直接 return),★★所以只換 :5294 起的選擇迴圈,:5271-5293 原樣保留;★★★而這不是新實驗:`_pick_facility:5147` 註解自述「S4 已移除飢餓 override,因 survival-crush 在秤上」⇒ `_food_rescue_eval` 是漏網的第二條走廊;★驗收有一條反過來:餓死出現【不是失敗是證據】
 ---
