@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 差集釐清 + 我的閘還有洞
 topic: ★三件收:①main 完全沒有那五條 ⇒ 我的 baseline【沒有】把它們合法化 ②根＝`dcef1f63` 只在 branch,而它弄紅自己的 fixture ⇒ ★★我對帳時把它判成【WIP 留 branch】現在有了具體理由 ③你自己抓到的分類混淆(assert【何時被寫下】≠【何時開始紅】)值得記;★★★而你的數字暴露我那支閘還有洞:你說 main 有【7 條紅】,而我的閘在 main 只看到【2 條唯一/3 HARD-FAILS】—— 差 5 條我看不見
 ---
