@@ -40,6 +40,7 @@ func _run() -> void:
 	_sec_10()
 	_sec_5()
 	_sec_12()
+	_sec_aid()
 	_sec_prepare()
 	print("★誠實限：①單 config／單 seed／%d 日 ②★純觀測（fp 不該變；變了＝我動到行為）" % days)
 	print("  ★★③三票【同一份跑】⇒ 彼此可比；★★★但與修前的舊值比時，那些舊值是【不同跑】的，")
@@ -65,6 +66,12 @@ func _sec_10() -> void:
 	print("  不在候選集 = %d（%.1f%%）｜贏 = %d｜輸 = %d" % [nir,
 		100.0 * float(nir) / maxf(float(sent), 1.0), won, lost])
 	print("  輸給誰：%s" % _bucket_list("redispatch.lost_to."))
+	print("  ★★★不在候選集的【是哪個 option】：%s" % _bucket_list("redispatch.not_in_ranked.opt."))
+	print("    其中 stall cooldown 排除=%d｜條件本身不成立=%d（★兩者在「不在候選集」上同形）" % [
+		int(Probe.counts.get("redispatch.nir_stall_cooldown", 0)),
+		int(Probe.counts.get("redispatch.nir_not_applicable", 0))])
+	print("    ★注：【條件名】這一步我做不到 —— `applicable` 是閉包，不會告訴你它為何回 false；")
+	print("      ★★知道是哪個 option 之後，才能在那一個的 applicable 裡接條件級 tap。")
 	print("  ★舊值（30 日）：sent=3 not_in_ranked=0 won=0 lost=3 ⇒ ★★病是【總是輸】不是【送不回】")
 
 func _sec_5() -> void:
@@ -156,3 +163,23 @@ func _sec_bands(pfx: String, title: String) -> void:
 			print("        ★★有隊但乞食【連候選都不是】⇒ 看施主可及率：低 ⇒ 世界沒施主；高 ⇒ 食物門檻擋的")
 	print("  ★★★判準：看【deep】那一列 —— 施主可及而乞食不贏，才是病；")
 	print("     ★施主可及率低 ⇒ 那是【世界太薄】，修法在關係密度不在秤。")
+
+# ★★★施主可及性：逐道濾網的拒絕次數（systems 2026-09-03）
+#   ★「沒人可乞」有五種意思，而它們在回值 -1 上完全同形。
+func _sec_aid() -> void:
+	var calls: int = int(Probe.counts.get("aid.calls", 0))
+	print("═══ ★施主可及性：_find_aid_target 五道濾網 ═══")
+	print("  呼叫次數（母體）= %d" % calls)
+	if calls == 0:
+		print("  ★★★母體 0 ⇒ 這支函式沒被呼叫過（儀器沒跑到），不是「沒施主」")
+		return
+	print("  平均掃到的 discovered 隊數 = %.2f" % (Probe.amount("aid.discovered_sum") / float(calls)))
+	print("  ①母體空（沒發現過任何隊）      = %d" % int(Probe.counts.get("aid.reject.1_no_discovered", 0)))
+	print("  ②沒 belief                     = %d" % int(Probe.counts.get("aid.reject.2_no_belief", 0)))
+	print("  ③★有 belief 但沒 food_est      = %d   ← systems 最懷疑的那一道" % int(Probe.counts.get("aid.reject.3_no_food_est", 0)))
+	print("  ④有糧但不夠分               = %d" % int(Probe.counts.get("aid.reject.4_not_enough", 0)))
+	print("  ⑤夠分但到不了               = %d" % int(Probe.counts.get("aid.reject.5_unreachable", 0)))
+	print("  ★找到施主 = %d｜找不到 = %d" % [
+		int(Probe.counts.get("aid.found", 0)), int(Probe.counts.get("aid.none", 0))])
+	print("  ★★讀法：③占大多數 ⇒ 【資訊門檻】（要互動過才知道對方存糧）；")
+	print("     ★★★①占大多數 ⇒ 世界太薄；⑤占大多數 ⇒ 地理；④ ⇒ 真的沒人有餘糧。")
