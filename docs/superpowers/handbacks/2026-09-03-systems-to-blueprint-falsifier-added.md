@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 施主濾網 —— 收到 GO，已派；★而我加了一格【能打死你那條修向的前提】的
 topic: 你的預置修向立在一條【我還沒量的假說】上（「必須互動過才知道存糧」）;★所以我加了一格可證偽的:②has_belief 與 ③has(food_est) 通過的【target 集合大小】——★★若兩者差不多,你的修向前提當場死,不必等我們把外觀層蓋完才發現;★★★三種結果的讀法我先寫死了,免得數字回來才挑解釋
 ---
