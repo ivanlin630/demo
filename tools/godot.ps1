@@ -84,3 +84,18 @@ Remove-Item $tempOut, $tempErr -ErrorAction SilentlyContinue
 $text = $cp950.GetString($bytesOut) + $cp950.GetString($bytesErr)
 $text -split "`r?`n"
 if ($timedOut) { "[GODOT TIMEOUT ${timeoutSec}s - process killed]" }
+# Stale-cache detector (2026-09-03). The guard above only covers a MISSING cache.
+# A cache that EXISTS but is out of date (a new class_name file was added and nobody
+# re-imported) produces the same family of symptom -- unresolved class_name types --
+# and that reads like "the change I just made broke it". Half a guard is worse than none
+# here, because after the missing-cache guard exists people stop suspecting this direction.
+# So: after the run, if the output mentions unresolved types WHILE the cache file exists,
+# say so. This detector cannot tell "stale cache" from "that class really does not exist",
+# so the message names both, and it does NOT re-import on its own.
+if ((-not $skipCacheGuard) -and (Test-Path $cacheFile)) {
+    if ($text -match 'Could not find type "|Identifier ".*" not declared') {
+        Write-Output "[godot.ps1] unresolved class_name type(s) above, while the cache EXISTS: $cacheFile"
+        Write-Output "[godot.ps1] two causes look identical here: (a) cache is STALE (new class_name added"
+        Write-Output "[godot.ps1] without --import) or (b) that type genuinely does not exist. Try --import first."
+    }
+}
