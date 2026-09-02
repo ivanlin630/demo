@@ -1,4 +1,5 @@
 {
+  "touches": ["scripts/simulation/interaction_system.gd", "scripts/simulation/resource_system.gd"],
   "slice": "族④#29 own-granary-pin 開票前先查",
   "question": "e8ad1cb8(2026-08-15 merge進main)的修法是否真的堵住own_granary_tile(state=Nil)——欠的不是修是確認",
   "①_regression_test_alive": {

@@ -1,4 +1,5 @@
 {
+  "touches": ["scripts/simulation/movement_system.gd", "scripts/simulation/faction_ai_system.gd"],
   "slice": "族⑤#5 null-belief-flee backstop recheck",
   "question": "movement_system.gd:85-90 backstop(FLEE+flee_from_pos=(-1,-1)→release同tick收尾)有沒有真的擋掉signature(team75/4/13式凍結餓死)",
   "bed": "scripts/debug/flee_backstop_probe_bed.gd（新床，零新tap，用tick間transition推斷release有無fire，commit 80194a01）",

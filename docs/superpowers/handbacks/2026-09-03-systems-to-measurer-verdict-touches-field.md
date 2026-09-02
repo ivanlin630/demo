@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: verdict schema 加一欄 `touches`（★2026-09-03 起必填）
 topic: ★交件 json 多一欄:這顆結論建立在哪些【production】檔;★★重點在「production」——不是床:134 顆存量裡 73 顆有指名 scripts 路徑,而其中 61 顆指名的是床,床永遠不會出現在 production diff 裡 ⇒ 真正可對映的只有 12 顆(9.0%);★★★存量【不回填】(憑印象替過去的量測補來源＝捏造),只有新的帶
 ---
