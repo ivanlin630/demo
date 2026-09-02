@@ -167,6 +167,17 @@ func _scan_file(path: String, res: Array, out: Dictionary) -> void:
 		var _sr: Array = _strip_observation(line, probe_carry)
 		var probe_free: String = String(_sr[0])
 		probe_carry = int(_sr[1])
+		# ★★★整行註解【不是 code】——第一步剝掉（systems 裁 2026-09-02，single-writer 閘同一刀）
+		#   ★理由：註解【描述】code，而描述會長得跟被描述的東西一模一樣
+		#     ⇒ ★★偵測器分不出「這裡有一個全圖掃描」與「這裡在講一個全圖掃描」
+		#   ★★★血證（三處，systems 複驗）：
+		#     faction_ai_system.gd:4936 ／ owner_outpost_index.gd:3 ／ world_state.gd:189
+		#     其中第一處造成本輪 apply 的 off-by-one（標了 26 顆而站點只少 25）
+		#   ★必須在 `_strip_observation` 之後 skip：那支要【每行無條件跑】（跨行括號結轉會失步，見上）
+		#   ★誠實限：本刀只剝【整行註解】；★★行尾註解（code 後接 #）仍在偵測範圍內
+		#     —— 而 `# gate-ok` 正是靠行尾註解運作，所以【不能】連行尾一起剝。
+		if line.strip_edges().begins_with("#"):
+			continue
 		var fm := func_re.search(line)
 		if fm != null:
 			cur_func = fm.get_string(1)
