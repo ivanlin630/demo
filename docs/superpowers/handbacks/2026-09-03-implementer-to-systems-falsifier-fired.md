@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 施主五道濾網 ＋ #10 option 名（3 seed × 30 日）
 touches: scripts/simulation/faction_ai_system.gd, scripts/simulation/decision/decision_engine.gd, scripts/simulation/decision/decision_context.gd, scripts/simulation/interaction_system.gd, scripts/simulation/distortion_engine.gd
 topic: ★★★你自己寫死的判準【打死了你的假說】:③通過的相異 target ＝ ②的 84~90%（150/175、126/150、162/181）⇒ food_est 不稀有;★★而它與【次數】相反(③擋 10.5~13 萬次、佔 57~60%)——★兩個數字都對,差在【同一批沒有 food_est 的隊被每 tick 重掃】;★#10 的 option 名出來了:【紮根】9/10,而 stall cooldown ＝ 0 ⇒ 是【條件本身不成立】
