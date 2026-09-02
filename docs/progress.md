@@ -1199,12 +1199,47 @@ reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權�
 ★掛著未派：相位混疊掃描(23 顆 % gate,spec 已立)／待補 T0 kind 清單(#1 #4,與輪詢那批合流一次判)
         ／新反向殘差(送達 -9.2%/比值 -10.9%/決策 -5.3%)
 ★★未做（★2026-08-28 補:blueprint 抓到我漏列 —— 我報的母體是【我做過的】不是【被宣告的】）：
-   ★S5 背景律三條 ⇒ 未做｜證據:harvest_system.gd:18 的 randf_range(-0.25,0.25)【還在】
+   ★S5 背景律三條 ⇒ ★★★【本行 2026-09-02 訂正：①已做】——`harvest_system.gd:16` 原文「★①刪 randf_range」，
+     ★全檔 `randf_range` 命中 0 ⇒ 舊證據「randf_range(-0.25,0.25) 還在」★已不成立
+     ★★②池再生加季節／③飢餓疲勞減半 ⇒ **我沒驗**（★不要把①的證據當成三條都做完）
      （季節曲線取代 6h 亂擲／池再生加季節／飢餓疲勞減半，三條各自可回退）
-   ★S6 工期表(person_hours、紮根 72 當量尺) ⇒ 未做｜證據:BUILD_TICKS 仍在用、person_hours 全庫 0 次
+   ★S6 工期表(person_hours、紮根 72 當量尺) ⇒ ★★★【本行 2026-09-02 訂正：已做】——
+     `outpost_system.gd:46 build_person_hours()` ／ `:175 build_eta_days(person_hours_left, pop)` 在位，
+     ★全檔 `BUILD_TICKS` 命中 0 ⇒ 舊證據「BUILD_TICKS 仍在用」★已不成立s 全庫 0 次
    ★S7 七病收編 ⇒ ★★狀態【不明】,要逐病盤點才能答（★不用一個計數說「做了/沒做」）
    ★★LOD 同體(輪詢退場) ⇒ 已裁【不退場,升格常設兜底】
 ★★★⇒ 所以【arc 沒收】,收的是【引擎／節律段】(S1b→S4b + emit-ordering 儀器)
 ```
 ★**窪地窗**：條款②③在計時（S4 完成後立即接續／延誤超一節拍則七支回滾＝改 `decision_tier.gd` 一個檔）——
 ★★**而「S4 完成」是否包含輪詢退場，我已呈 blueprint，未回。**
+
+
+---
+
+## 📍 現況板 2026-09-02（★下一個 session 從這裡看；★★上一塊是 08-28 時間重錨的，兩塊都要看）
+
+> ★★★**本板開頭先講一件事**：上面那塊 08-28 的板，**今天被我當場驗出兩行 stale**（S5①／S6 都做了，而板上寫「未做」＋附了已失效的證據）。
+> ⇒ **看任何一塊板之前，先驗它引用的那個證據還成不成立** —— **附了 file:line 的「未做」也會過期。**
+
+```
+★★族①god-view ⇒ CLOSE（2026-09-02）
+   真違規 5/5 修完：_is_border_adjacent(閘後)／_find_occupy_target(閘前)／decision_context::gather×2
+                    ／_try_invite_nearby_exile／_evaluate_alliance_need／_find_trade_partner
+   27 顆 legit 豁免：inline `# gate-ok:` ★各帶理由（禁批次 sed）
+   ★5 顆判不出來：既沒 gate-ok 也沒進 baseline ⇒ ★★留在 warn 桶每跑必印（刻意）
+   憲法閘 sites 97 → 67（含剝註解後幻影現形、off-by-one 歸零）
+★感知兩層落地：外觀層(tags/activity/in_combat)進 belief；parent_team_id 留情報層
+   ★寫入端【沒有 unknown 這個答案】(ACT_IDLE)；讀取端 state = never/stale ⇒ 三態分得開
+★族②觀測儀器 ⇒ CLOSE（A#14 死亡可見／A#19／A#27 faction-leave tap／A#36）
+★族④ #6 market_orders ⇒ 修完，★而真根不是條目寫的 capture/demolish，是
+   【訂單生命週期 owner 驅動 + erase_teams 不清死隊的單】
+★★族③ 先查完，兩條都【不開票給 implementer】：
+   #33 錨坐實到單一改動點 decision_tier.gd:162 poll_measurable 白名單（維持不開票，on-touch 入口具名）
+   #10 subteam-idle-latch＝行為病 ⇒ 已派 measurer 取 runtime 證據
+   ★★★而第一問是「那張七週前的 classifier 床現在還跑得起來嗎」——回報就停，不修床
+★新增閘（3 支，註冊表現 10 支）：ki-status／single-writer／cherrypick-fidelity(含 self-test)
+   ★single-writer 現管 faction_id + combat_target；★★兩者都抓到過「註解宣稱單寫者而它不是」
+★掛著：belief_pos 其他消費端有沒有假設「過閘就有位置」（本輪只修 invite 那條路徑）
+       ／_hex_dist 全站 11 份拷貝（公式抽查三份相同，目前無分歧）
+       ／detector 的 gv_belief_* 兩桶仍是 warn，升 hard 的條件＝那 5 顆判過
+```

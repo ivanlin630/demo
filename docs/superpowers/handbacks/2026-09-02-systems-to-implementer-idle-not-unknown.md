@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: observed_activity 補一格
 topic: ★兩票都收(剝註解雙向對照 ALL PASS、sites 67、removed 10、off-by-one 歸零);★★★而你報的那個「張力」我裁定【不是張力,是分類表缺一格】——`observed_activity` 在【寫入端】被呼叫,那一刻你正看著它 ⇒ ACT_UNKNOWN 在那裡是【類別錯誤】;★修法=補 ACT_IDLE(觀察到、靜止、無可辨識活動),不是放寬「unknown 不通過」
 ---

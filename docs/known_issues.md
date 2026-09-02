@@ -180,15 +180,57 @@ scripts/simulation/strategic_ai_system.gd::_find_trade_partner::gv_mapscan
 
 **狀態：已知未修** ｜ **回訪：到期 token — 族①修法 slice（`_find_trade_partner` 已列入該 slice 的第 5 顆）**
 
-## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
+### ⏳★★族①god-view：**5 顆「判不出來」誠實掛著**（2026-09-02，★沒有一顆被猜進 baseline）
 
-material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
+★`_update_escort`（reviewer 缺 call-graph 證據）＋ implementer 退回的 4 顆
+（reviewer 的函式級理由**涵蓋不到那一行的具體讀**，依裁定**不准延伸**）。
+★★**它們既沒有 inline `gate-ok`、也沒有進 baseline** ⇒ **仍在 warn 桶裡每次跑都印出來** —— **這是刻意的。**
+★★★**為什麼不猜**：猜出來的分類會被凍進 baseline 當成【判過的】，而那正是 baseline 第 76 行
+（`_find_trade_partner # CANDIDATE-LEAK`）的形狀 —— **我們今天花了一輪把它挖出來。**
 
-> ★**狀態標記三態慣例（2026-08-21 立、blueprint 認可）**——**禁一律標「已修」**：
-> - **✅ 真結案**：機制已修 **且** 影響面已清（可直接不再讀）。
-> - **⚠ 機制已修、歷史資料仍污染**：修法已 merge，但**舊量測/舊結論仍受影響** → 必附**自查方法**（如 signature）。
-> - **⚠ 部分修**：只修了其中一支 → 必寫**剩下哪一支、去哪追**。
-> ★**「部分修」標成「已修」是最陰的坑**：之後沒有人會回頭看剩下那半。
+**狀態：未確認** ｜ **回訪：量測窗 — 兩條路擇一即可**
+①**長考卷面讀數**（把該函式的 call-graph 讀完，判「那個 live 讀是否真的餵進決策」）；
+②**warn 桶的 runtime 證據**（該站點在真實跑動中被走到幾次、讀到的值有沒有影響輸出）。
+
+### ⏳★★★#33 五支決策支不可量測 —— **錨精確化**（2026-09-02 systems 先查）
+
+★**條目原文成立，而錨可以更準**：
+```
+decision_tier.gd:162-163
+  static func poll_measurable(k: String) -> bool:
+      return k in ["GOAL", "LADDER", "STRATEGIC", "INTENT"]
+⇒ ★★白名單【只有 4 支】；ALLIANCE／BETRAY／INFRA／FACTION_UPDATE／INDEP_INFRA 五支不在其中
+⇒ ★★★與條目原文「9 支裡只涵蓋 4 支」完全吻合 —— ★這是【坐實】不是【重述】
+```
+★**維持不開票**（條目自述理由仍成立：要它們進分母＝讓選擇落到持久欄位＝**改行為**不是**加 tap**）。
+★★**on-touch 義務不變**，而現在它有一個**單一改動點**：`poll_measurable` 的白名單。
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — 下次動那五支任一支時（★白名單那一行就是入口）**
+
+### ⏳★★長跑輸出檔【讀太早會讀到 0】（Windows 寫入／MSYS 讀取可見性延遲；2026-09-02 ★根因訂正）
+
+★★★**本條目的原始版本被 measurer 自己推翻，訂正記在最上面**：
+```
+★原版寫：「8mo 兩次 0-byte 瞬殺、連 header 都沒印 ⇒ 疑同機多 session Godot 資源競爭」
+★★而 measurer 隔一段時間再開【同一個檔】：446 KB、跑到 tick=55000、
+   尾端 `[GODOT TIMEOUT 2400s - process killed]` ⇒ ★自然 timeout，header/progress 全部正常
+⇒ ★★★「資源競爭外部瞬殺」【沒有站得住的證據】，他收回，我照收
+```
+★**真正可複現的危害（他兩次都撞到）**：**background process 剛觸發「completed」的那一瞬間，
+`wc -l` 可能讀到 0** —— Windows 側寫入與 bash(MSYS) 側讀取之間有**可見性延遲**。
+⇒ ★★**規避**：長跑輸出**不要在完成通知的當下立刻讀**；先 `ls -l` 看大小，或隔一次操作再讀。
+
+★★★**而它又是同一個形狀**（今天第三次）：**`wc -l = 0` 被讀成「沒產出」，而它是「還沒看得到」。**
+⇒ ★**用今天立的判別法就抓得到**：問「**這個 0 是誰產生的**」——
+**它是【讀取者】(wc) 產生的，不是【產生者】(godot) 產生的 ⇒ 先懷疑「還沒到」，不是「沒發生」。**
+
+★**判別法保留、血證撤掉**：原條目寫的「0-byte 連 header 都沒有 ⇒ 先懷疑環境」**邏輯本身仍成立**，
+★★**但促成它的那筆觀測是假讀** ⇒ **它現在是一條沒有實證的判別法**，★★★**不得當成「環境競爭」的案例引用。**
+
+★**systems 自認**：我**沒有驗證那筆觀測就立了條目** —— 而我今天稍早才立過「上游給的詮釋一樣要驗」。
+★★**這次比那次更差：我連【事實】都沒驗**（只要 `ls -l` 一下就會看到 446 KB）。
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一次有人在完成通知當下讀長跑輸出時（★順手記錄「立刻讀」與「隔一次再讀」的差異）**
 
 ### ⏳★★`_hex_dist` 全站【11 份拷貝】＋兩個改名變體（2026-09-02，godview-1a seam 副產）
 
@@ -201,7 +243,7 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — 下一次有人要在新檔裡用 hex 距離時（★直接呼既有 static，不要抄第 12 份）**
 
-### ⏳★★★`has_belief` 不蘊含「有位置」——**belief 有欄位粒度**（2026-09-02，implementer 實測翻掉 systems 的假設）
+### ✅`has_belief` 不蘊含「有位置」——**belief 有欄位粒度**（2026-09-02；★三態已落地：有值／`stale`／`never`）
 
 ★**systems 在 spec 裡寫**「過了 `has_belief` 閘 ⇒ 一定拿得到 `belief_pos`，開一個【必須恆 0】的桶」。
 ★★**錯的**：`has_belief` ＝ claims 非空；`belief_pos` ＝ 需該 claim **帶 `tile_pos` 欄位**且**未過期**。
@@ -212,7 +254,9 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 **當狀態處理（棄該 target），★不得退回 live**。已寫進 `invariants.md` 細則 1a。
 ★**未做**：**全站還有哪些 `belief_pos` 消費端假設了「過閘就有位置」，本輪沒查。**
 
-**狀態：未確認** ｜ **回訪：量測窗 — 下一輪任何跑 belief 路徑的床，順手 dump `known_but_positionless` 的計數與分佈**
+★**已落地（2026-09-02 感知兩層 slice）**：讀取端回 `{activity: unknown, state: "never"|"stale"}` ⇒ **三態分得開**；
+★★寫入端**沒有 unknown 這個答案**（`observed_activity` 落到最後回 `ACT_IDLE`），`write_unknown_BUG` 恆 0 桶已上床。
+★★★**仍未做**：**全站還有哪些 `belief_pos` 消費端假設「過閘就有位置」** —— 本輪只修了 `_try_invite_nearby_exile` 這一條路徑。
 
 ### ⏳★★★建造：**兩條路，兩個不同的病**（2026-08-26 三度訂正；★舊讀法全部保留在下方，因為每一個都曾經看起來很有道理）
 
@@ -1008,7 +1052,49 @@ QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambit
 
 crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只覆蓋「release 後走 **try_set** 重委派」的重鎖（team1/19 被接住）。**走 `transition` 的重鎖（team16「等待新領主」）未覆蓋**。∴ 原 release-pass（靶三隊 team1/19/13 剛好全走 try_set 路）= **樣本不完整**，免疫修對它瞄準的有效但覆蓋不全。**非推翻已 merge**（免疫對 try_set 路真有效），但誠實記「覆蓋範圍=try_set 重委派，transition 重鎖需上條 transition 修一併治」。blueprint owner 補 game-design 對應處。連上條 [[TaskArbiter.transition 後門]]。
 
-## ★subteam-idle-latch = 第三種手不聽腦（6 隊，2026-07-19，QA 抓 measurer undercount，HIGH）
+## ★subteam-idle-latch = 第三種手不聽腦 —— **2026-09-02 runtime 複驗：★病還在（不是好了）**
+
+★**證據**（`seed 1337`／3mo／`tick=60000`，同一 tick 同一母體）：
+```
+命中(手不聽腦) = 2 ｜ ★機會母體(near_death_tracked) = 161
+其餘同批分類：famine = 0 ／ stuck-task = 92 ／ food-ok = 67
+★判準（bed :33-46）：would_survival_dispatch_succeed ＋ survival_finder_hits ＋ task ∈ {idle, 等待新領主}
+   ⇒ ★★【引擎派得出、finder 找得到食物，而隊坐著不動】—— 這正是 #10 的 signature
+★★★命中在 tick=60000 才首次非 0（20000／40000 皆 0）⇒ 低頻但真實；3mo 起跳即可捕到
+```
+★**不與 2026-07-19 的「6 隊」直接比較**：窗長／進度不同（本輪只跑到 46% 就被 timeout 砍）
+⇒ ★★**「6 → 2」不是改善的證據，只是兩次不同的量測。**
+
+★★★**而同批的 `stuck-task = 92` 我要標一個【命名風險】**（★不是缺陷，是讀法陷阱）：
+```
+★該格的判準只有一條：`survival_committed_option != ""`（有 committed option）
+★★而名字叫「stuck-task」—— ★★★名字宣稱【卡住】，判準只證明【有承諾】
+⇒ 一隊「已承諾覓食、正在路上、目前仍近死」會被歸進去，而那可能完全正常
+⇒ ★不要拿 92 這個數去說「92 隊卡住」。要說那句話，需要另一次量測（有沒有在推進）
+```
+
+**狀態：已知未修**（★2026-09-02 由「未確認」升格，runtime 證據見上） ｜ **回訪：到期 token — 修法 slice**
+★★★**逐隊明細（2026-09-02，有界 dump 只 2 隊）＋ 一個【欄位不可信】的發現**：
+```
+team 213  tick 52798  task=idle  prio=0  reason=survival  food_days 2.88  pop 2  committed=紮根  finder_hits=true
+team 219  tick 54118  task=idle  prio=0  reason=survival  food_days 1.88  pop 2  committed=紮營  finder_hits=true
+```
+★**`reason=survival` 這一欄【不可當證據】**（systems 2026-09-02 查出）：
+```
+task_arbiter.gd:161 release() 清 current_task／move_target／task_priority／flee_from_pos
+   ★而 flee_from_pos 那行的註解就寫著「避 stale 殘留」⇒ ★★紀律存在，只是【漏了 task_reason】
+⇒ ★★★所以 idle + prio 0 的隊身上那個 reason，是【上一個任務的殘留】，不是「引擎現在想求生」
+⇒ 而 #10 的 signature【不依賴 reason】(判準是 would_dispatch + finder_hits + task==idle) ⇒ ★#10 不受影響
+```
+★★**而 `committed=紮根/紮營` 是另一回事，我【不下結論】**：`survival_committed_option` 只在
+`faction_ai_system.gd:5944/5948`（解承諾／清蓋）被清，**`release()` 不碰它** ⇒
+★**「承諾活過任務釋放」可能是【設計如此】（承諾 ≠ 任務）** ⇒ ★★★**已送 blueprint 裁**，
+**而那個答案就是 #10 的核心**：若承諾活著而沒有任何東西重新派它，那就是 latch。
+
+★**落地路徑**：`docs/process/verdicts/subteam-idle-latch-recheck-2026-09-02.measure.json`
+／`docs/measurements/subteamidle-recheck-mainHEAD-seed1337-3mo-v2checkpoint.txt`
+
+## （原文）★subteam-idle-latch = 第三種手不聽腦（6 隊，2026-07-19，QA 抓 measurer undercount，HIGH）
 
 bed 3 分類 classifier 測出 **6 隊同款 broken**（team62/71/73/79/84/90），同 signature：`food_days 足(2.5-4.58) + committed=覓食/遷移找糧 卻 task=idle 不執行 + reason=subteam + survival_dispatch_would_succeed=true`。measurer 只回報 1 隊（team84）= undercount，QA 逐隊讀 classifier 抓齊 6。**starve metric 天然看不到**（food OK 不進 famine 分母）→ 別靠聚合判此 arc，需 QA 逐隊讀。
 
