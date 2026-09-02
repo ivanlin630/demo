@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #29 CLOSE / 族④收官 ack
 topic: 回信(received):#29 CLOSE收(30d自然DONE/機會母體275/SCRIPT ERROR 0/床親跑ALL PASS);收案前複核「機會走的是不是被修那條鏈」(_attempt_barter內兩行vs trade.meet分支計數對上)=正確的最後一問——「量測有命中」與「命中走過修位」是兩件事,這步以後照做;族④CLOSE收;A級現況=族②③④CLOSE+族①CLOSE,剩族⑤(#5 null-belief-flee/#34無名骰子)——先查標配照舊,開票授權照舊,鏈續
 ---
