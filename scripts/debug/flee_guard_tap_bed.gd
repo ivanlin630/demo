@@ -20,6 +20,18 @@ func _init() -> void:
 	for d in range(days):
 		for _t in range(WorldState.TICKS_PER_DAY):
 			runner.advance_tick(state, Vector2i(-1, -1))
+		# ★★★分段吐值（systems 2026-09-02 的通則，★而我這支床自己也犯了同一條）：
+		#   ★原本只在最後印 ⇒ 被 timeout 砍掉就【一格都沒有】，而那跟「沒發生」長得一模一樣。
+		#   ★★間隔要小於【預期能跑到的長度】，所以逐日印（而不是逐十日）。
+		print("[CP] day=%d flee呼叫=%d(A=%d B=%d) 設無效=%d backstop=%d 退化=%d band=%d 無目的地過門檻=%d" % [
+			d + 1,
+			int(Probe.counts.get("flee.pos_none_no_threat", 0)) + int(Probe.counts.get("flee.pos_none_positionless", 0)) + int(Probe.counts.get("flee.pos_ok", 0)),
+			int(Probe.counts.get("flee.pos_none_no_threat", 0)), int(Probe.counts.get("flee.pos_none_positionless", 0)),
+			int(Probe.counts.get("flee.set_invalid.decide_unified", 0)) + int(Probe.counts.get("flee.set_invalid.solo", 0)),
+			int(Probe.counts.get("flee.backstop_release", 0)),
+			int(Probe.counts.get("flee.degrade.total", 0)),
+			int(Probe.counts.get("flee.band_no_dest_below_threshold", 0)),
+			int(Probe.counts.get("flee.no_dest_above_threshold", 0))])
 
 	var a: int = int(Probe.counts.get("flee.pos_none_no_threat", 0))
 	var b: int = int(Probe.counts.get("flee.pos_none_positionless", 0))
@@ -65,6 +77,8 @@ func _init() -> void:
 	var mdest: int = int(Probe.counts.get("flee.move_to_dest", 0))
 	var maway: int = int(Probe.counts.get("flee.move_away_fallback", 0))
 	print("  ①朝目的地 = %d／②away-tile 退化 = %d／③backstop = %d（★三層各接住幾次）" % [mdest, maway, back])
+	print("  ★派發時就已有目的地（不必重解）= %d（★★① 的數字小不代表沒走到）"
+		% int(Probe.counts.get("flee.dest_already_set", 0)))
 	print("  ③退化去向（母體＝怕過門檻但無目的地）total = %d"
 		% int(Probe.counts.get("flee.degrade.total", 0)))
 	var _tops: Array = []

@@ -86,6 +86,12 @@ func process(state: WorldState, team_ids: Array,
 		# ★而目的地【每 tick 重解】（不是 dispatch 時存一份）：存下來的目的地就是一個會悄悄過期的快照。
 		if team.current_task == TeamData.TASK_FLEE:
 			var _dest: Vector2i = FactionAISystem.flee_destination_static(state, team)
+			# ★spec ADDENDUM 後：目的地已經由派發站（to_task 的 target）存進 move_target
+			#   ⇒ ★★①這層只在【未設／已抵達】時才重新解一次（保新鮮），
+			#     而不是每 tick 都覆寫 ⇒ ★★★`flee.move_to_dest` 只數【重解】，不數【派發時就有】。
+			#   ⇒ 兩個要分得開，否則 `move_to_dest=0` 看起來像「① 沒被走到」，實際是「根本不必重解」。
+			if Probe.enabled and team.move_target != Vector2i(-1, -1) and team.tile_pos != team.move_target:
+				Probe.bump("flee.dest_already_set")
 			if team.move_target == Vector2i(-1, -1) or team.tile_pos == team.move_target:
 				if _dest != Vector2i(-1, -1):
 					team.move_target = _dest                                     # ①

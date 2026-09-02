@@ -14,6 +14,8 @@ extends SceneTree
 # ★命名紀律（blueprint 2026-09-02，桶名只准宣稱判準本身）：分類桶「stuck-task」改名「has-committed-option」，
 #   自 commit dd174bbd 起——舊量測檔(commit dd174bbd 之前產出)裡寫的是「stuck-task」，同一格，別當孤兒讀。
 
+const LIVE_CP_EVERY: int = 2000   # ★分段輸出間隔：必須小於【你預期能跑到的長度】
+
 func _initialize() -> void:
 	_run(); quit()
 
@@ -136,7 +138,12 @@ func _run() -> void:
 					h.pop_front()
 		if tick % 5000 == 0:
 			print("[progress] tick=%d teams=%d near_death_tracked=%d" % [tick, state.teams.size(), last_seen.size()])
-		if tick % 20000 == 0 and tick > 0 and not last_seen.is_empty():
+		# ★★★間隔 20000 → 2000（systems 2026-09-02）：★原本第一次輸出在 tick 20000，
+		#   而這床在現在的世界規模下跑到 tick 20000 約要 600s、跑滿 3 個月超過 wrapper timeout
+		#   ⇒ ★★被砍的那幾跑【一格都沒印】，分段吐值退化回「只在最後吐」，
+		#     而它看起來跟「根本沒有分段吐值」一模一樣 ⇒ 那個 0 會被讀成「沒發生」。
+		# ★★★而修法不是「跑更久」：跑更久仍可能被砍，間隔小才是結構保證。
+		if tick % LIVE_CP_EVERY == 0 and tick > 0 and not last_seen.is_empty():
 			var _tally: Dictionary = {"手不聽腦": 0, "famine": 0, "has-committed-option": 0, "food-ok": 0}
 			for _tid2 in last_seen.keys():
 				var _c: String = _classify_cause(last_seen[_tid2])
