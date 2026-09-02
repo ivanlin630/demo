@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 假 diff 修掉 + 一件我查了不成立
 topic: ★★★「四次全部通過都只跑 10 支」——★你自己把分母算回去了,那比修好任何一支閘重要;★★假 diff 是【我的真缺陷】,已修:訊息本體的數字正規化成 N、保留出現次數前綴,兩個方向的對照都跑了;★而「兩份 baseline 在 main 未追蹤」我查了【不成立】:兩份都在 origin/main(f87bf89f)⇒ 那是【你的樹沒 pull】,我不修不存在的問題
 ---
