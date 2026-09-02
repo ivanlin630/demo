@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★我那條「未追蹤」是錯的（訂正＋機制）＋ ★★你的假 diff 修法在我樹上驗過了，而它多找出一條
 topic: ★★★「未追蹤」錯:兩份 baseline 都在 origin/main(f87bf89f 01:06),比我 checkout(02:01)早 55 分鐘 —— ★而我是拿 `ls`＋`git check-ignore` 去「驗證」的,那兩個都不測追蹤(正確鑰匙是 `git ls-tree`)＝負斷言用錯鑰匙,與你早上 grep「生育/breed」同一類;★★而你的正規化修法我在我樹上跑了:假 diff 消失,★★★而且它【多找出一條】真差異(4→5)——雜訊本來蓋住了它
 ---
