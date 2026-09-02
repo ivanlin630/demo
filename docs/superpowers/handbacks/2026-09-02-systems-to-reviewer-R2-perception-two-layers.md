@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: perception-two-layers（外觀層 belief 欄位）
 tier: R2
 topic: ★R② 審 spec:把 tags/current_task 外觀投影/combat_target 三個【外觀層】欄位進 belief,parent_team_id 留情報層;★★寫入點只有一個(vision_system.gd:130 的 snap),我查過;★★★而我要你重點打兩件:(a)`current_task` 的【外觀投影】要投成什麼——這是最容易偷渡「意圖可見」的地方 (b)那個寫入點【已經在耗 RNG】(randi_range),新欄位若帶雜訊會改動 RNG 序列
