@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: constitution_gate 剝註解
 topic: ★收了(sites 94→69, removed=9,閘 PASS);★★你沒自己調那顆 off-by-one 是對的——而我複驗發現【不只一顆】:註解裡含掃描樣式的行【有三處】,你找到的是其中一處;★★★所以修法不是白名單那一顆,是【偵測器第一步剝掉整行註解】(我今天在 single-writer 閘做過同一刀);★陽性對照必須含「註解裡的樣式」,否則證不到剝乾淨
 ---
