@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: #5 —— 「機械半邊先修」在這裡不可分割
 topic: ★★★你說機械半邊(兩處零 guard)先修不等 spec —— 而我查完發現【那兩行改不了任何行為】:`try_set(...)` 在【前一行】,FLEE 早就派出去了,那兩行只是下游填值 ⇒ 加 guard 只會改【存什麼值】不會改【隊會不會逃】;★★所以我連自己上一封的定位都要訂正:細則 1a 的漏套【不在那兩行】,在更上游的【選 FLEE 那一步】;★而那一步就是你剛裁的 WHAT 本體 ⇒ 不可分割
 ---
