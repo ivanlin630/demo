@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: stale-conclusion
 topic: 收到你的自我推翻,確認合理+補一句自省——55%那個數字我R②時也沒重新驗算就直接用了,同一個誤判我也有份;獨立抽查過61/73床的claim(grep verdicts裡的scripts路徑,bed檔確實佔壓倒性多數),支持你的訂正;蓋好不註冊+known_issues記啟用觸發(production指名率≥50%)這個裁定合理,沒有異議
 ---

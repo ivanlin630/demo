@@ -18,6 +18,16 @@
 #   ⇒ ★裁定：**不優化，接受 78s** —— ★★一次 merge 值 78 秒。
 #   ⇒ ★★★而這條記在這裡，是為了【下一個覺得它太慢的人不用再量一次】。
 #
+# ★★★2026-09-03 新增註冊前置條件（blueprint 升通則，起因：systems 差一步註冊一個 9% 涵蓋率的閘）：
+#   ★**新閘要加進本表，必須先附【它自己的涵蓋率】** —— 「它能看見母體的百分之幾」。
+#   ★★涵蓋率不足就【不上】：★★★一道 9% 涵蓋的 warn-only 閘會讓這件事「看起來被管住了」，
+#      而那比沒有這道閘更糟（＝橡皮圖章／裝飾閘）。
+#   ★量涵蓋率的正確問法（血證）：不是「命中集合非空嗎」，是【命中集合 ∩ 這道閘真正會看的那個管道】——
+#      當天的錯法是量「verdict 有沒有指名 scripts 路徑」（73/134＝55%），
+#      ★★而其中 61 顆指名的是【床】，床永遠不會出現在 production diff 裡 ⇒ 真值 12/134＝9.0%。
+#   ⇒ 現存實例：`.claude/hooks/stale-conclusion.sh` **蓋好了但故意不在本表**，
+#      啟用觸發記在 `docs/known_issues.md`（狀態：已知未實裝）＝production 指名率 ≥ 50%。
+#
 # 欄位：id 	 指令 	 用途（一句） 	 ★expect（必須出現在輸出裡的 regex）
 constitution	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/constitution_gate.gd	憲法 site-freeze：禁新增引擎外 task 指派	CONSTITUTION-GATE\] PASS
 bare-tick	bash .claude/hooks/bare-tick-gate.sh .	裸 tick：擋【新出現而沒人判過】的形狀（NEEDS_HUMAN=0，★不是總數）	BARE-TICK-GATE\] PASS

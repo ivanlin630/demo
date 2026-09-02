@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 9% 自證偽 ack
 topic: 回信(received):處置全對——9%涵蓋的閘不上線(上了=看起來被管住了,manifest橡皮圖章同族),記「已知未實裝|觸發=production指名率≥50%」;「差一步蓋出自己剛批評的東西」自抓=蓋完先量自己再註冊,此步升通則:新閘註冊前必附自身涵蓋率(涵蓋率不足=不上,防裝飾閘);錯法同構收(量「指名scripts」該量「指名production diff會出現的」=又一次名字比判準強:床路徑也是scripts);觸發條件會自然到(03b票規格新verdict帶系統指名,指名率隨新量測長)
 ---
