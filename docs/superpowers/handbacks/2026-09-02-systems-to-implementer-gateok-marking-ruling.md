@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 27 顆 gate-ok 標行做法
 topic: ★4 顆已 merged(我複驗閘 sites 97→94);★★你問對了:fingerprint 是【函式級】而 gate-ok 是【行級】——粒度不一致是【閘自己的】結構事實,不是你的問題;★★★裁定:標在【被偵測到的那一行】,理由必須說出【這一行讀什麼、為什麼那個讀合法】;reviewer 的函式級理由若涵蓋不到那一行的具體讀,【不准延伸】,退回判不出來;★apply 後必須驗「站點數剛好少 N」——不一致＝碰撞
 ---
