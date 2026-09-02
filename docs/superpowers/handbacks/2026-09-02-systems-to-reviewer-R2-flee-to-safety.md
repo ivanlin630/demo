@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: flee-to-safety（#5 一張 spec）
 tier: R2
 topic: ★藍圖裁「逃＝逃往安全」+無安全處則退化戒備 + 漏套真位在【選 FLEE 那一步】;★★而我先盤點了三個方向源:①己方據點 ②同 faction 成員位置【兩個現成】③【記憶安全處根本不存在】⇒ 本刀不建,明寫;★★★退化目標 `TASK_PREPARE="備戰"` 是既有 option 不必新建;★要你重點打:(a)applicability 擋在選步會不會把恐懼吞掉 (b)「逃往安全」與既有 _flee_away_tile 反向邏輯的關係
