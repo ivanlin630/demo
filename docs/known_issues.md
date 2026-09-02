@@ -270,6 +270,26 @@ options.gd:400-401 "備戰"  applicable: ctx.threat_react >= ctx.threat_threshol
 
 **狀態：已知未修** ｜ **回訪：到期 token — flee-to-safety slice（該刀會在同一區動刀，屆時一併判要不要給 FLEE 補 threshold）**
 
+### ⏳★★能派 FLEE 的站【4 個】、設 `flee_from_pos` 的【2 個】、註解說【3 個】（2026-09-02 implementer 全量掃）
+
+```
+faction_ai_system.gd:2950 _decide_unified     → ✅ 設（:2989）
+faction_ai_system.gd:3373 _decide_subteam     → ★❌ 不設（★★而它走 ranked ⇒ 過 applicable 閘）
+faction_ai_system.gd:3549 _evaluate_solo      → ✅ 設（:3562）
+faction_ai_system.gd:5728 _trigger_survival   → ★❌ 不設（★implementer 讀 code 判 FLEE 走不到：
+                                                 rank_survival 只收 sets 含 "survival"，而 FLEE 是 {"threat": true}
+                                                 ⇒ ★★但「讀出來的走不到」不算證據，桶已放、恆 0 才是坦白）
+★而 flee_from_pos 的 writer 全量三處：上面兩個 setter ＋ `task_arbiter.gd:179 release()` 清成 (-1,-1)
+★★★faction_ai_system.gd:494 的註解寫「3 FLEE 派發站派 FLEE 後呼，設 flee_from_pos」
+   ⇒ 站 4 個、設 2 個、註解說 3 個 —— **三個數字沒有一個對得起來**
+```
+★**後果**：`_decide_subteam` 派 FLEE 而不設方向 ⇒ 欄位維持 `release()` 清出來的 `(-1,-1)`
+⇒ ★★**movement 看到 positionless ⇒ backstop ⇒ 同一個迴圈，只是換一站生出來。**
+★★★**而這一格【推翻了 systems 先前的定位】**（原指 `:2973/:3539` 兩站零 guard；
+實測 `_flee_threat_pos` 163 次呼叫【零次】回 (-1,-1)）。
+
+**狀態：已知未修** ｜ **回訪：到期 token — flee-to-safety slice（該刀的通則「凡能派 FLEE 的站都必須存目的地」直接涵蓋它）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。

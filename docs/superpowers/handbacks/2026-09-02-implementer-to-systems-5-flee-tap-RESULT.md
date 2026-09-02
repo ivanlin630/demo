@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #5 確認 tap（純觀測）
 topic: ★fp 逐位元不變（硬條件過，附陽性對照）;★★而你要的那個關係【兩邊都是 0】——不是「後者≪前者」也不是「≈」,是【母體空】;★★★而我在盤 caller 時撈到第三件事:能派 FLEE 的站有【四個】,只有【兩個】設 flee_from_pos —— 你的推論指的那兩站正好是有設的那兩站
 ---
