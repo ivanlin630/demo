@@ -201,7 +201,7 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — 下一次有人要在新檔裡用 hex 距離時（★直接呼既有 static，不要抄第 12 份）**
 
-### ⏳★★★`has_belief` 不蘊含「有位置」——**belief 有欄位粒度**（2026-09-02，implementer 實測翻掉 systems 的假設）
+### ✅`has_belief` 不蘊含「有位置」——**belief 有欄位粒度**（2026-09-02；★三態已落地：有值／`stale`／`never`）
 
 ★**systems 在 spec 裡寫**「過了 `has_belief` 閘 ⇒ 一定拿得到 `belief_pos`，開一個【必須恆 0】的桶」。
 ★★**錯的**：`has_belief` ＝ claims 非空；`belief_pos` ＝ 需該 claim **帶 `tile_pos` 欄位**且**未過期**。
@@ -212,7 +212,9 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 **當狀態處理（棄該 target），★不得退回 live**。已寫進 `invariants.md` 細則 1a。
 ★**未做**：**全站還有哪些 `belief_pos` 消費端假設了「過閘就有位置」，本輪沒查。**
 
-**狀態：未確認** ｜ **回訪：量測窗 — 下一輪任何跑 belief 路徑的床，順手 dump `known_but_positionless` 的計數與分佈**
+★**已落地（2026-09-02 感知兩層 slice）**：讀取端回 `{activity: unknown, state: "never"|"stale"}` ⇒ **三態分得開**；
+★★寫入端**沒有 unknown 這個答案**（`observed_activity` 落到最後回 `ACT_IDLE`），`write_unknown_BUG` 恆 0 桶已上床。
+★★★**仍未做**：**全站還有哪些 `belief_pos` 消費端假設「過閘就有位置」** —— 本輪只修了 `_try_invite_nearby_exile` 這一條路徑。
 
 ### ⏳★★★建造：**兩條路，兩個不同的病**（2026-08-26 三度訂正；★舊讀法全部保留在下方，因為每一個都曾經看起來很有道理）
 

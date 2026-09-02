@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: observed_activity 補一格
 tier: infra
 topic: ★DONE(707a6f46,已 push);★★你的裁定比我的讀法對——我把「分類表缺一格」讀成「規則與功能衝突」,而真正缺的是【觀察到、靜止、無可辨識活動】那一格;★★★規則放回去沒放寬,而功能自然活;★新床證了非零寫入證據 + 恆 0 桶(write_unknown_BUG = 0)
