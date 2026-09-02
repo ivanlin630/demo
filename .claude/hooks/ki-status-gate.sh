@@ -25,10 +25,15 @@ check_sect() {
   case "$title" in *'✅'*) old=$((old+1)); return 0;; esac   # ★已關/已撤回條目不要求狀態欄：那一欄是給【開放】條目的
   if grep -Fxq "$title" "$BASE"; then old=$((old+1)); return 0; fi
   new=$((new+1))
-  st=$(printf '%s' "$sect" | grep -oE '狀態：(已知未修|未確認)' | head -1)
+  st=$(printf '%s' "$sect" | grep -oE '狀態：(已知未修|未確認|已知未實裝)' | head -1)
   if [ -z "$st" ]; then
     echo "[KI-STATUS] ★FAIL：新條目缺【狀態】欄 ⇒ ${title:0:60}"
     echo "   ⇒ ★把【未確認】寫成【已知未修】是在考卷上說謊的溫和版；沒寫則是連問都沒問"
+    fail=$((fail+1)); return 0
+  fi
+  if [ "$st" = "狀態：已知未實裝" ] && ! printf '%s' "$sect" | grep -q '回訪：觸發事件'; then
+    echo "[KI-STATUS] ★FAIL：【已知未實裝】條目的回訪不是「觸發事件」⇒ ${title:0:60}"
+    echo "   ⇒ ★刻意不做的東西，唯一該回來看它的時機就是【那個觸發發生時】；寫別的＝擱到沒人會回來的地方"
     fail=$((fail+1)); return 0
   fi
   if [ "$st" = "狀態：未確認" ] && ! printf '%s' "$sect" | grep -q '回訪：量測窗'; then

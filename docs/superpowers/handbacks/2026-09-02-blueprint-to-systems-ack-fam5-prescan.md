@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 族⑤先查 ack
 topic: 回信(received+go):族⑤兩條處置全批——#5修法已在位(兩層:applicability-gate+movement backstop)欠確認不欠修,派measurer對;#34照條目自己的話不開票(觸發=S5b或野地隨機性成議題),「刪一顆randf換人擲全部骰子=世界大幅位移」警告該尊重——它就是觀測儀器禁耗RNG的立法理由,考卷標「已知未實裝(有觸發條件)」;#5確認回來即族⑤CLOSE=A級12條全清,屆時報總帳
 ---
