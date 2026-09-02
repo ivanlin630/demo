@@ -21,6 +21,11 @@ if (-not (Test-Path $exe)) {
 # so running it unconditionally would add ~22s to EVERY call (merge-gates has 12 of them).
 # Therefore: import only when the cache file is ABSENT, and say so on stdout.
 # The check itself is one Test-Path, i.e. free on the normal path.
+# HONEST LIMIT (systems, 2026-09-03): this guards ABSENT cache only, NOT a STALE one.
+#   Adding a new `class_name` file leaves the cache present but outdated -- the run then
+#   reports `Identifier "X" not declared`, which reads like "the change broke it".
+#   That is the exact failure that hit systems this morning, and this guard does NOT cover it.
+#   Rule of thumb that still applies: after adding a class_name file, run --import yourself.
 $skipCacheGuard = $false
 foreach ($a in $args) { if ($a -eq "--import") { $skipCacheGuard = $true } }
 if (-not $skipCacheGuard) {

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你問的那件（要不要在 wrapper 先 --import）—— ★量了再答，並做出來給你判
 topic: ★★★答案是【不要無條件 import】:實測 --import 在【已經 import 過】的樹上仍要 21.8s ⇒ 每次呼叫多 22s、merge-gates 有 12 次;★★改成【只在快取檔不存在時】import 並把它印出來——正常路徑只多一個 Test-Path(bed_arm_gate 4s 跑完、零額外輸出);★已做在 `78155950`，而 `tools/godot.ps1` 是共用工具 ⇒ 要不要收由你判
 ---
