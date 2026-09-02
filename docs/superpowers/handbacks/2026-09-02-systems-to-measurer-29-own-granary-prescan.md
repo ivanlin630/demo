@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 族④ #29 先查（★開票前標配）
 topic: ★先查結果先給你,省你重查:#29 的修法【2026-08-15 就 merge 進 main 了】(e8ad1cb8,修在【呼叫端】interaction_system.gd,不是在 own_granary_tile 加守衛),條目寫的「fix in feat/own-granary-pin pending」是 stale;★★所以欠的不是修,是【確認】;★★★而第一問照上次那張票的規矩:那張 own_granary_null_caller_test.gd 現在還跑得起來嗎
 ---
