@@ -3,7 +3,21 @@ class_name ThreatAssessment
 # 威脅評估（static 純函數）：限視野 + reputation + intel 估算實力 + 朝我移動 + 距離衰減。
 # 認知不等於真實：對方實力用觀察者 team_intel snapshot 估算，非全知。
 
-const THREAT_BASE_THRESHOLD: float = 0.3
+# ★★★門檻 re-baseline（systems spec 2026-09-02，技能維對稱化的同一刀）：
+#   ★舊值 0.3 是在【膨脹的尺】上定的 —— 那把尺把每一個 threat_react 都拉高了，
+#     所以 0.3 這個數字本身已經把膨脹吃進去了。尺改回中性之後，門檻必須跟著除。
+#   ★★而【改法必須是同源推導】（systems 明令）：除以【實測出來的膨脹係數】，
+#     ★★★不是重新手感選一個數字 —— 那等於把手抄物理從 0.3 搬到 threshold 上藏起來。
+#
+# ★膨脹係數的來歷（兩條腱【獨立】量到同一個數，12 日 seed1337）：
+#   warring ：mean(threat_react) 2.9945 → 0.6914  ⇒ 2.9945 / 0.6914 = 4.331
+#   peaceful：mean(threat_react) 0.2567 → 0.0593  ⇒ 0.2567 / 0.0593 = 4.329
+#   ★★兩個世界、兩個完全不同的母體，算出來差到小數第三位 ⇒ 這不是巧合，
+#   ★★★而是【膨脹本來就是一個全域常數倍率】（舊尺：other 固定 0.3／self 實測 0.1）。
+const THREAT_INFLATION_MEASURED: float = 4.33   # ★實測值，非手感；來源見上方兩行
+# ★★舊值 0.3 保留在式子裡（而不是直接寫 0.0693）：★★★讓下一個人看得到它的血統 ——
+#   寫成 0.0693 的話，三個月後沒人知道它是怎麼來的，而那就是下一代的手抄物理。
+const THREAT_BASE_THRESHOLD: float = 0.3 / THREAT_INFLATION_MEASURED
 const REPUTATION_NEUTRAL: float = 0.5
 const POWER_BASELINE: float = 1.0
 
