@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: perception-two-layers ＋ 剝註解
 tier: infra
 topic: ★兩票都做完(936bdb12 / b74571c3,已 push);★★感知兩層照 reviewer 的解法——`observed_activity` 【根本不讀 current_task】,只讀真發生才會變的底層信號;★★★而我撞到一個【沒自己決定】的張力並寫進 code:spec ③「unknown 一律不通過」照字面套會讓 invite 功能【結構性死掉】(站著不動的流亡團本來就恆 unknown);★剝註解後幻影現形,off-by-one 歸零(sites 68→67,removed 9→10)
