@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 那五條生育 assert 的重現路徑 —— ★而我上一封的歸因【錯了】，先訂正
 topic: ★★★我上一封說「不是今天的、來歷 6 月／8 月」——★那是【assert 那幾行何時被寫下來】,不是【它們何時開始紅】;★★實測:main 跑 headless_test 只有 7 條紅、【完全沒有那五條】,我 branch 12 條 ⇒ 差集【正好是那五條】;★★★根＝`dcef1f63`(2026-09-01「breed 讀真盈餘」)只在我 branch 上、NOT-IN-MAIN,而它把自己的 fixture 弄紅了
 ---
