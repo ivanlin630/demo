@@ -29,3 +29,5 @@ mailbox-integrity	bash .claude/hooks/mailbox-integrity.sh	信箱完整性:幽靈
 cherrypick-fidelity	bash .claude/hooks/cherrypick-fidelity.sh 40	cherry-pick 忠實度:宣稱帶了某顆而內容不等價(只帶一部分 hunk)	CHERRYPICK-FIDELITY\] ★誠實限
 ki-status	bash .claude/hooks/ki-status-gate.sh	known_issues 新條目必帶狀態欄(未確認者回訪只能是量測窗);★baseline 快照存量,存量不擋但【明寫沒被檢查】	\[KI-STATUS\] PASS
 single-writer	bash .claude/hooks/single-writer-gate.sh	受管欄位的直寫點必須全在白名單(病:「單寫者其實不單一」);白名單外多一處就紅	\[SINGLE-WRITER\] PASS
+tree-div	bash .claude/hooks/tree-divergence.sh	main↔工作 branch 的 production 樹差(★只印不判:branch 永遠有合法 WIP,硬閘會永久紅)	\[TREE-DIV\] PASS
+headless	bash .claude/hooks/headless-regression.sh	headless_test 回歸(★2026-09-03 補:它本來【不在】註冊表,而兩顆已 merge 的 slice 弄紅 fixture 時十支全綠);比對失敗【清單】非只數量	\[HEADLESS\] PASS
