@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 承諾再派 funnel（#10 修法）
 tier: R2
 topic: ★藍圖裁 (a):承諾＝決策層狀態非任務屬性 ⇒ #10 的病＝【缺再派 funnel】,release() 不碰承諾;★★而我寫 spec 時發現【護欄③現在不可驗】:解承諾兩條出口裡,STALL_STALLED 有 Probe.bump,★★★STALL_RESOLVING【一個 tap 都沒有】⇒「解承諾路真的會 fire」目前答不出來;★要你重點打:(a)再派的觸發點該掛在哪個窄口 (b)「重秤」與「強推」的界線我畫得對不對
