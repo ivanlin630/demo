@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: subteam-idle-latch recheck完整回報（①②③三格）
 ---
 

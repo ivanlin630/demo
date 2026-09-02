@@ -1052,7 +1052,32 @@ QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambit
 
 crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只覆蓋「release 後走 **try_set** 重委派」的重鎖（team1/19 被接住）。**走 `transition` 的重鎖（team16「等待新領主」）未覆蓋**。∴ 原 release-pass（靶三隊 team1/19/13 剛好全走 try_set 路）= **樣本不完整**，免疫修對它瞄準的有效但覆蓋不全。**非推翻已 merge**（免疫對 try_set 路真有效），但誠實記「覆蓋範圍=try_set 重委派，transition 重鎖需上條 transition 修一併治」。blueprint owner 補 game-design 對應處。連上條 [[TaskArbiter.transition 後門]]。
 
-## ★subteam-idle-latch = 第三種手不聽腦（6 隊，2026-07-19，QA 抓 measurer undercount，HIGH）
+## ★subteam-idle-latch = 第三種手不聽腦 —— **2026-09-02 runtime 複驗：★病還在（不是好了）**
+
+★**證據**（`seed 1337`／3mo／`tick=60000`，同一 tick 同一母體）：
+```
+命中(手不聽腦) = 2 ｜ ★機會母體(near_death_tracked) = 161
+其餘同批分類：famine = 0 ／ stuck-task = 92 ／ food-ok = 67
+★判準（bed :33-46）：would_survival_dispatch_succeed ＋ survival_finder_hits ＋ task ∈ {idle, 等待新領主}
+   ⇒ ★★【引擎派得出、finder 找得到食物，而隊坐著不動】—— 這正是 #10 的 signature
+★★★命中在 tick=60000 才首次非 0（20000／40000 皆 0）⇒ 低頻但真實；3mo 起跳即可捕到
+```
+★**不與 2026-07-19 的「6 隊」直接比較**：窗長／進度不同（本輪只跑到 46% 就被 timeout 砍）
+⇒ ★★**「6 → 2」不是改善的證據，只是兩次不同的量測。**
+
+★★★**而同批的 `stuck-task = 92` 我要標一個【命名風險】**（★不是缺陷，是讀法陷阱）：
+```
+★該格的判準只有一條：`survival_committed_option != ""`（有 committed option）
+★★而名字叫「stuck-task」—— ★★★名字宣稱【卡住】，判準只證明【有承諾】
+⇒ 一隊「已承諾覓食、正在路上、目前仍近死」會被歸進去，而那可能完全正常
+⇒ ★不要拿 92 這個數去說「92 隊卡住」。要說那句話，需要另一次量測（有沒有在推進）
+```
+
+**狀態：已知未修**（★2026-09-02 由「未確認」升格，runtime 證據見上） ｜ **回訪：到期 token — 修法 slice**
+★**落地路徑**：`docs/process/verdicts/subteam-idle-latch-recheck-2026-09-02.measure.json`
+／`docs/measurements/subteamidle-recheck-mainHEAD-seed1337-3mo-v2checkpoint.txt`
+
+## （原文）★subteam-idle-latch = 第三種手不聽腦（6 隊，2026-07-19，QA 抓 measurer undercount，HIGH）
 
 bed 3 分類 classifier 測出 **6 隊同款 broken**（team62/71/73/79/84/90），同 signature：`food_days 足(2.5-4.58) + committed=覓食/遷移找糧 卻 task=idle 不執行 + reason=subteam + survival_dispatch_would_succeed=true`。measurer 只回報 1 隊（team84）= undercount，QA 逐隊讀 classifier 抓齊 6。**starve metric 天然看不到**（food OK 不進 famine 分母）→ 別靠聚合判此 arc，需 QA 逐隊讀。
 
