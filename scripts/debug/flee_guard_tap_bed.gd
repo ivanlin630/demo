@@ -114,14 +114,23 @@ func _init() -> void:
 		if String(k3).begins_with("flee.band_team."):
 			band_ids.append(int(String(k3).substr(15)))
 	band_ids.sort()
-	print("  band 隊數（去重）= %d（★上面那個 49 是【次數】，這裡是【隊數】）" % band_ids.size())
+	print("  band 次數 = %d／★band 隊數（去重）= %d（★★兩個不同量綱，拿次數比總隊數會高估）"
+		% [int(Probe.counts.get("flee.band_no_dest_below_threshold", 0)), band_ids.size()])
 	var dead: int = 0
+	var extinct: int = 0
+	var absorbed: int = 0
 	var frozen: int = 0
 	var moving: int = 0
 	var task_tally: Dictionary = {}
 	for bid in band_ids:
 		if not state.teams.has(bid):
 			dead += 1
+			# ★★★【消失≠死】：真滅團有自己的桶（`cleanup_extinct_teams`）；
+			#   ★沒有那個桶而不見了 ⇒ 是被吸納／encounter 收編 ⇒ ★★【不是壞事】。
+			if int(Probe.counts.get("extinct.team.%d" % bid, 0)) > 0:
+				extinct += 1
+			else:
+				absorbed += 1
 			continue
 		var bt: TeamData = state.teams[bid]
 		task_tally[bt.current_task] = int(task_tally.get(bt.current_task, 0)) + 1
@@ -133,7 +142,8 @@ func _init() -> void:
 				if h[n] != h[h.size() - 1]: same = false; break
 			if same: frozen += 1
 			else: moving += 1
-	print("  結局：死亡（不在 state.teams）=%d／位置最後5日未變=%d／有移動=%d" % [dead, frozen, moving])
+	print("  結局：消失=%d（其中 ★真滅團=%d／★★被吸納或收編=%d）／位置最後5日未變=%d／有移動=%d"
+		% [dead, extinct, absorbed, frozen, moving])
 	var tt: Array = []
 	for k4 in task_tally.keys(): tt.append("%s=%d" % [String(k4), int(task_tally[k4])])
 	tt.sort()
