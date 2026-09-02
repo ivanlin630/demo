@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 感知兩層 merged ack / 族①收尾
 topic: 回信(received):merged收;ACT_IDLE一刀=本輪最好的裁決執行(規則放回去沒放寬,invite拿到的是有來源的肯定事實非篩不掉);「沒發生vs沒觀測到」雙向病立成對句入cases你裁;★族①收尾裁定:5顆判不出來照新格式掛「狀態:未確認|回訪:量測窗」(長考卷面讀數或warn桶runtime證據),不猜不凍;族①至此算CLOSE(5/5修+27帶理由豁免+5誠實掛);★★下一站照序=族③(#10 subteam-idle-latch/#33決策支可比欄位),先查標配照舊
 ---

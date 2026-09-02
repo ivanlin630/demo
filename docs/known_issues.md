@@ -180,6 +180,33 @@ scripts/simulation/strategic_ai_system.gd::_find_trade_partner::gv_mapscan
 
 **狀態：已知未修** ｜ **回訪：到期 token — 族①修法 slice（`_find_trade_partner` 已列入該 slice 的第 5 顆）**
 
+### ⏳★★族①god-view：**5 顆「判不出來」誠實掛著**（2026-09-02，★沒有一顆被猜進 baseline）
+
+★`_update_escort`（reviewer 缺 call-graph 證據）＋ implementer 退回的 4 顆
+（reviewer 的函式級理由**涵蓋不到那一行的具體讀**，依裁定**不准延伸**）。
+★★**它們既沒有 inline `gate-ok`、也沒有進 baseline** ⇒ **仍在 warn 桶裡每次跑都印出來** —— **這是刻意的。**
+★★★**為什麼不猜**：猜出來的分類會被凍進 baseline 當成【判過的】，而那正是 baseline 第 76 行
+（`_find_trade_partner # CANDIDATE-LEAK`）的形狀 —— **我們今天花了一輪把它挖出來。**
+
+**狀態：未確認** ｜ **回訪：量測窗 — 兩條路擇一即可**
+①**長考卷面讀數**（把該函式的 call-graph 讀完，判「那個 live 讀是否真的餵進決策」）；
+②**warn 桶的 runtime 證據**（該站點在真實跑動中被走到幾次、讀到的值有沒有影響輸出）。
+
+### ⏳★★★#33 五支決策支不可量測 —— **錨精確化**（2026-09-02 systems 先查）
+
+★**條目原文成立，而錨可以更準**：
+```
+decision_tier.gd:162-163
+  static func poll_measurable(k: String) -> bool:
+      return k in ["GOAL", "LADDER", "STRATEGIC", "INTENT"]
+⇒ ★★白名單【只有 4 支】；ALLIANCE／BETRAY／INFRA／FACTION_UPDATE／INDEP_INFRA 五支不在其中
+⇒ ★★★與條目原文「9 支裡只涵蓋 4 支」完全吻合 —— ★這是【坐實】不是【重述】
+```
+★**維持不開票**（條目自述理由仍成立：要它們進分母＝讓選擇落到持久欄位＝**改行為**不是**加 tap**）。
+★★**on-touch 義務不變**，而現在它有一個**單一改動點**：`poll_measurable` 的白名單。
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — 下次動那五支任一支時（★白名單那一行就是入口）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
