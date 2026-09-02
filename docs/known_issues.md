@@ -350,6 +350,25 @@ faction_ai_system.gd:5728 _trigger_survival   → ★❌ 不設（★implementer
 
 **狀態：未確認** ｜ **回訪：量測窗 — 下一輪任何跑決策的床，順手 dump 備戰的 util 組成（各項貢獻）與 applicable 命中率**
 
+### ⏳★★★設施【升級】整條路不在秤上（2026-09-02，導回自救建田時撞出來）
+
+★**建造新設施**走 `_pick_facility` 仲裁；★★**而升級既有設施**走 `start_upgrade_facility`，
+**被以【寫死的設施名】呼叫**：`outpost_system.gd:595 "farming"`／`:598 "workshop"`（＋玩家指令 `player_command_system.gd:504`）
+⇒ ★★★**`_pick_facility` 對這條路【零參照】—— 誰升級、升哪一個，不經過任何秤。**
+
+★**而 `_pick_facility` 自己也不能表達升級**：`:5164` `if 現有等級 > 0: … continue`（註解原文「已有設施→升級 skip」）
+⇒ ★★**秤的候選集合 ＝【未建設施】**，而「把既有的田 1→2」**不在它的語彙裡**。
+
+★★★**這是我們今天剛修掉的那個病的【兄弟】**：
+```
+①自救建田繞過仲裁 ⇒ ★已導回（#35）
+②★★升級整條路繞過仲裁 ⇒ ★★★【還在】，而且它是【寫死名字】的版本（比 ① 更硬）
+```
+★**血證（導回 #35 後的真世界床）**：自救路再也選不到 farming（`pick.farming = 0/3605`），選到的又幾乎全部付不起
+⇒ **自救建田形同停擺** —— ★★**因為它要的是「升級既有田」，而秤說不出那句話。**
+
+**狀態：已知未修** ｜ **回訪：到期 token — 「修秤」slice（blueprint 已預先授權：秤缺急迫項就修秤，禁回頭開走廊）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
