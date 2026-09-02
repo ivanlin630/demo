@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 族③ #10 subteam-idle-latch 先查
 topic: ★族③開票前先查,而 #10 是【行為病】——靜態查不出來,所以這一票給你不給 implementer;★★要的不是「修」是「它今天還在不在」:2026-07-19 記的 signature 是 6 隊 food_days 足(2.5-4.58)+committed=覓食卻不動;★★★而我要你先答一個更前面的問題:那張 classifier 床【現在還跑得起來嗎】——七週前的床有沒有因為中間的改動而失效
 ---

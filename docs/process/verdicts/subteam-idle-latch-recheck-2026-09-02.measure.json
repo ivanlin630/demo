@@ -1,0 +1,25 @@
+{
+  "slice": "族③#10 subteam-idle-latch 開票前先查",
+  "question": "2026-07-19記的手不聽腦latch signature(food_days足+committed=覓食卻task=idle不動)在main HEAD今天還在不在？",
+  "measured_at_head": "75edf48d（含本票新加LIVE-CHECKPOINT的commit本身）",
+  "bed": "scripts/debug/starvation_lockpoint_trace_bed.gd",
+  "①_bed_alive": {
+    "verdict": "YES，七週(2026-07-19→2026-09-02)重錨/belief化/decision重構沒斷這條依賴鏈",
+    "evidence": "1mo smoke乾淨執行；3mo/8mo正式跑header正常印出、progress逐tick累積、無SCRIPT ERROR；依賴API(TaskArbiter.PRIO_SURVIVAL/DecisionOptions.options_in_set/t.survival_committed_option/t.survival_stall_cooldown/FactionAISystem.CRISIS_FLOOR/BeliefSystem.belief_pos)全數resolve成功"
+  },
+  "②_signature_still_present": {
+    "same_timestamp_same_population": "tick=60000（同一checkpoint同一母體）",
+    "命中_手不聽腦": 2,
+    "機會母體_near_death_tracked": 161,
+    "同批其餘分類": {"famine": 0, "stuck-task": 92, "food-ok": 67},
+    "verdict": "★命中非0——signature今天還在main HEAD上，不是「病好了」，是【還沒修】"
+  },
+  "③_window_vs_population": "機會母體隨tick單調成長(tick=20000時66→40000時115→60000時161)，手不聽腦計數在60000才首次非0(20000/40000時=0)——顯示這是低頻但真實事件，3mo窗（甚至只跑到60000/129600=46%進度）已足夠捕到，不需拉到原始8mo；judgment criterion⑨例外(systems 2026-09-02裁定)成立：latch無週期，只要機會母體夠大(161)+命中非0即可判定訊號存在，不必等窗跑完",
+  "method_note": "本票期間為本床新增LIVE-CHECKPOINT機制（每20000tick對state.teams中仍存活的near_death_tracked隊即時套用死因3分類，純觀測不改sim邏輯，已commit 75edf48d）——原床只在隊「消失」後才印分類，長跑中途被GODOT_TIMEOUT砍會拿不到任何分類數字；此擴充讓中途被砍的跑法仍能給出真數字",
+  "raw_logs": [
+    "docs/measurements/subteamidle-recheck-mainHEAD-seed1337-3mo-v2checkpoint.txt",
+    "docs/measurements/subteamidle-recheck-mainHEAD-seed1337-3mo.txt（v1,無checkpoint,只證明床跑得動)",
+    "docs/measurements/subteamidle-recheck-mainHEAD-seed1337-8mo.txt（partial,跑到tick=55000被自然timeout砍,同為①佐證)"
+  ],
+  "honest_limit": "只有機會母體=近死追蹤中的隊；手不聽腦2隊沒有per-team明細(task_reason/committed_option具體值)——原床只在隊「消失」時才印per-team死前軌跡，仍存活的手不聽腦隊拿不到逐隊細節，只有本checkpoint的聚合計數。若需重現2026-07-19那樣『team62/71/73/79/84/90』式逐隊命中清單，需讓跑法撐到隊真的消失或另外加逐隊即時print（本票未做，未經授權擴大scope）。"
+}
