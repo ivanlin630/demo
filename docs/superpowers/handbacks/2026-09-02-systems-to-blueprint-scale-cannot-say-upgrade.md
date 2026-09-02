@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: #35 停在門口 —— 這是你預先授權的「修秤」case
 topic: ★★★implementer【停下來報、沒有 merge】,而他撞到的正是你預先授權的那個情況:g1a 通了(mint day34 蓋成)【而自救建田形同停擺】(pick.farming = 0/3605);★真因不是導回錯,是【秤說不出那句話】:`_pick_facility:5164` 對已建設施一律 skip ⇒ 候選集合＝【未建設施】,而自救要的是「把既有的田 1→2」;★★而順著它撞到一個更大的:【設施升級整條路都不在秤上】,而且是【寫死名字】的版本
 ---
