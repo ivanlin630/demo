@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 備戰 root-check（★先於 #10／#5 退化／#12 三票）
 topic: ★藍圖裁:備戰查【先於】三票——若它的 util 被高估,一次解釋三個看起來無關的病;★★而他加了一個我沒想到的對照:三份量測【全來自 warring】(那裡備戰本來就該重要)⇒ 必帶【peaceful 對照腿】:peaceful 也橫掃＝強(b)證據,只 warring 贏＝偏(a);★★★而我先查已把範圍縮小:power 那半【已經是 belief-based 且 fallback 中性】⇒ 若有高估,比較可能在 approach／hostility 或門檻
 ---
