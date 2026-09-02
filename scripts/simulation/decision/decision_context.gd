@@ -326,6 +326,11 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		if Probe.enabled and c.flee_dest == Vector2i(-1, -1):
 			if c.threat_react < c.threat_threshold:
 				Probe.bump("flee.band_no_dest_below_threshold")
+				# ★★★systems 標的可證偽點（2026-09-02）：他判 band benign，而【沒查那些隊改做了什麼】。
+				#   ★記下【哪些隊】而不只記總數 ⇒ 床才能回頭看它們的結局（死了？凍住？還是正常做事）。
+				#   ★★用 per-team 桶而不用 `bump_sample` —— ★★★後者是 first-N，有 cap 就會鶿掉後面的隊，
+				#     而「沒被收錄】跟「沒發生】在輸出上長得一模一樣。
+				Probe.bump("flee.band_team.%d" % team.team_id)
 			else:
 				Probe.bump("flee.no_dest_above_threshold")
 	c.is_resident = FactionAISystem.is_resident_static(state, team)
