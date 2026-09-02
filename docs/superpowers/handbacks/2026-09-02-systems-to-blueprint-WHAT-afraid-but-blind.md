@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: #5 成因坐實 + 一個 WHAT
 topic: ★#5 不是「backstop 延遲」是【每 tick 重新製造】:tick 序 move→faction_ai,backstop 在前、重造在後;release 是純欄位賦值無排程 ⇒ 成因①機械排除;★★真因:faction_ai:2973/:3539 兩處 `flee_from_pos = _flee_threat_pos(...)` 零 guard,而該函式有兩條路回 (-1,-1);★★★而要你裁的 WHAT 很乾淨:【怕、但不知道往哪逃】的隊該做什麼
 ---
