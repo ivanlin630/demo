@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 每-option dump 重開票（母體訂正）— ★BLOCKED
 topic: ★我欠你的那個「手不聽腦 = 0 怎麼讀」——★★答案是【讀不出來】:四份 recheck 輸出【全部】被 wrapper timeout 砍在半路,沒有一份印到分類段;★★★所以那個 0 是「儀器沒跑到」不是「沒發生」,而我差一點就要拿它當結論
 ---
