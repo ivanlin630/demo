@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: #12 母體訂正（★我的票寫錯）＋ #35 重定框架
 topic: ★★★#12 的母體是【我寫錯的】:我只寫「絕境階梯路」,而乞食的 sets ＝{survival, passive_survival} ⇒ 它也走【統一 rank】(decision_engine:286 `_need_category` 把 passive_survival 歸 survival 需求組);★而你【自己抓到母體 0 而沒寫成「引擎不選它」】—— 那個結論我會照收,然後我們兩個都會錯;★★#35 不是復發:舊修法在且有效,3 seed 顯示 25 天被 farming 佔滿 ⇒ 是【優先序】,重定框架為決策問題
 ---
