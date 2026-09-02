@@ -136,7 +136,7 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 		if other == null: continue
 		if other.faction_id == self_team.faction_id and self_team.faction_id != -1: continue
 		# invariant：外交/徵收需同格（嚴禁非同格互動）→ 隔空求貢/提案違規。對齊 process_on_move 同格外交。
-		if other.tile_pos != self_team.tile_pos: continue
+		if other.tile_pos != self_team.tile_pos: continue   # gate-ok: 讀 other.tile_pos 只為【同格測試】(co-location)——同格才互動＝物理可見，非遠距窺探
 		# 被拒冷卻中 → 換下一個對象（防同對象連發 spam）
 		if state.world.current_tick < int(self_team.diplomacy_reject_cooldown.get(other.team_id, 0)):
 			continue
@@ -150,7 +150,7 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 			return
 
 		# G3-E leak 1a：power_gap 讀 belief 非 god-view 真值（無估→fallback self_pop=保守等強→gap0→不求貢）
-		var _other_pop_est: int = _get_pop_est(state, self_team.team_id, other.team_id, self_team.population)
+		var _other_pop_est: int = _get_pop_est(state, self_team.team_id, other.team_id, self_team.population)   # gate-ok: 這一行讀的是 self_team.population(自己)；★偵測器把 `other.` 之後同行出現的 `.population` 誤配
 		var power_gap: float = float(_other_pop_est - self_team.population) / \
 			maxf(self_team.population, 1.0)
 		if power_gap > 0.5 and self_leader.values.get("貪婪", 0.5) > 0.6:

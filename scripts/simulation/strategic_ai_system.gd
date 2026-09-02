@@ -199,9 +199,9 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
         TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]
     for i in range(member_teams.size()):
         var t: TeamData = member_teams[i]
-        if t.current_task in FactionAISystem.SURVIVAL_TASKS:
+        if t.current_task in FactionAISystem.SURVIVAL_TASKS:   # gate-ok: t 全來自自己 faction 的成員，讀其 current_task ＝自身編制狀態
             continue
-        if t.current_task in _BUILDER_TASKS_SA:
+        if t.current_task in _BUILDER_TASKS_SA:   # gate-ok: 同上
             continue   # S9 施工子隊不參與包圍
         var dir: Vector2i = dirs[i % dirs.size()]
         var sa_pos: Vector2i = target_pos + dir * ENCIRCLE_DIST
@@ -289,7 +289,7 @@ func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
         if snap_pop >= 0:
             total += snap_pop
         elif t:
-            total += t.population
+            total += t.population   # gate-ok: t 僅來自自己 faction 成員，加總自己人的人口
     return total
 
 # 序8 灰項溶入：_dispatch_trade_net（idle 商隊 → try_set TASK_TRADE 繞引擎）已撕除
