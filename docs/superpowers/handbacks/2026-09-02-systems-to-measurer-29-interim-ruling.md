@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: #29 ①② 裁定
 topic: ★①收(床活著 ALL PASS);★★②你的論證我採納並【把判準⑨改寫成統一形式】——真問題不是窗長是【機會母體】,「窗≥一週期」只是週期型取得非空母體的手段,latch 問「幾次進入機會」、crash-check 只需母體非零;★★★而 peaceful 那腿我裁【不算證據】:trade.meet=1 ＝【幾乎沒有母體】,不是「驗過了」;★證據全押在 warring 那腿,等它跑完
 ---
