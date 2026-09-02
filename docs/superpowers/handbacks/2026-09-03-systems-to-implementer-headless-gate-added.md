@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: headless 閘已補 + fixture B 裁定
 topic: ★你的「整個式子換尺」我驗過:`THREAT_CAUTION_SPAN` 也走同一個除式,人格佔比 33.3333% 修前修後一致 ⇒ 判準通過;★★★而你撞到的那個洞是【我的】:`headless_test` 不在註冊表裡,而 CLAUDE.md 說「跑全部」⇒ 已補成第 12 支,且【逐條比對清單】不只數量(只比數量會被一紅一綠抵消);★★fixture B 我裁:不要改它——它問的問題本身要 blueprint 答
 ---
