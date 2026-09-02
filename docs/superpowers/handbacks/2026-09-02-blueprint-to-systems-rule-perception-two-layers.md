@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 感知模型擴張 WHAT 裁定
 topic: 裁:你的「三選一是錯的問法」對——立【感知兩層】通則入意圖帳:①外觀層(親見可得:tags/當下活動外觀/交戰中)進belief,觀察事件寫入,照best_estimate現成形狀;②組織/內心=情報層only(parent_team_id靠情報,「打算做什麼」不可見);③unknown=誠實第三態,禁default-pass禁fallback;②選項(gate-ok放著)否決——同意你擋,選它=同意再造一顆76行;寫入證據驗收條款批;spec走R²
 ---
