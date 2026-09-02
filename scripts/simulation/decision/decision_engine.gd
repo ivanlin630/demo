@@ -442,6 +442,18 @@ static func _prep_tap(ctx: DecisionContext, scored: Array, team: TeamData) -> vo
 		return
 	Probe.bump("prep.rank_calls")
 	Probe.add_amount("prep.threat_react_sum", ctx.threat_react)
+	# ★★★threat_react 自己的分佈（systems 2026-09-02）—— ★門檻擋的是【這個量】，
+	#   不是 `power_ratio`；而 raw 是【加法】，所以兩者的膨脹係數不一定相同。
+	#   ★★均值會藏分佈：同一個均值可以是「大家都 0.7」也可以是「一半 0、一半 1.4」，
+	#   ★★★而門檻切的是分位不是均值 ⇒ 只看均值換算門檻會錯。
+	var _tb: String = "ge3"
+	if ctx.threat_react < 0.1: _tb = "lt0.1"
+	elif ctx.threat_react < 0.3: _tb = "0.1to0.3"
+	elif ctx.threat_react < 0.5: _tb = "0.3to0.5"
+	elif ctx.threat_react < 1.0: _tb = "0.5to1"
+	elif ctx.threat_react < 2.0: _tb = "1to2"
+	elif ctx.threat_react < 3.0: _tb = "2to3"
+	Probe.bump("prep.react_hist." + _tb)
 	Probe.add_amount("prep.threat_threshold_sum", ctx.threat_threshold)
 	if ctx.threat_react >= ctx.threat_threshold:
 		Probe.bump("prep.gate_pass")            # ★applicable 的全部條件

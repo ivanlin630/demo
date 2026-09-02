@@ -70,6 +70,13 @@ func _run() -> void:
 			% [Probe.amount("prep.threat_react_sum") / float(calls),
 			   Probe.amount("prep.threat_threshold_sum") / float(calls)])
 
+	var _rh: Array = ["lt0.1", "0.1to0.3", "0.3to0.5", "0.5to1", "1to2", "2to3", "ge3"]
+	var _rs: Array = []
+	for rb in _rh:
+		_rs.append("%s=%d" % [rb, int(Probe.counts.get("prep.react_hist." + String(rb), 0))])
+	print("  ★★★threat_react 自己的分佈（★門檻擋的是這個量，不是 power_ratio）：")
+	print("     %s" % "｜".join(PackedStringArray(_rs)))
+	print("     ★均值會藏分佈；而門檻切的是【分位】—— ★★所以換算係數要拿這張表對。")
 	print("── ★★★③贏率（★母體與命中同印）──")
 	print("  在候選 = %d（%.1f%%）｜不在候選 = %d" % [inc,
 		100.0 * float(inc) / maxf(float(calls), 1.0), int(Probe.counts.get("prep.not_in_candidates", 0))])
