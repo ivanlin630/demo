@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 族④ #29 收案
 topic: ★#29 CLOSE:warring 30d 完整跑完(自然 DONE 非 timeout)、機會母體 275、SCRIPT ERROR 0、null-caller 床 ALL PASS(我親跑);★★而我收案前多做一件:複核【那 275 次機會走的是不是被修的那條鏈】——修的兩行在 _attempt_barter 內,而 trade.meet 正是該分支計數 ⇒ 對得上;★★★族④至此 CLOSE(#6 修完 + #29 驗完)
 ---
