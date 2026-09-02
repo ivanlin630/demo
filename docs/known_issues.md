@@ -313,6 +313,24 @@ faction_ai_system.gd:5728 _trigger_survival   → ★❌ 不設（★implementer
 
 **狀態：已知未實裝** ｜ **回訪：觸發事件 — 樹對帳專段完成、baseline 歸零的那一刻**
 
+### ⏳★★`_begin_facility_construction` 缺【再入守衛】（2026-09-02 reviewer 撿，★systems 判：潛在非活）
+
+★**不一致**：`start_build:540` 與 `start_demolish:651` **都有** `construction_team_id != -1` 的再入守衛，
+★★**而 `_begin_facility_construction` 沒有**。
+★**後果（若被繞過）**：★★不是「換目標」而是**真的把進行中的工程重置**（`ticks_left` 歸零）。
+★★★**現況判定：潛在，不是活的**（systems 複驗）——兩個呼叫端
+（`outpost_system.gd:592` 的 `start_upgrade_facility`／`:819`）**都在呼叫前檢查 `construction_team_id != -1`**。
+
+## ★★而它與今天另一個【相反方向】的裁定不矛盾，寫清楚免得後人誤讀
+```
+★`own_granary_tile(state=Nil)`：systems 認可【修呼叫端】而不在被呼叫端加 null 檢查
+   ⇒ 理由：被呼叫端擋 ＝ ★★【吞掉呼叫端的錯】（null 進來本身是 bug）
+★★★而這一條相反：被呼叫端加再入守衛 ＝ 【守住一個不變量】（不得覆蓋進行中的工程）
+   ⇒ ★差別在【那個檢查是在隱藏錯誤，還是在保護一個必須永遠成立的性質】
+```
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — 下一次新增 `_begin_facility_construction` 呼叫端時（★屆時補守衛，不要靠新呼叫端記得檢查）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
