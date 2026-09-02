@@ -25,7 +25,11 @@ KNOWN_INCIDENT="326923a7"
 #   c19018c0  撿 3f08be2e 時  衝突：兩邊記的是【不同世界狀態】
 #             ⇒ ★baseline 必須描述【main 自己跑出來的世界】⇒ 刻意 --ours；bed／gate 部分照收
 #             ★★所以與來源不等價是【設計選擇】不是遺失
-INVESTIGATED="ac8394ef|c19018c0|bdabab39"   # ★已調查白名單（每一顆的調查結果見上方註解區；bdabab39＝照錯的檔→commit 映射撿 604db63f，只帶進一個 BOM，已還原）
+# ★★★2026-09-02 自傷紀錄：本行曾因 hash 抽取失敗而寫成 `...|448185d3||`
+#   ⇒ ★【空的 alternative 匹配任何字串】⇒ 全部 commit 被放行 ⇒ 本閘當場變成廢的
+#   ★★而 self-test【沒有抓到】—— 它驗的是第二關，正是誠實限④寫的那個盲區
+#   ⇒ ★★★改這一行之後，必跑：`sed 兩個白名單為 __none__` 的陽性對照，確認仍抓得到
+INVESTIGATED="ac8394ef|c19018c0|bdabab39|95194e4b|2ff79ab6|8fb3c716"   # ★已調查白名單（調查結果見上方註解區）
 for c in $(git log -n "$N" --format=%H); do
   src=$(git log -1 --format=%B "$c" | grep -oE 'cherry picked from commit [0-9a-f]{7,40}' | awk '{print $NF}' | head -1)
   [ -z "$src" ] && continue
