@@ -154,7 +154,9 @@ var intent_target: int = -1
 # 含 approach/power 非純 hostility；≠ ctx.threat 的 reputation-filtered _max_threat）。
 # threat option（備戰/迎戰/求和）的 applicable gate + eval 讀此。
 # ★失聯帳本 defensive：警覺期威脅門檻降幅（≈半個 caution×0.3 範圍、meaningful vigilance、非 fire-crank）。
-const CONTACT_VIGILANCE_THREAT_DROP: float = 0.15
+# ★★它也是 threat_react 單位（從門檻裡減掉）⇒ 同一個實測係數一起除；
+#   ★★★不除的話，尺縮小之後這個折扣會【把門檻直接歸零】—— 警覺期變成「什麼都算威脅」。
+const CONTACT_VIGILANCE_THREAT_DROP: float = 0.15 / ThreatAssessment.THREAT_INFLATION_MEASURED
 var threat_react: float = 0.0
 var threat_id: int = -1
 var threat_pos: Vector2i = Vector2i(-1, -1)
@@ -306,7 +308,8 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.team_panic = clampf(float(_panic_n) / maxf(float(team.population), 1.0), 0.0, 1.0)
 	# 融合 threat：鏡射舊 _evaluate_threat 掃描（raw score over ALL discovered，含 approach/power 非純 hostility）。
 	var _caution: float = float(c.leader_values.get("慎重", 0.5))
-	c.threat_threshold = ThreatAssessment.THREAT_BASE_THRESHOLD + _caution * 0.3
+	# ★人格項跟基底【同一把尺】（否則只除基底等於把人格權重推高）
+	c.threat_threshold = ThreatAssessment.THREAT_BASE_THRESHOLD + _caution * ThreatAssessment.THREAT_CAUTION_SPAN
 	# ★失聯帳本 defensive 真 consumer：警覺期內→威脅門檻降（餵既有 threat gate、備戰/防衛更易 fire；非新平行旋鈕）。
 	if team.contact_vigilant_until > state.world.current_tick:
 		c.threat_threshold = maxf(c.threat_threshold - CONTACT_VIGILANCE_THREAT_DROP, 0.0)
