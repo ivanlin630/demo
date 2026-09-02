@@ -1,0 +1,15 @@
+{
+  "slice": "族⑤#5 null-belief-flee backstop recheck",
+  "question": "movement_system.gd:85-90 backstop(FLEE+flee_from_pos=(-1,-1)→release同tick收尾)有沒有真的擋掉signature(team75/4/13式凍結餓死)",
+  "bed": "scripts/debug/flee_backstop_probe_bed.gd（新床，零新tap，用tick間transition推斷release有無fire，commit 80194a01）",
+  "window": "warring_states 30d(43200 ticks)，自然DONE非timeout砍",
+  "results": {
+    "flee機會母體(曾進TASK_FLEE隊數)": 78,
+    "續卡事件累計(FLEE+positionless連續2+tick)": 1239,
+    "續卡隊數去重(signature複現的隊)": 15,
+    "backstop生效隊數(最終脫離FLEE+positionless)": 15
+  },
+  "verdict": "★signature未完全消失——續卡事件非0(1239次)，15/78隊曾陷入FLEE+positionless且【非同tick立即release】，累積多個tick才脫離。但15隊全數最終都脫離(backstop生效隊數=續卡隊數=15，沒有永久卡死到跑完的隊)——不是「backstop完全沒fire」，是「沒有像code註解說的同tick收尾，而是延遲多tick」。",
+  "honest_limit": "無法從本量測分辨兩種可能成因：①release()真的延遲多tick才被排程到（非同tick）②release後team被faction_ai_system.gd:2973/3539其中一處重新指派FLEE+positionless（backstop有fire但立刻被重新踩進同個壞狀態，看起來像沒解決）。這兩種成因systems原信③已預告過用戶你沒逐條追那兩處路徑——本票同樣沒追，如實回報不猜測。若要分辨，需要在backstop release那行加一個Probe.bump（跨我scope，需systems或implementer在scripts/simulation加）。",
+  "raw_log": "docs/measurements/flee-backstop-recheck-warring_states-30d.txt"
+}
