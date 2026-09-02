@@ -6488,7 +6488,18 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 	#     而本 tap 存在的目的就是【拿數字去打那個假說】。
 	var _aid_probe: bool = Probe.enabled
 	var _aid_seen: int = 0
-	if _aid_probe: Probe.bump("aid.calls")
+	# ★★★band × filter 交叉（systems 2026-09-03）：整體 33~38% 找得到施主，
+	#   而【最深帶】只有 0~7.2% ⇒ ★兩個數字都對，而「是哪一道擋住最餓的那群」
+	#   只有交叉才答得出來。★★帶界與 `_beg_tap` 同一套（★★★不另定一套，否則兩張表對不起來）。
+	var _aid_band: String = ""
+	if _aid_probe:
+		var _fd: float = ResourceSystem.effective_food(state, team) / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		_aid_band = "deep"
+		if _fd >= 5.0: _aid_band = "ge5"
+		elif _fd >= 2.0: _aid_band = "2to5"
+		elif _fd >= 0.5: _aid_band = "0.5to2"
+		Probe.bump("aid.calls")
+		Probe.bump("aid.b." + _aid_band + ".calls")
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
@@ -6496,24 +6507,24 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 		# G3-E leak 1c：施援目標 pop+food 讀 belief 非真值；無情報 / 無 food_est→保守跳過
 		_aid_seen += 1
 		if not BeliefSystem.has_belief(state, team.team_id, tid):
-			if _aid_probe: Probe.bump("aid.reject.2_no_belief")
+			if _aid_probe: Probe.bump("aid.reject.2_no_belief"); Probe.bump("aid.b." + _aid_band + ".reject.2_no_belief")
 			continue
 		# ★★★可證偽那一格（systems 2026-09-03）：【集合大小】不是【次數】。
 		#   ★次數會被「同一隊被看很多次」灌水 ⇒ ★★per-target 桶，最後數鍵匙。
 		#   ★★★假說要被打死的形狀：③的集合 ≈ ②的集合 ⇒ food_est 不稀有，擋人的不是資訊層。
-		if _aid_probe: Probe.bump("aid.pass2.tgt.%d" % int(tid))
+		if _aid_probe: Probe.bump("aid.pass2.tgt.%d" % int(tid)); Probe.bump("aid.b." + _aid_band + ".pass2.tgt.%d" % int(tid))
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
 		if not bel.has("food_est"):
-			if _aid_probe: Probe.bump("aid.reject.3_no_food_est")   # ★systems 最懷疑的那一道
+			if _aid_probe: Probe.bump("aid.reject.3_no_food_est"); Probe.bump("aid.b." + _aid_band + ".reject.3_no_food_est")   # ★systems 最懷疑的那一道
 			continue   # 不知有無餘糧 → 保守不列
-		if _aid_probe: Probe.bump("aid.pass3.tgt.%d" % int(tid))
+		if _aid_probe: Probe.bump("aid.pass3.tgt.%d" % int(tid)); Probe.bump("aid.b." + _aid_band + ".pass3.tgt.%d" % int(tid))
 		var reserve: float = float(bel.get("population_est", 0.0)) * 14.0
 		if float(bel.get("food_est", 0.0)) <= reserve:
-			if _aid_probe: Probe.bump("aid.reject.4_not_enough")
+			if _aid_probe: Probe.bump("aid.reject.4_not_enough"); Probe.bump("aid.b." + _aid_band + ".reject.4_not_enough")
 			continue
 		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid, true)
 		if not catch_result.reachable:
-			if _aid_probe: Probe.bump("aid.reject.5_unreachable")
+			if _aid_probe: Probe.bump("aid.reject.5_unreachable"); Probe.bump("aid.b." + _aid_band + ".reject.5_unreachable")
 			continue
 		var same_faction: bool = (t.faction_id != -1 and t.faction_id == team.faction_id)
 		var rep: float = float(team.known_reputations.get(tid, 0.5))
@@ -6526,7 +6537,9 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 		Probe.add_amount("aid.discovered_sum", float(_aid_seen))
 		# ★①母體本身是 0（沒發現過任何別隊）跟【發現了但全被後面幾道擋】意思完全不同
 		if _aid_seen == 0: Probe.bump("aid.reject.1_no_discovered")
+		if _aid_seen == 0: Probe.bump("aid.b." + _aid_band + ".reject.1_no_discovered")
 		Probe.bump("aid.found" if not candidates.is_empty() else "aid.none")
+		Probe.bump("aid.b." + _aid_band + (".found" if not candidates.is_empty() else ".none"))
 	if candidates.is_empty():
 		return -1
 	candidates.sort_custom(func(a, b): return a["score"] > b["score"])

@@ -60,6 +60,18 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 		Probe.bump("flee.degrade.top_" + (String(scored[0]["opt"]) if not scored.is_empty() else "NONE"))
 	_beg_tap(ctx, scored, team, "begu.")   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
 	_prep_tap(ctx, scored, team)   # ★備戰 root-check（純觀測）
+	# ★★★【紮根】條件級 tap（systems 2026-09-03）：#10 量到 `not_in_ranked` 九成是紮根，
+	#   而它的 applicable 是兩個分支的 OR（`options.gd:239`）：
+	#       can_settle_here  or  settle_resume_site != (-1,-1)
+	#   ⇒ ★互斥且窮盡：兩個都 false 才不 applicable，而兩個各自 false 幾次才看得出是哪一邊。
+	#   ★★母體寫死：跟 #10 同一個（IDLE 且 committed 就是紮根）—— ★★★否則母體不同就比不起來。
+	if Probe.enabled and team != null and team.current_task == TeamData.TASK_IDLE and team.survival_committed_option == "紮根":
+		Probe.bump("zhagen.mother")
+		var _cs: bool = ctx.can_settle_here
+		var _rs: bool = ctx.settle_resume_site != Vector2i(-1, -1)
+		if not _cs: Probe.bump("zhagen.false.can_settle_here")
+		if not _rs: Probe.bump("zhagen.false.no_resume_site")
+		Probe.bump("zhagen.applicable" if (_cs or _rs) else "zhagen.not_applicable")
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	return scored
 

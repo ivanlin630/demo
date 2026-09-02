@@ -41,6 +41,8 @@ func _run() -> void:
 	_sec_5()
 	_sec_12()
 	_sec_aid()
+	_sec_aid_bands()
+	_sec_zhagen()
 	_sec_prepare()
 	print("★誠實限：①單 config／單 seed／%d 日 ②★純觀測（fp 不該變；變了＝我動到行為）" % days)
 	print("  ★★③三票【同一份跑】⇒ 彼此可比；★★★但與修前的舊值比時，那些舊值是【不同跑】的，")
@@ -195,3 +197,49 @@ func _sec_aid() -> void:
 	print("       ② 本身 ≈ 0        ⇒ ★★★兩個假說都不成立，真根在更上游（根本沒發現別人）")
 	print("  ★★讀法：③占大多數 ⇒ 【資訊門檻】（要互動過才知道對方存糧）；")
 	print("     ★★★①占大多數 ⇒ 世界太薄；⑤占大多數 ⇒ 地理；④ ⇒ 真的沒人有餘糧。")
+
+# ★★★band × filter 交叉：整體找得到施主、而最深帶找不到 —— 兩個數字都對，
+#   ★而「是哪一道擋住最餓的那群」只有交叉答得出來。
+#   ★★每列附【相異 target 集合大小】—— ★★★上一輪就是它跟次數說相反的話。
+func _sec_aid_bands() -> void:
+	print("═══ ★band × filter 交叉 ═══")
+	print("  帶｜呼叫｜①母體空｜②無belief｜③無food_est｜④不夠分｜⑤到不了｜找到｜②集合｜③集合")
+	for b in ["ge5", "2to5", "0.5to2", "deep"]:
+		var k: String = "aid.b." + b + "."
+		var n2: int = 0
+		var n3: int = 0
+		for kk in Probe.counts.keys():
+			if String(kk).begins_with(k + "pass2.tgt."): n2 += 1
+			elif String(kk).begins_with(k + "pass3.tgt."): n3 += 1
+		var calls: int = int(Probe.counts.get(k + "calls", 0))
+		print("  %-7s|%7d|%6d|%6d|%8d|%7d|%7d|%6d|%5d|%5d" % [b, calls,
+			int(Probe.counts.get(k + "reject.1_no_discovered", 0)),
+			int(Probe.counts.get(k + "reject.2_no_belief", 0)),
+			int(Probe.counts.get(k + "reject.3_no_food_est", 0)),
+			int(Probe.counts.get(k + "reject.4_not_enough", 0)),
+			int(Probe.counts.get(k + "reject.5_unreachable", 0)),
+			int(Probe.counts.get(k + "found", 0)), n2, n3])
+		if calls == 0:
+			print("        ★呼叫 0 ⇒ 這一帶沒有隊去找過施主（不是「找不到」）")
+	print("  ★★★判讀（上一封先寫死的）：深帶④主導⇒真的沒餘糧（分配／產量）；")
+	print("     ⑤主導⇒走不到（可及性）；③主導⇒資訊門檻只咬最餓的（★仍要看集合不看次數）；")
+	print("     ①主導⇒真根在 discovery，不在乞食這條路。")
+
+# ★★★紮根條件級：`can_settle_here or settle_resume_site != (-1,-1)`（互斥且窮盡）
+func _sec_zhagen() -> void:
+	var m: int = int(Probe.counts.get("zhagen.mother", 0))
+	print("═══ ★【紮根】applicable 條件級 ═══")
+	print("  母體（IDLE 且 committed==紮根）= %d" % m)
+	if m == 0:
+		print("  ★★★母體 0 ⇒ 這個窗裡沒有隊落進來（儀器沒跑到／母體塌陷），不是「條件都成立」")
+		return
+	print("  can_settle_here 為 false = %d（%.1f%%）" % [
+		int(Probe.counts.get("zhagen.false.can_settle_here", 0)),
+		100.0 * float(Probe.counts.get("zhagen.false.can_settle_here", 0)) / float(m)])
+	print("  settle_resume_site 為空 = %d（%.1f%%）" % [
+		int(Probe.counts.get("zhagen.false.no_resume_site", 0)),
+		100.0 * float(Probe.counts.get("zhagen.false.no_resume_site", 0)) / float(m)])
+	print("  ★兩者皆 false（即 not applicable）= %d｜applicable = %d" % [
+		int(Probe.counts.get("zhagen.not_applicable", 0)), int(Probe.counts.get("zhagen.applicable", 0))])
+	print("  ★★讀法：兩行都接近 100%% ⇒ 兩個分支都幾乎不成立；")
+	print("     ★★★若其中一行明顯低 ⇒ 那一分支【有時成立】，而掉在另一邊。")
