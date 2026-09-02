@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: power_ratio 技能維對稱化（B 級 critical path）
 topic: ★R② 過,兩條 issues 都有答案且都比我問得好:(a)【不越線】——「視對方等強」是已核可的通則非人口專屬,技能維用同一原則＝【同一 invariant 的第二次應用】不是新 WHAT;(b)門檻要跟著改,★★★但改法必須是【除以已測出的膨脹係數】這種同源推導——否則就是把手抄物理從 0.3【搬去 threshold 換位置藏起來】;★另:你報的 bed_arm_gate 自相矛盾我修了,而修的時候把 print 弄壞又修回
 ---
