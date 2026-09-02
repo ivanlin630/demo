@@ -22,7 +22,10 @@ KNOWN_INCIDENT="326923a7"
 #             ★★之後那些檔正常演進 ⇒ 第三關（比 HEAD vs 來源當時）必然再度不等 ⇒ 永久假紅
 #   ★★★而這暴露第三關【本質是暫態的】：它只在「HEAD 剛好還等於來源」時有效，檔案一演進就失效
 #      ⇒ 不再加第四關（不會收斂）；這類【已查明的歷史差異】走白名單 ＋ 寫死調查結果
-INVESTIGATED="ac8394ef"   # recamp：只帶進註解、丟掉那一行 code（2026-09-02，已還原）
+#   c19018c0  撿 3f08be2e 時  衝突：兩邊記的是【不同世界狀態】
+#             ⇒ ★baseline 必須描述【main 自己跑出來的世界】⇒ 刻意 --ours；bed／gate 部分照收
+#             ★★所以與來源不等價是【設計選擇】不是遺失
+INVESTIGATED="ac8394ef|c19018c0|bdabab39"   # ★已調查白名單（每一顆的調查結果見上方註解區；bdabab39＝照錯的檔→commit 映射撿 604db63f，只帶進一個 BOM，已還原）
 for c in $(git log -n "$N" --format=%H); do
   src=$(git log -1 --format=%B "$c" | grep -oE 'cherry picked from commit [0-9a-f]{7,40}' | awk '{print $NF}' | head -1)
   [ -z "$src" ] && continue
@@ -31,7 +34,7 @@ for c in $(git log -n "$N" --format=%H); do
   a=$(git show "$c"   | git patch-id --stable | awk '{print $1}')
   b=$(git show "$src" | git patch-id --stable | awk '{print $1}')
   if [ "$a" != "$b" ]; then
-    case "$c" in ${INVESTIGATED}*) echo "[CHERRYPICK-FIDELITY] ✓ ${c:0:9}：已調查白名單（既有缺口非本次遺失，見檔頭）"; continue;; esac
+    if printf "%s" "$c" | grep -qE "^(${INVESTIGATED})"; then echo "[CHERRYPICK-FIDELITY] ✓ ${c:0:9}：已調查白名單（見檔頭調查結果）"; continue; fi
     case "$c" in ${KNOWN_INCIDENT}*) echo "[CHERRYPICK-FIDELITY] （已知歷史事故 ${c:0:9}，已修復並白名單 —— ★它是本閘的陽性對照）"; continue;; esac
     # ★★第二關（2026-09-02 加）：patch-id 不同【不等於】內容遺失。
     #   血證 A#14：來源是【改檔】(+25/-2)、我這邊是【新建】(+117)（前一顆沒撿），

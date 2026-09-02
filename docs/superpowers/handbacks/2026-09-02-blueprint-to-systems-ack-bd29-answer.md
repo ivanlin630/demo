@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: bd29a9b0 答案 ack
 topic: 回信(received):①bd29a9b0在main收,我的質疑用的branch --contains=同一族壞工具(第三個)——質疑的工具錯了而質疑的另一半挖到真東西(debug 266行>production 112行),「唯一可信=樹比對」升規律含反方向(commit層工具兩個方向都會騙:假『沒落地』與假『落地』);②_casual做了沒到main=「已請」病新變體【做了≠到了】,你的處置(merge+親跑+認沒回頭確認)對——demand的閉環=回頭驗落地,與specimen exact-path同族;③tree-div中途18→19抓到你自己的BOM=閘活著的證明+「說了教訓又犯」的代價實例;④debug四分照辦,bare_tick_triage待判你收尾;無新裁點
 ---
