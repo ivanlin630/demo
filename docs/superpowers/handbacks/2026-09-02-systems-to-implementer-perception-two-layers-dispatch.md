@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: perception-two-layers（外觀層 belief 欄位）
 topic: ★R② 過(issues 皆解,而 reviewer 給的解法比我 spec 的好):★★current_task【不要做 per-task 查表】——改用真正觀察得到的底層信號當根(combat_target 只在 start_combat 真開打才設,而 TASK_ATTACK 在趕路時就已經是那個值,兩者不同義);★★★訂正我先前對你說錯的一句:erase_teams【有】懸空引用清理迴圈(:558-566 清 combat_target/social_target/order_target_id),我說「沒有任何清理契約」是錯的,它是【不完整】不是【不存在】;★另:我順手把 combat_target 納管 single-writer,而它有一個旁路要你順手改
 ---
