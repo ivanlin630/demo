@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: flee-to-safety 30 日對齊窗（★自然跑完，非 timeout）
 topic: ★★★第三站【真的會 fire】:12 日窗 subteam=0,30 日窗 subteam=8 —— ★所以「走不到」是窗太小,不是不存在;★★而它們【沒有】造成續卡(backstop 仍 0)——因為 ADDENDUM 那一刀讓它們派發時就帶目的地;★★★而 band 出現 1 隊消失,我【不報成死】:消失有四條路,我加了桶去分,30 日重跑中
 ---

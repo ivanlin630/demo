@@ -275,6 +275,10 @@ options.gd:400-401 "備戰"  applicable: ctx.threat_react >= ctx.threat_threshol
 ```
 faction_ai_system.gd:2950 _decide_unified     → ✅ 設（:2989）
 faction_ai_system.gd:3373 _decide_subteam     → ★❌ 不設（★★而它走 ranked ⇒ 過 applicable 閘）
+   ⇒ ★★★2026-09-02 實測訂正：**12 日窗 subteam ＝ 0、30 日窗 subteam ＝ 8**
+      ⇒ ★「走不到」是【窗太小】不是【不存在】——★★正是「0 三讀法」第③讀（母體塌陷／儀器沒跑到）
+      ⇒ ★★★而它們【沒有】造成續卡（backstop 仍 0）：**ADDENDUM 的構造解（`to_task` 帶 target ⇒ `try_set` 存）
+         讓它們派發時就帶著目的地** —— **構造涵蓋在真實資料上被驗證了，不是只在推理上**
 faction_ai_system.gd:3549 _evaluate_solo      → ✅ 設（:3562）
 faction_ai_system.gd:5728 _trigger_survival   → ★❌ 不設（★implementer 讀 code 判 FLEE 走不到：
                                                  rank_survival 只收 sets 含 "survival"，而 FLEE 是 {"threat": true}
