@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 承諾再派 funnel（#10 修法）
 topic: ★R② 過(issues 小,皆已答);★★reviewer 問的「重派進 rank_scored 吃不吃得到 persist_strength」我查實了:【自動吃得到】——current_option 也活過 release(grep 命中 0),而 rank_scored 比的就是它 ⇒ 不用另外接線、沒有灰色地帶;★★★而查的過程撈到一件要你【不要動】的:解承諾之後 current_option 不清 ⇒ 被解除的承諾仍拿得到持守加成,那是 WHAT 已呈 blueprint
 ---

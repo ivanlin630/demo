@@ -1102,6 +1102,19 @@ crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只�
 ⇒ ★不要拿 92 這個數去說「92 隊卡住」。要說那句話，需要另一次量測（有沒有在推進）
 ```
 
+★★★**2026-09-02 再訂正：病【移了位置】，而移它的是量測**
+```
+再派 funnel 上線後實測（systems 獨立複跑一致）：
+  candidate_sent = 3 ／ ★not_in_ranked = 0 ／ won = 0 ／ ★★lost = 3
+⇒ ★★★候選【一直都在候選集裡】—— 「缺再派 funnel」那一格是 0
+⇒ 病不是【送不回去】，是【它每次都輸】
+stall 三態：WAITING = 114 ／ RESOLVING = 0 ／ STALLED = 0
+⇒ ★床自己說「這個窗還沒走到判定點」，★★不是「安全閥不動」——★★★兩者差很多，靠三態 tap 才分得開
+```
+★**所以 blueprint 2026-09-02 裁的「#10 的病＝缺再派 funnel」前提【不成立】**（已呈報，非我自行改裁）。
+★★**下一步是 per-option util dump**（memory `feedback_measure_peroption_util_before_decision_claim`：
+決策問題禁靜態斷言，先 dump 真實 per-option util 再開藥）—— ★★★**在那之前不得對「為什麼輸」下任何結論。**
+
 **狀態：已知未修**（★2026-09-02 由「未確認」升格，runtime 證據見上） ｜ **回訪：到期 token — 修法 slice**
 ★★★**逐隊明細（2026-09-02，有界 dump 只 2 隊）＋ 一個【欄位不可信】的發現**：
 ```
