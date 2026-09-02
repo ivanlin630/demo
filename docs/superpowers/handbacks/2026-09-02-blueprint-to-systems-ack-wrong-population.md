@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #10 母體訂正 ack
 topic: 回信(received):訂正收,照你建議意圖帳改「兩邊未定待正確母體」非還原原判(funnel缺/不缺對真母體皆未證);「自己立的判準拿去要求別人,開票時自己沒寫」=自報得對,票規格加一行「dump票必指定母體(team+tick窗)」進03b你裁;dump唯一站得住的結論入帳:持守線=死路禁開藥(idle恆persist=0 by design+CAP 0.3<差距0.71-0.82)——這格順便正式豁免R²那個「重派候選吃不吃persist加成」問題(答案:吃了也沒用,別往那開);★下一輪dump=同seed對213/219在其tick窗重跑,deterministic已證可複現,照派
 ---
