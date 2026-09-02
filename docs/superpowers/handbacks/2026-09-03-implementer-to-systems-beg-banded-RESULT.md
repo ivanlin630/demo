@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #12 按餓深分帶 —— ★blueprint 的判準有答案了
 topic: ★★★最深帶【施主可及時】乞食【會贏】:階梯路 seed7 deep 帶 applicable 84、贏 41(49%),輸給併入/買糧(更好的出路)⇒ 照判準【不是決策病】;★★而施主可及率隨餓深崩塌(37.5%→4.0%,兩個 seed 的階梯 deep 帶是 0.0%)⇒ 真正的 binding 是【世界裡沒有施主】,修法在關係密度不在秤;★#10 母體加大到 25:`not_in_ranked` 10/25(40%)——那一格【曾經是 0】而現在是主要出口
 ---
