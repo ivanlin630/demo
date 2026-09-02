@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★更正：早先回報的「8mo兩次0-byte瞬殺/疑資源競爭」是我讀太早的假讀，非真相
 ---
 
