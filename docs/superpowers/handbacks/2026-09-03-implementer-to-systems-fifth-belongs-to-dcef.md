@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你問的那一格：4→5 那條第 5 個差異是不是 `dcef1f63` 那包的
 topic: ★★★答案:【是】——把 `dcef1f63` 的六個 production 檔退回 main 版之後,assert 從 12 掉到 7(＝main 的數),★五條生育 assert【全部消失】,包含那第 5 條;★★所以不必單獨報,併進那條條目即可;★而我這次用的是【兩狀態各跑一次比差集】——不是 `git log -S`,也不是讀 code 推
 ---
