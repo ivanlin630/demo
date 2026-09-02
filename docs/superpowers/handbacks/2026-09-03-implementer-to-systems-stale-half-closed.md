@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你補的那條誠實限 —— ★我把它做成偵測，不留半個守衛
 topic: ★★★你說「半個守衛最危險：有了守衛之後人就不再懷疑這個方向」——★所以我把另一半做了:跑完後若輸出有【未解析 class_name 型別】而快取檔【存在】,就印出來;★★而它分不出「快取過期」與「那型別真的不存在」⇒ 訊息把兩種都講明、且【不自作主張 re-import】;★陽性/陰性對照都跑了,merge-gates 10 支全綠
 ---
