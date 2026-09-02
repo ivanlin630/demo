@@ -425,6 +425,25 @@ self_power  = _team_power(self_team) ←★★真值（真實 combat skill）
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — 下一次有人發現「閘全綠而東西是壞的」時（★屆時不要只補那一支，先問【還漏什麼】）**
 
+### ⏳★★`dcef1f63`「breed 讀真盈餘」在 branch 上**弄紅自己的 fixture**（2026-09-03 實測坐實）
+
+★**量測**：`main` 跑 `headless_test` ＝ **7 條紅**；`feat/old-growth-forest` ＝ **12 條** ⇒ **差集正好那 5 條生育 assert**。
+★★**根**：`dcef1f63`（2026-09-01「停下來報：breed 讀真盈餘…」）**只在 branch、NOT-IN-MAIN**。
+★★★**而這給了樹對帳裡「Package B ＝ WIP 留 branch」一個【具體理由】** ——
+先前的理由只是「commit 標題自己寫著停下來報」。
+
+★**要分開寫的兩件（在「WIP」這個標籤下長得一樣）**：
+```
+①★「還沒做完」⇒ 缺功能、測試沒動
+②★★「做了，而測試說它不對」⇒ ★★★本條是【②】
+⇒ 而 ② 若被當成 ① 擱著，會在某天被人「順手 merge 一下」——因為 WIP 聽起來像未完成不像有問題
+```
+★**附帶（implementer 自揭的分類混淆，值得記）**：他先前答「那五條來歷是 6 月／8 月」——
+★★**那是【assert 那幾行何時被寫下來】，不是【它們何時開始紅】** ⇒ ★★★**同一個東西的兩個時間軸，
+而【前者查得到、後者要跑】** —— 他用前者答了後者的問題，然後自己翻掉。
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — breed 真盈餘那條 arc 重啟時（★屆時第一件事是讓那 5 條綠，不是繼續往上疊）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
