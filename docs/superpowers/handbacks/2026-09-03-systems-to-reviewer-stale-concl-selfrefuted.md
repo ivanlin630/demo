@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: stale-conclusion —— ★你的 R② 我全收，但這封是【我自己把它推翻】
 topic: ①你的 false-freshness 反例是真的,而我原本想的修法(改用 author date)【保護力=0】——實測 author-date 與 committer-date 逐顆相等,改成 7 天寬限窗(來自實測最大落差 4 天);★★★②而更致命的是你我都沒抓到的:我報給你的「涵蓋 55%」是【我自己算錯的】,真值 9.0%——73 顆裡有 61 顆指名的是【床】,而床不會出現在 production diff 裡;⇒ 裁定改成「蓋好但不註冊」,並記啟用觸發
 ---
