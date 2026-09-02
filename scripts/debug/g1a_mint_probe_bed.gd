@@ -64,6 +64,17 @@ func _run() -> void:
 	print("   population=%d  minor=%d  anon=%d" % [team.population, team.minor_population,
 		AnonCohort.total(team.anon_cohorts)])
 	print("日|隊料|工具|vault礦|地上礦|mint_L|施工隊|餘工期|開工tick|task|建設中設施")
+	# ★★★#35 第二步（systems 2026-09-02）：dump 建設選項的 per-option util。
+	#   ★而我【不新建 tap】—— `_pick_facility` 本來就有 `infra.cand`／`infra.winner`（`:5170`／`:5186`），
+	#     只是默認關著（`trace_infra = false`）。★★新建一份就是兩份定義。
+	#   ★★★而它是 `bump_sample`（first-N，cap 4000）⇒ 後面的會被鶿掉，所以下面必印【樣本數 vs 母體】。
+	# ★★★先 arm Probe —— ★這支床第一版【沒 arm】，於是 cand=0、母體=0，
+	#   而那跟「_pick_facility 從來沒跑」長得一模一樣 ⇒ ★★差一點就去查【不存在的第二條建設路】。
+	#   ★★★所以下面必印 CONTROL 行：儀器有沒有開，要寫在輸出裡而不是假設。
+	Probe.arm()
+	FactionAISystem.trace_infra = true
+	print("[CONTROL] Probe.enabled=%s trace_infra=%s（★false 的話下面整張表都是儀器沒開）"
+		% [str(Probe.enabled), str(FactionAISystem.trace_infra)])
 	var runner := SimRunner.new()
 	var prev_left: int = -1
 	var prev_start: int = -999
@@ -89,6 +100,47 @@ func _run() -> void:
 			float(tile.resources.get("ore_gold", 0)) + float(tile.resources.get("ore_silver", 0)),
 			tile.mint_level, tile.construction_team_id, left, tile.construction_started_tick,
 			team.current_task, str(tile.construction_target.get("facility", ""))])
+	print("── ★★★【建設選項 per-option util】—— ★第一問是「farming 贏得對不對」──")
+	var cand: Array = Probe.samples.get("infra.cand", []) as Array
+	var win: Array = Probe.samples.get("infra.winner", []) as Array
+	print("  ★樣本數：cand=%d（cap 4000）／winner=%d（cap 4000）"
+		% [cand.size(), win.size()])
+	print("  ★★母體（_pick_facility 進場次數，全數非取樣）：%d"
+		% _sum_prefix("pick.") )
+	print("  ★★★達 cap 的話後面的輪次【靈默消失】⇒ 下面的輪次是【前 N 輪】不是【全部】")
+	# ★依 tick 分輪：同一 tick 的 cand 就是【同一次決策的候選集】
+	var by_tick: Dictionary = {}
+	for c in cand:
+		var tk: int = int((c as Dictionary).get("tick", -1))
+		if not by_tick.has(tk): by_tick[tk] = []
+		(by_tick[tk] as Array).append(c)
+	var tks: Array = by_tick.keys(); tks.sort()
+	var shown: int = 0
+	for tk2 in tks:
+		if shown >= 12: break
+		shown += 1
+		var row: Array = []
+		for c2 in (by_tick[tk2] as Array):
+			var cd: Dictionary = c2
+			row.append("%s=%.3f" % [String(cd.get("facility", "?")), float(cd.get("util", 0.0))])
+		row.sort()
+		print("  tick=%d day=%d 料=%.0f｜%s" % [int(tk2),
+			int(tk2) / WorldState.TICKS_PER_DAY,
+			float((by_tick[tk2] as Array)[0].get("team_material", 0.0)),
+			"｜".join(PackedStringArray(row))])
+	if tks.size() > 12:
+		print("  …共 %d 輪，上面只印前 12 輪（★而這是【印】的截斷，不是【量】的截斷）" % tks.size())
+	print("── ★★★【到底是誰開的工】—— ★兩條路各自計數──")
+	print("  ①`_pick_facility` 選出來的（基建路，有比較 mint）：進場 %d 次，winner 樣本 %d 筆"
+		% [_sum_prefix("pick."), (Probe.samples.get("infra.winner", []) as Array).size()])
+	print("  ②`_ensure_rescue_build_started`（自救建田，★★facility 來自 `_food_rescue_eval` 而【不經過 `_pick_facility`】）= %d"
+		% int(Probe.counts.get("survival.rescue_build", 0)))
+	print("  （參考）construct.start = %d｜village.build_fired = %d"
+		% [int(Probe.counts.get("construct.start", 0)), int(Probe.counts.get("village.build_fired", 0))])
+	print("  ★★★兩條路【從不互相比較】：自救建田直接拿 `_food_rescue_eval` 選定的 facility 去蓋，")
+	print("     而 `_pick_facility` 那一把秤（mint 贏 farming）在這條路上【沒被問過】。")
+	print("  ★讀法：mint 有沒有出現在候選裡是第一問（沒出現＝被三道過濾濾掉，不是輸）；")
+	print("     ★★出現了而 util 輸 farming ⇒ 才是【優先序】；★★★而一個沒糖的村先蓋田可能完全合理。")
 	print("── ★★★【這段窗口裡到底蓋了什麼】──")
 	var _st: Array = []
 	for k in starts.keys(): _st.append("%s×%d" % [String(k), int(starts[k])])
@@ -104,3 +156,9 @@ func _run() -> void:
 		% [stalled_days, days])
 	print("★誠實限：①單 seed／單 fixture（鏡射 headless_test 那一支，非隨機世界）")
 	print("  ★★本票【不改 production】⇒ 上面只有觀測，沒有任何修法")
+
+func _sum_prefix(pfx: String) -> int:
+	var n: int = 0
+	for k in Probe.counts.keys():
+		if String(k).begins_with(pfx) and String(k).contains(".entry"): n += int(Probe.counts[k])
+	return n
