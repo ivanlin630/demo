@@ -86,8 +86,16 @@ static var REGISTRY: Dictionary = {
 			#   ★而中間有一個【既有】窄 band：threat_pos!=-1 但 threat_react<threshold 且無目的地
 			#     ⇒ 兩者皆不 applicable。systems 判 benign，★★數字在 `flee.band_no_dest_below_threshold`。
 			return ctx.threat_pos != Vector2i(-1, -1) and ctx.flee_dest != Vector2i(-1, -1),
-		"to_task": func(_state: WorldState, _team: TeamData) -> Dictionary:
-			return {"task": TeamData.TASK_FLEE, "target": Vector2i(-1, -1)},
+		# ★★★spec ADDENDUM（systems 2026-09-02）：【凡能派 FLEE 的站，都必須把選中的目的地存進去】。
+		#   ★而【存在哪裡】這件事決定了這條規則是不是靠人遵守：
+		#     ★★寫在這裡（to_task 的 target）⇒ `TaskArbiter.try_set` 自己會把它存進 `move_target`
+		#        ⇒ ★★★四個派發站【由構造】全部涵蓋，不必在每一站補一行（而補行就是下一個「漏了一站」）。
+		#   ★而這裡重算一次 `flee_destination_static` 不是新的 race：
+		#     ★★它是純函數（只讀 state＋`current_tick`），而 applicable 與 to_task 在【同一 tick】
+		#     ⇒ 兩次必相同；★★★真正會過期的是跨 tick，而那由 movement 每 tick 重解接住（三層的①②）。
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			return {"task": TeamData.TASK_FLEE,
+				"target": FactionAISystem.flee_destination_static(state, team)},
 	},
 	"駐守": {
 		"affinity": [0.2, 0.1, 0.1, 0.1, 0.5], "sets": {"ambient": true},
