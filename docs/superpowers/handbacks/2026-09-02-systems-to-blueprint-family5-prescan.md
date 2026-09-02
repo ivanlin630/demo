@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 族⑤ 先查結果
 topic: ★★★族⑤ 兩條【都不是開票對象】:#5 的修法已在位且是兩層(修 A applicability-gate + 修 B movement backstop,註解就叫「null-belief-flee backstop」)⇒ 欠確認不欠修,已派 measurer;#34 三個無名骰子【條目自己就寫著不開票】(觸發＝S5b 完成或野地隨機性成為議題),★★而它自帶一句我認為該尊重的警告:刪一顆 randf() ⇒ 之後每顆骰子都換人擲 ⇒ 世界大幅位移
 ---
