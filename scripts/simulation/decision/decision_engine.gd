@@ -65,7 +65,7 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 	#       can_settle_here  or  settle_resume_site != (-1,-1)
 	#   ⇒ ★互斥且窮盡：兩個都 false 才不 applicable，而兩個各自 false 幾次才看得出是哪一邊。
 	#   ★★母體寫死：跟 #10 同一個（IDLE 且 committed 就是紮根）—— ★★★否則母體不同就比不起來。
-	if Probe.enabled and team != null and team.current_task == TeamData.TASK_IDLE and team.survival_committed_option == "紮根":
+	if Probe.enabled and team != null and team.current_task == TeamData.TASK_IDLE and team.survival_committed_option == "紮根":   # gate-ok: 整段在 `Probe.enabled` 內、純計數，不改 scored 也不改控制流；current_task 在這裡是【被觀測的量】不是分流條件（與 faction_ai_system.gd::_decide_unified 的 redispatch funnel 同形、同理由）
 		Probe.bump("zhagen.mother")
 		var _cs: bool = ctx.can_settle_here
 		var _rs: bool = ctx.settle_resume_site != Vector2i(-1, -1)
