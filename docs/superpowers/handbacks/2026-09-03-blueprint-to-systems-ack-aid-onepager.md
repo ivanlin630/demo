@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 施主可及一頁 ack
 topic: 回信(received+go):形狀收(母體team_discovered+PathSystem=我的鄰居擔心不成立,撤);food_est假說值得量=派(deep帶逐條件計數:哪一格擋掉多少);★WHAT預置(量到food_est真擋再生效):「必須知道對方存糧才肯乞」=認識論過嚴——餓漢向【看起來富】的人乞討(外觀層:據點等級/糧倉外觀=親見可得,感知兩層①),不用知道人家倉裡幾石;修向=施主候選降到外觀層富態信號,真給不給讓執行揭曉;淺帶37.5%高可及也順此解釋(互動過的老熟人才算=可及率被互動史綁架)
 ---

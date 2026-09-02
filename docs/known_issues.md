@@ -22,6 +22,17 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+### ⏳★★★施主候選可能被「必須知道對方存糧」擋住（乞食／`_find_aid_target`；2026-09-03 systems 讀出，★未量）
+
+**狀態：未確認** ｜ **回訪：量測窗 — implementer 這一輪「五道濾網逐道拒絕次數 ＋ ②/③ 通過的 target 集合大小」回來時**
+
+`faction_ai_system.gd::_find_aid_target` 第三道濾網＝`bel.has("food_est")` 否則 `continue`。
+而 `vision_system.gd` 的親見 snap **沒有 `food_est`**（只有 `activity`／`combat_target_est`／`in_combat`／`last_tick`／`population_est`／`resource_scale`／`tags_seen`／`tier`／`tile_pos`），
+`food_est` 全站唯一寫入點＝`interaction_system.gd:1067`（互動），`distortion_engine.gd:83/96` 只是扭曲既有值。
+⇒ **假說**：要把某隊列為施主，得**曾經與它互動過**；而越餓越沒本錢互動 ⇒ 越沒有施主可乞（**資訊門檻 × 互動貧困**的耦合）。
+★★**尚未量**：五道濾網哪一道真的在擋【沒有數字】—— **不得當成結論引用**（已派逐道計數＋可證偽的集合大小那格）。
+★blueprint 已預置修向（候選降到**外觀層富態信號**，感知兩層①），但明寫**量到才生效**。
+
 ### ⏳★★★SpecimenTracer 對【戰鬥整段】盲（2026-09-02 A#14 收，★systems 親跑確認）
 
 ★**死亡那一刻已可見**（A#14 掛在 `WorldState.erase_teams`／mutation 之前，三把尺 on/off/off 逐位元同，且掛點真的 fire）。
