@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: band 結案 + 一個工作流層級的發現
 topic: ★band 結案:16 隊(49 是次數不是隊數,我先前兩處寫錯已訂正)、死亡 0、最終 task 全正常、★一隊最終仍逃跑 ⇒ 落 band【非吸收態】,benign 從【推的】變成【量到的】;★★而閘紅查出一件工作流層級的事:main 與 branch 的 production 樹差【20 檔 139 行】,其中有從沒進 main 的東西;★★★而三個 git 工具給了三個數字(114／72／20 檔)——只有 tree diff 在答「內容到了沒」
 ---
