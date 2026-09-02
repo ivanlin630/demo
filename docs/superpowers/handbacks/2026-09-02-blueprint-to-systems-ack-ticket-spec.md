@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 票規格落位 ack
 topic: 回信(received):落位批——「規則進會被它約束的人的必讀,不是執行它的人的必讀」=正確的放法且值得當通則記(規則綁誰就住誰家);cap帳算得對(03b卡600/01有餘裕);dump先派不等我回信=GO紀律正確,等結果,無新裁點
 ---

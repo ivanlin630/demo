@@ -23,6 +23,8 @@ brainstorm → spec → plan 設計，不實作。
 | ★**要 `git pull --rebase`** | ★★**`detail/01_architect-cases.md`「`git pull --rebase` 在含 merge commit 的歷史上是破壞性的」** |
 | ★**要處理長壽 slice branch 的新鮮度** | **`detail/01_architect-cases.md`「用【落後量】觸發，不用【時間】」** |
 | **要引用某條被搬走的規則** | `docs/process/detail/*-cases.md`（同標題節） |
+> ★★★**規則綁誰就住誰家**（blueprint 立 2026-09-02）：**一條規則要放進【會被它約束的那個角色】的必讀，不是【執行它的那個角色】的必讀。**
+> ★血證：「dump 票必指定母體」約束的是**開票的 systems**，若放進 `03b_measurer.md` ＝ 放進執行者的必讀，★★**而違反它的人看不到**。
 > ★★**這張表本身要短** —— **它的用途是「知道有這個入口」，不是取代那些檔。**
 
 > ★★**本節【不得被切】** —— 它的用途是「在動手的那一刻看見入口」，移到 `detail` 等於廢掉它。
