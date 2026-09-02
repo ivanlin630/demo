@@ -157,6 +157,38 @@ func _run() -> void:
 					print("    [LIVE-CHECKPOINT-DETAIL] team=%d tick=%d task=%s prio=%d reason=%s food_days=%.2f pop=%d famine_days=%.1f committed=%s finder_hits=%s" % [
 						_tid3, _s["tick"], String(_s["task"]), _s["task_priority"], String(_s["task_reason"]),
 						_s["food_days"], _s["pop"], _s["famine_days"], String(_s["survival_committed_option"]), str(_s.get("survival_finder_hits", false))])
+					# ★★★per-option util 表【接到正確母體上】（systems 改票 2026-09-02）：
+					#   ★上一版我把表 dump 在 funnel bed 的 3 次 lost 上 —— ★★而那是【健康隊、開局兩天內】
+					#     （pop 8-9／runway 35-40 天／famine=0），不是 #10 的瀕死隊 ⇒ 母體錯
+					#   ⇒ ★★★同一支表，接在【手不聽腦命中】這個判定點上。
+					# ★而表【不是這裡重算的】：它是 production funnel（`_decide_unified`）在真決策當下寫的
+					#   ⇒ ★★這裡只是【把它撈出來】—— ★★★若在這裡呼 rank_scored，那會推進 EWMA ＝
+					#     觀測改變被觀測物，而這張床的整個價值就是它沒有改變世界。
+					var _tabs: Array = Probe.samples.get("redispatch.lost_table", []) as Array
+					# ★★★樣本數必印：`bump_sample` 是 first-N ⇒ ★滿了之後【後面的一筆都寫不進來】
+					#   ⇒ ★★「撈不到表」要分得出【funnel 沒 fire】與【cap 早就滿了】
+					if _tabs.size() >= 20000:
+						print("      [UTIL-TABLE] ★★★警告：lost_table 樣本已達 cap(20000) ⇒ 後續未收錄，下面的「無表」不可讀成「沒發生」")
+					var _hit: Dictionary = {}
+					for _t4 in _tabs:
+						if int((_t4 as Dictionary).get("team", -1)) == int(_tid3):
+							_hit = _t4 as Dictionary
+					if _hit.is_empty():
+						# ★沒有表【不是「沒資料」】：funnel 只在 committed != "" 時 fire
+						#   ⇒ ★★committed=="" 的手不聽腦隊，【再派本身無從發生】——那是另一回事
+						print("      [UTIL-TABLE] team=%d 無表 ⇒ %s" % [_tid3,
+							"committed 為空 ⇒ funnel 依設計不 fire（再派無標的）"
+								if String(_s["survival_committed_option"]) == ""
+								else "★committed 非空卻無表 ⇒ 這隊沒走到決策 entry（cadence/早退），要查"])
+					else:
+						print("      [UTIL-TABLE] team=%d tick=%s committed=%s current_option=%s persist_applies=%s persist=%s"
+							% [_tid3, str(_hit["tick"]), String(_hit["committed"]), String(_hit["current_option"]),
+							   str(_hit["persist_applies"]), str(_hit["persist_strength"])])
+						print("      [UTIL-TABLE] 承諾 u=%s ／ 贏家 %s u=%s ／ 差距 %s ／ 現況 pop=%s runway=%s famine=%s"
+							% [str(_hit["committed_u"]), String(_hit["winner"]), str(_hit["winner_u"]), str(_hit["gap"]),
+							   str(_hit["pop"]), str(_hit["food_runway"]), str(_hit["famine_days"])])
+						for _c2 in (_hit["table"] as Array):
+							print("        %-12s u=%s" % [String((_c2 as Dictionary)["opt"]), str((_c2 as Dictionary)["u"])])
 		if state.teams.is_empty():
 			break
 

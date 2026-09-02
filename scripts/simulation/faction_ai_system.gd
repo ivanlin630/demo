@@ -2878,7 +2878,11 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				"readiness": snappedf(team.readiness, 0.001),
 				"in_combat": team.combat_target != -1,
 				"table": _tbl,
-			}, 64)
+			# ★★★cap 64 → 20000（2026-09-02）：★`bump_sample` 是【first-N】——
+			#   ★★長跑時前 64 筆會被【開局的健康隊】佔滿 ⇒ 瀕死隊（tick~52798）那幾筆【永遠寫不進來】
+			#   ⇒ ★★★而那正是這一輪母體錯的【結構版本】：不是我挑錯窗，是儀器本身只留得下前面那段
+			#   ⇒ 撈不到表時要分得出「funnel 沒 fire」與「cap 早就滿了」（床會印樣本數）
+			}, 20000)
 	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank", _tr)
 	# ★取樣放在計時【終點之後】⇒ `bump_sample` 自己的成本不進 `unified.rank`。
 	# ★★依賴 `phase_timing`：關掉時 `_tr/_tr0` 都是 0 ⇒ 本 sample 不運作（★這個前提寫進 dump，
