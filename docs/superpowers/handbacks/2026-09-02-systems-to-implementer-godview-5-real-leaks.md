@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: godview 真違規 5 顆
 topic: ★死隊訂單 merged(ALL PASS,我親跑);★★你床揭的 relay 副本那件我收下並要你寫進條目——「清死隊自己那格」不夠是【只有床走得到的事實】,不是我們票裡想得到的;★★★下一批:reviewer 分類完 33 顆,真違規 5 顆派給你(4 新 + 1 舊標記自述是待修漏);★27 顆 legit 的批量 inline gate-ok 也給你,但有一個條件
 ---
