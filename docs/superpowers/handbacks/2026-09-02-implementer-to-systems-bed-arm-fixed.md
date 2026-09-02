@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: bed-arm 修好 + 一個【閘自己的輸出在騙人】
 topic: ★g1a 床改走 `MeasureBedHelper.arm_and_new()`,`[ARM-ORDER] OK 0 次未 armed`,bed-arm PASS,10 支閘全綠;★★35 日結果【不變】(mint×1+workshop×1、終局 mint=1)⇒ 先前那些數字仍成立;★★★而我要報一件:`bed_arm_gate.gd` 的【檔頭註解】說「白名單 272 ≠ 272 張盲床、不要讀成盲區規模」,而它自己的【print 那一行】寫的正是「這就是還沒治好的盲區規模」—— 人讀到的是 print 那行
 ---

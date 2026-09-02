@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: power_ratio技能維對稱化（B級critical path）
 topic: R②判決:issues(小)——(a)不越線,查到threat_assessment.gd:68那句「invariants.md:171-173」的行號引用已經腐朽(現在171-173是別的內容),真身在process/detail/invariants-cases.md:83「視對方等強」是已核可的通則非population專屬,技能維用同一原則是同一invariant的第二次應用非新WHAT判斷,world-average替代方案本來就被這條invariant排除(需要god-view);(b)re-baseline該是量完+門檻也跟著改,但改法要是「除以已測出的膨脹係數」這種同源推導,不是重新手感選一個數字,否則會把手抄物理從0.3搬去threshold換位置藏起來
 ---

@@ -140,8 +140,8 @@ func _run() -> void:
 		% ["OK" if acct_ok else "★MISMATCH", "" if acct_ok else " ⇒ ★有東西被靜默吐掉，先修這個"])
 	print("[BED-ARM-GATE] 已遷移 %d ／ 未遷移 %d ⇒ ★遷移進度看的是【兩個數字一起動】，不是單看一個"
 		% [ok.size(), listed.size()])
-	# ★★★白名單數字必印 —— 它就是盲區規模，而它應該單向下降。
-	print("[BED-ARM-GATE] ★白名單 %d 張 ⇒ 這就是【還沒治好的盲區規模】（★不是通過，是還沒做）"
+	# ★★★這個數字必印 —— 而它是【未納管存量】不是【盲區規模】（檔頭 :16-21 已訂正過一次，
+	print("[BED-ARM-GATE] ★白名單 %d 張 ⇒ 這是【未納管存量】，★★不是【盲區規模】（★★★真盲須逐張查 setup 位置；檔頭 :16-21 有完整理由）"
 		% listed.size())
 	if listed.size() > 0 and OS.has_environment("BED_ARM_LIST"):
 		for r in listed:
