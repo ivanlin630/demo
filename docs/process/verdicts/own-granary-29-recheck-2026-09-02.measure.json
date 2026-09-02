@@ -1,0 +1,22 @@
+{
+  "slice": "族④#29 own-granary-pin 開票前先查",
+  "question": "e8ad1cb8(2026-08-15 merge進main)的修法是否真的堵住own_granary_tile(state=Nil)——欠的不是修是確認",
+  "①_regression_test_alive": {
+    "target": "scripts/debug/own_granary_null_caller_test.gd",
+    "verdict": "YES，七週改動沒斷它，直接跑：3項全PASS，ALL PASS"
+  },
+  "②_longrun_crash_check": {
+    "bed": "scripts/debug/own_granary_regression_probe_bed.gd（新床，零新tap，commit cf97cda0）",
+    "opportunity_population_proxy": "trade.meet（own_granary_tile經reserve/_attempt_barter呼叫鏈的上界代理，非精確呼叫次數，已聲明）",
+    "peaceful_economy_30d": {"verdict_by_systems": "裁不算證據(trade.meet=1，機會母體幾乎空)", "trade.meet": 1, "SCRIPT_ERROR": 0},
+    "warring_states_30d": {
+      "verdict": "★證據核心：完整跑完30天(自然DONE，非timeout砍)，機會母體豐富，零SCRIPT ERROR",
+      "trade.meet累計": 275,
+      "trade.barter_deal累計": 88,
+      "SCRIPT_ERROR_own_granary_or_Nil": 0,
+      "raw_log": "docs/measurements/owngranary-recheck-warring_states-30d.txt"
+    }
+  },
+  "final_verdict": "e8ad1cb8修法在30天warring_states(機會母體=275非空)下沒有再現own_granary_tile(state=Nil)崩潰——確認成立，非stale。族④#29可視為已確認關閉（非「待修」，是「已修且驗過」）。",
+  "honest_limit": "trade.meet是上界proxy非own_granary_tile精確呼叫計數；30天/275次機會不是窮舉證明（不能排除極低機率邊界case），若未來再現需另開票；peaceful腿因機會母體太小已被系統裁定不算證據，只warring腿為準。"
+}
