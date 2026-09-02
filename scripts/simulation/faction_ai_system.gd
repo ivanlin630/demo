@@ -2818,7 +2818,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	#   ⇒ ★★★不接線才不會踩進「這算不算強推」的灰色地帶（★不 try_set、不 boost）。
 	# ★★本段【純觀測】：不改 ranked、不改順序、不新增旗（★禁死旗——死旗是 latch 的原料，
 	#   而我們正在修 latch）⇒ 防重複靠【次數】。
-	if Probe.enabled and team.current_task == TeamData.TASK_IDLE and team.survival_committed_option != "":
+	if Probe.enabled and team.current_task == TeamData.TASK_IDLE and team.survival_committed_option != "":   # gate-ok: 這【不是路由閘】——整段在 `Probe.enabled` 內、純計數、不改 ranked 也不改控制流；current_task 在這裡是【被觀測的量】不是分流條件
 		Probe.bump("redispatch.candidate_sent")
 		var _co: String = team.survival_committed_option
 		var _in_ranked: bool = false
