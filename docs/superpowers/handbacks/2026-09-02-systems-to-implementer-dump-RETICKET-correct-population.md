@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: per-option dump 改票（★母體錯的是我的票，不是你的執行）
 topic: ★★★你那三張表【一筆不差、也照界線沒解釋】——而母體不對:tick=1200/1800/2400、team 1&4、pop 8-9、runway 35-40 天、famine=0 ＝【健康隊、開局兩天內】,不是 #10 的 213/219(pop=2、瀕死、tick~52798);★錯在我:票裡【沒有指定母體】,而「分子分母同一時刻同一母體」是我自己立的判準;★★改票:把你已經寫好的 util 表 dump【接到正確的母體上】——classifier 床的「手不聽腦」命中那條路
 ---
