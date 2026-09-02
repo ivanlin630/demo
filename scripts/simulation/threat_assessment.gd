@@ -70,6 +70,23 @@ static func _power_ratio(state: WorldState, self_team: TeamData,
 	var pop_est: int = int(intel.get("population_est", self_team.population))
 	# 無 combat skill in intel → 用 0.3 baseline 估算
 	var other_power: float = float(pop_est) * 0.3
+	# ★★★備戰 root-check 第二層 tap（純觀測）：★量到 power 項平均 3.64（warring）之後，
+	#   要分得出【是 pop_est 高】還是【self_power 低】—— ★★兩者在比值上長得一模一樣。
+	#   ★★★而這裡有一個不對稱：self 用【真實 combat skill】、other 用【固定 0.3】
+	#     ⇒ “無 belief fallback 視對方等強” 只等在【人口】這一維，技能那一維並不相等。
+	if Probe.enabled:
+		Probe.bump("threat.pr_n")
+		Probe.add_amount("threat.pr.self_pop", float(self_team.population))
+		Probe.add_amount("threat.pr.self_combat", AnonTierSystem.avg_combat_skill(self_team))
+		Probe.add_amount("threat.pr.self_power", self_power)
+		Probe.add_amount("threat.pr.pop_est", float(pop_est))
+		Probe.add_amount("threat.pr.other_power", other_power)
+		Probe.add_amount("threat.pr.ratio", other_power / maxf(self_power, 0.1))
+		# ★fallback（沒有 belief）占多少 —— ★★它決定了上面那個不對稱有多常發生。
+		Probe.bump("threat.pr.no_belief" if not intel.has("population_est") else "threat.pr.has_belief")
+		# ★★★self 比 0.3 弱的那一群：他們就算面對【同人數的陌生人】也會算出 ratio > 1
+		if AnonTierSystem.avg_combat_skill(self_team) < 0.3:
+			Probe.bump("threat.pr.self_weaker_than_baseline")
 	return other_power / maxf(self_power, 0.1)
 
 static func _team_power(team: TeamData) -> float:
