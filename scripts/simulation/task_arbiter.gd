@@ -177,6 +177,16 @@ static func release(team: TeamData) -> void:
 	team.move_target = Vector2i(-1, -1)
 	team.task_priority = 0
 	team.flee_from_pos = Vector2i(-1, -1)   # flee 位移根治：清逃離位（避 stale 殘留）
+	# ★★★同一條紀律漏了一個欄位（systems 2026-09-02）：上面那行的註解就寫著「避 stale 殘留」，
+	#   ★而 `task_reason` 沒被清 ⇒ idle+prio0 的隊身上那個 reason 是【上一個任務的殘留】
+	#   ⇒ ★★量測後果：床的 reason 欄【整欄不可當證據】—— systems 差點拿它當「引擎想求生」的證據
+	#   ★★★`""` 是既有的「無理由」值（`faction_ai_system.gd:2348` relocate 收尾就是清成 ""），
+	#     而窮盡查過【沒有任何消費端把 "" 當成別的意思】（`task_reason == ""` 零命中）
+	if Probe.enabled and team.task_reason != "":
+		# ★這個計數【現在應該非 0】＝證明殘留真的存在；修完它本身不變，
+		#   ★★變的是那個殘留【不再被下游讀到】
+		Probe.bump("commit.release_with_stale_reason")
+	team.task_reason = ""
 
 
 # 不改釋放流程、就地轉換 task 的欄位同步（如 安頓→生產）。
