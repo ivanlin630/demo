@@ -5154,7 +5154,11 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 	var n_below: int = 0     # ★被評分但分數 <= 門檻的個數
 	var best_seen: float = 0.0
 	var n_unafford: int = 0   # ★第四道 pre-filter 篩掉的個數（★★「什麼都沒選」的成因之一）
-	var best_cur: int = 0     # ★winner 的現級（>0 代表這是【升級】而不是【新建】）
+	var best_is_upgrade: bool = false   # ★winner 是【升級既有設施】還是【新建】
+	#   ★★寫成 bool，而不是在下面寫那個「大於零」的比較：
+	#   後者在憲法閘眼裡是【門檻】的形狀，而它實際上是【這是不是升級】的分類。
+	#   ★★★形狀跟意思不一致時，改形狀 —— 而不是去標豁免：
+	#   標了豁免，下一個人讀到的是「這裡有個被放行的門檻」，而那是假的。
 	var best_cost: int = 0    # ★★同分 tie-break 用：winner 的 person_hours（★★★取自已算好的 upgrade_cost，不另算）
 	for f in OutpostSystem.FACILITY_DEF:
 		var def: Dictionary = OutpostSystem.FACILITY_DEF[f]
@@ -5200,7 +5204,7 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		if s > best_score:
 			best_score = s
 			best = f
-			best_cur = _cur
+			best_is_upgrade = _cur > 0
 			best_cost = _fph
 		elif best != "" and is_equal_approx(s, best_score) and _fph < best_cost:
 			# ★★★同分 tie-break【明寫、決定性】：偏好【成本低者】。
@@ -5209,7 +5213,7 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 			#   ★★★成本取 person_hours：它就在上面 afford 那一道已經拿到的 `_fcost` 裡，
 			#     不另算（reviewer：該資訊已存在）；而它是單一度量，不混單位。
 			best = f
-			best_cur = _cur
+			best_is_upgrade = _cur > 0
 			best_cost = _fph
 			if Probe.enabled: Probe.bump("pick.%s.tiebreak_cheaper" % site)
 		else:
@@ -5233,10 +5237,12 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 				#     而前者是本刀新造的（afford 從下游搬到 pre-filter）。
 				#   ★★不分的話：`reject_cannot_afford` 歸零 ⇒ 看起來像病好了，
 				#     而其實只是卡到別的地方。
-				if n_unafford > 0:
-					Probe.bump_pt("pick.%s.empty_all_unaffordable" % site, _pday, team.team_id)
-				else:
-					Probe.bump_pt("pick.%s.empty_no_eligible" % site, _pday, team.team_id)
+				# ★★★寫成【Probe 引數裡的三元】而不是 if/else：
+				#   ★這個比較是【替已經發生的事命名】（哪一種 empty），不是決策；
+				#   ★★而寫成 if/else 時，憲法閘剔除 Probe 呼叫後看到的是光禿禿的 `if x > 0:` ⇒ 判成門檻。
+				#   ★★★這不是騙閘：寫進引數裡之後，【比較真的只存在於觀測中】——形狀跟意思一致了。
+				Probe.bump_pt(("pick.%s.empty_all_unaffordable" if n_unafford > 0 else "pick.%s.empty_no_eligible") % site,
+					_pday, team.team_id)
 			else:
 				Probe.bump_pt("pick.%s.empty_all_below_threshold" % site, _pday, team.team_id)
 				Probe.bump("pick.%s.below.n_eligible.%d" % [site, elig])
@@ -5248,7 +5254,7 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 	# ★★★winner 是【升級既有設施】時，【不佔新格】⇒ slot 滿不滿跟它無關。
 	#   ★若不先擋這一手，一個 slot 滿的村會拿【升級】去跑拆建／擴建那兩條路，
 	#     而那兩條是為【新建】設計的 ⇒ ★★會白白拆掉一座設施來換一個根本不需要的格。
-	if best_cur > 0:
+	if best_is_upgrade:
 		if Probe.enabled:
 			Probe.bump_pt("pick.%s.ok_upgrade_facility" % site, _pday, team.team_id)
 			Probe.bump("pick.%s.win_upgrade" % site)
