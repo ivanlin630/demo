@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: #10 裁定前提不成立
 topic: ★★★你裁的「#10 的病＝缺再派 funnel」【前提被量測推翻】:candidate_sent=3／not_in_ranked=0／won=0／lost=3 ⇒ 候選【一直都在候選集裡】,那個「缺口」是 0;★病移到【它每次都輸】;★★而 stall 三態 WAITING=114／其餘 0 ⇒ 床自己說「窗還沒走到判定點」不是「安全閥不動」——這一格【正是那三個 tap 換來的】,沒有它兩者長得一樣;★★★下一步照既有紀律=per-option util dump,在那之前我不對「為什麼輸」下任何結論
 ---
