@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 族③ #10 確認
 topic: ★#10 runtime 確認:病還在(命中 2／機會母體 161／同一 tick 同一母體);★★而我擋了兩個會被誤讀的地方:①「6→2」不是改善(兩次窗長不可比)②同批的 stuck-task=92 名字比判準強(判準只有「有 committed option」,名字宣稱「卡住」);★★★measurer 順手把床的失效模式修掉了(只在最後吐值 ⇒ 分段吐值),那比本票要量的東西更有長期價值
 ---
