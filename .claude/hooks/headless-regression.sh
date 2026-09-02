@@ -37,7 +37,10 @@ fi
 # ★★★清單比對（2026-09-03 補：★關掉「只比數量」那條誠實限 —— 一紅一綠會抵消）
 LIST_F=docs/process/.headless-baseline-list.txt
 if [ -f "$LIST_F" ]; then
-  printf '%s' "$OUT" | grep -aE "\[FAIL\]|Assertion failed" | sed 's/^ERROR: *//; s/^ *//' | LC_ALL=C sort | LC_ALL=C uniq -c | sed 's/^ *//' > /tmp/hl_now.txt
+  # ★★★2026-09-03：訊息裡的【數字】會逐跑變動（血證 `vault_ore=35` vs `36`）⇒ 原文比對會造【假紅】
+  #   ⇒ 正規化：★保留【出現次數】(它變了是真訊號)，★★而訊息本體裡的數字一律換成 N
+  #   ⇒ ★★★誠實限：因此「3 隊失敗」與「5 隊失敗」在本閘眼中【一樣】——數量變化藏在訊息裡的那種看不見
+  printf '%s' "$OUT" | grep -aE "\[FAIL\]|Assertion failed" | sed 's/^ERROR: *//; s/^ *//'     | LC_ALL=C sort | LC_ALL=C uniq -c     | awk '{c=$1; $1=""; gsub(/[0-9]+/,"N"); sub(/^ /,""); print c" "$0}' > /tmp/hl_now.txt
   grep -v '^#' "$LIST_F" | grep -v '^$' > /tmp/hl_base.txt   # ★濾掉註解/空行:baseline 檔要能寫【來歷】
   if ! diff -q /tmp/hl_base.txt /tmp/hl_now.txt >/dev/null 2>&1; then
     echo "[HEADLESS] ★FAIL：失敗【清單】與 baseline 不同（★數量可能一樣 —— 一紅一綠會抵消）"
