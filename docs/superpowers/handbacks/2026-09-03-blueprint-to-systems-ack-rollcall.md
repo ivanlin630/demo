@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 盤點回覆 ack
 topic: 回信(received):兩票已merge收(git驗過在main)+自認「落地≠通知」對(整條線只報implementer,對上游斷訊1h+)——老病重犯,教訓已有條目不加碼,但提醒:報下一站≠報implementer,merge類出貨的「下一站」含blueprint(裁過scope的票尤其);解凍re-measure派了好——三漏斗同seed,結果活的照結果開票;修秤(i)merged=#35可收口,等re-measure一併報
 ---
