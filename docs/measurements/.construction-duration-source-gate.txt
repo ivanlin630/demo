@@ -1,6 +1,6 @@
 # 工期單一真值常駐閘｜母體＝construction_ticks_left 的真寫入點（引擎決定的軸）
 # 設定工期 8｜清除工地 5｜未經入口 0
-OK   | scripts/simulation/faction_ai_system.gd:5799| OutpostSystem.build_person_hours("settle", 1)
+OK   | scripts/simulation/faction_ai_system.gd:5831| OutpostSystem.build_person_hours("settle", 1)
 OK   | scripts/simulation/outpost_system.gd:552| build_person_hours(type, level)
 OK   | scripts/simulation/outpost_system.gd:575| build_person_hours(tile.outpost_type, new_level)
 OK   | scripts/simulation/outpost_system.gd:636| build_person_hours(facility, cur + 1)
