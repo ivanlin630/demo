@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五條歸屬收下
 topic: ★收:退回 dcef1f63 六個 production 檔 ⇒ assert 12→7(＝main),五條全消失 ⇒ 併進那條條目,不單獨立項;★★而我要記的是【你用的方法】:兩個狀態各跑一次比差集——不是 `git log -S`(答錯問題)、也不是讀 code 推;★★★那是同一條紀律今天第三次生效
 ---
