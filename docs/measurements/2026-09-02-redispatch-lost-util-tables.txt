@@ -1,0 +1,69 @@
+﻿
+=== 再派 funnel｜config=warring_states days=2 ===
+[Sub] Team46 派出子隊 Team49 leader=P123 advisors=[] (pop=1 cap=6 task=信使)
+[Sub] Team35 派出子隊 Team50 leader=P93 advisors=[] (pop=1 cap=13 task=信使)
+[Sub] Team35 派出子隊 Team51 leader=P94 advisors=[] (pop=1 cap=7 task=信使)
+[Sub] Team40 派出子隊 Team52 leader=P107 advisors=[] (pop=3 cap=35 task=擴建)
+[Sub] Team43 派出子隊 Team53 leader=P115 advisors=[] (pop=2 cap=17 task=idle)
+[Sub] Team42 派出子隊 Team54 leader=P112 advisors=[] (pop=1 cap=19 task=信使)
+[Sub] Team42 派出子隊 Team55 leader=P113 advisors=[] (pop=1 cap=1 task=信使)
+── stall 三態（★安全閥自身的可驗證性）──
+  WAITING=114 ／ RESOLVING=0 ／ STALLED=0 ／ 合計=114
+  ★全部落在 WAITING  ★★這個窗還沒走到判定點（stall_ticks 未到），不是「安全閥不動」
+── 再派 funnel（★每段有數）──
+  送回 candidate_sent = 3
+    ├ ★不在候選集 not_in_ranked = 0（★★這一格才是真缺口：承諾還在而 option 不可選）
+    ├ 贏 won  = 0
+    └ 輸 lost = 3（★「輸」是合法結果：承諾保留、任務給贏家）
+  ★對帳平：sent ＝ not_in_ranked ＋ won ＋ lost
+── 輸的當下：完整 per-option util 表（★母體只有 3  不取樣，全印）──
+  表數 = 3（★應等於 lost = 3；不等  有的沒印到）
+  ── tick=1200 team=1 ──
+     承諾 opt = 紮營 ／ current_option = 求和
+     ★persist 這一格【有沒有加到】= false（persist_strength=0）
+     承諾 util = 0.0967 ／ 贏家 = 備戰 util = 0.8046 ／ ★差距 = 0.7078
+        pop=8 food_runway=39.92 famine_days=0 readiness=1 in_combat=false
+     全候選表：
+        備戰         u=0.8046
+        求和         u=0.7329
+        迎戰         u=0.6013
+        survival   u=0.5
+        覓食         u=0.5485
+        建設         u=0.4473
+        掠奪         u=0.2332
+        紮營         u=0.0967
+        貿易         u=0.0428
+  ── tick=1800 team=4 ──
+     承諾 opt = 紮營 ／ current_option = 求和
+     ★persist 這一格【有沒有加到】= false（persist_strength=0）
+     承諾 util = 0.1527 ／ 贏家 = 備戰 util = 0.8742 ／ ★差距 = 0.7215
+        pop=9 food_runway=35.77 famine_days=0 readiness=1 in_combat=false
+     全候選表：
+        備戰         u=0.8742
+        迎戰         u=0.5132
+        survival   u=0.5
+        覓食         u=0.3005
+        建設         u=0.257
+        紮營         u=0.1527
+        貿易         u=0.0338
+  ── tick=2400 team=1 ──
+     承諾 opt = 紮營 ／ current_option = 求和
+     ★persist 這一格【有沒有加到】= false（persist_strength=0）
+     承諾 util = 0 ／ 贏家 = 備戰 util = 0.8152 ／ ★差距 = 0.8152
+        pop=8 food_runway=40.21 famine_days=0 readiness=1 in_combat=false
+     全候選表：
+        備戰         u=0.8152
+        求和         u=0.7338
+        迎戰         u=0.6112
+        survival   u=0.5
+        建設         u=0.4925
+        紮根         u=0.215
+        deliver_material u=0.1402
+        貿易         u=0.0509
+        紮營         u=0
+  ★★★判讀協定（blueprint 定、systems 轉述）：
+★誠實限：單 config／單 seed／短窗；★★★本刀是【純觀測】—— 它讓再派看得見，
+  ★而候選本來就自動在 ranked 裡（current_option 活過 release  自帶 persist_strength）
+   ★★若 not_in_ranked 佔多數，那才是要開的下一票（承諾在、選項不可選）
+
+
