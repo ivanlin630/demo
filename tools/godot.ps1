@@ -11,6 +11,32 @@ $exe = Join-Path $root "godot\Godot_v4.2.2-stable_win64_console.exe"
 if (-not (Test-Path $exe)) {
     $exe = "A:\GDS\demo\tools\godot\Godot_v4.2.2-stable_win64_console.exe"
 }
+# Class-cache guard (2026-09-03). A fresh checkout (e.g. `git worktree add` of an old
+# commit) has no .godot/global_script_class_cache.cfg. Without it EVERY class_name type
+# fails to resolve, the script is never loaded, and the run prints parse errors only --
+# i.e. a grep for failures returns ZERO, which reads exactly like "ran fine, all clean".
+# That misread already happened twice in one day, in opposite directions:
+#   "cache missing" read as "the bed is broken", and "cache missing" read as "the tree was clean".
+# Cost note (measured, not guessed): --import takes ~22s even on an already-imported tree,
+# so running it unconditionally would add ~22s to EVERY call (merge-gates has 12 of them).
+# Therefore: import only when the cache file is ABSENT, and say so on stdout.
+# The check itself is one Test-Path, i.e. free on the normal path.
+$skipCacheGuard = $false
+foreach ($a in $args) { if ($a -eq "--import") { $skipCacheGuard = $true } }
+if (-not $skipCacheGuard) {
+    $projPath = (Get-Location).Path
+    for ($i = 0; $i -lt ($args.Count - 1); $i++) {
+        if ($args[$i] -eq "--path") { $projPath = $args[$i + 1] }
+    }
+    $cacheFile = Join-Path $projPath ".godot\global_script_class_cache.cfg"
+    if (-not (Test-Path $cacheFile)) {
+        Write-Output "[godot.ps1] class cache MISSING: $cacheFile"
+        Write-Output "[godot.ps1] running --import first (one-off, ~20s). Without it every class_name type"
+        Write-Output "[godot.ps1] fails to resolve and this run would print ZERO failures while testing NOTHING."
+        $imp = Start-Process -FilePath $exe -ArgumentList @("--headless", "--path", $projPath, "--import") -NoNewWindow -PassThru -Wait
+        Write-Output "[godot.ps1] import finished (exit $($imp.ExitCode)); continuing with the requested run."
+    }
+}
 $timeoutSec = if ($env:GODOT_TIMEOUT) { [int]$env:GODOT_TIMEOUT } else { 360 }
 $tempOut = [System.IO.Path]::GetTempFileName()
 $tempErr = [System.IO.Path]::GetTempFileName()
