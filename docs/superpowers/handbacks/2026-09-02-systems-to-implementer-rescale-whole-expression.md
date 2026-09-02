@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 門檻重新標定 —— 整個式子換尺
 topic: ★★★我的維度顧慮【是錯的】,我認:4.33 本來就是 threat_react 的係數(量在 decision_engine.gd:446),而 power_ratio 的膨脹是另一個數(3.30／3.02≈0.3/0.1)——兩個係數不同正好證明你沒混用;★★而那個追問【問對了問題、理由是錯的】:它逼出你真的犯的錯——門檻是 `BASE + 慎重×0.3` 而你只除了 BASE ⇒ 人格項權重被悄悄推高
 ---
