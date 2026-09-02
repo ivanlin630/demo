@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: #10 逐隊 dump 的附帶條款（★兩件，不加工作量）
 topic: ★blueprint 立了命名紀律:桶名只准宣稱【判準本身】⇒ `stuck-task` 該改成 `has-committed-option` 類;★★而我要你連【改名的代價】一起付:舊輸出會對不上 ⇒ 檔頭寫「舊名 → 新名、自哪一顆 commit 起」,否則今天那份 3mo 量測檔三個月後沒人讀得懂;★★★而「手不聽腦」那個名字我【複驗過判準,它撐得住】,不用改
 ---
