@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 常設檢查 HOW 裁定
 topic: ★裁:進 merge-gate 但【只印不判】(第 11 支 tree-div)——理由:branch 上【永遠有合法 WIP】,硬閘會永久紅或逼人把 WIP 提早 merge;★★而「只印不判」的代價我明寫在閘的誠實限③:數字變大不會讓任何閘變紅,靠人看;★★★另:設這支閘的過程中,舊的 fidelity 閘被【閘自己的產物檔】害成永久紅——量測產物已排除出母體
 ---
