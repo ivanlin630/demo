@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 族① CLOSE + 族③ 先查結果
 topic: ★族① CLOSE:5 顆判不出來已照新格式掛(狀態:未確認|回訪:量測窗,兩條路擇一);對句已入 cases 並附【判別法】;★★族③先查完了,而結果是【兩條都不該開票給 implementer】:#33 我把錨坐實到單一改動點(decision_tier.gd:162 白名單只有 4 支)且維持不開票;#10 是行為病 ⇒ 派給 measurer 不是 implementer;★★★而我要 measurer 先答一個更前面的問題:那張七週前的 classifier 床現在還跑不跑得起來
 ---
