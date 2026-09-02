@@ -11072,8 +11072,10 @@ func _test_invite_high_commerce() -> void:
 		# ★★★外觀層欄位（感知兩層，2026-09-02）：鏡射 `vision_system._write_tier01` 寫的那幾個。
 		#   ★理由：本測的意圖是【高商業低野心的領主會不會邀】＝人格決策，不是感知；
 		#   ★★而新 code 不再讀 live 的 tags/current_task ⇒ ★★★fixture 不補外觀，領主就「看不出它是什麼團」
+		#   ★★★activity 用 ACT_IDLE 不是 ACT_UNKNOWN：★寫入端沒有「未知」這個答案
+		#     （systems 2026-09-02 裁：那一刻觀察者正看著它 ⇒ unknown 是類別錯誤）
 		#     ⇒ 依 unknown 紀律【不邀】—— 那會把一個【感知 fixture 不完整】讀成【決策壞了】。
-		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_UNKNOWN, "in_combat": false}}
+		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_IDLE, "in_combat": false}}
 	var fai := FactionAISystem.new()
 	fai._try_dispatch_or_invite(state, owner, tile, leader)
 	assert(ex.current_task == TeamData.TASK_SETTLE, "高商業低野心應邀流亡安頓，實際=%s" % ex.current_task)
@@ -11130,8 +11132,10 @@ func _test_invite_exile_accept() -> void:
 		# ★★★外觀層欄位（感知兩層，2026-09-02）：鏡射 `vision_system._write_tier01` 寫的那幾個。
 		#   ★理由：本測的意圖是【高商業低野心的領主會不會邀】＝人格決策，不是感知；
 		#   ★★而新 code 不再讀 live 的 tags/current_task ⇒ ★★★fixture 不補外觀，領主就「看不出它是什麼團」
+		#   ★★★activity 用 ACT_IDLE 不是 ACT_UNKNOWN：★寫入端沒有「未知」這個答案
+		#     （systems 2026-09-02 裁：那一刻觀察者正看著它 ⇒ unknown 是類別錯誤）
 		#     ⇒ 依 unknown 紀律【不邀】—— 那會把一個【感知 fixture 不完整】讀成【決策壞了】。
-		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_UNKNOWN, "in_combat": false}}
+		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_IDLE, "in_combat": false}}
 	var fai := FactionAISystem.new()
 	fai._try_invite_nearby_exile(state, owner, tile)
 	assert(ex.current_task == TeamData.TASK_SETTLE, "接受應 task=安頓")
@@ -11161,8 +11165,10 @@ func _test_invite_exile_reject_cooldown() -> void:
 		# ★★★外觀層欄位（感知兩層，2026-09-02）：鏡射 `vision_system._write_tier01` 寫的那幾個。
 		#   ★理由：本測的意圖是【高商業低野心的領主會不會邀】＝人格決策，不是感知；
 		#   ★★而新 code 不再讀 live 的 tags/current_task ⇒ ★★★fixture 不補外觀，領主就「看不出它是什麼團」
+		#   ★★★activity 用 ACT_IDLE 不是 ACT_UNKNOWN：★寫入端沒有「未知」這個答案
+		#     （systems 2026-09-02 裁：那一刻觀察者正看著它 ⇒ unknown 是類別錯誤）
 		#     ⇒ 依 unknown 紀律【不邀】—— 那會把一個【感知 fixture 不完整】讀成【決策壞了】。
-		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_UNKNOWN, "in_combat": false}}
+		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_IDLE, "in_combat": false}}
 	var fai := FactionAISystem.new()
 	fai._try_invite_nearby_exile(state, owner, tile)
 	assert(ex.current_task != TeamData.TASK_SETTLE, "拒絕不應安頓")

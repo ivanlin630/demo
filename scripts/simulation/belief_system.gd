@@ -344,7 +344,15 @@ const ACT_COMBAT: String = "combat"     # 正在交戰（combat_target 已設＝
 const ACT_MOVING: String = "moving"     # 位置與上一步不同＝真的在動（不是「打算動」）
 const ACT_BUILDING: String = "building" # 腳下 tile 的 construction_team_id ＝ 它＝工地上真的有它的人
 const ACT_SETTLED: String = "settled"   # 站在自己的據點/營地上＝駐紮（tile 狀態，非 task）
-const ACT_UNKNOWN: String = "unknown"   # ★誠實第三態：看得到這隊，但看不出它在幹嘛
+const ACT_IDLE: String = "idle"          # ★★★觀察到、靜止、無可辨識活動（★寫入端的預設答案）
+const ACT_UNKNOWN: String = "unknown"   # ★★只屬於【讀取端】：沒有 activity 欄位／claim 過期
+# ★★★分類表的層次（systems 裁 2026-09-02，已入 invariants 細則 1a）：
+#   ★「我看著它，而我不知道它在幹嘛」與「我沒看到它」是【兩件事】
+#   ⇒ 本函式是在【vision 記錄親見的當下】被呼叫的 —— 那一刻【你正看著它】
+#   ⇒ ★★所以寫入端【沒有「未知」這個答案】：落到最後 ＝ 觀察到但靜止 ＝ ACT_IDLE
+#   ⇒ ★★★在寫入端回 unknown ＝【類別錯誤】：那代表分類表缺一格，
+#     而「分類表沒有一格給它」不叫做未知 —— 它叫做分類表不完整。
+#   ★同一個形狀：今天的「指標＝0 三讀法」——「沒發生」與「沒觀測到」長得一樣而不是一件事。
 
 # ★純讀、零 RNG、零寫入。★★只讀【真的發生了才會變】的狀態。
 static func observed_activity(state: WorldState, tgt: TeamData) -> String:
@@ -357,7 +365,8 @@ static func observed_activity(state: WorldState, tgt: TeamData) -> String:
 		return ACT_MOVING
 	if _t != null and (_t.outpost_owner == tgt.team_id or _t.camp_level > 0):
 		return ACT_SETTLED
-	return ACT_UNKNOWN
+	# ★★★預設是 IDLE 不是 UNKNOWN：★這一刻我正看著它，只是它沒在做可辨識的事
+	return ACT_IDLE
 
 # ★外觀 belief 的讀取端 helper（★三態分得開：有值／過期／從未觀察到 —— 各自一個桶）
 #   回 `{"activity": String, "tags": Array, "in_combat": bool, "state": "fresh|stale|never"}`

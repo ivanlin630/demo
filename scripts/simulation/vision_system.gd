@@ -119,6 +119,10 @@ func _write_tier01(state: WorldState, obs_id: int, tgt_id: int,
 	#   ★`activity` 讀的是【真發生才會變的底層信號】，不是 current_task（見 BeliefSystem.observed_activity）
 	snap["tags_seen"]      = tgt.tags.duplicate()
 	snap["activity"]       = BeliefSystem.observed_activity(state, tgt)
+	# ★★★恆 0 桶（systems 2026-09-02）：寫入端【不該】出現 unknown ——
+	#   ★非 0 ＝ 分類表又缺一格 ⇒ ★★報 systems，【不要自己補一個預設值把它蓋掉】
+	if Probe.enabled and String(snap["activity"]) == BeliefSystem.ACT_UNKNOWN:
+		Probe.bump("appearance.write_unknown_BUG")
 	snap["in_combat"]      = tgt.combat_target != -1
 	# ★「看得到在打」與「看得出打誰」是兩件事（R² 確認拆兩欄，不合併）：
 	#   ★★對手也要在【觀察者自己的視野】內，才記得下「打誰」；否則只記「在打」。
