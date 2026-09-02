@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: flee-to-safety 30 日窗 —— ★最後一格補完
 topic: ★那 1 隊消失【不是死】:真滅團=0／被吸納或收編=1 ⇒ 你的 benign 沒有被推翻;★★而兩跑的逐日 checkpoint 30 行【完全相同】⇒ extinct 桶沒動到行為、數字也不是浮動出來的;★★★量測全文已落地 docs/measurements/2026-09-02-flee-to-safety-warring_states-seed1337-30d.txt
 ---

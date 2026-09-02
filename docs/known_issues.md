@@ -1095,7 +1095,21 @@ god-view arc 收官後 re-baseline（main 9c084d3a，乾淨 doom **21.2/22.5/0.6
 - **③ economy 入口 = GOODS 流動性/供給（blueprint 裁 2026-07-21）**：food-結構 arc 取消（food 豐產，starve=分配非產量，另議）。**★market-liquidize branch（`feat/b0cdf624` 降 goods reserve）HOLD 解除、重啟**（一直對著正確的靶=goods 流動性）。
 - **★決定性未決：goods「沒產夠 vs 產了瞬耗」**（measurer 拆分中）——定 fix 生產側（產出不足）vs 撮合/流動性側（產了賣不掉，market-liquidize 對）。**market-liquidize 全推進等此拆分**（blueprint「方向不明別走岔路」）。連 [[project_economy_arc]]/[[feedback-patch-gate-first]]。
 
-## ★null-belief-flee —— **2026-09-02 複驗：不是延遲，是【每 tick 重新製造】**
+## ✅null-belief-flee —— **已修並驗收（2026-09-02 收官）**
+
+★**收官數字**（`warring_states`／`seed 1337`／30 日；全文 `docs/measurements/2026-09-02-flee-to-safety-warring_states-seed1337-30d.txt`）：
+```
+`_flee_threat_pos` 呼叫 ＝ 351 ｜ ★桶 A ＝ 0、桶 B ＝ 0（★★從未回 (-1,-1)）｜ 設無效 ＝ 0
+★★★backstop release ＝ 0   ⇒ 續卡【歸零】
+退化（怕過門檻但無目的地 → 備戰）＝ 2108 ⇒ ★退化路【真的在用】（恆 0 才是可疑）
+band（有座標、未過門檻、無目的地）＝ 163 次／27 隊 ⇒ ★★真滅團 0、被吸納或收編 1 ⇒ benign 未被推翻
+```
+★**驗收②那條防自欺的也過了**：**續卡歸零【而母體沒塌】**（351 次呼叫）——
+★★**若 flee 路徑也一起靜下來，那會是「把恐懼擋掉」而不是「修好」。**
+★★★**而第三站（`_decide_subteam`）30 日 fire 8 次卻沒造成續卡** ——
+**構造解（`to_task` 帶 target ⇒ `try_set` 自己存）在真實資料上被驗證，不是只在推理上。**
+
+## （原文）★null-belief-flee —— 2026-09-02 複驗：不是延遲，是【每 tick 重新製造】
 
 ★**量測（measurer，warring 30d 完整跑完）**：
 ```
