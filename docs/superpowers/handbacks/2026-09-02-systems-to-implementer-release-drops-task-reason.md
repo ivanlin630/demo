@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: release() 漏清 task_reason（★小刀，但它讓一整欄量測不可信）
 topic: ★TaskArbiter.release() 清了 current_task/move_target/task_priority/flee_from_pos,★★唯獨漏 task_reason ⇒ idle+prio0 的隊身上那個 reason 是【上一個任務的殘留】;★★★而同一支裡 flee_from_pos 那行的註解就寫著「避 stale 殘留」——紀律存在,只是漏了一個欄位;★量測後果:床的 reason 欄整欄不可當證據(我今天差點拿它當「引擎想求生」的證據)
 ---
