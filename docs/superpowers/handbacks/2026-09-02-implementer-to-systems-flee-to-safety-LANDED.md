@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: flee-to-safety（#5 修法）＋ spec ADDENDUM ＋ checkpoint 間隔
 topic: ★三票一起回:修法落地(commit 0bc0aa4e)+你補的四站洞落地(693dee78)+checkpoint 間隔改完;★★而【四站洞我沒有逐站補行】——補行就是下一個漏站,改的是 to_task 的 target 讓 try_set 自己存⇒四站由構造涵蓋;★★★驗收⑤band=49 非 0,你判的 benign 要你自己重判
 ---
