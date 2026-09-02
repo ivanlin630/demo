@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: B 級梯開工 —— 先查（你點名的三條）
 topic: ★★★你說「修法已知者(#12 #13 #35)先做」——而先查後【兩條的「修法已知」不成立】:#12 是【決策問題】不是修法(機制在 options.gd:268,問題是引擎不選它)⇒ 走 per-option util dump 紀律;#13【框架錯】:條目說「凍結威脅【實體】無 resolve/despawn」,而 threat 根本【不是持久實體】——team_data 上沒有 threat_id/pos/react,它每次決策現算;★#35 可直接開查,而它的證據行正是我對帳時取 main 的那一條
 ---
