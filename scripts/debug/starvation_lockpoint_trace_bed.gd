@@ -141,6 +141,13 @@ func _run() -> void:
 				_tally[_c] = _tally.get(_c, 0) + 1
 			print("[LIVE-CHECKPOINT] tick=%d 機會母體(near_death_tracked)=%d 分類={手不聽腦=%d famine=%d stuck-task=%d food-ok=%d}" % [
 				tick, last_seen.size(), _tally["手不聽腦"], _tally["famine"], _tally["stuck-task"], _tally["food-ok"]])
+			# ★systems 2026-09-02 授權：只對「手不聽腦」命中隊印逐隊明細（不印全部161隊，訊號稀釋）
+			for _tid3 in last_seen.keys():
+				if _classify_cause(last_seen[_tid3]) == "手不聽腦":
+					var _s: Dictionary = last_seen[_tid3]
+					print("    [LIVE-CHECKPOINT-DETAIL] team=%d tick=%d task=%s prio=%d reason=%s food_days=%.2f pop=%d famine_days=%.1f committed=%s finder_hits=%s" % [
+						_tid3, _s["tick"], String(_s["task"]), _s["task_priority"], String(_s["task_reason"]),
+						_s["food_days"], _s["pop"], _s["famine_days"], String(_s["survival_committed_option"]), str(_s.get("survival_finder_hits", false))])
 		if state.teams.is_empty():
 			break
 
