@@ -41,7 +41,7 @@ func _classify_cause(snap: Dictionary) -> String:
 	elif not _finder_hits and _food < FactionAISystem.CRISIS_FLOOR:
 		return "famine"
 	elif _committed != "":
-		return "stuck-task"
+		return "has-committed-option"
 	else:
 		return "food-ok"
 
@@ -135,12 +135,12 @@ func _run() -> void:
 		if tick % 5000 == 0:
 			print("[progress] tick=%d teams=%d near_death_tracked=%d" % [tick, state.teams.size(), last_seen.size()])
 		if tick % 20000 == 0 and tick > 0 and not last_seen.is_empty():
-			var _tally: Dictionary = {"手不聽腦": 0, "famine": 0, "stuck-task": 0, "food-ok": 0}
+			var _tally: Dictionary = {"手不聽腦": 0, "famine": 0, "has-committed-option": 0, "food-ok": 0}
 			for _tid2 in last_seen.keys():
 				var _c: String = _classify_cause(last_seen[_tid2])
 				_tally[_c] = _tally.get(_c, 0) + 1
-			print("[LIVE-CHECKPOINT] tick=%d 機會母體(near_death_tracked)=%d 分類={手不聽腦=%d famine=%d stuck-task=%d food-ok=%d}" % [
-				tick, last_seen.size(), _tally["手不聽腦"], _tally["famine"], _tally["stuck-task"], _tally["food-ok"]])
+			print("[LIVE-CHECKPOINT] tick=%d 機會母體(near_death_tracked)=%d 分類={手不聽腦=%d famine=%d has-committed-option=%d food-ok=%d}" % [
+				tick, last_seen.size(), _tally["手不聽腦"], _tally["famine"], _tally["has-committed-option"], _tally["food-ok"]])
 			# ★systems 2026-09-02 授權：只對「手不聽腦」命中隊印逐隊明細（不印全部161隊，訊號稀釋）
 			for _tid3 in last_seen.keys():
 				if _classify_cause(last_seen[_tid3]) == "手不聽腦":
@@ -205,7 +205,7 @@ func _run() -> void:
 		elif not _finder_hits and _food < FactionAISystem.CRISIS_FLOOR:
 			_cause = "famine（finder全miss無可達食物 + food_days=%.2f<CRISIS_FLOOR=%.1f＝真餓,slice1救不了=經濟/可得性問題）" % [_food, FactionAISystem.CRISIS_FLOOR]
 		elif _committed != "":
-			_cause = "stuck-task（food_days=%.2f 足 + committed=%s 卻消失＝任務卡住非餓）" % [_food, _committed]
+			_cause = "has-committed-option（food_days=%.2f 足 + committed=%s 卻消失＝當下有承諾option,不代表卡住,判準只到此）" % [_food, _committed]
 		else:
 			_cause = "food-ok-vanish（food_days=%.2f 足、無 stuck 徵兆＝疑 merge/combat/absorb 非餓死）" % _food
 		print("    ★死因分類=%s%s" % [_cause, "" if fire_events.has(tid) else "（死前無 stall_exclude fire）"])
