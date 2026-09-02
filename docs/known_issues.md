@@ -126,7 +126,7 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — reviewer 交回 36 顆逐顆分類的那一刻**
 
-### ⏳★★★族①god-view 掃完：**兩顆真漏洞，而它們的【嚴重度不同】**（2026-09-02，reviewer 掃完候選）
+### ✅族①god-view 兩顆真漏洞 —— **已修 merged**（2026-09-02；★嚴重度不同，保留對照）
 
 | # | 位置 | 形狀 | 嚴重度 |
 |---|---|---|---|
@@ -137,7 +137,7 @@ faction_ai_system.gd:316-317  func _is_border_adjacent(attacker, prey):
 `has_belief` 在 `:6084`，**而 `:6080` 已經先用真值把候選篩過一輪了**。
 ⇒ ★**因此 `invariants.md` 細則 1a 已補洞**：初版寫「閘**後**評估」，涵蓋不到 B。**現在寫的是「決策路徑上」。**
 
-**狀態：✅已修（2026-09-02 merged）** ｜ A＝型別防線（`_is_border_adjacent` 改吃兩個 `Vector2i`，函式再也拿不到 `TeamData`）；
+A＝型別防線（`_is_border_adjacent` 改吃兩個 `Vector2i`，函式再也拿不到 `TeamData`）；
 B＝母體換成 `BeliefSystem.known_targets` ＋ 所有權查 `team_tile_known`。
 ★**證明 god-view 真被關掉的那一格不是差集**（舊/新母體差集 ＝ 0，同一張床上恰好重合），
 ★★**而是 `occupy.scan_kill_tile_unknown = 161`** —— **這 161 個候選在舊 code 直接讀全圖【會通過】。**
@@ -157,6 +157,28 @@ B＝母體換成 `BeliefSystem.known_targets` ＋ 所有權查 `team_tile_known`
 ★**教訓（比這條目本身有用）**：我驗了**事實**（inline 有、baseline 沒有），**沒驗【詮釋】**（兩者本來就該一致嗎）——
 ★★**而這個詮釋不是我自己想的，是從 reviewer 那裡照收的。** ★★★**上游給的詮釋一樣要驗。**
 （★我已據此撤回寄給 blueprint 的那一段，並砍掉為它寫到一半的 `gateok-reconcile` 閘 —— **錯前提上的守衛比沒有守衛更貴。**）
+
+### ⏳★★★憲法閘 baseline 的【一行兩義】：「判過合法」與「已知漏、暫緩」長得一樣（2026-09-02 reviewer 撿，★systems 讀原文複驗）
+
+★**坐實（該行自述，不是詮釋）**：
+```
+constitution_baseline_v2.txt:76
+scripts/simulation/strategic_ai_system.gd::_find_trade_partner::gv_mapscan
+  # CANDIDATE-LEAK: partner discovered 但 outpost pos 讀 live(半漏,待 R²+follow-up)
+```
+⇒ ★★**這一行自己說它是【待修的漏】，而閘對它與「判過合法」的行【一視同仁地靜音】。**
+★★★**所以「在 baseline 裡」不代表「判過」** —— 它可能是「看過、知道有問題、先放著」。
+
+★**與 2026-09-02 稍早那條【已撤回】的主張要分清楚**（★避免後人以為這是同一件事）：
+```
+★撤回的那條：inline gate-ok ↔ baseline「對不上」⇒ 錯，兩者是【不同機制】
+★★這一條：  baseline【內部】混了兩種語意 ⇒ 有原文支撐（該行自己寫著 CANDIDATE-LEAK）
+⇒ ★★★前者是我把兩個機制當成一本帳；後者是一本帳裡混了兩種判決。不同的病。
+```
+★**母體**：目前**只有 1 行**帶自述漏的字樣；★★**而其餘 74 行【有沒有被判過】，清單本身不記錄** ——
+**這才是真正的缺口**：不是「有幾行是漏」，是**「這份清單不保存判決」**。
+
+**狀態：已知未修** ｜ **回訪：到期 token — 族①修法 slice（`_find_trade_partner` 已列入該 slice 的第 5 顆）**
 
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 

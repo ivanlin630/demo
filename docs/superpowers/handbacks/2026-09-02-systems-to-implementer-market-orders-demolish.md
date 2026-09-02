@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: market-orders-dangling（★只做【拆除】那一半）
 topic: ★族④ #6:capture/demolish 都不清 tile.market_orders(我複驗:三支函式對它的參照皆 0,而條目原本的錨指錯門牌已訂正);★★本票【只做拆除】——宿主沒了看板還在=結構問題,我可以派;★★★而【易主】那一半含設計成分(看板算誰的)已去問 blueprint,不要一起做;★驗收要能分「沒有 dangling」與「根本沒發生拆除」
 ---

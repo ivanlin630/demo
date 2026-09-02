@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 族①殘：逐顆分類
 topic: ★族①兩顆漏洞已 merged,剩下的是【分類】不是【修】:23 顆 warn 命中(gv_belief_pre/post)+10 顆既有 gv_* 標記;★★判準是三分不是二分(真違規/legit 豁免/★判不出來要更多資訊)——★★★「判不出來」必須是一個可選答案,否則你會被逼著猜,而猜出來的分類會被凍進 baseline 當成判過的
 ---
