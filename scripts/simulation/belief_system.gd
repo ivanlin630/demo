@@ -323,3 +323,57 @@ static func msg_market_pos(msg) -> Vector2i:
 	elif msg.type == "outpost_built":
 		return msg.source_pos
 	return Vector2i(-999, -999)
+
+# ══════════════════════════════════════════════════════════════════════════
+# ★★★感知兩層：外觀層（親見可得）—— blueprint 裁、R² 過（2026-09-02）
+# ══════════════════════════════════════════════════════════════════════════
+# ★層次：①外觀層＝親見看得到的 ②組織/內心層＝只能靠情報 ③`unknown` ＝【誠實第三態】
+#   ⇒ ★★禁 default-pass、禁 fallback 回 live（那是 baseline 第 76 行的形狀）。
+#
+# ★★★而【怎麼決定外觀活動】是本刀最容易偷渡「意圖可見」的一格：
+#   ✗ 原 spec：`current_task` 列舉 → 外觀類別的【投影表】
+#     ⇒ ★reviewer 打掉：30+ 個 TASK_* ⇒ ★★【每一格都是一次偷渡意圖的機會】
+#   ✓ 改用【真正觀察得到的底層信號】當根：
+#     血證：`npc_combat_system.gd:110-111` —— `combat_target` 只在 `start_combat()` 真開打才設；
+#           而 `current_task == TASK_ATTACK` ★在還在趕路時就已經是那個值
+#     ⇒ ★★★兩者【不同義】：一個是「正在打」，一個是「打算打」
+#   ⇒ ★所以本函式【根本不讀 current_task】—— 防線是「拿不到」不是「記得別讀」。
+#
+# ★★對應不到底層信號的活動 ⇒ 歸 `unknown`，★★★不為了補滿類別去讀 task。
+const ACT_COMBAT: String = "combat"     # 正在交戰（combat_target 已設＝真開打）
+const ACT_MOVING: String = "moving"     # 位置與上一步不同＝真的在動（不是「打算動」）
+const ACT_BUILDING: String = "building" # 腳下 tile 的 construction_team_id ＝ 它＝工地上真的有它的人
+const ACT_SETTLED: String = "settled"   # 站在自己的據點/營地上＝駐紮（tile 狀態，非 task）
+const ACT_UNKNOWN: String = "unknown"   # ★誠實第三態：看得到這隊，但看不出它在幹嘛
+
+# ★純讀、零 RNG、零寫入。★★只讀【真的發生了才會變】的狀態。
+static func observed_activity(state: WorldState, tgt: TeamData) -> String:
+	if tgt.combat_target != -1:
+		return ACT_COMBAT
+	var _t: HexTileData = state.world.tiles.get(tgt.tile_pos.x * 1000 + tgt.tile_pos.y)
+	if _t != null and _t.construction_team_id == tgt.team_id:
+		return ACT_BUILDING
+	if tgt.last_tile_pos != Vector2i(-999, -999) and tgt.last_tile_pos != tgt.tile_pos:
+		return ACT_MOVING
+	if _t != null and (_t.outpost_owner == tgt.team_id or _t.camp_level > 0):
+		return ACT_SETTLED
+	return ACT_UNKNOWN
+
+# ★外觀 belief 的讀取端 helper（★三態分得開：有值／過期／從未觀察到 —— 各自一個桶）
+#   回 `{"activity": String, "tags": Array, "in_combat": bool, "state": "fresh|stale|never"}`
+static func appearance(state: WorldState, obs_id: int, tgt_id: int) -> Dictionary:
+	var bel: Dictionary = best_estimate(state, obs_id, tgt_id)
+	if bel.is_empty() or not bel.has("activity"):
+		if Probe.enabled: Probe.bump("appearance.never")
+		return {"activity": ACT_UNKNOWN, "tags": [], "in_combat": false, "state": "never"}
+	if state.world.current_tick - int(bel.get("last_tick", 0)) > BELIEF_STALE_TICKS:
+		if Probe.enabled: Probe.bump("appearance.stale")
+		return {"activity": ACT_UNKNOWN, "tags": [], "in_combat": false, "state": "stale"}
+	if Probe.enabled: Probe.bump("appearance.fresh")
+	return {
+		"activity": String(bel.get("activity", ACT_UNKNOWN)),
+		"tags": bel.get("tags_seen", []),
+		"in_combat": bool(bel.get("in_combat", false)),
+		"state": "fresh",
+	}
+

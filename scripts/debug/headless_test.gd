@@ -11068,7 +11068,12 @@ func _test_invite_high_commerce() -> void:
 	state.teams[1] = ex
 	state.team_discovered[0] = [1]
 	# A3 感知：invite 距離 gate 讀 belief_pos（production vision 同 tick 寫 discovered+belief）。手搭 state 補 belief。
-	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick}}
+	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick,
+		# ★★★外觀層欄位（感知兩層，2026-09-02）：鏡射 `vision_system._write_tier01` 寫的那幾個。
+		#   ★理由：本測的意圖是【高商業低野心的領主會不會邀】＝人格決策，不是感知；
+		#   ★★而新 code 不再讀 live 的 tags/current_task ⇒ ★★★fixture 不補外觀，領主就「看不出它是什麼團」
+		#     ⇒ 依 unknown 紀律【不邀】—— 那會把一個【感知 fixture 不完整】讀成【決策壞了】。
+		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_UNKNOWN, "in_combat": false}}
 	var fai := FactionAISystem.new()
 	fai._try_dispatch_or_invite(state, owner, tile, leader)
 	assert(ex.current_task == TeamData.TASK_SETTLE, "高商業低野心應邀流亡安頓，實際=%s" % ex.current_task)
@@ -11121,7 +11126,12 @@ func _test_invite_exile_accept() -> void:
 	state.teams[1] = ex
 	state.team_discovered[0] = [1]
 	# A3 感知：invite 距離 gate 讀 belief_pos（production vision 同 tick 寫 discovered+belief）。手搭 state 補 belief。
-	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick}}
+	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick,
+		# ★★★外觀層欄位（感知兩層，2026-09-02）：鏡射 `vision_system._write_tier01` 寫的那幾個。
+		#   ★理由：本測的意圖是【高商業低野心的領主會不會邀】＝人格決策，不是感知；
+		#   ★★而新 code 不再讀 live 的 tags/current_task ⇒ ★★★fixture 不補外觀，領主就「看不出它是什麼團」
+		#     ⇒ 依 unknown 紀律【不邀】—— 那會把一個【感知 fixture 不完整】讀成【決策壞了】。
+		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_UNKNOWN, "in_combat": false}}
 	var fai := FactionAISystem.new()
 	fai._try_invite_nearby_exile(state, owner, tile)
 	assert(ex.current_task == TeamData.TASK_SETTLE, "接受應 task=安頓")
@@ -11147,7 +11157,12 @@ func _test_invite_exile_reject_cooldown() -> void:
 	state.teams[1] = ex
 	state.team_discovered[0] = [1]
 	# A3 感知：invite 距離 gate 讀 belief_pos（production vision 同 tick 寫 discovered+belief）。手搭 state 補 belief。
-	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick}}
+	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick,
+		# ★★★外觀層欄位（感知兩層，2026-09-02）：鏡射 `vision_system._write_tier01` 寫的那幾個。
+		#   ★理由：本測的意圖是【高商業低野心的領主會不會邀】＝人格決策，不是感知；
+		#   ★★而新 code 不再讀 live 的 tags/current_task ⇒ ★★★fixture 不補外觀，領主就「看不出它是什麼團」
+		#     ⇒ 依 unknown 紀律【不邀】—— 那會把一個【感知 fixture 不完整】讀成【決策壞了】。
+		"tags_seen": ["流亡"], "activity": BeliefSystem.ACT_UNKNOWN, "in_combat": false}}
 	var fai := FactionAISystem.new()
 	fai._try_invite_nearby_exile(state, owner, tile)
 	assert(ex.current_task != TeamData.TASK_SETTLE, "拒絕不應安頓")
