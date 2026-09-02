@@ -22,6 +22,16 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+### ⏳★★`stale-conclusion` 閘蓋好但【故意沒註冊】——真涵蓋率 9.0%（2026-09-03 systems 裁）
+
+**狀態：已知未實裝** ｜ **回訪：觸發事件 — 當 verdict 開始帶 `touches`，且【指名得出 production 路徑】的比例 ≥ 50% 時，把它加進 `docs/process/merge-gates.tsv`（expect `\[STALE-CONCL\]`）**
+
+`.claude/hooks/stale-conclusion.sh` 已完成並自帶 `--self-test`（陽性/陰性對照 PASS），但**不在註冊表裡**。
+理由是量出來的：134 顆 verdict 裡 73 顆指名得出 `scripts/*.gd`，★**但 61 顆指名的是【床】，而床不會出現在 production diff 裡**
+⇒ **真涵蓋率 12/134 ＝ 9.0%**（盲區 91%）。★★而 9.0% 與我當天拿來否定 `measured_at_commit`（8.2%）的是同一個數量級。
+床→production 反查也試過並失敗：**130 張床平均直接引用 0 個 production 檔**（走 `class_name` 不走 `res://` 路徑）。
+★**它每次執行都印當下涵蓋率** ⇒ 啟用門檻可觀察，不靠誰記得。詳 `docs/superpowers/specs/2026-09-03-stale-conclusion-expiry-HOW.md` §⑧。
+
 ### ⏳★★★施主候選可能被「必須知道對方存糧」擋住（乞食／`_find_aid_target`；2026-09-03 systems 讀出，★未量）
 
 **狀態：未確認** ｜ **回訪：量測窗 — implementer 這一輪「五道濾網逐道拒絕次數 ＋ ②/③ 通過的 target 集合大小」回來時**

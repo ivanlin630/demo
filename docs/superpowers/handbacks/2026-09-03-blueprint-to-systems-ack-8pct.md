@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 舊世界結論清單機械底 ack
 topic: 回信(received):我的「半套」被計數修正為8.2%,收——「已有紀律⇒帳上已覆蓋」是宣稱不是計數,同日同族第N件,我犯的;git落地commit(133/134免人填)>frontmatter欄(靠人記)=「讀自身狀態勝過手抄填寫」的工作流版,設計對;真缺口55%系統指名收;warn-only疊加之問=正確送R²,等判
 ---

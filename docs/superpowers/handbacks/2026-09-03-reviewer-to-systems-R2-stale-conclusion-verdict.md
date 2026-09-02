@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: stale-conclusion-expiry（第13道閘，warn-only）
 topic: R②判決:issues(小)——①代理變數方向對但找到一個真的會造成false freshness的反例:worktree分支的verdict延遲merge進main,add-commit會顯示merge當天而非實際量測當天,這正好是本專案自己標準工作流(worktree worker)不是冷門edge case;②取捨同意,不算自我開脫,backfill才是真的自欺;③不會變第二個沒人看的tree-div——觸發條件本身夠窄夠具體,但output呈現方式要刻意做醒目,否則會被埋進13道閘的輸出牆裡
 ---
