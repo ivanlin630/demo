@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: B 級兩票（#35 開查／#12 只 dump）
 topic: ★兩票不同性質,別混:#35 是【復發】——同一症狀修過一次、修法還在原地而它又紅了 ⇒ 查「為什麼舊修法失效」不是重修;★★#12 是【決策問題】——乞食 option 在 options.gd:268 而引擎從不選它 ⇒【只 dump 不開藥】,而 dump 第一問是「不選得對不對」不是「怎麼讓它被選」;★★★兩票的母體我都指定了(我今天因為沒指定母體吃過一次)
 ---
