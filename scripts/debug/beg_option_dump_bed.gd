@@ -37,6 +37,22 @@ func _run() -> void:
 			int(Probe.counts.get("beg.rank_calls", 0)), int(Probe.counts.get("beg.in_candidates", 0)), int(Probe.counts.get("beg.won", 0)),
 			int(Probe.counts.get("begu.rank_calls", 0)), int(Probe.counts.get("begu.in_candidates", 0)), int(Probe.counts.get("begu.won", 0))])
 
+	# ★★★#35 驗收①（systems）：導回後【餓死不該出現】—— ★而若出現，那【不是失敗，是證據】：
+	#   代表 `SURVIVAL_CRUSH = 5.0`（TEST VALUE）不夠 ⇒ ★★開【修秤】票，★★★禁回頭開走廊。
+	#   ★而 g1a 那支 fixture 的村【根本不餓】（食日 55→120）⇒ 這條驗收在那裡沒被考到，
+	#     ★★所以拿這支【真世界】床來考它。
+	print("═══ ★#35 驗收①：導回後的自救路與死亡 ═══")
+	var _fr: Array = []
+	for k9 in Probe.counts.keys():
+		if String(k9).begins_with("food_rescue."):
+			_fr.append("%s=%d" % [String(k9).substr(12), int(Probe.counts[k9])])
+	_fr.sort()
+	print("  自救路：%s" % ("｜".join(PackedStringArray(_fr)) if not _fr.is_empty() else "（零）"))
+	var _ext: int = 0
+	for k10 in Probe.counts.keys():
+		if String(k10).begins_with("extinct.team."): _ext += 1
+	print("  真滅團隊數（cleanup_extinct_teams，★★消失≠死，這個桶只收真滅團）= %d" % _ext)
+	print("  ★讀法：★★滅團數要跟【修法前同窗】比，單看一邊的絕對值什麼都證不了。")
 	_report("beg.", "①絕境階梯路（rank_survival）")
 	_report("begu.", "②統一全 pool 路（rank_scored）★★這條不監的話，另一條的命中會被讀成 0")
 	print("★誠實限：①單 config／單 seed／%d 日；②★本票純觀測（fp 另跑對照）；③★★母體與命中同印" % days)

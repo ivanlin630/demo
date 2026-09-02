@@ -5289,39 +5289,58 @@ func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
 		var ipf: String = str(tile.construction_target.get("facility", ""))
 		var ipcur: int = int(tile.get(OutpostSystem.FACILITY_DEF.get(ipf, {}).get("current_level_key", "farming_level")))
 		var ipfrac: float = clampf(_food_facility_gain(tile, team, ipf, ipcur) / burn, 0.0, 1.0)
+		# ★★★驗收④回歸斷言（systems）：續蓋【不在本刀】，次數必須不變。
+		#   ★而「不變」要有數字才講得出來 ⇒ 這裡放計數（修法前後各跑一次對）。
+		if Probe.enabled: Probe.bump("food_rescue.inprogress_continue")
 		return {"viable": true, "facility": ipf, "util": 1.0 + ipfrac}
 	if tile.construction_team_id != -1:
 		return none   # 別人在蓋 / 非產糧短工期 → 不介入
-	for f in FOOD_FACILITIES:
-		var def: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
-		if def.is_empty(): continue
-		if not (tile.outpost_type in def.get("allowed_outpost", [])): continue
-		if def.has("required_terrain") and tile.terrain != def["required_terrain"]: continue
-		var cur: int = int(tile.get(def["current_level_key"]))
-		if cur >= 3: continue
-		if cur == 0 and OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile): continue
-		var cost: Dictionary = OutpostSystem.upgrade_cost(f, cur + 1)
-		if not os._can_afford(team, tile, cost, "self_rescue"):
-			continue   # 料未備（公庫+私產不足）→ 非 self-rescue 候選（禁掏空、genuine）
-		# ★genuine P(survive_to_harvest)：建工期(person-ticks / pop / 日tick) < 餓死窗(food_days) 才蓋得完。
-		# ★工期單一真相源（2026-08-25）：舊式除的是整日 tick(240) 而非每日推進窗數(24)
-		#   ⇒ 低估 10× ⇒ 這道「蓋得完才蓋」的閘放行了蓋不完的案子。修好後【會變嚴】——intended-change。
-		var build_eta_days: float = OutpostSystem.build_eta_days(
-			# ★C2（systems 裁定④）：缺鍵【直接爆】，不留 fallback 副本。
-			#   ★★舊式 fallback 72 是 farming 工期的手抄副本 ⇒ 錨一改就分家，
-			#     而它是【會醒過來的死路徑】：新增設施漏填就吃到它，且沒人在看它。
-			int(cost["person_hours"]), team.population)
-		if Probe.enabled:   # ★measurer L3 tap(2026-08-21,C6-#3票)：輸入變異性(閘核心兩值)+真物理對照(÷24非÷240)
-			Probe.bump_sample("food_rescue.gate_check", {"team": team.team_id, "food_days": food_days,
-				# ★舊 key 名把 bug 寫在裡面（÷240 低估／÷24 真值對照）——已收斂到單一源，只留真值與結果。
-				"build_eta_days": build_eta_days,
-				"passed": build_eta_days < food_days,
-				"tick": state.world.current_tick}, 30)
-		if build_eta_days >= food_days:
-			continue   # 蓋不完的田不能吃 → 覓食贏（失敗案留、禁 crank always-win）
-		# util = 1.0（求生行動基線、同覓食）+ 食安價值 frac（永久增產覆蓋每日食耗率、[0,1]）→ 蓋得完時穩越覓食。
-		var food_value_frac: float = clampf(_food_facility_gain(tile, team, f, cur) / burn, 0.0, 1.0)
-		return {"viable": true, "facility": f, "util": 1.0 + food_value_frac}
+	# ★★★#35 修法（systems spec 2026-09-02，reviewer 縮小範圍）：選擇迴圈改呼 `_pick_facility`。
+	#   ★舊迴圈只掃 `FOOD_FACILITIES`（實際上只有 farming）⇒ 它是【第二條走廊】：
+	#     建什麼在這裡自己決定，從來不上那把秤。
+	#   ★★而這不是新實驗：`_pick_facility:5147` 的註解自述「S4：移除飢養 override
+	#     —— S2 survival-crush 已讓餓隊 farming score 主導」（`SURVIVAL_CRUSH = 5.0`）
+	#     ⇒ ★★★同一個病 S4 治過一次，而這條走廊漏網了。
+	#   ★而【不得先算好 facility 再送去驗證】（systems 明令）：
+	#     ★★`_pick_facility` 回的 winner 就是要蓋的，★★★即使它不是 farming。
+	#     下面兩道閘（付不付得起、蓋不蓋得完）只對【那個 winner】套，不拿來換人。
+	var _rl: PersonData = state.persons.get(team.leader_id)
+	var pick: Dictionary = _pick_facility(state, team, tile, _rl, "self_rescue", true)
+	if pick.is_empty():
+		if Probe.enabled: Probe.bump("food_rescue.pick_empty")
+		return none
+	var f: String = String(pick["facility"])
+	if Probe.enabled: Probe.bump("food_rescue.pick." + f)
+	# ★pick 要求【先升級】或【先拆】時：自救這條路只會呼 `_subteam_upgrade_facility`（直接蓋一座），
+	#   ★★它【做不來】升級據點或拆設施 ⇒ 這裡老實回 none 並計數，
+	#   而不是退而去蓋【第二名】—— ★★★那就又是一條走廊。
+	if pick.has("upgrade_first") or pick.has("demolish_first"):
+		if Probe.enabled: Probe.bump("food_rescue.pick_needs_slot_work")
+		return none
+	var def: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
+	if def.is_empty():
+		return none
+	var cur: int = int(tile.get(def["current_level_key"]))
+	var cost: Dictionary = OutpostSystem.upgrade_cost(f, cur + 1)
+	if not os._can_afford(team, tile, cost, "self_rescue"):
+		if Probe.enabled: Probe.bump("food_rescue.reject_afford." + f)
+		return none   # 料未備（公庫＋私產不足）→ 非 self-rescue 候選（禁描空、genuine）
+	# ★genuine P(survive_to_harvest)：建工期 < 餓死窗才蓋得完。★★工期單一真相源（build_eta_days）。
+	var build_eta_days: float = OutpostSystem.build_eta_days(int(cost["person_hours"]), team.population)
+	if Probe.enabled:
+		Probe.bump_sample("food_rescue.gate_check", {"team": team.team_id, "food_days": food_days,
+			"facility": f,
+			"build_eta_days": build_eta_days,
+			"passed": build_eta_days < food_days,
+			"tick": state.world.current_tick}, 30)
+	if build_eta_days >= food_days:
+		if Probe.enabled: Probe.bump("food_rescue.reject_eta." + f)
+		return none   # 蓋不完的田不能吃 → 覛食贏（失敗案留、禁 crank always-win）
+	# util = 1.0（求生行動基線、同覛食）＋食安價值 frac。
+	#   ★★★winner 若不是產糧設施 ⇒ gain = 0 ⇒ util = 1.0（跟覛食同分，輸在順序上）
+	#   ⇒ ★這是誠實的：蓋一座不產糧的設施對【今晚的飯】確實沒有價值，不能因為想讓它贏而加分。
+	var food_value_frac: float = clampf(_food_facility_gain(tile, team, f, cur) / burn, 0.0, 1.0)
+	return {"viable": true, "facility": f, "util": 1.0 + food_value_frac}
 	return none
 
 # 產糧設施升一級的每日增產（自家 tile 自知、非 god-view；鏡射 MarginalEconomy._inflow_est 公式、純算術）。

@@ -63,7 +63,7 @@ func _run() -> void:
 	print("★★第一格要答的：pop cap 有沒有被撐住（舊修法的【直接效果】）")
 	print("   population=%d  minor=%d  anon=%d" % [team.population, team.minor_population,
 		AnonCohort.total(team.anon_cohorts)])
-	print("日|隊料|工具|vault礦|地上礦|mint_L|施工隊|餘工期|開工tick|task|建設中設施")
+	print("日|隊料|工具|糧|食日|pop|vault礦|地上礦|mint_L|farm_L|施工隊|餘工期|開工tick|task|建設中設施")
 	# ★★★#35 第二步（systems 2026-09-02）：dump 建設選項的 per-option util。
 	#   ★而我【不新建 tap】—— `_pick_facility` 本來就有 `infra.cand`／`infra.winner`（`:5170`／`:5186`），
 	#     只是默認關著（`trace_infra = false`）。★★新建一份就是兩份定義。
@@ -93,12 +93,14 @@ func _run() -> void:
 			prev_start = tile.construction_started_tick
 			var _f: String = str(tile.construction_target.get("facility", "?"))
 			starts[_f] = int(starts.get(_f, 0)) + 1
-		print("%d|%.0f|%.0f|%.0f|%.0f|%d|%d|%d|%d|%s|%s" % [
+		var _fd: float = ResourceSystem.effective_food(state, team) / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		print("%d|%.0f|%.0f|%.0f|%.1f|%d|%.0f|%.0f|%d|%d|%d|%d|%d|%s|%s" % [
 			d + 1,
 			float(team.resources.get("material", 0)), float(team.resources.get("tools", 0)),
+			float(team.resources.get("food", 0)), _fd, team.population,
 			float(tile.public_storage.get("ore_gold", 0)) + float(tile.public_storage.get("ore_silver", 0)),
 			float(tile.resources.get("ore_gold", 0)) + float(tile.resources.get("ore_silver", 0)),
-			tile.mint_level, tile.construction_team_id, left, tile.construction_started_tick,
+			tile.mint_level, tile.farming_level, tile.construction_team_id, left, tile.construction_started_tick,
 			team.current_task, str(tile.construction_target.get("facility", ""))])
 	print("── ★★★【建設選項 per-option util】—— ★第一問是「farming 贏得對不對」──")
 	var cand: Array = Probe.samples.get("infra.cand", []) as Array
@@ -137,8 +139,18 @@ func _run() -> void:
 		% int(Probe.counts.get("survival.rescue_build", 0)))
 	print("  （參考）construct.start = %d｜village.build_fired = %d"
 		% [int(Probe.counts.get("construct.start", 0)), int(Probe.counts.get("village.build_fired", 0))])
-	print("  ★★★兩條路【從不互相比較】：自救建田直接拿 `_food_rescue_eval` 選定的 facility 去蓋，")
-	print("     而 `_pick_facility` 那一把秤（mint 贏 farming）在這條路上【沒被問過】。")
+	print("  ★★★自救路的 facility 選擇（驗收③）：")
+	var _fr: Array = []
+	for k5 in Probe.counts.keys():
+		if String(k5).begins_with("food_rescue."):
+			_fr.append("%s=%d" % [String(k5).substr(12), int(Probe.counts[k5])])
+	_fr.sort()
+	print("     %s" % "｜".join(PackedStringArray(_fr)))
+	print("  ★驗收④續蓋回歸：food_rescue.inprogress_continue = %d（★★修法前後應相同）"
+		% int(Probe.counts.get("food_rescue.inprogress_continue", 0)))
+	print("  ★修法前：兩條路【從不互相比較】—— 自救建田直接拿 `_food_rescue_eval` 選定的 facility 去蓋。")
+	print("  ★★修法後：自救路的選擇迴圈改呼 `_pick_facility` ⇒ 兩條路同秤。")
+	print("  ★★★讀法：上面 `pick.<facility>` 列出自救路現在選了什麼；若還是 farming 就是修法沒接上。")
 	print("  ★讀法：mint 有沒有出現在候選裡是第一問（沒出現＝被三道過濾濾掉，不是輸）；")
 	print("     ★★出現了而 util 輸 farming ⇒ 才是【優先序】；★★★而一個沒糖的村先蓋田可能完全合理。")
 	print("── ★★★【這段窗口裡到底蓋了什麼】──")
