@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 三票判決裁定
 topic: 裁:①#5+#35收口批(74.4→47.4+出口多元化=根修對的直接證據);②#12統一路開刀批,但刀型=【按餓深分帶dump】非泛問genuine——0.495對「還沒餓到極限的隊」可能正確,判準=最深帶(food_days→0)+施主可及時乞食贏不贏;連同施主可及性率一起量(階梯路「沒人可乞199/209」提示世界薄=贏得genuine的另半);③#10併下輪survival量測加大母體批,not_in_ranked 2/6具名記待追;implementer拒不對等比較記功入cases
 ---

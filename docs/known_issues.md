@@ -486,6 +486,16 @@ self_power  = _team_power(self_team) ←★★真值（真實 combat skill）
 
 **狀態：已知未修**（★5 條老的、仍未判；2 條新的各有歸屬） ｜ **回訪：到期 token — 下一個碰 breed／絕境階梯的 slice（★屆時順手判掉相關的那幾條）**
 
+### ⏳★`redispatch.not_in_ranked` 0 → 2（33%）—— **新出現，母體 6，待追**（2026-09-03）
+
+★換尺後 re-measure：#10 承諾再派 母體 3 → 6、贏 0 → 1，★★**而冒出一格【新的】**：
+`not_in_ranked` **0 → 2（33%）** ⇒ **承諾的那個 option 現在【有時連候選都不是】**。
+★★★**不判**：**母體 6，2 不是趨勢**（implementer 自述「這個結論很脆」，systems 同意）。
+★**而它值得追的理由**：★★先前那一格【一直是 0】——**「候選一直都在」正是我們用來推翻「缺 funnel」的證據**；
+★★★**現在它不是 0 了 ⇒ 那個推翻的前提在新世界裡【可能不再成立】。**
+
+**狀態：未確認** ｜ **回訪：量測窗 — 併進下一輪任何跑 survival 的量測（★順手加大母體，不單獨開跑）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
@@ -1268,7 +1278,13 @@ god-view arc 收官後 re-baseline（main 9c084d3a，乾淨 doom **21.2/22.5/0.6
 - **③ economy 入口 = GOODS 流動性/供給（blueprint 裁 2026-07-21）**：food-結構 arc 取消（food 豐產，starve=分配非產量，另議）。**★market-liquidize branch（`feat/b0cdf624` 降 goods reserve）HOLD 解除、重啟**（一直對著正確的靶=goods 流動性）。
 - **★決定性未決：goods「沒產夠 vs 產了瞬耗」**（measurer 拆分中）——定 fix 生產側（產出不足）vs 撮合/流動性側（產了賣不掉，market-liquidize 對）。**market-liquidize 全推進等此拆分**（blueprint「方向不明別走岔路」）。連 [[project_economy_arc]]/[[feedback-patch-gate-first]]。
 
-## ✅null-belief-flee —— **已修並驗收（2026-09-02 收官）**
+## ✅null-belief-flee —— **已修並驗收（2026-09-02）＋ 退化去向已解一面倒（2026-09-03 收口）**
+
+★★★**2026-09-03 收口**：換尺後 re-measure ⇒ **退化去向不再備戰一面倒**：
+```
+母體 2108 → 1977 ｜ 備戰佔比 74.4% → ★47.4% ｜ 其餘散進：建設 323／外交 184／覓食 118／貿易 92
+```
+⇒ ★**「怕了但沒地方去 ⇒ 一律去備戰」不再成立** —— ★★**而它同時是【威脅被系統性放大】那條根修對了的直接證據。**
 
 ★**收官數字**（`warring_states`／`seed 1337`／30 日；全文 `docs/measurements/2026-09-02-flee-to-safety-warring_states-seed1337-30d.txt`）：
 ```
