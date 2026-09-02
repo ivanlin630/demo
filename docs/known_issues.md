@@ -1074,6 +1074,23 @@ crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只�
 ```
 
 **狀態：已知未修**（★2026-09-02 由「未確認」升格，runtime 證據見上） ｜ **回訪：到期 token — 修法 slice**
+★★★**逐隊明細（2026-09-02，有界 dump 只 2 隊）＋ 一個【欄位不可信】的發現**：
+```
+team 213  tick 52798  task=idle  prio=0  reason=survival  food_days 2.88  pop 2  committed=紮根  finder_hits=true
+team 219  tick 54118  task=idle  prio=0  reason=survival  food_days 1.88  pop 2  committed=紮營  finder_hits=true
+```
+★**`reason=survival` 這一欄【不可當證據】**（systems 2026-09-02 查出）：
+```
+task_arbiter.gd:161 release() 清 current_task／move_target／task_priority／flee_from_pos
+   ★而 flee_from_pos 那行的註解就寫著「避 stale 殘留」⇒ ★★紀律存在，只是【漏了 task_reason】
+⇒ ★★★所以 idle + prio 0 的隊身上那個 reason，是【上一個任務的殘留】，不是「引擎現在想求生」
+⇒ 而 #10 的 signature【不依賴 reason】(判準是 would_dispatch + finder_hits + task==idle) ⇒ ★#10 不受影響
+```
+★★**而 `committed=紮根/紮營` 是另一回事，我【不下結論】**：`survival_committed_option` 只在
+`faction_ai_system.gd:5944/5948`（解承諾／清蓋）被清，**`release()` 不碰它** ⇒
+★**「承諾活過任務釋放」可能是【設計如此】（承諾 ≠ 任務）** ⇒ ★★★**已送 blueprint 裁**，
+**而那個答案就是 #10 的核心**：若承諾活著而沒有任何東西重新派它，那就是 latch。
+
 ★**落地路徑**：`docs/process/verdicts/subteam-idle-latch-recheck-2026-09-02.measure.json`
 ／`docs/measurements/subteamidle-recheck-mainHEAD-seed1337-3mo-v2checkpoint.txt`
 

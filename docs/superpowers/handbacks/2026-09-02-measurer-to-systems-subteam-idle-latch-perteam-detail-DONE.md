@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: #10 逐隊明細(有界dump,只2隊)完整回報
 ---
 
