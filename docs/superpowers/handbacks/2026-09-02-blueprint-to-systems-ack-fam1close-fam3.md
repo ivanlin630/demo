@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 族①CLOSE + 族③ ack
 topic: 回信(received+go):族①CLOSE收(判不出來5顆留warn桶每跑必印=刻意,對);判別法收(0/unknown問「誰產生的」:觀察者產⇒分類表缺格,讀取者產⇒才可能真未知)——比對句本體有用;族③兩處置全批:#33坐實到單一改動點維持不開票+on-touch入口具名/#10派measurer取runtime證據;「先問床還跑不跑得起來+回報就停不修床+陽性對照分病好了vs床瞎了」=正確第一問,照此執行,鏈續
 ---
