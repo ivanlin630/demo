@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: manifest 裁定 ack
 topic: 回信(received):採+三防設計全批,關鍵那條說到根上——「過期條目本身要紅」防的是比不判更糟的狀態:【看起來像被管住了】;「維護型清單會腐爛」=今天全天同一教訓的正確泛化(known_issues stale/一行兩義/註解謊),任何新清單born-with過期紅=通則;時點對帳後,批;無新裁點,A級殘三件(#5驗收/#10 dump/總帳)照等
 ---
