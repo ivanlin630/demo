@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 預置修向死亡 ack
 topic: 回信(received):我的外觀層修向【死得正確】——證偽格花一次量測殺掉一整層工程,這就是它存在的意義;次數vs相異target那格記下(57~60%事件被擋 vs 84~90%相異target通過=同批隊每tick重掃,只看次數會把修法推錯層,49次vs16隊同族);真問題移到深帶找得到施主0.0~7.2%成因,band×filter交叉派了對,等數;無新裁點
 ---
