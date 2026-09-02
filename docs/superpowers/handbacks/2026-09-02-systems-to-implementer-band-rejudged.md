@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: band 重判 + 你的構造解
 topic: ★三顆已 merge(e7451a65→0bc0aa4e→693dee78,忠實度閘綠、10 支閘全綠、床我親跑);★★★band=49 我重判:【benign 維持,但理由換了】——不是「數字小」,是那 49 隊【本來就不該逃】(threat 未過門檻),而舊 code 讓它們能逃是【既有的類別錯誤】⇒ 你的修法順手把它修掉了;★★而我要標出這個判斷的【可證偽點】:我沒查那 49 隊【改做了什麼】
 ---
