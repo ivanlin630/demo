@@ -159,6 +159,10 @@ var threat_react: float = 0.0
 var threat_id: int = -1
 var threat_pos: Vector2i = Vector2i(-1, -1)
 var threat_threshold: float = 0.0
+# ★★★flee-to-safety（#5 修法）：★believed 安全處（自家據點／同 faction 成員），(-1,-1) ＝【沒有】。
+#   ★★單一來源＝`FactionAISystem.flee_destination_static`（選步與移動讀同一份，免得「選的時候有、走的時候沒有」）。
+#   ★★★只在 threat_pos 有值時才算 —— 沒有威脅座標的隊本來就不會 FLEE，替它算目的地是白燒 hot path。
+var flee_dest: Vector2i = Vector2i(-1, -1)
 # threat-oracle S1.5：純戰力比（belief-based，god-view-free）供 S2 winnable。★≠threat_react
 # （threat_react=approach+hostility+power blend；此=純 other_power/self_power）。無 threat→0。
 var perceived_power_ratio: float = 0.0
@@ -312,6 +316,18 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			c.threat_pos = BeliefSystem.belief_pos(state, team.team_id, _best_id)
 			# S1.5：純戰力比（belief-based，god-view-free）供 S2 winnable（禁拿 threat_react 當 proxy）。
 			c.perceived_power_ratio = ThreatAssessment._power_ratio(state, team, _ot)
+	# ★★★flee-to-safety：FLEE 的 applicable 從「有威脅座標」升級為「有威脅座標【且】有 believed 目的地」。
+	if c.threat_pos != Vector2i(-1, -1):
+		c.flee_dest = FactionAISystem.flee_destination_static(state, team)
+		# ★⑤band 計數（systems 判 benign，★★而「判它 benign」要有數字撐，不能靠判斷）：
+		#   band ＝ 有威脅座標、沒怕到過門檻、又沒有目的地 ⇒ FLEE 與 備戰【可能兩者皆不 applicable】。
+		#   ★★★恆 0 ⇒ band 不存在；數字大 ⇒ 那個 benign 要重判。
+		#   ★而過門檻那半也一起記 —— 它是【退化路該接住的母體】，兩個數要分得開。
+		if Probe.enabled and c.flee_dest == Vector2i(-1, -1):
+			if c.threat_react < c.threat_threshold:
+				Probe.bump("flee.band_no_dest_below_threshold")
+			else:
+				Probe.bump("flee.no_dest_above_threshold")
 	c.is_resident = FactionAISystem.is_resident_static(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.threat", _tg)
 	var _fa := FactionAISystem.new()

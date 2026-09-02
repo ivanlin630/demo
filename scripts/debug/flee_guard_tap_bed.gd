@@ -77,6 +77,16 @@ func _init() -> void:
 		% int(Probe.counts.get("flee.band_no_dest_below_threshold", 0)))
 	print("  ★怕過門檻但無目的地 = %d（★★這是退化路該接住的母體；它與上一行必須分得開）"
 		% int(Probe.counts.get("flee.no_dest_above_threshold", 0)))
+	print("── ★★★⑤四個 FLEE 派發站：誰設了 flee_from_pos、誰沒設 ──")
+	print("  ★有設：decide_unified=%d＋solo=%d" % [so_u + si_u, so_s + si_s])
+	var _sub: int = int(Probe.counts.get("flee.dispatch_site.subteam_NO_SET", 0))
+	var _tri: int = int(Probe.counts.get("flee.dispatch_site.trigger_survival_NO_SET", 0))
+	print("  ★★沒設：subteam=%d＋trigger_survival=%d" % [_sub, _tri])
+	if _sub + _tri > 0:
+		print("  ★★★這兩站非 0 ⇒ 它們派出的 FLEE 身上的 flee_from_pos 是【上一次 release() 清成的 (-1,-1)】")
+		print("     ⇒ ★而那正是 measurer 量到的 signature，★★而它不經過我上面那兩個設定站⇒兩站恆 0")
+	else:
+		print("  ★兩站都是 0 ⇒ 【這個窗裡】沒走到；★★而「走不到」要更大的窗才能講")
 	print("★誠實限：①單 config／單 seed／%d 日；★★本票【只加 tap 不改行為】——" % days)
 	print("  ★★★修法方向取決於 blueprint 裁「怕、但不知道往哪逃的隊該做什麼」，在他裁之前加任何 guard 都等於替他選")
 	quit()

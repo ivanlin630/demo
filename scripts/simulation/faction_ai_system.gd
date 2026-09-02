@@ -506,7 +506,7 @@ func _flee_threat_pos(state: WorldState, team: TeamData) -> Vector2i:
 	# ★★★#5 tap（純觀測，2026-09-02）：★兩條回 (-1,-1) 的路【意思完全不同】，要分開記
 	#   ★桶 A：找不到威脅 ⇒「沒有威脅卻在逃」
 	#   ★★桶 B：有威脅但 belief 給不出位置（positionless／過期）⇒「怕、但不知道往哪逃」
-	#   ⇒ ★★★修法方向會因為哪個佔多數而不同 —— 而修法本身【不在本票】
+	#   ⇒ ★★★修法方向會因為哪個佔多數而不同 —— 而修法本身【不在本票】（等 blueprint 裁）
 	if best_id == -1:
 		if Probe.enabled: Probe.bump("flee.pos_none_no_threat")   # 桶 A
 		return Vector2i(-1, -1)
@@ -3362,6 +3362,14 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			continue
 		var tgt: Vector2i = td["target"]
+		# ★★★#5 tap 追加：【第三個 FLEE 派發站】—— ★而它【不】設 `flee_from_pos`。
+		#   ★★`:494` 的註解自己寫著「3 FLEE 派發站派 FLEE 後呼，設 team.flee_from_pos」，
+		#     而真正設它的只有兩處（`:2989` unified、`:3562` solo）——★★★這一處漏了。
+		#   ⇒ 子隊從這裡拿到 FLEE ⇒ `flee_from_pos` 留在上一次 `release()` 清成的 (-1,-1)
+		#     ⇒ ★就是 measurer 量到的【task=FLEE ＋ flee_from_pos==(-1,-1)】signature。
+		#   ★★本票只計數不修 —— ★★★要不要把這站接上去是 systems 的判。
+		if Probe.enabled and td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_FLEE:
+			Probe.bump("flee.dispatch_site.subteam_NO_SET")
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue
 		# ★投靠走新 helper：玩家 target→forced_event 請求（★return 不 fallthrough，防 P2a W2 自動併）；NPC→try_set JOIN。
@@ -5716,6 +5724,12 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	for opt in DecisionEngine.rank_survival(state, team):
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
+		# ★#5 tap 追加：【第四個可能的 FLEE 派發站】—— 它也不設 `flee_from_pos`。
+		#   ★★而我讀 code 判它【走不到】：`rank_survival` 只收 `is_in_set(opt,"survival")`
+		#     （`decision_engine.gd:321`），而 FLEE 那個 option 的 sets 是 `{"threat": true}`（`options.gd:74`）
+		#   ⇒ ★★★而【讀出來的「走不到」不算證據】，所以這裡放一個桶：恆 0 才是坦白。
+		if Probe.enabled and td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_FLEE:
+			Probe.bump("flee.dispatch_site.trigger_survival_NO_SET")
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # 路徑維 tap：finder 撲空 attempt（churn 現形）
 			continue   # finder 撲空（無可派目標）→ 試次佳 option
@@ -6097,6 +6111,46 @@ func _find_own_outpost(state: WorldState, team: TeamData) -> Vector2i:
 		OwnerOutpostIndex.shadow_check("find_own_outpost", team.team_id,
 			_scan_own_outpost_legacy(state, team.team_id), pos)
 	return pos
+
+# ★★★flee-to-safety（#5 修法，systems spec 2026-09-02）：★「逃」＝逃往【believed 安全處】，不是只逃離威脅。
+#
+# ★方向源【只有兩個，而且兩個都是既有通道】（systems 已盤點，本刀不新建第三個）：
+#   ①自家據點 —— self-knowledge（自己蓋的自己知道）⇒ 零 god-view
+#   ②同 faction 成員位置 —— `faction_data.gd:33 known_member_states`
+#      ★★而這裡【不直讀那個欄位】，走 `BeliefSystem.belief_pos()`：★★★那條路自帶 staleness gate，
+#        直讀就等於偷看「盟友現在真的在哪」——同一個後門換個名字。
+#   ★★★【記憶安全處】：掃過 `scripts/data/*.gd` 沒有這個欄位 ⇒ 本刀不建（建它＝一整套寫入／過期機制）。
+#
+# ★★而它必須是 static 且【單一來源】—— 選步（DecisionContext）與移動（MovementSystem）若各讀一份實作，
+#   就會長出「選的時候有目的地、走的時候沒有」那種對不起來的世界，而那正是本條目原本的病。
+#
+# ★回 (-1,-1) ＝【沒有 believed 目的地】。★★caller 據此棄 FLEE（選步）或降級（移動），★★★絕不退自身位置。
+static func flee_destination_static(state: WorldState, team: TeamData) -> Vector2i:
+	var best: Vector2i = Vector2i(-1, -1)
+	var best_d: int = 999999
+	# ①自家據點（self-knowledge，走既有 owner→outpost 索引）
+	var own: HexTileData = state.own_outpost_tile(team.team_id)
+	if own != null and own.tile_pos != team.tile_pos:
+		best = own.tile_pos
+		best_d = _hex_dist(team.tile_pos, best)
+	# ②同 faction 成員（★過 belief_pos ⇒ 過期的自己會變成 (-1,-1)，不必在這裡再寫一次 staleness）
+	if team.faction_id != -1:
+		var f = state.factions.get(team.faction_id)
+		if f != null:
+			for mid in f.member_team_ids:
+				var m: int = int(mid)
+				if m == team.team_id: continue
+				var mp: Vector2i = BeliefSystem.belief_pos(state, team.team_id, m)
+				if mp == Vector2i(-1, -1) or mp == team.tile_pos: continue
+				var d: int = _hex_dist(team.tile_pos, mp)
+				if d < best_d:
+					best = mp; best_d = d
+	# ★★★「目的地就是我腳下這格」不算目的地 —— ★逃向自己站的地方＝零位移，
+	#   而【零位移的 FLEE】正是本條目原始 signature（task=逃跑＋凍結不動）。
+	#   ⇒ ★★所以上面兩個來源都先排除同格；★★★這是 HOW 層防禦，不是 WHAT 選擇（沒有替 blueprint 選行為）。
+	if best == team.tile_pos:
+		return Vector2i(-1, -1)
+	return best
 
 # 舊全圖掃保留為影子對照基準（gate①）：production 路徑不呼叫，只有 OwnerOutpostIndex.shadow 開時跑。
 static func _scan_own_outpost_legacy(state: WorldState, team_id: int) -> Vector2i:
