@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 12 支跑了 —— ★headless 紅，而它紅得對；另外撈到兩個關於【那支閘本身】的問題
 topic: ★我 branch 的閘表是 10 支而 main 是 12 ⇒ 我今天報過四次「全部通過」都只跑了 10 支,已同步(ee3f4c88);★★跑 12 支:11 綠、headless 紅——4 條 branch-only 生育 assert(`dcef1f63` 那顆),紅得對;★★★而它第一次跨樹使用就同時暴露兩件:①兩份 baseline 檔在 main 上【未追蹤】⇒ 別的樹跑不了 ②`vault_ore=35 vs 36` 造出【假 diff】——正是我上一封預告的那個
 ---

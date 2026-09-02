@@ -6,12 +6,14 @@
 #   â˜…å·²çŸ¥ï¼š`[FAIL]` é‚£å…©æ¢åœ¨ 357e7807(2026-08-25) å°±ç™»è¨˜æ–¼ test-baseline-failures.txtï¼Œè¨Šæ¯é€å­—ç›¸åŒã€‚
 #   â˜…â˜…â˜…è€Œ assert é‚£ 7 æ¢ã€æ²’æœ‰ä»»ä½•äººåˆ¤éã€‘â€”â€” 2026-09-03 æ‰ç¬¬ä¸€æ¬¡è¢«é–˜çœ‹è¦‹ã€‚
 #      â‡’ å·²ç«‹ known_issues æ¢ç›®ï¼›â˜…åœ¨åˆ¤å®Œä¹‹å‰å®ƒå€‘ç•™åœ¨é€™è£¡æ˜¯ç‚ºäº†ã€æ“‹ä½æ–°çš„ç´…ã€‘ï¼Œä¸æ˜¯æ‰¿èªå®ƒå€‘åˆç†ã€‚
-1 SCRIPT ERROR: Assertion failed: FORCE(¥ôrung)¡÷ambient_train_drive 0.5
-1 SCRIPT ERROR: Assertion failed: [g1a] Äq§ø¥¼Å±¹ô: mint_level=0 coin_delta=0 vault_ore=35 | ¬I¤u¶¤=800 ¾l¤u´Á=772 ¥Ø¼Ğ={ "action": "upgrade_facility", "facility": "mint", "start_pop": 7 } ¶}¤utick=4380 | ¶¤®Æ=0 ¤u¨ã=15 task=«Ø³] | ³]¬I={ "outpost_L": 1, "farming": 0, "workshop": 0, "apothecary": 0, "mint": 0, "stable": 0, "smeltery": 0, "weaponsmith": 0, "armorsmith": 0 }
-1 SCRIPT ERROR: Assertion failed: [p2a] join weight ¤Ó§C 0.41
-1 SCRIPT ERROR: Assertion failed: fixture B¡Gslot º¡¡Ï¤É¯Å¶R±o°_  upgrade ¸ÓÄ¹¹L demolish¡]¤£¥´§é  ¦P¤À¡A¦Ó©î«ØÁÙ­n¦h¹L ¡Ñ1.5 ¤@Ãö¡^¡A¹ê»Ú={ "facility": "farming" }
-1 SCRIPT ERROR: Assertion failed: rung ÂX±i+ªZ¤O ¥¼¿ïÂX±i intent, got={ "type": "¨¾½Ã", "target_id": -1, "why": "·V­«/«Â¯ÙÅX°Ê¡A³Æ¾Ô¦u¤g" }
-1 SCRIPT ERROR: Assertion failed: ²ÏÀç=1.0
-1 SCRIPT ERROR: Assertion failed: ¾Ô°«¤¤(combat_target¡Ú-1) ¡÷ 197 ¾× ¡÷ ¤£ resolve
-4 [FAIL] Team23 task=«Ø³] order=-1
+# â˜…â˜…â˜…2026-09-03 æ­£è¦åŒ–ï¼šè¨Šæ¯æœ¬é«”è£¡çš„ã€æ•¸å­—ä¸€å¾‹æ›æˆ Nã€‘ï¼ˆè¡€è­‰ `vault_ore=35` vs `36` é€ å‡ç´…ï¼‰ã€‚
+#   â˜…ä¿ç•™ã€å‡ºç¾æ¬¡æ•¸ã€‘å‰ç¶´ï¼ˆå®ƒè®Šäº†æ˜¯çœŸè¨Šè™Ÿï¼‰ï¼›â˜…â˜…è€Œã€Œ3 éšŠå¤±æ•— vs 5 éšŠå¤±æ•—ã€é€™ç¨®ã€è—åœ¨è¨Šæ¯è£¡çš„æ•¸é‡è®ŠåŒ–ã€‘æœ¬é–˜çœ‹ä¸è¦‹ã€‚
+1 SCRIPT ERROR: Assertion failed: FORCE(¥ôrung)¡÷ambient_train_drive N.N
+1 SCRIPT ERROR: Assertion failed: [gNa] Äq§ø¥¼Å±¹ô: mint_level=N coin_delta=N vault_ore=N | ¬I¤u¶¤=N ¾l¤u´Á=N ¥Ø¼Ğ={ "action": "upgrade_facility", "facility": "mint", "start_pop": N } ¶}¤utick=N | ¶¤®Æ=N ¤u¨ã=N task=«Ø³] | ³]¬I={ "outpost_L": N, "farming": N, "workshop": N, "apothecary": N, "mint": N, "stable": N, "smeltery": N, "weaponsmith": N, "armorsmith": N }
+1 SCRIPT ERROR: Assertion failed: [pNa] join weight ¤Ó§C N.N
+1 SCRIPT ERROR: Assertion failed: fixture B¡Gslot º¡¡Ï¤É¯Å¶R±o°_ upgrade ¸ÓÄ¹¹L demolish¡]¤£¥´§é ¦P¤À¡A¦Ó©î«ØÁÙ­n¦h¹L ¡ÑN.N ¤@Ãö¡^¡A¹ê»Ú={ "facility": "farming" }
+1 SCRIPT ERROR: Assertion failed: rung ÂX±i+ªZ¤O ¥¼¿ïÂX±i intent, got={ "type": "¨¾½Ã", "target_id": -N, "why": "·V­«/«Â¯ÙÅX°Ê¡A³Æ¾Ô¦u¤g" }
+1 SCRIPT ERROR: Assertion failed: ²ÏÀç=N.N
+1 SCRIPT ERROR: Assertion failed: ¾Ô°«¤¤(combat_target¡Ú-N) ¡÷ N ¾× ¡÷ ¤£ resolve
+4 [FAIL] TeamN task=«Ø³] order=-N
 2 [FAIL] ®z¥Ø¼Ğ¥¼¥[¤J§ğÀ» goal
