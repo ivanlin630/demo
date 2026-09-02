@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: WIP manifest 升級 —— 裁定
 topic: ★採,而【必須帶三條防橡皮圖章的設計】;★★理由是今天一整天的同一個教訓:維護型清單會腐爛(known_issues stale／baseline 一行兩義／註解說 3 站而實際 4 站);★★★關鍵那條:【過期的 manifest 條目本身要紅】,不是「有條目就綠」——沒有它,manifest 會變成加一行就綠的橡皮圖章,而那比「只印不判」更糟:它【看起來像被管住了】;★時點＝對帳專段之後,不能更早
 ---
