@@ -373,6 +373,31 @@ faction_ai_system.gd:5728 _trigger_survival   → ★❌ 不設（★implementer
 ★★★**在那個 arc 開場前做，等於用一個沒有估值模型的秤去仲裁升級。**
 ★**而止血的那半（(i)：讓秤能說「升級」）另案先做** —— 見 `#35` 修秤 slice。
 
+### ⏳★★★威脅評估的 power 維：**自己用真值、對方用手抄常數 0.3**（2026-09-02，備戰 root-check 釘死）
+
+★**量測（implementer，兩個 config）**：
+```
+peaceful：pop_est 5.99 vs self_pop 6.00（★人口幾乎相等）；★★而 ratio 平均 2.997 ≈ 0.3 / 0.1
+⇒ ★★★power 項【整個】來自常數落差 —— 不是 belief、不是情報
+★self combat < 0.3 的比例 ＝ 【100.0%】（母體 51.5 萬／1.07 萬，兩 config 皆然）
+★★而 power 項平均 3.6410(warring)／0.9882(peaceful)，approach −0.03／hostility 0.51 ⇒ power 主導 raw
+```
+★**code（`threat_assessment.gd::_power_ratio`）**：
+```
+other_power = pop_est * 0.3        ←★手抄常數（註解：「無 combat skill in intel → 用 0.3 baseline」）
+self_power  = _team_power(self_team) ←★★真值（真實 combat skill）
+```
+★★★**而答案就在同一支函式裡**：`pop_est` 的 fallback 是 **`self_team.population`**
+（註解原文「鏡射 diplomatic `_get_pop_est` fallback=self_pop 模式」）
+⇒ ★**人口那一維【用自己當先驗】，而技能那一維【用手抄常數】** —— **同一函式內兩維不一致。**
+
+★**修法方向（不是把 0.3 改成 0.1）**：memory `feedback_no_handcopied_physics` 明令
+**估值必 (a) 物理同源推導 或 (b) 讀自身狀態；血統② 手抄常數全禁；修法形狀＝改接線非改數值**
+⇒ ★★**讓技能維跟人口維走同一個 fallback（以自己為先驗）** ⇒ ratio ≈ 1（中性），
+★★★**而那正是那行註解自己宣稱的意思（「視對方等強」）——它只等在人口那一維。**
+
+**狀態：已知未修** ｜ **回訪：到期 token — 待 blueprint 裁（★它會改變【所有】威脅評估，不該夾在別的刀裡）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
