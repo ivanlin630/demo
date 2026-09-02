@@ -790,7 +790,7 @@ static func _idle_employ_value(state: WorldState, team: TeamData, tile: HexTileD
 # own_granary_tile 只在 team 站在自家據點時回傳；返家補給 gate 須在「離家」時也讀得到家糧 →
 # 仿 _find_own_outpost 掃法（不限本格），無自家 outpost → 0。
 static func _home_granary_food(state: WorldState, team: TeamData) -> float:
-	for tile_id in state.world.tiles:
+	for tile_id in state.world.tiles:   # gate-ok: 掃 tiles 只查【自家糧倉】＝legit-self
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
 			return float(tile.public_storage.get("food", 0))

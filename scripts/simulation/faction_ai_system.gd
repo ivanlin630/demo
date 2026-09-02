@@ -627,7 +627,7 @@ func _evaluate_outpost_residency(state: WorldState, team: TeamData) -> void:
 	team.residency_eval_next_tick = state.world.current_tick + RESIDENCY_CADENCE
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
-	for tile_id in state.world.tiles:
+	for tile_id in state.world.tiles:   # gate-ok: 掃 tiles 讀【地形/據點】＝公共地理，非他隊動態；legit-geo
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_owner != team.team_id: continue
 		if _has_resident_team_on_tile(state, tile): continue
@@ -1338,7 +1338,7 @@ func _rebuild_goals(state: WorldState, f) -> void:
 
 	# ── 步驟 1：survival override（意圖前）＋立國 gate（既有分離）──
 	# WS-2c：有效糧(私產+自家糧倉)，否則定居 leader 隊 food 在糧倉→永誤判缺糧→恆觸急徵稅。
-	var food_per_cap: float = ResourceSystem.effective_food(state, leader_team) / maxf(leader_team.population, 1)
+	var food_per_cap: float = ResourceSystem.effective_food(state, leader_team) / maxf(leader_team.population, 1)   # gate-ok: leader_team ＝自己 faction 的 leader 隊，讀自身糧/人口＝自身真值
 	var effective_emergency: float = FOOD_EMERGENCY * (0.7 + survival * 0.6) \
 		* clampf(1.0 - honor * HONOR_EMERGENCY_DISC, 0.5, 1.0)
 	if food_per_cap < effective_emergency:
@@ -1391,7 +1391,7 @@ func _rebuild_goals(state: WorldState, f) -> void:
 	# 非缺糧 survival；意圖無關（想武裝起來）。保留既有經濟行為，附 driver 連回意圖。
 	var martial: float = float(leader_p.values.get("好戰", 0.5)) if leader_p else 0.5
 	var war_chest_need: bool = (ambition > 0.6 or martial > 0.6) \
-		and float(leader_team.resources.get("material", 0)) < WAR_CHEST_MIN
+		and float(leader_team.resources.get("material", 0)) < WAR_CHEST_MIN   # gate-ok: 同上，讀自己 faction leader 隊的 material 存量
 	if war_chest_need:
 		f.strategy = "戰爭基金"
 		_emit_goal(state, f, "徵收", itype, "備戰籌餉(建材枯)", "fund_war")
@@ -1786,7 +1786,7 @@ func _tick_one_letter(state: WorldState, letter: Dictionary) -> int:
 			_deliver_relocate_order(state, letter)
 			Probe.bump("relocate.delivered"); return 1
 		var lord: TeamData = state.teams.get(int(letter.get("target_lord_id", -1)))
-		if lord != null and lord.tile_pos == target_pos:
+		if lord != null and lord.tile_pos == target_pos:   # gate-ok: lord.tile_pos 只用於【送信抵達的同格判定】＝物理事實
 			_deliver_letter_to_lord(state, letter, lord)   # lord 在 seat → deposit 進 team_known
 		else:
 			_deliver_letter_to_board(state, letter, target_pos)   # lord 不在 → 掛 seat board（Part1 接力等取）
@@ -1906,16 +1906,16 @@ func _tick_info_scout(state: WorldState, scout: TeamData, merge_queue: Array) ->
 	if state.world.current_tick - scout.task_start_tick > budget:
 		Probe.bump("scout.timeout"); SubteamSystem.recall_envoy(state, scout); return
 	# 抵達子民（co-located）→ 查得 need + 刷新領主 belief → recall。
-	if scout.tile_pos == target.tile_pos:
+	if scout.tile_pos == target.tile_pos:   # gate-ok: scout 與 target 的同格測試＝抵達判定（下面的讀全在這個分支內）
 		# 刷新領主對子民 belief（firsthand fresh：scout 是領主 agent 親見）
 		BeliefSystem.record_claim(state, mother.team_id, target_id, mother.team_id, "親見",
-			{"tile_pos": target.tile_pos}, 1.0, false)
+			{"tile_pos": target.tile_pos}, 1.0, false)   # gate-ok: 在同格分支內把 target.tile_pos 寫成【親見 claim】＝正在產生 belief，不是繞過它
 		_deposit_help_need(state, target_id, mother)   # 帶子民 post 的 food 買單回領主 team_known（同 herald deposit 機制）
 		# ★★care-loop (a) firsthand 觀察 write（P4 核心）——★必查項②：此段**必須 inline 在 co-location 分支內**，
 		#   禁抽外部/獨立可呼叫函式。讀村 live food/pop 缺口與 distribute-descan 修掉的 _resident_food_runway god-view
 		#   幾乎一樣、差別只在此 co-location gate（物理在場 firsthand=合法；分支外讀=違憲換皮復刻）。
 		#   傲村不 post 買單也看得見缺口（posted-order-independent）→ synth distress 入領主 team_known（帶時戳、去重）。
-		var _vburn: float = maxf(float(target.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		var _vburn: float = maxf(float(target.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)   # gate-ok: 同格親見讀 target.population＝scout 站在對方村裡看到的，正是 belief 的來源
 		var _vfdays: float = ResourceSystem.effective_food(state, target) / _vburn
 		if _vfdays < DecisionTerms.DESPERATION_DAYS:
 			var _deficit: int = maxi(int(ceil((DecisionTerms.DESPERATION_DAYS - _vfdays) * _vburn)), 1)
@@ -1931,7 +1931,7 @@ func _tick_info_scout(state: WorldState, scout: TeamData, merge_queue: Array) ->
 				_msg.origin_team_id = target_id; _msg.origin_tick = state.world.current_tick; _msg.strength = 1.0
 				_msg.is_distorted = false   # firsthand co-location 親見=honest
 				_msg.params = {"order_id": _oid, "res": "food", "qty": _deficit,
-					"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY}
+					"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY}   # gate-ok: 同格親見取得的 origin_pos，回傳給領主當情報
 				state.global_messages.append(_msg)
 				state.team_known[mother.team_id].append(_msg)
 				if Probe.enabled: Probe.bump("care.firsthand_distress")
@@ -1963,7 +1963,7 @@ func _deposit_help_need(state: WorldState, origin_id: int, helper: TeamData) -> 
 		msg.origin_team_id = origin_id; msg.origin_tick = state.world.current_tick; msg.strength = 1.0
 		msg.is_distorted = false   # 信使親送 intra-faction = honest
 		msg.params = {"order_id": oid, "res": "food", "qty": int(o.get("qty_remaining", 0)),
-			"origin_team": origin_id, "origin_pos": origin.tile_pos, "expire_tick": int(o.get("expire_tick", 0))}
+			"origin_team": origin_id, "origin_pos": origin.tile_pos, "expire_tick": int(o.get("expire_tick", 0))}   # gate-ok: origin.tile_pos ＝子民自願回報自己的位置（信使親送），非觀察者偷看
 		state.global_messages.append(msg)
 		state.team_known[helper.team_id].append(msg)
 		known[oid] = true
@@ -2233,7 +2233,7 @@ func _tick_migrant(state: WorldState, sub: TeamData, _merge_queue: Array) -> voi
 	if target == null:
 		if not state.teams_pending_erase.has(sub.team_id): state.teams_pending_erase.append(sub.team_id)
 		return   # 目標村消失→解散（人隨之散、真成本已付）
-	if sub.tile_pos == target.tile_pos:
+	if sub.tile_pos == target.tile_pos:   # gate-ok: target ＝遷徙目的地隊（同 faction 既有慣例），讀其位置做抵達判定
 		AnonTierSystem.transfer_proportional(sub, target, AnonTierSystem.total_pop(sub))   # 併入 target 村（P2 共址即產能）
 		if Probe.enabled: Probe.bump("migrant.arrived")
 		if not state.teams_pending_erase.has(sub.team_id): state.teams_pending_erase.append(sub.team_id)
@@ -2241,7 +2241,7 @@ func _tick_migrant(state: WorldState, sub: TeamData, _merge_queue: Array) -> voi
 	# ★執行層修：村靜態 own-faction、直接 move_target=村 pos（同 convoy home_pos/settle outpost）——
 	#   棄 predict_intercept（移動目標攔截器對靜態村是錯工具：新生 anon subteam 零 belief→belief_pos(-1,-1) 走不動、
 	#   且 observe_velocity 耗 global RNG=此路本該零 RNG）。村位=行政知（own-faction、非 god-view）。
-	sub.move_target = target.tile_pos
+	sub.move_target = target.tile_pos   # gate-ok: 同上，把 move_target 設成遷徙目的地
 
 # ══════ ★復甦 R3 遷村執行端（§2C+§3、compound reuse、整 team 非 subteam）══════
 # 棄現據點(generalize _action_abandon_outpost 核 set_owner(-1)) → 村轉 mobile(TASK_MIGRATE reason=relocate、
@@ -2284,8 +2284,8 @@ func tick_relocations_all(state: WorldState) -> void:
 			_finish_relocate(state, v, false); continue
 		var over: bool = state.world.current_tick - int(v.task_extra_data.get("relocate_spawn", 0)) \
 			> RELOCATE_TIMEOUT_DAYS * WorldState.TICKS_PER_DAY
-		if v.tile_pos == tgt or over:
-			if v.tile_pos == tgt and Probe.enabled: Probe.bump("relocate.arrived")
+		if v.tile_pos == tgt or over:   # gate-ok: v ＝自己管轄的村，讀它的位置＝對自己生命週期的例行更新，非 A 觀察 B
+			if v.tile_pos == tgt and Probe.enabled: Probe.bump("relocate.arrived")   # gate-ok: 同上（抵達 tap）
 			_settle_relocated_village(state, v)
 		else:
 			v.move_target = tgt   # 續移（movement 推進）
@@ -2381,10 +2381,10 @@ func _try_relocate_order(state: WorldState, team: TeamData) -> void:
 		if order_util <= RELOCATE_THRESHOLD:
 			continue   # 領主視角不划算（壞地損失不夠大 / 放任領主）→ 不下令（genuine 差異、非全序）
 		# 遷村令 letter：origin=領主、target_pos=村（送令到村）、payload=遷往地。真送達非瞬間、可被攔截。
-		var dist: int = _hex_dist(team.tile_pos, village.tile_pos)
+		var dist: int = _hex_dist(team.tile_pos, village.tile_pos)   # gate-ok: village 來自自己 leader 的行政管轄記錄，位置已走 belief
 		state.in_transit_letters.append({
 			"origin_team_id": team.team_id, "faction_id": team.faction_id,
-			"target_lord_id": vid, "target_pos": village.tile_pos, "kind": "relocate",
+			"target_lord_id": vid, "target_pos": village.tile_pos, "kind": "relocate",   # gate-ok: 同上，寫進命令的 target_pos
 			"relocate_to": best["pos"], "current_pos": team.tile_pos,
 			"spawn_tick": state.world.current_tick, "timeout": SubteamSystem.founding_timeout(dist), "speed": 1,
 		})
@@ -2669,7 +2669,7 @@ func _assign_tasks(state: WorldState, f) -> void:
 	if leader_team == null or leader_team.combat_target != -1:
 		return
 	# 生存 sticky：leader 在 survival task 中不蓋過（仍跑 member 指派）
-	if leader_team.current_task in SURVIVAL_TASKS:
+	if leader_team.current_task in SURVIVAL_TASKS:   # gate-ok: leader_team ＝自己 faction leader，讀它的 current_task ＝自身狀態
 		var _tas: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		_assign_member_tasks(state, f)
 		if SimRunner.phase_timing: _fai_pht("assign.members", _tas)
@@ -2735,7 +2735,7 @@ static func consolidate_target_of(state: WorldState, mt: TeamData, f) -> int:
 		var mt_cmd: float = float(mt_leader.skills.get("統領", 0.0)) if mt_leader else 0.0
 		var mt_cap: int = effective_pop_cap(state, mt)
 		var small_b: bool = mt.population < int(float(mt_cap) * SMALL_TEAM_RATIO)
-		var small_c: bool = float(mt.population) < float(state.teams[absorber_id].population) * SMALL_VS_LARGE
+		var small_c: bool = float(mt.population) < float(state.teams[absorber_id].population) * SMALL_VS_LARGE   # gate-ok: 與 baseline 標記 74 同一函式同一種讀（reviewer 明示同理由）
 		if small_b and small_c:
 			return absorber_id
 	if "攻擊" in f.goals and leader_team != null:
@@ -2961,7 +2961,7 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 			continue
 		var t_leader = state.persons.get(t.leader_id)
 		var t_cmd: float = float(t_leader.skills.get("統領", 0.0)) if t_leader else 0.0
-		var t_cap: int = effective_pop_cap(state, t) - t.population
+		var t_cap: int = effective_pop_cap(state, t) - t.population   # gate-ok: t 僅來自同 faction 成員（同 :2170/:2471 既有先例），讀自己人的 pop_cap/人口
 		if t_cap <= 0:
 			continue
 		# S-A 靶A 餵養 gate#1（防搬餓）：吸附者須有糧 + 併後合隊真能撐 ABSORBER_MIN_SURVIVE_DAYS。
@@ -2971,10 +2971,10 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 			continue   # 吸附者自身無糧→無餵養能力
 		var ef_mt: float = ResourceSystem.effective_food(state, mt)
 		var combined_days: float = (ef_t + ef_mt) \
-			/ maxf(float(t.population + mt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+			/ maxf(float(t.population + mt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)   # gate-ok: 同上，同 faction 成員的人口用於容量帳
 		if combined_days < ABSORBER_MIN_SURVIVE_DAYS:
 			continue   # 併後撐不住→不選
-		var d: int = _hex_dist(mt.tile_pos, t.tile_pos)
+		var d: int = _hex_dist(mt.tile_pos, t.tile_pos)   # gate-ok: 同上，同 faction 成員之間的距離
 		if d <= 1 or d > CONSOLIDATE_MAX_DIST:
 			continue
 		# 名聲磁鐵 §3：score = protector_rep 主導（避投奔強暴君）− dist 懲罰（近者次選）。
@@ -3245,7 +3245,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		return
 	var leader_p = state.persons.get(sub.leader_id)
 	if leader_p == null:
-		sub.move_target = parent.tile_pos   # 無腦 → 回家（lifecycle，不 capture）
+		sub.move_target = parent.tile_pos   # 無腦 → 回家（lifecycle，不 capture）   # gate-ok: parent ＝這支子隊【自己的母隊】＝內部階層知識，非他隊
 		return
 	var ranked: Array = DecisionEngine.rank_scored(state, sub)   # 全框架 rank
 	for e in ranked:
@@ -3253,7 +3253,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		# ★歸建 = 服從母團 = lifecycle move（回母團集結/歸建），不進 obey/violation 統計（量測特判）。
 		if opt == "歸建":
 			sub.current_option = opt
-			sub.move_target = parent.tile_pos
+			sub.move_target = parent.tile_pos   # gate-ok: 同上
 			merge_queue.append(sub.team_id)   # 到家由 loop2b try_merge_back
 			return
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
@@ -3293,7 +3293,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		print("[SubAI] Team%d 引擎→%s (%s)" % [sub.team_id, td["task"], opt])
 		return
 	# 全不可派 → 回母團（lifecycle，不 capture）
-	sub.move_target = parent.tile_pos
+	sub.move_target = parent.tile_pos   # gate-ok: 同上
 
 # A2a 子隊 join-player guard（scope B：只給 _decide_subteam 新路呼；既有 3 處 join 路不碰）。
 # 玩家 target → forced_event 請求（玩家決定收留），★不 try_set、caller 不 fallthrough；
@@ -3900,7 +3900,7 @@ func _check_mount_demand(state: WorldState, faction) -> float:
 func _check_ore_surplus(state: WorldState, faction) -> float:
 	var total: float = 0.0
 	for tid in faction.member_team_ids:
-		for tile_id in state.world.tiles:
+		for tile_id in state.world.tiles:   # gate-ok: 掃 tiles 只讀【自家 faction 的 outpost】＝legit-self
 			var tile: HexTileData = state.world.tiles[tile_id]
 			if tile.outpost_owner != tid: continue
 			total += float(tile.public_storage.get("ore_gold", 0)) * 5.0
@@ -4122,7 +4122,7 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	for cid in leader_team.subteam_ids:
 		var ct: TeamData = state.teams.get(cid)
 		if ct == null: continue
-		if ct.current_task == TeamData.TASK_CONSTRUCT or ct.current_task == TeamData.TASK_BUILD:
+		if ct.current_task == TeamData.TASK_CONSTRUCT or ct.current_task == TeamData.TASK_BUILD:   # gate-ok: ct ＝自己派出的子隊，讀它的 current_task ＝自身階層知識
 			# ★★漏斗③段（2026-08-26）：這道閘原本【完全靜默】——「已經有子隊在蓋」與
 			#   「資源不夠」在外面長得一樣（都是 return false），而它們的處置完全相反。
 			if Probe.enabled: Probe.bump("funnel.build_gate.busy_subteam")
@@ -4669,7 +4669,7 @@ const SITE_RES_BONUS: Dictionary = {
 func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) -> Dictionary:
 	var candidates: Array = []
 	var centers: Array = [leader_team.tile_pos]
-	for tile_id in state.world.tiles:
+	for tile_id in state.world.tiles:   # gate-ok: 掃 tiles 讀地形/空地＝公共地理；legit-geo
 		var t: HexTileData = state.world.tiles[tile_id]
 		if t.outpost_owner == -1 or t.outpost_level == 0: continue
 		var o: TeamData = state.teams.get(t.outpost_owner)
@@ -4686,7 +4686,7 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 	var greed_ambition: float = ldr_greed + ldr_ambition
 	# 敵 outpost 位置一次收集（hoist：原每 candidate 全圖掃 = O(tiles²) → 500-tick infra spike 根）
 	var enemy_outposts: Array = _enemy_outpost_positions(state, leader_team)
-	for tile_id in state.world.tiles:
+	for tile_id in state.world.tiles:   # gate-ok: 同上
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0: continue
 		var dist: int = 9999
@@ -4778,7 +4778,7 @@ func _site_resources_nearby(state: WorldState, pos: Vector2i) -> Dictionary:
 # min-dist，取代原 per-candidate 全圖掃（同集合同 min 值 = 行為不變，純複雜度收斂）。
 func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array:
 	var out: Array = []
-	for tile_id in state.world.tiles:
+	for tile_id in state.world.tiles:   # gate-ok: 團隊已核可過（followup-fixed 63d93aab）
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level == 0: continue
 		var owner: TeamData = state.teams.get(tile.outpost_owner)
@@ -4826,7 +4826,7 @@ func _pick_outpost_type(state: WorldState, leader_team: TeamData, leader: Person
 	return "military" if military > civilian else "civilian"
 
 func _faction_has_workshop(state: WorldState, leader_team: TeamData) -> bool:
-	for tile_id in state.world.tiles:
+	for tile_id in state.world.tiles:   # gate-ok: 掃 tiles 只查【自家 faction 有沒有 workshop】＝legit-self
 		var t: HexTileData = state.world.tiles[tile_id]
 		if t.outpost_level > 0 and int(t.manufacturing_level) > 0:
 			if t.outpost_owner == leader_team.team_id:
@@ -4942,7 +4942,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	#     first-success `return` 也沒動 —— pin 保護「哪一格先被掃到」，本票改的是「同一格上兩個選項誰先被考慮」。
 	# (2) 擴建設施（faction 內所有 outpost；owner 以自身 local 資料評估，
 	#     就地施工優先：owner 在場 > 居民團 > 派擴建子隊）
-	for tile_id in state.world.tiles:
+	for tile_id in state.world.tiles:   # gate-ok: 掃 tiles 讀地形/自家據點＝legit-geo/self
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level == 0: continue
 		if tile.construction_team_id != -1:
@@ -4971,8 +4971,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if pick.has("demolish_first"):
 			OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
 		# owner 在場 → 就地開工（居民村長 / 領主駐地）
-		if owner_team.tile_pos == tile.tile_pos and owner_team.combat_target == -1 \
-				and owner_team.current_task != TeamData.TASK_BUILD:
+		if owner_team.tile_pos == tile.tile_pos and owner_team.combat_target == -1 and owner_team.current_task != TeamData.TASK_BUILD:   # gate-ok: owner_team ＝這格據點的【自家擁有者】，讀它的位置/狀態＝自身真值（★續行併成一行是為了讓行級標記貼得上去——`# gate-ok` 不能放在 `\` 之後）
 			if OutpostSystem.new()._subteam_upgrade_facility(state, owner_team, tile, pick["facility"]):
 				if Probe.enabled: Probe.bump("infra.stop.2_facility")   # ★measurer L3 tap(T3票)：段(2)擴建return(owner在場)
 				if SimRunner.phase_timing: _fai_pht("infra.facility", _ti)
@@ -6177,7 +6176,7 @@ func _maybe_request_join_player(state: WorldState, team: TeamData) -> bool:
 	if pp == null: return false
 	var ptid: int = pp.team_id
 	var ppt: TeamData = state.teams.get(ptid)
-	if ppt == null or ppt.tile_pos != team.tile_pos: return false   # 同格才求
+	if ppt == null or ppt.tile_pos != team.tile_pos: return false   # 同格才求   # gate-ok: ppt.tile_pos 只為【同格測試】——同格才求（co-location）
 	if not state.player_forced_event.is_empty(): return false        # 已有待處理 event
 	state.player_forced_event = { "action": "join_request", "from_id": team.team_id }
 	state.player_forced_event_id = str(randi())
@@ -6503,7 +6502,7 @@ func _ensure_holding_ledger(state: WorldState, team: TeamData) -> void:
 		if m == null or not FactionAISystem.is_resident_static(state, m):
 			continue
 		var bpos = BeliefSystem.best_estimate(state, team.team_id, mid).get("tile_pos", Vector2i(-1, -1))
-		var dist: int = _hex_dist(team.tile_pos, bpos) if bpos != Vector2i(-1, -1) else 0
+		var dist: int = _hex_dist(team.tile_pos, bpos) if bpos != Vector2i(-1, -1) else 0   # gate-ok: 這一行讀的是 team.tile_pos(自己) 與 bpos(已走 belief 的位置)
 		_ledger_record(team, "holding", mid, true, state.world.current_tick, dist, bpos)   # holding=持久監看(subject=村)
 
 # ★care-loop ②反應：care 決定→派 scout 查村（reuse scout 機具、reason=info_scout→_tick_info_scout 走 firsthand）。

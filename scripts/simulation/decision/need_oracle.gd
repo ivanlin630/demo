@@ -150,7 +150,7 @@ static func _supply_chain(state: WorldState, team: TeamData, res: String) -> flo
 
 # 設施 gating：隊「自家」outpost 有此製造設施（非 positional——掃 team 擁有的 outpost，讀自家 need 側）。
 static func _team_has_facility(state: WorldState, team: TeamData, level_key: String) -> bool:
-	for tid in state.world.tiles:
+	for tid in state.world.tiles:   # gate-ok: 掃 tiles 只查【自家設施】＝legit-self
 		var tile: HexTileData = state.world.tiles[tid]
 		if tile.outpost_owner == team.team_id and tile.outpost_level > 0 and int(tile.get(level_key)) > 0:
 			return true
