@@ -18,6 +18,13 @@ const THREAT_INFLATION_MEASURED: float = 4.33   # ★實測值，非手感；來
 # ★★舊值 0.3 保留在式子裡（而不是直接寫 0.0693）：★★★讓下一個人看得到它的血統 ——
 #   寫成 0.0693 的話，三個月後沒人知道它是怎麼來的，而那就是下一代的手抄物理。
 const THREAT_BASE_THRESHOLD: float = 0.3 / THREAT_INFLATION_MEASURED
+# ★★★而門檻不只有基底：`decision_context.gd:309` 是 `BASE + 慎重 × 0.3`。
+#   ★只除基底、不除人格項 ⇒ 兩半不再在同一把尺上：
+#     舊尺 0.3 + 0.5×0.3 = 0.45（基底與人格各一半）
+#     ★★只除基底 0.069 + 0.15 = 0.219（人格項變成 ★★★三分之二以上）
+#   ⇒ ★那不是【保留原設計】，是【把人格的權重惄惄推高了】—— 而那是行為改變，不是重新標定。
+#   ★★★三個項都是【threat_react 單位】⇒ 同一個實測係數，一起除。
+const THREAT_CAUTION_SPAN: float = 0.3 / THREAT_INFLATION_MEASURED
 const REPUTATION_NEUTRAL: float = 0.5
 const POWER_BASELINE: float = 1.0
 
