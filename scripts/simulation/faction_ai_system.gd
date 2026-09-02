@@ -2833,6 +2833,40 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		else:
 			# ★「輸」必須看得見 —— ★★否則它跟「沒送回」長得一模一樣
 			Probe.bump("redispatch.lost")
+			# ★★★輸的【當下】印完整 per-option util 表（systems 2026-09-02，★只 dump 不開藥）
+			#   ★依據不是新紀律：memory `feedback_measure_peroption_util_before_decision_claim`
+			#     ——決策問題禁靜態斷言，先 dump 真實 per-option util 再開藥
+			#   ★★母體只有 3 ⇒ 【不取樣】，3 次全印
+			#   ★★★而 `persist` 加了多少要印出來：decision_engine.gd:96 只在 opt == current_option 時加
+			#     ⇒ 若 committed ≠ current_option，那一格【根本沒加】—— 而那件事只有印出來才知道
+			var _tbl: Array = []
+			for _r in ranked:
+				_tbl.append({"opt": String(_r["opt"]), "u": snappedf(float(_r["u"]), 0.0001)})
+			var _cu: float = -999.0
+			for _r2 in ranked:
+				if String(_r2["opt"]) == _co: _cu = float(_r2["u"]); break
+			var _wu: float = float(ranked[0]["u"]) if not ranked.is_empty() else 0.0
+			Probe.bump_sample("redispatch.lost_table", {
+				"tick": state.world.current_tick, "team": team.team_id,
+				"committed": _co,
+				"current_option": team.current_option,
+				"persist_applies": team.current_option == _co,
+				"persist_strength": snappedf(team.persist_strength, 0.0001),
+				"committed_u": snappedf(_cu, 0.0001),
+				"winner": String(ranked[0]["opt"]) if not ranked.is_empty() else "(空)",
+				"winner_u": snappedf(_wu, 0.0001),
+				"gap": snappedf(_wu - _cu, 0.0001),
+				# ★★★blueprint 的【第一問】：先問「它輸得對不對」，不是先問「怎麼讓它贏」
+				#   ⇒ ★所以表裡要有【判得出贏家贏得有沒有道理】的那幾格
+				#   ★★而它們必須是【已存的欄位】：呼 `DecisionContext.gather` 會推進 EWMA ＝ 改動被觀測物
+				#     ⇒ ★★★那會讓這張「純觀測」的表自己違反純觀測（今天已經修過同型兩次）
+				"pop": team.population,
+				"food_runway": snappedf(team.food_runway, 0.01),
+				"famine_days": snappedf(team.famine_days, 0.01),
+				"readiness": snappedf(team.readiness, 0.001),
+				"in_combat": team.combat_target != -1,
+				"table": _tbl,
+			}, 64)
 	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank", _tr)
 	# ★取樣放在計時【終點之後】⇒ `bump_sample` 自己的成本不進 `unified.rank`。
 	# ★★依賴 `phase_timing`：關掉時 `_tr/_tr0` 都是 0 ⇒ 本 sample 不運作（★這個前提寫進 dump，

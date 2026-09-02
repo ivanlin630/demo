@@ -45,6 +45,27 @@ func _init() -> void:
 		print("  ★FAIL 對帳不平：sent %d ≠ %d ⇒ 有一段沒被歸類" % [sent, nir + won + lost])
 	else:
 		print("  ★對帳平：sent ＝ not_in_ranked ＋ won ＋ lost")
+	print("── ③輸的當下：完整 per-option util 表（★母體只有 3 ⇒ 不取樣，全印）──")
+	var tabs: Array = Probe.samples.get("redispatch.lost_table", []) as Array
+	print("  表數 = %d（★應等於 lost = %d；不等 ⇒ 有的沒印到）" % [tabs.size(), lost])
+	for row in tabs:
+		print("  ── tick=%s team=%s ──" % [str(row["tick"]), str(row["team"])])
+		print("     承諾 opt = %s ／ current_option = %s" % [str(row["committed"]), str(row["current_option"])])
+		print("     ★persist 這一格【有沒有加到】= %s（persist_strength=%s）"
+			% [str(row["persist_applies"]), str(row["persist_strength"])])
+		print("     承諾 util = %s ／ 贏家 = %s util = %s ／ ★差距 = %s"
+			% [str(row["committed_u"]), str(row["winner"]), str(row["winner_u"]), str(row["gap"])])
+		print("     ★判「輸得對不對」用的現況（★皆為已存欄位，沒有呼叫會推進 EWMA 的東西）：")
+		print("        pop=%s food_runway=%s famine_days=%s readiness=%s in_combat=%s"
+			% [str(row["pop"]), str(row["food_runway"]), str(row["famine_days"]),
+			   str(row["readiness"]), str(row["in_combat"])])
+		print("     全候選表：")
+		for c in (row["table"] as Array):
+			print("        %-10s u=%s" % [String(c["opt"]), str(c["u"])])
+	print("  ★★★判讀協定（blueprint 定、systems 轉述）：")
+	print("     ①先問【它輸得對不對】，再談持守加成。★禁 crank。")
+	print("     ②★『可能 genuine』也是一個【解釋】——它一樣要等數字，不是答案")
+	print("     ③★★而在看完這張表之前，不對「為什麼輸」給任何解釋")
 	print("★誠實限：①單 config／單 seed／短窗；★★★本刀是【純觀測】—— 它讓再派看得見，")
 	print("  ★而候選本來就自動在 ranked 裡（current_option 活過 release ⇒ 自帶 persist_strength）")
 	print("  ⇒ ★★若 not_in_ranked 佔多數，那才是要開的下一票（承諾在、選項不可選）")
