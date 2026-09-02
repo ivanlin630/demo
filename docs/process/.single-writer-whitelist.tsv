@@ -8,4 +8,3 @@ faction_id	scripts/data/world_state.gd	team.faction_id = fid
 combat_target	scripts/simulation/invariant_audit.gd	out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
 combat_target	scripts/data/world_state.gd	team.combat_target = tid
 combat_target	scripts/data/world_state.gd	team.combat_target = -1
-combat_target	scripts/data/world_state.gd	o.combat_target = -1

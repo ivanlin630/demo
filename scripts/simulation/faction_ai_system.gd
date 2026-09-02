@@ -692,14 +692,40 @@ func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileDa
 		# 禁 live t.tile_pos（用 live=修 god-view 卻讀 god-view=cosmetic，belief 該拒卻照發跨圖 settle）。
 		var _bp: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
 		if _bp == Vector2i(-1, -1) or _hex_dist(team.tile_pos, _bp) > INVITE_RANGE: continue
-		# ★★★而下面四個欄位【仍然是 live】—— belief 裡沒有它們
-		#   （vision 只記 population_est／tile_pos／last_tick／tier／resource_scale）
-		#   ⇒ ★要讓它們也走 belief，得【新增 belief 欄位】＝「觀察者看不看得出對方在幹嘛/是什麼團」
-		#     ★★那是 WHAT，★★★我不自己發明 —— 已報 systems。
-		if t.tags.has(TeamData.TAG_PRODUCE) or t.parent_team_id != -1 \
-				or t.combat_target != -1 or t.current_task == TeamData.TASK_ATTACK:
+		# ★★★改讀【外觀層 belief】（感知兩層，2026-09-02）——不再讀 live 的四個欄位。
+		#   ★`unknown` ＝【誠實第三態】：★★看得到這隊、但看不出它在幹嘛 ⇒ 【不通過】
+		#     （禁 default-pass：不知道不等於符合條件）
+		#   ★★★而 `parent_team_id` 是【組織層】不進 belief ⇒ 「是不是子隊」我【不知道】
+		#     ⇒ 依同一條紀律：不知道 ⇒ 不邀（★寧可少邀一隊，不要靠 god-view 邀對）
+		var _ap: Dictionary = BeliefSystem.appearance(state, team.team_id, tid)
+		if String(_ap["state"]) != "fresh":
+			if Probe.enabled: Probe.bump("invite.kill_appearance_" + String(_ap["state"]))
 			continue
-		if t.current_task == TeamData.TASK_SETTLE: continue   # 已在路上，不重邀
+		# ★★★而這裡有一個【我沒有自己決定的張力】，做法與理由都寫在這裡：
+		#   spec ③說「篩選端：unknown 一律不通過」。★而【照字面套在這裡會讓功能結構性死掉】：
+		#   ★★一個站著不動的流亡團【本來就沒有可觀察的活動信號】⇒ `observed_activity` 回 unknown
+		#     ⇒ 「unknown 不通過」＝ 永遠邀不到任何漂流團 ＝ 本 feature 的目標對象全被擋掉
+		#   ⇒ ★★★我的讀法：spec ③講的是【拿 X 當條件而 X 未知 ⇒ 不能算符合】，
+		#     而這裡的四個條件全是【排除型】（是生產隊/在打/在施工就不邀）
+		#     ⇒ 「沒有排除證據」不等於「符合條件」—— 它就是沒有排除證據
+		#   ⇒ ★所以我【不擋 unknown】，但【數它】：非 0 代表有多少邀請是在「看不出在幹嘛」下發的
+		#     ★★若 systems/blueprint 判這仍是 default-pass，改成擋只要把這個 bump 換成 continue
+		if String(_ap["activity"]) == BeliefSystem.ACT_UNKNOWN:
+			if Probe.enabled: Probe.bump("invite.pass_activity_unknown")
+		if String(_ap["activity"]) == BeliefSystem.ACT_SETTLED:
+			# ★駐紮在自己據點/營地上＝看得出它有家 ⇒ 不是漂流團（★這是【正面排除證據】）
+			if Probe.enabled: Probe.bump("invite.kill_settled")
+			continue
+		# 排：已 settled 生產隊（外觀 tags 看得出旗號）／交戰中（外觀看得到在打）／勞作中（工地上有人）
+		if TeamData.TAG_PRODUCE in _ap["tags"]:
+			if Probe.enabled: Probe.bump("invite.kill_produce_tag")
+			continue
+		if bool(_ap["in_combat"]) or String(_ap["activity"]) == BeliefSystem.ACT_COMBAT:
+			if Probe.enabled: Probe.bump("invite.kill_in_combat")
+			continue
+		if String(_ap["activity"]) == BeliefSystem.ACT_BUILDING:
+			if Probe.enabled: Probe.bump("invite.kill_building")
+			continue
 		if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
 		var dipl := DiplomaticAiSystem.new()
 		var resp: String = dipl.handle_diplomacy_message(

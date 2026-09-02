@@ -112,6 +112,20 @@ func _write_tier01(state: WorldState, obs_id: int, tgt_id: int,
 	snap["population_est"] = pop_est
 	snap["tile_pos"]       = tgt.tile_pos
 	snap["last_tick"]      = state.world.current_tick
+	# ★★★外觀層（感知兩層，2026-09-02）：★不加雜訊 ⇒ 零額外 RNG 消耗
+	#   （★理由：旗號/隊形要嘛看到要嘛沒看到，不是「看錯」；★★而這個寫入點【已經在耗兩顆 RNG】
+	#     ——:110 randf_range(population_est) 與 :127 randi_range(resource_scale)——
+	#     ★★★新欄位若帶雜訊會多耗 ⇒ 全世界 fp 位移，且「fp 為什麼變」就不再是單一原因）
+	#   ★`activity` 讀的是【真發生才會變的底層信號】，不是 current_task（見 BeliefSystem.observed_activity）
+	snap["tags_seen"]      = tgt.tags.duplicate()
+	snap["activity"]       = BeliefSystem.observed_activity(state, tgt)
+	snap["in_combat"]      = tgt.combat_target != -1
+	# ★「看得到在打」與「看得出打誰」是兩件事（R² 確認拆兩欄，不合併）：
+	#   ★★對手也要在【觀察者自己的視野】內，才記得下「打誰」；否則只記「在打」。
+	if tgt.combat_target != -1 and obs_team != null and state.teams.has(tgt.combat_target):
+		var _foe: TeamData = state.teams[tgt.combat_target]
+		if _hex_dist(obs_team.tile_pos, _foe.tile_pos) <= VISION_RADIUS:
+			snap["combat_target_est"] = tgt.combat_target
 	if not snap.has("tier"):
 		snap["tier"] = 0
 	if dist <= 1:

@@ -561,7 +561,12 @@ func erase_teams(tids: Array) -> void:
 			continue
 		var o: TeamData = teams[otid]
 		if dead.has(o.combat_target):
-			o.combat_target = -1
+			# ★★★旁路修掉（systems 2026-09-02 納管 combat_target 後揭）：
+			#   :362 的註解白紙黑字寫著「所有 team.combat_target= 直寫改走此/clear_combat_target」
+			#   ⇒ ★而這一行【就是那個註解宣稱不存在的直寫】—— 今天第三個同形
+			#     （faction_id 解散路 ／ 訂單 owner 驅動 ／ 這個）
+			#   ⇒ 走 setter（★零行為：setter 就是 assign -1）
+			clear_combat_target(o)
 		if dead.has(o.social_target):
 			o.social_target = -1
 		if dead.has(o.order_target_id):
