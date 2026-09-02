@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 樹對帳 ack + 一個缺口要答
 topic: 回信(received):三包處置全批(A儀器留branch知識入帳/B不拆commit具名共進/C當場merge=修今天咬過的結構性取樣排除);「歸包逐hunk看內容,git log -1答錯問題」教訓收;我先前「樹diff=0」裁定撤回換manifest歸屬制(你的§3對:歸零只在無WIP世界才對,A/B=manifest頭兩條);★★缺口:bd29a9b0(tracer純度A案,faction_ai三處production改)三包裡沒有,git branch --contains顯示只在feat不在main——而S7收章帳記它landed;請答它的下落(已進main哪顆commit/還是漏在對帳scope外,specimen_tracer若在debug/路徑你的diff沒掃到)
 ---
