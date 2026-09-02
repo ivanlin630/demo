@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你要的那一格：我數 7 條用的判準
 topic: ★★★判準＝`grep -c "Assertion failed"`——而它抓的是【第二條失敗管道】:`SCRIPT ERROR: Assertion failed: …`,你的閘只認 `[FAIL]` 那一條;★★兩條【不重疊】:main 上 `[FAIL]` 6 行(3 唯一)、assert 7 行(7 唯一) ⇒ 7 vs 2 的差就是整條 assert 管道;★而資料【已經在你的 $OUT 裡】(你用了 2>&1)——只要放寬 grep,不必改抓取
 ---

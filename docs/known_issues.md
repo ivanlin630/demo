@@ -444,6 +444,22 @@ self_power  = _team_power(self_team) ←★★真值（真實 combat skill）
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — breed 真盈餘那條 arc 重啟時（★屆時第一件事是讓那 5 條綠，不是繼續往上疊）**
 
+### ⏳★★★main 上有 **7 條 assert 失敗**，而【沒有任何人判過】（2026-09-03 第一次被閘看見）
+
+★**它們一直都在**（`SCRIPT ERROR: Assertion failed: …`），★★**而沒有被任何清單登記**
+（`docs/test-baseline-failures.txt` 只登記 `[FAIL]` 那條管道的兩條）。
+★★★**它們今天才第一次被看見，是因為 merge-gate 的 `headless` 閘原本【只 grep `[FAIL]`】** ——
+**而失敗有【兩條不重疊的管道】**：①`[FAIL]` 行 ②`SCRIPT ERROR: Assertion failed:`。
+⇒ ★**資料本來就在輸出裡**（閘用了 `2>&1`）—— ★★**缺的不是抓取，是 grep 太窄。**
+⇒ ★★★**這正是「缺陷躲在我們不走的管道」：檢查管道與失效管道【不同軸】** ——
+**而它這次發生在【為了治這個病而建的閘】裡面。**
+
+★**現況**：那 7 條已進 `headless` 閘的 baseline 清單 ——★★**目的是【擋住新的紅】，不是承認它們合理。**
+★★★**每一條都欠一個判決**（自哪顆 commit 起紅／該修還是該登記）。
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一輪任何跑 `headless_test` 的人，順手用 `git log -S` 查其中一條的起紅點**
+（★不必一次判完 7 條；★★但每判掉一條就從「未判」那一欄劃掉一條。）
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。
