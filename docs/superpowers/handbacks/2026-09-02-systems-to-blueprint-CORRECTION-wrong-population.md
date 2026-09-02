@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 訂正（★我上一封的結論母體不對）
 topic: ★★★訂正:我報給你「funnel 不缺、病＝每次都輸」的那三筆,母體是【tick=1200/1800/2400、team 1&4、pop 8-9、food_runway 35-40 天、famine_days=0】＝【健康隊、開局兩天內】——★不是 #10 的 213/219(pop=2、瀕死、tick~52798、3mo 窗);★★所以「funnel 不缺」只對【那張床的母體】成立,對 #10 母體【未知】,你撤掉的病位判斷【請先不要當定案】;★★★而錯在我:票裡沒有指定母體
 ---
