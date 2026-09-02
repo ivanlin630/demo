@@ -181,5 +181,17 @@ func _sec_aid() -> void:
 	print("  ⑤夠分但到不了               = %d" % int(Probe.counts.get("aid.reject.5_unreachable", 0)))
 	print("  ★找到施主 = %d｜找不到 = %d" % [
 		int(Probe.counts.get("aid.found", 0)), int(Probe.counts.get("aid.none", 0))])
+	var n2: int = 0
+	var n3: int = 0
+	for k in Probe.counts.keys():
+		if String(k).begins_with("aid.pass2.tgt."): n2 += 1
+		elif String(k).begins_with("aid.pass3.tgt."): n3 += 1
+	print("  ── ★★★可證偽那一格（【集合大小】不是【次數】）──")
+	print("     ②has_belief 通過的相異 target 數 = %d" % n2)
+	print("     ③food_est 通過的相異 target 數 = %d" % n3)
+	print("     ★判讀（先寫死，免得數字回來才挑解釋）：")
+	print("       ③ ≪ ② 且③小到個位數  ⇒ ★支持假說（認得一堆人、只知道少數幾個的存糧）")
+	print("       ③ ≈ ②                ⇒ ★★假說死 ⇒ 擋人的是④⑤，別再往資訊層修")
+	print("       ② 本身 ≈ 0        ⇒ ★★★兩個假說都不成立，真根在更上游（根本沒發現別人）")
 	print("  ★★讀法：③占大多數 ⇒ 【資訊門檻】（要互動過才知道對方存糧）；")
 	print("     ★★★①占大多數 ⇒ 世界太薄；⑤占大多數 ⇒ 地理；④ ⇒ 真的沒人有餘糧。")

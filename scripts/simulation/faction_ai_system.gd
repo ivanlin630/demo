@@ -6484,8 +6484,8 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 	#     ①母體本身是空（沒發現過任何隊）②發現了但沒 belief
 	#     ③★有 belief 但【沒有 food_est】④知道他有糊但【不夠分】⑤知道也夠但【到不了】
 	#   ⇒ ★★五者的修法完全不同（世界密度／情報傳播／互動頻率／糧食盈餘／地理）
-	#   ⇒ ★★★所以這裡【只計數不判斷】—— systems 對③有假説（親見 snap 沒寫 food_est），
-	#     而本 tap 存在的目的就是【拿數字去打那個假説】。
+	#   ⇒ ★★★所以這裡【只計數不判斷】—— systems 對③有假說（親見 snap 沒寫 food_est），
+	#     而本 tap 存在的目的就是【拿數字去打那個假說】。
 	var _aid_probe: bool = Probe.enabled
 	var _aid_seen: int = 0
 	if _aid_probe: Probe.bump("aid.calls")
@@ -6498,10 +6498,15 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 		if not BeliefSystem.has_belief(state, team.team_id, tid):
 			if _aid_probe: Probe.bump("aid.reject.2_no_belief")
 			continue
+		# ★★★可證偽那一格（systems 2026-09-03）：【集合大小】不是【次數】。
+		#   ★次數會被「同一隊被看很多次」灌水 ⇒ ★★per-target 桶，最後數鍵匙。
+		#   ★★★假說要被打死的形狀：③的集合 ≈ ②的集合 ⇒ food_est 不稀有，擋人的不是資訊層。
+		if _aid_probe: Probe.bump("aid.pass2.tgt.%d" % int(tid))
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
 		if not bel.has("food_est"):
 			if _aid_probe: Probe.bump("aid.reject.3_no_food_est")   # ★systems 最懷疑的那一道
 			continue   # 不知有無餘糧 → 保守不列
+		if _aid_probe: Probe.bump("aid.pass3.tgt.%d" % int(tid))
 		var reserve: float = float(bel.get("population_est", 0.0)) * 14.0
 		if float(bel.get("food_est", 0.0)) <= reserve:
 			if _aid_probe: Probe.bump("aid.reject.4_not_enough")
