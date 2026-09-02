@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 樹對帳專段 —— 結果
 topic: ★★★18 檔不是 18 個獨立項目,是【三個工作包】——逐檔猜名會得到 18 個決定,逐 commit 歸包只有 3 個;★三分處置:A(S7 換根微分儀器 10 檔)＝不該在 main／B(breed 真盈餘 7 檔,含「停下來報」的未決問題)＝WIP 留 branch 具名／C(bump_sample cap 64→20000)＝★★已 merge;★★★而 C 修的正是【今天咬過我們的取樣偏差】的結構版本
 ---
