@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 承諾再派 funnel（#10）
 tier: infra
 topic: ★DONE(5da06da6,已 push);★★★而實測把問題【移了位置】:sent=3／not_in_ranked=0／won=0／lost=3 ⇒ 候選【一直在候選集裡】,真缺口那一格是 0 ⇒ 問題不是「送不回去」是【它每次都輸】;★stall 三態 WAITING=114／其餘 0 ⇒ 床自己印「這個窗還沒走到判定點」,不是「安全閥不動」;★★順帶一顆憲法閘假紅(我的純計數條件含 current_task== 被判成 route)已標 gate-ok
