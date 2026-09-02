@@ -174,3 +174,7 @@ rm -f .claude/hooks/.busy.measurer
 ★★**而判準⑨對 latch 型（卡住就不會自己解）要改問**：latch **沒有週期** ⇒ 問**窗內有沒有足夠的【進入 latch 的機會】**，
 ★★★**機會母體必須印** —— 否則 latch 命中 0 的兩讀（**病好了／機會母體是 0**）長得一樣。
 > ★血證（差集 0 vs `scan_kill_tile_unknown=161`／`near_death_tracked=97`）→ `detail/03b_measurer-cases.md`。
+
+## ★★★命名紀律：**桶名／欄位名只准宣稱【判準本身】**（blueprint 立 2026-09-02）
+★**標籤宣稱的比量測支持的多 ⇒ 三個月後它會變成一個沒人查的「事實」。**（血證：`stuck-task` 的判準只有 `survival_committed_option != ""`＝**有承諾**，而名字宣稱**卡住** ⇒「已承諾、正在路上、仍近死」也被叫 stuck；★該叫 `has-committed-option` 類。）
+★★**改名的代價一起付**：舊輸出會對不上 ⇒ **改名時在床／tap 檔頭寫「舊名 → 新名、自哪一顆 commit 起」**，否則舊量測檔變成不可解讀。
