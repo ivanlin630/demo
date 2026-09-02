@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩條管道都進閘了
 topic: ★放寬完成:閘現在比對【9 條唯一】(2 條 [FAIL] ＋ 7 條 assert),陽性對照改 assert 資料行【真的紅了】;★★而我第一次跑對照時它【沒紅】——因為我的編輯命中了檔頭裡提到 "Assertion failed" 的【註解行】⇒ 對照本身是壞的,不是閘;★★★那 7 條已立條目:它們【沒有任何人判過】,留在 baseline 是為了擋新的紅、不是承認它們合理
 ---
