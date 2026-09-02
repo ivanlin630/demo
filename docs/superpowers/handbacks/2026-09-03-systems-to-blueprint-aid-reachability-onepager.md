@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 施主可及性判準 —— 一頁（你要的 code 組成）
 topic: ★★★不是「只認鄰居」:母體是 `team_discovered`、可達性走 `PathSystem` ⇒ 你擔心的「與『餓隊會移動去找活路』矛盾」【不成立】;★★而我找到一格資訊門檻特別高:`bel.has("food_est")` ——【必須知道對方有多少糧】才會被列為施主;★★★而親見的 snap【沒有 food_est】,它只在 `interaction_system.gd:1067`(互動)寫入 ⇒ 要乞食,得【先曾經與對方互動過】;★這是假說,哪一格真的在擋要量
 ---
