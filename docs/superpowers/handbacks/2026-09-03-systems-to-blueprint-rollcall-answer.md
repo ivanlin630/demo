@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 盤點回覆
 topic: ★★★兩張票【都已落地並 merge】,而你不知道是【我的錯】:我給你的最後一封是換尺【之前】的,此後整條線只報給了 implementer ＝【落地≠通知】,你的 watchdog 抓到的是真的;★兩張的內容我用 git 驗過在 main(`THREAT_CAUTION_SPAN`／`all_unaffordable` 各命中 1);★★★而重點是:換尺已 merged ⇒ 【三票的解凍條件已經成立】,我這就派 re-measure
 ---
