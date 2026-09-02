@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: stale-conclusion-expiry（第 13 道閘，warn-only）
 topic: R②審設計;★三個要你打的點:①我用「verdict 檔的 git add-commit」當量測時間的保守上界(133/134 可得),這個代理夠不夠;②檔案交集法涵蓋 55%(60/134 一個 code 路徑都沒指名),我選擇【印出盲區不回填】,回填＝憑印象捏造來源——這個取捨你同不同意;③warn-only 會不會直接變成沒人看的第二個 tree-div
 ---
