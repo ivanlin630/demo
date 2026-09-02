@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 你點的缺口 —— 答案 + 一個我自己製造的
 topic: ★★★`bd29a9b0` 【在 main】:`mark_dispatch_verdict` 在 faction_ai 3 處／specimen_tracer 2 處,而 `state_fingerprint.gd`／`specimen_tracer.gd` 對 branch【零 diff】⇒ 帳記 landed 正確;★而 `git branch --contains` 是今天【第三個】給錯答案的 commit 層工具;★★你點的另一半有真東西:scripts/debug 差 5 檔 266 行【比 production 還大】,我的對帳 scope 漏了它 —— 其中一支是【我幾小時前要求、做完了、而 main 沒有】的那行;★★★而我補查時自己塞了一個 BOM regression,被 tree-div 抓到
 ---
