@@ -78,7 +78,14 @@ static var REGISTRY: Dictionary = {
 			# threat_pos 鏡射 _flee_threat_pos（同 team_discovered×ThreatAssessment.score max→belief_pos）——
 			# positionless（威脅存在但無座標/stale）→ FLEE not applicable → 不選中 → 落次佳(覓食/defend)，
 			# 非卡 task=逃跑 凍結餓死（movement 無座標無 target+continue，沒人 release）。不回退 live-track（無座標=真不知威脅在哪=顧眼前生存）。
-			return ctx.threat_pos != Vector2i(-1, -1),
+			# ★★★flee-to-safety（#5 修法，2026-09-02）：★藍圖裁「逃＝逃往安全」⇒ 光有【逃離方向】不夠，
+			#   還要有【believed 目的地】（自家據點／同 faction 成員位置，兩個既有通道，零 god-view）。
+			#   ★★沒有目的地 ⇒ FLEE 不 applicable ⇒ 引擎自然去 rank 別的，而「備戰」就在候選裡
+			#      （`備戰` 的 applicable 只看 threat_react >= threshold，★★★不需 destination
+			#        ⇒ 真恐懼保證有出口，恐懼【不會被這道閘吞掉】）。
+			#   ★而中間有一個【既有】窄 band：threat_pos!=-1 但 threat_react<threshold 且無目的地
+			#     ⇒ 兩者皆不 applicable。systems 判 benign，★★數字在 `flee.band_no_dest_below_threshold`。
+			return ctx.threat_pos != Vector2i(-1, -1) and ctx.flee_dest != Vector2i(-1, -1),
 		"to_task": func(_state: WorldState, _team: TeamData) -> Dictionary:
 			return {"task": TeamData.TASK_FLEE, "target": Vector2i(-1, -1)},
 	},

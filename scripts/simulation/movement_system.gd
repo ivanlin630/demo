@@ -77,20 +77,30 @@ func process(state: WorldState, team_ids: Array,
 		if team.combat_target != -1:
 			if _dbg_merge: Probe.bump("merge.mv_block_combat")   # DIAG：combat_target 擋移動
 			continue
-		# flee 位移根治：FLEE 隊(move_target 未設/已到達)+有威脅逃離位→算反向 away-tile（純幾何+可達，零 randf）。
-		# flee_from_pos==(-1,-1)（無威脅情報）→ 不設 target → 下方 continue，靠 release 收（不亂逃）。
-		if team.current_task == TeamData.TASK_FLEE and team.flee_from_pos != Vector2i(-1, -1) \
-				and (team.move_target == Vector2i(-1, -1) or team.tile_pos == team.move_target):
-			team.move_target = _flee_away_tile(state, team, team.flee_from_pos)
-		# null-belief-flee backstop（冗餘 defense，修 B）：FLEE 但威脅無座標(flee_from_pos=-1)→無法算逃向
-		# → release 回 IDLE re-rank（非下方 continue-freeze 卡 task=逃跑 餓死）。修 A applicability-gate 後正常
-		# 不會無座標選 FLEE；此為 timing 邊角 backstop（FLEE 設後 belief 過期成 positionless）。
-		if team.current_task == TeamData.TASK_FLEE and team.flee_from_pos == Vector2i(-1, -1):
-			# ★★★#5 tap：backstop 被走到幾次 —— ★而它要跟上游「設成 (-1,-1)」那兩個數比：
-			#   ★★後者 ≈ 前者 ⇒ 坐實【上游每 tick 重造】；★★★後者 ≪ 前者 ⇒ 結構推論錯，停下來報
-			if Probe.enabled: Probe.bump("flee.backstop_release")
-			TaskArbiter.release(team)
-			continue
+		# ★★★flee-to-safety（#5 修法，2026-09-02）：★三層優先序【寫死】——
+		#   ①目的地可解               → 朝目的地走（逃往安全）
+		#   ②目的地過期／無，而威脅座標還在 → away-tile（既有 `_flee_away_tile` 保留）
+		#   ③兩者皆無               → backstop release（既有 backstop 保留，★降級為【冗餘】非主要收尾）
+		# ★★為什麼三層而不是「有了新機制就把舊的拔掉」：★★★belief 會過期，
+		#   而「目的地上一 tick 還在、這一 tick 過期了」必須有下一層接住 —— 三層是不同的接住點，不是重複。
+		# ★而目的地【每 tick 重解】（不是 dispatch 時存一份）：存下來的目的地就是一個會悄悄過期的快照。
+		if team.current_task == TeamData.TASK_FLEE:
+			var _dest: Vector2i = FactionAISystem.flee_destination_static(state, team)
+			if team.move_target == Vector2i(-1, -1) or team.tile_pos == team.move_target:
+				if _dest != Vector2i(-1, -1):
+					team.move_target = _dest                                     # ①
+					if Probe.enabled: Probe.bump("flee.move_to_dest")
+				elif team.flee_from_pos != Vector2i(-1, -1):
+					team.move_target = _flee_away_tile(state, team, team.flee_from_pos)   # ②
+					if Probe.enabled: Probe.bump("flee.move_away_fallback")
+			# ③null-belief-flee backstop（冗餘 defense）：無目的地【且】無威脅座標 ⇒ 算不出任何逃向
+			# → release 回 IDLE re-rank（非下方 continue-freeze 卡 task=逃跑 餓死）。
+			# ★條件從「flee_from_pos==-1」擴成「兩者皆無」——★★否則剛用 ① 設好的 move_target
+			#   會在下一行被 release 掉（有目的地但威脅座標過期的隊，正是新機制要救的那批）。
+			if _dest == Vector2i(-1, -1) and team.flee_from_pos == Vector2i(-1, -1):
+				if Probe.enabled: Probe.bump("flee.backstop_release")
+				TaskArbiter.release(team)
+				continue
 		# A2c-2 折入：戰略移動 move_target 改由 arbiter-owned set_strategic_move 於 movement 前設
 		#（sim_runner._step2a_strategic_move）→ 此處不再直讀 strategic_assignments（bypass 收攏）。
 		if team.move_target == Vector2i(-1, -1):

@@ -50,6 +50,14 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 	GoalResolver.ensure_maintain_goals(state, team)   # ★means-end S2（組件 A）:冪等確保 5 資源維持 goal + 更新 active/satisfied
 	var ctx: DecisionContext = DecisionContext.gather(state, team, true)   # ★真決策評估入口 → 推進 EWMA（advance=true）
 	var scored: Array = rank_scored_ctx(ctx, team.current_option, state, team)   # ★means-end:傳 state/team 供 goal frontier hook
+	# ★★★flee-to-safety 驗收③：【因為沒有 believed 目的地而改派去哪】—— ★記【去向分布】不只記備戰。
+	#   ★★只記「備戰幾次」會漏掉「其實跑去覓食了」那種答案，而那正是「恐懼有沒有被吞掉」要看的。
+	#   ★★★母體＝有威脅座標＋怕過門檻＋無目的地（＝原本會選 FLEE、現在不 applicable 的那批）。
+	#   ★而恆 0 不等於退化路好好的 —— ★★它也可能是母體塌陷（沒人落進來），兩種要拿 gather 的兩個 band 桶分開。
+	if Probe.enabled and ctx.threat_pos != Vector2i(-1, -1) and ctx.flee_dest == Vector2i(-1, -1) \
+			and ctx.threat_react >= ctx.threat_threshold:
+		Probe.bump("flee.degrade.total")
+		Probe.bump("flee.degrade.top_" + (String(scored[0]["opt"]) if not scored.is_empty() else "NONE"))
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	return scored
 
