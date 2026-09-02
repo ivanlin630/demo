@@ -4075,6 +4075,14 @@ func cleanup_extinct_teams(state: WorldState) -> void:
 		_route_extinct_assets(state, state.teams[tid])
 		routed.append(tid)
 	state.erase_teams(routed)   # 批次清光所有 ref（含 detach、registry、交叉）
+	# ★★★【消失≠死】（2026-09-02）：`state.teams` 裡不見了有四條路 ——
+	#   滅團（這裡）、被吸納（`subteam_system.gd:212`）、encounter 收編（`encounter_system.gd:1460`）、野獸。
+	#   ★而床只能看到「不在 teams 裡】 ⇒ ★★四條路全被讀成「死了」，
+	#     而【被吸納】跟【餓死】在任何驗收裡都是相反的結論。
+	#   ⇒ ★★★per-team 桶（非 sample，無 cap），讓床能把【真滅團】跟其他三條分開。
+	if Probe.enabled:
+		for _xid in routed:
+			Probe.bump("extinct.team.%d" % int(_xid))
 	for tid in routed:
 		print("[Extinct] Team%d 滅團清除（遺財已路由）" % tid)
 	state.teams_pending_erase.clear()
