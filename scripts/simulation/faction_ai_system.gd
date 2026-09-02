@@ -701,17 +701,15 @@ func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileDa
 		if String(_ap["state"]) != "fresh":
 			if Probe.enabled: Probe.bump("invite.kill_appearance_" + String(_ap["state"]))
 			continue
-		# ★★★而這裡有一個【我沒有自己決定的張力】，做法與理由都寫在這裡：
-		#   spec ③說「篩選端：unknown 一律不通過」。★而【照字面套在這裡會讓功能結構性死掉】：
-		#   ★★一個站著不動的流亡團【本來就沒有可觀察的活動信號】⇒ `observed_activity` 回 unknown
-		#     ⇒ 「unknown 不通過」＝ 永遠邀不到任何漂流團 ＝ 本 feature 的目標對象全被擋掉
-		#   ⇒ ★★★我的讀法：spec ③講的是【拿 X 當條件而 X 未知 ⇒ 不能算符合】，
-		#     而這裡的四個條件全是【排除型】（是生產隊/在打/在施工就不邀）
-		#     ⇒ 「沒有排除證據」不等於「符合條件」—— 它就是沒有排除證據
-		#   ⇒ ★所以我【不擋 unknown】，但【數它】：非 0 代表有多少邀請是在「看不出在幹嘛」下發的
-		#     ★★若 systems/blueprint 判這仍是 default-pass，改成擋只要把這個 bump 換成 continue
+		# ★★★裁定（systems 2026-09-02）：那不是張力，是【分類表缺一格】——
+		#   `observed_activity` 在【寫入端】被呼叫，那一刻觀察者正看著它
+		#   ⇒ ★回 unknown 是類別錯誤 ⇒ 補了 `ACT_IDLE`（觀察到、靜止、無可辨識活動）
+		#   ⇒ ★★所以「unknown 一律不通過」【不放寬】，而 invite 現在拿得到 IDLE ⇒ 功能自然活
+		#   ⇒ ★★★而這比放寬規則強在：它靠的是【觀察到的肯定事實】，不是【沒被排除】
 		if String(_ap["activity"]) == BeliefSystem.ACT_UNKNOWN:
-			if Probe.enabled: Probe.bump("invite.pass_activity_unknown")
+			# ★沒有這個桶，「沒人符合」與「大家都 unknown」長得一模一樣
+			if Probe.enabled: Probe.bump("invite.kill_activity_unknown")
+			continue
 		if String(_ap["activity"]) == BeliefSystem.ACT_SETTLED:
 			# ★駐紮在自己據點/營地上＝看得出它有家 ⇒ 不是漂流團（★這是【正面排除證據】）
 			if Probe.enabled: Probe.bump("invite.kill_settled")
