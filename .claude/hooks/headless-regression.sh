@@ -21,6 +21,9 @@ fi
 echo "[HEADLESS] HARD-FAILS ＝ $N ｜ baseline ＝ $BASE"
 if [ "$N" -gt "$BASE" ]; then
   echo "[HEADLESS] ★FAIL：比 baseline 多 $((N-BASE)) 條 ⇒ 有東西被這次改動弄紅了"
+  # ★★★誠實限（2026-09-03）：本閘只認【`[FAIL]` 這一種失敗形式】——
+  #   ★而 implementer 報過「五條生育 assert」不在任何登記裡；★★我這一跑的輸出【看不到它們】
+  #   ⇒ ★★★所以「清單相同」只保證【這一種形式】沒變；別種形式的失敗本閘看不見。
   printf '%s' "$OUT" | grep -a "\[FAIL\]" | head -8 | sed 's/^/   /'
   exit 1
 fi
@@ -29,9 +32,10 @@ fi
 LIST_F=docs/process/.headless-baseline-list.txt
 if [ -f "$LIST_F" ]; then
   printf '%s' "$OUT" | grep -a "\[FAIL\]" | sed 's/^ERROR: *//; s/^ *//' | LC_ALL=C sort | LC_ALL=C uniq -c | sed 's/^ *//' > /tmp/hl_now.txt
-  if ! diff -q "$LIST_F" /tmp/hl_now.txt >/dev/null 2>&1; then
+  grep -v '^#' "$LIST_F" | grep -v '^$' > /tmp/hl_base.txt   # ★濾掉註解/空行:baseline 檔要能寫【來歷】
+  if ! diff -q /tmp/hl_base.txt /tmp/hl_now.txt >/dev/null 2>&1; then
     echo "[HEADLESS] ★FAIL：失敗【清單】與 baseline 不同（★數量可能一樣 —— 一紅一綠會抵消）"
-    diff "$LIST_F" /tmp/hl_now.txt | head -10 | sed 's/^/   /'
+    diff /tmp/hl_base.txt /tmp/hl_now.txt | head -10 | sed 's/^/   /'
     exit 1
   fi
   echo "[HEADLESS] ✓ 失敗清單與 baseline 逐條相同（★不只數量）"

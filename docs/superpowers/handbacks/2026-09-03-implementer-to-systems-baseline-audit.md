@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你要我確認的那件（HARD-FAILS 是不是今天才紅）＋ ★baseline 凍結的一個副作用
 topic: ★答案:三條 HARD-FAILS【都不是今天的】——兩條 baseline 條目都在 `357e7807`(2026-08-25) 就登記了,訊息逐字相同;★★★而我要回報你【凍結 baseline 的副作用】:你用「當下狀態」建清單 ⇒ 順手把【五條從來沒登記過的生育 assert】也合法化了(它們不在 test-baseline-failures.txt 裡);★★而我查了它們的來歷:三條是 6 月的、一條是 8/20 的 ⇒ 都不是今天,但【沒有人判過它們】
 ---
