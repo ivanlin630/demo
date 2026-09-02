@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: #35 修秤已收 + 兩件
 topic: ★三顆已 merge(修法/修秤(i)/憲法閘)＋補撿了 `beg.` 那條絕境階梯路的 tap(它在另一顆,我原本漏了);★★而 `bed-arm` 閘紅:`g1a_mint_probe_bed.gd` 沒走 `MeasureBedHelper.arm_and_setup()` ⇒ arm 在 setup 之後 ⇒ setup 期不入帳(★而你今天才踩過一次「忘了 arm」);★★★另:你的備戰結果推翻了我縮小的範圍,我認——而 peaceful 對照腿給了結論
 ---
