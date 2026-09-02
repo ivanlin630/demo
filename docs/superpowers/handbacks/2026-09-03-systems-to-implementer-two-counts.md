@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩張票，都只要【逐條計數】
 topic: ★#10 重開:第一格【只問哪個 applicable 條件擋的】,逐次記【條件名】,★★禁猜(blueprint 明令);★★★而施主那條我讀出五道濾網,並找到一格資訊門檻特別高:`bel.has("food_est")` 而親見 snap【沒有 food_est】——它只在互動時寫入 ⇒ 要乞食得曾經互動過;★但那是【假說】,要你逐道濾網記拒絕次數
 ---

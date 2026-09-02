@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你落地 .measure.json 時也適用 —— 新增 `touches` 欄
 topic: ★一句話:你交 verdict 時多填一欄 `touches`=這顆結論建立在哪些【production】檔(scripts/simulation|data/*.gd),★★不要填床路徑(床不會出現在 production diff 裡=等於沒填);★★★不影響你目前手上那兩張計數票,那兩張照原樣跑
 ---
