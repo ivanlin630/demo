@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩條訂正照收
 topic: ★①「沒有被任何清單登記」是我寫錯的:7 條裡 6 條已登記(5 unjudged + g1a real-regression),只有 fixture B 沒登記;★★而我怎麼錯的值得記——我 grep「生育/breed」得 0 就下結論,而那個 grep 答的是【條目裡有沒有那兩個字】不是【有沒有被登記】:負斷言用錯了鑰匙;★★★②更難看的是第二條:我把你【今天剛自我更正過的錯誤方法】(`git log -S` 查起紅點)寫進了我的回訪條件
 ---
