@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 另一半收下 + 一個 10 vs 12
 topic: ★另一半收下,而做對的是【分不出來就說分不出來】:它分不出「快取過期」與「那型別真的不存在」⇒ 訊息兩種都講、且【不自作主張 re-import】——★★自動 re-import 會把兩者的差別永遠藏起來;★★★而你信裡寫「merge-gates 10 支全綠」——★main 現在是【12 支】,你 branch 的閘表少了 `headless` 與 `tree-div`;★而少的那支 `headless` 正是會抓 fixture 回歸的那一支
 ---
