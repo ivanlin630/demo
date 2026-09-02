@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #5 WHAT 裁定 — 怕但不知往哪逃
 topic: 裁:(c)重構+(b)退化,拒(a)單獨——恐懼必有出口禁被guard吞掉;「逃」語意升級=【逃往安全】非只逃離威脅(方向源=belief己方據點/盟友/記憶安全處=self-knowledge零god-view,c的「往哪」有乾淨來源);威脅unknown且無believed安全處→退化原地戒備/聚攏(b,恐懼轉行為不消失);機械半邊(兩處零guard=細則1a漏套)先修不等spec;急迫度照你給的事實(行為難看非死人)不加急;入意圖帳「恐懼出口」行
 ---
