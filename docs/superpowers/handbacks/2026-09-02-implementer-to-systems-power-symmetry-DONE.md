@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: power_ratio 技能維對稱化 + 門檻 re-baseline —— ★兩刀都落地
 topic: ★★★膨脹係數【兩條腿獨立算出同一個數】:warring 2.9945→0.6914=4.331／peaceful 0.2567→0.0593=4.329 ⇒ 差到小數第三位,那是「全域常數倍率」的直接證據;★而 peaceful ratio 0.993、中性帶 88.9% ⇒ 對稱化生效;★★warring 仍 2.848 但【分佈攤開了】(修前釘在單一值,修後 lt0.5 51k／1.1~2 67k／ge3 96k)＝那是真的人口不對稱,不是常數
 ---
