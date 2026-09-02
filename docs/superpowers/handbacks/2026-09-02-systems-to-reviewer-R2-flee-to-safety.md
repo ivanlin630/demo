@@ -46,11 +46,35 @@ topic: ★藍圖裁「逃＝逃往安全」+無安全處則退化戒備 + 漏套
    ⇒ ★我傾向並存，但這是行為設計的邊界，請你判我有沒有越到 WHAT
 ```
 
+# ★★★⑤R② 回覆後補上的兩件（reviewer 查實，systems 複驗）
+
+## (a) 恐懼不會被吞掉，★而中間有一個【既有】的窄 band
+```
+options.gd:400-401 "備戰" applicable: threat_react >= threat_threshold   ⇒ ★不需 destination
+   ⇒ ★★【真的恐懼（過 threshold）】保證有出口，applicability 擋 FLEE 不會吞掉它
+★★★而 reviewer 撈到：options.gd:76-81 "逃跑" applicable 【不檢查 threshold】，只檢查 threat_pos != -1
+   ⇒ ★兩道閘問的是【不同種類的問題】：FLEE 問「有沒有座標(可行性)」、備戰問「怕不怕(強度)」
+   ⇒ ★★band ＝ `threat_pos != -1` 但 `threat_react < threshold`：加 destination 要求後可能兩者皆不 applicable
+★systems 判：★★benign（低於反應門檻＝沒怕到需要出口，隊會去 rank 正常選項）
+   ⇒ ★★★而「判它 benign」要有數字撐 ⇒ **驗收加一格：落進該 band 幾次**
+   ⇒ 已另立 known_issues 條目（★這 band 是既有結構落差，不是本刀新造）
+```
+
+## (b) 並存 —— 照 reviewer 的三層優先序寫死
+```
+①目的地可解        → ★朝目的地（逃往安全）
+②目的地過期/無，但威脅座標仍在 → ★★away-tile（既有 _flee_away_tile 保留）
+③兩者皆無          → ★★★backstop release（保留為冗餘）
+⇒ ★reviewer 指出這【不是越界 WHAT，是 HOW 層的 staleness race 防禦】——我採納
+   （★★belief 會過期，而「目的地剛才還在、這一 tick 過期了」必須有下一層接住）
+```
+
 # ④驗收
 ```
 ①★`fp` 會變（行為修正）⇒ 差在哪要說得出來
 ②★★沿用 #5 的量測：flee 機會母體／續卡事件／續卡隊數去重 —— ★★★修後【續卡隊數應趨近 0】，
    而【機會母體不該塌】（若 FLEE 隊數也掉到 0，那是把恐懼擋掉了，不是修好了）
 ③★退化路要有計數：「因無安全處而改派備戰」幾次 —— 恆 0 表示退化路沒被走到，要查
-④★★backstop release 次數應【下降】—— 它從主要收尾降級成冗餘
+④★★backstop release 次數應【下降】
+⑤★★★band 計數：`threat_pos!=-1 且 threat_react<threshold 且無目的地` 落進幾次 —— ★恆 0 代表 band 不存在；★★非 0 而數字大 ⇒ 我判的 benign 要重判—— 它從主要收尾降級成冗餘
 ```

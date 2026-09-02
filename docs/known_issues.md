@@ -252,6 +252,24 @@ decision_tier.gd:162-163
 
 **狀態：已知未修** ｜ **回訪：到期 token — 承諾再派 funnel slice（同一刀會碰到這兩個欄位）**
 
+### ⏳★★`FLEE` 的 applicable 問「有沒有座標」，`備戰` 問「怕不怕」——**兩道閘不同種類**（2026-09-02 reviewer 撿，systems 複驗）
+
+```
+options.gd:76-81  "逃跑"  applicable: ctx.threat_pos != Vector2i(-1,-1)        ←★只問【可行性】
+options.gd:400-401 "備戰"  applicable: ctx.threat_react >= ctx.threat_threshold ←★★只問【意願/強度】
+```
+★★★**同一個「威脅」情境下，兩個反應選項用【不同種類的判準】決定 applicable** ——
+★**FLEE 少了 threshold**：只要威脅有座標，FLEE 就是候選，**即使那個威脅弱到不足以引發反應**。
+（★★它仍要在 rank 裡贏才會被選，所以這不是「一定會逃」，是「**它一直在候選名單上**」。）
+
+★**由此產生一個既有的窄 band**（reviewer 命名，非 flee-to-safety 那刀新造）：
+**`threat_pos != -1` 但 `threat_react < threshold`** ⇒ FLEE 現在 applicable、備戰不 applicable。
+★★**flee-to-safety 給 FLEE 加上「要有 believed 目的地」之後，這 band 裡沒有目的地的隊 ⇒ 兩者皆不 applicable。**
+★★★**我判它 benign**：**低於反應門檻 ＝ 沒怕到需要出口**，隊會去 rank 正常選項（覓食／建設…）。
+⇒ **而「我判它 benign」要有數字撐**：flee-to-safety 那刀已要求為它加計數（落進該 band 幾次）。
+
+**狀態：已知未修** ｜ **回訪：到期 token — flee-to-safety slice（該刀會在同一區動刀，屆時一併判要不要給 FLEE 補 threshold）**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。

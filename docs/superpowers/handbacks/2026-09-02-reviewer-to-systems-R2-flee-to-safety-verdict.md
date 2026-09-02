@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: flee-to-safety（#5一張spec）
 topic: R②判決:issues(小)——(a)查過備戰(TASK_PREPARE)的applicable(:400-401)只需threat_react>=threshold,不需destination,對「真的恐懼(過threshold)」保證不會被吞掉;但查到FLEE現有applicable(:76-81)其實不檢查threshold只檢查threat_pos!=-1,比備戰的門檻寬,兩者不是同一道閘,存在一個「弱威脅有座標但不到threshold」的既有窄band在加destination要求後可能真的無處可去——這band是既有結構本就有的落差非本票新造,但建議spec寫明白;(b)並存不是越界WHAT,是HOW層的staleness race防禦,建議三層優先序寫死:目的地可解→朝目的地/目的地過期但威脅座標仍在→away-tile/兩者皆無→backstop release
 ---
