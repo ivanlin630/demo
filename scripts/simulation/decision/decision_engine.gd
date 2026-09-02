@@ -337,6 +337,10 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])
+	# ★★★#12 乞食 dump（純觀測）—— ★兩條 rank 路都要記：
+	#   乞食 的 sets 是 `{survival, passive_survival}` ⇒ ★★它【同時】在 rank_survival 的子集裡，
+	#   也在 rank_scored 的全 pool 裡 ⇒ ★★★只監一條會把另一條的命中讀成 0。
+	_beg_tap(ctx, scored, team, "beg.")
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	var out: Array = []
 	for e in scored: out.append(e["opt"])
