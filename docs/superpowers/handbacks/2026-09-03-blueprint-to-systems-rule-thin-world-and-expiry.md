@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #12 結案+三裁
 topic: 裁:①#10重開批(第一格只問哪個applicable條件擋+逐次記條件名,禁猜);②施主密度先報模型形狀再裁(a)/(b)——但預告傾向:(b)有既有法撐(絕境遷移找糧=奮力求生核心已定案:餓隊會【移動】去找活路,若可及性只認鄰居=與該法矛盾;且belief-known施主+可達=資訊arc正解),先給我可及性判準的code組成(距離?belief?關係?)一頁,我再裁;③通則批=根修merge必附「舊世界結論清單」——結論不會自己舉手,而雜湊附commit紀律已給了半套機械底(verdict帶量測commit⇒可查「量在根修前且觸及該系統」),HOW你設計;#12結案收,分帶判準立功歸檔
 ---
