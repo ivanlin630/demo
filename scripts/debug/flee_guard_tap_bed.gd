@@ -17,6 +17,7 @@ func _init() -> void:
 	var state := MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg, true)
 	seed(1337)
 	var runner := SimRunner.new()
+	var pos_hist: Dictionary = {}   # team_id -> Array[Vector2i]（逐日）
 	for d in range(days):
 		for _t in range(WorldState.TICKS_PER_DAY):
 			runner.advance_tick(state, Vector2i(-1, -1))
@@ -32,6 +33,12 @@ func _init() -> void:
 			int(Probe.counts.get("flee.degrade.total", 0)),
 			int(Probe.counts.get("flee.band_no_dest_below_threshold", 0)),
 			int(Probe.counts.get("flee.no_dest_above_threshold", 0))])
+		# ★逐日記位置（全隊，廣）—— ★★因為【哪些隊是 band】要跑完才知道，
+		#   而「它有沒有凍住」要有歷史才答得出來 ⇒ 先全部記、最後再選。
+		for _tid in state.teams:
+			var _tm: TeamData = state.teams[_tid]
+			if not pos_hist.has(_tid): pos_hist[_tid] = []
+			(pos_hist[_tid] as Array).append(_tm.tile_pos)
 
 	var a: int = int(Probe.counts.get("flee.pos_none_no_threat", 0))
 	var b: int = int(Probe.counts.get("flee.pos_none_positionless", 0))
@@ -101,6 +108,39 @@ func _init() -> void:
 		print("     ⇒ ★而那正是 measurer 量到的 signature，★★而它不經過我上面那兩個設定站⇒兩站恆 0")
 	else:
 		print("  ★兩站都是 0 ⇒ 【這個窗裡】沒走到；★★而「走不到」要更大的窗才能講")
+	print("── ★★★⑥band 那些隊【改做了什麼】（systems 標的可證偽點）──")
+	var band_ids: Array = []
+	for k3 in Probe.counts.keys():
+		if String(k3).begins_with("flee.band_team."):
+			band_ids.append(int(String(k3).substr(15)))
+	band_ids.sort()
+	print("  band 隊數（去重）= %d（★上面那個 49 是【次數】，這裡是【隊數】）" % band_ids.size())
+	var dead: int = 0
+	var frozen: int = 0
+	var moving: int = 0
+	var task_tally: Dictionary = {}
+	for bid in band_ids:
+		if not state.teams.has(bid):
+			dead += 1
+			continue
+		var bt: TeamData = state.teams[bid]
+		task_tally[bt.current_task] = int(task_tally.get(bt.current_task, 0)) + 1
+		# ★凍住判準：最後 5 日位置全同（★★而【位置不動≠壞】—— 駐守／建設本來就不動）
+		var h: Array = pos_hist.get(bid, [])
+		if h.size() >= 5:
+			var same: bool = true
+			for n in range(h.size() - 5, h.size()):
+				if h[n] != h[h.size() - 1]: same = false; break
+			if same: frozen += 1
+			else: moving += 1
+	print("  結局：死亡（不在 state.teams）=%d／位置最後5日未變=%d／有移動=%d" % [dead, frozen, moving])
+	var tt: Array = []
+	for k4 in task_tally.keys(): tt.append("%s=%d" % [String(k4), int(task_tally[k4])])
+	tt.sort()
+	print("  最終 task：%s" % "｜".join(PackedStringArray(tt)))
+	print("  ★讀法：★★【位置未變≠凍住】—— 駐守／建設／生產本來就不移動；")
+	print("     ★★★要判壞掉，看的是【死亡】與【task 是不是卡在同一個不能完成的動作】，不是看有沒有走路。")
+	print("  ★誠實限：band 隊是【曾經落進 band】非【一直在 band】；上面的結局是跑完那一刻的快照。")
 	print("★誠實限：①單 config／單 seed／%d 日；★★本票【只加 tap 不改行為】——" % days)
 	print("  ★★★修法方向取決於 blueprint 裁「怕、但不知道往哪逃的隊該做什麼」，在他裁之前加任何 guard 都等於替他選")
 	quit()
