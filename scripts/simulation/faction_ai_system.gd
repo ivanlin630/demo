@@ -2809,6 +2809,30 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	var _tr0: int = _tr
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
+	# ★★★承諾再派 funnel（#10，2026-09-02）——★掛在【決策 entry】，而理由是 reviewer 給的硬的那個：
+	#   `TaskArbiter.release()` 的簽名【連 state 都沒有】(task_arbiter.gd:161)
+	#   ⇒ ★★它【技術上做不到】呼 rank_scored/DecisionEngine —— 不是「比較不容易死循環」
+	#   ⇒ ★★★所以再派只能掛在這裡。
+	# ★而候選【不必另外接線】（systems 查實）：`current_option` 也活過 release（grep 命中 0），
+	#   而 `decision_engine.gd:96` 比的就是它 ⇒ ★★重派候選【自動】帶著 persist_strength
+	#   ⇒ ★★★不接線才不會踩進「這算不算強推」的灰色地帶（★不 try_set、不 boost）。
+	# ★★本段【純觀測】：不改 ranked、不改順序、不新增旗（★禁死旗——死旗是 latch 的原料，
+	#   而我們正在修 latch）⇒ 防重複靠【次數】。
+	if Probe.enabled and team.current_task == TeamData.TASK_IDLE and team.survival_committed_option != "":
+		Probe.bump("redispatch.candidate_sent")
+		var _co: String = team.survival_committed_option
+		var _in_ranked: bool = false
+		for _e in ranked:
+			if String(_e["opt"]) == _co: _in_ranked = true; break
+		if not _in_ranked:
+			# ★★★這一格才是真缺口的所在：承諾還在，而那個 option 根本不在候選集裡
+			#   （applicable 不成立／被 stall cooldown 排除）⇒ 「再派」無從發生
+			Probe.bump("redispatch.not_in_ranked")
+		elif not ranked.is_empty() and String(ranked[0]["opt"]) == _co:
+			Probe.bump("redispatch.won")
+		else:
+			# ★「輸」必須看得見 —— ★★否則它跟「沒送回」長得一模一樣
+			Probe.bump("redispatch.lost")
 	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank", _tr)
 	# ★取樣放在計時【終點之後】⇒ `bump_sample` 自己的成本不進 `unified.rank`。
 	# ★★依賴 `phase_timing`：關掉時 `_tr/_tr0` 都是 0 ⇒ 本 sample 不運作（★這個前提寫進 dump，
@@ -5894,6 +5918,12 @@ func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 	#   —— 不是我拍的門檻，是進度的最小單位。
 	var verdict: int = DecisionEngine.stall_verdict(team.commit_stall_tick, team.commit_stall_progress,
 		now, prog, stall_ticks, 1.0)
+	# ★★★三態 tap 補齊（reviewer 點出這【不是順便補觀測】，2026-09-02）：
+	#   ★「keeps-losing 會不會變成新 latch」的答案是【不會】—— 因為 `stall_verdict` 是
+	#     **outcome-based**（食物餘命 delta）不是 execution-based ⇒ 必然在 stall_ticks 內
+	#     落進 STALLED 或 RESOLVING，不會永遠 WAITING
+	#   ⇒ ★★而那個安全閥【本身能不能被驗證】，就靠這三個 tap
+	#   ⇒ ★★★原本只有 STALLED 有 tap ⇒「沒有 stall」與「根本沒判過」看起來一樣
 	match verdict:
 		DecisionEngine.STALL_RESOLVING:
 			team.commit_stall_tick = now      # 有進展 → 重置 baseline，繼續等
@@ -5947,12 +5977,15 @@ func _detect_survival_stall(state: WorldState, team: TeamData) -> void:
 		DecisionEngine.STALL_RESOLVING:
 			team.survival_stall_cooldown.erase(team.survival_committed_option)   # relief expiry：清該 option cooldown
 			team.survival_committed_option = ""   # 解承諾 → 下 cadence 正常重蓋
+			if Probe.enabled: Probe.bump("survival.stall_resolving")
 		DecisionEngine.STALL_STALLED:
 			team.survival_stall_cooldown[team.survival_committed_option] = \
 				state.world.current_tick + DecisionEngine.STALL_EXCLUDE_WINDOW   # 硬排除 bounded window
 			team.survival_committed_option = ""   # 清蓋章 → applicable() 排除後選次格 → 新格重蓋
 			if Probe.enabled: Probe.bump("survival.stall_exclude")
-		# STALL_WAITING：耐性未耗盡，保持承諾續等
+		DecisionEngine.STALL_WAITING:
+			# ★耐性未耗盡，保持承諾續等（★★沒有這個 tap，「還在等」與「根本沒判過」分不開）
+			if Probe.enabled: Probe.bump("survival.stall_waiting")
 
 # 找最佳狩獵格：本格+鄰格 wild_game 最多的無 outpost tile；皆無 game → (-1,-1)（掉去乞食/loot）。
 func _find_forage_tile(state: WorldState, team: TeamData) -> Vector2i:
