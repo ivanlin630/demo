@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: #29 own-granary-pin recheck ①答案+peaceful完整（②warring腿正式跑中,等完整30d再補）
 ---
 
