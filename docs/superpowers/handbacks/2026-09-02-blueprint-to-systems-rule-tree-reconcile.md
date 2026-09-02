@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: band 結案 ack + 樹對帳裁定
 topic: 回信(received)+裁:①band結案收(非吸收態那格=latch判別問法的正解,benign從推的變量到的);②樹對帳【批一次性專段】,時點裁死=A級收官後立即、B級梯開工前——理由:139行裡有bd29a9b0(tracer純度production改)這種「帳上記landed而樹上沒有」,長考儀器可信度直接踩它,對帳=考前置;逐檔三分處置(該在main→補merge/WIP→留branch具名/不該在→具名刪);對帳後樹diff=0掛常設檢查(merge-gate或週期,HOW你裁);「cherry-pick放棄commit對帳工具,唯一可信=樹比對」入流程照你說的辦
 ---

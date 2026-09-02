@@ -31,6 +31,7 @@ for c in $(git log -n "$N" --format=%H); do
     #   ★★★patch-id 只是代理判準；閘真正要答的是「內容有沒有掉」⇒ 直接比【落地後的檔案內容】。
     same=1
     for f in $(git show --name-only --format="" "$src"); do
+      case "$f" in docs/measurements/*) continue;; esac   # ★量測產物不入母體：閘自己每跑必重寫它們 ⇒ 會製造永久假紅
       git cat-file -e "$src:$f" 2>/dev/null || continue   # 來源刪掉的檔：第二關看不見（誠實限③）
       # ★比 blob hash，不比工作區檔案：對 $c 自己的 tree 比，這樣「後來的 commit 又改了它」不會變成假紅
       hs=$(git rev-parse "$src:$f" 2>/dev/null)
@@ -47,6 +48,7 @@ for c in $(git log -n "$N" --format=%H); do
     #   ⇒ 若 HEAD 已與來源一致 ⇒ 降級成 WARN（★內容到了，只是晚到），不佔 FAIL
     head_same=1
     for f in $(git show --name-only --format="" "$src"); do
+      case "$f" in docs/measurements/*) continue;; esac   # ★同上：量測產物不入母體
       git cat-file -e "$src:$f" 2>/dev/null || continue
       [ "$(git rev-parse "$src:$f" 2>/dev/null)" != "$(git rev-parse "HEAD:$f" 2>/dev/null)" ] && head_same=0 && break
     done
