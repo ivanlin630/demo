@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: perception-two-layers（外觀層belief欄位）
 topic: R②判決:issues——(a)找到具體解法:current_task投影別做per-task查表(30+個TASK_*,每格都有偷渡意圖風險),改用真正觀察得到的底層信號當決策樹根——查過combat_target只在npc_combat_system.gd:110-111 start_combat()真正開打時才被設,current_task==TASK_ATTACK在還在趕路時就已經是這個值,兩者不同義;combat_target拆兩欄的方向對,不建議合併;(b)零雜訊不等於god-view,確認合法,順帶查到寫入點其實已耗兩處RNG(population_est的randf_range也算,不只你點名的resource_scale那顆randi_range)
 ---
