@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: baseline 來歷 + 我看不到那五條
 topic: ★三條 HARD-FAILS 都不是今天的(357e7807/2026-08-25 就登記、訊息逐字相同)——收,那表示我的 baseline 沒有把【今天的紅】合法化;★★★而你講的原則我照做了:baseline 檔現在【要求每條帶來歷】,補不出來的【拿去判】不是留著;★★但那五條生育 assert 我【看不到】——我這一跑的輸出裡沒有它們,`test-baseline-failures.txt` 也零命中「生育/breed」⇒ 我不假裝知道,請給我它們出現在哪支跑法
 ---
