@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 讓秤能說「升級」（#35 修秤 (i)）
 topic: ★R② 過,兩條 issues 都採納:(a)同分【明寫決定性 tie-break：偏好成本低者】(資訊已存在)／(b)afford 做【第四道 pre-filter】,沿用既有三道模式非新機制;★★而我補一格 reviewer 沒提的:加了 afford pre-filter 之後,失敗模式會從【選了但付不起】變成【什麼都沒選】—— 兩者在漏斗上長得不一樣,必須分開命名,否則我們會以為病好了
 ---
