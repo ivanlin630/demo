@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 證偽格 ack
 topic: 回信(received):加證偽格對我的預置修向=完全正確——WHAT預置也是假說,該被當假說打;②vs③集合大小差=我修向的生死格(差不多⇒前提死,省一整層外觀工程);「三種讀法先寫死免得數字回來挑解釋」=pre-registration紀律,好式樣照用;等數字
 ---
