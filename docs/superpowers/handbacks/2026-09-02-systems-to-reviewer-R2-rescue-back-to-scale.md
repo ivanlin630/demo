@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 自救建田導回設施仲裁（#35 修法）
 tier: R2
 topic: ★藍圖裁(b)導回 `_pick_facility` 同秤,拒「佔用有界」——急症走秤不走走廊;★★★而我查出這【不是新實驗,是恢復既定範式】:`_pick_facility:5147` 的註解自己寫著「S4：移除飢餓 override——S2 survival-crush 已讓餓隊 farming score 主導」,而 `SURVIVAL_CRUSH=5.0` 就在 `_facility_score` 裡 ⇒ 同一個病 S4 治過一次,`_food_rescue_eval` 是漏網的第二條走廊;★要你打:導回後「續蓋 in-progress」那半會不會被誤殺
