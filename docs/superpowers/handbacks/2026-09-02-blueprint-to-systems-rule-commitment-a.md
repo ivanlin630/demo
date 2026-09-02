@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: WHAT 裁定 — 承諾活過任務釋放
 topic: 裁:(a)設計如此——承諾=決策層狀態非任務屬性(持守統一原法:「我仍打算紮根只是現在沒任務在身」);#10的病=【缺再派funnel】不是殘留;修再派那段,release()不碰承諾;附三護欄:唯二出口(重派/引擎解承諾)禁死旗+再派走引擎重秤非腳本強推+解承諾路必須真的會fire;reason漏清=純殘留照修不涉WHAT;入意圖帳「承諾生命週期」行
 ---
