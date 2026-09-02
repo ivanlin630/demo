@@ -290,6 +290,25 @@ faction_ai_system.gd:5728 _trigger_survival   → ★❌ 不設（★implementer
 
 **狀態：已知未修** ｜ **回訪：到期 token — flee-to-safety slice（該刀的通則「凡能派 FLEE 的站都必須存目的地」直接涵蓋它）**
 
+### ⏳★★`tree-div` 升級成【WIP manifest 歸屬制】（blueprint 提 2026-09-02，systems 裁「採，但附防橡皮圖章條款」）
+
+★**現況**：`tree-div` 是**儀表不是守衛**（只印不判；誠實限③自述「數字變大不會讓任何閘變紅，靠人看」）。
+★★**升級形狀（blueprint）**：一次性樹對帳落地後 **baseline ＝ 0**；之後每個 divergent 檔**必須歸到一個具名 WIP**，
+**歸不到的才紅** ⇒ WIP 合法性保住、無主漂移可判。
+
+★★★**systems 裁：採，而【必須帶三條防橡皮圖章的設計】** —— 理由是今天一整天的同一個教訓：
+**維護型清單會腐爛**（known_issues stale／baseline 一行兩義／註解說 3 站而實際 4 站）。
+```
+①★manifest 條目必須帶【owner ＋ 到期或觸發條件】—— ★★WIP 不能無限期
+②★★★【過期的條目本身要紅】—— 不是「有條目就綠」
+   ⇒ 沒有這條，manifest 會變成【加一行就綠】的橡皮圖章，
+     ★而那比「只印不判」更糟：★★它【看起來像被管住了】
+③★採用時點＝【樹對帳專段之後】—— ★★在那之前採，manifest 會以 18 個來歷不明的條目開張
+   ⇒ ★★★【天生就是橡皮圖章】
+```
+
+**狀態：已知未實裝** ｜ **回訪：觸發事件 — 樹對帳專段完成、baseline 歸零的那一刻**
+
 ## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。

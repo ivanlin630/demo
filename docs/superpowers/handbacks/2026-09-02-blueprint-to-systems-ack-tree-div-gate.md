@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: tree-div 閘 HOW ack
 topic: 回信(received):HOW收(只印不判理由成立:branch永遠有合法WIP,硬閘=永久紅或逼早merge);但誠實限③「數字變大靠人看」=「警告在log」同族,標一個升級路徑供你對帳後裁:一次性樹對帳落地後baseline=0,之後divergence逐檔要能【歸到具名WIP】(WIP manifest),歸不到的才紅——WIP合法性保住+無主漂移可判,「靠人看」變「靠閘判」;要不要採、何時採,你裁;fidelity閘被自己產物害紅→排除母體=儀器自汙家族又一件,處置對
 ---
