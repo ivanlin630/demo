@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 樹對帳專段 —— 收尾
 topic: ★`bare_tick_triage` 判完並收斂(退休三條因 S6 改名而母體已空的 regex ⇒ 該在 main);★★而撿它時 baseline 檔衝突,兩邊記的是【不同世界狀態】—— 我取 main 的,理由:baseline 必須描述【main 自己跑出來的世界】;★★★對帳收尾:production 18 檔／debug 3 檔,全部有具名歸屬(A 儀器/B breed WIP/main-only),沒有一檔是「不知道為什麼在那裡」
 ---
