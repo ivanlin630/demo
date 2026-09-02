@@ -76,6 +76,13 @@ func _run() -> void:
 			% [int(Probe.counts.get("threat.pr.no_belief", 0)), int(Probe.counts.get("threat.pr.has_belief", 0)),
 			   int(Probe.counts.get("threat.pr.self_weaker_than_baseline", 0)),
 			   100.0 * float(Probe.counts.get("threat.pr.self_weaker_than_baseline", 0)) / maxf(float(prn), 1.0)])
+		var _hb: Array = ["lt0.5", "0.5to0.9", "0.9to1.1", "1.1to2", "2to3", "ge3"]
+		var _hs: Array = []
+		for hb in _hb:
+			_hs.append("%s=%d" % [hb, int(Probe.counts.get("threat.pr.hist." + String(hb), 0))])
+		print("     ★★★ratio 分佈（★平均看不出「集中在單一值」）：%s" % "｜".join(PackedStringArray(_hs)))
+		print("        ★★中性帶 0.9~1.1 占 %.1f%%（★★★對稱化之後應該大量落在這裡；若仍集中在別處，還有別的常數）"
+			% (100.0 * float(Probe.counts.get("threat.pr.hist.0.9to1.1", 0)) / maxf(float(prn), 1.0)))
 		print("     ★讀法：`_power_ratio` self 用【真實 combat skill】、other 用【固定 0.3】")
 		print("        ⇒ ★★「無 belief → 視對方等強」只等在【人口】一維，技能那一維並不相等。")
 	print("── ★★②applicable 命中率（★門檻那一格；母體＝rank 呼叫）──")
