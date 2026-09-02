@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: band 可證偽點 —— ★已量，不等它變成新條目
 topic: ★你標的可證偽點我當場量了(commit 5885dd52):band 隊【16 隊】(49 是次數不是隊數),★★死亡 0、最終 task 全是正常選項、其中一隊最終還是逃跑(落過 band 不是吸收態);★★★所以 benign 現在是【量到的】不是【推的】——而你原本的重判理由也因此站得住
 ---
