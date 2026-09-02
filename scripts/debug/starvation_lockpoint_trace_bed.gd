@@ -11,6 +11,8 @@ extends SceneTree
 # 捕「逃跑主導/人口重摔」是否 coherent（真威脅觸發+真逃離某位置）vs broken（對空氣逃）。
 # 純觀測，不改 production 邏輯。用法：SPECIMEN_SEED(default 1337) SPECIMEN_MONTHS(default 8)
 # FOOD_DAYS_THRESHOLD(default 3.0，低於此才記錄，省開銷)
+# ★命名紀律（blueprint 2026-09-02，桶名只准宣稱判準本身）：分類桶「stuck-task」改名「has-committed-option」，
+#   自 commit dd174bbd 起——舊量測檔(commit dd174bbd 之前產出)裡寫的是「stuck-task」，同一格，別當孤兒讀。
 
 func _initialize() -> void:
 	_run(); quit()
