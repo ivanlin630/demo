@@ -2845,6 +2845,9 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		else:
 			# ★「輸」必須看得見 —— ★★否則它跟「沒送回」長得一模一樣
 			Probe.bump("redispatch.lost")
+			# ★輸【給誰】—— ★★sample 有 cap，而「輸給誰」是三票共同的問題（備戰是不是一面倒）
+			#   ⇒ ★★★用無 cap 的 per-winner 桶，不依賴取樣
+			Probe.bump("redispatch.lost_to." + (String(ranked[0]["opt"]) if not ranked.is_empty() else "(空)"))
 			# ★★★輸的【當下】印完整 per-option util 表（systems 2026-09-02，★只 dump 不開藥）
 			#   ★依據不是新紀律：memory `feedback_measure_peroption_util_before_decision_claim`
 			#     ——決策問題禁靜態斷言，先 dump 真實 per-option util 再開藥
