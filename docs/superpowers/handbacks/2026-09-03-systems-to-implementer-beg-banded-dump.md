@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: #12 統一路 —— 按餓深分帶 dump（★不是泛問 genuine）
 topic: ★★★刀型是 blueprint 定的,而它比我提的準:【按餓深分帶】而不是泛問「乞食 util 是否 genuine」——0.495 對【還沒餓到極限的隊】可能完全正確;★★判準寫死:【最深帶(food_days→0)且施主可及】時,乞食贏不贏;★連同【施主可及性率】一起量——階梯路「沒人可乞 199/209」提示世界可能太薄,而那是「贏得 genuine」的另一半;★★★#5＋#35 收口,#10 併進本輪順手加大母體
 ---
