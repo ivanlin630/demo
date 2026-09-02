@@ -1,4 +1,4 @@
-﻿class_name OutpostSystem
+class_name OutpostSystem
 
 const OUTPOST_NAMES: Dictionary = {
 	"civilian": ["村落", "城鎮", "都市"],
