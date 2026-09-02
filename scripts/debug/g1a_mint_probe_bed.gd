@@ -31,8 +31,12 @@ func _run() -> void:
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 25
 	var sd: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
 	seed(sd)
-	var state := WorldState.new()
-	state.world = WorldData.new()
+	# ★★★arm 必須在【建世界之前】（bed-arm 閘，systems 2026-09-02）：
+	#   ★舊寫法是先 new WorldState、搭完 fixture 才 `Probe.arm()`
+	#     ⇒ ★★setup 期發生的事【不入帳】，而那跟「没發生」在輸出上長得一樣。
+	#   ★★★而我今天已經踩過一次同族（這支床第一版根本沒 arm ⇒ cand=0
+	#     看起來像「`_pick_facility` 從不跑」）⇒ 這一次走 helper，不自己拼順序。
+	var state: WorldState = MeasureBedHelper.arm_and_new()
 	var pos := Vector2i(2, 0)
 	var tile := HexTileData.new()
 	tile.tile_id = pos.x * 1000 + pos.y; tile.tile_pos = pos
@@ -71,8 +75,8 @@ func _run() -> void:
 	# ★★★先 arm Probe —— ★這支床第一版【沒 arm】，於是 cand=0、母體=0，
 	#   而那跟「_pick_facility 從來沒跑」長得一模一樣 ⇒ ★★差一點就去查【不存在的第二條建設路】。
 	#   ★★★所以下面必印 CONTROL 行：儀器有沒有開，要寫在輸出裡而不是假設。
-	Probe.arm()
 	FactionAISystem.trace_infra = true
+	print("[CONTROL] %s" % MeasureBedHelper.arm_order_report())
 	print("[CONTROL] Probe.enabled=%s trace_infra=%s（★false 的話下面整張表都是儀器沒開）"
 		% [str(Probe.enabled), str(FactionAISystem.trace_infra)])
 	var runner := SimRunner.new()
