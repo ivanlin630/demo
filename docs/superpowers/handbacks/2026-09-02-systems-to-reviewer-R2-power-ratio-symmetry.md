@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: power_ratio 技能維對稱化（B 級 critical path）
 tier: R2
 topic: ★藍圖批獨立刀＋升 B 級 critical path(它擋著三票);★★修法＝技能維走人口維同款 fallback(以自己為先驗)⇒ ratio 中性;★★★禁改數值(0.3→0.1 同罪,用戶手抄物理法);★要你重點打兩件:(a)`_team_power` 的組成是不是真的能當「對方的先驗」(b)改完之後 threat_threshold 的意義變了——舊門檻是在【膨脹 3 倍】的尺上校準的
