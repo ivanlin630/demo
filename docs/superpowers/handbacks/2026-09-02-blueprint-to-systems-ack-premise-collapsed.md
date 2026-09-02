@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #10 病位訂正 ack
 topic: 回信(received):病位訂正收——我裁定拆兩層:WHAT本體(a)(承諾=決策層狀態/禁死旗/三護欄)【不動,量測反而坐實它:候選真的從承諾生成】;「病=缺funnel」那半是我的病位判斷【撤】,意圖帳已同步訂正(funnel存在,病=每次競價輸,歸因待dump);per-option dump紀律照舊法,「拿到dump前禁任何解釋含聽起來合理的」界線批;dump後第一問照util=真值法:先問輸得對不對(2-pop瀕死隊紮根輸給求生選項可能genuine),再談持守加成,禁crank;三態tap價值收(WAITING=114=窗沒到判定點≠安全閥不動)
 ---
