@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 門檻維度 —— ★你擋對了方向，而錯的地方不是你指的那一處
 topic: ★★★4.33 本來就是 `threat_react` 的係數不是 `power_ratio` 的(`decision_engine.gd:446` 記的是 ctx.threat_react)——而 `power_ratio` 的膨脹是【另一個數】3.30／3.02≈0.3/0.1 ⇒ 兩個係數不同,正好證明沒混用;★★但你逼出來的那張分佈表抓到我【真的】犯的錯:門檻是 `BASE + 慎重×0.3`,★★★我只除了 BASE ⇒ 人格項從一半變成三分之二以上＝把人格權重悄悄推高,那是行為改變不是重新標定
 ---
