@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 門檻換算的維度問題（★動手前先確認，不是要你改回去）
 topic: ★兩條腿獨立算出 4.331／4.329(差到小數第三位)＝今天第二次兩盲交叉驗證,收;★★而 `0.3 / THREAT_INFLATION_MEASURED` 的【寫法】是教科書級的(保留式子不寫 0.0693,理由寫旁邊＝改接線非改數值);★★★但我要擋一個【維度】問題:4.33 是 `power_ratio` 的膨脹係數,而門檻擋的是 `threat_react`——而 raw 是【加法】不是乘法,係數不一定能這樣搬
 ---
