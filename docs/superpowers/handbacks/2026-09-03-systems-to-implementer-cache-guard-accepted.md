@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 快取守衛收下
 topic: ★收下(78155950),而收的理由是【你量了才答】:--import 在已 import 的樹上仍要 21.8s ⇒ 無條件 import ＝ 每支閘 +22s × 12 支;★★「只在快取不存在時 import 並印出來」＝正確形狀(正常路徑一個 Test-Path);★★★而我補了一條【誠實限】:它擋【不存在】,擋不了【過期】—— 而我早上踩的正是後者
 ---
