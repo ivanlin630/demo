@@ -5153,6 +5153,9 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 	var elig: int = 0        # ★通過三道過濾的設施數（＝真正被評分的候選）
 	var n_below: int = 0     # ★被評分但分數 <= 門檻的個數
 	var best_seen: float = 0.0
+	var n_unafford: int = 0   # ★第四道 pre-filter 篩掉的個數（★★「什麼都沒選」的成因之一）
+	var best_cur: int = 0     # ★winner 的現級（>0 代表這是【升級】而不是【新建】）
+	var best_cost: int = 0    # ★★同分 tie-break 用：winner 的 person_hours（★★★取自已算好的 upgrade_cost，不另算）
 	for f in OutpostSystem.FACILITY_DEF:
 		var def: Dictionary = OutpostSystem.FACILITY_DEF[f]
 		if not (tile.outpost_type in def["allowed_outpost"]):
@@ -5161,8 +5164,25 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		if def.has("required_terrain") and tile.terrain != def["required_terrain"]:
 			if Probe.enabled: Probe.bump("pick.%s.filtered.terrain" % site)
 			continue
-		if int(tile.get(def["current_level_key"])) > 0:   # gate-ok: guard: 已有設施→升級 skip(selection)（★同上：拆行時標記留在 continue 行 → 搬回）
-			if Probe.enabled: Probe.bump("pick.%s.filtered.already_built" % site)   # gate-ok: guard: 已有設施→升級 skip(selection)
+		# ★★★#35 修秤(i)（systems spec 2026-09-02，R② 過）：候選集納【既有設施升一級】。
+		#   ★舊本這裡一律 `continue` ⇒ 這把秤【講不出「升級」這件事】；
+		#     而真世界的村大多已經有 farming ⇒ 自救路導回之後 `pick.farming = 0/3605`。
+		#   ★★秤本身不改：`_facility_score` 對等級零參照（reviewer 複驗）——
+		#     它問的是「我想不想在這裡有這座設施」，而 `_facility_deficit` 本來就在問「我缺多少」。
+		#   ★★★上限仍然守著：`cur >= 3` 不再升（世界機制，非本刀新門檻）。
+		var _cur: int = int(tile.get(def["current_level_key"]))
+		if _cur >= 3:   # gate-ok: world-mechanic: facility level cap (>=3)（與 FACILITY_DEF 同一個上限）
+			if Probe.enabled: Probe.bump("pick.%s.filtered.max_level" % site)
+			continue
+		# ★★★第四道 pre-filter：afford（★沿用上面三道的同一個模式，非新機制）。
+		#   ★★而它會讓【失敗模式搬家】：舊＝選了但下游 reject_cannot_afford；
+		#     新＝這裡就篩掉 ⇒ 【什麼都沒選】⇒ ★★★必須單獨命名，
+		#     否則 `reject_cannot_afford` 歸零會被讀成「病好了」，而其實只是卡在別的地方。
+		var _fcost: Dictionary = OutpostSystem.upgrade_cost(f, _cur + 1)
+		if not BuildAfford.can_afford(_fcost, [tile.public_storage, team.resources],
+			TradeValuation.leader_vals(state, team)):
+			n_unafford += 1
+			if Probe.enabled: Probe.bump("pick.%s.filtered.unaffordable" % site)
 			continue
 		elig += 1
 		var s: float = _facility_score(state, team, tile, leader, f)
@@ -5176,9 +5196,22 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 				"team_tools": float(team.resources.get("tools", 0)),
 			}, 4000)
 		best_seen = maxf(best_seen, s)
+		var _fph: int = int(_fcost.get("person_hours", 0))
 		if s > best_score:
 			best_score = s
 			best = f
+			best_cur = _cur
+			best_cost = _fph
+		elif best != "" and is_equal_approx(s, best_score) and _fph < best_cost:
+			# ★★★同分 tie-break【明寫、決定性】：偏好【成本低者】。
+			#   ★不留給 argmax 的偶然順序 —— ★★那會變成「看起來隨機」的行為，
+			#     而且會隨著 FACILITY_DEF 的字典順序逐版漂移。
+			#   ★★★成本取 person_hours：它就在上面 afford 那一道已經拿到的 `_fcost` 裡，
+			#     不另算（reviewer：該資訊已存在）；而它是單一度量，不混單位。
+			best = f
+			best_cur = _cur
+			best_cost = _fph
+			if Probe.enabled: Probe.bump("pick.%s.tiebreak_cheaper" % site)
 		else:
 			n_below += 1
 			if Probe.enabled: Probe.bump("pick.%s.below_threshold.%s" % [site, f])
@@ -5195,7 +5228,15 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		if Probe.enabled:
 			# ★★①與③分開：「一個候選都沒有」vs「有候選但分數都不夠」——修法完全相反
 			if elig == 0:
-				Probe.bump_pt("pick.%s.empty_no_eligible" % site, _pday, team.team_id)
+				# ★★★失敗模式搬家了，所以這裡再分一層（systems 2026-09-02）：
+				#   ★【全部付不起】與【本來就沒有候選】在舊桶裡長得一樣，
+				#     而前者是本刀新造的（afford 從下游搬到 pre-filter）。
+				#   ★★不分的話：`reject_cannot_afford` 歸零 ⇒ 看起來像病好了，
+				#     而其實只是卡到別的地方。
+				if n_unafford > 0:
+					Probe.bump_pt("pick.%s.empty_all_unaffordable" % site, _pday, team.team_id)
+				else:
+					Probe.bump_pt("pick.%s.empty_no_eligible" % site, _pday, team.team_id)
 			else:
 				Probe.bump_pt("pick.%s.empty_all_below_threshold" % site, _pday, team.team_id)
 				Probe.bump("pick.%s.below.n_eligible.%d" % [site, elig])
@@ -5204,8 +5245,18 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 				Probe.bump("pick.%s.below.score_bucket.%s" % [site,
 					("zero" if best_seen <= 0.0 else ("lt_half_floor" if best_seen < floor0 * 0.5 else "near_floor"))])   # gate-ok: observation-only — 診斷分桶，不參與 _pick_facility 的選擇
 		return {}
+	# ★★★winner 是【升級既有設施】時，【不佔新格】⇒ slot 滿不滿跟它無關。
+	#   ★若不先擋這一手，一個 slot 滿的村會拿【升級】去跑拆建／擴建那兩條路，
+	#     而那兩條是為【新建】設計的 ⇒ ★★會白白拆掉一座設施來換一個根本不需要的格。
+	if best_cur > 0:
+		if Probe.enabled:
+			Probe.bump_pt("pick.%s.ok_upgrade_facility" % site, _pday, team.team_id)
+			Probe.bump("pick.%s.win_upgrade" % site)
+		return { "facility": best }
 	if not slot_full:
-		if Probe.enabled: Probe.bump_pt("pick.%s.ok_slot_free" % site, _pday, team.team_id)
+		if Probe.enabled:
+			Probe.bump_pt("pick.%s.ok_slot_free" % site, _pday, team.team_id)
+			Probe.bump("pick.%s.win_new" % site)
 		return { "facility": best }
 	# ★★★升級收進【同一把秤】（spec 2026-08-26 infra-ladder-dissolve）：
 	#   三者想蓋的是【同一座設施】best，差別只在【怎麼騰出那一格】的代價 ⇒ 共用 best 的 `_facility_score`，
