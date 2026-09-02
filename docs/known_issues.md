@@ -1274,7 +1274,30 @@ QA 讀 seed4201 specimen 時抓：**team48 死於另一個既有 task-priority-p
 
 desperation 複判 6 specimen **全程從沒選過乞食**、log 無 beg print → 不是「幻覺」（never-selected 不守幻覺），是**引擎幾乎不選它**。該乞食的謙卑窮隊從不乞食＝絕境階梯一個死 rung。**非 desperation A 刀 blocker**（A=不選幻覺；乞食沒被選無 A 問題）。**★根因坐實（2026-07-15 code-read，非 util 是 applicability 門檻太嚴）**：`_find_aid_target`（`faction_ai_system.gd:3448`）要求 belief 有 **`food_est` 具體糧估** + 信它有餘糧（`food_est > pop×14`）——這種私有針對性情報通常只在**先前交易過/派人打探過**該隊才形成。剛絕境的隊大機率對鄰居無此具體 belief → `has_aid_target` 常年 false → 乞食**連候選都進不去**（與 util 無關）。對比買糧只需「聽過市集廣播賣單」（公開）寬鬆得多。**乞食非幻覺**（`_resolve_aid_request` mercy floor 有完成路，code 雙證）。**★blueprint WHAT 裁定（2026-07-15）＝盲乞食**：乞討本質＝對**可見鄰居的絕望懇求**（非對已知富 patron 的針對性精算）→ 放寬門檻：絕境隊對可見鄰居**盲試乞食**（不需 `food_est`，`has_belief`/視野內有隊即可）→ 撲空 emergent（謙卑施主給、禽獸拒；mercy 路真能救命＝可選 rung）。**人格 gate**：高求生欲/謙卑/低野心→肯乞；驕傲→寧死不乞（接決策模型）。**backlog 非本刀 blocker**（乞食 dead≠coherence bug，隊有覓食/遷移/掠奪其他路不 limbo）→ 歸「絕境階梯完整性」arc（見 progress.md，與抱團+食物流通同做）。連 [[project_desperation_economy]]。
 
-## ★凍結威脅實體無 resolve/despawn（2026-07-15，QA desperation 複判抓，「無事發生的假戲」族）
+## ★★★威脅值 29 天不變 —— **框架訂正（2026-09-02 先查）：不是「實體沒 despawn」**
+
+★**保留【當時觀察到的症狀】**（那部分仍然有效，不因框架錯而消失）：
+> Team18 後半 `threat_id:10 / threat_pos:[13,5] / threat_react:8.7` **29 天一個小數點沒變**，而 food 卻爬 279→…
+> ——「無事發生的假戲」族（2026-07-15 QA desperation 複判抓）。
+
+★★**而原標題的框架【套不上】**（systems 2026-09-02 窮盡掃 `threat_id`，全站 12 處）：
+```
+decision_context.gd:159  var threat_id: int = -1        ←★它是 DecisionContext 的欄位
+decision_context.gd:323  c.threat_id = _best_id         ←★★每次決策【現算】
+team_data.gd             ⇒ ★★★【沒有】threat_id／threat_pos／threat_react
+⇒ 威脅【不是持久實體】⇒ 「無 resolve/despawn」這個描述沒有對象
+```
+★★★**所以真正的問題要重問**：**為什麼【每次重算】都算出同一個值？** 兩個完全不同的解釋：
+```
+(a)★真的有一個穩定的鄰居威脅 ⇒ ★★合法，不是病
+(b)★★belief 過期而一直回同一份 stale ⇒ ★★★那是【belief 衰減層】的問題，不是威脅層的
+```
+★**歸屬（blueprint 2026-09-02 裁）**：**症狀多半在 belief 衰減層**；若查證成立，**掛 threat-oracle arc**。
+★★**查法**：dump `_best_id` 的來源與該 belief 的 `last_tick` 年齡 —— ★★★**不是加 despawn。**
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一輪任何跑 threat 決策的床，順手 dump `_best_id` 來源 ＋ belief 年齡**
+
+## （原文，框架已於上方訂正）★凍結威脅實體無 resolve/despawn（2026-07-15，QA desperation 複判抓，「無事發生的假戲」族）
 
 Team18 後半 `threat_id:10 / threat_pos:[13,5] / threat_react:8.7` **29 天一個小數點沒變**，food 卻爬 279→369＝**威脅實體掛著不動、無 resolve/despawn**，撐 survival 決策常勝（原地戒備恆合理）。QA 判「無事發生的假戲」家族（決策合理但底層世界靜止不動＝同 thrash/mirage 族——決策層對、世界層沒對應動作）。**修向**：威脅實體須有生命週期（接觸→交戰/嚇退/despawn），非永久靜掛。**可觀測性**：威脅 tap 已能抓（threat_id/react 凍結可見），故此 bug 現形＝觀測投資回報。優先序中（撐假 survival 常勝＝掩蓋真求生壓力）。
 
