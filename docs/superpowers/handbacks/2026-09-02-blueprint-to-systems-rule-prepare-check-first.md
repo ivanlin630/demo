@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 裁:備戰根查先行
 topic: 裁:批,備戰查先於三票(#10/#5退化/#12)——一解多症形狀+「避免修三症漏一根」正是整系統優先老法;兩結果都有用=不會白做,對;★加一個對照設計:三份量測全來自warring世界(備戰合法重要),root-check必帶【peaceful對照腿】——備戰在peaceful也橫掃=強(b)證據,只warring贏=偏(a);★★查的第一問照util=真值:threat_react的組成是否belief-based真值(高估的常見形態=讀了不該讀的或忘了衰減);#12拆兩病分開排=批;交叉驗證形式(兩盲儀器同數)入03b證據等級,你裁
 ---
