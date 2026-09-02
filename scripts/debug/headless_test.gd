@@ -10923,6 +10923,12 @@ func _test_find_trade_partner_outpost_only() -> void:
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
 	state.world.tiles[0] = tile
 	state.team_discovered[0] = [2, 1]   # 2 先掃但無 outpost → 應跳過
+	# ★★★fixture 補 belief（god-view 真違規④修法之後）：候選母體從 `team_discovered`
+	#   換成 `BeliefSystem.known_targets` ⇒ ★沒有 claim 的隊【不再是候選】
+	#   ★★意圖確認：本測的意圖是【只選有 outpost 的】，不是【測沒有 belief 的情形】
+	#   ⇒ 補 fixture 讓它變合理，★★★不是翻斷言
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "tile_pos": with_op.tile_pos}, 1.0, false)
+	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 5, "tile_pos": no_op.tile_pos}, 1.0, false)
 	var partner: Dictionary = StrategicAiSystem.new()._find_trade_partner(state, trader)
 	assert(not partner.is_empty() and int(partner["team_id"]) == 1, "應選有 outpost 的 Team1，實際=%s" % str(partner))
 	assert(partner["outpost_pos"] == Vector2i(0, 0), "outpost_pos 應 (0,0)")
@@ -11567,6 +11573,12 @@ func _test_trade_partner_requires_resident() -> void:
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(3, 3); tile.outpost_owner = 1
 	state.world.tiles[3003] = tile
 	state.team_discovered[0] = [1]
+	# ★同上：候選母體改讀 belief ⇒ 補 claim。★意圖＝【限居民團 tile】不是【測無 belief】
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "tile_pos": owner.tile_pos}, 1.0, false)
+	# ★★★而還要補【tile 已知】：outpost 在 (3,3)、trader 在 (5,5) ⇒ ★hex 距離 4 > VISION_RADIUS 3
+	#   ⇒ ★★harvest 掃不到它 ⇒ 新 code【正確地】不知道那個據點存在
+	#   ⇒ ★★★本測的意圖是【限居民團 tile】，不是【測看不見的據點】⇒ 補「這格我看過」讓意圖成立
+	state.team_tile_known[0] = {3003: true}
 	var sai := StrategicAiSystem.new()
 	# A: outpost 有 owner 但 tile 上無居民團 → 不選
 	var partner_a: Dictionary = sai._find_trade_partner(state, trader)
