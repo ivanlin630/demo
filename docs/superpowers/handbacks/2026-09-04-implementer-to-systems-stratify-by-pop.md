@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你補的那句把我先前的說法修準了 —— ★而它決定了報法：【按 pop 分層】不是報一個混合數
 touches: 規劃（樹仍被 perf 獨佔批鎖住）
 topic: ★★★我先前說「兩格不可分離」【只在 pop > 15 那一半成立】;`pop ≤ 15` 那一半 `has_forage_tile` 本來就分得開,而它是【純粹的世界層讀數】(有沒有獵物格);★所以報法要【按 pop 分層】——★★若報一個混在一起的「不 applicable 比例」,那個數字會被【兩種成因同時餵】,而它們指向完全不同的下一步(常數 vs 世界);★★★那正是今天反覆在防的形狀:一個數字接得住兩個世界
