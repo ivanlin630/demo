@@ -1,0 +1,95 @@
+ANCHORS=145  {'OK': 52, 'DRIFT': 88, 'UNRESOLVED': 5}
+
+[DRIFT] known_issues.md:163  `goal_resolver:197`  ｜★material-need bootstrap gap（code-provable，reviewer R² 2026-｜ const DISTRIB_RELIEF_REF_POP: float = 5.0     # TEST VALUE — 典型小型定居居民規
+[DRIFT] known_issues.md:187  `goal_resolver:154`  ｜★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribute-zero-di｜ var kind: String = String(prereq.get("kind", ""))
+[DRIFT] known_issues.md:193  `message_system:79`  ｜★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribute-zero-di｜ msg.type = type
+[DRIFT] known_issues.md:193  `read_market_board:194`  ｜★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribute-zero-di｜ var surplus: float = ResourceSystem.effective_food(state, team) \
+[DRIFT] known_issues.md:230  `faction_ai:4863`  ｜⏳JOIN 在途重申 CPU + ★pair-print 非有效 churn 指標（2026-08-19 農業b fin｜ # ★決策當下【兩池】material 總量分桶：直接回答「它有沒有機會買得起」
+[DRIFT] known_issues.md:230  `decision_context:530`  ｜⏳JOIN 在途重申 CPU + ★pair-print 非有效 churn 指標（2026-08-19 農業b fin｜ # severity=真 runway 缺口（deficit_severity），非死常數；help_target=領主（belief 已知
+[DRIFT] known_issues.md:249  `faction_ai_system:712`  ｜⏳★★perf 真兇=`near.faction_ai` 決策核心（2026-08-20 perf 線索包①② 決定性）｜ ResourceBank.set_amt(team, "mounts", current + take, "auto_withdraw_mo
+[DRIFT] known_issues.md:428  `movement_system:193`  ｜🧭★「走一格要多久」全站有**五套**算法（2026-08-21 R² 親查 + systems 窮盡確認）｜ if Probe.enabled: Probe.bump("rootdiff.WAGON_TERRAIN_MULT")
+[DRIFT] known_issues.md:431  `faction_ai:5612`  ｜🧭★「走一格要多久」全站有**五套**算法（2026-08-21 R² 親查 + systems 窮盡確認）｜ if td.has("social_target"):
+[DRIFT] known_issues.md:432  `subteam_system:12`  ｜🧭★「走一格要多久」全站有**五套**算法（2026-08-21 R² 親查 + systems 窮盡確認）｜ return maxi(int(float(dist) * float(MovementSystem.BASE_MOVE_TICKS) * 
+[DRIFT] known_issues.md:515  `interaction:781`  ｜📋 訂單簿健康度：成交率 0.7%、壽命是硬常數牆、churn 0%（2026-08-21 世界級數字、用戶追問的舊懸案｜ if String(visitor.task_extra_data.get("convoy_kind", "")) == "distribu
+[DRIFT] known_issues.md:523  `headless_test:12842`  ｜🩺 生育不給「醫療」技能 XP（既有、非新引入；2026-08-20 生育 slice merge-gate 時查清）｜ var lp := PersonData.new(); lp.id = 100; lp.team_id = 0
+[DRIFT] known_issues.md:530  `faction_ai:725`  ｜⚠️★★回溯標注：以下 peaceful 卷結論**全部缺一個章節**——「**這張卷沒有勢力層**」（2026-08-｜ #     「存著的值是舊的」≠「有決策讀到了舊的」——★該隊那個 tick 可能根本沒呼叫。
+[DRIFT] known_issues.md:544  `faction_ai:4394`  ｜★★★ 但由此浮出一條可能統一今天所有線的鏈（**假說，一個數字可定案**）｜ TaskArbiter.transition(state, worker, TeamData.TASK_BUILD, TaskArbiter
+[UNRESOLVED] known_issues.md:597  `known_issues:17`  ｜🏭 沒有人蓋 workshop ＝ 設施鏈斷的真上游（2026-08-20、mint 0% 追根時發現）｜ 
+[DRIFT] known_issues.md:620  `team_data:117`  ｜✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線修；rate-equivale｜ var previous_task: String = ""   # survival override 前的原 task，回復用
+[DRIFT] known_issues.md:624  `sim_runner:109`  ｜✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線修；rate-equivale｜ var top: String = ""
+[DRIFT] known_issues.md:650  `specimen_tracer:62`  ｜⚠️`DecisionContext.gather` 有寫副作用 —— **部分修**（`need_urgency`/`｜ 
+[DRIFT] known_issues.md:651  `decision_context:602`  ｜⚠️`DecisionContext.gather` 有寫副作用 —— **部分修**（`need_urgency`/`｜ var fi = state.factions.get(team.faction_id)
+[UNRESOLVED] known_issues.md:659  `_calc_reserve:667`  ｜🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 pin 定案、fix in f｜ 
+[DRIFT] known_issues.md:659  `decision_context:335`  ｜🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 pin 定案、fix in f｜ c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(fl
+[DRIFT] known_issues.md:696  `_try_dispatch_or_invite:567`  ｜gate② settle attempt-gate 矛盾（flagged 不一致，DEFER 進 means-end 重｜ 
+[DRIFT] known_issues.md:708  `resource_system:57`  ｜★★★食糧地方安全 arc = session keystone：兩分配閘（2026-07-23，measure+QA+｜ "forest":   { "food": 3.0,  "material": 12.0 },
+[DRIFT] known_issues.md:740  `faction_ai:2801`  ｜★weaponsmith 真牆 = 兩 build 閘（非 trade，2026-07-23，material-buy ｜ continue   # 非候選（子隊=非自主 leader）→ 試次佳
+[DRIFT] known_issues.md:741  `order_system:121`  ｜★weaponsmith 真牆 = 兩 build 閘（非 trade，2026-07-23，material-buy ｜ else:
+[DRIFT] known_issues.md:758  `trade_valuation:97`  ｜★cost70 診斷訂正 + construction cap 100 脫鉤 afford 門檻 = means-end｜ and NeedOracle._construction_facility_need(state, team, "material", le
+[DRIFT] known_issues.md:767  `_dispatch_facility_builder:2780`  ｜dispatch afford buffer ×1.5 承重（G1a mint 依賴，不能為 weaponsmith 降｜ if _mconq:
+[DRIFT] known_issues.md:767  `_dispatch_upgrader:2637`  ｜dispatch afford buffer ×1.5 承重（G1a mint 依賴，不能為 weaponsmith 降｜ 
+[DRIFT] known_issues.md:771  `faction_ai_system:1858`  ｜crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 fire，2026-07-22，｜ continue
+[DRIFT] known_issues.md:771  `resource_system:208`  ｜crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 fire，2026-07-22，｜ # 合併池提領（先 team 後糧倉）→ food 在哪都不誤餓。消耗是 sink，從哪扣都守恆。
+[DRIFT] known_issues.md:795  `outpost_system:606`  ｜market_orders capture/demolish 不清（pre-existing 洩漏，2026-07-20｜ if Probe.enabled: Probe.bump_pt("wall.reject_max_level", _wday2, team.
+[DRIFT] known_issues.md:799  `faction_ai_system:1115`  ｜god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E mea｜ break
+[UNRESOLVED] known_issues.md:799  `force_ge_target:1109`  ｜god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E mea｜ 
+[DRIFT] known_issues.md:812  `beast_system:16`  ｜★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，crisis-i｜ # 造臨時野獸 pseudo-team，入 state.teams，回傳 team_id。
+[DRIFT] known_issues.md:814  `faction_ai:3314`  ｜★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，crisis-i｜ return false
+[DRIFT] known_issues.md:814  `encounter:1232`  ｜★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，crisis-i｜ AnonTierSystem.kill_random(t, dead_anon, "combat")   # 上場陣亡（cohort 唯一來
+[DRIFT] known_issues.md:820  `sim_runner:259`  ｜★TaskArbiter.transition = 無條件 raw 覆寫後門（手不聽腦，2026-07-19，team1｜ var _t: int = Time.get_ticks_usec() if phase_timing else 0   # 相位計時鏈起點
+[DRIFT] known_issues.md:822  `faction_ai:3876`  ｜★TaskArbiter.transition = 無條件 raw 覆寫後門（手不聽腦，2026-07-19，team1｜ if not has_demand_tag: return 0.0
+[DRIFT] known_issues.md:867  `faction_ai_system:3448`  ｜★乞食死 rung——引擎幾乎不選乞食（2026-07-15，desperation QA 複判抓，絕境階梯斷階）｜ print("[SoloAI] Team%d → %s (%s)" % [team.team_id, td["task"], opt])
+[DRIFT] known_issues.md:914  `npc_combat:551`  ｜★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint 結構信號｜ func _loot_resources(winner: TeamData, loser: TeamData, cruelty: float
+[DRIFT] known_issues.md:917  `reaction:166`  ｜★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint 結構信號｜ "N3_defect":  _score_defect(person, team),
+[DRIFT] known_issues.md:919  `faction_ai:3252`  ｜★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint 結構信號｜ if opt == "併入":
+[UNRESOLVED] known_issues.md:919  `player_query:232`  ｜★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint 結構信號｜ 
+[DRIFT] known_issues.md:962  `faction_ai:1753`  ｜燒進度（2026-07-01 首三軌 merged）｜ if steps.size() >= 2:
+[DRIFT] known_issues.md:968  `beast:30`  ｜第二批燒進度（2026-07-01 三軌 merged）｜ t.named_members = []
+[DRIFT] known_issues.md:981  `event_faction_defect:21`  ｜第三批燒進度（2026-07-02 means-end + slice3 merged）｜ if leader == null:
+[DRIFT] known_issues.md:982  `faction_ai:3479`  ｜第三批燒進度（2026-07-02 means-end + slice3 merged）｜ var pool_mh: int = (int(team.resources.get("weapon_melee_high", 0)) + 
+[DRIFT] known_issues.md:994  `_evaluate_all_body:644`  ｜後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07｜ var settler_count: int = clampi(owner.population / 4, 2, 5)
+[DRIFT] known_issues.md:1001  `_evaluate_outpost_residency:419`  ｜後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07｜ # 威脅評估（cadence）：找視野內最高 threat，超門檻 → dispatch 反應。
+[DRIFT] known_issues.md:1001  `interaction_system:74`  ｜後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07｜ if other_id == arrived_id:
+[DRIFT] known_issues.md:1001  `sim_runner:247`  ｜後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07｜ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> St
+[DRIFT] known_issues.md:1009  `faction_ai:994`  ｜後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07｜ #   ★cap 給大：本票要數的是【每個 tick 幾隊】，樣本被截斷會讓「最大同批」失真成偏小。
+[DRIFT] known_issues.md:1022  `headless_test:14475`  ｜讀B/G3 Phase E backlog（2026-07-01 平行軌）｜ state.persons[1] = m
+[DRIFT] known_issues.md:1023  `resource_system:433`  ｜讀B/G3 Phase E backlog（2026-07-01 平行軌）｜ Probe.add_amount("qty.harvest_credited." + res, _qty_credited)
+[DRIFT] known_issues.md:1110  `erase_team:147`  ｜G3 殘缺情報進度｜ # UI 輪詢後清空（同 forced_event 模式）
+[DRIFT] known_issues.md:1132  `event_faction_defect:21`  ｜G1 供應鏈進度｜ if leader == null:
+[DRIFT] known_issues.md:1139  `resource_system:213`  ｜G1 供應鏈進度｜ 
+[DRIFT] known_issues.md:1160  `npc_combat:456`  ｜P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）｜ Probe.bump("rout.n_" + bucket)
+[DRIFT] known_issues.md:1165  `faction_ai:2050`  ｜P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）｜ var fired_desperate: bool = desperate and promote_util_desperate(deman
+[DRIFT] known_issues.md:1165  `ambush:66`  ｜P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）｜ NpcCombatSystem.new().start_combat(state, bid, team.team_id)
+[DRIFT] known_issues.md:1167  `encounter_system:1184`  ｜P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）｜ 
+[DRIFT] known_issues.md:1167  `npc_combat:456`  ｜P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）｜ Probe.bump("rout.n_" + bucket)
+[DRIFT] known_issues.md:1188  `faction_ai:2105`  ｜P5 QA批（2026-06-16 QA session harness 系統遍歷，stage2 驗收抓）｜ Probe.note("promote.init_stress", officer.stress)
+[DRIFT] known_issues.md:1204  `faction_ai:1058`  ｜🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）｜ #   非查 host 真位）。②timeout：殘距估額度內沒 resolve → release（追移動 host 追不到的止血）。
+[DRIFT] known_issues.md:1204  `health_system:221`  ｜🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）｜ if Probe.enabled: Probe.bump("rootdiff.HP_REGEN_PER_TICK")
+[DRIFT] known_issues.md:1205  `interaction_system:836`  ｜🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）｜ var ask: float = TradeValuation.ask_price(owner, res, commerce, owner_
+[DRIFT] known_issues.md:1205  `sim_runner:102`  ｜🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）｜ _perf_max_us = dt_us
+[DRIFT] known_issues.md:1206  `encounter_system:1301`  ｜🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）｜ if u["team_id"] != loser_id: continue
+[DRIFT] known_issues.md:1207  `person_generator:46`  ｜🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）｜ rng.seed = seed_offset
+[DRIFT] known_issues.md:1207  `faction_ai:389`  ｜🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）｜ Probe.bump("conq.prosperity_reached")   # 征服鏈起點（prosperity-attack→失能-c
+[DRIFT] known_issues.md:1321  `try_proactive_diplomacy:68`  ｜Bug5. DiplomacyAI demand_tribute 恆負｜ had_edge = feud_i > 0.0 or grat_i > 0.0
+[DRIFT] known_issues.md:1374  `movement:138`  ｜Movement｜ return team.population * BASE_CARRY \
+[DRIFT] known_issues.md:1419  `faction_ai_system:45`  ｜重複值 / magic numbers｜ # ②c prey 濾改分：同弱者（pop_est 近似）food_est 高者優先的 tie 帶寬。TEST VALUE。
+[DRIFT] known_issues.md:1503  `_evaluate_solo:1876`  ｜★FLEE 從不移動（dead flee-movement，序1 dissolution 遺留，2026-07-15 f｜ if mother == null:
+[DRIFT] known_issues.md:1511  `_tick_food_granary_sell:138`  ｜★經濟供給鏈斷點:非糧賣單查錯 storage(framework seam,2026-07-15 full-HD 觀察｜ team.active_orders = kept
+[DRIFT] known_issues.md:1587  `faction_ai:18`  ｜生產框架 arc follow-up（2026-07-16,供給側成功後殘項）｜ const FOOD_BRIDGE_MOVE_PER_DAY: float = 2.0  # TEST VALUE — 移速估（ETA_tr
+[DRIFT] known_issues.md:1602  `need_oracle:35`  ｜Arc1 need oracle S6 + 終端消耗品 known-deferred（2026-07-16）｜ return 0.0   # scope:build-cost res only（material/tools；★禁擴 build-cost
+[DRIFT] known_issues.md:1676  `event_faction_defect:16`  ｜★faction 成員資格 fragility＝結構 confound（2026-08-05，measurer 3 次重｜ if team.faction_id == -1:
+[DRIFT] known_issues.md:1677  `faction_ai:4571`  ｜★faction 成員資格 fragility＝結構 confound（2026-08-05，measurer 3 次重｜ for k in cost:
+[DRIFT] known_issues.md:1683  `faction_ai:590`  ｜★失聯帳本 subteam 記帳缺口＝WHAT-mandated completion（下批完成、非無限期 park）（｜ # 空間索引：同格查取代全掃。live 復驗 has + tile_pos 保零行為變。
+[DRIFT] known_issues.md:1689  `_detach_one_anon:1542`  ｜anon-exhaustion=caring 成本真但 distressed 世界無回補（2026-08-05、care｜ return   # defer to prosperity（scout-gated；不在此 dispatch 攻擊）
+[DRIFT] known_issues.md:1689  `reaction_system:199`  ｜anon-exhaustion=caring 成本真但 distressed 世界無回補（2026-08-05、care｜ "revenge":
+[DRIFT] known_issues.md:1689  `population_system:18`  ｜anon-exhaustion=caring 成本真但 distressed 世界無回補（2026-08-05、care｜ if team.minor_population <= 0: continue
+[DRIFT] known_issues.md:1709  `faction_ai:5152`  ｜★CONFIRMED tap-gap：faction-leave 4 出口無 Probe tap（2026-08-12、｜ return {"viable": true, "facility": ipf, "util": 1.0 + ipfrac}
+[DRIFT] known_issues.md:1715  `faction_ai:248`  ｜★★founding 降級 park（2026-08-13、blueprint WHAT 裁+用戶框挑戰「為啥一定要立國｜ if prey.faction_id != -1 and prey.faction_id == team.faction_id: conti
+[UNRESOLVED] known_issues.md:1715  `distortion:114`  ｜★★founding 降級 park（2026-08-13、blueprint WHAT 裁+用戶框挑戰「為啥一定要立國｜ 
+[DRIFT] known_issues.md:1718  `faction_ai:1039`  ｜★founding never-establish 真根定案（2026-08-12、③story-audit + sys｜ # feud_pull term 掛進 攻擊 option → 血仇成攻擊的 weight 驅力（衝動 leader 血仇高→攻擊贏 ran
+[DRIFT] known_issues.md:1718  `_declare_established:5070`  ｜★founding never-establish 真根定案（2026-08-12、③story-audit + sys｜ return { "facility": best }
+[DRIFT] known_issues.md:1736  `faction_ai:3799`  ｜★建造隊派遣的真閘 ＝ 建材，不是糧（2026-08-21 實測，lead 非結論）｜ return false
+[DRIFT] known_issues.md:1875  `npc_combat_system:784`  ｜★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上零疊代**｜ if fid == -1:
+[DRIFT] known_issues.md:1876  `diplomatic_ai_system:251`  ｜★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上零疊代**｜ var strong_id: int = team_a.team_id if team_a.population >= team_b.pop
+[DRIFT] known_issues.md:1929  `decision_context:472`  ｜★★★`own_granary_tile` nil 崩 —— **修過一次沒修乾淨，而根不在呼叫點**（2026-08-｜ # 買糧（Phase 1）：注入 _is_merchant（weight("buyfood") 讀，同 _loyalty 法）+ 最近市集 
+[DRIFT] known_issues.md:1984  `faction_ai_system:3475`  ｜★`local_value` 仍有 ~12 個 blind 呼叫點（2026-08-25，窮盡掃出，★不在當前票範圍）｜ var can_equip: int = total_weapons / 2

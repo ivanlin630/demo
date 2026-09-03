@@ -255,8 +255,21 @@ func _evaluate_life_events(_state: WorldState, _p: PersonData, _t: TeamData, _tr
 
 # ★T1 度量：rel_surplus ＝ 相對盈餘（比例量）＝ 日均淨食物流 / 全隊日食耗。
 # 比例量同時解掉兩個舊病：小村被【絕對門檻】封死、大團被【人均攤薄】。
+# ★★★2026-09-01：改讀【真盈餘】＝ 產出EMA − 消耗EMA（不是存量差分 EMA）。
+#   ★病（實測 90 天 peaceful）：9/10 隊有 74–90 個盈餘天，而舊訊號 >0 只有 0–10% 的天，
+#     平均值是 −0.08 ~ −0.36 ⇒ ★★兩個量【連正負號都不同】。
+#   ★★★而它有兩個症狀，第二個比第一個毒：
+#     ①滿倉隊：盈餘為正、存量差分≈0 ⇒ 判「沒盈餘」⇒ 不生
+#     ②把盈餘拿去【投資】的隊：存量下降 ⇒ 讀成【饑荒】⇒ 更不生 ⇒ ★反建設耦合
+#   ★分母不動（population × FOOD_PER_PERSON_PER_DAY），★★分子換成真盈餘。
 static func breed_rel_surplus(t: TeamData) -> float:
 	var need: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	# ★★★2026-09-03 systems 撤回這一行的改動（dcef1f63 的行為改動，僅此一行）：
+	#   ★測試說它不對：headless assert 12 → 7（＝main 的數），五條生育斷言逐條消失（implementer 實測）。
+	#   ★★而【帳務儀器全部留下】（food_produce_avg／food_consume_avg／_tally_food／per-tile 流量欄）——
+	#     它們只寫計數器、不餵任何決策，唯一的出口就是這一行；後面的工作（ade1dd48 等）還在用它們。
+	#   ★★★所以撤的是【一行】不是【六個檔】：檔案層 revert 會連帶丟掉其他 commit 在那些檔上的工作。
+	#   原行（保留供將來重啟）：return (t.food_produce_avg - t.food_consume_avg) / need
 	return t.food_flow_avg / need
 
 # ★T2 速率形狀：f(r) = 0 (r<=0) / r/(r+K) (r>0)——連續、單調、飽和於 1、無懸崖。

@@ -86,11 +86,51 @@ static func _power_ratio(state: WorldState, self_team: TeamData,
 	var self_power: float = _team_power(self_team)
 	# 對方用 team_intel snapshot（NPC 不全知）
 	var intel: Dictionary = BeliefSystem.best_estimate(state, self_team.team_id, other.team_id)
-	# ★god-view fix（invariants.md:171-173）：無 belief fallback 用 self_pop（視對方等強），禁讀 other.population
+	# ★god-view fix（`process/detail/invariants-cases.md::決策讀 belief 非真值` 的
+	#   「無估 fallback ＝保守／不行動，非偷讀真值」那一條）：無 belief fallback 用 self_pop（視對方等強），禁讀 other.population
+	#   ★★舊引用寫 `invariants.md:171-173` —— 行號已腐（現在那幾行是別的內容），
+	#   ★★★改成 檔::節名（行號跟編輯走、節名跟語意走）。
 	# （真值=god-view，破虛張/偽裝）。鏡射 diplomatic _get_pop_est fallback=self_pop 模式。
 	var pop_est: int = int(intel.get("population_est", self_team.population))
-	# 無 combat skill in intel → 用 0.3 baseline 估算
-	var other_power: float = float(pop_est) * 0.3
+	# ★★★技能維對稱化（systems spec 2026-09-02，R② 過）：
+	#   ★舊寫法：self 用【真實 avg_combat_skill】、other 用【手抄常數 0.3】
+	#     ⇒ 兩邊不是同一把尺；而實測全世界 `avg_combat_skill` 都是 0.1
+	#     ⇒ ★★每一隊看每一隊都自動 ×3（peaceful 量到 ratio 平均 2.997 ≈ 0.3/0.1，
+	#        而同窗 pop_est 5.99 vs self_pop 6.00 —— 人口那一維已經是中性的）。
+	#   ★★belief 根本沒有【技能】這個通道（claims 只帶 `population_est`）
+	#     ⇒ 技能維【一律】走 fallback ⇒ 照上面那條已核可的通則，以【自己】為先驗。
+	#   ★★★這不是新的 WHAT，是【同一條 invariant 的第二次應用】：
+	#     人口維已經這樣做（`pop_est` 的 fallback 就是 `self_team.population`）。
+	#   ★而【禁把 0.3 改成 0.1】（藍圖明令）—— 那只是把手抄物理換一個數字，
+	#     三個月後平均技能一變它又歪了；★★接線才不會。
+	var skill_est: float = AnonTierSystem.avg_combat_skill(self_team)
+	var other_power: float = float(pop_est) * skill_est
+	# ★★★備戰 root-check 第二層 tap（純觀測）：★量到 power 項平均 3.64（warring）之後，
+	#   要分得出【是 pop_est 高】還是【self_power 低】—— ★★兩者在比值上長得一模一樣。
+	#   ★★★而那個不對稱已經修掉（2026-09-02）⇒ 這組 tap 現在的用途是【驗證修後真的中性】。
+	if Probe.enabled:
+		Probe.bump("threat.pr_n")
+		Probe.add_amount("threat.pr.self_pop", float(self_team.population))
+		Probe.add_amount("threat.pr.self_combat", AnonTierSystem.avg_combat_skill(self_team))
+		Probe.add_amount("threat.pr.self_power", self_power)
+		Probe.add_amount("threat.pr.pop_est", float(pop_est))
+		Probe.add_amount("threat.pr.other_power", other_power)
+		Probe.add_amount("threat.pr.ratio", other_power / maxf(self_power, 0.1))
+		# ★★★分佈（systems 驗收④）：平均 2.997 【乾淨得可疑】—— 平均看不出【集中在單一值】。
+		#   ★若修後仍然死守在一個值上 ⇒ ★★還有別的常數在主導，而平均學不出來。
+		var _r: float = other_power / maxf(self_power, 0.1)
+		var _rb: String = "ge3"
+		if _r < 0.5: _rb = "lt0.5"
+		elif _r < 0.9: _rb = "0.5to0.9"
+		elif _r < 1.1: _rb = "0.9to1.1"      # ★中性帶（修後應該大量落在這裡）
+		elif _r < 2.0: _rb = "1.1to2"
+		elif _r < 3.0: _rb = "2to3"
+		Probe.bump("threat.pr.hist." + _rb)
+		# ★fallback（沒有 belief）占多少 —— ★★它決定了上面那個不對稱有多常發生。
+		Probe.bump("threat.pr.no_belief" if not intel.has("population_est") else "threat.pr.has_belief")
+		# ★★★self 比 0.3 弱的那一群：他們就算面對【同人數的陌生人】也會算出 ratio > 1
+		if AnonTierSystem.avg_combat_skill(self_team) < 0.3:
+			Probe.bump("threat.pr.self_weaker_than_baseline")
 	return other_power / maxf(self_power, 0.1)
 
 static func _team_power(team: TeamData) -> float:

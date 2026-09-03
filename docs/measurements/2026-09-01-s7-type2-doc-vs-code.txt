@@ -1,0 +1,103 @@
+# S7 型②【表 vs code】：doc 斷言的值 vs code 現況（只盤不修）
+#
+# ★開跑前已 grep known_issues（新規矩②）：:159「意圖帳 material row 待補註」＝相關族但非本體 ⇒ 不重疊。
+#
+# ═══ 母體【反過來綁】—— 這是本票的設計重點（systems 定）═══
+# ✗ 直覺做法：列 docs 裡所有數值表 ⇒ ★「文件裡的表」是文件決定的，不是引擎決定的
+# ✓ ★★從【code 常數】出發（引擎側可枚舉），問「doc 有沒有對它斷言一個值？值一樣嗎？」
+#   ⇒ 母體 ＝ code 常數 ∩ doc 斷言 —— 可機械求交集，而基準是 code（現況）不是另一份文件。
+#
+# ★側A 判準：scripts/**（★排除 debug——床不是 production 常數）的
+#   `const NAME: type = <數值字面值>` ⇒ 603 顆
+#   ★★導出式（`= A * B`、`= Other.CONST`）233 顆【不進主表】—— 見文末第二張表，那才是重災區
+# ★側B 判準：docs/*.md + docs/process/*.md
+#   ★★★specs / handbacks / verdicts / _archive 【不收】：它們是【有日期的紀錄】，
+#     記的是當時的事實 —— 拿今天的 code 去判它們「錯」是誤判。活文件才有「過時」可言。
+# ★匹配法（★systems 要求標明）：【常數名 + `=`或`:` + 數字】，★★大小寫敏感
+#   ⇒ 只收【斷言值】的行，不收單純提到名字的行
+#   ⇒ ★★★而「搜數值」會抓到不同的東西（例如 tick_parameters.md 寫 `ticks_per_day = 240` 小寫）
+#     —— 兩種匹配法漏的東西不同，本表用前者，後者的缺口在文末明列。
+
+═══════════════════════════════════════════════════════════════════
+★主表：交集 69 行，★不一致 6
+═══════════════════════════════════════════════════════════════════
+TICKS_PER_HOUR        doc=10    code=60     docs/tick_parameters.md:4     ★換根前的值
+TICKS_PER_HOUR        doc=10    code=60     docs/estimator-ledger.md:44   ★同上
+FORAGE_FLOOR_DAYS     doc=1.5   code=5.0    docs/known_issues.md:1015
+FOOD_PER_PERSON_PER_DAY doc=2.4 code=0.8    docs/known_issues.md:1243     ★該行自稱「勘誤」而它自己過時了
+FOOD_PER_PERSON_PER_DAY doc=2.4 code=0.8    docs/known_issues.md:1419
+CAPTIVE_INIT_MORALE   doc=0.25  code=0.35   docs/progress.md:493
+
+★判準演進（★記下來，因為它就是本輪的方法論產出）：
+  第一版（子字串 + 大小寫不敏感）⇒ 11 不一致 / 76 —— ★其中 5 條是假陽性
+    `TRUST_FLOOR=0.5`／`CRED_TIME_FLOOR=0.2` 被子字串 `FLOOR` 命中（★第三次踩同族）
+    `noise floor=0` 被英文單字命中（★★短常數名與英文字撞）
+  第二版（token 邊界）⇒ 7 / 70
+  第三版（＋大小寫敏感）⇒ ★★★6 / 69，零假陽性
+  ⇒ ★而三版都「跑得動、印得出數字」—— 只有逐條看才知道前兩版是錯的。
+
+═══════════════════════════════════════════════════════════════════
+★★★第二張表：doc 對【導出式常數】斷言了值 —— ★重災區在這裡
+═══════════════════════════════════════════════════════════════════
+★為什麼要另立一張：主表只收【字面值】常數，而 `TICKS_PER_DAY = TICKS_PER_HOUR * 24` 是導出式
+  ⇒ ★★【最有名的那顆錯數字，我的主表看不見它】。
+  ⇒ ★★★這是我自己判準的盲區，而我是先做完主表、對照 systems 給的起點才發現的。
+★真值來自【實跑 dump】不是推導（跑一支臨時床印常數，跑完即刪）。
+
+doc 斷言                                     實際值      判
+──────────────────────────────────────────────────────────────────
+TICKS_PER_DAY=240      tick_parameters.md:4    1440      ★過時（換根）
+TICKS_PER_DAY=240      world.md:36             1440      ★過時
+TICKS_PER_DAY=240      progress.md:1137        1440      ★過時（但 progress 是紀錄，見下）
+TICKS_PER_MONTH=7200   world.md:37             43200     ★過時
+TICKS_PER_SEASON=21600 world.md:38             129600    ★過時
+TICKS_PER_YEAR=86400   world.md:39             518400    ★過時
+SEASON_LENGTH=21600    tick_parameters.md:142  129600    ★過時
+SALARY_INTERVAL=1680   tick_parameters.md:143  10080     ★過時（＝1440×7）
+TICKS_PER_TURN=24      tick_parameters.md:5    144       ★過時
+MOVE_TICKS_PER_HEX=10  tick_parameters.md:30   240       ★過時
+BASE_MOVE_TICKS=48     estimator-ledger.md:34  240       ★過時
+TIME_DECAY_PER_TICK=0.005 message.md:45        0.000083  ★過時（隨根縮放）
+★JOIN_REJECT_COOLDOWN_TICKS=480  invariants.md:101  2880  ★★★過時，★而它在【憲法檔】裡
+JOIN_REJECT_COOLDOWN_TICKS=480   known_issues.md:230 2880  ★過時（同一顆）
+FAR_ZONE_INTERVAL=10   progress.md:674         600       ◆需人判：doc 疑指「10 小時」不是 10 tick
+ORDER_LIFETIME=5       known_issues.md:513     7200      ◆需人判：doc 疑指「5 天」
+GOAL_EVAL_CADENCE=3    known_issues.md:684     4320      ◆需人判：doc 疑指「3 天」
+MOVE_TICKS_PER_HEX=240 progress.md:684         240       OK
+BASE_ACTION_TICKS=10   mechanism-intents.md:35 10        OK（★換根後仍是 10：TICKS_PER_HOUR/6）
+VISION_RADIUS=3        known_issues.md:1423    3         OK
+VISION_RADIUS=3        progress.md:774         3         OK
+FOOD_RESERVE_TICKS=20  estimator-ledger.md:122 20        OK
+──────────────────────────────────────────────────────────────────
+★過時 13 ／ 需人判 3 ／ OK 6（doc 斷言 23 條，233 顆導出式常數中）
+
+═══════════════════════════════════════════════════════════════════
+★★修法建議（★只盤不修，判定給 systems）
+═══════════════════════════════════════════════════════════════════
+★systems 已先裁：**不要把數字更新成 1440** —— 三個月後又會爛。
+⇒ 分類（我建議，判定你的）：
+【A 指 code 為準】死數字拿掉、留用途/高層模型（doc-strategy 已裁的 glance-aid 形狀）
+   tick_parameters.md 整份（它就是一張純數字表 ⇒ ★整份都是這一類）
+   world.md:36-39 的四行時間常數表
+   message.md:45 的 TIME_DECAY_PER_TICK
+   estimator-ledger.md:34/44/122 的三處
+【B 真的要更新】invariants.md:101 —— ★★因為憲法檔的句子在講【規則】不是【參考值】，
+   ★★★而規則寫錯數字會被人拿去判 code 對不對。⇒ 建議改成指常數名不寫值。
+【C 不動】progress.md ／ known_issues.md 的歷史條目
+   ⇒ ★它們是【有日期的紀錄】：記的是當時的事實。改它們等於改歷史。
+   ⇒ ★★但 known_issues 的【現行待修條目】（如 :1015 FORAGE_FLOOR_DAYS）不同——
+     那是活的清單，值錯了會誤導修的人 ⇒ 建議改。
+   ⇒ ★★★而「同一個檔裡有歷史條目也有活條目」正是判不動的原因，需要逐條看。
+
+═══════════════════════════════════════════════════════════════════
+★誠實限
+═══════════════════════════════════════════════════════════════════
+①★匹配法是【常數名 + = + 數字】⇒ 抓不到「不提常數名只寫數字」的表
+   （★★例：某 doc 寫「一天 240 tick」而不寫常數名 ⇒ 本表看不見）
+   ⇒ 那要用【搜數值】的匹配法，而它會有大量假陽性（240 是個常見數字）⇒ 本輪未做。
+②★★導出式那 233 顆我只比了 doc 有斷言的 23 條；其餘 210 顆 doc 沒提 ⇒ 不在母體，不是「查過沒事」。
+③★★★主表的盲區（導出式看不見）是我【做完主表之後】才發現的 ——
+   若不是 systems 在票裡先給了 tick_parameters.md 那顆當起點，我會交出一份
+   「6 個不一致」的乾淨報告，★而真正的 13 顆全在我看不見的那一半。
+
+# ★只盤不修：production diff = 0 行。

@@ -74,6 +74,16 @@ var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，�
 # 由 ResourceSystem.resolve_consumption 每 cadence 更新（見 _update_food_flow）。
 var food_flow_avg: float = 0.0    # 日均淨食物流 EMA（食物/天）
 var food_flow_last: float = -1.0   # 上次取樣 effective_food（sentinel -1 = 未初始化，首取樣不計流）
+# ★★★真盈餘（2026-09-01，breed-reads-true-surplus）：拆開【產出】與【消耗】各存一條 EMA。
+#   ★動機：`food_flow_avg` EMA 的是【存量差分】，而用戶的法是【產出 − 消耗】——★★連正負號都不同：
+#     ①滿倉隊：盈餘為正、差分≈0 ⇒ 判「沒盈餘」
+#     ②★★★把盈餘拿去投資的隊：存量【下降】⇒ 讀成【饑荒】⇒ 反建設耦合
+#   ★而 production 原本【沒有】「產出−消耗」這個量 —— 兩邊各自在算，只是沒被分別存起來。
+#   ⇒ ★★所以這裡不是新公式，是【把已經在流動的兩個真數字分開記】。
+var food_in_today: float = 0.0      # 當窗累計：流入（收成/製造/交易買入/接濟…）
+var food_out_today: float = 0.0     # 當窗累計：流出（吃/賣出/給養/損耗…）
+var food_produce_avg: float = 0.0   # 日均【流入】EMA（食物/天）
+var food_consume_avg: float = 0.0   # 日均【流出】EMA（食物/天）
 # ★生育連續速率（累積器）：progress 每日累加 births，跨過 1.0 就產一個 minor 名額。
 # ★兩欄都是【直接因果態】（值本身決定下次跨過 1.0 是哪個 tick）→ 必入 state_fingerprint
 #   （對比被排除的 food_flow_avg/need_urgency＝可重算 ephemeral 快取）。

@@ -212,6 +212,7 @@ func _random_terrain(rng: RandomNumberGenerator) -> String:
 	var roll: int = rng.randi_range(0, 99)
 	var acc: int = 0
 	for t in TERRAIN_WEIGHTS:
+		if Probe.enabled: Probe.bump("rootdiff.TERRAIN_WEIGHTS")
 		acc += TERRAIN_WEIGHTS[t]
 		if roll < acc:
 			return t

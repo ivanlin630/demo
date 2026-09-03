@@ -1,0 +1,36 @@
+# 盈餘 → breed 訊號 對帳｜config=peaceful_economy days=90
+# ①盈餘＝_sustainable_inflow − burn｜②breed 讀的＝food_flow_avg｜③自家公庫飽和度
+# 全世界 breed.born 累計 = 0
+#
+# ★★★設計假設（reaction_system.gd:7-11 反推）：健康村 rel_surplus≈K=0.15 ⇒ f≈0.5，★適齡 5 人
+#   ⇒ 目標 births_per_day = 0.0133 × 0.5 × 5 = 0.0333（≈ 一個月一名額）
+team|①盈餘天|②平均 rel_surplus|★②>0 的天數|平均適齡|名額滿
+0|76|-0.3536|2(3%)|0.82|0(0%)
+1|84|-0.2857|0(0%)|0.71|0(0%)
+2|83|-0.2524|8(10%)|1.86|0(0%)
+3|87|-0.3566|0(0%)|2.00|0(0%)
+4|87|-0.3586|0(0%)|2.00|0(0%)
+5|90|-0.3368|3(3%)|1.27|0(0%)
+7|87|-0.0865|0(0%)|0.16|0(0%)
+9|90|0.1885|62(69%)|2.00|0(0%)
+10|83|-0.2222|0(0%)|0.46|0(0%)
+11|74|-0.2738|4(5%)|0.69|0(0%)
+#
+# ★讀法：★★「盈餘天多、而 food_flow_avg≈0 佔比高」＝ breed 看不到那個盈餘
+#   ★★★而若同一列的糧倉飽和度也接近 1.0 ⇒ 假說成立：存量到 cap ⇒ 差分歸零 ⇒ 訊號歸零
+#
+## ★★★四段斷點分辨（★rate_sample 只在 daily>0 時 fire ⇒ 它分得開 A/B/C 與 D）
+breed.rate_sample 次數 = 0｜breed.born = 0
+樣本數 = 24（cap 24）
+  { "team": 6, "rel_surplus": 0.022, "f": 0.128, "daily_rate": 0.0027, "progress": 0.001, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.044, "f": 0.225, "daily_rate": 0.0048, "progress": 0.003, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.065, "f": 0.302, "daily_rate": 0.0064, "progress": 0.006, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.085, "f": 0.362, "daily_rate": 0.0077, "progress": 0.009, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.104, "f": 0.409, "daily_rate": 0.0087, "progress": 0.013, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.121, "f": 0.447, "daily_rate": 0.0095, "progress": 0.017, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.137, "f": 0.478, "daily_rate": 0.0102, "progress": 0.021, "elapsed_days": 0.42 }
+  { "team": 6, "rel_surplus": 0.152, "f": 0.503, "daily_rate": 0.0107, "progress": 0.025, "elapsed_days": 0.42 }
+# ★讀法：rate_sample = 0 ⇒ 斷在 A(名額滿)/B(f<=0)/C(無適齡) 三者之一
+#        rate_sample > 0 而 born = 0 ⇒ ★★斷在 D：★★★速率太低，progress 到不了 1.0
+# ★誠實限：①用 FoodFlow._sustainable_inflow（★與 breed 讀的是不同的量，那正是本表要證的）
+#   ★★而『盈餘』的口徑若換成別的（例如含狩獵/交易），這張表的左欄會變 —— 口徑寫在這裡

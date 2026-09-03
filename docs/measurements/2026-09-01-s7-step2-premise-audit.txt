@@ -1,0 +1,50 @@
+# S7 第二步：母體 B 的時間語意規則【前提稽核】
+#
+# ★★★母體定義先訂正（我上封報 27，而那個數字隨樣式變）：
+#   窄樣式 TICK|DAY|HOUR|cadence|CADENCE|INTERVAL|時|天|小時        ⇒ 27 條
+#   寬樣式 再加 MIN|TIMEOUT|分鐘|週|季|月                        ⇒ 28 條
+#   ★差的那幾條：
+#     :77  _mk("SEASON_LENGTH\\)\\s*%\\s*4", "c_whitelist", "曆法結構：4＝一年幾季"),
+#   ⇒ ★★本盤點採【寬樣式】= 28 條（寬容失錯方向：寧可多看一條）
+#   ★★★而【數字隨樣式變】本身是一個發現：母體沒有寫死就不是母體。
+#
+# 判準（systems 寫死，我不改）：
+#   ①理由文字含【具體舊根數值】(10/240/2400) 或明寫「舊根」「S2 前」 ⇒ 候審
+#   ②理由是【結構性】（單位就是天／分母是根／曆法結構） ⇒ 銷案
+#   ③兩者皆非 ⇒ NEEDS_HUMAN（★不自己歸類）
+#
+## 對帳：①1 + ②19 + ③8 = 28（母體 28） ✓
+
+### ①前提綁舊根 ⇒ 【候審】1 條
+:50 | pattern=const BASE_ACTION_TICKS[^=]*=\\s*[0-9]+ | 憑哪個字=舊根
+
+### ②結構性 ⇒ 【銷案】19 條
+:54 | pattern=const PRISONER_CHECK_INTERVAL | 憑哪個字=遭遇
+:56 | pattern=const ENCOUNTER_STUCK_TICKS | 憑哪個字=遭遇
+:58 | pattern=const [A-Z_]+_DAYS | 憑哪個字=單位就是
+:59 | pattern=const SURVIVAL_BUILD_MAX_TICKS | 憑哪個字=工量
+:60 | pattern=const CAMP_BUILD_TICKS | 憑哪個字=工量
+:61 | pattern=const DUMP_CHUNK_TICKS | 憑哪個字=不是【時長】
+:64 | pattern=\ | 憑哪個字=工量
+:67 | pattern=const TICKS_PER_HOUR: | 憑哪個字=根常數本身
+:68 | pattern=TICKS_PER_HOUR / 6 | 憑哪個字=遭遇
+:70 | pattern=const TICKS_PER_DAY: | 憑哪個字=根常數本身
+:71 | pattern=const TICKS_PER_SECOND: | 憑哪個字=現實時間
+:73 | pattern=TICKS_PER_DAY / 24 | 憑哪個字=曆法
+:74 | pattern=TICKS_PER_HOUR\\)\\s*%\\s*24 | 憑哪個字=曆法
+:75 | pattern=TICKS_PER_DAY\\)\\s*%\\s*30 | 憑哪個字=曆法
+:76 | pattern=TICKS_PER_MONTH\\) % 12 | 憑哪個字=曆法
+:77 | pattern=SEASON_LENGTH\\)\\s*%\\s*4 | 憑哪個字=曆法
+:81 | pattern=TICKS_PER_DAY\\s*/\\s*4 | 憑哪個字=已導出
+:82 | pattern=[0-9]+\\s*\\*\\s*(WorldState\\.)?TICKS_PER_ | 憑哪個字=已導出
+:83 | pattern=[A-Z_]{3,}\\s*\\*\\s*[0-9]+ | 憑哪個字=已導出
+
+### ③NEEDS_HUMAN（★我不自己歸類）8 條
+:37 | pattern=current_tick\\s*-\\s*([0-9]{2,}) | 理由文字=_mk("current_tick\\s*-\\s*([0-9]{2,})", "a_change", "★真裸 tick：`current_tick - <字面量>` 沒有經過任何具名時間常數 ⇒ 根旋鈕一改它就静默偏移", true),
+:51 | pattern=const TICKS_PER_TURN: | 理由文字=_mk("const TICKS_PER_TURN:", "b_defer", "24 tick ＝ 2.4 小時；hours() 只吃整數小時 ⇒ 無法精確表達 ⇒ 交 S2"),
+:57 | pattern=const DECISION_CADENCE_MULT | 理由文字=_mk("const DECISION_CADENCE_MULT", "d_not_time", "multiplier：3 是【倍數】（×TICK_PER_DAY），本身不是時間量"),
+:63 | pattern=[=!]=\\s*\ | 理由文字=_mk("[=!]=\\s*\"ticks\"", "d_not_time", "key_filter：`if k == \"ticks\"` 是【欄位名比對】，同行的數字不是時間量"),
+:90 | pattern=current_tick\\s*\\+=\\s*1 | 理由文字=_mk("current_tick\\s*\\+=\\s*1", "d_not_time", "increment：tick 前進 1 步＝時間軸本身的定義"),
+:92 | pattern=\\}\\s*,\\s*[0-9]+\\s*\\) | 理由文字=_mk("\\}\\s*,\\s*[0-9]+\\s*\\)", "d_not_time", "sample_cap：字典後接的整數是 cap（★錨拿掉行尾 $：尾巴有註解時 $ 會沒命中，而那是【規則自己的盲點】不是新形狀）"),
+:93 | pattern=%[^=]*(==|!=)\\s*0 | 理由文字=_mk("%[^=]*(==|!=)\\s*0", "d_not_time", "zero_compare：`% INTERVAL == 0` 的 0 是餘數判準"),
+:97 | pattern=\\+\\s*1\\b | 理由文字=_mk("\\+\\s*1\\b", "d_not_time", "increment：+1 是「下一個」不是一段時間"),

@@ -298,6 +298,23 @@ func _update_food_flow(state: WorldState, team: TeamData, day_fraction: float) -
 	var alpha: float = clampf(day_fraction / FLOW_WINDOW_DAYS, 0.0, 1.0)
 	team.food_flow_avg += alpha * (daily_rate - team.food_flow_avg)
 	team.food_flow_last = post_food
+	# ★★★真盈餘（2026-09-01）：把【流入】與【流出】各自 EMA 一條 —— ★同一個 alpha、同一個窗，
+	#   ⇒ 兩條與既有 food_flow_avg 完全同構 ⇒ ★★不是新公式，是把已經在流動的兩個真數字分開記。
+	#   ★★★而【既有那條不動】：別處（ambition_ladder / need_hierarchy / faction_ai）還在讀它，
+	#     動它就變成「一次修兩件事」，而其中一件沒有人要求。
+	# ★★★自家糧倉那半：定居隊的收成【進公庫】，而吃飯先扣團側
+	#   ⇒ ★只記團側 ＝ 只記到支出（實測：team9 從 +0.192 掉到 −0.121，數字自己說的）
+	#   ⇒ ★★由 owner 隊收走並歸零（own_granary_tile 的語意就是「這個團的糧倉」）
+	var _g: HexTileData = own_granary_tile(state, team)
+	var _gin: float = 0.0
+	var _gout: float = 0.0
+	if _g != null:
+		_gin = _g.food_in_today; _gout = _g.food_out_today
+		_g.food_in_today = 0.0;  _g.food_out_today = 0.0
+	team.food_produce_avg += alpha * ((team.food_in_today + _gin) / day_fraction - team.food_produce_avg)
+	team.food_consume_avg += alpha * ((team.food_out_today + _gout) / day_fraction - team.food_consume_avg)
+	team.food_in_today = 0.0
+	team.food_out_today = 0.0
 
 # grace 期後每日餓死：先死 minor，minor 耗盡才死 anon。
 # cadence 多次/日 → 用 famine_days 跨整數日偵測，只在跨日當次結算（避免重複殺）。

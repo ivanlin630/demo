@@ -2840,11 +2840,24 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			# ★★★這一格才是真缺口的所在：承諾還在，而那個 option 根本不在候選集裡
 			#   （applicable 不成立／被 stall cooldown 排除）⇒ 「再派」無從發生
 			Probe.bump("redispatch.not_in_ranked")
+			# ★★★【是哪一個 condition 擋的】—— ★而我無法直接問那個 lambda：
+			#   `applicable` 是每個 option 自己的閉包，它【不會告訴你它為什麼回 false】。
+			#   ★★所以這一刀只做【第一步】：記下【是哪一個 option】不在候選集裡。
+			#   ⇒ ★★★知道是哪個 option 之後，才能在【那一個】的 applicable 裡接條件級 tap
+			#     —— 而在那之前講「大概是因為…」就是猜（blueprint 明令禁）。
+			Probe.bump("redispatch.not_in_ranked.opt." + _co)
+			# ★而有一個【非 applicable】的成因是可以當場分開的：stall cooldown 排除
+			#   （`DecisionOptions.applicable` 已收單一源 stall 排除）
+			#   ⇒ ★★它跟「條件本身不成立」是兩件事，而兩者在「不在候選集」上同形。
+			Probe.bump("redispatch.nir_stall_cooldown" if team.survival_stall_cooldown.has(_co) else "redispatch.nir_not_applicable")
 		elif not ranked.is_empty() and String(ranked[0]["opt"]) == _co:
 			Probe.bump("redispatch.won")
 		else:
 			# ★「輸」必須看得見 —— ★★否則它跟「沒送回」長得一模一樣
 			Probe.bump("redispatch.lost")
+			# ★輸【給誰】—— ★★sample 有 cap，而「輸給誰」是三票共同的問題（備戰是不是一面倒）
+			#   ⇒ ★★★用無 cap 的 per-winner 桶，不依賴取樣
+			Probe.bump("redispatch.lost_to." + (String(ranked[0]["opt"]) if not ranked.is_empty() else "(空)"))
 			# ★★★輸的【當下】印完整 per-option util 表（systems 2026-09-02，★只 dump 不開藥）
 			#   ★依據不是新紀律：memory `feedback_measure_peroption_util_before_decision_claim`
 			#     ——決策問題禁靜態斷言，先 dump 真實 per-option util 再開藥
@@ -4698,7 +4711,8 @@ func _load_convoy_cargo(owner: TeamData, sub: TeamData, home_tile: HexTileData, 
 			var v: float = float(home_tile.public_storage.get(res, 0))
 			var from_vault: float = minf(delta, v)
 			if from_vault > 0.0:
-				home_tile.public_storage[res] = v - from_vault
+				# ★單寫者：改走 TileBank（值不變，換來 tally + record_driver）——直寫會讓糧倉流出【看不見】
+				TileBank.set_amt(home_tile, res, v - from_vault, "convoy_load_vault_out")
 				ResourceBank.add(sub, res, from_vault, "convoy_load_vault_in")
 	elif delta < 0.0:
 		ResourceBank.add(sub, res, delta, "convoy_unload_excess_out")       # delta<0 → 減 porter
@@ -6465,18 +6479,53 @@ func _find_strong_neighbor(state: WorldState, team: TeamData, axis: String = "po
 
 func _find_aid_target(state: WorldState, team: TeamData) -> int:
 	var candidates: Array = []
+	# ★★★施主可及性：【逐道濾網記拒絕次數】（systems 2026-09-03，純觀測）。
+	#   ★「沒人可乞」有五種完全不同的意思，而它們在回值 -1 上長得一模一樣：
+	#     ①母體本身是空（沒發現過任何隊）②發現了但沒 belief
+	#     ③★有 belief 但【沒有 food_est】④知道他有糊但【不夠分】⑤知道也夠但【到不了】
+	#   ⇒ ★★五者的修法完全不同（世界密度／情報傳播／互動頻率／糧食盈餘／地理）
+	#   ⇒ ★★★所以這裡【只計數不判斷】—— systems 對③有假說（親見 snap 沒寫 food_est），
+	#     而本 tap 存在的目的就是【拿數字去打那個假說】。
+	var _aid_probe: bool = Probe.enabled
+	var _aid_seen: int = 0
+	# ★★★band × filter 交叉（systems 2026-09-03）：整體 33~38% 找得到施主，
+	#   而【最深帶】只有 0~7.2% ⇒ ★兩個數字都對，而「是哪一道擋住最餓的那群」
+	#   只有交叉才答得出來。★★帶界與 `_beg_tap` 同一套（★★★不另定一套，否則兩張表對不起來）。
+	var _aid_band: String = ""
+	if _aid_probe:
+		var _fd: float = ResourceSystem.effective_food(state, team) / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		_aid_band = "deep"
+		if _fd >= 5.0: _aid_band = "ge5"
+		elif _fd >= 2.0: _aid_band = "2to5"
+		elif _fd >= 0.5: _aid_band = "0.5to2"
+		Probe.bump("aid.calls")
+		Probe.bump("aid.b." + _aid_band + ".calls")
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
 		# G3-E leak 1c：施援目標 pop+food 讀 belief 非真值；無情報 / 無 food_est→保守跳過
-		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
+		_aid_seen += 1
+		if not BeliefSystem.has_belief(state, team.team_id, tid):
+			if _aid_probe: Probe.bump("aid.reject.2_no_belief"); Probe.bump("aid.b." + _aid_band + ".reject.2_no_belief")
+			continue
+		# ★★★可證偽那一格（systems 2026-09-03）：【集合大小】不是【次數】。
+		#   ★次數會被「同一隊被看很多次」灌水 ⇒ ★★per-target 桶，最後數鍵匙。
+		#   ★★★假說要被打死的形狀：③的集合 ≈ ②的集合 ⇒ food_est 不稀有，擋人的不是資訊層。
+		if _aid_probe: Probe.bump("aid.pass2.tgt.%d" % int(tid)); Probe.bump("aid.b." + _aid_band + ".pass2.tgt.%d" % int(tid))
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
-		if not bel.has("food_est"): continue   # 不知有無餘糧 → 保守不列
+		if not bel.has("food_est"):
+			if _aid_probe: Probe.bump("aid.reject.3_no_food_est"); Probe.bump("aid.b." + _aid_band + ".reject.3_no_food_est")   # ★systems 最懷疑的那一道
+			continue   # 不知有無餘糧 → 保守不列
+		if _aid_probe: Probe.bump("aid.pass3.tgt.%d" % int(tid)); Probe.bump("aid.b." + _aid_band + ".pass3.tgt.%d" % int(tid))
 		var reserve: float = float(bel.get("population_est", 0.0)) * 14.0
-		if float(bel.get("food_est", 0.0)) <= reserve: continue
+		if float(bel.get("food_est", 0.0)) <= reserve:
+			if _aid_probe: Probe.bump("aid.reject.4_not_enough"); Probe.bump("aid.b." + _aid_band + ".reject.4_not_enough")
+			continue
 		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid, true)
-		if not catch_result.reachable: continue
+		if not catch_result.reachable:
+			if _aid_probe: Probe.bump("aid.reject.5_unreachable"); Probe.bump("aid.b." + _aid_band + ".reject.5_unreachable")
+			continue
 		var same_faction: bool = (t.faction_id != -1 and t.faction_id == team.faction_id)
 		var rep: float = float(team.known_reputations.get(tid, 0.5))
 		var score: float = 0.0
@@ -6484,6 +6533,13 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 		if rep >= 0.5: score += 100.0
 		score -= float(int(catch_result.eta) / 60)
 		candidates.append({ "tid": tid, "score": score })
+	if _aid_probe:
+		Probe.add_amount("aid.discovered_sum", float(_aid_seen))
+		# ★①母體本身是 0（沒發現過任何別隊）跟【發現了但全被後面幾道擋】意思完全不同
+		if _aid_seen == 0: Probe.bump("aid.reject.1_no_discovered")
+		if _aid_seen == 0: Probe.bump("aid.b." + _aid_band + ".reject.1_no_discovered")
+		Probe.bump("aid.found" if not candidates.is_empty() else "aid.none")
+		Probe.bump("aid.b." + _aid_band + (".found" if not candidates.is_empty() else ".none"))
 	if candidates.is_empty():
 		return -1
 	candidates.sort_custom(func(a, b): return a["score"] > b["score"])

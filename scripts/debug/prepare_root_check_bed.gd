@@ -61,6 +61,30 @@ func _run() -> void:
 		   Probe.amount("threat.stranger_only_score") / maxf(float(so_n), 1.0)])
 	print("     ★這一格是【高估】的核心候選：它們的分數完全來自陌生人底分，而不是任何敵意行為。")
 
+	var prn: int = int(Probe.counts.get("threat.pr_n", 0))
+	print("  ── ★★★power 項拆開（★「pop_est 高】與【self_power 低】在比值上長得一樣）──")
+	if prn > 0:
+		print("     self pop 平均=%.2f｜self combat 平均=%.4f｜self_power 平均=%.3f"
+			% [Probe.amount("threat.pr.self_pop") / float(prn),
+			   Probe.amount("threat.pr.self_combat") / float(prn),
+			   Probe.amount("threat.pr.self_power") / float(prn)])
+		print("     pop_est 平均=%.2f｜other_power 平均=%.3f（＝pop_est × 0.3 固定 baseline）｜ratio 平均=%.3f"
+			% [Probe.amount("threat.pr.pop_est") / float(prn),
+			   Probe.amount("threat.pr.other_power") / float(prn),
+			   Probe.amount("threat.pr.ratio") / float(prn)])
+		print("     無 belief fallback=%d｜有 belief=%d｜★★★self combat < 0.3（弱於對手的固定 baseline）=%d（%.1f%%）"
+			% [int(Probe.counts.get("threat.pr.no_belief", 0)), int(Probe.counts.get("threat.pr.has_belief", 0)),
+			   int(Probe.counts.get("threat.pr.self_weaker_than_baseline", 0)),
+			   100.0 * float(Probe.counts.get("threat.pr.self_weaker_than_baseline", 0)) / maxf(float(prn), 1.0)])
+		var _hb: Array = ["lt0.5", "0.5to0.9", "0.9to1.1", "1.1to2", "2to3", "ge3"]
+		var _hs: Array = []
+		for hb in _hb:
+			_hs.append("%s=%d" % [hb, int(Probe.counts.get("threat.pr.hist." + String(hb), 0))])
+		print("     ★★★ratio 分佈（★平均看不出「集中在單一值」）：%s" % "｜".join(PackedStringArray(_hs)))
+		print("        ★★中性帶 0.9~1.1 占 %.1f%%（★★★對稱化之後應該大量落在這裡；若仍集中在別處，還有別的常數）"
+			% (100.0 * float(Probe.counts.get("threat.pr.hist.0.9to1.1", 0)) / maxf(float(prn), 1.0)))
+		print("     ★讀法：`_power_ratio` self 用【真實 combat skill】、other 用【固定 0.3】")
+		print("        ⇒ ★★「無 belief → 視對方等強」只等在【人口】一維，技能那一維並不相等。")
 	print("── ★★②applicable 命中率（★門檻那一格；母體＝rank 呼叫）──")
 	print("  rank 呼叫 = %d｜過門檻 = %d（%.1f%%）｜未過 = %d"
 		% [calls, pass_n, 100.0 * float(pass_n) / maxf(float(calls), 1.0),

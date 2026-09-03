@@ -328,6 +328,20 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_run_systems(state, far_teams, FAR_ZONE_INTERVAL,
 			time_vision_mult, time_speed_mult, false, _t)
 	if phase_timing: _t = _pht("far.total", _t)
+	# ★★★換根微分試驗的【合成雙端陽性對照】（S7-root-differential，commit1）：
+	#   ★A：每【遊戲日】一次 ⇒ 換根後每日次數不變 ⇒ 期望比值 1.00×
+	#   ★★B：每【tick】一次   ⇒ 換根後每日 tick 數加倍 ⇒ 期望比值 2.00×
+	#   ⇒ ★★★若整批候選跑出「全部 1.00×」，A/B 是【唯一】能分開
+	#     「真的沒漂」與「儀器根本沒開」的東西 —— 沒有它，全 1.00× 無法判讀。
+	#
+	# ★而 systems 原本指定的 B（ui_logic_test.gd:77）【不成立】：
+	#   那是 `_test_setup_sanity()` 函式內的 debug 常數，production 不讀它、
+	#   換根不影響它、它也不影響世界 ⇒ ★★它是【鏡像漂移】的發現，
+	#   不是「換根會加倍的速率」。⇒ 改用這裡的合成對照（語意無歧義）。
+	if Probe.enabled:
+		Probe.bump("rootdiff.__CTRL_B_per_tick")
+		if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+			Probe.bump("rootdiff.__CTRL_A_per_day")
 	_step_captives(state)
 	_step_cleanup_extinct_teams(state)
 	if phase_timing: _t = _pht("captives_cleanup", _t)

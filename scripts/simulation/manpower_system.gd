@@ -52,6 +52,7 @@ static func decide_treatment(state: WorldState, holder: TeamData, group: Diction
 	if itype == "" and holder.faction_id != -1 and state.factions.has(holder.faction_id):
 		itype = String(state.factions[holder.faction_id].intent.get("type", ""))
 	if itype in ["征服", "擴張", "建國"]:
+		if Probe.enabled: Probe.bump("rootdiff.INTENT_ARMY_KIND_BONUS")
 		kind_util += INTENT_ARMY_KIND_BONUS
 	var harsh_util: float = 0.2 + cruelty * 0.7 - ambition * 0.3
 	var treatment: String = "厚待" if kind_util >= harsh_util else "苛待"

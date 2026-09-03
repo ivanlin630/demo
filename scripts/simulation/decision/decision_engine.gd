@@ -60,6 +60,26 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 		Probe.bump("flee.degrade.top_" + (String(scored[0]["opt"]) if not scored.is_empty() else "NONE"))
 	_beg_tap(ctx, scored, team, "begu.")   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
 	_prep_tap(ctx, scored, team)   # ★備戰 root-check（純觀測）
+	# ★★★【紮根】條件級 tap（systems 2026-09-03）：#10 量到 `not_in_ranked` 九成是紮根，
+	#   而它的 applicable 是兩個分支的 OR（`options.gd:239`）：
+	#       can_settle_here  or  settle_resume_site != (-1,-1)
+	#   ⇒ ★互斥且窮盡：兩個都 false 才不 applicable，而兩個各自 false 幾次才看得出是哪一邊。
+	#   ★★母體寫死：跟 #10 同一個（IDLE 且 committed 就是紮根）—— ★★★否則母體不同就比不起來。
+	if Probe.enabled and team != null and team.current_task == TeamData.TASK_IDLE and team.survival_committed_option == "紮根":   # gate-ok: 整段在 `Probe.enabled` 內、純計數，不改 scored 也不改控制流；current_task 在這裡是【被觀測的量】不是分流條件（與 faction_ai_system.gd::_decide_unified 的 redispatch funnel 同形、同理由）
+		Probe.bump("zhagen.mother")
+		var _cs: bool = ctx.can_settle_here
+		var _rs: bool = ctx.settle_resume_site != Vector2i(-1, -1)
+		if not _cs: Probe.bump("zhagen.false.can_settle_here")
+		if not _rs: Probe.bump("zhagen.false.no_resume_site")
+		Probe.bump("zhagen.applicable" if (_cs or _rs) else "zhagen.not_applicable")
+		# ★★★systems 寫在數字之前的那句：「若有人要往【紮根 util 太低】修，
+		#   請先拿出【can_settle_here 為 true 而紮根仍然輸】的數字。」
+		#   ⇒ ★那個數字現在就量 —— ★★免得之後被當成事後解釋；
+		#   ★★★而它也是【可證偽】的：applicable 了却總是輸 ⇒ 那才輪到談 util。
+		if _cs or _rs:
+			var _w: String = String(scored[0]["opt"]) if not scored.is_empty() else "(空)"
+			Probe.bump("zhagen.appl_won" if _w == "紮根" else "zhagen.appl_lost")
+			if _w != "紮根": Probe.bump("zhagen.appl_lost_to." + _w)
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	return scored
 
@@ -89,12 +109,14 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# 極低糧時 survival-class 加法超量級破頂，隨 food→0 線性放大，奪回 argmax。全 SURVIVAL_OPTION_SET 等量加
 		# (不改 survival-class 內部相對序，只集體破頂)。food_days=FLOOR 時加成=0 平滑銜接無 flip-flop。
 		if ctx.food_days < SURVIVAL_BOOST_FLOOR and DecisionOptions.is_in_set(opt, "survival"):
+			if Probe.enabled: Probe.bump("rootdiff.SURVIVAL_BOOST_MAX")
 			u += SURVIVAL_BOOST_MAX * (SURVIVAL_BOOST_FLOOR - ctx.food_days) / SURVIVAL_BOOST_FLOOR
 			if Probe.enabled: Probe.bump("survival.boost_fire")   # 觸發頻率=健康指標(measurer 要)
 		# ★threat-oracle S2 break-top boost（解 skeptic finding3 單 term-多 term 不匹配）：severity≥FLOOR 時
 		# threat option 加法破頂 ∝ severity（鏡射 survival，全 THREAT_OPTION_SET 等量加，保內部序）
 		# ★capped 且 < survival boost(2.5)：threat=belief→survival(存亡)保序不破；blueprint② 非偽裝硬閘。
 		if ctx.threat_react >= THREAT_BOOST_FLOOR and DecisionOptions.is_in_set(opt, "threat"):
+			if Probe.enabled: Probe.bump("rootdiff.THREAT_BOOST_MAX")
 			u += THREAT_BOOST_MAX * clampf((ctx.threat_react - THREAT_BOOST_FLOOR) / (DecisionTerms.SEVERITY_MAX - THREAT_BOOST_FLOOR), 0.0, 1.0)
 			if Probe.enabled: Probe.bump("threat.boost_fire")
 		if Probe.enabled and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
@@ -403,6 +425,36 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 		return
 	Probe.bump(pfx + "rank_calls")                       # ★母體：這條路被呼叫的次數
 	Probe.bump(pfx + "rank_team.%d" % team.team_id)      # ★★母體：隣數（per-team 桶，無 cap）
+	# ★★★按餓深分帶（blueprint 定刀型 2026-09-03）：
+	#   ★泛問「乞食 util 是不是 genuine」會得到「平均而言合理」，
+	#     而那答不了【該乞食的時候它贏不贏】—— 0.495 對【還沒餓到極限的隊】可能完全正確。
+	#   ★★帶界印在床的輸出裡（不手抄）；★★★每帶母體必印 —— 某帶 0 要照三讀法報。
+	#   ★而【施主可及性】也逐帶記：「乞食不贏」可能是決策病，
+	#     ★★也可能是【世界裡沒有施主】—— 而兩者的修法完全不同。
+	var _bd: String = "deep"
+	if ctx.food_days >= 5.0: _bd = "ge5"
+	elif ctx.food_days >= 2.0: _bd = "2to5"
+	elif ctx.food_days >= 0.5: _bd = "0.5to2"
+	Probe.bump(pfx + "band." + _bd + ".pop")
+	# ★★★階梯交集守衛（systems 2026-09-03）：【無施主 ∧ 其他階一個都不 applicable】
+	#   ★裁定是【絕境無死路由階梯保證、不由每一階保證】⇒ 乞食那一階不修，
+	#     ★★但【交集非空】就是階梯真的斷了 ⇒ 這一格是那條裁定的守衛。
+	#   ★★★survival 階全名單是【種竭搜索】拉出來的 11 個（不是只拿信裡列的三個）：
+	#   覛食／自救建田／返家補給／掠奪／佔村／併入／紮營／紮根／乞食／買糧／遷移找糧
+	#   ⇒ ★這裡直接數 `scored` 裡【除了乞食之外的 survival 階】，不重算 applicable。
+	if pfx == "begu." and _bd == "deep":
+		Probe.bump("ladder.deep.calls")
+		var _others: int = 0
+		for _e in scored:
+			var _o: String = String(_e["opt"])
+			if _o != "乞食" and DecisionOptions.is_in_set(_o, "survival"): _others += 1
+		if not ctx.has_aid_target: Probe.bump("ladder.deep.no_donor")
+		if _others == 0: Probe.bump("ladder.deep.no_other_step")
+		if not ctx.has_aid_target and _others == 0:
+			Probe.bump("ladder.deep.intersect")
+			# ★相異隊數（又是它：次數會被每 tick 重掃灌水）
+			Probe.bump("ladder.deep.intersect.team.%d" % team.team_id)
+	if ctx.has_aid_target: Probe.bump(pfx + "band." + _bd + ".donor_ok")
 	var _food_ok: bool = ctx.food_days < ctx.desperation_entry_threshold
 	if _food_ok: Probe.bump(pfx + "gate.food_ok")
 	if ctx.has_aid_target: Probe.bump(pfx + "gate.aid_ok")
@@ -415,15 +467,22 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 		Probe.bump(pfx + "not_in_candidates")
 		return
 	Probe.bump(pfx + "in_candidates")
+	Probe.bump(pfx + "band." + _bd + ".applicable")
 	var _bu: float = float(scored[_bi]["u"])
 	var _wo: String = String(scored[0]["opt"])
 	var _wu: float = float(scored[0]["u"])
 	Probe.add_amount(pfx + "util_sum", _bu)
 	Probe.add_amount(pfx + "winner_util_sum", _wu)
+	# ★帶內 util 在【贏輸分流之前】記 —— ★★只記輸的那一半，平均值會偏
+	Probe.add_amount(pfx + "band." + _bd + ".util_sum", _bu)
+	Probe.add_amount(pfx + "band." + _bd + ".winner_util_sum", _wu)
 	if _wo == "乞食":
 		Probe.bump(pfx + "won")
+		Probe.bump(pfx + "band." + _bd + ".won")
 		return
 	Probe.bump(pfx + "lost_to." + _wo)
+	Probe.bump(pfx + "band." + _bd + ".lost")
+	Probe.bump(pfx + "band." + _bd + ".lost_to." + _wo)
 	# ★差距分桶：★★「差一點點」跟「從來不是對手」是兩種不同的事，
 	#   而它們在「輸了幾次」這個數字上長得一模一樣。
 	var _gap: float = _wu - _bu

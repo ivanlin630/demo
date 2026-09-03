@@ -55,8 +55,18 @@ static func get_stored(tile: HexTileData, res: String) -> float:
 	return float(tile.public_storage.get(res, 0))
 
 # 原始 set（呼叫端已算好目標值，含已 clamp / 已扣的結果）。delta 記絕對值（同 ResourceBank.set_amt 慣例）。
+# ★真盈餘計量：公庫食物流入/流出（★只記帳，不改任何數值）
+static func _tally_food(tile: HexTileData, res: String, delta: float) -> void:
+	if res != "food" or tile == null or delta == 0.0:
+		return
+	if delta > 0.0: tile.food_in_today += delta
+	else:           tile.food_out_today += -delta
+
 static func set_amt(tile: HexTileData, res: String, amt: float, reason: String) -> void:
+	# ★set 是蓋值 ⇒ 流量＝新值 − 舊值（同 ResourceBank.set_amt 的理由）
+	var prev: float = float(tile.public_storage.get(res, 0))
 	tile.public_storage[res] = amt
+	_tally_food(tile, res, amt - prev)
 	WorldState.record_driver(tile, res, amt, reason, "resource")
 
 # capped add（cap 單點）→ 回實際入庫量。溢出 = sink（呼叫端另處理殘量：私產留 / 落地面）。
@@ -64,6 +74,7 @@ static func deposit(tile: HexTileData, res: String, amt: float, reason: String) 
 	var cur: float = float(tile.public_storage.get(res, 0))
 	var newv: float = minf(cur + amt, cap(tile, res))
 	tile.public_storage[res] = newv
+	_tally_food(tile, res, newv - cur)
 	WorldState.record_driver(tile, res, newv - cur, reason, "resource")
 	return newv - cur
 
@@ -72,6 +83,7 @@ static func withdraw(tile: HexTileData, res: String, amt: float, reason: String)
 	var cur: float = float(tile.public_storage.get(res, 0))
 	var m: float = clampf(amt, 0.0, cur)
 	tile.public_storage[res] = cur - m
+	_tally_food(tile, res, -m)
 	WorldState.record_driver(tile, res, -m, reason, "resource")
 	return m
 

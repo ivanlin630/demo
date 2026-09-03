@@ -1,0 +1,80 @@
+# S7 第三步：三刀枚舉「時間語意不以整數 tick 呈現」的候選
+# ★只盤不修；production diff 0 行。★★本票【不判定會不會漂】——那靠換根微分試驗，是量測員下一輪。
+#
+# ★★★母體先寫死（三刀各自的樣式，逐條寫進來）：
+#   基底：production module-level const = 834 顆（scripts/simulation|data|ui）
+#          debug module-level const = 94 顆
+#   刀① 用法軸（機械）：`\w+ [+\-*]= <已知 const>`  ⇒ 19 顆
+#      ★「在 cadence pass 內」【不可機械判定】⇒ 改用可機械判定的代理：
+#        該函式內有無 day_fraction / cadence_ticks 正規化
+#        ★★norm=False ⇒ 常數是【per-call 速率】⇒ 換根改呼叫次數就漂
+#   刀② 命名軸（heuristic）：PER_TICK|PER_DAY|_RATE|ALPHA|DECAY|REGEN|CADENCE ⇒ 76 顆
+#   刀③ 鏡像對帳（exact）：debug 與 production 同名 const 而【值不同】⇒ 2 顆（★修正後）
+#   ★聯集 = 92 顆（交集不是判準）
+#
+## ★★★【只被一把刀抓到】—— 這一格告訴我們哪把刀真的在做事
+# 只①=14  只②=71  只③=2  ≥兩把=5  合計=92 ✓
+
+### 只被刀①（用法軸）抓到 14 顆 ★★這就是命名軸看不見的那一堆
+# 欄位：const | file:line | 函式 | norm(有無 day_fraction) | 運算
+only1|BLEEDING_MAJOR_DRAIN|scripts/simulation/health_system.gd:98|tick_status_effects|★NO|+=
+only1|BLEEDING_MINOR_DRAIN|scripts/simulation/health_system.gd:97|tick_status_effects|★NO|+=
+only1|HEX_NEIGHBORS|scripts/simulation/distortion_engine.gd:29|distort_message|★NO|+=
+only1|HIT_WEIGHTS|scripts/simulation/npc_combat_system.gd:720|_random_part|★NO|+=
+only1|INTENT_ARMY_KIND_BONUS|scripts/simulation/manpower_system.gd:55|decide_treatment|★NO|+=
+only1|NAMED_WEIGHT|scripts/simulation/movement_system.gd:227|_compute_base_team_speed|★NO|+=
+only1|POS_OFFSETS_FAR|scripts/simulation/distortion_engine.gd:38|distort_message|★NO|+=
+only1|STAMINA_EXHAUSTED_ATK_MULT|scripts/simulation/encounter_system.gd:808|resolve_attack|★NO|*=
+only1|STANCE_RANGED_DMG_MULT|scripts/simulation/encounter_system.gd:810|resolve_attack|★NO|*=
+only1|SURVIVAL_BOOST_MAX|scripts/simulation/decision/decision_engine.gd:82|rank_scored_ctx|★NO|+=
+only1|TERRAIN_SPEED_MULT|scripts/simulation/movement_system.gd:175|_move_cost|★NO|*=
+only1|TERRAIN_WEIGHTS|scripts/simulation/world_generator.gd:215|_random_terrain|★NO|+=
+only1|THREAT_BOOST_MAX|scripts/simulation/decision/decision_engine.gd:88|rank_scored_ctx|★NO|+=
+only1|WAGON_TERRAIN_MULT|scripts/simulation/movement_system.gd:192|_move_cost|★NO|*=
+
+### 只被刀③（鏡像）抓到 2 顆 ★exact，非啟發
+
+### ≥兩把刀都抓到 5 顆
+multi|BREED_BASE_RATE|①②|scripts/simulation/reaction_system.gd:299 norm=★NO
+multi|FATIGUE_PER_DAY|①②|scripts/simulation/sim_runner.gd:473 norm=YES
+multi|FATIGUE_RECOVERY_PER_DAY|①②|scripts/simulation/sim_runner.gd:466 norm=YES
+multi|STABLE_BREED_PER_DAY|①②|scripts/simulation/outpost_system.gd:230 norm=YES
+multi|STABLE_PRODUCE_PER_DAY|①②|scripts/simulation/outpost_system.gd:246 norm=YES
+
+
+### ★★★刀③ 修正紀錄（陽性對照失敗 → 修 → 通過）
+# 第一版【沒抓到已知那顆】ui_logic_test.gd:77 TICKS_PER_DAY := 24.0
+#   根因① const 樣式要求【模組層＋顯式型別】，而那顆是【函式內 :=】
+#   根因② 值用【字串】比 ⇒ PROVISION_DAYS 的 10 vs 10.0 被誤判成不同
+# ★修法：樣式放寬到允許縮排與 := ；值改【數值】比對
+# ★★修後：同名 const 5 顆／數值等價 3 顆／★真不同 2 顆
+only3|MAP_RADIUS|debug scripts/debug/scaling_bed.gd:11 = 16|prod scripts/simulation/encounter_system.gd:181 = 12|比值 1.333
+only3|TICKS_PER_DAY|debug scripts/debug/ui_logic_test.gd:77 = 24.0|prod scripts/data/world_state.gd:16 = TICKS_PER_HOUR|比值 非數值
+# ★★★TICKS_PER_DAY 那顆的 prod 值是【導出式】而 debug 是【字面值】——
+#   那正是鏡像危險的原因：一邊隨根走、一邊不走，而沒有任何東西比對它們。
+
+### ★命名軸額外欄：名字宣稱時間單位者，使用處有沒有乘 day_fraction
+# ★★病6就住在這一格：名字說 per-day，而使用處沒正規化 ⇒ 實際是 per-call
+# const | 使用行數 | 有無 day_fraction/cadence_ticks
+name|BLOOD_REGEN_PER_TICK|2|★NO
+name|FATIGUE_PER_DAY|1|YES
+name|FATIGUE_RECOVERY_PER_DAY|1|YES
+name|FOOD_BRIDGE_MOVE_PER_DAY|3|★NO
+name|FOOD_PER_MOUNT_PER_DAY|2|YES
+name|FOOD_PER_PERSON_PER_DAY|51|YES
+name|HP_REGEN_PER_TICK|1|★NO
+name|HUNGER_BLOOD_DRAIN_PER_TICK|1|★NO
+name|HUNGER_GAIN_PER_DAY|1|YES
+name|HUNGER_RECOVER_PER_DAY|1|YES
+name|MOVE_TILES_PER_DAY|1|★NO
+name|SECONDS_PER_TICK|0|★NO
+name|STABLE_BREED_PER_DAY|1|YES
+name|STABLE_FOOD_PER_DAY|2|YES
+name|STABLE_PRODUCE_PER_DAY|1|YES
+name|STAMINA_REGEN_PER_TICK|1|★NO
+name|TICKS_PER_DAY|79|YES
+name|TICK_PER_DAY|3|★NO
+name|TIME_DECAY_PER_TICK|4|★NO
+name|WILD_GAME_REGEN_PER_DAY|1|YES
+# ★★★而這一欄【只能標可疑】：沒有 day_fraction 不等於錨 ——
+#   有些確實是【每次呼叫就該加這麼多】。★判定靠換根微分試驗，不靠讀 code。

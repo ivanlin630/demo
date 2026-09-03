@@ -1,0 +1,113 @@
+# S7 型①【名 vs 值】：名字宣稱的東西 vs 它實際是什麼（只盤不修）
+#
+# ★開跑前已 grep known_issues（新規矩②）：
+#   :653 `gather` 命名/語義是「取脈絡」而【實為 mutator】 ⇒ ★本票的校準物，也是樣本之一
+#   :56  resource_candidate「穿著 facility 的名字」 ⇒ ◆同族但屬【資料標籤】不是識別字命名，本票未收
+#
+# ═══ 判準（systems 先講死的那條）═══
+# ★只收【機械可判】：名字含明確的單位詞／動作詞，而實際語意可查證
+# ★★「名字取得不好」不算 —— 那是品味不是缺陷
+#   判準：★若照名字寫 code 會寫出 bug ⇒ 算；只是不好聽 ⇒ 不算
+
+═══════════════════════════════════════════════════════════════════
+★T1b：動作詞 —— 名字宣稱【唯讀】而實際會寫
+═══════════════════════════════════════════════════════════════════
+母體判準：函式名以底線切開後，任一段 ∈
+  {get, peek, read, is, has, gather, query, view, inspect, snapshot}
+偵測：函式 body 內對【非區域變數】的欄位賦值，或呼叫已知寫入 API
+  （★Probe.* 排除：那是觀測寫入）
+⇒ 命中 6，逐條判如下。
+
+★真命中 3
+  ①decision/decision_context.gd:206  gather                （★已記 known_issues:653）
+     寫 8 處：EWMA 推進／labor cache／cadence 重排
+     ⇒ ★★最危險的那一型：讀寫之分決定能不能在【觀測路徑】上呼叫
+  ②faction_ai_system.gd:3110  _return_is_hopeless(state, sub, xd) -> bool   ★新
+     :3112 / :3116 / :3122  xd["abandon_reason"] = …
+     ⇒ ★名字是述詞（is_*）⇒ 讀的人會以為它可以安全地【問一次看看】
+     ⇒ ★★而它會把 abandon_reason 蓋進呼叫端的 dict ⇒ 預演/what-if 呼叫會留下痕跡
+     ⇒ ★★★同 gather 那一型（只是規模小），照名字寫 code 會寫出 bug ⇒ 算
+  ③order_system.gd:239  read_market_board(state, team) -> void            ★新
+     :246 state.team_known[team.team_id] = []；並 prune tile.market_orders
+     ⇒ ★名字說 read_、回傳 void、實際是完整 mutator
+     ⇒ ★★而它就是 tick step 的本體（sim_runner:424 `_step3c_read_market_board` 轉呼）
+
+◆判定【不算】1
+  sim_runner.gd:424  _step3c_read_market_board
+     ⇒ ★`_step*` 前綴主導語意（tick step 本來就會寫）
+     ⇒ 照名字寫 code 不會出錯 ⇒ 依判準不算（★它與 ③ 是同一個發現的包裝層）
+
+◆假陽性 2（★我的偵測 regex 造成，記下來免得下次重數）
+  observer_query_api.gd:79  query_team
+     ⇒ 命中的是【字典字面值】`"pop_anon": AnonTierSystem.total_pop(t)` —— 那是 key: value 不是賦值
+  outpost_system.gd:227  _get_storage_cap
+     ⇒ 命中的是 `TileBank.cap(...)`，而我把整個 `TileBank.` 當寫入 API；`cap()` 是讀
+  ⇒ ★教訓：把「模組名」當寫入判準會誤抓 —— 要判的是【那個方法】寫不寫
+
+═══════════════════════════════════════════════════════════════════
+★★T1a：單位詞 —— 名字宣稱的單位／量 vs 實際
+═══════════════════════════════════════════════════════════════════
+★母體先寫死：const 名以底線切開後含
+  {DAYS,DAY,TICKS,TICK,HOURS,HOUR,MINUTES,MINUTE,SECONDS,SECOND,MONTH(S),YEAR(S)}
+  ⇒ 71 顆。
+★★而【71 顆裡只有一個子集是機械可判的】：`*_PER_TICK` / `*_PER_DAY` / `*_PER_HOUR`（20 顆）
+  —— 因為它們的宣稱可以對照【使用點有沒有 day_fraction／掛在什麼節律】來驗。
+★★★其餘 51 顆（如 SURPLUS_DAYS=7.0、BELIEF_STALE_TICKS）要判就得詮釋「它想表達什麼」
+  ⇒ ★依判準【不收】，並明標為未收 —— 不是掃過了說沒事。
+
+── 名實相符 ✓（PER_DAY 且使用點有 day_fraction／或由根導出）──
+STABLE_PRODUCE_PER_DAY ／ STABLE_FOOD_PER_DAY ／ STABLE_BREED_PER_DAY
+WILD_GAME_REGEN_PER_DAY ／ FOOD_PER_MOUNT_PER_DAY ／ FOOD_PER_PERSON_PER_DAY
+HUNGER_GAIN_PER_DAY ／ HUNGER_RECOVER_PER_DAY ／ FATIGUE_PER_DAY ／ FATIGUE_RECOVERY_PER_DAY
+TIME_DECAY_PER_HOUR ／ TIME_DECAY_PER_TICK（後者由前者 ÷ TICKS_PER_HOUR 導出）
+TICK_PER_HOUR ／ TICK_PER_DAY（根常數本身）
+
+★★真命中 A：**單位錯**（名字說 per-tick，實際 per-cadence）—— 3 顆，而清單上只有 1 顆
+  health_system.gd:12  HP_REGEN_PER_TICK              ← ★S7 七病清單已列（病6c）
+  health_system.gd:14  BLOOD_REGEN_PER_TICK           ← ★★從未被列
+  health_system.gd:19  HUNGER_BLOOD_DRAIN_PER_TICK    ← ★★從未被列
+  ⇒ 三顆都在同一支 `tick_natural_regen`（:205-224）裡，同一個節律。
+  ⇒ ★★★而 `health_system.gd:16` 的註解【自己就寫著】：
+      「tick_natural_regen 為 per-cadence（近區 ~24 次/日）非 per-tick」
+      —— ★也就是說：真相寫在旁邊三行的地方，而名字照樣騙了兩年。
+      ★★同一族第二次：`known_issues:728` 也是「記著、沒人回來看」。
+
+★★真命中 B：**量值錯**（單位對，值不是物理真值）—— 2 顆，且是【同一個錯值寫兩處】
+  decision/goal_resolver.gd:896  MOVE_TILES_PER_DAY      = 2.0   # TEST VALUE
+  faction_ai_system.gd:18        FOOD_BRIDGE_MOVE_PER_DAY = 2.0  # TEST VALUE
+  ⇒ 兩者都當「每日移動幾格」用（`dist / X` ⇒ 天）
+  ⇒ ★物理真值：TimeScale.MOVE_TICKS_PER_HEX = 240 ⇒ 1440/240 = 6 hex/日 ⇒ 名字對、值差 3×
+  ⇒ ★★而它與型③命中②是【同一件事的兩面】：型③說「移動速度有三源」，
+     型①說「其中兩源的名字宣稱了一個它們沒有的量」。
+  ⇒ ★★★修法仍不是「把 2.0 改成 6.0」（手抄物理，用戶立法禁）——是改接線。
+
+◆待查／不機械可判 1
+  encounter_system.gd:23  STAMINA_REGEN_PER_TICK
+  ⇒ 遭遇有【自己的 tick 軸】（unit["action_timer"]）⇒ 「per-tick」指哪個 tick 需要判斷
+  ⇒ 依判準不硬歸類，標【需人判】
+
+═══════════════════════════════════════════════════════════════════
+★★★對帳
+═══════════════════════════════════════════════════════════════════
+T1b 母體 6 ＝ 真命中 3 ＋ 判定不算 1 ＋ 假陽性 2 ✓
+T1a（機械可判子集）20 ＝ 名實相符 14 ＋ 真命中 5 ＋ 需人判 1 ✓
+T1a 未收 51（單位詞但要詮釋才判得動）★明標未收，不是掃過了
+
+★總計【新發現】4 顆（★另 1 顆是校準物、1 顆已在七病清單）：
+  _return_is_hopeless ／ read_market_board
+  BLOOD_REGEN_PER_TICK ／ HUNGER_BLOOD_DRAIN_PER_TICK
+  （FOOD_BRIDGE_MOVE_PER_DAY 算半新：型③已點過它的家族，型①才點出它的名字也在說謊）
+
+═══════════════════════════════════════════════════════════════════
+★建議入 known_issues 的條目（★含回訪條件，照新規矩①）
+═══════════════════════════════════════════════════════════════════
+①`_return_is_hopeless` 是述詞卻寫 caller dict
+   回訪條件：【觸發事件】——任何 what-if／預演／specimen 路徑開始呼叫 convoy 判定時
+②`read_market_board` 名為 read 實為 mutator
+   回訪條件：【觸發事件】——下次有人要在觀測路徑上呼叫 order_system 任一方法時
+③health_system 三顆 PER_TICK 實為 per-cadence（清單只列了 1 顆）
+   回訪條件：【到期 token】——與 S7 病6c 同一顆票；病6c 收掉時三顆一起改
+④MOVE_TILES_PER_DAY / FOOD_BRIDGE_MOVE_PER_DAY 名對值錯 3×
+   回訪條件：【到期 token】——型③「移動速度三源」那一票收斂時一併處理
+
+# ★只盤不修：production diff = 0 行。

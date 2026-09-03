@@ -1,0 +1,16 @@
+# gather(advance=false) 純度構造式實證 —— ★觀測路徑走的就是這條
+# [CONTROL-RAN] 本床確實執行（★陽性對照必須先證明自己跑起來了）
+# 受測隊 team=0｜tile=(7,6)｜outpost_level=1
+#
+## 呼叫【一次】gather(advance=false) 之後，變了幾個欄位：3
+  ★ labor_eval_next_tick: 0 → 4320
+  ★ labor_alloc_size: 0 → 2
+  ★ consolidate_eval_next_tick: 0 → 1440
+#
+## 觸發條件檢查（★『相同』要能分辨是沒影響還是沒踩到）
+  has_own_outpost 前提｜outpost_level=1 owner==team=true
+  ctx.idle_labor=0.0000（>0 才會走 idle_employ 那個寫點）
+  team.population=6
+#
+# ★★誠實限：欄位清單是【我列的】⇒ 這是下界；
+#   ★★★所以另附 pending_rethink 大小當全域證據（抓得到「有人被叫醒」這類我沒列的副作用）

@@ -127,5 +127,6 @@ static func ewma_update(prev: PackedFloat32Array, raw: PackedFloat32Array) -> Pa
 	var has_prev: bool = prev.size() == N_LAYERS
 	for i in range(N_LAYERS):
 		var p: float = prev[i] if has_prev else 0.0
+		if Probe.enabled: Probe.bump("rootdiff.URGENCY_EWMA_ALPHA")
 		out[i] = URGENCY_EWMA_ALPHA * raw[i] + (1.0 - URGENCY_EWMA_ALPHA) * p
 	return out

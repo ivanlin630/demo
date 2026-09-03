@@ -26,6 +26,7 @@ static func distort_message(state: WorldState, msg: MessageData, mode: String) -
 	match mode:
 		"unintentional":
 			if randf() < 0.4:
+				if Probe.enabled: Probe.bump("rootdiff.HEX_NEIGHBORS")
 				msg.source_pos += HEX_NEIGHBORS[randi() % HEX_NEIGHBORS.size()]
 		"malicious":
 			if randf() < 0.5:
@@ -35,6 +36,7 @@ static func distort_message(state: WorldState, msg: MessageData, mode: String) -
 					msg.origin_team_id = ids[randi() % ids.size()]
 					msg.params["origin"] = str(msg.origin_team_id)
 			else:
+				if Probe.enabled: Probe.bump("rootdiff.POS_OFFSETS_FAR")
 				msg.source_pos += POS_OFFSETS_FAR[randi() % POS_OFFSETS_FAR.size()]
 				msg.params["x"] = str(msg.source_pos.x)
 				msg.params["y"] = str(msg.source_pos.y)

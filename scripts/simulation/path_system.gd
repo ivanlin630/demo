@@ -103,7 +103,14 @@ static func _dijkstra(state: WorldState, from: Vector2i) -> Dictionary:
 static func find_path(state: WorldState, from: Vector2i, to: Vector2i) -> Dictionary:
 	var key: String = "%d_%d_%d_%d" % [from.x, from.y, to.x, to.y]
 	var cached: Dictionary = _path_cache.get(key, {})
-	if cached and int(cached.get("tick", -1)) == state.world.current_tick:
+	# ★★★快取命中計數（常設，systems 2026-09-03）：全量暫態可觀測性是不變量，
+	#   ★而這一格今天剛好自己證明了價值：沒有計數器時，我們【分不出】
+	#     「清不清快取都一樣」是因為【沒差】還是因為【根本沒命中】。
+	#   ★★而它也是 `_path_cache` 世界鍵那一刀的驗收②：
+	#     修前跨世界命中＝72（300 tick×2、warring seed1337）⇒ ★★★修後應變 0。
+	var _hit: bool = cached and int(cached.get("tick", -1)) == state.world.current_tick
+	if Probe.enabled: Probe.bump("path.cache_hit" if _hit else "path.cache_miss")
+	if _hit:
 		return cached
 	var result: Dictionary = _astar(state, from, to)
 	result["tick"] = state.world.current_tick

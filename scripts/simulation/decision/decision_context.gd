@@ -376,6 +376,21 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _uf: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
 	var _not_player: bool = not (team.leader_id == state.player_id and state.player_id != -1)
 	c.can_settle_here = _not_player and team.leader_id != -1 and _uf != null 		and _uf.camp_level == 1 and _uf.outpost_level == 0 and _uf.construction_team_id == -1
+	# ★★★拆 `can_settle_here`（systems 2026-09-03）：上一輪量到它 19/21 為 false，
+	#   而它是【六個子條件的 AND】⇒ ★光知道「它 false」答不了【是哪一個】。
+	#   ★★母體寫死：跟 #10／紮根那一組同一個（IDLE 且 committed==紮根）
+	#     ⇒ ★★★母體不同就比不起來 —— 而這件事今天已經咬過一次（21 vs 9）。
+	#   ★子條件互斥不窮盡（AND 可多個同時 false）⇒ ★★逐個記，並另記【全部成立】作分母對帳。
+	if Probe.enabled and team.current_task == TeamData.TASK_IDLE and team.survival_committed_option == "紮根":   # gate-ok: 整段在 `Probe.enabled` 內、純計數，不改 ctx 也不改控制流；current_task 在這裡是【被觀測的量】（與 decision_engine.gd::rank_scored 的 zhagen tap 同形同理由）
+		Probe.bump("cansettle.mother")
+		if not _not_player: Probe.bump("cansettle.false.1_is_player")
+		if team.leader_id == -1: Probe.bump("cansettle.false.2_no_leader")
+		if _uf == null: Probe.bump("cansettle.false.3_no_tile")
+		else:
+			if _uf.camp_level != 1: Probe.bump("cansettle.false.4_camp_level_not_1")
+			if _uf.outpost_level != 0: Probe.bump("cansettle.false.5_already_outpost")
+			if _uf.construction_team_id != -1: Probe.bump("cansettle.false.6_busy_construction")
+		Probe.bump("cansettle.true" if c.can_settle_here else "cansettle.false_any")
 	# recovery：自己起的工程未完 → 回頭續建（憑自己 corvee_site 記憶，非掃世界）
 	if _not_player and team.corvee_site != Vector2i(-1, -1):
 		var _cs: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.corvee_site))
