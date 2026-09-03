@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩個小修（#2 crisis 絕對餓／#4 生育截斷懸崖）—— ★R² issues 已吸收，可以做
 topic: ★①真值來源【改掉】:不是 `team.resources.food`,是 `ResourceSystem.effective_food`(既有 accessor,已含「私產＋自家糧倉公庫」,註解自述「決策讀者一律經此」)——★★我原本要用 raw 那個,而那正是今天施主線踩過的 WS-1 坑;★★★②reviewer 撿到第二個 cap(`:295` 執行端 0.25、用 `maxi(1,…)`),我裁【不在本刀範圍】並寫明理由:那不是同一條規則——一個是「該不該想生」(連續),一個是「這次生幾個」(離散人頭)
 ---
