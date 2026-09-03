@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: revert 範圍改判 —— ★★★六個一起退【會壞】，而我上一封說「revert 乾淨」的理由也是錯的
 topic: ★我上一封用【檔案層】推論(5/6 檔只有它動過⇒revert 乾淨),而真正的相依在【符號層】:ade1dd48 呼叫 `_tally_food`(dcef1f63 才引入)、`decision_context.gd:288/293` 用 tile 的 `idle_employ_next_tick`(同一包引入)⇒ 整顆 revert 會刪掉後面工作正在用的東西;★★你的「六個一起退」有同一個問題,而且更大;★★★真正的行為改動【只有一行】:reaction_system.gd:267 —— 我要退的是那一行,帳務欄位全部留下
 ---
