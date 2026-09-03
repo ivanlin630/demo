@@ -40,17 +40,54 @@ if (-not $skipCacheGuard) {
 $timeoutSec = if ($env:GODOT_TIMEOUT) { [int]$env:GODOT_TIMEOUT } else { 360 }
 $tempOut = [System.IO.Path]::GetTempFileName()
 $tempErr = [System.IO.Path]::GetTempFileName()
+# STREAMING (2026-09-03, systems). The old shape redirected stdout to a temp file and printed
+# it only after the process exited. That is correct output but wrong timing: if THIS wrapper is
+# killed from outside (an outer timeout), the caller gets ZERO bytes even though the run had
+# already printed thousands of lines. Measured: a 3-seed measurement was lost exactly that way.
+# Streaming keeps the CP950->UTF-8 transcode (that is the only reason the temp file exists) but
+# emits as the run goes. Decode only up to the LAST COMPLETE NEWLINE -- CP950 is multi-byte and
+# a chunk boundary in the middle of a character produces mojibake.
+# Verified before swapping: byte-identical output vs the old shape on material_hold_test /
+# settlement_s2b_test / seam1_registry_test, AND the point of the change -- killed from outside,
+# old shape produced 0 bytes, this one produced 713751 bytes.
+$cp950 = [System.Text.Encoding]::GetEncoding(950)
 $proc = Start-Process -FilePath $exe -ArgumentList $args `
     -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr `
     -NoNewWindow -PassThru
-$timedOut = $false
-if (-not $proc.WaitForExit($timeoutSec * 1000)) {
-    $timedOut = $true
-    try { $proc.Kill() } catch {}
-    # Bounded grace: killed process still owns the stdout/stderr redirect handles for a moment.
-    # Unbounded WaitForExit could hang the wrapper; 5s is ample for handle teardown.
-    try { [void]$proc.WaitForExit(5000) } catch {}
+$sb = New-Object System.Text.StringBuilder
+$script:pos = 0
+function Pump-Out {
+    if (-not (Test-Path $tempOut)) { return }
+    try {
+        $fs = New-Object System.IO.FileStream($tempOut, [System.IO.FileMode]::Open,
+            [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+        try {
+            if ($fs.Length -le $script:pos) { return }
+            $fs.Position = $script:pos
+            $buf = New-Object byte[] ($fs.Length - $script:pos)
+            $n = $fs.Read($buf, 0, $buf.Length)
+            $last = -1
+            for ($i = $n - 1; $i -ge 0; $i--) { if ($buf[$i] -eq 10) { $last = $i; break } }
+            if ($last -lt 0) { return }
+            $chunk = $cp950.GetString($buf, 0, $last + 1)
+            $script:pos = $script:pos + $last + 1
+            [void]$sb.Append($chunk)
+            # $chunk always ends with a newline, so -split leaves a trailing "" element: drop ONLY
+            # that last one. Interior blank lines are real output and must survive.
+            $parts = $chunk -split "`r?`n"
+            for ($k = 0; $k -lt ($parts.Count - 1); $k++) { $parts[$k] }
+        } finally { $fs.Dispose() }
+    } catch { }
 }
+$deadline = (Get-Date).AddSeconds($timeoutSec)
+$timedOut = $false
+while (-not $proc.HasExited) {
+    Pump-Out
+    if ((Get-Date) -gt $deadline) { $timedOut = $true; try { $proc.Kill() } catch {}; break }
+    Start-Sleep -Milliseconds 150
+}
+try { [void]$proc.WaitForExit(5000) } catch {}
+Pump-Out
 # Read redirect files tolerantly: after a Kill the handles may not be released yet, so
 # ReadAllBytes throws "being used by another process" and the whole stdout vanishes.
 # FileShare::ReadWrite lets us read while the handle lives; retry with backoff covers the
@@ -72,12 +109,17 @@ function Read-BytesTolerant([string]$path) {
     }
     return ,[byte[]]@()
 }
-$cp950 = [System.Text.Encoding]::GetEncoding(950)
 $bytesOut = Read-BytesTolerant $tempOut
 $bytesErr = Read-BytesTolerant $tempErr
 Remove-Item $tempOut, $tempErr -ErrorAction SilentlyContinue
-$text = $cp950.GetString($bytesOut) + $cp950.GetString($bytesErr)
-$text -split "`r?`n"
+$fullOut = $cp950.GetString($bytesOut)
+$errText = $cp950.GetString($bytesErr)
+# Reproduce the old boundary EXACTLY: the old shape did ONE split over ($out + $err), so no blank
+# line appears between stdout and stderr, and a trailing "" IS emitted when the text ends with a
+# newline. The complete lines were already streamed (without that trailing ""), so emit the rest.
+$rest = $fullOut.Substring([Math]::Min($sb.Length, $fullOut.Length)) + $errText
+$rest -split "`r?`n"
+$text = $fullOut + $errText
 if ($timedOut) { "[GODOT TIMEOUT ${timeoutSec}s - process killed]" }
 # Stale-cache detector (2026-09-03). The guard above only covers a MISSING cache.
 # A cache that EXISTS but is out of date (a new class_name file was added and nobody
