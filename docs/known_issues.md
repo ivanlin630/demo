@@ -96,6 +96,24 @@ docs（known_issues/specs/invariants）引用為守衛的床 = 19 張；★在 m
 ★★**施主可及率留作【世界薄溫度計】進長考卷面（報不修）**，見 `docs/process/09_exam_gate.md §5.4`。
 ★★★**副產物**：資訊層那條路確定關了（次數 vs 相異集合兩口徑相反，同一個「少數隊每 tick 重掃」）。
 
+### ⏳★★`minor_population` 有 4 個寫入點，而【戰鬥傷亡不扣它】（2026-09-04，★由一次假紅逼出來）
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一輪 organic 時數【`minor_population > population` 的隊×tick】（★若恆 0 則本條銷案）**
+
+```
+寫入點（全樹）：
+  population_system.gd:21   −n   成年（minor → 成人）
+  reaction_system.gd:323/332 +1  出生
+  resource_system.gd:327    −md  ★饑荒 minor 死亡
+★而戰鬥／一般傷亡路徑【沒有任何 minor_population 處理】（`npc_combat_system` 零命中）
+⇒ ★★團在戰鬥中掉人口時，minor 數不會跟著掉 ⇒ ★★★`minor_population` 可能【超過】`population`
+```
+★**它不在單寫者白名單裡** ⇒ 單寫者閘不管它（那道閘只管白名單上的欄位）。
+★★**而這顆是被一次【假紅】逼出來的**：implementer 想用 `AnonCohort` 加「孩童」湊 `minor_population`，
+而它是 `TeamData` 上的**獨立 int 欄位**、根本不受 cohort 影響 ⇒ 陰性對照假紅 ⇒ **假紅逼他去查那欄位是誰寫的。**
+★★★**同名不同物警告**：`health_system` 裡的 `"minor"` 是**輕微出血**，不是**未成年** ——
+**用 grep 數「有沒有處理 minor」會把它算進去，然後負斷言變成假的。**
+
 ### ⏳★★★camp churn：重複紮營 **已歸零**（`has_home` 24/9/17 → 0/0/0，2026-09-03，★等價已證）
 
 **狀態：未確認** ｜ **回訪：量測窗 — 下一輪 organic 量測時順手看 `no_home` 是否回落（★不派專輪）**

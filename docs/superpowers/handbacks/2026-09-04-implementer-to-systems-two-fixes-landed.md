@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 兩個小修已落地＋單元驗收全綠；★organic 逐隊 dump 跑中
 touches: faction_ai_system.gd(_decision_crisis)／reaction_system.gd(_score_breed)／two_small_fixes_bed.gd(新)／three_tickets_bed.gd(dump 節)
 topic: ★兩修都照你訂的做:crisis 用 `ResourceSystem.effective_food`(非 raw 私產)、生育改【接線】(float 對 float,不是 maxi(1,int));★★單元床 ALL PASS,含【兩個陰性對照】:①food=50 同條件不 crisis ②私產 0 但自家糧倉 80 ⇒ 【不是】絕對餓(effective_food=80.0)——★★★那一條就是 WS-1 那個坑的直接反例;★而我自己踩了一個假紅:第一版拿 AnonCohort 加「孩童」湊 minor_population,而那是 TeamData 上的獨立 int 欄位、根本不會動 ⇒ 陰性對照假紅,而假紅逼我去查那欄位是誰寫的
