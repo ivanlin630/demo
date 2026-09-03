@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 跨 run static 列舉票（★排在 ③④ 之後，不插隊）
 topic: ★blueprint 把「跨 run 不清的 static」收為儀器騙人形態的新成員,理由:同 process 第二輪【靜默少計】而第一輪是對的 ⇒ 比「儀器沒開」更陰;★★要的是【列舉】不是修:production 15 個可變 static 逐個判「跨 run 會不會被清」;★★★判準是【證據】不是印象——每個要附清它的那一行 file:line,清不掉的寫「沒有清除點」
 ---

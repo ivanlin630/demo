@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 修 3 張守衛（★blueprint 批；★★序＝merge 與紮根【之後】，這封是排隊不是插隊）
 topic: ★修守衛【不是】放寬斷言:規則真的變了,fixture 該跟上;而①那張是 production 小修不是床;★★三張各自的修點我寫在下面,而【驗收判準】統一是陽性對照:修完要能【故意弄壞被守的東西 → 床變紅】;★★★沒有陽性對照的綠床從今天起不配當證據(blueprint 立「用時付費」,已寫進 01_architect 銷案表)
 ---
