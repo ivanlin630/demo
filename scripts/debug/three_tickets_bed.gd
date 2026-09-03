@@ -71,6 +71,9 @@ func _sec_10() -> void:
 		100.0 * float(nir) / maxf(float(sent), 1.0), won, lost])
 	print("  輸給誰：%s" % _bucket_list("redispatch.lost_to."))
 	print("  ★★★不在候選集的【是哪個 option】：%s" % _bucket_list("redispatch.not_in_ranked.opt."))
+	print("  ★★★不在候選集的隊【當下有沒有自己的營地】：%s" % _bucket_list("redispatch.nir_owncamp."))
+	print("     ★判讀（systems 寫在數字之前）：幾乎都 yes ⇒ 承諾比 applicable 活得久（假說成立）；")
+	print("        ★★幾乎都 no ⇒ 假說死，那是另一回事；★★★混合 ⇒ 原樣報不歸類")
 	print("    其中 stall cooldown 排除=%d｜條件本身不成立=%d（★兩者在「不在候選集」上同形）" % [
 		int(Probe.counts.get("redispatch.nir_stall_cooldown", 0)),
 		int(Probe.counts.get("redispatch.nir_not_applicable", 0))])
@@ -248,12 +251,54 @@ func _sec_zhagen() -> void:
 	print("     輸給誰：%s" % _bucket_list("zhagen.appl_lost_to."))
 	# ★★★own-camp（2026-09-03）：applicable 從兩支變三支 ⇒ 第三支也要印，否則這一節讀起來像少一半。
 	print("  第三支 no_own_camp（沒有自己的營地）為 false = %d" % int(Probe.counts.get("zhagen.false.no_own_camp", 0)))
+	# ★★★22 敗的 per-option util（blueprint 加派 2026-09-03）：★第一問是【輸得對不對】不是【為什麼輸】。
+	#   ★★資料來源是既有的 `zhagen.lost_table`（own-camp 那一刀就在記了）——★★★不新建格式，只是先前沒人印它。
+	#   ★差距分桶沿用既有那套：<0.1／0.1-0.5／0.5-1／1-2／≥2。
+	var zlt: Array = Probe.samples.get("zhagen.lost_table", [])
+	print("  ── ★紮根 applicable 卻輸掉：per-option util（樣本 %d／cap 200）──" % zlt.size())
+	if zlt.is_empty():
+		print("     （空）★★空有兩種讀法：真的沒有輸掉的次數／★★★樣本沒被寫進來——對照上面 appl_lost 的數字")
+	else:
+		var gb: Dictionary = {"<0.1": 0, "0.1-0.5": 0, "0.5-1": 0, "1-2": 0, ">=2": 0}
+		for e in zlt:
+			var tbl: Array = e.get("table", [])
+			var wu: float = 0.0
+			var zu: float = 0.0
+			var wname: String = String(e.get("winner", "?"))
+			for r in tbl:
+				if String(r["opt"]) == wname: wu = float(r["u"])
+				if String(r["opt"]) == "紮根": zu = float(r["u"])
+			var gap: float = wu - zu
+			if gap < 0.1: gb["<0.1"] += 1
+			elif gap < 0.5: gb["0.1-0.5"] += 1
+			elif gap < 1.0: gb["0.5-1"] += 1
+			elif gap < 2.0: gb["1-2"] += 1
+			else: gb[">=2"] += 1
+		var gk: Array = ["<0.1", "0.1-0.5", "0.5-1", "1-2", ">=2"]
+		var gs: Array = []
+		for k in gk: gs.append("%s=%d" % [k, int(gb[k])])
+		print("     ★差距（贏家 − 紮根）分桶：%s" % " ".join(PackedStringArray(gs)))
+		print("     ★★逐筆（最多 8 筆）：")
+		for i in range(mini(8, zlt.size())):
+			var e2: Dictionary = zlt[i]
+			var t2: Array = e2.get("table", [])
+			var top: Array = []
+			for j in range(mini(5, t2.size())):
+				top.append("%s=%.4f" % [String(t2[j]["opt"]), float(t2[j]["u"])])
+			print("        tick=%s team=%s 經[%s]支 贏家=%s｜%s" % [
+				str(e2.get("tick", -1)), str(e2.get("team", -1)), String(e2.get("branch", "?")),
+				String(e2.get("winner", "?")), " ".join(PackedStringArray(top))])
+		print("     ★★★判讀（systems 寫在數字之前）：贏家高且差距大 ⇒【輸得對】；")
+		print("        ★<0.1 佔多數 ⇒ 勢均力敵的【邊緣輸】，與「完全不是對手」意思完全不同；")
+		print("        ★★紮根 util 異常低/恆定 ⇒ 那才是 util 有問題；★★★以上皆非 ⇒ 原樣報不歸類")
 	print("  ── ★camp churn（★用既有的桶，不為此新開定義；★★列【觀察項】不列驗收）──")
 	print("     camp.built=%d｜camp.abandoned=%d｜settlement.camp_l0=%d｜outpost.l0_to_l1=%d｜walk_to_own_camp=%d｜own_camp_lost_release=%d"
 		% [int(Probe.counts.get("camp.built", 0)), int(Probe.counts.get("camp.abandoned", 0)),
 			int(Probe.counts.get("settlement.camp_l0", 0)), int(Probe.counts.get("outpost.l0_to_l1", 0)),
 			int(Probe.counts.get("settlement.walk_to_own_camp", 0)),
 			int(Probe.counts.get("survival.own_camp_lost_release", 0))])
+	print("     ★camp.built 分桶（有家再蓋 vs 無家初次）：has_home=%d｜no_home=%d"
+		% [int(Probe.counts.get("camp.built.has_home", 0)), int(Probe.counts.get("camp.built.no_home", 0))])
 	print("     ★★★誠實限：churn 這一行【是這一刀才加的】⇒ 它【沒有修前基準】")
 	print("        ⇒ ★單看修後數字說不出「降了」——★★那正是「拿一個數字去比一個不存在的數字」")
 	print("     ★這一格是 systems 寫在數字之前的門檻：要往【util 太低】修，先拿這個數字來。")
