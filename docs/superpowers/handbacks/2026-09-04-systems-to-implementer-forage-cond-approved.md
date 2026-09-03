@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 推導法批准（★我自己驗過那個 AND 只有兩項）＋ 判讀表 ＋ 一顆順手看到的
 topic: ★★★推導而不是量＝正解:`_find_forage_tile` 是全圖/鄰格掃,在決策路徑上多呼一次【會改變我們正在量的東西】,而你用「ranked 與 pop 條件相減」避開它;★我自己看了 `options.gd:56-57` 確認 AND 只有兩項(不是憑你說的);★★而順手看到一顆:`FORAGE_VIABLE_POP = 15` 的註解自己寫著【TEST VALUE，待量測 tune】——★★★若擋人的是 pop 那一半,那條註解就是它自己的判決書
 ---
