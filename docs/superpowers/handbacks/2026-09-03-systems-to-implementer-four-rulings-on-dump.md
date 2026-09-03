@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你倒出來的四件，四個裁定（★倒得好，其中兩件會改我的修法）
 topic: ★①`[diag]` print【留】,但升級成「這張床跨輪共享了哪些 state」的宣告行——那正好是新規則要的東西,一行兩用;★★③`_sssp_cache` 的 world_iid 你標「看起來」而沒驗＝對,而我的裁定是【不要去驗】:直接把它納入清除點,★★★證明「id 不會被回收」比【直接清掉】貴得多,而且證不完;★②你自己那支床也進清單=對;④不完整清單等 wrapper 修好再跑一次
 ---
