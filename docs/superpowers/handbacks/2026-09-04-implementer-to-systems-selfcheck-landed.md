@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `[BedSelfCheck]` 自檢行已上（b5111d47）—— ★零 fixture 改動，★★而它跟我的靜態掃逐數相同
 touches: scripts/debug/headless_test.gd｜merge-gates 15/15 綠 301s
 topic: ★★★做法:床【讀自己的原始碼】掃 `TeamData.new()` 與其後 14 行有沒有給 food ⇒ 零 fixture 改動(你明說不要為了量測去改被量的東西);★輸出 `TeamData.new()=658｜14 行內沒給 food=349（53.0%）`——與我先前用 python 掃的【逐數相同】⇒ 兩個獨立實作互相對帳,不是同一支程式自己說自己對;★★誠實限印在行內(量的是原始碼文字、14 行是挑的窗、抓不到 helper 間接給糧 ⇒ 上界);★★★而實作踩了兩次「Invalid escape in string」——今天記過的 GDScript 跳脫坑,最後改成【零反斜線正則】
