@@ -86,6 +86,19 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 			var _w: String = String(scored[0]["opt"]) if not scored.is_empty() else "(空)"
 			Probe.bump("zhagen.appl_won" if _w == "紮根" else "zhagen.appl_lost")
 			if _w != "紮根": Probe.bump("zhagen.appl_lost_to." + _w)
+			# ★★★tap 成對（systems 立為通則 2026-09-04）：★先前只有 `lost_table`
+			#   ⇒ ★★贏的那一半沒有證據 ⇒ 「它為什麼贏」永遠只能靠推論。
+			#   ★★★同格式、同 cap —— 不同格式就是又一把不同的尺，比不起來。
+			if _w == "紮根":
+				var _wt: Array = []
+				for _r3 in scored:
+					_wt.append({"opt": String(_r3["opt"]), "u": snappedf(float(_r3["u"]), 0.0001)})
+				Probe.bump_sample("zhagen.won_table", {
+					"tick": state.world.current_tick if state != null else -1,
+					"team": team.team_id, "winner": _w,
+					"branch": ("can_settle" if _cs else ("resume" if _rs else "own_camp")),
+					"table": _wt,
+				}, 200)
 			# ★★★輸的當下把 per-option util 印出來（同 redispatch.lost_table 的理由：
 			#   決策問題禁靜態斷言，先 dump 真實 per-option util 再開藥）。
 			if _w != "紮根":

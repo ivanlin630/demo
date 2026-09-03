@@ -45,6 +45,7 @@ func _run() -> void:
 	_sec_aid()
 	_sec_aid_bands()
 	_sec_zhagen()
+	_sec_churn()
 	_sec_cansettle()
 	_sec_ladder()
 	_sec_prepare()
@@ -293,25 +294,6 @@ func _sec_zhagen() -> void:
 		print("     ★★★判讀（systems 寫在數字之前）：贏家高且差距大 ⇒【輸得對】；")
 		print("        ★<0.1 佔多數 ⇒ 勢均力敵的【邊緣輸】，與「完全不是對手」意思完全不同；")
 		print("        ★★紮根 util 異常低/恆定 ⇒ 那才是 util 有問題；★★★以上皆非 ⇒ 原樣報不歸類")
-	print("  ── ★camp churn（★用既有的桶，不為此新開定義；★★列【觀察項】不列驗收）──")
-	print("     camp.built=%d｜camp.abandoned=%d｜settlement.camp_l0=%d｜outpost.l0_to_l1=%d｜walk_to_own_camp=%d｜own_camp_lost_release=%d"
-		% [int(Probe.counts.get("camp.built", 0)), int(Probe.counts.get("camp.abandoned", 0)),
-			int(Probe.counts.get("settlement.camp_l0", 0)), int(Probe.counts.get("outpost.l0_to_l1", 0)),
-			int(Probe.counts.get("settlement.walk_to_own_camp", 0)),
-			int(Probe.counts.get("survival.own_camp_lost_release", 0))])
-	print("     ★camp.built 分桶（有家再蓋 vs 無家初次）：has_home=%d｜no_home=%d"
-		% [int(Probe.counts.get("camp.built.has_home", 0)), int(Probe.counts.get("camp.built.no_home", 0))])
-	# ★★★等價證明（只在 `CAMP_SHADOW=1` 開）：索引版 vs 掃描版逐數比對＋索引查詢層的 shadow 對帳。
-	#   ★三條驗收（寫在數字之前）：`shadow_fails=0` 且 `shadow_checks>0` 且兩版分桶逐數相同。
-	if OwnerCampIndex.shadow:
-		print("     ★★等價證明｜掃描版：scan_has_home=%d｜scan_no_home=%d｜★mismatch=%d"
-			% [int(Probe.counts.get("camp.built.scan_has_home", 0)),
-				int(Probe.counts.get("camp.built.scan_no_home", 0)),
-				int(Probe.counts.get("camp.built.scan_mismatch", 0))])
-		print("     ★★★own_camp_tile 影子對帳：checks=%d｜fails=%d（★checks=0 ⇒ 「沒失敗」是因為沒跑）"
-			% [OwnerCampIndex.shadow_checks, OwnerCampIndex.shadow_fails])
-	print("     ★★★誠實限：churn 這一行【是這一刀才加的】⇒ 它【沒有修前基準】")
-	print("        ⇒ ★單看修後數字說不出「降了」——★★那正是「拿一個數字去比一個不存在的數字」")
 	print("     ★這一格是 systems 寫在數字之前的門檻：要往【util 太低】修，先拿這個數字來。")
 	print("  ★★讀法：兩行都接近 100%% ⇒ 兩個分支都幾乎不成立；")
 	print("     ★★★若其中一行明顯低 ⇒ 那一分支【有時成立】，而掉在另一邊。")
@@ -355,3 +337,31 @@ func _sec_ladder() -> void:
 		print("  ⇒ ★交集 ＝ 0 ⇒ 階梯沒斷：沒施主的時候【總有別階可用】⇒ 這條線可以收")
 	else:
 		print("  ⇒ ★★交集 > 0 ⇒ 階梯真的斷過 ⇒ ★★★重開的是【階梯有沒有斷】不是【乞食該不該保證施主】")
+
+# ★★★camp churn 獨立成節（2026-09-03 血證）：它原本掛在 `_sec_zhagen` 裡，
+#   而那支在 `zhagen.mother == 0` 時【早退】⇒ ★peaceful 世界（母體 0）跑完，churn 那幾行【整段消失】。
+#   ★★而 churn 跟 zhagen 母體【毫無關係】—— 我把一個量測掛在一個不相干的守衛底下，
+#   ★★★於是它正好在我最需要它的那個世界裡靜默失蹤（而輸出看起來完全正常）。
+#   ⇒ 修法＝獨立成節、無條件印。
+func _sec_churn() -> void:
+	print("═══ ★camp churn（觀察項，非驗收）═══")
+	print("  ── ★camp churn（★用既有的桶，不為此新開定義；★★列【觀察項】不列驗收）──")
+	print("     camp.built=%d｜camp.abandoned=%d｜settlement.camp_l0=%d｜outpost.l0_to_l1=%d｜walk_to_own_camp=%d｜own_camp_lost_release=%d"
+		% [int(Probe.counts.get("camp.built", 0)), int(Probe.counts.get("camp.abandoned", 0)),
+			int(Probe.counts.get("settlement.camp_l0", 0)), int(Probe.counts.get("outpost.l0_to_l1", 0)),
+			int(Probe.counts.get("settlement.walk_to_own_camp", 0)),
+			int(Probe.counts.get("survival.own_camp_lost_release", 0))])
+	print("     ★camp.built 分桶（有家再蓋 vs 無家初次）：has_home=%d｜no_home=%d"
+		% [int(Probe.counts.get("camp.built.has_home", 0)), int(Probe.counts.get("camp.built.no_home", 0))])
+	# ★★★等價證明（只在 `CAMP_SHADOW=1` 開）：索引版 vs 掃描版逐數比對＋索引查詢層的 shadow 對帳。
+	#   ★三條驗收（寫在數字之前）：`shadow_fails=0` 且 `shadow_checks>0` 且兩版分桶逐數相同。
+	if OwnerCampIndex.shadow:
+		print("     ★★等價證明｜掃描版：scan_has_home=%d｜scan_no_home=%d｜★mismatch=%d"
+			% [int(Probe.counts.get("camp.built.scan_has_home", 0)),
+				int(Probe.counts.get("camp.built.scan_no_home", 0)),
+				int(Probe.counts.get("camp.built.scan_mismatch", 0))])
+		print("     ★★★own_camp_tile 影子對帳：checks=%d｜fails=%d（★checks=0 ⇒ 「沒失敗」是因為沒跑）"
+			% [OwnerCampIndex.shadow_checks, OwnerCampIndex.shadow_fails])
+	print("     ★★★誠實限：churn 這一行【是這一刀才加的】⇒ 它【沒有修前基準】")
+	print("        ⇒ ★單看修後數字說不出「降了」——★★那正是「拿一個數字去比一個不存在的數字」")
+
