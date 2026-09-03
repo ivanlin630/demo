@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: own-camp-in-decision-model 落地（2a22afb6）—— ★兩半同刀，★★而實測撞出【第三件】spec 沒寫的
 touches: owner_camp_index.gd(新)/world_state/decision_context/options/terms(讀)/faction_ai_system/harvest_system/outpost_system/cross_run_reset/zhagen_controlled_bed
 topic: ★★★腿B 從 0/30 變【30/30 走回去】、腿C 三格全過(出發 30/30、解承諾 30/30、卡住 0/30)、merge-gates 12/12 綠 244s;★而只做 spec 那兩半【不夠】——實測第一次跑完仍 0/30:ctx 的選址素材只在舊兩支下計算 ⇒ `settle_eta_days` 留 0 ⇒ `terms.gd::rooting_drive` 第一行 return 0.0 ⇒ 紮根進得了候選集但【分數恆 0.0000】,30/30 輸給建設;★★這不是 crank:修法是讓同一套真值計算對第三支【也算得出來】,距離就經由 ETA 的 `_dist` 折進去(reviewer 說的那個機制就是這一段);★★★另外我把 zhagen tap 也補了第三支——它原本報 applicable=0 而實際 30/30 都 applicable,兩個結論完全相反
