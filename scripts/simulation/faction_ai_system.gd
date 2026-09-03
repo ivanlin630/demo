@@ -2869,6 +2869,12 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			#   （`DecisionOptions.applicable` 已收單一源 stall 排除）
 			#   ⇒ ★★它跟「條件本身不成立」是兩件事，而兩者在「不在候選集」上同形。
 			Probe.bump("redispatch.nir_stall_cooldown" if team.survival_stall_cooldown.has(_co) else "redispatch.nir_not_applicable")
+			# ★★★systems 的假說要用數字打（2026-09-03）：修後殘餘的 not_in_ranked 換成了【紮營】，
+			#   而半B 讓「有家的隊」紮營不再 applicable ⇒ 若這些隊當下【已經有 own_camp】，
+			#   ★假說成立（承諾比 applicable 活得久）；★★若幾乎都沒有，假說死。
+			#   ★★★問的是同一個資料源（索引查詢、不掃圖），純觀測不改控制流。
+			Probe.bump("redispatch.nir_owncamp.%s.%s" % [_co,
+				"yes" if state.own_camp_tile(team.team_id) != null else "no"])
 		elif not ranked.is_empty() and String(ranked[0]["opt"]) == _co:
 			Probe.bump("redispatch.won")
 		else:
@@ -5806,7 +5812,13 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	if tile.terrain == "mountain":
 		return false
 	tile.camp_level = 1
-	if Probe.enabled: Probe.bump("camp.built")   # ★gate3：紮營次數（要與 L0→L1 晉級率、L0 廢棄率一起看）
+	if Probe.enabled:
+		Probe.bump("camp.built")   # ★gate3：紮營次數（要與 L0→L1 晉級率、L0 廢棄率一起看）
+		# ★★★「紮營變少」有兩種意思，而它們在 `camp.built` 這一個數字上長得一模一樣（systems 2026-09-03）：
+		#   ★抑制【重複紮營】(有家還再蓋) ＝ 我們要的｜★★抑制【初次紮營】(無家) ＝ 傷害
+		#   ⇒ 按【當下有沒有 own_camp】分桶。★★★查詢必須在本函式把新營地登記進去【之前】——
+		#     而這一行就在 `camp_team_id` 寫入與 invalidate 之前，所以讀到的是【既有的】營地。
+		Probe.bump("camp.built.has_home" if state.own_camp_tile(team.team_id) != null else "camp.built.no_home")
 	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
 	tile.camp_team_id = team.team_id   # ★§4c：記起建隊（decay 時才知道「這是誰的失敗」；完工/消失時清）
 	OwnerCampIndex.invalidate()        # ★own-camp chokepoint①（寫）：新營地誕生 ⇒ 姊妹索引失效
