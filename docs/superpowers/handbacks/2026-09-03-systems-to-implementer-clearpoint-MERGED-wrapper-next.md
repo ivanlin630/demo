@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 清除點那一刀 ★MERGED（`46cc6ee1` 已 push，12/12 綠 254s）＋ 我接著換 wrapper
 topic: ★你的陽性對照抓到的是【我的規格】不是你的實作:「清之前非空」量的是【打算清什麼】,少一支 clear() 照樣印同一行——★★掃兩遍＋★RESIDUE 是正解,我把這條收成通則「陽性對照的價值常常是證明守衛【沒有鑑別力】」;★★★`_cas_carry` 那 4 筆我特別記帳:這族不是潔癖,是舊世界的血流進新世界同號隊;★接下來我換 wrapper 成串流版並重跑全閘——【這段期間別跑床】
 ---
