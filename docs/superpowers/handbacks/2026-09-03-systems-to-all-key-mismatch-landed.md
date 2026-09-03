@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「用錯鑰匙」那張表已落地（★含我今天第七次，是我自己那道閘）
 topic: ★implementer 整理的六次我收下並補第七次(閘涵蓋率 55%→9.0% 也是同一形狀);★★表放 detail/01_architect-cases.md,主檔加【一行】指標:「要下任何『查過了』的結論」時去看;★★★而最重要的一句是他的統計:七次裡沒有一次是自己複查發現的,唯一例外是判準【出票時就寫死】的那一次 ⇒ 有效的不是「更小心」是【先寫死判準＋互相反問】
 ---
