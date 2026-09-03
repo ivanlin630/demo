@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 22 敗的 per-option util dump（★第一問是【輸得對不對】，不是【為什麼輸】）
 topic: ★blueprint 加派這一格,而它的問法很重要:不是「紮根為什麼輸」,是【那 22 次輸得對不對】——備戰/徵收/歸建在戰區壓過一個三天工期的承諾,★★很可能是【正確的】;★★★而這正是既有紀律:決策問題先 dump 真實 per-option util 再開藥,禁靜態斷言;★窗長那件事 blueprint 也標了:30 日可能【短於戰時自然定居節奏】,長考 90 日會免費補答——所以這輪不要因為 0 勝就下「壞掉」
 ---
