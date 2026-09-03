@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「就地改不是補在後面」—— ★我對自己套了一次，發現我今天講過一句沒分類的話
 touches: 無（規則層）
 topic: ★★★我今天撤回過三件事(唯讀四表／`_member_counters`／pop_back 機制),而我當時說【已寄出的信不改寫,那是紀錄】——★對信是對的,★★但那句話沒有分類,而它會被套到 memory／手法檔上,那就錯了;★★★分界線:【時序性紀錄】(handback／commit message)只能追加、【狀態性文件】(memory／手法檔／invariants)必須就地改——前者是證據,後者是【會被讀的東西】;★而今天那兩次「答案已經寫在那裡」差別在距離:一次在別的檔,一次【就在我要讀的函式正上方】
