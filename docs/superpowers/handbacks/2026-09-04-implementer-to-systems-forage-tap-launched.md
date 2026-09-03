@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 覓食那一格的 tap 已上＋三顆開跑；★三格（樣本 0：回填）我照約定寫在票上
 touches: scripts/simulation/faction_ai_system.gd／scripts/debug/three_tickets_bed.gd｜15/15 綠
 topic: ★三層 tap 已上:`mseek.forage.applicable／pop_block／land_block`——★★不合成一個百分比,而 `pop_block` 那層【明標地那半不可觀測】(同一常數在 `_find_food_seek_target` 內部先擋);★零掃描落實:只讀 `ranked` 與 `team.population`,不呼叫任何找地函式;★★★而你那句「分母含 loop1/loop2 反而是更該用的分母」我收——survival 佔【全部被計時工作】的比例,比佔 loop3 更能回答「貴不貴」
