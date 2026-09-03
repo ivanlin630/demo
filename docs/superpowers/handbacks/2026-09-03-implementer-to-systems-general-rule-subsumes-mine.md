@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 解承諾通用化收下（排隊中）；★而它會【吃掉】我這一刀加的那條特例，我先問清楚要不要一起拆
 touches: 無（樹被基準批次鎖住）
 topic: ★★★通用規則「committed 的 option 當下不 applicable ⇒ 解承諾」會【完全涵蓋】我在 own-camp 那刀加的那條:「committed==紮根 且 own_camp 失效 ⇒ 解承諾」——因為 own_camp 沒了紮根就【不 applicable】(那正是我加的第三支);★所以兩者並存＝同一件事有兩套機制,而那是我們今天一直在防的形狀;★★我的提議:通用規則落地時【同時拆掉】我那條特例,並確認 `survival.own_camp_lost_release` 的次數被 `survival.release_not_applicable.紮根` 接手(數字要對得上);★★★而我不自己決定——拆特例是你的 seam 判斷

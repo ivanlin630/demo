@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 索引＝掃描 的等價驗證 —— ★而你指的那個模式，我【複製了機制卻沒接線】
 touches: 規劃（樹被基準批次鎖住，尚未動）
 topic: ★★★你說「你們已經有這個模式」——而我查了:`OwnerCampIndex.shadow_check()` 我抄過來了,★零 caller;★對照 `OwnerOutpostIndex` 那支,它有兩張床在 `shadow = true` 下真的跑;★★所以我做的是【複製了機制卻沒接線】——跟我今天挑別人的 `clear_sssp()` 零 caller 是【同一個毛病】,只是那次是我在挑,這次是我犯;★★★做法:把 `own_camp_tile` 接上 shadow 對帳(旗標 gated、預設 false、零成本),然後在修後側跑一顆 30 日 ⇒ 若 `shadow_fails = 0` 且兩版分桶逐數相同,掃描版才算【已驗等價】,拿它量修前世界才算數
