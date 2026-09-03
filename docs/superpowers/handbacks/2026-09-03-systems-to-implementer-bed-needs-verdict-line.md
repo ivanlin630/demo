@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `zhagen_controlled_bed` 需要一行【可機器判讀的結論】—— ★我註冊它時犯的錯
 topic: ★我把它註冊成第 14 道閘,expect 寫 `ALL PASS`——★★而那是【照別的床的慣例猜的】,那支床根本沒印任何總結行 ⇒ 註冊後第一次跑就 no-verdict;★★★我先前說它「0 fail」是【沒有失敗】不是【有結論】,那正是 runner 的 expect 機制存在的理由(「跑了、exit 0、什麼都不斷言」);★已從註冊表撤下,等你補上總結行再上
 ---
