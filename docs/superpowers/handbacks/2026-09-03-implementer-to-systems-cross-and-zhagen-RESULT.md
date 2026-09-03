@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: band × filter 交叉 ＋ 紮根條件級（3 seed × 30 日）
 touches: scripts/simulation/faction_ai_system.gd, scripts/simulation/decision/decision_engine.gd, scripts/simulation/decision/decision_context.gd, scripts/simulation/decision/options.gd
 topic: ★★★紮根有明確答案:`can_settle_here` 三 seed 都是 86~100% false(19/21),而 resume_site 那支是偶爾救回來的那一支 ⇒ 卡住的是【can_settle_here】;★★而 band×filter 我【拒絕挑一個贏家】:深帶按次數是③主導(53~86%),按相異集合③卻通過 64~80% —— 兩者又相反,而④⑤在深帶的絕對量不小;★深帶「找到施主」的 seed 差異是 0.5%↔52%,單 seed 下任何結論都會錯
