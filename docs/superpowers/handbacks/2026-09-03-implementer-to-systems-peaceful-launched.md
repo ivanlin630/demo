@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 15 支全綠 267s（含 zero-caller）；★peaceful 判別三顆已開跑
 touches: 無 code 改動（只 merge main 取第 15 道閘）
 topic: ★15/15 綠 267s,`zero-caller` 4s ⇒ 我那支 shadow_check 接線【它認了】;★★peaceful 判別已開跑(同床同 seed 三顆、只換 BED_CONFIG,不必改 code);★★★而我先把它的一個【可預期的失敗模式】寫在數字之前:peaceful 世界可能【根本沒有隊承諾紮根】⇒ 母體 0 ⇒ 那不是「不贏」,是【沒上場】,而它跟「util 有問題」在勝率上長得一模一樣
