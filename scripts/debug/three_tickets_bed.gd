@@ -407,6 +407,24 @@ func _sec_b_grade() -> void:
 		print("     ★再去【同一格】= %d（%.1f%%）｜換一格 = %d｜改做別的 = %d"
 			% [ms_same, 100.0 * float(ms_same) / float(ms_tot), ms_other, ms_gave])
 		print("     改做什麼：%s" % _bucket_list("mseek.gave_up.task."))
+		# ★★★覓食那一格（★三層，不合成一個百分比）
+		var f_ap: int = int(Probe.counts.get("mseek.forage.applicable", 0))
+		var f_pop: int = int(Probe.counts.get("mseek.forage.pop_block", 0))
+		var f_land: int = int(Probe.counts.get("mseek.forage.land_block", 0))
+		var f_tot: int = f_ap + f_pop + f_land
+		print("     ── ★覓食在不在候選（母體＝改做別的 %d，本節分母 %d）──" % [ms_gave, f_tot])
+		print("        ①applicable（覓食在 ranked）= %d" % f_ap)
+		print("        ★②pop > FORAGE_VIABLE_POP(%d) = %d ⇒ 常數擋（★而地那半在此【不可觀測】：同一常數先擋）"
+			% [FactionAISystem.FORAGE_VIABLE_POP, f_pop])
+		print("        ★★③pop ≤ 常數 而仍不 applicable = %d ⇒ 沒有獵物格（★★★純粹的世界層讀數）" % f_land)
+		print("        ★判讀（systems 寫在數字之前）：②佔絕大多數 ⇒ 常數擋的（而它的理由已被證不存在）；")
+		print("           ★★③佔絕大多數 ⇒ 世界層；①佔多數 ⇒ 它上場了而秤不過 ⇒ util 相對量級；混合 ⇒ 兩邊都報")
+		var fs: Array = Probe.samples.get("mseek.forage_sample", [])
+		for i in range(mini(5, fs.size())):
+			var e4: Dictionary = fs[i]
+			print("        team=%s pop=%s 覓食在候選=%s pop_ok=%s 改去做=%s" % [
+				str(e4.get("team", -1)), str(e4.get("pop", -1)), str(e4.get("forage_in_ranked", false)),
+				str(e4.get("pop_ok", false)), String(e4.get("went", "?"))])
 		var mss: Array = Probe.samples.get("mseek.sample", [])
 		for i in range(mini(5, mss.size())):
 			var e: Dictionary = mss[i]

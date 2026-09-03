@@ -3070,6 +3070,27 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				else:
 					Probe.bump("mseek.gave_up")
 					Probe.bump("mseek.gave_up.task." + String(td["task"]))
+					# ★★★#3 追一格（systems 2026-09-04）：這批「撲空後被別的事叫走」的隊，
+					#   當下【覓食】在不在候選集 —— ★而三 seed 量到覓食＝0／0／0，所以問的是【它進得去嗎】。
+					#   ★★分層報（★★★不合成一個百分比：那個數字會被兩種成因同時餵）：
+					#     `applicable`  ＝ 覓食在 ranked 裡
+					#     `pop_block`   ＝ 不在 且 pop > FORAGE_VIABLE_POP
+					#        ⇒ ★此時 `has_forage_tile` 也【必然】false（`_find_food_seek_target` 內部同一個常數先擋）
+					#          ⇒ 兩條件同源、不可分離 —— 而【那本身就是答案】
+					#     `land_block`  ＝ 不在 且 pop ≤ 常數 ⇒ ★★純粹的「沒有獵物格」＝世界層讀數
+					#   ★零掃描：只讀 `ranked`（已在手上）與 `team.population`（純欄位）
+					#     ⇒ ★★不呼叫 `_find_food_seek_target`（它是本格＋鄰格掃：會踩憲法閘，也會改變我們正在量的耗時）
+					var _forage_in: bool = false
+					for _e2 in ranked:
+						if String(_e2["opt"]) == "覓食": _forage_in = true; break
+					var _pop_ok: bool = team.population <= FORAGE_VIABLE_POP
+					Probe.bump("mseek.forage." + ("applicable" if _forage_in
+						else ("land_block" if _pop_ok else "pop_block")))
+					Probe.bump_sample("mseek.forage_sample", {
+						"tick": state.world.current_tick, "team": team.team_id,
+						"pop": team.population, "forage_in_ranked": _forage_in,
+						"pop_ok": _pop_ok, "went": String(td["task"]),
+					}, 200)
 				InteractionSystem._bail_last.erase(team.team_id)   # ★一次 bail 只判一次（★★否則同一次撲空會被重複計）
 		if _set_ok: _commit_settle_site(state, team, td)   # ★§4a 紮根：世界寫入只在 try_set 成功後（zombie 工地根治）
 		# 掠奪/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（社交 resolver 讀）
