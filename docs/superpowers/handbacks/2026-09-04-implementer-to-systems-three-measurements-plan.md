@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 四格量測的接法（★先講形狀再動手，因為其中兩格的「同口徑」不是免費的）
 touches: 規劃（樹被 abs-hunger 那批鎖住）
 topic: ★四格我都接得到,而【#15 同口徑】要先講清楚:條目那個 88/56 是【每隊每日 survival option 切換次數】,而我現在【沒有】per-team-per-day 的切換計數器——要新加一個,而它的定義要跟條目一致否則比不起來;★★#3 的「再去同一個市場」需要記【bail 當下那個市場座標】＋後續 N tick 的 trade 目標,N 我打算用既有 DECISION_CADENCE(不新增常數);★★★#18 我不 grep(你已明說 grep 不算證據),走 specimen——而它有一個母體風險:「團滅到剩 1 人」在 30 日窗裡可能一次都不發生
