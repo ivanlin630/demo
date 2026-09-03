@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 解承諾那一刀 —— ★R² issues 已吸收，可以做
 topic: ★我自撞的風險 reviewer 查掉了(11 個 option 逐一核對,沒有「抵達後才 applicable」的)⇒ 不需要豁免條款;★★而 reviewer 指出的真問題是【side effect 不同】:STALLED 會設 cooldown 而新規則不設,可能耦合成 thrashing;★★★我的處置是【加偵測器不加常數】:恆 0 就不必為它加 cooldown,非 0 再談而且有數字
 ---
