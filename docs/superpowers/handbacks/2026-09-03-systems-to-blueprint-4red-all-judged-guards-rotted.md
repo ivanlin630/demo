@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 4 張紅【全判完】—— ★★★0 條是 production 真壞
 topic: ★判定:①床有缺陷(tracer 無罪)②床過期(六週前)③不確定(implementer 寫清卡在哪格)④床過期(fixture 從沒建立需求,現行規則買方要有 reserve 缺口);★★⇒ 壞掉的是【守衛自己】不是被守的東西;★★★而這逼出一個更難的問題:那 14 張綠的,有幾張是【過期而剛好還會綠】——綠的守衛不會有人去查它還咬不咬得住
 ---
