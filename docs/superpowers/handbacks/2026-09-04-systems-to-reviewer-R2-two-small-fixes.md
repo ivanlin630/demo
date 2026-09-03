@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 兩個小修（#2 crisis 絕對餓／#4 生育截斷懸崖）—— R²
 topic: ★兩件都是 blueprint 明令「修,現在」,而我要你打的是【真值來源】不是要不要修;★①crisis 我打算用 `team.resources.food <= 0`(不引入新常數)——★★而我沒查「隊在自家糧倉旁但 team.food=0」算不算真絕對餓,那正是今天施主線踩過的同一個坑;★★★②生育我打算把 `int(pop*0.2)` 換成【浮點比較】而不是 `maxi(1,…)`——理由是後者是【換一個數值】,前者是【拿掉截斷】,而用戶定案要的是「無絕對懸崖」
 ---
