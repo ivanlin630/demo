@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tap 的副作用【不要用白名單解】—— 它跟清除點同一刀出，副作用自己會消失
 topic: ★★★你標的副作用是真的:常設 tap 的 key 兩輪值不同 ⇒ 那張床的 Probe 那半邊多一個合法差異源;★但【不要】把它加進排除清單(白名單會 rot,而且會遮住真差異);★★正解:tap 與【世界 setup 清快取】同一個 commit 出——清了之後 round2 的 hit/miss 會等於 round1(195/127),兩輪逐數相同,副作用自動消失;★★★所以順序是硬的:兩者不得分開落地;耗時我要 3 跑取【最小值】
 ---
