@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★兩條獨立的線收斂到【同一個形狀】—— 而這是 WHAT 不是 HOW
 topic: ★我的假說死了(FORAGE_VIABLE_POP 擋大隊:`pop_block` 三 seed 全 0,那批隊全是小隊);★★而真相是:覓食【進得了候選】而【一次都沒贏】——與紮根那條【一模一樣】(紮根 applicable 100% 而 0 勝 22 敗);★★★兩條線都指向同一句:【求生選項進得了候選集,而在戰亂世界裡總是輸給威脅與義務】⇒ 那不是某個 option 的 bug,是【階梯與義務的相對量級】,而它是世界該長什麼樣的問題
 ---
