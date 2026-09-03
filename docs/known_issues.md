@@ -1562,6 +1562,12 @@ outpost_system.gd:825  func demolish_with_control(state, team, …)     ← ★�
 
 ## ★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，crisis-immunity QA 故事稽核撿 team=-1000000）
 
+**狀態：已知未修 → ★已修（結案存查）** ｜ **回訪：不需要（★守衛在迴圈入口，且有一道自承冗餘的第二道）**
+
+★★**B 級 sweep 判定（2026-09-04）**：`faction_ai_system.gd:943`／`:1025` **兩個決策迴圈入口都 `if team.beast_kind != "": continue`**，
+註解寫明「**野獸不進決策迴圈：非-agent 無「腦」不該經引擎的秤（憲法決策模型）**」；`:5740` `_evaluate_survival` 另有守衛；
+`:4077-4078` 還有一道**自承冗餘**的（「防未來別條 extinct 路誤計」）。⇒ ★**條目描述的洩漏路徑已封。**
+
 QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambition food=0 survival_would_succeed=true` 從不轉求生。**身分坐實=野獸**（`beast_system.gd:16` `_next_beast_id=-1000000` 負區段避 team id；TAG_BEAST/leader_id=-1/1 anon pleb/無 food 經濟=戰鬥標的 pseudo-team）。**根因＝beast 未 skip 出決策迴圈**：`faction_ai_system._evaluate_all_body` loop2(`:700` `elif team.faction_id==-1`，beast faction_id=-1 落此支)無 `beast_kind` guard → beast 跑 `_evaluate_independent_strategy`(建國/ambition)+`_evaluate_solo`+`_evaluate_independent_infrastructure`(建設)；loop3(`:759` leader_id=-1)→`on_leader_death` 晉升 anon 當領袖。∴ 一隻鹿/豬跑完整定居隊 AI（野心→建設→晉升領袖），荒謬且污染鄰隊 belief/經濟 + 污染 starve 分母計數。
 
 **非 crisis-override 第 6 種 stuck-task 變體**（blueprint 疑「ambition@10 沒排進 preemption 鏈」= 症狀）。**根＝beast 是戰鬥 prop 非決策 agent，不該進決策迴圈**（補丁閘/root 通則：先查機械洩漏非猜 tuning；別加 ambition-preempt 補丁）。**★第二根（更深，blueprint 全 log 證據坐實 2026-07-19）＝beast id 碰撞**：`_next_beast_id` 是 **instance var 非 static**（`beast_system.gd:16`），但所有 spawn 走 `BeastSystem.new().build_beast_team()`（`faction_ai_system.gd::try_hunt_predator()`/`encounter_system.gd::_spawn_beast_units()`/`ambush_system.gd`（★L2 錨：檔級）/`player_command_system.gd`（★L2 錨：systems 判 2026-09-01 —— ★兩解排除法：舊行號 177 > `player_command_api.gd` 全長 159 ⇒ 只能是 system）=每次 fresh 實例）→ `_next_beast_id` 每次重置 -1000000、`-= 1` 對即棄實例無效 → **每隻 beast 都拿 team_id=-1000000**。`create_team`（`world_state.gd:256`）= `teams[id]=team` 靜默覆寫 → 後 beast 覆前 beast，前者從 dict 消失但 `combat_target`/belief 的 -1000000 ref 懸空指向新 beast。**這解釋 blueprint 全 log「-1000000 出現 20 次/8月,每次 Combat→晉升臨時領袖(統領0.03-0.28)→buy food」**＝20 隻不同 beast 全撞同 id、各自洩進決策迴圈跑 AI。blueprint 直覺「anon pool 聚合體」對其表象(臨時領袖無生活史)、根實=**id 碰撞 + 決策洩漏**。
@@ -1577,6 +1583,12 @@ QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambit
 **修方向（HOW，待 spec）**：transition 至少守 combat lock + 不 clobber 更高 priority（survival/combat）+ 尊重 crisis-免疫。★13 caller 有正當用途（安頓→生產就地轉換）→ spec 需 measure 逐 caller 不破。排序=beast-fix 定性後（絕境經濟/手不聽腦 arc 真根之一）。連 [[project_desperation_economy]]/[[feedback_patch_gate_first]]/[[project_reverse_engineering_arc]]（控制層手不聽腦）。
 
 ## crisis-immunity 覆蓋不全（2026-07-19，team16 揭）
+
+**狀態：已知未修 → ★已修（結案存查）** ｜ **回訪：不需要（★覆蓋面已從一個入口擴到兩個）**
+
+★★**B 級 sweep 判定（2026-09-04）**：條目說「免疫 guard **只在 `try_set`**」⇒ ★**現在兩個入口都有**：
+`task_arbiter.gd:79`（`try_set`）與 **`:202`（`transition`）** —— 同一組條件（`crisis_released_task` ＋ `crisis_released_until`）。
+★★★而 `:197` 的註解正好記著當初為什麼要補第二站：「**呼叫（defection「等待新領主」@AMBIENT）clobber 引擎剛派的 survival@80 ＋ 繞免疫 → crisis 永不 fire**」。
 
 crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只覆蓋「release 後走 **try_set** 重委派」的重鎖（team1/19 被接住）。**走 `transition` 的重鎖（team16「等待新領主」）未覆蓋**。∴ 原 release-pass（靶三隊 team1/19/13 剛好全走 try_set 路）= **樣本不完整**，免疫修對它瞄準的有效但覆蓋不全。**非推翻已 merge**（免疫對 try_set 路真有效），但誠實記「覆蓋範圍=try_set 重委派，transition 重鎖需上條 transition 修一併治」。blueprint owner 補 game-design 對應處。連上條 [[TaskArbiter.transition 後門]]。
 
@@ -1709,6 +1721,16 @@ Team18 後半 `threat_id:10 / threat_pos:[13,5] / threat_react:8.7` **29 天一�
 Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**combat 死接不到 SpecimenTracer**（tracer 只接決策路徑 capture_decision，combat 結算死亡不經決策 tap）。**違 `invariants.md §全量暫態可觀測性`**（combat 死也是決策依賴的暫態/結局，該可 trace）。**修向**：combat 死亡結算補 SpecimenTracer tap（死因+死前狀態），比照決策 tap。**歸屬**：全量暫態可觀測性補洞（同交易/威脅 tap 家族），非 desperation 刀 blocker。
 
 ## survival-latch: _evaluate_survival 每-tick 重觸 churn（2026-07-15，掠奪根 scrap 後 measurer 定位，non-fatal backlog）
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一輪 organic 三 seed 時，順手數【每隊每日 survival option 切換次數】**
+
+★★**B 級 sweep 判定（2026-09-04）：讀 code 判不出，需要量。**
+```
+★`_evaluate_survival(state, team)` 仍在 loop3 【每 tick】被呼叫（`faction_ai_system.gd:1100`，呼叫點無 cadence gate）
+★★而 2026-09 之後有了緩解：`survival_committed_option` 承諾機制 ＋ stall 三態 ＋（2026-09-04）
+   「不 applicable 就解承諾」——★★★但【緩解的效果沒有量過】
+⇒ 條目原始數字是 Team26 day24-26 churn 88/56 ⇒ **要的是同口徑的新數字，不是新的推論**
+```
 
 真 thrash 殘留源＝`_evaluate_survival` 每-tick 重觸（legacy，非掠奪選擇）→ Team26 day24-26 churn 88/56 次。**但非致命**：Team26 挺過 churn、期間仍行動（有 loot）、死在 60 天後（day85），churn 非死因＝噪音非 bug。**修向**：survival-latch（`_evaluate_survival` 別同快照重觸，＝原執行鎖意圖但對的層——非 recognizer、是「同狀態別每 tick 重跑」）。**backlog 非 urgent**：future 若觀察到 churn 普遍 + perf 貴再做。連 [[feedback_avoid_rabbithole]]（blueprint 判 Team26 剩的是邊際噪音，停追）。
 
@@ -2642,6 +2664,18 @@ func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) 
 ★★**`dormant-module-scan` 掃 `class_name` 層級，抓不到【函式層級】的死 code —— 這是掃描的已知覆蓋缺口。**
 
 ## ★`local_value` 仍有 ~12 個 blind 呼叫點（2026-08-25，窮盡掃出，★不在當前票範圍）
+
+**狀態：已知未修 → ★已修（結案存查）** ｜ **回訪：不需要（★由型別強制，不是靠人記得）**
+
+★★**B 級 sweep 判定（2026-09-04）：blind 呼叫【在型別層不可能存在】。**
+```
+簽名：`TradeValuation.local_value(team: TeamData, res: String, state: WorldState) -> float`
+   ★`state` 是【必填、無預設】⇒ ★★少傳一個參數【編不過】
+現行呼叫點逐個查（10 處）：`interaction_system` :901／:990／:1011／:1034×2／:1040×2／:1042／:1043
+                        `faction_ai_system` :2534／:3931 —— ★★★全部傳 `state`
+```
+★**所以這一條不是「有人記得去補」修好的，是【把參數變成必填】之後它自己不可能再發生。**
+★★**而那正是本條目該有的結局** —— **「~12 個 blind 呼叫點」這種條目，靠列清單去追永遠追不完。**
 **已傳 `state`（granary-aware）**：`interaction_system` 主撮合路徑 `:826/:866/:968/:993/:1000`、`order_system`、`goal_resolver`、`coin_treasury`。
 ★**仍 blind**：`faction_ai_system.gd`（★L2 錨：檔級）（商隊自評值）、`interaction_system:952/996/1002/1004/1005`（易貨估值）、`player_trade_system:46/85/88/137/139`、`player_api_mapper:864/866/876/879`。
 ⇒ ★★**同族 blind-view，但屬另一張票 —— 列管，不擴張當前 slice。**
