@@ -28,9 +28,16 @@ extends SceneTree
 const N_PER_LEG: int = 30
 const GRID: int = 24
 
+# ★★★閘化（systems 2026-09-03）：這支床原本【只印數字、不斷言】——
+#   ★而 systems 把它註冊成閘時，expect 寫了 `ALL PASS`，那是【照別的床的慣例猜的】
+#   ⇒ ★★註冊後第一次跑就 no-verdict。★★★「跑了、exit 0、什麼都不斷言」正是 expect 機制要抓的東西。
+#   ⇒ 補上斷言＋總結行。★斷言釘的是 own-camp 那一刀的驗收（腿A/B/C 各一條），
+#     ★★而它們在控制世界裡是【由構造決定】的整數，不是統計量 ⇒ 釘死值而不是釘閾值。
+var _fail: int = 0
 var _rows_a: Array = []
 var _rows_b: Array = []
 var _rows_c: Array = []
+var _stat: Dictionary = {}
 
 func _initialize() -> void:
 	print("=== 紮根控制場景床｜每腿母體 %d｜手構世界（非 seed） ===" % N_PER_LEG)
@@ -50,6 +57,7 @@ func _initialize() -> void:
 	var probe_c: Dictionary = Probe.counts.duplicate(true)
 	Probe.enabled = false
 	_report_c(probe_c)
+	_verdict()
 	print(MeasureBedHelper.arm_order_report())   # ★自檢有值而沒人看得到＝等於沒有自檢
 	print("★誠實限：①手構世界（非 organic）②單 tick 決策快照（腿 B 的『走回去』看的是【這一 tick 派了什麼】，")
 	print("   ★★不是【走完全程】）③每隊人格/糧況已打散（見 _mk_team），但仍是【我造的分布】不是世界的分布")
@@ -205,6 +213,9 @@ func _report_c(pc: Dictionary) -> void:
 		% [_rows_c.size() - still_committed_zhagen, _rows_c.size(), still_committed_zhagen])
 	print("     其中走既有出口（committed == \"\"）= %d｜tap survival.own_camp_lost_release = %d"
 		% [released, int(pc.get("survival.own_camp_lost_release", 0))])
+	_stat["c_start"] = t1_walk
+	_stat["c_released"] = _rows_c.size() - still_committed_zhagen
+	_stat["c_stuck"] = stuck_moving
 	print("  ★★③【卡在移動中】（t2 仍指向已消失的營地）= %d / %d ★★★這一格必須是 0"
 		% [stuck_moving, _rows_c.size()])
 	print("  t2 current_task 分布：%s" % _fmt(by_t2))
@@ -252,6 +263,8 @@ func _report(title: String, rows: Array, pc: Dictionary, ps: Dictionary, is_leg_
 	if is_leg_a:
 		var built: int = int(by_task.get(TeamData.TASK_BUILD, 0))
 		var won: int = int(pc.get("zhagen.appl_won", 0))
+		_stat["a_built"] = built
+		_stat["a_won"] = won
 		print("  ★★★判讀（表寫在數字之前）：")
 		print("     ①fire 且真 dispatch（task=建設）= %d / %d" % [built, rows.size()])
 		print("     ②applicable 但沒贏 = %d（appl_lost）" % int(pc.get("zhagen.appl_lost", 0)))
@@ -259,6 +272,8 @@ func _report(title: String, rows: Array, pc: Dictionary, ps: Dictionary, is_leg_
 			% [maxi(won - built, 0), won, built])
 		print("     ④若三者對不起來 ⇒ 原樣回報形狀，不歸類")
 	else:
+		_stat["b_home"] = moved_home
+		_stat["b_idle"] = idle_n
 		print("  ★★★判讀（表寫在數字之前）：")
 		print("     ①走回去（move_target == 自家營地）= %d / %d" % [moved_home, rows.size()])
 		print("     ②不走回去、改做別的 = %d（見 current_option 分布）" % (rows.size() - moved_home - idle_n))
@@ -290,3 +305,31 @@ func _fmt(d: Dictionary) -> String:
 	var parts: Array = []
 	for k in ks: parts.append("%s=%d" % [String(k), int(d[k])])
 	return " ".join(PackedStringArray(parts))
+
+# ★★★總結行（runner 的 expect 讀這一行）。★沒有它的話，「跑了、exit 0、什麼都不斷言」
+#   會被讀成通過 —— 而那正是 no-verdict 要擋的。
+func _ok(cond: bool, msg: String) -> void:
+	if cond: print("  [PASS] %s" % msg)
+	else: _fail += 1; print("  [FAIL] %s" % msg)
+
+func _verdict() -> void:
+	print("")
+	print("--- ★回歸斷言（own-camp 那一刀的驗收，逐腿一條）---")
+	_ok(int(_stat.get("a_won", -1)) == N_PER_LEG and int(_stat.get("a_built", -1)) == N_PER_LEG,
+		"腿A：站自家營地 ⇒ 紮根贏 %d/%d 且真 dispatch %d/%d"
+		% [int(_stat.get("a_won", -1)), N_PER_LEG, int(_stat.get("a_built", -1)), N_PER_LEG])
+	_ok(int(_stat.get("b_home", -1)) == N_PER_LEG,
+		"腿B：不在營地 ⇒ 走回去 %d/%d（★修前是 0/%d：原地重紮）"
+		% [int(_stat.get("b_home", -1)), N_PER_LEG, N_PER_LEG])
+	_ok(int(_stat.get("b_idle", -1)) == 0,
+		"腿B：沒有 IDLE latch（idle=%d）" % int(_stat.get("b_idle", -1)))
+	_ok(int(_stat.get("c_start", -1)) == N_PER_LEG,
+		"腿C：第一步真的出發 %d/%d" % [int(_stat.get("c_start", -1)), N_PER_LEG])
+	_ok(int(_stat.get("c_released", -1)) == N_PER_LEG,
+		"腿C：營地消失後解承諾 %d/%d" % [int(_stat.get("c_released", -1)), N_PER_LEG])
+	_ok(int(_stat.get("c_stuck", -1)) == 0,
+		"腿C：★卡在移動中 = %d（必須 0）" % int(_stat.get("c_stuck", -1)))
+	if _fail == 0:
+		print("=== DONE === ALL PASS")
+	else:
+		print("=== DONE === %d FAIL" % _fail)
