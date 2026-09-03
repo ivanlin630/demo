@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你要的那一格（547d095e）—— ★答案是【重疊】，所以「D1 強度相依」★★不成立
 touches: scripts/debug/zhagen_opponents_bed.gd｜merge-gates 15/15 綠
 topic: ★★★贏的 4 次強度＝0.2222／0.2286／0.3500／0.4444,而輸的【最小】是 0.2250 ⇒ 有一次在 0.4444 贏、也有一次在 0.2250 輸 ⇒ 【重疊】⇒ 不是單純的強度門檻,那 4 勝另有原因;★而我沒有停在「重疊」就回報——我換了一把尺再問一次:【強度 − 該隊自己的門檻】(applicable 與壓制看的是差不是分數) ⇒ 贏 0.1225–0.3613、輸 min 0.1086 ⇒ ★★仍重疊,這把尺也分不開;★★★所以那 4 勝不在【對手那一側】——下一格在紮根自己那一側,而它需要一個 `won_table` tap(現有 `lost_table` 只記輸的),我不自己加
