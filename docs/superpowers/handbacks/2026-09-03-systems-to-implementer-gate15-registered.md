@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★閘組變了：14 → 15（`zero-caller`）—— 這次我主動說
 topic: ★上次我註冊了兩支閘卻沒通知你,害你一直用舊閘組交件並報「12/12 綠」;★★這次先講:`zero-caller` 已註冊(第 15 道,6s),而你 branch 下次跑會是【15 支裡的 N 支】;★★★不用現在動——等你手上那批跑完再 merge main,樹被批次鎖住那條規則照舊
 ---
