@@ -11,6 +11,8 @@ extends SceneTree
 # ★★母體與命中同印 —— ★★★「贏 0 次」與「沒有隊在候選」長得一樣。
 # ★而第一問是【贏家贏得對不對】，不是【怎麼讓輸家贏】⇒ 本床只 dump，禁 crank。
 
+var _exclusive: String = "unknown"
+
 func _initialize() -> void:
 	_run(); quit()
 
@@ -20,6 +22,10 @@ func _run() -> void:
 	var sd: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
 	# ★等價證明用（預設關）：CAMP_SHADOW=1 才開，★開了每次 own_camp 查詢都會多掃一次全圖
 	OwnerCampIndex.shadow = OS.get_environment("CAMP_SHADOW") == "1"
+	# ★#15 perf 那半：`PHASE_TIMING=1` 才開（★★時間類 ⇒ 必須獨佔機器跑，今天剛立的規則）
+	SimRunner.phase_timing = OS.get_environment("PHASE_TIMING") == "1"
+	# ★★★獨佔與否【由跑的人明示】：沒傳就是 unknown（★不自動偵測升級成 yes——自動偵測只能反駁）
+	_exclusive = OS.get_environment("EXCLUSIVE") if OS.has_environment("EXCLUSIVE") else "unknown"
 	print("=== 三票 re-measure｜config=%s seed=%d days=%d ===" % [cfg, sd, days])
 	var state: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg, true)
 	seed(sd)
@@ -421,9 +427,25 @@ func _sec_b_grade() -> void:
 		% [day_teams.size(), hit, 100.0 * float(hit) / maxf(float(day_teams.size()), 1.0)])
 	print("     ★★★問的是【普遍嗎】不是【最大幾次】——「一隊 88 次」與「半數隊各 3 次」平均值可能一樣")
 	# ── #15 perf ＋ 備援分子 ──
-	print("  #15 perf｜`loop3.survival` 佔比需 phase_timing 開（本輪 %s）｜★備援分子 survival.eval_calls = %d"
+	print("  #15 perf｜phase_timing=%s｜★備援分子 survival.eval_calls = %d"
 		% [str(SimRunner.phase_timing), int(Probe.counts.get("survival.eval_calls", 0))])
-	print("     ★exclusive=unknown（★★除非跑的人明示；★★★自動偵測只能反駁不能確認）")
+	if SimRunner.phase_timing:
+		var ph: Dictionary = FactionAISystem._fai_ph
+		var tot_us: int = 0
+		for k3 in ph: tot_us += int(ph[k3])
+		var sv: int = int(ph.get("loop3.survival", 0))
+		print("     ★`loop3.survival` = %d us｜★★分母＝`_fai_ph` 全部相位（含 loop1/loop2）= %d us｜佔比 %.2f%%"
+			% [sv, tot_us, 100.0 * float(sv) / maxf(float(tot_us), 1.0)])
+		# ★★★兩個標籤訂正（2026-09-04，實測打掉我自己寫的前一版）：
+		#   ①舊版寫「loop3 群組總計」⇒ ★錯：我加總的是 `_fai_ph` 的【全部】key，含 loop1.*／loop2.*
+		#     ⇒ 這個比例是【survival ÷ 全部 faction_ai 相位】，不是【÷ loop3】
+		#   ②舊版寫「每 tick clear ⇒ 這是最後一個 tick 的快照」⇒ ★★也錯：
+		#     `evaluate_all` 確實在開頭 clear（:827），★★★而實測總量到 ~1200 萬 us
+		#     —— 一個 tick 不可能有 12 秒（同一份輸出裡 PhaseSpike 最大才 0.5 秒）
+		#     ⇒ 所以累積窗【比一個 tick 長】，而【多長我沒有量】⇒ 標未知，不猜
+		#   ★而【比例本身仍然有效】：分子與分母來自【同一個快照】，窗一樣長
+		print("     ★★★誠實限：累積窗【未知】（不是一個 tick）——而分子分母同窗 ⇒ 比例有效、絕對值不可跨跑比")
+	print("     ★exclusive=%s（★★由跑的人明示；沒傳就是 unknown；★★★自動偵測只能反駁不能確認）" % _exclusive)
 
 func _sec_churn() -> void:
 	print("═══ ★camp churn（觀察項，非驗收）═══")
