@@ -32,6 +32,23 @@
 床→production 反查也試過並失敗：**130 張床平均直接引用 0 個 production 檔**（走 `class_name` 不走 `res://` 路徑）。
 ★**它每次執行都印當下涵蓋率** ⇒ 啟用門檻可觀察，不靠誰記得。詳 `docs/superpowers/specs/2026-09-03-stale-conclusion-expiry-HOW.md` §⑧。
 
+### ⏳★★★4 張【docs 當守衛引用】的床是紅的，而沒有人判過（2026-09-03 systems 掃出，blueprint 裁判序）
+
+**狀態：未確認** ｜ **回訪：量測窗 — implementer 逐張判「床過期 vs code 真壞」回來時（判序①→④）**
+
+```
+docs（known_issues/specs/invariants）引用為守衛的床 = 19 張；★在 merge-gates 註冊表裡的 = 1 張（headless_test）
+⇒ 跑其餘 18 張：14 綠 / 4 紅，198s ——★這就是「紅床 12 天沒人讀」的機械原因
+①observability_path_test   [FAIL] tracer on vs off → 世界+Probe aggregate byte-identical（re-query 包 suppress 不污染）
+②seam1_registry_test       [FAIL] applicable 少了 "survival"（team 與 subteam 兩處）★#10 not_in_ranked 的熱 lead
+③tracer_completeness_test  [FAIL] commit-fail/heartbeat entry 期望 1、實際 0
+④unified_commerce_test     [FAIL] 交易整條沒發生（material 0→0／coin 0→0／庫存沒扣／order 沒被吃）
+```
+★**①插到最前面**（blueprint）：**儀器信任閘住一切** —— 真紅則今天所有數字都要重看；床過期則一判便知。
+★★**判定前，新 verdict 一律加「儀器待驗」誠實限**（已通知 measurer／implementer；★判完由 systems 主動發信撤，不靠人記得）。
+★★★**不註冊第 13 道閘**：+198s，且**現在註冊就得把 4 條未判的紅 baseline 掉＝重演同日早上那 7 條 assert 的錯**。
+涵蓋率（誠實）：18/19 claimed-guard；★而 claimed-guard 只是「docs 有沒有提到」的代理 —— **另外 116 張 `*_test.gd` 在視野外。**
+
 ### ✅（裁為可接受的世界性質，存查）深帶找不到施主 —— **此線收，僅剩一個守衛**（2026-09-03 blueprint 裁）
 
 **狀態：已知未修** ｜ **回訪：觸發事件 — 只有當「無施主 ∧ 無其他階可用」的交集【非空】時才重開（已派 implementer 查）**

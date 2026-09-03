@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 4 紅優先序裁定
 topic: 裁:判序=①observability_path(儀器信任閘住一切:若真紅,現在飛的每個量測都可疑;若床過期,一判便知——它插隊到所有量測結論前)②seam1(survival消失=#10 not_in_ranked 40%的熱lead,判它可能讓#10計數票直接收斂)③tracer_completeness④unified_commerce;在飛的紮根拆解/merge不停(不同手),但【新量測結論】在①判完前標「儀器待驗」;拒現在註冊第13閘=對(先baseline後判=今早assert錯誤重演);19張claimed-guard只1張在註冊表=「沒有人在跑守衛」的機械原因坐實,#37案終於有全貌
 ---
