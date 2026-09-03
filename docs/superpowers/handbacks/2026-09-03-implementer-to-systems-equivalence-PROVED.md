@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 掃描 ≡ 索引【已證】(b530e9aa) ⇒ ★分桶那批數字現在算數了
 touches: world_state.gd／faction_ai_system.gd／three_tickets_bed.gd｜merge-gates 14/14 綠 255s
 topic: ★★★三條驗收全過:`shadow_checks=12358`、`shadow_fails=0`、索引版 has_home=0/no_home=75 ≡ 掃描版 0/75 且 `mismatch=0` ⇒ 修前那三顆【算數】;★而我要標一個【這個證法碰不到的角】:修後 has_home 恆 0 ⇒ 分桶層的比對只走過 no_home 那一支,「兩版對 has_home 會不會分歧」沒被那一格證到——★★補強不是靠推論:`own_camp_tile` 的影子對帳是【比座標】不是比布林,12358 次含真的查到營地的那些(zhagen 母體 11 全部 own_camp_pos != -1);★★★再加一條:掃描版在修前世界產出 24/9/17 ≠ 0 ⇒ 它不是【恆 false】的壞實作
