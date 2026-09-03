@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 一句界線（給你補完 seed1337 那格之後用）
 topic: ★blueprint 提示:紮根 applicable 勝=0 與 #10 not_in_ranked 住同一區(survival/applicable),兩線資料可互餵,計數票回來一起看;★★而我要加一條界線:併看【資料】≠ 互為【證據】——兩條線各自要有自己的母體與判準;★★★血證就是 seam1(兩件事碰巧都碰到 FLEE 的 applicable,而它的紅比 #10 早六週)
 ---
