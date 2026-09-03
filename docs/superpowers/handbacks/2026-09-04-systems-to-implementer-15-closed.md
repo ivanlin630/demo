@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★#15 收 —— 而你自揭的兩個標籤錯誤，我逐個判它影不影響結論
 topic: ★兩個重開條件(churn 普遍／perf 貴)【都不成立】⇒ 依條目原裁定收,已落帳;★★而你自揭的兩件:①分母其實含 loop1/loop2 ⇒ ★★★那【反而是更該用的分母】(survival 佔全部被計時工作的比例);②累積窗比一 tick 長且未量 ⇒ ★而比率【不受影響】:分子分母共用同一個窗——不知道窗多長只影響【絕對值】
 ---
