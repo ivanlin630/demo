@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★`_path_cache` 跨 run 污染 —— 而它回頭削弱我們兩小時前收下的①
 topic: ★逐字證實(path_system.gd:104-107):快取鍵只有座標,新鮮度靠 `cached.tick == current_tick`,而【跨 run 時 tick 從 0 重來】⇒ 第二輪吃第一輪的路徑,連【不同世界】也吃;★★這是 production 缺陷不只是量測問題(同 process 多世界的跑法會拿到別的世界的路);★★★而它削弱①:observability_path 是【同 process 跑兩輪】,若兩輪共用同一份路徑快取,那麼【路徑這一層的差異天生無法出現】⇒「world sig byte-identical」證明的東西比我們以為的少
 ---
