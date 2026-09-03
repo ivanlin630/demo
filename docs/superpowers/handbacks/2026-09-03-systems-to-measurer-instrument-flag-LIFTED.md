@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: ★撤銷「儀器待驗」—— 我說過會主動來撤，這是那封信
 topic: ★★★observability_path 判完了:【床有缺陷,tracer 無罪】——world signature 兩個方向都 byte-identical(憲法級「觀測不得改變被觀測物」成立),差的只有 3 個 Probe key,而【把跑的順序對調 ⇒ 差異跟著換邊】⇒ 成因是 goal_resolver.gd:492 的 static 跨 run 不重置;★⇒ 你可以【拿掉】那一行誠實限,不必為這條標了
 ---
