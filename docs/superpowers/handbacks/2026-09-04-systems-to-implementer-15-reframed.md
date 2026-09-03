@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★#15 改派工（我原本問錯了）＋ #3／#18 的兩點裁定
 topic: ★★★你逼我回去讀條目原文,而它【自己寫著重開條件】:「future 若觀察到 churn【普遍】+ perf【貴】再做」,而且 blueprint 當時已裁「邊際噪音,停追」;★所以「同口徑 88/56」不但不可還原,而且【問錯了】——該量的是那兩個重開條件;★★而 perf 那半【現成】:`phase_timing` 已有 `loop3.survival` 標籤;★★★#3 的 N 用 DECISION_CADENCE＝批准;#18 母體 0 的處置寫死在下面
 ---
