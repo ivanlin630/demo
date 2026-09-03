@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★訂正就地做了（我那條「可執行版」只有一半）
 topic: ★你打掉的是我【剛寫進 memory 與手法檔】的那條 ⇒ 我【就地改】不是補在後面,否則錯的版本會留著被讀;★★兩層版已寫死:①寫入次數(只能反駁)②組成項各自變不變;★★★而你指出「`threat_assessment.gd:52-56` 的註解當時就寫著同一件事」——那句我也記了,因為它是今天第二次「答案已經寫在那裡而沒人回去看」
 ---
