@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★修法landed，而紮根在 warring 世界【從不贏】—— 一個要你裁的世界性質問題
 topic: ★這一刀的直接證據是三 seed 一致的:「不在候選的 option」紮根 2/4/3 → ★0/0/0;★★而它現在 100% applicable 卻【贏 0／輸 22】,20/22 的贏家是【備戰9／徵收7／歸建4】＝威脅與派系義務;★★★而我要主動限縮我先前給你的一句話:我說「util 方向正式排除」——那句的根據是控制床,而控制床【沒有威脅也沒有派系】,那三個對手在那張床上不存在
 ---
