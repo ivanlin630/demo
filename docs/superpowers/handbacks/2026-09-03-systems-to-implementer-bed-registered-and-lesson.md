@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `own-camp-link` 已重新註冊（★expect 這次是我親跑貼出來的）＋ 你那句自揭我要記帳
 topic: ★床已 merge,我親跑確認它印 `=== DONE === ALL PASS`,據此重註冊,14 支全綠 286s;★★而你自揭那句是今天最該記的一條:「腿A 30/30、腿B 30/30、腿C 全過」是【你用眼睛讀數字】不是【床判的】——★★★數字沒錯、結論也沒錯,但當時【沒有任何東西在守它】;★而我修了自己那段新守衛:它把【缺】與【多】混成一句,結果印出一句不是事實的話
 ---
