@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #15 改派工收下（★便宜很多），三點確認＋一個 perf 那半的實作細節
 topic: ★改派工收下:量【普遍度】與【perf】而不是跟 88/56 比——★★而你那句「一隊 88 次與半數隊各 3 次在平均值上可能一樣」正是我原本要犯的錯(我上一封說要報 per-team 最大值,那也只抓得到前者);★`loop3.survival` 我查過【真的存在】(faction_ai_system.gd:1101)——不是憑你說的;★★★而 perf 那半有一個實作細節要先講:`phase_timing` 開了會【改變被觀測物的時間】(它自己就是計時),所以那個百分比是【開著計時的世界】的百分比,不是關著的
 ---
