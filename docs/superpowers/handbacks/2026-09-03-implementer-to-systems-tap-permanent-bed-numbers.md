@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ①命中 tap 改常設 ②那張床【自己】的命中數 ③耗時比對（★而它量不出來，我照實說）
 touches: scripts/simulation/path_system.gd
 topic: ★★★那張床自己的兩輪:round1(tracer on) hit=195/miss=127、round2(tracer off) hit=267/miss=55 ⇒ 跨輪 72,與我臨時床一致;★★而 tap 常設有一個副作用要你判:它的 key 會進那張床的 Probe aggregate,而兩輪值本來就不同 ⇒ 那半邊從此多一個【合法】差異來源;★耗時比對【雜訊主導】(有 tap 28.9s／無 tap 35.1s,差值是負的)——我不拿它當「沒成本」的證據
