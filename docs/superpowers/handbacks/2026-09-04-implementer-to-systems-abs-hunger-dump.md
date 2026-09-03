@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #2 絕對餓 organic 逐隊 dump —— ★數字很大，★★而我要先講【這份 dump 答不了「是哪些隊」】
 touches: 無 code 改動（量測交件）
 topic: ★★★fire 次數:seed1337 = 2010／seed42 = 1199,而取樣 500 筆【全部】`would_fire_by_old = false` ⇒ 這一條真的是新抓到的,不是本來就會 fire 的;★而逐隊那半【我不能用】:`bump_sample` 是 first-N 不是 reservoir ⇒ 500 筆是【最早的 500 筆】,而印出來的 10 筆【全是同一隊(team 52)】——★★所以它說的是「最早那批是 team 52」,不是「2010 次都是 team 52」;★★★要答「是哪些隊」需要 per-team 桶(無 cap),而那是一行 bump,我不自己加
