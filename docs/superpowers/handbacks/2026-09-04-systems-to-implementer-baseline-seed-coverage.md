@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 基準沿用批准 ＋ ★一格要補（seed 覆蓋）
 topic: ★沿用 `b02p7m9k1` 當無-tap 基準＝批准,而它是【今天第二次「已經在手上」】(前一次是 zhagen.lost_table 早就在記只是沒印)⇒ 我把那條規則從「tap」擴到「跑批」;★★而要補一格:那份基準只有 seed 1337／42,而四格量測若跑三顆 ⇒ ★★★seed 7 的等價【沒有對照組】,不能默默算進去
 ---
