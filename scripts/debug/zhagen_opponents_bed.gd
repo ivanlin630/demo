@@ -27,6 +27,7 @@ const GRID: int = 24
 
 var _rows: Dictionary = {}     # arm → Array[Dictionary]
 var _inject: Dictionary = {}   # arm → Array[float/String] 注入強度樣本
+var _margin: Dictionary = {}   # arm → Array[float] 強度 − 該隊門檻（★分子/分母都要量）
 
 func _initialize() -> void:
 	print("=== 腿D：控制床＋對手｜每支母體 %d｜一次只加一個 ===" % N_PER_ARM)
@@ -99,6 +100,7 @@ func _run_arm(arm: String) -> void:
 	var ai := FactionAISystem.new()
 	_rows[arm] = []
 	_inject[arm] = []
+	_margin[arm] = []
 	for k in range(N_PER_ARM):
 		var tid: int = 4000 + k
 		var camp := Vector2i(2 + (k % 10) * 2, 2 + int(k / 10) * 2)
@@ -106,10 +108,19 @@ func _run_arm(arm: String) -> void:
 		_mk_camp(s, camp, tid)
 		var note: String = _inject_opponent(s, ai, arm, team, camp, k)
 		team.decision_eval_next_tick = 0
+		# ★★★逐隊記【贏了沒】＋【它自己那一次的注入強度】（systems 2026-09-04）：
+		#   ★總數說得出「4 勝 26 敗」，★★說不出【那 4 勝的威脅值落在哪裡】
+		#   ⇒ ★★★而「4 勝集中在最低端」與「4 勝散開」是兩個完全不同的結論
+		#     （前者＝強度相依、後者＝那 4 勝是別的東西）。
+		#   ★用 Probe 計數的【前後差】判勝負：不新增旗標、不改控制流。
+		var _won_before: int = int(Probe.counts.get("zhagen.appl_won", 0))
 		ai._decide_unified(s, team)
+		var _won: bool = int(Probe.counts.get("zhagen.appl_won", 0)) > _won_before
 		_rows[arm].append({
 			"tid": tid, "task": team.current_task, "option": team.current_option,
 			"committed": team.survival_committed_option, "note": note,
+			"won": _won, "strength": (float(_inject[arm][-1]) if not _inject[arm].is_empty() else -1.0),
+			"margin": (float(_margin[arm][-1]) if not _margin[arm].is_empty() else NAN),
 		})
 
 # ★注入對手，並【回傳強度字串】（systems 補的第一件：不記強度＝不能複驗）
@@ -142,7 +153,16 @@ func _inject_opponent(s: WorldState, ai: FactionAISystem, arm: String, team: Tea
 			#     ★★★沒印的話，我會拿一個【自變數其實沒有變】的實驗去回答「強度夠不夠」。
 			var sc: float = ThreatAssessment.score(s, team, enemy)
 			_inject[arm].append(sc)
-			return "enemy_pop=%d dist=%d threat_score=%.4f" % [enemy.population, 3, sc]
+			# ★★★第二個自變數（★而它不是我「加」的，是我【本來就在打散人格】而沒把它記下來）：
+			#   `threat_threshold = BASE + 慎重 × SPAN`（decision_context.gd:316）
+			#   ⇒ ★備戰是否 applicable、以及它壓不壓得過紮根，看的是【分數與門檻的差】不是分數本身
+			#   ⇒ ★★所以「贏的強度」與「輸的強度」重疊【不代表強度無關】——
+			#     ★★★可能是我拿錯了那把尺（量了分子沒量分母）。這一欄就是去分辨這件事。
+			var _caution: float = float(s.persons[team.leader_id].values.get("慎重", 0.5))
+			var _thr: float = ThreatAssessment.THREAT_BASE_THRESHOLD + _caution * ThreatAssessment.THREAT_CAUTION_SPAN
+			_margin[arm].append(sc - _thr)
+			return "enemy_pop=%d dist=%d threat_score=%.4f 門檻=%.4f 餘裕=%.4f" % [
+				enemy.population, 3, sc, _thr, sc - _thr]
 		"D2_levy":
 			# 派系：本隊＋一個更富的 member；faction goals 含「徵收」
 			var fid: int = 700 + k
@@ -207,6 +227,39 @@ func _report(arm: String, pc: Dictionary, ps: Dictionary) -> void:
 		var o: String = String(r["option"])
 		by_opt[o if o != "" else "(空)"] = int(by_opt.get(o if o != "" else "(空)", 0)) + 1
 	print("  current_option 分布：%s" % _fmt(by_opt))
+	# ★★★勝負 × 注入強度（★這一格才分得出「強度相依」與「那幾勝是別的東西」）
+	var win_s: Array = []
+	var lose_s: Array = []
+	for r in rows:
+		if bool(r.get("won", false)): win_s.append(float(r.get("strength", -1.0)))
+		else: lose_s.append(float(r.get("strength", -1.0)))
+	win_s.sort(); lose_s.sort()
+	print("  ── ★勝負 × 注入強度 ──")
+	print("     ★贏（%d 次）的強度：%s" % [win_s.size(), _nums(win_s)])
+	if not lose_s.is_empty():
+		print("     輸（%d 次）的強度：min=%.4f max=%.4f" % [lose_s.size(), float(lose_s[0]), float(lose_s[-1])])
+	# ★★★同一件事換一把尺：強度 − 該隊自己的門檻（分子/分母都量）
+	var win_m: Array = []
+	var lose_m: Array = []
+	for r in rows:
+		var mv = r.get("margin", null)
+		if mv == null or is_nan(float(mv)): continue
+		if bool(r.get("won", false)): win_m.append(float(mv))
+		else: lose_m.append(float(mv))
+	win_m.sort(); lose_m.sort()
+	if not win_m.is_empty() and not lose_m.is_empty():
+		print("     ★餘裕（強度−門檻）：贏 %s ｜ 輸 min=%.4f max=%.4f"
+			% [_nums(win_m), float(lose_m[0]), float(lose_m[-1])])
+		print("     ★★判讀（同上，換分母）：贏的最大餘裕 %.4f vs 輸的最小餘裕 %.4f ⇒ %s"
+			% [float(win_m[-1]), float(lose_m[0]),
+				("重疊 ⇒ 這把尺也分不開" if float(win_m[-1]) > float(lose_m[0])
+					else "★★★不重疊 ⇒ 分得開的是【餘裕】不是【強度】")])
+	if not win_s.is_empty() and not lose_s.is_empty():
+		var overlap: bool = float(win_s[-1]) > float(lose_s[0])
+		print("     ★★判讀：贏的最大強度 %.4f vs 輸的最小強度 %.4f ⇒ %s"
+			% [float(win_s[-1]), float(lose_s[0]),
+				("★★★重疊 ⇒ 不是單純的強度門檻（那幾勝另有原因）" if overlap
+					else "★★★不重疊 ⇒ 勝負由強度分開＝【強度相依】成立")])
 	# per-option util（★沿用既有 zhagen.lost_table，不新建格式）
 	var lt: Array = ps.get("zhagen.lost_table", [])
 	if not lt.is_empty():
@@ -232,3 +285,8 @@ func _fmt(d: Dictionary) -> String:
 	var parts: Array = []
 	for k in ks: parts.append("%s=%d" % [String(k), int(d[k])])
 	return " ".join(PackedStringArray(parts))
+
+func _nums(a: Array) -> String:
+	var parts: Array = []
+	for v in a: parts.append("%.4f" % float(v))
+	return " ".join(PackedStringArray(parts)) if not parts.is_empty() else "（無）"
