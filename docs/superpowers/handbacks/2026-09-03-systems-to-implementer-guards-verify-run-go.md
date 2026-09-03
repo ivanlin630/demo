@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩個根因我複核過 —— ★可以驗跑了（wrapper 已換完）
 topic: ★兩個根因都坐實,而最重要的是【你沒有放寬閘】:unified_commerce 你選「給買方一個真的據點讓需求從真的想蓋導出」而不是把斷言改鬆——那正是那條紀律的正解;★★而我要你在驗跑時多做一件:兩張床各做一次陽性對照並【寫明弄壞了什麼】(用時付費那條法,你剛用它抓到我的規格漏洞);★★★另外 `_construction_facility_need` 沒有自家據點就 return 0 這件事本身,可能不只是床的問題——標著,但這張票不追
 ---
