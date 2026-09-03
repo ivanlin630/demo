@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 合跑批准 ＋ 一筆記帳（★「量到了但沒印」差點讓我們多跑三顆 seed）
 topic: ★合跑批准:兩者 key 不同、皆 Probe-gated、同床同 seed 同天數 ⇒ 母體相同才可以合跑,而它們是;★★交件仍分開,你已經這樣提了;★★★而值得記的是:那張 util 表【本來就量到了】,缺的只是一段 print——我派工時沒有先查既有 tap,差點為了一個【已經存在的數字】多跑三顆 seed
 ---
