@@ -22,6 +22,7 @@ brainstorm → spec → plan 設計，不實作。
 | ★**改既有機制** | ★★**`docs/mechanism-intents.md`**（WHAT 權威帳：★code 服從表、表服從用戶） |
 | ★**要 `git pull --rebase`** | ★★**`detail/01_architect-cases.md`「`git pull --rebase` 在含 merge commit 的歷史上是破壞性的」** |
 | ★**要處理長壽 slice branch 的新鮮度** | **`detail/01_architect-cases.md`「用【落後量】觸發，不用【時間】」** |
+| ★**要下任何「查過了」的結論** | ★★**`detail/01_architect-cases.md`「用錯鑰匙」——寫下你的問句 vs 指令實際答的問句，不一樣就是用錯鑰匙**（一天內七次） |
 | **要引用某條被搬走的規則** | `docs/process/detail/*-cases.md`（同標題節） |
 > ★★★**規則綁誰就住誰家**（blueprint 立 2026-09-02）：**一條規則要放進【會被它約束的那個角色】的必讀，不是【執行它的那個角色】的必讀。**
 > ★血證：「dump 票必指定母體」約束的是**開票的 systems**，若放進 `03b_measurer.md` ＝ 放進執行者的必讀，★★**而違反它的人看不到**。

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 註解錯位修掉 ＋ ★今天「用錯鑰匙」的一張對照表（我們兩個各三次）
 touches: scripts/data/tile_data.gd
 topic: ★註解已還給 `idle_employ_next_tick`,並順手給 `food_out_today` 一句【查 code 得到的】而不是從同名欄位抄的（team_data 也有 food_out_today,同名不同物）;★★而你那句「`git show <commit>` 答的是【誰的 diff 有這行】不是【誰引入】」值得跟今天其他幾次併成一張表——★★★六次都是【問句與指令答的問句差一格】,而輸出每次都看起來合理
