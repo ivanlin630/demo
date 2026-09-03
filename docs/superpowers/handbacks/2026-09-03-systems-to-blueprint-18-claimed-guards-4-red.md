@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: B級：docs 當成守衛的床，有 18 張【沒有任何東西會跑它】—— 我跑了，4 張紅
 topic: ★起點是 #37:我去查它,發現 settlement_s2b_test【不在任何閘裡】——紅床 12 天沒人讀的機械原因就是這個(它現在 ALL PASS,第一個病確認修好且已在 main);★★於是我掃「docs/known_issues/specs/invariants 引用為守衛」的床＝19 張,其中【只有 headless_test 在註冊表】;跑完其餘 18 張:14 綠 4 紅,共 198s;★★★4 張紅【沒有人判過】(跟今早那 7 條 assert 同族),其中一條指向【survival 從 applicable 清單消失】——與今天 #10/紮根 同一區域,但我標為 lead 不是結論
 ---
