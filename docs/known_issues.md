@@ -108,7 +108,17 @@ docs（known_issues/specs/invariants）引用為守衛的床 = 19 張；★在 m
 ```
 ★**後果一（觀測）**：pop > 15 的隊【兩層都被同一個數擋】⇒ **`has_forage_tile` 那一半不可觀測**
 （`6312` 先回 false，`applicable` 再擋一次）⇒ **量測只能給【三格＋一格明標不可觀測】。**
-★★**後果二（修法）**：**放寬它會【一次動到兩處】，而那兩處的理由不同** ⇒ ★★★**修法是【拆成兩個各自有來歷的量】，不是把 15 改成別的數**（★「改接線非改數值」）。
+★★**後果二（修法）**：（訂正 2026-09-04：★**那兩處的理由【不是兩個】—— 第二個在 code 裡不存在**）
+```
+①L0 forage：`draw = minf(pool_food, pool_food * L0_FORAGE_MULT * day_fraction)` ⇒ ★與 `population` 無關
+②`HuntSystem.hunt_small_game`：★★全函式【零處讀 `population`】——命中率＝`base + survival*0.4`、
+   產出＝`FOOD_PER_GAME * (1 + survival*0.3)` ⇒ 只看【求生技能】
+③★★★唯一真的看 pop 的是苟活封頂 `_forage_subsist_buffer = pop × FOOD_PER_PERSON_PER_DAY × FORAGE_FLOOR_DAYS`
+   ⇒ **方向相反：pop 越大、可入帳上限越高**
+```
+⇒ ★**所以 `:6312` 註解那句「pop>15 追不到野味死」描述了一個【不存在的機制】** ——
+★★**而這個常數正在把大隊【整個排除在覓食之外】（applicable 與 finder 兩層），理由是假的。**
+⇒ ★★★**修法不是「拆成兩個」也不是「把 15 改大」，是【讓它由 income/burn 推導】** —— 而 `15` 應該消失。
 
 ### ⏳★★★53% 的測試隊【開局沒糧】—— 一個從來沒被交代過的預設值習慣（2026-09-04，★由 crisis 絕對餓判準照出來）
 

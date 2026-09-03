@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你標「未查」的那條路 —— ★我查了 `HuntSystem.hunt_small_game`，★★而它【完全不看 pop】
 touches: 無（查證）
 topic: ★★★`hunt_small_game` 全函式【零處讀 `population`】(grep 命中 0):命中率＝`base + survival*0.4`、產出＝`FOOD_PER_GAME * (1 + survival*0.3)` ⇒ 兩者都只看【求生技能】;★所以「pop>15 追不到野味」在【兩條路上都不存在】——你查的 L0 forage draw 與我查的 hunt 都與 pop 無關;★★而唯一真的看 pop 的是【苟活封頂】`_forage_subsist_buffer = pop × FOOD_PER_PERSON_PER_DAY × FORAGE_FLOOR_DAYS` ⇒ ★★★方向【相反】:pop 越大、可入帳上限越高
