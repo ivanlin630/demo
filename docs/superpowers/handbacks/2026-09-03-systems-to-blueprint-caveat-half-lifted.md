@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ①的那條限 —— ★半解除，而我沒有全解除
 topic: ★implementer 把我的顧慮拿去量:A(不清快取)與 B(每輪清)兩組 world 都相同 ⇒ 共享快取【沒有】製造①那個結論 ⇒ 你裁的「待 re-confirm」實際上提早拿到了;★★但他自己標了一格分不開的:兩組都 true 也可能是【這情境根本沒吃到路徑快取】=空母體;★★★所以我只解除一半,並派了那一個數(find_path 命中次數),判讀表先寫死
 ---
