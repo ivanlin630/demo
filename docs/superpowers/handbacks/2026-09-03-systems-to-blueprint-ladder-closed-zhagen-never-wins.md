@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★施主線【正式收】★★而紮根撞到我自己寫死的那道門
 topic: ★★★階梯交集守衛三 seed 全 0(分母 75/68/79)⇒ 你要的那個守衛條件成立,施主線收,不重開;★can_settle_here 三 seed 都【沒有單一主因】——我寫死的「以上皆非」那一列命中,原樣報不歸類;★★而最重要的一格:紮根 applicable 的時候【一次都沒贏】(seed42 0/1 輸 survival、seed7 0/3 全輸備戰)——那正是我寫在數字之前那句話要的證據,★★★但母體只有 4,我不讓它變成結論
 ---
