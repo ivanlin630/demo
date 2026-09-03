@@ -2388,6 +2388,8 @@ v1 → need_urgency（★被寫的【欄位】）   ／   v2 → gather()（★�
 | 4 | implementer | revert 這 6 個檔乾不乾淨 | 「只有 `dcef1f63` 動過」的印象 | ★**根本沒查**（`git show --name-only` 三秒） |
 | 5 | systems | 誰**引入** `idle_employ_next_tick` | `git show <commit>` | 誰的 **diff 裡有這一行**（★**搬動＝一刪一增**，兩顆都會顯示為新增；要問引入用 `git log -S'<符號>' --reverse`） |
 | 6 | implementer | 深帶被哪道濾網擋 | 只看**次數** | 掃描**事件數**（★同一批隊被每 tick 重掃 ⇒ 灌水） |
+| 9 | 兩人 | 「唯讀表是 4 個還是 3 個」 | 兩次 `grep` **範圍不同** | ★舊：`scripts/simulation + scripts/data` ⇒ `SimRunner.SYSTEMS` 寫入 **0（真）**／新：**含 `scripts/debug`** ⇒ 撈到 `seam3_sysreg_test.gd:61` ⇒ ★★**不是誰說謊，是母體不同**（★★★而雙方都先以為是「誰記錯了」） |
+| 10 | implementer | 「我當時到底做沒做那個 grep」 | ★**憑印象**（compact 洗掉了那封信） | ★★他對**自己**下了負斷言而沒先 grep 自己的寄件匣 ⇒ **負斷言的窮盡搜索義務，對「我自己做過什麼」一樣成立** |
 | 8 | systems | production 有哪些跨 run 殘留的 static | `grep "static var"` **同行再要求容器型別** | ★只答了**容器型別**那些（15 個）⇒ **旗標(bool/int)整類被濾掉**（實際 32 個；★★而旗標一樣會跨 run 殘留） |
 | ＋ | systems | 這道閘涵蓋多少 | 「verdict 有沒有指名 `scripts` 路徑」 | ★有沒有指名**任何** scripts 路徑（★★其中 61/73 指名的是**床**，床不出現在 production diff ⇒ 真值 55%→**9.0%**） |
 
