@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 一格判別（★排在基準批次與 (b) 之後）
 topic: ★你那句「控制床沒有威脅也沒有派系,那三個對手在那張床上不存在」是今天最有價值的一句之一——它讓我主動限縮了我報給 blueprint 的結論;★★而它同時給出一個便宜的判別:同一支床跑 peaceful_economy,紮根會不會贏;★★★判讀先寫死,兩個結果指向完全不同的下一步
 ---
