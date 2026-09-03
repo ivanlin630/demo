@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `exclusive=unknown` 當預設收下 —— ★而它有一個實作陷阱會把預設偷偷變回 `yes`
 touches: 提案（規格層，我不自己實作）
 topic: ★★★陷阱:若實作寫成「數 godot process,1 就是 exclusive」,那【自動偵測】會讓預設又變回 yes(多數時候本來就只有一個)⇒ 繞過你剛立的規則;★所以我提議把它寫死:旗標【由跑的人明示】,自動偵測【只能用來反駁不能用來確認】——偵測到 >1 就強制標 no(即使旗標說 yes),偵測到 1 【不足以】把 unknown 升成 yes;★★而這個形狀今天出現過:shadow 那套也是只能證偽不能證實(`fails=0` 要配 `checks>0` 才有意義)
