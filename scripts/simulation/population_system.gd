@@ -8,6 +8,16 @@ func check_overflow(state: WorldState) -> void:
 	# minor 長大簡版：每月 10% minor → 平民 anon（人口循環下游，性別/年齡留人口結構 spec）
 	if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 		_mature_minors(state)
+	# ★★★順手第四格（systems 2026-09-04）：`minor_population > population` 的隊×tick。
+	#   ★背景：4 個寫入點都在出生／成年／饑荒死，★★而【戰鬥傷亡路徑一個都沒有】
+	#   ⇒ 若成人死光而 minor 沒跟著減，就會出現「小孩比大人多」的狀態。
+	#   ★★★恆 0 ⇒ 那條銷案；非 0 ⇒ 貼隊 id 讓 systems 判是哪條路造成的。
+	if Probe.enabled:
+		for tid2 in state.teams:
+			var t2: TeamData = state.teams[tid2]
+			if t2.minor_population > t2.population:
+				Probe.bump("minor_exceeds_pop")
+				Probe.bump("minor_exceeds_pop.team.%d" % tid2)
 	for tid in state.teams.keys():
 		check_overflow_for_team(state, tid)
 

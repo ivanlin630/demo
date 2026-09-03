@@ -13517,14 +13517,25 @@ func _test_decision_crisis_bypass() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var fai := FactionAISystem.new()
 	# pop 驟降 >30%（20→10）→ crisis
+	# ★★★2026-09-04 訂正：`_decision_crisis` 新增【存量歸零】判準 ⇒ 三個 fixture 都要給糧，
+	#   否則它們會因為【食物 0】而 crisis —— ★那樣前兩條會【因為錯的理由而通過】、第三條會紅。
+	#   ★★同檔 `_test_decision_cadence` 早就寫了 `resources = {"food": 100.0}  # 非 crisis`
+	#   ⇒ ★★★那是既有慣例，我照它補上（而不是替新判準開例外）。
 	var t := TeamData.new(); t.team_id = 0; _seed_pop(t, 10); t.rung_pop_last = 20; t.food_flow_avg = 0.0
+	t.resources = {"food": 100.0}
 	assert(fai._decision_crisis(state, t), "pop 驟降>30%→crisis")
 	# food_flow 深負 → crisis
 	var t2 := TeamData.new(); t2.team_id = 1; _seed_pop(t2, 10); t2.rung_pop_last = 10; t2.food_flow_avg = -3.0
+	t2.resources = {"food": 100.0}
 	assert(fai._decision_crisis(state, t2), "food_flow<-2→crisis")
 	# 穩態 → 非 crisis
 	var t3 := TeamData.new(); t3.team_id = 2; _seed_pop(t3, 10); t3.rung_pop_last = 10; t3.food_flow_avg = 0.0
+	t3.resources = {"food": 100.0}   # ★穩態＝有糧；★★食物 0 的隊【本來就不該叫穩態】
 	assert(not fai._decision_crisis(state, t3), "穩態非 crisis")
+	# ★★★新判準自己的陽性對照（★同一支 fixture 裡，免得它只被別人的紅燈間接證明）
+	var t4 := TeamData.new(); t4.team_id = 3; _seed_pop(t4, 10); t4.rung_pop_last = 10; t4.food_flow_avg = 0.0
+	t4.resources = {"food": 0.0}
+	assert(fai._decision_crisis(state, t4), "存量歸零(flow 0、無崩跌)→crisis")
 	print("[TEST] decision_crisis_bypass PASS")
 
 func _test_should_reeval() -> void:
@@ -13537,6 +13548,7 @@ func _test_should_reeval() -> void:
 	# busy 無事 + cadence 未到 → false
 	t.current_task = TeamData.TASK_FORAGE; state.world.current_tick = 0; t.decision_eval_next_tick = 100
 	t.rung_pop_last = 0; t.food_flow_avg = 0.0
+	t.resources = {"food": 100.0}   # ★同 crisis_bypass：新增【存量歸零】判準後，沒糧的隊本來就該重評
 	assert(not fai._should_reeval(state, t), "busy無事+cadence未到→不重評")
 	# cadence 到 → true
 	t.decision_eval_next_tick = 0
@@ -13574,6 +13586,7 @@ func _test_unified_throttle() -> void:
 	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]; t.leader_id = 100
 	_seed_pop(t, 5); t.current_task = TeamData.TASK_TRADE; t.faction_id = -1
 	t.decision_eval_next_tick = 100; t.food_flow_avg = 0.0; t.rung_pop_last = 0
+	t.resources = {"food": 100.0}   # ★同上：throttle 測的是 cadence，不是「餓到 crisis 繞過 cadence」
 	var l := PersonData.new(); l.id = 100; state.persons[100] = l; state.teams[0] = t
 	var fai := FactionAISystem.new()
 	state.world.current_tick = 0

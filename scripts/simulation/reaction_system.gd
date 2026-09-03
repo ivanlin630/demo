@@ -227,8 +227,12 @@ func _score_expand(state: WorldState, p: PersonData, t: TeamData) -> float:
 func _score_breed(p: PersonData, t: TeamData) -> float:
 	var safe: bool = float(p.needs.get("safety", 1.0)) > 0.7
 	var fed: bool = float(p.needs.get("food", 1.0)) > 0.7
-	var minor_cap: int = int(t.population * 0.2)
-	var base: float = 0.4 if (safe and fed and t.minor_population < minor_cap) else 0.0
+	# ★★★#4 截斷懸崖（2026-09-04）：舊寫法 `int(t.population * 0.2)` 在 pop ≤ 4 時【恆為 0】
+	#   ⇒ `minor_population < 0` 永遠不成立 ⇒ ★小隊的生育慾望【結構性恆 0】，而那是截斷造成的不是設計。
+	#   ★★修法＝把比較搬到【連續量】上（float 對 float），★★★不是 `maxi(1, int(...))`
+	#     —— 那只是把懸崖從 0 往左挪到 1，而病是【截斷本身】（用戶生育定案：無絕對懸崖）。
+	#   ★數值沒動（仍是 0.2、仍是 0.4）——動的是接線。
+	var base: float = 0.4 if (safe and fed and float(t.minor_population) < float(t.population) * 0.2) else 0.0
 	base += float(p.skills.get("醫療", 0.0)) * 0.1
 	return base
 
