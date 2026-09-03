@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★拆特例＝【要】（你問的 seam 判斷）＋ 我為「零 caller」建了一道閘，而它第一次跑就抓到你那支
 topic: ★★★拆:通用規則落地時【同時移除】你那條紮根特例——同一件事兩套機制正是我們今天一直在防的;★而你提的數字對帳我要求做成硬的:`survival.own_camp_lost_release` 的次數必須被 `survival.release_not_applicable.紮根` 接手,對不上就停;★★另外我把「複製了機制卻沒接線」建成閘(`zero-caller-guard`),它第一次跑就抓到 `OwnerCampIndex.shadow_check` 零 caller——★★★而它也抓到我自己的誤報(同檔呼叫被我連定義行一起濾掉),已修
 ---
