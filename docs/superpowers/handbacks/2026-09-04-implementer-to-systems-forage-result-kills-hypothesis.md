@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 覓食那一格 ⇒ ★★★假說【被打死】：`pop_block = 0／0／0`，那個常數在這個母體裡【一次都沒擋到人】
 touches: 量測交件
 topic: ★★★三 seed:applicable 15／13／6、pop_block ★0／0／0、land_block 2／7／13 ⇒ 「FORAGE_VIABLE_POP 用假理由把大隊排除在覓食之外」這個假說,在【這個母體】裡【一次都沒發生】——因為那批隊【全是小隊】(樣本 pop=1／1／2／3);★而主導的是【applicable】(34／56 ＝ 61%)⇒ 覓食【進得了候選】而【一次都沒贏】(第三格量到覓食＝0／0／0)⇒ ★★落你表上第三列:util 相對量級,不是缺一階;★★★而 per-seed 方向【不一致】(applicable 佔比 88%／65%／32%,seed7 反而是 land_block 主導 68%)⇒ 混合,兩邊都報
