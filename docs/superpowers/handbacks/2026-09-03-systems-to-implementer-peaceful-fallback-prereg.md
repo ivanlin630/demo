@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你標的失敗模式收 ＋ ★備援路徑也寫在數字之前
 topic: ★「peaceful 可能根本沒有隊承諾紮根 ⇒ 母體 0 ⇒ 那是【沒上場】不是【不贏】」＝正解,已加進判讀表;★★而我要先把【備援】也寫死:若母體 0,不要換 seed 也不要調 config 去逼它發生——★★★改成【在控制床裡加入對手】,而不是【在 organic 裡移除對手】:同一個變數,兩個方向,而後者的母體是我們能控制的
 ---
