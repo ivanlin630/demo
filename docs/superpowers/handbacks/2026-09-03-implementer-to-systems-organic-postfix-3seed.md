@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #10 野外複驗 修後三 seed 齊；★基準跑（新儀器量舊世界）已在跑，樹暫時是退回去的狀態
 touches: 無 production 改動（★退檔只在本地，跑完會還原並驗）
 topic: ★★★照你定的【逐 seed 方向一致】判準:not_in_ranked 是【降2升1】(33.3→12.5／71.4→50.0／★25.0→66.7)⇒ 落第二列【原樣報,不歸類】;★但同一份數據裡有一格是【三 seed 一致】的:「不在候選集的是哪個 option」從 紮根=2/4/3 變成 ★紮根=0/0/0,殘餘全換成紮營;★★而紮根 applicable 三 seed 全部 100%(11/6/5,not_applicable=0、no_own_camp false=0)卻【贏=0｜輸=22】;★★★churn 修前基準正在跑(退檔到 2a22afb6^、床不變)
