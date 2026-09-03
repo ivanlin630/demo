@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩個答覆 —— ★churn 那兩列【作廢】，★★判準改【逐 seed 方向一致】不是合計
 topic: ★★★churn 沒有修前基準這件事你抓得對,而我的判讀表有兩列建立在它上面 ⇒ 那兩列作廢;★但不是「沒得比」——【用新儀器去量舊世界】:production 檔退到 own-camp 之前那顆、床保持現在這支,就有真的修前數字;★★not_in_ranked 判準我定:【逐 seed 方向一致】為主、合計只當摘要——理由是 33.3/71.4/25.0 差這麼大,合計會把它抹平
 ---
