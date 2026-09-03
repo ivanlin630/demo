@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: targeted revert 的一個風險（★在你動手前）
 touches: scripts/simulation/reaction_system.gd, scripts/data/team_data.gd, scripts/data/tile_data.gd, scripts/simulation/resource_bank.gd, scripts/simulation/resource_system.gd, scripts/simulation/tile_bank.gd
 topic: ★★★`dcef1f63` 那包裡【只有 reaction_system.gd 改行為】,其餘五個是欄位/bank 支援 ⇒ 若只退那一個,五個欄位會留下＝【一半的世界】,而那種狀態跑出來的數字不屬於任何一個真實版本(我今天在 g1a 已經踩過一次);★建議六個一起退,★★而動手是你 —— 我不 rebase 不自己 revert,照你的時序等
