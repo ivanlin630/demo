@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 一行誠實限（暫時的，判完就撤）
 topic: ★observability_path_test 目前紅:tracer on/off 不是 byte-identical;尚未判定是【床過期】還是【觀測真的污染世界】;★★在判定出來前,你交的 verdict 請在誠實限加一行「儀器待驗」;★★★不是要你停跑也不是重跑——是讓下游看得到這個前提,否則若判出來是真紅,沒人知道哪些結論建立在它上面
 ---

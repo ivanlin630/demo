@@ -11,6 +11,6 @@
     "backstop生效隊數(最終脫離FLEE+positionless)": 15
   },
   "verdict": "★signature未完全消失——續卡事件非0(1239次)，15/78隊曾陷入FLEE+positionless且【非同tick立即release】，累積多個tick才脫離。但15隊全數最終都脫離(backstop生效隊數=續卡隊數=15，沒有永久卡死到跑完的隊)——不是「backstop完全沒fire」，是「沒有像code註解說的同tick收尾，而是延遲多tick」。",
-  "honest_limit": "無法從本量測分辨兩種可能成因：①release()真的延遲多tick才被排程到（非同tick）②release後team被faction_ai_system.gd:2973/3539其中一處重新指派FLEE+positionless（backstop有fire但立刻被重新踩進同個壞狀態，看起來像沒解決）。這兩種成因systems原信③已預告過用戶你沒逐條追那兩處路徑——本票同樣沒追，如實回報不猜測。若要分辨，需要在backstop release那行加一個Probe.bump（跨我scope，需systems或implementer在scripts/simulation加）。",
+  "honest_limit": "無法從本量測分辨兩種可能成因：①release()真的延遲多tick才被排程到（非同tick）②release後team被faction_ai_system.gd:2973/3539其中一處重新指派FLEE+positionless（backstop有fire但立刻被重新踩進同個壞狀態，看起來像沒解決）。這兩種成因systems原信③已預告過用戶你沒逐條追那兩處路徑——本票同樣沒追，如實回報不猜測。若要分辨，需要在backstop release那行加一個Probe.bump（跨我scope，需systems或implementer在scripts/simulation加）。★儀器待驗：observability_path_test目前紅(tracer on/off非byte-identical)，尚未判定是床過期還是觀測真的污染世界；本輪數字在該判定之前不作為最終結論。",
   "raw_log": "docs/measurements/flee-backstop-recheck-warring_states-30d.txt"
 }

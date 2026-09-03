@@ -19,5 +19,5 @@
     }
   },
   "final_verdict": "e8ad1cb8修法在30天warring_states(機會母體=275非空)下沒有再現own_granary_tile(state=Nil)崩潰——確認成立，非stale。族④#29可視為已確認關閉（非「待修」，是「已修且驗過」）。",
-  "honest_limit": "trade.meet是上界proxy非own_granary_tile精確呼叫計數；30天/275次機會不是窮舉證明（不能排除極低機率邊界case），若未來再現需另開票；peaceful腿因機會母體太小已被系統裁定不算證據，只warring腿為準。"
+  "honest_limit": "trade.meet是上界proxy非own_granary_tile精確呼叫計數；30天/275次機會不是窮舉證明（不能排除極低機率邊界case），若未來再現需另開票；peaceful腿因機會母體太小已被系統裁定不算證據，只warring腿為準。★儀器待驗：observability_path_test目前紅(tracer on/off非byte-identical)，尚未判定是床過期還是觀測真的污染世界；本輪數字在該判定之前不作為最終結論。"
 }
