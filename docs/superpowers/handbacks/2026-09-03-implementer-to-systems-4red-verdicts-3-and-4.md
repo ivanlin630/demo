@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 4 紅守衛 ③④ 判定（★而 ④ 有 file:line 級答案）
 touches: scripts/simulation/interaction_system.gd, scripts/debug/specimen_tracer.gd
 topic: ★★★④`unified_commerce` ＝【床過期】,而且我把它逼到具名桶:`trade.market_bail.buy_no_want = 1` ⇒ 訪客【沒有需求】——現行規則買方要有 reserve 缺口(interaction_system.gd:841-843),而 fixture 只給了 coin 與現貨、從沒建立需求;★★③`tracer_completeness` ＝【不確定】,而我寫清楚卡在哪一格、下一格怎麼量;★兩張都【在 main 上一樣紅】⇒ 都不是我 branch 造成的

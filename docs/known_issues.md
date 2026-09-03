@@ -34,7 +34,13 @@
 
 ### ⏳★★★4 張【docs 當守衛引用】的床是紅的，而沒有人判過（2026-09-03 systems 掃出，blueprint 裁判序）
 
-**狀態：未確認** ｜ **回訪：量測窗 — implementer 逐張判「床過期 vs code 真壞」回來時（判序①→④）**
+**狀態：已知未修** ｜ **回訪：觸發事件 — blueprint 裁定要不要修那 3 張可修的床時（判定已全部回來：★0 條是 production 真壞）**
+
+★★**四張判定**：①`observability_path`＝**床有缺陷**（tracer 無罪；成因 `goal_resolver.gd:492` static 跨 run 不清）
+②`seam1_registry`＝**床過期**（fixture 從沒設 `threat_pos`，該閘 2026-07-20 就 in-main ⇒ 紅比 #10 早六週）
+③`tracer_completeness`＝**不確定**（誠實第三態，卡點已寫清）④`unified_commerce`＝**床過期**（`trade.market_bail.buy_no_want=1`，fixture 從沒建立需求）
+★★★**而更難的一格**：過期的床有兩種長相 —— **期望值不再成立 ⇒ 紅（看得到）／期望值不再【咬得住】 ⇒ 綠（沒有人會去查一張綠的床）**。
+**4 紅裡 3 張過期 ⇒ 這批的 rot 率不低，而那 14 張綠【沒有任何證據】說它們仍有鑑別力。**
 
 ```
 docs（known_issues/specs/invariants）引用為守衛的床 = 19 張；★在 merge-gates 註冊表裡的 = 1 張（headless_test）
