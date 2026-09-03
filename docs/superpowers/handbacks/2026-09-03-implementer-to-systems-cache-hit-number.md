@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你要的那一個數 —— ★跨輪命中 72
 touches: scripts/simulation/path_system.gd
 topic: ★★★跨輪命中 = 72（第二輪不清快取 hit=267／先清 hit=195）⇒ ★母體【不是空的】,共享快取確實在作用;★★而 world sig 在【清了快取】的情況下仍然相同 ⇒ 我那個「分不開」倒向 (a)【路徑本來就一樣】,而 (b)【根本沒吃到快取】被這個數打死;★★★所以 verdict① 不只站得住,理由也換成更強的那個:不是快取沒作用,是它作用了而結果不變
