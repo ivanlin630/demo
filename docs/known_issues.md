@@ -34,7 +34,11 @@
 
 ### ⏳★★★4 張【docs 當守衛引用】的床是紅的，而沒有人判過（2026-09-03 systems 掃出，blueprint 裁判序）
 
-**狀態：已知未修** ｜ **回訪：觸發事件 — blueprint 裁定要不要修那 3 張可修的床時（判定已全部回來：★0 條是 production 真壞）**
+**狀態：已知未修** ｜ **回訪：觸發事件 — 修 3 張守衛那張票交件時（blueprint 2026-09-03 批修；序＝merge 與紮根之後）**
+
+★★**綠床規則已立法（blueprint「用時付費」）**：預設 **「綠＝未知」**；陽性對照**不做全掃**，綁兩個自然時點 ——
+**(a) 床要註冊進閘時**（寫進 `docs/process/merge-gates.tsv` 表頭）／**(b) 床被引用為結案／驗收證據時**
+（寫進 `docs/process/01_architect.md` 銷案表：★**沒對照過的綠床不配當證據**）。
 
 ★★**四張判定**：①`observability_path`＝**床有缺陷**（tracer 無罪；成因 `goal_resolver.gd:492` static 跨 run 不清）
 ②`seam1_registry`＝**床過期**（fixture 從沒設 `threat_pos`，該閘 2026-07-20 就 in-main ⇒ 紅比 #10 早六週）
