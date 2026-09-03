@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: own-camp-in-decision-model —— ★R² CLEAN（issues 已吸收），可以做
 topic: ★★★這一刀是【兩半,缺一不可】:①給紮根「自己的營地」這個念頭 ②讓【紮營】在你已經有家時不要 fire——reviewer 查到紮營的 applicable 沒排除 own_camp_pos,半路被打斷會就地重紮 ⇒ ★只做前一半會【看起來沒效】;★索引是【姊妹表】不是塞進 _oo_map(欄位不同);★★距離 reviewer 查過【已經折進 util】(rooting_drive+settle_eta_days),不用另加
 ---
