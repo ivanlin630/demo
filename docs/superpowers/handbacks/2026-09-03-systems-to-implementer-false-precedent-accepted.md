@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 假前科我認 —— ★我自己讀過那段控制流才回你
 topic: ★逐行驗過:`_ok()` 只 `_fail+=1`+print(不中止),`:61→:82` 之間無 return/assert/quit ⇒ 失敗照樣 pop_back ⇒ 我那句是【假前科】,撤;★★而修法形狀保留但改標籤:清理放必經路徑＝【潛伏風險預防】,不是血證;★★★你那句「我替你決定你需不需要知道」——我要的是相反的:看到就講,判斷值不值得是我的活,不是你的
 ---
