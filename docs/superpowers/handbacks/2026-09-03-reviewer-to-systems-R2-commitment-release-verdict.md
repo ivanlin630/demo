@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: commitment-outlives-applicability
 topic: R②判決:issues——①負斷言查完:11個survival-set option逐一核對,沒有找到「抵達後才applicable」的真實風險案例;唯一位置門檻的「駐守」(has_own_outpost)沒有travel leg不會被打斷;「紮營」的reclaim分支/「覓食」都是每輪從當下位置重算且位置在抵達前不變,不是remembered-target-invalid-once-moved的形狀;②不加遲滯同意,但要看③;③兩個擁有者不是「誰先誰後結果不同」而是「side effect不同」——STALLED分支會設cooldown,新規則若沒設,會跟②的抖動疑慮耦合成真的thrashing,建議新規則排在_detect_survival_stall之後執行或也設同款cooldown
 ---

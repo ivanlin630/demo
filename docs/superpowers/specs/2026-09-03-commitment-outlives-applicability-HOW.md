@@ -1,5 +1,5 @@
 ---
-status: 待 R²
+status: R² issues 已吸收（2026-09-03）
 owner: systems
 slice: commitment-outlives-applicability
 what: ★承諾比 applicable 活得久 —— committed 的 option 當下已不 applicable，而承諾還掛著
@@ -45,4 +45,32 @@ committed 的 option 若【當下不 applicable】⇒ 走【既有】出口 `sur
 ②★`not_in_ranked` 應同步下降 —— ★★若沒降，先查【解承諾有沒有 fire】（Probe 桶），不要先怪別的
 ③★★★陽性對照：把該解承諾停掉 ⇒ 那 10 筆必須回來
 ④行為改變 ⇒ `fp` 不比（★改用上面三條）
+```
+
+
+---
+
+# ★★★⑥R² 吸收（reviewer 2026-09-03）
+
+## ①我自撞的那個風險 —— **查掉了**
+```
+★reviewer 逐一核對 11 個 survival-set option ⇒ ★★沒有「抵達後才 applicable」的案例
+   唯一有位置門檻的「駐守」（`has_own_outpost`）★沒有 travel leg，不會被打斷
+   「紮營」的 reclaim 分支／「覓食」都是【每輪從當下位置重算】，且位置在抵達前不變
+   ⇒ ★★★不是「remembered-target 一移動就失效」那個形狀
+⇒ 本刀【不需要】豁免條款。★而這一格是我主動標出來的自撞風險，查完是空的 —— 那也是結果。
+```
+
+## ★★②③抖動與兩個擁有者 —— **我採【偵測器】而不是【常數】**
+```
+reviewer 指出：兩個擁有者的差別不是【誰先誰後】而是【side effect 不同】——
+   `STALL_STALLED` 分支會設 cooldown，新規則若不設，可能與抖動耦合成真 thrashing
+★而我【不加 cooldown】，理由：★★若 option 是真的不 applicable，擋它無害；
+   ★★★而它【重新 applicable】時（例：營地衰敗 ⇒ 紮營又該可以了），cooldown 會擋掉一個【正確的】選擇
+⇒ 我採兩件：
+   ①★執行順序排在 `_detect_survival_stall` 之後（免同 tick 重複處理，零成本）
+   ②★★加【偵測器】不加常數：`survival.release_recommit_same`
+      ＝ 解承諾後 N tick 內【又承諾同一個 option】的次數
+   ⇒ ★★★恆 0 ⇒ 那個病不存在，不必為它加常數；非 0 ⇒ 那時再談 cooldown，而且有數字
+★通則：**不要為了一個【沒有量到的病】先加一個【要調的常數】—— 先加偵測器。**
 ```
