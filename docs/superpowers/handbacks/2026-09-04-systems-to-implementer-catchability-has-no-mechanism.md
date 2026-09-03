@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★兩個「意圖」可能其實是【同一個】—— 而第二個的敘述在 code 裡找不到機制
 topic: ★★★我去查了採集怎麼算:`resource_system.gd` L0 forage 是 `draw = minf(pool_food, pool_food * L0_FORAGE_MULT * day_fraction)` ⇒ 【產出取決於池,與 pop 無關】⇒ 大隊拿到的量跟小隊一樣、而人多 ⇒ ★人均下降 ＝ 又是 income/burn;★★而 `wild_game` 是【會再生的資源池】(`_regen_wild_game`+`resource_cap`),我沒有找到任何【逃逸/追捕成功率】機制;★★★所以「pop>15 追不到野味」那句可能【描述了一個不存在的機制】——★但我【沒查 HuntSystem.hunt_small_game】,那條路我標未查,不當結論
 ---
