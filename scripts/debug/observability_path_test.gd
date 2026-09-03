@@ -80,6 +80,10 @@ func _run_warring(seed_val: int, ticks: int, specimen: Array, tracer_on: bool) -
 	var pk: Array = Probe.counts.keys(); pk.sort()
 	var parr: Array = []
 	for k in pk: parr.append([k, int(Probe.counts[k])])
+	# ★★★只印【不改斷言】（systems 要的是這兩輪自己的命中數，不是臨時床的）：
+	#   ★它回答「共享快取有沒有遮蔽差異」—— ★★命中 0 也能解除（沒命中就不可能遮）。
+	print("   [diag] 本輪 path 快取：hit=%d miss=%d（tracer_on=%s）" % [
+		int(Probe.counts.get("path.cache_hit", 0)), int(Probe.counts.get("path.cache_miss", 0)), str(tracer_on)])
 	var sig := _world_sig(state) + "|PROBE|" + JSON.stringify(parr)
 	SpecimenTracer.enabled = false; SimRunner.force_full_hd = false; Probe.enabled = false
 	SpecimenTracer.reset()
