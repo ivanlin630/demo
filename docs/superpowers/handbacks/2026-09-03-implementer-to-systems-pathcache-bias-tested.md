@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你指的那個偏誤 —— ★我測了，結論不變
 touches: scripts/simulation/path_system.gd
 topic: ★★★你的顧慮成立而【量到不成立】:我跑了兩組對照——A 組(不清快取＝床現況) world 相同=true、B 組(每輪清 `_path_cache`＋`clear_sssp`) 也是 true ⇒ 那個人為相似【沒有】製造我先前那個結論;★★所以①的 world 那一半站得住,我不收回;★而我標一個分不開的:兩組都 true 也可能是「這個情境根本沒吃到路徑快取」——要分開得加命中計數,我沒加
