@@ -246,6 +246,16 @@ func _sec_zhagen() -> void:
 	print("  ★★★applicable 的那幾次，紮根贏了嗎：贏=%d｜輸=%d" % [
 		int(Probe.counts.get("zhagen.appl_won", 0)), int(Probe.counts.get("zhagen.appl_lost", 0))])
 	print("     輸給誰：%s" % _bucket_list("zhagen.appl_lost_to."))
+	# ★★★own-camp（2026-09-03）：applicable 從兩支變三支 ⇒ 第三支也要印，否則這一節讀起來像少一半。
+	print("  第三支 no_own_camp（沒有自己的營地）為 false = %d" % int(Probe.counts.get("zhagen.false.no_own_camp", 0)))
+	print("  ── ★camp churn（★用既有的桶，不為此新開定義；★★列【觀察項】不列驗收）──")
+	print("     camp.built=%d｜camp.abandoned=%d｜settlement.camp_l0=%d｜outpost.l0_to_l1=%d｜walk_to_own_camp=%d｜own_camp_lost_release=%d"
+		% [int(Probe.counts.get("camp.built", 0)), int(Probe.counts.get("camp.abandoned", 0)),
+			int(Probe.counts.get("settlement.camp_l0", 0)), int(Probe.counts.get("outpost.l0_to_l1", 0)),
+			int(Probe.counts.get("settlement.walk_to_own_camp", 0)),
+			int(Probe.counts.get("survival.own_camp_lost_release", 0))])
+	print("     ★★★誠實限：churn 這一行【是這一刀才加的】⇒ 它【沒有修前基準】")
+	print("        ⇒ ★單看修後數字說不出「降了」——★★那正是「拿一個數字去比一個不存在的數字」")
 	print("     ★這一格是 systems 寫在數字之前的門檻：要往【util 太低】修，先拿這個數字來。")
 	print("  ★★讀法：兩行都接近 100%% ⇒ 兩個分支都幾乎不成立；")
 	print("     ★★★若其中一行明顯低 ⇒ 那一分支【有時成立】，而掉在另一邊。")
