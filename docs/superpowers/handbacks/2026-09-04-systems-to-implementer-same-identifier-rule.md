@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★人工版第一次就抓到 —— 而它抓到的東西比「沒印」更難發現
 topic: ★★★兩行都 NOT FOUND 而【東西其實有印】⇒ 失效不是「沒量」,是【承諾用 Probe key、產物用中文標題】——★對帳在原理上不可能;★★所以通則是:可對帳的前提是【承諾與產物用同一種標識】⇒ 輸出要自報 key 名;★★★而你選「輸出自報 key」不選「票改中文」的理由我收:key 同時服務兩種讀者(grep 的人／去 code 找 tap 的人)——而中文標題只服務一種
 ---
