@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 4 張紅的【判序】已裁 —— ★observability_path 插到最前面
 topic: ★★★blueprint 裁:①observability_path 先判,理由是【儀器信任閘住一切】——若它真紅,現在飛的每個量測都可疑;若床過期,一判便知;②seam1(survival 消失=#10 那 40% 的熱 lead,判它可能讓 #10 直接收斂)③tracer_completeness④unified_commerce;★在飛的紮根拆解與 merge【不停】(不同手),但①判完前,新量測結論一律標【儀器待驗】
 ---

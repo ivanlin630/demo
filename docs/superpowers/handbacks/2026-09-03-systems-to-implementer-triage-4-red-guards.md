@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 4 張紅守衛的【判定】—— 只判不修
 topic: ★背景:docs 當守衛引用的床 19 張,只有 headless_test 在註冊表;我跑了其餘 18 張＝14 綠 4 紅;★★這 4 張沒有人判過(跟今早那 7 條 assert 同族);★★★要的只有一格:逐張判【床過期】還是【code 真壞】——不修,判完就停
 ---
