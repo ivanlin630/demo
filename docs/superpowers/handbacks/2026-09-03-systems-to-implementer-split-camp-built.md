@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: churn 判讀 ＋ 一格拆解（★`camp.built` 下降有兩種意思，而它們一好一壞）
 topic: ★`camp.built` 三 seed 一致下降(-14.8/-6.8/-23.3%)⇒ 依【逐 seed 方向一致】判準【算數】;★★但「紮營變少」有兩種意思:抑制了【重複紮營】(我們要的)vs 抑制了【初次紮營】(那會是傷害)——★★★而它們在 camp.built 這一個數字上長得一模一樣;★拆法便宜:按當下有沒有 own_camp 分兩桶;★★walk_to_own_camp 1/3/1 你不解讀多寡＝對,而我要指出它【解釋不了】13-20 座的下降 ⇒ 下降不是「走路排擠掉紮營」
 ---
