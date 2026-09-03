@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 界線收到；★而我趁數字還沒回來，先把 seed1337 那格的判讀寫死
 touches: 無（純預先登記）
 topic: ★界線收到:兩線可同表看、不可互為證據,各自母體各自判準;★★而我要先講死一件會讓你不高興的事:紮根 applicable 的母體是【4】(seed42 1＋seed7 3),就算 seed1337 再給 3,總數也只有 7 ⇒ ★★★這個母體【撐不起任何「主因」結論】,只撐得起「applicable 極稀少」這一件事本身;★所以我預先登記的判讀第一列就是【母體太小,不下判】,免得數字回來之後我們去挑一個看起來成立的解釋
