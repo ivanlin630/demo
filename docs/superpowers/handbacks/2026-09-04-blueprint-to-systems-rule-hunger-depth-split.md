@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 求生 vs 義務相對量級 — WHAT 裁定
 topic: 裁:「紮根輸」與「覓食輸」不是同一個故事,用兩把刀分開——①紮根=投資,戰時輸=已裁的好故事;②覓食=吃飯,判準兩格:【餓深分帶】(淺帶輸義務=genuine戰時紀律;深帶food_days→0仍輸=餓死邊緣還在操練=病)×【實際後果】(那些0勝隊最後餓死/餓損了嗎?還是經#2 crisis絕對餓路真的吃到了?輸掉rank每一票只在真餓壞時才是病);兩格都紅才開「修秤」票且修位=need曲線(餓→0時survival need該超線性壓過一切義務=need oracle arc正題),禁走廊禁crank;兩格任一綠=#3結行為正確同#10故事;per-seed不一致原樣報收
 ---
