@@ -221,9 +221,24 @@ func own_camp_tile(team_id: int) -> HexTileData:
 	if _oc_epoch != OwnerCampIndex.epoch:
 		_rebuild_owner_camp()
 	var tid = _oc_map.get(team_id, null)
-	if tid == null:
-		return null
-	return world.tiles.get(tid)
+	var got: HexTileData = world.tiles.get(tid) if tid != null else null
+	# ★★★影子對帳（接線，systems 2026-09-03）：★我先前【複製了 shadow 機制卻沒接線】——
+	#   `OwnerCampIndex.shadow_check()` 零 caller，而對照組 OwnerOutpostIndex 有兩張床真的開它。
+	#   ★★用途一（本來的）：索引與真值漂掉時當場現形。
+	#   ★★★用途二（這一輪要的）：證明【掃描版 ≡ 索引版】——
+	#     修前世界沒有這個索引，所以修前的分桶只能用掃描實作；
+	#     而「兩支不同實作的數字」不得直接比 ⇒ 先在【修後】側證它們逐數相同。
+	#   ★production 預設 false ＝ 單一 bool 判斷，零行為零 RNG。
+	if OwnerCampIndex.shadow:
+		var expect: Vector2i = Vector2i(-1, -1)
+		for _tid in world.tiles:   # ★舊式全圖掃：same ground truth（camp_team_id），different implementation
+			var _t: HexTileData = world.tiles[_tid]
+			if _t.camp_level > 0 and _t.camp_team_id == team_id:
+				expect = _t.tile_pos
+				break
+		OwnerCampIndex.shadow_check("own_camp_tile", team_id, expect,
+			got.tile_pos if got != null else Vector2i(-1, -1))
+	return got
 
 func _rebuild_owner_camp() -> void:
 	_oc_map.clear()

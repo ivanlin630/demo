@@ -18,6 +18,8 @@ func _run() -> void:
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 30
 	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "warring_states"
 	var sd: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
+	# ★等價證明用（預設關）：CAMP_SHADOW=1 才開，★開了每次 own_camp 查詢都會多掃一次全圖
+	OwnerCampIndex.shadow = OS.get_environment("CAMP_SHADOW") == "1"
 	print("=== 三票 re-measure｜config=%s seed=%d days=%d ===" % [cfg, sd, days])
 	var state: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg, true)
 	seed(sd)
@@ -299,6 +301,15 @@ func _sec_zhagen() -> void:
 			int(Probe.counts.get("survival.own_camp_lost_release", 0))])
 	print("     ★camp.built 分桶（有家再蓋 vs 無家初次）：has_home=%d｜no_home=%d"
 		% [int(Probe.counts.get("camp.built.has_home", 0)), int(Probe.counts.get("camp.built.no_home", 0))])
+	# ★★★等價證明（只在 `CAMP_SHADOW=1` 開）：索引版 vs 掃描版逐數比對＋索引查詢層的 shadow 對帳。
+	#   ★三條驗收（寫在數字之前）：`shadow_fails=0` 且 `shadow_checks>0` 且兩版分桶逐數相同。
+	if OwnerCampIndex.shadow:
+		print("     ★★等價證明｜掃描版：scan_has_home=%d｜scan_no_home=%d｜★mismatch=%d"
+			% [int(Probe.counts.get("camp.built.scan_has_home", 0)),
+				int(Probe.counts.get("camp.built.scan_no_home", 0)),
+				int(Probe.counts.get("camp.built.scan_mismatch", 0))])
+		print("     ★★★own_camp_tile 影子對帳：checks=%d｜fails=%d（★checks=0 ⇒ 「沒失敗」是因為沒跑）"
+			% [OwnerCampIndex.shadow_checks, OwnerCampIndex.shadow_fails])
 	print("     ★★★誠實限：churn 這一行【是這一刀才加的】⇒ 它【沒有修前基準】")
 	print("        ⇒ ★單看修後數字說不出「降了」——★★那正是「拿一個數字去比一個不存在的數字」")
 	print("     ★這一格是 systems 寫在數字之前的門檻：要往【util 太低】修，先拿這個數字來。")
