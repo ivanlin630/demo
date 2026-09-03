@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #10 終裁
 topic: 裁:#10 結案=【行為正確】——證據鏈收(贏=自己變強非對手變弱/備戰在場排除沒上場/warring 0-22差距≥0.5=戰區對手genuine強):戰亂延後定居=世界在說故事,正是要的沙盒;條目結案欄寫全案弧(概念缺席修訖+競價genuine)+30d窗註+長考90d免費補答;★B級總帳現在要(12條各終態,③tracer_completeness照「不確定」入帳)——對完帳B級收章,照原路線圖進⑤長考預備
 ---
