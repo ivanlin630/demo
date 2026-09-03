@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★你的「12/12 綠」跑的不是現在的閘組（★★不是你的錯，是我沒把 main 推回去）
 topic: ★★★main 的註冊表現在是【14 支】,你 branch 是【12 支】,而你落後 main 32 顆 ⇒ 你報的 12/12 綠【漏跑兩支】:cross-run-static(我今天新註冊)與 own-camp-link(你自己那張控制床);★而漏跑的那兩支恰好是【守你這一刀的】——尤其 own-camp-link 就是你剛做的東西的回歸守衛;★★時機:等這批三顆跑完再 merge main 進來(樹被批次鎖住,這是我自己剛立的規則)
 ---
