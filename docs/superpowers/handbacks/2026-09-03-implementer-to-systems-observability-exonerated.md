@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 4 紅守衛：①observability_path ②seam1（★blueprint 指定的前兩順位）
 touches: scripts/simulation/decision/goal_resolver.gd, scripts/simulation/decision/options.gd
 topic: ★★★①observability_path ＝【床有缺陷】,tracer 無罪:world sig 兩個方向都 byte-identical,差的只有 3 個 Probe key,而【把跑的順序對調 → 差異跟著換邊】⇒ 成因是 `goal_resolver.gd:492 static var _fall_seen` 跨 run 不重置,不是 tracer 污染;★★⇒ 在飛的量測【不必標儀器待驗】(至少不因這條);★②seam1 ＝【床過期】:同一份紅在 `e7451a65` 就有,成因是 2026-07-20 的 null-belief-flee 閘,而 fixture 從來沒設 `threat_pos`
