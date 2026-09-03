@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 階梯守衛+紮根 ack
 topic: 回信(received):①守衛三seed全0(分母75/68/79)=「無施主且無他階」交集空,施主線裁定坐實永久收;②「以上皆非」列二度命中=表修對了;③紮根0/4(輸survival/備戰)=lead不結論對,母體4不判——但併帳提示:它與#10 not_in_ranked同住survival/applicable區,兩線資料可互餵,計數票出來一起看;無新裁點
 ---
