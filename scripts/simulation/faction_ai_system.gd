@@ -5818,7 +5818,15 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 		#   ★抑制【重複紮營】(有家還再蓋) ＝ 我們要的｜★★抑制【初次紮營】(無家) ＝ 傷害
 		#   ⇒ 按【當下有沒有 own_camp】分桶。★★★查詢必須在本函式把新營地登記進去【之前】——
 		#     而這一行就在 `camp_team_id` 寫入與 invalidate 之前，所以讀到的是【既有的】營地。
-		Probe.bump("camp.built.has_home" if state.own_camp_tile(team.team_id) != null else "camp.built.no_home")
+		var _idx_home: bool = state.own_camp_tile(team.team_id) != null
+		Probe.bump("camp.built.has_home" if _idx_home else "camp.built.no_home")
+		# ★★★掃描版並排（`OwnerCampIndex.shadow` 開時才跑）：★證明【掃描 ≡ 索引】。
+		#   ★修前世界沒有索引 ⇒ 修前分桶只能用掃描實作 ⇒ ★★兩支不同實作的數字不得直接比
+		#   ⇒ ★★★先在修後側證它們逐數相同（同真值來源 camp_team_id，不同實作）。
+		if OwnerCampIndex.shadow:
+			var _scan_home: bool = _scan_own_camp_legacy(state, team.team_id)
+			Probe.bump("camp.built.scan_has_home" if _scan_home else "camp.built.scan_no_home")
+			if _scan_home != _idx_home: Probe.bump("camp.built.scan_mismatch")
 	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
 	tile.camp_team_id = team.team_id   # ★§4c：記起建隊（decay 時才知道「這是誰的失敗」；完工/消失時清）
 	OwnerCampIndex.invalidate()        # ★own-camp chokepoint①（寫）：新營地誕生 ⇒ 姊妹索引失效
@@ -6307,6 +6315,19 @@ static func flee_destination_static(state: WorldState, team: TeamData) -> Vector
 	if best == team.tile_pos:
 		return Vector2i(-1, -1)
 	return best
+
+# ★同上的姊妹版（own-camp）：舊全圖掃保留為影子對照基準，★production 路徑不呼叫，
+#   只有 `OwnerCampIndex.shadow` 開時跑。★★存在理由不只是對帳：
+#   【修前世界沒有 own_camp 索引】⇒ 修前分桶只能用掃描實作 ⇒ ★★★要先證「掃描 ≡ 索引」，
+#   那份跨世界的比較才算數（systems 2026-09-03：兩支不同儀器不得直接比）。
+#   ★形狀照抄 `_scan_own_outpost_legacy` —— ★★憲法閘擋的是【決策路徑上的全圖掃】，
+#   而這支是 shadow-only 基準掃，與那支同類同待遇（inline gate-ok，非白名單、非新豁免條款）。
+static func _scan_own_camp_legacy(state: WorldState, team_id: int) -> bool:
+	for tile_id in state.world.tiles:   # gate-ok: shadow-only 基準掃（debug 對照，production 不走）
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.camp_level > 0 and tile.camp_team_id == team_id:
+			return true
+	return false
 
 # 舊全圖掃保留為影子對照基準（gate①）：production 路徑不呼叫，只有 OwnerOutpostIndex.shadow 開時跑。
 static func _scan_own_outpost_legacy(state: WorldState, team_id: int) -> Vector2i:
