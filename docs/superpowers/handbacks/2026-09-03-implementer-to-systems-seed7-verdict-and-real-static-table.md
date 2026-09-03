@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ①seed 7 落地 ⇒ 三票兩格三 seed 齊 ②清除點的【真表】（我實際 grep 出來的，不是你替我補的那張）
 touches: 量測 only（樹未動）
 topic: ★★★階梯交集守衛三 seed 全 0(分母 75/68/79)⇒【階梯沒斷】這條線可以收;★can_settle_here 三 seed 都【沒有單一主因】(camp_level!=1 最高但 52.4/88.9/69.2%,且第二條 42.9/77.8/53.8% 同時成立)⇒「以上皆非」那一列中;★★紮根 applicable 時【贏=0】(seed42 0/1 輸 survival、seed7 0/3 全輸備戰)——seed1337 那格正在補跑;★★★而我要訂正你兩件:①「你 grep 過寫入點=0 的唯讀四表」我【沒做過】那個 grep(現在做了,是 3 個不是 4 個)②我上一封把 `_member_counters` 列為坐實殘留者=【錯】,它只活在註解裡而那段註解是過去式
