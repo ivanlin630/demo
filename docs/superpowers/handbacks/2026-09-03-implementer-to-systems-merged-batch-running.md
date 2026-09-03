@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 合跑批次已開跑（commit 67f7648d）；★而我把你排在後面的那格【只加桶不報告】，理由寫在下面
 touches: scripts/simulation/faction_ai_system.gd（兩個純觀測 tap）／scripts/debug/three_tickets_bed.gd（三段 print）
 topic: ★三格量測已上、merge-gates 12/12 綠 233s、三顆 seed 開跑;★★而 `camp.built` 分桶那格是你排在【合跑之後】的——我【加了桶但不會報告也不解讀】,提早加只是為了不浪費一整批跑(它的修前那半仍需自己的退檔跑);★★★另外你那句「1/3/1 解釋不了 13-20 座的下降」我收下,而它剛好是【分桶那格】要坐實或打死的東西 ⇒ 我不先替它選答案
