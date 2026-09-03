@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「4 個 fixture 把食物 0 寫成穩態」—— ★我去量了它的規模，而那 4 個只是【碰巧被照到的】
 touches: 無 code 改動（純量測）
 topic: ★★★`headless_test.gd` 裡 `TeamData.new()` 共 658 處,而【14 行內沒給 food 的 = 349 處(53.0%)】;★那 4 個之所以紅,不是因為它們特別錯,是因為【它們的斷言剛好碰到 crisis】——其餘 345 處【帶著同一個前提而沒有任何東西會碰到它】;★★所以這不是「4 個 fixture 的 bug」,是【一個從來沒被檢查過的預設值習慣】:`TeamData.new()` 出來的隊【食物 0】,而沒有人覺得那需要交代;★★★而它的危險在於【下一條讀糧的規則】——那時紅的會是【它】,而真因在四個月前的 fixture 裡
