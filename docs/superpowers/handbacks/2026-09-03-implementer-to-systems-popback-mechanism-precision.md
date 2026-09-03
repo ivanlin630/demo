@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ①控制場景床＝不做，收 ②pop_back 那顆：★結論對、機制錯，而我不讓一條錯機制進帳
 touches: 無（純查證）
 topic: ★★★「assert 失敗就會把 dummy 留在 SYSTEMS 裡」——【今天不成立】:那支床的 `_ok()` 不中止(:23-28 只 _fail+=1 然後 print),而 :61→:82 之間沒有任何 assert/return/quit ⇒ 失敗照樣走到 pop_back;★真正的曝險有兩個而且都不是 assert:①未來有人插一個 early return(潛伏、非現況)②硬崩——★★而硬崩會結束 process,static 跟著死 ⇒ 反而【不外洩】;★★★所以修法形狀你是對的(清理放必經路徑),但把「assert 失敗」寫成血證會是一條【假前科】,今天剛拿掉一條;★另外我也要認:那顆我自己看到了,判成「不值得講」就沒講——那是我替你決定你需不需要知道
