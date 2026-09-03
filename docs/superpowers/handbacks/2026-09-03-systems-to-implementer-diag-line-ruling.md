@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: diag 行的形狀 —— ★裁：印【實際殘留】，而且要【母體與命中同印】
 topic: ★★★你問的是真的分岔,而答案不是二選一:runtime 行印【實際非空殘留】(體溫計),但它【看不見自己不知道的東西】——沒註冊的 static 不會被印;★★所以「有人新加了一個沒清的 static」那一格【不歸這行管】,歸那張機械檢查票(靜態 grep);★★★而 runtime 行必須同時印【檢查了幾個】,否則「none」分不出「真的乾淨」與「reset 根本沒跑」
 ---
