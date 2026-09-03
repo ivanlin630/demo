@@ -82,7 +82,7 @@ func _sec_10() -> void:
 		100.0 * float(nir) / maxf(float(sent), 1.0), won, lost])
 	print("  輸給誰：%s" % _bucket_list("redispatch.lost_to."))
 	print("  ★★★不在候選集的【是哪個 option】：%s" % _bucket_list("redispatch.not_in_ranked.opt."))
-	print("  ★★★不在候選集的隊【當下有沒有自己的營地】：%s" % _bucket_list("redispatch.nir_owncamp."))
+	print("  ★★★不在候選集的隊【當下有沒有自己的營地】 `redispatch.nir_owncamp.*`：%s" % _bucket_list("redispatch.nir_owncamp."))
 	print("     ★判讀（systems 寫在數字之前）：幾乎都 yes ⇒ 承諾比 applicable 活得久（假說成立）；")
 	print("        ★★幾乎都 no ⇒ 假說死，那是另一回事；★★★混合 ⇒ 原樣報不歸類")
 	print("    其中 stall cooldown 排除=%d｜條件本身不成立=%d（★兩者在「不在候選集」上同形）" % [
@@ -393,7 +393,7 @@ func _sec_b_grade() -> void:
 	print("═══ ★B 級量測（#3 market-seeker／#15 普遍度＋perf／④minor>pop）═══")
 	# ── ④minor_population > population ──
 	var me: int = int(Probe.counts.get("minor_exceeds_pop", 0))
-	print("  ④minor>pop 的隊×tick = %d｜相異隊 = %s" % [me, _bucket_list("minor_exceeds_pop.team.")])
+	print("  ④`minor_exceeds_pop` 的隊×tick = %d｜相異隊 = %s" % [me, _bucket_list("minor_exceeds_pop.team.")])
 	print("     ★恆 0 ⇒ 那條銷案；★★非 0 ⇒ 上面那串就是隊 id（systems 判是哪條路造成的）")
 	# ── #3 market-seeker ──
 	var ms_same: int = int(Probe.counts.get("mseek.same", 0))
@@ -412,7 +412,7 @@ func _sec_b_grade() -> void:
 		var f_pop: int = int(Probe.counts.get("mseek.forage.pop_block", 0))
 		var f_land: int = int(Probe.counts.get("mseek.forage.land_block", 0))
 		var f_tot: int = f_ap + f_pop + f_land
-		print("     ── ★覓食在不在候選（母體＝改做別的 %d，本節分母 %d）──" % [ms_gave, f_tot])
+		print("     ── ★覓食在不在候選 `mseek.forage.*`（母體＝改做別的 %d，本節分母 %d）──" % [ms_gave, f_tot])
 		print("        ①applicable（覓食在 ranked）= %d" % f_ap)
 		print("        ★②pop > FORAGE_VIABLE_POP(%d) = %d ⇒ 常數擋（★而地那半在此【不可觀測】：同一常數先擋）"
 			% [FactionAISystem.FORAGE_VIABLE_POP, f_pop])
@@ -478,7 +478,7 @@ func _sec_b_grade() -> void:
 	var lt_teams: int = 0
 	for k4 in Probe.counts.keys():
 		if String(k4).begins_with("mseek.forage.lost.team."): lt_teams += 1
-	print("     ── ★格一：覓食 applicable 卻沒贏｜餓深分帶（母體 %d，相異隊 %d）──" % [lb_tot, lt_teams])
+	print("     ── ★格一 `mseek.forage.lost.band.*`：覓食 applicable 卻沒贏｜餓深分帶（母體 %d，相異隊 %d）──" % [lb_tot, lt_teams])
 	print("        %s" % " ｜ ".join(PackedStringArray(lb)))
 	print("        ★判讀：淺帶輸給義務 ⇒ genuine 戰時紀律；★★deep 仍輸 ⇒ 餓死邊緣還在操練＝病；")
 	print("           ★★★deep 母體 0 ⇒ 那格【答不了】，不是「深帶沒問題」")
@@ -489,7 +489,7 @@ func _sec_b_grade() -> void:
 		var v3: int = int(Probe.counts.get("mseek.forage.outcome." + o2, 0))
 		oc_tot += v3
 		oc.append("%s=%d" % [o2, v3])
-	print("     ── ★★格二：輸掉之後的實際後果（母體 %d｜N＝DECISION_CADENCE %d tick）──"
+	print("     ── ★★格二 `mseek.forage.outcome.*`：輸掉之後的實際後果（母體 %d｜N＝DECISION_CADENCE %d tick）──"
 		% [oc_tot, FactionAISystem.DECISION_CADENCE])
 	print("        %s" % " ｜ ".join(PackedStringArray(oc)))
 	print("        ★判讀：starved 多 ⇒ 輸掉【真的有代價】；★★ate 多 ⇒ 經 crisis 那條路吃到了 ⇒ 輸 rank 沒代價")
