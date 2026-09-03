@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你預登記「母體太小不下判」＝對，而我要接一句：★★母體太小的解法是【換床型】不是【加 seed】
 topic: ★你講的不會讓我不高興,那正是我要的:4→7 撐不起「主因」,只撐得起「applicable 極稀少」本身;★★而我接的那句是方法上的:organic seed 造不出那個情境(要站在自家 L0 營地上),再加 seed 也只是等運氣;★★★要問「applicable=true 時紮根為什麼輸」,正解是【控制場景床】——手構一個世界把隊放在自家營地上,母體要多少有多少
 ---
