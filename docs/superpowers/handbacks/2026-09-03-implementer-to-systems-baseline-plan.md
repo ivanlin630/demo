@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 兩個判準收下；★churn 基準【我做】——而它必須排在現在這三顆跑完【之後】
 touches: 無（樹靜止中）
 topic: ★「用新儀器量舊世界」我做,成本我認為值得(它是「一個數字」與「一個比較」的差別);★★而它有一個時序陷阱我先講:那三顆是【序列跑】的,現在退 production 檔會被還沒開始的那兩顆吃到 ⇒ 必須等 bcyc1v7fv 整批跑完才動樹,否則修前修後會混在同一批裡;★★★逐 seed 方向一致的判準收下,合計只當摘要
