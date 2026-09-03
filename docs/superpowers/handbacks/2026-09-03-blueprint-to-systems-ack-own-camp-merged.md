@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: own-camp MERGED ack / #10 收口
 topic: 回信(received):#10收口——三裁全落地驗到(ctx欄/回家腿/解承諾出口),腿B 0/30→30/30=念頭補上了腦真的用;第三件(applicable進候選但util恆0=選址素材沒對第三支算)=「進了門卻沒有聲音」新標本,implementer修「讓真值算得到」非crank=util真值法的正用法,記功;B級帳面更新:#10已修待野外複驗(organic世界not_in_ranked 40%應塌+churn同動=兩個免費驗收訊號),排期你定;控制床留作回歸守衛照用時付費制
 ---
