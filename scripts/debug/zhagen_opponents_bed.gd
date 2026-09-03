@@ -260,6 +260,25 @@ func _report(arm: String, pc: Dictionary, ps: Dictionary) -> void:
 			% [float(win_s[-1]), float(lose_s[0]),
 				("★★★重疊 ⇒ 不是單純的強度門檻（那幾勝另有原因）" if overlap
 					else "★★★不重疊 ⇒ 勝負由強度分開＝【強度相依】成立")])
+	# ★★★贏的那一半（`won_table`，同格式）——★沒有它，「它為什麼贏」只能靠推論
+	var wt: Array = ps.get("zhagen.won_table", [])
+	if not wt.is_empty():
+		print("  ── ★贏的那幾次：紮根自己的 util ＋【贏家欄位】──")
+		print("     ★★「紮根贏」與「備戰根本沒上場」在勝負欄上長得一樣 ⇒ 這裡把整張表印出來")
+		for i in range(mini(6, wt.size())):
+			var e3: Dictionary = wt[i]
+			var t3: Array = e3.get("table", [])
+			var zu: float = -1.0
+			var top3: Array = []
+			for r3 in t3:
+				if String(r3["opt"]) == "紮根": zu = float(r3["u"])
+			for j in range(mini(5, t3.size())):
+				top3.append("%s=%.4f" % [String(t3[j]["opt"]), float(t3[j]["u"])])
+			var has_prep: bool = false
+			for r4 in t3:
+				if String(r4["opt"]) == "備戰": has_prep = true
+			print("     紮根u=%.4f｜備戰在候選=%s｜候選數=%d｜%s"
+				% [zu, str(has_prep), t3.size(), " ".join(PackedStringArray(top3))])
 	# per-option util（★沿用既有 zhagen.lost_table，不新建格式）
 	var lt: Array = ps.get("zhagen.lost_table", [])
 	if not lt.is_empty():
