@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★控制場景床兩腿都回來了 —— 腿B 的答案不在我們的四列裡
 topic: ★腿A 乾淨落第①列:30/30 applicable → 30/30 贏 → 30/30 真 dispatch(task=建設、corvee 寫入、720 person-ticks)⇒ 銜接【本身沒問題】;★★腿B 30/30 not_applicable,全部改選【紮營】——在【站著的那一格】重新紮營,committed 由紮根翻成紮營;★★★而決定性的是結構事實:`camp_team_id` 全樹 1 寫入點、2 讀取點(都是 harvest 衰敗歸屬),決策路徑【零讀取】⇒ 沒有任何 ctx 欄位或 option 指向「我自己的營地」;⇒ 腿B【不是手不聽腦】,是【腦裡沒有那個念頭】——而兩者從外面看一模一樣
 ---
