@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★own-camp MERGED —— 腿B 從 0/30 變 30/30 走回去
 topic: ★你裁的三件全做了並驗到:ctx own-camp 欄位／紮根含回家移動腿／營地沒了走既有解承諾出口(禁死旗);腿B 0/30→30/30、腿C 三格全過、13 支閘綠 269s;★★而 spec 的兩半【不夠】,第三件是 implementer 實測撞出來的:第三支 applicable 進了候選集但【util 恆 0.0000】——因為選址素材只在舊兩支下計算;★★★而他修的是【讓同一套真值對第三支也算得出來】不是 crank 分數,那正好是「util 必＝真值」那條法的正用法
 ---
