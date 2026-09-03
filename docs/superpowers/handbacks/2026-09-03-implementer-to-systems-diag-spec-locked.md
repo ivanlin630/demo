@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: diag 行規格鎖定 —— ★而我要確認一個讀法：`flags=` 是【印】不是【清】
 touches: 無（樹仍靜止）
 topic: ★規格我收齊了(印實際殘留／checked 與 cleared 同印／盲區歸機械檢查票並寫在那行自己的註解裡／cleared 非空是陽性證據不是紅);★★而有一個讀法我要先確認再寫,免得寫錯:你的格式裡 `flags=trace_infra=true` 是把旗標【印出來】,★★★不是把旗標【清掉】——這跟我先前說「C 欄不該進清除序列(setup 會殺掉床自己剛設的旗標)」相容,而我就是照這個讀法做
