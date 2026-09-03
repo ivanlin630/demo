@@ -52,14 +52,39 @@ func _mk_state() -> WorldState:
 	var s := WorldState.new(); s.world = WorldData.new(); s.world.current_tick = 0
 	return s
 
+# ★★★買方的【需求】必須是真的（不是把 want 調大）。
+#   ★`_market_visitor_buy` 的可購量含一項 `want = reserve(res) - holding`
+#     （`interaction_system.gd::_market_visitor_buy`），而 material 的 reserve 走
+#     `TradeValuation.reserve` → `NeedOracle.need_keep` → `_construction_facility_need`：
+#     ★★沒有【自家據點】就 return 0 ⇒ material 的 reserve 恆 0 ⇒ want 0 ⇒ 這一單永遠不成交。
+#   ⇒ ★★★所以修法不是放寬那道閘，是【把買方的需求建起來】：
+#     給它一個自家 civilian 據點、facility 全 0 級 ⇒ farming 等的 build-cost 含 material
+#     ⇒ 需求由【真實的想蓋】導出，而不是由 fixture 直接塞一個數字。
+#   ★而 desire 那一關（CONSTRUCTION_DESIRE_MIN=0.3）也得是真的：farming 的 deficit 由
+#     `need_keep(food) vs 持有 food` 導出 ⇒ 買方 food=0 且有人口 ⇒ deficit≈1 ⇒ 真的想蓋。
+func _give_construction_demand(state: WorldState, team: TeamData, pos: Vector2i) -> HexTileData:
+	var home := HexTileData.new()
+	home.tile_pos = pos
+	home.outpost_level = 1
+	home.outpost_type = "civilian"     # farming/workshop/apothecary/mint 的 allowed_outpost
+	home.outpost_owner = team.team_id
+	home.terrain = "plains"
+	state.world.tiles[pos.x * 1000 + pos.y] = home
+	OwnerOutpostIndex.invalidate()     # ★直接寫 outpost_owner 繞過 bank ⇒ 索引要失效，否則查不到自家據點
+	return home
+
 # ── TDD1：訪客到市場 outpost → 向 stock 買（deal fire，扣 storage，coin→owner，守恆）──
 func _test_visitor_buy_from_stock() -> void:
 	print("--- TDD1：訪客買 owner sell 單/stock（coin→owner）---")
 	var s := _mk_state()
 	_mk_person(s, 100); _mk_person(s, 200)
 	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0, "material": 100.0})
-	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0})
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0, "food": 0.0})
 	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	# ★★★買方要有【真的想買 material 的理由】——見 `_give_construction_demand` 的註解。
+	#   ★這張 fixture 原本沒有它 ⇒ material 的 want 恆 0 ⇒ 「交易整條沒發生」
+	#   ⇒ ★★而那看起來跟【撮合壞掉】一模一樣（第一次 triage 就是那樣讀的）。
+	_give_construction_demand(s, visitor, Vector2i(7, 7))
 	# owner 掛 sell material ×80（board + active_orders 權威）
 	var sell_order := {"order_id": 42, "kind": "sell", "res": "material", "qty_remaining": 80}
 	owner.active_orders.append(sell_order.duplicate())
@@ -97,6 +122,9 @@ func _test_order_id_direct_settle() -> void:
 	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
 	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0})
 	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	# ★同一個因（★量過才寫，不是套用）：修前這一格的 bail 分因＝`trade.market_bail.buy_no_want = 1`，
+	#   而 `mkfill.attempt.buy = 1` ⇒ ★★撮合【有】被走到，是買方沒有需求 —— 跟 TDD1 同因。
+	_give_construction_demand(s, visitor, Vector2i(7, 7))
 	var sell_order := {"order_id": 42, "kind": "sell", "res": "material", "qty_remaining": 30}
 	owner.active_orders.append(sell_order.duplicate())
 	var tile := _mk_outpost(s, 1, Vector2i(1, 1), {"material": 100.0}, [sell_order])
