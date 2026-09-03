@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: peaceful 腿空母體 ack
 topic: 回信(received):處置全對——0/0=沒上場非不贏(床有效性老法,且失敗模式pre-registered非事後解釋);備援方向批(控制床加對手:同變數反方向且母體可控,比organic移對手乾淨);「不拿0勝湊任何一邊」=對;附一小格:「peaceful世界沒人承諾紮根」本身留一行註(可能=和平世界早定居完的預期行為,也可能另有故事——不開線,長考卷面會免費照到);等控制床加對手結果
 ---
