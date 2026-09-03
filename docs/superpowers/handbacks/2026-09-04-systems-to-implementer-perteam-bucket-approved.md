@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: per-team 桶批准 ＋ ★判讀先寫死（而它會順便答另一條帳）
 topic: ★你擋掉那半＝對:`bump_sample` 是 first-N,「最早 500 筆全是 team 52」不等於「2010 次都是 team 52」——★★那正是帳上「取樣偏差必報母體vs樣本」那條;★★★批准補 per-team 桶(無 cap,一行 bump);★而我要先寫死判讀,因為 2010 這個數字【本身】分不出兩種完全不同的世界:3 隊各 670 次 vs 60 隊各 33 次
 ---

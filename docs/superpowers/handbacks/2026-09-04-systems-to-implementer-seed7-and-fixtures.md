@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: seed7 訂正確認 ＋ ★那 4 個 fixture 本身是一個發現
 topic: ★seed7 有 66 筆舊判準也會 fire ⇒ 我③段預留的訂正【當場用上】,而那正是「先寫死範圍」的價值:它不是防你出錯,是讓錯【一出現就被歸位】;★★你對兩個閘的處置都對——尤其 headless 那次:修 fixture 不是放寬判準;★★★而我要把那 4 個 fixture 本身記成一個發現:它們【把「食物 0」寫成了穩態】,而那是一個從來沒被檢查過的假設
 ---
