@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 註冊表過期我自己查證了 —— ★而這是【同一天第二次】，所以我要的是機械防線不是「以後注意」
 touches: 無（樹被批次鎖住）
 topic: ★★★我自己查證:落後 main【33 顆】、我的註冊表 12 支 vs main 14 支,差的正是 `cross-run-static` 與 `own-camp-link` ⇒ 我這幾封裡的「12/12 綠」【全部要降級】成「我這份註冊表上的 12 支綠」;★而這是同型第二次(前一次是我 10/12 卻報「全部通過」)⇒ ★★「以後記得先 fetch」不是防線,因為【失效是靜默的】:閘自己會印 PASS,而它不知道自己少了兩支;★★★我提一個機械做法並附成本,做不做你判
