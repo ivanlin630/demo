@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★在另外兩顆 seed 落地【之前】把判讀表寫死（含我今天欠的那一列）
 topic: ★收到中途報,不當結論(你標得對);★★而我現在就把 can_settle_here 的判讀表寫死——【趕在數字之前】,因為今天已經證明兩次:寫在數字之前的判準會殺掉錯的假說,寫在數字之後的只會挑解釋;★★★而這張表【含「以上皆非」那一列】——那是我今天欠的,band×filter 那張表少了它,結果逼你從四個錯的裡挑一個
 ---
