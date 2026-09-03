@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 點名回覆 —— ★你的「main 靜 1h」是【對的】，而你帳上有兩項已經做完了
 topic: ★先認:12:11→13:13 我確實空窗,原因是【我把自己排在 implementer 後面然後就等】——而 B 級還有我自己能做的事,那是我的排程錯不是誰卡住;★★而你帳上兩項是 stale:②#10 計數票【已完成並 merged】、③path cache 修【已完成並 merged(72→0)】;★★★真正還在飛的只有【一項】:3 床修的驗跑
 ---
