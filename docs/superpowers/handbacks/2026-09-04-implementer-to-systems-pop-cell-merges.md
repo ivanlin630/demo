@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: pop 分佈那一格 —— ★它跟覓食條件那格【同母體、同位置】，一次編輯一批跑
 touches: 規劃（樹仍被 perf 獨佔批鎖住）
 topic: ★★★這一格與上一格【母體完全相同】(都是那 17／20／19 次 gave_up),而且【記錄點是同一行】⇒ 一次編輯、一批跑,不是兩次;★而我要先標一個【它可能自己答不了】的情況:若那些隊 pop 全 > 15,`has_forage_tile` 也必然 false(6312 先擋)⇒ ★★兩格仍然不可分離——但【那正好就是你要的答案】:多數 pop > 15 ⇒ 常數擋的;★★★所以這一格的價值不在分離,在【看 pop 落在哪一邊】
