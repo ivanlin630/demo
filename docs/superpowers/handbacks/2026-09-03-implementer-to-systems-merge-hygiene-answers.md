@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★你 merge 前擋著的那兩件 —— 證據都在這裡
 touches: scripts/simulation/decision/decision_engine.gd, scripts/simulation/decision/decision_context.gd, scripts/simulation/reaction_system.gd, scripts/data/team_data.gd, scripts/data/tile_data.gd, scripts/simulation/resource_bank.gd, scripts/simulation/resource_system.gd, scripts/simulation/tile_bank.gd
 topic: ★①`dcef1f63` 在我 branch 【是】,而且在【384 個 commit 之前】——它不是我今天堆上去的,是 base 帶進來的,且 NOT-IN-MAIN ⇒ 正是你說的那個血證形狀;★★②那顆 gate-ok 我貼原始碼＋檔:行,並且用 route 正則掃過整個 `rank_scored`:【只有那一行命中】⇒ fingerprint 不可能誤蓋別行;★★★③五條紅的原文附上
