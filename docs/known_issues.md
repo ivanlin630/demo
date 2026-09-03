@@ -1446,9 +1446,22 @@ material-buy arc（v1+v2a merged e6519f9f）修好 trade 側（mil 買 material�
 
 ## crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 fire，2026-07-22，QA d26ae644 驗證撿，低優先）
 
+**狀態：已知未修** ｜ **回訪：觸發事件 — blueprint 裁「要不要現在補絕對量判準」時（★修法明確，但它會讓 crisis 更常 fire＝平衡問題）**
+
+★★**B 級 sweep 判定（2026-09-04）：真病，還活著。** `_decision_crisis`（`faction_ai_system.gd:3469-3479`）**只有三個判準**：
+①pop 崩跌 %（`rung_pop_last`）②`food_flow_avg < RUNG_CRASH_FOOD_DEEP`③`food_flow_avg < GRADUAL_DECLINE_FLOW`
+⇒ ★**沒有任何【絕對量】判準**（沒有 `food == 0`／`food_days == 0`）⇒ **「穩定的零」flow≈0 ⇒ 三條都不觸發**，與條目原始量測一致。
+
 `_decision_crisis`（`faction_ai_system.gd:1858`）= **food_flow_avg 流-based**（`< RUNG_CRASH_FOOD_DEEP` / `< GRADUAL_DECLINE_FLOW`）+ pop-crash，**無絕對-food 條件**。`food_flow_avg`（`resource_system.gd::_update_food_flow()`）= daily_rate 的 EMA。∴ **food=0 stuck → daily_rate=0 → flow EMA→0 → 不 < 負門檻 → 不 fire crisis**。QA 坐實：seed1337 team54 food_days=0.0 連 500 tick（tick4800-5300）全程 `in_crisis=false`（11/11 food=0 DIVERT 事件皆非 crisis）→ crisis-escape 不 fire → 鎖空市場貿易 lingered（[SurvivalMergeIn] 併入 Team34 安全網接住沒釀死）。**根=crisis 只偵「流失中」不偵「已見底 stuck」**。**修向**：`_decision_crisis` 加絕對-food 條件（`team.famine_days > 0`=已進飢荒 / 或 `food_days < CRISIS_ABSOLUTE_DAYS` 硬底）→ 字面餓著必 crisis → crisis-escape fire → re-eval 求生。**低優先**（blueprint 裁 2026-07-22：merge 安全網接住、非釀死，記待查）。連 [[feedback_symptom_vs_root_retry]] + 下方 market-seeker 空市場 + DESPERATION cliff 同族（abandon-guard/絕境門檻連續化一批處理）。
 
 ## market-seeker 卡空市場不放棄→餓死（2026-07-22，QA 40-event 撿，DESPERATION 同族小範圍）
+
+**狀態：未確認** ｜ **回訪：量測窗 — 下一輪 organic 時看 `trade.market_bail.buy_no_stock` 之後【同一隊是否再度 seek 同一市場】**
+
+★★**B 級 sweep 判定（2026-09-04）：一半有了，一半沒查。**
+★**有的那半**：`interaction_system.gd:859` 已有具名 bail 桶 `trade.market_bail.buy_no_stock`（空貨會 bail）。
+★★**沒查的那半**：條目的症狀是「**繼續 re-seek 同一市場**」——★★★**bail 之後會不會馬上再去，我沒有量**，
+而那正是「治抖動＝治症」那條要求先問的（`feedback_symptom_vs_root_retry`：先問 X 能否曾成功）。
 
 market-seeker（TASK_TRADE 去市場）食物低 + 市場空（Gate B under-production，無貨）→ **該放棄交易轉覓食卻繼續 re-seek 同市場** → 食物耗乾部分餓死。= 「該放棄不可行選項轉可行選項」手不聽腦類型，連 [[feedback_symptom_vs_root_retry]]（治重試 X 前問 X 能否成功）+ DESPERATION 連續化 / look-before-leap 同家族。**範圍小**（只 market-seek 卡空市場特定情境）。**排低優先 / 順手併 DESPERATION cliff known-issue 一起處理**（market-seek 應 look-before-leap：市場空/無我要的貨 → 不 applicable → 轉覓食）。★真根仍是 Gate B（市場有貨了此情境自消）。**注意**：原 market-seek stickiness fix（Gate A）已撤回（治症狀，建在 buggy divert metric 上）。
 
@@ -1655,6 +1668,16 @@ bed 3 分類 classifier 測出 **6 隊同款 broken**（team62/71/73/79/84/90）
 
 ## task-priority-preempt 缺口（team48 型，2026-07-18，QA ② ladder 稽核順帶抓，與 ② 無關）
 
+**狀態：已知未修** ｜ **回訪：觸發事件 — blueprint 裁「餓到要死的隊卡在 JOIN／BEG／REVOLT 該不該被打斷」時**
+
+★★**B 級 sweep 判定（2026-09-04）：缺口【由構造而生】，而那個構造是刻意的。**
+```
+`PREEMPTIBLE_TASKS`（`faction_ai_system.gd:149`）＝ PRODUCE／MANUFACTURE／BUILD／TRADE／GOVERN／TRAIN／FORAGE／CAMP
+★註解自己列了不含哪些：ATTACK/LOOT(戰鬥)、FLEE/DEFEND/PREPARE/HOLD(已 threat)、REVOLT、JOIN/BEG(social)、survival
+⇒ ★★`:464` 忙且不在清單 ⇒ **直接 return** ⇒ 生存決策打不斷它
+```
+⇒ ★★★**所以這不是「漏了一行」，是【要不要把 social/REVOLT 也變成可打斷】的設計選擇** —— **交 blueprint。**
+
 QA 讀 seed4201 specimen 時抓：**team48 死於另一個既有 task-priority-preempt 缺口**（survival 該 preempt 的 task 沒 preempt 到），**與 desperation-ladder ② branch 無關**（非 ② 引入，pre-existing）。① priority 單一源收了 5 dispatch 路的 survival 保序，但 team48 這型疑另一 preempt 路徑漏（待 code-locate）。**獨立票**：不擋 ②。修前先 grep locate team48 走哪條 dispatch + 為何 survival 沒 preempt（別假設=本 session 反覆 state-錯教訓）。連 [[project_desperation_economy]] ① single-source。
 
 ## ★★★乞食 —— **框架訂正（2026-09-02，30 日實測）：「引擎從不選它」是假的**
@@ -1754,6 +1777,13 @@ Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**comb
 `decision_context.gd` 的 `has_food_market`（`faction_ai_system.gd:2024-2037 _nearest_market_outpost`）**掃全圖**找最近市集 outpost＝god-view 既有債（違感知鐵律，隊不該全知所有市集位置）。非 desperation-food-seeking 刀範圍（該刀新增的 has_buyable_food/food_seek 已守鐵律），但既有 has_food_market 未修。**修向**：改讀隊已知市集（探索過/傳播聞得）而非全圖掃。**優先序**：低（既有行為，非本刀 blocker），感知鐵律稽核 slice 一併掃。
 
 ## ★Team18 lone-survivor death-limbo + intent 誤標致富（2026-07-14，full-HD live 觀察首個獵物）
+
+**狀態：未確認** ｜ **回訪：量測窗 — 對照 A#14「死亡可見」那批落地後的 specimen（★該批已把 `erase_teams` 窄口接上 tracer）**
+
+★★**B 級 sweep 判定（2026-09-04）：機械上找不到 limbo 殘跡，但【不能據此結案】。**
+★`grep limbo／lone_survivor` 全樹 **0 命中**；團滅路徑現為 `_on_team_extinct`（`:4067`）＋批次 `erase_teams`（`:4115`）。
+★★**而「找不到符號」≠「症狀消失」** —— 條目的症狀是**行為**（獨活者卡住 ＋ intent 誤標致富），不是一個叫 limbo 的欄位。
+⇒ ★★★**要用 specimen 對照，不是用 grep 結案**（★而 A#14 那批剛好把死亡窄口接上 tracer，成本很低）。
 
 **來源**：execlock 全-HD story acceptance 找團滅 specimen 時意外揪出（`docs/measurements/2026-07-14-execlock-seed1337-Team18-annihilated.jsonl`，34 entries）。**非 thrash-fix 範圍**。這是「先有結果/full-HD live 觀察」方向提早見效——**真 coherence bug 從 specimen trace 浮出，靜態設計看不到**。
 
