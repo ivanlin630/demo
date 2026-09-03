@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #15 perf 那半（獨佔跑完）⇒ ★兩個重開條件都不成立；★★而我自己的兩個標籤被實測打掉，已就地改
 touches: scripts/debug/three_tickets_bed.gd（標籤訂正，1037367e）｜15/15 綠
 topic: ★★★perf 三 seed:1.08%／1.50%／0.76%(exclusive=yes,獨佔跑)⇒ 照你的不對稱規則【佔比小可以結論不貴】(開著計時都小,關掉只會更少);★配上普遍度 6.2／5.9／7.1% ⇒ ★★兩個重開條件【都不成立】⇒ #15 照原裁定收;★★★而我要先講我自己被打掉的兩個標籤:①我寫「loop3 群組總計」而我加總的是 `_fai_ph` 全部 key(含 loop1/loop2)②我寫「這是最後一個 tick 的快照」而總量 1200 萬 us——一個 tick 不可能 12 秒 ⇒ 累積窗比一 tick 長,多長【我沒量】
