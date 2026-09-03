@@ -428,6 +428,24 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 	elif ctx.food_days >= 2.0: _bd = "2to5"
 	elif ctx.food_days >= 0.5: _bd = "0.5to2"
 	Probe.bump(pfx + "band." + _bd + ".pop")
+	# ★★★階梯交集守衛（systems 2026-09-03）：【無施主 ∧ 其他階一個都不 applicable】
+	#   ★裁定是【絕境無死路由階梯保證、不由每一階保證】⇒ 乞食那一階不修，
+	#     ★★但【交集非空】就是階梯真的斷了 ⇒ 這一格是那條裁定的守衛。
+	#   ★★★survival 階全名單是【種竭搜索】拉出來的 11 個（不是只拿信裡列的三個）：
+	#   覛食／自救建田／返家補給／掠奪／佔村／併入／紮營／紮根／乞食／買糧／遷移找糧
+	#   ⇒ ★這裡直接數 `scored` 裡【除了乞食之外的 survival 階】，不重算 applicable。
+	if pfx == "begu." and _bd == "deep":
+		Probe.bump("ladder.deep.calls")
+		var _others: int = 0
+		for _e in scored:
+			var _o: String = String(_e["opt"])
+			if _o != "乞食" and DecisionOptions.is_in_set(_o, "survival"): _others += 1
+		if not ctx.has_aid_target: Probe.bump("ladder.deep.no_donor")
+		if _others == 0: Probe.bump("ladder.deep.no_other_step")
+		if not ctx.has_aid_target and _others == 0:
+			Probe.bump("ladder.deep.intersect")
+			# ★相異隊數（又是它：次數會被每 tick 重掃灌水）
+			Probe.bump("ladder.deep.intersect.team.%d" % team.team_id)
 	if ctx.has_aid_target: Probe.bump(pfx + "band." + _bd + ".donor_ok")
 	var _food_ok: bool = ctx.food_days < ctx.desperation_entry_threshold
 	if _food_ok: Probe.bump(pfx + "gate.food_ok")

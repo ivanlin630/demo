@@ -43,6 +43,8 @@ func _run() -> void:
 	_sec_aid()
 	_sec_aid_bands()
 	_sec_zhagen()
+	_sec_cansettle()
+	_sec_ladder()
 	_sec_prepare()
 	print("★誠實限：①單 config／單 seed／%d 日 ②★純觀測（fp 不該變；變了＝我動到行為）" % days)
 	print("  ★★③三票【同一份跑】⇒ 彼此可比；★★★但與修前的舊值比時，那些舊值是【不同跑】的，")
@@ -243,3 +245,43 @@ func _sec_zhagen() -> void:
 		int(Probe.counts.get("zhagen.not_applicable", 0)), int(Probe.counts.get("zhagen.applicable", 0))])
 	print("  ★★讀法：兩行都接近 100%% ⇒ 兩個分支都幾乎不成立；")
 	print("     ★★★若其中一行明顯低 ⇒ 那一分支【有時成立】，而掉在另一邊。")
+
+# ★★★拆 `can_settle_here`（decision_context.gd:378）—— 六個子條件的 AND。
+#   ★AND 可多個同時 false ⇒ ★★百分比加起來可以超過 100%，這不是錯。
+func _sec_cansettle() -> void:
+	var m: int = int(Probe.counts.get("cansettle.mother", 0))
+	print("═══ ★拆 can_settle_here（六個子條件的 AND）═══")
+	print("  母體（同 #10：IDLE 且 committed==紮根）= %d" % m)
+	if m == 0:
+		print("  ★★★母體 0 ⇒ 這個窗沒有隊落進來（儀器沒跑到／母體塌陷），不是「子條件都成立」")
+		return
+	for row in [["1_is_player", "是玩家隊"], ["2_no_leader", "沒領袖"], ["3_no_tile", "腳下無 tile"],
+			["4_camp_level_not_1", "★不是站在自家 L0 營地（camp_level != 1）"],
+			["5_already_outpost", "該格已有據點"], ["6_busy_construction", "該格有人在施工"]]:
+		var n: int = int(Probe.counts.get("cansettle.false." + String(row[0]), 0))
+		print("  %-34s false = %4d（%.1f%%）" % [String(row[1]), n, 100.0 * float(n) / float(m)])
+	print("  ★can_settle_here 成立 = %d｜不成立 = %d" % [
+		int(Probe.counts.get("cansettle.true", 0)), int(Probe.counts.get("cansettle.false_any", 0))])
+	print("  ★★讀法：AND 可多個同時 false ⇒ 百分比加起來可超過 100%%（不是錯）；")
+	print("     ★★★看【哪一行接近 100%%】—— 那一個就是真正卡住的；若多行都高，則是多重條件同時不成。")
+
+# ★★★階梯交集守衛（systems 2026-09-03）—— ★這張票只要【一個數】。
+func _sec_ladder() -> void:
+	var m: int = int(Probe.counts.get("ladder.deep.calls", 0))
+	var inter: int = int(Probe.counts.get("ladder.deep.intersect", 0))
+	var teams_n: int = 0
+	for k in Probe.counts.keys():
+		if String(k).begins_with("ladder.deep.intersect.team."): teams_n += 1
+	print("═══ ★★★階梯交集守衛（最深帶）═══")
+	print("  母體（deep 帶 × tick）= %d" % m)
+	if m == 0:
+		print("  ★★★母體 0 ⇒ 【沒有隊進到最深帶】，這是母體塌陷不是答案")
+		return
+	print("  無施主 = %d｜其他階一個都不 applicable = %d" % [
+		int(Probe.counts.get("ladder.deep.no_donor", 0)),
+		int(Probe.counts.get("ladder.deep.no_other_step", 0))])
+	print("  ★★★交集（無施主 ∧ 無其他階）= %d（分母 %d）｜相異隊數 = %d" % [inter, m, teams_n])
+	if inter == 0:
+		print("  ⇒ ★交集 ＝ 0 ⇒ 階梯沒斷：沒施主的時候【總有別階可用】⇒ 這條線可以收")
+	else:
+		print("  ⇒ ★★交集 > 0 ⇒ 階梯真的斷過 ⇒ ★★★重開的是【階梯有沒有斷】不是【乞食該不該保證施主】")
