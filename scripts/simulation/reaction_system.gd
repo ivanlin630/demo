@@ -264,7 +264,13 @@ func _evaluate_life_events(_state: WorldState, _p: PersonData, _t: TeamData, _tr
 #   ★分母不動（population × FOOD_PER_PERSON_PER_DAY），★★分子換成真盈餘。
 static func breed_rel_surplus(t: TeamData) -> float:
 	var need: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
-	return (t.food_produce_avg - t.food_consume_avg) / need
+	# ★★★2026-09-03 systems 撤回這一行的改動（dcef1f63 的行為改動，僅此一行）：
+	#   ★測試說它不對：headless assert 12 → 7（＝main 的數），五條生育斷言逐條消失（implementer 實測）。
+	#   ★★而【帳務儀器全部留下】（food_produce_avg／food_consume_avg／_tally_food／per-tile 流量欄）——
+	#     它們只寫計數器、不餵任何決策，唯一的出口就是這一行；後面的工作（ade1dd48 等）還在用它們。
+	#   ★★★所以撤的是【一行】不是【六個檔】：檔案層 revert 會連帶丟掉其他 commit 在那些檔上的工作。
+	#   原行（保留供將來重啟）：return (t.food_produce_avg - t.food_consume_avg) / need
+	return t.food_flow_avg / need
 
 # ★T2 速率形狀：f(r) = 0 (r<=0) / r/(r+K) (r>0)——連續、單調、飽和於 1、無懸崖。
 static func breed_f(rel_surplus: float) -> float:
