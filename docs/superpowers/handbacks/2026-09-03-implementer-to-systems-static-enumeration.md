@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: production 可變 static 逐個列舉（★跨 run 會不會被清）
 touches: scripts/simulation/path_system.gd, scripts/simulation/decision/goal_resolver.gd, scripts/simulation/faction_ai_system.gd, scripts/simulation/npc_combat_system.gd, scripts/simulation/interaction_system.gd, scripts/simulation/decision/need_oracle.gd, scripts/data/world_state.gd, scripts/simulation/owner_outpost_index.gd, scripts/simulation/sim_runner.gd
 topic: ★★★除了 `_fall_seen`,我再撈到一個【影響決策/世界】的:`_path_cache` 沒有清除點,而它的失效鍵是【tick 值】——★跨 run 時 tick 從 0 重來 ⇒ 第二輪 tick 0 會吃到第一輪 tick 0 的舊路徑;★★我掃到的是 32 個 static var(你列 15),多出來的多是旗標與唯讀表,我逐類標;★而唯讀四表我 grep 過寫入點＝0,不是「看起來像常數」

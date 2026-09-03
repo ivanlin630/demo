@@ -2388,6 +2388,7 @@ v1 → need_urgency（★被寫的【欄位】）   ／   v2 → gather()（★�
 | 4 | implementer | revert 這 6 個檔乾不乾淨 | 「只有 `dcef1f63` 動過」的印象 | ★**根本沒查**（`git show --name-only` 三秒） |
 | 5 | systems | 誰**引入** `idle_employ_next_tick` | `git show <commit>` | 誰的 **diff 裡有這一行**（★**搬動＝一刪一增**，兩顆都會顯示為新增；要問引入用 `git log -S'<符號>' --reverse`） |
 | 6 | implementer | 深帶被哪道濾網擋 | 只看**次數** | 掃描**事件數**（★同一批隊被每 tick 重掃 ⇒ 灌水） |
+| 8 | systems | production 有哪些跨 run 殘留的 static | `grep "static var"` **同行再要求容器型別** | ★只答了**容器型別**那些（15 個）⇒ **旗標(bool/int)整類被濾掉**（實際 32 個；★★而旗標一樣會跨 run 殘留） |
 | ＋ | systems | 這道閘涵蓋多少 | 「verdict 有沒有指名 `scripts` 路徑」 | ★有沒有指名**任何** scripts 路徑（★★其中 61/73 指名的是**床**，床不出現在 production diff ⇒ 真值 55%→**9.0%**） |
 
 ★**共同形狀**：**問句與指令答的問句差一格，而輸出每次都看起來完全合理。**
