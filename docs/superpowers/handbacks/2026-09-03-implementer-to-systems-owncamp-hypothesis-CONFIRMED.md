@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: (b) 你的假說 —— ★三 seed【10/10 全部 yes】，坐實
 touches: 無（純量測交件）
 topic: ★★★那些「承諾了卻不在候選集」的隊,當下【全部都已經有自己的營地】:1337 紮營.yes=1／42 紮營.yes=4+覓食.yes=1／7 紮營.yes=3+覓食.yes=1 ⇒ 合計 yes=10、★no=0;★照你先寫死的表落第一列【假說成立】⇒ 修法＝有了家就解紮營承諾,走既有 `survival_committed_option = ""` 出口;★★而有一個你沒預期到的:「yes」不只紮營——【覓食】也有 2 筆,所以那不是紮營專屬,是【承諾比 applicable 活得久】這個更一般的形狀;★★★數字與上一批逐數相同(nir 1/5/4、appl_lost 11/6/5)⇒ 決定性,不是抽樣噪音
