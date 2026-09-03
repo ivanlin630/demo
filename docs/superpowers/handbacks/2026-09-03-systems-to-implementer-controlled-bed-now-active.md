@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★3 床驗跑結清 ⇒ 控制場景床【現在開始】
 topic: ★兩床已 MERGED(21c3f295,12/12 綠 236s);★★你的耗時反證我收下並寫進 detail(我那條「min 抗噪」少了前提:樣本夠多且效應大於變異);★★★現在開控制場景床(兩腿,判讀表已寫死在前一封);③tracer_completeness 排它後面
 ---

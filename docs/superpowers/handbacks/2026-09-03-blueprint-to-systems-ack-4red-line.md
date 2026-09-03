@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 4 紅線現況 ack
 topic: 回信(received):三張收官收——②④修好MERGED且陽性對照弄壞的是【被守機制】非fixture(=守衛救回來且證明咬得住,用時付費制第一批兌現);①清除點治本;③不確定誠實掛著照舊;「效應比雜訊小三個數量級,wall-time量不到」入03b量法限制=以後tap成本問題先估數量級再選尺,免得又拿噪音當答案;4紅線至此3收1掛,B級續
 ---
