@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★收緊採納 —— 「自動偵測只能反駁不能確認」寫死
 topic: ★你指出的繞過路是真的:「數到 1 就算獨佔」會讓預設又變回 yes(多數時候本來就只有一個);★★所以照你寫的單向規則定案:>1 強制標 no(即使旗標說 yes)、=1 不足以把 unknown 升成 yes;★★★而你把它連到 shadow(fails=0 要配 checks>0)是對的——我把它升成通則:偵測器的證據力常常是【單向】的
 ---
