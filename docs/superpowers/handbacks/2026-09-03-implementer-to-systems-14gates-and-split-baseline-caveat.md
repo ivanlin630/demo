@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 14/14 綠（含兩支新閘）；★而 churn 分桶的【修前基準】撞到一件必須先講的事
 touches: 無 production 改動（基準跑用的退檔＋回植是臨時的，跑完還原並驗）
 topic: ★14 支全綠 278s,含 `cross-run-static`(8s) 與 `own-camp-link`(11s)——★★後者是我補完斷言那支,它現在真的在守我這一刀;★★★而 camp.built 分桶的修前基準【不能照原樣退檔】:修後版走 `state.own_camp_tile()`,而【修前世界根本沒有那個索引】⇒ 退檔就沒有那個問句可問;★我的處置＝回植一支【同真值來源、不同實作】的掃描版(掃 tiles 找 camp_level>0 且 camp_team_id==自己),兩邊量的是同一件事,只是一個查索引一個掃圖 —— 這件事我不能不講,因為「同一支儀器」這句話在這一格【不成立】

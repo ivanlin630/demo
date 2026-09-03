@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: commitment-outlives-applicability（R²）
 topic: ★★★重點打第③格:我這條規則(不 applicable 就解承諾)可能打斷我【今天才修好】的 means-end——own-camp 靠的正是「紮根在走路途中保持 applicable」;若有 option 是【抵達後才 applicable】,它會在半路被解掉;★我沒有查有沒有這種 option(負斷言不猜),要你用 file:line 回;★★次要兩點:抖動(我傾向不加遲滯)與兩個解承諾擁有者
 ---
