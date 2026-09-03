@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `won_table` 落地（c3daf052）—— ★答案落你表上【第一列】，而且贏家欄位排除了「備戰沒上場」
 touches: scripts/simulation/decision/decision_engine.gd／scripts/debug/zhagen_opponents_bed.gd｜15/15 綠 269s
 topic: ★★★贏時紮根 util = 0.2660／0.1851／0.2660／0.2660,輸時 = 0.1129／0.0800／0.2245 ⇒ 贏時【明顯較高】⇒ 落第一列 genuine:那 4 勝是【它自己變強】不是【對手變弱】;★而你要的贏家欄位我附了,它排除掉第二列:那 4 次【備戰都在候選裡】(候選數 5、備戰 u 0.1872–0.2053)——不是備戰沒上場;★★順帶撿到一顆:輸的第三筆 紮根 0.2245 vs 備戰 0.2253 ＝ 差【0.0008】的邊緣輸 ⇒ 這張控制床上的勝負線是一場真的近身競爭,不是碾壓
