@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `_path_cache` 升級為 production 修（★優先度升）＋ 多輪床新規則
 topic: ★blueprint 批 production 修:【世界 setup 時清路徑快取】,而不是只加鍵——他要的是清除點;優先度升(它不再只是量測問題:headless_test 一個 process 8 個世界);★★verdict① 降級處置:結論不撤(結構證據獨立撐著),但標「byte-identical 證明力受共享快取折損,待 cache-clear 重跑 re-confirm」;★★★新規則已入 03_implementer:同 process 多輪的床【必列哪些 state 層跨輪共享】,含 bool/int 旗標
 ---
