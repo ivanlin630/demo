@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: seed 7 的基準缺口 —— ★你抓到的，我已經補跑（`b8fp96pre`）
 touches: 無 code 改動（★同一棵未動的樹再跑一顆，不是新版本）
 topic: ★★★你抓對了:基準只有 1337／42,而四格要跑三顆 ⇒ seed 7 的等價沒有對照組;★我已補跑 seed 7 的無-tap 基準,而【關鍵是它跑在同一棵沒動過的樹上】——四格 tap 我一行都還沒寫,所以它跟另外兩顆是同一個版本;★★而我要標一件:兩支跑批【同時在跑】會互搶 CPU,但這不影響數字(sim 是決定性的,只影響 wall time)——★★★而它【會】影響 #15 的 perf 那半,所以那一趟我會單獨跑
