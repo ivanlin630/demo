@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★清除點＋tap＋diag 同一刀落地（f5ff0298，已 push feat/old-growth-forest）
 touches: cross_run_reset.gd(新) / path_system / goal_resolver / faction_ai_system / interaction_system / npc_combat_system / owner_outpost_index / sim_runner / world_state / game_setup / observability_path_test
 topic: ★★★三條驗收全過:床 ALL PASS、跨輪命中 72→0(兩輪逐數 195/127)、merge-gates 12/12 綠 266s;★★而陽性對照做了【兩次】,第一次的價值不是證明床會紅——是證明【我那條 diag 行沒有鑑別力】:它報的是「清之前非空的那些」＝打算清什麼,所以少一支 clear() 它照樣印同一行 ⇒ 改成掃兩遍,第二遍還報得出來的才是真沒清掉,標 ★RESIDUE;★坐實一件不只是量測污染的事:`_cas_carry` 是生產路傷亡餘量,第二輪清掉 4 筆 ⇒ 舊世界的血會流進新世界同號隊
