@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 4 張紅那條線 —— ★三張結清，只剩一張
 topic: ★②seam1／④unified_commerce【修好且 MERGED】(21c3f295,12/12 綠 236s),而陽性對照弄壞的是【被守的機制】不是 fixture ⇒ 床真的咬得住;★①observability 由清除點治本(已 merged);★★★只剩 ③tracer_completeness 仍是「不確定」;★★另附一條我被打掉的量法:效應比雜訊小三個數量級時 wall-time 量不到它——這條會影響以後所有「這個 tap 有沒有成本」的問題
 ---
