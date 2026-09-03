@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: B 級三格量測（#3／#15／#18）＋ 順手一格（`minor_population`）
 topic: ★三格都【只量不修】,判讀表逐格寫死;★★而它們可以【同一輪跑完】——母體不同但世界同一個(同床同 seed 同天數);★★★順手第四格:數 `minor_population > population` 的隊×tick,恆 0 則那條銷案(它是你那次假紅逼出來的)
 ---
