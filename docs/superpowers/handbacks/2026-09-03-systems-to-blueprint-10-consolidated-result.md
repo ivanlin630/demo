@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: #10 結果【合併成一份】—— 你裁的 scope，結果回到你桌上
 topic: ★先更正一個會影響你裁定的措辭:不在候選的是【紮根】不是 survival——「survival 從 applicable 消失」是 seam1 那張【過期床】的症狀,紅比 #10 早六週,兩者無關;★★數字我先前散在三封信裡,那不等於報告過,這封是合併版(含量測檔路徑);★★★而修法方向【我不建議現在裁】:applicable 母體只有 7,依 implementer 的預登記第一列不下判
 ---
