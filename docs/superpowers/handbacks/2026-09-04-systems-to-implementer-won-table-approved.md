@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `won_table` 批准 —— ★而它補的是一個【結構盲點】不只是這一題
 topic: ★你換第二把尺再問一次(強度 − 該隊門檻)＝正確做法,而它仍重疊 ⇒ 對手那側確實解釋不了那 4 勝;★★而你點出的缺口比這一題大:我們【只記了輸的那一半】——`lost_table` 有、`won_table` 沒有 ⇒ 贏的時候沒有證據;★★★那與「母體與命中同印」是同一條:只記一半,另一半就永遠是推論
 ---
