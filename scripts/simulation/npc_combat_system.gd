@@ -46,6 +46,18 @@ static var _combat_track: Dictionary = {}   # tid → {round:int, pop_start:int}
 # tid → 累積未取整傷亡餘量。絕境小 pop 每 round 傷亡 <1.0 不再 int(round) 截 0 → mortal zone 真流血 → 殲滅稀>0。
 static var _cas_carry: Dictionary = {}
 
+# ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
+#   ★兩個都以 tid 為 key ⇒ 新世界的 team id 會重號 ⇒ 上一輪的傷亡餘量／round 數會被
+#     新世界的同號隊【繼承】。★★而 `_cas_carry` 是【生產路】（Probe off 時仍流血），
+#     ★★★所以它的殘留不只污染量測，會改變新世界的傷亡。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _combat_track.is_empty(): cleared["NpcCombatSystem._combat_track"] = _combat_track.size()
+	if not _cas_carry.is_empty(): cleared["NpcCombatSystem._cas_carry"] = _cas_carry.size()
+	_combat_track.clear()
+	_cas_carry.clear()
+	return {"checked": 2, "cleared": cleared}
+
 func _init() -> void:
 	_msg       = SimMessageSystem.new()
 	_skill_sys = load("res://scripts/simulation/skill_system.gd").new()

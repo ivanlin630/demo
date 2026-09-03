@@ -491,6 +491,16 @@ const SEEK_TILE_RANGE: int = 30   # TEST VALUE — belief-reachable 上界（bou
 # ★僅觀測用去重帳（Probe.enabled 才寫）：答【單位】那一問，不影響決策。
 static var _fall_seen: Dictionary = {}
 
+# ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
+#   ★血證：`_fall_seen` 的 key 是 `team|tick|res` ⇒ 同 process 第二個世界的 tick 從 0 重來，
+#     每一把鑰匙都已經在裡面 ⇒ `goal.res_fall_distinct.*` 第二輪【一次都不 bump】
+#     （observability_path_test：on=5/58/54 vs off=0/0/0）⇒ ★★那張床紅的理由跟它掛的名字不同。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _fall_seen.is_empty(): cleared["GoalResolver._fall_seen"] = _fall_seen.size()
+	_fall_seen.clear()
+	return {"checked": 1, "cleared": cleared}
+
 static func harvest_terrains(res: String) -> Array:
 	var out: Array = []
 	for tn in ResourceSystem.REGEN_RATE:   # Dictionary 保持插入序 ⇒ determinism 安全

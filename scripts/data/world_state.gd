@@ -186,6 +186,19 @@ static func record_driver(entity, field: String, delta: float, reason: String, k
 static func clear_driver_ledger() -> void:
 	driver_ledger.clear()
 
+# ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
+#   ★`clear_driver_ledger()` 早就存在，而【只有 debug 床在叫它】——
+#     ★★也就是說「擁有者自己一支清除函式」這個形狀本來就有一個範例，缺的只是接線。
+#   ★`driver_tick_hint` 是 sim_runner 每 tick 覆寫的暫存 ⇒ 回 0。
+#   ★★`driver_ledger_enabled` / `driver_ledger_cap` 是【旗標／設定】⇒ 只印不清。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not driver_ledger.is_empty(): cleared["WorldState.driver_ledger"] = driver_ledger.size()
+	if driver_tick_hint != 0: cleared["WorldState.driver_tick_hint"] = driver_tick_hint
+	clear_driver_ledger()
+	driver_tick_hint = 0
+	return {"checked": 2, "cleared": cleared}
+
 # ★效能 arc B：owner → 自家據點查表（等價替換 `for tile_id in world.tiles` 全圖掃）。
 # 回傳該 team 在 world.tiles 迭代序中的第一個 outpost_level>0 據點 tile，無則 null。
 # 失效即整表重建（見 OwnerOutpostIndex 檔頭：整表重建天然免疫 spec §3 的「後設蓋前者」陷阱）。
