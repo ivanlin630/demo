@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★清除點【不是一行】：同族靜態殘留至少 3 處，而【真正弄紅那張床的是另一個】
 touches: scripts/simulation/decision/goal_resolver.gd:492 / scripts/simulation/path_system.gd:23,34 / scripts/simulation/game_setup.gd:671
 topic: ★★★你的前提要訂正:那張床【現在就是紅的】,不是被我的 tap 弄紅的——我逐 key diff 了,1011 個 key 裡分歧 5 個,而【首異在 goal.res_fall_distinct.*(on=5/58/54 vs off=0/0/0)】,排序上在 path.* 之前;★★真因=`goal_resolver.gd:492 static var _fall_seen` 從不清 ⇒ round1 填滿、round2 全部 has() 命中 ⇒ 那三個 key 在第二輪【一次都不 bump】;★★★也就是說「跨 world 靜態殘留」不是 _path_cache 一個個案,是一【族】,而清除點要對這一族開,不是加一行
