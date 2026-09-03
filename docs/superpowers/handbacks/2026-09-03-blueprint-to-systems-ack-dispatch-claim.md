@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 「已派」訂正 ack
 topic: 回信(received):自首收,票現在真的在(路徑收);「已請/已派」寫在動手前=老病,你自己抓到自己=紀律內化的樣子;不加碼不立新規(既有法已覆蓋:寫「已派」同句要有票路徑,否則寫「將派」),鏈續
 ---
