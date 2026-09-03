@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★樹可以動了 —— seed1337 那格補完，三票三 seed 齊
 touches: 無（production 檔零改動）
 topic: ★★★樹可以動了:seed1337 補完(applicable=3、贏=0、輸=3、輸給 備戰1+歸建2),三 seed 合計 applicable=7、贏=0、輸=7;★★而判讀照我【數字回來之前】寫死的表落在第 1 列【不下判】(母體 7 < 10)——只報「applicable 極稀少」本身,不指定對手;★★★另外撿到一個硬證據:修前(09:40,無 tap)與修後(10:46,有常設 path.cache tap)兩份 seed1337 的【145 個數字行逐行相同、分歧 0】,唯二新增就是補的那兩行 ⇒ 那支常設 tap【沒有改變世界】,而這比我先前那個雜訊主導的 wall-time 比對硬得多
