@@ -69,17 +69,35 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 		Probe.bump("zhagen.mother")
 		var _cs: bool = ctx.can_settle_here
 		var _rs: bool = ctx.settle_resume_site != Vector2i(-1, -1)
+		# ★★★own-camp（2026-09-03）：applicable 從兩支變【三支】OR ⇒ 這個 tap 也要跟著變。
+		#   ★不跟著變的後果不是「少一個數字」，是【它會把 applicable 的情況報成 not_applicable】
+		#   ⇒ ★★驗收會看到「applicable=0」而其實它 applicable 了、只是輸了 —— 兩者結論完全相反。
+		#   ★★★這一格就是今天的血證：第一次跑完，tap 說 applicable=0，而 30/30 其實都 applicable。
+		var _oc: bool = ctx.own_camp_pos != Vector2i(-1, -1)
 		if not _cs: Probe.bump("zhagen.false.can_settle_here")
 		if not _rs: Probe.bump("zhagen.false.no_resume_site")
-		Probe.bump("zhagen.applicable" if (_cs or _rs) else "zhagen.not_applicable")
+		if not _oc: Probe.bump("zhagen.false.no_own_camp")
+		Probe.bump("zhagen.applicable" if (_cs or _rs or _oc) else "zhagen.not_applicable")
 		# ★★★systems 寫在數字之前的那句：「若有人要往【紮根 util 太低】修，
 		#   請先拿出【can_settle_here 為 true 而紮根仍然輸】的數字。」
 		#   ⇒ ★那個數字現在就量 —— ★★免得之後被當成事後解釋；
 		#   ★★★而它也是【可證偽】的：applicable 了却總是輸 ⇒ 那才輪到談 util。
-		if _cs or _rs:
+		if _cs or _rs or _oc:
 			var _w: String = String(scored[0]["opt"]) if not scored.is_empty() else "(空)"
 			Probe.bump("zhagen.appl_won" if _w == "紮根" else "zhagen.appl_lost")
 			if _w != "紮根": Probe.bump("zhagen.appl_lost_to." + _w)
+			# ★★★輸的當下把 per-option util 印出來（同 redispatch.lost_table 的理由：
+			#   決策問題禁靜態斷言，先 dump 真實 per-option util 再開藥）。
+			if _w != "紮根":
+				var _zt: Array = []
+				for _r in scored:
+					_zt.append({"opt": String(_r["opt"]), "u": snappedf(float(_r["u"]), 0.0001)})
+				Probe.bump_sample("zhagen.lost_table", {
+					"tick": state.world.current_tick if state != null else -1,
+					"team": team.team_id, "winner": _w,
+					"branch": ("can_settle" if _cs else ("resume" if _rs else "own_camp")),
+					"table": _zt,
+				}, 200)
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	return scored
 

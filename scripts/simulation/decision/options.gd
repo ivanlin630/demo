@@ -213,7 +213,12 @@ static var REGISTRY: Dictionary = {
 		#   但必然輸給「立刻找吃的」（覓食/買糧吃 survival boost）。⇒ 拿掉絕境門檻，改由 camp_drive 的真值
 		#   （marg × urgency × 選址記憶）自己秤（term 非 gate）。★不抬 camp 分數、不加補償補丁；
 		#   秤輸與否留常設 tap（camp.lost_to.* / camp.won_argmax）看得見。
-			return ctx.has_farmable_tile and not ctx.has_own_outpost,
+		# ★★★own-camp 半B（reviewer 2026-09-03）：★已經有自己的營地就不該再紮一個。
+		#   ★沒有這一條，半A 會【看起來沒效】：人走回家的半路被打斷 → 重秤 → 紮營贏 → 就地重紮
+		#   ⇒ ★★沿途一路重紮，數字跟修前幾乎一樣。
+		#   ★★★與當日稍早 `recamp-candidate-exclusion`（站在自己 L0 營地上不再把該格當紮營候選）
+		#     是【同一家族的延伸】：那條擋「原地重紮」，這條擋「別處重紮」。
+			return ctx.has_farmable_tile and not ctx.has_own_outpost 				and ctx.own_camp_pos == Vector2i(-1, -1),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
 			if ft == Vector2i(-1, -1):
@@ -236,11 +241,21 @@ static var REGISTRY: Dictionary = {
 		#   否則 @80 > PRIO_THREAT(70) 會讓壓境威脅再也打不斷 L1 工期（敵人壓境還在蓋房子）。
 		"priority": TaskArbiter.PRIO_DISPATCH,
 		"terms": [["rooting_drive", "rooting"]],
+		# ★★★own-camp 半A（blueprint 裁 2026-09-03）：★第三支＝【我有自己的營地】。
+		#   ★病是量到的：腿B 30/30 not_applicable（前兩支都 false）⇒ 全部改選紮營原地重紮。
+		#   ★★而「走回去」不是被擋掉，是【不存在於決策空間】—— 加這一支就是把那個念頭放進腦裡。
+		#   ★★★距離不在這裡處理：reviewer 查過 `rooting_drive` + `settle_eta_days` 已把距離折進 util
+		#     ⇒ 「橫跨全圖走回家」會被既有 feasibility 自然壓低，★本刀不加任何距離門檻。
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.can_settle_here or ctx.settle_resume_site != Vector2i(-1, -1),
+			return ctx.can_settle_here or ctx.settle_resume_site != Vector2i(-1, -1) 				or ctx.own_camp_pos != Vector2i(-1, -1),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var _ctx: DecisionContext = DecisionContext.gather(state, team)
-			var _site: Vector2i = _ctx.settle_resume_site if _ctx.settle_resume_site != Vector2i(-1, -1) else team.tile_pos
+			# ★序：未完工地（回頭續建）＞ 腳下可紮（腿A 已驗證 30/30 fire）＞ 自己的營地（走回去）
+			var _site: Vector2i = team.tile_pos
+			if _ctx.settle_resume_site != Vector2i(-1, -1):
+				_site = _ctx.settle_resume_site
+			elif not _ctx.can_settle_here and _ctx.own_camp_pos != Vector2i(-1, -1):
+				_site = _ctx.own_camp_pos   # ★★means-end 全鏈：承諾＝【去那裡做】，不是【站哪做哪】
 			return {"task": TeamData.TASK_BUILD, "target": _site, "settle_site": _site},
 	},
 	"擴點": {

@@ -30,26 +30,38 @@ const GRID: int = 24
 
 var _rows_a: Array = []
 var _rows_b: Array = []
+var _rows_c: Array = []
 
 func _initialize() -> void:
 	print("=== 紮根控制場景床｜每腿母體 %d｜手構世界（非 seed） ===" % N_PER_LEG)
-	Probe.enabled = true; Probe.reset()
+	Probe.enabled = true; Probe.reset()   # ★三腿各自重置；世界則由 arm_and_new() 建（arm 先於 setup）
 	_run_leg(true)
 	var probe_a: Dictionary = Probe.counts.duplicate(true)
+	var samp_a: Dictionary = Probe.samples.duplicate(true)
 	Probe.reset()
 	_run_leg(false)
 	var probe_b: Dictionary = Probe.counts.duplicate(true)
+	var samp_b: Dictionary = Probe.samples.duplicate(true)
 	Probe.enabled = false
-	_report("腿 A：站在自家 L0 營地上 ＋ 已承諾紮根", _rows_a, probe_a, true)
-	_report("腿 B：★不在★自家營地 ＋ 已承諾紮根", _rows_b, probe_b, false)
+	_report("腿 A：站在自家 L0 營地上 ＋ 已承諾紮根", _rows_a, probe_a, samp_a, true)
+	_report("腿 B：★不在★自家營地 ＋ 已承諾紮根", _rows_b, probe_b, samp_b, false)
+	Probe.enabled = true; Probe.reset()
+	_run_leg_c()
+	var probe_c: Dictionary = Probe.counts.duplicate(true)
+	Probe.enabled = false
+	_report_c(probe_c)
+	print(MeasureBedHelper.arm_order_report())   # ★自檢有值而沒人看得到＝等於沒有自檢
 	print("★誠實限：①手構世界（非 organic）②單 tick 決策快照（腿 B 的『走回去』看的是【這一 tick 派了什麼】，")
 	print("   ★★不是【走完全程】）③每隊人格/糧況已打散（見 _mk_team），但仍是【我造的分布】不是世界的分布")
 	quit()
 
 # ── 固定裝置 ──────────────────────────────────────────────────────────
 func _mk_world() -> WorldState:
-	var s := WorldState.new()
-	s.world = WorldData.new()
+	# ★★★走 `MeasureBedHelper.arm_and_new()`（bed-arm 閘的兩支合法入口之一，給【手工組世界】的那支）
+	#   ★不是為了過閘才改：閘要防的是「setup 之後才 arm ⇒ 那段世界的 tap 是盲的」，
+	#   ★★而這張床本來就要靠 zhagen tap 的計數下判斷 ⇒ arm 早一步是它自己的需要。
+	#   ★★★而【不走白名單】是刻意的：白名單的數字應該單向下降，新床不該把它推高。
+	var s: WorldState = MeasureBedHelper.arm_and_new()
 	s.world.current_tick = 100
 	for x in range(GRID):
 		for y in range(GRID):
@@ -107,6 +119,11 @@ func _mk_camp(s: WorldState, pos: Vector2i, team_id: int) -> HexTileData:
 	tile.construction_team_id = -1
 	tile.camp_team_id = team_id
 	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
+	# ★★★直接寫 camp_team_id ＝【繞過 chokepoint】⇒ 姊妹索引不會知道 ⇒ 後面每一隊都查不到自己的營地。
+	#   ★血證：第一版漏了這一行，30 隊裡只有第 1 隊拿得到 own_camp（索引在它那次查詢時建好就凍住了），
+	#   ★★其餘 29 隊被我新加的『營地沒了就解承諾』誤判成營地消失 ⇒ 全部退回紮營
+	#   ⇒ ★★★看起來像【修法沒生效】，其實是【床自己繞過了自己剛立的失效點】。
+	OwnerCampIndex.invalidate()
 	return tile
 
 # ── 兩腿 ──────────────────────────────────────────────────────────────
@@ -134,18 +151,81 @@ func _run_leg(on_camp: bool) -> void:
 			"corvee": team.corvee_site,
 		})
 
+# ── 腿 C：走到一半，營地被衰敗清掉 ⇒ ★必須【解承諾重秤】，不得卡在移動中 ──
+#   ★這一腿問的不是「會不會走回去」（腿B 已答），是【對象消失之後會不會卡住】。
+#   ★★走的必須是既有出口 `survival_committed_option = ""`（★★★禁死旗）。
+func _run_leg_c() -> void:
+	var s: WorldState = _mk_world()
+	var ai := FactionAISystem.new()
+	for k in range(N_PER_LEG):
+		var tid: int = 3000 + k
+		var camp_pos := Vector2i(2 + (k % 10) * 2, 2 + int(k / 10) * 2)
+		var team: TeamData = _mk_team(s, tid, camp_pos + Vector2i(2, 0))
+		_mk_camp(s, camp_pos, tid)
+		team.decision_eval_next_tick = 0
+		ai._decide_unified(s, team)                       # ①先讓它承諾＋出發
+		var t1_task: String = team.current_task
+		var t1_move: Vector2i = team.move_target
+		var t1_committed: String = team.survival_committed_option
+		# ②營地在半路被衰敗清掉（照 harvest_system 的做法：camp_level=0＋camp_team_id=-1＋失效索引）
+		var camp: HexTileData = s.world.tiles[camp_pos.x * 1000 + camp_pos.y]
+		camp.camp_level = 0
+		camp.camp_ticks_left = 0
+		camp.camp_team_id = -1
+		OwnerCampIndex.invalidate()
+		s.world.current_tick += 1
+		team.decision_eval_next_tick = 0
+		ai._decide_unified(s, team)                       # ③重評
+		_rows_c.append({
+			"tid": tid, "camp": camp_pos,
+			"t1_task": t1_task, "t1_move": t1_move, "t1_committed": t1_committed,
+			"t2_task": team.current_task, "t2_move": team.move_target,
+			"t2_committed": team.survival_committed_option,
+			"t2_option": team.current_option,
+		})
+
+func _report_c(pc: Dictionary) -> void:
+	print("")
+	print("═══ 腿 C：出發之後營地被衰敗清掉 ⇒ 必須解承諾重秤 ═══")
+	print("  母體 = %d" % _rows_c.size())
+	var t1_walk: int = 0
+	var released: int = 0
+	var still_committed_zhagen: int = 0
+	var stuck_moving: int = 0
+	var by_t2: Dictionary = {}
+	for r in _rows_c:
+		if r["t1_move"] == r["camp"]: t1_walk += 1
+		if String(r["t2_committed"]) == "": released += 1
+		if String(r["t2_committed"]) == "紮根": still_committed_zhagen += 1
+		if r["t2_move"] == r["camp"]: stuck_moving += 1
+		var k2: String = String(r["t2_task"]) if String(r["t2_task"]) != "" else "(空)"
+		by_t2[k2] = int(by_t2.get(k2, 0)) + 1
+	print("  ①第一步真的出發（t1 move_target == 舊營地）= %d / %d" % [t1_walk, _rows_c.size()])
+	print("  ★②營地消失後【解承諾】（committed 變空或改別的）= %d / %d（仍是紮根 = %d）"
+		% [_rows_c.size() - still_committed_zhagen, _rows_c.size(), still_committed_zhagen])
+	print("     其中走既有出口（committed == \"\"）= %d｜tap survival.own_camp_lost_release = %d"
+		% [released, int(pc.get("survival.own_camp_lost_release", 0))])
+	print("  ★★③【卡在移動中】（t2 仍指向已消失的營地）= %d / %d ★★★這一格必須是 0"
+		% [stuck_moving, _rows_c.size()])
+	print("  t2 current_task 分布：%s" % _fmt(by_t2))
+	for i in range(mini(5, _rows_c.size())):
+		var r: Dictionary = _rows_c[i]
+		print("     t%d t1[task=%s move=%s com=%s] → t2[task=%s move=%s com=%s opt=%s]"
+			% [int(r["tid"]), String(r["t1_task"]), str(r["t1_move"]), String(r["t1_committed"]),
+				String(r["t2_task"]), str(r["t2_move"]), String(r["t2_committed"]), String(r["t2_option"])])
+
 func _rec(on_camp: bool, row: Dictionary) -> void:
 	if on_camp: _rows_a.append(row)
 	else: _rows_b.append(row)
 
 # ── 報告 ──────────────────────────────────────────────────────────────
-func _report(title: String, rows: Array, pc: Dictionary, is_leg_a: bool) -> void:
+func _report(title: String, rows: Array, pc: Dictionary, ps: Dictionary, is_leg_a: bool) -> void:
 	print("")
 	print("═══ %s ═══" % title)
 	print("  母體（本腿建的隊數）= %d" % rows.size())
 	print("  ── zhagen tap（引擎自己的計數，與上面的母體對帳）──")
 	for k in ["zhagen.mother", "zhagen.applicable", "zhagen.not_applicable",
-			"zhagen.false.can_settle_here", "zhagen.false.no_resume_site",
+			"zhagen.false.can_settle_here", "zhagen.false.no_resume_site", "zhagen.false.no_own_camp",
 			"zhagen.appl_won", "zhagen.appl_lost"]:
 		print("     %-32s = %d" % [k, int(pc.get(k, 0))])
 	var lost_to: Array = []
@@ -184,6 +264,19 @@ func _report(title: String, rows: Array, pc: Dictionary, is_leg_a: bool) -> void
 		print("     ②不走回去、改做別的 = %d（見 current_option 分布）" % (rows.size() - moved_home - idle_n))
 		print("     ③不走回去、也不做別的（IDLE）= %d ★又一個 IDLE latch 的話會出現在這裡" % idle_n)
 		print("     ④若三者對不起來 ⇒ 原樣回報形狀，不歸類")
+	# ★輸的時候把 per-option util 印出來（★禁靜態斷言：先看真實分數再談修法）
+	var lt: Array = ps.get("zhagen.lost_table", [])
+	if lt is Array and not lt.is_empty():
+		print("  ── ★紮根 applicable 卻輸掉時的 per-option util（前 3 筆，樣本 %d）──" % lt.size())
+		for i in range(mini(3, lt.size())):
+			var e: Dictionary = lt[i]
+			var tbl: Array = e.get("table", [])
+			var top: Array = []
+			for j in range(mini(6, tbl.size())):
+				top.append("%s=%.4f" % [String(tbl[j]["opt"]), float(tbl[j]["u"])])
+			print("     t%d 經由[%s]支 applicable，贏家=%s｜%s"
+				% [int(e.get("team", -1)), String(e.get("branch", "?")), String(e.get("winner", "?")),
+					" ".join(PackedStringArray(top))])
 	# 前 5 列原始資料（★不歸類，讓人自己看形狀）
 	print("  ── 前 5 列原始（★不解讀）──")
 	for i in range(mini(5, rows.size())):
