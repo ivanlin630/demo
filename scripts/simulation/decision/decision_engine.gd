@@ -72,6 +72,14 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 		if not _cs: Probe.bump("zhagen.false.can_settle_here")
 		if not _rs: Probe.bump("zhagen.false.no_resume_site")
 		Probe.bump("zhagen.applicable" if (_cs or _rs) else "zhagen.not_applicable")
+		# ★★★systems 寫在數字之前的那句：「若有人要往【紮根 util 太低】修，
+		#   請先拿出【can_settle_here 為 true 而紮根仍然輸】的數字。」
+		#   ⇒ ★那個數字現在就量 —— ★★免得之後被當成事後解釋；
+		#   ★★★而它也是【可證偽】的：applicable 了却總是輸 ⇒ 那才輪到談 util。
+		if _cs or _rs:
+			var _w: String = String(scored[0]["opt"]) if not scored.is_empty() else "(空)"
+			Probe.bump("zhagen.appl_won" if _w == "紮根" else "zhagen.appl_lost")
+			if _w != "紮根": Probe.bump("zhagen.appl_lost_to." + _w)
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	return scored
 

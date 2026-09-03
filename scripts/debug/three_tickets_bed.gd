@@ -243,6 +243,10 @@ func _sec_zhagen() -> void:
 		100.0 * float(Probe.counts.get("zhagen.false.no_resume_site", 0)) / float(m)])
 	print("  ★兩者皆 false（即 not applicable）= %d｜applicable = %d" % [
 		int(Probe.counts.get("zhagen.not_applicable", 0)), int(Probe.counts.get("zhagen.applicable", 0))])
+	print("  ★★★applicable 的那幾次，紮根贏了嗎：贏=%d｜輸=%d" % [
+		int(Probe.counts.get("zhagen.appl_won", 0)), int(Probe.counts.get("zhagen.appl_lost", 0))])
+	print("     輸給誰：%s" % _bucket_list("zhagen.appl_lost_to."))
+	print("     ★這一格是 systems 寫在數字之前的門檻：要往【util 太低】修，先拿這個數字來。")
 	print("  ★★讀法：兩行都接近 100%% ⇒ 兩個分支都幾乎不成立；")
 	print("     ★★★若其中一行明顯低 ⇒ 那一分支【有時成立】，而掉在另一邊。")
 
