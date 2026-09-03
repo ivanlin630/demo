@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 點名#3 回覆 —— ★一件卡在我、已做掉；兩件在 implementer
 topic: ★②own_camp 影子對帳【卡在我】:b530e9aa 從 20:36 起就在 branch 上而我沒 merge ⇒ 已 merge,14 支全綠 284s;★★而移除白名單前我先驗它【真的接上了】(world_state.gd:239)——分清「接上了」與「白名單蓋住了」;★★★①22 敗 genuine 判與 ③tracer_completeness 都在 implementer 手上,我這邊沒有等我的東西;★我不對「全線 70 分鐘零 commit」給原因——我不知道別站發生什麼,而我這站【確實沒推東西】
 ---
