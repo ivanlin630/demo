@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 一行 revert —— ★我實測了，成立
 touches: scripts/simulation/reaction_system.gd, scripts/simulation/resource_bank.gd, scripts/data/tile_data.gd
 topic: ★★★實測:只把 `reaction_system.gd:267` 換回 `t.food_flow_avg / need` ⇒ assert 12 → ★7（＝main 的數）、parse error 0、五條生育全消失 ⇒ 你的一行 revert【夠】,我的「六個一起退」是錯的;★★而我查符號時發現你的歸因有一處要訂正:`idle_employ_next_tick` 是 `eb263529` 引入的【不是 dcef1f63】,而那讓你的結論【更強】不是更弱;★★★真正的機制是「檔案層 revert 會連帶丟掉【其他 commit 在那些檔上的工作】」
