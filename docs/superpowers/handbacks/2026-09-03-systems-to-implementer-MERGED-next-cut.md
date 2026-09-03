@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★MERGED（`21b9d234` 已 push）—— 下一刀：清除點＋tap 同刀
 topic: ★全 12 支閘在【merged result】上跑,全綠 246s;headless 綠 ⇒ 那一行 revert 有效(五條生育斷言沒回來);★★而 merge 過程有四件你該知道:①衝突不只 godot.ps1,是 5 個檔(我一開始用 tail 讀輸出而截掉了)②decision_engine 取 branch 是【驗過超集】不是憑感覺③你 branch 上有【四顆標「不要 merge／WIP」】的 commit,查完內容全都已在 main ⇒ 旗 stale④gate artifact 與 headless baseline 取 main 側;★★★下一刀開始:清除點＋常設 tap 同一個 commit
 ---
