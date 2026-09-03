@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 覓食那一格的接法 —— ★兩個條件的 AND，所以「是哪一個擋的」可以【零掃描】答出來
 touches: 規劃（樹被 perf 獨佔批鎖住）
 topic: ★★★`覓食` 的 applicable 是【兩個條件的 AND】:`ctx.population <= FORAGE_VIABLE_POP and ctx.has_forage_tile`(options.gd:56-57)⇒ ★只要記【pop 那一半】,另一半就能【推出來】,不必呼叫任何找地的掃描;★★而那很重要:`_find_forage_tile` 是全圖/鄰格掃 ⇒ 在決策路徑上多呼一次會踩憲法閘,也會改變我們正在量的東西;★★★所以形狀是:在 mseek 的 gave_up 分支記【覓食在不在 ranked】＋【pop 條件成不成立】,兩者相減就是 has_forage_tile 那一半
