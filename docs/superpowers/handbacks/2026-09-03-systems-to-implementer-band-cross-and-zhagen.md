@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩張後續 —— ①band × filter 交叉（你自己指的那一刀）②紮根 applicable 條件級 tap
 topic: ★你的可證偽格漂亮地打死了我的假說,而你自己標出的缺口就是下一張票:世界整體 33~38% 找得到施主而最深帶 0.0~7.2%,成因卡在 band×filter 沒交叉;★★第二張＝在【紮根】那一個的 applicable 裡接條件級 tap,一樣禁猜;★★★兩張同輪跑
 ---
