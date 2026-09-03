@@ -37,6 +37,18 @@ var _npc_ai:    NpcAiSystem
 static var _mf_tick: int = -1
 static var _mf_seq: Dictionary = {}
 
+# ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
+#   ★`_mf_seq` 本來就有「tick 一變就整包清」的內建清除，★★但那個判準是 `cur_tick != _mf_tick`
+#     ⇒ 跨 run 時新世界的 tick 從 0 重來，而 `_mf_tick` 停在上一輪的最後一個 tick ——
+#     ★★★湊巧相等的機率不是 0（上一輪結束在 tick 0 的床），所以不靠它，直接回初值。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _mf_seq.is_empty(): cleared["InteractionSystem._mf_seq"] = _mf_seq.size()
+	if _mf_tick != -1: cleared["InteractionSystem._mf_tick"] = _mf_tick
+	_mf_seq.clear()
+	_mf_tick = -1
+	return {"checked": 2, "cleared": cleared}
+
 # ★回傳「這是本 tick 內第幾個碰到 `oid` 的」（1-based）。★同 tick 第一個回 1。
 static func _mf_next_seq(cur_tick: int, oid: int) -> int:
 	if cur_tick != _mf_tick:

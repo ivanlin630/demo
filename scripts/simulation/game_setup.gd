@@ -37,6 +37,10 @@ const FLOOR_RETRY_MAX: int = 8             # §3 地板 retry 上限（同 rng �
 const FLOOR_CONNECT_MAX: int = 12          # §3② 領土非孤島軟上界（同 faction outpost 最近距離 hex）
 
 static func setup(state: WorldState, config: Dictionary) -> void:
+	# ★★★跨 run 靜態殘留的【唯一呼叫點】（systems 裁定 2026-09-03；本體在 cross_run_reset.gd）。
+	#   ★放在 setup 最前面：晚一步就會清掉這一輪剛填進去的東西。
+	#   ★★為什麼是「一個呼叫點、各系統自己清」而不是別的形狀 —— 見 cross_run_reset.gd 檔頭。
+	CrossRunReset.run()
 	# ★★★arm 順序自檢（bed-arm-helper §5①）：世界被建的這一刻，回頭問「Probe armed 了嗎」。
 	#   ★方向是反的（不是 arm 去問世界）—— 因為 arm 當下世界還不存在，問不到。
 	#   ★★而這裡【不能】包進 `if Probe.enabled`：arm 太晚時 enabled 正好是 false

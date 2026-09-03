@@ -80,8 +80,13 @@ func _run_warring(seed_val: int, ticks: int, specimen: Array, tracer_on: bool) -
 	var pk: Array = Probe.counts.keys(); pk.sort()
 	var parr: Array = []
 	for k in pk: parr.append([k, int(Probe.counts[k])])
-	# ★★★只印【不改斷言】（systems 要的是這兩輪自己的命中數，不是臨時床的）：
-	#   ★它回答「共享快取有沒有遮蔽差異」—— ★★命中 0 也能解除（沒命中就不可能遮）。
+	# ★★★只印【不改斷言】。兩行各答一個問題，缺一不可：
+	#   ①`cross-run:` ＝【這一輪建世界時清掉了什麼】——★`checked` 必須跟 `cleared` 一起印，
+	#     否則 `cleared=none` 分不出「真的乾淨」與「reset 根本沒跑」。
+	#     ★★`cleared` 非空【不是紅】：它是清除點在做事的陽性證據；恆為 none 才要懷疑接線。
+	#     ★★★盲區：它只看得見【已註冊進 CrossRunReset 的】——「有沒有東西沒註冊」歸靜態閘，不歸這行。
+	#   ②`path 快取` ＝ 跨輪命中的體溫計（修前實測跨輪 72 ⇒ ★修後兩輪應【逐數相同】）。
+	print("   " + CrossRunReset.report_line())
 	print("   [diag] 本輪 path 快取：hit=%d miss=%d（tracer_on=%s）" % [
 		int(Probe.counts.get("path.cache_hit", 0)), int(Probe.counts.get("path.cache_miss", 0)), str(tracer_on)])
 	var sig := _world_sig(state) + "|PROBE|" + JSON.stringify(parr)

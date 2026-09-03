@@ -36,6 +36,20 @@ static var _sssp_cache: Dictionary = {}   # world_iid → { from_key → { to_ke
 static func clear_sssp() -> void:
 	_sssp_cache.clear()
 
+# ★★★跨 run 清除（CrossRunReset 單一呼叫點；見 cross_run_reset.gd 檔頭）。
+#   ★`_path_cache` 的失效鍵是【tick 值】 ⇒ 跨 run 時 tick 從 0 重來，第二輪 tick 0 會吃到
+#     第一輪 tick 0 的舊路徑。實測跨世界命中 72（同 seed／300 tick／warring）。
+#   ★★`_sssp_cache` 以 world instance id 分層，【看起來】自帶隔離 —— 而我們沒有去驗
+#     「Godot 的 instance id 不會被回收」：★★★證那件事比【直接清掉】貴得多，而且證不完。
+#     ⇒ 一併清，不是因為它壞了，是因為【不必依賴不確定的隔離性】（systems 裁 2026-09-03）。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _path_cache.is_empty(): cleared["PathSystem._path_cache"] = _path_cache.size()
+	if not _sssp_cache.is_empty(): cleared["PathSystem._sssp_cache"] = _sssp_cache.size()
+	_path_cache.clear()
+	clear_sssp()   # ★順手接上這支【零 caller】的函式（它一直在，只是沒人叫）
+	return {"checked": 2, "cleared": cleared}
+
 # from→to 最短 cost；INF = 不可達（同 A* path empty 條件）。
 static func catch_cost(state: WorldState, from: Vector2i, to: Vector2i) -> float:
 	if from == to:

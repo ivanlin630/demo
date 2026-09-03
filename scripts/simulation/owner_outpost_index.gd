@@ -36,6 +36,21 @@ static func shadow_reset() -> void:
 	shadow_fails = 0
 	legacy_visits = 0
 
+# ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
+#   ★★★`epoch` 【故意不歸零】——它是【單調版號】，而 WorldState 各自記 `_oo_epoch` 跟它比：
+#     若歸零成 1，一個 `_oo_epoch == 1` 而中間已被 invalidate 過的舊 state 會誤判「我的表還新」
+#     ⇒ ★靜默拿到 stale 索引（比殘留本身更糟：它會回錯的據點而不是回慢）。
+#   ⇒ ★★所以這裡是【往前推一格】（invalidate），不是【歸零】：
+#     單調性保住，新舊 state 都必定重建一次。
+#   ★shadow_* 是【計數器】⇒ 清；`shadow` 本身是【旗標】⇒ 只印不清。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if shadow_checks != 0 or shadow_fails != 0 or legacy_visits != 0:
+		cleared["OwnerOutpostIndex.shadow_counters"] = "%d/%d/%d" % [shadow_checks, shadow_fails, legacy_visits]
+	shadow_reset()
+	invalidate()   # ★推版號而非歸零（理由見上）
+	return {"checked": 4, "cleared": cleared}
+
 # 影子對照：expect（舊全圖掃結果）vs got（索引結果）不等即印 team/tile 並記 FAIL。
 static func shadow_check(tag: String, team_id: int, expect: Vector2i, got: Vector2i) -> void:
 	shadow_checks += 1

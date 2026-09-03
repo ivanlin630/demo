@@ -189,6 +189,19 @@ static var SYSTEMS: Array = [
 #     模範最不會被檢查，因為它是拿來檢查別人的。
 static var _registry_assumptions_checked: bool = false
 
+# ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
+#   ★兩個都是【一次性 latch】（「已經檢查過／已經警告過」）⇒ 殘留的效果是
+#     ★★同一個 process 的第二個世界【拿不到那個檢查與那個警告】——
+#     ★★★而少一個警告是【靜默】的：它看起來就跟「沒有問題」一模一樣。
+#   ★沒有人會刻意預設它們為 true ⇒ 屬累積型，清。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if _registry_assumptions_checked: cleared["SimRunner._registry_assumptions_checked"] = true
+	if _observer_guard_warned: cleared["SimRunner._observer_guard_warned"] = true
+	_registry_assumptions_checked = false
+	_observer_guard_warned = false
+	return {"checked": 2, "cleared": cleared}
+
 static func check_registry_assumptions() -> void:
 	if _registry_assumptions_checked:
 		return

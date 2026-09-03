@@ -786,6 +786,25 @@ static var _mk_path: String = "other"
 static var _mk_verify: bool = false
 static var _mk_verify_rows: Array = []
 
+# ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
+#   ★清的三個都是【累積型】：`_a2b_remote_tribute_payers`（payer id 對帳集合）、
+#     `_fai_ph`（相位耗時累加器）、`_mk_verify_rows`（稽核列）。
+#   ★★`_mk_path` 是【每次呼叫覆寫】的路徑標記，回預設 "other" 而不是留上一輪的值。
+#   ★★★而 `_mk_verify` / `trace_infra` 是【旗標】⇒ 只印不清（它們可能是這一輪故意設的，
+#     床先設旗標再建世界的話，清掉＝殺掉床自己的設定）。名單見 cross_run_reset.gd。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _a2b_remote_tribute_payers.is_empty():
+		cleared["FactionAISystem._a2b_remote_tribute_payers"] = _a2b_remote_tribute_payers.size()
+	if not _fai_ph.is_empty(): cleared["FactionAISystem._fai_ph"] = _fai_ph.size()
+	if not _mk_verify_rows.is_empty(): cleared["FactionAISystem._mk_verify_rows"] = _mk_verify_rows.size()
+	if _mk_path != "other": cleared["FactionAISystem._mk_path"] = _mk_path
+	_a2b_remote_tribute_payers.clear()
+	_fai_ph.clear()
+	_mk_verify_rows.clear()
+	_mk_path = "other"
+	return {"checked": 4, "cleared": cleared}
+
 func _fai_pht(name: String, t0: int) -> int:
 	var now: int = Time.get_ticks_usec()
 	_fai_ph[name] = int(_fai_ph.get(name, 0)) + (now - t0)
