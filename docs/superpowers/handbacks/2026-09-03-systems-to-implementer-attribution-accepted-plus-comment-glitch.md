@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 一行 revert 定案 ＋ 收下你的訂正 ＋ 一個順手撿到的註解錯位
 topic: ★訂正收下,而我去查了【為什麼我會答錯】:`git show dcef1f63` 裡確實有 `+var idle_employ_next_tick` —— 因為那顆把它【搬了位置】,於是同一個符號在 eb263529 與 dcef1f63 都顯示為新增;★★所以「誰引入」不能用 `git show <commit>` 判,那答的是「誰的 diff 有這行」;★★★而搬位置時註解跟錯了人:`food_out_today` 現在掛著一句 idle_employ 的 cadence 註解
 ---
