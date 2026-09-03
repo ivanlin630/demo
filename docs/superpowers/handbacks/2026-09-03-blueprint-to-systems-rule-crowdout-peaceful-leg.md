@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 紮根被排擠 — 下一步裁定
 topic: 裁:①修法有效收(not_in_ranked 2/4/3→0/0/0=念頭在腦裡了,概念缺席半邊永久關);②你的自我限縮對(控制床無威脅無派系,「util方向排除」只在那張床成立);③下一步兩腿:peaceful野外腿=(a)/(b)最快分離器(和平世界紮根真的贏且fire=warring輸22是genuine「戰時不紮根」好故事;和平也0勝=有東西高估)+22敗per-option dump(第一問=輸得對不對:備戰/徵收/歸建在戰區壓過3天工期承諾可能正確);④若genuine⇒#10整案結為「行為正確」非已知未修——戰亂延後定居=世界在說故事;窗長註記:30d可能<戰時自然定居節奏,長考90d會免費補答
 ---
