@@ -464,6 +464,36 @@ func _sec_b_grade() -> void:
 		#   ★而【比例本身仍然有效】：分子與分母來自【同一個快照】，窗一樣長
 		print("     ★★★誠實限：累積窗【未知】（不是一個 tick）——而分子分母同窗 ⇒ 比例有效、絕對值不可跨跑比")
 	print("     ★exclusive=%s（★★由跑的人明示；沒傳就是 unknown；★★★自動偵測只能反駁不能確認）" % _exclusive)
+	# ★★★格一／格二【獨立印】（2026-09-04）：它們原本寫在 `#3 母體 > 0` 的分支裡
+	#   ⇒ ★#3 母體 0 的那一輪，這兩節【整段消失】—— 而它們有【自己的母體】，跟 #3 是否有樣本無關。
+	#   ★★同型今天已經踩過一次（camp churn 掛在 `zhagen.mother == 0` 的 early-return 之後）
+	#   ⇒ ★★★所以這裡無條件印。
+	# ★★★格一：覓食 applicable 卻沒贏時的【餓深分帶】（★沿用既有 ge5／2to5／0.5to2／deep）
+	var lb: Array = []
+	var lb_tot: int = 0
+	for b2 in ["ge5", "2to5", "0.5to2", "deep"]:
+		var v2: int = int(Probe.counts.get("mseek.forage.lost.band." + b2, 0))
+		lb_tot += v2
+		lb.append("%s=%d" % [b2, v2])
+	var lt_teams: int = 0
+	for k4 in Probe.counts.keys():
+		if String(k4).begins_with("mseek.forage.lost.team."): lt_teams += 1
+	print("     ── ★格一：覓食 applicable 卻沒贏｜餓深分帶（母體 %d，相異隊 %d）──" % [lb_tot, lt_teams])
+	print("        %s" % " ｜ ".join(PackedStringArray(lb)))
+	print("        ★判讀：淺帶輸給義務 ⇒ genuine 戰時紀律；★★deep 仍輸 ⇒ 餓死邊緣還在操練＝病；")
+	print("           ★★★deep 母體 0 ⇒ 那格【答不了】，不是「深帶沒問題」")
+	# ★★★格二：輸掉之後【真的怎麼了】（★定義寫在 population_system 的註解裡）
+	var oc: Array = []
+	var oc_tot: int = 0
+	for o2 in ["ate", "starved", "neither", "gone"]:
+		var v3: int = int(Probe.counts.get("mseek.forage.outcome." + o2, 0))
+		oc_tot += v3
+		oc.append("%s=%d" % [o2, v3])
+	print("     ── ★★格二：輸掉之後的實際後果（母體 %d｜N＝DECISION_CADENCE %d tick）──"
+		% [oc_tot, FactionAISystem.DECISION_CADENCE])
+	print("        %s" % " ｜ ".join(PackedStringArray(oc)))
+	print("        ★判讀：starved 多 ⇒ 輸掉【真的有代價】；★★ate 多 ⇒ 經 crisis 那條路吃到了 ⇒ 輸 rank 沒代價")
+
 
 func _sec_churn() -> void:
 	print("═══ ★camp churn（觀察項，非驗收）═══")

@@ -18,6 +18,32 @@ func check_overflow(state: WorldState) -> void:
 			if t2.minor_population > t2.population:
 				Probe.bump("minor_exceeds_pop")
 				Probe.bump("minor_exceeds_pop.team.%d" % tid2)
+	# ★★★格二結算（#3：覓食輸掉之後【真的怎麼了】）——★blueprint 的關鍵一問：
+	#   輸掉每一票【有沒有代價】。★★定義寫死在先（免得事後挑）：
+	#     `ate`     ＝ N 天內 `effective_food` 比當時【回升】（★經 crisis 那條路真的吃到了 ⇒ 輸 rank 沒代價）
+	#     `starved` ＝ 期間 `population` 下降 或 `famine_days` 增加（★★輸掉真的有代價）
+	#     `neither` ＝ 活著但沒吃到（★★★兩者之間，原樣報）
+	#   ★N ＝ 既有 `DECISION_CADENCE`，不新增常數；★★隊沒了 ⇒ 記 `gone`（那也是後果）
+	if Probe.enabled and not FactionAISystem._forage_watch.is_empty():
+		var _due: Array = []
+		for _wid in FactionAISystem._forage_watch:
+			var _w: Dictionary = FactionAISystem._forage_watch[_wid]
+			if state.world.current_tick - int(_w.get("tick", 0)) >= FactionAISystem.DECISION_CADENCE:
+				_due.append(_wid)
+		for _wid2 in _due:
+			var _w2: Dictionary = FactionAISystem._forage_watch[_wid2]
+			var _t3: TeamData = state.teams.get(_wid2)
+			if _t3 == null:
+				Probe.bump("mseek.forage.outcome.gone")
+			else:
+				var _now_food: float = ResourceSystem.effective_food(state, _t3)
+				if _t3.population < int(_w2.get("pop", 0)) or _t3.famine_days > float(_w2.get("famine", 0.0)):
+					Probe.bump("mseek.forage.outcome.starved")
+				elif _now_food > float(_w2.get("food", 0.0)):
+					Probe.bump("mseek.forage.outcome.ate")
+				else:
+					Probe.bump("mseek.forage.outcome.neither")
+			FactionAISystem._forage_watch.erase(_wid2)
 	for tid in state.teams.keys():
 		check_overflow_for_team(state, tid)
 
