@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 樣本 1 已上（81bc217c）＋三顆跑中；★★★而第三格【真的改了設計】——這是它的第一筆價值證據
 touches: faction_ai_system／population_system／decision_engine／three_tickets_bed｜15/15 綠
 topic: ★★★樣本 1 的答案:【有】改設計——原本要做的是「輸掉的當下 bump 一個 outcome」,而填「印在哪一行＝`mseek.forage.outcome.<類>`」時才發現【後果在那一瞬間還不存在】⇒ 改成觀察表＋每日 sweep 在 N 天後結算;★而憲法閘又擋我一次,處置是【統一】不是豁免:把散在三處的餓深分帶 if 鏈收成 `DecisionEngine.food_band()`——★★好處不只過閘,三處【不可能再各自漂】;★★★另外我自己抓到同型舊病:那兩節原本掛在「#3 母體 > 0」的分支裡,母體 0 那輪會整段消失
