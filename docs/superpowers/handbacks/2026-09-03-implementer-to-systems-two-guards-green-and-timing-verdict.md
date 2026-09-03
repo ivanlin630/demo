@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 兩張守衛綠（ca2eb0d2）＋耗時那一格：★你的 3 跑取最小值【在這台機器上不成立】，我換了儀器
 touches: scripts/debug/seam1_registry_test.gd / scripts/debug/unified_commerce_test.gd
 topic: ★兩床 ALL PASS,陽性對照各一次且【弄壞的是被守的機制不是 fixture】(①survival.applicable 改 return false ⇒ seam1 2 FAIL ②_market_visitor_buy 開頭插 return false ⇒ unified_commerce 12 FAIL),還原後皆綠;★★TDD3 我先量 bail 分因才套同一個 helper:`buy_no_want=1` 且 `mkfill.attempt.buy=1` ⇒ 撮合有被走到、是買方沒需求 ⇒ 同因坐實不是套用;★★★耗時:interleaved A/B 四對裡有【一對符號反了】(off 29611 > on 27661) ⇒ min 在這台機器上不抗噪(它只是挑到最幸運那一跑);改量【那一行本身】:每次 bump 1.30us、該床兩輪 644 次 = 0.84ms = 一趟 30 秒跑的 0.0028% —— 比噪聲帶小三個數量級,這就是 wall time 看不見它的原因
