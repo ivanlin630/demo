@@ -3097,10 +3097,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 					#     ⇒ ★★★不新開一套，否則跟先前的量比不起來。
 					if _forage_in:
 						var _fd2: float = ResourceSystem.effective_food(state, team) 							/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
-						var _bd2: String = "deep"
-						if _fd2 >= 5.0: _bd2 = "ge5"
-						elif _fd2 >= 2.0: _bd2 = "2to5"
-						elif _fd2 >= 0.5: _bd2 = "0.5to2"
+						var _bd2: String = DecisionEngine.food_band(_fd2)
 						Probe.bump("mseek.forage.lost.band." + _bd2)
 						Probe.bump("mseek.forage.lost.team." + str(team.team_id))
 						# ★★格二的觀察起點：記下當下狀態，由每日 sweep 在 N 天後判後果
@@ -6685,10 +6682,7 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 	var _aid_band: String = ""
 	if _aid_probe:
 		var _fd: float = ResourceSystem.effective_food(state, team) / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
-		_aid_band = "deep"
-		if _fd >= 5.0: _aid_band = "ge5"
-		elif _fd >= 2.0: _aid_band = "2to5"
-		elif _fd >= 0.5: _aid_band = "0.5to2"
+		_aid_band = DecisionEngine.food_band(_fd)
 		Probe.bump("aid.calls")
 		Probe.bump("aid.b." + _aid_band + ".calls")
 	for tid in state.team_discovered.get(team.team_id, []):
