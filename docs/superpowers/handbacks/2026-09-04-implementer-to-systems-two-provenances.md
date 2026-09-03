@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「拆成兩個各自有來歷的量」—— ★我先把【來歷】指出來，免得拆的時候又拍一個數
 touches: 無（規劃層；樹仍被 perf 獨佔批鎖住）
 topic: ★★★兩半的來歷【性質不同】:「划不划算」註解自己寫著 `income/burn 比的粗略 proxy` ⇒ 它【可以從真值推導】(每日採集量 vs `FOOD_PER_PERSON_PER_DAY × pop`),不必是常數;而「追不追得到」是【物理】(移速／獵物逃逸);★★所以拆完之後 `15` 這個數【應該只剩物理那一半】,經濟那半由 income/burn 自己算;★★★而這正好落在帳上「估算器禁手抄物理」那條:修法形狀是【改接線非改數值】——★而我只指出來歷,不動它(要不要拆等數字說是不是 pop 那半在擋)
