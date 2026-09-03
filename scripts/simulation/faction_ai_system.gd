@@ -5809,6 +5809,7 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	if Probe.enabled: Probe.bump("camp.built")   # ★gate3：紮營次數（要與 L0→L1 晉級率、L0 廢棄率一起看）
 	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
 	tile.camp_team_id = team.team_id   # ★§4c：記起建隊（decay 時才知道「這是誰的失敗」；完工/消失時清）
+	OwnerCampIndex.invalidate()        # ★own-camp chokepoint①（寫）：新營地誕生 ⇒ 姊妹索引失效
 	if Probe.enabled: Probe.bump("settlement.camp_l0")   # L0 紮營 fire tap（觀測性）
 	print("[CampL0] Team%d 紮營 L0 @(%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 	return true
@@ -5935,6 +5936,14 @@ func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> v
 		if team.tile_pos != site:
 			team.move_target = site   # 走回工地（_tick_construction 需站上才推進）
 		if Probe.enabled: Probe.bump("settlement.l0_to_l1_resume")
+		return
+	# ★★★own-camp 半A 的執行腿：站點不是工地時【先走過去，不在遠端開工】。
+	#   ★遠端開工＝把 `construction_*` 寫在一個沒人站著的格子上 ⇒ 正是 §4a 的 zombie 工地那個病。
+	#   ★★走回去用的是既有欄位 `move_target`（同上面 resume 那一支的做法），★★★不新增旗標。
+	#   ★到了之後下一次評估自然落回腿A 已驗證的那條（can_settle_here → 30/30 fire）。
+	if site != team.tile_pos and tile.camp_level == 1 and tile.outpost_level == 0 			and tile.construction_team_id == -1 and tile.camp_team_id == team.team_id:
+		team.move_target = site
+		if Probe.enabled: Probe.bump("settlement.walk_to_own_camp")
 		return
 	if tile.camp_level != 1 or tile.outpost_level > 0 or tile.construction_team_id != -1:
 		# ★驗收#1（l0_to_l1 二值）的解釋層：紮根【贏了 argmax 卻沒落地】要分因，不能只看到 0。
@@ -6146,6 +6155,16 @@ func _detect_commitment_stall(state: WorldState, team: TeamData) -> void:
 func _detect_survival_stall(state: WorldState, team: TeamData) -> void:
 	if team.survival_committed_option == "":
 		return   # 未承諾 → 無可偵（待 try_set 蓋章）
+	# ★★★own-camp 失效 ⇒ 解承諾（spec §3c）：營地衰敗／被佔／升 L1 之後，
+	#   「走回去紮根」這個承諾的【對象已經不存在】⇒ 不解就會卡在移動中。
+	#   ★走的是【既有出口】`survival_committed_option = ""`（同下面 STALL_* 兩支）——
+	#   ★★禁新增 `camp_lost` 布林旗標：★★★死旗＝下一個人得記得清它，而那正是 latch 的原料。
+	if team.survival_committed_option == "紮根" 			and state.own_camp_tile(team.team_id) == null 			and team.corvee_site == Vector2i(-1, -1):
+		var _here: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
+		if _here == null or _here.camp_level != 1 or _here.outpost_level > 0 or _here.construction_team_id != -1:
+			team.survival_committed_option = ""   # 解承諾 → 下 cadence 正常重蓋
+			if Probe.enabled: Probe.bump("survival.own_camp_lost_release")
+			return
 	var leader: PersonData = state.persons.get(team.leader_id)
 	var vals: Dictionary = leader.values if leader != null else {}
 	var patience: float = DecisionEngine.stall_patience_factor(vals)

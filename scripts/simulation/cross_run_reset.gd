@@ -49,6 +49,7 @@ const _FLAG_DEFAULTS: Dictionary = {
 	"SimRunner.phase_timing": false,
 	"PathSystem.suppress_observe_noise": false,
 	"OwnerOutpostIndex.shadow": false,
+	"OwnerCampIndex.shadow": false,
 	"FactionAISystem.trace_infra": false,
 	"FactionAISystem._mk_verify": false,
 	"WorldState.driver_ledger_enabled": false,
@@ -85,6 +86,7 @@ static func _sweep() -> Dictionary:
 		InteractionSystem._reset_cross_run(),
 		NpcCombatSystem._reset_cross_run(),
 		OwnerOutpostIndex._reset_cross_run(),
+		OwnerCampIndex._reset_cross_run(),
 		SimRunner._reset_cross_run(),
 		WorldState._reset_cross_run(),
 	]:
@@ -102,6 +104,7 @@ static func _read_flag(name: String):
 		"SimRunner.phase_timing": return SimRunner.phase_timing
 		"PathSystem.suppress_observe_noise": return PathSystem.suppress_observe_noise
 		"OwnerOutpostIndex.shadow": return OwnerOutpostIndex.shadow
+		"OwnerCampIndex.shadow": return OwnerCampIndex.shadow
 		"FactionAISystem.trace_infra": return FactionAISystem.trace_infra
 		"FactionAISystem._mk_verify": return FactionAISystem._mk_verify
 		"WorldState.driver_ledger_enabled": return WorldState.driver_ledger_enabled

@@ -65,6 +65,7 @@ func _decay_l0_camps(state: WorldState) -> void:
 			if Probe.enabled: Probe.bump("camp.abandoned")   # ★gate3：蓋了就丟＝亂蓋的特徵
 			tile.camp_ticks_left = 0
 			tile.camp_team_id = -1
+			OwnerCampIndex.invalidate()   # ★own-camp chokepoint②（清）：營地衰敗消失 ⇒ 姊妹索引失效
 
 const WILD_HORSE_REGEN_CHANCE: float = 0.05   # 每月 5% chance +1（極慢）
 const WILD_HORSE_TILE_CAP: int = 3

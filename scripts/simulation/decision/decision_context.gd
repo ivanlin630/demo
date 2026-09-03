@@ -76,6 +76,10 @@ var camp_flow_delay_days: float = 0.0
 # ★§4a 紮根（L0→L1 建點入引擎）：物理可行性 + 可行性帳素材。全部 own-state（腳下 tile=自己站著＝親見最高信、
 # 自己的 corvee_site 記憶、自己的 food_runway），零 god-view、零新旋鈕（ETA 讀既有 L0_TO_L1_CORVEE_DAYS）。
 var can_settle_here: bool = false            # 站自己 L0 營地 + 該格無據點 + 無人施工 + 非玩家隊
+# ★★★own-camp-in-decision-model（blueprint 裁 2026-09-03，新病型「腦裡沒有那個念頭」）：
+#   ★自身狀態＝self-knowledge，零 god-view（隊當然知道自己的營地在哪）⇒ 不違感知鐵律。
+#   ★★(-1,-1) ＝ 沒有自己的營地（從未紮過／已衰敗／已升 L1）。
+var own_camp_pos: Vector2i = Vector2i(-1, -1)
 var settle_resume_site: Vector2i = Vector2i(-1, -1)   # 自己未完工地（回頭續建；S2b corvee recovery 語意）
 var settle_eta_days: float = 0.0             # 工期 ETA（既有工期常數 + 殘距日；ETA≫runway → util→0）
 var settle_site_quality: float = 0.0         # 腳下/工地 tile 選址品質（地力×farm 潛力，0..1）
@@ -376,6 +380,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _uf: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
 	var _not_player: bool = not (team.leader_id == state.player_id and state.player_id != -1)
 	c.can_settle_here = _not_player and team.leader_id != -1 and _uf != null 		and _uf.camp_level == 1 and _uf.outpost_level == 0 and _uf.construction_team_id == -1
+	# ★★★own-camp：從姊妹索引取（★不掃全圖——LOD/O(N²) 那條老帳）。
+	#   ★玩家隊排除同 can_settle_here 慣例（玩家的營地由玩家自己決定去不去）。
+	var _own_camp: HexTileData = state.own_camp_tile(team.team_id) if _not_player else null
+	c.own_camp_pos = _own_camp.tile_pos if _own_camp != null else Vector2i(-1, -1)
 	# ★★★拆 `can_settle_here`（systems 2026-09-03）：上一輪量到它 19/21 為 false，
 	#   而它是【六個子條件的 AND】⇒ ★光知道「它 false」答不了【是哪一個】。
 	#   ★★母體寫死：跟 #10／紮根那一組同一個（IDLE 且 committed==紮根）
@@ -396,9 +404,20 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _cs: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.corvee_site))
 		if _cs != null and _cs.construction_team_id == team.team_id and _cs.construction_ticks_left > 0:
 			c.settle_resume_site = team.corvee_site
-	var _site_pos: Vector2i = c.settle_resume_site if c.settle_resume_site != Vector2i(-1, -1) else team.tile_pos
+	# ★★★own-camp（2026-09-03）：紮根的 applicable 多了第三支（我有自己的營地）⇒ ★這裡的選址素材
+	#   也要跟著涵蓋它，否則 `settle_eta_days` 留在 0 ⇒ `terms.gd::rooting_drive` 第一行直接 return 0.0
+	#   ⇒ ★★紮根進得了候選集，分數卻【恆為 0】⇒ 永遠輸 ⇒ 看起來像「修法沒生效」。
+	#   ★★★這是實測撞出來的，不是設計時想到的：腿B 第一版 30/30 `紮根=0.0000` 輸給 `建設`。
+	#   ★而這【不是 crank】：它讓同一套真值計算（可行性帳 × 選址品質、ETA 含殘距）
+	#     對第三支【也算得出來】，★★而距離就是經由 ETA 的 `_dist` 自然折進去的
+	#     ——★★★reviewer 說「距離已折進 util」的那個機制，正是這一段。
+	var _site_pos: Vector2i = team.tile_pos
+	if c.settle_resume_site != Vector2i(-1, -1):
+		_site_pos = c.settle_resume_site
+	elif not c.can_settle_here and c.own_camp_pos != Vector2i(-1, -1):
+		_site_pos = c.own_camp_pos
 	var _site: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_site_pos))
-	if _site != null and (c.can_settle_here or c.settle_resume_site != Vector2i(-1, -1)):
+	if _site != null and (c.can_settle_here or c.settle_resume_site != Vector2i(-1, -1) 			or c.own_camp_pos != Vector2i(-1, -1)):
 		# 選址品質：地力（productivity）× 可耕潛力（farmable terrain=能發展農業的地）。腳下=親見，最高信。
 		var _farm_pot: float = 0.4 if _site.terrain == "mountain" else 1.0   # 可農判準沿用既有慣例（山不可農、_find_unowned_farmable_tile:4750）
 		# ★§4c 反饋讀回：同一 leader 對這塊地的過往結局（失敗折價/興旺加分、線性衰減過期歸零）。

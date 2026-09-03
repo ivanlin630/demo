@@ -78,6 +78,9 @@ var teams_by_tile: Dictionary = {}   # tile_id(int = x*1000+y) → Array[int] te
 # ＝完全重現舊掃「迭代序中的第一個符合者」語意（HOW spec §3）。失效走 OwnerOutpostIndex.epoch。
 var _oo_map: Dictionary = {}      # team_id → tile_id（owner=-1 亦入表，與舊掃對任何輸入皆等價）
 var _oo_epoch: int = 0            # 0 = 尚未建（OwnerOutpostIndex.epoch 從 1 起）
+# ★own-camp-in-decision-model：L0 營地的姊妹索引（★不與 _oo_map 共用——欄位不同，見 owner_camp_index.gd）
+var _oc_map: Dictionary = {}      # team_id → tile_id（camp_team_id -1 不入表：無主營地不屬於任何隊）
+var _oc_epoch: int = 0            # 0 = 尚未建（OwnerCampIndex.epoch 從 1 起）
 var _next_faction_id: int = 0
 # beast pseudo-team id counter（負區段，避開正常 team id）。★per-world（非 BeastSystem instance var，
 # 亦禁 static var）：每 world fresh init → per-seed 決定性 + 每 beast 唯一遞減 id。舊 instance var 令每
@@ -209,6 +212,27 @@ func own_outpost_tile(team_id: int) -> HexTileData:
 	if tid == null:
 		return null
 	return world.tiles.get(tid)
+
+# ★★★「自己的營地」——本刀新增的那個【念頭】的資料面。
+#   ★病：`camp_team_id` 全樹 1 寫入／2 讀取（衰敗歸屬、fingerprint），★★決策路徑【零讀取】
+#     ⇒ 「回我自己的營地」這件事【不存在於決策空間】（不是被擋掉，是沒有被表徵）。
+#   ★★★語意與 own_outpost_tile 同慣例：world.tiles 迭代序的第一個命中。
+func own_camp_tile(team_id: int) -> HexTileData:
+	if _oc_epoch != OwnerCampIndex.epoch:
+		_rebuild_owner_camp()
+	var tid = _oc_map.get(team_id, null)
+	if tid == null:
+		return null
+	return world.tiles.get(tid)
+
+func _rebuild_owner_camp() -> void:
+	_oc_map.clear()
+	for tile_id in world.tiles:   # ★依 world.tiles 迭代序 → 每隊只留第一個命中（同 outpost 慣例）
+		var t: HexTileData = world.tiles[tile_id]
+		if t.camp_level > 0 and t.camp_team_id != -1 and not _oc_map.has(t.camp_team_id):
+			_oc_map[t.camp_team_id] = tile_id
+	_oc_epoch = OwnerCampIndex.epoch
+	if Probe.enabled: Probe.bump("owner_camp.rebuild")
 
 func _rebuild_owner_outpost() -> void:
 	_oo_map.clear()
