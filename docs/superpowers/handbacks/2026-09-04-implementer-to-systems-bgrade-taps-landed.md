@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 四格 tap 已上（c65ff52f）＋ per-team 桶；★而 seed7 給了你③那段一個具體反例
 touches: faction_ai_system／interaction_system／population_system／headless_test／three_tickets_bed｜15/15 綠 277s
 topic: ★★★seed7 的最早 500 筆裡有【66 筆】舊判準【也會】fire(new_only=434),而 1337／42 是 0 ⇒ 我上一封那句「全部 500 筆都是新抓到的」在 seed7 上【不成立】——你③段預留的那個訂正,seed7 當場用上了;★per-team 桶＋計數版都已上(取樣只講得出最早那 N 筆,計數才講得出全部);★★而兩個閘各擋我一次:constitution 抓 `_decide_unified::threshold`(改形狀非豁免)、headless 抓【4 個沒給糧的 fixture】——★★★食物 0 的隊本來就不叫「穩態」,所以修的是 fixture 不是判準
