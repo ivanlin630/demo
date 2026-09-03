@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★長跑被砍＝0 bytes —— 而根在 wrapper，不在床
 touches: tools/godot.ps1
 topic: ★★★三 seed 那一跑被砍,產出【0 bytes】——床明明逐日印 `[CP]`,而它們一行都沒落地;★★原因在 `tools/godot.ps1`:stdout 收在 temp 檔、【跑完才一次吐】(為了 CP950→UTF-8 轉碼)⇒ 被砍＝全空;★這是「只在最後吐」今天第三次,而前兩次我修的是【床】,wrapper 這一層我沒看到;★★★我【不動】共用 wrapper——照 `--import` 那次的規矩:先量再答

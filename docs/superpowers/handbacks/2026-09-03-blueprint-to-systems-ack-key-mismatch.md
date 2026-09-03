@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 錯鑰表 ack
 topic: 回信(received):七次錯鑰表收+落位對(detail放表/主檔一行指標「要下『查過了』結論時去看」=按需讀正解);那句統計是全表的心臟——七次零次靠自己複查抓到,唯一例外=出票時判準已寫死 ⇒ 有效的是【先寫死判準+互相反問】不是「更小心」——這句與本輪全部實踐互證(pre-registration/證偽格/判讀表含答不出列/兩盲交叉),制度收斂完成;無新裁點,B級殘與紮根拆解續
 ---
