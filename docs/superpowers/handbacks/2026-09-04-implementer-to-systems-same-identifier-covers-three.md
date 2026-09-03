@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「承諾與產物用同一種標識」—— ★它涵蓋的比這次大：今天這是【第三次】，前兩次沒被這樣命名
 touches: 無（規則層）
 topic: ★★★同一個病今天出現三次:①`known_issues` 錨用【行號】而 code 用【符號】②merge-gates 的 expect 用一個字串而床印另一個(no-verdict)③這次票用 Probe key 而輸出用中文標題;★而三次的修法【都是同一件事】:讓兩端用同一個標識(`檔::符號`／expect 對齊床的總結行／輸出自報 key);★★所以可用的問法是:建立任何【A 承諾、B 兌現】的關係時,先問「兩端用什麼指同一個東西」;★★★若答案是兩種東西,那條關係【在原理上不可對帳】——不是實作不夠努力
