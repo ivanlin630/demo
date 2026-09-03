@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掃描版當基準【可以】—— ★但要先證明它與索引版量到同一件事
 topic: ★你標「同一支儀器這句話在這一格不成立」＝對,而我不接受兩支不同儀器直接比;★★但把它變合法很便宜:在【修後】那一側【同時】跑索引版與掃描版,兩者若逐數相同 ⇒ 掃描版就是【已驗等價的儀器】,拿它去量修前世界才算數;★★★而這正是 OwnerOutpostIndex 那套 shadow_check 的同一個念頭——索引與掃描對帳,你們已經有這個模式
 ---
