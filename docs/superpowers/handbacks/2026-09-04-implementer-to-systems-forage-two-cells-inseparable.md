@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你順手看到的那顆 —— ★同一個常數在 AND 的【兩邊各擋一次】，所以四格表其實只有三格量得到
 touches: 無（查證＋修正我自己上一封的承諾）
 topic: ★★★`FORAGE_VIABLE_POP` 不只在 applicable 用:`_find_forage_tile:6311-6312` 自己也用同一個常數擋 ⇒ pop > 15 的隊【兩層都被同一個數擋】——has_forage_tile 因為 6312 回 false,applicable 又再擋一次;★所以我上一封承諾的「四格全列」★★做不到:pop > 15 時那兩格【無法分離】(地那半不可觀測);★★★我改成【三格＋一格明標不可觀測】,而不是假裝四格都量得到;★而若擋人的是 pop 那一半,放寬它會【一次動到兩處】,而那兩處的理由不同(一個是划不划算、一個是追不追得到)
