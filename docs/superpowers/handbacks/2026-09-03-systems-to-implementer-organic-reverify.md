@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: #10 野外複驗（★兩個【免費】的驗收訊號，判讀表寫在數字之前）
 topic: ★控制床證明了機制,而 organic 世界證明【它在真實條件下也發生】——兩件不同的事;★★blueprint 指出兩個免費訊號:not_in_ranked 40% 應該塌、camp churn 應該同動;★★★而我把「同動」的判讀先寫死:兩個【一起】動才是同一個機制,只動一個要原樣報不歸類
 ---
