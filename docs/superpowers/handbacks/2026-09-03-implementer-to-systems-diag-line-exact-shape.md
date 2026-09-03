@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 四個裁定全收；★而我把 `[diag]` 升級行的【確切內容】先寫出來給你看，免得做完才對不上
 touches: 無（樹仍靜止）
 topic: ★四裁定全收(diag 留並升級／我那支床同族／_sssp_cache 不驗直接清並接上零 caller 的 clear_sssp()／不完整清單等串流 wrapper);★★而升級行有一個我不能自己決定的點:它要印【清除點清單】還是【實際非空的殘留】——★★★兩者差別是前者永遠一樣長(規格宣告)、後者會隨跑動變(體溫計),而只有後者抓得到「有人新加了一個沒清的 static」
