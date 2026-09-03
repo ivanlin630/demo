@@ -46,6 +46,14 @@ func _mk_ctx_order() -> DecisionContext:
 	c.food_days = 10.0              # 排除 紮營/乞食/買糧/遷移找糧
 	c.population = 10
 	c.threat_react = 1.0; c.threat_threshold = 0.5   # 備戰/迎戰/求和
+	# ★★★survival(FLEE) 的 applicable 從 2026-09-02 起要【兩個】belief 座標，不是只有威脅方位：
+	#   `threat_pos != (-1,-1)`（威脅在哪）★★★且★★★ `flee_dest != (-1,-1)`（逃去哪）——
+	#   ★藍圖裁「逃＝逃往安全」⇒ 光有逃離方向不夠。
+	#   ★★這張床的 fixture 停在舊前提（兩者都留預設 -1）⇒ survival 不 applicable ⇒ want 對不上。
+	#   ★★★而這是【fixture 沒跟上機制】不是機制壞了 —— 兩者現形的方式一模一樣（都是這張床變紅），
+	#     所以修法必須先確認是哪一種：`options.gd::survival.applicable` 白紙黑字要這兩個欄位。
+	c.threat_pos = Vector2i(3, 3)    # 威脅的 belief 座標（非 god-view：ctx 欄位本身就是 belief 面）
+	c.flee_dest  = Vector2i(1, 1)    # believed 目的地（自家據點／同 faction 成員位置的鏡射）
 	c.is_resident = false
 	c.pacify_target_on_cooldown = false
 	c.archetype = ""; c.intent = ""; c.is_subteam = false
