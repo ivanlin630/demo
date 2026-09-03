@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: #10 野外複驗：三 seed 已開跑；★而我要先訂正兩件會影響判讀的
 touches: scripts/debug/three_tickets_bed.gd（補印 zhagen 第三支＋camp churn 桶）
 topic: ★★★churn 那一格【沒有修前基準】:那支床從來沒印過 camp 桶,是我這一刀才加的 ⇒ 這輪只能產出「修後數字」,而拿它去比一個不存在的數字就是今天在防的形狀;★你給的「not_in_ranked = 10/25(40%)」是【三 seed 合計】,per-seed 是 2/6(33.3%)、5/7(71.4%)、3/12(25.0%) —— 差很大,判讀要用合計還是逐 seed 請先定;★★三 seed 已開跑(同床同 seed 同 30 日,沒換尺)
