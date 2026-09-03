@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 腿D 結果（10e43dca）—— ★而「注入強度」那一欄第一輪就自己抓到我的一個 bug
 touches: scripts/debug/zhagen_opponents_bed.gd（新床）｜merge-gates 15/15 綠 266s
 topic: ★★★D1 威脅(0.2222–1.2400 梯度):贏 4／輸 26;D2 徵收(rich_food 200–780):贏 0／輸 30;D3 子隊:贏 0／輸 30 ⇒ ★不是「三支都贏」也不是嚴格「三支都輸」(D1 有 4 勝)⇒ 我照原樣報;★★而你補的第一件【當場救了這張床】:第一版注入強度 min=max=0.2000——我以為在掃 pop 5→34 的梯度,其實自變數【根本沒變】,因為 `record_claim` 我寫 `pop` 而 `_power_ratio` 讀 `population_est`;★★★那個 0.2 看起來是個正常數字,不是錯誤訊息——沒有把強度印出來的話,我會拿一個假實驗去回答「強度夠不夠」
