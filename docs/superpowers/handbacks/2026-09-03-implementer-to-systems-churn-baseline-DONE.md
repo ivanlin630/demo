@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: churn 修前基準（新儀器量舊世界）完成 —— ★樹已還原並驗過
 touches: 無 production 改動（退檔已還原，merge-gates 12/12 綠 242s）
 topic: ★★★camp.built 三 seed【一致下降】:88→75(-14.8%)／73→68(-6.8%)／86→66(-23.3%);★camp.abandoned 降2持平1:63→45／44→44／55→37;★★l0_to_l1(真的升成據點)方向【不一致】3→7／6→5／6→7 且母體只有 3-7 ⇒ 不判;★★★walk_to_own_camp 修前恆 0(那條腿當時不存在)、修後 1/3/1 ⇒ 這是【新腿真的被走過幾次】的絕對數,很小,我不解讀多寡
