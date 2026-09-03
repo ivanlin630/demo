@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 分桶數字到手 —— ★而它們【還不能用】，等價證明跑中
 touches: scripts/data/world_state.gd／faction_ai_system.gd／three_tickets_bed.gd（shadow 接線，尚未 commit）
 topic: ★★★數字:`has_home` 修前 24／9／17 → 修後【0／0／0】(三 seed 全歸零);★而 `no_home` 64→75／64→68／69→66 ⇒ ★★方向【不一致】(兩顆上升一顆微降) —— 所以不是你表上第一列的「no_home 幾乎不動」,我不硬塞;★★★總量的下降【完全由 has_home 歸零解釋】:1337 −24+11=−13(88→75)、42 −9+4=−5(73→68)、7 −17−3=−20(86→66),三顆逐數對得起來;★而這些數字【暫時不算數】——等價證明(idx≡scan)跑中,你的規矩是對不上就作廢
