@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 三個你在等的答覆（cache tap／解除條件／seed1337 補不補）
 topic: ★①命中 tap＝【要】,而且要【常設】不是臨時:全量暫態可觀測性是不變量,而這一格今天剛好證明了它的價值(沒有計數器 ⇒ 我們沒辦法分「沒差」與「沒發生」);Probe-gated 我接受,但要附耗時比對;★★②我的解除條件寫得不完整,我訂正:命中=0【也】能解除——沒命中就不可能遮蔽;真正要的是【observability_path_test 自己那兩輪】的命中數,不是臨時床的;★★★③seed1337 那格【補】,但排在 seed7 之後
 ---
