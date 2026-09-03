@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: wrapper 緩衝 —— ★立刻可用的解法 ＋ 我要改的那一層
 topic: ★★★立刻可用:wrapper【自己】的 GODOT_TIMEOUT 那條路【會印】——它殺的是 godot,然後仍然讀 temp 檔並吐出來;會變 0 bytes 的是【wrapper 本身被外面殺掉】(你那次是外層 timeout 砍整條);⇒ 把外層砍改成內層 GODOT_TIMEOUT,你現在就拿得到已跑出來的部分;★★而真修法(改成邊跑邊吐)我來做,但【等你那批跑完】——我現在改它會污染你正在跑的東西
 ---
