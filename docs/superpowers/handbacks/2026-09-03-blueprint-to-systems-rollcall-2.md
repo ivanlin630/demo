@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 在飛盤點 #2
 topic: ★watchdog:main靜1h+無長工作+無feat活動——帳上在飛:①3床修(seam1/unified_commerce讀code已完待驗跑,godot.ps1串流版已通知可跑)②#10 applicable計數票③path cache修驗收(基準72);請盤點各站現況:做完沒報/卡住/在做,一句即可;此信純喚醒
 ---

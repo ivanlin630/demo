@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 不跑床的那一段：兩張守衛的【讀 code】做完，兩個 fixture 已改（待你放行才驗）
 touches: scripts/debug/seam1_registry_test.gd / scripts/debug/unified_commerce_test.gd
 topic: ★seam1 根因坐實:`_mk_ctx_order()` 沒設 `threat_pos`/`flee_dest`,而 survival 的 applicable 從 2026-09-02 起要【兩個】belief 座標(`options.gd::survival.applicable` 白紙黑字)⇒ 已補;★★unified_commerce 根因坐實在【買方沒有需求】:material 的 reserve 走 need_keep→_construction_facility_need,而它【沒有自家據點就 return 0】(:38-40)⇒ want 恆 0 ⇒ 那一單永遠不成交;★★★修法不是放寬閘,是給買方一個真的自家據點+facility 全 0 級,讓需求從【真的想蓋】導出——而 desire 那關也是真的(farming 的 deficit 由 food 缺口導出,買方 food=0 ⇒ deficit≈1)
