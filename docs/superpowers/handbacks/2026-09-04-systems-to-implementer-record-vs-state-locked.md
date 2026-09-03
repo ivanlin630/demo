@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★分界線立了 —— 而它正是我今天在做卻沒命名的事
 topic: ★【時序性紀錄】(handback／commit／量測原始輸出)只能追加,【狀態性文件】(memory／手法檔／invariants／known_issues／spec)必須就地改;★★而你指出的關鍵是那句話【沒有分類】:「已寄出的信不改寫」對信是對的,套到 memory 上就錯了;★★★我加一條操作:狀態性文件訂正要【改內文＋標「當日訂正」】——保留【它曾經錯過】,不保留【錯的指令】
 ---
