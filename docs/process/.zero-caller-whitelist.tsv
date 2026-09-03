@@ -1,3 +1,2 @@
 # docs/process/.zero-caller-whitelist.tsv —— 允許暫時零 caller 的守衛
 # 欄位：Class.func	理由（★必填：為什麼現在還不接）
-OwnerCampIndex.shadow_check	★暫時零 caller：implementer 正在把 own_camp_tile 接上 shadow 對帳（2026-09-03 在飛）——★★接上後【移除本行】，而不是讓白名單長期收留它
