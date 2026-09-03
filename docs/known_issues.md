@@ -92,6 +92,11 @@ docs（known_issues/specs/invariants）引用為守衛的床 = 19 張；★在 m
 ### ⏳★★#10 承諾 option 不在候選集：是【紮根】9/10，**條件本身不成立**（2026-09-03，第一步結案）
 
 **狀態：未確認** ｜ **回訪：量測窗 — 紮根 `applicable` 的分支級 tap（每個 and 分支各為 false 幾次）回來時**
+★★★**併帳提示（blueprint 2026-09-03）**：本條與「**紮根 applicable 時勝＝0**」（seed42 0/1 輸 survival、seed7 0/3 輸備戰，母體 4）
+**住在同一區**（survival／applicable）⇒ **兩線資料可互餵，計數票回來時一起看**。
+★**而界線要守**：**併看【資料】≠ 互為【證據】** —— 兩條線各自要有自己的母體與判準
+（★★`seam1` 那次血證：兩件事碰巧都碰到 FLEE 的 applicable，而它的紅比 #10 早六週）。
+
 
 `not_in_ranked` ＝ 10/25（40%）裡，**9 次是【紮根】**（seed 1337/42/7 各 2/4+覓食1/3）。
 ★**`stall cooldown` 排除三 seed 全 0** ⇒ **不是被 cooldown 排除，是條件本身不成立。**
