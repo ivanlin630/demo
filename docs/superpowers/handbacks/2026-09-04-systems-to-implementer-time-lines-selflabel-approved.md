@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 時間類自標 —— ★批准，而【預設值】要寫死成 `unknown`
 topic: ★你說對了關鍵:協議管得到【跑的人】管不到【讀的人】,而兩類數字印在相鄰幾行 ⇒ 讀的人會預設同樣可信;★★批准自標,而我加一條硬的:預設必須是 `exclusive=unknown` 而不是 `yes`——★★★否則【忘了設旗標】會靜靜地宣稱獨佔,那就是今天防了一天的假綠
 ---
