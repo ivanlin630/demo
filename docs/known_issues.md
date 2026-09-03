@@ -1748,6 +1748,19 @@ Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**comb
 `reeval_attribution_bed.gd` 死亡偵測（`elif spec_death_tick==-1 and not spec_last.is_empty(): spec_death_tick=tick`，單次 `state.teams` dict 查無即判死）→ Team18 tick7239 **瞬間 remove-readd**（併入嘗試的 lifecycle）被**誤判永久死亡**。**影響**：measurer 找「團滅 specimen」時把沒死透的隊誤當死透。**修法（L3）**：改連續 N tick 查無才判死、或讀 `population==0` 事件而非 dict-membership 瞬態。**已 dispatch implementer 修**（execlock worktree，量測可靠性在關鍵路徑上）。
 
 ## ★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint 結構信號；第 3 次同型）
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — 有人動 `_score_breed` 或處理「小隊不生育」時（★三顆原始血證已全修，剩一顆是本次 sweep 撞出的同型）**
+
+★★**B 級 sweep 判定（2026-09-04）**：**原始三顆血證【全部已修】** ——
+①殲滅端 `_cas_carry` de-patch ✅（條目自記）／②pursuit `_pursuit_carry` ★**符號全樹已不存在**（已移除）／
+③capture ✅ 現為 `interaction_system.gd:161 mini(maxi(1, int(round(...))), wounded)`（**已護欄**）。
+★★★**而 sweep 撞出【第四顆同型、未修】**：`reaction_system.gd:229`
+```gdscript
+var minor_cap: int = int(t.population * 0.2)
+var base: float = 0.4 if (safe and fed and t.minor_population < minor_cap) else 0.0
+```
+⇒ **pop ≤ 4 時 `minor_cap = 0`** ⇒ `minor_population < 0` 恆 false ⇒ ★**`_score_breed` 恆 0 ⇒ 小隊永遠不生育**。
+★★**而它是【截斷造成的硬零】不是【設計出來的門檻】** —— 正是本條目描述的病型（機制在小尺度靜默啞）。
 `int(pop*rate)`/`round(pop*rate)` 在小 pop 尺度恆歸零 → 機制靜默啞（探針前砍光=cosmetic 假過關）。血證 3 次：①殲滅端傷亡 `int(round)`→0（§D4 `_cas_carry` de-patch ✅）②pursuit `int(pop*0.05)` pop<18→0（S1 rev2 `_pursuit_carry` de-patch 中）③capture `round(wounded*rate)` 小 wounded→0（部分，rev2 severity 半救）。
 **sweep 揭未護欄站**（`grep int(...pop...*)`）：
 | 站 | 型 | 建議修 |
@@ -2233,6 +2246,20 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **不擋 god-view**：Tier1 控制場景=短窗受控→無窗口洞→god-view 繞開,tracer-completeness 排獨立 arc（序待用戶）。詳 handback `2026-07-15-systems-to-blueprint-tracer-completeness-analysis`。關 [[feedback_full_transient_observability]]/[[feedback_observer_no_global_rng]]。
 
 ## 選敵 finder（_find_weakest_prey 同-faction 不濾 — R② Fix F advisory②,pre-existing）
+
+**狀態：已知未修** ｜ **回訪：觸發事件 — 序6「loop3 全溶接回」時（★屆時成員征服 intent 會有 dispatch 路，後果就不再受限）**
+
+★★**B 級 sweep 判定（2026-09-04）：真病，而後果目前受限 —— 而【受限本身是暫時狀態】。**
+```
+★`_find_weakest_prey` 現行過濾：自己／null／`has_belief`／`reachable`／`pop_est < 0.7×自己`
+   ⇒ ★★【沒有 faction 過濾】——與條目描述一致
+★★★而我原本以為它不可能 fire（函式名叫 `_evaluate_independent_strategy`）——【錯】：
+   `faction_ai_system.gd:978` 那個 `else` 分支（＝**有 faction 的成員隊**，「入勢力不換腦」）
+   **也呼叫它**（:987／:990）⇒ 行為者【可以】有 faction ⇒ 同-faction 選敵【可以】發生
+```
+★**後果目前受限**：成員路只【宣告】征服 intent，`loop3` cascade 已刪 ⇒ **現在不會真打**。
+★★**而條目自己寫著「待 序6 loop3 全溶接回」** ⇒ ★★★**那一天到來時，這顆就從「宣告」變成「真打自己盟友」。**
+★**教訓（今日同族）**：**函式名寫著 independent，而它的呼叫者包含非 independent —— 名字比判準強。**
 - `_find_weakest_prey`(`faction_ai:3311-3332`)迭代 `team_discovered` **無 faction_id 過濾** → `prosperity_target_id` 理論可能曾是同-faction 隊。Fix F 用純 `BeliefSystem.best_estimate`（非 belief_pos 通道分流），同僚可能無 belief claim → 提早進態③放棄。**效果=提早放棄攻擊（保守退化）非危險行為**，pre-existing 非 Fix F 引入,不阻本刀。日後選敵 finder 補同-faction 濾一併處理。
 
 ## god-view 位置 belief 化 follow-up（2026-07-15 merge 6aa3ee18）
