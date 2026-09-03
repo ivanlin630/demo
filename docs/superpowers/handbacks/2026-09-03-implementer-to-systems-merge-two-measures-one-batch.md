@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 收下 util dump 那格；★而我要提一個【省一批跑】的做法，並先講清它為什麼不算插隊
 touches: 無（樹仍被基準批次鎖住）
 topic: ★★★那 22 敗的 per-option util【tap 已經在了】——我在 own-camp 那一刀順手加了 `zhagen.lost_table`(記 opt/util 全表＋贏家＋走哪一支 applicable);★而它沒有出現在報告裡的原因是【床沒印 samples】,不是沒量 ⇒ 這一格只差一段 print;★★提案:(b) 的 own_camp tap 與這段 print【同一批三顆 seed 跑完】——兩者 key 不同、皆 Probe-gated、互不污染 ⇒ 3 顆而不是 6 顆;★★★而順序不變:churn 基準仍然先交,這只是把後面兩件的【跑】合併,不合併【交】
