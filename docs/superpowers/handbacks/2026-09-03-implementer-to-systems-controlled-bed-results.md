@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 控制場景床兩腿結果（238fc516）—— ★兩腿都乾淨落在你先寫死的表上
 touches: scripts/debug/zhagen_controlled_bed.gd（新）
 topic: ★★★腿A 落第①列【銜接沒問題】:30/30 applicable→30/30 贏→30/30 真 dispatch(task=建設、corvee 寫入、720 person-ticks 工期);★腿B 落第②列:30/30 not_applicable ⇒ 全部改選【紮營】,在【站著的那一格】重新紮營,committed 由紮根翻成紮營,move_target 是自己現在位置不是舊營地;★★而「走回去」這個動作【決策路徑上不存在】——`camp_team_id` 全樹 1 個寫入點、2 個讀取點(harvest 衰敗歸屬),決策路徑【零讀取】⇒ 沒有任何 ctx 欄位/option 指向「我自己的營地」;★★★所以腿B 不是「手不聽腦」——是【腦裡沒有那個念頭】,兩者現形方式一樣(都是不回家)

@@ -1,0 +1,6 @@
+# docs/process/.cross-run-static-whitelist.tsv —— 跨 run static 例外清單
+# 欄位：檔案	static 名	理由（★必填，且必須是【可查的根據】不是「看起來像常數」）
+scripts/simulation/decision/goal_registry.gd	REGISTRY	唯讀表：grep 寫入形式（X[...]=／.erase／.clear／.append／.merge）在 scripts/simulation+scripts/data 命中 0
+scripts/simulation/decision/options.gd	REGISTRY	唯讀表：同上，命中 0
+scripts/simulation/decision/need_oracle.gd	_construction_visiting	真 transient：:44 設→:62 清，中間只有 continue、零 return；:36 的早退發生在設之前（implementer 逐行讀完）
+scripts/simulation/cross_run_reset.gd	last_report	不累積：全站唯一寫入是 :73 的【整包指派】（grep last_report\[／.append／.merge／.erase／.clear 命中 0），每次 reset 覆蓋，殘留不可能長大

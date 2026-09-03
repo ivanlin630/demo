@@ -52,3 +52,4 @@ ki-status	bash .claude/hooks/ki-status-gate.sh	known_issues 新條目必帶狀�
 single-writer	bash .claude/hooks/single-writer-gate.sh	受管欄位的直寫點必須全在白名單(病:「單寫者其實不單一」);白名單外多一處就紅	\[SINGLE-WRITER\] PASS
 tree-div	bash .claude/hooks/tree-divergence.sh	main↔工作 branch 的 production 樹差(★只印不判:branch 永遠有合法 WIP,硬閘會永久紅)	\[TREE-DIV\] PASS
 headless	bash .claude/hooks/headless-regression.sh	headless_test 回歸(★2026-09-03 補:它本來【不在】註冊表,而兩顆已 merge 的 slice 弄紅 fixture 時十支全綠);比對失敗【清單】非只數量	\[HEADLESS\] PASS
+cross-run-static	bash .claude/hooks/cross-run-static-gate.sh	跨 run static 必須有清除點或在白名單(病:新加一個沒清的 static,而床的 [diag] 行【只印它知道的】看不見它);★涵蓋率 34/34 個 `static var` 宣告形式,誠實限三條必印	\[CROSS-RUN-STATIC\] PASS

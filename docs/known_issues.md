@@ -34,7 +34,14 @@
 
 ### ⏳★★★4 張【docs 當守衛引用】的床是紅的，而沒有人判過（2026-09-03 systems 掃出，blueprint 裁判序）
 
-**狀態：已知未修** ｜ **回訪：觸發事件 — 修 3 張守衛那張票交件時（blueprint 2026-09-03 批修；序＝merge 與紮根之後）**
+**狀態：未確認（★4 張裡 3 張已收官，只剩 ③）** ｜ **回訪：量測窗 — `tracer_completeness_test` 那張「不確定」被判定時**
+
+★★**收官對帳（2026-09-03）**：①`observability_path`＝**治本已 merged**（跨 run 靜態清除點；跨輪命中 **72→0**）／
+②`seam1_registry`＝**修好 MERGED**（fixture 補 `threat_pos`／`flee_dest`）／④`unified_commerce`＝**修好 MERGED**（給買方真需求，**不是放寬斷言**）／
+③`tracer_completeness`＝★**仍「不確定」，誠實掛著**。
+★★★**而兩張修好的床都通過陽性對照，且【弄壞的是被守的機制不是 fixture】**
+（`survival.applicable` 改 `return false` ⇒ seam1 2 FAIL；`_market_visitor_buy` 插 `return false` ⇒ unified_commerce 12 FAIL）
+⇒ **那才是「床咬得住」的證據** —— blueprint「用時付費」制的第一批兌現。
 
 ★★**綠床規則已立法（blueprint「用時付費」）**：預設 **「綠＝未知」**；陽性對照**不做全掃**，綁兩個自然時點 ——
 **(a) 床要註冊進閘時**（寫進 `docs/process/merge-gates.tsv` 表頭）／**(b) 床被引用為結案／驗收證據時**
