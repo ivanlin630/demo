@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: own-camp-in-decision-model
 topic: R②判決:issues——①案A可行但不是字面「延伸同一張表」,查了_rebuild_owner_outpost/_oo_map,outpost跟camp是不同欄位(outpost_owner/level vs camp_team_id/level)不能塞同一個map,要建同架構的姊妹索引(自己的epoch+自己的3個chokepoint),不是逼出爛形狀而是要講清楚「延伸」延伸的是機制不是同一張表;②查了rooting_drive+settle_eta_days,距離已經折進util了,橫跨全圖走回家的病態被既有feasibility機制自然壓低,不是全新風險;③churn疑慮是真的,查到具體漏洞:「紮營」的applicable沒有排除「已有own_camp_pos」,中途被打斷時會贏過紮根導致沿途重紮,修法是同一天稍早recamp-candidate-exclusion那票同一個家族的延伸,紮營applicable加own_camp_pos==(-1,-1)
 ---

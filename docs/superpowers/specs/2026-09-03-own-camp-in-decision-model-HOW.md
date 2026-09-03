@@ -1,5 +1,5 @@
 ---
-status: 待 R²
+status: R² issues（三點已吸收，2026-09-03）
 owner: systems
 slice: own-camp-in-decision-model
 what: blueprint 裁 2026-09-03 —— ★給腦補上「自己的營地」這個念頭（新病型：**腦裡沒有那個念頭**）
@@ -66,3 +66,33 @@ to_task   ：★若不站在 own_camp_pos ⇒ 產生【移動到 own_camp_pos】
 ★★而**「該格已有據點」正是 `can_settle_here` 的第二支支配子條件（42.9／77.8／53.8%）**
 ⇒ ★★★**兩者可能是同一個迴圈**：churn 製造的舊營地，回頭擋住 `can_settle_here`。
 **本刀修好之後，那個比例應該下降** —— ★**列為觀察項，不列為驗收**（★★因為我沒有量過它們的因果，只量到共存）。
+
+
+---
+
+# ★★★⑥R² 三點吸收（reviewer 2026-09-03，★三點都改了 spec，其中一點是我不敢猜的那格）
+
+## ①「延伸 `OwnerOutpostIndex`」——**延伸的是【機制】不是【同一張表】**
+```
+★reviewer 查 `_rebuild_owner_outpost`／`_oo_map`：outpost 與 camp 是【不同欄位】
+   （`outpost_owner`/`outpost_level` vs `camp_team_id`/`camp_level`）⇒ ★★不能塞同一個 map
+⇒ ★★★正解：建一張【同架構的姊妹索引】——自己的 `epoch`、自己的 3 個 chokepoint
+⇒ 我原文寫「延伸」會被讀成「塞進同一張表」⇒ 措辭訂正：**複製那套機制，不是共用那張表**
+```
+
+## ★②我不敢猜的那格：**距離【已經】折進 util 了**
+```
+★reviewer 查 `rooting_drive` + `settle_eta_days` ⇒ ★★距離已折入
+⇒ ★★★「橫跨全圖走回家」被既有 feasibility 機制自然壓低 —— **不是新風險**
+⇒ 本刀【不需要】為它加任何東西（★而我先前把它列為未知，現在有 file:line 了）
+```
+
+## ★★★③churn 疑慮是真的，而 reviewer 找到具體漏洞
+```
+★「紮營」的 `applicable` 【沒有排除「已經有 own_camp_pos」】
+⇒ ★★人走回家的半路被打斷 ⇒ 重秤 ⇒ 紮營贏過紮根 ⇒ **沿途一路重紮**
+⇒ ★★★修法 ＝ 紮營 `applicable` 加 `own_camp_pos == (-1,-1)`
+   —— **與當日稍早 `recamp-candidate-exclusion`（站在自己 L0 營地上不再把該格當紮營候選）是【同一家族的延伸】**
+```
+⇒ ★**所以本刀是【兩半】，缺一不可**：**給紮根念頭** ＋ **讓紮營在你已經有家時不要 fire**。
+★★**而只做前一半會【看起來沒效】** —— 人會走一段、被打斷、就地紮營，數字上跟現在幾乎一樣。
