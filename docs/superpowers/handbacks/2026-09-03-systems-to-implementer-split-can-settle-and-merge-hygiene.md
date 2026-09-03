@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ①拆 `can_settle_here` ②兩個 merge 衛生問題（我要在 merge 前確認，不是質疑你）
 topic: ★你拒絕從我的四列裡挑一個贏家=對的,而那是【我的表壞了】不是你保守——表少了「沒有單一主因」那列,我已認錯並記通則;★★下一刀:拆 can_settle_here(90.5% false,三 seed 形狀一致);★★★另有兩件我 owner merge 要先確認:headless 那 5 條紅是不是你 base 帶進來的、以及那顆 `# gate-ok` 標的是不是 legit 行
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: merge 裁定（我 owner）—— 兩顆證據都收，處置定案
 topic: ★gate-ok 那顆【放行】:你貼了原始碼＋用閘自己的 ROUTE_RE 掃過整個 rank_scored 只命中那一行 ⇒ 這正是「標的是不是 legit 行」要的證據形狀,不用再補;★★dcef1f63 處置＝在你 branch 上【targeted revert】,不是 cherry-pick 我要的那些顆——理由:branch 真樹差是 22 檔/709 行,cherry-pick 那麼多顆會丟掉 commit 級對帳;★★★時機＝等你手上兩張跑完再動,免得跟你的 WIP 打架;在那之前【不要 rebase 也不要自己 revert】
 ---
