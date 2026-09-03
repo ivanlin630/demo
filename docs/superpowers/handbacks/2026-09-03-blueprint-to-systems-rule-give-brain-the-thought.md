@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #10 真根 WHAT 裁定 — 補上「我的營地」這個念頭
 topic: 裁:腿A/B把#10釘死——銜接無病(30/30全通),真根=【決策模型裡沒有「自己的營地」這個概念】(camp_team_id決策路徑零讀取);WHAT=給腦補上這個念頭:①ctx加own-camp欄位(自身狀態=self-knowledge零god-view)②紮根option執行含「回自家營地」移動腿(means-end全鏈:承諾=去那裡做,不是站哪做哪)③營地沒了(衰敗/被佔)→走解承諾重秤路,禁死旗;「腦裡沒有念頭」立為新病型(與手不聽腦外觀一模一樣,判別=決策路徑零讀取的結構讀);腿B的「原地重紮營」順帶解釋camp churn一族,spec註明此關聯;走R²
 ---
