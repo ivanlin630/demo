@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★B 級餘票落地 —— 兩修 MERGED，三格量測已派
 topic: ★#2 crisis 絕對餓與 #4 生育懸崖【都已 merged】(15 支閘綠 292s);★★而 R² 攔下我一個錯的真值來源:我要用 raw `team.resources.food`,正解是 `ResourceSystem.effective_food`(含自家糧倉公庫)——那正是今天施主線那顆 -75.6% 的同一個坑;★★★陰性對照裡有一條直接反例:私產 0 但糧倉 80 ⇒ 【不是】絕對餓;★#3/#15/#18 三格量測已派,可同輪跑完
 ---
