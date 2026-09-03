@@ -14,6 +14,7 @@ static func _seed_pop(team: TeamData, n: int) -> void:
 		AnonCohort.remove(team.anon_cohorts, "平民", "healthy", -delta)
 
 func _initialize() -> void:
+	_bed_self_check()
 	_run_sim_test()
 	_test_anon_tier_const()
 	_test_anon_cohort_key()
@@ -17268,3 +17269,41 @@ func _g1a_facility_dump(tile) -> Dictionary:
 		if key != "":
 			out[String(f)] = tile.get(key)
 	return out
+
+# ★★★床自檢行（systems 2026-09-04）：★不是斷言、不擋、不紅 —— 只是讓一個
+#   【從來沒被交代過的前提】出現在【每一份輸出裡】。
+#   ★★由來：新增「存量歸零 ⇒ crisis」時有 4 個 fixture 紅，而它們只是【碰巧被照到的】——
+#     實測本檔 53% 的建隊在 14 行內沒給 food。★★★那 4 個之外的 345 個帶著同一前提，
+#     而【沒有任何斷言會碰到它】⇒ 下一條讀糧的規則會紅，而真因在四個月前的 fixture 裡。
+#   ★為什麼不建閘：閘只擋【新的】，而危險是從【舊的 345 個】來的；自檢行每次都印。
+#   ★★為什麼不改那 345 個：多數 fixture 根本不在乎糧 ——
+#     ★★★為了量測而去改被量的東西，是今天防了一整天的形狀。
+#   ★誠實限（重要）：這一行量的是【原始碼文字】不是【執行期狀態】——
+#     ★★「14 行內」是我挑的窗，且抓不到經由 helper 間接給糧的路徑 ⇒ 它是【上界】。
+func _bed_self_check() -> void:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/headless_test.gd")
+	if src == "":
+		print("[BedSelfCheck] ★讀不到自身原始碼 ⇒ 本行無資料（★★而【讀不到】不是【沒問題】）")
+		return
+	var lines: PackedStringArray = src.split("\n")
+	var re_new := RegEx.new()
+	re_new.compile("var[ 	]+([A-Za-z_0-9]+)[ 	]*:?=[ 	]*TeamData[.]new[(][)]")
+	var total: int = 0
+	var foodless: int = 0
+	for i in range(lines.size()):
+		var m := re_new.search(lines[i])
+		if m == null:
+			continue
+		total += 1
+		var v: String = m.get_string(1)
+		var window: String = ""
+		for j in range(i, mini(i + 14, lines.size())):
+			window += lines[j] + "\n"
+		var re_food := RegEx.new()
+		re_food.compile(v + "[.]resources[ 	]*[[=]|_seed_food[(][ 	]*" + v)
+		if re_food.search(window) == null:
+			foodless += 1
+	print("[BedSelfCheck] TeamData.new()=%d｜14 行內沒給 food=%d（%.1f%%）" % [
+		total, foodless, 100.0 * float(foodless) / maxf(float(total), 1.0)])
+	print("   ★這一行量的是【原始碼文字】不是執行期狀態；「14 行」是挑的窗、抓不到 helper 間接給糧 ⇒ 上界")
+	print("   ★★用途：某天有人看到『我的新規則紅了』而旁邊寫著這個數字 —— 那一秒省下四個月")
