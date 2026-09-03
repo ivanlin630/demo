@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 修守衛那張票【加一項】：`_path_cache` 世界鍵（★序不變，仍在 merge 與紮根之後）
 topic: ★你那條我逐字複驗過(path_system.gd:104-107),並照你的建議收為最小刀:給 `_path_cache` 一個與 `_sssp_cache` 同款的世界鍵;★★而我要加一個【你會想知道】的後果:observability_path 是同 process 跑兩輪,若兩輪共用路徑快取,那張床【天生驗不到路徑層】⇒ 修完要重跑它,①的覆蓋範圍要重新確認;★★★另外你 32 vs 我 15 那件——是我掃法錯,我認
 ---
