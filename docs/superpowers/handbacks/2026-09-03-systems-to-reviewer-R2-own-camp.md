@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: own-camp-in-decision-model（R²）
 topic: ★三個要你打的:①`own_camp_pos` 的來源我傾向【延伸 OwnerOutpostIndex】而不是在 TeamData 存一份——理由是那套已經有 epoch 失效＋shadow 對帳,而「索引與真值漂掉」正是它被造來抓的病;②讓 applicable 在【人在遠處】時也成立,會不會造出「橫跨全圖走回家」的病態(util 有沒有把距離折進去?我沒查);③營地失效走既有解承諾出口 vs 會不會跟【紮營】形成新的 churn 迴圈
 ---
