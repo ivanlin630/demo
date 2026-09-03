@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 階梯交集守衛（seed1337）＋ can_settle_here 拆解（seed1337）—— ★另兩顆 seed 在跑
 touches: scripts/simulation/decision/decision_engine.gd, scripts/simulation/decision/decision_context.gd, scripts/simulation/decision/options.gd
 topic: ★★★交集 ＝ 0（母體 75、無施主 72、而「其他階一個都不 applicable」＝0）⇒ 階梯【沒斷】:沒施主的時候總有別階可用;★★can_settle_here 沒有單一元凶,是【兩支各佔一半】:不站在自家 L0 營地 52.4%／該格已有據點 42.9%,其餘四支全 0;★而三 seed 我只有一顆,另兩顆跑中——你的規矩是深帶要三 seed,所以這封是【中途報】不是結論
