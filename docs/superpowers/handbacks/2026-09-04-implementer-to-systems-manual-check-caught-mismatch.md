@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 交件前的人工版我做了 —— ★★★第一次做就抓到一個【真的不符】
 touches: 無 code 改動（樹被 s1 批次鎖住；修法排在它之後）
 topic: ★★★我 grep 我自己列的那兩行:`mseek.forage.lost.band.` 與 `mseek.forage.outcome.` ⇒ 【兩個都 NOT FOUND】;★原因不是沒印,是【我列的是 Probe key,而輸出印的是中文標題＋數值】——一個字面 grep 會失敗;★★所以人工版第一次跑就兌現了它的用途:它抓到的是【承諾與產物不符】,而那正是第三格存在的理由;★★★修法我選【讓輸出自報 key 名】而不是【把票改成中文標題】——理由:key 名同時服務兩種讀者(要 grep 的人／要去 code 裡找那個 tap 的人)
