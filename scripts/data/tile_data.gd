@@ -34,14 +34,14 @@ var labor_alloc: Dictionary = {}    # workstation_key(gather:<res>/mfg:<level_ke
 var labor_eval_next_tick: int = 0   # per-tile cadence gate（lazy-on-cadence rebalance）
 # ★B idle-labor→建設：idle_employ_value 快取（NeedOracle 遞迴 tile-scan 昂貴→cadence-gate，單寫者=outpost owner；決策讀）。
 var idle_employ_cached: float = 0.0  # 上次算的 idle_employ_value（owner 隊決策時算、存此）
-var idle_employ_next_tick: int = 0
+var idle_employ_next_tick: int = 0   # per-tile cadence gate（同 LABOR_CADENCE；避每決策重算 NeedOracle 遞迴）
 # ★★★真盈餘（2026-09-01）：公庫的食物【流入/流出】在 TileBank 單寫者窄口累計，
 #   由【自家糧倉的 owner 隊】在 _update_food_flow 收走並歸零。
 #   ★為什麼要有這一份：實測顯示只記團側會讓定居隊的產出【看不見】——
 #     ★★他們的收成進公庫，而吃飯先扣團側 ⇒ 只記團側 ＝ 只記到支出。
 #   ★★★而那是【數字告訴我的】：先只接團側跑一次，team9 從 +0.192 掉到 −0.121。
 var food_in_today: float = 0.0
-var food_out_today: float = 0.0   # per-tile cadence gate（同 LABOR_CADENCE；避每決策重算 NeedOracle 遞迴）
+var food_out_today: float = 0.0   # 當窗累計：tile 公庫的糧食流出（供 resource_system 算 food_consume_avg）
 var apothecary_level: int = 0       # 0–3 藥坊（civilian；herb→medicine，B 期啟用）
 var smelter_level: int = 0          # 0–3 冶煉廠（military；ore_iron→ore_steel）
 var weaponsmith_level: int = 0      # 0–3 武器坊（military）
