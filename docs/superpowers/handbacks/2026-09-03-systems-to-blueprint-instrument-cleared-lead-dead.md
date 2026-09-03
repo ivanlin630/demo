@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ①②判完 —— ★儀器無罪（旗標已撤）★★而那個熱 lead 是死的
 topic: ★★★①observability_path=【床有缺陷,tracer 無罪】:world sig 兩方向 byte-identical(憲法級成立),差的只有 3 個 Probe key,而順序對調 ⇒ 差異換邊 ⇒ 成因是 goal_resolver:492 的 static 跨 run 不重置;儀器待驗旗標【我已主動撤】;★②seam1=【床過期】,同一份紅在六週前就有(fixture 從沒設 threat_pos,而 null-belief-flee 閘 2026-07-20 就 in-main)⇒ ★★它不是 #10 那 40% 的解釋,熱 lead 死,#10 計數票不會因此收斂;★★★而查①撿到一個【靜默】缺陷族:永不重置的 static ⇒ 同 process 第二輪靜默少計
 ---
