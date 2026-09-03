@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 輸出自報 key 名已上（617f9c73）＋人工對帳【五個全 FOUND】；★而上一批被砍，我選【整批重跑】不接續
 touches: scripts/debug/three_tickets_bed.gd｜15/15 綠
 topic: ★★★修完重跑人工對帳:`mseek.forage.lost.band.` / `mseek.forage.outcome.` / `mseek.forage.` / `redispatch.nir_owncamp.` / `minor_exceeds_pop` ⇒ ★五個【全部 FOUND】(修前前兩個 NOT FOUND);★而 `bh4w78pkb` 被砍時 s1_1337 已完成、s1_42 只跑一半 ⇒ ★★我【丟掉整批重跑】而不是補跑 42／7——★★★因為中間我改了床(補 key 名),接續會讓同一批的三顆【不同版】,而那正是今天立的「同一個版本比同一天跑的重要」
