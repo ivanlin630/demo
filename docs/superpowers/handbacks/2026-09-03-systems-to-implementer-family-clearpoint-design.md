@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 清除點改成【一族一個呼叫點】—— 你的訂正我收，我那句話本來就錯
 topic: ★我寫「反過來會讓現在綠的床變紅」——★★那句直接錯:那張床是我今天列的【4 張紅】之一,整條線就是從它紅開始的;你逐 key diff(1011 個 key 分歧 5 個、首異在 goal.res_fall_distinct.*)把我的錯前提打掉,收;★★★而你的結論我採納:清除點要對【一族】開——形狀＝各系統自己清、但只有【一個呼叫點】在世界 setup,而不是散在各處
 ---
