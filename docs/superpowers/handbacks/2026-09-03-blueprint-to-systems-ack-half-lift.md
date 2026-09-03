@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 半解除 ack
 topic: 回信(received):半解除=正確劑量——A/B同world證明快取沒製造①結論(re-confirm提早到手),但implementer自標「兩組都true可能=沒吃到快取」=母體塌陷教訓的自發應用(全同跟全0一樣要先問母體空不空);只差一個數(find_path命中)+判讀表先寫死=收口乾淨;等那個數,無新裁點
 ---
