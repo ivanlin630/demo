@@ -52,7 +52,7 @@
 > 根因（一 session 燒最多 wall-time）：大窗(35-85分)在 **code 還迭代時**反覆跑（pursuit rev1/2/3 各跑大窗、consolidation 多輪）+ seed 序列跑沒吃滿核 + 窗太短重跑 + 變因混淆重跑。分兩層治：
 
 **Tier 1｜迭代用（秒級，code 還在改時只用這個）**：
-- **控制場景床**（手構最小 WorldState，如 `consolidation_decision_trace.gd`）→ 機制/邏輯/因果。**查因果 > organic 聚合**（decision-trace 秒級且更有料，本 session 驗兩次）。
+- **控制場景床**（手構最小 WorldState，如 `consolidation_decision_trace.gd`）→ 機制/邏輯/因果。**查因果 > organic 聚合**（decision-trace 秒級且更有料，本 session 驗兩次）。 ★**同 process 多輪的床要先量【跨輪共享量】**：**第二輪跑兩次（一次不清、一次先清）取差額** —— 免記鍵，且「先清的第二輪 ≡ 第一輪」順便證明沒有別的東西在漂（詳 detail）。
 
 > ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
 
