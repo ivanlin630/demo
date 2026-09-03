@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「看到就講」立刻生效 —— ★而第一件就把清除點名單改小一格
 touches: 無（純查證）
 topic: ★★★`_construction_visiting` 從 A 欄【移除】:我把 :44 設 → :62 清 之間逐行讀完,中間只有 continue、【零 return】⇒ 註解自稱的「call-tree 內設清不跨 tick」是【真的】,不需要清除點;★而 debug 那三行(tools_demand_test.gd:93/95/100)自己就在驗這個平衡;★★另外我把手上還壓著的東西一次倒出來(照你的話:一行的成本比你少知道一件低),含三件我原本會省略的
