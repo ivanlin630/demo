@@ -14,6 +14,7 @@ static func _seed_pop(team: TeamData, n: int) -> void:
 		AnonCohort.remove(team.anon_cohorts, "平民", "healthy", -delta)
 
 func _initialize() -> void:
+	_bed_self_check()
 	_run_sim_test()
 	_test_anon_tier_const()
 	_test_anon_cohort_key()
@@ -13517,14 +13518,25 @@ func _test_decision_crisis_bypass() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var fai := FactionAISystem.new()
 	# pop 驟降 >30%（20→10）→ crisis
+	# ★★★2026-09-04 訂正：`_decision_crisis` 新增【存量歸零】判準 ⇒ 三個 fixture 都要給糧，
+	#   否則它們會因為【食物 0】而 crisis —— ★那樣前兩條會【因為錯的理由而通過】、第三條會紅。
+	#   ★★同檔 `_test_decision_cadence` 早就寫了 `resources = {"food": 100.0}  # 非 crisis`
+	#   ⇒ ★★★那是既有慣例，我照它補上（而不是替新判準開例外）。
 	var t := TeamData.new(); t.team_id = 0; _seed_pop(t, 10); t.rung_pop_last = 20; t.food_flow_avg = 0.0
+	t.resources = {"food": 100.0}
 	assert(fai._decision_crisis(state, t), "pop 驟降>30%→crisis")
 	# food_flow 深負 → crisis
 	var t2 := TeamData.new(); t2.team_id = 1; _seed_pop(t2, 10); t2.rung_pop_last = 10; t2.food_flow_avg = -3.0
+	t2.resources = {"food": 100.0}
 	assert(fai._decision_crisis(state, t2), "food_flow<-2→crisis")
 	# 穩態 → 非 crisis
 	var t3 := TeamData.new(); t3.team_id = 2; _seed_pop(t3, 10); t3.rung_pop_last = 10; t3.food_flow_avg = 0.0
+	t3.resources = {"food": 100.0}   # ★穩態＝有糧；★★食物 0 的隊【本來就不該叫穩態】
 	assert(not fai._decision_crisis(state, t3), "穩態非 crisis")
+	# ★★★新判準自己的陽性對照（★同一支 fixture 裡，免得它只被別人的紅燈間接證明）
+	var t4 := TeamData.new(); t4.team_id = 3; _seed_pop(t4, 10); t4.rung_pop_last = 10; t4.food_flow_avg = 0.0
+	t4.resources = {"food": 0.0}
+	assert(fai._decision_crisis(state, t4), "存量歸零(flow 0、無崩跌)→crisis")
 	print("[TEST] decision_crisis_bypass PASS")
 
 func _test_should_reeval() -> void:
@@ -13537,6 +13549,7 @@ func _test_should_reeval() -> void:
 	# busy 無事 + cadence 未到 → false
 	t.current_task = TeamData.TASK_FORAGE; state.world.current_tick = 0; t.decision_eval_next_tick = 100
 	t.rung_pop_last = 0; t.food_flow_avg = 0.0
+	t.resources = {"food": 100.0}   # ★同 crisis_bypass：新增【存量歸零】判準後，沒糧的隊本來就該重評
 	assert(not fai._should_reeval(state, t), "busy無事+cadence未到→不重評")
 	# cadence 到 → true
 	t.decision_eval_next_tick = 0
@@ -13574,6 +13587,7 @@ func _test_unified_throttle() -> void:
 	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]; t.leader_id = 100
 	_seed_pop(t, 5); t.current_task = TeamData.TASK_TRADE; t.faction_id = -1
 	t.decision_eval_next_tick = 100; t.food_flow_avg = 0.0; t.rung_pop_last = 0
+	t.resources = {"food": 100.0}   # ★同上：throttle 測的是 cadence，不是「餓到 crisis 繞過 cadence」
 	var l := PersonData.new(); l.id = 100; state.persons[100] = l; state.teams[0] = t
 	var fai := FactionAISystem.new()
 	state.world.current_tick = 0
@@ -17255,3 +17269,41 @@ func _g1a_facility_dump(tile) -> Dictionary:
 		if key != "":
 			out[String(f)] = tile.get(key)
 	return out
+
+# ★★★床自檢行（systems 2026-09-04）：★不是斷言、不擋、不紅 —— 只是讓一個
+#   【從來沒被交代過的前提】出現在【每一份輸出裡】。
+#   ★★由來：新增「存量歸零 ⇒ crisis」時有 4 個 fixture 紅，而它們只是【碰巧被照到的】——
+#     實測本檔 53% 的建隊在 14 行內沒給 food。★★★那 4 個之外的 345 個帶著同一前提，
+#     而【沒有任何斷言會碰到它】⇒ 下一條讀糧的規則會紅，而真因在四個月前的 fixture 裡。
+#   ★為什麼不建閘：閘只擋【新的】，而危險是從【舊的 345 個】來的；自檢行每次都印。
+#   ★★為什麼不改那 345 個：多數 fixture 根本不在乎糧 ——
+#     ★★★為了量測而去改被量的東西，是今天防了一整天的形狀。
+#   ★誠實限（重要）：這一行量的是【原始碼文字】不是【執行期狀態】——
+#     ★★「14 行內」是我挑的窗，且抓不到經由 helper 間接給糧的路徑 ⇒ 它是【上界】。
+func _bed_self_check() -> void:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/headless_test.gd")
+	if src == "":
+		print("[BedSelfCheck] ★讀不到自身原始碼 ⇒ 本行無資料（★★而【讀不到】不是【沒問題】）")
+		return
+	var lines: PackedStringArray = src.split("\n")
+	var re_new := RegEx.new()
+	re_new.compile("var[ 	]+([A-Za-z_0-9]+)[ 	]*:?=[ 	]*TeamData[.]new[(][)]")
+	var total: int = 0
+	var foodless: int = 0
+	for i in range(lines.size()):
+		var m := re_new.search(lines[i])
+		if m == null:
+			continue
+		total += 1
+		var v: String = m.get_string(1)
+		var window: String = ""
+		for j in range(i, mini(i + 14, lines.size())):
+			window += lines[j] + "\n"
+		var re_food := RegEx.new()
+		re_food.compile(v + "[.]resources[ 	]*[[=]|_seed_food[(][ 	]*" + v)
+		if re_food.search(window) == null:
+			foodless += 1
+	print("[BedSelfCheck] TeamData.new()=%d｜14 行內沒給 food=%d（%.1f%%）" % [
+		total, foodless, 100.0 * float(foodless) / maxf(float(total), 1.0)])
+	print("   ★這一行量的是【原始碼文字】不是執行期狀態；「14 行」是挑的窗、抓不到 helper 間接給糧 ⇒ 上界")
+	print("   ★★用途：某天有人看到『我的新規則紅了』而旁邊寫著這個數字 —— 那一秒省下四個月")

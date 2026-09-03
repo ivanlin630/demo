@@ -773,6 +773,8 @@ func _auto_withdraw_mounts(state: WorldState, team: TeamData) -> void:
 
 # ── evaluate_all 子相位計時（opt-in 掛 SimRunner.phase_timing;cadence spike 歸因 zoom）──
 static var _fai_ph: Dictionary = {}
+# ★#15 普遍度用：每隊上一次的 current_option（★純觀測；只在 Probe.enabled 內讀寫）
+static var _churn_last: Dictionary = {}
 # ★★★market-known 命中率的【路徑標記】（spec 2026-08-27 驗收 3：兩條路徑分開報）。
 #   ★兩條路徑共用同一支 `_harvest_market_known`，而真正的分辨點在【上游呼叫堆疊】，不在 helper ——
 #     `DecisionContext.gather` 兩條都會走，所以在 helper 加參數答不了這題。
@@ -798,12 +800,14 @@ static func _reset_cross_run() -> Dictionary:
 		cleared["FactionAISystem._a2b_remote_tribute_payers"] = _a2b_remote_tribute_payers.size()
 	if not _fai_ph.is_empty(): cleared["FactionAISystem._fai_ph"] = _fai_ph.size()
 	if not _mk_verify_rows.is_empty(): cleared["FactionAISystem._mk_verify_rows"] = _mk_verify_rows.size()
+	if not _churn_last.is_empty(): cleared["FactionAISystem._churn_last"] = _churn_last.size()
 	if _mk_path != "other": cleared["FactionAISystem._mk_path"] = _mk_path
 	_a2b_remote_tribute_payers.clear()
 	_fai_ph.clear()
 	_mk_verify_rows.clear()
+	_churn_last.clear()
 	_mk_path = "other"
-	return {"checked": 4, "cleared": cleared}
+	return {"checked": 5, "cleared": cleared}
 
 func _fai_pht(name: String, t0: int) -> int:
 	var now: int = Time.get_ticks_usec()
@@ -2832,6 +2836,17 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	#   ★一個 bump 點涵蓋全部四個入口（leader_unified／member.unified ×2／threat force-reeval／獨立隊 solo）
 	#     —— 它們最終都匯入本函式體。★不要四處插。
 	if Probe.enabled: Probe.bump("unified.rank.calls")
+	# ★★★#15 普遍度（systems 改派工 2026-09-04）：條目的重開條件是【churn 普遍嗎】不是【churn 有多大】
+	#   ⇒ ★母體＝該日有 survival 決策的隊；命中＝當日切換 ≥2 次的隊 ⇒ 要的是【佔比】
+	#   ★★「一隊 88 次」與「半數隊各 3 次」在平均值上可能一樣，而後者才叫普遍。
+	#   ★★★這裡只記【原始事件】（誰、哪一天、換了沒），佔比由床算 —— tap 不做統計。
+	if Probe.enabled:
+		var _day: int = state.world.current_tick / WorldState.TICKS_PER_DAY
+		Probe.bump("churn.day_team.%d_%d" % [_day, team.team_id])   # ★母體：該日該隊有決策
+		if team.current_option != "" and team.current_option != _churn_last.get(team.team_id, ""):
+			Probe.bump("churn.switch.%d_%d" % [_day, team.team_id])   # ★命中：換了
+		_churn_last[team.team_id] = team.current_option
+		Probe.bump("survival.eval_calls")   # ★備援資料順手收（systems 批准）：perf 換方法的分子
 	if Probe.enabled: _mk_path = "rank_scored"
 	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	# ★★★單次耗時取自【既有的那對計時】——★純複製一個 int，不呼叫 Time.get_ticks_usec()。
@@ -3034,6 +3049,28 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# timeout 起算已改讀 try_set 蓋章的 task_start_tick（單源），此路不需另外蓋章。
 		if _set_ok and td["task"] == TeamData.TASK_TRADE:
 			Probe.bump("trade.dispatch.unified_" + opt)
+		# ★★★#3 market-seeker：撲空之後 N tick 內【再去的是不是同一格】（N＝既有 DECISION_CADENCE，不新增常數）
+		#   ★三種結局分開記 —— 而它們對應 systems 先寫死的三列：
+		#     same＝條目症狀仍在／other＝在找別的貨源（可銷）／else＝已經會放棄（可銷）
+		#   ★★兩個座標都印在 sample 裡（他的原話：否則「再去同一個」與「另一個剛好也空」計數上一樣）
+		if Probe.enabled and _set_ok:
+			var _bl: Dictionary = InteractionSystem._bail_last.get(team.team_id, {})
+			# ★憲法閘：`if … <= UPPER` 會被判成 threshold-gate ⇒ ★★改形狀（把比較搬出 if），
+			#   不是加豁免 —— 而它本來就不是門檻閘：這整段在 `Probe.enabled` 內、純計數、不改控制流。
+			var _in_window: bool = state.world.current_tick - int(_bl.get("tick", -99999)) <= DECISION_CADENCE
+			if not _bl.is_empty() and _in_window:
+				var _bpos: Vector2i = _bl.get("pos", Vector2i(-1, -1))
+				if td["task"] == TeamData.TASK_TRADE:
+					var _same: bool = tgt == _bpos
+					Probe.bump("mseek.same" if _same else "mseek.other")
+					Probe.bump_sample("mseek.sample", {
+						"tick": state.world.current_tick, "team": team.team_id, "opt": opt,
+						"bail_pos": str(_bpos), "new_pos": str(tgt), "same": _same,
+					}, 200)
+				else:
+					Probe.bump("mseek.gave_up")
+					Probe.bump("mseek.gave_up.task." + String(td["task"]))
+				InteractionSystem._bail_last.erase(team.team_id)   # ★一次 bail 只判一次（★★否則同一次撲空會被重複計）
 		if _set_ok: _commit_settle_site(state, team, td)   # ★§4a 紮根：世界寫入只在 try_set 成功後（zombie 工地根治）
 		# 掠奪/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（社交 resolver 讀）
 		if td.has("combat_target"):
@@ -3466,7 +3503,43 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 
 # 重評 cadence 重構：劇變事件→提前重評（複用 S3 crash-bypass 門檻）。純讀 team 已存欄，零 randf、零 gather
 # （避每 tick 全 gather perf）。pop 驟降/food 深負；威脅由既有 threat_eval cadence 路徑覆蓋，不在此重算。
-func _decision_crisis(_state: WorldState, team: TeamData) -> bool:
+func _decision_crisis(state: WorldState, team: TeamData) -> bool:
+	# ★★★#2 絕對餓（2026-09-04）：既有三判準全是【流量】（pop 崩跌／flow DEEP／flow GRADUAL）
+	#   ⇒ ★一支「食物早就 0、而 flow 也已經是 0（沒東西可流失）」的隊【一條都不觸發】
+	#   ⇒ ★★存量歸零是比任何流量都硬的危機，而它先前不在這個 predicate 裡。
+	#   ★★★真值來源＝`ResourceSystem.effective_food`【不是】`team.resources.get("food")`：
+	#     後者是團私產、不含自家糧倉公庫 ⇒ 會把「倉裡還有糧」的隊誤判成絕對餓
+	#     （`effective_holding` 的註解自述「決策讀者一律經此」）。
+	var _eff_food: float = ResourceSystem.effective_food(state, team)
+	if _eff_food <= 0.0:
+		# ★★★驗收要的是【逐隊】而不是總數（blueprint）：「更常 fire 不是平衡問題，是真相問題」
+		#   ⇒ 同時記【raw 私產】與【effective】——★兩者都印才分得出
+		#     「真的一粒都沒有」與「accessor 讀錯了」（後者會長得跟前者一模一樣）。
+		if Probe.enabled:
+			Probe.bump("crisis.abs_hunger")
+			# ★★★per-team 桶（systems 批准 2026-09-04）：★`bump_sample` 是 first-N ⇒ 它答不了
+			#   「2010 次是【3 隊各 670】還是【60 隊各 33】」——而那是兩個完全不同的世界。
+			#   ★★無 cap、不取樣 ⇒ 相異隊數與各自次數都出得來。
+			Probe.bump("crisis.abs_hunger.team.%d" % team.team_id)
+			# ★★★同理：`would_fire_by_old` 先前只在【取樣】裡 ⇒ 只能講「最早那 500 筆」。
+			#   改成計數 ⇒ 才講得出「全部 N 次裡有幾次是舊判準也會抓的」。
+			#   ★血證：seed7 的最早 500 筆裡有 66 筆舊判準【也會】fire，而 1337／42 是 0
+			#     ⇒ 「全部都是新抓到的」這句在 seed7 上【不成立】。
+			var _old_too: bool = (team.rung_pop_last > 0 and float(team.rung_pop_last - team.population)
+				/ float(maxi(team.rung_pop_last, 1)) > AmbitionLadder.RUNG_CRASH_POP_DROP_PCT) 				or team.food_flow_avg < AmbitionLadder.RUNG_CRASH_FOOD_DEEP 				or team.food_flow_avg < GRADUAL_DECLINE_FLOW
+			Probe.bump("crisis.abs_hunger.old_too" if _old_too else "crisis.abs_hunger.new_only")
+			Probe.bump_sample("crisis.abs_hunger.sample", {
+				"tick": state.world.current_tick, "team": team.team_id, "pop": team.population,
+				"raw_food": snappedf(float(team.resources.get("food", 0.0)), 0.001),
+				"eff_food": snappedf(_eff_food, 0.001),
+				"flow_avg": snappedf(team.food_flow_avg, 0.001),
+				# ★★其餘三條判準【當下成不成立】—— 沒有它就分不出「這一條新抓到的」與「本來就會 fire 的」
+				"would_fire_by_old": (team.rung_pop_last > 0 and float(team.rung_pop_last - team.population)
+					/ float(maxi(team.rung_pop_last, 1)) > AmbitionLadder.RUNG_CRASH_POP_DROP_PCT)
+					or team.food_flow_avg < AmbitionLadder.RUNG_CRASH_FOOD_DEEP
+					or team.food_flow_avg < GRADUAL_DECLINE_FLOW,
+			}, 500)
+		return true
 	if team.rung_pop_last > 0 \
 			and float(team.rung_pop_last - team.population) / float(team.rung_pop_last) > AmbitionLadder.RUNG_CRASH_POP_DROP_PCT:
 		return true

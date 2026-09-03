@@ -36,6 +36,8 @@ var _npc_ai:    NpcAiSystem
 #   ★純觀測：只有 `Probe.enabled` 時才維護；決策端一行都不讀它。
 static var _mf_tick: int = -1
 static var _mf_seq: Dictionary = {}
+# ★#3 market-seeker：team_id → {pos, tick}（★純觀測，只在 Probe.enabled 的 bail 路寫）
+static var _bail_last: Dictionary = {}
 
 # ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
 #   ★`_mf_seq` 本來就有「tick 一變就整包清」的內建清除，★★但那個判準是 `cur_tick != _mf_tick`
@@ -44,10 +46,12 @@ static var _mf_seq: Dictionary = {}
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
 	if not _mf_seq.is_empty(): cleared["InteractionSystem._mf_seq"] = _mf_seq.size()
+	if not _bail_last.is_empty(): cleared["InteractionSystem._bail_last"] = _bail_last.size()
 	if _mf_tick != -1: cleared["InteractionSystem._mf_tick"] = _mf_tick
 	_mf_seq.clear()
+	_bail_last.clear()
 	_mf_tick = -1
-	return {"checked": 2, "cleared": cleared}
+	return {"checked": 3, "cleared": cleared}
 
 # ★回傳「這是本 tick 內第幾個碰到 `oid` 的」（1-based）。★同 tick 第一個回 1。
 static func _mf_next_seq(cur_tick: int, oid: int) -> int:
@@ -856,7 +860,12 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 	qty = mini(qty, MovementSystem.new().carry_space_for_res(visitor, res))
 	if qty <= 0:
 		# 分因 bail 可觀測（29 bail 因 headline，measurer 拆得出）
-		if stock <= 0.0: Probe.bump("trade.market_bail.buy_no_stock")
+		if stock <= 0.0:
+			Probe.bump("trade.market_bail.buy_no_stock")
+			# ★★★#3 market-seeker（systems 2026-09-04）：記【誰、在哪一格、什麼時候】撲空，
+			#   供決策端在 N tick 內比對「再去的是不是【同一格】」。
+			#   ★★兩個座標都要留 —— 否則「再去同一個」與「去了另一個剛好也空」在計數上長得一樣。
+			_bail_last[visitor.team_id] = {"pos": tile.tile_pos, "tick": state.world.current_tick}
 		elif want <= 0.0: Probe.bump("trade.market_bail.buy_no_want")
 		elif vcoin / ask < 1.0: Probe.bump("trade.market_bail.buy_cant_afford")
 		else: Probe.bump("trade.market_bail.buy_carry_full")

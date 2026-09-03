@@ -46,6 +46,8 @@ func _run() -> void:
 	_sec_aid_bands()
 	_sec_zhagen()
 	_sec_churn()
+	_sec_abs_hunger()
+	_sec_b_grade()
 	_sec_cansettle()
 	_sec_ladder()
 	_sec_prepare()
@@ -343,6 +345,86 @@ func _sec_ladder() -> void:
 #   ★★而 churn 跟 zhagen 母體【毫無關係】—— 我把一個量測掛在一個不相干的守衛底下，
 #   ★★★於是它正好在我最需要它的那個世界裡靜默失蹤（而輸出看起來完全正常）。
 #   ⇒ 修法＝獨立成節、無條件印。
+# ★★★#2 絕對餓：blueprint 要的是【逐隊 dump】不是總數
+#   （「更常 fire 不是平衡問題，是真相問題；怕多 fire ＝ 怕真相」）
+func _sec_abs_hunger() -> void:
+	var n: int = int(Probe.counts.get("crisis.abs_hunger", 0))
+	print("═══ ★#2 crisis 絕對餓（新判準）═══")
+	print("  fire 次數 = %d" % n)
+	if n == 0:
+		print("  ★★★母體 0 ⇒ 這個窗裡沒有隊【存量歸零】——不是「判準沒接上」，兩者要分開：")
+		print("     ★接上與否看 code；有沒有隊落進來看世界。而這一行只答後者。")
+		return
+	var sm: Array = Probe.samples.get("crisis.abs_hunger.sample", [])
+	var new_only: int = 0
+	for e in sm:
+		if not bool(e.get("would_fire_by_old", false)): new_only += 1
+	print("  取樣 %d 筆（cap 500，★first-N 不是 reservoir）｜其中舊三判準都不成立 = %d" % [sm.size(), new_only])
+	# ★★★計數版（不受 first-N 限制）——★取樣只能講「最早那 N 筆」，計數才講得出全部
+	print("  ★全部 %d 次裡：新抓到的 = %d｜舊判準也會抓的 = %d" % [n,
+		int(Probe.counts.get("crisis.abs_hunger.new_only", 0)),
+		int(Probe.counts.get("crisis.abs_hunger.old_too", 0))])
+	# ★★per-team 桶（無 cap）——★★★2010 次是【3 隊各 670】還是【60 隊各 33】是兩個世界
+	var pt: Dictionary = {}
+	for k in Probe.counts.keys():
+		var ks2: String = String(k)
+		if ks2.begins_with("crisis.abs_hunger.team."): pt[ks2.substr(23)] = int(Probe.counts[k])
+	var keys2: Array = pt.keys(); keys2.sort_custom(func(a, b): return int(pt[a]) > int(pt[b]))
+	var top: Array = []
+	for i2 in range(mini(8, keys2.size())):
+		top.append("team%s=%d" % [String(keys2[i2]), int(pt[keys2[i2]])])
+	print("  ★相異隊數 = %d｜前 8 名：%s" % [keys2.size(), " ".join(PackedStringArray(top))])
+	print("  ── 逐隊（最多 10 筆）★raw 私產與 effective 並排：兩者都印才分得出「真的沒有」與「讀錯了」──")
+	for i in range(mini(10, sm.size())):
+		var e2: Dictionary = sm[i]
+		print("     tick=%s team=%s pop=%s raw_food=%s eff_food=%s flow=%s 舊判準也會 fire=%s" % [
+			str(e2.get("tick", -1)), str(e2.get("team", -1)), str(e2.get("pop", -1)),
+			str(e2.get("raw_food", -1)), str(e2.get("eff_food", -1)),
+			str(e2.get("flow_avg", -1)), str(e2.get("would_fire_by_old", false))])
+
+# ★★★B 級三格＋順手一格（systems 派工 2026-09-04）。★每一格都【母體與命中同印】。
+func _sec_b_grade() -> void:
+	print("═══ ★B 級量測（#3 market-seeker／#15 普遍度＋perf／④minor>pop）═══")
+	# ── ④minor_population > population ──
+	var me: int = int(Probe.counts.get("minor_exceeds_pop", 0))
+	print("  ④minor>pop 的隊×tick = %d｜相異隊 = %s" % [me, _bucket_list("minor_exceeds_pop.team.")])
+	print("     ★恆 0 ⇒ 那條銷案；★★非 0 ⇒ 上面那串就是隊 id（systems 判是哪條路造成的）")
+	# ── #3 market-seeker ──
+	var ms_same: int = int(Probe.counts.get("mseek.same", 0))
+	var ms_other: int = int(Probe.counts.get("mseek.other", 0))
+	var ms_gave: int = int(Probe.counts.get("mseek.gave_up", 0))
+	var ms_tot: int = ms_same + ms_other + ms_gave
+	print("  #3 母體（撲空後 %d tick 內有再派的）= %d" % [FactionAISystem.DECISION_CADENCE, ms_tot])
+	if ms_tot == 0:
+		print("     ★★★母體 0 ⇒ 這輪【沒人在窗內再派】——不是「不會再去」（0 三讀法）")
+	else:
+		print("     ★再去【同一格】= %d（%.1f%%）｜換一格 = %d｜改做別的 = %d"
+			% [ms_same, 100.0 * float(ms_same) / float(ms_tot), ms_other, ms_gave])
+		print("     改做什麼：%s" % _bucket_list("mseek.gave_up.task."))
+		var mss: Array = Probe.samples.get("mseek.sample", [])
+		for i in range(mini(5, mss.size())):
+			var e: Dictionary = mss[i]
+			print("        team=%s opt=%s bail=%s new=%s same=%s" % [
+				str(e.get("team", -1)), String(e.get("opt", "?")),
+				String(e.get("bail_pos", "?")), String(e.get("new_pos", "?")), str(e.get("same", false))])
+	# ── #15 普遍度（★佔比不是最大值）──
+	var day_teams: Dictionary = {}
+	var sw_teams: Dictionary = {}
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("churn.day_team."): day_teams[ks.substr(15)] = true
+		elif ks.begins_with("churn.switch."): sw_teams[ks.substr(13)] = int(Probe.counts[k])
+	var hit: int = 0
+	for k2 in sw_teams:
+		if int(sw_teams[k2]) >= 2: hit += 1
+	print("  #15 普遍度｜母體（該日有決策的 隊×日）= %d｜命中（當日切換 ≥2 次）= %d（%.1f%%）"
+		% [day_teams.size(), hit, 100.0 * float(hit) / maxf(float(day_teams.size()), 1.0)])
+	print("     ★★★問的是【普遍嗎】不是【最大幾次】——「一隊 88 次」與「半數隊各 3 次」平均值可能一樣")
+	# ── #15 perf ＋ 備援分子 ──
+	print("  #15 perf｜`loop3.survival` 佔比需 phase_timing 開（本輪 %s）｜★備援分子 survival.eval_calls = %d"
+		% [str(SimRunner.phase_timing), int(Probe.counts.get("survival.eval_calls", 0))])
+	print("     ★exclusive=unknown（★★除非跑的人明示；★★★自動偵測只能反駁不能確認）")
+
 func _sec_churn() -> void:
 	print("═══ ★camp churn（觀察項，非驗收）═══")
 	print("  ── ★camp churn（★用既有的桶，不為此新開定義；★★列【觀察項】不列驗收）──")
