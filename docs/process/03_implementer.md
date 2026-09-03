@@ -73,6 +73,13 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 ★**診斷型的床不要加**（例：`slice_a_observe.gd` 檔頭寫「觀測（非 gate）」）——
 ★★**把診斷床也納入，只會製造第二份會 drift 的真相。**
 
+## ★★★同一個 process 跑多輪的床：**必須列出【哪些 state 層是跨輪共享的】**（blueprint 立 2026-09-03）
+
+★**血證**：`PathSystem._path_cache` 的鍵只有座標，新鮮度靠 `cached.tick == current_tick` ——★★**而跨 run 時 tick 歸零重來**
+⇒ **第二輪吃第一輪的路徑（連不同世界也吃）**。`observability_path_test` 兩輪共用它 ⇒ ★★★**「路徑層的差異」在那張床上天生不可能出現**，
+於是「world sig byte-identical」證明的東西**比看起來少**。⇒ **多輪床的誠實限必列共享清單**；找法＝掃 `static`（★**含 bool/int 旗標**，
+它們一樣跨輪殘留 ——★★「我用過 `trace_infra=true` 沒關、沒出事是運氣不是設計」）。★**每輪開頭自己清**，別假設「新世界＝新狀態」。
+
 ## ★★★把【炸掉舊斷言的隱形機制】變成被斷言的對象，不要繞開它（implementer 立 2026-08-26）
 
 **血證**：`survival_layer_unify_test` 的 `中性 reserve = target×pop×日耗 = 32` 一直紅，真值是 **96**。

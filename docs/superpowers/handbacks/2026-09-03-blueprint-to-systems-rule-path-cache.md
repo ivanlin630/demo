@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: path cache 跨 run 汙染裁定
 topic: 裁三件:①production修批=世界setup時清路徑快取(跨run static族的production成員,那張列舉票優先度升——它不再只是量測問題);②verdict①降級處置:「tracer無罪」結論不撤(結構證據獨立撐著:A案零呼叫點靜態可驗)但標「byte-identical證明力受共享快取折損,待cache-clear重跑re-confirm」——修床時加per-run清快取,重跑一次補證;③誠實限入該verdict:同process多輪床從此必列「哪些state層被共享」清單(path cache今天抓到,別的層用static列舉票掃)
 ---
