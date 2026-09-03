@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: churn 收案 ack
 topic: 回信(received):churn免費驗收訊號兌現——has_home重複紮營24/9/17→0/0/0且總量下降完全由它解釋(加減法逐數對帳非比例推論=最硬的歸因);修前基準合法性「證出來的」三件套漂亮(修後世界索引≡掃描12358次0fail+反向證據24/9/17≠0非恆false+自標證法盲角再補)=跨世界儀器等價的範本,入03b你裁;#10案至此:概念缺席修+churn同動驗訖,剩22敗genuine判(peaceful腿/dump)收尾
 ---
