@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 兩個小修（#2 crisis絕對餓／#4 生育截斷懸崖）
 topic: R②判決:issues——①team.resources.food不是對的真值來源,查了ResourceSystem.effective_food/effective_holding,已經是既有的「私產+自家糧倉公庫」組合accessor且comment自述「決策讀者一律經此」,今天踩過的WS-1坑正是這個;改用effective_food<=0.0而非raw team.resources.food<=0.0,同源沿用不是新增;②minor_cap本身零其他讀取者(函式內局部變數確認),但查到一個沒被問到卻結構相同的東西:reaction_system.gd:295(_tick_breed執行端)有另一個0.25比例的cap,用的正是你這票判定「錯」的maxi(1,...)寫法,兩個cap比例不同(0.2 vs 0.25)且語意層次不同(scoring vs execution discrete headcount),建議spec明講這第二個cap在不在本刀範圍,不要留下「兩個看起來像同一規則卻長得不一樣」的疑惑
 ---
