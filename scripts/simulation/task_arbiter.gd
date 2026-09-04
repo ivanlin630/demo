@@ -72,12 +72,14 @@ static func _note_convoy_rewrite(team: TeamData, path: String, new_task: String)
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "") -> bool:
 	if team.combat_target != -1:
+		if Probe.enabled: Probe.bump("arbiter.deny.戰鬥鎖"); Probe.bump("arbiter.deny.戰鬥鎖.by." + _source)
 		return false   # 戰鬥鎖絕對（combat 結束流程清 combat_target）
 	# crisis-override 免疫窗：剛 crisis-released 的 task 短時間禁重委派（防同 cadence release-then-instant-recommit：
 	# defection「等待新領主」/solo FLEE 子系統立刻打回原 task → survival 永無機會）。只擋「同一 task」→ survival
 	# 選別的 task（覓食/買糧…）不受阻，順利接住餓死隊。到期自動解。
 	if new_task == team.crisis_released_task and team.crisis_released_task != "" \
 			and state.world.current_tick < team.crisis_released_until:
+		if Probe.enabled: Probe.bump("arbiter.deny.crisis免疫窗"); Probe.bump("arbiter.deny.crisis免疫窗.by." + _source)
 		return false
 	# ★持守統一 Slice 3 門檻式（§6）：committed progressive 動作（persist_strength 高）擋【非危機】搶班，完成優先。
 	# 危機 axis（任一側 ≥PRIO_THREAT：combat/survival/threat）不介入=守命/背水一戰；玩家命令（PRIO_PLAYER）authority 不擋；
@@ -104,6 +106,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			if _held_commit:
 				Probe.bump("commit.hold_blocked")
 				Probe.bump("commit.hold_blocked." + String(_commit.get("kind", "")))
+		if Probe.enabled: Probe.bump("arbiter.deny.持守擋班"); Probe.bump("arbiter.deny.持守擋班.by." + _source)
 		return false
 	if team.current_task == TeamData.TASK_IDLE or priority > team.task_priority:
 		# 漏斗站4探針（純觀測）：TRADE 在途被搶 → 記誰搶走（new_task|source）
@@ -154,6 +157,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			# 壓抑：慾望轉 stress/unrest（餵既有叛變管線；stress 進 desire 公式 → 憋多了爆）
 			leader.stress = minf(leader.stress + 0.05, 1.0)
 			UnrestBank.add(team, 1, "task")
+	if Probe.enabled: Probe.bump("arbiter.deny.優先序不足"); Probe.bump("arbiter.deny.優先序不足.by." + _source)
 	return false
 
 

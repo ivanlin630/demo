@@ -2991,8 +2991,17 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		for _e in ranked:
 			if _e["opt"] == "攻擊":
 				Probe.bump("conq.member_atk_eligible"); break
+	# ★★★徵收漏斗（blueprint 裁 2026-09-05：標準漏斗拆解，逐站條件名，禁猜）——
+	#   ★問的是【贏了而沒 dispatch，卡在哪個條件】⇒ ★★每一格要有 counter，
+	#     不要用 trace 逐筆讀出來的印象代替計數。
+	#   ★★★母體＝【rank[0] 是徵收】的那些決策；而下面每個 `continue`／每個結局各佔一格，
+	#     互斥且窮盡 ⇒ 卷面可對帳（Σ各格 == 母體）。
+	var _lvf: bool = Probe.enabled and not ranked.is_empty() and String(ranked[0]["opt"]) == "徵收"
+	if _lvf: Probe.bump("levyfun.rank0")
 	for e in ranked:
 		var opt: String = e["opt"]
+		# ★徵收只在【它是 rank[0]】時進漏斗：★★否則「它排第五也被算進母體」會讓分母膨脹
+		var _lvf_this: bool = _lvf and opt == "徵收" and String(ranked[0]["opt"]) == "徵收"
 		# means-end 統一攻擊：征服 intent 驅動的攻擊 → dispatch-time scout-verify scaffolding
 		# （_commit_conquest_attack：不確定→斥候、confident→打；削敵→俘虜→守乾淨鏈）。序5 dissolve：
 		# cascade 決策已溶進 攻擊 option（intent_fit 征服 × readiness/富prey）→ 此處只走 scaffolding。
@@ -3008,6 +3017,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				# 舊 `continue` 於 scaffolding 未派時落次佳 option（建設…）＝dispatch 層替 NPC 否決統一秤 #1，
 				# 已撕除；未派＝暫緩本 cadence，下輪重評（prey 真消失→攻擊 option 自然退榜，秤選次佳非 dispatch 替換）。
 				return
+			if _lvf_this: Probe.bump("levyfun.exit.子隊非自主leader")
 			continue   # 非候選（子隊=非自主 leader）→ 試次佳
 		var _t2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task（label 非 static REGISTRY key）；static option 走既有。
@@ -3034,9 +3044,11 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			if _dispatch_goal_delegate(state, team, td):
 				team.current_option = String(e["opt"])   # 承諾追蹤(label:delegate)
 				return
+			if _lvf_this: Probe.bump("levyfun.exit.delegate失敗")
 			continue
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+			if _lvf_this: Probe.bump("levyfun.exit.無目標")   # ★to_task 回 (-1,-1)＝找不到可徵的對象
 			continue   # 不可派 → 試次佳(修凍死)
 		# 投靠玩家：走 forced_event（玩家決定收留），不自動 merge（對稱 + UX）
 		if opt == "併入" and td.has("social_target"):
@@ -3054,6 +3066,12 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# 序6 probe 遷移：成員征服攻擊實派 + 徵收實派（舊 hand-cascade 探針已刪 → 引擎路重掛，供驗魂）。
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
+		# ★★★而【無勢力的隊也可能派徵收】—— 舊 tap 有 `faction_id != -1` 的前提，
+		#   ★所以「dispatch 數」少算了那一群；★★這一格把它補起來，並【與舊 tap 並排】不取代它
+		#   （★★★取代會讓舊卷與新卷的同名數字語意不同 —— 那比少一格更糟）
+		if _lvf_this:
+			Probe.bump("levyfun.commit")
+			Probe.bump("levyfun.commit.有勢力" if team.faction_id != -1 else "levyfun.commit.無勢力")
 		# full_probe（診斷）：fold 路 merge 實派 + merge-applicable 隊 option 去向（B 鐵證：該併卻選別的）。
 		if opt == "併入": Probe.bump("merge.consolidate_dispatch")
 		if Probe.enabled and opt == "吸納": Probe.bump("absorb.dispatch")   # §HOW-7 強方吸納實派
@@ -3073,6 +3091,10 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# 高值經濟 @50 換掉；task_arbiter self-replace 已擴認 70 同層 threat option 可換 迎戰→求和)。其餘 @50。
 		# ★絕境經濟 ① 單一源：option→priority 收 DecisionOptions.priority_for（survival 保序不看 dispatch 路）。
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "unified")
+		if _lvf_this:
+			# ★★★第四型手不聽腦：`try_set` 可能 no-op（priority 被更高的佔住）——
+			#   ★而它【不會報錯】，只是這一次派工靜靜地沒發生
+			Probe.bump("levyfun.try_set.ok" if _set_ok else "levyfun.try_set.noop")
 		if _set_ok: _stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位

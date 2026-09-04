@@ -1399,6 +1399,53 @@ func _sec_levy() -> void:
 		int(Probe.counts.get("levy.balanced", 0)), int(Probe.counts.get("levy.UNBALANCED_BUG", 0))])
 	print("     ★總量：付方減少 %.1f ｜ 收方增加 %.1f（★兩邊都印 —— 只看一邊會把幽靈讀成真轉移）" % [
 		Probe.amount("levy.amount_out"), Probe.amount("levy.amount_in")])
+	print("  ── ★★★贏了而沒 dispatch，卡在哪一格（★逐站條件名，互斥且窮盡）──")
+	var _r0: int = int(Probe.counts.get("levyfun.rank0", 0))
+	var _ex: Array = []
+	var _exsum: int = 0
+	for _k3 in Probe.counts.keys():
+		var _ks3: String = String(_k3)
+		if _ks3.begins_with("levyfun.exit."):
+			var _c3: int = int(Probe.counts[_k3])
+			_exsum += _c3
+			_ex.append("%s=%d" % [_ks3.substr(13), _c3])
+	_ex.sort()
+	var _cm2: int = int(Probe.counts.get("levyfun.commit", 0))
+	print("     母體（`徵收` 是 rank[0] 的決策）= %d" % _r0)
+	print("     落跑：%s" % ("｜".join(PackedStringArray(_ex)) if not _ex.is_empty() else "（無）"))
+	print("     派出：commit=%d（有勢力=%d ｜ ★無勢力=%d ← 舊 `tribute.dispatch.member` 看不到這一群）" % [
+		_cm2, int(Probe.counts.get("levyfun.commit.有勢力", 0)),
+		int(Probe.counts.get("levyfun.commit.無勢力", 0))])
+	print("     ★★★對帳：落跑 %d ＋ 派出 %d ＝ %d vs 母體 %d %s" % [
+		_exsum, _cm2, _exsum + _cm2, _r0,
+		"✅" if _exsum + _cm2 == _r0 else "❌ 不平（★有我沒列到的出口）"])
+	print("     ★第四型手不聽腦：`try_set` ok=%d ｜ ★★noop=%d（★★★noop ＝ 派了但靜靜地沒發生）" % [
+		int(Probe.counts.get("levyfun.try_set.ok", 0)), int(Probe.counts.get("levyfun.try_set.noop", 0))])
+	print("  ── ★①「無目標」是哪一種無（★三種共用同一個 (-1,-1) 回值，而處置不同）──")
+	var _nt: Array = []
+	var _ntsum: int = 0
+	for _k4 in Probe.counts.keys():
+		var _ks4: String = String(_k4)
+		if _ks4.begins_with("levyfun.notgt."):
+			var _c4: int = int(Probe.counts[_k4])
+			_ntsum += _c4
+			_nt.append("%s=%d" % [_ks4.substr(14), _c4])
+	_nt.sort()
+	print("     %s ｜ 合計 %d" % [
+		"｜".join(PackedStringArray(_nt)) if not _nt.is_empty() else "（空）", _ntsum])
+	print("     ★★★母體不同要標：這一格數的是【每一次 `徵收` 的 to_task 被呼叫】，")
+	print("        ★而「落跑 31」只算【徵收是 rank[0] 那幾次】⇒ 合計會 ≥ 31，兩者【不能相減】")
+	print("  ── ★②`try_set` 是被哪一條規則擋的（★TaskArbiter 逐條件名）──")
+	var _ad: Array = []
+	for _k5 in Probe.counts.keys():
+		var _ks5: String = String(_k5)
+		if _ks5.begins_with("arbiter.deny.") and _ks5.ends_with(".by.unified"):
+			_ad.append("%s=%d" % [_ks5.substr(13).replace(".by.unified", ""), int(Probe.counts[_k5])])
+	_ad.sort()
+	print("     引擎路(`unified`)被擋：%s" % (
+		"｜".join(PackedStringArray(_ad)) if not _ad.is_empty() else "（空）"))
+	print("     ★★★同樣要標母體：這一格是【所有 option 經 `unified` 被擋】的合計，")
+	print("        ★不是只有徵收 —— ★★要只看徵收需要在 arbiter 裡帶 option 名，那是下一票")
 	print("  ── ★★②重複頻率（★逐 pair 間隔分布；★★★不是平均）──")
 	print("     首次徵收的 pair 數 = %d ｜ 重複徵收次數 = %d" % [
 		int(Probe.counts.get("levy.pair.first", 0)), int(Probe.counts.get("levy.pair.repeat", 0))])
