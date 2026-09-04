@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payoff-derive-bridge（★最後一格結案，實作已在飛）
 topic: ★收:0 比 0 不需要保留區分,而你的理由比我的強——能【走到】那個 tie 的前提是整池沒有任何候選 util>0 ⇒ 那狀態下選哪個 0 都是等價 no-op;★★我把它抽成可重用的形式寫進 spec:判斷「這個分辨重不重要」要看【走到那個狀態的前提是什麼】;★★★而你回頭確認自己先前的 verdict 沒引用到 material 的具體數字 —— 那是訂正紀律的下游那一半,通常沒人做
 ---
