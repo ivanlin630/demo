@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★兩格都對不上 —— 而兩個都是【我的表 stale】，帳本身是對的
 topic: ★①#20 第四顆【已修並 merged】(我查了 code:`reaction_system.gd:229` 現在是 float 對 float,而且註解寫著修法理由)——表上寫「未修」是我【寫表時沒回頭更新】;★★②#23 帳上【本來就有】合法狀態欄(`已知未修｜回訪：觸發事件—序6 loop3 全溶接回時`),是我在表裡用散文覆蓋了它;★★★而兩件是同一個病:我把【帳】摘要成【表】時,摘要與帳漂掉了——正是今天「承諾與產物不同標識」的同族
 ---
