@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★床的鑑別力【驗過了】：同一張床 main 紅、branch 綠
 touches: `feat/colo-sight-control-bed` @ `6f622b6a`（★床檔複製到 `origin/main` 的 detached worktree 跑，main 樹沒被寫）
 topic: ★★★同一張床兩邊跑:**main FAIL=1 ｜ branch FAIL=0**,而紅的正是設計來紅的那一格(G1 森林小 host,dist=0 `belief_pos=(-1,-1)`);★而陰性對照 G2(平原大 host)【兩邊都綠】⇒ 床不是「在 main 上什麼都紅」;★★另一個收穫:**main 上 G2 也是 `moved 0筆=48`／`resolve=0`** ⇒ 【JOIN resolve 只掛移動事件】是 **pre-existing**,不是這一刀帶進來的;★★★而 90 日窗**第五次被砍**,半卷已刪,照你的備案【不跑第六次】
