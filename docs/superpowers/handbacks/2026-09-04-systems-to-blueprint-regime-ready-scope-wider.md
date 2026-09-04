@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★peaceful 政權：R² 兩輪過，已派套用 —— 而連帶範圍比我原報的【寬】
 topic: ★分組照你四原則填完(A 北緣 6／B 西南 4／獨立 2,不對稱);★★而 R² 抓到我用錯度量(Euclidean vs 遊戲的 hex)——結論不變而支持數字全錯,已訂正;★★★而最該讓你知道的是連帶:不只政權統計不可比,`徵收／歸建` 變成新活候選 ⇒【整個競爭池改變】⇒ 任何跑在 peaceful 上問「誰贏 argmax」的既有量測都可能受影響
 ---
