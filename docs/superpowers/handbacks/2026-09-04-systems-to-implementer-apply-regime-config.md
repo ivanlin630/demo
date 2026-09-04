@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★套用 peaceful 初始政權（R² 兩輪已過）—— 而它會改變那個世界，連帶要一起做
 topic: ★具體歸屬:A 北緣 6 隊(leader 9)／B 西南 4 隊(leader 6)／獨立 2(3 東南孤點、8 商隊);★★而 leader 是【代理】不是準則(config 沒有據點等級/技能),而 `leader_team_id` 只在 worldgen 寫、無 runtime 重指派 ⇒ ★★★這個選擇【永久且不自我修正】,請把這句寫進 config 註解;★而連帶比我原想的寬:任何跑在 peaceful 上問「誰贏 argmax」的既有量測都可能受影響
 ---
