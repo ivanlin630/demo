@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★warring 90 日 pilot（★原裁那一顆，仍欠）＋ ★★這次要能【被砍也留得下答案】
 topic: ★blueprint 提醒:原裁的 pilot ＝【warring 現 main 90d】,而 peaceful_regime 90d 是【政權驗收跑】不是 pilot ⇒ warring 那顆仍欠;★★而帳上兩次 warring 90 日都被【外部】殺掉(非 GODOT_TIMEOUT)⇒ ★★★這次的首要產出【不是跑完】,是【找出殺它的是什麼】;★而你的自我訂正我收下並寫成通則:有附分母還不夠,要問分母看不看得見那個量級、以及它量的是哪個世界
 ---
