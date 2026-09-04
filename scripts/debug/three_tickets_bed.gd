@@ -68,6 +68,7 @@ func _run() -> void:
 	_sec_donorladder()
 	_sec_zerowin()
 	_sec_goalutil()
+	_sec_aftermath(state, cfg, days)
 	_sec_prepare()
 	_sec_optpool()
 	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
@@ -733,3 +734,77 @@ func _gu2() -> void:
 		for i in range(mini(8, rows.size())):
 			parts.append("%s×%d" % [String(rows[i][0]), int(rows[i][1])])
 		print("     %-22s %s（相異值 %d 個）" % [pfx.substr(4), "｜".join(PackedStringArray(parts)), rows.size()])
+
+# ★★★`[DonorAftermath]`（systems 2026-09-04 票）——★這一節的重點【不是命中隊】，是【對照組】。
+#   ★「命中隊 39 天後還活著」沒有刻度：也許那個世界所有隊都活著。
+#   ★★所以沒命中的隊要印【同樣的欄位】，一行一隊，讓兩邊可以逐欄比。
+#   ★★★量【轉變】不量【狀態】：團滅＝`extinct` 那一刻（有 day），不是「跑完當下 pop==0」。
+#   ★誠實限印在最後（peaceful 本來就少死 ⇒ 「沒死」解釋力弱、「死了」解釋力強，不對稱）。
+func _sec_aftermath(state: WorldState, cfg: String, days: int) -> void:
+	print("═══ ★`[DonorAftermath]`（★命中隊 ＋ ★★對照組同欄位）═══")
+	# 命中隊：從 hit_table 取【第一次】命中
+	var first_hit: Dictionary = {}   # team → {tick, pop}
+	for r in Probe.samples.get("donorladder.hit_table", []):
+		var d: Dictionary = r
+		var tid: int = int(d.get("team", -1))
+		if not first_hit.has(tid):
+			first_hit[tid] = {"tick": int(d.get("tick", -1)), "pop": int(d.get("pop", -1))}
+	# 名冊：活著的（state.teams）＋ 死掉的（extinct 桶）＋ 被 crisis 評估過的
+	var roster: Dictionary = {}
+	for tid in state.teams.keys():
+		roster[int(tid)] = true
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("extinct.team."):
+			roster[int(ks.substr(13))] = true
+		elif ks.begins_with("crisis.entry.team."):
+			roster[int(ks.substr(18))] = true
+	var ids: Array = roster.keys()
+	ids.sort()
+	var n_hit_dead: int = 0
+	var n_hit: int = 0
+	var n_ctl_dead: int = 0
+	var n_ctl: int = 0
+	for tid in ids:
+		var t: int = int(tid)
+		var is_hit: bool = first_hit.has(t)
+		var dead: bool = int(Probe.counts.get("extinct.team.%d" % t, 0)) > 0
+		var dday: String = _first_day_suffix("extinct.day.team.%d.d" % t)
+		var ffd: String = _first_day_suffix("crisis.firstfire.team.%d.d" % t)
+		var pop_end: int = int(state.teams[t].population) if state.teams.has(t) else 0
+		var fh: Dictionary = first_hit.get(t, {})
+		var fh_day: String = ("%.1f" % (float(int(fh.get("tick", -1))) / float(WorldState.TICKS_PER_DAY))) if is_hit else "-"
+		print("[DonorAftermath] cfg=%s team=%d hit=%s first_hit_day=%s end=%s death_day=%s pop_first_hit=%s pop_end=%d crisis_entry=%d crisis_fired=%d crisis_first_fire_day=%s" % [
+			cfg, t, ("yes" if is_hit else "no"), fh_day,
+			("團滅" if dead else "存活"), dday,
+			(str(int(fh.get("pop", -1))) if is_hit else "-"), pop_end,
+			int(Probe.counts.get("crisis.entry.team.%d" % t, 0)),
+			int(Probe.counts.get("crisis.abs_hunger.team.%d" % t, 0)), ffd])
+		# ★★★8 日 smoke 撞到的第三種狀態：`pop_end=0` 而【沒有】`extinct` 桶 ⇒ 隊還在名冊裡但沒人。
+		#   ★「存活」與「團滅」兩個字裝不下它，而它會被讀成「存活」⇒ 直接把它標出來。
+		if pop_end == 0 and not dead:
+			print("[DonorAftermath]    ↑ ★★★team=%d 是【空殼】：pop_end=0 而未 extinct ⇒ 別讀成「存活」" % t)
+		if is_hit:
+			n_hit += 1
+			if dead: n_hit_dead += 1
+		else:
+			n_ctl += 1
+			if dead: n_ctl_dead += 1
+	print("[DonorAftermath] ── ★兩組並排（★這一行才是判讀表要讀的）──")
+	print("[DonorAftermath] cfg=%s window_days=%d｜命中隊 %d 支，團滅 %d（%s）｜對照組 %d 支，團滅 %d（%s）" % [
+		cfg, days, n_hit, n_hit_dead,
+		("%.1f%%" % (100.0 * float(n_hit_dead) / float(n_hit))) if n_hit > 0 else "母體 0",
+		n_ctl, n_ctl_dead,
+		("%.1f%%" % (100.0 * float(n_ctl_dead) / float(n_ctl))) if n_ctl > 0 else "母體 0"])
+	print("[DonorAftermath] ★★誠實限：①peaceful 本來就少死 ⇒「沒死」解釋力弱、「死了」解釋力強（不對稱）")
+	print("[DonorAftermath]    ②命中母體很小 ⇒ ★★★這是【個案】不是【樣本】：只能寫「這一隊發生了什麼」")
+	print("[DonorAftermath]    ③名冊＝跑完仍在 `state.teams` ＋ 有 `extinct` 桶 ＋ 被 crisis 評估過的聯集")
+	print("[DonorAftermath]       ⇒ ★一支【從沒被 crisis 評估過而且活到最後】的隊仍在名冊裡；★★而【中途生中途死且從沒被評估】的隊不在")
+
+# 取「第一個出現的日期後綴」（key 形如 `<prefix><4 位日>`）；沒有就回 `-`。
+func _first_day_suffix(prefix: String) -> String:
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with(prefix):
+			return str(int(ks.substr(prefix.length())))
+	return "-"

@@ -3548,6 +3548,11 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 # 重評 cadence 重構：劇變事件→提前重評（複用 S3 crash-bypass 門檻）。純讀 team 已存欄，零 randf、零 gather
 # （避每 tick 全 gather perf）。pop 驟降/food 深負；威脅由既有 threat_eval cadence 路徑覆蓋，不在此重算。
 func _decision_crisis(state: WorldState, team: TeamData) -> bool:
+	# ★★★母體（systems donor-aftermath 票 §③）：★`crisis_fired = 0` 有兩個意思 ——
+	#   「評估過但沒 fire」與「根本沒被評估過」，★★而它們在單一個 0 上長得一模一樣。
+	#   ⇒ ★★★所以先記【被評估幾次】，再記【fire 幾次】。
+	if Probe.enabled and team != null:
+		Probe.bump("crisis.entry.team.%d" % team.team_id)
 	# ★★★#2 絕對餓（2026-09-04）：既有三判準全是【流量】（pop 崩跌／flow DEEP／flow GRADUAL）
 	#   ⇒ ★一支「食物早就 0、而 flow 也已經是 0（沒東西可流失）」的隊【一條都不觸發】
 	#   ⇒ ★★存量歸零是比任何流量都硬的危機，而它先前不在這個 predicate 裡。
@@ -3564,6 +3569,10 @@ func _decision_crisis(state: WorldState, team: TeamData) -> bool:
 			# ★★★per-team 桶（systems 批准 2026-09-04）：★`bump_sample` 是 first-N ⇒ 它答不了
 			#   「2010 次是【3 隊各 670】還是【60 隊各 33】」——而那是兩個完全不同的世界。
 			#   ★★無 cap、不取樣 ⇒ 相異隊數與各自次數都出得來。
+			# ★第一次 fire 是【哪一天】：★★沒有它，「fire 了 1089 次」講不出它是從第幾天開始餓的。
+			#   ★★★只在還沒有這隊的桶時記 ⇒ 天然只記第一次（不需要額外狀態）。
+			if not Probe.counts.has("crisis.abs_hunger.team.%d" % team.team_id):
+				Probe.bump("crisis.firstfire.team.%d.d%04d" % [team.team_id, int(state.world.current_tick / WorldState.TICKS_PER_DAY)])
 			Probe.bump("crisis.abs_hunger.team.%d" % team.team_id)
 			# ★★★同理：`would_fire_by_old` 先前只在【取樣】裡 ⇒ 只能講「最早那 500 筆」。
 			#   改成計數 ⇒ 才講得出「全部 N 次裡有幾次是舊判準也會抓的」。
@@ -4238,6 +4247,10 @@ func cleanup_extinct_teams(state: WorldState) -> void:
 	if Probe.enabled:
 		for _xid in routed:
 			Probe.bump("extinct.team.%d" % int(_xid))
+			# ★★★死【哪一天】（systems donor-aftermath 票）：★per-team 桶只答「死了沒」，
+			#   答不了「命中之後才死」還是「命中之前就已經在死」—— ★★而那兩個結論相反。
+			#   ★★★key 有界：一隊最多死一次 ⇒ 一隊一個 key。
+			Probe.bump("extinct.day.team.%d.d%04d" % [int(_xid), int(state.world.current_tick / WorldState.TICKS_PER_DAY)])
 	for tid in routed:
 		print("[Extinct] Team%d 滅團清除（遺財已路由）" % tid)
 	state.teams_pending_erase.clear()

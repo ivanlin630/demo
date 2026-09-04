@@ -592,6 +592,7 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 				_all.append(String(_e3["opt"]))
 			Probe.bump_sample("donorladder.hit_table", {
 				"tick": (state.world.current_tick if state != null else -1), "team": team.team_id,
+				"pop": team.population,
 				"food_days": snappedf(ctx.food_days, 0.001),
 				"has_aid_target": ctx.has_aid_target,
 				"scored": _all,
