@@ -70,6 +70,7 @@ func _run() -> void:
 	_sec_goalutil()
 	_sec_aftermath(state, cfg, days)
 	_sec_unitoverlap()
+	_sec_perf5()
 	_sec_prepare()
 	_sec_optpool()
 	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
@@ -917,3 +918,29 @@ func _overlap(a: Array, b: Array) -> float:
 	var uni: float = maxf(float(a[1]), float(b[1])) - minf(float(a[0]), float(b[0]))
 	if uni <= 0.0: return 0.0
 	return maxf(inter, 0.0) / uni
+
+# ★★★perf（`payoff-derive-bridge` 驗收 #5）。★計數與時間【分開報】：
+#   ★★計數是決定性的（並跑不影響），時間必須獨佔才有意義 —— 混在同一行會讓人以為兩者都獨佔過。
+#   ★★★分母用 `optpool.mother`（rank_scored 呼叫次數）⇒ 印【每決策幾次】不是總次數。
+func _sec_perf5() -> void:
+	var m: int = int(Probe.counts.get("optpool.mother", 0))
+	print("═══ ★perf #5（`need_keep`／`_facility_deficit`）═══")
+	print("  分母 `optpool.mother`（rank_scored 呼叫次數）= %d｜exclusive=%s" % [m, _exclusive])
+	if m == 0:
+		print("  ★★★分母 0 ⇒ 這一節答不了")
+		return
+	for row in [["need_keep", "perf.need_keep"], ["_facility_deficit", "perf.facility_deficit"]]:
+		var nm: String = String(row[0])
+		var k: String = String(row[1])
+		var c: int = int(Probe.counts.get(k + ".calls", 0))
+		var us: float = Probe.amount(k + ".us")
+		print("  ★計數 %-18s calls=%-8d 每決策=%.2f 次" % [nm, c, float(c) / float(m)])
+		# ★★★這兩個函式【互相遞迴】：`need_keep`(need_oracle.gd:19) → `_construction_facility_need`
+		#   → `_facility_deficit`(faction_ai_system.gd:5704/5717) → `need_keep`
+		#   ⇒ ★計時是【巢狀重複計算】的：內層的時間被外層再算一次
+		#   ⇒ ★★所以這兩個 us 數字【不是成本】，不管獨不獨佔都不可引用
+		#   ⇒ ★★★段級成本要用 `PHASE_TIMING=1` 的 phase 計時（不巢狀），另跑且必須獨佔
+		print("     ★★時間 us_total=%.0f ← ★★★【不可引用】：兩函式互相遞迴 ⇒ 巢狀重複計算" % us)
+		print("        （exclusive=%s；★段級成本請看 `PHASE_TIMING=1` 的 phase 計時，不是這一行）" % _exclusive)
+	print("  ★★★誠實限：`need_keep` 在導出【之前】的呼叫次數就不是 0（A 類 evaluator 本來就呼叫它）")
+	print("     ⇒ ★要看的是【導出前後的差】，而不是「導出引入了這些呼叫」")

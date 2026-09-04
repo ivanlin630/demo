@@ -5671,7 +5671,18 @@ static var FACILITY_DEFICIT_DEF: Dictionary = {
 
 # 缺口（自身庫存 threshold，0–1）。TEST VALUES。★registry dispatch：A 類泛型 evaluator + C 類 special。
 # S6：non-food QUANTITY-target 讀 NeedOracle need（與生產/商業共讀同源）；farming granary/weaponsmith(armed_ratio)/mint(ore-tile)=C 特殊。
+# ★★★perf 量測外殼（驗收 #5）：★本體有多個 return ⇒ 直接在裡面包時間會漏掉其中幾條路。
+#   ⇒ ★★改成【薄外殼 + 原本體改名】：★★★量到的一定是【整支函式】，不是我記得的那幾條路。
 func _facility_deficit(state: WorldState, team: TeamData, facility: String,
+		tile: HexTileData) -> float:
+	var _t0d: int = Time.get_ticks_usec() if Probe.enabled else 0
+	var _rd: float = _facility_deficit_impl(state, team, facility, tile)
+	if Probe.enabled:
+		Probe.bump("perf.facility_deficit.calls")
+		Probe.add_amount("perf.facility_deficit.us", float(Time.get_ticks_usec() - _t0d))
+	return _rd
+
+func _facility_deficit_impl(state: WorldState, team: TeamData, facility: String,
 		tile: HexTileData) -> float:
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var entry: Dictionary = FACILITY_DEFICIT_DEF.get(facility, {})

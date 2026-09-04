@@ -166,6 +166,45 @@ static func _unit_overlap_tap(state: WorldState, team: TeamData, gt: String, def
 		 "w": snappedf((_target - _stock) * float(TradeValuation.BASE_PRICE.get(res, 0.0)), 0.0001),
 		 "w_ok": true}, 4000)
 
+# ★★★payoff 導出（`2026-09-04-payoff-derive-bridge` §8.1，R² CLEAN 後派）。
+#   ★舊形狀＝`GoalRegistry` 的 flat 常數（maintain 全 1.0、build 全 1.5，標著 TEST VALUE）
+#     ⇒ ★★同常數的 goal 之間 util 逐位元相等 ⇒ argmax 退化成 registry 插入序偏好
+#     （實測：`build_stable/apothecary/workshop` 與 `maintain_weapons` 兩個世界合計 tie 上千次）
+#   ★★新形狀＝【缺口的價值】：`(target − stock) × BASE_PRICE[res]`
+#     ⇒ ★不飽和（缺 10 與缺 100 不同），★★跨資源同單位（價值），★★★兩個因子都是既有的
+#   ★負值語意（§7.1）：`w < 0` ＝ 有餘 ⇒ 該 goal 不該贏 ⇒ `maxf(w, 0)`。
+#     ★★底部平手無害：能走到「整池都是 0」的前提本身就蘊含所有選擇等價（R² §8.2）。
+#     ★★★而【值分布 dump 印未 clamp 的 w】—— 否則「有餘多少」整段不可見（`unitoverlap.*` 那節）。
+#   ★C 類（special evaluator，farming／weaponsmith／mint）【不動】：它們沒有 outputs，
+#     ★★沒有可用的絕對量 ⇒ 硬湊一個近似值只會製造一個看起來正常的假數字。
+static func derived_payoff(state: WorldState, team: TeamData, def: Dictionary) -> float:
+	if def.has("facility"):
+		var f: String = String(def["facility"])
+		var e: Dictionary = FactionAISystem.FACILITY_DEFICIT_DEF.get(f, {})
+		if not e.has("outputs"):
+			return float(def.get("payoff", 1.5))   # gate-ok: C 類 special evaluator 照舊（無 outputs）
+		var lv: Dictionary = TradeValuation.leader_vals(state, team)
+		var best: float = 0.0
+		for r in e["outputs"]:
+			var res: String = String(r)
+			var tgt: float = NeedOracle.need_keep(state, team, res, lv)
+			if bool(e.get("use_demand", false)):
+				tgt += NeedOracle.demand(state, team, res, lv)
+			best = maxf(best, (tgt - float(team.resources.get(res, 0))) * float(TradeValuation.BASE_PRICE.get(res, 0.0)))
+		return best
+	var res2: String = ""
+	for pq in def.get("prereqs", []):
+		var d2: Dictionary = pq
+		if String(d2.get("kind", "")) == GoalRegistry.PREREQ_RESOURCE:
+			res2 = String(d2.get("res", ""))
+			break
+	if res2 == "":
+		return float(def.get("payoff", 1.0))   # gate-ok: 無資源型前置（純 location goal）⇒ 沿用表值
+	var pop: float = maxf(float(team.population), 1.0)
+	var stock: float = TradeValuation._stock(state, team, res2)
+	var target: float = pop * float(TradeValuation.TARGET_PER_POP.get(res2, 1.0))
+	return maxf((target - stock) * float(TradeValuation.BASE_PRICE.get(res2, 0.0)), 0.0)
+
 static func frontier_candidates(state: WorldState, team: TeamData, ctx: DecisionContext) -> Array:
 	if state == null or team == null or ctx == null:
 		return []   # harness 無 state/team → 無 goal frontier（安全）
@@ -205,7 +244,7 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 		if def.is_empty():
 			if Probe.enabled: Probe.bump("goal.skip.no_def" + _sday)
 			continue
-		var payoff: float = float(def.get("payoff", 1.0))
+		var payoff: float = derived_payoff(state, team, def)   # ★§8.1 導出（舊：`def.payoff` flat 常數）
 		if Probe.enabled:
 			_unit_overlap_tap(state, team, gt, def, _uo_fai, _uo_otile)
 		# ★S4 設施發展 goal（build_F）：walk build-cost/facility-type/manpower 前置→frontier or build_F action。
@@ -354,6 +393,7 @@ static func _distribute_candidates(state: WorldState, team: TeamData, ctx: Decis
 	var delay: float = _estimate_delay_days(team, to_task)
 	out.append({
 		"util": _candidate_util(clampf(best_util, 0.0, GOAL_UTIL_CAP), ctx, delay),
+		"delay": delay,
 		"to_task": to_task, "label": "distribute_food", "delegate": true,
 	})
 	return out
@@ -444,6 +484,7 @@ static func _deliver_candidates(state: WorldState, team: TeamData, ctx: Decision
 	var delay: float = _estimate_delay_days(team, to_task)
 	out.append({
 		"util": _candidate_util(payoff, ctx, delay),
+		"delay": delay,
 		"to_task": to_task, "label": "deliver_" + String(best["res"]), "delegate": true,
 	})
 	return out
@@ -497,7 +538,7 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 	if fdef.is_empty():
 		if Probe.enabled: Probe.bump_pt("resolver.empty_no_fdef", _rday, team.team_id)
 		return {}
-	var payoff: float = float(def.get("payoff", 1.5))
+	var payoff: float = derived_payoff(state, team, def)   # ★§8.1 導出（舊：`def.payoff` flat 常數）
 	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 	var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 	# F 已建 → satisfied（無 candidate）。
@@ -892,8 +933,12 @@ static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: Dec
 
 static func _mk_candidate(team: TeamData, g: Dictionary, gt: String, frontier_kind: String, payoff: float,
 		ctx: DecisionContext, to_task: Dictionary) -> Dictionary:
+	# ★★★tie-break 用的「成本」＝【已經算好的】`_estimate_delay_days`（R² §8：停止把算好的數字扔掉）
+	#   ⇒ ★算一次、util 與 tie-break 共用；★★不另外定義一個「成本」量。
+	var _dly: float = _estimate_delay_days(team, to_task)
 	return {
-		"util": _candidate_util(payoff, ctx, _estimate_delay_days(team, to_task)),   # ★S6:util 含 delay 折現
+		"util": _candidate_util(payoff, ctx, _dly),   # ★S6:util 含 delay 折現
+		"delay": _dly,
 		"to_task": to_task,
 		"source_goal": g,
 		"label": gt + ":" + frontier_kind,   # root_goal + frontier_kind（有界 label，HOW §7）
@@ -908,8 +953,10 @@ static func _mk_delegate_candidate(team: TeamData, g: Dictionary, gt: String, fr
 	var to_task: Dictionary = core.duplicate()
 	to_task["delegate"] = true
 	to_task["settler"] = clampi(team.population / 4, 2, 5)   # 派子隊配額（founding 分支 _dispatch_builder 內部自估，此為 generic 保底）
+	var _dly2: float = _estimate_delay_days(team, to_task)
 	return {
-		"util": _candidate_util(payoff, ctx, _estimate_delay_days(team, to_task)),
+		"util": _candidate_util(payoff, ctx, _dly2),
+		"delay": _dly2,
 		"to_task": to_task,
 		"source_goal": g,
 		"label": gt + ":" + frontier_kind + ":delegate",

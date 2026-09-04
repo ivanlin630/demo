@@ -239,7 +239,7 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			if _coeff < 1.0: Probe.bump("decision.opt_coeff_pressed." + opt)   # coeff 確隨急迫度變(非恆1)
 		if opt == current_option:
 			u += _persist   # ★持守統一：flat COMMITMENT_BONUS → persist_strength（bonus-collapse）
-		scored.append({"u": u, "i": idx, "opt": opt})
+		scored.append({"u": u, "i": idx, "opt": opt, "d": 0.0})
 		idx += 1
 	# ★means-end 長程規劃（組件 G，HOW §8）：goal frontier candidates 追加進同一 rank 池（sort 前→與 static option 同 argmax 競爭）。
 	# ★S1 骨架：GoalResolver.frontier_candidates stub 回 []→此迴圈 no-op→byte-identical。harness 無 state/team(null)→skip。
@@ -284,11 +284,20 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 					"goal": _gt_key, "label": String(cand.get("label", "")),
 					"target": (cand.get("to_task", {}) as Dictionary).get("target"),
 					"util": snappedf(float(cand.get("util", 0.0)), 0.0001)}, 500)
-			scored.append({"u": float(cand.get("util", 0.0)), "i": idx, "opt": String(cand.get("label", "")), "cand": cand})
+			# ★★★tie-break 的成本欄（`payoff-derive-bridge` §8.1）：直接帶 candidate 已經算好的
+			#   `delay`（`_estimate_delay_days`）—— ★不新增一個「成本」定義。
+			#   ★★static option 沒有 delay 概念 ⇒ 記 0.0 ⇒ 真平手時它們仍然優先，
+			#   ★★★而那與【舊行為一致】（static 先 append ⇒ i 較小 ⇒ 舊規則下也是它們贏）。
+			scored.append({"u": float(cand.get("util", 0.0)), "i": idx, "opt": String(cand.get("label", "")), "cand": cand, "d": float(cand.get("delay", 0.0))})
 			idx += 1
+	# ★★★tie-break（§7.2，blueprint 裁）：★單獨採 tie-break ＝ 掩蓋啞秤；
+	#   ★★配上推導後 ＝ 秤【說了平手】之後的合法裁決 ⇒ 採。
+	#   ⇒ 規則：真值相等時選【成本低者】（`_estimate_delay_days`，決定性、不用隨機），
+	#     ★★★仍然相等才回到 applicable 順序 —— 排序保持全序、可重現。
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
-		return a["i"] < b["i"])   # tiebreak：applicable 順序
+		if a["d"] != b["d"]: return a["d"] < b["d"]
+		return a["i"] < b["i"])   # tiebreak：成本 → applicable 順序
 	# ★★won_argmax（systems 要）：【產出】≠【贏】。
 	#   emitted > 0 且 fp 不變 可以同時為真，而最危險的解釋是
 	#   「接上了、有產出、但【從不改變結果】」——沒這顆 tap 就分不出來。
@@ -466,10 +475,14 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 		# 常態路 previous_task==current_task（_trigger_survival 設）→等價。
 		if DecisionOptions.to_task(state, team, opt).get("task") == team.previous_task:
 			u += _persist   # ★持守統一：flat COMMITMENT_BONUS → persist_strength（bonus-collapse）
-		scored.append({"u": u, "i": idx, "opt": opt})
+		scored.append({"u": u, "i": idx, "opt": opt, "d": 0.0})
 		idx += 1
+	# ★這條路只有 static option（沒有 goal candidate）⇒ `d` 恆 0 ⇒ 排序等價於舊規則。
+	#   ★★仍然帶上它，是為了讓【兩條 rank 路的 scored 形狀一致】—— 不一致的形狀會讓
+	#   下游 tap 在其中一條上靜默取到預設值。
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
+		if a["d"] != b["d"]: return a["d"] < b["d"]
 		return a["i"] < b["i"])
 	# ★★★#12 乞食 dump（純觀測）—— ★兩條 rank 路都要記：
 	#   乞食 的 sets 是 `{survival, passive_survival}` ⇒ ★★它【同時】在 rank_survival 的子集裡，
