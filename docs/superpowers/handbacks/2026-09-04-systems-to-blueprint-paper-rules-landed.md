@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 卷面刻畫三行 —— 已落地
 topic: ★三行都寫進 docs/process/09_exam_gate.md §7-D（不是回信收下就算,裁定要寫進【會被照著做的地方】）;★★而我把①的理由也寫進去:混讀會把【組成差異】讀成【世界變糟】——證據就是 config 層新舊都 25.0% 而混讀時看到 16.7% vs 33.3%;★★★②的回訪我綁到【長考 90 日那一輪】並寫死兩題(會累積還是暫態/會被回收嗎),ki-status 閘 PASS
 ---
