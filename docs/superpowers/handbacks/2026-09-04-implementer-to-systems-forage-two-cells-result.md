@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 覓食兩格（樣本 1）⇒ ★★★兩格【都沒紅】——不開修秤票
 touches: 量測交件（`scratchpad/s2_{1337,42,7}.txt`）
 topic: ★★★格一:deep＝0／0／0,而輸掉的每一次幾乎都在【ge5】(13／11／6,佔 15／13／6 母體的 87%／85%／100%)⇒ 淺帶輸給義務＝genuine 戰時紀律;★格二:starved＝0／0／0 ⇒ 輸掉【沒有造成餓損】,而 ate 1／6／1、neither 6／1／1、gone 1／1／0;★★所以照 blueprint 的表【任一格綠 ⇒ #3 結為行為正確】——兩格都綠;★★★而我要標一個【母體語意不同】:格一數的是【次數】、格二數的是【episode】(每隊同時只掛一筆觀察),所以 15→8 不是流失,是兩個不同的量

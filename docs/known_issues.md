@@ -1514,9 +1514,19 @@ material-buy arc（v1+v2a merged e6519f9f）修好 trade 側（mil 買 material�
 
 `_decision_crisis`（`faction_ai_system.gd:1858`）= **food_flow_avg 流-based**（`< RUNG_CRASH_FOOD_DEEP` / `< GRADUAL_DECLINE_FLOW`）+ pop-crash，**無絕對-food 條件**。`food_flow_avg`（`resource_system.gd::_update_food_flow()`）= daily_rate 的 EMA。∴ **food=0 stuck → daily_rate=0 → flow EMA→0 → 不 < 負門檻 → 不 fire crisis**。QA 坐實：seed1337 team54 food_days=0.0 連 500 tick（tick4800-5300）全程 `in_crisis=false`（11/11 food=0 DIVERT 事件皆非 crisis）→ crisis-escape 不 fire → 鎖空市場貿易 lingered（[SurvivalMergeIn] 併入 Team34 安全網接住沒釀死）。**根=crisis 只偵「流失中」不偵「已見底 stuck」**。**修向**：`_decision_crisis` 加絕對-food 條件（`team.famine_days > 0`=已進飢荒 / 或 `food_days < CRISIS_ABSOLUTE_DAYS` 硬底）→ 字面餓著必 crisis → crisis-escape fire → re-eval 求生。**低優先**（blueprint 裁 2026-07-22：merge 安全網接住、非釀死，記待查）。連 [[feedback_symptom_vs_root_retry]] + 下方 market-seeker 空市場 + DESPERATION cliff 同族（abandon-guard/絕境門檻連續化一批處理）。
 
-## market-seeker 卡空市場不放棄→餓死（2026-07-22，QA 40-event 撿，DESPERATION 同族小範圍）
+## ✅（裁為行為正確，存查）market-seeker 卡空市場不放棄→餓死（2026-07-22 記；★2026-09-04 兩格量測結案）
 
-**狀態：已知未修** ｜ **回訪：觸發事件 — blueprint 對「餓著的隊該不該輸給威脅／義務」的裁定**（訂正 2026-09-04：★原症狀描述被推翻，★★而 systems 的第二個假說也被推翻，見下）
+**狀態：已知未修（★已結為【行為正確】）** ｜ **回訪：不需要（★兩格皆綠）**（訂正 2026-09-04）
+
+★★★**最終兩格（blueprint 定判準，三 seed）**：
+```
+格一 餓深分帶：★`deep = 0／0／0`；輸掉的幾乎全在 `ge5`（13／11／6 ＝ 母體的 87%／85%／100%）
+   ⇒ ★★淺帶輸給義務 ＝ **genuine 戰時紀律**
+格二 實際後果：★`starved = 0／0／0` ⇒ **輸掉沒有造成餓損**（`ate 1／6／1`、`neither 6／1／1`、`gone 1／1／0`）
+```
+⇒ ★**依 blueprint 的表【任一格綠即結為行為正確】—— 而兩格都綠。**
+★★**母體語意註記（implementer 標）**：格一數【次數】、格二數【episode】（每隊同時只掛一筆觀察）
+⇒ ★★★**15→8 不是流失，是兩個不同的量** —— **不可相減。**（訂正 2026-09-04：★原症狀描述被推翻，★★而 systems 的第二個假說也被推翻，見下）
 
 ★★**量到了（三 seed）**：`applicable 15／13／6`｜`pop_block ★0／0／0`｜`land_block 2／7／13`
 ⇒ ★**systems 的假說（`FORAGE_VIABLE_POP` 用假理由把大隊排除在覓食外）在這個母體裡【一次都沒發生】** ——
