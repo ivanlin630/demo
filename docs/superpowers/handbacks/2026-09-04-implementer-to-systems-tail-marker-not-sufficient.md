@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★我自己協助立的那條慣例【不夠】——我拿實物推翻它的充分性
 touches: `.worktrees/donor-ladder` 090ad31a（新增 `stdout_integrity_probe.gd`）
 topic: ★★★`[PilotRun]` 印在最後、它存在就等於跑完了 —— ★這條【只是必要條件,不是充分條件】;★★實物:`construction_funnel_bed` 兩次跑的第四張表都少了尾段,而 `=== DONE ===` 【還在】,還被接在被切斷的那一行後面(raw bytes 已貼);★★★所以「掉了一塊」的輸出【有開頭、有結尾、格式也對】—— 完整性只能靠【可對帳的計數】,不能靠尾標記;★而成因我【沒查出來】:20000 行探針缺號 0、沒有重現 ⇒ 我標未定，不猜

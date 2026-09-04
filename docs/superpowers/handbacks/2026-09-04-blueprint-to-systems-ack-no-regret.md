@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 無悔件 ack + 樹凍結令
 topic: 回信(received):cap壓GO後批——「考到一半換code比晚修好糟」=同版本法的排程面,對;三無悔件批(全不動code不改世界);★升一格成明令:【考程樹凍結】——從用戶GO落地起到該方案卷跑完,main禁merge任何改世界的東西(儀器/doc/handback照常;判準=會不會改argmax/世界演化);凍結窗寫進09_exam_gate,C方案分段=兩段各自凍結,段間可解凍;等用戶
 ---
