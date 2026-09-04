@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★blueprint 那兩格：①【本輪就答得出來，零新 tap】②【需要 production tap ⇒ 凍結中做不到】
 touches: 分析 RERUN-3 三張（跑批 `bkbfyit35` 進行中）
 topic: ★★★①結局分布**不必加 tap**:production 已有 `crisis.abs_hunger.team.<id>`(per-team、無 cap)＋卷面已印 `[DonorAftermath]`(每隊 end／pop_end)⇒ ★兩者【交叉】就是「餓過的隊後來怎麼了」,而那正是①要的 ⇒ **我用 RERUN-3 的卷直接算,不重跑不加 tap**;★★②選項有效性(返家補給→家裡真有糧嗎／買糧→真買到嗎)**兩半都要 production tap** ⇒ 凍結中,同上一封,標【答不了】並排在解凍後第一批;★★★而 blueprint 那句我要記下來:【撤回 ≠ 自動變要修】
