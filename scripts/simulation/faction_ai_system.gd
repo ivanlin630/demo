@@ -1714,6 +1714,34 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 # 派信使子隊送提案（復用 SubteamSystem/herald/mounts/movement/belief 既有信號，零新系統）。
 # 提案權威存母隊 pending_proposal；信使帶 proposal_id ref（task_extra_data）。冗餘多騎首達生效。
 # 回 true = 至少派出 1 信使（母隊 release 回日常等結果）；false = 無法派（無 spare named）。
+# ★★★成員位置回報（spec 2026-09-05-member-report-envoy §2）——
+#   ★零新語意：不新增訊息型別、不新增投遞路徑，★★只是【在既有事件點呼既有 `_dispatch_envoy`】。
+#   ★★★零 payload：envoy 下一 tick 仍與母隊同格 ⇒ 吃到共位必見的 `dist==0` 保證 ⇒ `record_claim`
+#     ⇒ 它帶著【自己親眼看到母隊的那一筆】上路，抵達時由既有 `_exchange_intel` 雙向轉交。
+#     ⇒ ★所以「回報內容」不必設計 —— **信使自己就是載體**。
+func _report_to_leader(state: WorldState, team: TeamData, event: String) -> void:
+	# ★★這支【是世界路徑】不是觀測：回報行為本身要發生，而 `Probe.bump` 在關閉時自己 no-op。
+	# ★逐條件名（★否則「沒派出」會是一格答不了的黑箱）
+	# ★★★事件名要帶進【每一格】：★否則某事件的 attempt=0 會同時代表
+	#   「那個事件沒發生」與「它被前面的 guard 全部擋掉」——★★而這兩件事的處置相反。
+	Probe.bump("mreport.call." + event)
+	if team.faction_id == -1:
+		Probe.bump("mreport.skip.無勢力"); Probe.bump("mreport.skip.無勢力." + event); return
+	var f = state.factions.get(team.faction_id)
+	if f == null:
+		Probe.bump("mreport.skip.勢力不存在"); Probe.bump("mreport.skip.勢力不存在." + event); return
+	if f.leader_team_id == team.team_id:
+		Probe.bump("mreport.skip.自己就是領袖"); Probe.bump("mreport.skip.自己就是領袖." + event); return
+	if not state.teams.has(f.leader_team_id):
+		Probe.bump("mreport.skip.領袖不在名冊"); Probe.bump("mreport.skip.領袖不在名冊." + event); return
+	Probe.bump("mreport.attempt")
+	Probe.bump("mreport.attempt." + event)
+	# ★★`_dispatch_envoy` 自己會因【母隊不知道領袖在哪】而回 false —— 那是【真失聯】的一半，
+	#   ★★★spec §4 #3 明寫「失聯仍然可能」⇒ 這一格不該被修掉，而該被【數出來】。
+	var ok: bool = _dispatch_envoy(state, team, f.leader_team_id, "member_report")
+	Probe.bump("mreport.sent" if ok else "mreport.failed")
+	Probe.bump(("mreport.sent." if ok else "mreport.failed.") + event)
+
 func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype: String) -> bool:
 	var target: TeamData = state.teams.get(target_id)
 	if target == null:
@@ -2374,6 +2402,8 @@ func _tick_solo_settle(state: WorldState, team: TeamData) -> void:
 	TaskArbiter.release(team)   # 皆不成 → 回 idle（後續再遷/流亡，genuine 失敗案）
 
 func _settle_relocated_village(state: WorldState, v: TeamData) -> void:
+	# ★★★事件②遷移完成（spec §2②）：村子搬完家 ⇒ 領袖手上的舊位置從這一刻起是錯的
+	_report_to_leader(state, v, "遷移完成")
 	var tile: HexTileData = state.world.tiles.get(v.tile_pos.x * 1000 + v.tile_pos.y)
 	if tile != null and tile.outpost_owner != -1:
 		var o: TeamData = state.teams.get(tile.outpost_owner)
@@ -3565,6 +3595,15 @@ func _decision_crisis(state: WorldState, team: TeamData) -> bool:
 		# ★★★驗收要的是【逐隊】而不是總數（blueprint）：「更常 fire 不是平衡問題，是真相問題」
 		#   ⇒ 同時記【raw 私產】與【effective】——★兩者都印才分得出
 		#     「真的一粒都沒有」與「accessor 讀錯了」（後者會長得跟前者一模一樣）。
+		# ★★★事件③瀕危求援（spec §2②）——★而它是【狀態】不是【事件】：`effective_food <= 0`
+		#   每 tick 都成立 ⇒ ★★不節流就是每 tick 派一次信使＝洪水，不是「大事會派人送信」。
+		#   ⇒ ★★★用既有 `CadenceStagger`（純函式、零 RNG）＋ 既有 `*_eval_next_tick` 形狀節流，
+		#     零新常數；而 cadence 取 T2 戰術層（`DecisionTier.T2_TACTICAL`）＝「重新盤算處境」那一級。
+		if state.world.current_tick >= team.report_eval_next_tick:
+			team.report_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick,
+				team.team_id, DecisionTier.T2_TACTICAL)
+			_report_to_leader(state, team, "瀕危求援")
 		if Probe.enabled:
 			Probe.bump("crisis.abs_hunger")
 			# ★★★per-team 桶（systems 批准 2026-09-04）：★`bump_sample` 是 first-N ⇒ 它答不了
@@ -5969,6 +6008,8 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 			var _scan_home: bool = _scan_own_camp_legacy(state, team.team_id)
 			Probe.bump("camp.built.scan_has_home" if _scan_home else "camp.built.scan_no_home")
 			if _scan_home != _idx_home: Probe.bump("camp.built.scan_mismatch")
+	# ★★★事件①落腳建營（spec §2②）：位置級大事 ⇒ 派信使告訴領袖「我在這裡落腳了」
+	_report_to_leader(state, team, "落腳建營")
 	tile.camp_ticks_left = ResourceSystem.L0_DECAY_DAYS * WorldState.TICKS_PER_DAY
 	tile.camp_team_id = team.team_id   # ★§4c：記起建隊（decay 時才知道「這是誰的失敗」；完工/消失時清）
 	OwnerCampIndex.invalidate()        # ★own-camp chokepoint①（寫）：新營地誕生 ⇒ 姊妹索引失效

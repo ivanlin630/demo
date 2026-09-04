@@ -271,6 +271,7 @@ func _run() -> void:
 	_sec_join_funnel()
 	_sec_survival4(state)
 	_sec_levy()
+	_sec_mreport()
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -1324,6 +1325,44 @@ func _sec_join_funnel() -> void:
 	print("  ★★★而 `win` 與 `dispatch` 【不是同一個母體】：win 是決策次數，dispatch 是相遇次數")
 	print("     ⇒ 兩者相減沒有意義（★同一個陷阱我今天已經在 `[Merge]` 上踩過一次）")
 	_sec_sighting()
+
+# ★★★成員位置回報（spec 2026-09-05-member-report-envoy §4 #4）——
+#   ★「不塞世界」要有【數字】不是【宣稱】⇒ 印總數 ＋ 分事件類型 ＋ 沒派成的逐條件名。
+func _sec_mreport() -> void:
+	print("")
+	print("═══ ★★★成員位置回報信使（★#4：頻率要有母體）═══")
+	var _at: int = int(Probe.counts.get("mreport.attempt", 0))
+	var _se: int = int(Probe.counts.get("mreport.sent", 0))
+	var _fa: int = int(Probe.counts.get("mreport.failed", 0))
+	print("  嘗試 = %d ｜ 派出 = %d ｜ ★沒派成 = %d ｜ 對帳 %d+%d=%d vs %d %s" % [
+		_at, _se, _fa, _se, _fa, _se + _fa, _at,
+		"✅" if _se + _fa == _at else "❌ 不平"])
+	var _ev: Array = []
+	for _k in Probe.counts.keys():
+		var _ks: String = String(_k)
+		if _ks.begins_with("mreport.attempt.") or _ks.begins_with("mreport.sent.") 				or _ks.begins_with("mreport.failed."):
+			_ev.append("%s=%d" % [_ks.substr(8), int(Probe.counts[_k])])
+	_ev.sort()
+	print("  分事件：%s" % ("｜".join(PackedStringArray(_ev)) if not _ev.is_empty() else "（空）"))
+	var _sk: Array = []
+	for _k2 in Probe.counts.keys():
+		var _ks2: String = String(_k2)
+		if _ks2.begins_with("mreport.skip."):
+			_sk.append("%s=%d" % [_ks2.substr(13), int(Probe.counts[_k2])])
+	_sk.sort()
+	print("  連嘗試都沒到：%s" % ("｜".join(PackedStringArray(_sk)) if not _sk.is_empty() else "（無）"))
+	var _cl: Array = []
+	for _k3 in Probe.counts.keys():
+		var _ks3: String = String(_k3)
+		if _ks3.begins_with("mreport.call."):
+			_cl.append("%s=%d" % [_ks3.substr(13), int(Probe.counts[_k3])])
+	_cl.sort()
+	print("  ★★★呼叫點觸發次數（★接線的陽性對照）：%s" % (
+		"｜".join(PackedStringArray(_cl)) if not _cl.is_empty() else "（空）"))
+	print("     ★某事件 `attempt`＝0 而 `call`>0 ⇒ 它【被 guard 擋掉】；")
+	print("     ★★兩個都 0 ⇒ 【那個事件這個窗沒發生】—— ★★★沒有這一格，兩者長得一模一樣")
+	print("  ★★★`failed` 不是 bug：★`_dispatch_envoy` 會因【母隊不知道領袖在哪】而回 false")
+	print("     ⇒ 那正是 spec §4 #3 說的【失聯仍然可能】—— ★★它該被【數出來】而不是被修掉")
 
 # ★★★`徵收` 兩格（blueprint pre-register 2026-09-05：判準寫在數據之前）——
 #   ★①執行真實性：贏 → dispatch → 【真轉移】是三個獨立斷點，每一站都可能斷
