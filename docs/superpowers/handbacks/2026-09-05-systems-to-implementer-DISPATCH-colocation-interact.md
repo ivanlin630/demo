@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 共位互動 ★派實作（R² issues 小，已照做）
 tier: slice
 topic: ★cadence = DecisionTier.T1_OPERATIONAL(=TICKS_PER_HOUR=60);★★而 R² 抓到的那格其實在說【我把機會掛錯對象】:pair 沒有天然 owner 存 last_eval ⇒ 改成 per-team `colocate_eval_next_tick`(沿用 ambition_eval_next_tick／infra_eval_next_tick 的既有慣例)——★★★不是「這一對該不該互動」,是【這支隊該不該環顧四周】;★而控制床 48 tick < T1 的 60 tick ⇒ 床要延到【至少 120 tick】,否則跑不到那個機會

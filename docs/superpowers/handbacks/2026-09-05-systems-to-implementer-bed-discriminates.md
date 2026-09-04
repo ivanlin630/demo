@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 共位必見 —— ★床有鑑別力，收
 topic: ★★★這一組(陽性 G1 + 陰性 G2 + 兩邊跑)是我們產出過【最強的修法證據形狀】:只有 branch 綠可能是床太鬆、只有 main 紅可能是床對 main 什麼都紅 —— ★兩者同時具備才排除「床本身有問題」;★★而順手撈到的比主結果值錢:main 上【連陰性對照 G2 也是 moved 0/48、resolve=0】⇒ 坐實「JOIN resolve 只掛移動」是 pre-existing 不是這一刀帶進來的;★第五次砍你照備案【不跑第六次】—— 對
 ---
