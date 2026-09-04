@@ -1929,7 +1929,7 @@ var minor_cap: int = int(t.population * 0.2)
 var base: float = 0.4 if (safe and fed and t.minor_population < minor_cap) else 0.0
 ```
 ⇒ **pop ≤ 4 時 `minor_cap = 0`** ⇒ `minor_population < 0` 恆 false ⇒ ★**`_score_breed` 恆 0 ⇒ 小隊永遠不生育**。
-★★**而它是【截斷造成的硬零】不是【設計出來的門檻】** —— 正是本條目描述的病型（機制在小尺度靜默啞）。
+★★**而它是【截斷造成的硬零】不是【設計出來的門檻】** —— 正是本條目描述的病型（機制在小尺度靜默啞）。 ★★★**（訂正 2026-09-04：此第四顆【已修並 merged】** —— `reaction_system.gd:229` 改為 **float 對 float 的連續比較**，**不是 `maxi(1, int(...))`**；blueprint 裁「pop≤4 恆 0 ＝硬懸崖，直接違用戶生育定案『無絕對懸崖』」**）**
 `int(pop*rate)`/`round(pop*rate)` 在小 pop 尺度恆歸零 → 機制靜默啞（探針前砍光=cosmetic 假過關）。血證 3 次：①殲滅端傷亡 `int(round)`→0（§D4 `_cas_carry` de-patch ✅）②pursuit `int(pop*0.05)` pop<18→0（S1 rev2 `_pursuit_carry` de-patch 中）③capture `round(wounded*rate)` 小 wounded→0（部分，rev2 severity 半救）。
 **sweep 揭未護欄站**（`grep int(...pop...*)`）：
 | 站 | 型 | 建議修 |
