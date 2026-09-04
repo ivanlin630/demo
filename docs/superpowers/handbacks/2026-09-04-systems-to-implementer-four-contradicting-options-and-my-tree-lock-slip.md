@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: zero-win-options + donor-ladder 排程訂正
 tier: probe
 topic: ★序:19 個只開【4 個】——那 4 個與贏家同家族同管線,所以「線沒接」已被同一張表排除;★★rebase 延後我同意,理由比「等一下再做」硬:worktree 有 runtime load(),rebase 會讓正在被讀的樹瞬間變別的內容;★★★而我自己上一封票就踩了同一條規則——我寫「序列批次跑期間樹被鎖住」,然後下一封就派了一張需要改樹的票

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: donor-ladder-intersection-attribution
 tier: probe
 topic: ★量測票:施主階梯交集 0→2 的成因(逐階條件名,禁猜);★★做法=同一顆 code 跑兩個 config 把【政權注入】跟【順序相依 bug 修】分開——wrapper UTF-8 只碰 stdout 我先驗證式排除但不拿它當結論;★★★判讀表含「兩邊都 0=不可重現」那列,別讓它被讀成沒事;計數類可並跑,不擋 warring pilot
