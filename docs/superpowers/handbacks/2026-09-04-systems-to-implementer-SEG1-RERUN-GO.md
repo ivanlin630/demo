@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★seg1 重跑開跑（★下架後的乾淨卷）
 tier: slice
 topic: ★已 merge(specimen 涵蓋 + 備戰下架)、17 支全綠 287s、已 push;★★凍結重建 commit=23708982 —— 三張卷全跑這一顆;★★★而本輪比上輪多一條要求:重跑要跟【下架前那三張】比,所以【只比 ANNOTATION §3 那些格】,「誰在贏」那格是【新資訊】不是對照;★而我的預先登記預測在票裡:求和集中 vs 散開,兩種都有意義
