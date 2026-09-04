@@ -19,7 +19,15 @@
 ## §2 範圍（★做什麼）
 1. `goal_resolver.gd:139` 的 `float(def.get("payoff", 1.0))` 改為導出：
    - `maintain_*` ⇒ 由 `NeedOracle.need_keep(state, team, <prereq.res>)` 導出
-   - `build_*`    ⇒ 由既有 `_facility_deficit(state, team, facility, otile)` 導出（**同一次呼叫的值，不重算**）
+   - `build_*`    ⇒ 由 `_facility_deficit(state, team, facility, otile)` 導出
+     ★★★**（訂正 2026-09-04：我原寫「同一次呼叫的值，不重算」—— 錯。`:76`/`:104` 在
+     【goal 掛/退階段】，`:139` 在【candidate util 階段】，是同一 tick 的【不同階段】。）**
+     ⇒ ★兩條路，**而我要求走 (a)**：
+     ```
+     (a)★在 :139 重算    —— 多一次呼叫,成本進 §4-5 的 perf 判準
+     (b) 掛 goal 時把 desire 存進 goal dict —— ★★便宜,但 goal 跨 tick 存活
+        ⇒ payoff 會【凍在掛載當下的值】⇒ ★★★那是【換一個恆等】,正是本 slice 要修的病
+     ```
 2. **家族內正規化**（各自除以該家族的量綱基準），★**常數只剩「量綱基準」一個，且必須標明它是量綱不是偏好**
 3. **值分布 dump 保留**（`gu2.payoff_val` 相異值計數）——★**這是驗收的主證據**
 
@@ -45,6 +53,18 @@
 | 5 | ★**perf**：印 `need_keep` 每決策呼叫次數 ＋ 該段 wall-clock | 遞迴守衛在，**但頻率變了** |
 | 6 | 陰性對照：**導出後仍印值分布** | 防「改完就不看了」 |
 | 7 | ★★**憲法閘 PASS** | 導出式不得寫成新門檻 |
+
+## §4b ★前提查證（systems 自查，2026-09-04；★①原文有錯已訂正、②成立、★★③是新發現）
+```
+①`goal_resolver.gd:76`/`:104` 的 facility 【確實對應 goal】(f 由 BUILD_FACILITY_GOALS[gt] 導出)
+   ⇒ ★對應成立;★★但【階段不同】⇒ §2 那句已就地訂正(見上)
+②`weapon_melee_low` 【在】TradeValuation.TARGET_PER_POP（= 1.0）
+   ⇒ ★_self_use 回 pop × 1.0 ≠ 0 ⇒ ★★maintain_weapons 不會從「恆 1.0」變成「恆 0」——這個洞不存在
+★★★③新發現:`material` 在 NeedOracle.PURE_INTERMEDIATE ⇒ _self_use 【回 0】
+   ⇒ maintain_material 的 payoff 只由 _supply_chain + _construction_facility_need 組成
+   ⇒ ★組成項與其他四個 maintain 【不同】—— 不是 bug,但驗收 3 逐筆貼例時要【避開它當代表】
+   ⇒ ★★而它與實測對得上:maintain_material 本來就是唯一不平手的那個(0.8696、落 0.1to0.5、tie=0)
+```
 
 ## §5 誠實限（★寫在 spec 裡，不等結論時才補）
 ```
