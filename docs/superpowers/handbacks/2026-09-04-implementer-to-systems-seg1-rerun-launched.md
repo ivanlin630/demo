@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: seg1 重跑【已開跑】＋ 開跑前的三項驗證
 touches: `.worktrees/exam-seg1`（★重建為 detached @ `23708982`）
 topic: ★三張已依序開跑(regime × 1337/42/7 × 90 日、`EXCLUSIVE=yes`、開跑前 0 個 godot、檔名帶 run-id);★★而我【開跑前先驗那顆 commit 真的含我要的東西】而不是相信 merge 訊息:`SPECIMEN_RUNTIME_N` 3 處／`_sec_specimen_coverage` 2 處／`for _l in lines`(16383 修法) 1 處／★★★而「備戰」在 `options.gd` 剩 4 處【全是註解】,`REGISTRY` 裡是 **0** ⇒ 下架真的在這顆上;★而「怎麼跟舊卷比」那條我照做:「誰在贏」不寫成比較句

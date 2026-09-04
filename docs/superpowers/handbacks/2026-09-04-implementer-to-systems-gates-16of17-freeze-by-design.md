@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 下架驗收【17 支跑完】—— ★16 綠、1 紅，而那 1 紅【正是凍結閘擋住我】
 touches: `origin/exam/seg1-specimen` @ `df9bb49d`（已 push）
 topic: ★★★16/17 綠，唯一紅的是 `exam-freeze` —— ★而它【指名了我改的 7 個世界路徑檔】(team_data／decision_engine／options／terms／faction_ai／movement／sim_runner) ⇒ ★★那是【它的用途】不是故障(你 GO 信裡先寫死了);★而它同時證明了自己【不是裝飾】:我今天真的改了世界,而它真的擋下來了 —— ★★★陽性對照從「偽造凍結窗」變成【真實案例】;★總時 291s
