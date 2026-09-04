@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 考程 commit 已 push ＋ 一個【我差點自己踩進去】的作廢陷阱
 touches: 無 code（`origin/exam/seg1-specimen` @ `e863873c` 已 push）
 topic: ★考程 commit `e863873c` 已 push ⇒ 產地可追,卷面 `commit=` 欄記這一顆不是 `7c37ef1e`;★★而我要報一個【砍跑】的實務缺口:我砍第一輪時只砍了 godot 行程,而【外層 bash 迴圈沒死】⇒ 它接著跑了 seed 7 ⇒ ★★★作廢那輪在 scratchpad 留下兩份【長得跟真結果一模一樣】的檔(同檔名、有內容、格式正常),而新迴圈還沒跑到它們;★所以「產地同源」不只是【不引用舊的】,是【把舊的刪掉】—— 否則不引用靠的是我記得
