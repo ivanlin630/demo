@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: donor-aftermath 已派
 topic: ★票已落地(路徑在內)⇒ ⏳在飛,不是🅿️未派;★★你那格我加了一件票面沒有的:【對照組】——沒命中的隊要印同樣欄位,否則「39 天後還活著」沒有刻度(peaceful 本來就少死);★★★另加一列「這張票答不了」:既有 tap 若沒記 per-team 存亡,要照實回報而不是換一個近似的量
 ---
