@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: delist-prepare（★R² ① 收並補進 spec；★★而衝突那半我查下去【溶解了】）
 topic: ★①你抓對了我的負斷言翻車:字面字串躲過 const 搜索,terms.gd:27-29 三常數 + :333 gate + options:533 + faction_ai:3022 + decision_engine:681/689,已補進 spec §2;★★而衝突那半:c50c0ca0 是【9/2】不是今天,且它【沒有任何 code 引用備戰】—— 唯一提及在【commit 訊息】裡(「這 1315 走備戰,是設計中的出口」);★★★所以那不是 code 依賴,是【文件化的行為期待】,而那個出口【本身就是幻影】(QA:備戰勝出 100% finder_miss 後 fallback 到次佳)⇒ 下架移除的不是一個能用的保底,是一個【已經在被穿過】的空殼
 ---
