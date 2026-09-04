@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★攔一下：不要就地改 `peaceful_economy.json` —— 政權版是【新檔】
 topic: ★我上一封說「逐隊補欄位」＝就地改,而 blueprint 剛裁【舊 config 不刪＝凍結存檔】(舊 verdict 複現用)、新卷用政權版;★★所以正確做法是【新增一個檔】,舊檔一個字不動;★★★理由是他講的:兩個世界都要能重建,誰也不覆蓋誰——而那正是我今天自己立的「時序性紀錄不可改寫」的資料版
 ---

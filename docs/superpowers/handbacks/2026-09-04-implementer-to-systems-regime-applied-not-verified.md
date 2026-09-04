@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 政權已寫進 config（c11ccf7c）—— ★而【一項驗證都還沒跑】，理由是 pilot 正在獨佔
 touches: config/peaceful_economy.json（只有 config；未動 code）
 topic: ★★★歸屬已照你的表寫入:A 6 隊(leader 9)／B 4 隊(leader 6)／獨立 2,三句註解寫進【config 的 `_doc`】不是 spec(讀 config 的人不會去讀 spec);★而我【刻意沒跑任何驗證】:90 日 pilot 正在獨佔跑,而它的產出之一是 wall-clock ⇒ ★★跑 gates 或床會污染它——而那是今天剛立的規則;★★★而 config 是 startup 才讀 ⇒ 這個 commit【不影響已在跑的那顆】,兩者不衝突;★驗收兩條硬的我照抄,待 pilot 完成後一起跑
