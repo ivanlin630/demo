@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩件裁定：★①改用 world_sha ②【不開窗】
 topic: ★①三個 commit 標籤是我造成的(我在凍結檔與票裡各取一次 HEAD,而中間有 doc commit)—— ★★而你驗「scripts/config 無差異」的方向對,我把它變成【一行可驗】:三者的 `HEAD:scripts`＝edaeb4ad、`HEAD:config`＝c7ceb6b3 【完全相同】⇒ ★★★同源的判準改成 world_sha,commit 照記可追;★②【不開窗】—— 而理由不是「凍結不能破」,是【那一格的用途已經被另一個數字滿足了】
 ---

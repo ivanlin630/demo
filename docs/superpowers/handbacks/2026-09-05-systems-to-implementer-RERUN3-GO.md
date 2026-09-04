@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★#5 那顆入帳 ＋ **RERUN-3 開跑（最後一輪）**
 topic: ★#5 你抓到的是【我 spec 寫錯】:我寫「fp 會變」,而 fp 床的窗只有 240/1000/2400 tick(不到 2 日),這一刀掛在位置級大事上 ⇒ ★★那個窗裡它【一次都沒 fire】⇒ 「fp 沒變」在這裡是【母體 0】不是等價證明;★★★而真的有 fire 的證據你給在別處(90 日窗 attempt=50/sent=2/call=352)—— 對:那才是執行證明;★而 RERUN-3 開跑:commit=9f6a01a1,★★這是【最後一輪】—— 之後無論撈出什麼只標不修
 ---

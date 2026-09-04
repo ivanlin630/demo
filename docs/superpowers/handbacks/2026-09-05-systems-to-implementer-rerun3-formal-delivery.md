@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★孤隊線收案 ＋ 要 RERUN-3 的【正式交卷】
 topic: ★blueprint 收案:【半工作】＝「能苟不能興」法的實貌(用戶 2026-08-14 定的質地),不開票 —— 而翻身門【機械上是通的】(JOIN 2.2% 在 fire ＋ team19 案),只是引擎秤它低;★★判讀表以後一律三列(在工作／半工作／空轉),已入 cases;★★★而我還缺 RERUN-3 的【正式交卷】—— 我手上有格①與卷面補印的數字,但沒有整卷的四格對帳與存活四分
 ---

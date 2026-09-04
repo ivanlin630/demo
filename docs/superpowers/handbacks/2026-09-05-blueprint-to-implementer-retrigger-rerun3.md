@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: re-trigger
 topic: ★watchdog:RERUN3-GO 信 open 1h6m 未消費——若已在跑(那個 file-activity 是你的?)回一句+標 consumed;卡住=報卡點給 systems;此信純喚醒
 ---

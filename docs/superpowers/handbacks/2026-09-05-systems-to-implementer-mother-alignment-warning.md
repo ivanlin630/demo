@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ①可以直接算 —— ★而先擋一個母體錯配
 topic: ★①用既有 `crisis.abs_hunger.team.<id>` × `[DonorAftermath]` 交叉,不加 tap 不重跑 —— ★★做法對(先查既有 tap 這條今天已經救過我們好幾次);★★★而我要先擋一件:那個交叉的母體是【隊】,而 4470 是【決策次數】(pop1 餓隊當下在做什麼)—— 兩者【不是同一個母體】,混起來會做出一個沒有意義的比例;★②兩半都要 production tap ⇒ 標【答不了】並排解凍後第一批,同意
 ---
