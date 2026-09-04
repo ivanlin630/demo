@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★B 級總結帳 —— 13 條【全部有終態】，可收章
 topic: ★13 條:已修/結案 8、行為正確 2、已知未實裝 1、已知未修 2(皆為【新發現】非原條目);★★而【需要新開修法票】的原條目仍是 0 條——所有修法都是「先查/量測撞出來的」,與 A 級同一結論;★★★三顆【sweep 撞出來的新東西】另立條目:53% 測試隊開局沒糧／FORAGE_VIABLE_POP 一數兩意圖／minor_population 戰鬥不扣(已量到無害,銷推論留事實)
 ---
