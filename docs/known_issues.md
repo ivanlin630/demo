@@ -3339,7 +3339,34 @@ build_stable / build_apothecary / build_workshop / maintain_weapons 的 `:resour
 ★★**而這解釋了那個「5149 次候選、0 勝」為什麼那麼乾淨**：
 **若 tie-break 是 registry 插入序，那麼輸的那幾個【每一次都輸】** ⇒ ★★★**0/5149 不是偏好，是【決定性的排序假象】。**
 
-### ★懷疑點（★implementer 標明沒有下斷言，我照樣不升級）
+### ★★★【已推翻】懷疑點 —— clamp 不是來源（訂正 2026-09-04，推翻它的是 implementer 自己補的覆蓋率）
+```
+★訂正版探針(掛 `_candidate_util` 單一收斂點):30 日 母體 523｜clamped ★0｜unclamped 523
+⇒ ★★上限【從來沒咬到】⇒ 落在判讀表第二列:平手另有來源 ⇒ 往上游
+★★★而第一版探針【自己就是儀器沒開】:掛在兩個 clampf 上,母體僅 64,
+   而那七個 option 光 30 日就【各出現 46 次】⇒ 母體對不上 ⇒ 沒蓋到產它們的那條路
+   (`:resource` 走 `_mk_candidate` → `_candidate_util`,不經那兩個 clampf)
+⇒ ★那個 `clamped=0` 不是證據,是【沒量到】—— 工具騙人第一形態
+```
+★★**真來源 ＝ `goal_registry.gd:40-51` 的 flat 死常數（都標著 `TEST VALUE`）**：
+```
+maintain_food/material/tools/weapons/coin        payoff = ★1.0（五個同值）
+build_farming/workshop/apothecary/mint/stable/…  payoff = ★1.5（八個同值）
+★實測值分布坐實(不是從假設推的):30 日 1.50×242｜1.00×217 = 87.8% 只有兩個值;8 日跑相異值就 2 個
+★★算術:1.50 × devcoef 1.00 × discount 0.87 = 1.3043 ＝ 那五個逐位元相同的 util
+   maintain_material:1.00 × 1.00 × 0.87 = 0.8696 ＝ 它實測的值
+```
+⇒ ★★★**平手不是「上限壓平」，是【一群 goal 共用同一個常數】** ⇒ 同 payoff ＋ 同 dev_coeff（同隊同 tick）
+＋ 同 discount（同 delay）⇒ **util 逐位元相同** ⇒ **registry 插入序決定誰贏，而那一步是決定性的** ⇒ **0/5149 只能是 0。**
+
+### ★★歸因陷阱（值得單獨記）：**兩個不同的常數剛好同值**
+```
+`GOAL_UTIL_CAP` = 1.5，而 `build_*` 的 registry payoff **也** = 1.5
+⇒ ★「飽和」與「本來就等於那個數」在【單一數字】上長得一模一樣
+⇒ ★★分辨它們的不是推理,是【值分布】那一欄 —— ★★★而 clamped 計數看不出來(兩種情況它都可以是 0)
+```
+
+### （原文，框架已於上方推翻）★懷疑點（★implementer 標明沒有下斷言，我照樣不升級）
 ```
 goal_resolver.gd:285   clampf(best_util, 0, 1.5)
    ⇒ ★可能把多個 candidate 壓成同一個 payoff（數字對得上:1.3043 = 1.5 × 1/1.15）
