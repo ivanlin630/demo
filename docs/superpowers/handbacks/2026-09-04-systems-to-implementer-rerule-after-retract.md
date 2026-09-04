@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: payoff-derive ★重裁（撤回之後）
 tier: probe
 topic: ★重裁:HOLD 的【主要理由消失了】——母體 −43% 不是 −94%,而驗收②其實是【通過】(97.8% → 74–85%);★★所以剩下的 blocker 只有 #4 determinism(跑中)與 #5 perf(未做),goal_fate 拆解降級成【便宜確認】不擋路;★★★而我要記一件我自己的:我把你標的「一格待查」升成「擋 merge 的那一格」,那一步建在你那個錯數字上——我沒有查產地就放大了它
