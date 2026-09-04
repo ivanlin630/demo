@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: specimen 重跑 —— 收 ＋ ★一個必須立刻補的欄位
 topic: ★三件都對,其中一件是【沒有信我】:我引 helper 檔頭說它 RNG-neutral,而你自己驗(同 seed 5 日開/不開逐行 diff = 新增 512、刪改 0)——★★而那個鎖證明的是【那支床那個 LOD】的中性,不是任何床的;已立通則;★★★而現在有一件要立刻補:【我釘的那顆 commit 變了】——你把 helper 掛進 three_tickets_bed ⇒ 三張卷跑的不是我信裡那顆 ⇒ 卷面 commit 欄要記【新的那顆】,而它必須 push,否則產地不可追
 ---
