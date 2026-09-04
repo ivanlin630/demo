@@ -608,6 +608,16 @@ func _sec_abs_hunger() -> void:
 	for i2 in range(mini(8, keys2.size())):
 		top.append("team%s=%d" % [String(keys2[i2]), int(pt[keys2[i2]])])
 	print("  ★相異隊數 = %d｜前 8 名：%s" % [keys2.size(), " ".join(PackedStringArray(top))])
+	# ★★★全名單（2026-09-05）：★前 8 名【答不了 blueprint 格①】——
+	#   ★★那一格要的是「曾經餓到歸零的隊後來怎麼了」，而那需要【每一個 id】去跟
+	#     `[DonorAftermath]` 交叉；★★★只印前 8 名的話，21 隊裡有 13 隊【在卷上不存在】，
+	#     而下游會把「我找不到」讀成「沒有」。
+	#   ★這是 `scripts/debug/` 的改動 ⇒ 不在凍結範圍（凍的是 scripts/simulation|scripts/data|config）；
+	#     ★★而它【只是多印字】：零 RNG、零 state 改動 ⇒ 世界逐位元不變。
+	var _all2: Array = []
+	for _i3 in range(keys2.size()):
+		_all2.append("%s:%d" % [String(keys2[_i3]), int(pt[keys2[_i3]])])
+	print("  ★★全名單（team_id:次數，降序）：%s" % " ".join(PackedStringArray(_all2)))
 	print("  ── 逐隊（最多 10 筆）★raw 私產與 effective 並排：兩者都印才分得出「真的沒有」與「讀錯了」──")
 	for i in range(mini(10, sm.size())):
 		var e2: Dictionary = sm[i]
