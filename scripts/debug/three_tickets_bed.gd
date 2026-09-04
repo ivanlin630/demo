@@ -46,6 +46,13 @@ func _run() -> void:
 			int(Probe.counts.get("flee.degrade.total", 0)),
 			int(Probe.counts.get("begu.in_candidates", 0)), int(Probe.counts.get("begu.won", 0)),
 			int(Probe.counts.get("prep.won", 0))])
+		# ★★★中途小結（systems 2026-09-04）：★長跑的結論不能全部堆在結尾——
+		#   血證：90 日 pilot 被砍在 day 53，而免費補答三項【全在報告區】⇒ 一項都沒撈到。
+		#   ★★而它與串流版 wrapper 是【同一條在不同層】：wrapper 治 stdout 緩衝，
+		#     ★★★這條治【結論只在最後才存在】—— 而後者 wrapper 救不了。
+		#   ★格式照既有：母體與命中同印、key 名自報。
+		if (d + 1) % 10 == 0:
+			_sec_interim(d + 1)
 
 	_sec_10()
 	_sec_5()
@@ -543,3 +550,22 @@ func _sec_churn() -> void:
 	print("     ★★★誠實限：churn 這一行【是這一刀才加的】⇒ 它【沒有修前基準】")
 	print("        ⇒ ★單看修後數字說不出「降了」——★★那正是「拿一個數字去比一個不存在的數字」")
 
+# ★中途小結（每 10 日一次）：★★只印【被砍就會全損】的那幾格，不重印每日 [CP] 已有的
+func _sec_interim(day: int) -> void:
+	var zm: int = int(Probe.counts.get("zhagen.mother", 0))
+	var zw: int = int(Probe.counts.get("zhagen.appl_won", 0))
+	var zl: int = int(Probe.counts.get("zhagen.appl_lost", 0))
+	var solo: int = int(Probe.counts.get("solo_survivor.transition", 0))
+	print("[INTERIM day=%d] `zhagen.mother`=%d `zhagen.appl_won`=%d `zhagen.appl_lost`=%d"
+		% [day, zm, zw, zl])
+	print("[INTERIM day=%d] `camp.built`=%d `camp.built.has_home`=%d `camp.abandoned`=%d `outpost.l0_to_l1`=%d"
+		% [day, int(Probe.counts.get("camp.built", 0)), int(Probe.counts.get("camp.built.has_home", 0)),
+			int(Probe.counts.get("camp.abandoned", 0)), int(Probe.counts.get("outpost.l0_to_l1", 0))])
+	print("[INTERIM day=%d] `solo_survivor.transition`=%d `crisis.abs_hunger`=%d `minor_exceeds_pop`=%d"
+		% [day, solo, int(Probe.counts.get("crisis.abs_hunger", 0)),
+			int(Probe.counts.get("minor_exceeds_pop", 0))])
+	print("[INTERIM day=%d] `mseek.gave_up`=%d `mseek.forage.applicable`=%d `mseek.forage.pop_block`=%d `mseek.forage.land_block`=%d"
+		% [day, int(Probe.counts.get("mseek.gave_up", 0)),
+			int(Probe.counts.get("mseek.forage.applicable", 0)),
+			int(Probe.counts.get("mseek.forage.pop_block", 0)),
+			int(Probe.counts.get("mseek.forage.land_block", 0))])
