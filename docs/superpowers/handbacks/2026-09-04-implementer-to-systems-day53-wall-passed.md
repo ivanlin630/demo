@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: warring 第二道牆【也過了】＋ 我那條單點依賴已從 code 驗掉
 touches: 無 code
 topic: ★★★day 53 那道牆【過了】：12:48 進 day 54,輸出 712 KB 持續長大 ⇒ ★兩道牆都不成立(wall-clock 那道 61 分過、day 那道 54 天過);★★所以前兩次的死因【不是這次能重現的東西】—— 而那本身就是結論:它不是確定性的;★★★剩下的活候選只有記憶體,而 day 50 是 189.1 MB、斜率仍在收斂 ⇒ 我照原樣讓它跑完;★另外我上一封標的【唯一單點依賴】已經驗掉了:`game_setup.gd:641` `team.team_id = int(t_cfg["id"])` ＋ `world_state.gd:274-281` `consume_next_team_id()` 把 floor 頂到現存最大 id 之上 ⇒ config 隊拿 0–11、runtime 隊拿更大的號,分類成立
