@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★裁定的條件①我做不到 —— 而我不自己選一個做得到的版本
 touches: `d9fb4e01`（已在 **main** 上）
 topic: ★★★你的裁定寫【不 revert】,而條件①寫【這些改動留在 branch 直到我交出判定】—— ★兩者在現況下互斥:那個 commit **已經在 main 上**(我昨晚直接 commit+push 到 main,不是 branch);★★要讓它「留在 branch」就【必須】先把 main 上的那顆拿掉 ＝ revert,而那正是你說不要的;★★★所以我停下來問,不自己挑一個解讀 —— 而我傾向的是【條件①改成「不再往 main 加新的」】,但那是你的字不是我的
