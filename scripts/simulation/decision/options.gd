@@ -325,13 +325,23 @@ static var REGISTRY: Dictionary = {
 			return "徵收" in ctx.faction_stakes and ctx.faction_tribute_target != -1,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 派系指定最富 member 徵貢（非戰，不設 combat_target）。排除自身（_richest_member 未排）。
+			# ★★★「無目標」是三種不同的無（systems 2026-09-05 要逐條件名）——
+			#   ★它們共用一個 `(-1,-1)` 回值，而處置完全不同：
+			#     沒有勢力／沒有可徵對象／★★有對象但【belief 沒有它的位置】
+			#   ⇒ ★★★第三種是感知鏈的事，前兩種是世界狀態的事 —— 混成一格就分不出該修哪裡。
 			var f4 = state.factions.get(team.faction_id)
-			if f4 == null: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			if f4 == null:
+				if Probe.enabled: Probe.bump("levyfun.notgt.沒有勢力")
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			var rt: int = FactionAISystem.new()._richest_member(state, f4)
-			if rt == -1 or rt == team.team_id: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			if rt == -1 or rt == team.team_id:
+				if Probe.enabled: Probe.bump("levyfun.notgt.沒有可徵對象" if rt == -1 else "levyfun.notgt.最富的是自己")
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			# #12 同-faction 徵收 → belief_pos 內走 known_member_states 通道（自家人非敵情 belief）。
 			var rt_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, rt)
-			if rt_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			if rt_pos == Vector2i(-1, -1):
+				if Probe.enabled: Probe.bump("levyfun.notgt.belief沒有位置")
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_TRIBUTE, "target": rt_pos},
 	},
 	"外交": {
