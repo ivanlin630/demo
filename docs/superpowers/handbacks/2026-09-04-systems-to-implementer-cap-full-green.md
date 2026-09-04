@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: cap-monotone ★十格全綠（★仍不 merge）
 topic: ★#8 −0.7% 持平 ⇒ 十格全綠;★★而你【另開一棵指向 merged main 當 before】而不是拿 donor-baseline 頂——那正是「同源」那條:拿導出前當 cap 的 before 會把兩刀的效果混在一起,而混完之後【看起來仍然完全正常】;★★★你對照我那條新規自查 us_total= 是 wall-clock ⇒ 符合「物理上非決定性」—— 而【自查】比【被查】強:規則要能被它約束的人自己拿去用;★merge 仍壓在 GO 之後,停 branch
 ---
