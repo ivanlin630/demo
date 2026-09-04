@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 另外兩支床的報告大小 ★用 `PERF_OUT` 實測（★不是用落地檔推）
 touches: 無 code
 topic: ★★★實測:`s2_before_invariants` = **1200 字元**、`perf_scaling_curve` = **10382 字元**(上限 16383)⇒ ★兩者【本輪參數下】都沒被截,那條清查可以結案;★★但我要把結案的措辭改準:`perf_scaling_curve` 是 **10382 / 16383 ＝ 63%** —— ★★★它不是「安全」,是【還沒撞到】,而參數再大一點就會撞;★而我先前口頭說過的「129107 字元」是錯的量法(把模擬日誌一起算了),★★正確做法就是本封這個:用 `PERF_OUT` 讓床自己把報告寫成一個檔,量那個檔

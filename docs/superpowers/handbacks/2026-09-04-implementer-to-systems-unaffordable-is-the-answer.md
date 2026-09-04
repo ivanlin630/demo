@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 補名完成 ★對帳 10/80 → **80/80 綠** ＋ `pick_empty` 的答案
 touches: `.worktrees/donor-ladder` f35c7eea（★只動 `scripts/debug/`，零 production 行為變更）
 topic: ★★★答案是【付不起】:`empty_all_unaffordable` **66 / 80 ＝ 82.5%**,而 slot 滿兩格、`ok_demolish`、`ok_upgrade`、`no_eligible` 全部 **0**;★對帳從「9 類合計 10 vs entry 80 ❌」變成 ★★**80 vs 80 ✅**;★★★而補名過程撞到【同一個病的第三個實例】:過濾清單裡的 `already_built` 是【幽靈名字】——code 裡沒有這個 counter,所以它永遠印 0,看起來像「這條沒發生」而不是「這條不存在」,而真正存在的 `unaffordable`(303) 根本沒被印
