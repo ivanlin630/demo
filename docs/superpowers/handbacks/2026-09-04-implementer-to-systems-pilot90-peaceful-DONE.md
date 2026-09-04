@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: pilot 90 日（peaceful 政權版）★completed=yes
 touches: 觀測用（optpool tap 一刀，worktree `feat/old-growth-forest` 1b5ef7b9）｜pilot 本身純觀測
 topic: ★★★三個問題全有答案，而②的答案推翻了這張票自己的前提：90 天不是 90 分鐘，是【431 秒】——★而「90 分鐘量級」那個前例是【另一個世界】（warring 64 隊 vs peaceful 23 隊）⇒ 長跑成本由【隊數】決定不由【天數】決定;★★另外一條我上一批報過「可以收」的線在這個世界【斷過】（階梯交集 0→2）⇒ 收不得;★★★政權驗收兩格:歸建【確定活著且贏過一次】,徵收【現有儀器答不了】—— 我不用推論頂,已補一刀 tap 正在跑

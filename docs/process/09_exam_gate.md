@@ -111,7 +111,7 @@ bash .claude/hooks/stale-claims.sh docs/process/<考卷清單>.md
 |---|---|---|
 | ★**peaceful 卷預塞初始政權 spec** | ★★**未備** | **26/29 個 config 沒有 `factions`** ⇒ ★★★**這些床上 faction 層全程 dormant** ⇒ 在 peaceful 卷上考「派系／義務」等於考一個**不存在的層** |
 | ★**90 日 run-reliability** | ★★**未知** | 我們**沒有跑過 90 日**；★已知改善：wrapper 串流版（外殺也留得住輸出）；★★未知：會不會 timeout、記憶體、`_reset_cross_run` 在長窗下是否足夠 |
-| ★**wall-clock 預算重估** | ★★**未知** | 現況：`merge-gates` 15 支 ≈ 300s；★而 **90 日單跑的耗時我們沒有量過** —— ★★★**用 30 日 ×3 去外推是【手抄】，不算數** |
+| ★**wall-clock 預算重估** | ★**已備（2026-09-04 實測）** | `peaceful_economy_regime` **90 日 ＝ 431 秒**；★★**而成本驅動是【隊數】不是【天數】**（warring 64 隊 90 日跑不完 vs peaceful 23 隊 431 秒）⇒ ★★★**warring 卷的預算【仍未知】，不可由此推得** |
 
 ### ★★★C 開跑條件
 ```
