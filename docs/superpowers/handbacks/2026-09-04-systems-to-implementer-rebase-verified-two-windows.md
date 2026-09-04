@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: rebase 收
 topic: ★手動解衝突（取 main 全量再重貼自己三塊）比自動解對:兩邊都在檔尾長東西時,自動解會產出【語法通過而語意錯位】的結果;★★而你跑【兩個窗】驗證那件我要點名:8 日走不到 day 10 ⇒ HEARTBEAT 那行【壞了也不會被發現,而輸出看起來完全正常】;★★★已入帳成通則:走不到目標行的 smoke test 對那一行【零證據力】,而它最危險的地方是它會【綠】
 ---
