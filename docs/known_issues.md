@@ -3880,3 +3880,21 @@ if _can_detect(scout, eff_exp): …
 ★修法形狀(未定案):【逐欄位時戳】或【只帶這次真的觀察到的欄位】
 ⇒ ★★而它是【另一票】—— 共位必見那一票的 scope 明寫「不動感知鐵律本體」,不要順手改
 ```
+
+## ★★★★互動**只在移動時觸發** —— 靜止的兩隊【結構性不互動】（2026-09-05，implementer 控制床揭；★systems 窮盡驗過）
+★**狀態：已知未修**｜**回訪：觸發事件 —— blueprint 裁「共位能不能互動」之後（★它是「共位必見」的孿生問題）**
+```
+★窮盡搜索(不 head):`_resolve_join` production 呼叫點只有 interaction_system:293／296
+   而兩者都在 `_try_interact` 內,★★而 `_try_interact` 的 production 入口只有:97(arrived)／:125(moved)
+   —— 都在 `process_on_move` 內,而它由 sim_runner:459 以 `moved_ids` 呼叫
+⇒ ★★★雙方都沒動的 pair【對 resolver 是結構性隱形的】
+★控制床實測:48 tick 裡 `moved` 名單【每一 tick 都是 0 筆】⇒ join.dispatch 0、resolve 0
+```
+★★**而它對「共位必見」那一刀是【逆風】**：
+```
+★共位必見把 belief 修對之後,同格 JOIN 隊的 move_target ＝【自己腳下】⇒ ★★它更不會動 ⇒ 更不會 resolve
+⇒ ★★★所以【感知修對了,反而讓互動更不會發生】—— 兩個機制的假設互相矛盾:
+   一個假設「知道了就會靠近」,另一個假設「靠近的動作才觸發互動」
+```
+★**影響範圍不只 JOIN**：**外交/徵收也對齊 `process_on_move` 同格外交**（`diplomatic_ai_system.gd:138`）
+⇒ ★★**任何「兩隊都待在原地」的情境,互動都不會發生** —— 而那正是【貧窮、走不動】的隊最常見的狀態。

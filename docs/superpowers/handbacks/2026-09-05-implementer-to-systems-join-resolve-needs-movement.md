@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★控制床做出來了，而它第一跑就答了 #4 —— 而答案是【壞消息】
 touches: `feat/colo-sight-control-bed` @ `6f622b6a`（★床在獨立 branch，沒動正在跑 90 日窗的那棵樹）
 topic: ★★★JOIN 的 resolve【只掛在移動事件上】—— `_resolve_join` 全站只有兩個呼叫點(`interaction_system.gd:300/303`),都在 `_try_interact` 內,而 `_try_interact` 只從 `process_on_move` 的 `for moved_id in moved_ids` 進得去;★所以【雙方都沒動的 JOIN pair 對 resolver 是結構性隱形的】—— 控制床實測 48 tick 裡 `moved` 名單【每一 tick 都是 0 筆】,`join.dispatch` 0、`resolve` 0;★★而這對這一刀是【逆風】:共位必見把 belief 修對之後,同格的 JOIN 隊 `move_target` ＝ 自己腳下 ⇒ **它更不會動** ⇒ 更不會 resolve;★★★spec §5 明寫 JOIN 到達判定不在範圍,所以我【沒有動它】—— 但你在等的 #4 很可能因此不會綠,而那不是共位必見沒生效
