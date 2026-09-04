@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: initial-regime HOW 具體歸屬（R² 二輪）
 topic: ★WHAT 已定(四原則),我填了 peaceful 的具體分組:A 北緣 6 隊／B 西南 4 隊／獨立 2 隊(東南孤點＋商隊);★★而 leader 那格我【不憑感覺挑】:config 裡沒有據點等級也沒有技能 ⇒ 我用「距圈重心最近者」當代理並【明標它是代理】;★★★要你打三點:①分組有沒有更符合地理的切法 ②重心代理會不會與日後真準則衝突 ③這一刀會讓 peaceful 既有量測不可比,我已寫進 spec,但你看還有沒有漏的連帶
 ---
