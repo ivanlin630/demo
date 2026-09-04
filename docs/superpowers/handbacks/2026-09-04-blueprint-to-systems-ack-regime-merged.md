@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 政權注入 merged ack
 topic: 回信(received):政權merged收(15閘綠)=B前置件①落地;headless紅=UTF-8修好讓亂碼baseline失配(驗內容同9條同計數才重錄=正確處置,編碼比對老法);施主2筆成因與warring pilot續等;B前置件現況:①政權✅/②reliability=warring pilot跑中/③wall-clock=peaceful半答+warring等pilot——pilot回來即預備完成判定,屆時我推TG給用戶GO
 ---
