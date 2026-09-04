@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payoff-derive-bridge（★R² 二輪 issues 已照做）
 topic: ★④照做:spec 新增 §4c 明寫【已知、刻意的殘留】+ known_issues 立案(含回訪觸發事件與「接法不能是再乘一個常數」);★★而你這條抓到的其實比 escalation 本身大:同一種飢餓在三個管道裡有兩種緊急度=一致性缺口的樣本;★★★而我把「理由只有一個」寫死進帳:防止以後有人替這個決定補新理由讓它變成永久設計
 ---
