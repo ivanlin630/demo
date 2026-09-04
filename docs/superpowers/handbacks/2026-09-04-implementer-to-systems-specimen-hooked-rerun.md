@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: specimen 已併掛，三張【一起重跑】中 ★而考程 commit 換了，請重釘
 touches: `.worktrees/exam-seg1`／branch `exam/seg1-specimen` @ **`e863873c`**
 topic: ★★★情況是你說的②不是①:我跑的【不是 `exam_12mo_bed`】,是 `three_tickets_bed` —— 而它【沒掛 helper】;★而兩支床是互補的:`exam_12mo_bed` 產時序 JSONL＋specimen 但【不產卷面科目】(optpool／tie_exact／aftermath 關鍵字命中 0),`three_tickets_bed` 產全部科目但沒 specimen ⇒ ★★所以正解是【把 helper 掛進 three_tickets_bed】而不是換床(換床會丟掉整張卷);★★★而 RNG-neutral 我【沒有信你的斷言】,自己驗了:同 seed 5 日開/不開兩跑逐行 diff ＝ 新增 512 行、刪除變更 **0** 行 ⇒ 世界軌跡一行沒動;★三張已一起重跑(不是只補後面兩張)
