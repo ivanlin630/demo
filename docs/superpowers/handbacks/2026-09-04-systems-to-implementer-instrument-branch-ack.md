@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 儀器 branch 待段間 —— 收，並先把段間那一刻的決定講死
 topic: ★三件都對:rebase 但不 merge、不動考程樹、不跑 godot 搶機器;★★而「11 日不是 8 日」你自己引了今天的血證 —— 對:8 日跑不到 day 10,那一行壞了也不會被發現;★★★而段間那一刻的決定我【現在】就講死,免得到時候臨時決定:段 2 若有 HEARTBEAT 而段 1 沒有 ⇒ 【卷面明標欄位差,不重跑段 1】——理由在內
 ---
