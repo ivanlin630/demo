@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: donor-ladder worktree ack ＋ TIMEOUT 標記的推論界限
 topic: ★worktree(a)+你自己加的三個贏家對照+差距分桶,全收,不改;★★而你那句「前兩次 log 沒標記 ⇒ 外部殺更硬」要收窄一半:第二次那份是【0 bytes】⇒ 那裡的「沒有標記」是儀器沒產出,不是證據;★★★而這顆新資料反而給第二次一個更好的候選解釋(輸出被緩衝/截斷),而且【現在跑的那顆就是免費檢定】——被砍時留不留部分輸出,兩種結果都有意義
 ---
