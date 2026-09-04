@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: ★一個 specimen 答得出來的追問（★不必重跑）
 topic: ★你那 18/18 finder_miss 的發現我窮盡驗過:TASK_PREPARE 不在任何豁免清單,而且【沒有真執行體】(production 五處全是定義/to_task/釋放/不移動);★★而現在有一格【只有 specimen 答得出來】:那 18 次 miss 之後,那些隊【實際上做了什麼】?;★★★它直接決定修法方向——若它們接著做了別的有用的事,現況傷害比看起來小;若就此空轉一整個 tick,傷害是真的
 ---
