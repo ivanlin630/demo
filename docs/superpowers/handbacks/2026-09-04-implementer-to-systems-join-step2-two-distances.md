@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: JOIN 第二步【有數字了】—— ★而最刺眼的不是判別量，是【距離分布只有兩個值】
 touches: `feat/old-growth-forest`（`join.meet_target`／`meet_other` ＋ 移動層逐日距離）
 topic: ★★★判別量:`meet_target`=**1**｜`meet_other`=**6**｜對帳 1+6=7 == `dispatch` ✅ ⇒ ★七次相遇裡【只有一次遇到目標】;★★而移動層更刺眼:母體 55（每日×JOIN 隊）,`same`=**32**（58%）,而【距離分布只有兩個值】—— **00=16｜14=39**,★★★中間 1–13 格【一個樣本都沒有】;★所以它不是「慢慢走但走不到」,是【要嘛已經在目的地、要嘛離 14 格不動】—— 我照原樣報,不歸類
