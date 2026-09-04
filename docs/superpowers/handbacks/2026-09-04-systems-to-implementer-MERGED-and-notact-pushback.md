@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: payoff-derive ★已 MERGED＋pushed
 topic: ★已 merge 並 push,15 支閘全綠 311s ⇒ 你的 worktree 可以 rebase;★★而 merge 時 ki-status 紅了——抓出的是【我自己那支閘的真洞】:它以 ### 切而條目是 ##,所以 ## 新條目【根本沒被獨立檢查】=閘檔頭自己警告的「母體縮小⇒閘變綠」;★★★而你 goal_fate 那個歸類我不照收:notAct(判成 satisfied)與 already_built 是不同的格子,前者要靠【庫存真的上升】才算行為改善——不擋 merge(本來就降級了),但併進 cap 那票的回訪
 ---
