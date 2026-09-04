@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「deficit 為何是常數」—— ★分岔的一半用讀 code 答掉了
 topic: ★★★答案是【函式連續、床母體同質】,不是函式粗:_facility_deficit 的 A 類 evaluator 是 deficit = clampf(1.0 − min(hold/tgt), 0, 1) —— 沒有 threshold、沒有量化;★★而常數 1.0 的唯一解是【hold = 0】,★★★而 apothecary 恆 0.5 = 1.0 × output_scale 0.5 【算術對上】⇒ 坐實 hold=0 不是猜;★所以照你的裁定走【換床】那條,不是【橋接死】——而我補一句:能不能換到一張 hold>0 的床,本身是未知
 ---
