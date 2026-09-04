@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 備戰下架 ★派實作（R² 撤回 contradiction ⇒ CLEAN）
 tier: slice
 topic: ★R² 親自查 faction_ai:3720-3723 後【撤回】衝突:「備戰接住」在 code 層級從來不存在,只在 commit 訊息的文件化期待裡 ⇒ 可派;★★而 spec §2 已補上【字面字串】那五處(terms.gd:27-29 三常數／:333 gate／options:533／faction_ai:3022／decision_engine:681,689)—— 我原本的 const 搜索漏掉它們;★★★而兩個坑寫死在 spec §3:prep.* tap【一起移除】不留著印 0(幽靈 counter),殘留狀態【機械驗證】current_task=="備戰" 隊數 = 0

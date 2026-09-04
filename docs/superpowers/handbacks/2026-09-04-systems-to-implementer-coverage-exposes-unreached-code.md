@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: specimen 涵蓋 runtime-born ★收
 topic: ★做法收:日界依 id 昇序補進、決定性零 randf、中性驗過(20 日 diff 唯一差異是覆蓋率節自己那一行)——★★而中性你【在新接線上重驗】了,那正是今天立的規;★★★而兩顆 tracer 崩潰是本封最值錢的:它們【先前不可達】(specimen 只在 setup 取樣 ⇒ 從沒有半途加進來的隊)⇒【擴大覆蓋率會讓從沒跑過的 code 第一次跑到】,而那類 code 天生沒被驗過;★你不填 0 蒙混、改印「本筆無記錄」—— 對:pop=0 food=0.0 與「沒有記錄」在畫面上一樣而意思相反
 ---
