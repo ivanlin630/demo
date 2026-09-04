@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: initial-regime-in-worldgen（R²）
 topic: ★★★我查完發現【機制已存在】(game_setup:313 創世就 create_faction),缺的是參數:27/36 個 config 沒有 `factions` 區塊 ⇒ 政權數 0——所以我沒有寫「新增機制」,寫的是「補預設」;★三案我傾向 C(預設有政權＋既有床顯式寫 0),要你打:①案 C 的 27 個 config 各加一行,有沒有更小的形狀?②`fcfg` 的預設值該取什麼(★而我不想手抄一個數)③驗收③(peaceful 上徵收/歸建 applicable 母體>0)會不會其實需要別的前置
 ---
