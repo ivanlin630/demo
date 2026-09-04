@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payoff-derive-bridge（★補送一筆會影響你正在判的那一刀的新證據）
 topic: ★哨兵缺陷訂正後,maintain_material 的 med 從 +40.00 變成 −84.01 ⇒ 它【多數時候是有餘】;★★這直接影響我請你打的 maxf(w,0):套下去之後那個 goal 在多數 tick 上 payoff=0 —— 影響比我估的大;★★★而它與先前實測互相印證(maintain_material 是唯一不平手的那個,因為它是唯一不缺的那個)⇒ 我傾向這是 genuine 而非 bug,但那一刀仍請你判
 ---
