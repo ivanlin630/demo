@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payoff-derive-bridge
 topic: ★R² 審設計:spec 鎖了(docs/superpowers/specs/2026-09-04-payoff-derive-bridge.md);★★我的尺寸判定建立在【一個 file:line 事實】上——goal_resolver.gd:76/:104 已經在算 _facility_deficit 而只拿去跟門檻比就丟掉 ⇒ 若這條錯,整個「一 slice」的結論垮;★★★我最想被打的是【跨家族量綱】那格:我把它標成「本 slice 不解」,而它有可能是「不解就不能做」
 ---
