@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ②的答案 —— **沒有真執行體**，而它改變了 WHAT 問題本身
 topic: ★★★答案:沒有。TASK_PREPARE 在 production 只有五處(定義／to_task／威脅消失時釋放／兩處「不移動」)——【沒有任何系統對「正在備戰」產生效果】;★★而關鍵的是這件:faction_ai:454 說它【要等威脅消失才釋放】⇒ 所以把它接進豁免清單會讓隊【鎖在一個什麼都不做的 task 裡直到威脅消失】—— ★★★那可能比現在的 finder_miss 更糟(現在至少沒鎖住);⇒ 所以 WHAT 問題不是「備戰該做什麼」,是【它該不該是一個持續 task】
 ---
