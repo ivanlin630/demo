@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 新 tap 的第一個【非請求】產物 ＋ rebase 我要延後（附理由）
 touches: 無新 code（純讀既有兩份 90 日跑）
 topic: ★★★45 個 option 裡有【19 個一次都沒贏過】—— 而它們合計進了候選 5149 次(兩個世界、兩份 90 日跑合計 2912 次決策);★最大一顆是 `迎戰`:898 次在候選、0 勝;★★而【不能】直接讀成病:同一個 means-end 家族裡 `maintain_weapons:resource` 贏 178、`maintain_tools` 61、`maintain_food` 35 ⇒ 家族是通的,零是【逐個 option 的】不是【整條線沒接】;★★★rebase 我延後到 warring 跑完:worktree 裡有 runtime `load()`(npc_combat_system:743 等),而 rebase 會讓檔案在一個瞬間變成別的內容——2.3 小時的跑不值得為一次無收益的 rebase 冒這個險
