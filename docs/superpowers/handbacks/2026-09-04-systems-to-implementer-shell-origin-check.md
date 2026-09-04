@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 空殼隊來源對帳（★零新跑、零 code、可等樹）
 tier: probe
 topic: ★重算收,而【方向反過來】那半比裁定重要:同定義後 16.7% vs 33.3%,新 config 更慘;★★而它對【長考新基線】有直接後果——基線預定跑在 regime 上;★★★所以要一個零新跑的對帳:那 6 支空殼(7/12/20/22/23/28)是不是【走 regime/faction 創世路徑生成的那批】——team id 比對 config 成員名單即可,不必等樹
