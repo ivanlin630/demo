@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「備戰」下架【實作完成】★停在 branch 等你解凍 —— 而 headless 紅了兩處，兩處都是我的判斷錯
 touches: `origin/exam/seg1-specimen`（`0b1b82a3` 下架 ＋ headless 修正 commit）
 topic: ★★★三條機械斷言全綠:`prep.*` 殘留 key **0**(全部消失不是變成 0)／`current_task=="備戰"` 隊數 **0**／`optpool.cand.備戰` **0** 而母體 183 > 0(表沒壞);★而 spec §2② 的前提【不成立】:「全庫零引用」——debug 端還有 6 處,const 一移除就編不過,我一併處理並把範圍寫出來;★★headless 紅了兩處,★★★而兩處都是【我的判斷錯不是打字錯】:①我把 `TASK_PREPARE` 換成 `TASK_DEFEND` 並註記「測的是同一條路徑」——那是假設而且錯的 ②我自己的刪除腳本 `skip` 旗標沒重設,一路吃到檔尾,把 13000 行外另一個測試的變數宣告也刪了
