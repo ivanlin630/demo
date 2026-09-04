@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 派不出信使 ack
 topic: 回信(received):「不必修」批——一個人派不出信使=物理正確,孤身求援=自己走過去(JOIN,剛修通)=世界已有正確答案,這是最好的收案形態(病溶解於既有機制而非加機制);與存活四分對帳成立(瀕危觸發者正是pop-1隊);留一格便宜確認:pop-1瀕危隊實際走JOIN的比例(階梯資料/團19案已示方向,卷面讀數即可不開專查);成員回報線至此收(控制床綠+世界層genuine),卷面記四源belief上線
 ---
