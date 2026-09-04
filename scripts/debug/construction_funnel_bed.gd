@@ -449,10 +449,16 @@ func _run() -> void:
 	#     `lord_scan` 那條不經過 infra 漏斗，混進來對帳式就假——同 `_can_afford` 那顆的教訓）。
 	#   ★★六類互斥且窮盡，逐日加總必須 == 分母。
 	lines.append("")
-	lines.append("═══ ★★`_pick_facility` 出口分類（六類，分母＝pick.<site>.entry）═══")
-	var PICK_FATES: Array = ["empty_no_eligible", "empty_all_below_threshold", "ok_slot_free",
-		"empty_slot_full_no_lowest", "empty_slot_full_margin", "ok_demolish",
-		"ok_upgrade"]   # ★第七格（階梯溶解）：不加它，出口分類會少一項而合計看起來仍合理
+	lines.append("═══ ★★`_pick_facility` 出口分類（★九類，2026-09-04 訂正：舊寫「六類」而清單漏了兩個真實出口；分母＝pick.<site>.entry）═══")
+	# ★★★出口清單訂正（2026-09-04）：★舊清單【漏了兩個真實出口】，而對帳因此紅了 70/80。
+	#   ①`empty_all_unaffordable`（`faction_ai_system.gd:5413` 的三元分支）——★整個沒被列
+	#   ②`ok_upgrade_facility`（`:5428`）與 `ok_upgrade`（`:5451`）是【兩個不同的出口】，
+	#     ★★舊清單只寫了後者 ⇒ 前者永遠算不進去
+	#   ⇒ ★★★而這正是對帳的用途：它不是裝飾，它【指著我們對這支函式的認知缺口】
+	#   ★清單來源＝對 `bump_pt("pick.%s.…")` 做窮盡 grep（8 個 fate + 1 個 entry），不是憑印象列。
+	var PICK_FATES: Array = ["empty_no_eligible", "empty_all_unaffordable", "empty_all_below_threshold",
+		"ok_slot_free", "ok_upgrade_facility", "ok_upgrade",
+		"empty_slot_full_no_lowest", "empty_slot_full_margin", "ok_demolish"]
 	for site in ["infra", "lord_scan"]:
 		var ent: int = _sum_days("pick.%s.entry.day." % site)
 		lines.append("")
@@ -469,8 +475,14 @@ func _run() -> void:
 		lines.append("  ★★對帳：%d 類合計 %d vs entry %d ⇒ %s" % [PICK_FATES.size(), ssum, ent,
 			"✅一致" if ssum == ent else "❌不一致（★有出口沒被分類）"])
 		# ★被過濾掉的設施（★不入上面的對帳：它是 per-facility 不是 per-call）
-		lines.append("  ★三道過濾各擋掉幾個【設施-次】（per-facility，不入上面的對帳）：")
-		for fr in ["outpost_type", "terrain", "already_built"]:
+		# ★★★過濾清單訂正（2026-09-04，★與 PICK_FATES 同一個病的第三個實例）：
+		#   ★舊清單寫 `already_built` —— 而 code 裡【沒有這個 counter】⇒ 它永遠印 0
+		#     ⇒ ★★一個不存在的名字印出 0，看起來像「這條沒發生」而不是「這條不存在」
+		#   ★★而真正存在的 `max_level` 與 `unaffordable` 【沒有被印】
+		#     ⇒ ★★★`unaffordable` 正是本輪 `empty_all_unaffordable`（82.5%）的來源，而它先前不可見
+		#   ★清單來源＝對 `filtered.` 做窮盡 grep（4 個），不是憑印象列。
+		lines.append("  ★四道過濾各擋掉幾個【設施-次】（per-facility，不入上面的對帳）：")
+		for fr in ["outpost_type", "terrain", "max_level", "unaffordable"]:
 			lines.append("      filtered.%-16s = %d" % [String(fr), _c("pick.%s.filtered.%s" % [site, String(fr)])])
 		# ★分數不夠時：離門檻多遠 + 是哪幾個設施
 		var nb: Array = []
@@ -556,7 +568,13 @@ func _run() -> void:
 	lines.append("")
 	lines.append("★★對帳式：上面每一欄的 per-team 加總都應 == 該欄逐日加總；不平會在該欄下方印 ❌。")
 	var text: String = "\n".join(PackedStringArray(lines))
-	print("\n" + text)
+	# ★★★一次 print 一大包會【被截在 16383 字元】（實測 2026-09-04，見 `stdout_integrity_probe.gd`）：
+	#   ★存活的是【開頭】，而下一個 `print` 會【黏在被切斷的那一行後面】
+	#   ⇒ ★★輸出因此看起來完全正常：有開頭、有結尾、格式也對，★★★中間少掉的部分【沒有任何痕跡】
+	#   ⇒ 實測：20000 行 join 成一包只印一次 ⇒ 只活 191 行；同樣 20000 行【逐行 print】⇒ 一行不少
+	#   ★修法＝逐行印（不是加大 buffer，也不是分段猜一個安全大小）
+	for _l in lines:
+		print(_l)
 	if out_path != "":
 		var f := FileAccess.open(out_path, FileAccess.WRITE)
 		if f != null:

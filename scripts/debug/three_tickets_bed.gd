@@ -725,7 +725,15 @@ func _gu2() -> void:
 	if m == 0:
 		print("     ★★★母體 0 ⇒ 這一節答不了")
 		return
-	print("     均 payoff = %.4f" % (Probe.amount("gu2.payoff_sum") / float(m)))
+	print("     均 payoff = %.4f｜均 x = %.4f｜均 u = %.4f" % [
+		Probe.amount("gu2.payoff_sum") / float(m),
+		Probe.amount("gu2.x_sum") / float(m),
+		Probe.amount("gu2.u_sum") / float(m)])
+	# ★★★驗收 #4／#10 的機械斷言：★不是「數學上不會」，是【量到它沒有】。
+	var _viol: int = int(Probe.counts.get("gu2.cap_violation", 0))
+	var _xneg: int = int(Probe.counts.get("gu2.x_negative", 0))
+	print("     ★#4 `u >= GOAL_UTIL_CAP` 反例 = %d %s" % [_viol, ("✅" if _viol == 0 else "❌ 保證被侵蝕")])
+	print("     ★#10 `x < 0` 次數 = %d %s" % [_xneg, ("✅" if _xneg == 0 else "❌ 上游有人繞過 maxf(w,0)")])
 	for pfx in ["gu2.payoff_val.", "gu2.devcoef_val.", "gu2.discount_val."]:
 		var rows: Array = []
 		for k in Probe.counts.keys():
@@ -839,15 +847,23 @@ func _sec_unitoverlap() -> void:
 		var gt: String = rest.substr(dot + 1)
 		var vals: Array = []
 		var wals: Array = []
+		var xals: Array = []
+		var uals: Array = []
+		var rows_raw: Array = []
 		for r in Probe.samples[k]:
 			vals.append(float((r as Dictionary).get("v", 0.0)))
 			# ★可用性走獨立旗標，不靠值域判 —— ★★`w` 本來就可以是負的（有餘）
 			if bool((r as Dictionary).get("w_ok", false)):
 				wals.append(float((r as Dictionary).get("w", 0.0)))
+			xals.append(float((r as Dictionary).get("x", 0.0)))
+			uals.append(float((r as Dictionary).get("u", 0.0)))
+			rows_raw.append(r)
 		vals.sort()
 		wals.sort()
 		if vals.is_empty(): continue
-		fams[fam].append([gt, vals, wals])
+		xals.sort()
+		uals.sort()
+		fams[fam].append([gt, vals, wals, xals, uals, rows_raw])
 	for fam in ["maintain", "buildA", "buildC"]:
 		for row in fams[fam]:
 			var gt2: String = String(row[0])
@@ -870,6 +886,49 @@ func _sec_unitoverlap() -> void:
 			print("[UnitOverlap] w fam=%s goal=%s n=%d min=%.4f med=%.4f max=%.4f ★相異值=%d %s" % [
 				fam2, gt3, ws.size(), float(ws[0]), _pct(ws, 0.50), float(ws[ws.size() - 1]), uniq.size(),
 				("← ★★★常數，這個方向也死" if uniq.size() == 1 else "← ★會變")])
+	# ★★★驗收 #6：`w`／`x`／`u` 三欄並排（★組成項與結果一起看，才知道 u 為什麼是那個值）
+	print("[UnitOverlap] ── ★三欄 `w`／`x`／`u`（★x = payoff/UNIT，UNIT ＝ 該隊一天生計的價值）──")
+	print("[UnitOverlap]    ★★這裡的 `u` ＝ 壓縮輸出本身（`CAP × x/(1+x)`）——★★★【不含】 dev_coeff 與 discount，")
+	print("[UnitOverlap]       而 `_candidate_util` 的最終 util 還要再乘那兩個 ⇒ 兩者不可互相引用",)
+	for fam3 in ["maintain", "buildA", "buildC"]:
+		for row3 in fams[fam3]:
+			var g3: String = String(row3[0])
+			var xs: Array = row3[3]
+			var us2: Array = row3[4]
+			var ws2: Array = row3[2]
+			if xs.is_empty(): continue
+			print("[UnitOverlap] %-10s %-20s n=%-4d w_med=%-10s x: min=%.4f med=%.4f max=%.4f ｜ u: min=%.4f med=%.4f max=%.4f" % [
+				fam3, g3, xs.size(),
+				("%.2f" % _pct(ws2, 0.50)) if not ws2.is_empty() else "-",
+				float(xs[0]), _pct(xs, 0.50), float(xs[xs.size() - 1]),
+				float(us2[0]), _pct(us2, 0.50), float(us2[us2.size() - 1])])
+	# ★★★驗收 #9：build 那半【依隊規模分層】—— pop 殘留要可觀測，不要靜默存在
+	print("[UnitOverlap] ── ★★build 依隊規模分層（★pop 殘留可觀測：建設成本固定而 UNIT ∝ pop）──")
+	for fam4 in ["buildA", "buildC"]:
+		for row4 in fams[fam4]:
+			var g4: String = String(row4[0])
+			var raw: Array = row4[5]
+			var band: Dictionary = {"小(pop<=3)": [], "中(4-8)": [], "大(>=9)": []}
+			for r4 in raw:
+				var pp: int = int((r4 as Dictionary).get("pop", 0))
+				var key: String = ("小(pop<=3)" if pp <= 3 else ("中(4-8)" if pp <= 8 else "大(>=9)"))
+				band[key].append([float((r4 as Dictionary).get("x", 0.0)), float((r4 as Dictionary).get("u", 0.0))])
+			var parts4: Array = []
+			for bk in ["小(pop<=3)", "中(4-8)", "大(>=9)"]:
+				var arr: Array = band[bk]
+				if arr.is_empty():
+					parts4.append("%s n=0" % bk)
+					continue
+				var sx: float = 0.0
+				var su: float = 0.0
+				for e4 in arr:
+					sx += float(e4[0])
+					su += float(e4[1])
+				parts4.append("%s n=%d x̄=%.4f ū=%.4f" % [bk, arr.size(), sx / float(arr.size()), su / float(arr.size())])
+			print("[UnitOverlap]    %-20s %s" % [g4, "｜".join(PackedStringArray(parts4))])
+	print("[UnitOverlap]    ★★★讀法：`x̄` 隨 pop 【下降】＝ 大隊覺得蓋東西比較不急 ——")
+	print("[UnitOverlap]       ★而那個方向【對齊 size_matter_arc 的設計意圖】（同一筆固定成本對大隊相對負擔更輕）")
+	print("[UnitOverlap]       ⇒ ★★不是新 bug；★★★但它現在是【被印出來的】而不是靜默存在的")
 	var mm: Array = _fam_range(fams["maintain"])
 	var ba: Array = _fam_range(fams["buildA"])
 	var bc: Array = _fam_range(fams["buildC"])

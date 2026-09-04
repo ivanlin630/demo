@@ -100,7 +100,13 @@ func _run() -> void:
 	lines.append("  mkfill.order樣本數(cap受限,非真count) = %d　★不列入S2裁決" % mk_orders.size())
 
 	var text: String = "\n".join(PackedStringArray(lines))
-	print(text)
+	# ★★★一次 print 一大包會【被截在 16383 字元】（實測 2026-09-04，見 `stdout_integrity_probe.gd`）：
+	#   ★存活的是【開頭】，而下一個 `print` 會【黏在被切斷的那一行後面】
+	#   ⇒ ★★輸出因此看起來完全正常：有開頭、有結尾、格式也對，★★★中間少掉的部分【沒有任何痕跡】
+	#   ⇒ 實測：20000 行 join 成一包只印一次 ⇒ 只活 191 行；同樣 20000 行【逐行 print】⇒ 一行不少
+	#   ★修法＝逐行印（不是加大 buffer，也不是分段猜一個安全大小）
+	for _l in lines:
+		print(_l)
 	if out_path != "":
 		var f := FileAccess.open(out_path, FileAccess.WRITE)
 		if f != null:

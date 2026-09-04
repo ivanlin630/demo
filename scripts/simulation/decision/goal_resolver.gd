@@ -110,6 +110,22 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 
 # ★★★`[UnitOverlap]` 取值（純觀測）。★A 類與 C 類 build 分開記 —— 它們不同源，
 #   混在一起會讓 build 家族的值域【讀起來假寬】（systems 明寫）。
+# ★★★量測列（驗收 #6／#9）：★`w`／`x`／`u` 記在【同一筆】—— 組成項一起存。
+#   ★★理由是今天已經咬過的那條：只存結果、不存組成項 ⇒ 之後想換個算式就得重跑。
+#   ★★★`pop` 也一起存 ⇒ build 那半可以【依隊規模分層】（pop 殘留變成可觀測，不是靜默存在）。
+#   ★這裡的 `x`／`u` 是【量測用重算】，與 `_candidate_util` 同式 —— 不是共用出口。
+static func _row(state: WorldState, team: TeamData, v: float, w_raw: float, w_ok: bool, def: Dictionary) -> Dictionary:
+	var pay: float = maxf(derived_payoff(state, team, def), 0.0)
+	var pop: float = maxf(float(team.population), 1.0)
+	var unit: float = pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY * float(TradeValuation.BASE_PRICE.get("food", 1.0))
+	var x: float = pay / maxf(unit, 0.0001)
+	return {
+		"v": v, "w": snappedf(w_raw, 0.0001), "w_ok": w_ok,
+		"x": snappedf(x, 0.0001),
+		"u": snappedf(GOAL_UTIL_CAP * x / (1.0 + x), 0.0001),
+		"pop": int(team.population),
+	}
+
 static func _unit_overlap_tap(state: WorldState, team: TeamData, gt: String, def: Dictionary,
 		fai: FactionAISystem, otile: HexTileData) -> void:
 	if def.has("facility"):
@@ -144,8 +160,7 @@ static func _unit_overlap_tap(state: WorldState, team: TeamData, gt: String, def
 			_w = _worst_gap
 			_w_ok = true
 		Probe.bump_sample("unitoverlap." + _cls + "." + gt,
-			{"v": snappedf(fai._facility_deficit(state, team, f, otile), 0.0001),
-			 "w": snappedf(_w, 0.0001), "w_ok": _w_ok}, 4000)
+			_row(state, team, snappedf(fai._facility_deficit(state, team, f, otile), 0.0001), _w, _w_ok, def), 4000)
 		return
 	var _pq: Array = def.get("prereqs", [])
 	if _pq.is_empty():
@@ -162,9 +177,8 @@ static func _unit_overlap_tap(state: WorldState, team: TeamData, gt: String, def
 	# ★★★`w` ＝【絕對缺口 × 單價】＝ systems 的不飽和候選。★同一份取值、同一筆記錄，
 	#   ⇒ 兩個量【逐筆對齊】，可以直接問「v 釘住的那些筆，w 有沒有動」。
 	Probe.bump_sample("unitoverlap.maintain." + gt,
-		{"v": snappedf((_target - _stock) / maxf(_target, 1.0), 0.0001),
-		 "w": snappedf((_target - _stock) * float(TradeValuation.BASE_PRICE.get(res, 0.0)), 0.0001),
-		 "w_ok": true}, 4000)
+		_row(state, team, snappedf((_target - _stock) / maxf(_target, 1.0), 0.0001),
+			(_target - _stock) * float(TradeValuation.BASE_PRICE.get(res, 0.0)), true, def), 4000)
 
 # ★★★payoff 導出（`2026-09-04-payoff-derive-bridge` §8.1，R² CLEAN 後派）。
 #   ★舊形狀＝`GoalRegistry` 的 flat 常數（maintain 全 1.0、build 全 1.5，標著 TEST VALUE）
@@ -1048,7 +1062,19 @@ static func _candidate_util(payoff: float, ctx: DecisionContext, delay_days: flo
 	#   ⇒ ★★★所以改掛在【這個單一收斂點】：五個 `"util":` 站有四個經過它。
 	#   ★同時記 payoff 的【值分布】——★★平手的來源若是「幾個 goal 共用同一個死常數」，
 	#     那只有值分布看得出來，clamped 計數看不出來（它會是 0 而讓人以為沒事）。
-	var _final: float = clampf(payoff * dev_coeff * discount, 0.0, GOAL_UTIL_CAP)
+	# ★★★單調壓縮取代硬 clamp（spec `2026-09-04-goal-util-cap-monotone-HOW`，R² CLEAN 後派）。
+	#   ★舊形狀＝`clampf(..., 0, GOAL_UTIL_CAP)` ⇒ ★★超過上限的一律壓成【同一個 1.5】
+	#     ⇒ 可比性被削掉，argmax 退化成註冊序偏好（實測 `clamped` 167/333，五個 option 同為 1.5000）
+	#   ★★新形狀＝`u = CAP × x/(1+x)`：★單調遞增（保序）、★★值域 [0, CAP)
+	#     ⇒ ★★★`GOAL_UTIL_CAP < SURVIVAL_BOOST_MAX` 那條硬保證【不必改】就仍然成立
+	#   ★`x` 必須是 `payoff`（已 `maxf(w,0)`）而【不是原始 w】—— R² 抓到的實質錯：
+	#     ★★w 可為負（有餘）⇒ x ∈ (−1,0) 時 u 變負、x → −1 時分母趨 0 ⇒ 公式炸開。
+	#   ★★★UNIT ＝【該隊一天生計的價值】＝ pop × 每人每日食物 × 食物單價
+	#     ⇒ 它不是手填常數，是由既有的兩個物理量推導的（「估算器禁手抄物理」那條）。
+	var _pop: float = maxf(float(ctx.population), 1.0)
+	var _unit: float = _pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY * float(TradeValuation.BASE_PRICE.get("food", 1.0))
+	var _x: float = payoff / maxf(_unit, 0.0001)
+	var _final: float = GOAL_UTIL_CAP * _x / (1.0 + _x) * dev_coeff * discount
 	if Probe.enabled:
 		Probe.bump("gu2.mother")
 		Probe.add_amount("gu2.payoff_sum", payoff)
@@ -1058,6 +1084,15 @@ static func _candidate_util(payoff: float, ctx: DecisionContext, delay_days: flo
 		# ★★★不用 `if raw > GOAL_UTIL_CAP` 判「有沒有被咬」：那個形狀是憲法閘認定的
 		#   【引擎外門檻】，而閘說得對 —— ★我要的本來就不是一個門檻，是【clamp 有沒有改到值】。
 		#   ⇒ ★★改成比對 clamp 前後：`_raw != _final` ⇔ 上限咬到了。同一件事，沒有常數比較。
+		# ★★★保證的機械斷言（驗收 #4／#10）：★不是「數學上不會」，是【量到它沒有】。
+		#   ①`u >= GOAL_UTIL_CAP` 的反例必須是 0（★★壓縮後 u 恆 < CAP，而我要它被【數出來】）
+		#   ②`x < 0` 的次數必須是 0（★★★payoff 已 maxf(w,0) ⇒ 負值代表上游有人繞過了那道 maxf）
+		#   ★而「clamped」這個舊桶保留語意改為【壓縮咬到多少】：壓縮永遠在作用，
+		#     所以改記【壓縮前後差距超過一成】的次數，讓它與舊數字可以對讀而不是消失。
+		if _final >= GOAL_UTIL_CAP: Probe.bump("gu2.cap_violation")
+		if _x < 0.0: Probe.bump("gu2.x_negative")
 		var _raw: float = payoff * dev_coeff * discount
-		Probe.bump("gu2.clamped" if _raw != _final else "gu2.unclamped")
+		Probe.bump("gu2.clamped" if _raw > GOAL_UTIL_CAP else "gu2.unclamped")
+		Probe.add_amount("gu2.x_sum", _x)
+		Probe.add_amount("gu2.u_sum", _final)
 	return _final
