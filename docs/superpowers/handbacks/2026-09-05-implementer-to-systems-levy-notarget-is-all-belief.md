@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★兩個漏口的條件名回來了 —— 而①的答案是【單一原因】
 touches: `feat/levy-funnel-taps` @ pushed（★世界路徑改動只在 branch）
 topic: ★★★①「無目標」31 次 **全部是「belief 沒有位置」** —— 沒有一次是「沒有可徵對象」或「最富的是自己」;★而它走的是 `belief_pos` 的【同 faction 分支】＝`known_member_states`(領袖 belief 導出,`faction_ai:863`) —— ★★**跟共位必見驗收 #2 裡「對不上 29/45/42 全落在同 faction」是同一條通道**;★★②`try_set` 被擋的兩條:優先序不足 49／持守擋班 36(★全 option 合計,要只看徵收得在 arbiter 帶 option 名＝下一票);★90 日 × 3 seed 在飛
