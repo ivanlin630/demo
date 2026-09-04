@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: colocation-sight（★根修級，R² 審設計）
 topic: ★blueprint 裁「共位＝保證看見」(同格互不知對方存在＝感知物理壞掉,不是 fog 設計);★★而 spec 分兩部分:(a) 同格確定看見我用【分支】不是大乘數(乘數只是把機率推高,不是確定)——這半我有把握;★★★(b) 鄰近陡降的曲線【我沒有一個乾淨的候選】:三個候選各有問題(平方衰減會壓低遠場/分段的分界是手填/用 vrange 縮放的除數還是手填)⇒ 這正是送審的原因,請你判或給第四個
 ---
