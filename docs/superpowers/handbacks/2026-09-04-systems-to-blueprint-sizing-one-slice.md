@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: payoff-derive-bridge 尺寸判定
 topic: ★★★尺寸＝【≤ 一 slice ⇒ 考前做】,而理由不是「工作量小」:goal_resolver.gd:76/:104 【已經在算】_facility_deficit,只拿去跟門檻比就丟掉 ⇒ 這不是接新管線,是【停止把已算好的數字扔掉】;★maintain_* 那半也現成(need_keep 是 per-resource,而 prereq 就帶著 res);★★spec 已鎖並送 R²(路徑在內),而我把【跨家族量綱】標成本 slice 不解——那是我知道的洞,已請 reviewer 判它該不該擋
 ---
