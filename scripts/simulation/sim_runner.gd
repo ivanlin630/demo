@@ -457,6 +457,11 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 
 func _step4_resolve_interactions(state: WorldState, moved_ids: Array, all_ids: Array) -> void:
 	_interaction_system.process_on_move(state, moved_ids, all_ids)
+	# ★★★駐留共位的週期互動機會（spec 2026-09-05-colocation-interact）——
+	#   ★互動機會屬於【共位狀態】不屬於【移動事件】；移動觸發保留（它沒錯而且便宜），
+	#     ★★這裡只補上缺的那半：同格且都沒動的 pair 也拿得到機會。
+	#   ★★★掛在 `process_on_move` 之後 ⇒ `teams_by_tile` 已由 `_step2_move` 重建過（新鮮索引）。
+	_interaction_system.process_colocated_residency(state, all_ids)
 
 func _step4b_outpost_tick(state: WorldState) -> void:
 	_outpost_system.tick_all(state)

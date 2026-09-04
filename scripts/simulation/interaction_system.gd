@@ -100,6 +100,71 @@ func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Arr
 # 寬版同格 scan：凡「本 tick 有移動」的 team（不限走到最終目標）即掃同格互動。
 # 解 NPC-NPC encounter=0：追擊團路過 prey 格即觸發 try_interact，不必剛好 arrived。
 # body 同 process_on_arrival，只是 driver 從 arrived_ids 換成 moved_ids。
+# ★★★同 tick pair 去重（spec §4②）：一個 pair 可能同 tick 既被【移動】觸發、又被【駐留】觸發。
+#   ★去重的 key 必須【對稱】——(min_id, max_id)，否則 (a,b) 與 (b,a) 會被當成兩個 pair。
+#   ★★而這裡【只記錄不阻擋】移動路徑：移動路徑既有的「a 動 b 也動 ⇒ 處理兩次」是
+#     【既有行為】，spec §7①明寫不動 `_try_interact` 的任何判定 ⇒ 我不順手把它改掉。
+var _pair_tick: int = -1
+var _pair_seen: Dictionary = {}
+
+func _pair_key(a: int, b: int) -> int:
+	return mini(a, b) * 1000000 + maxi(a, b)
+
+func _pair_roll(state: WorldState) -> void:
+	if state.world.current_tick != _pair_tick:
+		_pair_tick = state.world.current_tick
+		_pair_seen.clear()
+
+func _pair_note(state: WorldState, a: int, b: int) -> void:
+	_pair_roll(state)
+	_pair_seen[_pair_key(a, b)] = true
+
+func _pair_done(state: WorldState, a: int, b: int) -> bool:
+	_pair_roll(state)
+	return _pair_seen.has(_pair_key(a, b))
+
+# ★★★駐留共位的週期互動機會（spec 2026-09-05-colocation-interact §2②）——
+#   ★【不新增互動語意】：呼叫的是【同一支】`_try_interact`，只新增【進入它的路】。
+#   ★★零 RNG：排程走 `CadenceStagger`（純函式）、列舉走排序鍵。
+#   ★★★迭代順序：`teams_by_tile` 是 Dictionary ⇒ 用【排序後的 team_id】，
+#     否則「誰先互動」隨字典順序漂 —— 那是 fp 假紅與真行為漂移的老來源。
+func process_colocated_residency(state: WorldState, team_ids: Array) -> void:
+	var cad: int = DecisionTier.T1_OPERATIONAL
+	var now: int = state.world.current_tick
+	var ordered: Array = team_ids.duplicate()
+	ordered.sort()
+	for tid in ordered:
+		if not state.teams.has(tid):
+			continue
+		var t: TeamData = state.teams[tid]
+		if now < t.colocate_eval_next_tick:
+			continue
+		t.colocate_eval_next_tick = CadenceStagger.next_tick(now, now, int(tid), cad)
+		var same: Array = state.teams_on_tile(t.tile_pos)
+		if Probe.enabled:
+			Probe.bump("colo.turn")
+			Probe.bump("colo.tile_pop.%02d" % clampi(same.size(), 0, 20))
+		if same.size() < 2:
+			continue
+		var others: Array = same.duplicate()
+		others.sort()
+		for oid in others:
+			if int(oid) == int(tid):
+				continue
+			if not state.teams.has(oid):
+				continue
+			# live 復驗 tile_pos（★鏡射 `process_on_move:122` 的既有容錯：容 mid-loop erase／瞬時態）
+			if (state.teams[oid] as TeamData).tile_pos != t.tile_pos:
+				continue
+			if _pair_done(state, int(tid), int(oid)):
+				# ★★★陽性對照：這一格數的是【被去重擋下來的】——
+				#   ★沒有它，「同 tick 同 pair 不重複」的 0 跟【駐留路徑根本沒跑】長得一模一樣。
+				Probe.bump("colo.dedup_prevented")
+				continue
+			_pair_note(state, int(tid), int(oid))
+			Probe.bump("colo.residency_interact")
+			_try_interact(state, int(tid), int(oid))
+
 func process_on_move(state: WorldState, moved_ids: Array, all_team_ids: Array) -> void:
 	_tick_readiness(state, all_team_ids)
 	_combat.tick_critical_npcs(state, all_team_ids)
@@ -123,6 +188,8 @@ func process_on_move(state: WorldState, moved_ids: Array, all_team_ids: Array) -
 			if other.tile_pos != moved.tile_pos:
 				continue
 			_try_interact(state, moved_id, other_id)
+			# ★只記錄不阻擋（見上）：讓【駐留】那條路知道這一對本 tick 已經處理過。
+			_pair_note(state, moved_id, other_id)
 	HealthSystem.tick_natural_regen(state)
 
 # ──────── 整備值恢復 + 傷兵治療（交戰中均不進行） ────────

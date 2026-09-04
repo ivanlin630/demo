@@ -111,7 +111,15 @@ func _scenario(label: String, terrain: String, joiner_pop: int, host_pop: int,
 	print("  commit JOIN=%s（task=%s move_target=%s social_target=%d）" % [
 		str(committed), joiner.current_task, str(joiner.move_target), joiner.social_target])
 	if committed:
-		for _i in range(48):
+		# ★★★迴圈跨度（systems 提醒床要 >= 120 tick；★而這裡要訂正一個【他與我都可能誤讀】的數字）：
+		#   ★本床每一輪推進的是 `TICKS_PER_HOUR`(60) 而不是 1 tick
+		#     ⇒ ★★舊床的「48」是【48 輪 = 2880 tick = 48 小時】，不是 48 tick
+		#     ⇒ ★★★所以它【本來就】跨過 T1(60 tick) 很多輪 —— 而 G1/G2 仍然 `resolve=0`，
+		#       那不是「跑不到機會」，是【當時根本沒有駐留這條路】。
+		#   ★我仍然把輪數拉到 72（＝4320 tick ＝ 3 日），讓「至少兩個週期」有很大的餘裕。
+		var _rounds: int = 72
+		var _t0: int = s.world.current_tick
+		for _i in range(_rounds):
 			s.world.current_tick += WorldState.TICKS_PER_HOUR
 			vs.tick_discovery(s, ids)
 			var r: Dictionary = mv.process(s, ids, 1.0, WorldState.TICKS_PER_HOUR)
@@ -124,6 +132,10 @@ func _scenario(label: String, terrain: String, joiner_pop: int, host_pop: int,
 			Probe.bump("ctrl.moved.size.%d" % _mv.size())
 			Probe.bump("ctrl.joiner_in_moved." + ("yes" if _mv.has(joiner.team_id) else "no"))
 			it.process_on_move(s, _mv, ids)
+			# ★★★新入口：駐留共位的週期機會（spec 2026-09-05）——
+			#   ★真 sim 由 `sim_runner._step4_resolve_interactions` 接在 `process_on_move` 之後，
+			#     ★★這裡鏡射同一個順序，否則床驗的就不是 production 的那條路。
+			it.process_colocated_residency(s, ids)
 			if not s.teams.has(joiner.team_id) or joiner.current_task != TeamData.TASK_JOIN:
 				break
 		print("  join.dispatch=%d meet_target=%d meet_other=%d resolve=%d timeout=%d abort_ghost=%d" % [
@@ -141,6 +153,20 @@ func _scenario(label: String, terrain: String, joiner_pop: int, host_pop: int,
 				_ms.append("%s筆=%d" % [_mks.substr(16), int(Probe.counts[_mk])])
 		_ms.sort()
 		print("  ★每 tick moved 名單長度分布：%s" % ("｜".join(PackedStringArray(_ms)) if not _ms.is_empty() else "（空）"))
+		print("  ★★★駐留入口：turn=%d｜residency_interact=%d｜dedup_prevented=%d（tick 跨度 %d→%d ＝ %d tick，T1=%d）" % [
+			int(Probe.counts.get("colo.turn", 0)), int(Probe.counts.get("colo.residency_interact", 0)),
+			int(Probe.counts.get("colo.dedup_prevented", 0)),
+			_t0, s.world.current_tick, s.world.current_tick - _t0, DecisionTier.T1_OPERATIONAL])
+		# ★★驗收 #1 的機械形式：同格靜止 ⇒ 駐留入口【必須】給出過機會。
+		#   ★而 `residency_interact` 是這一票的【陽性對照】：它 0 而 resolve 也 0，
+		#     ★★那兩個 0 長得一樣但意思相反（沒機會 vs 有機會卻沒收）。
+		if dist == 0 and int(Probe.counts.get("colo.residency_interact", 0)) == 0:
+			push_error("[FAIL] %s：同格靜止跨 %d tick，駐留入口一次機會都沒給" % [
+				label, s.world.current_tick - _t0])
+			_fails += 1
+		if dist == 0 and int(Probe.counts.get("join.resolve", 0)) == 0:
+			push_error("[FAIL] %s：同格靜止且已委派 JOIN，`join.resolve` 仍是 0" % label)
+			_fails += 1
 	print("  vis.colo：pairs=%d detect=%d nodetect=%d saved_by_branch=%d" % [
 		int(Probe.counts.get("vis.colo.pairs", 0)), int(Probe.counts.get("vis.colo.detect", 0)),
 		int(Probe.counts.get("vis.colo.nodetect", 0)), int(Probe.counts.get("vis.colo.saved_by_branch", 0))])

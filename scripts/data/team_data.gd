@@ -157,6 +157,11 @@ var ambition_archetype: String = ""   # 武力/商業/定居
 var ambition_cap: int = 0             # 終極野心封頂 rung
 var ambition_rung: int = 0            # 當前實際 rung（0 生存…4 稱霸）
 var ambition_eval_next_tick: int = 0
+# ★★★駐留共位的「環顧四周」排程（spec 2026-09-05-colocation-interact §3 訂正）：
+#   ★機會屬於【這支隊】不屬於【pair】—— pair 沒有天然 owner 存 last_eval，
+#     ★★而問題本來就不是「這一對該不該互動」，是【這支隊該不該環顧四周】。
+#   ★★★沿用 `ambition_eval_next_tick`／`infra_eval_next_tick` 的既有形狀，零新結構。
+var colocate_eval_next_tick: int = 0
 # G1 訂單系統：權威訂單（message 為可失真傳播副本）。{order_id, kind, res, qty_remaining, expire_tick}
 # ★執行失敗反饋鐵律（用戶立法 2026-08-21）：隊層失敗記憶 `"<option>|<target>" → {tick,count,ttl}`。
 # 掛隊層【非 leader p.memory】：那條 FIFO MEMORY_MAX=20 與人際記憶共用、已知會被擠掉。
