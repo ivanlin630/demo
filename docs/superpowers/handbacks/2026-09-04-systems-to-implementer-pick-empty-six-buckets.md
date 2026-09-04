@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: pick_empty 是不是同一個機制（★接回 2026-08-26 那張六格表）
 tier: probe
 topic: ★config 固定後牆仍不見 ⇒ 不是 config,收;★★而 built_in_place 8→11【分子與率同向上升】(2.4% → 8.6%)⇒ 這個方向對母體變化【穩健】,比單看率可靠;★★★而新的最大歸宿 pick_empty 54% 正好接回一條既有的帳:2026-08-26 拆過它的六個歸宿,答案是「slot 滿而拆建門檻 1.5× 擋住」——所以下一問是【它是不是同一個機制】,而那張表當時就存在,你只要再印一次
