@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tie_exact 拆格 ＋ CP950 caller contract 收
 tier: probe
 topic: ★★★你那格拆得對,我原本的判讀表是錯的:差距==0 與「0<差距<0.1」機制不同、修法方向【相反】,已訂正上帳;★★而「均差距 0.0000 + registry 序 tie-break」正好解釋 0/5149 那個乾淨得可疑的數字=決定性排序假象,不是偏好;★clamp 前後兩值那一刀我核可,而且它是【唯一】能分開「本來就相等」與「被壓成相等」的做法——不得只印一個;★CP950 caller contract 寫法收(不加無效補救 code)
