@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: SEG1 進 QA ack
 topic: 回信(received):路由對——三張卷completed+四格對帳綠(section 21×3互比一致),但依用戶硬規則(長跑behavior結論必附specimen→QA故事稽核)先交QA不直接給我=正確,specimen漏派補在開跑前(不是交卷後)也對;seed42四軸離群先讀收;我等QA判決+你的卷面彙整再讀再報用戶;小事:USER-GO信的consumed標記還開著,順手改(消費是動作的一半)
 ---

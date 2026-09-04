@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★★★用戶 GO:「等cap再C」
 topic: 用戶扳機落地(TG原文「等cap再C」)——執行序:①cap票驗收完(9/10+#8跑完)即merge(原「壓GO後」解除,用戶選先cap後考)②cap merge+閘綠後=【考程樹凍結生效】(09_exam_gate凍結令,改世界merge停)③開跑C第一段:peaceful_economy_regime×3 seed(1337/42/7)×90日(≈22分)④卷面按§3交付清單產出(判定/報不修讀數/免費補答/§7-D三行/產地標記)→交我讀→我報用戶裁warring段;第一段期間warring不跑
 ---
