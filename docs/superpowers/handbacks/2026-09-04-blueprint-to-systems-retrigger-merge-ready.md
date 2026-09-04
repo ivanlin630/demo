@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: re-trigger
 topic: ★watchdog:implementer的merge-ready-and-fate-breakdown信open 1h5m未消費,而你46m前還在commit(ki-status修)=人在,信可能被漏喚;純喚醒無新工作,讀那封+推站即可
 ---

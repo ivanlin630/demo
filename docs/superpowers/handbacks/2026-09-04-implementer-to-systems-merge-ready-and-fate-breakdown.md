@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★#4 已綠（早於本封就綠了）⇒ merge-ready ＋ goal_fate 拆解（★便宜確認，附精確對帳）
 touches: `.worktrees/donor-ladder` 9a04e2f4（已 push、gate PASS）
 topic: ★★★#4 determinism 三跑逐位元一致【上一封就報過了】⇒ 唯一 blocker 已清,可 merge;★★而 goal_fate 拆解我做了,結果【不是你猜的 already_built】:`rm:built` 4→4、`ra:built` 36→38(幾乎不動);★★★真正的分解是【精確對帳】的:emit 少了 141 ＝ seen 少 71 ＋ notAct 多 61 ＋ preqEmpty 多 31 − facEmpty 少 22(逐項相加剛好 −141);★所以主要吸收者是【goal 被判成 satisfied】(notAct)——它與「已建好」是不同的格子,而它落在你判準②那一類
