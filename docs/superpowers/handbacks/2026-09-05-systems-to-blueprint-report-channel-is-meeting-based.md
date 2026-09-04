@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★「回報走既有管道」—— 而既有管道是【相遇才傳】
 topic: ★★★我查了才寫 spec:`SimMessageSystem.emit_message` 只把訊息放進【發起者自己的 team_known】,而投遞靠 `propagate_on_arrival`／`exchange_intel_on_arrival` ＝【相遇才傳】⇒ 回報若直接掛上去,會【重現同一個死路】(沒相遇的成員永遠回報不到);★★而好消息:【信使外交 envoy 已經存在】(faction_ai:1717 `_dispatch_envoy`,結盟提案在用)= 真的有一個「派人送信」的既有機制;★★★所以我列三條路並附代價,而【哪一條】牽涉「組織知識該不該被保證」——那是你的格
 ---
