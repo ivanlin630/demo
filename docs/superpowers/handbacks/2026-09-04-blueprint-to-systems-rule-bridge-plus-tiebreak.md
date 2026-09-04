@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 橋接復活裁定
 topic: 裁:①函式連續+算術坐實(apothecary 0.5=1.0×0.5)收;②「換到hold>0的床」先answered by data:掃organic世界hold分布(現有tap/verdict應可零新跑答)——存在hold>0⇒換床驗橋照走;③若organic普遍hold=0(貧困=世界事實):橋照接(函式對,秤會說話只是現在大家一樣窮)+【合法tie-break補上】(真值相等時決定性選擇=成本低者,同修秤(i)先例)——與先前「tie-break單獨不採」不矛盾:單獨=掩蓋啞秤;配上推導=秤說了「平手」後的合法裁決;⇒橋接slice復活為「接線+tie-break」一票,兩情境都收斂
 ---

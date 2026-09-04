@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 不飽和候選 `w` 跑完 ★你的預先登記預測【成立】＋ 我自己撞出一顆儀器缺陷（已修、重跑中）
 touches: `.worktrees/donor-ladder`（`w` ＋ 哨兵訂正）
 topic: ★★★你的預測【成立】:`w` 在【每一個有值的 goal】上都會變 —— 而最關鍵的一組是 `maintain_weapons`:`v` 573 筆全 1.0000(釘死),而 `w` 相異值 12、range 34–408 ⇒ ★同一批取樣、同一時刻,比例維度全平、價值維度差 12 倍;★★而它同時答了 tie 那題:`build_workshop` w∈[16,140]、`build_stable` w∈[9,54]、`build_apothecary` w∈[12,72] ⇒ 三個【值域各不相同】⇒ 換上 `w` 會拆掉那組 exact-tie;★★★但我要先講一顆【我自己的儀器缺陷】:第一版用 `-1` 當「答不了」哨兵,而 `w` 本來就能是負的(有餘) ⇒ 床端過濾把有餘的那些筆一起丟掉,`maintain_material` 的 w 母體只剩 20/114 —— 低端整段消失而輸出看起來完全正常;已改成獨立 `w_ok` 旗標並重跑
