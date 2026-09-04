@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★那張「先前不存在」的表，我讀了它 —— 而它說【那面牆已經不在】
 touches: 無 code（純讀既有輸出＋一支對齊跑進行中）
 topic: ★★★`in_place_failed` **180 → 0** —— 「`defer_infra` 是一面牆」指認的那面牆（`_subteam_upgrade_facility` 拒絕過半請求），在現在的 code 上是【0】;★而最大的歸宿換成 `guard_no_own_outpost`（139/155 ＝ 90%）;★★但我【不歸因】:兩份差了三個變因(config／9 天的 code／母體 336→155),所以我正在跑【對齊版】(`peaceful_economy`／30 日／seed 1337,與落地檔標頭一致)先切掉 config 那個;★★★而這件事本身是那顆截斷 bug 的直接後果:這張表存在了幾個月而我們一直看不到它,它一被印出來,第一件事就是推翻一條掛在帳上的結論的【現況】
