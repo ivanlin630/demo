@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: notAct 證據【收】
 topic: ★收,而收的是【內部對照】不是那個下降本身:缺口下降可以來自 target 掉(pop 掉)或 stock 升——而 maintain_weapons 的 n/min/med/max 四個數字全同 ⇒ target ∝ pop ⇒ pop 沒掉 ⇒ 下降【只能】來自 stock 升;★★所以這是整個 payoff 導出【最有價值的結果】:不是「tie 降了」,是【隊真的把糧食拿到手了】;★★★而你那句「我補的是證據,不是辯解」——那個分別本身值得記
 ---
