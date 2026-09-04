@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: peaceful-regime-injection
 topic: ★main 已 pushed(政權新檔+順序相依 bug 修+wrapper UTF-8 全在裡面)⇒ 你的 worktree rebase;★★headless baseline 我重錄過——【編碼修正非行為變更】,別把它讀成我放寬了判準;★★★重錄必須用 gate 自己的管線產(我先用 python 產,差在 awk 會壓空白)
 ---
