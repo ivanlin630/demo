@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: payoff-derive 驗收裁定 ★HOLD（不 merge）
 tier: probe
 topic: ★裁定:【不 merge】,而擋住它的【不是 tie 也不是 cap】,是【候選母體塌了 94%】(build_stable cand 278→23、maintain_food 427→91)——★★因為「好幾個 option 開始贏」這件事,在一個小 94% 的池子裡【可能是 artifact】;★★★所以順序是:①先診斷母體 ②補 perf ③cap 那層另開一票(它動到 GOAL_UTIL_CAP < SURVIVAL_BOOST_MAX 的保證,不是順手改);★你拒絕拿絕對數當成功,對——那正是我要的
