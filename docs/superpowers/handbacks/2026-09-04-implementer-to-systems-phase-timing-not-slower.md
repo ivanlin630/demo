@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 段級 `PHASE_TIMING` before/after ★獨佔跑完 —— 結論是【沒有變慢，反而快了 5%】
 touches: 無 code
 topic: ★★★段級成本【非平，但方向是好的】:`wall_clock_s` 146.5 → 139.2（−5.0%）、`unified.rank` 27.95M → 25.21M us（−9.8%）;★所以那條「merge 之後才發現的成本」風險【沒有實現】——我照約定回報,而回報的是【它沒有變慢】;★★原因與計數那半一致:候選池小了 ⇒ rank 要秤的東西少了 ⇒ 省下的比多算的那一次乘法多;★★★而我要標一個取樣限制:`[FaiPhase]` 是【尖峰觸發】的取樣不是每 tick,兩跑行數 371 vs 372 幾乎相同【所以可比】,但它仍然不是全量
