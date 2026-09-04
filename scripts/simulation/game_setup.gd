@@ -584,11 +584,19 @@ static func _setup_explicit_teams(state: WorldState, config: Dictionary) -> void
 		var fid: int = int(t_cfg.get("faction_id", -1))
 		if fid == -1: continue
 		if seen_factions.has(fid): continue
+		# ★★★順序相依 bug 修（2026-09-04）：舊寫法在【確認 leader 之前】就 `seen_factions[fid] = true`
+		#   ⇒ 若該 faction 的【第一個出現的隊不是 leader】，這個 fid 就被標成看過了，
+		#   ★而真正的 leader 後面再出現時被 `continue` 掉 ⇒ ★★那個 faction【永遠不會被建立】。
+		#   ⇒ ★★★症狀是 `0 factions` 而 config 明明寫了 —— 而它【只在 leader 不是陣列第一個時】發生
+		#     （既有 config 剛好都把 leader 排在前面 ⇒ 這條路一直沒被走到）。
+		#   ★修法＝只在【真的建立了】才標 seen；★★而不是去把 config 的順序調成 leader 在前
+		#     —— 那是繞過，且下一份 config 會再踩一次。
+		if not t_cfg.get("is_faction_leader", false):
+			continue
 		seen_factions[fid] = true
-		if t_cfg.get("is_faction_leader", false):
-			var actual_fid: int = state.create_faction(int(t_cfg["id"]))   # 回實際 sequential id
-			if actual_fid != -1:
-				cfg_to_actual[fid] = actual_fid                            # ★map config→actual
+		var actual_fid: int = state.create_faction(int(t_cfg["id"]))   # 回實際 sequential id
+		if actual_fid != -1:
+			cfg_to_actual[fid] = actual_fid                            # ★map config→actual
 	# 第三段：非 leader 的 faction member 加入 faction list（用 map 查 actual id、非直接 config faction_id）
 	for t_cfg in teams_cfg:
 		var fid2: int = int(t_cfg.get("faction_id", -1))

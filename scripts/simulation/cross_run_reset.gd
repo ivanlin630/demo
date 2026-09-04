@@ -89,6 +89,7 @@ static func _sweep() -> Dictionary:
 		OwnerCampIndex._reset_cross_run(),
 		SimRunner._reset_cross_run(),
 		WorldState._reset_cross_run(),
+		PopulationSystem._reset_cross_run(),
 	]:
 		n += int(d.get("checked", 0))
 		var c: Dictionary = d.get("cleared", {})

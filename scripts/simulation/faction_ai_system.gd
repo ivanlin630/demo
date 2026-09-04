@@ -775,6 +775,9 @@ func _auto_withdraw_mounts(state: WorldState, team: TeamData) -> void:
 static var _fai_ph: Dictionary = {}
 # ★#15 普遍度用：每隊上一次的 current_option（★純觀測；只在 Probe.enabled 內讀寫）
 static var _churn_last: Dictionary = {}
+# ★格二（#3 覓食輸掉之後【真的怎麼了】）：team_id → {tick, food, pop, famine}
+#   ★★由 `PopulationSystem` 的每日 sweep 在 `DECISION_CADENCE` 之後結算並清除
+static var _forage_watch: Dictionary = {}
 # ★★★market-known 命中率的【路徑標記】（spec 2026-08-27 驗收 3：兩條路徑分開報）。
 #   ★兩條路徑共用同一支 `_harvest_market_known`，而真正的分辨點在【上游呼叫堆疊】，不在 helper ——
 #     `DecisionContext.gather` 兩條都會走，所以在 helper 加參數答不了這題。
@@ -801,13 +804,15 @@ static func _reset_cross_run() -> Dictionary:
 	if not _fai_ph.is_empty(): cleared["FactionAISystem._fai_ph"] = _fai_ph.size()
 	if not _mk_verify_rows.is_empty(): cleared["FactionAISystem._mk_verify_rows"] = _mk_verify_rows.size()
 	if not _churn_last.is_empty(): cleared["FactionAISystem._churn_last"] = _churn_last.size()
+	if not _forage_watch.is_empty(): cleared["FactionAISystem._forage_watch"] = _forage_watch.size()
 	if _mk_path != "other": cleared["FactionAISystem._mk_path"] = _mk_path
 	_a2b_remote_tribute_payers.clear()
 	_fai_ph.clear()
 	_mk_verify_rows.clear()
 	_churn_last.clear()
+	_forage_watch.clear()
 	_mk_path = "other"
-	return {"checked": 5, "cleared": cleared}
+	return {"checked": 6, "cleared": cleared}
 
 func _fai_pht(name: String, t0: int) -> int:
 	var now: int = Time.get_ticks_usec()
@@ -3070,6 +3075,45 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				else:
 					Probe.bump("mseek.gave_up")
 					Probe.bump("mseek.gave_up.task." + String(td["task"]))
+					# ★★★#3 追一格（systems 2026-09-04）：這批「撲空後被別的事叫走」的隊，
+					#   當下【覓食】在不在候選集 —— ★而三 seed 量到覓食＝0／0／0，所以問的是【它進得去嗎】。
+					#   ★★分層報（★★★不合成一個百分比：那個數字會被兩種成因同時餵）：
+					#     `applicable`  ＝ 覓食在 ranked 裡
+					#     `pop_block`   ＝ 不在 且 pop > FORAGE_VIABLE_POP
+					#        ⇒ ★此時 `has_forage_tile` 也【必然】false（`_find_food_seek_target` 內部同一個常數先擋）
+					#          ⇒ 兩條件同源、不可分離 —— 而【那本身就是答案】
+					#     `land_block`  ＝ 不在 且 pop ≤ 常數 ⇒ ★★純粹的「沒有獵物格」＝世界層讀數
+					#   ★零掃描：只讀 `ranked`（已在手上）與 `team.population`（純欄位）
+					#     ⇒ ★★不呼叫 `_find_food_seek_target`（它是本格＋鄰格掃：會踩憲法閘，也會改變我們正在量的耗時）
+					var _forage_in: bool = false
+					for _e2 in ranked:
+						if String(_e2["opt"]) == "覓食": _forage_in = true; break
+					var _pop_ok: bool = team.population <= FORAGE_VIABLE_POP
+					Probe.bump("mseek.forage." + ("applicable" if _forage_in
+						else ("land_block" if _pop_ok else "pop_block")))
+					# ★★★格一（systems 2026-09-04）：覓食 applicable 卻沒贏時，【當下餓多深】。
+					#   ★分帶沿用既有定義（`decision_engine.gd:465-468`：ge5／2to5／0.5to2／deep），
+					#     ★★food_days 也沿用既有算式（`decision_context.gd:236`：effective_food ÷ pop×日耗）
+					#     ⇒ ★★★不新開一套，否則跟先前的量比不起來。
+					if _forage_in:
+						var _fd2: float = ResourceSystem.effective_food(state, team) 							/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+						var _bd2: String = DecisionEngine.food_band(_fd2)
+						Probe.bump("mseek.forage.lost.band." + _bd2)
+						Probe.bump("mseek.forage.lost.team." + str(team.team_id))
+						# ★★格二的觀察起點：記下當下狀態，由每日 sweep 在 N 天後判後果
+						#   （★N 用既有 `DECISION_CADENCE`，不新增常數）
+						if not _forage_watch.has(team.team_id):
+							_forage_watch[team.team_id] = {
+								"tick": state.world.current_tick,
+								"food": ResourceSystem.effective_food(state, team),
+								"pop": team.population,
+								"famine": team.famine_days,
+							}
+					Probe.bump_sample("mseek.forage_sample", {
+						"tick": state.world.current_tick, "team": team.team_id,
+						"pop": team.population, "forage_in_ranked": _forage_in,
+						"pop_ok": _pop_ok, "went": String(td["task"]),
+					}, 200)
 				InteractionSystem._bail_last.erase(team.team_id)   # ★一次 bail 只判一次（★★否則同一次撲空會被重複計）
 		if _set_ok: _commit_settle_site(state, team, td)   # ★§4a 紮根：世界寫入只在 try_set 成功後（zombie 工地根治）
 		# 掠奪/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（社交 resolver 讀）
@@ -6638,10 +6682,7 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 	var _aid_band: String = ""
 	if _aid_probe:
 		var _fd: float = ResourceSystem.effective_food(state, team) / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
-		_aid_band = "deep"
-		if _fd >= 5.0: _aid_band = "ge5"
-		elif _fd >= 2.0: _aid_band = "2to5"
-		elif _fd >= 0.5: _aid_band = "0.5to2"
+		_aid_band = DecisionEngine.food_band(_fd)
 		Probe.bump("aid.calls")
 		Probe.bump("aid.b." + _aid_band + ".calls")
 	for tid in state.team_discovered.get(team.team_id, []):

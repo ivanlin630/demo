@@ -3,6 +3,15 @@ class_name PopulationSystem
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const OVERFLOW_CHECK_INTERVAL: int = WorldState.TICKS_PER_DAY   # 每天檢查
 const MATURE_RATE: float = 0.1   # TEST VALUE — 每月 minor 轉成人比例（簡版，無性別/個體年齡）
+# ★#18 用：每隊【前一日】人口（★純觀測，只在 Probe.enabled 內讀寫）
+static var _pop_last: Dictionary = {}
+
+# ★跨 run 清除（CrossRunReset 單一呼叫點）
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _pop_last.is_empty(): cleared["PopulationSystem._pop_last"] = _pop_last.size()
+	_pop_last.clear()
+	return {"checked": 1, "cleared": cleared}
 
 func check_overflow(state: WorldState) -> void:
 	# minor 長大簡版：每月 10% minor → 平民 anon（人口循環下游，性別/年齡留人口結構 spec）
@@ -18,6 +27,48 @@ func check_overflow(state: WorldState) -> void:
 			if t2.minor_population > t2.population:
 				Probe.bump("minor_exceeds_pop")
 				Probe.bump("minor_exceeds_pop.team.%d" % tid2)
+	# ★★★格二結算（#3：覓食輸掉之後【真的怎麼了】）——★blueprint 的關鍵一問：
+	#   輸掉每一票【有沒有代價】。★★定義寫死在先（免得事後挑）：
+	#     `ate`     ＝ N 天內 `effective_food` 比當時【回升】（★經 crisis 那條路真的吃到了 ⇒ 輸 rank 沒代價）
+	#     `starved` ＝ 期間 `population` 下降 或 `famine_days` 增加（★★輸掉真的有代價）
+	#     `neither` ＝ 活著但沒吃到（★★★兩者之間，原樣報）
+	#   ★N ＝ 既有 `DECISION_CADENCE`，不新增常數；★★隊沒了 ⇒ 記 `gone`（那也是後果）
+	if Probe.enabled and not FactionAISystem._forage_watch.is_empty():
+		var _due: Array = []
+		for _wid in FactionAISystem._forage_watch:
+			var _w: Dictionary = FactionAISystem._forage_watch[_wid]
+			if state.world.current_tick - int(_w.get("tick", 0)) >= FactionAISystem.DECISION_CADENCE:
+				_due.append(_wid)
+		for _wid2 in _due:
+			var _w2: Dictionary = FactionAISystem._forage_watch[_wid2]
+			var _t3: TeamData = state.teams.get(_wid2)
+			if _t3 == null:
+				Probe.bump("mseek.forage.outcome.gone")
+			else:
+				var _now_food: float = ResourceSystem.effective_food(state, _t3)
+				if _t3.population < int(_w2.get("pop", 0)) or _t3.famine_days > float(_w2.get("famine", 0.0)):
+					Probe.bump("mseek.forage.outcome.starved")
+				elif _now_food > float(_w2.get("food", 0.0)):
+					Probe.bump("mseek.forage.outcome.ate")
+				else:
+					Probe.bump("mseek.forage.outcome.neither")
+			FactionAISystem._forage_watch.erase(_wid2)
+	# ★★★#18 免費補答（systems 2026-09-04 pilot）：★問的是【團滅到剩 1 人】＝一個【轉變】，
+	#   ★★不是「現在 pop==1」—— 後者一直都有（今天 team 52 就是），拿它回答會恆為「有」。
+	#   ⇒ 記【前一日 pop > 1 而今日 pop == 1】的那一刻，並存隊 id 供 specimen 回查。
+	if Probe.enabled:
+		for tid3 in state.teams:
+			var t4: TeamData = state.teams[tid3]
+			var _prev: int = int(_pop_last.get(tid3, -1))
+			if _prev > 1 and t4.population == 1:
+				Probe.bump("solo_survivor.transition")
+				Probe.bump("solo_survivor.team.%d" % tid3)
+				Probe.bump_sample("solo_survivor.sample", {
+					"tick": state.world.current_tick, "team": tid3,
+					"prev_pop": _prev, "task": t4.current_task,
+					"intent": str(t4.solo_intent),   # ★Dictionary ⇒ 原樣存（★不預先詮釋成一個字串標籤）
+				}, 100)
+			_pop_last[tid3] = t4.population
 	for tid in state.teams.keys():
 		check_overflow_for_team(state, tid)
 

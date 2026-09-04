@@ -11,6 +11,9 @@ extends SceneTree
 # ★★母體與命中同印 —— ★★★「贏 0 次」與「沒有隊在候選」長得一樣。
 # ★而第一問是【贏家贏得對不對】，不是【怎麼讓輸家贏】⇒ 本床只 dump，禁 crank。
 
+var _exclusive: String = "unknown"
+var _t_start_ms: int = 0
+
 func _initialize() -> void:
 	_run(); quit()
 
@@ -20,6 +23,11 @@ func _run() -> void:
 	var sd: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
 	# ★等價證明用（預設關）：CAMP_SHADOW=1 才開，★開了每次 own_camp 查詢都會多掃一次全圖
 	OwnerCampIndex.shadow = OS.get_environment("CAMP_SHADOW") == "1"
+	_t_start_ms = Time.get_ticks_msec()
+	# ★#15 perf 那半：`PHASE_TIMING=1` 才開（★★時間類 ⇒ 必須獨佔機器跑，今天剛立的規則）
+	SimRunner.phase_timing = OS.get_environment("PHASE_TIMING") == "1"
+	# ★★★獨佔與否【由跑的人明示】：沒傳就是 unknown（★不自動偵測升級成 yes——自動偵測只能反駁）
+	_exclusive = OS.get_environment("EXCLUSIVE") if OS.has_environment("EXCLUSIVE") else "unknown"
 	print("=== 三票 re-measure｜config=%s seed=%d days=%d ===" % [cfg, sd, days])
 	var state: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg, true)
 	seed(sd)
@@ -38,6 +46,13 @@ func _run() -> void:
 			int(Probe.counts.get("flee.degrade.total", 0)),
 			int(Probe.counts.get("begu.in_candidates", 0)), int(Probe.counts.get("begu.won", 0)),
 			int(Probe.counts.get("prep.won", 0))])
+		# ★★★中途小結（systems 2026-09-04）：★長跑的結論不能全部堆在結尾——
+		#   血證：90 日 pilot 被砍在 day 53，而免費補答三項【全在報告區】⇒ 一項都沒撈到。
+		#   ★★而它與串流版 wrapper 是【同一條在不同層】：wrapper 治 stdout 緩衝，
+		#     ★★★這條治【結論只在最後才存在】—— 而後者 wrapper 救不了。
+		#   ★格式照既有：母體與命中同印、key 名自報。
+		if (d + 1) % 10 == 0:
+			_sec_interim(d + 1)
 
 	_sec_10()
 	_sec_5()
@@ -51,6 +66,31 @@ func _run() -> void:
 	_sec_cansettle()
 	_sec_ladder()
 	_sec_prepare()
+	_sec_optpool()
+	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
+	#   ★`completed` 【不是我判的】——這一行印在床的最後，★★所以【它存在】就等於跑完了；
+	#   ★★★若被砍／撞 timeout，這一行【不會出現】，而那正是 run-reliability 的答案。
+	#   ★而 wall_clock 從【床內】量（不是外部 shell 計時）：外部計時對一個被砍的跑【也會給出一個數】，
+	#     ★★而那個數會被誤讀成「它跑了這麼久就完成了」。
+	# ★★★#18 免費補答（pilot 順手撈）：★問的是【團滅到剩 1 人】這個【轉變】，
+	#   ★★不是「現在 pop==1」——後者一直都有，拿它回答會恆為「有」。
+	var _solo: int = int(Probe.counts.get("solo_survivor.transition", 0))
+	var _solo_teams: int = 0
+	for _k5 in Probe.counts.keys():
+		if String(_k5).begins_with("solo_survivor.team."): _solo_teams += 1
+	print("═══ ★#18 `solo_survivor.transition`（團滅到剩 1 人）═══")
+	print("  轉變次數 = %d｜相異隊 = %d" % [_solo, _solo_teams])
+	if _solo == 0:
+		print("  ★★★母體 0 ⇒ 這個窗裡【沒有隊走到那一步】——★不是「症狀已消失」")
+	else:
+		var _ss: Array = Probe.samples.get("solo_survivor.sample", [])
+		for _i6 in range(mini(5, _ss.size())):
+			var _e6: Dictionary = _ss[_i6]
+			print("     tick=%s team=%s prev_pop=%s 當下 task=%s intent=%s" % [
+				str(_e6.get("tick", -1)), str(_e6.get("team", -1)), str(_e6.get("prev_pop", -1)),
+				String(_e6.get("task", "?")), String(_e6.get("intent", "?"))])
+	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
+		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
 	print("★誠實限：①單 config／單 seed／%d 日 ②★純觀測（fp 不該變；變了＝我動到行為）" % days)
 	print("  ★★③三票【同一份跑】⇒ 彼此可比；★★★但與修前的舊值比時，那些舊值是【不同跑】的，")
 	print("     而中間隔了換尺 —— 所以「修前 vs 修後」看的是【方向與量級】，不是逐位元對照。")
@@ -76,7 +116,7 @@ func _sec_10() -> void:
 		100.0 * float(nir) / maxf(float(sent), 1.0), won, lost])
 	print("  輸給誰：%s" % _bucket_list("redispatch.lost_to."))
 	print("  ★★★不在候選集的【是哪個 option】：%s" % _bucket_list("redispatch.not_in_ranked.opt."))
-	print("  ★★★不在候選集的隊【當下有沒有自己的營地】：%s" % _bucket_list("redispatch.nir_owncamp."))
+	print("  ★★★不在候選集的隊【當下有沒有自己的營地】 `redispatch.nir_owncamp.*`：%s" % _bucket_list("redispatch.nir_owncamp."))
 	print("     ★判讀（systems 寫在數字之前）：幾乎都 yes ⇒ 承諾比 applicable 活得久（假說成立）；")
 	print("        ★★幾乎都 no ⇒ 假說死，那是另一回事；★★★混合 ⇒ 原樣報不歸類")
 	print("    其中 stall cooldown 排除=%d｜條件本身不成立=%d（★兩者在「不在候選集」上同形）" % [
@@ -305,7 +345,17 @@ func _sec_zhagen() -> void:
 func _sec_cansettle() -> void:
 	var m: int = int(Probe.counts.get("cansettle.mother", 0))
 	print("═══ ★拆 can_settle_here（六個子條件的 AND）═══")
-	print("  母體（同 #10：IDLE 且 committed==紮根）= %d" % m)
+	var zm: int = int(Probe.counts.get("zhagen.mother", 0))
+	# ★★★這一行的措辭 2026-09-04 訂正：它原本寫「同 #10」，而【那句話是錯的】。
+	#   ★兩個桶的條件文字一樣（IDLE 且 committed==紮根），但【記在不同的呼叫點】：
+	#     `cansettle.*` 記在 `DecisionContext.gather`，`zhagen.*` 記在 `rank_scored`
+	#   ⇒ ★★gather 的呼叫次數比 rank_scored 多 ⇒ ★★★兩個母體【天生就不相等】。
+	#   ★實測：同一份 90 日跑，cansettle 母體 22、zhagen 母體 4。
+	#   ⇒ 所以【這一節的百分比不能拿去讀紮根那一節】—— 兩節的分母是兩群。
+	#   ★★這正是「分母裡混了幾個世界」那一條；★★★而它先前是靠一句註解宣稱相同、沒有人印出來對帳。
+	print("  母體（IDLE 且 committed==紮根，記在 `gather`）= %d" % m)
+	print("  ★★★對帳：`zhagen.mother`（同條件但記在 `rank_scored`）= %d ⇒ 兩者%s" % [
+		zm, "相等" if zm == m else "【不相等，本節百分比不可拿去讀紮根那一節】"])
 	if m == 0:
 		print("  ★★★母體 0 ⇒ 這個窗沒有隊落進來（儀器沒跑到／母體塌陷），不是「子條件都成立」")
 		return
@@ -387,7 +437,7 @@ func _sec_b_grade() -> void:
 	print("═══ ★B 級量測（#3 market-seeker／#15 普遍度＋perf／④minor>pop）═══")
 	# ── ④minor_population > population ──
 	var me: int = int(Probe.counts.get("minor_exceeds_pop", 0))
-	print("  ④minor>pop 的隊×tick = %d｜相異隊 = %s" % [me, _bucket_list("minor_exceeds_pop.team.")])
+	print("  ④`minor_exceeds_pop` 的隊×tick = %d｜相異隊 = %s" % [me, _bucket_list("minor_exceeds_pop.team.")])
 	print("     ★恆 0 ⇒ 那條銷案；★★非 0 ⇒ 上面那串就是隊 id（systems 判是哪條路造成的）")
 	# ── #3 market-seeker ──
 	var ms_same: int = int(Probe.counts.get("mseek.same", 0))
@@ -401,6 +451,24 @@ func _sec_b_grade() -> void:
 		print("     ★再去【同一格】= %d（%.1f%%）｜換一格 = %d｜改做別的 = %d"
 			% [ms_same, 100.0 * float(ms_same) / float(ms_tot), ms_other, ms_gave])
 		print("     改做什麼：%s" % _bucket_list("mseek.gave_up.task."))
+		# ★★★覓食那一格（★三層，不合成一個百分比）
+		var f_ap: int = int(Probe.counts.get("mseek.forage.applicable", 0))
+		var f_pop: int = int(Probe.counts.get("mseek.forage.pop_block", 0))
+		var f_land: int = int(Probe.counts.get("mseek.forage.land_block", 0))
+		var f_tot: int = f_ap + f_pop + f_land
+		print("     ── ★覓食在不在候選 `mseek.forage.*`（母體＝改做別的 %d，本節分母 %d）──" % [ms_gave, f_tot])
+		print("        ①applicable（覓食在 ranked）= %d" % f_ap)
+		print("        ★②pop > FORAGE_VIABLE_POP(%d) = %d ⇒ 常數擋（★而地那半在此【不可觀測】：同一常數先擋）"
+			% [FactionAISystem.FORAGE_VIABLE_POP, f_pop])
+		print("        ★★③pop ≤ 常數 而仍不 applicable = %d ⇒ 沒有獵物格（★★★純粹的世界層讀數）" % f_land)
+		print("        ★判讀（systems 寫在數字之前）：②佔絕大多數 ⇒ 常數擋的（而它的理由已被證不存在）；")
+		print("           ★★③佔絕大多數 ⇒ 世界層；①佔多數 ⇒ 它上場了而秤不過 ⇒ util 相對量級；混合 ⇒ 兩邊都報")
+		var fs: Array = Probe.samples.get("mseek.forage_sample", [])
+		for i in range(mini(5, fs.size())):
+			var e4: Dictionary = fs[i]
+			print("        team=%s pop=%s 覓食在候選=%s pop_ok=%s 改去做=%s" % [
+				str(e4.get("team", -1)), str(e4.get("pop", -1)), str(e4.get("forage_in_ranked", false)),
+				str(e4.get("pop_ok", false)), String(e4.get("went", "?"))])
 		var mss: Array = Probe.samples.get("mseek.sample", [])
 		for i in range(mini(5, mss.size())):
 			var e: Dictionary = mss[i]
@@ -421,9 +489,55 @@ func _sec_b_grade() -> void:
 		% [day_teams.size(), hit, 100.0 * float(hit) / maxf(float(day_teams.size()), 1.0)])
 	print("     ★★★問的是【普遍嗎】不是【最大幾次】——「一隊 88 次」與「半數隊各 3 次」平均值可能一樣")
 	# ── #15 perf ＋ 備援分子 ──
-	print("  #15 perf｜`loop3.survival` 佔比需 phase_timing 開（本輪 %s）｜★備援分子 survival.eval_calls = %d"
+	print("  #15 perf｜phase_timing=%s｜★備援分子 survival.eval_calls = %d"
 		% [str(SimRunner.phase_timing), int(Probe.counts.get("survival.eval_calls", 0))])
-	print("     ★exclusive=unknown（★★除非跑的人明示；★★★自動偵測只能反駁不能確認）")
+	if SimRunner.phase_timing:
+		var ph: Dictionary = FactionAISystem._fai_ph
+		var tot_us: int = 0
+		for k3 in ph: tot_us += int(ph[k3])
+		var sv: int = int(ph.get("loop3.survival", 0))
+		print("     ★`loop3.survival` = %d us｜★★分母＝`_fai_ph` 全部相位（含 loop1/loop2）= %d us｜佔比 %.2f%%"
+			% [sv, tot_us, 100.0 * float(sv) / maxf(float(tot_us), 1.0)])
+		# ★★★兩個標籤訂正（2026-09-04，實測打掉我自己寫的前一版）：
+		#   ①舊版寫「loop3 群組總計」⇒ ★錯：我加總的是 `_fai_ph` 的【全部】key，含 loop1.*／loop2.*
+		#     ⇒ 這個比例是【survival ÷ 全部 faction_ai 相位】，不是【÷ loop3】
+		#   ②舊版寫「每 tick clear ⇒ 這是最後一個 tick 的快照」⇒ ★★也錯：
+		#     `evaluate_all` 確實在開頭 clear（:827），★★★而實測總量到 ~1200 萬 us
+		#     —— 一個 tick 不可能有 12 秒（同一份輸出裡 PhaseSpike 最大才 0.5 秒）
+		#     ⇒ 所以累積窗【比一個 tick 長】，而【多長我沒有量】⇒ 標未知，不猜
+		#   ★而【比例本身仍然有效】：分子與分母來自【同一個快照】，窗一樣長
+		print("     ★★★誠實限：累積窗【未知】（不是一個 tick）——而分子分母同窗 ⇒ 比例有效、絕對值不可跨跑比")
+	print("     ★exclusive=%s（★★由跑的人明示；沒傳就是 unknown；★★★自動偵測只能反駁不能確認）" % _exclusive)
+	# ★★★格一／格二【獨立印】（2026-09-04）：它們原本寫在 `#3 母體 > 0` 的分支裡
+	#   ⇒ ★#3 母體 0 的那一輪，這兩節【整段消失】—— 而它們有【自己的母體】，跟 #3 是否有樣本無關。
+	#   ★★同型今天已經踩過一次（camp churn 掛在 `zhagen.mother == 0` 的 early-return 之後）
+	#   ⇒ ★★★所以這裡無條件印。
+	# ★★★格一：覓食 applicable 卻沒贏時的【餓深分帶】（★沿用既有 ge5／2to5／0.5to2／deep）
+	var lb: Array = []
+	var lb_tot: int = 0
+	for b2 in ["ge5", "2to5", "0.5to2", "deep"]:
+		var v2: int = int(Probe.counts.get("mseek.forage.lost.band." + b2, 0))
+		lb_tot += v2
+		lb.append("%s=%d" % [b2, v2])
+	var lt_teams: int = 0
+	for k4 in Probe.counts.keys():
+		if String(k4).begins_with("mseek.forage.lost.team."): lt_teams += 1
+	print("     ── ★格一 `mseek.forage.lost.band.*`：覓食 applicable 卻沒贏｜餓深分帶（母體 %d，相異隊 %d）──" % [lb_tot, lt_teams])
+	print("        %s" % " ｜ ".join(PackedStringArray(lb)))
+	print("        ★判讀：淺帶輸給義務 ⇒ genuine 戰時紀律；★★deep 仍輸 ⇒ 餓死邊緣還在操練＝病；")
+	print("           ★★★deep 母體 0 ⇒ 那格【答不了】，不是「深帶沒問題」")
+	# ★★★格二：輸掉之後【真的怎麼了】（★定義寫在 population_system 的註解裡）
+	var oc: Array = []
+	var oc_tot: int = 0
+	for o2 in ["ate", "starved", "neither", "gone"]:
+		var v3: int = int(Probe.counts.get("mseek.forage.outcome." + o2, 0))
+		oc_tot += v3
+		oc.append("%s=%d" % [o2, v3])
+	print("     ── ★★格二 `mseek.forage.outcome.*`：輸掉之後的實際後果（母體 %d｜N＝DECISION_CADENCE %d tick）──"
+		% [oc_tot, FactionAISystem.DECISION_CADENCE])
+	print("        %s" % " ｜ ".join(PackedStringArray(oc)))
+	print("        ★判讀：starved 多 ⇒ 輸掉【真的有代價】；★★ate 多 ⇒ 經 crisis 那條路吃到了 ⇒ 輸 rank 沒代價")
+
 
 func _sec_churn() -> void:
 	print("═══ ★camp churn（觀察項，非驗收）═══")
@@ -447,3 +561,49 @@ func _sec_churn() -> void:
 	print("     ★★★誠實限：churn 這一行【是這一刀才加的】⇒ 它【沒有修前基準】")
 	print("        ⇒ ★單看修後數字說不出「降了」——★★那正是「拿一個數字去比一個不存在的數字」")
 
+# ★中途小結（每 10 日一次）：★★只印【被砍就會全損】的那幾格，不重印每日 [CP] 已有的
+func _sec_interim(day: int) -> void:
+	var zm: int = int(Probe.counts.get("zhagen.mother", 0))
+	var zw: int = int(Probe.counts.get("zhagen.appl_won", 0))
+	var zl: int = int(Probe.counts.get("zhagen.appl_lost", 0))
+	var solo: int = int(Probe.counts.get("solo_survivor.transition", 0))
+	print("[INTERIM day=%d] `zhagen.mother`=%d `zhagen.appl_won`=%d `zhagen.appl_lost`=%d"
+		% [day, zm, zw, zl])
+	print("[INTERIM day=%d] `camp.built`=%d `camp.built.has_home`=%d `camp.abandoned`=%d `outpost.l0_to_l1`=%d"
+		% [day, int(Probe.counts.get("camp.built", 0)), int(Probe.counts.get("camp.built.has_home", 0)),
+			int(Probe.counts.get("camp.abandoned", 0)), int(Probe.counts.get("outpost.l0_to_l1", 0))])
+	print("[INTERIM day=%d] `solo_survivor.transition`=%d `crisis.abs_hunger`=%d `minor_exceeds_pop`=%d"
+		% [day, solo, int(Probe.counts.get("crisis.abs_hunger", 0)),
+			int(Probe.counts.get("minor_exceeds_pop", 0))])
+	print("[INTERIM day=%d] `mseek.gave_up`=%d `mseek.forage.applicable`=%d `mseek.forage.pop_block`=%d `mseek.forage.land_block`=%d"
+		% [day, int(Probe.counts.get("mseek.gave_up", 0)),
+			int(Probe.counts.get("mseek.forage.applicable", 0)),
+			int(Probe.counts.get("mseek.forage.pop_block", 0)),
+			int(Probe.counts.get("mseek.forage.land_block", 0))])
+
+# ★★★全 option 勝負池（systems 2026-09-04：「把變動最大的三個 option 勝負列出來」）。
+#   ★這一節【不判斷】任何事 —— 它只把兩個量並排印出來，讓【兩份跑】可以逐行相減。
+#   ★★cand 與 win 都印：只印 win 分不出「它變常勝」與「它變常在場」，
+#      而兩份 config 對照時那兩件事的結論相反。
+#   ★★★母體同印；★沒有母體的比率不可比（今天已經咬過一次：4 vs 22 兩個母體都自稱同一群）。
+func _sec_optpool() -> void:
+	print("═══ ★全 option 勝負池（`optpool.*`；★兩份跑逐行相減用）═══")
+	var m: int = int(Probe.counts.get("optpool.mother", 0))
+	print("  母體 `optpool.mother`（rank_scored 呼叫次數）= %d" % m)
+	if m == 0:
+		print("  ★★★母體 0 ⇒ 這一節【答不了】，不是「沒有 option 贏過」")
+		return
+	var names: Dictionary = {}
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("optpool.cand."): names[ks.substr(13)] = true
+		elif ks.begins_with("optpool.win."): names[ks.substr(12)] = true
+	var arr: Array = names.keys()
+	arr.sort_custom(func(a, b): return int(Probe.counts.get("optpool.cand." + String(a), 0)) > int(Probe.counts.get("optpool.cand." + String(b), 0)))
+	print("  %-24s %8s %8s %8s" % ["option", "cand", "win", "win/cand"])
+	for n in arr:
+		var c: int = int(Probe.counts.get("optpool.cand." + String(n), 0))
+		var w: int = int(Probe.counts.get("optpool.win." + String(n), 0))
+		print("  %-24s %8d %8d %7.1f%%" % [String(n), c, w, (100.0 * float(w) / float(c)) if c > 0 else 0.0])
+	print("  ★誠實限：這一節【是這一刀才加的】⇒ 它沒有修前基準；")
+	print("     ★★所以它只能拿【同一版 code、兩份 config】互相比，不能拿去比任何舊跑。")

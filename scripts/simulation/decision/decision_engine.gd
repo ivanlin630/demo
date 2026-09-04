@@ -46,6 +46,17 @@ static func stall_patience_factor(leader_values: Dictionary) -> float:
 # options 依 util 降序（index tiebreak：util 相等→applicable 順序在前者勝，同 argmax strict >）。
 # 排序後帶 util 的 scored 陣列 [{u,i,opt}, ...]（降序）。rank() 只取 opt；
 # 量測探針（征服名實）要讀 util 排序根 → 走此無損 accessor（不重算 term loop）。
+# ★★★餓深分帶的【單一定義】（2026-09-04 統一）：先前這段 if 鏈【散在三處】
+#   （`decision_engine::_beg_tap`／`faction_ai::_find_aid_target`／而我第三處要用時撞了憲法閘
+#     `_decide_unified::threshold`）。★閘的訊息是「溶入引擎/統一」而不是加豁免 ⇒ 收成一支。
+#   ★★收成一支的實際好處不只過閘：★★★三處【不可能再各自漂】——
+#     而「同一個概念在三個地方各寫一份」正是今天 `FORAGE_VIABLE_POP` 那顆的病因。
+static func food_band(food_days: float) -> String:
+	if food_days >= 5.0: return "ge5"
+	if food_days >= 2.0: return "2to5"
+	if food_days >= 0.5: return "0.5to2"
+	return "deep"
+
 static func rank_scored(state: WorldState, team: TeamData) -> Array:
 	GoalResolver.ensure_maintain_goals(state, team)   # ★means-end S2（組件 A）:冪等確保 5 資源維持 goal + 更新 active/satisfied
 	var ctx: DecisionContext = DecisionContext.gather(state, team, true)   # ★真決策評估入口 → 推進 EWMA（advance=true）
@@ -58,6 +69,19 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 			and ctx.threat_react >= ctx.threat_threshold:
 		Probe.bump("flee.degrade.total")
 		Probe.bump("flee.degrade.top_" + (String(scored[0]["opt"]) if not scored.is_empty() else "NONE"))
+	# ★★★全 option 勝負池（systems 2026-09-04 問的「競爭池改變了多少」）。
+	#   ★先前【沒有任何】全域的 per-option 勝負計數 —— 只有 `zhagen.*` 那一組，
+	#     而那只答得了紮根一個 option ⇒ ★★「哪三個 option 變動最大」用既有的桶【答不出來】。
+	#   ★★★所以這裡記兩個量而不是一個：`cand`（進了候選幾次）與 `win`（贏了幾次）。
+	#     ★只記 win 會把「它變常勝」與「它變常在場」壓成同一個數字，
+	#     ★★而兩份 config 對照時那兩件事的意思相反：前者是【秤變了】，後者是【世界變了】。
+	#   ★★★母體同印（`optpool.mother` ＝ rank_scored 呼叫次數）—— 沒有母體的比率不可比。
+	if Probe.enabled:
+		Probe.bump("optpool.mother")
+		for _r4 in scored:
+			Probe.bump("optpool.cand." + String(_r4["opt"]))
+		if not scored.is_empty():
+			Probe.bump("optpool.win." + String(scored[0]["opt"]))
 	_beg_tap(ctx, scored, team, "begu.")   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
 	_prep_tap(ctx, scored, team)   # ★備戰 root-check（純觀測）
 	# ★★★【紮根】條件級 tap（systems 2026-09-03）：#10 量到 `not_in_ranked` 九成是紮根，
@@ -462,10 +486,7 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 	#   ★★帶界印在床的輸出裡（不手抄）；★★★每帶母體必印 —— 某帶 0 要照三讀法報。
 	#   ★而【施主可及性】也逐帶記：「乞食不贏」可能是決策病，
 	#     ★★也可能是【世界裡沒有施主】—— 而兩者的修法完全不同。
-	var _bd: String = "deep"
-	if ctx.food_days >= 5.0: _bd = "ge5"
-	elif ctx.food_days >= 2.0: _bd = "2to5"
-	elif ctx.food_days >= 0.5: _bd = "0.5to2"
+	var _bd: String = food_band(ctx.food_days)
 	Probe.bump(pfx + "band." + _bd + ".pop")
 	# ★★★階梯交集守衛（systems 2026-09-03）：【無施主 ∧ 其他階一個都不 applicable】
 	#   ★裁定是【絕境無死路由階梯保證、不由每一階保證】⇒ 乞食那一階不修，
