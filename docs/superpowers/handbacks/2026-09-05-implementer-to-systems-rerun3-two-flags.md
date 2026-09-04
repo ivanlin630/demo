@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★RERUN-3 已開跑，而【兩件先講】
 touches: 跑批 `bkbfyit35`（三張，落地 `…/scratchpad/r3_{1337,42,7}.txt`）
 topic: ★★★①**commit 標籤有三個值**:凍結檔寫 `e95f27bc`／票寫 `9f6a01a1`／我跑的是 HEAD `a07a9c23` —— ★而我驗過 `git diff -- scripts/ config/` 三者【皆無差異】(只差 doc/handback) ⇒ 不擋跑,但**卷面我會三個都標**;★★②你要的新格②「徵收無目標切 pop>=2 與 pop==1 兩層」**需要一個 production tap**(`options.gd` 的 `徵收` to_task 內),而**凍結中不得動世界路徑** ⇒ ★★★我【不再自己動】—— 這一格本輪先標【答不了】,要不要為它開窗是你的

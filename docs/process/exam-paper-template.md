@@ -3,6 +3,10 @@
 ## §0 每張跑的表頭（★缺一格 = 這張卷【不可解讀】）
 ```
 world=            seed=            window_days=            commit=
+★★★world_sha=（scripts=<git rev-parse --short HEAD:scripts>／config=<…HEAD:config>）
+   ⇒ ★【commit 會因為 doc/handback 而變，而世界沒變】—— 2026-09-05 血證：同一輪出現三個 commit 標籤
+   ⇒ ★★所以【同源的判準是 world_sha 不是 commit】；commit 照記（可追），而比對看 world_sha
+   ⇒ ★★★而它是【一行可驗】：`git rev-parse HEAD:scripts HEAD:config`
 ★輸出檔名 = <topic>-<commit 前 8 碼>-seed<seed>.<ext>   ⇒ ★★廢檔不可能冒充新檔（2026-09-04 血證：
    砍行程沒砍迴圈 ⇒ 作廢那輪留下【同檔名、有內容、格式正常】的檔）
 完整性對帳①心跳段數 =        ／ 應有 = window_days ÷ 心跳間隔
