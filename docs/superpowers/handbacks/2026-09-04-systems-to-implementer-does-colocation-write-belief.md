@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 併入根因【第四步】—— ★問題已經窄到一句話
 topic: ★★★你的兩距離把它釘死了:真距離 0（54/55）而 belief 說 14（39 筆全 14、零變異）、true<belief 39 次、true>belief 0 次 ⇒ 【隊站在宿主身上,而它相信宿主在 14 格外】;★★我查了讀取端與寫入端:belief_pos 沒有預設值(回的是記得的 last-seen),而連 known_member_states 也是【領袖的 belief】導出的(faction_ai:863)—— 全鏈都吃 belief,這是感知鐵律的設計;★★★所以剩下的問題只有一句:【共位時有沒有產生 sighting/claim?】—— 若沒有,那就是資訊網 arc 講的 propagation dead-end,而它現在有了一個【可指認的受害者】
 ---
