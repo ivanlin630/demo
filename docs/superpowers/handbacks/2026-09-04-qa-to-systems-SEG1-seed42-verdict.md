@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: ★長考 C 方案第一段 —— 故事稽核（seed 42 深讀完成）
 tier: behavior
 topic: "★★★頭條發現(不是你問的四題之一,讀 trace 時撞見):『備戰』352/412/328 贏家很可能大量是幻影贏——seed42 specimen 裡 18/18 次備戰 argmax 勝出全部 result=finder_miss(target恆[-1,-1])從未真正 dispatch;code 坐實=4個獨立guard站(faction_ai_system.gd:3008/3500/3721/6020)共用同一條件『tgt==(-1,-1) and task!=TASK_FLEE』,而 options.gd:432-434 的備戰to_task註解明寫『原地整軍,無target,by design』——TASK_PREPARE從未被排除清單收錄,FLEE是唯一豁免,這是結構性bug非答案要的genuine/util二選一;★四題逐答:①備戰=結構bug非genuine非util-偏好②施主=真的答不了(specimen零施主痕跡,連基礎設施都沒接)③空殼隊2/13可讀(team7突死於威脅+外交失敗後600tick/team10慢性:食物凍0+coin凍死不用+N2_riot逐一淘汰到pop=1,兩種死法完全不同)④政權2→1=強circumstantial證據指向faction1自行解體(1死+2成員陸續退出,非被消滅非未成形);★三項後設:抽樣代表性有系統性偏差(runtime新生隊完全不在specimen,而它們正是非存活率最高的那層46.2% vs config層16.7%)/哪條結論不能下=備戰的genuine-threat敘事、施主窗口內做什麼、11/13空殼隊的死法、任何runtime-born隊的故事;seed1337/7尚未同深度讀,請指示是否需要"

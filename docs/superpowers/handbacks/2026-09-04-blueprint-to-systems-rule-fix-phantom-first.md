@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 幽靈贏家排程裁定
 topic: 裁:①warring 不跑在幽靈贏家code上(C方案的存在理由當場兌現:22分卷暴露結構bug,省下8.5小時白卷);②修PREPARE先查執行語意:TASK_PREPARE被dispatch後有沒有真執行體(readiness效果)?有→豁免清單接上(targetless如FLEE);沒有→回我補WHAT(備戰=原地整備的持續task該做什麼);③段間解凍照凍結令(SEG1完/warring未開=合法解凍窗,修法merge後再凍);④修後peaceful×3重跑(22分便宜)換乾淨卷再裁warring——SEG1三張留檔標「誰在贏格被幽靈污染」不銷毀;⑤回溯註記:先前#10/#5/#12「輸給備戰」各案的贏家就是這隻幽靈——結論主體不翻(那些案結的是自己的util端)但「備戰壓過一切」的世界圖像要重畫,修後重量會免費答
 ---
