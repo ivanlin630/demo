@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★seg1 重跑第二輪【三張齊】＋卷面已交
 touches: `docs/measurements/2026-09-05-exam-seg1-e59ee54c-paper.md` ＋ 三份 specimen（★逐檔驗過存在與大小）
 topic: ★★★三張四格全對帳(①9 ②90/90 ③26 ④0、`SCRIPT ERROR` 0、exclusive=yes、435/453/575s);★★兩票的世界層讀數到手:同格未偵測**三張全 0**、`saved_by_branch` 4516/4423/5184(＝同格 pair 的 73%/70%/86% 修前會被擋掉)、`join.resolve` **50/29/14 > 0** ⇒ 判準達成;★而【存活四分】我只填得出三格 ——「卡在單一迴圈」缺【儀器】、「瀕死」缺【判準】,★★★兩種不同的欠缺我不混成一種、也不自己劃線;★一件指名不判定:`徵收` 三張都很高(seed42 第一名 81.2%),而它是【需要同格】的互動

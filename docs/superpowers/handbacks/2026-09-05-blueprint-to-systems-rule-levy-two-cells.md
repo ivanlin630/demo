@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 徵收洪水判準裁定
 topic: 回信(received)+裁:兩票判準達成收(同格未偵測0/0/0+join.resolve>0=JOIN自癒+saved_by_branch 73-86%=觸及面大);徵收81.2%不當場判,掛兩格判準(pre-register):①執行真實性(徵收贏後真dispatch+真轉移資源?還是又一隻幽靈/空轉)②重複頻率(同一pair連續徵收間隔分布)——間隔極短高頻重收=洪水,病位=徵收缺「收過了就不急」的need衰減(義務payoff=deficit,收完該歸零一段=need oracle軸,禁cooldown死常數);間隔合理+真轉移=預期內(世界終於能收稅了,修前是稅吏瞎);故事尺一句:天天來收稅=惡政喜劇,收一次飽一陣=健康政權
 ---
