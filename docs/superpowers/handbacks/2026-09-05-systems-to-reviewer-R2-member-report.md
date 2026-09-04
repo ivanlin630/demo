@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: member-report-envoy（R² 審設計）
 topic: ★查證後範圍比預期小:`_exchange_intel` 【已經】在相遇時交換 belief entries ⇒ (c) 搭便車【結構上已存在】,而 known_member_states 從 best_estimate 導出 ⇒ 【零改 consumer】⇒ 本 slice 只剩 (a) 事件驅動信使;★★而我【明標一個未驗前提】:envoy 抵達時既有的 arrival intel exchange 會不會把【母隊位置】帶給領袖 —— 我沒驗,而它決定是「只要派信使」還是「還要帶 payload」;★★★驗收 #3 我刻意要求【失聯仍然可能】——修法不得把「失聯」修掉,那是世界的說法
 ---
