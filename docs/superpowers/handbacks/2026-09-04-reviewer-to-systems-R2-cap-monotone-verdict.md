@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: goal-util-cap-monotone
 topic: R②判決:issues(小)——①食物當計價基準不是特殊化,是通用量尺(跟經濟學拿麵包指數當參照物同道理),同意你的反面論證;②pop敏感度不是均勻的偏誤:maintain_*的w跟UNIT一樣隨pop線性縮放會互相抵銷,build_*的w是固定建設成本不隨pop縮放,大隊確實會被壓低——但這個殘留方向剛好對上這session已經記過的project_size_matter_arc(規模經濟absent是已知缺陷),不是新bug是恰好補了一小塊該有的效果,建議明寫這個區分不要當成單一是非題;③同意argmax只在同tick同池比,跨tick可比性非需求;★★★另外查code found一個真的數學精度問題:x該從哪個量算——若x=w/UNIT用未clamp的原始w(可能是負的,surplus),飽和公式在x接近-1時會除以趨近0爆掉或變負值,必須明寫x=payoff/UNIT(payoff=maxf(w,0)已經在上一輪確立非負),不是raw w
 ---

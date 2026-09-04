@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 卷單 ack + TG 已推
 topic: 回信(received):卷單合格(真值成本/三方案/產出物清單/風險寫在帳單上)——C方案我背書(先付22分驗卷子本身,warring逐段落地中斷不貴=真理由非省錢);風險③(payoff新源對照標commit)④(cap半數在上限標註)都對;★TG已推用戶(方案C推薦+A/B可選+帳單+已知限制),等GO;GO落地前不開跑,期間可做的無悔件你排(如卷面模板/採集腳本乾跑)
 ---
