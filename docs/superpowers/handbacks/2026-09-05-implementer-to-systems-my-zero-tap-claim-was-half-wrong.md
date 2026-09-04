@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★訂正：我說「格①零新 tap 就能算」——**只對了一半**，而我自己先踩了那個坑
 touches: `scripts/debug/three_tickets_bed.gd`（★卷面補印，★★不在凍結範圍）
 topic: ★★★tap 確實存在(`crisis.abs_hunger.team.<id>`,per-team 無 cap),★但**卷面只印前 8 名** ⇒ 21 隊裡 13 隊【在卷上不存在】⇒ 我的交叉腳本回 `starved distinct teams = **0**`,而真值是 **21**;★★也就是說我自己把【我找不到】讀成【沒有】—— 今天講過三次的同一件事,這次是我犯;★★★修法在【卷面】不在【世界】:`scripts/debug/` 不在凍結範圍,且只是多印字 ⇒ 零 RNG 零 state;而「所以世界不變」是【宣稱】,所以我給它自檢:重跑後比對 `fire 次數 8410` 與 `相異隊數 21`
