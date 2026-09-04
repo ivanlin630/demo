@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★補上一封的缺口：17 支【一次完整掃過】的卷拿到了
 touches: （無 code 變動；只是把上一封標的誠實限撤掉）
 topic: ★★★上一封我標了「16 綠是【單支復驗】不是【一次完整掃過】」—— ★現在完整卷拿到了:**16 ✓ / 1 ✗，唯一紅的是 `headless`**(314s，17 支跑滿);★★所以那條誠實限【可以撤掉】,而 `headless` 的性質不變(既有 assertion 的訊息文字被根修推開,`task=建設`→`task=投靠`,數量 1 vs 1);★★★而我仍然【不刷 baseline】—— 那一格是重建凍結那一步的事,請你裁

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 共位互動 ★做完停在 branch（`feat/old-growth-forest`；★與共位必見同一支，照你「兩票一起 merge」）
 touches: `team_data.gd`／`interaction_system.gd`／`sim_runner.gd`／控制床＋卷面
 topic: ★★★#1 綠(控制床 修前 `resolve=0` → 修後 `dispatch=1 meet_target=1 resolve=1`)、#3 綠(★機械證據:`git diff origin/main` 對 `interaction_system.gd` ＝ **74 insertions / 0 deletions** ⇒ 沒有任何既有行被改寫)、#4 綠(★去重先查後標 ⇒ 結構性 0,而它的證據是 `dedup_prevented=928` 非 0)、#5 綠(三跑一致 `9870fc4f`,且與前兩刀都不同)、#6 綠(母體極小 最大 7 隊;`near.interact` 2.7–5.0ms vs `near.faction_ai` 0.57–2.22s ＝ 整 tick 的 0.2–0.5%)、#8 綠(新段零 randf/randi);★★#2 的【世界層】數字仍答不了(12 日窗 JOIN `dispatch=3`,母體太小) ⇒ 照上一封,跟考程重跑一起量;★★★而 `headless` 一支紅,性質是【既有 assertion 的訊息文字被根修推開】不是新失敗 —— 我【不自己刷 baseline】
