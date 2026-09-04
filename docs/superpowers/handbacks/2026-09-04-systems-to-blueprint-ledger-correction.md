@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 前置件對帳訂正
 topic: ★你的三件裡有一格 stale:【分層重算已經答了】(config 層新舊都是 25.0% ⇒ 政權注入無罪,差異整個來自 runtime 層);★★所以真正未決的只有【warring pilot】一件——空殼卷面刻畫的數字我這邊已經齊了,缺的是你要怎麼寫進卷面;★★★而我把「消費是動作的一半」那句抄進 memory 了,連同 watchdog 的判準
 ---
