@@ -66,6 +66,7 @@ func _run() -> void:
 	_sec_cansettle()
 	_sec_ladder()
 	_sec_prepare()
+	_sec_optpool()
 	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
 	#   ★`completed` 【不是我判的】——這一行印在床的最後，★★所以【它存在】就等於跑完了；
 	#   ★★★若被砍／撞 timeout，這一行【不會出現】，而那正是 run-reliability 的答案。
@@ -344,7 +345,17 @@ func _sec_zhagen() -> void:
 func _sec_cansettle() -> void:
 	var m: int = int(Probe.counts.get("cansettle.mother", 0))
 	print("═══ ★拆 can_settle_here（六個子條件的 AND）═══")
-	print("  母體（同 #10：IDLE 且 committed==紮根）= %d" % m)
+	var zm: int = int(Probe.counts.get("zhagen.mother", 0))
+	# ★★★這一行的措辭 2026-09-04 訂正：它原本寫「同 #10」，而【那句話是錯的】。
+	#   ★兩個桶的條件文字一樣（IDLE 且 committed==紮根），但【記在不同的呼叫點】：
+	#     `cansettle.*` 記在 `DecisionContext.gather`，`zhagen.*` 記在 `rank_scored`
+	#   ⇒ ★★gather 的呼叫次數比 rank_scored 多 ⇒ ★★★兩個母體【天生就不相等】。
+	#   ★實測：同一份 90 日跑，cansettle 母體 22、zhagen 母體 4。
+	#   ⇒ 所以【這一節的百分比不能拿去讀紮根那一節】—— 兩節的分母是兩群。
+	#   ★★這正是「分母裡混了幾個世界」那一條；★★★而它先前是靠一句註解宣稱相同、沒有人印出來對帳。
+	print("  母體（IDLE 且 committed==紮根，記在 `gather`）= %d" % m)
+	print("  ★★★對帳：`zhagen.mother`（同條件但記在 `rank_scored`）= %d ⇒ 兩者%s" % [
+		zm, "相等" if zm == m else "【不相等，本節百分比不可拿去讀紮根那一節】"])
 	if m == 0:
 		print("  ★★★母體 0 ⇒ 這個窗沒有隊落進來（儀器沒跑到／母體塌陷），不是「子條件都成立」")
 		return
@@ -569,3 +580,30 @@ func _sec_interim(day: int) -> void:
 			int(Probe.counts.get("mseek.forage.applicable", 0)),
 			int(Probe.counts.get("mseek.forage.pop_block", 0)),
 			int(Probe.counts.get("mseek.forage.land_block", 0))])
+
+# ★★★全 option 勝負池（systems 2026-09-04：「把變動最大的三個 option 勝負列出來」）。
+#   ★這一節【不判斷】任何事 —— 它只把兩個量並排印出來，讓【兩份跑】可以逐行相減。
+#   ★★cand 與 win 都印：只印 win 分不出「它變常勝」與「它變常在場」，
+#      而兩份 config 對照時那兩件事的結論相反。
+#   ★★★母體同印；★沒有母體的比率不可比（今天已經咬過一次：4 vs 22 兩個母體都自稱同一群）。
+func _sec_optpool() -> void:
+	print("═══ ★全 option 勝負池（`optpool.*`；★兩份跑逐行相減用）═══")
+	var m: int = int(Probe.counts.get("optpool.mother", 0))
+	print("  母體 `optpool.mother`（rank_scored 呼叫次數）= %d" % m)
+	if m == 0:
+		print("  ★★★母體 0 ⇒ 這一節【答不了】，不是「沒有 option 贏過」")
+		return
+	var names: Dictionary = {}
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("optpool.cand."): names[ks.substr(13)] = true
+		elif ks.begins_with("optpool.win."): names[ks.substr(12)] = true
+	var arr: Array = names.keys()
+	arr.sort_custom(func(a, b): return int(Probe.counts.get("optpool.cand." + String(a), 0)) > int(Probe.counts.get("optpool.cand." + String(b), 0)))
+	print("  %-24s %8s %8s %8s" % ["option", "cand", "win", "win/cand"])
+	for n in arr:
+		var c: int = int(Probe.counts.get("optpool.cand." + String(n), 0))
+		var w: int = int(Probe.counts.get("optpool.win." + String(n), 0))
+		print("  %-24s %8d %8d %7.1f%%" % [String(n), c, w, (100.0 * float(w) / float(c)) if c > 0 else 0.0])
+	print("  ★誠實限：這一節【是這一刀才加的】⇒ 它沒有修前基準；")
+	print("     ★★所以它只能拿【同一版 code、兩份 config】互相比，不能拿去比任何舊跑。")

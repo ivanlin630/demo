@@ -69,6 +69,19 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 			and ctx.threat_react >= ctx.threat_threshold:
 		Probe.bump("flee.degrade.total")
 		Probe.bump("flee.degrade.top_" + (String(scored[0]["opt"]) if not scored.is_empty() else "NONE"))
+	# ★★★全 option 勝負池（systems 2026-09-04 問的「競爭池改變了多少」）。
+	#   ★先前【沒有任何】全域的 per-option 勝負計數 —— 只有 `zhagen.*` 那一組，
+	#     而那只答得了紮根一個 option ⇒ ★★「哪三個 option 變動最大」用既有的桶【答不出來】。
+	#   ★★★所以這裡記兩個量而不是一個：`cand`（進了候選幾次）與 `win`（贏了幾次）。
+	#     ★只記 win 會把「它變常勝」與「它變常在場」壓成同一個數字，
+	#     ★★而兩份 config 對照時那兩件事的意思相反：前者是【秤變了】，後者是【世界變了】。
+	#   ★★★母體同印（`optpool.mother` ＝ rank_scored 呼叫次數）—— 沒有母體的比率不可比。
+	if Probe.enabled:
+		Probe.bump("optpool.mother")
+		for _r4 in scored:
+			Probe.bump("optpool.cand." + String(_r4["opt"]))
+		if not scored.is_empty():
+			Probe.bump("optpool.win." + String(scored[0]["opt"]))
 	_beg_tap(ctx, scored, team, "begu.")   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
 	_prep_tap(ctx, scored, team)   # ★備戰 root-check（純觀測）
 	# ★★★【紮根】條件級 tap（systems 2026-09-03）：#10 量到 `not_in_ranked` 九成是紮根，
