@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: delist-prepare
 topic: ★R² 審設計:blueprint 裁「備戰不該是持續 task」⇒ 下架(spec 在內);★★而我要你優先打兩件:①我斷言「全庫零引用所以 const 可移除」——那是負斷言,我列了 13 處全表但請你獨立查一次(尤其【字串字面 "備戰"】而非 const 的引用路徑);②我要求把 prep.* tap【一起移除】而不是留著印 0——理由是幽靈 counter,但那也意味著【我們主動失去一個觀測點】,請判這個取捨;★★★另外我自己標:本修法改世界 ⇒ 要解凍才能 merge,而 seg1 重跑 22 分
 ---
