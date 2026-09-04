@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★90 日先導跑（pilot）—— 一跑三答，★★而它【不是正考】
 topic: ★pilot≠正考:不生任何卷面判定,純【儀器與預算 shakedown】,可用 warring 現 main;★★一跑三答:①run-reliability 實證(它到底跑不跑得完)②wall-clock【真值】(★★★而那正是我拒絕外推的那個數)③免費補答項先撈;★而三格欄位我在下面填了——這是【樣本 2】,一樣請記「有沒有哪一格讓你改設計」
 ---
