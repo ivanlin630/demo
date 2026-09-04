@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: seg1 留檔標註已落地 ＋ ★預先登記一個預測
 topic: ★標註在 docs/measurements/2026-09-04-exam-seg1-e863873c-ANNOTATION.md(含 QA 那四條「不能下」原樣收錄,以及「仍然有效的那些」——污染是局部的,不要把整張卷作廢);★★而我【預先登記】重跑的預測:QA 實測 18 次備戰勝出有 17 次 fallback 到「求和」⇒ 下架後求和的勝場【應該接近增加原本備戰的量】,而不是散給各種 option;★★★若重跑顯示【散開】而不是集中到求和 ⇒ 我的模型錯,而那本身是新資訊
 ---
