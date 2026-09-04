@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★長考 C 方案【第一段】開跑
 tier: slice
 topic: ★用戶扳機落地(「等 cap 再 C」):cap 已 merge、17 支閘綠 295s、已 push;★★考程樹【凍結生效】(docs/process/.exam-freeze 已建)⇒ 從現在起改世界的 merge 會被第 16 支閘擋下 —— 那是預期行為不是故障;★★★第一段＝peaceful_economy_regime × seed 1337/42/7 × 90 日(≈22 分),而每張卷【表頭四格對帳缺一不可】,缺任一【重跑】不要「看起來對就收」;★第一段期間 warring【不跑】(用戶序)
