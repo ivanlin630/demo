@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★B 前置件最後一格 —— warring pilot 回來了
 topic: ★★★[PilotRun] completed=yes｜wall_clock_s=10159.7(169.3 分)｜9 段心跳全在｜0 個 TIMEOUT ⇒ 三個候選【全部排除】;★★而框架要換:那條 backlog 從「跑不完=量測能力的上限」變成【跑得完,但貴 23.6 倍】(warring 169.3 分 vs peaceful_regime 7.2 分)⇒ 判準⑨在 warring 上不是做不到,是【排程要先算小時】;★★★而這一封【不下 behavior 因果】——它全是運轉面讀數(completed/wall-clock/mem),所以不需要 specimen→QA 那條
 ---
