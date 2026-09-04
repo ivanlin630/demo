@@ -147,7 +147,15 @@ _promise_bare_check() {
       path=$(printf '%s' "$_para" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z]+-to-[a-z]+-[a-z0-9-]+\.md' | head -1)
       [ -n "$path" ] && [ -f "$d/$path" ] && continue
       line="$_txt"
-      printf '%s' "$line" | grep -qE '(blueprint|systems|implementer|measurer|reviewer|qa)' && continue
+      # ★★★「同時送/一併送/也寄 X」型:有角色名【也不放行】(2026-09-04 血證,blueprint 指出)
+      #   ★上面那道(_promise_check)查的是「今天有沒有寄信給該角色」,而我今天寄了幾十封 ⇒ 一定通過
+      #   ⇒ ★★而這型承諾的兌現物是【那一封特定的信存在】,不是「有寄過信給他」
+      #   ⇒ ★★★所以這型【必須】在同段落附票路徑,才算兌現
+      if printf '%s' "$line" | grep -qE '(同時|一併|另外|順便|也)[^。]{0,6}(送|寄|發)'; then
+        :   # 落到下面的段落路徑檢查,不因角色名而放行
+      else
+        printf '%s' "$line" | grep -qE '(blueprint|systems|implementer|measurer|reviewer|qa)' && continue
+      fi
       echo "  ⚠ $(basename "$f"): 裸承諾「$(printf '%s' "$line" | cut -c1-40)…」——同一行沒有【存在的】票路徑"
       miss=$((miss+1))
     done < <(awk '
@@ -161,13 +169,20 @@ _promise_bare_check() {
       #   ★★同一行只是那個要求的代理特徵,而它讓閘每回合對同幾封已寄出的信重複告警
       #   ⇒ ★★★雜訊會讓人開始忽略警告 —— 那比漏抓更貴(2026-09-04,被自己的閘教會)
       { para[NR] = $0 }
-      /(已請|已派|已寄|已轉)/ {
+      # ★★★2026-09-04:「同時送 X／一併寄 X」也是承諾,而它【沒有「已」字】⇒ 舊偵測層掃不到
+      /(已請|已派|已寄|已轉)|((同時|一併|另外|順便)[^。]*(送|寄|發))/ {
         line = $0
         gsub(/[「『](已請|已派|已寄|已轉)/, "", line)   # ★開引號緊貼動詞 = 引述,剝掉
-        if (line ~ /(已請|已派|已寄|已轉)/) print NR":"$0
+        if (line ~ /(已請|已派|已寄|已轉)|((同時|一併|另外|順便)[^。]*(送|寄|發))/) print NR":"$0
       }
     ' "$f")
   done
+  # ★★★已宣告的盲區(2026-09-04,第八輪後【停止調校】):
+  #   ①code fence 內的承諾【抓不到】—— fence 排除是為了不誤報「示範 pattern」的行,
+  #     而我的信大量用 fence 當強調區塊 ⇒ ★寫在 fence 裡的「同時送 X」逃得掉(血證:conflict-dissolves 那封)
+  #   ②先組成變數再 print／先寫成別的字再寄 —— 同理抓不到
+  #   ⇒ ★★停止調校的理由:第八輪了,而每一輪的邊際收益在掉、假陽性風險在升
+  #      ⇒ ★★★盲區【明寫】比【再修一輪】誠實:它讓讀的人知道這支閘保證了什麼、沒保證什麼
   # ★偵測器的證據力是單向的:checked=0 時不得讀成「全部合格」,直接 return 不印綠
   [ "$checked" -eq 0 ] && return 0
   [ "$miss" -gt 0 ] && echo "  ⇒ ★★寫「已派」同一句必須附票的 exact path,否則改寫成「將派」(⏳在飛 vs 🅿️未派下一步動作相反)"
