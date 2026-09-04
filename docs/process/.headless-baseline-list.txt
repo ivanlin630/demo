@@ -8,12 +8,16 @@
 #      ⇒ 已立 known_issues 條目；★在判完之前它們留在這裡是為了【擋住新的紅】，不是承認它們合理。
 # ★★★2026-09-03 正規化：訊息本體裡的【數字一律換成 N】（血證 `vault_ore=35` vs `36` 造假紅）。
 #   ★保留【出現次數】前綴（它變了是真訊號）；★★而「3 隊失敗 vs 5 隊失敗」這種【藏在訊息裡的數量變化】本閘看不見。
-1 SCRIPT ERROR: Assertion failed: FORCE(��rung)��ambient_train_drive N.N
-1 SCRIPT ERROR: Assertion failed: [gNa] �q����ű��: mint_level=N coin_delta=N vault_ore=N | �I�u��=N �l�u��=N �ؼ�={ "action": "upgrade_facility", "facility": "mint", "start_pop": N } �}�utick=N | ����=N �u��=N task=�س] | �]�I={ "outpost_L": N, "farming": N, "workshop": N, "apothecary": N, "mint": N, "stable": N, "smeltery": N, "weaponsmith": N, "armorsmith": N }
-1 SCRIPT ERROR: Assertion failed: [pNa] join weight �ӧC N.N
-1 SCRIPT ERROR: Assertion failed: fixture B�Gslot ���ϤɯŶR�o�_ upgrade ��Ĺ�L demolish�]������ �P���A�ө���٭n�h�L ��N.N �@���^�A���={ "facility": "farming" }
-1 SCRIPT ERROR: Assertion failed: rung �X�i+�Z�O �����X�i intent, got={ "type": "����", "target_id": -N, "why": "�V��/�¯��X�ʡA�ƾԦu�g" }
-1 SCRIPT ERROR: Assertion failed: ����=N.N
-1 SCRIPT ERROR: Assertion failed: �԰���(combat_target��-N) �� N �� �� �� resolve
-4 [FAIL] TeamN task=�س] order=-N
-2 [FAIL] �z�ؼХ��[�J���� goal
+# ★★★2026-09-04 重錄：`tools/godot.ps1` 修好 UTF-8 輸出（先前 CP950 轉碼在出口被還原）
+#   ⇒ ★舊 baseline 的中文是【亂碼位元組】，而現在輸出是正確 UTF-8 ⇒ 逐行比對必紅
+#   ★★而【內容沒有變】：同 9 條、同計數（ASCII 骨架＋計數逐條比對確認）
+#   ⇒ ★★★這是【修好一個編碼 bug 讓所有以壞編碼記錄的基準線失效】—— 根修讓舊紀錄過期的一個實例
+1 SCRIPT ERROR: Assertion failed: FORCE(任rung)→ambient_train_drive N.N
+1 SCRIPT ERROR: Assertion failed: [gNa] 礦村未鑄幣: mint_level=N coin_delta=N vault_ore=N | 施工隊=N 餘工期=N 目標={ "action": "upgrade_facility", "facility": "mint", "start_pop": N } 開工tick=N | 隊料=N 工具=N task=建設 | 設施={ "outpost_L": N, "farming": N, "workshop": N, "apothecary": N, "mint": N, "stable": N, "smeltery": N, "weaponsmith": N, "armorsmith": N }
+1 SCRIPT ERROR: Assertion failed: [pNa] join weight 太低 N.N
+1 SCRIPT ERROR: Assertion failed: fixture B：slot 滿＋升級買得起 upgrade 該贏過 demolish（不打折 同分，而拆建還要多過 ×N.N 一關），實際={ "facility": "farming" }
+1 SCRIPT ERROR: Assertion failed: rung 擴張+武力 未選擴張 intent, got={ "type": "防衛", "target_id": -N, "why": "慎重/威脅驅動，備戰守土" }
+1 SCRIPT ERROR: Assertion failed: 戰鬥中(combat_target≠-N) → N 擋 → 不 resolve
+1 SCRIPT ERROR: Assertion failed: 紮營=N.N
+4 [FAIL] TeamN task=建設 order=-N
+2 [FAIL] 弱目標未加入攻擊 goal

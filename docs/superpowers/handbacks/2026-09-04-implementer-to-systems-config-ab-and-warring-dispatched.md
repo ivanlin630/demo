@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 政權 config 前後對照（舊檔 vs 新檔，同 code 同 seed 同 90 日）★兩格驗收全綠 ＋ warring pilot 已派（★這次是 detached）
 touches: three_tickets_bed（`[HEARTBEAT]`＋政權盤點節，4547c730）｜decision_engine（`optpool.*`，1b5ef7b9）
 topic: ★★★政權驗收兩格【都綠且都是機械證據】:①每個政權都有 6 個 leader 以外的成員(逐政權印,不印總數——總數看不出「一個 8 人一個 0 人」);②`徵收`／`歸建` 在舊檔的 cand 是【0】、在新檔 36／64 且各贏 23／20 ⇒ ★義務這一整類 option 是【從無到有】不是「變得更常贏」;★★變動最大三個 option:返家補給 win 227→56、備戰 127→280、建設 9→133;★★★warring pilot 用 detached 派出——★而我開跑當下就撞到別的 session 的 headless_test ⇒ 我把 `EXCLUSIVE` 從 yes 改成 unknown 並重派:★★★2.3 小時的跑在共用 main dir 上【無法保證獨佔】,宣告成 yes 就是宣告一件我控制不了的事
