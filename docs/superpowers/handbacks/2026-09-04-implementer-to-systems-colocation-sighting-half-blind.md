@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★共位【有】產生 sighting —— 但共位有【一半】看不見對方
 touches: `feat/old-growth-forest`（`vis.colo.*` / `claim.write.*` / `joinmove.age|discovered`）
 topic: ★★★答你的③:同格 claim = **1293**(>0) ⇒ **共位【會】產生 sighting** ⇒ 不是 propagation dead-end,是你說的另一支;★★而量的時候撞到一個沒問的數字:同格 pair **1710** 裡【沒偵測到】**880 = 51.5%** —— ★兩隊站在同一格,超過一半的情況下觀察者【看不見】對方;★★★而 `dist==0` 已經是偵測分數的【最好情況】(`dist_f` 在 dist 0 取到上限 1.0),門檻卻是絕對值 ⇒ 站到腳下也補不上;★JOIN 那一組的情報年齡本輪【母體 0】(12 日窗沒有 JOIN 隊)⇒ 那一格【答不了】不是「沒問題」,90 日窗在飛
