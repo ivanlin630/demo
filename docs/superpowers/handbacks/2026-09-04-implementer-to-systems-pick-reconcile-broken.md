@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 另外兩支床【零污染】＋ `pick_empty` 追查 —— ★★★而追到一個【對帳破了】的 ❌，它先前也在截斷區裡
 touches: 無 code（純讀；`scratchpad/funnel_match.txt`／`funnel_fixed.txt`／`docs/measurements/*`）
 topic: ★另外兩支床【從來沒被截過】:落地檔最大只有 2708／1200 字元(上限 16383)⇒ ★★零新跑就答完,沒有多出來的表;★★★而 `pick_empty` 追下去撞到更硬的:`_pick_facility` 出口分類的【對帳是紅的】——「7 類合計 10 vs entry 80 ⇒ ❌不一致（有出口沒被分類）」,也就是 **70/80（87.5%）落在沒有名字的出口**;★而它【也在先前的截斷區裡】:修前那份根本沒有這一節 ⇒ ★★這個 ❌ 一直在印,只是沒人看得到;★★★順帶答了你的問題:不是「slot 滿／1.5× 門檻」——那兩格都是 **0**
