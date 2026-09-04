@@ -67,6 +67,7 @@ func _run() -> void:
 	_sec_ladder()
 	_sec_donorladder()
 	_sec_zerowin()
+	_sec_goalutil()
 	_sec_prepare()
 	_sec_optpool()
 	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
@@ -701,3 +702,34 @@ func _sec_zerowin() -> void:
 		print("     %-30s tick=%s team=%s 贏家=%s｜前5: %s｜本身: %s" % [
 			o3, str(r.get("tick", -1)), str(r.get("team", -1)), str(r.get("winner", "")),
 			"  ".join(PackedStringArray(top)), mine])
+
+# ★★★goal candidate payoff 的上限探針（systems 2026-09-04 核可）。
+#   ★它回答的是【那幾個 exact-tie 是不是 clamp 造成的】——
+#     ★★而那兩個可能性在【只印 post 值】時長得一模一樣。
+#   ★★★判讀先寫死（systems 的三列），不等數字出來再訂。
+func _sec_goalutil() -> void:
+	# ★★★這一節換過一次儀器，而【換掉的理由要留著】：
+	#   ★第一版掛在 `goal_resolver.gd:285`／`:372` 兩個 `clampf` 上 ⇒ 母體只有 64，
+	#     而那七個 option 光 30 日就各出現 46 次 ⇒ ★★儀器根本沒蓋到產它們的那條路。
+	#   ★★★所以第一版的 `clamped=0` 【不是證據】—— 它是「沒量到」。舊探針已移除，
+	#     ★不留兩把覆蓋率不同的尺並排印（那會讓人挑一把來讀）。
+	_gu2()
+func _gu2() -> void:
+	var m: int = int(Probe.counts.get("gu2.mother", 0))
+	print("  ── ★覆蓋率訂正版 `gu2.*`（掛在 `_candidate_util` 單一收斂點）──")
+	print("     母體 = %d｜clamped = %d｜unclamped = %d" % [
+		m, int(Probe.counts.get("gu2.clamped", 0)), int(Probe.counts.get("gu2.unclamped", 0))])
+	if m == 0:
+		print("     ★★★母體 0 ⇒ 這一節答不了")
+		return
+	print("     均 payoff = %.4f" % (Probe.amount("gu2.payoff_sum") / float(m)))
+	for pfx in ["gu2.payoff_val.", "gu2.devcoef_val.", "gu2.discount_val."]:
+		var rows: Array = []
+		for k in Probe.counts.keys():
+			var ks: String = String(k)
+			if ks.begins_with(pfx): rows.append([ks.substr(pfx.length()), int(Probe.counts[k])])
+		rows.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+		var parts: Array = []
+		for i in range(mini(8, rows.size())):
+			parts.append("%s×%d" % [String(rows[i][0]), int(rows[i][1])])
+		print("     %-22s %s（相異值 %d 個）" % [pfx.substr(4), "｜".join(PackedStringArray(parts)), rows.size()])

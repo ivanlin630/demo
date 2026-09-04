@@ -924,4 +924,21 @@ static func _candidate_util(payoff: float, ctx: DecisionContext, delay_days: flo
 	# ★S6 折現:discount=1/(1+rate×delay)（delay=0→1 近/即時不折;delay 大+絕境 rate 高→趨零不走遠路）。遞減有界。
 	var discount: float = 1.0 / (1.0 + _discount_rate(ctx) * maxf(delay_days, 0.0))
 	# clamp 上界 GOAL_UTIL_CAP < SURVIVAL_BOOST_MAX：硬保證 < 絕境 survival-boosted static util（折現只讓 util 更小=護欄更穩）。
-	return clampf(payoff * dev_coeff * discount, 0.0, GOAL_UTIL_CAP)
+	# ★★★覆蓋率訂正（2026-09-04）：我第一版把探針掛在 `goal_resolver.gd:285`／`:372` 兩個 clampf 上，
+	#   ⇒ ★母體只有 64，而那七個 option 光在 30 日就各出現 46 次 —— ★★儀器根本沒蓋到產它們的那條路
+	#     （`:resource` 走的是 `_mk_candidate` → 這裡）。
+	#   ⇒ ★★★所以改掛在【這個單一收斂點】：五個 `"util":` 站有四個經過它。
+	#   ★同時記 payoff 的【值分布】——★★平手的來源若是「幾個 goal 共用同一個死常數」，
+	#     那只有值分布看得出來，clamped 計數看不出來（它會是 0 而讓人以為沒事）。
+	var _final: float = clampf(payoff * dev_coeff * discount, 0.0, GOAL_UTIL_CAP)
+	if Probe.enabled:
+		Probe.bump("gu2.mother")
+		Probe.add_amount("gu2.payoff_sum", payoff)
+		Probe.bump("gu2.payoff_val.%.2f" % payoff)          # ★死常數會在這裡現形（key 有界：payoff 來自 registry）
+		Probe.bump("gu2.devcoef_val.%.2f" % dev_coeff)
+		Probe.bump("gu2.discount_val.%.2f" % discount)
+		if payoff * dev_coeff * discount > GOAL_UTIL_CAP:
+			Probe.bump("gu2.clamped")
+		else:
+			Probe.bump("gu2.unclamped")
+	return _final
