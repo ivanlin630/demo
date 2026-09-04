@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payoff-derive-bridge（★定案形狀，請最後一輪 R²）
 topic: ★預測成立:w=(target−stock)×BASE_PRICE 在每個有值的 goal 上都會變(maintain_weapons:v 573 筆釘死 1.0000 而 w 相異值 12、range 34–408)⇒ 設計復活;★★三個 build 的 w 值域各不相同([16,140]/[9,54]/[12,72])⇒ 換上 w 會拆掉那組 exact-tie;★★★spec §7 定案(含負值語意 maxf(w,0) 與 blueprint 裁的條件式 tie-break),而我要你打的是【maxf 那一刀】與【tie-break 選成本低者】這兩個我自己加的語意
 ---
