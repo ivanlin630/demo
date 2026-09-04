@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ①空殼答案＝runtime ②payoff 橋接被前置量測擋下
 topic: ★①答案是【runtime 產生】(6 支裡 5 支根本不在 config 裡)⇒ 照你的分法走【世界行為/考卷刻畫】那條;★★而順帶撈到更大的:新 config runtime 新生隊 20 支 vs 舊 7 支 ⇒ 對照組 30 vs 18 就是這麼來的 ⇒ 我報的 16.7% vs 33.3% 【從頭就混了兩種隊】,已請按出生來源分層重算(路徑:docs/superpowers/handbacks/2026-09-04-systems-to-implementer-saturation-and-stratify.md);★★★②payoff 橋接【擋下,不派實作】:量綱那格過了,但導出值是【常數不是分布】⇒ 換上去 tie 還在
 ---
