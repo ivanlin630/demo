@@ -13,6 +13,7 @@ extends SceneTree
 
 var _exclusive: String = "unknown"
 var _t_start_ms: int = 0
+var _hb_teams: int = 0            # ★心跳行用（在日迴圈裡更新；★★`_sec_interim` 拿不到 state）
 var _spec_born: Array = []        # ★創世名冊（用來分辨 runtime-born）
 var _spec_rt_cap: int = 0         # ★★runtime-born 最多補幾隊進 specimen（env SPECIMEN_RUNTIME_N）
 var _spec_rt_added: Array = []    # ★★★實際補進去的（卷面要印，不能只說「有補」）
@@ -85,6 +86,7 @@ func _run() -> void:
 				state.specimen_team_ids.append(int(_ti2))
 				_spec_rt_added.append(int(_ti2))
 		if (d + 1) % 10 == 0:
+			_hb_teams = state.teams.size()
 			_sec_interim(d + 1)
 
 	_sec_10()
@@ -135,6 +137,7 @@ func _run() -> void:
 	#   ★不是印「有補 runtime」——★★是印【補了誰、它們是什麼結局】，否則「有覆蓋」只是一句宣告。
 	_sec_delist_prepare(state)
 	_sec_specimen_coverage(state)
+	_sec_factions(state)
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -610,6 +613,15 @@ func _sec_churn() -> void:
 
 # ★中途小結（每 10 日一次）：★★只印【被砍就會全損】的那幾格，不重印每日 [CP] 已有的
 func _sec_interim(day: int) -> void:
+	# ★★★心跳行（systems warring 票）：三個互相獨立的量各指向一個嫌疑 ——
+	#   ①wall-clock 秒數（有計時器則三次死在同一秒數附近，而它在工具鏈裡不在引擎裡）
+	#   ②靜態記憶體（單調爬升到某值就死，也解釋得通死在不同天數）③隊數（每 tick 成本的驅動量）
+	#   ★★三個都印才分得出來 —— 只印 wall-clock 的話，「不是計時器」之後就沒有下一步。
+	#   ★★★實績：warring 90 日靠它把三個結構性候選全部排除，且 day 40 的記憶體外推（≈254 MB）
+	#     與 day 90 實測（254.8 MB）對上。
+	print("[HEARTBEAT day=%d] wall_s=%.1f mem_static_mb=%.1f teams=%d ｜ ★驗屍用：三個量指向三個不同兇手" % [
+		day, float(Time.get_ticks_msec() - _t_start_ms) / 1000.0,
+		float(OS.get_static_memory_usage()) / 1048576.0, _hb_teams])
 	var zm: int = int(Probe.counts.get("zhagen.mother", 0))
 	var zw: int = int(Probe.counts.get("zhagen.appl_won", 0))
 	var zl: int = int(Probe.counts.get("zhagen.appl_lost", 0))
@@ -1093,3 +1105,30 @@ func _sec_delist_prepare(state: WorldState) -> void:
 	print("  ★#1 `optpool.cand.備戰` = %d ／ 母體 `optpool.mother` = %d %s" % [
 		inpool, int(Probe.counts.get("optpool.mother", 0)),
 		("✅ 不在池裡（而母體 > 0 ⇒ 表沒壞）" if inpool == 0 else "❌ 仍在池裡")])
+
+# ★★★政權成員盤點（systems pilot 票的驗收第一格：「每個政權有 leader 以外的成員」）。
+#   ★這一節【只讀世界末狀態】—— 不是 Probe 桶，所以它答的是「跑完的當下」不是「整段期間」。
+#     ⇒ ★★那個差別要寫出來：政權中途空過而末狀態不空，這一節【看不見】。
+#   ★★★逐個政權印，不印總數：★「2 個政權、共 8 個成員」與「一個 8 人、一個 0 人」
+#     在總數上長得一模一樣，而後者正是這一格要抓的失敗（空政權 ⇒ 母體仍 0）。
+func _sec_factions(state: WorldState) -> void:
+	print("═══ ★政權盤點（★末狀態，非期間累計）═══")
+	var n: int = state.factions.size()
+	print("  `state.factions.size()` = %d" % n)
+	if n == 0:
+		print("  ★★★0 個政權 ⇒ 這一格【紅】：config 寫了政權而世界裡沒有")
+		return
+	var empty_cnt: int = 0
+	for fid in state.factions.keys():
+		var f = state.factions[fid]
+		var members: Array = f.member_team_ids
+		var others: Array = []
+		for tid in members:
+			if int(tid) != int(f.leader_team_id): others.append(int(tid))
+		if others.is_empty(): empty_cnt += 1
+		print("  faction %s：leader=%d｜成員數=%d｜★leader 以外=%d %s" % [
+			str(fid), int(f.leader_team_id), members.size(), others.size(),
+			("← ★★★空政權" if others.is_empty() else str(others))])
+	print("  ★驗收：空政權（只有 leader）= %d / %d %s" % [
+		empty_cnt, n, ("⇒ ★綠" if empty_cnt == 0 else "⇒ ★★★紅（空政權 ⇒ 義務的母體仍是 0）")])
+	print("  ★★誠實限：末狀態一張快照 —— ★★★它答不了「中途有沒有空過」，也答不了「成員有沒有換過」")
