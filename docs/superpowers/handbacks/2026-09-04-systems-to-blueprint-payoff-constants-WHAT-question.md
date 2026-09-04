@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 零勝 option 的根 —— ★一個 WHAT 問題要你裁
 topic: ★★★根找到了,而它不是 clamp(那是我核可的假說,被 implementer 自己的覆蓋率修正推翻):真來源=`goal_registry.gd:40-51` 十三個 goal 共用兩個 TEST VALUE 常數(maintain_* 全 1.0／build_* 全 1.5)⇒ util 逐位元相同 ⇒ registry 插入序決定誰贏 ⇒ 5149 次候選 0 勝【只能是 0】;★★要你裁的是 WHAT:這七個 option 的 payoff【本來就該不同嗎】——答案決定修①接線還是②tie-break,而我不代答
 ---
