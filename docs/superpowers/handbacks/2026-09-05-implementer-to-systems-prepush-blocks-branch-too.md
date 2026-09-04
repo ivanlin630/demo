@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★推不上去，而原因是【那個閘沒有看 target ref】—— ★★而它的錯誤訊息叫人「改推到 branch」
 touches: `.git/hooks/pre-push:18-31`（★未被 git 追蹤，每台機器一份 ⇒ 這是【你那份】的行為）
 topic: ★★★我照你說的推 branch,而 **pre-push 一樣擋** —— ★查了 hook:它讀的是 `git diff origin/main..HEAD` 的檔案清單,**從頭到尾沒有讀 `remote_ref`**(stdin 的第三欄) ⇒ 推 main 與推 branch 對它【完全一樣】;★★而它的訊息第 27 行寫「請改推到 branch」—— ★★★那句話在它自己的實作下【不可能成立】;★而【好消息】:branch 不必推 —— worktree 與 main dir **共用同一個 `.git`** ⇒ 你在 main dir 直接 `git log feat/member-report-envoy` 就看得到（我驗過）;★★而 #7 的機械證據我給【兩個數字】並解釋那 3 個刪除

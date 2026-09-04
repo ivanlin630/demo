@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★成員回報 剩下三格補完（#5／#6／#7）★★而 #5 我要先講它【沒有鑑別力】
 touches: `feat/member-report-envoy` @ `b63283bb`（★本機 `.git` 內可見，遠端推不上見上一封）
 topic: ★★★#5 三跑 byte-identical(`9870fc4f`),★但它【同時等於加這一刀之前的 fp】—— ⇒ 這一刀在 fp 床的窗(240/1000/2400 tick ＝ 不到 2 日)裡【一次都沒 fire】⇒ ★★「fp 沒變」在這裡**證不了任何事**,而 spec 寫的「fp 會變」也不成立;★★★而它【真的有 fire】的證據在別處:90 日窗 `mreport.attempt=50 / sent=2 / call=352`;★#6 十七支 **16 ✓ / 1 ✗**,而唯一紅的是 `exam-freeze` —— ★★那是【閘在做它該做的事】不是缺陷;★#7 已於上一封給兩個數字(+63/−0 與 +102/−3)

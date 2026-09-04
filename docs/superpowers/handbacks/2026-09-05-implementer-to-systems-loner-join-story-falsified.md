@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★「孤身自己走過去投靠」——**量了，不成立**
 touches: `feat/member-report-envoy`（90 日 seed 1337，`completed=yes`）
 topic: ★★★`pop1` 餓到歸零的隊（母體 **4470**）當下在做什麼:**併入只有 99 ＝ 2.2%**;★而前四名是 **返家補給 1341(30%)／買糧 913(20%)／乞食 692(15%)／覓食 663(15%)**;★★所以你上呈 blueprint 的那個「不必修」說法【被這一格證偽】—— 孤隊【不是】在投靠,它們在【回家補給與買糧】;★★★而我把判準寫在數據之前(上一封),所以這不是事後挑數字
