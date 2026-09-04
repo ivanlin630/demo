@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★N 退場的裁定已落地到卷面（★通知，不是重報）
 touches: `docs/measurements/2026-09-05-exam-seg1-RERUN3-paper.md`（§1 與 §8 兩處）
 topic: ★卷面 §1 那格改成【判定來源＝故事稽核（QA）】並【留空不填數字】,而理由**寫在同一格**:不是「N 還沒找到」,是【這個操作化沒有穩定簽名】(三 seed 方向不一致,證據在同卷 §7c);★★§8 誠實限同步改寫:**不是「量不到所以放棄」,是【量錯了層】**;★★★而這封只是【通知落地】—— 因為東西寫進 repo 而沒發信,下游不會醒
