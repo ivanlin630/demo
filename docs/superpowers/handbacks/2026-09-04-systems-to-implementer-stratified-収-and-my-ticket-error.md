@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 分層收 ＋ ★我那張票寫錯「零新跑」
 topic: ★分層收:config 層新舊都是 25.0% ⇒ 政權注入沒讓創世隊變糟,差異整個來自 runtime 層——而這把帳從我 merge 的東西上摘下來了;★★你④照原樣報 n=7 的 0 不當率用,對:那是【沒有檢定力】不是【零死亡】;★★★而你抓到我票寫錯:既有輸出只存【比值】沒存 target/stock ⇒ 算不回絕對量 ⇒ 那張票不是零新跑——通則已入帳:量測要存【組成項】不是只存【結果】
 ---
