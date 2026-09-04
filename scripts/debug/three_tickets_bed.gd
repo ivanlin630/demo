@@ -12,6 +12,7 @@ extends SceneTree
 # ★而第一問是【贏家贏得對不對】，不是【怎麼讓輸家贏】⇒ 本床只 dump，禁 crank。
 
 var _exclusive: String = "unknown"
+var _t_start_ms: int = 0
 
 func _initialize() -> void:
 	_run(); quit()
@@ -22,6 +23,7 @@ func _run() -> void:
 	var sd: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
 	# ★等價證明用（預設關）：CAMP_SHADOW=1 才開，★開了每次 own_camp 查詢都會多掃一次全圖
 	OwnerCampIndex.shadow = OS.get_environment("CAMP_SHADOW") == "1"
+	_t_start_ms = Time.get_ticks_msec()
 	# ★#15 perf 那半：`PHASE_TIMING=1` 才開（★★時間類 ⇒ 必須獨佔機器跑，今天剛立的規則）
 	SimRunner.phase_timing = OS.get_environment("PHASE_TIMING") == "1"
 	# ★★★獨佔與否【由跑的人明示】：沒傳就是 unknown（★不自動偵測升級成 yes——自動偵測只能反駁）
@@ -57,6 +59,30 @@ func _run() -> void:
 	_sec_cansettle()
 	_sec_ladder()
 	_sec_prepare()
+	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
+	#   ★`completed` 【不是我判的】——這一行印在床的最後，★★所以【它存在】就等於跑完了；
+	#   ★★★若被砍／撞 timeout，這一行【不會出現】，而那正是 run-reliability 的答案。
+	#   ★而 wall_clock 從【床內】量（不是外部 shell 計時）：外部計時對一個被砍的跑【也會給出一個數】，
+	#     ★★而那個數會被誤讀成「它跑了這麼久就完成了」。
+	# ★★★#18 免費補答（pilot 順手撈）：★問的是【團滅到剩 1 人】這個【轉變】，
+	#   ★★不是「現在 pop==1」——後者一直都有，拿它回答會恆為「有」。
+	var _solo: int = int(Probe.counts.get("solo_survivor.transition", 0))
+	var _solo_teams: int = 0
+	for _k5 in Probe.counts.keys():
+		if String(_k5).begins_with("solo_survivor.team."): _solo_teams += 1
+	print("═══ ★#18 `solo_survivor.transition`（團滅到剩 1 人）═══")
+	print("  轉變次數 = %d｜相異隊 = %d" % [_solo, _solo_teams])
+	if _solo == 0:
+		print("  ★★★母體 0 ⇒ 這個窗裡【沒有隊走到那一步】——★不是「症狀已消失」")
+	else:
+		var _ss: Array = Probe.samples.get("solo_survivor.sample", [])
+		for _i6 in range(mini(5, _ss.size())):
+			var _e6: Dictionary = _ss[_i6]
+			print("     tick=%s team=%s prev_pop=%s 當下 task=%s intent=%s" % [
+				str(_e6.get("tick", -1)), str(_e6.get("team", -1)), str(_e6.get("prev_pop", -1)),
+				String(_e6.get("task", "?")), String(_e6.get("intent", "?"))])
+	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
+		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
 	print("★誠實限：①單 config／單 seed／%d 日 ②★純觀測（fp 不該變；變了＝我動到行為）" % days)
 	print("  ★★③三票【同一份跑】⇒ 彼此可比；★★★但與修前的舊值比時，那些舊值是【不同跑】的，")
 	print("     而中間隔了換尺 —— 所以「修前 vs 修後」看的是【方向與量級】，不是逐位元對照。")

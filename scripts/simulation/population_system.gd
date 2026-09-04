@@ -3,6 +3,15 @@ class_name PopulationSystem
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const OVERFLOW_CHECK_INTERVAL: int = WorldState.TICKS_PER_DAY   # 每天檢查
 const MATURE_RATE: float = 0.1   # TEST VALUE — 每月 minor 轉成人比例（簡版，無性別/個體年齡）
+# ★#18 用：每隊【前一日】人口（★純觀測，只在 Probe.enabled 內讀寫）
+static var _pop_last: Dictionary = {}
+
+# ★跨 run 清除（CrossRunReset 單一呼叫點）
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _pop_last.is_empty(): cleared["PopulationSystem._pop_last"] = _pop_last.size()
+	_pop_last.clear()
+	return {"checked": 1, "cleared": cleared}
 
 func check_overflow(state: WorldState) -> void:
 	# minor 長大簡版：每月 10% minor → 平民 anon（人口循環下游，性別/年齡留人口結構 spec）
@@ -44,6 +53,22 @@ func check_overflow(state: WorldState) -> void:
 				else:
 					Probe.bump("mseek.forage.outcome.neither")
 			FactionAISystem._forage_watch.erase(_wid2)
+	# ★★★#18 免費補答（systems 2026-09-04 pilot）：★問的是【團滅到剩 1 人】＝一個【轉變】，
+	#   ★★不是「現在 pop==1」—— 後者一直都有（今天 team 52 就是），拿它回答會恆為「有」。
+	#   ⇒ 記【前一日 pop > 1 而今日 pop == 1】的那一刻，並存隊 id 供 specimen 回查。
+	if Probe.enabled:
+		for tid3 in state.teams:
+			var t4: TeamData = state.teams[tid3]
+			var _prev: int = int(_pop_last.get(tid3, -1))
+			if _prev > 1 and t4.population == 1:
+				Probe.bump("solo_survivor.transition")
+				Probe.bump("solo_survivor.team.%d" % tid3)
+				Probe.bump_sample("solo_survivor.sample", {
+					"tick": state.world.current_tick, "team": tid3,
+					"prev_pop": _prev, "task": t4.current_task,
+					"intent": str(t4.solo_intent),   # ★Dictionary ⇒ 原樣存（★不預先詮釋成一個字串標籤）
+				}, 100)
+			_pop_last[tid3] = t4.population
 	for tid in state.teams.keys():
 		check_overflow_for_team(state, tid)
 
