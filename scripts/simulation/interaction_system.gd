@@ -239,6 +239,13 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		Probe.bump("beg.dispatch")
 	if a.current_task == TeamData.TASK_JOIN or b.current_task == TeamData.TASK_JOIN:
 		Probe.bump("join.dispatch")
+		# ★★★判別量（systems join-step2 2026-09-04）：`join.dispatch` 在【任一方是 JOIN 隊】時就 bump，
+		#   ★【不要求對方是它的 social_target】⇒ 它數的是「JOIN 隊遇到【任何人】」。
+		#   ⇒ ★★而我們要判的是「有沒有遇到【它的目標】」⇒ 這裡把它切成兩格：
+		#     `meet_target`（相遇且對方 == social_target）／`meet_other`（相遇但不是目標）
+		#   ⇒ ★★★兩格【互斥且窮盡】：`meet_target + meet_other == dispatch`（可對帳）
+		Probe.bump("join.meet_target" if ((a.current_task == TeamData.TASK_JOIN and a.social_target == id_b)
+			or (b.current_task == TeamData.TASK_JOIN and b.social_target == id_a)) else "join.meet_other")
 	# attack→combat 漏斗探針（純觀測）：攻擊姿態隊到達同格 = 接觸事件。
 	# reached = 到達可開打（combat_target==-1，下方 276 branch 會 start_combat）；
 	# blocked_ct = 到達但 combat_target 已設 → 197 早退擋掉開打（路徑 B 凍死副作用）。

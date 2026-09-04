@@ -13,6 +13,7 @@ extends SceneTree
 
 var _exclusive: String = "unknown"
 var _t_start_ms: int = 0
+var _join_prev: Dictionary = {}   # ★JOIN 隊上一日的距離（★★逐日比較用，不是 god-view）
 var _hb_teams: int = 0            # ★心跳行用（在日迴圈裡更新；★★`_sec_interim` 拿不到 state）
 var _spec_born: Array = []        # ★創世名冊（用來分辨 runtime-born）
 var _spec_rt_cap: int = 0         # ★★runtime-born 最多補幾隊進 specimen（env SPECIMEN_RUNTIME_N）
@@ -85,6 +86,23 @@ func _run() -> void:
 					break
 				state.specimen_team_ids.append(int(_ti2))
 				_spec_rt_added.append(int(_ti2))
+		# ★★★JOIN 移動層（systems join-step2 ③）：★每日看 JOIN 隊與【它自己的 move_target】的距離。
+		#   ★用 `move_target`（隊自己的目的地）而不是目標隊的真實位置 —— ★★後者是 god-view，
+		#   ★★★而這裡要答的是「它有沒有在往自己認定的方向前進」，那正是 move_target 的語意。
+		#   ★四格互斥且窮盡：first（沒有前值）／closer／same／farther，Σ == sample。
+		for _jtid in state.teams.keys():
+			var _jt: TeamData = state.teams[_jtid]
+			if String(_jt.current_task) != TeamData.TASK_JOIN:
+				continue
+			var _dist: int = FactionAISystem._hex_dist(_jt.tile_pos, _jt.move_target)
+			Probe.bump("joinmove.sample")
+			var _key: String = "joinmove.first"
+			if _join_prev.has(int(_jtid)):
+				var _pv: int = int(_join_prev[int(_jtid)])
+				_key = ("joinmove.closer" if _dist < _pv else ("joinmove.farther" if _dist > _pv else "joinmove.same"))
+			Probe.bump(_key)
+			Probe.bump("joinmove.dist.%02d" % clampi(_dist, 0, 40))
+			_join_prev[int(_jtid)] = _dist
 		if (d + 1) % 10 == 0:
 			_hb_teams = state.teams.size()
 			_sec_interim(d + 1)
@@ -1153,6 +1171,22 @@ func _sec_join_funnel() -> void:
 	print("  ③命中層：`join.resolve`=%d ｜ `join.arrived_no_handler`=%d（★到了卻沒 handler）" % [res, nohand])
 	print("  ④中止：`join.abort_ghost`=%d（撲空：走到 last-seen 空格）｜`join.timeout`=%d" % [ghost, tmo])
 	print("  ★`join.accept_check` 取樣筆數=%d" % (Probe.samples.get("join.accept_check", []) as Array).size())
+	var mt: int = int(Probe.counts.get("join.meet_target", 0))
+	var mo: int = int(Probe.counts.get("join.meet_other", 0))
+	print("  ★★★判別量：`join.meet_target`=%d ｜ `join.meet_other`=%d ｜ 對帳 %d+%d=%d vs `dispatch`=%d %s" % [
+		mt, mo, mt, mo, mt + mo, disp, ("✅" if mt + mo == disp else "❌ 不平")])
+	var jsam: int = int(Probe.counts.get("joinmove.sample", 0))
+	print("  ★移動層（每日 × JOIN 隊）：母體=%d｜first=%d closer=%d same=%d farther=%d｜對帳 %s" % [
+		jsam, int(Probe.counts.get("joinmove.first", 0)), int(Probe.counts.get("joinmove.closer", 0)),
+		int(Probe.counts.get("joinmove.same", 0)), int(Probe.counts.get("joinmove.farther", 0)),
+		("✅" if (int(Probe.counts.get("joinmove.first",0))+int(Probe.counts.get("joinmove.closer",0))
+			+int(Probe.counts.get("joinmove.same",0))+int(Probe.counts.get("joinmove.farther",0))) == jsam else "❌ 不平")])
+	var _db: Array = []
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("joinmove.dist."): _db.append("%s=%d" % [ks.substr(14), int(Probe.counts[k])])
+	_db.sort()
+	print("  ★★距離分布（★離目的地幾格）：%s" % ("｜".join(PackedStringArray(_db)) if not _db.is_empty() else "（空）"))
 	print("  ★★讀法（systems 寫在數字之前）：")
 	print("     `dispatch`=0 而 `win`>0 ⇒ ★【從沒走到相遇】⇒ 病在移動/距離，不在 resolver")
 	print("     `dispatch`>0 而 `resolve`=0 ⇒ ★★病在 `social_target` 對不上或 resolver 內部")
