@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: donor-ladder-intersection-attribution
 topic: ★★訂正一句:你寫「施主 2 筆續等」——而它【沒有在飛】,我上封寫的是「我還沒派,要不要開」;現在真的派掉了(票已落地,exact path 在內);★★★這是「『已請』是宣告不是事實」的鏡像形態=下游把【尚未派】讀成【在跑】,而兩者在你那端長得一模一樣
 ---

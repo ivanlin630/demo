@@ -3269,3 +3269,39 @@ TERRAIN_WEIGHTS(world_generator.gd:215) 在 setup 階段套用
 ★**而我原本寫的「等它出現在某個群裡再處理」不是回訪條件** —— ★★**那是【希望】**（blueprint 指出）。
 ★★★**現在綁的是【長考基線那一輪】**：**那一輪本來就要量 founding，所以它是免費的觀測點。**
 ★**而屆時要先答的是：【它存在嗎】—— 而不是【它為什麼發生】。**
+
+## ★★★45 個 option 裡有 19 個【一次都沒贏過】——**而這是入口，不是工單**（2026-09-04，implementer 讀既有兩份 90 日跑，零新 code）
+```
+★零勝 option = 19 個｜它們合計進候選 5149 次｜母體 = optpool.mother 2912 次 rank_scored（兩份跑合計）
+★最大一顆：迎戰 cand 898 / win 0
+```
+★★**而不能直接讀成「這幾條線沒接」—— 同一個 means-end 家族【自己就反證了】**：
+```
+maintain_weapons:resource  cand 779  win 178      ←★同一條管線、同一個 dispatch
+maintain_tools:resource    cand 479  win  61
+maintain_food:resource     cand 636  win  35
+build_stable:resource      cand 685  win ★0
+build_apothecary:resource  cand 643  win ★0
+build_workshop:resource    cand 638  win ★0
+maintain_material:resource cand 683  win ★0
+```
+⇒ ★★★**零是【逐個 option 的】，不是【整條線斷掉】** ⇒ 問題形狀從「線斷了嗎」變成「**這幾個 option 的 util 憑什麼永遠比不過**」。
+
+### ★兩個誠實限（★寫在數字旁邊，不寫進結論）
+```
+①★兩份跑【都是 peaceful】⇒ 迎戰 0 勝【可能是 genuine】（和平世界不迎戰是對的）
+   ⇒ ★★warring 那份跑完【免費】會反駁或坐實它 —— 不必為它單開一票
+②★★「0 勝」與「不該贏」長得一模一樣 ⇒ ★★★所以本條是【入口】不是【工單】
+   ⇒ 同 2026-09-02 那條量化：A 級 12 條全查完，需新開修法票 = 0 條
+```
+
+### ★systems 裁序（2026-09-04）：只開**那 4 個自相矛盾的**，不開 19 個
+```
+★開：build_stable / build_apothecary / build_workshop / maintain_material 的 :resource 版
+   ⇒ 理由 = ★★它們與贏家【同家族同管線】,所以「線沒接」這個解釋【已經被同一張表排除】
+   ⇒ 做法 = dump 它們【輸掉當下】的 per-option util（既有 lost_table 形狀），★禁靜態斷言、禁 crank
+★不開：其餘 15 個（迎戰等 warring／:location:delegate 族 cand 小且與上面同因嫌疑）
+```
+★**一個尚未驗證的形狀，明標為假說**：贏家是 `food/tools/weapons`（**團自己消耗的**），
+輸家是 `stable/apothecary/workshop/mint`（**資本財**）＋ `material`（**原料**）。
+★★**這只是看表看出來的，util dump 沒回來之前不算數** —— **寫在這裡是為了讓 dump 回來時有東西可以被推翻。**
