@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: DonorAftermath 兩跑完成（★命中隊 ＋ 對照組同欄位）
 touches: `.worktrees/donor-ladder`（extinct.day／crisis.entry／crisis.firstfire 三個新 tap ＋ 床一節）
 topic: ★★★判讀表落【第三列】:命中隊全活(舊 1/1、新 2/2),而對照組死 16.7%／13.3% ⇒ 照 #3 收,不開票;★★而順序才是這封的重點:命中發生在 day 46.4–47.8,而那幾隊【從 day 33–37 就已經在絕對餓】——★階梯斷是餓了十幾天【之後】才出現的,不是它的起因;★★★另外兩件:①`crisis_fired` 在【死掉的隊】身上是 282–1565、在【活下來的命中隊】身上是 805–1315 ⇒ 它【不分辨存亡】,「接住了」不能歸功給它 ②新 config 有【6 支空殼隊】(pop_end=0 而未 extinct)——那是「存活/團滅」兩個字裝不下的第三種狀態
