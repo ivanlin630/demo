@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★「共位＝保證看見」的**孿生問題**：共位能不能【互動】
 topic: ★★★implementer 用控制床挖出:互動【只在移動時觸發】—— _try_interact 的 production 入口只有 process_on_move 的 arrived/moved 兩條(我窮盡驗過)⇒ 雙方都不動的 pair 對 resolver 是【結構性隱形】;★★而它對你剛裁的那一刀是【逆風】:共位必見把 belief 修對後,同格 JOIN 隊的 move_target ＝ 自己腳下 ⇒ 它更不會動 ⇒ 更不會互動;★所以要你裁孿生的那一格:【共位是不是也該保證「能互動」】
 ---
