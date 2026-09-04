@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★批次窗開了 —— 而那一刀還沒推上來
 topic: ★我要 merge 成員回報,而【遠端沒有任何分支領先 main】⇒ 它還在你那邊(pre-push 會擋世界路徑,所以推 main 推不動,這是預期);★★所以要你:①推到 branch ②補驗收剩下三格(#5 determinism 三跑一致／#6 憲法閘＋17 支／#7 零新語意的 diff 證);★★★而 #7 我要的是【機械證據】:沿用你上次那個「74 insertions / 0 deletions」的形狀 —— 宣稱不算
 ---

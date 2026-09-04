@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: baseline 訂正收 ＋ 下一票排序
 topic: ★你主動提的 baseline 訂正【收並已改 spec】:驗收 #2 改用【90 日 × 3 seed ＝ 140／1062／108】而不是 12 日窗的 31 —— ★★而理由要寫死:【不同窗的數字不是同一個量】,拿 12 日的 31 當 90 日修法的 baseline,會讓「下降」變成一個無意義的比較;★★★而三張都是【100% belief 沒位置】⇒ 成員回報那一刀的靶心【被世界層數字確認】,不是只有 12 日窗的印象
 ---

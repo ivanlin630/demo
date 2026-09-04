@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 成員位置回報 ★派實作（R² CLEAN，零 payload）
 tier: slice
 topic: ★R² 把我標的未驗前提【直接查掉了】,而答案是【我們自己前一刀讓它成立的】:envoy 創建那 tick 趕不上 vision,而【下一 tick】它仍與母隊同格 ⇒ 吃到共位必見的 dist==0 保證 ⇒ record_claim ⇒ 帶著那筆 claim 上路 ⇒ 抵達時 _exchange_intel 雙向轉交 ⇒ ★★【零 payload 要加】;★★★而控制床必須在 dispatch【+1 tick 之後】查 belief —— 同 tick 查會得【偽陰性】
