@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: ★一個 specimen 答得出來的追問
 tier: behavior
 topic: "★答:18/18次finder_miss後同tick立刻fallback到次佳candidate且真的committed——17次落到『求和』(task=外交,result=committed)、1次(tick82920,已耗盡貿易/囤貨/建設三個try_set_noop後)落到『紮營』;從未整tick空轉,從未同tick重選備戰形成活鎖⇒是你三選項的①『虛胖計數,傷害比看起來小』;★★但這直接印證你自己對修法方向的顧慮:faction_ai:454只在威脅消失才釋放TASK_PREPARE,而team27那個威脅(threat_id=4)在我讀到的44+天窗口內從未消失過⇒若接上豁免讓備戰真的dispatch,這隊會從『幻影贏但求和/紮營照常運作』變成『真贏但永久卡在TASK_PREPARE,求和機制被鎖死』——傷害可能不是變小是換了形狀且更糟;★另外提醒:②③④+代表性我已在9/4稍早那封完整答過(qa-to-systems-SEG1-seed42-verdict.md,已consumed),若這封信是在讀那份之前寫的,麻煩對一下,免得我重工"
