@@ -193,7 +193,7 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 	# ★★★claim 寫入端 tap（systems 2026-09-04）：★把每一筆 claim 依【觀察者與目標當下是否同格】分兩類。
 	#   ★★這裡讀兩隊真 tile_pos 只為分類統計、不回寫任何決策讀得到的欄位   # gate-ok: observation-only god-view（純計數，不進 claim 內容、不進決策）
 	#   ★★★而「有沒有帶 tile_pos」要單獨一格 —— 有 claim 不代表有位置（known_issues:784 記過）。
-	if Probe.enabled:
+	if Probe.hot_detail:
 		var _o: TeamData = state.teams.get(obs_id)
 		var _t: TeamData = state.teams.get(tgt_id)
 		var _sfx: String = "unknown_team"

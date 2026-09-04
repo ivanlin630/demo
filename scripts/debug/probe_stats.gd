@@ -9,6 +9,13 @@ static var peaks: Dictionary = {}
 static var amounts: Dictionary = {}   # 浮點累計器（如鑄幣 coin 總量 ledger）
 static var samples: Dictionary = {}   # event → Array[Dictionary]（≤cap 個具體 instance，聚合帶故事）
 
+# ★★★熱路徑細節旗標（2026-09-04，血證＝90 日窗撞 3000s timeout）：
+#   ★有些 tap 掛在【每 tick × 每個視野內 pair】的路上（例 `record_claim` 的同格分類）——
+#     ★★它們自己很便宜，但乘上母體之後【會把長窗跑批跑不完】。
+#   ★★★而「跑不完」與「跑完但沒有那一格」在下游長得不一樣：前者連尾標記都沒有。
+#   ⇒ 這類 tap 掛在這個旗標下，預設 off；要那一格的人自己開（床讀 env 設）。
+static var hot_detail: bool = false
+
 # ★★★arm 順序自檢（bed-arm-helper §5①，R² 二審反轉後的形狀）：
 #   ★觀察方向【反過來】：不是 arm 去問世界，是【建世界的那一刻回頭問 arm】
 #     —— arm 當下世界還不存在，問不到。
