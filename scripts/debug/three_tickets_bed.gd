@@ -102,6 +102,22 @@ func _run() -> void:
 				_key = ("joinmove.closer" if _dist < _pv else ("joinmove.farther" if _dist > _pv else "joinmove.same"))
 			Probe.bump(_key)
 			Probe.bump("joinmove.dist.%02d" % clampi(_dist, 0, 40))
+			# ★★★兩個距離都印（systems 2026-09-04）：★JOIN 的 target 來自
+			#   `options.gd:186 BeliefSystem.belief_pos(...)` ⇒ 它是【它相信宿主在哪】不是【宿主真在哪】。
+			#   ⇒ ★★所以「走到目的地」與「走到宿主旁邊」是兩件事，而只印一個【讀法完全相反】：
+			#     `belief 距離 → 0` 可以同時是「到了」與「到了一個空地」。
+			#   ★★★真位置是 god-view —— ★而這裡是【觀測】不是決策（憲法禁的是決策讀 god-view），
+			#     ★★所以合法；而我把它標出來，免得下一個人把這段當成可以抄進決策的樣板。
+			var _tdist: int = -1
+			var _host: int = int(_jt.social_target)
+			if _host != -1 and state.teams.has(_host):
+				_tdist = FactionAISystem._hex_dist(_jt.tile_pos, state.teams[_host].tile_pos)   # gate-ok: observation-only god-view（床端，不進決策）
+				Probe.bump("joinmove.tdist.%02d" % clampi(_tdist, 0, 40))
+				Probe.bump("joinmove.gap.%s" % ("same" if _tdist == _dist else ("true_far" if _tdist > _dist else "true_near")))
+				Probe.bump_sample("joinmove.pair", {"team": int(_jtid), "host": _host,
+					"belief_d": _dist, "true_d": _tdist}, 40)
+			else:
+				Probe.bump("joinmove.host_gone")   # ★宿主已不在名冊 ⇒ 真距離【答不了】，不是 0
 			_join_prev[int(_jtid)] = _dist
 		if (d + 1) % 10 == 0:
 			_hb_teams = state.teams.size()
@@ -1187,6 +1203,21 @@ func _sec_join_funnel() -> void:
 		if ks.begins_with("joinmove.dist."): _db.append("%s=%d" % [ks.substr(14), int(Probe.counts[k])])
 	_db.sort()
 	print("  ★★距離分布（★離目的地幾格）：%s" % ("｜".join(PackedStringArray(_db)) if not _db.is_empty() else "（空）"))
+	var _tb: Array = []
+	for k2 in Probe.counts.keys():
+		var ks2: String = String(k2)
+		if ks2.begins_with("joinmove.tdist."): _tb.append("%s=%d" % [ks2.substr(15), int(Probe.counts[k2])])
+	_tb.sort()
+	print("  ★★★真距離分布（★離【宿主真實位置】幾格；observation-only god-view）：%s" % (
+		"｜".join(PackedStringArray(_tb)) if not _tb.is_empty() else "（空）"))
+	print("  ★兩者關係：true==belief %d ｜ true>belief %d ｜ true<belief %d ｜ ★★宿主已不在名冊 %d（真距離答不了）" % [
+		int(Probe.counts.get("joinmove.gap.same", 0)), int(Probe.counts.get("joinmove.gap.true_far", 0)),
+		int(Probe.counts.get("joinmove.gap.true_near", 0)), int(Probe.counts.get("joinmove.host_gone", 0))])
+	print("  ★★逐筆（cap 40）：")
+	for r in Probe.samples.get("joinmove.pair", []):
+		var rd: Dictionary = r
+		print("     team=%s host=%s belief_d=%s true_d=%s" % [
+			str(rd.get("team", -1)), str(rd.get("host", -1)), str(rd.get("belief_d", -1)), str(rd.get("true_d", -1))])
 	print("  ★★讀法（systems 寫在數字之前）：")
 	print("     `dispatch`=0 而 `win`>0 ⇒ ★【從沒走到相遇】⇒ 病在移動/距離，不在 resolver")
 	print("     `dispatch`>0 而 `resolve`=0 ⇒ ★★病在 `social_target` 對不上或 resolver 內部")
