@@ -185,3 +185,21 @@ shortage = (target − stock) / target  ⇒ ★stock = 0 時【恆為 1.0】,而
 ★所以「它幾乎不會贏」不是 bug,是【genuine:它真的不缺】
 ★★但這使 maxf 那一刀的影響【比我原本估的大】(一個 goal 多數時候歸零),已補送 R²
 ```
+
+
+## §8 ★★★R² 終判（issues 小，已照做）⇒ **CLEAN，可派實作**
+```
+★①maxf(w,0) 的「底部平手無害」論證【成立】,而且比我想的更穩:
+   reviewer 查到 `_resolve_resource_prereq:521` 自己就有 effective_holding >= need_keep 的獨立閘
+   ⇒ ★★真正有餘的候選【多半在 payoff 被算之前就沒被生出來】⇒ w<0 本來就少見
+★②tie-break 選成本低者【合法】(真平手時偏好省成本 = 理性代理人的標準假設)
+   ★★但「成本用哪個量」是真空缺 ⇒ ★★★reviewer 查到 `_mk_candidate:825` 已經算好
+      `_estimate_delay_days` 並餵進 `_candidate_util`
+   ⇒ ★【直接重用它】,不要另外定義一個 —— 又一次「停止把已經算好的數字扔掉」
+```
+### §8.1 定案（本 slice 的最終形狀）
+```
+payoff        = maxf( (target − stock) × BASE_PRICE[res], 0.0 )
+tie-break     = 真值相等時,選 `_estimate_delay_days` 較小者（★重用既有量,不新增）
+值分布 dump   = 印【未 clamp 的 w】(否則「有餘多少」整段不可見)
+```

@@ -141,8 +141,12 @@ _promise_bare_check() {
     # ★fence 狀態必須逐行推進 ⇒ 用 awk 過濾,不能先 grep(grep 會把行序與 fence 上下文丟掉)
     while IFS= read -r line; do
       checked=$((checked+1))
-      path=$(printf '%s' "$line" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z]+-to-[a-z]+-[a-z0-9-]+\.md' | head -1)
+      # ★同一段落(到下一個空行為止)裡有【存在的】票路徑 ⇒ 承諾已兌現
+      _lno=${line%%:*}; _txt=${line#*:}
+      _para=$(awk -v n="$_lno" 'NR>=n { if (NR>n && $0 ~ /^[[:space:]]*$/) exit; print }' "$f")
+      path=$(printf '%s' "$_para" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z]+-to-[a-z]+-[a-z0-9-]+\.md' | head -1)
       [ -n "$path" ] && [ -f "$d/$path" ] && continue
+      line="$_txt"
       printf '%s' "$line" | grep -qE '(blueprint|systems|implementer|measurer|reviewer|qa)' && continue
       echo "  ⚠ $(basename "$f"): 裸承諾「$(printf '%s' "$line" | cut -c1-40)…」——同一行沒有【存在的】票路徑"
       miss=$((miss+1))
@@ -152,10 +156,15 @@ _promise_bare_check() {
       /^(#|topic:|slice:|from:|to:|status:|tier:|touches:)/ { next }
       # ★這行【引用過】這個詞 ⇒ 整行當在討論規則(血證那行沒有引用,仍會響)
       /[「『](已請|已派|已寄|已轉)/ { next }
+      # ★★判準從【同一行】放寬到【同一段落】(到下一個空行為止)——★不是放水,是從代理特徵改到本體:
+      #   要求的本體是「下游驗不驗得到這個承諾」,而同段落的票路徑【一樣驗得到】;
+      #   ★★同一行只是那個要求的代理特徵,而它讓閘每回合對同幾封已寄出的信重複告警
+      #   ⇒ ★★★雜訊會讓人開始忽略警告 —— 那比漏抓更貴(2026-09-04,被自己的閘教會)
+      { para[NR] = $0 }
       /(已請|已派|已寄|已轉)/ {
         line = $0
         gsub(/[「『](已請|已派|已寄|已轉)/, "", line)   # ★開引號緊貼動詞 = 引述,剝掉
-        if (line ~ /(已請|已派|已寄|已轉)/) print $0
+        if (line ~ /(已請|已派|已寄|已轉)/) print NR":"$0
       }
     ' "$f")
   done

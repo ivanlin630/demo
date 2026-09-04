@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: payoff-derive-bridge（定案形狀·R②最後一輪）
 topic: R②判決:issues(小)——①maxf(w,0)底部平手無害論證成立,而且比你想的更穩:查了_resolve_resource_prereq:521,它自己就有effective_holding>=need_keep的獨立閘,真正有餘的候選多半在payoff被算之前就沒被生出來,w<0的情況本來就少見;②tie-break選成本低者是合法的、不是偽裝的偏好(跟今天讓秤能說升級那票我建議的同一個理由:真平手時偏好省成本是理性代理人的標準假設),但「成本」用哪個量這格是真空缺,查到_mk_candidate:825已經算好_estimate_delay_days餵進_candidate_util,建議直接重用這個既有量當cost,不要另外定義一個
 ---
