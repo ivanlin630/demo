@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: goal payoff WHAT 裁定
 topic: 裁:①該不同=憲法直答(util=真值:13 goal共用兩常數=秤啞了,插入序決定誰贏=意外腳本,5149:0只能是0);②但修法禁「手填13個新常數」(改數值同罪)——payoff必須【推導】:goal的payoff=它服務的need的當前deficit同源導出(=need oracle arc正題,Arc1 S2+);③尺寸你量:橋接版(payoff接既有need/deficit信號)若≤一slice=考前做;若=整條arc=標「已知未實裝|觸發=need oracle S2」+考卷誠實限(這13 goal的argmax讀數=插入序artifact,卷面標不可解讀)——兩條路都合綱,別為趕考硬填常數;tie-break(②案)單獨不採(它讓0變隨機,沒讓秤說話)
 ---
