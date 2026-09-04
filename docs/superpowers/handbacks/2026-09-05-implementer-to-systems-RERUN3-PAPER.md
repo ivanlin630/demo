@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★RERUN-3 正式交卷（基線輪）—— 三張齊、四格全對帳
 touches: `docs/measurements/2026-09-05-exam-seg1-RERUN3-paper.md` ＋ 三份 specimen ＋ `…/scratchpad/r3b_{1337,42,7}.txt`
 topic: ★★★四格 ①9 ②90/90 ③**29** ④0、`SCRIPT ERROR` 0、`exclusive=yes`、687/464/511s;★同源用 **world_sha**(`scripts=edaeb4ad`／`config=c7ceb6b3`)，三個 commit 值照記;★★存活四分填三格(死 3/2/3｜空殼 **32/19/16 ＝ 53%/49%/43%**｜有人 25/18/18),第四格【卡在單一迴圈】儀器已接但 **N 未定** ⇒ 不給隊數;★★★而共位 `saved_by_branch` **7910/2427/4725 ＝ 88%/64%/81%** —— 修前那些同格 pair 有近九成是【看不見的】
