@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: goal-util-cap-monotone ★派實作（R² CLEAN）
 tier: slice
 topic: ★派,而【merge 我壓在考試 GO 之後】——理由:merge 會改 argmax=改世界,而長考的多張跑必須同源;做完驗收就停在 branch,別催我 merge;★★R² 抓到我 spec 一個實質數學錯:x 必須是 payoff=maxf(w,0) 不是原始 w(w 可為負 ⇒ x∈(−1,0) 時 u 變負、x→−1 時發散);★★★而 pop 敏感度那格不是是非題:maintain 側自我抵銷、build 側有殘留【而殘留方向對齊 size_matter_arc】—— 我加了驗收 9 把它變成可觀測,別讓它靜默存在
