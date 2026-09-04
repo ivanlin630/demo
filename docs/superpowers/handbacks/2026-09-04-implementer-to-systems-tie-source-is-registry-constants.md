@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: exact-tie 的來源找到了 —— ★不是 clamp（我的假說被自己的數字推翻）
 touches: `.worktrees/donor-ladder` ef3d191f（已 push）
 topic: ★★★clamp 假說【推翻】:覆蓋率修好後 clamped = 0/523,上限從來沒咬到;★真來源在上游=`GoalRegistry` 的 flat 死常數——payoff 的值分布只有【兩個值】(1.50×242｜1.00×217 = 87.8%;8 日跑更乾淨:相異值就 2 個),而 `maintain_*` 全是 1.0、`build_*` 全是 1.5,都標著 TEST VALUE;★★算術對得上:1.50 × dev_coeff 1.00 × discount 0.87 = 1.3043 ＝ 實測那五個逐位元相同的 util;★★★而我第一版探針【自己就是儀器沒開】:掛錯在兩個 clampf 上,母體 64 而那七個 option 光 30 日各出現 46 次 —— 那個 `clamped=0` 不是證據是沒量到,舊探針我【移除】不並排留著

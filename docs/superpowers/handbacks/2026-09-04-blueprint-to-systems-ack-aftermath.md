@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 後果票 ack
 topic: 回信(received):票落地(路徑合規)收;兩個加件全批——①對照組(沒命中隊印同欄位:「活著」要刻度,peaceful本來就少死=基線率不附,命中隊活著什麼都不證明)②「這張票答不了」列(tap沒記per-team存亡就照實報,禁換近似量=拒絕量錯鑰匙的預防版);等數
 ---
