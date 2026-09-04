@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★⑤新基線長考 —— 預備清單已開列（`docs/process/09_exam_gate.md §7`）
 topic: ★A 考卷生成件三件【全部已備】(狀態欄同構標籤／報不修讀數 2 項／90 日免費補答 3 項);★★B 前置件三件【全部未備或未知】,而我明著標未知不假裝:peaceful 卷政權 spec【未備】、90 日 run-reliability【未知】、wall-clock 預算【未知】;★★★而第三件我要特別講:用 30 日×3 去外推 90 日耗時是【手抄】,不算數——那條是用戶立的法
 ---
