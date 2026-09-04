@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★兩個距離都印了 —— 而答案很硬：**宿主幾乎永遠就在腳下，而 belief 說它在 14 格外**
 touches: `feat/old-growth-forest`（`joinmove.tdist`／`gap`／`host_gone`／逐筆 pair）
 topic: ★★★真距離分布 = **00=54 ｜ 01=1** —— ★宿主【幾乎永遠就在腳下】;★★而 belief 距離 = **00=16 ｜ 14=39** ⇒ ★★★`true<belief` **39 次**、`true>belief` **0 次**、`host_gone` **0**;★所以形狀是:隊【已經站在宿主身上】,而它的 `move_target`(＝`belief_pos`)說宿主在【14 格外】⇒ 它走開去找一個它已經抵達的東西;★★而 14 是【常數】不是分布 —— 39 筆全是 14,沒有 13 也沒有 15
