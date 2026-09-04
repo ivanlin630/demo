@@ -1,137 +1,117 @@
-### ⏳★★★建造：**兩條路，兩個不同的病**（2026-08-26 三度訂正；★舊讀法全部保留在下方，因為每一個都曾經看起來很有道理）
-### ★出口用的是【重定義後】的那組，不是原本那組
-### ★★真正的病（五顆探針換來的）
-### ★★★落地
-### ★★★★兩個【誠實的空手】—— ★這是收束帳的主體，不是附註
-### ★出口第三項【未做，且刻意】
-### ★★已排除的三條（★寫下來是為了下一個人【不要重走】）
-### ⇒ ★★★狀態：**未歸因**，而它【不是空白】
-### ★★★重納觸發（blueprint 命 2026-08-27）—— ★掛在這裡，因為做重基線／量市場的人一定會打開這一條
-### ★material-need bootstrap gap（code-provable，reviewer R² 2026-07-30 揭）
-### order-noise（arb_kill_nostock 42k-84k）= hollow-economy 症狀（measurer 確診 2026-07-24，同根不獨立修）
-### ★★measure-first Step0 收斂結論（和平經濟床，2026-07-30，用戶核可 measure-first）
-### ★資訊網 arc：核心機制 VALIDATED（fixture）但 whole-world distribute 未通（2026-08-05 QA CONFIRM-WITH-REVISIONS 誠實 flag）
-### ★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribute-zero-diagnostic.json 完整診斷）+ 後勤/商業 premature-victory
-### ★★constitution_gate god-view detector 盲點：間接 local-var 存取漏抓（2026-08-04 R² 揭、系統性追蹤）
-### ⏳資訊網名冊 ④分裂 frozen-snapshot 未實作（known gap、2026-08-04 R² 訂正）
-### ⏳糧流 Slice4(b) 和平 economy measure — 首批驗收 tripwire（B1 merged c82a685e，2026-07-29）
-### ⛔A1 stall latch+resume = **凍化 seed1337 世界 REGRESSION**（乾淨 fresh 重現坐實 2026-07-26，別 merge/folds until 根治）
-### specimen RNG leak（2026-07-28，★源訂正兩次收窄：非 tracer wrap、非既有 helper，是 measurer 一次性 ad-hoc pick_random 已刪）
-### ✅SurvivalMergeIn churn = (b)arrival-never（根修 MERGED `7877310a`，2026-08-19；缺口②③④待下游高壓輪覆蓋）
-### ⏳JOIN 在途重申 CPU + ★pair-print 非有效 churn 指標（2026-08-19 農業b final round 揭、systems code-read 定性）
-### ✅specimen 非中立性 —— **根修已 MERGED（2026-08-21 結案）**：掛 tracer 讓模擬軌跡真實分岔（2026-08-20 measurer 意外撞到、威脅所有 specimen-based QA）
-### ⏳零產出卡死（2026-08-20 lag-quantify 副產、與 honest-under-fed 不同病型）
-### ⏳`food_flow_avg` 5 日 EMA 落後（★2026-08-20 降級重寫：不影響死亡判定、只影響決策輸入）
-### ⏳★★perf 真兇=`near.faction_ai` 決策核心（2026-08-20 perf 線索包①② 決定性）+ ★loop1 全量雙掃（LOD 不生效、systems code-read 坐實）
-### ⏳~~per-team tick 成本 +34%~~ → ★推論已被 bisect 削弱（2026-08-20 訂正）
-### ⏳`tools/godot.ps1` wrapper timeout-kill race：長跑 stdout 憑空消失（2026-08-19 measurer 揪出、複現 2 次含 solo run）
-### ⏳record_driver 契約 bug：set-style 函式記絕對值非 delta（observability tap 完整性，2026-08-13 嚴格守恆帳追出）
-### 📉 `food_flow_avg` 不是「庫存健康度」，它是**刻意保守的成長訊號**（2026-08-21，★我先喊 bug、後讀註解的訂正）
-### 🤝 「投靠」決策正確但**執行沒接上**（2026-08-21 QA 坐實）
-### 🏕★★★「滿池餓死」的真 binding ＝ **紮營被拿「覓食能全額餬口」當基準線扣掉**（2026-08-21 診斷到底）
-### 🌾★★★真根因定案：**站在滿糧池上餓死** —— 沒 outpost 又沒紮營 ＝ 被動採集物理上為零（2026-08-21，四輪翻案後定案）
-### 👶 生育門檻：anon 與 named **不對稱**（2026-08-21 R² 認可為可接受，記錄供日後對齊）
-### 💔★人死了，關係不會消失：`relations`／`relation_edges` **全樹零清理**（2026-08-21 窮盡搜尋，★獨立於 id 重用的既有洞）
-### 💾 全樹**沒有存檔／載入路徑**（2026-08-21 窮盡稽核副產物，記錄事實非缺陷）
-### 🧭★「走一格要多久」全站有**五套**算法（2026-08-21 R² 親查 + systems 窮盡確認）
-### 🚶★★「明明相鄰卻不走最後一步」：移動／抵達執行斷（2026-08-21 QA 逐 tick 稽核坐實，★獨立缺陷）
-### 🚚★porter 餓到「投靠」非母隊：convoy 貨物隨人被第三方吸收（2026-08-21 QA 故事稽核挖出，★第四種結局）
-### 🚚 CONVOY porter 在運輸期間**完全沒有決策**（2026-08-21 診斷坐實，★交 blueprint 判是否 by design）
-### 👶★★生育 merge 後世界層級幾乎沒生效：90 天 `breed.born = 1`（2026-08-21 D1 短跑；**根因在 systems 的設計，非實作**）
-### 📈 N² 歸因：per-eval 掃描 ∝ |team_discovered|，穩態飽和於 N（2026-08-21、ramp vs 穩態的和解）
-### 📋 訂單簿健康度：成交率 0.7%、壽命是硬常數牆、churn 0%（2026-08-21 世界級數字、用戶追問的舊懸案）
-### 🩺 生育不給「醫療」技能 XP（既有、非新引入；2026-08-20 生育 slice merge-gate 時查清）
-### ⚠️★★回溯標注：以下 peaceful 卷結論**全部缺一個章節**——「**這張卷沒有勢力層**」（2026-08-21，用戶令）
-### ★★★ 但由此浮出一條可能統一今天所有線的鏈（**假說，一個數字可定案**）
-### ✅ 數字回來了 —— ★**我的假說【否證】，照我自己預寫的規則辦**
-### ★★但普查給了一個**更根本**的新事實（獨立於我的假說）
-### ★併同 C6-#1（棄工抖動）
-### 🏭 沒有人蓋 workshop ＝ 設施鏈斷的真上游（2026-08-20、mint 0% 追根時發現）
-### ⚠️舊 warring 長跑可能靜默凍結 —— **機制已修（觀察者永不凍結 MERGED）；★歷史資料仍受污染、舊結論仍須按 signature 自查**（`game_over` × headless；2026-08-20 measurer retro-audit CONFIRMED）
-### ✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線修；rate-equivalence far/near=1.00）**（LOD 紅線違憲；★範圍已於同日更正：原寫「四系統」是錯的）（2026-08-20 measurer 實證 + systems 親驗 code；**擋考級**）
-### 🔧 bed 工具坑：`OS.set_environment` 同進程讀回不可靠（2026-08-20 measurer 實證）
-### ⚠️人口不成長 —— **機制已修（生育＝per-capita 連續速率 MERGED）；效果待量（AT_CAP 短跑）**（領導天花板假說已 REFUTED、現指向生育引擎結構性關閉）
-### 📐 `_inflow_est` 的 `pop_mult` 在 pop≥20 飽和 ⇒「抽人不痛」（考後 backlog、blueprint 2026-08-20 確認）
-### ⚠️`DecisionContext.gather` 有寫副作用 —— **部分修**（`need_urgency`/`plan_phase` 已移出＝specimen 非中立根修；★**cache 群仍在**、另案） → 任何非決策路徑呼叫都擾動世界（specimen 非中立性的真根方向、2026-08-20 implementer 隔離）
-### 👁 §4c 選址記憶可能被 `MEMORY_MAX` 擠掉（12mo 大考監看、非阻塞）
-### 🔧own_granary_tile(state=Nil) SCRIPT ERROR（★根 pin 定案、fix in feat/own-granary-pin pending measurer 12mo confirm）
-### ⏳own_granary_tile(state=Nil) SCRIPT ERROR（原 flag、mid-sim onset、非 B4/B5）
-### ⏸(舊)A1 stall latch+resume = 部分改善 HOLD（↑已升級為凍化 regression）（**A1 核心新 outpost founding 未坐實**，revert merge 待 per-action-count，blueprint 判 2026-07-26）
-### ~~★★A1 仍 FAIL：construction pipeline stall~~（↑已根修，保留診斷史）（施工啟動後~完工前，systems code-trace 2026-07-25，QA 定位）
-### A1 remote-facility 分支 vs 既有 infra cadence 重疊（means-end re-measure watch，reviewer R² track 2026-07-25）
-### S7 cadence stale-satisfied 反向 staleness（means-end whole-measure watch，reviewer R² track 2026-07-25）
-### S5 _try_dispatch_or_invite residency 手評未退（means-end 委派 followup，2026-07-24）
-### S4 perf + facility-type-mismatch（means-end 設施型 followup，2026-07-24）
-### S3 unowned forest 優選（means-end 定位型 whole-measure 待撿，reviewer R² track 2026-07-24）
-### gate② settle attempt-gate 矛盾（flagged 不一致，DEFER 進 means-end 重寫）
-### 燒進度（2026-07-01 首三軌 merged）
-### 第二批燒進度（2026-07-01 三軌 merged）
-### 第三批燒進度（2026-07-02 means-end + slice3 merged）
-### P4 玩測批（2026-06-16 玩測抓,主 session harness 驗修中）
-### P6 玩測批（2026-06-17 玩家實機遭遇戰玩測抓）
-### P5 QA批（2026-06-16 QA session harness 系統遍歷，stage2 驗收抓）
-### Q7 QA批（2026-06-18 QA session harness 遍歷 + forced/encounter 動態驅動抓）→ **全 6 項 ✅ 修（2026-06-18）**
-### Q8 QA 自檢批（2026-06-18 Q7 修後重掃，驗證 Q7 關閉 + 新落差）→ **N-1/N-2/N-3 全 ✅ 修（2026-06-18）**
-### 🆕 vision-dist 測試 FAIL（pre-existing，Q7 work 期間確認）
-### W4. Faction leader 行為性貧窮 — 建造解鎖極慢 ⚠ 部分修（2026-06-13 economy-bootstrap）
-### Bug2. salary 拖 coin 無下限
-### S4. 人口分裂太快
-### S5. main.gd test setup 無 outpost → 12.5 天必定斷糧
-### U4. 地圖移動後有時消失
-### U5. 右側欄資訊不完整
-### U6. 圖塊資訊只有地形
-### Bug8. _test_on_team_extinct_to_storage 失敗 = stale test（非碼 bug）
-### U19. 強制事件無選單 → 卡死（H, blocker, 2026-06-14 run-verify 新發現）
-### U10b. 全 Team 死亡直接退出（edge，2026-06-14 run-verify）
-### U11b. 戰報 label 未顯（U11 修了但 GUI 沒出，run-verify）
-### U12b. 交易仍跳無資源（U12 direct preview 修沒對症，run-verify）
-### U13b. 裝備穿脫僅玩家，NPC named 成員無入口（run-verify）
-### U14b. 主畫面看不到自 team 武裝數（U14 reframe + U18，run-verify）
-### U18. 玩家無法武裝 anon（UI/指令皆缺）
-### U9. 圖形 Main.tscn UI 仍 reach-through raw WorldState（邊界債）
-### W8. coin 鑄造實機罕見 — 鑄幣**機制 ✅ 已存在且守恆**，缺實機觸發（2026-06-19 G1a 更正）
-### W7. 覓食 vs 乞食 仲裁（forage-foundation 遺留）
-### Bug5. DiplomacyAI demand_tribute 恆負
-### W3. BREAKOUT_DIST / ENCIRCLE_DIST tune
-### W4. NPC 不主動 promote / train ⚠ 部分修（2026-06-16）
-### U7. Camera 每 tick 強制回正
-### U8. Members/History popup 待確認
-### D1. SoloAI 保護條件脆弱 ⚠ 部分緩解（2026-06-15 驗證）
-### A1. agent_repl stdin 模式 stdout 污染
-### S9. 玩家 team 名 NPC 薪資 UI
-### 重複值 / magic numbers
-### smells
-### 架構
-### ⏳有大有小 領導軸 follow-up：spread gap + militarize（2026-08-03，B MVP 後）
-### ⏳need_oracle 前瞻/reserve need — buffer 儲備 completeness（2026-08-03，統一勞力池 follow-up，非本 slice blocker）
-### ⏳convoy 協調 live-scan perf（2026-07-31，flow-fix follow-up，非 blocker）
-### ⏳warring O(N²) per-tick + 世界膨脹 130+ 超目標 50（2026-08-01 measurer 附帶發現，後-logistics backlog，設計 gated）
-### ⏳勢力規模動態 arc — 整併觸發太晚（2026-08-01 measure REFRAME，乙 in-flight，串 perf 同根）
-### ⚠️乙 整併 util boost ＝ REVERTED crank（2026-08-02、真根 case B）
-### ✅（已 REVERT，存查）乙 整併 util boost 曾 merged（2026-08-01，ce369dca→已 revert 08d10281）
-### ✅甲 SLICE B 領主分配政策（統一光譜）merged（2026-08-01，4cc5da15）
-### ★faction 成員資格 fragility＝結構 confound（2026-08-05，measurer 3 次重現、systems 親驗坐實）
-### ★失聯帳本 subteam 記帳缺口＝WHAT-mandated completion（下批完成、非無限期 park）（2026-08-05、measurer confirmed + blueprint 加牙）
-### anon-exhaustion=caring 成本真但 distressed 世界無回補（2026-08-05、care-loop cohesion①natural verdict、genuine 非 bug）
-### recovery-path Slice R1 移民 follow-up（2026-08-06、merged 53907687、非阻塞）
-### recovery-r2 量測 perf + fixture-construction 教訓（2026-08-06、非 code bug）
-### ★★★★再訂正（2026-08-25）：**「誰會再呼叫 `_dispatch_builder`」＝ 兩半，其中一半是【床缺一條路】**
-### ✅★★★★★★★ARC 收束（2026-08-26 夜）：**配管全部接完，剩下的是【真的窮】**
-### ★★★★★★再收口（2026-08-26 晚）：**根再往下一層 —— 是【載重】，而閉環變成五層**
-### ⚠️ 連帶：**「冷啟動雞生蛋死結」這個命名要修正一半**
-### 原訂正（留史）
-### ★★★訂正（T3，2026-08-21）：**建材只是表象，真相是整個 faction 層在這張床上零疊代**
-### ⚠️★★★重大訂正（2026-08-25）：**「26/29 config 沒有 factions」是【我的讀法錯】**
-### ★★★這次錯的形狀值得單獨記
-### 原文（留史）
-### ★★★但我查完認為「補那兩個呼叫點」是**第三次補丁**
-### ⇒ ★真正的根修：**拔掉那 7 個 default**
-### ★★★而「拔 default」的結論**不變，理由更強了**
-### ★★★而它立刻污染了一個【我今天用過兩次的驗證法】
-### ★兩個【已死】的假說（★寫下來免得下一輪重走）
-### ★★★而這裡有一個更大的問題我沒有答案
-### ★嚴重度：**中高，但先量再開票**（systems judge 2026-09-01）
-### ★而兩次的失敗模式【不同】，不該併成一個原因（systems 2026-09-01）
-### ★★★而它同時讓【長跑假說】更難解釋第二次（systems 2026-09-01）
-### ★★severity 升檔：**它在燒真 token**（blueprint 旁證 2026-09-01）
-### ★★★修法（已立即施行）：**consume 之後【即刻 commit】，不累積到回合末**
+# ★★★2026-09-04 重錄:閘的切分單位從 `###` 改成 `##`(這份檔的條目是 ##)
+# ★而 baseline 不是拿【現在】的檔重錄 —— 那會把今天的新條目一起吸成存量=洗綠
+# ★★來源 = 今天第一顆 known_issues commit 的【父】d5e68a0c(2026-09-03 版),只取 '## ' 標題
+# ★★★所以今天新增的條目仍然【是新條目】,仍然要帶狀態欄
+## ★★★而漏掉的那顆有一個【名字】——detector 天生看不見的形狀
+## ★★而它與今天另一個【相反方向】的裁定不矛盾，寫清楚免得後人誤讀
+## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
+## ✅⚡效能 arc（事件比例計算）收束（2026-08-27，blueprint 點頭）
+## ⏳ g1a 舊根/新根差異＝【未歸因】，但帶著三條已排除的路徑（2026-08-27，S2 重錨）
+## 🏪 市場撮合幾乎不發生（2026-08-27，效能 arc 公平性量測【順手】挖到，★歸經濟線非效能 arc）
+## ★arc 狀態（blueprint 裁 2026-08-26）
+## ★★★食糧地方安全 arc = session keystone：兩分配閘（2026-07-23，measure+QA+systems code 三方坐實）
+## ★weaponsmith 真牆 = 兩 build 閘（非 trade，2026-07-23，material-buy arc 後 patch-gate-first）
+## ★★★貧困陷阱 = reserve_factor urgency-suppression 兩鎖（2026-07-23 大設計洞，blueprint 命記·folds game-design）
+## ★cost70 診斷訂正 + construction cap 100 脫鉤 afford 門檻 = means-end 缺口鐵證（2026-07-23 blueprint factcheck）
+## smeltery + armorsmith = weaponsmith afford-ceiling 同族洞（2026-07-23 generality audit，列意識非急）
+## crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 fire，2026-07-22，QA d26ae644 驗證撿，低優先）
+## market-seeker 卡空市場不放棄→餓死（2026-07-22，QA 40-event 撿，DESPERATION 同族小範圍）
+## workshop demand-deficit 封頂太粗→連續（follow-up，2026-07-21，reviewer R² 拆出）
+## ★economy 補丁閘優先查 verdict（2026-07-21，re-baseline 後，blueprint 認可）
+## ✅null-belief-flee —— **已修並驗收（2026-09-02）＋ 退化去向已解一面倒（2026-09-03 收口）**
+## （原文）★null-belief-flee —— 2026-09-02 複驗：不是延遲，是【每 tick 重新製造】
+## （原文）★null-belief-flee 凍結（個體 FLEE 對空氣逃，2026-07-20，Slice E QA 抽查撿，★Slice D 前必修）
+## market_orders capture/demolish 不清（★2026-09-02 systems 複驗：**斷言成立、錨錯**）
+## （原文，錨已於上方訂正）market_orders capture/demolish 不清（pre-existing 洩漏，2026-07-20，god-view Slice C v2 異質審撿）
+## ⚠部分修 can_reach（2026-09-02 systems 逐行複驗：★god-view 那半【已關】，剩 `<999` vacuous）
+## ✅（已關，存查）god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E measure 撿）
+## ★constitution_gate v3 god-view detector 揪 2 新候選殘留 leak（2026-07-20，god-view arc 收尾機器證撿）
+## ★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，crisis-immunity QA 故事稽核撿 team=-1000000）
+## ★TaskArbiter.transition = 無條件 raw 覆寫後門（手不聽腦，2026-07-19，team16 QA 撿 → systems patch-gate 查坐實）
+## crisis-immunity 覆蓋不全（2026-07-19，team16 揭）
+## ★subteam-idle-latch = 第三種手不聽腦 —— **2026-09-02 runtime 複驗：★病還在（不是好了）**
+## （原文）★subteam-idle-latch = 第三種手不聽腦（6 隊，2026-07-19，QA 抓 measurer undercount，HIGH）
+## task-priority-preempt 缺口（team48 型，2026-07-18，QA ② ladder 稽核順帶抓，與 ② 無關）
+## ★★★乞食 —— **框架訂正（2026-09-02，30 日實測）：「引擎從不選它」是假的**
+## （原文，框架已於上方訂正）★乞食死 rung——引擎幾乎不選乞食（2026-07-15，desperation QA 複判抓，絕境階梯斷階）
+## ★★★威脅值 29 天不變 —— **框架訂正（2026-09-02 先查）：不是「實體沒 despawn」**
+## （原文，框架已於上方訂正）★凍結威脅實體無 resolve/despawn（2026-07-15，QA desperation 複判抓，「無事發生的假戲」族）
+## ★SpecimenTracer combat-death 盲點（2026-07-15，違全量暫態觀測不變量）
+## survival-latch: _evaluate_survival 每-tick 重觸 churn（2026-07-15，掠奪根 scrap 後 measurer 定位，non-fatal backlog）
+## 絕境掠奪搶糧優先 + 權重量級（2026-07-15，掠奪 fix inert scrap 後 observe-later）
+## 求和 sue-for-peace 無 handler（2026-07-15，diplomacy grounded 揭，backlog）
+## ✅has_food_market god-view 既有債 —— **已關**（2026-09-02 systems 複驗）
+## ✅（已關，存查）has_food_market god-view 既有債（2026-07-15，desperation-food-seeking R② advisory）
+## ★Team18 lone-survivor death-limbo + intent 誤標致富（2026-07-14，full-HD live 觀察首個獵物）
+## ★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint 結構信號；第 3 次同型）
+## gossip 名聲傳播 backlog（2026-07-11，資訊維度 Phase D；磁鐵接口已留）
+## world-gen variety backlog（2026-07-11，blueprint 記，下個項目一起做非現在）
+## combat-into-engine arc backlog（2026-07-10，spec `specs/2026-07-10-combat-into-engine`）
+## 統一矩陣窮盡稽核揭項（2026-07-01，全貌 `specs/2026-07-01-unification-matrix-audit`）
+## 觀測 GUI 揭項（2026-07-04 observer slice，純觀測揭露、sim 未動）
+## 後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07-01-late-game-scaling-assessment`）
+## 讀B/G3 Phase E backlog（2026-07-01 平行軌）
+## affordance 真實性債（commander-unify v2 盤點，2026-06-28）
+## 統一決策框架 / survival backlog（P2b-1 揭）
+## G1a 礦村（鑄幣脈絡）backlog
+## 🔴 高優先（影響基本可玩性）
+## 🟠 中優先（影響遊戲合理性）
+## 🟡 低優先（體驗問題，不影響可玩性）
+## Movement
+## 待 spec（按優先排序）
+## 🟡 代碼健康批（2026-06-18 研究 session 審計，非阻塞·維護性債）
+## 待討論（設計決策）
+## 決策引擎（non-unified 求生 override thrash → 致死，2026-07-13 蟑螂普查確診 Team10 seed1337）
+## 決策引擎（貿易/訓練/囤貨 applicable-vs-target gap，2026-07-13 reviewer 稽核附帶）
+## 求生/資源決策 backlog（2026-07-14 slice A 排之後，用戶定）
+## 情緒系統（stress decay，death spiral 根層）
+## 觀測（SpecimenTracer 窗口非全生命 — 第三觀測洞,討論中 2026-07-15）
+## 選敵 finder（_find_weakest_prey 同-faction 不濾 — R② Fix F advisory②,pre-existing）
+## god-view 位置 belief 化 follow-up（2026-07-15 merge 6aa3ee18）
+## 俘虜處置擴選項 = ③內部政治 slice（用戶定 B，2026-07-15，backlog 非急）
+## tracer-completeness finder_miss 未 live-demo（2026-07-15 merge 2a805d35，留觀）
+## ★FLEE 從不移動（dead flee-movement，序1 dissolution 遺留，2026-07-15 full-HD 觀察揪出）
+## state-transition specimen tap（下批候選，R² advisory 2026-07-15）
+## 掛單噪音 churn(blueprint+用戶抓 2026-07-15,經濟arc納入)
+## ★生產/發展arc greenlight(甲·統一框架,2026-07-16用戶定)
+## 生產框架 arc follow-up（2026-07-16,供給側成功後殘項）
+## Arc1 need oracle S6 + 終端消耗品 known-deferred（2026-07-16）
+## ★★框架「做好」= 3 流（用戶零殘留+真統一+可擴充,blueprint 裁 2026-07-16,defer behavior)
+## 框架做好 stream① 進度2（2026-07-17，seam#1 R②翻案 + 軌2 fast-follow結案）
+## care-loop scout de-patch = correct but DORMANT（2026-08-11、blueprint 裁 merge banked）
+## 主動升匿名 = correct but DORMANT（2026-08-12、blueprint 裁 merge banked）
+## ★CONFIRMED tap-gap：faction-leave 4 出口無 Probe tap（2026-08-12、③長期故事驗證 first-pass 揭）
+## 記檔：用戶眼球「思考時間長」= O(N²) wall-clock perf + print-overhead（2026-08-13、③story-audit GUI 觀察）
+## 記檔更新：per-team perf 固定成本（2026-08-13、用戶 GUI 單團就慢 refine）
+## ★建造隊派遣的真閘 ＝ 建材，不是糧（2026-08-21 實測，lead 非結論）
+## ⚠️仍掛著的兩件（★blueprint 2026-08-26 已各給處置與【觸發條件】）
+## ⚠️ 床的失真設定（**這輪【刻意不改】**）
+## ⚠️ 而我上面寫的「infra 路不存在 ＝ 床的結構限制」**只對一半**
+## `predator_density` 住在 `tile.resources` —— 資料模型混雜（2026-08-25，falsifier 抓出）
+## ★★★`own_granary_tile` nil 崩 —— **修過一次沒修乾淨，而根不在呼叫點**（2026-08-25）
+## ~~★★★註解描述了一個【不存在】的事實 —— `_calc_reserve`~~　⇒ ★**已銷案（2026-09-02）**
+## ★`local_value` 仍有 ~12 個 blind 呼叫點（2026-08-25，窮盡掃出，★不在當前票範圍）
+## 情報操控接線現況（2026-07-06 盤點：捏造缺口，但框架放得下）
+## ★採集 material 在 warring 塌掉 −97%（具名，2026-08-27 S2 終量抓到）
+## ★★detail 檔的節【重複 4×】且副本已分歧（2026-08-27 發現，★早於今天、不是今天造成）
+## ★★★製造觸發 −7.5%（peaceful）—— **未歸因【但已刻畫】**（2026-08-27 結案掛 R①）
+## ★五支決策支的【選擇】沒有落在可比較的持久欄位 —— 可觀測性缺口（2026-08-28）
+## ★★分類建立在一個【正在被修的 bug】上 —— `LADDER` 的「②不退」待重判（2026-08-28）
+## ★LADDER 是唯一「選擇真的會變」的那一支 —— 具名記錄（2026-08-28，不現在修）
+## ★`harvest_system` 還有三個【無名骰子】（2026-09-01 記；★2026-09-02 systems 複驗：**錨精準、數目相符**）
+## （原文）★`harvest_system` 還有三個【無名骰子】（2026-09-01，S5a merge 時記，★不夾帶）
+## ★★★g1a 礦村未鑄幣 —— **根：繞過仲裁的路獨佔施工格**（2026-09-02，★框架被量測連改三次）
+## （原文，框架已於上方連改三次）★★★g1a 礦村未鑄幣 —— 框架訂正（2026-09-02 先查＋3 seed dump）：不是復發，是【建設優先序】
+## （原文，框架已於上方訂正）★g1a 礦村未鑄幣【復發】（2026-09-01 記，systems）
+## ★★★★床的 setup 盲區 ⇒ **真盲 0 張**（2026-09-02 重定性；★原記「結構性盲區」）
+## ★★★床的結構性盲區：`Probe.reset()` 在 `GameSetup.setup()` 之後（2026-09-01，measurer 自揭）
+## ★★★★settlement_s2b_test 紅 ＝ **床是對的，世界錯了**（2026-09-02 重定性；★原記「一張紅著沒人讀的床」）
+## ★settlement_s2b_test：**一張紅著、沒有人在讀的床**（2026-09-01）
+## ★★★44 處團級 burn 估算漏算 `minor_population`（2026-09-01，型③ 對帳所得）
+## ★44 處 burn 漏 minor —— **裁定不開票**（systems 2026-09-01）
+## ★人口不成長：**90 天只生 1 個**（2026-09-01 正式記；★不是迴歸，是長期低速率）
+## ★★★warring 床的長窗（90 天）跑不完 —— **而它是量測能力的上限**（2026-09-01）
+## ★★★信箱的 `consume` 標記會【消失】—— 而成因未知（2026-09-01）
+## ★★★信箱的 consume 標記會【消失】—— 而成因未知（2026-09-01）
+## ★recamp 那個病，在兩張床的 30 天窗內【從未被觸發】（2026-09-02 觀察，★不是「所以不重要」）
+## ★★founding 沉默 —— **具名上帳**（2026-09-02；★blueprint 要求：不得只寫「等它出現在某個群裡」）
