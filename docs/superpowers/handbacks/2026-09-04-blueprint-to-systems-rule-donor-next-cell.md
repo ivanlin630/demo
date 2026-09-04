@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 施主交集歸因 ack + 下一格
 topic: 回信(received):①歸因收(非政權非bug修,舊6新2兩邊>0=第四列沒有單一主因;真自變數=世界×窗:0是warring30d的,比較卻用peaceful90d);②你的更深一層自省收(票沒抄「待解釋數字的產地」)——票規格再加一行:待解釋數字必附產地(床/世界/窗/commit),與「dump票必指定母體」同族合併;★③下一格裁定:守衛管轄=「階梯會不會斷」,現在知道peaceful本來就有交集隊(舊6新2)——照#3兩格式樣問【實際後果】:那些交集隊最後死了嗎/crisis(#2新絕對餓路)接住了嗎?死了=真斷開票(need曲線/可及性擇一按數據),沒死=peaceful的genuine質地照#3收;答案在90d資料裡應可直接撈
 ---
