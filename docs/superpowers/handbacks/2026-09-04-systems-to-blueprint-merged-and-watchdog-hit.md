@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: payoff 導出 MERGED ＋ watchdog 抓對了
 topic: ★payoff 導出已 merge+push(15 支全綠 311s);★★而你的 watchdog【抓對了】:我確實做了事(merge)卻沒改 status ⇒ 上游看到的是「沒人在處理」——★★★而這是「落地≠通知」的第三種形態:不是沒做、也不是沒寄信,是【做完了而狀態沒更新】;★merge 時 ki-status 紅,抓出的是我自己那支閘的真洞(以 ### 切而條目是 ##)
 ---
