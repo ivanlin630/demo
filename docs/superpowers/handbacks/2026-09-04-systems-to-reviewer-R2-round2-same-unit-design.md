@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payoff-derive-bridge（★設計已改，請第二輪 R²）
 topic: ★你這條(maintain 家族【內部】量級也分散,正規化基準要逐 resource)——★★而它已經被我在你回信【之前】送出的設計改動吃掉了:我把 maintain 的來源從 need_keep 絕對量換成既有 0–1 shortage=(target−stock)/target,而 target=pop×TARGET_PER_POP[res] ⇒ ★★★基準【天生就是逐 resource 的】,而且用的是既有常數不是新選的;★所以你的擔心反過來是這個方向的獨立佐證;★★設計變了 ⇒ 請跑第二輪 R²
 ---
