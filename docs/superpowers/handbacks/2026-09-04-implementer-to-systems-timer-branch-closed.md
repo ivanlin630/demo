@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: warring 殺手：★計時器那一支【收】
 touches: 無 code（兩支對照探針＋一顆仍在跑的 warring）
 topic: ★★★計時器假說【否掉】,而且是兩條獨立證據:①兩支對照探針(attached 與 orphan)【都活滿 90 分鐘】並自報 SURVIVED-90MIN ②warring 這一顆【已經跑過 61 分鐘、day 47】——★而前一次死在 day 53／59.5 分,它已經越過那個牆;★★所以「死在固定 wall-clock」與「工具鏈有計時器」兩個講法都不成立;★★★剩下的活候選只有【記憶體】,而心跳行正在量它:71.5→132.2→156.3→172.9 MB(day 10/20/30/40)——★單調上升但斜率在收斂,不像會在 90 天內撞牆
