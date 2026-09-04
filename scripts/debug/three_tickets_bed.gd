@@ -65,6 +65,8 @@ func _run() -> void:
 	_sec_b_grade()
 	_sec_cansettle()
 	_sec_ladder()
+	_sec_donorladder()
+	_sec_zerowin()
 	_sec_prepare()
 	_sec_optpool()
 	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
@@ -607,3 +609,95 @@ func _sec_optpool() -> void:
 		print("  %-24s %8d %8d %7.1f%%" % [String(n), c, w, (100.0 * float(w) / float(c)) if c > 0 else 0.0])
 	print("  ★誠實限：這一節【是這一刀才加的】⇒ 它沒有修前基準；")
 	print("     ★★所以它只能拿【同一版 code、兩份 config】互相比，不能拿去比任何舊跑。")
+
+# ★★★`[DonorLadder]` 逐階歸因（systems 2026-09-04 票）。
+#   ★三格：自變數＝config／母體＝`entry`（階梯被評估的總次數，不是命中）／印在 `[DonorLadder]` 這一行。
+#   ★★逐階印【條件名】不印序號 —— 有人插一階時序號整排錯位，名字不會。
+#   ★★★對帳必印：`Σ各階 + hit == entry` 不平就在下一行印 ❌ —— ★沒有對帳的分桶等於沒有分桶。
+func _sec_donorladder() -> void:
+	var entry: int = int(Probe.counts.get("donorladder.entry", 0))
+	var hit: int = int(Probe.counts.get("donorladder.hit", 0))
+	var stages: Array = []
+	var ssum: int = 0
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("donorladder.first."):
+			var n: int = int(Probe.counts[k])
+			stages.append([ks.substr(18), n])
+			ssum += n
+	stages.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	var parts: Array = ["entry=%d" % entry]
+	for st in stages:
+		parts.append("stage.%s=%d" % [String(st[0]), int(st[1])])
+	parts.append("hit=%d" % hit)
+	print("[DonorLadder] " + "  ".join(PackedStringArray(parts)))
+	print("[DonorLadder] 對帳：Σ各階(%d) + hit(%d) = %d ｜ entry = %d %s" % [
+		ssum, hit, ssum + hit, entry,
+		("✅" if ssum + hit == entry else "❌ 不平 ⇒ 分桶不互斥或不窮盡，這一節的數字不可用")])
+	print("[DonorLadder] 交集對帳（與既有守衛）：`ladder.deep.intersect`=%d ｜ `donorladder.hit`=%d %s" % [
+		int(Probe.counts.get("ladder.deep.intersect", 0)), hit,
+		("✅ 兩個定義等價" if int(Probe.counts.get("ladder.deep.intersect", 0)) == hit
+			else "★★★不等 ⇒ 兩個定義不等價，先解釋差在哪再讀下面")])
+	if entry == 0:
+		print("[DonorLadder] ★★★entry = 0 ⇒ 這條階梯【從沒被評估過】—— 母體塌陷，不是「每一階都通」")
+		return
+	if hit == 0:
+		print("[DonorLadder] ★hit = 0 ⇒ 本跑【不可重現】那 2 筆（★★而這不等於「沒事」，見票的判讀表第三列）")
+		return
+	print("[DonorLadder] ── ★命中逐筆（cap 50；★印當下 `scored` 全名單，才看得出它是不是真的無路）──")
+	for r in Probe.samples.get("donorladder.hit_table", []):
+		var d: Dictionary = r
+		print("[DonorLadder]    tick=%s team=%s food_days=%s has_aid_target=%s｜scored=%s" % [
+			str(d.get("tick", -1)), str(d.get("team", -1)), str(d.get("food_days", -1.0)),
+			str(d.get("has_aid_target", false)), str(d.get("scored", []))])
+
+# ★★★零勝 option 的 util dump（systems 2026-09-04 票）。
+#   ★同家族的贏家（maintain_weapons/tools/food）一起印 —— ★★沒有它們，「輸家低」與
+#     「大家都低」分不開；★★★而 systems 的假說（贏家＝團自己消耗的、輸家＝資本財＋原料）
+#     只有在兩邊【並排】時才可能被推翻。
+func _sec_zerowin() -> void:
+	print("═══ ★零勝 option util dump（★同家族贏家並排；★★禁 crank：先問它是不是【就該低】）═══")
+	print("  %-30s %6s %6s %9s %9s %9s" % ["option", "n", "won", "均 util", "均贏家 u", "均差距"])
+	for opt in DecisionEngine.ZEROWIN_WATCH:
+		var o: String = String(opt)
+		var n: int = int(Probe.counts.get("zerowin." + o + ".n", 0))
+		if n == 0:
+			print("  %-30s %6d %6s %9s %9s %9s ← ★母體 0：這一列【答不了】" % [o, 0, "-", "-", "-", "-"])
+			continue
+		var won: int = int(Probe.counts.get("zerowin." + o + ".won", 0))
+		var us: float = Probe.amount("zerowin." + o + ".u_sum")
+		var ws: float = Probe.amount("zerowin." + o + ".winu_sum")
+		print("  %-30s %6d %6d %9.4f %9.4f %9.4f" % [o, n, won, us / float(n), ws / float(n), (ws - us) / float(n)])
+	print("  ★★★exact-tie（util 與贏家【完全相等】⇒ 它不是輸在分數，是輸在 tie-break 的 `i` 序）：")
+	for opt in DecisionEngine.ZEROWIN_WATCH:
+		var ot: String = String(opt)
+		var nt: int = int(Probe.counts.get("zerowin." + ot + ".n", 0))
+		var te: int = int(Probe.counts.get("zerowin." + ot + ".tie_exact", 0))
+		print("     %-30s tie_exact=%d / n=%d %s" % [ot, te, nt,
+			("← ★★★它從來沒有輸在分數上" if nt > 0 and te == nt else "")])
+	print("  ★★差距分桶（贏家 − 該 option；★只在它沒贏的那些 tick）：")
+	for opt in DecisionEngine.ZEROWIN_WATCH:
+		var o2: String = String(opt)
+		var parts: Array = []
+		for b in ["lt0.1", "0.1to0.5", "0.5to1", "1to2", "ge2"]:
+			parts.append("%s=%d" % [b, int(Probe.counts.get("zerowin." + o2 + ".gap." + b, 0))])
+		print("     %-30s %s" % [o2, "｜".join(PackedStringArray(parts))])
+	print("  ★★★逐筆（cap 20／option；★first-N 不是 reservoir）：")
+	for opt in DecisionEngine.ZEROWIN_WATCH:
+		var o3: String = String(opt)
+		var rows: Array = Probe.samples.get("zerowin." + o3 + ".lost_table", [])
+		if rows.is_empty():
+			continue
+		var r: Dictionary = rows[0]
+		var tbl: Array = r.get("table", [])
+		var top: Array = []
+		for i in range(mini(5, tbl.size())):
+			top.append("%s=%.4f" % [String((tbl[i] as Dictionary)["opt"]), float((tbl[i] as Dictionary)["u"])])
+		var mine: String = "(不在前 5)"
+		for e in tbl:
+			if String((e as Dictionary)["opt"]) == o3:
+				mine = "%s=%.4f" % [o3, float((e as Dictionary)["u"])]
+				break
+		print("     %-30s tick=%s team=%s 贏家=%s｜前5: %s｜本身: %s" % [
+			o3, str(r.get("tick", -1)), str(r.get("team", -1)), str(r.get("winner", "")),
+			"  ".join(PackedStringArray(top)), mine])
