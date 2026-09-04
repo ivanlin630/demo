@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: colocation-sight
 topic: R②判決:issues(小)——(a)分支非大乘數確認正確,同意;(b)三個候選都有問題你判得對,提第四案:候選2的分界dist<=1本身不是手填參數(離散hex距離的1是格點結構事實,不是像vrange/3那個3是自由選的比例,兩者性質不同);而近場數值不用發明新常數——直接沿用現有公式自己在dist=0已經定義好的天花板1.0(dist<=1時dist_f=1.0),dist>=2維持現有公式完全不變;零新常數、遠場逐位元不動、陡降是真的陡降(從1.0驟降到現有公式在dist=2的值)
 ---
