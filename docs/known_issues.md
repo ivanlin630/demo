@@ -3428,3 +3428,21 @@ tick=600 team=9  贏家 maintain_tools=1.3043
 ★★★而現有數字證得出「卡在上限」,證不出「沒有上限的話會不一樣」—— 而後者才是修法依據
    ⇒ pre／post／超出量三值同印的探針跑中(30 日足夠:tick 600 就看得到,母體不缺)
 ```
+
+## ★★★同一種飢餓、不同管道給不同緊急度 —— **payoff 導出【刻意】不含 `SURVIVAL_GOODS` ×6 放大**（2026-09-04 立案，★不是遺漏）
+```
+★trade_valuation.gd:160-161  if res in SURVIVAL_GOODS and shortage > 0.5:
+                                 shortage = 1.0 + (shortage - 0.5) * 6.0
+★payoff-derive-bridge 用【escalation 之前】那個值 ⇒ maintain_food 在 payoff 管道裡【沒有】這個待遇
+★★而「飢餓該有放大待遇」在本 repo 是 established:SURVIVAL_CRUSH(facility_score)／famine_escalation(_self_use)
+   ⇒ ★★★於是同一種飢餓,在【三個管道】裡有【兩種】緊急度
+```
+★**為什麼仍然這樣做（★理由只有一個，不要事後加別的）**：
+**含 escalation 會讓 food 的 shortage 衝到 4.0，而其餘資源上限 1.0 ⇒ 立刻重開剛剛才解掉的跨家族量綱問題。**
+> **回訪：觸發事件 —— payoff 導出橋接版 merge 之後的第一次「誰在贏」讀數。**
+```
+★屆時要先答的是:【maintain_food 有沒有因為少了這個待遇而系統性輸掉】
+⇒ ★★若沒有 ⇒ 這個殘留無害,留著;若有 ⇒ 下一刀要把放大接進來,而【接法不能是再乘一個常數】
+   ⇒ ★★★正解方向:讓三個管道【共用同一個放大函式】,而不是各自寫一份
+```
+★**而這條的價值不在 food** ——★★**它是一個【一致性缺口】的樣本**：**同一個世界事實，在不同管道被翻譯成不同的緊急度。**

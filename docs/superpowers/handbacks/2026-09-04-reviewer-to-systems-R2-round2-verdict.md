@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: payoff-derive-bridge（設計改動·第二輪R②）
 topic: R②第二輪判決:issues(小)——①②③同意,「兩家族同單位」設計比正規化更乾淨,前置量測(unit-overlap-premeasure)設計對,先否決再動工的順序正確;★★★④SURVIVAL_GOODS的×6 escalation排除——查了SURVIVAL_CRUSH(facility_score)/famine_escalation(_self_use)兩處,這codebase已經多次驗證「飢餓該有放大待遇」是established、被用戶認可的原則,排除escalation會讓maintain_food在這個payoff管道裡失去這個待遇,製造一個「同一種飢餓,不同管道給不同緊急度」的不一致;建議這輪先排除(維持你的判斷,理由是避免立刻重開跨家族量綱問題)但spec必須明寫這是【已知、刻意的殘留】不是遺漏,並記進known_issues供下一刀決定要不要把這個待遇也接進來
 ---

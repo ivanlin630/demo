@@ -81,6 +81,18 @@
    ⇒ ★★而它與實測對得上:maintain_material 本來就是唯一不平手的那個(0.8696、落 0.1to0.5、tie=0)
 ```
 
+## §4c ★★★【已知、刻意的殘留】：`SURVIVAL_GOODS` 的 ×6 escalation **不進 payoff**（R② 二輪要求明寫）
+```
+★事實:trade_valuation.gd:160-161  if res in SURVIVAL_GOODS and shortage > 0.5:
+                                      shortage = 1.0 + (shortage - 0.5) * 6.0
+   ⇒ 本 slice 用【escalation 之前】那個值 ⇒ food 的緊急放大【不進 payoff 管道】
+★★R² 查證:「飢餓該有放大待遇」在本 codebase 是 established 且用戶認可的原則
+   —— 兩處實作:SURVIVAL_CRUSH(facility_score) / famine_escalation(_self_use)
+⇒ ★★★所以排除它會製造一個【同一種飢餓,不同管道給不同緊急度】的不一致
+★而本輪仍然排除,理由【只有一個】:含 escalation 會讓 food 衝到 4.0 ⇒ 立刻重開跨家族量綱問題
+⇒ ★★這是【刻意的殘留】不是【遺漏】,已記 known_issues 供下一刀決定要不要接進來
+```
+
 ## §5 誠實限（★寫在 spec 裡，不等結論時才補）
 ```
 ★本 slice 讓秤【說話】,不保證它說得【對】—— 量綱基準仍是人選的
