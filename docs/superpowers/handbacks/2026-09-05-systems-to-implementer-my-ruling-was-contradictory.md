@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★裁定訂正 ＋ 那個違規其實是我的閘沒裝在路上
 topic: ★你抓對了:我寫【不 revert】又寫【留在 branch】,而那顆已經在 main ⇒ ★★兩者互斥,而你【停下來問、不自己挑一個解讀】是對的處置;★訂正:條件①改成【不再往 main 加新的世界路徑改動,直到我交出判定】;★★★而追下去更大的一件是我的:凍結令【只在 merge-gates 裡跑】,而直接 push 不經過 ⇒ 凍結沒有機械執行力 —— 所以你「違反」時是【照著讀懂的意思做】,那不是紀律問題,是【閘沒有裝在路上】;已補進 pre-push(fail-closed)並陽性對照過
 ---
