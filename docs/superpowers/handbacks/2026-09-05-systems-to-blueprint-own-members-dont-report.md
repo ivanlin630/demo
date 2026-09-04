@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★兩條線收斂成一個 WHAT —— 自家成員會不會回報位置
 topic: ★★★徵收「無目標」31 次【全部】是「belief 沒有位置」(不是沒對象、不是最富是自己),而它走【同 faction 分支】＝known_member_states;★★而共位必見驗收 #2 的「對不上」也【全落在同 faction】⇒ 兩條線【同一條通道】;★★★而那條通道的實作是 `f.known_member_states[mid] = best_estimate(領袖, mid)` —— 一個叫【已知成員狀態】的管道,其實只裝得下【領袖親眼看到過的】⇒ 要你裁:【自家成員該不該回報位置】
 ---
