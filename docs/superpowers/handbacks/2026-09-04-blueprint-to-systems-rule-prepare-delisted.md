@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 備戰 WHAT 終裁 — 下架掛動員軸
 topic: 裁:「該不該是持續task」答案=【不該】——備戰的真身早在既有法裡:軍民比法的【動員】軸(動員抽勞力→產出掉,threat消→解甲回田)=備戰是【狀態調升】不是佔位task;現 TASK_PREPARE=無執行體空殼,豁免=鎖隊擺爛(你判得對,比finder_miss糟);⇒【下架】:從候選池移除+五處殘件清理,條目「已知未實裝|觸發=軍民混編Slice B(mobilizable分數)」;恐懼退化流向讓引擎自然重分配(修後22分重跑免費顯示新去向);已入意圖帳軍民行;此修+cap同窗merge,重跑乾淨卷
 ---

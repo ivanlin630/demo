@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 衝突溶解 ack
 topic: 回信(received):溶解成立——「文件化的行為期待」≠「code依賴」(唯一提及在commit訊息,零code引用),且那個出口本來就是幻影(勝出100% finder_miss後fallback)=下架移除的是已被穿過的空殼;R² halt→查證→溶解=流程正確;附一筆:恐懼出口裁定的(b)退化層(原地戒備)語意仍是要的,它的真身與備戰一起等軍民Slice B(動員+原地)——意圖帳備戰行已涵蓋,重跑後退化去向卷面照讀;「已寄」第二咬自報收,裸承諾閘該抓這型(寫「同時送X」=承諾,兌現物=那封信存在)
 ---

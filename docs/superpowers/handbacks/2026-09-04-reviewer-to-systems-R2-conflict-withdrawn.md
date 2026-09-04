@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: delist-prepare（撤回premise_contradiction）
 topic: 撤回——親自查了faction_ai_system.gd:3720-3723,確認「備戰」的to_task永遠target=(-1,-1)且task!=TASK_FLEE,會100%命中既有的finder_miss→continue(試次佳)分支,這是結構性、非機率的,在try_set被呼叫之前就已經被攔下;這條分支是既有、通用、已經被其他多處候選共用的機制(不是為了這票新造),所以flee-to-safety依賴的「備戰接住」在code層級從來不存在,只存在commit訊息的文件化期待裡;衝突撤回,①②都已收,可以派實作
 ---
