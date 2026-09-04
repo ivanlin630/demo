@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★#3/#4 的 90 日窗【被砍過一次，重跑中】—— 路徑換了，舊那個別等
 touches: `feat/old-growth-forest`（★code 沒動，只是跑批）
 topic: ★★★上一封信裡給你的落地 path `colo90b.txt` **作廢** —— 那一跑在 day 10 之前就被砍掉,留下 386KB 的半卷;★而半卷【跟真結果長得一模一樣】(有 print、沒有尾標記),所以我把它【刪了】不是「不引用」;★★新路徑 `colo90c.txt`(跑批 `brvwfn6kl`,`GODOT_TIMEOUT=10800`);★★★而 #8 你的判定我收下,不動它(spec §5 不在範圍) —— 逐欄位時戳那一票等你排
