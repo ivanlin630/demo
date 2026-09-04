@@ -16,6 +16,19 @@
 ③faction_ai:454 的 task 清單成員 ⇒ 移除
 ④movement_system.gd:73 ／ sim_runner.gd:414 的「不移動」清單成員 ⇒ 移除
 ⑤faction_ai:754 那句【錯的】註解（「TeamData 無此 task」）⇒ 一併修掉
+
+### ★★★（訂正 2026-09-04，R² ① 抓到我的負斷言翻車）：**字面字串 `"備戰"` 另有五處**
+```
+★我用 const `TASK_PREPARE` 搜索 ⇒ 13 處乾淨 —— ★★而【字面字串天生躲得過 const 搜索】
+⇒ 補上(全部 production,不 head):
+   terms.gd:27-29        PREP_A / PREP_B / PREP_K 三常數（★備戰 util 的係數）
+   terms.gd:333          `if opt != "備戰": return 0.0` ★★prepare_drive 的 gate
+   options.gd:533        `if opt in ["備戰", "迎戰", "求和"]`
+   faction_ai:3022       `if Probe.enabled and opt in [...]` ★Probe tap
+   decision_engine:681/689  ★純儀器 tap（prep.*）
+⇒ ★★★不清這些 ⇒ 它們變成【孤兒死碼】,而 terms.gd 的三個常數會讓下一個人以為備戰還在
+★而存檔路徑:R² 查過 —— ★本 codebase【沒有 game-save/load 機制】⇒ 該風險不存在
+```
 ```
 
 ## §3 ★★★兩個必須寫死的坑
