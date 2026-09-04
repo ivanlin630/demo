@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 「併入 committed 卻沒併成」根因（★用戶「先修吧」⇒ warring HOLD）
 tier: probe
 topic: ★我先看了路徑,所以票問得比「查一下」準:真正併成的地方在 `interaction_system`,而它【需要兩隊相遇】(a/b 配對)+`social_target` 對得上;★★所以這可能不是「committed 沒發生」,是【committed ≠ 送達】——committed 只代表 TaskArbiter 收下意圖;★★★而第一步【零新跑】:既有 tap `join.dispatch`(interaction_system:240-241)就在,先讀 seg1 輸出裡它是多少
