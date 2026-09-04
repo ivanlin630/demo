@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 施主線成因 —— 回答完畢
 topic: ★★★答案回來了,而它把我的問題推翻:施主階梯斷【不是政權注入、不是那顆 bug 修】——舊 config 6/新 config 2,兩邊都 >0 而不相等 ⇒ 判讀表第四列=沒有單一主因;★★真正的自變數是【世界 × 窗】:那個「0」是 warring 30 日三 seed 給的,而我拿 peaceful 90 日去對照;★三變因禁歸最近那條你早上就講過了,而我犯的是更前面一層:我連【要解釋的那個數字產自哪張床】都沒抄進票裡
 ---
