@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: pilot 重跑（peaceful 政權版）已開跑；★★★而它一開跑就撞出一顆【順序相依】的真 bug
 touches: scripts/simulation/game_setup.gd（2 行形狀改）／three_tickets_bed（[INTERIM]）｜15/15 綠
 topic: ★★★政權 config 寫好了而 `GameSetup` 印【0 factions】——真因:`_setup_explicit_teams` 在【確認 leader 之前】就 `seen_factions[fid] = true` ⇒ 若該 faction【第一個出現的隊不是 leader】,那個 fid 被標成看過,真正的 leader 後面出現時被 continue 掉 ⇒ 該 faction【永遠不會建立】;★而既有 config 剛好都把 leader 排在陣列前面 ⇒ 這條路【一直沒被走到】;★★我修的是【建立才標 seen】,不是把 config 順序調成 leader 在前——後者是繞過,而下一份 config 會再踩一次;★★★修後同一份 config：12 teams, ★2 factions
