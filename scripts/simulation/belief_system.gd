@@ -190,6 +190,21 @@ static func confident_enough(state: WorldState, observer_id: int, target_id: int
 static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 		source_id: int, source_type: String, fields: Dictionary,
 		credibility: float, distorted: bool) -> void:
+	# ★★★claim 寫入端 tap（systems 2026-09-04）：★把每一筆 claim 依【觀察者與目標當下是否同格】分兩類。
+	#   ★★這裡讀兩隊真 tile_pos 只為分類統計、不回寫任何決策讀得到的欄位   # gate-ok: observation-only god-view（純計數，不進 claim 內容、不進決策）
+	#   ★★★而「有沒有帶 tile_pos」要單獨一格 —— 有 claim 不代表有位置（known_issues:784 記過）。
+	if Probe.enabled:
+		var _o: TeamData = state.teams.get(obs_id)
+		var _t: TeamData = state.teams.get(tgt_id)
+		var _sfx: String = "unknown_team"
+		if _o != null and _t != null:
+			_sfx = "same_tile" if _o.tile_pos == _t.tile_pos else "far"
+		# ★用字串相接不用 `%` 格式化：record_claim 是【每 tick × 每個視野內 pair】的熱路徑，
+		#   ★★而 `%` 會走 Variant 陣列裝箱 —— 12 日窗第一次跑就撞 360s wrapper timeout。
+		var _pfx: String = "claim.write." + _sfx
+		Probe.bump(_pfx)
+		Probe.bump(_pfx + "." + source_type)
+		Probe.bump(_pfx + (".帶位置" if fields.has("tile_pos") else ".無位置"))
 	if not state.team_intel.has(obs_id):
 		state.team_intel[obs_id] = {}
 	var cs: Array = _coerce(state.team_intel[obs_id].get(tgt_id, null))

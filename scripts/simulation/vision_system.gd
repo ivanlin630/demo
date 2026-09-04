@@ -38,10 +38,29 @@ func tick_discovery(state: WorldState, team_ids: Array,
 			if other_id == tid: continue
 			var other: TeamData = state.teams[other_id]
 			var dist: int = _hex_dist(obs.tile_pos, other.tile_pos)
-			if dist > vrange: continue
+			# ★★★共位偵測 tap（systems 2026-09-04 問「共位時有沒有產生 sighting」）——
+			#   ★這裡分【被視野擋掉】與【進了視野但沒偵測到】兩格：兩者都會讓 belief 停在舊位置，
+			#     ★★但處置完全相反（前者是 vrange，後者是 _can_detect 的門檻）。
+			#   ★★★而「同格 pairs」這一格必須先非 0，否則下面兩格的 0 是【儀器沒跑到】不是【沒發生】。
+			if Probe.enabled and dist == 0:
+				Probe.bump("vis.colo.pairs")
+			if dist > vrange:
+				if Probe.enabled and dist == 0: Probe.bump("vis.colo.out_of_vrange_IMPOSSIBLE")
+				continue
 			var exposure: float = _get_exposure(state, other)
 			var dist_f: float   = 1.0 - (float(dist) / float(vrange + 1)) * 0.5  # TEST VALUE
 			var eff_exp: float  = exposure * dist_f
+			if Probe.enabled and dist == 0:
+				Probe.bump("vis.colo.detect" if _can_detect(scout, eff_exp) else "vis.colo.nodetect")
+				if not _can_detect(scout, eff_exp):
+					# ★逐筆：沒偵測到的時候，是哪一項不夠 —— 潛行/地形/人口/偵查各自的值都帶上，
+					#   ★★否則只會知道「門檻沒過」而不知道【是誰把它壓下去的】。
+					var _ot = _get_tile(state, other.tile_pos)
+					Probe.bump_sample("vis.colo.nodetect.row", {
+						"obs": tid, "tgt": other_id, "obs_pop": obs.population, "tgt_pop": other.population,
+						"scout": scout, "exposure": exposure, "eff_exp": eff_exp,
+						"分數": eff_exp + scout * 0.3, "terrain": (_ot.terrain if _ot else "?"),
+						"stealth": _avg_skill(state, other, "潛行")}, 24)
 			if _can_detect(scout, eff_exp):
 				var is_new: bool = not state.team_discovered[tid].has(other_id)
 				_mark(state, tid, other_id)

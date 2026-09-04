@@ -114,8 +114,28 @@ func _run() -> void:
 				_tdist = FactionAISystem._hex_dist(_jt.tile_pos, state.teams[_host].tile_pos)   # gate-ok: observation-only god-view（床端，不進決策）
 				Probe.bump("joinmove.tdist.%02d" % clampi(_tdist, 0, 40))
 				Probe.bump("joinmove.gap.%s" % ("same" if _tdist == _dist else ("true_far" if _tdist > _dist else "true_near")))
+				# ★★★情報年齡（systems 2026-09-04 ③的對照組）：★belief 說 14 格外，
+				#   而那個 14 是【幾 tick 前的記憶】？—— ★★若年齡很小，代表它【最近才被寫過】
+				#   ⇒ 那就不是「舊記憶沒更新」，是【有東西正在把錯的位置寫進去】；
+				#   ★★★若年齡很大，代表共位【真的沒有產生任何 sighting】。
+				var _age: int = -1
+				var _cs: Array = BeliefSystem.claims(state, int(_jtid), _host)
+				for _c in _cs:
+					var _cv: Dictionary = _c["value"]
+					if _cv.has("tile_pos"):
+						_age = state.world.current_tick - int(_cv.get("last_tick", _c["tick"]))
+						break
+				if _age >= 0:
+					Probe.bump("joinmove.age.%s" % ("00_同tick" if _age == 0 else (
+						"01_一日內" if _age < WorldState.TICKS_PER_DAY else (
+						"02_一週內" if _age < WorldState.TICKS_PER_DAY * 7 else "03_超過一週"))))
+				else:
+					Probe.bump("joinmove.age.無位置claim")   # ★有 claim 不代表有位置（known_issues:784）
+				# ★對方在不在【我發現過的名冊】裡 —— ★★沒發現過 ⇒ 連 vision 都沒對上過
+				var _disc: bool = (state.team_discovered.get(int(_jtid), []) as Array).has(_host)
+				Probe.bump("joinmove.discovered.%s" % ("yes" if _disc else "no"))
 				Probe.bump_sample("joinmove.pair", {"team": int(_jtid), "host": _host,
-					"belief_d": _dist, "true_d": _tdist}, 40)
+					"belief_d": _dist, "true_d": _tdist, "age": _age, "disc": _disc}, 40)
 			else:
 				Probe.bump("joinmove.host_gone")   # ★宿主已不在名冊 ⇒ 真距離【答不了】，不是 0
 			_join_prev[int(_jtid)] = _dist
@@ -1216,11 +1236,69 @@ func _sec_join_funnel() -> void:
 	print("  ★★逐筆（cap 40）：")
 	for r in Probe.samples.get("joinmove.pair", []):
 		var rd: Dictionary = r
-		print("     team=%s host=%s belief_d=%s true_d=%s" % [
-			str(rd.get("team", -1)), str(rd.get("host", -1)), str(rd.get("belief_d", -1)), str(rd.get("true_d", -1))])
+		print("     team=%s host=%s belief_d=%s true_d=%s ｜ 情報年齡=%s tick ｜ 發現過=%s" % [
+			str(rd.get("team", -1)), str(rd.get("host", -1)), str(rd.get("belief_d", -1)), str(rd.get("true_d", -1)),
+			str(rd.get("age", -1)), str(rd.get("disc", false))])
 	print("  ★★讀法（systems 寫在數字之前）：")
 	print("     `dispatch`=0 而 `win`>0 ⇒ ★【從沒走到相遇】⇒ 病在移動/距離，不在 resolver")
 	print("     `dispatch`>0 而 `resolve`=0 ⇒ ★★病在 `social_target` 對不上或 resolver 內部")
 	print("     兩者都有 ⇒ ★★★照原樣報，分開計")
 	print("  ★★★而 `win` 與 `dispatch` 【不是同一個母體】：win 是決策次數，dispatch 是相遇次數")
 	print("     ⇒ 兩者相減沒有意義（★同一個陷阱我今天已經在 `[Merge]` 上踩過一次）")
+	_sec_sighting()
+
+# ★★★共位有沒有產生 sighting（systems 2026-09-04 ③）——
+#   ★這一段回答的是【資訊寫入端】，前一段回答的是【讀取端拿到什麼】。
+#   ★★順序有意義：先證「同格 pairs 非 0」（儀器有跑到），再看「同格 claim 是 0 還是 >0」。
+func _sec_sighting() -> void:
+	print("")
+	print("═══ ★★★共位有沒有產生 sighting（claim 寫入端）═══")
+	var _pairs: int = int(Probe.counts.get("vis.colo.pairs", 0))
+	var _det: int   = int(Probe.counts.get("vis.colo.detect", 0))
+	var _nod: int   = int(Probe.counts.get("vis.colo.nodetect", 0))
+	var _oov: int   = int(Probe.counts.get("vis.colo.out_of_vrange_IMPOSSIBLE", 0))
+	print("  ★視野掃描裡的同格 pair（母體）= %d" % _pairs)
+	if _pairs == 0:
+		print("     ★★★母體 0 ⇒ 下面每一格的 0 都是【儀器沒跑到】，不是【共位不產生 sighting】")
+	print("  ★★偵測到 = %d ｜ 沒偵測到 = %d ｜ 被 vrange 擋掉 = %d（★同格被 vrange 擋＝不可能，非 0 就是 bug）" % [
+		_det, _nod, _oov])
+	print("     對帳：%d + %d + %d = %d vs 母體 %d %s" % [
+		_det, _nod, _oov, _det + _nod + _oov, _pairs,
+		"✅" if _det + _nod + _oov == _pairs else "❌ 不平"])
+	var _nr: Array = Probe.samples.get("vis.colo.nodetect.row", [])
+	if not _nr.is_empty():
+		print("  ★★★沒偵測到的逐筆（cap 依 SPECIMEN_SAMPLE_N；★門檻是 `eff_exp + scout*0.3 > 0.3`）：")
+		for _r in _nr:
+			print("     %s" % str(_r))
+	print("")
+	print("  ── ★claim 寫入端：每一筆 claim 當下，觀察者與目標同格嗎 ──")
+	var _cw: Array = []
+	for _k in Probe.counts.keys():
+		var _ks: String = String(_k)
+		if _ks.begins_with("claim.write."):
+			_cw.append("%s=%d" % [_ks.substr(12), int(Probe.counts[_k])])
+	_cw.sort()
+	if _cw.is_empty():
+		print("     （空）★★★空 ⇒ record_claim 一次都沒被呼叫，或 Probe 沒開 —— 不是「沒有 claim」")
+	else:
+		for _line in _cw:
+			print("     %s" % _line)
+	var _st: int = int(Probe.counts.get("claim.write.same_tile", 0))
+	var _fa: int = int(Probe.counts.get("claim.write.far", 0))
+	print("  ★★判別（systems 寫在數字之前）：")
+	print("     同格 claim = 0 而同格 pair > 0 ⇒ ★【共位不產生 sighting】＝ propagation dead-end 的可指認受害者")
+	print("     同格 claim > 0 ⇒ ★★sighting 有產生 ⇒ 病在【寫進去的內容】或【JOIN 讀的是另一條通道】")
+	print("     ★★★而現在：同格 claim = %d ｜ 非同格 claim = %d ｜ 同格 pair = %d" % [_st, _fa, _pairs])
+	print("")
+	print("  ── ★JOIN 那一組的情報年齡（★對照組：belief 說 14 格外，那個 14 有多舊）──")
+	var _ab: Array = []
+	for _k2 in Probe.counts.keys():
+		var _ks2: String = String(_k2)
+		if _ks2.begins_with("joinmove.age."):
+			_ab.append("%s=%d" % [_ks2.substr(13), int(Probe.counts[_k2])])
+	_ab.sort()
+	print("     %s" % ("｜".join(PackedStringArray(_ab)) if not _ab.is_empty() else "（空）"))
+	print("     發現過宿主 yes=%d ｜ no=%d" % [
+		int(Probe.counts.get("joinmove.discovered.yes", 0)),
+		int(Probe.counts.get("joinmove.discovered.no", 0))])
+	print("     ★★年齡小 ⇒ 有東西【正在把錯的位置寫進去】；★★★年齡大 ⇒ 共位【真的沒產生 sighting】")
