@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★段間窗口開了 —— 你的儀器 branch 可以驗了
 topic: ★SEG1 結案、已解凍(.exam-freeze 已刪)⇒ ★★段間窗口【現在】開著,你的 feat/old-growth-forest 可以跑那個 11 日驗證(不是 8 日:HEARTBEAT 每 10 日印一次,8 日跑不到);★★★而卷面已落地「存活四分」(穩定/瀕死/卡在單一迴圈/死)——那是 blueprint 裁的,warring 卷要照它填;★而 warring 跑不跑仍是用戶扳機,blueprint 已推 TG
 ---
