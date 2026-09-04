@@ -28,7 +28,20 @@
      (b) 掛 goal 時把 desire 存進 goal dict —— ★★便宜,但 goal 跨 tick 存活
         ⇒ payoff 會【凍在掛載當下的值】⇒ ★★★那是【換一個恆等】,正是本 slice 要修的病
      ```
-2. **家族內正規化**（各自除以該家族的量綱基準），★**常數只剩「量綱基準」一個，且必須標明它是量綱不是偏好**
+2. ★★★**（訂正 2026-09-04，R② 判「跨家族量綱是阻塞依賴」後改設計）不做「家族內正規化」——改成【兩家族同單位】**
+```
+★查證:_facility_deficit 註解自書「缺口(自身庫存 threshold,★0–1)」(faction_ai_system.gd:5659)
+       而 need_keep 是【絕對量】(pop × TARGET_PER_POP…,cap 100)
+   ⇒ ★★量綱【系統性分離】—— 家族內正規化會留下一個人選的比例常數,而 R² 說得對:
+      驗收①(相異值>2)【抓不到】「兩塊各自有變化但整體仍分成兩塊」這個失敗模式
+★★★改法:maintain_* 改用【既有的 0–1 shortage】而不是 need_keep 絕對量
+   `trade_valuation.gd:158-159`  target = pop × TARGET_PER_POP[res]
+                                  shortage = (target - stock) / max(target, 1.0)   # ≤ 1.0
+   ⇒ ★它已經存在,只是被寫在 local_value 內部、沒有獨立出口
+   ⇒ ★★抽成 shortage_ratio(state, team, res)（★純重構,local_value 行為必須逐位元不變）
+   ⇒ ★★★用【escalation 之前】那個值(SURVIVAL_GOODS 的 ×6 升壓會讓 food 衝到 4.0=又一個分離源)
+⇒ ★於是【兩家族同單位 0–1 by construction】,而【正規化常數整個消失】—— 更合 blueprint「禁手填常數」
+```
 3. **值分布 dump 保留**（`gu2.payoff_val` 相異值計數）——★**這是驗收的主證據**
 
 ## §3 ★★★不在範圍（明寫，防止順手做掉）
@@ -53,6 +66,8 @@
 | 5 | ★**perf**：印 `need_keep` 每決策呼叫次數 ＋ 該段 wall-clock | 遞迴守衛在，**但頻率變了** |
 | 6 | 陰性對照：**導出後仍印值分布** | 防「改完就不看了」 |
 | 7 | ★★**憲法閘 PASS** | 導出式不得寫成新門檻 |
+| ★8 | **兩家族值域【重疊】**：並排印 maintain_*／build_* 的 min／p25／中位／p75／max ＋ 重疊率 | ★★★R② 指出的失敗模式：**兩塊各自有變化、整體仍分成兩塊** ⇒ 驗收①抓不到 |
+| ★9 | `local_value` 抽 `shortage_ratio` 後**逐位元不變**（純重構） | 抽出動作本身不得改行為 |
 
 ## §4b ★前提查證（systems 自查，2026-09-04；★①原文有錯已訂正、②成立、★★③是新發現）
 ```
