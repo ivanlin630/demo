@@ -451,8 +451,16 @@ static func _print_entry(e: Dictionary) -> void:
 	var w: Dictionary = e["想什麼"]
 	var d: Dictionary = e["做什麼"]
 	var s: Dictionary = e["狀態"]
+	# ★★★缺鍵防線（2026-09-04，★由「把 runtime-born 補進 specimen」照出來）：
+	#   ★`w["candidates"]` 是【直接索引】⇒ 該鍵不存在時直接 SCRIPT ERROR，而那會【中斷這一筆的列印】。
+	#   ★★它在什麼時候不存在：一支隊【在本 tick 的決策記錄之後】才被加進 specimen
+	#     ⇒ 它的 scratch 沒走過 `_scratch(...)["candidates"] = cands` 那一行。
+	#   ★★★而修法【不是】填一個空陣列蒙混過去 —— 空 candidates 會被讀成「它沒有候選」，
+	#     那正是今天數過很多次的「0 看起來像沒發生」⇒ 這裡【明寫它是缺記錄】。
 	var cand_str: String = ""
-	for c in w["candidates"]:
+	if not w.has("candidates"):
+		cand_str = "★(本筆無 candidates 記錄 —— 該隊在這一 tick 的決策之後才被加進 specimen)"
+	for c in w.get("candidates", []):
 		var _mark: String = "?"                       # ★預設【未判定】—— 空白會被讀成「可派」
 		if bool(c.get("nd_judged", false)):
 			_mark = "✗" if bool(c.get("nd", false)) else ""
@@ -464,11 +472,18 @@ static func _print_entry(e: Dictionary) -> void:
 		str(_m.get("主需求層", "?")), float(_m.get("winner_util", 0.0)),
 		d["winner_opt"], d["task"], str(d["target"])])
 	print("    candidates: %s" % cand_str.strip_edges())
-	if not w["beliefs"].is_empty():
+	if not (w.get("beliefs", []) as Array).is_empty():
 		print("    beliefs: %s" % str(w["beliefs"]))
-	print("    狀態: pop=%d food(priv=%.1f/gran=%.1f/eff=%.1f) consume/d=%.1f rung=%d fid=%d coin=%.0f mat=%.0f" % [
-		s["pop"], s["food_private"], s["food_granary"], s["effective_food"],
-		s["consume_per_day"], s["rung"], s["faction_id"], s["coin"], s["material"]])
+	# ★同上：狀態欄也是直接索引 ⇒ 半途加進 specimen 的隊會缺鍵而【中斷列印】。
+	#   ★★而這裡我一樣【不填 0 蒙混】：缺鍵時整行改印「本筆無狀態記錄」，
+	#   ★★★因為 `pop=0 food=0.0` 與「沒有記錄」在畫面上長得一模一樣，而意思完全相反。
+	if s.has("pop"):
+		print("    狀態: pop=%d food(priv=%.1f/gran=%.1f/eff=%.1f) consume/d=%.1f rung=%d fid=%d coin=%.0f mat=%.0f" % [
+			s["pop"], s.get("food_private", 0.0), s.get("food_granary", 0.0), s.get("effective_food", 0.0),
+			s.get("consume_per_day", 0.0), s.get("rung", 0), s.get("faction_id", -1),
+			s.get("coin", 0.0), s.get("material", 0.0)])
+	else:
+		print("    狀態: ★(本筆無狀態記錄 —— 該隊在這一 tick 的決策之後才被加進 specimen)")
 	var _tr: Dictionary = s.get("leader_traits", {})
 	if not _tr.is_empty():
 		print("    leader: 野心=%.2f 慎重=%.2f 求生欲=%.2f 好戰=%.2f 貪婪=%.2f → food_sec_target=%.1f天" % [

@@ -13,6 +13,9 @@ extends SceneTree
 
 var _exclusive: String = "unknown"
 var _t_start_ms: int = 0
+var _spec_born: Array = []        # ★創世名冊（用來分辨 runtime-born）
+var _spec_rt_cap: int = 0         # ★★runtime-born 最多補幾隊進 specimen（env SPECIMEN_RUNTIME_N）
+var _spec_rt_added: Array = []    # ★★★實際補進去的（卷面要印，不能只說「有補」）
 
 func _initialize() -> void:
 	_run(); quit()
@@ -38,6 +41,16 @@ func _run() -> void:
 	#     byte-identical）⇒ 開了【不會改世界軌跡】—— 否則三張卷就不是同一個世界了。
 	#   ★未設 env ＝ no-op、零成本（`SpecimenTracer.enabled` 維持 false）⇒ 不影響別人跑這支床。
 	SpecimenDumpHelper.setup_from_env(state)
+	# ★★★runtime-born 覆蓋（QA 揭 2026-09-04）：helper 在 setup 當下取樣 ⇒ ★只抽得到創世隊，
+	#   而 runtime 新生隊（本段實測佔名冊 59–68%、非存活率是 config 層的最高 2.8 倍）
+	#   ⇒ ★★specimen 天生【讀不到最激烈的那一層】⇒ 從它讀出的故事【方向明確地偏樂觀】。
+	#   ★★★做法：記下創世名冊，之後在日界把【新出現的隊】依 id 昇序補進 specimen，補到上限為止。
+	#   ★決定性（id 昇序、零 randf）⇒ 不耗 global RNG；★★而 specimen 身分本身已非侵入
+	#     （`sim_runner.gd:580/592` 2026-07-28 移除了 LOD-exempt ——
+	#      ★★★注意 `world_state.gd:102` 的註解還寫著「LOD-exempt」，那句【已經過期】）。
+	for _tid0 in state.teams.keys():
+		_spec_born.append(int(_tid0))
+	_spec_rt_cap = int(OS.get_environment("SPECIMEN_RUNTIME_N")) if OS.has_environment("SPECIMEN_RUNTIME_N") else 0
 	print("[CONTROL] %s" % MeasureBedHelper.arm_order_report())
 	print("[CONTROL] Probe.enabled=%s（★false ⇒ 下面整份都是儀器沒開）" % str(Probe.enabled))
 	print("★換尺後的常數（直讀）：THREAT_BASE=%.4f｜CAUTION_SPAN=%.4f｜INFLATION=%.2f"
@@ -58,6 +71,19 @@ func _run() -> void:
 		#   ★★而它與串流版 wrapper 是【同一條在不同層】：wrapper 治 stdout 緩衝，
 		#     ★★★這條治【結論只在最後才存在】—— 而後者 wrapper 救不了。
 		#   ★格式照既有：母體與命中同印、key 名自報。
+		# ★★★每日界補 runtime-born（★依 id 昇序、決定性、補到上限為止）
+		if SpecimenTracer.enabled and _spec_rt_cap > 0 and _spec_rt_added.size() < _spec_rt_cap:
+			var _new: Array = []
+			for _tid in state.teams.keys():
+				var _ti: int = int(_tid)
+				if not _spec_born.has(_ti) and not state.specimen_team_ids.has(_ti):
+					_new.append(_ti)
+			_new.sort()
+			for _ti2 in _new:
+				if _spec_rt_added.size() >= _spec_rt_cap:
+					break
+				state.specimen_team_ids.append(int(_ti2))
+				_spec_rt_added.append(int(_ti2))
 		if (d + 1) % 10 == 0:
 			_sec_interim(d + 1)
 
@@ -105,6 +131,9 @@ func _run() -> void:
 	# ★★specimen 落地【在 `[PilotRun]` 之前】：★這樣「卷面最後一行存在」與「specimen 已落地」
 	#   是同一件事的兩半 —— ★★而先前那條「尾標記只是必要條件」提醒的正是：
 	#   ★★★落地要有【自己的證據】（檔案存在 + 路徑印出來），不能靠尾標記代言。
+	# ★★★覆蓋率自報（systems 要求：印【抽到的 team_id ＋ 出生別 ＋ 結局分布】）
+	#   ★不是印「有補 runtime」——★★是印【補了誰、它們是什麼結局】，否則「有覆蓋」只是一句宣告。
+	_sec_specimen_coverage(state)
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -1014,3 +1043,29 @@ func _sec_perf5() -> void:
 		print("        （exclusive=%s；★段級成本請看 `PHASE_TIMING=1` 的 phase 計時，不是這一行）" % _exclusive)
 	print("  ★★★誠實限：`need_keep` 在導出【之前】的呼叫次數就不是 0（A 類 evaluator 本來就呼叫它）")
 	print("     ⇒ ★要看的是【導出前後的差】，而不是「導出引入了這些呼叫」")
+
+# ★★★specimen 覆蓋率（QA 揭 2026-09-04）：★印【抽到誰】而不是【抽了幾隊】。
+func _sec_specimen_coverage(state: WorldState) -> void:
+	print("═══ ★specimen 覆蓋率（★抽到的 team_id ＋ 出生別 ＋ 結局）═══")
+	if not SpecimenTracer.enabled:
+		print("  ★未啟用（未設 SPECIMEN_* env）⇒ 本跑沒有 specimen")
+		return
+	var cfg_n: int = 0
+	var rt_n: int = 0
+	var rows: Array = []
+	for tid in state.specimen_team_ids:
+		var t: int = int(tid)
+		var born: String = ("config" if _spec_born.has(t) else "runtime")
+		if born == "config": cfg_n += 1
+		else: rt_n += 1
+		var alive: bool = state.teams.has(t)
+		var pop: int = int(state.teams[t].population) if alive else 0
+		var dead: bool = int(Probe.counts.get("extinct.team.%d" % t, 0)) > 0
+		var end_s: String = ("團滅" if dead else ("空殼" if (alive and pop == 0) else ("存活(pop=%d)" % pop if alive else "不在名冊")))
+		rows.append("%d:%s/%s" % [t, born, end_s])
+	print("  ★抽到 %d 隊：config-born %d ｜ ★★runtime-born %d（上限 SPECIMEN_RUNTIME_N=%d）" % [
+		state.specimen_team_ids.size(), cfg_n, rt_n, _spec_rt_cap])
+	print("  ★★逐隊：%s" % " ".join(PackedStringArray(rows)))
+	if rt_n == 0:
+		print("  ★★★runtime-born = 0 ⇒ 【本跑的 specimen 讀不到 runtime 那一層】——")
+		print("     而那一層在本段實測【非存活率最高到 config 層的 2.8 倍】⇒ 故事會偏樂觀")
