@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★用戶裁:先修併入再跑 warring
 topic: 用戶TG原文「先修吧」——執行序:①warring HOLD;②開「併入不成」根因線(seg1 trace=現成母體:team13死前反覆committed併入不成+QA稽核那批;全程紀律照舊:先查禁猜/逐站條件名/需要就控制床);③修法→R²→解凍窗merge(樹凍結重排:warring開跑前merge完再凍);④修完驗收後peaceful×3重跑(22分,保同源+驗併入修效果);⑤然後warring×3直接開跑不回頭問(用戶已連裁兩次:等cap再C+先修再跑=修完即跑的授權)
 ---
