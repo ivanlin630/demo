@@ -12,8 +12,13 @@
 #   ⇒ ★舊 baseline 的中文是【亂碼位元組】，而現在輸出是正確 UTF-8 ⇒ 逐行比對必紅
 #   ★★而【內容沒有變】：同 9 條、同計數（ASCII 骨架＋計數逐條比對確認）
 #   ⇒ ★★★這是【修好一個編碼 bug 讓所有以壞編碼記錄的基準線失效】—— 根修讓舊紀錄過期的一個實例
+# ★★★2026-09-05 重錄:共位必見＋共位互動(根修)⇒ 同一條 assertion 的【訊息內夾帶的狀態細節】變了
+#   ★具體:[g1a] 礦村未鑄幣 那條的 `task=建設` → `task=投靠`
+#   ★★而【失敗清單本身沒變】:9 條、逐條對應、HARD-FAILS 仍是 3
+#   ★★★而那個差異【是修法生效的證據】:那隊現在真的去投靠了(共位互動讓 JOIN 走得通)
+#   ⇒ ★baseline 對【訊息內的狀態細節】天生敏感 ⇒ 每次根修都會假紅一次,而處置是【證內容沒變才重錄】
 1 SCRIPT ERROR: Assertion failed: FORCE(任rung)→ambient_train_drive N.N
-1 SCRIPT ERROR: Assertion failed: [gNa] 礦村未鑄幣: mint_level=N coin_delta=N vault_ore=N | 施工隊=N 餘工期=N 目標={ "action": "upgrade_facility", "facility": "mint", "start_pop": N } 開工tick=N | 隊料=N 工具=N task=建設 | 設施={ "outpost_L": N, "farming": N, "workshop": N, "apothecary": N, "mint": N, "stable": N, "smeltery": N, "weaponsmith": N, "armorsmith": N }
+1 SCRIPT ERROR: Assertion failed: [gNa] 礦村未鑄幣: mint_level=N coin_delta=N vault_ore=N | 施工隊=N 餘工期=N 目標={ "action": "upgrade_facility", "facility": "mint", "start_pop": N } 開工tick=N | 隊料=N 工具=N task=投靠 | 設施={ "outpost_L": N, "farming": N, "workshop": N, "apothecary": N, "mint": N, "stable": N, "smeltery": N, "weaponsmith": N, "armorsmith": N }
 1 SCRIPT ERROR: Assertion failed: [pNa] join weight 太低 N.N
 1 SCRIPT ERROR: Assertion failed: fixture B：slot 滿＋升級買得起 upgrade 該贏過 demolish（不打折 同分，而拆建還要多過 ×N.N 一關），實際={ "facility": "farming" }
 1 SCRIPT ERROR: Assertion failed: rung 擴張+武力 未選擴張 intent, got={ "type": "防衛", "target_id": -N, "why": "慎重/威脅驅動，備戰守土" }
