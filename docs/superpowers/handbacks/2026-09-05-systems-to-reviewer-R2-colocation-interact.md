@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: colocation-interact（R² 審設計）
 topic: ★形狀:保留移動觸發 + 補【駐留共位 pair 的週期機會】,而【不新增互動語意】—— 呼叫的是同一支 _try_interact,只新增進入它的路;★★兩個結構都現成:state.teams_by_tile(只取 size≥2)與 CadenceStagger(零 RNG 純函式);★★★而我不自己選的一格是【cadence 用哪個既有值】—— blueprint 說掛 T1/T2,而我不想新造常數,也沒把握哪個語意上對,交你判(同 cap 那票的做法)
 ---
