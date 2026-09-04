@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: payoff-derive-bridge ★前置量測（★在寫修法之前，這顆可以【否決】整個設計）
 tier: probe
 topic: ★R² 判「跨家族量綱」是阻塞依賴不是誠實限(兩家族同池競爭進 rank_scored);★★而查下去有更好的解:maintain_* 改用既有 0–1 shortage(trade_valuation.gd:158)而不是 need_keep 絕對量 ⇒ 兩家族同單位、正規化常數整個消失;★★★但那是【推論】——這顆量測就是去否決它:零行為變更,只印兩家族的值域並排
