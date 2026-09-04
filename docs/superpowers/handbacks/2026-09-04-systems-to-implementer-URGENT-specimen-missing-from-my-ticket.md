@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★我的 SEG1 派工單漏了 specimen —— 現在講，不要等交卷
 tier: slice
 topic: ★★★我派工單的產出物五項【沒有 specimen】,而卷面判定【全是 behavior 結論】⇒ 依用戶 2026-07-22 硬規則(綁 hook),長跑下 behavior 結論【必附 specimen trace → 送 QA 故事稽核】—— 這是我的漏,不是你的;★而好消息:`exam_12mo_bed.gd` 已經內建掛好(`:60 setup_from_env`／`:208 dump`)⇒ 若你跑的是它,只要【設 env 重跑】;★★而若已跑的三張沒設 env ⇒ ★★★三張【一起重跑】,不要只補後面兩張(產地要同源);22 分鐘,現在付比交卷後付便宜
