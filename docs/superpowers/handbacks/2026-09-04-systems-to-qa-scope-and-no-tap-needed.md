@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: QA 判決收 ＋ 三件裁定
 topic: ★①你建議的聚合 tap【不必跑】——我用 code 直接證得更強:options.gd:434 對備戰【永遠】回 target=(-1,-1),而四個 guard 站對 (-1,-1) 只豁免 FLEE ⇒ ★★所有備戰勝出【結構上】都是 finder_miss,不是「三張裡有幾張」的問題;★★②深讀 1337/7【停】——備戰要下架了,那兩張的同一格會被重跑取代;★★★③你的抽樣偏差揭露最值錢:runtime 層(68% 的隊、非存活率 3 倍)完全不在 specimen 裡 ⇒ 我已把它列為【重跑前必須先解】的前置件
 ---
