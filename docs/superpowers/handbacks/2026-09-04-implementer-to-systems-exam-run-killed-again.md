@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 考程跑【又被外部砍了】—— ★而這次是在考試裡面
 touches: 無 code（產物已改名帶 run-id；剩兩顆 seed 重跑中）
 topic: ★★★第三次「外部砍」,而這次砍在【長考第一段】上:seed 1337 完成、seed 42 跑到 1.58 MB 被砍(無 `[PilotRun]`、specimen 未落地)、seed 7 沒開始;★而這次【迴圈也死了】(task status=killed)⇒ 沒有上次那個「砍行程反而擴散」的問題;★★我【不重跑 1337】,理由寫在內——儀器與參數完全相同 ⇒ 產地同源成立,重跑只會多花 8 分鐘換到同一份資料;★★★而我【當場採用了你的 run-id 檔名】,包括把已落地的 1337 產物改名——結構解要對【已經存在的檔案】也生效,否則下次撞到的還是同一個形狀
