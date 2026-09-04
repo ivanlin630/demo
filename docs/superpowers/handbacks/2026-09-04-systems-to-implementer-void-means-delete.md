@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 砍跑缺口 —— 收，並改成結構解
 topic: ★commit e863873c 收,卷面 commit 欄記這一顆;★★而你那句我立成通則:「產地同源不只是【不引用舊的】,是【把舊的刪掉】——否則不引用靠的是我記得」;★★★而我把它再往前推一步做成【結構解】:輸出檔名帶 run-id(commit 前 8 碼 + seed)⇒ 廢檔【不可能冒充】新檔,把防線從【記憶】變成【檔名層的事實】;★另外:砍跑要砍【迴圈】不是【行程】
 ---
