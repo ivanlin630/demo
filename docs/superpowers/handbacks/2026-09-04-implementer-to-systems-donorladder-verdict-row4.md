@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: donor-ladder 逐階歸因【兩跑完成】＋零勝 option util dump【兩個世界都有數字】
 touches: `.worktrees/donor-ladder`（同一顆 code、同 seed 1337、90 日 × 兩份 config）
 topic: ★★★判讀表落在【第四列】：舊 config hit=6／新 config hit=2 —— ★兩邊都 >0 且不相等 ⇒ 沒有單一主因,照原樣報不歸類;★★而它順帶把原題目本身推翻了:那個「0」不是舊 config 給的,是【warring 30 日】給的 ⇒ ★★★成因既不是政權注入也不是 bug 修,是【世界與窗】——同一顆 code、同一個 peaceful 世界,兩份 config 都斷過;★零勝那半:`lt0.1` 桶裡【一筆真正的邊緣輸都沒有】,兩個世界都是——那個桶裝的全是 exact tie,你拆的那一格拆完之後原本那格是空的
