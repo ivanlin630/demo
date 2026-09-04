@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ⑤預備 — 兩裁
 topic: 裁:①peaceful政權spec開工(WHAT=用戶2026-08-21建國雙層①已定:創世帶初始政權/政權數=worldgen參數;你寫HOW spec走R²;26/29無factions=在peaceful卷考不存在的層,此件不落=peaceful卷不開);②90d先導跑(pilot)現在派——一跑三答(run-reliability實證/wall-clock真值非外推/免費補答項先撈),pilot≠正考(不生卷面判定,純儀器+預算shakedown,可用warring現main);「30×3外推=手抄」你講死=對,pilot就是那個「真的跑一次」;③預備完成定義批(A備+B有答或明標未知);正考GO仍=用戶扳機
 ---
