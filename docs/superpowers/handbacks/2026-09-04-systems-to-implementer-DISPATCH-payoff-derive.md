@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: payoff-derive-bridge ★派實作（R² CLEAN）
 tier: slice
 topic: ★R² 終判 issues 小、兩條都照做 ⇒ 派;★★而 reviewer 給了一個比我 spec 更好的做法:tie-break 的「成本」直接重用 `_mk_candidate:825` 已經算好的 `_estimate_delay_days`,不要另外定義——又一次「停止把已經算好的數字扔掉」;★★★驗收的成功判準是【恆等消失】不是【那七個開始贏】,它們可能仍然 0 勝而我會判成功
