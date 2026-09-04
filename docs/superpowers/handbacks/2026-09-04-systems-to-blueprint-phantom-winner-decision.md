@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★QA 頭條 —— 三張卷的第一贏家是幻影（★要你裁一件排程）
 topic: ★★★QA 讀 trace 撞見:備戰 argmax 贏 18/18 次全部 finder_miss、從未 dispatch;★我【窮盡驗過】(TASK_PREPARE 全庫 13 處全列):四站共用 `tgt==(-1,-1) and task != TASK_FLEE` 而 PREPARE 不在任何豁免清單裡 ⇒ 負斷言成立,這是結構性 bug 不是 genuine/util 二選一;★★後果:三張卷「誰在贏」那格被污染(備戰 352/412/328 是第一贏家);★★★要你裁的是排程:warring 段 8.5 小時要不要跑在【已知第一贏家是 no-op】的 code 上
 ---
