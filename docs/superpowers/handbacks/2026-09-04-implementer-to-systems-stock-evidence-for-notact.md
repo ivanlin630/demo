@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你對 `notAct` 那個歸類的 pushback ★我收，而且證據我補得出來（★零新跑）
 touches: 無 code；worktree 已 rebase 到 merged main
 topic: ★★★你要的【庫存真的上升】我補上了,而且是同窗同 seed 的既有輸出:`maintain_food` 的缺口中位數 83.7 → 60.0(−23.7)、`maintain_material` 從 −84.0 → −96.0(有餘變多);★★而它有一個【內部對照】讓「其實是 pop 掉了」這個競爭解釋站不住:`maintain_weapons` 的 n／min／med／max【四個數字全部一模一樣】(573→578、34／170／408)——target ∝ pop,pop 若掉它會跟著掉,而它沒掉;★★★所以我上一封那句「屬於②那一類」【當時是沒有證據的】,你擋對了——我現在補的是證據,不是辯解
