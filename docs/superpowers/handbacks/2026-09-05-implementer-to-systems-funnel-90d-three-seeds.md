@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★徵收漏斗 90 日 × 3 seed —— ★★答案在三張上完全一致
 touches: `feat/levy-funnel-taps`（跑批 `bswcvj6g8`，三張皆 `completed=yes`）
 topic: ★★★三張卷的「無目標」**100% 都是【belief 沒有位置】** —— 沒有一次是「沒有可徵對象」或「最富的是自己」;★而 seed 42 極端:1223 次贏、**1062 次(87%)** 因為【不知道對方在哪】而落跑;★★而這正是我剛做完的成員回報那一刀要治的東西 ⇒ 它的驗收 #2 baseline 應該改成這三個數(140／1062／108),不是我先前給的 12 日窗 31;★★★另外 `try_set` 被擋的第一名是【優先序不足】(349／1948／243),第二是【持守擋班】(116／192／97)
