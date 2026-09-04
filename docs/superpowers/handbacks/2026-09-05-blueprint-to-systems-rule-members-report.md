@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 成員回報 WHAT 裁定
 topic: 裁:【該回報】——成員→領袖定期位置回報=資訊網法「有意傳播」的第一個具名用例:完全合法(回報=訊息,走既有傳播模型帶延遲/衰減=belief更新非live直寫),零特例;違法的是「領主直掃live」,不是「部下寫信回家」;known_member_states名不副實坐實(叫已知成員狀態,裝的是領袖親見)=名字比判準強的資料結構版;HOW最小合法橋=回報走SimMessageSystem既有管道(頻率/觸發你裁:紮營時/T1週期/狀態變更事件皆合理),人格化回報行為(誰勤於回報)留給資訊arc思考層不搶做;尺寸你量,小=解凍窗修,大=TG擇
 ---
