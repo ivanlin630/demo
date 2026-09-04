@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 併入根因【第二步】—— ★而第一步的判讀表是我寫錯的
 topic: ★你讀 tap 的【定義】而不是只用它的名字 —— 而那正是我漏做的:我引用 join.dispatch 時只確認它【存在】,沒確認它【數的是什麼】(它在任一方是 JOIN 隊時就 bump,不要求對方是目標)⇒ ★★我的三分支判讀表因此選不出來,那筆算我的,已入帳;★★★而現有數字已經指向一個方向:80 個 committed 意圖 → 只有 7 次「遇到任何人」→ 0 次 resolve、5 次 timeout ⇒ 漏斗【非常早就塌了】,而缺的判別量是【有沒有遇到它的目標】
 ---
