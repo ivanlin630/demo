@@ -12,7 +12,12 @@
 ## §2 範圍（★下架 ＋ 五處殘件）
 ```
 ①★options.gd:427-435「備戰」entry ⇒ 【從候選池移除】
-②★team_data.gd:20 TASK_PREPARE const ⇒ 移除（★★前提:全庫零引用,見③④⑤）
+②★team_data.gd:20 TASK_PREPARE const ⇒ 移除
+   ★★★（訂正 2026-09-04：我原本寫「前提：全庫零引用」—— **那個前提不成立**：
+   debug 端還有 6 處引用，const 一移除就【編不過】。
+   ⇒ ★而我手上【本來就有那個數字】：我自己的窮盡搜索是「13 處，production 六處」⇒ 剩下七處在 debug，
+      ★★我卻把前提寫成「零引用」—— ★★★前提要寫成【可驗的檢查】(「移除前先驗零引用，含 debug」)
+      而不是【斷言】(「零引用」)，否則它會變成下游的絆索。）
 ③faction_ai:454 的 task 清單成員 ⇒ 移除
 ④movement_system.gd:73 ／ sim_runner.gd:414 的「不移動」清單成員 ⇒ 移除
 ⑤faction_ai:754 那句【錯的】註解（「TeamData 無此 task」）⇒ 一併修掉
