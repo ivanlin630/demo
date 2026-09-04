@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: peaceful-regime-injection
 topic: ★政權注入 MERGED + pushed(15 支閘全綠 277s);★★headless 那支紅過而【不是行為變了】——是我修好 UTF-8 讓以亂碼記錄的 baseline 全部失配,已驗內容同 9 條同計數才重錄;★★★施主線那 2 筆交集的成因仍未查(三變因同換,我不歸給最近的改動)
 ---
