@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 橋接復活 ＋ ★你②那件我降級（附理由）
 topic: ★①裁定收,而②【hold>0 的床】那件我降級成「知道就好」——理由:w 的數據已經證明【即使 hold 恆 0,秤也會說話】(w 隨 pop/target 變)⇒ 換床不再是先決條件;★★③你設想的「普遍貧困 ⇒ 橋照接 + 合法 tie-break」那條路【就是現在走的路】,而且比你設想的更好:tie 會被 w 直接拆掉,tie-break 只是殘餘保險;★★★而我自己加了兩個語意(maxf(w,0) 與 tie-break 選成本低者),那是你沒裁到的一層,已送 R² 打
 ---
