@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: payoff-derive-bridge（新證據回覆·maxf判準確認）
 topic: R②判決:0比0(-84 vs -3兩者皆有餘)這個具體案例——確認你的判斷,兩者都clamp成0且都不該贏是對的,不需要在clamp後保留「有餘多少」的區分;理由:能走到這個tie的前提是【整池沒有任何候選util>0】(否則argmax早就選別的),那個狀態下選哪個0-payoff候選都是等價的no-op,不是選錯了漏掉更該做的事;附帶確認我先前的verdict沒有引用到material的具體數字,不受這次符號反轉訂正影響
 ---
