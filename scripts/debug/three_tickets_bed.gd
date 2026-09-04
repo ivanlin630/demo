@@ -1365,6 +1365,25 @@ func _sec_sighting() -> void:
 	print("     ★判準：只能出現【真 pos（tile_pos）＋外觀層（pop 估/tags/activity/in_combat/tier/resource_scale）】")
 	print("     ★★出現【內部狀態】（真 pop/真 food/決策欄位）＝god-view 滋入 ⇒ ★★★報 systems，不自己删掉")
 	print("")
+	print("  ── ★★★共位互動（駐留入口）：驗收 #4／#6 ──")
+	var _ct: int = int(Probe.counts.get("colo.turn", 0))
+	var _ci: int = int(Probe.counts.get("colo.residency_interact", 0))
+	var _cd: int = int(Probe.counts.get("colo.dedup_prevented", 0))
+	print("     環顧回合 turn=%d ｜ 駐留互動 residency_interact=%d ｜ 被去重擋下 dedup_prevented=%d" % [
+		_ct, _ci, _cd])
+	print("     ★★★#4 的形狀：去重是【先查後標】⇒ 同 tick 同 pair 重複處理【結構上不可能】＝ 0；")
+	print("        ★而那個 0 的證據不是它自己，是 `dedup_prevented` —— ★★它 0 的話，")
+	print("          「不重複」跟【駐留路徑根本沒跑】長得一模一樣。")
+	var _tp: Array = []
+	for _tk in Probe.counts.keys():
+		var _tks: String = String(_tk)
+		if _tks.begins_with("colo.tile_pop."):
+			_tp.append("%s隊=%d" % [_tks.substr(14), int(Probe.counts[_tk])])
+	_tp.sort()
+	print("     ★#6 母體：環顧當下自己那格有幾隊 → %s" % (
+		"｜".join(PackedStringArray(_tp)) if not _tp.is_empty() else "（空）"))
+	print("        ★★母體應【極小】（同格 pair 天生稀少）；★★★不小則回報 —— 這一格是給 systems 判的")
+	print("")
 	print("  ── ★★★驗收 #2：同格 pair 的 belief `tile_pos` 對不對得上真 pos（讀取端）──")
 	var _cm: int = int(Probe.counts.get("colobel.match", 0))
 	var _cx: int = int(Probe.counts.get("colobel.mismatch", 0))

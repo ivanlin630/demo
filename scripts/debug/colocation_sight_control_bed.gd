@@ -22,7 +22,8 @@ func _initialize() -> void:
 func _run() -> void:
 	print("=== 共位必見 控制床 ===")
 	seed(1337)
-	Probe.enabled = true
+	# ★不在這裡手動 `Probe.enabled = true`：每個場景的 `_mk_world()` 走 `MeasureBedHelper.arm_and_new()`
+	#   ⇒ ★★arm（reset＋enabled＋順序判定）發生在【建世界之前】，順序由 helper 寫死沒得選錯。
 	_scenario("G1 森林·小 host（★修前應看不見：分數約 0.16 < 0.3）", "forest", 3, 3, 0, true)
 	_scenario("G2 平原·大 host（★修前也看得見：分數約 0.9 > 0.3）", "plains", 3, 30, 0, false)
 	_scenario("G3 森林·小 host·相鄰 dist=1（★拿 dist_f 上限，但仍走機率閘）", "forest", 3, 3, 1, true)
@@ -33,7 +34,10 @@ func _run() -> void:
 	print("[TEST-SUITE-COMPLETE]")
 
 func _mk_world(terrain: String) -> WorldState:
-	var s := WorldState.new(); s.world = WorldData.new(); s.player_id = -1
+	# ★★★arm 順序（bed-arm 閘）：★手工組世界的床用 `arm_and_new()`——
+	#   ★★`Probe.arm()` 必須在【建世界之前】，否則 setup 那段世界的 tap 是盲的。
+	#   ★★★新床【不得】進白名單（那份是待辦清單不是豁免清單）⇒ 用 helper 才是正解。
+	var s := MeasureBedHelper.arm_and_new(); s.player_id = -1
 	for x in range(0, 20):
 		for y in range(0, 3):
 			var t := HexTileData.new()
