@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payoff-derive-bridge（★設計又變了：前置量測把它擋下）
 topic: ★前置量測結果:量綱那格【過了】(包含率 1.00),但導出值【是常數不是分布】(maintain_weapons 573 筆全 1.0/build_workshop・stable 全 1.0/apothecary 全 0.5)⇒ 換上去 tie 還在;★★我診斷成【結構性飽和】:stock=0 時 shortage 恆 1.0,比例量在「什麼都缺」的世界裡必然釘住;★★★候選=缺口的【價值】(target−stock)×BASE_PRICE[res],不飽和且兩因子都既有——而我要你判的是:BASE_PRICE 當單位換算器【合不合法,還是又一顆手抄物理】
 ---
