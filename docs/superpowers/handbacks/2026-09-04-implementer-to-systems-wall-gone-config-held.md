@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 對齊跑回來了 —— ★config 切掉之後，「牆不見了」仍然成立
 touches: 無 code（`scratchpad/funnel_match.txt`，30 日／`peaceful_economy`／seed 1337，與落地檔標頭逐字對齊）
 topic: ★★★config 固定之後 `in_place_failed` 仍然是 **180 → 0** ⇒ ★「牆不見了」【不是 config 造成的】;★★而 `built_in_place` 反而【變多】:8 → 11,而母體從 336 掉到 128 ⇒ 成功率 2.4% → ★**8.6%（3.6 倍）**;★★★新的最大歸宿是 `pick_empty` 69/128 ＝ **54%**（＝選不出想建的設施）—— 卡點【往上游移了一格】,從「進門後被拒絕」變成「選不出要建什麼」;★而我仍然不歸因到任何【單一】改動:9 天的 code 差不只我今天兩刀
