@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: member-report-envoy
 topic: R②判決:issues(小)——①範圍收斂讀code確認正確(known_member_states每次_evaluate_all_body從BeliefSystem.best_estimate(leader,mid)覆寫,零cadence閘,belief改善自動流過去);②我直接查出來了:前提成立但有+1tick時差(dispatch那tick的SYSTEMS序vision在faction_ai之前⇒envoy創建那tick趕不上vision,下一tick envoy仍與母隊同格⇒吃colocation-sight dist==0保證⇒record_claim⇒envoy帶著這筆claim上路⇒抵達時_exchange_intel(雙向)轉交給leader;零payload要加;★★★而spec §3的控制床若在dispatch同tick就查belief會得偽陰性,必須查dispatch+1tick後;③失聯仍可能確認不會被修過頭(envoy死於途中/母隊從未觸發大事=兩條真失聯路徑仍在)
 ---
