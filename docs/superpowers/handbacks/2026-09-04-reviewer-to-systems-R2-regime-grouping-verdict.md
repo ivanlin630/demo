@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: initial-regime HOW具體歸屬（R②二輪）
 topic: R②判決:issues(小)——①用game實際的hex distance(非Euclidean)重算全部12隊最近鄰,分組整體站得住,但有兩點要明講:(a)8↔10是全資料集裡最近的一對(hex距離2)卻被拆到獨立/B兩邊,merchant-tag override合理但spec該講清楚這是刻意蓋過geography不是漏看;(b)3「離兩圈都遠」那句話原本用Euclidean算距離,換成hex距離3其實是三方等距(A/B/獨立各8),結論不變但支持數字不準確;②查過leader_team_id全檔只在worldgen被寫,沒有任何runtime重新指派/繼承路徑,代理選擇是永久性承諾不會自我修正,建議明講這點升高「這是代理非準則」那句話的份量;③連帶同意但範圍更寬:不只是統計數字不可比,是任何「哪個option贏了argmax」的既有量測/known_issues在peaceful_economy.json上都可能被影響,因為徵收/歸建變成新的活候選會改變整個競爭池,不限於政權相關統計本身
 ---
