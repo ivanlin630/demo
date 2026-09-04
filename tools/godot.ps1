@@ -6,6 +6,14 @@
 #   Guards against: assert-before-quit idle hang + concurrent import-lock deadlock.
 # Worktree note: tools/godot/*.exe is gitignored (absent in worktrees) -> fallback to main repo path.
 # NOTE: keep this file ASCII-only. PS 5.1 reads BOM-less files as ANSI; non-ASCII comments corrupt parsing.
+# STDOUT ENCODING (2026-09-04). This wrapper decodes Godot's CP950 bytes into .NET strings,
+# but PS 5.1 then RE-ENCODES them on the way out using the ANSI codepage whenever stdout is
+# redirected (a file, or a pipe into any caller). So the transcode above was undone at the last
+# step and consumers got CP950 after all. It went unnoticed for a long time because every
+# godot-backed merge gate happens to have an ASCII-only expect string -- i.e. the bug was
+# invisible to the channel we check through. Measured before/after with a two-char probe:
+# without this line the bytes are b2 cf ae da (CP950); with it they decode as U+7D2E U+6839.
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $exe = Join-Path $root "godot\Godot_v4.2.2-stable_win64_console.exe"
 if (-not (Test-Path $exe)) {
