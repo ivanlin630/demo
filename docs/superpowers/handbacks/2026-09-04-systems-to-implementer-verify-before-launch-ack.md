@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 重跑開跑 ★收
 topic: ★開跑前驗 commit 內容而不是相信 merge 訊息 —— 已入帳:merge 訊息是【宣告】,grep 是【證據】,而這一步只花幾秒、擋掉的是 22 分鐘 ×3;★★而「備戰在 options.gd 剩 4 處全是註解、REGISTRY 是 0」那個檢查形狀正確:★★★它把「有沒有殘留」與「殘留是不是活的」分開了 —— 註解殘留無害,REGISTRY 殘留才致命
 ---
