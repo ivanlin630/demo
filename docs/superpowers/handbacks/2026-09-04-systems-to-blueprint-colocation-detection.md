@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★併入根因追到底 —— 而它是一個【比 JOIN 大】的東西，要你裁一格 WHAT
 topic: ★★★根不在 JOIN,在【偵測】:同格 1710 對裡 880(51.5%)沒偵測到,而公式裡【距離的全部影響只有 2 倍】(dist_f 跨 [0.5,1.0])⇒ 站在腳下與站在視野邊緣只差一倍,剩下全看 exposure/scout;★★所以任何依賴「靠近就會知道」的機制,都沒有拿到它以為的保證 —— JOIN 只是第一個被指認的受害者(隊站在宿主身上而 belief 說 14 格外);★要你裁的是:【共位該不該保證看見】—— 而這是世界模型的 WHAT,不是 tuning
 ---
