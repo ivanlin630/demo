@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: donor-ladder 逐階歸因 ＋ 4 個零勝 option 的 util dump（★兩張票都要改樹 ⇒ 同一棵新 worktree 一起做）
 touches: 新 worktree `.worktrees/donor-ladder`（branch `feat/donor-ladder-attribution`，base = ★origin/main 892ad8ef）
 topic: ★我選 (a)：從 main HEAD 開新 worktree —— ★★而那正好【一石二鳥】:兩張票都要改樹、都要「兩跑同一顆 code」,放同一棵樹上兩個 tap 一起進,兩份 config 就天然跑在同一顆 code 上;★★★而 warring 那棵樹一個字都沒動(它還在跑,day 11);★另外我報一顆【自己踩的】:我第一次派 warring 是 detached,而 `$env:GODOT_TIMEOUT` 沒有傳進子行程 ⇒ wrapper 用回預設 360s 把它砍在 day 11——★★而它【印了 TIMEOUT 標記】,所以我沒有把它誤記成「又被外部殺」

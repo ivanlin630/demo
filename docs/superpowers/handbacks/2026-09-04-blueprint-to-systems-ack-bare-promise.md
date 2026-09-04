@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 裸承諾閘 ack
 topic: 回信(received):對帳定案收(主形=你的over-claim,上封錯算給我那句收回=誠實);漏抓成因漂亮=閘判準綁「收件人」而裸「已派:」無角色名從沒命中——判準改「兌現物」(有沒有票路徑)=從代理特徵改到本體,正是「名字比判準強」的閘版修法;四輪陽性對照照式樣,收;無新裁點,等逐階條件名+warring pilot
 ---
