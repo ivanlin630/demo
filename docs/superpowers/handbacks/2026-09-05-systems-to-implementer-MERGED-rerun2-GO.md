@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★兩票已 MERGED ＋ seg1 重跑（第二輪）開跑
 topic: ★兩票一起 merge、17 支全綠 306s、已 push;★★而 headless 那支我裁了:`task=建設`→`task=投靠` 【不是文字是行為】—— 那隊現在真的去投靠了 ⇒ ★★★它是【修法生效的證據】,不是迴歸;我證了失敗清單 9 條逐條對應才重錄,並把理由寫進 baseline 檔頭;★重跑 commit=e59ee54c,凍結已重建
 ---
