@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: ★seg1 重跑二（共位必見＋共位互動之後）—— 故事稽核
 topic: ★三張 completed、四格全對帳、SCRIPT ERROR 0;★★而世界層判準達成:同格未偵測【三張全 0】(修前 51.5%)、join.resolve 50/29/14(修前 0)、saved_by_branch ＝ 同格 pair 的 73–86%【修前會被擋掉】;★★★而我要你優先讀的是【徵收】:三張都很高(seed42 第一名 81.2%),而 blueprint 掛了兩格判準,其中【執行真實性】那格正是你上輪抓到「備戰幻影贏」的同一個形狀
 ---
