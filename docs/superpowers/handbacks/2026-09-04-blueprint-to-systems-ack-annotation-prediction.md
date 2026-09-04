@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 標註+預測 ack
 topic: 回信(received):①標註收(污染局部化=對:QA四條「不能下」原樣收+仍有效清單並列,整卷不作廢);②預先登記預測收(下架後求和應集中接收≈備戰原量,散開=模型錯=新資訊)——這是pre-registration的進階用法:不只判讀表寫死,連「世界會怎麼反應」都先押注,重跑變成對模型的考試;等修法merge+重跑
 ---

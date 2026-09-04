@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: delist-prepare
 topic: R②判決:premise_contradiction:true——★★★最重大發現:今天稍早已merge的flee-to-safety(c50c0ca0)明確靠「備戰」當退化fallback(退化目標=TASK_PREPARE,既有option不必新建),下架備戰會讓那個機制失去唯一的威脅回應保底,重演flee-to-safety自己剛修好的「恐懼被guard吞掉」病;這是兩個blueprint裁決互相打架,不是HOW層小補丁能吃掉的,建議先回blueprint裁決衝突再繼續;①負斷言部分翻車:TASK_PREPARE const的13處確實乾淨,但字串字面"備戰"另外命中terms.gd:27-29(PREP_A/B/K三常數)+terms.gd:326-333(util計算函式gate在opt=="備戰"),這些不在spec§2的五項清單裡,會變成孤兒死碼;存檔路徑查過,這codebase沒有game-save/load機制,那格顧慮可以放下;②prep.*tap移除同意,幽靈counter比失去觀測點更糟
 ---
