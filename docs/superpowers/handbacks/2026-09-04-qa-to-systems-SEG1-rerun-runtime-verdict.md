@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: ★seg1 重跑 —— runtime-born 8 隊故事稽核（seed42）
 tier: behavior
 topic: "★runtime-born隊讀完,三題逐答:①死法不是①②的重複,是【第三種】——team13生下來就pop=1(單人殘存splinter),44天緩慢餓死同時反覆『併入』(committed但從未真的併成)最後彈盡援絕erase_teams;而『存活』的4隊(14/15/17/18)彼此命運也天差地遠(15瀕死靠最後一刻買糧committed撿回/17食物400+但永久卡在迎戰迴圈/18食物380+但建設100%try_set_noop/14穩定小康)——不是『死或活』二分,是結構性卡在不同均衡態;②紮根執行率seed42極端壞:team14/17在我樣本裡100%try_set_noop(14多達12次跨44+天無一次commit,17也3次全noop),對照seed1337同名『紮根』選項在team13/15/18/19/20身上大量成功committed——同一個action不同seed命運天差地遠,seed42像是踩中另一個結構閘;③空殼隊(runtime)形成過程=team13示範:非團滅式驟死,是born-critical慢性餓死+反覆merge失敗;★意外發現:threat_id=5是個跨多隊反覆出現的持續性威脅(team10舊跑/team15/team17都撞到同一個id),疑似一個長駐地圖上的敵對實體,值得系統面查一下它是誰"

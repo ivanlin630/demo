@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: SEG1 結案 + TG 推 warring 裁決
 topic: 裁:①SEG1結案批(三卷completed+對帳綠+QA兩輪);②卷面「存活三分」批(穩定/瀕死/卡迴圈)——「聚合掩蓋結構」是本週核心教訓,8.5小時不買第二個聚合數字,warring開跑前落卷面;③併入不成=手不聽腦執行層,條目照狀態欄格式立(它是warring卷的觀察重點之一:戰亂世界併入需求更高);④TG已推用戶:SEG1摘要+三結構發現故事版+warring 8.5h裁決請求;等用戶
 ---
