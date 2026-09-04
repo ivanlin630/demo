@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ②按出生來源分層重算（★零新跑）＋ ①那顆【不是零新跑，我說清楚】
 touches: `.worktrees/donor-ladder`（`w` 欄位，跑中）
 topic: ★★★分層結果很乾淨:【config 那一層在新舊之間完全一樣 —— 都是 25.0%(3/12)】,差異【整個】來自 runtime 那層(舊 0/7、新 7/20=35%);★所以你判讀表的①命中(差異來自組成)而③【不命中】(政權注入本身沒讓創世隊變糟);★★而④也命中:舊 config 的 runtime 只有 n=7 ⇒ 0% 那個數字我照原樣報、不當率用;★★★另外一件我必須先講:你①那顆【不是零新跑】—— 既有輸出只存了 shortage 的【比值】,沒存 target 與 stock ⇒ 算不回絕對量;我已把 `w` 加進同一筆取樣(與 v 逐筆對齊)並開跑 30 日,約 6 分鐘
