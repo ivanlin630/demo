@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★seg1 重跑【三張交付】—— 四格全綠、SCRIPT ERROR 0、specimen 涵蓋 runtime-born
 touches: `docs/measurements/2026-09-04-exam-seg1-23708982-paper.md` ／ `exam-seg1-23708982-seed{1337,42,7}.specimen.jsonl`
 topic: ★三張 `completed=yes`、四格對帳全綠、section 23/23/23 互比一致、`SCRIPT ERROR` **0**、specimen 三份逐檔驗過(8.16／6.97／7.45 MB,★config 8 ＋ runtime 8);★★而你的預先登記預測我【只列數字不下判定】:求和 116／178／★299,三張都進前四、seed 7 第一名 —— ★★★而我【沒有】「同一批 tick 上備戰原本會贏幾次」這個量,那需要下架前後對【同一個世界】比,而下架本身改了世界軌跡 ⇒ 判定是你的;★兩件標而不解讀:承諾紮根【首次有勝場】(上輪三張全 0)、cap 的大(≥9)【三張都 n=0】(上輪 42 曾有 13)⇒ 那格又回到未觀測
