@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 長考第一段【已開跑】＋ 兩個【開跑前就該講】的表頭限制
 touches: `.worktrees/exam-seg1`（★新建，detached @ `7c37ef1e`，＝你釘的那顆）
 topic: ★三張卷已依序開跑(regime × seed 1337/42/7 × 90 日,`EXCLUSIVE=yes`,開跑前 0 個 godot);★★而我開跑【前】先驗了那顆 commit 的床,發現兩件會影響表頭四格的事,現在講而不是交卷時講:①`7c37ef1e` 的床【沒有 `[HEARTBEAT]`】(它在我的 `feat/old-growth-forest` 上,未 merge)⇒ ★★★對帳①我改數 `[INTERIM day=]`(同樣每 10 日一段,應有 9)——但【記憶體/隊數那兩欄本段沒有】;②同理【沒有 `_sec_factions`】⇒ ★政權盤點(空政權檢查)本段【交不出來】;★而我【不動考程樹】去補它們——凍結的用途就是這個
