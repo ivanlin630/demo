@@ -837,17 +837,38 @@ func _sec_unitoverlap() -> void:
 		if not fams.has(fam): continue
 		var gt: String = rest.substr(dot + 1)
 		var vals: Array = []
+		var wals: Array = []
 		for r in Probe.samples[k]:
 			vals.append(float((r as Dictionary).get("v", 0.0)))
+			# ★可用性走獨立旗標，不靠值域判 —— ★★`w` 本來就可以是負的（有餘）
+			if bool((r as Dictionary).get("w_ok", false)):
+				wals.append(float((r as Dictionary).get("w", 0.0)))
 		vals.sort()
+		wals.sort()
 		if vals.is_empty(): continue
-		fams[fam].append([gt, vals])
+		fams[fam].append([gt, vals, wals])
 	for fam in ["maintain", "buildA", "buildC"]:
 		for row in fams[fam]:
 			var gt2: String = String(row[0])
 			var v: Array = row[1]
 			print("[UnitOverlap] fam=%s goal=%s n=%d min=%.4f p25=%.4f med=%.4f p75=%.4f max=%.4f" % [
 				fam, gt2, v.size(), float(v[0]), _pct(v, 0.25), _pct(v, 0.50), _pct(v, 0.75), float(v[v.size() - 1])])
+	# ★★★不飽和候選 `w`（systems 2026-09-04）：★問的只有一件事 —— 【它會不會變】。
+	#   ★★與 `v` 逐筆對齊 ⇒ 「v 釘在 1.0 的那些筆，w 有沒有動」直接看得出來。
+	#   ★★★C 類沒有 outputs ⇒ 記 −1 ⇒ 印成「答不了」，不硬湊近似值。
+	print("[UnitOverlap] ── ★不飽和候選 `w` ＝（target − stock）× BASE_PRICE ──")
+	for fam2 in ["maintain", "buildA", "buildC"]:
+		for row2 in fams[fam2]:
+			var gt3: String = String(row2[0])
+			var ws: Array = row2[2]
+			if ws.is_empty():
+				print("[UnitOverlap] w fam=%s goal=%s ★答不了（此類無 outputs ⇒ 沒有可用的絕對量）" % [fam2, gt3])
+				continue
+			var uniq: Dictionary = {}
+			for wv in ws: uniq[wv] = true
+			print("[UnitOverlap] w fam=%s goal=%s n=%d min=%.4f med=%.4f max=%.4f ★相異值=%d %s" % [
+				fam2, gt3, ws.size(), float(ws[0]), _pct(ws, 0.50), float(ws[ws.size() - 1]), uniq.size(),
+				("← ★★★常數，這個方向也死" if uniq.size() == 1 else "← ★會變")])
 	var mm: Array = _fam_range(fams["maintain"])
 	var ba: Array = _fam_range(fams["buildA"])
 	var bc: Array = _fam_range(fams["buildC"])

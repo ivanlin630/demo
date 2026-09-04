@@ -119,8 +119,33 @@ static func _unit_overlap_tap(state: WorldState, team: TeamData, gt: String, def
 		var f: String = String(def["facility"])
 		var _entry: Dictionary = FactionAISystem.FACILITY_DEFICIT_DEF.get(f, {})
 		var _cls: String = "buildC" if _entry.has("special") else "buildA"
+		# ★★★第二個量（systems 2026-09-04）：★比例型缺口在【什麼都缺】的世界會釘在 1.0（結構性飽和）
+		#   ⇒ 同時記一個【絕對量 × 價值】的候選：它會不會變，是這條路生死的唯一問題。
+		#   ★A 類：逐 output 取【最缺的那一個】的價值缺口（鏡射既有 `min_per_res` 的取最差邏輯）
+		#   ★★C 類（special evaluator）沒有 outputs ⇒ ★★★這一格【答不了】，照實不記（不硬湊一個近似）
+		# ★★★哨兵值訂正（2026-09-04，我自己的儀器缺陷）：第一版用 `-1` 當「答不了」的哨兵，
+		#   而 `w` 【本來就可以是負的】（有餘 ⇒ target − stock < 0）
+		#   ⇒ ★哨兵與真值撞號 ⇒ 床端過濾 `>= 0` 時把【有餘的那些筆】一起丟掉
+		#   ⇒ ★★實測 `maintain_material` 的 w 母體只剩 20/114 —— 低端整段消失而輸出看起來完全正常
+		#   ⇒ ★★★改成獨立的 `w_ok` 旗標：可用性與值【分開表示】，不共用同一個數字空間。
+		var _w: float = 0.0
+		var _w_ok: bool = false
+		var _e2: Dictionary = FactionAISystem.FACILITY_DEFICIT_DEF.get(f, {})
+		if _e2.has("outputs"):
+			var _lv2: Dictionary = TradeValuation.leader_vals(state, team)
+			var _worst_gap: float = -INF
+			for _r5 in _e2["outputs"]:
+				var _res5: String = String(_r5)
+				var _tgt5: float = NeedOracle.need_keep(state, team, _res5, _lv2)
+				if bool(_e2.get("use_demand", false)):
+					_tgt5 += NeedOracle.demand(state, team, _res5, _lv2)
+				var _gap5: float = (_tgt5 - float(team.resources.get(_res5, 0))) * float(TradeValuation.BASE_PRICE.get(_res5, 0.0))
+				_worst_gap = maxf(_worst_gap, _gap5)
+			_w = _worst_gap
+			_w_ok = true
 		Probe.bump_sample("unitoverlap." + _cls + "." + gt,
-			{"v": snappedf(fai._facility_deficit(state, team, f, otile), 0.0001)}, 4000)
+			{"v": snappedf(fai._facility_deficit(state, team, f, otile), 0.0001),
+			 "w": snappedf(_w, 0.0001), "w_ok": _w_ok}, 4000)
 		return
 	var _pq: Array = def.get("prereqs", [])
 	if _pq.is_empty():
@@ -134,8 +159,12 @@ static func _unit_overlap_tap(state: WorldState, team: TeamData, gt: String, def
 	var _pop: float = maxf(float(team.population), 1.0)
 	var _stock: float = TradeValuation._stock(state, team, res)
 	var _target: float = _pop * float(TradeValuation.TARGET_PER_POP.get(res, 1.0))
+	# ★★★`w` ＝【絕對缺口 × 單價】＝ systems 的不飽和候選。★同一份取值、同一筆記錄，
+	#   ⇒ 兩個量【逐筆對齊】，可以直接問「v 釘住的那些筆，w 有沒有動」。
 	Probe.bump_sample("unitoverlap.maintain." + gt,
-		{"v": snappedf((_target - _stock) / maxf(_target, 1.0), 0.0001)}, 4000)
+		{"v": snappedf((_target - _stock) / maxf(_target, 1.0), 0.0001),
+		 "w": snappedf((_target - _stock) * float(TradeValuation.BASE_PRICE.get(res, 0.0)), 0.0001),
+		 "w_ok": true}, 4000)
 
 static func frontier_candidates(state: WorldState, team: TeamData, ctx: DecisionContext) -> Array:
 	if state == null or team == null or ctx == null:
