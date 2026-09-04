@@ -1361,6 +1361,28 @@ func _sec_mreport() -> void:
 		"｜".join(PackedStringArray(_cl)) if not _cl.is_empty() else "（空）"))
 	print("     ★某事件 `attempt`＝0 而 `call`>0 ⇒ 它【被 guard 擋掉】；")
 	print("     ★★兩個都 0 ⇒ 【那個事件這個窗沒發生】—— ★★★沒有這一格，兩者長得一模一樣")
+	var _ef: Array = []
+	for _k4 in Probe.counts.keys():
+		var _ks4: String = String(_k4)
+		if _ks4.begins_with("envoy.fail."):
+			_ef.append("%s=%d" % [_ks4.substr(11), int(Probe.counts[_k4])])
+	_ef.sort()
+	print("  ★★★沒派成的【逐條件名】（★`_dispatch_envoy` 的四種 false）：%s" % (
+		"｜".join(PackedStringArray(_ef)) if not _ef.is_empty() else "（空）"))
+	print("     ★母體是【全站所有 envoy 用途】（founding／proposal／回報都算）—— ★★不是只有回報")
+	print("  ── ★★★餓到歸零的隊【當下在做什麼】（★測「孤身自己走過去投靠」那個說法）──")
+	for _pb in ["pop1", "pop2to3", "pop4up"]:
+		var _tot: int = int(Probe.counts.get("starve.%s.total" % _pb, 0))
+		var _os: Array = []
+		for _k5 in Probe.counts.keys():
+			var _ks5: String = String(_k5)
+			if _ks5.begins_with("starve.%s.opt." % _pb):
+				_os.append("%s=%d" % [_ks5.substr(("starve.%s.opt." % _pb).length()), int(Probe.counts[_k5])])
+		_os.sort()
+		print("     %s（母體 %d）：%s" % [_pb, _tot,
+			"｜".join(PackedStringArray(_os)) if not _os.is_empty() else "（空）"])
+	print("     ★判準（systems 的說法可被這一格證偽）：★★若 `pop1` 那列的 option 不是【併入】為主，")
+	print("        ★★★那麼「孤身不是派信差、是自己走過去投靠」就【不成立】—— 而它是可量的，不必辯")
 	print("  ★★★`failed` 不是 bug：★`_dispatch_envoy` 會因【母隊不知道領袖在哪】而回 false")
 	print("     ⇒ 那正是 spec §4 #3 說的【失聯仍然可能】—— ★★它該被【數出來】而不是被修掉")
 

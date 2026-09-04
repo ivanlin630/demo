@@ -1743,13 +1743,18 @@ func _report_to_leader(state: WorldState, team: TeamData, event: String) -> void
 	Probe.bump(("mreport.sent." if ok else "mreport.failed.") + event)
 
 func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype: String) -> bool:
+	# ★★★失敗原因逐條件名（2026-09-05）：★`_dispatch_envoy` 回 false 有【四種】成因，
+	#   ★★而它們共用一個 `false` ⇒ 上游只看得到「沒派成 48 次」而答不出【是哪一種】。
+	#   ⇒ ★★★而處置完全不同：無 belief 位是【感知鏈】、沒有 spare named 是【人力】。
 	var target: TeamData = state.teams.get(target_id)
 	if target == null:
+		Probe.bump("envoy.fail.目標不在名冊")
 		return false
 	# 目標位讀 belief best_estimate（非上帝視角真位；對齊決策讀情報總則）
 	# F1 感知鐵律：缺 belief → sentinel (-1,-1)（禁默認 live）；無位不派 envoy。
 	var target_pos: Vector2i = BeliefSystem.best_estimate(state, mother.team_id, target_id).get("tile_pos", Vector2i(-1, -1))
 	if target_pos == Vector2i(-1, -1):
+		Probe.bump("envoy.fail.不知道對方在哪")
 		return false   # 無 belief 位 → 不派 envoy（不瞎追 live）
 	var dist: int = _hex_dist(mother.tile_pos, target_pos)
 	var budget: int = SubteamSystem.founding_timeout(dist)
@@ -1758,9 +1763,11 @@ func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype:
 	var sent: int = 0
 	for _i in range(ENVOY_REDUNDANCY_FOUNDING):
 		if mother.population <= 1:
+			Probe.bump("envoy.fail.母隊只剩一人")
 			break   # 不掏空母隊（保 leader + ≥1）
 		var sub_leader: int = sub_sys._pick_subteam_leader(state, mother, TeamData.TASK_HERALD)
 		if sub_leader == -1 or sub_leader == mother.leader_id:
+			Probe.bump("envoy.fail.沒有可派的名人")
 			break   # 無 spare named → 無法派信使（稀有 by construction，退守成）
 		var envoy_id: int = sub_sys.dispatch(state, mother.team_id, sub_leader, ENVOY_POP,
 			TeamData.TASK_HERALD, target_pos, target_id, "")
@@ -3621,6 +3628,15 @@ func _decision_crisis(state: WorldState, team: TeamData) -> bool:
 		#   每 tick 都成立 ⇒ ★★不節流就是每 tick 派一次信使＝洪水，不是「大事會派人送信」。
 		#   ⇒ ★★★用既有 `CadenceStagger`（純函式、零 RNG）＋ 既有 `*_eval_next_tick` 形狀節流，
 		#     零新常數；而 cadence 取 T2 戰術層（`DecisionTier.T2_TACTICAL`）＝「重新盤算處境」那一級。
+		# ★★★測 systems 上呈的那個「不必修」說法（2026-09-05）：
+		#   ★他說【孤身不是派信差，是自己走過去＝投靠】——而那是一個【可以量的斷言】。
+		#   ★★所以在同一個瀕危點記下：這隊當下【人口幾人】、【正在做什麼】。
+		#   ★★★而 `pop<=1` 那一格才是他說的「孤身」——若它們的 option 不是併入，那個說法就不成立。
+		if Probe.enabled:
+			var _pb: String = "pop1" if team.population <= 1 else ("pop2to3" if team.population <= 3 else "pop4up")
+			Probe.bump("starve.%s.total" % _pb)
+			Probe.bump("starve.%s.opt.%s" % [_pb, (team.current_option if team.current_option != "" else "（無）")])
+			Probe.bump("starve.%s.task.%s" % [_pb, String(team.current_task)])
 		if state.world.current_tick >= team.report_eval_next_tick:
 			team.report_eval_next_tick = CadenceStagger.next_tick(
 				state.world.current_tick, state.world.current_tick,
