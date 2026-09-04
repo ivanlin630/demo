@@ -1,6 +1,7 @@
 scripts/simulation/decision/decision_engine.gd::rank_ambient::dispatch_entry  # gate-ok: canonical 引擎 rank 入口(統一決策層,非散落)
 scripts/simulation/decision/decision_engine.gd::rank_scored::dispatch_entry  # gate-ok: canonical 引擎 rank 入口(統一決策層,非散落)
 scripts/simulation/decision/decision_engine.gd::rank_scored_ctx::dispatch_entry  # gate-ok: canonical 引擎 rank 入口(統一決策層,非散落)
+scripts/simulation/decision/decision_engine.gd::rank_scored::threshold  # gate-ok: observe-only（★整段在 `if Probe.enabled and …` 守衛內，只 Probe.bump 不改控制流）★systems 2026-09-05 逐行查過
 scripts/simulation/decision/decision_engine.gd::rank_scored_ctx::early_return
 scripts/simulation/decision/decision_engine.gd::rank_scored_ctx::threshold
 scripts/simulation/decision/decision_engine.gd::rank_survival::dispatch_entry  # gate-ok: canonical 引擎 rank 入口(統一決策層,非散落)
