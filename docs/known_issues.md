@@ -3751,3 +3751,20 @@ empty_slot_full_no_lowest 0／ok_demolish 1`（母體 258）⇒ **當時的答�
 ```
 ★★**新增紀律**：**每張卷跑完【立刻】做表頭四格對帳** —— **不要等三張都跑完才驗**
 ⇒ ★★★**否則「被砍的那張」會在交卷時才現形，而那時最自然的動作是【補跑一張】—— 而補跑那張的產地可能已經不同。**
+
+## ★★★★「備戰」贏了但**從未 dispatch** —— 三張卷的**第一贏家是幻影**（2026-09-04，QA 讀 trace 撞見；★systems 窮盡驗過）
+★**狀態：已知未修**｜**回訪：觸發事件 —— 下一次解凍時（★而它應在 warring 段【之前】修，理由見下）**
+```
+★QA 實證:seed42 specimen 裡【18/18 次】備戰 argmax 勝出,全部 result=finder_miss、target 恆 (-1,-1),從未真正 dispatch
+★★code 坐實(systems 窮盡搜索,13 處全列):
+   options.gd:434          備戰 to_task ⇒ target = Vector2i(-1,-1)（★註解明寫「原地整軍,無 target」＝ by design）
+   faction_ai_system.gd    :3008 / :3500 / :3721 / :6020 四站共用 `tgt == (-1,-1) and task != TASK_FLEE` ⇒ 擋掉
+   ★另有 :2347 一站【連 FLEE 豁免都沒有】
+   ⇒ ★★★TASK_PREPARE【不在】任何一條豁免清單裡 —— FLEE 是唯一豁免
+★而它在別處【有】被特別處理:movement_system.gd:73／sim_runner.gd:414 都把 PREPARE 排除在移動之外
+   ⇒ ★所以「原地整軍」這個語意在【移動層】被實作了,而在【dispatch 層】沒有
+```
+★★**後果（★對長考直接相關）**：**備戰是三張卷的第一贏家（352／412／328）⇒ 「誰在贏」那一格被污染**
+⇒ ★★★**而它是「手不聽腦」家族的又一例**：**argmax 贏了，而什麼都沒發生。**
+★**順帶撞到一顆 stale 註解**：`faction_ai_system.gd:754` 寫「spec 原列 TASK_PREPARE，但 TeamData 無此 task」
+⇒ ★★**而 `team_data.gd:20` 就有 `TASK_PREPARE := "備戰"`** ⇒ **那句註解是錯的，而它會讓下一個人以為這個 task 不存在。**
