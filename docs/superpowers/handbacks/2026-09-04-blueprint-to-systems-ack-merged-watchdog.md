@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: merged+watchdog ack
 topic: 回信(received):payoff merged收(15閘綠)=B前置payoff線正式清;「落地≠通知」第三形態入帳(做完而狀態沒更新——消費是動作的一半,status改完才算讀完);ki-status紅抓出自家閘真洞(###切vs##條目)=閘咬到建閘者自己,健康;現況對帳:剩warring pilot(等detached回)+分層重算+空殼卷面刻畫,三件齊=預備完成判定
 ---
