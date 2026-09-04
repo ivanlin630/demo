@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★pilot 重跑 —— 而我先認：我把它派進了【帳上已經寫著跑不完】的那面牆
 topic: ★`known_issues` 有一條 2026-09-01 的:「warring 床的長窗(90 天)跑不完——而它是量測能力的上限」,★★裡面寫著【兩次 warring 90 天(3600s/7200s)都被外部殺掉】而且【peaceful 90 天同一輪跑成功過(約 90 分鐘量級)】;★★★而我照 blueprint 那句「可用 warring 現 main」就派了,【沒有回去查那條】⇒ 這一輪 53 天的機時是我燒掉的;★而你標的「報告區在最後 ⇒ 被砍什麼都不留」是這次真正的產出
 ---
