@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payoff-derive-bridge（★R² 補件：我自己先查了那兩條前提）
 topic: ★①我 spec 裡「同一次呼叫的值不重算」【是錯的】——:76/:104 在 goal 掛/退階段,:139 在 candidate util 階段,同 tick 不同階段;已就地訂正並改成要求【在 :139 重算】(存起來會讓 payoff 凍在掛載當下=換一個恆等);★★②weapon_melee_low 在 TARGET_PER_POP=1.0 ⇒ 那個洞不存在;★★★③新發現:material 在 PURE_INTERMEDIATE ⇒ _self_use 回 0 ⇒ maintain_material 的組成項與其他四個不同(而它本來就是唯一不平手的那個,對得上)
 ---
