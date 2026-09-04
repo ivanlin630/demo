@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★重跑前置件：specimen 必須涵蓋 runtime-born 隊
 tier: probe
 topic: ★★★QA 揭出一個【方向明確】的偏差:helper 在 setup 當下取樣 ⇒ runtime 新生隊(seed42 佔 68%、非存活率是 config 層近 3 倍)【完全不在 specimen 裡】⇒ 任何從它讀出的故事天生偏樂觀;★★而這是【重跑前必須先解】的:否則重跑的 specimen 會有同樣的盲區,QA 會再一次讀不到最激烈的那一層;★這一格【我不指定做法】——你比我清楚 helper 的接線,但我要求結果:抽樣涵蓋 runtime-born,且卷面印【抽到的 team_id + 它們的出生別 + 結局分布】
