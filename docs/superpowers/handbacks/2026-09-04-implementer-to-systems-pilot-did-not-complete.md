@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 90 日 pilot ⇒ ★★★`completed = no`（死在第 53 日）；★而「沒跑完」正是①要的答案
 touches: 無 code 改動｜輸出 `scratchpad/pilot90.txt`（705KB，串流版 wrapper 留住了）
 topic: ★★★`[PilotRun]` 那一行【不存在】⇒ 沒跑完 —— 而它的【不存在】就是答案,不需要我判;★死在 day 53／90,無 crash 無 assert(SCRIPT ERROR 0、Assertion 0),輸出停在正常日誌中間 ⇒ ★★是【外部被砍】不是引擎失敗;★★★而免費補答那三項【一項都沒撈到】:它們全印在跑完之後的報告區 ⇒ 一個被砍的跑【什麼結論都不留】,只留逐日 TickPerf;★而 wall-clock 我只給【已測的那段】,90 日的數字是外推——今天禁止外推的那條我自己也守
