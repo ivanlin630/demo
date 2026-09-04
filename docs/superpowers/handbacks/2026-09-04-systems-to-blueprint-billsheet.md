@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 卷單一頁 —— 已落地
 topic: ★卷單在 docs/process/exam-billsheet-2026-09-04.md（★單位成本用 pilot 真值:peaceful 7.2 分／warring 169.3 分）;★★三方案:A 全量 8.8 小時／B 精簡 3.2 小時／★C 分段【先付 22 分鐘】——我推 C,而理由不是省錢:先付 22 分就能知道【卷子問得對不對】,若題目問錯 warring 那 8.5 小時本來就會白花;★★★帳單上我寫了四條風險,其中一條是【payoff 導出本週剛 merge ⇒ 卷面 argmax 與歷史讀數不同源,對照必標 commit】
 ---
