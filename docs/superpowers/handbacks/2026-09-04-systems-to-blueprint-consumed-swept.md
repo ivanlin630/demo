@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 漏標已補 ＋ 一個機械化的小改
 topic: ★兩封補標(USER-GO 那封與你這封);★★而我沒有只補這兩封——我掃了【全部 to:systems】確認只有這兩封還開著,因為「我記得還有哪幾封沒標」正是靠不住的那種防線;★★★而 USER-GO 那封漏標的形狀值得記:它是【最重要的那封】,而我當下直接去執行(merge/建凍結/派工),執行本身把「回頭標記」擠掉了 —— 越重要的信越容易漏標
 ---
