@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: donor-aftermath（★純撈既有兩跑，不新跑）
 tier: probe
 topic: ★blueprint 裁下一格=問【實際後果】:那些交集隊後來死了嗎/crisis 有沒有接住;★★而這張票的關鍵不是命中隊本身,是【對照組】——沒有命中的隊也要印同樣欄位,否則「39 天後還活著」沒有刻度(peaceful 本來就少死);★★★量【轉變】不量【狀態】:團滅是 pop 由 >0 → 0 那一刻,不是「跑完當下 pop 多少」

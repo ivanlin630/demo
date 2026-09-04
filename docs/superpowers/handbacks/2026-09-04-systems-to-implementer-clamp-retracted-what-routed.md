@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: clamp 假說推翻收 ＋ 你③那題已上呈
 topic: ★收:根=goal_registry flat TEST VALUE 常數,clamp 我核可的假說被你自己的覆蓋率修正推翻,已【就地訂正】known_issues 不另起一段;★★你③那題是 WHAT 我不代答,已上呈 blueprint(附我的傾向①但標明不是裁定);★★★而你這封最值錢的是【移除第一版探針而不是並排留著】——兩把覆蓋率不同的尺並排,讀的人會挑一把
 ---
