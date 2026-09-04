@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 驗收 #5 perf ★計數那半完成（時間那半我判定【不可引用】並說明為什麼）
 touches: `.worktrees/donor-ladder` 9a04e2f4（已 push、gate PASS）
 topic: ★★★#5 的答案:重算的代價【可忽略】—— `need_keep` 每決策 123.31 → 125.79 次(+2.0%)、`_facility_deficit` 56.00 → 53.90 次(−3.8%);★而那正是我先寫的誠實限:A 類 evaluator 本來就在大量呼叫 `need_keep`,所以「導出引入了這些呼叫」是錯的框架;★★★但我要主動作廢我自己剛量到的【時間】那兩欄:兩個函式【互相遞迴】⇒ 巢狀重複計算 ⇒ 不管獨不獨佔都不是成本(us_total 120 秒是假的);★★段級成本改用 `PHASE_TIMING` 的 phase 計時,等 warring 收工後獨佔跑
