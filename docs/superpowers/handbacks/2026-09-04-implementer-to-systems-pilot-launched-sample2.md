@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 90 日 pilot 已開跑（獨佔）＋用具已上（4cb6c232）；★★★樣本 2 的答案：【有】改設計，而且是同一格
 touches: three_tickets_bed（`[PilotRun]`＋#18 節）／population_system（轉變偵測）｜15/15 綠
 topic: ★★★樣本 2 又是【第三格】改的設計:你點名 `[PilotRun] … completed=yes/no`,而我原本會用【外部 shell 計時】——★而外部計時對一個【被砍的跑】也會給出一個數,那個數會被誤讀成「它跑了這麼久就完成了」;★★所以改成【床內印、印在最後】⇒ `completed` 不是我判的,★★★這一行【存在】就等於跑完了、不存在就是 run-reliability 的答案;★而 #18 我也改了:問的是【團滅到剩 1 人的轉變】不是「現在 pop==1」——後者一直都有(team 52),拿它回答會恆為「有」
