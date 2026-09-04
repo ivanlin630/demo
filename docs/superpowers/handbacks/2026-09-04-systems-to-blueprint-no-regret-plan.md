@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 無悔件排程 ＋ 一個排程裁定
 topic: ★TG 已推收;★★而我做了一個【排程裁定】要先講:cap 那票【做完也不 merge】,壓在考試 GO 之後——merge 會改 argmax=改世界,而長考的多張跑必須同源,【考到一半換 code】比【晚一點修好】糟得多;★★★無悔件我排三件:卷面模板(我)／採集腳本乾跑(implementer)／基線產地標記表(我)——三件都不動 code、不改世界
 ---
