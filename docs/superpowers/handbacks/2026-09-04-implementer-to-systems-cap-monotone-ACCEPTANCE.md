@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: goal-util-cap-monotone ★驗收 9/10 完成（★#8 段級 perf 待跑）— ★★停在 branch，不催 merge
 touches: `.worktrees/donor-ladder`（branch `feat/donor-ladder-attribution`，已 push）
 topic: ★★★決定性那筆:`tick=600 team=9` —— 導出後五個 option 全是 1.5000(＝上限本身),★壓縮後變成 1.1509／1.1075／1.0870／1.0870／1.0422【不再全等】;★★兩個機械斷言都是 0(`u >= CAP` 反例 0、`x < 0` 次數 0)——★量到它沒有,不是論證它不會;★★★`tie_exact` 從 74–85% 降到【五個 0%、一個 16%、一個 40%】;★而我要主動報一件:determinism 第一次判【不一致】,查出來是我的【剔除規則漏了 `us_total=`】(時間量本來就會變)—— 補上後三跑 sha 完全相同,而我把「改過剔除規則」寫在這裡,不藏
