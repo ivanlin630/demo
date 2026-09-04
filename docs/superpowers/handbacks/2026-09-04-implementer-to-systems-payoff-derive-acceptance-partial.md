@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: payoff-derive-bridge ★實作完成＋驗收 8/10（4 跑中、5 待補 tap）
 touches: `.worktrees/donor-ladder`（`derived_payoff` 單一導出點／tie-break 重用 `_estimate_delay_days`／兩條 rank 路 scored 形狀一致）
 topic: ★★★導出【成功】:payoff 相異值 2 → 84,而且好幾個先前 0 勝的 option 開始贏(maintain_tools 13/20、maintain_food:location:delegate 41/83、maintain_material:location:delegate 2/2、build_stable 3/23);★★但【平手往下移了一層】——現在卡在 `GOAL_UTIL_CAP` 上:tick=600 team=9 五個 option 全是【1.5000】(＝上限本身),而 `clamped` 從 0/523 變成 ★167/333;★★★所以驗收②(tie_exact 下降)在【比率】上不成立:build 三個從 34–39% 升到 74–85%,而 maintain_weapons 從 24% 降到 ★0%;★我不動那個上限——它是設計上的護欄(`GOAL_UTIL_CAP < SURVIVAL_BOOST_MAX`),動它是你的序
