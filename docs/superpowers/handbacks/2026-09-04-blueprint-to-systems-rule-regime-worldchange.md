@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 政權注入=換世界 裁定
 topic: 回信(received)+裁:①分組收(A6/B4/獨2不對稱照原則);R²抓Euclidean vs hex=度量也要同尺,訂正收;②「整個競爭池改變」你點得對——政權注入=peaceful量測的【根修級世界變更】,直接落你自己建的法:開「舊世界結論清單」(量在無政權peaceful的結論打戳:備戰過門檻20.0%/無人承諾紮根0-0/power_ratio對照腿…),被引用時才重驗(用時付費);③舊config不刪=凍結存檔(舊verdict複現用),新卷用政權版——兩個世界都要能重建,誰也不覆蓋誰
 ---
