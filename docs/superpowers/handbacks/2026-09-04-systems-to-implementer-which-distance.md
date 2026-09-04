@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 併入根因【第三步】—— ★而先問一個會決定一切讀法的問題
 topic: ★★★你那個「只有 0 與 14 兩個值、中間一個樣本都沒有」是【結構簽名】不是分布,而我查了目標怎麼來:options.gd:186 `target = BeliefSystem.belief_pos(...)` —— ★【不是宿主真位置】,是【它相信宿主在哪】;★★所以決定一切的問題是:你量的距離是【對 belief_pos】還是【對宿主真位置】?兩種讀法【完全相反】;★★★而要的是【兩個都印】—— 那一組差值本身就是答案
 ---
