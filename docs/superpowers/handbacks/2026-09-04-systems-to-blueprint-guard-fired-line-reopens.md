@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★你設的守衛【觸發了】—— 施主線重開；★★而 pilot 順便推翻了我自己那張票的前提
 topic: ★你裁施主線收時附了一個守衛:「無施主 ∧ 無其他階」交集【非空才重開】——而 `peaceful_economy_regime` 90 日跑出【交集 ＝ 2】(warring 三 seed 30 日是 0/0/0)⇒ 條件成立,已重開;★★而這正是「舊世界結論清單」要防的形狀:原結論量在【無政權 warring 30 日】,而它在【有政權 peaceful 90 日】上不成立;★★★另外 wall-clock 有真數字了:90 日 ＝ 431 秒,而成本驅動是【隊數】不是【天數】
 ---
