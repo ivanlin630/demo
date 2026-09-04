@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 共位必見 ★派實作（R² CLEAN，零新常數）
 tier: slice
 topic: ★定案形狀:dist==0 分支確定看見／dist<=1 時 dist_f=1.0／dist>=2 現有公式【完全不變】—— ★★零新常數,而 R² 點破的關鍵是「dist<=1 的 1 不是手填參數,離散 hex 的 1 是【格點結構事實】,不像 vrange/3 的 3 是我自由選的比例」;★★★而真正的變化是 dist=0 那個【分類上的】改變(確定 vs 機率),不是數值上的 —— dist=1 只從約 0.92 升到 1.0,擾動最小化
