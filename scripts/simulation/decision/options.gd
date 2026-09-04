@@ -424,15 +424,10 @@ static var REGISTRY: Dictionary = {
 	},
 	# ── 融合 threat（序1 溶入）：4 反應 repertoire 中的 3（FLEE=既有 survival option）。
 	# threat-gated（applicable 讀 threat_react≥threshold），人格秤 argmax（撕除舊手算）。
-	"備戰": {
-		"affinity": [0.1, 0.8, 0.0, 0.1, 0.0], "sets": {"threat": true},
-		"terms": [["prepare_drive", "prepare"]],
-		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.threat_react >= ctx.threat_threshold,
-		"to_task": func(_state: WorldState, _team: TeamData) -> Dictionary:
-			# 備戰=原地整軍，無 target。
-			return {"task": TeamData.TASK_PREPARE, "target": Vector2i(-1, -1)},
-	},
+	# ★★★「備戰」已下架（`2026-09-04-delist-prepare-HOW`）：它【從未成功 dispatch】——
+	#   ★贏了 argmax 卻沒有任何隊真的進入該 task，而 `prep.*` tap 一直在報它「贏」。
+	#   ⇒ ★★整個 entry 移除（不是設 applicable=false）：★★★留著 false 會讓下一個人以為
+	#     「它還在池裡只是條件沒過」，而真相是【它從來沒有出口】。
 	"迎戰": {
 		"affinity": [0.1, 0.6, 0.0, 0.3, 0.0], "sets": {"threat": true},
 		"terms": [["defend_drive", "defend"]],
@@ -530,7 +525,7 @@ static func priority_for(opt: String) -> int:
 			return _p
 	if is_in_set(opt, "survival") or opt == "survival":
 		return TaskArbiter.PRIO_SURVIVAL   # 求生 preempt 同層(絕境隊命運不看 dispatch 路)
-	if opt in ["備戰", "迎戰", "求和"]:
+	if opt in ["迎戰", "求和"]:   # ★「備戰」已下架（delist-prepare）
 		return TaskArbiter.PRIO_THREAT      # threat 反應 @70(finding3 黏性)
 	return TaskArbiter.PRIO_DISPATCH
 

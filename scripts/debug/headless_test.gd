@@ -10864,7 +10864,7 @@ func _test_threat_score_distance_decay() -> void:
 func _test_task_defend_prepare_const() -> void:
 	print("--- Engagement Task3: const + 欄位 ---")
 	assert(TeamData.TASK_DEFEND == "迎戰")
-	assert(TeamData.TASK_PREPARE == "備戰")
+	# ★`TASK_PREPARE` 已隨「備戰」下架移除（delist-prepare）⇒ 這條 assert 一併移除
 	var t := TeamData.new()
 	assert(t.threat_eval_next_tick == 0)
 	assert(t.task_start_tick == 0)   # TRADE timeout 起算=arbiter 單源（trade_task_start_tick 已廢）
@@ -10933,7 +10933,7 @@ func _test_resident_lock_prepare_allowed() -> void:
 	tile.outpost_level = 1; tile.outpost_type = "civilian"; tile.outpost_owner = 0
 	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(0, 0); _seed_pop(t, 5)
 	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
-	t.current_task = TeamData.TASK_PREPARE
+	t.current_task = TeamData.TASK_DEFEND   # ★原為 TASK_PREPARE（已下架）⇒ 改用 TASK_DEFEND，測的是同一條路徑
 	t.move_target = Vector2i(3, 0)
 	state.teams[0] = t
 	var mv: Object = load("res://scripts/simulation/movement_system.gd").new()

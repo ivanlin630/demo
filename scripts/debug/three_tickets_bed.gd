@@ -133,6 +133,7 @@ func _run() -> void:
 	#   ★★★落地要有【自己的證據】（檔案存在 + 路徑印出來），不能靠尾標記代言。
 	# ★★★覆蓋率自報（systems 要求：印【抽到的 team_id ＋ 出生別 ＋ 結局分布】）
 	#   ★不是印「有補 runtime」——★★是印【補了誰、它們是什麼結局】，否則「有覆蓋」只是一句宣告。
+	_sec_delist_prepare(state)
 	_sec_specimen_coverage(state)
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
@@ -1069,3 +1070,26 @@ func _sec_specimen_coverage(state: WorldState) -> void:
 	if rt_n == 0:
 		print("  ★★★runtime-born = 0 ⇒ 【本跑的 specimen 讀不到 runtime 那一層】——")
 		print("     而那一層在本段實測【非存活率最高到 config 層的 2.8 倍】⇒ 故事會偏樂觀")
+
+# ★★★下架驗收（`delist-prepare` §4-2／§4-3）：★兩條都是【機械斷言】不是論證。
+func _sec_delist_prepare(state: WorldState) -> void:
+	print("═══ ★「備戰」下架驗收（★機械斷言）═══")
+	# ②`prep.*` tap 必須【全部消失】（★不是變成 0）
+	var leftover: Array = []
+	for k in Probe.counts.keys():
+		if String(k).begins_with("prep."): leftover.append(String(k))
+	for k2 in Probe.amounts.keys():
+		if String(k2).begins_with("prep."): leftover.append(String(k2))
+	print("  ★#2 `prep.*` 殘留 key 數 = %d %s" % [leftover.size(),
+		("✅ 全部消失" if leftover.is_empty() else "❌ 仍在：%s" % str(leftover))])
+	# ③`current_task == "備戰"` 的隊數必須 = 0
+	var stuck: Array = []
+	for tid in state.teams.keys():
+		if String(state.teams[tid].current_task) == "備戰": stuck.append(int(tid))
+	print("  ★★#3 `current_task == \"備戰\"` 的隊數 = %d %s" % [stuck.size(),
+		("✅" if stuck.is_empty() else "❌ 卡住的隊：%s" % str(stuck))])
+	# ①「備戰」不在候選池（★母體仍印，證明表沒壞）
+	var inpool: int = int(Probe.counts.get("optpool.cand.備戰", 0))
+	print("  ★#1 `optpool.cand.備戰` = %d ／ 母體 `optpool.mother` = %d %s" % [
+		inpool, int(Probe.counts.get("optpool.mother", 0)),
+		("✅ 不在池裡（而母體 > 0 ⇒ 表沒壞）" if inpool == 0 else "❌ 仍在池裡")])

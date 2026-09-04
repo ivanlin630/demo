@@ -24,9 +24,6 @@ const SURPLUS_FOOD_DAYS: float = 7.0    # TEST VALUE — 「有餘糧」門檻�
 # ── threat-oracle S2：severity-scaled threat util（TEST VALUE，measure 校；方向/cap/零fall-through 鎖死）──
 const SEVERITY_MAX: float = 1.2   # TEST VALUE(S2 calibrate ↓1.5)— threat_react 上界(capped 保競秤;organic 碾平修)
 const CONFRONT_K: float = 0.6     # TEST VALUE(S2 calibrate)— 迎戰 dampen(好戰×sev×modulate×此;organic 迎戰 44-105x 修)
-const PREP_A: float = 0.6         # 備戰 base 慎重係數
-const PREP_B: float = 0.2         # 備戰 base 好戰係數
-const PREP_K: float = 0.5         # 備戰 severity 放大率(普遍隨威脅升，慎重-weighted 幅度)
 const PACIFY_C: float = 0.5       # 求和 貪婪係數
 const PACIFY_D: float = 0.3       # 求和 信義係數
 const PACIFY_E: float = 0.3       # 求和 好戰抑制(好戰者不屑低頭)
@@ -323,18 +320,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# means-end 戰術層：team 自己戰略 intent → 子需求 → boost 對應 option（貢獻打分,非 flat）。
 			# 人格染色（野心/貪婪/好戰）在 eval baked（mirror attack_drive 法）；weight("intent_fit")=1.0。
 			return _intent_fit(ctx, opt)
-		# ── 融合 threat（序1 溶入）：4 反應 repertoire（FLEE=survival / 備戰 / 迎戰 / 求和）──
+		# ── 融合 threat（序1 溶入）：★備戰下架後剩 3 反應（FLEE=survival / 迎戰 / 求和）──
 		# 人格染色 baked in eval（mirror intent_fit/attack_drive 法；weight=1.0）。additive personality-dominant
 		# 鏡射舊 _dispatch_threat_response scores（threat_react 只作小係數 modifier，非碾壓量級）——
 		# 否則 threat_react unbounded(power_ratio 可大)會壓過 survival 絕境 drive。threat 有無由 applicable gate 管。
-		"prepare_drive":
-			# ★threat-oracle S2：備戰 = (慎重·a + 好戰·b) × (1 + severity·k_prep)。普遍隨威脅升
-			#   (連謹慎/怯懦者被威脅也備戰=低後悔對沖)；人格調幅度非方向。零 fall-through:cautious 象限主導。
-			if opt != "備戰": return 0.0
-			var _sevp: float = clampf(ctx.threat_react, 0.0, SEVERITY_MAX)
-			var _base_p: float = float(ctx.leader_values.get("慎重", 0.5)) * PREP_A \
-				+ float(ctx.leader_values.get("好戰", 0.5)) * PREP_B
-			return _base_p * (1.0 + _sevp * PREP_K)
+		# ★★★`prepare_drive` 已隨「備戰」下架移除（`2026-09-04-delist-prepare-HOW`）：
+		#   ★它的 gate 是 `if opt != "備戰"` ⇒ 備戰下架後這一支【永遠回 0】＝ 孤兒死碼，
+		#   ★★而 `PREP_A/B/K` 三個常數留著會讓下一個人以為備戰還在（已一併移除）。
 		"defend_drive":
 			# ★threat-oracle S2：迎戰 = 好戰 × severity × modulate_win；modulate_win=lerp(winnable,1,1−慎重)
 			#   慎重高→respect winnable(不可勝→迎戰低)；慎重低→override(魯莽死戰 last-stand=proud-doomed 主導)。

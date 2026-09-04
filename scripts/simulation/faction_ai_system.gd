@@ -451,7 +451,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		team.previous_task = ""
 		if Probe.enabled: Probe.bump("crisis.override_release")
 		return
-	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_FLEE, TeamData.TASK_HOLD]:
+	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_FLEE, TeamData.TASK_HOLD]:   # ★TASK_PREPARE 已下架
 		# 威脅消失 → 釋放；或逃跑逾時（小地圖逃不到 5 格脫離 → 靠 timeout 重評，否則永逃）
 		var fled_too_long: bool = team.current_task == TeamData.TASK_FLEE \
 			and state.world.current_tick - team.task_start_tick > FLEE_TIMEOUT
@@ -751,7 +751,8 @@ func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileDa
 const MOUNT_TARGET_RATIO: float = 0.5
 
 # NPC 出征前自動從自家 outpost 公庫拉 mount 至 population × ratio
-# 註：spec 原列 TASK_PREPARE，但 TeamData 無此 task，改以 idle 為唯一不出征狀態
+# 註（★2026-09-04 訂正）：這句原寫「TeamData 無此 task」而【那是錯的】——當時 `TASK_PREPARE` 存在。
+# ★而它現在真的不存在了（備戰下架）⇒ 結論碰巧成立，但理由要記對：以 idle 為唯一不出征狀態。
 func _auto_withdraw_mounts(state: WorldState, team: TeamData) -> void:
 	if team.current_task == TeamData.TASK_IDLE:
 		return
@@ -3019,7 +3020,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		elif opt == "佔村": Probe.bump("occupy.dispatch")
 		# threat-oracle S1（seam#1 finding5）：統一路 threat option commit tap（收斂前補盲點；
 		# 現況唯一 threat.dispatch tap 在 preempt loop :405，統一隊 rank_scored 選中 threat option=無 tap）。
-		if Probe.enabled and opt in ["備戰", "迎戰", "求和"]: Probe.bump("threat.dispatch." + opt)
+		if Probe.enabled and opt in ["迎戰", "求和"]: Probe.bump("threat.dispatch." + opt)   # ★「備戰」已下架
 		# 序6 probe 遷移：成員征服攻擊實派 + 徵收實派（舊 hand-cascade 探針已刪 → 引擎路重掛，供驗魂）。
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
