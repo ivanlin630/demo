@@ -3898,3 +3898,28 @@ if _can_detect(scout, eff_exp): …
 ```
 ★**影響範圍不只 JOIN**：**外交/徵收也對齊 `process_on_move` 同格外交**（`diplomatic_ai_system.gd:138`）
 ⇒ ★★**任何「兩隊都待在原地」的情境,互動都不會發生** —— 而那正是【貧窮、走不動】的隊最常見的狀態。
+
+## ★★★★`徵收` 贏 137 次，**真正完成資源移轉的只驗到 1 例**（2026-09-05，QA 讀 trace）
+★**狀態：已知未修**｜**回訪：觸發事件 —— blueprint 裁「徵收兩格」的第②格（間隔分布）回來時一起判**
+```
+★137 次 argmax 勝出 ⇒ ★★108 次（79%）`try_set_noop`【連 dispatch 都沒過】
+★過關的 29 次裡 ⇒ ★★★24 次（83%）`tile_pos` 在後續窗口【完全凍結】
+   —— 從未真的往 target 移動,而 task 在 1–3 個決策週期內【被靜默換掉】
+★真正走到 target 並逐 tick 收到 coin 的：★★【只驗到 1 例】(team16,完整 travel→arrive→逐 tick 收稅)
+```
+★★★**而方法論上這比「備戰幻影贏」更隱蔽**：
+```
+★備戰:靠 `result=finder_miss` 字面就篩得出來
+★★徵收:★★★【連 `result=committed` 都會騙人】—— committed 只代表 TaskArbiter 收下,
+   而「有沒有真的走過去」要對【tile_pos 軌跡】才篩得出
+⇒ ★所以驗證標準要再升一級:【贏 → dispatch → committed → ★★軌跡 → 資源真的移動】
+   —— 五站,而我們今天已經證過【每一站都可能斷】
+```
+
+## ✅★JOIN 修法的**正面案例**（2026-09-05，QA 驗到端到端）
+```
+★team19:同 tick 前後兩筆快照
+   merge 前 faction=-1／coin=0／food=0／material=0.08／pop=1
+   merge 後 faction=1／coin=58.3／food=4.08／material=6.9／pop=2
+⇒ ★★全部【同步跳動】⇒ ★★★真的救到一支瀕死隊 —— 共位必見＋共位互動的端到端證據
+```

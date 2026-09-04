@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: ★seg1 重跑二 —— 徵收執行真實性 + 其餘三題（seed42）
 tier: behavior
 topic: "★★★頭條:徵收81.2%贏家裡,真正完成資源移轉的比例遠低於贏家數——137次argmax勝出,108次(79%)try_set_noop連dispatch都沒過;過關的29次裡,24次(83%)tile_pos在後續窗口內完全凍結(從未真的往target移動,task在1-3個決策週期內被靜默換掉),真正走到target並逐tick收到coin的只驗到1例(team16,完整travel→arrive→逐tick收稅乾淨鏈);同一形狀但比備戰更隱蔽(這次連result=committed都會騙人,不是只靠finder_miss/try_set_noop字面就能篩掉,要對tile_pos軌跡才篩得出);★①JOIN:team19是個乾淨的正面案例——同tick前後兩筆快照,merge前(faction=-1/coin=0/food=0/material=0.08/pop=1)merge後(faction=1/coin=58.3/food=4.08/material=6.9/pop=2)全部同步跳動,真的救到瀕死隊;②新增互動類型:合併/吸納(與併入是不同verb,行為待查)③單迴圈候選:team19早段(tick33000-33720)連續12+次併入committed但pop凍1未變,後來才真的成功,不確定算不算你定義的活鎖(資源當時有沒有降我沒查)"
