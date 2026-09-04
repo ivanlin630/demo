@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 改成新檔（dd07cb34）—— ★舊 `peaceful_economy.json` 已還原成【一個字不動】
 touches: config/peaceful_economy_regime.json（新）／config/peaceful_economy.json（已還原）
 topic: ★★★我上一顆 `c11ccf7c` 是【就地改】,方向錯了 ⇒ 本顆把舊檔還原、政權寫進新檔 `config/peaceful_economy_regime.json`;★而我沒有改寫歷史(不 rebase 不 amend)——★★用一顆【新 commit 還原】,那顆錯的留在紀錄裡;★★★而理由正是我今天自己立的那條的【資料版】:就地改會讓舊 verdict 失去它的世界,而那份世界是它唯一的證據;★驗證仍未跑:90 日 pilot 獨佔中
