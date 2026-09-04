@@ -271,6 +271,7 @@ func _run() -> void:
 	_sec_join_funnel()
 	_sec_survival4(state)
 	_sec_levy()
+	_sec_mreport()
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -1325,6 +1326,66 @@ func _sec_join_funnel() -> void:
 	print("     ⇒ 兩者相減沒有意義（★同一個陷阱我今天已經在 `[Merge]` 上踩過一次）")
 	_sec_sighting()
 
+# ★★★成員位置回報（spec 2026-09-05-member-report-envoy §4 #4）——
+#   ★「不塞世界」要有【數字】不是【宣稱】⇒ 印總數 ＋ 分事件類型 ＋ 沒派成的逐條件名。
+func _sec_mreport() -> void:
+	print("")
+	print("═══ ★★★成員位置回報信使（★#4：頻率要有母體）═══")
+	var _at: int = int(Probe.counts.get("mreport.attempt", 0))
+	var _se: int = int(Probe.counts.get("mreport.sent", 0))
+	var _fa: int = int(Probe.counts.get("mreport.failed", 0))
+	print("  嘗試 = %d ｜ 派出 = %d ｜ ★沒派成 = %d ｜ 對帳 %d+%d=%d vs %d %s" % [
+		_at, _se, _fa, _se, _fa, _se + _fa, _at,
+		"✅" if _se + _fa == _at else "❌ 不平"])
+	var _ev: Array = []
+	for _k in Probe.counts.keys():
+		var _ks: String = String(_k)
+		if _ks.begins_with("mreport.attempt.") or _ks.begins_with("mreport.sent.") 				or _ks.begins_with("mreport.failed."):
+			_ev.append("%s=%d" % [_ks.substr(8), int(Probe.counts[_k])])
+	_ev.sort()
+	print("  分事件：%s" % ("｜".join(PackedStringArray(_ev)) if not _ev.is_empty() else "（空）"))
+	var _sk: Array = []
+	for _k2 in Probe.counts.keys():
+		var _ks2: String = String(_k2)
+		if _ks2.begins_with("mreport.skip."):
+			_sk.append("%s=%d" % [_ks2.substr(13), int(Probe.counts[_k2])])
+	_sk.sort()
+	print("  連嘗試都沒到：%s" % ("｜".join(PackedStringArray(_sk)) if not _sk.is_empty() else "（無）"))
+	var _cl: Array = []
+	for _k3 in Probe.counts.keys():
+		var _ks3: String = String(_k3)
+		if _ks3.begins_with("mreport.call."):
+			_cl.append("%s=%d" % [_ks3.substr(13), int(Probe.counts[_k3])])
+	_cl.sort()
+	print("  ★★★呼叫點觸發次數（★接線的陽性對照）：%s" % (
+		"｜".join(PackedStringArray(_cl)) if not _cl.is_empty() else "（空）"))
+	print("     ★某事件 `attempt`＝0 而 `call`>0 ⇒ 它【被 guard 擋掉】；")
+	print("     ★★兩個都 0 ⇒ 【那個事件這個窗沒發生】—— ★★★沒有這一格，兩者長得一模一樣")
+	var _ef: Array = []
+	for _k4 in Probe.counts.keys():
+		var _ks4: String = String(_k4)
+		if _ks4.begins_with("envoy.fail."):
+			_ef.append("%s=%d" % [_ks4.substr(11), int(Probe.counts[_k4])])
+	_ef.sort()
+	print("  ★★★沒派成的【逐條件名】（★`_dispatch_envoy` 的四種 false）：%s" % (
+		"｜".join(PackedStringArray(_ef)) if not _ef.is_empty() else "（空）"))
+	print("     ★母體是【全站所有 envoy 用途】（founding／proposal／回報都算）—— ★★不是只有回報")
+	print("  ── ★★★餓到歸零的隊【當下在做什麼】（★測「孤身自己走過去投靠」那個說法）──")
+	for _pb in ["pop1", "pop2to3", "pop4up"]:
+		var _tot: int = int(Probe.counts.get("starve.%s.total" % _pb, 0))
+		var _os: Array = []
+		for _k5 in Probe.counts.keys():
+			var _ks5: String = String(_k5)
+			if _ks5.begins_with("starve.%s.opt." % _pb):
+				_os.append("%s=%d" % [_ks5.substr(("starve.%s.opt." % _pb).length()), int(Probe.counts[_k5])])
+		_os.sort()
+		print("     %s（母體 %d）：%s" % [_pb, _tot,
+			"｜".join(PackedStringArray(_os)) if not _os.is_empty() else "（空）"])
+	print("     ★判準（systems 的說法可被這一格證偽）：★★若 `pop1` 那列的 option 不是【併入】為主，")
+	print("        ★★★那麼「孤身不是派信差、是自己走過去投靠」就【不成立】—— 而它是可量的，不必辯")
+	print("  ★★★`failed` 不是 bug：★`_dispatch_envoy` 會因【母隊不知道領袖在哪】而回 false")
+	print("     ⇒ 那正是 spec §4 #3 說的【失聯仍然可能】—— ★★它該被【數出來】而不是被修掉")
+
 # ★★★`徵收` 兩格（blueprint pre-register 2026-09-05：判準寫在數據之前）——
 #   ★①執行真實性：贏 → dispatch → 【真轉移】是三個獨立斷點，每一站都可能斷
 #   ★★②重複頻率：★★★逐 pair 的【間隔分布】，不是平均
@@ -1360,6 +1421,53 @@ func _sec_levy() -> void:
 		int(Probe.counts.get("levy.balanced", 0)), int(Probe.counts.get("levy.UNBALANCED_BUG", 0))])
 	print("     ★總量：付方減少 %.1f ｜ 收方增加 %.1f（★兩邊都印 —— 只看一邊會把幽靈讀成真轉移）" % [
 		Probe.amount("levy.amount_out"), Probe.amount("levy.amount_in")])
+	print("  ── ★★★贏了而沒 dispatch，卡在哪一格（★逐站條件名，互斥且窮盡）──")
+	var _r0: int = int(Probe.counts.get("levyfun.rank0", 0))
+	var _ex: Array = []
+	var _exsum: int = 0
+	for _k3 in Probe.counts.keys():
+		var _ks3: String = String(_k3)
+		if _ks3.begins_with("levyfun.exit."):
+			var _c3: int = int(Probe.counts[_k3])
+			_exsum += _c3
+			_ex.append("%s=%d" % [_ks3.substr(13), _c3])
+	_ex.sort()
+	var _cm2: int = int(Probe.counts.get("levyfun.commit", 0))
+	print("     母體（`徵收` 是 rank[0] 的決策）= %d" % _r0)
+	print("     落跑：%s" % ("｜".join(PackedStringArray(_ex)) if not _ex.is_empty() else "（無）"))
+	print("     派出：commit=%d（有勢力=%d ｜ ★無勢力=%d ← 舊 `tribute.dispatch.member` 看不到這一群）" % [
+		_cm2, int(Probe.counts.get("levyfun.commit.有勢力", 0)),
+		int(Probe.counts.get("levyfun.commit.無勢力", 0))])
+	print("     ★★★對帳：落跑 %d ＋ 派出 %d ＝ %d vs 母體 %d %s" % [
+		_exsum, _cm2, _exsum + _cm2, _r0,
+		"✅" if _exsum + _cm2 == _r0 else "❌ 不平（★有我沒列到的出口）"])
+	print("     ★第四型手不聽腦：`try_set` ok=%d ｜ ★★noop=%d（★★★noop ＝ 派了但靜靜地沒發生）" % [
+		int(Probe.counts.get("levyfun.try_set.ok", 0)), int(Probe.counts.get("levyfun.try_set.noop", 0))])
+	print("  ── ★①「無目標」是哪一種無（★三種共用同一個 (-1,-1) 回值，而處置不同）──")
+	var _nt: Array = []
+	var _ntsum: int = 0
+	for _k4 in Probe.counts.keys():
+		var _ks4: String = String(_k4)
+		if _ks4.begins_with("levyfun.notgt."):
+			var _c4: int = int(Probe.counts[_k4])
+			_ntsum += _c4
+			_nt.append("%s=%d" % [_ks4.substr(14), _c4])
+	_nt.sort()
+	print("     %s ｜ 合計 %d" % [
+		"｜".join(PackedStringArray(_nt)) if not _nt.is_empty() else "（空）", _ntsum])
+	print("     ★★★母體不同要標：這一格數的是【每一次 `徵收` 的 to_task 被呼叫】，")
+	print("        ★而「落跑 31」只算【徵收是 rank[0] 那幾次】⇒ 合計會 ≥ 31，兩者【不能相減】")
+	print("  ── ★②`try_set` 是被哪一條規則擋的（★TaskArbiter 逐條件名）──")
+	var _ad: Array = []
+	for _k5 in Probe.counts.keys():
+		var _ks5: String = String(_k5)
+		if _ks5.begins_with("arbiter.deny.") and _ks5.ends_with(".by.unified"):
+			_ad.append("%s=%d" % [_ks5.substr(13).replace(".by.unified", ""), int(Probe.counts[_k5])])
+	_ad.sort()
+	print("     引擎路(`unified`)被擋：%s" % (
+		"｜".join(PackedStringArray(_ad)) if not _ad.is_empty() else "（空）"))
+	print("     ★★★同樣要標母體：這一格是【所有 option 經 `unified` 被擋】的合計，")
+	print("        ★不是只有徵收 —— ★★要只看徵收需要在 arbiter 裡帶 option 名，那是下一票")
 	print("  ── ★★②重複頻率（★逐 pair 間隔分布；★★★不是平均）──")
 	print("     首次徵收的 pair 數 = %d ｜ 重複徵收次數 = %d" % [
 		int(Probe.counts.get("levy.pair.first", 0)), int(Probe.counts.get("levy.pair.repeat", 0))])

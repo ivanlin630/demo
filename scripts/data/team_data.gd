@@ -162,6 +162,12 @@ var ambition_eval_next_tick: int = 0
 #     ★★而問題本來就不是「這一對該不該互動」，是【這支隊該不該環顧四周】。
 #   ★★★沿用 `ambition_eval_next_tick`／`infra_eval_next_tick` 的既有形狀，零新結構。
 var colocate_eval_next_tick: int = 0
+# ★★★成員回報信使的節流（spec 2026-09-05-member-report-envoy）——
+#   ★三個事件裡【落腳建營／遷移完成】是真事件（天然稀少、自帶邊緣），
+#     ★★而【瀕危】是【狀態】不是事件：`effective_food <= 0` 每 tick 都成立
+#     ⇒ ★★★不節流的話它每 tick 派一次信使 —— 那不是「大事會派人送信」，那是洪水。
+#   ★用既有 `CadenceStagger` ＋ 既有 `*_eval_next_tick` 形狀，零新常數零新結構。
+var report_eval_next_tick: int = 0
 # G1 訂單系統：權威訂單（message 為可失真傳播副本）。{order_id, kind, res, qty_remaining, expire_tick}
 # ★執行失敗反饋鐵律（用戶立法 2026-08-21）：隊層失敗記憶 `"<option>|<target>" → {tick,count,ttl}`。
 # 掛隊層【非 leader p.memory】：那條 FIFO MEMORY_MAX=20 與人際記憶共用、已知會被擠掉。
