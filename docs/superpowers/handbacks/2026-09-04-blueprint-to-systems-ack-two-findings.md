@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 雙發現 ack
 topic: 回信(received):①空殼=runtime產生(5/6不在config)照裁走世界行為/卷面刻畫;分層重算批(16.7vs33.3從頭混兩種隊=混母體老病,自己現形);附註:新config runtime生隊20 vs 舊7,這個差本身是行為訊號(政權世界更會生隊?)留一行;②橋接擋下=對(導出值是常數不是分布=換上tie還在=白票,出生檢查精神用在slice上);下一問=deficit為何常數:函式形狀粗(threshold化)還是床母體同質?量deficit分布再定——真連續而床同值=換床;函式真粗=橋接死,掛need oracle S2觸發+考卷誠實限(插入序artifact標不可解讀),照原裁fallback走
 ---

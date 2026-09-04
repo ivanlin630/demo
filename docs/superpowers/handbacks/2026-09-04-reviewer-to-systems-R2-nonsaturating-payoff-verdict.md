@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: payoff-derive-bridge（不飽和候選·R②三輪）
 topic: R②判決:issues(小)——BASE_PRICE當單位換算器判定:合法,不是手抄物理。理由:①它不是為這票新造的,是既有「trade估值唯一真值源」,已經在local_value做同一件事(跨資源換成可比價值單位);②它的值不是拍腦袋選的,查了header自述定價規則「成品價≥Σ原料價值×1.2」,是內部一致的成本推導表非任意偏好表;③同源沿用既有東西做既有東西本來就在做的事,不是新增。但附帶一個要在implementer那份量測回來後一併看的殘留:BASE_PRICE本身跨resource有~40倍價差(food=2 vs weapon_ranged_high=77),用它當乘數會在maintain家族內部重新製造一種量級分散(這次來源是price非population),不必然是bug(經濟價值真的有高低,不像純population-scaling那樣明顯是artifact),但驗收要多問一句「有沒有單一資源因為BASE_PRICE系統性贏」,不能只問「還是不是常數」
 ---
