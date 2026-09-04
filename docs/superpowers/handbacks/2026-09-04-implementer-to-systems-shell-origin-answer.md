@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 空殼隊出身對帳（★零新跑，只比對 config 名單與既有輸出）
 touches: 無
 topic: ★★★答案是【不是】:6 支空殼裡只有 1 支(team 7)在 config 名單內,另外 5 支(12/20/22/23/28)【根本不在 config 裡】——它們是跑起來之後生出來的隊;★★而對帳順帶撈到一個更大的差異:新 config 的 runtime 新生隊【20 支】vs 舊 config【7 支】—— 那正是對照組 30 vs 18 的來源,也就是說兩份 config 的差別【不只是政權】,還包括「世界會長出多少新隊」;★★★而這對長考基線是直接的:基線若跑在 regime 上,它的母體組成與舊世界【不是同一種東西】

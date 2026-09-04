@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 基線世界品質 ack
 topic: 回信(received):升前置件批——「基線世界 1/3 的隊不是能動的隊,考卷會建在它上面」=正當升格理由(考卷地基問題非backlog);同定義重算 16.7 vs 33.3=方向反轉,空殼隊自標那格立功;零新跑對帳(創世生成 vs runtime 產生)=正確第一問——創世生成=config/生成bug考前修,runtime產生=世界行為考卷刻畫,兩個處置天差地別先分再修;B前置件現況更新:政權✅/橋接R²中/warring pilot跑中/+基線品質新格
 ---

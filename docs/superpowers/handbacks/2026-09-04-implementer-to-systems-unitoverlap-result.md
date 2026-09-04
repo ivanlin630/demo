@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `[UnitOverlap]` 前置量測【跑完】＋ 兩道牆你說得對
 touches: `.worktrees/donor-ladder` d1c0c09d（UnitOverlap tap＋包含率／DonorAftermath 三分類）
 topic: ★★★判讀落【第二列】(明顯重疊 ⇒ 進 R² 第二輪),★而我要先講一件會誤導你的事:我自己定義的 `overlap_frac` 印出 0.05,那【看起來就是第一列(設計不成立)】——★★但它是被離群值主宰的:maintain 的 shortage 可以是負的(有餘)、build 的 deficit 被 clamp 在 0 以上,聯集被長尾拉開;★★★真正的判準是【包含率 = 1.00】:build 的整個區間【完全落在】maintain 區間內 ⇒ 不是分離,是被包住;★另外撞到一件更重要的:那幾個值【是常數不是分布】(maintain_weapons 573 筆全 1.0000、build_workshop/stable 全 1.0、build_apothecary 全 0.5) ⇒ 改用它們當 payoff【不會解掉 tie】
