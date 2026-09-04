@@ -138,6 +138,7 @@ func _run() -> void:
 	_sec_delist_prepare(state)
 	_sec_specimen_coverage(state)
 	_sec_factions(state)
+	_sec_join_funnel()
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -1132,3 +1133,29 @@ func _sec_factions(state: WorldState) -> void:
 	print("  ★驗收：空政權（只有 leader）= %d / %d %s" % [
 		empty_cnt, n, ("⇒ ★綠" if empty_cnt == 0 else "⇒ ★★★紅（空政權 ⇒ 義務的母體仍是 0）")])
 	print("  ★★誠實限：末狀態一張快照 —— ★★★它答不了「中途有沒有空過」，也答不了「成員有沒有換過」")
+
+# ★★★JOIN 逐站（systems join-rootcause 票 ①）：★這一節【只印既有 counter】，不新增 tap。
+#   ★理由：seg1 三張輸出裡 `join.*` 一個 key 都沒有 —— ★★而那是【床沒印】不是【值是 0】，
+#   ★★★兩者在輸出上長得一模一樣，所以先把既有的印出來，才談要不要加新 tap。
+#   ★母體與命中同印；★★而「committed」與「送達」是兩個不同的站，這一節把它們排開。
+func _sec_join_funnel() -> void:
+	print("═══ ★JOIN 逐站（★只印既有 counter，未新增 tap）═══")
+	var cand: int = int(Probe.counts.get("optpool.cand.併入", 0))
+	var win: int = int(Probe.counts.get("optpool.win.併入", 0))
+	print("  ①決策層：`optpool.cand.併入`=%d ｜ `optpool.win.併入`=%d ／ 母體 `optpool.mother`=%d" % [
+		cand, win, int(Probe.counts.get("optpool.mother", 0))])
+	var disp: int = int(Probe.counts.get("join.dispatch", 0))
+	var res: int = int(Probe.counts.get("join.resolve", 0))
+	var nohand: int = int(Probe.counts.get("join.arrived_no_handler", 0))
+	var ghost: int = int(Probe.counts.get("join.abort_ghost", 0))
+	var tmo: int = int(Probe.counts.get("join.timeout", 0))
+	print("  ②到達層：`join.dispatch`=%d（★到達核心互動＝真的遇到了）" % disp)
+	print("  ③命中層：`join.resolve`=%d ｜ `join.arrived_no_handler`=%d（★到了卻沒 handler）" % [res, nohand])
+	print("  ④中止：`join.abort_ghost`=%d（撲空：走到 last-seen 空格）｜`join.timeout`=%d" % [ghost, tmo])
+	print("  ★`join.accept_check` 取樣筆數=%d" % (Probe.samples.get("join.accept_check", []) as Array).size())
+	print("  ★★讀法（systems 寫在數字之前）：")
+	print("     `dispatch`=0 而 `win`>0 ⇒ ★【從沒走到相遇】⇒ 病在移動/距離，不在 resolver")
+	print("     `dispatch`>0 而 `resolve`=0 ⇒ ★★病在 `social_target` 對不上或 resolver 內部")
+	print("     兩者都有 ⇒ ★★★照原樣報，分開計")
+	print("  ★★★而 `win` 與 `dispatch` 【不是同一個母體】：win 是決策次數，dispatch 是相遇次數")
+	print("     ⇒ 兩者相減沒有意義（★同一個陷阱我今天已經在 `[Merge]` 上踩過一次）")
