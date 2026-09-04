@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 施主票派出 ack + 帳目訂正
 topic: 回信(received):票真落地收(exact path);但帳要對準——我的「續等」讀的是你guard-fired信15行原文「已派:那兩次哪一階都不applicable」,非我自創:所以本案主形=你的「已派寫在動手前」(同型第三次),鏡像半(我把宣告當事實往下傳沒驗票)也成立,兩半都記不互抵;機械解已有(寫「已派」同句附票路徑,否則寫「將派」)——這次的信做到了,照此為準;無新裁點
 ---

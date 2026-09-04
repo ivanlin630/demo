@@ -121,3 +121,44 @@ _promise_check() {
   return 0
 }
 _promise_check
+
+# ── ★★裸承諾檢查(2026-09-04 第三次同型後補):「已派」【不帶角色名】⇒ 上面那道掃不到 ──
+#   血證:2026-09-04-systems-to-blueprint-guard-fired-line-reopens.md:15
+#        原文「已派:那兩次【哪一階都不 applicable】、為什麼(逐階條件名,禁猜)」
+#        ★沒有角色名 ⇒ _promise_check 的 `[^。]{0,6}${role}` 從來沒命中 ⇒ 票不存在而下游照著它排隊。
+#   ★判準改成【兌現物】而不是【收件人】:同一行必須有一個【真的存在的】handback 路徑。
+#   ★★這樣「已派給 implementer」與「已派:<內容>」兩種寫法都被涵蓋。
+_promise_bare_check() {
+  local d="docs/superpowers/handbacks" me="${SESSION_ROLE:-systems}" today
+  today="$(date +%Y-%m-%d)"
+  [ -d "$d" ] || return 0
+  local f line path miss=0 checked=0
+  for f in "$d"/${today}-${me}-to-*.md; do
+    [ -f "$f" ] || continue
+    while IFS= read -r line; do
+      case "$line" in \#*|topic:*|slice:*) continue ;; esac
+      # ★提及(mention) ≠ 使用(use):「已請」出現在引號裡是【在講這條規則】,不是在承諾
+      #   ★做法:數【總出現次數】vs【被引號夾住的次數】,相等 ⇒ 整行都是引用 ⇒ 不算
+      #   ★★不用 sed 's/「[^」]*」//g':`[^」]` 在 byte locale 下把 E3 前導位元組一起排除
+      #      (『』也是 E3 開頭) ⇒ 剝不掉。★這是 2026-09-04 陽性對照第二輪抓到的。
+      _n_all=$(printf '%s' "$line" | grep -oE '(已請|已派|已寄|已轉)' | wc -l)
+      _n_q=$(printf '%s' "$line" | grep -oE '[「『](已請|已派|已寄|已轉)[』」]' | wc -l)
+      #   ★收窄:只要這行【引用過】這個詞,整行就當在討論規則(血證那行 q=0,仍會響)
+      #   ★★寧可漏一點也不要吵:雜訊會讓人開始忽略警告(同檔上面那道的已知界限同理)
+      [ "$_n_q" -gt 0 ] && continue
+      checked=$((checked+1))
+      # 同一行有存在的 handback 路徑 ⇒ 已兌現
+      path=$(printf '%s' "$line" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z]+-to-[a-z]+-[a-z0-9-]+\.md' | head -1)
+      if [ -n "$path" ] && [ -f "$d/$path" ]; then continue; fi
+      # 同一行有角色名 ⇒ 交給上面那道(它查有沒有寄給該角色)
+      printf '%s' "$line" | grep -qE '(blueprint|systems|implementer|measurer|reviewer|qa)' && continue
+      echo "  ⚠ $(basename "$f"): 裸承諾「$(printf '%s' "$line" | cut -c1-40)…」——同一行沒有【存在的】票路徑"
+      miss=$((miss+1))
+    done < <(grep -nE '(已請|已派|已寄|已轉)' "$f" 2>/dev/null | cut -d: -f2-)
+  done
+  # ★偵測器的證據力是單向的:checks=0 時不得讀成「全部合格」
+  [ "$checked" -eq 0 ] && return 0
+  [ "$miss" -gt 0 ] && echo "  ⇒ ★★寫「已派」同一句必須附票的 exact path,否則改寫成「將派」(⏳在飛 vs 🅿️未派下一步動作相反)"
+  return 0
+}
+_promise_bare_check
