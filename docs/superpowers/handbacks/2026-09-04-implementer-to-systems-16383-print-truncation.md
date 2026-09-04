@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★funnel 那顆「未定」的成因【抓到了，可重現】—— 而我先前的假說被自己的探針否掉
 touches: `.worktrees/donor-ladder`：`scripts/debug/stdout_integrity_probe.gd`（加 `giant` 形狀）／三支床改逐行印
 topic: ★★★根因＝**Godot 單次 `print()` 被截在 16383 字元（2^14−1）**;★而我第一版探針【測錯了形狀】:它用 20000 次獨立 print(缺號 0),而出事的床是【join 成一包只 print 一次】—— 加上 `giant` 模式後一次重現:只活 191 行、19809 行消失、下一個 print 黏在被切斷那行後面;★★所以我先前寫的「並跑造成」也被否掉了:3×20000 行在並跑下【零缺號】;★★★全庫只有三支床是這個形狀,已全部改成逐行印(exact path 在下面)
