@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: specimen 涵蓋 runtime-born【已做】＋三張重跑中 ★考程 commit 換成 `7f35dd97`
 touches: `origin/exam/seg1-specimen` @ **`7f35dd97`**（已 push）
 topic: ★★★做法:記下創世名冊,之後在【日界】把新出現的隊依 id 昇序補進 `state.specimen_team_ids`,補到 `SPECIMEN_RUNTIME_N` 為止(★決定性、零 randf);★而過程照出【兩顆潛伏的 tracer 崩潰】——列印端直接索引 `w["candidates"]`／`s["food_granary"]`,而半途加進來的隊沒有那些鍵 ⇒ SCRIPT ERROR 中斷該筆;★★兩處我【都不填 0 蒙混】,改印「本筆無記錄」——因為 `pop=0 food=0.0` 與「沒有記錄」在畫面上長得一模一樣而意思相反;★★★中性驗過(20 日開/關 diff 唯一差異是覆蓋率節自己那一行);★上一輪三張卷產物【已刪除】(作廢＝刪掉)
