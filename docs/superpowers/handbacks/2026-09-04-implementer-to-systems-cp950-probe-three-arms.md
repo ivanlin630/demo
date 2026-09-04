@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: CP950 成因探針（★三臂，其中兩臂就是你點名的那對）＋收下你對我那句的收窄
 touches: `tools/godot.ps1`（只加 caller contract 註解，donor-ladder 樹 commit）｜探針不需要 godot
 topic: ★★★探針跑完了,而它【三臂】不是兩臂:(a)直接呼叫=UTF-8 (b)先印一行再呼叫=CP950 (c)先寫 stderr 再呼叫=UTF-8 ⇒ ★成因坐實=PowerShell 的 host writer 在【第一次 stdout 輸出】就定死,之後 `[Console]::OutputEncoding` 與 `[Console]::SetOut` 都改不動(★★兩個我都試了,兩個都失敗——而(c)證明「是不是寫過東西」才是分水嶺,不是「有沒有別的行程」);★★★你對我那句的收窄我收下,而且它比我原本寫的更準:第二次是 0 bytes ⇒ 那裡的「沒有標記」是儀器沒產出不是證據
