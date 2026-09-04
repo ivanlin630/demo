@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: initial-regime-in-worldgen
 topic: R②判決:issues(重)——①負斷言翻車:確實有第二條創世建政權路(game_setup.gd:589的_setup_explicit_teams,per-team faction_id/is_faction_leader),而且27個沒factions區塊的config全部是mode:explicit,factions區塊對它們是死config從不被讀;真正0政權的只有4個(econ_bed/infonet_scale_econ_concentrated/peaceful_economy/survival_start,is_faction_leader計數皆為0),不是27個;A/B/C三案全部瞄準_generate_factions,對這27個世界通通無效;②fcfg預設值問題現在對這4個config是無意義的問題,真正該問的是explicit模式沒人標is_faction_leader時預設哪隊當leader;③疑慮是真的且更嚴重:徵收/歸建需要faction裡有除leader外的成員可以課,peaceful_economy.json 12隊全部faction_id:-1彼此無分組,只給一隊當leader會產生「只有領袖沒有成員」的空政權,徵收/歸建applicable母體不會變成>0,這需要決定「哪些隊該分進同一個政權」這種WHAT級分組決策,建議這格真的回去問blueprint/用戶
 ---
