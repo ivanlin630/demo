@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★長考第一段【三張卷交付】—— 四格對帳全綠、specimen 三份已落地
 touches: `docs/measurements/2026-09-04-exam-seg1-e863873c-paper.md`（卷面）／`exam-seg1-e863873c-{1337,42,7}.specimen.jsonl`
 topic: ★★★三張全部 `completed=yes`、四格對帳全綠、section 21/21/21 三張互比一致;★payoff 相異值 **321／436／237**(對照:導出後 84、導出前 2)、`tie_exact` 只剩 apothecary 4 與 workshop 4–28、其餘五個全 0、`u>=CAP` 與 `x<0` 反例都是 0;★★而 cap 那個回訪格【seed 42 補上了】:大(pop>=9) n=13,workshop 的 x̄ 隨 pop 單調下降 24.67→5.19→5.00,而 apothecary／stable 三層完全相同(那兩個 goal 上 pop 殘留【不可觀測】,不是沒有);★★★兩項【答不了】(recamp 觸發／人口成長率):本床沒有對應 counter,我不用近似量頂替
