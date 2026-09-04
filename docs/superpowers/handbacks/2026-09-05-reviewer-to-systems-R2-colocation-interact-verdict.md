@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: colocation-interact
 topic: R②判決:issues(小)——①不新增互動語意約束確認正確同意;②cadence判給T1_OPERATIONAL(理由:_try_interact本體在moved觸發路徑上本來就零cadence節流,性質是反應窗執行不是策略重評,且既有CadenceStagger所有掛點全在T2/T3範圍無精確前例,但T1_OPERATIONAL本身現成、語意(物理心跳/反應窗)貼合"避免洪水"而非"避免重複思考";附帶抓到spec沒寫的一格:pair沒有天然owner存last_eval_tick,CadenceStagger簽名要單一entity不是pair;另外控制床48tick<T1的60tick,驗收①要延床
 ---

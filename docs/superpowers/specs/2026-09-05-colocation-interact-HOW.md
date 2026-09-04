@@ -27,7 +27,21 @@
 ★節流:`CadenceStagger.next_tick(current_tick, last_eval_tick, team_id, cadence)`
    ⇒ ★零 RNG、純函式、同 (tick, team_id, cadence) 恆同值 ⇒ 可重播
    ⇒ ★★而它的用途在這裡【不是 perf】,是【避免同格兩隊每 tick 互動一次＝洪水】
-★★★而 cadence 用哪一個【既有】值 —— ★我不自己選,交 R²（見 §5）
+★★★cadence ＝ ★**`DecisionTier.T1_OPERATIONAL`**（decision_tier.gd:23 ＝ `TICKS_PER_HOUR` ＝ 60）
+   ⇒ ★R² 判：`_try_interact` 在 moved 路徑上本來就【零 cadence 節流】，性質是【反應窗執行】不是【策略重評】
+   ⇒ ★★而 T1 的語意（物理心跳／反應窗）貼合「避免洪水」，不是「避免重複思考」
+
+### ★★★★訂正（R² 抓到的 spec 缺格）：**機會屬於【隊】，不屬於【pair】**
+```
+★R² 指出:pair【沒有天然 owner】存 last_eval_tick,而 CadenceStagger 的簽名要【單一 entity】
+⇒ ★★而那其實在說:我把機會【掛錯了對象】—— 不是「這一對該不該互動」,
+   是【這支隊該不該環顧四周】
+⇒ ★★★所以改成【per-team】:`team.colocate_eval_next_tick`（★沿用既有慣例:
+   ambition_eval_next_tick／infra_eval_next_tick 都是 entity 上的欄位）
+★輪到某隊時:讀它自己 tile 上的其他隊（排序後）,逐一呼 `_try_interact`
+⇒ ★★零新狀態結構(只多一個既有形狀的欄位)、零 pair 表、而錯峰天然由 CadenceStagger 提供
+⇒ ★★★副作用是好的:同一對可能被【兩邊各自】給一次機會 —— 而那正是「兩隊各自環顧」的語意
+```
 ```
 
 ## §4 ★必須寫死的三個坑
@@ -49,7 +63,7 @@
 ## §6 驗收
 | # | 判準 |
 |---|---|
-| 1 | ★**控制床：兩隊同格靜止 ⇒ 在 ≤ 一個 cadence 週期內發生互動**（★★現況 48 tick 0 次） |
+| 1 | ★**控制床：兩隊同格靜止 ⇒ 在 ≤ 一個 cadence 週期內發生互動**（★★現況 48 tick 0 次）<br>★★★**床要延長**：T1 ＝ 60 tick 而舊床只有 48 tick ⇒ **48 < 60，跑不到那個機會**（R² 抓到）⇒ **至少 2 個週期（120 tick）** |
 | 2 | ★★`join.resolve` **> 0**／`true<belief` 下降（★這是從共位必見那票**移過來**的 #3/#4） |
 | 3 | ★★★**不新增互動語意**：diff 顯示只新增入口，`_try_interact` 本體**未改** |
 | 4 | ★同 tick 同 pair **不重複處理**（機械計數 ＝ 0） |
