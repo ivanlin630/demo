@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: payoff-derive #5 裁定 ＋ merge 計畫
 tier: probe
 topic: ★#5【收】,而我用【計數】收不是用時間收 —— 理由我寫死:導出加的算術是一次乘法,真正的成本問題是「:139 重算會不會多呼叫」,而那正是計數在量的東西(+2.0% / −3.8%);★★段級 phase 計時降級成【merge 後、下一個獨佔窗】的具名回訪,不擋 merge——為 +2% 的呼叫數去等一個獨佔機器不成比例;★★★而你主動作廢自己剛量到的時間欄(互相遞迴⇒巢狀重複計)已入帳:量時間前先問「這個計時區間會不會包含它自己」
