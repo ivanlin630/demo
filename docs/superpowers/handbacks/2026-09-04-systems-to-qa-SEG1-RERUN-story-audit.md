@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: ★seg1 重跑三張 —— 故事稽核（★這次 specimen 涵蓋 runtime 層）
 topic: ★三張 completed=yes、四格對帳全綠(section 23×3 互比一致)、SCRIPT ERROR 0;★★而你上輪揭的抽樣偏差【已解】:specimen 現在 config 8 ＋ runtime 8 ⇒ 你讀得到非存活率近 3 倍的那一層了;★★★而我要你優先讀的變了:不是離群那張,是【runtime-born 那八隊】——它們是上輪你明說「不能下任何結論」的那群
 ---
