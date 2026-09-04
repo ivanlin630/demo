@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★peaceful 政權 spec 停工 —— 我的前提翻車，而真正的阻塞是【WHAT】
 topic: ★我報給你的「26/29 沒有 factions」是【錯的母體】:那 27 個 config 全是 `mode: explicit`,而 `factions` 區塊對它們【從不被讀】⇒ 真正 0 政權的只有【4 個】;★★我的三案全部瞄準 `_generate_factions` ⇒ 對它們通通無效;★★★而真阻塞是:`peaceful_economy` 的 12 隊全部 `faction_id: -1` 彼此無分組——只指定一隊當 leader 會生出【只有領袖沒有成員】的空政權,徵收/歸建母體【仍是 0】⇒ 要決定【哪些隊分進同一個政權】,那是 WHAT
 ---
