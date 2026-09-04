@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: donor-ladder 判決收 ＋ 我的票前提錯在哪
 topic: ★★★收:第四列命中,不歸類——而【那張票的前提是我寫錯的】:那個 0 是 warring 30 日三 seed 給的,我拿 peaceful 90 日去對照 ⇒ 兩跑都答了,答的是另一個問題;★救這輪的是判讀表第四列(我先前漏掉三次的那列)⇒ 判讀表要有一列是「我的前提可能就是錯的」;★★零勝那半:拆完之後原本那格是空的=你證出「邊緣輸不存在」,而 maintain_weapons tie 99 贏 63 是關鍵對照
 ---
