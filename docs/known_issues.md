@@ -1267,6 +1267,13 @@ porter 整趟**不進任何決策路徑**。specimen 佐證（追逐窗 tick 360
 
 ### ⚠️★★回溯標注：以下 peaceful 卷結論**全部缺一個章節**——「**這張卷沒有勢力層**」（2026-08-21，用戶令）
 
+★★★**第二次打戳（2026-09-04，政權注入 ＝ 根修級世界變更）**：`config/peaceful_economy_regime.json` **新增初始政權**
+（A 北緣 6 隊／B 西南 4 隊／獨立 2；★**舊檔 `peaceful_economy.json` 凍結存檔、一字未動** ⇒ 兩個世界都能重建）。
+⇒ ★**打戳範圍比「政權統計」寬**（reviewer 放寬）：**`徵收／歸建` 變成新的活候選 ⇒ 整個競爭池改變**
+⇒ ★★**任何在【無政權 peaceful】上量到的「哪個 option 贏了 argmax」結論，被引用時要先重驗**（用時付費）。
+★**已知會被戳到的三筆**：①`備戰過門檻 20.0%` ②`peaceful 無人承諾紮根 0／0` ③`power_ratio 對照腿`。
+★★**而它們【不自動作廢】** —— **舊 config 還在，複現得了；戳的意思是「引用前先重驗」，不是「它錯了」。**
+
 **已坐實**：`peaceful_economy` **無 `factions`**（`state.factions.size()` 恆 0，逐 tick 驗）
 ⇒ `faction_ai_system.gd`（★L2 錨：檔級。原為行號錨，而行號跟著編輯走） `for fid in state.factions:`（**loop1**）**零疊代**
 ⇒ **`_update_goals` / `_assign_tasks` / `_evaluate_infrastructure` 全程未執行。**
@@ -2708,6 +2715,12 @@ measurer T3：`state.factions.size()` **恆為 0**（逐 tick 取樣）。
 **「建國」這個動詞只掛在「打贏」和「臣服」上，沒有「經濟／聚落成長 → 立國」的和平路徑。**
 
 ### ⚠️★★★重大訂正（2026-08-25）：**「26/29 config 沒有 factions」是【我的讀法錯】**
+
+★★★**而 2026-09-04 我【又犯了同一個錯】**：我再次用 top-level `factions` key 掃，報出「26/29」「27/36」，
+★**而正解就寫在本條目裡**（`teams[].faction_id`＋`is_faction_leader`）—— ⇒ **reviewer 第二次把它抓出來。**
+★★**真正 0 政權的是 4 個**：`econ_bed`／`infonet_scale_econ_concentrated`／`peaceful_economy`／`survival_start`。
+★★★**教訓（本檔自己就是證據）**：**訂正寫在帳上，而下一個犯同樣錯的人可能是【寫下那條訂正的人】** ——
+**⇒ 所以訂正要寫在【會被撞到的地方】，而不只是寫在【正確的地方】。**
 
 ★**我用 top-level `factions` key 掃 29 個 config** —— **但那不是 faction 的唯一表達方式。**
 **正確讀法 ＝ `teams[].faction_id`**（`game_setup` 會據此 `create_faction`）。
