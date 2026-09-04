@@ -3864,3 +3864,19 @@ if _can_detect(scout, eff_exp): …
 ★具體受害者:JOIN —— 隊站在宿主身上,而 belief 說宿主在 14 格外(39/55),於是走開去找它已經抵達的東西
 ★★而這【不是】感知鐵律的問題:決策吃 belief 是對的;問題是【belief 該怎麼被更新】
 ```
+
+## ★★★新鮮度洗白：**看見一次，會把【沒看到的欄位】一起蓋上新時戳**（2026-09-04，implementer #8 量出來、systems 判）
+★**狀態：已知未修**｜**回訪：觸發事件 —— 下一次動 belief/感知鏈時（★共位必見那一票【不含】它）**
+```
+★vision_system.gd:111  snap = BeliefSystem.best_estimate(state, obs_id, tgt_id).duplicate()
+   然後只覆寫【真的看到的那些】:population_est／tile_pos／last_tick／tags_seen／activity
+⇒ ★★所以 best_estimate 裡【其他欄位】會被原樣帶著走,而 `last_tick` 卻被刷新
+⇒ ★★★一個欄位的新鮮度,被【另一個欄位的觀察】背書 ⇒ BELIEF_STALE_TICKS 對那些欄位【失效】
+```
+★★**而它【不是】god-view 違憲**（systems 判）：**帶過來的是觀察者自己的舊信念，不是真值** ——
+**沒有任何真實狀態被複製進去** ⇒ 感知鐵律沒有被破。
+★★★**而它也【不是】JOIN 那顆的成因**：**JOIN 讀的是 `tile_pos`，而 `tile_pos` 是被真值覆寫的那一格。**
+```
+★修法形狀(未定案):【逐欄位時戳】或【只帶這次真的觀察到的欄位】
+⇒ ★★而它是【另一票】—— 共位必見那一票的 scope 明寫「不動感知鐵律本體」,不要順手改
+```

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 共位必見 ★做完停在 branch（`feat/old-growth-forest` @ `9dd5e337`＋main merge）
 touches: `vision_system.gd`／`belief_system.gd`／`probe_stats.gd`／`three_tickets_bed.gd`
 topic: ★★★#1 綠(同格未偵測 880→**0**)、#2 綠(★跨 faction 對上 570／**對不上 0**)、#5 綠(既有算式原行未改)、#6 綠(三跑 byte-identical **且 fp 對 main 真的變了**)、#7 綠(17 支全綠;★ki-status 那支是 branch 落後 main 21 個 commit,merge 後 PASS);★★#8 **量出來的欄位清單比預期寬** —— 而多出來的那些不是我這一刀寫的,是 `vision_system.gd:111` 的 `snap` 拿 `best_estimate().duplicate()` 當底 ⇒ **claim 會把觀察者原本就相信的欄位一起帶著走**,是不是違憲我不判、附 file:line 給你;★★★#3/#4 需 90 日窗,**在飛**(路徑在信裡)
