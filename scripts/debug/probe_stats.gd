@@ -118,8 +118,78 @@ static func reset() -> void:
 	# ★★★setup_saw_unarmed / setup_unarmed_sites 【刻意不清】——
 	#   盲床的順序就是「先 setup、後 reset+arm」⇒ 清掉的話證據會被它要抓的那個 bug 抹掉。
 	counts = {}; peaks = {}; amounts = {}; samples = {}
+	_streak = {}
+	_levy_last = {}
 	# ★判定時點①：reset() 是床 arm 時一定會走的路（218 處呼叫），而 production 零處。
 	check_arm_order()
+
+# ★★★「卡在單一迴圈」的儀器（systems 判準 2026-09-05）——
+#   ★判準是【同一 option 連續贏 ≥ N 次】★★且【該隊資源沒有下降】，兩條件缺一不可：
+#     「一直贏同一個」單獨【不算】，它可能是【正確的持續行為】（例如持續維持據點）
+#     ⇒ ★★★「資源沒下降」那半才排除掉「它正在解決問題」這個競爭解釋。
+#   ★而 N【由實測分布定，不先手填】⇒ 這裡印的是【連勝長度的分布】，不是一個判定結果。
+#   ★★零 RNG、純累加；★★★而它【只在 enabled 下動】，production 完全不走。
+static var _streak: Dictionary = {}   # team_id → {opt,len,food0,coin0,food1,coin1}
+
+static func note_winner(team_id: int, opt: String, food: float, coin: float) -> void:
+	if not enabled: return
+	var st: Dictionary = _streak.get(team_id, {})
+	if st.is_empty() or String(st.get("opt", "")) != opt:
+		if not st.is_empty(): _flush_streak(st)
+		_streak[team_id] = {"opt": opt, "len": 1, "food0": food, "coin0": coin,
+			"food1": food, "coin1": coin}
+	else:
+		st["len"] = int(st["len"]) + 1
+		st["food1"] = food
+		st["coin1"] = coin
+		_streak[team_id] = st
+
+static func _flush_streak(st: Dictionary) -> void:
+	var n: int = int(st.get("len", 0))
+	if n <= 0: return
+	bump("winstreak.len.%03d" % clampi(n, 0, 999))
+	bump("winstreak.opt.%s.len.%03d" % [String(st.get("opt", "?")), clampi(n, 0, 999)])
+	# ★單點連勝（len==1）沒有「區間內資源變化」可談 ⇒ 不進資源欄（★否則分母被灌水）
+	if n < 2: return
+	var f0: float = float(st.get("food0", 0.0)); var f1: float = float(st.get("food1", f0))
+	var c0: float = float(st.get("coin0", 0.0)); var c1: float = float(st.get("coin1", c0))
+	var _fd: String = "down" if f1 < f0 else ("flat" if f1 == f0 else "up")
+	bump("winstreak.food." + _fd)
+	bump("winstreak.coin." + ("down" if c1 < c0 else ("flat" if c1 == c0 else "up")))
+	# ★★★判準的【兩條件交叉】：長度分帶 × 資源有沒有下降 —— ★這才是 systems 要的那張表
+	bump("winstreak.cross.%s.%s" % [
+		("02to04" if n < 5 else ("05to09" if n < 10 else ("10to19" if n < 20 else "20up"))),
+		("res_down" if f1 < f0 else "res_not_down")])
+
+# ★跑批結尾必呼：★★否則【還沒結束的那一段連勝】永遠不進分布 —— 而長連勝正是最可能還沒結束的那些
+static func flush_all_streaks() -> void:
+	for k in _streak.keys(): _flush_streak(_streak[k])
+	_streak = {}
+
+# ★★★`徵收` 重複頻率（blueprint pre-register 2026-09-05）——
+#   ★要的是【同一 pair 連續兩次徵收的間隔分布】，★★不是平均：
+#     平均會把「一對每小時收一次」與「很多對各收一次」混成同一個數字。
+#   ★★★故事尺（blueprint 原話）：天天來收稅＝惡政喜劇；收一次飽一陣＝健康政權。
+static var _levy_last: Dictionary = {}   # "collector-payer" → tick
+
+static func note_levy(collector_id: int, payer_id: int, tick: int) -> void:
+	if not enabled: return
+	var k: String = "%d-%d" % [collector_id, payer_id]
+	if _levy_last.has(k):
+		var gap: int = tick - int(_levy_last[k])
+		var hours: int = gap / 60   # TICKS_PER_HOUR=60（★這裡只用來分帶，不進任何決策）
+		bump("levy.gap.%s" % (
+			"0_未滿1時" if hours < 1 else (
+			"1_1到6時" if hours < 6 else (
+			"2_6到24時" if hours < 24 else (
+			"3_1到3日" if hours < 72 else (
+			"4_3到7日" if hours < 168 else "5_超過7日"))))))
+		bump_sample("levy.gap.row", {"collector": collector_id, "payer": payer_id,
+			"gap_ticks": gap, "gap_hours": hours}, 24)
+		bump("levy.pair.repeat")
+	else:
+		bump("levy.pair.first")
+	_levy_last[k] = tick
 
 static func ambush_check(state: WorldState, attacker_id: int, defender_id: int) -> void:
 	if not enabled: return

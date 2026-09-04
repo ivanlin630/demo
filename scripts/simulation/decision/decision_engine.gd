@@ -139,6 +139,17 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 			Probe.bump("optpool.cand." + String(_r4["opt"]))
 		if not scored.is_empty():
 			Probe.bump("optpool.win." + String(scored[0]["opt"]))
+			# ★★★存活四分的兩格儀器（systems 判準 2026-09-05）——
+			#   ★連勝：接在【同一個「贏」的定義】上（`optpool.win.*` 就是卷面「誰在贏」那一節的來源）
+			#     ⇒ ★★否則「連勝」與「誰在贏」會是兩個不同的母體，而卷面會把它們並排。
+			#   ★★瀕死：判準是【窗內曾 food_days < 1】且【最終存活】——
+			#     ★★★這裡只記【曾經】那一半，「最終存活」由卷面在收尾時交叉（那時才知道誰活著）。
+			var _sf: float = ResourceSystem.effective_food(state, team)
+			Probe.note_winner(team.team_id, String(scored[0]["opt"]), _sf,
+				float(team.resources.get("coin", 0.0)))
+			var _fd2: float = _sf / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+			if _fd2 < 1.0:
+				Probe.bump("nearfatal.ever.%d" % team.team_id)
 	_beg_tap(ctx, scored, team, "begu.", state)   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
 	# ★`_prep_tap` 已隨「備戰」下架整組移除（`delist-prepare` §3①）：留著會【永遠印 0】，
 	#   而「這條沒發生」與「這條不存在」在 0 上長得一模一樣 ⇒ 幽靈 counter 比刪掉更糟。

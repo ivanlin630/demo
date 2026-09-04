@@ -625,6 +625,19 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> void:
 	var collector: TeamData = state.teams[collector_id]
 	var payer:     TeamData = state.teams[payer_id]
+	# ★★★`徵收` 執行真實性（blueprint pre-register 2026-09-05）——
+	#   ★「贏 → dispatch → 轉移」是【三個獨立的斷點】，而今天已經證過每一站都可能斷
+	#     （血證：備戰贏 352 次而【從未 dispatch】）⇒ ★★所以三站各有自己的計數。
+	#   ★★★而「轉移」要【兩邊都看】：收方 +X 且付方 −X ——★只看一邊的話，
+	#     「收方帳面變多」可能來自別的來源，那會把幽靈讀成真轉移。
+	var _lv_probe: bool = Probe.enabled
+	var _lv_p0: float = 0.0
+	var _lv_c0: float = 0.0
+	if _lv_probe:
+		Probe.bump("levy.resolve_entry")
+		for _r0 in ["food", "material", "goods", "coin"]:
+			_lv_p0 += float(payer.resources.get(_r0, 0))
+			_lv_c0 += float(collector.resources.get(_r0, 0))
 	# PRODUCE 居民：用 team.tax_rate，跳過勢力守衛
 	if payer.tags.has(TeamData.TAG_PRODUCE):
 		# 特別稅：一般稅率 × MULT，重於常態，進 collector(leader) 口袋（應急/戰爭）
@@ -681,18 +694,24 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			collector,
 			{ "origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % rate })
 		print("[Tribute] Team%d 徵收居民 Team%d rate=%.2f" % [collector_id, payer_id, rate])
+		# ★★★居民路（TAG_PRODUCE 特別稅）【也是】真徵收 —— ★它在這裡 return，
+		#   ★★若只在函式末端掛 tap，這一整條路會【完全不進帳】而卷面看起來像「徵收很少」。
+		_levy_settle_tap(state, collector, payer, _lv_probe, _lv_p0, _lv_c0)
 		return
 	# 非 PRODUCE：原有勢力守衛 + value 修正邏輯
 	var f = state.factions.get(collector.faction_id)
 	if f == null or f.leader_team_id != collector_id:
+		if _lv_probe: Probe.bump("levy.guard.非領袖或無勢力")
 		return
 	if not f.member_team_ids.has(payer_id):
+		if _lv_probe: Probe.bump("levy.guard.付方不是自家成員")
 		return
 	# S6 施工子隊豁免：建造/升級/擴建子隊是 collector 自己的派遣隊，不得逆向抽稅
 	var _BUILDER_TASKS: Array = [TeamData.TASK_CONSTRUCT, TeamData.TASK_BUILD,
 		TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]
 	if payer.tags.has(TeamData.TAG_SUBTEAM) and payer.parent_team_id == collector_id \
 			and payer.current_task in _BUILDER_TASKS:
+		if _lv_probe: Probe.bump("levy.guard.子隊在施工中")
 		return
 	var payer_p = state.persons.get(payer.leader_id)
 	var base_rate: float = f.tribute_rate
@@ -723,6 +742,30 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 		collector,
 		{ "origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % base_rate })
 	print("[Tribute] Team%d 徵收 Team%d rate=%.2f" % [collector_id, payer_id, base_rate])
+	_levy_settle_tap(state, collector, payer, _lv_probe, _lv_p0, _lv_c0)
+
+# ★★★徵收結算 tap（純觀測）：★付方減、收方加，兩邊【同時】驗；
+#   ★★不平衡不是「數字不好看」——它代表資源不守恆，那是要報 systems 的東西，不是我調的。
+func _levy_settle_tap(state: WorldState, collector: TeamData, payer: TeamData,
+		on: bool, p0: float, c0: float) -> void:
+	if not on:
+		return
+	var p1: float = 0.0
+	var c1: float = 0.0
+	for _r1 in ["food", "material", "goods", "coin"]:
+		p1 += float(payer.resources.get(_r1, 0))
+		c1 += float(collector.resources.get(_r1, 0))
+	var _out: float = p0 - p1        # 付方減少量
+	var _in: float  = c1 - c0        # 收方增加量
+	if _out <= 0.0 and _in <= 0.0:
+		Probe.bump("levy.zero_transfer")   # ★走到了、也沒被 guard 擋，但【什麼都沒動】＝幽靈的一種
+		return
+	Probe.bump("levy.transferred")
+	Probe.add_amount("levy.amount_out", _out)
+	Probe.add_amount("levy.amount_in", _in)
+	# ★★★兩邊對帳：★允許微小浮點誤差；★★而不平衡【具名】而不是靜靜吸收
+	Probe.bump("levy.balanced" if absf(_out - _in) <= maxf(0.001, absf(_out) * 0.001) else "levy.UNBALANCED_BUG")
+	Probe.note_levy(collector.team_id, payer.team_id, state.world.current_tick)
 
 func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> void:
 	var messenger: TeamData = state.teams[messenger_id]

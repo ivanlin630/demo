@@ -269,6 +269,8 @@ func _run() -> void:
 	_sec_specimen_coverage(state)
 	_sec_factions(state)
 	_sec_join_funnel()
+	_sec_survival4(state)
+	_sec_levy()
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -1322,6 +1324,130 @@ func _sec_join_funnel() -> void:
 	print("  ★★★而 `win` 與 `dispatch` 【不是同一個母體】：win 是決策次數，dispatch 是相遇次數")
 	print("     ⇒ 兩者相減沒有意義（★同一個陷阱我今天已經在 `[Merge]` 上踩過一次）")
 	_sec_sighting()
+
+# ★★★`徵收` 兩格（blueprint pre-register 2026-09-05：判準寫在數據之前）——
+#   ★①執行真實性：贏 → dispatch → 【真轉移】是三個獨立斷點，每一站都可能斷
+#   ★★②重複頻率：★★★逐 pair 的【間隔分布】，不是平均
+#     （平均會把「一對每小時收一次」與「很多對各收一次」混成同一個數字）
+func _sec_levy() -> void:
+	print("")
+	print("═══ ★★★`徵收` 兩格（★判準 blueprint pre-register；★★我只給數字不下判定）═══")
+	var _win: int = int(Probe.counts.get("optpool.win.徵收", 0))
+	var _cand: int = int(Probe.counts.get("optpool.cand.徵收", 0))
+	var _disp: int = int(Probe.counts.get("tribute.dispatch.member", 0))
+	var _entry: int = int(Probe.counts.get("levy.resolve_entry", 0))
+	var _tr: int = int(Probe.counts.get("levy.transferred", 0))
+	var _zero: int = int(Probe.counts.get("levy.zero_transfer", 0))
+	print("  ── ★①執行真實性（★三站各自的數字，★★不是一個「成功率」）──")
+	print("     決策層：`optpool.win.徵收`=%d ／ `cand`=%d" % [_win, _cand])
+	print("     派工層：`tribute.dispatch.member`=%d" % _disp)
+	print("     到達層：`levy.resolve_entry`=%d（★走進 `_resolve_tribute`）" % _entry)
+	print("     轉移層：★`levy.transferred`=%d ｜ ★★`levy.zero_transfer`=%d（走到了卻什麼都沒動）" % [_tr, _zero])
+	var _gs: Array = []
+	var _gsum: int = 0
+	for _k in Probe.counts.keys():
+		var _ks: String = String(_k)
+		if _ks.begins_with("levy.guard."):
+			var _c: int = int(Probe.counts[_k])
+			_gsum += _c
+			_gs.append("%s=%d" % [_ks.substr(11), _c])
+	_gs.sort()
+	print("     擋掉：%s" % ("｜".join(PackedStringArray(_gs)) if not _gs.is_empty() else "（無）"))
+	print("     ★★★對帳：轉移 %d ＋ 零轉移 %d ＋ 擋掉 %d ＝ %d vs 到達 %d %s" % [
+		_tr, _zero, _gsum, _tr + _zero + _gsum, _entry,
+		"✅" if _tr + _zero + _gsum == _entry else "❌ 不平（★有我沒列到的出口）"])
+	print("     ★兩邊守恆：`levy.balanced`=%d ｜ ★★`levy.UNBALANCED_BUG`=%d（★★★非 0 ＝ 資源不守恆，報 systems）" % [
+		int(Probe.counts.get("levy.balanced", 0)), int(Probe.counts.get("levy.UNBALANCED_BUG", 0))])
+	print("     ★總量：付方減少 %.1f ｜ 收方增加 %.1f（★兩邊都印 —— 只看一邊會把幽靈讀成真轉移）" % [
+		Probe.amount("levy.amount_out"), Probe.amount("levy.amount_in")])
+	print("  ── ★★②重複頻率（★逐 pair 間隔分布；★★★不是平均）──")
+	print("     首次徵收的 pair 數 = %d ｜ 重複徵收次數 = %d" % [
+		int(Probe.counts.get("levy.pair.first", 0)), int(Probe.counts.get("levy.pair.repeat", 0))])
+	var _gp: Array = []
+	for _k2 in Probe.counts.keys():
+		var _ks2: String = String(_k2)
+		if _ks2.begins_with("levy.gap."):
+			_gp.append("%s=%d" % [_ks2.substr(9), int(Probe.counts[_k2])])
+	_gp.sort()
+	print("     間隔分帶：%s" % ("｜".join(PackedStringArray(_gp)) if not _gp.is_empty() else "（空）"))
+	if int(Probe.counts.get("levy.pair.repeat", 0)) == 0:
+		print("     ★★★重複 0 ⇒ 【沒有同一對被收第二次】—— ★不是「間隔很長」")
+	for _r in Probe.samples.get("levy.gap.row", []):
+		print("     逐筆：%s" % str(_r))
+	print("     ★讀法（blueprint 寫在數據之前，我照抄）：")
+	print("        ★★間隔極短、高頻重收 ⇒ 洪水；而病位是【徵收缺「收過了就不急」的 need 衰減】")
+	print("        ★★★間隔合理 ＋ 真轉移 ⇒ 預期內 —— 世界終於能收稅了，修前是【稅吏瞎】")
+	print("        ★故事尺：天天來收稅＝惡政喜劇；收一次飽一陣＝健康政權")
+
+# ★★★存活四分的兩格（systems 判準 2026-09-05）——
+#   ★瀕死 ＝【窗內曾 food_days < 1】★★且【最終存活】（兩條件同時，不是「看起來很危險」）
+#   ★★卡在單一迴圈 ＝【同一 option 連續贏 ≥ N 次】★★★且【資源沒下降】（兩條件缺一不可）
+#     ⇒ ★而 N【由實測分布定，不先手填】⇒ 本段印的是【分布】，★★不是一個判定結果。
+#     ⇒ ★★★所以這一段【不會】給出「卡在單一迴圈 = 幾隊」—— 那要等 N 定下來。
+func _sec_survival4(state: WorldState) -> void:
+	Probe.flush_all_streaks()   # ★★★沒有這一行，【還沒結束的那段連勝】永遠不進分布 —— 而長連勝正是最可能還沒結束的
+	print("")
+	print("═══ ★★★存活四分的兩格（★判準 systems 2026-09-05；★★本段只給分布不給判定）═══")
+	print("  ── ★連勝長度分布（★同一 option 連續贏幾次決策）──")
+	var _sl: Array = []
+	var _tot: int = 0
+	for _k in Probe.counts.keys():
+		var _ks: String = String(_k)
+		if _ks.begins_with("winstreak.len."):
+			var _c: int = int(Probe.counts[_k])
+			_tot += _c
+			# ★★★排序用【補零鍵】、顯示用【去零值】——★直接對顯示字串排序會把 13 排到 1 前面
+			#   （★★而那種錯不會報錯，只會讓讀者以為分布長那樣）
+			_sl.append("%s%s次=%d" % [_ks.substr(14), _ks.substr(14).lstrip("0"), _c])
+	_sl.sort()
+	var _sl2: Array = []
+	for _e in _sl: _sl2.append(String(_e).split("")[1])
+	_sl = _sl2
+	print("     %s" % ("｜".join(PackedStringArray(_sl)) if not _sl.is_empty() else "（空）"))
+	print("     ★總連勝段數 = %d（★★母體 0 ⇒ 儀器沒跑到，不是「沒有連勝」）" % _tot)
+	print("  ── ★★區間內資源變化（★只算 len>=2 的段：len==1 沒有「區間」可談）──")
+	print("     food：down=%d ｜ flat=%d ｜ up=%d" % [
+		int(Probe.counts.get("winstreak.food.down", 0)), int(Probe.counts.get("winstreak.food.flat", 0)),
+		int(Probe.counts.get("winstreak.food.up", 0))])
+	print("     coin：down=%d ｜ flat=%d ｜ up=%d" % [
+		int(Probe.counts.get("winstreak.coin.down", 0)), int(Probe.counts.get("winstreak.coin.flat", 0)),
+		int(Probe.counts.get("winstreak.coin.up", 0))])
+	print("  ── ★★★兩條件交叉（★這才是判準要的那張表：長度分帶 × 資源有沒有下降）──")
+	var _cx: Array = []
+	for _k2 in Probe.counts.keys():
+		var _ks2: String = String(_k2)
+		if _ks2.begins_with("winstreak.cross."):
+			_cx.append("%s=%d" % [_ks2.substr(16), int(Probe.counts[_k2])])
+	_cx.sort()
+	for _line in _cx:
+		print("     %s" % _line)
+	if _cx.is_empty():
+		print("     （空）")
+	print("     ★讀法：`res_not_down` 那半才是【卡在單一迴圈】的候選 ——")
+	print("        ★★`res_down` 的長連勝可能正是【它正在解決問題】（持續行為，不是卡住）")
+	print("     ★★★N 未定 ⇒ 本段【不給隊數】；★而暫定值會變成事實，所以我不填一個")
+	print("  ── ★瀕死：【窗內曾 food_days < 1】×【最終存活】──")
+	var _ever: Array = []
+	for _k3 in Probe.counts.keys():
+		var _ks3: String = String(_k3)
+		if _ks3.begins_with("nearfatal.ever."):
+			_ever.append(int(_ks3.substr(15)))
+	var _alive: int = 0
+	var _hollow: int = 0
+	var _gone: int = 0
+	for _tid in _ever:
+		if not state.teams.has(_tid):
+			_gone += 1
+		elif (state.teams[_tid] as TeamData).population > 0:
+			_alive += 1
+		else:
+			_hollow += 1
+	print("     曾 food_days<1 的相異隊 = %d ｜ ★其中最終【存活且有人】= %d（＝瀕死）" % [_ever.size(), _alive])
+	print("     ★★其餘：最終空殼(pop=0 未滅) = %d ｜ 已不在名冊 = %d ｜ 對帳 %d+%d+%d = %d %s" % [
+		_hollow, _gone, _alive, _hollow, _gone, _alive + _hollow + _gone,
+		"✅" if _alive + _hollow + _gone == _ever.size() else "❌ 不平"])
+	print("     ★★★取樣粒度：每次【決策】採一次（非每 tick）⇒ 兩次決策之間的短暫低點【看不到】")
+	print("        ⇒ ★這一格是【下界】：真實的「曾經瀕死」只會【更多】不會更少")
 
 # ★★★共位有沒有產生 sighting（systems 2026-09-04 ③）——
 #   ★這一段回答的是【資訊寫入端】，前一段回答的是【讀取端拿到什麼】。
