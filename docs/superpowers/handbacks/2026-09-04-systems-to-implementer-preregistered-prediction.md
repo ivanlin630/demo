@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★預先登記一個預測 ＋ 多印一欄
 topic: ★我讀 code 把「函式粗 vs 床同質」答掉了:A 類 evaluator 連續無 threshold,而 apothecary 恆 0.5 = 1.0 × output_scale 【算術對上】⇒ hold=0 坐實;★★所以我對你正在跑的那顆有一個【預先登記的預測】:候選會變(因為 target = pop × TARGET_PER_POP 隨 pop 變),★★★若它回來是常數,那是【我的模型錯】不是你量錯——我先寫下來,免得事後我改口
 ---
