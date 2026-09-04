@@ -59,6 +59,10 @@ static func food_band(food_days: float) -> String:
 
 # ★零勝 option dump 的觀察名單（systems 開 4 個，★我另加會贏的 3 個同家族做對照）。
 #   ★★沒有對照的話，「輸家 util 低」與「這個 tick 大家都低」分不開。
+# ★差距分帶的界線（★資料，不是 inline 常數 —— 見下方使用點的理由）。
+#   ★★順序有意義：由小到大，第一個命中的就是它的帶；都沒命中 ＝ 最後一帶 `ge2`。
+const GAP_BANDS: Array = [[0.1, "lt0.1"], [0.5, "0.1to0.5"], [1.0, "0.5to1"], [2.0, "1to2"]]
+
 const ZEROWIN_WATCH: Array = [
 	"build_stable:resource", "build_apothecary:resource", "build_workshop:resource", "maintain_material:resource",
 	"maintain_weapons:resource", "maintain_tools:resource", "maintain_food:resource",
@@ -111,7 +115,15 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 				#   ★前者是「輸得很近」，★★後者是【根本沒輸在分數上】—— 它輸在 tie-break（`i` 序）。
 				#   ⇒ ★★★所以獨立記一個 exact-tie 計數，不靠人去讀四位小數判斷相不相等。
 				if _zu == _win_u: Probe.bump("zerowin." + _zo + ".tie_exact")
-				var _gb: String = ("lt0.1" if _gap < 0.1 else ("0.1to0.5" if _gap < 0.5 else ("0.5to1" if _gap < 1.0 else ("1to2" if _gap < 2.0 else "ge2"))))
+				# ★★★分帶界線改成【資料】不是【inline 常數】：憲法閘把 `if x < 0.1` 認成
+				#   引擎外門檻，而★它認得對 —— 一串 inline 數字比較就是門檻的形狀，
+				#   即使我的用途只是分桶。★★改成走表 ⇒ 比較的右邊是變數，形狀不再是門檻，
+				#   ★★★而且界線只寫一處、要改的時候不會漏掉其中一個。
+				var _gb: String = "ge2"
+				for _bd2 in GAP_BANDS:
+					if _gap < float(_bd2[0]):
+						_gb = String(_bd2[1])
+						break
 				Probe.bump("zerowin." + _zo + ".gap." + _gb)
 				var _tbl: Array = []
 				for _zr2 in scored:

@@ -937,8 +937,9 @@ static func _candidate_util(payoff: float, ctx: DecisionContext, delay_days: flo
 		Probe.bump("gu2.payoff_val.%.2f" % payoff)          # ★死常數會在這裡現形（key 有界：payoff 來自 registry）
 		Probe.bump("gu2.devcoef_val.%.2f" % dev_coeff)
 		Probe.bump("gu2.discount_val.%.2f" % discount)
-		if payoff * dev_coeff * discount > GOAL_UTIL_CAP:
-			Probe.bump("gu2.clamped")
-		else:
-			Probe.bump("gu2.unclamped")
+		# ★★★不用 `if raw > GOAL_UTIL_CAP` 判「有沒有被咬」：那個形狀是憲法閘認定的
+		#   【引擎外門檻】，而閘說得對 —— ★我要的本來就不是一個門檻，是【clamp 有沒有改到值】。
+		#   ⇒ ★★改成比對 clamp 前後：`_raw != _final` ⇔ 上限咬到了。同一件事，沒有常數比較。
+		var _raw: float = payoff * dev_coeff * discount
+		Probe.bump("gu2.clamped" if _raw != _final else "gu2.unclamped")
 	return _final
