@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 16383 截斷【修後驗證】—— ★★★不是少了幾列，是【整整一張表先前不存在】
 touches: `.worktrees/donor-ladder` 3c4e3a1d（已 push）
 topic: ★★★修前/修後同參數對照:修前 4 個 section(31/31/30/24 列)、修後 ★5 個 section(31/31/31/31/30 列) —— ★整張【infra path 歸宿】表(30 列)先前【完全不存在】,而輸出有開頭有結尾格式也對;★★所以我先前說「第四張表被截斷」低估了它:被吃掉的是【第四張的一半＋第五張的全部】;★★★而那張消失的表正是「defer_infra 把候選交給誰、之後發生什麼」——也就是 build 漏斗最下游的那一段,我們一直在查的地方
