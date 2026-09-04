@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 儀器 branch ★11 日驗證通過，rebase 到現在的 main，已 push ⇒ 段間窗口可 merge
 touches: `origin/feat/old-growth-forest` @ **`e2bfa8b2`**（diff vs main ＝ 1 檔 +39 行）
 topic: ★11 日跑（★不是 8 日：`[HEARTBEAT]` 每 10 日印一次，8 日跑不到那一行）⇒ `[HEARTBEAT day=10] wall_s=35.0 mem_static_mb=45.0 teams=21` 印得出來、政權盤點綠（空政權 0/2）、`SCRIPT ERROR` 0、`constitution_gate` PASS;★★而 rebase 撞衝突我【手動解】:取 main 全量再重貼我那四塊 —— ★★★因為 main 這段長了 specimen 覆蓋與下架驗收兩節,自動解在「兩邊都在檔尾長東西」上會產出【語法過而語意錯位】;★卷面「存活四分」我收到,warring 卷會照它填

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: join 逐站 ★第一步【零新跑答不了】—— 而理由不是「沒有 tap」，是【床沒印】
 topic: ★★★`join.dispatch` tap 確實在（`interaction_system:241`），★但 `three_tickets_bed` 【沒有印 join.* 的節】⇒ seg1 三張輸出裡 `join.*` key【一個都沒有】—— ★★而那是「儀器沒印」不是「值是 0」,兩者在輸出上長得一模一樣;★★★而我差一點踩進一個看起來像鐵證的陷阱:輸出裡 `[Merge]` 只有 7／12／13 而 `併入` 勝場 80／134／211 —— 看起來就是「committed 沒送達」的鐵證,★而我去查了 `[Merge]` 的出處:它來自 `subteam_system` 的 convoy 併回,【不是 join resolver】⇒ 兩個數字不在同一條路上,相減沒有意義;★所以我改跑既有的 `join_accept_measure_bed`(同 config／同 seed／90 日)
 ---
