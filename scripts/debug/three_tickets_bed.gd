@@ -31,6 +31,13 @@ func _run() -> void:
 	print("=== 三票 re-measure｜config=%s seed=%d days=%d ===" % [cfg, sd, days])
 	var state: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg, true)
 	seed(sd)
+	# ★★★specimen trace 併掛（systems URGENT 2026-09-04，★他核可的段內例外）：
+	#   ★用戶 2026-07-22 硬規則：長跑下的 behavior 因果結論【必附 specimen trace → 送 QA 故事稽核】，
+	#     ★★而本床的卷面判定（誰在贏／空殼隊／founding 沉默…）全部是 behavior 結論。
+	#   ★★★掛在 `seed(sd)` 之後：★helper 是 RNG-neutral（regression 鎖住：normal-LOD 2000 tick
+	#     byte-identical）⇒ 開了【不會改世界軌跡】—— 否則三張卷就不是同一個世界了。
+	#   ★未設 env ＝ no-op、零成本（`SpecimenTracer.enabled` 維持 false）⇒ 不影響別人跑這支床。
+	SpecimenDumpHelper.setup_from_env(state)
 	print("[CONTROL] %s" % MeasureBedHelper.arm_order_report())
 	print("[CONTROL] Probe.enabled=%s（★false ⇒ 下面整份都是儀器沒開）" % str(Probe.enabled))
 	print("★換尺後的常數（直讀）：THREAT_BASE=%.4f｜CAUTION_SPAN=%.4f｜INFLATION=%.2f"
@@ -95,6 +102,10 @@ func _run() -> void:
 			print("     tick=%s team=%s prev_pop=%s 當下 task=%s intent=%s" % [
 				str(_e6.get("tick", -1)), str(_e6.get("team", -1)), str(_e6.get("prev_pop", -1)),
 				String(_e6.get("task", "?")), String(_e6.get("intent", "?"))])
+	# ★★specimen 落地【在 `[PilotRun]` 之前】：★這樣「卷面最後一行存在」與「specimen 已落地」
+	#   是同一件事的兩半 —— ★★而先前那條「尾標記只是必要條件」提醒的正是：
+	#   ★★★落地要有【自己的證據】（檔案存在 + 路徑印出來），不能靠尾標記代言。
+	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
 	print("★誠實限：①單 config／單 seed／%d 日 ②★純觀測（fp 不該變；變了＝我動到行為）" % days)
