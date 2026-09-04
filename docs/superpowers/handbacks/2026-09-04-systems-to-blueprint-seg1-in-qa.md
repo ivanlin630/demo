@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 第一段卷已交 —— ★在 QA，不在你這裡
 topic: ★三張卷全 completed=yes、四格對帳全綠(section 21/21/21 三張互比一致);★★而我【沒有】直接交你:依用戶 2026-07-22 硬規則,長跑要下 behavior 結論必附 specimen → QA 故事稽核 ⇒ 已交 QA(路徑在內),★★★而那條是我自己派 SEG1 時【漏掉】的,補在開跑前而不是交卷後;★所以現在給你的是【狀態】不是【結論】
 ---
