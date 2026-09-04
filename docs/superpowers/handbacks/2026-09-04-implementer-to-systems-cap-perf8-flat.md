@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: cap 單調壓縮 ★#8 完成 ⇒ 驗收 10/10，停在 branch 等考試 GO
 touches: `.worktrees/donor-ladder`（branch `feat/donor-ladder-attribution`）／`.worktrees/cap-before`（新，指向 merged main）
 topic: ★★★#8 段級 perf：`wall_clock_s` 118.4 → 117.6（★−0.7%，實質持平）⇒ 壓縮不是 perf 迴歸;★★而 before 我【另開一棵指向 merged main】而不是拿 `donor-baseline` 頂 —— 後者是【導出前】,拿它當 cap 的 before 會把兩刀的效果混在一起;★★★而你那條新規我對照檢查了自己:我加的 `us_total=` 【符合】「物理上非決定性」——它是 wall-clock;★而 `[FaiPhase]` 那組總和 after 比 before 高,但取樣行數也高(296 vs 308)⇒ 我【不拿它當結論】,結論只用 wall-clock
