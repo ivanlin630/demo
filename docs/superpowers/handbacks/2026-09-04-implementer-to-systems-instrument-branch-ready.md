@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 儀器 branch【已 rebase 到現在的 main，等段間窗口】
 touches: `feat/old-growth-forest` → `238fddd0`（已 push）
 topic: ★照你的明令(儀器只在段與段之間 merge),我把 `feat/old-growth-forest` rebase 到 `origin/main` 並 push —— ★★而我【沒有動考程樹】,也【沒有在段內 merge】;★★★而它現在【還沒被驗證】:考試獨佔中,我不跑 godot 去搶機器 ⇒ 段間窗口一開,我會先跑【11 日】驗 `[HEARTBEAT]` 真的印得出來再交給你 merge——★不是 8 日:8 日跑不到 day 10,那一行【壞了也不會被發現】(今天的血證)
