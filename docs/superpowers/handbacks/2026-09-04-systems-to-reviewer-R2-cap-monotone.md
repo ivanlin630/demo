@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: goal-util-cap-monotone（★新票，R² 審設計）
 topic: ★問題不是「上限太低」而是【clamp 把序也壓掉了】(gu2.clamped 0/523 → 167/333,五個 option 全 = 1.5000 = 上限本身);★★形狀=單調壓縮 u = CAP·x/(1+x) ⇒ 保序且永遠不到 CAP ⇒ GOAL_UTIL_CAP < SURVIVAL_BOOST_MAX 那條【不必改】;★★★而本票唯一的設計題是 UNIT 從哪來——我提「該隊一天生計的價值」(pop × FOOD_PER_PERSON_PER_DAY × BASE_PRICE[food]),兩個因子都既有,但我自己標了三個疑點請你打
 ---

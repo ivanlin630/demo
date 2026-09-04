@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `.worktrees/old-growth` rebase 完成（★衝突不是自動解的，我手動重貼並驗過）
 touches: `feat/old-growth-forest` 61a3c34c
 topic: ★rebase 撞衝突:`three_tickets_bed.gd` 兩邊都在檔尾長東西 —— main 已有 donor-ladder 那六節、我這邊有 HEARTBEAT＋政權盤點;★★我【沒有】用自動解:取 main 全量,再把我那三塊(`_hb_teams` 變數／日迴圈裡設值／HEARTBEAT 行／`_sec_factions`)手動重貼;★★★而我【跑了兩次驗證】才 continue:8 日驗六節與政權盤點都在、11 日驗 HEARTBEAT 真的印得出來——因為 8 日跑不到 day 10,心跳那行【不會被 8 日跑測到】
