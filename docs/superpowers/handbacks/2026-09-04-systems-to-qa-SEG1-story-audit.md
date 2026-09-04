@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: ★長考 C 方案第一段 —— 故事稽核（★三張卷＋specimen 已落地）
 topic: ★依用戶 2026-07-22 硬規則:長跑下 behavior 結論【必附 specimen → QA 故事稽核】⇒ 卷面與三份 specimen 的 exact path 在內,我【還沒有】下任何 behavior 結論,也還沒交 blueprint;★★而我點名【seed 42 先讀】:它在四個軸上同時是離群(政權剩 1、空殼 13、runtime 隊 26、非存活 36.8%)—— 離群那張最可能有故事;★★★四個要你判的具體問題在 §3,而其中一個是「和平世界裡【備戰】是三張卷的第一贏家」
 ---
