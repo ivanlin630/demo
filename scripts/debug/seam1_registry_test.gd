@@ -137,8 +137,9 @@ func _test_to_task_pure_branches() -> void:
 	var s := WorldState.new()
 	var t := TeamData.new()
 	t.tile_pos = Vector2i(4, 5)
-	_ok(DecisionOptions.to_task(s, t, "備戰") == {"task": TeamData.TASK_PREPARE, "target": Vector2i(-1, -1)},
-		"備戰 → TASK_PREPARE / (-1,-1)")
+	# ★「備戰」已下架（delist-prepare）⇒ ★★這條改成【反向斷言】而不是刪掉：
+	#   ★★★刪掉＝下架這件事沒有守衛；而反向斷言會在【有人把它加回來】時響。
+	_ok(not DecisionOptions.REGISTRY.has("備戰"), "備戰 已下架：不在 REGISTRY（★有人加回來這條會紅）")
 	_ok(DecisionOptions.to_task(s, t, "生產") == {"task": TeamData.TASK_MANUFACTURE, "target": Vector2i(4, 5)},
 		"生產 → TASK_MANUFACTURE / tile_pos")
 	_ok(DecisionOptions.to_task(s, t, "建設") == {"task": TeamData.TASK_BUILD, "target": Vector2i(4, 5)},

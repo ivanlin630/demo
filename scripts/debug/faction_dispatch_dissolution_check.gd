@@ -207,7 +207,7 @@ func _check_preempt_preserved() -> void:
 	Probe.enabled = true
 	fai._evaluate_threat(s, t)
 	var defensive := t.current_task in [TeamData.TASK_FLEE, TeamData.TASK_DEFEND,
-		TeamData.TASK_PREPARE, TeamData.TASK_DIPLOMACY]
+		TeamData.TASK_DIPLOMACY]   # ★TASK_PREPARE 已下架
 	if defensive and not fai.uses_unified(t):
 		print("[preempt] 忙碌 non-unified 成員遇壓境 → 放下製造派 %s OK（uses_unified 未動,序3.5 保）" % t.current_task)
 	else:

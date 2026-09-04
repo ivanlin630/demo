@@ -411,7 +411,7 @@ func _step2a_strategic_move(state: WorldState, team_ids: Array) -> void:
 		# 居民鎖 guard（原 movement:58-63，call-site；防駐守居民被拉去戰略位）
 		if team.tags.has(TeamData.TAG_PRODUCE):
 			if fai._is_resident_team(state, team) \
-					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_REVOLT, TeamData.TASK_MIGRATE, TeamData.TASK_PREPARE]:
+					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_REVOLT, TeamData.TASK_MIGRATE]:   # ★TASK_PREPARE 已下架
 				continue
 		if team.strategic_assignments.size() == 0:
 			continue

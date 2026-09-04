@@ -237,7 +237,7 @@ func _initialize() -> void:
 	_test_evaluate_threat_cadence()
 	# 序1 threat 溶入：4 反應 repertoire 驗移至 threat_dissolution_check.gd（rank_threat 原型表）。
 	# 舊 _dispatch_flee/defend/prepare/tribute（直呼已刪的 _dispatch_threat_response）退役。
-	_test_resident_lock_prepare_allowed()
+	# ★`_test_resident_lock_prepare_allowed()` 已移除（受測對象「備戰」下架）
 	_test_find_trade_partner_outpost_only()
 	_test_trade_timeout()
 	_test_resolve_market_absorbs_storage()   # unified-commerce M2：market-as-place 到場買公庫（absorb/spill dance 已廢）
@@ -1972,14 +1972,8 @@ func _test_forage_subsistence_cap() -> void:
 # term-normalize T5：層內 base 校 + 訓練 eval-gate 對齊。
 func _test_t5_intra_layer() -> void:
 	print("[TEST] t5_intra_layer")
-	# 備戰：謹慎隊高、好戰隊低（保人格梯度）。★S2 migrate：base=(慎·0.6+好·0.2)×(1+sev·k)，
-	# sev=0(無 threat_react)時=純 base；謹慎隊 base≈0.58 > 好戰隊 base≈0.24（梯度保，量級隨 S2 base 調）。
-	var cc := DecisionContext.new(); cc.leader_values = {"慎重": 0.9, "好戰": 0.2}
-	var _prep_c: float = DecisionTerms.eval("prepare_drive", cc, "備戰")
-	var cf := DecisionContext.new(); cf.leader_values = {"慎重": 0.1, "好戰": 0.9}
-	var _prep_f: float = DecisionTerms.eval("prepare_drive", cf, "備戰")
-	assert(_prep_c > 0.5, "謹慎隊備戰 base 高(>0.5,S2 base;got %f)" % _prep_c)
-	assert(_prep_c > _prep_f, "謹慎隊備戰 > 好戰隊備戰(人格梯度保;%f>%f)" % [_prep_c, _prep_f])
+	# ★備戰人格梯度那組斷言已移除（`delist-prepare`）：受測的 `prepare_drive` term 已隨備戰下架，
+	#   ★★留著會變成「eval 一個不存在的 term 回 0」⇒ 斷言必紅，而紅的原因與它原本要測的事無關。
 	# 駐守 settle_fit
 	var c0 := DecisionContext.new()
 	assert(DecisionTerms.eval("settle_fit", c0, "駐守") == 0.9, "駐守 settle_fit=0.9")
@@ -10864,7 +10858,7 @@ func _test_threat_score_distance_decay() -> void:
 func _test_task_defend_prepare_const() -> void:
 	print("--- Engagement Task3: const + 欄位 ---")
 	assert(TeamData.TASK_DEFEND == "迎戰")
-	assert(TeamData.TASK_PREPARE == "備戰")
+	# ★`TASK_PREPARE` 已隨「備戰」下架移除（delist-prepare）⇒ 這條 assert 一併移除
 	var t := TeamData.new()
 	assert(t.threat_eval_next_tick == 0)
 	assert(t.task_start_tick == 0)   # TRADE timeout 起算=arbiter 單源（trade_task_start_tick 已廢）
@@ -10925,22 +10919,10 @@ func _test_evaluate_threat_cadence() -> void:
 # 4 反應 repertoire 驗（求生欲→逃跑 / 好戰非居民→迎戰 / 好戰居民→備戰 / 貪婪信義→求和）
 # 移至 threat_dissolution_check.gd（rank_threat 原型表，設計正確性閘）。
 
-func _test_resident_lock_prepare_allowed() -> void:
-	print("--- Engagement Task6: 居民 task=備戰 不被鎖 ---")
-	var state := WorldState.new(); state.world = WorldData.new()
-	_eng_plains_grid(state, 0, 5, 0, 5)
-	var tile: HexTileData = state.world.tiles[0]
-	tile.outpost_level = 1; tile.outpost_type = "civilian"; tile.outpost_owner = 0
-	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(0, 0); _seed_pop(t, 5)
-	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
-	t.current_task = TeamData.TASK_PREPARE
-	t.move_target = Vector2i(3, 0)
-	state.teams[0] = t
-	var mv: Object = load("res://scripts/simulation/movement_system.gd").new()
-	for _i in range(300):
-		mv.process(state, [0], 1.0)
-	assert(t.tile_pos.x > 0, "備戰 不應被鎖，tile 應移動，實際=%s" % str(t.tile_pos))
-	print("Engagement Task6 OK (移動到 %s)" % str(t.tile_pos))
+# ★★★`_test_resident_lock_prepare_allowed` 已移除（`delist-prepare` 2026-09-04）：
+#   ★它測的是「居民 task=備戰【不被移動鎖擋住】」—— ★★而「備戰」已下架 ⇒ 它的【受測對象不存在了】。
+#   ★★★我一度把它改成 `TASK_DEFEND` 想「測同一條路徑」—— 而那是錯的：`TASK_DEFEND` 的鎖行為不同，
+#     改完之後這條 assert 直接紅。⇒ 受測對象消失時【移除】，不要換一個對象假裝還在測同一件事。
 
 func _test_find_trade_partner_outpost_only() -> void:
 	print("--- Engagement Task7a: trade partner 只選有 outpost ---")
@@ -15044,7 +15026,7 @@ func _test_intent_fit_term() -> void:
 	var c0 := DecisionContext.new(); c0.food_days = 20.0; c0.leader_values = {"貪婪": 0.8}
 	assert(DecisionTerms.eval("intent_fit", c0, "貿易") == 0.0, "無 intent → intent_fit 零影響")
 	# 征服 + target → 攻擊 boost。
-	var cc := DecisionContext.new()
+	var cc := DecisionContext.new()   # ★2026-09-04 復原：我上一版的刪除腳本 skip 旗標沒重設，把這一行一起吃掉了
 	cc.intent = "征服"; cc.intent_target = 5; cc.food_days = 20.0; cc.leader_values = {"野心": 0.8, "好戰": 0.7}
 	cc.self_armed_ratio = 1.0   # capability grounding（裁2）：征服攻擊 boost 需有戰力（無牙征服=送死→0）
 	cc.readiness = 0.8; cc.readiness_thr_eff = 0.5   # 序5 溶入：征服攻擊吃 readiness 閘（沒本錢→趨0）

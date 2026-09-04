@@ -73,7 +73,7 @@ func _mk_case(attacker_pop: int, rep: float, approaching: bool,
 		"unified": fai.uses_unified(t), "resident": ctx.is_resident }
 
 func _is_defensive(task: String) -> bool:
-	return task in [TeamData.TASK_FLEE, TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_DIPLOMACY]
+	return task in [TeamData.TASK_FLEE, TeamData.TASK_DEFEND, TeamData.TASK_DIPLOMACY]   # ★TASK_PREPARE 已下架
 
 func _run_cases() -> void:
 	# ① 該出現：40 武裝、敵意(rep 0.05)、逼近 → 放下製造。

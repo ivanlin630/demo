@@ -140,7 +140,8 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 		if not scored.is_empty():
 			Probe.bump("optpool.win." + String(scored[0]["opt"]))
 	_beg_tap(ctx, scored, team, "begu.", state)   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
-	_prep_tap(ctx, scored, team)   # ★備戰 root-check（純觀測）
+	# ★`_prep_tap` 已隨「備戰」下架整組移除（`delist-prepare` §3①）：留著會【永遠印 0】，
+	#   而「這條沒發生」與「這條不存在」在 0 上長得一模一樣 ⇒ 幽靈 counter 比刪掉更糟。
 	# ★★★【紮根】條件級 tap（systems 2026-09-03）：#10 量到 `not_in_ranked` 九成是紮根，
 	#   而它的 applicable 是兩個分支的 OR（`options.gd:239`）：
 	#       can_settle_here  or  settle_resume_site != (-1,-1)
@@ -649,49 +650,3 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 	elif _gap < 1.0: Probe.bump(pfx + "gap.0.5to1")
 	elif _gap < 2.0: Probe.bump(pfx + "gap.1to2")
 	else: Probe.bump(pfx + "gap.ge2")
-
-# ★★★備戰 root-check tap（純觀測，2026-09-02）—— ★三份獨立量測指向同一個贏家。
-#   ★★母體與命中同印：【備戰贏 0 次】與【沒有隊在候選裡】在輸出上長得一樣。
-#   ★★★門檻那一格單獨記：`threat_react >= threat_threshold` 是 applicable 的全部條件，
-#     而「幾隊過門檻」跟「幾次贏」是兩件事：前者講 applicable 鬆不鬆，後者講 util 高不高。
-static func _prep_tap(ctx: DecisionContext, scored: Array, team: TeamData) -> void:
-	if not Probe.enabled or team == null:
-		return
-	Probe.bump("prep.rank_calls")
-	Probe.add_amount("prep.threat_react_sum", ctx.threat_react)
-	# ★★★threat_react 自己的分佈（systems 2026-09-02）—— ★門檻擋的是【這個量】，
-	#   不是 `power_ratio`；而 raw 是【加法】，所以兩者的膨脹係數不一定相同。
-	#   ★★均值會藏分佈：同一個均值可以是「大家都 0.7」也可以是「一半 0、一半 1.4」，
-	#   ★★★而門檻切的是分位不是均值 ⇒ 只看均值換算門檻會錯。
-	var _tb: String = "ge3"
-	if ctx.threat_react < 0.1: _tb = "lt0.1"
-	elif ctx.threat_react < 0.3: _tb = "0.1to0.3"
-	elif ctx.threat_react < 0.5: _tb = "0.3to0.5"
-	elif ctx.threat_react < 1.0: _tb = "0.5to1"
-	elif ctx.threat_react < 2.0: _tb = "1to2"
-	elif ctx.threat_react < 3.0: _tb = "2to3"
-	Probe.bump("prep.react_hist." + _tb)
-	Probe.add_amount("prep.threat_threshold_sum", ctx.threat_threshold)
-	if ctx.threat_react >= ctx.threat_threshold:
-		Probe.bump("prep.gate_pass")            # ★applicable 的全部條件
-	else:
-		Probe.bump("prep.gate_fail")
-	var _pi: int = -1
-	for _n in range(scored.size()):
-		if String(scored[_n]["opt"]) == "備戰": _pi = _n; break
-	if _pi == -1:
-		Probe.bump("prep.not_in_candidates")
-		return
-	Probe.bump("prep.in_candidates")
-	var _pu: float = float(scored[_pi]["u"])
-	Probe.add_amount("prep.util_sum", _pu)
-	var _wo: String = String(scored[0]["opt"])
-	if _wo == "備戰":
-		Probe.bump("prep.won")
-		Probe.add_amount("prep.win_util_sum", _pu)
-		# ★贏的時候【贏第二名多少】—— ★★贏很多跟贏一點點是兩種不同的病。
-		if scored.size() > 1:
-			Probe.add_amount("prep.win_margin_sum", _pu - float(scored[1]["u"]))
-			Probe.bump("prep.win_margin_n")
-		return
-	Probe.bump("prep.lost_to." + _wo)

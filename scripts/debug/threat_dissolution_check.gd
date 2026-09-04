@@ -176,7 +176,7 @@ func _check_live_dispatch() -> void:
 	var before: int = _threat_dispatch_total()
 	fai._evaluate_threat(state, t)
 	var after: int = _threat_dispatch_total()
-	var dispatched: bool = t.current_task in [TeamData.TASK_FLEE, TeamData.TASK_DEFEND, TeamData.TASK_PREPARE]
+	var dispatched: bool = t.current_task in [TeamData.TASK_FLEE, TeamData.TASK_DEFEND]   # ★TASK_PREPARE 已下架
 	if dispatched and after > before:
 		print("[live] _evaluate_threat 實派 %s + probe bump(%d→%d) OK（threat seam 確定性活）" % [t.current_task, before, after])
 	else:

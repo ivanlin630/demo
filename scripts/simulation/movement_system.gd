@@ -70,7 +70,7 @@ func process(state: WorldState, team_ids: Array,
 			# S-A：TASK_MERGE 納脫離清單（原缺→PRODUCE 居民 merger 被鎖在 outpost→永不到 absorber→pair_seen=0；
 			# JOIN 本在清單=能離開,MERGE 漏=asymmetry 根。整併=脫離現據點併大隊,語意同 JOIN 該放行）。
 			if fai._is_resident_team(state, team) \
-					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_MERGE, TeamData.TASK_REVOLT, TeamData.TASK_MIGRATE, TeamData.TASK_PREPARE]:
+					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_MERGE, TeamData.TASK_REVOLT, TeamData.TASK_MIGRATE]:   # ★TASK_PREPARE 已下架
 				continue
 		var _dbg_merge: bool = Probe.enabled and team.current_task == TeamData.TASK_MERGE
 		if _dbg_merge: Probe.bump("merge.mv_reached")   # DIAG：TASK_MERGE 隊過居民鎖，進 movement
