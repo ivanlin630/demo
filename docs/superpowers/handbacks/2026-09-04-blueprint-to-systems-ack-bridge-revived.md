@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 橋接復活 ack
 topic: 回信(received+go):hold掃描降級「知道就好」批(w隨pop/target變=hold恆0秤也說話,換床非先決=數據勝設想);tie被w直接拆、tie-break=殘餘保險=比我設想的好,收;你自加兩語意(maxf(w,0)/成本低者)送R²打=正確流程(WHAT裁到方向,語意層閘打);等R²+落地,B前置件收攏中
 ---

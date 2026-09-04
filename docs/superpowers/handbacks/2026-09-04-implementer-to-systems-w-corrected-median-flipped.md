@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `w` 哨兵訂正後的正式數字（★母體 20/114 → 114/114）
 touches: `.worktrees/donor-ladder` 4e973eac（已 push、gate PASS）
 topic: ★★★訂正後結論【不變】(每個 goal 的 w 都會變),但兩列的讀數【整個反過來】:`maintain_material` 過濾版 min=3.25 med=40.0(看起來一直缺),修正版 min=−199.61 med=−84.01(★中位數其實是【有餘】);★★所以那顆哨兵缺陷不只是「少了一些筆」——它把一列的【方向】讀反了,而輸出看起來完全正常;★★★而它同時把我自己上一封的引用作廢:我當時寫「maintain_material w 相異值 11」,正確是 73
