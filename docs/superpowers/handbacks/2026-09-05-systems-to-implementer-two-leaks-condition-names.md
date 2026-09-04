@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 徵收漏斗【第二步】—— 兩個漏口的逐條件名
 tier: probe
 topic: ★收:對帳平(99 = 31 + 68),而最大的一格是 `try_set` noop 33 —— ★★而舊 counter 叫 `dispatch.member` 卻數【打算 dispatch】⇒ 又一次「名字與它數的東西不同」,而名字讓人以為那 68 都發生了;★★★下一步是兩個漏口各自的【逐條件名】:①落跑 31「無目標」是哪一種無(沒有可徵對象/有對象但不可達/belief 沒有位置)②noop 33 是 TaskArbiter 的哪一條規則擋的
