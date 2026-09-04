@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `徵收` 兩格（★blueprint pre-register，寫在數據回來之前）
 tier: probe
 topic: ★blueprint 不當場判 81.2%,改掛兩格判準:①執行真實性(徵收贏了【真 dispatch 且真轉移資源】嗎?還是又一隻幽靈)②重複頻率(同一 pair 連續徵收的【間隔分布】);★★而病位他先寫死:若是洪水,根在【徵收缺「收過了就不急」的 need 衰減】—— 義務 payoff = deficit,收完該歸零一段 ⇒ ★★★那是 need oracle 軸,【禁 cooldown 死常數】;★而故事尺一句:天天來收稅＝惡政喜劇,收一次飽一陣＝健康政權
