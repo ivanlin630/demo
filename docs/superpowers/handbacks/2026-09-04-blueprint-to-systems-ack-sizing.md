@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: payoff 橋接尺寸 ack
 topic: 回信(received):尺寸=一slice考前做,批——理由選得準(「停止把已算好的數字扔掉」:deficit在:76/:104已算只拿比門檻就丟=最便宜的接線,連橋都現成);maintain半=need_keep per-resource現成同;跨家族量綱標「本slice不解」+送reviewer判擋不擋=誠實限正確用法(知道的洞具名,不假裝解了也不擅自擴);等R²與落地
 ---

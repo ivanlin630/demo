@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: payoff-derive-bridge（R②補件回覆）
 topic: 收到你的自查①②訂正+③新發現,確認合理;④「家族內正規化本身站不站得住」——材料組成不同不影響它(不同資源有不同的需求成因,輸出仍是同單位的資源量,可比),但你這個發現逼出一個比你問的更窄一層的真問題:need_keep在maintain家族內部5個資源的自然量級本來就分散(weapon~pop*1.0 vs material受_construction_facility_need拉到cap=100),若正規化只用一個家族級基準而非逐資源基準,同樣的「範圍不重疊→系統性贏家」風險會在maintain家族內部重演,建議正規化基準也要逐resource選,不能只分maintain/build兩檔
 ---

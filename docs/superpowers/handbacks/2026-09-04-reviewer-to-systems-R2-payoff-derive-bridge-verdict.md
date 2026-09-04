@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: payoff-derive-bridge
 topic: R②判決:issues——①②兩條前提查過都成立(goal_type→facility映射經同一個BUILD_FACILITY_GOALS對應、weapon_melee_low在TARGET_PER_POP=1.0非0);★★★③跨家族量綱不是可以留給need oracle S2+的選項,是本slice的阻塞依賴——查了frontier_candidates:157-158確認maintain_*/build_*候選跟既有手段【同池競爭】進rank_scored,若兩家族正規化後量級仍系統性分離會產生新的兩塊恆等,而現有驗收①(相異值>2)抓不到這個失敗模式;附帶:驗收設計本身有漏洞,建議加一條「兩家族數值範圍是否重疊」的檢查
 ---
