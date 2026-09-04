@@ -1,5 +1,5 @@
 {
-  "_doc": "和平經濟觀測床 (measure-first Step0, spec 2026-07-30-peaceful-economy-bed-HOW). explicit/seeded/好戰=0 全獨立. 4 類 sharp 缺口各對一問. ★零 sim-code 改, config-only. ①/③established+缺料設施 need_keep(material)>0=LIVE (apothecary medicine=0→deficit 0.5≥DESIRE_MIN, food-decoupled). radius 8/richness 5 → 有 unowned forest tile (founding 靶). 位置皆 hex_dist≤8 of center(8,8). ★★★量測衛生待辦（systems 記 2026-08-26，blueprint 裁）：Team3/4/5/7 開局塞 material 400，而 pop6 載重上限只有 60、L1 公庫 250 ⇒ 第一 tick 就超載 6.7 倍、Team5 至今 matunload.vault_full 72/72 卸不下去 = 失真設定。★當時刻意保留（它是「超載鎖」最乾淨的陽性對照）；★★處置＝【下次重建本床基線時一併除掉】——看到這行的人就是該做它的人。",
+  "_doc": "和平經濟觀測床 (measure-first Step0, spec 2026-07-30-peaceful-economy-bed-HOW). explicit/seeded/好戰=0 全獨立. 4 類 sharp 缺口各對一問. ★零 sim-code 改, config-only. ①/③established+缺料設施 need_keep(material)>0=LIVE (apothecary medicine=0→deficit 0.5≥DESIRE_MIN, food-decoupled). radius 8/richness 5 → 有 unowned forest tile (founding 靶). 位置皆 hex_dist≤8 of center(8,8). ★★★量測衛生待辦（systems 記 2026-08-26，blueprint 裁）：Team3/4/5/7 開局塞 material 400，而 pop6 載重上限只有 60、L1 公庫 250 ⇒ 第一 tick 就超載 6.7 倍、Team5 至今 matunload.vault_full 72/72 卸不下去 = 失真設定。★當時刻意保留（它是「超載鎖」最乾淨的陽性對照）；★★處置＝【下次重建本床基線時一併除掉】——看到這行的人就是該做它的人。　★★★初始政權（systems／blueprint 2026-09-04）：A 北緣 6 隊（leader 9）／B 西南 4 隊（leader 6）／獨立 2（3 東南孤點、8 商隊）。6／4／2 不對稱＝blueprint 原則「禁刻意均分」。　★①leader 是【代理】不是準則：blueprint 的準則是「圈內據點等級最高／統領高者」，而本 config 沒有據點等級也沒有技能 ⇒ 用【距圈重心最近】代替。　★★②而 `leader_team_id` 全檔【只在 worldgen 被寫、沒有 runtime 重指派】⇒ ★★★這個代理選擇【永久且不自我修正】——日後 config 有據點等級時應改回原準則。　★③`8↔10` 是全資料集最近的一對（hex 2）而仍被拆開：【商隊 tag 刻意蓋過地理】，不是漏看。",
   "seed": 1337,
   "mode": "explicit",
   "max_ticks": 50000,
@@ -20,7 +20,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 0,
       "anon_tiers": {
         "平民": 4
       },
@@ -75,7 +75,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 1,
       "anon_tiers": {
         "平民": 4
       },
@@ -130,7 +130,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 0,
       "anon_tiers": {
         "平民": 4
       },
@@ -240,7 +240,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 1,
       "anon_tiers": {
         "平民": 4
       },
@@ -295,7 +295,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 0,
       "anon_tiers": {
         "平民": 4
       },
@@ -350,7 +350,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 1,
       "anon_tiers": {
         "平民": 4
       },
@@ -391,7 +391,8 @@
         "level": 1,
         "terrain": "mountain",
         "tile_food_init": 400
-      }
+      },
+      "is_faction_leader": true
     },
     {
       "id": 7,
@@ -405,7 +406,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 0,
       "anon_tiers": {
         "平民": 4
       },
@@ -508,7 +509,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 0,
       "anon_tiers": {
         "平民": 4
       },
@@ -549,7 +550,8 @@
         "level": 1,
         "terrain": "plains",
         "tile_food_init": 60
-      }
+      },
+      "is_faction_leader": true
     },
     {
       "id": 10,
@@ -563,7 +565,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 1,
       "anon_tiers": {
         "平民": 4
       },
@@ -618,7 +620,7 @@
         "統領",
         "生產"
       ],
-      "faction_id": -1,
+      "faction_id": 0,
       "anon_tiers": {
         "平民": 4
       },
