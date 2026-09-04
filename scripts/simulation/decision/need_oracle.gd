@@ -11,8 +11,16 @@ class_name NeedOracle
 
 # 保留向 need：自用(消耗品) + 供應鏈(中間品下游 gap 傳導)。
 static func need_keep(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
-	return _self_use(state, team, res, leader_values) + _supply_chain(state, team, res) \
+	# ★★★perf tap（`payoff-derive-bridge` 驗收 #5）：spec 明寫「重算不是取用」
+	#   ⇒ ★「多一次呼叫」是這個設計【已知的代價】，而代價要有數字。
+	#   ★★計數決定性（不受並跑影響）；★★★時間必須獨佔才有意義 ⇒ 床端分開報。
+	var _t0: int = Time.get_ticks_usec() if Probe.enabled else 0
+	var _r: float = _self_use(state, team, res, leader_values) + _supply_chain(state, team, res) \
 		+ _construction_facility_need(state, team, res, leader_values)
+	if Probe.enabled:
+		Probe.bump("perf.need_keep.calls")
+		Probe.add_amount("perf.need_keep.us", float(Time.get_ticks_usec() - _t0))
+	return _r
 
 # ★means-end build-cost need（Gate B trade-primary 核心）：team 想建的 facility → 其 build-cost need
 # （前瞻買料建設，破 chicken-egg:need gated on 已有 facility→builder 不帶 need→買不到→建不了）。

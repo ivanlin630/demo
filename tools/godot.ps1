@@ -14,6 +14,17 @@
 # invisible to the channel we check through. Measured before/after with a two-char probe:
 # without this line the bytes are b2 cf ae da (CP950); with it they decode as U+7D2E U+6839.
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+# CALLER CONTRACT (2026-09-04, measured -- this is a real limit, not a style note).
+# The line above only takes effect while nothing has written to stdout yet in this process
+# chain. PowerShell fixes its host output writer on first write, and neither
+# [Console]::OutputEncoding nor [Console]::SetOut can retarget it afterwards (both tried,
+# both failed). So:
+#   powershell -File tools/godot.ps1 ...            -> UTF-8 (verified: U+7D2E U+6839)
+#   a.ps1 prints, then calls tools/godot.ps1        -> CP950 (verified: b2 cf ae da)
+#   a.ps1 writes to STDERR, then calls this script  -> UTF-8 (verified)
+# A launcher that wants to announce something before the run must use
+# [Console]::Error.WriteLine(...), not plain output. This bit us once already: a detached
+# warring run printed its env banner to stdout first and the whole 90-day log came back CP950.
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $exe = Join-Path $root "godot\Godot_v4.2.2-stable_win64_console.exe"
 if (-not (Test-Path $exe)) {

@@ -57,6 +57,17 @@ static func food_band(food_days: float) -> String:
 	if food_days >= 0.5: return "0.5to2"
 	return "deep"
 
+# ★零勝 option dump 的觀察名單（systems 開 4 個，★我另加會贏的 3 個同家族做對照）。
+#   ★★沒有對照的話，「輸家 util 低」與「這個 tick 大家都低」分不開。
+# ★差距分帶的界線（★資料，不是 inline 常數 —— 見下方使用點的理由）。
+#   ★★順序有意義：由小到大，第一個命中的就是它的帶；都沒命中 ＝ 最後一帶 `ge2`。
+const GAP_BANDS: Array = [[0.1, "lt0.1"], [0.5, "0.1to0.5"], [1.0, "0.5to1"], [2.0, "1to2"]]
+
+const ZEROWIN_WATCH: Array = [
+	"build_stable:resource", "build_apothecary:resource", "build_workshop:resource", "maintain_material:resource",
+	"maintain_weapons:resource", "maintain_tools:resource", "maintain_food:resource",
+]
+
 static func rank_scored(state: WorldState, team: TeamData) -> Array:
 	GoalResolver.ensure_maintain_goals(state, team)   # ★means-end S2（組件 A）:冪等確保 5 資源維持 goal + 更新 active/satisfied
 	var ctx: DecisionContext = DecisionContext.gather(state, team, true)   # ★真決策評估入口 → 推進 EWMA（advance=true）
@@ -76,13 +87,59 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 	#     ★只記 win 會把「它變常勝」與「它變常在場」壓成同一個數字，
 	#     ★★而兩份 config 對照時那兩件事的意思相反：前者是【秤變了】，後者是【世界變了】。
 	#   ★★★母體同印（`optpool.mother` ＝ rank_scored 呼叫次數）—— 沒有母體的比率不可比。
+	# ★★★零勝 option 的 util dump（systems 2026-09-04 票：19 個裡只開 4 個）。
+	#   ★開的 4 個＝`build_stable/apothecary/workshop:resource` ＋ `maintain_material:resource`
+	#     ⇒ 理由不是「比較重要」，是【只有這 4 個的解釋空間已被壓縮】：
+	#       ★★它們與 `maintain_weapons/tools/food:resource`【同家族同管線同 dispatch】而那三個會贏
+	#       ⇒ ★★★「線沒接」已被同一張表排除 ⇒ 剩下的只剩 util。
+	#   ★而我把【會贏的那三個】也一起記 —— ★★沒有它們的話，「輸家 util 低」與
+	#     「這個 tick 大家都低」分不開（systems 明寫的要求：同 tick 同隊並排）。
+	#   ★★★聚合（n／util 總和／贏家 util 總和）＋ 逐筆表兩者都留：
+	#     ★聚合不受 first-N 取樣偏差影響，★★逐筆表才看得到「輸給誰、差多少」。
+	if Probe.enabled and not scored.is_empty():
+		var _win_opt: String = String(scored[0]["opt"])
+		var _win_u: float = float(scored[0]["u"])
+		for _zr in scored:
+			var _zo: String = String(_zr["opt"])
+			if not ZEROWIN_WATCH.has(_zo):
+				continue
+			var _zu: float = float(_zr["u"])
+			Probe.bump("zerowin." + _zo + ".n")
+			Probe.add_amount("zerowin." + _zo + ".u_sum", _zu)
+			Probe.add_amount("zerowin." + _zo + ".winu_sum", _win_u)
+			if _zo == _win_opt:
+				Probe.bump("zerowin." + _zo + ".won")
+			else:
+				var _gap: float = _win_u - _zu
+				# ★★★「差距 < 0.1」與「差距【正好是 0】」是兩個不同的斷言（8 日 smoke 已看到後者）：
+				#   ★前者是「輸得很近」，★★後者是【根本沒輸在分數上】—— 它輸在 tie-break（`i` 序）。
+				#   ⇒ ★★★所以獨立記一個 exact-tie 計數，不靠人去讀四位小數判斷相不相等。
+				if _zu == _win_u: Probe.bump("zerowin." + _zo + ".tie_exact")
+				# ★★★分帶界線改成【資料】不是【inline 常數】：憲法閘把 `if x < 0.1` 認成
+				#   引擎外門檻，而★它認得對 —— 一串 inline 數字比較就是門檻的形狀，
+				#   即使我的用途只是分桶。★★改成走表 ⇒ 比較的右邊是變數，形狀不再是門檻，
+				#   ★★★而且界線只寫一處、要改的時候不會漏掉其中一個。
+				var _gb: String = "ge2"
+				for _bd2 in GAP_BANDS:
+					if _gap < float(_bd2[0]):
+						_gb = String(_bd2[1])
+						break
+				Probe.bump("zerowin." + _zo + ".gap." + _gb)
+				var _tbl: Array = []
+				for _zr2 in scored:
+					_tbl.append({"opt": String(_zr2["opt"]), "u": snappedf(float(_zr2["u"]), 0.0001)})
+				Probe.bump_sample("zerowin." + _zo + ".lost_table", {
+					"tick": (state.world.current_tick if state != null else -1),
+					"team": team.team_id, "winner": _win_opt,
+					"table": _tbl,
+				}, 20)
 	if Probe.enabled:
 		Probe.bump("optpool.mother")
 		for _r4 in scored:
 			Probe.bump("optpool.cand." + String(_r4["opt"]))
 		if not scored.is_empty():
 			Probe.bump("optpool.win." + String(scored[0]["opt"]))
-	_beg_tap(ctx, scored, team, "begu.")   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
+	_beg_tap(ctx, scored, team, "begu.", state)   # ★#12：統一全 pool 路的乞食命中（★★與絕境階梯路分開記）
 	_prep_tap(ctx, scored, team)   # ★備戰 root-check（純觀測）
 	# ★★★【紮根】條件級 tap（systems 2026-09-03）：#10 量到 `not_in_ranked` 九成是紮根，
 	#   而它的 applicable 是兩個分支的 OR（`options.gd:239`）：
@@ -182,7 +239,7 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			if _coeff < 1.0: Probe.bump("decision.opt_coeff_pressed." + opt)   # coeff 確隨急迫度變(非恆1)
 		if opt == current_option:
 			u += _persist   # ★持守統一：flat COMMITMENT_BONUS → persist_strength（bonus-collapse）
-		scored.append({"u": u, "i": idx, "opt": opt})
+		scored.append({"u": u, "i": idx, "opt": opt, "d": 0.0})
 		idx += 1
 	# ★means-end 長程規劃（組件 G，HOW §8）：goal frontier candidates 追加進同一 rank 池（sort 前→與 static option 同 argmax 競爭）。
 	# ★S1 骨架：GoalResolver.frontier_candidates stub 回 []→此迴圈 no-op→byte-identical。harness 無 state/team(null)→skip。
@@ -227,11 +284,20 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 					"goal": _gt_key, "label": String(cand.get("label", "")),
 					"target": (cand.get("to_task", {}) as Dictionary).get("target"),
 					"util": snappedf(float(cand.get("util", 0.0)), 0.0001)}, 500)
-			scored.append({"u": float(cand.get("util", 0.0)), "i": idx, "opt": String(cand.get("label", "")), "cand": cand})
+			# ★★★tie-break 的成本欄（`payoff-derive-bridge` §8.1）：直接帶 candidate 已經算好的
+			#   `delay`（`_estimate_delay_days`）—— ★不新增一個「成本」定義。
+			#   ★★static option 沒有 delay 概念 ⇒ 記 0.0 ⇒ 真平手時它們仍然優先，
+			#   ★★★而那與【舊行為一致】（static 先 append ⇒ i 較小 ⇒ 舊規則下也是它們贏）。
+			scored.append({"u": float(cand.get("util", 0.0)), "i": idx, "opt": String(cand.get("label", "")), "cand": cand, "d": float(cand.get("delay", 0.0))})
 			idx += 1
+	# ★★★tie-break（§7.2，blueprint 裁）：★單獨採 tie-break ＝ 掩蓋啞秤；
+	#   ★★配上推導後 ＝ 秤【說了平手】之後的合法裁決 ⇒ 採。
+	#   ⇒ 規則：真值相等時選【成本低者】（`_estimate_delay_days`，決定性、不用隨機），
+	#     ★★★仍然相等才回到 applicable 順序 —— 排序保持全序、可重現。
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
-		return a["i"] < b["i"])   # tiebreak：applicable 順序
+		if a["d"] != b["d"]: return a["d"] < b["d"]
+		return a["i"] < b["i"])   # tiebreak：成本 → applicable 順序
 	# ★★won_argmax（systems 要）：【產出】≠【贏】。
 	#   emitted > 0 且 fp 不變 可以同時為真，而最危險的解釋是
 	#   「接上了、有產出、但【從不改變結果】」——沒這顆 tap 就分不出來。
@@ -409,15 +475,19 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 		# 常態路 previous_task==current_task（_trigger_survival 設）→等價。
 		if DecisionOptions.to_task(state, team, opt).get("task") == team.previous_task:
 			u += _persist   # ★持守統一：flat COMMITMENT_BONUS → persist_strength（bonus-collapse）
-		scored.append({"u": u, "i": idx, "opt": opt})
+		scored.append({"u": u, "i": idx, "opt": opt, "d": 0.0})
 		idx += 1
+	# ★這條路只有 static option（沒有 goal candidate）⇒ `d` 恆 0 ⇒ 排序等價於舊規則。
+	#   ★★仍然帶上它，是為了讓【兩條 rank 路的 scored 形狀一致】—— 不一致的形狀會讓
+	#   下游 tap 在其中一條上靜默取到預設值。
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
+		if a["d"] != b["d"]: return a["d"] < b["d"]
 		return a["i"] < b["i"])
 	# ★★★#12 乞食 dump（純觀測）—— ★兩條 rank 路都要記：
 	#   乞食 的 sets 是 `{survival, passive_survival}` ⇒ ★★它【同時】在 rank_survival 的子集裡，
 	#   也在 rank_scored 的全 pool 裡 ⇒ ★★★只監一條會把另一條的命中讀成 0。
-	_beg_tap(ctx, scored, team, "beg.")
+	_beg_tap(ctx, scored, team, "beg.", state)
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	var out: Array = []
 	for e in scored: out.append(e["opt"])
@@ -475,7 +545,7 @@ static func decide(state: WorldState, team: TeamData) -> String:
 # ★★★#12 乞食 dump 的單一實作（純觀測，Probe-gated）——
 #   ★兩條 rank 路共用一份 ⇒ ★★定義不會分歧（兩份實作就會出現「兩邊數字不一致而沒人知道為什麼」）。
 #   ★★★prefix 分開两條路：`beg.`＝rank_survival（絕境階梯）、`begu.`＝rank_scored（統一全 pool）。
-static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: String) -> void:
+static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: String, state: WorldState) -> void:
 	if not Probe.enabled or team == null:
 		return
 	Probe.bump(pfx + "rank_calls")                       # ★母體：這條路被呼叫的次數
@@ -506,6 +576,42 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 			Probe.bump("ladder.deep.intersect")
 			# ★相異隊數（又是它：次數會被每 tick 重掃灌水）
 			Probe.bump("ladder.deep.intersect.team.%d" % team.team_id)
+		# ★★★`[DonorLadder]` 逐階歸因（systems 2026-09-04 票）——★★交集 0→2 的成因要【逐階條件名】。
+		#   ★母體是 `entry`（這條階梯被評估的總次數）而不是「命中的那幾筆」：
+		#     ★★沒有 entry 的話，逐階全 0 與「這段從沒被呼叫」長得一模一樣。
+		#   ★★★互斥且窮盡的做法＝按【階梯順序取第一個可用的階】分桶：
+		#     ⇒ ★Σ各階 + hit == entry 必然成立，而它【可以對帳】—— 不平就是我算錯了。
+		#   ★階名取自 `DecisionOptions.options_in_set("survival")`（REGISTRY 插入序，穩定）
+		#     ⇒ ★★用【條件名】不用序號：有人插一階時序號會整排錯位，名字不會。
+		#   ★★★乞食那一階的可用性 ＝ `has_aid_target`（其餘階＝有沒有進 `scored`）
+		#     ⇒ 於是「一階都不可用」與上面那個交集【定義上等價】，兩個數字可以互相對帳。
+		Probe.bump("donorladder.entry")
+		var _in_scored: Dictionary = {}
+		for _e2 in scored:
+			_in_scored[String(_e2["opt"])] = true
+		var _first: String = ""
+		for _st in DecisionOptions.options_in_set("survival"):
+			var _sn: String = String(_st)
+			var _avail: bool = (ctx.has_aid_target if _sn == "乞食" else _in_scored.has(_sn))
+			if _avail:
+				_first = _sn
+				break
+		if _first == "":
+			Probe.bump("donorladder.hit")
+			# ★命中要能被指認：印 team／tick／餓深／當下 `scored` 全名單
+			#   ⇒ ★★「一階都沒有」時，看得到【當時到底有什麼】才知道它是不是真的無路
+			var _all: Array = []
+			for _e3 in scored:
+				_all.append(String(_e3["opt"]))
+			Probe.bump_sample("donorladder.hit_table", {
+				"tick": (state.world.current_tick if state != null else -1), "team": team.team_id,
+				"pop": team.population,
+				"food_days": snappedf(ctx.food_days, 0.001),
+				"has_aid_target": ctx.has_aid_target,
+				"scored": _all,
+			}, 50)
+		else:
+			Probe.bump("donorladder.first." + _first)
 	if ctx.has_aid_target: Probe.bump(pfx + "band." + _bd + ".donor_ok")
 	var _food_ok: bool = ctx.food_days < ctx.desperation_entry_threshold
 	if _food_ok: Probe.bump(pfx + "gate.food_ok")

@@ -108,6 +108,103 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 			elif Probe.enabled:
 				Probe.bump_pt("goal.build_fate.readd_desire_below_min", _bday, team.team_id)
 
+# ★★★`[UnitOverlap]` 取值（純觀測）。★A 類與 C 類 build 分開記 —— 它們不同源，
+#   混在一起會讓 build 家族的值域【讀起來假寬】（systems 明寫）。
+static func _unit_overlap_tap(state: WorldState, team: TeamData, gt: String, def: Dictionary,
+		fai: FactionAISystem, otile: HexTileData) -> void:
+	if def.has("facility"):
+		if otile == null:
+			Probe.bump("unitoverlap.skip.no_otile")
+			return
+		var f: String = String(def["facility"])
+		var _entry: Dictionary = FactionAISystem.FACILITY_DEFICIT_DEF.get(f, {})
+		var _cls: String = "buildC" if _entry.has("special") else "buildA"
+		# ★★★第二個量（systems 2026-09-04）：★比例型缺口在【什麼都缺】的世界會釘在 1.0（結構性飽和）
+		#   ⇒ 同時記一個【絕對量 × 價值】的候選：它會不會變，是這條路生死的唯一問題。
+		#   ★A 類：逐 output 取【最缺的那一個】的價值缺口（鏡射既有 `min_per_res` 的取最差邏輯）
+		#   ★★C 類（special evaluator）沒有 outputs ⇒ ★★★這一格【答不了】，照實不記（不硬湊一個近似）
+		# ★★★哨兵值訂正（2026-09-04，我自己的儀器缺陷）：第一版用 `-1` 當「答不了」的哨兵，
+		#   而 `w` 【本來就可以是負的】（有餘 ⇒ target − stock < 0）
+		#   ⇒ ★哨兵與真值撞號 ⇒ 床端過濾 `>= 0` 時把【有餘的那些筆】一起丟掉
+		#   ⇒ ★★實測 `maintain_material` 的 w 母體只剩 20/114 —— 低端整段消失而輸出看起來完全正常
+		#   ⇒ ★★★改成獨立的 `w_ok` 旗標：可用性與值【分開表示】，不共用同一個數字空間。
+		var _w: float = 0.0
+		var _w_ok: bool = false
+		var _e2: Dictionary = FactionAISystem.FACILITY_DEFICIT_DEF.get(f, {})
+		if _e2.has("outputs"):
+			var _lv2: Dictionary = TradeValuation.leader_vals(state, team)
+			var _worst_gap: float = -INF
+			for _r5 in _e2["outputs"]:
+				var _res5: String = String(_r5)
+				var _tgt5: float = NeedOracle.need_keep(state, team, _res5, _lv2)
+				if bool(_e2.get("use_demand", false)):
+					_tgt5 += NeedOracle.demand(state, team, _res5, _lv2)
+				var _gap5: float = (_tgt5 - float(team.resources.get(_res5, 0))) * float(TradeValuation.BASE_PRICE.get(_res5, 0.0))
+				_worst_gap = maxf(_worst_gap, _gap5)
+			_w = _worst_gap
+			_w_ok = true
+		Probe.bump_sample("unitoverlap." + _cls + "." + gt,
+			{"v": snappedf(fai._facility_deficit(state, team, f, otile), 0.0001),
+			 "w": snappedf(_w, 0.0001), "w_ok": _w_ok}, 4000)
+		return
+	var _pq: Array = def.get("prereqs", [])
+	if _pq.is_empty():
+		Probe.bump("unitoverlap.skip.no_prereq")
+		return
+	var res: String = String((_pq[0] as Dictionary).get("res", ""))
+	if res == "":
+		Probe.bump("unitoverlap.skip.no_res")
+		return
+	# ★就地重算 `trade_valuation.gd:158-159` 的 shortage（★escalation 之前的那一步）
+	var _pop: float = maxf(float(team.population), 1.0)
+	var _stock: float = TradeValuation._stock(state, team, res)
+	var _target: float = _pop * float(TradeValuation.TARGET_PER_POP.get(res, 1.0))
+	# ★★★`w` ＝【絕對缺口 × 單價】＝ systems 的不飽和候選。★同一份取值、同一筆記錄，
+	#   ⇒ 兩個量【逐筆對齊】，可以直接問「v 釘住的那些筆，w 有沒有動」。
+	Probe.bump_sample("unitoverlap.maintain." + gt,
+		{"v": snappedf((_target - _stock) / maxf(_target, 1.0), 0.0001),
+		 "w": snappedf((_target - _stock) * float(TradeValuation.BASE_PRICE.get(res, 0.0)), 0.0001),
+		 "w_ok": true}, 4000)
+
+# ★★★payoff 導出（`2026-09-04-payoff-derive-bridge` §8.1，R² CLEAN 後派）。
+#   ★舊形狀＝`GoalRegistry` 的 flat 常數（maintain 全 1.0、build 全 1.5，標著 TEST VALUE）
+#     ⇒ ★★同常數的 goal 之間 util 逐位元相等 ⇒ argmax 退化成 registry 插入序偏好
+#     （實測：`build_stable/apothecary/workshop` 與 `maintain_weapons` 兩個世界合計 tie 上千次）
+#   ★★新形狀＝【缺口的價值】：`(target − stock) × BASE_PRICE[res]`
+#     ⇒ ★不飽和（缺 10 與缺 100 不同），★★跨資源同單位（價值），★★★兩個因子都是既有的
+#   ★負值語意（§7.1）：`w < 0` ＝ 有餘 ⇒ 該 goal 不該贏 ⇒ `maxf(w, 0)`。
+#     ★★底部平手無害：能走到「整池都是 0」的前提本身就蘊含所有選擇等價（R² §8.2）。
+#     ★★★而【值分布 dump 印未 clamp 的 w】—— 否則「有餘多少」整段不可見（`unitoverlap.*` 那節）。
+#   ★C 類（special evaluator，farming／weaponsmith／mint）【不動】：它們沒有 outputs，
+#     ★★沒有可用的絕對量 ⇒ 硬湊一個近似值只會製造一個看起來正常的假數字。
+static func derived_payoff(state: WorldState, team: TeamData, def: Dictionary) -> float:
+	if def.has("facility"):
+		var f: String = String(def["facility"])
+		var e: Dictionary = FactionAISystem.FACILITY_DEFICIT_DEF.get(f, {})
+		if not e.has("outputs"):
+			return float(def.get("payoff", 1.5))   # gate-ok: C 類 special evaluator 照舊（無 outputs）
+		var lv: Dictionary = TradeValuation.leader_vals(state, team)
+		var best: float = 0.0
+		for r in e["outputs"]:
+			var res: String = String(r)
+			var tgt: float = NeedOracle.need_keep(state, team, res, lv)
+			if bool(e.get("use_demand", false)):
+				tgt += NeedOracle.demand(state, team, res, lv)
+			best = maxf(best, (tgt - float(team.resources.get(res, 0))) * float(TradeValuation.BASE_PRICE.get(res, 0.0)))
+		return best
+	var res2: String = ""
+	for pq in def.get("prereqs", []):
+		var d2: Dictionary = pq
+		if String(d2.get("kind", "")) == GoalRegistry.PREREQ_RESOURCE:
+			res2 = String(d2.get("res", ""))
+			break
+	if res2 == "":
+		return float(def.get("payoff", 1.0))   # gate-ok: 無資源型前置（純 location goal）⇒ 沿用表值
+	var pop: float = maxf(float(team.population), 1.0)
+	var stock: float = TradeValuation._stock(state, team, res2)
+	var target: float = pop * float(TradeValuation.TARGET_PER_POP.get(res2, 1.0))
+	return maxf((target - stock) * float(TradeValuation.BASE_PRICE.get(res2, 0.0)), 0.0)
+
 static func frontier_candidates(state: WorldState, team: TeamData, ctx: DecisionContext) -> Array:
 	if state == null or team == null or ctx == null:
 		return []   # harness 無 state/team → 無 goal frontier（安全）
@@ -124,6 +221,17 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 	#     而沒加對應的 reason ⇒ ★對帳式會差一個數，而【差額會被當成正常】——
 	#     那正是「習慣了的異常」，比沒有對帳更難發現。⇒ 加 `continue` 就要加 reason。
 	var _sday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	# ★★★`[UnitOverlap]` 前置量測（systems 2026-09-04 票）——★純觀測、零行為變更。
+	#   ★它的用途是【否決】：若兩家族的值域系統性分離，那個「改用同單位」的設計就不成立。
+	#   ★★取值不動控制流：build 半邊讀既有的 `_facility_deficit`（不重算別的東西），
+	#     maintain 半邊【就地重算一次】`trade_valuation.gd:158-159` 的同一個算式
+	#     ⇒ ★★★這是【量測用重算，不是共用出口】—— 抽函式是修法的一部分，要逐位元不變的驗收。
+	#   ★母體＝所有 active goal（13 個都走到），不是只有那七個 —— 否則看不到值域兩端。
+	var _uo_fai: FactionAISystem = FactionAISystem.new() if Probe.enabled else null
+	var _uo_otile: HexTileData = null
+	if Probe.enabled:
+		var _uo_own: Vector2i = _uo_fai._find_own_outpost(state, team)
+		_uo_otile = state.world.tiles.get(_uo_own.x * 1000 + _uo_own.y) if _uo_own != Vector2i(-1, -1) else null
 	for g in team.goal_state:
 		if Probe.enabled: Probe.bump("goal.skip.seen" + _sday)   # ★分母：該日檢視過的 goal 數
 		if String(g.get("status", "")) != "active":
@@ -136,7 +244,9 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 		if def.is_empty():
 			if Probe.enabled: Probe.bump("goal.skip.no_def" + _sday)
 			continue
-		var payoff: float = float(def.get("payoff", 1.0))
+		var payoff: float = derived_payoff(state, team, def)   # ★§8.1 導出（舊：`def.payoff` flat 常數）
+		if Probe.enabled:
+			_unit_overlap_tap(state, team, gt, def, _uo_fai, _uo_otile)
 		# ★S4 設施發展 goal（build_F）：walk build-cost/facility-type/manpower 前置→frontier or build_F action。
 		if def.has("facility"):
 			var bc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt, def)
@@ -283,6 +393,7 @@ static func _distribute_candidates(state: WorldState, team: TeamData, ctx: Decis
 	var delay: float = _estimate_delay_days(team, to_task)
 	out.append({
 		"util": _candidate_util(clampf(best_util, 0.0, GOAL_UTIL_CAP), ctx, delay),
+		"delay": delay,
 		"to_task": to_task, "label": "distribute_food", "delegate": true,
 	})
 	return out
@@ -373,6 +484,7 @@ static func _deliver_candidates(state: WorldState, team: TeamData, ctx: Decision
 	var delay: float = _estimate_delay_days(team, to_task)
 	out.append({
 		"util": _candidate_util(payoff, ctx, delay),
+		"delay": delay,
 		"to_task": to_task, "label": "deliver_" + String(best["res"]), "delegate": true,
 	})
 	return out
@@ -426,7 +538,7 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 	if fdef.is_empty():
 		if Probe.enabled: Probe.bump_pt("resolver.empty_no_fdef", _rday, team.team_id)
 		return {}
-	var payoff: float = float(def.get("payoff", 1.5))
+	var payoff: float = derived_payoff(state, team, def)   # ★§8.1 導出（舊：`def.payoff` flat 常數）
 	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 	var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 	# F 已建 → satisfied（無 candidate）。
@@ -821,8 +933,12 @@ static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: Dec
 
 static func _mk_candidate(team: TeamData, g: Dictionary, gt: String, frontier_kind: String, payoff: float,
 		ctx: DecisionContext, to_task: Dictionary) -> Dictionary:
+	# ★★★tie-break 用的「成本」＝【已經算好的】`_estimate_delay_days`（R² §8：停止把算好的數字扔掉）
+	#   ⇒ ★算一次、util 與 tie-break 共用；★★不另外定義一個「成本」量。
+	var _dly: float = _estimate_delay_days(team, to_task)
 	return {
-		"util": _candidate_util(payoff, ctx, _estimate_delay_days(team, to_task)),   # ★S6:util 含 delay 折現
+		"util": _candidate_util(payoff, ctx, _dly),   # ★S6:util 含 delay 折現
+		"delay": _dly,
 		"to_task": to_task,
 		"source_goal": g,
 		"label": gt + ":" + frontier_kind,   # root_goal + frontier_kind（有界 label，HOW §7）
@@ -837,8 +953,10 @@ static func _mk_delegate_candidate(team: TeamData, g: Dictionary, gt: String, fr
 	var to_task: Dictionary = core.duplicate()
 	to_task["delegate"] = true
 	to_task["settler"] = clampi(team.population / 4, 2, 5)   # 派子隊配額（founding 分支 _dispatch_builder 內部自估，此為 generic 保底）
+	var _dly2: float = _estimate_delay_days(team, to_task)
 	return {
-		"util": _candidate_util(payoff, ctx, _estimate_delay_days(team, to_task)),
+		"util": _candidate_util(payoff, ctx, _dly2),
+		"delay": _dly2,
 		"to_task": to_task,
 		"source_goal": g,
 		"label": gt + ":" + frontier_kind + ":delegate",
@@ -924,4 +1042,22 @@ static func _candidate_util(payoff: float, ctx: DecisionContext, delay_days: flo
 	# ★S6 折現:discount=1/(1+rate×delay)（delay=0→1 近/即時不折;delay 大+絕境 rate 高→趨零不走遠路）。遞減有界。
 	var discount: float = 1.0 / (1.0 + _discount_rate(ctx) * maxf(delay_days, 0.0))
 	# clamp 上界 GOAL_UTIL_CAP < SURVIVAL_BOOST_MAX：硬保證 < 絕境 survival-boosted static util（折現只讓 util 更小=護欄更穩）。
-	return clampf(payoff * dev_coeff * discount, 0.0, GOAL_UTIL_CAP)
+	# ★★★覆蓋率訂正（2026-09-04）：我第一版把探針掛在 `goal_resolver.gd:285`／`:372` 兩個 clampf 上，
+	#   ⇒ ★母體只有 64，而那七個 option 光在 30 日就各出現 46 次 —— ★★儀器根本沒蓋到產它們的那條路
+	#     （`:resource` 走的是 `_mk_candidate` → 這裡）。
+	#   ⇒ ★★★所以改掛在【這個單一收斂點】：五個 `"util":` 站有四個經過它。
+	#   ★同時記 payoff 的【值分布】——★★平手的來源若是「幾個 goal 共用同一個死常數」，
+	#     那只有值分布看得出來，clamped 計數看不出來（它會是 0 而讓人以為沒事）。
+	var _final: float = clampf(payoff * dev_coeff * discount, 0.0, GOAL_UTIL_CAP)
+	if Probe.enabled:
+		Probe.bump("gu2.mother")
+		Probe.add_amount("gu2.payoff_sum", payoff)
+		Probe.bump("gu2.payoff_val.%.2f" % payoff)          # ★死常數會在這裡現形（key 有界：payoff 來自 registry）
+		Probe.bump("gu2.devcoef_val.%.2f" % dev_coeff)
+		Probe.bump("gu2.discount_val.%.2f" % discount)
+		# ★★★不用 `if raw > GOAL_UTIL_CAP` 判「有沒有被咬」：那個形狀是憲法閘認定的
+		#   【引擎外門檻】，而閘說得對 —— ★我要的本來就不是一個門檻，是【clamp 有沒有改到值】。
+		#   ⇒ ★★改成比對 clamp 前後：`_raw != _final` ⇔ 上限咬到了。同一件事，沒有常數比較。
+		var _raw: float = payoff * dev_coeff * discount
+		Probe.bump("gu2.clamped" if _raw != _final else "gu2.unclamped")
+	return _final

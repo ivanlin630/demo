@@ -65,6 +65,12 @@ func _run() -> void:
 	_sec_b_grade()
 	_sec_cansettle()
 	_sec_ladder()
+	_sec_donorladder()
+	_sec_zerowin()
+	_sec_goalutil()
+	_sec_aftermath(state, cfg, days)
+	_sec_unitoverlap()
+	_sec_perf5()
 	_sec_prepare()
 	_sec_optpool()
 	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
@@ -607,3 +613,334 @@ func _sec_optpool() -> void:
 		print("  %-24s %8d %8d %7.1f%%" % [String(n), c, w, (100.0 * float(w) / float(c)) if c > 0 else 0.0])
 	print("  ★誠實限：這一節【是這一刀才加的】⇒ 它沒有修前基準；")
 	print("     ★★所以它只能拿【同一版 code、兩份 config】互相比，不能拿去比任何舊跑。")
+
+# ★★★`[DonorLadder]` 逐階歸因（systems 2026-09-04 票）。
+#   ★三格：自變數＝config／母體＝`entry`（階梯被評估的總次數，不是命中）／印在 `[DonorLadder]` 這一行。
+#   ★★逐階印【條件名】不印序號 —— 有人插一階時序號整排錯位，名字不會。
+#   ★★★對帳必印：`Σ各階 + hit == entry` 不平就在下一行印 ❌ —— ★沒有對帳的分桶等於沒有分桶。
+func _sec_donorladder() -> void:
+	var entry: int = int(Probe.counts.get("donorladder.entry", 0))
+	var hit: int = int(Probe.counts.get("donorladder.hit", 0))
+	var stages: Array = []
+	var ssum: int = 0
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("donorladder.first."):
+			var n: int = int(Probe.counts[k])
+			stages.append([ks.substr(18), n])
+			ssum += n
+	stages.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	var parts: Array = ["entry=%d" % entry]
+	for st in stages:
+		parts.append("stage.%s=%d" % [String(st[0]), int(st[1])])
+	parts.append("hit=%d" % hit)
+	print("[DonorLadder] " + "  ".join(PackedStringArray(parts)))
+	print("[DonorLadder] 對帳：Σ各階(%d) + hit(%d) = %d ｜ entry = %d %s" % [
+		ssum, hit, ssum + hit, entry,
+		("✅" if ssum + hit == entry else "❌ 不平 ⇒ 分桶不互斥或不窮盡，這一節的數字不可用")])
+	print("[DonorLadder] 交集對帳（與既有守衛）：`ladder.deep.intersect`=%d ｜ `donorladder.hit`=%d %s" % [
+		int(Probe.counts.get("ladder.deep.intersect", 0)), hit,
+		("✅ 兩個定義等價" if int(Probe.counts.get("ladder.deep.intersect", 0)) == hit
+			else "★★★不等 ⇒ 兩個定義不等價，先解釋差在哪再讀下面")])
+	if entry == 0:
+		print("[DonorLadder] ★★★entry = 0 ⇒ 這條階梯【從沒被評估過】—— 母體塌陷，不是「每一階都通」")
+		return
+	if hit == 0:
+		print("[DonorLadder] ★hit = 0 ⇒ 本跑【不可重現】那 2 筆（★★而這不等於「沒事」，見票的判讀表第三列）")
+		return
+	print("[DonorLadder] ── ★命中逐筆（cap 50；★印當下 `scored` 全名單，才看得出它是不是真的無路）──")
+	for r in Probe.samples.get("donorladder.hit_table", []):
+		var d: Dictionary = r
+		print("[DonorLadder]    tick=%s team=%s food_days=%s has_aid_target=%s｜scored=%s" % [
+			str(d.get("tick", -1)), str(d.get("team", -1)), str(d.get("food_days", -1.0)),
+			str(d.get("has_aid_target", false)), str(d.get("scored", []))])
+
+# ★★★零勝 option 的 util dump（systems 2026-09-04 票）。
+#   ★同家族的贏家（maintain_weapons/tools/food）一起印 —— ★★沒有它們，「輸家低」與
+#     「大家都低」分不開；★★★而 systems 的假說（贏家＝團自己消耗的、輸家＝資本財＋原料）
+#     只有在兩邊【並排】時才可能被推翻。
+func _sec_zerowin() -> void:
+	print("═══ ★零勝 option util dump（★同家族贏家並排；★★禁 crank：先問它是不是【就該低】）═══")
+	print("  %-30s %6s %6s %9s %9s %9s" % ["option", "n", "won", "均 util", "均贏家 u", "均差距"])
+	for opt in DecisionEngine.ZEROWIN_WATCH:
+		var o: String = String(opt)
+		var n: int = int(Probe.counts.get("zerowin." + o + ".n", 0))
+		if n == 0:
+			print("  %-30s %6d %6s %9s %9s %9s ← ★母體 0：這一列【答不了】" % [o, 0, "-", "-", "-", "-"])
+			continue
+		var won: int = int(Probe.counts.get("zerowin." + o + ".won", 0))
+		var us: float = Probe.amount("zerowin." + o + ".u_sum")
+		var ws: float = Probe.amount("zerowin." + o + ".winu_sum")
+		print("  %-30s %6d %6d %9.4f %9.4f %9.4f" % [o, n, won, us / float(n), ws / float(n), (ws - us) / float(n)])
+	print("  ★★★exact-tie（util 與贏家【完全相等】⇒ 它不是輸在分數，是輸在 tie-break 的 `i` 序）：")
+	for opt in DecisionEngine.ZEROWIN_WATCH:
+		var ot: String = String(opt)
+		var nt: int = int(Probe.counts.get("zerowin." + ot + ".n", 0))
+		var te: int = int(Probe.counts.get("zerowin." + ot + ".tie_exact", 0))
+		print("     %-30s tie_exact=%d / n=%d %s" % [ot, te, nt,
+			("← ★★★它從來沒有輸在分數上" if nt > 0 and te == nt else "")])
+	print("  ★★差距分桶（贏家 − 該 option；★只在它沒贏的那些 tick）：")
+	for opt in DecisionEngine.ZEROWIN_WATCH:
+		var o2: String = String(opt)
+		var parts: Array = []
+		for b in ["lt0.1", "0.1to0.5", "0.5to1", "1to2", "ge2"]:
+			parts.append("%s=%d" % [b, int(Probe.counts.get("zerowin." + o2 + ".gap." + b, 0))])
+		print("     %-30s %s" % [o2, "｜".join(PackedStringArray(parts))])
+	print("  ★★★逐筆（cap 20／option；★first-N 不是 reservoir）：")
+	for opt in DecisionEngine.ZEROWIN_WATCH:
+		var o3: String = String(opt)
+		var rows: Array = Probe.samples.get("zerowin." + o3 + ".lost_table", [])
+		if rows.is_empty():
+			continue
+		var r: Dictionary = rows[0]
+		var tbl: Array = r.get("table", [])
+		var top: Array = []
+		for i in range(mini(5, tbl.size())):
+			top.append("%s=%.4f" % [String((tbl[i] as Dictionary)["opt"]), float((tbl[i] as Dictionary)["u"])])
+		var mine: String = "(不在前 5)"
+		for e in tbl:
+			if String((e as Dictionary)["opt"]) == o3:
+				mine = "%s=%.4f" % [o3, float((e as Dictionary)["u"])]
+				break
+		print("     %-30s tick=%s team=%s 贏家=%s｜前5: %s｜本身: %s" % [
+			o3, str(r.get("tick", -1)), str(r.get("team", -1)), str(r.get("winner", "")),
+			"  ".join(PackedStringArray(top)), mine])
+
+# ★★★goal candidate payoff 的上限探針（systems 2026-09-04 核可）。
+#   ★它回答的是【那幾個 exact-tie 是不是 clamp 造成的】——
+#     ★★而那兩個可能性在【只印 post 值】時長得一模一樣。
+#   ★★★判讀先寫死（systems 的三列），不等數字出來再訂。
+func _sec_goalutil() -> void:
+	# ★★★這一節換過一次儀器，而【換掉的理由要留著】：
+	#   ★第一版掛在 `goal_resolver.gd:285`／`:372` 兩個 `clampf` 上 ⇒ 母體只有 64，
+	#     而那七個 option 光 30 日就各出現 46 次 ⇒ ★★儀器根本沒蓋到產它們的那條路。
+	#   ★★★所以第一版的 `clamped=0` 【不是證據】—— 它是「沒量到」。舊探針已移除，
+	#     ★不留兩把覆蓋率不同的尺並排印（那會讓人挑一把來讀）。
+	_gu2()
+func _gu2() -> void:
+	var m: int = int(Probe.counts.get("gu2.mother", 0))
+	print("  ── ★覆蓋率訂正版 `gu2.*`（掛在 `_candidate_util` 單一收斂點）──")
+	print("     母體 = %d｜clamped = %d｜unclamped = %d" % [
+		m, int(Probe.counts.get("gu2.clamped", 0)), int(Probe.counts.get("gu2.unclamped", 0))])
+	if m == 0:
+		print("     ★★★母體 0 ⇒ 這一節答不了")
+		return
+	print("     均 payoff = %.4f" % (Probe.amount("gu2.payoff_sum") / float(m)))
+	for pfx in ["gu2.payoff_val.", "gu2.devcoef_val.", "gu2.discount_val."]:
+		var rows: Array = []
+		for k in Probe.counts.keys():
+			var ks: String = String(k)
+			if ks.begins_with(pfx): rows.append([ks.substr(pfx.length()), int(Probe.counts[k])])
+		rows.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+		var parts: Array = []
+		for i in range(mini(8, rows.size())):
+			parts.append("%s×%d" % [String(rows[i][0]), int(rows[i][1])])
+		print("     %-22s %s（相異值 %d 個）" % [pfx.substr(4), "｜".join(PackedStringArray(parts)), rows.size()])
+
+# ★★★`[DonorAftermath]`（systems 2026-09-04 票）——★這一節的重點【不是命中隊】，是【對照組】。
+#   ★「命中隊 39 天後還活著」沒有刻度：也許那個世界所有隊都活著。
+#   ★★所以沒命中的隊要印【同樣的欄位】，一行一隊，讓兩邊可以逐欄比。
+#   ★★★量【轉變】不量【狀態】：團滅＝`extinct` 那一刻（有 day），不是「跑完當下 pop==0」。
+#   ★誠實限印在最後（peaceful 本來就少死 ⇒ 「沒死」解釋力弱、「死了」解釋力強，不對稱）。
+func _sec_aftermath(state: WorldState, cfg: String, days: int) -> void:
+	print("═══ ★`[DonorAftermath]`（★命中隊 ＋ ★★對照組同欄位）═══")
+	# 命中隊：從 hit_table 取【第一次】命中
+	var first_hit: Dictionary = {}   # team → {tick, pop}
+	for r in Probe.samples.get("donorladder.hit_table", []):
+		var d: Dictionary = r
+		var tid: int = int(d.get("team", -1))
+		if not first_hit.has(tid):
+			first_hit[tid] = {"tick": int(d.get("tick", -1)), "pop": int(d.get("pop", -1))}
+	# 名冊：活著的（state.teams）＋ 死掉的（extinct 桶）＋ 被 crisis 評估過的
+	var roster: Dictionary = {}
+	for tid in state.teams.keys():
+		roster[int(tid)] = true
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("extinct.team."):
+			roster[int(ks.substr(13))] = true
+		elif ks.begins_with("crisis.entry.team."):
+			roster[int(ks.substr(18))] = true
+	var ids: Array = roster.keys()
+	ids.sort()
+	var n_hit_dead: int = 0
+	var n_hit: int = 0
+	var n_ctl_dead: int = 0
+	var n_ctl: int = 0
+	var n_hit_shell: int = 0
+	var n_ctl_shell: int = 0
+	for tid in ids:
+		var t: int = int(tid)
+		var is_hit: bool = first_hit.has(t)
+		var dead: bool = int(Probe.counts.get("extinct.team.%d" % t, 0)) > 0
+		var dday: String = _first_day_suffix("extinct.day.team.%d.d" % t)
+		var ffd: String = _first_day_suffix("crisis.firstfire.team.%d.d" % t)
+		var pop_end: int = int(state.teams[t].population) if state.teams.has(t) else 0
+		var fh: Dictionary = first_hit.get(t, {})
+		var fh_day: String = ("%.1f" % (float(int(fh.get("tick", -1))) / float(WorldState.TICKS_PER_DAY))) if is_hit else "-"
+		print("[DonorAftermath] cfg=%s team=%d hit=%s first_hit_day=%s end=%s death_day=%s pop_first_hit=%s pop_end=%d crisis_entry=%d crisis_fired=%d crisis_first_fire_day=%s" % [
+			cfg, t, ("yes" if is_hit else "no"), fh_day,
+			("團滅" if dead else "存活"), dday,
+			(str(int(fh.get("pop", -1))) if is_hit else "-"), pop_end,
+			int(Probe.counts.get("crisis.entry.team.%d" % t, 0)),
+			int(Probe.counts.get("crisis.abs_hunger.team.%d" % t, 0)), ffd])
+		# ★★★8 日 smoke 撞到的第三種狀態：`pop_end=0` 而【沒有】`extinct` 桶 ⇒ 隊還在名冊裡但沒人。
+		#   ★「存活」與「團滅」兩個字裝不下它，而它會被讀成「存活」⇒ 直接把它標出來。
+		if pop_end == 0 and not dead:
+			print("[DonorAftermath]    ↑ ★★★team=%d 是【空殼】：pop_end=0 而未 extinct ⇒ 別讀成「存活」" % t)
+		# ★★★三分類（systems 2026-09-04）：★「存活／團滅」兩格會把【空殼】算進存活，
+		#   而實測新 config 的空殼（6）比團滅（4）還多 ⇒ ★★兩格版本【低估】了非存活比例。
+		var shell: bool = (pop_end == 0 and not dead)
+		if is_hit:
+			n_hit += 1
+			if dead: n_hit_dead += 1
+			elif shell: n_hit_shell += 1
+		else:
+			n_ctl += 1
+			if dead: n_ctl_dead += 1
+			elif shell: n_ctl_shell += 1
+	print("[DonorAftermath] ── ★兩組並排（★這一行才是判讀表要讀的）──")
+	print("[DonorAftermath] cfg=%s window_days=%d ★三分類（存活／團滅／空殼）" % [cfg, days])
+	print("[DonorAftermath]   命中隊 n=%d：存活 %d｜團滅 %d｜★空殼 %d｜★★團滅+空殼 %d（%s）" % [
+		n_hit, n_hit - n_hit_dead - n_hit_shell, n_hit_dead, n_hit_shell, n_hit_dead + n_hit_shell,
+		("%.1f%%" % (100.0 * float(n_hit_dead + n_hit_shell) / float(n_hit))) if n_hit > 0 else "母體 0"])
+	print("[DonorAftermath]   對照組 n=%d：存活 %d｜團滅 %d｜★空殼 %d｜★★團滅+空殼 %d（%s）" % [
+		n_ctl, n_ctl - n_ctl_dead - n_ctl_shell, n_ctl_dead, n_ctl_shell, n_ctl_dead + n_ctl_shell,
+		("%.1f%%" % (100.0 * float(n_ctl_dead + n_ctl_shell) / float(n_ctl))) if n_ctl > 0 else "母體 0"])
+	print("[DonorAftermath]   ★★★只看『團滅』會低估：實測新 config 空殼 6 支 > 團滅 4 支")
+	print("[DonorAftermath] ★★誠實限：①peaceful 本來就少死 ⇒「沒死」解釋力弱、「死了」解釋力強（不對稱）")
+	print("[DonorAftermath]    ②命中母體很小 ⇒ ★★★這是【個案】不是【樣本】：只能寫「這一隊發生了什麼」")
+	print("[DonorAftermath]    ③名冊＝跑完仍在 `state.teams` ＋ 有 `extinct` 桶 ＋ 被 crisis 評估過的聯集")
+	print("[DonorAftermath]       ⇒ ★一支【從沒被 crisis 評估過而且活到最後】的隊仍在名冊裡；★★而【中途生中途死且從沒被評估】的隊不在")
+
+# 取「第一個出現的日期後綴」（key 形如 `<prefix><4 位日>`）；沒有就回 `-`。
+func _first_day_suffix(prefix: String) -> String:
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with(prefix):
+			return str(int(ks.substr(prefix.length())))
+	return "-"
+
+# ★★★`[UnitOverlap]`（systems 2026-09-04 前置量測票）——★這一節的用途是【否決】不是【確認】。
+#   ★若兩家族值域系統性分離（overlap_frac ≈ 0）⇒ 「改用同單位」那個設計不成立，systems 重畫。
+#   ★★A 類與 C 類 build 分開印：它們不同源，混在一起會讓 build 家族的值域讀起來假寬。
+#   ★★★`overlap_frac` 的定義印在輸出裡（★不印定義的比例數字沒有意義）。
+func _sec_unitoverlap() -> void:
+	print("═══ ★`[UnitOverlap]`（★前置量測：兩家族值域並排；★★用途是【否決】設計）═══")
+	var fams: Dictionary = {"maintain": [], "buildA": [], "buildC": []}
+	for k in Probe.samples.keys():
+		var ks: String = String(k)
+		if not ks.begins_with("unitoverlap."): continue
+		var rest: String = ks.substr(12)
+		var dot: int = rest.find(".")
+		if dot < 0: continue
+		var fam: String = rest.substr(0, dot)
+		if not fams.has(fam): continue
+		var gt: String = rest.substr(dot + 1)
+		var vals: Array = []
+		var wals: Array = []
+		for r in Probe.samples[k]:
+			vals.append(float((r as Dictionary).get("v", 0.0)))
+			# ★可用性走獨立旗標，不靠值域判 —— ★★`w` 本來就可以是負的（有餘）
+			if bool((r as Dictionary).get("w_ok", false)):
+				wals.append(float((r as Dictionary).get("w", 0.0)))
+		vals.sort()
+		wals.sort()
+		if vals.is_empty(): continue
+		fams[fam].append([gt, vals, wals])
+	for fam in ["maintain", "buildA", "buildC"]:
+		for row in fams[fam]:
+			var gt2: String = String(row[0])
+			var v: Array = row[1]
+			print("[UnitOverlap] fam=%s goal=%s n=%d min=%.4f p25=%.4f med=%.4f p75=%.4f max=%.4f" % [
+				fam, gt2, v.size(), float(v[0]), _pct(v, 0.25), _pct(v, 0.50), _pct(v, 0.75), float(v[v.size() - 1])])
+	# ★★★不飽和候選 `w`（systems 2026-09-04）：★問的只有一件事 —— 【它會不會變】。
+	#   ★★與 `v` 逐筆對齊 ⇒ 「v 釘在 1.0 的那些筆，w 有沒有動」直接看得出來。
+	#   ★★★C 類沒有 outputs ⇒ 記 −1 ⇒ 印成「答不了」，不硬湊近似值。
+	print("[UnitOverlap] ── ★不飽和候選 `w` ＝（target − stock）× BASE_PRICE ──")
+	for fam2 in ["maintain", "buildA", "buildC"]:
+		for row2 in fams[fam2]:
+			var gt3: String = String(row2[0])
+			var ws: Array = row2[2]
+			if ws.is_empty():
+				print("[UnitOverlap] w fam=%s goal=%s ★答不了（此類無 outputs ⇒ 沒有可用的絕對量）" % [fam2, gt3])
+				continue
+			var uniq: Dictionary = {}
+			for wv in ws: uniq[wv] = true
+			print("[UnitOverlap] w fam=%s goal=%s n=%d min=%.4f med=%.4f max=%.4f ★相異值=%d %s" % [
+				fam2, gt3, ws.size(), float(ws[0]), _pct(ws, 0.50), float(ws[ws.size() - 1]), uniq.size(),
+				("← ★★★常數，這個方向也死" if uniq.size() == 1 else "← ★會變")])
+	var mm: Array = _fam_range(fams["maintain"])
+	var ba: Array = _fam_range(fams["buildA"])
+	var bc: Array = _fam_range(fams["buildC"])
+	var all_build: Array = fams["buildA"] + fams["buildC"]
+	var bb: Array = _fam_range(all_build)
+	print("[UnitOverlap] SUMMARY maintain=[%.4f..%.4f] build=[%.4f..%.4f] overlap_frac=%.2f" % [
+		mm[0], mm[1], bb[0], bb[1], _overlap(mm, bb)])
+	print("[UnitOverlap]   ★分開看：buildA=[%.4f..%.4f]（n=%d）｜buildC=[%.4f..%.4f]（n=%d）" % [
+		ba[0], ba[1], int(ba[2]), bc[0], bc[1], int(bc[2])])
+	print("[UnitOverlap]   ★★`overlap_frac` 定義 ＝ 兩家族區間【交集長度 ÷ 聯集長度】（0 ＝ 完全不相交、1 ＝ 完全重合）")
+	# ★★★單一個 overlap_frac 會被【離群值】主宰：maintain 的 shortage 可以是負的（有餘），
+	#   而 build 的 deficit 被 clamp 在 0 以上 ⇒ 聯集被一條長尾拉開，比值就變得很小，
+	#   ★而那【不是】「兩家族分離」，是【一個家族的定義域比較寬】。
+	#   ⇒ ★★所以同時印【包含率】：build 的區間有多少落在 maintain 的區間裡。
+	#   ★★★兩個數字一起看才判得動 —— 只看比值會把「被包住」誤讀成「分離」。
+	var _inter: float = minf(mm[1], bb[1]) - maxf(mm[0], bb[0])
+	var _blen: float = bb[1] - bb[0]
+	print("[UnitOverlap]   ★★★包含率 ＝ build 區間落在 maintain 區間內的比例 = %.2f（1.00 ＝ build 完全被 maintain 包住 ⇒ 不是分離）" % [
+		(maxf(_inter, 0.0) / _blen) if _blen > 0.0 else 0.0])
+	print("[UnitOverlap]   ★★★誠實限：30 日窗、單 seed、單世界 ⇒ 這是【這個世界這段時間】的值域，")
+	print("[UnitOverlap]      不是機制的定義域 ⇒ 只能做【系統性分離 vs 明顯重疊】的粗判，")
+	print("[UnitOverlap]      ★不得拿它算任何比例常數（算了就變成手填常數）")
+	print("[UnitOverlap]   ★母體漏掉的：no_otile=%d｜no_prereq=%d｜no_res=%d（★這三種沒有值可取）" % [
+		int(Probe.counts.get("unitoverlap.skip.no_otile", 0)),
+		int(Probe.counts.get("unitoverlap.skip.no_prereq", 0)),
+		int(Probe.counts.get("unitoverlap.skip.no_res", 0))])
+
+func _pct(sorted_vals: Array, q: float) -> float:
+	var i: int = int(floor(q * float(sorted_vals.size() - 1)))
+	return float(sorted_vals[clampi(i, 0, sorted_vals.size() - 1)])
+
+func _fam_range(rows: Array) -> Array:
+	var lo: float = INF
+	var hi: float = -INF
+	var n: int = 0
+	for row in rows:
+		var v: Array = row[1]
+		lo = minf(lo, float(v[0]))
+		hi = maxf(hi, float(v[v.size() - 1]))
+		n += v.size()
+	if n == 0: return [0.0, 0.0, 0]
+	return [lo, hi, n]
+
+func _overlap(a: Array, b: Array) -> float:
+	var inter: float = minf(float(a[1]), float(b[1])) - maxf(float(a[0]), float(b[0]))
+	var uni: float = maxf(float(a[1]), float(b[1])) - minf(float(a[0]), float(b[0]))
+	if uni <= 0.0: return 0.0
+	return maxf(inter, 0.0) / uni
+
+# ★★★perf（`payoff-derive-bridge` 驗收 #5）。★計數與時間【分開報】：
+#   ★★計數是決定性的（並跑不影響），時間必須獨佔才有意義 —— 混在同一行會讓人以為兩者都獨佔過。
+#   ★★★分母用 `optpool.mother`（rank_scored 呼叫次數）⇒ 印【每決策幾次】不是總次數。
+func _sec_perf5() -> void:
+	var m: int = int(Probe.counts.get("optpool.mother", 0))
+	print("═══ ★perf #5（`need_keep`／`_facility_deficit`）═══")
+	print("  分母 `optpool.mother`（rank_scored 呼叫次數）= %d｜exclusive=%s" % [m, _exclusive])
+	if m == 0:
+		print("  ★★★分母 0 ⇒ 這一節答不了")
+		return
+	for row in [["need_keep", "perf.need_keep"], ["_facility_deficit", "perf.facility_deficit"]]:
+		var nm: String = String(row[0])
+		var k: String = String(row[1])
+		var c: int = int(Probe.counts.get(k + ".calls", 0))
+		var us: float = Probe.amount(k + ".us")
+		print("  ★計數 %-18s calls=%-8d 每決策=%.2f 次" % [nm, c, float(c) / float(m)])
+		# ★★★這兩個函式【互相遞迴】：`need_keep`(need_oracle.gd:19) → `_construction_facility_need`
+		#   → `_facility_deficit`(faction_ai_system.gd:5704/5717) → `need_keep`
+		#   ⇒ ★計時是【巢狀重複計算】的：內層的時間被外層再算一次
+		#   ⇒ ★★所以這兩個 us 數字【不是成本】，不管獨不獨佔都不可引用
+		#   ⇒ ★★★段級成本要用 `PHASE_TIMING=1` 的 phase 計時（不巢狀），另跑且必須獨佔
+		print("     ★★時間 us_total=%.0f ← ★★★【不可引用】：兩函式互相遞迴 ⇒ 巢狀重複計算" % us)
+		print("        （exclusive=%s；★段級成本請看 `PHASE_TIMING=1` 的 phase 計時，不是這一行）" % _exclusive)
+	print("  ★★★誠實限：`need_keep` 在導出【之前】的呼叫次數就不是 0（A 類 evaluator 本來就呼叫它）")
+	print("     ⇒ ★要看的是【導出前後的差】，而不是「導出引入了這些呼叫」")
