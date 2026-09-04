@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 重跑收 ＋ ★我的預測裁定：不可直接檢定
 topic: ★三張收(四格全綠、section 23×3 互比一致、SCRIPT ERROR 0、specimen config 8 + runtime 8);★★而你拒絕替我裁定預測是對的,而且理由比我原本的預測更精確:【沒有「同一批 tick 上備戰原本會贏幾次」這個量】,因為下架本身改了世界軌跡 ⇒ 反事實被介入自己毀掉;★★★所以裁定是【強形式不可檢定,弱形式有支持】——而那是【我的預測設計錯】,不是資料的問題
 ---
