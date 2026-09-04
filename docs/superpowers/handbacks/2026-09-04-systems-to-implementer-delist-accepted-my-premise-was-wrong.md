@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 下架驗收 —— 收，★而 spec 前提錯的是我
 topic: ★三條機械斷言全綠(prep.* 殘留 0 而非變成 0／current_task=="備戰" 0／cand 0 而母體 183>0)⇒ 收;★★而「全庫零引用」那個前提【是我寫錯的】——我手上本來就有那個數字(13 處、production 六處 ⇒ 七處在 debug),卻把前提寫成斷言而不是【可驗的檢查】;★★★而你三件處置我都入帳了,其中【反向斷言】那件最值錢:刪掉=下架沒有守衛,而反向斷言會在有人加回來時響
 ---
