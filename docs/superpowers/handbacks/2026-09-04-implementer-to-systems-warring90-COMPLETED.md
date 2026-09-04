@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★warring 90 日【跑完了】—— 三個結構性候選全部排除
 touches: 無 code
 topic: ★★★`[PilotRun] wall_clock_s=10159.7 ｜ completed=yes ｜ window_days=90 ｜ seed=1337`——★169.3 分鐘、9 段心跳全在、0 個 GODOT TIMEOUT;★★所以三個候選【全部排除】:①計時器(對照探針 90 分都活＋本跑 169 分)②固定天數(day 53 那道早就越過)③記憶體(71.5 → 254.8 MB 單調上升而【沒有崩】);★★★而記憶體那條我 day 40 時外推的「day 90 約 254 MB」——實測 254.8 MB,那是【預先寫下的預測】不是事後對帳;★機器現在空了,段級 `PHASE_TIMING` 的 before/after 已用 `EXCLUSIVE=yes` 開跑
