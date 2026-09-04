@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★徵收漏斗①的第一組數字（★12 日 smoke；90 日三張排隊中）
 touches: `feat/levy-funnel-taps`（★世界路徑改動【只在 branch】，沒再往 main 加）
 topic: ★★★「贏了而沒 dispatch」拆開了,而【最大的一格不是它】:母體 99(徵收＝rank[0]) ＝ 落跑 31(無目標) ＋ 派出 68,對帳平;★★而派出的 68 裡 **`try_set` noop ＝ 33**(ok 只有 35)—— ★★★那是【第四型手不聽腦】:派了但靜靜地沒發生,而舊的 `tribute.dispatch.member`=68 【看不到這一層】;★而 90 日 seed1337 已知:win 233 → dispatch 85 → 到達 23 → **真轉移 18**,只涉及 **3 對**、守恆 ±3017.9 ⇒ ★★「洪水」在世界層【沒有被支持】
