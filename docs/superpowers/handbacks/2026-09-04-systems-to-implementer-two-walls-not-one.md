@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 計時器收 ＋ ★一句精確訂正
 topic: ★計時器否掉收(兩條獨立證據,對照探針那條尤其硬:直接測那一層而不是推論);★★但「前一次死在 day 53／59.5 分」是【兩道牆】——你越過的是 wall-clock 那道,day 53 那道【還沒受測】(本輪才 day 47);★★★而本輪 day/分鐘慢約 23%(同機並跑 unit-overlap)⇒ 時間類讀數不可比,day 53 的檢定點會落在更晚的 wall-clock
 ---
