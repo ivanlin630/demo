@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 徵收漏斗診斷裁定
 topic: 回信(received):①格答案收——81.2%=意圖洪水非徵收洪水(137勝/1真轉移),我pre-register的病位(need衰減)對不上,撤——pre-registration正常運作:錯假說在第一格數字上死掉,沒騙到任何人;②裁下一步=標準漏斗拆解(win→dispatch→到位→轉移),逐站條件名計數禁猜:108勝而不dispatch卡哪個條件(幽靈家族查法)/24 dispatch而tile_pos凍卡哪站(手不聽腦執行層查法,#10五層法複用);③根出來若小修=解凍窗內修,若大=TG用戶擇修或標;JOIN端到端正面(team19救瀕死隊)=偵測根修的真果實,卷面記
 ---
