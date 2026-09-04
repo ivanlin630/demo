@@ -108,6 +108,35 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 			elif Probe.enabled:
 				Probe.bump_pt("goal.build_fate.readd_desire_below_min", _bday, team.team_id)
 
+# ★★★`[UnitOverlap]` 取值（純觀測）。★A 類與 C 類 build 分開記 —— 它們不同源，
+#   混在一起會讓 build 家族的值域【讀起來假寬】（systems 明寫）。
+static func _unit_overlap_tap(state: WorldState, team: TeamData, gt: String, def: Dictionary,
+		fai: FactionAISystem, otile: HexTileData) -> void:
+	if def.has("facility"):
+		if otile == null:
+			Probe.bump("unitoverlap.skip.no_otile")
+			return
+		var f: String = String(def["facility"])
+		var _entry: Dictionary = FactionAISystem.FACILITY_DEFICIT_DEF.get(f, {})
+		var _cls: String = "buildC" if _entry.has("special") else "buildA"
+		Probe.bump_sample("unitoverlap." + _cls + "." + gt,
+			{"v": snappedf(fai._facility_deficit(state, team, f, otile), 0.0001)}, 4000)
+		return
+	var _pq: Array = def.get("prereqs", [])
+	if _pq.is_empty():
+		Probe.bump("unitoverlap.skip.no_prereq")
+		return
+	var res: String = String((_pq[0] as Dictionary).get("res", ""))
+	if res == "":
+		Probe.bump("unitoverlap.skip.no_res")
+		return
+	# ★就地重算 `trade_valuation.gd:158-159` 的 shortage（★escalation 之前的那一步）
+	var _pop: float = maxf(float(team.population), 1.0)
+	var _stock: float = TradeValuation._stock(state, team, res)
+	var _target: float = _pop * float(TradeValuation.TARGET_PER_POP.get(res, 1.0))
+	Probe.bump_sample("unitoverlap.maintain." + gt,
+		{"v": snappedf((_target - _stock) / maxf(_target, 1.0), 0.0001)}, 4000)
+
 static func frontier_candidates(state: WorldState, team: TeamData, ctx: DecisionContext) -> Array:
 	if state == null or team == null or ctx == null:
 		return []   # harness 無 state/team → 無 goal frontier（安全）
@@ -124,6 +153,17 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 	#     而沒加對應的 reason ⇒ ★對帳式會差一個數，而【差額會被當成正常】——
 	#     那正是「習慣了的異常」，比沒有對帳更難發現。⇒ 加 `continue` 就要加 reason。
 	var _sday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+	# ★★★`[UnitOverlap]` 前置量測（systems 2026-09-04 票）——★純觀測、零行為變更。
+	#   ★它的用途是【否決】：若兩家族的值域系統性分離，那個「改用同單位」的設計就不成立。
+	#   ★★取值不動控制流：build 半邊讀既有的 `_facility_deficit`（不重算別的東西），
+	#     maintain 半邊【就地重算一次】`trade_valuation.gd:158-159` 的同一個算式
+	#     ⇒ ★★★這是【量測用重算，不是共用出口】—— 抽函式是修法的一部分，要逐位元不變的驗收。
+	#   ★母體＝所有 active goal（13 個都走到），不是只有那七個 —— 否則看不到值域兩端。
+	var _uo_fai: FactionAISystem = FactionAISystem.new() if Probe.enabled else null
+	var _uo_otile: HexTileData = null
+	if Probe.enabled:
+		var _uo_own: Vector2i = _uo_fai._find_own_outpost(state, team)
+		_uo_otile = state.world.tiles.get(_uo_own.x * 1000 + _uo_own.y) if _uo_own != Vector2i(-1, -1) else null
 	for g in team.goal_state:
 		if Probe.enabled: Probe.bump("goal.skip.seen" + _sday)   # ★分母：該日檢視過的 goal 數
 		if String(g.get("status", "")) != "active":
@@ -137,6 +177,8 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 			if Probe.enabled: Probe.bump("goal.skip.no_def" + _sday)
 			continue
 		var payoff: float = float(def.get("payoff", 1.0))
+		if Probe.enabled:
+			_unit_overlap_tap(state, team, gt, def, _uo_fai, _uo_otile)
 		# ★S4 設施發展 goal（build_F）：walk build-cost/facility-type/manpower 前置→frontier or build_F action。
 		if def.has("facility"):
 			var bc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt, def)

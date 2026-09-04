@@ -69,6 +69,7 @@ func _run() -> void:
 	_sec_zerowin()
 	_sec_goalutil()
 	_sec_aftermath(state, cfg, days)
+	_sec_unitoverlap()
 	_sec_prepare()
 	_sec_optpool()
 	# ★★★`[PilotRun]`（systems pilot 票的第三格點名的那一行）：
@@ -765,6 +766,8 @@ func _sec_aftermath(state: WorldState, cfg: String, days: int) -> void:
 	var n_hit: int = 0
 	var n_ctl_dead: int = 0
 	var n_ctl: int = 0
+	var n_hit_shell: int = 0
+	var n_ctl_shell: int = 0
 	for tid in ids:
 		var t: int = int(tid)
 		var is_hit: bool = first_hit.has(t)
@@ -784,18 +787,26 @@ func _sec_aftermath(state: WorldState, cfg: String, days: int) -> void:
 		#   ★「存活」與「團滅」兩個字裝不下它，而它會被讀成「存活」⇒ 直接把它標出來。
 		if pop_end == 0 and not dead:
 			print("[DonorAftermath]    ↑ ★★★team=%d 是【空殼】：pop_end=0 而未 extinct ⇒ 別讀成「存活」" % t)
+		# ★★★三分類（systems 2026-09-04）：★「存活／團滅」兩格會把【空殼】算進存活，
+		#   而實測新 config 的空殼（6）比團滅（4）還多 ⇒ ★★兩格版本【低估】了非存活比例。
+		var shell: bool = (pop_end == 0 and not dead)
 		if is_hit:
 			n_hit += 1
 			if dead: n_hit_dead += 1
+			elif shell: n_hit_shell += 1
 		else:
 			n_ctl += 1
 			if dead: n_ctl_dead += 1
+			elif shell: n_ctl_shell += 1
 	print("[DonorAftermath] ── ★兩組並排（★這一行才是判讀表要讀的）──")
-	print("[DonorAftermath] cfg=%s window_days=%d｜命中隊 %d 支，團滅 %d（%s）｜對照組 %d 支，團滅 %d（%s）" % [
-		cfg, days, n_hit, n_hit_dead,
-		("%.1f%%" % (100.0 * float(n_hit_dead) / float(n_hit))) if n_hit > 0 else "母體 0",
-		n_ctl, n_ctl_dead,
-		("%.1f%%" % (100.0 * float(n_ctl_dead) / float(n_ctl))) if n_ctl > 0 else "母體 0"])
+	print("[DonorAftermath] cfg=%s window_days=%d ★三分類（存活／團滅／空殼）" % [cfg, days])
+	print("[DonorAftermath]   命中隊 n=%d：存活 %d｜團滅 %d｜★空殼 %d｜★★團滅+空殼 %d（%s）" % [
+		n_hit, n_hit - n_hit_dead - n_hit_shell, n_hit_dead, n_hit_shell, n_hit_dead + n_hit_shell,
+		("%.1f%%" % (100.0 * float(n_hit_dead + n_hit_shell) / float(n_hit))) if n_hit > 0 else "母體 0"])
+	print("[DonorAftermath]   對照組 n=%d：存活 %d｜團滅 %d｜★空殼 %d｜★★團滅+空殼 %d（%s）" % [
+		n_ctl, n_ctl - n_ctl_dead - n_ctl_shell, n_ctl_dead, n_ctl_shell, n_ctl_dead + n_ctl_shell,
+		("%.1f%%" % (100.0 * float(n_ctl_dead + n_ctl_shell) / float(n_ctl))) if n_ctl > 0 else "母體 0"])
+	print("[DonorAftermath]   ★★★只看『團滅』會低估：實測新 config 空殼 6 支 > 團滅 4 支")
 	print("[DonorAftermath] ★★誠實限：①peaceful 本來就少死 ⇒「沒死」解釋力弱、「死了」解釋力強（不對稱）")
 	print("[DonorAftermath]    ②命中母體很小 ⇒ ★★★這是【個案】不是【樣本】：只能寫「這一隊發生了什麼」")
 	print("[DonorAftermath]    ③名冊＝跑完仍在 `state.teams` ＋ 有 `extinct` 桶 ＋ 被 crisis 評估過的聯集")
@@ -808,3 +819,80 @@ func _first_day_suffix(prefix: String) -> String:
 		if ks.begins_with(prefix):
 			return str(int(ks.substr(prefix.length())))
 	return "-"
+
+# ★★★`[UnitOverlap]`（systems 2026-09-04 前置量測票）——★這一節的用途是【否決】不是【確認】。
+#   ★若兩家族值域系統性分離（overlap_frac ≈ 0）⇒ 「改用同單位」那個設計不成立，systems 重畫。
+#   ★★A 類與 C 類 build 分開印：它們不同源，混在一起會讓 build 家族的值域讀起來假寬。
+#   ★★★`overlap_frac` 的定義印在輸出裡（★不印定義的比例數字沒有意義）。
+func _sec_unitoverlap() -> void:
+	print("═══ ★`[UnitOverlap]`（★前置量測：兩家族值域並排；★★用途是【否決】設計）═══")
+	var fams: Dictionary = {"maintain": [], "buildA": [], "buildC": []}
+	for k in Probe.samples.keys():
+		var ks: String = String(k)
+		if not ks.begins_with("unitoverlap."): continue
+		var rest: String = ks.substr(12)
+		var dot: int = rest.find(".")
+		if dot < 0: continue
+		var fam: String = rest.substr(0, dot)
+		if not fams.has(fam): continue
+		var gt: String = rest.substr(dot + 1)
+		var vals: Array = []
+		for r in Probe.samples[k]:
+			vals.append(float((r as Dictionary).get("v", 0.0)))
+		vals.sort()
+		if vals.is_empty(): continue
+		fams[fam].append([gt, vals])
+	for fam in ["maintain", "buildA", "buildC"]:
+		for row in fams[fam]:
+			var gt2: String = String(row[0])
+			var v: Array = row[1]
+			print("[UnitOverlap] fam=%s goal=%s n=%d min=%.4f p25=%.4f med=%.4f p75=%.4f max=%.4f" % [
+				fam, gt2, v.size(), float(v[0]), _pct(v, 0.25), _pct(v, 0.50), _pct(v, 0.75), float(v[v.size() - 1])])
+	var mm: Array = _fam_range(fams["maintain"])
+	var ba: Array = _fam_range(fams["buildA"])
+	var bc: Array = _fam_range(fams["buildC"])
+	var all_build: Array = fams["buildA"] + fams["buildC"]
+	var bb: Array = _fam_range(all_build)
+	print("[UnitOverlap] SUMMARY maintain=[%.4f..%.4f] build=[%.4f..%.4f] overlap_frac=%.2f" % [
+		mm[0], mm[1], bb[0], bb[1], _overlap(mm, bb)])
+	print("[UnitOverlap]   ★分開看：buildA=[%.4f..%.4f]（n=%d）｜buildC=[%.4f..%.4f]（n=%d）" % [
+		ba[0], ba[1], int(ba[2]), bc[0], bc[1], int(bc[2])])
+	print("[UnitOverlap]   ★★`overlap_frac` 定義 ＝ 兩家族區間【交集長度 ÷ 聯集長度】（0 ＝ 完全不相交、1 ＝ 完全重合）")
+	# ★★★單一個 overlap_frac 會被【離群值】主宰：maintain 的 shortage 可以是負的（有餘），
+	#   而 build 的 deficit 被 clamp 在 0 以上 ⇒ 聯集被一條長尾拉開，比值就變得很小，
+	#   ★而那【不是】「兩家族分離」，是【一個家族的定義域比較寬】。
+	#   ⇒ ★★所以同時印【包含率】：build 的區間有多少落在 maintain 的區間裡。
+	#   ★★★兩個數字一起看才判得動 —— 只看比值會把「被包住」誤讀成「分離」。
+	var _inter: float = minf(mm[1], bb[1]) - maxf(mm[0], bb[0])
+	var _blen: float = bb[1] - bb[0]
+	print("[UnitOverlap]   ★★★包含率 ＝ build 區間落在 maintain 區間內的比例 = %.2f（1.00 ＝ build 完全被 maintain 包住 ⇒ 不是分離）" % [
+		(maxf(_inter, 0.0) / _blen) if _blen > 0.0 else 0.0])
+	print("[UnitOverlap]   ★★★誠實限：30 日窗、單 seed、單世界 ⇒ 這是【這個世界這段時間】的值域，")
+	print("[UnitOverlap]      不是機制的定義域 ⇒ 只能做【系統性分離 vs 明顯重疊】的粗判，")
+	print("[UnitOverlap]      ★不得拿它算任何比例常數（算了就變成手填常數）")
+	print("[UnitOverlap]   ★母體漏掉的：no_otile=%d｜no_prereq=%d｜no_res=%d（★這三種沒有值可取）" % [
+		int(Probe.counts.get("unitoverlap.skip.no_otile", 0)),
+		int(Probe.counts.get("unitoverlap.skip.no_prereq", 0)),
+		int(Probe.counts.get("unitoverlap.skip.no_res", 0))])
+
+func _pct(sorted_vals: Array, q: float) -> float:
+	var i: int = int(floor(q * float(sorted_vals.size() - 1)))
+	return float(sorted_vals[clampi(i, 0, sorted_vals.size() - 1)])
+
+func _fam_range(rows: Array) -> Array:
+	var lo: float = INF
+	var hi: float = -INF
+	var n: int = 0
+	for row in rows:
+		var v: Array = row[1]
+		lo = minf(lo, float(v[0]))
+		hi = maxf(hi, float(v[v.size() - 1]))
+		n += v.size()
+	if n == 0: return [0.0, 0.0, 0]
+	return [lo, hi, n]
+
+func _overlap(a: Array, b: Array) -> float:
+	var inter: float = minf(float(a[1]), float(b[1])) - maxf(float(a[0]), float(b[0]))
+	var uni: float = maxf(float(a[1]), float(b[1])) - minf(float(a[0]), float(b[0]))
+	if uni <= 0.0: return 0.0
+	return maxf(inter, 0.0) / uni
