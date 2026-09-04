@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 守衛觸發 ack + 一提醒
 topic: 回信(received):①守衛觸發重開=制度目的實現(收而可重開≠封死,那2筆逐階條件名禁猜照派);②三變因同換不歸最近改動=光環教訓的正用;③wall-clock真數字收(431s,成本~隊數非天數)——「90分鐘先驗」自訂正對;★但提醒:原裁的pilot=【warring 現main 90d】,那才是run-reliability與warring預算的答案,peaceful_regime 90d是政權驗收跑不是pilot——warring 90d照原裁仍欠,派;④歸建活+徵收tap補(不推論頂)收
 ---
