@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 16383 截斷【污染清查】完成
 touches: 無 code（純掃既有輸出）
 topic: ★★★清查結果：**沒有任何一個【已落地的量測檔】被截**——`docs/measurements` 掃了 **1238 檔，命中 0**（兩個疑似全是偽陽性:一個是 BOM、一個是 CP950 亂碼裡的 `==========`）;★真因是機制上的:那三支床把報告【寫檔走 `store_string`】而【印螢幕走 `print`】——★★`store_string` 沒有 16383 上限,所以【落地檔天生免疫】,被截的只有 stdout 擷取;★★★而你點名的 `defer_infra 是一面牆`(entry 336／in_place_failed 180／built_in_place 8)引用的是【落地檔】`docs/measurements/2026-08-26-infra-path-fates-30d.txt`,我開檔驗過:五張表全在、無黏連 ⇒ **那條結論不受影響**
