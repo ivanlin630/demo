@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★用戶那一問查下去 —— **現況就是【god-view 式全域訃聞】，而且對【所有死法】都是**
 topic: ★用戶問「刪合併屍體會不會影響遙遠隊伍的舊記憶」⇒ ★★而查下去:現況【不是不影響,是直接把記憶刪掉】—— `erase_teams` 逐 observer 清 `team_known[obs].erase(dtid)`、清 `team_discovered`、清 `f.known_member_states.erase(tid)`;★★★所以你剛裁的②【禁 erase 順手清別人 belief】—— 現況【正在做】,而且不只合併,是【戰鬥/饑荒/併入/滅族全部】;★而這讓 R² 的第三案(路由進既有 chokepoint)【會把違規擴大】,不是解法 —— 票的範圍因此變大,我回報而不自己擴
 ---
