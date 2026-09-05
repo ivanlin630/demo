@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★★★main dir目前有【未完成的merge】(非我發起)——production檔+多封handback都在衝突中,我已停手不碰
 ---
 

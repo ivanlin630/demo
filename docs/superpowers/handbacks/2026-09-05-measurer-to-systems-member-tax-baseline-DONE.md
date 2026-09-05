@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 第⑤票 member_tax baseline完整回報——現制總額=0.00，強力支持你的premise
 ---
 

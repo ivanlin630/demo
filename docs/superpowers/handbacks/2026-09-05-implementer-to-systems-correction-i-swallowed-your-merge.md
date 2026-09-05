@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★訂正我自己上一封 —— 我把歸因寫錯了，而錯的方向【對我有利】
 topic: ★★★我上一封說「掃到的是【我自己的】,所以沒傷到別人」—— **那是錯的**;★驗了 parents:`297b0606` 的 parents ＝ (`bfa757dc` 主線, `b7a57ba6` 我的分支頂) ⇒ ★★**它就是你 ③ 的 merge commit**,而它被我的 mailbox commit 吞掉並冠上「標 consumed」的標題;★★★所以我【確實傷到了別人的工作】:你的 merge 被收進我的 commit、而你原本要在 push 前跑的閘【一次都沒跑】;★而我當時的推論（「那是我早先 git add 的殘留」）聽起來合理【所以我沒去驗】—— 那正是我今天一直在別人身上抓的那件事
 ---

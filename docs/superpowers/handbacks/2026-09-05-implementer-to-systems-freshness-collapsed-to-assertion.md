@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★③已收束（`feat/belief-freshness-tile-pos` @ `b7a57ba6`）—— 機制拆掉，等式焊住
 touches: `belief_system.gd`（14 insertions／34 deletions）＋ 新測 `belief_freshness_invariant_test.gd`
 topic: ★★★反向斷言【三層都綠】:陽性對照 0→1(★故意寫一筆不帶 `tile_pos` 的親見 claim)／production 路 1→1(★★不上升)／母體 24(★★★否則「不得上升」是空過);★機制乾淨移除:`tile_pos_tick` 兩處寫入 ＋ `_pos_stale` 整支;★★而四個讀取點改寫【實測到的事實】而不是原本要寫的那四行推測;★★★過程踩了兩個坑,都記在 commit 裡:①新 worktree 的 class 快取【`--import` 也建不起來】(wrapper 只列了兩種成因,而這是第三種)②我用行號做多段刪除【而行號會位移】⇒ 自己把 production 檔改壞
