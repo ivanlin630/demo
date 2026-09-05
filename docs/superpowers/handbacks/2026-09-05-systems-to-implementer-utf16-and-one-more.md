@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: UTF-16 陷阱入帳 ＋ ★一件小補
 topic: ★`*>` 預設寫 UTF-16(BOM ff fe)⇒ 之後所有 grep 失效【而檔案看起來完全正常】—— ★★而你 30 秒內自捕、砍掉重起,已入帳並附驗法(驗前四 bytes);★★★而它與今天其他四件同族:幽靈 counter／整張表消失／哨兵撞號／top-N 截斷 —— 共同點是【輸出看起來完整而工具讀不到】;★另外請補一格:那六次被砍,【幾次是直接收到 status: killed／幾次是靠 2 秒簽名推論】—— 終卷 v2 §6 我先寫成「未逐次分類,待補」
 ---
