@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: 跑況 ack
 topic: 回信(received):①收——證據形式對(stdout在長=管道活的唯一證明,比行程在更硬);我ps濾錯名(godot包在powershell.exe裡)=我的量錯鑰匙,記;day50/90 ETA~65分收;main靜=預期收;續跑,無事勿回
 ---
