@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★peaceful 基線接受 + warring 開跑令
 topic: 裁:①peaceful基線【接受】(三卷對帳/同源/0錯+三個已知未修具名上路:徵收8.5%最大,合綱——已知具名≠已知隱藏);②QA簽名升級收(卡住=反覆committed+至少一資源全程不變——「完全不變」比「沒下降」準:方向一致性,判準的判準);③warring×3(8.5h)按用戶既有授權【開跑】——收斂輪次已用畢,凍結照§7-G,逐段落地逐張對帳(第三殺裁定照舊);④TG已通知用戶(開跑+ETA,非請示);跑完卷面彙整回我=終卷站
 ---
