@@ -222,6 +222,12 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 		if _known_pos == null or _known_pos != fields["tile_pos"]:
 			WorldEvents.emit(state, "intel_arrived", [obs_id])
 	var firsthand: bool = source_type == "親見" and source_id == obs_id
+	# ★★★反向斷言（systems 裁 2026-09-05：留發現不留機制）——
+	#   ★實測：三個 production firsthand 寫入點全部同時寫 `tile_pos` ⇒ 等式成立
+	#   ★★而【等式斷掉的那一刻】就是這一格非 0 的時候 ⇒ ★★★由
+	#     `belief_freshness_invariant_test.gd` 執行斷言（★含陽性對照）。
+	if Probe.enabled and firsthand and not fields.has("tile_pos"):
+		Probe.bump("freshness.firsthand_no_tile_pos")
 	var found := false
 	for c in cs:
 		if int(c["source_id"]) == source_id:
@@ -390,6 +396,12 @@ static func appearance(state: WorldState, obs_id: int, tgt_id: int) -> Dictionar
 	if bel.is_empty() or not bel.has("activity"):
 		if Probe.enabled: Probe.bump("appearance.never")
 		return {"activity": ACT_UNKNOWN, "tags": [], "in_combat": false, "state": "never"}
+	# ★★★實測事實（2026-09-05，非推測）：三個 production firsthand 寫入點
+	#   （`vision_system.gd:113`／`interaction_system.gd:1219`／`faction_ai_system.gd:2015`）
+	#   **全部同時寫 `tile_pos`** ⇒ ★`tile_pos` 的新鮮度【就是】這個 `last_tick`，**沒有借**。
+	#   ★★★而若未來新增【只寫部分欄位】的親見寫入端，這個等式會斷 —— 屆時要補逐欄位時戳；
+	#     而 `freshness.firsthand_no_tile_pos` 這顆計數就是那一刻的警報。
+	#   ★★（曾做過逐欄位時戳，實測 `newly_expired=0`、`fp` 逐位元相同 ⇒ 沒有消費者 ⇒ 不留機制。）
 	if state.world.current_tick - int(bel.get("last_tick", 0)) > BELIEF_STALE_TICKS:
 		if Probe.enabled: Probe.bump("appearance.stale")
 		return {"activity": ACT_UNKNOWN, "tags": [], "in_combat": false, "state": "stale"}

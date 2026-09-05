@@ -272,6 +272,7 @@ func _run() -> void:
 	_sec_survival4(state)
 	_sec_levy()
 	_sec_mreport()
+	_sec_freshness()
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -1335,6 +1336,26 @@ func _sec_join_funnel() -> void:
 	print("  ★★★而 `win` 與 `dispatch` 【不是同一個母體】：win 是決策次數，dispatch 是相遇次數")
 	print("     ⇒ 兩者相減沒有意義（★同一個陷阱我今天已經在 `[Merge]` 上踩過一次）")
 	_sec_sighting()
+
+# ★★★新鮮度洗白（spec 2026-09-05-belief-freshness-per-field §5 #2）——
+#   ★systems 明令：**要印【多少次 belief 因此變成過期】**，
+#   ★★因為那會讓某些數字【變差】，而他要它【被看見】不是被解釋掉。
+func _sec_freshness() -> void:
+	print("")
+	print("═══ ★★★新鮮度洗白：`tile_pos` 改讀自己的時戳（★變差的那一格要被看見）═══")
+	var _chk: int = int(Probe.counts.get("freshness.pos_check", 0))
+	var _fb: int = int(Probe.counts.get("freshness.fallback_last_tick", 0))
+	var _ne: int = int(Probe.counts.get("freshness.newly_expired", 0))
+	var _nf: int = int(Probe.counts.get("freshness.newly_fresh", 0))
+	print("  位置新鮮度判斷次數（母體）= %d" % _chk)
+	if _chk == 0:
+		print("     ★★★母體 0 ⇒ 【儀器沒跑到】—— ★不是「沒有人查過位置新鮮度」")
+	print("  ★退回舊 `last_tick`（該 entry 沒有專屬時戳）= %d（%.1f%%）" % [
+		_fb, 100.0 * float(_fb) / maxf(float(_chk), 1.0)])
+	print("     ★★那是【舊 entry 相容】的量 —— ★★★它應隨時間下降；若長期不降，代表有寫入路徑沒蓋時戳")
+	print("  ★★★因此【新變成過期】= %d ｜ ★反向【新變成新鮮】= %d" % [_ne, _nf])
+	print("     ★★「新變成過期」是【預期內】的：舊制拿鎖步欄位的時戳替 `tile_pos` 背書，")
+	print("        ★★★而拿掉背書之後，本來就該過期的那些【現在會過期】—— 它讓數字變差，而那是對的")
 
 # ★★★成員位置回報（spec 2026-09-05-member-report-envoy §4 #4）——
 #   ★「不塞世界」要有【數字】不是【宣稱】⇒ 印總數 ＋ 分事件類型 ＋ 沒派成的逐條件名。

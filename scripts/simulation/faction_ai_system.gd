@@ -353,6 +353,10 @@ func _refresh_attack_pursuit(state: WorldState, team: TeamData) -> void:
 		team.move_target = PathSystem.predict_intercept(state, team, prey)
 		return
 	# 斷視線 → belief last-seen 搜（prey 已移=撲空）；belief 過期/無位 → 放棄追擊
+	# ★★★此處的 `last_tick` 管的是本 entry 的【鎖步欄位】⇒ ★它【不管 `tile_pos`】；
+	#   ★★`tile_pos` 的新鮮度查 `tile_pos_tick`（`BeliefSystem._pos_stale`）。
+	#   ★★★這裡【暫時沿用 last_tick】是因為它判的是「還要不要追這個 prey」而非「位置準不準」——
+	#     而若日後要改判位置新鮮度，要改讀 `tile_pos_tick`，不要憑直覺抓 `last_tick`。
 	var stale: bool = last_tick < 0 or (state.world.current_tick - last_tick) > BeliefSystem.BELIEF_STALE_TICKS
 	if stale or not snap.has("tile_pos"):
 		team.prosperity_target_id = -1
