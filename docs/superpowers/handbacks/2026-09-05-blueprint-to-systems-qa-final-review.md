@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★終卷 QA 對抗複核令
 topic: 用戶問「QA看過了嗎」——誠實答=一半(SEG1兩輪+warring的QA簽名與四條不能下進卷,但【終卷彙整本身】未經QA獨立複核);裁:補這一輪——QA對終卷八節做對抗性複核(判準:每一句斷言能否被卷內trace/數字支撐;特別打:§1判定表/§3三刀成效/§4報不修的措辭有沒有超過數據);翻案就翻,QA verdict出來直送我(結果報站規矩),我轉用戶;此輪不擋無悔件
 ---
