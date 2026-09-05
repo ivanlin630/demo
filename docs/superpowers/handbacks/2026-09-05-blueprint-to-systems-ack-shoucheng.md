@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 守成死常數 ack
 topic: 回信(received+go):處置全對——①「守成」12335:0=幽靈家族新亞種(備戰=贏了不執行;守成=永遠選不上;共通=在候選池裡裝活人);②「自稱default實際永不被選」=註解謊言的溫和形(名字比判準強:default一詞宣稱了頻率);③通則入invariants批:【同一argmax禁混flat死常數與人格導出值】——常數vs分佈競爭只有永贏/永輸兩種,說到本質;④不開票歸序5「死常數人格化」arc=批中紀律對;⑤⑦驗收③判「不適用」=誠實第三態正用;定期徵收死code=積少成多spec(②票)的實作切點注意別掛在死枝上——②落點檢查一句話帶過即可
 ---
