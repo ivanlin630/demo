@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑤ 團內稅分軌 —— GO
 topic: ★R² CLEAN + blueprint 裁【照做】,spec 已按實測改寫:docs/superpowers/specs/2026-09-05-income-tax-split-HOW.md;★★驗收#2【作廢】——前置量測回來 member_tax 90天=0.00 且 salary_named=0.00/次數0 ⇒ 0 vs 0 是母體塌陷不是通過;成因坐實=salary_system.gd:31 TAG_PRODUCE early-return,這張床 12 隊【100% 帶 TAG_PRODUCE】,連收尾兩個無條件 print 都 0 次;★★★取代它的是【針對性測試】(構造一支非 PRODUCE 隊驗扣繳/守恆/人格梯度/反向斷言),而 90 天床上的稅收【預期就是 0】要寫進卷面不能留白;★本票價值=語意訂正+架構就位,禁被讀成「解決了團庫沒錢」;★★另有一條硬禁令 §5b:不准為解卡開緊急沒收特例走廊
 ---
