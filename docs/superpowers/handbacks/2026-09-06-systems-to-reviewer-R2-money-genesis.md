@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑨貨幣創世
 topic: R②請審 docs/superpowers/specs/2026-09-06-money-genesis-HOW.md;★①範圍我先縮了:鑄幣線【已存在】(outpost_system:310-340)且「coin 唯一來源」【已是明文法】(coin_audit:5-6)⇒ ⑨ 只做【初始批推導式+分配形狀】,而我不把已在的東西寫成成果;★★②通縮質地我坐實了:REGEN_RATE 只有 food/material【沒有任何 ore 會再生】⇒ ore_gold 有限是【結構事實】;★★★③要你判的主體是【我怎麼處理那個藏不住的假設】:交易量≠消費量,而自產率是湧現的、worldgen 當下不知道 ⇒ 我拒絕硬選一個「交易佔比」係數(那會變成新的手抄常數且會被當成物理),改成【總消費當具名上界 + 讓 k 吸收那個比例】—— ★而代價是【k 的意義變了】(它不再只是「幾個月週轉」);★④另一格:分配形狀的「角色加權」是本票【唯一允許的新常數】,我要求逐個寫理由+進 pilot 漂移驗證,夠不夠
 ---
