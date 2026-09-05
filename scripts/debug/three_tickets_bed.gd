@@ -1337,25 +1337,20 @@ func _sec_join_funnel() -> void:
 	print("     ⇒ 兩者相減沒有意義（★同一個陷阱我今天已經在 `[Merge]` 上踩過一次）")
 	_sec_sighting()
 
-# ★★★新鮮度洗白（spec 2026-09-05-belief-freshness-per-field §5 #2）——
-#   ★systems 明令：**要印【多少次 belief 因此變成過期】**，
-#   ★★因為那會讓某些數字【變差】，而他要它【被看見】不是被解釋掉。
+# ★★★新鮮度等式（★機制已依 systems 裁定拆除 —— 這裡只印【那顆反向斷言的計數】）
+#   ★舊版這一節讀的是 `freshness.pos_check`／`fallback_last_tick`／`newly_expired`／`newly_fresh`
+#     ⇒ ★★而那四顆【已經隨機制一起移除】—— 留著讀就是【幽靈 counter：永遠印 0】
+#   ★★★所以改讀還活著的那一顆；而 0 在這裡是【好消息】，它的意思寫在下面。
 func _sec_freshness() -> void:
 	print("")
-	print("═══ ★★★新鮮度洗白：`tile_pos` 改讀自己的時戳（★變差的那一格要被看見）═══")
-	var _chk: int = int(Probe.counts.get("freshness.pos_check", 0))
-	var _fb: int = int(Probe.counts.get("freshness.fallback_last_tick", 0))
-	var _ne: int = int(Probe.counts.get("freshness.newly_expired", 0))
-	var _nf: int = int(Probe.counts.get("freshness.newly_fresh", 0))
-	print("  位置新鮮度判斷次數（母體）= %d" % _chk)
-	if _chk == 0:
-		print("     ★★★母體 0 ⇒ 【儀器沒跑到】—— ★不是「沒有人查過位置新鮮度」")
-	print("  ★退回舊 `last_tick`（該 entry 沒有專屬時戳）= %d（%.1f%%）" % [
-		_fb, 100.0 * float(_fb) / maxf(float(_chk), 1.0)])
-	print("     ★★那是【舊 entry 相容】的量 —— ★★★它應隨時間下降；若長期不降，代表有寫入路徑沒蓋時戳")
-	print("  ★★★因此【新變成過期】= %d ｜ ★反向【新變成新鮮】= %d" % [_ne, _nf])
-	print("     ★★「新變成過期」是【預期內】的：舊制拿鎖步欄位的時戳替 `tile_pos` 背書，")
-	print("        ★★★而拿掉背書之後，本來就該過期的那些【現在會過期】—— 它讓數字變差，而那是對的")
+	print("═══ ★★★belief 新鮮度等式（★反向斷言的計數）═══")
+	var _no: int = int(Probe.counts.get("freshness.firsthand_no_tile_pos", 0))
+	print("  親見 claim【沒帶 tile_pos】的次數 = %d" % _no)
+	print("     ★實測事實：三個 production firsthand 寫入點全部同時寫 `tile_pos`")
+	print("        ⇒ ★★`tile_pos` 的新鮮度【就是】`last_tick`，沒有借 ⇒ 不需要第二個時戳")
+	print("     ★★★所以【0 是預期值】；而【非 0 ＝ 等式斷了】⇒ 要補逐欄位時戳")
+	print("        ★而這一格的鑑別力由 `belief_freshness_invariant_test.gd` 保證")
+	print("          （★★它自己造一筆不帶 tile_pos 的 claim 當陽性對照 —— ★★★沒有它，這個 0 不能當證據）")
 
 # ★★★成員位置回報（spec 2026-09-05-member-report-envoy §4 #4）——
 #   ★「不塞世界」要有【數字】不是【宣稱】⇒ 印總數 ＋ 分事件類型 ＋ 沒派成的逐條件名。
