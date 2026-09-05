@@ -6,7 +6,6 @@ extends SceneTree
 
 func _initialize() -> void:
 	seed(1337)
-	SimRunner.force_full_hd = true
 	Probe.reset(); Probe.enabled = true
 	var state := WorldState.new()
 	var runner := SimRunner.new()

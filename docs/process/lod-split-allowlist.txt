@@ -1,0 +1,10 @@
+# docs/process/lod-split-allowlist.txt —— 第⑧票的具名放行清單
+#
+# ★★★這【不是豁免清單】，是「已經有人判過【它不是排程判斷】」的清單。
+# ★格式（TAB 分隔）：檔案 <TAB> 正規化後的整行 <TAB> 判過的理由
+# ★★憲法 §5③：`scripts/ui/` 的距離用法是【表現層 LOD】，允許 ⇒ 本閘不掃 ui/。
+scripts/simulation/sim_runner.gd	func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:	觀察者守衛／玩家指令 glue —— ★不是排程判斷（排程用的是 state.teams.keys()）
+scripts/simulation/sim_runner.gd	func advance_tick(state: WorldState, player_pos: Vector2i) -> String:	觀察者守衛／玩家指令 glue —— ★不是排程判斷（排程用的是 state.teams.keys()）
+scripts/simulation/sim_runner.gd	if player_pos == Vector2i(-1, -1) and state.player_id != -1 and not _observer_guard_warned:	觀察者守衛／玩家指令 glue —— ★不是排程判斷（排程用的是 state.teams.keys()）
+scripts/simulation/sim_runner.gd	print("[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=%d ——" % state.player_id	觀察者守衛／玩家指令 glue —— ★不是排程判斷（排程用的是 state.teams.keys()）
+scripts/simulation/sim_runner.gd	var _perf_result: String = _advance_tick_body(state, player_pos)	觀察者守衛／玩家指令 glue —— ★不是排程判斷（排程用的是 state.teams.keys()）

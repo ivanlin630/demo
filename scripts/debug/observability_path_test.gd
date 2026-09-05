@@ -66,7 +66,6 @@ func _run_warring(seed_val: int, ticks: int, specimen: Array, tracer_on: bool) -
 	var state := WorldState.new(); var runner := SimRunner.new()
 	var cfg: Dictionary = GameSetup.load_config(CFG); cfg["seed"] = seed_val
 	GameSetup.setup(state, cfg)
-	SimRunner.force_full_hd = true
 	Probe.enabled = true; Probe.reset()   # ★啟 Probe：驗 tracer re-query 不 bump 污染
 	SpecimenTracer.reset()
 	if tracer_on:
@@ -90,7 +89,7 @@ func _run_warring(seed_val: int, ticks: int, specimen: Array, tracer_on: bool) -
 	print("   [diag] 本輪 path 快取：hit=%d miss=%d（tracer_on=%s）" % [
 		int(Probe.counts.get("path.cache_hit", 0)), int(Probe.counts.get("path.cache_miss", 0)), str(tracer_on)])
 	var sig := _world_sig(state) + "|PROBE|" + JSON.stringify(parr)
-	SpecimenTracer.enabled = false; SimRunner.force_full_hd = false; Probe.enabled = false
+	SpecimenTracer.enabled = false; Probe.enabled = false   # ★第⑧票：force_full_hd 已退場
 	SpecimenTracer.reset()
 	return sig
 

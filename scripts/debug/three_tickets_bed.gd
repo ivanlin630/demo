@@ -67,29 +67,12 @@ func _run() -> void:
 		% [ThreatAssessment.THREAT_BASE_THRESHOLD, ThreatAssessment.THREAT_CAUTION_SPAN,
 		   ThreatAssessment.THREAT_INFLATION_MEASURED])
 	var runner := SimRunner.new()
-	# ★★★FULL_HD=1（2026-09-05）：本床把 player_pos 傳 `Vector2i(-1,-1)`（:72）⇒ 世上沒有一隊
-	#   在玩家 3 hex 內 ⇒ **near 批次恆空、全部的隊永遠只在 far 批次**。
-	#   ★而 far pass 的閘是 `tick % FAR_ZONE_INTERVAL(100) == 0`，
-	#     `SALARY_INTERVAL` = 10080 ⇒ 10080k % 100 = 80k%100，k=1..4 全非 0
-	#     ⇒ ★★【發薪日與 far pass 從不同刻】⇒ 薪資在本床【永遠量不到】——不是沒發生，是【看不見】。
-	#   ⇒ ★★★force_full_hd = 全隊 near、無 far 批次 ⇒ 發薪日 10080%60==0 必被涵蓋。
-	#   ★這是【judged-world】(RNG 路徑與 LOD world 不同，fp 不可與預設床互比)，只用來看見機制本身。
-	# ★★★⑥ 驗收 #4（systems 2026-09-05 指路，零新 tap）——
-	#   `salary_system.gd:190` 已經是 `UnrestBank.add(team, 1, "salary")`，
-	#   而 `unrest_bank.gd` 直接走 `WorldState.record_driver(team,"unrest_turns",n,reason,"state")`
-	#   ⇒ ★按 `reason == "salary"` 過濾 unrest_turns 的 driver 列 ＝【因發薪而產生的 unrest】
-	#     —— 是【流量】不是存量，而且【逐筆帶 tick 與 team】。
-	#   ⇒ ★★所以我原本不收 `unrest_turns` 存量是對的，我只是還沒找到那條流量的路。
-	WorldState.driver_ledger_enabled = true
-	# ★★★而 ledger 是【環形的】：`driver_ledger_cap` 預設 4096，滿了 `pop_front` ——
-	#   ★也就是【它會靜默丟掉舊列】，而丟掉之後「0 筆 salary 列」跟「真的沒發生」長得一樣。
-	#   ⇒ 床側把上限拉高 ＋【每日掃描並自己留一份】＋ 撞上限時明說（不靠讀完當下那一瞬的內容）。
-	WorldState.driver_ledger_cap = 400000
-	WorldState.clear_driver_ledger()
-	var _full_hd: bool = OS.get_environment("FULL_HD") == "1"
-	SimRunner.force_full_hd = _full_hd
-	print("[CONTROL] force_full_hd=%s（★true=judged-world：全隊 near、無 far 降頻；fp 不可與預設床互比）"
-		% str(_full_hd))
+	# ★★★`FULL_HD` 開關已隨第⑧票退場（2026-09-06）——
+	#   ★它的語意是「全隊 near」，而 near/far 分班【已拆除】⇒ 世界本來就全部都是那樣。
+	#   ★★而我【不留 no-op 開關】：留著會讓下一個人以為【設 FULL_HD=1 有差】，
+	#     ★★★那正是⑧要清掉的那類 dormant knob（旗標看起來在做事，實際上沒有）。
+	#   ★★★★而⑥的那組 judged-world 數字（居民占薪資流量 93.9%）是【在這個開關還有效時】跑的
+	#     ⇒ 它們仍然有效，但【不能再重現】—— 卷面要說這件事，不是默默讓它變成無來源的數字。
 	for d in range(days):
 		for _t in range(WorldState.TICKS_PER_DAY):
 			runner.advance_tick(state, Vector2i(-1, -1))

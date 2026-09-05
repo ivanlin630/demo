@@ -1,13 +1,14 @@
 class_name SimRunner
 
-const LOD_NEAR_RADIUS: int = 3
+# ★★★`LOD_NEAR_RADIUS` 已退場（第⑧票）：它是【離玩家幾格算近】的那個半徑——
+#   而憲法「計算跟隨事件密度、不跟隨觀察者」判死的就是這個判準本身。
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 # ★★★訂正 2026-09-05（第⑦票）：原註解寫「= 100 ticks」是【stale】——
 #   `TICKS_PER_HOUR` 重錨成 60 之後這行沒跟著改，★真值 = 10 * 60 = **600**。
 #   ★★而它【真的騙過人】：implementer 引它 → systems 引 implementer → systems 拿那個數字「驗算」一次
 #     ⇒ ★★★兩個人都沒有從定義處讀，所謂「驗算」只是把同一個錯誤重述了一遍（結論剛好不變＝運氣）。
 #   ⇒ ★紀律：引用常數要從【定義的算式】讀，不從行尾註解讀。
-const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # = 10h = 600 tick（1 tick = 1 分鐘）
+# ★`FAR_ZONE_INTERVAL` 已退場（第⑧票）：沒有 far pass 了，這個 cadence 沒有指涉對象。
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更新頻率（1h，可調）
 
@@ -125,10 +126,12 @@ func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 		_perf_count = 0
 		_perf_max_us = 0
 
-# ── 全高清 perf toggle（opt-in，預設 off = 零行為變；LOD 拿掉 vs 重定義裁決量測）──
-# on：_get_near_teams 回全隊、_get_far_teams 回空 → 全隊每 near-cadence 走完整 pipeline（無 far 批次降頻）。
-# 僅供 lod_perf_bed tick-time 對照；勿在正式跑開（會改世界節奏=移速/思考頻率恢復全速，需配 gen 重校）。
-static var force_full_hd: bool = false
+# ★★★`force_full_hd` 已退場（第⑧票 2026-09-06）——
+#   它的語意本來就是「全隊 near」，而 near/far 分班【已拆除】⇒ 它恆等於預設。
+#   ★而 systems 明裁【刪，不留 no-op】：留成 no-op ＝ dormant knob，
+#     下一個人會以為【調它有用】—— 而那正是今天整條線一直在咬人的形狀
+#     （儀器／旗標看起來在做事，實際上沒有）。
+#   ★★反向斷言由 `lod-split-guard` 那道閘守：有人重新引入按 `player_pos` 分批會自動紅。
 
 # ── 相位計時儀器（opt-in，預設 off = 零成本零行為變；cadence spike 歸因量測）──
 static var phase_timing: bool = false
@@ -142,49 +145,50 @@ func _pht(name: String, t0: int) -> int:
 	return now
 
 # ★seam#3 S1：per-team 系統 registry（near+far 統一 loop，byte-identical 純重構 dispatch 結構）。
-# 加 per-team 系統 = 加 SYSTEMS 1 entry（非改 near+far 兩分支）。lod=BOTH(near+far 都跑)/NEAR(僅 near)。
-# ★near/far 共同步序本就相同（逐 code 核）→ 單 registry 順序可同時 byte-identical 兩分支。
-# ★非平坦（R②②）：move entry 後顯式 checkpoint(rebuild_index=BOTH R②修正 + moved/arrived 抽取
-#   + near player-clear)；phase_timing label 掛群組最後 entry(near 才 fire)；near-only glue(player_old
-#   capture / encounter-return / RecruitTutorial)以 is_near+entry-name hook。tick 級單次步保 explicit。
+# 加 per-team 系統 = 加 SYSTEMS 1 entry。★第⑧票之後【只有一個 pass】，所以沒有 `lod` 欄。
+# ★非平坦（R②②）：move entry 後顯式 checkpoint（rebuild_index + moved/arrived 抽取 + player-clear）；
+#   phase_timing label 掛群組最後 entry；glue（player_old capture／encounter-return／RecruitTutorial）
+#   以 entry-name hook。tick 級單次步保 explicit。
 # args_shape(R② 補第4型 time_mult)：vision(state,teams,vmult)/teams/teams_cadence/moved(state,moved,teams)
 #   /arrived(state,arrived)/state/regen(state,cadence)/move(state,teams,smult,cadence→Dict special)。
-const LOD_NEAR: int = 0
-const LOD_BOTH: int = 1
+# ★★★`LOD_NEAR`／`LOD_BOTH` 已退場（第⑧票）：分班沒了，「這個 system 只在近區跑」這個概念也沒了。
+#   ★原本兩個 LOD_NEAR entry（outpost_tick／regen）都是 whole-state ⇒ 直接跟著單一 pass 跑。
+#   ★★而 registry 的 `lod` 欄一併移除 —— 留一個永遠是同一個值的欄位，下一個人會以為它有作用。
+const _LOD_FIELD_RETIRED: bool = true   # ★留一顆常數當【墓碑】，讓 grep `LOD_` 的人找得到這段註解
 static var SYSTEMS: Array = [
-	{"name": "vision",           "fn": "_step1b_update_vision",     "lod": LOD_BOTH, "shape": "vision",        "tl": "near.vision"},
-	{"name": "equip",            "fn": "_step1c_update_equipment",  "lod": LOD_BOTH, "shape": "teams",         "tl": "near.equip"},
-	{"name": "strategic_move",   "fn": "_step2a_strategic_move",    "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
-	{"name": "move",             "fn": "_step2_move_teams",         "lod": LOD_BOTH, "shape": "move",          "tl": "near.move"},
-	{"name": "letters",          "fn": "_step_tick_letters",        "lod": LOD_BOTH, "shape": "state",         "tl": ""},
-	{"name": "propagate",        "fn": "_step3_propagate_messages", "lod": LOD_BOTH, "shape": "moved",         "tl": ""},
-	{"name": "intel",            "fn": "_step3b_exchange_intel",    "lod": LOD_BOTH, "shape": "moved",         "tl": ""},
-	{"name": "market",           "fn": "_step3c_read_market_board", "lod": LOD_BOTH, "shape": "arrived",       "tl": "near.messages"},
-	{"name": "interactions",     "fn": "_step4_resolve_interactions","lod": LOD_BOTH,"shape": "moved",         "tl": "near.interact"},
-	{"name": "outpost_tick",     "fn": "_step4b_outpost_tick",      "lod": LOD_NEAR, "shape": "state",         "tl": ""},
-	{"name": "faction_snapshot", "fn": "_step4e_faction_snapshot",  "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
-	{"name": "ambush",           "fn": "_step_ambush_check",        "lod": LOD_BOTH, "shape": "teams",         "tl": "near.outpost_ambush"},
-	{"name": "collect",          "fn": "_step5_collect_resources",  "lod": LOD_BOTH, "shape": "teams_cadence", "tl": ""},
-	{"name": "regen",            "fn": "_step5a_regenerate_tiles",  "lod": LOD_NEAR, "shape": "regen",         "tl": ""},
-	{"name": "manufacture",      "fn": "_step5b_manufacture",       "lod": LOD_BOTH, "shape": "teams_cadence", "tl": "near.economy"},
-	{"name": "consumption",      "fn": "_step6_resolve_consumption","lod": LOD_BOTH, "shape": "teams_cadence", "tl": ""},
-	{"name": "salary",           "fn": "_step6c_salary",            "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
-	{"name": "fatigue",          "fn": "_step6d_fatigue",           "lod": LOD_BOTH, "shape": "teams_cadence", "tl": "near.consume"},
-	{"name": "faction_ai",       "fn": "_step6b_faction_ai",        "lod": LOD_BOTH, "shape": "teams",         "tl": "near.faction_ai"},
-	{"name": "info_dispatch",    "fn": "_step6b2_info_dispatch",    "lod": LOD_BOTH, "shape": "teams",         "tl": "near.faction_ai"},
-	{"name": "training",         "fn": "_step6f_training",          "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
-	{"name": "strategic_ai",     "fn": "_step6e_strategic_ai",      "lod": LOD_BOTH, "shape": "state",         "tl": "near.strategic_ai"},
-	# ★LOD 紅線修：個體反應層不再綁玩家位置（原 LOD_NEAR + near 判定=距 player_pos<=3 →
+	{"name": "vision",           "fn": "_step1b_update_vision",     "shape": "vision",        "tl": "near.vision"},
+	{"name": "equip",            "fn": "_step1c_update_equipment",  "shape": "teams",         "tl": "near.equip"},
+	{"name": "strategic_move",   "fn": "_step2a_strategic_move",    "shape": "teams",         "tl": ""},
+	{"name": "move",             "fn": "_step2_move_teams",         "shape": "move",          "tl": "near.move"},
+	{"name": "letters",          "fn": "_step_tick_letters",        "shape": "state",         "tl": ""},
+	{"name": "propagate",        "fn": "_step3_propagate_messages", "shape": "moved",         "tl": ""},
+	{"name": "intel",            "fn": "_step3b_exchange_intel",    "shape": "moved",         "tl": ""},
+	{"name": "market",           "fn": "_step3c_read_market_board", "shape": "arrived",       "tl": "near.messages"},
+	{"name": "interactions",     "fn": "_step4_resolve_interactions","shape": "moved",         "tl": "near.interact"},
+	{"name": "outpost_tick",     "fn": "_step4b_outpost_tick",      "shape": "state",         "tl": ""},
+	{"name": "faction_snapshot", "fn": "_step4e_faction_snapshot",  "shape": "teams",         "tl": ""},
+	{"name": "ambush",           "fn": "_step_ambush_check",        "shape": "teams",         "tl": "near.outpost_ambush"},
+	{"name": "collect",          "fn": "_step5_collect_resources",  "shape": "teams_cadence", "tl": ""},
+	{"name": "regen",            "fn": "_step5a_regenerate_tiles",  "shape": "regen",         "tl": ""},
+	{"name": "manufacture",      "fn": "_step5b_manufacture",       "shape": "teams_cadence", "tl": "near.economy"},
+	{"name": "consumption",      "fn": "_step6_resolve_consumption","shape": "teams_cadence", "tl": ""},
+	{"name": "salary",           "fn": "_step6c_salary",            "shape": "teams",         "tl": ""},
+	{"name": "fatigue",          "fn": "_step6d_fatigue",           "shape": "teams_cadence", "tl": "near.consume"},
+	{"name": "faction_ai",       "fn": "_step6b_faction_ai",        "shape": "teams",         "tl": "near.faction_ai"},
+	{"name": "info_dispatch",    "fn": "_step6b2_info_dispatch",    "shape": "teams",         "tl": "near.faction_ai"},
+	{"name": "training",         "fn": "_step6f_training",          "shape": "teams",         "tl": ""},
+	{"name": "strategic_ai",     "fn": "_step6e_strategic_ai",      "shape": "state",         "tl": "near.strategic_ai"},
+	# ★LOD 紅線修（⑦ 之前的舊修）：個體反應層不再綁玩家位置（原 near 判定=距 player_pos<=3 →
 	# headless 傳 (-1,-1) 使全隊皆 far ⇒ 無玩家＝全世界零個體反應；有玩家＝遠隊零個體反應）。
-	# 改 LOD_BOTH；reactions 走 teams_cadence 拿 cadence → far pass 用 trials 補回被跳過的窗次。
-	{"name": "reactions",        "fn": "_step7_person_reactions",   "lod": LOD_BOTH, "shape": "teams_cadence", "tl": ""},
-	{"name": "cleanup",          "fn": "_step7b_npc_goal_cleanup",  "lod": LOD_BOTH, "shape": "teams",         "tl": "near.reactions"},
-	{"name": "events",           "fn": "_step8_generate_events",    "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
-	{"name": "emit",             "fn": "_step9_emit_messages",      "lod": LOD_BOTH, "shape": "state",         "tl": "near.events_emit"},
+	# reactions 走 teams_cadence 拿 cadence。★★第⑧票之後只剩一個 cadence ⇒ trials 恆為 1。
+	{"name": "reactions",        "fn": "_step7_person_reactions",   "shape": "teams_cadence", "tl": ""},
+	{"name": "cleanup",          "fn": "_step7b_npc_goal_cleanup",  "shape": "teams",         "tl": "near.reactions"},
+	{"name": "events",           "fn": "_step8_generate_events",    "shape": "teams",         "tl": ""},
+	{"name": "emit",             "fn": "_step9_emit_messages",      "shape": "state",         "tl": "near.events_emit"},
 ]
 
-# 統一 near/far 系統 loop。is_near=true 跑 NEAR+BOTH（+near-only glue+分組 _pht）；false 僅 BOTH（無 _pht）。
-# 回 {"result": String, "t": int}——result="player_turn"=near 伏擊起 encounter 早退；t=更新後 timing 鏈點。
+# ★第⑧票：單一 pass 的系統 loop（原本是 near/far 兩趟，而那兩趟的差別【就是分班本身】）。
+# 回 {"result": String, "t": int}——result="player_turn"=伏擊起 encounter 早退；t=更新後 timing 鏈點。
 # ★★★關於【靜態設定】的假設，檢查點在【設定被讀進來】的時候（systems 裁定 2026-09-01）。
 #   ★而 SYSTEMS 是 const registry ⇒ 每 tick 檢查是浪費、有人問時檢查是【被動】。
 #   ⇒ 掛在【首次 dispatch】：那條路一定會走，而且只走一次。
@@ -216,20 +220,22 @@ static func check_registry_assumptions() -> void:
 		Probe.bump("build_eta.cadence_assumption_stale")
 		push_warning("[REGISTRY] outpost_tick 不在 near pass ⇒ build_eta 的每日推進次數假設已失效")
 
+# ★★★第⑧票（2026-09-06）：`is_near` 參數退場 —— 只剩一個 pass，「這是不是近區那趟」不再是問題。
+#   ★原本靠它做三件事：①跳過 LOD_NEAR entry ②near-only glue（player_old／RecruitTutorial）
+#     ③phase_timing 只在 near 記。★★①隨 `lod` 欄一起消失；②③改成【無條件】——
+#     因為現在只有一趟，「只在其中一趟做」這個概念本身沒有指涉對象了。
 func _run_systems(state: WorldState, teams: Array, cadence: int, vmult: float, smult: float,
-		is_near: bool, t_in: int) -> Dictionary:
+		t_in: int) -> Dictionary:
 	check_registry_assumptions()   # ★首次 dispatch 檢查一次（旗標短路，之後零成本）
 	var _t: int = t_in
 	var moved: Array = []
 	var arrived: Array = []
 	var player_old: Vector2i = Vector2i.ZERO
 	for sys in SYSTEMS:
-		if int(sys["lod"]) == LOD_NEAR and not is_near:
-			continue
 		var sname: String = sys["name"]
 		var fn: String = sys["fn"]
 		# near-only pre-hook：move 前擷取 player 舊位（供 move 後偵測玩家移動清 pending target）。
-		if is_near and sname == "strategic_move":
+		if sname == "strategic_move":
 			player_old = _get_player_tile_pos(state)
 		match String(sys["shape"]):
 			"vision":        call(fn, state, teams, vmult)
@@ -244,17 +250,17 @@ func _run_systems(state: WorldState, teams: Array, cadence: int, vmult: float, s
 				state.rebuild_team_tile_index()   # ★BOTH post-move rebuild（near+far 各一次；下游 co-location/hostile 查 post-move 位）
 				arrived = mv["arrived"]
 				moved = mv["moved"]
-				if is_near and _get_player_tile_pos(state) != player_old:
+				if _get_player_tile_pos(state) != player_old:
 					_player_cmd.clear_pending_targets(state)
 		# near-only post-hook：emit 後、near.events_emit _pht 前送 tutorial 投奔者。
-		if is_near and sname == "emit":
+		if sname == "emit":
 			RecruitTutorial.new().check(state)
 		# phase_timing 群組邊界（near 才 fire；label 掛該組最後 entry）。
 		var tl: String = sys["tl"]
-		if is_near and phase_timing and tl != "":
+		if phase_timing and tl != "":
 			_t = _pht(tl, _t)
 		# near-only：伏擊起 encounter（near.outpost_ambush 後）→ 交還 bridge。
-		if is_near and sname == "ambush" and state.encounter_active:
+		if sname == "ambush" and state.encounter_active:
 			return {"result": "player_turn", "t": _t}
 	return {"result": "", "t": _t}
 
@@ -293,14 +299,19 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	var time_vision_mult: float = _day_night_system.get_vision_mult(state)
 
 	# 近區：每小時執行
+	# ★★★第⑧票（2026-09-06，憲法債清償）：near/far 分班【已拆除】——
+	#   全世界【一個 pass、一個 cadence】，而 cadence 取現行 near 的 `NEAR_CADENCE`(60)。
+	#   ★取 60 而不取折衷值：近隊【行為完全不變】、遠隊【補回到與近隊相同】
+	#     ⇒ ★★差異只有一個來源；取折衷值會讓近隊也變 ⇒ 一次改兩件事，歸因不了。
+	#   ★★★而「遠」的定義是【離玩家遠】—— 無玩家世界裡「遠隊」＝【全部】，
+	#     今天已坐實一項後果（薪資相位病：遠隊四個發薪日一次都沒發），而那一類失效是【靜默】的。
 	if state.world.current_tick % NEAR_CADENCE == 0:
-		var near_teams := _get_near_teams(state, player_pos)
-		# ★★★⑦ 驗收②要的機具：每隊【被分到哪一批】要可觀測 ——
-		#   ★沒有這格就無法在【同一個世界裡】比較 near 隊與 far 隊，
-		#     而 systems 明裁：跑兩次（一次全 far、一次 FULL_HD）是【兩個世界】，比不得。
+		var all_teams: Array = state.teams.keys()
+		# ★驗收②的機具：每隊【真的被排進這個 pass 幾次】——
+		#   ★★分班拆掉之後這格應該【逐隊相同】，而「應該相同」要被量不是被相信。
 		if Probe.enabled:
-			for _ntid in near_teams:
-				Probe.bump("lod.near.byteam.%04d" % int(_ntid))
+			for _tid8 in all_teams:
+				Probe.bump("pass.byteam.%04d" % int(_tid8))
 		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
 		# H: choose_heir 不超時（advance_tick 開頭已凍結，此處為防禦）
 		if not state.player_forced_event.is_empty() \
@@ -333,28 +344,20 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 			state.player_forced_event = {}
 			state.player_forced_event_id = ""
 		if phase_timing: _t = _pht("near.forced_event", _t)
-		# ★seam#3 S1：near 塊改 SYSTEMS registry 統一 loop（NEAR+BOTH，含分組 _pht + near-only glue）。
-		var near_r: Dictionary = _run_systems(state, near_teams, NEAR_CADENCE,
-			time_vision_mult, time_speed_mult, true, _t)
-		_t = near_r["t"]
-		if near_r["result"] == "player_turn": return "player_turn"   # 伏擊起 encounter → 交還 bridge
+		# ★第⑧票：單一 pass 走 SYSTEMS registry（含分組 _pht + glue）。
+		var pass_r: Dictionary = _run_systems(state, all_teams, NEAR_CADENCE,
+			time_vision_mult, time_speed_mult, _t)
+		_t = pass_r["t"]
+		if pass_r["result"] == "player_turn": return "player_turn"   # 伏擊起 encounter → 交還 bridge
 
 	# Harvest：每 6 小時（TICKS_PER_DAY / 4）
 	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
 		_step4c_harvest_tick(state)
 	if phase_timing: _t = _pht("harvest", _t)
 
-	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
-	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
-		var far_teams := _get_far_teams(state, player_pos)
-		if Probe.enabled:
-			for _ftid in far_teams:
-				Probe.bump("lod.far.byteam.%04d" % int(_ftid))
-		# ★seam#3 S1：far 塊改 SYSTEMS registry 統一 loop（僅 BOTH，無分組 _pht；跳 near-only:reactions/
-		# cleanup/tile-regen/outpost_tick/tutorial）。tile 再生已由 near 每小時全域跑覆蓋 far tile（不重複=原 24× 雙記元凶）。
-		_run_systems(state, far_teams, FAR_ZONE_INTERVAL,
-			time_vision_mult, time_speed_mult, false, _t)
-	if phase_timing: _t = _pht("far.total", _t)
+	# ★★★far pass 已刪（第⑧票）：它的存在【就是分班本身】。
+	#   ★而它留下的 `far.total` phase label 也一併退場 —— 留一個恆為 0 的相位欄，
+	#     下一個人看 perf 拆解時會以為「遠區成本是 0」，而那是【沒有遠區】不是【很便宜】。
 	# ★★★換根微分試驗的【合成雙端陽性對照】（S7-root-differential，commit1）：
 	#   ★A：每【遊戲日】一次 ⇒ 換根後每日次數不變 ⇒ 期望比值 1.00×
 	#   ★★B：每【tick】一次   ⇒ 換根後每日 tick 數加倍 ⇒ 期望比值 2.00×
@@ -528,6 +531,8 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
 		if team == null: continue
+		if Probe.enabled:
+			Probe.bump("sysexec.fatigue.byteam.%04d" % int(tid))   # ★驗收②：第三個系統
 		if team.current_task == TeamData.TASK_REST:
 			# 紮營休息
 			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
@@ -590,34 +595,11 @@ func _get_player_team_sr(state: WorldState) -> TeamData:
 	if p == null: return null
 	return state.teams.get(p.team_id)
 
-func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:
-	if force_full_hd:
-		return state.teams.keys()   # perf 對照：全隊 near（無 LOD 分區）
-	var result: Array = []
-	for tid in state.teams:
-		var team: TeamData = state.teams[tid]
-		# 觀測非侵入：移除 specimen LOD-exempt（原強制 specimen 升 near → 岔 RNG → 改世界=Heisenberg 侵入）。
-		# specimen trace 改走 force_full_hd 全-HD acceptance（judged-world）；normal LOD 下 specimen 不再特殊待遇。
-		if _hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS:
-			result.append(tid)
-	return result
-
-func _get_far_teams(state: WorldState, player_pos: Vector2i) -> Array:
-	if force_full_hd:
-		return []                   # perf 對照：無 far 批次
-	var result: Array = []
-	for tid in state.teams:
-		var team: TeamData = state.teams[tid]
-		# 觀測非侵入：移除 specimen far 豁免（原 specimen 跳 far 降級 → 岔 RNG）。specimen 正常參與 LOD 分區。
-		if _hex_distance(team.tile_pos, player_pos) > LOD_NEAR_RADIUS:
-			result.append(tid)
-	return result
-
-func _hex_distance(a: Vector2i, b: Vector2i) -> int:
-	var dx := b.x - a.x
-	var dy := b.y - a.y
-	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
-
+# ★★★`_get_near_teams`／`_get_far_teams`／`_hex_distance` 全部刪除（第⑧票）——
+#   ★它們是【按 `player_pos` 把世界切兩半】的那三顆，而憲法判死的就是那個判準。
+#   ★★`_hex_distance` 在本檔【只有那兩支在用】（全庫 3 個呼叫點：兩個用點＋定義）
+#     ⇒ 一起刪，不留 dormant helper。
+#   ★★★反向斷言由 `lod-split-guard` 守：重新引入按 `player_pos` 分批會自動紅。
 func _get_player_tile_pos(state: WorldState) -> Vector2i:
 	var p: PersonData = state.persons.get(state.player_id)
 	if p == null:

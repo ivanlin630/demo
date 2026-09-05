@@ -1371,7 +1371,15 @@ outpost.l0_to_l1 = 0（實測）      ← 沒有隊靠紮根取得 outpost
 **★同族**：與〈LOD 紅線〉同根——**玩家中心假設在無玩家世界裡靜默停掉東西**（一個停個體反應、一個停整個世界）。本 session 兩次踩同一族。
 
 ### ✅無玩家 headless ＝個體反應層從不執行 —— **已 MERGED（LOD 紅線修；rate-equivalence far/near=1.00）**（LOD 紅線違憲；★範圍已於同日更正：原寫「四系統」是錯的）（2026-08-20 measurer 實證 + systems 親驗 code；**擋考級**）
-**機制**：`sim_runner` SYSTEMS registry 中 **`reactions`／`cleanup`／`outpost_tick`／`regen` 標 `lod=LOD_NEAR`**；near 判定＝`sim_runner.gd::_get_near_teams()` `_hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS(3)`。headless 床慣傳 `player_pos=(-1,-1)` → **全隊恆 far** → `sim_runner.gd::_run_systems()` 直接 `continue` → 四系統整段跳過。
+**機制**：`sim_runner` SYSTEMS registry 中 **`reactions`／`cleanup`／`outpost_tick`／`regen` 標 `lod=LOD_NEAR`**；near 判定＝（已刪除的）`_get_near_teams()`：`_hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS(3)`
+
+> ★★★**第⑧票（2026-09-06）落地後狀態：本條的【機制已不存在】。**
+> near/far 分班本體被拆除（`sim_runner.gd::_advance_tick_body` 現在只有【一個 pass、一個 cadence】），
+> `_get_near_teams`／`_get_far_teams`／`_hex_distance`／`LOD_NEAR_RADIUS`／`FAR_ZONE_INTERVAL`／`lod` 欄
+> 全部退場 ⇒ ★「headless 床全隊恆 far ⇒ 四系統整段跳過」這個因果鏈**沒有載體了**。
+> ★★而我**不自己把它標成 CLOSED**：條目的生死是 owner 的裁定，我只坐實【機制已不在】這個事實。
+> ★★★反向保護由 `lod-split-guard` 承擔（重新引入按 `player_pos` 分批會自動紅）。
+> —— implementer，第⑧票驗收期；★錨從已刪除的符號改成仍存在的 `sim_runner.gd::_advance_tick_body`。。headless 床慣傳 `player_pos=(-1,-1)` → **全隊恆 far** → `sim_runner.gd::_run_systems()` 直接 `continue` → 四系統整段跳過。
 **各自 body（單一 call site、已窮盡 grep）**：
 - `reactions` ＝ `ReactionSystem.evaluate_all`：**生育 `P5_breed`**／逃／暴動／叛／怠工／士氣／`goal_alignment`。
 - `outpost_tick` ＝ `OutpostSystem.tick_all`：**`_tick_construction`（建設進度）+ `_tick_mint`（鑄幣）+ `produce_stable_day`**。

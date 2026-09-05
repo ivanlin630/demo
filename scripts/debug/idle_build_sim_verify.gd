@@ -18,7 +18,6 @@ func _initialize() -> void:
 func _run_one(world_seed: int, months: int) -> void:
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	seed(world_seed)
-	SimRunner.force_full_hd = true
 	Probe.reset(); Probe.enabled = true
 	var state := WorldState.new()
 	var runner := SimRunner.new()
@@ -38,5 +37,4 @@ func _run_one(world_seed: int, months: int) -> void:
 		print("  ✓ idle→build 機制真 fire（閒勞力有 genuine 建產能價值 %d 次；其中選建 %d 次）" % [idle_pos, idle_build])
 	else:
 		print("  ⚠ idle_employ_value 全程未 >0（此 seed 無大隊 idle+可建有需求 mfg；§8 領導軸經濟場景由 measurer 驗）")
-	SimRunner.force_full_hd = false
 	Probe.enabled = false
