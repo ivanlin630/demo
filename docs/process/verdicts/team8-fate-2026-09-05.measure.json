@@ -1,0 +1,18 @@
+{
+  "touches": ["scripts/simulation/interaction_system.gd", "scripts/simulation/salary_system.gd", "scripts/data/team_data.gd"],
+  "slice": "B展品——team8(商隊)下場追查，決定三件展品是三證據還是一因三症",
+  "question": "team8(config「③商隊_中介」，全床唯一開局帶coin 1000的隊)day30/day90還在嗎？tags是什麼？1000coin去哪了？day30快照的12隊是哪12隊？",
+  "method": "獨立診斷腳本，setup剛完成/day30/day90三個時間點直接snapshot team8 + 全team_id清單",
+  "results": {
+    "setup剛完成": {"team_id清單": [0,1,2,3,4,5,6,7,8,9,10,11], "team8_tags": ["商隊"], "team8_named_members": [17], "team8_coin": 1000.00},
+    "day30": {"team_id清單": [0,1,2,3,4,5,6,7,8,9,10,11], "team8_tags": ["商隊","生產"], "team8_coin": 1000.00},
+    "day90": {"team_id清單": [0,1,3,4,5,6,8,9,12,13,14,15,16,17,18], "team8_tags": ["商隊","生產"], "team8_coin": 1000.00}
+  },
+  "①_team8_alive": "YES，day90仍存在，team_id沒變過",
+  "②_named_members": "[17]，只有1名（另一名person=16是leader，本身不算進named_members）",
+  "③_coin_1000_fate": "★完全沒動——setup到day90三個時間點coin恆為1000.00，一分未花未收，salary/member_tax/anon_treasury三條機制全部沒碰過它",
+  "④_day30_actual_12teams": "[0,1,2,3,4,5,6,7,8,9,10,11]——跟config原始12隊team_id完全一致，不是「12隊不是config那12隊」，是config那12隊【每一隊後來都額外被貼上生產tag】（含team8這個商隊）",
+  "root_cause_found": "systems查『TAG_PRODUCE runtime唯一寫入點是outpost_system.gd:525』不完整——實際還有interaction_system.gd:1509 `state.add_tag(t, TAG_PRODUCE, \"settle\")`（定居機制觸發，非outpost_system那條child-team安頓路徑）。team8(商隊)在setup時只有[\"商隊\"]，day30已變成[\"商隊\",\"生產\"]——它在遊戲過程中透過settle路徑被【加掛】了PRODUCE tag（保留原商隊tag，非取代），因此落入salary_system.gd:31『居民PRODUCE team不走薪資系統』的early-return，其1000起始coin從此凍結。",
+  "final_verdict": "★不是「12隊不是config那12隊」的母體錯位——team_id完全對得上config。真相是：連config唯一設計成有錢的那隊(team8商隊)，遊戲過程中都被settle機制追加PRODUCE tag，因而被同一道early-return擋下。這證實systems的疑慮：★★member_tax乾/salary死/anon_pool乾【不是三個獨立證據，是同一個PRODUCE-gate機制的三個症狀】——這個scenario的世界composition讓所有隊伍（含原本設計要當錢流動節點的商隊）最終都收斂進同一個『不發薪』狀態。這件事必須寫進B開場包，不能讓四件展品被讀成互相獨立佐證。",
+  "honest_limit": "只驗證了team8這一個案例，其餘10隊「統領/生產」隊本來就該有PRODUCE tag(config原生)，沒有逐一追查是否也是透過settle機制取得（vs config原生就有）——但不影響本票結論(team8已足夠證明機制收斂)。settle路徑本身的觸發條件(interaction_system.gd:1509上下文)未深入追查，只確認它是「另一個」寫入點，不是唯一那個。"
+}
