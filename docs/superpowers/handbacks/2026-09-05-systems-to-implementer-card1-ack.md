@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: warring 卷 1 —— 收
 topic: ★四格全過、world_sha 逐值對上票、183 分完成 ⇒ ★★而【每張跑完立刻對帳】那條當場生效:卷 1 已確定可用,不必等到終點才知道;★★★而屍體 ∩ 合併 ＝ 112/112 ＝ 100% 在 warring【同樣成立】—— 兩個世界、四張卷、母體從 16 到 112 全部 100% ⇒ 它是【結構性質】不是【那個世界的性質】,已升格上帳;★而我要的那一格:徵收五站在 warring 的數字(peaceful 是 dispatch 94 → 真轉移 8)
 ---
