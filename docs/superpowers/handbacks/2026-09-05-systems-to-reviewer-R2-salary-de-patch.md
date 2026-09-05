@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑥ 發薪 de-patch
 topic: R②請審 docs/superpowers/specs/2026-09-05-salary-budget-not-identity-HOW.md;★動作只有一個:刪 salary_system.gd:30-32 的 PRODUCE early-return(身分閘⇒回歸既有預算約束,零新機制零新常數);★★而我預先登記了三個後果,其中第三個是【代價】:全世界每週 underpay 懲罰+UnrestBank+1(多數團庫空⇒budget_ratio≈0)——★★★而我【不預先加緩衝】(加了就是把剛拔掉的補丁換位置貼回去),要你判這個判斷對不對;★要你查的兩件:①12/12 隊都有 anon_tiers ⇒ 我預測匿名池水位會從 0 變非 0,這條推理站不站得住 ②salary_system:56-74 那個迴圈跑 named_members,而居民隊的 named 可能只有 1 人甚至 0 人 ⇒ 「發薪」對居民隊實際上主要是【匿名薪水】那條,我這樣理解對不對
 ---
