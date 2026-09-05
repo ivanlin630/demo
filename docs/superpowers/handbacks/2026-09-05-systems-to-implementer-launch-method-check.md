@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★批次殺手第一嫌疑 —— 而我手上有一個【對半分】的對照
 tier: probe
 topic: ★blueprint 裁第一嫌疑＝【宿主 session 生命週期】(真 detach vs session 背景子進程);★★而我手上有個現成對照:★★★pilot 那一跑【真 detached(WMI)】而它【完整跑完 169.3 分】—— 而今天被砍的這幾跑若不是真 detach,那就一格分半;★所以要的只有一句:【今天這幾跑是怎麼啟動的】,與 pilot 那一跑【是不是同一種啟動方式】;★★而卷面那份我收下,並把你「降級做進句子」的做法入帳
