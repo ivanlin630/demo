@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: erase-merge-corpse
 topic: R②判決:issues(中)——不反對100%相關的機械坐實,但§2③「刪vs標記」是假二選一:讀code發現erase_teams(world_state.gd:527-654)已是「所有死法(戰鬥/饑荒/併入/滅族)」的單一chokepoint,逐項比對§2①點名的每個懸空引用(social_target/order_target_id/member_team_ids/belief條目)全部已在裡面處理;而subteam_system.gd:211-212 _erase_absorbed_team已經在merge_teams的population<=0分支呼叫state.erase_team——這條路是通的;真正該做的是查【觀測到的16→112屍體是從哪個merge/absorb call site漏過這個chokepoint】,不是先蓋一套新的mark/delete機制;第三案=路由進既有chokepoint(=delete)+複用既有capture_death的reason欄位(目前全域只用一個字串"erase_teams",從未區分死因)存merged_into事實,零新live欄位、零per-team迴圈過濾成本
 ---

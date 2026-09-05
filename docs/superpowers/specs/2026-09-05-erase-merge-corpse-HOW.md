@@ -11,7 +11,24 @@
 ⇒ ★★★而它污染【存活分類】與【曾餓過的隊結局】兩格（★其餘母體已逐格查證不受影響）
 ```
 
-## §2 ★★★而修法【不只是刪掉它】—— 三個必須先答的問題
+## §2 ★★★★【R² 訂正 2026-09-05】「刪 vs 標記」是**假二選一** —— 而真正該做的是【找漏出去的那個 call site】
+```
+★R² 讀 code 查到:`erase_teams`（world_state.gd:527-654）★★【已經是單一 chokepoint】
+   —— 所有死法(戰鬥／饑荒／併入／滅族)都走它
+⇒ ★★★而我在 §2① 點名的每一個懸空引用(social_target／order_target_id／member_team_ids／belief 條目)
+   【全部已經在裡面處理】
+★而 `subteam_system.gd:211-212 _erase_absorbed_team` 已在 merge_teams 的 population<=0 分支
+   呼叫 `state.erase_team` ⇒ ★★【這條路是通的】
+```
+★**所以真正的問題不是「要不要蓋一套 mark/delete」，是**：
+```
+★★★【觀測到的 16 → 112 具屍體，是從哪一個 merge／absorb call site【漏過】這個 chokepoint 的】
+⇒ ★而修法＝【把那個 call site 路由進既有 chokepoint】＝ de-patch,不是加機制
+⇒ ★★而我原本的二選一(刪 vs 標記)【兩邊都是新機制】—— 那正是「架構已定別打補丁」要防的
+⇒ ★★★而我的錯與今天那條同型:我列了風險(懸空引用)卻【沒先查有沒有東西已經在處理它】
+```
+
+## §2b（原文，框架已於上方訂正）★★★而修法【不只是刪掉它】—— 三個必須先答的問題
 ```
 ①★誰還在指向它? —— ★★`social_target`／`order_target_id`／`known_member_states`／
    faction 的 `member_team_ids`／別人的 belief 條目 ⇒ ★★★刪一個 team 而留下懸空 id ＝ 換一種病
@@ -26,7 +43,8 @@
 ## §3 驗收（★草案）
 | # | 判準 |
 |---|---|
-| 1 | ★**空殼（pop_end=0 而未 extinct）＝ 0**，或【全部帶 `merged_into`】（★依 §2③ 的選擇） |
+| 1 | ★**空殼（pop_end=0 而未 extinct）＝ 0**（★★而修法是【路由進既有 chokepoint】，不是新機制） |
+| ★1b | ★★★**先答**：那 112 具屍體是【哪一個 call site】產生的 —— **逐 call site 計數，禁猜** |
 | 2 | ★★**懸空引用 ＝ 0**：`social_target`／`order_target_id`／`member_team_ids`／belief 條目**逐類計數** |
 | 3 | ★★★**守恆**：合併前後【資源總量與人口總量】對得上（★而它是「東西沒憑空消失」的機械證據） |
 | 4 | 存活分類母體**不再需要事後扣除屍體**（★卷面那一行可以拿掉，而不是繼續標「不含」） |
