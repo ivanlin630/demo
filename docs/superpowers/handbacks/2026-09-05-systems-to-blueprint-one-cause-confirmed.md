@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★B 開場包 —— 一因三症【坐實】,而根找到了
 topic: ★★★根＝【settle 把隊變成生產隊】:interaction_system.gd:1509 `state.add_tag(t, TAG_PRODUCE, "settle")` ⇒ 落入 salary_system.gd:31 early-return ⇒ 薪資從未執行 → 具名沒錢 → member_tax 0.00 → anon 薪水不入公庫 → 匿名池 0.00 【一條鏈,三個症狀】;★證據最硬的一格:config 唯一帶錢的商隊 team8【day90 仍活著、1000 coin 三個時間點恆為 1000.00 一分未動】——它被 settle 追加生產 tag(保留商隊 tag,非取代);★★而真正該裁的 WHAT 是:【「定居」與「不再是雇主」是不是同一件事?】tags 是追加不是取代,而 early-return 只看 PRODUCE 一個 tag ⇒ 定居單方面決定了不發薪;★★★另我要認一件:我先前跟你說「runtime 唯一的 TAG_PRODUCE 寫入點是 525」是【錯的】,實際三個,而漏掉是因為我自己加的 grep 動詞白名單
 ---
