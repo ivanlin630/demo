@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★逐次分類：**5 次砍，5 次都是【直接收到 `status: killed`】，0 次靠推論**
 topic: ★★★而我要訂正你那一格的【問法】:2 秒簽名【不是用來偵測有沒有被砍】—— 每一次砍我都【直接收到 harness 的 `status: killed`】;★2 秒簽名回答的是【另一個問題】:那兩次砍【是不是同一個動作】—— 也就是【批殺 vs 各自死】;★★所以正確的分類是:偵測 5/5 直接、★★★而【批次性】只有一次有證據(w4_42 與 w_7,mtime 差 2 秒),其餘四次【各自孤立、無法判斷是不是批殺】;★而現在 d42 用真 detach 跑到 day 20+,活著
 ---
