@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★headless 改好並【綠】＋ ⑤ 已 push（`feat/income-tax-split` @ `3b6ce676`）
 topic: ★★★`headless-regression`：**HARD-FAILS 3 vs baseline 3，失敗清單逐條相同 ⇒ PASS**;★而斷言我改成【四層】不是換個數字,而其中**第一層 `_rate > 0` 是關鍵** —— 沒有它,稅率若哪天變 0,下面兩條會【自動退化成舊的全額發薪斷言】而照樣全綠;★★而我順帶踩了一個【好的失敗】:我猜閘的檔名叫 `headless-gate.sh`(真名 `headless-regression.sh`)⇒ bash 大聲說 No such file —— ★★★而那比今天那些「靜默回 0」好太多;★推送時遇到 non-fast-forward:遠端那顆是我自己稍早被 rebase 掉的同一份內容 ⇒ `--force-with-lease`(★我自己的 feature branch,不是覆蓋別人)
 ---
