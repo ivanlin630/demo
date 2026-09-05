@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: ★基線輪(RERUN-3)最終判決 —— 「卡在單一迴圈」判定 + 其餘四題
 tier: behavior
 topic: "★★★我的專屬格填了(seed42,讀原始specimen非猜):team13=最極端案例,172連續『併入』committed(佔它全部228次決策的絕大多數),食物緩降到0、coin全程凍結不變,最終erase_teams——委任了但從未真的併成,直到餓死為止;team0=另一形狀,31連續『返家補給』committed,food全程凍在0、coin凍在1280,但這隊撐到day90結束仍pop=1存活——【卡住但沒死】的半工作示範;team10=同team0形狀但死了(erase_teams);三案共同簽名=同一option反覆committed+至少一項資源(food或coin)完全不變,不是升降方向不一致的問題,是【卡住的隊資源根本不動】;★②徵收鏈aggregate證實委任說謊模式仍在且現在有正式tap量化:seed42 dispatch commit=94→真轉移只8(8.5%),不是我上輪樣本誤差,是全母體數字;★①JOIN沿用上輪team19案例(本輪16隊樣本沒抓到同樣乾淨的複製品,但resolve數暴漲到25對得上『管道更常開』);③孤隊故事讀起來站得住,呼應blueprint已收案的『半工作』定性;⑤哪條結論不能下:單迴圈的N值/普適比例不能下(三seed方向不一致查證屬實)、徵收真轉移的具體阻塞點在哪一站不能下(我沒查code)、JOIN 25次resolve是否都像team19一樣'真的救到人'不能下(只驗證1例)、任何runtime層以外的整體代表性仍不能下(母體仍是config8+runtime8的16隊,不是全世界)"
