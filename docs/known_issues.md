@@ -4072,3 +4072,17 @@ if _can_detect(scout, eff_exp): …
 ★★**而母體的誠實限（implementer 自標）**：**那三個 fail counter 的母體是【全站所有 envoy 用途】**
 ⇒ ★★★**所以【不能說】「回報因為沒名人而失敗 501 次」** —— **要歸給回報自己那一份，需要 `ptype` tap。**
 ★**而那張小票已開，排在終卷之後**（★`_dispatch_envoy` 在 `faction_ai_system.gd` ＝ 世界路徑，本段凍結中）。
+
+## ★★★belief **沒有位置**的真根因【未知】—— 而「新鮮度洗白」這個假說**已被否證**（2026-09-05）
+★**狀態：已知未修**｜**回訪：觸發事件 —— ②徵收 broad-thin 落地之後**（★②會改候選集合，現在切出來的分佈馬上過期）
+```
+★症狀兩格:徵收「無目標」86% ／ JOIN 的 true<belief 39/55
+★★曾經的假說:vision_system.gd:111 `duplicate()` 後【只覆寫子集】⇒ 未觀察欄位頂著新的 last_tick
+   ⇒ ★★★【已被否證】:三個 firsthand `record_claim` 寫入點【全部都寫 tile_pos】
+      (vision_system.gd:113／interaction_system.gd:1219／faction_ai_system.gd:2015)
+   ⇒ tile_pos_tick 恆等於 last_tick;實測 newly_expired=0／newly_fresh=0(母體 34039 次位置新鮮度判斷)
+   ⇒ 第二個獨立證據:fp 逐位元相同 92f890ca
+```
+★**這條要留著的理由**：**假說被否證是資訊**，不寫下來的話**下一個人會重新走一遍同一條死路**。
+★★**還沒切的三選一（互斥且窮盡）**：belief **從未建立** ／ 建立過但**真的過期**（`last_tick` 舊，＝正常行為不是 bug） ／ belief 在但 `tile_pos == (-1,-1)`。
+★★★**而「程式碼形狀是真的」不等於「它是這個症狀的病因」** —— 這輪的錯就是把形狀當病因，**沒先查那個子集裡到底有沒有出事的那個欄位**。
