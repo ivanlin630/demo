@@ -3,7 +3,10 @@
 ## §0 每張跑的表頭（★缺一格 = 這張卷【不可解讀】）
 ```
 world=            seed=            window_days=            commit=
-★★★world_sha=（scripts=<git rev-parse --short HEAD:scripts>／config=<…HEAD:config>）
+★★★world_sha=（sim=<HEAD:scripts/simulation>／data=<HEAD:scripts/data>／config=<HEAD:config>）
+   ⇒ ★★★★（訂正 2026-09-05）**不要用 `HEAD:scripts`** —— 它含 `scripts/debug`，
+      而【卷面改動也會改到它】⇒ 那正是這個欄位要避免的混淆（一次卷面補印就讓它從 edaeb4ad 變 f7f6b142）
+   ⇒ ★所以 world_sha 的三棵樹要與【凍結閘的 WORLD_RE】同一組：simulation／data／config
    ⇒ ★【commit 會因為 doc/handback 而變，而世界沒變】—— 2026-09-05 血證：同一輪出現三個 commit 標籤
    ⇒ ★★所以【同源的判準是 world_sha 不是 commit】；commit 照記（可追），而比對看 world_sha
    ⇒ ★★★而它是【一行可驗】：`git rev-parse HEAD:scripts HEAD:config`

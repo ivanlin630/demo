@@ -1,6 +1,6 @@
 plan=C-seg2（warring × 3 seed × 90 日 ≈ 8.5 小時）
 scope=warring_states × seed 1337/42/7 × 90 日
-commit=1dad863f ｜ ★world_sha: scripts=f7f6b142 config=c7ceb6b3
+commit=1dad863f ｜ ★world_sha: sim=61f2ab27 data=c9ca7ae7 config=c7ceb6b3（★不用 HEAD:scripts —— 它含 debug，卷面改動會污染它）
 from=2026-09-05（peaceful 基線接受、warring 開跑前）
 until=★【systems 交出該段判定】為止 —— ★★不是「卷跑完」、不是「卷交出來」
    ⇒ ★★★解凍的唯一形式＝【本檔被刪除】；檔在＝還在凍，不論其他人做到哪一步；誰能刪＝systems
