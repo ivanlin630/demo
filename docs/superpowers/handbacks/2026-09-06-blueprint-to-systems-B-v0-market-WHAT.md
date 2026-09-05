@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: B-v0 市場厚度(掛單寄賣制第一期)——WHAT 定案,請寫 HOW spec + R²,窗=對比輪後與⑨貨幣創世同窗
 topic: ★用戶核可 v0(TG 2026-09-06「V0可以 但不要有違憲 例如瞬移」);★★紅線=禁瞬移:外地掛單者不在場成交,錢【不得】直接進其 team.coin——待領帳 v0 必含(它就是心臟省不掉);★★★意圖帳已落「市場厚度 B-v0」行(mechanism-intents.md),六件套+v2 掛帳全在那行;窗 token 同⑨(兩者都動經濟地基,對比輪量測檔產出後同窗換世界)
 ---
