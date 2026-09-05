@@ -4185,3 +4185,24 @@ sim_runner.gd:337 far  pass = tick % FAR_ZONE_INTERVAL(600) == 0 ⇒ payday 只�
 ```
 ★**修法（已具名，不要另外發明）**：把 `salary_system.gd:31` 與 `faction_ai_system.gd:1499` 遷到 **`CadenceStagger`**，
 與策略層同形、**零新機制零新常數**。★★**而不要去調 `SALARY_INTERVAL` 的數值** —— 那是把相位問題偽裝成調參問題。
+
+## ★★★★憲法債：**玩家近遠分班「判死」於 2026-08-20，而它今天仍然活著**（2026-09-05 對帳）
+★**狀態：已知未修**｜**回訪：觸發事件 —— 用戶對 LOD 對帳的裁示**
+```
+★2026-08-20 明文(commit 0a1e03a7):「模擬層零 LOD…玩家近遠分班【判死】」
+★★而 docs/progress.md:99 同日我自己寫的:「systems 排序裁定:零 LOD(拆 near/far)【排最後】
+   —— 它是花預算不是賺預算,且 cadence 語意依賴時間包層級制」
+⇒ ★★★【已裁定、未執行】,而 16 天後它以【薪資相位病】的形式咬人
+   (遠隊四個月領一次薪水;而無玩家世界裡「遠隊」＝全部)
+```
+★**殘件（權威來源＝`SimRunner.SYSTEMS` 的 `lod` 欄，27 entry 逐條看）**：
+```
+①★分班本體:sim_runner.gd:583-589／:591-599 依 `_hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS` 分兩批
+②★★兩批不同 cadence:':291' near ＝ %60 ／ ':337' far ＝ %600
+   ⇒ ★★★遠隊的 vision／move／interactions／collect… 【有跑,但慢 10 倍】(它們是 LOD_BOTH)
+③`outpost_tick`(:159)／`regen`(:163) 仍掛 LOD_NEAR ⇒ ★但兩者 shape 是 whole-state
+   ⇒ 【不是按隊距離分班】,只是節奏跟著 near pass
+④stale 註解 `movement_system.gd:30`(寫 10／100,真值 60／600)—— ★它今天已經騙過兩個人一次
+```
+★★**而 ⑦（排程事件玩家無關）只止住了最會流血的那一刀** —— **它讓「排程事件」不受分班影響，
+但分班對其他一切的影響（頻率差 10 倍）仍未清。** ★★★**「模擬層零 LOD」今天還沒有做完。**
