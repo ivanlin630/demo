@@ -170,3 +170,24 @@ brainstorm → spec → plan 設計，不實作。
 | **6** | ★★★**一路用 cherry-pick 把東西搬進 main ＝ 放棄所有【以 commit 為單位】的對帳工具**——★**唯一可信的是【樹比對】**（`git diff main <branch> -- scripts/…`）。★★**而 commit 層工具【兩個方向都會騙】**：`HEAD..branch`／`git cherry` 給假的「沒落地」（114／72，實際 20 檔）、`git branch --contains` 給假的「沒落地」而內容其實全在。★★★**對帳的 scope 要涵蓋【所有會被引用的路徑】** —— 血證：我只掃 `scripts/simulation`＋`scripts/data`，而 `scripts/debug` 差 **266 行（比 production 還大）**，裡面躺著一個我幾小時前要求、對方做完、而 main 沒有的修改。★★血證 2026-09-02：同一個問題三個工具三個答案——`HEAD..branch` ＝ 114（cherry-pick 不留 ancestry）／`git cherry` ＝ 72（手動解過衝突就變 patch-id）／**樹比對 ＝ 20 檔**。★★★而我搬了十幾顆，**從沒做過一次樹比對** ⇒ 期間有一顆純註解 commit（`MUTATES` 標記）**從沒進 main** 而沒有人發現。⇒ **merge-gate 已加 `tree-div`（★只印不判：branch 永遠有合法 WIP，硬閘會永久紅）。** |
 | **5** | ★★★**dump／量測票必須指定【母體】**（team ＋ tick 窗），不得只寫「對那 N 次 dump」。★**血證 2026-09-02**：我開的 dump 票沒寫母體 ⇒ 回來的三筆是**健康隊、開局兩天內**（`pop 8-9`／`runway 35-40 天`／`famine 0`），而要問的是 `pop=2` 瀕死隊在 `tick≈52798`；★★**執行方一筆不差，是票錯**。★★★而「**分子分母同一時刻同一母體**」是我自己立的判準——**拿去要求別人，開票時自己沒寫**。 |
 | **4** | ★★★**A 級條目開票前一律先 code 複驗**（12 條已驗 6 條、★**5 條 stale**）：①符號還在不在 ②**錨對不對**（行號會漂，用 `檔::符號`）③斷言還成不成立（★特別是負斷言）④★★**分清「靜態可驗」與「要跑才知道」**——行為病靜態查不出來 ⇒ 標 `狀態：未確認`＋回訪：量測窗，★★★**不要寫成【已知未修】送去開票**。★**兩種 stale 都要查**：內容 stale（病被別的刀修掉了）／**錨 stale**（病還在但門牌指錯 ⇒ 照錨去看會看到「什麼都沒有」，而那看起來像已經修好）。 |
+
+## ★★★merge 不在共用 main dir 做（systems 立 2026-09-05，血證同日）
+```
+★事故:③的 merge 在主 dir 進行到一半(衝突已解、尚未 commit),
+   別的 session 跑了自己的 `git commit` ⇒ ★★它把【我的整個 merge】收進【它的 commit】
+   ⇒ 結果 297b0606 的 parents 是 (主線, 分支頂) = 【它就是 ③ 的 merge commit】
+      而標題寫的是「mailbox: return-main-dir 標 consumed」
+⇒ ★★★而它【已經 push 出去了】,而且【閘一次都沒跑】
+   —— 因為我原本打算「commit 後、push 前」跑閘,而 commit 這一步不是我按的
+```
+★**根因不是誰粗心**：主 dir 是**多個持久角色共用的工作區**，而 `git commit` 預設吃**整個 index**
+⇒ **任何人在你 merge 半途 commit，都會收走你的 merge** —— **而雙方都不會看到錯誤訊息。**
+
+★★**規矩**：
+```
+①merge 一律在【暫時 worktree】做:git worktree add <短路徑> main → merge → 跑閘 → push → remove
+   (★路徑要短:handback 檔名很長,%TEMP% 下會撞 Windows Filename too long)
+②★閘在【push 前】跑,而不是「commit 後」——因為 commit 那一步可能不是你按的
+③★★主 dir 只做:讀、寫檔、明列檔名的小 commit。★★★不做 merge、不做 rebase、不原地 checkout branch
+④半途發現被收走:【不重寫歷史】,補一顆說明 commit 把「那顆的真身是什麼」寫進紀錄
+```
