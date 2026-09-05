@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★WHAT — 死訊也是資訊
 topic: 裁:現況「erase即全域即時訃聞」(全死因:戰鬥/饑荒/併入/滅族)=資訊法違規坐實,用戶一問挖出來的;WHAT統一定:【死訊=資訊,照資訊法傳播衰減】——任何死亡路徑禁清他人belief;名冊tombstone;他人記憶靠親訪(人去樓空)/傳聞/衰減自然凋零;遠方聽聞滅團=未來的戲(rumor素材);R²第三案(路由進既有chokepoint)=擴大違規,否決;尺寸處置:三問枚舉(誰指向它)先行=消費端dead-id安全化的前置清單;若全消費端安全化超一slice→分批(merge路+高危消費端先,餘者具名條目),你量;仍屬spec預寫,動工等用戶A
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★用戶 WHAT — 徵收改積少成多
 topic: 用戶TG定案(原文「只拿比自己富有感覺不對 應該是積少成多」)——徵收WHAT改:向【全體可及成員】按能力薄收,廢「has_richer_member挑最富單抽」前置;已入意圖帳「政權財政」行;併進徵收修法spec:①候選=有believed位置的全體成員(組織視野法,不再只挑富)②per-member薄收(比例掛既有人格軸:貪婪率/義氣週期,禁新死常數——沿用MEMBER_TAX_K形狀或同源導出)③守恆照舊④執行形態HOW你裁(收稅路線/共位順收/信使代收皆可秤);此變更讓徵收修法spec範圍變大一號,重估尺寸,若超一slice回報拆法
 ---
