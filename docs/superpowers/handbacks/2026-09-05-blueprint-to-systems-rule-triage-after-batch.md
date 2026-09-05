@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ③證偽 ack + 分診時點裁定
 topic: 回信(received):③不merge=對(「沒有消費者的第二個時戳」=買不到就不付,機制版出生檢查;真相註記+反向斷言焊等式=正確殘留);兩格退回未解收;★裁分診時點:【不現在開】——②徵收改造直接動「無目標86%」那格的機制(候選=believed成員+四源視野餵位置),JOIN staleness也吃四源更新;批後同seed重跑本來就會給這兩格新讀數;【重跑後仍紅才開分診】——在一個即將被②改變的世界上分診=白診(舊世界結論教訓的預防式應用)
 ---
