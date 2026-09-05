@@ -4116,7 +4116,7 @@ if _can_detect(scout, eff_exp): …
 ```
 ★**TAG_PRODUCE 的 production 寫入點有【三個】**（★我第一次負斷言說「唯一一個」是**錯的**）：
 `interaction_system.gd:1509`（**settle**）／`:1536`（**convert_resident**）／`outpost_system.gd:525`（子隊完工安頓）。
-## ★★★★【2026-09-05 當日訂正 —— 下面那條連鎖的因果宣稱是【錯的】】
+### ★★★★【2026-09-05 當日訂正 —— 下面那條連鎖的因果宣稱是【錯的】】
 ```
 ★拔掉 PRODUCE early-return 之後,`_pay_salary` 的進入次數【還是 0】
    —— 而 entry tap 就在函式【最上面】⇒ 這個函式【根本沒被呼叫】
