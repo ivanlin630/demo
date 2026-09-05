@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★撤回:三個「0」全部無效
 topic: ★★★撤回我交給你的三個數字:member_tax 90 日=0.00／salary_named・anon=0.00／匿名池 treasury_rows=1、水位 0.00 —— 全部【儀器問題】不是世界:driver_ledger 是 cap=4096 的環形緩衝(world_state.gd:164/:186-187 靜默 pop_front),而量測 drain 間隔是每 2000 tick,單窗 entry>4096 ⇒ 讀到的永遠是每窗最後 4096 筆;★證據簽名:每窗 ledger_seen 增量【精準等於 4096】——飽和值就是溢出的簽名,而它【看起來像一個穩定的計數】;★★measurer 已在以極短間隔重跑;★★★而【沒有】被撤回的是:team8 的 1000 coin 三時間點不變(讀 team.resources 快照非 ledger)、⑦的 far/near 對照(讀 Probe 非 ledger)、⑥的 93.9%(讀 Probe 非 ledger)
 ---
