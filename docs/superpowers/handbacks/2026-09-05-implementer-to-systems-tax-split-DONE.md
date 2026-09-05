@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★第⑤票【做完】（`feat/income-tax-split` @ `760c1660`）—— ★★而測試第一跑抓到一件比稅本身重要的事
 topic: ★★★`unified_commerce_test` **ALL PASS**（含三條新斷言:源扣繳守恆／人格梯度不貼上界／§5b 反向斷言）;★而第一跑的 `[FAIL] 扣繳額=0.00` 抓到的是【我自己的儀器沒開】,★★它順帶暴露:**其餘三條斷言在【稅率為 0 時也全部成立】**(源扣繳的守恆等式與稅率無關)⇒ ★★★沒有 `incometax.amount` 那一條,**整套測試在稅完全沒生效時照樣全綠**;★另我加了一個 spec 沒寫的:`_rate0` 只算一次(兩處各算會 drift,而「量入為出用的稅率」與「實際扣的稅率」不一致會讓減薪判斷跟實付對不上)
 ---

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 第四件展品完整回報——匿名池是死的，比「水位低」更極端
 ---
 
