@@ -4116,7 +4116,19 @@ if _can_detect(scout, eff_exp): …
 ```
 ★**TAG_PRODUCE 的 production 寫入點有【三個】**（★我第一次負斷言說「唯一一個」是**錯的**）：
 `interaction_system.gd:1509`（**settle**）／`:1536`（**convert_resident**）／`outpost_system.gd:525`（子隊完工安頓）。
-★★**連鎖（一因三症，不是三個獨立證據）**：
+## ★★★★【2026-09-05 當日訂正 —— 下面那條連鎖的因果宣稱是【錯的】】
+```
+★拔掉 PRODUCE early-return 之後,`_pay_salary` 的進入次數【還是 0】
+   —— 而 entry tap 就在函式【最上面】⇒ 這個函式【根本沒被呼叫】
+★★真根 = LOD 相位:無玩家床 ⇒ 全隊走 far ⇒ far pass 每 FAR_ZONE_INTERVAL(100) tick
+   而 payday = 10080k,10080k % 100 = 80k ≠ 0 直到 k=5 ⇒ 30 日窗【一次都對不上】
+⇒ ★★★所以下面的「settle → 薪資 early-return → …」這條鏈,【機制描述為真,因果宣稱為假】
+   而三症之中【薪資 0】與【匿名池 0】是【相位造成的】,不是經濟造成的
+   (★member_tax = 0.00 那一格【仍然成立】:它的 caller 走 TICKS_PER_MONTH=43200,%100=0,不受相位影響)
+```
+★**而這不只是量測盲點，是世界的 bug**：在**有玩家的真實遊戲**裡，**離玩家遠的隊真的只領到 1/5 的薪水**（見下一條 known_issue）。
+
+★★**連鎖（★★★因果已於上方訂正，保留原文供對照）**：
 ```
 settle 把隊變成 PRODUCE ⇒ 薪資系統 early-return ⇒ ①【薪資從未執行】(90 日 0 次)
                                               ⇒ 具名成員拿不到錢 ⇒ ②【member_tax 90 日 0.00】
@@ -4141,3 +4153,25 @@ settle 把隊變成 PRODUCE ⇒ 薪資系統 early-return ⇒ ①【薪資從未
 它靠**有人新鮮地走到那個座標、用 vision 現場看到那裡沒人**（感知通道），**兩條不同通路**。
 ★★**修法形狀已有現成範本**：抄 `belief_system.gd:386-399` `appearance()` 的**三態**（`"fresh"`／`"stale"`／`"never"` 各一個桶），
 ★★★**不要另外發明一種表示法** —— 而它會 touch 全域 belief 讀取端，**是一張獨立的票**。
+
+## ★★★★裸 `current_tick % INTERVAL` 在 LOD far pass 下會【週期性漏拍】—— 而它是距離依賴的世界扭曲（2026-09-05）
+★**狀態：已知未修**｜**回訪：觸發事件 —— ⑦票（遷 `CadenceStagger`）落地**
+```
+★受害條件:【裸 modulo 閘】長在 shape:"teams" 且 LOD_BOTH 的 step 裡,
+   而 INTERVAL 不是 FAR_ZONE_INTERVAL(100) 的倍數
+★★命中清單(全掃 scripts/simulation,扣掉 whole-state 的):
+   salary_system.gd:31         SALARY_INTERVAL 10080 → %100 = 80  ★中招
+   faction_ai_system.gd:1170   TICKS_PER_MONTH 43200 → %100 = 0   安全
+   faction_ai_system.gd:1499   定期徵收,動態 interval             ★同一類
+★★★而策略層【免疫】:INFRA_INTERVAL 那一整排走 `CadenceStagger.next_tick()`
+   —— 它比的是 `last_eval_tick` 【不是精確 modulo】⇒ 相位錯開不會漏(全 repo 23 個呼叫點)
+```
+★**後果不是「床看不見」，是【世界不公平】**：
+```
+sim_runner.gd:291 near pass = tick % NEAR_CADENCE(60) == 0   ⇒ payday 全中
+sim_runner.gd:337 far  pass = tick % FAR_ZONE_INTERVAL(100) == 0 ⇒ payday 只有每 5 次中一次
+⇒ ★★同一支隊,【離玩家近就月月領薪,離玩家遠就四個月領一次】
+⇒ ★★★而【無玩家的 headless 世界裡「遠隊」＝全部】⇒ 薪資軸在任何預設床上都【不可觀測】
+```
+★**修法（已具名，不要另外發明）**：把 `salary_system.gd:31` 與 `faction_ai_system.gd:1499` 遷到 **`CadenceStagger`**，
+與策略層同形、**零新機制零新常數**。★★**而不要去調 `SALARY_INTERVAL` 的數值** —— 那是把相位問題偽裝成調參問題。
