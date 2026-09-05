@@ -387,7 +387,7 @@ B＝母體換成 `BeliefSystem.known_targets` ＋ 所有權查 `team_tile_known`
 ★★**而這個詮釋不是我自己想的，是從 reviewer 那裡照收的。** ★★★**上游給的詮釋一樣要驗。**
 （★我已據此撤回寄給 blueprint 的那一段，並砍掉為它寫到一半的 `gateok-reconcile` 閘 —— **錯前提上的守衛比沒有守衛更貴。**）
 
-### ⏳★★★憲法閘 baseline 的【一行兩義】：「判過合法」與「已知漏、暫緩」長得一樣（2026-09-02 reviewer 撿，★systems 讀原文複驗）
+### ⏳★★★憲法閘 baseline 的【一行兩義】：「判過合法」與「已知漏、暫緩【★非裁定：此處是【引述】那個一行兩義的問題本身】」長得一樣（2026-09-02 reviewer 撿，★systems 讀原文複驗）
 
 ★**坐實（該行自述，不是詮釋）**：
 ```
@@ -857,7 +857,7 @@ spike ＝ 每小時一次（間距恰好 = TICKS_PER_HOUR）｜中位數 ~6.8 �
    ⇒ ★★★**再驗觸發條件：市場成交量到達可統計量級時。**
 
 ### ★出口第三項【未做，且刻意】
-**長考 wall-clock 預算重估 ⇒ ★排在【時間重錨之後】**（blueprint 准）——
+**長考 wall-clock 預算重估 ⇒ ★排在【時間重錨之後】【★defer token: exam-budget-recalc；★★而時間重錨已落地 ⇒ 本條已逾期一次，2026-09-06 重新裁定】**（blueprint 准）——
 ★★**重錨會改所有 tick 語意，現在估的是【作廢數字】，不留。**
 
 ## ⏳ g1a 舊根/新根差異＝【未歸因】，但帶著三條已排除的路徑（2026-08-27，S2 重錨）
@@ -2013,7 +2013,7 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 
 ### 第二批燒進度（2026-07-01 三軌 merged）
 - ✅ **B 食物張力 done**（張力機制到:forest 苟活須交易/plains 繁榮/不 mass-starve）。**★下一閘=交易網未轉真因=建設 util 碾貿易**（specimen 商隊 想=致富但 winner=建設 0.79>貿易 0.26,決策權重域非食物）→ granary 爆倉閘拆後露出。**修向**：貿易 util 提權（有訂單/arb 時應勝建設）or 建設 gate。屬決策權重 slice。**其他 follow-up**：FOOD_PER_PERSON 0.8 + flow 常數 TEST VALUE 待平衡 pass;material harvest ÷24 但 mat_regen 未縮放（建造/製造吞吐未專測,掃一眼）;ambition rung 讀 flow=行為變（marginal 隊 flow=0 起步卡 SURVIVE、prosperity-attack 需盈餘=飢餓不主動開戰）。**★warring 全窗 24 月已驗（系統補跑,radius14 seed）**：**不 mass-starve ✓**（teams 穩~30、Famine 涓滴非潮、DONE、0 error）、**founding ✓**（found_ally=5/factions=7 穩/FOUND=1 全程）、RICH=13 主導（致富錨活）;**但 ⚠ CONQUER=0 全程、established 卡1、EXPAND=0=征服/擴張 emergence 全窗變平**。**根=雙重壓制**:①食物軌 ambition rung 讀 flow → prosperity-attack 需經濟盈餘（食物緊→少隊達 EXPAND rung→少開戰）②征服攻擊路徑分裂（見征服 measure,粗攻擊不轉化）。首燒 bounded-3 月曾見 CONQUER 0→1,加食物軌全窗回 0。**修向**:征服攻擊統一（本批 measure 修向）+ ~~可能 rung-gate flow 門檻放寬~~ **✅ 2026-07-02 R1 三帶裁定改「解綁」非「放寬」**（藍圖 c 路線:拔 rung-food 攻擊閘,食物盈餘只管立國/坐穩/擴編,已 merged;CONQUER 壓平根因收）。
-- ✅ **單寫者 slice2 done**（driver-ledger 真記 + roster chokepoint + audit）。**★audit 揭 pre-existing leader/team_id desync**（merchant leader P0 team_id!=本隊,經 leader 指派非-named 路徑;roster chokepoint 已修 named-transfer desync tyrant 4→0,但 leader 指派路徑覆蓋不到）= **第3不變量首個可查對象,root fix 行為變待 triage**（動 leader 指派/team_id 寫路徑）。**其他 follow-up**：`driver_tick_hint` sim_runner 未接線（要真 tick 溯源再接）;反向 roster audit 未做（需先解 health famine「死亡留屍保 team_id」語意）;`beast_system.gd`（★L2 錨：檔級。原為行號錨，而行號跟著編輯走）/`subteam clear()` 兩豁免暫緩。
+- ✅ **單寫者 slice2 done**（driver-ledger 真記 + roster chokepoint + audit）。**★audit 揭 pre-existing leader/team_id desync**（merchant leader P0 team_id!=本隊,經 leader 指派非-named 路徑;roster chokepoint 已修 named-transfer desync tyrant 4→0,但 leader 指派路徑覆蓋不到）= **第3不變量首個可查對象,root fix 行為變待 triage**（動 leader 指派/team_id 寫路徑）。**其他 follow-up**：`driver_tick_hint` sim_runner 未接線（要真 tick 溯源再接）;反向 roster audit 未做（需先解 health famine「死亡留屍保 team_id」語意）;`beast_system.gd`（★L2 錨：檔級。原為行號錨，而行號跟著編輯走）/`subteam clear()` 兩豁免暫緩【★defer token: single-writer-leftovers】。
 - ✅ **征服名實 measure done（證偽首燒假設）**：真斷點**非**掠奪搶排序（掠奪僅 2.4% winner、0 capture=打錯靶）,是**攻擊實作分裂**——舊 solo 粗攻擊(`_nearest_independent` 無 scout/rung gate,@PRIO_DISPATCH 優先)vs `_evaluate_prosperity_attack` 細攻擊(weakest-prey/scout-gated/導 subjugate),粗淹細 → 243 攻擊→1 capture。**修向（follow-up spec，數據支持）=統一征服攻擊路徑**（非-unified 好戰隊 TASK_ATTACK 委派 prosperity/共用 gate+subjugate 導向）。**次診斷**：攻擊→capture 轉化崩在「打不贏」還是「贏了不吸收」需另一輪 measure（戰鬥結局分布）。**→ means-end 已收攻擊路徑統一（route 6.6×）,但 capture 完成 depth 仍低,見下。**
 
 ### 第三批燒進度（2026-07-02 means-end + slice3 merged）
@@ -4071,7 +4071,7 @@ if _can_detect(scout, eff_exp): …
 ```
 ★★**而母體的誠實限（implementer 自標）**：**那三個 fail counter 的母體是【全站所有 envoy 用途】**
 ⇒ ★★★**所以【不能說】「回報因為沒名人而失敗 501 次」** —— **要歸給回報自己那一份，需要 `ptype` tap。**
-★**而那張小票已開，排在終卷之後**（★`_dispatch_envoy` 在 `faction_ai_system.gd` ＝ 世界路徑，本段凍結中）。
+★**而那張小票已開，排在終卷之後【★defer token: envoy-ptype-tap；★★而終卷已到 ⇒ 本條已逾期一次，2026-09-06 重新裁定】**（★`_dispatch_envoy` 在 `faction_ai_system.gd` ＝ 世界路徑，本段凍結中）。
 
 ## ★★★belief **沒有位置**的真根因【未知】—— 而「新鮮度洗白」這個假說**已被否證**（2026-09-05）
 ★**狀態：已知未修**｜**回訪：觸發事件 —— ②徵收 broad-thin 落地之後**（★②會改候選集合，現在切出來的分佈馬上過期）
@@ -4190,7 +4190,7 @@ sim_runner.gd:337 far  pass = tick % FAR_ZONE_INTERVAL(600) == 0 ⇒ payday 只�
 ★**狀態：已知未修**｜**回訪：觸發事件 —— 用戶對 LOD 對帳的裁示**
 ```
 ★2026-08-20 明文(commit 0a1e03a7):「模擬層零 LOD…玩家近遠分班【判死】」
-★★而 docs/progress.md:99 同日我自己寫的:「systems 排序裁定:零 LOD(拆 near/far)【排最後】
+★★而 docs/progress.md:99 同日我自己寫的:「systems 排序裁定:零 LOD(拆 near/far)【排最後】【★非裁定：此處是【引述】progress.md:99 的考古】
    —— 它是花預算不是賺預算,且 cadence 語意依賴時間包層級制」
 ⇒ ★★★【已裁定、未執行】,而 16 天後它以【薪資相位病】的形式咬人
    (遠隊四個月領一次薪水;而無玩家世界裡「遠隊」＝全部)

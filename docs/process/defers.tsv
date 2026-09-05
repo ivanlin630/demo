@@ -20,6 +20,13 @@
 #   ★真不可量化的極少數 ⇒ 退而求其次＝【定期複審日期】（也是 met_check：`[ "$(date +%F)" \> "YYYY-MM-DD" ]`）
 #   ⇒ ★★總之【表上不留裸 memory 行】
 #
+# ★★★★【2026-09-06 blueprint 立】「歸某 arc」與「排某事件後」的分界：
+#   ★「歸某 arc／歸某 backlog」 ⇒ 【合法的家】—— roadmap 由【用戶】駕駛，不需要 token
+#   ★★「排某事件之後／排最後／等 X 再做」 ⇒ 【要 token】
+#     —— ★★★因為它綁的是【一個會過去的事件】，而事件過去之後【沒有人會回頭】
+#        （血證：「零 LOD 排最後」＋本日一次判掉的存量裡，★兩筆的觸發事件【早就到期了】：
+#          `exam-budget-recalc`（時間重錨已落地）／`envoy-ptype-tap`（終卷已到））
+#
 # ★解除後：把該行【刪掉】並在 commit message 寫明 —— ★★不要改成「已完成」留在表上
 #   （留著會讓這張表長大，然後沒人看 —— 那正是它要防的病）
 #
@@ -28,3 +35,7 @@ modulo-same-shape-4	harvest×5／population×1 的裸 modulo(安全靠算術整�
 belief-perfield-rest	resource_scale／combat_target_est 的逐欄位時戳——未修理由是【目前無讀取端消費它們的新鮮度】	有任何讀取端開始檢查這兩個欄位的新鮮度	git grep -nE 'BELIEF_STALE_TICKS' -- scripts/simulation | grep -qE 'resource_scale|combat_target_est'
 belief-pos-tristate	belief_pos 把【從未有情報】與【情報過期】回成同一個 (-1,-1)——修法抄 appearance() 三態	墓碑(①票)落地(production 出現 live_teams/all_teams 縫)	git grep -q 'func live_teams' -- scripts/data
 event-density-schedule	事件密度排程未實裝(per-team cadence 由該隊自身活動密度決定,睡覺的隊少輪是因為沒事不是因為離玩家遠)	perf 越線:任一量測檔出現 wall_s > 28800(=8 小時)	grep -rho '"wall_s"[[:space:]]*:[[:space:]]*[0-9.]\+' docs/process/verdicts docs/measurements 2>/dev/null | grep -o '[0-9.]\+$' | awk '$1 > 28800 {found=1} END {exit found?0:1}'
+exam-budget-recalc	長考 wall-clock 預算重估(原裁「排在時間重錨之後」,blueprint 准)——★時間重錨已落地 ⇒ 本條【已逾期一次】,2026-09-06 重新裁定為批次收尾後	第一批收尾:⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish main
+envoy-ptype-tap	envoy ptype tap(回報歸因用;原裁「排在終卷之後」)——★終卷已到(EXAM-FINAL 已產、凍結已解除)⇒ 本條【已逾期一次】,2026-09-06 重新裁定為批次收尾後	第一批收尾:⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish main
+otherdomain-coordination	他域耦合求裁(戰俘/capture 需 combat 等)——原文「handback 藍圖求裁,暫緩」,而【解除條件不可量】⇒ 照 defers 檔頭退而求其次:定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
+single-writer-leftovers	單寫者 slice2 收案時暫緩的小項(反向 roster audit／beast_system L2 升級／subteam clear())——★解除條件不可量 ⇒ 定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]

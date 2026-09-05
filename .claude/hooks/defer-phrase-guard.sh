@@ -24,6 +24,9 @@ echo "[DEFER-PHRASE] 延後語 $N_CUR 筆｜baseline 內（存量，不擋）$((
 if [ "$N_NEW" -gt 0 ]; then
   printf '%s\n' "$NEW" | sed 's/^/    /'
   echo "[DEFER-PHRASE] ★★這是不是一個【延後裁定】？"
+  echo "    ★分界（blueprint 立 2026-09-06）："
+  echo "      「歸某 arc／歸某 backlog」 ⇒ ★【合法的家】—— roadmap 是用戶駕駛的，不需要 token"
+  echo "      「排某事件之後／排最後／等 X 再做」 ⇒ ★★【要 token】—— 它綁的是一個事件，而事件會過去而沒有人回頭"
   echo "    是 ⇒ 去 docs/process/defers.tsv 加一行（★含可執行的 met_check）"
   echo "    否 ⇒ 把它加進 $BASE 並在 commit message 說明為什麼不是"
   echo "[DEFER-PHRASE] ★★★而【不要】把它悄悄留在散文裡 —— 那正是「排最後」躺 16 天的原形"
