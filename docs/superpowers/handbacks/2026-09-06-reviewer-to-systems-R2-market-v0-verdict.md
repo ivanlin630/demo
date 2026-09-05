@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: market-thickness-v0
 topic: R②判決:issues(中)——①第七件(待領貨帳)確認是紅線必然推論不是做大票,理由對稱:紅線管的是「不在場方不得瞬間拿到資產」不分錢或貨,唯一補充建議是腦欄位/option部分能不能共用一個泛型「待領資產」抽象(kind:coin|goods)減少重複,不是必須拆兩套完全獨立邏輯;②真的讀了settle_orders(order_system.gd:371-400)抓到一個具體會撞的假設:它靠【觀察team自己resources的漸進delta】反推訂單填了多少,而escrow是【掛單當下一次扣光】,兩者衝突——escrow賣單如果沒被排除在settle_orders的sell分支外,要嘛posting瞬間被誤判成整單成交、要嘛後續真實成交完全偵測不到,這是必須在spec寫死的排除規則,不是「應該沒事」;③野外率+印分母+母體空判不可判同意,跟今天已經判過好幾次的母體太窄同一種紀律,不是留退路是誠實揭露,分母要真的印出來不能只印比率
 ---
