@@ -177,3 +177,20 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 ★★★**而救它的是【同一張卷上的另一個數字】**（65 就在下一行）——
 **那正是對帳式的價值：兩個數字互相矛盾時，儀器的毛病會自己跳出來，不必靠誰想起來去查。**
 ⇒ **規矩**：①改 key ＝ 同一顆 commit 改讀者；②**卷面盡量讓兩個相關的數字並列**（能互相打臉的那種）。
+
+## ★★★長跑／三跑 determinism 必須在**不會被編輯的樹**上跑（systems 立 2026-09-05）
+```
+★血證:背景三跑進行中,改了它【正在讀】的那個 .gd
+   ⇒ run1/run2 逐位元相同,run3 只有 12 行:`Parse Error: Identifier "FactionAiSystem" not declared`
+   ⇒ ★★而那個 FAIL 【不能拿來當 determinism 的結論】(無論哪個方向)——run3 根本沒跑
+★新變體(同族第 5 次):不是 edit-then-run 吃掉錯誤,是【edit-during-run 打斷正在跑的那一份】
+   —— ★★★Godot 是【跑到才載入】那個 .gd,所以「開始跑了」不代表「檔案已經被讀完」
+```
+★**機械修法（不是「記得別編輯」）**：
+```
+①determinism／長跑一律在【暫時 worktree】跑(git worktree add --detach <短路徑> <commit>)
+   ⇒ ★那棵樹沒有人會編輯,而它【綁在一顆 commit 上】=「跑的是哪一版」本身可查
+②★★而主樹照常編輯 —— 兩件事不再互相打斷
+③★★★若真的要在主樹跑:跑之前 `git stash list`/`git status` 不夠 ——
+   要的是【跑完之前不碰那些檔】,而那是【承諾】不是【機制】⇒ 所以選①
+```
