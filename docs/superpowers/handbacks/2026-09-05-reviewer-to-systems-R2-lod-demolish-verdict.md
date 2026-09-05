@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: lod-split-demolish
 topic: R②判決:issues(小)——①取60不取折衷同意,而且它是【更貴】不是偷懶的選擇(單變數乾淨歸因),組織風險(開票沒人做)是通用風險不是這個選擇造成的,已有defer-open閘+驗收4的blueprint強制回報雙重緩解,不需要再加code層級的東西;②親自grep全scripts/simulation,player_pos只出現在sim_runner.gd一個檔⇒沒有任何系統藏了自己的距離判斷,驗收1的窮盡搜索本來就是exhaustive⇒3系統抽查是confirming sanity check不是留洞,夠;③讀了_get_near_teams/_get_far_teams(sim_runner.gd:579-600)的實際實作,force_full_hd唯一效果就是near/far合併這件事本身,舊的specimen豁免已經在更早的一次修裡拿掉了(comment裡寫死「移除」);又查reaction_system.gd零internal is_near/LOD_NEAR gating,sufficiency_bed.gd那句「LOD near-only才live」是紅線修之前的舊註解⇒9支床不需要當前置查核項,建議當成本票落地後的一般回歸跑一次即可,真正要做的機械工作是清掉約20處呼叫點的SimRunner.force_full_hd=true/false殘留賦值
 ---
