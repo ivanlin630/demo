@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: C/D 定案(用戶核可 2026-09-06)=對比輪加三格量測,不動任何機制
 topic: ★用戶「可以」:C 規模經濟+D 物價 clamp 兩題都收斂成【對比輪加格】;★★C 前提=設施規模紅利管道已存在(resource_system.gd:131 farming_level 乘人均+labor 工位;腦接線三處 faction_ai:975 建設argmax/2666 facility_roi/marginal_economy 人口邊際)⇒問題只剩「知道→做到」通沒通;★★★D 前提=clamp 是後加穩定閥(意圖帳物價行記錄在案)⇒拆不拆先看命中率;三格請折進對比輪量測規格派 measurer,分母全印(母體空=不可判非紅)
 ---
