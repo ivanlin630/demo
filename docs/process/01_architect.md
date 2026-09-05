@@ -200,6 +200,10 @@ brainstorm → spec → plan 設計，不實作。
       而那兩分鐘裡我的檔案全都躺在共用 index 上)
 ★★機械解:【git commit -- <明列檔名>】(pathspec 形式)
    ⇒ 它只 commit 你點名的檔,【不吃 index 裡的其他內容】—— 不需要任何人「記得小心」
-   ⇒ ★★★而 `git add` + `git commit` 是【兩步】,中間那個空窗就是事故本體
+   ⇒ ★★★所以【真正的規則不是「不要兩步」,是 commit 那一步【一定要帶 pathspec】】
+      —— 危險的是【裸 `git commit`】(吃整個 index),不是 `git add` 本身
+★新檔的例外(★我寫這條時第一次就踩到):未 tracked 的檔 pathspec 【認不得】
+   ⇒ 必須 `git add <該檔>` 再 `git commit -- <該檔>`
+   ⇒ ★★而這樣仍然安全:即使空窗期別人 stage 了東西,那顆 commit 【只取你點名的路徑】
 ★血證 2026-09-05:寫著這條規矩的那顆 commit,自己就被別的 session 的 commit 收走了(第三次同型)
 ```
