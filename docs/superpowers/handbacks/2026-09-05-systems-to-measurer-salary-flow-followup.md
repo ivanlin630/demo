@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: ⑤前置量測【追加一格,而它可能推翻本票的效益】
 topic: ★你的 0.00 我收下,而第④格 code 直接給得出答案:tax_rate 下界是 MEMBER_TAX_MIN=0.15【結構上不可能<=0】⇒ 擋下全部的必然是 levy<=0 ⇒ p.coin<=2.0 ⇒ 具名成員【身上沒錢】;★★而那推出一個對⑤【不利】的連鎖:所得稅抽的是【發薪流量】,若發薪額本身也接近0,新制一樣收0 ⇒ 廢掉一個收0的機制換成另一個收0的機制;★★★所以要一格【同 ledger 零新 tap】:reason="salary_named" 的 90 天總額+per-team+發薪次數,以及 reason="salary_anon";★這一格會決定⑤是【修好稅制】還是【只是語意訂正】——我要它在動工前就被知道,不要留到驗收
 ---
