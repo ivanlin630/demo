@@ -8,11 +8,21 @@ class_name CoinTreasury
 const COIN_NEED_CAP: float = 500.0        # TEST VALUE — coin_need clamp 上限防爆
 const EXTRACT_BUFFER_MIN: float = 5.0     # TEST VALUE — 貪婪 leader extract 後留 treasury 下限（>0=非清空）
 const EXTRACT_BUFFER_MAX: float = 30.0    # TEST VALUE — 慎重 leader 留厚 buffer 上限
-const MEMBER_TAX_K: float        = 0.6    # TEST VALUE — 貪婪→稅率係數（單刀 0.3 太弱→強化）
-const MEMBER_TAX_K2: float       = 0.2    # TEST VALUE — 慎重→減稅係數
-const MEMBER_TAX_MIN: float      = 0.15   # TEST VALUE — 保底稅（連中性領袖也抽，全隊回補 coin 池）
-const MEMBER_TAX_MAX: float      = 0.7    # TEST VALUE — 上限（貪婪深抽）
-const PERSONAL_COIN_FLOOR: float = 2.0    # TEST VALUE — 留個人燃料不收乾（單刀 5.0 太保守→降）
+# ★★★團內稅分軌（用戶 TG 2026-09-05；spec 2026-09-05-income-tax-split-HOW §2）——
+#   ★匿名半邊＝抽【積蓄】（`consider_extraction`/`extract_treasury`，need-driven 池取用）⇒ 零改動
+#   ★★具名半邊＝抽【所得】：由 `salary_system` 在發薪當下【源扣繳】
+#   ★★★而舊的 `collect_member_tax`（月抽 `person.coin` 存量）**整支退場** ——
+#     ★退場的不只是一支函式：★★它同時是「把成員【既有存量】拉回團庫」的救急管道，
+#     ★★★而那條路是【用戶法的直接後果】刻意死掉的，不是副作用（見 spec §5b 禁令）。
+const INCOME_TAX_K: float   = 0.6    # TEST VALUE — 貪婪→稅率係數（沿用同形舊值 MEMBER_TAX_K）
+const INCOME_TAX_K2: float  = 0.2    # TEST VALUE — 慎重→減稅係數（沿用 MEMBER_TAX_K2）
+const INCOME_TAX_MAX: float = 0.7    # TEST VALUE — 上限（沿用 MEMBER_TAX_MAX）
+# ★下界改 0.0（原 `MEMBER_TAX_MIN`＝0.15 保底稅退場）——
+#   ★★理由：保底稅存在是因為【月抽存量】一年只有 12 次機會；
+#   ★★★而所得稅【隨每次發薪】發生（`SALARY_INTERVAL`＝7 日 ⇒ 4.3 倍機會）⇒ 不需要保底。
+# ★而 `PERSONAL_COIN_FLOOR`（留個人燃料不收乾）也退場：
+#   ★★它是【存量稅】才需要的護欄；所得稅按【流量】抽，★★★結構上碰不到既有積蓄
+#   ⇒ 天然退場，不是拔掉保護。
 
 static func extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: String) -> void:
 	if team.anon_treasury <= 0.0 or ratio <= 0.0: return
@@ -78,18 +88,9 @@ static func consider_extraction(state: WorldState, team: TeamData) -> void:
 # unified-commerce coin combo（fold coin-B 成員稅回收，破 salary 單向枯竭補 team.coin 池）。
 # 鏡射 _consider_extraction：月 cadence、玩家隊不自動、稅率掛領袖人格。★守恆：person.coin→team.coin 池間搬。
 # ★tune 強（coin now load-bearing：買方要有錢買市場 ask ~3.4+）：rate 高/MIN 保底/FLOOR 低（TEST VALUE，measurer 校）。
-static func collect_member_tax(state: WorldState, team: TeamData) -> void:
-	if team.leader_id == state.player_id: return   # 玩家手動（同 extraction）
-	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
-	var greed: float = float(leader.values.get("貪婪", 0.5))
-	var prudence: float = float(leader.values.get("慎重", 0.5))
-	var tax_rate: float = clampf(greed * MEMBER_TAX_K - prudence * MEMBER_TAX_K2, MEMBER_TAX_MIN, MEMBER_TAX_MAX)
-	if tax_rate <= 0.0: return
-	for pid in team.named_members:
-		var p: PersonData = state.persons.get(int(pid))
-		if p == null: continue
-		var levy: float = minf(p.coin * tax_rate, p.coin - PERSONAL_COIN_FLOOR)   # 留 floor 不收乾
-		if levy <= 0.0: continue
-		ResourceBank.adjust_person_coin(p, -levy, "member_tax")   # 守恆 chokepoint：person.coin−
-		ResourceBank.add(team, "coin", levy, "member_tax")        # team.coin+（池間搬，CoinAudit=0）
+# ★★★`collect_member_tax` 已於 2026-09-05 整支移除（團內稅分軌）——
+#   ★它抽的是 `person.coin` 的【存量】，而新規則抽【所得】（發薪源扣繳）。
+#   ★★而【不要因為 `team.coin=0` 卡死就把它加回來】：spec §5b 是硬禁令 ——
+#     ★★★不得新增「當 `team.coin < X` 時直接抽 named 成員 `p.coin`」這一類路徑
+#       （無論掛在 salary／extraction／trade 哪一支，也無論條件寫得多嚴）。
+#   ★而 `unified_commerce_test.gd` 有一條【反向斷言】守著這件事。
