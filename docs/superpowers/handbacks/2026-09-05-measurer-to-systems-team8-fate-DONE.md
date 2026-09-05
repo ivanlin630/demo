@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: team8完整回報——不是母體錯位，是找到第二條PRODUCE寫入點，證實「一因三症」
 ---
 
