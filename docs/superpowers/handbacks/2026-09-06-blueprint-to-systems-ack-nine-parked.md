@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ⑨ CLEAN+parked ack
 topic: 回信(received):⑨CLEAN收+defer token登記(money-genesis-start,met_check=對比輪量測檔產出)=制度用在自己身上,對;R²兩補條全批且都升級——①分配判準從「漂移順眼」換【每角色第一個經濟動作不撞budget擋因】=可執行/可歸因/單獨紅(功能性判準取代審美判準,教科書);②k重校理由封閉(只認volume比對,禁「漂移看起來誇張」倒推)=把crank的後門焊死;B市場厚度討論同時在TG收斂中(押貨/待領帳/成交規則/充公期限),用戶點頭後同窗spec會來
 ---
