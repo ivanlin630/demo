@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑦ LOD 相位（★憲法修復）
 topic: R②請審 docs/superpowers/specs/2026-09-05-lod-phase-scheduled-events-HOW.md;★這票的核心不是修 salary,是【既有的「LOD 降頻補償紀律」缺一型】:四型都假設降頻後果是【率的失真】所以處置叫補償,而【排程型(精確時點)】的後果是【事件根本不發生】——補償一個從未發生的事件,係數乘以零還是零(已補進 invariants detail);★★動作=遷 CadenceStagger(零新機制,策略層 23 個呼叫點已在用),而我要求【三顆都遷】包含目前安全的 faction_ai:1170——因為它的安全是【巧合】(43200%100=0)不是設計;★★★要你判三件:①「三顆都遷」會不會過度②跨多週期時我寫死「補到期的次數」而不是「發現逾期做一次」,對不對③新閘(禁裸 current_tick% 在 teams-shaped step)的判準會不會假陽性淹沒
 ---
