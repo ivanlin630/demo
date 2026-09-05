@@ -1523,10 +1523,16 @@ func _sec_payday() -> void:
 			print("     第 %d 個發薪日：因發薪的 unrest 筆數 = %d ｜ 合計 delta = %+.0f" % [
 				int(_p3), int(_sub[_p3]), float(_sut[_p3])])
 	print("     ★對照：`減薪` 隊次合計 = %d（★兩者應同源：只有減薪才寫這條 driver）" % _tot_cut)
-	if _su_cap_hit > 0:
-		print("     ★★★driver ledger 撞上限 %d 次 ⇒ 本節【可能不完整】——不要當成窮盡" % _su_cap_hit)
+	# ★★★改讀【真的丟棄計數】（blueprint 守衛令落地後）——
+	#   ★我原本的 `_su_cap_hit` 是【推測】：「掃描當下 size >= cap」⇒ 可能剛好錯過那一瞬。
+	#   ★★而 `driver_ledger_dropped` 是【事實】：每丟一列 +1，不需要任何人剛好在場。
+	if WorldState.driver_ledger_dropped > 0:
+		print("     ★★★driver ledger 已丟棄 %d 列（cap=%d）⇒ 本節【不是窮盡】——上面的筆數是【下界】"
+			% [WorldState.driver_ledger_dropped, WorldState.driver_ledger_cap])
 	else:
-		print("     ★ledger 未撞上限（cap=%d）⇒ 本節是【窮盡】的" % WorldState.driver_ledger_cap)
+		print("     ★ledger 丟棄 0 列（cap=%d）⇒ 本節是【窮盡】的" % WorldState.driver_ledger_cap)
+	if _su_cap_hit > 0 and WorldState.driver_ledger_dropped == 0:
+		print("     ★★（我的舊推測 `_su_cap_hit=%d` 與真計數 0 不一致 ⇒ 推測那格本來就不可靠，已改讀計數）" % _su_cap_hit)
 	print("     ★合計 進入 %d ／ 減薪 %d —— ★★而【這個合計正是不該拿來判讀的東西】：" % [_tot_paid, _tot_cut])
 	print("        ★★★同樣的合計可以來自【每日均勻】或【某一天全部塌】，而它們是兩個世界")
 	print("     ★★而【進入次數】也不是【發薪次數】：payroll==0 的隊進得來、走完、一毛沒發，")
