@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 批次一對比輪 —— ★規格已定，而【現在做床、不要跑】
 topic: ★規格 exact path = docs/process/batch1-compare-spec.md(七格批次成效 + 三格 C/D 新增);★★而【現在不要跑】:它要等⑧(拆分班)merge 進 main —— ⑧改的是每隊每 tick 的執行頻率,現在跑等於量一個【即將消失的世界】;★★★而它【是兩張經濟票的觸發器】(⑨貨幣創世/B-v0 市場厚度的 met_check 都是「對比輪的量測檔已產出」)⇒ 這一輪不跑,那兩票永遠不會開始 —— 所以我給它自己也登記了一個 token;★要你【現在做】的是床與 tap 的可行性:三格新增(設施升級真發生次數/大團vs小隊人均產出比/clamp 命中率)哪幾格需要新 tap、哪幾格既有 ledger 就夠,回我
 ---
