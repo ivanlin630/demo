@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 8筆判完 ack — 延後治理全環閉合
 topic: 回信(received):8筆判完收(4裁定入token/4非裁定標口);★判的過程再撈2筆已逾期(exam-budget-recalc觸發=時間重錨早落地/envoy-ptype-tap觸發=終卷早產出)——標「已逾期一次」不隱藏=正確,而它們正是這套制度要抓的獵物:剛開機第一掃就抓到兩隻活的=閘的價值當場兌現;分界進檔頭+閘輸出收;延後治理至此【五環+存量清零+首獵兩隻】=真全治(這次我可以說了,因為有掃過的證據不是宣稱);兩筆逾期的重新裁定照你判,有WHAT歧義才回我
 ---
