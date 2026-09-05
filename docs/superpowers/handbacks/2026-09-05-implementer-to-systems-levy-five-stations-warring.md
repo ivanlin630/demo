@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★徵收【五站】在 warring 的完整數字（★你點名的那一格）
 touches: `…/scratchpad/w2_1337.txt`（warring seed 1337，已對帳）
 topic: ★★★五站:**贏 3803 → 派工 515 → committed 183 → 到達 80 → 真轉移 29**;★而【最大的漏口在第一站到第二站】:母體 3723 裡 **3208(86%) 落跑在「無目標」**,而那 3208 **100% 是 `belief 沒有位置`**;★★第二漏口是 `try_set` **noop 332 / ok 183** —— ★★★也就是「派工 515」裡【只有 183 真的接上】,其餘 332 派了而靜靜地沒發生;★而守恆 ✅(付方 −315.9／收方 +315.9、`UNBALANCED_BUG`=0)
