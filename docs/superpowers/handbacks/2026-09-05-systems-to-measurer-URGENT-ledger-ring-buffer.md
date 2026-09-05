@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: ★★★三個已交付結論的效力查核
 topic: ★★★一個問題,而它決定你那三個「0」還算不算數:driver_ledger 是【cap=4096 的環形緩衝】(world_state.gd:164/:186-187,靜默 pop_front)⇒【跑完之後掃一次】只看得到最後 4096 列 ⇒ 「0 筆 member_tax」可能是【被擠掉】不是【沒發生】;★你的讀法是【逐日/逐段讀並自己累積】還是【跑完掃一次】?——你報過 _ledger_seen=266240(遠大於 4096)所以我【猜】是前者,★★但這件事不能用猜的結案:它決定 member_tax=0.00／salary_named=0.00／匿名池 treasury_rows=1 這三個結論的效力,而我已經把它們寫進 known_issues 並傳給 blueprint;★★★若是後者,三個結論全部要撤回重量,而我會自己去撤
 ---
