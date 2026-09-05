@@ -17,6 +17,7 @@ func _initialize() -> void:
 	_test_probe_full_funnel()
 	_test_member_tax_conservation()
 	_test_combo_taxed_buyer_deals()
+	_test_no_stock_seizure_path()   # ★★★新增反向斷言：存量沒收走廊【不得存在】
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -237,56 +238,111 @@ func _test_probe_full_funnel() -> void:
 
 # ── coin combo：成員稅守恆（person.coin→team.coin 池間搬，留 floor）──
 func _test_member_tax_conservation() -> void:
-	print("--- coin combo：成員稅守恆（person→team，留 floor）---")
+	# ★★★改測【所得稅守恆】（spec §4 #1：改測不刪 —— 刪測試＝把閘變綠）
+	#   ★舊測驗的是「存量稅：person.coin → team.coin，且留 floor」——★★而那條路已整支退場。
+	#   ★★★新規則是【源扣繳】：team 只淨支出 net，稅額【從未離開團庫】
+	#     ⇒ 守恆的形狀也跟著變：不是「兩池間搬」，是【團庫少流出】。
+	print("--- ★所得稅守恆：源扣繳＝團庫少流出（不是兩池間搬）---")
+	var s := _mk_state()
+	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.9, "慎重": 0.1}
+	ldr.skills = {"統領": 0.5}
+	s.persons[100] = ldr
+	var team := TeamData.new(); team.team_id = 1; team.leader_id = 100
+	team.resources = {"coin": 1000.0}
+	for i in range(3):
+		var p := PersonData.new(); p.id = 200 + i; p.coin = 0.0
+		p.skills = {"戰鬥": 0.5}
+		s.persons[200 + i] = p; team.named_members.append(200 + i)
+	s.teams[1] = team
+	var tc0: float = float(team.resources.get("coin", 0))
+	var mc0: float = 0.0
+	for pid in team.named_members: mc0 += s.persons[pid].coin
+	var sal := SalarySystem.new()
+	sal.tick(s, [1])
+	var tc1: float = float(team.resources.get("coin", 0))
+	var mc1: float = 0.0
+	for pid in team.named_members: mc1 += s.persons[pid].coin
+	var out: float = tc0 - tc1        # 團庫實際流出
+	var got: float = mc1 - mc0        # 成員實際收到
+	_ok(out > 0.0 and got > 0.0, "有發薪：團庫流出 %.2f、成員收到 %.2f" % [out, got])
+	# ★★★關鍵斷言：★團庫流出【等於】成員收到（源扣繳 ⇒ 稅額根本沒動）
+	#   ★★而【不是】「流出 gross、再抽回稅」——後者會讓 out > got
+	_ok(absf(out - got) < 0.001, "★源扣繳：團庫流出(%.3f) ＝ 成員收到(%.3f)（稅額從未離開團庫）" % [out, got])
+	# ★人格梯度：貪婪 leader 的稅率要【高於】慎重 leader，而兩邊【不得都貼在 clamp 上界】
+	var r_greedy: float = clampf(0.9 * CoinTreasury.INCOME_TAX_K - 0.1 * CoinTreasury.INCOME_TAX_K2,
+		0.0, CoinTreasury.INCOME_TAX_MAX)
+	var r_prudent: float = clampf(0.1 * CoinTreasury.INCOME_TAX_K - 0.9 * CoinTreasury.INCOME_TAX_K2,
+		0.0, CoinTreasury.INCOME_TAX_MAX)
+	_ok(r_greedy > r_prudent, "★人格梯度：貪婪 rate(%.3f) > 慎重 rate(%.3f)" % [r_greedy, r_prudent])
+	_ok(r_greedy < CoinTreasury.INCOME_TAX_MAX - 0.0001,
+		"★★而貪婪那端【沒有貼在 clamp 上界】(%.3f < %.3f) —— 否則梯度是假的"
+		% [r_greedy, CoinTreasury.INCOME_TAX_MAX])
+
+# ── ★★★反向斷言（spec §4 #1b）：把「這條路是【故意】拿掉的」焊成可執行的測試 ──
+#   ★未來有人重新引入【存量抽取】（team.coin 低就抽 named 成員 p.coin）會【自動變紅】
+func _test_no_stock_seizure_path() -> void:
+	print("--- ★★★反向斷言：team.coin=0 而成員有私產 ⇒ 不存在把存量拉回團庫的機制 ---")
 	var s := _mk_state()
 	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.9, "慎重": 0.1}
 	s.persons[100] = ldr
 	var team := TeamData.new(); team.team_id = 1; team.leader_id = 100
-	team.resources = {"coin": 0.0}
+	team.resources = {"coin": 0.0}          # ★團庫見底
+	team.anon_treasury = 0.0                # ★★匿名池也見底 ⇒ 真正的「卡死」形狀
 	for i in range(3):
-		var p := PersonData.new(); p.id = 200 + i; p.coin = 100.0
+		var p := PersonData.new(); p.id = 200 + i; p.coin = 100.0   # ★★★成員有私產
 		s.persons[200 + i] = p; team.named_members.append(200 + i)
 	s.teams[1] = team
 	var mc0: float = 0.0
 	for pid in team.named_members: mc0 += s.persons[pid].coin
-	CoinTreasury.collect_member_tax(s, team)
+	# ★跑一輪【所有】可能碰到 coin 的既有路徑
+	CoinTreasury.consider_extraction(s, team)
+	var sal := SalarySystem.new()
+	sal.tick(s, [1])
 	var mc1: float = 0.0
 	for pid in team.named_members: mc1 += s.persons[pid].coin
 	var tc1: float = float(team.resources.get("coin", 0))
-	_ok(mc1 < mc0 and tc1 > 0.0, "person.coin 降（%.0f→%.0f）、team.coin 升（%.0f）" % [mc0, mc1, tc1])
-	_ok(absf((mc0 - mc1) - tc1) < 0.001, "★守恆 Δperson(%.1f)=Δteam(%.1f)" % [mc0 - mc1, tc1])
-	var min_p: float = 1e9
-	for pid in team.named_members: min_p = minf(min_p, s.persons[pid].coin)
-	_ok(min_p >= CoinTreasury.PERSONAL_COIN_FLOOR, "留 floor：最低 person.coin(%.1f) >= FLOOR(%.1f)" % [min_p, CoinTreasury.PERSONAL_COIN_FLOOR])
+	_ok(absf(mc1 - mc0) < 0.001,
+		"★成員私產【未被動用】(%.1f → %.1f) —— ★★這條路是【故意】拿掉的（spec §5b 硬禁令）" % [mc0, mc1])
+	_ok(tc1 <= 0.001,
+		"★★★團庫仍是 0（%.3f）—— ★而那是【genuine 貧困】不是 bug：正路只有賣貨／anon 池／領袖徵收" % tc1)
+	print("     ★★若這兩條變紅 ⇒ 有人重新引入了【存量沒收】走廊 —— 那是禁令，不是優化")
 
 # ── ★combo：市場有 sell stock + 買方經稅有 coin → deal fire（no_coin binding 破）──
 func _test_combo_taxed_buyer_deals() -> void:
-	print("--- ★combo：稅回補 team.coin → 買方到市場成交 ---")
+	# ★★★改測不刪（spec §4 #1b）：原場景「team.coin=0 起手 → 抽成員【既有】私產 → 買得成」
+	#   ★在新規則下【結構上不成立】—— 而那不是這支測試壞了，是【那條路被刻意拿掉了】。
+	#   ★★所以正向改成：**發薪後 team.coin 的增量來自【本次薪資流量的扣繳】**。
+	print("--- ★所得稅：team.coin 的保留額來自【本次薪資流量】的扣繳 ---")
 	var s := _mk_state()
-	# owner 市場：food sell 單 + storage
-	_mk_person(s, 100)
-	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
-	owner.active_orders = [{"order_id": 95, "kind": "sell", "res": "food", "qty_remaining": 50}]
-	var tile := _mk_outpost(s, 1, Vector2i(2, 2), {"food": 500.0},
-		[{"order_id": 95, "kind": "sell", "res": "food", "qty_remaining": 50, "origin_team": 1, "expire_tick": 99999}])
-	# 買方 team.coin=0（no_coin binding）但 named 成員有錢
 	var vldr := PersonData.new(); vldr.id = 200; vldr.values = {"貪婪": 0.9, "慎重": 0.1}
+	vldr.skills = {"統領": 0.5}
 	s.persons[200] = vldr
 	var visitor := TeamData.new(); visitor.team_id = 2; visitor.leader_id = 200
-	visitor.resources = {"coin": 0.0, "food": 0.0}
-	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(2, 2)
+	visitor.resources = {"coin": 500.0, "food": 0.0}
 	for i in range(9):
-		var p := PersonData.new(); p.id = 300 + i; p.coin = 100.0
+		var p := PersonData.new(); p.id = 300 + i; p.coin = 0.0
+		p.skills = {"戰鬥": 0.5}
 		s.persons[300 + i] = p; visitor.named_members.append(300 + i)
 	s.teams[2] = visitor
-	# 稅前：team.coin=0 → 到市場買不成
-	var iact := InteractionSystem.new()
-	iact._resolve_market_at_outpost(s, visitor, tile)
-	var food_pretax: float = float(visitor.resources.get("food", 0))
-	_ok(food_pretax == 0.0, "稅前 team.coin=0 → 買不成（food=%.0f）" % food_pretax)
-	# 收稅 → team.coin 回補
-	CoinTreasury.collect_member_tax(s, visitor)
-	_ok(float(visitor.resources.get("coin", 0)) > 3.4, "★稅後 team.coin(%.1f) > market ask ~3.4（買方有錢）" % float(visitor.resources.get("coin", 0)))
-	# 稅後：到市場買成
-	iact._resolve_market_at_outpost(s, visitor, tile)
-	_ok(float(visitor.resources.get("food", 0)) > 0.0, "★combo：稅後買方到市場成交（food=%.0f，no_coin binding 破）" % float(visitor.resources.get("food", 0)))
+	var tc0: float = float(visitor.resources.get("coin", 0))
+	# ★★★儀器要【先開】：`incometax.amount` 是唯一能證明「稅真的發生了」的那一格 ——
+	#   ★其餘斷言（團庫流出＝成員收到）在【稅率為 0 時也成立】⇒ 沒有這一格，
+	#   ★★整套測試在稅完全沒生效時【照樣全綠】。
+	#   ★★★而第一次跑它回 0.00 —— 那不是「稅沒發生」，是【Probe 沒開】：同一個 0 兩種意思。
+	Probe.arm()
+	var sal := SalarySystem.new()
+	sal.tick(s, [2])
+	var tc1: float = float(visitor.resources.get("coin", 0))
+	var got: float = 0.0
+	for pid in visitor.named_members: got += s.persons[pid].coin
+	var withheld: float = Probe.amount("incometax.amount")
+	var gross: float = Probe.amount("incometax.gross")
+	_ok(got > 0.0, "有發薪：成員共收到 %.2f" % got)
+	_ok(tc1 < tc0, "團庫有流出：%.1f → %.1f" % [tc0, tc1])
+	# ★★★關鍵：**團庫【少流出】的那一份 ＝ 扣繳額**（而不是「先付再收回」）
+	_ok(withheld > 0.0, "★扣繳額 = %.2f（★★非 0 才證明稅真的發生了）" % withheld)
+	_ok(gross > 0.0 and absf(gross - withheld - got) < 0.001,
+		"★★gross(%.3f) − 扣繳(%.3f) ＝ 成員收到(%.3f) ⇒ 三者對得起來" % [gross, withheld, got])
+	_ok(absf((tc0 - tc1) - got) < 0.001,
+		"★★★團庫流出(%.3f) ＝ 成員收到(%.3f) ⇒ 稅額從未離開團庫" % [tc0 - tc1, got])
+

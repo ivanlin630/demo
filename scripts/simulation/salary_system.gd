@@ -47,6 +47,19 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		if p0 == null: continue
 		if _has_master_memory(p0, team.leader_id): continue
 		named_payroll += (p0.salary if is_player_team else _calc_fair_salary(p0) * npc_salary_mult)
+	# ★★★量入為出估的是【團真的要流出多少 coin】⇒ named 那半要乘 `(1 - rate)`（spec §2 判斷②）
+	#   ★用 gross 估會【明明付得起卻減薪】；★★而 anon 不課稅所以不乘。
+	#   ★★★代價（spec 自標）：「減薪」次數會下降 —— 那是【行為差異】，要被印出來。
+	var _leader_greed: float = 0.5
+	var _leader_prudence: float = 0.5
+	var _lead0: PersonData = state.persons.get(team.leader_id)
+	if _lead0 != null:
+		_leader_greed = float(_lead0.values.get("貪婪", 0.5))
+		_leader_prudence = float(_lead0.values.get("慎重", 0.5))
+	var _rate0: float = clampf(
+		_leader_greed * CoinTreasury.INCOME_TAX_K - _leader_prudence * CoinTreasury.INCOME_TAX_K2,
+		0.0, CoinTreasury.INCOME_TAX_MAX)
+	named_payroll *= (1.0 - _rate0)
 	var anon_total: float = AnonTierSystem.total_wage(team)
 	var payroll: float = named_payroll + anon_total
 	var coin_avail: float = maxf(float(team.resources.get("coin", 0)), 0.0)
@@ -62,9 +75,24 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		if not is_player_team:
 			p.salary = fair * npc_salary_mult
 		var paid: float = p.salary * budget_ratio
+		# ★★★所得稅【源扣繳】（spec 2026-09-05-income-tax-split §2B）——
+		#   ★稅額【從未離開團庫】：team 只淨支出 `net`，而不是「先付再抽回來」
+		#     ⇒ ★★守恆上是【少流出】不是【新增憑空 coin】（`CoinAudit` 應為 0）
+		#   ★★人格同形：貪婪↑稅率↑／慎重↑稅率↓ —— 沿用舊 `MEMBER_TAX_*` 的同一組係數，
+		#     ★★★而下界改 0.0（保底稅退場：所得稅隨每次發薪發生，不需要保底）
+		#   ★★★用【同一個 `_rate0`】不重算：★兩處各算一次會 drift，
+		#     而「量入為出用的稅率」與「實際扣的稅率」不一致 ⇒ 減薪判斷會跟實付對不上。
+		var net: float = paid * (1.0 - _rate0)
+		# ★忠誠 ratio 讀【名義】(gross) 不讀實發（spec §2 判斷①）——
+		#   ★★那條軸問的是「領主給不給得起／肯不肯給」，不是稅；
+		#   ★★★苛稅→離心該是【另一條具名的】戲，混進 underpay 懲罰＝一個數字扛兩個意思。
 		var ratio: float = paid / maxf(fair, 0.01)
-		ResourceBank.remove(team, "coin", paid, "salary_named")
-		ResourceBank.adjust_person_coin(p, paid, "salary_named")
+		ResourceBank.remove(team, "coin", net, "salary_named")
+		ResourceBank.adjust_person_coin(p, net, "salary_named")
+		if Probe.enabled:
+			Probe.bump("incometax.withheld")
+			Probe.add_amount("incometax.amount", paid - net)
+			Probe.add_amount("incometax.gross", paid)
 		if ratio >= 1.0:
 			LoyaltyBank.adjust(p, (ratio - 1.0) * OVERPAY_BONUS, "overpay", MAX_LOYALTY)
 			var intensity: float = clampf((ratio - 1.0) * 0.5, 0.05, 0.8)  # TEST VALUE
