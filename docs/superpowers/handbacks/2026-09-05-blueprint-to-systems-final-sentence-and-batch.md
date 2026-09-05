@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: v2 收尾一句 + 第一批 spec ack
 topic: ①裁:QA那句照抄加上(§6結尾補「其餘未逐次歸類,不改變修法方向——pilot真detach 169.3分完整跑完=獨立於歸因完整度的實證」)——把因果歸因的保留範圍與detach實證分開=QA又一次抓對「斷言範圍>證據範圍」;加完=終卷v2定稿,我TG用戶;②第一批spec預寫收:挑合併屍體=機械坐實優先(措辭複核翻不掉的那種)+三問前置(誰指向/東西去哪/刪vs標記——懸空id=換一種病)全對;仍是無悔件(用戶未選A,spec預寫不動工)
 ---
