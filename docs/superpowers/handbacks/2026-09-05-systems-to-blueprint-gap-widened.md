@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ⑤團內稅分軌
 topic: ★你的預裁我收下並直接套用,而它現在要蓋【更大的範圍】:R②抓到 collect_member_tax 還有第二個角色=把成員【已持有】p.coin 拉回團庫解 team.coin=0 卡死(函式註解自己寫著,示範案例是普通TASK_TRADE隊不是居民隊)⇒源扣繳永遠碰不到存量⇒這條救急路【對任何隊歸零】;★★而你那句「舊制在掩蓋『產出換不到錢』的真病」剛好是【同一句話的更強版】:掩蓋的是任何隊的 team.coin=0 卡死,不只居民隊 ⇒ 判準不變、範圍放大,前置量測加一格(不分隊型的卡死命中率),大宗=交回你併B議程;★★★另:main dir 現在在 feat branch 上,我沒先確認 HEAD 就 commit,docs commit 誤落 branch 已搬回 main(2eba2b76)並剔除誤掃入的別人WIP
 ---
