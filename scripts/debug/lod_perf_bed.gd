@@ -25,7 +25,13 @@ func _run() -> void:
 	var ladder_raw: String = OS.get_environment("LOD_PERF_LADDER") if OS.has_environment("LOD_PERF_LADDER") else "default,warring_states,perf_scale"
 	var world_seed: int = int(OS.get_environment("LOD_PERF_SEED")) if OS.has_environment("LOD_PERF_SEED") else 1337
 	var months: int = int(OS.get_environment("LOD_PERF_MONTHS")) if OS.has_environment("LOD_PERF_MONTHS") else 2
-	var total_ticks: int = maxi(months, 1) * WorldState.TICKS_PER_MONTH
+	# LOD_PERF_TICKS(2026-09-06)：最小單位原本是【一個月】，而 warring_states 在 ~99 隊時
+	#   LOD pass 就已經 ~40ms/tick ⇒ 一個月 ×2 趟 >6000s ⇒ ★兩次都被砍掉。
+	#   ⇒ ★★而「砍掉」的後果是【重的那個 config 一次都沒量到】，那會讓卷面看起來像
+	#     「只有 default 有代價」—— ★★★而重的那個才是代價最大的地方。
+	#   ⇒ 給一個 tick 級的窗讓重 config 也真的量得到（★窗變短要在卷面講明，不假裝同窗）。
+	var total_ticks: int = int(OS.get_environment("LOD_PERF_TICKS")) if OS.has_environment("LOD_PERF_TICKS") \
+		else maxi(months, 1) * WorldState.TICKS_PER_MONTH
 	var configs: Array = []
 	for c in ladder_raw.split(",", false):
 		configs.append(c.strip_edges())
@@ -55,6 +61,8 @@ func _run() -> void:
 		var tps: float = 1_000_000.0 / maxf(float(hm), 1.0)
 		print("%-12s %6d %13d %13d %8.1fx %10.0f %10d" % [
 			r["config"], int(r["hd"]["teams"]), lm, hm, float(hm) / maxf(float(lm), 1.0), tps, int(r["hd"]["max"])])
+	print("★窗長 = %d tick（%.1f 遊戲日）—— ★★短窗＝隊數成長較少，跨 config 比【倍率】不比絕對值"
+		% [total_ticks, float(total_ticks) / float(WorldState.TICKS_PER_DAY)])
 	print("\n注:HD_tps=full-HD 攤銷可達每秒 tick(1e6/mean)。playback 參考:1×=240tps/4×=960tps。HD_max=最壞單tick(hitch)。")
 	print("=== lod_perf_bed DONE ===")
 

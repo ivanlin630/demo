@@ -163,6 +163,12 @@ static var driver_ledger: Array = []          # Array[Dictionary] {tick,entity,f
 static var driver_ledger_enabled: bool = false
 static var driver_ledger_cap: int = 4096      # TEST VALUE
 static var driver_tick_hint: int = 0          # sim_runner 開 ledger 時填當前 tick；off 不動
+# ★★★環形緩衝的丟棄計數（blueprint 守衛令 2026-09-05）——
+#   ★純觀測：不改控制流、不耗 RNG ⇒ fp 逐位元不變。
+#   ★★而它存在的理由是【一個 0 有兩種意思】：`reason=="X"` 掃出 0 筆，
+#     可能是沒發生，也可能是【被 pop_front 擠掉了】—— 而這兩件事印出來一模一樣。
+static var driver_ledger_dropped: int = 0
+static var _driver_drop_warned: bool = false
 
 # ★`kind` 由【呼叫端的身分】填，不由字面推（systems 裁 2026-08-25）：
 #   `field` 是混雜欄——`tags`/`readiness`/`solo_intent`/`loyalty`/`coin` 跟真資源名同欄。
@@ -185,9 +191,22 @@ static func record_driver(entity, field: String, delta: float, reason: String, k
 	})
 	while driver_ledger.size() > driver_ledger_cap:
 		driver_ledger.pop_front()
+		# ★★★丟棄必須可見（blueprint 守衛令 2026-09-05，全量觀測法）——
+		#   ★病：這個 `pop_front` 【安靜地丟了 90 天】，而下游從 ledger 讀出來的三個「0 筆」
+		#     （member_tax／salary_named／匿名池）全都是【缺席宣稱】⇒ ★★「0」可能是【被丟掉】。
+		#   ★★★形狀是【丟棄計數】不是【window 寫入 > cap 自報】：後者要讀取端配合才看得到，
+		#     而計數器【不需要任何人記得去看】—— 只要有人印卷面就會撞到它。
+		driver_ledger_dropped += 1
+		if not _driver_drop_warned:
+			_driver_drop_warned = true
+			# ★【第一次丟就尖叫一次】—— 之後不再叫（每列一次會把 log 淹掉，而淹掉＝沒人看＝等於沒叫）
+			push_warning("[DRIVER-LEDGER] 開始丟棄舊列（cap=%d）★從此任何從 ledger 讀出來的「0 筆」都可能是【被丟掉】而不是【沒發生】" % driver_ledger_cap)
 
 static func clear_driver_ledger() -> void:
 	driver_ledger.clear()
+	# ★★★`dropped` 【不在這裡清】：它是「這個 process 曾經丟過東西」的證據，
+	#   而 clear 是【蓄意】的清空 —— 把證據跟著清掉會讓「清過之後的 0」再次無法分辨。
+	#   ★要清它請走 `_reset_cross_run()`（跨 run 邊界，唯一該歸零的地方）。
 
 # ★★★跨 run 清除（CrossRunReset 單一呼叫點）。
 #   ★`clear_driver_ledger()` 早就存在，而【只有 debug 床在叫它】——
@@ -198,6 +217,9 @@ static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
 	if not driver_ledger.is_empty(): cleared["WorldState.driver_ledger"] = driver_ledger.size()
 	if driver_tick_hint != 0: cleared["WorldState.driver_tick_hint"] = driver_tick_hint
+	if driver_ledger_dropped != 0: cleared["WorldState.driver_ledger_dropped"] = driver_ledger_dropped
+	driver_ledger_dropped = 0
+	_driver_drop_warned = false
 	clear_driver_ledger()
 	driver_tick_hint = 0
 	return {"checked": 2, "cleared": cleared}

@@ -1167,8 +1167,27 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 				Probe.bump("station.timeout")
 				TaskArbiter.release(team)
 		# 公庫徵用：每月一次依 leader 貪婪評估
-		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
-			CoinTreasury.consider_extraction(state, team)
+		# ★★★⑦：原本是 `current_tick % TICKS_PER_MONTH == 0`。它【目前】安全（43200 % 600 == 0），
+		#   ★而那是【巧合不是設計】—— 任何人動 `FAR_ZONE_INTERVAL` 或 `TICKS_PER_HOUR`，
+		#     它就會跟 salary 一樣【靜默】掉進相位縫（遠隊從此一次都不徵用，而沒有任何東西會紅）。
+		#   ⇒ ★★所以它也遷：安全的理由必須是【機制】，不能是【算術剛好整除】。
+		var _ex_cad: int = WorldState.TICKS_PER_MONTH
+		if team.extraction_eval_next_tick <= 0:
+			team.extraction_eval_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, team.team_id, _ex_cad)
+		elif state.world.current_tick >= team.extraction_eval_next_tick:
+			var _exg: int = 0
+			while team.extraction_eval_next_tick <= state.world.current_tick and _exg < EXTRACT_CATCHUP_MAX:
+				CoinTreasury.consider_extraction(state, team)
+				team.extraction_eval_next_tick = CadenceStagger.next_tick(
+					team.extraction_eval_next_tick, team.extraction_eval_next_tick,
+					team.team_id, _ex_cad)
+				_exg += 1
+			if _exg >= EXTRACT_CATCHUP_MAX:
+				Probe.bump("extraction.catchup_capped")
+				push_warning("[EXTRACT] team=%d 補評估撞上限 %d" % [team.team_id, EXTRACT_CATCHUP_MAX])
+				team.extraction_eval_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick, team.team_id, _ex_cad)
 			# ★★★`collect_member_tax` 已退場（團內稅分軌 2026-09-05）——
 			#   ★具名半邊改成【發薪源扣繳】(salary_system)，而它抽的是【所得】不是【存量】。
 			#   ★★而這裡原本的註解寫「回補 team.coin 池（買方要有錢買市場）」——
@@ -1493,11 +1512,58 @@ func _rebuild_goals(state: WorldState, f) -> void:
 				_emit_goal(state, f, "徵收", "防衛", "備戰籌餉", "fund_war")
 		"守成":
 			# default：無 stakes 令；僅維持經濟 cadence（定期徵收，仍帶 driver）
+			# ★★★這一格是驗收③的【母體】：`levy.due` 為 0 有兩種意思 ——
+			#   ①排程壞了（真病）②這個盟【從來沒進過「守成」】(本分支沒被執行過)
+			#   ⇒ ★沒有這格就分不出來，而我第一版就是拿「期望 22 次、實得 0」直接判紅 ——
+			#     ★★那是【拿一個假設的母體去判一個沒有母體的格子】。
+			if Probe.enabled:
+				Probe.bump("levy.branch.byfaction.%04d" % int(f.faction_id))
 			var greed_s: float = float(leader_p.values.get("貪婪", 0.5)) if leader_p else 0.5
 			var effective_interval: int = maxi(
 				int(COLLECT_INTERVAL * (1.5 - greed_s) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
-			if state.world.current_tick % effective_interval == 0 and _richest_member(state, f) != -1:
-				_emit_goal(state, f, "徵收", "守成", "定期維持 treasury", "levy")
+			# ★★★⑦：原本是 `current_tick % effective_interval == 0`。
+			#   ★★★★訂正（2026-09-05，我先前對 systems 講錯過一次）——
+			#     `evaluate_all(state, _team_ids)` 的 `_team_ids` 是【底線參數、根本沒用】，
+			#     faction 迴圈是 `for fid in state.factions`：★【每個 pass 都跑全部的盟】
+			#     ⇒ ★所以這一顆【不是距離依賴】的，我原本寫「遠盟徵不到」是錯的。
+			#   ★★真正的病是【量化】：pass 只發生在 `tick % 60 == 0` 或 `tick % 600 == 0`
+			#     ⇒ 觀測集 = `{t : t % 60 == 0}`
+			#     ⇒ 實際 fire 週期 = `lcm(60, eff)` 而不是 `eff`，失真倍率 = `60 / gcd(60, eff)`
+			#   ★★★而 `eff` 由 leader 的貪婪／義氣算出來 ⇒ ★倍率【隨個性而異】：
+			#     eff=1800（貪婪0.5義氣0.5）⇒ gcd=60 ⇒ 倍率 1，準時；
+			#     eff=2332（貪婪0.3義氣0.7）⇒ gcd=4  ⇒ 倍率 15，★★慢 15 倍
+			#     —— 而它看起來會像「這位統領就是不愛徵收」，★★★是【個性差異】的樣子。
+			#   ⇒ 遷 CadenceStagger 之後週期就是 `eff` 本身（到期後的第一個 pass 執行）。
+			#   ★★★補到期的次數：`_emit_goal`(:1562-1564) 是冪等 set(`goal not in f.goals` 才 append)
+			#      ⇒ 補 N 次與補一次結果相同（R² 查證）。
+			if f.levy_eval_next_tick <= 0:
+				f.levy_eval_next_tick = CadenceStagger.next_tick(
+					state.world.current_tick, state.world.current_tick,
+					f.faction_id, effective_interval)
+			elif state.world.current_tick >= f.levy_eval_next_tick:
+				var _lvg: int = 0
+				while f.levy_eval_next_tick <= state.world.current_tick and _lvg < EXTRACT_CATCHUP_MAX:
+					if Probe.enabled:
+						# ★★★【到期】與【真的發令】要分兩格：`_richest_member == -1` 時到期了也不發，
+						#   ⇒ 只記 emit 的話，「排程被相位吃掉」與「沒有富有的成員可徵」會共用同一個少。
+						#   ⇒ ★驗收③問的是【排程】，所以判準釘在 `due` 這格。
+						Probe.bump("levy.due.byfaction.%04d" % int(f.faction_id))
+					if _richest_member(state, f) != -1:
+						_emit_goal(state, f, "徵收", "守成", "定期維持 treasury", "levy")
+						if Probe.enabled:
+							# ★驗收③的機具：逐盟記【真的發了幾次徵收令】——
+							#   ★★合計答不了「哪些盟被相位吃掉」，而那正是這一顆的病的形狀。
+							Probe.bump("levy.emit.byfaction.%04d" % int(f.faction_id))
+					f.levy_eval_next_tick = CadenceStagger.next_tick(
+						f.levy_eval_next_tick, f.levy_eval_next_tick,
+						f.faction_id, effective_interval)
+					_lvg += 1
+				if _lvg >= EXTRACT_CATCHUP_MAX:
+					Probe.bump("levy.catchup_capped")
+					push_warning("[LEVY] faction=%d 補評估撞上限 %d" % [f.faction_id, EXTRACT_CATCHUP_MAX])
+					f.levy_eval_next_tick = CadenceStagger.next_tick(
+						state.world.current_tick, state.world.current_tick,
+						f.faction_id, effective_interval)
 	# 掠奪 = team option（P1）非統領令；war-priority 移除（單意圖後 moot）。
 
 # 子需求分解（深度1）：主行動未滿足前提 vs live 世界 → open needs（每 need = 子目標 String）。
@@ -5172,6 +5238,9 @@ func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array
 
 # ★S3 搬入 T3：【基建方向】是「這座城該往哪發展」—— 而建造本身以天計。
 const INFRA_INTERVAL: int = DecisionTier.C_INFRA
+# ★★★⑦ 補發上限：★不是行為旋鈕，是失控保護（正常 pass 間隔 << 週期 ⇒ 一次最多補 1 次）。
+#   撞到上限 = 資料壞了 ⇒ warn + 記一格，★不靜默截斷（靜默截斷會讓「補不完」長得像「補完了」）。
+const EXTRACT_CATCHUP_MAX: int = 8
 
 # ★★★決策 trace（QA 要求 2026-08-27）：【逐次決策的 candidate/util/winner】。
 #   ★預設關 ⇒ 一般跑零成本；只有 specimen 床會把它打開。

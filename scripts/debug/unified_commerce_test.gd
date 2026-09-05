@@ -28,6 +28,19 @@ func _ok(cond: bool, msg: String) -> void:
 	if cond: print("  [PASS] %s" % msg)
 	else: _fail += 1; print("  [FAIL] %s" % msg)
 
+# ★★★⑦（2026-09-05）之後 `SalarySystem.tick` 的閘不再是 `current_tick % SALARY_INTERVAL == 0`，
+#   而是【與 `team.salary_eval_next_tick` 比較】(CadenceStagger)。★第一次呼叫【只排程不發薪】
+#   （沒有工作過的那一週），所以「呼一次就期待發薪」的舊寫法會拿到 0。
+#   ★★而那個 0 【不是稅壞了也不是薪資壞了】—— 是【測試用了舊的觸發方式】。
+#   ⇒ ★★★這支 helper 把「排程 → 跳到到期 → 再呼一次」寫死，讓每個呼叫端都走同一條路，
+#     免得下一個人各自寫一份、而其中一份忘了跳。
+func _salary_due_tick(s: WorldState, sal: SalarySystem, tid: int) -> void:
+	var team: TeamData = s.teams[tid]
+	sal.tick(s, [tid])                                   # ①只排程
+	assert(team.salary_eval_next_tick > 0, "⑦：第一次呼叫必須排程")
+	s.world.current_tick = team.salary_eval_next_tick    # ②跳到到期那一刻
+	sal.tick(s, [tid])                                   # ③真的發
+
 func _mk_person(state: WorldState, id: int, vals: Dictionary = {}) -> void:
 	var p := PersonData.new(); p.id = id; p.values = vals; p.skills = {}
 	state.persons[id] = p
@@ -258,7 +271,7 @@ func _test_member_tax_conservation() -> void:
 	var mc0: float = 0.0
 	for pid in team.named_members: mc0 += s.persons[pid].coin
 	var sal := SalarySystem.new()
-	sal.tick(s, [1])
+	_salary_due_tick(s, sal, 1)
 	var tc1: float = float(team.resources.get("coin", 0))
 	var mc1: float = 0.0
 	for pid in team.named_members: mc1 += s.persons[pid].coin
@@ -297,7 +310,7 @@ func _test_no_stock_seizure_path() -> void:
 	# ★跑一輪【所有】可能碰到 coin 的既有路徑
 	CoinTreasury.consider_extraction(s, team)
 	var sal := SalarySystem.new()
-	sal.tick(s, [1])
+	_salary_due_tick(s, sal, 1)
 	var mc1: float = 0.0
 	for pid in team.named_members: mc1 += s.persons[pid].coin
 	var tc1: float = float(team.resources.get("coin", 0))
@@ -331,7 +344,7 @@ func _test_combo_taxed_buyer_deals() -> void:
 	#   ★★★而第一次跑它回 0.00 —— 那不是「稅沒發生」，是【Probe 沒開】：同一個 0 兩種意思。
 	Probe.arm()
 	var sal := SalarySystem.new()
-	sal.tick(s, [2])
+	_salary_due_tick(s, sal, 2)
 	var tc1: float = float(visitor.resources.get("coin", 0))
 	var got: float = 0.0
 	for pid in visitor.named_members: got += s.persons[pid].coin

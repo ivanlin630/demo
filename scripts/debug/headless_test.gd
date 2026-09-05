@@ -7312,11 +7312,28 @@ func _test_resident_no_salary() -> void:
 	state.persons[101] = member; t.named_members = [101]
 	state.teams[0] = t
 	var ss := SalarySystem.new()
+	# ★★★⑥（2026-09-05）：`_pay_salary` 的 `TAG_PRODUCE` 身分閘已拔（R² CLEAN、blueprint 核可）——
+	#   ★原本這裡三條斷言【就是那條閘的鏡像】：「居民隊應跳過」。閘沒了，鏡像必然紅。
+	#   ★★而改它的方式有講究（今天立的規矩）：★★★不是放寬成「容忍任何值」，
+	#     是換成【對的機制斷言】—— 而且要保留「機制壞掉會紅」的能力。
+	#   ★實測背景：`peaceful_economy` 那張床 93.9% 的薪資流量來自居民隊 ⇒ 修前那 94% 不存在。
+	var _fair: float = float(member.skills["戰鬥"]) * SalarySystem.SALARY_PER_SKILL_POINT
+	# ★稅率【由常數導出】不手抄（禁手抄物理）：貪婪=0、慎重未設走 production 同一個 default 0.5
+	var _rate: float = clampf(
+		float(l.values.get("貪婪", 0.5)) * CoinTreasury.INCOME_TAX_K
+		- float(l.values.get("慎重", 0.5)) * CoinTreasury.INCOME_TAX_K2,
+		0.0, CoinTreasury.INCOME_TAX_MAX)
+	var _anon_wage: float = AnonTierSystem.total_wage(t)
+	var _coin_before: float = float(t.resources["coin"])
 	ss._pay_salary(state, t)
-	# PRODUCE team 應跳過：member.salary 不變、coin 不扣、loyalty 不變
-	assert(member.salary == 0.0, "PRODUCE member salary 不應被設")
-	assert(float(t.resources["coin"]) == 500.0, "PRODUCE team coin 不應扣")
-	assert(member.loyalty == 0.5, "PRODUCE member loyalty 不應扣")
+	assert(member.salary > 0.0, "⑥：居民隊的具名成員【應該】被設薪（★修前恆 0 —— 這條就是⑥的簽名）")
+	# ★★這一條是【給下面兩條補鑑別力】的：慷慨 leader（義氣/信義=1、貪婪=0）⇒ mult>1 ⇒ 實發高於 fair。
+	#   ★★★沒有它，`loyalty > 0.5` 在 mult 掉到 1.0 時會【自動變成恆真】而照樣綠。
+	assert(member.salary > _fair, "★超額給付成立（mult>1）—— 沒有這條，下面的 loyalty 斷言會是空的")
+	var _spent: float = _coin_before - float(t.resources["coin"])
+	assert(absf(_spent - (member.salary * (1.0 - _rate) + _anon_wage)) < 0.01,
+		"★★守恆：團庫流出 == 具名淨額(gross×(1-rate)) + anon 薪資（★rate 由 CoinTreasury 常數導出，不抄數字）")
+	assert(member.loyalty > 0.5, "★★★超額給付 ⇒ 忠誠上升（上一條保證 ratio>1，所以這條不是恆真）")
 	print("Resident Task5 OK")
 
 func _test_invite_settle_execute() -> void:

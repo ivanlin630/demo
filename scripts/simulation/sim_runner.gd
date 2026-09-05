@@ -2,7 +2,12 @@ class_name SimRunner
 
 const LOD_NEAR_RADIUS: int = 3
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
-const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
+# ★★★訂正 2026-09-05（第⑦票）：原註解寫「= 100 ticks」是【stale】——
+#   `TICKS_PER_HOUR` 重錨成 60 之後這行沒跟著改，★真值 = 10 * 60 = **600**。
+#   ★★而它【真的騙過人】：implementer 引它 → systems 引 implementer → systems 拿那個數字「驗算」一次
+#     ⇒ ★★★兩個人都沒有從定義處讀，所謂「驗算」只是把同一個錯誤重述了一遍（結論剛好不變＝運氣）。
+#   ⇒ ★紀律：引用常數要從【定義的算式】讀，不從行尾註解讀。
+const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # = 10h = 600 tick（1 tick = 1 分鐘）
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更新頻率（1h，可調）
 
@@ -290,6 +295,12 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	# 近區：每小時執行
 	if state.world.current_tick % NEAR_CADENCE == 0:
 		var near_teams := _get_near_teams(state, player_pos)
+		# ★★★⑦ 驗收②要的機具：每隊【被分到哪一批】要可觀測 ——
+		#   ★沒有這格就無法在【同一個世界裡】比較 near 隊與 far 隊，
+		#     而 systems 明裁：跑兩次（一次全 far、一次 FULL_HD）是【兩個世界】，比不得。
+		if Probe.enabled:
+			for _ntid in near_teams:
+				Probe.bump("lod.near.byteam.%04d" % int(_ntid))
 		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
 		# H: choose_heir 不超時（advance_tick 開頭已凍結，此處為防禦）
 		if not state.player_forced_event.is_empty() \
@@ -336,6 +347,9 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
 		var far_teams := _get_far_teams(state, player_pos)
+		if Probe.enabled:
+			for _ftid in far_teams:
+				Probe.bump("lod.far.byteam.%04d" % int(_ftid))
 		# ★seam#3 S1：far 塊改 SYSTEMS registry 統一 loop（僅 BOTH，無分組 _pht；跳 near-only:reactions/
 		# cleanup/tile-regen/outpost_tick/tutorial）。tile 再生已由 near 每小時全域跑覆蓋 far tile（不重複=原 24× 雙記元凶）。
 		_run_systems(state, far_teams, FAR_ZONE_INTERVAL,
