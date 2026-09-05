@@ -132,32 +132,14 @@ static func belief_pos(state: WorldState, observer_id: int, target_id: int) -> V
 		if f == null:
 			return Vector2i(-1, -1)
 		var kms: Dictionary = f.known_member_states.get(target_id, {})
-		if kms.is_empty() or _pos_stale(now, kms):
+		if kms.is_empty() or now - int(kms.get("last_tick", 0)) > BELIEF_STALE_TICKS:
 			return Vector2i(-1, -1)
 		return kms.get("tile_pos", Vector2i(-1, -1))
 	# 跨-faction → BeliefSystem last-seen
 	var bel: Dictionary = best_estimate(state, observer_id, target_id)
-	if bel.is_empty() or _pos_stale(now, bel):
+	if bel.is_empty() or now - int(bel.get("last_tick", 0)) > BELIEF_STALE_TICKS:
 		return Vector2i(-1, -1)
 	return bel.get("tile_pos", Vector2i(-1, -1))
-
-# ★★★`tile_pos` 專屬的過期判斷（spec §3）——
-#   ★讀 `tile_pos_tick`；★★沒有它才退回 `last_tick`（舊 entry 相容，★★★而退回時會被記一筆）。
-#   ★零新常數：門檻仍是既有的 `BELIEF_STALE_TICKS`。
-static func _pos_stale(now: int, d: Dictionary) -> bool:
-	var has_own: bool = d.has("tile_pos_tick")
-	var t: int = int(d.get("tile_pos_tick", d.get("last_tick", 0)))
-	var stale: bool = now - t > BELIEF_STALE_TICKS
-	if Probe.enabled:
-		Probe.bump("freshness.pos_check")
-		if not has_own: Probe.bump("freshness.fallback_last_tick")   # ★舊 entry：沒有專屬時戳
-		# ★★★驗收 #2 要的那一格：**多少次 belief 因為改讀 `tile_pos_tick` 而【變成過期】**
-		#   ★它會讓某些數字變差 —— ★★而那是預期內的，所以它要【被看見】不是被解釋掉。
-		if has_own:
-			var old_stale: bool = now - int(d.get("last_tick", 0)) > BELIEF_STALE_TICKS
-			if stale and not old_stale: Probe.bump("freshness.newly_expired")
-			elif not stale and old_stale: Probe.bump("freshness.newly_fresh")
-	return stale
 
 static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictionary:
 	var cs: Array = claims(state, obs_id, tgt_id)
@@ -240,20 +222,17 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 		if _known_pos == null or _known_pos != fields["tile_pos"]:
 			WorldEvents.emit(state, "intel_arrived", [obs_id])
 	var firsthand: bool = source_type == "親見" and source_id == obs_id
+	# ★★★反向斷言（systems 裁 2026-09-05：留發現不留機制）——
+	#   ★實測：三個 production firsthand 寫入點全部同時寫 `tile_pos` ⇒ 等式成立
+	#   ★★而【等式斷掉的那一刻】就是這一格非 0 的時候 ⇒ ★★★由
+	#     `belief_freshness_invariant_test.gd` 執行斷言（★含陽性對照）。
+	if Probe.enabled and firsthand and not fields.has("tile_pos"):
+		Probe.bump("freshness.firsthand_no_tile_pos")
 	var found := false
 	for c in cs:
 		if int(c["source_id"]) == source_id:
 			(c["value"] as Dictionary).merge(fields, true)  # 同源累積/覆寫欄
 			if firsthand: (c["value"] as Dictionary)["last_tick"] = int(state.world.current_tick)
-			# ★★★新鮮度洗白（spec 2026-09-05-belief-freshness-per-field §3）：
-			#   ★`tile_pos` 是【條件寫入】的欄位（只有真的看到位置才寫），而 `last_tick` 是
-			#     ★★【鎖步欄位】的時戳 ⇒ 用 `last_tick` 判 `tile_pos` 的新鮮度＝
-			#     ★★★【一個欄位的新鮮度被另一個欄位的觀察背書】。
-			#   ★命名把欄位名【焊進】時戳名（禁 `observed_tick` 那種泛用字：
-			#     ★★泛用名會被下一個人誤認成「也能拿來判別的欄位」）。
-			#   ★★★轉述路【不蓋】：它帶的是 giver 的 `tile_pos_tick`（隨 fields 一起 merge 過來）。
-			if firsthand and fields.has("tile_pos"):
-				(c["value"] as Dictionary)["tile_pos_tick"] = int(state.world.current_tick)
 			c["tick"] = int(state.world.current_tick)
 			c["credibility"] = credibility
 			c["distorted"] = distorted
@@ -263,8 +242,6 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 		var v: Dictionary = {}
 		v.merge(fields, true)
 		if firsthand: v["last_tick"] = int(state.world.current_tick)
-		if firsthand and fields.has("tile_pos"):
-			v["tile_pos_tick"] = int(state.world.current_tick)   # ★同上：欄位名焊進時戳名
 		cs.append({ "value": v, "source_id": source_id, "source_type": source_type,
 			"tick": int(state.world.current_tick), "credibility": credibility, "distorted": distorted })
 	Probe.note("g3.claim_peak", float(cs.size()))
@@ -419,9 +396,12 @@ static func appearance(state: WorldState, obs_id: int, tgt_id: int) -> Dictionar
 	if bel.is_empty() or not bel.has("activity"):
 		if Probe.enabled: Probe.bump("appearance.never")
 		return {"activity": ACT_UNKNOWN, "tags": [], "in_combat": false, "state": "never"}
-	# ★★★此處的 `last_tick` 管的是本 entry 的【鎖步欄位】（population_est／tags_seen／activity／
-	#   in_combat —— 它們由 `vision_system.gd:142-157` 一次寫入）⇒ ★它【不管 `tile_pos`】。
-	#   ★★`tile_pos` 的新鮮度查 `tile_pos_tick`（見 `_pos_stale`）。
+	# ★★★實測事實（2026-09-05，非推測）：三個 production firsthand 寫入點
+	#   （`vision_system.gd:113`／`interaction_system.gd:1219`／`faction_ai_system.gd:2015`）
+	#   **全部同時寫 `tile_pos`** ⇒ ★`tile_pos` 的新鮮度【就是】這個 `last_tick`，**沒有借**。
+	#   ★★★而若未來新增【只寫部分欄位】的親見寫入端，這個等式會斷 —— 屆時要補逐欄位時戳；
+	#     而 `freshness.firsthand_no_tile_pos` 這顆計數就是那一刻的警報。
+	#   ★★（曾做過逐欄位時戳，實測 `newly_expired=0`、`fp` 逐位元相同 ⇒ 沒有消費者 ⇒ 不留機制。）
 	if state.world.current_tick - int(bel.get("last_tick", 0)) > BELIEF_STALE_TICKS:
 		if Probe.enabled: Probe.bump("appearance.stale")
 		return {"activity": ACT_UNKNOWN, "tags": [], "in_combat": false, "state": "stale"}
