@@ -41,6 +41,11 @@
    ⇒ ★★量:①撞下界次數 ②撞上界次數 ③未撞次數(★三者互斥且窮盡,加總 = local_value 呼叫次數)
    ⇒ ★★★讀法:命中率【高】= 這個閥在扛事(拆掉會出事)；【低】= 它是裝飾(可拆)
      —— ★而【兩種結論都要能下】,所以三格都要印,不能只印命中率
+★★★★可行性(measurer 2026-09-06):C-1／C-2 【零新 tap】(C-1 既有三段分母 faction_ai:5375-5427＋
+   `upg.eval_entry`／`infra.stop.1_upgrade`;C-2 直讀 `team.food_produce_avg` per-team EWMA)
+   ⇒ ★D 【需要一顆新 tap】,已派 implementer
+   ⇒ ★★而【判準形式我改過】:比 clamp【之前】的 shortage,不是比 clamp 之後的 sr
+      —— 後者會把【被夾住】與【剛好等於邊界】混在一起,而且要靠 epsilon
 ```
 
 ## §4 通則（★這一輪的全部格子都適用）
