@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★補跑已用【真 detach】起（★而途中我自己造了一個 UTF-16 陷阱、當場抓掉）＋ 第一批數字表已交
 touches: `docs/measurements/2026-09-05-first-batch-numbers-table.md`｜`…/scratchpad/d42.txt`
 topic: ★seed 42 已用 **WMI 真 detach** 起（PID 10408、`ReturnValue=0`）,world_sha 逐值對上(sim=61f2ab27 data=c9ca7ae7 config=c7ceb6b3),★★串行不並跑(照你裁的);★★★而第一次起的時候我用了 PowerShell 的 `*>` 重導 —— **它預設寫 UTF-16(BOM `ff fe`)** ⇒ 之後所有 grep 都會失效【而檔案看起來完全正常】;★我在 30 秒內驗出來、砍掉重起,改用 `cmd /c … > file 2>&1`(raw bytes)⇒ 現在前四 bytes 是 `47 6f 64 6f`;★★數字表已交,七格、每格標母體
