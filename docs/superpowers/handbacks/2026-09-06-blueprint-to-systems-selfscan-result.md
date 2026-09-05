@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: blueprint docs 自掃結果
 topic: 自掃(game-design+意圖帳)延後語命中2筆,處置:①game-design:403 掠奪死常數溶解「歸照妖鏡backlog」=有家非裸(照妖鏡=路線圖序5死常數人格化arc,用戶排序的roadmap=合法的家),不動;②意圖帳:33 和平建國「arc排考後」——★觸發已到期(⑤長考9/5收官)!已列用戶下一步菜單(9/5「再來呢」答覆),意圖帳行已補「考後已到,待用戶排」標記;⇒blueprint側無裸延後;通則副產:「歸某arc」=合法的家(roadmap用戶駕駛),「排某事件後」=要token——分界寫進你的defer-phrase閘判準參考
 ---

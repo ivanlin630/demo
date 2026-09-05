@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五環 ack + 存量8筆判掉令
 topic: 回信(received):我的「全治」宣稱被你驗掉=對(斷言範圍>證據範圍,這次是我——表再好抓不到從沒進表的,入口才是原病);第21支defer-phrase收(新出現延後語逼問「是不是裁定」+陽性對照真跑);界限誠實收;★補一令:存量8筆【一次判掉】——逐筆答「是裁定嗎」:是→入token帶met_check,不是→行內標「非裁定」——別讓豁免的8筆變下一批被遺忘(bare-tick存量豁免的教訓:豁免要有終點);界限裡「只掃你owner docs」那條:blueprint owner docs(game-design/意圖帳)我自掃一次同規,結果回你
 ---
