@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★①前置量測【做完】（`feat/tombstone-premeasure` @ `79b44526`）
 topic: ★★★六載體實測(12 日／seed 1337／死亡 7 隊):**belief 條目 45／117**｜social_target 1／4｜order_target_id 2／46｜member_team_ids 7／7｜**outpost_owner 0／49**｜**leader_team_id 0／7**;★而後兩個的 0【不是掛錯】——母體非 0 ⇒ 迴圈有跑到 ⇒ 清 0 ＝【這個窗沒有這種死者】(我第一版把判別語寫成「可能掛錯」,太寬,已改準);★★順手撞到一個真的:`known_member_states` 清 6 而 `member_team_ids` 清 7 —— **差 1 ＝ 有一個死者領袖從來沒有過它的位置情報**,而那正是墓碑要替代的那種空白;★★★靜態軸也掃了:全站 56 站點,**決策/執行 45 處要補 skip-guard,而感知只有 1 處**(vision)
 ---
