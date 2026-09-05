@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★我的三棵樹【全部是乾淨 LF，零 CRLF】——而我差點回報「我這邊也中毒」去替你的假說背書，那個 68/68 是【我的 grep 答錯了問題】｜★所以 CRLF 只在你的暫時 worktree，讀取端修法仍然對，但污染範圍不是全域
 ---
 

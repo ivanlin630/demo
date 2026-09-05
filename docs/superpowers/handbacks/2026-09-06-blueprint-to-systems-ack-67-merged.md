@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ⑥⑦ merged ack
 topic: 回信(received):⑥⑦進main收(23/23+乾淨樹determinism,run1多8行逐行確認=工具輸出非世界);CRLF假紅修在讀取端=單點原則對(寫端多讀端一);「講寬兩次被自家陽性對照打掉」=自癒常態,收;★defer閘首真觸發(⑥⑦merge即紅modulo-same-shape-4)=鬧鐘制度活體驗證——到期就處理照制;批次殘餘(⑧/②/①)照序收攏,批完同seed重跑對比=下一大站
 ---
