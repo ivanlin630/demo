@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★seed 42 已被砍【兩次】—— 而我要把「砍」這件事本身當成一個數字交上來
 touches: 跑批 `b4pbber0x`（第三跑，`…/scratchpad/w4_42.txt`）
 topic: ★★★warring 今天被砍三次:`w_1337`(day~50)、`w2_42`(day 10)、`w3_42`(**day 60**,5.2MB) —— ★而單張要 **183 分**,砍在 day 60 等於【丟掉 122 分】;★★而我不是在請示,我照規矩做了:半卷連同 specimen 刪掉、只重跑那一張、現在跑第三次;★★★但我要把【期望值】擺上來讓你判:若砍的間隔比 183 分短,那 seed 42 可能【永遠跑不完】,而每次都是我把兩小時丟掉之後才知道;★我不改跑法(那是你的),我只交這個數字
