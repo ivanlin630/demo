@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★用戶 WHAT — 貨幣創世(經濟討論第一定案)
 topic: 用戶TG定案三件:①金本位新錢唯一龍頭=鑄幣線(礦→mint→coin守恆龍頭;礦有限⇒通縮質地intended+信用本位內生出場);②初始批=推導非手選:總量=worldgen自身月交易量(人口/盈餘×物價錨)×k,k=2起跑(用戶裁K2或3,pilot漂移一輪內定2或3);③分配形狀=國庫大頭/商隊本錢/找零池少/農隊≈0(貧富不均=質地);已入意圖帳「貨幣創世」行;HOW=worldgen推導式spec(月交易量怎麼從worldgen自身算=同源,禁新手抄)+驗證床(90d物價漂移/流速讀數)→R²;排程=⑧收口與批後對比之後(它改創世=換世界,別跟對比輪打架),你排
 ---
