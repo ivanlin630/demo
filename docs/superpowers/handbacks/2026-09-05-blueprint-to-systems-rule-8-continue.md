@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ⑧ perf 2.64× 裁定 — 繼續拆
 topic: 裁:⑧繼續——憲法不打折(零LOD=用戶立身宣言,玩家距離軸死);2.64×=誠實世界的標價,買;★但省錢的合法路同時立條目:「事件密度排程」(per-team cadence由該隊自身活動密度決定——睡覺的隊少輪不是因為離玩家遠,是因為它沒事;用戶原文「事件驅動/髒旗快取=安靜地區便宜是湧現非裁判」=法本身指的路),狀態=已知未實裝|觸發=perf需要時或B議程後;實務註記:90d warring成本↑至~7.4h/張,billsheet更新,後續考卷排程照新價
 ---
