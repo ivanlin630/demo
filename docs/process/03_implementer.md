@@ -156,3 +156,12 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 而我拿它當「機制實存」的證據寫進了 `known_issues`。
 ★**規模**：`scripts/` 全域 600/4130（14.5%）是 static；★★而在 production 母體下是 36%，
 **且有 39~49 個檔【整檔皆 static】—— 對那些檔，`^func ` 每一行都會答錯。**
+
+## ★多段刪除用 anchor，不用行號（systems 立 2026-09-05，implementer 血證）
+★**每刪掉一段，後面所有行號就全錯** —— 而編輯工具不會抗議，它照著你給的（現在已經指錯地方的）行號動手。
+★★血證：③收束時用行號做多段刪除 ⇒ 誤刪 `cs.append(...)`、留下孤兒 `if` 與半截 dict literal ⇒ **把 production 檔改壞**。
+★★★而 Godot 只報 `Could not resolve class BeliefSystem, because of a parser error`，**不指出真正壞的那一行**
+⇒ **第一層看起來像是「測試檔」壞掉** —— 錯誤訊息把你導向錯的檔。
+★**真正的破口不是「用了行號」，是【anchor 沒對上就退回行號，而退回的那一步沒有補上驗證】**
+⇒ 規則：anchor 對不上 ⇒ **先弄清楚為什麼對不上**（多半是空白/全形字/CRLF），**不是換一種定位方式**；
+真的要退回行號，**每刪一段就重新取一次行號**，且刪完**立刻**跑一次語法檢查再繼續。

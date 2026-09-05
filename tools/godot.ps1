@@ -53,7 +53,23 @@ if (-not $skipCacheGuard) {
         Write-Output "[godot.ps1] running --import first (one-off, ~20s). Without it every class_name type"
         Write-Output "[godot.ps1] fails to resolve and this run would print ZERO failures while testing NOTHING."
         $imp = Start-Process -FilePath $exe -ArgumentList @("--headless", "--path", $projPath, "--import") -NoNewWindow -PassThru -Wait
-        Write-Output "[godot.ps1] import finished (exit $($imp.ExitCode)); continuing with the requested run."
+        # Third cause (2026-09-05, blood evidence): --import can RUN, exit 0, and still leave the
+        # cache empty (8 bytes) in a fresh worktree. The old message reported the exit code -- a
+        # state the reader had to interpret -- and then the run failed with unresolved types, which
+        # reads as "the change I just made broke it". A guard must report the DISPOSED RESULT.
+        # Predicate is semantic, not a size threshold: a real cache lists entries as `"class": &"X"`.
+        $built = (Test-Path $cacheFile) -and ((Get-Content $cacheFile -Raw -ErrorAction SilentlyContinue) -match '"class":')
+        if ($built) {
+            Write-Output "[godot.ps1] import finished (exit $($imp.ExitCode)); cache BUILT ($((Get-Item $cacheFile).Length) bytes); continuing."
+        } else {
+            Write-Output "[godot.ps1] *** import RAN (exit $($imp.ExitCode)) BUT THE CACHE IS STILL EMPTY ***"
+            Write-Output "[godot.ps1] This is the THIRD cause, not stale-cache and not a missing type:"
+            Write-Output "[godot.ps1] --import did not take in this tree (seen in fresh `git worktree add`)."
+            Write-Output "[godot.ps1] Every class_name type will fail to resolve and the run below tests NOTHING"
+            Write-Output "[godot.ps1] while it may still print ZERO failures. Do NOT read the errors as your change."
+            Write-Output "[godot.ps1] If this branch adds no new class_name file, the main tree's cache is equivalent:"
+            Write-Output "[godot.ps1]   verify equality first, then copy .godot\global_script_class_cache.cfg over."
+        }
     }
 }
 $timeoutSec = if ($env:GODOT_TIMEOUT) { [int]$env:GODOT_TIMEOUT } else { 360 }
@@ -150,8 +166,19 @@ if ($timedOut) { "[GODOT TIMEOUT ${timeoutSec}s - process killed]" }
 # so the message names both, and it does NOT re-import on its own.
 if ((-not $skipCacheGuard) -and (Test-Path $cacheFile)) {
     if ($text -match 'Could not find type "|Identifier ".*" not declared') {
-        Write-Output "[godot.ps1] unresolved class_name type(s) above, while the cache EXISTS: $cacheFile"
-        Write-Output "[godot.ps1] two causes look identical here: (a) cache is STALE (new class_name added"
-        Write-Output "[godot.ps1] without --import) or (b) that type genuinely does not exist. Try --import first."
+        # "The cache EXISTS" is not the same as "the cache has content": an import that did not take
+        # leaves an 8-byte file that passes Test-Path. Separate that case FIRST, otherwise the
+        # two-cause message below sends the reader hunting for a stale cache or a missing type
+        # when neither is true -- the list itself being incomplete is what costs the round.
+        $hasEntries = ((Get-Content $cacheFile -Raw -ErrorAction SilentlyContinue) -match '"class":')
+        if (-not $hasEntries) {
+            Write-Output "[godot.ps1] *** cache file EXISTS but is EMPTY (no entries): $cacheFile ***"
+            Write-Output "[godot.ps1] That is cause (c): --import ran or was skipped but never populated it."
+            Write-Output "[godot.ps1] The unresolved types above are NOT evidence about your code."
+        } else {
+            Write-Output "[godot.ps1] unresolved class_name type(s) above, while the cache HAS ENTRIES: $cacheFile"
+            Write-Output "[godot.ps1] two causes look identical here: (a) cache is STALE (new class_name added"
+            Write-Output "[godot.ps1] without --import) or (b) that type genuinely does not exist. Try --import first."
+        }
     }
 }
