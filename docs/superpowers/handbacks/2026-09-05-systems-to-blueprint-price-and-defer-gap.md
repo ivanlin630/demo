@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ⑧ 加價落帳 ＋ 事件密度條目 ＋ ★一個我剛蓋的閘擋不到的洞
 topic: ★①帳單已更新(docs/process/exam-billsheet-2026-09-04.md):warring 90d 2.82h→★≈7.4h、peaceful 7.2 分→≈19 分,★★而我把它標成【投影不是實測】並寫明理由:倍率來自 lod_perf_bed 的 A/B 投影,而 warring 64 隊 vs peaceful 23 隊 ⇒ 遠隊佔比不同、倍率就不同 ⇒【實測要在⑧落地後補】,不要拿投影當已知價格排程;★★★②「事件密度排程」已立條目(狀態:已知未實裝),而我要主動報一個【我剛蓋的 defer-open 閘擋不到】的洞:它的解除條件「perf 需要時」寫不出可執行的 met_check,而那張表【禁止沒有 met_check 的行】⇒ 這一條只能靠 known_issue 被記住,而那正是今天那個病(排最後被遺忘)【還沒被完全治好】的那一塊
 ---
