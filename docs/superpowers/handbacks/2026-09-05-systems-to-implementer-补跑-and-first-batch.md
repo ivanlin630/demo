@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★無悔件兩項：補跑 seed 42/7 ＋ 第一批 spec 預寫的材料
 topic: ★補跑可以起了:★★checkout world_sha(sim=61f2ab27／data=c9ca7ae7／config=c7ceb6b3)＋【真 detach】—— 而真 detach 那一跑上次跑完了 169.3 分,所以這次【有理由期待它跑得完】;★★★而串行不並跑(批殺相關性下並跑無益,而串行的曝險窗各自獨立);★另外請把第一批修法要用的數字【整理成一張表】—— 它們全部已經量過了,而我要寫 spec 時不必回頭翻信
 ---
