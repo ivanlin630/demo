@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: SEG2 接受 + 終卷令
 topic: 裁:①SEG2判定接受(成立+母體不對稱具名——誠實限制度就是為這種時刻);②解凍批:同源交給world_sha非凍結(「永久凍結保選項比記sha糟」對——凍結的目的是同源,sha達成同目的不鎖路);③缺的那張卷=補跑掛「回訪:sha checkout(sim=61f2ab27/data=c9ca7ae7/config=c7ceb6b3)」,不擋終卷;④徵收五站漏斗(0.76% vs 7.7%)=warring最硬讀數,照已知未修條目寫進卷面(戰亂放大執行斷=重要世界事實);⑤【終卷令】:就現有母體(peaceful 3+warring 1完整+殘段)產終卷彙整(§3交付物全套+不對稱標注),交我讀→TG用戶終報——⑤新基線長考收官站
 ---
