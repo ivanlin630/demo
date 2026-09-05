@@ -39,11 +39,10 @@ func _test_phase_timing_label_sequence() -> void:
 	SimRunner.phase_timing = true
 	var no_player := Vector2i(-1, -1)
 	var labels: Array = []
-	# 推進到「完整 near+far」tick（tick%FAR==0 且 near 全跑完=有 near.events_emit，無 encounter 早退）
+	# ★第⑧票：只剩一個 pass ⇒ 推進到「該 pass 全跑完」（有 near.events_emit，無 encounter 早退）
 	while state.world.current_tick < 2000:
 		runner.advance_tick(state, no_player)
-		if state.world.current_tick % SimRunner.FAR_ZONE_INTERVAL == 0 \
-				and ("near.events_emit" in runner._ph):
+		if "near.events_emit" in runner._ph:
 			labels = runner._ph.keys()
 			break
 	SimRunner.phase_timing = false
@@ -59,7 +58,7 @@ func _test_phase_timing_label_sequence() -> void:
 func _test_extensibility_dummy_both() -> void:
 	print("--- 擴充 proof：加 BOTH 系統 registry 1 entry ---")
 	SimRunner.SYSTEMS.append({
-		"name": "__dummy_both__", "fn": "_seam3_dummy_step", "lod": SimRunner.LOD_BOTH,
+		"name": "__dummy_both__", "fn": "_seam3_dummy_step",   # ★第⑧票：`lod` 欄已退場
 		"shape": "state", "tl": "",
 	})
 	Probe.reset(); Probe.enabled = true
@@ -70,10 +69,14 @@ func _test_extensibility_dummy_both() -> void:
 	config["seed"] = 7
 	GameSetup.setup(state, config)
 	var no_player := Vector2i(-1, -1)
+	# ★★★第⑧票：原本這裡在等一個【far tick】來證明 BOTH entry 兩趟都跑。
+	#   ★分班拆掉之後【沒有兩趟】⇒ proof 的形狀變成「entry 有沒有被跑到」。
+	#   ★★而這【比原本弱】：原本證的是「兩個分支都會自動吃到新 entry」，
+	#     現在只證「唯一那個分支會吃到」—— ★★★誠實限，不是升級。
 	var ran_far := false
 	while state.world.current_tick < 2000:
 		runner.advance_tick(state, no_player)
-		if state.world.current_tick % SimRunner.FAR_ZONE_INTERVAL == 0:
+		if int(Probe.counts.get("seam3.dummy", 0)) > 0:
 			ran_far = true
 			break
 	Probe.enabled = false

@@ -26,7 +26,6 @@ func _run() -> void:
 func _run_one(world_seed: int, months: int) -> void:
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	seed(world_seed)
-	SimRunner.force_full_hd = true
 	Probe.enabled = false
 	var state := WorldState.new()
 	var runner := SimRunner.new()
@@ -57,7 +56,6 @@ func _run_one(world_seed: int, months: int) -> void:
 			"farm": tile.farming_level > 0,
 			"military": tile.outpost_type == "military",
 		})
-	SimRunner.force_full_hd = false
 
 func _report() -> void:
 	print("[N] 總settled隊樣本數=%d（跨%d seeds）" % [_samples.size(), _samples.size()])

@@ -1,5 +1,12 @@
 extends SceneTree
 
+# ★★★【第⑧票 2026-09-06 警語】本床的 full-HD／near-far 對照【已恆等於預設】——
+#   `SimRunner.force_full_hd` 與 near/far 分班一起退場 ⇒ 對照的兩邊【變成同一個東西】
+#   ⇒ ★★此對照【已無鑑別力】：它還會跑、還會印數字，而那些數字【不再是在比較兩件事】。
+#   ★★★不加這行的話它會變成【一支安靜地什麼都沒比的床】—— 今天已經出現過兩次同型。
+#   ★而本床【沒有被刪】是刻意的：刪床是另一個決定，不歸第⑧票。
+#     要不要重寫或退休 ⇒ 具名交回 systems 與 measurer。
+
 # ★★★S7 LOD產出中性性驗證床(measurer側,純觀測,零production改動)。
 #   同一座工坊、同一組人、同一份配方——一組near一組far，比每日【真實產出量】
 #   (manufacture.output.<res>，不是runs_per_day()估算函式)。
@@ -70,7 +77,9 @@ func _initialize() -> void:
 	#   ★★raw 比值在 world 模式【不可讀】：本輪 near 收在 pop=1、far 收在 pop=8。
 	var isolated: bool = OS.has_environment("BED_ISOLATED") and OS.get_environment("BED_ISOLATED") == "1"
 	if isolated:
-		var cad: int = SimRunner.NEAR_CADENCE if mode == "near" else SimRunner.FAR_ZONE_INTERVAL
+		# ★★★第⑧票：`FAR_ZONE_INTERVAL` 已退場（沒有 far pass）⇒ 兩個 mode 現在【是同一個 cadence】。
+		#   ★本床的「near vs far 中性」對照因此【恆等於自己】—— 見檔頭警語。
+		var cad: int = SimRunner.NEAR_CADENCE
 		for _t in range(ticks):
 			state.world.current_tick += 1
 			if state.world.current_tick % cad == 0:

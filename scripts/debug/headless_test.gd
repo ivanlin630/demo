@@ -6338,7 +6338,6 @@ func _test_intervals_divisible_by_cadence() -> void:
 		"COLLECT_INTERVAL":        FactionAISystem.COLLECT_INTERVAL,
 		"GOAL_CHECK_INTERVAL":     ReactionSystem.GOAL_CHECK_INTERVAL,
 		"SALARY_INTERVAL":         SalarySystem.SALARY_INTERVAL,
-		"FAR_ZONE_INTERVAL":       SimRunner.FAR_ZONE_INTERVAL,
 		"OVERFLOW_CHECK_INTERVAL": PopulationSystem.OVERFLOW_CHECK_INTERVAL,
 	}
 	for name in intervals:
@@ -9161,8 +9160,11 @@ func _test_build_eta_cadence_assumption() -> void:
 	for e in SimRunner.SYSTEMS:
 		if String(e.get("name", "")) == "outpost_tick":
 			found = true
-			assert(int(e.get("lod", -1)) == SimRunner.LOD_NEAR,
-				"build_eta 分母假設：outpost_tick 必須掛 LOD_NEAR（改掛別的 LOD ⇒ 六處工期估值全錯）")
+			# ★★★第⑧票：`lod` 欄已退場（分班拆除 ⇒ 只有一個 pass）
+			#   ⇒ 「必須掛 LOD_NEAR」這條斷言【沒有指涉對象】了。
+			#   ★而它守的東西（build_eta 的每日推進次數）改由【entry 在不在表上】承載，
+			#     那正是下面 `assert(found, ...)` 那條 —— ★★所以這裡刪掉不是放寬，是【合併到那條】。
+			#   ★★★而誠實限要講：以前能抓「被挪去 far」，現在抓不到（因為沒有 far 可挪）。
 			break
 	assert(found, "build_eta 分母假設：SimRunner.SYSTEMS 裡找不到 outpost_tick")
 	assert(OutpostSystem._outpost_tick_runs_in_near_pass(), "accessor 的 registry 讀法與本斷言必須一致")

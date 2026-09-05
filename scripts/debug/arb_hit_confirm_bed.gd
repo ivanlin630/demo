@@ -19,7 +19,6 @@ func _run() -> void:
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	print("=== arb_hit_confirm_bed: seed=%d months=%d ===" % [world_seed, months])
 	seed(world_seed)
-	SimRunner.force_full_hd = true
 	Probe.enabled = true
 	Probe.reset()
 	var state := WorldState.new()
@@ -34,7 +33,6 @@ func _run() -> void:
 		if state.teams.is_empty():
 			break
 	_report()
-	SimRunner.force_full_hd = false
 	Probe.enabled = false
 	print("=== DONE ===")
 

@@ -122,7 +122,6 @@ func _run_one(world_seed: int, total_ticks: int) -> Dictionary:
 	GameSetup.setup(state, config)
 	state.player_id = -1                 # 自然世界：無玩家 → 全 NPC AI 自解，無 forced_event 卡死
 	if OS.get_environment("FORCE_FULL_HD") == "1":
-		SimRunner.force_full_hd = true   # 開沉睡系統（反應/生育/情緒 near-gated → 全隊 near）
 	var _spec_ids: Array[int] = []
 	var _spec_out_dir: String = OS.get_environment("SUFF_SPECIMEN_OUT_DIR")
 	var _spec_raw: String = OS.get_environment("SUFF_SPECIMEN_IDS")
@@ -165,7 +164,6 @@ func _run_one(world_seed: int, total_ticks: int) -> Dictionary:
 			for sid in _spec_ids:
 				SpecimenTracer.write_jsonl("%s/seed%d-team%d.jsonl" % [_spec_out_dir, world_seed, sid])
 		SpecimenTracer.enabled = false
-	SimRunner.force_full_hd = false   # 復位防洩（static 跨 seed 汙染）
 	Probe.enabled = false
 	return result
 

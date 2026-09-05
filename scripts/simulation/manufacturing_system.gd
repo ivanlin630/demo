@@ -94,7 +94,10 @@ static func runs_per_day() -> float:
 static func _manufacture_is_cadence_compensated() -> bool:
 	for e in SimRunner.SYSTEMS:
 		if String(e.get("name", "")) == "manufacture":
-			return String(e.get("shape", "")) == "teams_cadence" 				and int(e.get("lod", -1)) == SimRunner.LOD_BOTH
+			# ★★★第⑧票（2026-09-06）：`lod` 欄已退場（分班拆除 ⇒ 只有一個 pass）
+			#   ⇒ 「雙 LOD 都跑」這半的判準沒有指涉對象了，只留【吃不吃 cadence】那半。
+			#   ★而這支【比以前弱】：以前能抓「被改成只在近區跑」，現在抓不到 —— ★★誠實限，不是升級。
+			return String(e.get("shape", "")) == "teams_cadence"
 	return false   # 表裡找不到 ⇒ 假設已失效
 
 # ★【這個設施一天能產多少 out】——means-end 問「多久湊得到」就該問這支。

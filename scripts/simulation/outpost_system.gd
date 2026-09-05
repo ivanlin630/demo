@@ -163,11 +163,17 @@ static func build_ticks_per_day() -> float:
 		Probe.bump("build_eta.cadence_assumption_stale")
 	return float(WorldState.TICKS_PER_DAY) / maxf(float(SimRunner.NEAR_CADENCE), 1.0)
 
-# `outpost_tick` 是否仍在 near pass 跑（讀 registry，不手抄）。
+# `outpost_tick` 是否仍在【那個 pass】跑（讀 registry，不手抄）。
+# ★★★第⑧票（2026-09-06）改寫：原本讀 `e["lod"]` 判它在不在 near pass ——
+#   而分班拆掉之後【只有一個 pass】，`lod` 欄也退場了 ⇒ 那個判準沒有指涉對象。
+#   ★但這支【不能刪】：它守的是 `build_ticks_per_day()` 的「每日推進次數」假設，
+#     而那個假設現在改由【entry 還在不在表上】承載 —— ★★刪掉＝少一個會響的東西。
+#   ★★★而它現在【比以前弱】：以前能抓「被挪去 far」，現在只能抓「被整個拿掉」。
+#     這是誠實限，不是升級。
 static func _outpost_tick_runs_in_near_pass() -> bool:
 	for e in SimRunner.SYSTEMS:
 		if String(e.get("name", "")) == "outpost_tick":
-			return int(e.get("lod", SimRunner.LOD_NEAR)) in [SimRunner.LOD_NEAR, SimRunner.LOD_BOTH]
+			return true
 	return false   # 表裡找不到 ⇒ 假設已失效
 
 # ★六個估值點的【唯一】入口：剩餘 person-hours + 施工人力 → 還要幾天。

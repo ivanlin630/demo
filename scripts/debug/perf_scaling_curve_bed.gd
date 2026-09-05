@@ -1,4 +1,11 @@
 extends SceneTree
+
+# ★★★【第⑧票 2026-09-06 警語】本床的 full-HD／near-far 對照【已恆等於預設】——
+#   `SimRunner.force_full_hd` 與 near/far 分班一起退場 ⇒ 對照的兩邊【變成同一個東西】
+#   ⇒ ★★此對照【已無鑑別力】：它還會跑、還會印數字，而那些數字【不再是在比較兩件事】。
+#   ★★★不加這行的話它會變成【一支安靜地什麼都沒比的床】—— 今天已經出現過兩次同型。
+#   ★而本床【沒有被刪】是刻意的：刪床是另一個決定，不歸第⑧票。
+#     要不要重寫或退休 ⇒ 具名交回 systems 與 measurer。
 # perf-arc slice0：scaling 曲線 + 熱點分解（systems 派 2026-08-26，零 production code 改動）。
 # ★用途=分母，不是刀：在切任何優化刀之前，先知道「現況幾隊會爆、爆在哪一段」，
 #   否則「50+ 隊到了沒」答不了(=不可達驗收)、每一刀的效果也歸因不了。
@@ -114,7 +121,6 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 		print("[FAIL] config 不存在：%s" % path)
 		return {}
 	seed(world_seed)
-	SimRunner.force_full_hd = force_hd
 	SimRunner.phase_timing = want_phase
 	Probe.enabled = true; Probe.reset()   # systems票2026-08-26(perf-spike-denominator)：unified.rank.calls真呼叫次數tap需要這個開關
 	var state := WorldState.new()
@@ -122,7 +128,7 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 	var config: Dictionary = GameSetup.load_config(path)
 	if config.is_empty():
 		print("[FAIL] config 載入失敗：%s" % cfg_name)
-		SimRunner.force_full_hd = false; SimRunner.phase_timing = false
+		SimRunner.phase_timing = false   # ★★★這行差點被我的批次刪除吃掉（它與 force_full_hd 同一行）
 		return {}
 	config["seed"] = world_seed
 	GameSetup.setup(state, config)
@@ -271,7 +277,6 @@ func _run_one(cfg_name: String, world_seed: int, ticks: int, force_hd: bool, wan
 		if state.teams.is_empty():
 			break
 	var wall_total: int = Time.get_ticks_usec() - wall_t0
-	SimRunner.force_full_hd = false
 	SimRunner.phase_timing = false
 	# ★systems票2026-08-27(time-reanchor-S0)：no-op tick統計(母體占比+dt分布,不只中位數)
 	if noop_dts.size() > 0 or nonop_dts.size() > 0:

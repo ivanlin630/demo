@@ -50,7 +50,6 @@ func _run() -> void:
 	print("★問的是：【同一個世界裡】，一隊拿不拿得到薪水，跟它離觀察者多遠有沒有關係。")
 	print("  ★★憲法：計算跟隨【事件密度】不跟隨【觀察者】⇒ 期望答案是【無關】。")
 	seed(world_seed)
-	SimRunner.force_full_hd = false   # ★必須保留分班 —— 這張床要的就是【兩批同時存在】
 	var config: Dictionary = GameSetup.load_config("res://config/default.json")
 	config["seed"] = world_seed
 	# ★★★arm 順序寫死（bed-arm 閘）：`Probe.arm()` 必須發生在 `GameSetup.setup()` 之前，

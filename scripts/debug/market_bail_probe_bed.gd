@@ -16,7 +16,6 @@ func _run() -> void:
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	print("=== market_bail_probe_bed: seed=%d months=%d ===" % [world_seed, months])
 	seed(world_seed)
-	SimRunner.force_full_hd = true
 	Probe.enabled = true
 	Probe.reset()
 	var state := WorldState.new()
@@ -34,7 +33,6 @@ func _run() -> void:
 	print("[MBP-samples] 前30筆:")
 	for s in _samples.slice(0, 30):
 		print("  " + str(s))
-	SimRunner.force_full_hd = false
 	Probe.enabled = false
 	print("=== DONE ===")
 

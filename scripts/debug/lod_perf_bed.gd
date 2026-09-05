@@ -1,5 +1,12 @@
 extends SceneTree
 
+# ★★★【第⑧票 2026-09-06 警語】本床的 full-HD／near-far 對照【已恆等於預設】——
+#   `SimRunner.force_full_hd` 與 near/far 分班一起退場 ⇒ 對照的兩邊【變成同一個東西】
+#   ⇒ ★★此對照【已無鑑別力】：它還會跑、還會印數字，而那些數字【不再是在比較兩件事】。
+#   ★★★不加這行的話它會變成【一支安靜地什麼都沒比的床】—— 今天已經出現過兩次同型。
+#   ★而本床【沒有被刪】是刻意的：刪床是另一個決定，不歸第⑧票。
+#     要不要重寫或退休 ⇒ 具名交回 systems 與 measurer。
+
 # LOD perf 對照床（純 debug/infra，零 production 侵入）。
 # 藍圖裁定「LOD 拿掉 vs 重定義」需 perf 數據：目標規模下全高清 vs LOD 的 tick-time。
 # 每個 config（規模階梯）跑兩趟同世界：
@@ -68,14 +75,12 @@ func _run() -> void:
 
 func _run_one(cfg_name: String, world_seed: int, total_ticks: int, full_hd: bool) -> Dictionary:
 	seed(world_seed)
-	SimRunner.force_full_hd = full_hd
 	SimRunner.phase_timing = (OS.get_environment("LOD_PERF_PHASE") == "1")   # spike tick 印相位拆解=點名 O(N^2) 熱點
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg_name)
 	if config.is_empty():
 		print("[FAIL] config 載入失敗：%s" % cfg_name)
-		SimRunner.force_full_hd = false
 		return {}
 	config["seed"] = world_seed
 	GameSetup.setup(state, config)
@@ -91,7 +96,6 @@ func _run_one(cfg_name: String, world_seed: int, total_ticks: int, full_hd: bool
 			runner._encounter_system.resolve_encounter_end(state, "draw")
 		if state.teams.is_empty():
 			break
-	SimRunner.force_full_hd = false   # 復位（防洩到別 config pass）
 	if dts.is_empty():
 		return {}
 	var sum: int = 0

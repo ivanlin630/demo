@@ -75,7 +75,6 @@ func _run_warring(seed_val: int, ticks: int, specimen: Array, tracer_on: bool) -
 	var runner := SimRunner.new()
 	var cfg: Dictionary = GameSetup.load_config(CFG); cfg["seed"] = seed_val
 	GameSetup.setup(state, cfg)
-	SimRunner.force_full_hd = true
 	SpecimenTracer.reset()
 	if tracer_on:
 		state.specimen_team_ids.assign(specimen)
@@ -87,7 +86,6 @@ func _run_warring(seed_val: int, ticks: int, specimen: Array, tracer_on: bool) -
 			runner._encounter_system.resolve_encounter_end(state, "draw")
 	var arch: Array = SpecimenTracer._archive.duplicate(true)
 	SpecimenTracer.enabled = false
-	SimRunner.force_full_hd = false
 	return {"sig": _world_sig(state), "archive": arch}
 
 func _world_sig(state: WorldState) -> String:

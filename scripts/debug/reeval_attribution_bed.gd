@@ -28,7 +28,6 @@ func _run() -> void:
 		state.specimen_team_ids = [spec_id]
 	# ★全-HD acceptance 開關（measurer judged-world）：FORCE_FULL_HD=1 → 全隊 near、specimen 不特殊、非侵入 trace。
 	if OS.get_environment("FORCE_FULL_HD") == "1":
-		SimRunner.force_full_hd = true
 	var no_player := Vector2i(-1, -1)
 	var ticks: int = TimeScale.TICK_PER_DAY * 90
 	# specimen 死因快照：每 tick 存最後已知狀態，消失即記死 tick + 死前家當
@@ -99,6 +98,5 @@ func _run() -> void:
 	var _jsonl_out: String = OS.get_environment("SPECIMEN_JSONL_OUT")
 	if spec_id != -1 and _jsonl_out != "":
 		SpecimenTracer.write_jsonl(_jsonl_out)
-	SimRunner.force_full_hd = false   # 復位防洩（static 跨 run 汙染）
 	Probe.enabled = false
 	print("=== DONE ===")
