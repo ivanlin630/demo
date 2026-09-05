@@ -1,0 +1,60 @@
+# ★live-teams 閘的【存量快照】（2026-09-05 生成）
+# ★★這一份【不是豁免清單，是待遷移清單】：條目數 ＝ 還沒改用具名入口的站點數。
+# ★★★而新增站點【不得】加進來 —— 那是本閘要擋的東西；遷移一站就刪一行。
+# ★誠實限：存量【沒有被逐站複核過】（動作 vs 純讀），本閘不代表它們合格。
+275:	for tid in teams
+541:	for tid in teams
+671:	for otid in teams
+738:	for tid in teams
+782:		for tid in teams
+scripts/simulation/coin_audit.gd:11
+scripts/simulation/decision/decision_context.gd:623
+scripts/simulation/decision/goal_resolver.gd:346
+scripts/simulation/decision/goal_resolver.gd:450
+scripts/simulation/encounter_system.gd:1403
+scripts/simulation/faction_ai_system.gd:1033
+scripts/simulation/faction_ai_system.gd:2382
+scripts/simulation/faction_ai_system.gd:2744
+scripts/simulation/faction_ai_system.gd:4730
+scripts/simulation/faction_ai_system.gd:4737
+scripts/simulation/faction_ai_system.gd:4795
+scripts/simulation/faction_ai_system.gd:4891
+scripts/simulation/faction_ai_system.gd:630
+scripts/simulation/faction_ai_system.gd:6943
+scripts/simulation/faction_ai_system.gd:953
+scripts/simulation/game_setup.gd:457
+scripts/simulation/game_setup.gd:77
+scripts/simulation/interaction_system.gd:1526
+scripts/simulation/interaction_system.gd:1551
+scripts/simulation/interaction_system.gd:942
+scripts/simulation/invariant_audit.gd:103
+scripts/simulation/invariant_audit.gd:117
+scripts/simulation/invariant_audit.gd:18
+scripts/simulation/invariant_audit.gd:38
+scripts/simulation/invariant_audit.gd:49
+scripts/simulation/invariant_audit.gd:65
+scripts/simulation/invariant_audit.gd:90
+scripts/simulation/labor_system.gd:22
+scripts/simulation/labor_system.gd:39
+scripts/simulation/labor_system.gd:49
+scripts/simulation/manpower_system.gd:272
+scripts/simulation/npc_ai_system.gd:199
+scripts/simulation/npc_combat_system.gd:145
+scripts/simulation/npc_combat_system.gd:368
+scripts/simulation/outpost_system.gd:251
+scripts/simulation/outpost_system.gd:359
+scripts/simulation/outpost_system.gd:830
+scripts/simulation/player_api_mapper.gd:352
+scripts/simulation/player_api_mapper.gd:743
+scripts/simulation/player_api_mapper.gd:757
+scripts/simulation/player_api_mapper.gd:810
+scripts/simulation/player_command_system.gd:970
+scripts/simulation/population_system.gd:25
+scripts/simulation/population_system.gd:60
+scripts/simulation/population_system.gd:72
+scripts/simulation/population_system.gd:77
+scripts/simulation/reaction_system.gd:439
+scripts/simulation/sim_runner.gd:583
+scripts/simulation/sim_runner.gd:595
+scripts/simulation/strategic_ai_system.gd:328
+scripts/simulation/vision_system.gd:37

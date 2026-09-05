@@ -162,6 +162,14 @@ var ambition_eval_next_tick: int = 0
 #     ★★而問題本來就不是「這一對該不該互動」，是【這支隊該不該環顧四周】。
 #   ★★★沿用 `ambition_eval_next_tick`／`infra_eval_next_tick` 的既有形狀，零新結構。
 var colocate_eval_next_tick: int = 0
+
+# ★★★墓碑（spec 2026-09-05-erase-merge-corpse §5 定案：死訊＝資訊）——
+#   ★名冊 tombstone：**不參與模擬、不污染統計**；而他人記憶【保留照衰減】，
+#     靠親訪（人去樓空）與傳聞更新。
+#   ★★本步（分批①）只加欄位與迭代入口，★★★【沒有任何 production caller 會設它】
+#     ⇒ 零行為變更（`fp` 逐位元不變）。
+var is_tombstone: bool = false
+var tombstone_tick: int = -1
 # ★★★成員回報信使的節流（spec 2026-09-05-member-report-envoy）——
 #   ★三個事件裡【落腳建營／遷移完成】是真事件（天然稀少、自帶邊緣），
 #     ★★而【瀕危】是【狀態】不是事件：`effective_food <= 0` 每 tick 都成立

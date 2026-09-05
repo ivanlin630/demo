@@ -513,6 +513,54 @@ func create_team(team: TeamData) -> void:
 	teams[team.team_id] = team
 	team_known[team.team_id] = []
 	team_discovered[team.team_id] = []
+	_live_epoch += 1   # ★名冊變動 ⇒ live 快取失效
+
+# ★★★★墓碑的兩個【具名迭代入口】（spec 2026-09-05-erase-merge-corpse §8③；R² CLEAN）——
+#   ★★★★形狀的理由（這是本票最重要的一句）：
+#     ✗ 在 45 個決策迴圈各補一個 skip-guard ＝ `resource_bank.gd` 檔頭寫的【枚舉＝黑名單】：
+#       ★漏一個就是【靜默失效】，而★★【新寫的第 46 個迴圈不會有人記得補】。
+#     ✅ 改【迭代的來源】⇒ 把「45 處要記得」變成【一個縫 ＋ 一道閘】
+#       ⇒ ★★★而替換錯了會【立刻在行為上現形】（決策看得到墓碑 ＝ 隊追著死人跑），不是靜默。
+#   ★逐站判準（R² 給的，取代按檔名分類）：
+#     只讀觀察 ⇒ `all_teams()`／採取動作或當合法對象 ⇒ `live_teams()`／
+#     ★★兩件都做 ⇒ **拆兩輪**（先 all 觀察、篩完再對【篩出的活隊子集】動作），
+#     ★★★不是在兩個入口之間猜一個。
+#   ★★而本步（分批①）是【零行為變更】：目前【沒有任何隊會被標成墓碑】
+#     ⇒ `live_teams()` 與 `all_teams()` 回傳【相同集合】⇒ 驗收＝`fp` 逐位元不變。
+#     ⇒ ★★★而那也表示【任何只驗「沒崩／守恆／determinism」的判準都會綠】
+#       —— 所以另有一條【直接斷言】守著兩者的差異（見 `tombstone_seam_test.gd`）。
+var _live_epoch: int = 0
+var _live_cache: Array = []
+var _live_cache_epoch: int = -1
+
+# ★不含墓碑 —— 決策／執行用（★對 team 採取動作、或把它當合法對象）
+func live_teams() -> Array:
+	if _live_cache_epoch == _live_epoch:
+		return _live_cache
+	var out: Array = []
+	for tid in teams:
+		if not (teams[tid] as TeamData).is_tombstone:
+			out.append(tid)
+	_live_cache = out
+	_live_cache_epoch = _live_epoch
+	return out
+
+# ★★含墓碑 —— 感知／稽核用（★只讀觀察）
+#   ★★★它【必須具名】而不是「直接摸 state.teams」：★裸迴圈與「刻意要看到墓碑」在字面上分不出來，
+#     而那正是那道閘要抓的東西。
+func all_teams() -> Array:
+	return teams.keys()
+
+# ★把一支隊標成墓碑（★本步尚未有 production caller —— 分批③才會用）
+func mark_tombstone(tid: int, tick: int) -> void:
+	if not teams.has(tid):
+		return
+	var t: TeamData = teams[tid]
+	if t.is_tombstone:
+		return
+	t.is_tombstone = true
+	t.tombstone_tick = tick
+	_live_epoch += 1
 
 # 單一 team 移除 chokepoint：語意 = erase_teams([tid])（薄 wrapper，呼叫端零改動）。
 # 所有 team 移除（滅團/合併/野獸清除）都須走此/erase_teams 入口。
@@ -668,6 +716,7 @@ func erase_teams(tids: Array) -> void:
 				Probe.bump("obit.belief.cleared")   # ★★★「某觀察者對某死者的整條 claim 串」被抹掉一次
 			team_intel[obs].erase(dtid)
 	# 5. 自身條目（known/discovered/intel row）+ 移除，逐 dead tid 收尾
+	_live_epoch += 1   # ★★名冊變動 ⇒ live 快取失效（erase 路）
 	for dtid in dead_list:
 		team_known.erase(dtid)
 		team_discovered.erase(dtid)

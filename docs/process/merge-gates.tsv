@@ -64,3 +64,5 @@ exam-freeze	bash .claude/hooks/exam-freeze-gate.sh	考程樹凍結:GO 落地→�
 print-join	bash .claude/hooks/print-join-guard.sh	禁 print(換行 join(...)):Godot 單次 print 截在 16383 字元且【被截的輸出看起來完全正常】;★只抓換行 join(單行內 join 幾欄不危險,抓它只是雜訊);★★誠實限=先組成變數再 print 的形狀看不到;★★★陽性對照做過(quoted heredoc 寫探針⇒FAIL 指名檔案;★第一版探針被 printf 把 \n 解成真換行而靜默失效)	\[PRINT-JOIN\] PASS
 belief-freshness-invariant	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/belief_freshness_invariant_test.gd	反向斷言：每個 production firsthand 寫入點都帶 tile_pos（★③收束的殘留物——機制拆了，等式要有人守）	總計 FAIL = 0
 unified-commerce	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/unified_commerce_test.gd	統一商業+團內稅:源扣繳守恆/人格梯度不貼上界/★§5b 存量沒收走廊【不得存在】的反向斷言(★這支【從來不在表上】——它既有的斷言也一直沒人跑,同型第三次)	=== DONE === ALL PASS
+tombstone-seam	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/tombstone_seam_test.gd	墓碑縫的直接斷言：決策端看不到墓碑／感知端看得到（★兩個入口相同時「沒崩/守恆/determinism」都會綠，所以要這條）	總計 FAIL = 0
+live-teams	bash .claude/hooks/live-teams-guard.sh	禁【新的】裸 for-in-state.teams（★改迭代來源而不是 45 處各補 skip-guard；★★allowlist 是待遷移清單不是豁免清單）	[LIVE-TEAMS] PASS
