@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: belief-freshness-per-field（第③票）
 topic: ★R² CLEAN,③可動工——定案【只做 tile_pos,不一次做完】(理由是讀code:其餘欄位鎖步刷新⇒沒借新鮮度;真同病的 resource_scale/combat_target_est 目前【無讀取端消費】);★三項機械緩解是硬要求:①欄位名焊進時戳名 tile_pos_tick(禁 observed_tick)②四個既有讀取點各補一行「這個 last_tick 不管 tile_pos」③§6 具名;★★驗收#2 要印「多少次 belief 因此變過期」——那會讓數字變差,我要它被看見不要被解釋掉
 ---
