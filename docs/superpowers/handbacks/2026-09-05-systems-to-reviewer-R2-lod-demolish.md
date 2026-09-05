@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑧ 拆分班本體
 topic: R②請審 docs/superpowers/specs/2026-09-05-lod-split-demolish-HOW.md;★我裁的形狀=【單一 cadence 取現行 near 的 60】而不是折衷值——理由:取 60 ⇒ 近隊行為【完全不變】、遠隊補回相同,而折衷值會讓近隊也變 ⇒ 一次改兩件事歸因不了;★★而【事件密度計算】我切出去了:憲法那句有兩半(不跟隨觀察者/跟隨事件密度),本票只做前半,理由是先做前半才有乾淨基準;★★★要你判三件:①「取 60 不取折衷」會不會其實是把 perf 問題推給下一票而下一票可能不會來(我剛立了 defer 追蹤閘,但那只防遺忘不防「開了票沒人做」)②驗收2我要求擴大到至少三個系統(collect/interactions/vision),夠不夠③force_full_hd 退場後,那些現在靠它跑 judged-world 的床會不會全部失去一個必要的工具
 ---
