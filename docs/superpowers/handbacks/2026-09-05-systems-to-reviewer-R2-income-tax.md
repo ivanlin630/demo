@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: income-tax-split（第⑤票）
 topic: R②請審 spec docs/superpowers/specs/2026-09-05-income-tax-split-HOW.md——★本票真正的內容是【三個判斷】不是廢一支函式:①忠誠ratio讀名義非實發(稅不混進underpay懲罰)②量入為出payroll用net非gross(否則明明付得起卻減薪,而減薪次數會因此下降=行為差異)③居民PRODUCE隊沒薪資可抽⇒team.coin回補管道歸零,我判「沒有所得就沒有所得稅」是正確結果不是漏洞、但用前置量測先量那格多大;★前提三條已全庫核(母體含居民隊/reason無production消費端/debug測試會被打斷)
 ---
