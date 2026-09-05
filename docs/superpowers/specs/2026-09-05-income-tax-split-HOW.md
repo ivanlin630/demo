@@ -3,6 +3,21 @@
 WHAT 來源：用戶定案（TG 2026-09-05），意圖帳 `docs/mechanism-intents.md:43`「團內稅分軌」。
 設計原則（用戶）：**稅的粒度跟敘事粒度走** —— 記名者的積累軸留給嫁妝／贖金／繼承的戲。
 
+
+## §0-RETRACT ★★★★【2026-09-05 撤回】本 spec 引用的三個「0」**全部無效，待重量**
+```
+★撤回對象:member_tax 90 日 = 0.00 ／ salary_named・salary_anon = 0.00 ／ 匿名池 treasury_rows = 1
+★★成因【不是世界,是儀器】:WorldState.driver_ledger 是 cap=4096 的【環形緩衝】(world_state.gd:164/:186-187,靜默 pop_front)
+   而量測的 drain 間隔是【每 2000 tick 一次】⇒ 單窗產生的 entry 數 > 4096
+   ⇒ ★★★證據簽名:每個 2000-tick 窗口的 `ledger_seen` 增量【精準等於 4096】
+      —— 飽和值就是溢出的簽名,而它【看起來像一個穩定的計數】
+⇒ ★所以那三個「0」是【可能被擠掉】,不是【沒發生】
+★★受影響的推論(本 spec 內):
+   §3 前置量測的兩個維度／驗收 #2 作廢的理由／#2c「90 日床上稅收預期就是 0」／§5c「⑤只是語意訂正」
+   ⇒ ★★★【全部暫停效力】,待 measurer 以極短 drain 間隔重跑後重新評估
+★而【⑤的 code 本身不受影響】:它的正確性由針對性測試(#2b)證明,而那條與 ledger 無關
+```
+
 ## §1 現況（★file:line，已核，非轉述）
 ```
 ①匿名半邊 = CoinTreasury.consider_extraction/extract_treasury(coin_treasury.gd:66-79)
