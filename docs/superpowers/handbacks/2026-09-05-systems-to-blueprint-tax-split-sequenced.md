@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ⑤團內稅分軌
 topic: 收到,已排序並動起來:序=④done→③新鮮度(在飛)→★⑤→②徵收→①墓碑(⑤排②前:⑤是廢除為主,②動候選集合+執行路徑,兩者不碰同一檔已核);spec 已寫、R²已送、前置量測已送 measurer(可與①並行);★★一個 WHAT 缺口要你先知道:居民PRODUCE隊 salary_system.gd:31【早退不發薪】⇒廢掉月抽積蓄稅後它們【沒有所得稅可抽】,而現制 member_tax 母體是含它們的(全隊迴圈)⇒居民隊 team.coin 回補管道歸零;我判「沒有所得就沒有所得稅」是新規則的正確結果、先量那格多大,若是大宗我把它當WHAT缺口交回你,不自己補特例
 ---
