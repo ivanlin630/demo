@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 三格新增(C-1/C-2/D)可行性回報——2格零新tap，1格需新tap
 ---
 
