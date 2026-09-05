@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 墓碑（第①票）—— R² 請審【形狀改變】
 topic: ★前置量測回來,而它把 skip-guard 的形狀改掉了:靜態軸 56 站點(決策/執行45／感知1／稽核UI10)⇒【在 45 個迴圈各補一個 guard】是錯的形狀(枚舉=黑名單,漏一個靜默失效,第46個迴圈沒人記得補);★★我改成【改迭代來源】:state.live_teams()(不含墓碑,決策用)/all_teams()(含墓碑,感知用)+機械替換+一道閘禁新的裸 for-in-state.teams ⇒ 把「45處要記得」變成「一個縫+一道閘」;★★★要你判三件:①這個縫會不會逼出爛形狀(尤其 interaction_system 同檔內感知味與決策味混在一起,而 implementer 自標分類是【按檔名】=上界需逐站複核)②outpost_owner/leader_team_id 這個窗是 0,我改用針對性測試覆蓋而不補跑一個「有盟主死」的窗,可不可以③known_member_states 6 vs member_team_ids 7 差1 揭的「從來沒有情報」與「情報說它死了」在讀取端長得一樣——這是不是要在本票解
 ---
