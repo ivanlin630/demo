@@ -1476,8 +1476,18 @@ func _sec_levy() -> void:
 	_ad.sort()
 	print("     引擎路(`unified`)被擋：%s" % (
 		"｜".join(PackedStringArray(_ad)) if not _ad.is_empty() else "（空）"))
-	print("     ★★★同樣要標母體：這一格是【所有 option 經 `unified` 被擋】的合計，")
-	print("        ★不是只有徵收 —— ★★要只看徵收需要在 arbiter 裡帶 option 名，那是下一票")
+	print("     ★★★而【按 option 拆】的那一格已經接上（批次一之④）：")
+	var _ao: Array = []
+	for _k6 in Probe.counts.keys():
+		var _ks6: String = String(_k6)
+		if _ks6.begins_with("arbiter.deny.") and _ks6.find(".opt.") != -1:
+			_ao.append("%s=%d" % [_ks6.substr(13).replace(".opt.", "／"), int(Probe.counts[_k6])])
+	_ao.sort()
+	for _line2 in _ao:
+		print("        %s" % _line2)
+	if _ao.is_empty():
+		print("        （空）★而空有兩種意思：★★引擎路沒有任何 option 被擋，或【`_opt` 沒被傳進去】")
+		print("        ⇒ ★★★兩者要靠 `arbiter.deny.*.by.unified` 是否非 0 分辨（它不吃 `_opt`）")
 	print("  ── ★★②重複頻率（★逐 pair 間隔分布；★★★不是平均）──")
 	print("     首次徵收的 pair 數 = %d ｜ 重複徵收次數 = %d" % [
 		int(Probe.counts.get("levy.pair.first", 0)), int(Probe.counts.get("levy.pair.repeat", 0))])

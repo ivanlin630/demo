@@ -3097,7 +3097,10 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# ★threat-oracle S3：threat 反應(備戰/迎戰/求和)commit @PRIO_THREAT 70(finding3 黏性——收斂後不被
 		# 高值經濟 @50 換掉；task_arbiter self-replace 已擴認 70 同層 threat option 可換 迎戰→求和)。其餘 @50。
 		# ★絕境經濟 ① 單一源：option→priority 收 DecisionOptions.priority_for（survival 保序不看 dispatch 路）。
-		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "unified")
+		# ★★★批次一之④：把【被擋的是哪一個 option】帶進 arbiter（★只餵計數，不進判斷）——
+		#   ★這裡是【引擎統一路唯一的 try_set】⇒ 一個站點就覆蓋所有 option，
+		#   ★★而不必動 `_source`（它會寫進 `task_reason` 並與 `ENGINE_SOURCES` 比對）。
+		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "unified", opt)
 		if _lvf_this:
 			# ★★★第四型手不聽腦：`try_set` 可能 no-op（priority 被更高的佔住）——
 			#   ★而它【不會報錯】，只是這一次派工靜靜地沒發生
