@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 用戶輸入 → 合併屍體 spec 定向
 topic: 用戶TG兩問,第二問直接釘spec:「刪合併屍體會不會影響遙遠隊伍的舊記憶」——WHAT裁定順勢定:①名冊死記憶活(tombstone非物理刪id):名冊移除=不參與模擬不污染統計;他人belief保留照衰減,靠親訪/傳聞更新(鬼城情報第四種法,同條);②禁「erase順手清別人belief」(=god-view式全域訃聞);③懸空引用防=墓碑可解引用;徵收修序我對用戶講的版本抄送:①候選改「只列有believed位置的成員」(候選母體=belief集合老法適用)②try_set擋因排上游後③到達→轉移最後看——spec照此收斂
 ---
