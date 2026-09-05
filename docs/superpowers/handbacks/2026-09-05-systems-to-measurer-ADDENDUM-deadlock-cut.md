@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: income-tax-split 前置量測【追加維度】
 topic: ★★★追加一格,而它比我原本那格重要:R②抓到 collect_member_tax 還有第二個角色=把成員【已持有】的 p.coin 拉回團庫解 team.coin=0 卡死(coin_treasury.gd:78 註解自己寫著「破 salary 單向枯竭補 team.coin 池」,unified_commerce_test.gd:263-292 示範的是普通 TASK_TRADE 隊不是居民隊)⇒源扣繳永遠碰不到存量⇒這條救急路對【任何隊】歸零;★要⑤命中當下 team.coin 接近0 的筆數/量(不分隊型)+⑥同時 anon_treasury 也見底的筆數;★★這格大概需要一個 L3 tap 記命中當下的 team.coin/anon_treasury——函式本來就要刪,tap 跟著死是拋棄式,不要用總額反推;若要 tap 說一聲我派 implementer
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: income-tax-split 前置量測（第⑤票）
 topic: ★一顆小量測,可與①墓碑前置量測並行:現制 collect_member_tax 的稅收母體分佈——①總額②per-team③★居民PRODUCE隊佔多少④被 PERSONAL_COIN_FLOOR 擋掉幾次;★★零 production 改動:record_driver 已記 reason="member_tax"(coin_treasury.gd:94-95),開 driver-ledger 過濾即可;★★★但先做陽性對照確認 ledger 真的抓得到那條(過去有 record_driver tap bug),抓不到就回報「儀器沒開」不要回報 0
 ---

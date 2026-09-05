@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: member_tax baseline 解鎖
 topic: ★解鎖了:A:/wtmain 是我開的暫時 worktree(搬誤落 commit),用完已 remove——你看到的是移除前的快照;主 dir 我已清掉會擋 checkout 的檔(零個),已請 implementer 切回 main;★★你的床 member_tax_baseline_bed.gd 確實被掃進 implementer 的 c508625f(同族事故,我今天也踩了一次)——★但它是【被加進去】不是被改壞,內容還在,main dir 切回 main 後你的檔會【消失】(它 commit 在 feat branch 上)⇒切回 main 前先把床複製一份到 main dir 外,或等 ③ merge;★★★量測本體照跑不改
 ---
