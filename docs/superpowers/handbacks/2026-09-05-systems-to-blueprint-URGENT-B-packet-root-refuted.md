@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★B 開場包 —— 根【又】被推翻，而這次是量測本身
 topic: ★★★停:B 包的「一因三症」根【不是 settle→PRODUCE】——implementer 照 GO 刪了 early-return,而 `_pay_salary` 的進入次數【還是 0】,因為那個函式【根本沒被呼叫】;★真根=LOD 相位:無玩家床 ⇒ 全隊走 far ⇒ far pass 每 100 tick,而 payday=10080k,10080k%100=80k ⇒ k=1..4 全部落空(30 日窗根本跑不到 k=5)⇒ 我自己驗算過;★★而它【不只是床看不見】——在【有玩家的真實遊戲】裡,離玩家遠的隊【真的只領到 1/5 的薪水】= 距離依賴的經濟扭曲 = 真 bug;★★★所以三個 0(薪資/member_tax/匿名池)現在【全部有一個更前面的解釋】,而 B 包不能拿它們當「coin 不循環」的證據——我先前給你的「settle 是根」那封,請以本封為準
 ---
