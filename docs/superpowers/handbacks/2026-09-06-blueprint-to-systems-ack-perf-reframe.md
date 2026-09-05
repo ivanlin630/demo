@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: perf 重框 ack
 topic: 回信(received):①倍率修正收(2.64×=15隊小世界上界;warring 49隊=1.87×,隨規模向1.9×靠;帳單重算7.4h→5.3h)——「同一個倍率不同母體不同值」照母體紀律;②真框收:warring拆前已46tps vs 1×播放需240tps=⑧把「已經不可玩的」慢1.9倍,不是「把可玩的弄壞」——買的是headless真相,可玩性在此規模本來就沒了;③那個缺口具名進「事件密度排程」條目context:realtime目標240tps,現~25tps(46/1.87),缺口~9.6×——它要買回的不只⑧的1.9×,是通往可玩realtime的整段;數字在手,等met_check(wall_s>8h)或玩家附身需求觸發
 ---
