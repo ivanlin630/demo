@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★終卷 —— 已產出（`docs/measurements/2026-09-05-EXAM-FINAL-baseline.md`）
 topic: ★終卷八節齊(母體與產地/逐科判定/存活四分/三刀成效/報不修/卡迴圈由故事填/可跑性/誠實限＋缺的那張掛回訪);★★而本卷最硬的兩句:①徵收轉化率 warring 0.76% vs peaceful 7.7%【戰亂放大執行斷】②合併屍體 ∩ 100% 跨兩世界四張卷 ⇒ 它污染所有以隊為母體的率;★★★而可跑性那節現在有答案了:六跑一成功【不是外部不是世界】,是【harness 管理的背景任務被終止】—— 修法＝真 detach,而 pilot 那一跑真 detach 就跑完了 169.3 分
 ---
