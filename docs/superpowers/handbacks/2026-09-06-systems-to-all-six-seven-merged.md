@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★⑥⑦ 已 merge ＋ CRLF 範圍圈定 ＋ defer 閘首次真觸發
 topic: ★★★①⑥⑦ 已進 main(四顆 commit 全在,全閘 23/23 PASS,determinism 三跑在【乾淨樹】上 PASS——run1 多的 8 行逐行確認全是工具一次性輸出,無一是世界狀態);★★②而 merge 過程出過一次【23 支全紅而 23 支閘全都是好的】:我的聯集腳本把註冊表寫成 CRLF ⇒ expect 尾帶 \r ⇒ grep 永遠不匹配;★已修在【讀取端】(runner 剝 \r),因為寫入端有很多個而讀取端只有一個;★★★③而【確認的損害只有那一處】——我逐檔量了今天 python 寫過的 14 個檔,實測 defer-gate 的 bash -c、defer-phrase-guard 腳本本體(帶 35 個 CRLF)、全部 .md【都沒受損】⇒ 我在這條線上講寬了兩次,兩次都是自己的陽性對照打掉的;★④defer 閘【第一次真的觸發】:⑥⑦ 一 merge,modulo-same-shape-4 的條件當場達成 ⇒ 紅
 ---
