@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★B 開場包 —— 推給用戶【之前】要先看這封
 topic: ★★★三件展品【可能不是三個獨立證據,而是一個原因的三個症狀】——measurer 自己標了這條誠實限,我把它推到底:config/peaceful_economy.json 是【手寫 12 隊】,11 生產 + 1 商隊(id=8,★全床唯一帶 coin 1000 的隊);★而 measurer 的 day30 快照說 12/12 全帶 TAG_PRODUCE ⇒ 與 config 對不上(她也寫了「已知18隊、現存14隊」⇒ 母體早就變了);★★我查了 runtime 唯一的 TAG_PRODUCE 寫入點是 outpost_system.gd:525(建造子隊完工安頓),商隊走不到 ⇒ 缺口未解;★★★已派 measurer 補 team8 的下場(活著嗎/tags/named_members/那 1000 coin 去哪),而【那一格回來之前,B 開場包的證據份量不該被當成四件】
 ---
