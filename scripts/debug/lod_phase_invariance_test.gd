@@ -168,6 +168,7 @@ func _run() -> void:
 	print("")
 	print("═══ ★驗收③：定期徵收的排程準時度（逐盟；★合計會把人格相關的失真平均掉）═══")
 	var due: Dictionary = _count_by("levy.due.byfaction.")
+	var branch: Dictionary = _count_by("levy.branch.byfaction.")
 	var rows: Array = []
 	var worst: float = 0.0
 	var checked: int = 0
@@ -183,17 +184,41 @@ func _run() -> void:
 		var honor: float = float(lp.values.get("義氣", 0.5))
 		var eff: int = maxi(int(FactionAISystem.COLLECT_INTERVAL * (1.5 - greed)
 			* (1.0 + honor * FactionAISystem.HONOR_INTERVAL_MULT)), 10)
-		var expect: float = float(total_ticks) / float(eff)
 		var got: int = int(due.get(int(fid), 0))
+		var br: int = int(branch.get(int(fid), 0))
+		# ★★★母體先於判準：本分支【每個 pass 進來一次】，所以 `br` 就是這個盟真的被評估過幾次。
+		#   ★期望次數要用【它真的在「守成」的那段時間】算，不是用整個窗算 ——
+		#     ★★否則一個大半時間在打仗的盟會被判成「徵收壞了」，而那是【拿假設的母體判沒有母體的格】。
+		#   ★★★而 pass 之間相隔 NEAR_CADENCE(60)，所以「在守成的 tick 數」≈ br * 60。
+		var in_hold_ticks: float = float(br) * float(SimRunner.NEAR_CADENCE)
+		var expect: float = in_hold_ticks / float(eff)
+		if br == 0:
+			rows.append("f%d(貪%.2f義%.2f eff=%d) ★【從未進過「守成」】⇒ 不可判（不是 0 次，是沒有母體）" % [
+				int(fid), greed, honor, eff])
+			continue
 		if expect < 1.0:
-			continue   # ★窗內連一次都不該有 ⇒ 這盟答不了，別混進判準
+			rows.append("f%d(貪%.2f義%.2f eff=%d) 守成 pass=%d ⇒ 期望%.2f 次 <1 ⇒ 不可判（母體太小）" % [
+				int(fid), greed, honor, eff, br, expect])
+			continue
 		checked += 1
 		var ratio: float = float(got) / expect
-		rows.append("f%d(貪%.2f義%.2f eff=%d) 期望%.1f 實得%d 比值%.2f" % [
-			int(fid), greed, honor, eff, expect, got, ratio])
+		rows.append("f%d(貪%.2f義%.2f eff=%d) 守成 pass=%d 期望%.1f 實得%d 比值%.2f" % [
+			int(fid), greed, honor, eff, br, expect, got, ratio])
 		worst = maxf(worst, absf(ratio - 1.0))
 	for r in rows:
 		print("     " + r)
+	# ★★★母體是 0 的時候，卷面要說【它們去哪了】—— 否則「不可判」只是另一個沒有內容的字。
+	var sel: Array = []
+	for k in Probe.counts.keys():
+		var ks: String = String(k)
+		if ks.begins_with("intent.sel_"):
+			sel.append("%s=%d" % [ks.substr(11), int(Probe.counts[k])])
+	sel.sort()
+	print("     ★盟實際選到的意圖分布：%s" % (
+		"｜".join(PackedStringArray(sel)) if not sel.is_empty() else "（空 ⇒ 連意圖選擇都沒跑到）"))
+	print("        ★★而 `_rebuild_goals` 在【缺糧 survival override】那條會【提前 return】(:1436)")
+	print("           ⇒ ★★★若盟長期缺糧，`match itype` 整段【根本到不了】—— 守成分支是死的，")
+	print("              而那不是⑦的病，是【另一個要單獨查的東西】。")
 	_ok(checked > 0, "G：★母體非空（可判的盟 %d）—— ★★0 的話下面【答不了】不是通過" % checked)
 	if checked > 0:
 		_ok(worst <= 0.35,

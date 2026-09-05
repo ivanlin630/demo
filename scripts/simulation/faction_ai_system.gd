@@ -1512,6 +1512,12 @@ func _rebuild_goals(state: WorldState, f) -> void:
 				_emit_goal(state, f, "徵收", "防衛", "備戰籌餉", "fund_war")
 		"守成":
 			# default：無 stakes 令；僅維持經濟 cadence（定期徵收，仍帶 driver）
+			# ★★★這一格是驗收③的【母體】：`levy.due` 為 0 有兩種意思 ——
+			#   ①排程壞了（真病）②這個盟【從來沒進過「守成」】(本分支沒被執行過)
+			#   ⇒ ★沒有這格就分不出來，而我第一版就是拿「期望 22 次、實得 0」直接判紅 ——
+			#     ★★那是【拿一個假設的母體去判一個沒有母體的格子】。
+			if Probe.enabled:
+				Probe.bump("levy.branch.byfaction.%04d" % int(f.faction_id))
 			var greed_s: float = float(leader_p.values.get("貪婪", 0.5)) if leader_p else 0.5
 			var effective_interval: int = maxi(
 				int(COLLECT_INTERVAL * (1.5 - greed_s) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
