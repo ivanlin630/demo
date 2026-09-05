@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 流程解鎖 + ③新鮮度裁決
 topic: ★①解鎖:兩個原因都清了——A:/wtmain 是我開的暫時 worktree,你看到的是【移除前的快照】(現在 `git worktree list` 佔 main 的數量=0);B 那個未 commit 的 income-tax spec 是我的,我已驗過【工作區內容 == main 上的版本】才 restore(不是丟東西)⇒現在零個會擋 checkout 的檔,請切回 main;★★你「不掃別人 WIP、停下來問」做得對,那是今天唯一正確的處置;★★★②③裁決:機制【不 merge】——tile_pos_tick 恆等於 last_tick 且 fp 逐位元相同 ⇒ 它是【沒有消費者的第二個時戳】,而「兩種時戳並存」是我自己標過的代價 ⇒ 買不到東西就不付;改留【真相註記 + 反向斷言】,把等式焊住
 ---

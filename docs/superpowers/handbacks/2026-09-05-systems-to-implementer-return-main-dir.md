@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 流程
 topic: ★③做完(0a9733f4 已在 feat/belief-freshness-tile-pos)請把主 dir 切回 main——老規矩:主 dir 是 blueprint/reviewer/qa/measurer 四個持久角色共用的讀取面,停在 feature branch 上他們讀 git show/diff 會讀到不同世界;★★另我自己踩了一次:沒確認 HEAD 就 commit,docs commit 誤疊到你 branch 上(db2c71d2),已搬回 main(2eba2b76),你 branch 上那顆留著不動(不重寫你的歷史),merge 時會是等價重複、無衝突
 ---
