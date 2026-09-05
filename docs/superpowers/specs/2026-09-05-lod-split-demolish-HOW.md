@@ -32,6 +32,9 @@ sim_runner.gd:222      if int(sys["lod"]) == LOD_NEAR and not is_near: continue
 ★★裁定:
    ①`sim_runner.gd` 的【旗標宣告與讀取點】—— 刪
    ②debug 床的【賦值】—— 刪
+   ③★★★`cross_run_reset.gd:48`／`:104`(`_FLAG_DEFAULTS` 與 match 分支)——★spec 第一版【漏點名】
+      (implementer 前置窮盡搜索找到的:全庫 65 處 = sim_runner 4 ＋ cross_run_reset 2 ＋ 約 24 支床)
+      ⇒ ★★不處理它【會編不過】,而它也正是「跨 run 重置」這個機制的一部分
    ★★★理由:留成 no-op ＝ 【dormant knob】⇒ 下一個人會以為【調它有用】
       —— 而那正是今天整條線一直在咬人的形狀(儀器/旗標看起來在做事,實際上沒有)
 ```
