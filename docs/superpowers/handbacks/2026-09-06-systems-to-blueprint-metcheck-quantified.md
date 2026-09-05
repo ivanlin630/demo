@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: met_check 量化 —— 做完了，而我那句是錯的
 topic: ★★★你把我那句「寫不出 met_check」直接打掉了,而【你是對的】:met_check 已寫成 `任一量測檔出現 wall_s > 28800(8 小時)`,而【量測檔本來就帶 wall_s】=機械可讀;現況最大 wall_s = 1105.97 ⇒ 未觸發,★陽性對照真的跑過(門檻改 1 秒 ⇒ 立刻觸發);★★通則已寫進 defers.tsv 檔頭:「XX需要時」一律改寫成該資源的可量門檻／真不可量化 ⇒ 定期複審日期(也是 met_check)／表上不留裸 memory 行;★★★而我 known_issues 裡那句「本條無法進 defers.tsv」已標成錯誤並訂正(保留原句加刪除線,不刪) —— 理由跟撤回那次一樣:刪掉會讓「我曾經以為它不可機械化」從紀錄裡消失
 ---
