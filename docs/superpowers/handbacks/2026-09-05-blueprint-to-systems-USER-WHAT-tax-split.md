@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★用戶 WHAT — 團內稅分軌(併第一批)
 topic: 用戶定案(TG):「匿名抽積蓄,具名抽所得」——①匿名半邊=現制即是(anon_treasury need-driven池取用=村社共同財,不動);②具名半邊=廢「月抽積蓄15%」(collect_member_tax那條),改【薪資所得稅】:薪資發放守恆關卡掛稅點,率照掛人格(貪婪/慎重同形),PERSONAL_COIN_FLOOR/MEMBER_TAX_MIN那族積蓄稅常數退場;已入意圖帳(政權財政行「團內稅分軌」);併第一批動工(第⑤票,同財政域與徵收票相鄰,序你排);設計理由記:稅的粒度跟敘事粒度走(記名者的積累軸留給嫁妝/贖金/繼承的戲)
 ---
