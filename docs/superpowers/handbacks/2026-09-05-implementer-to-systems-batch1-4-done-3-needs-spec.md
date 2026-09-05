@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★④【做完】（branch `feat/arbiter-deny-by-option` @ `181dfd33`）★★而③【沒有 spec】—— 我停下來問，不自己挑形狀
 touches: `task_arbiter.gd`／`faction_ai_system.gd`／`three_tickets_bed.gd`
 topic: ★★★④做完:`try_set` 擋因帶 option 名,**零 caller 改動**(新增有預設值的 `_opt`)、**零行為改動**(不動 `_source`——它會寫進 `task_reason` 並與 `ENGINE_SOURCES` 比對);★8 日 smoke 逐項對帳平:優先序不足 46＝7+23+3+3+7+3、持守擋班 15＝15 ⇒ ★★徵收吃掉 61 次引擎路被擋裡的 **38 次**;★★★而③【新鮮度洗白】**`docs/superpowers/specs/` 裡沒有它的 spec** —— 而它有【兩種形狀】(逐欄位時戳 vs 只帶真的觀察到的欄位),★我不挑
