@@ -191,3 +191,15 @@ brainstorm → spec → plan 設計，不實作。
 ③★★主 dir 只做:讀、寫檔、明列檔名的小 commit。★★★不做 merge、不做 rebase、不原地 checkout branch
 ④半途發現被收走:【不重寫歷史】,補一顆說明 commit 把「那顆的真身是什麼」寫進紀錄
 ```
+
+### ★★★而真正的機械修法不是「小心一點」：**用 pathspec commit**
+```
+★問題的一般形【比 merge 更大】:主 dir 的 index 是【共用的】
+   ⇒ 任何人 commit 時,index 裡【別人剛 stage 的東西】都會被帶走
+   ⇒ ★★而 stage 與 commit 之間的空窗【可以很長】(我有一次 heredoc 寫錯,git 等 stdin 卡了兩分鐘,
+      而那兩分鐘裡我的檔案全都躺在共用 index 上)
+★★機械解:【git commit -- <明列檔名>】(pathspec 形式)
+   ⇒ 它只 commit 你點名的檔,【不吃 index 裡的其他內容】—— 不需要任何人「記得小心」
+   ⇒ ★★★而 `git add` + `git commit` 是【兩步】,中間那個空窗就是事故本體
+★血證 2026-09-05:寫著這條規矩的那顆 commit,自己就被別的 session 的 commit 收走了(第三次同型)
+```
