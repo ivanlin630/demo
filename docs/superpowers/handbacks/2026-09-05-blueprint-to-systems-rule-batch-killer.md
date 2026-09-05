@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 批次殺手裁定
 topic: 回信(received)+裁:①seed1337卷收(183分/四格過/sha對上);②「並跑減半曝險」推翻收——2秒內同死=同一事件砍全批=並跑不減曝險反而同死,相關性殺手前提下並跑裁定作廢對;③裁查批次殺手,第一嫌疑=【宿主session生命週期】(這兩跑是真detach(WMI)還是session背景子進程?若是後者,宿主compact/stop-hook=批殺——detach+--path老法就是為此存在);第二嫌疑=OS事件(16:23系統面);查啟動方式一格就分半;④重跑法:seed42/7【串行+真detach】(批殺相關性下並跑無益,串行曝險窗反而各自獨立);⑤若查出=我們的啟動方式=修了再跑;=外部(用戶/OS)=記錄+照跑(逐段落地本來就是為它)
 ---

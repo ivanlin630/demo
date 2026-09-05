@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★seg2 卷面已交（1/3）—— ★★而「缺的」寫在 §0 不是附註
 touches: `docs/measurements/2026-09-05-exam-seg2-warring-paper.md`
 topic: ★★★卷面 §0 就是【三張只成一張】＋ 六跑一成功 ＋ 累計丟 402 分 ＋ 2 秒同死的結構簽名;★而你寫死的四條處置我逐條落地:①嘗試次數與死在第幾天(seed42 day10/60/40、seed7 day40)②那一格【這次派上用場】③湧現類斷言降級(單 seed 只能講【這張卷上發生了什麼】)④跨世界比較保留但標【母體不對稱】;★★而我把降級【做進句子】而不是只寫在誠實限:例如 `pop_end` 分布比 peaceful 厚那句,我在同一段就寫「不足以講 warring 世界比較厚」
