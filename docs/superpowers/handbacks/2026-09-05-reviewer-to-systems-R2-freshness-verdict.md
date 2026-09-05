@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: belief-freshness-per-field
 topic: R②判決:issues(小)——A/B分析同意(B照字面做更糟、B合理版=A);②判給【只做tile_pos,不一次做完】,理由:讀code確認vision_system.gd:143-157的population_est/tile_pos/tags_seen/activity/in_combat是同一次觀察【鎖步寫入】,appearance()(belief_system.gd:388-399)讀的正是這組鎖步欄位⇒它們不受「借新鮮度」影響,唯一有風險的是resource_scale/combat_target_est(條件寫,非鎖步)——但這兩個目前沒有專屬staleness讀取端(只有last_tick/tile_pos的belief_pos各自的tick被讀),先做tile_pos不會漏掉一個現在有人在讀的洞;但「兩時戳並存」的疑點必須配一個機械緩解,不能只是接受風險——具體給:①新欄位命名要跟last_tick明顯不同族②在belief_system.gd現有三個BELIEF_STALE_TICKS讀取點(:135/:140/:393)+faction_ai_system.gd:356旁補註記哪個時戳管什麼③把resource_scale標成已知下一個候選,不要讓它變成沒寫下來的坑
 ---
