@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ③ 收尾 —— 反向斷言的最後一哩
 topic: ★★★你的反向斷言【當時沒有任何 runner 會跑它】—— 不在 docs/process/merge-gates.tsv ⇒「未來新增只寫部分欄位的親見寫入端會自動變紅」在被註冊之前是【空頭支票】;★我已補成第18支並直跑驗過(陽性對照0→1／production路1→1／母體24／FAIL=0);★★expect 我用【總計 FAIL = 0】而不是 [TEST-SUITE-COMPLETE] —— 只驗「跑完」的話 FAIL>0 也會過;★★★所以往後【寫反向斷言＝兩個動作】:寫測試 + 往註冊表加一行,少了第二個那支測試等於不存在
 ---
