@@ -121,7 +121,7 @@ func _run_one(world_seed: int, total_ticks: int) -> Dictionary:
 	config["seed"] = world_seed         # 播 setup RNG（map/team/person gen local rng）
 	GameSetup.setup(state, config)
 	state.player_id = -1                 # 自然世界：無玩家 → 全 NPC AI 自解，無 forced_event 卡死
-	if OS.get_environment("FORCE_FULL_HD") == "1":
+	# ★★★`FORCE_FULL_HD` 已隨第⑧票退場（分班拆除 ⇒ 本來就全隊 near）⇒ 整段判斷刪除。
 	var _spec_ids: Array[int] = []
 	var _spec_out_dir: String = OS.get_environment("SUFF_SPECIMEN_OUT_DIR")
 	var _spec_raw: String = OS.get_environment("SUFF_SPECIMEN_IDS")

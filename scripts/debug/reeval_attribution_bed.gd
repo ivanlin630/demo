@@ -26,8 +26,8 @@ func _run() -> void:
 	GameSetup.setup(state, config)
 	if spec_id != -1:
 		state.specimen_team_ids = [spec_id]
-	# ★全-HD acceptance 開關（measurer judged-world）：FORCE_FULL_HD=1 → 全隊 near、specimen 不特殊、非侵入 trace。
-	if OS.get_environment("FORCE_FULL_HD") == "1":
+	# ★★★`FORCE_FULL_HD` 開關已隨第⑧票退場：分班拆除 ⇒ 全世界【本來就是全隊 near】。
+	#   ★環境變數留著也沒有作用 ⇒ 整段判斷刪除，不留 no-op（dormant knob 會讓下一個人以為調它有用）。
 	var no_player := Vector2i(-1, -1)
 	var ticks: int = TimeScale.TICK_PER_DAY * 90
 	# specimen 死因快照：每 tick 存最後已知狀態，消失即記死 tick + 死前家當
