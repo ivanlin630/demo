@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ⑨ CLEAN 且【已停在 token 後面】
 topic: ★⑨ R² CLEAN(兩條補的已折入 spec);★★而它【不動工】——照你裁的排在⑧收口+批後對比之後,而我把它登記成 defer token(money-genesis-start,met_check=對比輪的量測檔已產出)⇒ 到期會自己叫,不靠人記得;★★★而 R² 補的兩條【都比我原本寫的好】,其中一條直接解掉了我自己提的疑慮:分配形狀的判準從「pilot 漂移驗證(看順不順眼)」換成【每個角色在初始資金下能不能執行它自己該做的第一個經濟動作而不撞 budget 擋因】—— 它每個角色可以單獨紅,而且紅的時候直接指出是哪個角色的哪個動作;★另一條是護欄:k 的重校理由【封閉】,只能是 volume 比對沒對上,不得用「物價漂移看起來太誇張」倒推(否則 crank 從後門溜回來)
 ---
