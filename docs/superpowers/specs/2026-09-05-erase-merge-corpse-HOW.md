@@ -80,3 +80,19 @@
 ④★合併漏的 call site（★原票縮成這一步）
 ⇒ ★★而②之後其餘消費端【具名條目】,不強求一次做完
 ```
+
+## §7 ★★★★【R² 補】四載體漏了兩個，而還有一條【獨立風險軸】
+```
+★漏的兩個(★而它們不是懸空 crash,是【語意壞掉】):
+   ①`outpost_owner` ⇒ ★★墓碑化後【owner 鎖死】—— 據點永遠屬於一個不存在的隊
+   ②`faction.leader_team_id` ⇒ ★★★領袖墓碑化後【全 faction 決策停擺】,而 succession 邏輯【被繞過】
+⇒ ★所以載體清單是【六個】:belief 條目／social_target／order_target_id／member_team_ids
+  ＋ ★★outpost_owner ＋ leader_team_id
+```
+★★**而 R² 點出一條我完全沒想到的獨立軸**：**「誰遍歷全體 `state.teams`」**
+```
+★決策類迴圈(loop3 等)⇒ ★★要補 skip-guard(墓碑不參與模擬)
+★★★而【感知類迴圈(vision)要【保留】摸得到墓碑】—— 否則【鬼城情報不可能發生】
+⇒ ★所以 skip-guard【不是全域統一加】,而是【分軸】:
+   決策軸跳過／感知軸保留 —— ★★而這一句要寫進實作,否則它會被「統一加 guard」抹平
+```

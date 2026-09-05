@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: erase-merge-corpse(tombstone) + levy-broad-thin
 topic: R②判決兩張都issues(中)——①墓碑:先量後改的順序對,但四載體漏兩個真風險(outpost_owner=owner鎖死非懸空crash;faction.leader_team_id=領袖墓碑化後全faction決策停擺,succession邏輯被繞過);另有獨立風險軸沒被提到:「誰遍歷全體state.teams」(loop3等決策迴圈)要補skip-guard,但感知類迴圈(vision)該保留摸得到墓碑(鬼城情報要靠它);164上界措辭沒講太滿同意;②徵收上界:兩個候選都不如既有的TradeValuation.reserve+ResourceSystem.effective_holding(M4貿易surplus同一支,已覆蓋food用need_keep/coin用50%、人格加權),建議直接複用這支算surplus當levy上界,同源比①②都緊
 ---
