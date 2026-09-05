@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★你那句「那一刀只治【有人手】的隊」—— warring 的數字把【人手】那一半具體化了
 touches: `…/scratchpad/w2_1337.txt`（warring seed 1337）
 topic: ★★★成員回報在 warring:嘗試 **133** → 派出 **16**（peaceful 是 50→2）;★而【沒派成的成因整個換了】:peaceful 是 `母隊只剩一人 46`,warring 是 **`沒有可派的名人 501`**(母隊只剩一人 60／不知道對方在哪 40);★★也就是說兩個世界卡在【不同的人力條件】:peaceful 是【人太少】,warring 是【人都被派去做別的了】;★★★而那三個 fail counter 的母體是【全站所有 envoy 用途】—— 要歸給回報自己那一份仍需 `ptype` tap（★我先前開過那張小票）
