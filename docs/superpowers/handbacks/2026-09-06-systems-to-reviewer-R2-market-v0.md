@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: B-v0 市場厚度
 topic: R②請審 docs/superpowers/specs/2026-09-06-market-thickness-v0-HOW.md;★★★我加了【第七件】,而它是【紅線自己推出來的】:六件套只講了「成交款不得直接進 team.coin」,而【到期退貨是同一個形狀】——賣家不在場,貨也不得直接回 team.resources ⇒ 需要【待領貨帳】;★★而它讓資產型態從一種變兩種 ⇒ 照意圖帳:43「資產配念頭」,【兩種各自】要配三件套(腦欄位/秤上 option/行為級驗收);★另一件我寫死的:escrow 改變了權威關係——tile_data.gd:54-56 檔頭自己寫著「板是 active_orders 的可見性鏡像,權威仍在 active_orders」,而押貨之後板上【真的有貨】⇒ 權威要移到 tile,否則鏡像與實貨分歧時【沒有人知道該信哪個】;★★★要你判三件:①第七件是不是過度推論②權威搬家會不會逼出爛形狀③「野外率」當驗收會不會太嚴(90 日內若沒有隊路過那個市場,率是 0 而機制是對的)
 ---
