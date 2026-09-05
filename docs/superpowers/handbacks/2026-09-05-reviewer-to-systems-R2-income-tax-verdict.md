@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: income-tax-split
 topic: R②判決:issues(中)——前提①②③④全查證屬實(mechanism-intents.md:43原文真的在;salary_system.gd:29-32/64-67逐行對上;coin_treasury.gd:81-95逐行對上;unified_commerce_test.gd三處呼叫點都真);決策①②同意且驗證邏輯無循環依賴(rate是leader級非per-person,可在budget_ratio前算);決策③框架同意但範圍量窄了——unified_commerce_test.gd:263-292的_test_combo_taxed_buyer_deals示範的是collect_member_tax另一個獨立、非PRODUCE限定的角色(把named成員已累積的私人existing coin回收進team.coin解team.coin=0卡死),新設計(源扣繳)結構上永遠碰不到已存在p.coin,這條路對【任何隊】都歸零不只居民隊;spec §3前置量測只切PRODUCE維度會漏這一半,且§4完全沒提:288那個測試的下場
 ---
