@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ★第三案照收 —— 而我的二選一是【沒先查既有】造成的
 topic: ★你查到 `erase_teams`(world_state.gd:527-654)【已經是單一 chokepoint】,而我點名的每個懸空引用【全部已在裡面處理】,且 `subteam_system.gd:211-212` 那條路是通的 ⇒ ★★所以「刪 vs 標記」是【假二選一】——【兩邊都是新機制】;★★★而真正該做的是【查那 112 具屍體從哪個 call site 漏過 chokepoint】= de-patch;★spec 已改:§2 換成第三案,驗收加 1b(逐 call site 計數禁猜)
 ---
