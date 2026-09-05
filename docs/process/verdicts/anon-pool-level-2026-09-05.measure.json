@@ -1,0 +1,21 @@
+{
+  "touches": ["scripts/simulation/anon_treasury_bank.gd", "scripts/simulation/coin_treasury.gd"],
+  "slice": "B議程第四件展品——匿名池水位",
+  "question": "匿名池活著但有沒有錢——「有進帳」跟「池子裡有錢」是兩件事，consider_extraction有沒有fire",
+  "bed": "scripts/debug/anon_pool_level_bed.gd（新床，零新tap，commit a846eeb6）",
+  "window": "peaceful_economy 90d(129600 ticks)，seed 1337，同前兩票同scenario同seed",
+  "①_mother_population": {"treasury_rows累計": 1, "verdict": "★母體幾乎全空——90天只有1列record_driver(kind=treasury)，且該筆delta=0.0（正負兩桶都沒分到，見honest_limit）"},
+  "results": {
+    "②入金by reason": "完全沒有（含空reason都沒有）",
+    "③出金by reason": "完全沒有（含空reason都沒有）",
+    "④水位": {
+      "全程樣本數": 979,
+      "全程最高水位": 0.00,
+      "全程中位水位": 0.00,
+      "期末per-team": "已知18隊名冊，現存14隊，全數anon_treasury=0.00；6隊已消失（team=-1000000/2/7/10/11/18，明確標示非留白）"
+    },
+    "⑤consider_extraction實際fire": "0次（grep原始log「徵用」字串=0）"
+  },
+  "final_verdict": "★匿名池在peaceful_economy這個scenario下是【死的】——不只流量趨近0，是90天內幾乎沒有任何treasury事件(僅1筆delta=0的空操作)，水位全程恆為0.00(979個樣本點無一例外)，consider_extraction從未真正抽到任何東西。用戶「匿名抽積蓄=現制即是」這句話在這張床上是【空轉】——不是抽得少，是根本沒有可抽的東西。搭配member_tax(個人乾)+salary(薪資死)+這張床(匿名池也乾)，三件展品指向同一顆心臟：coin在這個scenario下幾乎不循環。",
+  "honest_limit": "只測peaceful_economy一個scenario，跟member_tax/salary_flow同一批但都是同一個世界特徵（100%PRODUCE隊型）——三個展品的0不是三個獨立證據，是同一個世界composition下的同一組症狀，warring_states可能完全不同（更多military/trade活動、combat戰利品transfer可能觸發）。另：本床inflow/outflow_by_reason的分類用`delta>0.0`/`delta<0.0`判斷，若某筆treasury事件delta剛好=0.0（例如reset一個已經是0的池）會被跳過不進任何桶——本輪那唯一1筆treasury_rows極可能就是這種delta=0的no-op，不影響「池真的乾」這個結論，但如實聲明這個床邊界情況。"
+}
