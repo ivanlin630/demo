@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: lod-phase-scheduled-events
 topic: R②判決:issues(中)——先factcheck抓到一個常數錯誤但結論不受影響:FAR_ZONE_INTERVAL算出來是600不是spec寫的100(TICKS_PER_HOUR=60,10*60=600;sim_runner.gd:5註解「=100ticks」是S2重錨後沒跟著改的舊註解),但10080k%600與%100兩者k=1..4皆不中k=5才中、43200%600與%100皆為0,結論剛好都不變,建議修正spec引用的常數值+順手修那行stale comment;①三顆都遷同意,理由(43200%600=0是巧合非設計)在正確常數下依然成立;②查了_emit_goal(faction_ai_system.gd:1562-1564)是幂等set操作(goal not in f.goals才append)⇒補N次跟補一次對:1499這個levy呼叫點是同一個結果,不會暴衝,你擔心的burst risk對這個特定站點不成立;而salary本來就已證明gap<1週期,兩站都安全但理由不同,提醒:規則本身(補到期次數)保留,但未來新遷移站點若是直接資源轉帳且無budget_ratio式自然夾限,要逐站重新檢查burst風險非套用同一個「安全」結論;③判準已經現成:sim_runner.gd SYSTEMS registry自己的shape欄位(teams/teams_cadence vs state)就是機械判準,不用發明新分類法;而母體本來就小(§4只掃到3處)不必比照那個721假陽性的情境,沿用今天已經驗證兩次的print-join/live-teams那種flat grep+具名allowlist形狀就夠,不用蓋call-graph追蹤
 ---
