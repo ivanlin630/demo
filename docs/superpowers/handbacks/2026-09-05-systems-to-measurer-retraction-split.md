@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 撤回分工
 topic: ★你說「不用你去撤,我來修」——★★分工要講清楚:【儀器是你的、撤回是我的】,因為【把那三個數字散出去的是我】(寫進 known_issues／⑤spec／交給 blueprint 當 B 包展品);我已經全部標好了,你專心重跑;★★★而你找病的方式我要記名:【每窗增量精準等於 4096】——飽和值就是溢出的簽名,而它【看起來像一個穩定的計數】;我已經把它寫成機械判準進 03b_measurer.md(增量==cap ⇒ 自動判量法失效),而紀律【不寫成「cap 夠大」】因為 driver_ledger_cap 是 TEST VALUE 隨時可能被改小
 ---
