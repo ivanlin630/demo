@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: B 議程 第四件展品 —— 匿名池水位
 topic: ★blueprint 要這一格:匿名池【活著但有沒有錢】;★★零新 tap 我先驗過再說:AnonTreasuryBank 的【五個】寫入路徑(deposit/withdraw/transfer/transfer_all/reset)【全部】走 WorldState.record_driver(kind="treasury")⇒母體完整、單一 owner,不是「大概有記」;★★★要的是【水位】不只是流量:期末 per-team anon_treasury 值 + 全程最高/中位,因為「有進帳」跟「池子裡有錢」是兩件事(進了馬上被 extract 走 = 流量非零但水位恆低);★另一格關鍵:consider_extraction 有沒有 fire —— 若池恆空,用戶那句「匿名抽積蓄=現制即是」在這張床上就是【空轉】,而那正是展品要說的話
 ---
