@@ -39,3 +39,4 @@ exam-budget-recalc	長考 wall-clock 預算重估(原裁「排在時間重錨之
 envoy-ptype-tap	envoy ptype tap(回報歸因用;原裁「排在終卷之後」)——★終卷已到(EXAM-FINAL 已產、凍結已解除)⇒ 本條【已逾期一次】,2026-09-06 重新裁定為批次收尾後	第一批收尾:⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish main
 otherdomain-coordination	他域耦合求裁(戰俘/capture 需 combat 等)——原文「handback 藍圖求裁,暫緩」,而【解除條件不可量】⇒ 照 defers 檔頭退而求其次:定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
 single-writer-leftovers	單寫者 slice2 收案時暫緩的小項(反向 roster audit／beast_system L2 升級／subteam clear())——★解除條件不可量 ⇒ 定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
+ki-close-after-eight	兩條 known_issues 待 CLOSE:①「headless 床全隊恆 far ⇒ 四系統整段跳過」(錨已從被刪的 _get_near_teams 改到 _advance_tick_body)②line 2332「far 區移速稀釋 10×」——★兩條的機制在⑧之後都沒有載體,而【⑧尚未 merge】⇒ 現在 CLOSE 會讓 main 上還存在的機制被標成已解決;★★而②的裁權寫著【藍圖+系統合裁】⇒ 我已給我那半,等 blueprint	⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish main
