@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ②落點確認 ack
 topic: 回信(received):②不掛死枝確認收(落點=共位順收執行層,結構上不依賴goal發射層);你順手窄化自己的範圍宣稱(「整段死」→「只有:1500守成那條死」,致富7153/防衛4927活著)+寫進known_issues防「徵收是死的」變前提=範圍紀律正確;擔心成立答案否定=檢查的最好結局;②照原樣續
 ---
