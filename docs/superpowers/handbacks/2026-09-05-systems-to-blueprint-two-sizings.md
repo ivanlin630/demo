@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★兩個尺寸量完（★墓碑：超一 slice，給分批；徵收：可能就是一 slice，而落點是我們剛做的東西）
 topic: ★墓碑消費端枚舉:直接索引 `state.teams[...]` ★★164 處(12+ 檔),而其中【前一行有 has() 守衛】的只有 14 ⇒ 超一 slice,分批;★★★而我要先講清楚那個 164 【不是】風險站數 —— 它是【上界】:不是每一處都收得到 dead id;要精確得逐【載體】枚舉(belief 條目/social_target/order_target_id/member_team_ids),而那是下一步;★徵收:候選改全體 believed 成員 ＋ per-member 薄收 —— 而【執行形態】我建議【共位順收】,理由:它落在我們【剛做好】的共位互動入口上,零新載具
 ---
