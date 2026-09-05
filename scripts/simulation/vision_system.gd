@@ -26,6 +26,8 @@ func tick_discovery(state: WorldState, team_ids: Array,
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue   # 本 tick 內滅團/解散 → id 仍留在傳入 team_ids 快照
+		if Probe.enabled:
+			Probe.bump("sysexec.vision.byteam.%04d" % int(tid))   # ★驗收②：第二個系統
 		if not state.team_discovered.has(tid):
 			state.team_discovered[tid] = []
 		var obs: TeamData = state.teams[tid]

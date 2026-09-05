@@ -35,6 +35,13 @@ func _ok(cond: bool, msg: String) -> void:
 	if cond: print("  [PASS] %s" % msg)
 	else: _fail += 1; print("  [FAIL] %s" % msg)
 
+# ★床側的 hex 距離（production 的 `_hex_distance` 已隨⑧刪除 —— ★而床要量距離就得自己有一份）。
+#   ★★這【不是把它偷渡回 production】：它在 debug 床裡、只用於分組觀測，不進任何決策。
+func _hex_dist(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x
+	var dy: int = b.y - a.y
+	return (absi(dx) + absi(dx + dy) + absi(dy)) / 2
+
 func _count_by(prefix: String) -> Dictionary:
 	var out: Dictionary = {}
 	for k in Probe.counts.keys():
@@ -70,8 +77,22 @@ func _run() -> void:
 	print("  觀察者錨點 = %s（★固定不動；隊會移動 ⇒ 近/遠是實測比例）" % str(anchor))
 	print("  起始隊數 = %d" % t0_ids.size())
 
+	# ★★★第⑧票之後【分班不存在】⇒ `lod.near/far.byteam` 兩個 tap 也不存在
+	#   ⇒ ★不能再靠「runner 把你分到哪一批」來分組。
+	#   ★★而如果只是把分組拿掉，這張床會從【證明距離無關】退化成【兩組是同一批】的空綠，
+	#     而它還會印出漂亮的 PASS ⇒ ★★★那比沒有這張床更糟。
+	#   ⇒ 改成【床自己量每隊到錨點的距離】：每個 pass 取樣一次，最後用平均距離分成遠/近兩半。
+	var dist_sum: Dictionary = {}   # tid -> 距離總和
+	var dist_n: Dictionary = {}     # tid -> 取樣次數（★母體要跟著走，否則平均沒有意義）
 	for _t in range(total_ticks):
 		runner.advance_tick(state, anchor)
+		if _t % SimRunner.NEAR_CADENCE == 0:
+			for _tid in state.teams:
+				var _tm: TeamData = state.teams[_tid]
+				# gate-ok: 純觀測（床側量測，不進任何決策）——讀真 tile_pos 只為了分組
+				var _d: int = _hex_dist(_tm.tile_pos, anchor)
+				dist_sum[int(_tid)] = float(dist_sum.get(_tid, 0.0)) + float(_d)
+				dist_n[int(_tid)] = int(dist_n.get(_tid, 0)) + 1
 		if state.teams.is_empty():
 			break
 
@@ -86,6 +107,82 @@ func _run() -> void:
 	print("  全窗存活的隊 = %d／%d（★中途生或中途死的【不進判準】—— 它們的次數天生偏低）"
 		% [whole.size(), t0_ids.size()])
 
+	var pay: Dictionary = _count_by("salary.byteam.")
+	# ★分組改由【床自己量的平均距離】決定：以中位數切兩半（★不用固定門檻——
+	#   固定門檻在世界形狀改變時會讓一邊變空，而【空的那邊會讓判準變成恆真】）。
+	var avg_d: Dictionary = {}
+	var ds: Array = []
+	for tid in whole:
+		if int(dist_n.get(tid, 0)) == 0:
+			continue
+		var a: float = float(dist_sum[tid]) / float(dist_n[tid])
+		avg_d[tid] = a
+		ds.append(a)
+	ds.sort()
+	if ds.is_empty():
+		_fail += 1
+		print("  [FAIL] 距離取樣母體為 0 —— ★這不是「距離都一樣」，是【沒量到】")
+		Probe.enabled = false
+		return
+	var med: float = ds[ds.size() / 2]
+	var g_near: Array = []
+	var g_far: Array = []
+	for tid in avg_d.keys():
+		if float(avg_d[tid]) > med:
+			g_far.append(tid)
+		else:
+			g_near.append(tid)
+	print("  分組（全窗存活者，★依【床自己量的平均距離】以中位數 %.1f 切）：遠半 %d 隊 ｜ 近半 %d 隊"
+		% [med, g_far.size(), g_near.size()])
+	print("     ★★而分班已拆除 ⇒ 這裡的「遠/近」只是【地理事實】，不再是【排程身分】——")
+	print("        ★★★所以兩組的執行次數【應該】相同，而「應該」要被量不是被相信。")
+
+	# ── 判準 A/B：母體不能塌陷 ──
+	_ok(g_far.size() > 0, "A：far 組非空（母體 %d）★★空的話下面全部【答不了】，不是通過" % g_far.size())
+	_ok(g_near.size() > 0, "B：near 組非空（母體 %d）★★同上" % g_near.size())
+	if g_far.is_empty() or g_near.is_empty():
+		print("  ★★★母體塌陷 ⇒ 本次【沒有量到】距離的影響。處置＝換錨點（挑一個真的有隊常駐的格），")
+		print("     ★而不是把判準放寬 —— 放寬會讓這張床從此對這件事沒有鑑別力。")
+		return
+
+	# ── ★★★驗收②（第⑧票 §4-2）：判準擴到【三個不同系統】的 per-team 執行次數 ──
+	#   ★薪資那條只證明【一條路】距離無關；分班影響的是【每一個 per-team 系統】。
+	var sys_ok: bool = true
+	for sysname in ["collect", "vision", "fatigue"]:
+		var c: Dictionary = _count_by("sysexec.%s.byteam." % sysname)
+		var sf: float = 0.0
+		var sn: float = 0.0
+		var zero_f: int = 0
+		for tid in g_far:
+			sf += float(c.get(tid, 0))
+			if int(c.get(tid, 0)) == 0: zero_f += 1
+		for tid in g_near:
+			sn += float(c.get(tid, 0))
+		var mf: float = sf / maxf(float(g_far.size()), 1.0)
+		var mn: float = sn / maxf(float(g_near.size()), 1.0)
+		# ★母體先於判準：兩組都 0 ⇒ 這個系統【沒量到】，不是「相等」
+		if mf == 0.0 and mn == 0.0:
+			_fail += 1
+			sys_ok = false
+			print("  [FAIL] %-8s ★兩組都是 0 ⇒【沒量到】不是【相等】（tap 沒開／系統沒跑）" % sysname)
+			continue
+		var rel: float = absf(mf - mn) / maxf(mf, mn)
+		_ok(rel <= 0.10 and zero_f == 0,
+			"%-8s 遠半平均 %.1f ／ 近半平均 %.1f ⇒ 相對差 %.1f%%（遠半 0 次的隊 %d）"
+				% [sysname, mf, mn, rel * 100.0, zero_f])
+		if rel > 0.10 or zero_f > 0:
+			sys_ok = false
+	print("     ★★★三個系統的判準：★相對差 <= 10% 且【遠半沒有任何一隊是 0 次】——")
+	print("        ★而「0 次」那格是關鍵：⑧ 之前遠隊【有跑但慢 10 倍】，⑦ 之前遠隊【薪資完全沒跑】")
+	print("        ⇒ ★★兩種病的簽名不同（一個是比值 ~0.1、一個是 0），判準要同時抓得到。")
+	if not sys_ok:
+		print("     ★把這一刀撤掉，上面的相對差應該回到 ~90%（遠隊每 600 才跑、近隊每 60）—— 不是「稍微變大」")
+
+
+	# ★★★而這個守衛【只管薪資那一條】—— 它原本擺在【所有判準之前】，
+	#   ⇒ ★短窗時它 `return` 掉，把【與窗長無關的】三系統判準（collect/vision/fatigue）一起吞掉
+	#   ⇒ ★★而卷面只印「窗太短」，看起來像【一條沒過】，實際是【三條根本沒跑】
+	#   ⇒ ★★★所以它搬到三系統判準【後面】：一個判準的守衛不該靜默壓掉另一個判準。
 	# ★★★窗長守衛：stagger 讓【第一次發薪】落在 [C, 2C) 之間（offset 均勻）
 	#   ⇒ 窗 < 3 個週期時，「有些隊 0 次」是【窗太短】不是【⑦ 壞了】
 	#   ⇒ ★不要讓這張床在那種窗下印出【看起來像病、其實是量法錯】的紅。
@@ -97,32 +194,6 @@ func _run() -> void:
 		print("        【⑦ 壞了】與【還沒輪到】⇒ ★★★這是量法失效，不是結論。")
 		Probe.enabled = false
 		return
-	var pay: Dictionary = _count_by("salary.byteam.")
-	var nearc: Dictionary = _count_by("lod.near.byteam.")
-	var farc: Dictionary = _count_by("lod.far.byteam.")
-
-	var g_near: Array = []
-	var g_far: Array = []
-	for tid in whole:
-		var n: int = int(nearc.get(tid, 0))
-		var f: int = int(farc.get(tid, 0))
-		if n + f == 0:
-			continue
-		var share: float = float(n) / float(n + f)
-		if share <= 0.0:
-			g_far.append(tid)
-		elif share >= 0.5:
-			g_near.append(tid)
-	print("  分組（全窗存活者）：【純 far】%d 隊 ｜【多數時間 near】%d 隊" % [g_far.size(), g_near.size()])
-
-	# ── 判準 A/B：母體不能塌陷 ──
-	_ok(g_far.size() > 0, "A：far 組非空（母體 %d）★★空的話下面全部【答不了】，不是通過" % g_far.size())
-	_ok(g_near.size() > 0, "B：near 組非空（母體 %d）★★同上" % g_near.size())
-	if g_far.is_empty() or g_near.is_empty():
-		print("  ★★★母體塌陷 ⇒ 本次【沒有量到】距離的影響。處置＝換錨點（挑一個真的有隊常駐的格），")
-		print("     ★而不是把判準放寬 —— 放寬會讓這張床從此對這件事沒有鑑別力。")
-		return
-
 	var sum_far: int = 0
 	var zero_far: Array = []
 	for tid in g_far:

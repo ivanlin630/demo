@@ -531,6 +531,8 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
 		if team == null: continue
+		if Probe.enabled:
+			Probe.bump("sysexec.fatigue.byteam.%04d" % int(tid))   # ★驗收②：第三個系統
 		if team.current_task == TeamData.TASK_REST:
 			# 紮營休息
 			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
