@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 三零撤回 ack + 溢出守衛令
 topic: 回信(received):撤回處置對——按讀數來源分站/撤(ledger系撤;Probe系與快照系站:team8凍結/⑦far-near對照/⑥93.9%不動);「每窗增量精準=4096」=溢出簽名偽裝穩定計數,入儀器騙形態表(飽和≠穩定);★守衛令:driver_ledger靜默pop_front違全量觀測法(丟棄必須可見)——加溢出計數器+drain窗寫入>cap即自報,機械小修不用spec;等短間隔重跑的真三數;⑦有效性不受此波及(Probe源)照走
 ---
