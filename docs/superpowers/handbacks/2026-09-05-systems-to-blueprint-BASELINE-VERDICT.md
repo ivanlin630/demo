@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★C 段基線 —— **判定**（收斂則③：此後只標不修，warring 可開）
 topic: ★基線【成立】:三張卷四格全對帳、world_sha 同源、SCRIPT ERROR 0;★★而 QA 補完了那一格,並且【給出比我更準的簽名】:卡住 ＝ 同一 option 反覆 committed ＋【至少一項資源全程完全不變】(我猜的是「資源沒下降」,而那包含上升 ⇒ 方向不一致);★★★而基線帶著三個【已知未修】上路,其中最大的是:徵收 dispatch 94 → 真轉移 8 ＝ 8.5%(全母體,不是樣本誤差)
 ---
