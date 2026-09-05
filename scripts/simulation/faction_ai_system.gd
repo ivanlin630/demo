@@ -1537,6 +1537,11 @@ func _rebuild_goals(state: WorldState, f) -> void:
 			elif state.world.current_tick >= f.levy_eval_next_tick:
 				var _lvg: int = 0
 				while f.levy_eval_next_tick <= state.world.current_tick and _lvg < EXTRACT_CATCHUP_MAX:
+					if Probe.enabled:
+						# ★★★【到期】與【真的發令】要分兩格：`_richest_member == -1` 時到期了也不發，
+						#   ⇒ 只記 emit 的話，「排程被相位吃掉」與「沒有富有的成員可徵」會共用同一個少。
+						#   ⇒ ★驗收③問的是【排程】，所以判準釘在 `due` 這格。
+						Probe.bump("levy.due.byfaction.%04d" % int(f.faction_id))
 					if _richest_member(state, f) != -1:
 						_emit_goal(state, f, "徵收", "守成", "定期維持 treasury", "levy")
 						if Probe.enabled:

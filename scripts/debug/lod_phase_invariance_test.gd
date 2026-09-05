@@ -51,13 +51,12 @@ func _run() -> void:
 	print("  ★★憲法：計算跟隨【事件密度】不跟隨【觀察者】⇒ 期望答案是【無關】。")
 	seed(world_seed)
 	SimRunner.force_full_hd = false   # ★必須保留分班 —— 這張床要的就是【兩批同時存在】
-	Probe.enabled = true
-	Probe.reset()
-	var state := WorldState.new()
-	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config("res://config/default.json")
 	config["seed"] = world_seed
-	GameSetup.setup(state, config)
+	# ★★★arm 順序寫死（bed-arm 閘）：`Probe.arm()` 必須發生在 `GameSetup.setup()` 之前，
+	#   ★否則建世界那一段的事件【不在量測窗內】，而那個缺口印出來跟「沒發生」一樣。
+	var state: WorldState = MeasureBedHelper.arm_and_setup(config)
+	var runner := SimRunner.new()
 
 	# ★把 player_pos 釘在【第一隊的起始格】—— 一個真實座標（不是 (-1,-1)），
 	#   ★★而它是【固定】的：隊會走開／走近，所以近遠是實測比例，不是預設標籤。
@@ -159,5 +158,47 @@ func _run() -> void:
 	_ok(mean_far >= float(cycles) - 1.5 and mean_near >= float(cycles) - 1.5,
 		"F：★★★兩組平均都 >= %d-1.5（窗內週期數 %d；stagger 讓相位落窗尾的隊少一次）—— ★而沒有這格，【兩組都是 0】會讓 E 通過"
 			% [cycles, cycles])
+
+	# ════════ ★驗收③：定期徵收的【排程準時度】逐盟比對（systems 2026-09-05 採用我提的替代判準）════════
+	# ★原判準（far/near 對照）問錯了問題：`evaluate_all(state, _team_ids)` 的 `_team_ids` 沒用、
+	#   `for fid in state.factions` 每個 pass 跑全部的盟 ⇒ ★盟根本不分 far/near ⇒ 那個對照【恆等】。
+	# ★★真病是【量化】：pass 只在 `t % 60 == 0` 發生 ⇒ 實際週期 = `lcm(60, eff)`，失真 = `60 / gcd(60, eff)`
+	#   而 `eff` 由 leader 的貪婪／義氣算出 ⇒ ★★★失真【隨人格而異】，且【只有平均人格準時】
+	#   —— 它製造了一個【假的人格訊號】：看起來像「這位統領不愛徵收」。
+	print("")
+	print("═══ ★驗收③：定期徵收的排程準時度（逐盟；★合計會把人格相關的失真平均掉）═══")
+	var due: Dictionary = _count_by("levy.due.byfaction.")
+	var rows: Array = []
+	var worst: float = 0.0
+	var checked: int = 0
+	for fid in state.factions:
+		var f = state.factions[fid]
+		var lt: TeamData = state.teams.get(f.leader_team_id)
+		if lt == null:
+			continue
+		var lp: PersonData = state.persons.get(lt.leader_id)
+		if lp == null:
+			continue
+		var greed: float = float(lp.values.get("貪婪", 0.5))
+		var honor: float = float(lp.values.get("義氣", 0.5))
+		var eff: int = maxi(int(FactionAISystem.COLLECT_INTERVAL * (1.5 - greed)
+			* (1.0 + honor * FactionAISystem.HONOR_INTERVAL_MULT)), 10)
+		var expect: float = float(total_ticks) / float(eff)
+		var got: int = int(due.get(int(fid), 0))
+		if expect < 1.0:
+			continue   # ★窗內連一次都不該有 ⇒ 這盟答不了，別混進判準
+		checked += 1
+		var ratio: float = float(got) / expect
+		rows.append("f%d(貪%.2f義%.2f eff=%d) 期望%.1f 實得%d 比值%.2f" % [
+			int(fid), greed, honor, eff, expect, got, ratio])
+		worst = maxf(worst, absf(ratio - 1.0))
+	for r in rows:
+		print("     " + r)
+	_ok(checked > 0, "G：★母體非空（可判的盟 %d）—— ★★0 的話下面【答不了】不是通過" % checked)
+	if checked > 0:
+		_ok(worst <= 0.35,
+			"H：★★★每一盟的【實得／期望】都落在 1±0.35（最差偏離 %.2f）⇒ 排程準時、與人格無關" % worst)
+		print("        ★鑑別力：撤掉⑦ ⇒ 比值會塌成 `gcd(60,eff)/60`（1/15~1/30）★★而且【逐盟不同】——")
+		print("           那個【散開】就是「假人格訊號」的簽名，不是「全部一起變小」。")
 
 	Probe.enabled = false
