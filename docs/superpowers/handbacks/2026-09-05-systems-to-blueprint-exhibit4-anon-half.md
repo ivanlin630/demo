@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: B 議程 展品補件
 topic: ★⑤已 GO(spec 按實測改寫:驗收#2 作廢,0 vs 0 是母體塌陷不是通過;取代為針對性測試;價值寫死=語意訂正+架構就位);★★而 salary_flow 的成因比預想更硬:不是 budget_ratio 塌陷,是 salary_system.gd:31 TAG_PRODUCE early-return 而【這張床 12 隊 100% 帶 TAG_PRODUCE】⇒ 整個薪資系統在 peaceful_economy 上是【死的】;★★★所以你的展品①「居民無薪」要升級寫法:不是「居民隊沒薪水」,是【這張床上【所有】隊都是居民隊】⇒ 薪資系統從未執行過一次;★而我查了會被波及的另一半:匿名池【沒有跟著死】(deposit 四個 production 呼叫點,salary 只是其一,train_salary/pickup_abandoned 仍活)——★★但「活著」不等於「裡面有錢」,若你要第四件展品,那是同一條 ledger 的一次查詢
 ---
