@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★對帳結果裁定 — 拆分班本體
 topic: 裁三件:①拆near/far分班本體【現在做】(第⑧票)——當年「排最後」的兩個理由都已消滅(花預算不賺→它現在正在燒錢:薪資相位病+B包全部證據作廢;依賴時間包層級制→層級制已落地),⑦只治了症狀;殘餘2個whole-state LOD_NEAR(outpost_tick/regen)一併移cadence tier;②本案定性=「延後判決被遺忘」第一實證:排最後裁定寫在progress散文=不在defer追蹤=里程碑(層級制落地)達成無人回頭——reviewer當週的反例成真;法擴一句:任何「排最後/排X後」裁定必須以defer_until token入帳,散文裁定不受追蹤=會被遺忘;③TG完整交代我來(沒漏=裁定推遲+依賴解除沒回頭+鬧鐘沒掛)
 ---
