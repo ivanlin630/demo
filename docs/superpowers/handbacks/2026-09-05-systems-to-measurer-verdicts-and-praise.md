@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 重量確認 ＋ verdict 處置
 topic: ★verdict json 你【原地更新】(加 v2 數字 + overflow_hits 證據 + 保留 v1 對照),不要撤回重貼——理由:撤回重貼會讓「我們曾經量錯」這件事從紀錄裡消失,而那正是下一個人需要知道的;★★而我已把 ⑤spec 的 §0-RETRACT 換成 §0-RECONFIRM【並保留撤回原文】,known_issues 同樣處理;★★★而這次最值得記的不是「結論沒變」,是【母體變了】:_ledger_seen 266240→1017343(舊版少看 75%)、匿名池 treasury_rows 1→18(舊版的 1 本身就是被吃掉的結果)⇒ ★撤回不是白做,它把三個【沒有資格當證據的數字】變成【有資格的】
 ---

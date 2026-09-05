@@ -4,7 +4,10 @@
   "question": "新制所得稅抽的是發薪流量,若發薪額本身也接近0,新制一樣收0——這一格決定⑤是修好稅制還是語意訂正",
   "bed": "scripts/debug/salary_flow_baseline_bed.gd（新床，零新tap，commit 711851df）",
   "window": "peaceful_economy 90d(129600 ticks)，seed 1337，同床同seed同member_tax那票，自然DONE",
-  "①_positive_control": {"verdict": "PASS，_ledger_seen=266240（跟member_tax那輪同scenario同seed，數字一致，非巧合）"},
+  "①_positive_control": {
+    "v1_verdict_RETRACTED": "PASS，_ledger_seen=266240（★2026-09-05事後發現：drain間隔2000tick太寬，driver_ledger(cap=4096)在窗口內已溢出，266240是被低估75%的數字，本欄位保留原文供對照，不當最終依據）",
+    "v2_verdict_RECONFIRMED": "PASS，_ledger_seen=1017343，overflow_hits=0（drain間隔改50tick後每次drain前size都<cap，直接量證非推論，未溢出，本次為可信母體）"
+  },
   "results": {
     "①salary_named總額": 0.00,
     "①salary_named發生次數": 0,
@@ -14,5 +17,6 @@
   },
   "root_cause_isolated": "day30快照直接查team.tags：state.teams全數12隊、100%帶TAG_PRODUCE。salary_system.gd:30-32『居民PRODUCE team不走薪資系統』的early-return在peaceful_economy這個scenario下命中率=100%——不是budget_ratio塌陷（那個假說被print=0次直接排除，budget_ratio分支若執行過budget_ratio<1至少會印減薪、=1也會印薪水結算，兩者都是0代表函式連那段都沒到），是PRODUCE gate本身把全部人口擋在門外。",
   "final_verdict": "在peaceful_economy這個scenario，salary_named/salary_anon流量皆為0，成因跟member_tax的0不同（member_tax是levy<=0/p.coin見底；salary是100% PRODUCE隊early-return，函式本體從未執行）。兩條路徑各自獨立塌陷，但結論相同：★系統原信假說成立——新制所得稅若接到這條salary流量，在這個scenario下一樣會收0，是【廢掉一個收0機制換另一個收0機制】，不是修好稅制。真正binding constraint如系統所說在blueprint的B議程（團庫的錢該從哪來），不在稅制本身怎麼定義。",
-  "honest_limit": "只測了peaceful_economy一個scenario。100% PRODUCE的隊型組成可能是這個scenario本身的設計特徵（村莊經濟），warring_states可能有截然不同的隊型分佈(更多military/trade隊、更少PRODUCE)——若systems需要驗證這個結論是否scenario-general，需另跑warring_states 90天版本，本票未做(未被要求，如實聲明非偷懶省略)。"
+  "honest_limit": "只測了peaceful_economy一個scenario。100% PRODUCE的隊型組成可能是這個scenario本身的設計特徵（村莊經濟），warring_states可能有截然不同的隊型分佈(更多military/trade隊、更少PRODUCE)——若systems需要驗證這個結論是否scenario-general，需另跑warring_states 90天版本，本票未做(未被要求，如實聲明非偷懶省略)。",
+  "retraction_reconfirm_note": "★2026-09-05：driver_ledger環形緩衝(cap=4096)在原drain間隔(2000tick)下溢出，改50tick+overflow_hits量證後重跑，salary_named/salary_anon仍=0.00/次數0不變——結論RECONFIRMED非撤回，母體_ledger_seen從266240修正為1017343。v2原始log：docs/measurements/salary-flow-baseline-peaceful_economy-90d-v2.txt，床commit b0360e80。另見team8-fate-2026-09-05.measure.json——100% PRODUCE成因已追出第二條寫入點(interaction_system.gd:1509 settle)，本票的root_cause_isolated段落仍正確，team8那票補了「連config唯一有錢的商隊都被settle收斂進PRODUCE」這一層。"
 }

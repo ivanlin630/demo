@@ -5,7 +5,8 @@
   "bed": "scripts/debug/member_tax_baseline_bed.gd（新床，零新tap，走既有WorldState.record_driver+driver_ledger，commit c28f5040——原commit誤落implementer的feat/belief-freshness-tile-pos分支c508625f，已撈回main）",
   "window": "peaceful_economy 90d(129600 ticks)，seed 1337，自然DONE非timeout砍",
   "①_positive_control": {
-    "verdict": "PASS，_ledger_seen=266240（非零，ledger真的在記，過去record_driver tap bug在本輪不成立）"
+    "v1_verdict_RETRACTED": "PASS，_ledger_seen=266240（★2026-09-05事後發現：drain間隔2000tick太寬，driver_ledger(cap=4096)在窗口內已溢出，266240是被低估75%的數字，本欄位保留原文供對照，不當最終依據）",
+    "v2_verdict_RECONFIRMED": "PASS，_ledger_seen=1017343，overflow_hits=0（drain間隔改50tick後每次drain前size都<cap，直接量證非推論，未溢出，本次為可信母體）"
   },
   "results": {
     "①member_tax總額": 0.00,
@@ -19,5 +20,6 @@
     "named_members_check": "day30快照：12隊、全數12隊named_members.size()>0、累計12名——排除「母體本身是空」的假說（named_members非空，per-person迴圈理論上會執行）"
   },
   "final_verdict": "現制collect_member_tax在90天peaceful_economy(seed1337)下member_tax總額=0.00，per-team全空——不是母體塌陷（named_members非空、ledger本身健康），是函式內部（tax_rate<=0或levy<=0其中之一，本票無法分辨，需④的L3 tap或直接讀tax_rate/levy公式）持續擋下所有徵收。這直接支持⑤票「現制稅收機制已近乎失能」的前提——那一格（居民PRODUCE隊將無法被抽所得稅）事實上目前連【既有稅】都幾乎抽不到。",
-  "honest_limit": "無法分辨tax_rate<=0 vs levy<=0哪個是主因（需④的L3 tap，跨我production scope）；只測了peaceful_economy一個scenario，warring_states未測（母體用途不同，若systems需要可另跑）。"
+  "honest_limit": "無法分辨tax_rate<=0 vs levy<=0哪個是主因（需④的L3 tap，跨我production scope）；只測了peaceful_economy一個scenario，warring_states未測（母體用途不同，若systems需要可另跑）。",
+  "retraction_reconfirm_note": "★2026-09-05：systems發現driver_ledger是cap=4096的環形緩衝，原本每2000tick drain一次的間隔太寬，窗口內已溢出（每次checkpoint的ledger_seen增量精準卡在4096=溢出簽名）。改drain間隔為50tick+加overflow_hits直接量證後重跑，member_tax總額仍=0.00不變——結論RECONFIRMED非撤回，但母體_ledger_seen從266240修正為1017343（原數字少看75%）。v2原始log：docs/measurements/member-tax-baseline-peaceful_economy-90d-v2.txt，床commit b0360e80。"
 }
