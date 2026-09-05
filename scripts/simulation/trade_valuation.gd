@@ -159,5 +159,22 @@ static func local_value(team: TeamData, res: String, state: WorldState) -> float
 	var shortage: float = (target - stock) / maxf(target, 1.0)   # ≤ 1.0
 	if res in SURVIVAL_GOODS and shortage > 0.5:
 		shortage = 1.0 + (shortage - 0.5) * 6.0
-	var sr: float = clampf(shortage, -0.5, 4.0 if res in SURVIVAL_GOODS else 1.0)
+	var _hi: float = 4.0 if res in SURVIVAL_GOODS else 1.0
+	# ★★★物價 clamp 命中率（systems 2026-09-06；對比輪 D 格）——
+	#   ★measurer 原本提的是【比 clamp 之後的 `sr` 是否貼近邊界(±1e-6)】，而 systems 改了形狀：
+	#     ★★那會把【被夾住】跟【剛好等於邊界】混在一起，而且要靠一個 epsilon。
+	#   ⇒ ★★★改成比【clamp 之前】的 `shortage` 與邊界 ⇒ 精確、零 epsilon，
+	#     而且它量的正是要問的那件事【有沒有被夾】，不是【結果落在哪】
+	#     （那兩件事只有在【沒被夾】時才一樣）。
+	#   ★注意比的是【放大後】的 shortage：`SURVIVAL_GOODS` 的 ×6 放大在 clamp 前就做完了。
+	#   ★★三桶【互斥且窮盡】：lo + hi + none == `local_value.calls`（★對帳式要真的印，不心算）。
+	#   ★★★`local_value` 是熱路徑 ⇒ 三個 bump 都在 `Probe.enabled` 之內（關掉時零成本）。
+	if Probe.enabled:
+		if shortage < -0.5:
+			Probe.bump("valuation.clamp_lo")
+		elif shortage > _hi:
+			Probe.bump("valuation.clamp_hi")
+		else:
+			Probe.bump("valuation.clamp_none")
+	var sr: float = clampf(shortage, -0.5, _hi)
 	return float(BASE_PRICE[res]) * (1.0 + sr)
