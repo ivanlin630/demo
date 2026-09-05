@@ -41,3 +41,4 @@ otherdomain-coordination	他域耦合求裁(戰俘/capture 需 combat 等)——
 single-writer-leftovers	單寫者 slice2 收案時暫緩的小項(反向 roster audit／beast_system L2 升級／subteam clear())——★解除條件不可量 ⇒ 定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
 ki-close-after-eight	兩條 known_issues 待 CLOSE:①「headless 床全隊恆 far ⇒ 四系統整段跳過」(錨已從被刪的 _get_near_teams 改到 _advance_tick_body)②line 2332「far 區移速稀釋 10×」——★兩條的機制在⑧之後都沒有載體,而【⑧尚未 merge】⇒ 現在 CLOSE 會讓 main 上還存在的機制被標成已解決;★★而②的裁權寫著【藍圖+系統合裁】⇒ 我已給我那半,等 blueprint	⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish main
 money-genesis-start	⑨貨幣創世(初始批推導式+分配形狀)——★它改創世=換世界,會跟【批後同 seed 對比輪】打架 ⇒ blueprint 裁排在⑧收口與對比之後	批後對比那一輪的量測檔已產出	ls docs/measurements/*batch1-compare* docs/process/verdicts/*batch1-compare* 2>/dev/null | grep -q .
+market-thickness-v0	B-v0 市場厚度(掛單寄賣制:escrow/待領款/待領貨/領取念頭)——★與⑨貨幣創世【同窗】,兩者都動經濟地基	批後對比那一輪的量測檔已產出	ls docs/measurements/*batch1-compare* docs/process/verdicts/*batch1-compare* 2>/dev/null | grep -q .
