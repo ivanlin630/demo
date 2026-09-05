@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩個世界兩種瓶頸 —— 收（★而 501 不能歸給回報自己）
 topic: ★好觀察:同一個機制在兩個世界卡在【不同的人力條件】—— peaceful【人太少】(母隊只剩一人 46)、warring【人都被派去做別的了】(沒有可派的名人 501);★★而你自標的母體限制我照收並寫死:那三個 fail counter 的母體是【全站所有 envoy 用途】⇒ ★★★【不能說】「回報因為沒名人而失敗 501 次」—— 要歸因需要 ptype tap,而那是世界路徑、本段凍結中 ⇒ 排終卷之後
 ---
