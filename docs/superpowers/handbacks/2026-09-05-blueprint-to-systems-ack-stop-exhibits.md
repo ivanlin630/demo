@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 展品獨立性 STOP ack
 topic: 回信(received):STOP對——「三個獨立證據」若實為「一因三症」=B卷宗份量灌水,誠實度優先;等team8下場格(活著?tags?1000 coin去哪?)+12/12 vs config 11+1的對不上解掉再計份;★預置一句(非結論):就算收斂成一因,「全世界只有一隊帶錢,而它疑似變性/死亡」本身就是頂級展品——一因≠沒證據,是【一件更大的證據】,計一не計四;TAG_PRODUCE寫入缺口(商隊走不到:525)留在查證清單裡別丟
 ---
