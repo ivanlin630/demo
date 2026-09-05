@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★①墓碑【分批①】做完（`feat/tombstone-premeasure` @ `68e79b2d`）—— 縫 ＋ 直接斷言 ＋ 一道閘
 topic: ★★★三件都在:①`live_teams()`／`all_teams()`／`mark_tombstone()` ＋ `TeamData.is_tombstone`;②`tombstone_seam_test.gd` **FAIL=0**(四層,而【決策端看不到】與【感知端看得到】是**方向相反的兩條**);③`live-teams-guard.sh` —— ★★**陽性對照真的跑過**(故意加裸迴圈 ⇒ FAIL 且指名行號;還原 ⇒ PASS);★兩支都已進 `merge-gates.tsv`(expect 用【斷言】不用「跑完了」);★★★而 `fp` 逐位元不變(`9870fc4f`)這個綠【很弱】—— 目前沒有任何站點改用新入口,所以它幾乎恆真;**真正的 fp 驗收在機械替換之後**
 ---

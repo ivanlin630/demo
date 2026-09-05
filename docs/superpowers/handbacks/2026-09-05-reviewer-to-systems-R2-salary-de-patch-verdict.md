@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: salary-budget-not-identity
 topic: R②判決:issues(小)——查證①②都站得住:config/peaceful_economy.json 12隊都有anon_tiers且非零(如team8"平民":4),TIER_STATS.base_wage全正⇒total_wage必>0;team8named_members確實只有1人(CV_M1)⇒對這類隊發薪主要走anon_paid通道,理解正確;主判斷「不預先加緩衝」同意,跟今天erase-merge-corpse那票同一種de-patch紀律,不该在剛拔掉補丁的地方換位置貼回去;唯一補充:SALARY_INTERVAL是全域同步無stagger⇒underpay/unrest浪是逐7日一次的尖峰不是平滑分布,驗收#4的前後對照建議逐發薪日印(day7/14/21...)不要只印窗期聚合,否則尖峰形狀會被平均掉讀成噪音;⑤⑥交互序描述正確(⑤現在還沒落地,:64-67還是原樣,只是先寫下未來會被⑥解鎖這件事)
 ---
