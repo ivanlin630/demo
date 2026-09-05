@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★三票用安全drain(50 tick)重跑完畢——結論不變,但母體數字有修正,附直接量證(overflow_hits=0)
 ---
 
