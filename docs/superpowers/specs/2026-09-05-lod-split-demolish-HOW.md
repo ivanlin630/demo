@@ -25,6 +25,26 @@ sim_runner.gd:222      if int(sys["lod"]) == LOD_NEAR and not is_near: continue
    ⇒ ★連 `LOD_NEAR`／`LOD_FAR` 常數與 :222 那個 continue 一起退場
 ★④`force_full_hd` 旗標:★它的語意本來就是「全 near」⇒ 拆完之後它【等於預設】
    ⇒ ★★退場,而【退場要留反向斷言】(照「備戰」除名前例):有人重新引入分班會自動紅
+
+### ★★★④-b `force_full_hd` 的處置（R² 要求講清楚，不留給實作猜）——**我裁：刪，不留 no-op**
+```
+★全庫 60 處(scripts/,未截斷),分布在 sim_runner 本體 ＋ 約 22 支 debug 床
+★★裁定:
+   ①`sim_runner.gd` 的【旗標宣告與讀取點】—— 刪
+   ②debug 床的【賦值】—— 刪
+   ★★★理由:留成 no-op ＝ 【dormant knob】⇒ 下一個人會以為【調它有用】
+      —— 而那正是今天整條線一直在咬人的形狀(儀器/旗標看起來在做事,實際上沒有)
+```
+★**而有三類床【不是刪賦值就完事】，它們的【存在理由】就是 near/far 對照**：
+```
+`lod_perf_bed` ／ `perf_phase_bed` ／ `perf_scaling_curve_bed`(perf 對照)
+`specimen_confound_test` ／ `specimen_noninvasive_test`(用 full-HD 當對照組)
+⇒ ★拆完之後它們的「對照」【兩邊變成同一個東西】
+⇒ ★★★處置:【不刪床】(刪床是另一個決定,不歸本票),
+   但【床頭必須印一行】:「本床的 full-HD 對照在 ⑧ 之後【恆等於預設】,此對照已無鑑別力」
+   ⇒ ★否則它會變成【一支安靜地什麼都沒比的床】—— 今天已經出現過兩次(TSV 讀不到欄／孤兒讀者)
+★而「這幾支床要不要重寫或退休」⇒ 具名交回我與 measurer,不由 implementer 在本票裡決定
+```
 ```
 ### ★★而【事件密度計算】不在本票
 ```
