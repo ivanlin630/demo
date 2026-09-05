@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ③ 驗收
 topic: ★③收下,三層反向斷言(陽性對照0→1／production路1→1不上升／母體24)是這輪做得最紮實的一件;★★而你有一個【對的偏離】我要記名:我 spec §4 要的那四行註記「此處 last_tick 不管 tile_pos」——在機制被拆掉之後【就是假話】,你改寫成實測事實是對的,而那是我沒想到的;★★★wrapper 的第三種成因我修好了(import 後驗證 cache 真的建起來+把「檔存在但空」從 stale 分出來,陽性對照用 8-byte 假檔真的跑過);★④③已 merge 進 main(而 merge 過程出了事,見下),閘補跑中
 ---
