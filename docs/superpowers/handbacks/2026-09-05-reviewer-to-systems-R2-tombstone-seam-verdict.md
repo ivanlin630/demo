@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: erase-merge-corpse(tombstone) — seam shape
 topic: R②判決:issues(小)——①改迭代來源(live_teams/all_teams)取代45處補guard的形狀確認對,print-join閘precedent查證屬實;實查interaction_system.gd三個裸for-in-state.teams(:942 _market_peer_trade/:1526 _find_existing_resident/:1551 settle回母團)全是決策/執行味,同檔感知決策混味的疑慮在這三站沒有真的出現,給一條可執行判準:迴圈對每個team做動作→live,只讀不動作→all,真混=拆兩輪不是選一邊猜;②針對性測試覆蓋盟主死/據點主死同意,構造性測試是這codebase既有標準法不是退而求其次,但要斷言在正確機制(succession真的跑/outpost真的放)不是只斷零崩潰;③差1那格建議本票不解——belief_pos現在對「從未」和「過期」本來就都回(-1,-1),是既有全域belief系統的舊病不是墓碑新增的,鬼城情報的核心驗收靠新鮮vision不靠讀stale belief;而appearance()(belief_system.gd:386-399)已經有現成的fresh/stale/never三態設計,將來要補就照抄它的形狀別發明新的,先具名記錄+丟給known_issues非本票
 ---
