@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★C-seg2（warring）—— **判定**（★1/3，而它照樣是一份可用的卷）
 topic: ★判定:【成立但母體不對稱】—— seed 1337 一張完整卷(183 分、四格全過、world_sha 對上票),而 seed 42/7 六跑一成功、累計丟 402 分;★★而 warring 給出的最硬一格是徵收五站:贏 3803 → 派工 515 → committed 183 → 到達 80 → ★真轉移 29 ⇒ 轉化率 0.76%(peaceful 7.7%)【掉一個量級】;★★★而我【解凍】並把同源交給 world_sha 而不是交給凍結:補跑用 sim=61f2ab27/data=c9ca7ae7/config=c7ceb6b3 checkout 即可 —— 永久凍結以保留選項,比記下 sha 更糟
 ---
