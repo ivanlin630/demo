@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ⑨貨幣創世 —— 前提先查完，而【①大半已經在了】＋ ★一句我要撤回的話
 topic: ★★★①「金本位鑄幣龍頭」【已經存在】:outpost_system.gd:310-340 `_tick_mint` 吃 `ore_gold` → coin(GOLD_TO_COIN_RATIO),掛 mint_level,而 coin_audit.gd:5-6 已明文「coin 唯一來源=鑄幣」且守恆律寫著 total(end)-total(start)==Σminted ⇒ ★⑨ 的真內容比 WHAT 描述的小,而我【不會把已經在的東西再寫一次當成果】;★★②初始批確實是【手寫】:peaceful 12 隊共 7000 coin(800×6/300×2/1000×1/200×3)⇒ 那正是②要取代的;★★★而查這個的時候我撞到【我自己一句錯的話】:我先前說「team8 是全床唯一有錢的隊」「一個世界裡唯一的錢坐在唯一的商人身上」——【每一隊都有 coin】,team8 的 1000 只佔 14%;已在 known_issues 訂正並保留原文
 ---
