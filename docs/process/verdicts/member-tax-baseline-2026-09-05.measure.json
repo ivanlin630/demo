@@ -1,0 +1,23 @@
+{
+  "touches": ["scripts/simulation/coin_treasury.gd", "scripts/simulation/faction_ai_system.gd", "scripts/simulation/salary_system.gd"],
+  "slice": "income-tax-split 前置量測（第⑤票）",
+  "question": "現制 collect_member_tax(coin_treasury.gd:81-96) 的稅收母體分佈——①總額②per-team③PRODUCE隊佔多少④levy<=0擋掉次數",
+  "bed": "scripts/debug/member_tax_baseline_bed.gd（新床，零新tap，走既有WorldState.record_driver+driver_ledger，commit c28f5040——原commit誤落implementer的feat/belief-freshness-tile-pos分支c508625f，已撈回main）",
+  "window": "peaceful_economy 90d(129600 ticks)，seed 1337，自然DONE非timeout砍",
+  "①_positive_control": {
+    "verdict": "PASS，_ledger_seen=266240（非零，ledger真的在記，過去record_driver tap bug在本輪不成立）"
+  },
+  "results": {
+    "①member_tax總額": 0.00,
+    "②per_team": "全空（沒有任何team收到member_tax）",
+    "③PRODUCE隊佔": "0.00（0.0%，母體本身是0所以無意義）",
+    "④levy<=0擋掉次數": "量不到——coin_treasury.gd:92-93的`if levy<=0: continue`沒有record_driver呼叫，ledger看不到「沒發生的事」，需L3 tap（systems已提議可派implementer）"
+  },
+  "independent_reconfirmation": {
+    "method": "另一支完全獨立、無lambda的最小腳本，直接逐tick掃driver_ledger找reason==\"member_tax\"的entry(不分正負delta)",
+    "result": "member_tax entries any=0 pos=0 neg=0——90天內collect_member_tax從未寫入任何record_driver呼叫，兩種獨立方法一致",
+    "named_members_check": "day30快照：12隊、全數12隊named_members.size()>0、累計12名——排除「母體本身是空」的假說（named_members非空，per-person迴圈理論上會執行）"
+  },
+  "final_verdict": "現制collect_member_tax在90天peaceful_economy(seed1337)下member_tax總額=0.00，per-team全空——不是母體塌陷（named_members非空、ledger本身健康），是函式內部（tax_rate<=0或levy<=0其中之一，本票無法分辨，需④的L3 tap或直接讀tax_rate/levy公式）持續擋下所有徵收。這直接支持⑤票「現制稅收機制已近乎失能」的前提——那一格（居民PRODUCE隊將無法被抽所得稅）事實上目前連【既有稅】都幾乎抽不到。",
+  "honest_limit": "無法分辨tax_rate<=0 vs levy<=0哪個是主因（需④的L3 tap，跨我production scope）；只測了peaceful_economy一個scenario，warring_states未測（母體用途不同，若systems需要可另跑）。"
+}
