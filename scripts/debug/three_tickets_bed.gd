@@ -74,6 +74,18 @@ func _run() -> void:
 	#     ⇒ ★★【發薪日與 far pass 從不同刻】⇒ 薪資在本床【永遠量不到】——不是沒發生，是【看不見】。
 	#   ⇒ ★★★force_full_hd = 全隊 near、無 far 批次 ⇒ 發薪日 10080%60==0 必被涵蓋。
 	#   ★這是【judged-world】(RNG 路徑與 LOD world 不同，fp 不可與預設床互比)，只用來看見機制本身。
+	# ★★★⑥ 驗收 #4（systems 2026-09-05 指路，零新 tap）——
+	#   `salary_system.gd:190` 已經是 `UnrestBank.add(team, 1, "salary")`，
+	#   而 `unrest_bank.gd` 直接走 `WorldState.record_driver(team,"unrest_turns",n,reason,"state")`
+	#   ⇒ ★按 `reason == "salary"` 過濾 unrest_turns 的 driver 列 ＝【因發薪而產生的 unrest】
+	#     —— 是【流量】不是存量，而且【逐筆帶 tick 與 team】。
+	#   ⇒ ★★所以我原本不收 `unrest_turns` 存量是對的，我只是還沒找到那條流量的路。
+	WorldState.driver_ledger_enabled = true
+	# ★★★而 ledger 是【環形的】：`driver_ledger_cap` 預設 4096，滿了 `pop_front` ——
+	#   ★也就是【它會靜默丟掉舊列】，而丟掉之後「0 筆 salary 列」跟「真的沒發生」長得一樣。
+	#   ⇒ 床側把上限拉高 ＋【每日掃描並自己留一份】＋ 撞上限時明說（不靠讀完當下那一瞬的內容）。
+	WorldState.driver_ledger_cap = 400000
+	WorldState.clear_driver_ledger()
 	var _full_hd: bool = OS.get_environment("FULL_HD") == "1"
 	SimRunner.force_full_hd = _full_hd
 	print("[CONTROL] force_full_hd=%s（★true=judged-world：全隊 near、無 far 降頻；fp 不可與預設床互比）"
@@ -81,6 +93,7 @@ func _run() -> void:
 	for d in range(days):
 		for _t in range(WorldState.TICKS_PER_DAY):
 			runner.advance_tick(state, Vector2i(-1, -1))
+		_harvest_salary_unrest()
 		print("[CP] day=%d ｜#10 送回=%d 贏=%d ｜#5 退化=%d ｜#12 全pool候選=%d 贏=%d ｜備戰贏=%d" % [
 			d + 1,
 			int(Probe.counts.get("redispatch.candidate_sent", 0)), int(Probe.counts.get("redispatch.won", 0)),
@@ -1357,6 +1370,23 @@ func _sec_join_funnel() -> void:
 #   ★R² 要的關鍵：**逐發薪日印，不要窗期聚合**。
 #   ★★理由：`SALARY_INTERVAL` 是【全域同步、無 stagger】的 ⇒ 所有隊在同一天發薪
 #     ⇒ ★★★不滿/減薪的代價是【逐 7 日的尖峰】，而窗期聚合會把它【平均掉讀成噪音】。
+# ★★★⑥#4 的 ledger 收割：每日一次，把 `reason=="salary"` 的 unrest_turns 列撿走並【自己留一份】
+#   ⇒ ★不依賴「跑完之後 ledger 還留著」——環形緩衝會把舊列丟掉，而那個丟是【靜默】的。
+var _su_rows: Dictionary = {}        # "tick|team" -> delta（自己去重，因為每日掃會重複看到同一列）
+var _su_cap_hit: int = 0             # ★撞上限的次數（非 0 ⇒ 這份收割【可能不完整】，要說出來）
+
+func _harvest_salary_unrest() -> void:
+	if WorldState.driver_ledger.size() >= WorldState.driver_ledger_cap:
+		_su_cap_hit += 1
+	for row in WorldState.driver_ledger:
+		if String(row.get("field", "")) != "unrest_turns":
+			continue
+		if String(row.get("reason", "")) != "salary":
+			continue
+		var ent = row.get("entity", null)
+		var tid: int = int(ent.team_id) if ent != null and "team_id" in ent else -1
+		_su_rows["%d|%d" % [int(row.get("tick", -1)), tid]] = float(row.get("delta", 0.0))
+
 func _sec_payday() -> void:
 	print("")
 	print("═══ ★★★發薪逐日（★不要窗期聚合 —— 尖峰會被平均掉）═══")
@@ -1470,6 +1500,33 @@ func _sec_payday() -> void:
 		print("             ⇒ ★★居民 coin 非 0 ＝ ⑥ 的效果；★★★居民 coin ＝ 0 ⇒ ⑥ 在本床【無效果】不是「已驗過」")
 		if _pp == 0 and _p > 0:
 			print("        ★★★【本日 payroll 全 0】⇒ 減薪 0 是【沒東西可減】不是【付得起】——這兩件事印出來一樣")
+	# ── ★★★⑥ 驗收 #4：因【發薪】而產生的 unrest（★流量，逐發薪日） ──
+	print("  ── ★★★⑥#4：因發薪而產生的 unrest（`reason=\"salary\"` 的 driver 列＝流量，非存量）──")
+	var _sub: Dictionary = {}
+	var _sut: Dictionary = {}
+	for _k3 in _su_rows.keys():
+		var _parts: PackedStringArray = String(_k3).split("|")
+		var _tk: int = int(_parts[0])
+		var _pdi: int = _tk / SalarySystem.SALARY_INTERVAL
+		_sub[_pdi] = int(_sub.get(_pdi, 0)) + 1
+		_sut[_pdi] = float(_sut.get(_pdi, 0.0)) + float(_su_rows[_k3])
+	var _pdk: Array = _sub.keys()
+	_pdk.sort()
+	if _pdk.is_empty():
+		print("     每個發薪日的筆數 = （一筆都沒有）")
+		print("     ★★★而【0 筆】在這裡是【可歸因的 0】：`UnrestBank.add(team,1,\"salary\")`")
+		print("        只在 `budget_ratio < 1.0`（＝減薪）時才 fire ⇒ 上面「減薪 %d 隊」若也是 0，" % _tot_cut)
+		print("        兩個數字互相對得上 ⇒ ★這是【沒有隊付不出薪水】不是【儀器沒量到】。")
+		print("        ★★若「減薪」非 0 而這裡是 0 ⇒ 那才是儀器或歸因斷了。")
+	else:
+		for _p3 in _pdk:
+			print("     第 %d 個發薪日：因發薪的 unrest 筆數 = %d ｜ 合計 delta = %+.0f" % [
+				int(_p3), int(_sub[_p3]), float(_sut[_p3])])
+	print("     ★對照：`減薪` 隊次合計 = %d（★兩者應同源：只有減薪才寫這條 driver）" % _tot_cut)
+	if _su_cap_hit > 0:
+		print("     ★★★driver ledger 撞上限 %d 次 ⇒ 本節【可能不完整】——不要當成窮盡" % _su_cap_hit)
+	else:
+		print("     ★ledger 未撞上限（cap=%d）⇒ 本節是【窮盡】的" % WorldState.driver_ledger_cap)
 	print("     ★合計 進入 %d ／ 減薪 %d —— ★★而【這個合計正是不該拿來判讀的東西】：" % [_tot_paid, _tot_cut])
 	print("        ★★★同樣的合計可以來自【每日均勻】或【某一天全部塌】，而它們是兩個世界")
 	print("     ★★而【進入次數】也不是【發薪次數】：payroll==0 的隊進得來、走完、一毛沒發，")
