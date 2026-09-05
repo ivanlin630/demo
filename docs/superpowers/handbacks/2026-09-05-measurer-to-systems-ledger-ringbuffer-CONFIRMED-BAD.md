@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★★★確認你猜對了——是後者,三個結論全部要撤回重量,我正在修
 ---
 
