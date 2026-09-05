@@ -4120,11 +4120,11 @@ if _can_detect(scout, eff_exp): …
 ```
 ★拔掉 PRODUCE early-return 之後,`_pay_salary` 的進入次數【還是 0】
    —— 而 entry tap 就在函式【最上面】⇒ 這個函式【根本沒被呼叫】
-★★真根 = LOD 相位:無玩家床 ⇒ 全隊走 far ⇒ far pass 每 FAR_ZONE_INTERVAL(100) tick
-   而 payday = 10080k,10080k % 100 = 80k ≠ 0 直到 k=5 ⇒ 30 日窗【一次都對不上】
+★★真根 = LOD 相位:無玩家床 ⇒ 全隊走 far ⇒ far pass 每 FAR_ZONE_INTERVAL(600) tick
+   而 payday = 10080k,10080k % 600 = 480k % 600 ≠ 0 直到 k=5 ⇒ 30 日窗【一次都對不上】
 ⇒ ★★★所以下面的「settle → 薪資 early-return → …」這條鏈,【機制描述為真,因果宣稱為假】
    而三症之中【薪資 0】與【匿名池 0】是【相位造成的】,不是經濟造成的
-   (★member_tax = 0.00 那一格【仍然成立】:它的 caller 走 TICKS_PER_MONTH=43200,%100=0,不受相位影響)
+   (★member_tax = 0.00 那一格【仍然成立】:它的 caller 走 TICKS_PER_MONTH=43200,%600=0,不受相位影響)
 ```
 ★**而這不只是量測盲點，是世界的 bug**：在**有玩家的真實遊戲**裡，**離玩家遠的隊真的只領到 1/5 的薪水**（見下一條 known_issue）。
 
@@ -4158,10 +4158,10 @@ settle 把隊變成 PRODUCE ⇒ 薪資系統 early-return ⇒ ①【薪資從未
 ★**狀態：已知未修**｜**回訪：觸發事件 —— ⑦票（遷 `CadenceStagger`）落地**
 ```
 ★受害條件:【裸 modulo 閘】長在 shape:"teams" 且 LOD_BOTH 的 step 裡,
-   而 INTERVAL 不是 FAR_ZONE_INTERVAL(100) 的倍數
+   而 INTERVAL 不是 FAR_ZONE_INTERVAL(600) 的倍數
 ★★命中清單(全掃 scripts/simulation,扣掉 whole-state 的):
-   salary_system.gd:31         SALARY_INTERVAL 10080 → %100 = 80  ★中招
-   faction_ai_system.gd:1170   TICKS_PER_MONTH 43200 → %100 = 0   安全
+   salary_system.gd:31         SALARY_INTERVAL 10080 → %600 = 480  ★中招
+   faction_ai_system.gd:1170   TICKS_PER_MONTH 43200 → %600 = 0   安全
    faction_ai_system.gd:1499   定期徵收,動態 interval             ★同一類
 ★★★而策略層【免疫】:INFRA_INTERVAL 那一整排走 `CadenceStagger.next_tick()`
    —— 它比的是 `last_eval_tick` 【不是精確 modulo】⇒ 相位錯開不會漏(全 repo 23 個呼叫點)
@@ -4169,7 +4169,7 @@ settle 把隊變成 PRODUCE ⇒ 薪資系統 early-return ⇒ ①【薪資從未
 ★**後果不是「床看不見」，是【世界不公平】**：
 ```
 sim_runner.gd:291 near pass = tick % NEAR_CADENCE(60) == 0   ⇒ payday 全中
-sim_runner.gd:337 far  pass = tick % FAR_ZONE_INTERVAL(100) == 0 ⇒ payday 只有每 5 次中一次
+sim_runner.gd:337 far  pass = tick % FAR_ZONE_INTERVAL(600) == 0 ⇒ payday 只有每 5 次中一次
 ⇒ ★★同一支隊,【離玩家近就月月領薪,離玩家遠就四個月領一次】
 ⇒ ★★★而【無玩家的 headless 世界裡「遠隊」＝全部】⇒ 薪資軸在任何預設床上都【不可觀測】
 ```
