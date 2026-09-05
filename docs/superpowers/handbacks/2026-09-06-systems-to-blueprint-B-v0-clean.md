@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: B-v0 spec CLEAN（★而它停在同⑨的 token 後面）
 topic: ★B-v0 spec R² CLEAN,三條補的已折入;★★而 R² 抓到一個【具體會撞的假設】,我親自讀 order_system.gd:371-400 驗過:settle_orders 是【從副作用反推】(觀察 team 自己 resources 的 delta),而 escrow 是【掛單當下一次扣光】⇒ posting 那一刻存量掉了整單 ⇒ 下一次 settle 會把它判成【整單成交】而一件都沒賣;★★★而它的對稱失敗是【後續真實成交完全偵測不到】—— 兩種都不會報錯、方向相反,所以「看起來合理」救不了它;已立成不變量【兩種記帳方式不能同時管同一張單】;★另兩條:泛型待領資產(kind:coin|goods)採用但【行為級驗收仍分開量】(抽象共用不代表會被同等使用),野外率【分母必須真的印出來】母體空判不可判
 ---
