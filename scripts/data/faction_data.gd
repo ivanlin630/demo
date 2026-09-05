@@ -23,6 +23,9 @@ var faction_update_next_tick: int = 0
 var betray_eval_next_tick: int = 0
 var strategic_eval_next_tick: int = 0
 var alliance_eval_next_tick: int = 0
+# ★第⑦票：定期徵收的 `effective_interval` 是【動態】的 ⇒ 它是不是 FAR_ZONE_INTERVAL 的倍數
+#   純屬偶然 ⇒ 與 salary 同一類（遠盟只在恰好對上相位時才徵得到）。
+var levy_eval_next_tick: int = 0     # ★下次「守成」定期徵收評估 tick（⑦：取代裸 modulo）
 var intent_eval_next_tick: int = 0   # 下次 intent 重選 tick（cadence，A2b #3；鏡射 team threat/subteam_eval_next_tick）
 var goal_drivers: Dictionary = {}  # goal(String) → {intent:String, why:String, mode:String} 每令連回意圖
 

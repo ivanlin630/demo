@@ -2,7 +2,12 @@ class_name SimRunner
 
 const LOD_NEAR_RADIUS: int = 3
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
-const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
+# ★★★訂正 2026-09-05（第⑦票）：原註解寫「= 100 ticks」是【stale】——
+#   `TICKS_PER_HOUR` 重錨成 60 之後這行沒跟著改，★真值 = 10 * 60 = **600**。
+#   ★★而它【真的騙過人】：implementer 引它 → systems 引 implementer → systems 拿那個數字「驗算」一次
+#     ⇒ ★★★兩個人都沒有從定義處讀，所謂「驗算」只是把同一個錯誤重述了一遍（結論剛好不變＝運氣）。
+#   ⇒ ★紀律：引用常數要從【定義的算式】讀，不從行尾註解讀。
+const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # = 10h = 600 tick（1 tick = 1 分鐘）
 # TIER: unmigrated(b) — S3 只搬七支，本顆待 S5+
 const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更新頻率（1h，可調）
 

@@ -191,6 +191,13 @@ var absorb_target_cache: int = -1        # §HOW-7：吸納弱鄰 target 快取�
 var consolidate_eval_next_tick: int = 0  # S-A：下次整併 target 評估 tick（cadence，鏡射 subteam_eval_next_tick）
 var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
 var goal_eval_next_tick: int = 0         # ★means-end S7:下次 goal 生成/掛退評估 tick（cadence-gate,鏡射 residency_eval_next_tick;goal_state 持久不需每 decide 重算）
+# ★★★第⑦票（LOD 相位，2026-09-05）：排程事件不得用【精確 modulo】當 pass 內的閘 ——
+#   ★病：far pass 每 FAR_ZONE_INTERVAL(600) 才跑一次，而 `tick % SALARY_INTERVAL(10080) == 0`
+#     ⇒ 10080k % 600 = 480k % 600，k=1..4 全非 0 ⇒ ★★遠隊的發薪日【整個落在相位縫裡】
+#     ⇒ ★★★不是「少發」是【一次都沒發】—— 而無玩家世界裡「遠隊」＝全部。
+#   ⇒ 改成與 `*_eval_next_tick` 比較（既有 `CadenceStagger` 形狀，零新機制零新常數）。
+var salary_eval_next_tick: int = 0       # ★下次發薪 tick（⑦：取代 `tick % SALARY_INTERVAL == 0`）
+var extraction_eval_next_tick: int = 0   # ★下次公庫徵用評估 tick（⑦：取代 `tick % TICKS_PER_MONTH == 0`）
 var info_eval_next_tick: int = 0          # ★資訊網 Part2 side-action:下次求援/偵察 side-dispatch 評估 tick（cadence-gate,per-team 錯開,herald/scout 慢策略不需每 tick）
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻

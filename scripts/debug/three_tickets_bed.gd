@@ -1405,11 +1405,41 @@ func _sec_payday() -> void:
 		var _c: int = int(Probe.counts.get("salary.payday.%s.cut" % _d, 0))
 		_tot_paid += _p
 		_tot_cut += _c
-		print("     第 %s 個發薪日：發薪 %-4d ｜ 減薪 %-4d %s" % [
-			String(_d).lstrip("0"), _p, _c,
+		var _pz: int = int(Probe.counts.get("salary.payday.%s.payroll_zero" % _d, 0))
+		var _pp: int = int(Probe.counts.get("salary.payday.%s.payroll_pos" % _d, 0))
+		var _pr: int = int(Probe.counts.get("salary.payday.%s.produce" % _d, 0))
+		var _ot: int = int(Probe.counts.get("salary.payday.%s.other" % _d, 0))
+		var _np: float = Probe.amount("salary.payday.%s.person_paid" % _d)
+		var _co: float = Probe.amount("salary.payday.%s.coin_out" % _d)
+		var _lu: float = Probe.amount("salary.payday.%s.loy_up" % _d)
+		var _ld: float = Probe.amount("salary.payday.%s.loy_down" % _d)
+		var _ur: float = Probe.amount("salary.payday.%s.unrest" % _d)
+		print("     第 %s 個發薪日：進入 %-4d（居民 %d／其他 %d）｜ 減薪 %-4d %s" % [
+			String(_d).lstrip("0"), _p, _pr, _ot, _c,
 			"  ★★該日【全隊】減薪" if _c == _p and _p > 0 else ""])
-	print("     ★合計 發薪 %d ／ 減薪 %d —— ★★而【這個合計正是不該拿來判讀的東西】：" % [_tot_paid, _tot_cut])
+		print("        ★真的發了錢：payroll>0 的隊 %d ／ payroll==0 的隊 %d（★後者【進了函式但一毛沒發】）" % [_pp, _pz])
+		print("        ★★實付：具名人次 %d ｜ 團庫流出 coin %.2f ｜ 平均每隊 %.2f" % [
+			int(_np), _co, (_co / float(_p) if _p > 0 else 0.0)])
+		print("        ★★★忠誠：加 %d 人次 ／ 減 %d 人次 ｜ 該日各隊 unrest_turns 合計 %d" % [
+			int(_lu), int(_ld), int(_ur)])
+		var _ppp: int = int(Probe.counts.get("salary.payday.%s.pos.produce" % _d, 0))
+		var _ppo: int = int(Probe.counts.get("salary.payday.%s.pos.other" % _d, 0))
+		var _cop: float = Probe.amount("salary.payday.%s.coin_out.produce" % _d)
+		var _coo: float = Probe.amount("salary.payday.%s.coin_out.other" % _d)
+		var _npp: float = Probe.amount("salary.payday.%s.person_paid.produce" % _d)
+		var _npo: float = Probe.amount("salary.payday.%s.person_paid.other" % _d)
+		print("        ★★★★⑥ 判準（居民×真發錢的交叉）：居民 payroll>0 的隊 %d／%d ｜ 具名人次 %d ｜ coin %.2f" % [
+			_ppp, _pr, int(_npp), _cop])
+		print("             （對照 非居民：payroll>0 的隊 %d／%d ｜ 具名人次 %d ｜ coin %.2f）" % [
+			_ppo, _ot, int(_npo), _coo])
+		print("             ★反事實是現成的：修前居民隊在 `salary_system.gd:31` 就 return ⇒ 上面那筆恰好是 0")
+		print("             ⇒ ★★居民 coin 非 0 ＝ ⑥ 的效果；★★★居民 coin ＝ 0 ⇒ ⑥ 在本床【無效果】不是「已驗過」")
+		if _pp == 0 and _p > 0:
+			print("        ★★★【本日 payroll 全 0】⇒ 減薪 0 是【沒東西可減】不是【付得起】——這兩件事印出來一樣")
+	print("     ★合計 進入 %d ／ 減薪 %d —— ★★而【這個合計正是不該拿來判讀的東西】：" % [_tot_paid, _tot_cut])
 	print("        ★★★同樣的合計可以來自【每日均勻】或【某一天全部塌】，而它們是兩個世界")
+	print("     ★★而【進入次數】也不是【發薪次數】：payroll==0 的隊進得來、走完、一毛沒發，")
+	print("        ⇒ ★★★判讀 ⑥ 有沒有效要看【具名人次／coin 流出】那兩格，不是進入次數。")
 
 func _sec_freshness() -> void:
 	print("")
