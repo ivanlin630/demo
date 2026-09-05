@@ -13,6 +13,21 @@ func _init() -> void:
 	_npc_ai = NpcAiSystem.new()
 
 func tick(state: WorldState, team_ids: Array) -> void:
+	# ★★★判別 tap（2026-09-05）：`_pay_salary` 進入次數量到 0，而【early-return 已經被我移除】
+	#   ⇒ ★所以 0 的成因【不在 `_pay_salary` 裡】—— 它根本沒被呼叫。
+	#   ★★三種可能共用同一個 0：①`tick` 沒被呼叫 ②modulo 從不命中 ③`team_ids` 是空的
+	#   ⇒ ★★★三格分開記，否則我只能猜。
+	if Probe.enabled:
+		Probe.bump("salary.tick_called")
+		# ★★★而我第一版寫 `%d % (bool)` —— ★GDScript 把 bool 格式成 "true"/"false" 不是 0/1
+		#   ⇒ ★★key 變成 `.true`/`.false` 而讀者找 `.1`/`.0` ⇒ 兩格都印 0
+		#   ⇒ ★★★而【792 次呼叫卻兩格都 0】對不起來 —— **是那個不平把儀器的毛病露出來的**
+		Probe.bump("salary.tick.mod.hit" if state.world.current_tick % SALARY_INTERVAL == 0 else "salary.tick.mod.miss")
+		if state.world.current_tick % SALARY_INTERVAL == 0:
+			Probe.bump("salary.tick.ids.%03d" % clampi(team_ids.size(), 0, 999))
+			# ★★★而 `team_ids` 空的時候要知道【世界上其實有幾隊】—— 否則分不出
+			#   「世界沒隊了」與「這一批 LOD 批次是空的」
+			Probe.bump("salary.tick.world_teams.%03d" % clampi(state.teams.size(), 0, 999))
 	if state.world.current_tick % SALARY_INTERVAL != 0:
 		return
 	for tid in team_ids:
@@ -27,9 +42,17 @@ func _calc_fair_salary(p: PersonData) -> float:
 	return total * SALARY_PER_SKILL_POINT
 
 func _pay_salary(state: WorldState, team: TeamData) -> void:
-	# 居民 PRODUCE team 不走薪資系統（村民自食其力，村長非家臣）
-	if team.tags.has(TeamData.TAG_PRODUCE):
-		return
+	# ★★★居民 PRODUCE 隊的 early-return 已移除（第⑥票 2026-09-05，R² CLEAN）——
+	#   ★原註解寫「村民自食其力，村長非家臣」，而實測顯示它的後果是：
+	#     ★★`peaceful_economy` 那張床 **12 隊 100% 帶 `TAG_PRODUCE`** ⇒ 本函式【從未跑到】
+	#     （連收尾兩個【無條件】print 都 0 次）⇒ ★★★整條薪資軸在那個世界裡是死的。
+	#   ★零新機制零新常數：只是讓居民隊也走同一條既有的發薪路。
+	#   ★★而代價要被看見（R² 加的驗收）：`SALARY_INTERVAL` 是【全域同步、無 stagger】的
+	#     ⇒ ★★★不滿/忠誠的變化會是【逐 7 日的尖峰】，而【窗期聚合會把它平均掉讀成噪音】
+	#     ⇒ 所以卷面要【逐發薪日印】（day7／14／21…），不是印一個窗期總數。
+	if Probe.enabled:
+		Probe.bump("salary.pay_entry")
+		Probe.bump("salary.pay_entry." + ("produce" if team.tags.has(TeamData.TAG_PRODUCE) else "other"))
 	var is_player_team: bool = (team.leader_id == state.player_id and state.player_id != -1)
 	# NPC team: 每次發薪依 leader 個性同步薪資（慷慨/吝嗇 leader 隊伍動態不同）
 	var npc_salary_mult: float = 1.0
@@ -103,6 +126,13 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 	var anon_paid: float = anon_total * budget_ratio
 	ResourceBank.remove(team, "coin", anon_paid, "salary_anon")
 	AnonTreasuryBank.deposit(team, anon_paid, "salary")   # 匿名薪水沉澱公庫（非消失）
+	if Probe.enabled:
+		# ★★★逐【發薪日】記（R² 要求：不要窗期聚合）——
+		#   ★`SALARY_INTERVAL` 全域同步無 stagger ⇒ 尖峰落在同一天，而聚合會把它平均掉。
+		var _payday: int = state.world.current_tick / SALARY_INTERVAL
+		Probe.bump("salary.payday.%04d.paid" % _payday)
+		if budget_ratio < 1.0:
+			Probe.bump("salary.payday.%04d.cut" % _payday)   # ★該發薪日有幾隊減薪
 	if budget_ratio < 1.0:
 		UnrestBank.add(team, 1, "salary")
 		print("[Salary] Team%d 減薪 %.0f%%（coin 不足）" % [team.team_id, (1.0 - budget_ratio) * 100.0])

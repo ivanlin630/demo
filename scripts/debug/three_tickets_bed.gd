@@ -67,6 +67,17 @@ func _run() -> void:
 		% [ThreatAssessment.THREAT_BASE_THRESHOLD, ThreatAssessment.THREAT_CAUTION_SPAN,
 		   ThreatAssessment.THREAT_INFLATION_MEASURED])
 	var runner := SimRunner.new()
+	# ★★★FULL_HD=1（2026-09-05）：本床把 player_pos 傳 `Vector2i(-1,-1)`（:72）⇒ 世上沒有一隊
+	#   在玩家 3 hex 內 ⇒ **near 批次恆空、全部的隊永遠只在 far 批次**。
+	#   ★而 far pass 的閘是 `tick % FAR_ZONE_INTERVAL(100) == 0`，
+	#     `SALARY_INTERVAL` = 10080 ⇒ 10080k % 100 = 80k%100，k=1..4 全非 0
+	#     ⇒ ★★【發薪日與 far pass 從不同刻】⇒ 薪資在本床【永遠量不到】——不是沒發生，是【看不見】。
+	#   ⇒ ★★★force_full_hd = 全隊 near、無 far 批次 ⇒ 發薪日 10080%60==0 必被涵蓋。
+	#   ★這是【judged-world】(RNG 路徑與 LOD world 不同，fp 不可與預設床互比)，只用來看見機制本身。
+	var _full_hd: bool = OS.get_environment("FULL_HD") == "1"
+	SimRunner.force_full_hd = _full_hd
+	print("[CONTROL] force_full_hd=%s（★true=judged-world：全隊 near、無 far 降頻；fp 不可與預設床互比）"
+		% str(_full_hd))
 	for d in range(days):
 		for _t in range(WorldState.TICKS_PER_DAY):
 			runner.advance_tick(state, Vector2i(-1, -1))
@@ -273,6 +284,7 @@ func _run() -> void:
 	_sec_levy()
 	_sec_mreport()
 	_sec_freshness()
+	_sec_payday()
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -1341,6 +1353,64 @@ func _sec_join_funnel() -> void:
 #   ★舊版這一節讀的是 `freshness.pos_check`／`fallback_last_tick`／`newly_expired`／`newly_fresh`
 #     ⇒ ★★而那四顆【已經隨機制一起移除】—— 留著讀就是【幽靈 counter：永遠印 0】
 #   ★★★所以改讀還活著的那一顆；而 0 在這裡是【好消息】，它的意思寫在下面。
+# ★★★發薪逐日（第⑥票：PRODUCE early-return 移除之後）——
+#   ★R² 要的關鍵：**逐發薪日印，不要窗期聚合**。
+#   ★★理由：`SALARY_INTERVAL` 是【全域同步、無 stagger】的 ⇒ 所有隊在同一天發薪
+#     ⇒ ★★★不滿/減薪的代價是【逐 7 日的尖峰】，而窗期聚合會把它【平均掉讀成噪音】。
+func _sec_payday() -> void:
+	print("")
+	print("═══ ★★★發薪逐日（★不要窗期聚合 —— 尖峰會被平均掉）═══")
+	# ★★★判別：`_pay_salary` 進入 0 有三種成因，而它們共用同一個 0
+	print("  ★判別：`tick` 被呼叫 %d 次 ｜ 其中 modulo 命中 %d 次 ｜ 未命中 %d 次" % [
+		int(Probe.counts.get("salary.tick_called", 0)),
+		int(Probe.counts.get("salary.tick.mod.hit", 0)),
+		int(Probe.counts.get("salary.tick.mod.miss", 0))])
+	var _ids: Array = []
+	for _k0 in Probe.counts.keys():
+		var _ks0: String = String(_k0)
+		if _ks0.begins_with("salary.tick.ids."):
+			_ids.append("%s隊=%d" % [_ks0.substr(16), int(Probe.counts[_k0])])
+	_ids.sort()
+	var _wt: Array = []
+	for _k1 in Probe.counts.keys():
+		var _ks1: String = String(_k1)
+		if _ks1.begins_with("salary.tick.world_teams."):
+			_wt.append("%s隊=%d" % [String(_ks1.substr(24)).lstrip("0"), int(Probe.counts[_k1])])
+	_wt.sort()
+	print("     ★★★同一刻【世界上實際有幾隊】：%s" % (
+		"｜".join(PackedStringArray(_wt)) if not _wt.is_empty() else "（空）"))
+	print("        ★兩者一比就分得出【世界沒隊了】與【這一批 LOD 批次是空的】")
+	print("     ★★命中當下 `team_ids` 的大小分布：%s" % (
+		"｜".join(PackedStringArray(_ids)) if not _ids.is_empty() else "（空 ⇒ ★一次都沒命中）"))
+	var _entry: int = int(Probe.counts.get("salary.pay_entry", 0))
+	var _prod: int = int(Probe.counts.get("salary.pay_entry.produce", 0))
+	var _oth: int = int(Probe.counts.get("salary.pay_entry.other", 0))
+	print("  進入 `_pay_salary` 次數 = %d（居民 PRODUCE %d ｜ 其他 %d）" % [_entry, _prod, _oth])
+	if _entry == 0:
+		print("     ★★★母體 0 ⇒ 【本函式一次都沒跑到】—— ★而那正是這一票要修的病（修前它就是 0）")
+		return
+	if _prod == 0:
+		print("     ★★居民 PRODUCE ＝ 0 ⇒ ★這個窗【沒有居民隊】，而不是「early-return 還在」")
+	var _days: Array = []
+	for _k in Probe.counts.keys():
+		var _ks: String = String(_k)
+		if _ks.begins_with("salary.payday.") and _ks.ends_with(".paid"):
+			_days.append(_ks.substr(14, 4))
+	_days.sort()
+	print("  ── ★逐發薪日：該日發薪隊數 ／ 其中減薪隊數 ──")
+	var _tot_paid: int = 0
+	var _tot_cut: int = 0
+	for _d in _days:
+		var _p: int = int(Probe.counts.get("salary.payday.%s.paid" % _d, 0))
+		var _c: int = int(Probe.counts.get("salary.payday.%s.cut" % _d, 0))
+		_tot_paid += _p
+		_tot_cut += _c
+		print("     第 %s 個發薪日：發薪 %-4d ｜ 減薪 %-4d %s" % [
+			String(_d).lstrip("0"), _p, _c,
+			"  ★★該日【全隊】減薪" if _c == _p and _p > 0 else ""])
+	print("     ★合計 發薪 %d ／ 減薪 %d —— ★★而【這個合計正是不該拿來判讀的東西】：" % [_tot_paid, _tot_cut])
+	print("        ★★★同樣的合計可以來自【每日均勻】或【某一天全部塌】，而它們是兩個世界")
+
 func _sec_freshness() -> void:
 	print("")
 	print("═══ ★★★belief 新鮮度等式（★反向斷言的計數）═══")
