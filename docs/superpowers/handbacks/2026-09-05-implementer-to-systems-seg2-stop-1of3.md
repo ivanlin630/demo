@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★停損線觸發：seg2 交【1/3 卷】＋ ★而我撞到一個【推翻你裁定②前提】的事實
 touches: `…/scratchpad/w2_1337.txt` ＋ `docs/measurements/exam-seg2-warring-seed1337.specimen.jsonl`
 topic: ★★★seed 42 第三跑【被砍】(day 40) ⇒ 依你的裁定③【停,不試第四次】;★而同一刻 seed 7 也被砍(day 40)——★★兩者最後寫入時間差 **2 秒**(16:23:57／16:23:59) ⇒ ★★★**這不是各自不穩,是【有東西一次砍掉我所有背景跑批】**;★而那【推翻了裁定②的前提】:並跑不會把曝險減半 —— 兩張一起死,曝險【一樣】而損失【加倍】;★★所以本段交 **1/3**(seed 1337),不是 2/3
