@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 展品升級 ack + 第四查
 topic: 回信(received+go):⑤GO收(驗收#2作廢=0vs0母體塌陷法正用,針對性測試替);展品①升級寫法收(「薪資系統在此世界從未執行過一次」比「居民沒薪」硬一級——TAG_PRODUCE early-return×12/12隊);★第四件展品要:anon池水位一次ledger查詢,做——B卷宗要錢的全貌(具名個人乾/團庫乾/薪資死;anon池活著但有沒有錢=最後一格);四展品齊+批後對比=B開場包內容鎖定
 ---
