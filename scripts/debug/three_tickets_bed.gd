@@ -273,6 +273,7 @@ func _run() -> void:
 	_sec_levy()
 	_sec_mreport()
 	_sec_freshness()
+	_sec_obituary()
 	SpecimenDumpHelper.dump(state, OS.get_environment("SPECIMEN_OUT") if OS.has_environment("SPECIMEN_OUT") else "")
 	print("[PilotRun] wall_clock_s=%.1f ｜ completed=yes ｜ window_days=%d ｜ seed=%d ｜ exclusive=%s" % [
 		float(Time.get_ticks_msec() - _t_start_ms) / 1000.0, days, sd, _exclusive])
@@ -1336,6 +1337,48 @@ func _sec_join_funnel() -> void:
 	print("  ★★★而 `win` 與 `dispatch` 【不是同一個母體】：win 是決策次數，dispatch 是相遇次數")
 	print("     ⇒ 兩者相減沒有意義（★同一個陷阱我今天已經在 `[Merge]` 上踩過一次）")
 	_sec_sighting()
+
+# ★★★墓碑前置量測（systems 工單 2026-09-05）——
+#   ★量的是：`erase_teams` 執行時【每個載體各清掉多少筆】
+#     ＝ god-view 全域訃聞的【真實體積】＝ 墓碑必須替代掉的量。
+#   ★★不是反事實推測，是【今天就量得到的】。
+#   ★★★而每一格都帶【母體】：0 要分得出【掛錯】與【不可達】。
+func _sec_obituary() -> void:
+	print("")
+	print("═══ ★★★墓碑前置量測：全域訃聞的【真實體積】═══")
+	var _b: int = int(Probe.counts.get("erase.batches", 0))
+	print("  死亡批次 = %d ｜ 死亡隊數 = %.0f" % [_b, Probe.amount("erase.teams_erased")])
+	if _b == 0:
+		print("     ★★★母體 0 ⇒ 這個窗【沒有隊死】—— ★下面每一格的 0 都是【不可達】不是【掛錯】")
+		return
+	print("  ── ★六載體：各清掉多少筆（★每格帶自己的母體）──")
+	var _rows: Array = [
+		["①belief 條目（team_intel）", "obit.belief.cleared", "obit.belief.observer_entry", "有情報的觀察者數"],
+		["②social_target", "obit.social_target.cleared", "obit.social_target.entry", "有 social_target 的活隊"],
+		["③order_target_id", "obit.order_target.cleared", "obit.order_target.entry", "有 order_target 的活隊"],
+		["④member_team_ids", "obit.member_ids.cleared", "obit.member_ids.entry", "死者有勢力的次數"],
+		["⑤outpost_owner", "obit.outpost_owner.cleared", "obit.outpost_owner.entry", "有主的據點數"],
+		["⑥leader_team_id", "obit.leader_team_id.cleared", "obit.member_ids.entry", "死者有勢力的次數"],
+	]
+	for _r in _rows:
+		var _c: int = int(Probe.counts.get(String(_r[1]), 0))
+		var _m: int = int(Probe.counts.get(String(_r[2]), 0))
+		print("     %-26s 清掉 %-6d ／ 母體 %-6d （%s）%s" % [
+			String(_r[0]), _c, _m, String(_r[3]),
+			"  ★母體 0 ⇒ 這一格【不可達】（迴圈沒跑到／沒有那種東西）" if _m == 0
+				else ("  ★★母體 >0 ⇒ 迴圈【有跑到】⇒ 清 0 ＝【這個窗沒有這種死者】，不是掛錯" if _c == 0 else "")])
+	var _kms: int = int(Probe.counts.get("obit.known_member_states.cleared", 0))
+	var _mid: int = int(Probe.counts.get("obit.member_ids.cleared", 0))
+	print("     ★另：`known_member_states` 清掉 %d ｜ 而 `member_team_ids` 清掉 %d" % [_kms, _mid])
+	if _kms != _mid:
+		print("        ★★★兩者【不相等】（差 %d）—— ★而它們是同一次 faction 退場的兩半：" % (_mid - _kms))
+		print("           ⇒ 有 %d 個死者【在成員名冊裡、卻沒有 known_member_states 條目】" % (_mid - _kms))
+		print("           ⇒ ★★也就是【領袖從來沒有過它的位置情報】—— 而那正是墓碑要替代的那種空白")
+	print("     ★★活隊掃描母體（步3 的 for otid）= %d" % int(Probe.counts.get("obit.livingteam.entry", 0)))
+	print("  ── ★★★而【誰遍歷全體 state.teams】是一條【靜態軸】，不在這張卷上 ──")
+	print("     ★決策類迴圈要補 skip-guard；★★而感知類（vision）要【保留摸得到墓碑】")
+	print("        ⇒ ★★★否則【鬼城情報不可能發生】—— 而「全域統一加 skip」會把這個區分抹平")
+	print("     ★這一格由靜態掃描回答（`grep 'for .* in state.teams'`），不是 runtime 計數")
 
 # ★★★新鮮度等式（★機制已依 systems 裁定拆除 —— 這裡只印【那顆反向斷言的計數】）
 #   ★舊版這一節讀的是 `freshness.pos_check`／`fallback_last_tick`／`newly_expired`／`newly_fresh`

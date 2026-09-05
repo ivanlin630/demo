@@ -591,8 +591,17 @@ func erase_teams(tids: Array) -> void:
 		# 2. faction：退成員 + known_member_states + 若為盟主則解散
 		if team.faction_id != -1 and factions.has(team.faction_id):
 			var f = factions[team.faction_id]
+			# ★★★墓碑前置量測（systems 2026-09-05）：每個載體【各清掉多少筆】
+			#   ＝ god-view 全域訃聞的【真實體積】＝ 墓碑必須替代掉的量。
+			#   ★每格都帶【母體】—— 否則 0 分不出「掛錯」與「不可達」。
+			if Probe.enabled:
+				Probe.bump("obit.member_ids.entry")
+				if f.member_team_ids.has(tid): Probe.bump("obit.member_ids.cleared")
+				if f.known_member_states.has(tid): Probe.bump("obit.known_member_states.cleared")
 			f.member_team_ids.erase(tid)
 			f.known_member_states.erase(tid)
+			if Probe.enabled and f.leader_team_id == tid:
+				Probe.bump("obit.leader_team_id.cleared")   # ★★領袖墓碑化 ⇒ 全 faction 決策停擺（R² 補的載體）
 			if f.leader_team_id == tid:
 				# ★繼承-lite：領袖團死 → 先找接班（傳本批 dead 集合，排除同波死者＝dead-man-walking race）
 				succeed_or_disband_faction(team.faction_id, tid, dead)
@@ -604,7 +613,10 @@ func erase_teams(tids: Array) -> void:
 	# （非每 dead team 各掃全圖 O(dead×tiles)）。同 :315 for-otid-if-dead.has pattern。
 	for tid in world.tiles:
 		var wt: HexTileData = world.tiles[tid]
+		if Probe.enabled and wt.outpost_owner != -1:
+			Probe.bump("obit.outpost_owner.entry")   # ★母體＝有主的據點數
 		if dead.has(wt.outpost_owner):
+			if Probe.enabled: Probe.bump("obit.outpost_owner.cleared")   # ★★不清＝owner 鎖死（R² 補的載體）
 			wt.outpost_owner = -1
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint③：繞過 bank 的直接 owner 寫
 	# 3. 其他隊指向任一 dead tid 的 ref 單趟全清（死隊間互指不清：隨 teams.erase 一併消失）
@@ -619,9 +631,15 @@ func erase_teams(tids: Array) -> void:
 			#     （faction_id 解散路 ／ 訂單 owner 驅動 ／ 這個）
 			#   ⇒ 走 setter（★零行為：setter 就是 assign -1）
 			clear_combat_target(o)
+		if Probe.enabled:
+			Probe.bump("obit.livingteam.entry")   # ★母體＝這一批要掃過的活隊數
+			if o.social_target != -1: Probe.bump("obit.social_target.entry")
+			if o.order_target_id != -1: Probe.bump("obit.order_target.entry")
 		if dead.has(o.social_target):
+			if Probe.enabled: Probe.bump("obit.social_target.cleared")
 			o.social_target = -1
 		if dead.has(o.order_target_id):
+			if Probe.enabled: Probe.bump("obit.order_target.cleared")
 			o.order_target_id = -1
 		for dtid in dead_list:
 			o.known_reputations.erase(dtid)
@@ -644,7 +662,10 @@ func erase_teams(tids: Array) -> void:
 	for obs in team_intel:
 		if dead.has(obs):
 			continue
+		if Probe.enabled: Probe.bump("obit.belief.observer_entry")   # ★母體＝有情報的觀察者數
 		for dtid in dead_list:
+			if Probe.enabled and (team_intel[obs] as Dictionary).has(dtid):
+				Probe.bump("obit.belief.cleared")   # ★★★「某觀察者對某死者的整條 claim 串」被抹掉一次
 			team_intel[obs].erase(dtid)
 	# 5. 自身條目（known/discovered/intel row）+ 移除，逐 dead tid 收尾
 	for dtid in dead_list:
