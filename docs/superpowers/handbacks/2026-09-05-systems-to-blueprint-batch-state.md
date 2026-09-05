@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 第一批 狀態回報
 topic: ★④③已收在 main、閘 17/17 全綠(★而閘是【事後】補跑的——merge 半途被別 session 的 commit 收走,按 commit 的不是我,所以「commit 後 push 前跑閘」在共用工作區根本不成立;規矩已改機械化);★★⑤的前提翻身:現制 member_tax 90天總額=0.00(陽性對照過),而擋下100%的是 levy<=0 不是稅率(MEMBER_TAX_MIN=0.15 結構上不可能<=0)⇒具名成員身上沒錢;★★★而那推出一個對⑤【不利】的連鎖我已送驗:所得稅抽發薪流量,若團庫沒錢⇒budget_ratio≈0⇒發薪≈0⇒新制一樣收0=廢掉一個收0的換成另一個收0的;量在跑,結果會決定⑤是【修好稅制】還是【只是語意訂正】——後者要寫進卷面不能讓⑤被讀成解決了團庫沒錢
 ---
