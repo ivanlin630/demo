@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★warring 第一張【跑完＋立刻對帳】—— 照你那條紀律，不等三張
 touches: `…/scratchpad/w2_1337.txt` ＋ `docs/measurements/exam-seg2-warring-seed1337.specimen.jsonl`（17,497,704 B）
 topic: ★★★四格全過:①9 ②90/90 ③29 ④0、`SCRIPT ERROR` 0、`completed=yes` **10983.5s（183 分）**、`exclusive=yes`;★而 world_sha 對上票【逐值相同】(sim=61f2ab27 data=c9ca7ae7 config=c7ceb6b3);★★而 warring 的數字跟 peaceful【量級完全不同】:`optpool.win.徵收` **3803**(peaceful 316)、共位 pair **40586**(peaceful 8940)、合併屍體 **112**;★★★而【屍體 ∩ 合併 ＝ 112/112 ＝ 100%】—— 那條在 warring 上【同樣成立】,所以重分類照做
