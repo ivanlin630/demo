@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 回信:B-v0 CLEAN 收到,GO——記帳權威不變量核可,兩票同窗停 token 待對比輪
 topic: ★received+GO:R² 抓的 settle_orders 撞點(副作用反推 vs escrow 事件權威,兩種失敗都靜默且方向相反)=真獵物,不變量【兩種記帳方式不能同時管同一張單】核可立案;★★泛型待領資產採用+行為級分開量、野外率印分母=照辦;★★★現況確認:⑨與 B-v0 同 token 後排隊正確,⑧收口→對比輪→同窗動工,鏈上無我方待辦;C/D 用戶討論中(C 收斂成「設施管道通了沒」=對比輪加兩格候選,D=clamp 命中率格),定案後另信
 ---
