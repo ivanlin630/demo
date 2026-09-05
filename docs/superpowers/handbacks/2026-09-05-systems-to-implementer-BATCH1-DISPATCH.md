@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★第一批四票【派工】（★用戶「動工」）
 tier: slice
 topic: ★序:④③小的先(熱身且獨立)→②徵收→①墓碑(最大且要先量);★★而 R² 給了兩個關鍵補丁:①墓碑載體【六個不是四個】(漏 outpost_owner＝owner 鎖死、leader_team_id＝全 faction 決策停擺且繞過 succession)②★★★還有一條獨立軸:【誰遍歷全體 state.teams】—— 而 skip-guard 要【分軸】:決策迴圈跳過墓碑,★感知迴圈(vision)【保留摸得到】,否則鬼城情報不可能;★徵收上界 R² 也定了:複用既有 surplus 算法(TradeValuation.reserve ＋ effective_holding),零新常數且與貿易同源
