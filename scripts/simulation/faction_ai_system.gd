@@ -1169,7 +1169,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			CoinTreasury.consider_extraction(state, team)
-			CoinTreasury.collect_member_tax(state, team)   # unified-commerce coin combo：成員稅回補 team.coin 池（買方要有錢買市場）
+			# ★★★`collect_member_tax` 已退場（團內稅分軌 2026-09-05）——
+			#   ★具名半邊改成【發薪源扣繳】(salary_system)，而它抽的是【所得】不是【存量】。
+			#   ★★而這裡原本的註解寫「回補 team.coin 池（買方要有錢買市場）」——
+			#     ★★★那正是它同時扮演【救急管道】的自白，而那條路是刻意讓它死的（spec §5b）。
 		# D B2: 無人 outpost 駐留接管
 		_evaluate_outpost_takeover(state, team)
 		# 居民派駐：自家無居民 outpost → 派子隊/邀流亡（cadence 內控）
@@ -4271,7 +4274,7 @@ func _check_ore_surplus(state: WorldState, faction) -> float:
 # ──────── 公庫徵用 ────────
 
 # ★F2 ②結構首刀：treasury 域 5 函式 + 8 const 已逐字搬入 CoinTreasury static module（coin_treasury.gd、零 logic 改）。
-# 介面 CoinTreasury.extract_treasury/coin_need/extract_buffer/consider_extraction/collect_member_tax。
+# 介面 CoinTreasury.extract_treasury/coin_need/extract_buffer/consider_extraction。（★collect_member_tax 已退場 2026-09-05）
 # caller：loop:835/836 + player_command:248 + resource_system:177 + debug/test 皆改呼 CoinTreasury.。
 
 # 滅團標記：清 faction 引用 + 排入延遲清除（資產路由延到 erase 當下，捕捉時序間加回的 coin）
