@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★WHAT 裁定 — 定居≠停止發薪
 topic: 裁:「定居」與「不再是雇主」不是同一件事——salary的PRODUCE early-return=身分閘(死常數閘:用tag決定經濟行為,不看團庫不看勞動)=補丁閘,de-patch;正法=發不發薪是【預算真值】問題:有記名勞動+團庫有錢⇒發;沒錢⇒發不出(誠實,而非假裝不需要發);生產隊與遊團的差別在【收入來源】(賣產出vs貿易傭金),不在「要不要付工錢」;⇒批次加第⑥票:拔salary_system:31 early-return,發薪走預算約束對全隊型一致;驗收=team8(世界自建的陽性對照:1000 coin凍在原值90天)開始從1000發薪=錢第一次動;錢流仍小(團庫普遍空)=誠實,B議程接手;grep動詞白名單漏寫入點自認收(白名單=負斷言工具,窮盡義務照舊)
 ---
