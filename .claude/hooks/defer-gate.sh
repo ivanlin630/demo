@@ -19,7 +19,18 @@ while IFS=$'\t' read -r token summary until_cond met_check; do
     echo "[DEFER-GATE] ✗ $token —— ★沒有 met_check：不能有「沒有判準也算過」的路徑"
     FAILED=1; continue
   fi
-  if bash -c "$met_check" >/dev/null 2>&1; then
+  # ★★★2026-09-06 加:met_check 的【健康檢查】——一個【永遠不會觸發的判準】
+  #   與【正確地還沒觸發】在輸出上長得一樣(今天已經被這個形狀咬過好幾次)。
+  #   ⇒ 指令若【自己出錯】(rc 不是 0/1,例:ref 不存在 ⇒ git 回 128),那它【永遠不會給 0】
+  #     ⇒ ★★這條 defer 就【死了】,而閘會一直印綠。
+  bash -c "$met_check" >/dev/null 2>&1; _mc_rc=$?
+  if [ $_mc_rc -ne 0 ] && [ $_mc_rc -ne 1 ]; then
+    echo "[DEFER-GATE] ✗ $token —— ★★★met_check 【自己出錯】(rc=$_mc_rc)：它永遠不會觸發"
+    echo "    met_check: $met_check"
+    echo "    ⇒ ★修那個指令 —— 而【不要】因為「它現在不紅」就當它沒事"
+    FAILED=1; continue
+  fi
+  if [ $_mc_rc -eq 0 ]; then
     echo "[DEFER-GATE] ✗ $token —— ★★【解除條件已達成】而它還躺在表上"
     echo "    裁定：$summary"
     echo "    條件：$until_cond"
