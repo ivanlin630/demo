@@ -20,6 +20,10 @@ func _drain(state: WorldState, acc: Dictionary) -> void:
 		if t.tags.has(TeamData.TAG_PRODUCE):
 			produce_team_ids[tid] = true
 	var per_team: Dictionary = acc["per_team"]
+	# ★溢出直接證：drain前若size已摸到cap(4096)，代表這個窗口本身可能已經溢出過（不只是推論）
+	var pre_size: int = WorldState.driver_ledger.size()
+	if pre_size >= WorldState.driver_ledger_cap:
+		acc["overflow_hits"] = int(acc.get("overflow_hits", 0)) + 1
 	for e in WorldState.driver_ledger:
 		acc["ledger_seen"] = int(acc["ledger_seen"]) + 1
 		if String(e.get("reason", "")) != "member_tax":
@@ -55,14 +59,14 @@ func _run() -> void:
 	#   ★不是 production/工具問題，是我自己的床邏輯 bug，發現後直接修，未上呈假 0）。
 	var acc: Dictionary = {
 		"ledger_seen": 0, "total_tax": 0.0, "produce_total": 0.0,
-		"per_team": {}, "produce_team_ids": {},
+		"per_team": {}, "produce_team_ids": {}, "overflow_hits": 0,
 	}
 
 	print("=== member_tax_baseline_bed: config=%s days=%d ticks=%d seed=%d ===" % [cfg, days, ticks, seed_val])
 
 	for tick in range(ticks):
 		runner.advance_tick(state, no_player)
-		if tick % 2000 == 0 and tick > 0:
+		if tick % 50 == 0 and tick > 0:   # ★間隔從2000→50（2026-09-05血教訓：2000tick窗恰好卡滿ring-buffer cap=4096,更早entry被靜默丟棄，實測rate~2/tick，50tick遠低於cap留足安全邊際）
 			_drain(state, acc)
 			print("[CHECKPOINT] tick=%d ledger_seen累計=%d total_tax累計=%.1f teams=%d" % [
 				tick, int(acc["ledger_seen"]), float(acc["total_tax"]), state.teams.size()])
@@ -80,6 +84,7 @@ func _run() -> void:
 		print("=== member_tax_baseline_bed DONE ===")
 		return
 	print("[OK] 陽性對照：_ledger_seen=%d（非零，ledger 真的在記）" % _ledger_seen)
+	print("[OVERFLOW-CHECK] drain前摸到cap次數=%d（0=每次drain前size都<cap=4096，本輪未溢出，非推論是直接量）" % int(acc.get("overflow_hits", 0)))
 	print("①member_tax總額=%.2f" % total_tax)
 	print("③PRODUCE隊佔=%.2f（%.1f%%）" % [produce_total, (produce_total / total_tax * 100.0) if total_tax > 0.0 else 0.0])
 	print("④levy<=0被PERSONAL_COIN_FLOOR擋掉次數：★★★量不到——coin_treasury.gd:92-93 的 `if levy<=0: continue` 沒有 record_driver 呼叫，ledger看不到「沒發生的事」；需要一個L3 tap才能量，本床沒加（跨production scope，如實回報非總額反推）")

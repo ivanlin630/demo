@@ -13,6 +13,8 @@ func _initialize() -> void:
 func _drain(acc: Dictionary) -> void:
 	var inflow_by_reason: Dictionary = acc["inflow_by_reason"]
 	var outflow_by_reason: Dictionary = acc["outflow_by_reason"]
+	if WorldState.driver_ledger.size() >= WorldState.driver_ledger_cap:
+		acc["overflow_hits"] = int(acc.get("overflow_hits", 0)) + 1
 	for e in WorldState.driver_ledger:
 		if String(e.get("kind", "")) != "treasury":
 			continue
@@ -23,6 +25,8 @@ func _drain(acc: Dictionary) -> void:
 			inflow_by_reason[reason] = float(inflow_by_reason.get(reason, 0.0)) + delta
 		elif delta < 0.0:
 			outflow_by_reason[reason] = float(outflow_by_reason.get(reason, 0.0)) + (-delta)
+		else:
+			acc["zero_delta_events"] = int(acc.get("zero_delta_events", 0)) + 1   # ★補先前honest_limit提過的落差：delta恰好=0的事件單獨計數，不消失
 	WorldState.clear_driver_ledger()
 
 func _percentile(sorted_arr: Array, p: float) -> float:
@@ -49,6 +53,7 @@ func _run() -> void:
 
 	var acc: Dictionary = {
 		"treasury_rows": 0, "inflow_by_reason": {}, "outflow_by_reason": {},
+		"overflow_hits": 0, "zero_delta_events": 0,
 	}
 	var level_samples: Array = []   # ★水位樣本池：每次checkpoint把所有現存隊的anon_treasury丟進來
 	var known_ids: Dictionary = {}
@@ -59,7 +64,7 @@ func _run() -> void:
 		runner.advance_tick(state, no_player)
 		for tid in state.teams:
 			known_ids[tid] = true
-		if tick % 2000 == 0 and tick > 0:
+		if tick % 50 == 0 and tick > 0:   # ★間隔從2000→50（2026-09-05血教訓：2000tick窗恰好卡滿ring-buffer cap=4096,更早entry被靜默丟棄，實測rate~2/tick，50tick遠低於cap留足安全邊際）
 			_drain(acc)
 			var cur_max: float = 0.0
 			for tid2 in state.teams:
@@ -79,6 +84,8 @@ func _run() -> void:
 		print("=== anon_pool_level_bed DONE ===")
 		return
 	print("[OK] ①母體：record_driver treasury類總列數=%d（非零，ledger真的在記）" % treasury_rows)
+	print("[OVERFLOW-CHECK] drain前摸到cap次數=%d（0=每次drain前size都<cap=4096，本輪未溢出，非推論是直接量）" % int(acc.get("overflow_hits", 0)))
+	print("[ZERO-DELTA] delta恰好=0的treasury事件數=%d（不進inflow/outflow任一桶，但仍被計數，不消失）" % int(acc.get("zero_delta_events", 0)))
 
 	print("②入金 by reason：")
 	var inflow_by_reason: Dictionary = acc["inflow_by_reason"]

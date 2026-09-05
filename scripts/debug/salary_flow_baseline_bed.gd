@@ -13,6 +13,8 @@ func _initialize() -> void:
 	_run(); quit()
 
 func _drain(state: WorldState, acc: Dictionary) -> void:
+	if WorldState.driver_ledger.size() >= WorldState.driver_ledger_cap:
+		acc["overflow_hits"] = int(acc.get("overflow_hits", 0)) + 1
 	for e in WorldState.driver_ledger:
 		acc["ledger_seen"] = int(acc["ledger_seen"]) + 1
 		var reason: String = String(e.get("reason", ""))
@@ -53,14 +55,14 @@ func _run() -> void:
 
 	var acc: Dictionary = {
 		"ledger_seen": 0, "named_total": 0.0, "named_count": 0,
-		"anon_total": 0.0, "anon_count": 0, "per_team_anon": {},
+		"anon_total": 0.0, "anon_count": 0, "per_team_anon": {}, "overflow_hits": 0,
 	}
 
 	print("=== salary_flow_baseline_bed: config=%s days=%d ticks=%d seed=%d ===" % [cfg, days, ticks, seed_val])
 
 	for tick in range(ticks):
 		runner.advance_tick(state, no_player)
-		if tick % 2000 == 0 and tick > 0:
+		if tick % 50 == 0 and tick > 0:   # ★間隔從2000→50（2026-09-05血教訓：2000tick窗恰好卡滿ring-buffer cap=4096,更早entry被靜默丟棄，實測rate~2/tick，50tick遠低於cap留足安全邊際）
 			_drain(state, acc)
 			print("[CHECKPOINT] tick=%d ledger_seen累計=%d named_total累計=%.1f anon_total累計=%.1f teams=%d" % [
 				tick, int(acc["ledger_seen"]), float(acc["named_total"]), float(acc["anon_total"]), state.teams.size()])
@@ -74,6 +76,7 @@ func _run() -> void:
 		print("=== salary_flow_baseline_bed DONE ===")
 		return
 	print("[OK] 陽性對照：_ledger_seen=%d（非零，ledger 真的在記）" % _ledger_seen)
+	print("[OVERFLOW-CHECK] drain前摸到cap次數=%d（0=每次drain前size都<cap=4096，本輪未溢出，非推論是直接量）" % int(acc.get("overflow_hits", 0)))
 	print("①salary_named總額=%.2f 發生次數=%d" % [float(acc["named_total"]), int(acc["named_count"])])
 	print("②salary_anon總額=%.2f 發生次數=%d（對照組，anon不課稅）" % [float(acc["anon_total"]), int(acc["anon_count"])])
 	print("②per-team(salary_anon)明細（team_id: 累計，按總額降冪）：")
