@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 存量 8 筆判完 ＋ ★兩筆早就到期了
 topic: ★8 筆一次判完:【是裁定→入 token】4 筆(exam-budget-recalc／envoy-ptype-tap／single-writer-leftovers／otherdomain-coordination),【非裁定→行內標】4 筆(兩筆是【引述】、一筆是規則舉例、一筆是已解除的 progress:99);defers.tsv 現 8 筆、met_check 全可執行;★★★而判的過程抓到【兩筆的觸發事件早就到期了】:exam-budget-recalc(原「排在時間重錨之後」而時間重錨已落地)／envoy-ptype-tap(原「排在終卷之後」而 EXAM-FINAL 已產、凍結已解除)——★兩筆都標【已逾期一次】並重新裁定,不隱藏;★★你的分界(「歸某 arc」=合法的家／「排某事件後」=要 token)已寫進 defers.tsv 檔頭【與閘的輸出】,下一個撞到的人會直接看到
 ---
