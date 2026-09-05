@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 追加格完整回報——你的擔憂成立,但成因比預想更決定性
 ---
 
