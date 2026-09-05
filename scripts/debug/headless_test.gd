@@ -11593,8 +11593,22 @@ func _test_salary_full_pay_unchanged() -> void:
 	var ss := SalarySystem.new()
 	ss._pay_salary(state, team)
 	var coin_after: float = float(team.resources.get("coin", 0))
-	assert(absf(coin_after - (100.0 - 1.1)) < 0.01, "全額發薪 coin=98.9，實際=%.2f" % coin_after)
-	assert(absf(m.coin - 1.1) < 0.01, "named 領全額 1.1，實際=%.2f" % m.coin)
+	# ★★★所得稅源扣繳之後（2026-09-05 團內稅分軌）：團庫只流出【net】，而不是 gross。
+	#   ★而改法有講究（systems 釘）：★★【不要】改成「容忍任何值」，也【不要】只把數字換掉 ——
+	#     ★★★要改成【與稅率有關】的斷言，否則就是把一條【原本會抓到扣繳壞掉】的斷言
+	#       改成【扣繳壞掉也不會紅】的。
+	#   ★leader 貪婪 0.5／慎重預設 0.5 ⇒ rate = clamp(0.5*K - 0.5*K2, 0, MAX)
+	var _rate: float = clampf(
+		0.5 * CoinTreasury.INCOME_TAX_K - 0.5 * CoinTreasury.INCOME_TAX_K2,
+		0.0, CoinTreasury.INCOME_TAX_MAX)
+	assert(_rate > 0.0, "★稅率必須 > 0，否則下面兩條斷言退化成舊的全額發薪（實際 rate=%.3f）" % _rate)
+	var _net: float = 1.1 * (1.0 - _rate)
+	assert(absf(coin_after - (100.0 - _net)) < 0.01,
+		"源扣繳：團庫只流出 net=%.3f ⇒ coin=%.3f，實際=%.2f" % [_net, 100.0 - _net, coin_after])
+	assert(absf(m.coin - _net) < 0.01, "named 領【淨額】%.3f（gross 1.1 − 稅），實際=%.2f" % [_net, m.coin])
+	# ★★而【團庫流出 ＝ 成員收到】要單獨驗：★★★它證明稅額【從未離開團庫】（不是先付再收回）
+	assert(absf((100.0 - coin_after) - m.coin) < 0.01,
+		"★團庫流出(%.3f) ＝ 成員收到(%.3f)" % [100.0 - coin_after, m.coin])
 	assert(m.loyalty > 0.5, "超額薪資（mult 1.1）→ loyalty 上升，實際=%.2f" % m.loyalty)
 	assert(team.unrest_turns == 0, "coin 充足不應 unrest，實際=%d" % team.unrest_turns)
 	print("EcoFix Task1b OK")
