@@ -295,6 +295,12 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	# 近區：每小時執行
 	if state.world.current_tick % NEAR_CADENCE == 0:
 		var near_teams := _get_near_teams(state, player_pos)
+		# ★★★⑦ 驗收②要的機具：每隊【被分到哪一批】要可觀測 ——
+		#   ★沒有這格就無法在【同一個世界裡】比較 near 隊與 far 隊，
+		#     而 systems 明裁：跑兩次（一次全 far、一次 FULL_HD）是【兩個世界】，比不得。
+		if Probe.enabled:
+			for _ntid in near_teams:
+				Probe.bump("lod.near.byteam.%04d" % int(_ntid))
 		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
 		# H: choose_heir 不超時（advance_tick 開頭已凍結，此處為防禦）
 		if not state.player_forced_event.is_empty() \
@@ -341,6 +347,9 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
 		var far_teams := _get_far_teams(state, player_pos)
+		if Probe.enabled:
+			for _ftid in far_teams:
+				Probe.bump("lod.far.byteam.%04d" % int(_ftid))
 		# ★seam#3 S1：far 塊改 SYSTEMS registry 統一 loop（僅 BOTH，無分組 _pht；跳 near-only:reactions/
 		# cleanup/tile-regen/outpost_tick/tutorial）。tile 再生已由 near 每小時全域跑覆蓋 far tile（不重複=原 24× 雙記元凶）。
 		_run_systems(state, far_teams, FAR_ZONE_INTERVAL,

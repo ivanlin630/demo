@@ -93,6 +93,9 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 	if Probe.enabled:
 		Probe.bump("salary.pay_entry")
 		Probe.bump("salary.pay_entry." + ("produce" if team.tags.has(TeamData.TAG_PRODUCE) else "other"))
+		# ★★★驗收①要的是【每隊幾次】不是合計 —— 合計把「每隊都領到 4 次」與
+		#   「少數幾隊領很多次、多數一次都沒有」壓成同一個數字。
+		Probe.bump("salary.byteam.%04d" % team.team_id)
 	var is_player_team: bool = (team.leader_id == state.player_id and state.player_id != -1)
 	# NPC team: 每次發薪依 leader 個性同步薪資（慷慨/吝嗇 leader 隊伍動態不同）
 	var npc_salary_mult: float = 1.0

@@ -1361,15 +1361,28 @@ func _sec_payday() -> void:
 	print("")
 	print("═══ ★★★發薪逐日（★不要窗期聚合 —— 尖峰會被平均掉）═══")
 	# ★★★判別：`_pay_salary` 進入 0 有三種成因，而它們共用同一個 0
-	print("  ★判別：`tick` 被呼叫 %d 次 ｜ 其中 modulo 命中 %d 次 ｜ 未命中 %d 次" % [
-		int(Probe.counts.get("salary.tick_called", 0)),
-		int(Probe.counts.get("salary.tick.mod.hit", 0)),
-		int(Probe.counts.get("salary.tick.mod.miss", 0))])
+	# ★★★⑦ 之後閘不再是 modulo —— 這裡跟著改讀【到期】那兩格。
+	#   ★留舊 key 會印出「一次都沒命中」而同時有 65 次發薪，★★卷面自相矛盾就是在誤導下一個讀的人。
+	var _due_hist: Array = []
+	var _due_nonzero: int = 0
+	for _kd in Probe.counts.keys():
+		var _ksd: String = String(_kd)
+		if _ksd.begins_with("salary.tick.due."):
+			var _n: int = int(String(_ksd.substr(16)).lstrip("0") if String(_ksd.substr(16)).lstrip("0") != "" else "0")
+			_due_hist.append("%d隊到期=%d次" % [_n, int(Probe.counts[_kd])])
+			if _n > 0:
+				_due_nonzero += int(Probe.counts[_kd])
+	_due_hist.sort()
+	print("  ★判別：`tick` 被呼叫 %d 次 ｜ 其中【有隊到期】的 pass = %d 次" % [
+		int(Probe.counts.get("salary.tick_called", 0)), _due_nonzero])
+	print("     ★★到期隊數分布：%s" % ("｜".join(PackedStringArray(_due_hist)) if not _due_hist.is_empty() else "（空）"))
+	# ★⑦ 之後 `salary.tick.ids.*` 已改名為 `salary.tick.batch.*`（那格量的是【這一批有幾隊】，
+	#   而不再是「發薪日當下有幾隊」—— ★因為現在【沒有「發薪日當下」這個時刻】了，每隊各自到期）。
 	var _ids: Array = []
 	for _k0 in Probe.counts.keys():
 		var _ks0: String = String(_k0)
-		if _ks0.begins_with("salary.tick.ids."):
-			_ids.append("%s隊=%d" % [_ks0.substr(16), int(Probe.counts[_k0])])
+		if _ks0.begins_with("salary.tick.batch."):
+			_ids.append("%s隊=%d" % [String(_ks0.substr(18)).lstrip("0"), int(Probe.counts[_k0])])
 	_ids.sort()
 	var _wt: Array = []
 	for _k1 in Probe.counts.keys():
@@ -1380,11 +1393,32 @@ func _sec_payday() -> void:
 	print("     ★★★同一刻【世界上實際有幾隊】：%s" % (
 		"｜".join(PackedStringArray(_wt)) if not _wt.is_empty() else "（空）"))
 	print("        ★兩者一比就分得出【世界沒隊了】與【這一批 LOD 批次是空的】")
-	print("     ★★命中當下 `team_ids` 的大小分布：%s" % (
-		"｜".join(PackedStringArray(_ids)) if not _ids.is_empty() else "（空 ⇒ ★一次都沒命中）"))
+	print("     ★★每個 pass 收到的 `team_ids` 大小分布：%s" % (
+		"｜".join(PackedStringArray(_ids)) if not _ids.is_empty() else "（空 ⇒ ★儀器沒開）"))
+	print("        ★★★⑦ 之前這裡【全是 0隊】而世界上有 20+ 隊 —— 那就是病本身")
 	var _entry: int = int(Probe.counts.get("salary.pay_entry", 0))
 	var _prod: int = int(Probe.counts.get("salary.pay_entry.produce", 0))
 	var _oth: int = int(Probe.counts.get("salary.pay_entry.other", 0))
+	# ★★★驗收①：【每隊】的發薪次數分布（合計答不了「每隊都領到了嗎」）
+	var _bt: Dictionary = {}
+	for _kb in Probe.counts.keys():
+		var _ksb: String = String(_kb)
+		if _ksb.begins_with("salary.byteam."):
+			var _c: int = int(Probe.counts[_kb])
+			_bt[_c] = int(_bt.get(_c, 0)) + 1
+	var _btk: Array = _bt.keys()
+	_btk.sort()
+	var _btr: Array = []
+	var _teams_seen: int = 0
+	for _k2 in _btk:
+		_btr.append("領%d次的隊=%d" % [int(_k2), int(_bt[_k2])])
+		_teams_seen += int(_bt[_k2])
+	print("  ★★★【每隊】發薪次數分布（★驗收①問的是這個，不是合計）：%s" % (
+		"｜".join(PackedStringArray(_btr)) if not _btr.is_empty() else "（空 ⇒ 一隊都沒領過）"))
+	print("     ★曾領過薪的隊數 = %d（★★沒出現在這裡的隊 = 一次都沒領過，而它們不會自己現身）" % _teams_seen)
+	print("     ★★★30 日窗 ÷ SALARY_INTERVAL(7日) = 4 ⇒ 期望【每隊 4 次】；")
+	print("        ★而 stagger 讓每隊的發薪相位不同 ⇒ 相位落在窗尾的隊會是 3 次（窗邊效應，不是漏發）")
+	print("        ★★中途才建立／中途死掉的隊也會 <4 ⇒ 判讀要看【眾數是不是 4】，不是【全部都是 4】")
 	print("  進入 `_pay_salary` 次數 = %d（居民 PRODUCE %d ｜ 其他 %d）" % [_entry, _prod, _oth])
 	if _entry == 0:
 		print("     ★★★母體 0 ⇒ 【本函式一次都沒跑到】—— ★而那正是這一票要修的病（修前它就是 0）")
