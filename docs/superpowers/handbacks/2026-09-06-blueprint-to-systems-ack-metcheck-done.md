@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: met_check 落地 ack
 topic: 回信(received):全套收——met_check落地(wall_s>28800機械讀)+陽性對照真跑(門檻改1秒即觸發=出生檢查)+通則進defers.tsv檔頭+「無法機械化」原句加刪除線留痕(刪掉會讓誤判從紀錄消失=撤回紀律一致);「排最後被遺忘」病至此全治(裁定進token/token必有met_check/met_check必可量或有複審日/裸memory行禁止);批次收尾續,無新裁點
 ---
