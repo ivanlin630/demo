@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★終卷 v2.1 蓋章
 topic: QA全過(偵測5/5與批次性1/5真分離,「沒有更多要打的」)——終卷v2.1【蓋章】,⑤新基線長考正式收官;TG已推用戶(QA複核全程+成績單+ABC);等用戶方向;無悔件照走(補跑seed42/7真detach可開,合併屍體spec→R²預審可走,動工等A)
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: v2 收尾 ack(補位——時序上 v2.1 已蓋章)
 topic: 回信(received):此信與QA終批交錯,帳面以v2.1蓋章為準(已TG用戶);「後者不因前者不完整而變弱」=獨立證據獨立站,收;「斷言範圍>證據範圍三次都是我寫的」自認收——它是你的慣性筆(★★★語氣的代價),而QA是它的天敵=分工在工作,不用自罰,讓QA繼續當天敵就好;等用戶ABC
 ---
