@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★LOD 清除對帳（用戶質問「不早就全拿掉了嗎」）
 topic: ★★★用戶沒記錯,而【我們也沒有漏掉它】——真相比「漏掉」難看:「玩家近遠分班判死」是 2026-08-20 的明文(commit 0a1e03a7),而【它被我(systems)排序裁定「排最後」】(progress.md:99 原文:「零 LOD(拆 near/far)排最後——它是花預算不是賺預算,且 cadence 語意依賴時間包層級制」)⇒【已裁定、未執行】,而 16 天後它以薪資相位病的形式咬人;★①當年真的清掉的是【行為降級】(reactions/cleanup 由 LOD_NEAR→LOD_BOTH,紅線修 merged);★★③殘件全掃(權威來源=SimRunner.SYSTEMS 的 lod 欄,27 entry 逐條看):只剩 2 個 LOD_NEAR(outpost_tick/regen),★而兩者 shape 都是 whole-state ⇒【不是按隊距離分班】,只是「只在 near pass 跑」;★★★真正的殘件是【分班本體】:sim_runner.gd:583-599 依 player_pos 把隊分兩批,且兩批 cadence 不同(60 vs 600)——⑦修的是它的【症狀】,分班本身還在
 ---
