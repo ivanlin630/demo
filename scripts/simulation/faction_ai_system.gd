@@ -1515,10 +1515,19 @@ func _rebuild_goals(state: WorldState, f) -> void:
 			var greed_s: float = float(leader_p.values.get("貪婪", 0.5)) if leader_p else 0.5
 			var effective_interval: int = maxi(
 				int(COLLECT_INTERVAL * (1.5 - greed_s) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
-			# ★★★⑦：原本是 `current_tick % effective_interval == 0` —— ★而這個 interval 是【動態】的
-			#   ⇒ 它是不是 `FAR_ZONE_INTERVAL(600)` 的倍數【純屬偶然】
-			#   ⇒ ★★遠盟只在恰好對上相位的那些 leader 個性值上徵得到，其餘【一次都不徵】
-			#      —— 而那看起來會像「這些統領就是不愛徵收」，是【個性差異】的樣子。
+			# ★★★⑦：原本是 `current_tick % effective_interval == 0`。
+			#   ★★★★訂正（2026-09-05，我先前對 systems 講錯過一次）——
+			#     `evaluate_all(state, _team_ids)` 的 `_team_ids` 是【底線參數、根本沒用】，
+			#     faction 迴圈是 `for fid in state.factions`：★【每個 pass 都跑全部的盟】
+			#     ⇒ ★所以這一顆【不是距離依賴】的，我原本寫「遠盟徵不到」是錯的。
+			#   ★★真正的病是【量化】：pass 只發生在 `tick % 60 == 0` 或 `tick % 600 == 0`
+			#     ⇒ 觀測集 = `{t : t % 60 == 0}`
+			#     ⇒ 實際 fire 週期 = `lcm(60, eff)` 而不是 `eff`，失真倍率 = `60 / gcd(60, eff)`
+			#   ★★★而 `eff` 由 leader 的貪婪／義氣算出來 ⇒ ★倍率【隨個性而異】：
+			#     eff=1800（貪婪0.5義氣0.5）⇒ gcd=60 ⇒ 倍率 1，準時；
+			#     eff=2332（貪婪0.3義氣0.7）⇒ gcd=4  ⇒ 倍率 15，★★慢 15 倍
+			#     —— 而它看起來會像「這位統領就是不愛徵收」，★★★是【個性差異】的樣子。
+			#   ⇒ 遷 CadenceStagger 之後週期就是 `eff` 本身（到期後的第一個 pass 執行）。
 			#   ★★★補到期的次數：`_emit_goal`(:1562-1564) 是冪等 set(`goal not in f.goals` 才 append)
 			#      ⇒ 補 N 次與補一次結果相同（R² 查證）。
 			if f.levy_eval_next_tick <= 0:
@@ -1530,6 +1539,10 @@ func _rebuild_goals(state: WorldState, f) -> void:
 				while f.levy_eval_next_tick <= state.world.current_tick and _lvg < EXTRACT_CATCHUP_MAX:
 					if _richest_member(state, f) != -1:
 						_emit_goal(state, f, "徵收", "守成", "定期維持 treasury", "levy")
+						if Probe.enabled:
+							# ★驗收③的機具：逐盟記【真的發了幾次徵收令】——
+							#   ★★合計答不了「哪些盟被相位吃掉」，而那正是這一顆的病的形狀。
+							Probe.bump("levy.emit.byfaction.%04d" % int(f.faction_id))
 					f.levy_eval_next_tick = CadenceStagger.next_tick(
 						f.levy_eval_next_tick, f.levy_eval_next_tick,
 						f.faction_id, effective_interval)
