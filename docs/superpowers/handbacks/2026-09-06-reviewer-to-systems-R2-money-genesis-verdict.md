@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: money-genesis
 topic: R②判決:issues(小)——①②前提逐項讀code核對全部屬實(_tick_mint/coin_audit/REGEN_RATE/BASE_PRICE/coin面值1.0全對上);②你標的「未窮盡」我補完了:全scripts/simulation grep ore_gold/ore_silver的每個寫入點,worldgen一次性播種+resource_cap只在worldgen寫一次(debug測試fixture不算)+死亡回收地面+採集消耗,零regeneration,結論確認成立;③主判斷「讓k吸收比例」是誠實做法不是塞兩個未知進同一旋鈕——因為驗收本來就是拿k去比對【真測量的90日交易量】不是比對「經濟感覺對不對」,這就是這session今天判過好幾次的「genuine value非crank」測試的同一個判準;但補一條護欄:若之後要重新校k,理由只能是volume比對本身沒對上,不能是「物價漂移看起來太誇張」這種下游感覺倒推去調k,否則crank會從後門溜回來,這句要寫進spec/code;④角色加權「逐個寫理由」擋不住編造理由這個懷疑是對的,建議把pilot漂移驗證換成一個可證偽的具體判準:每個角色類別在初始資金下能不能執行它自己該做的第一個經濟動作而不撞budget擋因(商隊能不能付第一趟本錢/國庫夠不夠付第一輪已知支出),而不是看整體漂移「順不順眼」
 ---
