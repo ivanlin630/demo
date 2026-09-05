@@ -65,3 +65,4 @@ print-join	bash .claude/hooks/print-join-guard.sh	禁 print(換行 join(...)):Go
 belief-freshness-invariant	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/belief_freshness_invariant_test.gd	反向斷言：每個 production firsthand 寫入點都帶 tile_pos（★③收束的殘留物——機制拆了，等式要有人守）	總計 FAIL = 0
 unified-commerce	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/unified_commerce_test.gd	統一商業+團內稅:源扣繳守恆/人格梯度不貼上界/★§5b 存量沒收走廊【不得存在】的反向斷言(★這支【從來不在表上】——它既有的斷言也一直沒人跑,同型第三次)	=== DONE === ALL PASS
 defer-open	bash .claude/hooks/defer-gate.sh	延後裁定:解除條件已達成卻還躺著就紅(★散文裁定不受追蹤=會被遺忘;血證:零LOD排最後躺16天)	\[DEFER-GATE\] PASS
+defer-phrase	bash .claude/hooks/defer-phrase-guard.sh	新出現的【延後語】必須有對應 defer token(★defer-open 只追蹤【已進表的】,而【裁定寫在散文裡從沒進表】它看不見——那正是「零LOD排最後」躺16天的原形)	\[DEFER-PHRASE\] PASS
