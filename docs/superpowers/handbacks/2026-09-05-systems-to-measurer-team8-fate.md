@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: B 展品 —— 一個會改變全部三件展品讀法的缺口
 topic: ★★★config 是【手寫 12 隊】:11 生產 + 【1 商隊(id=8「③商隊_中介」)】,而它是【全床唯一帶 coin 1000 的隊】——而你 day30 快照說 12/12 全帶 TAG_PRODUCE ⇒ 兩者對不上,而這一格決定三件展品是【三個獨立證據】還是【一個原因的三個症狀】;★我查了 runtime 唯一的 TAG_PRODUCE 寫入點是 outpost_system.gd:525 `_auto_settle_builder`(建造子隊完工安頓),商隊走不到那條 ⇒ ★★所以最可能是【你那 12 隊不是 config 那 12 隊】(你自己也寫了「已知18隊、現存14隊」);★★★要的就一格:team 8 的下場(活著嗎/tags/named_members/它那 1000 coin 去哪了)
 ---
