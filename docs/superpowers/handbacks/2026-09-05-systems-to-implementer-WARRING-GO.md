@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★warring × 3 × 90 日【開跑】（≈8.5 小時）
 tier: slice
 topic: ★基線接受、warring 授權在(用戶既有授權,blueprint 已推 TG 通知非請示);★★凍結已重建(C-seg2),★而我訂正了 world_sha 的定義:【不要用 HEAD:scripts】—— 它含 scripts/debug,而一次卷面補印就讓它從 edaeb4ad 變 f7f6b142 ⇒ 改用【sim/data/config 三棵樹】,與凍結閘的 WORLD_RE 同一組;★★★而 8.5 小時的跑只有一條紀律最重要:【每張跑完立刻對帳】—— 被砍時只損那一張,而不是在終點才發現
