@@ -3873,3 +3873,33 @@ sim_runner.gd:337 far  pass = tick % FAR_ZONE_INTERVAL(600) == 0 ⇒ payday 只�
 （現況最大 `wall_s` ＝ 1105.97 ⇒ 未觸發；**陽性對照**：門檻改 1 秒 ⇒ 立刻觸發）。
 ★★**而通則比這一條重要**：**寫不出數字的「需要」＝還沒想清楚需要什麼**；
 真不可量化的極少數 ⇒ 退而求其次＝**定期複審日期**（也是 met_check）⇒ ★★★**表上不留裸 memory 行。**
+
+## 🔧 CoinAudit 是既有律，但【不在 merge-gates.tsv 上】（2026-09-07，systems 自查）
+
+```
+scripts/simulation/coin_audit.gd:6  守恆律：total(end) − total(start) == Σ minted
+grep -inE 'coin' docs/process/merge-gates.tsv  ⇒ ★零命中
+```
+★一條寫得很清楚的律，**沒有接電** —— 同型第 N 次（儀器裝好但沒接電）。
+★★而它**本來就會抓到** ⑨ 的驗收②（床自寫子集普查報 −1210.61，換 `CoinAudit.total()` 後 = 0.00）。
+**處置**：補進註冊表，★**但不盲補**——先確認 `scripts/debug/coin_b_verify_bed.gd`
+跑得起來且**關掉機制會紅**（陽性對照）才進，否則只是多一道恆綠的裝飾。
+owner=systems｜擋 Godot：排在 implementer 的 post-⑩ 雙向跑之後。
+
+## ⏳ 131 床分診掃描：detach 啟動路徑【死因未破】（2026-09-07，★記成未知，不解釋掉）
+
+```
+症狀：WMI-detach 起的 sweep，log 只寫到兩行 header 就整棵樹消失，
+      ★連 bat 最後那行 `SWEEP_DONE_RC=%ERRORLEVEL%` 都沒寫到 ⇒ cmd.exe 本身沒活到最後
+      ★★兩次死在【完全相同的位置】(續掃訊息之後、第一支床之前) ⇒ 可重現，不是隨機被殺
+```
+★**已排除的**（都實測過，不是推測）：
+```
+① 腳本本身        前景跑 7 支(含先前卡 59 分鐘的 game_sim_test.gd)全綠 rc=0
+② detach 環境缺工具 探針 bat 實測：PATH 完整、powershell/timeout/cut 都在、PROBE_DONE_RC=0 有寫
+③ Godot 佔用      起跑時已驗 Godot FREE + implementer beacon 已消
+```
+⇒ ★★★**三條都排除，而它仍然死** —— 我**沒有找到兇手**，這格是**未知**。
+   ★**不填一個看起來合理的因果進去**（今天已經有一次「從不完整母體算出的差被升級成關於世界的主張」）。
+**繞道**：改走 harness 追蹤的背景執行（非 WMI），腳本不變 —— ★繞過不等於修好，這條留著。
+owner=systems
