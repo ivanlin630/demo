@@ -68,3 +68,11 @@ ten-consequence-farm-income	⑩ 的【後果】那一格:糧食零價是否真�
 ten-zero-gain-reach	⑩ 的【觸達】那一格:零價到底有沒有真的殺掉訂單(arb_kill_zero_gain 次數)——★驗收⑤答的是【結構】(5 個消費點全是 OR/乘數 ⇒ 不是懸崖),那個方法對;★★但它答不了【次數】:③④量的是【估值層】501,636 次,而估值層變了不等於【決策層】變了;★★★這格 ⑩ 之前【恆 0】(clamp 讓 local_value 恆 >0)⇒ 它非 0 本身就是「白送區流到下游」的證據	B-v0(市場厚度)動 order_system 時順手加那一格並量(不另起一輪長跑)	git show origin/main:scripts/simulation/order_system.gd 2>/dev/null | grep -q 'arb_kill_zero_gain'
 status-files-delete	現況檔 docs/process/status/*(約 370KB)是否刪除——★2026-08-21 停更並寫「觀察至 2026-08-28 沒人 miss 就刪」,★★而那句寫在散文裡沒有人追,到 2026-09-07 已逾期 10 天;★★★而現在去看,證據【反過來】:02_reviewer.status.md 154KB、2026-09-02 還在被寫、此刻還有未 commit 改動 ⇒ 有人在用 ⇒ 刪除條件【不成立】,不能照原計畫執行	連續 30 天沒有任何 status 檔被改過(=真的沒人在用)	test -z "$(find docs/process/status -name '*.md' -mtime -30 2>/dev/null)"
 bv0-claim-expiry	B-v0 的【到期處置】——★implementer 在 Slice A 把「到期退貨」列為可砍(當時對),★★而 ⑩ 之後 local_value 可為 0 ⇒ 待領貨折值 0 ⇒ pending_claim_amt 0 ⇒ 領取念頭不上秤⇒ ★★★貨已離開賣家庫存進 escrow 卻永遠沒人領 = orphan_escrow(漏貨),不再是【功能少一塊】	B-v0 收束之前必須有到期處置(形狀:貨留在 escrow 只標到期,不讓貨自己回家=瞬移)	git show origin/main:scripts/simulation/interaction_system.gd 2>/dev/null | grep -q 'claim_expir'
+# ★★★【2026-09-07 blueprint 預註冊的分流判準】—— 名單(A 階段跑床的結果)來了【直接套,不再議】
+#   必重跑三類:(a)被【意圖帳／裁決】引用過的數字 (b)推過【用戶 TG】的結論 (c)當過【merge-gate 判準】的床
+#   其餘:★記帳標記「產地含吞寫 setter」,【不重跑】
+#   ★★對外紀律:名單落地前【不對外撤結論、也不預告災難】——現在只有「可能」,量級未知;
+#     名單 + 重跑結果【一起】推用戶,一次講清。
+#   ★★★而【現在就寫下來】的理由:等名單來了再議,會在【已經看到數字】之後才定判準
+#     —— 那正是「預寫解讀」那條要防的相反面。
+scaffold-swallowing-setters	★遷移鷹架:team_data.gd 五個計算屬性的 `set(_value): pass`(:57 population／:242 wounded／:260 anon_tiers／:269 anon_combat_skill／:277)——★它們的用途是【讓舊賦值站繼續編得過】,而遷移完成後【沒有人回來拆】⇒ ★★變成永久的靜默失敗產生器(直寫處裸掃 scripts/ 合計 107);★★★本 token 就是 blueprint 立的「鷹架出生必掛拆除 token」那條規矩的【第一個實例】	五個 setter 全部移除(賦值變 parse error)= 遷移真的完成	! git grep -q 'set(_value):' -- scripts/data/team_data.gd
