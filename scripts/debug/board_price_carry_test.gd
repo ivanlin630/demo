@@ -37,19 +37,26 @@ func _run() -> void:
 
 	# ── 佈局：seller(隊2) 在自家市集掛賣單；visitor(隊1) 去讀；再把消息 deposit 到隊3 的板 ──
 	var seller := TeamData.new(); seller.team_id = 2; seller.tile_pos = Vector2i(2, 0)
-	seller.population = 5
+	AnonTierSystem.add_anon(seller, "平民", 5)   # ★population 是 getter，直接賦值會被 set(_value): pass 吞掉
 	# ★★★存量刻意選【不是深過剩】：若 goods 堆到自評值掉到 0，
 	#   下面整條帶價鏈就是【拿 0 去比 0】——而一個【到處寫 0】的 bug 會全部通過。
 	#   ★這是我第一版寫錄真的踩到的（native price 量出來就是 0.0000）。
 	seller.resources = {"goods": 12.0, "coin": 50.0}
 	var visitor := TeamData.new(); visitor.team_id = 1; visitor.tile_pos = Vector2i(2, 0)
-	visitor.population = 5
+	AnonTierSystem.add_anon(visitor, "平民", 5)   # ★population 是 getter，直接賦值會被 set(_value): pass 吞掉
 	var third := TeamData.new(); third.team_id = 3; third.tile_pos = Vector2i(9, 0)
-	third.population = 5
+	AnonTierSystem.add_anon(third, "平民", 5)   # ★population 是 getter，直接賦值會被 set(_value): pass 吞掉
 	state.teams[1] = visitor; state.teams[2] = seller; state.teams[3] = third
 	var t_sell: HexTileData = _mk_outpost(state, Vector2i(2, 0), 2)
 	var t_far: HexTileData = _mk_outpost(state, Vector2i(9, 0), 3)
 
+	# ★★★前提驗證（寫在看任何價格之前）：
+	#   TeamData.population 是 getter，而它的 setter 是 `set(_value): pass`――【靕默吞掉寫入】。
+	#   ★我第一版直接賦值，而 pop 一直是 0
+	#     ⇒ target = pop×3 = 0 ⇒ shortage 極負 ⇒【任何存量都算深過剩】⇒ 價格恒 0
+	#   ★★而我第一次看到 0 時診斷成「存量開太大」，把 80 改成 12
+	#     ⇒ ★★★改對了數字，而真正的原因一步都沒動。
+	_ok(seller.population > 0, "前提：seller 真的有人（pop=%d）――沒這格，下面每一個價格都是在量一個空隣" % seller.population)
 	var oid: int = os.post_order(state, seller, "sell", "goods", 10)
 	_ok(oid >= 0, "掛單成功 oid=%d" % oid)
 
@@ -97,7 +104,7 @@ func _run() -> void:
 	print("  ── ④ 套利剩餘：兩邊各要有正數（★不是「有欄位」）──")
 	# 賣邊正數：third 手上有 goods，而 buyer 掛的買單自報價高於 third 自評 ⇒ 剩餘 > 0
 	var buyer := TeamData.new(); buyer.team_id = 4; buyer.tile_pos = Vector2i(10, 0)
-	buyer.population = 5
+	AnonTierSystem.add_anon(buyer, "平民", 5)   # ★population 是 getter，直接賦值會被 set(_value): pass 吞掉
 	buyer.resources = {"goods": 0.0, "coin": 200.0}   # 缺 goods ⇒ local_value 高 ⇒ bid 高
 	state.teams[4] = buyer
 	var t_buy: HexTileData = _mk_outpost(state, Vector2i(10, 0), 4)
