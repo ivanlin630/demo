@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★分診結案：131/131 ｜ green 98 ／ red 33 ／ timeout 0；★★specimen 追完了——**QA 的證據沒有問題**，是床的等式寫錯（4 個 append 點 vs 1 個計數器）；★★★3 支「真回歸候選」**全部翻案成床過期**
 ---
 
