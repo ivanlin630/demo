@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: batch1-compare①vs③ salary flow數字出來——批次一真的救活薪資系統
 ---
 
