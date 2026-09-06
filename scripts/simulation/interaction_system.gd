@@ -961,6 +961,30 @@ func _market_peer_trade(state: WorldState, visitor: TeamData, tile: HexTileData,
 
 # 訪客買：向 owner sell 單 + public_storage stock 買 → 扣 storage、visitor.coin → owner.coin。
 # 可購量 = min(單餘量, 現貨, 買得起, 缺口, carry)；withdraw 實量計價（禁信 board 鏡像）。
+# ★★★待領資產的唯一寫入口（B-v0）——★款與貨【共用一個結構】（R² 建議、systems 採用）：
+#   {kind:"coin"|"goods", res, amt, owner_team, since_tick}
+#   ⇒ ★腦欄位一個、秤上 option 一個（讀 kind 決定怎麼算價值）
+#   ⇒ ★★而【行為級驗收仍然要分開量】：抽象共用【不代表】它們會被同等使用，而那正是要量的東西。
+# ★★★同 owner+kind+res 的合併：★不合併會讓「一隊有 30 筆 1 元」與「一隊有 1 筆 30 元」
+#   在【筆數】上長得完全不同，而【領取念頭】要秤的是【額】不是【筆】。
+static func _add_pending_claim(tile: HexTileData, kind: String, res: String, amt: float,
+		owner_team: int, tick: int) -> void:
+	if amt <= 0.0 or owner_team < 0:
+		return
+	for c in tile.pending_claims:
+		if String(c.get("kind", "")) == kind and String(c.get("res", "")) == res 				and int(c.get("owner_team", -1)) == owner_team:
+			c["amt"] = float(c["amt"]) + amt
+			if Probe.enabled:
+				Probe.bump("mkt.claim.merged")
+				Probe.add_amount("mkt.claim.added." + kind, amt)
+			return
+	tile.pending_claims.append({"kind": kind, "res": res, "amt": amt,
+		"owner_team": owner_team, "since_tick": tick})
+	if Probe.enabled:
+		Probe.bump("mkt.claim.opened")
+		Probe.bump("mkt.claim.opened." + kind)
+		Probe.add_amount("mkt.claim.added." + kind, amt)
+
 func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
 		oid: int, res: String, order_rem: int, commerce: float, owner_lv: Dictionary) -> bool:
 	if Probe.enabled: Probe.bump("mkfill.attempt.buy")   # ★母體：撮合被走到幾次（沒有它，「碰撞 12 次」分不出很少還是幾乎每次）
@@ -969,7 +993,12 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 	var ask: float = TradeValuation.ask_price(owner, res, commerce, owner_lv, state) if owner != null \
 		else float(TradeValuation.BASE_PRICE.get(res, 0.0))   # 無主 outpost → face value
 	if ask <= 0.0: Probe.bump("trade.market_bail.buy_no_price"); return false
-	var stock: float = TileBank.get_stored(tile, res)   # ★min(單餘,現貨)：可購量鎖現貨
+	# ★★★B-v0：escrow 支撐的賣單，貨源是【市場保管的那批】不是 owner 的公庫。
+	#   ★兩者【不可混】：owner 自家櫃檯賣的是自己的公庫（錢進自己口袋，不涉紅線）；
+	#     而 escrow 單的貨是【別人寄賣的】⇒ ★★錢【不得】進 owner 口袋，也不得瞬移回賣家。
+	var _esc: Dictionary = tile.market_escrow.get(oid, {})
+	var _is_escrow: bool = not _esc.is_empty()
+	var stock: float = float(_esc.get("qty", 0.0)) if _is_escrow else TileBank.get_stored(tile, res)   # ★min(單餘,現貨)：可購量鎖現貨
 	# 訪客缺口（storage-aware，補到自己 reserve）；SURVIVAL 買方求生亦補
 	var want: float = maxf(TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state)
 		- ResourceSystem.effective_holding(state, visitor, res), 0.0)
@@ -987,12 +1016,28 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 		elif vcoin / ask < 1.0: Probe.bump("trade.market_bail.buy_cant_afford")
 		else: Probe.bump("trade.market_bail.buy_carry_full")
 		return false
-	var got: float = TileBank.withdraw(tile, res, float(qty), "market_sell_out")   # 實量
+	var got: float = 0.0
+	if _is_escrow:
+		got = minf(float(qty), float(_esc.get("qty", 0.0)))
+	else:
+		got = TileBank.withdraw(tile, res, float(qty), "market_sell_out")   # 實量
 	var q: int = int(got)
 	if q <= 0: Probe.bump("trade.market_bail.buy_withdraw_empty"); return false
 	ResourceBank.add(visitor, res, q, "market_buy_in")
 	ResourceBank.add(visitor, "coin", -(q * ask), "market_buy_coin_out")
-	_credit_owner_coin(state, owner, tile, q * ask)
+	if _is_escrow:
+		# ★★★紅線：外地掛單者【不在場】⇒ 錢【不得】直接進其 team.coin ⇒ 進【待領款帳】。
+		#   ★而貨從 escrow 扣（它本來就已經離開賣家的 resources —— 掛單當下就扣了）。
+		_esc["qty"] = float(_esc["qty"]) - float(q)
+		if float(_esc["qty"]) <= 0.0:
+			tile.market_escrow.erase(oid)
+		_add_pending_claim(tile, "coin", "coin", float(q) * ask, int(_esc.get("owner_team", -1)),
+			state.world.current_tick)
+		if Probe.enabled:
+			Probe.bump("mkt.escrow.filled")
+			Probe.add_amount("mkt.escrow.filled_qty", float(q))
+	else:
+		_credit_owner_coin(state, owner, tile, q * ask)
 	_settle_owner_order(owner, tile, oid, q)
 	if Probe.enabled:
 		# ★成交後記錄：★★「誰【先】」才是重點——`seq` 是同 tick 同 order_id 的第幾個。
