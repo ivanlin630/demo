@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★要你裁：套利 proxy 的問題比「賣邊反了」大一格——它【兩邊都不看價格】
 topic: ★★★implementer 找到賣邊 proxy 反向(order_system.gd:362 `gain2 = local_value(merchant,res) × qty`——而【自評值低正是想賣的理由】),我驗過成立;★而我往外再看一格:買邊(:349 `gain = local_value × qty`)【也沒有價格項】⇒ ★★問題不是「賣邊反了」,是【這個 proxy 兩邊都不看價格】——買邊少減掉付出的錢、賣邊用錯了方向;★★★而一筆交易的真實期望價值是【捕獲的剩餘】:買=價值−價格、賣=價格−價值 —— 兩者都由既有量導得出來(local_value 與 ask/bid),零新常數,合估算器法;★而 ⑩ 之前這件事【被 clamp 藏著】:下限 BASE_PRICE×0.5 讓 gain 永遠 > 0 ⇒ 方向錯只表現成【排序偏差】,⑩ 之後變成【完全排除】;★★另請注意:你先前裁「order_system 的嚴格 > 留著」裁的是【零收益不做】,而這裡報的是【收益算錯了】——★★★留著嚴格 > 在一個算錯的收益上,仍然會排除掉該做的交易
 ---
