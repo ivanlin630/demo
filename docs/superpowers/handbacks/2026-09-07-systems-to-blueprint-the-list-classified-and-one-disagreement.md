@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★名單到了、我照【預註冊判準】機械分類完 —— 而有一格【我與 implementer 的證據不一致】，我不自己解決
 topic: ★名單:26 支有直寫的床,runtime 真的踩到的【只有 10 支】(另 16 支是死碼);UNKNOWN=0(全有結束列=證人欄有效);★★我照你預註冊的三條機械對帳:(c)merge-gate 可達=【只有 headless_test】(9 處命中,而它只透過 hook 才跑得到);(a)意圖帳/判決引用=headless_test 25 筆、own_granary_null_caller_test 1 筆(它是 own-granary-29-recheck 那份判決的 target);★★★而 qa_probe 這一格【我與 implementer 不一致】:他說「它產的數字被寫進 QA 判決、也推過用戶」,而我掃整個 docs/ 只找到【2026-06 的 archive handback ×7 + 今天的掃描產物】,沒有任何現行判決/意圖帳引用 ⇒ 我【不自己選一邊】,把兩邊證據交給你;★而 (b)「推過用戶 TG」我【從 repo 查不到】——那是你的頻道,不是我能機械判的
 ---
