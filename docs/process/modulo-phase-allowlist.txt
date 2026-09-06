@@ -20,10 +20,14 @@
 #   `state`＝每 tick 都跑到的 whole-state step ⇒ 精確 modulo 安全
 #   `teams`／`teams_cadence`＝【被 pass 相位過濾過】⇒ 精確 modulo 會整個掉進縫裡（不是失真，是不發生）
 #
-# ★★★而清單裡標【同型待裁】的那四筆要說清楚：它們現在是安全的，
-#   ★但安全的理由是【算術剛好整除】不是【機制】—— 而 systems 對 faction_ai:1170
-#     下的裁定正是「安全是巧合不是設計 ⇒ 也要遷」。這四筆同一個形狀，等 systems 裁。
-#     （★我沒有自己擴大票的範圍：spec 具名的是三顆，這四筆只登記不動手。）
+# ★★★【2026-09-06 CLOSE】原本這裡寫「清單裡標【同型待裁】的那四筆，等 systems 裁」。
+#   ★而現在 12 列裡【沒有任何一列標著待裁】—— 門牌指向一個不存在的東西。
+#   ★★兩種讀法長得一樣：(a) 已經裁完了 (b) 還有四筆沒裁而標記掉了。
+#   ⇒ 對照 code 定案是 (a)：那四筆＝本票已遷的四處
+#      （harvest 的 game／predator／herb ＋ population 的 minor_mature），
+#      它們的安全理由確實是「43200%1440==0 算術整除」不是機制，而現在全部走 `_due` 到期比較。
+#   ★★★裁定：CLOSE，不留待辦。★而這段【不刪掉改成留註記】，是因為
+#      「本來就沒有待裁」跟「裁完了」在卷面上必須分得出來 —— 前者代表當初登記錯。
 1	scripts/simulation/day_night_system.gd	return float(state.world.current_tick % WorldState.TICKS_PER_DAY) / \	值不是閘：算一天之內的相位比例，沒有 == 0 的分支 ⇒ 不會被相位吃掉
 1	scripts/simulation/faction_ai_system.gd	"mod_infra": state.world.current_tick % INFRA_INTERVAL, "n_factions": state.factions.size()}, 5)	觀測不是閘：Probe.note 的欄位（唯讀記錄）⇒ 不決定任何事發不發生
 1	scripts/simulation/harvest_system.gd	var t: float = float(state.world.current_tick % SEASON_LENGTH) / float(SEASON_LENGTH)	值不是閘：季節相位比例
