@@ -51,3 +51,13 @@ for f in "$HB"/*.md; do
 done
 echo "[archive] 歸檔 ${moved} 封｜保留：open ${kept_open} 封、今天 ${kept_today} 封"
 echo "[archive] 熱目錄剩 $(ls "$HB"/*.md 2>/dev/null | wc -l | tr -d ' ') 封"
+
+# ★寫下【它有在跑】的正面證據（2026-09-06）。
+#   ★★這一步不是裝飾：歸檔本體從 2026-08-27 建好起【一次都沒被觸發過】，
+#     而「它沒跑」這件事【完全沒有症狀】—— 直到熱目錄長到 1997 封、
+#     SessionStart 掃描超時被殺、所有角色【靜默】失去角色 context。
+#   ★★★而這個檔只證明【它跑過】；證明【它沒停下來】的是 merge gate `mailbox-size`（>600 就紅）。
+#     兩層缺一層都會再靜默長回去。
+_hot=$(ls "$HB"/*.md 2>/dev/null | wc -l | tr -d ' ')
+printf '%s 搬=%s 熱目錄剩=%s 時間=%s
+' "$(date +%s)" "${moved}" "${_hot}" "$(date +%FT%T)" > .claude/hooks/.archive-last

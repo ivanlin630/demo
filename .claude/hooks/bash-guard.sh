@@ -33,9 +33,14 @@ if printf '%s' "$_cmd" | grep -qiE 'godot(\.ps1|-detach)?|--headless'; then
   for f in "$_hookd"/.busy.*; do
     r="${f##*/.busy.}"
     [ "$r" = "$_me" ] && continue
-    dl=$(cat "$f" 2>/dev/null || echo 0)
-    case "$dl" in (*[!0-9]*|'') dl=0 ;; esac
-    [ "$dl" -gt "$(date +%s)" ] && _others="${_others} ${r}"
+    # 2026-09-06：beacon 契約從【檔內存一個 deadline epoch】改成【心跳 mtime】。
+    #   ★改的理由不是形式：舊契約要人手寫，而稽核發現【一個 beacon 都沒被寫過】
+    #     ⇒ 母體恆空 ⇒ 這道護欄從上線到現在【一次都沒響過】，而它防的事當天正在發生。
+    #   ★★改成 godot.ps1 wrapper 自己蓋章＋每 10s 續期後，反向的壞處要一起擋掉：
+    #     wrapper 被 kill ⇒ 清理不會跑 ⇒ 屍體 beacon 永久留著 ⇒ 從【永遠不響】變【永遠亂響】。
+    #     ★★★而「清理」正好是被 kill 時唯一不會執行的東西 ⇒ 所以用【會自己過期】的心跳，
+    #        不用「結束時刪掉」。60s 沒續期＝那個跑已經死了＝視同不存在。
+    if [ -n "$(find "$f" -mmin -1 2>/dev/null)" ]; then _others="${_others} ${r}"; fi
   done
   if [ -n "$_others" ]; then
     _warn="${_warn}${_warn:+
