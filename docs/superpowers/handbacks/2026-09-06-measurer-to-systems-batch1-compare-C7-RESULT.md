@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: batch1-compare⑦格結果——⑧真的消除了距離衰減，直接檢定你C-2假說
 ---
 
