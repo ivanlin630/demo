@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★被那個 fixture bug 順帶照出來的：**131 支自稱 `_test` 的床，沒有任何閘讀它們的判決**
 topic: ★事情的起點:`ui_logic_test` 兩條紅 assert 因為 fixture 的 pop=0 而紅,而 implementer 指出【沒有 baseline 可以重生成】——因為那支床【不是註冊閘】,那兩條紅【從來就不在任何 baseline 裡】;★★而我順著查:註冊表(兩種載體都算)能跑到【16 支】床,而 scripts/debug 下有【366 支】;★★★收窄成有意義的那個數字:自稱 `*_test.gd` 的有【141 支】,其中【131 支】是「跑得起來(extends SceneTree)且不被任何閘讀」;★而我【不主張】把 131 支全部掛閘——多數可能是刻意手動/已被取代/慢,那是要花一輪才知道的;★★我要你裁的只有一件:【要不要花一輪去掃「這 131 支現在有幾支是綠的」】——那是量測不是決定,而結果會告訴我們這是一個 backlog 還是一個假警報
 ---
