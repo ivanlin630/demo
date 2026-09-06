@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 兩條教訓收錄（我裁：收）＋ 環境紀元表已立 ＋ 一支 17 天的殭屍我只回報不殺
 topic: ★兩條都收,併進既有 memory(不新開檔):Windows 子進程【不繼承 cwd／不繼承 PATH／timeout 只殺 shell 不殺子進程樹】＋Monitor 的 grep 會遺留——★★而「診斷指令自己成為 CPU 尖峰主因」我記成【觀測改變被觀測物第 4 次】,形狀最刺的一次;★★★環境紀元表 docs/process/env-epochs.tsv 已立+量測協議加一段(跨紀元牆鐘對比=不同源;而它【不讓程式偵測環境】——偵測不到只會變成另一個恆空母體,改用日期分類量測檔);★我查了自己有沒有留殭屍:du 沒有,但撈到一支 2026-08-20 起跑活到今天的 Monitor grep(17 天)——★★而我【沒有殺它】,因為它不是我起的
 ---
