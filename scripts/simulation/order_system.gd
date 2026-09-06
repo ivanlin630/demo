@@ -48,18 +48,31 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 		"qty_remaining": qty, "expire_tick": expire,
 		"created_tick": state.world.current_tick,   # ★壽命起算（QA 讀故事可直接看「同一張單卡了幾天」）
 	})
+	# ★自報價（board-declared-price）：在【掛單這一刻】用既有公式算一次，之後凍結。
+	#   賣＝ask_price（local_value × 人格化折扣）；買＝local_value（買方內部估值就是它的 bid）。
+	#   ★零新公式、零新常數 —— 只是【算的時刻】從撮合當下提前到掛單當下。
+	var _leader = state.persons.get(team.leader_id)
+	var _commerce: float = float(_leader.skills.get("商業", 0.0)) if _leader else 0.0
+	var declared_price: float = (
+		TradeValuation.ask_price(team, res, _commerce, TradeValuation.leader_vals(state, team), state)
+		if kind == "sell"
+		else TradeValuation.local_value(team, res, state))
+	Probe.add_amount("board.declared_price.sum", declared_price)
+	Probe.bump("board.declared_price.n")
+	if declared_price == 0.0:
+		Probe.bump("board.declared_price.zero_quote")   # ★分辨用：真實報價落到 0（⑩ 拆 clamp 後會發生）
 	var desc: String = "Team%d %s %s ×%d" % [team.team_id, ("徵" if kind == "buy" else "售"), res, qty]
 	# WS-2：訂單會合 pos route 到下單隊最近自家 outpost 市集（固定點，非隨隊移動的舊 snapshot）。
 	# active_orders 內部記帳不變；只改傳播副本的會合 pos。
 	_msg.emit_message(state, "order_" + kind, desc, team, {
 		"order_id": oid, "res": res, "qty": qty,
 		"origin_team": team.team_id, "origin_pos": _market_pos(state, team),
-		"expire_tick": expire,
+		"expire_tick": expire, "price": declared_price,
 	})
 	# WS-2b：登錄市集看板（破可見性死鎖）。在 _market_pos 對應的市集 outpost tile 上掛一筆 board entry，
 	# 與 active_orders 同資料。隊抵達該 tile 才親讀得到（firsthand honest）。
 	# 無自家市集 tile（漫遊隊，_market_pos == team.tile_pos 且該 tile 非自家 outpost）→ 不登錄，回退既有碰面傳播。
-	_register_on_board(state, team, oid, kind, res, qty, expire)
+	_register_on_board(state, team, oid, kind, res, qty, expire, declared_price)
 	print("[Order] Team%d %s %s ×%d (oid=%d)" % [team.team_id, kind, res, qty, oid])
 	Probe.bump("g1.order_placed")
 	Probe.bump("order.placed")
@@ -68,7 +81,7 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 	return oid
 
 # WS-2b：把訂單登錄到發起隊最近自家市集 outpost tile 的看板（可見性鏡像）。
-func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: String, res: String, qty: int, expire: int) -> void:
+func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: String, res: String, qty: int, expire: int, price: float) -> void:
 	var mpos: Vector2i = _market_pos(state, team)
 	var tid: int = mpos.x * 1000 + mpos.y
 	var tile: HexTileData = state.world.tiles.get(tid)
@@ -80,6 +93,7 @@ func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: Strin
 		"qty_remaining": qty, "origin_team": team.team_id, "expire_tick": expire,
 		# ★資訊網 S-prop：origin_tick(age→decay) + strength + relayed 旗（本隊原生單 relayed=false、由 _sync_board 權威維護）。
 		"origin_tick": state.world.current_tick, "strength": 1.0, "relayed": false,
+		"price": price,   # ★掛單那一刻凍結；要改價＝撤單重掛（不就地改）
 	})
 	Probe.bump("g1.board_register")
 
@@ -215,6 +229,7 @@ func received_buy_orders(state: WorldState, team: TeamData) -> Array:
 			"origin_team": m.params.get("origin_team", -1),
 			"pos": m.params.get("origin_pos", Vector2i.ZERO),
 			"order_id": m.params.get("order_id", -1), "distorted": m.is_distorted,
+			"price": float(m.params.get("price", -1.0)),   # ★自報價（-1.0 ＝這則消息沒帶到）
 		})
 	return out
 
@@ -228,6 +243,7 @@ func received_sell_orders(state: WorldState, team: TeamData) -> Array:
 			"origin_team": m.params.get("origin_team", -1),
 			"pos": m.params.get("origin_pos", Vector2i.ZERO),
 			"order_id": m.params.get("order_id", -1), "distorted": m.is_distorted,
+			"price": float(m.params.get("price", -1.0)),   # ★自報價（-1.0 ＝這則消息沒帶到）
 		})
 	return out
 
@@ -286,6 +302,12 @@ func read_market_board(state: WorldState, team: TeamData) -> void:
 			"order_id": oid, "res": e["res"], "qty": int(e["qty_remaining"]),
 			"origin_team": int(e["origin_team"]), "origin_pos": e.get("origin_pos", tile.tile_pos),
 			"expire_tick": int(e["expire_tick"]),
+			# ★★★這一格是 spec §2 沒列到的第 4 站：價格從 entry 換載體到 message。
+			#   漏掉它，下游 :316 的 relay deposit 就【沒有東西可抄】—— 而那格看起來有寫。
+			# ★預設 -1.0 而非 0.0：0.0 是【真的零價】(charity／⑩ 深過剩)，
+			#   而【欄位不存在】是另一件事。用 0.0 當預設 ⇒ 一張沒帶價的單會變成【免費】——
+			#   ★★那是把「不知道」靜默地變成「白送」，而下游分不出來。
+			"price": float(e.get("price", -1.0)),
 		}
 		state.global_messages.append(msg)
 		state.team_known[team.team_id].append(msg)
@@ -318,6 +340,7 @@ func _deposit_known_orders_to_board(state: WorldState, team: TeamData, tile: Hex
 			"origin_team": int(m.params.get("origin_team", -1)), "expire_tick": int(m.params.get("expire_tick", 0)),
 			"origin_tick": int(m.origin_tick), "strength": cur_strength, "relayed": true,
 			"origin_pos": m.params.get("origin_pos", tile.tile_pos),
+			"price": float(m.params.get("price", -1.0)),   # ★同上：-1.0 ＝【沒帶到價】，0.0 ＝【價就是零】
 		})
 		board_oids[oid] = true
 		Probe.bump("board.relay_deposit")
@@ -346,7 +369,20 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 			Probe.bump("trade.arb_kill_range")
 			continue
 		# M5：廢 arb ×0.1 硬碼（相對排序不變，argmax 無關）。M4：估值讀 effective_holding。
-		var gain: float = TradeValuation.local_value(merchant, o["res"], state) * float(o["qty"])   # proxy：自評值高→值得搬回
+		# ★§0：套利的正解＝【捕獲剩餘】，不是【自評值高】。
+		#   舊式子 local_value × qty 是 proxy：它對【要花多少錢】完全盲。
+		#   ★★而在 ⑥ 拆掉 clamp 之後，那個盲點會真的呍人：
+		#     商隊自己就有貨→local_value→0 ⇒ gain→0 ⇒ 【一張單都不選】。
+		#   ★★★而 ask 現在帶得到了（board-declared-price）⇒ 可以真算剩餘。
+		var _ask: float = float(o.get("price", -1.0))
+		var _mine: float = TradeValuation.local_value(merchant, o["res"], state)
+		var gain: float
+		if _ask >= 0.0:
+			gain = (_mine - _ask) * float(o["qty"])
+			if Probe.enabled: Probe.bump("trade.arb_surplus.sell")
+		else:
+			gain = _mine * float(o["qty"])   # 舊 proxy（這則消息沒帶價）
+			if Probe.enabled: Probe.bump("trade.arb_proxy.sell")
 		if gain > best_score:
 			best_score = gain; best = {"kind": "sell", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	for o in received_buy_orders(state, merchant):
@@ -359,7 +395,16 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 		if stock <= 0.0:
 			Probe.bump("trade.arb_kill_nostock")   # 有買單無貨可賣
 			continue
-		var gain2: float = TradeValuation.local_value(merchant, o["res"], state) * minf(stock, float(o["qty"]))
+		var _bid: float = float(o.get("price", -1.0))
+		var _mine2: float = TradeValuation.local_value(merchant, o["res"], state)
+		var _q2: float = minf(stock, float(o["qty"]))
+		var gain2: float
+		if _bid >= 0.0:
+			gain2 = (_bid - _mine2) * _q2   # ★卖掉手上的貨，賺的是【他出的價 − 我自己的估值】
+			if Probe.enabled: Probe.bump("trade.arb_surplus.buy")
+		else:
+			gain2 = _mine2 * _q2
+			if Probe.enabled: Probe.bump("trade.arb_proxy.buy")
 		if gain2 > best_score:
 			best_score = gain2; best = {"kind": "buy", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	if not best.is_empty():

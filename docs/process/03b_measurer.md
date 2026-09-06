@@ -3,17 +3,15 @@
 > pipeline 位置：`implementer(03) → 【量測員】 → QA 故事性稽核 → 藍圖判`（原 QA release-gate 2026-07-09 砍；2026-07-14 QA 以**故事性判官**加回=量測後讀你的**全量 specimen trace** 判 motive→action→outcome，見下 §⑤ + `04_qa §第五職`）。maker/checker 的 **maker 側**。
 > 一句話：**你產獨立數字 + 全量 specimen trace，QA 讀 trace 判故事、藍圖讀數字判/升。你不判、不改 code。**
 
-> **★★2026-07-09 流程改（用戶定案）——你的下游 checker 從 QA 改藍圖；acceptance/診斷跑標準 full_probe 床**：
-> - **正式 per-slice QA release-gate 砍**（`04_qa.md` banner）→ 你的完整數字**直接餵藍圖判**（release-pass 權在藍圖，有問題才升用戶）。handback `to:` 改 **`blueprint`**（acceptance/診斷場合），非 `qa`。
-> - **acceptance/診斷 = 跑標準 full_probe 床，全維度一次抓齊**（下 §Scope ④）——結構化 JSON、**不靠 print 刮、無 quiet 死路、無缺維度**。∴ 你**永遠量得出完整數字**→藍圖判得動→不再 bounce（A2c-1 卡死根因=量不了：quiet bed + 缺 merge/option 維度）。
-> - **caveat**：full_probe **只在 acceptance/診斷床**（本跑對照的場合，慢可接受），**非每 sim/live GUI/每 headless**（perf）。標準 beds（HOB/const/sanity）照舊每 slice。
+> **★★2026-07-09 流程改（用戶定案）**：下游 checker 從 QA 改**藍圖**（release-pass 權在藍圖）；handback `to:` 用 `blueprint`。
+> **acceptance／診斷跑標準 `full_probe` 床，全維度一次抓齊**（結構化 JSON，不靠 print 刮）；★`full_probe` **只在 acceptance／診斷床**，非每 sim／每 headless（perf）。
+> ★原文與理由（A2c-1 卡死根因＝量不了）→ `detail/03b_measurer-cases.md` 同標題節
 
-## ★現況檔 ⏸已停更（開工/完工自更，01 監控用）
-> **⏸ 停更中（O1，2026-08-21）**：本現況檔的**更新義務已停**——它宣稱是「即時狀態快照」，實際 `03_implementer` 停在 8/5（16 天）、`04_qa` 停在 8/14（7 天），而且已從快照長成 append log（02 已 153KB）。**★病根：它是「不會過期的手寫狀態」，所以爛了**——對照 `.busy.*` beacon 帶死線會自動過期，兩個方向的錯都不致命。
-> **改用**：`bash .claude/hooks/peers.sh`（誰在線＝讀 lock 租約，**推導不手寫**）＋ watchdog v4 的 `open 信/長工作/commit` 分類。
-> **處置**：先停更 → 觀察一週（**至 2026-08-28**）沒人 miss → 刪檔。**這段期間不要再寫入。**
-
-收量測工單開工 → 更 `docs/process/status/03b_measurer.status.md` frontmatter `status: working` + `current_ticket: <handback檔名>`（併行多工單列多個）;長跑 detach → 標「detach 跑中 <bed>」;回報完 → `status: idle`。低成本一行,01(系統) grep 監控。詳 `status/README.md`。
+## ★現況檔 `docs/process/status/*` ⏸**已停更**（O1，2026-08-21）
+> ★**別再寫入**；誰在線改用 `bash .claude/hooks/peers.sh`（讀 lock 租約，**推導不手寫**）。
+> ★★**病根**：它是「不會過期的手寫狀態」，所以爛了 —— 對照 `.busy.*` beacon 帶心跳會自動過期。
+> ★★★**刪不刪已改由 `docs/process/defers.tsv: status-files-delete` 追**（met_check ＝連續 30 天沒人改過）
+>    —— **原本那句「觀察至 2026-08-28 就刪」寫在散文裡沒有人追，逾期 10 天，而屆時證據還反過來（有人在用）。**
 
 ## 身分
 
@@ -106,18 +104,16 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 
 ---
 
-## ★長工作 beacon（watchdog v4 用，2026-08-21 用戶定案）
+## ★長工作 beacon —— **★2026-09-06 起【不要手寫】，wrapper 自己蓋章**
 
-長工作（長跑量測／大窗 bed／長編譯）**開跑前寫、跑完刪**：
+★**舊制要人手寫 `.busy.<role>`，而 2026-09-06 稽核發現【一個都沒被寫過】** ⇒ 護欄母體恆空、
+**上線至今一次沒響，而它防的事（兩支 Godot 同跑污染 perf）當天正在發生。**
+⇒ ★★**現在 `tools/godot.ps1` 起跑自己寫、每 10s 續期（心跳）、結束刪，並把時窗寫進 `.claude/hooks/.godot-runs.log`。**
+★★★**你要做的只有一件**：**確認你那棵 worktree 的 `tools/godot.ps1` 是新版**
+（`grep -c 'BUSY BEACON' <worktree>/tools/godot.ps1`）—— **舊版的樹跑的 Godot 一筆都不會被記到，**
+**而「log 裡沒有紀錄」＝【那棵樹沒有新版 wrapper】或【真的沒跑】，兩者長得一樣。**
 
-```bash
-# 開跑前
-echo $(( $(date +%s) + 28800 )) > .claude/hooks/.busy.measurer      # 8h 死線
-# 跑完
-rm -f .claude/hooks/.busy.measurer
-```
-
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
+> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）；★環境紀元 → `docs/process/env-epochs.tsv`
 
 ## ★★★判準七條（★2026-09-01 整節搬入 `detail/03b_measurer-cases.md`，此處留表列）
 ★**每一條都有血證，全文在 detail** —— 這裡只留【判準本身】，撞到了再去讀成因。
@@ -179,26 +175,9 @@ rm -f .claude/hooks/.busy.measurer
 ★**標籤宣稱的比量測支持的多 ⇒ 三個月後它會變成一個沒人查的「事實」。**（血證：`stuck-task` 的判準只有 `survival_committed_option != ""`＝**有承諾**，而名字宣稱**卡住** ⇒「已承諾、正在路上、仍近死」也被叫 stuck；★該叫 `has-committed-option` 類。）
 ★★**改名的代價一起付**：舊輸出會對不上 ⇒ **改名時在床／tap 檔頭寫「舊名 → 新名、自哪一顆 commit 起」**，否則舊量測檔變成不可解讀。
 
-## ★★★★有 cap 的來源：**「缺席」不是缺席的證據**，而**飽和值就是溢出的簽名**（systems 立 2026-09-05）
-```
-★血證:WorldState.driver_ledger 是 cap=4096 的【環形緩衝】(world_state.gd:164/:186-187,靜默 pop_front)
-   量測用【每 2000 tick drain 一次】—— 而單窗產生的 entry 數 > 4096
-   ⇒ ★★讀到的永遠是【每窗最後 4096 筆】,更早的被靜默丟棄
-   ⇒ ★★★三個已交付結論(member_tax 90日=0.00／salary_named=0.00／匿名池=1)全部作廢重量
-```
-★**機械偵測（★這一格最有用）**：
-```
-若【每窗的 seen 增量】恰好等於 cap ⇒ ★【一定溢出過】—— 不是巧合
-   (本次:tick 2000/4000/6000/8000 的增量都是 4096,精準卡住)
-⇒ ★★而【飽和的計數看起來像一個穩定的計數】—— 那正是它騙人的地方
-⇒ ★★★所以卷面要印【每窗增量】,不要只印總數;而增量 == cap 要【自動判為量法失效】
-```
-★**紀律（不要寫成「cap 夠大」）**：
-```
-①`driver_ledger_cap` 是 TEST VALUE ⇒ 它【隨時可能被改小】
-   ⇒ 紀律要寫成【drain 間隔必須讓單窗 entry 數遠低於 cap】,而不是「4096 夠用」
-②★陽性對照(`_ledger_seen` 非零)證明的是【儀器有在記】,
-   ★★【不證明】你看到的是全部 —— 環形緩衝下,「有在記」與「沒漏掉」是兩件事
-③★★★撞到 cap 要【明說本節不完整】,不要靜默截斷
-   (implementer 在他的床上就是這樣處置的:拉高上限 ＋ 逐日掃描去重 ＋ 撞上限就明說)
-```
+## ★★★★有 cap 的來源：**「缺席」不是缺席的證據**，**飽和值就是溢出的簽名**（systems 立 2026-09-05）
+> ★**機械偵測**：**每窗的 `seen` 增量恰好等於 cap ⇒ 一定溢出過**（不是巧合）——
+> ★★**而飽和的計數看起來像一個穩定的計數，那正是它騙人的地方** ⇒ **卷面要印【每窗增量】不要只印總數**。
+> ★**紀律**：①寫成「drain 間隔要讓單窗 entry 遠低於 cap」，**不要寫成「cap 夠大」**（cap 是 TEST VALUE）
+> ②**陽性對照只證【有在記】，不證【沒漏掉】** ③撞到 cap 要**明說本節不完整**，不要靜默截斷。
+> ★★★血證（`driver_ledger` cap=4096 環形緩衝害三個已交付結論作廢）→ `detail/03b_measurer-cases.md` 同標題節

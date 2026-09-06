@@ -1,0 +1,18 @@
+{
+  "slice": "modulo-same-shape-4 + envoy-ptype-tap (fp 中性配對)",
+  "branch": "tmp/mrg-fpneutral (worktree A:/wt-mrg)",
+  "★狀態": "★★★HALT 中 —— merge 已做好但【沒有 push 進 main】(HALT ② 可完不推)",
+  "閘": { "註冊表": 28, "全綠": true, "總時_s": 694,
+    "★本地多出": ["envoy-ptype", "world-schedule-due"],
+    "說明": "『多出』是分叉非缺失(本地新登記還沒 push)" },
+  "淨差": "10 檔 / +317 −19（git diff --stat main...tmp/mrg-fpneutral），零夾帶",
+  "fp": "implementer 側 A/B：main 與 modulo4 sha 皆 5ae4e545ce58cd5e ⇒ 逐位元相同",
+  "★過程中的假紅": {
+    "第一輪": "4 支紅 = headless(真) + bed-parse/defer-open/mailbox-size(★假紅)",
+    "假紅根因": "★WMI detached 的 bash 找不到 git(rc=127) ⇒ 一個缺失二進位、三支閘、三種靜默退化,其中兩支還 exit 0",
+    "★★沒被騙的原因": "runner 不只看 exit code,還要求 expect pattern 命中",
+    "修法": "bat 補 mingw64\bin 與 SESSION_ROLE；兩支讀 git 的閘不准靜默 exit 0/SKIP"
+  },
+  "★headless 那支真紅的歸屬": "★★不是 production 回歸：測試把時鐘釘死後呼叫 200 次,舊制分不出「同一 tick 呼叫 200 次」⇒ 200 次全 fire ⇒ 它一直在保護舊制的一個缺陷；修的是測試的時鐘,production 一行沒動",
+  "恢復後要做的": "確認 origin/main 的 scripts/ 未變動,然後 push（不需重跑閘，除非 scripts/ 有變）"
+}

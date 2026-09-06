@@ -1,0 +1,34 @@
+bed	verdict	wall_s	note
+scripts/debug/a2a_join_guard_test.gd	green	4	
+scripts/debug/abandon_courage_test.gd	green	4	
+scripts/debug/active_promotion_test.gd	green	3	
+scripts/debug/agriculture_a_test.gd	green	3	
+scripts/debug/agriculture_b_test.gd	green	4	
+scripts/debug/beast_decision_leak_test.gd	green	4	
+scripts/debug/breed_rate_test.gd	green	5	
+scripts/debug/build_afford_persona_test.gd	green	5	
+scripts/debug/build_eta_single_source_test.gd	green	4	
+scripts/debug/camp_marginal_test.gd	red	4	  [FAIL] 富流浪(food_days=1210)→ urgency=0→ camp_drive=0
+scripts/debug/careloop_scout_test.gd	green	4	
+scripts/debug/convoy_delivery_test.gd	red	4	  [FAIL] deliver_material candidate 未生成(cands=0)
+scripts/debug/convoy_dispatch_tap_test.gd	green	5	
+scripts/debug/convoy_return_closure_test.gd	green	5	
+scripts/debug/crisis_override_test.gd	red	4	  [FAIL] committed build 深餓(0.5)N天未緩 → crisis TRUE
+scripts/debug/depatch_track2_test.gd	green	3	
+scripts/debug/desperation_food_seeking_test.gd	red	3	  [FAIL] host 沒拒過+可達 → acceptable(給一次真試不誤殺)
+scripts/debug/desperation_ordering_test.gd	green	4	
+scripts/debug/diplomacy_grounded_test.gd	green	4	
+scripts/debug/directive_stamp_test.gd	green	4	
+scripts/debug/discounted_flow_test.gd	green	4	
+scripts/debug/encounter_sim_test.gd	green	4	
+scripts/debug/ewma_advance_test.gd	green	4	
+scripts/debug/extraction_need_driven_test.gd	green	4	
+scripts/debug/faction_cohesion_test.gd	green	4	
+scripts/debug/faction_succession_test.gd	green	3	
+scripts/debug/failure_feedback_test.gd	green	3	
+scripts/debug/flee_restore_test.gd	green	4	
+scripts/debug/food_bridge_test.gd	green	4	
+scripts/debug/food_flow_test.gd	red	4	  [FAIL] 糧充裕 persist(0.150) > 糧見底 persist(0.150)（safe_ratio 乘法縮放）
+scripts/debug/framework_f1_test.gd	green	3	
+scripts/debug/framework_f4_test.gd	green	4	
+scripts/debug/g3_betrayal_bond_test.gd	green	3	

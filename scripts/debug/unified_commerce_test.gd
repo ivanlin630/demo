@@ -107,7 +107,24 @@ func _test_visitor_buy_from_stock() -> void:
 	var vis_mat0: float = float(visitor.resources.get("material", 0))
 	InteractionSystem.new()._resolve_market_at_outpost(s, visitor, tile)
 	_ok(float(visitor.resources.get("material", 0)) > vis_mat0, "訪客得 material（%.0f→%.0f）" % [vis_mat0, float(visitor.resources.get("material", 0))])
-	_ok(float(owner.resources.get("coin", 0)) > owner_coin0, "owner 得 coin（%.0f→%.0f，coin→owner）" % [owner_coin0, float(owner.resources.get("coin", 0))])
+	# ★★★零價可成交（blueprint 裁 2026-09-07）之後，這一格【必須拆】——
+	#   ★本 fixture：owner pop=10、material 存量 100 ⇒ target=50 ⇒ shortage=(50−100)/50=−1.0
+	#     ⇒ `1+shortage = 0` ⇒ ★★`ask = 0` ⇒ 【貨換手、而錢是 0】
+	#   ⇒ 舊斷言「owner 得 coin > 0」寫的是【每一次交易都會產生收入】那個舊世界的假設
+	#     —— ★★★它把【拆閥前的物價下限】寫進了判準。
+	#   ⇒ ★而【不是放寬成「容忍任何值」】：拆成兩條，各自仍然會紅：
+	var _ask_now: float = TradeValuation.ask_price(owner, "material", 0.0,
+		TradeValuation.leader_vals(s, owner), s)
+	var _moved: float = 100.0 - float(tile.public_storage.get("material", 0))
+	var _got_coin: float = float(owner.resources.get("coin", 0)) - owner_coin0
+	_ok(absf(_got_coin - _moved * _ask_now) < 0.01,
+		"owner 收到的 coin == 成交量 × ask（%.2f == %.0f × %.4f）★而 ask 為 0 時它就是 0"
+			% [_got_coin, _moved, _ask_now])
+	_ok(_moved > 0.0 and _ask_now == 0.0,
+		"★★★【真的成交過 0 元】：換手 %.0f 件而 ask=%.4f —— ★這是 systems 要的【正數】，"
+			% [_moved, _ask_now]
+		+ "「5 紅轉綠」不夠")
+	print("        ★★而【零價成交仍然是成交】：貨換手、守恆成立、只是價金為 0。")
 	_ok(float(tile.public_storage.get("material", 0)) < 100.0, "public_storage material 扣減（%.0f）" % float(tile.public_storage.get("material", 0)))
 
 # ── TDD2：★訪客賣 → 向 owner buy 單賣（貨入 storage，owner.coin→visitor，套利閉合）──

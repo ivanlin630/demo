@@ -143,3 +143,19 @@ Monitor(command="source tools/telegram/config.local.sh && python tools/telegram/
 ★**做法**：**改完 `status: consumed` ⇒ 立刻 `git add <該檔> && git commit`**（單獨一顆，內容只有那一行）。
 ★★**並 `grep` 驗一次** —— ★★★**因為 sed 不匹配是靜默的，回傳碼仍是 0。**
 ★**成本＝多幾顆小 commit；收益＝消掉幽靈喚醒。** ★★詳 `docs/known_issues.md`「信箱的 consume 標記會消失」。
+
+## ★★★廣播一律【一人一封】—— `to: all` 有兩個獨立缺陷（2026-09-06 血證）
+```
+缺陷①比對式:inbox-watch 認的是 `^to:<我>`,而 `to: all (systems/implementer/...)`
+   ★對【每一個角色】都不命中(連 systems 也是)⇒ ★★那封 HALT 廣播【沒有喚醒任何人】
+   ⇒ ★★★四個角色 HALT 期間沒有違規動作【純屬僥倖】—— 他們只是剛好在等下一步
+   （已修:matcher 現在認得 `to: all`。★但那只是 defense in depth,不是可以用廣播的理由。）
+缺陷②consume 狀態:一封廣播只有【一個 status 欄位】
+   ⇒ ★第一個 consume 它的角色,就讓其他所有人【再也收不到】(watcher 要求 status: open)
+   ⇒ ★★這個【修不掉】—— 它是檔案格式的性質,不是比對式的 bug
+   ⇒ ★★★而它已經發生過:HALT 主信被別的 session 標 consumed,其他人再也不會被喚醒
+```
+★**所以規矩是**：**要廣播就【一人一封】（收件人各一個檔）** —— 而不是一封 `to: all`。
+★★**機械面**：merge-gate `mailbox-broadcast` —— **還開著的 `to: all` 就紅**（已 consumed 的歷史信不擋）。
+★★★**而這條的通則值得記住**：
+> **一個【多人共用一份狀態】的通知機制，第一個處理它的人會替所有人把它關掉。**

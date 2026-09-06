@@ -66,6 +66,18 @@ if printf '%s' "$_cmd" | grep -qE 'git[[:space:]]+(commit|add|merge|rebase|mv)';
   fi
 fi
 
+
+# 護欄④：`git commit -m "..."` 訊息裡有反引號（2026-09-07，同日第三次）
+#   ★雙引號裡的反引號會被 bash 當【命令替換】⇒ 那段文字【從訊息裡消失】,
+#     而 commit 仍然成功 ⇒ ★★「訊息寫好了」與「訊息被吃掉一段」在卷面上分不出來
+#     (今天三次:兩次吃掉整個片語、一次噴 "No such file or directory" 但 commit 照樣成立)
+#   ★★★修法不是「記得別用反引號」——那已經被證偽三次了 ——
+#     而是【改用 quoted heredoc】:`git commit -F - <<'MSG' ... MSG`(單引號界定符=零展開)
+if printf '%s' "$_cmd" | grep -qE 'git[[:space:]]+commit' && printf '%s' "$_cmd" | grep -q '`'; then
+  _warn="${_warn}${_warn:+
+}⚠ commit 訊息裡有【反引號】—— ★雙引號中的反引號會被當成命令替換,那段文字會【從訊息裡消失】而 commit 仍然成功（今天已發生三次）。★★改用 quoted heredoc（git commit -F - 搭配單引號界定符 ＝ 零展開），或把反引號換成「」。"
+fi
+
 [ -z "$_warn" ] && exit 0
 
 json_str() {

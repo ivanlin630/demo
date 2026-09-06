@@ -1,5 +1,8 @@
 {
-  "touches": ["scripts/simulation/interaction_system.gd", "scripts/simulation/resource_system.gd"],
+  "touches": [
+    "scripts/simulation/interaction_system.gd",
+    "scripts/simulation/resource_system.gd"
+  ],
   "slice": "族④#29 own-granary-pin 開票前先查",
   "question": "e8ad1cb8(2026-08-15 merge進main)的修法是否真的堵住own_granary_tile(state=Nil)——欠的不是修是確認",
   "①_regression_test_alive": {
@@ -9,7 +12,11 @@
   "②_longrun_crash_check": {
     "bed": "scripts/debug/own_granary_regression_probe_bed.gd（新床，零新tap，commit cf97cda0）",
     "opportunity_population_proxy": "trade.meet（own_granary_tile經reserve/_attempt_barter呼叫鏈的上界代理，非精確呼叫次數，已聲明）",
-    "peaceful_economy_30d": {"verdict_by_systems": "裁不算證據(trade.meet=1，機會母體幾乎空)", "trade.meet": 1, "SCRIPT_ERROR": 0},
+    "peaceful_economy_30d": {
+      "verdict_by_systems": "裁不算證據(trade.meet=1，機會母體幾乎空)",
+      "trade.meet": 1,
+      "SCRIPT_ERROR": 0
+    },
     "warring_states_30d": {
       "verdict": "★證據核心：完整跑完30天(自然DONE，非timeout砍)，機會母體豐富，零SCRIPT ERROR",
       "trade.meet累計": 275,
@@ -19,5 +26,13 @@
     }
   },
   "final_verdict": "e8ad1cb8修法在30天warring_states(機會母體=275非空)下沒有再現own_granary_tile(state=Nil)崩潰——確認成立，非stale。族④#29可視為已確認關閉（非「待修」，是「已修且驗過」）。",
-  "honest_limit": "trade.meet是上界proxy非own_granary_tile精確呼叫計數；30天/275次機會不是窮舉證明（不能排除極低機率邊界case），若未來再現需另開票；peaceful腿因機會母體太小已被系統裁定不算證據，只warring腿為準。"
+  "honest_limit": "trade.meet是上界proxy非own_granary_tile精確呼叫計數；30天/275次機會不是窮舉證明（不能排除極低機率邊界case），若未來再現需另開票；peaceful腿因機會母體太小已被系統裁定不算證據，只warring腿為準。",
+  "★產地警示": {
+    "標記日": "2026-09-07",
+    "問題": "★本判決的 target 床 `scripts/debug/own_granary_null_caller_test.gd` 【直寫 team.population】，而 TeamData.population 的 setter 是 `set(_value): pass` ⇒ ★★那個寫入【被靜默吞掉】，該場景的 pop 是【導出值】不是床設定的值",
+    "runtime 佐證": "2026-09-07 床粒度掃描：該床 runtime 確認執行到吞寫（DIRTY），非死碼",
+    "★★本判決的狀態": "★【尚未失效，但也尚未重驗】—— 而兩者不同：我沒有證據說結論錯了，我有證據說【產地含已知污染】",
+    "★★★處置": "blueprint 裁 2026-09-07：床修好（stage B）後【重跑並重簽】；在重簽之前，引用本判決的數字要一併引用本段",
+    "來源": "docs/measurements/2026-09-07-swallowing-setters-bed-scan.measure.json"
+  }
 }
