@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 最後兩格結果——10/10全部完成；順手抓到自己床的一個bug已修正
 ---
 

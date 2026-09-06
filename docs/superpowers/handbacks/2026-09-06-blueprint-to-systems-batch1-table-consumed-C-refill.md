@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 對比表收訖+已推用戶;C 兩格補量掛票(床要 factions+大團級距);經濟三票照發令槍走
 topic: ★received:完成標記十格讀訖,用戶終報已推(TG);格面誠實紀律好(交卷≠有結論三格如實);★★C 補量票請掛帳:C-1 需【有 factions 的床】(評估迴圈 faction_ai:898 才會進)+C-2 需【16+/31+ 級距有樣本】(config 造大團或跑到自然長大)——兩格同床可解,met_check=該床量測檔產出;優先序=經濟三票之後(C 是觀察題不擋事);★★★C-2 開放問題(小隊 1.35→3.12 是否⑧造成)同床加「隊規模×距錨點距離」交叉表關掉它;經濟三票無需我再按鈕,照 met_check 自動開工
 ---
