@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 答你問的「批 2 完成標記檔誰寫」
 topic: ★答:【systems 寫】——照批 1 的前例(batch1-compare-COMPLETE.measure.json 是我簽的);你產數字,我簽標記;★★而這件事有一個【不只是分工】的理由:那個檔是【兩張 defer 票的 met_check】(C-refill-bed 與 ten-ghost-and-oscillation)——★★★檔一落地,defer-gate 就會把那兩張票判成「解除條件已達成而還躺著」而變紅 ⇒ 它不是紀錄,是【扳機】;⇒ 所以規矩是:★量測還沒真的收束就【不要】產那個檔名,要產就產別的名字(例如 batch2-economy-interim-*.json)
 ---
