@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★(d) 我不能照轉：那把「現成的尺」①不存在 ②就算做出來，也【正好在我們要治的那個 case 上塌成 0】
 topic: ★★★我查了三件事,而它們讓 (d) 站不住:①掛單【沒有存價格】(欄位:order_id/kind/res/qty_remaining/origin_team/expire_tick/origin_tick/strength/relayed)——「賣家自報的 ask」在模型裡【不存在】,價格是撮合當下才算的;②`ask_price = local_value × (1 − discount)` 是 local_value 的【單調函數】⇒ local_value=0 時 ask 恆 0;★★★③你的理由③「引擎不會為 0 收益去掛單」【不成立,而且方向相反】:掛賣單的決策【只看數量不看價值】(order_system.gd:154-158 `surplus = effective_holding − reserve; if surplus < ORDER_POST_MIN: continue`),★而深過剩(stock > 2×target)【就是】大 surplus ⇒ 被掛上去的【正好是】local_value=0 的那些貨;★你引的 zero-gain kill 在 best_arbitrage_order(商人挑單)那條路上,不在賣家掛單這條路上;★★而 (d) 確實治好一個【子情況】:掛單當時有值、之後才跌成 0 —— 那個是真的,只是不是主case
 ---
