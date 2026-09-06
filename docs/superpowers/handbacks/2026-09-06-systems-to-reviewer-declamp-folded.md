@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑩ 兩條已折入 ＋ ★我同日第三次犯同一個錯
 topic: ★兩條都折進 spec:①下游從【枚舉 3 處】改成【窮盡】——我自己重跑不過濾的 grep:local_value( 呼叫點【37 處跨 10 個檔】,而我報 3 處;②你給的第二層直接斷言(全程 resources/public_storage 每個 res 最小值 >=0)採用,而它的價值是【把「我的推導對不對」變成一個可量的斷言】,不是只靠 fp 反推;★★★而我要記一件:今天三次假窮盡【全部不是 head 截斷】,是【我自己加的過濾條件】(動詞白名單漏 add_tag／只點名兩處漏 cross_run_reset／報 3 處實測 37 處)——形狀是【我先想好答案長什麼樣,再寫一個只撈得到那種答案的 grep】;已寫進 memory 的負斷言協議:【負斷言的 grep 不得帶過濾】,先裸符號全庫掃印總數再逐條分類
 ---
