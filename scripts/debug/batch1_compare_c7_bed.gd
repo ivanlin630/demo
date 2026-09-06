@@ -23,8 +23,13 @@ func _run() -> void:
 
 	print("=== batch1_compare_c7_bed: config=%s days=%d ticks=%d seed=%d ===" % [cfg, days, ticks, seed_val])
 
+	# ★2026-09-06追加(systems C7-0921-needs-attribution)：per-team存活tick計數，
+	#   避免「執行次數差異」被「存活時長差異」混淆（implementer控制床720/720=0.0%全存活對照）。
+	var alive_ticks: Dictionary = {}   # team_id -> 累計出現在state.teams的tick數
 	for tick in range(ticks):
 		runner.advance_tick(state, no_player)
+		for tid in state.teams:
+			alive_ticks[tid] = int(alive_ticks.get(tid, 0)) + 1
 		if tick % 20000 == 0 and tick > 0:
 			print("[CHECKPOINT] tick=%d teams=%d" % [tick, state.teams.size()])
 
@@ -54,24 +59,34 @@ func _run() -> void:
 	var systems: Array = ["collect", "vision", "fatigue"]
 	for sys in systems:
 		print("\n--- 系統=%s ---" % sys)
-		var rows: Array = []   # [team_id, dist, exec_count]
+		var rows: Array = []   # [team_id, dist, exec_count, alive_tick, rate]
 		for tid in state.teams:
 			var t: TeamData = state.teams[tid]
 			var dist: float = Vector2(t.tile_pos.x - cx, t.tile_pos.y - cy).length()
 			var cnt: int = int(Probe.counts.get("sysexec.%s.byteam.%04d" % [sys, tid], 0))
-			rows.append([tid, dist, cnt])
+			var alive: int = int(alive_ticks.get(tid, 0))
+			var rate: float = float(cnt) / maxf(float(alive), 1.0)
+			rows.append([tid, dist, cnt, alive, rate])
 		rows.sort_custom(func(a, b): return a[1] < b[1])   # 按距離排序
 		for r in rows:
-			print("  team=%d 距錨點=%.1f 執行次數=%d" % [r[0], r[1], r[2]])
-		# 粗分近/遠兩組看有沒有系統性差異
+			print("  team=%d 距錨點=%.1f 執行次數=%d 存活tick=%d rate(執行/存活)=%.4f" % [r[0], r[1], r[2], r[3], r[4]])
+		# 粗分近/遠兩組看有沒有系統性差異——原始執行次數 vs 正規化後rate 兩種都印
 		var mid: int = int(rows.size() / 2.0)
 		var near_sum: float = 0.0; var far_sum: float = 0.0
+		var near_rate_sum: float = 0.0; var far_rate_sum: float = 0.0
 		for i in range(rows.size()):
-			if i < mid: near_sum += rows[i][2]
-			else: far_sum += rows[i][2]
+			if i < mid:
+				near_sum += rows[i][2]; near_rate_sum += rows[i][4]
+			else:
+				far_sum += rows[i][2]; far_rate_sum += rows[i][4]
 		var near_avg: float = near_sum / maxf(mid, 1.0)
 		var far_avg: float = far_sum / maxf(rows.size() - mid, 1.0)
-		print("  近半(%d隊)平均執行次數=%.1f　遠半(%d隊)平均執行次數=%.1f　比值(遠/近)=%.3f" % [
+		var near_rate_avg: float = near_rate_sum / maxf(mid, 1.0)
+		var far_rate_avg: float = far_rate_sum / maxf(rows.size() - mid, 1.0)
+		print("  [原始次數] 近半(%d隊)平均=%.1f　遠半(%d隊)平均=%.1f　比值(遠/近)=%.3f" % [
 			mid, near_avg, rows.size() - mid, far_avg, (far_avg / near_avg) if near_avg > 0.0 else -1.0])
+		print("  [正規化rate，除以存活tick] 近半平均=%.4f　遠半平均=%.4f　比值(遠/近)=%.3f%s" % [
+			near_rate_avg, far_rate_avg, (far_rate_avg / near_rate_avg) if near_rate_avg > 0.0 else -1.0,
+			"　★正規化後比值≈1.0⇒原始差異是壽命混淆，非距離殘留" if near_rate_avg > 0.0 and abs((far_rate_avg / near_rate_avg) - 1.0) < 0.05 else ""])
 
 	print("=== batch1_compare_c7_bed DONE ===")
