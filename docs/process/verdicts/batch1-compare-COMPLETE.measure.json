@@ -1,0 +1,59 @@
+{
+  "_doc": "批次一對比輪 完成標記 —— ★由 systems 親自過一遍十格後簽發(不是量測產物,是【判定】)。★★它是三張經濟票的發令槍(money-genesis-start／market-thickness-v0／declamp-price 的 met_check 指向本檔)。",
+  "signed_by": "systems",
+  "signed_date": "2026-09-06",
+  "worlds": {
+    "before": "daaabc46 (批前基準)",
+    "after": "9e3cd1fe (批後、⑧之後)",
+    "_note": "★中間態(批後⑧之前)【未量】—— 主對比是 before vs after;而【三個世界不可互比】,②只在需要歸因『是哪一刀』時才拿"
+  },
+  "cells": [
+    {"n": 1, "name": "salary_named/anon (⑤⑥⑦)", "status": "有結論",
+     "result": "0.00/0 → 209.45/73 ｜ 0.00/0 → 159.50/80",
+     "attribution": "★造出流量的是【⑥拔身分閘 + ⑦相位】;⑤(團內稅分軌)【自己不產生流量】,它只是讓稅接得到"},
+    {"n": 2, "name": "匿名池水位 (⑤)", "status": "有結論",
+     "result": "treasury_rows 18(全 no-op) → 241 ｜ 水位 0.00/0.00 → 24.00/2.00 ｜ 出金 extract 71.31",
+     "cross_check": "★入金 salary 159.50 與 cell#1 的 salary_anon 159.50 【完全對得上】(兩個獨立量測互相對帳)",
+     "caveat": "★『徵用 print 40 次』是【粗估未逐條核對】⇒ 不入結論"},
+    {"n": 3, "name": "C-1 設施升級真發生次數", "status": "★不可判(結構)",
+     "result": "兩世界皆 0;分母①(升級評估被走到)= 0",
+     "why": "★_evaluate_infrastructure 掛在 `for fid in state.factions`(faction_ai:898),而這張床 config 無 factions 欄、12 隊全 faction_id=-1 ⇒ 迴圈跑零次",
+     "ruling": "★★【既有 known_issue 的再確認】—— 不是新發現,★★★也【不是批次一的功過】"},
+    {"n": 4, "name": "C-2 大團 vs 小隊人均產出比", "status": "部分有結論 + ★關鍵級距不可判",
+     "result": "1-5 人:1.3478 → 3.1194 ｜ 6-15:0.7839 → 0.7859 ｜ 16-30／31+:★無樣本",
+     "ruling": "★★★【C 本身是未回答】—— C 問的是【規模紅利管道通不通】,而大團級距【無樣本】;答到的是另一個問題(小隊產出提升)",
+     "open_question": "『小隊提升是⑧造成的』仍是【假說】—— 要關掉它需要【隊規模 × 距錨點距離】交叉表,本輪未做"},
+    {"n": 5, "name": "D clamp 命中率", "status": "有結論",
+     "result": "母體 8771 ｜ 撞下界 2792(31.8%) ｜ 撞上界 0 ｜ 未撞 5979 ｜ 三桶對帳 = 母體",
+     "reading_discipline": "★上界的 0 是【構造性恆 0】(effective_holding 兩項皆>=0 ⇒ shortage 恆<=1.0 ⇒ 放大後恰好等於上界)⇒ ★★【禁寫『物價從沒撞到上限』】",
+     "direction_note": "★★★撞【下界】= stock > 1.5×target = 【過剩】側,不是短缺(我與 blueprint 先前都寫錯,他抓回)"},
+    {"n": 6, "name": "D 歸因", "status": "有結論(★情境那格未實作,如實聲明)",
+     "result": "by res: material 674(36.5%)／tools 476(25.8%)／food 471(25.5%)／horses 140／goods 86 ｜ by team: 20 隊、分佈連續無斷崖(普遍非個案) ｜ ★深度過剩(shortage<-1)佔撞下界 81.6%",
+     "implication": "★★世界級:2792×81.6% = 2278 = 【全部估值呼叫的 26.0%】拆閥後會【恰好是 0】;而 local_value 同時服務市場定價與成本估算 ⇒ blueprint 裁【一真值不分軌】,並加三格觀察(見⑩spec §4b)"},
+    {"n": 7, "name": "④ _pay_salary entry 次數(⑦)", "status": "有結論",
+     "result": "18 隊 [5,7,8,8,8,9,10,11,12,12,12,12,12,12,12,12,12,12] ｜ ★entry=0 的隊數 = 0 ｜ 眾數 12",
+     "note": "★與先前寫的『眾數 ∈{3,4}』【不矛盾】:那是 30 日窗,這是 90 日窗(90/7 ≈ 12.86)—— ★★窗不同不可互比"},
+    {"n": 8, "name": "⑤ 發薪 unrest (⑥#4)", "status": "有結論 ＋ ★預先登記的預測【被證偽】",
+     "result": "★cut(減薪隊次)累計 = 0 ⇒ 90 天【沒有一次】因發薪減薪",
+     "falsified": "★★我在⑥spec §3 預先登記的後果③(『全世界每週 underpay 懲罰』)【未發生】—— 團庫付得起 payroll",
+     "reading_trap": "★★★measurer 自己抓到:`salary.payday.*.unrest` 記的是【狀態快照】不是【流量】,unrest 169→5970 與發薪【無因果】"},
+    {"n": 9, "name": "⑦ per-team 執行次數 vs 錨點距離(⑧)", "status": "有結論(★已正規化)",
+     "result": "★正規化(除以存活 tick)後 遠/近 = 【1.000】;未正規化 0.921",
+     "ruling": "★★0.921 是【壽命混淆】不是距離殘留 —— ★★★而 implementer ⑧控制床的 720.0/720.0 = 0.0%(全窗存活)與它【互相印證】"},
+    {"n": 10, "name": "①try_set 擋因 ＋ ②JOIN true<belief", "status": "★單邊(③)有結論;①未跑",
+     "result": "try_set deny 側:優先序不足 331(73.7%)／crisis 免疫窗 82(18.3%)／持守擋班 36(8.0%)／戰鬥鎖 0 ｜ JOIN:freshness.firsthand_no_tile_pos = 0(與③票否證結論一致)",
+     "caveat": "★try_set 的【母體(含成功)量不到】(無總呼叫次數 tap)⇒ 只有 deny 側【相對分布】;★★而【①世界 90 天正式版未跑】(measurer 判斷不需要)⇒ 這一格【不是完整的 ①vs③ 對比】,要補可補"}
+  ],
+  "summary": {
+    "cells_total": 10,
+    "with_conclusion": 7,
+    "unjudgeable_or_partial": 3,
+    "_note": "★★★【『十格都交了』與『十格都有結論』不是同一件事】—— 3 格是不可判或單邊:#3(結構不可判)／#4(關鍵級距無樣本⇒C 未回答)／#10(①未跑+母體量不到)"
+  },
+  "batch1_effect": {
+    "positive": "★薪資軸從【完全不發薪】變成【真的在流動】(cell#1)、匿名池從幾乎死透變成有流量(cell#2)、距離不再決定執行頻率(cell#9)",
+    "attribution": "★★造出流量的是【⑥拔身分閘 + ⑦相位】;⑤是【語意訂正 + 架構就位】(它讓稅接得到,自己不產生流量);⑧拆掉距離依賴",
+    "not_batch1": "★★★C-1(設施升級 0 次)是【既有缺陷】,不算批次一的功過"
+  },
+  "unlocks": ["money-genesis-start", "market-thickness-v0", "declamp-price"]
+}
