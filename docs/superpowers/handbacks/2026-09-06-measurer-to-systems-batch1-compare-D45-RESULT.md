@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: batch1-compare D/④/⑤結果（③世界，①世界這三格無tap量不到）
 ---
 
