@@ -85,6 +85,50 @@ $tempErr = [System.IO.Path]::GetTempFileName()
 # Verified before swapping: byte-identical output vs the old shape on material_hold_test /
 # settlement_s2b_test / seam1_registry_test, AND the point of the change -- killed from outside,
 # old shape produced 0 bytes, this one produced 713751 bytes.
+# BUSY BEACON (2026-09-06, systems). bash-guard guard #2 warns when another role is already
+# running Godot -- two long runs share the CPU and CONTAMINATE perf numbers. That guard read
+# .busy.* beacons that measurer/implementer were supposed to hand-write, and a 2026-09-06 audit
+# found ZERO beacons had ever been written: the population was always empty, so the guard always
+# passed and never once fired -- while two Godot processes were in fact running concurrently at
+# that very moment. A guard whose input is never produced is indistinguishable from a guard that
+# looked and found nothing.
+# So the wrapper stamps it itself: this is the single entry point for every long run.
+# The beacon carries the PID because the OPPOSITE failure is just as bad: if this process is
+# killed the cleanup never runs, the beacon leaks, and a permanently-stale beacon turns
+# "never fires" into "always fires" -- the same disease with the sign flipped. Readers MUST
+# treat a beacon whose PID is dead as ABSENT.
+# The run window goes to an out-of-band log, NOT to stdout: several gates compare output
+# byte-for-byte (fp), and a timestamp line in the stream would break every one of them.
+$beaconRole = if ($env:SESSION_ROLE) { $env:SESSION_ROLE } else { "unknown-$PID" }
+$hookDir = "A:\GDS\demo\.claude\hooks"
+$beaconFile = Join-Path $hookDir ".busy.$beaconRole"
+$runLog = Join-Path $hookDir ".godot-runs.log"
+$runStart = Get-Date
+if (Test-Path $hookDir) {
+    try {
+        "pid=$PID started=$($runStart.ToString('yyyy-MM-ddTHH:mm:ss')) args=$($args -join ' ')" |
+            Out-File -FilePath $beaconFile -Encoding ascii -Force
+    } catch { }
+}
+
+# COLLISION RECORD (2026-09-06). bash-guard warns before a Godot run, but a PreToolUse hook
+# only ever sees calls that go THROUGH the tool -- a WMI-detached run does not, so neither a
+# warning nor a hard block can reach it. The only thing that sits on both sides of that
+# boundary is this wrapper. So instead of trying to PREVENT the overlap here, record it:
+# "was there a collision, with whom, for how long" becomes a fact you can look up afterwards,
+# which replaces the question "did anyone see the warning" -- a question nobody can answer.
+if (Test-Path $hookDir) {
+    try {
+        $fresh = Get-ChildItem -Path (Join-Path $hookDir ".busy.*") -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -ne (".busy." + $beaconRole) -and ((Get-Date) - $_.LastWriteTime).TotalSeconds -lt 60 }
+        if ($fresh) {
+            $who = ($fresh | ForEach-Object { $_.Name -replace "^\.busy\.", "" }) -join ","
+            "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`tCOLLISION`t$beaconRole`tstarted-while-running=$who" |
+                Out-File -FilePath $runLog -Encoding ascii -Append
+        }
+    } catch { }
+}
+
 $cp950 = [System.Text.Encoding]::GetEncoding(950)
 $proc = Start-Process -FilePath $exe -ArgumentList $args `
     -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr `
@@ -116,8 +160,17 @@ function Pump-Out {
 }
 $deadline = (Get-Date).AddSeconds($timeoutSec)
 $timedOut = $false
+$lastBeat = Get-Date
 while (-not $proc.HasExited) {
     Pump-Out
+    # HEARTBEAT (2026-09-06). The beacon is refreshed, not just written once, so that a
+    # killed wrapper leaves a beacon that goes STALE on its own. That is why the reader can
+    # decide with one mtime check and never has to resolve a Windows PID from inside bash.
+    # Self-expiring beats self-cleanup: cleanup is exactly what does not run when killed.
+    if (((Get-Date) - $lastBeat).TotalSeconds -ge 10) {
+        $lastBeat = Get-Date
+        try { (Get-Item $beaconFile -ErrorAction Stop).LastWriteTime = $lastBeat } catch { }
+    }
     if ((Get-Date) -gt $deadline) { $timedOut = $true; try { $proc.Kill() } catch {}; break }
     Start-Sleep -Milliseconds 150
 }
@@ -147,6 +200,17 @@ function Read-BytesTolerant([string]$path) {
 $bytesOut = Read-BytesTolerant $tempOut
 $bytesErr = Read-BytesTolerant $tempErr
 Remove-Item $tempOut, $tempErr -ErrorAction SilentlyContinue
+# Clear the beacon and record the run window out-of-band (see BUSY BEACON above).
+# If this wrapper was killed, neither line runs: the beacon is left behind with a dead PID,
+# which readers must treat as absent -- and its absence from the run log is itself the
+# evidence that the run did not finish.
+try {
+    $runEnd = Get-Date
+    "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`t$($runEnd.ToString('yyyy-MM-ddTHH:mm:ss'))`t$beaconRole`tpid=$PID`t$($args -join ' ')" |
+        Out-File -FilePath $runLog -Encoding ascii -Append
+    Remove-Item $beaconFile -ErrorAction SilentlyContinue
+} catch { }
+
 $fullOut = $cp950.GetString($bytesOut)
 $errText = $cp950.GetString($bytesErr)
 # Reproduce the old boundary EXACTLY: the old shape did ONE split over ($out + $err), so no blank

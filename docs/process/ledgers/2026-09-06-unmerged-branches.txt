@@ -1,0 +1,56 @@
+# docs/process/ledgers/2026-09-06-unmerged-branches.txt
+# ★51 支【還沒 merge 進 main】—— blueprint 裁 2026-09-06:【一支都不碰】,出清單掛帳慢審。
+# ★★它們先前藏在 288 支裡面 ⇒「有 51 支待審」這件事本身是【看不見的】。
+# 格式: 最後commit日期 <TAB> 領先main幾顆 <TAB> branch <TAB> 標題
+
+2026-09-06	8	tmp/mrg-fpneutral	merge feat/modulo-same-shape-4 again: bare-tick 規則(
+2026-09-06	3	feat/modulo-same-shape-4	bare-tick 規則：錨下在【右值的來源】不是
+2026-09-06	1	feat/envoy-ptype-tap	envoy 失敗原因加 ptype 維度（defer envoy-ptype-
+2026-09-06	1	feat/declamp-price	⑩ 拆物價 clamp：上臂死碼移除 + 下臂拆掉
+2026-09-05	2	feat/tombstone-premeasure	①墓碑 分批①：兩個具名迭代入口 ＋ 直�
+2026-08-26	9	feat/failure-memory-structural-identity	measure(failure-memory): face 1 as a set, so collateral
+2026-08-26	2	feat/generator-ranking-probe	fix(measure): ask the path the world actually uses, not
+2026-08-25	1	feat/workshop-followthrough	feat(diag): trace what happens after a goal candidate w
+2026-08-25	1	feat/goal-delegate-build-diag	measure(goal-delegate): tap every exit of the build-can
+2026-08-25	1	feat/eta-single-model	fix(path): one model for how long a hex takes, instead 
+2026-08-25	1	feat/camp-construction-duration	feat(diag): find out why construction stops, by instrum
+2026-08-25	1	feat/a1-construction-dispatch-drop	feat(diag): enumerate every exit between "rooting wins 
+2026-08-21	5	feat/convoy-return-t3-budget	Merge remote-tracking branch 'origin/main' into feat/co
+2026-08-21	2	feat/convoy-drop-enum	measure: land specimen trace for the convoy drop enumer
+2026-08-21	1	feat/subteam-survival-ladder	tap: make the survival-ladder entry visible for subteam
+2026-08-21	1	feat/breed-anon-eligible	feat(breed): anon count as breeders, and re-anchor the 
+2026-08-18	1	feat/labor-marginal-food	labor-slice: 食物工位邊際分配(T1 治斷崖) + �
+2026-08-05	1	feat/info-network-whole	量測員 persist relief 通用化補完批(A) 代表�
+2026-08-05	1	feat/L3-circuit-trade	L3 循環貿易: _best_market_target visit-util (升 na
+2026-08-03	1	feat/jia-distribute-diag	甲 distribute/deliver=0 measure-first 診斷 tap+bed�
+2026-08-03	1	feat/famine-flee-diag	饑荒-flee sanity 診斷 bed：resident 決策層非�
+2026-08-01	1	feat/scale-join-measure	乙 grounding:JOIN lifecycle trajectory instrument → 
+2026-08-01	1	feat/scale-absorb-measure	乙補全貌:吸納(pull-side 整併)trajectory instrum
+2026-07-26	1	feat/construction-commitment-latch	per-action-type completion 計數 tap (A1 閉沒硬確�
+2026-07-22	1	feat/weaponsmith	feat(facility): weaponsmith deficit adds weapon-market 
+2026-07-22	1	feat/market-sticky	fix(faction): market-seek stickiness (Gate A) — in-tr
+2026-07-19	3	feat/subteam-idle	fix(subteam): v3 continuous parent-monitoring + orphan-
+2026-07-18	2	feat/starvation-desperation-fix	絕境經濟 S2b: 紮營 famine-amplifier(systems 裁 A
+2026-07-18	2	feat/mortal-flee-famine	fix(mortal-flee-famine): recognize famine in _mortal_fl
+2026-07-18	1	feat/desperation-ladder-feedback	② calibration-sweep env override (blueprint 裁 B): S
+2026-07-17	1	feat/threat-oracle-s2	refactor(threat-oracle-S2 defiance): replace global boo
+2026-07-15	2	feat/loot-hunger-targeting	feat(loot-hunger): 絕境掠奪對準糧源（hunger-we
+2026-07-15	1	feat/supply-seam-effective-holding	feat(supply): 供給 seam 統一 effective_holding acce
+2026-07-15	1	feat/market-liquidize	feat(trade): 市場成交條件液化(經濟revive①�
+2026-07-15	1	feat/coin-circulation	feat(coin): coin 循環 B 成員稅回收（私囊鎖�
+2026-07-14	9	feat/survival-execution-lock	fix(debug): reeval_bed 死亡偵測 false-positive（�
+2026-07-13	1	feat/plan-phase-probe	feat(warring_harness): 補 plan_phase 分布 probe(orga
+2026-07-13	1	feat/establish-intent-redesign	feat(faction_ai): 立國 redesign—機械B-gate→意�
+2026-07-12	2	feat/command-tenure-growth	merge main(forage-floor-tune) into command-tenure for c
+2026-07-12	1	feat/depatch-build-rights	feat(faction_ai): de-patch建造權—faction-leader-te
+2026-07-09	2	feat/machine-A2c1	fix(A2c1): can_reach 缺 state.teams.has guard(dormant,
+2026-07-09	11	feat/A2b	wip(A2b): 保存 QA 產物(qa_checklist/qa_verdict + qa
+2026-07-08	24	feat/machine-A2a	handback(A2a measurer): FINAL — perf blocker prevents
+2026-07-08	1	feat/machine-A1a	docs(A1a): 回應 QA issue#2——subteam_bypass +28% �
+2026-07-07	2	worktree-agent-abc973df872af67a6	fix(③a): train-dispatch 搶佔軟busywork——破真
+2026-07-07	1	worktree-agent-a91331ec36a7a773e	fix(faction_ai): A1c 塌 dispatch dead-path — D2 free
+2026-06-28	3	worktree-agent-a4b289c33e13d086a	docs(handback): commander-decision-unify 交接(統領�
+2026-06-16	1	worktree-feat+encounter-core-systems	docs(handback): mark hex exit-boundary question resolve
+2026-06-05	9	feat/player-trade-system	fix(trade): coin face-value only; floorf coin transfers
+2026-06-01	4	worktree-feat+text-ui-renderer-fix	docs: add hand-back for text-ui-renderer-fix branch
+2026-06-01	11	worktree-feat+headless-play-architecture	docs: hand-back for headless play architecture Phase 1

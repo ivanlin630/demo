@@ -23,9 +23,38 @@ func _initialize() -> void:
 	_defer_re.compile("defer_until:\\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
 	_run(); quit()
 
-func _mk(re: String, disp: String, reason: String, lit_bound: bool = false) -> Dictionary:
-	var r := RegEx.new(); r.compile(re)
-	return {"re": r, "disp": disp, "reason": reason, "src": re, "hits": 0, "lit_bound": lit_bound}
+# ★★★`sample` ＝【這條規則必須命中的一行】—— 啟動時自檢（systems 2026-09-06）。
+#   ★病（實測）：我加的規則把 `int(` 的閉括號忘了跳脫 ⇒ ★★【無效 regex ⇒ 靜默不匹配任何東西】
+#     ⇒ 閘繼續顯示 NEEDS_HUMAN ⇒ ★★★而【錨下錯地方】與【regex 壞了】的症狀【完全一樣】
+#     —— 我改了三次錨才發現問題在跳脫。
+#   ⇒ 把【陽性對照裝進規則表本身】：規則自己帶一行樣本，不命中就喊「規則 N 自檢失敗」。
+#   ★而 `sample` 留空 ＝【這條沒有自檢】：它會被算進「無樣本」那個數字（★可見的債，不是靜默）。
+func _mk(re: String, disp: String, reason: String, lit_bound: bool = false, sample: String = "") -> Dictionary:
+	var r := RegEx.new()
+	var rc: int = r.compile(re)
+	return {"re": r, "disp": disp, "reason": reason, "src": re, "hits": 0,
+		"lit_bound": lit_bound, "sample": sample, "compile_ok": rc == OK}
+
+# ★★規則表自檢：①compile 成功 ②有樣本的必須命中自己的樣本
+#   ⇒ ★★★回 [壞掉的規則數, 沒樣本的規則數]；★而【沒樣本不判 FAIL】——
+#     否則為了過閘會有人隨便補一個樣本，而【隨便補的樣本比沒有樣本更糟】。
+func _selfcheck_rules(rules: Array) -> Array:
+	var broken: int = 0
+	var nosample: int = 0
+	for i in range(rules.size()):
+		var r: Dictionary = rules[i]
+		if not bool(r.get("compile_ok", true)):
+			broken += 1
+			print("  ✗ 規則 %d 自檢失敗【regex 編不起來】：%s" % [i, String(r["src"])])
+			continue
+		var smp: String = String(r.get("sample", ""))
+		if smp == "":
+			nosample += 1
+			continue
+		if (r["re"] as RegEx).search(smp) == null:
+			broken += 1
+			print("  ✗ 規則 %d 自檢失敗【樣本沒命中】：re=%s ｜ sample=%s" % [i, String(r["src"]), smp])
+	return [broken, nosample]
 
 func _run() -> void:
 	# ★規則順序即優先序；每條都要寫【為什麼它不是時間量】
@@ -102,7 +131,7 @@ func _run() -> void:
 		_mk("\"speed\": 1", "d_not_time", "speed_mult：速度倍率，不是 tick"),
 		_mk("maxi\\(1,", "d_not_time", "floor：`maxi(1, …)` 的 1 是下限保護"),
 		_mk(", 1\\)$", "d_not_time", "floor：末位 1 是下限保護"),
-		_mk("_next_tick = 0", "d_not_time", "sentinel：重設為「未排程」"),
+		_mk("_next_tick = 0", "d_not_time", "sentinel：重設為「未排程」", false, "	team.salary_eval_next_tick = 0"),
 		# ★★★第⑦票（2026-09-05）新形狀：`*_eval_next_tick <= 0` / `> 0`
 		#   ★判：(d) 不是時間量 —— 那個 0 是【未排程】哨兵，與既有的 `_next_tick = 0`／`== 0`
 		#     是【同一個哨兵】，只是比較運算子不同（`<= 0` 用在「還沒排過就先排一次」，
@@ -110,7 +139,16 @@ func _run() -> void:
 		#   ★★它【不隨根縮放】也不該縮放：`0` 在這裡不代表「零個 tick」，代表「沒有值」。
 		#   ★★★而它是因為⑦把三顆裸 modulo 閘遷成 CadenceStagger 才出現的
 		#     —— 也就是說，【修好一個病會讓另一道閘多出要判的形狀】，那是正常代價不是迴歸。
-		_mk("_next_tick\\s*(<=|>)\\s*0", "d_not_time", "sentinel：`*_next_tick <= 0 / > 0` 的 0 是【未排程】哨兵（同 `_next_tick = 0`，只是運算子不同）"),
+		_mk("_next_tick\\s*(<=|>)\\s*0", "d_not_time", "sentinel：`*_next_tick <= 0 / > 0` 的 0 是【未排程】哨兵（同 `_next_tick = 0`，只是運算子不同）", false,
+			"	if team.salary_eval_next_tick <= 0:"),
+		# ★★★`modulo-same-shape-4`（2026-09-06）新形狀：`state.world.X_next_tick = int(_d[1])`
+		#   ★判 (c) 白名單：右值是 `_due()` 回傳的【下一個 INTERVAL 邊界】—— 它【已由具名常數導出】，
+		#     隨根縮放，不是手抄的時間量。
+		#   ★★★而錨【不准下在變數名上】（systems 裁）：`_next_tick\\s*=` 會把
+		#     `X_next_tick = current_tick + N`（★手寫排程，正是這道閘要擋的東西）【一起靜默放行】。
+		#   ⇒ ★錨下在【右邊那個值的來源】：`= int(_d…[1])` —— 它只認【走 `_due()` 的那條路】。
+		_mk("=\\s*int\\(_d\\w*\\[1\\]\\)", "c_whitelist", "已導出：`= int(_d[1])` 的右值來自 `HarvestSystem._due()` 回傳的【下一個邊界】——它是【算出來的排程時點】不是手抄的時間量", false,
+			"	state.world.regen_game_next_tick = int(_d[1])"),
 		_mk("current_tick\\s*\\+=\\s*1", "d_not_time", "increment：tick 前進 1 步＝時間軸本身的定義"),
 		_mk("< 0\\b", "d_not_time", "sentinel：`< 0` 是「從未發生」的哨兵比較"),
 		_mk("\\}\\s*,\\s*[0-9]+\\s*\\)", "d_not_time", "sample_cap：字典後接的整數是 cap（★錨拿掉行尾 $：尾巴有註解時 $ 會沒命中，而那是【規則自己的盲點】不是新形狀）"),
@@ -121,6 +159,15 @@ func _run() -> void:
 		_mk("\\+\\s*1\\b", "d_not_time", "increment：+1 是「下一個」不是一段時間"),
 		_mk("-\\s*1\\b", "d_not_time", "sentinel：-1 是無效值哨兵"),
 	]
+	# ★★★規則表自檢（陽性對照裝在規則表本身）—— ★在【用規則分類任何東西之前】跑。
+	var _sc: Array = _selfcheck_rules(_rules)
+	if int(_sc[0]) > 0:
+		print("[FAIL] 規則表自檢：%d 條壞掉 ⇒ ★分類結果不可信" % int(_sc[0]))
+		print("   ★★壞規則【靜默不匹配】，而那與「錨下錯地方」的症狀【完全一樣】。")
+		return
+	print("[SELFCHECK] 規則 %d 條：★全部 compile 成功且有樣本的都命中自己的樣本" % _rules.size())
+	print("   ★★而【無自檢樣本】的規則 %d 條 —— 它是【可見的債】不是通過：" % int(_sc[1]))
+	print("      ★★★沒樣本不判 FAIL，因為【為了過閘隨便補的樣本比沒有樣本更糟】。")
 	var in_path: String = _env("SCAN_IN", "docs/measurements/2026-08-27-bare-tick-candidates.txt")
 	var out_path: String = _env("TRIAGE_OUT", "docs/measurements/2026-08-27-bare-tick-triage.txt")
 	var f := FileAccess.open(in_path, FileAccess.READ)

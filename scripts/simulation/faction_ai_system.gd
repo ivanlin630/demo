@@ -1816,18 +1816,28 @@ func _report_to_leader(state: WorldState, team: TeamData, event: String) -> void
 	Probe.bump(("mreport.sent." if ok else "mreport.failed.") + event)
 
 func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype: String) -> bool:
+	# ★★★★`ptype` 維度（2026-09-06，defer `envoy-ptype-tap` 到期）——
+	#   ★病：四個 fail counter 的母體是【全站所有 envoy 用途】（`alliance` ＋ `member_report`）
+	#     ⇒ ★★不能說「回報因為沒名人而失敗 501 次」—— 那 501 裡有多少是結盟的，卷面答不出來。
+	#   ⇒ ★★★每個 fail 同時記【總計】與【逐 ptype】：總計維持既有 key（下游卷面不斷線），
+	#     逐 ptype 是新增的 `envoy.fail.<ptype>.<原因>` ⇒ 兩層可對帳：
+	#     ★Σ(各 ptype 的同一原因) == 該原因的總計。
+	#   ★而呼叫端只有兩種 ptype（`alliance` / `member_report`，全庫兩個呼叫點）
+	#     ⇒ 桶不會爆炸；★★而若哪天多一種，對帳式會自己把它照出來（Σ 對不上就是有新桶）。
 	# ★★★失敗原因逐條件名（2026-09-05）：★`_dispatch_envoy` 回 false 有【四種】成因，
 	#   ★★而它們共用一個 `false` ⇒ 上游只看得到「沒派成 48 次」而答不出【是哪一種】。
 	#   ⇒ ★★★而處置完全不同：無 belief 位是【感知鏈】、沒有 spare named 是【人力】。
 	var target: TeamData = state.teams.get(target_id)
 	if target == null:
 		Probe.bump("envoy.fail.目標不在名冊")
+		Probe.bump("envoy.fail.%s.目標不在名冊" % ptype)
 		return false
 	# 目標位讀 belief best_estimate（非上帝視角真位；對齊決策讀情報總則）
 	# F1 感知鐵律：缺 belief → sentinel (-1,-1)（禁默認 live）；無位不派 envoy。
 	var target_pos: Vector2i = BeliefSystem.best_estimate(state, mother.team_id, target_id).get("tile_pos", Vector2i(-1, -1))
 	if target_pos == Vector2i(-1, -1):
 		Probe.bump("envoy.fail.不知道對方在哪")
+		Probe.bump("envoy.fail.%s.不知道對方在哪" % ptype)
 		return false   # 無 belief 位 → 不派 envoy（不瞎追 live）
 	var dist: int = _hex_dist(mother.tile_pos, target_pos)
 	var budget: int = SubteamSystem.founding_timeout(dist)
@@ -1837,10 +1847,12 @@ func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype:
 	for _i in range(ENVOY_REDUNDANCY_FOUNDING):
 		if mother.population <= 1:
 			Probe.bump("envoy.fail.母隊只剩一人")
+			Probe.bump("envoy.fail.%s.母隊只剩一人" % ptype)
 			break   # 不掏空母隊（保 leader + ≥1）
 		var sub_leader: int = sub_sys._pick_subteam_leader(state, mother, TeamData.TASK_HERALD)
 		if sub_leader == -1 or sub_leader == mother.leader_id:
 			Probe.bump("envoy.fail.沒有可派的名人")
+			Probe.bump("envoy.fail.%s.沒有可派的名人" % ptype)
 			break   # 無 spare named → 無法派信使（稀有 by construction，退守成）
 		var envoy_id: int = sub_sys.dispatch(state, mother.team_id, sub_leader, ENVOY_POP,
 			TeamData.TASK_HERALD, target_pos, target_id, "")

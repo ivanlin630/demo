@@ -5,7 +5,6 @@
   "baseline": "main HEAD（已含 ⑥⑦：b172f457 / c95f6b3d / 9172d3b7 / b7e40d59）",
   "bed": "scripts/debug/lod_phase_invariance_test.gd（常設，已在 merge-gates 之外；perf 用 scripts/debug/lod_perf_bed.gd）",
   "seed": 1337,
-
   "acceptance": {
     "1_player_pos_exhaustive": {
       "verdict": "PASS",
@@ -16,25 +15,64 @@
       "verdict": "PASS",
       "window_ticks": 43200,
       "grouping": "床自己量每隊到固定錨點的平均距離，以中位數切（★不用固定門檻：門檻會讓一邊變空而空的那邊使判準恆真）",
-      "groups": {"far_half_teams": 7, "near_half_teams": 8},
-      "collect": {"far": 720.0, "near": 720.0, "rel_diff_pct": 0.0},
-      "vision":  {"far": 720.0, "near": 720.0, "rel_diff_pct": 0.0},
-      "fatigue": {"far": 720.0, "near": 720.0, "rel_diff_pct": 0.0},
+      "groups": {
+        "far_half_teams": 7,
+        "near_half_teams": 8
+      },
+      "collect": {
+        "far": 720.0,
+        "near": 720.0,
+        "rel_diff_pct": 0.0
+      },
+      "vision": {
+        "far": 720.0,
+        "near": 720.0,
+        "rel_diff_pct": 0.0
+      },
+      "fatigue": {
+        "far": 720.0,
+        "near": 720.0,
+        "rel_diff_pct": 0.0
+      },
       "note": "720 = 43200/60 ⇒ 每隊每個 pass 都跑到，一格不差"
     },
     "3_discriminating_power": {
       "verdict": "PASS",
       "method": "同床同 seed 同窗同錨點，唯一差別是把 ⑧ 撤掉（far pass 與距離分批加回去），trap 保證還原",
-      "reverted": {"far": 72.0, "near": 416.6, "rel_diff_pct": 82.7},
+      "reverted": {
+        "far": 72.0,
+        "near": 416.6,
+        "rel_diff_pct": 82.7
+      },
       "note_72": "72 = 43200/600 ⇒ 撤刀後遠隊只有 far pass 跑得到，剛好 1/10，與『慢 10 倍』對得上",
       "note_416": "416.6 不是 720：近半的隊會移動，有時也落在 far ⇒ 混合值 ⇒ 差是 82.7% 而非 90%，那是『近/遠是實測比例不是標籤』的必然結果",
       "★immunity_finding": "撤刀後【薪資的 C/D/E/F 四條照樣全綠】——⑦ 已把薪資遷 CadenceStagger ⇒ 它對距離分班免疫 ⇒ 只看薪資的話這張床會在【分班已回來】的世界印 PASS。⇒ spec §4-2『擴到至少三個系統』是必要條件不是保險（systems 已立成 invariant 6393c352）"
     },
     "4_perf_report_only": {
       "verdict": "REPORTED（不否決）",
-      "default_1month": {"teams_start": 15, "lod_mean_us": 3649, "hd_mean_us": 9642, "ratio": 2.64, "hd_tps": 104},
-      "warring_3day":   {"teams_start": 49, "lod_mean_us": 21887, "hd_mean_us": 40967, "ratio": 1.87, "hd_tps": 24},
-      "warring_1month": {"teams_start": 49, "teams_end": 112, "lod_mean_us": 43725, "hd_mean_us": 91630, "ratio": 2.1, "lod_tps": 23, "hd_tps": 11},
+      "default_1month": {
+        "teams_start": 15,
+        "lod_mean_us": 3649,
+        "hd_mean_us": 9642,
+        "ratio": 2.64,
+        "hd_tps": 104
+      },
+      "warring_3day": {
+        "teams_start": 49,
+        "lod_mean_us": 21887,
+        "hd_mean_us": 40967,
+        "ratio": 1.87,
+        "hd_tps": 24
+      },
+      "warring_1month": {
+        "teams_start": 49,
+        "teams_end": 112,
+        "lod_mean_us": 43725,
+        "hd_mean_us": 91630,
+        "ratio": 2.1,
+        "lod_tps": 23,
+        "hd_tps": 11
+      },
       "★retracted": "我先前寫的『倍率隨負載下降』已【收回】——那是拿【窗長不同】的兩列比趨勢，而全月 warring 是 2.1× 高於 3 日的 1.87× ⇒ 三點不支持任何單調方向",
       "★decision_relevant": "warring 在【現行 LOD 下】就已 23 tps，而 1× 播放要 240 tps ⇒ 拆分班【之前】就跑不動了，差一個數量級 ⇒ ⑧ 不是把可玩的弄成不可玩",
       "★90d_bill": "3.3h 是【下界】不是估計（mean 取自一個還在長大的世界）；真價以 ⑧ 後第一張 90d 跑為準"
@@ -47,23 +85,35 @@
       "filter": "TickPerf|FaiPhase|usec|msec|elapsed|耗時|WARNING|at: push_warning",
       "★filter_note": "★不剔 [TickPerf] 會得到【假紅】：它印的是 `us` 不是 `usec`，我第一版過濾器漏了它，三跑同行數不同 sha 而 60 行差異全是牆鐘時間"
     },
-    "6_merge_gates": {"verdict": "PASS", "count": "22/22", "seconds": 430,
-      "note": "★這次是【兩支修完之後重跑全部】——先前只修了兩支沒重跑，所以當時我沒說全綠"},
-    "7_defers_tsv": {"verdict": "NOT_ACTIONABLE",
-      "reason": "docs/process/defers.tsv 與 defer-open/defer-phrase 兩支閘【不存在於本 branch】（是 systems 在暫時 worktree 取聯集才有的）⇒ 我沒有為了讓驗收項可勾而建一個檔來刪；交 systems merge 時處理"}
+    "6_merge_gates": {
+      "verdict": "PASS",
+      "count": "22/22",
+      "seconds": 430,
+      "note": "★這次是【兩支修完之後重跑全部】——先前只修了兩支沒重跑，所以當時我沒說全綠"
+    },
+    "7_defers_tsv": {
+      "verdict": "NOT_ACTIONABLE",
+      "reason": "docs/process/defers.tsv 與 defer-open/defer-phrase 兩支閘【不存在於本 branch】（是 systems 在暫時 worktree 取聯集才有的）⇒ 我沒有為了讓驗收項可勾而建一個檔來刪；交 systems merge 時處理"
+    }
   },
-
   "honest_limits": [
     "★perf 的三個量測【窗長不同】（default 1 個月 / warring 3 日 / warring 1 個月）⇒ 絕對值不可互比；而【倍率】也不是窗長穩定的（同 config 1.87×→2.1×）",
     "★★full-HD 會改行為（移速/思考頻率恢復全速）⇒ 兩趟世界 tick1 後發散：量的是分佈 envelope，不是同一世界狀態雙跑（bed 自帶 caveat）",
     "★★★驗收② 的判準只涵蓋 collect/vision/fatigue 三個系統 —— 其餘 per-team 系統【沒有被這張床守到】",
     "★裁剪過的 perf 原始檔：只留 TickPerf 逐日 + 摘要表，模擬事件 log 已丟（丟掉的行數寫在各檔頭）"
   ],
-
   "artifacts": {
     "verify_summary": "docs/measurements/2026-09-06-eight-verify.txt",
     "acc2_acc3_contrast": "docs/measurements/2026-09-06-eight-acc2-acc3.txt",
     "perf_default": "docs/measurements/2026-09-06-eight-perf-default.txt",
     "perf_warring_fullmonth": "docs/measurements/2026-09-06-eight-perf-warring-fullmonth.txt"
+  },
+  "perf_honest_limit": {
+    "適用": "本票所有 perf 數字（含 warring full-month 的 2.10×）",
+    "限制": "採於【沒有任何重疊紀錄可查】的時期 —— 當時 .godot-runs.log 與 busy beacon 都還不存在",
+    "★可查到的徵候": "warring full-month 逐日 avg=20,000~29,000us 而 max=6,257,501~10,025,343us（單 tick 卡 6~10 秒，約 avg 的 300 倍）；外部 CPU 爭用會長這樣，但長跑 GC/IO/單 tick 真的很重也會",
+    "★★我沒有下的結論": "沒有寫「所以 2.10× 是髒的」——它是【兩個跑的比值】，兩臂同樣被拖會部分抵消，而無法分辨是否只有一臂被拖",
+    "★★★裁定": "blueprint 2026-09-06 裁【不重測】：此數字本來就是「只報不否決」，不是任何門檻的依據；唯一會消費 perf 的下游（事件密度 defer 的 wall_s met_check）吃的是【未來的量測】",
+    "已裝上的真修法": "tools/godot.ps1 起跑寫 .busy.<role> 心跳 beacon + 結束把時窗寫進 .claude/hooks/.godot-runs.log（out-of-band，不進 stdout 以免打掉逐位元 fp 比對）⇒ 之後的 perf 數字【重疊與否可機械查】"
   }
 }
