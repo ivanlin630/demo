@@ -43,13 +43,17 @@
 # ★解除後：把該行【刪掉】並在 commit message 寫明 —— ★★不要改成「已完成」留在表上
 #   （留著會讓這張表長大，然後沒人看 —— 那正是它要防的病）
 #
+# ★【2026-09-06 CLOSE 三筆】money-genesis-start／market-thickness-v0／declamp-price
+#   解除條件（批後同 seed 對比輪的量測檔）★已達成 ⇒ 三張票都已派工到 implementer：
+#   ⑩ declamp 核心已落地 `feat/declamp-price` @02801041（驗收進行中）；⑨／B-v0 在手上。
+#   ★★所以是【延後結束了】,不是【條件放鬆了】—— 兩者在表上必須分得出來,
+#     ★★★否則「做完了所以移除」跟「等不下去所以移除」會長成同一個動作。
+#   ★批 2 規矩（我立）:這三張【不得一起 merge】—— 動的是不同子系統,
+#     合著進會讓下一條 baseline 讀不出是誰造成的。
 token	summary	defer_until	met_check
 belief-perfield-rest	resource_scale／combat_target_est 的逐欄位時戳——未修理由是【目前無讀取端消費它們的新鮮度】	有任何讀取端開始檢查這兩個欄位的新鮮度	git grep -nE 'BELIEF_STALE_TICKS' -- scripts/simulation | grep -qE 'resource_scale|combat_target_est'
 belief-pos-tristate	belief_pos 把【從未有情報】與【情報過期】回成同一個 (-1,-1)——修法抄 appearance() 三態	墓碑(①票)落地(production 出現 live_teams/all_teams 縫)	git grep -q 'func live_teams' -- scripts/data
 event-density-schedule	事件密度排程未實裝(per-team cadence 由該隊自身活動密度決定,睡覺的隊少輪是因為沒事不是因為離玩家遠)	perf 越線:任一量測檔出現 wall_s > 28800(=8 小時)	grep -rho '"wall_s"[[:space:]]*:[[:space:]]*[0-9.]\+' docs/process/verdicts docs/measurements 2>/dev/null | grep -o '[0-9.]\+$' | awk '$1 > 28800 {found=1} END {exit found?0:1}'
 otherdomain-coordination	他域耦合求裁(戰俘/capture 需 combat 等)——原文「handback 藍圖求裁,暫緩」,而【解除條件不可量】⇒ 照 defers 檔頭退而求其次:定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
 single-writer-leftovers	單寫者 slice2 收案時暫緩的小項(反向 roster audit／beast_system L2 升級／subteam clear())——★解除條件不可量 ⇒ 定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
-money-genesis-start	⑨貨幣創世(初始批推導式+分配形狀)——★它改創世=換世界,會跟【批後同 seed 對比輪】打架 ⇒ blueprint 裁排在⑧收口與對比之後	批後對比那一輪的量測檔已產出	test -f docs/process/verdicts/batch1-compare-COMPLETE.measure.json
-market-thickness-v0	B-v0 市場厚度(掛單寄賣制:escrow/待領款/待領貨/領取念頭)——★與⑨貨幣創世【同窗】,兩者都動經濟地基	批後對比那一輪的量測檔已產出	test -f docs/process/verdicts/batch1-compare-COMPLETE.measure.json
-declamp-price	⑩拆物價 clamp(回原案無上下限;飢荒不對稱放大留;floor 0 保留=定義非閥)——★經濟窗,與⑨/B-v0 同批	批後對比那一輪的量測檔已產出	test -f docs/process/verdicts/batch1-compare-COMPLETE.measure.json
 C-refill-bed	C 補量:①C-1 需【有 factions 的床】(評估迴圈 faction_ai:898 才進得去)②C-2 需【16+/31+ 級距有樣本】(config 造大團或跑到自然長大)③同床加【隊規模×距錨點距離】交叉表(關掉「小隊 1.35→3.12 是否⑧造成」那個開放問題)——★三者同床可解;優先序=經濟三票之後(C 是觀察題不擋事)	經濟三票收束(batch2 完成標記產出)	test -f docs/process/verdicts/batch2-economy-COMPLETE.measure.json

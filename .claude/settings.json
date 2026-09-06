@@ -16,6 +16,14 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/doc-line-cap.sh\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/mailbox-archive-trigger.sh\""
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
