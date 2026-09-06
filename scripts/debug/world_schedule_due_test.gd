@@ -22,9 +22,14 @@ func _ok(cond: bool, msg: String) -> void:
 	else: _fail += 1; print("  [FAIL] %s" % msg)
 
 # 舊制：呼叫端每 outer 跑一次，而閘是 tick % cadence == 0
+# ★★★★訂正（2026-09-06）：迴圈從 `outer` 起跑，不是從 0 ——
+#   ★真正的呼叫端（`_step4c_harvest_tick` / `_step1d_overflow`）的閘是 `tick % outer == 0`，
+#     而 `current_tick` 在系統跑之前就遞增 ⇒ ★★【第一次呼叫是 t = outer，不是 t = 0】。
+#   ★★★而我原本從 0 起跑 ⇒ 測試印綠、實跑岔開 —— 【測試對呼叫端的模型是錯的】。
+#   ⇒ 這就是「算術與實跑不是同一件事」的具體長相：算術沒錯，錯的是【算術的前提】。
 func _old_fire_ticks(total: int, outer: int, cadence: int) -> Array:
 	var out: Array = []
-	for t in range(0, total + 1, outer):
+	for t in range(outer, total + 1, outer):
 		if t % cadence == 0:
 			out.append(t)
 	return out
@@ -33,8 +38,8 @@ func _old_fire_ticks(total: int, outer: int, cadence: int) -> Array:
 func _new_fire_ticks(total: int, outer: int, cadence: int) -> Array:
 	var out: Array = []
 	var w := WorldData.new()
-	var nxt: int = 0
-	for t in range(0, total + 1, outer):
+	var nxt: int = cadence   # ★初值＝第一個邊界（與 WorldData 的欄位初值同源語意）
+	for t in range(outer, total + 1, outer):
 		w.current_tick = t
 		var d: Array = HarvestSystem._due(w, nxt, cadence)
 		nxt = int(d[1])
@@ -76,7 +81,9 @@ func _run() -> void:
 	# ── ③首次呼叫必 fire（等同舊制 0 % INTERVAL == 0）──
 	var w := WorldData.new()
 	w.current_tick = 0
-	var d0: Array = HarvestSystem._due(w, 0, MONTH)
-	_ok(bool(d0[0]) and int(d0[1]) == MONTH,
-		"③首次（tick 0、next=0）必 fire 且 next 落在 %d（實得 fire=%s next=%d）"
-			% [MONTH, str(d0[0]), int(d0[1])])
+	w.current_tick = HARVEST_OUTER
+	var d0: Array = HarvestSystem._due(w, MONTH, MONTH)
+	_ok(not bool(d0[0]) and int(d0[1]) == MONTH,
+		"③★第一次呼叫（t=%d、next=%d）【不 fire】" % [HARVEST_OUTER, MONTH])
+	print("        ★★這條就是 fp 實跑 A/B 抓到的那個坑：原本初值 0 ⇒ 第一次必 fire，")
+	print("           而舊制在 t=%d 不 fire（%d %% 1440 != 0）⇒ ★★★世界從第一天就岔開。" % [HARVEST_OUTER, HARVEST_OUTER])
