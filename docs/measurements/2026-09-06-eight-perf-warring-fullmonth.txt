@@ -1,0 +1,75 @@
+# eight-perf-warring-fullmonth —— ★★★這份是【裁剪過的】：只留 TickPerf 逐日 + 對照摘要表。
+# ★被丟掉的是模擬事件 log（[SoloAI]/[Move]/[Barter]…）共 31789 行，留下 69 行。
+# ★★丟掉的理由是【體積】不是【無關】—— 而我把數字寫在這裡，是因為
+#   ★★★靜默截斷會讓「這就是全部」跟「這是我挑過的」長得一樣。
+# ★原始完整輸出在 session scratchpad（session-local，★不隨 repo 走 ⇒ 下一個人拿不到）。
+
+=== lod_perf_bed：seed=1337 months=1 (ticks=43200) ladder=["warring_states"] ===
+config       regime    teams    mean_us     p99_us     max_us      tps
+[TickPerf] day=1 avg=26000 us max=10025343 us ticks=1440 teams=65 factions=8
+[TickPerf] day=2 avg=19775 us max=6332160 us ticks=1440 teams=64 factions=8
+[TickPerf] day=3 avg=23089 us max=7485877 us ticks=1440 teams=64 factions=8
+[TickPerf] day=4 avg=20607 us max=6370175 us ticks=1440 teams=65 factions=8
+[TickPerf] day=5 avg=29669 us max=8161880 us ticks=1440 teams=73 factions=8
+[TickPerf] day=6 avg=25706 us max=8160740 us ticks=1440 teams=81 factions=8
+[TickPerf] day=7 avg=24871 us max=6257501 us ticks=1440 teams=85 factions=8
+[TickPerf] day=8 avg=29654 us max=6192485 us ticks=1440 teams=91 factions=8
+[TickPerf] day=9 avg=32542 us max=11004454 us ticks=1440 teams=91 factions=8
+[TickPerf] day=10 avg=36022 us max=11784132 us ticks=1440 teams=94 factions=9
+[TickPerf] day=11 avg=37296 us max=13260021 us ticks=1440 teams=95 factions=9
+[TickPerf] day=12 avg=37255 us max=13380130 us ticks=1440 teams=97 factions=9
+[TickPerf] day=13 avg=45391 us max=13868048 us ticks=1440 teams=98 factions=9
+[TickPerf] day=14 avg=39360 us max=13155149 us ticks=1440 teams=99 factions=9
+[TickPerf] day=15 avg=54209 us max=17501694 us ticks=1440 teams=98 factions=9
+[TickPerf] day=16 avg=41575 us max=14983429 us ticks=1440 teams=101 factions=9
+[TickPerf] day=17 avg=48578 us max=18127505 us ticks=1440 teams=101 factions=9
+[TickPerf] day=18 avg=54306 us max=13184911 us ticks=1440 teams=100 factions=9
+[TickPerf] day=19 avg=47601 us max=15998206 us ticks=1440 teams=100 factions=9
+[TickPerf] day=20 avg=59259 us max=20062814 us ticks=1440 teams=98 factions=9
+[TickPerf] day=21 avg=52806 us max=18520030 us ticks=1440 teams=102 factions=9
+[TickPerf] day=22 avg=56871 us max=18455746 us ticks=1440 teams=103 factions=9
+[TickPerf] day=23 avg=61729 us max=16340485 us ticks=1440 teams=108 factions=9
+[TickPerf] day=24 avg=48402 us max=16816539 us ticks=1440 teams=105 factions=9
+[TickPerf] day=25 avg=63112 us max=16812731 us ticks=1440 teams=105 factions=9
+[TickPerf] day=26 avg=53260 us max=21302811 us ticks=1440 teams=104 factions=9
+[TickPerf] day=27 avg=50925 us max=13829529 us ticks=1440 teams=105 factions=9
+[TickPerf] day=28 avg=65095 us max=15691090 us ticks=1440 teams=106 factions=10
+[TickPerf] day=29 avg=51603 us max=12349284 us ticks=1440 teams=108 factions=10
+[TickPerf] day=30 avg=75068 us max=22939425 us ticks=1440 teams=106 factions=10
+[TickPerf] day=1 avg=64034 us max=12637818 us ticks=1440 teams=67 factions=8
+[TickPerf] day=2 avg=33466 us max=5452078 us ticks=1440 teams=62 factions=8
+[TickPerf] day=3 avg=34685 us max=4899960 us ticks=1440 teams=62 factions=8
+[TickPerf] day=4 avg=39095 us max=4332156 us ticks=1440 teams=64 factions=9
+[TickPerf] day=5 avg=48715 us max=6213743 us ticks=1440 teams=69 factions=9
+[TickPerf] day=6 avg=46934 us max=6714155 us ticks=1440 teams=72 factions=9
+[TickPerf] day=7 avg=56131 us max=6452528 us ticks=1440 teams=74 factions=9
+[TickPerf] day=8 avg=60958 us max=7944398 us ticks=1440 teams=80 factions=9
+[TickPerf] day=9 avg=65087 us max=8094714 us ticks=1440 teams=84 factions=9
+[TickPerf] day=10 avg=80146 us max=8888619 us ticks=1440 teams=87 factions=10
+[TickPerf] day=11 avg=83700 us max=10352855 us ticks=1440 teams=88 factions=10
+[TickPerf] day=12 avg=90584 us max=10883519 us ticks=1440 teams=89 factions=10
+[TickPerf] day=13 avg=82538 us max=9425685 us ticks=1440 teams=93 factions=10
+[TickPerf] day=14 avg=92507 us max=10107074 us ticks=1440 teams=92 factions=10
+[TickPerf] day=15 avg=100020 us max=9277553 us ticks=1440 teams=93 factions=10
+[TickPerf] day=16 avg=87704 us max=8634937 us ticks=1440 teams=96 factions=10
+[TickPerf] day=17 avg=119127 us max=16818319 us ticks=1440 teams=99 factions=10
+[TickPerf] day=18 avg=106544 us max=10045601 us ticks=1440 teams=102 factions=10
+[TickPerf] day=19 avg=102232 us max=9310887 us ticks=1440 teams=102 factions=10
+[TickPerf] day=20 avg=127627 us max=15466726 us ticks=1440 teams=106 factions=10
+[TickPerf] day=21 avg=105321 us max=8701854 us ticks=1440 teams=105 factions=10
+[TickPerf] day=22 avg=127083 us max=14513991 us ticks=1440 teams=105 factions=10
+[TickPerf] day=23 avg=131281 us max=12594453 us ticks=1440 teams=103 factions=10
+[TickPerf] day=24 avg=116507 us max=13212228 us ticks=1440 teams=103 factions=10
+[TickPerf] day=25 avg=138259 us max=14155811 us ticks=1440 teams=104 factions=10
+[TickPerf] day=26 avg=122153 us max=11851043 us ticks=1440 teams=104 factions=10
+[TickPerf] day=27 avg=121031 us max=11272754 us ticks=1440 teams=103 factions=10
+[TickPerf] day=28 avg=118981 us max=11806947 us ticks=1440 teams=105 factions=10
+[TickPerf] day=29 avg=132897 us max=14417883 us ticks=1440 teams=112 factions=10
+[TickPerf] day=30 avg=113432 us max=11297848 us ticks=1440 teams=112 factions=10
+warring_states LOD          49      43725    1417565   22939429       23
+warring_states full-HD      49      91630    4702177   16818325       11
+────────── 對照摘要（full-HD = 拿掉 LOD 後的成本；mean=攤銷吞吐） ──────────
+config        teams   LOD_mean_us    HD_mean_us    HD/LOD     HD_tps  HD_max_us
+★窗長 = 43200 tick（30.0 遊戲日）—— ★★短窗＝隊數成長較少，跨 config 比【倍率】不比絕對值
+注:HD_tps=full-HD 攤銷可達每秒 tick(1e6/mean)。playback 參考:1×=240tps/4×=960tps。HD_max=最壞單tick(hitch)。
+=== lod_perf_bed DONE ===
