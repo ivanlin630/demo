@@ -14,39 +14,91 @@
   "positive_control": "手動寫一次 → swallowed_writes={\"population\":1}",
   "negative_control": "不加 --debug 跑 → ABORT-LISTING，且不輸出任何假站列",
   "static_sites_main_6edde62f": {
-    "population": 52, "wounded": 2, "anon_tiers": 1, "anon_combat_skill": 2, "anon_wage": 0,
+    "population": 52,
+    "wounded": 2,
+    "anon_tiers": 1,
+    "anon_combat_skill": 2,
+    "anon_wage": 0,
     "production": "唯一 1 處 decision_context.gd:237 寫的是 DecisionContext 自己的欄位，不在此列"
   },
   "runtime": {
     "production_600tick_warring_states_seed1337": {},
     "beds_scanned": 26,
     "beds_with_witness": 26,
-    "beds_unknown": 0,
+    "beds_unknown": 1,
     "beds_dirty": 10,
-    "beds_clean": 16,
+    "beds_clean": 15,
     "dirty": {
-      "headless_test": ["population", "wounded"],
-      "encounter_sim_test": ["anon_combat_skill", "population"],
-      "map_render_test": ["population"],
-      "own_granary_null_caller_test": ["population"],
-      "qa_probe": ["population"],
-      "settlement_s2a_test": ["population"],
-      "survival_layer_unify_test": ["population"],
-      "team_ui_test": ["population"],
-      "ui_flow_test": ["population"],
-      "ui_logic_test": ["population"]
-    }
+      "headless_test": [
+        "population",
+        "wounded"
+      ],
+      "encounter_sim_test": [
+        "anon_combat_skill",
+        "population"
+      ],
+      "map_render_test": [
+        "population"
+      ],
+      "own_granary_null_caller_test": [
+        "population"
+      ],
+      "qa_probe": [
+        "population"
+      ],
+      "settlement_s2a_test": [
+        "population"
+      ],
+      "survival_layer_unify_test": [
+        "population"
+      ],
+      "team_ui_test": [
+        "population"
+      ],
+      "ui_flow_test": [
+        "population"
+      ],
+      "ui_logic_test": [
+        "population"
+      ]
+    },
+    "unknown": {
+      "data_test": "extends Node（--script 跑它不會執行任何東西）⇒ GODOT_TIMEOUT 殺掉；outcome=timeout"
+    },
+    "clean_note": "15 支：outcome=ok 且無吞寫。★這是修好 outcome 欄之後重導的，第一版的 CLEAN 不可信。"
   },
   "findings": [
     "production 執行路徑上這五個屬性從來沒有被賦值 ⇒ 遷移早已完成，鷹架只是沒拆",
-    "26 支有直寫的床裡，只有 10 支 runtime 真的執行到 ⇒ 另 16 支的直寫是死碼",
+    "真債務 32 站（TeamData 31 + UNKNOWN 1），全部落在 10 支 runtime 會執行到的床",
+    "『刪不是改』最後適用於【零站】—— 沒有死碼",
     "唯一同時是註冊 merge-gate 的髒床是 headless_test（且只透過 headless-regression.sh 這個 hook 才跑得到）",
-    "qa_probe 是髒的 —— 它餵 QA 判決",
-    "anon_wage 靜態 0 站 ⇒ 拆它的 setter 零成本；population 52 站 ⇒ 五個不該當一批處理"
+    "qa_probe 的『餵 QA 判決』是我從檔名推的，零證據，已撤回（blueprint 對 TG 亦零命中）",
+    "data_test.gd 是 extends Node ⇒ 一支永遠不會執行任何測試的床，而它不在 merge-gates ⇒ 沒有東西會發現它",
+    "anon_wage 靜態 0 站 ⇒ 拆它零成本；五個不該當成一批處理"
   ],
   "honest_limits": [
-    "屬性層 yes/no —— 答不了『某支床的哪幾條 assert 是在 pop=0 的世界上做的』",
-    "逐站（行粒度）清單取不到：get_stack() 只在 --debug 下有值，而 --debug 讓 assert 失敗變成互動式 debugger break ⇒ 有紅 assert 的床永遠卡住等 stdin",
-    "CLEAN 只代表『這一次這支床沒有執行到吞寫』——不同輸入/config 可能走到別的 fixture"
-  ]
+    "床粒度 yes/no —— 答不了『某支床的哪幾條 assert 是在 pop=0 的世界上做的』，也答不了『那支床的 9 站裡是哪幾站執行到』⇒ 31 站是【上界】",
+    "行粒度清單取不到：get_stack() 只在 --debug 下有值，而 --debug 讓 assert 失敗變成互動式 debugger break ⇒ 有紅 assert 的床永遠卡住等 stdin",
+    "CLEAN 只代表『這一次這支床沒有執行到吞寫』——不同 config/輸入可能走到別的 fixture",
+    "型別靠同檔內宣告推；set(\"population\", v) 這種反射寫入看不到"
+  ],
+  "revisions": [
+    {
+      "when": "2026-09-07 (same day, after three corrections)",
+      "what_changed": "靜態站數、CLEAN/UNKNOWN 的判定、以及『死碼』那個結論",
+      "why": [
+        "① 靜態數（原記 population 52 等）是純 grep 產物，混進了比較運算子、註解、字串字面值，以及最重要的 DecisionContext 的【合法】寫入（c.population 是它的真欄位）。按接收者宣告型別重算：TeamData 31 / DecisionContext 20 / UNKNOWN 1 ⇒ 真債務 32 站。",
+        "② 原記『16 支的直寫是死碼』不成立：那 16 支多數寫的是 DecisionContext（本來就對），而唯一的 TeamData×未執行候選 data_test.gd:26 的成因是【那支床是 extends Node，用 --script 跑不起來】。",
+        "③ 原記 beds_unknown=0 不成立：活著的證人（run-log 結束列）當時把 timeout-kill 記成完跑。wrapper 已加 outcome 欄（ok|timeout）後重導 CLEAN 側 ⇒ 15 ok+無吞寫、1 timeout=UNKNOWN。"
+      ],
+      "what_did_not_change": "DIRTY 那一側 —— 陽性是自證的（輸出裡真的出現 push_error），不受證人缺陷影響。"
+    }
+  ],
+  "static_sites_by_receiver_type_main": {
+    "TeamData": 31,
+    "DecisionContext": 20,
+    "UNKNOWN": 1,
+    "note": "DecisionContext 那 20 站是【正確的 code】，不在範圍；另有 6 處是註解或字串字面值，根本不是 code。",
+    "tool": ".claude/hooks/computed_prop_sites.py（認接收者宣告型別；反射寫入看不到）"
+  }
 }
