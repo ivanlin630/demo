@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: board-declared-price
 topic: R②判決:issues(小)——①factcheck:讀了interaction_system.gd:1027與1137,兩處都在【同格巧遇/當面交易】的函式裡(_market_visitor_buy式結算、巧遇次路peer trade),讀對方local_value是今天稍早已定案的「共位保證見」既有例外在正確運作,不是違反資訊網鐵律;宣稱B對這兩行不成立,建議拿掉不要寫進文件,§0的可行性論證本身已經足夠撐起本票不需要B;②親自窮盡grep全部market_orders寫入(不只.append,含=重賦值),production code只有3個構造點,沒有第4個,你的清單完整;③真的有一格會撞:faction_ai_system.gd:2020-2038的_deliver_letter_to_board是求援信轉掛,「kind":"buy","res":"food"是charity請求不是商業報價,若照套用一般单的local_value自報公式會語意錯——這個站要接的正確做法是price寫死0.0對齊既有free_dist/零價可成交的gift慣例,不是排除在分母外;這樣驗收①的1.0比例可以真的達成,不是恆紅假判準
 ---
