@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ⑦格結案——正規化後比值=1.000，你的假說完全對，0.921是壽命混淆
 ---
 
