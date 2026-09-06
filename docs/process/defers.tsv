@@ -85,4 +85,4 @@ bv0-claim-expiry	B-v0 的【到期處置】——★implementer 在 Slice A 把�
 #   ⇒ 處置:baseline docs/process/.headless-baseline-list.txt 必須【重生成】,而重生成時要附一句
 #      【哪幾條變了、為什麼】—— ★否則新 baseline 會把舊污染【洗白】成新常態
 #   ★★★這段【現在寫】的理由:等看到新清單再判,就是在【已經看到數字之後】才定判準
-scaffold-swallowing-setters	★遷移鷹架:team_data.gd 五個計算屬性的 `set(_value): pass`(:57 population／:242 wounded／:260 anon_tiers／:269 anon_combat_skill／:277)——★它們的用途是【讓舊賦值站繼續編得過】,而遷移完成後【沒有人回來拆】⇒ ★★變成永久的靜默失敗產生器(直寫處裸掃 scripts/ 合計 107);★★★本 token 就是 blueprint 立的「鷹架出生必掛拆除 token」那條規矩的【第一個實例】	五個 setter 全部移除(賦值變 parse error)= 遷移真的完成	! git grep -q 'set(_value):' -- scripts/data/team_data.gd
+scaffold-swallowing-setters	★遷移鷹架:team_data.gd 五個計算屬性的 `set(_value): pass`(:57 population／:242 wounded／:260 anon_tiers／:269 anon_combat_skill／:277)——★它們的用途是【讓舊賦值站繼續編得過】,而遷移完成後【沒有人回來拆】⇒ ★★變成永久的靜默失敗產生器(直寫處裸掃 scripts/ 合計 107);★★★本 token 就是 blueprint 立的「鷹架出生必掛拆除 token」那條規矩的【第一個實例】	★【2026-09-07 訂正】原本寫「五個 setter 全部移除(賦值變 parse error)」——★★而實測【拿掉 setter 不會變成 parse error】,賦值仍是靜默 no-op ⇒ 移除【達不到目的】;★★★真正在等的是【呼叫端清乾淨】:活的 10 支床改走合法路徑、死碼 16 支刪掉	! grep -rqE '\.(population|wounded|anon_tiers|anon_combat_skill|anon_wage)[[:space:]]*=[^=]' scripts/debug/
