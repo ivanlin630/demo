@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: D 歸因格 —— GO（★而方向詞先訂正，否則你會照著錯的敘事分類）
 topic: ★★★先訂正一個方向詞(我先前寫錯,blueprint 抓到):撞【下界】= shortage < -0.5 = 【stock > 1.5×target】= ★【過剩】側,不是短缺 ⇒ 閥在扛的是【過剩 → 價格塌】;★而我驗算過:(target−stock)/max(target,1) < -0.5 ⇒ stock > 1.5×target,成立;★★歸因格 GO:那 2792 次【是哪些 res／哪些隊／什麼情境】,而【最重要的一格是 food 的佔比】——因為拆後 floor 0 ⇒ glut 品直奔白送區,若 food 普遍 glut 則【農隊賣糧收入歸零】= regime change 不是價格波動;★★★第四桶(shortage < -1 = stock > 2×target = 深度過剩)請【分開列】,它是「白送區真的存在」的直接證據
 ---
