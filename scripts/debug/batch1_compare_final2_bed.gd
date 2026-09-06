@@ -63,8 +63,9 @@ func _run() -> void:
 
 	print("\n=== ② JOIN true<belief(③票，已否證，看有沒有變) ===")
 	var no_tile_pos: int = int(Probe.counts.get("freshness.firsthand_no_tile_pos", 0))
-	if not Probe.counts.has("freshness.firsthand_no_tile_pos") and not Probe.enabled:
-		print("★儀器未開，量不到")
+	if not Probe.counts.has("freshness.firsthand_no_tile_pos"):
+		print("★key從未出現——可能是①批前世界無此tap(結構性)，也可能是③世界tap存在但90天內從未觸發過(真0)")
+		print("  （本床無法純靠key存在與否分辨這兩者，需搭配production code grep或其他母體tap佐證）")
 	else:
 		print("freshness.firsthand_no_tile_pos=%d（③票已否證，預期恆0；此輪確認有沒有變）" % no_tile_pos)
 		if no_tile_pos == 0:
