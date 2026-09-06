@@ -47,6 +47,34 @@ const TAG_BEAST    := "野獸"
 static func pop_cap_from_leadership(skill: float) -> int:
 	return clampi(int(round(49.0 * minf(skill / 0.8, 1.0))) + 1, 1, 50)
 
+# ★★★ stage A 的計數器【不掛在 Probe 上】——★理由：`Probe.bump` 開頭是 `if not enabled: return`，
+#   而【正好是那些沒 arm Probe 的床】最可能在寫這些計算屬性 ⇒ 掛 Probe ＝ 儀器裝好但沒接電。
+#   ⇒ 用 static Dictionary，恆計；★★而 Probe 那筆【也記】，給有 arm 的跑做交叉。
+static var swallowed_writes: Dictionary = {}
+static var swallow_sites: Dictionary = {}   # ★"prop @ file:line func" → 次數（真的執行到的站）
+
+static func _note_swallowed(prop: String) -> void:
+	swallowed_writes[prop] = int(swallowed_writes.get(prop, 0)) + 1
+	if int(swallowed_writes[prop]) == 1:
+		push_error("[SETTER-SWALLOWED] TeamData.%s 是計算屬性，賦值被靜默吞掉（首次報一次；逐站清單見下方 SITE 列）" % prop)
+	# ★★★【哪幾個屬性】答不了【哪幾行】――而 stage B 要修的是行不是屬性。
+	#   ★這裡把【真的有執行到的呼叫點】印出來（去重，每個站只印一次）：
+	#     107 是静態數，而這張清單是【真的會跑到的那一子集】。
+	#   ★★而沒有它，stage B 就只能【全部改】――而改一個從來不執行的站，既沒有收益也沒有驗證方式。
+	var st: Array = get_stack()
+	var site: String = "(no-stack)"
+	for fr in st:
+		var src: String = String(fr.get("source", ""))
+		if not src.ends_with("team_data.gd"):
+			site = "%s:%d %s" % [src, int(fr.get("line", -1)), String(fr.get("function", ""))]
+			break
+	var key: String = prop + " @ " + site
+	if not swallow_sites.has(key):
+		swallow_sites[key] = 0
+		print("[SETTER-SWALLOWED-SITE] %s" % key)
+	swallow_sites[key] = int(swallow_sites[key]) + 1
+	Probe.bump("setter_swallowed." + prop)
+
 var team_id: int = 0
 var leader_id: int = -1
 var named_members: Array = []
@@ -55,7 +83,12 @@ var population: int:
 	get:
 		return (1 if leader_id != -1 else 0) + named_members.size() + AnonTierSystem.total_pop(self)
 	set(_value):
-		pass
+		# ★★★ stage A（2026-09-07）：這個 setter 本來是 `pass`――【靜默吞掉寫入】。
+		#   它是遷移鷹架（讓舊的賦值站繼續編得過），而它變成了永久的靜默失敗產生器。
+		#   ★靜態數是 107 處，而我們要的是【runtime 真的執行到幾處】――所以先計數、不拿掉。
+		#   ★★push_error 只在【第一次】發：96 個賦值站 × 每 tick 會把 log 淡掉，
+		#     而【把診斷訊息淡成噪音】與沒有診斷訊息是同一件事。
+		_note_swallowed("population")
 var minor_population: int = 0
 var anon_female_ratio: float = 0.5   # anon 女性占比(metadata,不影響 pop count);戰損可扭斜(combat他域後)
 var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰鬥 spawn）
@@ -240,7 +273,12 @@ var wounded: int:
 	get:
 		return AnonCohort.by_health(anon_cohorts, "wounded")
 	set(_value):
-		pass
+		# ★★★ stage A（2026-09-07）：這個 setter 本來是 `pass`――【靜默吞掉寫入】。
+		#   它是遷移鷹架（讓舊的賦值站繼續編得過），而它變成了永久的靜默失敗產生器。
+		#   ★靜態數是 107 處，而我們要的是【runtime 真的執行到幾處】――所以先計數、不拿掉。
+		#   ★★push_error 只在【第一次】發：96 個賦值站 × 每 tick 會把 log 淡掉，
+		#     而【把診斷訊息淡成噪音】與沒有診斷訊息是同一件事。
+		_note_swallowed("wounded")
 var equip_order: Dictionary = {
 	"melee_low": 0, "melee_high": 0,
 	"ranged_low": 0, "ranged_high": 0,
@@ -258,7 +296,12 @@ var anon_tiers: Dictionary:
 			d[tier] = AnonCohort.by_tier(anon_cohorts, tier)
 		return d
 	set(_value):
-		pass
+		# ★★★ stage A（2026-09-07）：這個 setter 本來是 `pass`――【靜默吞掉寫入】。
+		#   它是遷移鷹架（讓舊的賦值站繼續編得過），而它變成了永久的靜默失敗產生器。
+		#   ★靜態數是 107 處，而我們要的是【runtime 真的執行到幾處】――所以先計數、不拿掉。
+		#   ★★push_error 只在【第一次】發：96 個賦值站 × 每 tick 會把 log 淡掉，
+		#     而【把診斷訊息淡成噪音】與沒有診斷訊息是同一件事。
+		_note_swallowed("anon_tiers")
 var anon_exp: Dictionary = {
 	"平民": 0.0, "新兵": 0.0, "老兵": 0.0,
 }
@@ -267,7 +310,12 @@ var anon_combat_skill: float:
 	get:
 		return AnonTierSystem.avg_combat_skill(self)
 	set(_value):
-		pass
+		# ★★★ stage A（2026-09-07）：這個 setter 本來是 `pass`――【靜默吞掉寫入】。
+		#   它是遷移鷹架（讓舊的賦值站繼續編得過），而它變成了永久的靜默失敗產生器。
+		#   ★靜態數是 107 處，而我們要的是【runtime 真的執行到幾處】――所以先計數、不拿掉。
+		#   ★★push_error 只在【第一次】發：96 個賦值站 × 每 tick 會把 log 淡掉，
+		#     而【把診斷訊息淡成噪音】與沒有診斷訊息是同一件事。
+		_note_swallowed("anon_combat_skill")
 var anon_wage: float:
 	get:
 		var total: int = AnonTierSystem.total_pop(self)
@@ -275,7 +323,12 @@ var anon_wage: float:
 			return 1.0
 		return AnonTierSystem.total_wage(self) / float(total)
 	set(_value):
-		pass
+		# ★★★ stage A（2026-09-07）：這個 setter 本來是 `pass`――【靜默吞掉寫入】。
+		#   它是遷移鷹架（讓舊的賦值站繼續編得過），而它變成了永久的靜默失敗產生器。
+		#   ★靜態數是 107 處，而我們要的是【runtime 真的執行到幾處】――所以先計數、不拿掉。
+		#   ★★push_error 只在【第一次】發：96 個賦值站 × 每 tick 會把 log 淡掉，
+		#     而【把診斷訊息淡成噪音】與沒有診斷訊息是同一件事。
+		_note_swallowed("anon_wage")
 var armed_anon_ratio: float = 0.0
 var anon_treasury: float = 0.0   # 匿名兵 wage 沉澱
 var fatigue: float = 0.0
