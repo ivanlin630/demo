@@ -37,15 +37,26 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   echo "[SWEEP] ★ABORT：分類器把空輸出判成有結果 ⇒ 本輪作廢"; exit 3; }
 echo "[SWEEP] 分類器自檢通過（red／green／no-output 三向）"
 
-printf 'bed\tverdict\twall_s\tnote\n' > "$OUT"
+if [ -f "$OUT" ]; then echo "[SWEEP] 續掃:$OUT 已有 $(( $(wc -l < "$OUT") - 1 )) 筆,跳過它們"
+else printf 'bed	verdict	wall_s	note
+' > "$OUT"; fi
 n=0
 while IFS= read -r bed; do
   [ -n "$bed" ] || continue
+  if cut -f1 "$OUT" 2>/dev/null | grep -qxF "$bed"; then continue; fi   # ★已掃過就跳(續掃)
   n=$((n+1))
   t0=$SECONDS
-  o="$(GODOT_TIMEOUT="$PER_BED_TIMEOUT" powershell -NoProfile -File ./tools/godot.ps1 --headless --path "$REPO" --script "$bed" 2>&1)"
+  # ★★★2026-09-07 血證:只靠【內層工具的 timeout】不夠 ——
+  #   第 34 支(game_sim_test.gd)卡了【59 分鐘】,而當時★沒有任何 Godot 在跑、
+  #   ★★wrapper 的 powershell 也不在 ⇒ 子進程早就沒了,
+  #   ★★★卡住的是 bash 的 `$(...)` 在等一個【沒有人關閉的管道】。
+  #   ⇒ 通則:【不要依賴被呼叫者自己會準時回來】—— 封頂要設在【呼叫端】。
+  o="$(timeout -k 5 "$((PER_BED_TIMEOUT + 30))" env GODOT_TIMEOUT="$PER_BED_TIMEOUT" powershell -NoProfile -File ./tools/godot.ps1 --headless --path "$REPO" --script "$bed" 2>&1)"
+  outer_rc=$?
   dt=$((SECONDS-t0))
-  if printf '%s' "$o" | grep -qa 'GODOT TIMEOUT'; then v="timeout"; else v="$(printf '%s' "$o" | classify)"; fi
+  if [ "$outer_rc" = "124" ] || [ "$outer_rc" = "137" ]; then v="hang"
+  elif printf '%s' "$o" | grep -qa 'GODOT TIMEOUT'; then v="timeout"
+  else v="$(printf '%s' "$o" | classify)"; fi
   note=""
   [ "$v" = "red" ] && note="$(printf '%s' "$o" | grep -am1 'Assertion failed\|\[FAIL\]' | tr '\t' ' ' | cut -c1-90)"
   printf '%s\t%s\t%s\t%s\n' "$bed" "$v" "$dt" "$note" >> "$OUT"
