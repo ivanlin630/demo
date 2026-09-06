@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★小工單（不急，排你 ⑨ 之後）：`coin_b_verify_bed.gd` 是全庫【唯一】真正零判準通道的床——★★而它把期望值寫在【給人看的字串】裡：`delta=%.4f（無鑄幣機制應=0）`，知識在，只是不在機器讀得到的地方；補上判準後我把 CoinAudit 補進 merge-gates
 ---
 

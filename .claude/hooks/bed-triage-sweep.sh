@@ -24,7 +24,14 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   local t; t="$(cat)"
   if [ -z "${t//[[:space:]]/}" ]; then echo "no-output"; return; fi
   if printf '%s' "$t" | grep -qa 'Parse Error\|Failed to load script\|Could not find type\|not declared'; then echo "crash"; return; fi
-  if printf '%s' "$t" | grep -qaE 'Assertion failed|SCRIPT ERROR|\[FAIL\]|(^|[[:space:]])FAIL[[:space:]]|HAS FAILURE|FAILS=[1-9]'; then echo "red"; return; fi
+  # ★硬紅：引擎級錯誤，任何情況都算紅
+  if printf '%s' "$t" | grep -qaE 'Assertion failed|SCRIPT ERROR'; then echo "red"; return; fi
+  # ★★優先讀【床自己的總結行】——它是權威自報，勝過在內文裡撈字串
+  if printf '%s' "$t" | grep -qaE 'HAS FAILURE|FAILS=[1-9]'; then echo "red"; return; fi
+  if printf '%s' "$t" | grep -qaE 'ALL PASS|FAILS=0|fail=0'; then echo "green"; return; fi
+  # ★★★沒有總結行才退回逐行掃，且【只認行首】的失敗標記
+  #   血證 2026-09-07：不錨行首會把 `  PASS 對照:...=v1 FAIL 根` 判成紅（假紅）
+  if printf '%s' "$t" | grep -qaE '^[[:space:]]*(\[FAIL\]|FAIL[[:space:]])'; then echo "red"; return; fi
   echo "green"
 }
 
@@ -37,7 +44,8 @@ for _s in "SCRIPT ERROR: Assertion failed: boom" "  FAIL  agriculture yield mism
 ' "$_s" | classify)" = "red" ] || {
     echo "[SWEEP] ★ABORT：分類器抓不到真實紅形狀：$_s ⇒ 本輪作廢（不得讀成任何結果）"; exit 3; }
 done
-for _s in "  PASS  ok" "=== ALL PASS（fail=0）===" "ok" "=== DONE === ALL PASS"; do
+# ★★★血證樣本（2026-09-07）：PASS 訊息【內文】含 FAIL 字樣 —— 不錨行首就會判成假紅
+for _s in "  PASS  ok" "=== ALL PASS（fail=0）===" "ok" "=== DONE === ALL PASS" "  PASS 對照:舊 fill 式 level 相消(old L1 2.00==L3 2.00=v1 FAIL 根)" "[bed] 這是說明:預期 FAIL 根已修"; do
   [ "$(printf '%s
 ' "$_s" | classify)" = "green" ] || {
     echo "[SWEEP] ★ABORT：分類器把通過樣本判成非綠（過度匹配）：$_s ⇒ 本輪作廢"; exit 3; }
@@ -67,7 +75,7 @@ while IFS= read -r bed; do
   elif printf '%s' "$o" | grep -qa 'GODOT TIMEOUT'; then v="timeout"
   else v="$(printf '%s' "$o" | classify)"; fi
   note=""
-  [ "$v" = "red" ] && note="$(printf '%s' "$o" | grep -am1 'Assertion failed\|\[FAIL\]' | tr '\t' ' ' | cut -c1-90)"
+  [ "$v" = "red" ] && note="$(printf '%s' "$o" | grep -aE -m1 'Assertion failed|\[FAIL\]|(^|[[:space:]])FAIL[[:space:]]|HAS FAILURE|FAILS=[1-9]' | tr '\t' ' ' | cut -c1-90)"
   printf '%s\t%s\t%s\t%s\n' "$bed" "$v" "$dt" "$note" >> "$OUT"
   echo "[SWEEP] $n $(basename "$bed") ⇒ $v (${dt}s)"
 done < "$LIST"
