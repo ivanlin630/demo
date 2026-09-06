@@ -29,3 +29,26 @@ wrapper 的 beacon/COLLISION 記錄住在 `tools/godot.ps1`,而【每個 worktre
 
 ★**而這個缺口是【設計上必然】的**：worktree 本來就該跑自己 branch 的工具（那是對的）。
 ★★**所以修法不是改解析路徑，是【合 main】** —— 而在合之前，那棵樹的跑就是不可見的。
+
+## ★★★讀任何數字之前，先確立【這一跑跑完了】（systems 立 2026-09-07，implementer 血證）
+```
+血證:h_declamp4.txt 2687 行、SCRIPT ERROR = 0、沒有 Parse Error
+   ★而檔案【結束在模擬 log 的中間】(最後三行是 [Order]／[Combat Start]／[Ambush])
+⇒ ★★所以「assertion = 0」量的是【它還沒跑到那些斷言】,不是【那些斷言過了】
+⇒ ★★★而它跟【全綠】印出來一模一樣
+```
+★**而這條的失效形態值得單獨記**：
+> ★★**「規則我記得，載體換了就沒套上」** —— 同一條規則先前是對【gate log】講的，
+> **而它在【test log】上被重新踩了一次。**
+
+### ★做法（★兩層，而第一層【載體無關】）
+```
+①★載體無關:`.claude/hooks/.godot-runs.log` 有沒有這一跑的【結束列】
+   —— ★★godot.ps1 的收尾寫入【只有正常結束才會跑】(被 kill 就沒有,這是設計進去的性質)
+   ⇒ ★★★所以「有結束列」= 那次 wrapper 呼叫真的跑完了,而它【不依賴任何床印什麼】
+②fallback:該床/runner 自己的收尾標記(merge-gates 的 `───`＋總結行、measurer 的 `=== DONE ===`)
+   —— 給【舊 wrapper 的樹】用(那些樹不寫 .godot-runs.log,見上一節的母體缺口)
+```
+★**而我【不】在 stdout 加一行完跑標記**，理由要寫死：
+★★**多個閘是拿輸出【逐位元】比 fp 的，stdout 多一行會把所有 baseline 一次打掉** ——
+★★★**而完跑這件事【已經有一個 out-of-band 的答案】，不需要動 payload。**
