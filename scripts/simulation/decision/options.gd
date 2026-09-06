@@ -26,6 +26,34 @@ static var REGISTRY: Dictionary = {
 				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_TRADE, "target": tgt},
 	},
+	# ★★★B-v0 領取念頭（意圖帳:43 三件套的第②：秤上 option）——
+	#   ★沒有這個 entry，`claim_value` term 【永遠回 0】⇒ 那就是「儀器裝好但沒接電」的決策層版本。
+	#   ★★而它【不新增 task 型別】：走既有 `TASK_TRADE` ＋ target = 待領所在的市集
+	#     ⇒ 到場之後由 `_resolve_market_at_outpost` 順手結清（★見 interaction_system 的領取段）
+	#     ⇒ ★★★新增 task 型別會讓所有讀 `current_task` 的地方多一個要處理的值，
+	#       而「去一個地方」這件事既有的 TRADE 已經表達得了。
+	"領取": {
+		"affinity": [0.2, 0.0, 0.1, 0.6, 0.1], "sets": {"ambient": true},
+		"terms": [["claim_value", "economic"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.pending_claim_amt > 0.0 and ctx.pending_claim_pos != Vector2i(-1, -1),
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			# ★目標＝自己待領資產所在的市集；★★而【那是自知】（自己寄賣的紀錄），不是偷看
+			var best: Vector2i = Vector2i(-1, -1)
+			var best_d: int = 1 << 30
+			for tile_id in state.world.tiles:
+				var t: HexTileData = state.world.tiles[tile_id]
+				for c in t.pending_claims:
+					if int(c.get("owner_team", -1)) != team.team_id: continue
+					if float(c.get("amt", 0.0)) <= 0.0: continue
+					var dv: Vector2i = t.tile_pos - team.tile_pos
+					var d: int = (absi(dv.x) + absi(dv.x + dv.y) + absi(dv.y)) / 2
+					if d < best_d:
+						best_d = d; best = t.tile_pos
+			if best == Vector2i(-1, -1):
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_TRADE, "target": best},
+	},
 	"生產": {
 		"affinity": [0.3, 0.0, 0.0, 0.5, 0.2], "sets": {"ambient": true},
 		"terms": [["produce_need", "settle"], ["ambition_drive", "ambition"]],

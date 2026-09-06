@@ -891,6 +891,11 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 	# 觀測：到市場地方＝會合（鏡射舊 pairwise trade.meet 語意，全量暫態可觀測性）。
 	if Probe.enabled and visitor.current_task == TeamData.TASK_TRADE:
 		Probe.bump("trade.meet")
+	# ★★★B-v0 領取【執行端】——★沒有這一段，「領取」option 會 dispatch 而【什麼都不會發生】：
+	#   那正是本專案有前科的【手不聽腦】（committed 求生卻不 dispatch 的同族，只是這次在下游）。
+	#   ★★而它掛在【到場】這一刻：訪客站上這個市集 ⇒ 結清他自己的待領資產。
+	#   ★★★紅線的另一半：領取【必須是本人到場】—— 而這一段就是「不在場不給」的執行證明。
+	_claim_pending_here(state, visitor, tile)
 	var dealt: bool = false
 	var saw_live_order: bool = false
 	for entry in tile.market_orders.duplicate():   # 複製：沖銷改動原陣列
@@ -984,6 +989,40 @@ static func _add_pending_claim(tile: HexTileData, kind: String, res: String, amt
 		Probe.bump("mkt.claim.opened")
 		Probe.bump("mkt.claim.opened." + kind)
 		Probe.add_amount("mkt.claim.added." + kind, amt)
+
+# ★★★領取：把【這個 tile 上、屬於這隊】的待領資產交還本人（★到場才給）。
+#   ★款 ⇒ 進 `team.resources["coin"]`；貨 ⇒ 進 `team.resources[res]`
+#   ★★而【逐筆對帳】：交出去的量 == 條目上的量（零蒸發），★★★而條目【清乾淨】不留 0 額幽靈
+#     —— 留 0 額條目會讓 `pending_claims` 越積越長，而 `audit_escrow`/腦欄位都要掃它。
+static func _claim_pending_here(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	if tile.pending_claims.is_empty():
+		return
+	var kept: Array = []
+	var got_coin: float = 0.0
+	var got_goods: float = 0.0
+	for c in tile.pending_claims:
+		if int(c.get("owner_team", -1)) != team.team_id:
+			kept.append(c)
+			continue
+		var amt: float = float(c.get("amt", 0.0))
+		if amt <= 0.0:
+			continue   # ★0 額條目直接丟（幽靈）
+		if String(c.get("kind", "")) == "coin":
+			ResourceBank.add(team, "coin", amt, "claim_coin")
+			got_coin += amt
+		else:
+			ResourceBank.add(team, String(c.get("res", "")), amt, "claim_goods")
+			got_goods += amt
+	tile.pending_claims = kept
+	if (got_coin > 0.0 or got_goods > 0.0):
+		print("[Claim] Team%d 於 %s 領回 coin=%.2f goods=%.1f" % [team.team_id, str(tile.tile_pos), got_coin, got_goods])
+		if Probe.enabled:
+			Probe.bump("mkt.claim.taken")
+			Probe.add_amount("mkt.claim.taken_coin", got_coin)
+			Probe.add_amount("mkt.claim.taken_goods", got_goods)
+			# ★★★款與貨【分開記】——抽象共用不代表被同等使用，而那正是要量的東西
+			if got_coin > 0.0: Probe.bump("mkt.claim.taken.coin")
+			if got_goods > 0.0: Probe.bump("mkt.claim.taken.goods")
 
 func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
 		oid: int, res: String, order_rem: int, commerce: float, owner_lv: Dictionary) -> bool:
