@@ -75,3 +75,4 @@ envoy-ptype	powershell -NoProfile -File ./tools/godot.ps1 --headless --script sc
 mailbox-size	bash .claude/hooks/mailbox-size-gate.sh	信箱熱目錄超上限就紅——★它存在的理由不是「大不好看」,是【歸檔停下來時會有人知道】(2026-08-27 建好的歸檔沒接觸發器,沒跑,而沒跑完全沒有症狀,直到 1997 封把 SessionStart 掃描拖到超時被殺)	\[mailbox-size\] (PASS|FAIL)
 mailbox-broadcast	bash .claude/hooks/mailbox-broadcast-gate.sh	★還開著的 to: all 廣播信就紅——廣播只有【一個 status 欄位】,第一個 consume 它的角色會讓其他人再也收不到(血證 2026-09-06:HALT 那封 to: all 沒喚醒任何人,四角色沒違規是僥倖)	\[mailbox-broadcast\] (PASS|FAIL)
 board-price	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/board_price_carry_test.gd	自報價跨載體帶得到：entry→message→entry 三站不漏；★分母為 0 判不可判非綠；★★含鑑別力（去價必退回 proxy）	=== DONE === ALL PASS
+swallow-setter	bash .claude/hooks/swallow-setter-gate.sh	★新出現的靜默吞寫 setter(set(_value): pass)就紅——它讓賦值不報錯而且什麼都不做,呼叫端會靜默量到另一個世界(血證 2026-09-07:五個這種 setter、直寫處 107,床裡設 pop 卻跑 pop=0 的世界)	\[SWALLOW-SETTER\] (PASS|FAIL)

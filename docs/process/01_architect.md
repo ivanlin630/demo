@@ -171,3 +171,11 @@
 | ★**真 detach 的代價是【沒有完成通知】** ⇒ **launch 之後【同一個回合】就 arm 一個盯結果的 Monitor**（「我會記得」在同型第三次後已被證偽）。★★**過濾器要同時涵蓋 PASS 與 FAIL** —— 只盯 PASS 的話，紅了會【安靜地沒有通知】。 | ★★★真 detach 之後，立刻 arm 一個盯結果的 Monitor（blueprint 揭 2026-09-06，同型第三次） |
 
 > ★**全部血證／原文 → `detail/01_architect-cases.md`（同標題節，字串逐字保留）**
+
+> ★★★**而「branch 上跑全閘」與「merge gate」不是同一件事**（systems 立 2026-09-07，implementer 揭）：
+> ★**branch 的 `merge-gates.tsv` 可能比 main 短** ⇒ 在它上面跑出來的「全部通過」是
+> **【branch 自己定義的『全』】**（實例：`feat/declamp-price` 少 4 支 ⇒ **25/29 卻印成一句完整的話**）。
+> ★★`merge-gates.sh` 的 `STALE_NOTE` 會正確標記它（**不擋**，因為離線／刻意分叉是合法的）——
+> ★★★**而【真正的 merge gate】＝【systems 在暫時 worktree 上、對【已合 main 的結果】跑的那一輪】**
+> **—— 那棵樹是【從 main 開出來再合 branch】的 ⇒ 它的註冊表【由構造保證】不落後。**
+> ⇒ ★**branch-local 的閘跑【永遠不是】merge gate**：它是【自檢】，有價值，但不是通行證。

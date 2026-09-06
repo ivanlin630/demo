@@ -206,7 +206,15 @@ Remove-Item $tempOut, $tempErr -ErrorAction SilentlyContinue
 # evidence that the run did not finish.
 try {
     $runEnd = Get-Date
-    "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`t$($runEnd.ToString('yyyy-MM-ddTHH:mm:ss'))`t$beaconRole`tpid=$PID`t$($args -join ' ')" |
+    # 2026-09-07 FIX (implementer found it): this row used to be written unconditionally,
+    # so a run killed at the timeout deadline left EXACTLY the same evidence as a run that
+    # finished. The row was being used as the 'did this run complete' witness, so a timeout
+    # was silently counted as a completion -- and every 'no bad news' conclusion drawn from
+    # a timed-out bed was therefore unfounded. The witness had the disease it was meant to cure.
+    # The outcome now travels WITH the row: ok | timeout. No row at all still means the
+    # wrapper itself died (killed from outside), which is a third, different state.
+    $outcome = if ($timedOut) { 'timeout' } else { 'ok' }
+    "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`t$($runEnd.ToString('yyyy-MM-ddTHH:mm:ss'))`t$beaconRole`tpid=$PID`t$outcome`t$($args -join ' ')" |
         Out-File -FilePath $runLog -Encoding ascii -Append
     Remove-Item $beaconFile -ErrorAction SilentlyContinue
 } catch { }
