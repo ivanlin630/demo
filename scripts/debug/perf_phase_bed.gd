@@ -1,5 +1,12 @@
 extends SceneTree
 
+# ★★★【第⑧票 2026-09-06 警語】本床的 full-HD／near-far 對照【已恆等於預設】——
+#   `SimRunner.force_full_hd` 與 near/far 分班一起退場 ⇒ 對照的兩邊【變成同一個東西】
+#   ⇒ ★★此對照【已無鑑別力】：它還會跑、還會印數字，而那些數字【不再是在比較兩件事】。
+#   ★★★不加這行的話它會變成【一支安靜地什麼都沒比的床】—— 今天已經出現過兩次同型。
+#   ★而本床【沒有被刪】是刻意的：刪床是另一個決定，不歸第⑧票。
+#     要不要重寫或退休 ⇒ 具名交回 systems 與 measurer。
+
 # 相位計時 profile 床（純 debug/infra，零 production 侵入）。
 # 藍圖/用戶題「運算卡哪」：短窗跑 + 累積相位表 → 哪個 phase 吃大頭。
 #
@@ -33,14 +40,12 @@ func _run() -> void:
 		world_seed, days, total_ticks, cfg_name])
 
 	seed(world_seed)
-	SimRunner.force_full_hd = true    # 全隊 near → 分組相位計時
 	SimRunner.phase_timing = true
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg_name)
 	if config.is_empty():
 		print("[FAIL] config 載入失敗：%s" % cfg_name)
-		SimRunner.force_full_hd = false
 		return
 	config["seed"] = world_seed
 	GameSetup.setup(state, config)
@@ -66,7 +71,6 @@ func _run() -> void:
 			break
 
 	var wall_total: int = Time.get_ticks_usec() - wall_t0
-	SimRunner.force_full_hd = false
 	SimRunner.phase_timing = false
 	_report(dts, phase_total, wall_total, teams_start, state.teams.size())
 	print("=== perf_phase_bed DONE ===")

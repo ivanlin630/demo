@@ -1,0 +1,10 @@
+===== ①全閘（兩支修完後【重跑全部】——★上一輪我只修了兩支，沒重跑就不能說全綠）=====
+[MERGE-GATES] 註冊表 22 支｜總時 430s
+[MERGE-GATES] PASS：全部通過（★每一支都印出了它該印的結論）
+
+===== ②determinism 三跑（★同一份 code；跑前跑後比 HEAD）=====
+run 1: lines=3163  sha=5ae4e545ce58cd5e  err=0
+run 2: lines=3163  sha=5ae4e545ce58cd5e  err=0
+run 3: lines=3163  sha=5ae4e545ce58cd5e  err=0
+[DET3] HEAD 未變：e88000b7
+[DET3] PASS 三跑逐位元相同

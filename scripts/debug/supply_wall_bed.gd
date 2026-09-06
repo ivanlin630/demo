@@ -22,7 +22,6 @@ func _run() -> void:
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	print("=== supply_wall_bed: seed=%d months=%d ===" % [world_seed, months])
 	seed(world_seed)
-	SimRunner.force_full_hd = true
 	Probe.enabled = true
 	Probe.reset()
 	var state := WorldState.new()
@@ -38,7 +37,6 @@ func _run() -> void:
 		if state.teams.is_empty():
 			break
 	print("[SW-final] yield.works_tile_pass=%d" % int(Probe.counts.get("yield.works_tile_pass", 0)))
-	SimRunner.force_full_hd = false
 	Probe.enabled = false
 	print("=== DONE ===")
 

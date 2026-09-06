@@ -1,12 +1,12 @@
 # 工期單一真值常駐閘｜母體＝construction_ticks_left 的真寫入點（引擎決定的軸）
 # 設定工期 8｜清除工地 5｜未經入口 0
-OK   | scripts/simulation/faction_ai_system.gd:6206| OutpostSystem.build_person_hours("settle", 1)
-OK   | scripts/simulation/outpost_system.gd:553| build_person_hours(type, level)
-OK   | scripts/simulation/outpost_system.gd:576| build_person_hours(tile.outpost_type, new_level)
-OK   | scripts/simulation/outpost_system.gd:637| build_person_hours(facility, cur + 1)
-OK   | scripts/simulation/outpost_system.gd:655| build_person_hours(tile.outpost_type, tile.outpost_level) / 2
-OK   | scripts/simulation/outpost_system.gd:791| build_person_hours(tile.outpost_type, target_level)
-OK   | scripts/simulation/outpost_system.gd:844| build_person_hours(tile.outpost_type, tile.outpost_level) / 2
+OK   | scripts/simulation/faction_ai_system.gd:6285| OutpostSystem.build_person_hours("settle", 1)
+OK   | scripts/simulation/outpost_system.gd:559| build_person_hours(type, level)
+OK   | scripts/simulation/outpost_system.gd:582| build_person_hours(tile.outpost_type, new_level)
+OK   | scripts/simulation/outpost_system.gd:643| build_person_hours(facility, cur + 1)
+OK   | scripts/simulation/outpost_system.gd:661| build_person_hours(tile.outpost_type, tile.outpost_level) / 2
+OK   | scripts/simulation/outpost_system.gd:797| build_person_hours(tile.outpost_type, target_level)
+OK   | scripts/simulation/outpost_system.gd:850| build_person_hours(tile.outpost_type, tile.outpost_level) / 2
 OK   | scripts/simulation/player_command_system.gd:242| OutpostSystem.build_person_hours("camp")
 # ★誠實限：讀原始碼文本 ⇒ 抓得到「沒經過入口」，抓不到「經過入口但 kind 給錯」
 #   後者由 s6_phase2_single_source_bed 的倍數對照守

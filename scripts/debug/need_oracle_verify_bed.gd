@@ -18,7 +18,6 @@ func _run() -> void:
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	print("=== need_oracle_verify_bed: seed=%d months=%d ===" % [world_seed, months])
 	seed(world_seed)
-	SimRunner.force_full_hd = true
 	Probe.enabled = true
 	Probe.reset()
 	var state := WorldState.new()
@@ -49,7 +48,6 @@ func _run() -> void:
 	print("[market_bail-final] %s" % str(bail_final))
 	print("[death-final] starve_minor=%d starve_anon=%d combat_pop=%d combat_named=%d defect_leave=%d" % [
 		_c("death.starve_minor"), _c("death.starve_anon"), _c("death.combat_pop"), _c("death.combat_named"), _c("death.defect_leave")])
-	SimRunner.force_full_hd = false
 	Probe.enabled = false
 	print("=== DONE ===")
 

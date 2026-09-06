@@ -45,7 +45,7 @@ static var last_report: Dictionary = {"checked": 0, "cleared": {}, "flags": {}}
 
 # ★旗標：只印不清。這裡是名單與【預設值】，非預設才會出現在 `flags=` 欄。
 const _FLAG_DEFAULTS: Dictionary = {
-	"SimRunner.force_full_hd": false,
+	# ★`SimRunner.force_full_hd` 已隨第⑧票退場（分班拆掉之後它恆等於預設）⇒ 從旗標名單移除。
 	"SimRunner.phase_timing": false,
 	"PathSystem.suppress_observe_noise": false,
 	"OwnerOutpostIndex.shadow": false,
@@ -101,7 +101,6 @@ static func _sweep() -> Dictionary:
 # ★旗標讀值（★用字串表而不是 Callable：這張表要能被人一眼讀完，而它就是那份名單本身）
 static func _read_flag(name: String):
 	match name:
-		"SimRunner.force_full_hd": return SimRunner.force_full_hd
 		"SimRunner.phase_timing": return SimRunner.phase_timing
 		"PathSystem.suppress_observe_noise": return PathSystem.suppress_observe_noise
 		"OwnerOutpostIndex.shadow": return OwnerOutpostIndex.shadow

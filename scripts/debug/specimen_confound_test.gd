@@ -1,5 +1,12 @@
 extends SceneTree
 
+# ★★★【第⑧票 2026-09-06 警語】本床的 full-HD／near-far 對照【已恆等於預設】——
+#   `SimRunner.force_full_hd` 與 near/far 分班一起退場 ⇒ 對照的兩邊【變成同一個東西】
+#   ⇒ ★★此對照【已無鑑別力】：它還會跑、還會印數字，而那些數字【不再是在比較兩件事】。
+#   ★★★不加這行的話它會變成【一支安靜地什麼都沒比的床】—— 今天已經出現過兩次同型。
+#   ★而本床【沒有被刪】是刻意的：刪床是另一個決定，不歸第⑧票。
+#     要不要重寫或退休 ⇒ 具名交回 systems 與 measurer。
+
 # SpecimenTracer RNG confound 修 TDD（slice: specimen-rng-confound-fix）
 # spec: docs/superpowers/specs/2026-07-15-specimen-rng-confound-fix.md
 #
@@ -48,7 +55,6 @@ func _run(seed_val: int, ticks: int, specimen: Array) -> String:
 	var cfg: Dictionary = GameSetup.load_config(CFG)
 	cfg["seed"] = seed_val
 	GameSetup.setup(state, cfg)
-	SimRunner.force_full_hd = true
 	state.specimen_team_ids.assign(specimen)
 	SpecimenTracer.reset()
 	SpecimenTracer.enabled = specimen.size() > 0
@@ -58,7 +64,6 @@ func _run(seed_val: int, ticks: int, specimen: Array) -> String:
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
 	SpecimenTracer.enabled = false
-	SimRunner.force_full_hd = false
 	SpecimenTracer.reset()
 	return _world_sig(state)
 

@@ -70,6 +70,10 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue
+		# ★★★驗收②（第⑧票）：per-team 執行次數要可觀測 —— ★判準要擴到【至少三個系統】，
+		#   因為只看薪資的話「距離無關」只被證明在一條路上，而分班影響的是【每一個 per-team 系統】。
+		if Probe.enabled:
+			Probe.bump("sysexec.collect.byteam.%04d" % int(tid))
 		var team: TeamData = state.teams[tid]
 		var tile_id: int   = _pos_to_tile_id(team.tile_pos)
 		if not state.world.tiles.has(tile_id):

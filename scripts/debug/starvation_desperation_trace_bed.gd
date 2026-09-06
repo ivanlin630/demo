@@ -15,7 +15,6 @@ func _run() -> void:
 	var months: int = int(OS.get_environment("SPECIMEN_MONTHS")) if OS.has_environment("SPECIMEN_MONTHS") else 6
 	var out_path: String = OS.get_environment("SPECIMEN_JSONL") if OS.has_environment("SPECIMEN_JSONL") else "res://specimen_trace.jsonl"
 	seed(seed_val)
-	SimRunner.force_full_hd = true
 	Probe.enabled = true
 	SpecimenTracer.reset()
 	SpecimenTracer.enabled = true

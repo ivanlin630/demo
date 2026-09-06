@@ -1,0 +1,110 @@
+# eight-perf-default —— ★★★這份是【裁剪過的】：只留 TickPerf 逐日 + 對照摘要表。
+# ★被丟掉的是模擬事件 log（[SoloAI]/[Move]/[Barter]…）共 21245 行，留下 104 行。
+# ★★丟掉的理由是【體積】不是【無關】—— 而我把數字寫在這裡，是因為
+#   ★★★靜默截斷會讓「這就是全部」跟「這是我挑過的」長得一樣。
+# ★原始完整輸出在 session scratchpad（session-local，★不隨 repo 走 ⇒ 下一個人拿不到）。
+
+=== lod_perf_bed：seed=1337 months=1 (ticks=43200) ladder=["default", "warring_states"] ===
+config       regime    teams    mean_us     p99_us     max_us      tps
+[TickPerf] day=1 avg=2074 us max=924382 us ticks=1440 teams=19 factions=2
+[TickPerf] day=2 avg=1443 us max=485589 us ticks=1440 teams=17 factions=2
+[TickPerf] day=3 avg=1605 us max=443608 us ticks=1440 teams=18 factions=2
+[TickPerf] day=4 avg=1713 us max=358994 us ticks=1440 teams=18 factions=2
+[TickPerf] day=5 avg=1486 us max=460838 us ticks=1440 teams=16 factions=2
+[TickPerf] day=6 avg=1375 us max=483586 us ticks=1440 teams=18 factions=2
+[TickPerf] day=7 avg=2186 us max=611420 us ticks=1440 teams=17 factions=2
+[TickPerf] day=8 avg=1985 us max=648164 us ticks=1440 teams=15 factions=2
+[TickPerf] day=9 avg=1761 us max=436802 us ticks=1440 teams=17 factions=2
+[TickPerf] day=10 avg=1852 us max=384310 us ticks=1440 teams=17 factions=2
+[TickPerf] day=11 avg=2040 us max=625214 us ticks=1440 teams=18 factions=2
+[TickPerf] day=12 avg=2157 us max=570616 us ticks=1440 teams=18 factions=2
+[TickPerf] day=13 avg=1893 us max=315995 us ticks=1440 teams=19 factions=2
+[TickPerf] day=14 avg=2232 us max=549473 us ticks=1440 teams=20 factions=2
+[TickPerf] day=15 avg=2722 us max=875352 us ticks=1440 teams=21 factions=2
+[TickPerf] day=16 avg=2406 us max=670621 us ticks=1440 teams=22 factions=2
+[TickPerf] day=17 avg=3625 us max=1048285 us ticks=1440 teams=23 factions=2
+[TickPerf] day=18 avg=4560 us max=1208906 us ticks=1440 teams=24 factions=2
+[TickPerf] day=19 avg=4717 us max=1680891 us ticks=1440 teams=24 factions=2
+[TickPerf] day=20 avg=5861 us max=1989525 us ticks=1440 teams=25 factions=2
+[TickPerf] day=21 avg=5776 us max=1860294 us ticks=1440 teams=25 factions=2
+[TickPerf] day=22 avg=5492 us max=1404956 us ticks=1440 teams=25 factions=2
+[TickPerf] day=23 avg=7387 us max=2378346 us ticks=1440 teams=25 factions=2
+[TickPerf] day=24 avg=5675 us max=1680865 us ticks=1440 teams=25 factions=2
+[TickPerf] day=25 avg=6616 us max=2107980 us ticks=1440 teams=24 factions=2
+[TickPerf] day=26 avg=5660 us max=1312294 us ticks=1440 teams=24 factions=2
+[TickPerf] day=27 avg=5482 us max=2449005 us ticks=1440 teams=24 factions=2
+[TickPerf] day=28 avg=4897 us max=1571082 us ticks=1440 teams=24 factions=2
+[TickPerf] day=29 avg=4477 us max=936897 us ticks=1440 teams=24 factions=2
+[TickPerf] day=30 avg=8189 us max=1933808 us ticks=1440 teams=24 factions=2
+[TickPerf] day=1 avg=4140 us max=1260761 us ticks=1440 teams=17 factions=2
+[TickPerf] day=2 avg=2637 us max=481367 us ticks=1440 teams=17 factions=2
+[TickPerf] day=3 avg=4147 us max=700867 us ticks=1440 teams=17 factions=2
+[TickPerf] day=4 avg=6839 us max=817806 us ticks=1440 teams=17 factions=2
+[TickPerf] day=5 avg=5553 us max=749771 us ticks=1440 teams=17 factions=2
+[TickPerf] day=6 avg=5735 us max=681453 us ticks=1440 teams=18 factions=2
+[TickPerf] day=7 avg=6031 us max=650347 us ticks=1440 teams=19 factions=2
+[TickPerf] day=8 avg=5777 us max=776578 us ticks=1440 teams=19 factions=2
+[TickPerf] day=9 avg=5529 us max=642143 us ticks=1440 teams=20 factions=2
+[TickPerf] day=10 avg=6458 us max=880967 us ticks=1440 teams=21 factions=2
+[TickPerf] day=11 avg=9658 us max=1046402 us ticks=1440 teams=21 factions=2
+[TickPerf] day=12 avg=9762 us max=1092329 us ticks=1440 teams=21 factions=2
+[TickPerf] day=13 avg=7936 us max=871414 us ticks=1440 teams=21 factions=2
+[TickPerf] day=14 avg=12087 us max=1146408 us ticks=1440 teams=22 factions=2
+[TickPerf] day=15 avg=9687 us max=942431 us ticks=1440 teams=23 factions=2
+[TickPerf] day=16 avg=14228 us max=2559112 us ticks=1440 teams=22 factions=2
+[TickPerf] day=17 avg=15375 us max=1616092 us ticks=1440 teams=22 factions=2
+[TickPerf] day=18 avg=14618 us max=1797685 us ticks=1440 teams=22 factions=2
+[TickPerf] day=19 avg=12895 us max=1263200 us ticks=1440 teams=22 factions=2
+[TickPerf] day=20 avg=15956 us max=2015000 us ticks=1440 teams=22 factions=2
+[TickPerf] day=21 avg=15373 us max=1392483 us ticks=1440 teams=20 factions=2
+[TickPerf] day=22 avg=9953 us max=1347662 us ticks=1440 teams=21 factions=2
+[TickPerf] day=23 avg=12261 us max=1124224 us ticks=1440 teams=22 factions=2
+[TickPerf] day=24 avg=13564 us max=1294438 us ticks=1440 teams=23 factions=2
+[TickPerf] day=25 avg=9901 us max=1053596 us ticks=1440 teams=22 factions=3
+[TickPerf] day=26 avg=9908 us max=1039119 us ticks=1440 teams=24 factions=3
+[TickPerf] day=27 avg=12299 us max=1528058 us ticks=1440 teams=25 factions=3
+[TickPerf] day=28 avg=9931 us max=844772 us ticks=1440 teams=24 factions=3
+[TickPerf] day=29 avg=11063 us max=1133948 us ticks=1440 teams=25 factions=3
+[TickPerf] day=30 avg=9859 us max=941142 us ticks=1440 teams=25 factions=3
+default      LOD          15       3649      94879    2449012      274
+default      full-HD      15       9642     466372    2559119      104
+[TickPerf] day=1 avg=20730 us max=9207096 us ticks=1440 teams=65 factions=8
+[TickPerf] day=2 avg=16151 us max=5377002 us ticks=1440 teams=64 factions=8
+[TickPerf] day=3 avg=20917 us max=6121970 us ticks=1440 teams=64 factions=8
+[TickPerf] day=4 avg=17338 us max=5281050 us ticks=1440 teams=65 factions=8
+[TickPerf] day=5 avg=22180 us max=6390337 us ticks=1440 teams=73 factions=8
+[TickPerf] day=6 avg=22564 us max=6458560 us ticks=1440 teams=81 factions=8
+[TickPerf] day=7 avg=23961 us max=6525000 us ticks=1440 teams=85 factions=8
+[TickPerf] day=8 avg=26800 us max=7100893 us ticks=1440 teams=91 factions=8
+[TickPerf] day=9 avg=29263 us max=9444766 us ticks=1440 teams=91 factions=8
+[TickPerf] day=10 avg=40651 us max=13251100 us ticks=1440 teams=94 factions=9
+[TickPerf] day=11 avg=33367 us max=12994348 us ticks=1440 teams=95 factions=9
+[TickPerf] day=12 avg=35727 us max=11597597 us ticks=1440 teams=97 factions=9
+[TickPerf] day=13 avg=37415 us max=11478144 us ticks=1440 teams=98 factions=9
+[TickPerf] day=14 avg=42870 us max=14308772 us ticks=1440 teams=99 factions=9
+[TickPerf] day=15 avg=57783 us max=18846627 us ticks=1440 teams=98 factions=9
+[TickPerf] day=16 avg=46926 us max=17358958 us ticks=1440 teams=101 factions=9
+[TickPerf] day=17 avg=43485 us max=13343025 us ticks=1440 teams=101 factions=9
+[TickPerf] day=18 avg=52277 us max=15354297 us ticks=1440 teams=100 factions=9
+[TickPerf] day=19 avg=42888 us max=11823052 us ticks=1440 teams=100 factions=9
+[TickPerf] day=20 avg=56384 us max=18600685 us ticks=1440 teams=98 factions=9
+[TickPerf] day=21 avg=44640 us max=16696451 us ticks=1440 teams=102 factions=9
+[TickPerf] day=22 avg=47844 us max=13798188 us ticks=1440 teams=103 factions=9
+[TickPerf] day=23 avg=56003 us max=13499345 us ticks=1440 teams=108 factions=9
+[TickPerf] day=24 avg=45506 us max=13118708 us ticks=1440 teams=105 factions=9
+[TickPerf] day=25 avg=57280 us max=15448380 us ticks=1440 teams=105 factions=9
+[TickPerf] day=26 avg=52991 us max=19463671 us ticks=1440 teams=104 factions=9
+[TickPerf] day=27 avg=49073 us max=13523138 us ticks=1440 teams=105 factions=9
+[TickPerf] day=28 avg=58962 us max=12987901 us ticks=1440 teams=106 factions=10
+[TickPerf] day=29 avg=52297 us max=18174625 us ticks=1440 teams=108 factions=10
+[TickPerf] day=30 avg=64119 us max=15805581 us ticks=1440 teams=106 factions=10
+[TickPerf] day=1 avg=52944 us max=10565371 us ticks=1440 teams=67 factions=8
+[TickPerf] day=2 avg=26846 us max=4472322 us ticks=1440 teams=62 factions=8
+[TickPerf] day=3 avg=30531 us max=3899780 us ticks=1440 teams=62 factions=8
+[TickPerf] day=4 avg=31678 us max=3795147 us ticks=1440 teams=64 factions=9
+[TickPerf] day=5 avg=38607 us max=5971014 us ticks=1440 teams=69 factions=9
+[TickPerf] day=6 avg=35103 us max=6303728 us ticks=1440 teams=72 factions=9
+[TickPerf] day=7 avg=38680 us max=5121766 us ticks=1440 teams=74 factions=9
+[TickPerf] day=8 avg=46085 us max=5628780 us ticks=1440 teams=80 factions=9
+[TickPerf] day=9 avg=50595 us max=5425958 us ticks=1440 teams=84 factions=9
+[TickPerf] day=10 avg=64211 us max=8206560 us ticks=1440 teams=87 factions=10

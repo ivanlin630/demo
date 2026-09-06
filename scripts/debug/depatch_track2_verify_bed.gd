@@ -37,7 +37,6 @@ func _run_one(world_seed: int, months: int, verbose_first: bool) -> WorldState:
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	_seed_militancy_n = 0; _seed_tribute_n = 0; _seed_dip_n = 0
 	seed(world_seed)
-	SimRunner.force_full_hd = true
 	Probe.enabled = true
 	if verbose_first:
 		Probe.reset()
@@ -65,7 +64,6 @@ func _run_one(world_seed: int, months: int, verbose_first: bool) -> WorldState:
 		print("[regression-seed%d] diplomacy活性: envoy.dispatched=%d envoy.accept=%d envoy.reject=%d raid.extort=%d raid.combat_at_outpost=%d raid.combat_open_field=%d" % [
 			world_seed, _c("envoy.dispatched"), _c("envoy.accept"), _c("envoy.reject"), _c("raid.extort"),
 			_c("raid.combat_at_outpost"), _c("raid.combat_open_field")])
-	SimRunner.force_full_hd = false
 	Probe.enabled = false
 	return state
 

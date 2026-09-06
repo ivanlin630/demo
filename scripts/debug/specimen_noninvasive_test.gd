@@ -1,6 +1,11 @@
 extends SceneTree
 
 # specimen 觀測非侵入化 TDD（slice: specimen-observer-noninvasive）
+#
+# ★★★【第⑧票 2026-09-06 警語】本床的 full-HD 對照【已恆等於預設】——
+#   `SimRunner.force_full_hd` 隨 near/far 分班一起退場，所以「全高清 vs LOD」這個對照
+#   ★兩邊變成同一個東西 ⇒ ★★此對照【已無鑑別力】。
+#   ★★★而本床【沒有被刪】是刻意的：刪床是另一個決定。要不要重寫或退休 → systems + measurer。
 # spec: docs/superpowers/specs/2026-07-14-specimen-observer-noninvasive.md
 #
 # Fix 1：移除 sim_runner _get_near_teams/_get_far_teams 的 specimen LOD-exemption。
@@ -47,25 +52,17 @@ func _mk_state_with_teams() -> WorldState:
 	return state
 
 func _test_lod_partition_noninvasive() -> void:
-	print("--- Fix 1 LOD 分區非侵入：specimen 不改 near/far 分類 ---")
-	var runner := SimRunner.new()
-	var player_pos := Vector2i(0, 0)
-	var state := _mk_state_with_teams()
-	state.specimen_team_ids = [2]   # far team 2 設 specimen
-	var near: Array = runner._get_near_teams(state, player_pos)
-	var far: Array = runner._get_far_teams(state, player_pos)
-	# post-fix：specimen 不豁免 → far team 2 依距離歸 far、不入 near（pre-fix 被強制入 near=紅）
-	_ok(not (2 in near), "specimen far team 不被強制入 near（依距離歸類）")
-	_ok(2 in far, "specimen far team 正常參與 far 降級（不再跳過）")
-	# near team 1 不受影響
-	_ok(1 in near, "near team（距1）仍 near")
-	_ok(not (1 in far), "near team 不在 far")
-	# ★換觀測對象不改分區：specimen=[1] vs [2] → team 2 的歸類完全相同（非侵入 by construction）
-	state.specimen_team_ids = [1]
-	var near_b: Array = runner._get_near_teams(state, player_pos)
-	var far_b: Array = runner._get_far_teams(state, player_pos)
-	_ok((2 in far) == (2 in far_b) and (2 in near) == (2 in near_b),
-		"換 specimen [2]→[1]：team 2 near/far 歸類不變（觀測選擇零影響分區）")
+	print("--- Fix 1 LOD 分區非侵入：★★★本測項已隨第⑧票【退場】 ---")
+	# ★★★第⑧票（2026-09-06）拆掉 near/far 分班本體 ⇒ `_get_near_teams`／`_get_far_teams`
+	#   這兩支函式【已不存在】，而本測項證的是「specimen 不改變它們的分類結果」。
+	#   ⇒ ★被證的那個東西沒了，測項不是失敗也不是通過，是【沒有指涉對象】。
+	# ★★而我【不刪這個函式】：留下這段說明，讓下一個人知道
+	#   「Fix 1 的保護現在由【分班不存在】本身提供」—— 而不是以為有人偷偷拿掉了一條保護。
+	# ★★★形狀升級了不是消失了：以前要證「specimen 不影響分區」，
+	#   現在【沒有分區可影響】—— 那是 by construction 的更強版本。
+	_ok(true, "★分班已拆除 ⇒ specimen 不可能影響 near/far 分類（沒有分類）—— by construction")
+	print("     ★而這條【恆真】，它【沒有鑑別力】—— 真正的保護是 `lod-split-guard` 那道閘：")
+	print("        ★★有人重新引入按 player_pos 分批 ⇒ 那道閘會紅，而不是這條會紅。")
 
 # ── Fix 3：jsonl writer 非空 + archive 跨 flush 全捕 ──
 func _setup_world(world_seed: int) -> Array:   # → [state, runner]
@@ -84,7 +81,6 @@ func _test_jsonl_production() -> void:
 	var sr: Array = _setup_world(world_seed)
 	var state: WorldState = sr[0]
 	var runner: SimRunner = sr[1]
-	SimRunner.force_full_hd = true   # judged-world acceptance 設定：全-HD（此路 specimen 不特殊）
 	var ids: Array = state.teams.keys()
 	ids.sort()
 	state.specimen_team_ids.assign(ids.slice(0, mini(5, ids.size())))   # 前幾隊觀測，提高 capture 命中
@@ -99,7 +95,6 @@ func _test_jsonl_production() -> void:
 	var path := "user://specimen_test_trace.jsonl"
 	SpecimenTracer.write_jsonl(path)
 	SpecimenTracer.enabled = false
-	SimRunner.force_full_hd = false
 
 	var f := FileAccess.open(path, FileAccess.READ)
 	_ok(f != null, "jsonl 檔開得成")
@@ -134,7 +129,6 @@ func _test_trade_threat_taps() -> void:
 	var sr: Array = _setup_world(world_seed)
 	var state: WorldState = sr[0]
 	var runner: SimRunner = sr[1]
-	SimRunner.force_full_hd = true
 	var ids: Array = state.teams.keys()
 	ids.sort()
 	state.specimen_team_ids.assign(ids.slice(0, mini(5, ids.size())))
@@ -148,7 +142,6 @@ func _test_trade_threat_taps() -> void:
 	var path := "user://specimen_trade_threat_trace.jsonl"
 	SpecimenTracer.write_jsonl(path)
 	SpecimenTracer.enabled = false
-	SimRunner.force_full_hd = false
 
 	var f := FileAccess.open(path, FileAccess.READ)
 	_ok(f != null, "jsonl 檔開得成")

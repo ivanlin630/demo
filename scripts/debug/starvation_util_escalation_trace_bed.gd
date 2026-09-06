@@ -19,7 +19,6 @@ func _run() -> void:
 	var threshold: float = float(OS.get_environment("FOOD_DAYS_THRESHOLD")) if OS.has_environment("FOOD_DAYS_THRESHOLD") else 3.0
 	var sample_interval: int = int(OS.get_environment("SAMPLE_INTERVAL")) if OS.has_environment("SAMPLE_INTERVAL") else 50
 	seed(seed_val)
-	SimRunner.force_full_hd = true
 	Probe.enabled = true
 	var state := WorldState.new()
 	var runner := SimRunner.new()
