@@ -21,6 +21,32 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## 🔧 2026-09-07 systems log —— 批 2 進行中 ＋ 一個【靜默吞寫】的全庫問題
+
+### ★已 merge
+- **② `modulo-same-shape-4` ＋ `envoy-ptype-tap`**（fp 中性配對，28 閘綠）——
+  裸 modulo 遷「到期比較」：★**外層 cadence 不整除時，舊制是【整段不 fire】**（不是頻率失真）。
+
+### ★★在飛（等閘）
+- **⑩ 拆物價 clamp ＋ `board-declared-price`（綁一批）** —— ★**拆開會【知情地】把回歸推上 main**。
+  - ⑩ 讓 `local_value` 可以是 **0** ⇒ 三處比較閘 ＋ 五處除法 ＋ 套利 proxy 都被它咬到；
+  - ★★而**捕獲剩餘**兩式在現行資料下【兩半都不可行】（bid=god-view／ask 只有到場才算得出來）
+    ⇒ ★★★**單據帶價**（賣單帶 ask、買單帶 bid，掛單當下快照）不是優化，是【唯一的路】。
+
+### ★★★新發現：`TeamData` 的計算屬性【靜默吞寫】
+- `population`／`wounded`／`anon_tiers`／`anon_combat_skill`／`anon_wage` 的 setter 是 `set(_value): pass`
+  ⇒ ★**床裡寫 `team.population = 5` 不報錯，而 pop 就是 0**。
+- ★★**runtime 盤面**（工具量的，不是 grep 數的）：**DIRTY 10 ／ CLEAN 15 ／ UNKNOWN 1**；
+  **production 執行期為零**（唯一那處寫的是 `DecisionContext` 自己的欄位）。
+- ★★★**而根因是遷移鷹架**：`set: pass` 的用途是【讓舊賦值站繼續編得過】，而**沒有人回來拆**。
+  ⇒ 已掛 `defers.tsv: scaffold-swallowing-setters`（等【呼叫端清乾淨】，不是等 setter 消失）。
+
+### ★今天新增的機械防線（★都兩向對照過）
+- `swallow-setter`（新的吞寫 setter 就紅）／`mailbox-size`／`mailbox-broadcast`／`world-schedule-due`／`envoy-ptype`
+- ★★`godot.ps1` 的 run-log **結束列自帶 `outcome`（ok｜timeout）** ——
+  **原本無條件寫 ⇒ 把 timeout-kill 記成完跑**，而那條列正被當成「這一跑跑完了」的證人。
+- ★★★`computed-prop-write-guard`（implementer 做的）**尚未 merge** ⇒ **目前對任何人都還不存在**。
+
 ## ✅★★ 四選項同秤 MERGED（`camp-access`，2026-08-25）—— **世界第一次做出「文明化」這個動作**
 
 **折現原語（脊椎第一磚）＋ 四個 survival 選項改用同一把尺。**
