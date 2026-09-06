@@ -982,7 +982,9 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 	# 訪客缺口（storage-aware，補到自己 reserve）；SURVIVAL 買方求生亦補
 	var want: float = maxf(TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state)
 		- ResourceSystem.effective_holding(state, visitor, res), 0.0)
-	var qty: int = int(minf(minf(float(order_rem), stock), minf(vcoin / ask, want)))
+	# ★同上：`ask == 0` 時 coin 不構成限制（見 pairwise 那段的長註解）。
+	var _afford_b: float = stock if ask == 0.0 else vcoin / ask
+	var qty: int = int(minf(minf(float(order_rem), stock), minf(_afford_b, want)))
 	qty = mini(qty, MovementSystem.new().carry_space_for_res(visitor, res))
 	if qty <= 0:
 		# 分因 bail 可觀測（29 bail 因 headline，measurer 拆得出）
@@ -993,7 +995,7 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 			#   ★★兩個座標都要留 —— 否則「再去同一個」與「去了另一個剛好也空」在計數上長得一樣。
 			_bail_last[visitor.team_id] = {"pos": tile.tile_pos, "tick": state.world.current_tick}
 		elif want <= 0.0: Probe.bump("trade.market_bail.buy_no_want")
-		elif vcoin / ask < 1.0: Probe.bump("trade.market_bail.buy_cant_afford")
+		elif ask > 0.0 and vcoin / ask < 1.0: Probe.bump("trade.market_bail.buy_cant_afford")
 		else: Probe.bump("trade.market_bail.buy_carry_full")
 		return false
 	var got: float = TileBank.withdraw(tile, res, float(qty), "market_sell_out")   # 實量
@@ -1043,9 +1045,11 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 	if free_dist:
 		qty = int(minf(float(order_rem), sellable))
 	else:
-		qty = int(minf(minf(float(order_rem), sellable), ocoin / bid))
+		# ★同上：`bid == 0` 時 owner 的 coin 不構成限制。
+		var _afford_s: float = sellable if bid == 0.0 else ocoin / bid
+		qty = int(minf(minf(float(order_rem), sellable), _afford_s))
 	if qty <= 0:
-		if not free_dist and ocoin / bid < 1.0: Probe.bump("trade.market_bail.sell_owner_cant_afford")
+		if not free_dist and bid > 0.0 and ocoin / bid < 1.0: Probe.bump("trade.market_bail.sell_owner_cant_afford")
 		else: Probe.bump("trade.market_bail.sell_zero_qty")
 		return false
 	var deposited: float = TileBank.deposit(tile, res, float(qty), "market_buy_in")   # cap 限
@@ -1150,7 +1154,14 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		# ★零價可成交（同上裁定）：`< 0` 擋負價；★★而 spread 那半【不動】——它是撮合條件不是定義域。
 		if ask < 0.0 or ask > bid * (1.0 + TradeValuation.SPREAD_TOL): continue
 		if Probe.enabled and ask == 0.0: Probe.bump("mkt.zero_price.match_allowed")
-		var qty: int = mini(int(surplus), int(buyer_coin / ask))
+	# ★★★★零價的【第四種形態】：不是比較閘，是【把價格當除數】。
+	#   ★systems 窮盡掃過「同型硬閘」找到三處 `<= 0`，★★而這一族用的是【除法】語法，
+	#     所以那個掃描【看不到它】—— 而它擋掉的是同一件事：ask=0 ⇒ 買得起的量。
+	#   ★★★實測血證：seller pop=4 mounts=30 ⇒ ask=0；buyer mounts=0 ⇒ bid=81
+	#     —— 一筆【互利到極點】的交易，而 `int(buyer_coin / 0.0)` 讓 qty 算不出來 ⇒ 貨沒動。
+	#   ⇒ 語意：ask == 0 時【coin 不構成限制】⇒ 可負擔量 ＝ 沒有上限（由其他限制決定）。
+		var _afford: float = surplus if ask == 0.0 else buyer_coin / ask
+		var qty: int = mini(int(surplus), int(_afford))
 		qty = mini(qty, ms.carry_space_for_res(buyer, res))   # WS-3 carry 限（買方滿載即止買）
 		if qty <= 0: continue
 		_execute_transfer(seller, buyer, res, qty, ask)
