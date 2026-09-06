@@ -1,4 +1,14 @@
 # docs/process/modulo-phase-allowlist.txt —— ★相位守衛的【具名放行清單】（第⑦票 2026-09-05）
+# ★2026-09-06 一併移除【⑧ 之後 code 已無】的 1 筆（閘自己指出來的）：
+#   - scripts/simulation/sim_runner.gd | if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
+#   ⇒ ★★閘的「allowlist 有、code 已無」不是 FAIL，而【放著不動就會累積成假清單】。
+
+# ★★★2026-09-06（`modulo-same-shape-4`）：以下 3 筆【已遷 CadenceStagger】⇒ 從清單移除：
+#   - scripts/simulation/harvest_system.gd | if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+#   - scripts/simulation/harvest_system.gd | if state.world.current_tick % WorldState.TICKS_PER_MONTH != 
+#   - scripts/simulation/population_system.gd | if state.world.current_tick % WorldState.TICKS_PER_MONTH == 
+#   ⇒ ★這份清單【變小了】—— 而變小要在卷面上看得到，否則「遷完了」跟「忘了遷」長得一樣。
+
 #
 # ★★★這【不是豁免清單，是「已經有人判過」的清單】——
 #   閘擋的是【新出現而沒人判過的形狀】，不是「有裸 modulo」本身。
@@ -16,14 +26,10 @@
 #     （★我沒有自己擴大票的範圍：spec 具名的是三顆，這四筆只登記不動手。）
 1	scripts/simulation/day_night_system.gd	return float(state.world.current_tick % WorldState.TICKS_PER_DAY) / \	值不是閘：算一天之內的相位比例，沒有 == 0 的分支 ⇒ 不會被相位吃掉
 1	scripts/simulation/faction_ai_system.gd	"mod_infra": state.world.current_tick % INFRA_INTERVAL, "n_factions": state.factions.size()}, 5)	觀測不是閘：Probe.note 的欄位（唯讀記錄）⇒ 不決定任何事發不發生
-1	scripts/simulation/harvest_system.gd	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:	★同型待裁：外層 _step4c_harvest_tick 已被 %(1440/4=360) 過濾，1440%360==0 ⇒ 安全【靠整除不靠機制】
-4	scripts/simulation/harvest_system.gd	if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:	★同型待裁：同上，43200%360==0 ⇒ 安全靠整除（四處同一形狀）
 1	scripts/simulation/harvest_system.gd	var t: float = float(state.world.current_tick % SEASON_LENGTH) / float(SEASON_LENGTH)	值不是閘：季節相位比例
 1	scripts/simulation/manpower_system.gd	if state.world.current_tick % CAPTIVE_CADENCE != 0:	安全：_step_captives 在 advance_tick 頂層【每 tick 都跑到】⇒ 沒有外層相位
-1	scripts/simulation/population_system.gd	if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:	★同型待裁：外層 _step1d_overflow 已被 %1440 過濾，43200%1440==0 ⇒ 安全靠整除
 1	scripts/simulation/sim_runner.gd	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:	安全：advance_tick 頂層 —— ★這一層【就是】排程本身，它每 tick 都被求值
 1	scripts/simulation/sim_runner.gd	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0: # 每 6 小時	安全：advance_tick 頂層（同上，另一處）
-1	scripts/simulation/sim_runner.gd	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:	安全：★這一行【就是 far pass 的定義】—— 相位問題的來源，不是受害者
 1	scripts/simulation/sim_runner.gd	if state.world.current_tick % NEAR_CADENCE == 0:	安全：★near pass 的定義（同上）
 1	scripts/simulation/sim_runner.gd	if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:	安全：advance_tick 頂層
 1	scripts/simulation/sim_runner.gd	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:	安全：advance_tick 頂層（perf 輸出）

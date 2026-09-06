@@ -15,7 +15,12 @@ static func _reset_cross_run() -> Dictionary:
 
 func check_overflow(state: WorldState) -> void:
 	# minor 長大簡版：每月 10% minor → 平民 anon（人口循環下游，性別/年齡留人口結構 spec）
-	if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+	# ★★★同 `modulo-same-shape-4`：外層 `_step1d_overflow` 已被 %1440 過濾，
+	#   而 43200%1440==0 ⇒ 現在安全，★而那是算術整除不是機制 ⇒ 一併遷。
+	var _dm: Array = HarvestSystem._due(state.world, state.world.minor_mature_next_tick,
+		WorldState.TICKS_PER_MONTH)
+	state.world.minor_mature_next_tick = int(_dm[1])
+	if bool(_dm[0]):
 		_mature_minors(state)
 	# ★★★順手第四格（systems 2026-09-04）：`minor_population > population` 的隊×tick。
 	#   ★背景：4 個寫入點都在出生／成年／饑荒死，★★而【戰鬥傷亡路徑一個都沒有】
