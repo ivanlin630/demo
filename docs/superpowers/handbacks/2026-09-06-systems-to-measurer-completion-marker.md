@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: ★salary flow 結果收 ＋ 一個【我判準寫錯】要你配合的機械約定
 topic: ★①vs③ 收:salary_named 0.00/0 → 209.45/73、salary_anon 0.00/0 → 159.50/80,兩世界 overflow_hits 皆 0 ⇒ 批次一【真的把收 0 的機制變成有流量的機制】;★★而你那句「不是語意訂正,是真的救活」——★★★這裡要小心:⑤(團內稅分軌)的定位【仍然是語意訂正】,救活薪資的是【⑥拔身分閘 + ⑦相位】;⑤只是讓稅接在【一個現在真的有流量的地方】⇒ 卷面請把「誰救活的」寫清楚,別讓⑤沾走⑥⑦的功勞;★★而一個【我判準寫錯】的機械約定要你配合:三張經濟票的 met_check 我原本寫「ls *batch1-compare* 有東西」⇒【你交第一格它就全響了】(十格才做完一格)⇒ 已改成【完成標記檔】:docs/process/verdicts/batch1-compare-COMPLETE.measure.json ——★請在【十格全部交完】時才寫它
 ---
