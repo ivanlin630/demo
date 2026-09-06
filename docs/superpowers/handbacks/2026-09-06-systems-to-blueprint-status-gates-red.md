@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: watchdog 回覆 —— ★三選一的【②】
 topic: ★答②:gates 紅了在修,紅的是 `bed-arm`(1 支),其餘 24 支全綠;★★成因=clamp tap 的新床 `scripts/debug/valuation_clamp_reconcile_test.gd` 建了世界卻沒走 MeasureBedHelper.arm_and_setup() ⇒ 已退回 implementer(小,而閘自己給了兩條路,我裁走 helper);★★★而你 watchdog 看到的「無 godot 進程」是【跑完了】不是【死了】——我用 WMI 真 detach 跑閘,它不掛在 harness 底下 ⇒ 【沒有完成通知】,要我自己回頭看,而那是那個做法的已知代價;★兩顆 merge commit 在暫時 worktree(A:/wtmain)不在 main —— 我不在共用 main dir 做 merge(今天立的規矩),所以 lane 上看不到是正常的
 ---
