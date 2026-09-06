@@ -9,6 +9,9 @@ extends SceneTree
 # 用法：MG_DAYS（default 90）／MG_SEED（default 1337）／MG_CONFIG（default peaceful_economy）
 #       ★MG_HANDWRITTEN=1 ⇒ 驗收⑤鑑別力：把推導改回手寫 7000 的近似（總量固定 7000）
 
+# ★手寫批的總量：config/peaceful_economy.json 12 隊 800×6 + 300×2 + 1000×1 + 200×3 = 7000
+const HANDWRITTEN_TOTAL: float = 7000.0
+
 var _fail: int = 0
 func _ok(c: bool, m: String) -> void:
 	if c: print("  [PASS] %s" % m)
@@ -20,13 +23,14 @@ func _initialize() -> void:
 	else: print("=== DONE === %d FAIL" % _fail)
 	quit()
 
+# ★★★全池普查――直接用既有的 `CoinAudit.total()`（coin_audit.gd:9，六池）。
+#   ★血證 2026-09-07：我自己寫了一支只數【team.resources.coin + person.coin】的普查（兩池），
+#     漏了 anon_treasury（薪資就是進這裡）／tile.public_storage.coin／tile.abandoned_coin／offmap_extinct_coin。
+#   ★★於是我看到 −90 日 −1210.61，而我把它報成【coin 在消失】。
+#   ★★★而它是【兩個普查的差】――守恆律的量必須用守恆律自己的普查，
+#     另寫一支「差不多的」普查 = 把自己的盲點當成世界的缺陷。
 func _coin_total(state: WorldState) -> float:
-	var t: float = 0.0
-	for tid in state.teams:
-		t += float(state.teams[tid].resources.get("coin", 0))
-	for pid in state.persons:
-		t += float(state.persons[pid].coin)
-	return t
+	return CoinAudit.total(state)
 
 func _run() -> void:
 	var days: int = int(OS.get_environment("MG_DAYS")) if OS.has_environment("MG_DAYS") else 90
@@ -37,9 +41,29 @@ func _run() -> void:
 	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg)
 	config["seed"] = world_seed
 	var state: WorldState = MeasureBedHelper.arm_and_setup(config)
+	# ★★★驗收⑤ 鑑別力：MG_HANDWRITTEN=1 ⇒ 把 coin 換回【手寫 7000】。
+	#   ★血證 2026-09-07：本檔檔頭從一開始就寫著這個旗標，而【全庫沒有任何 code 讀它】――
+	#     兩邊輸出逐字相同，只差 TickPerf 的耗時數字。
+	#   ★★也就是說：驗收⑤【從來不可測】，而檔頭看起來像它可測。
+	#   ★★★而它被抓到的唯一原因是我真的跑了那個對照並比對。
+	if OS.has_environment("MG_HANDWRITTEN") and OS.get_environment("MG_HANDWRITTEN") == "1":
+		var cur: float = 0.0
+		for _tid in state.teams:
+			cur += float(state.teams[_tid].resources.get("coin", 0))
+		if cur > 0.0:
+			var scale: float = HANDWRITTEN_TOTAL / cur
+			for _tid2 in state.teams:
+				var t2: TeamData = state.teams[_tid2]
+				t2.resources["coin"] = float(t2.resources.get("coin", 0)) * scale
+		print("[MG] ★鑑別力模式：已把隊伍 coin 總量縮放回手寫值 %.1f（原 %.1f）" % [HANDWRITTEN_TOTAL, cur])
 	var start_coin: float = _coin_total(state)
 	var derived: float = Probe.amount("genesis.coin_total")
 	var given: float = Probe.amount("genesis.coin_given")
+	# ★鑑別力模式下，實發要讀【縮放後的真實存量】，不能繼續讀 genesis 的 tap（那是推導側的數）
+	if OS.has_environment("MG_HANDWRITTEN") and OS.get_environment("MG_HANDWRITTEN") == "1":
+		given = 0.0
+		for _tid3 in state.teams:
+			given += float(state.teams[_tid3].resources.get("coin", 0))
 
 	# ── 驗收①：初始總量 ＝ 推導值（★逐項來源已由 GameSetup 印出）──
 	print("")
@@ -73,7 +97,7 @@ func _run() -> void:
 	print("═══ ★★★驗收④：coin 月週轉（★k 的唯一合法證據）═══")
 	print("  coin 流量總額（絕對值，全 reason）= %.1f ｜ 筆數 = %d"
 		% [flow, int(Probe.counts.get("coin.flow.n", 0))])
-	print("  月週轉 = 流量 ÷ 存量 ÷ 月數 = %.2f 次/月" % (flow / maxf(start_coin, 0.001) / maxf(months, 0.001)))
+	print("  月週轉 = 流量 ÷ 存量 ÷ 月數 = %.4f 次/月" % (flow / maxf(start_coin, 0.001) / maxf(months, 0.001)))
 	print("     ★★而【流量 ≠ 成交額】：它含薪資／徵收／鑄幣等所有 coin 移動")
 	print("        ⇒ ★★★所以下面逐 reason 拆開 —— 【哪些算成交是讀的人的判斷，儀器不替判讀做選擇】")
 	var rows: Array = []
