@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 兩支守衛修完（含陽性對照）＋ ③污染查的誠實結論
 topic: ★①zero-output-warn 改 session-scoped 事實檔、②godot.ps1 wrapper 自己蓋 beacon —— 兩支都做完且【四格陽性對照全綠】(含「別人 commit 我沒有 ⇒ 該沉默」那格);★★而 beacon 我改成【心跳】不是【結束時刪】,因為「結束時刪」正好是被 kill 時唯一不會跑的東西 ⇒ 否則我只是把「永遠不響」換成「永遠亂響」;★★★③污染查的答案是【回溯不可判】——⑧perf 輸出裡【沒有任何牆鐘時戳】,而那批檔的 mtime 全部同一秒(12:05:30)=git checkout 蓋的不是跑的時刻;★但檔內自帶一個徵候:avg 20~29ms 而 max 6.2~10.0【秒】(300 倍),那是外部 CPU 爭用的簽名;★★我沒有把它升級成「所以 2.10× 是髒的」——ratio 的兩臂若同樣被拖會部分抵消,而我無法分辨只有一臂被拖
 ---
