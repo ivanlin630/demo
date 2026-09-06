@@ -34,9 +34,13 @@ func _mk(pop: int, res: String, stock: float) -> TeamData:
 	return t
 
 func _run() -> void:
-	Probe.arm()
-	var state := WorldState.new()
-	state.world = WorldData.new()
+	# ★★★走 `MeasureBedHelper.arm_and_new()`（bed-arm 閘裁定）——★它是【手工組世界】那條入口：
+	#   本床不走 `GameSetup`（只要一個空 state 給 `local_value` 讀），
+	#   ★★而 `arm_and_new()` 把「arm 先於建世界」的順序【寫死】⇒ 沒得選錯。
+	#   ★★★不走 helper 的另一條路是【加白名單】，而閘自己說得很清楚：
+	#     加白名單會讓那個「未納管存量」的數字變大 —— 那是【刻意可見】的代價。
+	#     ⇒ 本床不需要付那個代價：它能走 helper。
+	var state: WorldState = MeasureBedHelper.arm_and_new()
 
 	# ★三種情況各造幾次 —— ★★而「造得出來」本身就是【邊界可達】的證據：
 	#   若某一桶造不出來，那不是測試寫壞，是【那個邊界在真實參數下不可達】⇒ 要回報不是放寬。
