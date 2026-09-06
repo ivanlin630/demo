@@ -10,7 +10,12 @@
 # ★這是 memory「沒有人負責讓東西變少」的第四例（326 → 修一次 → 911 → 修一次 → 1997）——
 #   ★★前兩次都「修好了」,而兩次都沒有人問「誰負責讓它不要再長回來」。
 set -u
-_gc=$(git rev-parse --git-common-dir 2>/dev/null) || { echo "[mailbox-size] 無 git ⇒ SKIP"; exit 0; }
+# ★★★拿不到 git 時【不准 SKIP 成功】——SKIP 會被讀成「查過了沒事」。
+if ! _gc=$(git rev-parse --git-common-dir 2>/dev/null); then
+  echo "[mailbox-size] ★git 不可用 ⇒ 本閘【沒有判過】(不是 PASS 也不是 FAIL)"
+  echo "  ⇒ 多半是 detached/精簡 PATH 少了 mingw64\bin"
+  exit 1
+fi
 cd "$(cd "$(dirname "$_gc")" && pwd)" || exit 0
 HB="docs/superpowers/handbacks"
 CEIL=600
