@@ -226,3 +226,18 @@ brainstorm → spec → plan 設計，不實作。
      (例:扣繳額非 0 ★★★而且 gross − 扣繳 ＝ 成員收到 —— 單看「非 0」還不夠)
 ```
 ★★★**而守恆式特別會騙人**：它們**天生對「有沒有做事」不敏感** —— **零流量也守恆**。
+
+## ★★★真 detach 之後，**立刻 arm 一個盯結果的 Monitor**（blueprint 揭 2026-09-06，同型第三次）
+```
+★WMI 真 detach 的代價是【沒有完成通知】(它不掛在 harness 底下)
+⇒ ★★而我三次都用「我自己會回頭看」補這個缺口 —— 而三次都是【被 watchdog 叫醒的】
+⇒ ★★★「我會記得」在同型第三次之後,已經被證偽
+```
+★**機械解**：**launch 之後【同一個回合】就 arm**：
+```
+Monitor(command="bash -c 'until grep -qE \"MERGE-GATES\] (PASS|FAIL)\" <log>; do sleep 20; done; tail -3 <log>'",
+        description="<log> 的閘結果")
+⇒ ★它會在【結果出現的那一刻】把結論送到我面前,而不是等我想起來
+⇒ ★★而【過濾器要同時涵蓋 PASS 與 FAIL】—— 只盯 PASS 的話,紅了會【安靜地沒有通知】
+   (★★★那正是今天記過的:守衛的過濾器若只涵蓋 happy path,失敗與「還在跑」長得一樣)
+```
