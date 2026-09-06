@@ -66,7 +66,9 @@ func _t3_l0_forage_foot_pool() -> void:
 	var ldr := PersonData.new(); ldr.id = 9; ldr.skills = {"生產": 0.0}
 	state.persons[9] = ldr
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 9; team.tile_pos = Vector2i(5,5)
-	team.population = 5; team.work_morale = 1.0; team.resources = {"food": 0.0}
+	AnonTierSystem.add_anon(team, "平民", 4)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；getter = leader(0/1)+named+anon
+	assert(team.population == 5, "fixture 前提：pop 該是 5（leader1+anon4），實際=%d" % team.population)
+	team.work_morale = 1.0; team.resources = {"food": 0.0}
 	state.teams[0] = team
 	ResourceSystem.new().collect_resources(state, [0], WorldState.TICKS_PER_DAY)
 	var got: float = float(team.resources.get("food", 0))

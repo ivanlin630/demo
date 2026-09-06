@@ -19,7 +19,8 @@ func _test_members_detail_snapshot() -> void:
 	# Setup: leader + 2 members + player
 	var team := TeamData.new()
 	team.team_id = 0
-	team.population = 3
+	# ★舊寫法 team.population = 3 是靕默 no-op；而下方 loop 造 leader+2 named ⇒ pop 本來就是 3
+	#   ⇒ ★★這裡不換成 add_anon(...,0)：那會是一個【假裝有做事】的 no-op
 	team.resources = { "food": 50.0, "coin": 0, "material": 0 }
 	team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
@@ -78,7 +79,7 @@ func _test_team_stats_snapshot() -> void:
 
 	var team := TeamData.new()
 	team.team_id = 0
-	team.population = 5
+	AnonTierSystem.add_anon(team, "平民", 4)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；leader 在下方設 ⇒ 1+4=5
 	team.resources = { "food": 200.0, "coin": 0, "material": 0 }
 	team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
@@ -90,6 +91,7 @@ func _test_team_stats_snapshot() -> void:
 	p.id = 0; p.person_name = "P0"; p.team_id = 0
 	state.persons[0] = p
 	team.leader_id = 0
+	assert(team.population == 5, "fixture 前提：pop 該是 5，實際=%d" % team.population)
 	state.player_id = 0
 
 	var result := bridge.query_player()

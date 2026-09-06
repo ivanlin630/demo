@@ -53,7 +53,13 @@ func _run() -> void:
 	atk.team_id          = 0
 	atk.leader_id        = 0
 	atk.named_members    = []          # leader 不算進 named_members
-	atk.population       = 20
+	# ★舊寫法 atk.population = 20 與 atk.anon_combat_skill = 0.35 都是 getter-only 賦值（靕默 no-op）。
+	#   ★★影響不只是 pop：沒有 anon 時 `AnonCohort.avg_combat` 走 `tot<=0` 分支回 0.1
+	#   ⇒ ★★★這支戰鬥床一直在用 combat 0.1 跑，而不是 fixture 寫的 0.35。
+	#   ★tier 組成推導：14×新兵(0.3) + 5×老兵(0.5) = 6.7 / 19 = 0.3526
+	#     ★★【拿不到恰好 0.35】――tier 是離散的，而我不去改 TIER_STATS 去遷就一支床。
+	AnonTierSystem.add_anon(atk, "新兵", 14)
+	AnonTierSystem.add_anon(atk, "老兵", 5)
 	atk.armed_anon_ratio = 0.5         # 10 個匿名參戰
 	atk.fatigue          = 0.0
 	atk.resources        = TeamData.new().resources.duplicate()
@@ -61,7 +67,8 @@ func _run() -> void:
 	atk.resources["weapon_ranged_low"] = 10
 	atk.resources["armor_low"]         = 20
 	atk.resources["arrows"]            = 200
-	atk.anon_combat_skill = 0.35
+	assert(atk.population == 20, "fixture 前提：atk pop 該是 20（leader1+anon19），實際=%d" % atk.population)
+	assert(absf(atk.anon_combat_skill - 0.35) < 0.01, "fixture 前提：atk combat 該近 0.35，實際=%.4f" % atk.anon_combat_skill)
 	# equip_order: 3 近戰 + 2 遠端（_assign_anon_weapons 會按此分配）
 	atk.equip_order = { "melee_low": 5, "melee_high": 0, "ranged_low": 5, "ranged_high": 0 }
 	state.teams[0] = atk
@@ -71,7 +78,8 @@ func _run() -> void:
 	def.team_id          = 1
 	def.leader_id        = 1
 	def.named_members    = []
-	def.population       = 5
+	# ★同上；4×老兵(0.5) ⇒ avg 恰好 0.5，而 leader 在上面已設 ⇒ pop = 1+4 = 5
+	AnonTierSystem.add_anon(def, "老兵", 4)
 	def.armed_anon_ratio = 0.6         # 3 個匿名參戰
 	def.fatigue          = 0.0
 	def.resources        = TeamData.new().resources.duplicate()
@@ -79,7 +87,8 @@ func _run() -> void:
 	def.resources["weapon_melee_high"] = 1
 	def.resources["armor_low"]         = 3
 	def.resources["armor_high"]        = 10
-	def.anon_combat_skill = 0.5
+	assert(def.population == 5, "fixture 前提：def pop 該是 5，實際=%d" % def.population)
+	assert(absf(def.anon_combat_skill - 0.5) < 0.01, "fixture 前提：def combat 該是 0.5，實際=%.4f" % def.anon_combat_skill)
 	# equip_order: 先配高階，再配低階
 	def.equip_order = { "melee_low": 2, "melee_high": 1, "ranged_low": 0, "ranged_high": 0 }
 	state.teams[1] = def

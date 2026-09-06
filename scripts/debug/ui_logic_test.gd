@@ -93,7 +93,8 @@ func _test_vision_threshold() -> void:
 			(state.world.tiles[_k] as HexTileData).terrain = "plains"
 	for t in range(3):
 		var team := TeamData.new()
-		team.team_id = t; team.population = 10
+		team.team_id = t
+		AnonTierSystem.add_anon(team, "平民", 8)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；getter = leader(0/1)+named+anon（下方 loop 再造 leader+1 named）
 		team.tile_pos = Vector2i(t, 0)
 		team.resources = {
 			"food": 5000.0, "material": 10, "coin": 200, "goods": 0, "gem": 0,

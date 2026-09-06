@@ -8,7 +8,7 @@ func _initialize() -> void:
 	# 玩家放「偏離地圖中心」的格（近邊界）→ 驗視窗仍以 @ 為中心（U16 真因:舊版整圖絕對座標 @ 會偏）
 	var team := TeamData.new()
 	team.team_id = 0
-	team.population = 10
+	AnonTierSystem.add_anon(team, "平民", 9)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；getter = leader(0/1)+named+anon
 	team.tile_pos = Vector2i(6, 2)   # 偏離中心(地圖中心 4,4)但仍在 radius-4 圖內
 	team.tags = ["統領"]
 	team.resources = { "food": 500.0, "coin": 50 }
@@ -21,6 +21,7 @@ func _initialize() -> void:
 	leader.team_id = 0; leader.loyalty = 1.0
 	state.persons[0] = leader
 	team.leader_id = 0
+	assert(team.population == 10, "fixture 前提：pop 該是 10，實際=%d" % team.population)
 	state.player_id = 0
 
 	var cursor := Vector2i(-99, -99)   # 無 cursor

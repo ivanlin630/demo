@@ -44,7 +44,8 @@ func _test_interact_self_team_split() -> void:
 		tile = HexTileData.new(); tile.tile_pos = ppos; st.world.tiles[ppos.x*1000+ppos.y] = tile
 	tile.resources["wild_game"] = 5   # → hunt 可用
 	var other := TeamData.new(); other.team_id = 7001; other.tile_pos = ppos
-	other.population = 5; other.faction_id = -1
+	AnonTierSystem.add_anon(other, "平民", 5)   # ★舊寫法是 getter-only 賦值（靕默 no-op）
+	other.faction_id = -1
 	st.teams[7001] = other
 	st.team_discovered[ptid] = [7001]
 	node._interact_mode = true; node._interact_target = -1
@@ -113,7 +114,8 @@ func _test_join_request_ui() -> void:
 	var ptid: int = st.persons[st.player_id].team_id
 	st.teams[ptid].resources["food"] = 50.0
 	var ppos = st.teams[ptid].tile_pos
-	var ds := TeamData.new(); ds.team_id = 8888; ds.population = 3; ds.tile_pos = ppos
+	var ds := TeamData.new(); ds.team_id = 8888; ds.tile_pos = ppos
+	AnonTierSystem.add_anon(ds, "平民", 3)   # ★舊寫法是 getter-only 賦值（靕默 no-op）
 	st.teams[8888] = ds
 	st.player_forced_event = {"action": "join_request", "from_id": 8888}
 	st.player_forced_event_id = "t1"
@@ -164,7 +166,8 @@ func _test_forced_aid_request_ui() -> void:
 	var pt = st.teams[ptid]
 	pt.resources["food"] = 100.0
 	var ppos = pt.tile_pos
-	var b := TeamData.new(); b.team_id = 8889; b.population = 4; b.tile_pos = ppos
+	var b := TeamData.new(); b.team_id = 8889; b.tile_pos = ppos
+	AnonTierSystem.add_anon(b, "平民", 3)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；leader 在下方設 ⇒ 1+3 = 4
 	b.resources["food"] = 0.0
 	var bl := PersonData.new(); bl.id = 88890; bl.team_id = 8889
 	st.persons[88890] = bl; b.leader_id = 88890
@@ -198,7 +201,10 @@ func _test_recruit_named_reachable() -> void:
 	st.teams[ptid].resources["coin"] = 300.0   # > named gate 150
 	# 同格 NPC 隊：含一名不忠 named 成員（loyalty<0.4）
 	var npc := TeamData.new(); npc.team_id = 4321; npc.tile_pos = ppos
-	npc.population = 4; npc.faction_id = -1
+	# ★leader 43210 且 named_members 含 43210 與 43211 ⇒ getter = 1 + 2 + anon
+	#   ★★（同一人既是 leader 又在 named 裡 ―― 那是舊 fixture 的寫法，我不動它，只把 anon 算對）
+	AnonTierSystem.add_anon(npc, "平民", 1)   # ★舊寫法是 getter-only 賦值（靕默 no-op）
+	npc.faction_id = -1
 	st.teams[4321] = npc
 	var lead := PersonData.new(); lead.id = 43210; lead.team_id = 4321; lead.loyalty = 0.9
 	st.persons[43210] = lead; npc.leader_id = 43210; npc.named_members.append(43210)
@@ -368,7 +374,8 @@ func _test_q7_3_take_loot_flow() -> void:
 	var pt = st.teams[ptid]
 	var before_food: float = float(pt.resources.get("food", 0))
 	# 敗隊持有食物 → loot_pool 取自其資源
-	var loser := TeamData.new(); loser.team_id = 7700; loser.population = 3
+	var loser := TeamData.new(); loser.team_id = 7700
+	AnonTierSystem.add_anon(loser, "平民", 3)   # ★舊寫法是 getter-only 賦值（靕默 no-op）
 	loser.resources["food"] = 100.0
 	st.teams[7700] = loser
 	# 模擬戰勝結算結果（玩家為 winner）
@@ -396,7 +403,8 @@ func _test_q7_5_dispatch_subteam_task() -> void:
 	var st = node._bridge.get_state()
 	var ptid: int = st.persons[st.player_id].team_id
 	var pt = st.teams[ptid]
-	pt.population = 10
+	# ★舊寫法 pt.population = 10 已刪：它是靕默 no-op，而下一行的 add_anon 才是真的在加人。
+	#   ★★pt 是玩家隊（已有 leader/成員）⇒ 不能把 10 当成目標值再算一次。
 	AnonTierSystem.add_anon(pt, "平民", 8)
 	# 注入命名非 leader 成員當子隊長
 	var m := PersonData.new(); m.id = 95001; m.team_id = ptid; m.skills["統領"] = 0.5
@@ -524,7 +532,7 @@ func _test_u21_interact_paging() -> void:
 		var t := TeamData.new()
 		t.team_id = 5000 + i
 		t.tile_pos = ppos
-		t.population = 3
+		AnonTierSystem.add_anon(t, "平民", 3)   # ★舊寫法是 getter-only 賦值（靕默 no-op）
 		t.faction_id = -1
 		st.teams[t.team_id] = t
 	node._interact_mode = true
@@ -554,7 +562,7 @@ func _test_u12_trade_str() -> void:
 	var other := TeamData.new()
 	other.team_id = 6001
 	other.tile_pos = ppos
-	other.population = 5
+	AnonTierSystem.add_anon(other, "平民", 5)   # ★舊寫法是 getter-only 賦值（靕默 no-op）
 	other.resources = {"coin": 100, "food": 0}
 	st.teams[6001] = other
 	# preview API 需 target 已發現
@@ -575,7 +583,8 @@ func _test_trade_offer_builder() -> void:
 	var ptid: int = st.persons[st.player_id].team_id
 	var ppos = st.teams[ptid].tile_pos
 	st.teams[ptid].resources["food"] = 50.0
-	var npc := TeamData.new(); npc.team_id = 7777; npc.tile_pos = ppos; npc.population = 5
+	var npc := TeamData.new(); npc.team_id = 7777; npc.tile_pos = ppos
+	AnonTierSystem.add_anon(npc, "平民", 5)   # ★舊寫法是 getter-only 賦值（靕默 no-op）
 	npc.resources = {"coin": 100}
 	st.teams[7777] = npc
 	node._trade_mode = true; node._trade_target_id = 7777
