@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: batch1-compare C-1/C-2結果——C-1兩世界皆0(批次一沒碰到的獨立缺陷)，C-2小隊提升明顯
 ---
 
