@@ -1871,10 +1871,19 @@ func _test_wild_game_regen() -> void:
 	state.world.tiles[tile.tile_id] = tile
 	var hs := HarvestSystem.new()
 	# 跑多次月邊界（再生有機率），統計是否會增長至 cap 附近
+	# ★★★2026-09-06（`modulo-same-shape-4`）：迴圈每輪要【真的推進一個月】。
+	#   ★舊寫法把 `current_tick` 釘死在 43200 然後呼叫 200 次 —— 而舊制的閘是
+	#     `current_tick % TICKS_PER_MONTH == 0` ⇒ ★★【200 次全部 fire】。
+	#   ⇒ ★★★也就是說：這個測試會綠，【只是因為舊機制分不出「同一個 tick 被呼叫 200 次」】
+	#     —— 它把【舊制的缺陷】寫進了判準。
+	#   ★而新制（到期比較）第一次 fire 之後就把 `next` 推到 86400，而時鐘從來沒動
+	#     ⇒ 只 fire 一次 ⇒ 30% 機率 ⇒ 七成會紅。
+	#   ⇒ ★★修的是【測試的時鐘】，production 一行都不動。
 	var grew: bool = false
 	for _m in range(200):
 		var before: int = int(tile.resources["wild_game"])
 		hs._regen_wild_game(state)
+		state.world.current_tick += WorldState.TICKS_PER_MONTH   # ★真的過一個月
 		if int(tile.resources["wild_game"]) > before:
 			grew = true
 		assert(int(tile.resources["wild_game"]) <= 5, "不應超過 cap")
