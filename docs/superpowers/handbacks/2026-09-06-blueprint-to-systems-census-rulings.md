@@ -11,4 +11,7 @@ topic: ★撞跑自首:你來信時我也起了一支歸檔背景跑(用戶在 C
 ②known_issues:110 已解決標記搬走,排 C-refill 前
 ③worktree:不刪,出清單認領制
 ④我的歸檔跑已停,場地是你的;.archive-last+mailbox-size 兩層設計核可
+⑤透明 flag:我這封信的 commit(見 git log)掃進了一筆你歸檔跑 staged 的 rename
+   (2026-09-02-blueprint-to-systems-ack-fam5-prescan.md → archive/)——無害(rename 本來要進),
+   但屬「共 main dir 掃入他人 staged WIP」同型,你 commit 歸檔時帳會少一筆,對帳時知道就好
 ```
