@@ -14,7 +14,11 @@ PAT='排最後|排在[^,，。]{0,8}之後|之後再[做開處]|暫緩|待[^,，
 FILES="docs/progress.md docs/invariants.md docs/known_issues.md"
 for f in docs/process/*.md; do FILES="$FILES $f"; done
 
-CUR="$(grep -rEno "$PAT" $FILES 2>/dev/null | sed 's/[[:space:]]\+/ /g' | sort)"
+# ★★★2026-09-06 修錨:baseline 原本用【file:行號:詞】—— 而【行號會位移】
+#   ⇒ 在檔案上方插一段文字,下方所有既有條目【全部看起來像新出現的】(今天真的發生了)
+#   ⇒ ★★而這個專案早就學過同一條(ki-anchor:錨要用【符號】不用行號)——我蓋這道閘時沒套用
+#   ⇒ ★★★改用【file<TAB>詞<TAB>次數】:位移不影響,而【真的多一筆】才會被看見
+CUR="$(grep -rEo "$PAT" $FILES 2>/dev/null | sort | uniq -c | awk '{c=$1; $1=""; sub(/^ /,""); print $0"	"c}' | sort)"
 [ -f "$BASE" ] || { printf '%s\n' "$CUR" > "$BASE"; echo "[DEFER-PHRASE] baseline 建立（$(printf '%s\n' "$CUR" | grep -c . ) 筆）"; }
 
 NEW="$(comm -13 <(sort "$BASE") <(printf '%s\n' "$CUR"))"

@@ -1,8 +1,7 @@
-docs/known_issues.md:2016:暫緩
-docs/known_issues.md:390:暫緩
-docs/known_issues.md:4074:排在終卷之後
-docs/known_issues.md:4193:排最後
-docs/known_issues.md:860:排在【時間重錨之後
-docs/process/01_architect.md:169:暫緩
-docs/progress.md:516:暫緩
-docs/progress.md:99:排最後
+docs/known_issues.md:排在【時間重錨之後	1
+docs/known_issues.md:排在終卷之後	1
+docs/known_issues.md:排最後	1
+docs/known_issues.md:暫緩	2
+docs/process/01_architect.md:暫緩	1
+docs/progress.md:排最後	1
+docs/progress.md:暫緩	1
