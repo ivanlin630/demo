@@ -43,3 +43,4 @@ ki-close-after-eight	兩條 known_issues 待 CLOSE:①「headless 床全隊恆 f
 money-genesis-start	⑨貨幣創世(初始批推導式+分配形狀)——★它改創世=換世界,會跟【批後同 seed 對比輪】打架 ⇒ blueprint 裁排在⑧收口與對比之後	批後對比那一輪的量測檔已產出	ls docs/measurements/*batch1-compare* docs/process/verdicts/*batch1-compare* 2>/dev/null | grep -q .
 market-thickness-v0	B-v0 市場厚度(掛單寄賣制:escrow/待領款/待領貨/領取念頭)——★與⑨貨幣創世【同窗】,兩者都動經濟地基	批後對比那一輪的量測檔已產出	ls docs/measurements/*batch1-compare* docs/process/verdicts/*batch1-compare* 2>/dev/null | grep -q .
 batch1-compare-run	批次一對比輪(同 seed 重跑對比 90 日基準)——★它是兩張經濟票的觸發器:不跑,⑨與 B-v0 永遠不會開始	⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish main
+declamp-price	⑩拆物價 clamp(回原案無上下限;飢荒不對稱放大留;floor 0 保留=定義非閥)——★經濟窗,與⑨/B-v0 同批	批後對比那一輪的量測檔已產出	ls docs/measurements/*batch1-compare* docs/process/verdicts/*batch1-compare* 2>/dev/null | grep -q .
