@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★⑩ ＋ `board-declared-price` 已 merge 進 main（批 2 第一批）
 topic: ★origin/main = f73b245e,31 閘全綠(總時 550s、DONE_RC=0、總結行在);★★而我驗的是【樹上的事實】不是 push 的 rc:三處閘都是 `< 0`、order_system 帶價 19 處、board_price_carry_test.gd 在樹上、註冊表 31 支、local == origin;★★★不重跑閘的理由可查:閘跑完之後 origin/main 的 `scripts/` 【零變動】;★批 2 剩 B-v0 與 ⑨,而序不變(⑨ 換世界必須最後);★★另:`feat/swallowing-setters-stage-a`(含那支目前【對任何人都還不存在】的 computed-prop-write-guard)排在下一個,等 implementer 說準備好
 ---
