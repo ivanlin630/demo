@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: D歸因結果——food非過半(25.5%)但深度過剩(白送區)佔撞下界81.6%，普遍非集中
 ---
 
