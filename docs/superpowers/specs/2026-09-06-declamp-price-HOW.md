@@ -41,7 +41,8 @@ trade_valuation.gd:158-163
 | 2 | ★★**拆下臂 ⇒ `fp` 會變且【應該變】**；而**價格分布**要印（★★★最低價 / 有多少次落在 0） |
 | 3 | ★**第四桶（`shortage < -1`）的實測值**：它非 0 ＝「**白送區真的存在**」（blueprint：**有戲不是 bug**） |
 | 4 | ★★**負價不存在**：全窗 `local_value` 最小回傳值 **>= 0**（★而這是 floor 的直接斷言） |
-| 5 | ★★★**下游不炸**：`faction_ai:2654` `cost_value`／`coin_treasury:59,66` `need`／`goal_resolver:485` `bid` —— **最小值都 >= 0** |
+| 5 | ★★★**下游不炸** —— ~~枚舉三處~~ **★★★★【R² 訂正：改成窮盡】**：`local_value(` 的呼叫點**實測 37 處、跨 10 個檔**（`interaction_system`／`order_system`／`player_api_mapper`／`player_trade_system`／`marginal_economy`… **全是我原本沒列的**）⇒ **逐站 confirm**，判準 ＝ **全窗每一個呼叫點的回傳值最小值 >= 0**。★而 `interaction_system.gd:1170,1172` 已有 `maxf(...,0.001)` 除零防護**不會炸** —— ★★**但那正是「機制存在」需要被驗收【明確覆蓋】而不是【假設沒事】的例子** |
+| 5b | ★★★★**第二層證據（R² 給，比只看 fp 更直接）**：**全程 `team.resources` ／ `tile.public_storage` 的每一個 res 最小值 >= 0**。<br>★**理由**：`ResourceBank.remove()` 有 `clampf(amt, 0.0, have)` 保底，★★**而 `add()` ／ `set_amt()` 【沒有下限保護】** ⇒ 若某處傳負 `amt` 且超過現有量，`stock` 會變負 ⇒ **§2「shortage 恆 <= 1.0」的前提就破了**。<br>★★★**而這條的價值是：它把「我的推導對不對」變成【一個直接可量的斷言】，而不是只靠「fp 有沒有變」去反推** |
 | 6 | ★**讀數紀律**：D 格分流（命中高⇒先治上游／低⇒直接拆）**只用在下界桶**；★★上界桶恆 0 是**構造性的**，**不得**拿它推論「閥沒在扛事」 |
 | 7 | determinism 三跑（★不會被編輯的樹）＋ 全部 merge-gate |
 
