@@ -1431,7 +1431,6 @@ func _test_invariant_audit() -> void:
 	var m := PersonData.new(); m.id = 1; m.team_id = 0
 	state.persons[1] = m
 	var t := TeamData.new(); t.team_id = 0; t.leader_id = 0; t.named_members = [1]
-	t.wounded = 0
 	AnonTierSystem.add_anon(t, "平民", 3)
 	state.teams[0] = t
 	# population 為唯讀 getter（leader+named+anon）→ 物理上不可 drift。
@@ -1451,7 +1450,7 @@ func _test_invariant_faction_bidir() -> void:
 	var f := FactionData.new(); f.faction_id = 9; f.member_team_ids = [0]
 	state.factions[9] = f
 	# 修掉 population 干擾：給最小一致 team
-	t.leader_id = -1; t.named_members = []; t.wounded = 0; _seed_pop(t, 0)
+	t.leader_id = -1; t.named_members = []; _seed_pop(t, 0)
 	assert(InvariantAudit.check(state).is_empty(), "雙向一致不該違反:%s" % str(InvariantAudit.check(state)))
 	# 造懸空：member 列含 0 但 team0.faction_id 改成別的
 	t.faction_id = 5
@@ -8010,7 +8009,9 @@ func _test_pick_facility_upgrade_scale() -> void:
 		tile.outpost_owner = 0
 		state.world.tiles[0] = tile
 		var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
-		team.population = 20; team.work_morale = 1.0
+		AnonTierSystem.add_anon(team, "平民", 19)   # ★舊寫法 team.population = 20 是靕默 no-op（getter-only）
+		# ★★ 19 不是 20：getter = leader(1) + named(0) + anon ―― leader 在下面兩行才設
+		team.work_morale = 1.0
 		var leader := PersonData.new(); leader.id = 1; leader.person_name = "L"
 		state.persons[1] = leader; team.leader_id = 1
 		state.teams[0] = team
@@ -8556,7 +8557,8 @@ func _test_forced_options_label_no_drift() -> void:
 		var player := PersonData.new(); player.id = 200; player.team_id = 0
 		state.persons[200] = player
 		# from team（diplomacy both_independent 需雙方 faction_id=-1）
-		var ft := TeamData.new(); ft.team_id = 1; ft.population = 5
+		var ft := TeamData.new(); ft.team_id = 1
+		AnonTierSystem.add_anon(ft, "平民", 5)   # ★ft 無 leader ⇒ getter = anon ⇒ 5
 		ft.faction_id = -1 if c["both_indep"] else 0
 		pt.faction_id = -1 if c["both_indep"] else 0
 		state.teams[1] = ft
@@ -16587,7 +16589,7 @@ func _test_need_raw_urgency() -> void:
 	var state := WorldState.new()
 	var team := TeamData.new()
 	team.team_id = 1
-	team.population = 4
+	AnonTierSystem.add_anon(team, "平民", 4)   # ★team 無 leader ⇒ getter = anon ⇒ 4
 	team.food_flow_avg = 0.0
 	team.faction_id = -1
 	team.ambition_cap = AmbitionLadder.RUNG_HEGEMON
