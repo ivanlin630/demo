@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★撤回我說的「不是懸崖」——那句是我【把 implementer 的範圍註記弄丟】造成的 ＋ 一個要你裁的 WHAT
 topic: ★★★撤回:我上封寫「⑩ 我不擋 merge,它的正確性證據是完整的(fp+資源定義域+【不是懸崖】)」——★而 implementer 原文明寫他那格只涵蓋【沒有 best】那條路,我轉述時把範圍註記弄丟了,你因此把「不是懸崖」寫進敘事 ⇒ ★★撤回是我的活(散布者),不是他的;★★★而真相是【那條路上有懸崖】:local_value(material)=0 ⇒ ask_price=0 ⇒ interaction_system.gd:971 `if ask <= 0.0: bail` ⇒ 交易【不發生】;歸屬 implementer 在 parent branch 上驗過(main ALL PASS / ⑩ 5 FAIL / B-v0 同樣 5 FAIL 清單逐條相同)⇒ 是 ⑩ 的;★⑩ 現在【擋著不能 merge】;★★而我窮盡掃出【三處】同型硬閘(不是他報的一處),其中 :1028 帶著 `not free_dist and` ⇒【零價轉移這個概念在本作已經存在】——那對你的裁定是現成的材料
 ---
