@@ -5,6 +5,8 @@
 # 分類器：①引擎級錯誤(Assertion failed/SCRIPT ERROR)=red ②床自己的總結行(ALL PASS/HAS FAILURE/FAILS=n)為權威
 #         ③無總結行才逐行掃且【只認行首】的失敗標記（血證：PASS 內文含 "FAIL" 字樣會造成假紅）
 # 自檢：5 種真實紅形狀必紅 + 6 種通過樣本不得誤判 + 空輸出=no-output，任一不過則整輪作廢
+# ★90s 窗會製造【假 timeout】：specimen_confound 實測 88s(綠)、lod_phase_invariance 實測 312s(紅)
+#   ⇒ timeout 這個判決混了「它壞了」與「我的窗太小」兩件事,窗要按實測分佈定
 # 母體：scripts/debug/*_test.gd 共 141 支，扣掉已掛閘的 7 支 + 3 支(data/headless/team_ui) = 131
 # ★真的會被跑的床 = 16 支(11%)：merge-gates.tsv 12 + hooks 5(聯集)；★紅的 31 支【沒有一支】在閘上
 bed	verdict	wall_s	note
@@ -137,3 +139,5 @@ scripts/debug/threat_oracle_s15_test.gd	red	4	  [FAIL] 無 belief → pop_est=se
 scripts/debug/threat_oracle_s1_probe_test.gd	red	4	  [FAIL] 統一隊選 threat option（chosen=建設）
 scripts/debug/threat_oracle_s2_test.gd	red	5	  [FAIL] cautious-hawk → 備戰(got=建設)
 scripts/debug/tracer_completeness_test.gd	red	50	  [FAIL] commit-fail/heartbeat entry 1（churn/空檔現形），實際=0
+scripts/debug/lod_phase_invariance_test.gd	red	312	  [FAIL] G：★母體非空（可判的盟 0）—— ★★0 的話下面【答不了】
+scripts/debug/specimen_confound_test.gd	green	88	
