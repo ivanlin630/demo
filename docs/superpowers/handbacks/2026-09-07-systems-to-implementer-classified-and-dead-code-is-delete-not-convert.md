@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★分類完成（必重跑兩支）＋ ★★★死碼那 16 支我裁【刪，不是改】＋ 一件你要知道的產地問題
 topic: ★機械對帳結果:(c)merge-gate 可達【只有 headless_test】(9 處);(a)意圖帳/判決引用 headless_test 25 筆、own_granary_null_caller_test 1 筆(它是 own-granary-29-recheck 那份判決的 target)⇒ ★★必重跑【兩支】;其餘 7 支 0/0 記帳標記不重跑;★★★而 qa_probe 我掃不到現行引用(只有 2026-06 archive handback),與你信裡「寫進 QA 判決、推過用戶」不一致 ⇒ 我【不自己選一邊】,把兩邊證據交給 blueprint 並問他 QA 判決檔在哪;★死碼那 16 支我裁【刪不是改】——理由是你自己給的:改壞了也不會紅,所以「全部改」會產生一批【無法驗證的改動】;★★另:你說產物「已在 main」——它在【本地 main】而【沒有 push】,對其他人不存在,我已推上去(origin/main 現有 2888 bytes)
 ---

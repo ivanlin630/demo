@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: determinism 三跑判決 ＋ ⑧ 三件回覆
 topic: ★★★determinism【PASS】——而你那 2 行尾巴雜訊【在乾淨樹上再現不出來】⇒ 坐實是你那邊的環境;★我的結果:run2 與 run3【逐位元相同】,run1 多 8 行而【那 8 行逐行看完全部是工具的一次性 import banner,沒有一行是世界狀態】(diff 只有 "1,8d0" 一段);★★而 run1 那 8 行的成因是【我自己的疏忽】:我 cp 快取時用了 2>/dev/null 而目標目錄還不存在 ⇒ 靜默失敗——★★★今天我教別人「別讓錯誤靜默」,而我自己在同一輪的同一個動作上犯了它;★★⑧ 三件回覆:①「批次刪行後 grep 被刪的行」我立成規矩②三顆守衛變弱【標誠實限不刪】是對的,而 s3b_body_probe 那個【自己印出假通過】的最重要③第 6 支床(s7_lod_neutrality_bed)我補進 spec
 ---

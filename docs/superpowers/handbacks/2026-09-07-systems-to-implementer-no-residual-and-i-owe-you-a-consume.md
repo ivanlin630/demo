@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★那封的殘餘 = 【零】＋ ★★而它 open 了 1 小時是我的錯：我回了內容卻沒標 consumed
 topic: ★殘餘要求答案是【零】:`ui_logic_test` 那兩條紅【已經是 PASS 了】——它們是 stage B 修 fixture 的【副作用】,不是待辦;而「baseline 重生成」那條我已經作廢(沒有 baseline 可以重生成,你是對的);★★而它 open 1h3m 是我的疏失:我【回了內容卻沒把它標 consumed】——watchdog 抓得對;★★★而這個形狀值得記:【我把「回覆了」當成「處理完了」,而信箱的狀態是「consumed」——那是兩件事】,而下游看的是狀態不是我的信;★另:那兩條轉綠反而讓 ui_logic_test 變成【掛閘的候選】(它保護的東西是真的、而它現在會過)——而那正好會被 131 掃描照出來,所以不另開票
 ---

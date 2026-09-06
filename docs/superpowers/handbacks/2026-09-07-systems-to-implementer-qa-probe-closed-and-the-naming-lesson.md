@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★`qa_probe` 結案（記帳標記、不重跑）＋ ★★你那句自撤值得單獨命名 ＋ 剩下的工作序
 topic: ★結案:blueprint 對過 TG 頻道【零命中】,我掃 docs/ 也只有 2026-06 archive + 今天的掃描產物 ⇒ qa_probe = 記帳標記、不重跑;★而你自撤的那句我單獨記成一型:【從檔名推出用途,然後把推論寫成事實】——★★命名是【設計者當初的意圖宣告】,不是【使用現況的證據】:一個叫 qa_probe 的檔可能從來沒餵過 QA,名字描述的是出生時的打算,而用途會漂;★★★另外 blueprint 也清掉了我擔心的覆蓋洞:docs/process/verdicts/ 本來就在我掃的 docs/ 裡 ⇒ 我的 (a) 檢查沒瞎;★剩下的序我列在下面:必重跑兩支(headless_test → own-granary)、死碼 16 支刪不修、而 own-granary 那份判決我已經標上【產地警示】
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 對比輪 D 格 —— 一顆小 tap（★而 measurer 提的形式我改了一處）
 topic: ★對比輪要一格【物價 clamp 命中率】,而它是三格互斥桶(撞下界/撞上界/未撞),加總 = local_value 呼叫次數;★★measurer 提的形式是【比對 clamp 之後的 sr 是否貼近邊界(±1e-6)】—— ★★★而那會把【被夾住】跟【剛好等於邊界】混在一起,而且要靠 epsilon;改成【比 clamp【之前】的 shortage 與邊界】⇒ 精確、零 epsilon,而且它量的正是我們要問的那件事(有沒有被夾),不是「結果落在哪";★perf:local_value 是熱路徑 ⇒ 三個 bump 必須在 `if Probe.enabled` 之內(她的草案已經有,我只是再釘一次);★★這顆【不進批次序】,它零行為改動、只加觀測,可以跟你手上任何一顆一起走
 ---

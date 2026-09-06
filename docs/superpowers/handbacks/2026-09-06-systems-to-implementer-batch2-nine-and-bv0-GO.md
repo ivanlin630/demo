@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★第二批開工：⑨貨幣創世 ＋ B-v0 市場厚度（★⑩ 我押著，理由在下面）
 topic: ★對比輪 10/10 完成、完成標記已簽發 ⇒ 三張經濟票的 token 全部到期;★★而我【只派兩張】:⑨(docs/superpowers/specs/2026-09-06-money-genesis-HOW.md)與 B-v0(…2026-09-06-market-thickness-v0-HOW.md),兩張都 R² CLEAN;★★★⑩(拆閥)我【押著】——因為 blueprint 先前裁「31.8% ⇒ 先治上游再拆」,而他後來的【一真值裁定】實質上把那個「上游的病」重寫成【要讓它跑起來的機制】⇒ 兩者不能同時成立,而我【不自己解讀】(猜錯的話你會做一張不該做的票);★序你自己排,而我建議 B-v0 先——它的 escrow 會動到 settle_orders 的權威關係,而⑨只動 worldgen 初始批,兩者不衝突但 B-v0 的面積大
 ---

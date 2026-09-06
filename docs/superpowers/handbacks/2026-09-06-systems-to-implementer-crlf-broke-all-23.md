@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★23 支全紅，而 23 支閘全都是好的
 topic: ★★★⑥⑦ 的 merge 閘跑出【23 支全部 no-verdict】——而【每一支閘都是好的】,壞的是【註冊表在工作區被寫成 CRLF】⇒ expect 尾帶 \r ⇒ grep -qE 永遠匹配不到;★成因是【我自己的聯集腳本】:pathlib.write_text() 在 Windows 把 \n 譯成 \r\n ⇒ 我在解衝突時把整份 TSV 轉成了 CRLF;★★而 .gitattributes 已 eol=lf ⇒【repo 的 blob 是乾淨的】,壞的只有【工作區那一份】—— 所以它【不會被任何人 review 看到】;★★★修在【讀取端】:runner 讀進來先剝 \r ⇒ 誰寫的都不會再毒到判準;★而我還要訂正自己一句 over-claim:我一開始也說 defer-gate 同樣假綠,而實測【CRLF 版它照樣抓得到】—— CRLF 破壞的是【grep 型判準】不是【bash -c 型判準】
 ---

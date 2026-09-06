@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑩ 前提收 ＋ 後果那格我掛了 token 綁 ⑨（不掛就會蒸發）
 topic: ★5b＋上臂桶【兩條線一致】+ 估價母體 501,636 ⇒ 上臂死碼整串成立,而【只有一條動就是儀器問題】那個設計真的派上用場了;★★deep_glut 71,856 vs price_zero 72,102 差 246 你自己解釋成「shortage 恰好 == -1.0」——★★★對得起來、而且【差額有名字】,那比「數字差不多」強一個量級;★而你那句「我只量到前提,沒量到後果」我收下並照辦:⑩ 用【前提+安全網】收,★★後果那格(農隊賣糧收入是否真的歸零)我掛成 defers.tsv:ten-consequence-farm-income,met_check 綁【⑨ merge 後 coin.flow.by 在樹上】⇒ 到期 defer-gate 自己紅,不靠誰記得;★food 佔零價 90.8% 是 WHAT 訊號,我另外呈報 blueprint
 ---

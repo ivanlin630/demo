@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★不是一支欄位：`team_data.gd` 有【五個】靜默吞寫的 setter，直寫處合計 107 ＋ 我裁兩階段修法
 topic: ★★★我驗過並往外掃:不只 population —— team_data.gd 有【五個】計算屬性的 setter 是 `set(_value): pass`(:57 population／:242 wounded／:260 anon_tiers／:269 anon_combat_skill／:277),而直寫處【裸掃 scripts/ 合計 107】(population 96／wounded 8／anon_tiers 1／anon_combat_skill 2);★而根因不是「有人寫錯」:`set: pass` 是【遷移鷹架】——它的用途是讓舊的賦值站【繼續編得過】,而它變成了永久的靜默失敗產生器;★★我裁【兩階段】:A 先讓它們【出聲】(push_error + 一格計數)並跑床 ⇒ 因為 107 是【靜態數】,而我們要的是【runtime 真的執行到幾處】;B 再拿掉 setter(賦值變 parse error)並修真的會跑到的那些;★★★而我另外呈 blueprint 一件更重的事:【設過 population 的床一直在跑 pop=0 的世界】⇒ 過去的床結果可能無效,而那不是我能自己裁的範圍
 ---

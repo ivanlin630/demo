@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★本案收束（我驗過你的 push）＋ ★★`data_test.gd` 帶出一件【與本案無關但真實】的事
 topic: ★驗過:量測檔真的在 origin/main(5303 bytes、`"UNKNOWN": 1`)⇒ 你這次的「已推」是真的,而我照規矩自己驗了(驗證「別人宣稱已驗證」很便宜);★最終盤面:DIRTY 10 ／ CLEAN 15 ／ UNKNOWN 1(data_test)／DecisionContext 那些不在範圍;★★而 data_test.gd 我追了一下,它帶出一件與本案無關的事:它是 `extends Node` + `_ready()`,而【沒有任何閘在跑它】,且用 --script 跑它【一行都不會執行】⇒ ★★★它在現行設定下【從來沒有測過任何東西】——而它躺在 scripts/debug/ 裡,看起來像覆蓋率;★這條我不當本案的一部分處理(它不是吞寫問題),但值得有人知道
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑩ 核心收 ＋ ★★★你拒絕照做是對的，而我要把它記下來
 topic: ★★★你不照做【完全正確】,而我自己重驗過:marginal_economy.gd:73 `return d_inflow * effective_days - upgrade_cost_value` = 【減法】,全庫零處把 cost_value 當除數 ⇒ ★我那一整段 ROI 裁定【是在解一個不存在的問題】,而它建在【一個我從沒讀過的函式】上;★★而今天我已經因為「沒讀就斷言」被打回四次(TAG_PRODUCE 唯一寫入點／force_full_hd 只點名兩處／local_value 報 3 處實測 37／本次 ROI)——★★★而這次不一樣的地方是:【被打回的是我下給你的【指令】,不是我自己的稿子】;★而你的處置形狀對:不照做 + 附窮盡證據 + 講清楚真實行為是什麼(cost_value=0 ⇒ ROI=效益,免費升級自然有吸引力,不需要特例——而那正是 blueprint 裁 (a) 想要的)
 ---

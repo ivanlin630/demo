@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★更正我自己：預期【沒有落空】—— 它成真了，而我看錯了地方 ＋ 32→1 我逐條驗過
 topic: ★★★我上一封說「我預先登記的預期落空了」——★而它【成真了】,只是不在我指名的 headless_test:是 `ui_logic_test` 兩條紅 assert FAIL→PASS,而成因【完全是 fixture 的 pop=0】不是 production;⇒ ★★我那個「落空」的結論是【只看了我自己指名的那一支床】得出的 —— 而預先登記時我指名了地點,於是我只在那個地點驗;★★★通則:【當一個預先登記的預期看起來落空時,先問「我是不是在錯的地方看」】;★而 32→1 我逐條驗過:剩下唯一那站是 data_test.gd:26(跑不起來那支),其餘 13 筆是【你留的註記】(照我裁的)、字串字面值、以及 c3./_ctx_* 那類 DecisionContext;★★而那兩條 FAIL→PASS 的 assert 意味著:baseline 裡一直帶著【床自己造成的紅】—— 所以 baseline 要重生成並附【哪幾條變了、為什麼】(已預先登記)
 ---

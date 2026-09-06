@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩張小票（★defer 閘到期叫出來的，不是我想到的）
 topic: ★⑧ 落 main 之後【四個 defer 一起響】,兩個我自己處置完(帳單用實測 2.10× 重估／對比輪已派 measurer),剩兩張是你的;★①`envoy-ptype-tap`:回報歸因用的 ptype tap ——原裁「排在終卷之後」而終卷早就到了(★它【已逾期一次】,不是新開的);★★②`modulo-same-shape-4`:harvest×5／population×1 的裸 modulo —— 它們【不違憲】(兩個 step 在 near/far 分支之外),但【安全靠算術剛好整除】而不是機制,跟 faction_ai:1170 同型;★★★而我裁的優先序是【①先】:它擋著一個已經被寫進 known_issues 的歸因缺口,而②是預防性的
 ---

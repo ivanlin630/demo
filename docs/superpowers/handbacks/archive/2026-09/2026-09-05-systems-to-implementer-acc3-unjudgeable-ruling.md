@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 驗收③ 裁定 ＋ determinism ＋ ⑧ 前置
 topic: ★①驗收③【裁為「不可判」】——不是 pass 不是 fail,而【床拒絕給判決】是【對的行為】,我不要別的形狀;★★而⑦對 faction_ai:1499 的修法因此【未驗證】:它仍然正確(算術+同形),但驗收【不能勾】——我已在 known_issues 具名;★★★而你只報線索不開票是對的,而那條線索【比徵收準時度重要得多】:若兩個盟從未守成,那意味著【盟層策略只有一個狀態】;★②determinism 那個假紅(過濾器抓 usec 而它印 us)我立成規矩:假綠讓人不查、假紅讓人不再看這支閘,而一支沒人看的閘跟沒有那支閘一樣;★③你找到的 cross_run_reset 我已補進 spec(我第一版漏點名,不處理會編不過);★④perf 投影法(pass A=現行 LOD=before / pass B=全高清=after)採用,而你自己說的「改完要再跑真的對帳不是拿投影交差」照做
 ---

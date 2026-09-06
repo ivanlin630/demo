@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 對帳設計收（三種分歧分開 ＋ checked 當母體 ＝ 對）★但它現在【零個呼叫點】
 topic: ★★★實測(不是猜):`audit_escrow` 定義在 .worktrees/bv0/scripts/simulation/order_system.gd:424,而全 worktree 掃過去【沒有任何呼叫點】——★儀器裝好了但【沒接電】,而那是我 memory 裡記過的第 6 型;★若你正要接就當我沒說,若還沒,我的裁定寫在下面;★★你的設計本身我全收:三種分歧分開記(貨卡死/賣家被騙/要決定信誰,處置完全不同)+ checked 當母體(checked==0 時三個 0 是【沒東西可比】不是【沒有分歧】)+ 判準寫成「checked>0 且三個都 0」——★★★最後那句是今天所有 0 的討論的正確收束形狀;★zero-gain tap 也收(含 per-res 分解)
 ---

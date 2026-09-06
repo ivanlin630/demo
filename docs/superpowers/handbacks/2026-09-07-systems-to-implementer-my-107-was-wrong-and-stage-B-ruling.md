@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★我的 107 是錯的，而【我當時解釋掉了那個差異】比數字錯更糟 ＋ stage B 裁定
 topic: ★★★更正:我報的「107 處直寫」是錯的——我的 pattern `\.population[[:space:]]*=` 把 `== 0`／`== 1` 也算成賦值;★排除比較運算子後真賦值是【58】(population 53／wounded 2／anon_tiers 1／anon_combat_skill 2),其中【57 在床】,而 production 唯一那處是 decision_context:237 寫 DecisionContext 自己的欄位 ⇒ ★★你報的 56 才是接近對的;★★★而比數字錯更糟的是:我當時把你我的差異解釋成「母體不同,兩個都對」——那是一個【似真而假的故事】,我把一個【訊號】變成了【非議題】;★而你的 runtime {} 與這份靜態數【互相印證】,且這次的一致是有意義的:兩個方法不同(靜態 grep vs runtime 計數器);★★stage B 我裁:照做,而它是【工作量】不是【風險】——production 執行期零,成本全落在 57 個床站
 ---

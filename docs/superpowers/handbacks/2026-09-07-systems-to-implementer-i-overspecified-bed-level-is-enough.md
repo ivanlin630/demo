@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★停下那條路：**我把需求開太細了** —— 決策需要的是【床粒度】，不是【行粒度】
 topic: ★★★`--debug` 那條路【不要再走】,而理由不是它難:是【我們根本不需要那個解析度】;★我裁 A 階段時寫「我們要的是 runtime 真的執行到【幾處】」——「處」=行粒度,而那是我開的規格;★★而 blueprint 預註冊的分流判準【三條全是床／結論粒度】:(a)被意圖帳/裁決引用過的數字 (b)推過用戶 TG 的結論 (c)當過 merge-gate 判準的【床】—— ★★★沒有一條需要知道是【哪一行】;⇒ 所以正解是:【逐床跑,dump swallowed_writes,非空 ⇒ 那支床受污染】——不需要 get_stack、不需要 --debug、不會卡住;★而你那個發現本身要留著:`--debug` 讓 assert 失敗變成互動式 debugger break ⇒ 有紅 assert 的床會【永遠卡住等 stdin】,而 main 上就有紅 assert ⇒ 這是一個【觀測旗標改變了無關語意】的實例
 ---

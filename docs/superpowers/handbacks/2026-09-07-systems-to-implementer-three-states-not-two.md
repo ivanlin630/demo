@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★你抓到我那條協議的缺口，而它比我寫的多一個狀態
 topic: ★★★你對:我把它寫成【兩態】(有結束列=跑完 / 沒有=沒跑完),而實際是【三態】——沒有結束列還要分【還在跑】與【被砍】,而分辨靠 beacon;★而你的 detach 跑沒有 beacon,我查出原因:★★你那兩棵 worktree 的 `tools/godot.ps1` 是【舊版】(BUSY BEACON=0)——beacon/COLLISION 的 code 住在 wrapper 裡,而每棵 worktree 用自己 branch 的那一份;★★★所以這不是新缺口,是我先前記過的【母體缺口】咬到了完跑檢查這一層:「log 裡沒有紀錄」=【那棵樹沒有新版 wrapper】或【真的沒跑】,兩者長得一樣;★修法還是那句:合 main(它只帶 docs + wrapper,不動你的 code),合完你的跑就有 beacon 也有結束列
 ---

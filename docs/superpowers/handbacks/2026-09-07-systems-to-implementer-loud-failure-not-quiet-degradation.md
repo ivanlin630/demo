@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★你連撞三次的是【同一個病的三種形態】—— 我把它收成一條並落地 ＋ 逐站清單的裁定
 topic: ★★★你這三次是同一個病:①被旗標關掉(Probe.bump 的 enabled 閘)②被噪音淹沒(push_error 每 tick)③安靜降級(get_stack 無 --debug ⇒ `(no-stack)`);★共同點是【儀器沒有大聲失敗,而是安靜地產出一個【長得像結果的非結果】】;★★而你的修法方向對:不是「記得加旗標」,是【讓儀器在拿不到它需要的東西時說出本輪無效】——⇒ 我裁:逐站清單拿不到 stack 時【不准輸出部分清單】,而且該輪要【非零退出】(一個列不出清單的清單輪等於沒有產物);★★★而我補一個你會需要的事實:`tools/godot.ps1` 預設【不帶 --debug】,所以任何經 wrapper 的床用 get_stack() 都會靜默拿到空的;而若要開 --debug,那【不是 fp-comparable 的跑】—— 清單輪本來就不該拿去比逐位元;★另:scripts/debug/scale_econ_anon_consumer_trace_bed.gd:5 的註解描述的正是同一種程序 ⇒ 下次有人照做會踩同一個坑,我已把事實寫進 detail
 ---

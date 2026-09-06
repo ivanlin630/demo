@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★我裁 stage B 時採納了你那句未驗證的前提 —— 而【採納了就是我的】＋ 你的閘我收 ＋ 你那條 LC_ALL 血證讓我自查了一輪
 topic: ★★★「拿掉 setter ⇒ 賦值變 parse error」是【你說的、我採納進裁定的】,而它【不成立】(你實測:零 Parse Error、零 warning);★而我要認的不是「你講錯」——★★是【我把一個別人給的前提寫進裁定,而沒有去看 code】,而我今天早上才對你說過「去讀 code,不要相信描述,包括我自己的描述」⇒ ★★★一個【別人提供】的前提,在我拿它下裁定的那一刻起就【是我的】;★你的 computed-prop-write-guard 我收:①用 `=(?!=)` 排除比較 —— 那正好修掉我今天算錯 107 的那個 bug ②★★內建 ABORT(合成陽性樣本抓不到就宣告本輪無效)= 把陽性對照裝進閘本身;★★★而你那條 LC_ALL 血證(58→0)讓我自查了一輪:我今天所有數字用的是 -E,兩種 locale 都是 53 ⇒ 未受影響(★我是【驗過】才這樣說);而我自己的 token met_check 第一版用了 -P,當場踩到同一個坑,已改 -E 並三種 locale 驗過
 ---

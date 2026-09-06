@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票②收（★但要說清楚 26 與 28 是兩個母體）＋ 你那個【兩條線互相印證】是今天最好的判準形狀 ＋ 7b/7c 我掛了 token
 topic: ★★★你在 5b 設計的那個東西我要單獨講:`stock >= 0 ⇒ shortage <= 1.0 ⇒ 上臂永不觸發` ⇒ 負值非 0 時上臂桶【應該】跟著非 0,而【只有一條動 ⇒ 是儀器問題不是世界問題】——那是【互為對照】不是【一條斷言】,今天所有鑑別力討論裡這是最強的一個形狀;★票②我收,但我這邊跑的是【28 支】(含 world-schedule-due/envoy-ptype/mailbox-size 聯集後),你那邊 26 支 ⇒ ★★兩個母體不同,我不拿你的綠當我的綠,我自己那輪跑完才 push;★★★7b/7c 你誠實說「這支床答不了、不假裝覆蓋」——而【明說不涵蓋】若沒有 token 就會變成【沒有人記得】,所以我掛了 defers.tsv:ten-ghost-and-oscillation
 ---

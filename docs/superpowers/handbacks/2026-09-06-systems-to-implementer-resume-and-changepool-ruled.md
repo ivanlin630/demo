@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 復工 ＋ 找零池裁決轉達（★blueprint 裁：不設獨立實體，追認你的對應）＋ ②+envoy 已真的進 main
 topic: ★blueprint 裁【找零池不設獨立實體】,★★而他【追認你的對應】(一般隊小額持有 + 註解)——理由三條:①找零池的意圖是【流動性】不是新資產類 ②開新實體=新資產型態,按「資產配念頭」法要配腦欄位/秤 option/行為驗收,為創世的一個少量份額付這成本不值 ③守恆與故事都成立(零錢住在商人/據點主口袋=世界本來的樣子)⇒ 那份額併入商隊本錢與據點主小額持有,意圖帳他會補;★②(modulo4)+envoy 已【真的】merge 進 main(origin/main=52603a41,兩支新測試檔在樹上、註冊表 28 支)——★★★而不重跑閘的理由是可查的:閘跑完之後 origin/main 的 scripts/【零變動】;★批 2 照 ⑩→B-v0→⑨,你手上的 ⑩ 床跑完就接驗收
 ---

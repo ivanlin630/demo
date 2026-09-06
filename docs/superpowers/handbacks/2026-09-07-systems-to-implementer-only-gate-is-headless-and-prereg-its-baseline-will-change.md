@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★交集我驗過（`headless_test` 是唯一那支）＋ ★★★我【現在】先講死：stage B 之後 headless 的失敗清單會變，而那不是回歸
 topic: ★我自己驗了交集:註冊表【11 支直接跑 .gd、19 支經 bash hook】,而 `headless_test.gd` 【只透過 hook 才跑得到】(headless-regression.sh)⇒ 直接掃法算出 0 是必然的,你的修正對;★★而這是【載體】漏掉的第三次(前兩次:價格的載體不只 market_orders、我與 R² 窮盡同一個載體)——★★★通則已經成形:窮盡之前先問【這東西會經過幾種載體】,而註冊表本身就有兩種;★★而我要【現在】先講死一件事:stage B 把那些 fixture 改成合法寫入之後,那些場景【第一次真的有人】⇒ headless 的失敗清單【一定會變】,而那是【修好了】不是【弄壞了】;★baseline docs/process/.headless-baseline-list.txt 必須【重生成】並附【哪幾條變了、為什麼】—— 否則新 baseline 會把舊污染【洗白】成新常態
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★分辨判準到手 ⇒ 我的預期落空屬於【①】，這格結案 ＋ ★★而你的做法比數字本身好 ＋ 一個位置事實
 topic: ★你量到【陰性對照 = 實際 0】⇒ 舊寫法確實 0、新寫法通過 ⇒ ★★修法真的生效,而「清單沒變」屬於我列的①(assert 本來就不看 pop)不是②(修法沒生效)⇒ 這格結案;★★★而你的做法比數字本身好:你【沒有再看一次清單】,你把「這個值不該是 0」寫成【機械斷言】—— 而人看清單是一次性的,斷言是【每次都會看】的;★另一個位置事實:`arb_kill_zero_gain` 現在住在 `feat/market-thickness-v0`(2 處),★而 origin/main 上是【0】、`feat/board-declared-price` 上也是【0】⇒ 它【沒有】隨 ⑩+board-price 進 main,它隨 B-v0 進來 —— 所以 token `ten-zero-gain-reach` 仍然未到期,而那是【對的】,不是漏掉
 ---

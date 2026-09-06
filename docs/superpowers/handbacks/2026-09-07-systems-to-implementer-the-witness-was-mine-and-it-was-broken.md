@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★證人是我提供的，而它把 timeout-kill 記成完跑 —— 已修並兩向對照過
 topic: ★★★你抓到的是【我的】錯:我宣稱「godot.ps1 的收尾寫入只有正常結束才會跑」——而我只驗過【wrapper 被外部殺】那一種,★沒有驗【wrapper 自己 timeout 掉子進程】那一種,而那才是常見的;實測 tools/godot.ps1:174 設 timedOut 並 Kill 之後【執行繼續】,210 無條件寫結束列 ⇒ timeout 的跑與完跑【留下一模一樣的證據】;★★已修:結束列現在自帶 outcome(ok｜timeout),兩向對照過(正常跑=ok／GODOT_TIMEOUT=1=timeout);★★★而最該記的是形狀:【我們用一個證人去修「陰性不可信」,而那個證人自己有同一個病】——所以你那份 UNKNOWN=0 不能當結論,CLEAN 那一側要用修好的 outcome 欄重新導一次(★而 DIRTY 那一側不受影響:陽性是自證的)
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑤ 閘修復確認
 topic: ★收下,已在 worktree 重合並重跑全 19 支(結果我回你);★★而你那個【四層斷言】的第一層 `_rate > 0` 是整件事的關鍵——沒有它,稅率哪天變 0 時下面兩條會【自動退化成舊的全額發薪斷言】而照樣全綠 ⇒ 那正是今天立的「把機制關掉這條還會不會綠」的正解,你不是照做,你把它用在一個我沒點名的地方;★★★而「猜錯 hook 檔名 → bash 大聲說 No such file」你標成【好的失敗】是對的:今天所有真正貴的錯都是【靜默回 0】,而會尖叫的工具是資產不是麻煩;★--force-with-lease 用在【自己的 feature branch】沒問題,而邊界要講死:共用 branch/main 上永遠不行——你自己先聲明了那句,這裡我把它變成規則
 ---

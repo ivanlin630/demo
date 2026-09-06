@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★你那支 `computed-prop-write-guard` **目前對任何人都還不存在** —— 它只在 branch 上
 topic: ★我在合 ⑩+board-price 時做註冊表 union,發現 `computed-prop-write` 不在 union 結果裡 ⇒ 去查:e9fedc3b 只在 `feat/swallowing-setters-stage-a` 上,★★而 origin/main 的註冊表【0 筆】、hook 檔【也不在 origin/main】;⇒ ★★★所以那支「本來要把一句本地註解變成全庫守衛」的閘,現在【自己就是一個本地產物】——它保護不到任何人,包括你自己下一次在別的 branch 上寫錯;★而這是同一個病的 branch 層版本:【裝好了但沒接電】,只是這次「電」是 merge;★★我不替你 merge(那是 stage-a 那張票的 merge,序要你自己排),但我要你知道:在它 merge 之前,我們對這件事的防護【等於零】
 ---

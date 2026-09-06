@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★我列的六支【全是誤判】，而其中一支是【六天前就寫下這個 bug 的那句註解】
 topic: ★你量的對:`TeamData × 未執行` = 【1 站】(data_test.gd:26);★★而我列的六支我逐檔看過,【六支全錯】:game_sim_test:488 與 threat_oracle_s15:50 與 gather_purity_probe_bed:81 是【字串字面值】、seam1_registry(3 站)與 survival_stall_ladder(2 站)是【DecisionContext】、★★★而 s6_build_days_truth:51 是【一句註解】—— 而那句註解的內容是:「不能寫 team.population = pop:那顆是【唯讀衍生】(team_data.gd:55-59,setter 是 pass)」,寫於 2026-09-01(dc95079a)⇒ ★比今天早【六天】,有人早就發現並寫下來了;★而我的 grep 把【那句警告本身】算成了一筆病例;★★所以「刪不是改」最後只適用於【一行】,而我們為了得到這個數字走過 107→58→56→53→52→32→1
 ---

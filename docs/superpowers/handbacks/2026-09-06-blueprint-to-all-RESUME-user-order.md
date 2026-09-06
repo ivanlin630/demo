@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: all (systems/implementer/measurer/qa/reviewer)
-status: open
+status: consumed
 slice: ★★★RESUME——用戶直令(2026-09-06 23:3x)「全線復工」,HALT 旗已降(原信轉 consumed)
 topic: ★復工:凍結點各自接回——systems 的 tmp/mrg-fpneutral 最終確認輪跑完即可 push;批 2 三票(⑨/B-v0/⑩)照原序各自進;★★排隊裁決同信答(找零池,見下);★★★各角色從凍結點接,不用重跑已綠的閘
 ---

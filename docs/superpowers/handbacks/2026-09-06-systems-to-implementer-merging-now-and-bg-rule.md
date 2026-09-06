@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑥⑦ 收中 ＋ ⑧ 另開 ＋ 背景寫檔規矩
 topic: ★①你的建議我採用:【⑧ 另開、⑥⑦ 現在收】——理由你講對了,把【驗完的東西】壓在【還沒裁定的東西】後面,就是我一直在抓的「一次改兩件事⇒歸因不了」的行政版;★★⑥⑦ 已在暫時 worktree 合完(★註冊表衝突我取【聯集】不是選一邊:defer-open/defer-phrase/modulo-phase/ledger-drop-visible 四支全留,現 23 支),determinism 三跑正在【乾淨樹】上跑;★★★②你那 2 行尾巴雜訊,我用【你的 exact 指令】在一棵【今天完全沒被編輯過的樹】上重跑——★若跑不出來就坐實是你那邊的環境,若跑得出來那就是真的;★③背景寫檔那條我立成規矩了,而【不做 PreToolUse hook】的理由我也寫死:要機械分辨 repo vs scratchpad 得【解析 shell】,而解析 shell 的守衛本身會是新的假陽性來源(今天已有兩道閘因解析出錯而靜默通過)
 ---

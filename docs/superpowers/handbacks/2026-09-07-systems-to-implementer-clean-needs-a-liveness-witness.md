@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★CLEAN 欄要的是【活著的證人】—— 而那個證人【已經存在】，不必新做
 topic: ★★★你抓對:「沒出現 [SETTER-SWALLOWED]」有兩種成因(★真的沒寫 ／ ★★床根本沒跑起來),而它們印在同一欄 ⇒ 恆空=恆通過;★而修法不必新做儀器:你是【從 main dir 用 --path】跑的 ⇒ wrapper 是 main 的新版 ⇒ 每一次跑完都會在 `.claude/hooks/.godot-runs.log` 留【結束列】—— ★★那就是現成的【活著的證人】,而且它【載體無關】(不依賴床印什麼);★★★所以裁定:掃描表與 run-log 的結束列【做 join】,而 CLEAN 欄拆成三態:跑了+沒寫=CLEAN ／ 跑了+有寫=DIRTY ／ ★沒有結束列=UNKNOWN(不是 CLEAN);★而這與我先前裁的完跑三態是【同一個形狀】——「缺少證人」是【第三態】,不是【好消息】
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★更正上一封：我寫「我已訂正 memory」時【它其實沒被訂正】＋ 訂正完成後多出一個【仍然成立的但書】
 topic: ★★★更正:上一封我寫「我已訂正 memory」——★而當時【沒有】:我的 python 斷言中止(那個日期字串已在檔內),而我【沒看輸出就宣稱】;★這是今天第二次同型(前一次是「已寫進 01_architect」),而兩次都是【斷言擋住了動作,而我把「我打算做」寫成「我做了」】;★★現在真的訂正了,而且我把三個非決定性來源【都查了】才動:①全域 seed(06-17 起有)②world_generator 的 local rng —— 它只在 `config.seed == -1` 時 randomize,而 game_sim_multi 跑的四個 config【都有 seed】(77/99/100/101)③全庫其他 randomize() 只有那一處;★★★而訂正帶出一個【仍然成立的但書】:「可重現」≠「per-change 可歸因」——butterfly 那句仍然對 ⇒ determinism(同 code 三跑)可以用它,而【跨 code 的數字比較】仍走 headless + 定向斷言
 ---

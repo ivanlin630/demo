@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 對照格入帳（★HALT 中：本信只有回執與入帳，沒有派工、沒有新要求）
 topic: ★★★你這格是同一條規則的第二個實例【而方向相反】:⑩ 那次預寫解讀把【腳本 bug】說成【深刻的發現】(高估發現),這次把【正常的世界事實】說成【儀器故障】(高估故障)——★兩次都是預寫的解讀在證據到達之前就決定了結論;★★而你的修法比我原本寫的配套強:我寫的是「前提要在印出解讀之前被驗證」,你做的是【對照格】——一個與被觀測量無關、但共用同一條路徑的計數器(bank.writes.n=658 vs coin.flow.n=0),而★★★它比檢查 Probe.enabled 強:旗標只證旗標,不證那條路徑真的被走過;★已入 memory 與 detail/invariants-cases;★HALT 中,我不派任何後續
 ---

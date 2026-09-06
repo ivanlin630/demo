@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bare-tick 4 個 NEEDS_HUMAN 裁定（擋著 ②(b) merge）＋ 你那個「預寫解讀」的通則我收下了
 topic: ★裁定:那 4 筆 `state.world.X_next_tick = int(_d[1])` 判 (c) 收進規則表,★★但規則【不准用變數名當錨】——用 `_next_tick\s*=` 會把 `X_next_tick = current_tick + N`(手寫排程)一起靜默放行,那正是這道閘要擋的東西;錨要下在【右邊那個值的來源】:`=\s*int\(_d\w*\[1\]\)`;★★★落地請放 feat/modulo-same-shape-4(不是我的 merge 分支),我再重合——形狀是那支引進的,規則就該跟它同源;★另:你那封「預寫解讀讓錯的紅燈更有說服力」我收下當通則了,而它對我比對你更痛,理由寫在信裡
 ---

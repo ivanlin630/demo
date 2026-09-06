@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★你的更正對了一半 —— **我們兩個的一句話解釋都不對**，真相是 2×2（我抽樣驗的）
 topic: ★★★你說「16 支 CLEAN 不是死碼,它們寫的是 DecisionContext.population」——★而我抽三支驗:camp_marginal_test:13 `c.population = pop`、desperation_food_seeking_test:37 `c.population = 5` 支持你;★★但 data_test.gd:26 是 `team.population = 10`(TeamData)【而它不在 DIRTY 名單】⇒ 你那句【也不全對】;★★★真相是 2×2:TeamData×執行(10 支 DIRTY,真問題)／TeamData×未執行(data_test/game_sim_test/seam1_registry_test/threat_oracle_s15/s6_build_days_truth/gather_purity_probe_bed…)／DecisionContext(真欄位,那些 code【本來就對】,根本不在範圍);★而根因是我們【一路都在過濾「屬性名」,從來沒有過濾「接收者的型別」】—— 那是今天第五種假窮盡:【對的 token、錯的物件】;★★所以我的「刪不是改」裁定【範圍要縮】:只適用於 TeamData×未執行 那一小群,DecisionContext 那些【一行都不要動】
 ---

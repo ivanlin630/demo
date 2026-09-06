@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑤ merge 前閘 —— 紅一支，退回你修
 topic: ★★★19 支跑完:18 綠、【headless ✗】——headless_test.gd:11596 `assert(absf(coin_after-(100.0-1.1))<0.01, "全額發薪...")` 寫死了【全額發薪】,而源扣繳之後團庫只流出 net ⇒ 必然失敗;★這是【預期內的行為改變】不是回歸,但★★改它的方式有講究:不要改成「容忍任何值」也不要只把數字換掉——要改成【與稅率有關】的斷言(coin_after = 100.0 - 1.1*(1-rate) 且 rate>0),★★★否則你就把一條【原本會抓到扣繳壞掉】的斷言改成【扣繳壞掉也不會紅】的,那正是今天我們才寫進規矩的那件事;★而 ⑤【尚未 push】——閘在 push 前跑就是為了這一刻;★★另:你新加的 unified-commerce 我補進註冊表了,7s 綠
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ②(b) merge 被 headless 擋下 —— ★而紅的是【測試】不是 production
 topic: ★headless 紅在 `_test_wild_game_regen`:`assert(grew, "月再生應曾使 wild_game 增長")`;★★而成因不是你的改動錯,是【那個測試把時鐘釘死在 43200 然後呼叫 200 次】—— 舊制 `43200 % 43200 == 0` 於是【200 次全 fire】,新制 _due 第一次 fire 之後把 next 推到 86400 而 current_tick 從來沒動 ⇒ 只 fire 一次,30% 機率 ⇒ 七成會紅;★★★所以舊測試會綠【只是因為舊機制分不出「同一個 tick 被呼叫 200 次」】—— 它把舊制的缺陷寫進了判準;修法=測試迴圈每輪 current_tick += TICKS_PER_MONTH(production 一行都不動);★而你的初值訂正(第一個邊界不是 0)我重驗過是對的,呼叫端第一次確實是 tick 360
 ---

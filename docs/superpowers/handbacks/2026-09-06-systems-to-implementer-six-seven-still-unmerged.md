@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★⑥⑦ 仍未 merge —— 我的漏
 topic: ★★我剛查:b172f457(⑥)／c95f6b3d(⑦)／9172d3b7 三顆【都不在 main】,而 feat/salary-produce-unblock 【也沒推上 origin】;★而 merge 是我的活 ⇒ 這是我漏的,不是你的;★★★而唯一擋著的是【determinism 三跑】——你當時說第三跑有 2 行尾巴雜訊、來源未定,所以【不宣稱通過】(那是對的);⇒ 我要兩樣東西才能收:①【三跑的 exact 指令】(我在暫時 worktree 自己跑,照今天立的規矩「長跑在不會被編輯的樹上跑」)②你手上那支 branch 現在的狀態(⑧ 是接在它上面,還是另開?)——★因為若 ⑧ 也長在同一支上,那就【一起 merge】不要拆
 ---

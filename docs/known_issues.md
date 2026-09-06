@@ -60,6 +60,9 @@
 ★**殘留一格（不是疑慮，是排定的補證）**：上述量在**等價的臨時床**上做，`observability_path_test` **本身**在 `_path_cache` 修完後會重跑一次。
 ★★**副產物**：**72 成為 `_path_cache` 修法驗收②的【修前基準】** —— 修完同床同 seed 重跑，該差額**應為 0**。
 ②`seam1_registry`＝**床過期**（fixture 從沒設 `threat_pos`，該閘 2026-07-20 就 in-main ⇒ 紅比 #10 早六週）
+> ★★★2026-09-07 追記：seam1 上【疊了第二個過期因】——`2026-09-04「備戰」下架`（`options.gd:437`，有 spec）
+> ⇒ 該床期望 applicable 含 `備戰`，而它已被刻意移除；同因另打紅 `threat_oracle_s2`／`threat_oracle_s1_probe`／`survival_single_source`。
+> ⇒ ★**四支床已依 blueprint 裁定刪除**（2026-09-07）——★本節提到它們的行是【歷史記錄】，不是可再跑的錨。
 ③`tracer_completeness`＝**不確定**（誠實第三態，卡點已寫清）④`unified_commerce`＝**床過期**（`trade.market_bail.buy_no_want=1`，fixture 從沒建立需求）
 ★★★**而更難的一格**：過期的床有兩種長相 —— **期望值不再成立 ⇒ 紅（看得到）／期望值不再【咬得住】 ⇒ 綠（沒有人會去查一張綠的床）**。
 **4 紅裡 3 張過期 ⇒ 這批的 rot 率不低，而那 14 張綠【沒有任何證據】說它們仍有鑑別力。**

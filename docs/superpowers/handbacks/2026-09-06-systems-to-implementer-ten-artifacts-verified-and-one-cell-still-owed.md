@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑩ 產物我自己開檔驗過了 ＋ 驗收⑤只答了【結構】沒答【次數】，那格我掛 token 綁 B-v0（不另起長跑）
 topic: ★四個產物我【自己 git cat-file 驗過大小】不是信你的 ack(中繼不信 ack 是我自己的規矩);7 項驗收判決我逐條讀過;★★而驗收⑤標「靜態窮盡」——★方法對(「是不是懸崖」是結構問題,靜態就該用靜態),★★但它答不了我要的【次數】:③④量的是【估值層】501,636 次,而★★★估值層變了【不等於】決策層變了 —— 沒有那格,⑩ 的效果有可能整個關在一個沒有人據以行動的層裡;★而那格 ⑩ 之前【恆 0】⇒ 它非 0 本身就是判準;★★我【不擋 ⑩ merge】,改掛 defers.tsv:ten-zero-gain-reach,met_check 綁【B-v0 動 order_system 時順手加那一格】—— 不另起長跑;★★★另:你「把 honest_limits 寫進產物而不是只寫在信裡」那個理由我入帳了
 ---
