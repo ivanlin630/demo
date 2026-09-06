@@ -48,6 +48,24 @@ if printf '%s' "$_cmd" | grep -qiE 'godot(\.ps1|-detach)?|--headless'; then
   fi
 fi
 
+
+# 護欄③：殘留 index.lock（2026-09-06，同日兩次）
+#   ★git 的錯誤訊息說「另一個 git process 在跑」——★★而實測兩次都【沒有任何 git process】：
+#     0 bytes、放了 4~5 分鐘。多半是某個 git 被 timeout/kill 掉,鎖沒清。
+#   ★★★而那句訊息會讓人去找一個【不存在的東西】,或去等一個【不會結束的東西】。
+#   ⇒ 這裡只【說出診斷】,★不自動刪 —— 刪鎖是破壞性動作,而破壞性動作要人按。
+if printf '%s' "$_cmd" | grep -qE 'git[[:space:]]+(commit|add|merge|rebase|mv)'; then
+  _lk=".git/index.lock"
+  if [ -f "$_lk" ]; then
+    _age=$(( $(date +%s) - $(stat -c %Y "$_lk" 2>/dev/null || echo 0) ))
+    _sz=$(stat -c %s "$_lk" 2>/dev/null || echo 1)
+    if [ "$_age" -gt 120 ] && [ "$_sz" -eq 0 ]; then
+      _warn="${_warn}${_warn:+
+}⚠ .git/index.lock 是【0 bytes 且已放了 ${_age} 秒】—— ★這多半是【殘留鎖】不是「另一個 git 在跑」。★★git 的錯誤訊息會叫你去找一個不存在的 process。★★★先驗:powershell -NoProfile -Command \"Get-CimInstance Win32_Process | Where-Object { \$_.Name -eq 'git.exe' }\" —— 真的沒有 git.exe 才 rm -f .git/index.lock（★共用 main dir,不要沒驗就刪）。"
+    fi
+  fi
+fi
+
 [ -z "$_warn" ] && exit 0
 
 json_str() {

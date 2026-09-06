@@ -111,6 +111,24 @@ if (Test-Path $hookDir) {
     } catch { }
 }
 
+# COLLISION RECORD (2026-09-06). bash-guard warns before a Godot run, but a PreToolUse hook
+# only ever sees calls that go THROUGH the tool -- a WMI-detached run does not, so neither a
+# warning nor a hard block can reach it. The only thing that sits on both sides of that
+# boundary is this wrapper. So instead of trying to PREVENT the overlap here, record it:
+# "was there a collision, with whom, for how long" becomes a fact you can look up afterwards,
+# which replaces the question "did anyone see the warning" -- a question nobody can answer.
+if (Test-Path $hookDir) {
+    try {
+        $fresh = Get-ChildItem -Path (Join-Path $hookDir ".busy.*") -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -ne (".busy." + $beaconRole) -and ((Get-Date) - $_.LastWriteTime).TotalSeconds -lt 60 }
+        if ($fresh) {
+            $who = ($fresh | ForEach-Object { $_.Name -replace "^\.busy\.", "" }) -join ","
+            "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`tCOLLISION`t$beaconRole`tstarted-while-running=$who" |
+                Out-File -FilePath $runLog -Encoding ascii -Append
+        }
+    } catch { }
+}
+
 $cp950 = [System.Text.Encoding]::GetEncoding(950)
 $proc = Start-Process -FilePath $exe -ArgumentList $args `
     -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr `
