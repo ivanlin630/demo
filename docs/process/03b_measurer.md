@@ -106,18 +106,16 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 
 ---
 
-## ★長工作 beacon（watchdog v4 用，2026-08-21 用戶定案）
+## ★長工作 beacon —— **★2026-09-06 起【不要手寫】，wrapper 自己蓋章**
 
-長工作（長跑量測／大窗 bed／長編譯）**開跑前寫、跑完刪**：
+★**舊制要人手寫 `.busy.<role>`，而 2026-09-06 稽核發現【一個都沒被寫過】** ⇒ 護欄母體恆空、
+**上線至今一次沒響，而它防的事（兩支 Godot 同跑污染 perf）當天正在發生。**
+⇒ ★★**現在 `tools/godot.ps1` 起跑自己寫、每 10s 續期（心跳）、結束刪，並把時窗寫進 `.claude/hooks/.godot-runs.log`。**
+★★★**你要做的只有一件**：**確認你那棵 worktree 的 `tools/godot.ps1` 是新版**
+（`grep -c 'BUSY BEACON' <worktree>/tools/godot.ps1`）—— **舊版的樹跑的 Godot 一筆都不會被記到，**
+**而「log 裡沒有紀錄」＝【那棵樹沒有新版 wrapper】或【真的沒跑】，兩者長得一樣。**
 
-```bash
-# 開跑前
-echo $(( $(date +%s) + 28800 )) > .claude/hooks/.busy.measurer      # 8h 死線
-# 跑完
-rm -f .claude/hooks/.busy.measurer
-```
-
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
+> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）；★環境紀元 → `docs/process/env-epochs.tsv`
 
 ## ★★★判準七條（★2026-09-01 整節搬入 `detail/03b_measurer-cases.md`，此處留表列）
 ★**每一條都有血證，全文在 detail** —— 這裡只留【判準本身】，撞到了再去讀成因。
