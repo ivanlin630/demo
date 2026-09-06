@@ -2010,7 +2010,8 @@ func _deliver_letter_to_lord(state: WorldState, letter: Dictionary, lord: TeamDa
 		msg.origin_team_id = origin_id; msg.origin_tick = int(o.get("origin_tick", state.world.current_tick)); msg.strength = 1.0
 		msg.is_distorted = false   # 信使親送 intra-faction = honest
 		msg.params = {"order_id": oid, "res": "food", "qty": int(o.get("qty", 0)),
-			"origin_team": origin_id, "origin_pos": o.get("origin_pos", Vector2i(-1, -1)), "expire_tick": int(o.get("expire_tick", 0))}
+			"origin_team": origin_id, "origin_pos": o.get("origin_pos", Vector2i(-1, -1)), "expire_tick": int(o.get("expire_tick", 0)),
+			"price": 0.0}   # ★§2.5：求援＝charity 請求不是商業報價 ⇒ 價格寫 0.0（對齊 free_dist 慣例）
 		state.global_messages.append(msg)
 		state.team_known[lord.team_id].append(msg)
 		known[oid] = true
@@ -2033,6 +2034,7 @@ func _deliver_letter_to_board(state: WorldState, letter: Dictionary, seat_pos: V
 			"qty_remaining": int(o.get("qty", 0)), "origin_team": origin_id, "expire_tick": int(o.get("expire_tick", 0)),
 			# relayed=true（信使代掛他隊單、非 seat owner 原生）；origin_tick 保 spawn（age→decay 真起作用）。
 			"origin_tick": int(o.get("origin_tick", state.world.current_tick)), "strength": 1.0, "relayed": true,
+			"price": 0.0,   # ★§2.5：信使代掛的求援單――charity 非報價
 		})
 		have[oid] = true
 		Probe.bump("help.need_deposited")
@@ -2116,7 +2118,8 @@ func _tick_info_scout(state: WorldState, scout: TeamData, merge_queue: Array) ->
 				_msg.origin_team_id = target_id; _msg.origin_tick = state.world.current_tick; _msg.strength = 1.0
 				_msg.is_distorted = false   # firsthand co-location 親見=honest
 				_msg.params = {"order_id": _oid, "res": "food", "qty": _deficit,
-					"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY}   # gate-ok: 同格親見取得的 origin_pos，回傳給領主當情報
+					"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY,
+					"price": 0.0}   # gate-ok: 同格親見取得的 origin_pos，回傳給領主當情報｜★§2.5：charity → price 0.0
 				state.global_messages.append(_msg)
 				state.team_known[mother.team_id].append(_msg)
 				if Probe.enabled: Probe.bump("care.firsthand_distress")
@@ -2148,7 +2151,8 @@ func _deposit_help_need(state: WorldState, origin_id: int, helper: TeamData) -> 
 		msg.origin_team_id = origin_id; msg.origin_tick = state.world.current_tick; msg.strength = 1.0
 		msg.is_distorted = false   # 信使親送 intra-faction = honest
 		msg.params = {"order_id": oid, "res": "food", "qty": int(o.get("qty_remaining", 0)),
-			"origin_team": origin_id, "origin_pos": origin.tile_pos, "expire_tick": int(o.get("expire_tick", 0))}   # gate-ok: origin.tile_pos ＝子民自願回報自己的位置（信使親送），非觀察者偷看
+			"origin_team": origin_id, "origin_pos": origin.tile_pos, "expire_tick": int(o.get("expire_tick", 0)),
+			"price": 0.0}   # gate-ok: origin.tile_pos ＝子民自願回報自己的位置（信使親送），非觀察者偷看｜★§2.5：charity → price 0.0
 		state.global_messages.append(msg)
 		state.team_known[helper.team_id].append(msg)
 		known[oid] = true

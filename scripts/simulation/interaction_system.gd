@@ -900,8 +900,14 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 		var oid: int = int(entry["order_id"])
 		var res: String = String(entry["res"])
 		var kind: String = String(entry["kind"])
+		# ★§4 board-declared-price：成交價＝板上 maker 自報價（taker 吃 maker 價）。
+		#   -1.0 ＝這張單沒帶價（舊單／中繼漏抄）⇒ 退回原本的當場重算，並留下 tap。
+		var bprice: float = float(entry.get("price", -1.0))
+		if Probe.enabled:
+			if bprice < 0.0: Probe.bump("board.price.missing")
+			else: Probe.bump("board.price.present")
 		if kind == "sell":
-			if _market_visitor_buy(state, visitor, owner, tile, oid, res, rem, commerce, owner_lv):
+			if _market_visitor_buy(state, visitor, owner, tile, oid, res, rem, commerce, owner_lv, bprice):
 				dealt = true
 		elif kind == "buy":
 			# ★後勤 SLICE A refine：convoy porter DELIVER → 傳 cargo_qty 當 deliver_cargo（賣 full cargo 繞 reserve）；normal 傳 -1。
@@ -913,7 +919,7 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 				dc = float(visitor.task_extra_data.get("cargo_qty", -1.0))
 				if String(visitor.task_extra_data.get("convoy_kind", "")) == "distribute":
 					oask = 0.0   # ★免費直注 gift：賑濟=施捨、mini-util(仁慈/責任)已 gate 該不該送、送了就免費給（不對餓子民定價）；啟用既有 free_dist 路（舊 local_value×price_factor 分子最小 0.5 永不 0=免費路 dead code bug）
-			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv, dc, oask):
+			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv, dc, oask, bprice):
 				dealt = true
 	if not saw_live_order:
 		Probe.bump("trade.market_bail.no_board_order")   # 板上無活單（29 bail 因可觀測）
@@ -962,12 +968,22 @@ func _market_peer_trade(state: WorldState, visitor: TeamData, tile: HexTileData,
 # 訪客買：向 owner sell 單 + public_storage stock 買 → 扣 storage、visitor.coin → owner.coin。
 # 可購量 = min(單餘量, 現貨, 買得起, 缺口, carry)；withdraw 實量計價（禁信 board 鏡像）。
 func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
-		oid: int, res: String, order_rem: int, commerce: float, owner_lv: Dictionary) -> bool:
+		oid: int, res: String, order_rem: int, commerce: float, owner_lv: Dictionary,
+		board_price: float = -1.0) -> bool:
 	if Probe.enabled: Probe.bump("mkfill.attempt.buy")   # ★母體：撮合被走到幾次（沒有它，「碰撞 12 次」分不出很少還是幾乎每次）
 	var vcoin: float = float(visitor.resources.get("coin", 0))
 	if vcoin <= 0.0: Probe.bump("trade.market_bail.buy_no_coin"); return false
-	var ask: float = TradeValuation.ask_price(owner, res, commerce, owner_lv, state) if owner != null \
-		else float(TradeValuation.BASE_PRICE.get(res, 0.0))   # 無主 outpost → face value
+	# ★§4：板上有自報價就吃板價（凍結於掛單那一刻）；沒有才退回當場重算。
+	#   ★★這一改的意義不是省一次計算，是【商隊出發前看到的價，就是它到場付的價】——
+	#     沒有它，「套利」只是一個到場才知道結果的賭博。
+	var ask: float
+	if board_price >= 0.0:
+		ask = board_price
+		if Probe.enabled: Probe.bump("board.price.used.buy")
+	elif owner != null:
+		ask = TradeValuation.ask_price(owner, res, commerce, owner_lv, state)
+	else:
+		ask = float(TradeValuation.BASE_PRICE.get(res, 0.0))   # 無主 outpost → face value
 	# ★★★零價可成交（blueprint 裁 (a) 2026-09-07）——★理由：他裁過的「爛大街＝白送」
 	#   本來就是【轉移語意】；若 0 元一律 bail，「白送」就會變成一個【從不發生的形容詞】。
 	#   ★★所以判準從 `<= 0` 改成 `< 0`：★負價仍然擋（那是定義域，價格不得為負），
@@ -1018,7 +1034,7 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 #   <0 = normal team sell（sellable=holding−reserve 既有不變，sim_runner:380 caller 回歸）。
 func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
 		oid: int, res: String, order_rem: int, owner_lv: Dictionary, deliver_cargo: float = -1.0,
-		override_ask: float = -1.0) -> bool:
+		override_ask: float = -1.0, board_price: float = -1.0) -> bool:
 	if Probe.enabled: Probe.bump("mkfill.attempt.sell")   # ★母體：撮合被走到幾次（沒有它，「碰撞 12 次」分不出很少還是幾乎每次）
 	# ★SLICE B override_ask: >=0=distribute 領主注入 ask（=local_value×price_factor）；==0=免費(仁君)跳 owner-coin/bid bail;
 	#   <0=現行 local_value 內算（normal trade + deliver 零變、guard 全不動）。付費端(>0)保留 affordability cap。
@@ -1035,7 +1051,17 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 		sellable = maxf(ResourceSystem.effective_holding(state, visitor, res)
 			- TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state), 0.0)
 	if sellable <= 0.0: Probe.bump("trade.market_bail.sell_no_surplus"); return false
-	var bid: float = override_ask if override_ask >= 0.0 else TradeValuation.local_value(owner, res, state)
+	# ★§4：優先序＝distribute 的 override_ask（領主注入、仁君免費那條）＞板上自報價＞當場重算。
+	#   ★★override_ask 排最前是【故意的】：它是一個【當下的政治決定】，
+	#     而板價是【掛單當時的商業報價】——政治決定該蓋過舊報價，反過來就不對。
+	var bid: float
+	if override_ask >= 0.0:
+		bid = override_ask
+	elif board_price >= 0.0:
+		bid = board_price
+		if Probe.enabled: Probe.bump("board.price.used.sell")
+	else:
+		bid = TradeValuation.local_value(owner, res, state)
 	# ★零價可成交（同上裁定）：`< 0` 擋負價，0 元放行；★而 `free_dist` 那半【不動】——
 	#   它是賣方的贈與意圖，與市場零價是兩件事（見 buy 路的長註解）。
 	if not free_dist and bid < 0.0: Probe.bump("trade.market_bail.sell_no_price"); return false
