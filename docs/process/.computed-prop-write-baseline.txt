@@ -1,0 +1,31 @@
+# 計算屬性直寫站 baseline（每列：檔案 站數）—— 2026-09-07 建立
+# ★這不是「允許清單」，是「已知債務快照」：目標是讓它【只減不增】。
+# ★★來歷：TeamData 五個 getter-only 屬性（population/wounded/anon_tiers/anon_combat_skill/anon_wage）
+#   賦值靜默 no-op，而拿掉 setter 也【不會】變成 parse error（實測 Godot 4.2.2）。
+scripts/debug/camp_marginal_test.gd 1
+scripts/debug/data_test.gd 1
+scripts/debug/desperation_food_seeking_test.gd 1
+scripts/debug/encounter_sim_test.gd 4
+scripts/debug/faction_dispatch_dissolution_check.gd 1
+scripts/debug/game_sim_test.gd 1
+scripts/debug/gather_purity_probe_bed.gd 1
+scripts/debug/greylist_dissolution_check.gd 1
+scripts/debug/headless_test.gd 8
+scripts/debug/map_render_test.gd 1
+scripts/debug/named_scarcity_ab_test.gd 1
+scripts/debug/own_granary_null_caller_test.gd 2
+scripts/debug/prosperity_dissolution_check.gd 1
+scripts/debug/qa_probe.gd 4
+scripts/debug/rung_dissolution_check.gd 1
+scripts/debug/s6_build_days_truth.gd 1
+scripts/debug/seam1_registry_test.gd 5
+scripts/debug/settlement_s2a_test.gd 1
+scripts/debug/solo_dissolution_check.gd 1
+scripts/debug/survival_layer_unify_test.gd 4
+scripts/debug/survival_stall_ladder_test.gd 2
+scripts/debug/team_ui_test.gd 2
+scripts/debug/threat_oracle_s15_test.gd 1
+scripts/debug/ui_flow_test.gd 9
+scripts/debug/ui_logic_test.gd 1
+scripts/debug/vendetta_dissolution_check.gd 1
+scripts/simulation/decision/decision_context.gd 1
