@@ -1,7 +1,11 @@
-# 131 床中【零判準通道】的床（2026-09-07 靜態掃，systems）
-# 判準：grep -E '\[FAIL\]|\bassert\b|push_error|printerr|SCRIPT ERROR|\[ERR\]|FAILED' ⇒ 0 命中
-# ★它們只 print，沒有任何通道可以說「壞了」⇒ 永遠不會紅 ⇒ 分診的 green 對它們沒有意義
-# 已掃 33 支中有 13 支是這種，全被判 green ⇒ 真綠 15/33
+# 131 床【紅訊號形狀】普查（2026-09-07 systems，★本檔取代已撤回的 -no-verdict-channel.txt）
+# ★撤回：舊檔說『29 支零判準通道』是錯的——它們有判準，只是印成裸 FAIL 而我的 grep 要 [FAIL]
+#
+# [FAIL] 方括號式 = 99 支（分類器看得見）
+# ★裸 FAIL/其他式 = 31 支（★舊分類器看不見它們的紅 ⇒ 失敗時被判 green）
+# 真正零判準通道 = 1 支（coin_b_verify_bed.gd，直接讀完 80 行確認：首尾各算一次 CoinAudit.total() 卻從不比較）
+
+## 裸 FAIL/其他式（31 支）
 scripts/debug/a2a_join_guard_test.gd
 scripts/debug/agriculture_a_test.gd
 scripts/debug/agriculture_b_test.gd
@@ -22,12 +26,17 @@ scripts/debug/monotonic_team_id_test.gd
 scripts/debug/observer_never_freeze_test.gd
 scripts/debug/orderbook_tap_test.gd
 scripts/debug/own_granary_null_caller_test.gd
+scripts/debug/owner_outpost_index_test.gd
 scripts/debug/perf_cut1_test.gd
 scripts/debug/settlement_s1_test.gd
 scripts/debug/settlement_s2a_test.gd
 scripts/debug/settlement_s2b_test.gd
 scripts/debug/settlement_s4b_test.gd
+scripts/debug/settlement_s4c_test.gd
 scripts/debug/specimen_lineage_test.gd
 scripts/debug/t0_event_bus_test.gd
 scripts/debug/ui_flow_test.gd
 scripts/debug/ui_logic_test.gd
+
+## 真正零判準通道（1 支）
+scripts/debug/map_render_test.gd

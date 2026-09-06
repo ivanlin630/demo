@@ -3886,20 +3886,34 @@ grep -inE 'coin' docs/process/merge-gates.tsv  ⇒ ★零命中
 跑得起來且**關掉機制會紅**（陽性對照）才進，否則只是多一道恆綠的裝飾。
 owner=systems｜擋 Godot：排在 implementer 的 post-⑩ 雙向跑之後。
 
-## ⏳ 131 床分診掃描：detach 啟動路徑【死因未破】（2026-09-07，★記成未知，不解釋掉）
+## ⏳ 131 床分診：**detach 路徑的 stdout 不落地**（2026-09-07；★★本條是【訂正後】的，原標題「死因未破」是誤診）
 
+★**原本我寫的**：「WMI-detach 起的 sweep 整棵樹消失、死因未破」。★**那個前提是錯的。**
 ```
-症狀：WMI-detach 起的 sweep，log 只寫到兩行 header 就整棵樹消失，
-      ★連 bat 最後那行 `SWEEP_DONE_RC=%ERRORLEVEL%` 都沒寫到 ⇒ cmd.exe 本身沒活到最後
-      ★★兩次死在【完全相同的位置】(續掃訊息之後、第一支床之前) ⇒ 可重現，不是隨機被殺
+實測：★10 支 sweep bash【同時活著】—— 先前我判定「死掉」的那幾支都還在跑
+⇒ 我看的是 A:\sweep131.log，而 log 停在兩行 header 沒有再動
+⇒ ★★我把【管道安靜】讀成了【進程死亡】
 ```
-★**已排除的**（都實測過，不是推測）：
+★★★**這正是既有教訓的第三次現形：活著 ≠ 前進 ≠ 送達。**
+  ——「進程在」不能證明它在前進；★**「log 沒動」也不能證明它死了。**
+  ⇒ **唯一算數的是它【成功寫過 stdout】，而這裡失敗的正是那一段。**
+
+**真症狀（重新定義）**：`cmd.exe /c bat > log 2>&1` 經 WMI 起動時，**bash 的 stdout 沒有落到 log**
+（bat 末尾的 `SWEEP_DONE_RC=%ERRORLEVEL%` 也沒寫到 ⇒ 但那是因為 bash 還沒結束，不是 cmd 死了）。
+★**已排除**：腳本本身（前景 7 支全綠 rc=0）／detach 環境缺工具（探針 bat 實測 PATH 完整、
+powershell/timeout/cut 都在、`PROBE_DONE_RC=0` 有寫）。
+**繞道**：改走 harness 追蹤的背景執行（非 WMI）＋**換輸出檔**避開仍在飛的舊實例。
+★**繞過 ≠ 修好**，條目留著。owner=systems
+
+## ⚠️ 分診分類器曾有【假綠通道】（2026-09-07，已修，★留作教訓）
 ```
-① 腳本本身        前景跑 7 支(含先前卡 59 分鐘的 game_sim_test.gd)全綠 rc=0
-② detach 環境缺工具 探針 bat 實測：PATH 完整、powershell/timeout/cut 都在、PROBE_DONE_RC=0 有寫
-③ Godot 佔用      起跑時已驗 Godot FREE + implementer beacon 已消
+舊判紅：grep 'Assertion failed|\[FAIL\]|SCRIPT ERROR'
+131 床紅訊號形狀：[FAIL] 式 99 支 ／ ★裸 FAIL 等其他式 31 支(24%) ／ 真正無判準 1 支
+⇒ ★那 31 支失敗時被判 green（安靜失敗），而分類器自檢【三向全綠】
+⇒ ★★自檢樣本是我【照著自己偵測器的形狀】造的 ⇒ 它永遠抓不到偵測器不認得的紅
 ```
-⇒ ★★★**三條都排除，而它仍然死** —— 我**沒有找到兇手**，這格是**未知**。
-   ★**不填一個看起來合理的因果進去**（今天已經有一次「從不完整母體算出的差被升級成關於世界的主張」）。
-**繞道**：改走 harness 追蹤的背景執行（非 WMI），腳本不變 —— ★繞過不等於修好，這條留著。
+**已修**：自檢改用真實床採來的 5 種紅形狀 ＋ 4 種通過樣本不得誤判（成對）。
+★修完第一件事就是擋下我自己寫壞的 regex（awk 把 `\[FAIL\]` 吃成字元類 ⇒ `PASS` 的 `A` 也算紅）。
+**資料處置**：99 支 `[FAIL]` 式新舊判法相同 ⇒ 舊列保留；31 支裸式**只撤其中判 green 的列**重跑
+（紅在兩版都成立）⇒ 新表 `docs/measurements/2026-09-07-bed-triage-131-v2.tsv`。owner=systems
 owner=systems

@@ -24,18 +24,27 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   local t; t="$(cat)"
   if [ -z "${t//[[:space:]]/}" ]; then echo "no-output"; return; fi
   if printf '%s' "$t" | grep -qa 'Parse Error\|Failed to load script\|Could not find type\|not declared'; then echo "crash"; return; fi
-  if printf '%s' "$t" | grep -qa 'Assertion failed\|\[FAIL\]\|SCRIPT ERROR'; then echo "red"; return; fi
+  if printf '%s' "$t" | grep -qaE 'Assertion failed|SCRIPT ERROR|\[FAIL\]|(^|[[:space:]])FAIL[[:space:]]|HAS FAILURE|FAILS=[1-9]'; then echo "red"; return; fi
   echo "green"
 }
 
-# ★★★分類器自檢（合成樣本）——抓不到就整輪作廢
-[ "$(printf 'x\nSCRIPT ERROR: Assertion failed: boom\n' | classify)" = "red" ] || {
-  echo "[SWEEP] ★ABORT：分類器抓不到合成的紅 ⇒ 本輪作廢（不得讀成任何結果）"; exit 3; }
-[ "$(printf 'ok\n=== DONE ===\n' | classify)" = "green" ] || {
-  echo "[SWEEP] ★ABORT：分類器把乾淨輸出判成非綠 ⇒ 本輪作廢"; exit 3; }
+# ★★★分類器自檢 —— ★★樣本【必須從真實床的輸出形狀採來】，不得自己照偵測器的形狀造
+#   血證 2026-09-07：舊自檢用 'SCRIPT ERROR: Assertion failed: boom'（＝我的偵測器認得的形狀）
+#   ⇒ 它永遠抓不到【偵測器不認得的紅】。實際漏掉 31/131 支用裸 `FAIL `（無方括號）的床，
+#   ⇒ 那些床失敗時會被判 green（假綠）。★陽性對照要用真實樣本，不是合成樣本。
+for _s in "SCRIPT ERROR: Assertion failed: boom" "  FAIL  agriculture yield mismatch" "=== HAS FAILURE（fail=2）===" "FAILS=3" "[FAIL] x"; do
+  [ "$(printf '%s
+' "$_s" | classify)" = "red" ] || {
+    echo "[SWEEP] ★ABORT：分類器抓不到真實紅形狀：$_s ⇒ 本輪作廢（不得讀成任何結果）"; exit 3; }
+done
+for _s in "  PASS  ok" "=== ALL PASS（fail=0）===" "ok" "=== DONE === ALL PASS"; do
+  [ "$(printf '%s
+' "$_s" | classify)" = "green" ] || {
+    echo "[SWEEP] ★ABORT：分類器把通過樣本判成非綠（過度匹配）：$_s ⇒ 本輪作廢"; exit 3; }
+done
 [ "$(printf '' | classify)" = "no-output" ] || {
   echo "[SWEEP] ★ABORT：分類器把空輸出判成有結果 ⇒ 本輪作廢"; exit 3; }
-echo "[SWEEP] 分類器自檢通過（red／green／no-output 三向）"
+echo "[SWEEP] 分類器自檢通過（5 種真實紅形狀 + 4 種通過樣本不誤判 + 空輸出）"
 
 if [ -f "$OUT" ]; then echo "[SWEEP] 續掃:$OUT 已有 $(( $(wc -l < "$OUT") - 1 )) 筆,跳過它們"
 else printf 'bed	verdict	wall_s	note
