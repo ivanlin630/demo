@@ -8014,6 +8014,9 @@ func _test_pick_facility_upgrade_scale() -> void:
 		team.work_morale = 1.0
 		var leader := PersonData.new(); leader.id = 1; leader.person_name = "L"
 		state.persons[1] = leader; team.leader_id = 1
+		# ★前提驗證：「清單沒變」有兩種意思――assert 本來就不看 pop，或修法沒真的生效。
+		#   ★★SETTER-SWALLOWED=0 只證明【沒有吞寫】，不證明【add_anon 真的長出了人】。
+		assert(team.population == 20, "fixture 前提：pop 該是 20（leader1+anon19），實際=%d" % team.population)
 		state.teams[0] = team
 		# ★slot 狀態：A 留空位；B/C/D 塞滿（civilian L1 cap = 2 格）
 		# ★把 slot 塞滿：★不手抄欄位名 —— 從 `FACILITY_DEF[f].current_level_key` 讀（單一真值），
@@ -8559,6 +8562,7 @@ func _test_forced_options_label_no_drift() -> void:
 		# from team（diplomacy both_independent 需雙方 faction_id=-1）
 		var ft := TeamData.new(); ft.team_id = 1
 		AnonTierSystem.add_anon(ft, "平民", 5)   # ★ft 無 leader ⇒ getter = anon ⇒ 5
+		assert(ft.population == 5, "fixture 前提：ft.pop 該是 5，實際=%d" % ft.population)
 		ft.faction_id = -1 if c["both_indep"] else 0
 		pt.faction_id = -1 if c["both_indep"] else 0
 		state.teams[1] = ft
@@ -16590,6 +16594,7 @@ func _test_need_raw_urgency() -> void:
 	var team := TeamData.new()
 	team.team_id = 1
 	AnonTierSystem.add_anon(team, "平民", 4)   # ★team 無 leader ⇒ getter = anon ⇒ 4
+	assert(team.population == 4, "fixture 前提：pop 該是 4，實際=%d" % team.population)
 	team.food_flow_avg = 0.0
 	team.faction_id = -1
 	team.ambition_cap = AmbitionLadder.RUNG_HEGEMON
