@@ -46,7 +46,13 @@ wrapper 的 beacon/COLLISION 記錄住在 `tools/godot.ps1`,而【每個 worktre
 ①★載體無關:`.claude/hooks/.godot-runs.log` 有沒有這一跑的【結束列】
    —— ★★godot.ps1 的收尾寫入【只有正常結束才會跑】(被 kill 就沒有,這是設計進去的性質)
    ⇒ ★★★所以「有結束列」= 那次 wrapper 呼叫真的跑完了,而它【不依賴任何床印什麼】
-②fallback:該床/runner 自己的收尾標記(merge-gates 的 `───`＋總結行、measurer 的 `=== DONE ===`)
+②★★★而它是【三態】不是兩態(implementer 揭 2026-09-07):
+   有結束列                 ⇒ ✅跑完
+   沒有結束列 + 新鮮 beacon ⇒ ★還在跑
+   沒有結束列 + 沒有 beacon ⇒ ★★【被砍】或【那棵樹沒有新版 wrapper】—— ★★★兩者長得一樣
+   ⇒ 所以判「被砍」之前要先 `grep -c 'BUSY BEACON' <worktree>/tools/godot.ps1`
+   ⇒ ★否則會把【從來沒被觀測過】讀成【被觀測到失敗】
+③fallback:該床/runner 自己的收尾標記(merge-gates 的 `───`＋總結行、measurer 的 `=== DONE ===`)
    —— 給【舊 wrapper 的樹】用(那些樹不寫 .godot-runs.log,見上一節的母體缺口)
 ```
 ★**而我【不】在 stdout 加一行完跑標記**，理由要寫死：
