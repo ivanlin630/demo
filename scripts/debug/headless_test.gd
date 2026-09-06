@@ -11986,12 +11986,23 @@ func _test_famine_price_spike() -> void:
 		float(TradeValuation.BASE_PRICE["food"]) * 5.0), "food 饑荒應 5×")
 	assert(is_equal_approx(TradeValuation.local_value(team, "material", state),
 		float(TradeValuation.BASE_PRICE["material"]) * 2.0), "material 饑荒維持 2×")
-	# 過剩下限 0.5× 兩者皆同
+	# ★★★過剩下限【已隨第⑩票拆除】（用戶裁「拆」，blueprint 裁「floor 0 是定義域不是閥」）——
+	#   ★這兩條原本斷言 `local_value(過剩) == BASE_PRICE × 0.5`，而那個 0.5 【就是被拆掉的下臂】
+	#   ⇒ ★★它們是【那條 clamp 的鏡像】：閥沒了，鏡像必然紅（今天第四個同型）。
+	#   ⇒ ★★★而修法不是放寬成「小於原價就好」——那樣它【再也抓不到任何東西】；
+	#     改成斷言【新的機制】：深過剩 ⇒ 價格【就是 0】，而 0 是定義域的下界不是一個閥值。
 	team.resources = { "food": 100000.0, "material": 100000.0 }
-	assert(is_equal_approx(TradeValuation.local_value(team, "food", state),
-		float(TradeValuation.BASE_PRICE["food"]) * 0.5), "food 過剩 0.5×")
-	assert(is_equal_approx(TradeValuation.local_value(team, "material", state),
-		float(TradeValuation.BASE_PRICE["material"]) * 0.5), "material 過剩 0.5×")
+	assert(TradeValuation.local_value(team, "food", state) == 0.0,
+		"★深過剩 ⇒ food 價格【就是 0】（floor 是定義域）；實得 %.4f"
+			% TradeValuation.local_value(team, "food", state))
+	assert(TradeValuation.local_value(team, "material", state) == 0.0,
+		"★深過剩 ⇒ material 價格【就是 0】；實得 %.4f"
+			% TradeValuation.local_value(team, "material", state))
+	# ★★★而【只斷言 0 沒有鑑別力】——「函式壞掉恆回 0」也會綠。
+	#   ⇒ 補一條【同一支函式在不過剩時必須 > 0】的對照：★它讓「恆 0」立刻紅。
+	team.resources = { "food": 0.0, "material": 0.0 }
+	assert(TradeValuation.local_value(team, "food", state) > 0.0,
+		"★★對照：缺糧時 food 價格必須 > 0 —— ★★★沒有這條，上面兩條在【函式恆回 0】時照樣綠")
 	print("Econ Task2b OK")
 
 func _test_trade_valuation_single_source() -> void:
