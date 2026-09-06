@@ -968,7 +968,16 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 	if vcoin <= 0.0: Probe.bump("trade.market_bail.buy_no_coin"); return false
 	var ask: float = TradeValuation.ask_price(owner, res, commerce, owner_lv, state) if owner != null \
 		else float(TradeValuation.BASE_PRICE.get(res, 0.0))   # 無主 outpost → face value
-	if ask <= 0.0: Probe.bump("trade.market_bail.buy_no_price"); return false
+	# ★★★零價可成交（blueprint 裁 (a) 2026-09-07）——★理由：他裁過的「爛大街＝白送」
+	#   本來就是【轉移語意】；若 0 元一律 bail，「白送」就會變成一個【從不發生的形容詞】。
+	#   ★★所以判準從 `<= 0` 改成 `< 0`：★負價仍然擋（那是定義域，價格不得為負），
+	#     而【0 元】是一個合法的成交價。
+	#   ★★★而【不接 `free_dist`】（systems 讀過那條）：`free_dist = (override_ask == 0.0)`
+	#     是【賣方決定送】的意圖旗標（仁君賑濟），它同時跳過 owner-coin 與 ownerless 檢查；
+	#     而市場零價是【價格結果】不是【贈與意圖】⇒ 接過去會讓「市場把它送掉」與
+	#     「領主決定送」變成同一件事，★還會旁路本該生效的檢查。
+	if ask < 0.0: Probe.bump("trade.market_bail.buy_no_price"); return false
+	if Probe.enabled and ask == 0.0: Probe.bump("mkt.zero_price.buy_allowed")
 	var stock: float = TileBank.get_stored(tile, res)   # ★min(單餘,現貨)：可購量鎖現貨
 	# 訪客缺口（storage-aware，補到自己 reserve）；SURVIVAL 買方求生亦補
 	var want: float = maxf(TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state)
@@ -1025,7 +1034,10 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 			- TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state), 0.0)
 	if sellable <= 0.0: Probe.bump("trade.market_bail.sell_no_surplus"); return false
 	var bid: float = override_ask if override_ask >= 0.0 else TradeValuation.local_value(owner, res, state)
-	if not free_dist and bid <= 0.0: Probe.bump("trade.market_bail.sell_no_price"); return false
+	# ★零價可成交（同上裁定）：`< 0` 擋負價，0 元放行；★而 `free_dist` 那半【不動】——
+	#   它是賣方的贈與意圖，與市場零價是兩件事（見 buy 路的長註解）。
+	if not free_dist and bid < 0.0: Probe.bump("trade.market_bail.sell_no_price"); return false
+	if Probe.enabled and not free_dist and bid == 0.0: Probe.bump("mkt.zero_price.sell_allowed")
 	# 免費分配跳 affordability(ocoin/bid div-by-0)；付費端保留 affordability cap（居民買可負擔量,買不夠→deficit 殘留=苛捐雜稅）。
 	var qty: int
 	if free_dist:
@@ -1135,7 +1147,9 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		# 液化：ask 折扣人格化(急鬆手/貪守價)；willing 對閉合邊際價差(SPREAD_TOL)。
 		var ask: float = TradeValuation.ask_price(seller, res, commerce, TradeValuation.leader_vals(state, seller), state)
 		var bid: float = TradeValuation.local_value(buyer, res, state)
-		if ask <= 0.0 or ask > bid * (1.0 + TradeValuation.SPREAD_TOL): continue
+		# ★零價可成交（同上裁定）：`< 0` 擋負價；★★而 spread 那半【不動】——它是撮合條件不是定義域。
+		if ask < 0.0 or ask > bid * (1.0 + TradeValuation.SPREAD_TOL): continue
+		if Probe.enabled and ask == 0.0: Probe.bump("mkt.zero_price.match_allowed")
 		var qty: int = mini(int(surplus), int(buyer_coin / ask))
 		qty = mini(qty, ms.carry_space_for_res(buyer, res))   # WS-3 carry 限（買方滿載即止買）
 		if qty <= 0: continue
