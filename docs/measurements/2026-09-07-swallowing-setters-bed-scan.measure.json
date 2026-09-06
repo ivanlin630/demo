@@ -1,0 +1,52 @@
+{
+  "slice": "swallowing-setters-stage-a",
+  "date": "2026-09-07",
+  "tree": ".worktrees/setterswallow",
+  "head": "5a0259df",
+  "base": "origin/main ad1cad15",
+  "question": "TeamData 五個計算屬性的 setter 是 set(_value): pass（靜默吞寫）。哪些床 runtime 真的踩到？",
+  "method": {
+    "instrument": "TeamData._note_swallowed()：static var swallowed_writes 恆計 + 每屬性首次 push_error。不掛 Probe（Probe.bump 有 enabled 閘，會在沒 arm 的床上恆 0）。",
+    "run": "從 main dir 用 --path 指 worktree 逐床跑（wrapper 用 main 的新版）",
+    "liveness_witness": ".claude/hooks/.godot-runs.log 的結束列 —— 載體無關，不依賴床印什麼",
+    "tri_state": "跑了+沒寫=CLEAN / 跑了+有寫=DIRTY / 沒有結束列=UNKNOWN（★不是 CLEAN）"
+  },
+  "positive_control": "手動寫一次 → swallowed_writes={\"population\":1}",
+  "negative_control": "不加 --debug 跑 → ABORT-LISTING，且不輸出任何假站列",
+  "static_sites_main_6edde62f": {
+    "population": 52, "wounded": 2, "anon_tiers": 1, "anon_combat_skill": 2, "anon_wage": 0,
+    "production": "唯一 1 處 decision_context.gd:237 寫的是 DecisionContext 自己的欄位，不在此列"
+  },
+  "runtime": {
+    "production_600tick_warring_states_seed1337": {},
+    "beds_scanned": 26,
+    "beds_with_witness": 26,
+    "beds_unknown": 0,
+    "beds_dirty": 10,
+    "beds_clean": 16,
+    "dirty": {
+      "headless_test": ["population", "wounded"],
+      "encounter_sim_test": ["anon_combat_skill", "population"],
+      "map_render_test": ["population"],
+      "own_granary_null_caller_test": ["population"],
+      "qa_probe": ["population"],
+      "settlement_s2a_test": ["population"],
+      "survival_layer_unify_test": ["population"],
+      "team_ui_test": ["population"],
+      "ui_flow_test": ["population"],
+      "ui_logic_test": ["population"]
+    }
+  },
+  "findings": [
+    "production 執行路徑上這五個屬性從來沒有被賦值 ⇒ 遷移早已完成，鷹架只是沒拆",
+    "26 支有直寫的床裡，只有 10 支 runtime 真的執行到 ⇒ 另 16 支的直寫是死碼",
+    "唯一同時是註冊 merge-gate 的髒床是 headless_test（且只透過 headless-regression.sh 這個 hook 才跑得到）",
+    "qa_probe 是髒的 —— 它餵 QA 判決",
+    "anon_wage 靜態 0 站 ⇒ 拆它的 setter 零成本；population 52 站 ⇒ 五個不該當一批處理"
+  ],
+  "honest_limits": [
+    "屬性層 yes/no —— 答不了『某支床的哪幾條 assert 是在 pop=0 的世界上做的』",
+    "逐站（行粒度）清單取不到：get_stack() 只在 --debug 下有值，而 --debug 讓 assert 失敗變成互動式 debugger break ⇒ 有紅 assert 的床永遠卡住等 stdin",
+    "CLEAN 只代表『這一次這支床沒有執行到吞寫』——不同輸入/config 可能走到別的 fixture"
+  ]
+}
