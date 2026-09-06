@@ -75,4 +75,14 @@ bv0-claim-expiry	B-v0 的【到期處置】——★implementer 在 Slice A 把�
 #     名單 + 重跑結果【一起】推用戶,一次講清。
 #   ★★★而【現在就寫下來】的理由:等名單來了再議,會在【已經看到數字】之後才定判準
 #     —— 那正是「預寫解讀」那條要防的相反面。
+# ★★★【2026-09-07 預先講死:stage B 之後 headless 的失敗清單【會變】,而那【不是回歸】】
+#   事實:26 支有直寫的床裡,同時是【註冊 merge-gate】的只有一支 = scripts/debug/headless_test.gd
+#        (★它只透過 hook 才跑得到:headless-regression.sh —— 註冊表 11 支直接跑 .gd、19 支經 bash hook,
+#         直接掃法會算出 0,而那是【載體】漏掉的第三次)
+#   ★而它 runtime 確認被污染(population + wounded 都被吞寫)
+#   ⇒ ★★stage B 把那些 fixture 改成合法寫入之後,那些場景【第一次真的有人】
+#      ⇒ 失敗清單【一定會變】—— ★★★而那個變化是【修好了】不是【弄壞了】
+#   ⇒ 處置:baseline docs/process/.headless-baseline-list.txt 必須【重生成】,而重生成時要附一句
+#      【哪幾條變了、為什麼】—— ★否則新 baseline 會把舊污染【洗白】成新常態
+#   ★★★這段【現在寫】的理由:等看到新清單再判,就是在【已經看到數字之後】才定判準
 scaffold-swallowing-setters	★遷移鷹架:team_data.gd 五個計算屬性的 `set(_value): pass`(:57 population／:242 wounded／:260 anon_tiers／:269 anon_combat_skill／:277)——★它們的用途是【讓舊賦值站繼續編得過】,而遷移完成後【沒有人回來拆】⇒ ★★變成永久的靜默失敗產生器(直寫處裸掃 scripts/ 合計 107);★★★本 token 就是 blueprint 立的「鷹架出生必掛拆除 token」那條規矩的【第一個實例】	五個 setter 全部移除(賦值變 parse error)= 遷移真的完成	! git grep -q 'set(_value):' -- scripts/data/team_data.gd
