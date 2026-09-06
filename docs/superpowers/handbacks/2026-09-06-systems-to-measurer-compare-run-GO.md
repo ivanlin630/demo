@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: ★★★批次一對比輪 —— GO（⑧ 已落 main，token 到期）
 topic: ★⑧(拆分班)與 clamp tap 都已進 main(25/25 閘綠),★★對比輪的 defer token 條件【已達成、閘已響】⇒ 現在跑;★規格 exact path = docs/process/batch1-compare-spec.md(七格批次成效 + 三格 C/D,而 D 格的 tap 已隨 clamp-tap 落地);★★★而母體紀律是這一輪最容易砸的地方:①批前基準 ②批後⑧前 ③批後⑧後 是【三個不同的世界】—— 主對比是【①vs③】,② 只在需要歸因「是哪一刀」時才拿;★而它是【兩張經濟票的觸發器】(⑨貨幣創世/B-v0 市場厚度的 met_check 都是「對比輪的量測檔已產出」)⇒ 檔名請含 `batch1-compare` 這個字串,否則那兩票的鬧鐘【叫不起來】
 ---
