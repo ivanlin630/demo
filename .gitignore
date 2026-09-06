@@ -21,6 +21,10 @@ tools/telegram/config.local.sh
 !.claude/hooks/
 .claude/hooks/*
 !.claude/hooks/*.sh
+# ★閘的列舉器（computed_prop_sites.py）――它要認型別，shell 做不來。
+#   ★★gitignore 【不支援行內註解】：註解写在 pattern 後面會變成 pattern 的一部分，
+#   而它不會報錯――只是這條規則從此什麼都不匹配。
+!.claude/hooks/*.py
 !.claude/settings.json
 
 # Superpowers plugin cache

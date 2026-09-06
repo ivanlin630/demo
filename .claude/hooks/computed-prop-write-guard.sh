@@ -1,46 +1,46 @@
 #!/usr/bin/env bash
-# ★★★計算屬性直寫閘（implementer 立 2026-09-07）
+# ★★★TeamData 計算屬性直寫閘（implementer 立 2026-09-07）
 #   ★病：TeamData 有五個【只有 getter】的計算屬性。對它們賦值【不報錯、不 warn、值不變】。
-#     實測（Godot 4.2.2）：把 `set(_value): pass` 整個拿掉之後，賦值【仍然】是靜默 no-op
-#     ⇒ ★★「拿掉 setter 讓它變成 parse error」這條路【不存在】——引擎不提供這個保護。
-#   ★★★所以【唯一】會響的東西只有兩個：①runtime 的 push_error（要那行真的被執行到）
-#     ②本閘（靜態，不需要執行）。⇒ 兩者互補：runtime 抓得到「真的在跑錯的世界」，
-#     本閘抓得到「新加進來的站」——而後者是【預防】，前者是【考古】。
-#   ★誠實限：本閘只認【`.prop =` 這個語法形狀】。`set("population", 5)`／反射寫入它看不到。
+#     實測 Godot 4.2.2：把 `set(_value): pass` 整段拿掉，賦值【仍然】是靜默 no-op
+#     ⇒ ★★「拿掉 setter 讓它變成 parse error」這條路【不存在】——引擎不給這個保護。
+#   ★★★本閘【不用 grep 判】。同一天四個數字的血證：107 / 58 / 56 / 53 / 52，
+#     它們混進了①比較運算子 ②註解 ③字串字面值 ④★DecisionContext 的【合法】寫入
+#     （c.population 是它的真欄位）⇒ 真數是 32（31 TeamData + 1 UNKNOWN）。
+#     ⇒ ★★前四個數字不是「比較不精確」，它們量的是【別的東西】。
+#     ⇒ 判準必須【認接收者的宣告型別】⇒ 交給 .claude/hooks/computed_prop_sites.py。
+#   ★CRLF：兩邊都過 `tr -d '\r'`。血證＝內容完全相同卻【每一行都 diff】，
+#     而那看起來像「有人全面改寫了這個檔」。
 set -u
-# ★★★【不】export LC_ALL=C ――血證 2026-09-07：它讓 `grep -P` 對這些 UTF-8 檔回【 0 筆】（58→0）。
-#   ★而我那行是從 headless-regression.sh 抄來的，沒問它對我的 pattern 做了什麼。
-#   ★★失效形狀：閘會宣稱【債務全清了】；若 baseline 也用同一個 locale 產，
-#     兩邊都是空 ⇒ 閘印 PASS（0 vs 0）――★★★一支完全沒有鑑別力的閘。
-#   ⇒ 只對【排序】固定 locale（下方 LC_ALL=C sort），不動 grep 的。
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
 
-PROPS='population|wounded|anon_tiers|anon_combat_skill|anon_wage'
+BASE_F=docs/process/.computed-prop-write-baseline.txt
+[ -f "$BASE_F" ] || { echo "[COMPUTED-PROP] ★FAIL：baseline 不存在（$BASE_F）"; exit 1; }
 
-# ★★★內建陽性對照：先確認【正則引擎本身會不會抓】，再去相信它抓到的 0。
-#   ★沒有這四行，一個抓不到任何東西的閘與一個【真的沒債務】的閘長得一模一樣。
-if ! printf 'x.population = 1
-' | grep -qP "\.($PROPS)\s*=(?!=)"; then
-  echo "[COMPUTED-PROP] ★ABORT：grep -P 連合成的陽性樣本都抓不到 ⇒ 本輪結果無效（不得讀成 PASS 也不得讀成 FAIL）"
+PY=$(command -v python || command -v python3 || true)
+[ -n "$PY" ] || { echo "[COMPUTED-PROP] ★ABORT：找不到 python ⇒ 本輪結果無效（不得讀成 PASS）"; exit 2; }
+
+# ★★★不要用管線取狀態：`X | tr` 的 $? 是【tr 的】――
+#   血證 2026-09-07：python 當場 SyntaxError，而閘看到 rc=0 + 空輸出 ⇒ 印 PASS(0 vs 0)。
+#   ⇒ 先單獨取 python 的狀態，再做 CRLF 正規化。
+RAW=$("$PY" .claude/hooks/computed_prop_sites.py 2>/dev/null)
+RC=$?
+NOW=$(printf %s "$RAW" | tr -d '')
+if [ "$RC" -ne 0 ]; then
+  echo "[COMPUTED-PROP] ★ABORT：列舉工具非零退出（rc=$RC；2＝它自己的陽性對照失敗）⇒ 本輪結果無效"
   exit 2
 fi
-BASE_F=docs/process/.computed-prop-write-baseline.txt
-[ -f "$BASE_F" ] || { echo "[COMPUTED-PROP] ★FAIL：baseline 不存在（$BASE_F）—— 沒有 baseline 就分不出「本來就有」與「新加的」"; exit 1; }
 
-# ★裸掃：不加動詞白名單、不加目錄白名單。★★排除比較運算子（`==`/`!=`）——
-#   血證 2026-09-07：兩個角色各自報了 107 與 56，兩個都把 `== 0` 算成了賦值。
-NOW=$(grep -rnP "\.($PROPS)\s*=(?!=)" scripts/ 2>/dev/null | sed 's/:[0-9]*:.*//' | LC_ALL=C sort | uniq -c | awk '{print $2" "$1}' | LC_ALL=C sort)
-BASE=$(grep -v '^#' "$BASE_F" | grep -v '^$' | LC_ALL=C sort)
+BASE=$(grep -v '^#' "$BASE_F" | grep -v '^$' | tr -d '\r')
+N_NOW=$(printf '%s\n' "$NOW" | grep -c . || true)
+N_BASE=$(printf '%s\n' "$BASE" | grep -c . || true)
 
 if [ "$NOW" = "$BASE" ]; then
-  N=$(printf '%s\n' "$NOW" | grep -c . || true)
-  echo "[COMPUTED-PROP] ✓ 直寫站與 baseline 逐檔相同（$N 檔）"
+  echo "[COMPUTED-PROP] ✓ TeamData 直寫站與 baseline 逐行相同（$N_NOW 站）"
   echo "[COMPUTED-PROP] PASS"
   exit 0
 fi
-
-echo "[COMPUTED-PROP] ★FAIL：直寫站與 baseline 不同"
-echo "   ★★而【變少】也會紅 —— 那是好事，但要更新 baseline 並寫理由，"
+echo "[COMPUTED-PROP] ★FAIL：TeamData 直寫站與 baseline 不同（baseline $N_BASE → 現在 $N_NOW）"
+echo "   ★★【變少】也會紅 —— 那是好事，但要更新 baseline 並寫理由，"
 echo "     否則下次它會遮住新加的站（同 headless-regression 的做法）。"
 diff <(printf '%s\n' "$BASE") <(printf '%s\n' "$NOW") | sed 's/^/   /'
 exit 1

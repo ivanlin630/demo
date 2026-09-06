@@ -1,31 +1,37 @@
-# 計算屬性直寫站 baseline（每列：檔案 站數）—— 2026-09-07 建立
-# ★這不是「允許清單」，是「已知債務快照」：目標是讓它【只減不增】。
-# ★★來歷：TeamData 五個 getter-only 屬性（population/wounded/anon_tiers/anon_combat_skill/anon_wage）
-#   賦值靜默 no-op，而拿掉 setter 也【不會】變成 parse error（實測 Godot 4.2.2）。
-scripts/debug/camp_marginal_test.gd 1
-scripts/debug/data_test.gd 1
-scripts/debug/desperation_food_seeking_test.gd 1
-scripts/debug/encounter_sim_test.gd 4
-scripts/debug/faction_dispatch_dissolution_check.gd 1
-scripts/debug/game_sim_test.gd 1
-scripts/debug/gather_purity_probe_bed.gd 1
-scripts/debug/greylist_dissolution_check.gd 1
-scripts/debug/headless_test.gd 8
-scripts/debug/map_render_test.gd 1
-scripts/debug/named_scarcity_ab_test.gd 1
-scripts/debug/own_granary_null_caller_test.gd 2
-scripts/debug/prosperity_dissolution_check.gd 1
-scripts/debug/qa_probe.gd 4
-scripts/debug/rung_dissolution_check.gd 1
-scripts/debug/s6_build_days_truth.gd 1
-scripts/debug/seam1_registry_test.gd 5
-scripts/debug/settlement_s2a_test.gd 1
-scripts/debug/solo_dissolution_check.gd 1
-scripts/debug/survival_layer_unify_test.gd 4
-scripts/debug/survival_stall_ladder_test.gd 2
-scripts/debug/team_ui_test.gd 2
-scripts/debug/threat_oracle_s15_test.gd 1
-scripts/debug/ui_flow_test.gd 9
-scripts/debug/ui_logic_test.gd 1
-scripts/debug/vendetta_dissolution_check.gd 1
-scripts/simulation/decision/decision_context.gd 1
+# TeamData 計算屬性直寫站 baseline —— 2026-09-07 重建
+# ★格式：<檔> <接收者宣告型別> <接收者>.<屬性>
+# ★★這不是允許清單，是【已知債務快照】：目標是只減不增。
+# ★★★第一版 baseline 是純 grep 產的 27【檔】，裡面有 20 站是 DecisionContext 的合法寫入
+#   加上註解與字串字面值 ⇒ 那個數字量的是別的東西，不是債務。
+scripts/debug/data_test.gd TeamData team.population
+scripts/debug/encounter_sim_test.gd TeamData atk.population
+scripts/debug/encounter_sim_test.gd TeamData atk.anon_combat_skill
+scripts/debug/encounter_sim_test.gd TeamData def.population
+scripts/debug/encounter_sim_test.gd TeamData def.anon_combat_skill
+scripts/debug/headless_test.gd TeamData t.wounded
+scripts/debug/headless_test.gd TeamData t.wounded
+scripts/debug/headless_test.gd TeamData team.population
+scripts/debug/headless_test.gd TeamData ft.population
+scripts/debug/headless_test.gd TeamData team.population
+scripts/debug/map_render_test.gd TeamData team.population
+scripts/debug/own_granary_null_caller_test.gd TeamData a.population
+scripts/debug/own_granary_null_caller_test.gd TeamData b.population
+scripts/debug/qa_probe.gd TeamData ds.population
+scripts/debug/qa_probe.gd TeamData tgt.population
+scripts/debug/qa_probe.gd TeamData tgt.population
+scripts/debug/settlement_s2a_test.gd TeamData team.population
+scripts/debug/survival_layer_unify_test.gd TeamData t.population
+scripts/debug/survival_layer_unify_test.gd TeamData t.population
+scripts/debug/survival_layer_unify_test.gd TeamData t2.population
+scripts/debug/team_ui_test.gd TeamData team.population
+scripts/debug/team_ui_test.gd TeamData team.population
+scripts/debug/ui_flow_test.gd TeamData other.population
+scripts/debug/ui_flow_test.gd TeamData ds.population
+scripts/debug/ui_flow_test.gd TeamData b.population
+scripts/debug/ui_flow_test.gd TeamData npc.population
+scripts/debug/ui_flow_test.gd TeamData loser.population
+scripts/debug/ui_flow_test.gd UNKNOWN pt.population
+scripts/debug/ui_flow_test.gd TeamData t.population
+scripts/debug/ui_flow_test.gd TeamData other.population
+scripts/debug/ui_flow_test.gd TeamData npc.population
+scripts/debug/ui_logic_test.gd TeamData team.population
