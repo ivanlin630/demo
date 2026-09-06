@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: batch1-compare GO收到,已定位①③兩顆commit+開跑,先報範圍與進度
 ---
 
