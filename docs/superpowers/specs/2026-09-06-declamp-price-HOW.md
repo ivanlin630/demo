@@ -71,7 +71,22 @@ trade_valuation.gd:158-163
 | 7b | ★★**蓋出來的東西【有沒有 consumer】** —— ★★★**幽靈資產判準**：**蓋了而沒有人用 ＝ 過剩被搬到另一個桶，不是被吸收** |
 | 7c | ★★★**震盪簽名**：**build-spree → 短缺 → 反彈** 的週期是否出現（★而它是 (a) 最可能的壞法：**世界在兩個極端之間擺盪**） |
 
-### ★★ROI 除零 —— **blueprint 指定我層自治，而我裁【不用 epsilon】**
+### ~~★★ROI 除零 —— blueprint 指定我層自治，而我裁【不用 epsilon】~~
+### ★★★★【2026-09-06 撤回：這一整段的【前提是錯的】】
+```
+★`MarginalEconomy.facility_roi`(marginal_economy.gd:59-73)的最後一行是:
+   `return d_inflow * effective_days - upgrade_cost_value`
+   ⇒ ★★【減法,不是除法】⇒ 【沒有除零這回事】
+★而全庫【零處】把 cost_value 當除數(implementer 窮盡搜索,我自己也重驗過)
+⇒ ★★★所以【整段 ROI 裁定是在解一個不存在的問題】
+```
+★**而真實行為是**：`cost_value == 0` ⇒ `ROI = 效益 − 0 = 效益`
+⇒ **免費的升級【自然就會很有吸引力】—— 不需要任何特例**
+⇒ ★★**而那【正是 blueprint 裁 (a) 想要的】**（東西多到爛 ⇒ 拿去蓋房）。
+★**這段保留不刪的理由**：**它記錄了「我下了一條建在未讀 code 上的裁定」** ——
+★★**而 implementer 拒絕照做並附窮盡證據，那是本票最該被記住的一件事。**
+
+### ~~（以下為原文，已由上方撤回）~~
 ```
 `MarginalEconomy.facility_roi(...)` 吃 cost_value ⇒ cost_value == 0 時分母為零
 ✗ 【不用 epsilon】(例 maxf(cost, 0.001))
