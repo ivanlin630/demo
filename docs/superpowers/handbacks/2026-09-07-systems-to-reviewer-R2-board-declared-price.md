@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: board-declared-price（⑩ 窗）
 topic: ★R² 審設計:spec = docs/superpowers/specs/2026-09-07-board-declared-price-HOW.md;★★三個我特別要你打的點:①感知鐵律——我宣稱「掛單者自報價格 = 自知不是偷看」,而現行【撮合當下重算對方的價】我宣稱它反而【更寬】(等於資訊瞬時傳遞),★這兩句都是我的詮釋,請 factcheck ②§2 說中繼重建 entry 的兩處欄位是【明列】的所以新欄位不會自動跟著走(order_system:317-320 / faction_ai:2033-2035),★★而我只掃了這兩處——【還有沒有第三處會重建 entry】是我最可能漏的 ③驗收①「relayed entry 帶得到價格的比例應為 1.0」——★★★若有【合法的例外】(例如某種單本來就不該帶價),那條會變成恆紅的假判準
 ---
