@@ -1,0 +1,33 @@
+# 131 床中【零判準通道】的床（2026-09-07 靜態掃，systems）
+# 判準：grep -E '\[FAIL\]|\bassert\b|push_error|printerr|SCRIPT ERROR|\[ERR\]|FAILED' ⇒ 0 命中
+# ★它們只 print，沒有任何通道可以說「壞了」⇒ 永遠不會紅 ⇒ 分診的 green 對它們沒有意義
+# 已掃 33 支中有 13 支是這種，全被判 green ⇒ 真綠 15/33
+scripts/debug/a2a_join_guard_test.gd
+scripts/debug/agriculture_a_test.gd
+scripts/debug/agriculture_b_test.gd
+scripts/debug/breed_rate_test.gd
+scripts/debug/build_eta_single_source_test.gd
+scripts/debug/convoy_dispatch_tap_test.gd
+scripts/debug/convoy_return_closure_test.gd
+scripts/debug/directive_stamp_test.gd
+scripts/debug/discounted_flow_test.gd
+scripts/debug/encounter_sim_test.gd
+scripts/debug/ewma_advance_test.gd
+scripts/debug/faction_succession_test.gd
+scripts/debug/failure_feedback_test.gd
+scripts/debug/labor_marginal_v2_test.gd
+scripts/debug/mergein_join_lifecycle_test.gd
+scripts/debug/monotonic_person_id_test.gd
+scripts/debug/monotonic_team_id_test.gd
+scripts/debug/observer_never_freeze_test.gd
+scripts/debug/orderbook_tap_test.gd
+scripts/debug/own_granary_null_caller_test.gd
+scripts/debug/perf_cut1_test.gd
+scripts/debug/settlement_s1_test.gd
+scripts/debug/settlement_s2a_test.gd
+scripts/debug/settlement_s2b_test.gd
+scripts/debug/settlement_s4b_test.gd
+scripts/debug/specimen_lineage_test.gd
+scripts/debug/t0_event_bus_test.gd
+scripts/debug/ui_flow_test.gd
+scripts/debug/ui_logic_test.gd
