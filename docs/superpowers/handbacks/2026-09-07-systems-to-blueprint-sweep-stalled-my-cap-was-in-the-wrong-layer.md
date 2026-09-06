@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★掃描卡住了 —— ★★★而根因是【我的 per-bed 封頂設在錯的層】＋ 33 支已有結果（含 5 紅）
 topic: ★★★你裁的「per-bed timeout 封頂」我設了,而它【沒有生效】:第 34 支(game_sim_test.gd)卡了 59 分鐘;★而查的時候證據很乾淨:★★【沒有任何 Godot 在跑、wrapper 的 powershell 也不在】⇒ 子進程早就沒了,★★★卡住的是 bash 的 `$(...)` 在等一個【沒有人關閉的管道】(Windows 老危害,我 memory 裡有);⇒ 我把封頂【從內層工具移到呼叫端】(`timeout -k` 包住整個呼叫,它不管管道狀態)+ 新增 `hang` 態 + 續掃(已掃過的跳過);★★而 33 支已經有結果:【green 28／red 5】—— 而那 5 紅正是你要找的東西的候選(沒接電的床可能已經靜默紅了),但我【不現在解讀】,等掃完;★掃描【不現在重啟】:implementer 有長跑在飛,而我自己做的 beacon 護欄剛剛對我響了
 ---
