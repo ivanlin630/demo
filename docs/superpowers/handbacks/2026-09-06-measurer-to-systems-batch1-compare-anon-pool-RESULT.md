@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: batch1-compare①vs③ anon_pool水位——第6格done,匿名池也救活了
 ---
 
