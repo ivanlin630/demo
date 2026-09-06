@@ -25,6 +25,14 @@
 #   ⇒ ★★而那會讓鬧鐘【在它最該響的時候不響】(東西已經上去了,而本地還沒看到)
 #   ⇒ ★★★血證 2026-09-06:⑧ 已在 origin/main,而 defer 閘印 PASS —— 因為本地 main 落後兩顆
 #
+# ★★★★【2026-09-06 第二個血證:判準要對應【你真正在等的事】】
+#   ★我把三張經濟票的 met_check 寫成「`ls docs/measurements/*batch1-compare*` 有東西」
+#   ⇒ ★★而【一個 interim 檔就滿足它】—— 對比輪十格才做完【一格】,鬧鐘就全響了
+#   ⇒ ★★★我寫「檔案存在」時,心裡想的是【那一輪跑完了】——【兩者不是同一件事】
+#   ⇒ 修法:改成【完成標記】`docs/process/verdicts/batch1-compare-COMPLETE.measure.json`
+#      (★由 measurer 在【十格全部交完】時才寫)
+#   ⇒ ★而通則:met_check 要問「這個條件為真的時候,我【真的】可以動工了嗎?」
+#
 # ★★★★【2026-09-06 blueprint 立】「歸某 arc」與「排某事件後」的分界：
 #   ★「歸某 arc／歸某 backlog」 ⇒ 【合法的家】—— roadmap 由【用戶】駕駛，不需要 token
 #   ★★「排某事件之後／排最後／等 X 再做」 ⇒ 【要 token】
@@ -36,14 +44,11 @@
 #   （留著會讓這張表長大，然後沒人看 —— 那正是它要防的病）
 #
 token	summary	defer_until	met_check
-modulo-same-shape-4	harvest×5／population×1 的裸 modulo(安全靠算術整除,非機制)——(b)另開票。★2026-09-06 原條件【已達成並觸發】(⑥⑦ 已 merge),而【重新裁定】為⑧後:理由=它是【維護性脆弱】不是違憲(兩個 step 在 near/far 分支之外),而⑧正在飛;★★met_check【沒有改鬆】,只是換一個同樣可執行的事件	⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish origin/main
 belief-perfield-rest	resource_scale／combat_target_est 的逐欄位時戳——未修理由是【目前無讀取端消費它們的新鮮度】	有任何讀取端開始檢查這兩個欄位的新鮮度	git grep -nE 'BELIEF_STALE_TICKS' -- scripts/simulation | grep -qE 'resource_scale|combat_target_est'
 belief-pos-tristate	belief_pos 把【從未有情報】與【情報過期】回成同一個 (-1,-1)——修法抄 appearance() 三態	墓碑(①票)落地(production 出現 live_teams/all_teams 縫)	git grep -q 'func live_teams' -- scripts/data
 event-density-schedule	事件密度排程未實裝(per-team cadence 由該隊自身活動密度決定,睡覺的隊少輪是因為沒事不是因為離玩家遠)	perf 越線:任一量測檔出現 wall_s > 28800(=8 小時)	grep -rho '"wall_s"[[:space:]]*:[[:space:]]*[0-9.]\+' docs/process/verdicts docs/measurements 2>/dev/null | grep -o '[0-9.]\+$' | awk '$1 > 28800 {found=1} END {exit found?0:1}'
-envoy-ptype-tap	envoy ptype tap(回報歸因用;原裁「排在終卷之後」)——★終卷已到(EXAM-FINAL 已產、凍結已解除)⇒ 本條【已逾期一次】,2026-09-06 重新裁定為批次收尾後	第一批收尾:⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish origin/main
 otherdomain-coordination	他域耦合求裁(戰俘/capture 需 combat 等)——原文「handback 藍圖求裁,暫緩」,而【解除條件不可量】⇒ 照 defers 檔頭退而求其次:定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
 single-writer-leftovers	單寫者 slice2 收案時暫緩的小項(反向 roster audit／beast_system L2 升級／subteam clear())——★解除條件不可量 ⇒ 定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
-money-genesis-start	⑨貨幣創世(初始批推導式+分配形狀)——★它改創世=換世界,會跟【批後同 seed 對比輪】打架 ⇒ blueprint 裁排在⑧收口與對比之後	批後對比那一輪的量測檔已產出	ls docs/measurements/*batch1-compare* docs/process/verdicts/*batch1-compare* 2>/dev/null | grep -q .
-market-thickness-v0	B-v0 市場厚度(掛單寄賣制:escrow/待領款/待領貨/領取念頭)——★與⑨貨幣創世【同窗】,兩者都動經濟地基	批後對比那一輪的量測檔已產出	ls docs/measurements/*batch1-compare* docs/process/verdicts/*batch1-compare* 2>/dev/null | grep -q .
-batch1-compare-run	批次一對比輪(同 seed 重跑對比 90 日基準)——★它是兩張經濟票的觸發器:不跑,⑨與 B-v0 永遠不會開始	⑧(拆分班)merge 進 main	git merge-base --is-ancestor feat/lod-split-demolish origin/main
-declamp-price	⑩拆物價 clamp(回原案無上下限;飢荒不對稱放大留;floor 0 保留=定義非閥)——★經濟窗,與⑨/B-v0 同批	批後對比那一輪的量測檔已產出	ls docs/measurements/*batch1-compare* docs/process/verdicts/*batch1-compare* 2>/dev/null | grep -q .
+money-genesis-start	⑨貨幣創世(初始批推導式+分配形狀)——★它改創世=換世界,會跟【批後同 seed 對比輪】打架 ⇒ blueprint 裁排在⑧收口與對比之後	批後對比那一輪的量測檔已產出	test -f docs/process/verdicts/batch1-compare-COMPLETE.measure.json
+market-thickness-v0	B-v0 市場厚度(掛單寄賣制:escrow/待領款/待領貨/領取念頭)——★與⑨貨幣創世【同窗】,兩者都動經濟地基	批後對比那一輪的量測檔已產出	test -f docs/process/verdicts/batch1-compare-COMPLETE.measure.json
+declamp-price	⑩拆物價 clamp(回原案無上下限;飢荒不對稱放大留;floor 0 保留=定義非閥)——★經濟窗,與⑨/B-v0 同批	批後對比那一輪的量測檔已產出	test -f docs/process/verdicts/batch1-compare-COMPLETE.measure.json
