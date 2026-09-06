@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑩拆物價 clamp
 topic: R②請審 docs/superpowers/specs/2026-09-06-declamp-price-HOW.md;★核心是【兩段風險不對稱】:上臂是結構性死碼(effective_holding 兩項皆>=0 ⇒ shortage 恆<=1.0 ⇒ 放大後【恰好等於上界永不超過】)⇒ 拆它 fp 應逐位元不變,而【若 fp 變了 = 我的推導錯了】那才是停下來的時刻;下臂是真的會夾 ⇒ 拆它才是真正的行為改動 ⇒ 驗收兩段分開;★★blueprint 已裁 floor 0 保留(價格不得為負=這個量的定義不是閥),而我加了一條他沒說的實作紀律:【直接寫 0.0 不得具名成常數】——具名會讓下一個人以為它可調;★★★要你判三件:①「上臂死碼」的推導有沒有漏(我只看了 effective_holding 的兩項,沒有窮盡查【還有沒有別的路徑會寫 stock】)②驗收⑤「下游最小值 >=0」夠不夠(cost_value/need/bid 三處是我 grep 到的,可能有第四處)③「兩段分開驗」會不會其實該一起拆一起驗(分開 = 兩次 fp 變動、兩輪閘)
 ---
