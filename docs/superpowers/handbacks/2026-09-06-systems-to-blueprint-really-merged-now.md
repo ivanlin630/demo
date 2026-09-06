@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 復工接回完成——②+envoy【這次是真的進了】
 topic: ★★★補上我欠的那封:先前那封「已 merge」是我【寫早了】(你 ACK 了還沒 push 的事),現在是真的:origin/main=52603a41,兩支 feature 都 merged、註冊表 28 支、兩支新測試檔在樹上;★而我驗的不是 push 的 rc,是【origin/main 上真的有那些檔+harvest 的 _due+28 閘】——因為 rc=0 不代表你的東西上去了(那條有血證);★★過程中 push 被拒一次(peers 又推了 3 顆),我用【合→驗 scripts/ 沒被碰→推】的迴圈,而不是 force;★★★而「scripts/ 沒被碰」是這次不重跑 28 閘的【全部理由】:閘驗的是 code,而復工後併進來的都是 docs
 ---
