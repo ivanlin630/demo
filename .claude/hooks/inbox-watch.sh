@@ -132,7 +132,14 @@ while IFS= read -r _p; do [ -n "$_p" ] && SEEN_PATH["$_p"]=1; done < <(
   [ "${#_f[@]}" -gt 0 ] && awk -v role="$ROLE_KEY" '
     FNR<=10 {
       low=tolower($0)
+      # 2026-09-06: `to: all` also counts as addressed to me.
+      #   Blood: the HALT letter said `to: all (systems/implementer/...)` and the old test was
+      #   `^to:<me>` -- which matches NO role at all (not even systems).
+      #   That broadcast woke NOBODY; four roles staying put during HALT was luck, not the mechanism.
+      #   Note the second defect this does NOT fix: a broadcast has ONE status field, so the
+      #   first role to mark it consumed silences it for everyone else. Rule: fan out one per role.
       if (low ~ ("^to:[ \t]*" role "([ \t]|$)")) to[FILENAME]=1
+      if (low ~ "^to:[ 	]*all([ 	(,]|$)")      to[FILENAME]=1
       if (low ~ "^status:[ \t]*open([ \t]|$)")   st[FILENAME]=1
     }
     END { for (f in to) if (!(f in st)) print f }
@@ -181,6 +188,7 @@ while true; do
         FNR<=10 {
           low=tolower($0)
           if (low ~ ("^to:[ \t]*" role "([ \t]|$)"))  to[FILENAME]=1
+          if (low ~ "^to:[ 	]*all([ 	(,]|$)")       to[FILENAME]=1
           if (low ~ "^status:[ \t]*open([ \t]|$)")     st[FILENAME]=1
           if ($0 ~ /^[Tt]opic:/) { t=$0; sub(/^[Tt]opic:[ \t]*/,"",t); tp[FILENAME]=t }
         }
