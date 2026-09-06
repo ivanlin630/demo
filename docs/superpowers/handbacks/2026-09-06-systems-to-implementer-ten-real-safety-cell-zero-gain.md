@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑩ 補一格【真的】安全網（取代我那條被你推翻的 ROI 格）＋ 批 2 順序驗到一條真相依
 topic: ★★★具體風險:`order_system.gd:341` `best_score = 0.0` 且用【嚴格 >】(註解「僅正套利」);而 ⑩ 之前 clamp 讓 `local_value` 恆 > 0 ⇒ `gain = 價格 × qty` 【不可能是 0】,⑩ 之後價格可以正好 0.000(你自己實測 1.000 → 0.000)⇒ ★整個過剩區的貨對商隊【變成不可見】——它不是「值得搬但分數低」,是「連候選都不算」;★★而排除本身可能是對的(沒人搬廢物),★★★真正要驗的是【有沒有別的地方把「沒有 best」當成異常/餓死訊號】——那才是行為會歪的地方;★另:批 2 順序 ⑩→B-v0 我驗到真相依(order_system:349/362 直接讀 local_value),不再是直覺
 ---
@@ -44,3 +44,28 @@ order_system.gd:349／362 直接讀 TradeValuation.local_value(...)
 ⇒ ★★所以「⑩ 先進」不是我的直覺,是這兩行
 ★而 ⑨(貨幣創世)那條邊我【仍然沒驗】—— 誠實限照留在 docs/process/batch2-merge-order.md
 ```
+
+---
+
+# ★★補充（我讀完下游才寫的，★省你一格工）
+
+## ★格①【可能不用新 tap】—— 先查它是不是已經在既有漏斗裡
+```
+order_system.gd 既有:trade.arb_sell_seen／arb_buy_seen／arb_kill_range／arb_kill_nostock
+                     ＋ :366 `trade.arb_pick`(漏斗站3:選中非空)
+⇒ ★殘差 = seen − kill_range − kill_nostock − arb_pick
+        = 「看到候選,但沒有任何一個贏過 best_score」
+⇒ ★★格①要的「沒有 best 的次數」【就是這個殘差】—— 不用新 tap,只要對帳式成立
+```
+★**這是我自己那條規矩**：「派一個【量 X】的工單之前，先問 X 是不是已經在某個 tap 裡，只是沒印出來。」
+
+## ★★但格②【真的要新 tap】，理由是殘差把兩件事混在一起
+```
+殘差裡有兩種:
+  (a) gain == 0.0 被嚴格 > 擋掉          ←★這是 ⑩ 造出來的【新】類別
+  (b) gain > 0 但輸給另一個更高的候選     ←★這是本來就有的正常競爭
+⇒ ★★兩者在殘差裡【不可分】,而只有 (a) 是 ⑩ 的影響
+⇒ ★★★所以格② `trade.arb_kill_zero_gain` 必須是【獨立一格】,不能靠減法推
+```
+★**而它 ⑩ 之前恆 0**（clamp 讓 `local_value` 恆 > 0）⇒ ★★**它非 0 這件事本身就是判準**：
+**白送區有沒有流到下游，看這一格就知道，不用靠敘事。**
