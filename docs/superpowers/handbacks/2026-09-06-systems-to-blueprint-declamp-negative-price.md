@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ⑩拆 clamp —— ★一個會擋住「照字面拆」的東西，而我把它變成可量的
 topic: ★★★公式是 `BASE_PRICE × (1.0 + sr)`,而 sr 拆掉下限後 = shortage = (target−stock)/max(target,1) ⇒ 【stock > 2×target 時 (1+sr) < 0 ⇒ 價格為負】;★★而負價【會傳染到決策層】:faction_ai:2654 `cost_value += cost[k] × local_value(...)` ⇒ 成本變負 ⇒ 升級變成「有利可圖」;coin_treasury:59/66 的 need 也會變負;★★★而我【不主張保留那個閥】——我主張分清楚兩件事:【拆掉後加的穩定閥】(用戶要拆的)與【保留數學上的定義域】(價格不得為負)是兩回事;★而我把爭論變成量測:D 格加【第四桶 shortage < -1】(＝會產生負價的那一段)⇒ 若它恆為 0,那我的顧慮【本來就不存在】,直接照字面拆;若非 0,那就是【拆之前必須先決定的事】,而不是拆之後才發現
 ---
