@@ -61,8 +61,19 @@ static func _note_swallowed(prop: String) -> void:
 	#   ★這裡把【真的有執行到的呼叫點】印出來（去重，每個站只印一次）：
 	#     107 是静態數，而這張清單是【真的會跑到的那一子集】。
 	#   ★★而沒有它，stage B 就只能【全部改】――而改一個從來不執行的站，既沒有收益也沒有驗證方式。
+	# ★★★`get_stack()` 【只在 --debug 下才有東西】――而沒有它的時候，
+	#   舊版印的是 `population @ (no-stack)`，★而那看起來像一筆【結果】。
+	#   ⇒ ★★現在改成【不像結果的話】：它要讓讀的人知道【這一輪的清單不能用】。
 	var st: Array = get_stack()
-	var site: String = "(no-stack)"
+	if st.is_empty():
+		if not swallow_sites.has("__NOSTACK__"):
+			swallow_sites["__NOSTACK__"] = 0
+			push_error("[SETTER-SWALLOWED-SITE] ★本輪【無逐站清單】：get_stack() 空 ⇒ 未加 --debug。只有屬性層計數可用；不得把【沒有站】讀成【沒有發生】。")
+			print("[SETTER-SWALLOWED-SITE] ★ABORT-LISTING：get_stack() 空（未加 --debug）⇒ 本輪逐站清單無效")
+		swallow_sites["__NOSTACK__"] = int(swallow_sites["__NOSTACK__"]) + 1
+		Probe.bump("setter_swallowed." + prop)
+		return
+	var site: String = "(unresolved)"
 	for fr in st:
 		var src: String = String(fr.get("source", ""))
 		if not src.ends_with("team_data.gd"):
