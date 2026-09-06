@@ -111,6 +111,13 @@ func _run() -> void:
 		#   ★★★而它是因為⑦把三顆裸 modulo 閘遷成 CadenceStagger 才出現的
 		#     —— 也就是說，【修好一個病會讓另一道閘多出要判的形狀】，那是正常代價不是迴歸。
 		_mk("_next_tick\\s*(<=|>)\\s*0", "d_not_time", "sentinel：`*_next_tick <= 0 / > 0` 的 0 是【未排程】哨兵（同 `_next_tick = 0`，只是運算子不同）"),
+		# ★★★`modulo-same-shape-4`（2026-09-06）新形狀：`state.world.X_next_tick = int(_d[1])`
+		#   ★判 (c) 白名單：右值是 `_due()` 回傳的【下一個 INTERVAL 邊界】—— 它【已由具名常數導出】，
+		#     隨根縮放，不是手抄的時間量。
+		#   ★★★而錨【不准下在變數名上】（systems 裁）：`_next_tick\\s*=` 會把
+		#     `X_next_tick = current_tick + N`（★手寫排程，正是這道閘要擋的東西）【一起靜默放行】。
+		#   ⇒ ★錨下在【右邊那個值的來源】：`= int(_d…[1])` —— 它只認【走 `_due()` 的那條路】。
+		_mk("=\\s*int\\(_d\\w*\\[1\\]\\)", "c_whitelist", "已導出：`= int(_d[1])` 的右值來自 `HarvestSystem._due()` 回傳的【下一個邊界】——它是【算出來的排程時點】不是手抄的時間量"),
 		_mk("current_tick\\s*\\+=\\s*1", "d_not_time", "increment：tick 前進 1 步＝時間軸本身的定義"),
 		_mk("< 0\\b", "d_not_time", "sentinel：`< 0` 是「從未發生」的哨兵比較"),
 		_mk("\\}\\s*,\\s*[0-9]+\\s*\\)", "d_not_time", "sample_cap：字典後接的整數是 cap（★錨拿掉行尾 $：尾巴有註解時 $ 會沒命中，而那是【規則自己的盲點】不是新形狀）"),
