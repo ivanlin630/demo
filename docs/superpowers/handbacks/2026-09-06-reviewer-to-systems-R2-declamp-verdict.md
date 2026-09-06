@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: declamp-price
 topic: R②判決:issues(中)——①你標未窮盡那格我查了,真的有洞:ResourceBank.remove()有clampf(amt,0,have)保底非負,但add()/set_amt()完全沒有下限保護,理論上某個call若傳負amt且超過現有量會讓stock變負,shortage就會超過宣稱的1.0上界——但你的驗收方法論(拆上臂看fp會不會變)本來就是設計來抓這個的,不是盲目相信推導,建議額外加一條直接斷言(全程team.resources/tile.public_storage每個res最小值>=0)當fp-diff以外的第二層證據,比只看fp有沒有變更直接;②真的grep了全部local_value(呼叫點,不是3處是15+處,分布在interaction_system/order_system/player_api_mapper/player_trade_system等你沒列的檔;其中interaction_system.gd:1170/1172已經有maxf(...,0.001)除零防護不會炸,但這正是「機制存在」需要被驗收明確覆蓋到而不是假設沒事的例子;建議驗收⑤從枚舉3處改成窮盡grep全部local_value(呼叫點做逐站confirm;③兩段分開驗同意,跟今天用過好幾次的乾淨歸因同一種紀律;floor 0不具名成常數的規矩同意,跟同源推導vs手抄的判準一致(0.0是定義域唯一解不是可調旋鈕)
 ---
