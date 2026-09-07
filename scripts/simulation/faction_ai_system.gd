@@ -2424,6 +2424,18 @@ func _tick_migrant(state: WorldState, sub: TeamData, _merge_queue: Array) -> voi
 		return   # 目標村消失→解散（人隨之散、真成本已付）
 	if sub.tile_pos == target.tile_pos:   # gate-ok: target ＝遷徙目的地隊（同 faction 既有慣例），讀其位置做抵達判定
 		AnonTierSystem.transfer_proportional(sub, target, AnonTierSystem.total_pop(sub))   # 併入 target 村（P2 共址即產能）
+		# ★同上：移民抵達後 sub 馬上進 pending_erase ⇒ 它身上的小孩必須先搬走。
+		if sub.minor_population > 0:
+			# ★★★三行必須緑在一起：陰性對照實測（只拿掉 `target +=` 那一行）⇒
+			#   小孩憑空消失，而 tap 照樣報「搬了 2」、死亡 counter 也是 0。
+			#   ⇒ ★計數與搬家不是同一件事時，tap 會在搬家失敗時講真話以外的話。
+			#   ⇒ ★★先把量拿下來，【先加後清】，而 tap 記的是【實際加進去的那個量】。
+			var _mv: int = sub.minor_population
+			target.minor_population += _mv
+			sub.minor_population = 0
+			if Probe.enabled:
+				Probe.bump("merge.minors_moved")
+				Probe.add_amount("merge.minors_moved_n", float(_mv))
 		if Probe.enabled: Probe.bump("migrant.arrived")
 		if not state.teams_pending_erase.has(sub.team_id): state.teams_pending_erase.append(sub.team_id)
 		return
