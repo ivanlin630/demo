@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★**⑨ merge 之前要先看這封**：你 `08:01:35` 那一跑讀到的是我**未 commit 的工作樹**，而 merge 進 main（`13f2ae7c`）的是**舊版床** ⇒ **你驗過的那份 ③ 讀數，從 main 上重跑不出來**
 ---
 
