@@ -978,7 +978,7 @@ func _market_peer_trade(state: WorldState, visitor: TeamData, tile: HexTileData,
 #   ⇒ ★★而【行為級驗收仍然要分開量】：抽象共用【不代表】它們會被同等使用，而那正是要量的東西。
 # ★★★同 owner+kind+res 的合併：★不合併會讓「一隊有 30 筆 1 元」與「一隊有 1 筆 30 元」
 #   在【筆數】上長得完全不同，而【領取念頭】要秤的是【額】不是【筆】。
-static func _add_pending_claim(tile: HexTileData, kind: String, res: String, amt: float,
+static func add_pending_claim(tile: HexTileData, kind: String, res: String, amt: float,
 		owner_team: int, tick: int) -> void:
 	if amt <= 0.0 or owner_team < 0:
 		return
@@ -1097,7 +1097,7 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 		_esc["qty"] = float(_esc["qty"]) - float(q)
 		if float(_esc["qty"]) <= 0.0:
 			tile.market_escrow.erase(oid)
-		_add_pending_claim(tile, "coin", "coin", float(q) * ask, int(_esc.get("owner_team", -1)),
+		add_pending_claim(tile, "coin", "coin", float(q) * ask, int(_esc.get("owner_team", -1)),
 			state.world.current_tick)
 		if Probe.enabled:
 			Probe.bump("mkt.escrow.filled")

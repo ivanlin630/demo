@@ -153,6 +153,9 @@ func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: Strin
 		for _ao in team.active_orders:
 			if int(_ao.get("order_id", -1)) == oid:
 				_ao["escrowed"] = true
+				# ★★★連【哪塊 tile】一起記：到期退貨要找回那批貨，
+				#   而【掃全圖 tile】既貴又會在 tile 被回收時静默漏掉。
+				_ao["escrow_tile"] = tile.tile_pos.x * 1000 + tile.tile_pos.y
 				break
 	Probe.bump("g1.board_register")
 
@@ -194,6 +197,27 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		else:
 			# ★abandoned tap：逾時未成交（帶 order_id + 壽命，事後可串）
 			Probe.bump("order.abandoned")
+			# ★★★B-v0 §2：到期退貨是【同一條紅線、換一個方向】――
+			#   賣家不在場，貨【不得】直接回到他的 resources，否則就是【貨物瞬移】。
+			#   ⇒ 落【待領貨帳】，與待領款共用同一個 pending_claims 結構。
+			#   ★而這裡【不】把 escrow 直接刪掉：刪掉 = 貨消失，而守恆會在 audit 裡紅。
+			if bool(o.get("escrowed", false)):
+				var _etid: int = int(o.get("escrow_tile", -1))
+				var _etile: HexTileData = state.world.tiles.get(_etid)
+				if _etile == null:
+					Probe.bump("mkt.escrow.expire_tile_gone")   # ★tile 消失（降級/回收）⇒ 貨沒有落地點，要看得見
+				else:
+					var _e: Dictionary = _etile.market_escrow.get(int(o["order_id"]), {})
+					var _q: float = float(_e.get("qty", 0.0))
+					if _q > 0.0:
+						InteractionSystem.add_pending_claim(_etile, "goods", String(_e.get("res", "")), _q,
+							int(_e.get("owner_team", -1)), state.world.current_tick)
+						_etile.market_escrow.erase(int(o["order_id"]))
+						if Probe.enabled:
+							Probe.bump("mkt.escrow.expire_to_claim")
+							Probe.add_amount("mkt.escrow.expire_qty", _q)
+					else:
+						Probe.bump("mkt.escrow.expire_empty")   # ★已全部賣掉（正常）
 			# ★執行失敗反饋鐵律 T4 示範接線：買單到期沒人填 ＝ 執行失敗，不准靜默丟棄。
 			# 記隊層失敗記憶 → 下輪「買糧/買料」（＝依賴市場供貨的決策）折價；TTL 用 ORDER_LIFETIME
 			# ＝該動作的自然重試週期（相對錨定，不新增全域絕對天數常數）。
