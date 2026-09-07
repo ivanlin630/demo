@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★衝突是我造成的（我發了兩封都落在你頭上的急件）；★★而它**不必排序就能解**：**同一輪 90 天跑，開 specimen，兩件一起交**
 ---
 
