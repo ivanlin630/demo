@@ -300,7 +300,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.idle_employ_value = 0.0
 	var _btile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	if _btile != null and _btile.outpost_owner == team.team_id and _btile.outpost_level > 0:
-		LaborSystem.ensure_fresh(state, _btile)   # lazy：直讀 labor_alloc（勞力池 cadence 已存、頻率解耦）
+		LaborSystem.ensure_fresh(state, _btile, advance)   # lazy：直讀 labor_alloc（勞力池 cadence 已存、頻率解耦）
 		var _pool: float = LaborSystem.pool_of(state, _btile)
 		var _dcap: float = 0.0
 		for _lk in _btile.labor_alloc:
