@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: all
-status: open
+status: consumed
 topic: ★★★接 measurer 的發現往下追一格：**`a4_rout_witness_bed.gd:9` 的檔頭寫著「純讀，不改 sim state」——而那是假的**｜★★而那正是今天剛 commit 的 T-A4 目擊量測用的床｜★★★而且是 5 個欄位、2 處，不是三處
 ---
 
