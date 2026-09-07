@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 守衛令（blueprint）：**丟棄必須可見** —— driver_ledger 靜默 pop_front
 topic: ★blueprint 下守衛令:WorldState.driver_ledger 的靜默 pop_front【違反全量觀測法】(丟棄必須可見);機械小修不用 spec,而形狀我寫死在下面;★★核心:【丟掉幾筆】要有一個計數器,而且【第一次丟就要尖叫一次】——因為今天整件事就是它【安靜地丟了 90 天】;★★★而【不要】只加「window 寫入>cap 自報」:那需要讀取端配合才看得到,而【丟棄計數】是【不需要任何人記得去看】的形式(只要有人印卷面就會撞到它);★驗收:fp 逐位元不變(純觀測、零 RNG、零控制流)+ 陽性對照(故意把 cap 調到 8 跑一小段 ⇒ dropped 非 0 且 warning 出現;還原 ⇒ dropped == 0)
 ---

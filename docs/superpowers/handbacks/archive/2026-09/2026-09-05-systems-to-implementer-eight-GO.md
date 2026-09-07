@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑧ 拆 near/far 分班本體（★憲法債清償）— GO
 topic: ★R² CLEAN,spec=docs/superpowers/specs/2026-09-05-lod-split-demolish-HOW.md;★★動作:刪 _get_near_teams/_get_far_teams 與 far pass ⇒ 全世界【一個 pass、一個 cadence】,而 cadence 取【現行 near 的 60】不取折衷值(取 60 ⇒ 近隊行為完全不變、遠隊補回相同 ⇒ 差異只有一個來源;折衷值會讓近隊也變 ⇒ 一次改兩件事歸因不了);★★★force_full_hd【刪不留 no-op】(留成 no-op = dormant knob,下一個人會以為調它有用)——但靠它當對照的【五支床不刪】,床頭要印「此對照在⑧之後恆等於預設、已無鑑別力」;★perf【不擋 merge】(憲法已裁分班判死,perf 是資訊不是否決權),但劣化 >2× 要【具名回報 blueprint】不是你或我決定要不要繼續;★★R² 已親自 grep:player_pos 只出現在 sim_runner.gd 一個檔 ⇒ 沒有任何系統藏了自己的距離判斷
 ---

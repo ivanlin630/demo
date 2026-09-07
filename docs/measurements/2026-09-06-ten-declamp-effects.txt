@@ -1,0 +1,23 @@
+# ⑩ declamp_effects_bed —— warring_states seed=1337 30 日（branch feat/declamp-price）
+# ★★★這份是【裁剪過的】：只留結算段與判讀行。
+# ★被丟掉的是模擬事件 log（[SoloAI]/[Move]/[Combat]…）共 19268 行，留下 17 行。
+# ★★丟掉的理由是【體積】不是【無關】—— 而我把數字寫在這裡，是因為
+#   ★★★靜默截斷會讓「這就是全部」跟「這是我挑過的」長得一樣。
+
+=== declamp_effects_bed: config=warring_states seed=1337 days=30 ===
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+═══ ★驗收 5b：資源最小值（★這是【上臂永不觸發】那個推導的前提）═══
+  team.resources 最小 = 0.0000  @ team0.goods
+  tile.public_storage 最小 = 0.0000  @ tile8008.material
+  ★負值出現次數 = 0
+     ★★`ResourceBank.remove()` 有 clampf 保底，而 `add()`／`set_amt()`【沒有下限保護】
+      ★★★負值非 0 【`shortage <= 1.0` 的前提破了】 上臂桶【應該】跟著非 0
+═══ ★★驗收 3：raw shortage 分帶（母體 501636）═══
+  deep_glut(stock>2×target) = 71856 (14.3%) ｜ glut = 14307 (2.9%) ｜ normal = 415473 (82.8%) ｜ over_hi = 0
+     ★over_hi 應為 0（上臂死碼）；★★deep_glut 佔比【高】 那些貨拆後價格直接 0
+      ★★★若 food 大量落在 deep_glut 【農隊賣糧收入歸零】＝ regime change 不是價格波動
+═══ ★驗收 2/4：價格分布 ═══
+  估價次數 = 501636 ｜ 價格為 0 的次數 = 72102 (14.4%) ｜ 平均價 = 9.869
+  ★價格為 0 的【是哪些 res】：armor_low=219｜food=65459｜material=5829｜weapon_melee_low=595
+     ★★這一欄比總數重要：★★★`food` 出現在這裡才是 regime change 的訊號。
+=== declamp_effects_bed DONE ===

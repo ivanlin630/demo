@@ -1,0 +1,143 @@
+# 131 床分診表 v2（2026-09-07 systems）
+# ★★★這張表【不能用來下行為因果結論】——它只回答「這支床跑起來紅不紅」。
+#   「為什麼這條 arc 的床一起紅」屬於 behavior 因果 ⇒ 必須走 specimen trace → QA 故事稽核，
+#   ★禁止拿本表的分佈直接推機制（工作流硬規則，用戶定 2026-07-22）。
+# 分類器：①引擎級錯誤(Assertion failed/SCRIPT ERROR)=red ②床自己的總結行(ALL PASS/HAS FAILURE/FAILS=n)為權威
+#         ③無總結行才逐行掃且【只認行首】的失敗標記（血證：PASS 內文含 "FAIL" 字樣會造成假紅）
+# 自檢：5 種真實紅形狀必紅 + 6 種通過樣本不得誤判 + 空輸出=no-output，任一不過則整輪作廢
+# ★90s 窗會製造【假 timeout】：specimen_confound 實測 88s(綠)、lod_phase_invariance 實測 312s(紅)
+#   ⇒ timeout 這個判決混了「它壞了」與「我的窗太小」兩件事,窗要按實測分佈定
+# 母體：scripts/debug/*_test.gd 共 141 支，扣掉已掛閘的 7 支 + 3 支(data/headless/team_ui) = 131
+# ★真的會被跑的床 = 16 支(11%)：merge-gates.tsv 12 + hooks 5(聯集)；★紅的 31 支【沒有一支】在閘上
+bed	verdict	wall_s	note
+scripts/debug/abandon_courage_test.gd	green	4	
+scripts/debug/active_promotion_test.gd	green	3	
+scripts/debug/beast_decision_leak_test.gd	green	4	
+scripts/debug/build_afford_persona_test.gd	green	5	
+scripts/debug/careloop_scout_test.gd	green	4	
+scripts/debug/depatch_track2_test.gd	green	3	
+scripts/debug/desperation_ordering_test.gd	green	4	
+scripts/debug/diplomacy_grounded_test.gd	green	4	
+scripts/debug/extraction_need_driven_test.gd	green	4	
+scripts/debug/faction_cohesion_test.gd	green	4	
+scripts/debug/flee_restore_test.gd	green	4	
+scripts/debug/food_bridge_test.gd	green	4	
+scripts/debug/framework_f1_test.gd	green	3	
+scripts/debug/framework_f4_test.gd	green	4	
+scripts/debug/g3_betrayal_bond_test.gd	green	3	
+scripts/debug/game_sim_test.gd	green	41	
+scripts/debug/gateA_hysteresis_test.gd	green	6	
+scripts/debug/gateA_test.gd	green	6	
+scripts/debug/godview_1119_test.gd	green	6	
+scripts/debug/godview_b_test.gd	green	6	
+scripts/debug/godview_c_test.gd	green	6	
+scripts/debug/godview_d_test.gd	green	7	
+scripts/debug/godview_e_test.gd	green	7	
+scripts/debug/godview_f_test.gd	green	7	
+scripts/debug/godview_followup_test.gd	green	6	
+scripts/debug/idle_labor_build_test.gd	green	5	
+scripts/debug/infonet_herald_test.gd	green	6	
+scripts/debug/infonet_letter_test.gd	green	6	
+scripts/debug/infonet_part2_test.gd	green	6	
+scripts/debug/infonet_prop_test.gd	green	5	
+scripts/debug/junmin_guard_test.gd	green	6	
+scripts/debug/junmin_mobilize_test.gd	green	6	
+scripts/debug/labor_pool_test.gd	green	5	
+scripts/debug/lord_care_loop_test.gd	green	5	
+scripts/debug/map_render_test.gd	green	6	
+scripts/debug/market_memoize_test.gd	green	6	
+scripts/debug/material_buy_test.gd	green	6	
+scripts/debug/material_hold_test.gd	green	7	
+scripts/debug/means_end_s3_test.gd	green	7	
+scripts/debug/means_end_s4_test.gd	green	7	
+scripts/debug/means_end_s5_test.gd	green	5	
+scripts/debug/means_end_s7_test.gd	green	7	
+scripts/debug/mfg_labor_depatch_test.gd	green	6	
+scripts/debug/mil_facility_cost70_test.gd	green	5	
+scripts/debug/missing_contact_ledger_test.gd	green	6	
+scripts/debug/named_scarcity_ab_test.gd	green	5	
+scripts/debug/need_oracle_test.gd	green	6	
+scripts/debug/agriculture_a_test.gd	green	5	
+scripts/debug/agriculture_b_test.gd	green	5	
+scripts/debug/breed_rate_test.gd	green	5	
+scripts/debug/build_eta_single_source_test.gd	green	5	
+scripts/debug/convoy_dispatch_tap_test.gd	green	5	
+scripts/debug/convoy_return_closure_test.gd	green	5	
+scripts/debug/directive_stamp_test.gd	green	4	
+scripts/debug/discounted_flow_test.gd	green	5	
+scripts/debug/encounter_sim_test.gd	green	5	
+scripts/debug/ewma_advance_test.gd	green	4	
+scripts/debug/faction_succession_test.gd	green	5	
+scripts/debug/failure_feedback_test.gd	green	5	
+scripts/debug/mergein_join_lifecycle_test.gd	green	12	
+scripts/debug/monotonic_person_id_test.gd	green	5	
+scripts/debug/monotonic_team_id_test.gd	green	5	
+scripts/debug/observability_path_test.gd	green	34	
+scripts/debug/observer_inspect_test.gd	green	5	
+scripts/debug/observer_never_freeze_test.gd	green	5	
+scripts/debug/observer_rng_gate_test.gd	green	1	
+scripts/debug/orderbook_tap_test.gd	green	4	
+scripts/debug/own_granary_null_caller_test.gd	green	5	
+scripts/debug/owner_outpost_index_test.gd	green	5	
+scripts/debug/peaceful_economy_liveness_test.gd	green	5	
+scripts/debug/perf_cut1_test.gd	green	5	
+scripts/debug/persist_construction_floor_test.gd	green	4	
+scripts/debug/persist_tryset_test.gd	green	5	
+scripts/debug/position_belief_test.gd	green	6	
+scripts/debug/probe_bump_sample_test.gd	green	6	
+scripts/debug/produce_demand_test.gd	green	4	
+scripts/debug/promotion_mood_test.gd	green	4	
+scripts/debug/seam2_facility_registry_test.gd	green	6	
+scripts/debug/settlement_s1_test.gd	green	4	
+scripts/debug/settlement_s2a_test.gd	green	5	
+scripts/debug/settlement_s2b_test.gd	green	5	
+scripts/debug/settlement_s4b_test.gd	green	4	
+scripts/debug/settlement_s4c_test.gd	green	5	
+scripts/debug/spawn_offmap_guard_test.gd	green	6	
+scripts/debug/specimen_lineage_test.gd	green	5	
+scripts/debug/survival_prio_fix_test.gd	green	5	
+scripts/debug/survival_prod_test.gd	green	4	
+scripts/debug/survival_stall_ladder_test.gd	green	4	
+scripts/debug/t0_event_bus_test.gd	green	5	
+scripts/debug/tapgap_fire_test.gd	green	6	
+scripts/debug/tools_demand_test.gd	green	4	
+scripts/debug/transition_arbiter_bypass_test.gd	green	6	
+scripts/debug/ui_flow_test.gd	green	8	
+scripts/debug/ui_logic_test.gd	green	6	
+scripts/debug/unified_dispatch_test.gd	green	4	
+scripts/debug/unrestsplit_tap_test.gd	green	5	
+scripts/debug/a2a_join_guard_test.gd	red	4	  FAIL  B.ret_true
+scripts/debug/camp_marginal_test.gd	red	4	  [FAIL] 富流浪(food_days=1210)→ urgency=0→ camp_drive=0
+scripts/debug/convoy_delivery_test.gd	red	7	  [FAIL] deliver_material candidate 未生成(cands=0)
+scripts/debug/crisis_override_test.gd	red	6	  [FAIL] committed build 深餓(0.5)N天未緩 → crisis TRUE
+scripts/debug/desperation_food_seeking_test.gd	red	5	  [FAIL] host 沒拒過+可達 → acceptable(給一次真試不誤殺)
+scripts/debug/food_flow_test.gd	red	4	  [FAIL] 糧充裕 persist(0.150) > 糧見底 persist(0.150)（safe_ratio 乘法縮放）
+scripts/debug/infonet_bootstrap_test.gd	red	5	  [FAIL] target 無固定 outpost → -1（移動隊落 belief）
+scripts/debug/infonet_scout_test.gd	red	5	  [FAIL] 斥候 co-loc 子民 → 子民 food 買單回領主 team_known（got 2）=active
+scripts/debug/infonet_sideaction_test.gd	red	6	  [FAIL] 領主子民 belief 陳舊(名冊)→ anon scout side-dispatch（dispatched=0）
+scripts/debug/infonet_trade_test.gd	red	5	  [FAIL] V 向同格 peer P 買到 food（Δfood=980.0 Δcoin=0.0 dealt=false）=交易面
+scripts/debug/invite_widen_test.gd	red	5	  [FAIL] 流亡 wanderer 邀得到（regression、過 filter 到 diplomacy）
+scripts/debug/labor_marginal_v2_test.gd	green	5	
+scripts/debug/means_end_a1_test.gd	red	8	  [FAIL] _dispatch_goal_delegate(build_type 分支)→派子隊
+scripts/debug/means_end_s1_test.gd	red	5	  [FAIL] REGISTRY 空表結構（S1 空 data，S2+ 填 goal 定義）
+scripts/debug/means_end_s2_test.gd	red	6	  [FAIL] location 前置 goal → S2 回無 candidate（定位=S3 stub 邊界，got 1）
+scripts/debug/means_end_s6_test.gd	red	5	  [FAIL] delay 0 → discount1，utilpayoff×dev_coeff(食足 1.0)=0.577（即時不折）
+scripts/debug/nullbelief_flee_test.gd	red	5	  [FAIL] threat_pos=(3,3) → FLEE applicable（正常逃，coherent flee 不誤傷）
+scripts/debug/persist_strength_test.gd	red	5	  [FAIL] construction 近完(left=10) persist > 剛開工(left=90)：0.150>0.150（用真 
+scripts/debug/production_framework_test.gd	red	5	  [FAIL] ★餓隊 _pick_facility→farming（score 驅動非 override，實際=）
+scripts/debug/recovery_r1_test.gd	red	14	  [FAIL] ★全 pipeline：dispatched=1 + arrived=0>0 + 村 pop 2→2 真升(過 merge-bac
+scripts/debug/recovery_r2_test.gd	red	12	  [FAIL] 料備妥+建工期<餓死窗→自救建田 viable、util=0.00>1.0(勝覓食基�
+scripts/debug/recovery_r3_test.gd	red	13	  [FAIL] ★全 pipeline：棄爛地(abandoned=1、原 owner→-1)→travel 抵好地(at_t
+scripts/debug/seam1_registry_test.gd	DELETED	7	★2026-09-07 依 blueprint 裁定刪除（備戰下架 delist-prepare 的過期床）——本列是歷史記錄，檔案已不存在
+scripts/debug/seam3_sysreg_test.gd	red	8	  [FAIL] phase_timing label 序 byte-identical
+scripts/debug/slice2_perception_test.gd	red	5	  [FAIL] 近 belief(2,0) → 處理達 diplomacy（寫 cooldown），cooldown.has(3)=false
+scripts/debug/specimen_noninvasive_test.gd	red	27	  [FAIL] 每行 valid JSON 且含 tick/team_id/做什麼(9/48)
+scripts/debug/survival_a4_test.gd	red	4	  [FAIL] 瀕餓 food_days=3 → survival_pressure=1.0（floor 不動、不餓死 regressio
+scripts/debug/survival_layer_unify_test.gd	red	5	  [FAIL] 離開 crisis → latch 解除
+scripts/debug/survival_single_source_test.gd	DELETED	5	★2026-09-07 依 blueprint 裁定刪除（備戰下架 delist-prepare 的過期床）——本列是歷史記錄，檔案已不存在
+scripts/debug/threat_oracle_s15_test.gd	red	4	  [FAIL] 無 belief → pop_est=self_pop（虛張生效，禁讀 other.population） (a=1.
+scripts/debug/threat_oracle_s1_probe_test.gd	DELETED	4	★2026-09-07 依 blueprint 裁定刪除（備戰下架 delist-prepare 的過期床）——本列是歷史記錄，檔案已不存在
+scripts/debug/threat_oracle_s2_test.gd	DELETED	5	★2026-09-07 依 blueprint 裁定刪除（備戰下架 delist-prepare 的過期床）——本列是歷史記錄，檔案已不存在
+scripts/debug/tracer_completeness_test.gd	red	50	  [FAIL] commit-fail/heartbeat entry 1（churn/空檔現形），實際=0
+scripts/debug/lod_phase_invariance_test.gd	red	312	  [FAIL] G：★母體非空（可判的盟 0）—— ★★0 的話下面【答不了】
+scripts/debug/specimen_confound_test.gd	green	88	

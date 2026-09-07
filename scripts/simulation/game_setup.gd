@@ -70,8 +70,102 @@ static func setup(state: WorldState, config: Dictionary) -> void:
 	# 開局憑「聽過附近有市集」出得了門（冷啟動不因不知市集全卡死）；放 mode 分支後=全 outpost 就位。一次性（非 per-tick）。
 	_seed_creation_market_known(state)
 
+	# ★★★貨幣創世（第⑨票 2026-09-06）：初始 coin 批【用推導不用手選】。
+	_apply_money_genesis(state)
+
 	print("[GameSetup] 完成：%d teams, %d factions, %d persons" %
 		[state.teams.size(), state.factions.size(), state.persons.size()])
+
+# ★★★★★貨幣創世 —— 初始 coin 總量【從世界自己的量推導】，不是手寫在 config 裡。
+#
+# ★病：`config/peaceful_economy.json` 的 12 隊 coin（800×6／300×2／1000×1／200×3 ＝ 7000）
+#   是【手選的】，而它與 worldgen 的人口／盈餘／物價【無關】。
+#
+# ★★推導式（★每一項都【已經存在且已經被別的系統在用】—— 禁新手抄）：
+#   初始 coin 總量 = Σ_teams(pop) × FOOD_PER_PERSON_PER_DAY × 30 × BASE_PRICE["food"] × k
+#     pop                       ← worldgen 自身（`team.population`）
+#     FOOD_PER_PERSON_PER_DAY   ← `resource_system.gd:3`（全域已在用）
+#     30                        ← 一個月的天數（`TICKS_PER_MONTH / TICKS_PER_DAY`，不手抄）
+#     BASE_PRICE["food"]        ← `trade_valuation.gd:8`（既有定價表；而 coin 面值恆 1.0 是貨幣單位的錨）
+#
+# ★★★而 `k` 的意義【不只是「幾個月的週轉」】：
+#   總消費值 ≠ 交易量（自己種得出來的糧不會進市場），而【自產率是湧現的、worldgen 當下不知道】
+#   ⇒ 所以我【不另外手抄一個「交易佔比」係數】（那會是新的手抄常數，而且會被當成物理）
+#   ⇒ ★★而是把【總消費值當成明確具名的上界】，讓 `k` 同時吸收那個比例。
+#   ⇒ ★★★這句話必須留在 code 裡而不是只留在 spec：下一個看到 k=2 的人
+#      會以為它是「兩個月週轉」，而它其實是【兩個月週轉 × 交易佔消費的比例】的合體。
+#
+# ★★★★而【重新校 k 的理由是封閉的】（R² 護欄）：
+#   ✅ 只能是【volume 比對本身沒對上】（推導值 vs 實測 90 日交易量）
+#   ✗ 【不得】用下游感覺倒推（「物價漂移看起來太誇張」⇒ 調 k）
+#      ⇒ ★那條路一開，crank 就從後門溜回來：k 會變成一個【調到看起來對】的萬用旋鈕，
+#        而它表面上還掛著「推導式」的名義 —— 那正是「util 必須是真值不是 crank」的同一個判準。
+const GENESIS_K: float = 2.0   # ★用戶裁 2（k 同時吸收「交易佔消費的比例」，見上）
+
+# ★分配權重 —— ★★這是本票【唯一允許的新常數】，逐個寫理由：
+#   統領/國庫 3.0：它要付【第一輪已知支出】（薪資、建設、徵召），而那是全世界最大的一筆
+#   商隊     2.0：它要付得出【第一趟本錢】—— 沒有本錢的商隊在第一次決策就出不了門
+#   生產隊   0.0：★用戶定「農隊≈0」，而判準是【它不需要 coin 也能做它的第一個動作】（種田/採集不花錢）
+#   其他     1.0：★★「找零池」在本作沒有獨立實體 ⇒ 它落在【一般隊的小額持有】上
+#              —— ★★★而我把這個對應寫出來，因為 spec 的「找零池」若沒有對應物就會變成一個【沒人做的項目】
+#   ★★★★而 blueprint 已裁【追認這個對應，不設獨立實體】（2026-09-06 RESUME 同信）：
+#     ①「找零池」的意圖是【交易點有零錢可找＝流動性】，不是一個新的資產類
+#     ②開新實體＝新資產型態 ⇒ 按「資產配念頭」法就要配腦欄位／秤 option／行為驗收，
+#       ★而為創世分配的一個少量份額付那個成本【不值】
+#     ③守恆與故事都成立：★★零錢住在商人／據點主口袋＝世界本來的樣子
+#   ⇒ 那份「少量」併入【商隊本錢】與【據點主的小額持有】—— 也就是下面
+#     `GENESIS_W_MERCHANT` 與 `GENESIS_W_OTHER` 兩格，★★★而不是另立第五個權重。
+const GENESIS_W_COMMAND: float = 3.0
+const GENESIS_W_MERCHANT: float = 2.0
+const GENESIS_W_PRODUCE: float = 0.0
+const GENESIS_W_OTHER: float = 1.0
+
+static func _apply_money_genesis(state: WorldState) -> void:
+	var days_per_month: float = float(WorldState.TICKS_PER_MONTH) / float(WorldState.TICKS_PER_DAY)
+	var food_price: float = float(TradeValuation.BASE_PRICE.get("food", 0.0))
+	var total_pop: float = 0.0
+	for tid in state.teams:
+		total_pop += float(state.teams[tid].population)
+	var monthly_food_value: float = total_pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY 		* days_per_month * food_price
+	var total_coin: float = monthly_food_value * GENESIS_K
+
+	# ★逐項印出【推導的每一個因子與它的來源】—— 驗收①要的是這個，不是只印結果。
+	print("[MoneyGenesis] 初始 coin 總量 = %.1f" % total_coin)
+	print("   = Σpop(%.0f) × FOOD_PER_PERSON_PER_DAY(%.2f, resource_system.gd:3)" % [total_pop, ResourceSystem.FOOD_PER_PERSON_PER_DAY])
+	print("     × 每月天數(%.0f, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](%.1f, trade_valuation.gd:8)" % [days_per_month, food_price])
+	print("     × k(%.1f) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」" % GENESIS_K)
+
+	# ★分配：基底 = 該隊的人口份額，再按角色加權；★★而權重總和歸一，總量不因權重而膨脹。
+	var weights: Dictionary = {}
+	var wsum: float = 0.0
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		var w: float = GENESIS_W_OTHER
+		if t.tags.has(TeamData.TAG_COMMAND): w = GENESIS_W_COMMAND
+		elif t.tags.has(TeamData.TAG_MERCHANT): w = GENESIS_W_MERCHANT
+		elif t.tags.has(TeamData.TAG_PRODUCE): w = GENESIS_W_PRODUCE
+		var share: float = float(t.population) * w
+		weights[tid] = share
+		wsum += share
+	if wsum <= 0.0:
+		print("   ★★★分母為 0（沒有任何隊有正權重）⇒ 【不分配】而不是平均分 ——")
+		print("      平均分會製造一個【沒有理由的分配】，而它看起來會像推導的結果。")
+		return
+	var given: float = 0.0
+	var n_zero: int = 0
+	for tid in state.teams:
+		var amt: float = total_coin * float(weights[tid]) / wsum
+		state.teams[tid].resources["coin"] = amt
+		given += amt
+		if amt <= 0.0:
+			n_zero += 1
+	print("   分配：%d 隊；其中【拿到 0】的 %d 隊（★生產隊 by design，用戶定「農隊≈0」）" % [state.teams.size(), n_zero])
+	print("   ★對帳：實發 %.1f vs 推導 %.1f（差 %.4f）" % [given, total_coin, absf(given - total_coin)])
+	if Probe.enabled:
+		Probe.add_amount("genesis.coin_total", total_coin)
+		Probe.add_amount("genesis.coin_given", given)
+		Probe.bump("genesis.teams.%03d" % state.teams.size())
+		Probe.bump("genesis.zero_teams.%03d" % n_zero)
 
 static func _seed_creation_market_known(state: WorldState) -> void:
 	for tid in state.teams:

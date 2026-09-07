@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★我說「合 main 只帶 docs + wrapper」是【錯的】，我自己驗過了
 topic: ★★★我錯了,而且是【沒查就宣稱】:三點 diff 實測 `feat/declamp-price...origin/main -- scripts/` = 【8 檔 +297/−11】(②的 world_data/harvest/population/bare_tick_triage/headless_test/world_schedule_due + envoy 的 faction_ai/envoy_ptype_reconcile)——★不是「不動你的 code」;★而我那句是拿來【說服你去合】的,若你照單全收,你會在一個我提供的假前提下 debug;★★而你用三點救了自己那件事我要單獨記:兩點 `git diff A B` 會把【你自己的改動倒過來顯示】(實測 13 檔 +372/−254,trade_valuation 的 −254 那半就是 ⑩ 自己)⇒ 看起來像「main 會刪掉我的 ⑩」= 假警報;★★★三點 `A...B` 答的才是【會來到我這邊的東西】——兩個問題不同,而它們的指令只差一個點
 ---

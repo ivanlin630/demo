@@ -1,0 +1,71 @@
+{
+  "ticket": "docs/superpowers/specs/2026-09-06-declamp-price-HOW.md",
+  "branch": "feat/declamp-price",
+  "branch_commit": "e8cb29f0",
+  "baseline": "main（閥還在）— lod_phase_invariance fp sha=5ae4e545ce58cd5e",
+  "bed": "scripts/debug/declamp_effects_bed.gd（world 讀數）＋ scripts/debug/valuation_clamp_reconcile_test.gd（單元對帳）",
+  "config": "warring_states", "seed": 1337, "days": 30,
+
+  "acceptance": {
+    "1_upper_arm_only_fp_unchanged": {
+      "verdict": "PASS",
+      "method": "trap 保護的暫時 patch：只把上臂拿掉（下臂保留、無 floor），與 main 同 seed 同窗 43200 tick 比對",
+      "base_sha": "5ae4e545ce58cd5e", "upperonly_sha": "5ae4e545ce58cd5e",
+      "★note": "一字不差 ⇒ 上臂在真實世界跑 43200 tick 之後【一次都沒夾過】——不是推導說它不會夾，是世界本身作證",
+      "★★guard": "patch 標記不在就 ABORT（前一輪 patch 沒套上而實驗照跑，腳本印出【預先寫好的】錯誤結論）"
+    },
+    "2_full_declamp_fp_changes": {"verdict": "PASS（預期內）", "full_sha": "b33fabd382f73e02",
+      "★note": "只有 A 過會與『patch 沒生效』不可分；兩段方向相反且都必須對，才把『上臂死、下臂活』釘死"},
+    "3_band_distribution": {
+      "verdict": "MEASURED",
+      "population": 501636,
+      "deep_glut": 71856, "deep_glut_pct": 14.3,
+      "glut": 14307, "glut_pct": 2.9,
+      "normal": 415473, "normal_pct": 82.8,
+      "over_hi": 0,
+      "★note": "over_hi == 0 是【反向斷言】：它非 0 ＝ 推導錯了（stock 變可負／放大係數改了）"
+    },
+    "4_price_distribution": {
+      "verdict": "MEASURED",
+      "priced": 501636, "price_zero": 72102, "price_zero_pct": 14.4, "mean_price": 9.869,
+      "zero_by_res": {"food": 65459, "material": 5829, "weapon_melee_low": 595, "armor_low": 219},
+      "★★★food_share_of_zero_pct": 90.8,
+      "★reconcile": "deep_glut 71856 vs price_zero 72102，差 246 ＝ shortage 恰好 == -1.0 的那些（deep_glut 用嚴格 < -1，零價是 1+shortage <= 0）⇒ 差額【有名字】"
+    },
+    "5b_resource_floor": {
+      "verdict": "PASS",
+      "team_resources_min": 0.0, "public_storage_min": 0.0, "negative_hits": 0,
+      "★paired_with": "band_over_hi == 0",
+      "★★note": "這兩條是【一組】：stock >= 0 ⇒ shortage <= 1.0 ⇒ 上臂永不觸發。★★★只有一條動 ⇒ 是儀器問題不是世界問題（本輪兩條都成立）"
+    },
+    "5_downstream_zero_gain": {
+      "verdict": "PASS（靜態窮盡）",
+      "★finding": "order_system.gd:341 best_score=0.0 且嚴格 > ⇒ 價格正好 0 的貨【連候選都不算】",
+      "consumers_enumerated": {
+        "decision_context.gd:240": "只轉成 has_arb 這個 bool",
+        "faction_ai_system.gd:4074": "空 ⇒ 明確 fallback（巡最近市集），註解寫明是預期路徑",
+        "options.gd:20": "貿易 applicable = has_goods OR has_arb（OR 不是 AND）",
+        "options.gd:426": "囤貨 applicable = has_arb OR has_food_market",
+        "terms.gd:140": "economic_opp = has_arb ? 1.0 : 0.3（乘數不是門檻）"
+      },
+      "★★conclusion": "沒有任何一處把「沒有 best」當成異常／餓死訊號 ⇒ 分級降級不是懸崖"
+    },
+    "roi_division_premise": {
+      "verdict": "SPEC_PREMISE_WRONG（不照做，附證據）",
+      "evidence": "marginal_economy.gd:73 `return d_inflow * effective_days - upgrade_cost_value` 是【減法】；faction_ai_system.gd:2666 只比大小；全庫 grep「除以 cost」= 0 處",
+      "★note": "cost_value == 0 不會除零，而現況已自動滿足 spec 想要的語意（零成本的正收益方案自然排前面）⇒ 不需要 epsilon／INF／新常數"
+    }
+  },
+
+  "honest_limits": [
+    "★★★只量到【前提】沒量到【後果】：量到的是「糧食估值有 13.0% 的時候是 0」，★沒有量到農隊的【賣糧收入】變成多少 —— 零價要變成「收入歸零」還要看那些時刻有沒有正在發生交易、以及農隊本來多少收入來自賣糧。spec 那句是【預測】，本份證的是【它的前提】。",
+    "★7a（cost_value==0 次數）／7b（幽靈資產）／7c（震盪簽名）★本床沒量 —— 它們要 consumer 追蹤與時間序列，硬塞進來只會得到看起來有數字但答不了問題的欄位（已由 defers.tsv:ten-ghost-and-oscillation 承接）",
+    "★★單一 config（warring_states）單一 seed（1337）單一窗（30 日）—— 比例是否隨 regime／seed 變動【未驗】",
+    "★★原始輸出已裁剪落地（19285 → 23 行），★而丟掉的行數寫在檔頭：靜默截斷會讓「這就是全部」跟「這是我挑過的」長得一樣"
+  ],
+
+  "artifacts": {
+    "world_readout": "docs/measurements/2026-09-06-ten-declamp-effects.txt",
+    "unit_reconcile": "scripts/debug/valuation_clamp_reconcile_test.gd（merge-gates: valuation-clamp）"
+  }
+}

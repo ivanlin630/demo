@@ -1,0 +1,81 @@
+# ██████████████████████████████████████████████████████████████████████████
+# ★★★ SUPERSEDED —— 不要用這張表。用 2026-09-07-bed-triage-131-v2.tsv
+# ██████████████████████████████████████████████████████████████████████████
+# 為什麼：本表是【分類器修好之前】的產物，而那版分類器有【假綠通道】：
+#   它判紅只認 `[FAIL]` 方括號式 ⇒ 131 床中 31 支(24%)用裸 `FAIL ` ⇒ ★失敗時被判 green。
+# 後果（數字自己說話）：
+#   本表   66 列（未跑完） red 15 / green 50
+#   v2    131 列（跑完）  red 29 / green 98 / DELETED 4
+#   ⇒ ★本表少報【一半】的紅，而它的檔名看起來就是「那份表」。
+# ★★本表【不刪除】：它是「那一輪確實跑過而且判錯了」的證據。
+# ★★★而它會出現在 main，是因為別的 session 的 commit 把它連同其他人的 WIP 一起掃進去
+#     （2026-09-07 77daa70f，implementer 自報）——★掃入者不知道自己掃了什麼，
+#     所以危害不在「誰 commit」，在【被掃進去的東西看起來像權威】。
+# ██████████████████████████████████████████████████████████████████████████
+bed	verdict	wall_s	note
+scripts/debug/abandon_courage_test.gd	green	4	
+scripts/debug/active_promotion_test.gd	green	3	
+scripts/debug/beast_decision_leak_test.gd	green	4	
+scripts/debug/build_afford_persona_test.gd	green	5	
+scripts/debug/camp_marginal_test.gd	red	4	  [FAIL] 富流浪(food_days=1210)→ urgency=0→ camp_drive=0
+scripts/debug/careloop_scout_test.gd	green	4	
+scripts/debug/convoy_delivery_test.gd	red	4	  [FAIL] deliver_material candidate 未生成(cands=0)
+scripts/debug/crisis_override_test.gd	red	4	  [FAIL] committed build 深餓(0.5)N天未緩 → crisis TRUE
+scripts/debug/depatch_track2_test.gd	green	3	
+scripts/debug/desperation_food_seeking_test.gd	red	3	  [FAIL] host 沒拒過+可達 → acceptable(給一次真試不誤殺)
+scripts/debug/desperation_ordering_test.gd	green	4	
+scripts/debug/diplomacy_grounded_test.gd	green	4	
+scripts/debug/extraction_need_driven_test.gd	green	4	
+scripts/debug/faction_cohesion_test.gd	green	4	
+scripts/debug/flee_restore_test.gd	green	4	
+scripts/debug/food_bridge_test.gd	green	4	
+scripts/debug/food_flow_test.gd	red	4	  [FAIL] 糧充裕 persist(0.150) > 糧見底 persist(0.150)（safe_ratio 乘法縮放）
+scripts/debug/framework_f1_test.gd	green	3	
+scripts/debug/framework_f4_test.gd	green	4	
+scripts/debug/g3_betrayal_bond_test.gd	green	3	
+scripts/debug/game_sim_test.gd	green	41	
+scripts/debug/gateA_hysteresis_test.gd	green	6	
+scripts/debug/gateA_test.gd	green	6	
+scripts/debug/godview_1119_test.gd	green	6	
+scripts/debug/godview_b_test.gd	green	6	
+scripts/debug/godview_c_test.gd	green	6	
+scripts/debug/godview_d_test.gd	green	7	
+scripts/debug/godview_e_test.gd	green	7	
+scripts/debug/godview_f_test.gd	green	7	
+scripts/debug/godview_followup_test.gd	green	6	
+scripts/debug/idle_labor_build_test.gd	green	5	
+scripts/debug/infonet_bootstrap_test.gd	red	5	  [FAIL] target 無固定 outpost → -1（移動隊落 belief）
+scripts/debug/infonet_herald_test.gd	green	6	
+scripts/debug/infonet_letter_test.gd	green	6	
+scripts/debug/infonet_part2_test.gd	green	6	
+scripts/debug/infonet_prop_test.gd	green	5	
+scripts/debug/infonet_scout_test.gd	red	5	  [FAIL] 斥候 co-loc 子民 → 子民 food 買單回領主 team_known（got 2）=active
+scripts/debug/infonet_sideaction_test.gd	red	7	  [FAIL] 領主子民 belief 陳舊(名冊)→ anon scout side-dispatch（dispatched=0）
+scripts/debug/infonet_trade_test.gd	red	5	  [FAIL] V 向同格 peer P 買到 food（Δfood=980.0 Δcoin=0.0 dealt=false）=交易面
+scripts/debug/invite_widen_test.gd	red	6	  [FAIL] 流亡 wanderer 邀得到（regression、過 filter 到 diplomacy）
+scripts/debug/junmin_guard_test.gd	green	6	
+scripts/debug/junmin_mobilize_test.gd	green	6	
+scripts/debug/labor_pool_test.gd	green	5	
+scripts/debug/lod_phase_invariance_test.gd	timeout	91	
+scripts/debug/lord_care_loop_test.gd	green	5	
+scripts/debug/map_render_test.gd	green	6	
+scripts/debug/market_memoize_test.gd	green	6	
+scripts/debug/material_buy_test.gd	green	6	
+scripts/debug/material_hold_test.gd	green	7	
+scripts/debug/means_end_a1_test.gd	red	8	  [FAIL] _dispatch_goal_delegate(build_type 分支)→派子隊
+scripts/debug/means_end_s1_test.gd	red	6	  [FAIL] REGISTRY 空表結構（S1 空 data，S2+ 填 goal 定義）
+scripts/debug/means_end_s2_test.gd	red	6	  [FAIL] location 前置 goal → S2 回無 candidate（定位=S3 stub 邊界，got 1）
+scripts/debug/means_end_s3_test.gd	green	7	
+scripts/debug/means_end_s4_test.gd	green	7	
+scripts/debug/means_end_s5_test.gd	green	5	
+scripts/debug/means_end_s6_test.gd	red	7	  [FAIL] delay 0 → discount1，utilpayoff×dev_coeff(食足 1.0)=0.577（即時不折）
+scripts/debug/means_end_s7_test.gd	green	7	
+scripts/debug/mergein_join_lifecycle_test.gd	green	11	
+scripts/debug/mfg_labor_depatch_test.gd	green	6	
+scripts/debug/mil_facility_cost70_test.gd	green	5	
+scripts/debug/missing_contact_ledger_test.gd	green	6	
+scripts/debug/monotonic_person_id_test.gd	green	5	
+scripts/debug/monotonic_team_id_test.gd	green	4	
+scripts/debug/named_scarcity_ab_test.gd	green	5	
+scripts/debug/need_oracle_test.gd	green	6	
+scripts/debug/nullbelief_flee_test.gd	red	7	  [FAIL] threat_pos=(3,3) → FLEE applicable（正常逃，coherent flee 不誤傷）

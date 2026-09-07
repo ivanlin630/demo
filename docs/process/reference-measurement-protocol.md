@@ -43,7 +43,11 @@ wrapper 的 beacon/COLLISION 記錄住在 `tools/godot.ps1`,而【每個 worktre
 
 ### ★做法（★兩層，而第一層【載體無關】）
 ```
-①★載體無關:`.claude/hooks/.godot-runs.log` 有沒有這一跑的【結束列】
+①★載體無關:`.claude/hooks/.godot-runs.log` 的結束列,★★而【要看它的 outcome 欄】(ok｜timeout)
+   ★★★2026-09-07 訂正:這一列原本【無條件寫】—— 於是【被 timeout 殺掉的跑】留下與完跑
+   【一模一樣的證據】⇒ 證人把 timeout-kill 記成完跑,而所有建立在它上面的「沒有壞消息」都不成立。
+   ⇒ 現在 outcome 跟著列走;而【完全沒有列】仍然是第三態(wrapper 自己被外部殺)。
+   ★而這一格的教訓:【我們用一個證人去修「陰性不可信」,而那個證人自己有同一個病】。
    —— ★★godot.ps1 的收尾寫入【只有正常結束才會跑】(被 kill 就沒有,這是設計進去的性質)
    ⇒ ★★★所以「有結束列」= 那次 wrapper 呼叫真的跑完了,而它【不依賴任何床印什麼】
 ②★★★而它是【三態】不是兩態(implementer 揭 2026-09-07):

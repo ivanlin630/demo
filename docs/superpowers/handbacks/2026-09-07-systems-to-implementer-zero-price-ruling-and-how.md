@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑩ 零價成交裁定下來了（blueprint 裁 (a)）＋ HOW：★改 `<= 0` → `< 0`，★★【不要】接 free_dist（我讀完它才否掉這個選項）
 topic: ★blueprint 裁 (a):零價可成交,理由=他裁過的「爛大街=白送」本來就是【轉移語意】,若 0 元一律 bail,「白送」會變成一個【從不發生的形容詞】;(c) epsilon 否決(同我);★★HOW 我裁:三處閘 `<= 0` 改 `< 0`,★★★而【不要】走 free_dist —— 我讀了它:`free_dist = (override_ask == 0.0)` 是【賣方決定送】的意圖旗標(仁君賑濟),它同時跳過 owner-coin 檢查與 ownerless 檢查;而市場零價是【價格結果】不是【贈與意圖】⇒ 接過去會讓「市場把它送掉」與「領主決定送」變成同一件事,還會旁路本該生效的檢查;★blueprint 特別點的別混:zero-GAIN 不做是決策引擎的正常秤(order_system 的嚴格 > 【留著】),zero-PRICE 但買方高需求是真互利【該 fire】;★★驗收我加一格:5 紅轉綠【不夠】,要有【真的成交過 0 元】的正數
 ---

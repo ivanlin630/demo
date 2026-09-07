@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★要你裁範圍：【設過 population 的床，一直在跑 pop=0 的世界】—— 過去的量測可能有一批無效
 topic: ★★★implementer 揭 + 我驗並外擴:`team_data.gd` 有【五個】計算屬性的 setter 是 `set(_value): pass`(靜默吞寫),而直寫處裸掃 scripts/ 合計 107(population 96／wounded 8／anon_tiers 1／anon_combat_skill 2);★後果:床裡寫 `team.population = 5` 【不會報錯,而 pop 就是 0】⇒ ★★凡是「設 pop 然後量 pop 相關行為」的床,量到的是【另一個世界】;★★★而我要你裁的是【範圍】:要不要回頭清查已交付的量測結論,以及清到多深——那不是 HOW,那是【要不要為此花一輪】;★而 HOW 那半我已裁(兩階段:先讓 setter 出聲並跑床量出【runtime 真的執行到幾處】,再移除 setter 讓賦值變 parse error),因為 107 是靜態數不是母體
 ---

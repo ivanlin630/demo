@@ -64,7 +64,40 @@ otherdomain-coordination	他域耦合求裁(戰俘/capture 需 combat 等)——
 single-writer-leftovers	單寫者 slice2 收案時暫緩的小項(反向 roster audit／beast_system L2 升級／subteam clear())——★解除條件不可量 ⇒ 定期複審日期	複審日 2026-09-20 到期	[ "$(date +%F)" \> "2026-09-19" ]
 C-refill-bed	C 補量:①C-1 需【有 factions 的床】(評估迴圈 faction_ai:898 才進得去)②C-2 需【16+/31+ 級距有樣本】(config 造大團或跑到自然長大)③同床加【隊規模×距錨點距離】交叉表(關掉「小隊 1.35→3.12 是否⑧造成」那個開放問題)——★三者同床可解;優先序=經濟三票之後(C 是觀察題不擋事)	經濟三票收束(batch2 完成標記產出)	test -f docs/process/verdicts/batch2-economy-COMPLETE.measure.json
 ten-ghost-and-oscillation	⑩ 的 7b(幽靈資產:蓋了沒人用)與 7c(震盪簽名:build-spree→短缺→反彈)——★implementer 誠實回報 declamp_effects_bed【答不了】(要設施 consumer 追蹤 + 時間序列),而他【沒有假裝覆蓋】,在卷面上明說不涵蓋 ⇒ ★★所以它需要一個 token,否則「明說不涵蓋」會變成「沒有人記得」	批 2 三票收束後重新裁定(屆時 batch2 對比輪的數字會說 7b/7c 值不值得建專門的追蹤)	test -f docs/process/verdicts/batch2-economy-COMPLETE.measure.json
-ten-consequence-farm-income	⑩ 的【後果】那一格:糧食零價是否真的讓農隊賣糧收入歸零——★implementer 量到的是【前提】(food 佔零價 90.8%、糧食估值 13.0% 的時候是 0),★★而 spec §4 那句「農隊賣糧收入歸零=regime change」是【預測】,證前提不等於證後果;★★★要量後果需要農隊 coin 收入的 before/after,而那要 ⑨ 的 coin.flow.by.<reason>	⑨(money-genesis)merge 進 main 之後(屆時 coin.flow.by.<reason> 在樹上,可量農隊賣糧收入)	git show origin/main:scripts/simulation/resource_bank.gd 2>/dev/null | grep -q 'coin.flow'
-ten-zero-gain-reach	⑩ 的【觸達】那一格:零價到底有沒有真的殺掉訂單(arb_kill_zero_gain 次數)——★驗收⑤答的是【結構】(5 個消費點全是 OR/乘數 ⇒ 不是懸崖),那個方法對;★★但它答不了【次數】:③④量的是【估值層】501,636 次,而估值層變了不等於【決策層】變了;★★★這格 ⑩ 之前【恆 0】(clamp 讓 local_value 恆 >0)⇒ 它非 0 本身就是「白送區流到下游」的證據	B-v0(市場厚度)動 order_system 時順手加那一格並量(不另起一輪長跑)	git show origin/main:scripts/simulation/order_system.gd 2>/dev/null | grep -q 'arb_kill_zero_gain'
+ten-consequence-farm-income	⑩ 的【後果】那一格:糧食零價是否真的讓農隊賣糧收入歸零——★implementer 量到的是【前提】(food 佔零價 90.8%、糧食估值 13.0% 的時候是 0),★★而 spec §4 那句「農隊賣糧收入歸零=regime change」是【預測】,證前提不等於證後果;★★★要量後果需要農隊 coin 收入的 before/after,而那要 ⑨ 的 coin.flow.by.<reason>｜★★★2026-09-07 解鎖：⑨ 已 merge（ed8a094d），coin.flow.by.<reason> 在樹上 ⇒ 本 token 從【等解鎖】轉為【等交付】，已派 measurer（低優先，排 B-v0 之後）｜★交付物須帶誠實限「貨幣量未過校驗（±14× 待判）」——它跑在 ⑨ 世界上	量測交付：農隊賣糧 coin 收入的實測數（⑨ 世界）	test -f docs/process/verdicts/ten-consequence-farm-income.measure.json
+ten-zero-gain-reach	⑩ 的【觸達】那一格:零價到底有沒有真的殺掉訂單(arb_kill_zero_gain 次數)——★驗收⑤答的是【結構】(5 個消費點全是 OR/乘數 ⇒ 不是懸崖),那個方法對;★★但它答不了【次數】:③④量的是【估值層】501,636 次,而估值層變了不等於【決策層】變了;★★★這格 ⑩ 之前【恆 0】(clamp 讓 local_value 恆 >0)⇒ 它非 0 本身就是「白送區流到下游」的證據｜★★2026-09-07 轉【等交付】：tap `arb_kill_zero_gain` 已隨 B-v0 落 main（ecf818c4），★而 until 要求的是「加那一格【並量】」——tap 有了，量還沒 ⇒ token 不撤，met_check 改追【交付】	窗後量測輪：觸達格的實測數（不另起長跑，掛在市場厚度那輪）	test -f docs/process/verdicts/ten-zero-gain-reach.measure.json
 status-files-delete	現況檔 docs/process/status/*(約 370KB)是否刪除——★2026-08-21 停更並寫「觀察至 2026-08-28 沒人 miss 就刪」,★★而那句寫在散文裡沒有人追,到 2026-09-07 已逾期 10 天;★★★而現在去看,證據【反過來】:02_reviewer.status.md 154KB、2026-09-02 還在被寫、此刻還有未 commit 改動 ⇒ 有人在用 ⇒ 刪除條件【不成立】,不能照原計畫執行	連續 30 天沒有任何 status 檔被改過(=真的沒人在用)	test -z "$(find docs/process/status -name '*.md' -mtime -30 2>/dev/null)"
-bv0-claim-expiry	B-v0 的【到期處置】——★implementer 在 Slice A 把「到期退貨」列為可砍(當時對),★★而 ⑩ 之後 local_value 可為 0 ⇒ 待領貨折值 0 ⇒ pending_claim_amt 0 ⇒ 領取念頭不上秤⇒ ★★★貨已離開賣家庫存進 escrow 卻永遠沒人領 = orphan_escrow(漏貨),不再是【功能少一塊】	B-v0 收束之前必須有到期處置(形狀:貨留在 escrow 只標到期,不讓貨自己回家=瞬移)	git show origin/main:scripts/simulation/interaction_system.gd 2>/dev/null | grep -q 'claim_expir'
+# ★★★【2026-09-07 blueprint 預註冊的分流判準】—— 名單(A 階段跑床的結果)來了【直接套,不再議】
+#   必重跑三類:(a)被【意圖帳／裁決】引用過的數字 (b)推過【用戶 TG】的結論 (c)當過【merge-gate 判準】的床
+#   其餘:★記帳標記「產地含吞寫 setter」,【不重跑】
+#   ★★對外紀律:名單落地前【不對外撤結論、也不預告災難】——現在只有「可能」,量級未知;
+#     名單 + 重跑結果【一起】推用戶,一次講清。
+#   ★★★而【現在就寫下來】的理由:等名單來了再議,會在【已經看到數字】之後才定判準
+#     —— 那正是「預寫解讀」那條要防的相反面。
+# ★★★【2026-09-07 預先講死:stage B 之後 headless 的失敗清單【會變】,而那【不是回歸】】
+#   事實:26 支有直寫的床裡,同時是【註冊 merge-gate】的只有一支 = scripts/debug/headless_test.gd
+#        (★它只透過 hook 才跑得到:headless-regression.sh —— 註冊表 11 支直接跑 .gd、19 支經 bash hook,
+#         直接掃法會算出 0,而那是【載體】漏掉的第三次)
+#   ★而它 runtime 確認被污染(population + wounded 都被吞寫)
+#   ⇒ ★★stage B 把那些 fixture 改成合法寫入之後,那些場景【第一次真的有人】
+#      ⇒ 失敗清單【一定會變】—— ★★★而那個變化是【修好了】不是【弄壞了】
+#   ⇒ 處置:baseline docs/process/.headless-baseline-list.txt 必須【重生成】,而重生成時要附一句
+#      【哪幾條變了、為什麼】—— ★否則新 baseline 會把舊污染【洗白】成新常態
+#   ★★★這段【現在寫】的理由:等看到新清單再判,就是在【已經看到數字之後】才定判準
+scaffold-swallowing-setters	★遷移鷹架:team_data.gd 五個計算屬性的 `set(_value): pass`(:57 population／:242 wounded／:260 anon_tiers／:269 anon_combat_skill／:277)——★它們的用途是【讓舊賦值站繼續編得過】,而遷移完成後【沒有人回來拆】⇒ ★★變成永久的靜默失敗產生器(直寫處裸掃 scripts/ 合計 107);★★★本 token 就是 blueprint 立的「鷹架出生必掛拆除 token」那條規矩的【第一個實例】	★【2026-09-07 訂正】原本寫「五個 setter 全部移除(賦值變 parse error)」——★★而實測【拿掉 setter 不會變成 parse error】,賦值仍是靜默 no-op ⇒ 移除【達不到目的】;★★★真正在等的是【呼叫端清乾淨】:活的 10 支床改走合法路徑、死碼 16 支刪掉	! grep -rqE '\.(population|wounded|anon_tiers|anon_combat_skill|anon_wage)[[:space:]]*=[^=]' scripts/debug/
+militia-sliceB-mobilization-beds	★軍民混編 Slice B 啟動時，動員相關的床【隨 spec 新建】，不得復用已刪的舊「備戰」床——★Slice B 的動員語意 ≠ 舊備戰（舊床期望值已隨 2026-09-04 delist-prepare 失效，4 支已刪：seam1_registry/threat_oracle_s2/threat_oracle_s1_probe/survival_single_source）｜★退化判準（met_check 之外的人工檢查）：ls scripts/debug/{seam1_registry_test,threat_oracle_s2_test,threat_oracle_s1_probe_test,survival_single_source_test}.gd 應零命中——有人把舊床撿回來就是退化	Slice B 開工（uses_unified:2394 承重牆 spike 之後）	git grep -q 動員床 -- docs/superpowers/specs/ && grep -q 動員 docs/process/merge-gates.tsv
+genesis-k-calibration	★GENESIS_K=2.0 的前提與實測差 14.3 倍（post-⑩ 90d：月週轉 derived 0.1395／handwritten 0.1377，18 隊 90 日僅 316 筆 coin 流動＝每隊每月 <0.6 筆）——★★不得以【未診斷的稀薄度】為輸入去重導（以症狀為輸入調，鑄下去同樣收不回）｜★處置分岔：症狀⇒先修撮合再重量／genuine⇒照「推導式吃真輸入」重導（寧低勿高）｜★★未結案前所有 ⑨ 世界量測卷面必帶誠實限「貨幣量未過校驗（±14× 待判）」	QA 故事稽核結案：0.1395 是 genuine 還是症狀（GATE-B local-only 撮合仍在 backlog＝症狀嫌疑有名有姓）	test -f docs/process/verdicts/genesis-turnover-story-audit.measure.json
+genesis-merchant-weight-empty-population	★`GENESIS_W_MERCHANT` 角色加權靠 `t.tags.has(TeamData.TAG_MERCHANT)` 判商隊（game_setup.gd:144-145），★★但 random-mode 世界裡 TAG_MERCHANT 母體＝0（`arb_hit_confirm_bed.gd:42-43`：真正驅動 merchant 判定的是 `ambition_archetype == ARCHETYPE_TRADE`，faction_ai:2045）⇒ 商隊權重會 **silently 退化成 OTHER 權重**，整個角色加權形同虛設｜★本次量測用 peaceful_economy(explicit 模式，team8 config 手寫 tags 含「商隊」) ⇒ 不影響 ⑨ 的 CLEAN 判決｜★met_check 查的是【接線有沒有改】（game_setup 是否改讀 ambition_archetype）——★★修法是改接線不是把權重調大，調大只讓錯誤更大聲；★★★pilot 卷面另須印出 TAG_MERCHANT 母體隊數	spec §6④ warring 獨立 pilot（或任何把 genesis 套到 random-mode 世界的時點）	git grep -qE 'ambition_archetype|ARCHETYPE_TRADE' -- scripts/simulation/game_setup.gd
+T-C1a-decision-density	★C1 玩家循環：每隊每日【decision-worthy 事件】密度——答「隨機附身開得了嗎」（附身一個隊，一天有沒有值得決策的事）｜量法=specimen 數，不是 aggregate	measurer 空檔（不擋批 2）	test -f docs/process/verdicts/c1a-decision-density.measure.json
+T-C1b-verb-latency	★C1 玩家動詞【下注→咬回】延遲分布（tick）——玩家做一個動作到看見結果要多久；★分布不是均值（均值會把「大多數很快、少數永遠不回」讀成中等）	measurer 空檔（不擋批 2）	test -f docs/process/verdicts/c1b-verb-latency.measure.json
+T-A4-rout-witness	★A4 驗證票（★不開設計 arc）：鄰隊潰逃後，目擊者的威脅評估動沒動／逃有沒有提早｜★★會 fire ⇒ A4 劃掉；不會 ⇒ 查補丁閘斷鏈｜★★★前提已對帳：潰逃【有】對外產物(npc_combat_system.gd:530 Probe.bump("conq.combat_retreat")、:536 產生訊息)，所以問題是【下游有沒有讀】不是【上游有沒有發】	measurer 空檔（不擋批 2）	test -f docs/process/verdicts/a4-rout-witness.measure.json
+A1-reweigh	★A1 重量：同組 probe 對照 8/20 舊 jsonl，看 order_fulfilled 率與 bail 佔比	經濟窗收口	test -f docs/process/verdicts/a1-reweigh.measure.json
+zero-children-genuine-or-defect	★★★【2026-09-07 撤回並改寫】原始前提是【窗口假影】：TICKS_PER_DAY=1440（world_state.gd:16）⇒ 那個「1000 tick、65 隊、小孩 0」的跑其實只有 ★0.69 天 —— 17 小時的遊戲時間當然生不出小孩｜★★implementer 的 60 天量測：單隊最大 breed_progress=0.7975 ⇒ ★約 75 天生一個，機制沒斷｜★★★所以真正的問題【換了一個】：不是「生育會不會 fire」（會），是【75 天/胎 是不是我們要的速率】——那是平衡/願景層，要用戶看數字說話	人口卷（90 天窗）出爐後由用戶判速率	test -f docs/process/verdicts/population-90d.measure.json
+pending-claims-index-not-mapscan	★B-v0 的待領資產查找用【全圖掃】：decision_context.gd::_gather_pending_claims 與 options.gd 的「領取」to_task 都是 `for tile_id in state.world.tiles` 再過濾 owner_team==自己｜★★語意合法（自知：自己寄賣的紀錄，不是偷看他隊），已標 `# gate-ok`；★★★但形狀錯：每次決策 O(tiles)，且【全圖掃正是 god-view 滲入的通道】——今天過濾自家，明天有人拿掉那個過濾｜★本專案已有既有慣用法：owner_outpost_index.gd（索引取代掃描）	市場厚度窗後量測輪（若板厚/成交量顯示 claim 量大到會痛，提前）	git show origin/main:scripts/simulation/decision/decision_context.gd 2>/dev/null | grep -q "claims_index\|pending_claims_of"
+# ═══════════ 已解除（保留紀錄，閘略過註解行）═══════════
+# ★不刪除：解除過的 token 是「這件事被要求過、而且達成了」的證據；
+#   ★★刪掉之後，下一個人只會看到「沒有這條規矩」。
+# [已解除 2026-09-07] bv0-claim-expiry —— 條件：「B-v0 收束之前必須有到期處置（貨留在 escrow 只標到期，不讓貨自己回家＝瞬移）」
+#   ⇒ 達成：order_system.gd 的 mkt.escrow.expire_to_claim／expire_tile_gone，隨 B-v0 落 main（ecf818c4）
+#   ⇒ ★驗收證據：B-v0 驗收床紅線①「外地賣家成交 coin 0.00→0.00、待領款 +11.20」＝禁瞬移兌現
+

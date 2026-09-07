@@ -103,6 +103,63 @@ $beaconRole = if ($env:SESSION_ROLE) { $env:SESSION_ROLE } else { "unknown-$PID"
 $hookDir = "A:\GDS\demo\.claude\hooks"
 $beaconFile = Join-Path $hookDir ".busy.$beaconRole"
 $runLog = Join-Path $hookDir ".godot-runs.log"
+
+# --- Tree provenance stamp (2026-09-07) -------------------------------------
+# Blood evidence: a 90d acceptance run used --path <worktree>, which reads the
+# WORKING TREE, not any commit. Three bed improvements were sitting uncommitted,
+# so the verdict was built on code that existed nowhere anyone could fetch.
+# "I measured it" != "anyone else can measure it" -- and only the person who
+# aimed --path knows which tree they aimed at. So the wrapper states it, every
+# run, in the output itself. No discipline required.
+$provPath = (Get-Location).Path
+for ($i = 0; $i -lt ($args.Count - 1); $i++) {
+    if ($args[$i] -eq "--path") { $provPath = $args[$i + 1] }
+}
+try {
+    $provSha = (& git -C $provPath rev-parse --short HEAD 2>$null)
+    $provDirty = @(& git -C $provPath status --porcelain 2>$null)
+    if ($provSha) {
+        # Only dirt that can change the RUN matters. Docs churn is constant here
+        # (six sessions share this repo), and a stamp that shouts every time is a
+        # stamp people learn to ignore -- the same 'drowned in noise' failure as a
+        # push_error on every tick.
+        $codeDirty = @($provDirty | Where-Object { $_ -match ' (scripts|config|tools|addons)/' })
+        if ($codeDirty.Count -gt 0) {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=NO code-dirty=$($codeDirty.Count)"
+            Write-Output "[TREE]   *** measuring the WORKING TREE, not commit $provSha ***"
+            foreach ($d in ($codeDirty | Select-Object -First 8)) { Write-Output "[TREE]   $d" }
+        } elseif ($provDirty.Count -gt 0) {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=code-yes (docs-dirty=$($provDirty.Count), does not affect this run)"
+        } else {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=yes"
+        }
+    } else {
+        Write-Output "[TREE] path=$provPath commit=UNKNOWN (git said nothing)"
+    }
+} catch {
+    Write-Output "[TREE] path=$provPath commit=UNKNOWN (git unavailable)"
+}
+# ---------------------------------------------------------------------------
+# --- Time-scale stamp (2026-09-07) ------------------------------------------
+# Blood evidence: three people in a row read "1000 tick" as "a long run".
+# TICKS_PER_DAY = 1440, so it was 0.69 days -- 17 game-hours. A "no children
+# were born" world-level finding was pure window artifact, and it travelled
+# through a token, a spec and a ruling before anyone checked the unit.
+# A number without its window length is not a number. So the wrapper prints
+# the conversion factor on every run: the reader never has to know 1440.
+try {
+    $wsFile = Join-Path $provPath "scripts/data/world_state.gd"
+    if (Test-Path $wsFile) {
+        $tphLine = Select-String -Path $wsFile -Pattern 'const TICKS_PER_HOUR[^0-9]*([0-9]+)' | Select-Object -First 1
+        if ($tphLine -and $tphLine.Matches[0].Groups[1].Value) {
+            $tph = [int]$tphLine.Matches[0].Groups[1].Value
+            $tpd = $tph * 24
+            Write-Output ("[SCALE] TICKS_PER_HOUR=$tph TICKS_PER_DAY=$tpd  |  1000t=" + [math]::Round(1000/$tpd,2) + "d  10000t=" + [math]::Round(10000/$tpd,1) + "d  " + ($tpd*30) + "t=30d(1 month)")
+            Write-Output "[SCALE]   *** a tick count without its day-conversion is not a number ***"
+        }
+    }
+} catch { }
+# ---------------------------------------------------------------------------
 $runStart = Get-Date
 if (Test-Path $hookDir) {
     try {
@@ -206,7 +263,15 @@ Remove-Item $tempOut, $tempErr -ErrorAction SilentlyContinue
 # evidence that the run did not finish.
 try {
     $runEnd = Get-Date
-    "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`t$($runEnd.ToString('yyyy-MM-ddTHH:mm:ss'))`t$beaconRole`tpid=$PID`t$($args -join ' ')" |
+    # 2026-09-07 FIX (implementer found it): this row used to be written unconditionally,
+    # so a run killed at the timeout deadline left EXACTLY the same evidence as a run that
+    # finished. The row was being used as the 'did this run complete' witness, so a timeout
+    # was silently counted as a completion -- and every 'no bad news' conclusion drawn from
+    # a timed-out bed was therefore unfounded. The witness had the disease it was meant to cure.
+    # The outcome now travels WITH the row: ok | timeout. No row at all still means the
+    # wrapper itself died (killed from outside), which is a third, different state.
+    $outcome = if ($timedOut) { 'timeout' } else { 'ok' }
+    "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`t$($runEnd.ToString('yyyy-MM-ddTHH:mm:ss'))`t$beaconRole`tpid=$PID`t$outcome`t$($args -join ' ')" |
         Out-File -FilePath $runLog -Encoding ascii -Append
     Remove-Item $beaconFile -ErrorAction SilentlyContinue
 } catch { }

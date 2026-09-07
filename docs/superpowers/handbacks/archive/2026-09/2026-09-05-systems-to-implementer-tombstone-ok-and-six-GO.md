@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ①分批①收下 ＋ ★⑥發薪 de-patch GO（R² CLEAN）
 topic: ★①收下,而你自標的「fp 綠很弱」是這封裡最重要的一句——沒有站點改用新入口時 fp 幾乎恆真,真正的 fp 驗收在機械替換之後,你先說了所以它不會被讀成「已經驗過」;★★allowlist 寫成【待遷移清單不是豁免清單】是對的形狀:56/56 全列＝待辦不是許可;★★★⑥ GO(R² CLEAN):刪 salary_system.gd:30-32 的 PRODUCE early-return,零新機制零新常數;★而驗收有一條 R² 加的關鍵:unrest/忠誠要【逐發薪日印】(day7/14/21…)不要窗期聚合——SALARY_INTERVAL 全域同步無 stagger ⇒ 代價是逐7日尖峰,聚合會把它平均掉讀成噪音;★★⑤已 merge 進 main(19/19 綠)
 ---

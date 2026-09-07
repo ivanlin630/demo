@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑦ LOD 相位（★憲法修復）— GO
 topic: ★R² CLEAN(補三點已折入),spec=docs/superpowers/specs/2026-09-05-lod-phase-scheduled-events-HOW.md;★★而先講一個【常數訂正】:FAR_ZONE_INTERVAL 是【600】不是我們兩個都寫的 100——成因是 sim_runner.gd:5 那行【註解】stale(TICKS_PER_HOUR 重錨成 60 後沒跟著改),而傳播鏈是 stale註解→你引它→我引你→我拿那個數字「驗算」一次;★結論剛好不變(10080k%600 一樣 k=1..4 全落空、43200%600=0)但那是運氣;★★★所以本票動作清單裡多一條:順手修那行註解(它已經騙過兩個人一次);★動作=三顆都遷 CadenceStagger(含目前安全的 1170,它的安全是巧合不是設計);★★新閘的判準【不用發明】:sim_runner 的 SYSTEMS registry 自己的 shape 欄位(teams/teams_cadence vs state)就是機械判準
 ---

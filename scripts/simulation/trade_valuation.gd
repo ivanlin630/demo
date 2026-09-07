@@ -160,21 +160,37 @@ static func local_value(team: TeamData, res: String, state: WorldState) -> float
 	if res in SURVIVAL_GOODS and shortage > 0.5:
 		shortage = 1.0 + (shortage - 0.5) * 6.0
 	var _hi: float = 4.0 if res in SURVIVAL_GOODS else 1.0
-	# ★★★物價 clamp 命中率（systems 2026-09-06；對比輪 D 格）——
-	#   ★measurer 原本提的是【比 clamp 之後的 `sr` 是否貼近邊界(±1e-6)】，而 systems 改了形狀：
-	#     ★★那會把【被夾住】跟【剛好等於邊界】混在一起，而且要靠一個 epsilon。
-	#   ⇒ ★★★改成比【clamp 之前】的 `shortage` 與邊界 ⇒ 精確、零 epsilon，
-	#     而且它量的正是要問的那件事【有沒有被夾】，不是【結果落在哪】
-	#     （那兩件事只有在【沒被夾】時才一樣）。
-	#   ★注意比的是【放大後】的 shortage：`SURVIVAL_GOODS` 的 ×6 放大在 clamp 前就做完了。
-	#   ★★三桶【互斥且窮盡】：lo + hi + none == `local_value.calls`（★對帳式要真的印，不心算）。
-	#   ★★★`local_value` 是熱路徑 ⇒ 三個 bump 都在 `Probe.enabled` 之內（關掉時零成本）。
+	# ★★★第⑩票（2026-09-06，用戶裁「拆」）：穩定閥 `clampf(shortage, -0.5, _hi)` 【已拆除】。
+	#   ★上臂是【結構性死碼】：`stock = effective_holding = team.resources + 自家糧倉`（兩項皆 >= 0）
+	#     ⇒ `shortage = (target - stock)/maxf(target,1.0)` 恆 <= 1.0
+	#     ⇒ 生存品放大後恰好 4.0、非生存品恰好 1.0 —— ★★【恰好等於上界，永不超過】
+	#     ⇒ ★★★拆上臂【零行為改動】；而【若 fp 變了，代表上面這串推導錯了】—— 那才是要停下來的時刻。
+	#   ★而下臂 -0.5 【是真的會夾】⇒ 拆它是【真正的行為改動】：深過剩的貨會一路跌到白送。
+	#
+	# ★★★★價格【定義域 floor 0】—— blueprint 裁：「價格不得為負」是【這個量的定義】不是閥。
+	#   「爛大街 ⇒ 白送(0)」；而【「倒貼你拿走」的物流世界不在本作 scope】。
+	#   ★★而它【直接寫 0.0，不具名成常數】—— 具名會讓下一個人以為它可調，
+	#     ★★★而它是【定義域】不是【旋鈕】。
 	if Probe.enabled:
-		if shortage < -0.5:
-			Probe.bump("valuation.clamp_lo")
+		# ★★原本三桶量的是「有沒有被夾」，而【閥拆掉之後那個問題不存在了】
+		#   ⇒ ★改量【raw shortage 落在哪一帶】，★★key 一併改名（`band_` 不再叫 `clamp_`）——
+		#     留著舊名會產生【孤兒讀者】：讀的人以為還有閥在夾（今天已經踩過一次同型）。
+		#   ★★★第四桶（`shortage < -1` ＝ `stock > 2×target` ＝【深度過剩】）是 blueprint 點名那格：
+		#     拆後那些貨的價格【直接是 0】⇒ 若 food 落在這桶比例高 ⇒ 農隊賣糧收入歸零
+		#     —— ★那是 regime change 不是價格波動。
+		if shortage < -1.0:
+			Probe.bump("valuation.band_deep_glut")
+		elif shortage < -0.5:
+			Probe.bump("valuation.band_glut")
 		elif shortage > _hi:
-			Probe.bump("valuation.clamp_hi")
+			Probe.bump("valuation.band_over_hi")   # ★恆 0 ＝ 上臂死碼的反向斷言
 		else:
-			Probe.bump("valuation.clamp_none")
-	var sr: float = clampf(shortage, -0.5, _hi)
-	return float(BASE_PRICE[res]) * (1.0 + sr)
+			Probe.bump("valuation.band_normal")
+	var price: float = float(BASE_PRICE[res]) * maxf(1.0 + shortage, 0.0)
+	if Probe.enabled:
+		Probe.bump("valuation.priced")
+		if price <= 0.0:
+			Probe.bump("valuation.price_zero")
+			Probe.bump("valuation.price_zero." + res)
+		Probe.add_amount("valuation.price_sum", price)
+	return price

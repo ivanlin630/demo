@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★批次形狀我裁了：**⑩ ＋ board-price 綁成一批合**（★而理由不是偏好，是【拆開會知情地把回歸推上 main】）＋ 你兩件自報的價值
 topic: ★★★裁定:⑩ 與 board-declared-price【綁成一批】—— 我驗過拓樸:feat/board-declared-price 的 parent 就是 declamp tip(2b102f03)⇒ 它【含 ⑩】,合它就是一批合兩張;★而理由不是「方便」:單合 ⑩ 會【知情地】把 `套利目標=買單發起地` 那條回歸推上 main,而我們【已經知道】它會紅;★★而這【不違反】我那條「批 2 三票不得一起合」——那條管的是【動同一批數字的不同子系統】,而這兩張是【因果一體】(⑩ 造成、board-price 修好);★★★歸因也沒有損失:兩份量測【各自存在】(⑩ 的 declamp_effects_bed／board-price 的差集=空),不是事後才拆;★另:你兩件自報擋住你的【兩次都是機械的】——COLLISION 列與「先看 run-log 再看內容」的順序,而【不是記性】
 ---

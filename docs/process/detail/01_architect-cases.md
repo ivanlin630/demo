@@ -2755,3 +2755,55 @@ Monitor(command="bash -c 'until grep -qE \"MERGE-GATES\] (PASS|FAIL)\" <log>; do
 ⇒ ★★而【過濾器要同時涵蓋 PASS 與 FAIL】—— 只盯 PASS 的話,紅了會【安靜地沒有通知】
    (★★★那正是今天記過的:守衛的過濾器若只涵蓋 happy path,失敗與「還在跑」長得一樣)
 ```
+
+---
+
+## ★★★界限第三條的活血證（2026-09-07）：**規則已經寫在那裡了，而它沒有被用到**
+
+第三條（2026-08-26 立）逐字：
+> 「**對帳式證明母體內部無漏，不證明母體本身完整** ⇒ 立完要再問『有沒有東西在進入這個母體之前就……』」
+
+⑨ 的驗收②正是一個對帳式（`期末 − 期初 == Σmint`），而床自己寫的普查母體是 `.coin` **子集**；
+真正的律 `coin_audit.gd:6-9` 是**六池**（`team.resources.coin + anon_treasury + person.coin
++ tile.public_storage.coin + abandoned_coin + offmap_extinct_coin`）。
+
+```
+期末 5701.39 − 期初 6912.00 = −1210.61 ／ Σmint = 0
+單向流量只湊到 437（salary_anon 160 / salary_named 210 / extract_treasury 66 / extort 1）
+成對流量(market_sell 1223↔1223、trade 188↔188)全部守恆
+```
+★**指紋是母體偏窄，不是漏水**：漏水通常伴隨某條單向流量對不上，這裡全對得上。
+★★而 `salary_anon` 的收端就是沒被普查的房間：`team.anon_treasury`（`team_data.gd:280`＝「匿名兵 wage **沉澱**」），
+  `train_salary` 亦然（`anon_tier_system.gd:423-424`，該行註解自己寫**「守恆：訓練餉銀入公庫，不蒸發」**）。
+★★★而「湊不滿」也**不能反推「還有一個沒看到的出口」**：`resource_bank.gd:44`
+  `person.coin = maxf(person.coin + delta, 0.0)` 但 `record_driver(..., delta, ...)` 記的是 **delta**
+  ⇒ **帳記「被要求的」、世界套用「夾過的」** ⇒ 夾到時帳本身就不忠實，那個減法失去證據力。
+
+### ★處置：先換母體（一行 `CoinAudit.total()`），不是先開票
+**票名會變成下一個人的前提** ⇒ 開一張「coin 漏水」票，就會有人拿著它去找一個可能不存在的洞
+⇒ ★★**錯的票名比沒有票更貴**（沒有票只是沒人做；錯的票是**很多人做錯方向**）。
+
+### ★★★而這條的失效模式值得單獨記
+**不是「沒想到」，是「想到了、寫下來了、開場讀不到」。**
+同日 `doc-cap` hook 報 **systems 必讀區 601 > 600** ⇒ **超限＝規則存在但不會被用到**，
+**它今天真的漏掉了一條救得了一個 90 日跑的規則。**
+
+---
+
+## ★★★「排期前先 code 對帳」的血證（2026-09-07，★同日、我自己犯的）
+
+blueprint 立規當下，我正在對帳他那批票的前提（A1/A4 他自承寫錯）。而我對帳 A4 時：
+```
+我跑：git grep -nE 'rout|retreat' -- scripts/simulation/ | grep -iE 'message|event|emit|broadcast|witness|belief'
+得到：（空）⇒ 我寫下「★潰逃沒有對外廣播」
+★★裸掃後推翻：git grep -c '潰逃' -- scripts/simulation/ ⇒ 只有 2 檔 16 行，逐條看：
+   npc_combat_system.gd:530  Probe.bump("conq.combat_retreat")   ← ★有 counter
+   npc_combat_system.gd:536  產生訊息「Team%d 俘獲 Team%d 潰逃殘部 %d人」← ★★有對外產物
+```
+★★★**過濾條件自己產生了答案**——我搜的是「我以為廣播長的樣子」（`message|event|emit`），
+而真實的產物叫 `Probe.bump` 與一則被組出來的字串。**假窮盡形態③（語法形狀）。**
+
+★**時間差 2 分鐘**：從寫下錯誤負斷言到自己推翻。⇒ **裸掃的成本 ≈ 0，而它擋下的是一張前提錯的票。**
+★★而 A5 的對帳同時給了**票的答案**：`政治` simulation 1 檔/2 行、`faction_politic` **0 檔**；
+`設施` 18 檔/119 行（`facility` 22／`outpost_level` 28）；`俘虜` 8 檔/26 行（`prisoner` 6）
+⇒ **三件成熟度差一個量級以上**，綁成一個 arc 等於把「幾乎沒開始」和「已有厚骨架」綁在一起。

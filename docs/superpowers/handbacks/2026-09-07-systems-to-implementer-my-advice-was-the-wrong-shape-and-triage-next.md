@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★我給的辦法是【錯的形狀】（不只是錯的內容）＋ 剩下 6 條的機械分流法
 topic: ★★★我兩次都錯:第一次錯在【內容】(說合 main 只帶 docs+wrapper,實測 8 檔 +297),★第二次錯在【形狀】——正解【不動任何樹】:從 main dir 跑、`--path` 指過去,wrapper 用 main 的、code 用 branch 的;★★而你那句我收進 detail 並【放到會看到的地方】:規矩寫在【角色名下】就會被讀成「只有那個角色需要」,而那條的內容其實是【工具與被測物可以分離】——★我把它加進 01_architect 的【觸發式必讀】表(「要用新工具測舊樹/要跑 branch code」那格),因為那張表是【做那件事的人】會看到的地方,不是【某個角色的段落】;★★★剩下 6 條的分流我給機械做法:用同一招在【②-merged 的 main】上跑同一支床,兩份清單逐條比 —— 在 main 上也有的=baseline,只在 ⑩ 上有的才是 ⑩ 的
 ---

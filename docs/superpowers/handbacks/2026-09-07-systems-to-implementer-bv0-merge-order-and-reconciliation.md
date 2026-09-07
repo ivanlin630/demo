@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: B-v0 Slice A 收 ＋ 三件：merge 順序、你欠的那格 tap 順手做、以及【權威搬家需要一條對帳不變量】
 topic: ★平行做 B-v0【沒問題】,但 merge 順序不能亂:⑩ 必須先進 —— 我的批 2 序管的是【merge】不是【工作】,而若 B-v0 先進,每一票「對照組=前一票 merge 後的狀態」那個設計就整個垮掉;★★你順手加的 escrow.partial/short/nothing 那格【正是鑑別力】——「押了 5 件」與「想押 10 只押到 5」印出來一樣,而你沒等我列就補了;★★★而我要問一件你信裡沒答的:權威從 active_orders 搬到 tile 之後,【誰負責發現存根與實貨分歧】?partial 那格抓的是【發生的那一刻】,而分歧是【持續狀態】——一個沒有對帳不變量的權威搬家,分歧會靜默累積;★另:⑩ 的 zero-gain tap(arb_kill_zero_gain)請在這一票順手加,它已掛 token 綁 B-v0
 ---

@@ -2,6 +2,13 @@ class_name DecisionTerms
 
 const RESTOCK_DAYS: float = 5.0   # TEST VALUE：商隊糧低於此 → proactive 返家補給(> WARNING 3)
 const RETURN_HYSTERESIS_DAYS: float = 5.0   # ★GATE-A 二刀:返家途中撐到 food≥此才停(=RESTOCK_DAYS 重用非新魔數)。band[DESPERATION 3, 此 5]破 oscillation(途中過 3 就漂回)
+# ★★★領取念頭的兩把尺（★而它們是【尺】不是【門檻】——沒有「超過就去領」這種硬閘）：
+#   `CLAIM_REF_AMT`  = 把額正規化到 [0,1] 的參照；取 `BASE_PRICE["food"] × 10`
+#                      ＝【十份糧的價】—— ★由既有定價表導出，不手抄一個新數字。
+#   `CLAIM_DIST_HALF`= 距離折一半的半徑；取 `SimRunner.NEAR_CADENCE / 10 = 6 hex`
+#                      —— ★★同樣不手抄；★★★而【它們的值會不會對】要靠野外率量，不是靠選。
+const CLAIM_REF_AMT: float = 20.0        # = TradeValuation.BASE_PRICE["food"](2.0) × 10
+const CLAIM_DIST_HALF: float = 6.0       # = SimRunner.NEAR_CADENCE(60) / 10
 const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-trade 軟壓(能但很少)
 const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× weight(loot 0..1) → loot util ≈ 0..1，危時不碾壓 survival(≥2)
 const DESPERATION_DAYS: float = 3.0    # TEST VALUE — 食物低於此才入絕境 option（對齊 WARNING_DAYS）
@@ -138,6 +145,19 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var role: float = 1.0 if ctx.is_merchant else NON_MERCHANT_TRADE_FACTOR
 			# T3 正規化：rescale 到 [0,1]（舊 max 0.8 → /0.8）。品質=有貨×有單×商隊角色。
 			return clampf((0.8 if ctx.has_goods else 0.2) * (1.0 if ctx.has_arb else 0.3) * role / 0.8, 0.0, 1.0)
+		"claim_value":
+			# ★★★B-v0 領取念頭（三件套第②：秤上 option）——
+			#   ★價值 = 【額】× 【距離折現】：額大而遠 ⇒ 未必值得跑一趟；額小而近 ⇒ 順手。
+			#   ★★而它【不是死常數門檻】：沒有「超過 N 才去領」，只有【秤】。
+			#   ★★★正規化到 [0,1]：用 `CLAIM_REF_AMT` 當參照額（★而它是【尺】不是【門檻】——
+			#     額超過它只是把這一項推向 1.0，不會讓它變成必選）。
+			if opt != "領取": return 0.0
+			if ctx.pending_claim_amt <= 0.0: return 0.0
+			var _amt_f: float = clampf(ctx.pending_claim_amt / CLAIM_REF_AMT, 0.0, 1.0)
+			# ★距離折現：同格(0 hex)不折，越遠越折。★★而距離是 gather 時算好的（見 ctx 註解）——
+			#   term 是【秤】不是【測量儀】。
+			var _near: float = 1.0 / (1.0 + ctx.pending_claim_dist / CLAIM_DIST_HALF)
+			return _amt_f * _near
 		"produce_need":
 			# ★製造 bootstrap 子根②：死常數 0.3/0.6 → belief demand-responsive produce_pull
 			# （自家可造 outputs 的 worst-shortfall；聽到好賣 tools/goods 買單→pull 升→選生產產貨→進市場）。

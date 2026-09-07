@@ -60,6 +60,9 @@
 ★**殘留一格（不是疑慮，是排定的補證）**：上述量在**等價的臨時床**上做，`observability_path_test` **本身**在 `_path_cache` 修完後會重跑一次。
 ★★**副產物**：**72 成為 `_path_cache` 修法驗收②的【修前基準】** —— 修完同床同 seed 重跑，該差額**應為 0**。
 ②`seam1_registry`＝**床過期**（fixture 從沒設 `threat_pos`，該閘 2026-07-20 就 in-main ⇒ 紅比 #10 早六週）
+> ★★★2026-09-07 追記：seam1 上【疊了第二個過期因】——`2026-09-04「備戰」下架`（`options.gd:437`，有 spec）
+> ⇒ 該床期望 applicable 含 `備戰`，而它已被刻意移除；同因另打紅 `threat_oracle_s2`／`threat_oracle_s1_probe`／`survival_single_source`。
+> ⇒ ★**四支床已依 blueprint 裁定刪除**（2026-09-07）——★本節提到它們的行是【歷史記錄】，不是可再跑的錨。
 ③`tracer_completeness`＝**不確定**（誠實第三態，卡點已寫清）④`unified_commerce`＝**床過期**（`trade.market_bail.buy_no_want=1`，fixture 從沒建立需求）
 ★★★**而更難的一格**：過期的床有兩種長相 —— **期望值不再成立 ⇒ 紅（看得到）／期望值不再【咬得住】 ⇒ 綠（沒有人會去查一張綠的床）**。
 **4 紅裡 3 張過期 ⇒ 這批的 rot 率不低，而那 14 張綠【沒有任何證據】說它們仍有鑑別力。**
@@ -3873,3 +3876,55 @@ sim_runner.gd:337 far  pass = tick % FAR_ZONE_INTERVAL(600) == 0 ⇒ payday 只�
 （現況最大 `wall_s` ＝ 1105.97 ⇒ 未觸發；**陽性對照**：門檻改 1 秒 ⇒ 立刻觸發）。
 ★★**而通則比這一條重要**：**寫不出數字的「需要」＝還沒想清楚需要什麼**；
 真不可量化的極少數 ⇒ 退而求其次＝**定期複審日期**（也是 met_check）⇒ ★★★**表上不留裸 memory 行。**
+
+## 🔧 CoinAudit 是既有律，但【不在 merge-gates.tsv 上】（2026-09-07，systems 自查）
+
+**狀態：已知未修**（事實已坐實：`grep -inE coin docs/process/merge-gates.tsv` 零命中；修法待 `coin_b_verify_bed.gd` 補上判準通道後才能登記，工單已開）
+**回訪：** `coin_b_verify_bed.gd` 補上判準通道（工單已開，`2026-09-07-systems-to-implementer-coin-bed-needs-a-verdict-then-it-becomes-a-gate.md`）⇒ 屆時我跑陽性對照，綠才登記進 `merge-gates.tsv`
+
+```
+scripts/simulation/coin_audit.gd:6  守恆律：total(end) − total(start) == Σ minted
+grep -inE 'coin' docs/process/merge-gates.tsv  ⇒ ★零命中
+```
+★一條寫得很清楚的律，**沒有接電** —— 同型第 N 次（儀器裝好但沒接電）。
+★★而它**本來就會抓到** ⑨ 的驗收②（床自寫子集普查報 −1210.61，換 `CoinAudit.total()` 後 = 0.00）。
+**處置**：補進註冊表，★**但不盲補**——先確認 `scripts/debug/coin_b_verify_bed.gd`
+跑得起來且**關掉機制會紅**（陽性對照）才進，否則只是多一道恆綠的裝飾。
+owner=systems｜擋 Godot：排在 implementer 的 post-⑩ 雙向跑之後。
+
+## ⏳ 131 床分診：**detach 路徑的 stdout 不落地**（2026-09-07；★★本條是【訂正後】的，原標題「死因未破」是誤診）
+
+**狀態：未確認**（★三條假設已實測排除，真因未明；★★量測窗＝下次需要 WMI-detach 長跑時重現一次並抓 stdout 落點，非排程回訪）
+**回訪：量測窗** —— 下次有 WMI-detach 長跑需求時，同一支腳本各跑一次（detach vs 前景），比對 stdout 是否落到 log；★母體＝那一次的兩份 log，判準＝detach 版有沒有寫出第一列資料行
+
+★**原本我寫的**：「WMI-detach 起的 sweep 整棵樹消失、死因未破」。★**那個前提是錯的。**
+```
+實測：★10 支 sweep bash【同時活著】—— 先前我判定「死掉」的那幾支都還在跑
+⇒ 我看的是 A:\sweep131.log，而 log 停在兩行 header 沒有再動
+⇒ ★★我把【管道安靜】讀成了【進程死亡】
+```
+★★★**這正是既有教訓的第三次現形：活著 ≠ 前進 ≠ 送達。**
+  ——「進程在」不能證明它在前進；★**「log 沒動」也不能證明它死了。**
+  ⇒ **唯一算數的是它【成功寫過 stdout】，而這裡失敗的正是那一段。**
+
+**真症狀（重新定義）**：`cmd.exe /c bat > log 2>&1` 經 WMI 起動時，**bash 的 stdout 沒有落到 log**
+（bat 末尾的 `SWEEP_DONE_RC=%ERRORLEVEL%` 也沒寫到 ⇒ 但那是因為 bash 還沒結束，不是 cmd 死了）。
+★**已排除**：腳本本身（前景 7 支全綠 rc=0）／detach 環境缺工具（探針 bat 實測 PATH 完整、
+powershell/timeout/cut 都在、`PROBE_DONE_RC=0` 有寫）。
+**繞道**：改走 harness 追蹤的背景執行（非 WMI）＋**換輸出檔**避開仍在飛的舊實例。
+★**繞過 ≠ 修好**，條目留著。owner=systems
+
+## ✅ 分診分類器曾有【假綠通道】（2026-09-07，已修，★留作教訓）
+
+**狀態：已修**（2026-09-07 當日修畢並加成對自檢：5 種真實紅形狀必紅 + 6 種通過樣本不得誤判；★留作教訓不刪）
+```
+舊判紅：grep 'Assertion failed|\[FAIL\]|SCRIPT ERROR'
+131 床紅訊號形狀：[FAIL] 式 99 支 ／ ★裸 FAIL 等其他式 31 支(24%) ／ 真正無判準 1 支
+⇒ ★那 31 支失敗時被判 green（安靜失敗），而分類器自檢【三向全綠】
+⇒ ★★自檢樣本是我【照著自己偵測器的形狀】造的 ⇒ 它永遠抓不到偵測器不認得的紅
+```
+**已修**：自檢改用真實床採來的 5 種紅形狀 ＋ 4 種通過樣本不得誤判（成對）。
+★修完第一件事就是擋下我自己寫壞的 regex（awk 把 `\[FAIL\]` 吃成字元類 ⇒ `PASS` 的 `A` 也算紅）。
+**資料處置**：99 支 `[FAIL]` 式新舊判法相同 ⇒ 舊列保留；31 支裸式**只撤其中判 green 的列**重跑
+（紅在兩版都成立）⇒ 新表 `docs/measurements/2026-09-07-bed-triage-131-v2.tsv`。owner=systems
+owner=systems

@@ -1,25 +1,45 @@
 # 開發進度
 
-## 🗺 進度快照 dashboard（藍圖 2026-07-02，視覺總覽；細節見下方系統 log）
+## 🗺 進度快照 dashboard（藍圖 2026-09-07 刷新；細節見下方系統 log）
 
 ```
 【沙盒三維度 = 遊戲活起來沒】
-  經濟  ████████▓░  戲成 ✓  交易網轉、商隊想致富真去貿易
-  征服  ██████░░░░  差一哩  機制到 route×6.6，差 capture 完成
-  資訊  ███░░░░░░░  地基好  Phase E done、Phase D 欺敵(玩家錨C) queued
+  經濟  █████████░  換地基中  薪資/匿名池復活✓ 拆物價閥✓ 貨幣創世✓ 市場寄賣制(B-v0)收口中
+  征服  ██████▓░░░  法已立    據點易主=接收經濟體(已裁)、combat-into-engine 未開(絕境兩腿)
+  資訊  ████▓░░░░░  四源活    組織視野四源belief✓ 共位雙刀✓；L2 價格情報=下一題候選
+  人口  ██▓░░░░░░░  arc 新開  生育→成年→晉升管道全通(驗)；儀器六格+人口卷=第一刀(票已開)
 
-【統一矩陣 burn-down】
-  思考決策 ████████▓░ 85%  ★旗艦燒完→致富/征服錨活、交易轉
-  單寫者   ███▓░░░░░░ 35%  coin/ledger/roster/leader done；剩 8/12(強制閘前提)
-  belief   ████░░░░░░ 40%  Phase E；剩 known_states/audit
-  互動     ██░░░░░░░░ 20%  BEG/JOIN 驗死待修；剩多 resolver 統一
-  人力俘虜 ██░░░░░░░░ 20%  失能-capture；剩雙模型/prisoner 死路
-  玩家面   ▓░░░░░░░░░  5%  幾乎未動(大 arc)
-  強制閘   ▓░░░░░░░░░ 起步  ledger 有牙；待單寫者撐
-
-【方法論/願景 定型 ✓】沙盒 bar｜AI 深度節流閥｜兩隻眼(measure+矩陣)｜3 不變量
-【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
+【NOW(批2經濟窗收口)】B-v0 驗收跑 → merge → 經濟窗完結 → 新量測輪推用戶
+【just landed】⑩拆閥+自報價板 ✓｜⑨貨幣創世(k=2,QA稽核token帶著) ✓｜131床分診(真回歸=0,兩層+差異告警制) ✓
+【queued】⑥a孤兒修法｜人口儀器卷(可併C-refill床)｜29紅床逐arc判｜125床三分清單
+【未討論清單】docs/notes/2026-09-07-undiscussed-topics-for-deputy.md(A7大題/B5子題/C4願景)
 ```
+
+## 🔧 2026-09-07 systems log —— 批 2 進行中 ＋ 一個【靜默吞寫】的全庫問題
+
+### ★已 merge
+- **② `modulo-same-shape-4` ＋ `envoy-ptype-tap`**（fp 中性配對，28 閘綠）——
+  裸 modulo 遷「到期比較」：★**外層 cadence 不整除時，舊制是【整段不 fire】**（不是頻率失真）。
+
+### ★★在飛（等閘）
+- **⑩ 拆物價 clamp ＋ `board-declared-price`（綁一批）** —— ★**拆開會【知情地】把回歸推上 main**。
+  - ⑩ 讓 `local_value` 可以是 **0** ⇒ 三處比較閘 ＋ 五處除法 ＋ 套利 proxy 都被它咬到；
+  - ★★而**捕獲剩餘**兩式在現行資料下【兩半都不可行】（bid=god-view／ask 只有到場才算得出來）
+    ⇒ ★★★**單據帶價**（賣單帶 ask、買單帶 bid，掛單當下快照）不是優化，是【唯一的路】。
+
+### ★★★新發現：`TeamData` 的計算屬性【靜默吞寫】
+- `population`／`wounded`／`anon_tiers`／`anon_combat_skill`／`anon_wage` 的 setter 是 `set(_value): pass`
+  ⇒ ★**床裡寫 `team.population = 5` 不報錯，而 pop 就是 0**。
+- ★★**runtime 盤面**（工具量的，不是 grep 數的）：**DIRTY 10 ／ CLEAN 15 ／ UNKNOWN 1**；
+  **production 執行期為零**（唯一那處寫的是 `DecisionContext` 自己的欄位）。
+- ★★★**而根因是遷移鷹架**：`set: pass` 的用途是【讓舊賦值站繼續編得過】，而**沒有人回來拆**。
+  ⇒ 已掛 `defers.tsv: scaffold-swallowing-setters`（等【呼叫端清乾淨】，不是等 setter 消失）。
+
+### ★今天新增的機械防線（★都兩向對照過）
+- `swallow-setter`（新的吞寫 setter 就紅）／`mailbox-size`／`mailbox-broadcast`／`world-schedule-due`／`envoy-ptype`
+- ★★`godot.ps1` 的 run-log **結束列自帶 `outcome`（ok｜timeout）** ——
+  **原本無條件寫 ⇒ 把 timeout-kill 記成完跑**，而那條列正被當成「這一跑跑完了」的證人。
+- ★★★`computed-prop-write-guard`（implementer 做的）**尚未 merge** ⇒ **目前對任何人都還不存在**。
 
 ## ✅★★ 四選項同秤 MERGED（`camp-access`，2026-08-25）—— **世界第一次做出「文明化」這個動作**
 

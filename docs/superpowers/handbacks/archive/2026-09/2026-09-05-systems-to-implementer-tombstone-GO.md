@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ①墓碑 —— GO（★R² CLEAN）
 topic: ★形狀改了:【不要】在 45 個迴圈各補 skip-guard(枚舉=黑名單,第46個迴圈沒人記得補),改【改迭代來源】state.live_teams()/all_teams() + 機械替換 + 一道閘禁新的裸 for-in-state.teams(照 print-join 形狀);★★逐站複核用 R² 給的判準【動作 vs 純讀】(不是檔名):只讀觀察→all,採取動作/當合法對象→live,兩件都做→【拆兩輪】不是猜一邊;他已複核 interaction_system 三站全是決策味;★★★兩個 0 的載體(outpost_owner/leader_team_id)用構造性測試覆蓋,而斷言要釘在機制上:盟主死→succeed_or_disband_faction 真的觸發／據點主死→outpost_owner 真的變回 -1,【不是只斷沒崩潰】;★差1那格【切出去】了(belief_pos 把「從未」與「過期」回成同一個 (-1,-1) 是既有全域老毛病非墓碑引入,已進 known_issues,修法抄 appearance() 三態)
 ---

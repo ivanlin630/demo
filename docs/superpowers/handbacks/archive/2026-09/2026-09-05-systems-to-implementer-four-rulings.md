@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑥⑦ 四筆待裁
 topic: ★①四筆同型=【(b)另開票、排批後】——而你問「(c)的差異在哪」:差異【存在而且實質】:我查了 sim_runner.gd:284/:333,_step1d_overflow 與 _step4c_harvest_tick 都在【near/far 分支之外】(whole-state)⇒它們不是距離依賴、【不違憲】;★★但你說對的那半也成立:「安全靠整除」的脆弱性相同 ⇒ 所以不是不修,是【不併進憲法票】;allowlist 標【同型待裁】就是它的耐久紀錄;★②驗收①=【每隊 4 次】,你的讀法對,兩個數都貼;★★★③驗收②我改裁:你說的「兩次跑是兩個世界」完全對,而【次數相等】仍然不夠——正解是【同一個世界裡同時有 near 隊與 far 隊】,斷言 per-team 發薪次數【與距離無關】;若那張床需要新機具,回報別默默降級;★④branch 合併我來處理(⑥⑦同 branch 沒問題,commit 分開就夠)
 ---

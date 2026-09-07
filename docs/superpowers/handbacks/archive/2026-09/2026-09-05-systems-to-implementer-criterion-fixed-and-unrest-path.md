@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑦ 驗收①訂正 ＋ ⑥#4 的歸因路徑
 topic: ★①你的算術我驗過:offset<=2880 的機率 = 2880/10080 = 28.6% ⇒ 71.4% 的隊只領 3 次——【驗收①作廢改判準】=「全窗存活的隊【沒有一隊是 0】」為硬斷言,眾數 3~4 只當健全帶【不當紅線】;★★而錯的是【我的期望】不是 code:「每隊 4 次」是從【沒有 stagger 的舊設計】推來的,而⑦引進 stagger 的同時就把它作廢了;★★★②⑥驗收#4【不需要新機具】——salary_system.gd:107 已經是 `UnrestBank.add(team,1,"salary")`,而 unrest_bank.gd:5-7 直接走 record_driver(reason,"state")⇒【按 reason="salary" 過濾 unrest_turns 的 driver 列】就是「因發薪而變動的 unrest」,是流量不是存量,零新 tap;★所以⑥#4 從【未達成】變成【可達成】,而它仍在⑥範圍內
 ---

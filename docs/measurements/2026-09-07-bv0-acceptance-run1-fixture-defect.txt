@@ -1,0 +1,39 @@
+[TREE] path=A:/GDS/demo/.worktrees/bv0 commit=cd70364e clean=NO code-dirty=3
+[TREE]   *** measuring the WORKING TREE, not commit cd70364e ***
+[TREE]    M scripts/simulation/interaction_system.gd
+[TREE]    M scripts/simulation/order_system.gd
+[TREE]   ?? scripts/debug/bv0_acceptance_bed.gd
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== bv0_acceptance_bed: mode=normal ===
+[Order] Team2 sell goods ×10 (oid=1)
+  [PASS] 寄賣掛單成功 oid=1
+  ──  escrow 守恆 ──
+     賣家 goods 12.0 → 2.0 ｜ tile escrow qty = 10.0
+  [PASS] ★押貨發生（寄賣才押；自家櫃檯不押）
+  [PASS] ★★賣家減量 == escrow 增量（零蒸發）
+  ──  紅線：成交後錢不得瞬移 ──
+[Market@(5, 5)] Team3  outpost owner Team9 成交
+     撮合被走到：dealt=true
+     分母（tile 上的 pending_claims 條數）= 0
+     賣家 coin 0.00 → 39.20 ｜ 待領款 = 0.00
+  [FAIL] ★不可判（母體為 0）：這一輪沒有任何成交發生  紅線沒有被測到（不是紅線沒被違反） ── 這不是紅燈，是【沒有資格說通過】
+  ──  到期退貨 ──
+[Order] Team2 buy food ×16 (oid=2)
+     到期前 escrow=10.0 ｜ 賣家 goods 0.0 → 0.0 ｜ 待領貨 = 10.0
+  [PASS] ★貨【沒有】回到賣家 resources（不瞬移）
+  [PASS] ★★待領貨帳 == 原 escrow 量（零蒸發）
+  [PASS] ★★★escrow 已搬空（不是兩邊都有＝重複計數）
+  ── 3b 款／貨分開量（★抽象共用不代表被同等使用）──
+     待領款條數 = 0 ｜ 待領貨條數 = 1 ｜ 合計 = 1
+  [PASS] ★兩種 kind 窮盡（沒有第三種悄悄混進來）
+  ──  五個 tap（掛單／成交／待領餘額／領取／到期）──
+     mkt.post.consign                 = 2
+     mkt.escrow.post                  = 1
+     mkt.claim.add                    = 0
+     mkt.claim.take                   = 0
+     mkt.escrow.expire_to_claim       = 1
+     ★★而【待領餘額】是存量、上面那些是流量 —— 分開印，不混成一個數
+     待領餘額（存量）= 10.00
+=== DONE === 1 FAIL
+

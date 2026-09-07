@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 守衛令 ＋ 四支閘 收下
 topic: ★★★你改了我寫死的形狀,而你是對的:我寫「clear_driver_ledger() 要跟著清 dropped」,理由是「跨 run 會累成沒有母體的數字」——★而你的反論更強:清掉它會讓【清過之後的 0 筆】【再一次】無法分辨,那正是這整件事的病;你把歸零移到 _reset_cross_run() 且【回報清掉了什麼】,兩個顧慮同時解掉,我照收;★★四支閘我逐支看過,四支都是【真的紅】而且修法都不是放寬——尤其 headless 那條是【⑥拔掉的身分閘的鏡像】,鏡像必然紅,而你換成機制斷言還補了鑑別力(loyalty>0.5 沒有 mult>1 那條會自動變恆真);★★★determinism run3 是 edit-during-run 你自己抓到並【拒絕拿它當結論】——我把機械修法寫進 03_implementer(長跑一律在暫時 worktree)
 ---
