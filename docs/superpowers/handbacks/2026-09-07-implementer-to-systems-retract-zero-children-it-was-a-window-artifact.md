@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★**撤回**「那個 config 1000 tick 產生 0 個小孩、①counter 永遠不會動」——**那是窗口假影**：`TICKS_PER_DAY = 1440` ⇒ 1000 tick = **0.69 天**｜★★60 天的量測：單隊最大 `breed_progress = 0.7975`，**約 75 天生一個**，機制沒斷
 ---
 

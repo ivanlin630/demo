@@ -140,6 +140,26 @@ try {
     Write-Output "[TREE] path=$provPath commit=UNKNOWN (git unavailable)"
 }
 # ---------------------------------------------------------------------------
+# --- Time-scale stamp (2026-09-07) ------------------------------------------
+# Blood evidence: three people in a row read "1000 tick" as "a long run".
+# TICKS_PER_DAY = 1440, so it was 0.69 days -- 17 game-hours. A "no children
+# were born" world-level finding was pure window artifact, and it travelled
+# through a token, a spec and a ruling before anyone checked the unit.
+# A number without its window length is not a number. So the wrapper prints
+# the conversion factor on every run: the reader never has to know 1440.
+try {
+    $wsFile = Join-Path $provPath "scripts/data/world_state.gd"
+    if (Test-Path $wsFile) {
+        $tphLine = Select-String -Path $wsFile -Pattern 'const TICKS_PER_HOUR[^0-9]*([0-9]+)' | Select-Object -First 1
+        if ($tphLine -and $tphLine.Matches[0].Groups[1].Value) {
+            $tph = [int]$tphLine.Matches[0].Groups[1].Value
+            $tpd = $tph * 24
+            Write-Output ("[SCALE] TICKS_PER_HOUR=$tph TICKS_PER_DAY=$tpd  |  1000t=" + [math]::Round(1000/$tpd,2) + "d  10000t=" + [math]::Round(10000/$tpd,1) + "d  " + ($tpd*30) + "t=30d(1 month)")
+            Write-Output "[SCALE]   *** a tick count without its day-conversion is not a number ***"
+        }
+    }
+} catch { }
+# ---------------------------------------------------------------------------
 $runStart = Get-Date
 if (Test-Path $hookDir) {
     try {
