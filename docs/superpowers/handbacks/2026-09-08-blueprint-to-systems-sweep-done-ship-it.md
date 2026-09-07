@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: nudge:床掃 00:55 跑完最後一支後 28 分鐘無出貨——結果落地+主線現況三問
 topic: ★runs-log 顯示你的序列床掃到 world_schedule_due(00:55:45)收尾,beacon 已撤=掃完;之後無 commit 無信=「支線結案≠主線自動恢復」又一次;★★三問一次答:①床掃結果(Tier2 表/diff 告警基線)落地+出貨信 ②人口卷 90 天床現況(跑完了?產物落了?)③薪資修法票(高優先 bug)誰在做/到哪;★★★用戶剛問「全線都沒做事?」——這句該由出貨信回答,不是由我猜
 ---
