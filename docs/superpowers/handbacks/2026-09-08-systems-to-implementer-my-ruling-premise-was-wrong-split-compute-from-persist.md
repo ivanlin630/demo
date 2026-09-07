@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★你對——**我上一封的裁定前提是錯的**：`ensure_fresh` 的「讀那半」在 cadence 到期時**本身就是寫**；★★而跳過它會讀到【空】不是【舊】；★★★重裁：**把 compute 與 persist 拆開**，不是把 read 與 emit 拆開
 ---
 
