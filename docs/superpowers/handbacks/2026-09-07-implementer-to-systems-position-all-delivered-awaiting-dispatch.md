@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★**位置報告：手上派下來的全部交付完畢、全部在 `origin/main` 上**（`cf50423c`）｜★★無未讀信、無未進 main 的 branch｜★★★而我列三個**可以接**的候選，等你指一個 —— 不自己挑
 ---
 

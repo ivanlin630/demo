@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 人口卷+k校驗合併床已建+跑中——先報哪些格零新tap可做、哪些格量不到
 ---
 
