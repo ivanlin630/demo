@@ -53,6 +53,17 @@ static func pop_cap_from_leadership(skill: float) -> int:
 static var swallowed_writes: Dictionary = {}
 static var swallow_sites: Dictionary = {}   # ★"prop @ file:line func" → 次數（真的執行到的站）
 
+# ★★★跨 run 清除（cross-run-static 閘點）――這兩個是【診斷計數器】，
+#   而計數器不清 ⇒ ★第二輪吃第一輪的數，而那正好是【儀器講謊】的另一種：
+#   ★★一支床看到 `swallowed_writes` 非空，分不出那是【它自己踩的】還是【上一支床留的】。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not swallowed_writes.is_empty(): cleared["TeamData.swallowed_writes"] = swallowed_writes.size()
+	if not swallow_sites.is_empty(): cleared["TeamData.swallow_sites"] = swallow_sites.size()
+	swallowed_writes.clear()
+	swallow_sites.clear()
+	return {"checked": 2, "cleared": cleared}
+
 static func _note_swallowed(prop: String) -> void:
 	swallowed_writes[prop] = int(swallowed_writes.get(prop, 0)) + 1
 	if int(swallowed_writes[prop]) == 1:
