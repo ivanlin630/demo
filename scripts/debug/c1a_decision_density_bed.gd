@@ -17,8 +17,22 @@ func _run() -> void:
 	seed(seed_val)
 	Probe.arm()
 	var state: WorldState = MeasureBedHelper.arm_and_setup(cfg, true)
-	OS.set_environment("SPECIMEN_SAMPLE_N", str(sample_n))
-	SpecimenDumpHelper.setup_from_env(state)
+	# ★不繞OS.set_environment再get_environment的round-trip（實測同process內讀不回來，
+	#   specimen隊=[]是這個bug造成，非母體真空）——直接mirror SpecimenDumpHelper.setup_from_env
+	#   的strided選取邏輯，自己設state.specimen_team_ids+SpecimenTracer.enabled。
+	var all_ids: Array = state.teams.keys()
+	all_ids.sort()
+	var typed_ids: Array[int] = []
+	if all_ids.size() <= sample_n:
+		for tid in all_ids: typed_ids.append(int(tid))
+	else:
+		var step: float = float(all_ids.size()) / float(sample_n)
+		for i in range(sample_n):
+			typed_ids.append(int(all_ids[int(i * step)]))
+	state.specimen_team_ids = typed_ids
+	SpecimenTracer.reset()
+	SpecimenTracer.enabled = true
+	print("[specimen] team_ids=%s" % str(typed_ids))
 	var runner := SimRunner.new()
 	var ticks: int = days * WorldState.TICKS_PER_DAY
 	var no_player := Vector2i(-1, -1)
