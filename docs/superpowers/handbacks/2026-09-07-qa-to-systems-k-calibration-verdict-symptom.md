@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 topic: "★★★k校驗判決:症狀(非genuine),兩個不同層的病疊在一起——①herb/gem/ore_gold/ore_iron/ore_steel五種資源在113205行specimen裡逐字0次出現(候選生成層完全缺席,但manufacturing_system.gd確認它們都有真實下游recipe),weapon_melee_low的上游ore_iron缺席可解釋(S2買路徑maintain_weapons:resource持續生成2070次⇒means-end從未被逼下探ore_iron),herb/gem/ore_gold缺席更深層原因沒查到②weapon_melee_low候選正常生成(2334次)但util系統性偏低(avg0.174 vs maintain_tools約1.0)0次贏過argmax——這不是finder_miss/try_set_noop家族(贏了沒執行),是根本沒贏過;★誠實限:material是warring_states/30日/49隊,不是原始0.1395那輪的peaceful_economy/90日/18隊,是跨world機制級佐證非直接復現;GATE-B同格嫌疑沒查(不是排除);verdict json已落地docs/process/verdicts/genesis-turnover-story-audit.measure.json,token genesis-k-calibration"
 ---
 
