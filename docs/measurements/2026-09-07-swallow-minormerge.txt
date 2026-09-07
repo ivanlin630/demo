@@ -1,0 +1,17 @@
+[TREE] path=A:/GDS/demo/.worktrees/setterswallow commit=5af5d776 clean=yes
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[CTRL1] 滅團前 minor=3
+[CTRL1] erase.minors_lost=3  erase.teams_with_minors=1
+  [PASS] 陽性：滅團帶走的 3 個小孩被計到
+  [PASS] 兩個桶分開：帶小孩死的隊數 = 1
+[CTRL2] 合併後 absorber.minor=2  sub.minor=0  merge.minors_moved_n=2
+[CTRL2] 滅團 counter erase.minors_lost=0 ★★該是 0（小孩已經先搬走）
+  [PASS] 小孩跟著大人走（2 進 absorber、sub 歸 0）
+  [PASS] ★順序陣阱：被併的小孩【沒有】被記成死亡
+[CTRL2] 守恆：前 2 ｜ 後 2 ｜ 死亡損失 0
+  [PASS] ★★守恆：小孩不憑空消失（前 2 == 後 2 + 損失 0）
+=== DONE === ALL PASS
+

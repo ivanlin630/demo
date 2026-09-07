@@ -1,0 +1,4 @@
+[HEADLESS] HARD-FAILS ＝ 3 ｜ baseline ＝ 3
+[HEADLESS] ✓ 失敗清單與 baseline 逐條相同（★不只數量）
+[HEADLESS] PASS
+rc=0
