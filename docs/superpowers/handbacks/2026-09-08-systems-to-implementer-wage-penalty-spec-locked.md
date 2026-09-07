@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★薪資懲罰重構 **HOW spec 已鎖**：`docs/superpowers/specs/2026-09-08-wage-penalty-rework-HOW.md`；★★bug 行號坐實 `salary_system.gd:176`；★★★而我**訂正了票面一處**：unrest 那一半可能是【零改動】
 ---
 
