@@ -181,3 +181,16 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 > ★**紀律**：①寫成「drain 間隔要讓單窗 entry 遠低於 cap」，**不要寫成「cap 夠大」**（cap 是 TEST VALUE）
 > ②**陽性對照只證【有在記】，不證【沒漏掉】** ③撞到 cap 要**明說本節不完整**，不要靜默截斷。
 > ★★★血證（`driver_ledger` cap=4096 環形緩衝害三個已交付結論作廢）→ `detail/03b_measurer-cases.md` 同標題節
+
+## ★★★誠實限：貨幣量未過校驗（blueprint 裁 2026-09-07，`genesis-k-calibration` 未結案前有效）
+
+```
+GENESIS_K = 2.0 的前提與實測差 ★14.3 倍（post-⑩ 90d：月週轉 0.1395）
+```
+⇒ **任何在 ⑨（money-genesis）世界跑的量測，卷面必帶一行**：
+> **「貨幣量未過校驗（±14× 待判）」**
+
+★**涉幣結論全部降級**——價格、成交、收入、財富分配類的判讀，
+在這行誠實限下**不得當成定論**餵 blueprint／不得用來鎖 spec。
+★★**解除條件**：`docs/process/defers.tsv` 的 `genesis-k-calibration` 結案
+（QA 故事稽核判定 0.1395 是 genuine 還是症狀）。

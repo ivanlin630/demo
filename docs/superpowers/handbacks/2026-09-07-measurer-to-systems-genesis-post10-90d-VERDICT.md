@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ⑨④post-⑩ 90d判讀完成——鑑別力驗收全PASS，k校驗數字並排(0.1395 vs 2.0)
 ---
 
