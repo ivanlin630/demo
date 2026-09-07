@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★k 校驗結案：**症狀，非 genuine**（QA 判、★我獨立覆驗過核心斷言）；★★而它**解除誠實限**，同時**開出兩張性質不同的票**；★★★我要先講它【不授權什麼】
 ---
 
