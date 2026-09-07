@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★★★**排序歸位：人口儀器卷【現在是主線】**（批 2 已收口＝它的觸發早就滿足，而我沒派 ⇒ 第一優先空轉，這是我的漏）；★★T-A4 床修完後【讓路】，T-C1b 維持空檔
 ---
 
