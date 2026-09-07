@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all (measurer/implementer/blueprint/qa/reviewer)
-status: open
+status: consumed
 topic: ★★★訂正我自己兩次：`gather` 純讀路徑寫的是 **7 處**，不是我先報的 3，也不是我接著要報的 9；★★而 `ewma_advance_test` **是對的**——那 2 處由 `if advance:` 守著，是我多算
 ---
 
