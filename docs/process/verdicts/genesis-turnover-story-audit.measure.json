@@ -1,0 +1,53 @@
+{
+  "slice": "genesis-k-calibration",
+  "met_check_token": "genesis-k-calibration",
+  "ticket": "systems正式排工:0.1395月週轉(GENESIS_K=2.0假設差14.3倍)是genuine還是症狀——aggregate分不出來,要讀motive→action→outcome",
+  "judge": "qa",
+  "judged_date": "2026-09-07",
+
+  "★判決": "症狀（有成因，非genuine低週轉）——而且是兩個不同層的症狀疊在一起，不是單一病灶",
+
+  "★★材料聲明（世界/config 不完全對齊，讀判決前先看這段）": {
+    "原始0.1395數字產地": "peaceful_economy config, 90日, 18隊, 90日18隊316筆coin流動(來自9/7較早的money-genesis⑨驗收信)",
+    "本次specimen產地": "warring_states config, 30日, 49隊(來自measurer 2026-09-07-population-turnover-warring_states-30d.txt / .specimen.jsonl)",
+    "落差": "measurer選了不同config/天數/隊數的一輪，理由未明說（可能是既有bed/取樣覆蓋率考量）",
+    "我的處置": "★不是同一輪的直接復現，是跨world的機制級佐證——若同一套候選生成/估值機制在兩個config都表現同型缺陷，That支持『症狀』判決比『只在peaceful_economy出現』更強（排除了config特有巧合），但不能宣稱『這就是那0.1395的精確成因分解』，只能宣稱『同一套機制在跑，且它壞在這裡』"
+  },
+
+  "★★★發現一：五種資源(herb/gem/ore_gold/ore_iron/ore_steel)——候選生成層完全缺席": {
+    "證據": "113,205行specimen逐行grep原始文本，這五個資源名稱字面『0次出現』——不只是沒有勝出，是連候選都沒被提議過一次，跨14,975個決策entry、49隊",
+    "對照": "manufacturing_system.gd確認這五種資源都有真實下游recipe（herb→medicine, gem→goods, ore_iron→ore_steel/weapon_melee_low/armor_low, ore_steel→weapon_melee_high/armor_high）——不是『世界裡沒有用途』",
+    "根因假說（讀code支持，非猜）": "means-end遞迴（AcquisitionPaths.for_resource系列，見acquisition-paths-wire-in slice）只在『買/採』S2/S3路徑失敗時才觸發——而weapon_melee_low的『直接買』候選(maintain_weapons:resource)持續被生成(2070次)代表S2買路徑判定『有手段』，於是從未真的失敗過，means-end recursion從未被逼著往下問『那我該去弄ore_iron』。這解釋了weapon_melee_low的上游(ore_iron)為何缺席，但不完全解釋herb/gem/ore_gold(它們沒有觀察到的『買』候選，可能是連S2買路徑的需求觸發本身都沒發生——這段我沒有查到具體code站，標『查不到更深，需implementer查goal_resolver的S2觸發條件』)"
+  },
+
+  "★★★發現二：weapon_melee_low——候選生成正常，估值層系統性輸": {
+    "證據": "candidate『maintain_weapons:resource』出現2070次、『maintain_weapons:facility:delegate』217次、『maintain_weapons:location:delegate』47次，合計2334次——但winner_opt統計裡『0次』真的贏過argmax",
+    "util數字": "2334個樣本util min=0 max=0.609 avg=0.174；同時同tick的『maintain_tools:resource』/『build_workshop:resource』util穩定在0.96~1.10——武器候選穩定輸給工具/工坊候選約5~6倍",
+    "判讀": "這不是finder_miss/try_set_noop那種『贏了沒執行』的家族——這是argmax從未選中它，值本身就系統性偏低。是genuine（世界裡工具真的比武器更值錢，因為多數隊在做基礎建設而非備戰）還是估值公式有個結構性低估武器的常數/係數，我沒有查那段payoff/util公式的code，這格★留判不了，交systems/measurer查util公式"
+  },
+
+  "★GATE-B同格嫌疑——本輪沒有直接驗到（不是排除，是沒查到）": {
+    "說明": "measurer原始嫌疑是『想買的隊與有貨的隊是不是根本沒站在同一格』——我這輪的分析集中在『候選有沒有被生成』這一層，沒有逐筆追蹤maintain_weapons:resource候選commit之後的tile_pos軌跡（跟我之前查徵收/紮根用的方法一樣）。時間關係沒有做完整這一段追蹤。★這格誠實答：沒有查，不是查了說没有"
+  },
+
+  "★不能下的結論": [
+    "不能說『0.1395這個精確數字』的成因分解——材料是跨world佐證，不是同一輪復現",
+    "不能排除GATE-B同格嫌疑——沒有查（不是查了排除）",
+    "不能判weapon_melee_low估值過低是bug還是genuine——沒有查payoff公式code",
+    "不能判herb/gem/ore_gold缺席的更深層原因（S2買路徑觸發條件）——沒有查到那段code",
+    "不能推廣到peaceful_economy——本材料是warring_states"
+  ],
+
+  "★下一步建議（不裁決，呈給systems/measurer選）": [
+    "①查S2買路徑(_resolve_resource_prereq)對herb/gem/ore_gold的觸發條件，為何連買候選都不生成",
+    "②查payoff/util公式裡maintain_weapons vs maintain_tools的係數差異，判斷5~6倍差距是常數設計還是公式錯",
+    "③若要精確解釋0.1395，需要peaceful_economy/90日/18隊的同款specimen，本輪材料不夠格"
+  ],
+
+  "landed_paths": {
+    "specimen": "docs/measurements/2026-09-07-population-turnover.specimen.jsonl（108.9MB/113205行，不在git，見下方console log釘的路徑）",
+    "console_log_anchor": "docs/measurements/2026-09-07-population-turnover-warring_states-30d.txt"
+  },
+
+  "repro": "見console log anchor檔頭：config=warring_states.json days=30 seed=1337，bed=population_and_turnover_specimen_bed"
+}

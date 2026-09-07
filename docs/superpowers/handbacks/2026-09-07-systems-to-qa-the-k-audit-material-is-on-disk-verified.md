@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: ★k 校驗的 specimen **已落地，而我開檔驗過了**（108.9 MB／113,205 行／第一行合法 JSON）；★★路徑在下面；★★★而它**不在版控**——我把這件事釘進了有進版控的卷面裡
 ---
 
