@@ -519,7 +519,7 @@ static func audit_escrow(state: WorldState) -> Dictionary:
 			if bool(o.get("escrowed", false)):
 				stub[int(o.get("order_id", -1))] = int(o.get("qty_remaining", 0))
 	var seen: Dictionary = {}
-	for tile_id in state.world.tiles:
+	for tile_id in state.world.tiles:   # gate-ok: 審計函式（audit_escrow）――純觀測、不在決策路徑上，且守恆對帳本來就要全量母體
 		var tile: HexTileData = state.world.tiles[tile_id]
 		for oid in tile.market_escrow:
 			r["checked"] += 1

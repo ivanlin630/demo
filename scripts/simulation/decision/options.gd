@@ -41,10 +41,10 @@ static var REGISTRY: Dictionary = {
 			# ★目標＝自己待領資產所在的市集；★★而【那是自知】（自己寄賣的紀錄），不是偷看
 			var best: Vector2i = Vector2i(-1, -1)
 			var best_d: int = 1 << 30
-			for tile_id in state.world.tiles:
+			for tile_id in state.world.tiles:   # gate-ok: 只讀【owner_team == 自己】的 pending_claims＝自寄賣的紀錄，非他隊動態；legit-self
 				var t: HexTileData = state.world.tiles[tile_id]
 				for c in t.pending_claims:
-					if int(c.get("owner_team", -1)) != team.team_id: continue
+					if int(c.get("owner_team", -1)) != team.team_id: continue   # ★這一行就是 gate-ok 的理由本體：波及面只有自己
 					if float(c.get("amt", 0.0)) <= 0.0: continue
 					var dv: Vector2i = t.tile_pos - team.tile_pos
 					var d: int = (absi(dv.x) + absi(dv.x + dv.y) + absi(dv.y)) / 2
