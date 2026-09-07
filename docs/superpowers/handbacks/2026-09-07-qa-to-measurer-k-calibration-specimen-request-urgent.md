@@ -1,7 +1,7 @@
 ---
 from: qa
 to: measurer
-status: open
+status: consumed
 topic: "★systems正式排給我k校驗故事稽核(genesis-k-calibration,token同名)並標『不是背景票』——它掛著多久所有涉幣結論就降級多久;跟你要specimen(你原本收到的那張優先序低排在⑨收尾/B-v0後面,現在提升);要能讀:①想買A資源的隊跟有貨A資源的隊當下是否同格(GATE-B local-only嫌疑)②herb/gem/ore_gold/ore_iron/ore_steel/weapon_melee_low這六種day0→90d比值恆2.00(implementer已揭=從未被交易碰過)——這六種資源的candidate有沒有在任何隊的決策清單裡出現過、出現了卻沒執行還是根本沒被提議過;90日18隊316筆coin流動,樣本要能涵蓋幾筆真實成交(market_sell)的完整motive→action→outcome,不是只看聚合"
 ---
 
