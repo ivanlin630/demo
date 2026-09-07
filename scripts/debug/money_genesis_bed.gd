@@ -125,9 +125,32 @@ func _run() -> void:
 	print("═══ ★驗收③：物價（相對 BASE_PRICE 的實際估值分布）═══")
 	var priced: int = int(Probe.counts.get("valuation.priced", 0))
 	if priced == 0:
-		print("  ★★母體 0 ⇒ 本 branch 沒有 `valuation.priced` tap（它在 ⑩ 那支）——")
-		print("     ★★★這格【不是 0，是這棵樹上沒有這個儀器】。⑨⑩ 合流後才量得到。")
+		# ★★★舊版寫死「這棵樹上沒有這個儀器」――而那只是【其中一個成因】。
+		#   ★血證 2026-09-07：MG_DAYS=0 跑 0 tick 時它照樣印那句，而樹上【有】那個 tap。
+		#   ⇒ ★★預寫的解釋綁定了一個成因，而任何產生同樣症狀的成因都會觸發它。
+		if not Probe.counts.has("valuation.priced") and not Probe.counts.has("valuation.price_zero"):
+			print("  ★母體 0：這棵樹上找不到 valuation.* 的任何 tap ⇒ 【儀器不在】")
+		else:
+			print("  ★母體 0，而儀器【在】⇒ 這一輪真的沒有任何估價發生（例：days=0）")
 	else:
-		print("  估價次數 = %d ｜ 平均價 = %.3f" % [priced, Probe.amount("valuation.price_sum") / float(priced)])
+		print("  估價次數 = %d ｜ 全物資平均價 = %.3f" % [priced, Probe.amount("valuation.price_sum") / float(priced)])
+		print("     ★★★而【全物資平均價】答不了本格要問的問題：BASE_PRICE 從 food 2.0 到 weapon 77.0，")
+		print("        把它們平均成一個數 = 把【不同單位的東西】相加。★它會隨【交易組成】飄，")
+		print("        而那與【物價漂移】是兩件事。★★下面改用【無量綱比值】逐物資印：")
 	print("")
+	# ★直接量【每種物資的 local_value ÷ BASE_PRICE】――無量綱，可以跨物資比較。
+	#   1.0 = 持平；>1 = 缺（估值高於基準）；<1 = 過剩；0 = ⑥拆 clamp 後的深過剩。
+	var lines: Array = []
+	for res in TradeValuation.BASE_PRICE.keys():
+		var base: float = float(TradeValuation.BASE_PRICE[res])
+		if base <= 0.0: continue
+		var sum_r: float = 0.0
+		var n_r: int = 0
+		for tid_r in state.teams:   # gate-ok: 觀測用全量普查（不進決策）
+			sum_r += TradeValuation.local_value(state.teams[tid_r], res, state)
+			n_r += 1
+		if n_r == 0: continue
+		lines.append("%s=%.2f" % [res, (sum_r / float(n_r)) / base])
+	print("     逐物資 local_value/BASE_PRICE（全隊均值，母體 %d 隊）：" % state.teams.size())
+	print("       " + " ｜ ".join(lines))
 	print("=== money_genesis_bed DONE ===")
