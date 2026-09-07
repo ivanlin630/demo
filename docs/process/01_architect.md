@@ -38,6 +38,7 @@
 > ★**全部血證／原文 → `detail/01_architect-cases.md`（同標題節，字串逐字保留）**
 
 ## 設計 checklist（spec 前必過）
+- ★★★**`player_reachable` 欄（blueprint 立 2026-09-08，制度性修法）**：★立案時由**定案人**填（**不是實作人**）——`yes` ⇒ 該動詞**必須進 `player_api`** 且 **agent 自檢腳本要斷言得到**（＝可跑迴歸）。★★根因是制度性的：**P9 全引擎產物零玩家格**，GUI/REPL 與 api 一起 drift ⇒ ★★★**沒有這一欄，「玩家碰不到」永遠不會在任何一張票上現形**。
 
 - **judge 盤點（藍圖裁定 2026-07-02，R2 desync 教訓）**：統一/新增一個概念的判斷器時，**必須盤點並退役/收編所有既存 judge，不並存**。新系統上線前問：「這概念已有 judge 嗎？」（首燒統一 intent 菜單只加新 judge 沒退役 `derive_archetype` → 兩判斷器讀同 values 48% 分類矛盾。矩陣抓結構 fork、抓不到語意重複——兩公式判同概念要 runtime measure 才現形。）
 
