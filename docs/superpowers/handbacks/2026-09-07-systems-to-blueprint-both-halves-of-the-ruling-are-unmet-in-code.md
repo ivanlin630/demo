@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★用戶那格我查完了，而答案是**兩半都不符合**：滅團【死了但沒記帳】、合併【小孩根本沒被搬＝靜默蒸發】；★★所以 ⑥a 不是儀器票，是**修法票＋儀器票**
 ---
 
