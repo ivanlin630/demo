@@ -1,0 +1,18 @@
+﻿[TREE] path=A:/GDS/demo/.worktrees/setterswallow commit=5af5d776 clean=NO code-dirty=3
+[TREE]   *** measuring the WORKING TREE, not commit 5af5d776 ***
+[TREE]    M scripts/data/team_data.gd
+[TREE]    M scripts/simulation/cross_run_reset.gd
+[TREE]   ?? scripts/debug/_tmp_crossrun_ctrl.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[SETTER-SWALLOWED-SITE] ★ABORT-LISTING：get_stack() 空（未加 --debug） 本輪逐站清單無效
+[CTRL] 寫入後 swallowed_writes={ "population": 1 }
+[CTRL] CrossRunReset.run() 回報 cleared 含 TeamData? true
+[CTRL] 清除後 swallowed_writes={  } ★該是空
+ERROR: [SETTER-SWALLOWED] TeamData.population 是計算屬性，賦值被靜默吞掉（首次報一次；逐站清單見下方 SITE 列）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [SETTER-SWALLOWED-SITE] ★本輪【無逐站清單】：get_stack() 空  未加 --debug。只有屬性層計數可用；不得把【沒有站】讀成【沒有發生】。
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
