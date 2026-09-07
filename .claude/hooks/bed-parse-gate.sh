@@ -7,7 +7,15 @@
 # ★偵測形狀：GDScript 端只負責 load 每一張床；★★Parse Error 由 Godot 吐 stderr，shell 端 grep。
 #   （第一版用 load()==null 判 ⇒ 假綠：load 對 parse error 不回 null。★陽性對照抓到的。）
 set -u
-_gc=$(git rev-parse --git-common-dir 2>/dev/null) || exit 0
+# ★★★2026-09-06:拿不到 git 時【不准靜默 exit 0】。
+#   血證:detached 跑法的 bash 找不到 git(rc=127) ⇒ 這一行讓本閘 0 秒無輸出地 exit 0
+#   ⇒ ★runner 判成 no-verdict(它幸好不只看 exit code)——★★但看 log 的人會讀成「這支紅了」
+#   ⇒ ★★★而真相是【它根本沒有驗過任何東西】。守衛不准輸出「要被解讀的狀態」。
+if ! _gc=$(git rev-parse --git-common-dir 2>/dev/null); then
+  echo "[BED-PARSE-GATE] ★git 不可用 ⇒ 本閘【沒有判過】—— 這不是紅也不是綠,是工具缺件"
+  echo "  ⇒ 多半是 detached/精簡 PATH 少了 mingw64\bin(互動 bash 的 git 在那裡)"
+  exit 1
+fi
 WT="${1:-.}"
 OUT=$(mktemp)
 # ★★★2026-09-02：先重建 class 快取再驗床。

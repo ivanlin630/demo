@@ -1816,18 +1816,28 @@ func _report_to_leader(state: WorldState, team: TeamData, event: String) -> void
 	Probe.bump(("mreport.sent." if ok else "mreport.failed.") + event)
 
 func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype: String) -> bool:
+	# ★★★★`ptype` 維度（2026-09-06，defer `envoy-ptype-tap` 到期）——
+	#   ★病：四個 fail counter 的母體是【全站所有 envoy 用途】（`alliance` ＋ `member_report`）
+	#     ⇒ ★★不能說「回報因為沒名人而失敗 501 次」—— 那 501 裡有多少是結盟的，卷面答不出來。
+	#   ⇒ ★★★每個 fail 同時記【總計】與【逐 ptype】：總計維持既有 key（下游卷面不斷線），
+	#     逐 ptype 是新增的 `envoy.fail.<ptype>.<原因>` ⇒ 兩層可對帳：
+	#     ★Σ(各 ptype 的同一原因) == 該原因的總計。
+	#   ★而呼叫端只有兩種 ptype（`alliance` / `member_report`，全庫兩個呼叫點）
+	#     ⇒ 桶不會爆炸；★★而若哪天多一種，對帳式會自己把它照出來（Σ 對不上就是有新桶）。
 	# ★★★失敗原因逐條件名（2026-09-05）：★`_dispatch_envoy` 回 false 有【四種】成因，
 	#   ★★而它們共用一個 `false` ⇒ 上游只看得到「沒派成 48 次」而答不出【是哪一種】。
 	#   ⇒ ★★★而處置完全不同：無 belief 位是【感知鏈】、沒有 spare named 是【人力】。
 	var target: TeamData = state.teams.get(target_id)
 	if target == null:
 		Probe.bump("envoy.fail.目標不在名冊")
+		Probe.bump("envoy.fail.%s.目標不在名冊" % ptype)
 		return false
 	# 目標位讀 belief best_estimate（非上帝視角真位；對齊決策讀情報總則）
 	# F1 感知鐵律：缺 belief → sentinel (-1,-1)（禁默認 live）；無位不派 envoy。
 	var target_pos: Vector2i = BeliefSystem.best_estimate(state, mother.team_id, target_id).get("tile_pos", Vector2i(-1, -1))
 	if target_pos == Vector2i(-1, -1):
 		Probe.bump("envoy.fail.不知道對方在哪")
+		Probe.bump("envoy.fail.%s.不知道對方在哪" % ptype)
 		return false   # 無 belief 位 → 不派 envoy（不瞎追 live）
 	var dist: int = _hex_dist(mother.tile_pos, target_pos)
 	var budget: int = SubteamSystem.founding_timeout(dist)
@@ -1837,10 +1847,12 @@ func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype:
 	for _i in range(ENVOY_REDUNDANCY_FOUNDING):
 		if mother.population <= 1:
 			Probe.bump("envoy.fail.母隊只剩一人")
+			Probe.bump("envoy.fail.%s.母隊只剩一人" % ptype)
 			break   # 不掏空母隊（保 leader + ≥1）
 		var sub_leader: int = sub_sys._pick_subteam_leader(state, mother, TeamData.TASK_HERALD)
 		if sub_leader == -1 or sub_leader == mother.leader_id:
 			Probe.bump("envoy.fail.沒有可派的名人")
+			Probe.bump("envoy.fail.%s.沒有可派的名人" % ptype)
 			break   # 無 spare named → 無法派信使（稀有 by construction，退守成）
 		var envoy_id: int = sub_sys.dispatch(state, mother.team_id, sub_leader, ENVOY_POP,
 			TeamData.TASK_HERALD, target_pos, target_id, "")
@@ -1998,7 +2010,8 @@ func _deliver_letter_to_lord(state: WorldState, letter: Dictionary, lord: TeamDa
 		msg.origin_team_id = origin_id; msg.origin_tick = int(o.get("origin_tick", state.world.current_tick)); msg.strength = 1.0
 		msg.is_distorted = false   # 信使親送 intra-faction = honest
 		msg.params = {"order_id": oid, "res": "food", "qty": int(o.get("qty", 0)),
-			"origin_team": origin_id, "origin_pos": o.get("origin_pos", Vector2i(-1, -1)), "expire_tick": int(o.get("expire_tick", 0))}
+			"origin_team": origin_id, "origin_pos": o.get("origin_pos", Vector2i(-1, -1)), "expire_tick": int(o.get("expire_tick", 0)),
+			"price": 0.0}   # ★§2.5：求援＝charity 請求不是商業報價 ⇒ 價格寫 0.0（對齊 free_dist 慣例）
 		state.global_messages.append(msg)
 		state.team_known[lord.team_id].append(msg)
 		known[oid] = true
@@ -2021,6 +2034,7 @@ func _deliver_letter_to_board(state: WorldState, letter: Dictionary, seat_pos: V
 			"qty_remaining": int(o.get("qty", 0)), "origin_team": origin_id, "expire_tick": int(o.get("expire_tick", 0)),
 			# relayed=true（信使代掛他隊單、非 seat owner 原生）；origin_tick 保 spawn（age→decay 真起作用）。
 			"origin_tick": int(o.get("origin_tick", state.world.current_tick)), "strength": 1.0, "relayed": true,
+			"price": 0.0,   # ★§2.5：信使代掛的求援單――charity 非報價
 		})
 		have[oid] = true
 		Probe.bump("help.need_deposited")
@@ -2104,7 +2118,8 @@ func _tick_info_scout(state: WorldState, scout: TeamData, merge_queue: Array) ->
 				_msg.origin_team_id = target_id; _msg.origin_tick = state.world.current_tick; _msg.strength = 1.0
 				_msg.is_distorted = false   # firsthand co-location 親見=honest
 				_msg.params = {"order_id": _oid, "res": "food", "qty": _deficit,
-					"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY}   # gate-ok: 同格親見取得的 origin_pos，回傳給領主當情報
+					"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY,
+					"price": 0.0}   # gate-ok: 同格親見取得的 origin_pos，回傳給領主當情報｜★§2.5：charity → price 0.0
 				state.global_messages.append(_msg)
 				state.team_known[mother.team_id].append(_msg)
 				if Probe.enabled: Probe.bump("care.firsthand_distress")
@@ -2136,7 +2151,8 @@ func _deposit_help_need(state: WorldState, origin_id: int, helper: TeamData) -> 
 		msg.origin_team_id = origin_id; msg.origin_tick = state.world.current_tick; msg.strength = 1.0
 		msg.is_distorted = false   # 信使親送 intra-faction = honest
 		msg.params = {"order_id": oid, "res": "food", "qty": int(o.get("qty_remaining", 0)),
-			"origin_team": origin_id, "origin_pos": origin.tile_pos, "expire_tick": int(o.get("expire_tick", 0))}   # gate-ok: origin.tile_pos ＝子民自願回報自己的位置（信使親送），非觀察者偷看
+			"origin_team": origin_id, "origin_pos": origin.tile_pos, "expire_tick": int(o.get("expire_tick", 0)),
+			"price": 0.0}   # gate-ok: origin.tile_pos ＝子民自願回報自己的位置（信使親送），非觀察者偷看｜★§2.5：charity → price 0.0
 		state.global_messages.append(msg)
 		state.team_known[helper.team_id].append(msg)
 		known[oid] = true

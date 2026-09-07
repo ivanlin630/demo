@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# ★★★2026-09-07（implementer 揭）：本檔原本用【固定 /tmp 檔名】。
+#   ⇒ ★兩個角色同時跑閘時,後跑的會【蓋掉】先跑的中間檔
+#   ⇒ ★★而結果是【無法解釋的紅或綠】—— 它不會報錯,它只是拿到別人的資料
+#   ⇒ ★★★而共用 main dir + 六個角色 ⇒ 併跑是常態,不是例外
+#   修法:每次呼叫用 mktemp,trap 清理。
+_TMP_SW_WL="$(mktemp)"
+_TMP_SW_FIELDS="$(mktemp)"
+trap 'rm -f "$_TMP_SW_WL" "$_TMP_SW_FIELDS"' EXIT
 # ★單寫者閘（systems 立 2026-09-02；接走 implementer A#27 驗收④）
 #   ★病：「這個欄位只有一個地方會寫」是我們反覆做出的假設，而它反覆是假的。
 #        血證 2026-09-02：`clear_team_faction` 被當成離團窄口，而 `world_state.gd` 勢力解散那個迴圈
@@ -12,12 +20,12 @@ cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
 WL=docs/process/.single-writer-whitelist.tsv
 [ -f "$WL" ] || { echo "[SINGLE-WRITER] ★FAIL：白名單不存在（$WL）"; exit 1; }
 
-tr -d "" < "$WL" > /tmp/sw_wl.txt   # ★白名單正規化（漏了這行 ⇒ awk 讀不到檔 ⇒ 全部誤報成「不在白名單」）
+tr -d "" < "$WL" > "$_TMP_SW_WL"   # ★白名單正規化（漏了這行 ⇒ awk 讀不到檔 ⇒ 全部誤報成「不在白名單」）
 fail=0; fields=0
 while IFS=$'\t' read -r field _ _; do
   case "$field" in ''|'#'*) continue;; esac
   echo "$field"
-done < <(tr -d '\r' < "$WL") | sort -u > /tmp/sw_fields.txt
+done < <(tr -d '\r' < "$WL") | sort -u > "$_TMP_SW_FIELDS"
 
 while IFS= read -r field; do
   [ -z "$field" ] && continue
@@ -33,7 +41,7 @@ while IFS= read -r field; do
     # ★整行註解不是寫者：結構性排除，而不是把註解養進白名單（白名單會越養越大而沒人敢刪）
     case "$src_trim" in "#"*) n=$((n-1)); continue;; esac
     if ! awk -F'\t' -v fd="$field" -v ff="$f" -v ss="$src_trim" \
-         '$1==fd && $2==ff && $3==ss {found=1} END{exit !found}' /tmp/sw_wl.txt 2>/dev/null; then
+         '$1==fd && $2==ff && $3==ss {found=1} END{exit !found}' "$_TMP_SW_WL" 2>/dev/null; then
       echo "[SINGLE-WRITER] ★FAIL：$field 有【不在白名單】的直寫 ⇒ $f:$ln"
       echo "   ⇒ $src_trim"
       echo "   ⇒ ★若這是合法的第二個寫者：把它導回單一 setter（首選），或加進白名單並寫理由"
@@ -43,7 +51,7 @@ while IFS= read -r field; do
 $hits
 EOF
   echo "[SINGLE-WRITER] $field：直寫 $n 處｜白名單外 $bad"
-done < /tmp/sw_fields.txt
+done < "$_TMP_SW_FIELDS"
 
 echo "[SINGLE-WRITER] 受管欄位 $fields｜★白名單外總計 $fail"
 echo '[SINGLE-WRITER] ★誠實限①：只掃 scripts/simulation 與 scripts/data。scripts/debug 的直寫【刻意不入母體】——床手工組世界合法，但這代表「床繞過 setter」本閘不管'

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑧＋clamp tap merge —— ★閘紅一支，退回你（小）
 topic: ★25 支跑完 1 紅:`bed-arm` —— 你的新床 `scripts/debug/valuation_clamp_reconcile_test.gd` 【建了世界,既不用 helper 也不在白名單】;★★閘自己給了兩條路,而我裁【走 helper】:`MeasureBedHelper.arm_and_setup()`(順序寫死沒得選錯)——★★★除非它真的不能走 GameSetup(手工組世界),那才加白名單,而【加白名單會讓那個數字變大,那是刻意可見的代價】;★而其餘 24 支全綠(含新加的 lod-split 與 valuation-clamp 兩支);★★這一支修完我就 push,而 push 會【連鎖觸發兩個 defer】(modulo-same-shape-4 / batch1-compare-run)
 ---

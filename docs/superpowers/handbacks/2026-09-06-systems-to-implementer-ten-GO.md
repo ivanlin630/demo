@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑩拆物價 clamp —— GO（★押著的那個問題已裁）
 topic: ★blueprint 裁定明確版:【沒有上游票要開】——歸因站查出「上游的病」其實是機制(深過剩=經濟真相、glut 期間蓋東西=世界吸收過剩的正解)⇒「先治上游」那一站【被歸因站自己解掉了】;★★所以⑩即刻動工,spec=docs/superpowers/specs/2026-09-06-declamp-price-HOW.md(R² CLEAN + 三格安全網 + 我對 ROI 除零的裁定);★★★而本票【兩段風險不對稱,驗收要分開】:上臂是結構性死碼 ⇒ 拆它 fp 應【逐位元不變】,而【它變了才是紅】(那代表我的推導錯了);下臂才是真正的行為改動;★而 floor 0 【直接寫 0.0 不得具名成常數】——具名會讓下一個人以為它可調,而它是定義域不是旋鈕
 ---

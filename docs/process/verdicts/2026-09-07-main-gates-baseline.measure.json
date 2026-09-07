@@ -1,0 +1,14 @@
+{
+  "what": "main 全閘健檢基準線（systems 2026-09-07）",
+  "★為什麼記這個": "★未來任何人的閘紅了,要分得出【本來就紅】還是【我弄紅的】——而沒有基準線時,兩者長得一樣;★★而我今天往註冊表加了 3 支閘(mailbox-size／mailbox-broadcast／以及隨 ② merge 進來的 world-schedule-due/envoy-ptype),若其中一支在 main 上本來就紅,它會擋住每一個人",
+  "commit": "1fa184e79a30aedeefb2117ff3a7b9b4968b0d04",
+  "gates": {
+    "註冊表": 29,
+    "綠": 29,
+    "紅": 0,
+    "總時_s": 382
+  },
+  "★完跑證據": "★log 有固定的總結行(───＋『註冊表 29 支｜總時 382s』)＋ DONE_RC=0 —— ★★而我是【先驗總結行才看綠】,不是先看綠(被砍斷的 log 與跑完的 log 前半段長得一樣)",
+  "跑法": "WMI detach ／ SESSION_ROLE=systems ／ PATH 在 bash 內以 POSIX 形式設 ／ cd 在 bash 內",
+  "★誠實限": "★這是【main 上】的結果,不是任何 feature branch 的;★★而 29 支裡有幾支讀的是【工作區狀態】(mailbox-size 讀熱目錄封數、mailbox-broadcast 讀有沒有還開著的 to: all、defer-open 讀 defers.tsv)⇒ ★★★它們的綠【會隨時間變】,不是這顆 commit 的性質"
+}

@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# ★★★2026-09-07（implementer 揭）：本檔原本用【固定 /tmp 檔名】。
+#   ⇒ ★兩個角色同時跑閘時,後跑的會【蓋掉】先跑的中間檔
+#   ⇒ ★★而結果是【無法解釋的紅或綠】—— 它不會報錯,它只是拿到別人的資料
+#   ⇒ ★★★而共用 main dir + 六個角色 ⇒ 併跑是常態,不是例外
+#   修法:每次呼叫用 mktemp,trap 清理。
+_TMP_HL_NOW="$(mktemp)"
+_TMP_HL_BASE="$(mktemp)"
+trap 'rm -f "$_TMP_HL_NOW" "$_TMP_HL_BASE"' EXIT
 # ★headless_test 回歸閘（systems 立 2026-09-03）
 #   ★★★為什麼今天才有：2026-09-03 implementer 發現【兩顆已 merge 的 slice 各弄紅了 fixture，
 #      而 merge-gates 十支全綠】—— 因為 headless_test【不在註冊表裡】（bed-parse 只解析不執行）。
@@ -43,11 +51,11 @@ if [ -f "$LIST_F" ]; then
   #   ★★而正規化的價值【不只是少一些假紅】：implementer 在自己樹上套用後，
   #     ★★★它【多找出一條真差異】(4→5) —— 雜訊本來蓋住了它。
   #     ⇒ 假 diff 不是無害的噪音，它會【遮住真訊號】。
-  printf '%s' "$OUT" | grep -aE "\[FAIL\]|Assertion failed" | sed 's/^ERROR: *//; s/^ *//'     | LC_ALL=C sort | LC_ALL=C uniq -c     | awk '{c=$1; $1=""; gsub(/[0-9]+/,"N"); sub(/^ /,""); print c" "$0}' > /tmp/hl_now.txt
-  grep -v '^#' "$LIST_F" | grep -v '^$' > /tmp/hl_base.txt   # ★濾掉註解/空行:baseline 檔要能寫【來歷】
-  if ! diff -q /tmp/hl_base.txt /tmp/hl_now.txt >/dev/null 2>&1; then
+  printf '%s' "$OUT" | grep -aE "\[FAIL\]|Assertion failed" | sed 's/^ERROR: *//; s/^ *//'     | LC_ALL=C sort | LC_ALL=C uniq -c     | awk '{c=$1; $1=""; gsub(/[0-9]+/,"N"); sub(/^ /,""); print c" "$0}' > "$_TMP_HL_NOW"
+  grep -v '^#' "$LIST_F" | grep -v '^$' > "$_TMP_HL_BASE"   # ★濾掉註解/空行:baseline 檔要能寫【來歷】
+  if ! diff -q "$_TMP_HL_BASE" "$_TMP_HL_NOW" >/dev/null 2>&1; then
     echo "[HEADLESS] ★FAIL：失敗【清單】與 baseline 不同（★數量可能一樣 —— 一紅一綠會抵消）"
-    diff /tmp/hl_base.txt /tmp/hl_now.txt | head -10 | sed 's/^/   /'
+    diff "$_TMP_HL_BASE" "$_TMP_HL_NOW" | head -10 | sed 's/^/   /'
     exit 1
   fi
   echo "[HEADLESS] ✓ 失敗清單與 baseline 逐條相同（★不只數量）"

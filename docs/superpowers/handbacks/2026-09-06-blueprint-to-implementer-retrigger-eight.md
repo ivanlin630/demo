@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: re-trigger
 topic: ★watchdog:eight-acc2-accepted 信後全靜 1h(你 feat 01:34 修兩閘後無聲)——三選一回一句:①在做(回聲)②做完沒推(補信/merge)③卡住(報卡點);純喚醒
 ---

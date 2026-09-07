@@ -18,11 +18,32 @@ _gc=$(git rev-parse --git-common-dir 2>/dev/null) || exit 0
 cd "$(cd "$(dirname "$_gc")" && pwd)" || exit 0
 D=docs/superpowers/handbacks
 [ -d "$D" ] || exit 0
-# 近 20 分鐘：我有 commit 嗎？
-c=$(git log --since="20 minutes ago" --author="$(git config user.name 2>/dev/null || echo .)" --oneline 2>/dev/null | wc -l | tr -d ' ')
+# 近 20 分鐘：★【我這個 session】有 commit 嗎？
+# ★★2026-09-06 修恆誤報：原本這裡是 `git log --author="$(git config user.name)"`，
+#   而★六個角色 session ＋ 影子 session【共用同一個 git 身分 ivanlin630】
+#   ⇒ `--author` 篩不掉任何人 ⇒ 它數的是【全 repo 的 commit】
+#   ⇒ ★★只要任何一個角色在 20 分鐘內 commit，其他所有角色回合結束時都會被警告
+#   ⇒ ★★★在這個專案那幾乎是恆真 ⇒ 這支守衛天天喊狼，於是真斷鏈那次沒人會停下來看。
+#   （血證：影子 session 本回合【一個 commit 都沒有】卻收到「近 20 分鐘有 3 個 commit」。）
+# ★修法不是換篩選條件（`--committer` 一樣共用，沒救），是【記事實】：
+#   commit-fact.sh（PostToolUse）在【HEAD 真的變了】時寫一筆到 .committed.<session_id>，
+#   這裡只讀【自己那一份】。零猜測。
+_sid="${CLAUDE_CODE_SESSION_ID:-}"
+[ -z "$_sid" ] && exit 0        # fail-open：拿不到 session id 就不猜（寧可不報也不誤報）
+_cf=".claude/hooks/.committed.${_sid}"
+[ -f "$_cf" ] || exit 0
+_cut=$(( $(date +%s) - 1200 ))
+c=$(awk -v t="$_cut" '$1 >= t' "$_cf" 2>/dev/null | wc -l | tr -d ' ')
 [ "${c:-0}" -eq 0 ] && exit 0
 # 近 20 分鐘：有沒有新的 status:open 信（任何寄件者）
-o=$(find "$D" -maxdepth 1 -name '*.md' -mmin -20 2>/dev/null | while read -r f; do grep -q '^status: open' "$f" 2>/dev/null && echo x; done | wc -l | tr -d ' ')
+# ★★★2026-09-07 修第二個假陽性：原本數的是【現在還 open 的信】，
+#   ⇒ 而一封【已經被收件人 consume 的信】不算數 —— ★但那是【更好】的狀態，不是更差：
+#     它代表下游【已經收走並動工了】。
+#   ⇒ ★★實證：本回合我寄出 12 封，全部已被 consume ⇒ 這支 hook 判我「零產出」。
+#   ⇒ ★★★分不出【從沒寄】與【寄了而且已經被收走】—— 而後者正是我們要的結果。
+#   修法：數【本窗內我寄出的信】(from: 我)，不管它現在是 open 還是 consumed。
+_me_role="${SESSION_ROLE:-}"
+o=$(find "$D" -maxdepth 1 -name '*.md' -mmin -20 2>/dev/null | while read -r f; do grep -qE "^from:[[:space:]]*${_me_role}([[:space:]]|$)" "$f" 2>/dev/null && echo x; done | wc -l | tr -d ' ')
 [ "${o:-0}" -gt 0 ] && exit 0
 # ★★★輸出必須用 decision:block —— 純 echo 的 stdout【不會回到 agent 眼前】。
 #   ★血證 2026-08-25：本 hook 第一版只 echo ⇒ 我做完整批工作沒回報，它「偵測到了」但沒人收到；

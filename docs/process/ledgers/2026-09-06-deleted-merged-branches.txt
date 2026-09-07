@@ -1,0 +1,294 @@
+# docs/process/ledgers/2026-09-06-deleted-merged-branches.txt
+# ★blueprint 裁 2026-09-06:已【完全 merge 進 main】的 local branch 全刪。
+#   ★理由:commit 全部 reachable from main ⇒ 刪了不掉任何東西;
+#   ★★留著的成本不是磁碟,是【git branch 的輸出沒有人讀得完】
+#     ⇒ 52 支【真的還沒 merge】的藏在 288 支裡面。
+# ★★★這份清單存在的理由:刪除要留帳 —— 否則「刪了」跟「從來沒有過」長得一樣。
+# 刪除前 tip sha 一併記下(要復原:git branch <name> <sha>)
+# ★★★【實際結果，不是計畫】：清單列了 236 支，而【真正刪掉的是 193 支】。
+#   ★另外 43 支被 `git branch -d` 【拒絕】—— 它們正被 worktree 佔用（保護正確，不是失敗）。
+#   ★★這一行存在的理由：清單寫 236 而事實是 193 ——
+#      ★★★若不寫下來，日後任何人拿這份清單當「這些都不在了」的依據都會是錯的。
+#   ⇒ 被拒的那幾支列在檔尾，它們【仍然存在】。
+
+04f857f1	2026-06-01-claudever
+df9bb49d	exam/seg1-specimen
+cc364b7e	feat/A2b-impl
+c7f5fe1c	feat/acquisition-paths-wire-in
+630f177c	feat/active-anon-promotion
+18f40293	feat/agriculture-a
+5b986d44	feat/agriculture-b
+181dfd33	feat/arbiter-deny-by-option
+58f5dc69	feat/asm-deepen-hunger-raid
+171b3709	feat/attempt-tick-team
+7fb16350	feat/beast-fix
+c41aa925	feat/bed-baselines
+46f26889	feat/bed-follow-generator
+14681238	feat/beg-join-probe
+b7a57ba6	feat/belief-freshness-tile-pos
+8b0480b4	feat/breed-rate-continuous
+fc61d7d8	feat/bucketb2-marks
+f4ac3ee6	feat/bucketb-gateok
+90f3fe19	feat/build-eta-single-source
+2dd9835d	feat/buyfood-survival-option
+677d8c7b	feat/cadence-spike-fix
+7dd00787	feat/camp-access
+e560c48e	feat/capture-completion
+89af4837	feat/careloop-scout-depatch
+88c8dcd6	feat/coin-conservation
+6f622b6a	feat/colo-sight-control-bed
+f2af65e6	feat/combat-s1-pursuit
+43bfcd60	feat/combat-target-split
+dcac872c	feat/conquest-measure
+a5ce54d2	feat/conquest-yield-chain
+78d45bdf	feat/consolidation-s-a
+03e203dc	feat/constitution-gate-strengthen
+de1729e5	feat/construction-funnel-12
+26ddf078	feat/construction-funnel-34
+2a5bb412	feat/construction-obs-tap
+35393e96	feat/controlled-manpower-phase1
+64380327	feat/convoy-dispatch-tap
+74905148	feat/convoy-return-conservation
+7f4952d4	feat/convoy-return-task-authority
+d2049b9b	feat/costume-identity-keys
+b71647ab	feat/crisis-override
+a7ebebfa	feat/decision-needs-hierarchy
+7ee9ec29	feat/decouple-suspicion-promotion
+e8236cf6	feat/defeat-flee
+5fcb68e3	feat/desperation-food-seeking
+998b0ae7	feat/desperation-ordering
+aaa8ad95	feat/dieoff-erase-batch
+d277259b	feat/diplomacy-grounded
+64b8f639	feat/directive-stamp-honesty
+5e473936	feat/dispatch-builder-attempt-tap
+f35c7eea	feat/donor-ladder-attribution
+44cb6fd0	feat/drop-retracted-117
+2aaa9843	feat/envoy-diplomacy-fi1
+84682288	feat/ewma-advance-decouple
+0e7ac585	feat/exam-12mo-harness
+29c44ad9	feat/extraction-need-driven
+f0a69085	feat/facility-buffer
+de135dfd	feat/faction-cohesion
+ed0e7501	feat/faction-succession-lite
+7a12d3b1	feat/failure-feedback
+fb179da0	feat/failure-memory-face1-bed-only
+b831631b	feat/far-elapsed-movement
+77d7687c	feat/flee-restore-movement
+f945dd18	feat/food-flow-slice-A
+91fe5741	feat/food-flow-slice-B1
+e54c926f	feat/food-tension
+eef0d9fe	feat/forage-floor-tune
+06221fed	feat/foraging-survival-floor
+adfd573e	feat/framework-F0
+fa3cabfe	feat/framework-F1
+f5da3319	feat/framework-F2
+fc2509e1	feat/framework-F3
+e30b3208	feat/framework-F4
+9015a5eb	feat/funnel-tick-buckets
+03f6fb40	feat/g1a-mint-mining-village
+13434faa	feat/g3-phase-e-enforce
+7a2e22b0	feat/gateA-productive-home
+8c7fbd83	feat/gateA-return-hysteresis
+e1bb6b2a	feat/gen-params-calibration
+d8b865e8	feat/gift-alliance
+f6af5c47	feat/goal-removal-reason
+e4665428	feat/goal-skip-reason
+ab0c6e9d	feat/godview-1119
+23989506	feat/godview-b
+a6cf4466	feat/godview-c
+99afe147	feat/godview-d
+62697e6c	feat/godview-e
+9e965631	feat/godview-followup
+d0ab7f91	feat/godview-slice-F
+4ebaf7dd	feat/harvest-terrain-from-regen
+22604514	feat/hook-prepush
+09855a5a	feat/horse-slice
+ec919ad3	feat/identity-key-honest
+5fea1737	feat/identity-tap-act-field
+eb263529	feat/idle-labor-build
+3b6ce676	feat/income-tax-split
+4a673cc2	feat/independent-strategic-layer
+adff6e8b	feat/infra-path-fates
+91a8fbbe	feat/interaction-unification-fi
+c3cf3df8	feat/junmin-militia-slice-a
+d9d396df	feat/junmin-militia-slice-b
+383ec81e	feat/labor-marginal-food-v2
+c79f7181	feat/levy-funnel-taps
+6735b2c2	feat/local-value-blind-callsites
+03fdf03c	feat/local-value-state-required
+4afa4be5	feat/lod-redline-reactions
+8b918b2d	feat/lod-split-demolish
+de33885f	feat/logistics-sliceB-distribution
+ec12f12d	feat/longwindow-harness
+1e474797	feat/lord-care-loop
+1c19953b	feat/margin-clamp-pin
+1076c0d5	feat/material-buy
+f5c0c99a	feat/material-gate-persona
+1017fe31	feat/material-hold-protection
+264a1844	feat/means-end-A1-fix
+987a8b57	feat/means-end-brick
+e339ac4c	feat/means-end-s1-skeleton
+f9114f74	feat/means-end-s2-resource
+660a9506	feat/means-end-s3-location
+8a2d862d	feat/means-end-s4-facility
+3f765ad8	feat/means-end-s5-delegate
+2d89ca6c	feat/means-end-s6-discount
+737ee409	feat/means-end-s7-cadence
+d0742742	feat/meansend-tactical
+b63283bb	feat/member-report-envoy
+b107d3b2	feat/mergein-churn-fix
+0c9a5c6a	feat/mfg-labor-depatch
+f3d201cb	feat/mil-facility-cost70
+af62dd33	feat/missing-contact-ledger
+7e24f3e5	feat/monotonic-person-id
+eacdd5df	feat/monotonic-team-id
+7304e16c	feat/named-scarcity-ab
+fd1625f7	feat/need-oracle
+28470932	feat/nullbelief-flee
+f4b8bb6d	feat/observability-path-completion
+6107676a	feat/observer-gui-slice
+f79bd8ac	feat/observer-rng-freeze-gate
+9c445fc1	feat/occupy-village
+5914a824	feat/old-growth-forest
+deb051f6	feat/orderbook-tap
+07172639	feat/owner-outpost-index
+e8ad1cb8	feat/own-granary-pin
+682318ad	feat/p2a-survival-options
+1d7c618b	feat/p2b1-survival-selection-unify
+3f6a7673	feat/p3-hybrid-coordination
+99196fb5	feat/p4-faction-stakes-options
+8bb2ad7b	feat/peaceful-economy-bed
+5d400c08	feat/perf-cut1
+5e9438ba	feat/peroption-probe
+6912c6a7	feat/persistence-slice1-bonus-collapse
+cd22a91e	feat/persistence-slice2-writeback-freshness
+15952748	feat/persistence-slice3-tryset-threshold
+c9544b2e	feat/persistence-slice4-A1-close
+124ce5f8	feat/phase3-tapgap-fix
+1c6f4184	feat/phase3-unrestsplit-tap
+b042877a	feat/plan-layer-s1
+e14f1cbc	feat/plan-layer-s2
+878c0c5b	feat/plan-layer-s3
+96e15793	feat/plan-layer-s4
+08e376d5	feat/position-belief
+a78b1998	feat/probe-sample
+50337300	feat/produce-demand-responsive
+6510b52e	feat/production-framework
+71609428	feat/promotion-initial-mood-loyalty
+bc6b1d41	feat/r1-threeband-r2-judge-retire
+33056e9e	feat/raid-continuity-identity-weight
+5810f95c	feat/recovery-r1
+e079cd41	feat/recovery-r2
+f4fda140	feat/recovery-r3
+e41cac06	feat/reeval-cadence
+282a5bd8	feat/reeval-unify
+033933e8	feat/reserve-assertion-destringify
+b7297fd4	feat/resolver-exit-fates
+b7e40d59	feat/salary-produce-unblock
+48284d4e	feat/same-need-fallthrough
+b65a9692	feat/scale-consolidation-revert
+21119a35	feat/scale-consolidation-util-boost
+716c432a	feat/scaling-hardening-p0
+24e51cc1	feat/seam1-registry
+df264bf5	feat/seam2-facility-registry
+1d370635	feat/seam3-sysreg
+eea1c297	feat/seeded-harness
+f9817f6d	feat/settlement-s1
+a52549fa	feat/settlement-s2a
+922a30ee	feat/settlement-s2b
+b4c84692	feat/settlement-s4a
+d12ac9a2	feat/settlement-s4b
+af474229	feat/settlement-s4c
+104c19b6	feat/singlewriter-chokepoints
+647b75f5	feat/singlewriter-ledger-roster
+56e42f75	feat/singlewriter-slice3
+a5495461	feat/slice2-perception
+7c8551cc	feat/specimen-coverage-pos
+40915657	feat/specimen-lineage-scope
+93146fac	feat/specimen-observer-noninvasive
+04917274	feat/specimen-rng-confound-fix
+fecba76e	feat/specimen-stale-test
+bb3a5846	feat/specimen-tracer
+b89da476	feat/specimen-tracer-rng-fix
+3096fc5d	feat/stock-vs-flow-ruler
+c94730ab	feat/strategic-intent-unification
+5a9d5ed3	feat/sufficiency-rate-harness
+67d4a470	feat/survival-layer-unify
+2c414e0d	feat/survival-path
+d286e21a	feat/survival-prio-fix
+1bfda95b	feat/t0-event-bus
+acd6f738	feat/term-scale-normalize
+fd801ecd	feat/threat-oracle-s1.5
+8ea5e90e	feat/threat-oracle-s1-probe
+7e8f61b0	feat/threat-oracle-s3
+bbb965c2	feat/tile-bank
+02c854e4	feat/timescale-skeleton
+49b9b6eb	feat/tools-assertion-samefamily
+bdbcfd22	feat/tools-demand
+bc50c05b	feat/trace-motive-field
+b21794b7	feat/tracer-completeness
+c3eff0d8	feat/trade
+e001d252	feat/trade-loop-ignition
+93966d15	feat/transition-arbiter
+160301d9	feat/unified-commerce
+285bca8f	feat/unified-dispatch
+61b2a354	feat/unified-labor-pool
+06285b9f	feat/valuation-clamp-tap
+e7cb5c4a	feat/verification-gate
+41161d34	feat/wall-refusal-reasons
+462ede84	feat/wire-in-specimen-trace
+ef089fe2	feat/worldgen-variety
+b74bf16a	worktree-agent-a4d2b3ef6867855ac
+99196fb5	worktree-agent-a5002e5424b9a3e3a
+afcc45b9	worktree-agent-a5def1a564658357d
+739b29d5	worktree-agent-ad7123a27282dc1f7
+d25710f2	worktree-agent-ae0533d4e68960ab5
+280f7d25	worktree-agent-af4f8012661720267
+eff4130c	worktree-feat+agent-repl
+cfbe39fb	worktree-feat+encounter-system
+e8c3ea1c	worktree-feat+ui
+
+# ★★被拒(worktree 佔用)⇒【仍然存在】,不在已刪之列：
+# STILL-EXISTS	feat/acquisition-paths-wire-in
+# STILL-EXISTS	feat/agriculture-a
+# STILL-EXISTS	feat/bed-follow-generator
+# STILL-EXISTS	feat/belief-freshness-tile-pos
+# STILL-EXISTS	feat/build-eta-single-source
+# STILL-EXISTS	feat/camp-access
+# STILL-EXISTS	feat/colo-sight-control-bed
+# STILL-EXISTS	feat/convoy-dispatch-tap
+# STILL-EXISTS	feat/convoy-return-conservation
+# STILL-EXISTS	feat/convoy-return-task-authority
+# STILL-EXISTS	feat/donor-ladder-attribution
+# STILL-EXISTS	feat/ewma-advance-decouple
+# STILL-EXISTS	feat/failure-feedback
+# STILL-EXISTS	feat/g1a-mint-mining-village
+# STILL-EXISTS	feat/harvest-terrain-from-regen
+# STILL-EXISTS	feat/income-tax-split
+# STILL-EXISTS	feat/levy-funnel-taps
+# STILL-EXISTS	feat/lod-redline-reactions
+# STILL-EXISTS	feat/lod-split-demolish
+# STILL-EXISTS	feat/means-end-brick
+# STILL-EXISTS	feat/member-report-envoy
+# STILL-EXISTS	feat/mergein-churn-fix
+# STILL-EXISTS	feat/monotonic-person-id
+# STILL-EXISTS	feat/monotonic-team-id
+# STILL-EXISTS	feat/named-scarcity-ab
+# STILL-EXISTS	feat/old-growth-forest
+# STILL-EXISTS	feat/orderbook-tap
+# STILL-EXISTS	feat/own-granary-pin
+# STILL-EXISTS	feat/owner-outpost-index
+# STILL-EXISTS	feat/recovery-r2
+# STILL-EXISTS	feat/salary-produce-unblock
+# STILL-EXISTS	feat/settlement-s1
+# STILL-EXISTS	feat/settlement-s2a
+# STILL-EXISTS	feat/settlement-s2b
+# STILL-EXISTS	feat/specimen-coverage-pos
+# STILL-EXISTS	feat/specimen-lineage-scope
+# STILL-EXISTS	feat/specimen-stale-test
+# STILL-EXISTS	feat/trade
+# STILL-EXISTS	feat/valuation-clamp-tap
+# STILL-EXISTS	feat/wire-in-specimen-trace
+# STILL-EXISTS	worktree-feat+agent-repl
+# STILL-EXISTS	worktree-feat+encounter-system
+# STILL-EXISTS	worktree-feat+ui

@@ -7,6 +7,30 @@ const SEASON_NAMES: Array = ["春", "夏", "秋", "冬"]
 
 var _last_season: int = -1   # diff print：季節變化才印
 
+# ★★★世界級排程的到期判斷（`modulo-same-shape-4`，2026-09-06；★systems 裁 (b)）——
+#   ★取代裸 `current_tick % INTERVAL == 0`：那種寫法要求【恰好那一 tick 有人跑到】，
+#     而本檔的 `tick_all` 只在 `tick % (TICKS_PER_DAY/4)` 被呼叫 ⇒ ★★安全與否取決於
+#     【INTERVAL 是不是外層 cadence 的倍數】—— 那是算術巧合，不是機制。
+#
+# ★★★而【不加相位偏移】（不走 `CadenceStagger`）是 systems 的裁定，理由有兩層：
+#   ①對比輪【正在跑】，它比的是兩顆固定 commit ⇒ 現在合一個【會改 fp】的東西進 main，
+#     ③ 就移動了，而 measurer 已交出去的兩格會跟後面八格【不在同一個世界】。
+#   ②★★就這張票本身：票②的病是【潛在脆弱性】，而加相位偏移【順手多做了一件事】
+#     （四個 regen 去同批）—— ★★★那是【另一張票的好處】被夾帶進來，
+#     而「一次改兩件事 ⇒ 歸因不了」是同一條規矩。（regen 去同批已具名成候選，不是丟掉。）
+#
+# ★等價性（★這是「fp 逐位元不變」的理由，不是願望）：
+#   `next` 起始 0 ⇒ 第一次呼叫必 fire（等同舊制 `0 % INTERVAL == 0`）；
+#   之後 `next = (current / cadence + 1) * cadence` ⇒ 落在【下一個 INTERVAL 邊界】
+#   ⇒ ★INTERVAL 整除外層 cadence 時，fire 的 tick 集合【與舊制完全相同】
+#   ⇒ ★★而不整除時（＝將來有人改外層 cadence），舊制【整段不 fire】、新制【到期後第一次補上】
+#      —— 那正是這張票要買的東西。
+static func _due(world: WorldData, next_tick: int, cadence: int) -> Array:
+	# 回 [是否到期, 新的 next_tick]
+	if world.current_tick < next_tick:
+		return [false, next_tick]
+	return [true, (world.current_tick / cadence + 1) * cadence]
+
 func tick_all(state: WorldState) -> void:
 	# ★S1b 白名單(c)：4 ＝【一年幾季】的曆法結構 ——
 	#   ★分子已由 SEASON_LENGTH 導出（會隨根縮放），★★這個 4 不隨小時縮放：
@@ -43,7 +67,9 @@ func tick_all(state: WorldState) -> void:
 	_regen_predator(state)
 	_regen_herb(state)
 	# 每日 outpost 鄰格 wild_horses 批採進公庫（tick_all 每 6 小時跑，日邊界才採）
-	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+	var _d0: Array = _due(state.world, state.world.harvest_daily_next_tick, WorldState.TICKS_PER_DAY)
+	state.world.harvest_daily_next_tick = int(_d0[1])
+	if bool(_d0[0]):
 		_collect_wild_horses_by_outposts(state)
 		_decay_l0_camps(state)
 
@@ -73,7 +99,9 @@ const WILD_HORSE_TILE_CAP_RICH: int = 8   # 野馬草原 cap（resource_cap["wil
 
 # 每月（month 邊界）平原/森林 tile 5% 機率 +1 野馬，上限 cap（一般 3 / 野馬草原 8）
 func _regen_wild_horses(state: WorldState) -> void:
-	if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+	var _d: Array = _due(state.world, state.world.regen_horses_next_tick, WorldState.TICKS_PER_MONTH)
+	state.world.regen_horses_next_tick = int(_d[1])
+	if not bool(_d[0]):
 		return
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
@@ -89,7 +117,9 @@ const WILD_GAME_REGEN_CHANCE: float = 0.30   # TEST VALUE — 每月增長機率
 
 # 每月（month 邊界）平原/森林 tile 機率 +1 wild_game，上限 resource_cap["wild_game"]
 func _regen_wild_game(state: WorldState) -> void:
-	if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+	var _d: Array = _due(state.world, state.world.regen_game_next_tick, WorldState.TICKS_PER_MONTH)
+	state.world.regen_game_next_tick = int(_d[1])
+	if not bool(_d[0]):
 		return
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
@@ -106,7 +136,9 @@ const PREDATOR_REGEN_CHANCE: float = 0.10   # TEST VALUE — 猛獸再生較慢�
 
 # 每月（month 邊界）森林/山地 tile 機率 +1 predator_density，上限 resource_cap["predator_density"]
 func _regen_predator(state: WorldState) -> void:
-	if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+	var _d: Array = _due(state.world, state.world.regen_predator_next_tick, WorldState.TICKS_PER_MONTH)
+	state.world.regen_predator_next_tick = int(_d[1])
+	if not bool(_d[0]):
 		return
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
@@ -123,7 +155,9 @@ func _regen_predator(state: WorldState) -> void:
 
 # 每月（month 邊界）herb +1 至 resource_cap["herb"]（生成初始值）
 func _regen_herb(state: WorldState) -> void:
-	if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+	var _d: Array = _due(state.world, state.world.regen_herb_next_tick, WorldState.TICKS_PER_MONTH)
+	state.world.regen_herb_next_tick = int(_d[1])
+	if not bool(_d[0]):
 		return
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]

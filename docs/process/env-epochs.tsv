@@ -1,0 +1,11 @@
+# docs/process/env-epochs.tsv —— ★量測環境紀元表（systems 立 2026-09-06，blueprint 要求）
+#
+# ★★為什麼要有這張表：★牆鐘類讀數（wall_s／gates 總時／checkout 秒數／IO 密集的一切）
+#   會因為【機器環境改變】而系統性地變快或變慢，★★而那個改變【不會出現在任何 diff 裡】
+#   ⇒ 跨紀元的 before/after 對比【產地不同源】，而兩邊的數字看起來完全一樣有效。
+#
+# ★★★這張表【不是】讓程式去偵測環境（偵測不到 ⇒ 只會變成另一個恆空的母體）——
+#   它是【用日期分類量測檔】的依據：量測檔有日期，這裡有紀元起日，兩者一比就知道能不能對比。
+#
+# ★欄位（TAB）：起日  受影響的讀數類  影響方向與量級（★實測，不是估）  說明
+2026-09-06	★牆鐘／IO 密集類（wall_s、gates 總時、checkout、大量檔案開啟）	★變快。實測依據：Get-MpPerformanceReport 60 秒窗內 Defender RealTimeScan 吃走 54.9/60 秒（每次檔案開啟約 5-7ms 稅）	★用戶裁定加 `Add-MpPreference -ExclusionPath "A:\GDS"`（殭屍 du 案後；安全性取捨用戶自負）。★★tick 內計算類（us/tick 的 avg／p99）影響小——它們不開檔；★★★IO 密集類影響大。⇒【跨 2026-09-06 的牆鐘對比一律標為不同源】

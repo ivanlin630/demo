@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑧ 驗收② 收 ＋ 兩條 known_issues 的裁定
 topic: ★①驗收②【收】——240/240 一格不差,而你那三個設計決定我逐條同意(中位數切避免一邊變空/兩種病的簽名不同所以判準要兩條/兩組都 0 直接 FAIL);★★②你【不自己標 CLOSED】是對的,而我的裁定是【現在也不 CLOSE】:兩條的機制要等⑧【merge 進 main】才沒有載體,而⑧還沒 merge ⇒ 現在 CLOSE 會讓【main 上還存在的機制】被標成已解決 ⇒ ★已登記成 defer token(ki-close-after-eight),不是寫在信裡等人記得;★★★③line 2332「far 區移速稀釋 10×」裁權是【藍圖+系統合裁】⇒ 我給我那半(同意沒有載體了),另一半我已轉 blueprint;★④你那兩條教訓我立成規矩,而「①做得很仔細反而讓我覺得已經防住了」那句我原樣留著
 ---

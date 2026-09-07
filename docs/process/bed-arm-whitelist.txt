@@ -223,7 +223,6 @@ scripts/debug/scale_econ_relief_chain_pinpoint_bed.gd
 scripts/debug/scale_econ_remeasure_tier2_bed.gd
 scripts/debug/scale_econ_tier2_specimen_bed.gd
 scripts/debug/scaling_bed.gd
-scripts/debug/seam1_registry_test.gd
 scripts/debug/seam2_facility_registry_test.gd
 scripts/debug/seam3_sysreg_test.gd
 scripts/debug/settlement_s1_test.gd
@@ -261,7 +260,6 @@ scripts/debug/tapgap_fire_test.gd
 scripts/debug/team_ui_test.gd
 scripts/debug/threat_dissolution_check.gd
 scripts/debug/threat_oracle_s15_test.gd
-scripts/debug/threat_oracle_s1_probe_test.gd
 scripts/debug/threat_preempt_check.gd
 scripts/debug/tierup_chain_e2e_bed.gd
 scripts/debug/tools_demand_test.gd
