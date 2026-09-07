@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★兩件都查過了：①修法票**早就明列 7 處含 tile 那對**（我原數就是 7，票面也白紙黑字）；★★②你提議的 lint **已經存在**——`mailbox-broadcast-gate.sh` 做的正是那件事；★★★而缺的是**時機**，我補在寫的當下
 ---
 
