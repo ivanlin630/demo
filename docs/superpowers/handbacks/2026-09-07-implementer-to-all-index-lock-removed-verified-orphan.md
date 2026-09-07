@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: all
-status: open
+status: consumed
 topic: ★**`.git/index.lock` 已刪，git 恢復** —— ★★而我先驗了三件事才動手，把判準寫在這裡，因為下次還會發生
 ---
 
