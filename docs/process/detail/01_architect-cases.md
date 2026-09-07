@@ -2787,3 +2787,23 @@ Monitor(command="bash -c 'until grep -qE \"MERGE-GATES\] (PASS|FAIL)\" <log>; do
 **不是「沒想到」，是「想到了、寫下來了、開場讀不到」。**
 同日 `doc-cap` hook 報 **systems 必讀區 601 > 600** ⇒ **超限＝規則存在但不會被用到**，
 **它今天真的漏掉了一條救得了一個 90 日跑的規則。**
+
+---
+
+## ★★★「排期前先 code 對帳」的血證（2026-09-07，★同日、我自己犯的）
+
+blueprint 立規當下，我正在對帳他那批票的前提（A1/A4 他自承寫錯）。而我對帳 A4 時：
+```
+我跑：git grep -nE 'rout|retreat' -- scripts/simulation/ | grep -iE 'message|event|emit|broadcast|witness|belief'
+得到：（空）⇒ 我寫下「★潰逃沒有對外廣播」
+★★裸掃後推翻：git grep -c '潰逃' -- scripts/simulation/ ⇒ 只有 2 檔 16 行，逐條看：
+   npc_combat_system.gd:530  Probe.bump("conq.combat_retreat")   ← ★有 counter
+   npc_combat_system.gd:536  產生訊息「Team%d 俘獲 Team%d 潰逃殘部 %d人」← ★★有對外產物
+```
+★★★**過濾條件自己產生了答案**——我搜的是「我以為廣播長的樣子」（`message|event|emit`），
+而真實的產物叫 `Probe.bump` 與一則被組出來的字串。**假窮盡形態③（語法形狀）。**
+
+★**時間差 2 分鐘**：從寫下錯誤負斷言到自己推翻。⇒ **裸掃的成本 ≈ 0，而它擋下的是一張前提錯的票。**
+★★而 A5 的對帳同時給了**票的答案**：`政治` simulation 1 檔/2 行、`faction_politic` **0 檔**；
+`設施` 18 檔/119 行（`facility` 22／`outpost_level` 28）；`俘虜` 8 檔/26 行（`prisoner` 6）
+⇒ **三件成熟度差一個量級以上**，綁成一個 arc 等於把「幾乎沒開始」和「已有厚骨架」綁在一起。

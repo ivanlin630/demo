@@ -5,6 +5,7 @@
 
 | 你要做這件事 | ★**動手前必讀** |
 |---|---|
+| ★★★**把清單／票【排期】** | ★**先 code 對帳再排**：出現「從未開題／還沒做／零 caller／沒有骨架」⇒ 必 `git grep -c <裸符號>` 印總數再逐條分類；★★**帶過濾的搜尋不算對帳**（過濾條件會自己產生答案）。血證＋A5 對帳結果 → `detail/01_architect-cases.md` |
 | ★**開驗收考／診斷考** | ★**`docs/process/09_exam_gate.md`**（★半成品禁跑驗收考） |
 | ★**動信箱／Monitor／watchdog** | ★**`docs/process/07_mailbox_trigger.md`** |
 | **動機器軌（orchestrator）** | `docs/process/08_machine_workflow_v2.md` |
