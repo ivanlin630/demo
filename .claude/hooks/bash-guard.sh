@@ -49,19 +49,34 @@ if printf '%s' "$_cmd" | grep -qiE 'godot(\.ps1|-detach)?|--headless'; then
 fi
 
 
-# 護欄③：殘留 index.lock（2026-09-06，同日兩次）
-#   ★git 的錯誤訊息說「另一個 git process 在跑」——★★而實測兩次都【沒有任何 git process】：
-#     0 bytes、放了 4~5 分鐘。多半是某個 git 被 timeout/kill 掉,鎖沒清。
-#   ★★★而那句訊息會讓人去找一個【不存在的東西】,或去等一個【不會結束的東西】。
-#   ⇒ 這裡只【說出診斷】,★不自動刪 —— 刪鎖是破壞性動作,而破壞性動作要人按。
+# 護欄③：殘留 index.lock（2026-09-06 兩次；★2026-09-07 改成【永遠說話】）
+#   ★git 的錯誤訊息說「另一個 git process 在跑」——★★而實測三次都【沒有任何 git process】。
+#   ★★★2026-09-07 缺口：舊版只在【鎖 >120 秒】才說話 ⇒ 鎖還年輕時它完全沉默，
+#     而人就直接撞上原始錯誤訊息，★那訊息裡沒有處置程序 ⇒ 有人以為要去找用戶。
+#   ⇒ 改成【只要鎖存在就說話】，但依年齡說【不同的話】。★仍然不自動刪：刪鎖是破壞性動作。
 if printf '%s' "$_cmd" | grep -qE 'git[[:space:]]+(commit|add|merge|rebase|mv)'; then
   _lk=".git/index.lock"
   if [ -f "$_lk" ]; then
     _age=$(( $(date +%s) - $(stat -c %Y "$_lk" 2>/dev/null || echo 0) ))
     _sz=$(stat -c %s "$_lk" 2>/dev/null || echo 1)
-    if [ "$_age" -gt 120 ] && [ "$_sz" -eq 0 ]; then
+    if [ "$_sz" -ne 0 ]; then
       _warn="${_warn}${_warn:+
-}⚠ .git/index.lock 是【0 bytes 且已放了 ${_age} 秒】—— ★這多半是【殘留鎖】不是「另一個 git 在跑」。★★git 的錯誤訊息會叫你去找一個不存在的 process。★★★先驗:powershell -NoProfile -Command \"Get-CimInstance Win32_Process | Where-Object { \$_.Name -eq 'git.exe' }\" —— 真的沒有 git.exe 才 rm -f .git/index.lock（★共用 main dir,不要沒驗就刪）。"
+}⚠ .git/index.lock 存在且【非 0 bytes】(${_sz}B, ${_age}s) —— ★這可能是【寫到一半的 index】，★★不要刪它，等或找人。"
+    elif [ "$_age" -le 120 ] && [ "$_sz" -eq 0 ]; then
+      _warn="${_warn}${_warn:+
+}⚠ .git/index.lock 是 0 bytes 但【只放了 ${_age} 秒】—— ★可能真的有人正在 commit，先等 1-2 分鐘再試。★★若超過 120 秒仍在，本護欄會給你處置程序。"
+    else
+      _warn="${_warn}${_warn:+
+}⚠ .git/index.lock【0 bytes 且已放了 ${_age} 秒】= ★可證的孤兒鎖候選（不是「另一個 git 在跑」）。
+   ★★處置程序（三驗全過才刪，缺一不可 —— implementer 2026-09-07 實證）：
+     ① git 程序數必須是 0：powershell -NoProfile -Command \"@(Get-CimInstance Win32_Process | Where-Object { \\$_.Name -match '^git' }).Count\"
+        ★沒有這一格，刪鎖＝把別人正在寫的 index 砍掉
+     ② 檔案大小 = 0 bytes（有內容的 lock 要另外處理，★不可刪）
+     ③ 已經數分鐘沒有變動
+   ⇒ 三驗全過 ⇒ rm -f .git/index.lock
+   ★★★而「我做不到」有兩種：【權限不足】與【這個 session 的工具受限】——★兩者長得一樣。
+     ⇒ 別替別人宣告做不到；★誰能做用【試】的，不要用【猜】的（血證 2026-09-07：
+       systems 說「沒有權限」，implementer 同機同帳號一試就刪掉了）。"
     fi
   fi
 fi
