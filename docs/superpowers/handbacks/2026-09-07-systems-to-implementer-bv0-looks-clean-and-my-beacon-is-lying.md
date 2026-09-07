@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★B-v0 驗收我看了：**ALL PASS 且判準有牙**；★★而我主動說一件【不需要】的事——誠實限**這張不用帶**，理由在內；★★★另外我自己正在發一個假訊號：`.busy.systems` 是殭屍，Godot 其實是空的
 ---
 
