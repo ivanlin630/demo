@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★`player_reachable` 欄**已進 `01_architect.md` 的「設計 checklist（spec 前必過）」**；★★三票入表；★★★③**我裁合併**進 C1 介面票——理由是今天剛學到的
 ---
 
