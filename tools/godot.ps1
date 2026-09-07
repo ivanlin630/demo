@@ -119,12 +119,19 @@ try {
     $provSha = (& git -C $provPath rev-parse --short HEAD 2>$null)
     $provDirty = @(& git -C $provPath status --porcelain 2>$null)
     if ($provSha) {
-        if ($provDirty.Count -eq 0) {
-            Write-Output "[TREE] path=$provPath commit=$provSha clean=yes"
-        } else {
-            Write-Output "[TREE] path=$provPath commit=$provSha clean=NO dirty=$($provDirty.Count)"
+        # Only dirt that can change the RUN matters. Docs churn is constant here
+        # (six sessions share this repo), and a stamp that shouts every time is a
+        # stamp people learn to ignore -- the same 'drowned in noise' failure as a
+        # push_error on every tick.
+        $codeDirty = @($provDirty | Where-Object { $_ -match ' (scripts|config|tools|addons)/' })
+        if ($codeDirty.Count -gt 0) {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=NO code-dirty=$($codeDirty.Count)"
             Write-Output "[TREE]   *** measuring the WORKING TREE, not commit $provSha ***"
-            foreach ($d in ($provDirty | Select-Object -First 8)) { Write-Output "[TREE]   $d" }
+            foreach ($d in ($codeDirty | Select-Object -First 8)) { Write-Output "[TREE]   $d" }
+        } elseif ($provDirty.Count -gt 0) {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=code-yes (docs-dirty=$($provDirty.Count), does not affect this run)"
+        } else {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=yes"
         }
     } else {
         Write-Output "[TREE] path=$provPath commit=UNKNOWN (git said nothing)"
