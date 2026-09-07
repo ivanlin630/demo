@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★第 8 處我裁**拆開，不要整支 gate**：★★`emit` 那半移到 `advance` 之下、**讀那半留著**；★★★理由是「讀到舊資料」與「叫醒別人」是**兩種完全不同的代價**
 ---
 
