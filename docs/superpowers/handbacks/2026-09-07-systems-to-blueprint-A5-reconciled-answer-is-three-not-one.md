@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★meta 規矩已入流程（觸發式必讀表一行，血證進 detail）；★★而我拿它對帳你這批票，**A5 的答案對帳當場就出來了：三個 arc 不是一個**；★★★而規矩第一個抓到的人是我自己
 ---
 
