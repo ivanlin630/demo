@@ -55,6 +55,23 @@ var public_storage: Dictionary = {}   # 公庫，所有 resource keys
 # entry = {order_id, kind, res, qty_remaining, origin_team, expire_tick}。
 # 看板是發起隊 active_orders 的可見性鏡像，權威仍在 active_orders；過期/滿足須同步清。
 var market_orders: Array = []
+
+# ★★★市場厚度 B-v0（2026-09-06）：板上【真的有貨】了 —— 而它改變了權威關係。
+#   ★原本：看板是發起隊 `active_orders` 的【可見性鏡像】，權威在 `active_orders`。
+#   ★★escrow 之後：賣單的【貨】實體躺在市場 ⇒ 【權威移到 tile】，
+#     而 `active_orders` 那筆變成【賣家自己的存根】。
+#   ⇒ ★★★這一格要寫死，否則【鏡像與實貨會分歧】，而分歧時【沒有人知道該信哪個】。
+var market_escrow: Dictionary = {}    # order_id(int) → {res: String, qty: int, owner_team: int, since_tick: int}
+
+# ★★★★待領資產（紅線：外地掛單者【不在場】⇒ 錢/貨【不得】直接進他的帳）——
+#   ★用戶紅線原文是「不要有違憲，例如瞬移」；而【到期退貨】是同一條線換一個方向：
+#     賣家不在場，貨也【不得】自己回家。
+#   ⇒ 兩種資產型態【共用一個泛型結構】（R² 建議、systems 採用）：
+#     entry = {kind: "coin"|"goods", res: String, amt: float, owner_team: int, since_tick: int}
+#   ⇒ ★★腦欄位一個、秤上 option 一個（它讀 `kind` 決定怎麼算價值）
+#   ⇒ ★★★而【行為級驗收仍然要分開量】（款/貨各自的野外率）——
+#     抽象共用【不代表】它們會被同等使用，而那正是要量的東西。
+var pending_claims: Array = []
 var abandoned_coin: float = 0.0       # 滅團遺財（無 outpost）
 var mint_level: int = 0               # mint 設施等級
 var predator_infamy: int = 0          # 掠食者致死計數（輕量 hook；持久惡獸實體屬任務系統）

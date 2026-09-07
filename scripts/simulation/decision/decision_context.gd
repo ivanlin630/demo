@@ -30,6 +30,19 @@ var strongest_feud: float = 0.0
 # 序4 vendetta 溶入：血仇仇敵 team id（NpcAiSystem.vendetta_target 回值，鏡射舊 hand dispatch 掃描）。
 # 攻擊 applicable 血仇路 + to_task 血仇 target fallback 讀此。內含衝動 gate + 可見/存在守衛。
 var feud_target_id: int = -1
+# ★★★B-v0：待領資產的腦欄位（意圖帳:43「資產配念頭」三件套的第①）——
+#   ★「自己的單據【天生在手】」：寄賣人知道自己寄賣過，★★不需要情報系統、不需要 belief
+#     ⇒ 這一格【不違憲】：它讀的是【自己的紀錄】不是別人的世界。
+#   ★★★而【額】與【位置】分開存：秤 option 的價值 = 額 × 距離折現，
+#     ⇒ 只有額沒有位置的話，「一筆很大但在天邊」與「一筆很小但就在腳下」會秤成一樣。
+var pending_claim_amt: float = 0.0        # 全部待領（款＋貨折值）的總額
+var pending_claim_pos: Vector2i = Vector2i(-1, -1)   # 最近一筆的所在（sentinel = 沒有；★to_task 的旅行目標）
+# ★★★距離【在 gather 時就算好】放進 ctx，而不是讓 term 自己算幾何 ——
+#   ★DecisionContext 沒有 `self_pos`（我原本假設有，實測沒有）⇒ term 層算不出距離。
+#   ★★而就算有，讓 term 層做幾何也是錯的分工：term 是【秤】，它該吃現成的輸入。
+var pending_claim_dist: float = 0.0
+var pending_claim_coin: float = 0.0       # ★款那半（★★而【款與貨要分開量】——抽象共用不代表被同等使用）
+var pending_claim_goods: float = 0.0      # ★貨那半（折成 local_value）
 var has_own_outpost: bool = false
 var has_manufacturing_facility: bool = false   # S1：本格有製造設施+生產權（「生產」applicable precondition，A2 補缺）
 var produce_pull: float = 0.0   # ★製造 bootstrap 子根②：自家可造 outputs 的 belief demand-responsive worst-shortfall（0-1；替死常數 produce_need）
@@ -238,6 +251,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.is_subteam = team.parent_team_id != -1   # A2a：子隊旗（歸建 directive + 戰略-gate）
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
 	c.has_arb = not OrderSystem.new().best_arbitrage_order(state, team).is_empty()
+	_gather_pending_claims(c, state, team)
 	c.team_strength = NpcCombatSystem.new().team_strength(state, team.team_id)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.head", _tg)
 	c.ambition_gap = maxi(team.ambition_cap - team.ambition_rung, 0)
@@ -867,3 +881,54 @@ static func _tile_forage_yield(tile: HexTileData, forage_rate: float) -> float:
 	if int(tile.resources.get("wild_game", 0)) > 0:
 		return forage_rate            # 獵物在 ⇒ 餬口地板拿得到（超額不 bank，見 HuntSystem buffer latch）
 	return minf(pool, forage_rate)
+
+
+# ★★★B-v0：待領資產的 gather（三件套第①的實作）——
+#   ★「自己的單據天生在手」：★★所以這裡【掃全世界的 tile】是【自知】不是【偷看】——
+#     它只認 `owner_team == team.team_id` 的那些條目，那些是【這隊自己寄賣的紀錄】。
+#   ★★★而【貨】折成 `local_value` 才能與【款】相加：不折的話「10 件糧」與「10 元」
+#     會被當成同一個大小，而它們差一個定價表。
+static func _gather_pending_claims(c: DecisionContext, state: WorldState, team: TeamData) -> void:
+	var best_d: int = 1 << 30
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.pending_claims.is_empty():
+			continue
+		for cl in tile.pending_claims:
+			if int(cl.get("owner_team", -1)) != team.team_id:
+				continue
+			var amt: float = float(cl.get("amt", 0.0))
+			if amt <= 0.0:
+				continue
+			var v: float = amt
+			if String(cl.get("kind", "")) == "goods":
+				v = amt * TradeValuation.local_value(team, String(cl.get("res", "")), state)
+				# ★★★★而這裡有一個【⑩ 之後才存在】的坑，systems 抓到、我把它記可見：
+				#   ⑩ 拆閥之後 `local_value` 可以【正好是 0】（深過剩）
+				#   ⇒ 待領【貨】的折值 = 0 ⇒ `pending_claim_amt` = 0 ⇒ `claim_value` 直接回 0
+				#   ⇒ ★【自己的貨永遠沒有人去領】—— 而那不是「不值錢的東西沒人交易」：
+				#     ★★那些貨【已經離開賣家庫存進了 escrow】⇒ 不去領 ＝ 卡在中間永遠不回來
+				#     ⇒ ★★★正是 `OrderSystem.audit_escrow()` 裡我自己命名的 `orphan_escrow`。
+				#   ★而更根本的一句：`local_value` 問的是【我還缺不缺這個】，
+				#     而【要不要去把自己的東西拿回來】問的是【別的問題】——
+				#     ★★用錯的價值函數，答案會是 0 而它看起來像一個正常的秤。
+				#   ⇒ ★★★這一格的修法【不是我的格子】（是換尺還是靠到期退貨兜底），
+				#     而在它裁定之前，我讓這個 0 【被看見】而不是靜靜地讓貨卡死。
+				if Probe.enabled and v <= 0.0 and amt > 0.0:
+					Probe.bump("claim.goods_value_zero")
+					Probe.bump("claim.goods_value_zero." + String(cl.get("res", "")))
+					Probe.add_amount("claim.goods_stuck_qty", amt)
+				c.pending_claim_goods += v
+			else:
+				c.pending_claim_coin += v
+			c.pending_claim_amt += v
+			var dv: Vector2i = tile.tile_pos - team.tile_pos
+			var d: int = (absi(dv.x) + absi(dv.x + dv.y) + absi(dv.y)) / 2
+			if d < best_d:
+				best_d = d
+				c.pending_claim_pos = tile.tile_pos
+	if c.pending_claim_amt > 0.0:
+		c.pending_claim_dist = float(best_d)
+		if Probe.enabled:
+			Probe.bump("claim.ctx.has_pending")
+			Probe.add_amount("claim.ctx.amt", c.pending_claim_amt)

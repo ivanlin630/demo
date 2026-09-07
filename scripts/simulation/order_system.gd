@@ -45,6 +45,15 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 			break
 	team.active_orders.append({
 		"order_id": oid, "kind": kind, "res": res,
+		# ★★★B-v0 ⑧：escrow 支撐的賣單【必須排除在 settle_orders 的 delta 反推之外】。
+		#   ★`settle_orders` 是【從副作用反推】：`pool[res] = 現在存量 − before`，
+		#     而 escrow 是【掛單當下一次扣光】⇒ 下一次 settle 會看到 avail = −qty
+		#     ⇒ ★★【整單被判成交，而一件都還沒賣掉】（對稱失敗：後續真實成交完全偵測不到）。
+		#   ⇒ ★★★通則：【兩種記帳方式不能同時管同一張單】——
+		#     一種【從副作用反推】、一種【事件權威】；混用 ⇒ 重複計數 或 全盲。
+		#   ★而這個旗標在 `post_order` 這裡先寫 false，由 `_register_on_board` 押成功後改 true
+		#     —— 因為【只有那裡知道 tile 存不存在】（漫遊隊沒有自家市集 ⇒ 押不了）。
+		"escrowed": false,
 		"qty_remaining": qty, "expire_tick": expire,
 		"created_tick": state.world.current_tick,   # ★壽命起算（QA 讀故事可直接看「同一張單卡了幾天」）
 	})
@@ -82,19 +91,72 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 
 # WS-2b：把訂單登錄到發起隊最近自家市集 outpost tile 的看板（可見性鏡像）。
 func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: String, res: String, qty: int, expire: int, price: float) -> void:
-	var mpos: Vector2i = _market_pos(state, team)
-	var tid: int = mpos.x * 1000 + mpos.y
-	var tile: HexTileData = state.world.tiles.get(tid)
-	# 僅在「自家市集 outpost」掛單；漫遊隊（無 outpost → _market_pos 回隊位、該 tile 非自家 outpost）不登錄。
-	if tile == null or tile.outpost_level <= 0 or tile.outpost_owner != team.team_id:
+	# ★合併註（2026-09-07）：main 側加了 `price` 參數（board-declared-price），
+	#   而 B-v0 側加了 consign 分流。★★兩者不衝突：一個改【掛在哪塊板】、一個改【entry 帶什麼】。
+	# ★★★★B-v0 ①掛單權 ＝【到場】（非 owner-only）：板是據點的公共設施。
+	#   ★★★而我第一版【只做了 ②escrow 沒做 ①】，結果是【escrow 打在完全相反的母體上】：
+	#     舊 `_register_on_board` 只在【自家市集】登錄 ⇒ 板上【全部都是 owner 自己的單】
+	#     ⇒ 我對所有 sell 單押貨 ⇒ ★把【自家櫃檯】的貨從 `team.resources` 扣走，
+	#       而櫃檯賣的是 `public_storage` ⇒ ★★owner 的櫃檯【直接停擺】（unified-commerce 5 紅）。
+	#   ⇒ ★★★通則：【②沒有正確的母體，直到 ①存在】—— 兩件事不是獨立的，
+	#     而「先做看起來獨立的那一半」會把機制打在錯的那群人身上。
+	#
+	# ★寄賣 ＝ 站在【別人的】市集上掛單 ⇒ 押貨（紅線：貨與錢都不得瞬移）
+	# ★★自家櫃檯 ＝ 站在自家市集掛單 ⇒ 【不押】（賣的是 public_storage，錢進自己口袋，不涉紅線）
+	var here_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
+	var here: HexTileData = state.world.tiles.get(here_id)
+	var consign: bool = here != null and here.outpost_level > 0 		and here.outpost_owner >= 0 and here.outpost_owner != team.team_id
+	var tile: HexTileData = null
+	if consign:
+		tile = here
+		if Probe.enabled: Probe.bump("mkt.post.consign")
+	else:
+		var mpos: Vector2i = _market_pos(state, team)
+		tile = state.world.tiles.get(mpos.x * 1000 + mpos.y)
+		# 僅在「自家市集 outpost」掛單；漫遊隊（無 outpost → _market_pos 回隊位、該 tile 非自家 outpost）不登錄。
+		if tile == null or tile.outpost_level <= 0 or tile.outpost_owner != team.team_id:
+			return
+		if Probe.enabled: Probe.bump("mkt.post.own_counter")
+	if tile == null:
 		return
+	# ★★★B-v0 ②押貨 escrow：掛【賣】單即【交貨入市場保管】——
+	#   ★而它改變了權威關係：板上真的有貨 ⇒ 權威從 `active_orders` 移到 tile（見 tile_data 註解）。
+	#   ★★買單押錢那半【本 slice 不做】（systems 的砍法優先序：買單押錢半邊後補）。
+	var escrowed: bool = false
+	if kind == "sell" and consign:   # ★只有【寄賣】才押貨；自家櫃檯不押（見上）
+		var moved: float = ResourceBank.remove(team, res, float(qty), "escrow_post")
+		if moved > 0.0:
+			tile.market_escrow[oid] = {"res": res, "qty": moved,
+				"owner_team": team.team_id, "since_tick": state.world.current_tick}
+			escrowed = true
+			if Probe.enabled:
+				Probe.bump("mkt.escrow.post")
+				Probe.add_amount("mkt.escrow.qty", moved)
+			# ★★★而【押不到整單】要被看見：`remove()` 有 clampf 保底 ⇒ 存量不足時只押到有的部分
+			#   ⇒ 若不記，「押了 5 件」與「想押 10 件只押到 5」印出來一樣。
+			if moved < float(qty) and Probe.enabled:
+				Probe.bump("mkt.escrow.partial")
+				Probe.add_amount("mkt.escrow.short", float(qty) - moved)
+		elif Probe.enabled:
+			Probe.bump("mkt.escrow.nothing")   # ★存量 0 ⇒ 一件都押不到（★單仍掛，而板上沒貨）
 	tile.market_orders.append({
-		"order_id": oid, "kind": kind, "res": res,
+		"order_id": oid, "kind": kind, "res": res, "escrowed": escrowed,
 		"qty_remaining": qty, "origin_team": team.team_id, "expire_tick": expire,
 		# ★資訊網 S-prop：origin_tick(age→decay) + strength + relayed 旗（本隊原生單 relayed=false、由 _sync_board 權威維護）。
 		"origin_tick": state.world.current_tick, "strength": 1.0, "relayed": false,
 		"price": price,   # ★掛單那一刻凍結；要改價＝撤單重掛（不就地改）
 	})
+	# ★★★把 escrow 結果【寫回賣家自己的存根】—— settle_orders 的排除規則讀的是這個旗標。
+	#   ★而它必須在這裡寫：只有這裡知道 tile 存不存在（漫遊隊沒有自家市集 ⇒ 押不了 ⇒ 旗標維持 false
+	#   ⇒ ★★那種單【仍然走舊的 delta 反推】，而那是對的：它沒有 escrow，delta 就是它唯一的證據）。
+	if escrowed:
+		for _ao in team.active_orders:
+			if int(_ao.get("order_id", -1)) == oid:
+				_ao["escrowed"] = true
+				# ★★★連【哪塊 tile】一起記：到期退貨要找回那批貨，
+				#   而【掃全圖 tile】既貴又會在 tile 被回收時静默漏掉。
+				_ao["escrow_tile"] = tile.tile_pos.x * 1000 + tile.tile_pos.y
+				break
 	Probe.bump("g1.board_register")
 
 # WS-2b：把 team 在其市集 outpost tile 的看板 entry 與 active_orders（權威）對齊：
@@ -135,6 +197,27 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		else:
 			# ★abandoned tap：逾時未成交（帶 order_id + 壽命，事後可串）
 			Probe.bump("order.abandoned")
+			# ★★★B-v0 §2：到期退貨是【同一條紅線、換一個方向】――
+			#   賣家不在場，貨【不得】直接回到他的 resources，否則就是【貨物瞬移】。
+			#   ⇒ 落【待領貨帳】，與待領款共用同一個 pending_claims 結構。
+			#   ★而這裡【不】把 escrow 直接刪掉：刪掉 = 貨消失，而守恆會在 audit 裡紅。
+			if bool(o.get("escrowed", false)):
+				var _etid: int = int(o.get("escrow_tile", -1))
+				var _etile: HexTileData = state.world.tiles.get(_etid)
+				if _etile == null:
+					Probe.bump("mkt.escrow.expire_tile_gone")   # ★tile 消失（降級/回收）⇒ 貨沒有落地點，要看得見
+				else:
+					var _e: Dictionary = _etile.market_escrow.get(int(o["order_id"]), {})
+					var _q: float = float(_e.get("qty", 0.0))
+					if _q > 0.0:
+						InteractionSystem.add_pending_claim(_etile, "goods", String(_e.get("res", "")), _q,
+							int(_e.get("owner_team", -1)), state.world.current_tick)
+						_etile.market_escrow.erase(int(o["order_id"]))
+						if Probe.enabled:
+							Probe.bump("mkt.escrow.expire_to_claim")
+							Probe.add_amount("mkt.escrow.expire_qty", _q)
+					else:
+						Probe.bump("mkt.escrow.expire_empty")   # ★已全部賣掉（正常）
 			# ★執行失敗反饋鐵律 T4 示範接線：買單到期沒人填 ＝ 執行失敗，不准靜默丟棄。
 			# 記隊層失敗記憶 → 下輪「買糧/買料」（＝依賴市場供貨的決策）折價；TTL 用 ORDER_LIFETIME
 			# ＝該動作的自然重試週期（相對錨定，不新增全域絕對天數常數）。
@@ -383,6 +466,12 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 		else:
 			gain = _mine * float(o["qty"])   # 舊 proxy（這則消息沒帶價）
 			if Probe.enabled: Probe.bump("trade.arb_proxy.sell")
+		# ★★★⑩ 的 zero-gain tap（token `ten-zero-gain-reach`）――保留，而它的意義在新公式下【更強】：
+		#   舊公式下 gain<=0 只能發生在【自評值 0】；
+		#   ★新公式下它還含【他開的價高於我的估值】――那才是真正的【不值得買】。
+		if Probe.enabled and gain <= 0.0:
+			Probe.bump("trade.arb_kill_zero_gain")
+			Probe.bump("trade.arb_kill_zero_gain." + String(o["res"]))
 		if gain > best_score:
 			best_score = gain; best = {"kind": "sell", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	for o in received_buy_orders(state, merchant):
@@ -413,11 +502,49 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 
 # 履約結算：按窗內 res 淨持有變化沖 active_orders（純記帳，不碰 resources）。
 # before = 交易窗前各 res 持有快照。回 progressed（任一單 qty 有減）。
+# ★★★★escrow 對帳（systems 追問：權威搬家之後【誰負責發現存根與實貨分歧】）——
+#   ★`mkt.escrow.partial` 抓的是【發生的那一刻】，而分歧是【持續狀態】：
+#     ★★一個沒有對帳不變量的權威搬家，分歧會【靜默累積】。
+#   ⇒ 三種分歧【分開記】，因為處置不同：
+#     `escrow_orphan` 實貨在市場、而賣家存根不見了 ⇒ 貨【永遠沒有人來領】
+#     `stub_orphan`   存根說 escrowed、而市場沒有那批貨 ⇒ 賣家【以為自己還有貨在賣】
+#     `qty_mismatch`  兩邊都在但數量不同 ⇒ ★★★誰對？—— 而權威在 tile（見 tile_data 註解）
+#   ★回 {orphan_escrow, orphan_stub, qty_mismatch, checked}；★★`checked` 是母體：
+#     它 0 的時候上面三個 0 【不是「沒有分歧」】，是【沒有東西可比】。
+static func audit_escrow(state: WorldState) -> Dictionary:
+	var r: Dictionary = {"orphan_escrow": 0, "orphan_stub": 0, "qty_mismatch": 0, "checked": 0}
+	var stub: Dictionary = {}          # oid → qty_remaining（所有標了 escrowed 的存根）
+	for tid in state.teams:
+		for o in state.teams[tid].active_orders:
+			if bool(o.get("escrowed", false)):
+				stub[int(o.get("order_id", -1))] = int(o.get("qty_remaining", 0))
+	var seen: Dictionary = {}
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		for oid in tile.market_escrow:
+			r["checked"] += 1
+			seen[int(oid)] = true
+			if not stub.has(int(oid)):
+				r["orphan_escrow"] += 1
+				continue
+			if absf(float(tile.market_escrow[oid].get("qty", 0.0)) - float(stub[int(oid)])) > 0.01:
+				r["qty_mismatch"] += 1
+	for oid2 in stub:
+		if not seen.has(int(oid2)):
+			r["orphan_stub"] += 1
+			r["checked"] += 1
+	return r
+
 func settle_orders(team: TeamData, before: Dictionary, _tick: int) -> bool:
 	var progressed: bool = false
 	# 各 res 的 delta 池（一池只沖該 res 同向單，FIFO）
 	var pool: Dictionary = {}
 	for o in team.active_orders:
+		if bool(o.get("escrowed", false)):
+			# ★★★事件權威單：它的 fill 只認【市場撮合事件】，不認資源 delta（見 post_order 註解）。
+			if Probe.enabled:
+				Probe.bump("order.settle_skip_escrowed")
+			continue
 		var res: String = o["res"]
 		if not pool.has(res):
 			pool[res] = float(team.resources.get(res, 0)) - float(before.get(res, 0))
