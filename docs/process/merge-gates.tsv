@@ -79,3 +79,4 @@ swallow-setter	bash .claude/hooks/swallow-setter-gate.sh	★新出現的靜默�
 tier2-sweep-staleness	bash .claude/hooks/bed-sweep-tier2.sh --check-staleness	★Tier2 全床掃描【停了要有人知道】：上次跑 >7 天即紅（本閘不跑掃描，只驗它還活著）	TIER2-STALENESS\] PASS
 minor-merge	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/minor_population_merge_test.gd	★合併時小孩跟著走、且【不被記成滅團損失】——順序陷阱的機械證據（determinism 對本票沒有鑑別力：那個世界小孩總數 0）	=== DONE === ALL PASS
 escrow-audit	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/escrow_audit_test.gd	escrow 對帳不變量(B-v0):權威從 active_orders 搬到 tile 之後,【誰負責發現存根與實貨分歧】——★partial 抓的是發生的那一刻,而分歧是【持續狀態】,沒有對帳不變量它會靜默累積;★★三種分歧分開造分開斷言(orphan_escrow 貨卡死／orphan_stub 賣家被騙／qty_mismatch 要決定信誰,處置完全不同);★★★判準形狀=【checked>0 且三個都 0】——checked==0 時那三個 0 是【沒東西可比】不是【沒有分歧】,而空世界那條就是在擋這個	=== DONE === ALL PASS
+computed-prop	bash .claude/hooks/computed-prop-write-guard.sh	計算屬性直寫站只減不增（拿掉 setter 不會變 parse error——引擎不給這個保護，所以靜態閘是唯一的預防線）	[COMPUTED-PROP] PASS

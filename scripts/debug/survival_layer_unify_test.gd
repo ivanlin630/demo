@@ -45,7 +45,8 @@ func _mk_team() -> TeamData:
 	t.parent_team_id = -1
 	t.current_task = TeamData.TASK_PRODUCE   # 非 IDLE、非 STUCK(ATTACK/LOOT)、非 survival
 	t.move_target = Vector2i(0, 0)
-	t.population = 10
+	AnonTierSystem.add_anon(t, "平民", 10)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；t 無 leader ⇒ pop = anon = 10
+	assert(t.population == 10, "fixture 前提：pop 該是 10，實際=%d" % t.population)
 	t.crisis_latched = false
 	t.decision_eval_next_tick = 999999       # cadence 遠期 → 不干擾 crisis edge 判定
 	t.rung_pop_last = 0                       # 不觸發 pop-drop crisis 分支
@@ -104,9 +105,11 @@ func _test_fix3_food_ready_via_leader() -> void:
 	print("--- Fix3-v2 food_ready 讀領袖人格 ---")
 	var state := WorldState.new()
 	var t := TeamData.new()
-	t.team_id = 2; t.faction_id = -1; t.population = 10
+	t.team_id = 2; t.faction_id = -1
+	AnonTierSystem.add_anon(t, "平民", 9)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；leader 在下一行設 ⇒ 1+9 = 10
 	t.ambition_cap = 2; t.ambition_rung = 0   # ambition_gap = 1.0
 	t.food_flow_avg = 0.0; t.leader_id = 100
+	assert(t.population == 10, "fixture 前提：pop 該是 10（leader1+anon9），實際=%d" % t.population)
 	# 賭徒領袖：ref≈2 → food_days=3 時 food_ready=min(3/2,1)=1.0 → esteem 近滿(薄糧就搏發展)
 	var gambler := PersonData.new(); gambler.id = 100; gambler.values = {"慎重": 0.0, "野心": 1.0}
 	state.persons[100] = gambler
@@ -119,7 +122,8 @@ func _test_fix3_food_ready_via_leader() -> void:
 	_ok(raw_c[NeedHierarchy.L_ESTEEM] < 0.5, "謹慎狂領袖 food_days=3 → esteem 低(%.2f，存久)" % raw_c[NeedHierarchy.L_ESTEEM])
 	_ok(raw_g[NeedHierarchy.L_ESTEEM] > raw_c[NeedHierarchy.L_ESTEEM], "同糧態：賭徒 esteem > 謹慎 esteem(餓死行為分化)")
 	# null leader → 預設 ref=BASE 4（不崩）
-	var t2 := TeamData.new(); t2.team_id = 3; t2.faction_id = -1; t2.population = 10
+	var t2 := TeamData.new(); t2.team_id = 3; t2.faction_id = -1
+	AnonTierSystem.add_anon(t2, "平民", 10)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；t2.leader_id = -1（下行）⇒ pop = anon = 10
 	t2.ambition_cap = 2; t2.ambition_rung = 0; t2.leader_id = -1
 	var raw_n := NeedHierarchy.compute_raw(state, t2, 4.0, 0.0)
 	_ok(absf(raw_n[NeedHierarchy.L_ESTEEM] - 1.0) < 0.01, "null leader food_days=4 → ref=4→food_ready=1.0(不崩)")

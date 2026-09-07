@@ -31,9 +31,12 @@ func _init() -> void:
 	state.persons[10] = la; state.persons[20] = lb
 
 	var a := TeamData.new(); a.team_id = 1; a.leader_id = 10; a.tile_pos = apos
-	a.population = 5; a.resources = {"food": 0, "material": 50}
+	AnonTierSystem.add_anon(a, "平民", 4)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；getter = leader(0/1)+named+anon
+	a.resources = {"food": 0, "material": 50}
 	var b := TeamData.new(); b.team_id = 2; b.leader_id = 20; b.tile_pos = bpos
-	b.population = 5; b.resources = {"food": 50, "material": 0}
+	AnonTierSystem.add_anon(b, "平民", 4)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；getter = leader(0/1)+named+anon
+	b.resources = {"food": 50, "material": 0}
+	assert(a.population == 5 and b.population == 5, "fixture 前提：兩隊 pop 該是 5，實際=%d/%d" % [a.population, b.population])
 	state.teams[1] = a; state.teams[2] = b
 
 	# ① 站家隊 effective_food 含糧倉（granary-aware、非只私產）

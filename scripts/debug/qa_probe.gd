@@ -155,7 +155,9 @@ func _probe_join_request_population() -> void:
 	print("  玩家 leader 統領=%.3f → pop_cap=%d, 現 population=%d" % [cmd_skill, cap, pt.population])
 	pt.resources["food"] = 200.0
 	var ppos = pt.tile_pos
-	var ds = TeamData.new(); ds.team_id = 91001; ds.population = 8; ds.tile_pos = ppos; ds.faction_id = -1
+	var ds = TeamData.new(); ds.team_id = 91001; ds.tile_pos = ppos; ds.faction_id = -1
+	AnonTierSystem.add_anon(ds, "平民", 8)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；ds 無 leader/named ⇒ pop = anon = 8
+	assert(ds.population == 8, "fixture 前提：ds pop 該是 8，實際=%d" % ds.population)
 	st.teams[91001] = ds
 	var before = pt.population
 	st.player_forced_event = {"action": "join_request", "from_id": 91001}
@@ -196,9 +198,11 @@ func _probe_recruit_anon_ui_path() -> void:
 	var pt = st.teams[ptid]
 	pt.resources["coin"] = 500.0
 	var ppos = pt.tile_pos
-	var tgt = TeamData.new(); tgt.team_id = 92001; tgt.population = 6; tgt.tile_pos = ppos; tgt.faction_id = -1
+	var tgt = TeamData.new(); tgt.team_id = 92001; tgt.tile_pos = ppos; tgt.faction_id = -1
+	AnonTierSystem.add_anon(tgt, "平民", 5)   # ★舊寫法是 getter-only 賦值（靕默 no-op）；下方還會 append 1 名 named ⇒ 5+1 = 6
 	var m = PersonData.new(); m.id = 92099; m.team_id = 92001; m.loyalty = 0.2
 	st.persons[92099] = m; tgt.named_members.append(92099); tgt.leader_id = -1
+	assert(tgt.population == 6, "fixture 前提：tgt pop 該是 6（named1+anon5），實際=%d" % tgt.population)
 	st.teams[92001] = tgt
 	st.team_discovered[ptid] = st.team_discovered.get(ptid, [])
 	if not st.team_discovered[ptid].has(92001): st.team_discovered[ptid].append(92001)
@@ -222,7 +226,9 @@ func _probe_beg_ui_path() -> void:
 	var st = node._bridge.get_state()
 	var ptid = st.persons[st.player_id].team_id
 	var ppos = st.teams[ptid].tile_pos
-	var tgt = TeamData.new(); tgt.team_id = 93001; tgt.population = 6; tgt.tile_pos = ppos; tgt.faction_id = -1
+	var tgt = TeamData.new(); tgt.team_id = 93001; tgt.tile_pos = ppos; tgt.faction_id = -1
+	AnonTierSystem.add_anon(tgt, "平民", 6)   # ★舊寫法是 getter-only 賦值（靕默 no-op）
+	assert(tgt.population == 6, "fixture 前提：tgt pop 該是 6，實際=%d" % tgt.population)
 	tgt.resources["food"] = 100.0
 	st.teams[93001] = tgt
 	st.team_discovered[ptid] = st.team_discovered.get(ptid, [])

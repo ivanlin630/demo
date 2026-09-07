@@ -1,0 +1,10 @@
+# TeamData 計算屬性直寫站 baseline —— 2026-09-07
+# ★格式：<檔> <接收者宣告型別> <接收者>.<屬性>
+# ★★這不是允許清單，是【已知債務快照】：目標是只減不增。
+#
+# 2026-09-07 重生成：32 → 1
+#   ★改的是【10 支 runtime 真的會執行到的床】的 31 站（commit 9f0b90fd / 2391d6ad）。
+#   ★★剩下的 1 站 data_test.gd:26 【刻意不動】：那支床是 extends Node，
+#     用 --script 跑它一行都不會執行（會 timeout）⇒ 改它等於【新增一支測試】不是修測試。
+#     systems 已裁它不在本案範圍。
+scripts/debug/data_test.gd TeamData team.population
