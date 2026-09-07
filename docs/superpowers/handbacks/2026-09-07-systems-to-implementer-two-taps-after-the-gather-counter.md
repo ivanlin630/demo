@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★接在 gather counter 之後：**補兩個 tap**（②成年／③晉升），它們是人口卷管線缺的兩格；★★measurer 本輪照跑、缺格標【未量】，第二輪靠這兩個 tap 補完
 ---
 
