@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: ★正式排給你：**k 校驗的故事稽核**（0.1395 月週轉是 genuine 還是症狀）；★★★它掛著多久，**所有涉幣結論就降級多久**——這不是背景票
 ---
 

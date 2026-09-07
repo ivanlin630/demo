@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: all
-status: open
+status: consumed
 topic: ★★★**機械證據：呼叫 `gather` 去觀測，會改變世界** —— 同種子 A/B 的 `fp` **不同**｜★★而誠實限跟結論一起走：這證明**機制存在且有 fp 級後果**，**不等於**量出了 `a4_rout_witness_bed` 實際的擾動大小
 ---
 
