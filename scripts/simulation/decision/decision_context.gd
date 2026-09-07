@@ -239,6 +239,12 @@ var survival_stall_active: Array = []
 # ★★修法方向已定（:653，本檔不動）：拆 pure-read vs commit 兩段
 #   —— 而【不是】給 observe-mode 抑制寫：抑制清單＝易漏的黑名單（本輪已證：
 #   specimen_tracer 的 _begin_observe 只擋 RNG 與 Probe，擋不住這裡）。
+# ★★★觀測純度儀器（blueprint GO：先量、坐實後才修）――【只加 tap，不改行為】。
+#   ★`gather` 在【純讀路徑】寫 7 處（team ×5、HexTileData ×2，其中三個是 cadence），
+#     而 production 有 10 個 `advance=false` 的呼叫點全在決策路徑上。
+#   ★★【寫幾次】與【有沒有影響】是兩件事 ⇒ 先量前者：每處按 `advance` 分桶。
+#   ★★★Probe.bump 不耗 RNG、不改控制流 ⇒ 儀器不改變被觀測物。
+#   ★誠實限：tap 只答【這一行被跑到幾次】，不答【寫進去的值有沒有真的不同】。
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
 	var c := DecisionContext.new()
 	var _tg: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
@@ -308,7 +314,9 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			else:
 				c.idle_employ_value = DecisionContext._idle_employ_value(state, team, _btile, c.idle_labor, c.leader_values)
 				_btile.idle_employ_cached = c.idle_employ_value
+				if Probe.enabled: Probe.bump("gather.write.idle_employ_cached." + ("advance" if advance else "observe"))
 				_btile.idle_employ_next_tick = state.world.current_tick + LaborSystem.LABOR_CADENCE
+				if Probe.enabled: Probe.bump("gather.write.idle_employ_next_tick." + ("advance" if advance else "observe"))
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
 	c.current_task = team.current_task   # ★GATE-A 二刀 touch0：自身 current_task（返家 hysteresis；自身欄非 god-view）
@@ -452,8 +460,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	if c.has_own_outpost and c.idle_labor > 0.0 			and not (team.leader_id == state.player_id and state.player_id != -1):
 		if state.world.current_tick >= team.expand_eval_next_tick:
 			team.expand_eval_next_tick = state.world.current_tick + FactionAISystem.INFRA_INTERVAL
+			if Probe.enabled: Probe.bump("gather.write.expand_eval_next_tick." + ("advance" if advance else "observe"))
 			var _loc: Dictionary = _fa._evaluate_new_outpost_location(state, team)
 			team.expand_site_cached = _loc.get("pos", Vector2i(-1, -1)) if not _loc.is_empty() else Vector2i(-1, -1)
+			if Probe.enabled: Probe.bump("gather.write.expand_site_cached." + ("advance" if advance else "observe"))
 		var _cand_pos: Vector2i = team.expand_site_cached
 		var _cand: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_cand_pos)) if _cand_pos != Vector2i(-1, -1) else null
 		# settler 數＝沿用 _dispatch_builder 既有規則（level1 建造隊 6 人、母隊須 ≥2 倍）＝不新增門檻
@@ -730,9 +740,12 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 				if _f != null and team.team_id != _f.leader_team_id:
 					ct = FactionAISystem.consolidate_target_of(state, team, _f)
 			team.consolidate_target_cache = ct
+			if Probe.enabled: Probe.bump("gather.write.consolidate_target_cache." + ("advance" if advance else "observe"))
 			# §HOW-7 吸納 target（強方 pull，capacity-bound 弱鄰）
 			team.absorb_target_cache = FactionAISystem.new()._find_absorb_target(state, team)
+			if Probe.enabled: Probe.bump("gather.write.absorb_target_cache." + ("advance" if advance else "observe"))
 			team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
+			if Probe.enabled: Probe.bump("gather.write.consolidate_eval_next_tick." + ("advance" if advance else "observe"))
 		c.consolidate_target_id = team.consolidate_target_cache
 		c.absorb_target_id = team.absorb_target_cache
 		# 名聲磁鐵 §3：本隊對 host 的 protector_rep（主觀 per-observer，禁全域真值）

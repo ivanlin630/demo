@@ -384,9 +384,16 @@ static func total_captives(team: TeamData) -> int:
 
 # leader 命令升一波。回實際升等人數（失敗回 0，不部分扣）
 static func try_promote(state: WorldState, team: TeamData, from_tier: String, count: int) -> int:
+	# ★★★③晉升漏斗 tap（人口卷缺的那一格）――★逐關記，不只記成功。
+	#   此函式有【六道 early-return】：只數成功次數答得了【升了幾個】，
+	#   ★★答不了【死在哪一關】――而後者才是【為什麼沒人升級】的答案。
+	#   ★★★而【嘗試數】是母體：沒有它，「升級 0 次」分不出【沒人試】與【試了都被擋】。
+	if Probe.enabled: Probe.bump("promote.attempt")
 	if count <= 0:
+		if Probe.enabled: Probe.bump("promote.kill.count_le0")
 		return 0
 	if from_tier == "菁英":
+		if Probe.enabled: Probe.bump("promote.kill.already_elite")
 		return 0
 	var idx: int = TIER_ORDER.find(from_tier)
 	if idx == -1 or idx + 1 >= TIER_ORDER.size():
@@ -394,15 +401,22 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 	var to_tier: String = TIER_ORDER[idx + 1]
 	# 1. count 足
 	if AnonCohort.by_tier(team.anon_cohorts, from_tier) < count:
+		if Probe.enabled: Probe.bump("promote.kill.not_enough_bodies")
 		return 0
 	# 2. exp 足（每升 1 人需 1 份 threshold；consume threshold × count）
 	var threshold: float = float(PROMOTION_EXP_THRESHOLD[from_tier])
 	if float(team.anon_exp.get(from_tier, 0.0)) < threshold * float(count):
+		if Probe.enabled:
+			Probe.bump("promote.kill.not_enough_exp")
+			Probe.bump("promote.kill.not_enough_exp." + from_tier)
 		return 0
 	# 3. 物資足
 	var cost: Dictionary = PROMOTION_COST[from_tier]
 	for res in cost:
 		if float(team.resources.get(res, 0)) < float(cost[res]) * float(count):
+			if Probe.enabled:
+				Probe.bump("promote.kill.not_enough_res")
+				Probe.bump("promote.kill.not_enough_res." + String(res))
 			return 0
 	# 4. leader 戰術 cap（訓練升等受限）
 	var leader: PersonData = state.persons.get(team.leader_id)
@@ -410,11 +424,13 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 		var tact: float = float(leader.skills.get("戰術", 0.0))
 		var cap: String = _training_cap(tact)
 		if TIER_ORDER.find(to_tier) > TIER_ORDER.find(cap):
+			if Probe.enabled: Probe.bump("promote.kill.leader_tactics_cap")
 			return 0
 	# 5. 菁英武器需求（check 不消耗）
 	if to_tier == "菁英":
 		var future_elite: int = AnonCohort.by_tier(team.anon_cohorts, "菁英") + count
 		if int(team.resources.get(ELITE_WEAPON_REQ, 0)) < future_elite:
+			if Probe.enabled: Probe.bump("promote.kill.elite_weapon")
 			return 0
 	# 全過 → 執行
 	for res in cost:
@@ -424,6 +440,10 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 			AnonTreasuryBank.deposit(team, amt, "train_salary")   # 守恆：訓練餉銀入公庫，不蒸發
 	AnonCohort.move(team.anon_cohorts, from_tier, "healthy", to_tier, "healthy", count)
 	team.anon_exp[from_tier] = float(team.anon_exp[from_tier]) - threshold * float(count)
+	if Probe.enabled:
+		Probe.bump("promote.ok")
+		Probe.bump("promote.ok.%s_to_%s" % [from_tier, to_tier])
+		Probe.add_amount("promote.ok.n", float(count))
 	return count
 
 static func _training_cap(tact: float) -> String:

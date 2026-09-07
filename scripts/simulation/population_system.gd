@@ -86,6 +86,12 @@ func _mature_minors(state: WorldState) -> void:
 		n = mini(n, team.minor_population)
 		team.minor_population -= n
 		AnonTierSystem.add_anon(team, AnonCohort.TIER_PLEB, n)
+		# ★★★②成年 tap（人口卷缺的另一格）――★【人次】與【隊次】分開：
+		#   合成一個數就分不出【很多隊各成年一個】與【一隊成年很多】。
+		#   ★★而母體（有小孩的隊數）在上方 `minor_exceeds_pop` 那一區已有旁證。
+		if Probe.enabled:
+			Probe.bump("pop.mature.batches")
+			Probe.add_amount("pop.mature.n", float(n))
 		print("[PopMgmt] Team%d %d 名未成年長大成人（平民）" % [tid, n])
 
 # ★§4b 唯一新常數（TEST VALUE、R² 判 margin 優於純 delay）：機械拆隊保底的觸發倍率。
