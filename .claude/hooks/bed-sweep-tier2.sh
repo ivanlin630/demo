@@ -44,7 +44,11 @@ fi
 
 # ── 三問之一/之二：誰觸發＋多久跑 ──────────────────────
 [ -f "$LIST" ] || ls -1 scripts/debug/*_test.gd > "$LIST"
-TMP="$(mktemp)"; trap 'rm -f "$TMP"' EXIT
+# ★★★進度可見（2026-09-07 血證）：原本寫在 mktemp ⇒ 外面【無法回答「它還在跑嗎」】
+#   當天首跑 16 分鐘只掃完 1 支（殘留進程搶 Godot），而我是靠翻 /tmp 才發現的。
+#   ⇒ 進度表寫在【固定可見路徑】，任何人 wc -l 就知道它活著、走到哪。
+TMP="docs/measurements/.bed-sweep-inprogress.tsv"
+: > "$TMP"
 echo "[tier2] 全床掃描開始（$(grep -c . "$LIST") 支）"
 PER_BED_TIMEOUT="${PER_BED_TIMEOUT:-600}" bash .claude/hooks/bed-triage-sweep.sh "$LIST" "$TMP" >/dev/null 2>&1
 rc=$?

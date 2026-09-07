@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: money-genesis(⑨) merge-gate
 topic: R②判決:issues(小)——①推導鏈讀code確認乾淨:total_pop讀state.teams真population、FOOD_PER_PERSON_PER_DAY/BASE_PRICE[food]/days_per_month全是既有量重用,唯一常數GENESIS_K=2.0是我上次已核可的複合校準常數,且護欄語句(重校k唯一合法理由=volume比對不符)真的逐字寫進code註解(game_setup.gd:98-102)不只留spec;②MG_HANDWRITTEN讀取點確認真在路徑上:money_genesis_bed.gd:49-58真的改寫state.teams[tid].resources[coin]縮放成7000,:63-66驗證也改讀縮放後的真實team.resources而非genesis探針tap,不是只改印出的數字;★額外抓到一個獨立發現(非你要求範圍但讀code時撞見):GENESIS_W_MERCHANT權重靠team.tags.has(TAG_MERCHANT)判斷,但arb_hit_confirm_bed.gd:42-43自己記錄「TAG_MERCHANT本世界全程0隊,真正驅動merchant判定的閘是ambition_archetype==ARCHETYPE_TRADE」——這是對其他(非peaceful_economy explicit-mode)世界講的,對本次量測用的peaceful_economy(explicit模式,team8 config裡tags真的含"商隊")沒有影響、量測結果有效;但若genesis之後套用到random-mode或warring世界,商隊權重會silently退化成跟其他隊一樣的OTHER權重,整個角色加權形同虛設,建議在§6④warring獨立pilot時一併驗證TAG_MERCHANT母體是否非0,不是本票必須現在修但要記下來別遺失
 ---

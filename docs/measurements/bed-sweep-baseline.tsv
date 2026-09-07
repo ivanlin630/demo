@@ -128,16 +128,16 @@ scripts/debug/production_framework_test.gd	red	5	  [FAIL] ★餓隊 _pick_facili
 scripts/debug/recovery_r1_test.gd	red	14	  [FAIL] ★全 pipeline：dispatched=1 + arrived=0>0 + 村 pop 2→2 真升(過 merge-bac
 scripts/debug/recovery_r2_test.gd	red	12	  [FAIL] 料備妥+建工期<餓死窗→自救建田 viable、util=0.00>1.0(勝覓食基�
 scripts/debug/recovery_r3_test.gd	red	13	  [FAIL] ★全 pipeline：棄爛地(abandoned=1、原 owner→-1)→travel 抵好地(at_t
-scripts/debug/seam1_registry_test.gd	red	7	  [FAIL] applicable 順序 = ["貿易", "建設", "survival", "掠奪", "備戰", "迎戰"
+scripts/debug/seam1_registry_test.gd	DELETED	7	★2026-09-07 依 blueprint 裁定刪除（備戰下架 delist-prepare 的過期床）——本列是歷史記錄，檔案已不存在
 scripts/debug/seam3_sysreg_test.gd	red	8	  [FAIL] phase_timing label 序 byte-identical
 scripts/debug/slice2_perception_test.gd	red	5	  [FAIL] 近 belief(2,0) → 處理達 diplomacy（寫 cooldown），cooldown.has(3)=false
 scripts/debug/specimen_noninvasive_test.gd	red	27	  [FAIL] 每行 valid JSON 且含 tick/team_id/做什麼(9/48)
 scripts/debug/survival_a4_test.gd	red	4	  [FAIL] 瀕餓 food_days=3 → survival_pressure=1.0（floor 不動、不餓死 regressio
 scripts/debug/survival_layer_unify_test.gd	red	5	  [FAIL] 離開 crisis → latch 解除
-scripts/debug/survival_single_source_test.gd	red	5	  [FAIL] threat-class '備戰' → PRIO_THREAT 70
+scripts/debug/survival_single_source_test.gd	DELETED	5	★2026-09-07 依 blueprint 裁定刪除（備戰下架 delist-prepare 的過期床）——本列是歷史記錄，檔案已不存在
 scripts/debug/threat_oracle_s15_test.gd	red	4	  [FAIL] 無 belief → pop_est=self_pop（虛張生效，禁讀 other.population） (a=1.
-scripts/debug/threat_oracle_s1_probe_test.gd	red	4	  [FAIL] 統一隊選 threat option（chosen=建設）
-scripts/debug/threat_oracle_s2_test.gd	red	5	  [FAIL] cautious-hawk → 備戰(got=建設)
+scripts/debug/threat_oracle_s1_probe_test.gd	DELETED	4	★2026-09-07 依 blueprint 裁定刪除（備戰下架 delist-prepare 的過期床）——本列是歷史記錄，檔案已不存在
+scripts/debug/threat_oracle_s2_test.gd	DELETED	5	★2026-09-07 依 blueprint 裁定刪除（備戰下架 delist-prepare 的過期床）——本列是歷史記錄，檔案已不存在
 scripts/debug/tracer_completeness_test.gd	red	50	  [FAIL] commit-fail/heartbeat entry 1（churn/空檔現形），實際=0
 scripts/debug/lod_phase_invariance_test.gd	red	312	  [FAIL] G：★母體非空（可判的盟 0）—— ★★0 的話下面【答不了】
 scripts/debug/specimen_confound_test.gd	green	88	

@@ -55,3 +55,4 @@ docs/measurements/.bare-tick-gate-*.txt
 .claude/hooks/.busy.*
 .claude/hooks/.committed.*
 .claude/hooks/.godot-runs.log
+docs/measurements/.bed-sweep-inprogress.tsv
