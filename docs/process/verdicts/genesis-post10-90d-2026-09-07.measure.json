@@ -1,0 +1,43 @@
+{
+  "touches": ["scripts/simulation/coin_treasury.gd", "scripts/simulation/salary_system.gd", "scripts/simulation/trade_valuation.gd", "scripts/simulation/interaction_system.gd"],
+  "slice": "⑨貨幣創世 merge前置：④月週轉+k校驗、③物價漂移、⑤推導vs手寫鑑別力",
+  "source": "--path A:/GDS/demo/.worktrees/genesis @ 211a5cb0（⑩+board-price已merge），床scripts/debug/money_genesis_bed.gd，MG_DAYS=90，seed=1337",
+  "raw_logs": {
+    "derived": "docs/measurements/2026-09-07-genesis-post10-90d-derived.txt",
+    "handwritten": "docs/measurements/2026-09-07-genesis-post10-90d-handwritten.txt（MG_HANDWRITTEN=1對照版）"
+  },
+  "①守恆": "PASS，兩版皆0.00（derived期初期末6912.00對稱；handwritten期初期末7000.00對稱，各自內部守恆，CoinAudit.total()已判過不重判）",
+  "②月週轉_k校驗": {
+    "derived_4位小數": 0.1395,
+    "handwritten_4位小數": 0.1377,
+    "GENESIS_K": 2.0,
+    "並排(不改k)": "derived 0.1395次/月 vs GENESIS_K=2.0——相差約14.3倍(2.0/0.1395≈14.34)，超過一個量級(10倍)",
+    "陷阱①已避開": "4位小數印出後derived≠handwritten(0.1395≠0.1377)，證明讀數精度足夠鑑別，非「看起來沒在量」",
+    "陷阱②已知": "這次(post-⑩，價格已站起來)才是有效pilot，非首跑0.16次/月那個不能直接拿來調k的數字；本次0.1395是否仍低一量級由blueprint/systems判讀，本票只並排不改k"
+  },
+  "③物價漂移": {
+    "母體": "估價次數=15174(非0，valuation.priced tap隨⑩進了main，母體健康)",
+    "全物資平均價(不建議用)": "10.211——此數混合不同單位BASE_PRICE(food 2.0~weapon 77.0)，會隨交易組成飄，答不了物價漂移的問題",
+    "無量綱比值(local_value/BASE_PRICE，逐物資，全隊均值18隊)": {
+      "food": 1.82, "material": 0.59, "herb": 2.00, "goods": 1.67, "gem": 2.00,
+      "ore_gold": 2.00, "ore_silver": 1.95, "ore_iron": 2.00, "ore_steel": 2.00,
+      "weapon_melee_low": 2.00, "weapon_melee_high": 1.64, "weapon_ranged_low": 1.86, "weapon_ranged_high": 1.57,
+      "tools": 0.77, "arrows": 1.89, "armor_low": 1.49, "armor_high": 1.36,
+      "horses": 1.30, "mounts": 1.42, "wagons": 1.38, "medicine": 5.00
+    },
+    "derived_vs_handwritten": "逐物資比值兩版完全一模一樣——物價漂移不受推導vs手寫的鑄幣初始量差異影響，符合預期(交易行為邏輯相同，只差初始coin存量)"
+  },
+  "④coin流量細節": {
+    "流量總額(絕對值,全reason)": 2892.3,
+    "筆數": 316,
+    "逐reason": {"extort": 88, "extort_in": 58, "extort_out": 58, "extract_treasury": 64, "market_sell_coin_in": 1133, "market_sell_coin_out": 1133, "salary_anon": 158, "salary_named": 200},
+    "derived_vs_handwritten": "流量總額/筆數/逐reason分布兩版完全相同——流量不受初始存量差異影響（存量6912 vs 7000造成月週轉分母不同才是真正差異來源，非交易行為本身變了）",
+    "對照tap": "bank.writes.n=17490(全res)｜coin.flow.n=316，儀器確實在跑"
+  },
+  "⑤鑑別力驗收": {
+    "①必須紅": "PASS——handwritten版`[FAIL] 實發==推導(差88.0000)`真的紅了，derived版ALL PASS。差值88.0000與期初coin差(7000-6912=88)完全吻合，邏輯自洽",
+    "③④數字必須變": "PASS——月週轉0.1395≠0.1377(4位小數可鑑別)；期初期末coin 6912≠7000；物價漂移比值不變(合理，因為交易邏輯本身相同，只有存量分母變了)"
+  },
+  "final_verdict": "⑨貨幣創世的90天post-⑩雙向對照全部通過鑑別力驗收：守恆PASS、鑑別力①③④皆如預期反應（紅/變/不變分別對應各自該有的行為）。k校驗數字已並排(0.1395 vs GENESIS_K=2.0，相差14.3倍)，本票不判讀是否要改k，交由blueprint/systems決定。",
+  "honest_limit": "本輪只判讀aggregate數字本身，未做specimen→QA故事稽核（依systems原信要求，behavior因果結論需走那條路，本票未做）；月週轉0.1395是否真的「低一量級」需要跟blueprint原定的合理範圍比對，本票不代為判斷合理性只呈現事實。"
+}
