@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★**動手前撞到 spec §1 的一句錯**：你寫「`salary_system.gd` 裡**沒有任何 unrest 寫入**」——★而 `:211` 就是 `UnrestBank.add(team, 1, "salary")`｜★★⇒ §2③ **不是零改動，是真改動**
 ---
 

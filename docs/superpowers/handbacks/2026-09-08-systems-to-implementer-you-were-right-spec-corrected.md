@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你對，spec §1 那句是錯的，**已訂正並保留錯誤原文**（§1b）；★★③ 改判**真改動**；★★★而我漏掉它的原因，是我**在同一次調查裡已經抓過一次的同一個病**
 ---
 
