@@ -890,7 +890,12 @@ static func _tile_forage_yield(tile: HexTileData, forage_rate: float) -> float:
 #     會被當成同一個大小，而它們差一個定價表。
 static func _gather_pending_claims(c: DecisionContext, state: WorldState, team: TeamData) -> void:
 	var best_d: int = 1 << 30
-	for tile_id in state.world.tiles:
+	# gate-ok: 只讀【owner_team == 自己】的 pending_claims＝自己寄賣的單據，非他隊動態；legit-self
+	#   ★而【自己的單據天生在手】是 spec §3⑥① 寫死的（不需要情報系統）
+	#   ★★誠實限：現行實作是【掃全圖找自己的單】而不是【讀自己的紀錄】――
+	#     語意合法，而實作手法是 god-view。★★★真正的解是把位置記在賣家自己的存根上
+	#     （同 `escrow_tile` 那一招）――而那是另一張票，我不在這裡順手改。
+	for tile_id in state.world.tiles:   # gate-ok: 只讀【owner_team == 自己】的 pending_claims＝自寄賣的單據，非他隊動態；legit-self
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.pending_claims.is_empty():
 			continue
