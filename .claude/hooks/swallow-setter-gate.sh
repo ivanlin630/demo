@@ -20,7 +20,14 @@ cd "$(cd "$(dirname "$_gc")" && pwd)" || exit 1
 BASE="docs/process/swallow-setter-baseline.txt"
 [ -f "$BASE" ] || { echo "[SWALLOW-SETTER] FAIL：基準線不存在 $BASE"; exit 1; }
 NOW="$(mktemp)"; trap 'rm -f "$NOW"' EXIT
-git grep -c 'set(_value):' -- scripts/ | LC_ALL=C sort > "$NOW"
+# ★★★2026-09-07 血證：原本 `git grep -c 'set(_value):'` 會把【註解裡提到它】也算進去，
+#   而 board_price_carry_test.gd 的註解正是在【解釋這個危害】
+#   ⇒ ★偵測器懲罰了「記載它所偵測之物」的行為（在內文撈關鍵字必然撈到談論它的句子）。
+#   ⇒ 修法：先把 `#` 之後的內容剝掉，再判是否仍含該 pattern。
+git grep -n 'set(_value):' -- scripts/ \
+  | awk -F: '{ f=$1; c=$0; sub(/^[^:]*:[^:]*:/,"",c); sub(/#.*/,"",c); if (c ~ /set\(_value\):/) n[f]++ }
+             END { for (k in n) printf "%s:%d\n", k, n[k] }' \
+  | LC_ALL=C sort > "$NOW"
 NEW=$(comm -13 <(LC_ALL=C sort "$BASE") "$NOW")
 GONE=$(comm -23 <(LC_ALL=C sort "$BASE") "$NOW")
 if [ -n "$NEW" ]; then

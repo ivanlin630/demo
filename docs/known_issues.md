@@ -3879,6 +3879,9 @@ sim_runner.gd:337 far  pass = tick % FAR_ZONE_INTERVAL(600) == 0 ⇒ payday 只�
 
 ## 🔧 CoinAudit 是既有律，但【不在 merge-gates.tsv 上】（2026-09-07，systems 自查）
 
+**狀態：已知未修**（事實已坐實：`grep -inE coin docs/process/merge-gates.tsv` 零命中；修法待 `coin_b_verify_bed.gd` 補上判準通道後才能登記，工單已開）
+**回訪：** `coin_b_verify_bed.gd` 補上判準通道（工單已開，`2026-09-07-systems-to-implementer-coin-bed-needs-a-verdict-then-it-becomes-a-gate.md`）⇒ 屆時我跑陽性對照，綠才登記進 `merge-gates.tsv`
+
 ```
 scripts/simulation/coin_audit.gd:6  守恆律：total(end) − total(start) == Σ minted
 grep -inE 'coin' docs/process/merge-gates.tsv  ⇒ ★零命中
@@ -3890,6 +3893,9 @@ grep -inE 'coin' docs/process/merge-gates.tsv  ⇒ ★零命中
 owner=systems｜擋 Godot：排在 implementer 的 post-⑩ 雙向跑之後。
 
 ## ⏳ 131 床分診：**detach 路徑的 stdout 不落地**（2026-09-07；★★本條是【訂正後】的，原標題「死因未破」是誤診）
+
+**狀態：未確認**（★三條假設已實測排除，真因未明；★★量測窗＝下次需要 WMI-detach 長跑時重現一次並抓 stdout 落點，非排程回訪）
+**回訪：量測窗** —— 下次有 WMI-detach 長跑需求時，同一支腳本各跑一次（detach vs 前景），比對 stdout 是否落到 log；★母體＝那一次的兩份 log，判準＝detach 版有沒有寫出第一列資料行
 
 ★**原本我寫的**：「WMI-detach 起的 sweep 整棵樹消失、死因未破」。★**那個前提是錯的。**
 ```
@@ -3908,7 +3914,9 @@ powershell/timeout/cut 都在、`PROBE_DONE_RC=0` 有寫）。
 **繞道**：改走 harness 追蹤的背景執行（非 WMI）＋**換輸出檔**避開仍在飛的舊實例。
 ★**繞過 ≠ 修好**，條目留著。owner=systems
 
-## ⚠️ 分診分類器曾有【假綠通道】（2026-09-07，已修，★留作教訓）
+## ✅ 分診分類器曾有【假綠通道】（2026-09-07，已修，★留作教訓）
+
+**狀態：已修**（2026-09-07 當日修畢並加成對自檢：5 種真實紅形狀必紅 + 6 種通過樣本不得誤判；★留作教訓不刪）
 ```
 舊判紅：grep 'Assertion failed|\[FAIL\]|SCRIPT ERROR'
 131 床紅訊號形狀：[FAIL] 式 99 支 ／ ★裸 FAIL 等其他式 31 支(24%) ／ 真正無判準 1 支
