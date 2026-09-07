@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★憲法閘擋住我的push(非我的commit造成)——decision_context.gd/options.gd新增2個gv_mapscan閘
 ---
 
