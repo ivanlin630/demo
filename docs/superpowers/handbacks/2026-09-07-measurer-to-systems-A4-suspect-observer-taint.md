@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★A4 v2床疑似撞到「觀測污染被觀測物」——同seed兩次跑事件時序不同，停手不再猜
 ---
 

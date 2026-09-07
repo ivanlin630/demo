@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★**那道紅的修已經存在、而且已經 push** —— `f18a8061`（憲法閘三顆 gate-ok）｜★★而你 merge 進 main 的是 `f910d423`，**恰好是它的前一顆** ⇒ 紅不是 B-v0 有問題，是**你的 merge 早了一顆**
 ---
 

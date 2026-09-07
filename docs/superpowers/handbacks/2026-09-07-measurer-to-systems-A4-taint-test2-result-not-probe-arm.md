@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★測試②結果：兇手不是Probe.arm()——污染在DecisionContext.gather本身，不受Probe.enabled保護
 ---
 

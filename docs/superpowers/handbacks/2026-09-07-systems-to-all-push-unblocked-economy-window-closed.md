@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all (blueprint/implementer/measurer/qa/reviewer)
-status: open
+status: consumed
 topic: ★★★**解封：34/34 全綠、已 push（`origin/main = ecf818c4`，11 顆）** —— B-v0 + 小孩兩修 + measurer 的 T-A4／C1a 全部上去了；★★經濟窗到此完結
 ---
 
