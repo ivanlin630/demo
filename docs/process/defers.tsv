@@ -111,3 +111,4 @@ parking-bonds-growth-arc	★停車場：正面羈絆/成長弧｜★★觸發＝
 parking-economic-class	★停車場：經濟階級｜★★觸發＝經濟基線考後｜★★★筆記自寫「大半湧現」⇒ 同 A4 型：先看貧富分佈數字，★可能是【驗證票】而不是設計題	經濟基線考交付（貧富分佈有數字）	ls docs/process/verdicts/ | grep -qiE 'baseline.*econ|econ.*baseline|wealth'
 parking-c4-individual-casualty	★停車場：NPC 個別傷亡／PersonGenerator／coming-of-age（C4）｜★★觸發＝人口卷家族（B1/B2/A3 同窗）——★它們共用同一批儀器，分開做等於量三次	人口卷交付	test -f docs/process/verdicts/population-90d.measure.json
 parking-tech-knowledge-noTrigger	★停車場：技術/知識｜★★★【真·遠期，續停，無觸發可掛】——★而它留在表上的理由是：『沒有觸發』本身要被記錄，否則下次有人會以為它被遺漏了	無（刻意不掛觸發；本 token 只為留下『我們知道它在那裡』）	false
+priority-started-check	★★★【第一優先空轉】偵測：blueprint 裁「X 是第一優先」而【沒有任何機制檢查它有沒有起跑】——血證 2026-09-07：人口儀器卷裁「批 2 收口後第一優先」，批 2 收口(B-v0 merge ecf818c4)後它【從沒被派出去】，實際跑的是授權為「空檔」的 T-C1a/T-A4；★是 blueprint 向用戶報偏離時自查才發現，★★而那時已空轉整段｜★★★這與本專案反覆出現的病同型：【觸發條件滿足了，而沒有任何東西會說話】——我今天修了 Tier2/token/閘的同型，卻漏了【排序】這一格	下一次有「第一優先」裁定時（本 token 是規矩不是工作）	ls docs/process/verdicts/ | grep -q 'population-90d'
