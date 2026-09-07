@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★決定性測試①結果：世界本身是determinism的，污染在我的床——繼續②測試
 ---
 
