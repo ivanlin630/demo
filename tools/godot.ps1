@@ -103,6 +103,36 @@ $beaconRole = if ($env:SESSION_ROLE) { $env:SESSION_ROLE } else { "unknown-$PID"
 $hookDir = "A:\GDS\demo\.claude\hooks"
 $beaconFile = Join-Path $hookDir ".busy.$beaconRole"
 $runLog = Join-Path $hookDir ".godot-runs.log"
+
+# --- Tree provenance stamp (2026-09-07) -------------------------------------
+# Blood evidence: a 90d acceptance run used --path <worktree>, which reads the
+# WORKING TREE, not any commit. Three bed improvements were sitting uncommitted,
+# so the verdict was built on code that existed nowhere anyone could fetch.
+# "I measured it" != "anyone else can measure it" -- and only the person who
+# aimed --path knows which tree they aimed at. So the wrapper states it, every
+# run, in the output itself. No discipline required.
+$provPath = (Get-Location).Path
+for ($i = 0; $i -lt ($args.Count - 1); $i++) {
+    if ($args[$i] -eq "--path") { $provPath = $args[$i + 1] }
+}
+try {
+    $provSha = (& git -C $provPath rev-parse --short HEAD 2>$null)
+    $provDirty = @(& git -C $provPath status --porcelain 2>$null)
+    if ($provSha) {
+        if ($provDirty.Count -eq 0) {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=yes"
+        } else {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=NO dirty=$($provDirty.Count)"
+            Write-Output "[TREE]   *** measuring the WORKING TREE, not commit $provSha ***"
+            foreach ($d in ($provDirty | Select-Object -First 8)) { Write-Output "[TREE]   $d" }
+        }
+    } else {
+        Write-Output "[TREE] path=$provPath commit=UNKNOWN (git said nothing)"
+    }
+} catch {
+    Write-Output "[TREE] path=$provPath commit=UNKNOWN (git unavailable)"
+}
+# ---------------------------------------------------------------------------
 $runStart = Get-Date
 if (Test-Path $hookDir) {
     try {
