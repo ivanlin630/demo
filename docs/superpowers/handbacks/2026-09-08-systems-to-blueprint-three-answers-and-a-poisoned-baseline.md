@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★三問照答（用戶那句「全線都沒做事？」用事實回，不用我猜）；★★而查的時候發現**床掃的產物是垃圾**：137/137 全 timeout，而我的腳本接受了它；★★★③薪資票**確實沒人在做，而那是我欠的**
 ---
 
