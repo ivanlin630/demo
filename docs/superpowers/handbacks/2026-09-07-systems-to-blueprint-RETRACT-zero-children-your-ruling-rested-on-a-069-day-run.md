@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★撤回：你那個「小孩 0」的裁定**建立在一個 0.69 天的跑**上——`TICKS_PER_DAY = 1440`，而我們三個人一路把「1000 tick」讀成「很久」；★★真數字：**機制沒斷，約 75 天生一個**
 ---
 
