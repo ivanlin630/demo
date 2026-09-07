@@ -1,0 +1,66 @@
+{
+  "slice": "market-thickness-v0 (B-v0)",
+  "date": "2026-09-07",
+  "branch": "feat/market-thickness-v0",
+  "head": "f910d423",
+  "base": "origin/main（⑩ + board-declared-price + ⑨ 已入）",
+  "spec": "docs/superpowers/specs/2026-09-06-market-thickness-v0-HOW.md",
+  "acceptance": {
+    "1_redline_coin": {
+      "verdict": "PASS",
+      "evidence": "自報價 1.1200 → 成交 11.20 進待領款；賣家 team.coin 0.00 → 0.00",
+      "note": "★前提斷言先跑：板上自報價 > 0——價格 0 的單沒有錢可追，那不是違憲是白送（⑩ 已裁）"
+    },
+    "2_expiry_goods": {
+      "verdict": "PASS",
+      "evidence": "escrow 8.0 → 待領貨 8.0；賣家 material 32.0 → 32.0；escrow 已搬空（非兩邊都有）",
+      "note": "★用第二張單（material，買家無需求）才有母體——一支床不能同時測『賣完』與『留著過期』"
+    },
+    "3b_coin_vs_goods_separately": {
+      "verdict": "PASS",
+      "evidence": "待領款 1 條 / 待領貨 1 條 / 合計 2，兩種 kind 窮盡"
+    },
+    "4_escrow_conservation": {
+      "verdict": "PASS",
+      "evidence": "賣家 food 60.0 → 50.0 == tile escrow qty 10.0"
+    },
+    "5_discriminating_power": {
+      "verdict": "PASS",
+      "evidence": "BV0_MODE=no_claim_account ⇒ 賣家 coin 0.00 → 11.20、待領款 0.00 ⇒ ①的兩格【都】紅（2 FAIL）",
+      "honest_limit": "★這是【模擬反事實】（把 claim 搬進賣家口袋），不是真的把 production 的待領帳拆掉 ⇒ 它證明的是【斷言有鑑別力】，不是【production 拿掉待領帳之後會怎樣】"
+    },
+    "5b_no_claim_option": {
+      "verdict": "NOT MEASURABLE HERE",
+      "note": "★『拿掉領取 option ⇒ 野外率掉到 0』需要全世界長跑，本床是單元層 fixture。★★不假裝測得到——否則這格會在一支根本沒有 option 迴圈的床上永遠綠"
+    },
+    "6_five_taps": {
+      "verdict": "PASS",
+      "evidence": "mkt.post.consign / mkt.escrow.post / mkt.claim.add / mkt.claim.take / mkt.escrow.expire_to_claim；待領餘額（存量）19.20 與流量分開印"
+    },
+    "7_determinism": {
+      "verdict": "PASS",
+      "evidence": "a4_determinism_check 三跑 byte-identical fp=39657d1e4acd83c15337553fded10563"
+    }
+  },
+  "artifacts": [
+    "docs/measurements/2026-09-07-bv0-acceptance-run1-fixture-defect.txt",
+    "docs/measurements/2026-09-07-bv0-acceptance-run2.txt",
+    "docs/measurements/2026-09-07-bv0-acceptance-run3-funnel.txt",
+    "docs/measurements/2026-09-07-bv0-acceptance-run4.txt",
+    "docs/measurements/2026-09-07-bv0-acceptance-run5.txt",
+    "docs/measurements/2026-09-07-bv0-acceptance-run6.txt",
+    "docs/measurements/2026-09-07-bv0-acceptance-FINAL.txt",
+    "docs/measurements/2026-09-07-bv0-discriminator-no-claim-account.txt",
+    "docs/measurements/2026-09-07-bv0-discriminator-no-claim-option.txt",
+    "docs/measurements/2026-09-07-bv0-determinism-r1.txt",
+    "docs/measurements/2026-09-07-bv0-determinism-r2.txt",
+    "docs/measurements/2026-09-07-bv0-determinism-r3.txt"
+  ],
+  "why_six_failed_runs_are_kept": "四次看起來像 production 紅燈的結果，全部是 fixture 前提沒被驗證：①賣家在場⇒peer trade 直接付款是合法的 ②買家沒需求⇒want=0 是正確行為 ③深過剩⇒自報價 0⇒沒有錢可追 ④母體被①吃光。★每一次若只看結果不看分母，都會去改一個沒壞的 production——而改完紅燈會消失，看起來像修好了。",
+  "bed_defects_found_in_its_own_instrument": [
+    "BV0_MODE 只被讀進變數、從未被使用（MG_HANDWRITTEN 的同型；批評完那一個之後一小時內自己複製）",
+    "claims_coin 在鑑別力操作前就算 ⇒ 對照只讓一半的斷言動、另一半讀舊值",
+    "母體判準用『claims 是否為空』⇒ 鑑別力模式會把它搞空 ⇒ 對照把自己偽裝成『沒有母體』，避開它要觸發的紅"
+  ],
+  "out_of_scope": ["買單押錢半邊（systems 砍法優先序）", "v2 掛帳／自動改價／懸帳充公／跨地捎款"]
+}

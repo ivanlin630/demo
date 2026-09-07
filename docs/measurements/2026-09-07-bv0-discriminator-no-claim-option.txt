@@ -1,0 +1,48 @@
+[TREE] path=A:/GDS/demo/.worktrees/bv0 commit=cd70364e clean=NO code-dirty=3
+[TREE]   *** measuring the WORKING TREE, not commit cd70364e ***
+[TREE]    M scripts/simulation/interaction_system.gd
+[TREE]    M scripts/simulation/order_system.gd
+[TREE]   ?? scripts/debug/bv0_acceptance_bed.gd
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== bv0_acceptance_bed: mode=no_claim_option ===
+  ★本床【測不到】這一格：「拿掉領取 option  野外率掉到 0」
+     需要的是【全世界長跑】的野外率，而本床是單元層 fixture。
+     ★★而我【不假裝它測得到】──否則這一格會在一支根本沒有 option 迴圈的床上永遠綠。
+[Order] Team2 sell food ×10 (oid=1)
+[Order] Team2 sell material ×8 (oid=2)
+  [PASS] 第二張單（material，無人要）oid=2
+  [PASS] 寄賣掛單成功 oid=1
+  [PASS] 前提：板上自報價 > 0（實際=1.1200）──否則紅線那格沒有錢可追
+  ──  escrow 守恆 ──
+     賣家 goods 60.0 → 50.0 ｜ tile escrow qty = 10.0
+  [PASS] ★押貨發生（寄賣才押；自家櫃檯不押）
+  [PASS] ★★賣家減量 == escrow 增量（零蒸發）
+  ──  紅線：成交後錢不得瞬移 ──
+[Market@(5, 5)] Team3  outpost owner Team9 成交
+     撮合被走到：dealt=true
+     分母（tile 上的 pending_claims 條數）= 1
+     賣家 coin 0.00 → 0.00 ｜ 待領款 = 11.20
+  [PASS] ★賣家 team.coin 不變（錢沒有瞬移）
+  [PASS] ★★待領款帳 > 0（錢落在市場等他來領）
+  ──  到期退貨 ──
+[Order] Team2 sell material ×32 (oid=3)
+     到期前 escrow=8.0 ｜ 賣家 goods 32.0 → 32.0 ｜ 待領貨 = 8.0
+  [PASS] ★貨【沒有】回到賣家 resources（不瞬移）
+  [PASS] ★★待領貨帳 == 原 escrow 量（零蒸發）
+  [PASS] ★★★escrow 已搬空（不是兩邊都有＝重複計數）
+  ── 3b 款／貨分開量（★抽象共用不代表被同等使用）──
+     待領款條數 = 1 ｜ 待領貨條數 = 1 ｜ 合計 = 2
+  [PASS] ★兩種 kind 窮盡（沒有第三種悄悄混進來）
+  ──  五個 tap（掛單／成交／待領餘額／領取／到期）──
+     mkt.post.consign                 = 2
+     mkt.escrow.post                  = 2
+     mkt.claim.add                    = 0
+     mkt.claim.take                   = 0
+     mkt.escrow.expire_to_claim       = 1
+  ── 診斷：撮合走到哪裡 ──
+     board.price.present=2 ｜ board.price.used.buy=2 ｜ g1.board_register=2 ｜ g1.order_placed=3 ｜ g1.order_settled_direct=1 ｜ mkfill.attempt.buy=2 ｜ trade.market_bail.buy_no_want=1
+     ★★而【待領餘額】是存量、上面那些是流量 —— 分開印，不混成一個數
+     待領餘額（存量）= 19.20
+=== DONE === ALL PASS
+
