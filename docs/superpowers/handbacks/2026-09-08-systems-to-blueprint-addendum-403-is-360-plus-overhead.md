@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★補上一封的具體線索：那個 403 秒 **＝ `tools/godot.ps1` 的預設逾時 360s ＋ 開銷** ⇒ ★★**`GODOT_TIMEOUT` 沒有生效**；★★★而它與分診表的舊數字**互相矛盾**，那個矛盾才是真線索
 ---
 
