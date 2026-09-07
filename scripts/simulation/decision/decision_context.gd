@@ -309,7 +309,9 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		if c.idle_labor > 0.0:
 			# ★perf：_idle_employ_value 遞迴呼 NeedOracle（supply_chain/construction tile-scan）昂貴 → cadence-gate 快取
 			# （單寫者=本 owner 隊；LABOR_CADENCE 同勞力池，staleness 有界；決策每 tick 只 O(1) 讀）。
-			if state.world.current_tick < _btile.idle_employ_next_tick:
+			if state.world.current_tick < _btile.idle_employ_next_tick or not advance:
+				# ★advance-gating：觀測只讀快取，不重算也不寫
+				#   （重算递迴呼 NeedOracle、tile-scan ―― 重算本身就是這個 cadence 要防的）
 				c.idle_employ_value = _btile.idle_employ_cached
 			else:
 				c.idle_employ_value = DecisionContext._idle_employ_value(state, team, _btile, c.idle_labor, c.leader_values)
@@ -458,7 +460,12 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	#   （手數 vs 食物/日 量綱不符、進公式會逼出換算係數＝偷藏新旋鈕）。
 	#   選址評估是 O(tiles)＝用既有 INFRA_INTERVAL cadence 快取，不每次 gather 跑。
 	if c.has_own_outpost and c.idle_labor > 0.0 			and not (team.leader_id == state.player_id and state.player_id != -1):
-		if state.world.current_tick >= team.expand_eval_next_tick:
+		# ★★★advance-gating（blueprint 預核形狀、量測坐實後授權）――
+		#   ★取【整段 cadence 重算都跳過】而不是【只擋寫、仍重算】：
+		#     ★★後者會讓每一次觀測都跑一次昂貴的重算 ⇒ 把這個 cadence 的目的整個拆掉。
+		#   ★★★代價（誠實限）：觀測讀到的可能是【過時的快取】――
+		#     而那正是【觀測不改世界】的價錢，不是 bug。
+		if advance and state.world.current_tick >= team.expand_eval_next_tick:
 			team.expand_eval_next_tick = state.world.current_tick + FactionAISystem.INFRA_INTERVAL
 			if Probe.enabled: Probe.bump("gather.write.expand_eval_next_tick." + ("advance" if advance else "observe"))
 			var _loc: Dictionary = _fa._evaluate_new_outpost_location(state, team)
@@ -732,7 +739,12 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.consolidate_target_id = -1
 	c.absorb_target_id = -1
 	if team.parent_team_id == -1:
-		if state.world.current_tick >= team.consolidate_eval_next_tick:
+		# ★★★advance-gating（blueprint 預核形狀、量測坐實後授權）――
+		#   ★取【整段 cadence 重算都跳過】而不是【只擋寫、仍重算】：
+		#     ★★後者會讓每一次觀測都跑一次昂貴的重算 ⇒ 把這個 cadence 的目的整個拆掉。
+		#   ★★★代價（誠實限）：觀測讀到的可能是【過時的快取】――
+		#     而那正是【觀測不改世界】的價錢，不是 bug。
+		if advance and state.world.current_tick >= team.consolidate_eval_next_tick:
 			# §HOW-6 併入 target（faction 成員 push）
 			var ct: int = -1
 			if team.faction_id != -1:
