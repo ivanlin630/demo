@@ -23,7 +23,7 @@ const GATHER_SKIP: Array = ["wild_horses", "wild_game"]   # 活物不走 generic
 #     前者只騙到觀測者自己，後者改變世界。
 # ★預設 true：舊呼叫端（resource/manufacturing/interaction/床）行為一行不變，
 #   只有 decision_context.gather 的純讀路徑會傳 false。
-static func ensure_fresh(state: WorldState, tile: HexTileData, advance: bool = true) -> void:
+static func ensure_fresh(state: WorldState, tile: HexTileData, advance: bool = true) -> Dictionary:
 	# ★T0-A1 ③：共址任一 PRODUCE 隊糧餘命跌破危機線＝勞力危機 → 共址各隊當 tick 可重新思考
 	# （原本只有「重算勞力分配」，隊自己不會因此提前重評）。純讀既有 food_runway，零 RNG。
 	if not advance:
@@ -39,8 +39,15 @@ static func ensure_fresh(state: WorldState, tile: HexTileData, advance: bool = t
 			elif Probe.enabled:
 				Probe.bump("labor.crisis_emit.suppressed")   # ★觀測路徑：本來會叫醒人，現在不叫
 	if state.world.current_tick < tile.labor_eval_next_tick and not tile.labor_alloc.is_empty():
-		return
-	rebalance(state, tile)
+		return tile.labor_alloc
+	if advance:
+		rebalance(state, tile)
+		return tile.labor_alloc
+	# ★觀測路徑：cadence 到期且快取可能是空 ⇒ 【純算】回傳，不寫世界
+	#   ★★代價：觀測每次都重算（perf）――而那是【新鮮 + 不寫】的唯一代價，
+	#   ★★★而 systems 重裁時已知道這件事。
+	if Probe.enabled: Probe.bump("labor.compute_only")
+	return compute_alloc(state, tile)
 
 # ★军民混编 Slice B：可務農勞力 = pop×(1−動員比)（動員的人當兵不下田=guns-vs-butter）。
 static func labor_pop(team: TeamData) -> float:
@@ -56,7 +63,13 @@ static func pool_of(state: WorldState, tile: HexTileData) -> float:
 	return maxf(p, 1.0)
 
 # rebalance（deterministic）：pool → 列 workstations → need 權重 → 比例+demand-cap+溢出串聯 → fill。
-static func rebalance(state: WorldState, tile: HexTileData) -> void:
+# ★★★compute / persist 拆開（systems 重裁 2026-09-08）――
+#   ★上一版裁「讀那半留著」的前提是錯的：`ensure_fresh` 的「讀新鮮」
+#     在 cadence 到期時【本身就是寫】（`tile.labor_alloc` 與 `labor_eval_next_tick`）。
+#   ★★而【跳過它】也不行：`labor_alloc` 可能是【空】不是【舊】――
+#     第一次進來的 tile 根本沒有值。讀空 ≠ 讀舊。
+#   ⇒ ★★★拆成【純算】與【寫回】：觀測拿純算的回傳值，不碰世界。
+static func compute_alloc(state: WorldState, tile: HexTileData) -> Dictionary:
 	var teams: Array = []
 	var pool: float = 0.0
 	for tid in state.teams:
@@ -113,7 +126,11 @@ static func rebalance(state: WorldState, tile: HexTileData) -> void:
 		var d: float = float(demand[k])
 		var f: float = clampf(float(alloc[k]) / d, 0.0, 1.0) if d > 0.0 else 0.0
 		out[k] = {"demand": d, "share": float(alloc[k]), "fill": f}
-	tile.labor_alloc = out
+	return out
+
+# 寫回（persist）――★只有真推進的路徑才呼它。
+static func rebalance(state: WorldState, tile: HexTileData) -> void:
+	tile.labor_alloc = compute_alloc(state, tile)
 	tile.labor_eval_next_tick = state.world.current_tick + LABOR_CADENCE
 
 static func _workstation_need(state: WorldState, teams: Array, key: String, tile: HexTileData) -> float:

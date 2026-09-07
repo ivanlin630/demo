@@ -300,11 +300,14 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.idle_employ_value = 0.0
 	var _btile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	if _btile != null and _btile.outpost_owner == team.team_id and _btile.outpost_level > 0:
-		LaborSystem.ensure_fresh(state, _btile, advance)   # lazy：直讀 labor_alloc（勞力池 cadence 已存、頻率解耦）
+		# ★★★讀【回傳值】不讀 `_btile.labor_alloc`：
+		#   observe 路徑下 `ensure_fresh` 只【純算】不寫回 ⇒ tile 上可能是舊的或空的。
+		#   ★讀回傳值才拿得到【新鮮且未落地】的那份。
+		var _alloc: Dictionary = LaborSystem.ensure_fresh(state, _btile, advance)
 		var _pool: float = LaborSystem.pool_of(state, _btile)
 		var _dcap: float = 0.0
-		for _lk in _btile.labor_alloc:
-			_dcap += float(_btile.labor_alloc[_lk].get("demand", 0.0))   # 現 active workstation 吸得掉的手數
+		for _lk in _alloc:
+			_dcap += float(_alloc[_lk].get("demand", 0.0))   # 現 active workstation 吸得掉的手數
 		c.idle_labor = maxf(_pool - _dcap, 0.0)
 		if c.idle_labor > 0.0:
 			# ★perf：_idle_employ_value 遞迴呼 NeedOracle（supply_chain/construction tile-scan）昂貴 → cadence-gate 快取
