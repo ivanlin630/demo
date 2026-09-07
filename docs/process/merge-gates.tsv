@@ -77,3 +77,4 @@ mailbox-broadcast	bash .claude/hooks/mailbox-broadcast-gate.sh	★還開著的 t
 board-price	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/board_price_carry_test.gd	自報價跨載體帶得到：entry→message→entry 三站不漏；★分母為 0 判不可判非綠；★★含鑑別力（去價必退回 proxy）	=== DONE === ALL PASS
 swallow-setter	bash .claude/hooks/swallow-setter-gate.sh	★新出現的靜默吞寫 setter(set(_value): pass)就紅——它讓賦值不報錯而且什麼都不做,呼叫端會靜默量到另一個世界(血證 2026-09-07:五個這種 setter、直寫處 107,床裡設 pop 卻跑 pop=0 的世界)	\[SWALLOW-SETTER\] (PASS|FAIL)
 tier2-sweep-staleness	bash .claude/hooks/bed-sweep-tier2.sh --check-staleness	★Tier2 全床掃描【停了要有人知道】：上次跑 >7 天即紅（本閘不跑掃描，只驗它還活著）	TIER2-STALENESS\] PASS
+minor-merge	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/minor_population_merge_test.gd	★合併時小孩跟著走、且【不被記成滅團損失】——順序陷阱的機械證據（determinism 對本票沒有鑑別力：那個世界小孩總數 0）	=== DONE === ALL PASS

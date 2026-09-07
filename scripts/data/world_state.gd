@@ -570,6 +570,22 @@ func erase_teams(tids: Array) -> void:
 	#     specimen-gated（非 specimen ／ tracer 關 ⇒ 兩個 early-return）⇒ tracer off 時 byte-identical。
 	for _dtid2 in dead_list:
 		SpecimenTracer.capture_death(self, teams[_dtid2], "erase_teams")
+	# ★★★①滅團小孩損失 counter（systems 派）――【常開】，不挘 specimen/tracer。
+	#   ★而它必須【晚於②】上線：合併搬小孩那一步若還沒做，
+	#     被併進去的小孩會在這裡被記成【死亡】――而那正好違反用戶裁定。
+	#     ⇒ ★★本分支與 subteam_system/faction_ai 的搬家是【同一票】，不得拆開上線。
+	#   ★★★分兩個桶：【帶著小孩死的隊數】與【小孩總數】――
+	#     合成一個數就分不出「很多隊各死一個」與「一隊死很多」。
+	var _minors_lost: int = 0
+	var _teams_with_minors: int = 0
+	for _dtid3 in dead_list:
+		var _mt: TeamData = teams[_dtid3]
+		if _mt.minor_population > 0:
+			_minors_lost += _mt.minor_population
+			_teams_with_minors += 1
+	if _minors_lost > 0:
+		Probe.bump("erase.teams_with_minors", _teams_with_minors)
+		Probe.add_amount("erase.minors_lost", float(_minors_lost))
 	# ★★★死隊的看板單隨它一起走（族④#6 改票，systems 2026-09-02）：
 	#   ★訂單生命週期是【owner 驅動】的（`order_system.gd:88` 原文：「他隊 entry 不動，由各自
 	#     tick_team_orders 維護」），而 `tick_team_orders` 只對【活著的隊】跑

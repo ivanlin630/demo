@@ -261,6 +261,20 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 			state.remove_member(absorbed, pid, false)   # 出被吸隊 roster（team_id 已=absorber）
 			state.add_member(absorber, pid)             # 入吸收隊
 	AnonTierSystem.transfer_proportional(absorbed, absorber, anon_xfer)
+	# ★★★小孩跟著大人走（systems 派②）――而順序是【先於①】：
+	#   ★若先裝【滅團損失小孩】的 counter 而這裡還沒搬，
+	#     被【併】進去的小孩會被記成【死亡】――而那正好違反用戶裁定。
+	#   ★★按同一個 `frac` 搬（孩子跟著被搬走的那一比例的大人）；
+	#     ★★★完全合併（absorbed 即將滅團）⇒ 【全搬】，否則餘下的隨團消失。
+	if absorbed.minor_population > 0:
+		var _m_move: int = absorbed.minor_population if absorbed.population <= 0 			else int(round(float(absorbed.minor_population) * frac))
+		_m_move = clampi(_m_move, 0, absorbed.minor_population)
+		if _m_move > 0:
+			absorbed.minor_population -= _m_move
+			absorber.minor_population += _m_move
+			if Probe.enabled:
+				Probe.bump("merge.minors_moved")
+				Probe.add_amount("merge.minors_moved_n", float(_m_move))
 	_transfer_proportional_assets(absorber, absorbed, frac, absorbed.population <= 0)
 	if absorbed_leader_moved and absorbed.population > 0:
 		var es := EventSystem.new()
