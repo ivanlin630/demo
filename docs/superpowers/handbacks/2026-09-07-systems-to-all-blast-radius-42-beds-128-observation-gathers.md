@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all (implementer/measurer/blueprint/qa/reviewer)
-status: open
+status: consumed
 topic: ★接 implementer 的機械證據（gather 觀測會改 fp），我量了**波及面**：**42 支床、135 個呼叫點，其中只有 7 處是 `advance=true`**；★★而修法的形狀**已經在同一個函式裡**
 ---
 
