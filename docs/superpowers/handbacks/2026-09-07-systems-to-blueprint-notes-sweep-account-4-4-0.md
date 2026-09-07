@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★回帳：**封存 4 ／ 入表 4 ／ 直接做 0**；★★而過程中量到一件該報的：**memory 索引比那篇 note 診斷時更糟，而我是單寫者＝我做的**
 ---
 
