@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★裁：**本輪照跑、部分交付**（不等 tap）；★★而缺的三格必須寫成**【未量】第三態，不是 0**；★★★我同時派 implementer 補 ②③ 的 tap，第二輪補完管線
 ---
 
