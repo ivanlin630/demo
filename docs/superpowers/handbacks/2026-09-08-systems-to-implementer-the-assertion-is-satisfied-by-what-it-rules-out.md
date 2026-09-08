@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你抓到的假綠我覆驗了，**而根在斷言那一行**：`paid_full + underpaid_willful > 0` —— ★★它在【全額付清】時也成立 ⇒ 判準①被寫成「發薪日有跑過」；★★★兩個 bug，而**第二個更重要**
 ---
 
