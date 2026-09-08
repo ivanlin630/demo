@@ -469,9 +469,38 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 		# ★★★⑩ 的 zero-gain tap（token `ten-zero-gain-reach`）――保留，而它的意義在新公式下【更強】：
 		#   舊公式下 gain<=0 只能發生在【自評值 0】；
 		#   ★新公式下它還含【他開的價高於我的估值】――那才是真正的【不值得買】。
+		#
+		# ★★★【它比的是誰跟誰】―― 寫死在這裡，因為舊名字
+		#   `arb_kill_zero_gain` 已經把兩個人帶偏過（systems 與 measurer，同一天）：
+		#     `_mine` = 【路過的這一個潛在買方】對該貨的估值
+		#     `_ask`  = 【賣單張貼者】自己標的價
+		#   ⇒ 它是【需求側的「不值得買」計數】，
+		#     ★不是【兩張掛單張貼者彼此估值的價差】（那是另一個量）。
+		#   ⇒ ★★改名為 `buyer_reject_priced_too_high`：事件要有自己的名字。
+		#
+		# ★★★五個純量（systems 裁）：用來分開兩個假說。
+		#   mine_zero 高 ∧ ask_zero 高            ⇒ 兩邊都趨 0，「全員過剩」站得住
+		#   mine_zero 高 ∧ ask_zero 低 ∧ 平均 ask ≫ 平均 mine ⇒ 「賣家開價脫離行情」
+		#   兩個 share 都在中間                  ⇒ 不可判（★而那時才需要分布）
+		#   ★刻意不做分布：Probe 的 instance 是 first-N cap（取樣有偏），
+		#     而分布正是最不能忍受取樣偏差的那種問題。
 		if Probe.enabled and gain <= 0.0:
-			Probe.bump("trade.arb_kill_zero_gain")
-			Probe.bump("trade.arb_kill_zero_gain." + String(o["res"]))
+			Probe.bump("trade.buyer_reject_priced_too_high")
+			Probe.bump("trade.buyer_reject_priced_too_high." + String(o["res"]))
+			var _r: String = String(o["res"])
+			Probe.add_amount("trade.buyer_reject.ask_sum", _ask)     # ÷n ⇒ 平均 ask
+			Probe.add_amount("trade.buyer_reject.mine_sum", _mine)   # ÷n ⇒ 平均 mine
+			if _mine <= 0.0: Probe.bump("trade.buyer_reject.mine_zero")
+			if _ask  <= 0.0: Probe.bump("trade.buyer_reject.ask_zero")
+			# ★★★per-res 同一組（實測驅動的小延伸，仍然只是純量、無取樣偏差）：
+			#   3 日窗首跑：mine_zero=106、ask_zero=106，而 food=106 / material=105
+			#   ⇒ ★兩個資源行為相反，被平均成【中間】⇒ 判別失效。
+			#   ⇒ ★★而這不是雜訊，是【聚合把兩個母體掺在一起】―― 加 per-res 就分得開，
+			#     而不需要 systems 想避免的那種分布機制。
+			Probe.add_amount("trade.buyer_reject.ask_sum." + _r, _ask)
+			Probe.add_amount("trade.buyer_reject.mine_sum." + _r, _mine)
+			if _mine <= 0.0: Probe.bump("trade.buyer_reject.mine_zero." + _r)
+			if _ask  <= 0.0: Probe.bump("trade.buyer_reject.ask_zero." + _r)
 		if gain > best_score:
 			best_score = gain; best = {"kind": "sell", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	for o in received_buy_orders(state, merchant):
