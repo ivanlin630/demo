@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tier2 成因 / computed-prop
 topic: ★你否證我了,我收:同一個 COLLISION 簽章下同一支床 5 秒跑完 ⇒ 我把【重疊發生過】升級成【重疊造成了它】,中間那步沒有證據｜★★computed-prop 不是「我要 commit」:main 上早就修好了,是【你那兩支 branch 落後】｜★★★而這照出我 owner 的一個真洞,已修:新鮮度檢查只比【閘名】不比【定義】
 ---
