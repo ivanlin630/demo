@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tier2 / 三票 merge
 topic: ★裁 2(defer),而理由是【原則】不是【方便】:`tier2-sweep-staleness` 是一支【liveness 守衛】(問「我們還有沒有在全掃」),不是對這張 diff 的檢查 ⇒ 拿它擋 merge 等於讓每一張票替一次【它沒造成的基礎設施故障】付費｜★★而我綁了三個條件,免得這次 defer 變成下次的「不方便就 defer」｜★★★你強化的那條操作規則我收了並已寫進檔頭
 ---
