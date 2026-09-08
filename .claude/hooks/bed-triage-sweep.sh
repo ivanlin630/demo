@@ -87,6 +87,7 @@ while IFS= read -r bed; do
   esac
   n=$((n+1))
   t0=$SECONDS
+  _ts0=$(date +%Y-%m-%dT%H:%M:%S)
   # ★★★2026-09-07 血證:只靠【內層工具的 timeout】不夠 ——
   #   第 34 支(game_sim_test.gd)卡了【59 分鐘】,而當時★沒有任何 Godot 在跑、
   #   ★★wrapper 的 powershell 也不在 ⇒ 子進程早就沒了,
@@ -95,11 +96,18 @@ while IFS= read -r bed; do
   o="$(timeout -k 5 "$((PER_BED_TIMEOUT + 30))" env GODOT_TIMEOUT="$PER_BED_TIMEOUT" powershell -NoProfile -File ./tools/godot.ps1 --headless --path "$REPO" --script "$bed" 2>&1)"
   outer_rc=$?
   dt=$((SECONDS-t0))
+  # ★★★systems 裁定 v2：逐床標註競爭。判準不是「開始時有沒有人在跑」（瞬時取樣）,
+  #   而是「這支床跑的【整段期間】run-log 有沒有出現 COLLISION 列」――
+  #   ★單調紀錄,涵蓋【開始之後才來】的情形。
+  _ts1=$(date +%Y-%m-%dT%H:%M:%S)
+  _coll=$(awk -F"	" -v a="$_ts0" -v b="$_ts1" '$2 ~ /COLLISION/ && $1>=a && $1<=b' .claude/hooks/.godot-runs.log 2>/dev/null | wc -l | tr -d "[:space:]")
+  case "$_coll" in ""|*[!0-9]*) _coll=0;; esac
   if [ "$outer_rc" = "124" ] || [ "$outer_rc" = "137" ]; then v="hang"
   elif printf '%s' "$o" | grep -qa 'GODOT TIMEOUT'; then v="timeout"
   else v="$(printf '%s' "$o" | classify)"; fi
   note=""
   [ "$v" = "red" ] && note="$(printf '%s' "$o" | grep -aE -m1 'Assertion failed|\[FAIL\]|(^|[[:space:]])FAIL[[:space:]]|HAS FAILURE|FAILS=[1-9]' | tr '\t' ' ' | cut -c1-90)"
+  [ "$_coll" -gt 0 ] && note="CONTENDED(collisions=$_coll) $note"
   printf '%s\t%s\t%s\t%s\n' "$bed" "$v" "$dt" "$note" >> "$OUT"
   echo "[SWEEP] $n $(basename "$bed") ⇒ $v (${dt}s)"
 done < "$LIST"
