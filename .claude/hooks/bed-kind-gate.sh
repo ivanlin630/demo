@@ -62,7 +62,7 @@ selftest() {
     "invariant_not_wired_bed.gd|RED" \
     "pending_bogus_blocker_bed.gd|RED" \
     "diagnostic_with_verdict_bed.gd|RED" \
-    "good_pending_bed.gd|GREEN"
+    "acceptance_no_slice_bed.gd|RED"     "good_pending_bed.gd|GREEN"     "good_acceptance_bed.gd|GREEN"
   do
     n="${pair%|*}"; want="${pair#*|}"
     if [ ! -f "$FIX/$n" ]; then
@@ -82,7 +82,7 @@ if ! selftest; then
   echo "[BED-KIND] ★ABORT：陽性對照沒過 ⇒ 本輪作廢（不得讀成任何結果）"
   exit 3
 fi
-echo "[BED-KIND] 陽性對照通過（4 種紅各一格 + 1 格反向綠）"
+echo "[BED-KIND] 陽性對照通過（5 格紅 + 2 格反向綠，涵蓋 §3b 全部四條）"
 
 # ── 存量規模（★只是讓它可見；★★不宣稱它會因此下降）────────────────
 TOTAL="$(git ls-files 'scripts/debug/*.gd' | wc -l | tr -d ' ')"
