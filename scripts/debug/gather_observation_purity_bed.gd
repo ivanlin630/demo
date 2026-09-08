@@ -29,6 +29,25 @@ func _initialize() -> void:
 	var days: int = int(OS.get_environment("GP_DAYS")) if OS.has_environment("GP_DAYS") else 6
 	print("=== gather_purity: days=%d ===" % days)
 
+	# ★先跑 fixture：母體靠造，不靠世界碰運氣
+	print("  ── fixture（造出 idle_labor > 0）──")
+	var cf: Dictionary = _fixture_counts()
+	for f in FIELDS:
+		var fa: int = int(cf.get("gather.write.%s.advance" % f, 0))
+		var fo: int = int(cf.get("gather.write.%s.observe" % f, 0))
+		print("     %-28s advance=%-4d observe=%d" % [f, fa, fo])
+		# ★★★判準優先序：`observe > 0` 【本身就是違規】，
+		#   不該先被【母體為空】吃掉。實測血證：拿掉 `and advance` 之後，
+		#   第一呼（observe）就把 cadence 用掉 ⇒ advance 那一呼反而不寫
+		#   ⇒ advance == 0 ⇒ 若先判母體就會把【真的寫了】報成【不可判】。
+		if fo > 0:
+			_ok(false, "fixture %s：觀測路徑寫了 %d 次（★寫了就是違規，跟母體無關）" % [f, fo])
+		elif fa == 0:
+			print("       ★fixture 沒造出這一欄的母體")
+			_unjudgeable += 1
+		else:
+			_ok(true, "fixture %s：觀測零寫入（母體 advance=%d）" % [f, fa])
+
 	var ra: Array = _run_world(days, false)
 	var rb: Array = _run_world(days, true)
 	var fp_a: String = ra[0]
@@ -41,13 +60,14 @@ func _initialize() -> void:
 		var adv: int = int(cb.get("gather.write.%s.advance" % f, 0))
 		var obs: int = int(cb.get("gather.write.%s.observe" % f, 0))
 		print("     %-28s advance=%-6d observe=%d" % [f, adv, obs])
-		if adv == 0:
-			# ★母體為空 ⇒ 不可判。★★這【不是】綠：它說的是「這一輪沒有執行到那個寫入點」，
-			#   而不是「觀測沒有寫」。把它算成綠就是恆綠。
-			print("       ★不可判：advance == 0 ⇒ 這一輪根本沒走到這個寫入點")
-			_unjudgeable += 1
+		if obs > 0:
+			_ok(false, "%s：觀測路徑寫了 %d 次（★寫了就是違規，跟母體無關）" % [f, obs])
+		elif adv == 0:
+			# ★母體交給 fixture 背（systems 裁）：用【取樣一個世界】去測【code 形狀】是類別錯誤。
+			#   ⇒ 世界段降級成【診斷】：只在 observe > 0 時紅，不再計【不可判】。
+			print("       （世界段沒走到這個寫入點；母體由 fixture 負責）")
 		else:
-			_ok(obs == 0, "%s：觀測路徑零寫入（母體 advance=%d）" % [f, adv])
+			_ok(true, "%s：觀測路徑零寫入（母體 advance=%d）" % [f, adv])
 
 	# ── labor 那一支：兩條路各自要有 tap 點過，否則同樣是母體為空 ──
 	var ro: int = int(cb.get("labor.ensure_fresh.readonly", 0))
@@ -92,3 +112,38 @@ func _run_world(days: int, observe: bool) -> Array:
 				var _c: DecisionContext = DecisionContext.gather(state, state.teams[tid])
 				var _x: float = _c.threat_react
 	return [StateFingerprint.compute(state), Probe.counts.duplicate(true)]
+
+# ★★★fixture（systems 裁 2026-09-08）：用【取樣一個世界】去測【一個 code 形狀】是類別錯誤。
+#   那四欄的前置是 `c.idle_labor > 0`（:312 / :465），而那是一個可以【造】的條件：
+#     tile 自家據點、無資源無製造設施 ⇒ demand 空 ⇒ _dcap = 0
+#     共位一支 TAG_PRODUCE 的隊 ⇒ pool > 0 ⇒ idle_labor = pool > 0
+#   ⇒ 母體【造出來】而不是【等出來】。
+func _fixture_counts() -> Dictionary:
+	var state: WorldState = MeasureBedHelper.arm_and_new()
+	state.world.current_tick = 100
+	var t := TeamData.new()
+	t.team_id = 1
+	t.tags = [TeamData.TAG_PRODUCE]
+	t.tile_pos = Vector2i(3, 3)
+	var ldr := PersonData.new(); ldr.id = 10; ldr.team_id = 1
+	state.persons[10] = ldr
+	t.leader_id = 10
+	t.named_members = [10]
+	state.teams[1] = t
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3)
+	tile.outpost_owner = 1
+	tile.outpost_level = 1
+	state.world.tiles[3 * 1000 + 3] = tile
+	# ★★★順序是這支 fixture 的命門（實測血證 2026-09-08）：
+	#   若先呼 advance 再呼 observe，advance 那一呼已把 `*_eval_next_tick`
+	#   推到未來 ⇒ observe 那一呼走【快取分支】，本來就不寫
+	#   ⇒ ★把 `and advance` 拿掉它照樣全綠 ⇒ 【這個斷言不可能變紅】。
+	# ⇒ observe 必須在 cadence【到期】時呼：前一呼（next_tick 還是 0），
+	#   後一呼把 tick 推過 cadence 再呼一次 ―― 兩次都是【該寫而不寫】的情境。
+	var _b0: DecisionContext = DecisionContext.gather(state, t, false)  # observe（cadence 到期）
+	var _a: DecisionContext = DecisionContext.gather(state, t, true)    # advance（造母體）
+	print("     fixture: idle_labor(advance)=%.2f" % _a.idle_labor)
+	state.world.current_tick += 100000                                  # ★推過所有 cadence
+	var _b1: DecisionContext = DecisionContext.gather(state, t, false)  # observe（再次到期）
+	return Probe.counts.duplicate(true)
