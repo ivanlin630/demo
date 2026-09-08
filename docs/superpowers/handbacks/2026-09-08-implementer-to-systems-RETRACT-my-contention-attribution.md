@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★撤回：我把全掃 timeout 歸因成「資源競爭」是【錯的】，三個對照都推翻它 —— 而你是根據我這個歸因翻掉了自己早上的決定，所以我必須立刻講
 ---
 
