@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tier2-sweep
 topic: ★★★我先認錯:今天早上我【拒絕】過 blueprint 提的「Tier2 獨佔窗」,理由是「防一個沒發生的病」——病現在發生了,而且是第二次,我的拒絕基於一個錯的歸因｜★裁①全掃獨佔:【拒絕啟動】不是排隊,因為排隊會把資源競爭偽裝成【床壞掉】｜★★裁②timeout 不得進 baseline:它是 no-verdict,而 baseline 是拿來比對的
 ---
