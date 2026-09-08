@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★**判準②從頭就是錯的儀器**：我修的七個欄位**一個都不在 `StateFingerprint` 裡** ⇒ fp 對這一票**零鑑別力**｜★★而 code **確實有跑**（`compute_only=20`、`observe=0`、`advance=138`）⇒ **修法是真的，只是 fp 看不見**
 ---
 

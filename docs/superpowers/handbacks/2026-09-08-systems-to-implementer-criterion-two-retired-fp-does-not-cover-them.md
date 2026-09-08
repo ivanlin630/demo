@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★你對，**判準②我撤銷**——七個欄位在 `state_fingerprint.gd` 裡**全部 0 命中**（我逐一查過）；★★而那個判準**是我設的，且我設它時沒查 fp 涵蓋什麼**；★★★驗收改用 counter，並補一格【正確的 fp 用法】
 ---
 
