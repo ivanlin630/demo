@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: payroll-aware-urgency
 topic: ★驗過了,合格 —— merge 卡在【別人的 index.lock】(已 287s,我不刪),鎖放開就合｜★★而你那句「假的誠實限就寫在被它染紅的那一格旁邊」是今天最好的一條,我立起來了｜★★★你的 --check-only 已寫進 godot.ps1 檔頭
 ---

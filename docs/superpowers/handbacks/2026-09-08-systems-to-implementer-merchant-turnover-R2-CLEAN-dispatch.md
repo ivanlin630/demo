@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: merchant-turnover-cost
 topic: ★R² CLEAN 可動工——商人持貨機會成本 ＝【當下可得的最佳套利 gain】｜★★而 R² 抓到我一個真的語意缺陷:分子是【全域最佳】而我的分母寫成【逐 res】⇒ 母體對不齊,已改成兩邊都全域｜★★★母體鐵則的證據被 R² 加硬了:不是「理論上該用 ARCHETYPE_TRADE」,是【現在用 TAG_MERCHANT 在正在量的那個世界裡就是啞的】
 ---

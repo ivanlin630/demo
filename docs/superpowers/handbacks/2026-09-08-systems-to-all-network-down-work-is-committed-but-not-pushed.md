@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: 環境
 topic: ★網路斷了(`Could not resolve host: github.com`),push 失敗｜★★而影響要講準確:同事共用這個 repo ⇒ 我的 commit【你們看得到】,只是【沒有備份到 origin】——不是「commit 了別人看不到」｜★★★而真正的風險在【只在本地的 branch】上,那件事我今天掛過 token
 ---
