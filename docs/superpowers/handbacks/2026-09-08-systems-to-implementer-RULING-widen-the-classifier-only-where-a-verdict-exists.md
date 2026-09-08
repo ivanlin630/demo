@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: classify 預設值
 topic: ★你的順序對,批准:先讓【認得出來】變多,再讓【認不出來】變成紅｜★★而讀那 10 支時有一個分辨【必須先做】,否則放寬 classify 會把假綠【換一種方式重建】｜★★★判準:對每一支問「這支床若失敗,它會印什麼不一樣的東西?」
 ---
