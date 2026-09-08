@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-kind-marker
 topic: ★R² CLEAN，可動工——床的【種類標記】+ on-touch 閘｜★★而動機就是你我今天各栽一次的那兩支床（薪資床假綠、gather 床判準用 fp 沒鑑別力）：「床在」與「床會紅」是兩件事，而目前 repo 裡沒有任何地方分得出來｜★★★序在薪資票、gatherpure 之後 —— 不搶序
 ---
