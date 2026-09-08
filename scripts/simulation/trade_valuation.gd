@@ -60,7 +60,6 @@ const RESERVE_HOARD_K: float = 0.5       # TEST VALUE — 貪婪/慎重守貨斜
 const RESERVE_URGENCY_K: float = 0.4     # TEST VALUE — 急迫/絕境鬆手斜率(高 urgency→reserve 低賣)
 const RESERVE_FACTOR_MIN: float = 0.1    # TEST VALUE — 液化下限(絕境也留一點非活命品緩衝)
 const RESERVE_FACTOR_MAX: float = 1.2    # TEST VALUE — 守貨上限(貪婪囤)
-const URGENCY_COIN_COMFORT: float = 10.0 # TEST VALUE — 人均 coin 舒適線(低於→缺幣壓力升 urgency)
 # ── ask/bid 液化：折扣人格化(急鬆手/貪守價)，willing 對閉合邊際價差 ──
 const COMMERCE_DISCOUNT_K: float = 0.1   # TEST VALUE — 商業技能折扣斜率
 const URGENCY_DISCOUNT_K: float = 0.3    # TEST VALUE — 急迫賣方折扣加深(鬆手賣)
@@ -121,8 +120,19 @@ static func _food_urgency(team: TeamData, state: WorldState) -> float:
 
 # 隊急迫度 [0,1]：食物天數低 + 人均 coin 缺 → 鬆手賣非活命品換 coin/糧。純狀態，零 randf。
 static func _urgency(team: TeamData, state: WorldState) -> float:
-	var pop: float = maxf(float(team.population), 1.0)
-	var coin_urg: float = clampf(1.0 - float(team.resources.get("coin", 0)) / (pop * URGENCY_COIN_COMFORT), 0.0, 1.0)
+	# ★★★coin 需求接到【真實的 payroll】（systems spec 2026-09-08，零新常數）。
+	#   舊版：`pop × URGENCY_COIN_COMFORT(10.0, TEST VALUE)` ―― 手抄物理，
+	#   而【領主要付薪水所以需要 coin】這件事賣貨決策看不見。
+	#   ★這是【接線】不是【調參】；常數連著一起刪掉（不留沒人用的）。
+	# ★★誠實限：payroll ≠ 全部的 coin 需求（建設/採購/稅仍看不見）
+	#   ⇒ 這是把【手抄的假需求】換成【真實但不完整的需求】，不是「coin 需求接好了」。
+	var need: float = SalarySystem.estimated_payroll(state, team)
+	var coin_urg: float = 0.0
+	# ★★★`need > 0.0` 這個守衛【承載語意】：payroll=0 的隊沒有薪資壓力，
+	#   coin_urg=0 是【誠實】而不是【遺漏】。不得改寫成 maxf(need, 1.0)
+	#   ―― 那會把【沒有義務】偽裝成【有一點義務】。
+	if need > 0.0:
+		coin_urg = clampf(1.0 - float(team.resources.get("coin", 0)) / need, 0.0, 1.0)
 	return maxf(_food_urgency(team, state), coin_urg)
 
 # ask 售價：折扣人格化——商業技能 + 急迫鬆手(折扣深)，貪婪守價(折扣收窄→部分談崩)。零 randf。
