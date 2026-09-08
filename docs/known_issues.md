@@ -22,6 +22,33 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+### ⏳★★★`[TickPerf] teams=` 的分母混了【野獸 pseudo-team】⇒ 隊數曲線讀不出「分團/定居活了」（2026-09-08 systems 自查自撤）
+
+**狀態：已知未修** ｜ **回訪：量測窗 人口卷 round 2**
+
+★這條入的是【**儀器的缺陷**】，不是【世界的現象】——現象目前是**未知**，不是已知。
+
+```
+分母定義  scripts/simulation/sim_runner.gd:122-124   teams=%d ← state.teams.size()  ★裸字典大小
+野獸入帳  scripts/simulation/beast_system.gd:16      「造臨時野獸 pseudo-team，★入 state.teams」
+算術對上  docs/measurements/2026-09-07-population-turnover-warring_states-90d.txt
+            [GameSetup] 完成：49 teams ／ 相異負 id 隊（Team-1xxxxxx）＝ 16 ／ day=1 teams=65
+          ⇒ ★★★49 + 16 = 65 精確吻合 ⇒ day1 的「成長」全部是野獸 pseudo-team
+```
+
+★★**被它誤導過一次**：systems 曾報「隊數膨脹到 93（16→93）⇒ 分團/定居在新經濟世界活了」，
+blueprint 收下並要求入帳。查來源時整條垮掉——
+★而那個「16」是從 `tools/orchestrator/runs/main_story_trace.txt`（**另一個 config 的世界**）抓的，
+warring_states 的 setup 本來就是 49 隊。**兩個世界的數字被接成一條曲線。**
+
+★★★**要答原本那題需要換分母**：`state.teams` 排除負 id 之後逐日印一行。
+綁人口卷 round 2 一起跑（那批本來就要重跑），不單獨開輪。
+
+★**順帶（會誤導下一個人）**：`…-★90d★.txt` 那份跑的 TickPerf 最後一行是 **day=19** —— 檔名說 90 天，實際沒跑完。
+
+---
+
+
 ### ⏳★★`stale-conclusion` 閘蓋好但【故意沒註冊】——真涵蓋率 9.0%（2026-09-03 systems 裁）
 
 **狀態：已知未實裝** ｜ **回訪：觸發事件 — 當 verdict 開始帶 `touches`，且【指名得出 production 路徑】的比例 ≥ 50% 時，把它加進 `docs/process/merge-gates.tsv`（expect `\[STALE-CONCL\]`）**

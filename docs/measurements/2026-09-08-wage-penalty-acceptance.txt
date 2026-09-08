@@ -1,0 +1,41 @@
+[TREE] path=A:/GDS/demo/.worktrees/wagepen commit=7099907c clean=NO code-dirty=2
+[TREE]   *** measuring the WORKING TREE, not commit 7099907c ***
+[TREE]    M scripts/debug/wage_penalty_test.gd
+[TREE]    M scripts/simulation/salary_system.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+  ──  有錢卻不發（★懲罰必須發生）──
+[Salary] Team1 薪水結算 coin=99999.6
+[Salary] Team1 薪水結算 coin=99999.2
+[Salary] Team1 薪水結算 coin=99998.8
+     coin 充足 = 100000 ｜ 忠誠 0.8000 → 0.7820
+     reason: paid_full=0 willful=3 unpayable=0
+  [PASS] ★情境真的造出來了：`underpaid_willful` > 0（不是付滿）
+  [PASS] ★★且【沒有人被付滿】──否則情境是混的
+  [PASS] ★★★懲罰真的發生：忠誠 0.8000 → 0.7820（必須下降）
+  [PASS] ★★有錢的隊不得被判成【付不出】
+  ──  無幣村（★忠誠流失必須為 0）──
+[Salary] Team2 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team2 薪水結算 coin=0.0
+[Salary] Team2 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team2 薪水結算 coin=0.0
+[Salary] Team2 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team2 薪水結算 coin=0.0
+     coin = 0 ｜ 忠誠 0.8000 → 0.8000 ｜ unrest 0 → 0
+     reason: paid_full=0 willful=0 unpayable=3 ｜ unrest.suppressed=3
+  [PASS] ★無幣村：忠誠【沒有】流失
+  [PASS] ★★無幣村：unrest【沒有】增加（同一把刀的另一半）
+  [PASS] ★★★母體：`unpayable_local` > 0 —— 沒有這格，「忠誠沒掉」分不出【修好了】與【根本沒發薪】
+  ──  玩家領主定零薪（★不得被豁免）──
+[Salary] Team3 薪水結算 coin=100000.0
+[Salary] Team3 薪水結算 coin=100000.0
+[Salary] Team3 薪水結算 coin=100000.0
+     coin 充足 = 100000 ｜ salary=0 ｜ 忠誠 0.8000 → 0.7100
+     reason: paid_full=0 willful=3 unpayable=0
+  [PASS] ★玩家領主定零薪  判【不肯付】（★★若軸鍵在 npc_salary_mult，這格會紅）
+  [PASS] ★★★懲罰真的落在玩家領主身上：忠誠 0.8000 → 0.7100
+  [PASS] ★團庫有錢  不得被判成【付不出】
+=== DONE === ALL PASS
+

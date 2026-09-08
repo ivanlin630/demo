@@ -101,6 +101,24 @@ if [ "$rc" != "0" ] || [ "$rows" = "0" ] || [ "$rows" = "NaN" ]; then
   exit 3
 fi
 
+# ★★★退化守衛（2026-09-08 血證）：★我原本只防「沒有結果」（rows=0），
+#   ★★而真正發生的是【全部都是同一種壞結果】——137/137 全 timeout，
+#     腳本照樣接受、覆蓋 baseline、蓋戳記，超期閘還說 PASS。
+#   ⇒ ★★★後果比空結果更糟：diff 機制被【毒化】——基準說「本來就是 timeout」，
+#     於是下一輪真正的 green→red 【看不見】。
+#   ⇒ 判準：非 green 佔比 > 60% ⇒ 視為【這一輪壞了】，不是【世界壞了】。
+_bad=$(awk -F'\t' '/^scripts\//{n++; if($2!="green") b++} END{printf "%d %d", b+0, n+0}' "$TMP")
+_b=${_bad% *}; _n=${_bad#* }
+if [ "${_n:-0}" -gt 0 ]; then
+  _pct=$(( _b * 100 / _n ))
+  if [ "$_pct" -gt 60 ]; then
+    echo "[tier2] ★ABORT：非 green 佔 ${_pct}%（$_b/$_n）⇒ ★這一輪【壞了】，不是世界壞了"
+    echo "[tier2]   ★★不更新 baseline、不蓋戳記 —— 因為【全部同一種壞結果】會毒化 diff："
+    echo "[tier2]   基準若寫成「本來就是 timeout」，下一輪真正的 green→red 就看不見了"
+    echo "[tier2]   ⇒ 常見成因：Godot 爭用／wrapper 起不來 ⇒ 先查誰在跑，再重跑"
+    exit 4
+  fi
+fi
 # ── diff：只報【綠→紅】 ────────────────────────────────
 alerts=0
 if [ -f "$BASELINE" ]; then

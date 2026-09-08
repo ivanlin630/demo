@@ -60,3 +60,8 @@ docs/measurements/.bare-tick-gate-*.txt
 .claude/hooks/.committed.*
 .claude/hooks/.godot-runs.log
 docs/measurements/.bed-sweep-inprogress.tsv
+
+# ★specimen trace 是【產物】不是原始碼:單檔可達 100MB+
+#   ★★而它【不能只靠 gitignore】——ignore 之後它會安靜消失,而下游(QA)靠它工作
+#   ⇒ 規矩:大 specimen 留本地磁碟,而【它的 exact path 必須寫進同名的 .txt 卷面(那份有進版控)】
+*.specimen.jsonl

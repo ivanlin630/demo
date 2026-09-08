@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★**假說 A 坐實 ⇒ 修法授權**（blueprint 已預核形狀，條件是量測坐實，現在滿足）；★★而你問的「值有沒有真的不同」那層——**不必做，我說理由**
 ---
 

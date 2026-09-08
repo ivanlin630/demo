@@ -178,6 +178,23 @@ if (Test-Path $hookDir) {
     try {
         $fresh = Get-ChildItem -Path (Join-Path $hookDir ".busy.*") -ErrorAction SilentlyContinue |
             Where-Object { $_.Name -ne (".busy." + $beaconRole) -and ((Get-Date) - $_.LastWriteTime).TotalSeconds -lt 60 }
+        # SAME-ROLE BLIND SPOT (2026-09-08). The filter above excludes this role's own
+        # beacon -- deliberately, so a wrapper does not collide with itself. But the side
+        # effect is that N concurrent instances of the SAME role never register a collision,
+        # and that is by far the commonest overlap: one person spawning parallel work.
+        # Blood evidence: 10 concurrent `systems` sweeps, ZERO collisions logged, 150 beds
+        # timed out at the 360s cap while the average healthy run was 41s. The detector's
+        # blind spot was exactly the collision that happened.
+        # So: also look at the world directly -- another Godot already running is a fact
+        # that does not care whose beacon it is.
+        try {
+            $others = @(Get-Process -Name "*odot*" -ErrorAction SilentlyContinue |
+                Where-Object { $_.Id -ne $PID })
+            if ($others.Count -gt 0) {
+                "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`tCOLLISION-SAMEROLE`t$beaconRole`tgodot-already-running=$($others.Count)" |
+                    Out-File -FilePath $runLog -Encoding ascii -Append
+            }
+        } catch { }
         if ($fresh) {
             $who = ($fresh | ForEach-Object { $_.Name -replace "^\.busy\.", "" }) -join ","
             "$($runStart.ToString('yyyy-MM-ddTHH:mm:ss'))`tCOLLISION`t$beaconRole`tstarted-while-running=$who" |

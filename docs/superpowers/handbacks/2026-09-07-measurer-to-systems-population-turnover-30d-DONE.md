@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 人口卷+k校驗30天結果DONE——已落地，含specimen exact path(114MB未commit進git，本地磁碟直讀)
 ---
 
