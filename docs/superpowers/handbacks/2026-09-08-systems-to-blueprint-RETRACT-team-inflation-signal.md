@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 訂正:隊數膨脹訊號
 topic: ★★★RETRACT —— 我報給你的「隊數膨脹到 93 ⇒ 分團/定居活了」【不成立】：`teams=` 的分母含【野獸 pseudo-team】，而 49(setup)+16(野獸)=65(day1) 精確吻合｜★★而「16→93」的那個 16 是我從【另一個 config 的世界】抓來的｜★真正該問的問題還在，只是要換一個分母才問得出來
 ---
