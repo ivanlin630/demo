@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: per-res 留著，收到｜★裁定 B 的影子數字（跑到一半的中間值）：fall-through 佔綠的 ~33%
 ---
 
