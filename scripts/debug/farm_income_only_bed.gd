@@ -20,9 +20,10 @@ func _run() -> void:
 
 	print("=== farm_income_only_bed: config=%s days=%d ticks=%d seed=%d ===" % [cfg, days, ticks, seed_val])
 
-	var farm_income_total: float = 0.0
-	var farm_income_count: int = 0
-	var farm_income_by_team: Dictionary = {}
+	var farm_income_total: float = 0.0     # Σdelta，含delta==0(2026-09-08修正:去掉delta>0.0過濾,同主床同一bug)
+	var farm_entry_count: int = 0          # 所有市場賣糧entry數，含delta==0
+	var farm_zero_price_count: int = 0     # 其中delta==0的筆數(=賣了但零價)
+	var farm_income_by_team: Dictionary = {}  # 只收非零delta
 	var overflow_hits: int = 0
 	var ledger_seen: int = 0
 
@@ -37,24 +38,40 @@ func _run() -> void:
 					var ent = e.get("entity")
 					if ent is TeamData and ent.tags.has(TeamData.TAG_PRODUCE):
 						var delta: float = float(e.get("delta", 0.0))
-						if delta > 0.0:
-							farm_income_total += delta
-							farm_income_count += 1
+						farm_entry_count += 1
+						farm_income_total += delta
+						if is_equal_approx(delta, 0.0):
+							farm_zero_price_count += 1
+						else:
 							var tid_e: int = ent.team_id
 							farm_income_by_team[tid_e] = float(farm_income_by_team.get(tid_e, 0.0)) + delta
 			WorldState.clear_driver_ledger()
 		if tick % 10000 == 0 and tick > 0:
-			print("[CHECKPOINT] tick=%d farm_income累計=%.2f(%d筆) ledger_seen=%d overflow_hits=%d" % [
-				tick, farm_income_total, farm_income_count, ledger_seen, overflow_hits])
+			print("[CHECKPOINT] tick=%d farm_income累計=%.2f(entry=%d,零價=%d) ledger_seen=%d overflow_hits=%d" % [
+				tick, farm_income_total, farm_entry_count, farm_zero_price_count, ledger_seen, overflow_hits])
+
+	var produce_team_count: int = 0
+	for tid3 in state.teams:
+		var t3 = state.teams[tid3]
+		if t3 is TeamData and t3.tags.has(TeamData.TAG_PRODUCE):
+			produce_team_count += 1
 
 	print("\n=== 結果 ===")
 	print("[OK] 陽性對照：ledger_seen=%d" % ledger_seen)
 	print("[OVERFLOW-CHECK] overflow_hits=%d（0=未溢出，直接量證）" % overflow_hits)
-	print("④農隊收入(⑨世界market_sell_coin_in，PRODUCE隊)：總額=%.2f 筆數=%d 涉及隊數=%d" % [
-		farm_income_total, farm_income_count, farm_income_by_team.size()])
-	if farm_income_count == 0:
-		print("  ★★零筆——PRODUCE隊母體是否存在需另查（若為0則不可判非結論0）")
+	print("④農隊收入(⑨世界market_sell_coin_in，PRODUCE隊，2026-09-08修正:不再濾delta>0.0)：")
+	print("  entry筆數(含零價)=%d｜其中零價筆數=%d｜非零總額=%.2f｜非零涉及隊數=%d" % [
+		farm_entry_count, farm_zero_price_count, farm_income_total, farm_income_by_team.size()])
+	print("  PRODUCE隊母體(末tick快照)=%d" % produce_team_count)
+	if farm_entry_count == 0:
+		if produce_team_count == 0:
+			print("  ★(a)不可判——PRODUCE隊母體末tick=0")
+		else:
+			print("  ★(b)真0——有PRODUCE隊(%d)但整輪零賣出entry" % produce_team_count)
+	elif is_equal_approx(farm_income_total, 0.0):
+		print("  ★★★(c)賣了但零價——entry筆數=%d全部delta==0⇒零價機制成立(⑩後果格答案成立)" % farm_entry_count)
 	else:
+		print("  ★正常有非零收入(非零entry=%d)：" % (farm_entry_count - farm_zero_price_count))
 		for tid2 in farm_income_by_team.keys():
 			print("  team=%d 收入=%.2f" % [tid2, farm_income_by_team[tid2]])
 	print("★世界誠實限：貨幣量未過校驗（±14×待判）")
