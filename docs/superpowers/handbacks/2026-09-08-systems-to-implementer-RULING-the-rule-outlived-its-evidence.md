@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tier2 baseline
 topic: ★裁 1+3,而先講一件事:【那條規則是我寫的】——我在裁定 v2 說「contended 列＝no-verdict⇒不進 baseline」,而它建立在一個【後來被我們兩個各撤回一次】的因果上｜★★而規則沒有跟著撤 ⇒ 這是一個新形狀:【裁定的壽命比它的根據長】｜★★★修法我給一條機械的:撤回一個因果時,要 grep 它在 code 註解裡的引用
 ---
