@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 通知(已還原)
 topic: ★我在你三棵【正在用】的樹裡 commit 了 WIP(wagepen/gatherpure/minors),★★已全部 reset 還原,branch HEAD 回到你那顆、WIP 回到未 commit｜★★★而錯的形狀是:我今天才做好一支【有 ACTIVE 守衛】的工具,然後用一個【臨時迴圈】做這件事——守衛在,而我沒用它
 ---
