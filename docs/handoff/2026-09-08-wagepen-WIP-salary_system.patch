@@ -1,0 +1,99 @@
+diff --git a/scripts/simulation/salary_system.gd b/scripts/simulation/salary_system.gd
+index 903f4940..aefa8605 100644
+--- a/scripts/simulation/salary_system.gd
++++ b/scripts/simulation/salary_system.gd
+@@ -132,10 +132,19 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
+ 	var budget_ratio: float = 1.0
+ 	if payroll > 0.0 and coin_avail < payroll:
+ 		budget_ratio = coin_avail / payroll
++	# ★★★§2②：【付不出】與【不肯付】是兩件事，而舊 code 把它們合成一個 `ratio`。
++	#   ★而判準【不用發明】――它們本來就是兩個變數：
++	#     (a) `budget_ratio < 1` ⇒ 手上錢不夠【付不出】
++	#     (b) `p.salary < fair` 而 `budget_ratio == 1` ⇒ 付得起卻定低薪【不肯付】
++	#   ★★而舊 code 對 (a) 扣满額忠誠 ⇒ 【地理被定罪】：
++	#     無幣村每 7 天被判一次「苛待部下」，永動。
++	#   ★★★而【付不出】不是惡意：它該有別的戴述（士氣/敘事），不是忠誠懲罰。
++	var _can_pay: bool = budget_ratio >= 1.0
+ 	var _payday: int = state.world.current_tick / SALARY_INTERVAL
+ 	var _person_paid: int = 0
+ 	var _loy_up: int = 0
+ 	var _loy_down: int = 0
++	var _willful: int = 0   # ★【付得起卻定低薪】的人數 ―― unrest 該跟這個走，不跟 `budget_ratio` 走
+ 	var _coin_out: float = 0.0
+ 	for pid in team.named_members:
+ 		var p: PersonData = state.persons.get(pid)
+@@ -167,14 +176,25 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
+ 			Probe.add_amount("incometax.amount", paid - net)
+ 			Probe.add_amount("incometax.gross", paid)
+ 		if ratio >= 1.0:
++			if Probe.enabled: Probe.bump("salary.reason.paid_full")   # ★三格窮盡：付滿/不肯付/付不出
+ 			LoyaltyBank.adjust(p, (ratio - 1.0) * OVERPAY_BONUS, "overpay", MAX_LOYALTY)
+ 			_loy_up += 1
+ 			var intensity: float = clampf((ratio - 1.0) * 0.5, 0.05, 0.8)  # TEST VALUE
+ 			_npc_ai.write_memory(p, "kindness", team.leader_id,
+ 				state.world.current_tick, intensity)
+-		else:
++		elif _can_pay:
++			# ★【不肯付】：付得起而定低薪 ⇒ 個體忠誠流失（導向離團，非全隊懲罰）
+ 			LoyaltyBank.adjust(p, -(1.0 - ratio) * SALARY_LOYALTY_PENALTY, "underpay")
+ 			_loy_down += 1
++			_willful += 1
++			if Probe.enabled: Probe.bump("salary.reason.underpaid_willful")
++		else:
++			# ★★【付不出】：不扣忠誠――這一行就是本票的主刀。
++			#   ★★★而它仍然【被記錄】：不罰 ≠ 沒發生，否則下游分不出
++			#     【付滿了】與【付不出所以不罰】。
++			if Probe.enabled:
++				Probe.bump("salary.reason.unpayable_local")
++				Probe.add_amount("salary.reason.unpayable_shortfall", 1.0 - ratio)
+ 	var anon_paid: float = anon_total * budget_ratio
+ 	ResourceBank.remove(team, "coin", anon_paid, "salary_anon")
+ 	AnonTreasuryBank.deposit(team, anon_paid, "salary")   # 匿名薪水沉澱公庫（非消失）
+@@ -182,34 +202,20 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
+ 		# ★★★逐【發薪日】記（R² 要求：不要窗期聚合）——
+ 		#   ★`SALARY_INTERVAL` 全域同步無 stagger ⇒ 尖峰落在同一天，而聚合會把它平均掉。
+ 		Probe.bump("salary.payday.%04d.paid" % _payday)
+-		if budget_ratio < 1.0:
+-			Probe.bump("salary.payday.%04d.cut" % _payday)   # ★該發薪日有幾隊減薪
+-		# ★★★而【進入次數】不等於【真的發了錢】——
+-		#   `budget_ratio` 只在 `payroll > 0.0 and coin_avail < payroll` 才 < 1
+-		#   ⇒ ★`payroll == 0`（沒有具名成員／全被 master_memory 濾掉／anon 為 0）時
+-		#     budget_ratio 恆 1.0 ⇒ ★★「減薪 0」與「根本沒發過錢」【印出來長得一樣】
+-		#   ⇒ ★★★所以 payroll 的零/非零要自己一格，實際流出的 coin 也要自己一格。
+-		Probe.bump("salary.payday.%04d.%s" % [_payday,
+-			"payroll_pos" if payroll > 0.0 else "payroll_zero"])
+-		var _kind: String = "produce" if team.tags.has(TeamData.TAG_PRODUCE) else "other"
+-		Probe.bump("salary.payday.%04d.%s" % [_payday, _kind])
+-		# ★★★這一格才是【⑥ 到底有沒有效】的判準——
+-		#   ★「進入次數」與「payroll>0 的隊數」都【不分居民與非居民】
+-		#     ⇒ 居民隊可以全部都是 payroll==0，而合計看起來一樣漂亮。
+-		#   ★★而 ⑥ 的反事實是【現成的】：修前居民隊在 :31 就 return，付出恰好 0
+-		#     ⇒ ★★★居民隊這一格的 coin 流出【只要非 0，就是 ⑥ 造成的】，不需要另跑 A/B。
+-		if payroll > 0.0:
+-			Probe.bump("salary.payday.%04d.pos.%s" % [_payday, _kind])
+-		Probe.add_amount("salary.payday.%04d.coin_out.%s" % [_payday, _kind], _coin_out + anon_paid)
+-		Probe.add_amount("salary.payday.%04d.person_paid.%s" % [_payday, _kind], float(_person_paid))
+-		Probe.add_amount("salary.payday.%04d.person_paid" % _payday, float(_person_paid))
+-		Probe.add_amount("salary.payday.%04d.coin_out" % _payday, _coin_out + anon_paid)
+-		Probe.add_amount("salary.payday.%04d.loy_up" % _payday, float(_loy_up))
+-		Probe.add_amount("salary.payday.%04d.loy_down" % _payday, float(_loy_down))
+-		Probe.add_amount("salary.payday.%04d.unrest" % _payday, float(team.unrest_turns))
+-	if budget_ratio < 1.0:
++		# ★★★§2③ unrest：它本來挂在 `budget_ratio < 1.0`（付不出）上――
++	#   ★而那是【同一把刀的另一半】：只改忠誠不改這裡，無幣村會繼續被冤枉，
++	#     只是換了一個欄位，而卷面會看起來「修好了」。
++	#   ★★現在它跟【不肯付的人數】走，不跟 `budget_ratio` 走。
++	#   ★★★而我第一版把 `if not _can_pay:` 寫在 `if budget_ratio < 1.0:` 裡面――
++	#     那裡 `_can_pay` 恒為 false，於是 `else` 是【死分支】、而「不肯付」根本不會進來。
++	#     ★一個永遠跑不到的分支看起來與【有處理】一模一樣。
++	if _willful > 0:
+ 		UnrestBank.add(team, 1, "salary")
+-		print("[Salary] Team%d 減薪 %.0f%%（coin 不足）" % [team.team_id, (1.0 - budget_ratio) * 100.0])
++		if Probe.enabled: Probe.bump("salary.unrest.willful")
++	elif budget_ratio < 1.0:
++		if Probe.enabled: Probe.bump("salary.unrest.suppressed_unpayable")   # ★本來會加、現在不加
++	if budget_ratio < 1.0:
++		print("[Salary] Team%d 減薪 %.0f%%（本地無幣，不計懲罰）" % [team.team_id, (1.0 - budget_ratio) * 100.0])
+ 	print("[Salary] Team%d 薪水結算 coin=%.1f" % [team.team_id, float(team.resources.get("coin", 0))])
+ 
+ func _has_master_memory(p: PersonData, leader_id: int) -> bool:
