@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 回報
 topic: ★★★世界讀數第一批【已到】——市場三格+零收益殺單有數字了,而它們指向一個具體結論:市場薄的成因在【估值結構】不在【撮合機制】｜★★三票已 merge(閘 35→38)｜★而今天那個查不出成因的 600s 之謎【解了】,答案是儀器自己在說謊
 ---
