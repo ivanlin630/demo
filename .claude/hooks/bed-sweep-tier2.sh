@@ -94,7 +94,7 @@ fi
 #     ―― 單調紀錄，涵蓋【開始之後才來】，而瞬時取樣涵蓋不了。
 _running=$(powershell -NoProfile -Command "(Get-Process godot* -ErrorAction SilentlyContinue | Measure-Object).Count" 2>/dev/null | tr -d "[:space:]")
 case "$_running" in ""|*[!0-9]*) _running=0;; esac
-[ "$_running" -gt 0 ] && echo "[tier2] ℹ 開始時有 $_running 個 Godot 在跑 ⇒ 受影響的床會被標 CONTENDED（不進 baseline）"
+[ "$_running" -gt 0 ] && echo "[tier2] ℹ 開始時有 $_running 個 Godot 在跑 ⇒ 受影響的床會被標 CONTENDED（★標記而不排除，2026-09-08 訂正）"
 if [ "$IS_WORKTREE" = "1" ]; then
   echo "[tier2] ★拒絕：本掃描只准從【主 repo】跑（目前 cwd 是 worktree）"
   echo "[tier2]   理由：bed-triage-sweep.sh 會 cd 到 $MAIN_ROOT ⇒ 從這裡跑會【量到 main 的 code】而不自知，"
@@ -169,7 +169,20 @@ fi
 #   它們是 no-verdict,而 baseline 是【拿來比對的】——
 #   ★把 no-verdict 寫進去,下一輪的「由綠轉紅」就會被一次沒判決的跑污染一整輪。
 #   ★★而丟掉了多少要印出來:靜默過濾跟「本來就沒有」長得一樣。
-_keep=$(awk -F"	" 'NR==1 || (($2=="green" || $2=="red") && $4 !~ /CONTENDED/)' "$TMP")
+# ★★★ 2026-09-08 訂正（systems 裁 1+3）：CONTENDED 【標記但不排除】。
+#   舊規則（裁定 v2）把 contended 列當 no-verdict 排掉，而它建立在
+#   【競爭會讓判決變錯】這個因果上 ―― 而那個因果後來被我們兩個各撤回一次
+#   （真正的原因是 godot.ps1 的 $tempOut null）。
+#   ★而規則沒有跟著撤 ⇒ 【裁定的壽命比它的根據長】。
+#   ★★實際後果：六個 session 平行開，競爭是常態 ⇒ 幾乎每一列都被排除
+#   ⇒ baseline 一支都收不到，把【假綠】改成了【什麼都蓋不了】。
+#   ⇒ ★★★只排除【真的沒有判決】的（timeout/hang/crash/not-a-bed），
+#     CONTENDED 留在 note 欄可回頭查，並在檔頭記下這一輪的筆數。
+_keep=$(awk -F"	" 'NR==1 || $2=="green" || $2=="red"' "$TMP")
+# ★數的必須是【收進去的那些】：首版數全表 ⇒ 印出「列數 135、其中 139 列」
+#   ―― 一個【不可能為真】的數字。子集的計數要在子集上算。
+_contended=$(printf "%s
+" "$_keep" | awk -F"	" 'NR>1 && $4 ~ /CONTENDED/{c++} END{print c+0}')
 _kept=$(printf "%s" "$_keep" | grep -c "^scripts/")
 _dropped=$(( rows - _kept ))
 echo "[tier2] baseline 只收判決列:收 $_kept 支｜★丟 $_dropped 支 no-verdict(timeout/hang/crash) 或 CONTENDED"
@@ -177,8 +190,13 @@ if [ "$_kept" = "0" ]; then
   echo "[tier2] ★ABORT:一支判決都沒有 ⇒ 不更新 baseline、不蓋時間戳(全 no-verdict 不是結果)"
   exit 6
 fi
-printf "%s
-" "$_keep" > "$BASELINE"
+{ echo "# bed-sweep baseline｜產生於 $(date +%Y-%m-%dT%H:%M:%S)｜列數 $_kept"
+  echo "# ★其中 $_contended 列在跑的期間有別的 Godot 在跑（CONTENDED）―― 標記而不排除："
+  echo "#   無證據顯示競爭會讓判決變錯（2026-09-08 三次對照均正常），"
+  echo "#   而排除它會讓 baseline 在這個環境裡永遠寫不出來。"
+  printf "%s
+" "$_keep"
+} > "$BASELINE"
 date +%s > "$STAMP"
 echo "[tier2] 完成：$rows 支｜★綠→紅 $alerts 支｜baseline 已更新｜時間戳已蓋"
 [ "$alerts" -gt 0 ] && exit 1

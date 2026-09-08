@@ -38,6 +38,13 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   # ★★★沒有總結行才退回逐行掃，且【只認行首】的失敗標記
   #   血證 2026-09-07：不錨行首會把 `  PASS 對照:...=v1 FAIL 根` 判成紅（假紅）
   if printf '%s' "$t" | grep -qaE '^[[:space:]]*(\[FAIL\]|FAIL[[:space:]])'; then echo "red"; return; fi
+  # ★★★這一行是【認不出來就算綠】―― 一個預設也是一個判決。
+  #   data_test.gd 就是從這裡掉出去的（載入失敗 ⇒ green 184s）。
+  #   systems 准了改成 no-verdict，★但要先【影子跑一輪】量出會翻幾支，
+  #   否則把【假綠】換成【什麼都蓋不了】。
+  #   ⇒ 先只記錄，不改行為（SWEEP_SHADOW 指一個檔就會收到名單）。
+  [ -n "${SWEEP_SHADOW:-}" ] && printf '%s
+' "${bed:-?}" >> "$SWEEP_SHADOW"
   echo "green"
 }
 
@@ -126,6 +133,11 @@ while IFS= read -r bed; do
   # ★★★systems 裁定 v2：逐床標註競爭。判準不是「開始時有沒有人在跑」（瞬時取樣）,
   #   而是「這支床跑的【整段期間】run-log 有沒有出現 COLLISION 列」――
   #   ★單調紀錄,涵蓋【開始之後才來】的情形。
+  # ★★★ 2026-09-08 訂正：這個標記【只是標記】―― 它不再把列排出 baseline。
+  #   它原本的根據是【競爭會讓判決變錯】,而那個因果已被撤回
+  #   （真因是 godot.ps1 的 $tempOut null；帶 COLLISION 的對照跑三次都正常）。
+  #   ⇒ ★★【裁定的壽命不得比它的根據長】―― 撤回一個因果時,
+  #     要 grep 它在註解裡的引用並一併訂正（systems 2026-09-08 的機械修法）。
   _ts1=$(date +%Y-%m-%dT%H:%M:%S)
   _coll=$(awk -F"	" -v a="$_ts0" -v b="$_ts1" '$2 ~ /COLLISION/ && $1>=a && $1<=b' .claude/hooks/.godot-runs.log 2>/dev/null | wc -l | tr -d "[:space:]")
   case "$_coll" in ""|*[!0-9]*) _coll=0;; esac
