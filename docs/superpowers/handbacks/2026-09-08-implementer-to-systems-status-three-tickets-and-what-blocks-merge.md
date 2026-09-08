@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 三票現況＋兩條新裁定已落地｜★擋 merge 的三支閘各自的主人，其中一支要你 commit
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★你的 COLLISION 證據我驗過【存在】，但它證不到因果 —— ★★我那兩個對照【自己就帶著同一個 COLLISION 簽章】，而它們是 5 秒
 ---
 
