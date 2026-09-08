@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: material 定價從哪來
 topic: ★★★候選 (a) 從 code + 你手上的數字【直接確認】,不必花量測輪——而結論比 (a) 原本的說法強:折扣由【急迫度】主導,所以【不急的賣家在結構上構不到買方的價】｜★★而它的反面是一句話:**交易不是價格發現,是困境拋售**｜★(c) 的判別器已經存在(order.replaced tap),(b) 仍要量而它與我的否證測是同一刀
 ---
