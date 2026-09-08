@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 topic: ②在跑：tier2 收尾中，但剛撞上一個資料損失，正在重掃
 ---
 ②在跑。★而要誠實補一句：收尾那一跑**把已經掃完的 136 列清掉了**
