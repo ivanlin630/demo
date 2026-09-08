@@ -1,0 +1,30 @@
+{
+ "slice": "bed-kind-marker",
+ "date": "2026-09-08",
+ "branch": "feat/bed-kind-marker",
+ "head": "e9c87a41",
+ "base": "origin/main",
+ "what": "床的種類標記（四選一）＋ on-touch 閘：【床在】與【床會紅】是兩件事",
+ "gate_self_control": "★閘自帶陣性對照 7 格（5 紅 + 2 反向綠，涵蓋 §3b 全四條），不符即 ABORT exit 3；★★對照樣本不見時算【對照沒過】而不是【對照過了】",
+ "population": "merge-base → 工作樹 + untracked（★三點 diff 只看已 commit ⇒ 正在寫的床看不到＝閘不會鎮）",
+ "also_landed": [
+  "bed_arm_gate 母體改 tracked（git ls-files），untracked 降級成不擋的警告；★集合為空必須 ABORT（否則閘無條件轉綠）",
+  "a4_taint_test2 入 bed-arm 白名單：★它的自變項就是 arm 順序，遷移會消滅它要量的東西"
+ ],
+ "own_beds_single_run": {
+  "scripts/debug/bed_arm_gate.gd": "2s（★仍 FAIL 1 張＝gather 那張，修法在 gatherpure 票）",
+  "scripts/debug/a4_taint_test2.gd": "113s FP_TICKS=2000 DONE arm_probe=true fp=2ea631d1277da7edacc480af602ccbee",
+  ".claude/hooks/bed-kind-gate.sh": "2s [BED-KIND] PASS（★它先紅了我自己：bed_arm_gate.gd 沒標種類）"
+ },
+ "merge_gates": {
+  "result": "34 / 36",
+  "reds_not_caused_by_this_ticket": [
+   "bed-arm（gather 那張，修法在 gatherpure 票）",
+   "tier2-sweep-staleness（★本 defer 的對象）"
+  ]
+ },
+ "deferred_gates": [
+  "tier2-sweep-staleness (token: tier2-first-successful-sweep, hard-expiry 2026-09-10)"
+ ],
+ "deferred_gates_note": "★本 defer 只涵蓋【與本 diff 無關】的那一部分：tier2-sweep-staleness 是 liveness 守衛（問「全掃這個習慢還活著嗎」），不是對這張 diff 的檢查。★★而本票碰到的床已【單跑】並寫入下方，不在 defer 範圍內。systems 裁定 2026-09-08。"
+}

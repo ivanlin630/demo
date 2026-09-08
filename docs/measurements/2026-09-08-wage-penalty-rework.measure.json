@@ -2,7 +2,7 @@
  "slice": "wage-penalty-rework",
  "date": "2026-09-08",
  "branch": "feat/wage-penalty-rework",
- "head": "4d25868c",
+ "head": "1855bebd",
  "base": "origin/main 970ee864",
  "spec": "docs/superpowers/specs/2026-09-08-wage-penalty-rework-HOW.md",
  "bug": "salary_system.gd 把「這個地方沒有貨幣流通」判成「這個領主苛待部下」；SALARY_INTERVAL=7天 ⇒ 無幣村每週被判一次，永動。",
@@ -56,5 +56,20 @@
  },
  "not_in_scope": {
   "wage_2_4_anon_morale": "★不存在物：裸符號全庫掃 morale 92 處，salary_system.gd 為 0；anon 的 morale 只有俘虜群 CAPTIVE_INIT_MORALE，與薪資無呼叫關係 ⇒ 沒有可移除的東西，加一個是新 WHAT"
+ },
+ "deferred_gates": [
+  "tier2-sweep-staleness (token: tier2-first-successful-sweep, hard-expiry 2026-09-10)"
+ ],
+ "deferred_gates_note": "★本 defer 只涵蓋【與本 diff 無關】的那一部分：tier2-sweep-staleness 是 liveness 守衛（問「全掃這個習慢還活著嗎」），不是對這張 diff 的檢查。★★而本票碰到的床已【單跑】並寫入下方，不在 defer 範圍內。systems 裁定 2026-09-08。",
+ "merge_gates": {
+  "result": "33 / 36",
+  "reds_not_caused_by_this_ticket": [
+   "bed-arm（跨票依賴：gather 那張床的修法在 gatherpure 票）",
+   "defer-open（該輪未併到 systems 修 memory 索引的 main；main 上實測已 PASS）",
+   "tier2-sweep-staleness（★本 defer 的對象）"
+  ]
+ },
+ "own_beds_single_run": {
+  "scripts/debug/wage_penalty_test.gd": "6s === DONE === ALL PASS（13 格）"
  }
 }

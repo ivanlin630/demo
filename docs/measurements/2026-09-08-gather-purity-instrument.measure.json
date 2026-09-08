@@ -1,0 +1,37 @@
+{
+ "slice": "gather-purity-instrument",
+ "date": "2026-09-08",
+ "branch": "feat/gather-purity-instrument",
+ "head": "cd48eb30",
+ "base": "origin/main",
+ "what": "gather 觀測路徑的純讀性：七欄寫入的 observe 計數必須是 0，而母體由 fixture 【造】而不是向世界【等】",
+ "discriminator": {
+  "judgement": "gather.write.<f>.observe == 0（★observe > 0 無條件先紅，不被母體為空吃掉）",
+  "population": "同欄 advance > 0（fixture 造：tile 自家據點無資源無設施 ⇒ demand 空；共位 TAG_PRODUCE 隊 ⇒ pool=2 ⇒ idle_labor=2）",
+  "fp": "★只印不判：B≠A 是已知未收口，做成 FAIL 格等於每次都紅"
+ },
+ "paired_discrimination": {
+  "positive": "現行 code ⇒ fixture 七格全綠",
+  "negative": "拿掉三處 `and advance` / `or not advance` ⇒ fixture 七格【全紅】"
+ },
+ "false_greens_caught_on_the_way": [
+  "★fixture 第一版先呼 advance 再呼 observe ⇒ cadence 已被推到未來 ⇒ observe 走快取分支 ⇒ 拿掉閘也全綠",
+  "★★判準優先序錯：先判母體再判 observe ⇒ 把【真的寫了】報成【不可判】"
+ ],
+ "own_beds_single_run": {
+  "scripts/debug/gather_observation_purity_bed.gd": "167s === DONE === ALL PASS"
+ },
+ "gate_registered": "gather-purity（merge-gates.tsv）",
+ "merge_gates": {
+  "result": "33 / 36",
+  "reds_not_caused_by_this_ticket": [
+   "bed-arm（a4_taint_test2，白名單在 bed-kind 票）",
+   "defer-open（該輪未併最新 main）",
+   "tier2-sweep-staleness（★本 defer 的對象）"
+  ]
+ },
+ "deferred_gates": [
+  "tier2-sweep-staleness (token: tier2-first-successful-sweep, hard-expiry 2026-09-10)"
+ ],
+ "deferred_gates_note": "★本 defer 只涵蓋【與本 diff 無關】的那一部分：tier2-sweep-staleness 是 liveness 守衛（問「全掃這個習慢還活著嗎」），不是對這張 diff 的檢查。★★而本票碰到的床已【單跑】並寫入下方，不在 defer 範圍內。systems 裁定 2026-09-08。"
+}
