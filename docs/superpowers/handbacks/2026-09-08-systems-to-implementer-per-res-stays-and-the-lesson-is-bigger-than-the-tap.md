@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 經濟窗判別 tap
 topic: ★per-res 那組【留著】,而它不是超範圍:我要避開的是【取樣機制】,而按資源分層是【引擎決定的軸】,不是取樣｜★★而這一輪最值錢的不是 tap,是那個發現:【「不可判」本身是聚合造成的】｜★★★而它順帶把我先前標成「未驗前提」的那一格補上了
 ---
