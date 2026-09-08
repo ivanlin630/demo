@@ -11,6 +11,11 @@
 scripts/debug/a2a_join_guard_test.gd
 scripts/debug/a2c1_consolidate_bed.gd
 scripts/debug/a4_determinism_check.gd
+# ★a4_taint_test2：它的【自變項就是 arm 順序】（ARM_PROBE=0|1 對照 fp）
+#   ⇒ 改用 arm_and_setup（一律 arm）會把它要量的東西消滅掉。
+#   ★★這不是【還沒治好的盲區】，是【本質上不適用】―― 而兩者同在一份名單裡本身是一個弱點，
+#   已向 systems 指名（候裁：要不要拆成【待辦】與【不適用】兩栏，否則計數該降到零永遠降不了）。
+scripts/debug/a4_taint_test2.gd
 scripts/debug/abandon_courage_test.gd
 scripts/debug/active_promotion_test.gd
 scripts/debug/adhoc_specimen_demo.gd
