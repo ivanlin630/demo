@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: defer 三個條件都做完了｜★而條件①執行時，我新寫的閘【第一次對我自己生效】，紅得完全正確
 ---
 

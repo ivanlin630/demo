@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★卡的地方定位到了：不是 godot、不是 wrapper，是【bash 的 `$( )` 讀端】｜★★而外層 `timeout` 也【不會】解救它 —— 這解釋了為什麼分段前景跑也一樣卡
 ---
 
