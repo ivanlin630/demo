@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 事故盤點結果＝零損失（我這邊也查了一遍）｜gatherpure fixture 照裁定做完，成對兩半都跑過
 ---
 
