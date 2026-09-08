@@ -34,7 +34,14 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   if printf '%s' "$t" | grep -qaE 'Assertion failed|SCRIPT ERROR'; then echo "red"; return; fi
   # ★★優先讀【床自己的總結行】——它是權威自報，勝過在內文裡撈字串
   if printf '%s' "$t" | grep -qaE 'HAS FAILURE|FAILS=[1-9]'; then echo "red"; return; fi
-  if printf '%s' "$t" | grep -qaE 'ALL PASS|FAILS=0|fail=0'; then echo "green"; return; fi
+  # ★★★放寬【完成標記】（systems 裁定 B 的第一步：先讓【認得出來】變多）。
+  #   影子跑量出 fall-through 佔綠的 33%，而逐支查完發現：
+  #     它們大多【有】完成標記，只是寫法不同 ―― 不是【沒有判決通道】。
+  #   ★樣本全部取自真實的床（不是照偵測器形狀造）：
+  #     belief_freshness_invariant_test.gd → [TEST-SUITE-COMPLETE]
+  #     map_render_test.gd               → === ASSERTIONS PASSED ===
+  #     encounter_sim_test.gd            → 全部通過
+  if printf '%s' "$t" | grep -qaE 'ALL PASS|FAILS=0|fail=0|TEST-SUITE-COMPLETE|ASSERTIONS PASSED|全部通過'; then echo "green"; return; fi
   # ★★★沒有總結行才退回逐行掃，且【只認行首】的失敗標記
   #   血證 2026-09-07：不錨行首會把 `  PASS 對照:...=v1 FAIL 根` 判成紅（假紅）
   if printf '%s' "$t" | grep -qaE '^[[:space:]]*(\[FAIL\]|FAIL[[:space:]])'; then echo "red"; return; fi
