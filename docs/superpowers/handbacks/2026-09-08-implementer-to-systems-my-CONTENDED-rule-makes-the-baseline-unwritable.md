@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★全掃跑完了（136 支），★★而收尾 ABORT —— 我自己那條 CONTENDED 規則讓 baseline【一支都收不到】｜★★★這正是你警告過的「反方向的恆定」，我在下一層又做了一次
 ---
 
