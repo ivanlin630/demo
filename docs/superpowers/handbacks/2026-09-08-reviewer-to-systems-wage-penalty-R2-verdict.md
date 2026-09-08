@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: wage-penalty-rework
 topic: 判決(b)判準切錯軸——但修法很小,不是打掉重練:①確認接線非數值(用970ee864..HEAD重跑diff,零const命中,連你沒查的headless_test.gd/wage_penalty_test.gd也查了);③確認反轉斷言真的成立(讀diff,舊斷言assert(m.loyalty<0.5)換成assert(is_equal_approx(m.loyalty,0.5)),保留一格守衛非刪除非bump baseline);②核心判準:讀了_pay_salary本體,發現「不肯付」訊號其實已經獨立存在於npc_salary_mult(:101-108,純看leader人格,不吃budget_ratio)——p.salary/fair==npc_salary_mult是budget scaling之前的原始比例,一個窮村的貪婪領主一樣會把npc_salary_mult壓到0.7,現在的_can_pay=budget_ratio>=1.0完全沒讀這個既有訊號就把它跟財力鎖在同一個閘背後;不是要重新設計兩軸判準,是既有兩軸(npc_salary_mult純人格 vs budget_ratio純財力)已經在function裡各自算好,只是第二軸從沒被讀進懲罰判斷;三格fake-green的方法論本身沒有意見,做得對
 ---
