@@ -108,6 +108,24 @@ while IFS= read -r bed; do
   note=""
   [ "$v" = "red" ] && note="$(printf '%s' "$o" | grep -aE -m1 'Assertion failed|\[FAIL\]|(^|[[:space:]])FAIL[[:space:]]|HAS FAILURE|FAILS=[1-9]' | tr '\t' ' ' | cut -c1-90)"
   [ "$_coll" -gt 0 ] && note="CONTENDED(collisions=$_coll) $note"
+  # ★★★timeout/hang 的床：把【它卡住前印了什麼】存下來。
+  #   ★舊版把 `$o` 整份丟掉 ⇒ 每一次 timeout 都只剩一個數字（604），
+  #     而那個數字對【為什麼卡】零資訊。今天我花了四輪拼 log 拼不出來，
+  #     而【卡在哪一行】本來就在手上，只是被丟了。
+  #   ★★同時存當下的外部狀態（進程清單 + run-log 尾）：
+  #     失效是【間歇且有狀態】的，事後補不回來。
+  case "$v" in timeout|hang)
+    _dg="docs/measurements/.sweep-timeout-$(basename "$bed" .gd)-$(date +%H%M%S).txt"
+    { echo "=== bed: $bed  verdict=$v  wall=${dt}s  collisions=$_coll ==="
+      echo "=== 進程（timeout 當下）==="
+      powershell -NoProfile -Command "Get-Process godot*,powershell -ErrorAction SilentlyContinue | Select-Object Name,Id,StartTime | Format-Table -AutoSize" 2>/dev/null
+      echo "=== run-log 尾 15 ==="; tail -15 .claude/hooks/.godot-runs.log
+      echo "=== 床的輸出（★卡住前的最後 60 行）==="
+      printf "%s" "$o" | tail -60
+    } > "$_dg" 2>&1
+    echo "[SWEEP] ★timeout 診斷已存：$_dg"
+    note="diag=$_dg $note" ;;
+  esac
   printf '%s\t%s\t%s\t%s\n' "$bed" "$v" "$dt" "$note" >> "$OUT"
   echo "[SWEEP] $n $(basename "$bed") ⇒ $v (${dt}s)"
 done < "$LIST"
