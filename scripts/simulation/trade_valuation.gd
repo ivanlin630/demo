@@ -133,7 +133,31 @@ static func _urgency(team: TeamData, state: WorldState) -> float:
 	#   ―― 那會把【沒有義務】偽裝成【有一點義務】。
 	if need > 0.0:
 		coin_urg = clampf(1.0 - float(team.resources.get("coin", 0)) / need, 0.0, 1.0)
-	return maxf(_food_urgency(team, state), coin_urg)
+	# ★★★第三項：持貨的機會成本（systems spec 2026-09-08）。
+	#   商人不卸貨所放棄的，是【當下可得的最佳套利】。
+	# ★母體鐵則：一律用 `ambition_archetype == ARCHETYPE_TRADE`，
+	#   ★★【禁用】TAG_MERCHANT / c.is_merchant ―― R² 量過：
+	#   warring_states.json（正在跑經濟量測的那個世界）是 random 模式、商隊字面 0 處
+	#   ⇒ 用 TAG 當闘在那個世界裡就是【啦的】：闘綠、床綠、世界毫無變化。
+	# ★★★分子全域、分母也必須全域（R² 抓到的語意缺陷）：
+	#   `best_score` 是全庫掃出的單一最佳值，不分 res；
+	#   若分母只算某一種 res，【貨種愈多的商人愈被稀釋】，
+	#   而那不是因為他真的比較不缺流動性。
+	#   ⇒ 分母＝卸不掉的【全部資本】，而 coin 必須排除（它已經是流動的）。
+	var turnover_urg: float = 0.0
+	if team.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
+		if Probe.enabled: Probe.bump("trade.turnover_urg.eval")   # ★成本可見：每算一次掃一次兩邊訂單
+		var _arb: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
+		var gain: float = float(_arb.get("gain", 0.0))
+		if gain > 0.0:
+			var hold_val: float = 0.0
+			for res in team.resources:
+				if String(res) == "coin": continue
+				hold_val += local_value(team, String(res), state) * float(team.resources[res])
+			if hold_val > 0.0:
+				turnover_urg = clampf(gain / hold_val, 0.0, 1.0)
+				if Probe.enabled: Probe.add_amount("trade.turnover_urg.sum", turnover_urg)
+	return maxf(maxf(_food_urgency(team, state), coin_urg), turnover_urg)
 
 # ask 售價：折扣人格化——商業技能 + 急迫鬆手(折扣深)，貪婪守價(折扣收窄→部分談崩)。零 randf。
 static func ask_price(seller: TeamData, res: String, commerce: float, leader_values: Dictionary, state: WorldState) -> float:

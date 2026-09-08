@@ -13,6 +13,9 @@ var rescue_build_util: float = 0.0      # ★同上 genuine util（食安價值 
 var population: int = 0
 var has_goods: bool = false
 var has_arb: bool = false
+# ★量級：當下可得的【最佳套利 gain】（has_arb 只說有沒有，這個說多少）。
+# ★★只讀：任何讀取端不得寫回 DecisionContext 或 team。
+var arb_gain: float = 0.0
 var team_strength: float = 0.0
 var threat: float = 0.0
 # 序7 reaction 溶入：團潰散信號（兵卒集體恐慌）。= 高 stress 低 loyalty named 成員比例聚合。
@@ -256,7 +259,9 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.population = team.population
 	c.is_subteam = team.parent_team_id != -1   # A2a：子隊旗（歸建 directive + 戰略-gate）
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
-	c.has_arb = not OrderSystem.new().best_arbitrage_order(state, team).is_empty()
+	var _arb: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
+	c.has_arb = not _arb.is_empty()
+	c.arb_gain = float(_arb.get("gain", 0.0))   # ★同一次呼叫，不多一次掃描
 	_gather_pending_claims(c, state, team)
 	c.team_strength = NpcCombatSystem.new().team_strength(state, team.team_id)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.head", _tg)
