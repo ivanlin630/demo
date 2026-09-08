@@ -5,7 +5,7 @@ extends SceneTree
 # ③價差：buy/sell訂單各自origin_team的local_value(res)分布(非單一bid/ask，本遊戲設計是
 #   每隊各自估值，spread=買方組估值vs賣方組估值的差距分布)
 # ④農隊收入：PRODUCE隊reason=market_sell_coin_in的coin收入(⑨世界農隊賣糧後果實測)
-# +arb_kill_zero_gain：既有tap直讀
+# +buyer_reject_priced_too_high：既有tap直讀
 # 零新tap，全部讀既有tile.market_orders/driver_ledger/Probe.counts。
 # ★跑法紀律(systems 2026-09-08)：卷面第一行標HEAD sha+樹乾淨與否+實際跑到第幾天。
 # 用法：BED_CONFIG(default res://config/warring_states.json) BED_DAYS(default 30) BED_SEED(default 1337)
@@ -161,16 +161,48 @@ func _run() -> void:
 	if farm_income_count == 0:
 		print("  ★★零筆——需分辨:PRODUCE隊母體是否存在（若為0則不可判非結論0）")
 
-	print("\n★trade.arb_kill_zero_gain（舊名，implementer另案改名為trade.buyer_reject_priced_too_high；")
+	print("\n★trade.buyer_reject_priced_too_high（舊名，implementer另案改名為trade.buyer_reject_priced_too_high；")
 	print("  ★★★真實語意：某個【路過的潛在買方】認為【賣單自標price】高於自己對該資源的local_value估值")
 	print("  ★★★=拒買次數，不是「board上buy訂單vs sell訂單的配對價差≤0」——這是與③格不同維度的東西，見systems裁決）：")
-	print("  總次數=%d" % int(Probe.counts.get("trade.arb_kill_zero_gain", 0)))
+	print("  總次數=%d" % int(Probe.counts.get("trade.buyer_reject_priced_too_high", 0)))
 	var by_res_kill: Dictionary = {}
 	for k in Probe.counts.keys():
-		if String(k).begins_with("trade.arb_kill_zero_gain."):
-			by_res_kill[String(k).trim_prefix("trade.arb_kill_zero_gain.")] = int(Probe.counts[k])
+		if String(k).begins_with("trade.buyer_reject_priced_too_high."):
+			by_res_kill[String(k).trim_prefix("trade.buyer_reject_priced_too_high.")] = int(Probe.counts[k])
 	for r3 in by_res_kill.keys():
 		print("    %s: %d" % [r3, by_res_kill[r3]])
+	# ★★★五個純量的判別（systems 裁 2026-09-08）―― 刻意不做分布：
+	#   Probe 的 instance 是 first-N cap（取樣有偏），而分布最不能忍受取樣偏差。
+	var _n: int = int(Probe.counts.get("trade.buyer_reject_priced_too_high", 0))
+	if _n <= 0:
+		print("  ★母體為空（n=0）⇒ 【不可判】，不是【兩邊都不趨 0】")
+	else:
+		var _ask_avg: float = float(Probe.amounts.get("trade.buyer_reject.ask_sum", 0.0)) / float(_n)
+		var _mine_avg: float = float(Probe.amounts.get("trade.buyer_reject.mine_sum", 0.0)) / float(_n)
+		var _mz: int = int(Probe.counts.get("trade.buyer_reject.mine_zero", 0))
+		var _az: int = int(Probe.counts.get("trade.buyer_reject.ask_zero", 0))
+		var _mzs: float = float(_mz) / float(_n)
+		var _azs: float = float(_az) / float(_n)
+		print("  ── 判別（n=%d）──" % _n)
+		print("     平均 ask =%.4f｜平均 mine=%.4f" % [_ask_avg, _mine_avg])
+		print("     mine_zero=%d (%.1f%%)｜ask_zero=%d (%.1f%%)" % [_mz, _mzs * 100.0, _az, _azs * 100.0])
+		if _mzs >= 0.7 and _azs >= 0.7:
+			print("     ⇒ ★兩邊都趨 0 ⇒「全員過剩、誰都不要」讀法站得住")
+		elif _mzs >= 0.7 and _azs <= 0.3 and _ask_avg > _mine_avg:
+			print("     ⇒ ★★「賣家開價脫離行情」―― 另一種病，下一刀完全不同")
+		else:
+			print("     ⇒ ★★★【不可判】兩個 share 都在中間 ⇒ 這時才需要分布（而那時我們會知道為什麼需要）")
+		# ★per-res 拆開：聚合判【不可判】時，先看是不是【兩個母體被掺在一起】。
+		for r4 in by_res_kill.keys():
+			var _rn: int = int(by_res_kill[r4])
+			if _rn <= 0: continue
+			var _rm: int = int(Probe.counts.get("trade.buyer_reject.mine_zero." + String(r4), 0))
+			var _ra: int = int(Probe.counts.get("trade.buyer_reject.ask_zero." + String(r4), 0))
+			var _rasum: float = float(Probe.amounts.get("trade.buyer_reject.ask_sum." + String(r4), 0.0))
+			var _rmsum: float = float(Probe.amounts.get("trade.buyer_reject.mine_sum." + String(r4), 0.0))
+			print("     [%s] n=%d｜mine_zero=%.1f%%｜ask_zero=%.1f%%｜平均 ask=%.4f｜平均 mine=%.4f"
+				% [r4, _rn, float(_rm) / float(_rn) * 100.0, float(_ra) / float(_rn) * 100.0,
+				   _rasum / float(_rn), _rmsum / float(_rn)])
 
 	print("\n★否證③：「三症一根」的價差倒掛→殺單那一節目前沒有橋(見systems裁決，殺單是不同維度的拒買次數)")
 	print("★⑨世界誠實限：貨幣量未過校驗（±14×待判）")
