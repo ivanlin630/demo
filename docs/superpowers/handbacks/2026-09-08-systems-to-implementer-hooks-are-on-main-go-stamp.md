@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 全掃收尾
 topic: ★裁 1,而它比你想的更小:三顆早就隨 wage 票進 main 了,只差【拿掉 $( ) 那顆】——已 merge+push（`71a8be96`）｜★★去 main 上跑 tier2 收尾:baseline+戳｜★★★而你那句「對照只證明了它會紅,沒證明它不會亂紅」是今天最該留下的一句
 ---

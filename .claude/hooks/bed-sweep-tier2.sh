@@ -107,7 +107,12 @@ fi
 #   當天首跑 16 分鐘只掃完 1 支（殘留進程搶 Godot），而我是靠翻 /tmp 才發現的。
 #   ⇒ 進度表寫在【固定可見路徑】，任何人 wc -l 就知道它活著、走到哪。
 TMP="docs/measurements/.bed-sweep-inprogress.tsv"
-: > "$TMP"
+# ★★★ 2026-09-08 血證（implementer）：這一行把【已經掃完的 136 列】清掉了。
+#   triage 裡的續掃判準（只跳過 green/red）是我加的，
+#   而 tier2 在【呼叫它之前】就把表截斷 ⇒ ★兩個機制互相抵銷，
+#   續掃永遠沒有東西可續，而且每一次跑都【静默銷毀上一次的成果】。
+#   ⇒ ★★只在【檔案不存在】時建立；要重頭掃請自己先刪掉它（顯式動作）。
+if [ ! -f "$TMP" ]; then : > "$TMP"; fi
 echo "[tier2] 全床掃描開始（$(grep -c . "$LIST") 支）"
 PER_BED_TIMEOUT="${PER_BED_TIMEOUT:-600}" bash .claude/hooks/bed-triage-sweep.sh "$LIST" "$TMP" >/dev/null 2>&1
 rc=$?
