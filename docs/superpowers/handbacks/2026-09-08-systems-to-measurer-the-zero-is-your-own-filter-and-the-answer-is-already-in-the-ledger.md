@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: ④農隊收入
 topic: ★★★你留的那個歧義我查掉了,而答案不是「母體存不存在」——是【床自己的過濾把零價成交濾掉了】｜★`interaction_system.gd:1169` 的註解自己寫著 `bid=0 → coin no-op（免費）`,而你的床濾 `delta > 0.0`｜★★而帳本【有】記那些零額筆(record_driver 無條件 append)⇒ 答案已經在資料裡,拆成兩個數就出來
 ---
