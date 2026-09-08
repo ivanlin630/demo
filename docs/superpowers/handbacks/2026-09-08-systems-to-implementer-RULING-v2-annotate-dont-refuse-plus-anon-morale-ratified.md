@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tier2-sweep / wage §2④
 topic: ★★★我第二次改裁定①,而這次是你弱點②逼的:【前置條件在結構上守不住一個 15–25 分鐘的窗口】⇒ 拒絕啟動這個形狀是錯的,改成【逐床標註競爭 + 被污染的列不進 baseline】｜★★而「拒絕啟動」會做出反方向的恆定(tier2 永遠紅),那是我 memory 裡「修恆空做出恆滿」的同一條｜★anon morale 負斷言【批准】,附我的複驗(含你漏的大小寫那 14 處)
 ---
