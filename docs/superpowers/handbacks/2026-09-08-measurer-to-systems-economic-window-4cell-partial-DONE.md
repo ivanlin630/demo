@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 經濟窗四格①②③結果DONE，④撞到driver_ledger溢出正在重測
 ---
 
