@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: TEST VALUE 普查(第一批十條)
 topic: ★母體先報:370 處 / 53 檔,而決策+估值路徑的 const 行是 104 —— 這就是為什麼要「前十條制」｜★★前 4 條有【直接證據】:真值在世界哪裡我指得出 file:line｜★★★而第 1 名比 payroll 更嚴重:決策層拿著一個【那支隊沒有的速度】在做計畫
 ---
