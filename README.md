@@ -1,167 +1,75 @@
-# Medieval World Evolution – 2.5D 中世紀社會演化原型
+# Medieval World Evolution – 中世紀世界模擬器
 
 ## 專案定位
 
-這是一個以「資訊不對稱、社會互動、世界自行演化」為核心的 Godot 4.x 原型。
+Godot 4.2.2 GDScript 世界模擬器:**無玩家也要好玩**——世界自己說故事(勢力演化/經濟流轉/資訊傳播/人口興衰),玩家是可插拔的附身鏡頭,不是世界結構。核心願景見 [docs/game-design.md](docs/game-design.md)。
 
-目前狀態對齊 [docs/project-goals.md](docs/project-goals.md)：
-- 第一階段（Vertical Slice）已完成
-- 第二階段（Demo）已完成部分核心系統（NPC 個體化、記憶、傳聞失真、聚落需求循環）
+三條硬憲法:util=真實期望價值禁 crank;一個資訊模型零特例(認知非真相,fog 靠衰減);模擬層零 LOD(計算跟隨事件密度,不跟隨觀察者)。全表見 [docs/invariants.md](docs/invariants.md);機制意圖的 WHAT 權威=[docs/mechanism-intents.md](docs/mechanism-intents.md)(code 服從表、表只服從用戶)。
 
-核心設計方向請見 [docs/game-design.md](docs/game-design.md)。
+## 目前世界有什麼(2026-09 快照)
 
----
+- **統一決策引擎**:所有隊伍行動走同一個 utility 秤(生產/貿易/遷徙/求生/建設),人格 MODULATE 真值,零腳本走廊。
+- **經濟**:金本位貨幣(創世推導+鑄幣龍頭)、物價=主觀短缺浮動(無上下限,地板 0=白送可成交)、市場寄賣制(到場掛單+押貨 escrow+待領帳+自報價板)、雙層薪資(匿名供養/記名薪資,付不出=離心非叛亂)、徵收積少成多。
+- **資訊網**:belief 四源(親見/相遇/順風車/事件信使),傳聞失真、共位必見、死訊也是資訊;組織對成員的知識隨往來而定,失聯就是失聯。
+- **人口管線**:生育(盈餘驅動連續速率)→小孩→成年進匿名層→多管道晉升記名;成人死光小孩同滅;滅團/合併記帳。
+- **戰爭**:遭遇戰同一時鐘 1:1、潰退人格化、據點易主=接收經濟體。
+- **玩家層(C1 已定案,實作中)**:附身=繼承記憶/創隊=point-buy 純霧;記憶模型一流四頁+as-of 戳;歸因可發掘(≤2 跳保證路徑);時間控制=UI 第一公民。
 
-## 目前已實作內容
+進度快照與各系統 log:[docs/progress.md](docs/progress.md)。
 
-### 1) 時間與地圖
-- 六角格大地圖（2.5D 顯示）
-- 半即時/回合制可切換
-- 統一世界時間推進（玩家在回合制移動一格會推進時間）
-- 相機縮放（鍵盤 + 滑鼠滾輪）
+## 怎麼跑
 
-### 2) 世界演化（聚合模擬）
-- 勢力每回合進行資源收集、人口變化、擴張、衝突
-- 聚落需求欄位：safety、labor、unrest_turns、is_armed_group
-- 治安不足會累積動盪，觸發社會崩潰事件（流民化/兵變/叛亂）
-
-### 3) 資訊傳播與主觀認知
-- 事件訊息延遲傳播（信使、商旅、流民、隊友）
-- 傳播途中會依 carrier 與訊息強度失真
-- UI 顯示主觀描述（可靠/傳聞/可疑），不是客觀全知資訊
-
-### 4) 玩家與遭遇戰
-- 玩家可生成並在六角格移動
-- 可與據點互動查看勢力資訊與訊息
-- 可觸發基礎遭遇戰流程
-- 玩家死亡後支援接手 NPC 繼續遊玩（原型版）
-
-### 5) NPC 個體化與記憶
-- 深度互動後可生成 NPC 檔案（身份、性格、目標、技能）
-- 記憶有強度（輕微/深刻/刻骨）與衰減
-- 已建立關係資料結構與調整介面（trust/affinity/fear/loyalty）
-
----
-
-## 操作按鍵（目前版本）
-
-| 按鍵 | 功能 |
-|---|---|
-| T | 切換半即時 / 回合制 |
-| PageUp / PageDown / 滑鼠滾輪 | 地圖縮放 |
-| Space | 推進回合 |
-| + / - | 調整每次推進回合數 |
-| P | 暫停 / 繼續時間 |
-| [ / ] | 調整每回合秒數 |
-| B | 嘗試觸發遭遇戰 |
-| Enter | 生成玩家 |
-| 數字鍵盤 7 / 9 / 4 / 6 / 1 / 3 | 六角方向移動（主要） |
-| A / D + Q / R / Z / X | 六角方向移動（相容） |
-| E | 互動 / 查看據點資訊 |
-
----
-
-## 執行方式
-
-### 方式 A：觀測 GUI（★目前主要看世界用；玩家模式暫擱）
-
-god-view 觀測視窗——看勢力自行演化（擴張 / 整併 / 背叛 / 掠奪）即時跑，不需玩家。
-
-用 wrapper 開（強制 UTF-8，避免中文亂碼），**不加 `--headless`** 才有視窗：
+**一律用 wrapper**(強制 UTF-8,避免 CP950 亂碼;並自動蓋產地/beacon 戳):
 
 ```powershell
+# 觀測 GUI(主要看世界用):god-view 地圖+事件 ticker+隊伍 inspect+速度四檔
 .\tools\godot.ps1 scenes/ObserverMain.tscn -- --obs-seed=1337
-```
 
-> `--` 分隔符必帶；`--obs-*` 參數在它之後。主場景是玩家用的 `TextUI.tscn`（dormant），所以觀測要直接指 `scenes/ObserverMain.tscn`。
-
-**視窗內容**：
-- god-view 六角地圖（archetype 顏色 + faction 環 + outpost 標）
-- 事件 ticker（人話事件流 + 隊過濾）
-- 隊伍 inspect（點選看細節，地圖三方同步）
-- 速度四檔：暫停 / 1×（240 tps）/ 4×（960 tps）/ max（預算內盡量）+ 月/日/tick 顯示
-
-**參數**：
-
-| 參數 | 作用 |
-|---|---|
-| `--obs-seed=N` | 換世界（驗過 1337 / 2674，狼弧鏈可讀） |
-| `--obs-config=warring_states` | 世界配置（預設 warring_states；`default` 跑真產品世界） |
-| `--obs-run-months=M` | 跑滿 M 月後停（headless 落檔用） |
-| `--obs-shots=t1,t2,...` | 指定 tick 截圖 |
-| `--obs-out=dir` | 截圖 / dump 輸出目錄 |
-| `--obs-ticker-dump=file` | 跑完把全量事件流落檔（`tick⇥type⇥teams⇥text`）＝世界大事記，機器可讀 |
-
-**無視窗變體**（截圖 / 世界句子落檔，加 `--headless`）：
-
-```powershell
-# 6 月世界大事記落檔（讀故事用）
+# headless 世界大事記落檔(讀故事)
 .\tools\godot.ps1 --headless scenes/ObserverMain.tscn -- --obs-seed=1337 --obs-ticker-dump=story.txt --obs-run-months=6
 
-# 特定 tick 快照
-.\tools\godot.ps1 --headless scenes/ObserverMain.tscn -- --obs-seed=1337 --obs-shots=3000,9000,15000 --obs-out=shots/
+# headless 回歸測試
+.\tools\godot.ps1 --headless --script scripts/debug/headless_test.gd
+
+# 新增 class_name 檔後必跑
+.\tools\godot.ps1 --headless --import
+
+# merge 前跑全部 merge-gate(閘清單=註冊表 docs/process/merge-gates.tsv,runner 讀)
+bash .claude/hooks/merge-gates.sh
 ```
 
-### 方式 B：Godot 編輯器
-1. 安裝 Godot 4.2+
-2. Import 專案中的 project.godot
-3. 按 F5 執行
+`--obs-*` 參數:`--obs-config=warring_states|default`、`--obs-shots=t1,t2`、`--obs-out=dir`。`--` 分隔符必帶。
 
-### 方式 C：命令列（可用於快速驗證）
-在專案根目錄執行：
+## 程式結構
 
-Godot_v4.2.2-stable_win64_console.exe --path . --quit --verbose
+```
+scripts/data/          資料結構(PersonData, TeamData, TileData, WorldData, FactionData, MessageData)
+scripts/simulation/    模擬系統(sim_runner, decision_engine, resource, faction_ai, message,
+                       order/market, salary, population, reaction, movement, event, worldgen…)
+scripts/simulation/events/  事件(base_event + event_*.gd)
+scripts/debug/         headless 測試床(種類標記 @bed-kind;僅註冊表所列會被閘讀)
+tools/                 godot wrapper 等工具
+docs/                  設計文件
+docs/process/          工作流(六角色信箱制)/merge-gates 註冊表/defers 延後帳/量測判決
+docs/measurements/     量測產物(.measure.json+跑面;產地戳=世界/seed/窗長/commit)
+```
 
-說明：
-- headless 模式可能出現 Dummy Renderer 的 mesh_get_surface_count 訊息，這通常不是 GDScript 語法錯誤。
+## 文件地圖(按需讀)
 
----
-
-## 主要程式模組
-
-- scripts/main.gd：主流程與系統串接（世界、時間、戰鬥、玩家）
-- scripts/world_state.gd：世界資料容器（Cell/Faction/Outpost）
-- scripts/world_generator.gd：地圖與初始勢力生成
-- scripts/faction_system.gd：每回合勢力演化與聚落需求/崩潰
-- scripts/message_system.gd：延遲傳播、失真、主觀訊息顯示
-- scripts/npc_memory.gd：NPC 個體化、記憶、關係
-- scripts/player_controller.gd：玩家六角格移動
-- scripts/ui_controller.gd：HUD 與互動資訊面板
-
----
-
-## 文件索引
-
-- 核心設計與目標
-  - [docs/game-design.md](docs/game-design.md)：核心玩法、世界觀、時間尺度與設計不變量。
-  - [docs/project-goals.md](docs/project-goals.md)：四階段開發目標、目前進度與中長期範圍。
-  - [docs/open-questions.md](docs/open-questions.md)：待討論議題、決策追蹤與高優先反饋。
-
-- 協作與交付規範
-  - [docs/coding-standards.md](docs/coding-standards.md)：程式風格、命名規則與檔案責任邊界。
-  - [docs/delivery-standards.md](docs/delivery-standards.md)：交付驗收標準與文件同步要求。
-  - [docs/change-management.md](docs/change-management.md)：小型修正、功能變更與架構調整流程。
-  - [docs/roles.md](docs/roles.md)：Human / AI Agent 角色分工與可動作範圍。
-
-- 世界模型與規則拆解
-  - [docs/person.md](docs/person.md)：人物層、代表角色與未來 NPC 擴充方向。
-  - [docs/world.md](docs/world.md)：世界狀態、資源流、時間推進與勢力成長。
-  - [docs/event.md](docs/event.md)：事件觸發、結算流程與事件分層。
-  - [docs/message.md](docs/message.md)：訊息產生、傳播、失真與玩家接收流程。
-
-- 補充參考
-  - [docs/glossary.md](docs/glossary.md)：專案術語與常用定義。
-
-## Agent / Contributor 閱讀順序
-
-1. 先讀本 README，掌握專案定位、目前已實作內容、操作方式與文件地圖。
-2. 再讀 [docs/game-design.md](docs/game-design.md) 與 [docs/project-goals.md](docs/project-goals.md)，確認核心設計方向與階段目標。
-3. 開始實作、調整設計或整理文件時，隨時查閱 [docs/open-questions.md](docs/open-questions.md)，避免與未定案事項衝突。
-4. 實作前後都要遵守 [docs/coding-standards.md](docs/coding-standards.md)、[docs/delivery-standards.md](docs/delivery-standards.md) 與 [docs/change-management.md](docs/change-management.md)。
-
----
+| 檔 | 內容 |
+|---|---|
+| [docs/game-design.md](docs/game-design.md) | 願景/玩法/世界觀(玩家循環/貨幣三幕/薪資敘事) |
+| [docs/mechanism-intents.md](docs/mechanism-intents.md) | ★機制意圖帳=WHAT 權威,改機制先查 |
+| [docs/invariants.md](docs/invariants.md) | ★跨系統規則(session 開頭讀) |
+| [docs/progress.md](docs/progress.md) | 進度 dashboard+系統 log |
+| [docs/world.md](docs/world.md) / [person.md](docs/person.md) / [team.md](docs/team.md) | 各域模型 glance-aid |
+| [docs/event.md](docs/event.md) / [message.md](docs/message.md) | 事件/訊息傳播 |
+| [docs/known_issues.md](docs/known_issues.md) | 已知問題(入口非工單,取用前驗現況) |
+| [docs/glossary.md](docs/glossary.md) | 術語表 |
+| CLAUDE.md | 專案工作指引+六角色工作流 |
 
 ## 注意事項
 
-- .godot/ 與 tools/godot/*.exe 已加入 .gitignore，避免提交大型快取與本機執行檔。
-- 目前是系統原型階段，數值平衡與內容量仍會持續調整。
+- `.godot/` 與 `tools/godot/*.exe` 在 .gitignore。
+- 所有時間/數值常數多為測試值,正式需大幅調整([docs/tick_parameters.md](docs/tick_parameters.md))。
+- 量測紀律:數字必附產地(世界/seed/窗長/commit);一個數字沒有窗口長度就不是一個數字。
