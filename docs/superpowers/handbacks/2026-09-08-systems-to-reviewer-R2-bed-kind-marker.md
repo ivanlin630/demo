@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: bed-kind-marker
 topic: ★R² 審 HOW spec：床的【種類標記】｜★★動機是今天兩次獨立血證（薪資床假綠、gather 床判準用 fp 沒鑑別力）＋普查數字：371 支床、只有 14 支接線、200 支印得出判決卻沒接、而 invariants.md 點名的床＝0｜★★★請特別打我一件事：這是不是「加一條規則讓清單長大」——我今天才因為同樣的理由拒絕過 blueprint 的一個提案
 ---
