@@ -93,8 +93,17 @@ while IFS= read -r bed; do
   #   ★★wrapper 的 powershell 也不在 ⇒ 子進程早就沒了,
   #   ★★★卡住的是 bash 的 `$(...)` 在等一個【沒有人關閉的管道】。
   #   ⇒ 通則:【不要依賴被呼叫者自己會準時回來】—— 封頂要設在【呼叫端】。
-  o="$(timeout -k 5 "$((PER_BED_TIMEOUT + 30))" env GODOT_TIMEOUT="$PER_BED_TIMEOUT" powershell -NoProfile -File ./tools/godot.ps1 --headless --path "$REPO" --script "$bed" 2>&1)"
+  # ★★★systems 裁定 2026-09-08：拿掉 `$( )`，改導檔案。
+  #   ★卡點實測：triage 的 `$( )` 那一層【沒有任何子進程】卻回不來――
+  #     godot 與 powershell 都已結束，而 bash 還在等 EOF。
+  #   ★★EOF 不來的唯一原因是【還有別的東西握著寫端】（孫進程繼承了 handle）
+  #     ⇒ 外層 `timeout` 救不了它：它包的 powershell 已經死了。
+  #   ⇒ ★★★把管道拿掉，就沒有 EOF 可等；檔案有確定的結尾。
+  _of="$(mktemp)"
+  timeout -k 5 "$((PER_BED_TIMEOUT + 30))" env GODOT_TIMEOUT="$PER_BED_TIMEOUT" powershell -NoProfile -File ./tools/godot.ps1 --headless --path "$REPO" --script "$bed" 2>&1 > "$_of" 2>&1
   outer_rc=$?
+  o="$(cat "$_of")"
+  rm -f "$_of"
   dt=$((SECONDS-t0))
   # ★★★systems 裁定 v2：逐床標註競爭。判準不是「開始時有沒有人在跑」（瞬時取樣）,
   #   而是「這支床跑的【整段期間】run-log 有沒有出現 COLLISION 列」――
