@@ -33,7 +33,7 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   # ★硬紅：引擎級錯誤，任何情況都算紅
   if printf '%s' "$t" | grep -qaE 'Assertion failed|SCRIPT ERROR'; then echo "red"; return; fi
   # ★★優先讀【床自己的總結行】——它是權威自報，勝過在內文裡撈字串
-  if printf '%s' "$t" | grep -qaE 'HAS FAILURE|FAILS=[1-9]'; then echo "red"; return; fi
+  if printf '%s' "$t" | grep -qaE 'HAS FAILURE|FAILS=[1-9]|errors: [1-9]'; then echo "red"; return; fi
   # ★★★放寬【完成標記】（systems 裁定 B 的第一步：先讓【認得出來】變多）。
   #   影子跑量出 fall-through 佔綠的 33%，而逐支查完發現：
   #     它們大多【有】完成標記，只是寫法不同 ―― 不是【沒有判決通道】。
@@ -41,7 +41,17 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   #     belief_freshness_invariant_test.gd → [TEST-SUITE-COMPLETE]
   #     map_render_test.gd               → === ASSERTIONS PASSED ===
   #     encounter_sim_test.gd            → 全部通過
-  if printf '%s' "$t" | grep -qaE 'ALL PASS|FAILS=0|fail=0|TEST-SUITE-COMPLETE|ASSERTIONS PASSED|全部通過'; then echo "green"; return; fi
+  #     ui_flow_test.gd / ui_logic_test.gd → "=== UI ... DONE === errors: N"
+  #   ★★★而 ui 那兩支我第一次判成【真診斷型、沒有判決通道】―― 錯的：
+  #   我用 `grep print | tail -1` 取【檔案裡最後一個 print】當完成標記，
+  #   而它們的完成行在 :32 / :17（_initialize 裡）――
+  #   ★★拿【檔案位置】當【執行順序】的代理。
+  #   ★★★而 team_ui_test.gd 也一樣：我先判它【缺總結行】並動手補了一行，
+  #   實跑才發現它本來就印 "=== TEAM UI TEST DONE ==="。
+  #   ⇒ 我加的行已撤回；改成讓 classify 認得 "TEST DONE ==="。
+  #   ★★★★同一個方法議錯誤在三支床上都發生了一次：
+  #     【靜態讀檔案只能看到順序，看不到執行】―― 要知道它印什麼，就要跑它。
+  if printf '%s' "$t" | grep -qaE 'ALL PASS|FAILS=0|fail=0|TEST-SUITE-COMPLETE|ASSERTIONS PASSED|全部通過|errors: 0|TEST DONE ==='; then echo "green"; return; fi
   # ★★★沒有總結行才退回逐行掃，且【只認行首】的失敗標記
   #   血證 2026-09-07：不錨行首會把 `  PASS 對照:...=v1 FAIL 根` 判成紅（假紅）
   if printf '%s' "$t" | grep -qaE '^[[:space:]]*(\[FAIL\]|FAIL[[:space:]])'; then echo "red"; return; fi
@@ -50,9 +60,14 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   #   systems 准了改成 no-verdict，★但要先【影子跑一輪】量出會翻幾支，
   #   否則把【假綠】換成【什麼都蓋不了】。
   #   ⇒ 先只記錄，不改行為（SWEEP_SHADOW 指一個檔就會收到名單）。
-  [ -n "${SWEEP_SHADOW:-}" ] && printf '%s
-' "${bed:-?}" >> "$SWEEP_SHADOW"
-  echo "green"
+  # ★只在【真的在掃某一支床】時記：分類器自檢也會呼 classify，
+  #   而舊版的 `${bed:-?}` 把那些記成 "?" ⇒ ★母體裡混進了不是床的東西。
+  [ -n "${SWEEP_SHADOW:-}" ] && [ -n "${bed:-}" ] && printf '%s
+' "$bed" >> "$SWEEP_SHADOW"
+  # ★★★已切（systems 裁定 B，切換條件「剩下的每一支都被看過】已達成）：
+  #   一個預設也是一個判決 ―― 而【認不出來】不是【通過】。
+  #   no-verdict 不進 baseline、且在表上看得見，而不是靈默算綠。
+  echo "no-verdict"
 }
 
 # ★★★分類器自檢 —— ★★樣本【必須從真實床的輸出形狀採來】，不得自己照偵測器的形狀造
@@ -64,15 +79,31 @@ for _s in "SCRIPT ERROR: Assertion failed: boom" "  FAIL  agriculture yield mism
 ' "$_s" | classify)" = "red" ] || {
     echo "[SWEEP] ★ABORT：分類器抓不到真實紅形狀：$_s ⇒ 本輪作廢（不得讀成任何結果）"; exit 3; }
 done
-# ★★★血證樣本（2026-09-07）：PASS 訊息【內文】含 FAIL 字樣 —— 不錨行首就會判成假紅
-for _s in "  PASS  ok" "=== ALL PASS（fail=0）===" "ok" "=== DONE === ALL PASS" "  PASS 對照:舊 fill 式 level 相消(old L1 2.00==L3 2.00=v1 FAIL 根)" "[bed] 這是說明:預期 FAIL 根已修"; do
+# ★★★血證樣本（2026-09-07）：PASS 訊息【內文】含 FAIL 字樣 ⇒ 不錨行首會判成假紅。
+# ★★★★ 2026-09-08 拆開：預設從 green 改成 no-verdict 之後，這組樣本其實有兩種契約，
+#   而舊版用同一個期望值把它們混在一起：
+#   ★A 組【完整輸出且含完成標記】⇒ 必須 green
+#   ★★B 組【片段】（逐項 PASS、說明文字）⇒ 只要求【不得判紅】――
+#     它們本來就不是完整輸出，新政策下判 no-verdict 是對的。
+#   ★★★而這個拆分是被自檢逃出來的：切換那一刻它直接 ABORT。
+for _s in "=== ALL PASS（fail=0）===" "=== DONE === ALL PASS"; do
   [ "$(printf '%s
 ' "$_s" | classify)" = "green" ] || {
-    echo "[SWEEP] ★ABORT：分類器把通過樣本判成非綠（過度匹配）：$_s ⇒ 本輪作廢"; exit 3; }
+    echo "[SWEEP] ★ABORT：A 組（含完成標記）被判成非綠：$_s ⇒ 本輪作廃"; exit 3; }
 done
+for _s in "  PASS  ok" "ok" "  PASS 對照:舊 fill 式 level 相消(old L1 2.00==L3 2.00=v1 FAIL 根)" "[bed] 這是說明:預期 FAIL 根已修"; do
+  [ "$(printf '%s
+' "$_s" | classify)" != "red" ] || {
+    echo "[SWEEP] ★ABORT：B 組（片段）被判成紅（過度匹配）：$_s ⇒ 本輪作廃"; exit 3; }
+done
+# ★★★新政策的牙：完整輸出但【沒有任何判決通道】⇒ 必須 no-verdict。
+[ "$(printf 'world tick 1
+world tick 2
+' | classify)" = "no-verdict" ] || {
+  echo "[SWEEP] ★ABORT：無判決通道的輸出被算成綠 ⇒ 預設又變回判決，本輪作廃"; exit 3; }
 [ "$(printf '' | classify)" = "no-output" ] || {
   echo "[SWEEP] ★ABORT：分類器把空輸出判成有結果 ⇒ 本輪作廢"; exit 3; }
-echo "[SWEEP] 分類器自檢通過（5 種真實紅形狀 + 4 種通過樣本不誤判 + 空輸出）"
+echo "[SWEEP] 分類器自檢通過（5 紅 + A組2綠 + B組4不誤紅 + 無通道⇒no-verdict + 空輸出）"
 
 MAX_ATTEMPTS="${MAX_ATTEMPTS:-2}"
 # ★★★systems 裁定 2026-09-08：timeout/hang/crash 【不算掃過】。
@@ -94,7 +125,7 @@ while IFS= read -r bed; do
   _last=$(awk -F"	" -v b="$bed" '$1==b{v=$2} END{print v}' "$OUT")
   _tries=$(awk -F"	" -v b="$bed" '$1==b{c++} END{print c+0}' "$OUT")
   case "$_last" in
-    green|red|timeout-persistent) continue;;
+    green|red|no-verdict|timeout-persistent) continue;;
     "") ;;
     *)
       if [ "$_tries" -ge "$MAX_ATTEMPTS" ]; then
