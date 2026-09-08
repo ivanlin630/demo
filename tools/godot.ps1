@@ -1,5 +1,14 @@
 #!/usr/bin/env pwsh
 # Godot wrapper: Godot win console exe writes stdout in system locale (CP950).
+# ★★★PARSE ERROR 長得像【卡住】，不像【錯誤】（2026-09-08 血證，implementer 發現）
+#   Godot 對【載入失敗】彈阻斷對話框 —— ★--headless 也彈。
+#   ⇒ 一個 parse error / 繼承錯誤的腳本，表現是【燒滿 GODOT_TIMEOUT 才被砍】，
+#     而不是一個二秒就回來的錯誤訊息。
+#   ★★血證二則：①`data_test.gd`（extends Node）被全掃拉進去 ⇒ 184s 而且被判【綠】；
+#     ②抽函式時誤刪了下游還在用的變數 ⇒ 同樣燒滿逾時。
+#   ⇒ ★★★改了 .gd 之後、或遇到【跑很久而沒有輸出】時，先跑：
+#       godot --headless --check-only --script <那支.gd>      ← 兩秒內就看得到 Parse Error
+#     而不是去猜【為什麼它卡住】。
 # Launch with a hard timeout (kill if it hangs), then transcode CP950 -> UTF-8.
 # Usage: .\tools\godot.ps1 --headless --script scripts/debug/headless_test.gd
 # Timeout: default 360s; override via env GODOT_TIMEOUT (seconds).
