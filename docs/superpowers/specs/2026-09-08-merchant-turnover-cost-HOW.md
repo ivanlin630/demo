@@ -1,6 +1,6 @@
 # HOW spec：商人的【持貨機會成本】接上當下可得的最佳套利 gain
 
-owner: systems ｜ 2026-09-08 ｜ player_reachable: no ｜ 狀態：待 R²
+owner: systems ｜ 2026-09-08 ｜ player_reachable: no ｜ 狀態：★R² CLEAN（issues 中，兩點已補）
 上游：用戶裁「一般人賣貨 ≠ 商人賣貨」；blueprint 核可「當下 gain」版（非歷史版）
 
 ## §1 病
@@ -33,6 +33,8 @@ decision_context.gd:259  c.has_arb = not ....is_empty()   ⇒ ★★只留布林
 
 ```
 decision_context.gd:325  c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
+★★★R² 加碼驗證（比我自己標的硬）：config/*.json 的 mode 分布 ＝ 28 explicit / 9 random，而 **warring_states.json（目前經濟量測正在用的世界）是 random 模式且商隊字面搜尋 ＝ 0 處**。
+⇒ ★鐵則不是「理論上該用 ARCHETYPE_TRADE」，是【現在用 TAG_MERCHANT 在正在量的那個世界裡就是啦的】。
 ★而 defers.tsv 的 `genesis-merchant-weight-empty-population` 仍掛著：
   **random-mode 世界裡 TAG_MERCHANT ＝ 0 隊**（真正驅動的是 ambition_archetype）
 ★★interaction_system.gd:852 的註解也記著：「R²#7：ARCHETYPE_TRADE 分流，TAG_MERCHANT …」
@@ -43,17 +45,38 @@ decision_context.gd:325  c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
   但要在卷面標明：它是同族，已有 token。
 ```
 
-## §4 ★常數自由的正規化（gain 是 coin，discount 是比例）
+## §4 ★常數自由的正規化（★★R² 訂正：分子分母必須同母體）
 
 ```
-問題：`gain` 是絕對 coin 額，`_urgency` 要 [0,1]。轉換需要一個尺度 ——
-      ★而【引一個 TURNOVER_K 就是手抄常數】，blueprint 已禁（同 discount 常數那條）。
-解：用【同源的量】正規化 ——
-      holding_value = local_value(seller, res, state) * qty   （★賣方自己對手上這批貨的估值）
-      turnover_urg  = clamp(arb_gain / holding_value, 0, 1)
-語意：**我放棄的套利，值不值我手上這批貨？** 值 ⇒ 急著出手；不值 ⇒ 不折價。
-⇒ ★★無因次、同源推導、零新常數（估算器法血統 (a)+(b)）。
-⇒ ★★★holding_value ≤ 0 ⇒ turnover_urg = 0（不得用 maxf 墊成非零 —— 同 payroll 票 §5③）。
+問題：`gain` 是絕對 coin 額，`_urgency` 要 [0,1]。
+      ★而引一個 TURNOVER_K 就是手抄常數，blueprint 已禁。
+```
+
+### ★★★R² 抳掉我的第一版（而他是對的）
+
+```
+我原本寫：turnover_urg = arb_gain / (local_value(seller,res) * qty)   ← ★分母是【特定 res】
+而 `best_arbitrage_order` 回傳的 `gain` 是【全庫掃描出的單一最佳值】，不分 res。
+⇒ ★★分子是【全域】、分母是【逐 res】 ⇒ **母體對不齊**。
+⇒ ★★★後果：貨物種類愉多的商人，同一個 arb_gain 被切成愉小份
+   ⇒ turnover_urg 系統性偏低，而那不是因為他真的比較不缺流動性。
+（★這是 memory「比率的分子分母不同時刻同母體＝沒有意義」的【空間版】。）
+```
+
+### ★修正：兩邊都用【全域】
+
+```gdscript
+total_holding_value = Σ_{res ≠ "coin"} local_value(seller, res, state) * qty_held(res)
+turnover_urg        = clamp(arb_gain / total_holding_value, 0.0, 1.0)
+```
+```
+★語意：**我放棄的那一個最佳套利，相對於我卸不掉的全部資本，值多少？**
+  ⇒ 分子：全域的【單一最佳替代】（商人一次只能做一筆套利）
+  ⇒ 分母：全域的【被壓住的資本】
+  ⇒ ★★比值 ＝ 【每單位被鎖住的資本所放棄的報酬】—— 這才是周轉率。
+★★★coin 必須排除：`local_value(coin)` 恆為 1.0 face value，
+  而 coin 是【已經流動的資本】—— 把它放進分母正好把語意弄反。
+total_holding_value <= 0 ⇒ turnover_urg = 0（不得用 maxf 墊成非零）。
 ```
 
 ## §5 ★★鐵則

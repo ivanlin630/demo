@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: merchant-turnover-cost
 topic: R②判決:issues(中)——①無因次/零新常數兩點成立,但讀了order_system.gd:444-530發現一個真的語意問題:best_arbitrage_order回傳的best_score/gain是【全庫掃描出的單一最佳值】,不分resource也不綁定賣方正在考慮出售的那個res的數量,而holding_value卻是【特定res】的估值——兩者不是同一個東西的分子分母,持有愈多不同種類貨物的商人,同一個arb_gain會被切成愈小份除給每一種貨、造成turnover_urg系統性偏低,不是因為他真的比較不缺流動性,是因為他手上東西種類多;這不是恆0/恆1那種簡單陷阱,是分子分母的母體對不齊;②你的證據足夠且我加碼驗證更硬:親自查了config/*.json的mode分布(28 explicit/9 random),warring_states.json(目前經濟量測正在用的世界)是random模式且商隊字面搜尋=0處,不是假設是量到的——鐵則不是理論上該用ARCHETYPE_TRADE,是【現在用TAG_MERCHANT在正在用的量測世界裡就是啞的】,證據比你自己標的還硬
 ---
