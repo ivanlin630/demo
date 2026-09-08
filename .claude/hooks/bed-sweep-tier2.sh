@@ -15,12 +15,24 @@ export LC_ALL=C
 
 BASELINE="docs/measurements/bed-sweep-baseline.tsv"
 STAMP=".claude/hooks/.sweep-last"
+# ★★★systems 裁定 2026-09-08：tier2 【只准從 main 跑】。
+#   舊行為：bed-triage-sweep.sh 自己 `cd` 到 git-common-dir 的父目錄（＝主 repo），
+#   而 tier2 傳給它的是【相對路徑】⇒ 寫進主 repo、tier2 回頭數的卻是 worktree 那一份
+#   ⇒ rows 恆為 0。★而更深的一層：從 worktree 跑實際量的是 main 的 code。
+# ⇒ 【靜默改對象】換成【明確拒絕】。
+MAIN_ROOT="$(cd "$(dirname "$(git rev-parse --git-common-dir)")" && pwd)"
+IS_WORKTREE=0
+[ "$(git rev-parse --absolute-git-dir)" != "$(cd "$(git rev-parse --git-common-dir)" && pwd)" ] && IS_WORKTREE=1
+# ★戳一律看主 repo 那一份：否則每個 worktree 都有自己的戳，而掃描只有一份。
 MAX_AGE_DAYS=7          # ★頻率寫死在這裡，不靠人記得
 LIST="docs/measurements/bed-sweep-list.txt"
 
 # ── 三問之三：它停了誰知道 ────────────────────────────────
 # ★超期告警【掛在 merge 閘上】——因為 merge 閘是【一定會跑】的東西。
 #   排程可能死掉而沒有人發現；merge 不會。
+STAMP="$MAIN_ROOT/$STAMP"
+BASELINE_ABS="$MAIN_ROOT/$BASELINE"
+
 if [ "${1:-}" = "--check-staleness" ]; then
   if [ ! -f "$STAMP" ]; then
     echo "[tier2] ★從未跑過（找不到 $STAMP）"
@@ -43,6 +55,13 @@ if [ "${1:-}" = "--check-staleness" ]; then
 fi
 
 # ── 三問之一/之二：誰觸發＋多久跑 ──────────────────────
+if [ "$IS_WORKTREE" = "1" ]; then
+  echo "[tier2] ★拒絕：本掃描只准從【主 repo】跑（目前 cwd 是 worktree）"
+  echo "[tier2]   理由：bed-triage-sweep.sh 會 cd 到 $MAIN_ROOT ⇒ 從這裡跑會【量到 main 的 code】而不自知，"
+  echo "[tier2]   而且產出寫進主 repo、計數場在這裡 ⇒ rows 恆為 0。"
+  echo "[tier2]   正確跑法：cd $MAIN_ROOT && bash .claude/hooks/bed-sweep-tier2.sh"
+  exit 4
+fi
 [ -f "$LIST" ] || ls -1 scripts/debug/*_test.gd > "$LIST"
 # ★★★進度可見（2026-09-07 血證）：原本寫在 mktemp ⇒ 外面【無法回答「它還在跑嗎」】
 #   當天首跑 16 分鐘只掃完 1 支（殘留進程搶 Godot），而我是靠翻 /tmp 才發現的。

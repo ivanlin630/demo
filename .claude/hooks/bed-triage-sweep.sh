@@ -54,13 +54,37 @@ done
   echo "[SWEEP] ★ABORT：分類器把空輸出判成有結果 ⇒ 本輪作廢"; exit 3; }
 echo "[SWEEP] 分類器自檢通過（5 種真實紅形狀 + 4 種通過樣本不誤判 + 空輸出）"
 
-if [ -f "$OUT" ]; then echo "[SWEEP] 續掃:$OUT 已有 $(( $(wc -l < "$OUT") - 1 )) 筆,跳過它們"
-else printf 'bed	verdict	wall_s	note
-' > "$OUT"; fi
+MAX_ATTEMPTS="${MAX_ATTEMPTS:-2}"
+# ★★★systems 裁定 2026-09-08：timeout/hang/crash 【不算掃過】。
+#   舊版的續掃判準是【這支床有沒有一列】，而不是【有沒有判決】
+#   ⇒ 上一輪 137/137 全 timeout 的殘留檔會讓下一輪【全部跳過】，瞬間 rc=0 零新列。
+# ★★而【重掃】不能無限：同一支累積 $MAX_ATTEMPTS 次無判決 ⇒ 標 timeout-persistent 停手，
+#   ★★★而那個標記必須印出來 ―― 否則【不再重試】跟【掃過了】又長得一樣。
+if [ -f "$OUT" ]; then
+  _done=$(awk -F"	" '$2=="green"||$2=="red"{c++} END{print c+0}' "$OUT")
+  _pend=$(awk -F"	" '$2=="timeout"||$2=="hang"||$2=="crash"{c++} END{print c+0}' "$OUT")
+  echo "[SWEEP] 續掃:$OUT 已有判決 $_done 筆（跳過）｜無判決 $_pend 筆（★重掃，上限 $MAX_ATTEMPTS 次）"
+else
+  printf "bed	verdict	wall_s	note
+" > "$OUT"
+fi
 n=0
 while IFS= read -r bed; do
   [ -n "$bed" ] || continue
-  if cut -f1 "$OUT" 2>/dev/null | grep -qxF "$bed"; then continue; fi   # ★已掃過就跳(續掃)
+  _last=$(awk -F"	" -v b="$bed" '$1==b{v=$2} END{print v}' "$OUT")
+  _tries=$(awk -F"	" -v b="$bed" '$1==b{c++} END{print c+0}' "$OUT")
+  case "$_last" in
+    green|red|timeout-persistent) continue;;
+    "") ;;
+    *)
+      if [ "$_tries" -ge "$MAX_ATTEMPTS" ]; then
+        printf "%s	%s	%s	%s
+" "$bed" "timeout-persistent" 0 "attempts=$_tries last=$_last" >> "$OUT"
+        echo "[SWEEP] ★$(basename "$bed") 連 $_tries 次無判決 ⇒ 標 timeout-persistent，停止重試"
+        continue
+      fi
+      echo "[SWEEP] ↻ $(basename "$bed") 上次=$_last ⇒ 重掃（第 $((_tries+1)) 次）";;
+  esac
   n=$((n+1))
   t0=$SECONDS
   # ★★★2026-09-07 血證:只靠【內層工具的 timeout】不夠 ——
