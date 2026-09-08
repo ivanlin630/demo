@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★邊界**不用我定，fixture 自己回答了**：`:11616 coin = payroll * 0.5` ⇒ 那是【付不出】；★★所以 `:11623` 斷言的正是本票要移除的 bug；★★★裁決＝**把那條斷言反轉，不是刪掉，更不是 bump baseline**
 ---
 

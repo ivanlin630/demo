@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-purity-instrument
 topic: ★gatherpure 的第 4 顆(2e82de32)落地了但【沒寄信】⇒ 鏈停在我這站而我不知道（今天第四次「落地≠通知」）｜★★而我查完之後不能 merge：這支【零床、零閘、零 .measure.json】——把修法 revert 掉，沒有任何一格會紅｜★★★排在薪資票【之後】，這不是新斷點，是說明它為什麼一直沒動
 ---

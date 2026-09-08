@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: wage-penalty-rework
 topic: ★R² 判 (b) 判準切錯軸——修法一句話量級｜★★而我改 reviewer 的處方一個字：軸要鍵在 `p.salary/fair`【不是】`npc_salary_mult`，否則【玩家領主】被靜默豁免｜★★★而這個修法對現有兩格綠是【數學上的 no-op】，所以它需要一個新的第三格陽性對照，否則沒有鑑別力
 ---

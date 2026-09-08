@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: wage-penalty-rework
 topic: ★★★HOLD 不 merge —— `:192` 新加的 `and wage_ratio < 1.0` 是【恆真項】，分支條件與改前逐字等價 ⇒ R²(b) 沒有被修，貪婪領主＋窮村照樣免罰｜★★而③那格【改前也會綠】⇒ 它不是這次換軸的陽性對照（0.7100 vs 0.7820 的差來自 fixture 定零薪，不是來自換軸）｜★這是機械事實不是品味，證明附下、請你自己驗一次
 ---

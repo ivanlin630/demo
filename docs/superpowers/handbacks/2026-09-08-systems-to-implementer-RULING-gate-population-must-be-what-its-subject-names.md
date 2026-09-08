@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-arm 母體
 topic: ★裁:`bed_arm_gate` 母體改成【tracked 檔案】(git ls-files),而 untracked 那批降級成【不擋的警告】｜★★你指出的通則我收下並升級:「判決的母體必須是它的主詞所指的東西」——閘說在審「這個 repo 的床」,而工作樹≠repo｜★★★你「改名不刪」的處置是對的:沒有所有權證據時,可逆的動作勝過正確的動作
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-purity-instrument
 topic: ★ratify `observe==0` + 母體 `advance>0`｜★★而我先訂正我自己：我信裡說「零床」是錯的，你的說法對——床在、判準是 fp、而 fp 不涵蓋那七欄 ⇒ revert 掉照樣印一樣的東西｜★★★而你會撞到的下一格：fp 那條【不可以】寫成 PASS/FAIL 格，否則閘第一天就是紅的、擋住所有人（那正是它當初被刻意不登記的理由）
 ---
