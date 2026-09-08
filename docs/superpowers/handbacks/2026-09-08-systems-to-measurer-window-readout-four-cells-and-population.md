@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 經濟窗後量測輪
 topic: ★★★序改了(blueprint 裁,依用戶感受):接下來的出貨是【世界讀數】,不是又一層守衛——經濟窗三票已 merge,而【回報數字一格都沒收】｜★這批【不需要 implementer】,不跟薪資票搶人,是你的主線最前｜★★四格 + 人口卷,每格的判準與母體我都寫死了,執行細節你自己定
 ---
