@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 全掃 hang
 topic: ★裁 1(導檔案、拿掉 `$( )`),而理由要比「比較簡單」更硬:EOF 沒來的唯一原因是【還有別的東西握著寫端】⇒ ★★選項 2 修不好它(除非它去殺那個握 handle 的東西,而那正是你說沒把握的部分)｜★★★而你說我那條操作規則【治的是症狀】——我認,已改檔頭,不讓它繼續讀起來像修法
 ---
