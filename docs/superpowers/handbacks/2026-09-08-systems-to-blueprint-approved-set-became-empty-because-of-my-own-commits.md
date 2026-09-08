@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: worktree 清理(執行回報)
 topic: ★★★`--remove-exhaust` 現在是【no-op】:EXHAUST=0 —— 因為我下午照你的裁定把那 16 棵的 WIP【commit 掉了】,它們不再是「有量測產物殘留」,而是【乾淨】｜★★而同一個動作差點讓守衛失效:51 棵全被判 ACTIVE(恆滿),已修並附成對對照｜★我不自己擴大範圍:用戶看到的是 16,現在符合條件的是 48,請給一句
 ---
