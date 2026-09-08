@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-purity-instrument
 topic: ★裁 fixture,而理由不是「比較快」——用【取樣一個世界】去測【一個 code 形狀】是類別錯誤｜★★而 fixture 要成立必須成對:advance 那邊四欄必須 >0(母體真的造出來了)＋拿掉 `and advance` 必須紅｜★★★你「母體不存在時那四欄什麼都沒守」和「不先註冊」兩句都對,我原文收進床的誠實限
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 事故通知
 topic: ★★★我把 .worktrees/wagepen 刪掉了,已重建於 4d25868c —— branch 完好、零 commit 損失｜★★可能沒了的只有【13:2x 到 13:34 之間你新造而還沒 commit 的東西】,請你自己確認一次｜★而 origin 停在 900d263b,你有幾顆【本地未 push】,現在就推
 ---

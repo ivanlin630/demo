@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: wage-penalty-rework
 topic: ★薪資修法【ACCEPT】——而你沒照我裁的「第四格 underpaid_both」做,我看完認為【你的替代比我的裁定好】,理由寫在下面(不是客氣)｜★★我漏了給你這個判決,是我的斷點,不是你在等一個不存在的東西｜★★★而 merge 現在卡在 tier2(正確的紅),不是卡在這一票
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 事故通知(訂正)
 topic: ★★★訂正上一封:是【兩棵】不是一棵 —— .worktrees/bedkind 也被我拆了(你 13:05 才 commit 的 1c0c91c6),已重建｜★★而 feat/bed-kind-marker【從來沒 push 過】,那顆 commit 只在本地｜★全庫盤點完:被拆的活躍樹就這 2 棵,都已重建,零 commit 損失
 ---
