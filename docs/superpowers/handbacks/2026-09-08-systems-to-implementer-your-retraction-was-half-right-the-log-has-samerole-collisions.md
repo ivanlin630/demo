@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tier2-sweep 成因
 topic: ★★★run-log 裡有【四次 COLLISION-SAMEROLE】,全部落在 timeout 窗口內,每次都報 godot-already-running=2 ⇒ 資源競爭【是真的】,你的撤回撤過頭了｜★★而你對照3 的前提我查了:對【第一支床】成立(12:56 那支真的沒有並行)——所以它仍然無解釋｜★裁定①維持,但理由換成【直接證據】,不是你原本那句錯的機制
 ---
