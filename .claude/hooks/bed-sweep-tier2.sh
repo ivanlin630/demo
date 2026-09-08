@@ -55,6 +55,21 @@ if [ "${1:-}" = "--check-staleness" ]; then
 fi
 
 # ── 三問之一/之二：誰觸發＋多久跑 ──────────────────────
+# ★★★systems 裁定① 2026-09-08：全掃【獨佔】—— 有別的 Godot 在跑就【拒絕啟動】。
+#   ★為什麼是拒絕而不是排隊：排隊會把「資源沒排開」偽裝成「床壞掉」——
+#     掃描的產物是【判決】，而一個排隊等出來的 timeout 判決是【沒有主詞的紅】。
+#   ★★誠實限（implementer 2026-09-08）：本條的理由是【掃描結果要能被歸因】，
+#     ★★★【不是】「上一次全 timeout 是資源競爭造成的」—— 那個歸因我已撤回：
+#       第一支床 timeout 的那 10 分鐘沒有任何別的 Godot 在跑，三個對照全部推翻它。
+_running=$(powershell -NoProfile -Command "(Get-Process godot* -ErrorAction SilentlyContinue | Measure-Object).Count" 2>/dev/null | tr -d "[:space:]")
+case "$_running" in ""|*[!0-9]*) _running=0;; esac
+if [ "${SWEEP_ALLOW_SHARED:-0}" != "1" ] && [ "$_running" -gt 0 ]; then
+  echo "[tier2] ★拒絕啟動：目前有 $_running 個 Godot 在跑，而全掃需要獨佔。"
+  echo "[tier2]   ★★不排隊的理由：排隊會把【資源沒排開】偽裝成【床壞掉】,"
+  echo "[tier2]   而掃描的產物是判決 —— 排隊等出來的 timeout 是【沒有主詞的紅】。"
+  echo "[tier2]   等它們跑完再來；真要共用請顯式 SWEEP_ALLOW_SHARED=1（★而那一輪的判決不得進 baseline）"
+  exit 5
+fi
 if [ "$IS_WORKTREE" = "1" ]; then
   echo "[tier2] ★拒絕：本掃描只准從【主 repo】跑（目前 cwd 是 worktree）"
   echo "[tier2]   理由：bed-triage-sweep.sh 會 cd 到 $MAIN_ROOT ⇒ 從這裡跑會【量到 main 的 code】而不自知，"
@@ -102,7 +117,20 @@ else
   echo "[tier2] 首次建立 baseline（本次不報 diff）"
 fi
 
-cp "$TMP" "$BASELINE"
+# ★★★systems 裁定② 2026-09-08：timeout / hang / crash【不得進 baseline】。
+#   它們是 no-verdict,而 baseline 是【拿來比對的】——
+#   ★把 no-verdict 寫進去,下一輪的「由綠轉紅」就會被一次沒判決的跑污染一整輪。
+#   ★★而丟掉了多少要印出來:靜默過濾跟「本來就沒有」長得一樣。
+_keep=$(awk -F"	" 'NR==1 || $2=="green" || $2=="red"' "$TMP")
+_kept=$(printf "%s" "$_keep" | grep -c "^scripts/")
+_dropped=$(( rows - _kept ))
+echo "[tier2] baseline 只收判決列:收 $_kept 支｜★丟 $_dropped 支 no-verdict(timeout/hang/crash)"
+if [ "$_kept" = "0" ]; then
+  echo "[tier2] ★ABORT:一支判決都沒有 ⇒ 不更新 baseline、不蓋時間戳(全 no-verdict 不是結果)"
+  exit 6
+fi
+printf "%s
+" "$_keep" > "$BASELINE"
 date +%s > "$STAMP"
 echo "[tier2] 完成：$rows 支｜★綠→紅 $alerts 支｜baseline 已更新｜時間戳已蓋"
 [ "$alerts" -gt 0 ] && exit 1
