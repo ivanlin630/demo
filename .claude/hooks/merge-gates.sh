@@ -9,6 +9,32 @@ set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
 REG="docs/process/merge-gates.tsv"
 
+# ★★★判決要落地（2026-09-07 血證）：本 runner 的判決原本【只走 stdout】。
+#   ★外層 shell 被殺 ⇒ 閘跑完了，而判決消失在一個沒有人接收的管道裡。
+#   ⇒ 把事實放在【活得比呼叫者久】的地方。不改行為：stdout 照舊，只是同時寫檔。
+MG_LOG="${MG_LOG:-.claude/hooks/.merge-gates-last.log}"
+mkdir -p "$(dirname "$MG_LOG")" 2>/dev/null
+exec > >(tee "$MG_LOG") 2>&1
+echo "[MERGE-GATES] ★判決同時寫入 $MG_LOG（外層 shell 若被殺，結論仍在這裡）"
+
+# ★★★判決要能【歸因】（2026-09-08 血證）：★本 runner 讀【工作區】不是 HEAD。
+#   ★.merge-gates-last.log 記著 `✓ computed-prop`，而 HEAD 上那行 expect 是
+#     [COMPUTED-PROP] PASS ⇒ grep -qE 把它當【字元類】⇒ 在 HEAD 上永遠不可能綠；
+#     那次的綠是靠一份【未 commit 的修改】跑出來的。
+#   ⇒ ★★沒有 provenance 的「35/35 全綠」【不能】被引用成「main 是綠的」。
+#   ★★★不拒絕執行（改自己的 slice 時本來就該髒）——改成【標明適用範圍】。
+_mg_head=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
+_mg_reg=$(git status --porcelain -- "$REG" 2>/dev/null | head -c1)
+_mg_run=$(git status --porcelain -- .claude/hooks 2>/dev/null | head -c1)
+_mg_code=$(git status --porcelain -- scripts tools 2>/dev/null | grep -v '^??' | wc -l | tr -d ' ')
+echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code"
+if [ -n "$_mg_reg$_mg_run" ]; then
+  echo "[MERGE-GATES] ★★本次判決【只適用於你的工作區】——註冊表或 runner 有未 commit 的修改"
+  echo "[MERGE-GATES]   ⇒ 綠【不等於】HEAD $_mg_head 是綠的。要引用成「main 綠」必須先 commit 再重跑。"
+else
+  echo "[MERGE-GATES] ★本次判決適用於 HEAD=$_mg_head（註冊表與 runner 皆乾淨）"
+fi
+
 # ★★★註冊表新鮮度（2026-09-03，implementer 提、systems 實作）——★病：閘自己會印 PASS，而它【不知道自己少了幾支】。
 #   ★血證同型兩次（同一天）：branch 上只有 10 支卻連報四次「全部通過」；後來 12 支 vs main 14 支。
 #   ★★「以後記得先 fetch」防不到 —— **忘記的時候沒有任何東西會響**（失效是靜默的）。
@@ -20,6 +46,8 @@ if [ "${MG_NO_FETCH:-0}" != "1" ]; then
   git fetch -q origin 2>/dev/null || true
   UP=$(git show origin/main:docs/process/merge-gates.tsv 2>/dev/null | grep -v '^#' | cut -f1 | sed '/^$/d' | LC_ALL=C sort)
   LOC=$(grep -v '^#' "$REG" 2>/dev/null | cut -f1 | sed '/^$/d' | LC_ALL=C sort)
+  UPFULL=$(git show origin/main:docs/process/merge-gates.tsv 2>/dev/null | grep -v '^#' | sed '/^$/d')
+  LOCFULL=$(grep -v '^#' "$REG" 2>/dev/null | sed '/^$/d')
   if [ -n "$UP" ]; then
     MISSING=$(comm -23 <(printf '%s
 ' "$UP") <(printf '%s
@@ -36,6 +64,17 @@ if [ "${MG_NO_FETCH:-0}" != "1" ]; then
     #   ⇒ ★★守衛自己說了一句【不是事實】的話,而那比沒有守衛更糟。
     [ -n "$MISSING" ] && STALE_NOTE="★註冊表落後 origin/main：缺 $MISSING"
     [ -n "$EXTRA" ] && FORK_NOTE="★本地多出（分叉，非缺失；多半是還沒 push 的新閘）：$EXTRA"
+    # ★★★定義差異（2026-09-08 血證）—— 舊版只比【閘名集合】(cut -f1)，
+    #   而閘可以名字在、【定義壞掉】。血證：`computed-prop` 的 expect 在 main 上已修成
+    #   `\[COMPUTED-PROP\] PASS`，而兩支 feature branch 上還是未跳脫的版本
+    #   ⇒ grep -qE 把 `[...]` 當字元類 ⇒ ★那支閘在那兩棵樹上【永遠不可能綠】，
+    #     而新鮮度檢查說【一支也不缺】。
+    #   ⇒ ★★一個只看名字的新鮮度檢查，對【定義腐壞】天生盲。
+    DEFDIFF=$(awk -F'	' 'NR==FNR{u[$1]=$0; next} ($1 in u) && u[$1]!=$0 {printf "%s ", $1}'       <(printf '%s
+' "$UPFULL") <(printf '%s
+' "$LOCFULL") 2>/dev/null | sed 's/ *$//')
+    [ -n "$DEFDIFF" ] && DEF_NOTE="★定義與 origin/main 不同（名字在、內容不一樣）：$DEFDIFF"
+    [ -n "${DEF_NOTE:-}" ] && echo "[MERGE-GATES] $DEF_NOTE"   # ★無條件印：算了不印＝沒接電
     UPSTREAM_N="$UPN"
   fi
 fi

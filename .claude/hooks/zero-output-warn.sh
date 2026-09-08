@@ -50,6 +50,40 @@ o=$(find "$D" -maxdepth 1 -name '*.md' -mmin -20 2>/dev/null | while read -r f; 
 #   ★★是【用戶】抓到我沒回報，我才手動跑這支 hook，它才響 —— ★它是被叫出來的，不是它叫我。
 #   ★★★而我在本檔檔頭自己寫過「fire 給沒人聽等於沒 fire」，然後做出一個 fire 給沒人聽的東西。
 #   ⇒ 對照組：`implementer-cleanup.sh` 一直是用 `{"decision":"block"}` —— 那才送得到。
+# ★★★產物落地卻沒出貨信（2026-09-08，blueprint 點名：今夜六次 stall 五次要人肉踢）
+#   ★上面那段只認【commit】。而真正會讓下游空等的是【產物落地】——
+#     一份 .measure.json／一張量測表躺在 repo 裡，而沒有任何信提到它 ⇒ 下游不知道它存在。
+#   ★★而「支線結束」沒有明確時刻，【產物出現】有 ⇒ 觸發點選產物不選「結束」。
+#   ★★★訊息要【點名那個檔】：說「你有產物沒出貨」而不說是哪一份 ⇒ 讀的人還要自己找。
+_arts=""
+if [ -f "$_cf" ]; then
+  _arts=$(git log --since="20 minutes ago" --name-only --pretty=format: -- docs/measurements docs/process/verdicts 2>/dev/null           | grep -E '\.(measure\.json|tsv|txt|jsonl)$' | sort -u | head -6)
+fi
+if [ -n "$_arts" ]; then
+  _unshipped=""
+  while IFS= read -r _a; do
+    [ -n "$_a" ] || continue
+    _base=$(basename "$_a")
+    # 近 20 分鐘的信裡，有沒有任何一封提到這個檔名
+    # ★★★2026-09-08：我原本把這裡收窄成「只掃近 20 分鐘的信」【為了快】，
+    #   而它當場製造假陽性：★一份三小時前【已經出過貨】的產物，今天被別的 commit 碰到就會被誤報。
+    #   ⇒ ★★而那個收窄【根本沒必要】——全信箱 258 檔 grep 實測 118ms。
+    #   ⇒ ★★★過早最佳化把正確性弄壞了，而我是先量了才知道自己不必省。
+    if ! grep -rlF "$_base" "$D" --include='*.md' 2>/dev/null | head -1 | grep -q .; then
+      _unshipped="${_unshipped}${_unshipped:+ }${_base}"
+    fi
+  done <<EOF_ARTS
+$_arts
+EOF_ARTS
+  if [ -n "$_unshipped" ]; then
+    MSG2="[產物沒出貨] 這些檔落地了，而【沒有任何信提到它們】：${_unshipped}
+★下游靠信被喚醒，不靠 commit ⇒ 它們現在躺在 repo 裡而沒有人知道。
+★★請寄一封帶【exact path】的信（產物路徑寫進信裡，★「在我手上」不算落地）。
+★★★若它【刻意不推下一站】（純自檢／純留證）⇒ 回一句「本回合無需推站」即可。"
+    python -c "import json,sys; print(json.dumps({'decision':'block','reason':sys.argv[1]}))" "$MSG2"
+    exit 0
+  fi
+fi
 MSG="[零產出] 近 20 分鐘有 ${c} 個 commit，但沒有任何新的 status:open 信。★做了事卻沒送出去 ＝ 下游不會被喚醒（Monitor 靠信、不靠 commit）。⇒ 若這回合有成果要推下一站，現在寫那封信（含 exact path）；若本來就不需要推（純自檢／純整理），回一句「本回合無需推站」即可結束。"
 python -c "import json,sys; print(json.dumps({'decision':'block','reason':sys.argv[1]}))" "$MSG"
 exit 0

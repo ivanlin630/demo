@@ -82,6 +82,20 @@ if printf '%s' "$_cmd" | grep -qE 'git[[:space:]]+(commit|add|merge|rebase|mv)';
 fi
 
 
+
+# 護欄⑤：寫廣播信（2026-09-07，blueprint 提；★而閘早就有了，缺的是【時機】）
+#   ★`.claude/hooks/mailbox-broadcast-gate.sh` 已經會擋「to: all 且還開著」的信，
+#     ★★但它只在【merge 時】跑 ⇒ 一封卡死的廣播會躺到有人跑閘為止。
+#   ★★★真正的根因修不掉：一封廣播【只有一個 status 欄位】⇒ 第一個 consume 的人
+#     讓其他所有人再也收不到（inbox-watch 要求 status: open）。
+#   ⇒ 所以正解是【一人一封】，而這裡在【寫的當下】就講，不是等 merge。
+if printf '%s' "$_cmd" | grep -qE '^to:[[:space:]]*all|to:[[:space:]]*all[[:space:]]*\(|to: all'; then
+  _warn="${_warn}${_warn:+
+}⚠ 你正在寫【to: all】的廣播信 —— ★一封廣播只有【一個 status 欄位】：第一個 consume 它的角色，
+   會讓其他所有人【再也收不到】（inbox-watch 只叫醒 status: open 的）。
+   ⇒ ★★正解＝【一人一封】（同內容分別寄給每個收件者），★★★而不是靠對方自律不要提早 consume。
+   ⇒ 若確實要廣播（例如純公告、不需要每個人動作）⇒ 可以，但★請預期只有一個人會被叫醒。"
+fi
 # 護欄④：`git commit -m "..."` 訊息裡有反引號（2026-09-07，同日第三次）
 #   ★雙引號裡的反引號會被 bash 當【命令替換】⇒ 那段文字【從訊息裡消失】,
 #     而 commit 仍然成功 ⇒ ★★「訊息寫好了」與「訊息被吃掉一段」在卷面上分不出來

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★**stage-a 全部落地**（`computed-prop` 閘在 main、baseline **1 站**、cross-run 修也在）｜★★而 branch 上**還剩一顆** `1b73164d` —— ★★★它**不是 stage-a 的東西**，是觀測純度床，**要不要進由你判**
 ---
 

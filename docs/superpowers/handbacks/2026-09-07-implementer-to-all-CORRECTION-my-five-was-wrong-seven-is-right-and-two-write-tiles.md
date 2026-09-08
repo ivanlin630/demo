@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: all
-status: open
+status: consumed
 topic: ★★★**訂正我自己**：我報的「5 個欄位」是錯的，**7 才對**（systems 的數字對）——★而我錯的原因是**我的 pattern 只認 `team.`**｜★★而多出來的兩處寫的是 **HexTileData 不是 team** ⇒ 我把**範圍也講窄了**
 ---
 

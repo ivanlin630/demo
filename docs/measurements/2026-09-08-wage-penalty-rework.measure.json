@@ -1,0 +1,60 @@
+{
+ "slice": "wage-penalty-rework",
+ "date": "2026-09-08",
+ "branch": "feat/wage-penalty-rework",
+ "head": "4d25868c",
+ "base": "origin/main 970ee864",
+ "spec": "docs/superpowers/specs/2026-09-08-wage-penalty-rework-HOW.md",
+ "bug": "salary_system.gd 把「這個地方沒有貨幣流通」判成「這個領主苛待部下」；SALARY_INTERVAL=7天 ⇒ 無幣村每週被判一次，永動。",
+ "discriminator": {
+  "how": "★兩個軸【本來就獨立】，舊 code 用 if/elif 串成互斥 ⇒ ratio = wage_ratio × budget_ratio，只看乘積",
+  "wage_axis": "wage_ratio = p.salary / fair < 1（領主【選】了低薪）⇒ 罰，★不問付不付得出",
+  "budget_axis": "budget_ratio < 1（領主【付不出】）⇒ 不罰，但仍 tap",
+  "penalty_amount": "★罰幅 = (1 − wage_ratio)，不是 (1 − ratio) —— 後者把【沒錢】那一段也算進懲罰",
+  "retracted": "★上一版（900d263b）加的 `and wage_ratio < 1.0` 是【恆真項】：進 elif 時已知 ratio<1；_can_pay ⇒ budget_ratio==1 ⇒ ratio==wage_ratio ⇒ 被蘊涵 ⇒ 分支條件逐字等價，軸沒換。systems 揭、我自己驗過屬實。",
+  "gap_closed": "★★貪婪領主＋窮村：舊 code `_can_pay=false` 直接掉進 else ⇒ 判 unpayable ⇒ 【免罰】。新 code 罰工資軸那一段。"
+ },
+ "acceptance": {
+  "1_still_punishes": {
+   "verdict": "PASS",
+   "evidence": "貪婪領主（mult 0.8）、coin 充足 ⇒ willful=3、paid_full=0、忠誠 0.8000 → 0.7820"
+  },
+  "2_no_punish_when_unpayable": {
+   "verdict": "PASS",
+   "evidence": "無幣村 coin=0、人格中性 ⇒ 忠誠 0.8000→0.8000、unrest 0→0、unpayable_local=3、unrest.suppressed=3"
+  },
+  "3_player_lord_not_exempt": {
+   "verdict": "PASS",
+   "evidence": "玩家隊 salary=0、團庫 100000 ⇒ willful=3、忠誠 0.8000→0.7100",
+   "honesty": "★這格【不是】換軸的陽性對照 —— 它的 budget_ratio==1，改前也會綠（systems 指出，我驗過屬實）"
+  },
+  "4_greedy_lord_poor_village": {
+   "verdict": "PASS",
+   "evidence": "貪婪（mult 0.8）＋ coin=0 ⇒ willful=3、unpayable_local=3、忠誠 0.8000→0.7820",
+   "why_this_one_matters": "★★這是【唯一】有鑑別力的一格"
+  }
+ },
+ "false_greens_caught_on_the_way": [
+  "★fixture coin 必須是 0 不是「一點點」：tick() 一次追 3 個結算期，coin=1 在前兩期付得出 ⇒ 舊 code 也判 willful ⇒ 斷言不可能變紅",
+  "★★④ 第三句斷言原本寫「兩個 tap 同時 >0 ⇒ 舊版互斥⇒不可能」——【錯】：互斥是 per-person-per-tick，計數器是跨-tick 累加 ⇒ 舊 code 那格是綠的。已改成誠實的母體格並註明它不是鑑別格。",
+  "★★★salary_eval_next_tick 必須 >0：=0 會走「只初始化、continue 不發薪」⇒ 三個 reason 計數器全 0 而兩個 PASS 照印。接住它的是母體斷言。",
+  "★①②③ 三格【改前也全綠】—— 沒有 ④ 的話「換軸」這件事沒有任何證據"
+ ],
+ "artifacts": [
+  "docs/measurements/2026-09-08-wage-penalty-acceptance.txt",
+  "docs/measurements/2026-09-08-wage-headless-gate.txt",
+  "docs/measurements/2026-09-08-wage-headless.txt",
+  "docs/measurements/2026-09-08-wage-fp-r1.txt",
+  "docs/measurements/2026-09-08-wage-fp-r2.txt",
+  "docs/measurements/2026-09-08-wage-fp-r3.txt"
+ ],
+ "gate_registered": "wage-penalty（merge-gates.tsv，expect '=== DONE === ALL PASS'）",
+ "discrimination_test": {
+  "method": "把 HEAD（900d263b，恆真項版）的 salary_system.gd 換回去，跑同一支床",
+  "result": "④ 兩紅（忠誠沒掉／willful=0），★①②③ 全綠",
+  "conclusion": "⇒ 只有 ④ 有鑑別力；①②③ 對這次換軸是 no-op"
+ },
+ "not_in_scope": {
+  "wage_2_4_anon_morale": "★不存在物：裸符號全庫掃 morale 92 處，salary_system.gd 為 0；anon 的 morale 只有俘虜群 CAPTIVE_INIT_MORALE，與薪資無呼叫關係 ⇒ 沒有可移除的東西，加一個是新 WHAT"
+ }
+}

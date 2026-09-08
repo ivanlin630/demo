@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★優先序衝突待澄清——人口儀器卷(你剛排主線) vs k校驗specimen(QA說你正式排「不是背景票」)
 ---
 
