@@ -86,6 +86,18 @@ while IFS= read -r bed; do
       echo "[SWEEP] ↻ $(basename "$bed") 上次=$_last ⇒ 重掃（第 $((_tries+1)) 次）";;
   esac
   n=$((n+1))
+  # ★★★ 2026-09-08 血證（用戶擞到彈框）：不繼承 SceneTree/MainLoop 的檔
+  #   用 --script 跑時 Godot 會彈一個【阻斷式錯誤對話框】（連 --headless 也彈）
+  #   ⇒ 進程卡在那裡等人按【確定】，一路燒到 GODOT_TIMEOUT。
+  #   ★★而它彈在【用戶螢幕上】―― 掃描是背景工作，卻中斷了人。
+  #   ⇒ ★★★看檔頭就能判，根本不要啟動 Godot；
+  #     而判決寫成 not-a-bed（【可見】而不是靈默跳過）。
+  if ! head -5 "$bed" 2>/dev/null | grep -q "^extends \(SceneTree\|MainLoop\)"; then
+    printf "%s	%s	%s	%s
+" "$bed" "not-a-bed" 0 "extends $(head -1 "$bed" | sed "s/^extends //") ⇒ --script 跑不了（會彈阻斷對話框）" >> "$OUT"
+    echo "[SWEEP] ★$(basename "$bed") ⇒ not-a-bed（不啟動 Godot）"
+    continue
+  fi
   t0=$SECONDS
   _ts0=$(date +%Y-%m-%dT%H:%M:%S)
   # ★★★2026-09-07 血證:只靠【內層工具的 timeout】不夠 ——
