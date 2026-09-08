@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 裁定 v2 已落地（兩格對照都跑過）｜★而我的 merge-gates 背景跑【被殺兩次】，我沒殺它 —— 想知道是不是你那邊的清理
 ---
 

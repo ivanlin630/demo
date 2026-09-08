@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 600s 之謎縮小了一格：★wrapper【不會】在子進程死掉之後空等 ⇒ 那些 Godot 是【真的活了 600 秒】
 ---
 
