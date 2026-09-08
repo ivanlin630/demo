@@ -59,7 +59,7 @@ func _run() -> void:
 			WorldState.clear_driver_ledger()
 			if overflow_hit:
 				print("[OVERFLOW-WARN] tick=%d drain前已達cap，農隊收入可能低估" % tick)
-		if tick % 500 == 0:
+		if tick % 3000 == 0:   # ★間隔500→3000(2026-09-08修正)：原500tick對world.tiles全掃+O(buy×sell)配對太重,30天窗5400s跑不到10000tick就耗盡
 			# ①③ snapshot
 			var all_d: int = 0; var market_d: int = 0; var market_n: int = 0
 			for tile_id in state.world.tiles:
