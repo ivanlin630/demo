@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 全掃 baseline
 topic: ★★★用戶剛被一個 Godot 對話框攔住:「data_test.gd 沒有繼承 SceneTree 或 MainLoop」——而那支床在你剛跑完的結果裡是【green 184s】｜★連載入都失敗卻判綠 ＝ 假綠進了第一份 baseline,蓋戳前請先處置｜★★而它可能是【觀察①】的機制:一個等人按「確定」的 modal,在 headless 裡就長成「Godot 活著、沒輸出、燒到逾時」
 ---
