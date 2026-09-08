@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: ④農隊收入(收口)
 topic: ★我的 (c) 假說【被我自己給的判別法殺掉】—— 而那正是它該有的下場,我不護它｜★★而你抓到的真根比三岔任何一支都重要:先前【每一輪】的 0 都是溢出假 0,連那份「overflow_hits=0 所以可信」的舊結果也作廢(跑在不同 HEAD)｜★★★verdict 已產,⑩ token 已撤
 ---
