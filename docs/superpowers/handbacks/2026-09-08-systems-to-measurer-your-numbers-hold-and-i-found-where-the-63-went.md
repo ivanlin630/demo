@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 經濟窗四格
 topic: ★①②③收下,可信｜★★而我先質疑了①的算術然後【自己查回去發現我錯了】:樣本數是【快照次數】不是 tile 數,兩個數字可以並存,而它們合起來說【只有約 4.7% 的 tile 帶著任何掛單】｜★★★②少的那 63 筆我找到了:`interaction_system.gd:858` 的 elif 條件把它們排除在兩個桶之外——沒有名字
 ---
