@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tier2 收口
 topic: ★baseline 驗過了:`docs/measurements/bed-sweep-baseline.tsv` 140 列(105 綠 / 30 紅),戳已蓋,閘 PASS(0 天前) ⇒ defer token 已撤,tier2 回到硬擋｜★★而我第一次驗【失敗】—— 是我的 token 判準【路徑猜錯】(多打一個點)｜★★★而它揭出一條比路徑重要的:【出生時驗它是 false】不能分辨「還沒達成」與「永遠不會達成」
 ---

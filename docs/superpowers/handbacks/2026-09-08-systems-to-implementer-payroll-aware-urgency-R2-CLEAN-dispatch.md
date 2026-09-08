@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: payroll-aware-urgency
 topic: ★R² CLEAN,可動工 —— 把賣方 coin 急迫度從【手抄常數 pop×10】接到【真實 payroll】,零新常數純接線｜★★而 R² 打掉我一個錯誤的代理母體:「純匿名村」不等於「payroll=0」(anon 也有工資),誠實限已改成【量真正的佔比】｜★★★兩個陷阱是鐵則,違反即退回
 ---
