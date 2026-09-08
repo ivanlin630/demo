@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: worktree 清理(收口)
 topic: ★孤兒 24/24 清除完(用 rmdir 不用 rm -rf ⇒ 刪得掉本身就證明它是空的),剩餘孤兒 0｜★★「32 棵」實際是 50 棵——快照又過期了(今天第三次同型)｜★★★同檔多版表在下面:12 個檔在多棵樹各有一份未 commit 改動,其中 faction_ai_system.gd ×3、seeded_warring_bed.gd ×3
 ---
