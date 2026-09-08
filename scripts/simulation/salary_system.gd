@@ -167,6 +167,13 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		#   ★★那條軸問的是「領主給不給得起／肯不肯給」，不是稅；
 		#   ★★★苛稅→離心該是【另一條具名的】戲，混進 underpay 懲罰＝一個數字扛兩個意思。
 		var ratio: float = paid / maxf(fair, 0.01)
+		# ★★★R² (b)：【不肯付】的軸要鍵在 `p.salary / fair`，不是 `budget_ratio`。
+		#   ★兩者在 `budget_ratio == 1` 時數值相同 ⇒ 這個改動對現有兩格綠是【no-op】
+		#     ⇒ ★★所以它【必須】配一個新的陽性對照，否則沒人知道軸換了。
+		#   ★★★而換軸的理由是【玩家領主】：NPC 的 `p.salary` 由 `fair × npc_salary_mult` 寫入，
+		#     而玩家隊的 `p.salary` 是玩家自訂、不經過 mult。
+		#     ⇒ 若把軸鍵在 mult，【玩家故意定零薪】會被靕默豁免。
+		var wage_ratio: float = p.salary / maxf(fair, 0.01)
 		ResourceBank.remove(team, "coin", net, "salary_named")
 		ResourceBank.adjust_person_coin(p, net, "salary_named")
 		_person_paid += 1
@@ -182,7 +189,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 			var intensity: float = clampf((ratio - 1.0) * 0.5, 0.05, 0.8)  # TEST VALUE
 			_npc_ai.write_memory(p, "kindness", team.leader_id,
 				state.world.current_tick, intensity)
-		elif _can_pay:
+		elif _can_pay and wage_ratio < 1.0:
 			# ★【不肯付】：付得起而定低薪 ⇒ 個體忠誠流失（導向離團，非全隊懲罰）
 			LoyaltyBank.adjust(p, -(1.0 - ratio) * SALARY_LOYALTY_PENALTY, "underpay")
 			_loy_down += 1

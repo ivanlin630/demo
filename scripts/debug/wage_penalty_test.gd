@@ -97,3 +97,31 @@ func _run() -> void:
 	_ok(tb.unrest_turns == unrest_b0, "★★②無幣村：unrest【沒有】增加（同一把刀的另一半）")
 	_ok(int(Probe.counts.get("salary.reason.unpayable_local", 0)) > 0,
 		"★★★②母體：`unpayable_local` > 0 —— 沒有這格，「忠誠沒掉」分不出【修好了】與【根本沒發薪】")
+
+	# ── ③ ★★★玩家領主定低薪（R² (b) 的陽性對照）──
+	#   ★換軸（`budget_ratio` → `p.salary/fair`）對①②是【數學上的 no-op】
+	#     ⇒ ★★沒有這一格，換軸之後兩格照樣綠，而【沒人知道軸換了】。
+	#   ★★★而它守的是一個真洞：NPC 的 `p.salary` 由 `fair × mult` 寫入，
+	#     而玩家隊的不經過 mult ⇒ 若軸鍵在 mult，玩家【故意定零薪】會被靕默豁免。
+	print("  ── ③ 玩家領主定零薪（★不得被豁免）──")
+	Probe.reset(); Probe.enabled = true
+	var st3: WorldState = MeasureBedHelper.arm_and_new()
+	st3.world.current_tick = SalarySystem.SALARY_INTERVAL * 3
+	var c3: Array = _mk_team(st3, 3, 100000.0, 0.5, 0.5)   # ★人格中性：mult=1.1（若鍵 mult 會判「慢態度好」）
+	var t3: TeamData = c3[0]
+	var m3: PersonData = c3[1]
+	st3.player_id = t3.leader_id            # ★這一行讓它成為【玩家隊】：p.salary 不再被 mult 覆寫
+	m3.salary = 0.0                          # ★★玩家故意定零薪，而團庫有錢
+	t3.salary_eval_next_tick = 1
+	var loy_c0: float = m3.loyalty
+	SalarySystem.new().tick(st3, [3])
+	print("     coin 充足 = 100000 ｜ salary=0 ｜ 忠誠 %.4f → %.4f" % [loy_c0, m3.loyalty])
+	print("     reason: paid_full=%d willful=%d unpayable=%d" % [
+		int(Probe.counts.get("salary.reason.paid_full", 0)),
+		int(Probe.counts.get("salary.reason.underpaid_willful", 0)),
+		int(Probe.counts.get("salary.reason.unpayable_local", 0))])
+	_ok(int(Probe.counts.get("salary.reason.underpaid_willful", 0)) > 0,
+		"★③玩家領主定零薪 ⇒ 判【不肯付】（★★若軸鍵在 npc_salary_mult，這格會紅）")
+	_ok(m3.loyalty < loy_c0, "★★★③懲罰真的落在玩家領主身上：忠誠 %.4f → %.4f" % [loy_c0, m3.loyalty])
+	_ok(int(Probe.counts.get("salary.reason.unpayable_local", 0)) == 0,
+		"★③團庫有錢 ⇒ 不得被判成【付不出】")
