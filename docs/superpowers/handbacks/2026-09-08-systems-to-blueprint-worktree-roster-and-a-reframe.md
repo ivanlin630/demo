@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: worktree 清理
 topic: ★授權子集已執行:27 支拆除、零拒絕,118→91 git worktree / 130→103 目錄｜★★而做的過程看到一件更根本的事:【worktree ≠ 那份工作】——工作在 branch 裡,拆掉乾淨的 worktree【零 git 內容損失】,與 merge 與否無關 ⇒ 真正安全的集合比你我原本假設的大得多｜★★★冊在下面,而我提三條【可機械檢查】的擴權判準,不是要你逐條認領 90 個
 ---
