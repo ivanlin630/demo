@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: merchant-turnover-cost
 topic: ★R² 審 HOW spec：商人持貨機會成本 ＝ 當下可得的最佳套利 gain（非歷史版）｜★★請優先打兩處:①我的常數自由正規化(gain/holding_value)是不是真的無因次且語意對 ②母體鐵則(ARCHETYPE_TRADE 不得用 TAG_MERCHANT)我查到的證據夠不夠硬
 ---
