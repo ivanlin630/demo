@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★我剛寫的獨佔守衛有兩個弱點，我自己先講 —— 一個會讓全掃【永遠跑不成】，一個建在瞬時取樣上
 ---
 
