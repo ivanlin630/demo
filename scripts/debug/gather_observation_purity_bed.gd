@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: pending
+# blocker: gather-purity-bed-as-gate
 # ★問一個可以現在就答的問題：【呼叫 gather 去觀測，會不會改變世界】？
 #   A 輪：只跑 tick（不觀測）｜B 輪：每天對每支隊呼一次 DecisionContext.gather
 #
