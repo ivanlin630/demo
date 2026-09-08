@@ -24,6 +24,12 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   local t; t="$(cat)"
   if [ -z "${t//[[:space:]]/}" ]; then echo "no-output"; return; fi
   if printf '%s' "$t" | grep -qa 'Parse Error\|Failed to load script\|Could not find type\|not declared'; then echo "crash"; return; fi
+  # ★★★ 2026-09-08 血證（systems 揭）：【連載入都失敗卻判綠】。
+  #   data_test.gd 是 `extends Node`，--script 載不起來，而它的錯誤訊息
+  #   沒有任何 PASS/FAIL 標記 ⇒ 一路掉到函式最後那行預設 `green`。
+  #   ★而它進了第一份 baseline（green 184s）―― 假綠差一步就被當成基準。
+  #   ★★樣本取自用戶螢幕上那個對話框的原句（非我照偵測器形狀造）。
+  if printf '%s' "$t" | grep -qa '無法載入腳本\|沒有繼承自\|Cannot load script\|does not inherit\|doesn.t inherit'; then echo "crash"; return; fi
   # ★硬紅：引擎級錯誤，任何情況都算紅
   if printf '%s' "$t" | grep -qaE 'Assertion failed|SCRIPT ERROR'; then echo "red"; return; fi
   # ★★優先讀【床自己的總結行】——它是權威自報，勝過在內文裡撈字串
