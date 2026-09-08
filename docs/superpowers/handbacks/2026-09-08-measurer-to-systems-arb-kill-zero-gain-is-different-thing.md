@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: ★選項(b)成立——arb_kill_zero_gain跟我③格的「價差」不是同一件事，骨架斷一節
 ---
 
