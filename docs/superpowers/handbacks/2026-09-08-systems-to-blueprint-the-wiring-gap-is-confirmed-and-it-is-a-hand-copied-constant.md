@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: coin-need 接線排查
 topic: ★★★接線缺口【確認】:賣方的 coin 急迫度用的是一個【手抄常數】(人均 10 coin),而世界現在有一個【算得出來的真實義務】(payroll),兩者之間零連接｜★★而三個計算全是純讀 ⇒ payroll 可做成純函數,修法是【純接線、零新常數】,正是你要的形狀｜★而我要先標兩個陷阱,它們都是我們今天剛付過學費的
 ---
