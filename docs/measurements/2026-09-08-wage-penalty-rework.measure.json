@@ -1,0 +1,59 @@
+{
+  "slice": "wage-penalty-rework",
+  "date": "2026-09-08",
+  "branch": "feat/wage-penalty-rework",
+  "head": "7099907c",
+  "base": "origin/main 970ee864",
+  "spec": "docs/superpowers/specs/2026-09-08-wage-penalty-rework-HOW.md",
+  "bug": "salary_system.gd 把「這個地方沒有貨幣流通」判成「這個領主苛待部下」；SALARY_INTERVAL=7天 ⇒ 無幣村每週被判一次，永動。",
+  "discriminator": {
+    "how": "判準不用發明——ratio<1 本來就有兩個成因，只是被合成一個數字",
+    "unpayable_local": "budget_ratio < 1（手上錢不夠，且已全部發光）⇒ 不扣忠誠、不加 unrest",
+    "underpaid_willful": "p.salary < fair 而 budget_ratio == 1（付得起卻定低薪）⇒ 扣忠誠、導向離團",
+    "note": "邊界（不足但非零）由 fixture 自己回答：coin = payroll*0.5 ⇒ 錢全發光 ⇒ 屬付不出"
+  },
+  "acceptance": {
+    "1_still_punishes": {
+      "verdict": "PASS",
+      "evidence": "貪婪領主（npc_salary_mult 0.8）⇒ willful=3、paid_full=0、忠誠 0.8000 → 0.7820",
+      "note": "★情境不需要新機制——npc_salary_mult = clampf(1+(義氣−貪婪×0.5)×0.4,0.7,1.3) 本來就會產生低薪"
+    },
+    "2_no_longer_punishes_innocent": {
+      "verdict": "PASS",
+      "evidence": "無幣村 coin=0 ⇒ unpayable=3、unrest.suppressed=3、忠誠不變、unrest 不變"
+    },
+    "3_unrest_unhooked": {
+      "verdict": "PASS",
+      "evidence": "unrest 改掛【不肯付的人數】而非 budget_ratio；供養失敗另有兩個更貼切的來源（resource_system:544 famine、faction_ai_system:4964 領主斷糧/剝削）",
+      "note": "★spec §1 原本說 salary_system 沒有 unrest 寫入——那是錯的，:211 就是。已由 systems 訂正。"
+    },
+    "4_anon": {
+      "verdict": "NOT DONE — 未驗證前不動",
+      "note": "salary_system.gd 零個 morale 引用、anon 側沒有懲罰可移除 ⇒ 與 ③ 同型，可能又是「不存在的東西」"
+    },
+    "headless_gate": {
+      "verdict": "PASS",
+      "evidence": "HARD-FAILS = 3 ｜ baseline = 3 ｜ 失敗清單逐條相同 ｜ rc=0",
+      "note": "★舊斷言 :11623 是【反轉】不是刪除、也沒有 bump baseline——反轉後它會在「有人把舊語意改回去」時紅"
+    },
+    "determinism": {
+      "verdict": "PASS (byte-identical ×3)",
+      "fp": "39657d1e4acd83c15337553fded10563",
+      "honest_limit": "★對本票【沒有鑑別力】：SALARY_INTERVAL = 7 天，而 a4_determinism_check 跑 1000 tick = 0.69 天 ⇒ 永遠不會有發薪日。它只證明沒弄壞別的東西。"
+    }
+  },
+  "false_greens_caught_on_the_way": [
+    "第一跑：三格 reason 全 0 ⇒ _pay_salary 根本沒被呼叫，而床印了兩個 PASS（忠誠沒掉／unrest 沒加）——數字是真的，解釋是錯的。接住它的是母體格 unpayable_local > 0。成因：fixture 把 salary_eval_next_tick 設 0，走進「第一次只初始化、continue 不發薪」。",
+    "第二跑：ALL PASS 但 willful=0、忠誠上升 ⇒ ①的情境根本沒造出來（付滿還超付）。根在斷言那一行：paid_full + underpaid_willful > 0 被【它本該排除的情形】滿足 ⇒ 判準①實際上寫成了「發薪日有跑過」。★一個斷言被它該排除的情形滿足，就永遠不會紅。",
+    "我自己造出來又移除的死分支：把 if not _can_pay 寫在 if budget_ratio < 1.0 裡面——那裡 _can_pay 恆 false，else 是死碼，而「不肯付」根本不會進來。★一個永遠跑不到的分支看起來與【有處理】一模一樣。"
+  ],
+  "artifacts": [
+    "docs/measurements/2026-09-08-wage-penalty-acceptance.txt",
+    "docs/measurements/2026-09-08-wage-headless-gate.txt",
+    "docs/measurements/2026-09-08-wage-headless.txt",
+    "docs/measurements/2026-09-08-wage-fp-r1.txt",
+    "docs/measurements/2026-09-08-wage-fp-r2.txt",
+    "docs/measurements/2026-09-08-wage-fp-r3.txt"
+  ],
+  "gate_registered": "wage-penalty（成對：有錢卻不發必須罰＋無幣村必須不罰；三格 reason 當母體）"
+}
