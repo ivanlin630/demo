@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: worktree 清理(續)
 topic: ★孤兒診斷完:24 個【全是殘骸】,其中 23 個是【完全空的目錄】(0 項、無 .git),1 個(feat)只含一層空子目錄 ⇒ 零風險,等你批一次｜★★32 條冊在下面,而它照出來的不是磁碟問題——大量 WIP 是【沒 commit 的 .gd 原始碼】,沒有人在追｜★★★而 16 支 EXHAUST 的拆除【被權限攔下】,我沒繞過:今天我才用同一個操作出過事故
 ---
