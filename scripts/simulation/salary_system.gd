@@ -75,7 +75,43 @@ func tick(state: WorldState, team_ids: Array) -> void:
 			push_warning("[SALARY] team=%d 補發次數撞上限 %d（tick=%d）" % [int(tid), CATCHUP_MAX, now])
 			team.salary_eval_next_tick = CadenceStagger.next_tick(now, now, int(tid), SALARY_INTERVAL)
 
-func _calc_fair_salary(p: PersonData) -> float:
+# ★★★抽出來的【純讀】payroll 估算（systems spec 2026-09-08）。
+#   病：`trade_valuation` 問「我需要多少 coin」時用的是 `pop × 10.0`（手抄常數），
+#   而世界有真實的義務 payroll――領主要付薪水所以需要 coin，
+#   而【賣貨決策看不見這件事】。
+# ★公式逐字搬自 `tick()`（不重寫），且 `tick()` 改呼它
+#   ⇒ 【只有一份公式】，不會分岔。
+# ★★鐵則（systems）：本函數【禁寫任何世界狀態】―― 估值路徑寫世界
+#   就是今天剛修掉的 gather 觀測純度缺陷。要快取也只能由
+#   SalarySystem 在它自己的 advance 路徑寫，估值端只讀。
+static func estimated_payroll(state: WorldState, team: TeamData) -> float:
+	var is_player_team: bool = (team.leader_id == state.player_id and state.player_id != -1)
+	var npc_salary_mult: float = 1.0
+	if not is_player_team:
+		var leader: PersonData = state.persons.get(team.leader_id)
+		if leader != null:
+			var honor: float = (float(leader.values.get("義氣", 0.5)) 				+ float(leader.values.get("信義", 0.5))) / 2.0
+			var greed: float = float(leader.values.get("貧婪", 0.5))
+			npc_salary_mult = clampf(1.0 + (honor - greed * 0.5) * 0.4, 0.7, 1.3)
+	var named_payroll: float = 0.0
+	for pid in team.named_members:
+		var p0: PersonData = state.persons.get(pid)
+		if p0 == null: continue
+		if _has_master_memory(p0, team.leader_id): continue
+		named_payroll += (p0.salary if is_player_team else _calc_fair_salary(p0) * npc_salary_mult)
+	var _leader_greed: float = 0.5
+	var _leader_prudence: float = 0.5
+	var _lead0: PersonData = state.persons.get(team.leader_id)
+	if _lead0 != null:
+		_leader_greed = float(_lead0.values.get("貧婪", 0.5))
+		_leader_prudence = float(_lead0.values.get("慎重", 0.5))
+	var _rate0: float = clampf(
+		_leader_greed * CoinTreasury.INCOME_TAX_K - _leader_prudence * CoinTreasury.INCOME_TAX_K2,
+		0.0, CoinTreasury.INCOME_TAX_MAX)
+	named_payroll *= (1.0 - _rate0)
+	return named_payroll + AnonTierSystem.total_wage(team)
+
+static func _calc_fair_salary(p: PersonData) -> float:
 	var total: float = 0.0
 	for v in p.skills.values():
 		total += float(v)
@@ -107,27 +143,20 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 			var greed: float = float(leader.values.get("貪婪", 0.5))
 			npc_salary_mult = clampf(1.0 + (honor - greed * 0.5) * 0.4, 0.7, 1.3)
 	# ── 量入為出：估總 payroll，coin 不足 → 全員按比例減薪（leader 主動緊縮，非賴帳）──
-	var named_payroll: float = 0.0
-	for pid in team.named_members:
-		var p0: PersonData = state.persons.get(pid)
-		if p0 == null: continue
-		if _has_master_memory(p0, team.leader_id): continue
-		named_payroll += (p0.salary if is_player_team else _calc_fair_salary(p0) * npc_salary_mult)
-	# ★★★量入為出估的是【團真的要流出多少 coin】⇒ named 那半要乘 `(1 - rate)`（spec §2 判斷②）
-	#   ★用 gross 估會【明明付得起卻減薪】；★★而 anon 不課稅所以不乘。
-	#   ★★★代價（spec 自標）：「減薪」次數會下降 —— 那是【行為差異】，要被印出來。
-	var _leader_greed: float = 0.5
-	var _leader_prudence: float = 0.5
-	var _lead0: PersonData = state.persons.get(team.leader_id)
-	if _lead0 != null:
-		_leader_greed = float(_lead0.values.get("貪婪", 0.5))
-		_leader_prudence = float(_lead0.values.get("慎重", 0.5))
+	# ★公式已抽成 `estimated_payroll()`（估值端也要讀同一份）
+	#   ⇒ 這裡呼它，而不是留一份複製品―― 兩份公式一定會分岔。
+	var payroll: float = estimated_payroll(state, team)
+	# ★★★下游還要用到這兩個局部（:183 用 `_rate0` 算稅後淨額、:235 用 `anon_total` 發匿名薪）
+	#   ⇒ 抽函數時不能連它們一起拿掉。
+	#   ★而我拿掉了，而它的表現形式是【卡住】不是【錯誤訊息】：
+	#     Godot 對載入失敗彈阻斷對話框（連 --headless 也彈）⇒ 燒到逆時。
+	#     今天第三次碰到同一個形狀（data_test / 全掃 / 這裡）。
+	var _lead1: PersonData = state.persons.get(team.leader_id)
 	var _rate0: float = clampf(
-		_leader_greed * CoinTreasury.INCOME_TAX_K - _leader_prudence * CoinTreasury.INCOME_TAX_K2,
+		(float(_lead1.values.get("貧婪", 0.5)) if _lead1 != null else 0.5) * CoinTreasury.INCOME_TAX_K
+		- (float(_lead1.values.get("慎重", 0.5)) if _lead1 != null else 0.5) * CoinTreasury.INCOME_TAX_K2,
 		0.0, CoinTreasury.INCOME_TAX_MAX)
-	named_payroll *= (1.0 - _rate0)
 	var anon_total: float = AnonTierSystem.total_wage(team)
-	var payroll: float = named_payroll + anon_total
 	var coin_avail: float = maxf(float(team.resources.get("coin", 0)), 0.0)
 	var budget_ratio: float = 1.0
 	if payroll > 0.0 and coin_avail < payroll:
@@ -237,7 +266,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		print("[Salary] Team%d 減薪 %.0f%%（本地無幣，不計懲罰）" % [team.team_id, (1.0 - budget_ratio) * 100.0])
 	print("[Salary] Team%d 薪水結算 coin=%.1f" % [team.team_id, float(team.resources.get("coin", 0))])
 
-func _has_master_memory(p: PersonData, leader_id: int) -> bool:
+static func _has_master_memory(p: PersonData, leader_id: int) -> bool:
 	for m in p.memory:
 		if m.get("type") == "master" and m.get("subject_id") == leader_id:
 			return true
