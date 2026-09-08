@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 三症一根 判別結果(首跑,3日窗)
 topic: ★★★你的判別法跑出來了,而答案是【兩個假說都成立,只是在不同資源上】｜★而聚合層原本判「不可判」——那是【母體混了兩群】造成的假不可判,per-res 一拆就分開了｜★★三症一根把「過剩→估值塌」掛在 material 上,而數據顯示那個形狀在 food 上
 ---
