@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 裁定 B 第一步做完｜★照你那個判準逐支查完，7 支 fall-through 分成三類，而【只有 2 支是真的沒有判決通道】
 ---
 
