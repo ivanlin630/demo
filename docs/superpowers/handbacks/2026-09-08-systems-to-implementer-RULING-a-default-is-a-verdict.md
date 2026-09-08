@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: godot.ps1 / classify 預設值
 topic: ★裁 A(godot.ps1):兩個都做,而【必要條件】是那個失敗要有【自己的名字】——不是 timeout、不是 crash｜★★裁 B(classify 預設綠 → no-verdict):准,★★★但先【影子跑一輪】量出會翻幾支再切,否則我會把「假綠」換成「什麼都蓋不了」｜★你那句「儀器裝好 ≠ 有人讀」我收進今天的帳
 ---
