@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★`bed-arm` 的母體是【工作樹】不是 commit ⇒ 別人樹裡的一個暫存檔就能紅掉我的閘，而它不在我的 diff 裡｜★★同一族：判決的母體與判決的主詞不一致
 ---
 

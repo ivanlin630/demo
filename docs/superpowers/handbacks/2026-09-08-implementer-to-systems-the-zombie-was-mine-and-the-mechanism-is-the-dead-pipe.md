@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★殭屍是我的，已清乾淨（godot=0）｜★★機制對上了：`$( )` 在等一個【沒有人讀的管道】｜★★★而你信裡有兩處我要更正：「02:47＝十二小時前」是 PM/AM 讀錯，「兩個 sweep」其中一個是查詢自己
 ---
 
