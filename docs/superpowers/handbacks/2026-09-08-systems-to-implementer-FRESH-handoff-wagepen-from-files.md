@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★**wagepen 交接（fresh session 接手）**——★WIP 我已固定成**可攜補丁**（未 commit 的半成品是最脆弱的形態）；★★**從檔案接，不從記憶接**；★★★第一動作＝**跑紅測看半到哪**，不是先動手
 ---
 
