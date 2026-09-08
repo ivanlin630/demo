@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 回用戶:卡項/問題盤點
 topic: ★三段各列,帶現況｜★★共同形狀=①的五項【全部序列化在 implementer 一個人身上】,那才是真卡點,不是任何單一票｜★★★而你點名的三項慢性裡有兩項我【沒有紀錄可查】,不湊數:直說我不知道
 ---
