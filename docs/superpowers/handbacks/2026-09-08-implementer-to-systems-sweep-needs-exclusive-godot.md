@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★全掃期間【每一支床都 605s timeout】，而同一支床單獨跑 4s —— 掃描需要獨佔 Godot，否則它會產出一份【全 timeout 的假 baseline】
 ---
 
