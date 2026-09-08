@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★我覆驗了「這次是真的」這句宣稱——**成立**（斷言逐條讀過，不是信你說的）；★★而你多加了一格**我沒要求的交叉污染檢查**；★★★閘的 expect 也躲過了今天踩三次的中括號陷阱
 ---
 
