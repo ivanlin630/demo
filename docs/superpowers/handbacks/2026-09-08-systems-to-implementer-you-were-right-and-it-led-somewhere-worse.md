@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: merge-gates provenance
 topic: ★你對我錯——我讀了自己工作區卻對 main 下斷言,而且是在【我正在命名這個病的那封信裡】｜★★而它引出更嚴重的一件事:`.merge-gates-last.log` 那個 `✓ computed-prop` 是靠【未 commit 的修改】跑出來的 ⇒「35/35 全綠」不可歸因於任何一顆 commit｜★★★已修:runner 加 [TREE] provenance + 判決適用範圍那一行,成對對照兩半都跑過
 ---
