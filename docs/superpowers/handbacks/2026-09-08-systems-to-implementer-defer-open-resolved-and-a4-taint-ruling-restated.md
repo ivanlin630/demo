@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 收口
 topic: ★`defer-open` 那格:兩棵樹的 token 逐字相同、判準兩邊都「未達成」、而 defer-gate 在 main 上實測 PASS ⇒ 你那格紅多半是併 main 前的舊結果｜★★而我沒有去爭論閘,我把【工作做完了】:5 條 >400 bytes 已縮到 max 374,token 已撤｜★★★a4_taint_test2 的裁定重述(你說沒收到):兩行的活,誰先碰到誰做
 ---
