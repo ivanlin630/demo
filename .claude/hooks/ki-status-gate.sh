@@ -18,7 +18,7 @@ KI=docs/known_issues.md
 BASE=docs/process/.ki-status-baseline.txt
 [ -f "$BASE" ] || { echo "[KI-STATUS] ★FAIL：baseline 不存在（$BASE）—— 沒有 baseline 就分不出新舊，本閘無效"; exit 1; }
 
-fail=0; new=0; old=0; title=""; sect=""
+fail=0; new=0; old=0; noclock=0; title=""; sect=""
 
 check_sect() {
   [ -z "$title" ] && return 0
@@ -30,6 +30,26 @@ check_sect() {
     echo "[KI-STATUS] ★FAIL：新條目缺【狀態】欄 ⇒ ${title:0:60}"
     echo "   ⇒ ★把【未確認】寫成【已知未修】是在考卷上說謊的溫和版；沒寫則是連問都沒問"
     fail=$((fail+1)); return 0
+  fi
+  # ★★★【回訪必須有時鐘】（blueprint 裁 2026-09-08，systems 實作）
+  #   ★實測動機：有回訪欄的 10 條裡，量測窗 5 / 觸發事件 5 /
+  #     ★★複審日期 0 / 到期 token 0 —— **所有人都選了沒有時鐘的那兩種**。
+  #   ⇒ 「量測窗」＝下一輪（無界）、「觸發事件」＝某事發生時（無界）
+  #     ⇒ ★★★到期機制【沒有東西可以咬】。
+  #   修法：【未確認】的回訪必須【同時】帶一個時鐘：
+  #     一個 YYYY-MM-DD 複審日，或一個 defers.tsv 裡真實存在的 token。
+  #   ★舊規則不取消（未確認仍須靠量測解決），這一條是【再加一個時鐘】。
+  if [ "$st" = "狀態：未確認" ]; then
+    # ★只看【回訪那一行】—— 搜整段會撃中證據段裡的日期（systems 自犯一次，2026-09-08）
+    _rev=$(printf '%s' "$sect" | grep -oE '回訪：[^|]*' | head -1)
+    if ! printf '%s' "$_rev" | grep -qE '20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]|token'; then
+      # ★★★警告不擋（systems 2026-09-08）：這條規則是今天立的，而這 14 條在它之前就寫了。
+      #   ★回溯適用並擋住所有人的 merge ＝ 把【恆空】做成【恆滿】。
+      #   ★★而不印它 ＝ 規則存在而永遠不會被用到。
+      #   ⇒ 印名字 + 印總數，回填完成後再翻成硬擋。
+      echo "[KI-STATUS] ⚠未回填：【未確認】回訪沒有時鐘（需 YYYY-MM-DD 或 defers token）⇒ ${title:0:56}"
+      noclock=$((noclock+1)); return 0
+    fi
   fi
   if [ "$st" = "狀態：已知未實裝" ] && ! printf '%s' "$sect" | grep -q '回訪：觸發事件'; then
     echo "[KI-STATUS] ★FAIL：【已知未實裝】條目的回訪不是「觸發事件」⇒ ${title:0:60}"
@@ -62,6 +82,7 @@ done < <(tr -d '\r' < "$KI")
 check_sect
 
 echo "[KI-STATUS] 條目 $((new+old))｜baseline 內(存量,不擋) $old｜新條目(硬檢) $new｜★違規 $fail"
+[ "${noclock:-0}" -gt 0 ] && echo "[KI-STATUS] ⚠【回訪沒有時鐘】${noclock} 條——警告不擋，回填完成後翻硬擋（systems 2026-09-08）"
 echo "[KI-STATUS] ★誠實限①：baseline 是【標題快照】—— 改標題的舊條目會被當成新條目（會紅，是保守方向）"
 echo "[KI-STATUS] ★誠實限②：存量 $old 條【沒有被檢查】—— 回填排在「清單清零」階段，★本閘不代表它們合格"
 [ "$fail" -gt 0 ] && { echo "[KI-STATUS] FAIL"; exit 1; }
