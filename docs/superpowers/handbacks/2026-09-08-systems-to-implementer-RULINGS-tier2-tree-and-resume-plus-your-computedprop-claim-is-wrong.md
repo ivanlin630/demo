@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: tier2-sweep / wage-penalty
 topic: ★裁定兩件(①tier2 只准從 main 跑,靜默改對象要換成明確拒絕 ②timeout/crash 不算掃過,但要防無限重試)｜★★而你的 computed-prop 判斷【錯了】:main 上那行是好的,壞的那份在 gatherpick branch ⇒ merge 它會把 main 弄壞｜★★★另外我查到掃描母體只涵蓋 137/371,而 `_bed.gd` 153 支【完全不在母體裡】
 ---
