@@ -11620,8 +11620,16 @@ func _test_salary_budget_ratio() -> void:
 	assert(coin_after >= -0.001, "coin 不得為負，實際=%.2f" % coin_after)
 	assert(coin_after < 0.05, "錢應幾乎發光（按比例縮水發完），實際=%.2f" % coin_after)
 	assert(m.coin > 0.0, "named 領到減額薪資，實際=%.2f" % m.coin)
-	assert(m.loyalty < 0.5, "減薪 → ratio 路徑掉 loyalty，實際=%.2f" % m.loyalty)
-	assert(team.unrest_turns == 1, "減薪應 unrest+1，實際=%d" % team.unrest_turns)
+	# ★★★反轉（wage-penalty-rework，2026-09-08）――【不是刪掉，也不是 bump baseline】。
+	#   ★舊斷言寫的是【減薪 ⇒ 掉 loyalty / unrest+1】，
+	#     而本 fixture 的條件是 `coin = payroll * 0.5` ⇒ ★★領主把手上的錢【全部發光】
+	#     ⇒ 那是【付不出】不是【不肯付】。
+	#   ★★★而舊斷言正是本票要移除的 bug 本身：
+	#     把「這個地方沒有貨幣流通」判成「這個領主苛待部下」。
+	#   ⇒ 反轉它【保留這一格】：這支測試仍然在守同一個情境，只是守的方向反了。
+	#     ★刪掉等於少一個守衛；bump baseline 等於把舊語意追認成新常態。
+	assert(is_equal_approx(m.loyalty, 0.5), "★付不出【不得】扣 loyalty（無幣村不是苛待），實際=%.2f" % m.loyalty)
+	assert(team.unrest_turns == 0, "★★付不出【不得】加 unrest（同一把刀的另一半），實際=%d" % team.unrest_turns)
 	print("EcoFix Task1a OK")
 
 func _test_salary_full_pay_unchanged() -> void:

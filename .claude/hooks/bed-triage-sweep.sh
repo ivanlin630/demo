@@ -54,15 +54,40 @@ done
   echo "[SWEEP] ★ABORT：分類器把空輸出判成有結果 ⇒ 本輪作廢"; exit 3; }
 echo "[SWEEP] 分類器自檢通過（5 種真實紅形狀 + 4 種通過樣本不誤判 + 空輸出）"
 
-if [ -f "$OUT" ]; then echo "[SWEEP] 續掃:$OUT 已有 $(( $(wc -l < "$OUT") - 1 )) 筆,跳過它們"
-else printf 'bed	verdict	wall_s	note
-' > "$OUT"; fi
+MAX_ATTEMPTS="${MAX_ATTEMPTS:-2}"
+# ★★★systems 裁定 2026-09-08：timeout/hang/crash 【不算掃過】。
+#   舊版的續掃判準是【這支床有沒有一列】，而不是【有沒有判決】
+#   ⇒ 上一輪 137/137 全 timeout 的殘留檔會讓下一輪【全部跳過】，瞬間 rc=0 零新列。
+# ★★而【重掃】不能無限：同一支累積 $MAX_ATTEMPTS 次無判決 ⇒ 標 timeout-persistent 停手，
+#   ★★★而那個標記必須印出來 ―― 否則【不再重試】跟【掃過了】又長得一樣。
+if [ -f "$OUT" ]; then
+  _done=$(awk -F"	" '$2=="green"||$2=="red"{c++} END{print c+0}' "$OUT")
+  _pend=$(awk -F"	" '$2=="timeout"||$2=="hang"||$2=="crash"{c++} END{print c+0}' "$OUT")
+  echo "[SWEEP] 續掃:$OUT 已有判決 $_done 筆（跳過）｜無判決 $_pend 筆（★重掃，上限 $MAX_ATTEMPTS 次）"
+else
+  printf "bed	verdict	wall_s	note
+" > "$OUT"
+fi
 n=0
 while IFS= read -r bed; do
   [ -n "$bed" ] || continue
-  if cut -f1 "$OUT" 2>/dev/null | grep -qxF "$bed"; then continue; fi   # ★已掃過就跳(續掃)
+  _last=$(awk -F"	" -v b="$bed" '$1==b{v=$2} END{print v}' "$OUT")
+  _tries=$(awk -F"	" -v b="$bed" '$1==b{c++} END{print c+0}' "$OUT")
+  case "$_last" in
+    green|red|timeout-persistent) continue;;
+    "") ;;
+    *)
+      if [ "$_tries" -ge "$MAX_ATTEMPTS" ]; then
+        printf "%s	%s	%s	%s
+" "$bed" "timeout-persistent" 0 "attempts=$_tries last=$_last" >> "$OUT"
+        echo "[SWEEP] ★$(basename "$bed") 連 $_tries 次無判決 ⇒ 標 timeout-persistent，停止重試"
+        continue
+      fi
+      echo "[SWEEP] ↻ $(basename "$bed") 上次=$_last ⇒ 重掃（第 $((_tries+1)) 次）";;
+  esac
   n=$((n+1))
   t0=$SECONDS
+  _ts0=$(date +%Y-%m-%dT%H:%M:%S)
   # ★★★2026-09-07 血證:只靠【內層工具的 timeout】不夠 ——
   #   第 34 支(game_sim_test.gd)卡了【59 分鐘】,而當時★沒有任何 Godot 在跑、
   #   ★★wrapper 的 powershell 也不在 ⇒ 子進程早就沒了,
@@ -71,11 +96,36 @@ while IFS= read -r bed; do
   o="$(timeout -k 5 "$((PER_BED_TIMEOUT + 30))" env GODOT_TIMEOUT="$PER_BED_TIMEOUT" powershell -NoProfile -File ./tools/godot.ps1 --headless --path "$REPO" --script "$bed" 2>&1)"
   outer_rc=$?
   dt=$((SECONDS-t0))
+  # ★★★systems 裁定 v2：逐床標註競爭。判準不是「開始時有沒有人在跑」（瞬時取樣）,
+  #   而是「這支床跑的【整段期間】run-log 有沒有出現 COLLISION 列」――
+  #   ★單調紀錄,涵蓋【開始之後才來】的情形。
+  _ts1=$(date +%Y-%m-%dT%H:%M:%S)
+  _coll=$(awk -F"	" -v a="$_ts0" -v b="$_ts1" '$2 ~ /COLLISION/ && $1>=a && $1<=b' .claude/hooks/.godot-runs.log 2>/dev/null | wc -l | tr -d "[:space:]")
+  case "$_coll" in ""|*[!0-9]*) _coll=0;; esac
   if [ "$outer_rc" = "124" ] || [ "$outer_rc" = "137" ]; then v="hang"
   elif printf '%s' "$o" | grep -qa 'GODOT TIMEOUT'; then v="timeout"
   else v="$(printf '%s' "$o" | classify)"; fi
   note=""
   [ "$v" = "red" ] && note="$(printf '%s' "$o" | grep -aE -m1 'Assertion failed|\[FAIL\]|(^|[[:space:]])FAIL[[:space:]]|HAS FAILURE|FAILS=[1-9]' | tr '\t' ' ' | cut -c1-90)"
+  [ "$_coll" -gt 0 ] && note="CONTENDED(collisions=$_coll) $note"
+  # ★★★timeout/hang 的床：把【它卡住前印了什麼】存下來。
+  #   ★舊版把 `$o` 整份丟掉 ⇒ 每一次 timeout 都只剩一個數字（604），
+  #     而那個數字對【為什麼卡】零資訊。今天我花了四輪拼 log 拼不出來，
+  #     而【卡在哪一行】本來就在手上，只是被丟了。
+  #   ★★同時存當下的外部狀態（進程清單 + run-log 尾）：
+  #     失效是【間歇且有狀態】的，事後補不回來。
+  case "$v" in timeout|hang)
+    _dg="docs/measurements/.sweep-timeout-$(basename "$bed" .gd)-$(date +%H%M%S).txt"
+    { echo "=== bed: $bed  verdict=$v  wall=${dt}s  collisions=$_coll ==="
+      echo "=== 進程（timeout 當下）==="
+      powershell -NoProfile -Command "Get-Process godot*,powershell -ErrorAction SilentlyContinue | Select-Object Name,Id,StartTime | Format-Table -AutoSize" 2>/dev/null
+      echo "=== run-log 尾 15 ==="; tail -15 .claude/hooks/.godot-runs.log
+      echo "=== 床的輸出（★卡住前的最後 60 行）==="
+      printf "%s" "$o" | tail -60
+    } > "$_dg" 2>&1
+    echo "[SWEEP] ★timeout 診斷已存：$_dg"
+    note="diag=$_dg $note" ;;
+  esac
   printf '%s\t%s\t%s\t%s\n' "$bed" "$v" "$dt" "$note" >> "$OUT"
   echo "[SWEEP] $n $(basename "$bed") ⇒ $v (${dt}s)"
 done < "$LIST"
