@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant
 # @observe-pure
 # ★★★床 arm 順序閘（bed-arm-helper §3）——防【增量】：新床不得再自己拼 arm 順序。
 #
