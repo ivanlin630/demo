@@ -32,6 +32,9 @@ func _run() -> void:
 	var depth_market_tiles: Array = []    # 只算market_orders非空的tile
 	# ③價差樣本：{res: [spread值...]}
 	var spread_by_res: Dictionary = {}
+	# ②零價佔比：{res: 總筆數}/{res: price==0筆數}(2026-09-08加)
+	var zero_price_total_by_res: Dictionary = {}
+	var zero_price_zero_by_res: Dictionary = {}
 	# ④農隊收入
 	var farm_income_total: float = 0.0
 	var farm_income_count: int = 0
@@ -73,6 +76,15 @@ func _run() -> void:
 					for o in tile.market_orders:
 						var od: Dictionary = o
 						var res: String = String(od.get("res", ""))
+						# ★2026-09-08加②零價佔比by res：price==0.0明確視為「價就是零」(order_system.gd:426註解)，
+						#   排除-1.0(未帶價)。零新tap，讀既有market_orders.price欄位。
+						var declared_price: float = float(od.get("price", -1.0))
+						if declared_price >= 0.0:
+							if not zero_price_total_by_res.has(res): zero_price_total_by_res[res] = 0
+							if not zero_price_zero_by_res.has(res): zero_price_zero_by_res[res] = 0
+							zero_price_total_by_res[res] = int(zero_price_total_by_res[res]) + 1
+							if is_equal_approx(declared_price, 0.0):
+								zero_price_zero_by_res[res] = int(zero_price_zero_by_res[res]) + 1
 						var otid: int = int(od.get("origin_team", -1))
 						if not state.teams.has(otid): continue
 						var ot: TeamData = state.teams[otid]
@@ -117,7 +129,7 @@ func _run() -> void:
 		int(Probe.counts.get("trade.meet", 0)), int(Probe.counts.get("trade.deal", 0)),
 		int(Probe.counts.get("trade.deal_market", 0)), int(Probe.counts.get("trade.meet_nodeal", 0))])
 
-	print("\n③價差(buy估值-sell估值，正=買方願付比賣方要價高)：")
+	print("\n③價差(buy估值-sell估值，正=買方願付比賣方要價高)：★含分位數+≤0佔比(2026-09-08補)")
 	if spread_by_res.is_empty():
 		print("  ★無配對樣本(可能板上從未同時有同res的buy+sell)，不可判")
 	else:
@@ -125,16 +137,33 @@ func _run() -> void:
 			var arr: Array = spread_by_res[res2]
 			arr.sort()
 			var sum3: float = 0.0
-			for v3 in arr: sum3 += v3
-			print("  %s: 樣本數=%d 平均=%.3f min=%.3f p50=%.3f max=%.3f" % [
-				res2, arr.size(), sum3 / arr.size(), arr[0], arr[int(arr.size() / 2)], arr[-1]])
+			var le0: int = 0
+			for v3 in arr:
+				sum3 += v3
+				if v3 <= 0.0: le0 += 1
+			var n_arr: int = arr.size()
+			print("  %s: 樣本數=%d 平均=%.3f ≤0佔比=%.1f%%(%d/%d) p10=%.3f p25=%.3f p50=%.3f p75=%.3f p90=%.3f min=%.3f max=%.3f" % [
+				res2, n_arr, sum3 / n_arr, float(le0) / float(n_arr) * 100.0, le0, n_arr,
+				arr[int(n_arr * 0.10)], arr[int(n_arr * 0.25)], arr[int(n_arr * 0.50)],
+				arr[int(n_arr * 0.75)], arr[mini(int(n_arr * 0.90), n_arr - 1)], arr[0], arr[-1]])
+
+	print("\n②零價佔比by res(2026-09-08補，price==0.0視為「價就是零」，排除-1.0未帶價，order_system.gd:426)：")
+	if zero_price_total_by_res.is_empty():
+		print("  ★無樣本(order從未帶price欄位)，不可判")
+	else:
+		for res4 in zero_price_total_by_res.keys():
+			var tot: int = int(zero_price_total_by_res[res4])
+			var zc: int = int(zero_price_zero_by_res.get(res4, 0))
+			print("  %s: 零價佔比=%.1f%%(%d/%d)" % [res4, float(zc) / float(tot) * 100.0, zc, tot])
 
 	print("\n④農隊收入(⑨世界market_sell_coin_in，PRODUCE隊)：")
 	print("  總額=%.2f 筆數=%d 涉及隊數=%d" % [farm_income_total, farm_income_count, farm_income_by_team.size()])
 	if farm_income_count == 0:
 		print("  ★★零筆——需分辨:PRODUCE隊母體是否存在（若為0則不可判非結論0）")
 
-	print("\n★arb_kill_zero_gain：")
+	print("\n★trade.arb_kill_zero_gain（舊名，implementer另案改名為trade.buyer_reject_priced_too_high；")
+	print("  ★★★真實語意：某個【路過的潛在買方】認為【賣單自標price】高於自己對該資源的local_value估值")
+	print("  ★★★=拒買次數，不是「board上buy訂單vs sell訂單的配對價差≤0」——這是與③格不同維度的東西，見systems裁決）：")
 	print("  總次數=%d" % int(Probe.counts.get("trade.arb_kill_zero_gain", 0)))
 	var by_res_kill: Dictionary = {}
 	for k in Probe.counts.keys():
@@ -143,5 +172,6 @@ func _run() -> void:
 	for r3 in by_res_kill.keys():
 		print("    %s: %d" % [r3, by_res_kill[r3]])
 
-	print("\n★⑨世界誠實限：貨幣量未過校驗（±14×待判）")
+	print("\n★否證③：「三症一根」的價差倒掛→殺單那一節目前沒有橋(見systems裁決，殺單是不同維度的拒買次數)")
+	print("★⑨世界誠實限：貨幣量未過校驗（±14×待判）")
 	print("=== economic_window_4cell_bed DONE ===")
