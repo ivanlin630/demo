@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: gatherpure 判準裝好了，而它自己先照出一個母體洞（4/7 欄不可判）——要你裁窗口 vs fixture
 ---
 
