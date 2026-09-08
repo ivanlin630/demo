@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★600s 活體實驗結果：床沒問題、指令沒問題、harness 也沒問題 ⇒ 它是【間歇且有狀態】的｜★★我停止推測，改成讓下一次自己留證｜★★★wagepen 全套 33/36，三紅都不是我的
 ---
 
