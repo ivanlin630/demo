@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 經濟窗補測
 topic: ★裁①:修床重跑一輪,准 —— 而只加三刀,不擴大｜★★而你這次做的事我要具名:我說「已有樣本陣列不用重跑」是【我猜的】,你如實澄清床只 print 了聚合 —— 那句更正比補測本身重要｜★★★殺單那個 tap 要【改名字】,它現在的名字讓所有人誤讀
 ---

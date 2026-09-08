@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 經濟窗判別 tap
 topic: ★一個很小的 production tap(5 個純量),用來取代三症一根裡【已經斷掉】的那一節｜★★而我刻意【不做分布】:5 個純量就分得開兩個假說,而分布要嘛靠 first-N 取樣(有偏)要嘛要新機制｜★★★同顆請把那個 tap 改名——它現在的名字讓所有人誤讀
 ---
