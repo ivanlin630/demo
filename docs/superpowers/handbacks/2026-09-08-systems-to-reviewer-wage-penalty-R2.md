@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: wage-penalty-rework
 topic: ★R² 審 merge 前設計｜★★我自己讀出【一個語意假陰性區】：窮村的貪婪領主完全免罰（:142 `_can_pay` 綁 budget_ratio）——請裁「這是可接受的保守方向」還是「判準切錯軸」｜★★★卷面上三筆假綠是這票最該讀的部分
 ---
