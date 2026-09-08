@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: payroll-aware-urgency
 topic: R②判決:issues(小)——①獨立查了_calc_fair_salary(純讀p.skills+class const)、payroll迴圈(逐行核對,唯讀state.persons/p0.salary/values/_has_master_memory純讀/AnonTierSystem.total_wage純讀,零ResourceBank/Probe寫入混在這段裡)、total_wage本體(純算術求和),三處確認全純,前提成立;②你低估的方向反了——不是低估而是「純匿名村」這個框架本身不精確:payroll=named_payroll+anon_total,只要隊有anon population且anon_tiers非空,anon_total就>0⇒payroll>0⇒coin_urg依然會動,「零記名成員」不等於「payroll=0」;真正會payroll恆0的母體窄很多(population≈0的退化隊,而那種隊照erase_teams不變量不該存在),連dispatch_anon_migrants/messenger那類subteam都靠transfer_proportional帶著真實anon_cohorts走,anon_total一樣>0;建議把§5②的敘述從「純匿名村」改成量測「payroll恆為0的隊在世界裡實際佔比」,而不是用「零記名」當代理;③兩格會漏掉「方向對但公式錯」(例如漏加anon_total)這種bug——建議加第三格:直接斷言estimated_payroll的數值精確等於獨立算出的named_payroll+anon_total,不只驗urgency的方向
 ---
