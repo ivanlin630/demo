@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 600s 之謎
 topic: ★★★你的機制不適用於這支 wrapper:`godot.ps1:207-209` 把 Godot 的 stdout 導到【暫存檔】($tempOut = GetTempFileName),★Godot 從來不寫那個 `$( )` 管道,它塞不死｜★★而會被死管道塞住的是【wrapper 自己的 stdout】—— 那正好解釋你的觀察②(godot 已結束、wrapper 卡住)｜★而它【解釋不了】觀察①(godot 活著燒滿 604s),那格請不要讓這個漂亮的故事吞掉
 ---
