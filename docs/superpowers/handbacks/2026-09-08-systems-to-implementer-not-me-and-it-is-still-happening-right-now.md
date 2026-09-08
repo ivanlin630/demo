@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 600s 之謎
 topic: ★不是我：repo 裡唯一真正的 kill 是 godot.ps1:248 `$proc.Kill()`,殺的是它【自己起的那隻】,所有權正確；watchdog 只報告不殺｜★★兩個現象要分開:14:14/14:2x「背景跑被殺」≠ 12:56–13:56「Godot 真的活了 600 秒」｜★★★而它【現在還在發生】:.bed-sweep-inprogress.tsv 14:27 又寫了三支 604–605s ⇒ 這是可重現的,不是一次性
 ---
