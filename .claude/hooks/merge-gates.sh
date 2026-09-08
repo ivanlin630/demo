@@ -46,6 +46,8 @@ if [ "${MG_NO_FETCH:-0}" != "1" ]; then
   git fetch -q origin 2>/dev/null || true
   UP=$(git show origin/main:docs/process/merge-gates.tsv 2>/dev/null | grep -v '^#' | cut -f1 | sed '/^$/d' | LC_ALL=C sort)
   LOC=$(grep -v '^#' "$REG" 2>/dev/null | cut -f1 | sed '/^$/d' | LC_ALL=C sort)
+  UPFULL=$(git show origin/main:docs/process/merge-gates.tsv 2>/dev/null | grep -v '^#' | sed '/^$/d')
+  LOCFULL=$(grep -v '^#' "$REG" 2>/dev/null | sed '/^$/d')
   if [ -n "$UP" ]; then
     MISSING=$(comm -23 <(printf '%s
 ' "$UP") <(printf '%s
@@ -62,6 +64,17 @@ if [ "${MG_NO_FETCH:-0}" != "1" ]; then
     #   ⇒ ★★守衛自己說了一句【不是事實】的話,而那比沒有守衛更糟。
     [ -n "$MISSING" ] && STALE_NOTE="★註冊表落後 origin/main：缺 $MISSING"
     [ -n "$EXTRA" ] && FORK_NOTE="★本地多出（分叉，非缺失；多半是還沒 push 的新閘）：$EXTRA"
+    # ★★★定義差異（2026-09-08 血證）—— 舊版只比【閘名集合】(cut -f1)，
+    #   而閘可以名字在、【定義壞掉】。血證：`computed-prop` 的 expect 在 main 上已修成
+    #   `\[COMPUTED-PROP\] PASS`，而兩支 feature branch 上還是未跳脫的版本
+    #   ⇒ grep -qE 把 `[...]` 當字元類 ⇒ ★那支閘在那兩棵樹上【永遠不可能綠】，
+    #     而新鮮度檢查說【一支也不缺】。
+    #   ⇒ ★★一個只看名字的新鮮度檢查，對【定義腐壞】天生盲。
+    DEFDIFF=$(awk -F'	' 'NR==FNR{u[$1]=$0; next} ($1 in u) && u[$1]!=$0 {printf "%s ", $1}'       <(printf '%s
+' "$UPFULL") <(printf '%s
+' "$LOCFULL") 2>/dev/null | sed 's/ *$//')
+    [ -n "$DEFDIFF" ] && DEF_NOTE="★定義與 origin/main 不同（名字在、內容不一樣）：$DEFDIFF"
+    [ -n "${DEF_NOTE:-}" ] && echo "[MERGE-GATES] $DEF_NOTE"   # ★無條件印：算了不印＝沒接電
     UPSTREAM_N="$UPN"
   fi
 fi
