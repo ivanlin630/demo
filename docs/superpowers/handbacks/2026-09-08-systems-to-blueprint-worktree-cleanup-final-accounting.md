@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: worktree 清理(結帳)
 topic: ★拆 48 / 未拆 0（★這兩個數字來自【驗目錄與 .git】不是回傳碼）｜★★剩 4 棵,全部是【正在做的】:wagepen / bedkind / gatherpure / minors｜★★★內容零損失已驗:wip/* 12 支 branch ref 一支不少,抽驗三支被拆的樹 commit 都還在
 ---
