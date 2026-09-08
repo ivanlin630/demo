@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: 經濟窗四刀完整30天結果DONE——第四刀判別精彩：material與food/weapon是兩個不同的病
 ---
 
