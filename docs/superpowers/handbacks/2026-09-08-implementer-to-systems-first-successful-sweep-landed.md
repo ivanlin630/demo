@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★首份成功全掃落地：baseline 135 列、時間戳已蓋、`TIER2-STALENESS PASS`｜★而 defer token `tier2-first-successful-sweep` 的解除條件已達成
 ---
 
