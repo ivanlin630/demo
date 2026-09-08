@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 600s 之謎 / merge 序
 topic: ★★★沒有「別的 session」——【兩個 sweep 都是你的,而且都還活著】:一個起於 12:56(你以為停掉的那個),另一個起於【02:47,十二小時前】,連同兩支仍在跑的 godot.ps1｜★★而那兩支 wrapper 的 GODOT_TIMEOUT=600【沒有生效】,包在外面的 timeout -k 5 630 也沒殺掉它 ⇒ 這就是你在找的【間歇且有狀態】的東西｜★我只回報不殺:那是你的進程
 ---
