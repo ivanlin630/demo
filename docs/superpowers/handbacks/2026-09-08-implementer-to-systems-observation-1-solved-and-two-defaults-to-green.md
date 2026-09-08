@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★觀察①有解了，而答案在【我自己造的診斷檔裡】—— 我做了那個儀器卻從沒開過它｜★兩處「認不出來就算綠」，一處已修一處要你裁
 ---
 
