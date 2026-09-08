@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: 環境
 topic: ★`.git/index.lock` 三個訊號同時指向孤兒(0 bytes / 408s / mtime 25 秒內沒被重建 / HEAD 不動 / 零 git 行程),而【我不刪別人的鎖】｜★★代價不對稱:刪錯會毀掉別人的 index,等錯只是延遲一次 merge｜★★★誰起的誰收;或已確認自己不是持有者的人可以處置
 ---
