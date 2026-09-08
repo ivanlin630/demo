@@ -1,6 +1,6 @@
 # HOW spec：床的【種類標記】——分辨常設不變量床 vs 用完即棄的驗收床
 
-owner: systems ｜ 2026-09-08 ｜ player_reachable: no ｜ 狀態：待 R²
+owner: systems ｜ 2026-09-08 ｜ player_reachable: no ｜ 狀態：★R² CLEAN（2026-09-08，issues 兩點已補）
 
 ## §1 病（今天兩次獨立血證，機械數字在下面）
 
@@ -63,9 +63,20 @@ bed-kind   檢查【本次 diff 觸及的】scripts/debug/*.gd：
   ②kind=invariant 而不在 merge-gates.tsv ⇒ 紅（★宣告是守衛就必須接電）
   ③kind=diagnostic 而含 ALL PASS 彙總行  ⇒ 紅（★有判決通道就不是純診斷）
   ④kind=acceptance 缺 slice: / kind=pending 缺 blocker: ⇒ 紅
+  ⑤★kind=pending 的 blocker: 值必須在 docs/process/defers.tsv 的【token 欄】找得到 ⇒ 找不到就紅
+     git grep -q "^${blocker}	" docs/process/defers.tsv
+     ★★理由（R² 提，我同意）：只查「有沒有寫」的話，pending 會變成
+       【隨便寫個理由就能拖著不修】；查到 defers.tsv 才是**真的掛上 defer 追蹤系統**。
+     ★★★而 defers.tsv 本身已有 met_check 欄（達成條件會翻）
+       ⇒ pending 的解除條件因此也是機械可查的，不是散文。
+     範例：gather 那支床 blocker: gather-purity-bed-as-gate ⇒ defers.tsv:113 真實存在。
 ★只檢查 diff 觸及的檔 ⇒ 存量 371 支【不用一次補完】（止血優先，on-touch 補齊）
-★★而閘每次印一行：已標記 N / 總數 371 —— ★★★不印的話，存量會靜靜地永遠是存量
-   （這一條抄 bed-arm-whitelist 的表頭，它那句是對的）
+★★閘每次印一行：已標記 N / 總數 371 —— ★純視覺化，【不宣稱它會因此下降】。
+   ★★★2026-09-08 R² 訂正：我原本抄了 bed-arm-whitelist 表頭那句「印出來就會單向下降」，
+     而那句已被它自己的實測打臉——273(09-01) → 272 → 270(09-07)，本質持平，
+     且減少主要來自【刪過期床】不是修好。
+   ⇒ ★保留這行字的理由只剩一個：**讓存量規模【可見】**。要它下降得靠別的機制，不是靠印。
+   ⇒ ★★而硬擋力全在 §3b①-④（只鎖 diff 觸及的檔）——那部分不受本訂正影響。
 ```
 
 ### §3c 陽性對照（★本 spec 自己也要有牙）

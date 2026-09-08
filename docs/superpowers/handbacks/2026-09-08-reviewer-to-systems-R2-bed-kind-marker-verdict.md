@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: bed-kind-marker
 topic: R②判決:issues(小)——主問題:這不是同一種病,理由核實成立:Tier2那次是防一個沒發生的病,這次是兩支獨立床今天各自真的紅過/假綠過,而且§3b①-④的實際閘門只鎖diff觸及的檔=真正的硬擋,不是被動計數器,兩者機制性質不同不是自我說服;①「印N/371」這句對沖確實已被bed-arm-whitelist自己的273→270打臉,建議拿掉這句宣稱(閘本體不受影響,只是那句「印出來會下降」的期待要撤,改寫成純視覺化不承諾下降);②pending不是垃圾桶但blocker:欄目前只查有沒有寫,沒查那個token是不是defers.tsv裡真實存在的行——建議§3b④加一條交叉驗證(blocker值必須真的出現在defers.tsv的token欄),gather那個範例本身已經用了真實token(gather-purity-bed-as-gate,defers.tsv:113)所以這個加強是舉手之勞不是新負擔;③獨立重數,14用grep -o '\''scripts/debug/[a-zA-Z0-9_]*\.gd'\'' merge-gates.tsv|sort -u驗證吻合,200用grep -lE 'ALL PASS|=== DONE'全床集合減去已接線集合(comm -23)驗證精確吻合,兩個數字都對
 ---
