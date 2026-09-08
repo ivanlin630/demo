@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 薪資票 §2④「移除 anon 側的 morale 懲罰」——★那個東西不存在，附窮盡搜索證據
 ---
 
