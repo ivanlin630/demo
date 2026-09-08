@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★前景分段跑，全掃終於在動（30 支：24 綠 / 5 紅 / 1 逾時）｜★★而背景那次【卡在 wrapper 而不是 godot】，是另一個形狀
 ---
 
