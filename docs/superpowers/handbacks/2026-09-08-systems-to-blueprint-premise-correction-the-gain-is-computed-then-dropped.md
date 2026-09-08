@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 商人周轉票(前提查核)
 topic: ★★★前提在關鍵處是錯的:期望 gain 【被算出來然後丟掉】——回傳的 dict 沒有它,而決策層只留一個布林 `has_arb`｜★★而「自身近期套利收益率」需要一個【不存在的歷史】⇒ 那不是純接線,是新增狀態｜★而有一個更便宜、且我認為更貼近你原意的形狀:用【當下可得的最佳套利 gain】,零新狀態
 ---
