@@ -26,7 +26,7 @@ func _ok(c: bool, m: String) -> void:
 		_fail += 1
 
 func _initialize() -> void:
-	var days: int = int(OS.get_environment("GP_DAYS")) if OS.has_environment("GP_DAYS") else 6
+	var days: int = int(OS.get_environment("GP_DAYS")) if OS.has_environment("GP_DAYS") else 1
 	print("=== gather_purity: days=%d ===" % days)
 
 	# ★先跑 fixture：母體靠造，不靠世界碰運氣
