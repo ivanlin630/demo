@@ -31,13 +31,19 @@ func _run() -> void:
 	Probe.arm()
 	var state: WorldState = MeasureBedHelper.arm_and_setup(cfg, true)
 
-	# specimen：全隊取樣(k校驗要"18隊全開"，不抽樣)
+	# specimen：k校驗story稽核已收口(QA verdict已產，2026-09-07)，90天長窗預設關閉——
+	# ★舊坑：90天全隊specimen在tick=20000就因檔案暴增(30天=114MB)被外部殺，人口卷本身跑不完。
+	# 要重開k校驗時設BED_SPECIMEN=1。
+	var specimen_on: bool = OS.has_environment("BED_SPECIMEN") and OS.get_environment("BED_SPECIMEN") == "1"
 	var all_ids: Array[int] = []
-	for tid in state.teams.keys(): all_ids.append(int(tid))
-	state.specimen_team_ids = all_ids
-	SpecimenTracer.reset()
-	SpecimenTracer.enabled = true
-	print("[specimen] 全隊取樣team_ids=%s" % str(all_ids))
+	if specimen_on:
+		for tid in state.teams.keys(): all_ids.append(int(tid))
+		state.specimen_team_ids = all_ids
+		SpecimenTracer.reset()
+		SpecimenTracer.enabled = true
+		print("[specimen] 全隊取樣team_ids=%s" % str(all_ids))
+	else:
+		print("[specimen] 本輪關閉(BED_SPECIMEN!=1)——k校驗story稽核已收口，90天窗只跑人口卷聚合")
 
 	var runner := SimRunner.new()
 	var ticks: int = days * WorldState.TICKS_PER_DAY
@@ -72,9 +78,10 @@ func _run() -> void:
 				tick, state.teams.size(), int(Probe.counts.get("breed.born", 0)),
 				Probe.amounts.get("erase.minors_lost", 0.0), Probe.amounts.get("merge.minors_moved_n", 0.0)])
 
-	SpecimenTracer.flush()
 	var specimen_path: String = "docs/measurements/2026-09-07-population-turnover.specimen.jsonl"
-	SpecimenTracer.write_jsonl(specimen_path)
+	if specimen_on:
+		SpecimenTracer.flush()
+		SpecimenTracer.write_jsonl(specimen_path)
 
 	print("\n=== 人口儀器卷 結果(窗=%.2f天/%d ticks) ===" % [float(ticks) / float(WorldState.TICKS_PER_DAY), ticks])
 	print("①出生 breed.born(全域)=%d" % int(Probe.counts.get("breed.born", 0)))
@@ -139,8 +146,11 @@ func _run() -> void:
 	else:
 		print("  ★不可判——本窗無隊產生正向breed_progress訊號")
 
-	print("\n=== k校驗story稽核 specimen落地：%s ===" % specimen_path)
-	print("全隊取樣%d隊，含①GATE-B同格嫌疑②六種未被交易資源(herb/gem/ore_gold/ore_iron/ore_steel/weapon_melee_low)" % all_ids.size())
-	print("  的candidate有無出現——需人工/QA逐條讀jsonl裡的candidates欄位，本床只負責produce，不代為判讀因果")
+	if specimen_on:
+		print("\n=== k校驗story稽核 specimen落地：%s ===" % specimen_path)
+		print("全隊取樣%d隊，含①GATE-B同格嫌疑②六種未被交易資源(herb/gem/ore_gold/ore_iron/ore_steel/weapon_melee_low)" % all_ids.size())
+		print("  的candidate有無出現——需人工/QA逐條讀jsonl裡的candidates欄位，本床只負責produce，不代為判讀因果")
+	else:
+		print("\nk校驗story稽核：本輪未跑(已收口，見QA verdict)")
 
 	print("=== population_and_turnover_specimen_bed DONE ===")
