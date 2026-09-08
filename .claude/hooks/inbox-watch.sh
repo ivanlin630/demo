@@ -140,9 +140,10 @@ while IFS= read -r _p; do [ -n "$_p" ] && SEEN_PATH["$_p"]=1; done < <(
       #   first role to mark it consumed silences it for everyone else. Rule: fan out one per role.
       if (low ~ ("^to:[ \t]*" role "([ \t]|$)")) to[FILENAME]=1
       if (low ~ "^to:[ 	]*all([ 	(,]|$)")      to[FILENAME]=1
+      if (low ~ ("^from:[ 	]*" role "([ 	]|$)")) mine[FILENAME]=1   # ★寄件者是我 ⇒ 不算收件（to: all 會彈回寄件者）
       if (low ~ "^status:[ \t]*open([ \t]|$)")   st[FILENAME]=1
     }
-    END { for (f in to) if (!(f in st)) print f }
+    END { for (f in to) if (!(f in st) && !(f in mine)) print f }
   ' "${_f[@]}"
 )
 
@@ -189,11 +190,13 @@ while true; do
           low=tolower($0)
           if (low ~ ("^to:[ \t]*" role "([ \t]|$)"))  to[FILENAME]=1
           if (low ~ "^to:[ 	]*all([ 	(,]|$)")       to[FILENAME]=1
+          if (low ~ ("^from:[ 	]*" role "([ 	]|$)")) mine[FILENAME]=1   # ★同上：寄件者是我不算收件
           if (low ~ "^status:[ \t]*open([ \t]|$)")     st[FILENAME]=1
           if ($0 ~ /^[Tt]opic:/) { t=$0; sub(/^[Tt]opic:[ \t]*/,"",t); tp[FILENAME]=t }
         }
         END {
           for (f in to) {
+            if (f in mine) continue   # ★寄件者是我 ⇒ 不吐回自己的廣播
             # ★寄件端誤寫 consumed 的洞：啟動後才動過的信也吐一次（SEEN 保證不重吐）
             if ((f in st) || (f in REC))
               printf "%s\t%s\t%s\n", ((f in st) ? "1" : "0"), f, (tp[f] ? tp[f] : "(無 topic)")
