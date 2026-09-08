@@ -35,10 +35,11 @@ func _run() -> void:
 	# ②零價佔比：{res: 總筆數}/{res: price==0筆數}(2026-09-08加)
 	var zero_price_total_by_res: Dictionary = {}
 	var zero_price_zero_by_res: Dictionary = {}
-	# ④農隊收入
-	var farm_income_total: float = 0.0
-	var farm_income_count: int = 0
-	var farm_income_by_team: Dictionary = {}
+	# ④農隊收入(2026-09-08修正:去掉delta>0.0過濾——systems查出零價entry被濾掉,見handback)
+	var farm_income_total: float = 0.0     # Σdelta，含delta==0(無條件累加，0不影響總額)
+	var farm_entry_count: int = 0          # 所有市場賣糧entry數，含delta==0
+	var farm_zero_price_count: int = 0     # 其中delta==0的筆數(=賣了但零價)
+	var farm_income_by_team: Dictionary = {}  # 只收非零delta，方便看真收入落在哪隊
 
 	var actual_days_completed: int = 0
 
@@ -54,9 +55,11 @@ func _run() -> void:
 					var ent = e.get("entity")
 					if ent is TeamData and ent.tags.has(TeamData.TAG_PRODUCE):
 						var delta: float = float(e.get("delta", 0.0))
-						if delta > 0.0:
-							farm_income_total += delta
-							farm_income_count += 1
+						farm_entry_count += 1
+						farm_income_total += delta
+						if is_equal_approx(delta, 0.0):
+							farm_zero_price_count += 1
+						else:
 							var tid_e: int = ent.team_id
 							farm_income_by_team[tid_e] = float(farm_income_by_team.get(tid_e, 0.0)) + delta
 			WorldState.clear_driver_ledger()
@@ -103,8 +106,8 @@ func _run() -> void:
 			if market_n > 0:
 				depth_market_tiles.append(float(market_d) / float(market_n))
 		if tick % 10000 == 0 and tick > 0:
-			print("[CHECKPOINT] tick=%d day=%d teams=%d farm_income累計=%.1f(%d筆)" % [
-				tick, actual_days_completed, state.teams.size(), farm_income_total, farm_income_count])
+			print("[CHECKPOINT] tick=%d day=%d teams=%d farm_income累計=%.1f(entry=%d,零價=%d)" % [
+				tick, actual_days_completed, state.teams.size(), farm_income_total, farm_entry_count, farm_zero_price_count])
 
 	print("\n=== 結果 ===")
 	print("★卷面首行：HEAD需另外git log查｜實際跑到day=%d / 目標%d天(%.1f%%)" % [
@@ -156,10 +159,24 @@ func _run() -> void:
 			var zc: int = int(zero_price_zero_by_res.get(res4, 0))
 			print("  %s: 零價佔比=%.1f%%(%d/%d)" % [res4, float(zc) / float(tot) * 100.0, zc, tot])
 
-	print("\n④農隊收入(⑨世界market_sell_coin_in，PRODUCE隊)：")
-	print("  總額=%.2f 筆數=%d 涉及隊數=%d" % [farm_income_total, farm_income_count, farm_income_by_team.size()])
-	if farm_income_count == 0:
-		print("  ★★零筆——需分辨:PRODUCE隊母體是否存在（若為0則不可判非結論0）")
+	var produce_team_count: int = 0
+	for tid5 in state.teams:
+		var t5 = state.teams[tid5]
+		if t5 is TeamData and t5.tags.has(TeamData.TAG_PRODUCE):
+			produce_team_count += 1
+
+	print("\n④農隊收入(⑨世界market_sell_coin_in，PRODUCE隊，2026-09-08修正:不再濾delta>0.0)：")
+	print("  entry筆數(含零價)=%d｜其中零價筆數=%d｜非零總額=%.2f｜非零涉及隊數=%d" % [farm_entry_count, farm_zero_price_count, farm_income_total, farm_income_by_team.size()])
+	print("  PRODUCE隊母體(末tick快照)=%d" % produce_team_count)
+	if farm_entry_count == 0:
+		if produce_team_count == 0:
+			print("  ★(a)不可判——PRODUCE隊母體末tick=0")
+		else:
+			print("  ★(b)真0——有PRODUCE隊(%d)但整輪零賣出entry" % produce_team_count)
+	elif is_equal_approx(farm_income_total, 0.0):
+		print("  ★★★(c)賣了但零價——entry筆數=%d全部delta==0⇒零價機制成立(⑩後果格答案成立：糧食零價讓農隊賣糧收入歸零，機制是零價不是沒賣)" % farm_entry_count)
+	else:
+		print("  ★正常有非零收入(非零entry=%d)" % (farm_entry_count - farm_zero_price_count))
 
 	print("\n★trade.buyer_reject_priced_too_high（舊名，implementer另案改名為trade.buyer_reject_priced_too_high；")
 	print("  ★★★真實語意：某個【路過的潛在買方】認為【賣單自標price】高於自己對該資源的local_value估值")
