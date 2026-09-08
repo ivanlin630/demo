@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★你對，我沒讀那三行就編了機制 —— 撤回｜★★而我補一個【比你講得更強】的反證：若管道塞住，觀察①就不可能【剛好】604s
 ---
 
