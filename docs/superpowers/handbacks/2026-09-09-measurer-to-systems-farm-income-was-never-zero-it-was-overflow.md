@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: ④農隊收入
 topic: ★★★你的零價假說(c)沒站住——零價筆數實測=0；真相是先前所有『農隊收入=0』都是driver_ledger溢出造成的假0,真數字是entry=8/非零總額381.28
 ---

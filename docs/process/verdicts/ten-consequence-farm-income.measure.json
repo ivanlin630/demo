@@ -1,0 +1,54 @@
+{
+  "token": "ten-consequence-farm-income",
+  "slice": "⑩ 後果格：糧食零價是否讓農隊賣糧收入歸零",
+  "date": "2026-09-09",
+  "head": "0cd52d0d",
+  "world": "warring_states / seed=1337 / BED_DAYS=30（跑滿 30/30）",
+  "bed": "scripts/debug/farm_income_only_bed.gd（drain=50）",
+  "artifact": "docs/measurements/2026-09-08-farm-income-only-fix-warring_states-30d.txt",
+
+  "answer": {
+    "verdict": "★收入【不是】0 —— 而先前所有『農隊收入 = 0』都是假的",
+    "numbers": {
+      "entry筆數(含零價)": 8,
+      "其中零價筆數": 0,
+      "非零總額": 381.28,
+      "非零涉及隊數": 3,
+      "分佈": "team19=192.00 / team68=128.14 / team111=61.13",
+      "PRODUCE隊母體(末tick)": 11
+    },
+    "讀法": "11 隊母體裡只有 3 隊賣過糧，全程 8 筆 ⇒ ★【非 0，但極稀疏】"
+  },
+
+  "why_previous_zeros_were_false": {
+    "真根": "driver_ledger 溢出污染",
+    "機制": "主床 economic_window_4cell_bed 的 ④ 格 drain 間隔 = 2000，整趟出現 [OVERFLOW-WARN] 21+ 次 ⇒ entry 還沒被掃到就被下一批沖掉",
+    "★而不是": "不是『零價成交被 delta>0.0 濾掉』——systems 的 (c) 假說【已被否證】：零價筆數實測 = 0",
+    "★★舊的那份 0": "舊 farm_income_only_bed 雖 overflow_hits=0 但跑在【不同 HEAD】上（ledger_seen 1320151 vs 本輪 1353979）⇒ 不同世界不可比，一併作廢"
+  },
+
+  "positive_control": {
+    "ledger_seen": 1353979,
+    "意義": "★帳本確實在動 —— 排除『儀器沒接電』那一種 0",
+    "overflow_hits": 0,
+    "意義2": "★★0 是【直接量證】不是推論 —— 這一格正是先前每一輪都缺的那個對照"
+  },
+
+  "systems_hypothesis_falsified": {
+    "假說": "(c) 賣了但每筆價為 0 ⇒ delta=0 ⇒ 被床的 delta>0.0 過濾掉 ⇒ 看起來像 0",
+    "結果": "★否證。零價筆數 = 0，那個機制在這個世界裡沒有發生",
+    "★而機械鏈①②仍然成立": "寫入點唯一（interaction_system.gd:1169）、record_driver 無條件 append —— 錯的是推論③不是前提",
+    "★★留下的價值": "那個三岔（不可判 / 真0 / 零價）本身是對的問法，而它給的判別法把我自己的分支殺掉了"
+  },
+
+  "honest_limits": [
+    "★8 筆 / 30 天 / 11 隊母體 —— 樣本量小到【拼不出任何分布形狀】，只能報『非 0 但極稀疏』",
+    "★★『稀疏本身是不是問題』答不了 —— 需要 PRODUCE 隊正常賣糧的期望頻率（design intent），那是 WHAT 層，measurer 沒有基準可比",
+    "★★★本結論只對 warring_states / seed=1337 / 30 天成立；其他 config 未量"
+  ],
+
+  "supersedes": [
+    "2026-09-08-measurer-to-systems-economic-window-4cell-partial-DONE.md（④『0 筆，被溢出污染，作廢』）",
+    "2026-09-08-measurer-to-systems-economic-window-4cell-FINAL-DONE.md（④『仍 0 筆』★該句現訂正為 entry=8 / 非零總額 381.28）"
+  ]
+}
