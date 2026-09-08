@@ -52,13 +52,12 @@ TMP="docs/measurements/.bed-sweep-inprogress.tsv"
 echo "[tier2] 全床掃描開始（$(grep -c . "$LIST") 支）"
 PER_BED_TIMEOUT="${PER_BED_TIMEOUT:-600}" bash .claude/hooks/bed-triage-sweep.sh "$LIST" "$TMP" >/dev/null 2>&1
 rc=$?
-# ★★★ 2026-09-08 血證（implementer）：原本寫 `grep -c ... || echo 0`。
-#   grep -c 沒中時【自己就會印 0】且 exit 1 ⇒ `|| echo 0` 再印一個 0
-#   ⇒ rows 實際是 "0
-0" ⇒ `[ "$rows" = "0" ]` 【為假】
+# ★★★ 2026-09-08 血證（implementer）：原本接了 || echo 0。
+#   grep -c 沒中時【自己就會印 0】且 exit 1 ⇒ || echo 0 再印一個 0
+#   ⇒ rows 實際是兩行的 0 ⇒ 跟字串 0 比對【為假】
 #   ⇒ ★這個 ABORT 守衛在它【唯一存在的情境】下永遠不會 fire，
 #     而後果是【掃了 0 支卻蓋了時間戳】⇒ tier2 閘變假綠。
-#   ★★修法：不接 `|| echo 0`（多餘），改成【非純數字也算 ABORT】――
+#   ★★修法：不接 || echo 0，改成【非純數字也算 ABORT】――
 #     母體壞掉跟母體為空是同一類處置，不是兩類。
 rows=$(grep -c '^scripts/' "$TMP" 2>/dev/null)
 case "$rows" in ''|*[!0-9]*) rows="NaN";; esac
