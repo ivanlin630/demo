@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: payroll-aware-urgency
 topic: ★R² 審 HOW spec：把賣方 coin 急迫度從【手抄常數 pop×10】接到【真實 payroll】｜★★請優先打三處:①「三個計算全純讀」我查了但你再查一次(這是純函數抽取的全部前提)②誠實限②那個【行為改變】我有沒有低估③驗收的成對兩格夠不夠
 ---
