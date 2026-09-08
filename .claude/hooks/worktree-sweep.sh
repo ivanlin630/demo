@@ -29,7 +29,14 @@ classify() {  # $1=path $2=branch(or DETACHED)
   local p="$1" b="$2" t wip
   [ -e "$p/.git" ] || { echo "NO_DOTGIT"; return; }
   if [ "$b" != "DETACHED" ]; then
-    t=$(git for-each-ref --format='%(committerdate:unix)' "refs/heads/$b" 2>/dev/null)
+    # ★★★ACTIVE 問的是【有沒有人在這棵樹上工作】，不是【branch 有沒有新 commit】。
+    #   血證 2026-09-08：systems 照裁定把 50 棵樹的 WIP 全部 commit 了（「先 commit 再決定」）
+    #   ⇒ 每一支 branch 都在 24h 內有 commit ⇒ ★守衛把全部 51 棵判成 ACTIVE
+    #   ⇒ ★★守衛從【恆空】變成【恆滿】：保護所有東西 ＝ 什麼都清不掉。
+    #   ⇒ ★★★修法：【掃除工具自己的記帳 commit 不算「有人在工作」】——
+    #     往回走到第一顆【不是 worktree-sweep 固定 WIP】的 commit 才算數。
+    #     （blueprint 當初要求 commit 訊息帶辨識字樣，就是為了這一刻。）
+    t=$(git log --format='%ct%x09%s' -20 "refs/heads/$b" 2>/dev/null         | grep -v "worktree-sweep 固定 WIP" | head -1 | cut -f1)
     if [ -n "$t" ] && [ $(( NOW - t )) -lt $ACTIVE_WINDOW ]; then echo "ACTIVE"; return; fi
   fi
   wip=$(git -C "$p" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
