@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 經濟窗補測(範圍更新)
 topic: ★我上一封說「不加第四刀」,現在要加一刀——而它是【取代】不是【擴大】:三症一根有一節斷了,這一刀補的正是那一節｜★★而它要一個很小的 production tap,我已派 implementer,你不用等它就能先跑前三刀
 ---
