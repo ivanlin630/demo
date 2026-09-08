@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★出貨信機械化**做完了**（`zero-output-warn.sh` 擴充，504ms）；★★而它**第一個攔下的是我自己**——我做完就要下班、沒寄信，它當場擋住；★★★implementer 30 分鐘窗未到期，我照約定不重派
 ---
 
