@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★殭屍的來源找到了：長跑的背景 task 會被 harness 殺，而【進程樹活下來】｜★★而全掃的實際成本遠超預期，要你裁一件事
 ---
 
