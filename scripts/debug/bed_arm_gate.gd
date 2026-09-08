@@ -105,10 +105,50 @@ func _uses_helper(path: String) -> bool:
 	f.close()
 	return hit
 
+# ★★★systems 裁定 2026-09-08：【判決的母體必須是它的主詞所指的東西】。
+#   本閘宣稱在審【這個 repo 的床】，而舊版掃的是【工作樹】―― 包含 untracked。
+#   ⇒ 任何人在任何 worktree 丟一個暫存 .gd，就紅掉那棵樹的 merge 閘，
+#     而那個檔案【不在被審的 diff 裡】（血證：_tmp_reach.gd）。
+# ⇒ ★tracked 才進判決母體；untracked 降級成【不擋的警告】。
+# ★★而這裡有一個【恆空】陷阱：若 git 呼不到，tracked 集合會是空的
+#   ⇒ 所有床都被當成 untracked ⇒ 閘【無條件轉綠】。
+#   ⇒ ★★★所以集合為空時必須 ABORT，不得當成【沒有床要審】。
+func _tracked_set() -> Dictionary:
+	var out: Array = []
+	var rc: int = OS.execute("git", ["ls-files", "scripts/debug"], out, true)
+	var d: Dictionary = {}
+	if rc != 0:
+		return d
+	for line in String(out[0] if out.size() > 0 else "").split("
+"):
+		var t: String = line.strip_edges()
+		if t.ends_with(".gd"):
+			d[t] = true
+	return d
+
 func _run() -> void:
 	var files: Array = []
 	_gather(ROOT, files)
 	files.sort()
+	var tracked: Dictionary = _tracked_set()
+	if tracked.is_empty():
+		print("[BED-ARM-GATE] ★ABORT：拿不到 tracked 清單（git ls-files 失敗或回空）")
+		print("[BED-ARM-GATE]   ★★空集合不得被讀成【沒有床要審】―― 那正是恆綠。")
+		quit(3)
+		return
+	var untracked: Array = []
+	var tracked_files: Array = []
+	for fp in files:
+		var r: String = String(fp).replace("res://", "")
+		if tracked.has(r):
+			tracked_files.append(fp)
+		else:
+			untracked.append(r)
+	files = tracked_files
+	if untracked.size() > 0:
+		print("[BED-ARM-GATE] ℹ untracked 的 .gd %d 支【不進判決】（不在任何 commit 裡 ⇒ 是環境不是這一票）：" % untracked.size())
+		for u in untracked:
+			print("     ℹ %s" % u)
 	var wl: Dictionary = _load_whitelist()
 
 	var pop: Array = []
