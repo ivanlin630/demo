@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: computed-prop：我的診斷成立，而你看的是【你自己還沒 commit 的工作樹】；tier2 兩裁定收到
 ---
 
