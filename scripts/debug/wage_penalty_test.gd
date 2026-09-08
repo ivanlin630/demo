@@ -98,10 +98,11 @@ func _run() -> void:
 	_ok(int(Probe.counts.get("salary.reason.unpayable_local", 0)) > 0,
 		"★★★②母體：`unpayable_local` > 0 —— 沒有這格，「忠誠沒掉」分不出【修好了】與【根本沒發薪】")
 
-	# ── ③ ★★★玩家領主定低薪（R² (b) 的陽性對照）──
-	#   ★換軸（`budget_ratio` → `p.salary/fair`）對①②是【數學上的 no-op】
-	#     ⇒ ★★沒有這一格，換軸之後兩格照樣綠，而【沒人知道軸換了】。
-	#   ★★★而它守的是一個真洞：NPC 的 `p.salary` 由 `fair × mult` 寫入，
+	# ── ③ 玩家領主定低薪──
+	#   ★★★【訂正】它【不是】換軸的陽性對照―― systems 點出、我自己驗過：
+	#     這格的 `budget_ratio == 1` ⇒ 改前改後都走同一分支，【改前也會綠】。
+	#     它真正守的是另一件事（見下），而換軸的陽性對照在④。
+	#   ★而它守的那件事仍然是真洞：NPC 的 `p.salary` 由 `fair × mult` 寫入，
 	#     而玩家隊的不經過 mult ⇒ 若軸鍵在 mult，玩家【故意定零薪】會被靕默豁免。
 	print("  ── ③ 玩家領主定零薪（★不得被豁免）──")
 	Probe.reset(); Probe.enabled = true
@@ -125,3 +126,38 @@ func _run() -> void:
 	_ok(m3.loyalty < loy_c0, "★★★③懲罰真的落在玩家領主身上：忠誠 %.4f → %.4f" % [loy_c0, m3.loyalty])
 	_ok(int(Probe.counts.get("salary.reason.unpayable_local", 0)) == 0,
 		"★③團庫有錢 ⇒ 不得被判成【付不出】")
+
+	# ── ④ ★★★【真陽性對照】貪婪領主 ＋ 窮村 ──
+	#   ★兩個軸【同時】成立：wage_ratio 0.8 < 1（故意定低薪）
+	#     且 budget_ratio ≪ 1（團庫真的沒錢）。
+	#   ★★改前：`_can_pay == false` ⇒ 直接掉進 else ⇒ 判 unpayable ⇒ 【免罰】。
+	#     ―― 這就是 systems 說的【貪婪領主＋窮村照樣免罰】。
+	#   ★★★改後：兩個判斷獨立 ⇒ 工資軸罰、預算軸不罰，而兩個 tap 【同時】>0。
+	#   ★★★鑑別力實測（我把 HEAD 版 salary_system 換回去跑過）：
+	#     舊 code ⇒ ④ 兩紅（忠誠沒掉 / willful=0），而 ①②③ 全綠――
+	#     ⇒ ★【只有④有鑑別力】，這是 systems 點的那件事的實測版。
+	#   ★★而【兩個 tap 同時 >0】本身【不】是獨立性的證明：
+	#     互斥是 per-person-per-tick 的，而計數器是跨-tick 累加的
+	#     ⇒ 舊版只要不同 tick 走不同分支，兩個也會同時 >0。真正的鑑別格是 `w4 > 0`。
+	print("  ── ④ 貪婪領主＋窮村（★換軸的真陽性對照）──")
+	Probe.reset(); Probe.enabled = true
+	var st4: WorldState = MeasureBedHelper.arm_and_new()
+	st4.world.current_tick = SalarySystem.SALARY_INTERVAL * 3
+	# ★★★coin 必須是 0，不是【一點點】：tick() 一次追 3 個結算期，
+	#   而 coin=1 在前兩期是【付得出】的 ⇒ 舊 code 也會在那兩期判 willful
+	#   ⇒ ★★【忠誠下降】跟【兩個 tap 都 >0】舊版照樣綠 ⇒ 斷言不可能變紅。
+	#   ★★★三個 tick 不是一個事件：互斥是 per-tick 的，而計數器是跨-tick 累加的。
+	var c4: Array = _mk_team(st4, 4, 0.0, 1.0, 0.0)   # ★貪婪（mult 0.8）＋庫房全空
+	var t4: TeamData = c4[0]
+	var m4: PersonData = c4[1]
+	t4.salary_eval_next_tick = 1
+	var loy_d0: float = m4.loyalty
+	SalarySystem.new().tick(st4, [4])
+	var w4: int = int(Probe.counts.get("salary.reason.underpaid_willful", 0))
+	var u4: int = int(Probe.counts.get("salary.reason.unpayable_local", 0))
+	print("     coin = 0 （→ budget_ratio = 0 【每一期】）｜mult 0.8 （→ wage_ratio 0.8）")
+	print("     忠誠 %.4f → %.4f ｜ willful=%d unpayable=%d" % [loy_d0, m4.loyalty, w4, u4])
+	_ok(m4.loyalty < loy_d0,
+		"★④貪婪領主在窮村【仍然要罰】――沒錢不是定低薪的免死金牌（改前這格必紅）")
+	_ok(w4 > 0, "★★④工資軸 tap 點了：underpaid_willful > 0")
+	_ok(u4 > 0, "★★★④母體：unpayable_local > 0 ⇒ 預算軸真的卡了（★這格舊版也綠，它不是鑑別格）")

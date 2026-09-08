@@ -52,8 +52,17 @@ TMP="docs/measurements/.bed-sweep-inprogress.tsv"
 echo "[tier2] 全床掃描開始（$(grep -c . "$LIST") 支）"
 PER_BED_TIMEOUT="${PER_BED_TIMEOUT:-600}" bash .claude/hooks/bed-triage-sweep.sh "$LIST" "$TMP" >/dev/null 2>&1
 rc=$?
-rows=$(grep -c '^scripts/' "$TMP" 2>/dev/null || echo 0)
-if [ "$rc" != "0" ] || [ "$rows" = "0" ]; then
+# ★★★ 2026-09-08 血證（implementer）：原本寫 `grep -c ... || echo 0`。
+#   grep -c 沒中時【自己就會印 0】且 exit 1 ⇒ `|| echo 0` 再印一個 0
+#   ⇒ rows 實際是 "0
+0" ⇒ `[ "$rows" = "0" ]` 【為假】
+#   ⇒ ★這個 ABORT 守衛在它【唯一存在的情境】下永遠不會 fire，
+#     而後果是【掃了 0 支卻蓋了時間戳】⇒ tier2 閘變假綠。
+#   ★★修法：不接 `|| echo 0`（多餘），改成【非純數字也算 ABORT】――
+#     母體壞掉跟母體為空是同一類處置，不是兩類。
+rows=$(grep -c '^scripts/' "$TMP" 2>/dev/null)
+case "$rows" in ''|*[!0-9]*) rows="NaN";; esac
+if [ "$rc" != "0" ] || [ "$rows" = "0" ] || [ "$rows" = "NaN" ]; then
   echo "[tier2] ★ABORT：掃描沒有產出（rc=$rc rows=$rows）⇒ ★不更新 baseline、不蓋時間戳"
   echo "[tier2]   （★空結果不得被讀成「沒有變化」——那正是恆綠）"
   exit 3

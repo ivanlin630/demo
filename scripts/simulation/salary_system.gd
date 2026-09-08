@@ -182,26 +182,38 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 			Probe.bump("incometax.withheld")
 			Probe.add_amount("incometax.amount", paid - net)
 			Probe.add_amount("incometax.gross", paid)
+		# ★★★兩個軸是【獨立】的，而我上一版用 if/elif 把它們串成互斥：
+		#   ★工資軸：`wage_ratio = p.salary / fair` ⇒ 領主【選】了多少薪水
+		#   ★★預算軸：`budget_ratio` ⇒ 領主【付得出】多少
+		#   ⇒ ratio = wage_ratio × budget_ratio ―― 兩個因子，而舊 code 只看乘積。
+		# ★★★上一版的 `elif _can_pay and wage_ratio < 1.0` 是【恒真項】：
+		#   進到 elif 時已知 ratio < 1；_can_pay ⇒ budget_ratio == 1 ⇒ ratio == wage_ratio
+		#   ⇒ wage_ratio < 1 被蕴涵 ⇒ 分支條件逐字等價，★軸根本沒換。
+		#   ⇒ ★★而後果是【貪婪領主 + 窮村】照樣免罰：它 _can_pay=false ⇒ 落進 else。
+		# ⇒ ★★★改成【兩個獨立判斷】，而懲罰只算【故意的那一段】：
+		#   罰幅 = (1 − wage_ratio)，不是 (1 − ratio) ―― 後者把【沒錢】那一段也算進去了。
 		if ratio >= 1.0:
-			if Probe.enabled: Probe.bump("salary.reason.paid_full")   # ★三格窮盡：付滿/不肯付/付不出
+			if Probe.enabled: Probe.bump("salary.reason.paid_full")
 			LoyaltyBank.adjust(p, (ratio - 1.0) * OVERPAY_BONUS, "overpay", MAX_LOYALTY)
 			_loy_up += 1
 			var intensity: float = clampf((ratio - 1.0) * 0.5, 0.05, 0.8)  # TEST VALUE
 			_npc_ai.write_memory(p, "kindness", team.leader_id,
 				state.world.current_tick, intensity)
-		elif _can_pay and wage_ratio < 1.0:
-			# ★【不肯付】：付得起而定低薪 ⇒ 個體忠誠流失（導向離團，非全隊懲罰）
-			LoyaltyBank.adjust(p, -(1.0 - ratio) * SALARY_LOYALTY_PENALTY, "underpay")
-			_loy_down += 1
-			_willful += 1
-			if Probe.enabled: Probe.bump("salary.reason.underpaid_willful")
 		else:
-			# ★★【付不出】：不扣忠誠――這一行就是本票的主刀。
-			#   ★★★而它仍然【被記錄】：不罰 ≠ 沒發生，否則下游分不出
-			#     【付滿了】與【付不出所以不罰】。
-			if Probe.enabled:
+			# ①工資軸：定低薪 ⇒ 罰（★不問付不付得出）
+			if wage_ratio < 1.0:
+				LoyaltyBank.adjust(p, -(1.0 - wage_ratio) * SALARY_LOYALTY_PENALTY, "underpay")
+				_loy_down += 1
+				_willful += 1
+				if Probe.enabled: Probe.bump("salary.reason.underpaid_willful")
+			# ②預算軸：付不出 ⇒ 【不罰】，但仍然記錄
+			#   ★不罰 ≠ 沒發生；而兩個軸可以【同時】成立（貪婪領主的窮村）。
+			if budget_ratio < 1.0 and Probe.enabled:
 				Probe.bump("salary.reason.unpayable_local")
-				Probe.add_amount("salary.reason.unpayable_shortfall", 1.0 - ratio)
+				Probe.add_amount("salary.reason.unpayable_shortfall", 1.0 - budget_ratio)
+			# ★★兩軸都不成立卻 ratio<1 ⇒ 不可能（ratio = wage×budget），留一格防們候
+			if wage_ratio >= 1.0 and budget_ratio >= 1.0 and Probe.enabled:
+				Probe.bump("salary.reason.IMPOSSIBLE_ratio_lt1")
 	var anon_paid: float = anon_total * budget_ratio
 	ResourceBank.remove(team, "coin", anon_paid, "salary_anon")
 	AnonTreasuryBank.deposit(team, anon_paid, "salary")   # 匿名薪水沉澱公庫（非消失）
