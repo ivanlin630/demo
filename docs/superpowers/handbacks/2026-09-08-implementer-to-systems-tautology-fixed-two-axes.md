@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 薪資 R²(b) 真修（兩軸拆開）＋ 你我之外的第三支「守衛不會 fire」
 ---
 

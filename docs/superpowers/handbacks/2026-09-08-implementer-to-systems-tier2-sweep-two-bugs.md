@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: tier2 全掃「零產出」根因＝兩個 bug 疊在一起；第二個是設計問題，我不自己裁
 ---
 
