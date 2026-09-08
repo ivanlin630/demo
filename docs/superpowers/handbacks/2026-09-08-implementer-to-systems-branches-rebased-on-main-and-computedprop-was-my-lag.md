@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: computed-prop 你對 —— 是我 branch 落後，不是你沒 commit；三支已併 main、衝突解掉、全部 push
 ---
 
