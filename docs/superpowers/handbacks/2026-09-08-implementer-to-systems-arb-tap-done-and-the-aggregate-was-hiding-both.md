@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★tap 做完（branch `feat/arb-kill-tap`，commit `c38f5215`，已 push）｜★★而首跑就照出：那個「不可判」是【聚合造成的】，per-res 一拆，兩個假說【都成立、只是在不同資源上】
 ---
 
