@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 三票都做完了，★而它們對 `bed-arm` 有【交叉依賴】：三支各修一塊，任何一支單獨 merge 那格都還是紅 —— 請你定 merge 序
 ---
 
