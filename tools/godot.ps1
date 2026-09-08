@@ -73,8 +73,6 @@ if (-not $skipCacheGuard) {
     }
 }
 $timeoutSec = if ($env:GODOT_TIMEOUT) { [int]$env:GODOT_TIMEOUT } else { 360 }
-$tempOut = [System.IO.Path]::GetTempFileName()
-$tempErr = [System.IO.Path]::GetTempFileName()
 # STREAMING (2026-09-03, systems). The old shape redirected stdout to a temp file and printed
 # it only after the process exited. That is correct output but wrong timing: if THIS wrapper is
 # killed from outside (an outer timeout), the caller gets ZERO bytes even though the run had
@@ -103,6 +101,46 @@ $beaconRole = if ($env:SESSION_ROLE) { $env:SESSION_ROLE } else { "unknown-$PID"
 $hookDir = "A:\GDS\demo\.claude\hooks"
 $beaconFile = Join-Path $hookDir ".busy.$beaconRole"
 $runLog = Join-Path $hookDir ".godot-runs.log"
+
+# 2026-09-08 (implementer found it, systems ruled). GetTempFileName() has only 4 hex digits,
+# so it throws once the temp dir holds 65535 tmpNNNN.tmp files -- and killed/orphaned wrappers
+# never reach their Remove-Item, so the count only grows. When it threw, $tempOut became $null:
+# Godot's stdout went nowhere, Pump-Out spat a Test-Path error every 150ms, the deadline loop
+# kept counting, and the run was killed at the timeout and RECORDED AS 'timeout'.
+# That is the worst shape of lie: an infrastructure failure wearing the name of a slow bed.
+# Fix per ruling: (1) our own scratch dir with unique names (no 65535 ceiling), and
+# (2) failure gets ITS OWN NAME -- not timeout, not crash. Callers must be able to tell
+# "the wrapper could not start" apart from "the bed misbehaved".
+# NOTE: -ErrorAction Stop on every New-Item below is load-bearing. New-Item emits a
+# NON-TERMINATING error by default, so try/catch does not see it: the first version of this
+# guard let the run continue with unusable paths and recorded it as 'ok'. A guard that cannot
+# fire is worse than no guard, because it reads as coverage.
+$scratchDir = Join-Path $hookDir "wrapper-scratch"
+try {
+    if (-not (Test-Path $scratchDir)) { New-Item -ItemType Directory -Path $scratchDir -Force -ErrorAction Stop | Out-Null }
+    # Killed wrappers never reach their Remove-Item, so this dir leaks exactly the way the
+    # system temp dir did. Bound it here instead of waiting for a second incident: drop files
+    # older than 6h at startup. 6h is far longer than any legitimate run (slowest bed ~190s).
+    try {
+        Get-ChildItem $scratchDir -File -ErrorAction SilentlyContinue |
+            Where-Object { ((Get-Date) - $_.LastWriteTime).TotalHours -gt 6 } |
+            Remove-Item -Force -ErrorAction SilentlyContinue
+    } catch { }
+    $stamp = (Get-Date).ToString('yyyyMMddHHmmssfff')
+    $tempOut = Join-Path $scratchDir ("out-$PID-$stamp-" + [guid]::NewGuid().ToString('N') + ".txt")
+    $tempErr = Join-Path $scratchDir ("err-$PID-$stamp-" + [guid]::NewGuid().ToString('N') + ".txt")
+    New-Item -ItemType File -Path $tempOut -Force -ErrorAction Stop | Out-Null
+    New-Item -ItemType File -Path $tempErr -Force -ErrorAction Stop | Out-Null
+} catch {
+    Write-Output "[GODOT WRAPPER FAIL: no-scratch-file] $($_.Exception.Message)"
+    Write-Output "[GODOT WRAPPER FAIL] scratch dir = $scratchDir"
+    Write-Output "[GODOT WRAPPER FAIL] the run did NOT start -- this is NOT a bed timeout and NOT a bed crash."
+    try {
+        "$((Get-Date).ToString('yyyy-MM-ddTHH:mm:ss'))`t$((Get-Date).ToString('yyyy-MM-ddTHH:mm:ss'))`t$beaconRole`tpid=$PID`twrapper-error`t$($args -join ' ')" |
+            Out-File -FilePath $runLog -Encoding ascii -Append
+    } catch { }
+    exit 97
+}
 
 # --- Tree provenance stamp (2026-09-07) -------------------------------------
 # Blood evidence: a 90d acceptance run used --path <worktree>, which reads the
