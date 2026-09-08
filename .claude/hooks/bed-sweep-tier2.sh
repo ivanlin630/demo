@@ -22,7 +22,15 @@ STAMP=".claude/hooks/.sweep-last"
 # ⇒ 【靜默改對象】換成【明確拒絕】。
 MAIN_ROOT="$(cd "$(dirname "$(git rev-parse --git-common-dir)")" && pwd)"
 IS_WORKTREE=0
-[ "$(git rev-parse --absolute-git-dir)" != "$(cd "$(git rev-parse --git-common-dir)" && pwd)" ] && IS_WORKTREE=1
+# ★★★兩邊都要 `cd ... && pwd` 歸一化：
+#   `--absolute-git-dir` 回 Windows 格式（A:/GDS/demo/.git），
+#   `cd ... && pwd` 回 MSYS 格式（/a/GDS/demo/.git）⇒ 直接比字串永遠不等
+#   ⇒ ★守衛會【連從 main 跑也拒絕】。
+#   ★★而我上一版只驗了【紅的方向】（從 worktree 跑要拒絕），
+#     沒驗【綠的方向】（從 main 跑要放行）―― 而那正是它壞掉的那一半。
+_gd="$(cd "$(git rev-parse --absolute-git-dir)" && pwd)"
+_gc="$(cd "$(git rev-parse --git-common-dir)" && pwd)"
+[ "$_gd" != "$_gc" ] && IS_WORKTREE=1
 # ★戳一律看主 repo 那一份：否則每個 worktree 都有自己的戳，而掃描只有一份。
 MAX_AGE_DAYS=7          # ★頻率寫死在這裡，不靠人記得
 LIST="docs/measurements/bed-sweep-list.txt"
