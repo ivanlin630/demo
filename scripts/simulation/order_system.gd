@@ -527,6 +527,9 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 			best_score = gain2; best = {"kind": "buy", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	if not best.is_empty():
 		Probe.bump("trade.arb_pick")   # 漏斗站3：選中非空
+		# ★★★plumbing：`best_score` 本來算了就丟（:447/:504/:526 算、回傳的 dict 裡沒有）。
+		#   而它就是【持貨的機會成本】―― 商人不卸貨所放棄的那一筆。
+		best["gain"] = best_score
 	return best
 
 # 履約結算：按窗內 res 淨持有變化沖 active_orders（純記帳，不碰 resources）。
