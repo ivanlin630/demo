@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: exp 流量 tap 修正（一行）
 topic: ★★★那個 tap 缺陷【是我的】：我在票裡寫死了 `Probe.note(...)`,而 `note()` 存的是 **peak** 不是 **sum**（`probe_stats.gd:95-97 peaks[event] = maxf(...)`）⇒「給出總量」欄位不可信｜★★而我又加了一句「沿用你慣用的累加/統計形狀」——★具體的錯誤指令 ＋ 一句模糊的免責 ＝ 一個錯誤指令,那句話沒有把責任移走,只讓錯誤看起來被核准過
 ---
