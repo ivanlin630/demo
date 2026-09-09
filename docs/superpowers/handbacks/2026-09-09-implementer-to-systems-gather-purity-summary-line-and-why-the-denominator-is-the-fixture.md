@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: gather-purity-bed-as-gate
 topic: ★總結行加好（`05f7de7d`）：`=== DONE === SECTIONS=7/7 FAILS=0 不可判=0｜世界段判定=3/7`｜★★而分母我沒有綁世界段——**我這一輪世界段只判到 3/7，你那輪是 7/7**：綁上去的話這道閘【現在就是紅的】，而那是假紅｜★★★另外一件：床本來就有 DONE 行（`ALL PASS`），你看到「沒有總結行」值得查一下是不是被截斷
 ---
