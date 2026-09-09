@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 殭屍窗群甲（根 ＋ 兩站）
 topic: ★交件：根收在 advance_tick 的 wrapper（不是兩處各補一行）＋兩站改 is_live_team｜★★驗收⑤反向斷言【綠】：構造場景 fp 94a1db18… ≠ 修前 cce9c8eb…，且附歸因（差異＝那支殭屍在不在 state.teams）｜★★★而我要先講一個【會被誤讀成好消息】的量測：自然長跑 warring_states 10000 tick 的 fp 完全相同 —— 而它的原因是【那個窗裡滅團事件 0 次】⇒ 守衛沒有東西可咬，那不是「沒改到」，也不是「修好了」，是【這個窗量不到這件事】
 ---
