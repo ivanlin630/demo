@@ -172,6 +172,12 @@ func _test_world_distribution() -> void:
 		max_gap = maxf(max_gap, eff_gap)
 	# ★★★第三個數：【閘】的反事實 —— drive 飽和不代表改動不咬人，
 	#   本票真正會翻的是 options 的 home-empty gate（home_food >= 門檻）。
+	# ★★而 eff/gate 讀到 0 時【不得】讀成「這個改動不咬人」（systems 更正 2026-09-09）：
+	#   家糧倉的 800 是 `config/warring_states.json: opening_granary_food` 的【初始值】，
+	#   短窗裡它根本還沒被吃 ⇒ 那個 0 與【窗長】混淆。
+	#   ★★★純消耗算式：門檻 = RETURN_HYSTERESIS_DAYS × pop × 0.8 = 4·pop，
+	#   從 800 掉到門檻需 (800 − 4·pop) / (0.8·pop) 天 ⇒ pop=30 約 28 天、pop=10 約 95 天，
+	#   而糧倉還會被生產補充 ⇒ 那是【下界】。⇒ 這個閘是被【參數】關掉的，不是被窗長遮住的。
 	var diff_gate: int = 0
 	var hf: Array = []
 	for tid4 in state.teams:
@@ -188,8 +194,15 @@ func _test_world_distribution() -> void:
 		# ★家糧的分布：eff/gate 都翻 0 隊時，要能看出【為什麼不咬人】
 		print("  home_food 分布（有家的 %d 隊）：min=%.1f median=%.1f max=%.1f" % [
 			hf.size(), float(hf[0]), float(hf[hf.size() / 2]), float(hf[hf.size() - 1])])
-	print("  反事實（母體 %d 隊有家有糧）：raw 不同 %d 隊｜eff（clamp 後進 drive）不同 %d 隊，最大差 %.3f｜★閘的判斷翻掉 %d 隊" % [
-		pop_home, diff_raw, diff_eff, max_gap, diff_gate])
+	var cfg_g: float = float(GameSetup.load_config("res://config/warring_states.json").get("opening_granary_food", 0.0))
+	print("  反事實（母體 %d 隊有家有糧）：raw 不同 %d 隊【斷言掛這裡＝機制的性質】" % [pop_home, diff_raw])
+	print("    eff（clamp 後進 drive）不同 %d 隊，最大差 %.3f｜gate 判斷翻掉 %d 隊 —— ★只印不斷言" % [
+		diff_eff, max_gap, diff_gate])
+	print("    ★這兩個 0 不等於「改動不咬人」：家糧倉 = opening_granary_food %.0f（config/warring_states.json 的初始值），"
+		% cfg_g)
+	print("      而門檻上限 = 4×pop；純消耗要 %d-%d 天才掉得到（pop 30 / pop 10），且生產還會補 ⇒ 那是下界。"
+		% [int((cfg_g - 4.0 * 30.0) / (0.8 * 30.0)), int((cfg_g - 4.0 * 10.0) / (0.8 * 10.0))])
+	print("      ⇒ ★★這個閘是被【參數】關掉的（800 對上 ≤40，差 20 倍以上），不是被窗長遮住的。")
 	_ok(diff_raw >= DIFF_MIN,
 		"③成對反事實(raw)：≥%d 隊算出來的量因這次改動而不同（實得 %d）—— 陰性對照下必歸零" % [DIFF_MIN, diff_raw])
 	# ★⑤ pop=0 的隊：門檻 0 ⇒ 家裡有任何糧都算「值得回」，drive → 1.0。★印出來，不要靜靜吃掉。
