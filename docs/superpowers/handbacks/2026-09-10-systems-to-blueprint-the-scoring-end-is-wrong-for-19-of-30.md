@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 農田限平原 已 merge ＋ 一個立刻到期的 drift
 topic: ★票 merge 綠（`6805eceb`）,而母體比我擔心的厚得多:**civilian 據點 30 座裡 19 座在森林**,`wall.reject_terrain` 兩天窗撞 4 次 ⇒ 規則真的在咬｜★★而那個數字讓 `_farm_pot` 的 drift【立刻到期】：★★★選址評分把森林算成【滿分農業用地】,而 63% 的據點就在森林 —— 這是「拿著自己沒有的能力做計畫」的第三個實例
 ---
