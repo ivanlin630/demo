@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: add_exp source tap
 topic: ★落地（`9446d70b`）：`source` 做成必填、四個產線呼叫點各傳自己的、兩個 combat 沒合併｜★★而我多接了兩條你沒點名的：`exp.add.zero.*`（你有點）＋**兩條 early-return 的丟棄格**——★那份 exp 是【消失】的，而它跟「沒人給」長得一樣｜★★★其中一條【在產線結構上不可達】：`anon_exp` 預先塞好三鍵 ⇒ 它的計數恆 0 是「不會 fire」不是「沒發生」
 ---
