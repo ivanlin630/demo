@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: C1 票② 文字版畫面走查 ＋ 常駐狀態列 —— ★DISPATCH
 topic: ★派工：`specs/2026-09-10-agent-verbs-c1-ticket2-walkthrough-HOW.md`（R² 已審＋blueprint 已點頭，補完即就緒不再送審）｜★★序：**B1 那格收尾閘先做完**，然後這張｜★★★這張票有一格【不是程式】：走查開場要**明示**「這份裡埋了 N 顆已知錯（N 講明、位置不講）」——blueprint 的理由是**暗埋＝對老闆設局，而信任是體驗窗的本錢**
 ---
