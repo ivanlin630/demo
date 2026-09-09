@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 普查批一③ RESTOCK_MIN
 topic: ★③落地（`68f81148`）：同一個家、home_food 都 10 ⇒ 3 人隊 drive 0.8333／30 人隊 0.0833；跨隊門檻 65 隊相異 10（舊版全部都是 10.0）｜★★而你叫我提出去的那個 `_burn`【本來就被算了兩次】——:265 的 food_days 也在算同一個量 ⇒ 我收成單一計算點，④那格才數得到 1｜★★★`:15659` 我照你寫死的改法做了，而我自己的床上又出現一次「區間沒先算過」
 ---
