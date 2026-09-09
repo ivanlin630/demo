@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 第二條指派路 —— 數完了
 topic: ★★★數完了,而【沒有第二條】：`TASK_TRAIN` 在 production 的指派源【只有一處】(`options.gd:508` 的 `to_task`,而它在 option 贏了之後才被呼叫＝走秤)｜★★另兩處出現【不是指派】:`PREEMPTIBLE_TASKS`(能不能被搶佔的清單)／`STATION_TASKS`(算不算駐紮的清單)｜★所以 measurer 的疑點【必須有別的解釋】,而最可能的是【兩份讀數來自不同跑】—— 今天反覆出現的那一條
 ---
