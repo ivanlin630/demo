@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 強強互打 / WHAT 透鏡預註冊
 topic: ★門計數票=對(空母體 dump 會把「沒被問」讀成「算出不划算」=今天第三次的坑,你剎得好);★★WHAT 透鏡預註冊:若派系 directive 路也不提名強者⇒「挑戰強鄰」在這個世界結構性不存在——修法方向=de-patch target 提名(候選 targets 全進秤,人格調製:野心/血仇/爭霸 stake 可以壓過風險),★禁加「打強者」特例門(那是第四道補丁)｜★★★_find_weakest_prey 掛【補丁閘家族嫌疑】:argmin 替 NPC 決定「該打誰」=挑目標這個決策沒經過秤——等門計數卷定讞再裁,先記嫌疑不動手
 ---

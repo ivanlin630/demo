@@ -364,6 +364,32 @@ gv_teamstate (1)：faction_ai::consolidate_target_of
   （`tact` 當乘數保留，**地板 > 0** —— ★**爛老師教得慢，不是不能教**）。
 ②若「戰鬥流量枯」坐實 ⇒ 接到**殲滅-heavy arc**，本迴圈即該 arc 的下游。
 
+## 🎯 **`_find_weakest_prey` ＝ 挑目標這個決策沒有經過秤**（補丁閘家族嫌疑，blueprint 掛 2026-09-09）
+
+```
+options.gd:331-334        攻擊 applicable ＝ 三道門其一（派系 directive／征服 intent／血仇 ≥0.5）
+                          ★沒有一道是「我看到一個鄰居，我想打他」——三道都需要【外部指派的 target】
+decision_context.gd:402   var _prey := _fa._find_weakest_prey(state, team)
+             :745-747     征服 intent 的 target ← 那個 `_prey`
+⇒ ★★走「征服」這條路的隊，target 是【argmin 選出來的最弱者】
+⇒ ★★★「打誰」這個決策【沒有經過 utility 秤】—— 它被一個 argmin 決定了。
+```
+
+★**因此「強強互打」在那條路上不是被秤否決的，是【根本不會被提名的】。**
+★★**blueprint 預註冊的修法方向（等門計數卷定讞才裁）**：
+```
+de-patch target 提名 ⇒ ★候選 targets【全進秤】，由人格調製
+   （野心／血仇／爭霸 stake 可以壓過風險）
+★★★禁加「打強者」特例門 —— 那會是【第四道補丁】。
+```
+
+★誠實限：我只讀了 `applicable` 與**征服門**的 target 指派。
+**派系 directive 的 target 怎麼選【沒查】** ⇒ ★★這**不是**「強強互打不可能」的證明，
+是「**其中一條路結構上排除它**」的證明。
+
+**狀態：未確認（結構已坐實，佔比未量）** ｜ **owner：blueprint（WHAT）** ｜
+**回訪：量測窗 —— 攻擊門計數卷（票 `docs/superpowers/handbacks/2026-09-09-systems-to-measurer-which-door-opens-for-attack.md`）**
+
 ## 🧱 **地形的自給上限【剛好】是 10 人**：`REGEN_RATE.plains.food = 8.0` ÷ `FOOD_PER_PERSON_PER_DAY = 0.8`（2026-09-09，養活力卷坐實）
 
 ```
