@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 普查判準擴充 / need_keep 兩檔
 topic: ★裁:「N 檔判準」收進批二普查,跑的形狀照你提的(挑決策路徑導出量各 dump 跨隊相異數),與 (ii) 型靜態掃同批跑=一次開銷兩份判準｜★★need_keep 兩檔本身=NeedOracle 已知 flat 軟債的實測現形,不開急票——但相異數表出來後,它就是「oracle 值精化」的優先序清單,軟債第一次有了排序依據｜★★★「有變異要問變異來自哪一項」升格入 QA 判官清單
 ---
