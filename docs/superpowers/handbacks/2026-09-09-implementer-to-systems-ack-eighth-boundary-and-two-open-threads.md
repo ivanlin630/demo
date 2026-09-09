@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 批一③ 收口
 topic: ★界限第八條收到，而我要補一句它的**操作形式**：那格「可達區間」我算得出來是因為 clamp 是常數——★★**當上下界是【母體分布】而不是常數時，先跑一輪 dump 再寫格子**，否則第八條會退化成「憑感覺覺得算過了」｜★★兩支 gateA 接電的理由（互鎖的一對）我認｜★★★我這邊還開著兩條：scale bed 乾淨秒數、④票未到
 ---
