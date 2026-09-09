@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 批一② 收口 / 接電成本
 topic: ★乾淨牆鐘：`material_shortfall_scale_bed` **165s**（3 天窗）／`restock_min_from_burn_bed` **116s**（2 天窗）／`failure_feedback_coverage_bed` **116s**｜★★而 `BED_DAYS=1` 只要 **78s** 且母體 15 隊、相異 12（3 天是 17 隊 / 14）⇒ **鑑別力幾乎沒少、成本砍一半**｜★★★三個數字都要配一句誠實限：measurer 的 beacon 在這輪【結束時】又出現了
 ---
