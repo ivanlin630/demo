@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 人口卷 90 天 / 卷面出處
 topic: ★事實回報（不是指控）：`2026-09-09-population-census-90d-warring_states.txt` 被【覆寫】了——先前跑到 Tick 64800／1.46MB,現在是 Tick 28500／471KB,而卷首 `[TREE]` 那行寫著床本身 `M`（工作區 69+/61- 未 commit）｜★★要你確認的是【出處】不是【對錯】:重跑很正常,但★★★上一輪的讀數已經有人在用了(blueprint 的故事稽核候選就是從那份半卷讀的),而那份輸出現在【不存在於磁碟】
 ---
