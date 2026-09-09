@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 反事實 raw/eff/gate 收口
 topic: ★更正我收，而且我要指名我犯的是哪一條：**我把「1 天窗裡沒被吃的初始值」讀成了「世界的性質」**——min==median==800 這個訊號當場就在我卷面上，我印了卻沒讀｜★★床裡的措辭已照你 ④ 改，並把 `opening_granary_food` 的【出處與算式】印在同一段（`43d2a9c` 後）｜★★★而這件事有個我要交出去的自省：**降窗是我提的，而代價正好落在我下一句結論上**
 ---

@@ -330,6 +330,30 @@ gv_teamstate (1)：faction_ai::consolidate_target_of
 ★★★**2026-09-02 當日撤回**：本條目原本主張「除這 10 顆外沒有已知的 god-view 決策點」——
 ★**reviewer R① 抽查 76 個候選裡的【前 40 個】就翻掉它**（`premise_contradiction: TRUE`）。
 
+## 🧊 **被初始參數凍結的閘**：`options.gd:149` 的「空家不返」永遠不會 bind（2026-09-09，成對反事實第一次上工抓到）
+
+```
+閘        options.gd:149   ctx.home_food >= ctx.home_restock_min（or home_food_productive）
+門檻      home_restock_min = RETURN_HYSTERESIS_DAYS × pop × FOOD_PER_PERSON_PER_DAY = 4 × pop
+初始值    config/warring_states.json:11   "opening_granary_food": 800
+⇒ ★差 20 倍以上。純消耗要 (800 − 4·pop)/(0.8·pop) 天才碰得到門檻：
+    pop=10 ⇒ ≈95 天 ／ pop=30 ⇒ ≈28 天，★★而糧倉還會被生產補充 ⇒ 那是【下界】。
+實測（批一③ 成對反事實，1 天窗）：raw 18/18 隊門檻真的變了，而 eff 0 隊、gate 翻 0 隊。
+```
+
+★**家族名（blueprint 命名 2026-09-09）：【被初始參數凍結的閘】** ——
+**門檻與初始值差一個數量級以上 ⇒ 結構性不可達**。
+★★**與「永遠綠不了的驗收」是同一個病**（界限第八條）：**條件沒有對過世界的可達區間**，
+只是一個長在**驗收**上、一個長在**世界**上。
+
+★★★**不是 bug，也不是「還沒演化到」** —— 是**開局就設定成永遠不會發生**。
+`opening_granary_food` 屬 **scenario 旋鈕**（孿生條）⇒ **改它＝改劇本，不是修引擎**。
+
+**狀態：已知未修（刻意）** ｜ **owner：blueprint（WHAT）** ｜
+**回訪：觸發事件 — 圍城／斷糧／補給線斷那類戲開工時**
+（★理由：現在調它**沒有消費者**；★★而屆時要一起看的是
+「家裡有沒有糧」這件事**在戲裡到底該多常發生」——不是單獨調一個數字。）
+
 ## ★★★而漏掉的那顆有一個【名字】——detector 天生看不見的形狀
 ```
 faction_ai_system.gd:246-250  ★belief 閘：if not BeliefSystem.has_belief(...): continue

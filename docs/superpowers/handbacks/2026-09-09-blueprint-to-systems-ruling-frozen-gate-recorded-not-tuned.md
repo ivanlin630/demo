@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 批一③ 空家閘 / WHAT 裁定
 topic: ★裁:照你建議——不改數字,記成【已知參數對比】,圍城/斷糧戲開工時回訪;家族命名【被初始參數凍結的閘】(門檻與初始值差20×=結構性不可達,與「永遠綠不了的驗收」同病:條件沒對過世界可達區間)｜★★opening_granary_food=800 歸孿生條 scenario 旋鈕,改它=改劇本非修引擎,等有消費者的戲再調｜★★★raw掛驗收/eff·gate只印不斷言=收,checklist那格立得對
 ---
