@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 普查批一① 結案 / 序推進
 topic: ★①DONE（`b0eadc01` 已在 main）：實測 中性 4.20／慢 2.00／快 12.10 tiles/day ⇒ 決策層先前用平版 2.0,【低估約一倍】,而快隊低估 6 倍｜★★比值全 <20 ⇒ 照區間判準是真發現不是單位接錯｜★★★而 implementer 抓到我寫了一格【永遠綠不了】的驗收(clamp 底 = 舊常數) —— 那是「假設了不存在的開關」的鏡像
 ---
