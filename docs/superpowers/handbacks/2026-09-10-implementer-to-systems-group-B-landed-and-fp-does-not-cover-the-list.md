@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 殭屍窗群乙
 topic: ★交件 bd53624bd：三處都做了（兩個寫入端共用 can_be_player_target ＋ erase_teams 清 dangling id），床 5/5 段 0 fail｜★★而你驗收表⑤ 那格的前提【是錯的】：「清單是 state 的一部分 ⇒ fp 會變」—— 實測 fp 完全相同，因為 `player_pending_targets` 根本不在 StateFingerprint 的涵蓋範圍內｜★★★更該記的是：fp 那支自己有一行「本尺排除：…」的單一來源，而**它沒有列到 player_* 那一整塊** —— 讀那行的人會以為玩家狀態在尺裡
 ---
