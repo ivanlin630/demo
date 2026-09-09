@@ -1,0 +1,43 @@
+# 普查：公開查詢動詞有沒有把【引擎狀態的本體】交出去？
+# 產於 systems 2026-09-10 §③ 的小票（上游 static 掃＝零命中，★但那個 pattern 只認得兩種寫法）
+# 撈法（★我沒有沿用上游的 pattern，改用 runtime 識別）：
+#   ①先走一遍 state，記下每個容器的大小（path→size）與每個物件的 instance_id→path
+#   ②呼叫動詞，把回傳值裡【每一個容器】戳一下（dict 加鍵／array 加長）
+#   ③再走一遍 state：任何容器大小變了 ⇒ 那個容器就是本體，且【知道它在 state 的哪裡】
+#   ④物件另判：物件永遠是參考，★但「是參考」與「是引擎的」是兩件事
+#     ⇒ 用 instance_id 是否出現在 state 走訪集合裡區分【本體】vs【新 make 的 struct】
+#   ⑤還原並驗證還原（★否則這支床自己就是污染源）
+#   ⇒ ★這個方法不管容器是【怎麼】被放進回傳值的：先存變數／巢狀／迴圈 append／
+#     mapper 轉手兩層／值來自別的模組 —— 五種寫法一視同仁。
+# 床：scripts/debug/query_returns_body_census_bed.gd（acceptance；★含偵測器自己的成對對照）
+#
+# 誠實限：
+#   ①母體＝小世界（2 隊/3 格/已 gather 過一次）；★沒有據點、沒有市場單、沒有派系
+#     ⇒ 只在那些欄位有值時才會出現的容器【不在本次母體裡】。
+#   ②走訪深度上限 6 層。③Packed* 是值型別，本法對它沒有鑑別力（也不需要）。
+#   ④本次 24 支動詞【全部回了 ok envelope】⇒ 沒有「等於沒測到」的那一類。
+verb	containers_poked	verdict	detail
+player.get_player_snapshot	78	★本體	village_estimate.gd ＠ state.teams[3].ctx_snapshot[camp_target_est]（同一顆出現 2 處）
+player.pt_tile_self	0	★本體	tile_data.gd ＠ state.world.tiles[1001]——★整顆 tile 交出去（回傳型別就是 HexTileData）
+player.get_decision_snapshot	6	★本體	village_estimate.gd ＠ state.teams[3].ctx_snapshot[camp_target_est]（★duplicate(true) 不深拷【物件】）
+player.get_team_details	8	副本
+player.get_member_details	5	副本
+player.get_location_context	7	副本
+player.get_trade_preview	7	副本
+player.get_trade_direct_preview	5	副本
+player.get_trade_session	11	副本
+player.get_available_actions	19	副本
+player.get_and_clear_alerts	1	副本
+player.query_faction_panel	5	副本
+player.get_storage_panel	5	副本
+player.query_outpost_panel	4	副本
+player.query_subteam_panel	6	副本
+player.get_event_stream	3	副本
+player.get_world_clock	2	副本
+player.get_status_line	7	副本
+observer.query_all_teams	3	副本
+observer.query_team	6	副本
+observer.query_map_teams	3	副本
+observer.query_map_tiles	4	副本
+observer.query_outpost	1	副本
+observer.query_all_outposts	1	副本
