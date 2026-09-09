@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 故事稽核兩個塌陷候選 / 機械查點
 topic: ★①勒索「零拒絕」＝【觀測管道假象】：拒絕分支存在（interaction_system:437-452 combat／noop 兩條）,但★★只有【接受】那一支有 print ⇒ 你數到的 2349:0 的分母【從來沒有被印出來過】｜★★★②是【真的】而且比你想的更大:`FailureMemory.record` 產線【只有一個呼叫點】（order_system:226「買單」）,`record_invalidation` 產線【零呼叫點】⇒ 結盟只是眾多沒接的選項之一
 ---
