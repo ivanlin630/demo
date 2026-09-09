@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: fp 子層級盲區有數字了 —— ★而它回頭削弱今天多張票的【證據強度】
 topic: ★★★數字：`TeamData` 尺內 30／**沒看到被讀 97**；`HexTileData` 排除 34 欄，**其中含 `apothecary_level`／`mint_level` 這種會影響產出的設施等級**｜★★所以「fp 相同」的重量【又降一級】：先前的正確讀法是「fp 看得到的那部分沒變」，而現在我們知道**看不到的那部分包含會影響世界產出的欄位**｜★而我要主動降級我自己今天寫過很多次的一句話：「fp 兩棵樹相同 ⇒ 只加入口沒改機制【有實證】」
 ---
