@@ -1,0 +1,59 @@
+{
+  "token": "population-census-90d",
+  "slice": "人口卷 90 天普查（乾淨分母 + 75天/胎錨 + 儀器六格）",
+  "date": "2026-09-09",
+  "measured_at_head": "e5d7566f-dirty(scripts/debug/population_and_turnover_specimen_bed.gd only, since committed as 38e31db0; scripts/simulation touches=none)",
+  "touches": [],
+  "world": "warring_states / seed=1337 / BED_DAYS=90（第四輪，跑到100000/129600 ticks=69.44天/90天=77%被GODOT_TIMEOUT 21600s砍——吞吐4.63 tick/s，低於blueprint裁的6 tick/s續跑門檻，見honest_limits）",
+  "bed": "scripts/debug/population_and_turnover_specimen_bed.gd",
+  "raw_logs": [
+    "docs/measurements/2026-09-09-population-census-90d-warring_states-r4.txt（第四輪、帶輪次識別、完整原始輸出，68978行）",
+    "docs/measurements/2026-09-09-population-census-90d-warring_states.txt（同內容，未帶輪次後綴的活動路徑——之後每輪會被覆寫，勿引用；讀 -r4 那份）"
+  ],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★69.4天窗（77%目標）：出生極稀疏(breed.born=4)，隊數成長主要不是靠生育；75天/胎錨p50=89.6天比設計錨慢，且七成隊(190/257)全程無正向breed_progress訊號——戰亂人口停滯是真的，不是量測盲點",
+    "①出生(breed.born全域)": 4,
+    "②成年(population_system)": { "隊次batches": 3, "人次n": 3 },
+    "③晉升漏斗(anon_tier_system.try_promote)": {
+      "嘗試母體": 121, "成功": 0,
+      "死因分布": "death.kill.not_enough_exp=121（佔嘗試100.0%，唯一死因）"
+    },
+    "④死亡分軸": {
+      "成人named餓死(hunger/bleed)": "1/0",
+      "小孩餓死": 0, "匿名成人餓死": 3, "戰死(pop/named)": "0/0"
+    },
+    "⑥a滅團帶小孩": { "隊數": 0, "小孩損失": 0 },
+    "⑥a合併搬小孩": { "觸發次數": 0, "搬運小孩數": 0 },
+    "乾淨分母逐日(排除beast pseudo-team)": "49(day0)→137(day~69)，beast幾乎全程=0（僅tick=4320出現1）——見raw_logs逐行",
+    "75天/胎錨(逐隊breed_progress日delta推導)": {
+      "有訊號隊數": 67, "無訊號隊數(全程delta<=0)": 190,
+      "days/胎": { "min": 29.5, "p50": 89.6, "max": 2502.3 },
+      "對照": "設計錨=75天/胎；blueprint先前引用60天窗數字"
+    }
+  },
+
+  "two_dilemmas_answer": {
+    "(a) 75天/胎 vs 設計錨": "p50=89.6天/胎，比75天設計錨慢19%、比60天引用數字慢49%；★但min=29.5顯示有隊快很多——分布極寬(min29.5~max2502.3)，不是單一速率，供blueprint判要不要接",
+    "(b) 戰亂人口停滯接不接受": "★強訊號支持『真的停滯』：257隊裡190隊(74%)整個69天窗沒有一次正向breed_progress delta；晉升漏斗121次嘗試100%死在not_enough_exp；breed.born全域僅4——三個獨立格子(出生/晉升/breed_progress)方向一致，非單一儀器的偽讀",
+    "★★隊數成長的真正來源": "乾淨隊數49→137成長顯著，但breed.born只4、pop.mature人次只3——成長主要不是生育/成年，是raw log裡大量[Sub]派子隊/新team_id生成（信使/子隊機制），這格量測不在本卷scope內，如實聲明非本床產物"
+  },
+
+  "positive_control": {
+    "乾淨分母機制": "beast_n逐日計數幾乎全程=0（僅一次=1），證明乾淨分母算法本身在動、不是恆0儀器沒接電",
+    "促成訊號": "有67隊產生過正向breed_progress delta，證明breed_progress tap本身有訊號，190隊無訊號不是儀器死"
+  },
+
+  "honest_limits": [
+    "★★★本輪跑到69.4/90天(77%)被GODOT_TIMEOUT 21600s砍，非跑滿——三次以前的timeout(900s/900s/7200s)+本輪，累計四輪；blueprint已裁『碰撞從此刻起=常態，門檻=吞吐<6tick/s才續跑』，本輪吞吐4.63tick/s已跌破門檻，是否再跑round5補滿90天由blueprint/systems裁，不由我自行再燒一輪",
+    "★75天/胎錨的p50/min/max是【速率外推】非【完整週期觀測】——大多數隊在69天內還沒真的生過一胎（190/257無訊號），有訊號的67隊是用『正向delta的平均速率』反推1.0/rate，短窗下對慢隊會低估其實際天數(還沒觀察到足夠delta)、對快隊也可能因樣本少而不穩，★該讀成『方向性訊號』不是『精確值』",
+    "★晉升漏斗121次嘗試100%死在not_enough_exp——這是唯一死因，其餘六種kill原因(count_le0/already_elite/not_enough_bodies/not_enough_res/leader_tactics_cap/elite_weapon)全程=0次，如實聲明非漏抓",
+    "★上一輪(第三輪，砍在tick=70000/48.6天)的原始log已被本輪(第四輪)同名覆寫，不存在於磁碟——已具名回報systems(見handback 2026-09-09-measurer-to-systems-90d-scroll-provenance-answer.md)，往後每輪一律帶-rN輪次後綴，不再同名覆寫",
+    "★specimen(k校驗story稽核)本輪關閉(BED_SPECIMEN!=1)——QA verdict已收口，非本輪疏漏"
+  ],
+
+  "supersedes": [
+    "2026-09-09-population-census-90d-warring_states.txt 頭三輪(900s/900s/7200s砍在tick=21480/更早/70000)的原始log全數作廢或已被覆寫，唯一可引用產物=-r4這份"
+  ]
+}
