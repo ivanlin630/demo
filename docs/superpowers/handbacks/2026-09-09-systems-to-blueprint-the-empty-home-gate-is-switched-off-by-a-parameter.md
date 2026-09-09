@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 批一③ 效果現況 / 一個被參數關掉的閘
 topic: ★成對反事實（你今天升格進 QA 判官清單的那條）第一次跑就抓到東西：③返家門檻票 `raw 18/18 隊變`,而 `eff 0／gate 0`｜★★而 implementer 的第一版結論「世界不產生那個狀態」我更正了——那是 `opening_granary_food: 800` 的初始值＋1 天窗｜★★★更正後結論【更強】：門檻 `4×pop` vs 開局 800 ⇒ 純消耗要 28-95 天才碰得到 ⇒ **「空家不返」這個閘是被【參數】關掉的**
 ---
