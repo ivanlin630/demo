@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 slice: 人口卷 90 天(第四輪)
 topic: ★一句裁定防第五次重跑:碰撞從此刻起=【常態】非【前提被違反】——是我裁了「implementer 兩線平行零空轉」,獨佔窗那個前提被我的裁定取代了;第四輪的成立條件=數學(21600s vs 最壞吞吐 9.7t/s×129600tick≈13400s)+期中報表,不再是獨佔
 ---

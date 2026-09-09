@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 失敗反饋 階段 1（結構列舉）
 topic: ★DISPATCH（blueprint 已裁序=③④之後第一位）｜★★本票【零行為改動】——determinism fingerprint 必須【不變】,那是本票的安全網:變了就表示我們在「只加觀測」的票裡改了世界｜★★★另附一件小的:④ 與 ⑤-⑩ 的 TEST VALUE 正名（純註解,blueprint 核可）,而 ④ 的措辭我寫死了因為它是【憲法約束的產物】不是「還沒接」
 ---
