@@ -400,7 +400,15 @@ func _step_ambush_check(state: WorldState, team_ids: Array) -> void:
 func _step1d_overflow(state: WorldState) -> void:
 	_population_system.check_overflow(state)
 
-# 滅團延遲清除：tick 末單點 route+erase（中途 erase 不安全 — 多系統持 team_ids 快照）
+# ★2026-09-10 實測訂正（床 scripts/debug/midtick_erase_safety_bed.gd，commit 5df521523）：
+#   ~~中途 erase 不安全（多系統持 team_ids 快照）~~ ⇒ ★在【崩潰／狀態損毀】層級上【不成立】：
+#   合併點之後的 16 支系統吃【含死 id 的快照】全部跑完沒炸、死者沒復活、沒重新長出參照。
+# ★★而機制【保留】，真正的理由是另外兩個（它們這次量測沒被碰到，仍成立）：
+#   ①遺財路由要在 erase 之前跑完（守恆）②批次收斂（die-off 潮 K 趟 O(N) → 單趟，見 faction_ai_system.cleanup_extinct_teams 的批次註解）
+# ★★★限：一個構造（3 隊/無派系/無市場單/無 encounter）、16 支消費者 ——
+#   它【沒有】證明「任何時刻 erase 都安全」。而留著這段而不是刪掉那句話，是因為
+#   【一句被實測推翻的斷言留在 code 裡，下一個人會原封不動繼承它】。
+# 滅團延遲清除：tick 末單點 route+erase（★「中途 erase 不安全」那句已被實測訂正，見上）
 func _step_cleanup_extinct_teams(state: WorldState) -> void:
 	_faction_ai_system.cleanup_extinct_teams(state)
 
