@@ -364,6 +364,27 @@ gv_teamstate (1)：faction_ai::consolidate_target_of
   （`tact` 當乘數保留，**地板 > 0** —— ★**爛老師教得慢，不是不能教**）。
 ②若「戰鬥流量枯」坐實 ⇒ 接到**殲滅-heavy arc**，本迴圈即該 arc 的下游。
 
+## ➗ **地形被算了兩次**：`productivity × _farm_pot`（2026-09-10 坐實，★而它是「同一資訊禁進兩次秤」的第一個實例）
+
+```
+decision_context.gd:467   settle_site_quality = clampf(_site.productivity × _farm_pot, 0, 1) × quality_multiplier
+★而 `productivity`【逐地形生成】(implementer 2026-09-10 查實)
+★★而 `_farm_pot` 也是地形的函數（`1.0 if terrain_allows(farming) else 0.4`，6bbb6bcf 後）
+⇒ ★★★同一個資訊（地形）進了同一個秤【兩次】。
+```
+
+★**規矩來源**：blueprint 2026-09-09 在 `DELIVER_PAYOFF_NORM` 那條裁
+「**同一資訊禁進兩次秤，查出雙算就只留一處**」⇒ **這是那條規矩的第一個坐實實例**，
+★★**而它在 systems 自己剛 merge 的那張票的算式裡**（`_farm_pot` 單一真相源）。
+
+★**處置（systems 判，blueprint 可覆蓋）**：**不單獨開票**。
+理由：它與 `_farm_pot` 是**同一段算式** ⇒ **下次動那段時一起修最省**；
+★★而現在單獨開一張，成本（spec→R²→驗收）**高於它現在造成的偏差**
+（★兩個都是地形的單調函數 ⇒ 方向一致，只是**權重被平方了**，不是符號錯）。
+
+**狀態：已知未修** ｜ **owner：systems（HOW）** ｜
+**回訪：觸發事件 —— 下一次動 `settle_site_quality` 那段算式時**
+
 ## 🌱 **評分端不知道建址端變嚴**：`_farm_pot` 與 `required_terrain` 是兩個真相源（R² 2026-09-10 順手挖到，★【既有】不是新造成的）
 
 ```

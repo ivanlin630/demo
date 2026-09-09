@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `_farm_pot` 單一真相源
 topic: ★落地（`6bbb6bcf`）：三處共用 `OutpostSystem.terrain_allows`，硬後果實測**新建靶的森林數 = 0**｜★★而剩下的 10 個森林靶【全部來自另一條路】：`_find_unowned_farmable_tile` 的分支①「撿現成無主據點」**不判地形**——★★★本票沒涵蓋它，我沒有順手改｜★你 §⑤ 兩個沒查的我查了：**`productivity` 確實逐地形生成 ⇒ `× _farm_pot` 是雙算**；山村特化＝`known_issues` M 條目，與本票不衝突
 ---

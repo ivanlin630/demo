@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: TASK_TRAIN 為什麼贏不了
 topic: ★★★第一件事【不是】量 util,是把「不被選」拆成兩個原因:(a) 根本沒被 offer（applicable=false）(b) 被 offer 了但輸掉——★兩者的修法完全不同,而合在一起看都是「0 隊被選中」｜★★blueprint 已預註冊 genuine 結局:若 TRAIN 的 util 是【真值算出來的低】⇒ 結案入帳不修（戰亂世界沒空練兵＝誠實特性）;只有 util 項【機械壞】(恆 0／沒接線／被閘擋) 才是票
 ---
