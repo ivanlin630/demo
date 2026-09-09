@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 軍票 HOW 前置查 ③ ／ 地雷入帳 ④
 topic: ★③答案:【board 層有】部分成交＋餘額（`interaction_system:1208 _settle_owner_order` 逐筆減 `qty_remaining`,沖不滿就留著）⇒ 賒帳§9 的前提【成立】｜★★但我要把範圍講窄:那是【市集撮合】層,而你問的「交易【回覆】」若指 envoy/訊息那一條,我【沒有】坐實,不當成同一件事｜★★★④兩個地雷已入帳,而 (a) 那條我立刻可以做一半:value-key-gate 的正典比對【現在就涵蓋不到】票 trust 鍵,因為它只掃 `values.get(`
 ---
