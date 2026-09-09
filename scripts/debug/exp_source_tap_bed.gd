@@ -53,6 +53,18 @@ func _test_sources_distinguishable() -> void:
 		if n == 0:
 			missing.append(src)
 	_ok(missing.is_empty(), "①四個 source 都有計數（缺 %s）" % [str(missing)])
+	# ★★★sum vs peak：`note()` 存 peak、`add_amount()` 存 sum，而【兩支 API 的名字都不說】。
+	#   ⇒ 連給三次同樣的量：sum 會是 3 倍、peak 會是單次值 ⇒ 這格就是那個缺陷的守衛。
+	#   ★用獨立的 source 名，★★不要在這裡 Probe.reset()——第一版我 reset 了，
+	#     把同段前面的 combat 計數洗掉 ⇒ 下一格無故紅（★儀器把自己要驗的東西擦掉了）。
+	var t2 := _mk()
+	for i in 3:
+		AnonTierSystem.add_exp(t2, "平民", 5.0, "sumcheck")
+	var amt: float = Probe.amount("exp.add.amount.sumcheck")
+	var pk: float = float(Probe.peaks.get("exp.add.amount.sumcheck", 0.0))
+	print("    連給 3 次 5.0 ⇒ amounts=%.1f（sum 應為 15.0）｜peaks=%.1f（誤用 note 的話這裡才會有值）" % [amt, pk])
+	_ok(is_equal_approx(amt, 15.0),
+		"①【總量】走 add_amount ⇒ 15.0（誤用 note 會是 5.0＝單次最大值，而欄位名一樣叫 amount）")
 	# ★成對對照：贏家與敗方【沒有】被合成同一格（合起來就答不出「贏了才有用嗎」）
 	_ok(int(Probe.counts.get("exp.add.combat_survivor_winner", 0)) == 1
 		and int(Probe.counts.get("exp.add.combat_survivor_loser", 0)) == 1,

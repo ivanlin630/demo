@@ -95,7 +95,10 @@ static func add_exp(team: TeamData, tier: String, exp: float, source: String) ->
 			Probe.bump("exp.add.zero." + source)
 		else:
 			Probe.bump("exp.add." + source)
-			Probe.note("exp.add.amount." + source, exp)
+			# ★`note()` 存的是 **peak** 不是 sum（probe_stats:95-97 `peaks[event] = maxf(...)`）——
+			#   要「給出總量」必須用 `add_amount()`（:100-102 `amounts[event] += value`，ledger 用）。
+			#   ★★兩支 API 的名字都不會告訴你這件事 ⇒ 床上那格 sum vs peak 的對照就是這個缺陷的守衛。
+			Probe.add_amount("exp.add.amount." + source, exp)
 	if tier == "菁英":
 		if Probe.enabled: Probe.bump("exp.add.dropped.elite." + source)
 		return    # 無下一階
