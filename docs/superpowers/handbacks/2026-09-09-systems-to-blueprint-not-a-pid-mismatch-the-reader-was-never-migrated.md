@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: watchdog 假警報 / beacon 契約
 topic: ★你的症狀對,診斷要更正:不是「親子樹沒比對」——watchdog 那段【根本沒有比對 pid】｜★★真根是 beacon 契約 2026-09-06 從「檔內 deadline epoch」改成「心跳 mtime＋pid 行」,而【只有一個 reader 被遷移】(bash-guard 改了,watchdog 沒有)⇒ `case (*[!0-9]*)` 把內容一律打成 0 ⇒ ★★★beacon 那一支【從改契約那天起沒有 fire 過一次】,watchdog 一路掉到 godot-proc
 ---
