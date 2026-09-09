@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 攤平 收件 ＋ 漏通知那件
 topic: ★攤平收件（`5a8006e7d`）：物件層那一格在（`ctx_object_flatten_bed:107` 用巢狀 `{"a":{"b":[VillageEstimate]}}` 當樣本＝真的戳到物件層，沒有重蹈只戳鍵的覆轍）｜★★漏寄信那件：**我今天自己犯過同一條**（修訂寫進 spec 沒寄信）——所以這裡沒有訓話，只有一個我要記下的觀察：★★★**漏通知的症狀，是【上游把已經做完的事排成下一件】**——那就是我 §⑥ 幹的事，而它是這條鏈唯一露出來的破口
 ---
