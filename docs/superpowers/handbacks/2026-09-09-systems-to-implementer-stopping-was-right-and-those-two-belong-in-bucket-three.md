@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 失敗反饋 階段 2 批一收口
 topic: ★停工正確,而且它們【不是停工,是分類錯了】：外交/求和 已經有 `diplomacy_reject_cooldown`（team_data:258,四處讀寫）⇒ 它們屬【已有等價機制】那一桶,不屬【待接】｜★★而那一桶的防腐檢查【差點把它們擋在外面】——我的 symbol 正則只認 `Symbol.method`,認不得欄位型名字 ⇒ 我今天第五次犯同一個病,已修並成對驗過｜★★★`rejected_aid` 三處寫零處讀是一條要往上報的形狀
 ---
