@@ -404,7 +404,7 @@ static func _distribute_candidates(state: WorldState, team: TeamData, ctx: Decis
 		"kind": "distribute", "order_id": int(best["oid"]), "terminus_team_id": int(best["rid"]),
 		"price_factor": price_factor, "delegate": true,
 	}
-	var delay: float = _estimate_delay_days(team, to_task)
+	var delay: float = _estimate_delay_days(state, team, to_task)
 	out.append({
 		"util": _candidate_util(clampf(best_util, 0.0, GOAL_UTIL_CAP), ctx, delay),
 		"delay": delay,
@@ -495,7 +495,7 @@ static func _deliver_candidates(state: WorldState, team: TeamData, ctx: Decision
 		"kind": "deliver", "order_id": int(best["oid"]), "delegate": true,
 	}
 	var payoff: float = clampf(best_gain / DELIVER_PAYOFF_NORM, 0.0, GOAL_UTIL_CAP)
-	var delay: float = _estimate_delay_days(team, to_task)
+	var delay: float = _estimate_delay_days(state, team, to_task)
 	out.append({
 		"util": _candidate_util(payoff, ctx, delay),
 		"delay": delay,
@@ -601,7 +601,7 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 		return {}
 	# owner 不在場（own outpost 在別格）→ facility candidate（派子隊 remote 真移動→抵達→建，_dispatch_facility_builder）。
 	if Probe.enabled: Probe.bump_pt("resolver.build_candidate", _rday, team.team_id)   # ★★唯一算「成功」的那種
-	return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
+	return _mk_delegate_candidate(state, team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
 		{"facility": f, "target": own_tile.tile_pos})
 
 # ★S2/S3 資源型前置 resolution：未滿→取得 candidate（S2 買 / S3 採@地形定位）。
@@ -654,7 +654,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, res)
 		if mp != Vector2i(-1, -1):
 			if Probe.enabled: Probe.bump("goal.res_prereq.buy_wins")
-			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
+			return _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
 		if Probe.enabled: Probe.bump("goal.res_prereq.no_market")
 	# ── 取得手段 2：採@地形（S3，買不到→定位取得）——★地形集合由真相源導出，不查表。
 	# ★湧現閉環：缺料→(a)移動到產地→(b)到了建 outpost→own.terrain 產該資源→採 satisfied。
@@ -721,7 +721,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		# ★A1 裁③：remote founding（異格）→ 派子隊（子隊真移動→抵達→建，正常）。
 		# ★裁② guard：pos == team.tile_pos（隊已站產地）= same-tile founding，無母隊就地 outpost-build 路 → 已於上面 continue（followup）。
 		if best_pos != Vector2i(-1, -1):
-			return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx,
+			return _mk_delegate_candidate(state, team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx,
 				{"build_type": "civilian", "target": best_pos})
 	elif Probe.enabled:
 		Probe.bump("goal.harvest.not_terrain_produced." + res)   # ★B 型：地形本來就不產（缺的是【製造】那條手段）
@@ -851,7 +851,7 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				out.append(subc)   # ★空字典不能進 out：掉出 if 外會讓 out 幾乎恆非空
 		elif pkind == "ready":
 			# ★前置全滿 ⇒ 直接製造
-			var _rc: Dictionary = _mk_candidate(team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx,
+			var _rc: Dictionary = _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx,
 				{"task": TeamData.TASK_MANUFACTURE, "target": team.tile_pos})
 			_rc["me_depth"] = _depth
 			out.append(_rc)
@@ -880,7 +880,7 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				var _stock_v: float = DiscountedFlow.stock_utility(_sgain, 0.0, _need_d,
 					ctx.leader_values, ctx.net_food_flow, ctx.food_stock, _samt, 0.0, _sdelay)
 				var _finite_ratio: float = clampf(_stock_v / _flow_v, 0.0, 1.0) if _flow_v > 0.0 else 0.0
-				var _sc: Dictionary = _mk_candidate(team, g, gt, "stock_site", payoff, ctx,
+				var _sc: Dictionary = _mk_candidate(state, team, g, gt, "stock_site", payoff, ctx,
 					{"task": TeamData.TASK_PRODUCE, "target": _spos})
 				_sc["util"] = float(_sc.get("util", 0.0)) * _finite_ratio
 				_sc["me_depth"] = int(path.get("depth", 0))
@@ -943,13 +943,13 @@ static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: Dec
 		pos = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)
 	if pos == Vector2i(-1, -1):
 		return {}
-	return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
+	return _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
 
-static func _mk_candidate(team: TeamData, g: Dictionary, gt: String, frontier_kind: String, payoff: float,
+static func _mk_candidate(state: WorldState, team: TeamData, g: Dictionary, gt: String, frontier_kind: String, payoff: float,
 		ctx: DecisionContext, to_task: Dictionary) -> Dictionary:
 	# ★★★tie-break 用的「成本」＝【已經算好的】`_estimate_delay_days`（R² §8：停止把算好的數字扔掉）
 	#   ⇒ ★算一次、util 與 tie-break 共用；★★不另外定義一個「成本」量。
-	var _dly: float = _estimate_delay_days(team, to_task)
+	var _dly: float = _estimate_delay_days(state, team, to_task)
 	return {
 		"util": _candidate_util(payoff, ctx, _dly),   # ★S6:util 含 delay 折現
 		"delay": _dly,
@@ -962,12 +962,12 @@ static func _mk_candidate(team: TeamData, g: Dictionary, gt: String, frontier_ki
 # ★A1 founding/facility delegate candidate：新建 outpost（build_type）或自家 outpost 建設施（facility）
 # 本質=派子隊施工（複用既有 _dispatch_builder / _dispatch_facility_builder working consumer，非發無 consumer 的 TASK_BUILD）。
 # to_task 帶 delegate=true→faction_ai 路由 _dispatch_goal_delegate 型別分支。util 走 must-fix① 護欄（clamp<survival）。
-static func _mk_delegate_candidate(team: TeamData, g: Dictionary, gt: String, frontier_kind: String,
+static func _mk_delegate_candidate(state: WorldState, team: TeamData, g: Dictionary, gt: String, frontier_kind: String,
 		payoff: float, ctx: DecisionContext, core: Dictionary) -> Dictionary:
 	var to_task: Dictionary = core.duplicate()
 	to_task["delegate"] = true
 	to_task["settler"] = clampi(team.population / 4, 2, 5)   # 派子隊配額（founding 分支 _dispatch_builder 內部自估，此為 generic 保底）
-	var _dly2: float = _estimate_delay_days(team, to_task)
+	var _dly2: float = _estimate_delay_days(state, team, to_task)
 	return {
 		"util": _candidate_util(payoff, ctx, _dly2),
 		"delay": _dly2,
@@ -1020,17 +1020,33 @@ static func _harvest_tile_known(state: WorldState, team: TeamData) -> void:
 	BeliefSystem.harvest_tile_known(state, team)
 
 # ★S6 折現（組件 F，HOW §7）：delay-based discount（連續，符憲法 utility 連續）。
-const MOVE_TILES_PER_DAY: float = 2.0   # TEST VALUE — 移速估（淺啟發，delay 有界）
+# ★舊版：`const MOVE_TILES_PER_DAY = 2.0`（TEST VALUE，平版猜測）——2026-09-09 刪。
+#   ★★病不是「2.0 太小」，是【決策層拿著一個那支隊沒有的速度在做計畫】：
+#   執行層逐隊算真成本（地形/疲勞/超載/坐騎/車輛），而症狀出現在【執行端】
+#   （走不到／延遲）⇒ ★★★沒有人會回頭懷疑決策端的一個常數。
 # ★工期單一真相源（2026-08-25）：舊 `BUILD_DAYS_EST = 3.0` 是手抄的一個「大概三天」——
 #   它其實只在 pop≈10 時才對，pop 少一半就要兩倍時間。改讀 `OutpostSystem.build_eta_days`。
 const DISCOUNT_BASE: float = 0.5        # TEST VALUE — 折現率基值（人格/絕境調）
 
-# delay 估（淺啟發有界）：移動天數（target hex dist÷移速）+ build/settle 工期。純狀態零 randf。
-static func _estimate_delay_days(team: TeamData, to_task: Dictionary) -> float:
+# delay 估：移動天數（target hex dist ÷【這支隊自己的】tiles/day）+ build/settle 工期。純狀態零 randf。
+# ★★★單位鐵則（systems spec §2）：`team_speed_pure` 回的【不是】tiles/day，
+#   它是餵給 clamp 的中間量；`move_cost_pure` 回的才是【每格 tick 成本】。
+#   ⇒ tiles_per_day = TICKS_PER_DAY / move_cost；直接代速度會差約 TICKS_PER_DAY 倍，
+#   ★而它【看起來仍然像一個數字】。用成本不用速度：成本那版已含地形/疲勞/超載/車輛
+#   且被 clamp 在 [MIN_MOVE_TICKS, MAX_MOVE_TICKS] ⇒ 不會除爆。
+# ★誠實限：`move_cost` 讀【當下這格】的地形與【當下】疲勞 ⇒ 這是「以現況估」的 ETA，
+#   不是路線平均（不含途中地形變化/疲勞累積/被打斷）。它比平版 2.0 好的理由是
+#   ★★【與執行端同源】，不是它準。
+static func _estimate_delay_days(state: WorldState, team: TeamData, to_task: Dictionary) -> float:
 	var days: float = 0.0
 	var target = to_task.get("target", Vector2i(-1, -1))
 	if team != null and target is Vector2i and target != Vector2i(-1, -1) and target != team.tile_pos:
-		days += float(FactionAISystem._hex_dist(team.tile_pos, target)) / MOVE_TILES_PER_DAY   # ★perf cut1 A：static（免 per-candidate .new() alloc）
+		# 決策路徑：bumps 傳 null ⇒ 不碰 `rootdiff.*`（那三格的語意是【執行端走了幾格】）
+		# ★沒有 state 就【不要有 fallback】：一個安靜的 2.0 會變成第二份物理，
+		#   而它壞掉的樣子跟正常一模一樣 ⇒ 寧可讓它在 null 上大聲炸。
+		var cost: int = MovementSystem.move_cost_pure(state, team, 1.0, null)
+		var tiles_per_day: float = float(WorldState.TICKS_PER_DAY) / float(maxi(cost, 1))
+		days += float(FactionAISystem._hex_dist(team.tile_pos, target)) / maxf(tiles_per_day, 0.01)   # ★perf cut1 A：static（免 per-candidate .new() alloc）
 	var task: String = String(to_task.get("task", ""))
 	# ★A1:founding(build_type)/facility 委派亦含 build 工期（雖不發 TASK_BUILD，仍派子隊施工）。
 	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE \

@@ -145,28 +145,45 @@ func process(state: WorldState, team_ids: Array,
 					Probe.bump("strat.expand_reached")
 	return { "arrived": arrived, "moved": moved }
 
-func get_effective_mounts(team: TeamData) -> int:
+# ★★★static pure 核心（2026-09-09）：決策端要算「這支隊的真實每格成本」，
+#   而它拿不到 MovementSystem 實例（per-candidate .new() 是既有 perf 禁忌）。
+#   ⇒ 計算搬到 static `*_pure`，instance func 保留原名當 delegate ——
+#   ★★理由：24 個外部呼叫端全是 `ms.foo(...)` 形態，直接改 static 會變成
+#   「static 用實例呼叫」的警告海；而 delegate 讓呼叫端零改動、也不留第二份物理。
+static func get_effective_mounts_pure(team: TeamData) -> int:
 	return mini(int(team.resources.get("mounts", 0)), team.population)
 
-func get_effective_wagons(team: TeamData) -> int:
+func get_effective_mounts(team: TeamData) -> int:
+	return get_effective_mounts_pure(team)
+
+static func get_effective_wagons_pure(team: TeamData) -> int:
 	# 1 人 1 獸：wagon 用剩餘人口（pop - effective_mounts）上限
-	var rem: int = team.population - get_effective_mounts(team)
+	var rem: int = team.population - get_effective_mounts_pure(team)
 	return mini(int(team.resources.get("wagons", 0)), maxi(rem, 0))
 
-func get_carry_capacity(team: TeamData) -> float:
-	return team.population * BASE_CARRY \
-		+ get_effective_mounts(team) * MOUNT_BONUS \
-		+ get_effective_wagons(team) * WAGON_BONUS
+func get_effective_wagons(team: TeamData) -> int:
+	return get_effective_wagons_pure(team)
 
-func calc_total_weight(team: TeamData) -> float:
+static func get_carry_capacity_pure(team: TeamData) -> float:
+	return team.population * BASE_CARRY \
+		+ get_effective_mounts_pure(team) * MOUNT_BONUS \
+		+ get_effective_wagons_pure(team) * WAGON_BONUS
+
+func get_carry_capacity(team: TeamData) -> float:
+	return get_carry_capacity_pure(team)
+
+static func calc_total_weight_pure(team: TeamData) -> float:
 	var total: float = 0.0
 	for key in team.resources:
 		total += maxf(float(team.resources[key]), 0.0) * _resource_weight(key)
 	return total
 
+func calc_total_weight(team: TeamData) -> float:
+	return calc_total_weight_pure(team)
+
 # 剩餘載重空間（weight 單位）= carry_cap − 當前總重，floor 0（防負/除零）。
 func remaining_carry_space(team: TeamData) -> float:
-	return maxf(get_carry_capacity(team) - calc_total_weight(team), 0.0)
+	return maxf(get_carry_capacity_pure(team) - calc_total_weight_pure(team), 0.0)
 
 # 某 res 還能裝幾個（依 _resource_weight；重量 0 的工具→大數不設限）。
 func carry_space_for_res(team: TeamData, res: String) -> int:
@@ -175,7 +192,7 @@ func carry_space_for_res(team: TeamData, res: String) -> int:
 		return 1 << 30
 	return int(remaining_carry_space(team) / w)
 
-func _resource_weight(key: String) -> float:
+static func _resource_weight(key: String) -> float:
 	match key:
 		"food":              return 0.1
 		"weapon_melee_low":  return 2.0
@@ -186,12 +203,20 @@ func _resource_weight(key: String) -> float:
 		"coin":              return 0.0  # 錢幣不計入載重（WS-3 carry cap 不能因囤 coin 卡死進貨）
 		_:                   return 1.0
 
-func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> int:
-	var speed: float = _compute_team_speed(state, team) * time_mult
+# ★★★bumps sink（2026-09-09，systems spec §3）：`rootdiff.*` 三格的語意是
+#   【執行端走了幾格】。決策端現在也會走這條鏈算 ETA ⇒ 若照原樣 bump，
+#   ★這三格會混進決策端的呼叫，任何讀它的分析/床都被改。
+# ★★形狀選了【bumps sink】而不是 `probe := false` 旗標：
+#   旗標有預設值 ⇒ 會被忘記傳，而忘記的那一版【看起來仍然正常】；
+#   sink 是【必填】⇒ 呼叫端一定要明講自己是執行端(傳陣列)還是決策端(傳 null)。
+# ★★★而 bump 本身留在計算裡、只是改成「附進 sink」：條件（tile 存在／wagons>0／
+#   named 找得到）全在函式內部 —— 把條件搬到呼叫端就是把物理抄第二份。
+static func move_cost_pure(state: WorldState, team: TeamData, time_mult: float, bumps) -> int:
+	var speed: float = team_speed_pure(state, team, bumps) * time_mult
 	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 	if state.world.tiles.has(tile_id):
 		var terrain: String = (state.world.tiles[tile_id] as HexTileData).terrain
-		if Probe.enabled: Probe.bump("rootdiff.TERRAIN_SPEED_MULT")
+		if bumps != null: bumps.append("rootdiff.TERRAIN_SPEED_MULT")
 		speed *= TERRAIN_SPEED_MULT.get(terrain, 1.0)
 	# 疲勞懲罰
 	if team.fatigue >= 1.0:
@@ -199,42 +224,67 @@ func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> in
 	elif team.fatigue > 0.5:
 		speed *= (1.0 - team.fatigue * 0.4)
 	# 超載懲罰
-	var cap: float = get_carry_capacity(team)
-	var weight: float = calc_total_weight(team)
+	var cap: float = get_carry_capacity_pure(team)
+	var weight: float = calc_total_weight_pure(team)
 	if weight > cap:
 		speed *= (cap / weight)
 	# 車輛地形懲罰
-	var wagons: int = get_effective_wagons(team)
+	var wagons: int = get_effective_wagons_pure(team)
 	if wagons > 0:
 		var tile_id2: int = team.tile_pos.x * 1000 + team.tile_pos.y
 		var tile2 = state.world.tiles.get(tile_id2)
 		var terrain2: String = tile2.terrain if tile2 else "plains"
-		if Probe.enabled: Probe.bump("rootdiff.WAGON_TERRAIN_MULT")
+		if bumps != null: bumps.append("rootdiff.WAGON_TERRAIN_MULT")
 		speed *= WAGON_TERRAIN_MULT.get(terrain2, 1.0)
 	return clamp(int(round(float(BASE_MOVE_TICKS) / maxf(speed, 0.01))), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
 
+# 執行端入口：算完把 sink 裡的計數倒進 Probe（★Probe 關掉時傳 null，零配置）
+func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> int:
+	if not Probe.enabled:
+		return move_cost_pure(state, team, time_mult, null)
+	var b: Array = []
+	var c: int = move_cost_pure(state, team, time_mult, b)
+	for k in b:
+		Probe.bump(k)
+	return c
+
+static func team_speed_pure(state: WorldState, team: TeamData, bumps) -> float:
+	var base_speed: float = base_team_speed_pure(state, team, bumps)
+	return base_speed * _compute_mount_bonus_pure(team) * _compute_wagon_penalty_pure(team)
+
 func _compute_team_speed(state: WorldState, team: TeamData) -> float:
-	var base_speed: float = _compute_base_team_speed(state, team)
-	return base_speed * _compute_mount_bonus(team) * _compute_wagon_penalty(team)
+	if not Probe.enabled:
+		return team_speed_pure(state, team, null)
+	var b: Array = []
+	var v: float = team_speed_pure(state, team, b)
+	for k in b:
+		Probe.bump(k)
+	return v
 
 # mount 速度加成：(1 + ratio*FACTOR) * size_penalty
-func _compute_mount_bonus(team: TeamData) -> float:
+static func _compute_mount_bonus_pure(team: TeamData) -> float:
 	if team.population <= 0: return 1.0
-	var em: int = get_effective_mounts(team)
+	var em: int = get_effective_mounts_pure(team)
 	if em == 0: return 1.0
 	var ratio: float = float(em) / float(team.population)
 	var size_penalty: float = 1.0 - clampf(float(em) / MOUNT_SIZE_CAP, 0.0, 1.0) * MOUNT_SIZE_PENALTY
 	return (1.0 + ratio * MOUNT_SPEED_FACTOR) * size_penalty
 
+func _compute_mount_bonus(team: TeamData) -> float:
+	return _compute_mount_bonus_pure(team)
+
 # wagon 速度懲罰：1 - ratio*PENALTY（無 size penalty）
-func _compute_wagon_penalty(team: TeamData) -> float:
+static func _compute_wagon_penalty_pure(team: TeamData) -> float:
 	if team.population <= 0: return 1.0
-	var ew: int = get_effective_wagons(team)
+	var ew: int = get_effective_wagons_pure(team)
 	if ew == 0: return 1.0
 	var ratio: float = float(ew) / float(team.population)
 	return 1.0 - ratio * WAGON_SPEED_PENALTY
 
-func _compute_base_team_speed(state: WorldState, team: TeamData) -> float:
+func _compute_wagon_penalty(team: TeamData) -> float:
+	return _compute_wagon_penalty_pure(team)
+
+static func base_team_speed_pure(state: WorldState, team: TeamData, bumps) -> float:
 	var total_speed: float = 0.0
 	var total_count: int = 0
 	var named_ids: Array = team.named_members.duplicate()  # duplicate() — 避免直接修改 team.named_members
@@ -244,7 +294,7 @@ func _compute_base_team_speed(state: WorldState, team: TeamData) -> float:
 	for pid in named_ids:
 		var p = state.persons.get(pid)
 		if p != null:
-			if Probe.enabled: Probe.bump("rootdiff.NAMED_WEIGHT")
+			if bumps != null: bumps.append("rootdiff.NAMED_WEIGHT")
 			total_speed += p.get_effective_speed() * NAMED_WEIGHT
 			total_count += NAMED_WEIGHT
 			named_found += 1

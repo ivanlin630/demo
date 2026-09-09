@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: pending
+# blocker: means-end-s6-delay-discount-red
 
 # means-end S6 折現 TDD（HOW spec §10 S6+§7）。遠慾望「看得遠」:投資型 candidate util 按 delay×人格折現率折,
 # 絕境隊折趨零不走遠路 forest（WHAT §6）。util=payoff×dev_coeff×discount(delay,rate)。
@@ -75,7 +77,9 @@ func _test_guardrail_after_discount() -> void:
 func _test_delay_estimate() -> void:
 	print("--- delay 估 ---")
 	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0, 0)
-	var d_near: float = GoalResolver._estimate_delay_days(t, {"task": TeamData.TASK_TRADE, "target": Vector2i(0, 0)})
+	# ★delay 估已接執行端真成本 ⇒ 需要 state（無 tile 時 move_cost 走 baseline，不影響本測意圖）
+	var st := WorldState.new()
+	var d_near: float = GoalResolver._estimate_delay_days(st, t, {"task": TeamData.TASK_TRADE, "target": Vector2i(0, 0)})
 	_ok(is_equal_approx(d_near, 0.0), "自己 tile+非 build → delay 0（即時）")
-	var d_build: float = GoalResolver._estimate_delay_days(t, {"task": TeamData.TASK_BUILD, "target": Vector2i(0, 0)})
+	var d_build: float = GoalResolver._estimate_delay_days(st, t, {"task": TeamData.TASK_BUILD, "target": Vector2i(0, 0)})
 	_ok(d_build > 0.0, "build action → delay 含工期(%.1f>0)" % d_build)

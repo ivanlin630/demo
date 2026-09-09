@@ -19,4 +19,8 @@ VERDICT_GREEN_RE='ALL PASS|FAILS=0|fail=0|TEST-SUITE-COMPLETE|ASSERTIONS PASSED|
 # 原始碼裡存在判決/完成彙總通道 ⇒ 它就不是【純診斷】
 # ★注意 `errors: ` 與 `DONE ===` 用【不含零】的寬形式：原始碼寫的是 `errors: %d`，
 #   而它跑出 `errors: 3` 時 classify 判紅 ⇒ 通道存在。
-VERDICT_CHANNEL_RE='ALL PASS|TEST-SUITE-COMPLETE|ASSERTIONS PASSED|全部通過|DONE ===|errors: |FAILS=|HAS FAILURE|fail=0'
+# ★2026-09-09 收窄：原本收 `DONE ===`（任何完成行）——太寬。
+#   classify 綠的那個 token 是 `TEST DONE ===`,而 `=== 和平經濟觀測床 DONE ===`
+#   在 classify 眼中【不是】判決 ⇒ 收寬會把真的觀測床誤判成「有判決通道」。
+#   ★兩份清單要對齊的是【同一件事】：classify 讀得出判決的那些形狀。
+VERDICT_CHANNEL_RE='ALL PASS|TEST-SUITE-COMPLETE|ASSERTIONS PASSED|全部通過|TEST DONE ===|errors: |FAILS=|HAS FAILURE|fail=0'

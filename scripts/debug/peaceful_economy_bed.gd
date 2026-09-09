@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # ──────────────────────────────────────────────────────────────────────────
 # 和平經濟觀測床（measure-first Step0，HOW spec 2026-07-30）。
@@ -118,7 +119,7 @@ func _dump_team_at(state: WorldState, tid: int, tick: int) -> void:
 		if not e.has("cand"):
 			continue
 		var cand: Dictionary = e["cand"]
-		var delay: float = GoalResolver._estimate_delay_days(t0, cand.get("to_task", {}))
+		var delay: float = GoalResolver._estimate_delay_days(state, t0, cand.get("to_task", {}))
 		var discount: float = 1.0 / (1.0 + rate * maxf(delay, 0.0))
 		var denom: float = dev_coeff * discount
 		var u: float = float(e["u"])
