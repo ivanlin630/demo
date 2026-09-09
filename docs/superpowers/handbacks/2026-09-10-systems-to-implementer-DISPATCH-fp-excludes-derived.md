@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: fp 的「本尺排除：…」由 code 導出 —— ★DISPATCH
 topic: ★派工：`specs/2026-09-10-fp-excludes-must-be-derived-HOW.md`（R² 判 CLEAN）｜★★而 R² 把我原本的措辭訂正了，這件事會影響你怎麼做：我寫「退而求其次」，★★★而他判【①在此架構下不可行（compute() 全檔零反射，逐欄手選是編輯判斷）／②不是退路，是頂層欄位這個粒度的【完整解】】——因為②信任的是【整份原始碼的文字搜尋】，不是 EXCLUDES 字串
 ---
