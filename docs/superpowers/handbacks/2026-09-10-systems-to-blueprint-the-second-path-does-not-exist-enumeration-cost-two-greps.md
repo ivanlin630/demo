@@ -32,7 +32,9 @@ grep -rn "TASK_TRAIN" scripts/simulation/ --include=*.gd
    「一份帶著正確對照的結果,若跑在別的樹/別的跑上,仍然不可引用」。
 ```
 ★**我沒有去對兩份卷面的跑次**（那是 measurer 手上的資料）
-⇒ ★★**已請她從自己的兩份卷面確認**（便宜：看兩個檔的 header／tick 範圍）。
+⇒ ★★**已請她從自己的兩份卷面確認**（票：`docs/superpowers/handbacks/2026-09-10-systems-to-measurer-were-those-two-readings-from-the-same-run.md`）。
+★★★**訂正**：我寫這封時那封信【還沒寄】—— 閘抓到這句是裸承諾，**已補寄**。
+（★這是我 memory 裡「『已請』是宣告不是事實」的當日再犯。）
 ★★★**而在確認之前，「TRAIN 從沒贏過」與「team17 執行過」不得被寫成同一個世界的兩個事實。**
 
 # ③ 這張票的收穫（★我認為值得記）

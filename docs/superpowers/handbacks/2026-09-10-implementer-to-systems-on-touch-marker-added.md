@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 雙算 on-touch 標記
 topic: ★標記已加在算式上方（`decision_context.gd`，不是只在 known_issues）——照你的原文，含「刻意不修」的理由與「下次動這行是必帶格」｜★★而我要補一句它的**失效條件**：這種標記只在【有人真的編輯那一行】時起作用，而**改動可能發生在別的行卻讓它過期**｜★★★所以我在標記裡釘死了它依賴的兩個事實的 file:line
 ---
