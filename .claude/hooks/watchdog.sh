@@ -119,6 +119,50 @@ open_letters() {
 
 # ── S3 長工作在跑？（★分層：便宜的先問，貴的最後且有 timeout 護欄）──
 #    beacon 只壓警報、不造警報，帶死線自動過期（忘了刪 → 8h 後失效；忘了寫 → 只多響一次）。
+# ★★★beacon `started=` → epoch（2026-09-10 抽成函式，因為它是【第三次】beacon 讀取系 bug 的現場）
+#   ★回 0 ＝【問不出來】——★★呼叫端必須落回「連續觀察到多久」，不得把 0 當成「剛開始」。
+#   ★★★而抽成函式的理由是【它需要成對對照】：`date -d ""` 在 GNU date 上回【今天午夜】，
+#      ⇒ 若少了 `[ -n ]` 那道守衛，一個【沒有 started= 的 beacon】會生出一個
+#        最多 24 小時的假工期 —— 正是本次要修的那一族（假的長工期）。
+beacon_started_s() {   # $1 = beacon 檔路徑；回 epoch（0 = 問不出來）
+  local st se
+  [ -r "${1:-}" ] || { echo 0; return; }
+  st=$(sed -nE 's/.*started=([0-9T:+-]+).*/\1/p' "$1" 2>/dev/null | head -1)
+  [ -n "$st" ] || { echo 0; return; }
+  se=$(date -d "$st" +%s 2>/dev/null || echo 0)
+  case "$se" in ''|*[!0-9]*) se=0 ;; esac
+  echo "$se"
+}
+
+_selfcheck() {
+  # ★成對對照：會回真值的一組 ＋ ★★【不得生出假工期】的一組。
+  local d fail=0 got
+  d=$(mktemp -d) || { echo "[watchdog --selfcheck] ⚠ 無暫存目錄 ⇒ ABORT（不是綠）"; return 1; }
+  _c() { # $1=期望(gt0/zero) $2=檔內容 $3=說明
+    printf '%s\n' "$2" > "$d/b"
+    got=$(beacon_started_s "$d/b")
+    if [ "$1" = "gt0" ]; then
+      if [ "$got" -gt 0 ]; then echo "  ✓ $3"; else echo "  ✗ $3（期望解得出，實得 0）"; fail=1; fi
+    else
+      if [ "$got" = "0" ]; then echo "  ✓ $3"; else echo "  ✗ $3（★生出假工期 epoch=$got）"; fail=1; fi
+    fi
+  }
+  echo "[watchdog --selfcheck] beacon started= 解析（會解出 × 不得生假工期）"
+  _c gt0  "pid=1 started=2026-09-10T04:22:48 args=--headless"  "真格式解得出"
+  _c zero "pid=1 args=--headless"                              "★沒有 started= ⇒ 0（不是今天午夜）"
+  _c zero "pid=1 started= args=--headless"                     "★★started= 空 ⇒ 0"
+  _c zero "pid=1 started=NOTADATE args=x"                      "非數字 ⇒ 0"
+  _c zero "pid=1 started=2026-09-10T args=x"                   "★★★被截斷的時戳 ⇒ 0（半個 ISO 不是時間）"
+  _c zero "pid=1 started=99999-99-99T99:99:99 args=x"          "荒謬日期 ⇒ 0"
+  got=$(beacon_started_s "$d/does-not-exist"); \
+    { [ "$got" = "0" ] && echo "  ✓ 檔不存在 ⇒ 0"; } || { echo "  ✗ 檔不存在卻回 $got"; fail=1; }
+  rm -rf "$d"
+  [ "$fail" = 0 ] && echo "[watchdog --selfcheck] ✅ 全綠" || echo "[watchdog --selfcheck] ❌ 有格不符"
+  return $fail
+}
+
+case "${1:-}" in --selfcheck) _selfcheck; exit $? ;; esac
+
 long_running() {
   local now f hit; now=$(date +%s)
   shopt -s nullglob
@@ -164,7 +208,7 @@ announce() {
 # ★待命升級參數（跨代不必等、當場判；同代久不讓位才逾時升級）
 STANDBY_MAX_ROUNDS="${STANDBY_MAX_ROUNDS:-8}"   # 8 × POLL ≈ 2h
 ESCALATE_EVERY="${ESCALATE_EVERY:-8}"           # 升級訊息複述間隔（輪）——說一次會被錯過
-last_class="OK"; last_fire=0; run_since=0; standby_said=0; standby_rounds=0; claim_rc=0; holder=""
+last_class="OK"; last_fire=0; run_since=0; run_src=""; run_maxrun_ok=0; run_true_s=0; standby_said=0; standby_rounds=0; claim_rc=0; holder=""
 while true; do
   claim_lock; claim_rc=$?
   if [ "$claim_rc" != "0" ]; then
@@ -198,7 +242,34 @@ while true; do
   alive="$(alive_roles)"
   letters="$(open_letters)"
   running="$(long_running)"
-  if [ -n "$running" ]; then [ "$run_since" -eq 0 ] && run_since=$now; else run_since=0; fi
+  # ★★★2026-09-10 修（第三次 beacon 讀取系 bug，blueprint 揭：watchdog 報 8h32m 對不上任何進程）：
+  #   ★病①【計時器的主詞會變，而計時器不會重來】：`long_running` 是一個【異質來源的 or】
+  #     （beacon／godot-proc／file-activity／file-activity-wt），舊碼只要它非空就把 run_since
+  #     一直留著 ⇒ ★★來源換了、計時照舊 ⇒ 報出來的「長工作已跑 X」的主詞【不存在】。
+  #   ★病②【其中一個來源幾乎恆真】：`file-activity` ＝ scripts/ 或 docs/measurements
+  #     十分鐘內有檔被動過 —— 六個角色同時在工作時它【永遠是真的】
+  #     ⇒ run_since 在 watchdog 起來的第一輪就被設下，之後【永遠不重置】
+  #     ⇒ ★★★它量到的是【watchdog 自己的 uptime】，不是任何一個工作的時長。
+  #   ⇒ 修法三件：(a) 記住【是哪個來源】，來源一換就重來；
+  #              (b) file-activity* 【不餵 MAXRUN】（它是「有人在工作」，不是「有個長工作」）；
+  #              (c) beacon 有 `started=<iso>` ⇒ ★用它算【真工期】，不用「我連續看到多久」。
+  if [ -n "$running" ]; then
+    [ "$running" != "$run_src" ] && { run_src="$running"; run_since=$now; }
+  else
+    run_src=""; run_since=0
+  fi
+  # ★MAXRUN 的合格來源：只有【真的代表一個進程】的那兩種
+  run_maxrun_ok=0
+  case "$run_src" in beacon:*|godot-proc) run_maxrun_ok=1 ;; esac
+  # ★★beacon 帶 started=<iso> ⇒ 真工期優先於「我連續看到多久」
+  run_true_s=0
+  case "$run_src" in
+    beacon:*)
+      _bf="$HOOKD/.busy.${run_src#beacon:}"
+      _se=$(beacon_started_s "$_bf")
+      [ "$_se" -gt 0 ] && [ "$_se" -le "$now" ] && run_true_s=$(( now - _se ))
+      ;;
+  esac
 
   # git：兩個信號，用途不可混（★v3 病：取全 ref 最新 commit ⇒ merge 到 main 沒寫信反而把警報壓住）
   any_ct=$(git -C "$ROOT" for-each-ref --sort=-committerdate --count=1 --format='%(committerdate:unix)' 2>/dev/null || echo 0)
@@ -271,8 +342,13 @@ while true; do
   fi
 
   if [ "$class" = "OK" ]; then
-    if [ -n "$running" ] && [ "$run_since" -ne 0 ] && [ $(( now - run_since )) -ge "$T_MAX_RUN" ]; then
-      class="RUNAWAY"; via="running-maxrun"; detail="  長工作已跑 $(dur $(( now - run_since )))（來源 ${running}）—— 疑似掛死"
+    _obs_s=0; [ "$run_since" -ne 0 ] && _obs_s=$(( now - run_since ))
+    _judge_s=$_obs_s; _judge_kind="連續觀察到"
+    [ "$run_true_s" -gt 0 ] && { _judge_s=$run_true_s; _judge_kind="★真工期(beacon started=)"; }
+    if [ "$run_maxrun_ok" = "1" ] && [ "$_judge_s" -ge "$T_MAX_RUN" ]; then
+      class="RUNAWAY"; via="running-maxrun"
+      detail="  ${_judge_kind} $(dur $_judge_s)（來源 ${run_src}）—— 疑似掛死
+  ★判準來源：${_judge_kind}；★★file-activity 類不計入 MAXRUN（它是「有人在工作」不是「有個長工作」）"
     elif [ -n "$running" ]; then
       class="OK"                                   # ★量測跑半天走這條
     else
