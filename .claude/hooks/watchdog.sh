@@ -106,12 +106,19 @@ open_letters() {
 # ── S3 長工作在跑？（★分層：便宜的先問，貴的最後且有 timeout 護欄）──
 #    beacon 只壓警報、不造警報，帶死線自動過期（忘了刪 → 8h 後失效；忘了寫 → 只多響一次）。
 long_running() {
-  local now f dl hit; now=$(date +%s)
+  local now f hit; now=$(date +%s)
   shopt -s nullglob
+  # ★★★2026-09-09 修：本函式讀的是【舊契約】(檔內一個 deadline epoch),
+  #   而 beacon 的內容 2026-09-06 起是 `pid=<n> started=<iso> args=<...>`(godot.ps1 蓋的)
+  #   ⇒ `case (*[!0-9]*)` 一律把 dl 打成 0 ⇒ `0 > now` 恆假
+  #   ⇒ ★【beacon 這一支從改契約那天起就沒有 fire 過一次】,watchdog 一路掉到 `godot-proc`,
+  #     於是「beacon 明明在」卻報「不是任何人的 beacon」(blueprint 連兩次收到這個假警報)。
+  #   ★★病灶不是判斷寫錯,是【契約改了而只有一個 reader 被遷移】
+  #     (`bash-guard.sh` 已改成心跳 mtime,本檔沒有) —— 同型另一處沒跟著改。
+  #   ★★★改成與 bash-guard 同一個判準:【心跳 mtime】。窗放寬到 3 分鐘,
+  #     理由是 watchdog 的呼叫間隔比 bash-guard 稀疏,60s 窗會在兩次心跳之間誤判成沒人在跑。
   for f in "$HOOKD"/.busy.*; do
-    dl=$(cat "$f" 2>/dev/null || echo 0)
-    case "$dl" in (*[!0-9]*|'') dl=0 ;; esac
-    [ "$dl" -gt "$now" ] && { echo "beacon:${f##*/.busy.}"; return; }
+    [ -n "$(find "$f" -mmin -3 2>/dev/null)" ] && { echo "beacon:${f##*/.busy.}"; return; }
   done
   # ps -W ★必須帶 -W：實測不帶抓不到 WMI-detach 起的 Godot（2026-08-21 階段0 驗）
   ps -W 2>/dev/null | grep -qi godot && { echo "godot-proc"; return; }

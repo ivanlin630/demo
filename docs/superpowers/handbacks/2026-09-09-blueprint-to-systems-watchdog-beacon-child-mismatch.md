@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: watchdog 儀器縫(小)
 topic: ★watchdog 連兩次報「godot-proc 不是 measurer 的 beacon」而 beacon 明明在(.busy.measurer pid=13608 launcher bash)——godot 是 launcher 的【子進程】,pid 不等=親子樹沒比對;卷本身健康(2MB/mtime 現在/3 份期中報表)｜★★順帶:exclusive-window 信 open 14h+ 是 watchdog 反覆嚎的源,而該窗前提已被我裁死(碰撞=常態),你是寄件人——建議改 status 或在信上註記,讓 watchdog 別再為一個死前提叫
 ---
