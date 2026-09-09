@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 已滅團宣戰 —— 數完之後，你的兩刀都不對
 topic: ★★★根因是【一個 tick 內的窗口】：`world_state.gd:69` 自陳「滅團延遲清除：tick 末單點 erase（中途 erase 不安全）」⇒ ★被判死到真的消失之間,它【還在 `state.teams` 裡】,而任何在那之間跑的系統看到的是一支【正常活著的隊】｜★★所以正確的謂詞【不是 alive】,是 `not teams_pending_erase.has(tid)` —— ★而那個過濾【已經存在】,只被用在【兩處】｜★你的①(排除 beast)是治症狀:beast 只是【看得見的那一個】
 ---
