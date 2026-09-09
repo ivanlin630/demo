@@ -60,7 +60,8 @@ func _t1_food_split() -> void:
 # ④ magnitude 守 FUY 2.0 不爆（full-staff level3 production bounded）
 func _t4_magnitude() -> void:
 	print("--- ④ magnitude 守 ---")
-	var t := HexTileData.new(); t.tile_pos = Vector2i(0,0); t.harvest_factor = 1.0; t.farming_level = 3
+	# ★顯式 terrain（同上）：farming_level 需要平原，別靠預設值碰巧合法
+	var t := HexTileData.new(); t.tile_pos = Vector2i(0,0); t.terrain = "plains"; t.harvest_factor = 1.0; t.farming_level = 3
 	# full-staff：share=demand=level×K_FARM
 	var full_share: float = 3.0 * LaborSystem.K_FARM
 	t.labor_alloc = {"farm": {"share": full_share, "demand": full_share, "fill": 1.0}}

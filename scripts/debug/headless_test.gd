@@ -11861,6 +11861,10 @@ func _test_facility_slots() -> void:
 	print("--- Facility Task1b: slot 制 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var tile := HexTileData.new()
+	# ★顯式指定地形（2026-09-10，農田限平原票）：這裡的 farming_level 需要平原，
+	#   而原本它靠 `tile_data.gd:5` 的【預設值】剛好合法 ——
+	#   ★碰巧正確的前提與刻意正確的前提在綠燈上長得一樣，只有後者在預設改變時會出聲。
+	tile.terrain = "plains"
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
 	assert(OutpostSystem.slot_cap(tile) == 2)
 	tile.outpost_level = 3

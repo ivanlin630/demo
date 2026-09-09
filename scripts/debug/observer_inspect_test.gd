@@ -18,6 +18,8 @@ func _tid_key(pos: Vector2i) -> int:
 
 func _make_tile(pos: Vector2i, otype: String, olevel: int, owner: int) -> HexTileData:
 	var t := HexTileData.new()
+	# ★顯式 terrain（同上）：civilian 分支塞 farming_level=3，需要平原
+	t.terrain = "plains"
 	t.tile_pos = pos
 	t.tile_id = _tid_key(pos)
 	t.outpost_type = otype
