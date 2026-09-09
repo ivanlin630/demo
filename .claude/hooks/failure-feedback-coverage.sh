@@ -47,7 +47,12 @@ _dead_equivalents() { # $1 = failure_memory.gd —— 印出「宣稱有等價�
     while IFS= read -r line; do
       opt="$(printf '%s' "$line" | sed 's/^	"//; s/".*$//')"
       # 抓理由裡第一個 Xxx.yyy 形式的符號
-      sym="$(printf '%s' "$line" | grep -oE '[A-Z][A-Za-z0-9_]*\.[a-z_][A-Za-z0-9_]*' | head -1)"
+      # ★★★2026-09-09 放寬（我自己的守衛第 5 次犯同一個病：母體排除了合法形狀）：
+      #   舊版只認 `Symbol.method`（大寫開頭＋點）⇒ 一個【欄位型】的等價機制
+      #   （`diplomacy_reject_cooldown`，team_data.gd:258，真的存在且被四處讀寫）
+      #   會被判成「沒有指名 Symbol.method」而紅 —— ★合法的東西被擋在母體外。
+      #   ⇒ 判準改成【夠長且含 `_` 或 `.` 的識別字】,再用 grep 驗它真的在 code 裡。
+      sym="$(printf '%s' "$line" | grep -oE '[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)?'              | grep -E '[_.]' | awk 'length($0)>=8' | head -1)"
       # ★「同上」是合法簡寫,但它【自己會腐爛】(前一條改了它就默默指向別處)
       #   ⇒ 允許它,而【繼承來的符號一樣要被驗】。繼承不到 ⇒ 紅。
       if [ -z "$sym" ] && printf '%s' "$line" | grep -q '同上'; then sym="$_prev_sym"; fi

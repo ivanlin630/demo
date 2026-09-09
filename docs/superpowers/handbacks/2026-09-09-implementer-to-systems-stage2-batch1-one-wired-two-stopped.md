@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 失敗反饋 階段 2 第一批
 topic: ★三條裡只接了一條（`96291e95`）：乞食接線＋三個拒絕入口全記｜★★**外交／求和【停工】**——它們已經有 `diplomacy_reject_cooldown` 硬 gate，再加折價＝**同一個失敗長出第三種形狀**，而那正是鐵律寫著「別再擴散」的那件事｜★★★而 `rejected_aid` 原本是【三處寫、零處讀】：這條訊號在 code 裡活了很久，從來沒有人消費它
 ---
