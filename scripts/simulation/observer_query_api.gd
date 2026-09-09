@@ -108,6 +108,23 @@ static func query_team(state: WorldState, tid: int) -> Dictionary:
 		"tile_pos": t.tile_pos,
 		"tags": t.tags.duplicate(),
 		"is_beast": t.beast_kind != "",
+		# ★★★inspect 深化（2026-09-10）：以下五欄是【掏欄位】不是造機制 —— 資料都已在 state。
+		# ★目標【對象】：task 早就有了，缺的是「對誰／去哪」。三個 target 欄各有語意，
+		#   ★★不合併成一個字串：合併之後就分不出「去某地」與「打某隊」。
+		"target": {
+			"move_pos": t.move_target,        # 去哪（-1,-1 ＝ 無）
+			"combat_team_id": t.combat_target,  # 打誰（-1 ＝ 無）
+			"social_team_id": t.social_target,  # 找誰（外交/乞食/投靠，-1 ＝ 無）
+		},
+		# ★goal 細節：印【引擎自己存的那個結構】，★★不做解釋文字層（那是票②）
+		"goal_state": t.goal_state.duplicate(true),
+		# ★morale：team 層唯一的士氣量是 work_morale（reaction 寫入、產出系統消費）
+		"work_morale": t.work_morale,
+		# ★★★威脅感：★沒有快照可讀 —— `threat_react`／`threat_id` 只活在 DecisionContext，
+		#   而 ctx 是【每 tick 重算】的。本票【不重算】：重算＝觀察一次就跑一次 gather，
+		#   ★而「觀測改變被觀測物」今天已經有血證 ⇒ 印【未快照】而不是偷偷算一個。
+		#   ⇒ 要不要存快照留給下一張票（本票的誠實限，已寫進交件信）。
+		"threat": { "snapshot": false, "note": "未快照：threat_react/threat_id 只在 DecisionContext，每 tick 重算" },
 	}
 
 # 地圖渲染 DTO：全隊真位（god-view）
@@ -154,7 +171,26 @@ static func query_outpost(state: WorldState, tpos: Vector2i) -> Dictionary:
 		"garrison": tile.garrison.size(),
 		"resources_nonzero": _nonzero_resources(tile.resources),
 		"resource_cap": tile.resource_cap.duplicate(),
+		# ★★★居民團清單：★注意 `is_resident_static` 是【位置謂詞】——
+		#   它答的是「【此刻】站在這裡且算居民的隊」，不是「屬於這裡的隊」。
+		#   ★★兩者不同（known_issues「兩個位置謂詞」條）⇒ 欄位名與註解都要說出這件事，
+		#   ★★★而【空清單不是面板壞了】：這個世界目前沒有村莊那一層（known_issues 已坐實）。
+		"residents_here_now": _residents_here_now(state, tpos),
 	}
+
+# 此刻站在這格、且 is_resident_static 為真的隊（★位置謂詞，非歸屬謂詞）
+static func _residents_here_now(state: WorldState, tpos: Vector2i) -> Array:
+	var out: Array = []
+	var ids: Array = state.teams.keys()
+	ids.sort()   # ★穩定排序：面板不得因字典順序而每次不同
+	for tid in ids:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos != tpos:
+			continue
+		if not FactionAISystem.is_resident_static(state, t):
+			continue
+		out.append({ "team_id": tid, "label": team_label(state, tid), "pop": t.population })
+	return out
 
 # 全據點列表 DTO（god-view；免逐隊翻找）。sort by tile_id 穩定。
 static func query_all_outposts(state: WorldState) -> Array:
