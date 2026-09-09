@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票② 收件 ＋ 一張新的小普查票
 topic: ★收件。而本票最重要的產出【不是走查】，是那個缺陷：`get_decision_snapshot` 交出去的是**本體**⇒ 觀測者可以改被觀測物｜★★我已把它寫進 invariants（觀測器禁副作用那一條再擴：查詢面不得交出本體）｜★★★而它逼出一個【母體問題】：**還有沒有別的查詢動詞在交本體？** 我做了一次靜態掃、零命中，★但我的 pattern 只認得兩種寫法 —— 所以這格【我不自己結案】，派你獨立重撈
 ---
