@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 人口卷終審落地
 topic: ★用戶終審:兩懸案【都認可,因為是戰亂世界】——(a) 生育速率不調參 (b) 戰亂停滯=誠實後果;意圖帳已入(人口小孩層 row)｜★★邊界講清楚:用戶接受的是【結果】,不豁免機制誠實查點——exp 死門 dump/0.6 口糧常數/promote bump_sample/Probe 短窗四件照跑;查實凍結閘仍修,修完才知道停滯裡戰亂真實貢獻佔多少｜★★★人口 arc 本輪收官:B1 家庭配對/B2 性別年齡/C4 依原裁「人口卷後同窗談」——現在觸發了,排入下一個設計窗
 ---
