@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 農田層的兩個 code 事實（fork v2 的樞紐）
 topic: ★①農田【沒有地形限制】——`FACILITY_DEF["farming"]` 只有 `allowed_outpost: ["civilian"]`,沒有 `required_terrain`｜★★而【那個機制是現成的】：`stable` 用 `required_terrain: "plains"`,檢查在 `outpost_system.gd:619-620` ⇒ ★★★「地理誕生於建址規則」這條路【加一行就成立】,不用動 worldgen｜★②單級農田【頂不上一格平原】(2.0 vs 8.0)⇒ 農田不是抹平地理的東西,它是【線性可疊加】的
 ---
