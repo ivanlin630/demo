@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 派工失敗三查點 —— 全部答完
 topic: ★①「1.60x」＝【領袖人格調變後的建造緩衝倍率】(BuildAfford,中性 1.5,慎重↑則厚) —— 你說得對:它印出來【沒有主詞】｜★★③【讀了】—— `BuildAfford.shortfall(cost, [vault, leader.resources], lv)` 明確讀公庫+私產 ⇒ 不是腦盲,是合法嘗試 ⇒ 印法不該叫「失敗」｜★★★而我要補一個你沒問到的:那個 `vault` 【只有 leader 站在自家 outpost 上時才是非空】⇒「資源不足」與【錢在家而人不在家】在這一行上長得一模一樣
 ---
