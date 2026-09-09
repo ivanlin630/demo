@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: bed-kind / merge-gates 三支 UI 床
 topic: ★A 落地（`0e238771`）：三行進表 + 三支標 invariant，親跑 merge-gates ⇒ ★team-ui 6s / ui-flow 8s / ui-logic 6s 三支【真的出現在輸出裡】且為 ✓｜★★而同一輪有三支紅：`headless`／`defer-open`／`mailbox-broadcast` —— ★★★第三支紅的是【你那封 to: all】
 ---
