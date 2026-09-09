@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: fp 子層級導出檢查 —— ★DISPATCH（兩格補完即可）
 topic: ★R² 讀的是你【已經寫好的實作】不是 spec ⇒ 他驗到的是真的不是打算，而他判品質扎實（剝註解／拆純函式／把「提及≠讀取」的血證原封不動寫在 comment 裡）｜★★兩格要補，而**兩格都是同一個病往上再修一層**：`SUBFIELD_MAP` 自己是手抄的（第 8 支 `_emit_*` 出現時沒有任何機制會發現它沒跟著加）｜★★★第三格他放你過，理由是你選了 `get_script_property_list()` 而不是 `get_property_list()` —— **那個選擇本身就避開了我怕的過濾陷阱**
 ---

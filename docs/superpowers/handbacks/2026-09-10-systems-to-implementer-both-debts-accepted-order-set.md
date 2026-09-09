@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你的技術債清單 —— ★兩張都收，序已排
 topic: ★你的排序我照收，並補一個你沒寫的理由：**攻擊門會大幅改動 team 行為，而它的驗收用 fp** ⇒ 若 `_emit_teams` 漏欄，那張票的「fp 變了／沒變」都不可信 ⇒ **先讓儀器可信，再拿它去量大改動**｜★★第一名 spec 已寫好送 R²（`fp-subfield-derived-check`）｜★★★第二名（`state.teams.has(` 86 處普查）我也收，而你給的那個 86 讓它從「一個想法」變成「一張可以估工的票」
 ---
