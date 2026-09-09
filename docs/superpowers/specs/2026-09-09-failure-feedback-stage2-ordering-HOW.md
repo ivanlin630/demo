@@ -1,6 +1,6 @@
 # HOW spec：失敗反饋 階段 2 —— 排序、分批，與第一批
 
-owner: systems ｜ 2026-09-09 ｜ player_reachable: no ｜ 序：階段 1 已 DONE（`d554ed39`）之後
+owner: systems ｜ 2026-09-09 ｜ player_reachable: no ｜ 狀態：R² CLEAN（item3/4 已補）⇒ 可 dispatch
 
 ## §1 這張票在解什麼
 
@@ -47,8 +47,32 @@ option ｜ 桶（已接／待接／已有等價機制／判準不成立）｜ un
 | option | unmapped | 已存在的失敗訊號 | 三個設計問題的**已知答案** |
 |---|---|---|---|
 | **外交**（結盟） | ─ | `envoy.reject`（`faction_ai_system:582`）、全庫 152 reject / 6 accept | 失敗＝envoy 被 reject；target＝**對象勢力**；TTL＝★待定 |
-| **建設** | 483 | `construction_abandoned`（`faction_ai_system:6426`）★而 `FailureMemory.record` 那行**被註解掉**（`:6424`，TODO(rebase-after-brick)） | 失敗＝abandoned；target＝★**設施種類還是地點？**（見下）；TTL＝★待定 |
-| **求和** | 428 | diplomatic reject 路徑 | 失敗＝求和被拒；target＝對象勢力；TTL＝★待定 |
+| **求和** | 428 | diplomatic reject 路徑 | 失敗＝求和被拒；target＝對象勢力；TTL＝**借 §5③ 的先例形狀** |
+| **乞食** | ★見下 | `rejected_aid` 已寫進 memory（`interaction_system:1493`） | 失敗＝乞食被拒；target＝**被乞求的那一隊**（單一事件、單一對象，無歸屬歧義）；TTL＝借先例形狀 |
+
+★★★**「建設」被移出第一批（R² 2026-09-09 查實，硬阻斷不是軟風險）**：
+
+```
+faction_ai_system.gd:6383  ⛔ current_dispatch_id / current_dispatch_target 是【磚 branch 的欄位】,本 branch 沒有
+              :6386-6387  # TODO(rebase-after-brick): team.commit_stall_id = team.current_dispatch_id  ←整段註解
+team_data.gd:272-273       commit_stall_id / commit_stall_target 欄位【存在】但【永遠沒被賦值】
+⇒ ★這不是「查完可能還好」,是【跨 branch 依賴沒到位】⇒ 查完必定卡住。
+⇒ ★★`自救建田` 也【不能】當替補：它的理由寫著「同『建設』,走同一條 construction_abandoned」
+   （failure_memory.gd:54）⇒ 同一組依賴、同一個阻斷。
+```
+
+★**第三條為什麼是「乞食」而不是照 unmapped 次數選** —— 我把限制寫出來，不假裝排過：
+```
+§3 排序鍵②（unmapped 次數）★我【無法套用】：階段 1 只回報了前 5 名,
+   完整的 20 種計數【沒有落地成檔案】,而那份回報的來源卷面已被覆寫（見 03b 第四條）。
+⇒ 改用排序鍵③（訊號具體度）——它有 file:line 可查,不需要重跑：
+   明確 reject 事件 ＞ abandoned 偵測 ＞ 靜默 return false
+   `乞食` 有 `rejected_aid`（單一事件、單一對象）
+   `併入`／`吸納` 共用 `join_rejected`（faction_ai_system:6331 / interaction:1280）
+   ⇒ ★選 `乞食`：★★兩個共用同一事件的 option 會多出一個「這筆失敗算誰的」的歸屬問題,
+     而第一批不該同時處理【接線】與【歸屬歧義】。
+⇒ ★★★而本票【必須把完整的 join 表印出來】(§2)：若真實計數與這個選擇矛盾,那必須看得見。
+```
 
 ★★★**`建設` 那條有一個【現成的坑】**：`:6424` 的註解自己寫著
 「**現在故意不記 —— 寧可少一筆，也不要用錯身分記到無辜選項頭上**」
@@ -63,9 +87,16 @@ option ｜ 桶（已接／待接／已有等價機制／判準不成立）｜ un
 ②【target】是誰？ ——★這決定「重撞同一個目標」的粒度:
    接太粗(target="-")=試過一次就對【所有】同類選項折價;
    接太細(target=具體座標)=每次都是新目標,折價永遠不累積。
-③TTL 多久？ ——★★這是設計選擇,而它必須【從那件事的物理導出】,不是挑一個數字:
-   例如結盟=對方的態度多久會變／建設=一個工程週期。
-   ★★★答不出來就寫「答不出來」並說明卡在哪 —— 不要為了填格子發明一個數。
+③TTL 多久？ ——★★這是設計選擇,而它必須【從那件事的物理導出】,不是挑一個數字。
+   ★**既有先例（R² 指出，直接抄這個做法不算發明數字）**：
+     `order_system.gd:226` 的 TTL 用 `ORDER_LIFETIME`（`:4`，＝5 天）——
+     ★★**衍生方式是「借【這個動作自己的到期週期】」**（買單自然到期＝重試的自然週期），
+     不是另外算一個物理量。⇒ 外交／求和／乞食都該先找「這件事自己的週期」。
+   ★★★**而「答不出來」的後果 spec 必須講完（R² 抓到的自我抵消）**：
+     `FailureMemory.record` 的 `ttl_ticks <= 0` 會【直接放棄不記】（`failure_memory.gd:86-89`）
+     ⇒ 實作者面前只有兩條路：**發明一個數字（違規）** 或 **這個 option 不接**。
+     ⇒ **規則：TTL 從物理導出不出來 ⇒ 這個 option 這批【不接】，換 §3 排序的下一個候選。**
+     ★**停工是允許的結果**，而「寫了『答不出來』但 code 裡還是塞了一個數」不是。
 ```
 
 ## §6 驗收
