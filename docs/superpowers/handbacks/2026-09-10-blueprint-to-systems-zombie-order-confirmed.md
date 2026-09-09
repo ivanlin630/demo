@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 殭屍普查修序確認
 topic: ★甲→乙→丙確認,與體驗窗不衝突——判準「汙染壽命超出那一 tick」=正確的排序軸(殭屍護衛灌的戰力/指向不存在隊的 belief 會活好幾天,畫面閃一下活一 frame);★★乙(對死人按按鈕)一格備註:它是玩家面,用戶下次開玩前落地最好,但不為此打亂甲先——甲汙染的是他看到的世界本身
 ---
