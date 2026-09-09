@@ -55,6 +55,76 @@ _check() {
 	return 1
 }
 
+# ── ② 裸 commit（2026-09-10 擴充，blueprint 裁「自己人照咬」）────────────────────
+# ★病：三次事故（blueprint e848dfef／systems f5f84c56／…）全都不是「誰不小心」，
+#   是【裸 git commit 吃掉整個 index】——而 index 是共用 main dir 上【所有角色共寫】的東西。
+# ★★收窄 add 的範圍解不了：目錄仍然是容器（我先前給 blueprint 的建議本身就是錯的）。
+#   ★★★唯一結構解＝【commit 帶 pathspec】：git 會為它另開一個暫時 index
+#     ⇒ 別人 staged 的東西【在型別上】進不來，不是靠紀律擋。
+# ★偵測法（實測，非推論）：pathspec commit 時 GIT_INDEX_FILE 指向 .git/next-index-<pid>.lock；
+#   裸 commit 時它是 .git/index（或未設）。⇒ 這是 git 自己給的、可靠的區分。
+_bare_commit_check() {
+	# 合併／cherry-pick／rebase 進行中：pathspec 不適用 ⇒ 放行
+	local gd; gd="$(git rev-parse --git-dir 2>/dev/null)" || return 0
+	[ -e "$gd/MERGE_HEAD" ] && { echo "[role-scope] ⚪ merge 進行中 ⇒ 不判" >&2; return 0; }
+	[ -e "$gd/CHERRY_PICK_HEAD" ] && { echo "[role-scope] ⚪ cherry-pick 進行中 ⇒ 不判" >&2; return 0; }
+	[ -d "$gd/rebase-merge" ] || [ -d "$gd/rebase-apply" ] && { echo "[role-scope] ⚪ rebase 進行中 ⇒ 不判" >&2; return 0; }
+	# linked worktree（單一角色獨佔）⇒ 不判；只有共用的 main worktree 才咬
+	case "$gd" in *"/worktrees/"*) echo "[role-scope] ⚪ worktree（單角色獨佔）⇒ 不判" >&2; return 0 ;; esac
+	local idx="${GIT_INDEX_FILE:-}"
+	case "$(basename "${idx:-index}")" in
+		next-index-*|*.lock) echo "[role-scope] ✅ pathspec commit（暫時 index）⇒ 別人 staged 的東西進不來" >&2; return 0 ;;
+	esac
+	{
+		echo "[role-scope] ⛔ 擋下：這是一個【裸 git commit】，它會吃掉【整個 index】。"
+		echo "             ★而 index 在共用 main dir 上是【所有角色共寫】的 —— 別人剛 git add 的東西會被你帶走。"
+		echo "             ★★同型事故 2026-09-10 一天內兩次（blueprint e848dfef／systems f5f84c56），"
+		echo "               兩次都不是誰不小心，是這個工作方式在有並行寫入時【必然發生】。"
+		echo ""
+		echo "  ★正解（結構解，不是紀律）：commit 帶 pathspec —— git 會另開一個暫時 index，"
+		echo "     ⇒ 別人 staged 的東西【在型別上】進不來。"
+		echo ""
+		echo "     git add <你這輪真改的檔…>            ← 新檔仍需先 add（pathspec 認不得未追蹤檔）"
+		echo "     git commit -F <訊息檔> -- <同一批檔…>"
+		echo ""
+		echo "  目前 staged（你若照上面做，只有你列出的那些會進 commit）："
+		git diff --cached --name-only | sed 's/^/               /'
+		echo ""
+		echo "  ★★逃生門：ROLE_COMMIT_SCOPE_OVERRIDE=1 git commit …（★用了請在訊息裡寫為什麼）"
+	} >&2
+	return 1
+}
+
+_selfcheck_bare() {
+	# ★成對對照②：裸 commit 必紅／pathspec commit 不得亂紅／merge 進行中不得亂紅。
+	# ★★這一組【必須在真的 git repo 上跑】——GIT_INDEX_FILE 是 git 自己設的，
+	#    ★★★用假環境變數自己餵一遍只會證明「我的偵測器認得我造的假象」。
+	local tmp rc out fail=0
+	tmp="$(mktemp -d 2>/dev/null)" || { echo "  ⚠ 無法建暫存 repo ⇒ 本組略過（★不是綠）"; return 0; }
+	local hook="$PWD/.claude/hooks/role-commit-scope.sh"
+	(
+		cd "$tmp" || exit 1
+		git init -q -b main . >/dev/null 2>&1
+		git config user.email t@t; git config user.name t
+		printf '#!/usr/bin/env bash\nexec bash "%s"\n' "$hook" > .git/hooks/pre-commit
+		chmod +x .git/hooks/pre-commit
+		echo a > f; echo b > g
+		git add f g >/dev/null 2>&1
+		# 先做一顆 base（用 override 讓它一定過）
+		ROLE_COMMIT_SCOPE_OVERRIDE=1 git commit -qm base >/dev/null 2>&1
+		echo x1 > f; echo x2 > g; git add f g >/dev/null 2>&1
+		# (1) 裸 commit ⇒ 必紅
+		if git commit -qm bare >/dev/null 2>&1; then echo "BARE_PASSED"; else echo "BARE_BLOCKED"; fi
+		# (2) pathspec commit ⇒ 必綠
+		if git commit -qm pathspec -- f >/dev/null 2>&1; then echo "PATH_OK"; else echo "PATH_BLOCKED"; fi
+	) > "$tmp/.out" 2>&1
+	out="$(cat "$tmp/.out" 2>/dev/null)"
+	case "$out" in *BARE_BLOCKED*) echo "  ✓ 會紅：裸 commit 被擋" ;; *) echo "  ✗ 會紅格失敗：裸 commit 沒被擋"; fail=1 ;; esac
+	case "$out" in *PATH_OK*) echo "  ✓ 不得亂紅：pathspec commit 放行" ;; *) echo "  ✗ 亂紅：pathspec commit 被擋"; fail=1 ;; esac
+	rm -rf "$tmp" 2>/dev/null
+	return $fail
+}
+
 _selfcheck() {
 	# ★成對對照：會紅的一組 ＋ 不得亂紅的一組。
 	# ★★對照必須落在【這個擋真正改變行為的區間】＝ 角色 × 有無 .gd 的四格。
@@ -82,6 +152,8 @@ docs/superpowers/handbacks/x.md"                   "不得亂紅：blueprint 只
 	# ★邊界格：路徑【長得像】但不是 production code
 	_one 0 blueprint  "docs/notes/scripts/foo.gd"   "不得亂紅：docs 底下的同名路徑（錨在行首）"
 	_one 0 blueprint  "scripts/README.md"           "不得亂紅：scripts/ 底下的非 .gd"
+	echo "[role-scope --selfcheck] 裸 commit × pathspec commit（★在真 repo 上跑）"
+	_selfcheck_bare || fail=1
 	[ "$fail" = 0 ] && echo "[role-scope --selfcheck] ✅ 全綠" || echo "[role-scope --selfcheck] ❌ 有格不符"
 	return $fail
 }
@@ -93,5 +165,6 @@ esac
 [ "${ROLE_COMMIT_SCOPE_OVERRIDE:-0}" = "1" ] && {
 	echo "[role-scope] ⚠ OVERRIDE=1 ⇒ 略過。★請在 commit 訊息裡寫為什麼。" >&2; exit 0; }
 
-_check "${SESSION_ROLE:-}" "$(git diff --cached --name-only)"
-exit $?
+_check "${SESSION_ROLE:-}" "$(git diff --cached --name-only)" || exit 1
+_bare_commit_check || exit 1
+exit 0
