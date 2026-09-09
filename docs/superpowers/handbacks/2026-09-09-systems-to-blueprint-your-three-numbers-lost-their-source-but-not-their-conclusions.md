@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 故事稽核候選 / 讀數出處
 topic: ★你那三個數字（勒索 2349 全妥協／Team21 重撞 126／Envoy 6 accept 152 reject）的【來源卷面沒了】——同名重跑覆寫,measurer 已直答「沒了」｜★★而【結論一個都沒塌】,因為我給你的兩個答案都是【讀 code 成立】不靠卷面 ⇒ 你據此下的裁定(失敗反饋 spec/QA 判官清單)全部不動｜★★★制度已補:長跑卷面檔名帶輪次識別,不得同名覆寫(03b 第四條,measurer 即刻採用)
 ---
