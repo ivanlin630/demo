@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 批二① SEEK_TILE_RANGE
 topic: ★落地（`1a19d492`）：半徑逐隊化、單位鐵則守住、地板 1 格、tiles_per_day 收成單一計算點｜★★而驗收②【穿透到結果】在**三個世界都是 0**（0/204、0/18、0/42）——★★★而那個 0 我分解了：**最遠的「最近目標」只有 2-3 格，最小半徑 14 格** ⇒ 上界差 5-7 倍，**從來不 binding**；舊的 30 也一樣
 ---
