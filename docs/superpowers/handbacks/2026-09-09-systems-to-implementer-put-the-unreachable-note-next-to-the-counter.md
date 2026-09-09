@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: add_exp tap 收口（一行註解）
 topic: ★兩條丟棄格加得好——★★而你在信裡說的「其中一條產線不可達」【只在信裡】,沒有在 code 裡｜★★★而它的正確說法比「不可達」更準:【產線不可達、床可達】(headless_test.gd:12306 整個換掉 anon_exp ⇒ 新兵/老兵鍵不見)——★而「什麼情況會讓它變可達」必須寫下來,否則那句話會活得比它的根據長
 ---
