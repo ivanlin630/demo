@@ -1,0 +1,35 @@
+{
+  "token": "sustainability-map",
+  "slice": "養活力地圖（上一卷「存在性距離」的量綱修正）",
+  "date": "2026-09-09",
+  "measured_at_head": "5381bf93",
+  "touches": [],
+  "world": "tick-0快照；本體=warring_states×2seed；對照=warring_states/infonet_established_fragility(16)/perf_scale(24)/infonet_recovery_r2_invest(40)×2seed",
+  "bed": "scripts/debug/sustainability_map_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-09-sustainability-map.txt"],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★★★證實systems的假說：pop=30的隊在全部4種圖尺寸(radius14/16/24/40)、兩個seed下，100%無解——沒有任何一格能自給自足養活它，且圖再大也不會有(距離不是變遠，是根本不存在)。pop=10剛好卡在邊界(plains regen=8.0恰好==burn=8.0)。pop=3到處都活得下去(plains+forest皆可)。規模本身就是地理約束，這不是距離問題，是存在性問題。",
+    "predicate": "GATE-A原樣(decision_context.gd:641-655、:268)：regen=REGEN_RATE[terrain][food]×harvest_factor(tick-0恆1.0)；burn=pop×FOOD_PER_PERSON_PER_DAY(0.80)；productive=regen>=burn",
+    "①②養活力距離(pop=3/10/30+中位數pop=9)": {
+      "pop=3": "可自給terrain=[plains,forest]；(a)每隊 p50=0 max=1 (b)每格 p50=0 max=1，無解比例0%",
+      "pop=9(warring_states中位數隊規模)": "可自給terrain=[plains]；(a)每隊 p50=1 max=2 (b)每格 p50=0-1 max=2，無解比例0%",
+      "pop=10": "可自給terrain=[plains]（regen8.0==burn8.0，剛好邊界）；同pop=9量級",
+      "pop=30": "可自給terrain=[]（空集合）⇒ ★★★距離undefined，無解比例=100%，四個圖尺寸、兩個seed全部一致"
+    },
+    "③規模相依（本票核心）": "burn=2.4(pop3)/8.0(pop9-10)/24.0(pop30) vs regen[plains/forest/mountain]=8.0/3.0/0.5——mountain對任何pop>=1都不自給(0.5<0.8)；forest只撐得住pop<=3.75(≈3)；plains撐到pop<=10。超過10的隊，靠raw地形regen在任何地方都活不下去，必須依賴farming_level投資/貿易/糧倉，這正是ticket①所說的『這隊會不會餓死』——本卷刻意不量那個",
+    "④跨圖尺寸對照": "radius=14/16/24/40四種尺寸，pop=3/10/30三種規模，結果全部一致(p50/max幾乎不變，pop=30恆100%無解)——★與上一卷『存在性』的結論同型：把圖畫大不會讓養活力變稀也不會變濃，因為predicate本身只看terrain類型不看位置，terrain分布密度又不隨圖變(見terrain-density-distance卷④)",
+    "與GATE-A舊讀數(56-61%)比對": "★不是同一件事：舊讀數量『有productive home outpost卻離家』(位置性，人跑掉了)；本卷量『這塊地本身能不能撐得起』(存在性，跟人在不在無關)。★★兩者方向一致但層次不同——本卷的pop=30結果(100%恆無解)是比GATE-A更上游的結構限制：即使隊乖乖待在家，只要規模>10，raw地形regen永遠不夠，那時候GATE-A講的『離家』甚至還沒發生就已經不夠吃了。★★★若世界裡存在population>10的定居隊，它們的存活必然依賴farming_level投資或貿易/外部補給，不能只靠raw terrain——這件事值得標出讓blueprint/systems知道兩份讀數不衝突但問的是不同層"
+  },
+
+  "honest_limits": [
+    "★①本卷不下設計結論——『要不要讓地理成簇稀疏化』的fork屬用戶，blueprint已明說呈報不預裁",
+    "★★②regen>=burn是【自給自足】定義，不涵蓋貿易/convoy/糧倉存量——本卷量的是『這塊地自己養不養得活』，不是『這隊會不會餓死』（有farming_level投資、貿易補給的隊即使home terrain不productive仍可能活下去，本卷未涵蓋這條路）",
+    "★③材料：全庫grep(MATERIAL_PER_PERSON/material_burn/材料日耗類)零結果——沒有material的per-person-per-day消耗率常數，如實聲明『無法做④的材料sub-question』，不硬造一個消耗率湊數；這本身即是『材料不構成像食物那樣的生存壓力』的證據",
+    "★④只跑2 seed/config——與terrain-density-distance卷同樣的限制，但因predicate本身只依賴terrain類型(非隨機的resource>0布點)，2 seed一致性已非常強(僅terrain直方圖隨seed小幅波動，未動搖任何一格的productive判定)",
+    "★⑤跑法沿用terrain-density-distance卷的BFS/config集合，全部秒級(<1.6秒)，符合票面預期"
+  ],
+
+  "supersedes": []
+}
