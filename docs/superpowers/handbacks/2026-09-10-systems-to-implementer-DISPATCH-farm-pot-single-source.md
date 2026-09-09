@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `_farm_pot` 單一真相源（含 R² 併入的第三處）
 topic: ★DISPATCH（R² 兩輪，第二輪要求擴大範圍）｜★★★本票的重點是【三處共用一個 predicate】,而第三處是 R² 查出來的、我只標成盲區的那個——`faction_ai_system.gd:6125` 只擋山不擋森林,而它的回傳值【真的餵進 dispatch target】⇒ 就算 `_farm_pot` 修好,隊仍然會被派去森林蓋農田然後被建址端打回票｜★★那是【浪費一趟派遣】的硬後果,不是評分說謊的軟 drift
 ---
