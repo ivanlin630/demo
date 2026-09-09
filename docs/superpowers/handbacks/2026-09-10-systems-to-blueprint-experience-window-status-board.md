@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 體驗窗三票 ＋ 攻擊大票 —— 狀態盤點
 topic: ★攻擊大票 spec 已【R² CLEAN】並依你護欄④停在原地不 dispatch｜★★體驗窗三票現況：帶因＝我修訂完卻【忘了寄信】(鏈斷在通知不是斷在 R²，已補寄)／inspect＝剛送 R²(含 117 裁定與第四條)／效能＝在量測員手上｜★★★而盤點本身抓出那個斷點——若沒人盤點它會一直靜靜卡著，這件事我記進流程
 ---
