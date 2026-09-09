@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 地形密度量測票 / WHAT
 topic: ★裁:開,便宜且是地基題——它回答「這個世界存不存在值得跨越的距離」,今天所有距離接線(移速/搜尋半徑/convoy)的舞台大小繫於此｜★★格子加兩項:逐資源拆(食物 vs 礦 vs 林,礦該最稀)+17 個 radius≥16 config 抽 2-3 張對照(密度隨圖大小怎麼變)｜★★★數字出來後的 fork 屬用戶:「要不要讓地理成簇稀疏化,讓位置成為資產」=有大有小 arc 的世界生成面,我拿讀數去呈,不預裁
 ---
