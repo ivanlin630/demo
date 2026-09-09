@@ -10,6 +10,17 @@
 #   ⇒ ★★★那條 met_check【永遠不會觸發】—— 而它不觸發的樣子,跟「條件還沒到」一模一樣
 #   ⇒ 規矩:met_check 若 grep 一個符號,★【先去查那個符號現在住在哪個檔】,不要憑印象寫路徑
 #      (我是在稽核『每一條 met_check 會不會永遠不觸發』時,在自己一小時前寫的那條上抓到的)
+#
+# ★★★★★【2026-09-09 同一個病的【上一層】：不是路徑錯，是【詞彙】是憑空想的】
+#   `ore-depletion-counter` 的 met_check grep `depletion|remaining_yield`，
+#   ★而 code 裡真正的字是 `harvest_deplete`（`resource_system.gd:458`）——
+#   ★★`depletion` 不是 `harvest_deplete` 的子字串 ⇒ 那條 met_check 永遠不會觸發。
+#   ⇒ 規矩升級：★★★**met_check 的詞彙要從【目標檔案現有的詞彙】取**
+#     （先 `grep` 那個檔看它怎麼命名，再寫 pattern），**不要用自己想的詞**。
+#   ⇒ ★★而本閘【抓不到這一類】，我明說：pattern 沒命中的樣子，
+#     跟「條件正確地還沒到」一模一樣，而「還沒實作的東西本來就 grep 不到」是合法情形
+#     ⇒ 無法用「詞彙不存在」當紅燈。★★★所以這一類的防線是【人在碰到那個 arc 時複驗】，
+#     不是閘 —— 而把這句話寫在這裡，就是那條防線本身。
 # ★欄位（TAB 分隔，四欄）：
 #   token        唯一代號（kebab-case）
 #   summary      裁定摘要（一行）
@@ -112,7 +123,18 @@ priority-started-check	★★★【第一優先空轉】偵測：blueprint 裁�
 gather-purity-bed-as-gate	★`scripts/debug/gather_observation_purity_bed.gd` 已在 main（證據本體），★★但【刻意不登記成 merge 閘】——它此刻會紅（gather 確實擾動），紅閘會擋住所有人｜★★★配對規則：`gather-not-pure-read` 修法落地【那一刻】把它登記進 merge-gates.tsv ⇒ 它從【證據】變成【回歸守衛】，而那正是本專案反覆漏掉的一格（床在、卻沒接到任何會讀的東西上）｜★★2026-09-08 訂正：修法已落地，而【床仍不是守衛】——它的判準是 fp，而 fp 不涵蓋那七個欄位 ⇒ revert 掉床照樣印一樣的東西。收口＝給床補 `observe==0` 閘格＋`advance>0` 母體格，fp 那條降級成診斷不進 PASS/FAIL（它此刻仍不同，當閘格會第一天就紅）	gather-not-pure-read 修法落地（★2e82de32 已落地 2026-09-08）	grep -q "^gather-purity" docs/process/merge-gates.tsv
 k-symptom-A-five-resources-never-candidate	★接 k 校驗判決①：herb/gem/ore_gold/ore_iron/ore_steel 五種資源【從未出現在候選生成層】(113205 行 specimen 逐字 0 次)，而它們都有真實下游 recipe｜★★已解釋的一半：weapon_melee_low 的上游 ore_iron 缺席可解釋——S2 買路徑 maintain_weapons:resource 持續生成 2070 次 ⇒ means-end 從未被逼下探 ore_iron｜★★★未解釋的一半：herb/gem/ore_gold 的缺席【更深層原因沒查到】——這格是【未知】不是【已知未修】｜★★QA 跨 world 誠實限（照抄，必須跟票走）：material 是 warring_states/30日/49隊，不是原始 0.1395 那輪的 peaceful_economy/90日/18隊 ⇒【機制級佐證，不是直接復現】；★★★GATE-B 同格嫌疑【沒查，不是排除】——它仍在桌上｜★關票時同時撤掉 03b_measurer 的方向註記	下一輪 means-end/候選生成診斷（不急，但別讓它變成「大家都知道所以沒人查」）	grep -c '"herb"' docs/measurements/2026-09-07-population-turnover.specimen.jsonl 2>/dev/null | grep -qv '^0$'
 k-symptom-B-weapon-util-never-wins	★接 k 校驗判決②：weapon_melee_low 候選【生成正常】(2334 次) 但 util avg 0.174 vs maintain_tools 約 1.0 ⇒【0 次贏過 argmax】｜★★★而處置【禁 crank】：本專案既有法「util 必＝真值，禁因不 fire 就把分數調到會贏」——要先問【0.174 是不是 genuine 的真值】(武器對一支不缺武器的隊本來就低價值?) 再談上游｜★而它不是手不聽腦家族(贏了沒執行)，是【根本沒贏過】＝要查的是 util 的輸入不是 dispatch｜★★QA 跨 world 誠實限（照抄，必須跟票走）：material 是 warring_states/30日/49隊，不是原始 0.1395 那輪的 peaceful_economy/90日/18隊 ⇒【機制級佐證，不是直接復現】；★★★GATE-B 同格嫌疑【沒查，不是排除】——它仍在桌上｜★關票時同時撤掉 03b_measurer 的方向註記	武器/製造鏈診斷輪	test -f docs/process/verdicts/weapon-util-genuine-or-gap.measure.json
-ore-depletion-counter	★儲量遞減計數器（礦有限裁定的 HOW）：`tile.resources` 採集要遞減，★而 worldgen 現在是【寫一次即永恆】⇒ 礦是無限的｜★★這一格與「有大有小/規模經濟」arc 相關：資源有限才有地理張力	薪資票之後（同屬經濟地基批）	git grep -q 'depletion\|remaining_yield' -- scripts/simulation/resource_system.gd scripts/simulation/harvest_system.gd
+# ── ★CLOSED 2026-09-09：`ore-depletion-counter`（blueprint 裁「前提不成立」，systems 複驗）──
+#   前提原文：「`tile.resources` 採集要遞減，而 worldgen 現在是【寫一次即永恆】⇒ 礦是無限的」
+#   ★複驗：`resource_system.gd:458`  TileBank.pool_set(src_tile, res, maxf(current - gain, 0.0), "harvest_deplete")
+#     ⇒ 採集【真的會遞減】；而 `REGEN_RATE`（:55-59）只有 food/material，★★礦沒有再生 ⇒ 遞減是永久的。
+#   ⇒ 前提在寫下的當時可能成立，現在不成立 ⇒ 關。
+#   ★★★而這一列的 met_check 是【永遠不會觸發】的：它 grep `depletion|remaining_yield`，
+#     而 code 裡的字是 `harvest_deplete` —— ★`depletion` 不是 `harvest_deplete` 的子字串。
+#     ⇒ 就算前提還成立，這條 defer 也【永遠不會被叫醒】。
+#   ⇒ ★後續（blueprint 開）：機制存在 ≠ 枯竭在實際時間尺度上會發生 ⇒ 量測票
+#     `qty.harvest_taken.ore_gold` 累計 vs worldgen 初始總量（90/180 天採掉幾成）。
+#   （★留這段而不是刪掉整列：下一個查「礦有沒有限」的人要看得到它是怎麼被關的。）
+# ore-depletion-counter	★儲量遞減計數器（礦有限裁定的 HOW）：`tile.resources` 採集要遞減，★而 worldgen 現在是【寫一次即永恆】⇒ 礦是無限的｜★★這一格與「有大有小/規模經濟」arc 相關：資源有限才有地理張力	薪資票之後（同屬經濟地基批）	git grep -q 'depletion\|remaining_yield' -- scripts/simulation/resource_system.gd scripts/simulation/harvest_system.gd
 verify-coin-marginal-diminishing	★★【四待驗票之首，最優先】coin 邊際遞減【在不在引擎裡】——★成本錨是否成立，決定「無限泉」會不會自穩｜★★★若沒有邊際遞減 ⇒ 給錢就是線性好處 ⇒ 貨幣量的任何裁定都建立在一個不會飽和的系統上	現在可查（★這是 code 對帳題不是長跑題）	test -f docs/process/verdicts/coin-marginal-diminishing.measure.json
 verify-chronic-underpay-downstream	★四待驗票②：慢性減薪的【下游全貌】——扣忠誠之後會走到哪（離團？叛變？生產下降？）★目前只知道入口不知道出口	薪資修法票落地後（★修完才有新的下游可看）	test -f docs/process/verdicts/chronic-underpay-downstream.measure.json
 verify-anon-treasury-zero-longterm	★四待驗票③：`anon_treasury = 0` 的長期效應——匿名兵公庫見底之後世界會怎樣（★而它現在是薪資懲罰的觸發源之一）	薪資修法票落地後	test -f docs/process/verdicts/anon-treasury-zero-longterm.measure.json
