@@ -4286,3 +4286,23 @@ powershell/timeout/cut 都在、`PROBE_DONE_RC=0` 有寫）。
 **資料處置**：99 支 `[FAIL]` 式新舊判法相同 ⇒ 舊列保留；31 支裸式**只撤其中判 green 的列**重跑
 （紅在兩版都成立）⇒ 新表 `docs/measurements/2026-09-07-bed-triage-131-v2.tsv`。owner=systems
 owner=systems
+
+## ⬜ 攻擊 option 的三道門【全是授權型】，沒有「機會＋需要」那道（2026-09-10）
+
+```
+量測(warring/1337/30天/380 次全隊快照)：三道門全關 = 97.37%(370/380)
+  faction_directive 6次(1.58%) ／ 征服 intent 6次(1.58%) ／ 血仇 0次(0.00%)
+code(options.gd:332-334) 三道門：
+  ①派系叫我打（上級授權）②我的 intent 標籤是征服（身分授權）③我對某人有仇≥0.5（歷史授權）
+★★★沒有任何一道是【他弱、我缺、我夠得著】⇒「強打弱掠奪」不是被秤壓低，是提名不到。
+★而攻擊 option 有完整四 term 效用秤(faction_duty/attack_drive/intent_fit/feud_pull)
+  ⇒ 引擎存在而 97.37% 不被叫到 ＝【離散硬閘 pre-empt 連續引擎】的教科書形狀。
+★②門對派系 member 恆關（intent 只填給獨立隊與 faction leader，decision_context:753-761）【待驗】
+★②門本身是 argmax 離散標籤 ⇒ 45%想征服的隊，門是全關不是分數低（序5 死常數人格化的同形）
+```
+**狀態**：等 blueprint 裁 WHAT——這個世界【應該】有圖利型掠奪嗎？
+- 若應該 ⇒ HOW 建議**不是加第四個 `or`**（那只是第四張許可證），是把 `applicable`
+  從【授權清單】降級成【可行性檢查】（夠得著＋打得動），把「該不該打」交回秤。
+- 若不應該 ⇒ 97.37% 是設計如此，寫進機制意圖帳當 WHAT，結案不修。
+★血仇門 0.00% 另掛號（`FEUD_ATTACK_MIN=0.5` vs 世界實際 feud 分布**未量**，
+  不下「凍結閘」的結論）。owner=systems

@@ -150,3 +150,9 @@ decision_context.gd 全檔【零筆】 event／Event／MessageData 命中
    他玩到的問題**回 blueprint 彙整**，不直接當工單。
 3. ★★**撤單若真的沒有既有路徑**，那是本票唯一的新機制 ⇒ **要在 handback 明講**，
    ★★★而不是混在「四件套都做好了」裡面。
+
+---
+
+★**附掛【順手改】格**：裸 print 帶因（`[SoloAI]` 行 ＋ 派工失敗行）
+⇒ `docs/superpowers/specs/2026-09-10-bare-print-carry-cause-CELL.md`
+（blueprint 2026-09-10 裁：低優先、不單獨開工、本票或另一票**誰先動誰帶走並刪該檔**。）

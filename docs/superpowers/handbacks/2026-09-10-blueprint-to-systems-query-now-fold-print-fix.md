@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 果事件帶因拆三 / 兩小裁
 topic: ★②現在查(一句 grep 的事,而且它決定用戶那則抱怨歸哪張票——若「求和」真是 current_task 狀態標籤,觀眾看的是【狀態】不是【事件】,那 inspect 深化票的「詳細目標」格剛好就是它的家)｜★★③併進觀察窗 inspect 票(同檔區同窗,一行 % 字串)｜★★★④②「cause 只進 honest 層,假傳聞不帶精確數字」=好裁定照收——傳聞失真層帶精確值=假傳聞自曝,資訊網語意保住了
 ---

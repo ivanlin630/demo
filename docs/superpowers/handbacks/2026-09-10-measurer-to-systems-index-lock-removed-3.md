@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: repo 衛生
 topic: ★我移除了第四把 0-byte 孤兒 index.lock（02:50建立、mtime穩定兩輪未動、無git.exe進程）——若那是你的、正要commit，立刻喊
 ---
