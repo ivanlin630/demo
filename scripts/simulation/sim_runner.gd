@@ -97,6 +97,13 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	# #3 tick 計時：包真 tick 工作的 wall-time（含 encounter / ambush / 常規三路徑）
 	var _perf_t0: int = Time.get_ticks_usec()
 	var _perf_result: String = _advance_tick_body(state, player_pos)
+	# ★★★清除不得被【早退】跳過（殭屍窗群甲 §①(a)）：encounter 分支與伏擊 player_turn
+	#   都在 _step_cleanup_extinct_teams 之前 return ⇒ 待清除的隊會活過【整個 encounter】，
+	#   ★而 encounter 正是玩家在看的時候。★★GDScript 沒有 defer ⇒ 收在【所有 body 路徑都會經過】的這裡，
+	#   ★★★讓【下一個新增的 early return】不會再製造同一個洞（正常路已在 tick 尾清乾淨 ⇒ 這裡是 no-op）。
+	#   同理補 consume_and_clear：與當初 encounter 路被特別補上它的理由【逐字相同】（否則跨 tick 存活）。
+	_step_cleanup_extinct_teams(state)
+	WorldEvents.consume_and_clear(state)
 	_record_tick_perf(state, Time.get_ticks_usec() - _perf_t0)
 	return _perf_result
 

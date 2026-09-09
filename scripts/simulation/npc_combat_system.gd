@@ -151,6 +151,10 @@ func team_strength(state: WorldState, team_id: int) -> float:
 	for tid in state.teams:
 		if tid == team_id:
 			continue
+		# ★殭屍護衛不得灌水戰力（群甲）：已判死未 erase 的隊仍在 state.teams 裡，
+		#   ★★而戰力餵決策（_eff_strength → 敗北出路 → 潰退判斷）⇒ 這一站的後果不在畫面。
+		if not state.is_live_team(tid):
+			continue
 		var t: TeamData = state.teams[tid]
 		if t.current_task == TeamData.TASK_ESCORT and t.order_target_id == team_id \
 				and t.tile_pos == team.tile_pos:

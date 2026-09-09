@@ -24,7 +24,9 @@ static func vision_range(state: WorldState, team: TeamData, time_vision_mult: fl
 func tick_discovery(state: WorldState, team_ids: Array,
 		time_vision_mult: float = 1.0) -> void:
 	for tid in team_ids:
-		if not state.teams.has(tid):
+		# ★這裡本來就有守衛，而它用的是 has() ⇒ 認不出【已判死未 erase】的隊（群甲）：
+		#   ★★「半個守衛」比完全沒守衛更危險 —— 它不會引人懷疑。
+		if not state.is_live_team(tid):
 			continue   # 本 tick 內滅團/解散 → id 仍留在傳入 team_ids 快照
 		if Probe.enabled:
 			Probe.bump("sysexec.vision.byteam.%04d" % int(tid))   # ★驗收②：第二個系統
@@ -38,6 +40,9 @@ func tick_discovery(state: WorldState, team_ids: Array,
 		var vrange: int   = roundi((VISION_RADIUS + scout * SCOUT_BONUS) * vmult * time_vision_mult)
 		for other_id in state.teams:
 			if other_id == tid: continue
+			# ★被觀測的那一側也要：發現一支這 tick 就會消失的隊 ⇒ 留下一筆
+			#   【指向不存在隊】的 belief，★★而 belief 的壽命比那一 tick 長。
+			if not state.is_live_team(other_id): continue
 			var other: TeamData = state.teams[other_id]
 			var dist: int = _hex_dist(obs.tile_pos, other.tile_pos)
 			# ★★★共位偵測 tap（systems 2026-09-04 問「共位時有沒有產生 sighting」）——
