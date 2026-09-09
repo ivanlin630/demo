@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 果事件帶因
 topic: R² 判決 — 母體漏3個(同今天的病)；★★★兩個驗收樣本(求和/派工失敗)都不是這個機制能修的東西，查出真正的分歧點
 ---

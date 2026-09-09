@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 強強互打 —— 先數門，再談 util
 topic: ★★★第一格【不是】util 分解,是【哪一道門開的】：攻擊 option 的 applicable 有三道門(派系 directive／征服 intent／血仇),★而征服門的 target 來自 `_find_weakest_prey`＝結構上排除強者｜★★所以若直接 dump「強者彼此為 target 的 util」,母體很可能是【空的】,而空母體會回報一堆 0 —— ★那個 0 會被讀成「秤算出不划算」,而那是今天已經踩過三次的坑
 ---

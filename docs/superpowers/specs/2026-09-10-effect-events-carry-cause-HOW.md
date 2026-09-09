@@ -5,6 +5,29 @@ owner: systems ｜ 2026-09-10 ｜ **player_reachable: yes（觀眾可讀）** �
 上游：用戶看到**求和**而上游沒有任何宣戰/威脅事件；又看到**派工失敗**印一個沒有主詞的 `1.60x`。
 blueprint 裁：**零新機制**、**事件文本帶因快照**、**同族一起掃不要逐隻**。
 
+## §0 ★★★【R² 2026-09-10 大幅訂正】三個代表案例裡，只有一個真的走這條管道
+
+```
+宣戰    ★走 emit_message（npc_combat_system.gd:124）⇒ ★本票修得到
+求和    ★★【查無實據】：全庫 grep「求和」只出現在 decision_context／options／terms／failure_memory
+        ＝【決策層的 option 名稱】,★★★【沒有任何 emit_message 與它關聯,一個都沒有】
+        ⇒ 用戶看到的「求和」八成是 observer/text UI 直接顯示 `team.current_task` 之類的【狀態標籤】
+        ⇒ ★而我把它定成本票的【頭號驗收樣本】—— 那是在修一個【不存在的呼叫點】
+派工失敗 ★★走【裸 print()】（faction_ai_system.gd:4538 `_log_dispatch_fail`）
+        —— 與 emit_message／TextBank／global_messages 【完全不同管道】
+        ⇒ ★它不受本票 §4④⑤（fingerprint／事件總數）約束,因為它根本不碰 global_messages
+```
+
+⇒ ★**本票拆成三件，而只有第一件是「加 cause 欄位」**：
+```
+①本票      emit_message ＋ cause 欄（代表案例：宣戰、★replace —— 見 §1b，因現成且更便宜）
+②求和      ★【先查它到底在哪個畫面顯示】—— 一句話的查點,不是本票
+③派工失敗  ★★直接改 `_log_dispatch_fail:4624-4626` 那行 `%` 格式化字串
+           （加 leader 在不在家）—— ★★★不套 cause／TextBank 機制,套錯會查半天找不到掛勾點
+```
+★★★**而我犯的錯是【把三個不同管道的東西打包成一個機制】** ——
+**症狀相同（觀眾看不到因）不代表管道相同**，而**打包會讓兩件事卡在一個掛不上的鉤子上**。
+
 ## §1 列舉（★母體，我 grep 過的）
 
 ```
@@ -16,6 +39,43 @@ blueprint 裁：**零新機制**、**事件文本帶因快照**、**同族一起
 ⇒ ★★★【誰做了什麼】有，【為什麼】沒有。
 （★唯一帶一點因的是 `famine_warning`（帶 harvest 相關欄），而它正好是用戶【沒有抱怨】的那個。）
 ```
+
+## §1b ★★而我的母體漏了【整個目錄】（R² 查出，今天第 N 次同病）
+
+```
+grep -rn "emit_message(" scripts/simulation/events/*.gd   ← ★我完全沒掃這個目錄
+   event_faction_defect.gd:51   "faction_defect"   params 只有 origin
+   event_unrest_replace.gd:17   "replace"          params 只有 origin
+   event_unrest_split.gd:26     "split"            params 只有 origin+x+y
+⇒ ★母體是 23 不是 20。★★而這次排除的不是一種寫法,是【一整個目錄】。
+```
+★★★**而 `replace`（領袖替換）的因【現成且比我原本的三個例子都便宜】**：
+```
+event_unrest_replace.gd:7-14   team.unrest_turns（已跨 UNREST_REPLACE_THRESHOLD=20）
+                               dissenters（_get_dissenters 已算出,非空才會走到這行）
+⇒ ★用它當本票的代表案例,比「求和」（查無實據）與「派工失敗」（不同管道）都合適。
+```
+
+## §1c ★TextBank 是【兩條路徑】不是一條（R² 查實）
+
+```
+TextBank.TEMPLATES 有模板的 9 個：subjugate／battle／betrayal／faction_establish／
+   diplomacy／tribute／outpost_built／order_delivered／famine_warning
+★而 combat_start 是【直接 % 格式化字面】,TEMPLATES 裡【根本沒有這個 key】
+  （只有 "battle"，那是另一個 type＝結果訊息）
+faction_defect／replace／split 同樣是 call-site 字面
+⇒ ★★加 cause 有【兩條路】：有模板的要編輯模板字串（加 {cause} 佔位）,
+  其餘要改 call site 那行 % 字串
+⇒ ★★★§4① 的對帳表要多一欄：【這個 type 走 TextBank 還是 call-site 字面】
+  —— 否則實作者會遇到「加了 cause 進 params,而 TEMPLATES 裡沒有這個 type 可以改」
+  ⇒ ★而那正是我怕的「加了但沒接電」,只是漏電點在【模板缺席】不是【模板沒讀那個欄位】。
+```
+
+★★**而 `cause` 只進 `honest` 層**（R² 指出的語意衝突）：
+有模板的型別分 `honest／unintentional／malicious／vague` 四層＝**傳播失真**用的
+⇒ ★**一則被扭曲成「附近有政治動作」的模糊傳聞，不該同時附一句精確的「威脅 0.82」**
+⇒ ★★★**寫死在這裡**，否則實作者會照抄 honest 的做法塞進所有層，
+   產生【假傳聞卻帶精確數字】的不一致。
 
 ★**而 `combat_start` 印的就是「Team X 對 Team Y 宣戰」** —— **它自己也沒有因**
 ⇒ ★★所以「求和沒有上游宣戰」這件事，**即使有宣戰，觀眾也一樣看不到為什麼**。
@@ -49,12 +109,13 @@ blueprint 裁：**零新機制**、**事件文本帶因快照**、**同族一起
 ```
 ①【逐事件對帳表】20 個 emit 點 × 有沒有因 × 因從哪個欄位來 ⇒ ★落地成檔案
    ★★「無因」那一欄要有【理由】：是「產生端沒有」還是「有但沒印」——★★★兩者處置不同
-②★求和那則【一定要有】：它是用戶親自抓到的那一則 ⇒ 拿它當這張票的驗收樣本
-③派工失敗那則要能【分開兩種世界】：真的沒料 vs 料在公庫而 leader 不在家
-   ⇒ ★成對對照：構造兩種情形 ⇒ 兩行【文字不同】
+②★★★【訂正】求和那則【不在本票範圍】（§0：查無 emit_message 關聯）
+   ⇒ 代表案例改用【`replace`】（因現成：unrest_turns ＋ dissenters）
+③★★★【訂正】派工失敗那則【不在本票範圍】（§0：走裸 print，不碰 global_messages）
+   ⇒ 它是【另一張一句話的票】：直接改 `_log_dispatch_fail:4624-4626` 的 `%` 字串
 ④★★fingerprint 不變（只加印，不改判斷）
-⑤★★★事件【總數】不增加 —— 對照跑前後的 `global_messages.size()`
-   ⇒ 它證明我們沒有偷偷新增事件族
+⑤★★★【逐 type 的計數】都不變（R² 加固：總數不變擋不住「刪一則、在別處加一則」的淨零）
+   ⇒ 而 by-type 幾乎零額外成本（本來就在讀 `global_messages`）
 ```
 
 ★誠實限：
