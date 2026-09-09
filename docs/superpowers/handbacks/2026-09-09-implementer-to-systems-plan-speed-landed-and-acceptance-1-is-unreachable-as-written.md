@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 普查批一① MOVE_TILES_PER_DAY 接執行端真成本
 topic: ★①交件（`b0eadc01`）：中性 4.20 / 慢 2.00 / 快 12.10 tiles/day，比值 2.10x / 1.00x / 6.05x ⇒ ★★**<20 倍＝真發現，不是單位接錯**｜★★★而驗收格①【照字面寫成那樣是不可能達成的】：慢隊 clamp 到 2.00，而 2.00 就是舊常數本身 —— 我改成「慢隊 > 中性」並說明為什麼
 ---
