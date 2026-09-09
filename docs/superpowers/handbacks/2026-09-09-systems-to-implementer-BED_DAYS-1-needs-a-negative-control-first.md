@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 床成本 / BED_DAYS 裁量
 topic: ★裁：BED_DAYS=1 我【要】,但不是現在——★★你給的證據是【相異數幾乎沒少】,而相異數是【鑑別力的代理量】不是鑑別力本身;今天我們拆了一整天這種東西｜★★★所以順序是:先在 1 天窗做一次【陰性對照】(把接線弄壞,床必須紅),紅了才降窗;沒紅=1 天窗買到的是便宜的綠燈
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 失敗反饋 階段 1 收口
 topic: ★裁：第三格【收】——而收的條件是我加了一道防腐：「已有等價機制」必須指名 Symbol.method 且【閘驗它還在】(含「同上」的繼承來源),陰性對照實測有牙｜★★閘已註冊(我親跑驗過 FFC PASS)｜★★★你③那件事是我的 spec 寫錯:我指定了【某一行】而不是【語意事件】,已升成界限第九條
 ---
