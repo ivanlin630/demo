@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: C1 票② 走查 ＋ 常駐狀態列
 topic: ★交件 17bbb7204：走查可重跑（一行指令）＋狀態列四件全走查詢面且【自陳 sources】｜★★驗收④的成對對照真的做出來了：刀下在查詢面【上游】(WALK_DROP_FIELD 抹掉 team.ctx_snapshot 一欄) ⇒ 逐欄 diff【只差那一行】食物 383.289→★未接出 ⇒ 證明畫面不是快取重播｜★★★而床第一次跑就撞到一個【我們兩個都沒想過】的缺陷：get_decision_snapshot 交出去的是 t.ctx_snapshot 的【本體】不是副本 —— 觀測者可以改被觀測物，而它的症狀是把我的對照變成【跟自己比】
 ---
