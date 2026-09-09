@@ -1,0 +1,203 @@
+[TREE] path=A:\GDS\demo commit=47a8a248 clean=code-yes (docs-dirty=3, does not affect this run)
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== terrain_density_distance_bed (tick-0 快照，非模擬窗) ===
+
+############  本體：res://config/warring_states.json ############
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+
+--- config=res://config/warring_states.json radius=14 seed=1337 tiles=631 (耗時458ms) ---
+terrain直方圖(組成，背景)：
+  plains: 313格 (49.6%)
+  mountain: 135格 (21.4%)
+  forest: 183格 (29.0%)
+到最近各terrain的距離分布(排列，真答案)：
+  (a)每一格起算→最近[plains] 母體=631 min=0 p50=1 p90=1 max=2　>5格比例=0.00%(★操作定義非世界性質)
+  (a)每一格起算→最近[mountain] 母體=631 min=0 p50=1 p90=2 max=3　>5格比例=0.00%(★操作定義非世界性質)
+  (a)每一格起算→最近[forest] 母體=631 min=0 p50=1 p90=2 max=3　>5格比例=0.00%(★操作定義非世界性質)
+  (b)每支隊當下位置起算→最近[plains](母體=49隊) 母體=49 min=0 p50=1 p90=1 max=2　>5格比例=0.00%(★操作定義非世界性質)
+  (b)每支隊當下位置起算→最近[mountain](母體=49隊) 母體=49 min=0 p50=1 p90=2 max=3　>5格比例=0.00%(★操作定義非世界性質)
+  (b)每支隊當下位置起算→最近[forest](母體=49隊) 母體=49 min=0 p50=1 p90=1 max=2　>5格比例=0.00%(★操作定義非世界性質)
+逐資源拆(真相源見檔頭註解)：
+  食物(REGEN_RATE最高地形=plains, resource_system.gd:56)→ 母體=631 min=0 p50=1 p90=1 max=2　>5格比例=0.00%(★操作定義非世界性質)
+  材料(REGEN_RATE最高地形=forest, resource_system.gd:57)→ 母體=631 min=0 p50=1 p90=2 max=3　>5格比例=0.00%(★操作定義非世界性質)
+  礦(ore_gold真實帶量的tile，非全部mountain——world_generator.gd:92-94 mountain×12%%機率)：
+    帶ore_gold的tile數=13/631(2.06%)
+    到最近ore_gold→ 母體=631 min=0 p50=3 p90=5 max=8　>5格比例=9.35%(★操作定義非世界性質)
+    ★礦是否最稀：mountain佔21.4% vs 帶ore_gold佔2.06%  礦確實比其所在地形本身稀得多(符合預期)
+[MoneyGenesis] 初始 coin 總量 = 38112.0
+   = Σpop(397) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：44 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 38112.0 vs 推導 38112.0（差 0.0000）
+[GameSetup] 完成：44 teams, 8 factions, 116 persons
+
+--- config=res://config/warring_states.json radius=14 seed=2026 tiles=631 (耗時283ms) ---
+terrain直方圖(組成，背景)：
+  forest: 180格 (28.5%)
+  mountain: 132格 (20.9%)
+  plains: 319格 (50.6%)
+到最近各terrain的距離分布(排列，真答案)：
+  (a)每一格起算→最近[forest] 母體=631 min=0 p50=1 p90=2 max=4　>5格比例=0.00%(★操作定義非世界性質)
+  (a)每一格起算→最近[mountain] 母體=631 min=0 p50=1 p90=2 max=3　>5格比例=0.00%(★操作定義非世界性質)
+  (a)每一格起算→最近[plains] 母體=631 min=0 p50=0 p90=1 max=2　>5格比例=0.00%(★操作定義非世界性質)
+  (b)每支隊當下位置起算→最近[forest](母體=44隊) 母體=44 min=0 p50=1 p90=1 max=2　>5格比例=0.00%(★操作定義非世界性質)
+  (b)每支隊當下位置起算→最近[mountain](母體=44隊) 母體=44 min=0 p50=1 p90=2 max=2　>5格比例=0.00%(★操作定義非世界性質)
+  (b)每支隊當下位置起算→最近[plains](母體=44隊) 母體=44 min=0 p50=1 p90=1 max=1　>5格比例=0.00%(★操作定義非世界性質)
+逐資源拆(真相源見檔頭註解)：
+  食物(REGEN_RATE最高地形=plains, resource_system.gd:56)→ 母體=631 min=0 p50=0 p90=1 max=2　>5格比例=0.00%(★操作定義非世界性質)
+  材料(REGEN_RATE最高地形=forest, resource_system.gd:57)→ 母體=631 min=0 p50=1 p90=2 max=4　>5格比例=0.00%(★操作定義非世界性質)
+  礦(ore_gold真實帶量的tile，非全部mountain——world_generator.gd:92-94 mountain×12%%機率)：
+    帶ore_gold的tile數=24/631(3.80%)
+    到最近ore_gold→ 母體=631 min=0 p50=3 p90=4 max=7　>5格比例=1.11%(★操作定義非世界性質)
+    ★礦是否最稀：mountain佔20.9% vs 帶ore_gold佔3.80%  礦確實比其所在地形本身稀得多(符合預期)
+
+############ 對照：密度隨圖變大怎麼變 ############
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+
+--- config=res://config/warring_states.json radius=14 seed=1337 tiles=631 (耗時428ms) ---
+terrain直方圖(組成，背景)：
+  plains: 313格 (49.6%)
+  mountain: 135格 (21.4%)
+  forest: 183格 (29.0%)
+  [plains] 母體=631 p50=1 p90=1 max=2 >5格比例=0.00%
+  [mountain] 母體=631 p50=1 p90=2 max=3 >5格比例=0.00%
+  [forest] 母體=631 p50=1 p90=2 max=3 >5格比例=0.00%
+[MoneyGenesis] 初始 coin 總量 = 38112.0
+   = Σpop(397) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：44 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 38112.0 vs 推導 38112.0（差 0.0000）
+[GameSetup] 完成：44 teams, 8 factions, 116 persons
+
+--- config=res://config/warring_states.json radius=14 seed=2026 tiles=631 (耗時342ms) ---
+terrain直方圖(組成，背景)：
+  forest: 180格 (28.5%)
+  mountain: 132格 (20.9%)
+  plains: 319格 (50.6%)
+  [forest] 母體=631 p50=1 p90=2 max=4 >5格比例=0.00%
+  [mountain] 母體=631 p50=1 p90=2 max=3 >5格比例=0.00%
+  [plains] 母體=631 p50=0 p90=1 max=2 >5格比例=0.00%
+[MoneyGenesis] 初始 coin 總量 = 6720.0
+   = Σpop(70) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 4 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 6720.0 vs 推導 6720.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 12 persons
+
+--- config=res://config/infonet_established_fragility.json radius=16 seed=1337 tiles=817 (耗時277ms) ---
+terrain直方圖(組成，背景)：
+  plains: 403格 (49.3%)
+  mountain: 169格 (20.7%)
+  forest: 245格 (30.0%)
+  [plains] 母體=817 p50=1 p90=1 max=2 >5格比例=0.00%
+  [mountain] 母體=817 p50=1 p90=2 max=3 >5格比例=0.00%
+  [forest] 母體=817 p50=1 p90=2 max=3 >5格比例=0.00%
+[MoneyGenesis] 初始 coin 總量 = 6720.0
+   = Σpop(70) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 4 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 6720.0 vs 推導 6720.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 12 persons
+
+--- config=res://config/infonet_established_fragility.json radius=16 seed=2026 tiles=817 (耗時314ms) ---
+terrain直方圖(組成，背景)：
+  forest: 238格 (29.1%)
+  mountain: 167格 (20.4%)
+  plains: 412格 (50.4%)
+  [forest] 母體=817 p50=1 p90=2 max=3 >5格比例=0.00%
+  [mountain] 母體=817 p50=1 p90=2 max=3 >5格比例=0.00%
+  [plains] 母體=817 p50=0 p90=1 max=2 >5格比例=0.00%
+[MoneyGenesis] 初始 coin 總量 = 87264.0
+   = Σpop(909) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：101 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 87264.0 vs 推導 87264.0（差 0.0000）
+[GameSetup] 完成：101 teams, 20 factions, 271 persons
+
+--- config=res://config/perf_scale.json radius=24 seed=1337 tiles=1801 (耗時3350ms) ---
+terrain直方圖(組成，背景)：
+  plains: 891格 (49.5%)
+  mountain: 368格 (20.4%)
+  forest: 542格 (30.1%)
+  [plains] 母體=1801 p50=1 p90=1 max=2 >5格比例=0.00%
+  [mountain] 母體=1801 p50=1 p90=2 max=4 >5格比例=0.00%
+  [forest] 母體=1801 p50=1 p90=1 max=3 >5格比例=0.00%
+[MoneyGenesis] 初始 coin 總量 = 94560.0
+   = Σpop(985) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：108 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 94560.0 vs 推導 94560.0（差 0.0000）
+[GameSetup] 完成：108 teams, 20 factions, 292 persons
+
+--- config=res://config/perf_scale.json radius=24 seed=2026 tiles=1801 (耗時3439ms) ---
+terrain直方圖(組成，背景)：
+  forest: 520格 (28.9%)
+  mountain: 355格 (19.7%)
+  plains: 926格 (51.4%)
+  [forest] 母體=1801 p50=1 p90=1 max=3 >5格比例=0.00%
+  [mountain] 母體=1801 p50=1 p90=2 max=3 >5格比例=0.00%
+  [plains] 母體=1801 p50=0 p90=1 max=2 >5格比例=0.00%
+[MoneyGenesis] 初始 coin 總量 = 4992.0
+   = Σpop(52) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 3 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 4992.0 vs 推導 4992.0（差 0.0000）
+[GameSetup] 完成：6 teams, 3 factions, 6 persons
+
+--- config=res://config/infonet_recovery_r2_invest.json radius=40 seed=1337 tiles=4921 (耗時1288ms) ---
+terrain直方圖(組成，背景)：
+  plains: 2521格 (51.2%)
+  mountain: 977格 (19.9%)
+  forest: 1423格 (28.9%)
+  [plains] 母體=4921 p50=0 p90=1 max=2 >5格比例=0.00%
+  [mountain] 母體=4921 p50=1 p90=2 max=4 >5格比例=0.00%
+  [forest] 母體=4921 p50=1 p90=1 max=3 >5格比例=0.00%
+[MoneyGenesis] 初始 coin 總量 = 4992.0
+   = Σpop(52) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 3 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 4992.0 vs 推導 4992.0（差 0.0000）
+[GameSetup] 完成：6 teams, 3 factions, 6 persons
+
+--- config=res://config/infonet_recovery_r2_invest.json radius=40 seed=2026 tiles=4921 (耗時1373ms) ---
+terrain直方圖(組成，背景)：
+  forest: 1471格 (29.9%)
+  mountain: 977格 (19.9%)
+  plains: 2473格 (50.3%)
+  [forest] 母體=4921 p50=1 p90=1 max=3 >5格比例=0.00%
+  [mountain] 母體=4921 p50=1 p90=2 max=4 >5格比例=0.00%
+  [plains] 母體=4921 p50=0 p90=1 max=2 >5格比例=0.00%
+
+=== terrain_density_distance_bed DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+

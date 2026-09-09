@@ -1,0 +1,36 @@
+{
+  "token": "terrain-density-distance",
+  "slice": "地形密度/資源分布——這個世界存不存在值得跨越的距離",
+  "date": "2026-09-09",
+  "measured_at_head": "47a8a248",
+  "touches": [],
+  "world": "tick-0快照(不跑模擬)；本體=warring_states(radius=14)×2 seed；對照=warring_states/infonet_established_fragility(16)/perf_scale(24)/infonet_recovery_r2_invest(40)×2 seed各一",
+  "bed": "scripts/debug/terrain_density_distance_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-09-terrain-density-distance.txt"],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★世界不存在值得跨越的距離——不論圖多大，到最近任一terrain(plains/forest/mountain)的距離p50=0-1格、max從沒超過4格，>5格比例全部0.00%；唯一真的稀的是ore_gold(p50=3、>5格比例1-9%)，但那也只是『比其他資源稀』不是『值得跨越』（max=7-8格仍很近）",
+    "①terrain直方圖(組成)": "三張圖(不同radius)比例穩定：plains≈50% mountain≈20% forest≈29%——地形組成不隨圖變大而變",
+    "②距離分布(排列，真答案)": {
+      "(a)每一格起算": "四種圖尺寸(radius=14/16/24/40)全部一致：到最近任一terrain p50=0-1 p90=1-2 max=2-4，>5格比例=0.00%",
+      "(b)每支隊起算": "與(a)幾乎相同分布(隊不是刻意避開任何terrain聚落，母體49-108隊視config而定)"
+    },
+    "③逐資源": {
+      "食物(最近plains)": "p50=0-1 max=2，跟terrain距離同數量級——食物哪裡都有",
+      "材料(最近forest)": "p50=1 max=3-4，同上",
+      "礦(最近真實帶ore_gold的tile)": "p50=3 p90=4-5 max=7-8 >5格比例=1.11%~9.35%（唯一非0的一格）；帶ore_gold的tile僅2-4%（vs mountain本身20%），確認礦比其所在地形本身稀得多，符合『礦該最稀』的預期"
+    },
+    "④密度隨圖變大怎麼變": "★決定性結果：radius從14漲到40(tiles從631漲到4921，8倍面積)，到最近任一terrain的p50/p90/max幾乎不變(仍是0-1/1-2/2-4)——是【同密度鋪更大】不是【同數量攤更開】。⇒『把圖畫大』單獨不會製造出值得跨越的距離，因為terrain本身在世界生成時就是均勻高密度散布(plains50%/forest29%/mountain20%的weights保證任何位置周遭都很快撞到三種地形)"
+  },
+
+  "honest_limits": [
+    "★①本卷不下設計結論——它量『距離長什麼樣』，不答『該不該讓它變遠』，那個fork屬用戶，blueprint拿讀數呈報不預裁",
+    "★②>5格是我沿用票面給的操作定義，不是世界的性質——原始min/p50/p90/max分布已全部附上，下游可用別的門檻重切",
+    "★③礦的terrain綁定=world_generator.gd:92-94(tile.terrain==mountain時擲ORE_GOLD_CHANCE=0.12機率生成ore_gold)，查得到，非查不到；食物/材料真相源=ResourceSystem.REGEN_RATE(resource_system.gd:55-59)——三地形皆>0，加上world_generator.gd:8-12的RESOURCE_PROFILE三地形下限也都>0，導致食物/材料的『到最近產地』在初始化上幾乎是平凡的0，這是本卷如實聲明的發現，非量測失誤",
+    "★④只跑2 seed/config——worldgen隨機性下2 seed的一致性已經很強(四個尺寸×2 seed共8次全部同一種形狀)，但嚴格說仍是有限樣本，非窮舉；若要更強證據可加seed，跑法你/blueprint決定",
+    "★⑤radius=24(perf_scale)的1801格耗時3.3-3.6秒，是本卷唯一接近秒級門檻的一次(其餘均<1.6秒)——仍在票面『秒級』要求內，但如實標出這是四組裡最慢的一組（BFS本身O(N)，變慢原因可能是tile數×樣本seed組合疊加或GDScript解譯開銷，非算法複雜度問題）"
+  ],
+
+  "supersedes": []
+}
