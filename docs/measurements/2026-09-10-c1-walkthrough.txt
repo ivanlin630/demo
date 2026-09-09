@@ -1,8 +1,7 @@
-[TREE] path=A:\GDS\demo commit=f0ace3b3a clean=NO code-dirty=3
-[TREE]   *** measuring the WORKING TREE, not commit f0ace3b3a ***
-[TREE]    M scripts/simulation/player_query_api.gd
-[TREE]   ?? scripts/debug/c1_ticket2_bed.gd
-[TREE]   ?? scripts/debug/c1_walkthrough.gd
+[TREE] path=A:\GDS\demo commit=45ccfc61f clean=NO code-dirty=2
+[TREE]   *** measuring the WORKING TREE, not commit 45ccfc61f ***
+[TREE]    M scripts/simulation/decision/decision_context.gd
+[TREE]   ?? scripts/debug/ctx_object_flatten_bed.gd
 [SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
 [SCALE]   *** a tick count without its day-conversion is not a number ***
 Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
@@ -725,7 +724,7 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
 [Horse] Outpost (15, 13) 捕野馬 +1
 [Horse] Outpost (16, 17) 捕野馬 +1
 [Horse] Outpost (22, 9) 捕野馬 +1
-[TickPerf] day=1 avg=42004 us max=7977516 us ticks=1440 teams=66 factions=8
+[TickPerf] day=1 avg=43682 us max=8137215 us ticks=1440 teams=66 factions=8
 [Equip] Team63 裝備 melee_low ×1
 [Equip] Team64 裝備 melee_low ×1
 [Combat Start] Team-1000010 vs Team1
@@ -982,7 +981,7 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
 [Horse] Outpost (14, 20) 捕野馬 +1
 [Horse] Outpost (15, 13) 捕野馬 +1
 [Horse] Outpost (16, 17) 捕野馬 +1
-[TickPerf] day=2 avg=41841 us max=4248985 us ticks=1440 teams=62 factions=8
+[TickPerf] day=2 avg=42074 us max=5172539 us ticks=1440 teams=62 factions=8
 
 ╔══════════════════════════════════════════════════════════════════╗
 ║ 世界沙盒 · 文字版畫面走查（C1 票）                              ║
@@ -1003,7 +1002,7 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
   camp_flow_delay_days             8.286
   camp_forage_floor                5.600
   camp_site_quality_mult           1.000
-  camp_target_est                  〈物件〉尚未轉成可讀值 —— ★人話層清單的一筆（票第二個產物）
+  camp_target_est                  {8 鍵} { "_kind": "village_estimate", "terrain": "forest", "outpost
   can_rescue_build                 false
   can_settle_here                  false
   desperation_entry_threshold      3.452
@@ -1036,7 +1035,7 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
   settle_eta_days                  0.000
   settle_resume_site               (-1, -1)
   settle_site_quality              0.000
-  survival_stall_active            [0 項] []
+  survival_stall_active            （無）
   team_panic                       0.000
 
  【經濟】頁 
@@ -1143,11 +1142,11 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
 
  【補充母體】（★結構上不在 119 列裡的東西）
   事件流（最近 5 則）：
-    · <RefCounted#-9223370651241280906>
-    · <RefCounted#-9223370651224503689>
-    · <RefCounted#-9223370563798431095>
-    · <RefCounted#-9223370459024717160>
-    · <RefCounted#-9223370458219410793>
+    · <RefCounted#-9223370651241280907>
+    · <RefCounted#-9223370651224503690>
+    · <RefCounted#-9223370563798431096>
+    · <RefCounted#-9223370459024717161>
+    · <RefCounted#-9223370458219410794>
   關係圖全貌：★未接出（todo:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md）
 
 ── 走查結束 ──

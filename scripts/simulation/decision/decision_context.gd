@@ -906,8 +906,43 @@ func snapshot_dict() -> Dictionary:
 			continue
 		if int(pi.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE == 0:
 			continue
-		out[pname] = get(pname)
+		out[pname] = _readable(get(pname))
 	return out
+
+# ★把【物件】攤成可讀 dict —— 一個改動同時解掉兩件事（systems 裁 2026-09-10）：
+#   ①【交本體】：物件永遠是參考 ⇒ 快照裡留著一顆物件，等於把引擎的東西交到呼叫端手上
+#     （★而 duplicate(true) 深拷巢狀 dict/array 但【不深拷物件】⇒ 只在查詢端 duplicate 補不掉）
+#   ②【看不懂】：走查畫面上它印出來是「〈物件〉尚未轉成可讀值」
+# ★★寫成【通用的】而不是只認 VillageEstimate：下一個被塞進 ctx 的物件會自動被攤平，
+#   ★★★而「手寫清單不會跟著新欄位長大」正是這批票在修的病本身。
+static func _readable(v, depth: int = 0):
+	if depth > 3:
+		return str(v)
+	if v is Object and not (v is Callable):
+		var o: Object = v
+		var d: Dictionary = {}
+		# ★留下它是什麼：攤平之後讀的人要看得出「這一格原本是一顆什麼」
+		if o.get_script() != null:
+			d["_kind"] = String(o.get_script().resource_path.get_file()).get_basename()
+		for pi in o.get_property_list():
+			var n: String = String(pi.get("name", ""))
+			if n == "" or n.begins_with("_") or n == "script":
+				continue
+			if int(pi.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE == 0:
+				continue
+			d[n] = _readable(o.get(n), depth + 1)
+		return d
+	if v is Dictionary:
+		var dd: Dictionary = {}
+		for k in (v as Dictionary):
+			dd[k] = _readable((v as Dictionary)[k], depth + 1)
+		return dd
+	if v is Array:
+		var aa: Array = []
+		for e in (v as Array):
+			aa.append(_readable(e, depth + 1))
+		return aa
+	return v
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
 # belief-based（認知非全知）；dist≥5 衰減 0（遠敵不算）。
