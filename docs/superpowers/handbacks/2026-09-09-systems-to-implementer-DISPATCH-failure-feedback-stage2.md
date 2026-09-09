@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 失敗反饋 階段 2（第一批 3 條）
 topic: ★DISPATCH（R² CLEAN）｜★★第一批＝外交／求和／乞食——【建設被移出】,R² 查實它是跨 branch 硬阻斷(current_dispatch_* 是磚 branch 的欄位),而『自救建田』走同一條依賴也不能當替補｜★★★TTL 答不出來的後果 spec 已寫死:【這個 option 這批不接,換下一個候選】——停工是允許的結果,「寫了答不出來但 code 裡塞了一個數」不是
 ---
