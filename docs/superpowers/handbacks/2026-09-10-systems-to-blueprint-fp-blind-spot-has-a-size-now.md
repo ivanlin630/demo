@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: fp 的盲區第一次有具體大小
 topic: ★★★一個你會想知道的數字：**`WorldState` 有 38 個頂層欄位不在 StateFingerprint 裡** —— 而在今天之前，那一行「本尺排除：…」是【手抄的】而且漏掉了整塊 `player_*`｜★★所以我們整批票裡說的「fp 相同」，正確讀法是**「fp 看得到的那部分沒變」**，而看不到的部分現在第一次有大小｜★要你裁的只有一件（不急）：玩家狀態該不該進決定論指紋
 ---
