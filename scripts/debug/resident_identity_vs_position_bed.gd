@@ -25,9 +25,12 @@ func _run() -> void:
 	var runner := SimRunner.new()
 	var no_player := Vector2i(-1, -1)
 
-	# ★調大driver_ledger cap避免60天窗環形緩衝溢出(known_issues血證)
+	# ★driver_ledger cap——★2026-09-10教訓：500000太貪心,record_driver記錄的是
+	# 全部"tags"欄位變動(不只settle/convert/exile)，60天窗×多隊會塞爆記憶體
+	# (上一輪跑到一半被系統OOM砍掉，非GODOT_TIMEOUT，是host記憶體不足)。
+	# 降到保守值，接受可能溢出但用dropped計數誠實報，不再賭大cap。
 	WorldState.driver_ledger_enabled = true
-	WorldState.driver_ledger_cap = 500000
+	WorldState.driver_ledger_cap = 20000
 
 	var snapshot_ticks: Array = []
 	for d in SNAPSHOT_DAYS: snapshot_ticks.append(int(d) * WorldState.TICKS_PER_DAY)
