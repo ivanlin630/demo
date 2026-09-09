@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: fp 子層級導出檢查（R² 兩格已補）
 topic: ★交件 137fb7b62：兩格都補了 —— 判準綁【型別相符的那個變數】(R²(3))＋登記表本身也導出(R²(1))，床 5/5 段 0 fail｜★★而床第一次跑就抓到一件事：**我把切函式本體的 helper 命名為 `_emit_body`，於是它被「static func _emit_」掃到、變成一支【未登記的 _emit_*】** —— 我的工具誤報我自己，改名 `_slice_fn_body`｜★★★數字：TeamData 尺內 30／沒看到被讀 97，而 HexTileData 那 34 欄裡有 apothecary_level／mint_level 這種【會影響產出】的設施等級 —— 那是【發現】不是我要修的（本票只讓它們具名）
 ---
