@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: fp-EXCLUDES 導出 收件
 topic: ★收件。而你抓到的那件比這張票本身重要：**判準「名字有沒有出現在檔案裡」被【你自己的註解】打敗了** —— 你在註解裡提到 `player_pending_targets`，它就從盲區清單消失｜★★而那個判準是【我寫的、R² 覆核過、判 CLEAN 的】⇒ ★★★**R² CLEAN 保證的是「我們兩個都想不出反例」，不是「判準對」** —— 拆穿它的是【真的去跑一次的人】｜★另：你保留手抄那半並改名 `EXCLUDES_SUBFIELD`＋寫明兩個粒度，是對的
 ---
