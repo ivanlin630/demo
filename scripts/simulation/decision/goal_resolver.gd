@@ -318,7 +318,14 @@ const PRICE_MARKUP_CAP: float = 3.0           # TEST VALUE — price_factor 上�
 # relief need_signal 正規化 scale（★非門檻 gate：任何 qty>=1 仍 fire、NORM 只影響 relief 強度梯度）。
 # ★calibration-anchor（DERIVED、PER_HAND 紀律，非 invent 能 fire 常數）：典型小型居民絕境窗全額 food 買單量
 #   = 絕境天(DESPERATION_DAYS) × 每人日耗(FOOD_PER_PERSON_PER_DAY) × 典型居民規模(DISTRIB_RELIEF_REF_POP)。
-const DISTRIB_RELIEF_REF_POP: float = 5.0     # TEST VALUE — 典型小型定居居民規模（relief scale 參考、非 gate）
+# 真參數（非 TEST VALUE）— ★這個 5.0 不是「還沒接上真值」，是【領主不被允許知道真值】的結果：
+#   :373 的 de-scan（資訊網 arc）已移除 god-view live-read（直讀 resident live pop/food）
+#   ⇒ ★★`resident: TeamData` 仍在 scope（:363 只用來查 faction）—— 接 `resident.population`
+#     只差一個鍵盤動作而且看起來無害，★★★但那會【revert 一個憲法修法】，
+#     而 diff 上看起來只是「把死常數接上真值」。**不要接。**
+#   ⇒ 憲法乾淨的替代路是 belief.population_est，而它【硬前提是 belief 覆蓋率】
+#     （blueprint 2026-09-09 裁：覆蓋率低時禁 fallback-常數假接線，先修資訊網的縫）。
+const DISTRIB_RELIEF_REF_POP: float = 5.0     # relief scale 參考、非 gate
 const DISTRIB_RELIEF_NORM: float = DecisionTerms.DESPERATION_DAYS * ResourceSystem.FOOD_PER_PERSON_PER_DAY * DISTRIB_RELIEF_REF_POP
 # ★de-scan 後 _distribute_candidates 不再用此（deficit 判定改 belief）；仍供 _tick_resident_unrest 居民自讀 runway 回升安全線（自讀非 god-view lord-scan）。
 const DISTRIB_DEFICIT_DAYS: float = 4.0       # TEST VALUE — 居民 food runway > 此=脫離 deficit（unrest 回升線）
@@ -507,7 +514,8 @@ static func _deliver_candidates(state: WorldState, team: TeamData, ctx: Decision
 # （pop − settler_count ≥ MIN_PARENT_POP_AFTER_DISPATCH，attempt=dispatch 同源→無 pop 8-12 浪費帶）。
 # 委派 util=自己做 util+多線紅利(母隊留守+子隊並行)−餘力成本;must-fix① clamp<survival 沿用。純狀態零 randf。
 const DELEGATE_MULTILINE_BONUS: float = 0.3   # TEST VALUE — 多線紅利（母隊留守本業+子隊並行，不離 food base）
-const DELEGATE_COST: float = 0.1              # TEST VALUE — 餘力成本（分兵管理開銷）
+const DELEGATE_COST: float = 0.1              # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （餘力成本：分兵管理開銷）
 static func _delegate_variant(state: WorldState, team: TeamData, ctx: DecisionContext, self_cand: Dictionary) -> Dictionary:
 	# ★A1:founding/facility candidate 本身已 delegate（派子隊建）→ 別再包委派的委派（早退）。
 	if self_cand.get("delegate", false):

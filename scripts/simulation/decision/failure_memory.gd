@@ -17,18 +17,66 @@ class_name FailureMemory
 #   `failure.recorded.<reason>` ＝ 失敗真的被記下；`failure.suppressed.<option>` ＝ 折價真的生效。
 #   ★沒有後者，就會把「大家都放棄了」誤讀成「症狀解決了」——用反饋消滅症狀≠消滅病。
 
-const FLOOR: float = 0.25          # TEST VALUE — 折價下限（絕不歸零、絕境仍可翻盤）
+const FLOOR: float = 0.25          # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （折價下限：絕不歸零、絕境仍可翻盤）
 # ★INTENSITY × COUNT_CAP 刻意 < 1−FLOOR：count 上限先咬住（0.2×3 → 0.4），FLOOR 才是真正的
 # 「永不歸零」安全網而非同一條線；兩個機制若重合，count 上限就是裝飾。
-const INTENSITY: float = 0.2       # TEST VALUE — 單次新鮮失敗的折價強度
-const COUNT_CAP: int = 3           # TEST VALUE — count_factor 上限（連撞加深到此為止）
+const INTENSITY: float = 0.2       # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （單次新鮮失敗的折價強度）
+const COUNT_CAP: int = 3           # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （count_factor 上限：連撞加深到此為止）
 
 # ★接線表（A1 五族照抄的地方就是這張表）：決策 option → 它依賴的那件事的失敗 key。
 # 例：「買糧」依賴的是【food 買單真的被填】；買單一再到期沒人送 → 下輪別再一頭撞市場。
 # 未列的 option ＝ 無折價（1.0），故本機制對其餘 option 零行為。
+# ★TODO 指向的票（★它必須真的存在——同 .value-key-baseline.tsv 的 born-with 過期紅）
+const TODO_TICKET: String = "docs/superpowers/specs/2026-09-09-failure-feedback-structural-enumeration-HOW.md"
+
 const OPTION_FAIL_KEY: Dictionary = {
 	"買糧": ["買單", "food"],
 	"買料": ["買單", "material"],
+}
+
+# ★★★缺席清單（階段 1，2026-09-09）：`OPTION_FAIL_KEY` 的【互補且互斥】另一半。
+#   ★病：28 個 option 裡只有 2 個有失敗反饋，★★而缺席是【靜默】的——
+#   `mult_for_option` 對沒列到的 option 回 1.0，跟「決定它不需要」長得一模一樣。
+#   ⇒ 這份表讓每一個「沒有失敗反饋」都變成【有人決定的】而不是【沒人想過的】。
+# ★判準（spec §3）：進 OPTION_FAIL_KEY 要三條全成立——
+#   ①有一個【執行步驟】會失敗（做不成，不是效果不好）②失敗當下偵測得到 ③重試對同一個目標且會重複。
+#   ⇒ 進本表的理由必須指名【哪一條不成立】，或 `TODO:<票路徑>`（★那張票必須真的存在）。
+# ★★★而我在填的過程中發現判準少一格：有三個 option【已經有等價的失敗反饋，只是掛在靶地不在 option】
+#   （SettlementMemory 的 site_failed → quality_multiplier）⇒ 它們既不是「不需要」也不是「還沒接」。
+#   我用 `已有等價機制:` 前綴標它們，並已回報 systems（分類表不完整，不是這幾格不對）。
+const NO_FAILURE_FEEDBACK: Dictionary = {
+	# ── 該接，等階段 2（三條全成立；理由後面是【它已經存在的失敗訊號】）──
+	"貿易": "TODO:%s ── trade.market_bail.<reason>（interaction_system:930 等）可偵測；同一市集重撞" % TODO_TICKET,
+	"建設": "TODO:%s ── construction_abandoned 事件（faction_ai_system:6426）；同一工地重試" % TODO_TICKET,
+	"自救建田": "TODO:%s ── 同「建設」，走同一條 construction_abandoned" % TODO_TICKET,
+	"返家補給": "TODO:%s ── 路不通＝失效（movement_system 的 stuck 偵測）；法條指定這類升 T0" % TODO_TICKET,
+	"掠奪": "TODO:%s ── 追不到／被擊退＝做不成，同一 prey 會重撞" % TODO_TICKET,
+	"佔村": "TODO:%s ── 佔領被擋＝做不成，同一 village 會重撞" % TODO_TICKET,
+	"併入": "TODO:%s ── join_rejected 已寫進 leader memory（interaction_system:1586）" % TODO_TICKET,
+	"吸納": "TODO:%s ── 同上另一端（faction_ai_system:6331）" % TODO_TICKET,
+	"乞食": "TODO:%s ── rejected_aid 已寫進 memory（interaction_system:1493）" % TODO_TICKET,
+	"外交": "TODO:%s ── envoy.reject（interaction_system:582）全庫 152 reject / 6 accept；systems 已判三條全成立" % TODO_TICKET,
+	"遷移找糧": "TODO:%s ── 到場沒糧＝只折價、路不通＝失效（法條兩類都在這條路上）" % TODO_TICKET,
+	"囤貨": "TODO:%s ── convoy dispatch 的 7 個靜默 return false（法條指定的第一份清單）" % TODO_TICKET,
+	"求和": "TODO:%s ── 求和會被拒（diplomatic_ai_system:186 的 reject 路徑）" % TODO_TICKET,
+	"歸建": "TODO:%s ── committed 卻不 dispatch 的 drop 點（手不聽腦 mini-arc 的 subteam-idle-latch）" % TODO_TICKET,
+	# ── 已有等價機制：失敗反饋存在，只是掛在【靶地】不在 option ──
+	"紮營": "已有等價機制: SettlementMemory.quality_multiplier → ctx.camp_site_quality_mult（decision_context:526）",
+	"紮根": "已有等價機制: 同上 → ctx.settle_site_quality（decision_context:468）",
+	"擴點": "已有等價機制: 同上 → ctx.expand_site_marginal（decision_context:511）",
+	# ── 判準不成立（指名是哪一條）──
+	"領取": "②不成立: 沒有「領不到」的事件——pending_claims 只有增刪，到場落空不留記號 ⇒ 偵測不到。★補上 miss 記號時這格要改判",
+	"生產": "①不成立: 沒有【生產被拒絕】的執行步驟；缺料是產出量的問題（效果不好），由 need/資源層處理",
+	"覓食": "①不成立: 採不到＝產量低，不是做不成",
+	"survival": "①不成立: 逃跑是做得成的動作；逃不掉是結果不是執行失敗",
+	"駐守": "①不成立: 本地治理，沒有會失敗的執行步驟",
+	"攻擊": "①不成立: 打得起來就算執行成功，輸贏是結果；★目標消失屬【失效】，走 T0 不走折價",
+	"徵收": "①不成立: 本地動作，沒有對手方會拒絕",
+	"迎戰": "①不成立: 接戰是做得成的；勝負是結果",
+	"訓練": "①不成立: 本地動作，沒有會失敗的執行步驟",
 }
 
 static func key(option: String, target: String = "-") -> String:
@@ -102,6 +150,15 @@ static func prune(state: WorldState, team: TeamData) -> void:
 
 # 決策引擎唯一入口：option 名 → 查接線表 → 折價乘數（未接線 option 恆 1.0＝零行為）。
 static func mult_for_option(state: WorldState, team: TeamData, option: String) -> float:
+	# ★把【靜默缺席】變成可數的次數（階段 1）：用途是【排序】——先接被決策最多次的那幾個。
+	#   ★★它數的是【決策次數】不是【失敗次數】⇒ 是代理量，不是「損失了多少」。
+	# ★★★這段必須在 `recent_failures.is_empty()` 早退【之前】——
+	#   第一版寫在早退之後，實測 unmapped 恆為 0：沒有失敗記憶的隊（＝絕大多數，因為
+	#   目前只有 2 個 option 會記）根本走不到那一行 ⇒ ★儀器看起來乾淨，其實是瞎的。
+	if not OPTION_FAIL_KEY.has(option):
+		if Probe.enabled:
+			Probe.bump("failure.unmapped." + option)
+		return 1.0
 	if team == null or team.recent_failures.is_empty():
 		return 1.0
 	var m = OPTION_FAIL_KEY.get(option)

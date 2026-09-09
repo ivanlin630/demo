@@ -16,7 +16,8 @@ const CLAIM_REF_AMT: float = 20.0        # = TradeValuation.BASE_PRICE["food"](2
 const CLAIM_DIST_HALF: float = 6.0       # = SimRunner.NEAR_CADENCE(60) / 10
 const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-trade 軟壓(能但很少)
 const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× weight(loot 0..1) → loot util ≈ 0..1，危時不碾壓 survival(≥2)
-const DESPERATION_DAYS: float = 3.0    # TEST VALUE — 食物低於此才入絕境 option（對齊 WARNING_DAYS）
+const DESPERATION_DAYS: float = 3.0    # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （食物低於此才入絕境 option，對齊 WARNING_DAYS）
 const DESPERATION_SCALE: float = 1.2   # TEST VALUE — 絕境 drive 量級（對齊 survival-class 域，不碾壓 forage/restock）
 const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略低於 join/camp）
 # ★A1 紮營價值=MarginalEconomy 真帳（term 非 gate、禁 crank bound）。
@@ -37,7 +38,8 @@ const BUYFOOD_DIST_FULL: float = 6.0    # TEST VALUE — 買糧旅費折扣基�
 const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量即視為可換糧籌碼（forest/mountain 特產）
 # ── means-end 戰術層（2026-07-01）：intent → 子需求 → option 貢獻打分（mirror FACTION_DUTY_DRIVE）──
 const INTENT_FIT_DRIVE: float = 1.0     # TEST VALUE — T3 正規化：意圖反應量級→[0,1]（1.5→1.0）
-const SURPLUS_FOOD_DAYS: float = 7.0    # TEST VALUE — 「有餘糧」門檻（致富→囤貨/貿易 子需求觸發）
+const SURPLUS_FOOD_DAYS: float = 7.0    # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （「有餘糧」門檻，致富→囤貨/貿易 子需求觸發）
 # ── threat-oracle S2：severity-scaled threat util（TEST VALUE，measure 校；方向/cap/零fall-through 鎖死）──
 const SEVERITY_MAX: float = 1.2   # TEST VALUE(S2 calibrate ↓1.5)— threat_react 上界(capped 保競秤;organic 碾平修)
 const CONFRONT_K: float = 0.6     # TEST VALUE(S2 calibrate)— 迎戰 dampen(好戰×sev×modulate×此;organic 迎戰 44-105x 修)

@@ -3,7 +3,8 @@ class_name DecisionEngine
 # 統一決策引擎：一隊一個 decide()。utility weigh + 承諾慣性（單一決策生產者）。
 # 蒐集 DecisionContext → 列候選 Option → 每 option util = Σ(人格權重 × 驅力 term)
 # + 現行 option 承諾 bonus → argmax。平手 → 保持現行（承諾慣性防震盪）。
-const COMMITMENT_BONUS: float = 0.3   # TEST VALUE：承諾慣性（防震盪）
+const COMMITMENT_BONUS: float = 0.3   # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （承諾慣性，防震盪）
 const PRODUCE_WANT_THRESH: float = 0.3   # TEST VALUE — produce_pull>此=有意義想產（wanted_not_chosen tap 過濾噪音）
 # 層0 安全氣囊：極低糧→survival-class option 加法超量級，突破 coeff [0,1] 天花板奪回 argmax。
 # floor 低→正常隊靠層1/2/5 安全網不觸發；boost 觸發頻率=健康指標(常觸發=安全網失職)。

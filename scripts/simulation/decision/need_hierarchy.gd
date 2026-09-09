@@ -13,7 +13,8 @@ const L_ACTUAL: int = 4
 const N_LAYERS: int = 5
 
 # raw 急迫度門檻（TEST VALUE）
-const SURVIVAL_SATED_DAYS: float = 5.0   # TEST VALUE — 食物餘命達此→生存急迫度 0（對齊 forage floor 域）
+const SURVIVAL_SATED_DAYS: float = 5.0   # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （食物餘命達此→生存急迫度 0，對齊 forage floor 域）
 # Fix3-v2 esteem food_ready 參考線人格化（退役死常數 ESTEEM_FOOD_REF_DAYS=3）。
 # 候選2 收編：門檻函式單一 home = DecisionTerms.food_security_target(領袖慎重/野心)，此處直接呼(別雙常數)。
 const URGENCY_EWMA_ALPHA: float = 0.25   # TEST VALUE — 急迫度平滑係數（同 S1 zero-randf pattern）

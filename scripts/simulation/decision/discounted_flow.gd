@@ -19,8 +19,10 @@ class_name DiscountedFlow
 #     （R² 必查項；★gate 3a 的人格極端測試抓不到它，因為它不是人格驅動的。）
 
 const HORIZON_DAYS: float = MarginalEconomy.PLANNING_HORIZON_DAYS   # 90，沿用既驗常數（不新增）
-const DELTA_FLOOR: float = 0.90     # TEST VALUE — 蟑螂地板①：最短視人格也不得低於此
-const DELTA_CAP: float = 0.99       # TEST VALUE — 最有耐性人格的上限（避免 1.0 的無窮視野）
+const DELTA_FLOOR: float = 0.90     # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （蟑螂地板①：最短視人格也不得低於此）
+const DELTA_CAP: float = 0.99       # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+#   （最有耐性人格的上限，避免 1.0 的無窮視野）
 # ★δ ＝【耐性／慎重】族，★不是貪婪（用戶明確修正：貪婪≠短視；貪婪調的是「在意哪種明天」）。
 static func delta_of(values: Dictionary) -> float:
 	var patience: float = clampf(float(values.get("慎重", 0.5)), 0.0, 1.0)
