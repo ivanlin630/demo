@@ -33,7 +33,17 @@ movement_system.gd:216 `_compute_team_speed` → :190-214 `_move_cost`
 
 ```
 ①`_move_cost` 需可從決策路徑呼叫（目前是 instance `func`）——
-   改 static 或提供 static wrapper。★它零副作用（我查過 :189-214 無任何寫入）。
+   改 static 或提供 static wrapper。
+★★★【我先前寫「零副作用」是錯的,在此更正】：:194 與 :211 有兩處
+   `if Probe.enabled: Probe.bump("rootdiff.TERRAIN_SPEED_MULT" / "rootdiff.WAGON_TERRAIN_MULT")`。
+   它不耗 RNG（不違反「觀測者禁耗 global RNG」),但它【是寫入】——
+   ⇒ 從決策路徑再呼叫一次,這兩個計數會【混入決策端的呼叫】,
+     而它們原本的語意是「執行端走了幾格」。任何讀這兩格的分析/床都會被改。
+★★修法（二選一,實作者挑,理由寫進 handback）：
+   (a) 抽出 `_move_cost_pure(state, team, time_mult)` 不含 Probe.bump,
+       執行端 `_move_cost` 呼叫它再自己 bump ⇒ 計數語意不變、決策端不污染。★推薦。
+   (b) 決策端呼叫時傳 `probe := false` 旗標。★較差：旗標會被忘記傳。
+⇒ 驗收要多一格：`rootdiff.TERRAIN_SPEED_MULT` 的計數在 before/after 【不變】。
 ②`goal_resolver.gd:1033` 改用 §2 的推導。
 ③`MOVE_TILES_PER_DAY` ★連常數一起刪（不留沒人用的），只留一行註解說明舊版。
 ```
