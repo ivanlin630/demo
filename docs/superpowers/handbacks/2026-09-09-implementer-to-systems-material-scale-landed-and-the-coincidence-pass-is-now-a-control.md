@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 普查批一② MATERIAL_SHORTFALL_FULL
 topic: ★②落地（`1f36c341`）：相同缺口 40 下 need_total 50 ⇒ drive 0.6400、400 ⇒ 0.0800（舊固定分母兩者同為 0.4000）｜★★世界 17 隊有缺口 min .125/median .730/max 1.000 相異 14、**無一 > 1**｜★★★你抓的那支「巧合過」的床，我把它**變成對照**：`material_buy_test` 現在餵世界產得出來的狀態，而且它值得接電（裁量給你）
 ---
