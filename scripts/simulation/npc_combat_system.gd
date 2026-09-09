@@ -121,9 +121,15 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	var def: TeamData = state.teams[def_id]
 	state.set_combat_target(atk, def_id)
 	state.set_combat_target(def, atk_id)
+	# ★★★果事件帶因（2026-09-10）：★只印【產生端此刻已經讀到】的量 —— 零新讀取、零新機制。
+	#   ★這裡手上有的是攻方的 task／task_reason／雙方 readiness ⇒ 因就寫這些。
+	#   ★★因附在【同一行】的括號裡，★★★不另發一則「因事件」（另發＝ticker 刷屏＝更看不到戲）。
+	var _cause: String = "task=%s reason=%s readiness %.2f vs %.2f" % [
+		atk.current_task, (atk.task_reason if atk.task_reason != "" else "（無）"),
+		atk.readiness, def.readiness]
 	_msg.emit_message(state, "combat_start",
-		"Team %d 對 Team %d 宣戰" % [atk_id, def_id], atk,
-		{ "origin": str(atk_id), "target": str(def_id) })
+		"Team %d 對 Team %d 宣戰（%s）" % [atk_id, def_id, _cause], atk,
+		{ "origin": str(atk_id), "target": str(def_id), "cause": _cause })
 	print("[Combat Start] Team%d vs Team%d" % [atk_id, def_id])
 	# de-patch §D4：傷亡累積器餘量開場歸零（生產路，非探針——staleness 綁定單場、確定性）。
 	_cas_carry[atk_id] = 0.0

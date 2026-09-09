@@ -1,0 +1,31 @@
+# docs/process/event-cause-ledger.tsv —— 果事件帶因：逐 emit 點對帳（★機械產出）
+#
+# ★母體＝全 scripts/simulation（★含 events/ 子目錄——原清單漏掉整個目錄，母體是 23 不是 20）。
+# ★★「無因」要分兩種，因為處置不同：
+#   產生端沒有 ＝ 這個決定不是在這裡做的 ⇒ 往上游追（★不得在這裡發明一個）
+#   有但沒印   ＝ 這裡就能補（本票的形狀）
+# ★★★TextBank 有模板 vs call-site 字面是【兩條路】：前者改模板加佔位，後者改那行 % 字串。
+type	call_site	has_cause	textbank	note
+aid_given	scripts/simulation/interaction_system.gd:1515	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+aid_given	scripts/simulation/player_command_system.gd:1016	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+aid_refused	scripts/simulation/interaction_system.gd:1489	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+aid_refused	scripts/simulation/interaction_system.gd:1508	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+aid_refused	scripts/simulation/player_command_system.gd:1010	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+aid_refused	scripts/simulation/player_command_system.gd:996	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+aid_refused	scripts/simulation/sim_runner.gd:327	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+combat_end	scripts/simulation/npc_combat_system.gd:399	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+combat_start	scripts/simulation/npc_combat_system.gd:130	yes	call-site	本票已帶因
+diplomacy	scripts/simulation/interaction_system.gd:541	no	template	待判：產生端有沒有因（★不得在這裡發明）
+extortion	scripts/simulation/interaction_system.gd:485	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+faction_defect	scripts/simulation/events/event_faction_defect.gd:51	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+faction_establish	scripts/simulation/faction_ai_system.gd:6951	no	template	待判：產生端有沒有因（★不得在這裡發明）
+famine_warning	scripts/simulation/harvest_system.gd:219	no	template	待判：產生端有沒有因（★不得在這裡發明）
+order_	scripts/simulation/order_system.gd:76	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+order_delivered	scripts/simulation/interaction_system.gd:800	no	template	待判：產生端有沒有因（★不得在這裡發明）
+outpost_built	scripts/simulation/outpost_system.gd:436	no	template	待判：產生端有沒有因（★不得在這裡發明）
+replace	scripts/simulation/events/event_unrest_replace.gd:21	yes	call-site	本票已帶因
+split	scripts/simulation/events/event_unrest_split.gd:26	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+subjugate	scripts/simulation/npc_combat_system.gd:817	no	template	待判：產生端有沒有因（★不得在這裡發明）
+trade_done	scripts/simulation/player_trade_system.gd:187	no	call-site	待判：產生端有沒有因（★不得在這裡發明）
+tribute	scripts/simulation/interaction_system.gd:690	no	template	待判：產生端有沒有因（★不得在這裡發明）
+tribute	scripts/simulation/interaction_system.gd:738	no	template	待判：產生端有沒有因（★不得在這裡發明）
