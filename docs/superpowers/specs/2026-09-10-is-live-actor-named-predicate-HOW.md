@@ -118,3 +118,59 @@ state.succeed_or_disband_faction(team.faction_id, team.team_id, state.pending_er
 ★這是**把一條靠記憶維持的紀律，換成一個編譯器看得見的名字**。
 ★★而普查那一格的價值可能比改名更大：
 **我們到今天才第一次數清楚，62 個迴圈裡只有 2 個知道殭屍窗存在。**
+---
+
+## ⑥ ★★★R² 回件（2026-09-10）：母體 62 → **68**，我的 pattern 系統性地漏掉一整類寫法
+
+R² **沒有沿用我的 pattern**，獨立重撈，結果我猜中的那件事成立：
+
+```
+①state.teams.values()                      ⇒ 零命中（這條沒被用）
+②in state.teams.keys() 直接迭代            ⇒ 命中，但那一行仍含「in state.teams」子字串
+                                              ⇒ ★已經在我的 62 裡（faction_ai:1033／manpower:272／population:77）
+③★★★keys() 先存變數、迴圈打在變數上      ⇒ 【完全繞過】——迴圈那行寫的是 in ids / in all_teams
+    sim_runner.gd:309         for _tid8 in all_teams（pass.byteam probe）
+    observer_query_api.gd:66  query_all_teams()
+    observer_query_api.gd:133 query_map_teams()
+    observer_query_api.gd:184 _residents_here_now()
+    state_fingerprint.gd:77   _emit_teams()（★fp 序列化本體）
+④★keys() 當【參數】傳下去，迴圈在被呼叫的函式內部  ⇒ 那一行連 state.teams 四個字都沒有
+    sim_runner.gd:291 → resource_system.gd:346 flush_forage_episodes(state, team_ids)
+                          內部 :348 for tid in team_ids
+⑤裸 state.teams 整包當參數傳遞             ⇒ 三種呼叫形狀查過，★零命中（確認乾淨，不是漏查）
+```
+
+⇒ ★**真母體 ＝ 68**（62 ＋ 6）。★★而漏掉的不是零星一兩個，是**一整類寫法**
+（先存變數再迴圈／當參數往下傳）**對我的 pattern 系統性隱形**。
+
+### R² 對那 6 站的初判（★普查時要覆核，不得照抄）
+
+| 站點 | 初判 | 理由 |
+|---|---|---|
+| `observer_query_api.gd:66/133/184` | **[A]** | ★**玩家可見面** —— 一支剛判死未 erase 的隊會在隊伍列表／地圖上**閃現一 tick** |
+| `sim_runner.gd:309`（probe 計數） | [B] | 記帳本來就該看見全部 |
+| `state_fingerprint.gd:77`（fp 本體） | [B] | 同 `:145` 讀 `teams_pending_erase.size()` 的道理 |
+| `resource_system.gd:348`（flush_forage_episodes） | **[A]?** | 對已判死的隊清暫存／發 forage 訊息＝跟死人互動，★但後果可能無害 ⇒ 交普查裁 |
+
+★★★**跨票通知（R² 提，我照做）**：`observer_query_api` 那三個**正是「觀察窗 inspect」那張票的消費者**
+⇒ **兩張票的母體重疊** ⇒ 已知會 implementer。
+
+## ⑦ ★第四種狀態（R² 定位，**不新增測試格**）
+
+```
+faction_ai_system.gd:4423  state.erase_teams(routed)         ← teams.has(tid) 變 false
+faction_ai_system.gd:4438  state.teams_pending_erase.clear() ← pending.has(tid) 變 false
+⇒ 這兩行之間（4424-4437）存在第四種組合：teams=false 而 pending=true。
+★它回的答案與「已 erase」一樣是 false，但【內部原因不同】。
+★★不加第四格斷言的理由（R²，我同意）：is_live_team 是一個【沒有分支的純布林 AND】
+   ⇒ 三種會回 false 的組合走同一條運算，沒有任何特殊判斷能讓其中一個走不同路徑。
+★★★但這個窗寫在這裡當紀錄 —— 免得以後有人以為只有三種組合存在。
+```
+
+## ⑧ R² 判決狀態
+
+```
+2026-09-10 R²：非 CLEAN（唯一阻塞＝母體 62→68），已補上 ⇒ ★R² 明示補完不用再送審，直接 dispatch。
+其餘全過：兩個名字不是過度設計（★理由是【下一批票幾乎確定要用單點布林】，
+不是「將來也許有人要」）／驗收表／不做的事／我自招的兩件（[C] 必須存在、[A] 本票不修）。
+```
