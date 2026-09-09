@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 觀察窗 inspect 深化（體驗窗三票之一）
 topic: ★R² 送審：`2026-09-10-observer-inspect-depth-HOW.md`——★★它剛長大了：blueprint 對盲格 117 裁「全要」，我把裁定＋三條 HOW 折進這張票｜★★★我要你優先打的是【覆蓋率守衛那一格】：我宣稱它比照 failure-feedback-coverage 就成立，而那支閘今天才因為「已有等價機制」的宣稱會腐爛而補過一次——同一個坑我可能又踩了
 ---
