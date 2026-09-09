@@ -62,11 +62,179 @@ static func derive_from(ws_script, src: String) -> Array:
 	missing.sort()
 	return missing
 
+# ★★★子層級的導出檢查（HOW spec 2026-09-10）：頂層那支【自己寫明看不到子層級】——
+#   「_emit_teams 漏掉 TeamData 某個新欄位」那一類。★而一個【被寫下來的洞仍然是洞】。
+#   母體＝每個被序列化的資料類的 var 欄位（get_script_property_list 抽，不手抄）；
+#   判準＝【那支 _emit_* 裡宣告的、型別相符的那個變數】的 "<變數>.<欄位>"
+#     ★★R² 訂正：只比對 ".<欄位>" 會誤判 —— 函式裡若有第二個變數剛好有同名欄位
+#     （tile_pos／faction_id／team_id 這種橫跨多類的常見名）就會被算成「讀過了」。
+#     ⇒ 現在先從函式本體抓出 `var X: <該類>` 的變數名，再組 "X.<欄位>"。
+#   ★註解先被剝掉（「提及 ≠ 讀取」，今天血證過一次，不重演）。
+#   ★★★它仍然看不到【第三層】（例如 TeamData 裡某個 Dictionary 的鍵）—— 這句住在這裡，
+#   不是只住在交件信裡。
+const SUBFIELD_MAP: Array = [
+	["TeamData",    "res://scripts/data/team_data.gd",    "_emit_teams",   ""],
+	["PersonData",  "res://scripts/data/person_data.gd",  "_emit_persons", ""],
+	["FactionData", "res://scripts/data/faction_data.gd", "_emit_factions",""],
+	["HexTileData", "res://scripts/data/tile_data.gd",    "_emit_tiles",   ""],
+	# ★WorldData 沒有 `var w: WorldData` 這種宣告，它一律走 state.world.<欄位>
+	#   ⇒ 用 accessor 提示（第四欄），而不是硬套「找型別宣告」那條規則。
+	["WorldData",   "res://scripts/data/world_data.gd",   "_emit_world",   "state.world"],
+]
+
+# ★★兩支【被排除而那是對的】的 _emit_*：它們序列化的是【裸 Dictionary】，
+#   沒有 class_name 背書 ⇒ get_script_property_list 天生不適用（不是漏，是不適用）。
+const SUBFIELD_NOT_APPLICABLE: Array = ["_emit_belief", "_emit_player"]
+
+static var _subfield_cache: Dictionary = {}
+
+# ★R² 補的第二格：SUBFIELD_MAP 自己【也是手抄的】——第 8 支 _emit_* 出現時，
+#   沒有任何機制會發現它沒跟著加一行 ⇒ ★★本票要根治的病換了個容器又長出來。
+#   ⇒ 這支把【行集本身】也變成導出的：本檔所有 static func _emit_* × 已登記的 ⇒ 差集具名。
+static func emit_registry_gaps() -> Array:
+	var f := FileAccess.open(SELF_PATH, FileAccess.READ)
+	if f == null:
+		return ["<讀不到本檔原始碼 ⇒ 不可判>"]
+	var src: String = f.get_as_text()
+	f.close()
+	var registered: Array = []
+	for entry in SUBFIELD_MAP:
+		if String(entry[2]) != "":
+			registered.append(String(entry[2]))
+	var gaps: Array = []
+	for l in src.split("\n"):
+		var line: String = String(l)
+		if not line.begins_with("static func _emit_"):
+			continue
+		var nm: String = line.substr(12, line.find("(") - 12)
+		if nm in registered or nm in SUBFIELD_NOT_APPLICABLE:
+			continue
+		gaps.append(nm)
+	gaps.sort()
+	return gaps
+
+# 回 {類名: {"in_ruler": [...], "string_read": [...], "excluded": [...]}}
+static func derived_subfield_excludes() -> Dictionary:
+	if not _subfield_cache.is_empty():
+		return _subfield_cache
+	var f := FileAccess.open(SELF_PATH, FileAccess.READ)
+	if f == null:
+		return {"<讀不到本檔原始碼>": {"in_ruler": [], "string_read": [], "excluded": []}}
+	var src: String = f.get_as_text()
+	f.close()
+	var out: Dictionary = {}
+	for entry in SUBFIELD_MAP:
+		var cls: String = String(entry[0])
+		var sc = load(String(entry[1]))
+		if sc == null:
+			continue
+		# ★accessor 非空（WorldData 走 state.world.<欄位>）⇒ 用整份原始碼：
+		#   它的欄位散在 _emit_world 與 _emit_tiles 兩支裡（tiles 是被 _emit_tiles 讀的）。
+		var body: String = _strip_comments(src) if String(entry[3]) != "" else _slice_fn_body(src, String(entry[2]))
+		var accessor: String = String(entry[3])
+		if accessor == "":
+			accessor = _typed_var_name(body, cls)
+		out[cls] = derive_subfield_from(sc, body, accessor)
+	_subfield_cache = out
+	return out
+
+# 從函式本體抓出 `var X: <型別>` 的變數名（★沒抓到 ⇒ 回空字串，而空字串會讓
+#   下面那支【拒絕判斷】而不是退回寬鬆比對 —— 判不了要說判不了，不要偷偷降級。）
+static func _typed_var_name(body: String, cls: String) -> String:
+	for l in body.split("\n"):
+		var line: String = String(l).strip_edges()
+		if not line.begins_with("var "):
+			continue
+		var colon: int = line.find(": " + cls)
+		if colon < 0:
+			continue
+		return line.substr(4, colon - 4).strip_edges()
+	return ""
+
+static func _strip_comments(src: String) -> String:
+	var out: PackedStringArray = PackedStringArray()
+	for l in src.split("\n"):
+		var line: String = String(l)
+		var hash_at: int = line.find("#")
+		if hash_at >= 0:
+			line = line.substr(0, hash_at)
+		out.append(line)
+	return "\n".join(out)
+
+# 抽出某支函式的本體（到下一個 "static func" 為止）
+# ★名字不叫 _emit_body：★★床第一次跑就抓到——它自己會被 emit_registry_gaps 的
+#   「static func _emit_」掃到，變成一支【未登記的 _emit_*】＝我的工具誤報我自己。
+static func _slice_fn_body(src: String, fname: String) -> String:
+	var body: PackedStringArray = PackedStringArray()
+	var inside: bool = false
+	for l in _strip_comments(src).split("\n"):
+		var line: String = String(l)
+		if line.begins_with("static func "):
+			inside = line.begins_with("static func " + fname + "(")
+			continue
+		if not inside:
+			continue
+		body.append(line)
+	return "\n".join(body)
+
+# 純函式（床可餵假類 ＋ 假本體 ＋ 假 accessor）
+static func derive_subfield_from(cls_script, body_raw: String, accessor: String = "") -> Dictionary:
+	# ★剝註解【在判準這一側】做，不是靠呼叫端先剝好：
+	#   ★★床第一次跑就抓到 —— 我原本把剝註解放在 _emit_body（只有真實檔案走它），
+	#   而床餵原始文字進來，於是「提及 ≠ 讀取」那一格當場紅。
+	#   ★★★保證要跟【做判斷的那段程式碼】住在一起，否則它只對某一條呼叫路徑成立。
+	var body: String = _strip_comments(body_raw)
+	var in_ruler: Array = []
+	var string_read: Array = []
+	var excluded: Array = []
+	if accessor == "":
+		return {"in_ruler": [], "string_read": [],
+			"excluded": ["<找不到型別相符的變數 ⇒ 本類【不可判】，不退回寬鬆比對>"]}
+	for pi in cls_script.get_script_property_list():
+		var n: String = String(pi.get("name", ""))
+		if n == "" or n.begins_with("_"):
+			continue
+		if int(pi.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE == 0:
+			continue
+		if body.contains(accessor + "." + n):
+			in_ruler.append(n)
+		elif body.contains('"' + n + '"'):
+			# ★第三桶（★★量出來的，不是我設計的）：farming_level 走 t.get("farming_level")
+			#   ⇒ 字串鍵動態讀取，"<變數>.<欄位>" 這個判準看不到它。
+			#   ★★★不併進「尺內」是因為字串也可能只是某個 dict 的鍵
+			#   ⇒ 併進去會【隱藏一個真的缺口】，而漏報比誤報貴。
+			string_read.append(n)
+		else:
+			excluded.append(n)
+	in_ruler.sort()
+	string_read.sort()
+	excluded.sort()
+	return {"in_ruler": in_ruler, "string_read": string_read, "excluded": excluded}
+
+
 # ★輸出 fp 的地方請印這一行（單一來源，改一處全部跟）。
 static func blind_note() -> String:
 	var d: Array = derived_excludes()
 	var top: String = ("、".join(d)) if not d.is_empty() else "（無）"
-	return ("[FP-BLIND] ★本尺排除【頂層欄位・導出】：%s" % top) 		+ ("｜【子層級・手抄，只涵蓋列出的那些】：%s" % EXCLUDES_SUBFIELD) 		+ " ⇒ ★★fp 相同【不等於】沒有污染（那半由 EphemeralStateHash 量）"
+	var out: String = "[FP-BLIND] ★本尺排除【頂層欄位・導出】：" + top
+	out += "｜【子層級・導出】" + _subfield_summary()
+	var gaps: Array = emit_registry_gaps()
+	if not gaps.is_empty():
+		# ★登記表自己少了一列 ⇒ 印在同一行（★★它不會靜默：少一列不會紅＝橡皮圖章）
+		out += "｜★★未登記的 _emit_*：" + "、".join(gaps)
+	out += "｜【子層級・手抄補述（只涵蓋列出的那些）】" + EXCLUDES_SUBFIELD
+	out += " ⇒ ★★fp 相同【不等於】沒有污染（那半由 EphemeralStateHash 量）"
+	out += " ★★★而三層以下（dict 內部的鍵）本尺看不到。"
+	return out
+
+static func _subfield_summary() -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for cls in derived_subfield_excludes():
+		var d: Dictionary = derived_subfield_excludes()[cls]
+		parts.append("%s 尺內 %d／字串鍵讀取 %d／★沒看到被讀 %d：%s" % [String(cls),
+			(d["in_ruler"] as Array).size(), (d["string_read"] as Array).size(),
+			(d["excluded"] as Array).size(), "、".join(d["excluded"])])
+	return " ｜ ".join(parts)
 
 # 全 state canonical hash（decision-and-lifecycle-affected state；純讀零 RNG）。
 static func compute(state: WorldState) -> String:
