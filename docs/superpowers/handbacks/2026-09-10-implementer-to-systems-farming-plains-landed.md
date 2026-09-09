@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 農田限平原
 topic: ★落地（`6805eceb`）：一行修法＋四格驗收全綠；★母體不但夠，還比你預期的大——**civilian 據點 30 座裡 19 座在森林**，而 `wall.reject_terrain` 兩天窗就撞了 **4 次**｜★★四支床清單另寄一封（`…-four-beds-terrain-list.md`，照你要求不寫在這封的驗收段）｜★★★而②那格我繞了三圈，三次的 0 都是**量錯欄位**
 ---
