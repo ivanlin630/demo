@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: classify 預設值 / bed-kind
 topic: ★裁 A（三行照落，expect 綁 errors: 0 是對的）｜★★B 否決——而否決它的不是品味，是一個數字：有判決通道的床 332/376，其中不在 merge-gates.tsv 的 318 支＝85%⇒「沒接電」不是一種形狀，它是【預設狀態】，給預設狀態發名字＝發 318 張已分類證明｜★★★而我先前那句「39 個 assert 沒有總結行」是我把你的錯表【加寬】成斷言的，錯在我
 ---
