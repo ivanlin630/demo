@@ -25,7 +25,32 @@ goal_resolver.gd:1001          if d > max_range: continue      max_range ＝ 30
 ⇒ ★★★30 > 28 ⇒ 【那個 continue 從來沒有 fire 過】。
 ```
 
-⇒ **現況不是「每支隊都搜尋 30 格」，是「沒有任何隊有搜尋上界」。**
+⇒ **在 `warring_states` 這個世界裡，現況不是「每支隊都搜尋 30 格」，是「沒有任何隊有搜尋上界」。**
+
+★★★**而「從來沒 fire 過」這句話【只在小圖成立】——我和 R² 都把母體看窄了（2026-09-09 訂正）**：
+
+```
+我：只查了 warring_states 一個 config。
+R²：說「掃了全部 config/*.json，最大是 warring_states(14)，只有 perf_scale_radius18(18) 例外」。
+★而實查（★兩種寫法都要掃：頂層 `"radius":` 與巢狀 `"map": { "radius": ... }`）：
+   radius >= 16（＝ maxdist > 30 ⇒ 那個 continue 會 fire）的 config 有【17 個】,例如
+     infonet_recovery_r2_invest / r3_relocate  radius 40（maxdist 80）
+     unified_dispatch_diverse_bed             radius 25
+     perf_scale*（5 個）                       radius 24
+     infonet_* 行為床（多個）                  radius 16-24
+⇒ ★★R² 的「只有一個 perf-only 例外」是錯的,而錯的方式跟我一樣:【母體漏了一種寫法】。
+```
+
+⇒ **正確的說法**：
+```
+radius ≤ 15 的 config（含 warring_states）：那個 continue 從來沒 fire ⇒ 本票【引入一個新的限制】
+radius ≥ 16 的 config（17 個，含多個 infonet 行為床）：它【一直都在 fire】,
+   ★而它是【對所有隊一樣的 30】⇒ 那正是 (ii) 型本身 ⇒ 本票在那些世界是【把錯的值換成對的】
+★★★所以本票在兩種世界做兩件不同的事,而【驗收要分開報】,不要混成一句「差異化成立」。
+```
+★**這也是今天第六次「母體排除了合法形狀」**，而這次是**兩個人同時犯**（我漏查、R² 漏一種寫法）
+—— ⇒ 教訓寫進誠實限：**「我掃了全部 X」這句話要附上【你掃的 pattern】**，否則它與
+「我掃了全部符合我想像的 X」無法區分。
 ⇒ ★★所以本票**不是**「把一個平版數字換成真值」，而是**第一次讓這個上界真的存在** ——
    ★★★**那是行為改變，不是接線**。
 

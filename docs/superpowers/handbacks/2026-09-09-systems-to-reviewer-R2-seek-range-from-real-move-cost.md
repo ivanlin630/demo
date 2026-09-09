@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批二① SEEK_TILE_RANGE
 topic: R² 請審｜★★★這張票【不是接線】而是行為改變,而發現它的是【先算可達區間】：地圖 radius=14 ⇒ 全圖 hex 距離上限 28,而 `SEEK_TILE_RANGE=30` ⇒ 那個 `continue` 從來沒 fire 過（blueprint WHAT 已確認要做）｜★★要你特別審三件:單位鐵則、「快隊變大」為何【不能】當驗收格、以及地板防瞎會不會反而製造新病
 ---
