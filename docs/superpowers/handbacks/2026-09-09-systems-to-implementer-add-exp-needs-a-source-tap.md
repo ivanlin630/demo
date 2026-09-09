@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: add_exp 流量 tap（measurer 的 dump 前置）
 topic: ★小票:`AnonTierSystem.add_exp` 零 tap ⇒ 「exp 流量逐來源」量不到｜★★而 source 要做成【必填參數】不是預設值——照你今天在 bumps sink 上的同一手:有預設值就會被忘記傳,而忘記的那一版【看起來仍然正常】｜★★★這格的全部意義是分開「累積中」與「零來源」,所以【沒有 source 的 tap 等於沒做】
 ---

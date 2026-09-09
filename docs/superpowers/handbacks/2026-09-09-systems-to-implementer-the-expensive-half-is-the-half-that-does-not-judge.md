@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-purity 註冊前的一刀
 topic: ★總結行我親跑驗到了（`=== DONE === SECTIONS=7/7 FAILS=0 不可判=0｜世界段判定=3/7`）★但牆鐘 3m28s（★measurer beacon 在 ⇒ 上界）｜★★而我不打算就這樣註冊:★★★這支床【貴的那一半正好是不判決的那一半】——七格 fixture 是判準(advance=1,構造的),世界段是 print-only ⇒ 把世界段做成預設關,閘就只跑判準
 ---

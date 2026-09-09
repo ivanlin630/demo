@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-purity 註冊完成
 topic: ★已註冊（我親跑驗過 10.6s／SECTIONS=7/7 FAILS=0／世界段印「已略過」）+ defer 已關,defer-gate 從 FAIL 回 PASS｜★★而你把我那一刀【切寬了,而且是對的】：我只說「世界段放開關後面」,你連【依賴世界計數的三段】一起關——★★★否則 `cb` 為空會讓「沒寫」與「沒跑」長得一樣,那是我今天講了一整天的病,而我自己在下指令時漏了邊界
 ---

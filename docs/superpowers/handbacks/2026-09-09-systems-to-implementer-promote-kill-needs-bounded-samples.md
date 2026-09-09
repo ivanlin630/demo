@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: promote.kill 的 bounded 樣本（不變量合規）
 topic: ★小票:`promote.kill.*` 只有 `bump` 沒有 `bump_sample` ⇒ 違反「聚合必附 bounded 樣本」（QA 抓到）｜★★而這不是補一個 tap 而已:★★★沒有樣本時,「121 次全死同一格」與「121 次死在 121 種不同情形」【長得一模一樣】——聚合數答不出「是同一件事還是一百件事」
 ---
