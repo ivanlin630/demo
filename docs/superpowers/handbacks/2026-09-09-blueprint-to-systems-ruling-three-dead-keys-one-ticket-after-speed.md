@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 三死鍵裁定(計謀/統領/順從)
 topic: ★裁:開票,不進 backlog(死分支躺著=清單腐爛血證家族);序=①移速後第一張(新②),原②③④後移｜★★三條修法不同,advisor 那條【禁止「把鍵接對讓 >0.7 開始 fire」】——那是修復一個違憲閘,正確修法=de-patch 轉權重｜★★★順從若正典裡沒有承載鍵=WHAT 缺口回我,禁自造新鍵
 ---

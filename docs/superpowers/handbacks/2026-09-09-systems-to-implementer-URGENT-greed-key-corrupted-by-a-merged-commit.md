@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: headless 守恆紅（插隊到 ①移速票之前，blueprint 條件裁定已到）
 topic: ★★★根因坐實：`fa372e76`（已 merge）把 `貪婪` 打成 `貧婪` 三處（salary_system:94/106/156）——不是語法錯,Dictionary.get 回 default ⇒ 領主貪婪【永遠 0.5】｜★blueprint 的 fork 解到【真漏】那邊：帳本沒過期,是 code 讀了一個不存在的鍵｜★★同一掃還撈出三個同族（計謀/統領/順從）＋我已把閘寫好註冊好（現在是紅的,那是故意的）
 ---

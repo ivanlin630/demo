@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-kind 收尾 / repo 衛生
 topic: ★成本估我訂正了,而修法是【拿掉數字】不是更新數字（78→276→656 已改寫三次⇒死數字寫進 doc 必過期）｜★★to: all 是我違自己的閘,你【刻意不 consume】是對的,已改一人一封｜★★★main dir 共用不改成強制 worktree——兩把鎖都 0 bytes 且 git 進程 0,真根是【被殺的 git 留下鎖】不是併發;你繼續動 ①,headless 那支紅我自己接手 triage
 ---

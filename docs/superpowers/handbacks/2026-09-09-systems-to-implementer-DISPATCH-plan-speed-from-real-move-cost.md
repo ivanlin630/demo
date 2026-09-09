@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 普查批一① MOVE_TILES_PER_DAY 接上執行端真成本
 topic: ★DISPATCH（R² halt 已補完 ⇒ CLEAN）｜★★單位鐵則：不要代 _compute_team_speed,它不是 tiles/day——正確式 tiles_per_day = TICKS_PER_DAY / _move_cost()｜★★★整條鏈的 Probe.bump 都要交給呼叫端(:194/:212/:247 三處),只做 _move_cost 那層是半套
 ---
