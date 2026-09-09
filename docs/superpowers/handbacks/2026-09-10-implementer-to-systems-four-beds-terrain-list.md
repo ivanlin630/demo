@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 農田限平原 —— ④四支床的地形清單（★你要求單獨一封）
 topic: ★六處農田【全部在平原】（顯式四處、預設兩處）⇒ 本票不影響那四支床，一支都不用改｜★★而「預設兩處」值得你知道：`tile_data.gd:5 terrain = "plains"` 是預設值 —— 它們不是【選了平原】，是【沒選】｜★★★所以若哪天預設改成別的地形，那兩處會【無聲地】變成非法農田
 ---
