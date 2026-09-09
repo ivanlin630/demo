@@ -330,6 +330,34 @@ gv_teamstate (1)：faction_ai::consolidate_target_of
 ★★★**2026-09-02 當日撤回**：本條目原本主張「除這 10 顆外沒有已知的 god-view 決策點」——
 ★**reviewer R① 抽查 76 個候選裡的【前 40 個】就翻掉它**（`premise_contradiction: TRUE`）。
 
+## 🔒 **停滯自鎖迴圈**：戰爭不出結局 ⇒ 無存活 exp ⇒ 無老兵 ⇒ 軍隊永遠平民 ⇒ 戰爭更不出結局（blueprint 命名 2026-09-09）
+
+```
+觀測   人口卷：晉升 121 次、★100% 死在 not_enough_exp
+靜態鏈 anon_tier_system.gd:28-32   門檻 平民 50／新兵 100／老兵 200
+       anon_tier_system.gd:406-412 exp 不足 ⇒ not_enough_exp
+       exp 的 NPC 供給【只有兩條】：
+         ①encounter_system.gd:1290-97  戰鬥存活 5.0（贏家 +5.0）⇒ 平民要【10 場存活】
+         ②training_system.gd:26        tact × n，★而 :19 `if tact <= 0.0: continue`
+           tact = leader.skills.get("戰術", 0.0)，而 game_setup.gd:471 給 leader 的只有 統領=0.15
+       （player_command_system.gd:198 是玩家專屬，NPC 沒有這條）
+```
+
+★**迴圈的形狀**：`絕境經濟 arc` 已坐實**殲滅-heavy ⇒ 戰爭不出結局**；
+而沒有結局＝**沒有存活者累積 exp** ⇒ 晉升死在 exp 閘 ⇒ **軍隊永遠是平民**
+⇒ **戰力不分層 ⇒ 戰爭更不容易出結局**。★★**自己餵自己。**
+
+★★★**它與【被初始參數凍結的閘】是不同的病，寫清楚免得混**：
+凍結閘是**一個門檻與一個初始值的靜態距離**；這一條是**兩個機制互為對方的前提**
+⇒ ★**動任何一端的參數都不會解開它**，要打斷的是**環**。
+
+**狀態：未確認（假說已具名，dump 在跑）** ｜ **owner：blueprint（WHAT）** ｜
+**回訪：量測窗 —— 晉升 exp 閘距離 dump（票 `docs/superpowers/handbacks/2026-09-09-systems-to-measurer-promotion-exp-gate-distance.md`，2026-09-10 前）**
+★**WHAT 透鏡 blueprint 已預註冊（2026-09-09，dump 坐實後不必再等裁）**：
+①若「戰術=0 佔多數」坐實 ⇒ 修法方向＝**訓練效率隨師資【連續】調製、拆掉 0/1 閘**
+  （`tact` 當乘數保留，**地板 > 0** —— ★**爛老師教得慢，不是不能教**）。
+②若「戰鬥流量枯」坐實 ⇒ 接到**殲滅-heavy arc**，本迴圈即該 arc 的下游。
+
 ## 🧊 **被初始參數凍結的閘**：`options.gd:149` 的「空家不返」永遠不會 bind（2026-09-09，成對反事實第一次上工抓到）
 
 ```
