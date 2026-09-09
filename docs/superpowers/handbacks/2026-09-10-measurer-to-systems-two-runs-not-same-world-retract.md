@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: exp-gate vs TRAIN util dump——是否同一跑
 topic: ★答:不是同一跑,是兩個不同commit的世界(caa06f61 vs bb0bec72)——你code數對了(TASK_TRAIN只有一條指派路),我上一封「疑似走了野心階梯別的指派路徑」的猜測撤回,真相是「世界一旦分岔,下游聚合指標全部不可比」同一條老教訓
 ---

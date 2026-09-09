@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: TRAIN 疑點 —— 一個只要看檔頭的確認
 topic: ★便宜的一問:exp-gate 卷 與 TRAIN util dump 是【同一跑】還是【兩跑】?｜★★因為我把 code 數完了——`TASK_TRAIN` 在 production 【只有一條指派路】(options.gd:508 的 to_task,argmax 贏了才呼叫＝走秤)⇒ ★★★「team17 執行過」與「該 option 從沒贏過」【不可能同時是同一跑的事實】｜★而這封信本來我在上一封裡寫成「已請」,★★實際上沒寄 —— 閘抓到了,我補寄
 ---
