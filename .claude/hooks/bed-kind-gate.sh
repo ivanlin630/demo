@@ -15,6 +15,8 @@ export LC_ALL=C
 #   ★改用【腳本自己住哪裏】：.claude/hooks/x.sh ⇒ ../.. 就是它那棵樹的 root。
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO" || exit 2
+# ★判決行形狀走【共用清單】——兩處各養一份必 drift（血證見 verdict-shapes.sh 檔頭）
+. "$(dirname "${BASH_SOURCE[0]}")/verdict-shapes.sh"
 FIX=".claude/hooks/fixtures/bed-kind"
 TSV="docs/process/merge-gates.tsv"
 DEFERS="docs/process/defers.tsv"
@@ -40,7 +42,9 @@ check_one() {
       sed -n '1,8p' "$f" | grep -q '^#[[:space:]]*slice:[[:space:]]*[^[:space:]]' \
         || { echo "宣告 acceptance 卻沒有 slice: 欄"; return; };;
     diagnostic)
-      if grep -qE 'ALL PASS|=== DONE ===' "$f"; then
+      # ★2026-09-09 放寬：舊版只認字面 `=== DONE ===`，而真實床寫的是
+      #   `=== UI Flow Test DONE === errors: %d` ⇒ 舊版對它印 ok（★閘替謊蓋章）。
+      if grep -qE "$VERDICT_CHANNEL_RE" "$f"; then
         echo "宣告 diagnostic 卻有判決彙總行（有判決通道就不是純診斷）"; return
       fi;;
     pending)
@@ -62,6 +66,8 @@ selftest() {
     "invariant_not_wired_bed.gd|RED" \
     "pending_bogus_blocker_bed.gd|RED" \
     "diagnostic_with_verdict_bed.gd|RED" \
+    "diagnostic_real_shape_bed.gd|RED" \
+    "good_diagnostic_bed.gd|GREEN" \
     "acceptance_no_slice_bed.gd|RED"     "good_pending_bed.gd|GREEN"     "good_acceptance_bed.gd|GREEN"
   do
     n="${pair%|*}"; want="${pair#*|}"
@@ -82,7 +88,7 @@ if ! selftest; then
   echo "[BED-KIND] ★ABORT：陽性對照沒過 ⇒ 本輪作廢（不得讀成任何結果）"
   exit 3
 fi
-echo "[BED-KIND] 陽性對照通過（5 格紅 + 2 格反向綠，涵蓋 §3b 全部四條）"
+echo "[BED-KIND] 陽性對照通過（6 格紅 + 3 格反向綠，涵蓋 §3b 全部四條；含【真實床原句】的 diagnostic 紅）"
 
 # ── 存量規模（★只是讓它可見；★★不宣稱它會因此下降）────────────────
 TOTAL="$(git ls-files 'scripts/debug/*.gd' | wc -l | tr -d ' ')"

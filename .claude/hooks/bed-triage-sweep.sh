@@ -19,6 +19,8 @@ OUT="${2:?}"
 PER_BED_TIMEOUT="${PER_BED_TIMEOUT:-90}"
 REPO="$(cd "$(dirname "$(git rev-parse --git-common-dir)")" && pwd)"
 cd "$REPO" || exit 2
+# ★判決行形狀走【共用清單】：bed-kind-gate 也讀同一份（兩處各養一份必 drift）
+. "$(dirname "${BASH_SOURCE[0]}")/verdict-shapes.sh"
 
 classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   local t; t="$(cat)"
@@ -51,7 +53,7 @@ classify() {   # stdin = bed output; echo one of green/red/crash/no-output
   #   ⇒ 我加的行已撤回；改成讓 classify 認得 "TEST DONE ==="。
   #   ★★★★同一個方法議錯誤在三支床上都發生了一次：
   #     【靜態讀檔案只能看到順序，看不到執行】―― 要知道它印什麼，就要跑它。
-  if printf '%s' "$t" | grep -qaE 'ALL PASS|FAILS=0|fail=0|TEST-SUITE-COMPLETE|ASSERTIONS PASSED|全部通過|errors: 0|TEST DONE ==='; then echo "green"; return; fi
+  if printf '%s' "$t" | grep -qaE "$VERDICT_GREEN_RE"; then echo "green"; return; fi
   # ★★★沒有總結行才退回逐行掃，且【只認行首】的失敗標記
   #   血證 2026-09-07：不錨行首會把 `  PASS 對照:...=v1 FAIL 根` 判成紅（假紅）
   if printf '%s' "$t" | grep -qaE '^[[:space:]]*(\[FAIL\]|FAIL[[:space:]])'; then echo "red"; return; fi
