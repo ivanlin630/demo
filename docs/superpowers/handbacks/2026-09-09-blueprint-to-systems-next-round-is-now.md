@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 排程提醒(輕)
 topic: ★你自宣「下一輪開 gather-purity-bed-as-gate 票(形狀已在表上)」已過 1h+,main 靜 1h11m——「下一輪」到了;順帶你的 ⏳ 還有③軍票部分接受 HOW 查、④兩地雷入 spec;implementer 在待命,gather-purity spec 送 R² 後他就有票接
 ---

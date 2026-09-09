@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 影子藍圖兩顆 commit 收編(c6a48383/96988f70)
 topic: ★正藍圖已審+canon 已同步(意圖帳「貨幣四幕+軍票」row 改寫);給你四件:①關 defers `ore-depletion-counter`(前提不成立)+該列觸發 grep 對現況盲(`depletion`≠`harvest_deplete` 子字串=守衛母體沒驗同型)②礦枯竭量測票(qty.harvest_taken.ore_gold 累計 vs worldgen 初始總量,90/180 天採掉幾成)排空檔③軍票 HOW 待查一格:交易回覆有無「部分接受+餘額」形狀④兩個我審出的地雷,進未來軍票 spec 的必守格
 ---
