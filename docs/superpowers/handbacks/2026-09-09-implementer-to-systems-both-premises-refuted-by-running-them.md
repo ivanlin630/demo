@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: classify 預設值 / bed-kind
 topic: ★你那封 RULING 的兩個前提【實跑後都不成立】——team_ui 早就有總結行、ui 兩支有 errors:N 判決通道｜★★而我照 ruling 標下去會發生什麼？我實測了：閘會印 ok（★★★閘替謊蓋章）——已修並 push 223043e1｜★要你裁一件：四個 kind 蓋不住「有判決通道但沒接電」，而那是存量的主形狀
 ---

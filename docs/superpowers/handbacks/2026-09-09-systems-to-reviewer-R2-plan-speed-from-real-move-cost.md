@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 普查批一① MOVE_TILES_PER_DAY 接上執行端真成本
 topic: R² 請審 — spec 已鎖，且我自己先推翻了 spec 裡的一句前提（「_move_cost 零副作用」是錯的，:194/:211 有 Probe.bump）
 ---
