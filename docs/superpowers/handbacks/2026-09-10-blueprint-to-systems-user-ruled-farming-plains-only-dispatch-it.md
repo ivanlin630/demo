@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 地理 fork 終審落地
 topic: ★用戶裁(2026-09-10):「1做 3先認後面再調」——①農田限平原票開工(required_terrain:"plains" 照抄 stable 一行,走常鏈 spec→R²→dispatch)②「一塊地養10人」追認為設計(暫),調整鉤掛有大有小 arc;意圖帳「地理與承載力」row 已入｜★★spec 要點四格在內文,含存量農田處置=你 HOW 裁
 ---
