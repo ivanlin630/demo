@@ -1,0 +1,15 @@
+# 人格鍵閘的【已知未修】清單 —— ★不是豁免，是【帶到期條件的暫記】。
+# 欄：key <TAB> owner <TAB> ticket(必須是存在的檔) <TAB> 為什麼還沒修
+#
+# ★★★born-with 過期紅（我自己立的規矩，這裡自己遵守）：
+#   ①ticket 欄指的檔【不存在】⇒ 閘紅（清單條目沒有真的掛在追蹤系統上）
+#   ②某個 key 已經【不在產線出現】而條目還在 ⇒ 閘紅（★該退場的白名單條目不准躺著）
+#   ⇒ 所以這份清單【只會縮短，不會靜靜長大】。
+#
+# ★★為什麼需要這份：2026-09-09 我把 value-key-gate 註冊進 merge-gates 時它是紅的，
+#   而紅的原因【超出任何一張在飛的票的 scope】⇒ 它會擋住所有 merge 直到三死鍵票落地，
+#   而那張票排在 ①移速之後 ⇒ ★我自己造了一個死結。
+#   implementer 照 scope 停手並把「閘還是紅的」明講 —— 那是對的，錯的是我的註冊方式。
+計謀	implementer	docs/superpowers/specs/2026-09-09-three-dead-value-keys-HOW.md	技能鍵讀進 values；★HOLD：blueprint 依我的錯前提裁過一輪，已撤回待重裁
+統領	implementer	docs/superpowers/specs/2026-09-09-three-dead-value-keys-HOW.md	技能鍵讀進 values；接 skills.統領 且 default 改 0.0
+順從	implementer	docs/superpowers/specs/2026-09-09-three-dead-value-keys-HOW.md	★BLOCKED：正典 8 鍵沒有承載「服從性」語意的鍵 ⇒ WHAT 缺口，等 blueprint

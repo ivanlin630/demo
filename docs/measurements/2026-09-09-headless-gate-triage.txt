@@ -1,0 +1,4 @@
+[HEADLESS] HARD-FAILS ＝ 3 ｜ baseline ＝ 3
+[HEADLESS] ★FAIL：失敗【清單】與 baseline 不同（★數量可能一樣 —— 一紅一綠會抵消）
+   5a6
+   > 1 SCRIPT ERROR: Assertion failed: ★★守恆：團庫流出 == 具名淨額(gross×(N-rate)) + anon 薪資（★rate 由 CoinTreasury 常數導出，不抄數字）

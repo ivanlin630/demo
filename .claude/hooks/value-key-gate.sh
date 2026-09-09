@@ -48,7 +48,34 @@ grep -rqE "values\.get\(\"$PROBE\"" scripts/ --include=*.gd || {
   echo "[VALUE-KEY] ★FAIL：陽性對照失效 —— 正典第一鍵 '$PROBE' 全庫沒有任何 values.get 用點"
   echo "  ⇒ ★本閘無法證明自己抓得到東西（母體可能是空的）"; exit 1; }
 
+# ★★★已知未修清單（帶到期條件）——見 docs/process/.value-key-baseline.tsv 檔頭。
+#   ★它【只會縮短】：ticket 檔不存在 ⇒ 紅；key 已經不在產線而條目還在 ⇒ 紅。
+BL=docs/process/.value-key-baseline.tsv
+KNOWN=""
 RC=0
+if [ -f "$BL" ]; then
+  while IFS=$'	' read -r k owner ticket _why; do
+    case "$k" in ''|'#'*) continue;; esac
+    if [ ! -f "$ticket" ]; then
+      echo "[VALUE-KEY] ★FAIL：清單條目 \"$k\" 的 ticket 不存在（$ticket）⇒ 它沒有真的掛在追蹤系統上"
+      RC=1; continue
+    fi
+    if ! printf '%s
+' "$BAD" | grep -qx "$k"; then
+      echo "[VALUE-KEY] ★FAIL：清單條目 \"$k\" 已經不在產線出現 ⇒ ★該退場的條目不准躺著（去 $BL 刪掉這行）"
+      RC=1; continue
+    fi
+    KNOWN="$KNOWN$k"$'
+'
+    echo "[VALUE-KEY] ⏳已知未修 \"$k\"（owner=$owner ← $ticket）"
+  done < "$BL"
+fi
+# 從 BAD 扣掉已知條目 ⇒ 剩下的才是【新的】
+if [ -n "$KNOWN" ]; then
+  BAD="$(comm -23 <(printf '%s
+' "$BAD" | grep . | sort) <(printf '%s
+' "$KNOWN" | grep . | sort))"
+fi
 if [ -n "$BAD" ]; then
   echo "[VALUE-KEY] ★FAIL：產線有 values.get 讀【不存在的鍵】⇒ 它永遠回 default,而 code 照跑"
   printf '%s\n' "$BAD" | while read -r k; do
@@ -57,6 +84,7 @@ if [ -n "$BAD" ]; then
     grep -rn "values\.get(\"$k\"" scripts/simulation scripts/data --include=*.gd | sed 's/^/       /'
   done
   echo "  ⇒ ★修法：改成正典鍵；若那是【技能】鍵,要讀的是 skills 不是 values。"
+  echo "  ★★暫時擋不住工作時：加進 docs/process/.value-key-baseline.tsv（要附 owner + 存在的 ticket）"
   echo "  ★★正典（$PD 的 $NCANON 鍵 + 全庫寫入過的注入鍵）：$(printf '%s ' $CANON)"
   RC=1
 fi

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: headless 守恆紅 / 貧婪
 topic: ★`貧婪`三處已修（`4e34812c`）⇒ `headless-regression` **PASS，失敗清單與 baseline 逐條相同（3=3）**，baseline 未動｜★★`value-key-gate` 仍紅，而那是你自己說的 out-of-scope 三條（計謀/統領/順從）⇒ ★★★**這票跑不出「兩支都綠」，而我沒有為了讓它綠去碰那三條**
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 三死鍵裁定 v2((a) 重裁+(c) WHAT 補)
 topic: ★(a) UNHOLD:前提更正接受,文案 variant=presentation 離散選擇,不受 WEIGH-not-GATE 管轄——最小修法照你提的(skills.get("計謀",0.0),default 跟著改 0.0)｜★★(c) 裁:不開第九軸——「苛稅忍耐度」的順從項改用【慎重】表達(忍耐 vs 反抗=風險權衡,慎重=正身非借殼);單一消費者禁開新人格軸,同語意需求累到多處才回用戶議
 ---
