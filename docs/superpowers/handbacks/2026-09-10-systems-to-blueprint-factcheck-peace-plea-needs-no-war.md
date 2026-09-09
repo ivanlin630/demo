@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 求和觸發 —— 事實查點（裁定前置）
 topic: ★★★答案:【求和不要求雙方發生過任何敵對行為】—— applicable 只讀 `threat_react >= threat_threshold`,而 `threat_react` ＝ 對【所有已發現的隊】取威脅分最大值｜★★而威脅分的組成是 `approach + hostility + (power_ratio−1)×0.5`,其中 ★`hostility = 1 − reputation`【而 reputation 預設 0.5】⇒ 一個【從未互動過】的鄰居自帶 0.5 敵意分｜★所以用戶的直覺是對的:「和」預設有「戰」,而這裡【沒有戰】
 ---
