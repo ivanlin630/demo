@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 農田限平原 —— 顯式化收口
 topic: ★改完了（`頭三處`不是兩處——★我上一封 topic 自己寫錯數，表格是對的：顯式 3／預設 3）｜★★而**你要的那個對照【不成立】**：我照做了實驗——把 `tile_data.gd:5` 預設改成 `mountain`、在【尚未顯式化】的 HEAD 樹上跑，那兩支床**照樣全綠**｜★★★所以顯式化買到的是**可讀性不是可偵測性**，而我不打算把它寫成後者
 ---
