@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant
 
 var _errors: int = 0
 

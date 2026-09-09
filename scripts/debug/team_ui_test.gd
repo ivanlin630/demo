@@ -1,6 +1,7 @@
 # scripts/debug/team_ui_test.gd
 # Headless test for team member inspector snapshot and TeamUiHelper rendering.
 extends SceneTree
+# @bed-kind: invariant
 
 func _initialize() -> void:
 	print("=== TEAM UI TEST START ===")
