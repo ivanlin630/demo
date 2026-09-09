@@ -22,7 +22,10 @@ const DEFECT_AMBITION_K: float = 1.0    # TEST VALUE — 野心折損 faction_du
 const ATTACK_DRIVE_BASE: float = 0.3    # TEST VALUE — 個人參戰基值；× attack weight(好戰/殘忍)=染色 HOW
 const STAKES_DRIVE_BASE: float = 0.3    # TEST VALUE — 徵收/外交 個人 drive 基值（沿用 ATTACK_DRIVE_BASE 值，獨立便調）
 const BUYFOOD_DIST_FULL: float = 6.0    # TEST VALUE — 買糧旅費折扣基準距離（≤此距離不折扣，遠則衰減）
-const MATERIAL_SHORTFALL_FULL: float = 80.0   # TEST VALUE — 買料 material 缺口標度化基準（≈一 weaponsmith cost；缺此量→drive 滿）
+# ★舊版：`const MATERIAL_SHORTFALL_FULL = 80.0`（TEST VALUE）——2026-09-09 刪。
+#   ★★病：分子是【那支隊自己的缺口】，分母卻對所有隊都一樣 ⇒「缺 80 材料」
+#   對想蓋大設施的隊是小事、對只想補柵欄的隊是天大的事，而它們拿到同一個 drive。
+#   ⇒ 改成同一次 need_keep 呼叫的 `material_need_total`（見 decision_context）。
 const RESTOCK_MIN: float = 10.0         # TEST VALUE — 家糧倉至少這麼多 food 才值得返家補給（空家不返）
 const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量即視為可換糧籌碼（forest/mountain 特產）
 # ── means-end 戰術層（2026-07-01）：intent → 子需求 → option 貢獻打分（mirror FACTION_DUTY_DRIVE）──
@@ -301,9 +304,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return clampf(0.5 + 0.5 * _dd + SECURITY_STOCK_DRIVE * _gap, 0.0, 1.0)
 		"buymaterial_drive":
 			# ★v2a：買料 util 繫「建設迫切」（買料=建設前置，想建強+缺料多→競得過建設，非 0.5-1.0 band 墊底 1.7%）。
-			# = 標度化缺口(shortfall/CAP) × max material-facility 建設迫切。food-ok gate 已在 options applicable 結構擋餓隊。
+			# = 標度化缺口(shortfall/need_total) × max material-facility 建設迫切。food-ok gate 已在 options applicable 結構擋餓隊。
 			if opt != "買料" or not ctx.has_material_market or not ctx.has_specie: return 0.0
-			var _msf: float = clampf(ctx.material_shortfall / MATERIAL_SHORTFALL_FULL, 0.0, 1.0)
+			# 標度化＝自己的需求有幾成沒被滿足（分子分母同一次 need_keep 呼叫，見 decision_context）
+			# ★shortfall > 0 ⇒ need_keep > holding ≥ 0 ⇒ need_total > 0 ⇒ 天然落在 (0,1]，不會除以零
+			var _msf: float = clampf(ctx.material_shortfall / maxf(ctx.material_need_total, 0.01), 0.0, 1.0)
 			return clampf(_msf * ctx.material_build_urgency, 0.0, 1.0)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0

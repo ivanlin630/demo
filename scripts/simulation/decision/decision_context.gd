@@ -118,6 +118,9 @@ var food_market_dist: int = -1
 # ★買料（material means-end，Gate B）：有 material stock 的已知市集 + material 缺口。
 var has_material_market: bool = false
 var material_shortfall: float = 0.0
+# ★同一次 need_keep 呼叫的分母（②票）：`material_shortfall` 的標度化母體。
+#   ★★兩欄【必須在同一段落、由同一個 local var 賦值】，否則就不是同一時刻的量。
+var material_need_total: float = 0.0
 var material_build_urgency: float = 0.0   # ★v2a：max material-facility 建設迫切（買料 util 繫此=建設前置）
 # Fix4 覓食可達性：本格/鄰格有可覓食 tile（無→覓食不 applicable，防 forage-to-nowhere churn）。
 var has_forage_tile: bool = false
@@ -596,8 +599,13 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.food_market_dist = FactionAISystem._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1   # ★perf cut1 A：static
 	# ★買料信號（material means-end，Gate B）：有 material stock 的已知市集 + material 缺口（need_keep 含 construction need）。
 	c.has_material_market = _fa._nearest_market_outpost_with(state, team, "material", true) != Vector2i(-1, -1)
-	c.material_shortfall = maxf(NeedOracle.need_keep(state, team, "material", c.leader_values) \
-		- ResourceSystem.effective_holding(state, team, "material"), 0.0)
+	# ★★★分子分母【同一次呼叫】（2026-09-09，②標度化票）：need_total 存進 ctx 一起帶走。
+	#   ★不要讓 terms 自己再呼叫一次 —— 兩次呼叫之間世界可能已變，分子分母就不是同一時刻的量。
+	#   ★★語意＝「自己的需求有幾成沒被滿足」；分母用 build-need 是錯的（那只涵蓋建設，
+	#   而分子從 need_keep 來、含 construction need ⇒ 母體不同，比值會 > 1）。
+	var _mat_need: float = NeedOracle.need_keep(state, team, "material", c.leader_values)
+	c.material_need_total = _mat_need
+	c.material_shortfall = maxf(_mat_need - ResourceSystem.effective_holding(state, team, "material"), 0.0)
 	c.material_build_urgency = NeedOracle.max_material_facility_desire(state, team)   # ★v2a：買料 util 繫建設迫切
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.market", _tg)
 	# Fix4 覓食可達性：本格/鄰格有 wild_game tile 才可覓食（鏡射 market 一次性 gather，避每 option 重跑）。

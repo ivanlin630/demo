@@ -1,4 +1,9 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: material-buy-v2a（spec 2026-07-23）＋ 2026-09-09 ②標度化票補 need_total
+#   ★標 acceptance 不是 invariant：它現在【沒有】接上任何閘。
+#   ★★而它值得被接電（本輪才發現它的 ③ 斷言是【巧合過】：shortfall=80/need_total=0 都 saturate 到 1.0）
+#   —— 接不接電是 systems 的裁量，我不自決（見同日 handback）。
 
 # material means-end buy v2a TDD（spec 2026-07-23-material-buy-v2a-full-need-utility）。
 # v1(ca199844) QA 半破:want 接上但 buy-to-80 未達。3 fix 疊 v1:
@@ -74,9 +79,12 @@ func _test_cap_clamps() -> void:
 func _test_drive_rises_with_urgency() -> void:
 	print("--- ③buymaterial_drive 繫建設迫切 ---")
 	var lo := DecisionContext.new()
-	lo.material_shortfall = 80.0; lo.has_material_market = true; lo.has_specie = true; lo.material_build_urgency = 0.3
+	# ★need_total 必須一起餵（②票）：舊版只餵 shortfall=80 而 need_total=0
+	#   ⇒ 那是【世界不會產生的狀態】（shortfall 定義上 ≤ need_keep），而斷言會照樣過
+	#   （新舊都 saturate 到 1.0）⇒ ★巧合不是測到東西。兩支給同值，差異只來自 urgency。
+	lo.material_shortfall = 80.0; lo.material_need_total = 100.0; lo.has_material_market = true; lo.has_specie = true; lo.material_build_urgency = 0.3
 	var hi := DecisionContext.new()
-	hi.material_shortfall = 80.0; hi.has_material_market = true; hi.has_specie = true; hi.material_build_urgency = 0.9
+	hi.material_shortfall = 80.0; hi.material_need_total = 100.0; hi.has_material_market = true; hi.has_specie = true; hi.material_build_urgency = 0.9
 	var d_lo: float = DecisionTerms.eval("buymaterial_drive", lo, "買料")
 	var d_hi: float = DecisionTerms.eval("buymaterial_drive", hi, "買料")
 	_ok(d_hi > d_lo, "建設迫切高(0.9) drive > 低(0.3)（買料繫建設前置，got hi=%.2f lo=%.2f）" % [d_hi, d_lo])
