@@ -20,6 +20,13 @@ const FIELDS: Array = [
 
 var _fail: int = 0
 var _unjudgeable: int = 0
+# ★總結行的分母（systems 小票 2026-09-09）：中途崩掉【只會少印幾行】，而剩下的每一行都還是 PASS
+#   ⇒ 中途崩與全部通過在輸出上一模一樣。SECTIONS 讓「跑完了嗎」與「驗過了嗎」分開回答。
+# ★★分母綁【fixture 段】的七欄而不是世界段：fixture 的母體是【造出來的】(確定性)，
+#   而世界段有沒有走到某個寫入點【隨世界變】——把它掛進 SECTIONS 會做出一格會隨機假紅的閘。
+#   ★★★世界段的判定數照樣印在同一行（只是不進分母），所以它變少一樣看得見。
+var _fixture_judged: int = 0
+var _world_judged: int = 0
 
 func _ok(c: bool, m: String) -> void:
 	if c: print("  [PASS] %s" % m)
@@ -44,11 +51,13 @@ func _initialize() -> void:
 		#   ⇒ advance == 0 ⇒ 若先判母體就會把【真的寫了】報成【不可判】。
 		if fo > 0:
 			_ok(false, "fixture %s：觀測路徑寫了 %d 次（★寫了就是違規，跟母體無關）" % [f, fo])
+			_fixture_judged += 1
 		elif fa == 0:
 			print("       ★fixture 沒造出這一欄的母體")
 			_unjudgeable += 1
 		else:
 			_ok(true, "fixture %s：觀測零寫入（母體 advance=%d）" % [f, fa])
+			_fixture_judged += 1
 
 	var ra: Array = _run_world(days, false)
 	var rb: Array = _run_world(days, true)
@@ -64,12 +73,14 @@ func _initialize() -> void:
 		print("     %-28s advance=%-6d observe=%d" % [f, adv, obs])
 		if obs > 0:
 			_ok(false, "%s：觀測路徑寫了 %d 次（★寫了就是違規，跟母體無關）" % [f, obs])
+			_world_judged += 1
 		elif adv == 0:
 			# ★母體交給 fixture 背（systems 裁）：用【取樣一個世界】去測【code 形狀】是類別錯誤。
 			#   ⇒ 世界段降級成【診斷】：只在 observe > 0 時紅，不再計【不可判】。
 			print("       （世界段沒走到這個寫入點；母體由 fixture 負責）")
 		else:
 			_ok(true, "%s：觀測路徑零寫入（母體 advance=%d）" % [f, adv])
+			_world_judged += 1
 
 	# ── labor 那一支：兩條路各自要有 tap 點過，否則同樣是母體為空 ──
 	var ro: int = int(cb.get("labor.ensure_fresh.readonly", 0))
@@ -92,10 +103,8 @@ func _initialize() -> void:
 
 	if _unjudgeable > 0:
 		print("[GP] ★%d 欄不可判（母體為空）—— ★★這不算過" % _unjudgeable)
-	if _fail == 0 and _unjudgeable == 0:
-		print("=== DONE === ALL PASS")
-	else:
-		print("=== DONE === %d FAIL / %d 不可判" % [_fail, _unjudgeable])
+	print("=== DONE === SECTIONS=%d/%d FAILS=%d 不可判=%d｜世界段判定=%d/%d（不進分母：隨世界變）" % [
+		_fixture_judged, FIELDS.size(), _fail, _unjudgeable, _world_judged, FIELDS.size()])
 	quit()
 
 func _run_world(days: int, observe: bool) -> Array:
