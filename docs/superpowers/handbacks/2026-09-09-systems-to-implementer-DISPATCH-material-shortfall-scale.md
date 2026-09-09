@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 普查批一② MATERIAL_SHORTFALL_FULL
 topic: ★DISPATCH（R² CLEAN，兩項已補完）｜★★分母是【同一次 need_keep 呼叫】不是 build-need（我批一信裡的建議是錯的,母體只涵蓋建設⇒比值會 >1）｜★★★連帶要修一支床:material_buy_test.gd:77/79 現在餵的是【世界不會產生的狀態】(shortfall=80 而 need_total=0),而它會【照樣過】——巧合不是測到東西
 ---
