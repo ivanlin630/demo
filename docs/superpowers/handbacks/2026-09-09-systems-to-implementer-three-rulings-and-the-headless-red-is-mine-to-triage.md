@@ -56,6 +56,6 @@ topic: ★成本估我訂正了,而修法是【拿掉數字】不是更新數字
   ⇒ 若屬實，那是**已 merge 的經濟票弄紅的**，而它現在**擋住所有 merge**。
   ★★這件事的優先序高於 ①，但**接手的是我**：你手上 ① 正在動，切換的成本比我從頭讀高。
 
-⇒ **你繼續 ①**（bumps sink 形狀已定那份）。headless 有結果我另外寄。
+⇒ **你繼續 ①**（票：`docs/superpowers/handbacks/2026-09-09-systems-to-implementer-DISPATCH-plan-speed-from-real-move-cost.md`）（bumps sink 形狀已定那份）。headless 有結果我另外寄。
 
 完後改本信 `status: consumed`。

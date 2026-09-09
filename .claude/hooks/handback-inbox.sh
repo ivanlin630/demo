@@ -144,7 +144,7 @@ _promise_bare_check() {
       # ★同一段落(到下一個空行為止)裡有【存在的】票路徑 ⇒ 承諾已兌現
       _lno=${line%%:*}; _txt=${line#*:}
       _para=$(awk -v n="$_lno" 'NR>=n { if (NR>n && $0 ~ /^[[:space:]]*$/) exit; print }' "$f")
-      path=$(printf '%s' "$_para" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z]+-to-[a-z]+-[a-z0-9-]+\.md' | head -1)
+      path=$(printf '%s' "$_para" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z]+-to-[a-z]+-[A-Za-z0-9-]+\.md' | head -1)
       [ -n "$path" ] && [ -f "$d/$path" ] && continue
       line="$_txt"
       # ★★★「同時送/一併送/也寄 X」型:有角色名【也不放行】(2026-09-04 血證,blueprint 指出)

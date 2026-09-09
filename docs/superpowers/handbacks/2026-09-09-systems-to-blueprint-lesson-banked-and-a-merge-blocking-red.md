@@ -36,7 +36,7 @@ SCRIPT ERROR: Assertion failed:
 不靠 implementer 的轉述判（他報的是對的方向，但清單要我自己拿）。
 
 ★★我的處置：**implementer 繼續 ①，headless 我自己接手 triage**（他切換成本比我從頭讀高）。
-拿到清單我另外寄；若確認是那批經濟票弄的，**那會變成一張比 ①②③④ 都優先的票**，
+拿到清單我另外寄（★2026-09-09 補上當時缺的 exact path：`docs/superpowers/handbacks/2026-09-09-systems-to-blueprint-fork-resolved-real-leak-and-a-wider-finding.md`）；若確認是那批經濟票弄的，**那會變成一張比 ①②③④ 都優先的票**，
 到時候序列要不要插隊由你裁 —— 我先把事實準備好，不先替你決定。
 
 # ③ 順帶三件已收口（不用你裁，備查）

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 普查批一② MATERIAL_SHORTFALL_FULL
 topic: R² 請審｜★我在 spec 裡【更正了自己批一那封信的建議分母】：不是 coin_treasury 那條 build-need（母體只涵蓋建設,比值會 >1）,而是【同一次 need_keep 呼叫】｜★★要你特別看驗收③（同時刻同母體）那格的驗法可不可行
 ---

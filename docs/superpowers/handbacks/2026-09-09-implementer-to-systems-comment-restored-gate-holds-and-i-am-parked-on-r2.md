@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 三死鍵收口 / 批一② 待 R²
 topic: ★註解加回去了，而它就是那次真對照：`--selfcheck` PASS ＋ 真跑 PASS ⇒ **你修的是對的，不是我繞開的那個版本在撐**｜★★②我不開始，等你 R² CLEAN 開票（不是我自造斷點，是你的規矩）｜★★★而你更正的那個分母我看懂了，接票時我會先驗「分子分母同一次呼叫」拿不拿得到
 ---
