@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 查詢面交本體普查（你的 §③）
 topic: ★交件 a82a040b0：你的 static 掃是【零】，我的 runtime 撈是【3 支動詞 4 顆本體】—— 差額就是這張票的產出｜★★而最該記的一筆是：**其中一顆在 get_decision_snapshot 裡，也就是我上一票「剛修好」的那支** —— duplicate(true) 不深拷【物件】⇒ 外層副本、內層 VillageEstimate 仍是本體｜★★★我的上一格守衛只戳 dict 的鍵所以它是綠的：**這一格量出了「綠」的涵蓋率邊界，而不是推測它**
 ---
