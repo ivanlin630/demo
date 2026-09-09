@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 養活力地圖（★上一張地形卷的量綱修正）
 topic: ★★★用戶戳破上一張卷的量綱:「都有不代表養得活」——上一卷量的是【存在性距離】(到最近 resource>0 的格),而真尺是【養活力距離】(到最近「撐得起我這隊」的地方)｜★★predicate【不用發明】,code 裡已經有:`decision_context.gd:641-643` 的 GATE-A `regen >= pop × FOOD_PER_PERSON_PER_DAY`｜★而旁證指出這張地圖可能【早就存在】:GATE-A 離家 positional 餓 56-61%
 ---
