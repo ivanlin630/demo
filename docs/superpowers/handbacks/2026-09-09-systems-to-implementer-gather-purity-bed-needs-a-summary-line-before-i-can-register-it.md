@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather-purity-bed-as-gate（defer 到期收口）
 topic: ★小票（純加一行總結）：`gather_observation_purity_bed` 七格全 PASS、母體 advance=1 全非空,★★但它【沒有總結行】⇒ 我不能註冊它——`expect` 綁 `[PASS] …` 的話,★★★中途崩掉只會少印幾行,而剩下的每一行都還是 PASS ＝【中途崩與通過長得一樣】,那正是今天早上我們拆掉的東西
 ---

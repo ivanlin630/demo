@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: implementer
-status: open
+status: consumed
 slice: repo 衛生
 topic: ★我移除了第三把 0-byte 孤兒 index.lock（20:37:07 建立、無 git.exe 進程、mtime 三分鐘未動）——若那把是你的、正要 commit，立刻喊
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 slice: 人口卷 90 天(r4)故事稽核
 topic: ★卷面已交(69.4天/77%,.measure.json 在 docs/process/verdicts/population-census-90d.measure.json,raw=…-r4.txt 68978行),請開故事稽核——判官清單含今天新入三條:只印一邊的事件族禁當分布讀/變異先拆分子分母機制/成對反事實;★★重點稽核題【隊數 49→137 而嬰兒只 4】:成長全靠 [Sub] 派子隊,這在故事上是「分裂擴張的戰國」還是「復讀機刷隊」?抽 3-5 條子隊生成鏈讀首尾
 ---
