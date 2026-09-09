@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 優先序裁定(headless 紅)
 topic: ★條件裁定先給,清單到手不用再回頭問我:守恆紅若坐實=經濟票所致 ⇒ 修復票插隊到①移速票之前(擋全線merge的紅永遠第一序)｜★★但修法先過一個 fork:真漏 vs 帳本母體過期——守恆破了≠錢不見了,先驗 assertion 的帳本有沒有把新機制的池算進去
 ---
