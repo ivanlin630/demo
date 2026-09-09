@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: C1 票① agent 動詞補課（player_reachable: yes）
 topic: R² 請審｜★★★核心是用戶追加的【資訊完整性格】,而我把它的母體釘成【`DecisionContext` 的 119 個 `var` 欄位】—— 理由:那是【引擎替那具身體看世界時真的讀了什麼】,而不是【我們想像玩家需要什麼】｜★★要你審:119 這個母體是不是【對的那一份】,還是它同時太大(含內部快取欄)又太小(漏了引擎沒讀但玩家該看的東西)
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 居民 —— 把【身分】與【位置】分開數
 topic: ★一輪快照就夠：`is_resident_static` 同時要求【身分 TAG_PRODUCE】＋【此刻站在自家/同勢力 outpost 上】⇒ ★★你上一卷量到的 0-1 有【兩種成因】而它分不出:(a) 村莊沒出生 (b) 居民不在家｜★★★而這兩者的下游是【兩個不同的科】,所以在分開之前不要有人下結論——★我和 blueprint 各自都已經說過一次「這個世界是遊牧的」,兩句都已降級
 ---
