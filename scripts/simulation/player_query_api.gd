@@ -506,6 +506,17 @@ func query_subteam_panel(state: WorldState) -> Dictionary:
 	return PlayerApiMapper.map_query_envelope(true, "ok", "",
 		{"subteam_panel": PlayerApiMapper.map_subteam_panel(state)})
 
+# ★★★事件流（C1 票①併入）：機制早就有（player_api_mapper.gd:792 map_global_messages），
+#   ★而它【唯一的呼叫點是 ui/sim_bridge.gd:154】—— GUI 在用，agent/REPL 層零呼叫。
+#   ⇒ 這正是「機制蓋好了、只接了 GUI 沒接 agent」的活教材（P9 病歷）。
+#   ★★形狀照既有 wrapper（get_storage_panel／query_outpost_panel）。
+func get_event_stream(state: WorldState, n: int = 10) -> Dictionary:
+	var check := _check_player(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	return PlayerApiMapper.map_query_envelope(true, "ok", "",
+		{ "events": PlayerApiMapper.map_global_messages(state, n) })
+
 func _action_label(action_id: String) -> String:
 	match action_id:
 		"ignore":           return "忽略"

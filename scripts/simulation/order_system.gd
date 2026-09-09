@@ -187,6 +187,50 @@ func _sync_board(state: WorldState, team: TeamData) -> void:
 		kept.append(e)
 	tile.market_orders = kept
 
+# ★★★escrow 釋放【唯一入口】（2026-09-10，C1 票①抽出）：過期迴圈與【玩家主動撤單】共用。
+#   ★共用的【只有這一段】——貨不能瞬移，守恆要求它一定要落 pending_claims。
+#   ★★★而 `FailureMemory.record` 【故意不在這裡】：
+#     過期 ＝ 執行失敗（該折價、下輪別再撞）；★主動撤單 ＝ 玩家的決定，不是失敗。
+#     共用的話，【玩家取消自己的訂單會讓 AI 以為這條路失敗了而折價下一輪決策】。
+func release_order_escrow(state: WorldState, o: Dictionary) -> void:
+	if bool(o.get("escrowed", false)):
+		var _etid: int = int(o.get("escrow_tile", -1))
+		var _etile: HexTileData = state.world.tiles.get(_etid)
+		if _etile == null:
+			Probe.bump("mkt.escrow.expire_tile_gone")   # ★tile 消失（降級/回收）⇒ 貨沒有落地點，要看得見
+		else:
+			var _e: Dictionary = _etile.market_escrow.get(int(o["order_id"]), {})
+			var _q: float = float(_e.get("qty", 0.0))
+			if _q > 0.0:
+				InteractionSystem.add_pending_claim(_etile, "goods", String(_e.get("res", "")), _q,
+					int(_e.get("owner_team", -1)), state.world.current_tick)
+				_etile.market_escrow.erase(int(o["order_id"]))
+				if Probe.enabled:
+					Probe.bump("mkt.escrow.expire_to_claim")
+					Probe.add_amount("mkt.escrow.expire_qty", _q)
+			else:
+				Probe.bump("mkt.escrow.expire_empty")   # ★已全部賣掉（正常）
+
+# ★玩家主動撤單（C1 票①）：與過期【共用 escrow 釋放】，★但【不記失敗記憶】——
+#   撤單是玩家的決定，不是執行失敗；記了會讓 AI 折價自己下一輪的「買糧/買料」。
+# 回傳：真的撤掉了才 true（找不到那張單 ⇒ false，★不靜默成功）。
+func cancel_order(state: WorldState, team: TeamData, order_id: int) -> bool:
+	var kept: Array = []
+	var found: bool = false
+	for o in team.active_orders:
+		if int(o.get("order_id", -1)) == order_id:
+			found = true
+			release_order_escrow(state, o)
+			if Probe.enabled:
+				Probe.bump("order.cancelled_by_player")
+			continue
+		kept.append(o)
+	if not found:
+		return false
+	team.active_orders = kept
+	_sync_board(state, team)   # ★看板是鏡像權威 ⇒ 撤掉的單不能留在板上當幽靈
+	return true
+
 # cadence：過期清理 + 餘量發賣盤（買單短缺驅動完整化 = G1c/G1d）。
 func tick_team_orders(state: WorldState, team: TeamData) -> void:
 	# 1. 過期清理
@@ -201,23 +245,7 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 			#   賣家不在場，貨【不得】直接回到他的 resources，否則就是【貨物瞬移】。
 			#   ⇒ 落【待領貨帳】，與待領款共用同一個 pending_claims 結構。
 			#   ★而這裡【不】把 escrow 直接刪掉：刪掉 = 貨消失，而守恆會在 audit 裡紅。
-			if bool(o.get("escrowed", false)):
-				var _etid: int = int(o.get("escrow_tile", -1))
-				var _etile: HexTileData = state.world.tiles.get(_etid)
-				if _etile == null:
-					Probe.bump("mkt.escrow.expire_tile_gone")   # ★tile 消失（降級/回收）⇒ 貨沒有落地點，要看得見
-				else:
-					var _e: Dictionary = _etile.market_escrow.get(int(o["order_id"]), {})
-					var _q: float = float(_e.get("qty", 0.0))
-					if _q > 0.0:
-						InteractionSystem.add_pending_claim(_etile, "goods", String(_e.get("res", "")), _q,
-							int(_e.get("owner_team", -1)), state.world.current_tick)
-						_etile.market_escrow.erase(int(o["order_id"]))
-						if Probe.enabled:
-							Probe.bump("mkt.escrow.expire_to_claim")
-							Probe.add_amount("mkt.escrow.expire_qty", _q)
-					else:
-						Probe.bump("mkt.escrow.expire_empty")   # ★已全部賣掉（正常）
+			release_order_escrow(state, o)
 			# ★執行失敗反饋鐵律 T4 示範接線：買單到期沒人填 ＝ 執行失敗，不准靜默丟棄。
 			# 記隊層失敗記憶 → 下輪「買糧/買料」（＝依賴市場供貨的決策）折價；TTL 用 ORDER_LIFETIME
 			# ＝該動作的自然重試週期（相對錨定，不新增全域絕對天數常數）。

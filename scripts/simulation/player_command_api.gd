@@ -138,6 +138,86 @@ func take_team_item(state: WorldState, item_grade: String, qty: int) -> Dictiona
 
 # ── Dispatch ───────────────────────────────────────────────────────────────────
 
+# ── 市場四件套（C1 票①）：★接既有 order_system，不新寫市場邏輯 ──────────────
+# ★「板上掛單／撮合」與既有 execute_action("trade") 的【隊對隊直接交易】是兩回事，
+#   而玩家層原本【只有後者】—— 世界有市場而玩家碰不到它。
+
+func post_buy_order(state: WorldState, res: String, qty: int) -> Dictionary:
+	return _post_order(state, "buy", res, qty)
+
+func post_sell_order(state: WorldState, res: String, qty: int) -> Dictionary:
+	return _post_order(state, "sell", res, qty)
+
+func _post_order(state: WorldState, kind: String, res: String, qty: int) -> Dictionary:
+	var check := _check_controlled_team(state)
+	if not check.is_empty():
+		return check
+	var team: TeamData = state.teams[state.persons[state.player_id].team_id]
+	var oid: int = OrderSystem.new().post_order(state, team, kind, res, qty)
+	if oid < 0:
+		return PlayerApiMapper.map_command_result(false, "invalid_request",
+			"post_order rejected (qty<=0 或掛單條件不符)", { "kind": kind, "res": res, "qty": qty })
+	return PlayerApiMapper.map_command_result(true, "ok", "",
+		{ "order_id": oid, "kind": kind, "res": res, "qty": qty })
+
+func cancel_order(state: WorldState, order_id: int) -> Dictionary:
+	var check := _check_controlled_team(state)
+	if not check.is_empty():
+		return check
+	var team: TeamData = state.teams[state.persons[state.player_id].team_id]
+	# ★走 order_system 的唯一入口：它共用 escrow 釋放（守恆），★而【不】記失敗記憶
+	var ok: bool = OrderSystem.new().cancel_order(state, team, order_id)
+	if not ok:
+		return PlayerApiMapper.map_command_result(false, "not_found",
+			"no such active order: %d" % order_id, { "order_id": order_id })
+	return PlayerApiMapper.map_command_result(true, "ok", "", { "order_id": order_id })
+
+# ── 附身／離身（C1 票①）：★語意 = state.player_id 是唯一開關（world_state.gd:101/752）──
+# ★離身要還原成【附身前那個 id】⇒ 需要一個地方記住它。
+#   ★★記在 WorldState（`player_possess_prev`）而不是 API 實例：
+#   API 是每次呼叫 new 出來的（見 sim_bridge），實例欄位活不過一次呼叫。
+#   ★★★而它【不進 fingerprint】（StateFingerprint 只 emit teams/persons/world/factions/belief）
+#   ⇒ 加這個欄位不改世界。
+
+func possess(state: WorldState, person_id: int) -> Dictionary:
+	if not state.persons.has(person_id):
+		return PlayerApiMapper.map_command_result(false, "not_found",
+			"no such person: %d" % person_id, {})
+	var prev: int = state.player_id
+	state.player_possess_prev = prev
+	state.player_id = person_id
+	return PlayerApiMapper.map_command_result(true, "ok", "",
+		{ "player_id": person_id, "prev_player_id": prev })
+
+func unpossess(state: WorldState) -> Dictionary:
+	var prev: int = state.player_possess_prev
+	var cur: int = state.player_id
+	state.player_id = prev
+	state.player_possess_prev = -1
+	return PlayerApiMapper.map_command_result(true, "ok", "",
+		{ "player_id": prev, "left_person_id": cur })
+
+# ── 時間控制（C1 票①）：★不在 sim_runner 加狀態 ────────────────────────────
+# ★「推進幾步」留在呼叫端（REPL 傳 runner 進來）—— 否則會多出一個「誰在控制時間」的第二真相源。
+# ★★暫停 ＝ 呼叫端不呼叫它（不是引擎裡的一個旗標）。
+func advance_ticks(state: WorldState, runner: SimRunner, n: int) -> Dictionary:
+	if runner == null or n <= 0:
+		return PlayerApiMapper.map_command_result(false, "invalid_request",
+			"advance_ticks needs runner and n>0", { "n": n })
+	var before: int = state.world.current_tick
+	var stalled_at: int = -1
+	var stall_reason: String = ""
+	for i in n:
+		var r: String = runner.advance_tick(state, Vector2i(-1, -1))
+		if r != "" and stalled_at == -1:
+			stalled_at = state.world.current_tick
+			stall_reason = r
+	# ★回傳【真的推進了幾 tick】而不是「呼叫成功」——game_over/等待繼承人會凍結世界
+	return PlayerApiMapper.map_command_result(true, "ok", "", {
+		"advanced": state.world.current_tick - before, "requested": n,
+		"first_stall_tick": stalled_at, "stall_reason": stall_reason,
+	})
+
 func dispatch(state: WorldState, name: String, args: Dictionary) -> Dictionary:
 	match name:
 		"move_to":
@@ -156,4 +236,14 @@ func dispatch(state: WorldState, name: String, args: Dictionary) -> Dictionary:
 			return deposit_item(state, args.get("item_grade", ""), args.get("qty", 0))
 		"take_team_item":
 			return take_team_item(state, args.get("item_grade", ""), args.get("qty", 0))
+		"post_buy_order":
+			return post_buy_order(state, args.get("res", ""), args.get("qty", 0))
+		"post_sell_order":
+			return post_sell_order(state, args.get("res", ""), args.get("qty", 0))
+		"cancel_order":
+			return cancel_order(state, args.get("order_id", -1))
+		"possess":
+			return possess(state, args.get("person_id", -1))
+		"unpossess":
+			return unpossess(state)
 	return PlayerApiMapper.map_command_result(false, "invalid_request", "unknown command: %s" % name, {})

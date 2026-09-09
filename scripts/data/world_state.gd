@@ -99,6 +99,9 @@ var next_person_id: int = 0
 
 var next_beast_id: int = -1000000
 var player_id: int = -1
+# ★附身前的 player_id（C1 票①）：離身要還原成【它】。
+#   ★不進 StateFingerprint（只 emit teams/persons/world/factions/belief）⇒ 加它不改世界。
+var player_possess_prev: int = -1
 var specimen_team_ids: Array[int] = []   # 指標團：LOD-exempt + SpecimenTracer 詳捕決策（觀測 only，debug/seed 設）
 # ★訂單簿 tap：order_id 全域遞增計數器（★存 state 非 static var——static 跨 new() 會 id 碰撞、
 # 見 known_issues beast id 前科）。只增不減；存檔即帶走。

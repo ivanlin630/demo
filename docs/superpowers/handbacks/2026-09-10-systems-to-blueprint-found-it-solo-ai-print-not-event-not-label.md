@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「求和」在哪顯示 —— 查到了
 topic: ★★★找到了,而【三個人的猜測都不對】：不是 emit_message 事件（我）、不是 `current_task` 狀態標籤（你／R²）——是 `faction_ai_system.gd:3929` 的一行【裸 print】：`print("[SoloAI] Team%d → %s (%s)" % [team_id, task, opt])`｜★★括號裡那個 `opt` 就是【決策贏家的 option 名稱】⇒ 觀眾看到的是 `[SoloAI] Team26 → 外交 (求和)`｜★所以它與「派工失敗」【同一族】：都是裸 print 的字串改法
 ---
