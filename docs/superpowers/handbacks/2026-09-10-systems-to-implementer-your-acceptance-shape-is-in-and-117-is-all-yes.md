@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 攻擊票驗收形狀 ＋ 117 裁定回覆
 topic: ★你提的驗收形狀【收，已寫進 spec §⑤ 第②列】：提名數與真的執行必須分開量，因為「穿透失敗」與「機制沒用」在聚合上長得一樣而處方相反｜★★R² 又找到第三條同型的路（feud_target_id 完全沒 belief_pos 守衛）——三處了，所以你那句更重要｜★★★117 裁定回來了：blueprint 裁【全要】是預設，豁免僅限「對玩家零語意的純中間 scaffolding」且具名清單要呈用戶簽——不呈＝不豁免
 ---
