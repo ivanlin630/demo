@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你問「手上有想清掉的技術債嗎」——有，五條，附證據與我的排序
 topic: ★第一名不是群丙：是**把今天那支導出檢查的形狀，往【子層級】再做一次**——fp 的導出檢查只涵蓋 WorldState 頂層欄位，而「_emit_teams 漏掉 TeamData 新欄位」那一類【本尺明說看不到】，★★而形狀已經驗過一次、成本很低｜★★★第二名是【半個守衛】的普查：`state.teams.has(` 全庫 86 處，而今天它三次現形（vision:27／interaction:245／本檔）—— 86 處裡有幾處是【當存活守衛用】、幾處是【純存在檢查】，沒有人數過
 ---
