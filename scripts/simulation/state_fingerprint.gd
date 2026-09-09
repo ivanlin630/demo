@@ -321,6 +321,43 @@ static func _val_canon(v) -> String:
 	if v is Array: return "[" + _arr_canon(v) + "]"
 	return str(v)
 
+# ★★★覆蓋擴張（HOW spec 2026-09-10）：進尺欄位【由 FpCoverage 導出】，不手抄。
+#   ★每一支 _emit_* 的手寫那一行【保留】（它是給人讀的骨架），
+#   ★★而下面這一行是【機器維護的全集】—— 新增欄位自動進尺，不必有人記得回來改。
+#   ★★★物件型別的值一律只取類名：物件的 str() 帶 instance id，★逐跑不同 ⇒ 會把尺變成噪音。
+static func _derived_line(obj: Object, tag: String, cls: String) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for n in FpCoverage.fields_for(cls):
+		parts.append("%s=%s" % [n, _canon_deep(obj.get(n))])
+	return "%s|%s" % [tag, ";".join(parts)]
+
+# ★物件在【任何深度】都只取類名 —— ★★血證：第一版只擋了頂層，
+#   而 WorldData.tiles 是一個【裝滿物件的 Dictionary】⇒ _val_canon 落到 str() ⇒ 吐出 instance id
+#   ⇒ ★★★同 seed 兩跑 fp 不同 = 這張票唯一的真風險（尺變噪音）當場現形，
+#     而它不是「某欄該被豁免」，是【我的序列化寫錯了】—— 兩者的處置完全不同。
+static func _canon_deep(v, depth: int = 0) -> String:
+	if depth > 4:
+		return "…"
+	if v is Object:
+		var o: Object = v
+		if o.get_script() != null:
+			return "OBJ:" + String(o.get_script().resource_path.get_file())
+		return "OBJ:" + o.get_class()
+	if v is Dictionary:
+		var ks: Array = (v as Dictionary).keys()
+		ks.sort()
+		var dp: PackedStringArray = PackedStringArray()
+		for k in ks:
+			dp.append("%s=%s" % [str(k), _canon_deep((v as Dictionary)[k], depth + 1)])
+		return "{" + ";".join(dp) + "}"
+	if v is Array:
+		var ap: Array = []
+		for e in (v as Array):
+			ap.append(_canon_deep(e, depth + 1))
+		ap.sort()
+		return "[" + ";".join(PackedStringArray(ap)) + "]"
+	return _val_canon(v)
+
 # ──────── 域序列化（sorted by id、spec §2.1 欄位）────────
 static func _emit_teams(state: WorldState, buf: PackedStringArray) -> void:
 	var ids: Array = state.teams.keys(); ids.sort()
@@ -338,6 +375,7 @@ static func _emit_teams(state: WorldState, buf: PackedStringArray) -> void:
 			_dict_canon(t.known_reputations), _dict_canon(t.solo_intent), _arr_canon(t.goal_state),
 			# ★失敗記憶＝直接因果態（乘進 util、改下輪 argmax）→ 必入 fp（同 breed_progress 判準）
 			_dict_canon(t.recent_failures)])
+		buf.append(_derived_line(t, "TD", "TeamData"))
 
 static func _emit_persons(state: WorldState, buf: PackedStringArray) -> void:
 	var ids: Array = state.persons.keys(); ids.sort()
@@ -348,6 +386,7 @@ static func _emit_persons(state: WorldState, buf: PackedStringArray) -> void:
 			_dict_canon(p.values), _dict_canon(p.skills), _memory_canon(p.memory)])
 
 # memory full canonical（type+key+tick sorted、非全 value dump=防噪但足偵移位漂移）。
+		buf.append(_derived_line(p, "PD", "PersonData"))
 static func _memory_canon(mem: Array) -> String:
 	var lines: PackedStringArray = PackedStringArray()
 	for m in mem:
@@ -367,6 +406,7 @@ static func _emit_factions(state: WorldState, buf: PackedStringArray) -> void:
 		buf.append("F|%d|leader=%d|est=%s|members=%s|goals=%s|drivers=%s|relations=%s" % [
 			f.faction_id, f.leader_team_id, str(f.is_established),
 			_arr_canon(f.member_team_ids), _arr_canon(f.goals), _dict_canon(f.goal_drivers), _dict_canon(f.relations)])
+		buf.append(_derived_line(f, "FD", "FactionData"))
 
 static func _emit_belief(state: WorldState, buf: PackedStringArray) -> void:
 	# per-observer sorted canonical（team_discovered / team_intel / known_reputations 結構摘要）。
@@ -387,6 +427,7 @@ static func _emit_tiles(state: WorldState, buf: PackedStringArray) -> void:
 			tid, t.outpost_owner, t.outpost_level, t.camp_level, t.camp_ticks_left, t.camp_team_id,
 			str(t.get("farming_level")), t.construction_team_id, t.construction_ticks_left,
 			_dict_canon(t.public_storage)])
+		buf.append(_derived_line(t, "HD", "HexTileData"))
 
 static func _emit_world(state: WorldState, buf: PackedStringArray) -> void:
 	buf.append("W|tick=%d|letters=%d|teams=%d|persons=%d|factions=%d|pending_erase=%d" % [
@@ -399,3 +440,4 @@ static func _emit_world(state: WorldState, buf: PackedStringArray) -> void:
 			ls.append("%s:%d:%s:%s" % [str(l.get("kind","")), int(l.get("origin_team_id",-1)), _vec(l.get("target_pos", Vector2i(-1,-1))), _vec(l.get("relocate_to", Vector2i(-1,-1)))])
 	ls.sort()
 	for e in ls: buf.append("L|" + e)
+	buf.append(_derived_line(state.world, "WD", "WorldData"))
