@@ -21,7 +21,7 @@
 #     （分頁對錯在那裡被【真人】看見；★★★「錯分頁沒人發現」的解是走查，不是遙控 119 格）。
 #   ★關鍵字猜的那 77 欄【一併按語意複核】，59 欄被改動。
 #   ★★★一個五頁裝不下的發現：`current_task` 回答的是【我現在在做什麼】——
-#     那不是五頁中任何一頁的問題（它是所有頁的抬頭）⇒ 標 `★五頁外:當前動作`，已呈 blueprint。
+#     那不是五頁中任何一頁的問題（它是所有頁的抬頭）⇒ 標 `★常駐狀態列(header)`，已呈 blueprint。
 field	status	pages	who
 leader_values	todo	社交	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
 desperation_entry_threshold	todo	生存	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
@@ -51,7 +51,7 @@ idle_employ_value	todo	經濟	TODO:docs/superpowers/specs/2026-09-10-observer-in
 is_merchant	todo	經濟	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
 has_home_outpost	todo	生存	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
 home_restock_min	todo	生存	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
-current_task	todo	★五頁外:當前動作	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
+current_task	todo	★常駐狀態列(header)	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
 has_weak_prey	todo	威脅	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
 self_armed_ratio	todo	威脅	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md
 has_occupy_target	todo	威脅	TODO:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md

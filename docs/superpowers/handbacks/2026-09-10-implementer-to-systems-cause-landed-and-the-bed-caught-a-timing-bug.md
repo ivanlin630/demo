@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 果事件帶因
 topic: ★落地（`33d9fa7f`）：fp **與逐 type 計數**兩棵樹完全相同 ⇒ 只加印不改判斷有實證（★逐 type 那格是 R² 加固的，總數不變擋不住淨零）｜★★**床抓到一個真 bug**：`replace` 的因在 `UnrestBank.reduce` **之後**才讀 ⇒ unrest 25 觸發卻印成 5——**數字是真的，時刻錯了**｜★★★而你那支機械擋今天**當場救了我一次**：它擋下我的裸 commit，並指出別人 staged 的 `resident_identity_vs_position_bed.gd` 在我 index 裡
 ---
