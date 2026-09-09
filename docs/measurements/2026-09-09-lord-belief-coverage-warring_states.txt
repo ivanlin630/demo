@@ -1912,3 +1912,108 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
 [Extort] Team38 勒索 Team58，Team58 妥協給付
 [Extort] Team38 勒索 Team76，Team76 妥協給付
 [SoloAI] Team32 → 貿易 (maintain_tools:resource)
+[SoloAI] Team33 → 貿易 (maintain_tools:resource)
+[SoloAI] Team34 → 紮營 (紮營)
+[SoloAI] Team86 → 紮營 (紮營)
+[SoloAI] Team87 → 迎戰 (迎戰)
+[Order] Team11 sell material ×30 (oid=287)
+[Order] Team11 buy weapon_melee_low ×4 (oid=288)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=289)
+[Order] Team11 buy tools ×2 (oid=290)
+[Order] Team16 sell material ×59 (oid=291)
+[Order] Team16 buy weapon_melee_low ×4 (oid=292)
+[Order] Team16 buy weapon_ranged_low ×3 (oid=293)
+[Order] Team16 buy tools ×2 (oid=294)
+[CampL0] Team34 紮營 L0 @(8,15)
+[SurvivalCamp] team=Team52 → 紮營 @(14,15)
+[Survival] Team52 warning days_left=2.3 擴建→紮營
+[SurvivalCamp] team=Team58 → 紮營 @(14,15)
+[Survival] Team58 warning days_left=2.4 擴建→紮營
+[CampL0] Team86 紮營 L0 @(11,17)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[StrategicAI] Faction5 受威脅，尋求結盟
+[Move] Team 43 抵達 (19,2)
+[Extort] Team2 勒索 Team81，Team81 妥協給付
+[Extort] Team18 勒索 Team20，Team20 妥協給付
+[Extort] Team24 勒索 Team68，Team68 妥協給付
+[Tribute] Team35 徵收 Team55 rate=0.02
+[Extort] Team38 勒索 Team58，Team58 妥協給付
+[Extort] Team38 勒索 Team76，Team76 妥協給付
+[SoloAI] Team37 → 覓食 (覓食)
+[SoloAI] Team38 → 建設 (自救建田)
+[SoloAI] Team86 → 外交 (求和)
+[Order] Team28 buy weapon_melee_low ×5 (oid=295)
+[Order] Team28 buy weapon_ranged_low ×4 (oid=296)
+[Order] Team28 buy tools ×2 (oid=297)
+[Order] Team43 buy weapon_melee_low ×1 (oid=298)
+[Order] Team43 buy weapon_ranged_low ×1 (oid=299)
+[SurvivalCamp] team=Team52 → 紮營 @(14,15)
+[SurvivalCamp] team=Team58 → 紮營 @(14,15)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction5 受威脅，尋求結盟
+[Tick 8520] Person 140 (member/team38) → P1_comply | stress=0.00 loyalty=0.96
+[Move] Team 66 抵達 (18,0)
+[Order] Team24 sell material ×30 (oid=300)
+[Order] Team24 buy weapon_melee_low ×4 (oid=301)
+[Order] Team24 buy weapon_ranged_low ×3 (oid=302)
+[Order] Team24 buy tools ×2 (oid=303)
+[Order] Team33 buy weapon_melee_low ×2 (oid=304)
+[Order] Team33 buy weapon_ranged_low ×1 (oid=305)
+[Order] Team33 buy material ×30 (oid=306)
+[Order] Team33 buy tools ×2 (oid=307)
+[Order] Team37 buy weapon_melee_low ×4 (oid=308)
+[Order] Team37 buy weapon_ranged_low ×3 (oid=309)
+[Order] Team37 buy material ×38 (oid=310)
+[Order] Team37 buy tools ×3 (oid=311)
+[Order] Team47 buy weapon_melee_low ×6 (oid=312)
+[Order] Team47 buy weapon_ranged_low ×4 (oid=313)
+[Order] Team47 buy tools ×3 (oid=314)
+[SurvivalCamp] team=Team52 → 紮營 @(14,15)
+[SurvivalCamp] team=Team58 → 紮營 @(14,15)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction5 受威脅，尋求結盟
+[DayNight] Day 6 開始
+[Move] Team 4 抵達 (14,16)
+[Move] Team 9 抵達 (6,14)
+[Move] Team 68 抵達 (19,3)
+[Move] Team 75 抵達 (24,6)
+[Extort] Team2 勒索 Team81，Team81 妥協給付
+[Extort] Team18 勒索 Team20，Team20 妥協給付
+[Tribute] Team35 徵收 Team55 rate=0.02
+[SoloAI] Team86 → 外交 (求和)
+[Order] Team27 buy weapon_melee_low ×5 (oid=315)
+[Order] Team27 buy weapon_ranged_low ×4 (oid=316)
+[Order] Team27 buy tools ×2 (oid=317)
+[Order] Team41 sell material ×3 (oid=318)
+[Order] Team41 sell food ×1051 (oid=319)
+[Order] Team41 buy weapon_melee_low ×3 (oid=320)
+[Order] Team41 buy weapon_ranged_low ×2 (oid=321)
+[Order] Team41 buy tools ×1 (oid=322)
+[Order] Team42 buy weapon_melee_low ×4 (oid=323)
+[Order] Team42 buy weapon_ranged_low ×3 (oid=324)
+[Order] Team42 buy tools ×2 (oid=325)
+[Order] Team49 buy weapon_melee_low ×1 (oid=326)
+[Order] Team49 buy weapon_ranged_low ×1 (oid=327)
+[SurvivalCamp] team=Team52 → 紮營 @(14,15)
+[SurvivalCamp] team=Team58 → 紮營 @(14,15)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction5 受威脅，尋求結盟
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=6 avg=78784 us max=9015237 us ticks=1440 teams=81 factions=9
+[Move] Team 22 抵達 (18,4)
+[Move] Team 40 抵達 (9,24)
+[Move] Team 81 抵達 (9,18)
+[SoloAI] Team38 → 建設 (自救建田)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team68 → 建設 (建設)
+[SoloAI] Team80 → 外交 (求和)
+[SoloAI] Team86 → 外交 (求和)
+[Residency] Team12 邀請 Team34 安頓 outpost (18,1)
+[Residency] Team12 邀請 Team81 安頓 outpost (19,8)
+[Residency] Team17 邀請 Team41 安頓 outpost (19,11)
+[Residency] Team26 邀請 Team27 安頓 outpost (22,4)
+[Residency] Team38 邀請 Team34 安頓 outpost (12,17)
+[SurvivalCamp] team=Team52 → 紮營 @(14,15)
+[SurvivalCamp] team=Team58 → 紮營 @(14,15)

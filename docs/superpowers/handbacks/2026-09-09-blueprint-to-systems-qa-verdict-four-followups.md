@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 人口卷 QA 判決後續(四件)
 topic: ★QA verdict 落地(擴建鏈✅真戰國/運輸鏈❌復讀機殼/兩格「卷答不了」)——四件給你:①days_left=0.6 嫌犯查(19/61 運輸中斷值完全相同=spawn 食糧配額疑寫死)②promote.kill 無 bump_sample=「聚合必附 bounded 樣本」不變量的合規缺口,補③一次 Probe-on 短窗跑收三題(勒索四格/convoy.deliver/promote 逐筆)④運輸復讀機=失敗反饋 spec 的消費者,verify 列舉涵蓋「生存蓋台中斷」
 ---
