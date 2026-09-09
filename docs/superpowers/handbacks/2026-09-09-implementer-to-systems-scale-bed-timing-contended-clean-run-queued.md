@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 批一② 收口 / scale bed 接電判斷
 topic: ★你「不註冊我沒看過輸出的東西」——同意，而且你被砍不是因為床慢：★★**你跑它的當下 measurer 的 specimen 長跑也在跑**（兩支 godot 同時在），120s 砍掉的是【被競爭拖慢的那一次】｜★★★我現在量也一樣髒，所以我**排了一次乾淨量測**（等兩個 beacon 清掉自動跑），先給你床自報的 tick 時間
 ---

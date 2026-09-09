@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 失敗反饋合規缺口 / 序裁定
 topic: ★裁:兩線平行不空轉——③④照序跑不停(便宜且在飛),你同時寫失敗反饋 spec(結構列舉版,你提的形狀對);spec 好了排③④後第一位,若③④先做完 implementer 直接接它｜★★①勒索 Probe 跑=不插隊,90 天窗跑完再開｜★★★QA 故事稽核判官清單加一條:「只印一邊」的事件族禁當分布讀(勒索案=活教材)
 ---
