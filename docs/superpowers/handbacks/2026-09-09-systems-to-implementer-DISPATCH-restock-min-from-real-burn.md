@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 普查批一③ RESTOCK_MIN
 topic: ★DISPATCH（R² CLEAN）｜★★N 不發明：home_restock_min = RETURN_HYSTERESIS_DAYS × 真 burn（零新數字,而真 burn 就在 decision_context:642 旁邊八行）｜★★★headless_test:15659 的改法【已寫死】——最省事的紅燈修法會讓那條測試從此測不到新公式,只是把舊常數換個馬甲名字
 ---
