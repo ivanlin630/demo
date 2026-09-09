@@ -1,0 +1,42 @@
+{
+  "token": "lord-belief-coverage",
+  "slice": "領主對自家居民的belief覆蓋率",
+  "date": "2026-09-10",
+  "measured_at_head": "e5d7566f起跑(dirty=僅床本身,已commit=41d74313)",
+  "touches": [],
+  "world": "warring_states / seed=1337 / 60天窗，5次快照(day10/20/30/45/60)",
+  "bed": "scripts/debug/lord_belief_coverage_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-09-lord-belief-coverage-warring_states.txt"],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★★★母體本身近乎空——這才是真答案，不是覆蓋率高低。5次快照(day10/20/30/45/60)，領主(faction leader)隊數從9漲到13，但『配對(領主×自家居民)總數』全程只有0或1——13個faction裡，任何時刻最多只有1個真的有居民，其餘12個恆為0。所謂『覆蓋率100%』是n=1的假象(用戶/systems定的紀律『top-1>50%⇒不得單獨當趨勢用』在這裡是極端版：分母本身=1，任何比率都無意義)。★★真正要回答的問題不是『領主看不看得到自家居民』，是『這個世界裡幾乎沒有自家居民這種東西存在』",
+    "母體逐次快照": {
+      "day10": "領主=9隊，配對=1(faction3/Team12)，覆蓋率100%（n=1）",
+      "day20": "領主=9隊，配對=0——★母體=0，不可判",
+      "day30": "領主=10隊，配對=1(faction3/Team12，同一個)，覆蓋率100%（n=1）",
+      "day45": "領主=11隊，配對=1(faction1/Team5，換人了)，覆蓋率100%（n=1）",
+      "day60": "領主=13隊，配對=1(faction1/Team5，同上次)，覆蓋率100%（n=1）"
+    },
+    "①覆蓋率(在僅有意義的樣本裡)": "有記錄的那1筆(每次快照)都是100%覆蓋、新鮮度0.00-2.33天、偏差0.00——★但n=1不能當趨勢",
+    "②新鮮度": "day10=2.33天，day30/45/60=0.00天(剛更新過)——樣本太少看不出穩定趨勢",
+    "③偏差(population_est vs真population)": "0.00——僅有的樣本裡belief完全準，但同樣n=1不能外推",
+    "④逐faction分布": "12/13的faction恆為『該faction目前無居民』——★這才是要報的分布，不是覆蓋率的分布",
+    "★哪個faction持有那1個配對會變": "day10/30=faction3(Team12)，day45/60=faction1(Team5)——★同一時刻全世界最多1個resident，且會在不同faction間轉移，非穩定定居的族群"
+  },
+
+  "root_cause_reframe": {
+    "原始問題(systems票)": "領主對自家居民的belief覆蓋率高不高、低覆蓋是缺產生路徑還是TTL過兇",
+    "本卷實測答案": "問題問錯了層——不是『belief覆蓋率』的問題，是『自家居民』(is_resident_static：TAG_PRODUCE+站在自家/同faction outpost tile)這個群體本身幾乎不存在。★★這與人口卷([population-census-90d])的既有發現一致：隊數成長(49→137)主要來自[Sub]派子隊，不是定居生產——這個warring_states世界裡的隊絕大多數是移動作戰狀態，極少真正『定居當居民』。",
+    "對relief機制的意涵": "goal_resolver.gd:328 DISTRIB_RELIEF_REF_POP=5.0的『領主賑濟自家居民』機制，在這個世界配置下幾乎沒有母體可以套用——不是belief接不到，是【幾乎沒有居民存在】讓belief可以接。若blueprint要的『relief隨belief規模變』要有意義，前提是世界裡要有穩定的定居居民族群，而本卷顯示這個前提目前不成立。"
+  },
+
+  "honest_limits": [
+    "★①本卷不下設計結論——覆蓋率高低要不要接關belief規模的fork屬用戶",
+    "★★②本卷原本要答『覆蓋率低是缺產生路徑還是TTL過兇』——但因為母體本身近乎空(n=0-1)，這個問題在目前世界配置下【問不出答案】：樣本太少看不出是缺產生路徑還是TTL，只能說『沒有母體可以觀察這個現象』",
+    "★③『居民』的定義嚴格照FactionAISystem.is_resident_static(TAG_PRODUCE+站在自家/同faction outpost tile)——這是production既有定義，非本卷發明；若這個定義本身太嚴格(例如要求『站在』而非『名下擁有』)，那是另一個要查的問題，本卷未深究",
+    "★④單seed(1337)——母體近乎空這個結論建立在單一世界上，若換seed母體會不會不一樣大，本卷未測，跑法建議留給systems/blueprint裁"
+  ],
+
+  "supersedes": []
+}
