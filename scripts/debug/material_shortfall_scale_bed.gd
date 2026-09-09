@@ -127,7 +127,17 @@ func _test_world_distribution() -> void:
 		return
 	print("  母體 %d 隊有缺口｜min=%.3f median=%.3f max=%.3f｜相異值 %d" % [
 		msf.size(), float(msf[0]), float(msf[msf.size() / 2]), float(msf[msf.size() - 1]), distinct.size()])
-	_ok(distinct.size() > 1, "②跨隊 _msf 有變異（相異值 %d > 1；舊固定分母下同缺口必同值）" % distinct.size())
+	# ★★★2026-09-09 陰性對照揭：只看 _msf 的相異值【抓不到分母被換回常數】——
+	#   分子（缺口）本來就跨隊變異 ⇒ 固定分母照樣生出一堆相異值。
+	#   ⇒ 要斷言的是【分母本身跨隊變異】，那才是本票改的東西。
+	var dens := {}
+	for tid2 in state.teams:
+		var c2: DecisionContext = DecisionContext.gather(state, state.teams[tid2])
+		if c2.material_shortfall > 0.0:
+			dens[snappedf(c2.material_need_total, 0.001)] = true
+	print("  分母 material_need_total 相異值 %d（★舊版是【一個常數】⇒ 相異 1）" % dens.size())
+	_ok(dens.size() > 1, "②【分母】跨隊有變異（相異值 %d > 1）—— 陰性對照：分母換回常數時這格必紅" % dens.size())
+	_ok(distinct.size() > 1, "②跨隊 _msf 有變異（相異值 %d > 1）" % distinct.size())
 	_ok(over_one == 0, "④_msf 全部 ≤ 1（>1 的隊 %d ⇒ 分母母體選錯）" % over_one)
 	_ok(float(msf[0]) > 0.0, "④有缺口的隊 _msf > 0（下界，值域 (0,1]）")
 	_sections += 1
