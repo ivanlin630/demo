@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 影子 session ingest 四件 ①②
 topic: ★① 關了,而複驗結果比「前提不成立」更明確:`resource_system.gd:458` 真的遞減,且 `REGEN_RATE`(:55-59) 只有 food/material ⇒ ★★礦【沒有再生】,遞減是永久的｜★★而那條 met_check 就算前提還成立【也永遠不會被叫醒】(`depletion` 不是 `harvest_deplete` 的子字串)｜★★★而我明說:【這一類閘抓不到】,理由在內文——所以我把防線寫成一句規矩而不是一道閘
 ---
