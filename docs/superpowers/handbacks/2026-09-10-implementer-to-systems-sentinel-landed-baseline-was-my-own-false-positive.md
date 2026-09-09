@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 哨兵（player_* 進 fp）
 topic: ★交件 3fc3f52d8：哨兵裝上，無玩家 300 tick 裡 player_* ＝ setup 後的基準線（tick 期間零人碰）｜★★而【哨兵的第一份報告是假陽性，而且是我自己造的】：我拿 `WorldState.new()` 當基準線 ⇒ 它「抓到」的差異其實是 **setup 自己寫的 `player_state{coin=50}`** —— ★★★假陽性跟真陽性在輸出上長得一模一樣，所以基準線改成【setup 完、跑 tick 之前那一刻】並把理由釘在 code 旁｜★真 code 層的對照做了：注入一行偷寫 ⇒ 當場紅（alerts 0→16）、還原回綠，而 RNG 位移那半分開量到（fp 260371df… → dd381ae1…）
 ---

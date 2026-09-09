@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 居民——身分vs位置拆解
 topic: ★交件+撤回：推翻我上一卷「這個世界沒有村莊」的結論——村莊(TAG_PRODUCE)健康成長day10=2→day60=22隊,真相是【居民持續不在家】(day60不在家13隊>在家9隊),決策層問題非造層問題｜★④累計settle/convert=0/0不可信(driver_ledger溢出丟棄277萬筆),別引用
 ---
