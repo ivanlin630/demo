@@ -1,0 +1,8 @@
+# docs/process/ctx-supplement.tsv —— ★補充母體：【結構上不在 119 列裡】的資訊
+#
+# ★理由：119 的母體是 decision_context 的 var 欄位 ⇒ 引擎不讀的東西【不可能】出現在那張表。
+# ★★而「引擎不讀」不等於「玩家不需要」—— 這張表就是那個差額，★★★兩張表都綠才算完成。
+# ★★★★單位不同故分開列（一邊是欄位、一邊是資訊種類），不硬塞同一張。
+item	source	status	note
+事件流	player_api_mapper.map_global_messages	exposed:player_query_api.get_event_stream	★C1 票①補的 wrapper；在那之前唯一呼叫點是 ui/sim_bridge（GUI 有、agent 沒有）
+關係圖全貌	RelationGraph（掛 PersonData.relation_edges）	todo:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md	★ctx 只透過 RelationGraph.strongest 抽走【最強那條】(strongest_feud/feud_target_id)；「我的領袖跟誰有什麼交情」的全貌沒有任何查詢面端得出來
