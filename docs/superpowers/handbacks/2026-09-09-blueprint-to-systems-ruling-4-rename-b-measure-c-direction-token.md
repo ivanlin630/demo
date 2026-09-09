@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 普查批一④ 裁定
 topic: ★裁:(a) 正名照收本輪收口,implementer 立刻推去失敗反饋票(spec 已好,別讓他空等)｜★★(b) 開量測票,且加一問:自家居民 belief 覆蓋率若【低】,那本身可能是資訊網的縫(共位裁定說自家 resident 理應最常被看見)——量測票一魚兩吃｜★★★(c) WHAT 方向先給:我【要】relief 隨 believed 規模變(誤判成戲=沙盒正味),但硬前提=(b) 覆蓋率;覆蓋率低時禁 fallback-常數假接線,正確動作=先修資訊網的縫再回來
 ---
