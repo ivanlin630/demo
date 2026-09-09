@@ -13,11 +13,60 @@ const QUANT: float = 10000.0   # float 量化 1e-4（避浮點格式噪；round(
 #     ★★而 fp 對那個 bug 類別是【結構性地瞎的】——它不是量不到，是設計上就不看。
 #   ⇒ ★★★systems 已立成 invariant：凡輸出 fingerprint／比對結果的地方，
 #     同一段輸出要帶一行「本尺排除：…」。這個常數就是那一行的單一來源。
-const EXCLUDES: String = "ephemeral 快取(food_runway/persist_strength/food_flow_avg/need_urgency)" 	+ " ＋ cadence 排程欄(*_eval_next_tick) ＋ observer/probe"
+# ★★★【子層級】的排除 —— 這一段仍然是【手抄的】，而我把它標出來而不是假裝它不是：
+#   它講的是 TeamData／PersonData 內部的欄位（food_runway 等），
+#   ★而本檔的導出檢查只涵蓋【WorldState 的頂層欄位】那個粒度
+#   ⇒ ★★「_emit_teams 漏掉 TeamData 某個新欄位」這一類【本尺仍然看不到】，說在前面。
+const EXCLUDES_SUBFIELD: String = "ephemeral 快取(food_runway/persist_strength/food_flow_avg/need_urgency)" 	+ " ＋ cadence 排程欄(*_eval_next_tick) ＋ observer/probe"
+
+const WORLD_STATE_PATH: String = "res://scripts/data/world_state.gd"
+const SELF_PATH: String = "res://scripts/simulation/state_fingerprint.gd"
+
+static var _derived_cache: Array = []
+
+# ★頂層欄位的排除清單＝【算出來的】，不是手抄的（HOW spec 2026-09-10）。
+#   判準：WorldState 的某個 var 欄位，本檔【有沒有真的去讀它】（原始碼裡出現 "state.<欄位>"）——
+#   ★沒讀到 ⇒ 它就進「本尺排除」那一行，而那一行從此是【算出來的】不是手抄的。
+#   ★★它信任的不是某一個字串（EXCLUDES 那種），是【整份原始碼的文字搜尋】，
+#   ★★★所以「新增一個頂層欄位而兩邊都沒提到它」這種靜默缺席，在這個粒度上不會發生。
+static func derived_excludes() -> Array:
+	if not _derived_cache.is_empty():
+		return _derived_cache
+	var f := FileAccess.open(SELF_PATH, FileAccess.READ)
+	if f == null:
+		return ["<讀不到本檔原始碼 ⇒ 這一行【不可判】，不要當成「沒有盲區」>"]
+	var src: String = f.get_as_text()
+	f.close()
+	var ws_script = load(WORLD_STATE_PATH)
+	if ws_script == null:
+		return ["<讀不到 world_state.gd ⇒ 不可判>"]
+	_derived_cache = derive_from(ws_script, src)
+	return _derived_cache
+
+# ★推導本體拆成純函式：★★這樣床可以餵【假的 WorldState ＋ 假的 fp 原始碼】給它，
+#   ⇒ 「加一個新欄位會不會被具名」不用真的去改 WorldState 才驗得到。
+static func derive_from(ws_script, src: String) -> Array:
+	var missing: Array = []
+	for pi in ws_script.get_script_property_list():
+		var n: String = String(pi.get("name", ""))
+		if n == "" or n.begins_with("_"):
+			continue
+		if int(pi.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE == 0:
+			continue
+		# ★判準是【本檔有沒有真的去讀它】＝ 原始碼裡出現 "state.<欄位>"，
+		#   ★★而不是「這個名字在檔案裡出現過」—— 血證：我第一版用後者，
+		#   結果我自己在【註解裡提到 player_pending_targets】就讓它從盲區清單消失了
+		#   ⇒ ★★★一個會被【提到它的註解】關掉的檢查，等於誰寫一句話就能讓紅燈熄掉。
+		if not src.contains("state." + n):
+			missing.append(n)
+	missing.sort()
+	return missing
 
 # ★輸出 fp 的地方請印這一行（單一來源，改一處全部跟）。
 static func blind_note() -> String:
-	return "[FP-BLIND] ★本尺排除：%s ⇒ ★★fp 相同【不等於】沒有污染（那半由 EphemeralStateHash 量）" % EXCLUDES
+	var d: Array = derived_excludes()
+	var top: String = ("、".join(d)) if not d.is_empty() else "（無）"
+	return ("[FP-BLIND] ★本尺排除【頂層欄位・導出】：%s" % top) 		+ ("｜【子層級・手抄，只涵蓋列出的那些】：%s" % EXCLUDES_SUBFIELD) 		+ " ⇒ ★★fp 相同【不等於】沒有污染（那半由 EphemeralStateHash 量）"
 
 # 全 state canonical hash（decision-and-lifecycle-affected state；純讀零 RNG）。
 static func compute(state: WorldState) -> String:
