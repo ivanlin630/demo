@@ -517,6 +517,58 @@ func get_event_stream(state: WorldState, n: int = 10) -> Dictionary:
 	return PlayerApiMapper.map_query_envelope(true, "ok", "",
 		{ "events": PlayerApiMapper.map_global_messages(state, n) })
 
+# ★世界時鐘（票②）：狀態列四件事之一【現在幾時】——★而任何查詢面原本都沒有時間。
+#   ★★它是【查詢面本身】的補件，不是「為狀態列開的捷徑」：任何人問時間都走這裡。
+func get_world_clock(state: WorldState) -> Dictionary:
+	var tick: int = state.world.current_tick
+	return PlayerApiMapper.map_query_envelope(true, "ok", "", {
+		"tick": tick,
+		"day": int(tick / WorldState.TICKS_PER_DAY),
+		"tick_of_day": tick % WorldState.TICKS_PER_DAY,
+		"ticks_per_day": WorldState.TICKS_PER_DAY,
+		# ★速度檔【不在引擎裡】：推進由呼叫端決定（票① advance_ticks 的裁定）
+		#   ⇒ 這裡誠實印「由呼叫端控制」而不是編一個檔位出來。
+		"speed": "由呼叫端控制（advance_ticks）",
+	})
+
+# ★★★常駐狀態列（票② §1）：我是誰／在哪／在做什麼／現在幾時。
+#   ★★四件事【全部來自既有查詢動詞】—— 本函式只【組合】，不自己讀 state：
+#   否則它會變成第二個資料來源，而兩個來源必然 drift。
+func get_status_line(state: WorldState) -> Dictionary:
+	var snap: Dictionary = get_player_snapshot(state, {})
+	if not bool(snap.get("ok", false)):
+		return snap
+	var ctx: Dictionary = get_decision_snapshot(state)
+	var clock: Dictionary = get_world_clock(state)
+	# ★真實形狀：get_player_snapshot 的 data 是 {"snapshot": {...}}，而【我第一版直接讀 data】
+	#   ⇒ 我是誰／在哪 兩格印成「未知」。★★那不是「查詢面沒有」，是【我讀錯了一層】——
+	#   ★★★而兩者在畫面上長得一模一樣（都是空的），這正是走查要抓的東西，只是這次被我自己撞到。
+	var sd: Dictionary = (snap.get("data", {}) as Dictionary).get("snapshot", {})
+	# ★真實鍵是 `player_summary`（map_player_snapshot:572）——★我猜了兩次鍵名（"player"／直讀 data），
+	#   兩次都印成「未接出」。★★而「未接出」與「我讀錯鍵」在畫面上長得一樣 ⇒
+	#   ★★★狀態列自陳 sources 那一行就是為了這種時候：先查【我讀對了嗎】再說查詢面缺什麼。
+	var player_sum: Dictionary = sd.get("player_summary", {})
+	var cd: Dictionary = ctx.get("data", {})
+	var fields: Dictionary = cd.get("fields", {})
+	return PlayerApiMapper.map_query_envelope(true, "ok", "", {
+		"who": player_sum.get("player_name", "（未接出）"),
+		"team": player_sum.get("controlled_team_name", "（未接出）"),
+		"where": {
+			"tile": player_sum.get("position", null),
+			"q": player_sum.get("q", null), "r": player_sum.get("r", null),
+		},
+		"doing": {
+			# ★current_task 來自 ctx 快照（B1 已接出）——★★沒快照時誠實說沒有，不填「idle」
+			"current_task": fields.get("current_task", null),
+			"has_snapshot": bool(cd.get("snapshot", false)),
+			"snapshot_age_ticks": cd.get("age_ticks", null),
+			"intent": fields.get("intent", null),
+		},
+		"clock": clock.get("data", {}),
+		# ★★★來源自陳：狀態列讀了哪幾支動詞 —— 讓「它有沒有走查詢面」可被查證
+		"sources": ["get_player_snapshot", "get_decision_snapshot", "get_world_clock"],
+	})
+
 # ★★★決策快照（B1）：把引擎【替這具身體讀的每一個欄位】端出來。
 #   ★值來自 sim 自己那一次 gather（team.ctx_snapshot），★★查詢端【不重算】——
 #   重算＝觀察一次跑一次引擎，而那是有血證的禁止形狀。
@@ -536,7 +588,10 @@ func get_decision_snapshot(state: WorldState) -> Dictionary:
 		"snapshot": true,
 		"snapshot_tick": t.ctx_snapshot_tick,
 		"age_ticks": state.world.current_tick - t.ctx_snapshot_tick,   # ★快照有年紀，讀的人要看得到
-		"fields": t.ctx_snapshot,
+		# ★回【副本】不是本體：t.ctx_snapshot 直接交出去 ＝ 呼叫端手上握著引擎的狀態，
+		#   ★★改它就改了世界（床第一次跑就撞到：拿到的 f0 被後面的 erase 一起改了）
+		#   ⇒ 觀測不得改變被觀測物 —— duplicate(true) 連巢狀 dict/array 一起複製。
+		"fields": t.ctx_snapshot.duplicate(true),
 	})
 
 func _action_label(action_id: String) -> String:
