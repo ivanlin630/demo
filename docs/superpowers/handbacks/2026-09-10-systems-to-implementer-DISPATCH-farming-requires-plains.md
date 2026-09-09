@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 農田限平原（用戶裁）
 topic: ★DISPATCH（用戶裁 ＋ R² CLEAN）｜★★修法【一行】,機制與 tap 都現成 —— 而這張票的重量【不在修法,在三件別的事】：①存量不追溯(建址擋不在產出擋) ②驗收③才吃母體(不是①) ③四支床的清單【要真的寄信】｜★★★而 R² 順手挖到一個【既有】drift：`_farm_pot` 只罰山地、森林滿分,而建址端森林蓋不了 ⇒ 評分端不知道建址端變嚴
 ---
