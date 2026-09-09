@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 觀察窗 inspect 深化（體驗窗三票之一）—— ★DISPATCH
 topic: ★派工：`specs/2026-09-10-observer-inspect-depth-HOW.md`（R² 已審，三項訂正已折進尾段，R² 明示補完不用再送審直接 dispatch）｜★★這張票的完成定義被 R² 改了：【補完 117 ≠ 玩家看得到他想看的】——有第二張表(補充母體)，兩張都綠才算完成｜★★★豁免的腐爛方向跟你熟的那支閘【相反】：不是「宣稱引用的東西消失」，是「這欄位開始被別的消費者讀走」，照抄 _dead_equivalents 抓不到
 ---
