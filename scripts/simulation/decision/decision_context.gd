@@ -883,7 +883,31 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	for _sopt in team.survival_stall_cooldown:
 		if _stall_now < int(team.survival_stall_cooldown[_sopt]):
 			c.survival_stall_active.append(_sopt)
+	# ★★★玩家隊的 ctx 快照（B1：把 117 個盲格端到查詢面）——
+	#   ★零額外 gather：借【引擎自己這一次】的結果，不在查詢時重算
+	#     （「觀測改變被觀測物」已有血證 ⇒ 查詢端 gather 是禁止的形狀）。
+	#   ★★只給【玩家控制的那一隊】：全隊都存 = 119 個值 × 每隊 × 每次決策，那是白付的成本。
+	#   ★★★只在 advance 路徑寫：observe 路徑必須零寫入（gather_observation_purity_bed 守著那條）。
+	if advance and state.player_id != -1:
+		var _pp = state.persons.get(state.player_id)
+		if _pp != null and int(_pp.team_id) == team.team_id:
+			team.ctx_snapshot = c.snapshot_dict()
+			team.ctx_snapshot_tick = state.world.current_tick
 	return c
+
+# ★把自己攤平成 {欄位名: 值}（B1 用）。★用 get_property_list 而不是手抄清單：
+#   ★★手抄的清單【不會跟著新欄位長大】，而漏掉新欄位的症狀正好是「玩家看不到」——
+#   ★★★那正是這批票在修的病本身。
+func snapshot_dict() -> Dictionary:
+	var out := {}
+	for pi in get_property_list():
+		var pname: String = String(pi.get("name", ""))
+		if pname == "" or pname.begins_with("_") or pname == "script" or pname == "Built-in script":
+			continue
+		if int(pi.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE == 0:
+			continue
+		out[pname] = get(pname)
+	return out
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
 # belief-based（認知非全知）；dist≥5 衰減 0（遠敵不算）。

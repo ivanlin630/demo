@@ -517,6 +517,28 @@ func get_event_stream(state: WorldState, n: int = 10) -> Dictionary:
 	return PlayerApiMapper.map_query_envelope(true, "ok", "",
 		{ "events": PlayerApiMapper.map_global_messages(state, n) })
 
+# ★★★決策快照（B1）：把引擎【替這具身體讀的每一個欄位】端出來。
+#   ★值來自 sim 自己那一次 gather（team.ctx_snapshot），★★查詢端【不重算】——
+#   重算＝觀察一次跑一次引擎，而那是有血證的禁止形狀。
+#   ★★★還沒有快照時回 {snapshot:false, note:…}：★玩家知道自己看不到、以及為什麼，
+#   比一堆 0 有用（同 inspect 票的 threat 那格）。
+func get_decision_snapshot(state: WorldState) -> Dictionary:
+	var check := _check_player_with_team(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	var t: TeamData = state.teams[state.persons[state.player_id].team_id]
+	if t.ctx_snapshot.is_empty():
+		return PlayerApiMapper.map_query_envelope(true, "ok", "", {
+			"snapshot": false,
+			"note": "尚無快照：引擎還沒替這支隊跑過一次決策（推進幾 tick 後就會有）",
+		})
+	return PlayerApiMapper.map_query_envelope(true, "ok", "", {
+		"snapshot": true,
+		"snapshot_tick": t.ctx_snapshot_tick,
+		"age_ticks": state.world.current_tick - t.ctx_snapshot_tick,   # ★快照有年紀，讀的人要看得到
+		"fields": t.ctx_snapshot,
+	})
+
 func _action_label(action_id: String) -> String:
 	match action_id:
 		"ignore":           return "忽略"

@@ -165,6 +165,12 @@ var food_runway: float = 9999.0   # default 安全大值（未算前不誤塌 pe
 # 每元素 GoalInstance = {goal_type:String, target=null, created_tick:int, status:String[active/satisfied/abandoned]}。
 # 只存慾望本身(要什麼)非 plan-state(怎麼走)；中繼 frontier 由 GoalResolver 每 tick 重算不鎖此。S1 空初始。
 var goal_state: Array = []
+# ★玩家隊的決策快照（B1）：引擎自己 gather 完順手存一份，供查詢面讀。
+#   ★★只有【玩家控制的隊】會被寫（見 decision_context.gather 尾），其餘隊恆空。
+#   ★★★不進 StateFingerprint —— `_emit_teams` 是【逐欄列舉的白名單】，加欄不改 fp；
+#   而 sim 端沒有任何地方讀它 ⇒ 它不可能影響決策。
+var ctx_snapshot: Dictionary = {}
+var ctx_snapshot_tick: int = -1
 var beast_kind: String = ""       # 非空 = 此 team 為野獸 pseudo-team（鹿/野豬/熊/狼群）
 var beast_strength: float = 0.0   # npc_combat 用：beast team 的整體戰鬥力
 var resources: Dictionary = {
