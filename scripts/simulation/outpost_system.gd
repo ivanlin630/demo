@@ -99,6 +99,10 @@ const FACILITY_DEF: Dictionary = {
 		"cost": { "material": 30, "tools": 0 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "farming_level",
+		# ★農田限平原（用戶裁 2026-09-10）：★★規則只擋【建址】，產出端一個字都不動——
+		#   同一個規則放兩個地方必然 drift。★★★既有的非平原農田【不追溯沒收】：
+		#   規則約束的是未來的建址；而存量池是【結構性空】（本 codebase 沒有讀檔恢復 WorldState 的路徑）。
+		"required_terrain": "plains",
 		"leader_pref": { "慎重": 0.3 },
 	},
 	"workshop": {
