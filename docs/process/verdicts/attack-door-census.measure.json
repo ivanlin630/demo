@@ -1,0 +1,43 @@
+{
+  "token": "attack-door-census",
+  "slice": "強強互打——先數門,再談util",
+  "date": "2026-09-10",
+  "measured_at_head": "29ac0daa起跑(dirty=1，僅decision_context.gd當時implementer WIP，非我的床)",
+  "touches": [],
+  "world": "warring_states / seed=1337 / 30天，5次快照間隔(每7天，共5次)",
+  "bed": "scripts/debug/attack_door_census_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-10-attack-door-census.txt"],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★★★比『哪道門』更重要的發現：攻擊option在97.37%的快照裡三道門全關(沒進候選)——這不是嚇阻(util輸)，是【提名不到】(applicable=false)。而在僅有的兩道會開的門裡(faction_directive/征服，各6次，血仇0次)，強→強候選母體=0，確認你的假說：不是嚇阻，是提名不到。★但征服門『永遠最弱』的靜態推論不完全成立(66.7%在弱者區，非100%)——有例外，如實回報。",
+    "①哪一道門開(母體=380次全隊快照)": {
+      "faction_directive": "6次(1.58%)",
+      "征服intent": "6次(1.58%)",
+      "血仇": "0次(0.00%)——本窗全程沒開過",
+      "全關(沒進候選)": "370次(97.37%)——★★★這是主要發現"
+    },
+    "②征服門target軍力排序(驗證永遠最弱)": {
+      "母體": "6筆",
+      "平均排名百分位": "0.627(1.0=最弱方向)",
+      "後30%弱者區比例": "66.7%(4/6)",
+      "判定": "★推論不完全成立，有例外——2/6筆的target不在弱者區底部30%"
+    },
+    "③派系directive門target軍力排序(唯一可能強強來源，之前沒查過)": {
+      "母體": "6筆",
+      "平均排名百分位": "0.594",
+      "逐次樣本": "target_armed_rank在26-82之間(隊伍總數82-94)，全部偏弱/中後段；僅1筆attacker_is_strong=true(tick=40320,team=21)，但其target_is_strong仍為false"
+    },
+    "④強→強候選(strong_set=armed排序top8或15%取大，非population)": "★★★母體=0——本窗全程沒有出現任何強打強的候選。照票面規則母體不足不做util分解，省下那一跑。"
+  },
+
+  "honest_limits": [
+    "★①本卷不碰combat層(擊潰即逃/追擊/殲滅率是另一件事，blueprint的推論②)",
+    "★②全關佔97.37%這件事本身就是答案——不需要④的util分解，本卷確實省下了那一跑(照你的規則)",
+    "★③征服門『永遠最弱』推論不完全成立(66.7%非100%)——本卷只給出現象(有例外)，不深究為何有例外(可能belief_pos延遲/population_est誤差/tie-break規則讓非最弱者偶爾中選)，若要深究成因需要另開票",
+    "★④樣本量小(每道門僅6筆)——30天/7天間隔快照下這兩道門本身就很少開，6筆已是全部母體，非抽樣不足，而是母體本身就小",
+    "★⑤strong_set定義=armed排序top8或總隊數15%取大(取大者)——這是本卷的操作定義，非世界性質，若要用別的門檻(如top5或top10%)可能改變④的結論，卷面已寫明用哪個定義"
+  ],
+
+  "supersedes": []
+}
