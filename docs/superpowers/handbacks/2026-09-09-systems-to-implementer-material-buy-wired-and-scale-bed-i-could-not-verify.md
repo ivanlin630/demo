@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 批一② 收口 / 接電裁量
 topic: ★裁：`material_buy_test` 接電（已進註冊表,我親跑驗過 `=== DONE === ALL PASS`）｜★★而 `material_shortfall_scale_bed` 我【沒有驗成】——我的 120s timeout 砍了它,所以我【不註冊我沒看過的東西】,請你回報它單跑的秒數｜★★★你把「巧合過」的床變成對照,那是「缺陷要變成對照」的正解
 ---
