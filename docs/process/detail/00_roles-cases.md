@@ -155,7 +155,7 @@ memory [[feedback-never-wrap]]。
 | 母體地板（普查塌到 0 不得讀成綠） | 🔒 | `expect-min-gate.sh`（exit 1） |
 | **空 merge／改動被丟**（git 說已合併但 code 不在樹上） | 🔒 | `merge-verify.sh`（exit 1）——**每次 merge 後跑**。血證 `4bdce7c1` |
 | **QA verdict 存在**（長跑因果類 slice） | 🔒 | `seam-gate.sh` 驗 `qa: required` → 有 `from: qa` 的 slice handback（HARD 擋 merge）。**2026-08-04 立、2026-08-21 從自律升機械** |
-| **共用 main 禁全量 `git add`** | 🔔 | `bash-guard.sh`（PreToolUse，**warn-only／fail-open**）——血證：別角色 WIP 被掃進他人 commit |
+| **共用 main 禁全量 `git add`** | 🔔＋🔒**部分** | `bash-guard.sh`（PreToolUse，warn-only／fail-open）★**＋ `role-commit-scope.sh`（pre-commit，exit 1）2026-09-10 新增** —— ★★但**只擋 blueprint/qa/reviewer 的 `scripts/**.gd`**（刻意選的零誤判子集）；★★★**裸 commit 吃整個 index** 這個更寬的形狀**仍然無機器**（血證 `e848dfef`）⇒ **規則不得退役**（「機制已立 ≠ 機制已覆蓋」） |
 | **長跑兼職互斥**（起 Godot 前查別人的 beacon） | 🔔 | `bash-guard.sh` 同上——兩角色同時長跑會互相拖慢並污染 perf 量測 |
 | **[DONE] 後拆 worktree** | 🔔 | `implementer-cleanup.sh` Stop hook 把「拆」寫進 nag，**並先判 worktree 髒不髒**（髒的不叫你直接拆）。56GB 血案根治 |
 | **承諾即檔名**（信裡說「已派」必附檔名） | 🔔 | **收件端簽收時 `ls` 驗**（執行點在收件端）——`07 §承諾即檔名`。**機器不驗散文**，見下列 |

@@ -140,14 +140,9 @@
 **而正確的形狀是【跨 frame 分攤】，不是【做得更快】** ——
 ★把一批 1000 隊的思考壓到 2 秒仍然是**凍 2 秒**；把它切成每 frame 50 隊**才是解**。
 
-★**這條與既有的效能討論【不是同一件事】**：我們一直在優化**總時**
-（merge gate 656s、tick/s、LOD），而**這條問的是【最壞單 frame】** ——
-★★**一個總時更短但有一次 5 秒尖峰的方案，在這條下【更差】。**
-
-★**現況未診斷**：嫌疑是思考層的大批次（`faction_ai` 月級 pass／T0 burst／
-`DecisionContext` 的 119 欄 × 全隊同 frame）——**而這是嫌疑不是結論**，
-⇒ **診斷格先跑**（票：`docs/superpowers/handbacks/2026-09-10-systems-to-measurer-frame-time-who-freezes.md`）。
-★★★**先量再開藥**（本專案的老規矩），**而修法形狀（frame 預算上限＋批次切片）等數字。**
+★**這條與既有的效能討論【不是同一件事】**：過去所有量測量的都是**總時**，
+★★**而一個總時更短但有一次 5 秒尖峰的方案，在這條下【更差】。**
+（★現況＝**未診斷**，嫌疑清單與診斷票 → `detail/invariants-cases.md` 同標題節）
 
 ## ★其餘不變量 → 索引（2026-08-25 #4：本檔只留【憲法級】）
 
@@ -156,32 +151,14 @@
 
 | 條目 |
 |---|
-| World |
-| Map |
-| Time |
-| Information |
-| Simulation |
+| **域**（純標題，逐條全文在 detail 同標題節）：World ／ Map ／ Time ／ Information ／ Simulation ／ 關鍵設計規則 ／ 對稱性 ／ 玩法節奏 ／ UI 邊界 ／ NPC ／ Interaction ／ Anon ／ Task ／ 財產 / 守恆 ／ 飢餓 / 人口 ／ team reference 契約 ／ Leader 繼承單一 owner ／ 訂單系統 ／ 隊目標單一 owner = leader 野心階梯 |
 | ★★ 三條對稱不變量（統一架構骨架，believability 北極星，藍圖 2026-06-29） |
 | ★ 意圖驅動完備（決策域，藍圖 2026-06-28） |
-| 關鍵設計規則 |
-| 對稱性 |
-| 玩法節奏 |
-| UI 邊界 |
-| NPC |
-| Interaction |
-| Anon |
-| Task |
-| 財產 / 守恆 |
 | ★ 統一搬運脊椎（後勤，用戶定 2026-08-01，enforce 起步） |
 | ★ 統一勞力池（生產規模、用戶定 size-matter 2026-08-03，enforce 起步） |
-| 飢餓 / 人口 |
 | 資料模型不變量規則（防散落純量 drift） |
-| team reference 契約 |
-| Leader 繼承單一 owner |
 | 關係圖（typed-edge） |
 | 私人脫軌（血仇） |
-| 訂單系統 |
-| 隊目標單一 owner = leader 野心階梯 |
 | 混合協調（faction stakes vs team 日常） |
 | perf 優化 arc（用戶+blueprint 憲章 2026-08-18） |
 | resource 分類學（農業a merge 落定、守恆稽核依此） |
@@ -191,7 +168,6 @@
 | 長跑量測床的三條硬規（2026-08-20 立、大考實戰產出） |
 | 承諾態只能經仲裁移轉：直接寫欄位 ＝ 承諾靜默消失（2026-08-21 立，convoy RETURN 實戰產出） |
 | specimen 選樣必須「血緣封閉」：執行期生成的實體不得落在觀測範圍外（2026-08-21 立，convoy RETURN QA 判不了產出） |
-| ★工作紀律八條 → 已搬家（2026-08-25 #4 doc 瘦身） |
 | ★★★觀測器**禁任何副作用**（不只禁耗 RNG）——2026-08-25 擴充 |
 | ★means-end / 前提解析的「無手段終止」不得靜默（2026-08-25） |
 

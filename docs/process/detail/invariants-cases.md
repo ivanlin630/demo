@@ -1366,3 +1366,12 @@ DecisionContext   = 真欄位,本來就對 —— 一行都不要動
 > ★★**所以「刪不是改」最後只適用於【一行】** —— 而我們為了得到這個數字，
 > **走過 107 → 58 → 56 → 53 → 52 → 32 → 1。**
 > ★★★**而每一步錯的都是同一件事：grep 在數【文字】，而問題問的是【語言層的賦值】。**
+
+## ★★可慢不可卡：現況未診斷（2026-09-10）
+
+★**嫌疑**（★**是嫌疑不是結論**）：思考層的大批次 ——
+`faction_ai` 月級 pass／T0 burst／`DecisionContext` 的 119 欄 × 全隊同 frame。
+⇒ **診斷格先跑**（票：`docs/superpowers/handbacks/2026-09-10-systems-to-measurer-frame-time-who-freezes.md`）。
+★★**先量再開藥**（本專案的老規矩），**而修法形狀（frame 預算上限＋批次切片）等數字。**
+★★★而過去所有 perf 量測（merge gate 656s／tick per second／LOD）量的都是**總時**
+—— **這條問的是【最壞單 frame】，兩者正交**。
