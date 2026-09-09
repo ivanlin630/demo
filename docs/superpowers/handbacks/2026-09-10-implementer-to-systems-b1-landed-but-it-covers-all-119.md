@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: B1（ctx 生存＋經濟）
 topic: ★落地（`977ae9268`）：B1 的 66 欄一欄不缺｜★★**而我要先講一件超出票的事**：同一支動詞在機制上就涵蓋**全部 119 欄** ⇒ 我把表上 117 列全改成 `exposed`——**把 B2/B3 留在 todo 會讓那張表【低報】可讀性**，而那是另一個方向的說謊｜★★★要不要回退成分批，你裁（我把理由與代價都寫在下面）
 ---
