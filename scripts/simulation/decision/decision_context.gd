@@ -579,6 +579,13 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	# `_` 前綴非人格值，既有 term match 不誤讀，leader_values 已 duplicate 不污染 PersonData）。
 	c.leader_loyalty = ldr.loyalty if ldr != null else 0.5
 	c.leader_values["_loyalty"] = c.leader_loyalty
+	# ★統領【技能】注入（2026-09-09，三死鍵票 (b)）：`terms.gd` 的 scout_drive 原本讀
+	#   leader_values 裡的「統領」—— 而「統領」是 skills 鍵、不在 values 裡
+	#   ⇒ `Dictionary.get` 回 default ⇒ ★那個量【恆等於 0.5】，程式照跑、註解照樣描述它的效果。
+	# ★★default 跟著改成 0.0（skills 的預設是 0.0）：沿用 0.5 會把【沒有統領技能的人】當成中等。
+	# ★★★用 `_` 前綴注入（同 `_loyalty`／`_is_merchant` 的既有做法）：既有 term match 不誤讀，
+	#   而 `leader_values` 已 duplicate ⇒ 不污染 PersonData。
+	c.leader_values["_command"] = float(ldr.skills.get("統領", 0.0)) if ldr != null else 0.0
 	# 買糧（Phase 1）：注入 _is_merchant（weight("buyfood") 讀，同 _loyalty 法）+ 最近市集 + 有錢。
 	c.leader_values["_is_merchant"] = c.is_merchant
 	# ★perf slice A：refresh market cache 一次(call-scoped)、下兩 finder skip_refresh 讀 cache（去 _harvest_market_known 100% 冗餘二刷）。

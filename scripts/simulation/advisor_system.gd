@@ -22,7 +22,11 @@ func _advice_is_accurate(advisor: PersonData, skill: String) -> bool:
 	return randf() < float(advisor.skills.get(skill, 0.0))
 
 func _advisor_tone(advisor: PersonData) -> String:
-	if float(advisor.values.get("計謀", 0.5)) > 0.7 \
+	# ★接對 dict（2026-09-09）：`計謀` 是 skills 鍵不是 values 鍵 ⇒ 舊寫法恆 0.5
+	#   ⇒ `> 0.7` 這一支【永遠不會 fire】＝ "sarcastic" 語氣是死碼。
+	# ★★default 一起改 0.0：skills 的預設是 0.0，沿用 0.5 會把【沒有計謀技能的人】當成中等。
+	# ★★★這裡是 presentation（文案 variant 的離散選擇），不是決策閘 —— blueprint 2026-09-09 裁。
+	if float(advisor.skills.get("計謀", 0.0)) > 0.7 \
 			and float(advisor.values.get("義氣", 0.5)) < 0.3:
 		return "sarcastic"
 	if float(advisor.values.get("好戰", 0.5)) > 0.7: return "blunt"

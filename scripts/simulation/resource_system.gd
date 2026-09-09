@@ -518,12 +518,16 @@ func _apply_normal_tax(state: WorldState, team: TeamData, tile: HexTileData,
 	_apply_chronic_tax_unrest(state, team, rate)
 
 # 一般稅慢性不滿：tax_rate 超容忍閾值 → 居民 leader/named stress 緩增；超久 → unrest_turns。
-# tolerance = 0.3 + 順從×0.2 + 義氣×0.1 − 野心×0.2（個性決定，非硬編）
+# tolerance = 0.3 + 慎重×0.2 + 義氣×0.1 − 野心×0.2（個性決定，非硬編）
+# ★2026-09-09：原本寫的是「順從×0.2」，而 `順從` 從來不是正典人格鍵 ⇒ `values.get` 恆回 0.5
+#   ⇒ ★這條註解描述了一個【不存在的輸入】，而世界從來沒有讀到過它。
+# ★★改讀 `慎重`（blueprint 裁，不開第九條人格軸）：忍受苛稅 vs 反抗＝風險權衡，
+#   慎重是這個語意的正身，不是借殼。
 func _apply_chronic_tax_unrest(state: WorldState, team: TeamData, rate: float) -> void:
 	var lp: PersonData = state.persons.get(team.leader_id)
 	if lp == null:
 		return
-	var submit: float = float(lp.values.get("順從", 0.5))
+	var submit: float = float(lp.values.get("慎重", 0.5))   # 忍受 vs 反抗＝風險權衡
 	var honor_v: float = float(lp.values.get("義氣", 0.5))
 	var amb: float = float(lp.values.get("野心", 0.5))
 	var tolerance: float = 0.3 + submit * 0.2 + honor_v * 0.1 - amb * 0.2

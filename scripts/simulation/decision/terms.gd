@@ -189,7 +189,9 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# ★資訊網 S-scout 偵察 util（genuine + 人格）：base=真 info_staleness（belief age/norm、DERIVED 非死常數）
 			# ×人格 MODULATE：統領/責任↑盯子民 / 野心↑擴張疏忽內政↓。→ per-option dump 顯 關切型多查 vs 野心型少查。
 			if opt != "偵察": return 0.0
-			var _cmd: float = float(ctx.leader_values.get("統領", 0.5))    # 責任/關切 proxy
+			# ★接對鍵（2026-09-09）：`統領` 是 skills 不是 values ⇒ 舊寫法恆 0.5（死值）。
+			#   走 ctx 注入的 `_command`（decision_context 從 leader.skills 取，default 0.0）。
+			var _cmd: float = float(ctx.leader_values.get("_command", 0.0))    # 責任/關切 proxy（統領技能）
 			var _amb2: float = float(ctx.leader_values.get("野心", 0.5))    # 擴張疏忽內政
 			var _smult: float = (0.4 + _cmd * 0.6) * (1.0 - _amb2 * SCOUT_AMBITION_NEGLECT)
 			return ctx.scout_staleness * clampf(_smult, 0.0, 1.5)
