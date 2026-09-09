@@ -102,6 +102,12 @@ static func add_exp(team: TeamData, tier: String, exp: float, source: String) ->
 	if not team.anon_exp.has(tier):
 		# ★★這條 early-return 也要看得見：exp 給了、tier 不存在 ⇒ 那份 exp 【消失了】，
 		#   而它跟「沒人給 exp」在 anon_exp 上長得一模一樣。
+		# ★這個計數器在【產線】恆 0：`team_data.gd:327-329` 預先塞好 平民/新兵/老兵 三鍵，
+		#   而 `菁英` 被上一條 early-return 接走 ⇒ 產線走不到這裡。
+		# ★★所以它的 0 是【不會 fire】，不是【沒發生】—— 讀卷面的人不得把它當成證據。
+		# ★★★而它【床可達】（`headless_test.gd:12306` 整個換掉 `anon_exp`）⇒ 床上的非零是真的。
+		# ⇒ 什麼會讓它在產線變可達：任何【整個換掉 anon_exp】或【新增第四個 tier 而沒更新預設】的改動
+		#   —— ★屆時這段註解就過期了，而過期的方式是【它會開始說謊】。
 		if Probe.enabled: Probe.bump("exp.add.dropped.no_tier." + source)
 		return
 	team.anon_exp[tier] = float(team.anon_exp[tier]) + exp

@@ -93,8 +93,9 @@ func _test_dropped_visible() -> void:
 	print("    菁英丟棄 %d｜無此 tier 丟棄 %d" % [d1, d2])
 	_ok(d1 == 1 and d2 == 1,
 		"③兩條 early-return 的 tap 都會動（否則那份 exp 消失了，而它跟「沒人給」長得一樣）")
-	print("    ★誠實限：no_tier 那條在【產線】不可達（anon_exp 預先塞好三鍵）"
-		+ " ⇒ 它的計數恆 0 是【不會 fire】不是【沒發生】")
+	print("    ★誠實限：no_tier 那條【產線不可達、床可達】——"
+		+ "產線 anon_exp 預先塞好三鍵（team_data:327）；床可以整個換掉字典（headless_test:12306）")
+	print("      ⇒ 它在產線的 0 是【不會 fire】不是【沒發生】；床上的非零是真的")
 	Probe.enabled = false
 	_sections += 1
 
