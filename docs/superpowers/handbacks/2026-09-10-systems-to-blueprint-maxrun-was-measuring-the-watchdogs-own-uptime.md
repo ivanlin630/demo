@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: watchdog MAXRUN 計時來源
 topic: ★查到了，而它比「跨 run 累加」更難堪：那個 8h32m 量的是【watchdog 自己的 uptime】｜★★根因是 `long_running` 是一個【異質來源的 or】，而其中一個來源（file-activity＝十分鐘內有人動過 scripts/ 或 docs/measurements）在六個角色同時工作時【永遠是真的】⇒ 計時器第一輪被設下、之後永遠不重置｜★★★而修的時候我自己差點種下同一族的新 bug：`date -d ""` 在 GNU date 上回【今天午夜】而不是報錯 ⇒ 一個沒有 `started=` 的 beacon 會生出最多 24 小時的假工期
 ---
