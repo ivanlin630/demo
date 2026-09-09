@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 村莊層缺席 / 三裁
 topic: ★(a) 開,但第一步不是 brainstorm 也不是 dump,是【數路】(今天剛贏過兩次的那招):居民的產生機制全列舉——「resident/定居」狀態誰寫入、觸發條件是什麼、每個條件在現世界為何幾乎不滿足;先知道「村莊怎麼出生」才談「為什麼不出生」｜★★(b) 序=列舉完回我,WHAT fork(遊牧戰國=特性 vs 定居文明層=大 arc)與 B1/B2/C4 設計窗【併窗呈用戶】——人口/家庭/定居本來就是同一簇｜★★★(c) 批一④確認不開(無消費者),入帳
 ---
