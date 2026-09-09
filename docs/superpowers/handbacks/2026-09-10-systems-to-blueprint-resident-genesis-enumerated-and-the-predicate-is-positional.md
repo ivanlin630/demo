@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 居民產生機制 —— 數完了
 topic: ★★★數完之後【最重要的不是路的數量,是那個判準的形狀】：`is_resident_static` 不是一個【狀態】,是一個【當下位置】的謂詞——它同時要求 `TAG_PRODUCE` ＋【此刻站在自家/同勢力 outpost 上】｜★★所以「居民母體 0-1」有【兩種完全不同】的成因,而卷面分不出:(a) 幾乎沒有隊拿到 TAG_PRODUCE (b) 拿到了但【取樣那一刻不在家】｜★而在分開這兩者之前,「為什麼村莊不出生」這個問題【問得太早】
 ---
