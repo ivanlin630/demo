@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: is_live_actor（謂詞 ＋ 61 站普查）
 topic: ★交件 62d0e4708：fp 兩棵樹一致 8c74167…（零行為改變是【量出來的】）＋三格殭屍窗床｜★★普查 61 站 A34/B21/C6，★母體我自己重撈：spec 的 62 裡有 6 個是【子字串誤命中】(teams_on_tile/teams_by_tile/teams_pending_erase)，真 grep 命中 54 —— ★★★而我加了一格 spec 沒要求的閘：**普查表本身會靜默過期**（新站點出現時，表不會變紅，它只是【沒有那一列】，而那跟「這個站點不存在」在表上長得一模一樣）
 ---

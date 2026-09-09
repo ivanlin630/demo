@@ -174,3 +174,55 @@ faction_ai_system.gd:4438  state.teams_pending_erase.clear() ← pending.has(tid
 其餘全過：兩個名字不是過度設計（★理由是【下一批票幾乎確定要用單點布林】，
 不是「將來也許有人要」）／驗收表／不做的事／我自招的兩件（[C] 必須存在、[A] 本票不修）。
 ```
+
+---
+
+## ⑨ ★★★母體終值：**61**（implementer 獨立重撈，而我的 62 是【兩個方向的錯都有】）
+
+```
+grep -rn "in state.teams" scripts/simulation scripts/data ⇒ 60 行
+  ★−6【子字串誤命中】：teams_on_tile ／ teams_by_tile ／ teams_pending_erase
+     （那 6 行的迴圈根本不是在迭代 state.teams，而它們的字面包含「in state.teams」）
+  ＝ 真命中 54
+  ＋R² 的 6 站（先存變數再迴圈／當參數往下傳）—— 逐站覆核，全部確認存在
+  ＋清除端自己 1 站（faction_ai:4416，迭代 teams_pending_erase，被過濾排除 ⇒ 手動收錄）
+  ＝ ★61
+★★另掃 state.teams.values() 與裸 state.teams 當參數 ⇒ 零命中（與 R² 一致，確認不是漏查）。
+```
+
+★**這一格的教訓比數字重要**：我的 62 **同時有 6 個偽陽與 6 個偽陰**，
+⇒ **62 與真值 61 只差 1** ⇒ ★★**只核對總數的人會讀成「差不多對」**。
+⇒ ★★★**比對的單位是【逐站】不是【總數】** —— 已寫進 01_architect 那條「我掃了全部 X」。
+
+## ⑩ 普查結果：A 34 ／ B 21 ／ C 6（★A 裡有三群後果完全不同）
+
+```
+★群甲【決策污染】—— 後果不在畫面，在決策，而且【壽命比那一 tick 長】：
+   npc_combat_system.gd:151 team_strength   殭屍護衛【灌水】一支隊的戰力，而戰力餵決策
+   vision_system.gd:39      tick_discovery  發現一支這 tick 就會消失的隊
+                                            ⇒ 留下一筆【指向不存在隊】的 belief
+★★群乙【玩家會對死人按按鈕】：
+   player_command_system.gd:970 refresh_colocation_targets（implementer 補進來的一站）
+   ⇒ 產的是【玩家的互動對象清單】—— ★不是畫面閃一下，是一個會失敗或更糟的指令
+★★★群丙【畫面閃現】6 站：
+   player_api_mapper.gd:352/743/757/810 ＋ observer_query_api.gd:66/133/184
+   ⇒ 殭屍隊在列表／地圖上閃現一 tick
+其餘 A 25 站：後果逐站不同，未分群。
+C 6 站（labor ×3／manpower tick_all／_mature_minors／flush_forage_episodes）
+   ★其中 flush_forage_episodes 是把 R² 的初判 [A]? 【降成 C】——
+     「讀不出來」不該被寫成 A（★這個降級是對的）。
+```
+
+⇒ **修的順序（systems 排，呈 blueprint）**：**群甲 → 群乙 → 群丙 → 其餘 A → C 逐站判**。
+★理由：**群甲汙染的是【會被後續決策讀的量】，它的壽命超出那一 tick**，
+而群丙最糟只是一格畫面閃一下。
+
+## ⑪ ★implementer 自己加的那格閘（spec 沒要求）
+
+```
+普查表會【靜默過期】：新加一個迭代站點時，表【不會變紅】——它只是【沒有那一列】，
+★而那跟「這個站點不存在」在表上長得一模一樣。
+⇒ 他加了 live-team-census-gate.sh（已註冊 merge-gates）。
+★★這與「born-with 過期紅」是同一條的實例：★★★一份要人維護的清單，
+   若「少一列」不會紅，它就會變成【加一行就綠】的橡皮圖章。
+```
