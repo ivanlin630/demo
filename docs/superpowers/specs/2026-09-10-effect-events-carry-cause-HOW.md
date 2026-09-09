@@ -85,11 +85,17 @@ faction_defect／replace／split 同樣是 call-site 字面
 ```
 ①`emit_message` 的 params 加一個【約定欄位】`cause`（★不是新事件族、不是新函式）
 ②在【產生端手上已經有因】的地方填它 —— ★★零新機制：只印它【當下已經讀到的東西】
-   求和   ：`threat_id` / `threat_react`（decision_context:377-378）
-            ⇒ 「Team X 向 Team Y 求和（懼其兵鋒，威脅 0.82）」
-   派工失敗：`_short["margin"]` / `res` / `avail` ＋ ★★★【leader 在不在家】
-            ⇒ 「安全緩衝 1.60x（慎重領袖）；material 5（公庫 0 ＋ 私 5）；★leader 不在自家據點」
    宣戰   ：`_should_attack` 的分數項（ambition/martial/greed/str_ratio/caution）
+   replace ：`unrest_turns` / `dissenters`（★★本票的代表案例，見 §0 訂正）
+   ★★★以下兩則【已於 §0 移出本票，保留在此只為對照】：
+   ~~求和~~   ：走 `faction_ai_system.gd:3929` 的裸 print ⇒ **不碰 `global_messages`**
+   ~~派工失敗~~：同上，裸 print ⇒ **不碰 `global_messages`**
+   ⇒ ★這兩則的家在【裸 print 帶因】那一格：
+     `docs/superpowers/specs/2026-09-10-bare-print-carry-cause-CELL.md`
+     （blueprint 裁：低優先、不單獨開工、拆動詞票或 inspect 票誰先動誰帶走）
+   ⇒ ★★留著劃掉的版本而不是刪掉，是因為**本票曾經拿它們當驗收樣本**——
+     ★★★而那是一個真的錯誤：拿兩個【本機制完全影響不到】的樣本當驗收，
+     等於這張票就算完全沒做，那兩格也會長一樣。
 ③★★★而【產生端手上沒有因】的地方 —— **不要發明**：
    ⇒ 那是一個【發現】：它表示「這個決定不是在這裡做的」
    ⇒ **列進 handback 的『無因清單』**，由我逐條判要不要往上游追。
@@ -123,3 +129,11 @@ faction_defect／replace／split 同樣是 call-site 字面
 2. ★**它不會讓「求和」變得合理** —— 求和的觸發條件（`threat_react` 過線、不要求敵對行為）
    **是另一回事**，已另記（`factcheck-peace-plea-needs-no-war`）。
    ★★**本票只保證觀眾【看得到它為什麼發生】**，不保證他【同意】那個為什麼。
+
+---
+
+★**附掛【順手改】格**：裸 print 帶因（`[SoloAI]` 行 ＋ 派工失敗行）
+⇒ `docs/superpowers/specs/2026-09-10-bare-print-carry-cause-CELL.md`
+（本票**曾經**把「求和」錯當自己的驗收樣本 ⇒ 這行指標是為了讓以後回頭查的人
+**省一次重新推導**。blueprint 2026-09-10 裁：低優先、不單獨開工、
+本票或 inspect 票**誰先動誰帶走並刪該檔**。）

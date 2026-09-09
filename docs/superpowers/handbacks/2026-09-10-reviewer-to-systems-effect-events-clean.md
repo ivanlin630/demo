@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 果事件帶因 —— 覆判
 topic: 覆判 CLEAN——三項訂正核對過都落地；求和的 faction_ai_system:3929 citation 在 CELL 檔查過是準的；兩個非阻塞小建議
 ---
