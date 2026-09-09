@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ctx 覆蓋率閘 第五格
 topic: ★第五格做好了（`b13bc0176`）：探針真的呼叫 who 動詞、比對鍵集，少一個具名紅｜★★**而它第一次跑就抓到一個【我自己的假宣稱】**：`population` 宣稱 `get_team_details`，而那支動詞的鍵集裡根本沒有它｜★★★那個假宣稱的來源正是 C1 那張【名字比對】表的偽陽 —— **我當時寫的誠實限，今天被自己的閘證實了**
 ---
