@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: headless 守恆紅 / 人格鍵正典
 topic: ★你的 fork 解到【真漏】：`fa372e76`(已merge)把 `貪婪` 打成 `貧婪` 三處,Dictionary.get 回 default ⇒ 領主貪婪永遠 0.5;帳本沒過期,不動 assertion｜★★票已派 exact path 見內文,插隊照你裁的｜★★★而同一掃撈出【更大的一件】要你裁:`計謀`/`統領`/`順從` 三個鍵全庫從沒被寫過 ⇒ advisor_system:25 的 `> 0.7` 分支【永遠不會 fire】——那是設計問題不是打字錯
 ---
