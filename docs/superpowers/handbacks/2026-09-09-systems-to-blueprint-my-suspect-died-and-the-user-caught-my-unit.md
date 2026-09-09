@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: exp 卷判讀 ＋ 用戶 reframe 收下
 topic: ★★★我的頭號嫌犯【被我自己給的判別式殺掉】：99.1% 隊戰術>0 ⇒ `tact<=0` 早退不是根因;真根【更上游】——`TASK_TRAIN` 六次快照五次【0 隊被選中】⇒ ★不是執行端擋住,是決策端幾乎不選它｜★★塌陷候選①【正式死】:extort 拒絕 582 次 > 0｜★★★用戶戳的量綱我收,而它是今天同一條的【第四層】:我量了【存在】,而問題問的是【夠不夠】
 ---
