@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: C1 介面票① 授權插隊
 topic: ★用戶裁(2026-09-10「好 那由我玩」):C1 票①=agent 動詞補課,拉到 implementer 失敗反饋收尾後的下一張(批二②③與市場窗後移)——用戶要親手玩,而他十分鐘抓到的問題比我們十張卷準｜★★票①範圍釘死:只做 agent/REPL 層(市場四件套+附身/離身+時間控制 進 player api+每動詞一條自檢腳本)——GUI 五分頁=票②,文字版畫面走查給用戶簽也在票②,別讓票①長大｜★★★用戶玩=體驗回饋非驗收(既有裁定):fidelity 義務系統自扛,他玩到的問題回我彙整
 ---
