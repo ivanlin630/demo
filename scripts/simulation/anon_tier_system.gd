@@ -401,7 +401,17 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 	var to_tier: String = TIER_ORDER[idx + 1]
 	# 1. count 足
 	if AnonCohort.by_tier(team.anon_cohorts, from_tier) < count:
-		if Probe.enabled: Probe.bump("promote.kill.not_enough_bodies")
+		if Probe.enabled:
+			Probe.bump("promote.kill.not_enough_bodies")
+			# ★★★聚合必附 bounded 樣本（不變量）：沒有樣本時，「121 次全死同一格」與
+			#   「121 次死在 121 種不同情形」【長得一模一樣】——★而兩者的修法完全相反。
+			#   ⇒ 樣本要帶【差多少】，不只帶「差了」。
+			Probe.bump_sample("promote.kill.not_enough_bodies", {
+				"team": team.team_id, "from_tier": from_tier, "want": count,
+				"have": AnonCohort.by_tier(team.anon_cohorts, from_tier),
+				"short": count - AnonCohort.by_tier(team.anon_cohorts, from_tier),
+				"tick": state.world.current_tick,
+			}, 64)
 		return 0
 	# 2. exp 足（每升 1 人需 1 份 threshold；consume threshold × count）
 	var threshold: float = float(PROMOTION_EXP_THRESHOLD[from_tier])
@@ -409,6 +419,14 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 		if Probe.enabled:
 			Probe.bump("promote.kill.not_enough_exp")
 			Probe.bump("promote.kill.not_enough_exp." + from_tier)
+			# ★「差 5」與「差 45」是兩個世界，而聚合數把它們壓成同一個字串。
+			Probe.bump_sample("promote.kill.not_enough_exp", {
+				"team": team.team_id, "from_tier": from_tier, "want": count,
+				"threshold": threshold, "need": threshold * float(count),
+				"have": float(team.anon_exp.get(from_tier, 0.0)),
+				"short": threshold * float(count) - float(team.anon_exp.get(from_tier, 0.0)),
+				"tick": state.world.current_tick,
+			}, 64)
 		return 0
 	# 3. 物資足
 	var cost: Dictionary = PROMOTION_COST[from_tier]
@@ -417,6 +435,13 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 			if Probe.enabled:
 				Probe.bump("promote.kill.not_enough_res")
 				Probe.bump("promote.kill.not_enough_res." + String(res))
+				Probe.bump_sample("promote.kill.not_enough_res", {
+					"team": team.team_id, "from_tier": from_tier, "want": count,
+					"res": String(res), "need": float(cost[res]) * float(count),
+					"have": float(team.resources.get(res, 0)),
+					"short": float(cost[res]) * float(count) - float(team.resources.get(res, 0)),
+					"tick": state.world.current_tick,
+				}, 64)
 			return 0
 	# 4. leader 戰術 cap（訓練升等受限）
 	var leader: PersonData = state.persons.get(team.leader_id)

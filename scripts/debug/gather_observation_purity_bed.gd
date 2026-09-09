@@ -59,52 +59,69 @@ func _initialize() -> void:
 			_ok(true, "fixture %s：觀測零寫入（母體 advance=%d）" % [f, fa])
 			_fixture_judged += 1
 
-	var ra: Array = _run_world(days, false)
-	var rb: Array = _run_world(days, true)
-	var fp_a: String = ra[0]
-	var fp_b: String = rb[0]
-	var cb: Dictionary = rb[1]
+	# ★★★世界段預設【關】（systems 裁 2026-09-09）：這支床【貴的那一半正好是不判決的那一半】——
+	#   七格 fixture 是判準（母體是造出來的、便宜）；世界段是 print-only（fp 比對 + 世界段判定），
+	#   而它要跑兩個世界 ⇒ 208s+。閘只需要判準那一半。
+	# ★開關：`GP_WORLD=1` 才跑（人手診斷用）。★★關掉時世界段欄位印【已略過】不印 0/7 ——
+	#   「關掉」與「跑了但一格都沒判到」是兩件事，印成 0/7 會把它們變成同一件。
+	var world_on: bool = OS.get_environment("GP_WORLD") == "1"
+	var fp_a: String = ""
+	var fp_b: String = ""
+	var cb: Dictionary = {}
+	if world_on:
+		var ra: Array = _run_world(days, false)
+		var rb: Array = _run_world(days, true)
+		fp_a = String(ra[0])
+		fp_b = String(rb[0])
+		cb = rb[1]
+	else:
+		print("  ── 世界段：已略過（GP_WORLD=1 才跑；它是 print-only 的診斷，不是判準）──")
 
-	# ── 判準：觀測路徑的七個欄位一個都不准寫 ──────────────────
-	print("  ── 純讀路徑：七欄 advance / observe ──")
-	for f in FIELDS:
-		var adv: int = int(cb.get("gather.write.%s.advance" % f, 0))
-		var obs: int = int(cb.get("gather.write.%s.observe" % f, 0))
-		print("     %-28s advance=%-6d observe=%d" % [f, adv, obs])
-		if obs > 0:
-			_ok(false, "%s：觀測路徑寫了 %d 次（★寫了就是違規，跟母體無關）" % [f, obs])
-			_world_judged += 1
-		elif adv == 0:
-			# ★母體交給 fixture 背（systems 裁）：用【取樣一個世界】去測【code 形狀】是類別錯誤。
-			#   ⇒ 世界段降級成【診斷】：只在 observe > 0 時紅，不再計【不可判】。
-			print("       （世界段沒走到這個寫入點；母體由 fixture 負責）")
-		else:
-			_ok(true, "%s：觀測路徑零寫入（母體 advance=%d）" % [f, adv])
-			_world_judged += 1
+	# ★以下【全部】依賴世界段的計數（cb）——世界段關掉時它們無法判，
+	#   ★不是判成 0，是【不判】：cb 為空時 adv/obs 都會是 0，而那跟「跑了都沒寫」長得一樣。
+	if world_on:
+		# ── 判準：觀測路徑的七個欄位一個都不准寫 ──────────────────
+		print("  ── 純讀路徑：七欄 advance / observe ──")
+		for f in FIELDS:
+			var adv: int = int(cb.get("gather.write.%s.advance" % f, 0))
+			var obs: int = int(cb.get("gather.write.%s.observe" % f, 0))
+			print("     %-28s advance=%-6d observe=%d" % [f, adv, obs])
+			if obs > 0:
+				_ok(false, "%s：觀測路徑寫了 %d 次（★寫了就是違規，跟母體無關）" % [f, obs])
+				_world_judged += 1
+			elif adv == 0:
+				# ★母體交給 fixture 背（systems 裁）：用【取樣一個世界】去測【code 形狀】是類別錯誤。
+				#   ⇒ 世界段降級成【診斷】：只在 observe > 0 時紅，不再計【不可判】。
+				print("       （世界段沒走到這個寫入點；母體由 fixture 負責）")
+			else:
+				_ok(true, "%s：觀測路徑零寫入（母體 advance=%d）" % [f, adv])
+				_world_judged += 1
 
-	# ── labor 那一支：兩條路各自要有 tap 點過，否則同樣是母體為空 ──
-	var ro: int = int(cb.get("labor.ensure_fresh.readonly", 0))
-	var co: int = int(cb.get("labor.compute_only", 0))
-	var sup: int = int(cb.get("labor.crisis_emit.suppressed", 0))
-	var cadv: int = int(cb.get("labor.crisis_emit.advance", 0))
-	print("  ── labor：readonly=%d compute_only=%d crisis_emit(advance=%d suppressed=%d) ──"
-		% [ro, co, cadv, sup])
-	_ok(ro > 0, "★母體：observe 路徑真的走過 LaborSystem.ensure_fresh（readonly > 0）")
+		# ── labor 那一支：兩條路各自要有 tap 點過，否則同樣是母體為空 ──
+		var ro: int = int(cb.get("labor.ensure_fresh.readonly", 0))
+		var co: int = int(cb.get("labor.compute_only", 0))
+		var sup: int = int(cb.get("labor.crisis_emit.suppressed", 0))
+		var cadv: int = int(cb.get("labor.crisis_emit.advance", 0))
+		print("  ── labor：readonly=%d compute_only=%d crisis_emit(advance=%d suppressed=%d) ──"
+			% [ro, co, cadv, sup])
+		_ok(ro > 0, "★母體：observe 路徑真的走過 LaborSystem.ensure_fresh（readonly > 0）")
 
 	# ── fp：只印，不判（見檔頭）──────────────────────────
-	print("  ── fp（★只印不判：B ≠ A 是已知未收口，不是回歸）──")
-	print("     A（不觀測）        fp = %s" % fp_a)
-	print("     B（每天 gather 全隊）fp = %s" % fp_b)
-	if fp_a == fp_b:
-		print("     ★相同 ⇒ 在這個窗口/config 下觀測沒有在 fp 上顯現")
-	else:
-		print("     ★★★不同 ⇒ 還有一條寫入路徑不在這七欄裡（fp 覆蓋 current_task/plan_phase/")
-		print("        unrest_turns/resources/goal_state ⇒ 兇手在那幾欄之一）")
+	if world_on:
+		print("  ── fp（★只印不判：B ≠ A 是已知未收口，不是回歸）──")
+		print("     A（不觀測）        fp = %s" % fp_a)
+		print("     B（每天 gather 全隊）fp = %s" % fp_b)
+		if fp_a == fp_b:
+			print("     ★相同 ⇒ 在這個窗口/config 下觀測沒有在 fp 上顯現")
+		else:
+			print("     ★★★不同 ⇒ 還有一條寫入路徑不在這七欄裡（fp 覆蓋 current_task/plan_phase/")
+			print("        unrest_turns/resources/goal_state ⇒ 兇手在那幾欄之一）")
 
 	if _unjudgeable > 0:
 		print("[GP] ★%d 欄不可判（母體為空）—— ★★這不算過" % _unjudgeable)
-	print("=== DONE === SECTIONS=%d/%d FAILS=%d 不可判=%d｜世界段判定=%d/%d（不進分母：隨世界變）" % [
-		_fixture_judged, FIELDS.size(), _fail, _unjudgeable, _world_judged, FIELDS.size()])
+	var world_col: String = ("%d/%d（不進分母：隨世界變）" % [_world_judged, FIELDS.size()]) if world_on 		else "已略過（GP_WORLD=1 才跑）"
+	print("=== DONE === SECTIONS=%d/%d FAILS=%d 不可判=%d｜世界段判定=%s" % [
+		_fixture_judged, FIELDS.size(), _fail, _unjudgeable, world_col])
 	quit()
 
 func _run_world(days: int, observe: bool) -> Array:
