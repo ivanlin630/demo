@@ -1,4 +1,7 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: GATE-A 二刀（home gate／productive／granary 主導）
+#   ★沒有接上任何閘（接不接電是 systems 的裁量，見 2026-09-09 handback）。
 
 # GATE-A 認自家食物源 TDD（spec 2026-07-23-gateA-recognize-productive-home）。
 # 根:harvest positional(採站的 tile),離 food-rich home 買糧→home regen 沒人採→餓死在 surplus 平原;
@@ -34,6 +37,8 @@ func _ctx(productive: bool, home_food: float, food_days: float) -> DecisionConte
 	c.has_home_outpost = true
 	c.home_food_productive = productive
 	c.home_food = home_food
+	# ★③票：門檻＝該隊 N 天口糧（pop 5 對齊 _mk_gather 的隊）——不是全域 10.0
+	c.home_restock_min = DecisionTerms.RETURN_HYSTERESIS_DAYS * 5.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	c.food_days = food_days
 	c.has_food_market = true; c.has_specie = true; c.has_buyable_food = true
 	c.is_merchant = false
@@ -78,8 +83,10 @@ func _test_forest_buyfood() -> void:
 # ③ granary 有量 + 非產糧 → restock_need granary_q 主導（非 productive floor）
 func _test_granary_stock_drives() -> void:
 	print("--- ③granary stock 主導 ---")
-	var c: DecisionContext = _ctx(false, 5.0, 2.0)   # home_food 5 = 半 RESTOCK_MIN、非產糧
-	_ok(is_equal_approx(DecisionTerms.eval("restock_need", c, "返家補給"), 0.5), "granary 5/10=0.5 granary_q 主導（非產糧無 floor，got %.2f）" % DecisionTerms.eval("restock_need", c, "返家補給"))
+	var c: DecisionContext = _ctx(false, 5.0, 2.0)   # home_food 5、非產糧
+	var _want: float = 5.0 / maxf(c.home_restock_min, 0.01)   # 測試自己算（同公式，不抄 code 的值）
+	_ok(is_equal_approx(DecisionTerms.eval("restock_need", c, "返家補給"), _want),
+		"granary 5/%.1f=%.3f granary_q 主導（非產糧無 floor，got %.3f）" % [c.home_restock_min, _want, DecisionTerms.eval("restock_need", c, "返家補給")])
 
 # ④ home_food_productive 算式（gather：plains 產糧 / forest 不產）
 func _test_productive_formula() -> void:

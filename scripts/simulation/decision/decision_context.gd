@@ -54,6 +54,10 @@ var idle_labor: float = 0.0          # 超現產能吸納的閒 PRODUCE 勞力�
 var idle_employ_value: float = 0.0   # 雇用閒勞力於待建 mfg 設施的真 need-weighted 期望產出（anti-crank：全因子從 manufacturing 真公式反推；只加建設 util）
 var is_merchant: bool = false
 var has_home_outpost: bool = false
+# ★家糧倉「值不值得回」的門檻（③票）：= RETURN_HYSTERESIS_DAYS × 這支隊自己的 burn。
+#   ★★舊版是全域 const 10.0 ——「10 食物」對 3 人隊是四天口糧、對 30 人隊不到半天，
+#   而它們用同一條線判斷家裡值不值得回。
+var home_restock_min: float = 0.0
 var current_task: String = ""   # ★GATE-A 二刀 touch0：team 自身 current_task（返家 hysteresis 用；自身欄非 god-view）
 var has_weak_prey: bool = false
 # capability grounding（藍圖 tag-soft-ruling 裁2）：self 有效武裝比（armed / pop）。
@@ -258,7 +262,11 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.leader_values = ldr.values.duplicate() if ldr != null else {}
 	c.desperation_entry_threshold = DecisionTerms.desperation_entry_threshold(c.leader_values)   # ★F1 靶A 單一計算點（5+ survival-entry applicable 共讀；HOW §2.5.1）
 	var ef: float = ResourceSystem.effective_food(state, team)
-	c.food_days = ef / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	# ★★★這支隊的日耗（單一計算點，2026-09-09 ③票）：food_days、home_food_productive、
+	#   home_restock_min 三處共用【同一個 _burn】——★三者問的是同一個物理量在不同時間點，
+	#   分開算才會 drift（血證：本票之前 :265 與家糧那段各算了一次同樣的東西）。
+	var _burn: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+	c.food_days = ef / maxf(_burn, 0.001)
 	c.population = team.population
 	c.is_subteam = team.parent_team_id != -1   # A2a：子隊旗（歸建 directive + 戰略-gate）
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
@@ -634,12 +642,16 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	# ★GATE-A：home_food_productive=家 outpost tile 食物再生≥燃燒率（產糧潛力，非只 granary stock）。
 	# ★感知鐵律 clean：自家 outpost terrain=自家知識，非 god-view 世界。
 	c.home_food_productive = false
+	# ★同一個 _burn（本函式開頭算的那個）餵這兩個門檻：出發前問「家裡的糧夠不夠撐 N 天」、
+	#   回家後問「撿了糧之後 food_days 有沒有到 N」——★除數是同一個 burn。
+	# ★N 不發明：RETURN_HYSTERESIS_DAYS 已經定義了「返家算不算完成」——
+	#   家裡的糧若連讓這支隊達到 food_days ≥ N 都做不到，那趟返家依定義達不成目標。
+	c.home_restock_min = DecisionTerms.RETURN_HYSTERESIS_DAYS * _burn
 	if c.has_home_outpost:
 		var _hp: Vector2i = _fa._find_own_outpost(state, team)
 		var _htile: HexTileData = state.world.tiles.get(_hp.x * 1000 + _hp.y)
 		if _htile != null:
 			var _regen: float = float(ResourceSystem.REGEN_RATE.get(_htile.terrain, {}).get("food", 0.0)) * _htile.harvest_factor
-			var _burn: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 			c.home_food_productive = _regen >= _burn
 	# Fix A 買糧 look-before-leap：隊「聽過」≤MERCHANT_MAX_RANGE 的 food 賣單才追買糧
 	# （received=team_known 物理在場/傳播，守感知鐵律；★不濾 stale=血訓 G1d/r3，撲空由 B/C 承接）。

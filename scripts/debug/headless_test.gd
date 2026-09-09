@@ -1,4 +1,7 @@
 extends SceneTree
+# @bed-kind: invariant
+#   接電方式＝走 .claude/hooks/headless-regression.sh（註冊表 `headless` 那一行），
+#   不是自己直接進表 —— 比對的是【失敗清單】不是數量。
 
 # population 為 getter（leader+named+anon）後，測試 setup 不能直設 population。
 # 此 helper 補/減 平民 healthy anon，使 getter 恰為 n（保留既有 tier/wounded 結構）。
@@ -2031,7 +2034,9 @@ func _test_term_normalize_t1() -> void:
 	ctx.food_days = 25.0
 	assert(is_equal_approx(_sp_a, DecisionTerms.eval("survival_pressure", ctx, "覓食")),
 		"覓食 base 不隨 food_days 變")
-	# restock_need(返家補給) = home_food/RESTOCK_MIN clamp[0,1]
+	# restock_need(返家補給) = home_food / home_restock_min clamp[0,1]
+	#   ★③票：門檻已是【這支隊自己的 N 天口糧】，不是全域 10.0
+	ctx.home_restock_min = DecisionTerms.RETURN_HYSTERESIS_DAYS * 10.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	ctx.home_food = 5.0
 	var rn := DecisionTerms.eval("restock_need", ctx, "返家補給")
 	assert(rn >= 0.0 and rn <= 1.0, "restock ∈[0,1]，got %f" % rn)
@@ -4976,7 +4981,7 @@ func _mk_forest_team(state: WorldState, pos: Vector2i, home_granary: float) -> T
 	t.resources = {"food": 5.0, "coin": 0.0, "goods": 0.0, "material": 300.0}
 	state.teams[0] = t
 	if not state.team_discovered.has(0): state.team_discovered[0] = []
-	# 遠端自家 outpost（forest 家）：granary 由參數控（0=空家、≥RESTOCK_MIN=有糧）
+	# 遠端自家 outpost（forest 家）：granary 由參數控（0=空家、≥home_restock_min=有糧）
 	var op := pos + Vector2i(2, 0)
 	var tile := HexTileData.new(); tile.tile_pos = op; tile.terrain = "forest"
 	tile.outpost_level = 1; tile.outpost_owner = 0
@@ -5004,11 +5009,11 @@ func _test_econ_empty_home_no_return() -> void:
 	# (觀察項1:安全隊 spurious FLEE?)。
 	assert(forester.current_task != TeamData.TASK_IDLE,
 		"[econ] forest 隊應產出行動(非 IDLE)，task=%s" % forester.current_task)  # organic-verified(T1)
-	# (b) 對照：家有糧(≥RESTOCK_MIN) → 返家補給 仍 applicable
+	# (b) 對照：家有糧(≥home_restock_min) → 返家補給 仍 applicable
 	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
 	var homed := _mk_forest_team(s2, Vector2i(2,2), 200.0)    # 家糧倉滿
 	var ctx2 := DecisionContext.gather(s2, homed)
-	assert(ctx2.home_food >= DecisionTerms.RESTOCK_MIN, "[econ] 對照家糧倉未滿 home_food=%.1f" % ctx2.home_food)
+	assert(ctx2.home_food >= ctx2.home_restock_min, "[econ] 對照家糧倉未滿 home_food=%.1f < 門檻 %.1f" % [ctx2.home_food, ctx2.home_restock_min])
 	assert("返家補給" in DecisionOptions.applicable(ctx2), "[econ] 家有糧竟不返(返家補給 被誤 gate)")
 	print("[econ] empty-home gate + material specie OK (空家task=%s)" % forester.current_task)
 
@@ -6745,7 +6750,7 @@ func _mk_homed_desperate_team(state: WorldState, pos: Vector2i, tags: Array, val
 	var op := pos + Vector2i(1, 0)
 	var tile := HexTileData.new(); tile.tile_pos = op
 	tile.outpost_level = 1; tile.outpost_owner = t.team_id
-	tile.public_storage = {"food": 200.0}   # 家糧倉有糧（≥RESTOCK_MIN）→ 返家補給 home-empty gate 過
+	tile.public_storage = {"food": 200.0}   # 家糧倉有糧（≥home_restock_min）→ 返家補給 home-empty gate 過
 	state.world.tiles[op.x * 1000 + op.y] = tile
 	return t
 
@@ -15619,7 +15624,7 @@ func _test_merchant_restock() -> void:
 
 	# 非商隊(生產隊)絕境(food<DESPERATION)有家 → 返家補給 applicable
 	# （P2b-1 generalize：保 non-unified 1037 熱路徑；任何有家隊絕境皆返家）
-	# 隊離家在外(5,5)+自帶糧空 → 絕境；遠端家糧倉滿(≥RESTOCK_MIN) → home-empty gate 過 → 返家補給。
+	# 隊離家在外(5,5)+自帶糧空 → 絕境；遠端家糧倉滿(≥home_restock_min) → home-empty gate 過 → 返家補給。
 	var s4 := WorldState.new(); s4.world = WorldData.new()
 	var p := TeamData.new(); p.team_id = 0; p.tags = [TeamData.TAG_PRODUCE]
 	p.tile_pos = Vector2i(5,5); p.leader_id = 100
@@ -15631,7 +15636,7 @@ func _test_merchant_restock() -> void:
 	var ctx4: DecisionContext = DecisionContext.gather(s4, p)
 	assert(ctx4.food_days < DecisionTerms.DESPERATION_DAYS and not ctx4.is_merchant, \
 		"前置:非商隊絕境 days=%.1f" % ctx4.food_days)
-	assert(ctx4.home_food >= DecisionTerms.RESTOCK_MIN, "前置:遠端家糧倉應滿 home_food=%.1f" % ctx4.home_food)
+	assert(ctx4.home_food >= ctx4.home_restock_min, "前置:遠端家糧倉應滿 home_food=%.1f < 門檻 %.1f" % [ctx4.home_food, ctx4.home_restock_min])
 	assert("返家補給" in DecisionOptions.applicable(ctx4), \
 		"非商隊絕境有家應返家補給(P2b-1 generalize 保熱路徑)")
 	# 非商隊輕飢(DESPERATION≤food<RESTOCK)有家 → 無返家補給(proactive 補給限商隊)
@@ -15655,8 +15660,17 @@ func _test_survival_magnitude() -> void:
 	c.food_days = 40.0
 	assert(is_equal_approx(_sm_a, DecisionTerms.eval("survival_pressure", c, "覓食")),
 		"T1:覓食 base 不隨 food_days 變（飢餓移 L_SURVIVAL coeff）")
-	c.home_food = 5.0
-	assert(abs(DecisionTerms.eval("restock_need", c, "返家補給") - 0.5) < 0.01, "T1:restock=home_food/RESTOCK_MIN(5/10)")
+	# ★③票：restock 門檻＝這支隊自己的 N 天口糧 ⇒ 這裡走【真團隊的 population】，
+	#   而門檻由測試【自己算一次】（同公式同常數，★不抄 code 算好的值）。
+	#   ★★home_food 刻意不取會湊出舊 0.5 的值——否則改對改錯都看不出來。
+	var _rt := TeamData.new()
+	_seed_pop(_rt, 12)
+	var _rmin: float = DecisionTerms.RETURN_HYSTERESIS_DAYS * float(_rt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+	c.home_restock_min = _rmin
+	c.home_food = 12.0
+	var _rwant: float = c.home_food / maxf(_rmin, 0.01)
+	assert(abs(DecisionTerms.eval("restock_need", c, "返家補給") - _rwant) < 0.001,
+		"T1:restock = home_food / (RETURN_HYSTERESIS_DAYS × pop×FOOD_PER_PERSON_PER_DAY)，want=%.4f 門檻=%.1f" % [_rwant, _rmin])
 	c.threat = 0.0; c.team_panic = 0.0
 	assert(DecisionTerms.eval("threat_pressure", c, "survival") == 0.0, "②無威脅→threat_pressure 0(撤 T1 0.6 floor)")
 
@@ -16213,7 +16227,7 @@ func _give_home_outpost(state: WorldState, team: TeamData, pos: Vector2i) -> voi
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	tile.outpost_level = 1
 	tile.outpost_owner = team.team_id
-	tile.public_storage = {"food": 200.0}   # 家糧倉有糧（≥RESTOCK_MIN）→ 返家補給 home-empty gate 過
+	tile.public_storage = {"food": 200.0}   # 家糧倉有糧（≥home_restock_min）→ 返家補給 home-empty gate 過
 
 # ════════ 投靠 vs 自立：★排序【由真實流量決定】的法條（systems 裁定 2026-08-21）════════
 #

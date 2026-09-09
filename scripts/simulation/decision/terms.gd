@@ -26,7 +26,9 @@ const BUYFOOD_DIST_FULL: float = 6.0    # TEST VALUE — 買糧旅費折扣基�
 #   ★★病：分子是【那支隊自己的缺口】，分母卻對所有隊都一樣 ⇒「缺 80 材料」
 #   對想蓋大設施的隊是小事、對只想補柵欄的隊是天大的事，而它們拿到同一個 drive。
 #   ⇒ 改成同一次 need_keep 呼叫的 `material_need_total`（見 decision_context）。
-const RESTOCK_MIN: float = 10.0         # TEST VALUE — 家糧倉至少這麼多 food 才值得返家補給（空家不返）
+# ★舊版：`const RESTOCK_MIN = 10.0`（TEST VALUE）——2026-09-09 刪，改用 ctx.home_restock_min
+#   （= RETURN_HYSTERESIS_DAYS × 該隊 burn，見 decision_context）。
+#   ★★注意 RESTOCK_DAYS（本檔 :3，商隊 proactive 返家的糧線）是【另一個東西】，沒有一起動。
 const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量即視為可換糧籌碼（forest/mountain 特產）
 # ── means-end 戰術層（2026-07-01）：intent → 子需求 → option 貢獻打分（mirror FACTION_DUTY_DRIVE）──
 const INTENT_FIT_DRIVE: float = 1.0     # TEST VALUE — T3 正規化：意圖反應量級→[0,1]（1.5→1.0）
@@ -132,7 +134,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "返家補給": return 0.0
 			# T1：剝 hunger urgency(移 coeff)，保機會品質——家糧倉越滿返家越值(空家不返)。
 			# ★GATE-A：產糧家即使 granary 空也 drive=1.0（回去採飽脫餓，非空 granary 低 drive 返不了）。
-			return maxf(clampf(ctx.home_food / RESTOCK_MIN, 0.0, 1.0), 1.0 if ctx.home_food_productive else 0.0)
+			return maxf(clampf(ctx.home_food / maxf(ctx.home_restock_min, 0.01), 0.0, 1.0), 1.0 if ctx.home_food_productive else 0.0)
 		"threat_pressure":
 			# ★threat-oracle S2（finding5 rewrite）：FLEE = 膽量秤(求生欲/1−好戰) × severity × (1−winnable)
 			#   + 恐慌加成（outlet:怯/絕境）。無威脅(threat=0)→0（食足隊不 spurious FLEE 餓死；panic 僅威脅時計）。

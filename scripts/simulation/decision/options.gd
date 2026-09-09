@@ -138,7 +138,7 @@ static var REGISTRY: Dictionary = {
 		"terms": [["restock_need", "survival_pressure"]],
 		# 商隊 proactive 補給：糧低於 RESTOCK 且有家可回 → 回家補 carried(避 survival latch)。
 		# P2b-1 generalize：任何有家隊絕境(food<DESPERATION)→回家(保 non-unified 1037 熱路徑)。
-		# 經濟底 home-empty gate：家糧倉 < RESTOCK_MIN（空家）→ 不 offer（返空家乾耗無意義）
+		# 經濟底 home-empty gate：家糧倉 < home_restock_min（＝該隊 N 天口糧；空家）→ 不 offer（返空家乾耗無意義）
 		#   → 讓 買糧/交易/覓食 接手（forest 隊賣特產換糧而非返空家）。
 		# ★GATE-A：home-empty gate 加 OR home_food_productive——產糧家即使 granary 空也值得返（回去採飽，
 		# 非空 granary trap）。harvest positional→離 food-rich home 買糧=home 沒人採→餓死 surplus 平原之修。
@@ -146,7 +146,7 @@ static var REGISTRY: Dictionary = {
 		# (返家途中 food 過 DESPERATION 3→option 消失→漂回 idle/trade→re-warn，days_left 卡 1.6-3.0 never 爬升)。
 		# band[3,5]:trigger 3 開始返家、途中撐到 food≥5 停 → 完成返家+到家 harvest 補到 5+ 才出門。
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.has_home_outpost and (ctx.home_food >= DecisionTerms.RESTOCK_MIN or ctx.home_food_productive) and ( \
+			return ctx.has_home_outpost and (ctx.home_food >= ctx.home_restock_min or ctx.home_food_productive) and ( \
 					(ctx.is_merchant and ctx.food_days < DecisionTerms.RESTOCK_DAYS) \
 					or ctx.food_days < ctx.desperation_entry_threshold \
 					or (ctx.current_task == TeamData.TASK_RETURN_HOME and ctx.food_days < DecisionTerms.RETURN_HYSTERESIS_DAYS)),

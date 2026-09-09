@@ -1,4 +1,7 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: GATE-A hysteresis（返家途中撐到 food≥N 才釋放，破 oscillation）
+#   ★同上，未接電。
 
 # GATE-A 二刀 返家閉環 hysteresis TDD（spec 2026-07-23-gateA-2nd-cut-return-hysteresis）。
 # 根:返家補給 applicable food_days<DESPERATION(3)→隊返家途中 food 過 3→option 消失→漂回 idle/trade→
@@ -30,7 +33,7 @@ func _ok(cond: bool, msg: String) -> void:
 func _ctx(task: String, food_days: float) -> DecisionContext:
 	var c := DecisionContext.new()
 	c.has_home_outpost = true
-	c.home_food_productive = true   # 過 home gate（home_food>=RESTOCK_MIN or productive）
+	c.home_food_productive = true   # 過 home gate（home_food>=home_restock_min or productive）
 	c.home_food = 0.0
 	c.current_task = task
 	c.food_days = food_days
