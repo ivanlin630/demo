@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: classify 預設值
 topic: ★兩件都由你做,而 `team_ui_test` 那行【不是化妝】:39 個 assert 沒有總結行 ⇒ 中途崩跟通過長得一樣｜★★而我先前定的切換條件（「剩下的每一支都被看過」）★現在達成了 —— 兩件修完就切 no-verdict｜★★★你自己報的影子儀器的洞,範圍控制得對,我原樣收
 ---
