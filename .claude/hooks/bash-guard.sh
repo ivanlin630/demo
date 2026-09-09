@@ -19,9 +19,30 @@ _cmd=$(printf '%s' "$_in" | grep -oE '"command"[[:space:]]*:[[:space:]]*"([^"\]|
 
 _warn=""
 
+# ★_cmd 是【從 JSON 撈出來的整段】（含前綴與結尾的引號）⇒ 先剝成純指令再判。
+#   ★★2026-09-10 血證：舊版 ① 的結尾錨是「空白／反斜線引號／行尾」三選一，
+#      而真實 payload 裡 git add -A 後面接的是【一個普通的引號】⇒ ★★★三個錨一個都不中
+#      ⇒ 最常見的寫法（-A 就是最後一個 token）從上線到今天【一次都沒被抓到】。
+#      —— 「守衛的母體排除了合法形狀」的又一例，而它是【成對對照】抓出來的。
+_bare=$(printf '%s' "$_cmd" | sed -E 's/^"command"[[:space:]]*:[[:space:]]*"//; s/"$//')
+
 # ① 全量 add
-if printf '%s' "$_cmd" | grep -qE 'git[[:space:]]+add[[:space:]]+(-A|--all|\.)([[:space:]]|\\"|$)'; then
-  _warn="⚠ 偵測到 git add -A / git add . —— ★共用 main working tree 禁全量 add：會把【別角色未 commit 的活】掃進你的 commit（provenance 錯亂，今日已實證一次）。請改成逐一列出你這輪真改的檔。"
+if printf '%s' "$_bare" | grep -qE 'git[[:space:]]+add[[:space:]]+(-A|--all|\.)([[:space:]]|$)'; then
+  _warn="⚠ 偵測到 git add -A / git add . —— ★共用 main working tree 禁全量 add：會把【別角色未 commit 的活】掃進你的 commit（provenance 錯亂，已實證多次）。請改成逐一列出你這輪真改的【檔名】。"
+fi
+
+# ①b ★★★目錄層級的 add（2026-09-10 補：同型事故當日第二次，而這一次是我自己）
+#   ★病歷：我把「別用 git add -A」的教訓改成了【逐一列出目錄】（git add docs/superpowers docs/process …）
+#     ⇒ implementer 的兩個新 tsv 剛好落在 docs/process/ ⇒ ★★被我的 commit f5f84c56 掃走。
+#   ★★★【收窄到目錄】不是解 —— 目錄仍然是一個【會裝進別人東西的容器】。
+#     真正的解是【逐檔】：git add <明列檔名>，或 git commit -- <明列檔名>。
+#   ★偵測法：add 的參數若不是旗標、且【不含副檔名】，當成目錄嫌疑（寧可誤報，warn-only 代價低）。
+if [ -z "$_warn" ]; then
+  _args=$(printf '%s' "$_bare" | sed -nE 's/.*git[[:space:]]+add[[:space:]]+([^;&|]*).*/\1/p' | tr ' ' '\n')
+  _dirish=$(printf '%s\n' "$_args" | grep -vE '^-|^$' | grep -vE '\.[A-Za-z0-9]+$' | head -6)
+  if [ -n "$_dirish" ]; then
+    _warn="⚠ 偵測到【目錄層級】的 git add（$(printf '%s' "$_dirish" | tr '\n' ' ')）—— ★目錄是一個【會裝進別人東西的容器】：共用 main dir 上，別角色剛落地的新檔會被一起掃走。★★血證 2026-09-10 同日兩次（blueprint e848dfef 掃走 implementer 7 檔／systems f5f84c56 掃走 implementer 2 個新 tsv）。★★★解是【逐檔】：git add <明列檔名> 或 git commit -- <明列檔名>，不是把 -A 收窄成目錄。"
+  fi
 fi
 
 # ② 起 Godot 但別人的 beacon 還在
