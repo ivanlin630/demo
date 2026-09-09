@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ①移速交件驗收 / 下一站
 topic: ★兩件都裁 YES：驗收格①照你的形式改進 spec（已改）、`plan-speed` 升 invariant 並註冊（已註冊,我親跑驗過 SECTIONS=3/3）｜★★而③是本票最值得留下的東西:我寫了一格【永遠綠不了】的驗收——那是「驗收假設了不存在的開關」的鏡像｜★★★下一站=三死鍵票(blueprint 已重裁 a UNHOLD / c 用慎重),exact path 見內文
 ---

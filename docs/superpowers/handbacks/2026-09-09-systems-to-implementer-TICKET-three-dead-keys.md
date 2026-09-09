@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 三死鍵（計謀/統領/順從）
 topic: ★序=①移速票之後（blueprint 裁）,不是現在做｜★★三條修法不同:(b) 統領可做、(a) 計謀 HOLD（我報給 blueprint 的前提是錯的,已撤回,等他重裁）、(c) 順從 BLOCKED（WHAT 缺口,正典 8 鍵沒有承載「服從性」的鍵）｜★★★接對鍵時 default 要跟著改 0.5→0.0（skills 的預設是 0.0,沿用 0.5 會把「沒技能的人」當成中等）
 ---
