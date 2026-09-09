@@ -4,7 +4,8 @@ extends SceneTree
 # ──────────────────────────────────────────────────────────────────────────
 # 和平經濟床 TDD — fixture-liveness 機械防死 fixture（HOW spec 2026-07-30 §7）。
 # ★t0 斷言（R² 教訓）：每 ①隊/③料窮側 NeedOracle.need_keep(material)>0（因果活，非 material≈0 但 need≡0 死路）
-#   + ①隊有 unowned forest tile 在 SEEK_TILE_RANGE 內（founding 靶存在）。否則 FAIL 拒開工。
+#   + ①隊有 unowned forest tile 在【該隊自己的 seek 半徑】內（founding 靶存在）。否則 FAIL 拒開工。
+#     ★批二①：半徑從全域 30 改成 SEEK_DAYS × 該隊 tiles/day ⇒ 這條前置也逐隊問。
 # + config 載入 sanity（GameSetup.setup 無錯、~12 隊、有 unowned forest tile）。
 # 純讀+斷言、零 RNG、零 sim 改。
 
@@ -57,7 +58,7 @@ func _initialize() -> void:
 		else:
 			_bad("T%d need_keep(material)=0 = 因果死路（material≈0 但 need≡0；outpost=%s；apothecary/farming deficit<DESIRE_MIN?）拒開工" % [tid, str(own)])
 
-	# ★①founding 隊 unowned forest 靶在 SEEK_TILE_RANGE 內、非腳下
+	# ★①founding 隊 unowned forest 靶在【該隊自己的】seek 半徑內、非腳下
 	for tid in FOUNDING_TEAMS:
 		var team: TeamData = state.teams.get(tid)
 		if team == null: continue
@@ -68,10 +69,12 @@ func _initialize() -> void:
 				continue
 			if t.tile_pos == team.tile_pos:
 				continue
-			if fai._hex_dist(team.tile_pos, t.tile_pos) <= GoalResolver.SEEK_TILE_RANGE:
+			if fai._hex_dist(team.tile_pos, t.tile_pos) <= GoalResolver.seek_range_tiles(state, team):
 				found = true; break
 		if found:
-			_ok("T%d 有 unowned forest 靶在 SEEK_TILE_RANGE(%d) 內" % [tid, GoalResolver.SEEK_TILE_RANGE])
+			_ok("T%d 有 unowned forest 靶在 seek 半徑(%d 格＝該隊 %.2f tiles/day × %.0f 天) 內" % [
+				tid, GoalResolver.seek_range_tiles(state, team),
+				GoalResolver.seek_range_tiles(state, team) / GoalResolver.SEEK_DAYS, GoalResolver.SEEK_DAYS])
 		else:
 			_bad("T%d 無 unowned forest 靶在 seek 內 = founding 因果死路 拒開工" % tid)
 

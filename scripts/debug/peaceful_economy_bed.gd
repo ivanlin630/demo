@@ -164,7 +164,8 @@ func _has_unowned_forest_in_seek(state: WorldState, team: TeamData, fai: Faction
 		var t: HexTileData = state.world.tiles[wtid]
 		if t.terrain != "forest" or t.outpost_owner != -1 or t.tile_pos == team.tile_pos:
 			continue
-		if fai._hex_dist(team.tile_pos, t.tile_pos) <= GoalResolver.SEEK_TILE_RANGE:
+		# ★批二①：seek 半徑改成逐隊（SEEK_DAYS × 該隊 tiles/day）⇒ 這裡也要問【那支隊自己的】半徑
+		if fai._hex_dist(team.tile_pos, t.tile_pos) <= GoalResolver.seek_range_tiles(state, team):
 			return true
 	return false
 

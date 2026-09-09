@@ -613,7 +613,27 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 		{"facility": f, "target": own_tile.tile_pos})
 
 # ★S2/S3 資源型前置 resolution：未滿→取得 candidate（S2 買 / S3 採@地形定位）。
-const SEEK_TILE_RANGE: int = 30   # TEST VALUE — belief-reachable 上界（bounded seek，非全知 PathSystem live）
+# ★舊版：`const SEEK_TILE_RANGE = 30`（TEST VALUE）——2026-09-09 刪。
+#   ★★病：「能去多遠找地形」對所有隊都是同一個 30，而真速度逐隊差 6 倍
+#   （2.00 vs 12.10 tiles/day，批一① 卷面）⇒ 慢隊被允許規劃它走不到的距離。
+# ★SEEK_DAYS 是【設計選擇】留成參數；7.0 的來歷【不是發明】：
+#   中性隊實測 4.20 tiles/day，30 ÷ 4.20 ≈ 7.1 ⇒ 取 7.0
+#   ⇒ ★★中性隊幾乎不動、快慢隊分開 ⇒ 本票是【差異化】不是【全域收緊】。
+# ★★★人格化（膽大探得遠）本票不做 —— defer token `seek-days-personality`：
+#   一次只動一個變因，否則量到的差異分不出是【限制生效】還是【人格分化】。
+const SEEK_DAYS: float = 7.0
+
+# ★★★單一計算點（批二①）：`tiles_per_day` 在本檔【只算這一次】。
+#   ★用批一① 抽好的 static 核心（`move_cost_pure`），不重算一份物理——
+#   「估算器禁手抄物理」，而批一① 正是為此把核心抽成 static。
+#   ★★單位鐵則：`move_cost_pure` 回的是【每格 tick 成本】⇒ TICKS_PER_DAY / cost 才是【格/天】。
+static func _tiles_per_day(state: WorldState, team: TeamData) -> float:
+	return float(WorldState.TICKS_PER_DAY) / float(maxi(MovementSystem.move_cost_pure(state, team, 1.0, null), 1))
+
+# ★這支隊「七天走得到」的格數。★地板 1：被 clamp 到最慢的隊【仍要看得到隔壁格】——
+#   否則本票把【慢】變成【瞎】，而那是新的病不是修好的舊病。
+static func seek_range_tiles(state: WorldState, team: TeamData) -> int:
+	return maxi(int(round(SEEK_DAYS * _tiles_per_day(state, team))), 1)
 # ★★「哪種地形產哪種資源」的【唯一真相源】＝ `ResourceSystem.REGEN_RATE`（2026-08-25）。
 #   ★手抄本 `RES_HARVEST_TERRAIN = {"material": "forest"}` 已刪 —— 它與真相源【直接矛盾】：
 #   表說 food 不可採，而 REGEN_RATE 裡【三種地形全都產 food】，且 plains 的 food(8.0)
@@ -700,7 +720,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		var best_pos: Vector2i = Vector2i(-1, -1)
 		var best_v: float = -1.0
 		for tc in terr_cands:
-			var p: Vector2i = find_nearest_terrain_tile(state, team, String(tc["terrain"]), SEEK_TILE_RANGE)   # 純地形=公共地理
+			var p: Vector2i = find_nearest_terrain_tile(state, team, String(tc["terrain"]), seek_range_tiles(state, team))   # 純地形=公共地理
 			if p == Vector2i(-1, -1) or p == team.tile_pos:
 				continue
 			var delay: float = float(FactionAISystem._hex_dist(team.tile_pos, p)) / FactionAISystem.FOOD_BRIDGE_MOVE_PER_DAY
@@ -948,7 +968,7 @@ static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: Dec
 		pos = find_nearest_known_tile(state, team, terrain)
 	else:
 		# (i) 純地形/物理地理 → 公共知識全圖掃（# gate-ok）
-		pos = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)
+		pos = find_nearest_terrain_tile(state, team, terrain, seek_range_tiles(state, team))
 	if pos == Vector2i(-1, -1):
 		return {}
 	return _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
@@ -1049,12 +1069,8 @@ static func _estimate_delay_days(state: WorldState, team: TeamData, to_task: Dic
 	var days: float = 0.0
 	var target = to_task.get("target", Vector2i(-1, -1))
 	if team != null and target is Vector2i and target != Vector2i(-1, -1) and target != team.tile_pos:
-		# 決策路徑：bumps 傳 null ⇒ 不碰 `rootdiff.*`（那三格的語意是【執行端走了幾格】）
-		# ★沒有 state 就【不要有 fallback】：一個安靜的 2.0 會變成第二份物理，
-		#   而它壞掉的樣子跟正常一模一樣 ⇒ 寧可讓它在 null 上大聲炸。
-		var cost: int = MovementSystem.move_cost_pure(state, team, 1.0, null)
-		var tiles_per_day: float = float(WorldState.TICKS_PER_DAY) / float(maxi(cost, 1))
-		days += float(FactionAISystem._hex_dist(team.tile_pos, target)) / maxf(tiles_per_day, 0.01)   # ★perf cut1 A：static（免 per-candidate .new() alloc）
+		# 決策路徑走【單一計算點】`_tiles_per_day`（批二① 起兩個消費者共用：ETA 與 seek 半徑）
+		days += float(FactionAISystem._hex_dist(team.tile_pos, target)) / maxf(_tiles_per_day(state, team), 0.01)   # ★perf cut1 A：static（免 per-candidate .new() alloc）
 	var task: String = String(to_task.get("task", ""))
 	# ★A1:founding(build_type)/facility 委派亦含 build 工期（雖不發 TASK_BUILD，仍派子隊施工）。
 	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE \
