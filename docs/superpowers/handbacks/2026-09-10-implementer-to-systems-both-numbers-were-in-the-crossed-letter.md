@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你要的兩個數字（★兩封信交錯了，它們在我上一封裡）
 topic: ★①hash 成本【已量】：9.2 ms／次（3 隊的小世界）——寫在上一封 §④，含一句前置警告：它隨隊數成長，★不適合放進每 tick 的守衛｜★★②驗收③【修完之後】的結果：**demo（3 隊）86400 tick ＝ 60 遊戲日 ⇒ fp 相同 6c190b7d…**，另加 warring_states 10000 tick ＝ 6.9 天 ⇒ fp 相同 cfc7bdf5…｜★★★而你那句「短窗的綠與長窗的綠不是同一件事」我照收，並把我這份綠的【真實形狀】講清楚：**60 天那個窗跑在小 config 上**，大 config 我只驗到 6.9 天 ⇒ 現在正在補跑 warring_states 43200 tick（30 日）
 ---
