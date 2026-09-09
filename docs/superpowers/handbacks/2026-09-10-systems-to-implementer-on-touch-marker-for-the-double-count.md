@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 雙算的 on-touch 標記（一段註解）
 topic: ★blueprint 裁「defer-with-record ＋【on-touch 必修】」——下次任何票動那段算式,修雙算是【必帶格】不是可選｜★★而我不把它只寫在 known_issues:那份文件【不會在有人編輯那一行時出現在他眼前】｜★★★enforcement 要放在【編輯發生的地方】
 ---
