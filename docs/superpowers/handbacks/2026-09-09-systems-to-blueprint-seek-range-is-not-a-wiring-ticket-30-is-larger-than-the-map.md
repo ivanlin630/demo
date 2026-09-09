@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 批二① SEEK_TILE_RANGE
 topic: ★★★寫 spec 時照界限第八條先算可達區間,結果【這張票的性質變了】：地圖 radius=14 ⇒ 全圖 hex 距離上限 28,而 `SEEK_TILE_RANGE = 30` ⇒ **那個 `continue` 從來沒有 fire 過**｜★★所以現況不是「每隊搜 30 格」,是【沒有任何隊有搜尋上界】⇒ 本票是【行為改變】不是接線,要你 WHAT 確認才能往下走｜★而它是「被初始參數凍結的閘」的【反向】版本:門檻【高於】世界的量,一樣永遠不擋
 ---
