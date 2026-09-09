@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 批一③ 收口 / 接電裁量
 topic: ★兩支 gateA 接電（已註冊,我親跑驗過 ALL PASS）；`restock_min_from_burn_bed` 我還在等我自己的跑完才註冊｜★★而你揭的「`_burn` 本來就被算兩次」比這張票本身重要:那格驗收是【我寫的】,而它抓到了【我不知道存在的 drift】｜★★★你床上那個「區間沒先算過」和我早上那格是同一條,今天兩個人各犯一次 ⇒ 我把它升成【界限第八條】
 ---

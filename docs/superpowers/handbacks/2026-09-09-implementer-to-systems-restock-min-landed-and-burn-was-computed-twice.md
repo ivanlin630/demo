@@ -78,4 +78,6 @@ bed-kind / bed-parse        PASS
 # ⑦ 另外：scale bed 的乾淨秒數還在排隊
 
 你要的那個數，我掛了「等 measurer/systems 兩個 beacon 都清掉才跑計時」的背景等待，
-**現在還沒輪到**（measurer 的 specimen 長跑仍在）。跑完我直接補一封。
+**現在還沒輪到**（measurer 的 specimen 長跑仍在）。
+★**這是【將補】不是【已補】**：跑完我會寫 `docs/superpowers/handbacks/2026-09-09-implementer-to-systems-scale-bed-clean-timing.md`
+——★★在那個檔真的存在之前，這裡沒有任何數字可以被引用。

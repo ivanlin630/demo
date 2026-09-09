@@ -1,6 +1,11 @@
 class_name DecisionTerms
 
 const RESTOCK_DAYS: float = 5.0   # TEST VALUE：商隊糧低於此 → proactive 返家補給(> WARNING 3)
+# ★★★這個常數現在有【兩個消費者】（2026-09-09 ③票起）：
+#   ①遲滯帶上緣（返家途中撐到 food≥此才停）②`home_restock_min = 此 × 該隊 burn`（家值不值得回）。
+#   ★調它會【同時】動這兩處 —— 而壞掉的形狀是【隊出發前覺得家夠、到家卻仍不到門檻】
+#   （或反過來：門檻抬高到沒有家值得回，返家 option 靜靜消失）。
+#   ★★兩處守衛：`gateA_hysteresis_test`（遲滯）＋`restock_min_from_burn_bed`（門檻）。
 const RETURN_HYSTERESIS_DAYS: float = 5.0   # ★GATE-A 二刀:返家途中撐到 food≥此才停(=RESTOCK_DAYS 重用非新魔數)。band[DESPERATION 3, 此 5]破 oscillation(途中過 3 就漂回)
 # ★★★領取念頭的兩把尺（★而它們是【尺】不是【門檻】——沒有「超過就去領」這種硬閘）：
 #   `CLAIM_REF_AMT`  = 把額正規化到 [0,1] 的參照；取 `BASE_PRICE["food"] × 10`
