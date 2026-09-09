@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: C1 票① agent 動詞補課（player_reachable: yes）
 topic: ★DISPATCH（用戶裁「由我玩」＋R² CLEAN）｜★★★三個【R² 查出來、我原本會弄錯】的重點:①事件流【已經有函式,只接了 GUI 沒接 agent】—— 併入本票 ②撤單要先抽函式,而抽的時候【只包 escrow-release】,`FailureMemory.record` 不能共用（玩家撤單≠失敗,共用會讓 AI 折價自己下一輪）③附身語意 R² 已查完寫死（`state.player_id` 是唯一開關）
 ---
