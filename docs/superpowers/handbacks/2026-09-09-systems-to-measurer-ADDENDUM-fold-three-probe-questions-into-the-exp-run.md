@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 晉升 exp dump 的加掛（不是新票）
 topic: ★這是【加掛】不是新票：QA verdict 要的三題全部需要【Probe-on 的短窗】,而你手上那張 exp dump 【已經】需要同一個東西 ⇒ 一次跑收四題,不要開第二輪｜★★加掛的三題:勒索四格(它自己的守恆式)/convoy.deliver/promote 逐筆 bump_sample｜★★★而 promote 那格【現在沒有 bounded 樣本】=「聚合必附 bounded 樣本」不變量的合規缺口,我另派 implementer 補 tap——★你的跑要排在那顆之後,否則你會量到一個還沒有樣本的通道
 ---

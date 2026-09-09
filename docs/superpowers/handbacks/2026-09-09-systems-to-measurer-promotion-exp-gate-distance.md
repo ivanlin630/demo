@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 晉升 exp 閘的「門檻 vs 可達量」距離
 topic: ★這張要量【兩件事】不是一件:存量(exp 有多少) ＋ ★★流量(exp 從哪來、有沒有來)——只量存量會得到「大家 exp 都很低」,而那句話【分不出】「累積中但還沒到」與「根本沒有任何來源」｜★★★我的頭號嫌犯是 `training_system.gd:19 if tact <= 0.0: continue`,而①那一格就是為了【殺掉或坐實】它——若戰術普遍 >0,我的假說就錯了,答案會在④
 ---

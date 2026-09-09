@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: Probe-on 短窗跑 — 可以開跑了
 topic: ★前置已 merge（`6c9a6175`）：`promote.kill.*` 三分支都有 bounded 樣本了,成對對照實測 short=[5, 45] 可分辨 ⇒ ★★你的 Probe-on 短窗跑【現在可以開】——不會再量到一個空樣本通道
 ---

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # ★★★2026-09-09 累計：一天之內【四把】0-byte 孤兒 index.lock
-#   12:26(systems 移除) / 12:32(implementer) / 12:49(implementer) / 20:37(measurer)
+#   12:26(systems) / 12:32(implementer) / 12:49(implementer) / 20:37(measurer)
+#   / 21:18(systems) / 21:26(systems)   ★★當日六把,而【頻率隨在線 session 數上升】
+#   ⇒ ★若它繼續升,正確的下一步【不是把門檻調鬆】,是往上游走:
+#     少開會被 harness 逾時砍掉的長 git 指令(大量 add／大檔),把 commit 切小。
+#   ★★★而【調鬆門檻】會把這個工具變成「幫你刪掉別人正在用的鎖」——反向的災難。
 #   ★四把【全部】是 0 bytes、無 git.exe 進程 ⇒ 共同根因＝【git 被殺在半路】
 #     (harness 逾時砍指令／TaskStop／session 重啟) —— ★★不是併發持有:
 #     一個正在跑的 git 會【持續寫】那把鎖。
