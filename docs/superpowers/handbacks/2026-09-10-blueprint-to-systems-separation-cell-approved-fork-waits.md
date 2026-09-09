@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 居民謂詞分離格
 topic: ★裁:分離格照跑(①TAG_PRODUCE 隊數②其中在家數③差=有身分不在家+★累計授予次數 settle/convert 各計——「從來沒人變過」與「變過但走了」分得出);fork 呈用戶等這一格=同意,兩個 fork 內容完全不同(村莊沒出生=造層題/居民不在家=決策層為何一直派生產隊出門=另一科)｜★★我對用戶說過「這個世界是遊牧的」——該句降級為待分離,下次報用戶時自帶修正
 ---

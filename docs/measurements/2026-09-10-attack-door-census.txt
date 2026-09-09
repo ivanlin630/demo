@@ -7005,3 +7005,872 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
 [Sub] Team31 派出子隊 Team114 leader=P144 advisors=[] (pop=2 cap=7 task=運輸)
 [Convoy] Team31 派運輸子隊 Team114 送 food×1 → demand 市場(11,16)
 [SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 投靠 (併入)
+[Merge] Team31 ← Team110 完全合併 (pop=6)
+[Ambition] Team80 rung 1→0 (定居 cap=3)
+[Ambition] Team104 rung 0→1 (武力 cap=4)
+[SurvivalCamp] team=Team114 → 紮營 @(1,18)
+[Survival] Team114 urgent days_left=0.6 運輸→紮營
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Equip] Team104 裝備 melee_low ×1
+[Equip] Team112 裝備 melee_low ×1
+[Equip] Team113 裝備 melee_low ×1
+[Move] Team 43 抵達 (18,3)
+[Market] Team43 <-> Team22 巧遇成交
+[Market] Team114 <-> Team62 巧遇成交
+[SoloAI] Team1 → 建設 (建設)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team20 → 迎戰 (迎戰)
+[SoloAI] Team21 → 建設 (建設)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team63 → 迎戰 (迎戰)
+[Ambition] Team43 rung 0→1 (商業 cap=2)
+[Ambition] Team111 rung 0→1 (商業 cap=3)
+[SurvivalMergeIn] team=Team114 → 併入 Team6
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Tick 25200] Person 144 (member/team114) → P1_comply | stress=0.00 loyalty=0.72
+[Move] Team 15 抵達 (24,14)
+[Move] Team 44 抵達 (17,12)
+[Move] Team 51 抵達 (19,11)
+[Move] Team 63 抵達 (18,3)
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[Extort] Team31 勒索 Team114，Team114 妥協給付
+[SoloAI] Team1 → 建設 (建設)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team21 → 建設 (建設)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team44 → 建設 (建設)
+[Settle] Team51 安頓於 (19,11) 變居民
+[SoloAI] Team62 → 迎戰 (迎戰)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Equip] Team66 裝備 melee_low ×1
+[Move] Team 111 抵達 (2,20)
+[Extort] Team31 勒索 Team114，Team114 妥協給付
+[Salary] Team27 減薪 58%（本地無幣，不計懲罰）
+[Salary] Team27 薪水結算 coin=0.0
+[SoloAI] Team1 → 建設 (建設)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team21 → 建設 (建設)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team41 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 迎戰 (迎戰)
+[Order] Team111 buy weapon_melee_low ×1 (oid=789)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 3 抵達 (21,4)
+[Move] Team 34 抵達 (5,15)
+[Move] Team 36 抵達 (18,18)
+[Move] Team 73 抵達 (10,19)
+[Extort] Team31 勒索 Team62，Team62 妥協給付
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[Extort] Team31 勒索 Team114，Team114 妥協給付
+[Salary] Team16 薪水結算 coin=309.2
+[SoloAI] Team1 → 建設 (建設)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team21 → 建設 (建設)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 迎戰 (迎戰)
+[SubAI] Team73 引擎→覓食 (覓食)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 21 抵達 (24,0)
+[Move] Team 35 抵達 (26,5)
+[Move] Team 38 抵達 (19,11)
+[Move] Team 104 抵達 (10,6)
+[Move] Team 112 抵達 (10,6)
+[Move] Team 113 抵達 (10,6)
+[Market@(19, 11)] Team38  outpost owner Team17 成交
+[Extort] Team31 勒索 Team114，Team114 妥協給付
+[Salary] Team92 薪水結算 coin=88.2
+[SoloAI] Team1 → 建設 (建設)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team20 → 迎戰 (迎戰)
+[SoloAI] Team21 → 建設 (建設)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team33 → 貿易 (maintain_tools:resource)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 76 抵達 (24,0)
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[Market] Team112 <-> Team104 巧遇成交
+[Market] Team113 <-> Team104 巧遇成交
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team21 → 建設 (建設)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team37 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SurvivalForage] team=Team77 pop=1 → 覓食 @(24,0)
+[Survival] Team77 warning days_left=3.0 貿易→覓食
+[SurvivalLoot] team=Team104 → 掠 Team113
+[Survival] Team104 warning days_left=2.9 貿易→掠奪
+[Order] Team114 sell material ×2 (oid=790)
+[Order] Team114 buy weapon_melee_low ×1 (oid=791)
+[Order] Team114 buy food ×2 (oid=792)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 4 抵達 (12,18)
+[Combat Start] Team104 vs Team20
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team21 → 建設 (建設)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team42 → 貿易 (maintain_food:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[Order] Team63 buy weapon_melee_low ×1 (oid=793)
+[SurvivalForage] team=Team77 pop=1 → 覓食 @(24,0)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 19 抵達 (8,6)
+[Move] Team 28 抵達 (22,12)
+[Move] Team 45 抵達 (3,23)
+[Exhaust] Team104 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person48 left_leg: healthy → wounded
+[Hit] Person48 left_arm: healthy → wounded
+[Pursuit] Team20 追擊 Team104 +2傷亡 (straggler_kill=2)
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[Extort] Team104 勒索 Team112，Team112 妥協給付
+[Extort] Team104 勒索 Team113，Team113 妥協給付
+[Salary] Team89 薪水結算 coin=0.0
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team21 → 建設 (建設)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[Order] Team18 buy food ×15 (oid=794)
+[Ambition] Team21 rung 0→1 (武力 cap=4)
+[SurvivalForage] team=Team77 pop=1 → 覓食 @(24,0)
+[Order] Team104 buy weapon_melee_low ×1 (oid=795)
+[Order] Team112 sell material ×2 (oid=796)
+[Order] Team113 sell material ×2 (oid=797)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 0 抵達 (2,21)
+[Move] Team 1 抵達 (19,9)
+[Move] Team 50 抵達 (14,20)
+[Move] Team 77 抵達 (24,0)
+[Move] Team 108 抵達 (24,0)
+[Diplomacy] Team77 + Team21 建國 → 勢力9（leader=Team21）
+[Diplomacy] Team77 與 Team21 結盟
+[Envoy] Team92 提案送達 Team77 → accept（發起 Team21）
+[Combat Start] Team104 vs Team20
+[Salary] Team63 薪水結算 coin=139.7
+[Salary] Team84 薪水結算 coin=307.7
+[Faction] 立國：勢力9（leader=Team21，2 teams）
+[Site] 選址 (22, 7) score=567 周邊資源={ "ore_silver": 81, "herb": 20, "ore_iron": 161 } terrain=mountain
+[Site] Faction9 派工失敗: 資源不足 1.27x: material 有 23(公庫0+私23) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team39 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Merge] Team21 ← Team92 完全合併 (pop=8)
+[Merge] Team21 ← Team93 完全合併 (pop=9)
+[Ambition] Team21 rung 1→2 (武力 cap=4)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Equip] Team21 裝備 melee_low ×1
+[Move] Team 32 抵達 (10,25)
+[Move] Team 47 抵達 (16,17)
+[Move] Team 53 抵達 (26,7)
+[Move] Team 80 抵達 (19,11)
+[Exhaust] Team104 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person48 torso: healthy → wounded
+[Hit] Person48 right_leg: healthy → wounded
+[Pursuit] Team20 追擊 Team104 +2傷亡 (straggler_kill=2)
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[Market] Team71 <-> Team77 巧遇成交
+[Extort] Team104 勒索 Team112，Team112 妥協給付
+[Extort] Team104 勒索 Team113，Team113 妥協給付
+[Salary] Team14 薪水結算 coin=3011.1
+[SoloAI] Team14 → 覓食 (覓食)
+[Sub] Team20 派出子隊 Team115 leader=P145 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team20 派運輸子隊 Team115 送 material×21 → demand 市場(10,5)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team37 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[SurvivalCamp] team=Team115 → 紮營 @(10,7)
+[Survival] Team115 warning days_left=2.2 運輸→紮營
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 2 抵達 (12,12)
+[Move] Team 14 抵達 (15,9)
+[Move] Team 46 抵達 (15,19)
+[Combat Start] Team104 vs Team20
+[Tribute] Team21 徵收 Team77 rate=0.05
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[SoloAI] Team37 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team62 → 迎戰 (迎戰)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Ambition] Team20 rung 0→1 (武力 cap=4)
+[Ambition] Team21 rung 2→3 (武力 cap=4)
+[Order] Team108 buy food ×1 (oid=798)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 首要目標: expand target=76
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Tick 25800] Person 145 (member/team115) → P1_comply | stress=0.00 loyalty=0.58
+[Exhaust] Team104 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person47 right_leg: healthy → wounded
+[Hit] Person48 head: healthy → wounded
+[Pursuit] Team20 追擊 Team104 +2傷亡 (straggler_kill=2)
+[Combat Start] Team21 vs Team71
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[Market] Team112 <-> Team37 巧遇成交
+[Extort] Team104 勒索 Team112，Team112 妥協給付
+[Market] Team113 <-> Team37 巧遇成交
+[Extort] Team104 勒索 Team113，Team113 妥協給付
+[Salary] Team33 薪水結算 coin=540.2
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team37 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Order] Team2 sell material ×42 (oid=799)
+[Order] Team20 sell material ×4 (oid=800)
+[Ambition] Team104 rung 1→0 (武力 cap=4)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Tick 25860] Person 1 (member/team62) → P4_expand | stress=0.20 loyalty=0.05
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=5 known=70
+[Move] Team 43 抵達 (18,3)
+[Move] Team 97 抵達 (19,3)
+[Move] Team 112 抵達 (11,5)
+[Move] Team 113 抵達 (11,5)
+[Exhaust] Team71 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person131 left_leg: healthy → wounded
+[Pursuit] Team21 追擊 Team71 +1傷亡 (straggler_kill=1)
+[Combat Start] Team104 vs Team20
+[Combat Start] Team21 vs Team76
+[SoloAI] Team4 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 逃跑 (survival)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team37 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[TickPerf] day=18 avg=103652 us max=8826416 us ticks=1440 teams=83 factions=10
+[Move] Team 44 抵達 (17,12)
+[Exhaust] Team104 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person48 torso: healthy → wounded
+[Hit] Person48 left_leg: healthy → wounded
+[Pursuit] Team20 追擊 Team104 +2傷亡 (straggler_kill=2)
+[Exhaust] Team76 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person9 torso: healthy → wounded
+[Pursuit] Team21 追擊 Team76 +1傷亡 (straggler_kill=1)
+[Combat Start] Team21 vs Team71
+[Salary] Team2 薪水結算 coin=1022.7
+[Salary] Team26 薪水結算 coin=1486.5
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team19 → 建設 (建設)
+[SoloAI] Team28 → 建設 (建設)
+[SoloAI] Team31 → 逃跑 (survival)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team45 → 建設 (建設)
+[SoloAI] Team62 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[SubAI] Team115 引擎→貿易 (maintain_food:resource)
+[Residency] Team17 邀請 Team37 安頓 outpost (23,1)
+[Order] Team21 sell material ×24 (oid=801)
+[Residency] Team38 邀請 Team44 安頓 outpost (12,17)
+[Residency] Team41 邀請 Team55 安頓 outpost (16,9)
+[Survival] Team104 warning days_left=2.3 掠奪→idle
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Equip] Team66 裝備 melee_low ×1
+[Move] Team 17 抵達 (10,5)
+[Move] Team 20 抵達 (9,7)
+[Move] Team 41 抵達 (19,8)
+[Move] Team 108 抵達 (24,0)
+[Exhaust] Team71 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person131 torso: healthy → wounded
+[Pursuit] Team21 追擊 Team71 +1傷亡 (straggler_kill=1)
+[Combat Start] Team21 vs Team76
+[Market] Team104 <-> Team115 巧遇成交
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 8(公庫1+私7) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 逃跑 (survival)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Ambition] Team17 rung 0→1 (商業 cap=3)
+[Order] Team17 sell food ×854 (oid=802)
+[Ambition] Team71 rung 1→0 (商業 cap=3)
+[SurvivalLoot] team=Team104 → 掠 Team17
+[Survival] Team104 warning days_left=2.4 貿易→掠奪
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Reaction] Person146 離團自立流亡 Team116 at (26,0)
+[Tick 26040] Person 146 (leader/team116) → N1_flee | stress=0.15 loyalty=0.37
+[Move] Team 3 抵達 (21,4)
+[Move] Team 34 抵達 (5,15)
+[Move] Team 36 抵達 (18,18)
+[Move] Team 73 抵達 (10,19)
+[Move] Team 115 抵達 (10,5)
+[Market@(10, 5)] Team115  outpost owner Team17 成交
+[Exhaust] Team76 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person9 right_arm: healthy → wounded
+[Pursuit] Team21 追擊 Team76 +1傷亡 (straggler_kill=1)
+[Combat Start] Team21 vs Team71
+[Extort] Team26 勒索 Team116，Team116 妥協給付
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team37 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team47 → 建設 (建設)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[SoloAI] Team116 → 乞食 (乞食)
+[Ambition] Team67 rung 0→1 (商業 cap=2)
+[Survival] Team76 warning days_left=2.1 迎戰→乞食
+[Survival] Team104 warning days_left=2.6 掠奪→idle
+[Ambition] Team115 rung 0→1 (商業 cap=3)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Tick 26100] Person 146 (leader/team116) → P4_expand | stress=0.10 loyalty=0.37
+[Move] Team 33 抵達 (26,7)
+[Move] Team 38 抵達 (19,11)
+[Move] Team 104 抵達 (10,5)
+[Move] Team 113 抵達 (11,5)
+[Market@(10, 5)] Team104  outpost owner Team17 成交
+[Exhaust] Team71 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person131 right_leg: healthy → wounded
+[Pursuit] Team21 追擊 Team71 +1傷亡 (straggler_kill=1)
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[Salary] Team12 薪水結算 coin=111.8
+[Salary] Team34 薪水結算 coin=682.1
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 11(公庫4+私7) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 逃跑 (survival)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[SoloAI] Team116 → 外交 (求和)
+[Survival] Team76 warning days_left=2.1 迎戰→乞食
+[Ambition] Team104 rung 0→1 (武力 cap=4)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Tick 26160] Person 146 (leader/team116) → P1_comply | stress=0.05 loyalty=0.38
+[Move] Team 75 抵達 (24,0)
+[Move] Team 112 抵達 (11,5)
+[Combat Start] Team21 vs Team71
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 逃跑 (survival)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[SoloAI] Team116 → 迎戰 (迎戰)
+[Survival] Team76 warning days_left=2.1 迎戰→乞食
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 42 抵達 (9,24)
+[Exhaust] Team71 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person131 right_leg: healthy → wounded
+[Pursuit] Team21 追擊 Team71 +1傷亡 (straggler_kill=1)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Survival] Team76 warning days_left=2.2 迎戰→乞食
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 76 抵達 (24,0)
+[Move] Team 108 抵達 (24,0)
+[Move] Team 114 抵達 (4,17)
+[Combat Start] Team21 vs Team71
+[Extort] Team26 勒索 Team116，Team116 妥協給付
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 逃跑 (survival)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[SubAI] Team114 引擎→逃跑 (survival)
+[Survival] Team76 warning days_left=2.2 idle→乞食
+[Ambition] Team114 rung 0→1 (商業 cap=3)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction1 首要目標: defend target=114
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 39 抵達 (18,18)
+[Move] Team 50 抵達 (13,20)
+[Move] Team 62 抵達 (2,20)
+[Move] Team 77 抵達 (23,0)
+[Exhaust] Team71 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person131 head: healthy → wounded
+[Pursuit] Team21 追擊 Team71 +1傷亡 (straggler_kill=1)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team41 → 貿易 (maintain_food:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Survival] Team76 warning days_left=2.3 idle→乞食
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 32 抵達 (10,25)
+[Move] Team 37 抵達 (10,5)
+[Move] Team 53 抵達 (26,7)
+[Move] Team 80 抵達 (19,11)
+[Move] Team 113 抵達 (11,5)
+[Move] Team 116 抵達 (27,0)
+[Market@(10, 5)] Team37  outpost owner Team17 成交
+[Combat Start] Team21 vs Team71
+[Extort] Team31 勒索 Team111，Team111 妥協給付
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team27 → 覓食 (覓食)
+[SoloAI] Team31 → 掠奪 (掠奪)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team37 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[SoloAI] Team116 → 迎戰 (迎戰)
+[Merge] Team31 ← Team111 完全合併 (pop=8)
+[Survival] Team76 warning days_left=2.3 idle→乞食
+[SurvivalLoot] team=Team104 → 掠 Team113
+[Survival] Team104 warning days_left=2.9 貿易→掠奪
+[Ambition] Team116 rung 0→1 (商業 cap=2)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 14 抵達 (15,9)
+[Move] Team 35 抵達 (26,5)
+[Exhaust] Team71 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person131 torso: healthy → wounded
+[Pursuit] Team21 追擊 Team71 +1傷亡 (straggler_kill=1)
+[Salary] Team67 薪水結算 coin=0.7
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 逃跑 (survival)
+[SoloAI] Team33 → 貿易 (maintain_tools:resource)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 乞食 (乞食)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Survival] Team76 warning days_left=2.4 idle→乞食
+[Survival] Team104 warning days_left=2.9 掠奪→idle
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 71 抵達 (24,0)
+[Move] Team 104 抵達 (10,5)
+[Combat Start] Team21 vs Team75
+[Salary] Team66 薪水結算 coin=159.6
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team31 → 逃跑 (survival)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 乞食 (乞食)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Order] Team39 sell material ×3 (oid=803)
+[Survival] Team76 warning days_left=2.4 idle→乞食
+[SurvivalLoot] team=Team104 → 掠 Team113
+[Survival] Team104 warning days_left=2.8 idle→掠奪
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 4 抵達 (12,18)
+[Move] Team 31 抵達 (2,21)
+[Move] Team 43 抵達 (18,3)
+[Move] Team 97 抵達 (21,1)
+[Move] Team 108 抵達 (24,0)
+[Exhaust] Team75 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person133 left_arm: healthy → wounded
+[Pursuit] Team21 追擊 Team75 +1傷亡 (straggler_kill=1)
+[Salary] Team29 薪水結算 coin=1807.8
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team37 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team42 → 覓食 (遷移找糧)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team71 → 乞食 (乞食)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Ambition] Team31 rung 0→1 (商業 cap=2)
+[Order] Team71 buy food ×1 (oid=804)
+[Survival] Team76 warning days_left=2.4 idle→乞食
+[Survival] Team104 warning days_left=2.8 掠奪→idle
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 19 抵達 (8,6)
+[Move] Team 28 抵達 (22,12)
+[Move] Team 44 抵達 (17,12)
+[Move] Team 45 抵達 (3,23)
+[Combat Start] Team21 vs Team75
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team62 → 外交 (求和)
+[SoloAI] Team71 → 乞食 (乞食)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Ambition] Team23 rung 4→3 (武力 cap=4)
+[Survival] Team76 warning days_left=2.5 idle→乞食
+[SurvivalLoot] team=Team104 → 掠 Team113
+[Survival] Team104 warning days_left=2.8 貿易→掠奪
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction3 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Exhaust] Team75 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person133 head: healthy → wounded
+[Pursuit] Team21 追擊 Team75 +1傷亡 (straggler_kill=1)
+[Salary] Team7 薪水結算 coin=678.6
+[Salary] Team37 薪水結算 coin=678.0
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 7(公庫0+私7) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team39 → return_home (返家補給)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team63 → 迎戰 (迎戰)
+[SoloAI] Team71 → 乞食 (乞食)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Survival] Team104 warning days_left=2.7 掠奪→idle
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction3 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 3 抵達 (21,4)
+[Move] Team 34 抵達 (5,15)
+[Move] Team 36 抵達 (18,18)
+[Move] Team 47 抵達 (16,17)
+[Move] Team 73 抵達 (10,19)
+[Move] Team 113 抵達 (10,6)
+[Move] Team 116 抵達 (27,0)
+[Merge] Team4 ← Team100 完全合併 (pop=9)
+[Market] Team113 <-> Team115 巧遇成交
+[Combat Start] Team21 vs Team75
+[Salary] Team11 薪水結算 coin=547.8
+[Salary] Team98 薪水結算 coin=97.7
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team4 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team20 → 迎戰 (迎戰)
+[SoloAI] Team27 → 覓食 (覓食)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team63 → 迎戰 (迎戰)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[SurvivalLoot] team=Team104 → 掠 Team17
+[Survival] Team104 warning days_left=2.7 貿易→掠奪
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction3 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 38 抵達 (19,11)
+[Move] Team 46 抵達 (15,19)
+[Exhaust] Team75 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person133 right_arm: healthy → wounded
+[Pursuit] Team21 追擊 Team75 +1傷亡 (straggler_kill=1)
+[Merge] Team20 ← Team115 完全合併 (pop=7)
+[Salary] Team47 薪水結算 coin=717.4
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team20 → 迎戰 (迎戰)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team35 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team63 → 迎戰 (迎戰)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Ambition] Team23 rung 3→2 (武力 cap=4)
+[Survival] Team104 warning days_left=2.6 掠奪→idle
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction3 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction6 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 108 抵達 (24,0)
+[Combat Start] Team21 vs Team71
+[Salary] Team35 薪水結算 coin=551.9
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team19 → 建設 (建設)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team63 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Ambition] Team75 rung 0→1 (定居 cap=3)
+[SurvivalLoot] team=Team104 → 掠 Team17
+[Survival] Team104 warning days_left=2.6 貿易→掠奪
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction3 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Exhaust] Team71 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person131 head: healthy → wounded
+[Pursuit] Team21 追擊 Team71 +1傷亡 (straggler_kill=1)
+[Barter] Team76 93xfood <-> Team21 12xmaterial
+[Barter] Team76 12xmaterial <-> Team21 12xfood
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team63 → 迎戰 (迎戰)
+[SoloAI] Team71 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Survival] Team104 warning days_left=2.6 掠奪→idle
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction3 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 76 抵達 (24,0)
+[Combat Start] Team21 vs Team71
+[Salary] Team20 薪水結算 coin=764.6
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team28 → 建設 (建設)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team45 → 建設 (建設)
+[SoloAI] Team63 → 迎戰 (迎戰)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Ambition] Team23 rung 2→1 (武力 cap=4)
+[SurvivalLoot] team=Team104 → 掠 Team17
+[Survival] Team104 warning days_left=2.5 貿易→掠奪
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction3 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[StrategicAI] Faction9 受威脅，尋求結盟
+[Move] Team 41 抵達 (19,8)
+[Move] Team 50 抵達 (14,20)
+[Move] Team 62 抵達 (3,19)
+[Move] Team 75 抵達 (24,0)
+[Move] Team 77 抵達 (23,1)
+[Move] Team 97 抵達 (22,0)
+[Market@(23, 1)] Team77  outpost owner Team17 成交
+[Exhaust] Team71 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person131 torso: healthy → wounded
+[Pursuit] Team21 追擊 Team71 +1傷亡 (straggler_kill=1)
+[Barter] Team76 93xfood <-> Team21 11xmaterial
+[Barter] Team76 11xmaterial <-> Team21 11xfood
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team63 → 迎戰 (迎戰)
+[SoloAI] Team71 → 乞食 (乞食)
+[SoloAI] Team75 → 迎戰 (迎戰)
+[SubAI] Team77 引擎→攻擊 (攻擊)
+[SoloAI] Team108 → 迎戰 (迎戰)
+[Survival] Team104 warning days_left=2.5 掠奪→idle
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction3 受威脅，尋求結盟
+[StrategicAI] Faction4 受威脅，尋求結盟
+[StrategicAI] Faction7 受威脅，尋求結盟
+[Move] Team 13 抵達 (13,15)
+[Move] Team 27 抵達 (26,1)
+[Move] Team 32 抵達 (10,25)
+[Move] Team 37 抵達 (10,5)
+[Move] Team 53 抵達 (26,7)
+[Move] Team 80 抵達 (19,11)
+[Combat Start] Team21 vs Team75
+[Salary] Team23 薪水結算 coin=369.8
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team34 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (maintain_tools:resource)
+[SoloAI] Team43 → 建設 (建設)
