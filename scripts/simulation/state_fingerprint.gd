@@ -77,7 +77,39 @@ static func compute(state: WorldState) -> String:
 	_emit_belief(state, buf)
 	_emit_tiles(state, buf)
 	_emit_world(state, buf)
+	_emit_player(state, buf)
 	return "\n".join(buf).md5_text()
+
+# ★★★哨兵（HOW spec 2026-09-10）：player_* 進 canon 【不是】因為玩家會影響 sim，
+#   而是因為【sim 不該碰 player_*】—— 兩顆【無玩家】的 seeded 跑若在這一段上分岔，
+#   ⇒ ★有系統在沒有玩家的世界裡寫了玩家欄（或更兇：在那條路上耗掉全域 RNG）。
+#   ★★精確版（不是字面版）：sim 可以【對玩家說話】，但【只在有玩家的時候】
+#     —— 字面版會讓 player_forced_event／player_alerts 不能存在，遊戲玩不成。
+#   ★★★它看到的粒度：頂層 10 個 player_* 欄位；Dictionary 走【鍵排序後的鍵＋值】、
+#     Array 走整個 str() —— 所以 player_state 這種 dict 的【內部鍵】看得到，
+#     而巢狀第二層以下只走 str()：形狀變了看得到，浮點細節不保證。
+static func _emit_player(state: WorldState, buf: PackedStringArray) -> void:
+	buf.append("P|id=%d|possess_prev=%d|fe_id=%s" % [
+		state.player_id, state.player_possess_prev, state.player_forced_event_id])
+	buf.append("P|hostile=%s" % str(state.player_hostile_teams))
+	buf.append("P|pending_targets=%s" % str(state.player_pending_targets))
+	buf.append("P|alerts=%d" % state.player_alerts.size())
+	for pair in [["state", state.player_state], ["forced_event", state.player_forced_event],
+			["pending_orders", state.player_pending_orders], ["pre_encounter", state.player_pre_encounter]]:
+		var d: Dictionary = pair[1]
+		var ks: Array = d.keys()
+		ks.sort()
+		var parts: PackedStringArray = PackedStringArray()
+		for k in ks:
+			parts.append("%s=%s" % [str(k), str(d[k])])
+		buf.append("P|%s{%s}" % [String(pair[0]), ",".join(parts)])
+
+# ★給床用：只取 player_* 那一段（★「fp 相同」與「player 段相同」是兩個不同的斷言，
+#   ★★而哨兵要的是後者 —— 前者可能因為世界別處也一起變而說不清楚）。
+static func player_section(state: WorldState) -> String:
+	var buf: PackedStringArray = PackedStringArray()
+	_emit_player(state, buf)
+	return "\n".join(buf)
 
 # 逐域 fingerprint（除錯/假覆蓋檢：驗某域欄位在 27 筆真有變化非死值）。
 static func compute_domains(state: WorldState) -> Dictionary:
