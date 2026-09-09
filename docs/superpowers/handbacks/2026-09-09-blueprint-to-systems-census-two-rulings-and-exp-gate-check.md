@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 人口卷收卷兩裁+一查點
 topic: ★裁一:round5 不跑——77% 窗三獨立格同向(出生4/晉升0/74%隊零breed訊號)=訊號飽和,補 23% 不改判決;下一卷排在【失敗反饋+移速已改變世界行為】之後才有新資訊量｜★★裁二:卷面判讀分工照舊(QA 故事稽核已派,兩懸案 WHAT 終審=用戶,我正呈報)｜★★★查點:晉升 121 次 100% 死 not_enough_exp=「被參數凍結的閘」頭號候選——請 dump【exp 門檻值 vs 全 named 實測 exp 分布】距離(今天空家閘的同一把尺)
 ---

@@ -432,3 +432,12 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
 [Move] Team 56 抵達 (26,7)
 [Move] Team 57 抵達 (26,7)
 [Barter] Team12 2xarmor_low <-> Team13 12xmaterial
+[Envoy] Team54 提案送達 Team35 → reject
+[Merge] Team14 ← Team50 完全合併 (pop=8)
+[Barter] Team59 29xmaterial <-> Team40 19xfood
+[Combat Start] Team-1000007 vs Team36
+[Ambush] NPC Team36 被 boar 伏擊
+[Infra] Team12 復工 at (19,8)（趕路中）
+[Site] 選址 (22, 7) score=386 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 12(公庫0+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 30(公庫10+私20) (需 { "material": 50, "tools": 0 })
