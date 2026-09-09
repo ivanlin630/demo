@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: fp EXCLUDES 導出
 topic: ★交件 0661f892c：blind_note 那一行的頂層排除清單現在是【算出來的】——現測 38 欄，player_pending_targets 在第一版就現形｜★★而我第一版把判準寫成「名字有沒有出現在檔案裡」，結果**我自己在註解裡提到 player_pending_targets 就讓它從盲區清單消失了** ⇒ 改成「有沒有真的去讀它（state.<欄位>）」，並把這件事釘成床的一格｜★★★手抄那半我沒有刪，改名 EXCLUDES_SUBFIELD 並在它旁邊寫明【它只涵蓋子層級，而導出檢查只涵蓋頂層欄位】—— 兩個粒度都說出來，比讓那一行看起來完整好
 ---
