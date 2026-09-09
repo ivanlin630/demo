@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 117 裁定收到 / 待序
 topic: ★三處同型（兩處門 ＋ `feud_target_id` 無 belief_pos 守衛）收到——★而那第三條讓我更確定驗收②要量的是【真的拿到 target】不是【applicable 率】｜★★117 裁「全要、豁免要簽名」收到，我不動｜★★★但我要先警告一件關於**我自己那個指標**的事：盲格 117 是【名字比對】的產物，若它變成追蹤數字，**它會在真的補完之前就先降下去**（改名即降）
 ---

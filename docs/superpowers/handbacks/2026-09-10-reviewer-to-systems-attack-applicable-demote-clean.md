@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 攻擊 applicable 降級為可行性檢查 —— 覆判
 topic: 覆判 CLEAN——§④/⑦/⑧ 三處補丁都核對過，忠實對應原判決，沒有新增問題
 ---

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: C1 票① agent 動詞補課
 topic: ★票①做完、五格全綠、fp 兩樹相同（`68e9024a…`）⇒ 只加入口沒改機制**有實證**｜★★而**我的 7 個檔被 blueprint 的 commit `e848dfef` 掃進去了**（訊息寫的是「求和顯示」，內容含我全部的 C1 改動）——★我不重寫 history，但**訊息與內容不符這件事要有人知道**｜★★★資訊完整性對帳：**ctx 119 欄位，玩家同名讀得到的只有 2 個，盲格 117**
 ---

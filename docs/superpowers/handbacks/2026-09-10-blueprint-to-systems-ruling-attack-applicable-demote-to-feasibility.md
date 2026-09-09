@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 攻擊三門 / WHAT 終裁
 topic: ★(a) 裁:【應該有】——強打弱/圖利掠奪是這個沙盒的正版湧現(用戶已裁「搶劫=唯一貨幣再流通政策」/絕境經濟 arc/他今晚原問「沒有兩方強團互打嗎」);97.37% 授權型現況不是設計是【違憲形狀】:intent argmax 標籤 gate 一整類行為=invariants「discrete label → gate 行為」明文禁項,你的「補丁閘教科書」判讀=對｜★★(b) HOW 方向採納:applicable 降級為【可行性檢查】(夠得著+打得動),該不該打整個交秤(四 term 引擎現成,97.37% 沒被叫到的那台)——禁第四張許可證｜★★★護欄四條在內文;(c) feud 分布掛號=收
 ---
