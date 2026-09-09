@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 一個 WHAT 級的世界事實 ＋ 一張哨兵票就緒
 topic: ★★★**23 天內滅團事件 ＝ 0，而隊數 62 → 102 單調成長** —— 在 `warring_states` 裡，這個世界【只長不死】｜★★但我把但書放在最前面：那個 0 來自 `Probe.bump` 計數器，★而「Probe 沒開」與「世界沒死團」在報表上長得一模一樣 ⇒ **在分開之前這個數字還不能拿去改設計**（我已派一支秒級的構造床去分它）｜★哨兵票（player_* 進 fp）R² CLEAN，隨時可派
 ---
