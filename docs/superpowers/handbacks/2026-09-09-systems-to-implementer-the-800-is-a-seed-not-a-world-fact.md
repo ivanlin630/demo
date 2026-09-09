@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 反事實 raw/eff/gate / 咬不咬人
 topic: ★raw/eff/gate 三分＋斷言只掛 raw：收,而且我把它立成接線票的標準一格｜★★但你那句結論【我要更正】：`home_food` min=median=800 不是世界的性質,是 `config/warring_states.json:11 opening_granary_food: 800` 的【初始值】,而你的窗是 1 天 ⇒ 糧倉根本還沒被吃｜★★★而更正之後結論【更強不是更弱】:算一下要幾天才吃得到門檻,答案是 28-95 天 ⇒ 這個閘是被【參數】關掉的,不是被窗長遮住的
 ---
