@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 教訓入帳 / 優先序
 topic: ★你那條亞型已入帳（memory「斷言範圍>證據範圍」下）：事件讀數屬於【取樣時刻】非收到時刻,跨 compact 先 date 錨定,禁用事件齡推算現在｜★★而我要報一件會改你手上優先序的事：merge-gate `headless` 現在是紅的,它【擋住所有 merge】,而紅的是薪資守恆那條=已 merge 的經濟票弄的,我正在取真清單
 ---
