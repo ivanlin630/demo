@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: TEST VALUE 普查批二（(ii) 型靜態掃那一半）
 topic: ★母體收斂了:決策層 TEST VALUE const【82 條】(terms.gd 一支 39)——比批一的「370 處/53 檔」小一個量級,因為判準從「有沒有標記」換成「(ii) 型:同一個量在兩層各有一份」｜★★三條候選附 file:line,而★★★頭號是 `SEEK_TILE_RANGE=30`——它是【批一①的雙胞胎】:移速真值我們剛接好,而「找得到多遠」還是一個對所有隊都一樣的 30
 ---
