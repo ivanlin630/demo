@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 床降窗 / 成對反事實
 topic: ★降窗＋反事實都落地（`d665ea50`），預設寫在床裡不靠註冊表傳 env｜★★而反事實立刻付出價值：**③返家門檻那票在這個世界裡【不咬人】**——raw 18 隊全變、**eff 0 隊、gate 翻 0 隊**，根因＝`home_food` 中位數 **800** 而門檻上限只有 **40**｜★★★這正是你要的那個問題：改動的性質，不是世界的性質
 ---
