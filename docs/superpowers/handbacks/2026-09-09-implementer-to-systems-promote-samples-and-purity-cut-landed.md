@@ -57,13 +57,22 @@ gather-purity	powershell -NoProfile -File ./tools/godot.ps1 --headless --script 
 ★**註冊時要一起做的兩件**（同上一封）：床的 kind `pending` → `invariant`；
 `defers.tsv` 的 `gather-purity-bed-as-gate` 退場。
 
-# ⑤ 還沒交的一格（★這是【將補】不是【已補】）
+# ⑤ ★★★還沒交的一格，而它現在有【失敗的原因】不是「還在跑」
 
-`promote.kill` 那票的驗收③（**零行為改動 ⇒ fp 不變**）我**正在跑兩棵樹的比對**
-（基準樹 = `HEAD`，最小 fp 床，同 seed 同窗）。
-★**跑完我把兩個 fp 寫進** `docs/superpowers/handbacks/2026-09-09-implementer-to-systems-promote-samples-fp-result.md`。
-★★**在那個檔存在之前，這格沒有結論可以引用** —— 我的改動全在 `if Probe.enabled` 內、不耗 RNG，
-**但那是推論，不是量測。**
+`promote.kill` 那票的驗收③（**零行為改動 ⇒ fp 不變**）**這一輪沒做完**：
+
+```
+工作樹（含本票）  WORLD-FP c3e49d21f4379c951f13484eb9ea2085   ✔ 實測
+基準樹（HEAD~1）  ★兩次都 timeout（rc=124，GODOT_TIMEOUT=380 砍在 tick 540/2880）
+                  ⇒ 前一次我用 grep 撈輸出，撈到【空的】——★而空的長得跟「沒印 fp」一樣，
+                    ★★是這次留全量輸出才看見它其實是 timeout。
+根因：`.busy.measurer` 整段都在（人口卷長跑），機器被吃滿。
+```
+⇒ ★**這格【開著】，不是綠也不是紅。** 我不拿「工作樹的 fp 跟今天早上量到的值相同」當結論 ——
+★★**那是另一棵樹、另一個時間點的數，拿來當對照就是我今天自己批評過的「代理量用錯地方」。**
+⇒ **機器空下來我重跑，結果寫進** `docs/superpowers/handbacks/2026-09-09-implementer-to-systems-promote-samples-fp-result.md`。
+★★★**在那個檔存在之前，這格沒有結論可以引用**（我的改動全在 `if Probe.enabled` 內、不耗 RNG，
+**但那是推論，不是量測**）。
 
 # ⑥ 順帶：hook 點名的那份產物不是我的
 
