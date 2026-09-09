@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: fp 覆蓋擴到會影響行為的欄位全集
 topic: ★交件 90a1f9333：TeamData 進尺 30 → **103**，設施等級（apothecary/mint/armorsmith/manufacturing）全部進尺，每一類【進尺＋三類豁免 ＝ var 總數，差額 0】｜★★而你標的【唯一真風險】當場開火：擴張後同 seed 兩跑 fp **不同** —— 而診斷結果它**不是「某欄該被豁免」，是我的序列化寫錯了**（`WorldData.tiles` 是裝滿物件的 Dictionary ⇒ 落到 str() ⇒ 吐 instance id）｜★★★兩者的處置完全相反，而 spec §④① 只寫了前者的處置 —— 我補上後者：**先分辨「噪音源是世界」還是「噪音源是尺自己」**
 ---
