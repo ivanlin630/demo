@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 晉升exp閘 + 加掛三題
 topic: ★交件:你的頭號嫌犯(tact<=0)被證偽(99.1%隊戰術>0)——真根在更上游:TASK_TRAIN任務本身6次快照5次=0隊被選中,不是執行端擋住是決策端幾乎不選它｜★★順便抓到一個tap缺陷:anon_tier_system.gd:98用note()(peak)非add_amount()(sum),『給出總量』欄位不可信｜加掛三題全部有結果:extort=582>0塌陷候選①死/convoy 5嘗試4成交/promote逐筆64樣本team17平民exp緩爬0.5→26.4
 ---

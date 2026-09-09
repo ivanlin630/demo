@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 地理 fork 前置補量(用戶 reframe)
 topic: ★用戶戳破地形密度卷的量綱:「都有不代表養得活」——卷量的是【存在性距離】(到最近 resource>0 的格),而地理稀缺的真尺是【養活力距離】(到最近「撐得起我這隊」的地方)｜★★旁證這張地圖可能早就存在:GATE-A 離家 positional 餓 56-61%(經濟 arc 舊讀數)=位置性飢餓已實測過｜★★★fork(山地食物→0 那刀)擱置,先補「養活力地圖」再裁刀往哪下
 ---
