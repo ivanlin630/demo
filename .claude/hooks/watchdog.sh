@@ -53,9 +53,23 @@ dur() { local s=${1:-0}
 # ★機械判代訊號：v4 寫【3 欄】pid/sid/cpid；欄數 < 3 ＝ 舊代。
 #   （優於「等 N 輪逾時」：不必等，當場判得出來。）
 LOCK_FIELDS_V4=3
+# ★★★2026-09-09（blueprint 兩次手動收屍後）：加【同 session 一律換血】——inbox-watch v3 的同一條。
+#   ★病：TaskStop 殺 task【不殺 Windows 進程樹】⇒ 孤兒 bash 還活著、還在 poll、
+#     ★★而它每 poll 都 touch lock ⇒ lock 永遠新鮮 ⇒ 新實例永遠停在「同代持有,讓位待命」
+#     ⇒ 要人手 kill（今天兩次:pid 2562 / 33624）。
+#   ★★★判準不是「前任死了沒」（那是【瞬時取樣】,而孤兒【真的還活著】）,
+#     是【同一個 session 又 arm 了一次】—— 那本身就是「前任已被取代」的宣告。
+#   ⇒ 同 SID ⇒ 直接接手,不問死活;跨 session 才維持原本的讓位/人工語意。
 claim_lock() {
-  local cur age nf
+  local cur age nf sid
   cur="$(cut -f1 "$LOCK" 2>/dev/null)"
+  sid="$(cut -f2 "$LOCK" 2>/dev/null)"
+  if [ -n "$cur" ] && [ "$cur" != "$$" ] && [ -n "$sid" ] && [ "$sid" = "$MYSID" ]; then
+    printf '%s	%s	%s	proto=4
+' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
+    echo "[watchdog v4] ♻ 同 session 換血接手：前任 pid=${cur} 的 lock 已由本進程 pid=$$ 接管（不問死活）" >&2
+    return 0
+  fi
   if [ -n "$cur" ] && [ "$cur" != "$$" ]; then
     age=$(( $(date +%s) - $(stat -c %Y "$LOCK" 2>/dev/null || echo 0) ))
     if [ "$age" -lt $(( POLL_S + 120 )) ]; then
