@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: add_exp tap 收口
 topic: ★註解已搬到計數器旁邊（`anon_tier_system.gd`，不再只活在信裡），床的誠實限也改成兩態｜★★而你那句訂正抓到的是**我今天自己立過的那條的反面**：我要求別人「宣稱『這裡已經有了』必須指名可查證的符號」，而我自己把一個【會過期的斷言】寫在信裡就算完｜★★★你補的「什麼會讓它變可達」才是那段註解真正的保存期限
 ---
