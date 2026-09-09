@@ -68,3 +68,58 @@ owner: systems ｜ 2026-09-10 ｜ 觸發：implementer 的技術債清單第一�
     （今天已經學過：誠實限要跟它描述的東西住在一起）。
 ③不改 hash 內容、不碰 EphemeralStateHash。
 ```
+---
+
+## ⑤ ★★★R² 回件（2026-09-10）：兩格要補，而**兩格都是「同一個病往上再修一層」**
+
+★**先記一件事**：R² 這次讀的是**已經寫好的實作**（`state_fingerprint.gd`），不是只有 spec
+⇒ 他驗到的是【真的】不是【打算】。
+
+### (1) ★母體沒有第 6 類，**但 `SUBFIELD_MAP` 自己是同一個病**
+
+```
+compute() 現在呼叫 7 支 _emit_*（比我以為的 6 支多一支 _emit_player —— ★上一張票剛落地的）
+而 SUBFIELD_MAP 只列 5 類。另外兩支【被排除是對的】：
+  _emit_belief  讀 state.team_discovered／team_intel ⇒ ★裸 Dictionary，沒有 class_name 背書
+  _emit_player  讀 player_* 頂層 ＋ 幾個裸 Dictionary ⇒ ★沒有獨立的 PlayerData class
+⇒ get_script_property_list 對未型別化的 Dictionary【天生不適用】⇒ 不是漏，是不適用。
+```
+
+★★**而真正的洞在 `SUBFIELD_MAP`（:72-78）本身**：
+
+```
+它是一個【手寫的 5 列 Array】，把「哪支 _emit_* 對應哪個 class」又手抄了一次。
+⇒ ★若未來有人加第 8 支 _emit_*（例如 _emit_outpost 讀 OutpostData），
+   **沒有任何機制會發現 SUBFIELD_MAP 沒有跟著加一行**
+   ⇒ ★★★**這正是本票要根治的那個病，只是換了個容器。**
+⇒ **要求**：SUBFIELD_MAP 的【行集】本身也要導出 ——
+   `grep 本檔全部 "static func _emit_"` × SUBFIELD_MAP 登記的函式名 ⇒ **差集具名紅**
+   （已知例外 `_emit_belief`／`_emit_player` 要【明確標註】「序列化裸 Dictionary，子層級不適用」）
+   ⇒ ★這樣「SUBFIELD_MAP 少一列」也會變成【有人決定的】而不是【沒人想過的】。
+```
+
+### (2) ★過濾風險：**不是我怕的那種**，乾淨
+
+```
+①呼叫的是 `get_script_property_list()` 而不是 `get_property_list()`
+  ⇒ ★只回【這支腳本自己宣告】的屬性，天生不含 Node/Object 內建欄位
+  ⇒ ★★**這個選擇本身就避開了我怕的那個過濾陷阱**（不需要自創過濾條件）。
+②`usage & PROPERTY_USAGE_SCRIPT_VARIABLE` ⇒ ★★★**是 Godot 引擎自己貼的旗標**，
+  不是作者自創的判斷條件 ⇒ 與今天別處「作者自己想出一個過濾條件」不是同一類風險。
+```
+
+### (3) ★★★判準沒有退化成「名字在檔案裡」，**但它現在是【巧合】安全**
+
+```
+現況判準：`body.contains("." + n)`，且 `_emit_body` 用 "static func" 邊界切出【該支函式本體】
+⇒ ★已經比「名字在整個檔案裡出現過」嚴格得多（有 `.` 前綴、有函式邊界）。
+★★**但它沒有綁定【哪一個變數】** —— 函式體內【任何】變數的 `.欄位名` 出現過就算。
+   現有 5 支每支只宣告一個型別相符的物件變數（`_emit_teams` 只有 `t: TeamData`…）
+   ⇒ ★★★**所以現在的結果是對的，而那是【巧合】，不是機制保證的。**
+   ⇒ 若某支為了別的理由多宣告第二個變數，而它剛好有同名欄位
+     （`tile_pos`／`faction_id`／`team_id` 這種橫跨多個 class 的常見名）⇒ **誤判成「讀過了」**。
+⇒ **要求**：判準收緊成【函式一開頭宣告的那個目標型別變數】的 `.欄位名`
+   （抓出 `var t: TeamData = …` 的變數名再組 `"<變數名>.<欄位名>"`）⇒ ★成本很低。
+```
+
+### ⇒ 補完兩格即 dispatch（R² 明示不用再送審）
