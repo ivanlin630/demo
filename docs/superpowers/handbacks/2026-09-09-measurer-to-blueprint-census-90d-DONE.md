@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 人口卷 90 天
 topic: ★卷面交件(69.4/90天=77%，四輪砍完最後停在吞吐<6tick/s門檻)：出生極稀疏+七成隊全程無breed訊號+75天/胎p50=89.6天——兩懸案都有強訊號可判，數字在.measure.json
 ---

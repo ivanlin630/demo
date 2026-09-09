@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+# ★★★2026-09-09 累計：一天之內【四把】0-byte 孤兒 index.lock
+#   12:26(systems 移除) / 12:32(implementer) / 12:49(implementer) / 20:37(measurer)
+#   ★四把【全部】是 0 bytes、無 git.exe 進程 ⇒ 共同根因＝【git 被殺在半路】
+#     (harness 逾時砍指令／TaskStop／session 重啟) —— ★★不是併發持有:
+#     一個正在跑的 git 會【持續寫】那把鎖。
+#   ⇒ ★★★所以正確處置【不是】等它自己消失（它不會），
+#     是【三驗 + 具名移除】：0 bytes ／ 無 git 進程 ／ mtime 兩次取樣不變 ＋ 寫一封具名的信。
+#   ★而本工具刻意【不自動刪】：刪的動作要有人具名 —— 四次都有人具名，這條規矩在運作。
+#
 # ★★★index.lock 孤兒判定（blueprint 提、systems 實作 2026-09-08）
 #
 # 病：鎖卡著時【全員 commit 都掛】，而「to: all 問一圈」的延遲 > 判準跑一次。
