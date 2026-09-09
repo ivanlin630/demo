@@ -61,12 +61,18 @@ const NO_FAILURE_FEEDBACK: Dictionary = {
 	"佔村": "TODO:%s ── 佔領被擋＝做不成，同一 village 會重撞" % TODO_TICKET,
 	"併入": "TODO:%s ── join_rejected 已寫進 leader memory（interaction_system:1586）" % TODO_TICKET,
 	"吸納": "TODO:%s ── 同上另一端（faction_ai_system:6331）" % TODO_TICKET,
-	"外交": "TODO:%s ── envoy.reject（interaction_system:582）全庫 152 reject / 6 accept；systems 已判三條全成立" % TODO_TICKET,
 	"遷移找糧": "TODO:%s ── 到場沒糧＝只折價、路不通＝失效（法條兩類都在這條路上）" % TODO_TICKET,
 	"囤貨": "TODO:%s ── convoy dispatch 的 7 個靜默 return false（法條指定的第一份清單）" % TODO_TICKET,
-	"求和": "TODO:%s ── 求和會被拒（diplomatic_ai_system:186 的 reject 路徑）" % TODO_TICKET,
 	"歸建": "TODO:%s ── committed 卻不 dispatch 的 drop 點（手不聽腦 mini-arc 的 subteam-idle-latch）" % TODO_TICKET,
-	# ── 已有等價機制：失敗反饋存在，只是掛在【靶地】不在 option ──
+	# ── 已有等價機制：失敗反饋存在，只是掛在別的地方（靶地／硬 cooldown）──
+	# ★★★外交／求和（2026-09-09 階段 2 改分類）：它們【不是待接】，是失敗反饋掛在一個
+	#   硬 cooldown 上。★而硬 cooldown 是〈執行失敗反饋鐵律〉要溶掉的形狀
+	#   （「形狀統一走連續折價、不走硬 cooldown…別再擴散第三種形狀」）
+	#   ⇒ ★★再加一層折價＝擴散第三種形狀；正解是 de-patch，而那是另一張票。
+	#   ★★★放這一桶不是把問題掃進去：桶有防腐檢查（符號必須存在），
+	#   哪天 cooldown 被拿掉，這兩條會【自己紅】。
+	"外交": "已有等價機制: diplomacy_reject_cooldown（team_data:258）→ decision_context:731 不當慾望目標",
+	"求和": "已有等價機制: 同上 → diplomatic_ai_system:141 early return",
 	"紮營": "已有等價機制: SettlementMemory.quality_multiplier → ctx.camp_site_quality_mult（decision_context:526）",
 	"紮根": "已有等價機制: 同上 → ctx.settle_site_quality（decision_context:468）",
 	"擴點": "已有等價機制: 同上 → ctx.expand_site_marginal（decision_context:511）",
