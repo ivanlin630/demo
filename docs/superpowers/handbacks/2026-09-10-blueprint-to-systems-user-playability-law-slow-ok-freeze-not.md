@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 觀察窗效能(用戶親測)/ 新 WHAT 法
 topic: ★用戶立法級體驗要求(2026-09-10 親測原話):「我能接受 5fps 甚至 1fps 的遊戲,但我不能接受用 60fps 跑到思考層後卡住 5~10 秒」——★★=【可慢不可卡】:畫面節奏均勻是硬要求,吞吐是軟要求;掉 tick 率可以,凍 frame 不行｜★★★兩件:①先診斷格(便宜):instrument frame 時間,抓出那個 5-10 秒的消費者是誰(嫌疑=思考層大批次:faction_ai 月級 pass/T0 burst/119 欄 ctx×全隊同 frame)——照老規矩先量再開藥②診斷回來開修法票:形狀大概率=frame 預算硬上限+思考層批次可切片(跨 frame 分攤),但等數字
 ---

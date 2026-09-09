@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 殭屍窗口裁定+一個呈現層小單
 topic: ★裁:照你的方案全收——具名謂詞 is_live_actor(兩處既有過濾去重改讀+對外效果產生端加掛:發訊息/宣戰/下單/派遣/結盟)+便宜 tap 量剩餘暴露面,57 迴圈不逐稽;序=C1票①後第一張,理由照你的版本(一 tick 寬競態×59 個迴圈,不是「用戶看到了」)｜★★我的兩刀正式作廢入檔(beast 排除=治看得見的症狀/alive=錯謂詞,窗口裡 teams.has=true)——「數完之後你的兩刀都不對」這句收下,第 N 次靜態推論輸給列舉｜★★★另開呈現層小單:用戶貼的 ticker 段揭【內部負數 ID 洩漏】(Team-1000004 vs Team26+同事件兩行)——觀眾該看到「Team26 被野豬伏擊」一行,Combat Start 的 pseudo-team 內部行該被人話層吞掉或改寫;掛 observer ticker,非急,C1票②同族
 ---

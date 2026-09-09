@@ -1,6 +1,6 @@
 # HOW spec：C1 票① —— agent／REPL 動詞補課
 
-owner: systems ｜ 2026-09-10 ｜ **player_reachable: yes** ｜ 用戶裁「好 那由我玩」
+owner: systems ｜ 2026-09-10 ｜ **player_reachable: yes** ｜ 用戶裁「好 那由我玩」｜狀態：R² CLEAN（item1/3 已補）⇒ 可 dispatch
 
 上游：用戶要**親手玩**。blueprint 裁：拉到 implementer 失敗反饋收尾後的下一張，
 批二②③與市場窗後移。★**範圍釘死在 agent/REPL 層** —— GUI 五分頁與文字版畫面走查是**票②**。
@@ -37,11 +37,26 @@ player_command_api.gd 的動詞：move_to / cancel_move / execute_action / respo
 ①市場四件套【接既有函式，不要新寫一份市場邏輯】：
    看板   order_system.read_market_board(state, team)（★或讀 tile.market_orders 的既有結構）
    掛單   order_system.post_order(state, team, kind, res, qty)
-   撤單   ★`grep` 現有的撤單路徑（`tick_team_orders` 內有過期/移除邏輯）——
-          ★★若【沒有】獨立的撤單函式，那是本票要補的【唯一新機制】，
-          ★★★而它要寫成【與既有移除路徑共用】，不是第二份。
-②附身／離身：★語意先定——「附身」＝把 `state.player_id` 指到某隊 leader？還是換控制權？
-   ⇒ ★★`grep` 現有的 `player_id` / `controlled_team` 用法，**沿用既有語意**，不要發明第三種。
+   撤單   ★R² 查實：**沒有** `cancel_order`／`remove_order`；移除/過期邏輯**內嵌在
+          `tick_team_orders`（:191-230）的 for 迴圈裡** ⇒ ★★「共用既有路徑」目前**沒有東西可共用**
+          ⇒ **第一步是把那段【抽成一支獨立函式】**（過期迴圈與手動撤單都呼叫它）。
+   ★★★而抽的時候有一個【陷阱】，R² 點名，**寫死在這裡**：
+   ```
+   :204-220  escrow 釋放進 pending_claims   ← ★守恆機制,【必須共用】(不共用＝貨瞬移)
+   :225-227  FailureMemory.record(..., "order_abandoned_buy")  ← ★★【不能共用】
+   ⇒ 過期 ＝ 執行失敗（該折價，下輪別再撞）
+     ★★★主動撤單 ＝ 玩家的決定（不是失敗）—— 原樣搬過去共用的話，
+        玩家取消自己的訂單，會讓 AI 以為「這條路失敗了」而折價自己下一輪的決策。
+   ⇒ 抽出來的共用函式【只包 escrow-release】；`FailureMemory.record` 留在過期迴圈自己的分支。
+   ```
+②附身／離身：★★語意 R² 已查完，**寫死不再是問句**：
+   ```
+   world_state.gd:101  var player_id: int = -1                      ← ★唯一開關
+   world_state.gd:752  if t.leader_id == player_id or player_id in t.named_members  ← 控制隊【反查】
+   ⇒ 附身 ＝ 把 `state.player_id` 設成目標人物 id
+     離身 ＝ 還原成【附身前記下的那個 id】
+   ★不發明第三種語意。
+   ```
 ③時間控制：★入口是 `sim_runner.advance_tick` ⇒ 玩家層要的是【推進 N tick】與【暫停】
    ⇒ ★★不要在 sim_runner 裡加狀態；★★★把「推進幾步」留在【呼叫端】(REPL)，
      否則會多出一個「誰在控制時間」的第二真相源。
@@ -70,7 +85,7 @@ player_command_api.gd 的動詞：move_to / cancel_move / execute_action / respo
 ★**母體不是「我們覺得玩家需要什麼」，是【決策引擎替這支隊讀的每一個欄位】**：
 ```
 scripts/simulation/decision/decision_context.gd  的 `var` 欄位 ⇒ ★實測【119 個】
-對照面：`player_query_api.gd` 的查詢動詞 ⇒ 實測【18 支】
+對照面：`player_query_api.gd` 的【公開】查詢動詞 ⇒ ★實測 **14 支**（R² 訂正：18 個 `func` 裡 4 個是私有輔助 `_check_player`／`_check_player_with_team`／`_build_available_actions`／`_action_label`）
 ⇒ ★★逐格打勾：每一個 ctx 欄位，玩家【讀不讀得到】？
 ⇒ ★★★盲格必須【歸零或具名豁免】，而具名豁免【呈用戶】——不是我們自己勾掉。
 ```
@@ -93,6 +108,32 @@ scripts/simulation/decision/decision_context.gd  的 `var` 欄位 ⇒ ★實測�
 P9 交付【零玩家格】＋指令表停了六個月 ⇒ ★機制長了，而玩家面沒跟
 ⇒ ★★而 `player_reachable` 那一欄與本格,就是【防再犯的閘】
 ⇒ ★★★所以本格【不能是一句「我檢查過了」】—— 要有一份【逐格清單】落地成檔案。
+```
+
+## §5b ★★★而 119 列的表【裝不下】事件流 —— 所以要有第二個各自可驗證的斷言（R² 的結構補丁）
+
+```
+decision_context.gd 全檔【零筆】 event／Event／MessageData 命中
+⇒ ★決策引擎【從來不讀】事件流 ⇒ 它【結構上不可能】出現在 119 列裡
+⇒ ★★不是漏勾,是【這張表的形狀容不下它】。
+★★★而事件流不是空想的需求 —— 它已經有一支函式在做：
+   player_api_mapper.gd:792  map_global_messages(state, n := 10)
+   唯一呼叫點 ui/sim_bridge.gd:154   ← ★GUI 在用
+   player_query_api.gd 裡：★★零呼叫    ← agent/REPL 層【完全碰不到】
+⇒ ★這正是 P9 病歷的活教材：機制蓋好了,而【只接了 GUI 沒接 agent】。
+```
+⇒ **併入本票**（不另開）：`player_query_api.gd` 補一支**薄 wrapper** 呼叫 `map_global_messages`
+（形狀同 `get_storage_panel`／`query_outpost_panel`）。
+★理由與前一張票（`_find_unowned_farmable_tile`）相同：**本票標題已經涵蓋它，
+拆開只會製造「119 列全綠，而事件流仍然碰不到」的假完整。**
+
+⇒ **§5⑥ 的落地檔要有【兩個獨立小節】**：
+```
+①119 列的 ctx 欄位對帳表
+②★「§5 邊界文字裡明列、但【不對應任何 ctx 欄位】的項目」——目前只有【事件流】一項
+   逐項列：來源函式／有沒有接到 agent 層／缺的話補哪個 wrapper
+⇒ ★★★這樣「119 列全在」與「§5 邊界全兌現」是【兩個各自可驗證的斷言】，
+   不會因為前者綠了就誤以為後者也綠了。
 ```
 
 **驗收（併入 §4）**：

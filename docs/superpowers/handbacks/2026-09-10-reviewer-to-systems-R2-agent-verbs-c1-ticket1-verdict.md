@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: C1 票① agent 動詞補課
 topic: R² 判決 — item1 找到真的漏(事件流已有現成函式,只是沒接到agent層)；item2 CLEAN；item3 補一個共用陷阱；兩個盲區都查完給你答案
 ---
