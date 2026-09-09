@@ -36,6 +36,27 @@ _bad_reasons() { # $1 = failure_memory.gd —— 理由不得是空話
   | awk '{ s = $0; sub(/^\t"/, "", s); sub(/".*$/, "", s); print s }'
 }
 
+# ★★★「已有等價機制」是一個【會腐爛的斷言】：機制被刪掉之後這行字還在，
+#   而它會讓下一個人以為這個 option 有失敗反饋。⇒ 要求它指名一個符號,並【驗那個符號還在】。
+#   （systems 加 2026-09-09,收第三格的條件。同族：任何「已經有了」的宣稱都要能被證偽。）
+_dead_equivalents() { # $1 = failure_memory.gd —— 印出「宣稱有等價機制但符號不存在」的 option
+  awk -v d="const NO_FAILURE_FEEDBACK: Dictionary = {" '
+    index($0, d) == 1 { inb = 1; next }
+    inb && /^}/ { inb = 0 }
+    inb && /^	"/ && /已有等價機制/ { print }' "$1"   | { _prev_sym=""
+    while IFS= read -r line; do
+      opt="$(printf '%s' "$line" | sed 's/^	"//; s/".*$//')"
+      # 抓理由裡第一個 Xxx.yyy 形式的符號
+      sym="$(printf '%s' "$line" | grep -oE '[A-Z][A-Za-z0-9_]*\.[a-z_][A-Za-z0-9_]*' | head -1)"
+      # ★「同上」是合法簡寫,但它【自己會腐爛】(前一條改了它就默默指向別處)
+      #   ⇒ 允許它,而【繼承來的符號一樣要被驗】。繼承不到 ⇒ 紅。
+      if [ -z "$sym" ] && printf '%s' "$line" | grep -q '同上'; then sym="$_prev_sym"; fi
+      if [ -n "$sym" ]; then _prev_sym="$sym"; fi
+      if [ -z "$sym" ]; then echo "$opt(理由沒有指名任何 Symbol.method,也繼承不到「同上」的來源)"; continue; fi
+      grep -rqF "$sym" scripts/ --include=*.gd || echo "$opt(宣稱的 $sym 在全庫找不到)"
+    done; }
+}
+
 # 回一行：OK 或紅因（★單一判斷點：陽性對照與真檢查走同一個函式）
 check_pair() {
   optf="$1"; fmf="$2"; out=""
@@ -59,6 +80,11 @@ check_pair() {
 $opts
 EOF
   badreason="$(_bad_reasons "$fmf")"
+  deadeq="$(_dead_equivalents "$fmf")"
+  if [ -n "${deadeq//[[:space:]]/}" ]; then
+    out="$out 宣稱已有等價機制但符號不在:$(printf '%s' "$deadeq" | tr '
+' ',')"
+  fi
   if [ -n "${badreason//[[:space:]]/}" ]; then
     out="$out 理由是空話:$(printf '%s' "$badreason" | tr '\n' ',')"
   fi

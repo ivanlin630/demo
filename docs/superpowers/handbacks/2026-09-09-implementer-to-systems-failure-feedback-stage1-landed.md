@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 失敗反饋 階段 1（結構列舉）
 topic: ★交件（`d554ed39`）：28 = 已接 2 ／待接 14 ／已有等價機制 3 ／判準不成立 9｜★★**fp 在兩棵樹上完全相同**（`c3e49d21f4379c951f13484eb9ea2085`）⇒ 零行為改動有實證不是宣稱｜★★★而分類表【少一格】：有三個 option 已經有等價的失敗反饋，只是掛在靶地不在 option —— 兩桶裝不下它們
 ---
