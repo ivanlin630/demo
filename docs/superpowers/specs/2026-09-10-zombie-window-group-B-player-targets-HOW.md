@@ -88,3 +88,59 @@ blueprint 備註：**它是玩家面，用戶下次開玩前落地最好**，但
 ⇒ ★★**那個 chokepoint 上到底該清幾個容器？** 目前是【想到一個補一個】。
 ⇒ ★★★這與 `is_live_actor` 那張是同一個形狀（**指向死者的參照散在各處**），
    **值得一張獨立的普查票**：掃所有存 `team_id` 的容器，逐個問「死的時候誰清它」。
+---
+
+## ⑥ ★★★R² 回件（2026-09-10）：(3) 已補，其餘兩格過 ⇒ 補完直接 dispatch
+
+### (1) 我標未驗那格：★**真的會**，而且是【最常見的那條路】，不是邊角
+
+```
+interaction_system.gd:245  if not state.teams.has(id_a) or not state.teams.has(id_b): return
+   ⇒ ★★【半個守衛】第三次現形（前兩次：vision_system:27／本檔）——
+     用 has() 不用 is_live_team()；pending_erase 的隊 has() 仍是 true ⇒ 擋不住。
+:260  if npc == null or pt == null: return
+   ⇒ 同理：get() 對 pending_erase 的隊回的是【活物件】不是 null ⇒ 也擋不住。
+:296-299  路徑 4（NPC 無敵意、非 diplomacy/loot、玩家可主動選互動）⇒ append
+   ★★★這是【預設分支】：一支同格的殭屍隊只要 current_task 不是 TASK_DIPLOMACY／TASK_LOOT
+     就會落進來 —— 不是罕見 forced_event，是【同格且平靜相遇】這個最常見情境本身。
+```
+
+⇒ ★**我猜錯的方向值得記**：我猜「它可能有自己的前提所以更難觸發」，
+**查完是相反 —— 它是【排除兩條特殊路之後的 default】，比我設想的更容易觸發**。
+⇒ ★★**(b) 那一半不是多餘的，是這張票裡風險比 (a) 更高的那一半。**
+
+### (2) 清除端掛 `erase_teams`：★沒找到反例
+
+```
+erase_teams 是單執行緒、單點、tick 尾同步跑完的批次清理（GDScript 無並行）
+⇒ 沒有「清到一半被別的東西讀走」的交錯。
+player_pending_targets 唯一讀取端（player_api_mapper）是【玩家發查詢指令時才讀】，
+不是背景常駐 ⇒ 不會與 erase_teams 同時進行。
+⇒ 實作位置：world_state.gd:707-711 那個 for-loop 直接加一行 player_pending_targets.erase(dtid)。
+```
+
+### (3) ★★驗收①的反向格：我自己懷疑得對 —— **不夠，拆成兩條精確前提**
+
+```
+★兩個寫入端的精確前提【不一樣】：
+  寫入端①(player_command_system:970-979)  同格 ＋ combat_target == -1
+  寫入端②(interaction_system:296-299)     同格 ＋ current_task 非 diplomacy/loot
+★★若反向格只寫「活著時必須進清單」，一個【前提被意外收窄】的退化
+  （例如多加了「且要 named leader 在場」）在某些佈局下會「有時進、有時不進」，
+  ★★★而寫得夠寬鬆的反向斷言會照樣判綠。
+⇒ 反向格拆兩條（取代原本那一條）：
+  反向格a：同格 ＋ combat_target == -1 ＋ 活著 ⇒ 必進清單
+  反向格b：同格 ＋ current_task 非 diplomacy/loot ＋ 活著 ⇒ 必進清單
+⇒ 這樣【永遠不 append】與【前提被意外收窄】兩種退化都會被抓到，不只前者。
+```
+
+### (4) 種子票：R² 同意值得開，★但不是現在
+
+```
+「散在各處的 team_id 容器普查」——★母體形狀可直接照搬 is_live_actor 那張
+（所有存 team_id 的容器，逐個問「死的時候誰清它」）。
+★★而我要在此把母體【擴一半】：R² 這輪讓「半個守衛」第三次現形
+  ⇒ ★★★那張票的母體要涵蓋兩種站點：
+     ①【誰在迭代／存 team_id】（原本的）
+     ②★【誰拿 state.teams.has() 當存活守衛】（新加的——它看起來已經被想過了，而它沒有）
+```
