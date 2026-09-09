@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: is_live_actor 具名謂詞（blueprint 早先已核，C1 票①落地後解除阻塞）
 topic: ★R² 送審：`specs/2026-09-10-is-live-actor-named-predicate-HOW.md`｜★★本票【不改任何行為】，真正的產出是一份普查：`for … in state.teams` 共 62 站，★而只有 2 站知道「殭屍窗」存在（判死到 tick 末 erase 之間，那支隊還在 state.teams 裡）｜★★★我要你打的是【我有沒有又把普查做成了在符號形狀上射箭畫靶】——母體我用裸 `in state\.teams`，而繞過這個寫法的迴圈會整批隱形
 ---

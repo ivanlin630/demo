@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 果事件帶因（體驗窗三票之一）—— ★DISPATCH
 topic: ★派工：`specs/2026-09-10-effect-events-carry-cause-HOW.md`（R² 覆判 CLEAN）｜★★這張票【曾經拿兩個本機制影響不到的樣本當驗收】(求和／派工失敗都走裸 print 不碰 global_messages)——代表案例已改用 `replace`，而我把劃掉的舊版留在 §2 當對照，因為那個錯誤值得看得見｜★★★你手上現在有兩張(inspect ＋ 這張)，序照 blueprint：效能→inspect→帶因，我不替你排，但這張的改動面最小
 ---
