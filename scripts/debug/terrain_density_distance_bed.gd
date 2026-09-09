@@ -56,7 +56,7 @@ func _analyze_one(cfg_path: String, seed_val: int, full_detail: bool) -> void:
 	var conf: Dictionary = GameSetup.load_config(cfg_path)
 	conf["seed"] = seed_val
 	var state: WorldState = MeasureBedHelper.arm_and_setup(conf, true)
-	var radius: int = int(conf.get("radius", -1))
+	var radius: int = int((conf.get("map", {}) as Dictionary).get("radius", -1))
 	var tiles: Dictionary = state.world.tiles
 	var n: int = tiles.size()
 	var elapsed_ms: int = Time.get_ticks_msec() - t0
