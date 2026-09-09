@@ -116,6 +116,60 @@ N_SUP="$(awk -F'\t' 'NF>=3 && $1 !~ /^#/ && $1 != "item"{c++} END{print c+0}' "$
 N_SUP_TODO="$(awk -F'\t' '$3 ~ /^todo:/{c++} END{print c+0}' "$SUP")"
 echo "[CTX-COV] 補充母體 $N_SUP 項｜其中待接 $N_SUP_TODO（★兩張表都綠才算完成）"
 
+# ── ★★★第五格（2026-09-10）：who 的宣稱要【可被證偽】───────────────────
+#   ★病：119 列的 who 全指同一支動詞 ⇒ 那支動詞退化（改名／少回欄位／快照寫入被拿掉），
+#   ★★119 格【同時】變暗，而表上【一格都不會紅】—— 表只檢查「每欄剛好一列、status 三選一」。
+#   ⇒ ★★★這是宣稱腐爛的【第三種方向】：宣稱沒變，而它指向的東西縮水了。
+#   ⇒ 解法：★真的呼叫那支動詞，比對它回的鍵集是否涵蓋宣稱它的欄位。
+PROBE_OUT="$(mktemp)"
+if [ "${CTX_COV_SKIP_PROBE:-0}" = "1" ]; then
+  echo "[CTX-COV] ⚠探針略過（CTX_COV_SKIP_PROBE=1）★這一輪【沒有】驗證 who 的宣稱"
+else
+  timeout -k 5 180 env GODOT_TIMEOUT=150 powershell -NoProfile -File ./tools/godot.ps1     --headless --script scripts/debug/ctx_who_probe.gd > "$PROBE_OUT" 2>&1
+  if ! grep -q "PROBE-DONE" "$PROBE_OUT"; then
+    echo "[CTX-COV] ★ABORT：探針沒跑完（★沒有 PROBE-DONE ⇒ 這一輪讀到的鍵集不完整，不得當結果）"
+    tail -3 "$PROBE_OUT"; rm -f "$PROBE_OUT"; exit 3
+  fi
+  # ★陽性對照：從探針結果【拿掉一個真的存在的欄位】⇒ 比對邏輯必須具名紅
+  _probe_check() {   # $1 = 探針輸出檔 ⇒ 印缺漏（空＝全涵蓋）
+    awk -F'	' -v tsv="$TSV" '
+      /^WHOKEYS/ { split($1, a, " "); verb = a[2]; keys[verb] = $2 }
+      /^WHOMISSING/ { split($0, b, " "); missing_verb[b[2]] = 1 }
+      END {
+        while ((getline line < tsv) > 0) {
+          if (line ~ /^#/ || line ~ /^field	/) continue
+          n = split(line, c, "	")
+          if (n < 4 || c[2] != "exposed") continue
+          who = c[4]; sub(/^.*\./, "", who)
+          if (who in missing_verb) { print "who 不存在:" c[1] "(" who ")"; continue }
+          if (!(who in keys)) { print "探針沒有這支動詞:" c[1] "(" who ")"; continue }
+          if (index(" " keys[who] " ", " " c[1] " ") == 0) print "exposed 宣稱 " c[1] " 而 " who " 沒有回它"
+        }
+      }' "$1"
+  }
+  PROBE_BAD="$(_probe_check "$PROBE_OUT")"
+  # ★★成對對照：把一個真的有的鍵從探針輸出裡刪掉 ⇒ 該列必須具名紅（否則這格是恆真）
+  CTRL_OUT="$(mktemp)"
+  sed 's/ food_days / /' "$PROBE_OUT" > "$CTRL_OUT"
+  CTRL_BAD="$(_probe_check "$CTRL_OUT")"
+  case "$CTRL_BAD" in
+    *food_days*) ;;
+    *) echo "[CTX-COV] ★ABORT：對照失準 —— 拿掉 food_days 之後比對邏輯沒有紅（$CTRL_BAD）"
+       rm -f "$PROBE_OUT" "$CTRL_OUT"; exit 3;;
+  esac
+  rm -f "$CTRL_OUT"
+  N_WHO="$(awk '/^WHOKEYS/{c++} END{print c+0}' "$PROBE_OUT")"
+  echo "[CTX-COV] 探針：$N_WHO 支 who 動詞真的被呼叫過（★對照：抽掉一個鍵會具名紅）"
+  if [ -n "${PROBE_BAD//[[:space:]]/}" ]; then
+    echo "[CTX-COV] ★FAIL（who 宣稱不成立）："
+    printf '%s
+' "$PROBE_BAD" | head -10
+    echo "  ⇒ ★宣稱沒變、而它指向的東西縮水了：那支動詞少回了這些欄位"
+    rm -f "$PROBE_OUT"; exit 1
+  fi
+fi
+rm -f "$PROBE_OUT"
+
 R="$(check_pair "$CTX" "$TSV" "$SURFACES")"
 if [ "$R" != "OK" ] || [ -n "${SUP_BAD//[[:space:]]/}" ]; then
   echo "[CTX-COV] ★FAIL：$R $SUP_BAD"

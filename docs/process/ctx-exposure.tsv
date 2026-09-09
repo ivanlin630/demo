@@ -28,7 +28,7 @@ desperation_entry_threshold	exposed	生存	player_query_api.get_decision_snapsho
 food_days	exposed	生存	player_query_api.get_player_snapshot
 can_rescue_build	exposed	生存	player_query_api.get_decision_snapshot
 rescue_build_util	exposed	生存	player_query_api.get_decision_snapshot
-population	exposed	生存	player_query_api.get_team_details
+population	exposed	生存	player_query_api.get_decision_snapshot
 has_goods	exposed	經濟	player_query_api.get_decision_snapshot
 has_arb	exposed	經濟	player_query_api.get_decision_snapshot
 arb_gain	exposed	經濟	player_query_api.get_decision_snapshot
