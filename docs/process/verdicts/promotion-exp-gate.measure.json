@@ -1,0 +1,48 @@
+{
+  "token": "promotion-exp-gate",
+  "slice": "晉升exp閘：門檻vs可達量的距離（含加掛勒索四格/convoy.deliver/promote逐筆）",
+  "date": "2026-09-09",
+  "measured_at_head": "caa06f61",
+  "touches": [],
+  "world": "warring_states / seed=1337 / BED_DAYS=30（跑滿30/30，每5天期中報表看趨勢）",
+  "bed": "scripts/debug/promotion_exp_gate_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-09-promotion-exp-gate-warring_states.txt"],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★systems的頭號嫌犯(training_system.gd:19 tact<=0導致訓練跳過)被證偽——99.1%隊戰術>0；真根在更上游：TASK_TRAIN這個任務本身幾乎從不被決策層選中(6次快照5次=0隊)，執行端(tact閘)沒有機會發揮作用是因為根本沒隊走到那條路",
+    "①leader戰術分布": "母體=110隊(有leader)，min=0.00 p50=0.21 max=0.60，戰術==0的隊數=1/110(0.9%)——★★systems假說的判別式：普遍>0⇒假說錯，答案在④——本輪證實普遍>0",
+    "②TASK_TRAIN隊數vs tact>0": "6次快照(day5/10/15/20/25/30)：1,0,0,0,0,0——★★★幾乎全程=0，唯一一次非0時tact>0=1(差=0，代表那唯一一次也不是被戰術閘擋)。這是本卷最關鍵的一格：問題不在『想訓練但訓練不會發生』(手不聽腦執行端)，而在『幾乎沒有隊選擇去訓練』(決策端從不選這個任務)",
+    "③anon_exp各tier分布vs門檻": {
+      "平民(門檻50)": "母體110隊 min=0.0 p50=0.0 max=35.8 達標=0(0.0%)",
+      "新兵(門檻100)": "min=0.0 p50=0.0 max=0.0 達標=0(0.0%)",
+      "老兵(門檻200)": "min=0.0 p50=0.0 max=0.0 達標=0(0.0%)"
+    },
+    "④exp流量逐來源": {
+      "combat_survivor_winner/loser": "母體=0——本窗兩者從未被呼叫過(全程零場encounter_system戰鬥產生存活exp；★交叉驗證：population census[69天窗]也量到death.combat_pop/named=0/0，兩份獨立卷指向同一結論：encounter_system戰鬥本身在這個世界配置下幾乎不發生)",
+      "train_npc": "呼叫=127次(其中給0=0)——★★★這127次幾乎全部來自單一團(team17，見⑤逐筆樣本)一段連續~127-tick(~0.09天)的訓練episode，非分散在多隊多次",
+      "train_player": "母體=0(玩家已被strip，符合預期)",
+      "★給出總量欄位不可信": "本卷讀『給出總量』欄位全部顯示0.0，但promote.kill逐筆樣本明確顯示team17的anon_exp平民值從0.5緩步爬升到26.4(tick 5880→9660)——證明exp確實在累積，非真的0。★★★根因＝anon_tier_system.gd:98 `Probe.note(\"exp.add.amount.\"+source, exp)` 用的是peak-tracker(取MAX)不是sum-tracker，而`note()`寫入`Probe.peaks`、我讀的是`Probe.amount()`(讀`Probe.amounts`，那個dict從未被這個tap寫過)⇒雙重問題：(a)我讀錯dict(peaks vs amounts)(b)即使讀對dict，peaks存的也只是單次最大值不是累積總量，答不了『總量』這個問法。這是要回報給implementer/systems的tap缺陷，非我這輪能補的資料。"
+    },
+    "⑤promote.kill四格+母體核對": "嘗試=127 成功=0 死在[not_enough_exp]=127(100%) ⇒ 成功+死亡總和=127==嘗試數(守恆，沒有第五條未記路徑)",
+    "加掛①勒索四格守恆式": "extort=582 combat_at_outpost=1 combat_open_field=13 loot_noresolve=0 ⇒ 四格加總=596==raid.resolve=596(守恆✓，計數器沒壞) ⇒ ★extort=582>0——拒絕【有】fire過，blueprint『結局塌陷候選①』正式死",
+    "加掛②convoy.deliver": "抵達嘗試=5 真成交(deliver_settled)=4",
+    "加掛③promote逐筆bump_sample": "not_enough_exp樣本64筆全部team17/平民tier，have值從0.5緩步爬升到26.4(逐tick+60累加)——直接證據：訓練確實在發生、確實在累積，只是①持續時間太短(僅~127 tick≈0.09天)②只有這一隊做過③離門檻50還很遠就結束了"
+  },
+
+  "root_cause_reframe": {
+    "systems原假說": "training_system.gd:19 `if tact<=0.0: continue` ⇒ 戰術=0的leader訓練這條路不存在",
+    "本卷判定": "假說被①③④三格共同否證：戰術99.1%>0(①)、僅有的一次訓練episode(team17)確實產生了exp累積且tact>0(④train_npc給出非零樣本佐證)——執行端閘門沒有被戰術=0擋住",
+    "真根": "★問題在決策層：TASK_TRAIN任務本身幾乎不被選中(②：6次快照5次=0隊，全30天窗僅捕捉到一次非0)——這是『手不聽腦』的姊妹形狀，但層次不同：不是『想做而做不到』，是『幾乎沒有隊在想』。下一步該查的是決策端(goal_resolver/decision_engine)給TASK_TRAIN的utility/candidate生成邏輯，而非training_system.gd內部的戰術閘。"
+  },
+
+  "honest_limits": [
+    "★①本卷不下因果結論——它量門檻與可達量的距離，不判『因此世界少了什麼戲』",
+    "★②exp.add.dropped.no_tier.*在產線恆0(team_data.gd:327-329三鍵預先塞好)——它的0是【不會fire】不是【沒發生】，本輪確實全程=0，符合預期，不當作『沒有exp被丟棄』的證據去外推其他場景",
+    "★③本卷不改任何常數——門檻該不該動是WHAT，blueprint裁",
+    "★★★④『給出總量』欄位因tap用note()非add_amount()而失真，見answer.④——此為production tap缺陷(anon_tier_system.gd:98)，建議回報implementer；本卷的『次數』欄位(exp.add.<source>用bump())不受影響、可信",
+    "★單seed(1337)/單run——TASK_TRAIN是否『幾乎不被選中』這個結論建立在30天單一世界上，若要排除『這個seed恰好倒楣』需要多seed驗證，本輪未做，跑法建議留給systems/blueprint裁是否需要"
+  ],
+
+  "supersedes": []
+}
