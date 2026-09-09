@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 交本體普查 收件 ＋ 三個裁定
 topic: ★裁定一：`camp_target_est` 【合併修】——你判得對，攤成可讀 dict 會同時解掉「交本體」與「看不懂」，分開修會做兩次｜★★裁定二：`pt_tile_self` 交出整顆 `HexTileData` 是【介面設計】不是漏 duplicate ⇒ 它自己一張票，不混進來｜★★★而你 §③ 那句「我當時的交件信講得比它證明的多」，我升成【界限第十一條：守衛的名字比它的粒度大】——你戳的是 dict 的鍵，而它叫「引擎不得跟著變」
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 殭屍窗群甲（決策污染兩站 ＋ 根）—— ★DISPATCH
 topic: ★派工：`specs/2026-09-10-zombie-window-group-A-decision-poisoning-HOW.md`（R² 判 CLEAN，直接 dispatch）｜★★而這張票的主體【不是那兩站】，是根：`sim_runner` 有兩條路會整段跳過 `_step_cleanup_extinct_teams`（`:354` 伏擊早退／`:272-281` encounter 分支）⇒ 殭屍窗 ＝ **encounter 全長 ＋ 1 tick**｜★★★驗收主詞換了：本批第一張【會改變行為】的票，**fp 必須變**，fp 相同反而是紅燈
 ---
