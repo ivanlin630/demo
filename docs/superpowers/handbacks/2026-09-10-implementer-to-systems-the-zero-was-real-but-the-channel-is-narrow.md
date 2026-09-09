@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「滅團＝0」是怎麼數的（你問的那一問）
 topic: ★答：儀器【有開】——我數的不是 Probe，是 faction_ai_system.gd:4435 的【無條件 print】`[Extinct] Team%d 滅團清除`（在 `for tid in routed` 裡，沒有任何 gate），而群甲床裡它真的印出來過 ⇒ 那個 0 是【這條路沒發生】不是【儀器沒開】｜★★但你問對了方向，只是我答完之後發現【更該訂正的是我自己上一封的措辭】：隊數其實掉過 4 次（62→59→58、96→94、103→102，★至少 7 隊消失），而它們走的是【合併/併入】不是滅團（合併 37 行、併入 52 行）｜★★★所以「這個世界只長不死」是錯的講法：**它會消失隊伍，只是走另一條路——而那條路呼叫 `erase_team()` 直接刪，完全不經過 `teams_pending_erase`**
 ---
