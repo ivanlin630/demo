@@ -1,0 +1,39 @@
+{
+  "token": "train-option-util-dump",
+  "slice": "TASK_TRAIN為什麼贏不了——applicable/util分解",
+  "date": "2026-09-10",
+  "measured_at_head": "bb0bec72",
+  "touches": [],
+  "world": "warring_states / seed=1337 / BED_DAYS=30（跑滿30/30）",
+  "bed": "scripts/debug/train_option_util_dump_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-09-train-option-util-dump.txt"],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★★★決定性：TRAIN不是『沒被offer』，是【offer了但100%輸】——1469次真決策applicable、0次被選中(0.00%)。組成逐項dump顯示43%(13/30)樣本有非零正值util(0.22-0.83)，其餘57%(17/30)因officer_need恰好=0而term合理為0(非機械壞，是applicable走archetype==FORCE那條路徑時officer_need剛好沒有缺口)。沒有任何樣本顯示term/weight恆0或沒接線⇒判定落blueprint預註冊的【genuine】結局：戰亂世界裡TRAIN的util真實存在但系統性小於生存/經濟類選項，這是誠實特性，非bug。",
+    "①applicable/chosen(真決策母體,非快照)": {
+      "TRAIN在candidate陣列出現的決策輪次": 1469,
+      "有決策的總輪次": 15295,
+      "applicable佔比": "9.60%",
+      "TRAIN被選中(贏)輪次": 0,
+      "勝率": "0.00%（1469次機會，0次贏——不是稀少，是系統性輸）"
+    },
+    "②組成逐項dump(純讀快照,gather advance=false,樣本數=30/cap30)": {
+      "term分布(train_drive=ambient_train_drive)": "0(17/30，officer_need恰好0)或0.65-1.3(13/30，officer真的短缺)",
+      "weight分布(戰意人格項)": "0.34-0.87，隨leader戰意/野心值變化，非恆定",
+      "raw_contribution(term×weight)": "0(17/30)或0.22-0.83(13/30)——有訊號時的量級",
+      "與贏家的gap": "0.22到2.40不等，即使TRAIN有正值也系統性輸給覓食/建設/徵收/自救建田/maintain_tools/乞食/歸建等",
+      "winner_opt常見": "建設/徵收/覓食/maintain_tools:resource/自救建田——多為生存或經濟類選項"
+    },
+    "與exp-gate卷(TASK_TRAIN隊數快照)的關係——不矛盾，量的是不同東西": "exp-gate卷②量的是current_task==TASK_TRAIN(執行中)的隊數快照(6次快照5次=0)；本卷①量的是『訓練』這個決策option在rank_scored_ctx裡的勝率(0.00%)。exp-gate卷曾捕捉到team17短暫執行TASK_TRAIN(127 tick)——★但本卷證實『訓練』option從未真的贏過argmax⇒team17那段執行極可能來自別的指派路徑(options.gd:497註解提到的『野心階梯ACCUMULATE×FORCE→TASK_TRAIN』, 疑似繞過本rank pool的直接指派)，非贏得決策競爭。這條疑點本卷不深究(超出票面scope)，如實標出供systems判斷是否要開新票查那條路徑。"
+  },
+
+  "honest_limits": [
+    "★①本卷不下「該不該讓TRAIN更容易贏」的結論——那是WHAT，且blueprint已預註冊『util低若是真的就不修』，禁把util往上crank",
+    "★②組成逐項dump用gather(advance=false)純讀快照，非真決策當下ctx——與①的真決策母體(production tap)是兩個不同資料來源，卷面已分開標示，不混用",
+    "★③3筆樣本(tick=10080, team=59/63/76)my applicable_fn直測回true，但呼叫rank_scored_ctx後『訓練』完全不在scored陣列裡(記成train_final_u=-1)——這代表DecisionOptions.applicable(ctx)的完整pipeline比單一option的applicable callable多一層過濾(可能是set/mode限制)，本卷未深究這個落差的機制，只誠實記錄(30個樣本裡3個，10%)",
+    "★④判別結論『genuine非機械壞』是根據『樣本裡沒有恆0/沒接線的證據』推出，非窮舉證明——本卷只採30個bounded樣本，理論上不能排除某個未被抽到的邊界case是機械壞，但1469次applicable、0次贏這個母體級別的數字本身已經很難用抽樣偏差解釋掉"
+  ],
+
+  "supersedes": []
+}
