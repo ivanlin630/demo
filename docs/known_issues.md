@@ -364,6 +364,29 @@ gv_teamstate (1)：faction_ai::consolidate_target_of
   （`tact` 當乘數保留，**地板 > 0** —— ★**爛老師教得慢，不是不能教**）。
 ②若「戰鬥流量枯」坐實 ⇒ 接到**殲滅-heavy arc**，本迴圈即該 arc 的下游。
 
+## 🌱 **評分端不知道建址端變嚴**：`_farm_pot` 與 `required_terrain` 是兩個真相源（R² 2026-09-10 順手挖到，★【既有】不是新造成的）
+
+```
+decision_context.gd:465     var _farm_pot: float = 0.4 if terrain == "mountain" else 1.0
+                            ⇒ ★選址評分【只罰山地】，森林與平原同分（1.0）
+outpost_system.gd FACILITY_DEF["farming"]["required_terrain"] = "plains"（2026-09-10 上線後）
+                            ⇒ ★★建址端【森林也蓋不了】
+⇒ ★★★落差：隊伍的「選址品質評分」會繼續把森林算成【滿分農業用地】，
+   直到它真的去蓋，才被 `wall.reject_terrain` 打回票。
+```
+
+★**這是「同一個規則放兩個地方必然 drift」的第二個活教材**，
+★★**而它是【已經存在】的**（`_farm_pot` 早就只罰山地），**不是農田限平原那張票造成的** ——
+那張票只是**讓落差變得可見**。
+
+★★★**修法形狀（不在本輪做）**：`_farm_pot` 應該**讀同一個真相源**
+（`FACILITY_DEF["farming"]` 的地形規則），而不是自己再寫一份地形判斷 ——
+⇒ 那是「**估算器禁手抄物理**」在**地形規則**上的同一條。
+
+**狀態：已知未修** ｜ **owner：systems（HOW）** ｜
+**回訪：觸發事件 —— 農田限平原票 merge 後的第一份 `wall.reject_terrain` 讀數**
+（★屆時「被打回票的次數」就是這個落差的大小）
+
 ## 🎯 **`_find_weakest_prey` ＝ 挑目標這個決策沒有經過秤**（補丁閘家族嫌疑，blueprint 掛 2026-09-09）
 
 ```
