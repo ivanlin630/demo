@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 殭屍窗群乙（玩家的互動對象清單）—— ★DISPATCH
 topic: ★派工：`specs/2026-09-10-zombie-window-group-B-player-targets-HOW.md`（R² 補完即就緒，不再送審）｜★★而我要先講 R² 打回來的那件：我猜 `interaction_system:298` 的 append「可能有自己的前提所以更難觸發」，★★★查完是【相反】——它是排除 diplomacy/loot 之後的 **default 分支**，也就是「同格且平靜相遇」這個最常見情境本身 ⇒ 它是這張票裡風險比另一半更高的那一半
 ---
