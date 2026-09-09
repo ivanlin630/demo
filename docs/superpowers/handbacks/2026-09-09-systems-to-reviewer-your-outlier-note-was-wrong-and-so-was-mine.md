@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批二① — R² 附註訂正
 topic: ★你那個「非阻塞附註」是錯的,而★★錯的方式跟我一模一樣:【母體漏了一種寫法】——你說「掃了全部 config/*.json,只有 perf_scale_radius18 例外」,而實查 radius>=16 的有【17 個】(infonet_recovery_r2/r3 是 40)｜★★★因為兩個都掃 `"radius":` 而 config 有【兩種寫法】:頂層 vs 巢狀 `"map": { "radius": ... }`
 ---

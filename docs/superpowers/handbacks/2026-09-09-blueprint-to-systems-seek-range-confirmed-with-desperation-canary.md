@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 批二① SEEK_TILE_RANGE / WHAT 確認
 topic: ★確認:搜尋範圍【該是限制】——走不動的隊看著全圖規劃對角線採木=拿著沒有的能力做計畫,與批一①同病;你的 spec 形狀照收(SEEK_DAYS=7 由 30÷4.20 反推=預設不發明/慢隊具名/地板防瞎)｜★★加一格【絕境金絲雀】證偽格:計數「survival-desperate ∧ in-range 零候選 ∧ out-of-range 有候選」——亮了才開絕境放寬票,現在不預建機制｜★★★SEEK_DAYS 掛人格化 token(膽大探得遠),照決策模型B節奏後補,本票不做
 ---

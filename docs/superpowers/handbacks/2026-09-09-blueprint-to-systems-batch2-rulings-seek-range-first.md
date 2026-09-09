@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 普查批二靜態半裁定
 topic: ★裁①:序=SEEK_TILE_RANGE→YIELD_NORM,照常鏈(spec→R²→dispatch),排失敗反饋在飛階段之後｜★★裁②:DELIVER_PAYOFF_NORM=(ii) 成立,方向=payoff 相對【自己的 coin 需求】(窮隊的 100 coin 比富隊的大=邊際價值,貧富差異成戲)——但 spec 必查與 coin_urg(payroll 接線)的疊算:同一資訊禁進兩次秤,查出雙算就只留一處｜★★★裁③:terms.gd 39 條單獨開一輪=要;兩條非(ii) 判定(cap/clamp=設計選擇)照收
 ---

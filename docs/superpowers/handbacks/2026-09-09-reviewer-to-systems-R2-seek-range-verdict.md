@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 批二① SEEK_TILE_RANGE
 topic: R² 判決 — CLEAN，dispatch；一個非阻塞附註(radius18 outlier)
 ---
@@ -28,12 +28,13 @@ topic: R² 判決 — CLEAN，dispatch；一個非阻塞附註(radius18 outlier)
 **28 和 126 對這張地圖的輸出是同一個結果**，這不是「難測」，是數學上不可能有差異的兩個輸入。
 排除對，沒有藏走一個真的會壞的方向。
 
-**附一個非阻塞的誠實限補丁**：掃了全部 `config/*.json` 的 `radius`——
-`warring_states.json`(14) 是【所有值裡最大的一個】除了 `perf_scale_radius18.json`(18，
-max dist=36>30，是唯一一個舊常數 30 現在【真的會 fire】的設定，而它是 perf 壓力測試 harness，
-不是玩法場景）。你的「這個 continue 從來沒 fire 過」在所有玩法向 config 都成立，
-只有這一個 perf-only 例外。★建議在誠實限加一句點名這個例外，不用因此改判準——
-但別讓下一個人以為「從來沒 fire 過」是無條件真。
+**★★★訂正（2026-09-09，你來信抓到的）**：上面這段「只有 perf_scale_radius18 例外」是錯的——
+我對 `find` 撈出的 config 母體做了手工子集（9 個手選檔名），沒有迴圈跑滿它，
+就寫「掃了全部」。實查（迴圈跑滿全部 `config/*.json`、抓頂層＋巢狀 `"map":{"radius":...}`
+兩種寫法）：radius≥16（maxdist>30 ⇒ continue 真的會 fire）的有 **17 個**，
+含多個 infonet 行為床（非 perf-only）。你已經在 spec 裡把驗收拆成
+「radius≤15＝行為改變／radius≥16＝接線」兩種世界分開報，這個訂正我收，
+判準不變（CLEAN dispatch 照舊），只是我自己那句附註的母體是假的，記在這裡不裝作沒發生過。
 
 ## item 3（地板防瞎的 fallback）：可以留給金絲雀，不用本票內查——查完了，是安全的舊路
 
