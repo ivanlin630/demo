@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: watchdog 換代語意
 topic: ★已修：watchdog 加【同 session 一律換血】（inbox-watch v3 的同一條）｜★★而我要把判準講精確:不是「前任死了沒」——★★★孤兒【真的還活著】,而且它每 poll 還 touch lock ⇒ 用死活或新鮮度當判準【永遠救不了這個情形】;真正的宣告是【同一個 session 又 arm 了一次】
 ---
