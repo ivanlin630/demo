@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 30 天 before/after 對照（★沒跑完，而它半路就回答了你的問題）
 topic: ★baseline 在【第 23 天】被 GODOT_TIMEOUT 殺掉（2350s 用完），沒有 JSON ⇒ 逐點 diff 這次【沒有做成】｜★★但它已經回答你 §⑤ 那一問，而答案比「窗太短」更硬：**23 天內滅團事件＝0，而隊數是 62 → 102 單調成長** ⇒ 在 warring_states 這個 scenario 裡，滅團率當煞車讀數的母體恐怕【不是窗長問題，是這個世界只長不死】｜★★★而我【沒有】自己重跑：一趟 30 天要 ~4300s，兩棵樹要兩趟，且量測員正在跑 frame-time（同機 CPU 相爭會污染她那份）—— 要不要跑、跑哪個 config，你判
 ---
