@@ -1492,6 +1492,13 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 		beggar.update_reputation(target_id, -0.1)
 		_npc_ai.write_memory(beggar_leader, "rejected_aid", target_id,
 			state.world.current_tick, 0.5)
+		# ★★★TTL＝`BeliefSystem.BELIEF_STALE_TICKS`（＝3 天）：不是挑一個數字，是【借這件事自己的週期】。
+		#   ★推導：乞食的目標由 `_find_aid_target` 從 belief 選出，而【沒有 belief 的隊直接跳過】
+		#   ⇒ 這筆「他拒絕過我」的記憶，只在【當初讓我去找他的那份情報還新鮮】的期間有意義；
+		#   ★★情報過期之後那個目標本來就不會再被選中（被另一個機制擋掉）⇒ 折價再活下去是多餘的。
+		#   ★★★同族做法＝`order_system:226` 借 `ORDER_LIFETIME`（買單自然到期＝重試的自然週期）。
+		FailureMemory.record(state, beggar, "乞食", str(target_id),
+			BeliefSystem.BELIEF_STALE_TICKS, "aid_refused")
 		_npc_ai.write_memory(target_leader, "begged_at_me", beggar_id,
 			state.world.current_tick, 0.3)
 		_clear_aid_task(state, beggar)

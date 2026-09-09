@@ -330,6 +330,9 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 						beggar_t.update_reputation(pt_t.team_id, -0.1)   # S12 chokepoint（等價 clampf(cur-0.1,0,1)）
 						NpcAiSystem.new().write_memory(b_leader_t, "rejected_aid",
 							pt_t.team_id, state.world.current_tick, 0.5)
+						# ★玩家沒回應＝視同拒絕（同一語意事件的第三個入口）
+						FailureMemory.record(state, beggar_t, "乞食", str(pt_t.team_id),
+							BeliefSystem.BELIEF_STALE_TICKS, "aid_refused_timeout")
 					state.clear_social_target(beggar_t)   # BEG 現走 social_target（非 combat_target）
 					if beggar_t.previous_task != "" and beggar_t.previous_task != TeamData.TASK_IDLE:
 						# release-first + move_target 存/還（同 _clear_aid_task；release 清 -1，resume 需原目的地）。

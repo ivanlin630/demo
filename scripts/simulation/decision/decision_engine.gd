@@ -229,7 +229,7 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# ★乘在 survival/threat 破頂【加法】boost 之前 → 絕境仍能壓過折價再試（FLOOR + 加法 boost 雙保險，
 		# 不得絕對否決）。未接線的 option 恆 1.0 ＝ 對其餘 option 零行為。
 		if team != null:
-			u *= FailureMemory.mult_for_option(state, team, opt)
+			u *= FailureMemory.mult_for_option(state, team, opt, ctx)
 		# 層0 安全氣囊（★插在 coeff 乘法之後——寫死此序：coeff 前會被 0.15 floor 打折失效）：
 		# 極低糧時 survival-class 加法超量級破頂，隨 food→0 線性放大，奪回 argmax。全 SURVIVAL_OPTION_SET 等量加
 		# (不改 survival-class 內部相對序，只集體破頂)。food_days=FLOOR 時加成=0 平滑銜接無 flip-flop。

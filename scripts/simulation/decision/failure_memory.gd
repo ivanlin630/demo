@@ -35,6 +35,10 @@ const TODO_TICKET: String = "docs/superpowers/specs/2026-09-09-failure-feedback-
 const OPTION_FAIL_KEY: Dictionary = {
 	"買糧": ["買單", "food"],
 	"買料": ["買單", "material"],
+	# ★階段 2 第一批（2026-09-09）：乞食被拒。
+	#   ★target 走 `ctx:` 前綴＝【決策當下 ctx 裡的那個欄位】——因為施主是逐次決定的，
+	#   寫死一個字串會變成「對任何人乞食失敗一次，就對所有人折價」（spec §5② 的「接太粗」）。
+	"乞食": ["乞食", "ctx:aid_target_id"],
 }
 
 # ★★★缺席清單（階段 1，2026-09-09）：`OPTION_FAIL_KEY` 的【互補且互斥】另一半。
@@ -57,7 +61,6 @@ const NO_FAILURE_FEEDBACK: Dictionary = {
 	"佔村": "TODO:%s ── 佔領被擋＝做不成，同一 village 會重撞" % TODO_TICKET,
 	"併入": "TODO:%s ── join_rejected 已寫進 leader memory（interaction_system:1586）" % TODO_TICKET,
 	"吸納": "TODO:%s ── 同上另一端（faction_ai_system:6331）" % TODO_TICKET,
-	"乞食": "TODO:%s ── rejected_aid 已寫進 memory（interaction_system:1493）" % TODO_TICKET,
 	"外交": "TODO:%s ── envoy.reject（interaction_system:582）全庫 152 reject / 6 accept；systems 已判三條全成立" % TODO_TICKET,
 	"遷移找糧": "TODO:%s ── 到場沒糧＝只折價、路不通＝失效（法條兩類都在這條路上）" % TODO_TICKET,
 	"囤貨": "TODO:%s ── convoy dispatch 的 7 個靜默 return false（法條指定的第一份清單）" % TODO_TICKET,
@@ -149,7 +152,7 @@ static func prune(state: WorldState, team: TeamData) -> void:
 		Probe.bump("failure.pruned")
 
 # 決策引擎唯一入口：option 名 → 查接線表 → 折價乘數（未接線 option 恆 1.0＝零行為）。
-static func mult_for_option(state: WorldState, team: TeamData, option: String) -> float:
+static func mult_for_option(state: WorldState, team: TeamData, option: String, ctx = null) -> float:
 	# ★把【靜默缺席】變成可數的次數（階段 1）：用途是【排序】——先接被決策最多次的那幾個。
 	#   ★★它數的是【決策次數】不是【失敗次數】⇒ 是代理量，不是「損失了多少」。
 	# ★★★這段必須在 `recent_failures.is_empty()` 早退【之前】——
@@ -164,4 +167,18 @@ static func mult_for_option(state: WorldState, team: TeamData, option: String) -
 	var m = OPTION_FAIL_KEY.get(option)
 	if m == null:
 		return 1.0
-	return mult(state, team, String(m[0]), String(m[1]))
+	var tgt: String = String(m[1])
+	if tgt.begins_with("ctx:"):
+		# ★逐次目標：從決策當下的 ctx 讀。★★沒有 ctx／目標未知（-1）⇒ 不折價（1.0），
+		#   而不是退回一個粗粒度 target —— ★★★「不知道對誰」與「對誰都一樣」是兩件事。
+		if ctx == null:
+			return 1.0
+		var field: String = tgt.substr(4)
+		var raw = ctx.get(field)
+		if raw == null:
+			return 1.0
+		var tid: int = int(raw)
+		if tid == -1:
+			return 1.0
+		tgt = str(tid)
+	return mult(state, team, String(m[0]), tgt)
