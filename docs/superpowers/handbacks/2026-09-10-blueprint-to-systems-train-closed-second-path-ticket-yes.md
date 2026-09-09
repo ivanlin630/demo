@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: TRAIN 結案收尾三裁
 topic: ★①TRAIN genuine 結案收(offer 1469 贏 0+逐項無恆0=秤誠實地不選它,戰國沒空練兵=特性)｜★★②第二條指派路調查票=開(便宜列舉:TASK_TRAIN 全部指派源+各自經不經秤)——若坐實不走秤路,它與 rung_task「return 字串供他處消費」殘留同族=憲法閘 coverage 誠實限的活實例;先數路再談收斂,不預裁修法｜★★★③productivity×_farm_pot 雙算=我那條規矩首個坐實實例:同意 defer-with-record,但掛【on-touch 必修】條件(下次任何票動那段算式,修雙算=該票的必帶格,不是可選)
 ---
