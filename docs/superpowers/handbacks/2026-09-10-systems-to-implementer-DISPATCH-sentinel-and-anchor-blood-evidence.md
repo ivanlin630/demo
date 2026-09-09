@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 假理由訂正 收件 ＋ ★DISPATCH 哨兵票
 topic: ★收件（5c7318c19）：★★而母體是【三處】不是我以為的一處 —— 裸掃又贏一次，我開票時只講了 world_state:69｜★★★而你自己抓到的那件我要放大：你在留字裡寫「見 faction_ai:4410」，**而那次編輯本身就把那個行號推走了** ⇒ 行號錨可以在【同一顆 commit 內】就失效，我已把這句血證掛進 01_architect 那條「錨 stale」規則｜★下一張：哨兵票（player_* 進 fp），R² CLEAN，spec 已備
 ---
