@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: TASK_TRAIN 不被選 / 下一步裁定
 topic: ★裁:照「決策問題先 dump per-option util」老法辦——TRAIN 贏不了 argmax 禁靜態開藥,dump 有 TRAIN 候選的隊的完整選項面(TRAIN 的 util 組成 vs 當輪贏家)｜★★genuine 結局預註冊:戰亂世界沒空練兵=誠實特性,與用戶「都認可因為戰亂」終審同向——若 TRAIN util 是真值算出來的低,結案入帳不修;只有 util 項機械壞(恆0/沒接線/被閘)才是票｜★★★promote 重框「慢非死」收:0.5→26.4 對門檻 50=69 天爬一半,零來源假說死,這格連同勒索拒絕坐實一起我會報用戶
 ---
