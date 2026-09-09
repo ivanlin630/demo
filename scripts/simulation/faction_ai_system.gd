@@ -6122,7 +6122,10 @@ func _find_unowned_farmable_tile(state: WorldState, team: TeamData) -> Vector2i:
 		# ★L0 營地不設 outpost_level 也不 set_owner ⇒ 上面那行【看不見它】。
 		#   已有營地的格不該再當「紮營候選」——站在自己營地上時，生產性動作是紮根(L0→L1)。
 		if tile.camp_level > 0: continue
-		if tile.terrain == "mountain": continue   # 山不可農（見山村特化待 spec）
+		# ★讀【唯一 predicate】：舊版只擋山、不擋森林 ⇒ 隊會被派去森林蓋農田，
+		#   然後在建址端撞 wall.reject_terrain ——★那是【浪費一趟派遣】的硬後果，
+		#   不是評分說謊的軟 drift。（山村特化＝known_issues「M 山村採礦換糧」階段 3+，與本條不衝突）
+		if not OutpostSystem.terrain_allows("farming", tile.terrain): continue
 		return p
 	return Vector2i(-1, -1)
 

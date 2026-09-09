@@ -1,0 +1,2 @@
+token	summary	defer_until	met_check
+bed-kind-fixture-token	★陽性對照專用 token（不是真的 defer）：good_pending_bed.gd 的 blocker 指它	永不解除（它只是讓 fixture 不依賴 live registry）	false

@@ -19,7 +19,7 @@ cd "$REPO" || exit 2
 . "$(dirname "${BASH_SOURCE[0]}")/verdict-shapes.sh"
 FIX=".claude/hooks/fixtures/bed-kind"
 TSV="docs/process/merge-gates.tsv"
-DEFERS="docs/process/defers.tsv"
+DEFERS="${BEDKIND_DEFERS:-docs/process/defers.tsv}"
 
 # 回一行：OK 或 "紅因"。★單一判斷點：陽性對照與真檢查走【同一個函式】。
 check_one() {
@@ -61,6 +61,9 @@ check_one() {
 # ── 陽性對照（★每次都跑；★★四種紅各一格 + 一格反向綠）───────────────
 selftest() {
   bad=0
+  # ★對照樣本走【fixtures 自帶的 defers】：否則 pending 那格會綁在 live registry 上，
+  #   而 registry 裡的 token 一退場，整支閘就 ABORT（2026-09-10 真的發生過一次）。
+  DEFERS="$FIX/defers.tsv"
   for pair in \
     "unmarked_bed.gd|RED" \
     "invariant_not_wired_bed.gd|RED" \
@@ -81,6 +84,7 @@ selftest() {
       echo "[BED-KIND] ★對照失準：$n 期望 $want 實得 $got（$r）"; bad=1
     fi
   done
+  DEFERS="${BEDKIND_DEFERS:-docs/process/defers.tsv}"   # ★還原：真檢查仍讀 live registry
   [ "$bad" = "0" ]
 }
 

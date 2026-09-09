@@ -608,6 +608,16 @@ func start_upgrade_farming(state: WorldState, team: TeamData) -> bool:
 func start_upgrade_manufacturing(state: WorldState, team: TeamData) -> bool:
 	return start_upgrade_facility(state, team, "workshop")
 
+# ★★★地形是否允許蓋這個設施 —— 【唯一的 predicate】（2026-09-10，farm_pot 單一真相源票）。
+#   ★決策端（選址評分／派遣靶）與建址端從此讀【同一份】：
+#   在 decision_context 或 faction_ai 裡再寫一份地形清單，那就是第四個真相源。
+#   ★★沒有 required_terrain 的設施 ＝ 任何地形都行（照既有語意）。
+static func terrain_allows(facility: String, terrain: String) -> bool:
+	if not FACILITY_DEF.has(facility):
+		return false
+	var def: Dictionary = FACILITY_DEF[facility]
+	return (not def.has("required_terrain")) or String(def["required_terrain"]) == terrain
+
 # 共用 gate + 扣款 + 排程（呼叫端先驗 owner/faction 與 construction 空檔）
 func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTileData, facility: String) -> bool:
 	# ★同上：六條拒絕逐一具名 ＋ 標【物理 vs 判斷】（★這一層才是真正的拒絕大宗）

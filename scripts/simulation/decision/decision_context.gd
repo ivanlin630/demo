@@ -53,6 +53,11 @@ var produce_pull: float = 0.0   # ★製造 bootstrap 子根②：自家可造 o
 var idle_labor: float = 0.0          # 超現產能吸納的閒 PRODUCE 勞力（手數；team 所在 tile；只 PRODUCE=軍隊天然不算）
 var idle_employ_value: float = 0.0   # 雇用閒勞力於待建 mfg 設施的真 need-weighted 期望產出（anti-crank：全因子從 manufacturing 真公式反推；只加建設 util）
 var is_merchant: bool = false
+# ★不可農地的選址折價（沿用既有的 0.4，★不發明新數值）。
+#   ★★具名的理由：它的適用範圍在 2026-09-10 變寬了（山 → 任何 farming 不允許的地形），
+#   而【裸字面 0.4 會讓那個語意變化在 diff 上消失】。
+const FARM_UNFIT_MULT: float = 0.4
+
 var has_home_outpost: bool = false
 # ★家糧倉「值不值得回」的門檻（③票）：= RETURN_HYSTERESIS_DAYS × 這支隊自己的 burn。
 #   ★★舊版是全域 const 10.0 ——「10 食物」對 3 人隊是四天口糧、對 30 人隊不到半天，
@@ -462,7 +467,13 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _site: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_site_pos))
 	if _site != null and (c.can_settle_here or c.settle_resume_site != Vector2i(-1, -1) 			or c.own_camp_pos != Vector2i(-1, -1)):
 		# 選址品質：地力（productivity）× 可耕潛力（farmable terrain=能發展農業的地）。腳下=親見，最高信。
-		var _farm_pot: float = 0.4 if _site.terrain == "mountain" else 1.0   # 可農判準沿用既有慣例（山不可農、_find_unowned_farmable_tile:4750）
+		# ★★★可農判準改讀【唯一 predicate】（OutpostSystem.terrain_allows）：
+		#   舊版寫死「山不可農」，而建址端從 2026-09-10 起【森林也不能蓋農田】
+		#   ⇒ 舊版會把森林算成滿分農業用地，然後隊真的去蓋才被打回票。
+		# ★★注意：`FARM_UNFIT_MULT` 的【值沒變】（仍是 0.4），但它的【適用範圍變寬了】
+		#   （「山不可農」→「這塊地不能農」）——
+		#   ★★★一個常數的適用範圍變了而值沒變，是最容易被下一個人讀成【沒動過】的改動。
+		var _farm_pot: float = 1.0 if OutpostSystem.terrain_allows("farming", _site.terrain) else FARM_UNFIT_MULT
 		# ★§4c 反饋讀回：同一 leader 對這塊地的過往結局（失敗折價/興旺加分、線性衰減過期歸零）。
 		# 掛既有選址品質項＝不新增獨立 term 線；self-knowledge（只讀自己 leader memory）。
 		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0) * SettlementMemory.quality_multiplier(state, team, _site.tile_id)
