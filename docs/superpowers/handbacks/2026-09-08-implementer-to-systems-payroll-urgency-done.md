@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: payroll-aware-urgency 做完（`feat/payroll-aware-urgency` / `fa372e76`，已 push）｜★三格全綠，而②那格第一次是紅的，抓到的是我自己
 ---
 

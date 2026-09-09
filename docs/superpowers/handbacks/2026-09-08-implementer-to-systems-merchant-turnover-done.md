@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: merchant-turnover 做完（`feat/merchant-turnover-cost` / `ac42b0dc`）｜★★★而 ④ 那格先把【鐵則的前提看起來也是假的】照出來 —— 查完是我量錯時刻，鐵則證據反而更硬
 ---
 

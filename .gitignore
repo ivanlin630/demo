@@ -69,3 +69,7 @@ docs/measurements/.bed-sweep-inprogress.tsv
 #   ★★而它【不能只靠 gitignore】——ignore 之後它會安靜消失,而下游(QA)靠它工作
 #   ⇒ 規矩:大 specimen 留本地磁碟,而【它的 exact path 必須寫進同名的 .txt 卷面(那份有進版控)】
 *.specimen.jsonl
+
+# ★掃床暫存/debris（每輪重生，不進 repo）——2026-09-09 當機後盤點加上
+docs/measurements/.sweep-timeout-*.txt
+docs/measurements/.bed-sweep-*.tsv

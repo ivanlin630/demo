@@ -1,0 +1,29 @@
+﻿[TREE] path=A:/GDS/demo/.worktrees/bv0 commit=f910d423 clean=NO code-dirty=3
+[TREE]   *** measuring the WORKING TREE, not commit f910d423 ***
+[TREE]    M scripts/simulation/decision/decision_context.gd
+[TREE]    M scripts/simulation/decision/options.gd
+[TREE]    M scripts/simulation/order_system.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_context.gd::_home_granary_food::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/decision/need_oracle.gd::_team_has_facility::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_check_ore_surplus::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_enemy_outpost_positions::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_outpost_residency::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_faction_has_workshop::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_find_own_outpost::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::consolidate_target_of::gv_teamstate
+[gate] 類型分布: { "dispatch_entry": 8, "threshold": 10, "early_return": 6, "route": 10, "rng": 3, "taskarbiter": 28, "gv_belief_post": 1, "gv_belief_pre": 4 }
+[gate]  WARN（不擋 merge）：gv_belief_* 5 顆 —— ★【沒有逐顆判過是否 legit】
+[gate]     scripts/simulation/faction_ai_system.gd::_deposit_help_need::gv_belief_pre
+[gate]     scripts/simulation/faction_ai_system.gd::_evaluate_all_body::gv_belief_post
+[gate]     scripts/simulation/faction_ai_system.gd::_tick_info_scout::gv_belief_pre
+[gate]     scripts/simulation/faction_ai_system.gd::_update_escort::gv_belief_pre
+[gate]     scripts/simulation/faction_ai_system.gd::consolidate_target_of::gv_belief_pre
+[gate] ★★這個數字要【印出來】才不會靜靜長大；★★★而它不是「5 個違憲」，是【5 顆待判】。
+[CONSTITUTION-GATE] PASS (sites=70, removed=10)
+
