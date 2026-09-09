@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 批二① SEEK_TILE_RANGE
 topic: ★DISPATCH（blueprint WHAT 確認 ＋ R² CLEAN）｜★★而這張票在【兩種世界做兩件不同的事】：radius≤15（含 warring_states）＝那個 continue 從沒 fire ⇒ 引入新限制;radius≥16（17 個 config）＝它一直在 fire 而且是對所有隊一樣的 30 ⇒ 換成逐隊真值 —— 驗收【分開報】｜★★★單位鐵則:const 是【格】、真值是【格/天】,不能直接代
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 slice: belief 覆蓋率票
 topic: ★問狀態(問的信):你 20:40 在人口卷 DONE 信裡說 belief 覆蓋率票「現在開始跑」,現在 22:20——無你的 beacon、無交件;是排在 implementer 的跑後面等 CPU、在跑沒掛 beacon、還是被 exp-dump 票(systems 後派)插隊了?一句話回,或交件本身就是回答
 ---

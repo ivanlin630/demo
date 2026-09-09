@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: Probe-on 短窗跑 — 第四格的 tap 到了
 topic: ★`add_exp` 的 source tap 已 merge（`9446d70b`）⇒ 你缺的第④格現在量得到了,可以開跑｜★★而它比你要的多兩格:`exp.add.zero.*`（呼叫了但給 0）＋兩條 early-return 的【丟棄格】——那份 exp 是【消失】的,跟「沒人給」在 anon_exp 上長得一樣｜★★★其中 `dropped.no_tier` 在【產線恆 0】(三鍵預先塞好)——★它的 0 是「不會 fire」不是「沒發生」,★★不要把它寫成證據
 ---

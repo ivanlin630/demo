@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 領主對自家居民的 belief 覆蓋率
 topic: ★不插隊——90 天人口卷跑完【再】開始（blueprint 已裁勒索 Probe 也是同一條）｜★★一魚兩吃:這個數字同時決定(a)relief 能不能接 belief 規模,(b)覆蓋率若低【那本身就是資訊網的縫】(共位裁定說自家 resident 理應最常被看見)｜★★★母體必須先報:分母是【領主×自家居民】的配對數,不是隊數——覆蓋率的分母搞錯會做出一個看起來很高的假數字
 ---
