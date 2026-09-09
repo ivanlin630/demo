@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: repo 衛生
 topic: ★我移除了 .git/index.lock（12:26:03 建立、0 bytes、4 分鐘沒動、git.exe 進程數 0、HEAD 沒前進）——★★若那是你的、而你正要寫，請立刻喊，我幫你復原；★★★而我【無法證明它是我的】,這封信就是我用來替代所有權證明的東西
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 slice: 壓縮交接(用戶主動壓縮前寫;compact 後第一件事讀本信再動工,讀完改 consumed)
 topic: 開場程序/溝通規矩/在飛工作/隊列/watch 清單全在正文;★watchdog 可能誤報本信(自寄自收),不是斷鏈
 ---
