@@ -23,67 +23,9 @@ extends SceneTree
 func _initialize() -> void:
 	_run(); quit()
 
-func _run() -> void:
-	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 90
-	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "res://config/warring_states.json"
-	var seed_val: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
-	seed(seed_val)
-	Probe.arm()
-	var state: WorldState = MeasureBedHelper.arm_and_setup(cfg, true)
-
-	# specimen：k校驗story稽核已收口(QA verdict已產，2026-09-07)，90天長窗預設關閉——
-	# ★舊坑：90天全隊specimen在tick=20000就因檔案暴增(30天=114MB)被外部殺，人口卷本身跑不完。
-	# 要重開k校驗時設BED_SPECIMEN=1。
-	var specimen_on: bool = OS.has_environment("BED_SPECIMEN") and OS.get_environment("BED_SPECIMEN") == "1"
-	var all_ids: Array[int] = []
-	if specimen_on:
-		for tid in state.teams.keys(): all_ids.append(int(tid))
-		state.specimen_team_ids = all_ids
-		SpecimenTracer.reset()
-		SpecimenTracer.enabled = true
-		print("[specimen] 全隊取樣team_ids=%s" % str(all_ids))
-	else:
-		print("[specimen] 本輪關閉(BED_SPECIMEN!=1)——k校驗story稽核已收口，90天窗只跑人口卷聚合")
-
-	var runner := SimRunner.new()
-	var ticks: int = days * WorldState.TICKS_PER_DAY
-	var no_player := Vector2i(-1, -1)
-
-	# 人口卷：periodic per-team snapshot（minor_population/population/breed_progress），推導淨變化——
-	# ★不是出生/死亡各自計數的替代(那些已有全域tap，見下)，是「淨變化」+「75天/胎錨」的觀測。
-	var pop_samples: Dictionary = {}   # team_id -> Array[{tick, pop, minor, breed_progress}]
-	var teams_total_by_day: Array = []   # 逐日[{tick, total, beast, clean}]（乾淨分母，零新tap）
-
-	print("=== population_and_turnover_specimen_bed: config=%s days=%d ticks=%d seed=%d ===" % [
-		cfg, days, ticks, seed_val])
-
-	for tick in range(ticks):
-		runner.advance_tick(state, no_player)
-		if tick % 1440 == 0:   # 每日採樣一次（足夠看淨成長率趨勢，不需要逐tick）
-			var beast_n: int = 0
-			for tid2 in state.teams:
-				var t: TeamData = state.teams[tid2]
-				if int(tid2) < 0: beast_n += 1
-				if not pop_samples.has(tid2): pop_samples[tid2] = []
-				(pop_samples[tid2] as Array).append({
-					"tick": tick, "pop": t.population, "minor": t.minor_population,
-					"breed_progress": t.breed_progress,
-				})
-			teams_total_by_day.append({
-				"tick": tick, "total": state.teams.size(), "beast": beast_n,
-				"clean": state.teams.size() - beast_n,
-			})
-		if tick % 10000 == 0 and tick > 0:
-			print("[CHECKPOINT] tick=%d teams=%d breed.born累計=%d erase.minors_lost累計=%.0f merge.minors_moved_n累計=%.0f" % [
-				tick, state.teams.size(), int(Probe.counts.get("breed.born", 0)),
-				Probe.amounts.get("erase.minors_lost", 0.0), Probe.amounts.get("merge.minors_moved_n", 0.0)])
-
-	var specimen_path: String = "docs/measurements/2026-09-07-population-turnover.specimen.jsonl"
-	if specimen_on:
-		SpecimenTracer.flush()
-		SpecimenTracer.write_jsonl(specimen_path)
-
-	print("\n=== 人口儀器卷 結果(窗=%.2f天/%d ticks) ===" % [float(ticks) / float(WorldState.TICKS_PER_DAY), ticks])
+func _print_report(pop_samples: Dictionary, teams_total_by_day: Array, ticks: int, is_final: bool) -> void:
+	var tag: String = "=== 人口儀器卷 結果" if is_final else "--- [INTERIM REPORT] 期中(尚未跑完，被砍也有這份可用) ---\n人口儀器卷 期中結果"
+	print("\n%s(窗=%.2f天/%d ticks) ===" % [tag, float(ticks) / float(WorldState.TICKS_PER_DAY), ticks])
 	print("①出生 breed.born(全域)=%d" % int(Probe.counts.get("breed.born", 0)))
 	print("②成年(population_system.gd:93-94，2026-09-09已merge)：隊次(batches)=%d　人次(n)=%.0f" % [
 		int(Probe.counts.get("pop.mature.batches", 0)), Probe.amounts.get("pop.mature.n", 0.0)])
@@ -145,6 +87,72 @@ func _run() -> void:
 			anchor_days_per_litter[0], anchor_days_per_litter[n_a / 2], anchor_days_per_litter[n_a - 1]])
 	else:
 		print("  ★不可判——本窗無隊產生正向breed_progress訊號")
+
+func _run() -> void:
+	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 90
+	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "res://config/warring_states.json"
+	var seed_val: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
+	seed(seed_val)
+	Probe.arm()
+	var state: WorldState = MeasureBedHelper.arm_and_setup(cfg, true)
+
+	# specimen：k校驗story稽核已收口(QA verdict已產，2026-09-07)，90天長窗預設關閉——
+	# ★舊坑：90天全隊specimen在tick=20000就因檔案暴增(30天=114MB)被外部殺，人口卷本身跑不完。
+	# 要重開k校驗時設BED_SPECIMEN=1。
+	var specimen_on: bool = OS.has_environment("BED_SPECIMEN") and OS.get_environment("BED_SPECIMEN") == "1"
+	var all_ids: Array[int] = []
+	if specimen_on:
+		for tid in state.teams.keys(): all_ids.append(int(tid))
+		state.specimen_team_ids = all_ids
+		SpecimenTracer.reset()
+		SpecimenTracer.enabled = true
+		print("[specimen] 全隊取樣team_ids=%s" % str(all_ids))
+	else:
+		print("[specimen] 本輪關閉(BED_SPECIMEN!=1)——k校驗story稽核已收口，90天窗只跑人口卷聚合")
+
+	var runner := SimRunner.new()
+	var ticks: int = days * WorldState.TICKS_PER_DAY
+	var no_player := Vector2i(-1, -1)
+
+	# 人口卷：periodic per-team snapshot（minor_population/population/breed_progress），推導淨變化——
+	# ★不是出生/死亡各自計數的替代(那些已有全域tap，見下)，是「淨變化」+「75天/胎錨」的觀測。
+	var pop_samples: Dictionary = {}   # team_id -> Array[{tick, pop, minor, breed_progress}]
+	var teams_total_by_day: Array = []   # 逐日[{tick, total, beast, clean}]（乾淨分母，零新tap）
+
+	print("=== population_and_turnover_specimen_bed: config=%s days=%d ticks=%d seed=%d ===" % [
+		cfg, days, ticks, seed_val])
+
+	for tick in range(ticks):
+		runner.advance_tick(state, no_player)
+		if tick % 1440 == 0:   # 每日採樣一次（足夠看淨成長率趨勢，不需要逐tick）
+			var beast_n: int = 0
+			for tid2 in state.teams:
+				var t: TeamData = state.teams[tid2]
+				if int(tid2) < 0: beast_n += 1
+				if not pop_samples.has(tid2): pop_samples[tid2] = []
+				(pop_samples[tid2] as Array).append({
+					"tick": tick, "pop": t.population, "minor": t.minor_population,
+					"breed_progress": t.breed_progress,
+				})
+			teams_total_by_day.append({
+				"tick": tick, "total": state.teams.size(), "beast": beast_n,
+				"clean": state.teams.size() - beast_n,
+			})
+		if tick % 10000 == 0 and tick > 0:
+			print("[CHECKPOINT] tick=%d teams=%d breed.born累計=%d erase.minors_lost累計=%.0f merge.minors_moved_n累計=%.0f" % [
+				tick, state.teams.size(), int(Probe.counts.get("breed.born", 0)),
+				Probe.amounts.get("erase.minors_lost", 0.0), Probe.amounts.get("merge.minors_moved_n", 0.0)])
+		# ★2026-09-09加：每20000tick印一次完整期中報表——若這輪被GODOT_TIMEOUT砍，
+		# log裡最後一份[INTERIM REPORT]就是可用的部分結果(標明跑到第幾天)，不必整輪重跑。
+		if tick % 20000 == 0 and tick > 0:
+			_print_report(pop_samples, teams_total_by_day, tick, false)
+
+	var specimen_path: String = "docs/measurements/2026-09-07-population-turnover.specimen.jsonl"
+	if specimen_on:
+		SpecimenTracer.flush()
+		SpecimenTracer.write_jsonl(specimen_path)
+
+	_print_report(pop_samples, teams_total_by_day, ticks, true)
 
 	if specimen_on:
 		print("\n=== k校驗story稽核 specimen落地：%s ===" % specimen_path)
