@@ -91,7 +91,7 @@ static func estimated_payroll(state: WorldState, team: TeamData) -> float:
 		var leader: PersonData = state.persons.get(team.leader_id)
 		if leader != null:
 			var honor: float = (float(leader.values.get("義氣", 0.5)) 				+ float(leader.values.get("信義", 0.5))) / 2.0
-			var greed: float = float(leader.values.get("貧婪", 0.5))
+			var greed: float = float(leader.values.get("貪婪", 0.5))
 			npc_salary_mult = clampf(1.0 + (honor - greed * 0.5) * 0.4, 0.7, 1.3)
 	var named_payroll: float = 0.0
 	for pid in team.named_members:
@@ -103,7 +103,7 @@ static func estimated_payroll(state: WorldState, team: TeamData) -> float:
 	var _leader_prudence: float = 0.5
 	var _lead0: PersonData = state.persons.get(team.leader_id)
 	if _lead0 != null:
-		_leader_greed = float(_lead0.values.get("貧婪", 0.5))
+		_leader_greed = float(_lead0.values.get("貪婪", 0.5))
 		_leader_prudence = float(_lead0.values.get("慎重", 0.5))
 	var _rate0: float = clampf(
 		_leader_greed * CoinTreasury.INCOME_TAX_K - _leader_prudence * CoinTreasury.INCOME_TAX_K2,
@@ -153,7 +153,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 	#     今天第三次碰到同一個形狀（data_test / 全掃 / 這裡）。
 	var _lead1: PersonData = state.persons.get(team.leader_id)
 	var _rate0: float = clampf(
-		(float(_lead1.values.get("貧婪", 0.5)) if _lead1 != null else 0.5) * CoinTreasury.INCOME_TAX_K
+		(float(_lead1.values.get("貪婪", 0.5)) if _lead1 != null else 0.5) * CoinTreasury.INCOME_TAX_K
 		- (float(_lead1.values.get("慎重", 0.5)) if _lead1 != null else 0.5) * CoinTreasury.INCOME_TAX_K2,
 		0.0, CoinTreasury.INCOME_TAX_MAX)
 	var anon_total: float = AnonTierSystem.total_wage(team)
