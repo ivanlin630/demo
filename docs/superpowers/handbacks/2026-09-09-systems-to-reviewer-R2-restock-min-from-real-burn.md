@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 普查批一③ RESTOCK_MIN
 topic: R² 請審｜★核心主張:N 不用發明——返家的成功條件已經定義它了(RETURN_HYSTERESIS_DAYS,options.gd:151)⇒ home_restock_min = 5天 × 真 burn,零新數字｜★★而它【綁定了兩個決定】,我寫進誠實限,請你判這個綁定是聰明還是偷懶｜★★★headless_test 有四處硬編舊公式期望,我要求「改表述不要改數字」,請看這條會不會被繞過
 ---
