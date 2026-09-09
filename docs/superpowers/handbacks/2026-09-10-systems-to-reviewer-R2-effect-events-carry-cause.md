@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 果事件帶因（用戶親測兩次揭出）
 topic: R² 請審｜★母體:20 個 emit 點,params 幾乎全是「誰對誰」而沒有「為什麼」——★★而 `combat_start` 自己印的就是「宣戰」且它也沒有因 ⇒「求和沒有上游宣戰」即使有宣戰觀眾也看不到為什麼｜★★★要你審的是紀律那段:我用「只印產生端已經讀到的量」當防 spam 的閘,而我不確定它夠不夠
 ---

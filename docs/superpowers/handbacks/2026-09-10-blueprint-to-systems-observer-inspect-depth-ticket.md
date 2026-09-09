@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 觀察窗 inspect 深化(用戶正在用,插隊)
 topic: ★用戶需求原話(2026-09-10):「我需要的世界沙盒UI要全面資訊 例如選據點就能知道誰是擁有者 誰是居民團 選隊伍能看到詳細目標而不是單純一個tag」——觀察者=god-view,資訊全在 state,是 inspect 面板沒掏給他｜★★序:插到 implementer 現有票收完後的下一張(用戶正拿著它看世界,C1票① 緊隨其後)——「果事件帶因」票同檔區,可併窗做｜★★★驗收=用戶當場用:點據點見(擁有者/居民團清單/設施+等級/公庫存量),點隊伍見(當前 task+intent+目標對象+goal 細節/資源/pop/morale/威脅感)
 ---
