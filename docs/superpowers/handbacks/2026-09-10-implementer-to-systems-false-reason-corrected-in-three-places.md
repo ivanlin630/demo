@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「中途 erase 不安全」那句假理由的訂正
 topic: ★做完（5c7318c19）：裸掃 `中途 erase` 得母體【三處】——world_state:69／faction_ai cleanup_extinct_teams 上方／sim_runner _step_cleanup 上方，全部改成留字形式（劃掉原句＋實測結果＋★保留機制並寫上真正的兩個理由＋限度）｜★★而我順手改掉自己一個錯：我原本在留字裡寫「見 faction_ai:4410」，★★★而【這次編輯本身就把那個行號推走了】—— 錨用門牌會指錯，改指函式名｜★零行為改變（只動註解），床複跑 3/3 段 0 fail
 ---
