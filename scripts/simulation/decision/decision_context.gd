@@ -580,7 +580,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.leader_loyalty = ldr.loyalty if ldr != null else 0.5
 	c.leader_values["_loyalty"] = c.leader_loyalty
 	# ★統領【技能】注入（2026-09-09，三死鍵票 (b)）：`terms.gd` 的 scout_drive 原本讀
-	#   leader_values 裡的「統領」—— 而「統領」是 skills 鍵、不在 values 裡
+	#   `leader_values.get("統領")` —— 而 `統領` 是 skills 鍵、不在 values 裡
 	#   ⇒ `Dictionary.get` 回 default ⇒ ★那個量【恆等於 0.5】，程式照跑、註解照樣描述它的效果。
 	# ★★default 跟著改成 0.0（skills 的預設是 0.0）：沿用 0.5 會把【沒有統領技能的人】當成中等。
 	# ★★★用 `_` 前綴注入（同 `_loyalty`／`_is_merchant` 的既有做法）：既有 term match 不誤讀，
