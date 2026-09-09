@@ -113,3 +113,57 @@ vision_system.gd:41  for other_id in state.teams（被觀測的那一側）
 ②不改 teams_pending_erase 的「tick 尾單點 erase」設計 —— ★那個設計是對的
 ③不修 recovery_r1_test／headless_test 的既有紅（★但要證明它沒變多）
 ```
+---
+
+## ⑤ ★★★R² 回件（2026-09-10）：**CLEAN**，而【我標未驗的那一格】被追到底了
+
+### (1) 「encounter 期間清除會不會抽掉地基」——★不會，而且**我怕的情境結構上進不去**
+
+```
+第一層（每輪處理 advance_encounter_tick）：靠 state.encounter_units（獨立 per-person 名冊）
+  ＋ encounter_attacker_id/defender_id（★純 int 不是物件參照）；
+  _has_active_units／_all_exited（:915-931）只掃 encounter_units，★完全不碰 state.teams。
+  唯一 state.teams.get(...) 那處（:890 messenger_exit）已 `if parent:` 守著（:891）。
+第二層（resolve_encounter_end）：:1194/:1204/:1211/:1229 每處 get(...) 後面都接 `if t:`。
+⇒ 兩層都是防禦寫法，team 不見了就跳過那段記帳，不會崩。
+
+★★★而【我怕的那個情境結構上不會發生】：teams_pending_erase 的寫入點只有
+   faction_ai_system.gd:2423/2440/4408-4409 —— ★全部在正常決策迴圈裡，
+   而 encounter_active 時整段跳過那個迴圈。
+   ⇒ **encounter 進行中，沒有任何程式碼路徑會把新的隊標記成待清除**
+     （全庫查 encounter_system／npc_combat_system：零筆 `teams_pending_erase`）。
+   ⇒ ★★「encounter 正在用的隊，恰好是這一刻被判死的隊」不會發生 ——
+     ★★★不是機率低，是**判死的程式碼在 encounter 期間根本不會被執行**。
+```
+
+★**兩層理由都記在這裡**（R² 的建議）：防禦寫法讓它不會崩／結構讓那個情境進不去。
+★★**而這也界定了窗的長度**：encounter 期間**不會新增**待清除者
+⇒ 存活的是 **encounter 開始那一刻已經在 pending 裡的那些** ⇒ 窗 ＝ **encounter 全長 ＋ 1 tick**。
+
+### (2) early-return 路徑上跑清除：★沒找到反例，論證成立
+
+```
+_run_systems（:351）在 :354 檢查【之前已經完整跑完】（pass_r 是它的回傳值，不是進行中的引用）
+⇒ 不存在「pass 還在跑、cleanup 把它腳下的隊抽走」的交錯。
+下游：sim_bridge.gd:86-87 消費 "player_turn" 只是把訊號原樣往上傳給 UI，★不持有 team_ids 快照；
+      :309 的 all_teams 是 _advance_tick_body 的【區域變數】，函式一 return 就消失。
+```
+
+### (3) fp 反向斷言：不脆 —— ★但把「同一個構造場景」寫死
+
+**驗收表⑤那一格補上（照 R² 的字）**：
+
+```
+★本格【必須在①②的同一個構造場景上跑】（構造一個 encounter ＋ 同 tick 有隊滅團），
+★★【不得】用自然長跑／隨機 seed 驗 —— 否則「沒觸發」與「沒做」無法分辨。
+⇒ ★★★這樣「窗要選到確定有滅團的那一段」就不是散在腦裡的判斷，是寫在驗收表裡的規則。
+```
+
+### (4) R² 順手記的一筆（我收）
+
+```
+★「半個守衛」比【完全沒守衛】更危險 —— 因為它不會引人懷疑。
+  （vision_system:27 已經有守衛，而它用的是 has()，認不出 pending_erase。）
+```
+
+⇒ **R² 判 CLEAN，直接 dispatch。**
