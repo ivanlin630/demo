@@ -78,6 +78,13 @@ func is_live_team(tid: int) -> bool:
 # ★第二個名字：現有兩處消費的【不是布林】，是餵給 succeed_or_disband_faction 的排除集合
 #   ⇒ 只給 is_live_team 消滅不了那段重複。★★兩個名字各對應一種真實用法，
 #   ★★★不發明第三個「將來也許有人要」的介面。
+# ★玩家能不能把它當互動對象＝【一條規則、兩個寫入端】（player_command_system:970 與
+#   interaction_system:298）。★★抽在這裡是因為那兩處各有自己的額外前提
+#   （前者 combat_target == -1、後者 current_task 非 diplomacy/loot），
+#   ★★★共用的只有【它還活著嗎】—— 而普查上次只點到其中一邊，那正是分兩份的下場。
+func can_be_player_target(tid: int) -> bool:
+	return is_live_team(tid)
+
 func pending_erase_set() -> Dictionary:
 	var d: Dictionary = {}
 	for _pid in teams_pending_erase:
@@ -708,6 +715,11 @@ func erase_teams(tids: Array) -> void:
 		team_known.erase(dtid)
 		team_discovered.erase(dtid)
 		team_intel.erase(dtid)
+		# ★★★玩家的互動對象清單也要（殭屍窗群乙）：一個 id 進了清單之後那支隊死掉，
+		#   ★這個 id 會【留在清單裡】—— 玩家看到的不是殭屍，是【指向已刪除物件的 id】。
+		#   ★★掛在這裡的理由：dangling ref 的清除要掛在【物件消失的那一刻】，
+		#   ★★★不是掛在【下次有人來看的時候】——而這個 chokepoint 已經在清 team_intel 了。
+		player_pending_targets.erase(dtid)
 		teams.erase(dtid)
 
 

@@ -970,6 +970,9 @@ func refresh_colocation_targets(state: WorldState) -> void:
 	for other_id in state.teams:
 		if other_id == pt.team_id:
 			continue
+		# ★寫入端①（群乙）：待刪除的隊不得進玩家的互動對象清單
+		if not state.can_be_player_target(other_id):
+			continue
 		var other: TeamData = state.teams[other_id]
 		if other.tile_pos != pt.tile_pos:
 			continue

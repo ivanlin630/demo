@@ -295,6 +295,11 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 					return
 				# 路徑 4：NPC 無敵意 → 玩家可主動選擇互動
 				else:
+					# ★寫入端②（群乙）：★★R² 查實它是【排除 diplomacy/loot 之後的 default 分支】
+					#   ＝「同格且平靜相遇」這個最常見情境本身 ⇒ 比寫入端①更容易踩到。
+					#   （:245 的 has() 與 :260 的 null 檢查都擋不住 pending_erase：半個守衛。）
+					if not state.can_be_player_target(npc_id):
+						return
 					if not state.player_pending_targets.has(npc_id):
 						state.player_pending_targets.append(npc_id)
 					return
