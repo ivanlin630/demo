@@ -180,6 +180,10 @@ func _fmt(v) -> String:
 		return "〈物件〉尚未轉成可讀值 —— ★人話層清單的一筆（票②第二個產物）"
 	if v is float:
 		return "%.3f" % v
+	# ★空集合印「（無）」而不是「[0 項]」：★★空值與【未接出】在畫面上必須不同形
+	#   —— 否則天窗要防的病會以【空值】的形態溜過去（systems 立為慣例 2026-09-10）。
+	if (v is Array and (v as Array).is_empty()) or (v is Dictionary and (v as Dictionary).is_empty()):
+		return "（無）"
 	if v is Array:
 		return "[%d 項] %s" % [v.size(), str(v).substr(0, 60)]
 	if v is Dictionary:

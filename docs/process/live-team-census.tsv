@@ -1,0 +1,77 @@
+# 普查：誰在迭代 state.teams，而它需要的是【活著的】還是【全部的】？
+# 產於 is_live_actor 票（HOW: docs/superpowers/specs/2026-09-10-is-live-actor-named-predicate-HOW.md）
+# ★本票【不修任何一站】——清單交上游判優先序、分票開（逐站後果不同，混一張票＝無法驗收的大改）。
+#
+# 母體撈法（★我自己重撈，沒有沿用 spec 的 pattern）：
+#   ①grep -rn "in state\.teams" scripts/simulation scripts/data --include=*.gd  ⇒ 60 行
+#     ★其中 6 行是【子字串誤命中】（teams_on_tile / teams_by_tile / teams_pending_erase）⇒ 真命中 54
+#     ★★而 spec 寫 62：差額 2 ＝ 本票剛剛消滅的那兩處逐字重複（現在是 state.pending_erase_set()）
+#   ②R² 找到的【先存變數／當參數傳】那一類 6 站，逐站覆核後併入 ⇒ 母體 60
+#   ③我另掃 state.teams.values() / 裸 state.teams 當參數 ⇒ 零命中（與 R² 一致）
+#   ⇒ 本表 61 列 ＝ 60 ＋ 【清除端自己】1 站（faction_ai:4416，它迭代的是 teams_pending_erase，
+#     ★被 ①的過濾排除掉，我手動收錄——因為讀這張表的人一定會問「那清除端呢」）
+#
+# class：A=需要活著的（對它做事／玩家可見）｜B=需要全部的（記帳/守恆/fp/cleanup 自己）｜C=讀 code 判不出來
+# ★★★C 這一類必須存在：一份沒有 C 的普查是可疑的（它表示分類者把不確定的塞進了 A 或 B）。
+site	func	class	reason
+scripts/simulation/encounter_system.gd:1403	_find_resident_team_on_tile	A	挑一支居民隊來互動——挑到殭屍＝跟死人交涉
+scripts/simulation/faction_ai_system.gd:630	_has_inflight_settler	A	「同派系已有人在去拓殖的路上」＝殭屍會讓活隊誤以為有人去了 ⇒ 拓殖被抑制
+scripts/simulation/faction_ai_system.gd:953	_evaluate_all_body	A	★主決策迴圈：殭屍隊【還會做一次決策】（它這 tick 已判死）
+scripts/simulation/faction_ai_system.gd:1033	_evaluate_all_body	A	同上第二段；它有 teams.has 復查（防 erase）★但沒有 pending 復查（不防殭屍窗）
+scripts/simulation/faction_ai_system.gd:2479	tick_relocations_all	A	對隊執行遷移＝對死人做事
+scripts/simulation/faction_ai_system.gd:2841	_resolve_scout_target	A	挑同派系隊當斥候目標
+scripts/simulation/faction_ai_system.gd:4825	_try_resume_construction	A	「已有人施工」⇒ 殭屍佔著位置 ⇒ 工地無人續建
+scripts/simulation/faction_ai_system.gd:4832	_try_resume_construction	A	同上第二段（挑接手的隊）
+scripts/simulation/faction_ai_system.gd:4890	_resident_team_for_construction	A	挑居民隊接手工程
+scripts/simulation/faction_ai_system.gd:4986	_dispatch_convoy	A	「已有 convoy 在路上」的判定（drop 點之一）
+scripts/simulation/faction_ai_system.gd:7044	_evaluate_uprising	A	挑鄰近生產隊當起事對象
+scripts/simulation/interaction_system.gd:953	_market_peer_trade	A	跟 peer 成交＝跟死人交易
+scripts/simulation/interaction_system.gd:1668	_find_existing_resident	A	找既有居民隊
+scripts/simulation/interaction_system.gd:1693	_convert_to_resident	A	把子隊轉成居民時掃同格隊
+scripts/simulation/npc_ai_system.gd:199	_find_revenge_redirect	A	找復仇對象的接手者
+scripts/simulation/npc_combat_system.gd:151	team_strength	A	★把護衛隊的戰力加進來——殭屍護衛會【灌水】一支隊的戰力，而戰力餵決策
+scripts/simulation/npc_combat_system.gd:374	_end_combat	A	戰後找護衛隊
+scripts/simulation/outpost_system.gd:261	_has_resident_on_tile	A	據點有沒有居民＝殭屍會讓它看起來有人住
+scripts/simulation/outpost_system.gd:369	_tick_construction	A	挑正在施工的隊推進工程
+scripts/simulation/outpost_system.gd:850	_has_control	A	據點控制權判定
+scripts/simulation/player_api_mapper.gd:352	map_location_context	A	★玩家可見面：殭屍隊會在「這格有誰」裡閃現一 tick
+scripts/simulation/player_api_mapper.gd:743	map_subteam_panel	A	★玩家可見面：子隊面板
+scripts/simulation/player_api_mapper.gd:757	map_subteam_panel	A	★玩家可見面：同上第二段
+scripts/simulation/player_api_mapper.gd:810	map_visible_teams_render	A	★玩家可見面：地圖渲染
+scripts/simulation/player_command_system.gd:970	refresh_colocation_targets	A	★玩家的互動對象清單——他可能對一支死了的隊按下按鈕
+scripts/simulation/reaction_system.gd:439	_spawn_exile_or_join	A	流亡者要加入誰
+scripts/simulation/strategic_ai_system.gd:328	_tile_has_resident	A	同 outpost 的居民判定
+scripts/simulation/vision_system.gd:39	tick_discovery	A	★發現＝寫進 belief：發現一支這 tick 就會消失的隊 ⇒ 留下一筆指向不存在隊的 belief
+scripts/simulation/decision/decision_context.gd:708	gather	A	同派系同僚掃描（餵決策）
+scripts/simulation/decision/goal_resolver.gd:353	_distribute_candidates	A	convoy 候選（對它派活）
+scripts/simulation/decision/goal_resolver.gd:457	_deliver_candidates	A	同上
+scripts/simulation/observer_query_api.gd:66	query_all_teams	A	★玩家可見面（R² 初判，我覆核＝同意）
+scripts/simulation/observer_query_api.gd:133	query_map_teams	A	★玩家可見面（同上）
+scripts/simulation/observer_query_api.gd:184	_residents_here_now	A	★玩家可見面（同上）
+scripts/simulation/coin_audit.gd:11	total	B	守恆記帳：★殭屍身上的錢【還在世界裡】，漏算它才會假性不守恆
+scripts/simulation/invariant_audit.gd:18	_check_population	B	稽核＝本來就要看全部
+scripts/simulation/invariant_audit.gd:38	_check_faction_bidir	B	同上
+scripts/simulation/invariant_audit.gd:49	_check_subteam_bidir	B	同上
+scripts/simulation/invariant_audit.gd:65	_check_roster_bidir	B	同上
+scripts/simulation/invariant_audit.gd:90	_check_anon_cohort	B	同上
+scripts/simulation/invariant_audit.gd:103	_check_captive_cohort	B	同上
+scripts/simulation/invariant_audit.gd:117	_check_no_dangling_team_id	B	同上（★它查的正是懸空引用，更需要看全部）
+scripts/simulation/order_system.gd:577	audit_escrow	B	託管守恆稽核
+scripts/simulation/order_system.gd:578	audit_escrow	B	同上（內層迴圈）
+scripts/simulation/population_system.gd:30	check_overflow	B	人口不變量檢查（★它是稽核不是行為）
+scripts/simulation/population_system.gd:65	check_overflow	B	同上（pop 驟降偵測）
+scripts/simulation/population_system.gd:77	check_overflow	B	同上（逐隊派工的外層）
+scripts/simulation/game_setup.gd:127	_apply_money_genesis	B	★創世期：teams_pending_erase 恆空 ⇒ 兩者等價（列出來是因為【等價不是不存在】）
+scripts/simulation/game_setup.gd:141	_apply_money_genesis	B	同上
+scripts/simulation/game_setup.gd:156	_apply_money_genesis	B	同上
+scripts/simulation/game_setup.gd:171	_seed_creation_market_known	B	同上
+scripts/simulation/game_setup.gd:551	_is_tile_occupied	B	同上（創世佈點）
+scripts/simulation/faction_ai_system.gd:4416	cleanup_extinct_teams	B	★它【就是】清除端本身——這一站永遠不該過濾
+scripts/simulation/sim_runner.gd:309	(pass.byteam probe)	B	記帳本來就該看見全部（R² 初判，覆核同意）
+scripts/data/state_fingerprint.gd:77	_emit_teams	B	★fp 序列化本體；且 :145 本來就把 teams_pending_erase.size() 算進 fp
+scripts/simulation/labor_system.gd:31	ensure_fresh	C	同格 PRODUCE 隊掃描 ＋ 發 labor_crisis 叫醒：殭屍觸發的叫醒【對誰有害說不清】
+scripts/simulation/labor_system.gd:59	pool_of	C	★勞力池：殭屍這 tick 還在格子上——它的人今天到底有沒有幹活，是語意問題不是語法問題
+scripts/simulation/labor_system.gd:75	compute_alloc	C	同上（分配）
+scripts/simulation/manpower_system.gd:272	tick_all	C	兵役/人力逐隊 tick：對將死之隊做一次結算，後果不明
+scripts/simulation/population_system.gd:82	_mature_minors	C	讓一支這 tick 會被 erase 的隊的小孩成年——多半無害，★但「無害」是猜的
+scripts/simulation/resource_system.gd:348	flush_forage_episodes	C	R² 初判 [A]?；★我覆核後降成 C：清暫存/發覓食訊息對死者的後果我讀不出來

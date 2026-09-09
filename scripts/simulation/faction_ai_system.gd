@@ -4402,9 +4402,7 @@ func _on_team_extinct(state: WorldState, team: TeamData) -> void:
 		f.member_team_ids.erase(team.team_id)
 		if f.leader_team_id == team.team_id:
 			# ★繼承-lite：排除本 tick 已判死未 erase 的隊（既有 teams_pending_erase＝正好要排除的集合）
-			var _pending: Dictionary = {}
-			for _pid in state.teams_pending_erase: _pending[_pid] = true
-			state.succeed_or_disband_faction(team.faction_id, team.team_id, _pending)
+			state.succeed_or_disband_faction(team.faction_id, team.team_id, state.pending_erase_set())
 	if not state.teams_pending_erase.has(team.team_id):
 		state.teams_pending_erase.append(team.team_id)
 

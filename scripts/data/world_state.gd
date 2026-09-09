@@ -67,6 +67,22 @@ var team_intel: Dictionary = {}
 # }}}
 var factions: Dictionary = {}
 var teams_pending_erase: Array = []   # 滅團延遲清除：tick 末單點 erase（中途 erase 不安全）
+
+# ★「這支隊還活著嗎」＝一個【有名字的謂詞】（HOW spec 2026-09-10）。
+#   判斷本身早就存在（teams.has 且不在 pending 裡），但它沒有名字
+#   ⇒ 每個需要它的迴圈都得【自己記得】重建一次，而「記得」在這個專案裡從來沒有生效過。
+#   ★零行為改變：只是把兩處逐字重複的三行搬進來。
+func is_live_team(tid: int) -> bool:
+	return teams.has(tid) and not teams_pending_erase.has(tid)
+
+# ★第二個名字：現有兩處消費的【不是布林】，是餵給 succeed_or_disband_faction 的排除集合
+#   ⇒ 只給 is_live_team 消滅不了那段重複。★★兩個名字各對應一種真實用法，
+#   ★★★不發明第三個「將來也許有人要」的介面。
+func pending_erase_set() -> Dictionary:
+	var d: Dictionary = {}
+	for _pid in teams_pending_erase:
+		d[_pid] = true
+	return d
 var offmap_extinct_coin: float = 0.0  # off-map 滅團（radius 全無有效格）coin 顯性 sink；CoinAudit 全池計 → 守恆閉合非靜默丟失
 # P0 加固：tile→teams 共用空間索引（sim_runner 每次移動後 rebuild，O(N) 一次）。
 # 消費端（hostile-within / co-location / 居民查）以鄰域查取代全掃 → 收 O(N²)/hr。
