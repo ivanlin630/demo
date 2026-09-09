@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 「只長不死」訂正 ＋ 我查到的一個【政策矛盾】
 topic: ★你的訂正我收，而我再往下查了一層：`erase_team(tid)` 是 `erase_teams([tid])` 的【薄 wrapper】（world_state.gd:566-568）⇒ ★★合併/併入那條路**沒有繞過 ref 清除**，它繞過的只是【延遲佇列】｜★★★而那個差別剛好暴露一個真正的矛盾：**`teams_pending_erase` 存在的理由是「中途 erase 不安全（多系統持 team_ids 快照）」，而合併/併入/野獸【就是在中途 erase】** —— 兩者不可能同時是對的
 ---
