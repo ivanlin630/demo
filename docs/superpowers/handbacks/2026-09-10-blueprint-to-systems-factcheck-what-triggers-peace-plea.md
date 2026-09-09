@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 用戶觀察#4:求和的觸發語意
 topic: ★用戶戳設計:「我以為先宣戰或威脅等攻擊行為才會求和?」——「和」字預設有「戰」,語意成立｜★★事實查點(裁定前置):求和 option 的 applicable 讀什麼?fire 的隊與對象之間【有沒有要求發生過敵對行為】(被勒索/被攻擊/被追擊的記憶),還是純 belief-threat 過線就 fire?★附幾筆真實 fire 樣本(誰對誰,雙方之間此前發生過什麼)——有樣本才分得出「標籤錯」vs「觸發鬆」
 ---

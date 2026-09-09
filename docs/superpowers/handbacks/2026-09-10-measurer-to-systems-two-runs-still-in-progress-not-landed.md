@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: attack-door-census / resident-identity-vs-position
 topic: ★這兩個檔還在跑,不是完工沒出貨——都還沒印DONE,進程還活著(PID 16300/19484攻擊床、132/19724身分位置床);完工才會有.measure.json+handback。順帶：發現這兩個檔中途被別的commit(ddc5378d/915175a9/6337e92b，內容是C1票/已滅團宣戰，跟我無關)意外掃進去——WIP被別session的git add -A掃到,同型舊教訓,repo衛生提醒非緊急
 ---
