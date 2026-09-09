@@ -83,10 +83,26 @@ static func remove_anon(team: TeamData, tier: String, count: int) -> int:
 		return 0
 	return AnonCohort.remove(team.anon_cohorts, tier, "healthy", count)
 
-static func add_exp(team: TeamData, tier: String, exp: float) -> void:
+# ★★★`source` 是【必填】不是預設值（systems 立 2026-09-09，同 bumps sink 那一手）：
+#   有預設值就會被忘記傳，而【忘記的那一版看起來仍然正常】——
+#   而這格的全部意義就是分開「exp 累積中」與「exp 零來源」⇒ ★沒有 source 的 tap 等於沒做。
+# ★建議 source 值：combat_survivor_winner / combat_survivor_loser / train_npc / train_player
+#   ★★兩個 combat 不合併：贏家有 bonus，合起來就答不出「贏了才有用嗎」。
+static func add_exp(team: TeamData, tier: String, exp: float, source: String) -> void:
+	if Probe.enabled:
+		# ★「呼叫了但給 0」與「沒呼叫」是兩件事 —— 這張票就是在分辨這種東西。
+		if exp <= 0.0:
+			Probe.bump("exp.add.zero." + source)
+		else:
+			Probe.bump("exp.add." + source)
+			Probe.note("exp.add.amount." + source, exp)
 	if tier == "菁英":
+		if Probe.enabled: Probe.bump("exp.add.dropped.elite." + source)
 		return    # 無下一階
 	if not team.anon_exp.has(tier):
+		# ★★這條 early-return 也要看得見：exp 給了、tier 不存在 ⇒ 那份 exp 【消失了】，
+		#   而它跟「沒人給 exp」在 anon_exp 上長得一模一樣。
+		if Probe.enabled: Probe.bump("exp.add.dropped.no_tier." + source)
 		return
 	team.anon_exp[tier] = float(team.anon_exp[tier]) + exp
 

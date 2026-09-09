@@ -1292,9 +1292,9 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	for exp_tier in AnonTierSystem.TIER_ORDER:
 		if exp_tier == AnonCohort.TIER_ELITE: continue
 		if winner_team != null and AnonTierSystem.tier_count(winner_team, exp_tier) > 0:
-			AnonTierSystem.add_exp(winner_team, exp_tier, EXP_SURVIVOR + EXP_VICTORY_BONUS)
+			AnonTierSystem.add_exp(winner_team, exp_tier, EXP_SURVIVOR + EXP_VICTORY_BONUS, "combat_survivor_winner")
 		if loser_team_exp != null and AnonTierSystem.tier_count(loser_team_exp, exp_tier) > 0:
-			AnonTierSystem.add_exp(loser_team_exp, exp_tier, EXP_SURVIVOR)
+			AnonTierSystem.add_exp(loser_team_exp, exp_tier, EXP_SURVIVOR, "combat_survivor_loser")
 	# 新：俘虜存入 prisoner_population，上限 = winner population
 	for u in state.encounter_units:
 		if not u.get("is_prisoner", false): continue

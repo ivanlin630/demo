@@ -195,7 +195,7 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 			target_tier = tier; break
 	if target_tier == "":
 		return { "ok": true, "msg": "訓練（-%.0f coin,無可升階對象）" % TRAIN_COST_COIN }
-	AnonTierSystem.add_exp(pt, target_tier, TRAIN_EXP_GAIN)
+	AnonTierSystem.add_exp(pt, target_tier, TRAIN_EXP_GAIN, "train_player")
 	var promoted: int = 0
 	for tier in AnonTierSystem.TIER_ORDER:
 		if tier == AnonCohort.TIER_ELITE: break

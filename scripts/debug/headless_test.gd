@@ -10123,10 +10123,10 @@ func _test_add_remove_anon() -> void:
 
 func _test_add_exp() -> void:
 	var t := TeamData.new()
-	AnonTierSystem.add_exp(t, "平民", 30.0)
+	AnonTierSystem.add_exp(t, "平民", 30.0, "test")
 	assert(abs(t.anon_exp["平民"] - 30.0) < 0.01)
 	# 菁英 無 exp slot → no-op
-	AnonTierSystem.add_exp(t, "菁英", 99.0)
+	AnonTierSystem.add_exp(t, "菁英", 99.0, "test")
 	assert(not t.anon_exp.has("菁英"))
 	print("AnonTier Task3b OK")
 
