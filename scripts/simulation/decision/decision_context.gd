@@ -476,6 +476,14 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _farm_pot: float = 1.0 if OutpostSystem.terrain_allows("farming", _site.terrain) else FARM_UNFIT_MULT
 		# ★§4c 反饋讀回：同一 leader 對這塊地的過往結局（失敗折價/興旺加分、線性衰減過期歸零）。
 		# 掛既有選址品質項＝不新增獨立 term 線；self-knowledge（只讀自己 leader memory）。
+		# ★★★【on-touch 必修】：這一行有一個【已知的雙算】（blueprint 裁 2026-09-10）——
+		#   `productivity` 是【逐地形生成】的（world_generator.gd:90-91 讀 PRODUCTIVITY_RANGE[terrain]），
+		#   而 `_farm_pot` 也是地形的函數 ⇒ ★同一個資訊（地形）進了同一個秤【兩次】。
+		# ★現在【刻意不修】：兩者都是地形的單調函數 ⇒ 方向一致、只是權重被平方，不是符號錯；
+		#   而單獨開一張票的成本（spec→R²→驗收）高於它現在造成的偏差。
+		# ★★但【下一次任何票動到這一行】，修雙算是【那張票的必帶格，不是可選】。
+		# ★★★它是 blueprint「同一資訊禁進兩次秤」那條規矩的【第一個坐實實例】。
+		#   詳 → known_issues「地形被算了兩次」條目。
 		c.settle_site_quality = clampf(_site.productivity * _farm_pot, 0.0, 1.0) * SettlementMemory.quality_multiplier(state, team, _site.tile_id)
 		# ETA=既有工期常數 + 殘距（回工地的路程；腳下=0）。零新旋鈕。
 		var _dist: int = FactionAISystem._hex_dist(team.tile_pos, _site_pos)
