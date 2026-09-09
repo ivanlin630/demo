@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 普查批一① MOVE_TILES_PER_DAY 接上執行端真成本
 topic: R² 判決 — premise_contradiction 確認，halt
 ---

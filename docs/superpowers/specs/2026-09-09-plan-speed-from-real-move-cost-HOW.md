@@ -1,6 +1,6 @@
 # HOW spec：計畫用的移速接上【執行端真正的每格成本】
 
-owner: systems ｜ 2026-09-09 ｜ player_reachable: no ｜ 狀態：待 R²
+owner: systems ｜ 2026-09-09 ｜ player_reachable: no ｜ 狀態：R² CLEAN（2026-09-09，halt 已補完）⇒ 可 dispatch
 上游：TEST VALUE 普查第一批①（blueprint 裁「先開」，(ii) 型、證據最硬）
 
 ## §1 病：決策層拿著一個【那支隊沒有的速度】在做計畫
@@ -39,11 +39,20 @@ movement_system.gd:216 `_compute_team_speed` → :190-214 `_move_cost`
    它不耗 RNG（不違反「觀測者禁耗 global RNG」),但它【是寫入】——
    ⇒ 從決策路徑再呼叫一次,這兩個計數會【混入決策端的呼叫】,
      而它們原本的語意是「執行端走了幾格」。任何讀這兩格的分析/床都會被改。
-★★修法（二選一,實作者挑,理由寫進 handback）：
-   (a) 抽出 `_move_cost_pure(state, team, time_mult)` 不含 Probe.bump,
-       執行端 `_move_cost` 呼叫它再自己 bump ⇒ 計數語意不變、決策端不污染。★推薦。
-   (b) 決策端呼叫時傳 `probe := false` 旗標。★較差：旗標會被忘記傳。
-⇒ 驗收要多一格：`rootdiff.TERRAIN_SPEED_MULT` 的計數在 before/after 【不變】。
+★★★【R² 2026-09-09 擴大範圍】我只查了 `_move_cost` 本體,漏了它【呼叫出去的那一支】：
+   `_move_cost:190 → _compute_team_speed:216 → _compute_base_team_speed:237`
+   而 `movement_system.gd:247` 有 `if Probe.enabled: Probe.bump("rootdiff.NAMED_WEIGHT")`
+   （每個 named/leader 成員各 bump 一次）。
+   ⇒ 這一段對 pure/impure 兩版是【同一條路徑】,「pure 版跳過」繞不開它。
+★★修法：整條鏈的 bump 一起交給呼叫端（同一套機制,不要只在 `_move_cost` 那層做半套）
+   —— `_compute_base_team_speed` 也要有不 bump 的版本。
+   實作者挑形狀（抽 `*_pure` 或把 bump 提到呼叫端）,理由寫進 handback。
+   ★不採「傳 probe:=false 旗標」：旗標會被忘記傳。
+★窮盡依據（reviewer 全檔 grep + 我複驗定義處）：`movement_system.gd` 全檔 `rootdiff.*` bump
+   只有 :194 / :212 / :247 三處,三處都在 `_move_cost` 鏈內；
+   鏈上其餘函式（`_compute_mount_bonus` :221 / `_compute_wagon_penalty` :230 /
+   `get_carry_capacity` :156 / `get_effective_wagons` :151 / `get_effective_mounts` :148 /
+   `calc_total_weight` :161）★全部定義在同一檔 ⇒ 跨檔遺漏的疑慮不存在。
 ②`goal_resolver.gd:1033` 改用 §2 的推導。
 ③`MOVE_TILES_PER_DAY` ★連常數一起刪（不留沒人用的），只留一行註解說明舊版。
 ```
@@ -55,9 +64,17 @@ movement_system.gd:216 `_compute_team_speed` → :190-214 `_move_cost`
    ★慢隊（重載/疲勞/惡地形）的計畫天數【變長】
    ★★快隊（有坐騎/輕載/平原）的計畫天數【變短】
 ②【不亂動】速度落在舊估值附近的隊 ⇒ 計畫天數變化很小
-③★★★【單位健全性】典型隊的 tiles_per_day 必須與舊常數 2.0 【同一個數量級】。
-   ⇒ 若差約 TICKS_PER_DAY（~1440）倍 ⇒ ★單位接錯,不是發現。
-   ⇒ 若差 2–3 倍 ⇒ ★★那才是發現（舊估值本來就不準）。
+③★★★【單位健全性】—— ★門檻改成【區間】,不是兩個範例點（R² 指出 6–9 倍那段原本無判準）。
+   真常數代入：`BASE_MOVE_TICKS=240, MIN_MOVE_TICKS=80, MAX_MOVE_TICKS=720, TICKS_PER_DAY=1440`
+   ⇒ baseline（speed=1,無修正,cost=240）就是 1440/240 = **6 tiles/day**（舊常數 2.0 的 3 倍）
+   ⇒ clamp 全範圍 [80,720] ⇒ tiles_per_day ∈ **[2, 18]**,即舊值的 1x–9x。
+   ★判準：
+     比值 ≥ 100 倍  ⇒ 單位接錯（~1440 倍是典型症狀）,不是發現,回去修接線。
+     比值 < 20 倍   ⇒ 真發現（涵蓋算得出的 1x–9x 全範圍 + 安全邊際）。
+     20–100 倍之間 ⇒ 模糊帶,不自動判,貼數字上來人裁。
+④【觀測不被污染】`rootdiff.TERRAIN_SPEED_MULT`、`rootdiff.WAGON_TERRAIN_MULT`、
+   ★`rootdiff.NAMED_WEIGHT` 三格的計數在 before/after 【都不變】。
+   ⇒ 少一格就是決策端的呼叫混進了執行端的計數。
    —— 這一格專門把【單位 bug】與【真實差異】分開,不要合成一個「數字變了」。
 ```
 
