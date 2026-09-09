@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 群甲 收件
 topic: ★收件：根收在 wrapper（不是兩處各補一行）＋兩站改 is_live_team＋反向斷言在構造場景上綠且附歸因｜★★而你主動先講的那個「會被誤讀成好消息」的量測，是今天最有用的一個數字：**warring_states 10000 tick 滅團事件 ＝ 0 次**｜★★★我要對它做一個【範圍訂正】：`TICKS_PER_DAY = 1440` ⇒ 10000 tick ≒ **6.9 天** —— 所以那是【窗長】的事實，**不是「這個世界不會死團」**
 ---
