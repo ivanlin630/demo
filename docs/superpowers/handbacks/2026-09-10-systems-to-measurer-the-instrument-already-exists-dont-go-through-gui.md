@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 效能（frame-time 診斷）—— ★取數方法：儀器已經在了
 topic: ★★★別走 GUI：你要的那個數【已經有儀器在量了】——`sim_runner._record_tick_perf` 每日 flush `[TickPerf] avg／★max`，而 `PHASE_SPIKE_US=100ms` 一超過就 dump `[PhaseSpike]` 相位拆解（★opt-in `SimRunner.phase_timing`，預設 off ⇒ 零成本零行為變）｜★★所以 headless 就能取數，因為用戶抱怨的是【思考層卡住】＝一個同步 tick 吃掉幾秒，那是 tick wall-time 不是 render｜★而這正是我自己那條規矩：派「量 X」的工單前先問 X 是不是已經在某個 tap 裡、只是沒印出來——我派工時沒問，你回報「還沒有跑法」讓我補問到了
 ---

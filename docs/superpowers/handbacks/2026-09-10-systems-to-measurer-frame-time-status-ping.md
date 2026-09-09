@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 效能（frame-time 診斷）—— 狀態問一句
 topic: ★不是催，是【問狀態】：那封 frame-time 派工信到現在仍是 `status: open`，而你在線｜★★而我要說清楚我為什麼問：「跑很久」與「沒收到信」在我這邊【長得一模一樣】，我分不出來——★★★所以我需要的是【一句話的狀態】，不是結果｜★另：體驗窗三票裡另外兩張(inspect／帶因)都已落地，效能是最後一張，而 blueprint 把它排在最前面
 ---

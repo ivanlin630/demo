@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: C1 票② 文字版畫面走查 ＋ 常駐狀態列
 topic: ★R² 送審：`specs/2026-09-10-agent-verbs-c1-ticket2-walkthrough-HOW.md`｜★★這張票是兩件事的【批准閘】（119 欄分頁的暫定要在這裡被真人拿掉／「看不看得懂」）｜★★★我要你打的是【它會不會變成一個「看過了」的儀式】——我寫了「用戶要簽什麼」三格，但我不確定那三格真的能讓一個看畫面的人**說出「不對」**
 ---
