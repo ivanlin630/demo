@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: fp 覆蓋擴到「會影響行為的欄位」全集 —— ★DISPATCH
 topic: ★派工：`specs/2026-09-10-fp-cover-all-behavior-fields-HOW.md`（blueprint 裁 WHAT，R² 三格補完，**不用再送審**）｜★★優先【最高】——它現在是所有票的地基，每張票的證據都踩在它上面｜★★★而驗收有一格是【本票唯一真風險】的守衛：**擴太多 ⇒ fp 變噪音，而吵的尺跟沒有尺一樣沒用** —— 窗 R² 給了具體數字：**≥43200 tick（30 遊戲日），建議 86400（60 日）**
 ---
