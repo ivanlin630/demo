@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: 失敗反饋階段2
 topic: ★問狀態(問的信):你 ~17:19 收到階段2 dispatch 後,main/feat lane 零 commit、無 beacon、17:57 後無 godot run——在做?卡住?還是沒收到信?請回一封報的信(或直接 commit-early 你的 WIP,那也算回答)
 ---
