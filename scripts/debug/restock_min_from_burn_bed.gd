@@ -8,7 +8,8 @@ extends SceneTree
 
 const CTX_SRC: String = "res://scripts/simulation/decision/decision_context.gd"
 const BURN_EXPR: String = "population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY"
-const OLD_RESTOCK_MIN: float = 10.0   # ★舊常數，只在本床當對照基準（production 已刪）
+const OLD_RESTOCK_MIN: float = 10.0   # ★舊常數，寫死在床裡當【反事實對照】（production 已刪）
+const DIFF_MIN: int = 3               # ★陰性對照下這個數必為 0 ⇒ 任何正數都是鑑別；取 3 是防單一噪音樣本
 
 var _fails: int = 0
 var _sections: int = 0
@@ -114,7 +115,7 @@ func _test_applicable_gate_follows() -> void:
 func _test_world_distribution() -> void:
 	print("-- ③⑤ 跨隊門檻分布 + pop=0 的隊 --")
 	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "res://config/warring_states.json"
-	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 2
+	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 1   # ★預設 1 天：陰性對照在 1 天窗紅過（窗長只影響時間，不影響鑑別力）
 	seed(1337)
 	Probe.arm()
 	var state: WorldState = MeasureBedHelper.arm_and_setup(cfg, true)
@@ -144,6 +145,53 @@ func _test_world_distribution() -> void:
 	print("  母體 %d 隊｜min=%.1f median=%.1f max=%.1f｜相異值 %d（舊版全部都是 %.1f）" % [
 		n, float(mins[0]), float(mins[n / 2]), float(mins[n - 1]), distinct.size(), OLD_RESTOCK_MIN])
 	_ok(distinct.size() > 1, "③跨隊門檻有變異（相異值 %d > 1）" % distinct.size())
+	# ★★★成對反事實（systems 立 2026-09-09）：同一輪同一批隊，算 home_food/門檻 兩版 ——
+	#   問的不是「世界有沒有變異」，是【這次改動有沒有改變任何一支隊的結果】。
+	#   ★陰性對照（門檻換回固定 10.0）會讓這個差【整批歸零】。
+	# ★兩個數要分開看（★★第一版只算了 clamp 後的，實得 0 —— 而 0 有兩種意思）：
+	#   raw  ＝ 未 clamp 的比值 ⇒ 問「這次改動有沒有改變【算出來的量】」（機制層）
+	#   eff  ＝ clamp 後真的餵進 drive 的值 ⇒ 問「有沒有改變【決策看到的東西】」（效果層）
+	# ★★★實測 eff 可能是 0：家糧多到兩版都飽和在 1.0 ⇒ 那不是床壞，是【這個世界窗裡這次改動不咬人】。
+	#   ⇒ 斷言掛在 raw（陰性對照下必歸零），eff 只印【不斷言】——因為它是世界的性質不是改動的性質。
+	var diff_raw: int = 0
+	var diff_eff: int = 0
+	var max_gap: float = 0.0
+	var pop_home: int = 0
+	for tid3 in state.teams:
+		var c3: DecisionContext = DecisionContext.gather(state, state.teams[tid3])
+		if not c3.has_home_outpost or c3.home_food <= 0.0:
+			continue
+		pop_home += 1
+		var raw_real: float = c3.home_food / maxf(c3.home_restock_min, 0.01)
+		var raw_fixed: float = c3.home_food / OLD_RESTOCK_MIN
+		if absf(raw_real - raw_fixed) > 0.001:
+			diff_raw += 1
+		var eff_gap: float = absf(clampf(raw_real, 0.0, 1.0) - clampf(raw_fixed, 0.0, 1.0))
+		if eff_gap > 0.001:
+			diff_eff += 1
+		max_gap = maxf(max_gap, eff_gap)
+	# ★★★第三個數：【閘】的反事實 —— drive 飽和不代表改動不咬人，
+	#   本票真正會翻的是 options 的 home-empty gate（home_food >= 門檻）。
+	var diff_gate: int = 0
+	var hf: Array = []
+	for tid4 in state.teams:
+		var c4: DecisionContext = DecisionContext.gather(state, state.teams[tid4])
+		if not c4.has_home_outpost:
+			continue
+		hf.append(c4.home_food)
+		var new_pass: bool = c4.home_food >= c4.home_restock_min
+		var old_pass: bool = c4.home_food >= OLD_RESTOCK_MIN
+		if new_pass != old_pass:
+			diff_gate += 1
+	hf.sort()
+	if hf.size() > 0:
+		# ★家糧的分布：eff/gate 都翻 0 隊時，要能看出【為什麼不咬人】
+		print("  home_food 分布（有家的 %d 隊）：min=%.1f median=%.1f max=%.1f" % [
+			hf.size(), float(hf[0]), float(hf[hf.size() / 2]), float(hf[hf.size() - 1])])
+	print("  反事實（母體 %d 隊有家有糧）：raw 不同 %d 隊｜eff（clamp 後進 drive）不同 %d 隊，最大差 %.3f｜★閘的判斷翻掉 %d 隊" % [
+		pop_home, diff_raw, diff_eff, max_gap, diff_gate])
+	_ok(diff_raw >= DIFF_MIN,
+		"③成對反事實(raw)：≥%d 隊算出來的量因這次改動而不同（實得 %d）—— 陰性對照下必歸零" % [DIFF_MIN, diff_raw])
 	# ★⑤ pop=0 的隊：門檻 0 ⇒ 家裡有任何糧都算「值得回」，drive → 1.0。★印出來，不要靜靜吃掉。
 	print("  ★pop=0 的隊：%d 支%s" % [zero_pop.size(),
 		("（門檻 0 ⇒ 空家也過 gate、drive→1.0，這是已知後果）" if zero_pop.size() > 0 else "（本窗沒有）")])

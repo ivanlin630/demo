@@ -6,6 +6,8 @@ extends SceneTree
 #   ②跨隊 _msf 相異值增加（分布不是單點） ③結構檢查：need_keep 只呼叫一次（成對對照）
 #   ④_msf ∈ (0,1]（量到 >1 ⇒ 分母母體選錯）
 
+const OLD_FIXED_DENOM: float = 80.0   # ★舊常數，寫死在床裡當反事實對照（production 已刪）
+const DIFF_MIN: int = 3               # ★陰性對照下這個數必為 0 ⇒ 任何正數都是鑑別；取 3 是防單一噪音樣本
 const CTX_SRC: String = "res://scripts/simulation/decision/decision_context.gd"
 const NEED_CALL: String = 'NeedOracle.need_keep(state, team, "material"'
 
@@ -88,7 +90,7 @@ func _test_drive_separates_by_need() -> void:
 func _test_world_distribution() -> void:
 	print("-- ②④ 跨隊分布 + 值域 --")
 	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "res://config/warring_states.json"
-	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 3
+	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 1   # ★預設 1 天：陰性對照在 1 天窗紅過（窗長對鑑別力零影響，只影響時間）
 	seed(1337)
 	Probe.arm()
 	var state: WorldState = MeasureBedHelper.arm_and_setup(cfg, true)
@@ -127,16 +129,30 @@ func _test_world_distribution() -> void:
 		return
 	print("  母體 %d 隊有缺口｜min=%.3f median=%.3f max=%.3f｜相異值 %d" % [
 		msf.size(), float(msf[0]), float(msf[msf.size() / 2]), float(msf[msf.size() - 1]), distinct.size()])
-	# ★★★2026-09-09 陰性對照揭：只看 _msf 的相異值【抓不到分母被換回常數】——
-	#   分子（缺口）本來就跨隊變異 ⇒ 固定分母照樣生出一堆相異值。
-	#   ⇒ 要斷言的是【分母本身跨隊變異】，那才是本票改的東西。
+	# ★★★成對反事實（systems 立 2026-09-09）：同一輪、同一批隊算兩個值 ——
+	#   _msf_real（現在的分母）vs _msf_fixed（舊常數 80，★寫死在床裡當對照，不從 code 讀）。
+	#   ★為什麼不用「分母相異值 > 1」：那個斷言的【下限就是 2】，是險過的；
+	#   而且它問的是「世界有沒有變異」（世界的性質），
+	#   ★★反事實問的是「這次改動有沒有改變任何一支隊的結果」（改動的性質）——後者才是驗收該問的。
+	#   ★★★分母只有 2 個相異值也騙不過它：把分母換回常數會讓這個差【整批歸零】。
 	var dens := {}
+	var diff_n: int = 0
+	var max_gap: float = 0.0
 	for tid2 in state.teams:
 		var c2: DecisionContext = DecisionContext.gather(state, state.teams[tid2])
-		if c2.material_shortfall > 0.0:
-			dens[snappedf(c2.material_need_total, 0.001)] = true
-	print("  分母 material_need_total 相異值 %d（★舊版是【一個常數】⇒ 相異 1）" % dens.size())
-	_ok(dens.size() > 1, "②【分母】跨隊有變異（相異值 %d > 1）—— 陰性對照：分母換回常數時這格必紅" % dens.size())
+		if c2.material_shortfall <= 0.0:
+			continue
+		dens[snappedf(c2.material_need_total, 0.001)] = true
+		var real_v: float = clampf(c2.material_shortfall / maxf(c2.material_need_total, 0.01), 0.0, 1.0)
+		var fixed_v: float = clampf(c2.material_shortfall / OLD_FIXED_DENOM, 0.0, 1.0)
+		var gap: float = absf(real_v - fixed_v)
+		if gap > 0.001:
+			diff_n += 1
+		max_gap = maxf(max_gap, gap)
+	print("  分母相異值 %d（★誠實限：只有兩檔——見 handback）｜反事實：%d 隊的 _msf 與舊常數版不同（最大差 %.3f）" % [
+		dens.size(), diff_n, max_gap])
+	_ok(diff_n >= DIFF_MIN,
+		"②成對反事實：≥%d 隊的結果因為這次改動而不同（實得 %d）—— 陰性對照下這個數會【整批歸零】" % [DIFF_MIN, diff_n])
 	_ok(distinct.size() > 1, "②跨隊 _msf 有變異（相異值 %d > 1）" % distinct.size())
 	_ok(over_one == 0, "④_msf 全部 ≤ 1（>1 的隊 %d ⇒ 分母母體選錯）" % over_one)
 	_ok(float(msf[0]) > 0.0, "④有缺口的隊 _msf > 0（下界，值域 (0,1]）")
