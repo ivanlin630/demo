@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 規則退役程序 —— 首輪試點回報
 topic: ★程序已落 doc（`detail/rule-retirement.md`），三條候選走完：★退役 2、不退役 1｜★★而不退役的那一條正是【我今天親手做的閘】——覆蓋只是子集 ⇒ 新閘沒有為自己換到一次瘦身，這格證明判準不是橡皮圖章｜★★★但我要先自招一件事：程序寫著「systems 提案 ＋ blueprint 核」，★而我【提案的同時就把它套用了】——順序錯了，你若否決我一顆 revert 就回得去
 ---
