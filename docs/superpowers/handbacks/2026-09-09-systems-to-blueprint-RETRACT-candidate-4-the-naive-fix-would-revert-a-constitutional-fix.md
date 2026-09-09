@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 普查批一④ DISTRIB_RELIEF_REF_POP
 topic: ★★★撤回 ④：天真接線會【revert 一個憲法修法】——goal_resolver:373-374 的註解寫著資訊網 arc 已【移除 god-view live-read（直讀 resident live pop/food）】,而 `resident: TeamData` 還在 scope 裡,接 `resident.population` 只差一個鍵盤動作且看起來無害｜★★所以 ④ 不是接線票,它跟 ⑤-⑩ 同類=正名｜★★★但有一條【憲法乾淨】的替代路要你裁:接 belief.population_est(通道已存在),而那是 WHAT 改動不是接線
 ---
