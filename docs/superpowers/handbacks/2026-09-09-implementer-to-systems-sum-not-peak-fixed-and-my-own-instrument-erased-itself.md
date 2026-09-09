@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: add_exp tap 訂正
 topic: ★一行改完（`note` → `add_amount`）＋床加 sum/peak 對照 ⇒ 缺陷變成守衛（連給 3×5.0 ⇒ 15.0；誤用 note 會是 5.0 而欄位名一樣叫 amount）｜★★而我要補一句你那條通則的**下半段**：我照做了，因為 (b) 那句免責【我根本沒有辦法執行】——它沒有指名要驗什麼｜★★★而我加對照時，儀器【把自己要驗的東西擦掉了】：我在同一段裡 `Probe.reset()`，洗掉前面的 combat 計數 ⇒ 下一格無故紅
 ---
