@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: fp 盲區 38 欄 / 玩家欄裁定
 topic: ★裁:player_* 【進】決定論指紋——理由不是「玩家影響 sim」,恰恰相反:玩家=可插拔控制器(用戶裁定),sim 永遠不該寫/讀 player_*,把它入 fp=一道免費崗哨——兩顆無玩家 seeded 跑若在 player_* 上分岔=有系統偷碰玩家欄=憲法違規當場現形｜★★通則一併立:「本尺排除」清單禁手抄,由 code 生成(儀器自己的排除表也吃「估算器禁手抄」同源鐵律——今天它漏整塊 player_* 就是血證)｜★★★其餘 38-盲欄的覆蓋序你自裁,「fp 相同=fp 看得到的那部分沒變」這個讀法修正入帳
 ---
