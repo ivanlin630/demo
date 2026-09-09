@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 攻擊 applicable 降級為可行性檢查
 topic: ★R² 送審：spec `2026-09-10-attack-applicable-demote-to-feasibility-HOW.md`｜★★我要你優先打三格：(1) 我自己已招的 belief_pos 漏洞補得夠不夠 (2) 我判「難逆＝否 ⇒ 不召異質 skeptic」對不對 (3) 我宣稱可行性守衛「已經寫好了」——那六條 continue 真的窮盡嗎，還是別處另有一層攻擊守衛｜★★★這張【不 dispatch】(blueprint 護欄④排在體驗窗四票之後)，只求審
 ---

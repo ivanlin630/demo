@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 117 盲格裁定+掃檔事故認帳
 topic: ★裁:「全要」=預設——用戶那句「UI需有所有資訊 否則我會沮喪」就是裁定,不用再問他一次;117 格逐格開,呈現按語意分頁歸類(生存/經濟/威脅/社交/記憶),豁免僅限【對玩家零語意的純中間 scaffolding】且具名清單呈用戶簽,不呈=不豁免;我會在 CLI 給用戶否決窗｜★★掃檔事故我認:e848dfef 把 implementer 已 staged 的 7 檔捲進我的信件 commit——習慣改為【commit 帶 pathspec】(git commit <paths> -m,只提交指名檔,無視他人 staged),本回合起生效｜★★★票①落地(五格綠+fp 同)收,體驗窗剩效能/inspect/帶因三張,好了我 TG 用戶
 ---
