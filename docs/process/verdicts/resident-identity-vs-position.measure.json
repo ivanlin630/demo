@@ -1,0 +1,41 @@
+{
+  "token": "resident-identity-vs-position",
+  "slice": "居民——把身分與位置分開數(修正lord-belief-coverage卷的過早結論)",
+  "date": "2026-09-10",
+  "measured_at_head": "f8faac89起跑(dirty=5，implementer WIP，非我的床)",
+  "touches": [],
+  "world": "warring_states / seed=1337 / 60天，5次快照(day10/20/30/45/60，同上一卷可比)",
+  "bed": "scripts/debug/resident_identity_vs_position_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-10-resident-identity-vs-position.txt"],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★★★推翻lord-belief-coverage卷的結論：這個世界【有】村莊，而且持續在長大——TAG_PRODUCE隊數day10=2→day60=22，健康成長。真正的現象是【居民持續不在家】：is_resident_static(在家)隊數day10=0→day60=9，成長速度遠落後於①，導致③(不在家)持續擴大成day60=13，day60時『不在家』隊數(13)已超過『在家』隊數(9)。這是systems判讀出口②：村莊存在，居民不在家=決策層問題(為什麼生產隊一直被派出門)，不是造層問題(村莊機制不缺)。",
+    "①②③逐次快照": {
+      "day10": "身分①=2　在家②=0　不在家③=2　不在家id=[36,48]",
+      "day20": "身分①=4　在家②=1　不在家③=3　不在家id=[36,48,55]",
+      "day30": "身分①=6　在家②=2　不在家③=4　不在家id=[36,48,55,87]",
+      "day45": "身分①=14　在家②=8　不在家③=6　不在家id=[36,48,55,87,132,133]",
+      "day60": "身分①=22　在家②=9　不在家③=13　不在家id=[36,44,48,50,51,55,87,132,133,140,150,285,369]"
+    },
+    "在家比例逐次快照": "day10=0% day20=25% day30=33% day45=57% day60=41%——非單調，day45→60反而下降(在家比例)，值得注意但本卷不深究成因",
+    "④累計settle/convert_resident授予+uprising_exile移除": "0/0/0——★★★不可信，見honest_limits，driver_ledger嚴重溢出"
+  },
+
+  "root_cause_reframe": {
+    "上一卷(lord-belief-coverage)的過早結論": "『這個世界沒有村莊那一層』『隊數成長主要靠派子隊非定居生產』——★★★這個結論下得太早，是本卷要修正的對象",
+    "本卷推翻理由": "is_resident_static同時要求身分+位置，上一卷只讀這個合成謂詞，量到母體0-1就直接下結論說『沒有村莊』；本卷拆開後看到①(身分)其實健康成長到22隊——村莊真的存在，只是【多數時刻不在家】，導致合成謂詞經常判否。★這正是systems原本的警告成立的例子：兩句『這個世界是遊牧的』(我和blueprint各自說過)都已被systems降級，本卷實測進一步坐實那個降級是對的。",
+    "真正待查問題": "為什麼有TAG_PRODUCE身分的隊持續被派出門(不在家)——這是決策層問題，可能與人口卷/exp-gate卷已發現的『隊數成長主要來自[Sub]派子隊』『世界多為移動作戰狀態』的圖景有關，但確切機制(是不是被faction指令派出/是不是主動選擇離家貿易覓食)本卷未查，屬另一票範圍。"
+  },
+
+  "honest_limits": [
+    "★①本卷不問成因——只把一個數字拆成兩個，如票面要求",
+    "★★②④的累計授予/移除次數(0/0/0)不可信：driver_ledger cap=20000，本窗結束時累計丟棄筆數=2777058(現存20000筆只是最後一小段)——record_driver記錄全部tags欄位變動(不只settle/convert/exile)，60天窗下settle/convert這種稀有reason的entry很可能在早期就被淹沒沖掉。①的身分隊數從2漲到22這個事實本身就證明『變成居民』這件事顯然發生過多次，因此④的0是【被丟棄造成的假象】，不是【真的沒發生】——不得引用這個0",
+    "★③若要真的量④，需要換方法：或(a)用短窗多次快照間的①差值反推(day10→20身分+2、day20→30+2、day30→45+8、day45→60+8，這是身分淨變化，包含settle+convert+死亡+exile的合成，不能單獨拆出settle/convert)或(b)不透過driver_ledger改用別的方式(例如直接比對相鄰snapshot的tags集合差異，本卷的①②③已經做到這步但沒有細分reason)，跑法建議留給systems裁",
+    "★④在家比例day45(57%)→day60(41%)不升反降，本卷只如實記錄不深究——可能是新增身分隊的『成家』速度快於既有隊回家的速度，也可能是別的原因，值得後續一提"
+  ],
+
+  "supersedes": [
+    "docs/process/verdicts/lord-belief-coverage.measure.json 裡『這個世界沒有村莊那一層』『隊絕大多數在移動作戰極少真正定居』的框架性結論——身分①數字本身(22隊)推翻，改採本卷『村莊存在，居民不在家』的圖景"
+  ]
+}
