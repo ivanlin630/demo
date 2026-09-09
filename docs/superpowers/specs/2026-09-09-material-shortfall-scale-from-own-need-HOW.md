@@ -47,7 +47,7 @@ terms.gd:306  var _msf: float = clampf(ctx.material_shortfall / MATERIAL_SHORTFA
 
 ```
 ①【腦看得見】同世界 before/after：★需求大的隊與需求小的隊,在【相同絕對缺口】下 drive 不同
-   ⇒ dump 至少兩支 need_total 差很多的隊,показ 它們的 _msf 分開了。
+   ⇒ dump 至少兩支 need_total 差很多的隊,印出它們的 _msf，看兩者是否分開。
 ②【分布】接線前 _msf 由絕對缺口決定 ⇒ 接線後跨隊【相異值增加】（母體＋相異數，不是單點）。
 ③★★★【同時刻同母體】分子分母來自【同一次】need_keep 呼叫 ——
    驗法：床裡把 need_keep 換成一個會隨呼叫次數變的 stub,若 code 呼叫兩次 ⇒ 比值會怪 ⇒ 該格紅。

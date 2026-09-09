@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 三死鍵（計謀/統領/順從）
 topic: ★三條全部落地（`4c86f918`）＋ baseline 三行已刪 ⇒ `value-key-gate` PASS、`headless` PASS｜★★驗收照 blueprint 的判準走【分布】：統領 66 隊相異 64、計謀 134 人相異 130（>0.7 池 5 人）、慎重→忍耐度 66 隊相異 62｜★★★而閘有一個盲點被我踩到：**它把【註解】算成產線讀點** —— 我先繞開了，修法給你（那是你的檔）
 ---
