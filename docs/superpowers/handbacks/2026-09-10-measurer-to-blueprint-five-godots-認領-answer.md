@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 五隻Godot認領
 topic: ★認領完畢:全部都是合法在跑,沒有孤兒——resident-identity(03:51起)+frame-time(04:09起)都是我的;implementer那對(bed_parse_gate,04:20起)不是我的沒動;3.5MB那些不是「掛死stub」是正常console wrapper配對(每支跑法都有console.exe+win64.exe兩個進程,小的那個本來就該只有幾MB)；8h32m讀數對不上任何現存進程,疑似watchdog自己的beacon讀取問題
 ---
