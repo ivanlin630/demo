@@ -111,6 +111,22 @@ func _initialize() -> void:
 			print("%-40s %10d %12.3f %14.1f" % [row[0], int(row[1]), float(row[2]) / 1e6,
 				float(row[2]) / float(row[1])])
 	# ★★★四段要跟【整支的碼表】比（涵蓋全部呼叫端），不是跟只涵蓋 path 迴圈那 1116 次的 `rbf_*` 比
+	# ★★★遞迴：一次頂層呼叫【之內】的展開與重複（★兩個原始數都印，母體不足印不可判）
+	if GoalResolver.rec_top_n == 0:
+		print("★★★遞迴展開：**不可判**（頂層呼叫 0 次）")
+	else:
+		var _dh: Array = []
+		var _dk2: Array = GoalResolver.rec_depth_hist.keys()
+		_dk2.sort()
+		for k2 in _dk2:
+			_dh.append("深度%s=%d" % [k2, int(GoalResolver.rec_depth_hist[k2])])
+		print("★★★遞迴（一次頂層呼叫之內）：頂層 %d 次／子問題總展開 %d 次／相異 %d 個" % [
+			GoalResolver.rec_top_n, GoalResolver.rec_calls_sum, GoalResolver.rec_distinct_sum])
+		print("   ⇒ 每次頂層展開 %.2f 次；相異 %.2f 個；%s" % [
+			float(GoalResolver.rec_calls_sum) / float(GoalResolver.rec_top_n),
+			float(GoalResolver.rec_distinct_sum) / float(GoalResolver.rec_top_n),
+			("★重複率 %.1f%%" % (100.0 * (1.0 - float(GoalResolver.rec_distinct_sum) / float(GoalResolver.rec_calls_sum)))) if GoalResolver.rec_calls_sum > 0 else "★不可判（展開 0 次）"])
+		print("   ★深度分佈：%s" % "、".join(_dh))
 	print("★守恆⑤：四段和 %.3f s（母體 %d 次）vs 整支 %.3f s（母體 %d 次）⇒ 差 %.3f s" % [
 		rb_sum / 1e6, GoalResolver.rb_payoff_n, GoalResolver.rb_all_us / 1e6, GoalResolver.rb_all_n,
 		(GoalResolver.rb_all_us - rb_sum) / 1e6])

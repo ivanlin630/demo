@@ -769,6 +769,18 @@ static var rb_tail_us: float = 0.0      # ④尾段（allowed／pop／defer 判�
 static var rb_tail_n: int = 0
 static var rb_all_us: float = 0.0       # ★整支（涵蓋全部呼叫端）——四段要跟它比，不是跟 `rbf_*` 比
 static var rb_all_n: int = 0
+# ★★★遞迴的【一次呼叫之內】重複（systems 2026-09-10）：
+#   ★這種 memo 與「世界會不會變」無關 —— 它活在一次呼叫之內（輸入同、時間同、世界同）
+#   ⇒ 語意天然中性，是 memo 最安全的那一種。★★而若相異 ≈ 總數 ⇒ memo 這條路整條關掉。
+static var _rec_depth: int = 0          # `_resource_prereq_candidates` 的巢狀深度（頂層＝0→1）
+static var _rec_calls: int = 0          # 本次頂層呼叫之內：子問題被算幾次
+static var _rec_keys: Dictionary = {}   # 本次頂層呼叫之內：相異子問題
+static var _rec_maxd: int = 0           # 本次頂層呼叫之內：最深幾層
+static var _rrp_depth: int = 0
+static var rec_top_n: int = 0           # 頂層呼叫數
+static var rec_calls_sum: int = 0
+static var rec_distinct_sum: int = 0
+static var rec_depth_hist: Dictionary = {}   # 深度分佈（★不是只有平均）
 # ★★★同一 tick 內【同一組輸入】重複算幾次（★母體地板在算式之前）
 static var _rep_tick: int = -1
 static var _rep_rrp_seen: Dictionary = {}
@@ -842,6 +854,15 @@ static func _reset_cross_run() -> Dictionary:
 	rb_tail_n = 0
 	rb_all_us = 0.0
 	rb_all_n = 0
+	_rec_depth = 0
+	_rec_calls = 0
+	_rec_keys = {}
+	_rec_maxd = 0
+	_rrp_depth = 0
+	rec_top_n = 0
+	rec_calls_sum = 0
+	rec_distinct_sum = 0
+	rec_depth_hist = {}
 	_rep_tick = -1
 	_rep_rrp_seen = {}
 	_rep_rbf_seen = {}
@@ -879,12 +900,19 @@ static func harvest_terrains(res: String) -> Array:
 
 static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: DecisionContext,
 		g: Dictionary, gt: String, payoff: float, prereq: Dictionary) -> Dictionary:
+	if SimRunner.phase_timing and _rec_depth > 0:
+		_rec_calls += 1
+		_rec_keys["%d|%s|%s" % [team.team_id, gt, String(prereq.get("res", ""))]] = true
+		_rrp_depth += 1
+		if _rrp_depth > _rec_maxd:
+			_rec_maxd = _rrp_depth
 	var res: String = String(prereq.get("res", ""))
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 組件 E 泛化：qty 走通用 need_keep（任 res）。
 	if Probe.enabled: Probe.bump("goal.res_prereq.entry")
 	if ResourceSystem.effective_holding(state, team, res) >= NeedOracle.need_keep(state, team, res, lv):
 		if Probe.enabled: Probe.bump("goal.res_prereq.satisfied")
+		if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
 		return {}   # 前置滿
 	# ── 取得手段 1：買（S2，市場取得不需定位；belief-gated）──
 	if not ctx.has_specie:
@@ -901,6 +929,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 			mkt_n += 1
 		if mp != Vector2i(-1, -1):
 			if Probe.enabled: Probe.bump("goal.res_prereq.buy_wins")
+			if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
 			return _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
 		if Probe.enabled: Probe.bump("goal.res_prereq.no_market")
 	# ── 取得手段 2：採@地形（S3，買不到→定位取得）——★地形集合由真相源導出，不查表。
@@ -958,6 +987,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 					"own_terrain": own_tile.terrain, "own_yield": own_yield,
 					"own_v": snappedf(own_v, 0.001), "best_alt_v": snappedf(best_v, 0.001),
 					"tick": state.world.current_tick}, 30)
+			if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
 			return {}   # ★自家產地已經不輸給任何替代 ⇒ 再跑一趟無益
 		if Probe.enabled:
 			if best_pos == Vector2i(-1, -1):
@@ -968,10 +998,12 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		# ★A1 裁③：remote founding（異格）→ 派子隊（子隊真移動→抵達→建，正常）。
 		# ★裁② guard：pos == team.tile_pos（隊已站產地）= same-tile founding，無母隊就地 outpost-build 路 → 已於上面 continue（followup）。
 		if best_pos != Vector2i(-1, -1):
+			if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
 			return _mk_delegate_candidate(state, team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx,
 				{"build_type": "civilian", "target": best_pos})
 	elif Probe.enabled:
 		Probe.bump("goal.harvest.not_terrain_produced." + res)   # ★B 型：地形本來就不產（缺的是【製造】那條手段）
+	if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
 	return {}   # S3 無取得手段（產=S4 設施 / same-tile founding=followup）
 
 # ★★把 means-end 磚接進決策（systems 裁 2026-08-25，spec §3）。
@@ -984,16 +1016,37 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 	var _rr0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	if SimRunner.phase_timing:
 		_rep_note(state, "%d|%s" % [team.team_id, String(prereq.get("res", ""))], false)
+		if _rec_depth == 0:      # ★頂層：開一個新的統計視窗
+			_rec_calls = 0
+			_rec_keys = {}
+			_rec_maxd = 0
+		_rec_depth += 1
 	var first: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, prereq)
 	if SimRunner.phase_timing:
 		rrp_us += float(Time.get_ticks_usec() - _rr0)
 		rrp_n += 1
 	if not first.is_empty():
 		out.append(first)
+		if SimRunner.phase_timing:
+			_rec_depth -= 1
+			if _rec_depth == 0:
+				rec_top_n += 1
+				rec_calls_sum += _rec_calls
+				rec_distinct_sum += _rec_keys.size()
+				var _dk: String = str(_rec_maxd)
+				rec_depth_hist[_dk] = int(rec_depth_hist.get(_dk, 0)) + 1
 		return out   # 買／採@地形已給出手段 ⇒ 不必再問製造（既有優先序不變）
 	# ★走到這裡＝既有兩條手段都沒有 ⇒ 問 means-end：「這東西誰產、我缺什麼」
 	var res: String = String(prereq.get("res", ""))
 	if res == "":
+		if SimRunner.phase_timing:
+			_rec_depth -= 1
+			if _rec_depth == 0:
+				rec_top_n += 1
+				rec_calls_sum += _rec_calls
+				rec_distinct_sum += _rec_keys.size()
+				var _dk: String = str(_rec_maxd)
+				rec_depth_hist[_dk] = int(rec_depth_hist.get(_dk, 0)) + 1
 		return out
 	var _pl0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var _paths: Array = AcquisitionPaths.for_resource(state, team, res)
@@ -1212,6 +1265,14 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				"food_days": snappedf(ctx.food_days, 0.01), "team": team.team_id}, 60)
 	if SimRunner.phase_timing:
 		path_us += float(Time.get_ticks_usec() - _bl0)   # ★迴圈身體（含 _resolve_build_facility 與 Probe taps）
+	if SimRunner.phase_timing:
+		_rec_depth -= 1
+		if _rec_depth == 0:
+			rec_top_n += 1
+			rec_calls_sum += _rec_calls
+			rec_distinct_sum += _rec_keys.size()
+			var _dk: String = str(_rec_maxd)
+			rec_depth_hist[_dk] = int(rec_depth_hist.get(_dk, 0)) + 1
 	return out
 
 # ★設施欄位 key → FACILITY_DEF 名（真相源反查，不建對照表）。
