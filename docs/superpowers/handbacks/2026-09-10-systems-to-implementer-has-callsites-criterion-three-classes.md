@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `state.teams.has(` 86 處 —— ★判準（你點出的第三種形狀，我照收並定三類）
 topic: ★母體 dump 收（86 處＋上下文三行＋函式名），而你【沒有分類】是對的｜★★而你先報的那個形狀直接改了判準：`state.teams.has(x) and <再讀它的欄位>` **兩類都不像** ⇒ 判準改成【三類】｜★★★另：效能那張的主詞已經點名（`sim_runner:315` 全域閘 ＋ `loop2.solo` 主兇），spec 已送 R²
 ---
