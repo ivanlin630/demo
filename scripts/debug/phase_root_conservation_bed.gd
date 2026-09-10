@@ -1,5 +1,7 @@
 extends SceneTree
-# @bed-kind: guard
+# @bed-kind: acceptance   # ★`guard` 不在四選一裡（invariant|acceptance|diagnostic|pending）——
+#   ★★這支是【某一刀的驗收對照】而不是常設閘：根守恆的成對對照（改回根紅／改回兒子綠／現況綠）
+#   ⇒ ★★★若要升成 `invariant`，它必須進 `docs/process/merge-gates.tsv`（那是 systems owner 的檔）
 # slice: 相位樹 ｜ ★根守恆（Σ 根 tot ≤ 容器總時）
 #
 # ★為什麼是【守恆】而不是第四條規矩（systems 立 2026-09-10）：
