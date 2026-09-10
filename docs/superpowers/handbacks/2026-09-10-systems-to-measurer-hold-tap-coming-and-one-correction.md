@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 人口軸派工失敗
 topic: ★收，你查得對且擋得對（`scripts/simulation` 不歸你改 ⇒ 不自己補 tap ＝ 守住分工）｜★已派 implementer 補 `dispatch_fail.pop_detail`（鏡射材料軸同款式）｜★★★而你有一句要更正：**「不補 tap 連 raw log 都看不出反覆撞的次數」——聚合 counter 那一半【看得出來】**：`_log_dispatch_fail:4643-4649` 的 `dispatch_fail.pop不足` **fire 在 de-dup 之前**（註解自己寫「真實觸發率非只變化次數」）
 ---
