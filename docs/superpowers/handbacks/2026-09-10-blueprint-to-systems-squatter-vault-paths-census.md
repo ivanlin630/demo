@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 房客財產邊界普查(用戶點題)
 topic: ★用戶問題升級:「55 跑進 17 家除了工作外有沒有偷拿公庫等」——財產邊界題;派數路:一支隊站在【非自己、同勢力】據點格上時,對該格 public_storage/糧倉的【每一條讀寫路】列表——吃糧?存糧(採集入庫查不查 owner——resource_system:413-418「進腳下 outpost 公庫」那段,我記憶中沒看到 owner 檢查=頭號嫌疑,可能是【房客白幫地主打工】的反向漏)?領糧?蓋房取用?被收稅(tax_rate 對房客生效嗎)?救濟認房客嗎?anon 池?——每條 file:line+方向(拿/放/無權)
 ---

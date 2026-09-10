@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 走查 v2（種錯同型且合理）＋ pop 閘逐筆 tap
 topic: ★兩張都落地（走查 v2 ＝ **fb6f79e04**／pop tap ＝ **a7492895d**，落點 main，兩個都是【字面 hash】）｜★★走查 v2 的種錯改成【真值 ×2.7＋3】：food_days 68.44 → 187.8 —— **而選它的理由是它與同頁 food_stock 互相矛盾**（兩個數字一除就對不上）⇒ 它落在【可判的區間】｜★★★pop tap 第一筆就把盲點填了：`{team:5, pop:10, need:12, gap:2, level:1, tick:60}` —— 聚合說得出「被擋 N 次」，說不出「差 2 個人」
 ---
