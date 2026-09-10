@@ -683,6 +683,8 @@ static var _fall_seen: Dictionary = {}
 #     （observability_path_test：on=5/58/54 vs off=0/0/0）⇒ ★★那張床紅的理由跟它掛的名字不同。
 # ★量測用的共用實例（只在 `Probe.enabled` 路徑上；★它不持有世界狀態）
 static var _uo_fai_shared: FactionAISystem = null
+# ★production 熱路徑上的共用實例（`_nearest_market_outpost_with` 是無狀態查詢）
+static var _mkt_fai: FactionAISystem = null
 
 # ★★★`frontier_candidates` 的內部碼表（systems 派 2026-09-10）——
 #   ★走 `SimRunner.phase_timing`，**不走 `Probe.enabled`**：界限 43（量儀器的碼表不能跟被量的儀器同一個開關）
@@ -704,6 +706,16 @@ static var acq_us: float = 0.0          # ★`AcquisitionPaths.for_resource` 本
 static var acq_n: int = 0
 static var path_us: float = 0.0         # ★逐 path 的迴圈【身體】（`_resolve_build_facility` ＋ taps）
 static var path_n: int = 0
+# ★★★迴圈身體再切四段（切法由 implementer 定；★單價一律量、不准除）
+static var pb_fac_us: float = 0.0       # ①facility 分支：REGISTRY 掃 ＋ `_resolve_build_facility`
+static var pb_fac_n: int = 0
+static var pb_probe_us: float = 0.0     # ②facility 分支的 Probe 區塊（帶 Dictionary 的 bump_sample）
+static var pb_probe_n: int = 0
+static var pb_sub_us: float = 0.0       # ③material 分支：遞迴回 `_resolve_resource_prereq`
+static var pb_sub_n: int = 0
+static var pb_ready_us: float = 0.0     # ④ready／stock 分支：`_mk_candidate`
+static var pb_ready_n: int = 0
+static var paths_hist: Dictionary = {}  # ★paths/call 的分佈（不是平均）
 
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
@@ -711,6 +723,8 @@ static func _reset_cross_run() -> Dictionary:
 	_fall_seen.clear()
 	if _uo_fai_shared != null: cleared["GoalResolver._uo_fai_shared"] = 1
 	_uo_fai_shared = null   # ★跨 run 靜態殘留：量測用實例也要清（同一份清單，不例外）
+	if _mkt_fai != null: cleared["GoalResolver._mkt_fai"] = 1
+	_mkt_fai = null
 	mkt_us = 0.0
 	mkt_n = 0
 	rrp_us = 0.0
@@ -719,6 +733,15 @@ static func _reset_cross_run() -> Dictionary:
 	acq_n = 0
 	path_us = 0.0
 	path_n = 0
+	pb_fac_us = 0.0
+	pb_fac_n = 0
+	pb_probe_us = 0.0
+	pb_probe_n = 0
+	pb_sub_us = 0.0
+	pb_sub_n = 0
+	pb_ready_us = 0.0
+	pb_ready_n = 0
+	paths_hist = {}
 	if fr_calls != 0: cleared["GoalResolver.fr_*"] = fr_calls
 	fr_calls = 0
 	fr_goalloop_us = 0.0
@@ -758,7 +781,9 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		# ★★★量測（不改行為）：這一行【每次呼叫都 new 一支七千行的 class】，而且它**不在 Probe 內**
 		#   ⇒ 與 goal_resolver:244 那顆是同族，但那顆只在儀器開著時跑，**這一顆在 production 熱路徑上**。
 		var _mk0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
-		var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, res)
+		if _mkt_fai == null:
+			_mkt_fai = FactionAISystem.new()   # ★順手修（systems 裁）：本行原本【每次呼叫都 new 一支七千行的 class】
+		var mp: Vector2i = _mkt_fai._nearest_market_outpost_with(state, team, res)
 		if SimRunner.phase_timing:
 			mkt_us += float(Time.get_ticks_usec() - _mk0)
 			mkt_n += 1
@@ -861,6 +886,15 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 	if SimRunner.phase_timing:
 		acq_us += float(Time.get_ticks_usec() - _pl0)
 		acq_n += 1
+		# ★分佈用桶（★平均會把「某次 path 特別多」藏起來）
+		var _pk: String = "ge16"
+		var _ps: int = _paths.size()
+		if _ps == 0: _pk = "0"
+		elif _ps == 1: _pk = "1"
+		elif _ps <= 3: _pk = "2to3"
+		elif _ps <= 7: _pk = "4to7"
+		elif _ps <= 15: _pk = "8to15"
+		paths_hist[_pk] = int(paths_hist.get(_pk, 0)) + 1
 	var _bl0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	for path in _paths:
 		if SimRunner.phase_timing:
@@ -883,6 +917,7 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 			#   ★不靠 default 湊：`_resolve_build_facility` 的 default 剛好也是 1.5，
 			#   但【靠 default 達成的相等】在有人改 default 時會靜默斷掉。
 			#   ★路徑：systems 曾依舊錨定案 1.0，blueprint 修錨後改判 1.5；兩組實測都在交件信裡。
+			var _fs0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 			var _fname: String = _facility_of_level_key(blocked)
 			var _fdef: Dictionary = {"facility": _fname}
 			for _rgt in GoalRegistry.REGISTRY:
@@ -891,6 +926,10 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 					_fdef = _rd
 					break
 			var fc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt, _fdef)
+			if SimRunner.phase_timing:
+				pb_fac_us += float(Time.get_ticks_usec() - _fs0)
+				pb_fac_n += 1
+			var _pp0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 			# ★★★本票的【世界層價值】只在這一格（systems 最後一格）：
 			#   若既有 candidate 總是在，兩者等價 ⇒ means-end 對世界零影響。
 			#   ★既有候選存在 ⟺ 隊的 goal_state 裡有對應的 active build_<facility> goal。
@@ -956,6 +995,9 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 					 # ★仍是空的話，把鍵名原樣帶出來 —— ★★不猜第四個鍵（systems 明令）
 					 "to_task_keys": ("" if _act != "" else str(_tt2.keys())),
 					 "existing": _existing}, 500)
+			if SimRunner.phase_timing:
+				pb_probe_us += float(Time.get_ticks_usec() - _pp0)   # ★②儀器自己（Probe 區塊）
+				pb_probe_n += 1
 			if not fc.is_empty():
 				fc["me_depth"] = _depth
 				# ★設施【具名】(2026-08-26，QA 故事稽核抓的)：candidate 的 label ＝ `goal_type:frontier_kind`，
@@ -967,14 +1009,22 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 		elif pkind == "material":
 			# ★缺原料 ⇒ 遞迴結果各自成 candidate：把「缺什麼」變成一個真的可選行動
 			var sub: Dictionary = {"kind": GoalRegistry.PREREQ_RESOURCE, "res": blocked}
+			var _sb0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 			var subc: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, sub)
+			if SimRunner.phase_timing:
+				pb_sub_us += float(Time.get_ticks_usec() - _sb0)
+				pb_sub_n += 1
 			if not subc.is_empty():
 				subc["me_depth"] = _depth
 				out.append(subc)   # ★空字典不能進 out：掉出 if 外會讓 out 幾乎恆非空
 		elif pkind == "ready":
 			# ★前置全滿 ⇒ 直接製造
+			var _rd0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 			var _rc: Dictionary = _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx,
 				{"task": TeamData.TASK_MANUFACTURE, "target": team.tile_pos})
+			if SimRunner.phase_timing:
+				pb_ready_us += float(Time.get_ticks_usec() - _rd0)
+				pb_ready_n += 1
 			_rc["me_depth"] = _depth
 			out.append(_rc)
 		# ★★★stock 形狀：出口【解封】（2026-08-26）。當初裁「不進價值比較」的理由只有一個

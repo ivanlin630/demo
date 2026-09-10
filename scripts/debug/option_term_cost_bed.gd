@@ -61,6 +61,29 @@ func _initialize() -> void:
 	AcquisitionPaths._ap_flush()   # ★最後一個 tick 也要結清（★否則最後那一 tick 靜默消失）
 	var ap_t: float = maxf(1.0, float(AcquisitionPaths.ap_ticks_n))
 	print("")
+	# ★★★迴圈身體四段（★母體地板在算式之前：次數 0 ⇒ 明寫 0，不印任何以 0 為分母的比率）
+	print("")
+	print("★逐 path 迴圈身體四段")
+	print("%-34s %10s %12s %14s" % ["段", "次數", "總計(s)", "us/次"])
+	var pb: Array = [
+		["①facility(REGISTRY掃+_resolve_build_facility)", GoalResolver.pb_fac_n, GoalResolver.pb_fac_us],
+		["②facility 的 Probe 區塊（儀器）", GoalResolver.pb_probe_n, GoalResolver.pb_probe_us],
+		["③material 遞迴 _resolve_resource_prereq", GoalResolver.pb_sub_n, GoalResolver.pb_sub_us],
+		["④ready/stock 的 _mk_candidate", GoalResolver.pb_ready_n, GoalResolver.pb_ready_us]]
+	var pb_sum: float = 0.0
+	for row in pb:
+		pb_sum += float(row[2])
+		if int(row[1]) == 0:
+			print("%-34s %10s %12.3f %14s" % [row[0], "★0 次", float(row[2]) / 1e6, "不可判"])
+		else:
+			print("%-34s %10d %12.3f %14.1f" % [row[0], int(row[1]), float(row[2]) / 1e6,
+				float(row[2]) / float(row[1])])
+	print("★守恆③：四段和 %.3f s vs 迴圈身體 %.3f s（差 %.3f s）" % [
+		pb_sum / 1e6, GoalResolver.path_us / 1e6, (GoalResolver.path_us - pb_sum) / 1e6])
+	var ph_parts: Array = []
+	for k in ["0", "1", "2to3", "4to7", "8to15", "ge16"]:
+		ph_parts.append("%s=%d" % [k, int(GoalResolver.paths_hist.get(k, 0))])
+	print("★★paths/call 分佈（桶）：%s" % "、".join(ph_parts))
 	print("★★★`for_resource` 本身 %d 次／%.3f s／%.1f us；★逐 path 迴圈身體 %d 個 path／%.3f s／%.1f us per path" % [
 		GoalResolver.acq_n, GoalResolver.acq_us / 1e6, GoalResolver.acq_us / maxf(1.0, float(GoalResolver.acq_n)),
 		GoalResolver.path_n, GoalResolver.path_us / 1e6,
