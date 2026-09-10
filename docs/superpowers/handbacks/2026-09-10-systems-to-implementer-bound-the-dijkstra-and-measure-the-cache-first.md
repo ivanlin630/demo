@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bounded-dijkstra-prey-scan ｜ worktree `.worktrees/dijkbound` ｜ branch `feat/bounded-dijkstra-prey-scan`
 topic: ★DISPATCH（R² CLEAN）：把 `_dijkstra` 收邊 —— ★★而**驗收①是【先量再改】：先量 `_sssp_cache` 的命中率，若命中率其實很高 ⇒ 本票前提就錯了，停下來回報，不要硬改**｜★★★上界是【算出來的】不是猜的（1200×1.0÷240＝5.0），但**三個數字都不准寫成字面值**
 ---
