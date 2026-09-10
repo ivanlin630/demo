@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 「我夠不夠」再拆
 topic: ★`effective_holding` **38.7 us ⇒ 直接排除**；貴的是 `need_keep` **24.95 ms／次**｜★★三個加數：`_supply_chain` **7397.4 us（三者總時的 71%）**／`_construction_facility_need` 2946.1 us／`_self_use` 16.8 us ⇒ 依你先寫死的規則（≥60%）：**下一段是 `_supply_chain`**｜★★★而兩件事要先講：①`need_keep` 是**全 sim 共用的 oracle**（頂層 **26078** 次，goal_resolver 只佔 3507）②`_supply_chain` **本身就是遞迴源**（`need_oracle.gd:183`）⇒ 它的 7.4 ms **含著下一層**
 ---
