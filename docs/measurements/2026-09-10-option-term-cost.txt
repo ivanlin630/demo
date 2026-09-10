@@ -22,6 +22,22 @@ subteam           6        154.3        231.0      17030.5         14.7       4.
   ＝ 該呼叫端 `rank_scored_ctx` 的 **99.7%**。
   option 迴圈 0.56 ms（0.25%）／`applicable()` 0.14 ms／`sort` 0.05 ms。
 
+=== ②-b ★★★而 ② 那些 frontier 數字【含儀器成本】（2026-09-10 後補，就地加註）===
+`frontier_candidates` 內部有【只在 Probe 開著時才跑】的量測工作：
+  `goal_resolver.gd:244` 每次呼叫 `FactionAISystem.new()`（★七千行的 class）＋ `_find_own_outpost`
+  ＋ 逐 goal 的 `_unit_overlap_tap`（★它就地重算一次 trade valuation）
+①`.new()` 改成重用 static 實例（仍在 `Probe.enabled` 內）⇒ leader 的 frontier 段
+   **225472.6 → 201548.2 us/call（−10.6%）**（同窗同 seed 同 config）
+②★★而「儀器在這一段佔多少」要用【不依賴 Probe 的碼表】才量得到（Probe-gated 的碼表量不到它自己）
+   ⇒ 走 `SimRunner.phase_timing` 的碼表，同窗同 seed 跑兩趟（全 590 次呼叫的平均）：
+     Probe=ON  **107506.6 us/call**
+     Probe=OFF  **91929.7 us/call**
+   ⇒ ★儀器 ＝ **15.6 ms/call ＝ 14.5%** ⇒ ★★★**沒有崩掉：剩下的 91.9 ms 是真工作。**
+③fp：兩趟 **相同**（`16bb6924789c18ac031e61d34c2aeae7`）⇒ 儀器沒有在改世界。
+   ★★而第一版我量出兩個不同的 fp —— 那是【我的床】的錯：OFF 那趟我自己 `WorldState.new()` 建世界、
+   沒走 helper 的 `_strip_player` ⇒ **兩個世界本來就不同**。★★★兩趟必須走同一條建世界的路，
+   只有【建完之後】才准分岔。
+
 === ③ 逐 term（★問「成本集中在一兩個 term 還是攤平」）===
 term                             次數        總計(s)         us/次    單次max(ms)       佔比
 camp_drive                       452        0.018         40.6          1.3    21.1%

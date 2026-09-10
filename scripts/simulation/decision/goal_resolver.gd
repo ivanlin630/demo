@@ -241,7 +241,16 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 	#     maintain 半邊【就地重算一次】`trade_valuation.gd:158-159` 的同一個算式
 	#     ⇒ ★★★這是【量測用重算，不是共用出口】—— 抽函式是修法的一部分，要逐位元不變的驗收。
 	#   ★母體＝所有 active goal（13 個都走到），不是只有那七個 —— 否則看不到值域兩端。
-	var _uo_fai: FactionAISystem = FactionAISystem.new() if Probe.enabled else null
+	# ★★★儀器自己的成本（systems 讀出、implementer 實測 2026-09-10）：
+	#   舊寫法**每呼叫一次就 `new()` 一支七千行的 class**，而且只在 `Probe.enabled` 時執行
+	#   ⇒ ★量到的 `frontier_candidates` us/call 裡有一塊是【儀器自己】。
+	#   ★★修法＝**重用一個 static 實例**（它只被拿來呼叫無狀態的 `_find_own_outpost`）
+	#   ⇒ ★★★而它仍在 `Probe.enabled` 內：關掉儀器時連這一個都不會建。
+	var _uo_fai: FactionAISystem = null
+	if Probe.enabled:
+		if _uo_fai_shared == null:
+			_uo_fai_shared = FactionAISystem.new()
+		_uo_fai = _uo_fai_shared
 	var _uo_otile: HexTileData = null
 	if Probe.enabled:
 		var _uo_own: Vector2i = _uo_fai._find_own_outpost(state, team)
@@ -652,11 +661,16 @@ static var _fall_seen: Dictionary = {}
 #   ★血證：`_fall_seen` 的 key 是 `team|tick|res` ⇒ 同 process 第二個世界的 tick 從 0 重來，
 #     每一把鑰匙都已經在裡面 ⇒ `goal.res_fall_distinct.*` 第二輪【一次都不 bump】
 #     （observability_path_test：on=5/58/54 vs off=0/0/0）⇒ ★★那張床紅的理由跟它掛的名字不同。
+# ★量測用的共用實例（只在 `Probe.enabled` 路徑上；★它不持有世界狀態）
+static var _uo_fai_shared: FactionAISystem = null
+
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
 	if not _fall_seen.is_empty(): cleared["GoalResolver._fall_seen"] = _fall_seen.size()
 	_fall_seen.clear()
-	return {"checked": 1, "cleared": cleared}
+	if _uo_fai_shared != null: cleared["GoalResolver._uo_fai_shared"] = 1
+	_uo_fai_shared = null   # ★跨 run 靜態殘留：量測用實例也要清（同一份清單，不例外）
+	return {"checked": 2, "cleared": cleared}
 
 static func harvest_terrains(res: String) -> Array:
 	var out: Array = []

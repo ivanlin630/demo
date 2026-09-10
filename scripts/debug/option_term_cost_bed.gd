@@ -13,12 +13,27 @@ func _initialize() -> void:
 	print("=== 逐 option／逐 term 成本（%d tick ＝ %.1f 遊戲天，%s，Probe=ON）===" % [
 		ticks, float(ticks) / float(WorldState.TICKS_PER_DAY), cfg])
 	seed(4242)
-	var st := MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
+	# ★★★Probe ON/OFF 同窗對照（OT_PROBE=0 ⇒ 關）：`frontier_candidates` 裡有只在 Probe 開著時才跑的
+	#   量測工作 ⇒ ★用 Probe-gated 碼表量不到它自己；下面那支碼表走 `phase_timing`，兩趟都在。
+	var probe_on: bool = OS.get_environment("OT_PROBE") != "0"
+	# ★★★兩趟必須走【同一條建世界的路】（第一版我在 OFF 那趟自己 new WorldState ⇒ 世界不同 ⇒ fp 當然不同，
+	#   而那會被誤讀成「儀器在改世界」）⇒ 兩趟都走 helper，只有【建完之後】才關 Probe。
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
+	if not probe_on:
+		Probe.enabled = false
 	SimRunner.phase_timing = true
 	var runner := SimRunner.new()
 	for _i in range(ticks):
 		runner.advance_tick(st, Vector2i(-1, -1))
 
+	print("★★★frontier 碼表（不依賴 Probe）：%d 次／總計 %.2f s／**%.1f us per call**（Probe=%s）" % [
+		DecisionEngine.frontier_calls, DecisionEngine.frontier_us_total / 1e6,
+		DecisionEngine.frontier_us_total / maxf(1.0, float(DecisionEngine.frontier_calls)),
+		"ON" if probe_on else "OFF"])
+	if not probe_on:
+		print("★fp=%s" % StateFingerprint.compute(st))
+		print("=== DONE === SECTIONS=1/1 FAILS=0（★Probe 關 ⇒ 只有這一支碼表有數字）")
+		quit()
 	var calls: int = int(Probe.counts.get("optterm.calls", 0))
 	var opt_rows: Array = []
 	var tot_opt_us: float = 0.0

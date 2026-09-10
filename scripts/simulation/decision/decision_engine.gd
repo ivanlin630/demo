@@ -72,6 +72,10 @@ const ZEROWIN_WATCH: Array = [
 # ★★★src 要【穿進來】（systems 2026-09-10）：否則新的分段鍵會變成四個呼叫端共用的 multi
 #   —— 那正是我們上一張票才剛拆掉的東西。
 #   ★沒帶 ⇒ "unknown"：它會在表上自成一列（★★而不是靜默混進某個父親）。
+# ★不依賴 Probe 的 frontier 碼表（見 `rank_scored_ctx` 內的理由）：ON/OFF 兩趟才比得出儀器成本。
+static var frontier_us_total: float = 0.0
+static var frontier_calls: int = 0
+
 static func rank_scored(state: WorldState, team: TeamData, src: String = "unknown") -> Array:
 	# ★★★守衛移位（systems 裁 2026-09-10）：`from_unknown ⇒ 未登記具名紅` 本來守在
 	#   `_decide_unified`，而那裡的母體只有 733 次 —— ★真母體是【本函式】的 1096 次
@@ -326,6 +330,12 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	var _s2: int = Time.get_ticks_usec() if Probe.enabled else 0
 	if Probe.enabled:
 		Probe.add_amount("ctxseg.optloop." + src, float(_s2 - _s1))
+	# ★★★這一段的計時【不依賴 Probe】（systems 2026-09-10 的問題要這樣才答得出來）：
+	#   `frontier_candidates` 內部有【只在 Probe 開著時才跑】的量測工作（`_unit_overlap_tap` 等）
+	#   ⇒ ★用 Probe-gated 的碼表量它，等於用儀器量儀器自己 —— 永遠看不到「關掉會少多少」。
+	#   ⇒ ★★所以這一支走 `SimRunner.phase_timing`（與 `Probe.enabled` 正交）
+	#     ⇒ ★★★同窗同 seed 跑 Probe ON / OFF 兩趟，差額就是【儀器在這一段的成本】。
+	var _fr0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	if state != null and team != null:
 		for cand in GoalResolver.frontier_candidates(state, team, ctx):
 			if Probe.enabled:
@@ -376,6 +386,9 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	#   ★★配上推導後 ＝ 秤【說了平手】之後的合法裁決 ⇒ 採。
 	#   ⇒ 規則：真值相等時選【成本低者】（`_estimate_delay_days`，決定性、不用隨機），
 	#     ★★★仍然相等才回到 applicable 順序 —— 排序保持全序、可重現。
+	if SimRunner.phase_timing:
+		frontier_us_total += float(Time.get_ticks_usec() - _fr0)
+		frontier_calls += 1
 	var _s3: int = Time.get_ticks_usec() if Probe.enabled else 0
 	if Probe.enabled:
 		Probe.add_amount("ctxseg.frontier." + src, float(_s3 - _s2))
