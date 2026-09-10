@@ -534,8 +534,90 @@ func set_leader(team: TeamData, pid: int, old_leader_action: String = "none") ->
 			p.team_id = team.team_id     # 強制回指本隊（修 stale desync）
 			p.role = "leader"
 
+# ── ★★★登記錨 ④a：登記謂詞（唯一真值＝ TeamData.work_outpost）────────────
+# ★呼叫端【只准用這三支】。★★手寫 `tile.outpost_owner == team.team_id or ... parent_team_id`
+#   的組合 ⇒ 棘輪具名紅（`.claude/hooks/registry-axis-ratchet.sh`）——
+#   ★★★因為那正是「同一個問題長出四種識別軸」當初的長法：每一處各自手寫一份。
+# ★遷移旗（單次、冪等）：見 `migrate_registry_anchor`。
+var registry_migrated: bool = false
+
+# 這支隊【本人】登記在這格嗎？
+func registered_at(team: TeamData, tile_id_pos: Vector2i) -> bool:
+	return team != null and team.work_outpost == tile_id_pos and tile_id_pos != Vector2i(-1, -1)
+
+# 本人登記 OR 母隊登記／擁有（★一跳，【不遞迴】—— blueprint 裁 2026-09-10 §⑧）。
+# ★語意：登記＝居住／雇傭契約（隊↔據點）；親緣＝組織隸屬（隊↔隊）。
+#   子隊是母隊的延伸 ⇒ 回自家母村不該需要自己的一份登記 ⇒ 權利【沿母隊流下來】。
+# ★★不發第二份登記：登記欄是唯一真值，parent 只是【查詢時多查一跳】
+#   （發第二份 ⇒ 子隊獨立／母隊搬家時兩欄打架 ＝ 又一個兩真相源）。
+# ★★★誠實限（systems 加）：一跳推導 ⇒ 母隊登記一變，子隊權利【當場】跟著變，
+#   而子隊自己的狀態【一個位元都沒變】⇒ 觀測後果是「它突然不能在這裡卸貨了」而查不出原因
+#   ⇒ 所以 denied 要接 tap，且 tap 要有【主詞】（ctx）：否則卸貨／施工／自救三件事混成一個數字。
+func registered_or_parent_at(team: TeamData, tile_id_pos: Vector2i, ctx: String) -> bool:
+	if registered_at(team, tile_id_pos):
+		return true
+	if team != null and team.parent_team_id != -1:
+		var parent: TeamData = teams.get(team.parent_team_id)
+		if parent != null:
+			if registered_at(parent, tile_id_pos):
+				return true
+			var tile: HexTileData = world.tiles.get(tile_id_pos.x * 1000 + tile_id_pos.y)
+			if tile != null and tile.outpost_owner == parent.team_id:
+				return true
+	if Probe.enabled:
+		Probe.bump("registry.parent_hop.denied." + ctx)   # ★紅燈要有主詞
+	return false
+
+# 這支隊是不是【某座村的居民】（登記存在，且那格仍是據點）。
+func is_registered_resident(team: TeamData) -> bool:
+	if team == null or team.work_outpost == Vector2i(-1, -1):
+		return false
+	var tile: HexTileData = world.tiles.get(team.work_outpost.x * 1000 + team.work_outpost.y)
+	return tile != null and tile.outpost_level > 0
+
+# ★★★遷移（HOW spec §③＝本票的心臟）：把【當下符合舊站位判定】的隊寫進登記欄。
+#   ★沒有它，上線那一刻全世界同時失去居民身分（生產停／返家 gate 全關／救濟找不到對象）。
+#   ★★單次＋冪等（旗擋重入；重跑同一個世界得到同一份登記）。
+#   ★★★同 faction 借宿那一類【照樣登記】—— 卡②已裁開放村，本票不趁機收緊門禁
+#     （收緊＝改世界，而那不在卡④裡）。
+func migrate_registry_anchor() -> void:
+	if registry_migrated:
+		return
+	registry_migrated = true
+	for tid in teams:
+		var t: TeamData = teams[tid]
+		if t.work_outpost != Vector2i(-1, -1):
+			continue
+		if FactionAISystem.legacy_resident_by_position(self, t):
+			t.work_outpost = t.tile_pos
+
+# ★★★自動登記 stub（systems 裁 2026-09-10）—— ★它【明文是 stub】，不是最終機制。
+#   ★病：spec 原本寫「登記只會由遷移產生」⇒ 世界【單向流失居民】（只會失去、不會取得）
+#     ⇒ 實測 `Team0` 在 t=0 還沒站上自家據點，之後站上去了而**永遠不會登記**
+#     ⇒ ★★那不是「動詞還沒來」，是【地基本身會隨時間崩壞】：窗越長差距越大。
+#   ⇒ 本 stub ＝ ④b「上門請求（村主秤）」的**永遠答應版**：
+#     一支 PRODUCE 隊站上（自家 OR 同 faction 的）據點 ⇒ 自動登記。
+#   ★★★而它的 tap 次數就是【④b 上線後該歸零的量】—— 驗收判準寫在 ④b：
+#     `registry.auto_register_stub` 歸零 ＝ stub 真的被秤取代（而不是被忘記）。
+func auto_register_stub_sweep() -> void:
+	for tid in teams:
+		var t: TeamData = teams[tid]
+		if t.work_outpost != Vector2i(-1, -1):
+			continue
+		if FactionAISystem.legacy_resident_by_position(self, t):
+			t.work_outpost = t.tile_pos
+			if Probe.enabled:
+				Probe.bump("registry.auto_register_stub")   # ★④b 上線後這個數字該歸零
+
 # ── S5 tags 單寫者 chokepoint ─────────────────────────────────
-# load-bearing tags（軍隊/生產/流亡，movement 讀決策）＝真值源保護點。reason 供 driver-ledger 審計。
+# ★★★訂正（systems 量測 2026-09-10，登記錨 ④a spec §⑥）：舊註解寫「軍隊/生產/流亡，movement 讀決策」
+#   —— ★三個裡有兩個是假的。量法＝全庫裸符號掃：
+#     `TAG_PRODUCE`：`movement_system.gd:68` 讀（★這一個是真的）
+#     `TAG_MILITARY`：全庫 6 處，movement 裡 **0 處**
+#     `TAG_EXILE`：全庫 **1 處**，而那是唯一的【寫入】點（`manpower_system.gd:206`）⇒ **零讀者**
+#   ⇒ ★★這個 chokepoint 仍然是真值源保護點（三個 tag 的單寫者），但它的「load-bearing」理由
+#     目前只由 `TAG_PRODUCE` 撐著。★★★註解是【當時的意圖】不是【現在的事實】，
+#     而下一個人會把它當事實引用（今天已經是第三次）。
 # 所有 team.tags= / .append / .erase 直寫改走此三入口（outpost_system 暫豁免＝平行紀律：
 #   conquest-yield-chain 在飛同機改 outpost，避 merge 撞；該波 merge 後補收）。
 # 語意鏡射原直寫（append/erase 無條件，不加 dedup）→ pointwise 位元不變；原有 site-guard 保留於呼叫端。

@@ -596,8 +596,38 @@ func _is_resident_team(state: WorldState, team: TeamData) -> bool:
 	return FactionAISystem.is_resident_static(state, team)
 
 # static 版供 DecisionContext.gather 呼叫（避免 ctx 依賴 FactionAISystem 實例）。
-# 本體 = 舊 _is_resident_team（居民 = 生產隊 + 站自家/同 faction outpost）。
+# ★★★登記錨 ④a：**實作**換成讀登記欄（`TeamData.work_outpost`），★簽名不動
+#   ⇒ 呼叫端（decision_context/goal_resolver/options/movement/sim_runner/observer_query…）不必逐處改。
+# ★居民 ＝【登記在腳下這格】（而不是「站在一格符合條件的地上」）——
+#   ★★差別在哪一天會現形：站位判定會因為【隊走開了】而當場失去居民身分；
+#     登記制下走開仍是居民，直到它自己退租或據點消失（★而動詞是 ④b，本票不加）。
+# ★★★shadow（spec 驗收④）：新謂詞 vs 舊站位判定【逐次比對】＋母體地板，
+#   因為裸掃只到同函式體粒度 —— 跨函式的漏網要靠【跑起來的世界】逼出來。
 static func is_resident_static(state: WorldState, team: TeamData) -> bool:
+	# ★★★語意（systems 裁 2026-09-10 §②）：登記是【持久】的 —— 隊走開【不會】失去居民身分。
+	#   ★這正是「錨 vs 站位」的唯一差別；★★而它是【真的行為改變】：
+	#     舊判定下離家的生產隊當場變非居民，登記制下它仍是居民（直到退租／據點消失）。
+	#   ⇒ ★★★所以驗收⑥「行為未變」在【離家的居民】這一格上**不成立**，而那是本裁定的內容，
+	#     不是實作走樣 —— 差異量在交件裡逐項報。
+	var now: bool = state.is_registered_resident(team) and team.tags.has(TeamData.TAG_PRODUCE)
+	if Probe.enabled and now and team.work_outpost != team.tile_pos:
+		Probe.bump("registry.resident.away")   # ★★「登記了但人不在」＝錨真正做的事，量得到才談得上價值
+	if Probe.enabled:
+		var was: bool = legacy_resident_by_position(state, team)
+		Probe.bump("registry.shadow.resident.n")                     # ★母體：比過幾次（沒有它，「零不一致」沒有鑑別力）
+		if was != now:
+			Probe.bump("registry.shadow.resident.mismatch")
+			Probe.bump_sample("registry.shadow.resident.detail", {
+				"team": team.team_id, "was": was, "now": now,
+				"pos": "%d,%d" % [team.tile_pos.x, team.tile_pos.y],
+				"reg": "%d,%d" % [team.work_outpost.x, team.work_outpost.y]}, 200)
+	return now
+
+# 舊站位判定（居民 = 生產隊 + 站自家/同 faction outpost）。
+# ★它【不是死碼】：①遷移拿它決定誰有登記 ②shadow 拿它當對照
+#   ⇒ ★★所以它要有名字：一個沒有名字的舊判定會被下一個人當成「重複邏輯」刪掉，
+#     而那一刻對照就消失了（而對照消失【不會有任何一格紅】）。
+static func legacy_resident_by_position(state: WorldState, team: TeamData) -> bool:
 	if not team.tags.has(TeamData.TAG_PRODUCE):
 		return false
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
@@ -5880,7 +5910,7 @@ func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
 	if tile == null or tile.outpost_level <= 0:
 		return none
 	var os := OutpostSystem.new()
-	if not os._faction_owns(state, team, tile):
+	if not os._faction_owns(state, team, tile, "food_rescue"):   # ★主隊自己餓了就地蓋產糧設施（R² 補回的第三個呼叫點）
 		return none
 	var food_days: float = ResourceSystem.effective_food(state, team) \
 		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)

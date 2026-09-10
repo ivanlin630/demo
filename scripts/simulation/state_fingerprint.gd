@@ -365,7 +365,7 @@ static func _emit_teams(state: WorldState, buf: PackedStringArray) -> void:
 		var t: TeamData = state.teams[tid]
 		# 全 decision/lifecycle 持久欄（full canonical、最大化 drift 偵測）。
 		# ★排除 ephemeral 快取（food_runway/persist_strength/food_flow_avg/need_urgency=recompute/EWMA）+ cadence 排程欄（*_eval_next_tick）+ observer/probe。
-		buf.append("T|%d|pop=%d|minor=%d|prisoner=%d|task=%s|prio=%d|reason=%s|prev=%s|pos=%s|mt=%s|corvee=%s|fac=%d|parent=%d|combat=%d|social=%d|opt=%s|unrest=%d|famine=%s|rung=%d|phase=%s|breedp=%s|breedt=%d|res=%s|tags=%s|anon=%s|subs=%s|rep=%s|intent=%s|goals=%s|fail=%s" % [
+		buf.append("T|%d|pop=%d|minor=%d|prisoner=%d|task=%s|prio=%d|reason=%s|prev=%s|pos=%s|mt=%s|corvee=%s|fac=%d|parent=%d|combat=%d|social=%d|opt=%s|unrest=%d|famine=%s|rung=%d|phase=%s|breedp=%s|breedt=%d|res=%s|tags=%s|anon=%s|subs=%s|rep=%s|intent=%s|goals=%s|fail=%s|wo=%s" % [
 			t.team_id, t.population, t.minor_population, t.prisoner_population, t.current_task, t.task_priority, t.task_reason, t.previous_task,
 			_vec(t.tile_pos), _vec(t.move_target), _vec(t.corvee_site), t.faction_id, t.parent_team_id, t.combat_target, t.social_target,
 			t.current_option, t.unrest_turns, _q(t.famine_days), t.ambition_rung, t.plan_phase,
@@ -374,7 +374,9 @@ static func _emit_teams(state: WorldState, buf: PackedStringArray) -> void:
 			_dict_canon(t.resources), _arr_canon(t.tags), _dict_canon(t.anon_cohorts), _arr_canon(t.subteam_ids),
 			_dict_canon(t.known_reputations), _dict_canon(t.solo_intent), _arr_canon(t.goal_state),
 			# ★失敗記憶＝直接因果態（乘進 util、改下輪 argmax）→ 必入 fp（同 breed_progress 判準）
-			_dict_canon(t.recent_failures)])
+			# ★登記錨 ④a：`work_outpost` 是【持久決策態】（居民身分由它答）⇒ 必入 fp
+			#   ⇒ ★fp 會變，而那是預期的（spec 驗收⑤）：附歸因、同 seed 兩跑仍須相同。
+			_dict_canon(t.recent_failures), _vec(t.work_outpost)])
 		buf.append(_derived_line(t, "TD", "TeamData"))
 
 static func _emit_persons(state: WorldState, buf: PackedStringArray) -> void:

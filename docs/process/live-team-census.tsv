@@ -49,13 +49,14 @@ scripts/simulation/observer_query_api.gd:66	query_all_teams	A	★玩家可見面
 scripts/simulation/observer_query_api.gd:133	query_map_teams	A	★玩家可見面（同上）
 scripts/simulation/observer_query_api.gd:184	_residents_here_now	A	★玩家可見面（同上）
 scripts/simulation/coin_audit.gd:11	total	B	守恆記帳：★殭屍身上的錢【還在世界裡】，漏算它才會假性不守恆
-scripts/simulation/invariant_audit.gd:18	_check_population	B	稽核＝本來就要看全部
-scripts/simulation/invariant_audit.gd:38	_check_faction_bidir	B	同上
-scripts/simulation/invariant_audit.gd:49	_check_subteam_bidir	B	同上
-scripts/simulation/invariant_audit.gd:65	_check_roster_bidir	B	同上
-scripts/simulation/invariant_audit.gd:90	_check_anon_cohort	B	同上
-scripts/simulation/invariant_audit.gd:103	_check_captive_cohort	B	同上
-scripts/simulation/invariant_audit.gd:117	_check_no_dangling_team_id	B	同上（★它查的正是懸空引用，更需要看全部）
+scripts/simulation/invariant_audit.gd:19	_check_population	B	稽核＝本來就要看全部
+scripts/simulation/invariant_audit.gd:39	_check_faction_bidir	B	同上
+scripts/simulation/invariant_audit.gd:50	_check_subteam_bidir	B	同上
+scripts/simulation/invariant_audit.gd:65	_check_no_grandparent	B	登記錨 ④a 的一跳假設守衛：稽核＝看全部（★兩層子隊即使在待清除隊上出現也要紅）
+scripts/simulation/invariant_audit.gd:81	_check_roster_bidir	B	同上
+scripts/simulation/invariant_audit.gd:106	_check_anon_cohort	B	同上
+scripts/simulation/invariant_audit.gd:119	_check_captive_cohort	B	同上
+scripts/simulation/invariant_audit.gd:133	_check_no_dangling_team_id	B	同上（★它查的正是懸空引用，更需要看全部）
 scripts/simulation/order_system.gd:577	audit_escrow	B	託管守恆稽核
 scripts/simulation/order_system.gd:578	audit_escrow	B	同上（內層迴圈）
 scripts/simulation/population_system.gd:30	check_overflow	B	人口不變量檢查（★它是稽核不是行為）
