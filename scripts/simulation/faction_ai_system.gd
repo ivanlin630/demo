@@ -963,15 +963,14 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			# SoloAI 見非 idle 自動跳過（不雙寫）；守成(不 dispatch)則 SoloAI 照常跑既有個體決策。
 			# 不另設 cadence gate：與 SoloAI 同「每 idle tick 評估」節奏（否則 SoloAI 每 tick 搶走 idle
 			# →戰略層 cadence tick 永遠撞非 idle=漏觸發）。內部三閘(野心+累積+路徑)+hysteresis 自限稀有。
+			# ★_evaluate_solo 已移出本迴圈 ⇒ 改由 tick_solo_think() 每 tick 檢查到期才跑
+			#   （HOW spec 2026-09-10 §⑥ 選項 A）。這裡只留戰略層，維持每小時。
 			if SimRunner.phase_timing:
 				var _ts: int = Time.get_ticks_usec()
 				_evaluate_independent_strategy(state, team)
-				_ts = _fai_pht("loop2.indep_strategy", _ts)
-				_evaluate_solo(state, team)
-				_fai_pht("loop2.solo", _ts)
+				_fai_pht("loop2.indep_strategy", _ts)
 			else:
 				_evaluate_independent_strategy(state, team)
-				_evaluate_solo(state, team)
 			# S3 means-end 統一：獨立定居隊自家 outpost 建設施（同 _pick_facility argmax，閉合想 goods→需設施→去蓋）。
 			# ★S3：`% == 0` → 錯峰排程（actor = 隊）。
 			if team.indep_infra_next_tick == 0:
@@ -7357,3 +7356,51 @@ func _evaluate_owner_contact(state: WorldState, team: TeamData) -> void:
 	elif team.pending_owner_change_tick != -1:
 		team.pending_owner_change_tick = -1
 	team.known_reputations[cached_key] = owner_leader_now
+
+
+# ★★★每 tick 檢查、到期才想（HOW spec 2026-09-10 §⑥ 選項 A，blueprint 裁）
+#   ★為什麼不留在 evaluate_all 裡：那整支只在 `current_tick % NEAR_CADENCE == 0` 跑
+#     ⇒ 到期檢查會被【只看得到 60 倍數的取樣格】吃掉 ⇒ 98.3% 的隊思考頻率砍半。
+#   ★★所以到期檢查要在【每 tick 都會跑到的地方】—— 而【只有這一個 pass 移出來】：
+#     視野／移動／forced_event 超時維持每小時（動整個閘 ＝ 一次改很多件事，歸因不了）。
+#   ★★★T0 不受相位影響：緊急事件走的是事件驅動路徑，不經過這個排程閘。
+func tick_solo_think(state: WorldState) -> void:
+	for tid in state.teams.keys():
+		var team: TeamData = state.teams.get(tid)
+		if team == null:
+			continue
+		if team.beast_kind != "":
+			continue          # 野獸不進決策迴圈（憲法決策模型）
+		if team.parent_team_id != -1 or team.faction_id != -1:
+			continue          # 子隊／勢力成員不走 solo 日常（與原迴圈的分支條件逐字相同）
+		if team.solo_think_next_tick == 0:
+			# ★首次【不當場想】，而是排一個錯開過的到期時間：
+			#   ★★否則所有隊的第一次思考會集中在【同一個 tick】—— 那正是這張票要消滅的形狀，
+			#   ★★★而它會在世界剛開始時原封不動重演一次（床的公平性格第一次跑就抓到）。
+			team.solo_think_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, team.team_id, SimRunner.NEAR_CADENCE)
+			continue
+		# ★★T0 瞬醒不受相位影響（護欄①）：事件喚醒的隊【不等自己的相位】。
+		#   ★形狀逐字沿用同檔 INDEP_INFRA 那一段（due or woke ⇒ 跑；★只有 due 才重排下次）
+		#   ⇒ ★★★否則這個閘會【包住既有的 _should_reeval 事件早退路徑】，
+		#     而那正是 spec 護欄①明文禁止的事。
+		var _due: bool = state.world.current_tick >= team.solo_think_next_tick
+		var _woke: bool = WorldEvents.is_pending(state, team.team_id)
+		if not _due and not _woke:
+			continue
+		# ★驗收②的新 tap：掛在【到期檢查之後】—— 只在真的往下跑思考時 bump。
+		#   ★★舊的 pass.byteam 量的是「有沒有出現在 all_teams」⇒ 錯開前後都相同，量不到這件事。
+		if Probe.enabled:
+			Probe.bump("solo.think.byteam.%04d" % int(team.team_id))
+			Probe.bump("solo.think.gap.%04d.%d" % [int(team.team_id),
+				int(state.world.current_tick - team.solo_think_last_tick)])
+		team.solo_think_last_tick = state.world.current_tick
+		if _due:
+			team.solo_think_next_tick = CadenceStagger.next_tick(
+				state.world.current_tick, state.world.current_tick, team.team_id, SimRunner.NEAR_CADENCE)
+		if SimRunner.phase_timing:
+			var _ts: int = Time.get_ticks_usec()
+			_evaluate_solo(state, team)
+			_fai_pht("loop2.solo", _ts)
+		else:
+			_evaluate_solo(state, team)

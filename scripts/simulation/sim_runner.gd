@@ -360,6 +360,14 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_t = pass_r["t"]
 		if pass_r["result"] == "player_turn": return "player_turn"   # 伏擊起 encounter → 交還 bridge
 
+	# ★★★每 tick：個體日常思考的【到期檢查】（HOW spec 2026-09-10 選項 A）
+	#   ★它【故意】不在上面那個 `% NEAR_CADENCE` 閘裡：在閘裡檢查 ＝ 只看得到 60 的倍數
+	#   ⇒ CadenceStagger 的 offset 會被取樣格吃掉（offset≥1 就跳過一個檢查點 ⇒ 間隔 120）
+	#   ⇒ ★★98.3% 的隊思考頻率砍半 —— 而那不是工具壞，是【它被放錯了取樣格】。
+	#   ★★★只移這一個 pass：視野／移動／forced_event 超時維持每小時。
+	_step6b1_solo_think(state)
+	if phase_timing: _t = _pht("solo_think", _t)
+
 	# Harvest：每 6 小時（TICKS_PER_DAY / 4）
 	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
 		_step4c_harvest_tick(state)
@@ -391,6 +399,9 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	return ""   # non-encounter tick
 
 # 受控人力 P1：captive 待遇決策 + 軌跡（cadence 內部 gate，全域；同化/暴動/逃 守恆）
+func _step6b1_solo_think(state: WorldState) -> void:
+	_faction_ai_system.tick_solo_think(state)
+
 func _step_captives(state: WorldState) -> void:
 	ManpowerSystem.tick_all(state)
 

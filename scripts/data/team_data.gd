@@ -243,6 +243,13 @@ var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標
 #   ★留著 `% == 0` 的話，那顆常數只搬一半，而獨立隊會重現同一個相位病。
 var indep_infra_next_tick: int = 0
 var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
+# ★★★每小時全隊一起想 ⇒ 錯開（HOW spec 2026-09-10 選項 A，blueprint 裁）：
+#   到期【每 tick 檢查】而不是只在 60 的倍數檢查 —— ★這一點是關鍵：
+#   ★★只在 60 倍數檢查時，CadenceStagger 的 offset 精細資訊會被取樣格吃掉
+#   （offset≥1 就跳過一個檢查點 ⇒ 間隔 120）⇒ 98.3% 的隊思考頻率砍半。
+#   ★★★逐 tick 檢查之後偏移相消 ⇒ 長期均值恰好 ＝ cadence。
+var solo_think_next_tick: int = 0        # 個體日常思考（loop2.solo）的下次到期 tick
+var solo_think_last_tick: int = 0        # ★上次真的想的 tick —— 驗收⑧（實際間隔分布）要它
 var decision_eval_next_tick: int = 0     # 重評 cadence 重構：下次決策重評 tick（週期閘，非-unified 解 IDLE-lock）
 var last_decision_tick: int = 0          # ⑦ 統一重評：上次跑決策 tick（directive_fresh 比對基準，截斷死循環）
 var crisis_latched: bool = false         # Fix2 crisis edge-trigger：進 crisis fire 一次(latch)，持續期落 cadence，離開解 latch
