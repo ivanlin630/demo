@@ -40,8 +40,14 @@ const SELF_EXEMPT: Array = [
 	"scripts/debug/probe_stats.gd",          # Probe 自己（訊息字串提到 helper 名字）
 ]
 
+# ★★★誰決定 exit code：★由 _run() 回傳，呼叫端【只轉發】——
+#   ★★血證（systems 2026-09-10）：原本是 `_run(); quit()` ⇒ _run() 裡的 quit(1) 執行了，
+#   控制權回到這裡，那句無條件的 quit() 把 exit code【蓋回 0】
+#   ⇒ ★一個真紅被降級成【不可判】，而兩者的處置完全相反。
+#   ⇒ ★★★修的是【誰決定 exit code】這件事，不是那一行 —— 若只在 FAIL 路徑加 return，
+#     下一個人新增第四條退出路徑時會再犯一次。
 func _initialize() -> void:
-	_run(); quit()
+	quit(_run())
 
 func _gather(dir_path: String, out: Array) -> void:
 	var d := DirAccess.open(dir_path)
@@ -127,7 +133,7 @@ func _tracked_set() -> Dictionary:
 			d[t] = true
 	return d
 
-func _run() -> void:
+func _run() -> int:
 	var files: Array = []
 	_gather(ROOT, files)
 	files.sort()
@@ -135,8 +141,7 @@ func _run() -> void:
 	if tracked.is_empty():
 		print("[BED-ARM-GATE] ★ABORT：拿不到 tracked 清單（git ls-files 失敗或回空）")
 		print("[BED-ARM-GATE]   ★★空集合不得被讀成【沒有床要審】―― 那正是恆綠。")
-		quit(3)
-		return
+		return 3   # ★不可判（★保持 3，別在重構時把它併成 1）
 	var untracked: Array = []
 	var tracked_files: Array = []
 	for fp in files:
@@ -191,11 +196,11 @@ func _run() -> void:
 
 	if bad.is_empty():
 		print("[BED-ARM-GATE] PASS：沒有【新的】自己拼 arm 順序的床")
-		return
+		return 0
 	print("[BED-ARM-GATE] ★FAIL：%d 張床建了世界，既不用 helper 也不在白名單" % bad.size())
 	for r in bad:
 		print("   ★ ", r)
 	print("★處置：改用 MeasureBedHelper.arm_and_setup()（順序寫死，沒得選錯）")
 	print("★★若真的不能用（例如手工組世界不走 GameSetup），才加進白名單 ——")
 	print("   ★★★而加進白名單會讓上面那個數字變大，那是【刻意可見】的代價。")
-	quit(1)
+	return 1
