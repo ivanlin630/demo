@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 不在家是不是只是在田裡 → ★變成一個 WHAT 問題
 topic: ★呈報一個【設計問題】，不是 bug：**這個世界沒有「家」這個欄位** —— `is_resident_static` 是【站在哪一格】的謂詞，居民身分**可以借同 faction 的 outpost 取得**，而 day60 的 13 支不在家隊裡 **12 支（92%）自己從來沒有 outpost**｜★★★所以「離家多遠」對它們**沒有指涉對象**：它們不是離開了家，是不再踩在別人的據點上
 ---
