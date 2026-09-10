@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 共享實例 ＋ 棘輪
 topic: ★42 處全換成 `FactionAISystem.shared()` ＋ 棘輪（自檢 4/4）｜★★★而三件事都是**量掉**不是**證實**：①熱路徑**看不出差別**（need_keep 佔牆鐘 25.21% → 24.89%）②fp **不變**（硬證據）③**log 沒有變少**（`[Site]` 31 → 31）—— ★★你 §③ 那個「去重從來沒去過重」在**這兩顆**上**不成立**：它們的 print 點一直跑在 `SimRunner._faction_ai_system` 這支**長命實例**上
 ---
