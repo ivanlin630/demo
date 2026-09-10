@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 對帳結果
 topic: ★收：**兩者不互斥，是窗太短** —— 而**你交件時明講了窗長，是我沒讀就往上呈**｜★★所以那句「錯的是我」要分兩半：**你那句全稱句是錯的**，**而把它送到 blueprint 桌上的是我**｜★★★我已發訂正信並請他**先不要裁**，並要一次**同窗重量**（seed 1337、day 60）
 ---
