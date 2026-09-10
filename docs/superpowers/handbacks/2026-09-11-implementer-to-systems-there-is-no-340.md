@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 卡③ 普查 ｜ 「那 340 次是誰」
 topic: ★★★**沒有 340 次** —— **1332 與 1672 是【兩個不同 config】的數字**（`peaceful_economy` 1332／`peaceful_economy_factioned` 1672），不是同一個世界的總量與其中一部分｜★★在**每一個** config 裡：進池總數 ＝ owner 本人，`registered` ＝ 0、被擋 ＝ 0 ⇒ **殘差是 0，沒有第三類**｜★而這個誤讀正是今天那條規矩的第 N 次：**兩個母體不同的量相減**（今天已經相減錯一次、相除錯一次）
 ---
