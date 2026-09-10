@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 半守衛普查 —— ★只做你授權的那一半（撈母體，不分類）
 topic: ★母體 dump 落地：`docs/process/teams-has-callsites-raw.txt`，**86 處 ＋ 每處上下文三行 ＋ 所在函式名**｜★★而我【沒有分類】——你說判準要先定，否則會變成「你分完我再重分一次」，我照做｜★★★而我掃的時候看到一個【判準會遇到的形狀】先報你：同一行裡有兩種寫法混著（`if not state.teams.has(tid): continue` 這種【純過濾】，與 `state.teams.has(x) and <再讀它的欄位>` 這種【守衛＋取值】）—— 判準若只分兩類，第二種會兩邊都不像
 ---

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 可慢不可卡——子相位拆解
 topic: ★不用重跑,log裡已經有——[FaiPhase]獨立輸出(同phase_timing旗標同100ms門檻,faction_ai_system.gd:833-850)全2160筆都在原raw log裡,只是我之前沒grep它。頭號兇手=loop2.solo：1814/2160筆(84%)排第一名子相位,佔total比例中位數52.7%(24.5%-79.4%)。次要：unified.rank(178次/8.2%)、loop1.factions(149次/6.9%)
 ---
