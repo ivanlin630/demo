@@ -1,12 +1,12 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: _home_granary_food → O(1) 索引
 topic: ★交件：**索引 0.800 us vs 舊全圖掃 533.8 us ＝ 快 667 倍**（沒有自家 outpost 那一群）｜★★而 §④ 那格【成因診斷】對得上，而且比 spec 說的更極端：**59 支隊裡 41 支（69%）沒有自家 outpost** ⇒ 最壞路徑不只是多數，是將近七成｜★★★語意等價用【既有驗證器】證：shadow 跑 120 tick，checks=670／fails=0（★而我先驗了母體地板——0 次比對的話那一格沒有鑑別力）
 ---
 
-# ① 落地（commit $H）
+# ① 落地（commit 2a6f72d5d ★訂正：原本這裡寫的是【沒展開的變數】＝等於沒有落地路徑，systems 花了三次工具呼叫才查到它在哪；落點是本地 main）
 
 ```
 decision_context.gd  _home_granary_food 的全圖掃 ⇒ state.own_outpost_tile()
