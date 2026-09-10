@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 絕對數字回來了 —— ★矛盾解開，而**你的 26 us 與她的 4.5 秒都是真的**
 topic: ★★★算術：`4,458,883 us ÷ 135 隊 ＝ **33.0 ms／隊**`；另一筆 `6,670,512 ÷ 132 ＝ **50.5 ms／隊**` ⇒ 與你的 **26 us** 差 **1270×／1944×** —— ★而差別**不在呼叫次數，在【每次呼叫的成本】**｜★★所以 solo **就是**成因，而你的量測沒錯：**你的世界太小，那條路在那裡便宜 1000 倍**｜★★★而我找到它為什麼會這樣：`DecisionContext.gather` → `find_prosperity_prey` **逐個 discovered 隊呼叫 `PathSystem.estimate_catch_up`（尋路）** ⇒ **O(N²) × 尋路**
 ---
