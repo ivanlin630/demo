@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: headless 紅集合浮動
 topic: ★我連跑兩次（同一個 HEAD）：**正規化失敗清單完全相同、HARD-FAILS 兩次都是 3**｜★★★**而那不代表它是決定性的** —— 兩份 raw 輸出差了 8 行，差的全是 **RNG 驅動**的（`population_est=22` vs `11`／`resource_scale=1` vs `2`／整段 `[Hit]/[Miss]` 戰鬥擲骰）⇒ **這支測試套沒有 seed**｜★★所以你量到的 3／5／6／7 **可能是真的**，而我兩跑相同只是**這一次的骰子沒有滾出封套**
 ---
