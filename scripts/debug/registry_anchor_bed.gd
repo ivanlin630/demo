@@ -18,19 +18,17 @@ func _ok(name: String, cond: bool, detail: String) -> void:
 		print("  [FAIL] %s ── %s" % [name, detail])
 
 func _make() -> WorldState:
-	var st := WorldState.new()
+	# ★走 helper（arm → setup 的順序寫死在它裡面）：自己拼順序＝建世界那一段的 tap 是盲的，
+	#   ★而「少掉一段」與「那一段沒發生」在輸出上長得一模一樣。
 	var cfg: String = OS.get_environment("RA_CONFIG") if OS.has_environment("RA_CONFIG") else "warring_states"
-	GameSetup.setup(st, GameSetup.load_config("res://config/%s.json" % cfg))
-	st.player_id = -1
-	return st
+	return MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
 
 func _initialize() -> void:
 	var ticks: int = int(OS.get_environment("RA_TICKS")) if OS.has_environment("RA_TICKS") else 400
 	print("=== 登記錨 ④a 驗收床（shadow 窗 %d tick ＝ %.2f 遊戲天）===" % [
 		ticks, float(ticks) / float(WorldState.TICKS_PER_DAY)])
-	Probe.arm()
 	seed(9001)
-	var st := _make()
+	var st := _make()   # ★helper 內含 Probe.arm()
 
 	# ①★★★遷移逐隊相同（不是總數）
 	var mism: Array = []
