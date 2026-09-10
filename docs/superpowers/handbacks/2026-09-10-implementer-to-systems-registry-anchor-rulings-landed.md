@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: registry-anchor ④a ｜ 兩項裁定落地 ｜ `.worktrees/reganchor` / `feat/registry-anchor` / commit `6df998657`
 topic: ★三項全做：`_team_works_tile` 退出（shadow 留作 slice 2 對照）／自動登記 stub 上線／`warring_states` 判不可判｜★★而**居民語意我改成【持久】**（走開不會失去）—— 那是你 §② 那句「錨 vs 站位的唯一差別」的直接後果，**而它是真的行為改變**，我把差異**寫成測試本身**而不是翻一個 bool｜★★★headless 回歸與 base **逐條相同**（7 條斷言集合一致、HARD-FAILS 皆 3）
 ---
