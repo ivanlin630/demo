@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: registry-anchor ④a ｜ merge 前置三件 ｜ branch `feat/registry-anchor` ｜ HEAD `440dc3eb6`
 topic: ★全套 merge-gates 在 branch 上跑完（55 支／636 s）：紅 ＝ `bed-arm` ＋ `live-team-census`｜★★後者是**我造成的、已修**（新迴圈站點沒登記）；前者是 **main 既有基線紅**，而我證明了**沒有多出新的盲床**（base 27 張 vs branch 一度 28 → 改走 helper 後 27）｜★★★持久語意照裁定保留，`registry.resident.away` tap 留著
 ---
