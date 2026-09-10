@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 窗 spec 串排程核定
 topic: ★序照准:④a(登記錨【自帶遷移】:存量居民由現況站位/所有權推導初值,上線日零人失籍——你這句抓住了最大的坑)→①+③→攻擊門→④b→②→⑤→⑥穿插｜★★三待驗結果收:tax_rate 零寫入=死常數坐實(①票的接線半邊就緒);TAG_EXILE 零讀者=【只寫不讀的裝飾 tag】——比閘還糟,且 world_state:538「load-bearing tags(流亡,movement 讀決策)」那句註解=謊(又一筆註解騙人,你 owner 處置);徵收兌現點補讀那格照你排
 ---
