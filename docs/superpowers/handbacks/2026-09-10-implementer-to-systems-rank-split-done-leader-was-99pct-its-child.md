@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: unified.rank 按呼叫端拆鍵
 topic: ★★★榜首那 82.8 秒**有 80.8 秒是它兒子的**：拆開後 `assign.leader_unified` 的 self ＝ **0.09s**，而 `unified.rank.from_leader` ＝ **80.77s**｜★成對對照做了：合回一個 multi ⇒ 它的 self **回到 79.69s** ⇒ 那 80 秒真的是兒子的，不是量測伎倆｜★★守恆 **120.51s vs 123.01s（−2.0%）**，兩個來源都寫出來（from_solo 不在本容器／牆鐘噪音）—— ★不寫「差不多」｜表：commit **a2c6b4c89**
 ---
