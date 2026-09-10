@@ -1,0 +1,92 @@
+# rank_scored 四段拆解 ＋ 儀器自己的成本（Probe 開/關）
+# 日期 2026-09-10 ｜ bed: scripts/debug/rank_calls_bed.gd ｜ config warring_states ｜ seed 4242
+# 三軸：6000 tick ＝ 62.5 遊戲天 ＝ 起始 53 隊（warring_states）；★跑到底（rc=0，非 OOM 被砍）
+# 票：2026-09-10-systems-to-implementer-cut-decide-unified-and-measure-the-instrument-itself.md
+# ★本檔【不含修法建議】（票 §「看到最大的那一格先別動手」）
+
+=== ① 切法（照 systems 讀的那四段，decision_engine.gd:75-110）===
+goals   = GoalResolver.ensure_maintain_goals(state, team)
+gather  = DecisionContext.gather(state, team, true)
+score   = rank_scored_ctx(...)            ★＝真正的排序/term 計算
+probe   = ★儀器自己那一段（Probe 區塊，迴圈＋字串串接）
+src 已穿進 rank_scored(state, team, src)  ⇒ 新鍵不是四個呼叫端共用的 multi
+
+=== ② 呼叫端表（母體＝走 _decide_unified 那條路，faction_ai_system.gd:3125）===
+呼叫端        次數      總計(s)   us/call   單次max(ms)   走這條路的隊數  每隊次數
+leader          241      53.20  220750.3        402.6               8     30.13
+member          468      20.21   43177.6        119.5              25     18.72
+solo              2       0.19   95049.5        151.3               2      1.00
+threat           22       1.51   68523.2        284.4              18      1.22
+unknown       ★0 次 —— ★明寫：它在這一窗【沒有被走到】，不是沒登記
+              （★★而見 §③：seg 表的 unknown 有 363 次 ⇒ 兩張表【母體不同】，見 §⑤）
+
+=== ③ 四段表（母體＝【全部】rank_scored 呼叫，含沒走 _decide_unified 的）===
+呼叫端     次數   goals(us)  gather(us)  score(us)  ★probe(us)   四段和   options/call  us/option
+leader       241     2577.2     44796.3   173121.1       220.6  220715.2        15.11    14590.7
+member       468     1084.9     19256.2    22718.7        85.3   43145.1         8.15     5283.7
+solo           2    12804.5     23070.5    59006.5       136.5   95018.0        10.50     9036.3
+threat        22     8007.4     19549.5    40847.6        85.1   68489.6         5.95    11487.8
+unknown      363     2008.0     34052.4   117012.2       157.2  153229.9        10.47    14622.5
+
+段佔比（leader）：score 78.4% ／ gather 20.3% ／ goals 1.2% ／ ★probe 0.10%
+段佔比（member）：score 52.7% ／ gather 44.6% ／ goals 2.5% ／ ★probe 0.20%
+各 src 總量：leader 53.19s ／ member 20.19s ／ solo 0.19s ／ threat 1.51s ／ unknown 55.62s
+  ⇒ rank_scored 全部 ＝ 130.7 s，佔本窗牆鐘 215.13 s 的 60.8%
+
+=== ④ 票 §④ 的岔路：leader 是【option 多】還是【每個 option 貴】？⇒ ★兩個都是，而比例可乘 ===
+leader vs member：options/call 15.11 ÷ 8.15 ＝ 1.85×
+                  us/option   14590.7 ÷ 5283.7 ＝ 2.76×
+                  1.85 × 2.76 ＝ 5.11×    （實測 220715.2 ÷ 43145.1 ＝ 5.12× ⇒ 分解對得上）
+⇒ ★所以「誰進得了候選」與「term 計算多貴」【各佔一半左右】，
+  ★★不能只挑一邊 —— 只砍候選數最多回收 1.85 倍中的一部分。
+★本檔到此為止，不開修法票。
+
+=== ⑤ 守恆（票 §② —— ★不可以只說「差不多」）===
+四段和 vs 外層 us/call（外層＝faction_ai_system.gd:3122-3126 那對計時，貼著 rank_scored）：
+  leader  220715.2 vs 220750.3  ⇒ 差 35.1 us/call（0.016%）
+  member   43145.1 vs  43177.6  ⇒ 差 32.5 us/call（0.075%）
+  solo     95018.0 vs  95049.5  ⇒ 差 31.5 us/call（0.033%）
+  threat   68489.6 vs  68523.2  ⇒ 差 33.6 us/call（0.049%）
+★差額的形狀就是它的解釋：**四個 src 都是 32–35 us 的【常數】，不隨成本放大**
+  ⇒ 它是每次呼叫固定的框外開銷（函式呼叫本身＋五次 Time.get_ticks_usec() 讀時鐘＋return），
+    不是漏掉某一段真工（真漏會隨 score 一起放大 ⇒ leader 的差會遠大於 member 的，實測沒有）。
+
+★★兩張表母體不同（§② 733 次 vs §③ 1096 次），差的 363 次＝【沒有 src 的呼叫端】：
+  faction_ai_system.gd:3773（subteam 全框架 rank）
+  faction_ai_system.gd:4030
+  decision_engine.gd:484（rank_options 內部再呼一次）
+  ⇒ ★★★它們共 55.62 s，**比 leader 的 53.19 s 還大**，
+    而它們【不掛在 unified.rank.from_* 底下】⇒ 相位樹目前看不到這 55.6 s 在哪一格。
+    （★本檔只報這件事，不提議接線 —— 那是下一張票要裁的。）
+
+=== ⑥ 儀器自己（票 §★★★）===
+【in-band】rank_scored 內那段 Probe：全部 src 相加 ＝ 0.152 s
+  ⇒ 佔 rank_scored 130.7 s 的 0.12%；佔 leader us/call 的 0.10%
+  ⇒ ★這一段【不是】成本的一部分。
+
+【外層牆鐘】同窗同 config、同 seed，Probe 開 vs 關（6000 tick）：
+  Probe=ON  215.13 s
+  Probe=OFF 188.92 s
+  ⇒ 差 26.21 s ＝ OFF 的 +13.9%
+★★★而這一句要跟數字一起出現：**關掉那一趟【沒有任何相位/分段數字】**
+  ⇒ 兩趟只能比【外層牆鐘總時】，不能比任何相位值。
+★而 26.21 s 的歸屬要講清楚：它是【全 sim 所有 Probe】的成本
+  （churn.day_team 逐日逐隊 bump、phase 計時字典、各系統的 tap……），
+  ★★其中 rank_scored 自己那一段只佔 0.152 s ＝ 0.58%
+  ⇒ ★★★「儀器是成本的一部分」在【全 sim 尺度】上成立（13.9%），
+    在【rank_scored 這條被歸因的路上】不成立（0.12%）—— 兩個結論不可互換。
+
+【對照（觀測不得改被觀測物）】600 tick 同 seed 兩趟 fp：
+  ON  fp=34110029e24ea79da457a0212388b796
+  OFF fp=34110029e24ea79da457a0212388b796  ⇒ 相同 ⇒ 牆鐘差是儀器差，不是兩個世界的差
+  ★誠實限：fp 這一格是 600 tick 跑的（fp 印出是在 6000 tick 那對跑完之後才加的）；
+    6000 tick 那一對【沒有直接 fp 證據】，只有同 seed 同 config。
+  600 tick 的儀器開銷 ＝ 23.73 vs 22.38 ＝ +6.0%（< 6000 tick 的 13.9%
+    ⇒ 開銷隨世界長大而放大，不是固定百分比）。
+
+=== ⑦ 誠實限 ===
+①fp 不變（純觀測）：本票的 sim 側改動只有 decision_engine.gd 的計時/Probe 區塊與 src 參數；
+  §⑥ 的 ON/OFF 同 fp 是它的行為證據。零 RNG（新增碼只有 Time.get_ticks_usec 與 Probe.*）。
+②★本表是【全體 tick 母體】，不是相位樹那份 spike 母體（>100ms 才印）
+  ⇒ 與先前 `unified.rank.from_leader 80.77s` **不可相加、不可對比**（不同窗、不同母體）。
+③solo 只有 2 次 ⇒ 它那一列 us/call 是 n=2 的樣本，只當存在證據，不當代表值。

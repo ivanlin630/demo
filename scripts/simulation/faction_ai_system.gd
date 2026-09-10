@@ -3122,7 +3122,7 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 	var _tr0: int = _tr
 	_solo_ran_engine = true                         # ★同上：走到 rank 就不是早退
 	var _tr0_rank: int = Time.get_ticks_usec() if Probe.enabled else 0
-	var ranked: Array = DecisionEngine.rank_scored(state, team)
+	var ranked: Array = DecisionEngine.rank_scored(state, team, src)
 	# ★★★量測窗要【貼著被量的東西】：第一版我把終點放在 90 行之後的 Probe 區塊，
 	#   ⇒ 那個 us/call 裡混進了 reorder／funnel／specimen dump ——
 	#   ★而它會讓「rank 每次 222ms」這種【看起來很有解釋力】的數字進到交件裡。

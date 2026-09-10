@@ -69,10 +69,17 @@ const ZEROWIN_WATCH: Array = [
 	"maintain_weapons:resource", "maintain_tools:resource", "maintain_food:resource",
 ]
 
-static func rank_scored(state: WorldState, team: TeamData) -> Array:
+# ★★★src 要【穿進來】（systems 2026-09-10）：否則新的分段鍵會變成四個呼叫端共用的 multi
+#   —— 那正是我們上一張票才剛拆掉的東西。
+#   ★沒帶 ⇒ "unknown"：它會在表上自成一列（★★而不是靜默混進某個父親）。
+static func rank_scored(state: WorldState, team: TeamData, src: String = "unknown") -> Array:
+	var _t0: int = Time.get_ticks_usec() if Probe.enabled else 0
 	GoalResolver.ensure_maintain_goals(state, team)   # ★means-end S2（組件 A）:冪等確保 5 資源維持 goal + 更新 active/satisfied
+	var _t1: int = Time.get_ticks_usec() if Probe.enabled else 0
 	var ctx: DecisionContext = DecisionContext.gather(state, team, true)   # ★真決策評估入口 → 推進 EWMA（advance=true）
+	var _t2: int = Time.get_ticks_usec() if Probe.enabled else 0
 	var scored: Array = rank_scored_ctx(ctx, team.current_option, state, team)   # ★means-end:傳 state/team 供 goal frontier hook
+	var _t3: int = Time.get_ticks_usec() if Probe.enabled else 0
 	# ★★★flee-to-safety 驗收③：【因為沒有 believed 目的地而改派去哪】—— ★記【去向分布】不只記備戰。
 	#   ★★只記「備戰幾次」會漏掉「其實跑去覓食了」那種答案，而那正是「恐懼有沒有被吞掉」要看的。
 	#   ★★★母體＝有威脅座標＋怕過門檻＋無目的地（＝原本會選 FLEE、現在不 applicable 的那批）。
@@ -206,6 +213,18 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 					"table": _zt,
 				}, 200)
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
+	# ★★★分段成本（systems 裁 2026-09-10）：221ms/call 要拆成【哪一段】。
+	#   ★而 Probe 區塊【自己也在被量的那條路上做真工】（逐 option 迴圈＋字串串接）
+	#   ⇒ ★★所以它自成一段：儀器可能是成本的一部分，而我們會把它讀成「決策很貴」。
+	#   ★★★這一段的分母是【同一次呼叫】：四段相加 ≈ 這次呼叫的總 us（守恆可自驗）。
+	if Probe.enabled:
+		var _t4: int = Time.get_ticks_usec()
+		Probe.bump("rank.seg.calls." + src)
+		Probe.add_amount("rank.seg.goals." + src, float(_t1 - _t0))
+		Probe.add_amount("rank.seg.gather." + src, float(_t2 - _t1))
+		Probe.add_amount("rank.seg.score." + src, float(_t3 - _t2))
+		Probe.add_amount("rank.seg.probe." + src, float(_t4 - _t3))
+		Probe.add_amount("rank.seg.options." + src, float(scored.size()))
 	return scored
 
 # ctx-taking 純打分 accessor（鏡射 rank_threat(ctx)）：不 gather、不寫 current_option、不 specimen tap。
