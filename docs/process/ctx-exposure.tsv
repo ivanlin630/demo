@@ -22,123 +22,128 @@
 #   ★關鍵字猜的那 77 欄【一併按語意複核】，59 欄被改動。
 #   ★★★一個五頁裝不下的發現：`current_task` 回答的是【我現在在做什麼】——
 #     那不是五頁中任何一頁的問題（它是所有頁的抬頭）⇒ 標 `★常駐狀態列(header)`，已呈 blueprint。
-field	status	pages	who
-leader_values	exposed	社交	player_query_api.get_decision_snapshot
-desperation_entry_threshold	exposed	生存	player_query_api.get_decision_snapshot
-food_days	exposed	生存	player_query_api.get_player_snapshot
-can_rescue_build	exposed	生存	player_query_api.get_decision_snapshot
-rescue_build_util	exposed	生存	player_query_api.get_decision_snapshot
-population	exposed	生存	player_query_api.get_decision_snapshot
-has_goods	exposed	經濟	player_query_api.get_decision_snapshot
-has_arb	exposed	經濟	player_query_api.get_decision_snapshot
-arb_gain	exposed	經濟	player_query_api.get_decision_snapshot
-team_strength	exposed	威脅	player_query_api.get_decision_snapshot
-threat	exposed	威脅	player_query_api.get_decision_snapshot
-team_panic	exposed	生存	player_query_api.get_decision_snapshot
-ambition_gap	exposed	社交	player_query_api.get_decision_snapshot
-strongest_feud	exposed	社交;威脅	player_query_api.get_decision_snapshot
-feud_target_id	exposed	社交;威脅	player_query_api.get_decision_snapshot
-pending_claim_amt	exposed	經濟	player_query_api.get_decision_snapshot
-pending_claim_pos	exposed	經濟	player_query_api.get_decision_snapshot
-pending_claim_dist	exposed	經濟	player_query_api.get_decision_snapshot
-pending_claim_coin	exposed	經濟	player_query_api.get_decision_snapshot
-pending_claim_goods	exposed	經濟	player_query_api.get_decision_snapshot
-has_own_outpost	exposed	生存;經濟	player_query_api.get_decision_snapshot
-has_manufacturing_facility	exposed	經濟	player_query_api.get_decision_snapshot
-produce_pull	exposed	經濟	player_query_api.get_decision_snapshot
-idle_labor	exposed	經濟	player_query_api.get_decision_snapshot
-idle_employ_value	exposed	經濟	player_query_api.get_decision_snapshot
-is_merchant	exposed	經濟	player_query_api.get_decision_snapshot
-has_home_outpost	exposed	生存	player_query_api.get_decision_snapshot
-home_restock_min	exposed	生存	player_query_api.get_decision_snapshot
-current_task	exposed	★常駐狀態列(header)	player_query_api.get_decision_snapshot
-has_weak_prey	exposed	威脅	player_query_api.get_decision_snapshot
-self_armed_ratio	exposed	威脅	player_query_api.get_decision_snapshot
-has_occupy_target	exposed	威脅	player_query_api.get_decision_snapshot
-occupy_target_id	exposed	威脅	player_query_api.get_decision_snapshot
-has_strong_neighbor	exposed	社交;威脅	player_query_api.get_decision_snapshot
-strong_neighbor_id	exposed	社交;威脅	player_query_api.get_decision_snapshot
-has_farmable_tile	exposed	生存	player_query_api.get_decision_snapshot
-farmable_pos	exposed	生存	player_query_api.get_decision_snapshot
-camp_target_est	exposed	生存	player_query_api.get_decision_snapshot
-camp_forage_floor	exposed	生存	player_query_api.get_decision_snapshot
-passive_food_daily	exposed	生存	player_query_api.get_decision_snapshot
-forage_yield_here	exposed	生存	player_query_api.get_decision_snapshot
-forage_yield_target	exposed	生存	player_query_api.get_decision_snapshot
-food_seek_delay_days	exposed	生存	player_query_api.get_decision_snapshot
-join_host_flow	exposed	生存;社交	player_query_api.get_decision_snapshot
-occupy_target_flow	exposed	生存;威脅	player_query_api.get_decision_snapshot
-net_food_flow	exposed	生存	player_query_api.get_decision_snapshot
-food_stock	exposed	生存	player_query_api.get_decision_snapshot
-camp_site_quality_mult	exposed	生存;記憶	player_query_api.get_decision_snapshot
-camp_flow_delay_days	exposed	生存	player_query_api.get_decision_snapshot
-can_settle_here	exposed	生存	player_query_api.get_decision_snapshot
-own_camp_pos	exposed	生存	player_query_api.get_decision_snapshot
-settle_resume_site	exposed	生存	player_query_api.get_decision_snapshot
-settle_eta_days	exposed	生存	player_query_api.get_decision_snapshot
-settle_site_quality	exposed	生存	player_query_api.get_decision_snapshot
-food_runway_days	exposed	生存	player_query_api.get_decision_snapshot
-can_expand	exposed	經濟	player_query_api.get_decision_snapshot
-expand_pos	exposed	經濟	player_query_api.get_decision_snapshot
-expand_settler	exposed	經濟	player_query_api.get_decision_snapshot
-expand_site_marginal	exposed	經濟	player_query_api.get_decision_snapshot
-expand_home_marginal	exposed	經濟	player_query_api.get_decision_snapshot
-expand_build_cost	exposed	經濟	player_query_api.get_decision_snapshot
-has_aid_target	exposed	社交	player_query_api.get_decision_snapshot
-aid_target_id	exposed	社交	player_query_api.get_decision_snapshot
-has_food_market	exposed	經濟	player_query_api.get_decision_snapshot
-food_market_pos	exposed	經濟	player_query_api.get_decision_snapshot
-food_market_dist	exposed	經濟	player_query_api.get_decision_snapshot
-has_material_market	exposed	經濟	player_query_api.get_decision_snapshot
-material_shortfall	exposed	經濟	player_query_api.get_decision_snapshot
-material_need_total	exposed	經濟	player_query_api.get_decision_snapshot
-material_build_urgency	exposed	經濟	player_query_api.get_decision_snapshot
-has_forage_tile	exposed	生存	player_query_api.get_decision_snapshot
-forage_pos	exposed	生存	player_query_api.get_decision_snapshot
-has_specie	exposed	經濟	player_query_api.get_decision_snapshot
-has_buyable_food	exposed	生存;經濟	player_query_api.get_decision_snapshot
-food_seek_target	exposed	生存	player_query_api.get_decision_snapshot
-help_need_severity	exposed	社交	player_query_api.get_decision_snapshot
-help_target_id	exposed	社交	player_query_api.get_decision_snapshot
-help_target_pos	exposed	社交	player_query_api.get_decision_snapshot
-scout_staleness	exposed	記憶	player_query_api.get_decision_snapshot
-scout_target_id	exposed	記憶	player_query_api.get_decision_snapshot
-scout_target_pos	exposed	記憶	player_query_api.get_decision_snapshot
-can_send_herald	exposed	社交	player_query_api.get_decision_snapshot
-can_send_scout	exposed	記憶	player_query_api.get_decision_snapshot
-has_acceptable_join_host	exposed	社交	player_query_api.get_decision_snapshot
-home_food	exposed	生存	player_query_api.get_decision_snapshot
-home_food_productive	exposed	生存	player_query_api.get_decision_snapshot
-faction_stakes	exposed	社交	player_query_api.get_decision_snapshot
-faction_attack_target	exposed	社交;威脅	player_query_api.get_decision_snapshot
-faction_tribute_target	exposed	社交	player_query_api.get_decision_snapshot
-faction_diplo_target	exposed	社交	player_query_api.get_decision_snapshot
-pacify_target_on_cooldown	exposed	社交;記憶	player_query_api.get_decision_snapshot
-diplo_target_on_cooldown	exposed	社交;記憶	player_query_api.get_decision_snapshot
-leader_loyalty	exposed	社交	player_query_api.get_decision_snapshot
-intent	exposed	社交	player_query_api.get_decision_snapshot
-intent_target	exposed	社交	player_query_api.get_decision_snapshot
-threat_react	exposed	威脅	player_query_api.get_decision_snapshot
-threat_id	exposed	威脅	player_query_api.get_decision_snapshot
-threat_pos	exposed	威脅	player_query_api.get_decision_snapshot
-threat_threshold	exposed	威脅	player_query_api.get_decision_snapshot
-flee_dest	exposed	生存;威脅	player_query_api.get_decision_snapshot
-perceived_power_ratio	exposed	威脅	player_query_api.get_decision_snapshot
-winnable	exposed	威脅	player_query_api.get_decision_snapshot
-is_resident	exposed	社交	player_query_api.get_decision_snapshot
-archetype	exposed	社交	player_query_api.get_decision_snapshot
-rung	exposed	社交	player_query_api.get_decision_snapshot
-has_trainable	exposed	社交	player_query_api.get_decision_snapshot
-ambient_train_drive	exposed	社交	player_query_api.get_decision_snapshot
-need_urgency	exposed	生存;經濟	player_query_api.get_decision_snapshot
-readiness	exposed	威脅	player_query_api.get_decision_snapshot
-readiness_thr_eff	exposed	威脅	player_query_api.get_decision_snapshot
-prosperity_prey_id	exposed	威脅	player_query_api.get_decision_snapshot
-is_subteam	exposed	社交	player_query_api.get_decision_snapshot
-consolidate_target_id	exposed	社交	player_query_api.get_decision_snapshot
-absorb_target_id	exposed	社交	player_query_api.get_decision_snapshot
-resource_slack	exposed	經濟	player_query_api.get_decision_snapshot
-absorb_yield	exposed	社交	player_query_api.get_decision_snapshot
-host_protector_rep	exposed	社交	player_query_api.get_decision_snapshot
-best_protector_rep	exposed	社交	player_query_api.get_decision_snapshot
-survival_stall_active	exposed	生存	player_query_api.get_decision_snapshot
+# ★第五欄【中文顯示名】（systems 2026-09-10，blueprint 拉前）：
+#   ★★REPL、GUI、走查【同一張表取名】—— 否則三個地方各取各的，
+#     而同一個欄位在三個畫面上叫三個名字⇒ 用戶無法交叉比對。
+#   ★★★它是【附加在最後】而不是插在中間：現有讀者都按位置讀 $1..$4
+#     （c1_walkthrough.gd:126 、ctx-coverage-gate.sh）⇒ 插在中間會静默地把它們全部弄歪。
+field	status	pages	who	中文顯示名
+leader_values	exposed	社交	player_query_api.get_decision_snapshot	領袖的價值觀
+desperation_entry_threshold	exposed	生存	player_query_api.get_decision_snapshot	走投無路的門檻
+food_days	exposed	生存	player_query_api.get_player_snapshot	粮食還能撒幾天
+can_rescue_build	exposed	生存	player_query_api.get_decision_snapshot	能不能援手施工
+rescue_build_util	exposed	生存	player_query_api.get_decision_snapshot	援手施工的劃算
+population	exposed	生存	player_query_api.get_decision_snapshot	人數
+has_goods	exposed	經濟	player_query_api.get_decision_snapshot	手上有貨
+has_arb	exposed	經濟	player_query_api.get_decision_snapshot	有無兩地價差
+arb_gain	exposed	經濟	player_query_api.get_decision_snapshot	兩地價差賺多少
+team_strength	exposed	威脅	player_query_api.get_decision_snapshot	本隊戰力
+threat	exposed	威脅	player_query_api.get_decision_snapshot	受到的威脅
+team_panic	exposed	生存	player_query_api.get_decision_snapshot	隊伍慌張程度
+ambition_gap	exposed	社交	player_query_api.get_decision_snapshot	野心與現狀的落差
+strongest_feud	exposed	社交;威脅	player_query_api.get_decision_snapshot	最深的仇
+feud_target_id	exposed	社交;威脅	player_query_api.get_decision_snapshot	仇家是誰
+pending_claim_amt	exposed	經濟	player_query_api.get_decision_snapshot	寄賣待收金額
+pending_claim_pos	exposed	經濟	player_query_api.get_decision_snapshot	寄賣在哪裡
+pending_claim_dist	exposed	經濟	player_query_api.get_decision_snapshot	距寄賣地多遠
+pending_claim_coin	exposed	經濟	player_query_api.get_decision_snapshot	寄賣待收錢
+pending_claim_goods	exposed	經濟	player_query_api.get_decision_snapshot	寄賣待收貨
+has_own_outpost	exposed	生存;經濟	player_query_api.get_decision_snapshot	腳下是不是自家據點
+has_manufacturing_facility	exposed	經濟	player_query_api.get_decision_snapshot	有沒有工坊
+produce_pull	exposed	經濟	player_query_api.get_decision_snapshot	生產的拉力
+idle_labor	exposed	經濟	player_query_api.get_decision_snapshot	閒置人手
+idle_employ_value	exposed	經濟	player_query_api.get_decision_snapshot	把閒人用起來值多少
+is_merchant	exposed	經濟	player_query_api.get_decision_snapshot	是不是商隊
+has_home_outpost	exposed	生存	player_query_api.get_decision_snapshot	在世上有沒有家
+home_restock_min	exposed	生存	player_query_api.get_decision_snapshot	值不值得回家補給
+current_task	exposed	★常駐狀態列(header)	player_query_api.get_decision_snapshot	現在在做什麼
+has_weak_prey	exposed	威脅	player_query_api.get_decision_snapshot	附近有沒有弱雞
+self_armed_ratio	exposed	威脅	player_query_api.get_decision_snapshot	自己武裝比例
+has_occupy_target	exposed	威脅	player_query_api.get_decision_snapshot	有沒有可佔的地
+occupy_target_id	exposed	威脅	player_query_api.get_decision_snapshot	想佔哪一块
+has_strong_neighbor	exposed	社交;威脅	player_query_api.get_decision_snapshot	旁邊有沒有強鄰
+strong_neighbor_id	exposed	社交;威脅	player_query_api.get_decision_snapshot	強鄰是誰
+has_farmable_tile	exposed	生存	player_query_api.get_decision_snapshot	有沒有能開的田
+farmable_pos	exposed	生存	player_query_api.get_decision_snapshot	可開的田在哪
+camp_target_est	exposed	生存	player_query_api.get_decision_snapshot	營地預估收益
+camp_forage_floor	exposed	生存	player_query_api.get_decision_snapshot	營地的糊口底
+passive_food_daily	exposed	生存	player_query_api.get_decision_snapshot	每日自動進粮
+forage_yield_here	exposed	生存	player_query_api.get_decision_snapshot	在這裡覓食拿得到多少
+forage_yield_target	exposed	生存	player_query_api.get_decision_snapshot	走過去覓食拿得到多少
+food_seek_delay_days	exposed	生存	player_query_api.get_decision_snapshot	找粮要耗幾天
+join_host_flow	exposed	生存;社交	player_query_api.get_decision_snapshot	投靠別人的粮流
+occupy_target_flow	exposed	生存;威脅	player_query_api.get_decision_snapshot	佔下那塊地的粮流
+net_food_flow	exposed	生存	player_query_api.get_decision_snapshot	粮食淨流（進減耗）
+food_stock	exposed	生存	player_query_api.get_decision_snapshot	庫存粮
+camp_site_quality_mult	exposed	生存;記憶	player_query_api.get_decision_snapshot	營地選址品質
+camp_flow_delay_days	exposed	生存	player_query_api.get_decision_snapshot	營地要等幾天才有粮
+can_settle_here	exposed	生存	player_query_api.get_decision_snapshot	能不能就地紮根
+own_camp_pos	exposed	生存	player_query_api.get_decision_snapshot	自家營地在哪
+settle_resume_site	exposed	生存	player_query_api.get_decision_snapshot	未完工的工地
+settle_eta_days	exposed	生存	player_query_api.get_decision_snapshot	紮根還要幾天
+settle_site_quality	exposed	生存	player_query_api.get_decision_snapshot	紮根選址品質
+food_runway_days	exposed	生存	player_query_api.get_decision_snapshot	粮食跑道（還能擐幾天）
+can_expand	exposed	經濟	player_query_api.get_decision_snapshot	能不能分村
+expand_pos	exposed	經濟	player_query_api.get_decision_snapshot	分村選址
+expand_settler	exposed	經濟	player_query_api.get_decision_snapshot	派幾人去分村
+expand_site_marginal	exposed	經濟	player_query_api.get_decision_snapshot	新村的邊際產出
+expand_home_marginal	exposed	經濟	player_query_api.get_decision_snapshot	抽人走對本村的損失
+expand_build_cost	exposed	經濟	player_query_api.get_decision_snapshot	分村的建造成本
+has_aid_target	exposed	社交	player_query_api.get_decision_snapshot	有沒有人要援
+aid_target_id	exposed	社交	player_query_api.get_decision_snapshot	援助對象
+has_food_market	exposed	經濟	player_query_api.get_decision_snapshot	附近有粮市
+food_market_pos	exposed	經濟	player_query_api.get_decision_snapshot	粮市在哪
+food_market_dist	exposed	經濟	player_query_api.get_decision_snapshot	距粮市多遠
+has_material_market	exposed	經濟	player_query_api.get_decision_snapshot	附近有材料市
+material_shortfall	exposed	經濟	player_query_api.get_decision_snapshot	材料缺口
+material_need_total	exposed	經濟	player_query_api.get_decision_snapshot	材料總需求
+material_build_urgency	exposed	經濟	player_query_api.get_decision_snapshot	工程缺料的急迫度
+has_forage_tile	exposed	生存	player_query_api.get_decision_snapshot	附近有沒有能覓的地
+forage_pos	exposed	生存	player_query_api.get_decision_snapshot	覓食地點
+has_specie	exposed	經濟	player_query_api.get_decision_snapshot	身上有錢
+has_buyable_food	exposed	生存;經濟	player_query_api.get_decision_snapshot	市上買得到粮
+food_seek_target	exposed	生存	player_query_api.get_decision_snapshot	打算去哪找粮
+help_need_severity	exposed	社交	player_query_api.get_decision_snapshot	別人有多需要幫忙
+help_target_id	exposed	社交	player_query_api.get_decision_snapshot	求援的是誰
+help_target_pos	exposed	社交	player_query_api.get_decision_snapshot	求援的在哪
+scout_staleness	exposed	記憶	player_query_api.get_decision_snapshot	情報有多舊
+scout_target_id	exposed	記憶	player_query_api.get_decision_snapshot	想打探誰
+scout_target_pos	exposed	記憶	player_query_api.get_decision_snapshot	想打探哪裡
+can_send_herald	exposed	社交	player_query_api.get_decision_snapshot	派得出使者嗎
+can_send_scout	exposed	記憶	player_query_api.get_decision_snapshot	派得出斥候嗎
+has_acceptable_join_host	exposed	社交	player_query_api.get_decision_snapshot	有沒有值得投靠的人
+home_food	exposed	生存	player_query_api.get_decision_snapshot	家裡的粮倉
+home_food_productive	exposed	生存	player_query_api.get_decision_snapshot	家裡還產不產粮
+faction_stakes	exposed	社交	player_query_api.get_decision_snapshot	派系交代的利害
+faction_attack_target	exposed	社交;威脅	player_query_api.get_decision_snapshot	派系要打誰
+faction_tribute_target	exposed	社交	player_query_api.get_decision_snapshot	派系要向誰納貢
+faction_diplo_target	exposed	社交	player_query_api.get_decision_snapshot	派系要跟誰談
+pacify_target_on_cooldown	exposed	社交;記憶	player_query_api.get_decision_snapshot	安撫對象還在冷卻
+diplo_target_on_cooldown	exposed	社交;記憶	player_query_api.get_decision_snapshot	邦交對象還在冷卻
+leader_loyalty	exposed	社交	player_query_api.get_decision_snapshot	領袖的忠誠
+intent	exposed	社交	player_query_api.get_decision_snapshot	目前的意向
+intent_target	exposed	社交	player_query_api.get_decision_snapshot	意向對象
+threat_react	exposed	威脅	player_query_api.get_decision_snapshot	對威脅的反應強度
+threat_id	exposed	威脅	player_query_api.get_decision_snapshot	威脅來自誰
+threat_pos	exposed	威脅	player_query_api.get_decision_snapshot	威脅在哪
+threat_threshold	exposed	威脅	player_query_api.get_decision_snapshot	威脅多大才會動
+flee_dest	exposed	生存;威脅	player_query_api.get_decision_snapshot	逃往哪裡
+perceived_power_ratio	exposed	威脅	player_query_api.get_decision_snapshot	看起來強弱比
+winnable	exposed	威脅	player_query_api.get_decision_snapshot	打不打得贏
+is_resident	exposed	社交	player_query_api.get_decision_snapshot	是不是居民
+archetype	exposed	社交	player_query_api.get_decision_snapshot	人格原型
+rung	exposed	社交	player_query_api.get_decision_snapshot	需求層級
+has_trainable	exposed	社交	player_query_api.get_decision_snapshot	有沒有人可練
+ambient_train_drive	exposed	社交	player_query_api.get_decision_snapshot	平時練兵的動力
+need_urgency	exposed	生存;經濟	player_query_api.get_decision_snapshot	當下需求的急迫度
+readiness	exposed	威脅	player_query_api.get_decision_snapshot	戰備程度
+readiness_thr_eff	exposed	威脅	player_query_api.get_decision_snapshot	戰備門檻
+prosperity_prey_id	exposed	威脅	player_query_api.get_decision_snapshot	看上的肥羊
+is_subteam	exposed	社交	player_query_api.get_decision_snapshot	是不是分隊
+consolidate_target_id	exposed	社交	player_query_api.get_decision_snapshot	想整併誰
+absorb_target_id	exposed	社交	player_query_api.get_decision_snapshot	想吸收誰
+resource_slack	exposed	經濟	player_query_api.get_decision_snapshot	資源寬裕
+absorb_yield	exposed	社交	player_query_api.get_decision_snapshot	吸收拿得到什麼
+host_protector_rep	exposed	社交	player_query_api.get_decision_snapshot	現主子的名聲
+best_protector_rep	exposed	社交	player_query_api.get_decision_snapshot	最好的主子名聲
+survival_stall_active	exposed	生存	player_query_api.get_decision_snapshot	生存停滞中

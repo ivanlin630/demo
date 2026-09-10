@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位樹（淨值 ＋ 未登記閘）
 topic: ★交件 **0f00a04bc**（★★落點：本地 main，純儀器改動；★★★這次 hash 是【字面值】不是變數 —— 上一輪的教訓）｜★床 4/4 段 0 fail｜★★而 `"*multi"` 那條硬規則我照 R² 的形狀實作了：`gather.*`／`unified.*` **不參與減法**、輸出具名標示，理由（正的但錯的淨值沒有任何一格會紅）寫在表旁邊
 ---
