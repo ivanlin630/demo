@@ -849,7 +849,10 @@ const PHASE_PARENT: Dictionary = {
 	"loop3.outpost": "", "loop3.orders_ambition": "", "loop3.misc": "",
 	# ★loop2.solo 現在【不在 evaluate_all 裡】（錯開票移出去了）⇒ 它的帳在另一個容器
 	#   ⇒ 登記為根，而它與本表其餘列【不可相加】（分母不同）。
-	"loop2.solo": "", "loop2.solo_engine": "", "loop2.solo_cheap": "",
+	# ★★★裁定（systems 2026-09-10）：`solo_engine`／`solo_cheap` 是 `loop2.solo` 的【兩個桶】——
+	#   它們與它是巢狀的（`:7573` 包住 `_evaluate_solo` 的呼叫，兩個桶在它內部分帳）
+	#   ⇒ 登記成根 ⇒ 它們的 tot 與 `loop2.solo` 幾乎相同 ⇒ ★根列相加會把 solo 那塊算兩次。
+	"loop2.solo": "", "loop2.solo_engine": "loop2.solo", "loop2.solo_cheap": "loop2.solo",
 	"loop2.subteam": "",   # ★新容器（見 loop2 子隊分支）：它之前不存在 ⇒ 子隊的錢不在任何一格
 	# ── loop1.assign_tasks 的兒子 ──
 	"assign.player_cmd": "loop1.assign_tasks",
@@ -883,15 +886,17 @@ const PHASE_PARENT: Dictionary = {
 }
 
 # ★把相位表算成【可排序的報告】。★★抽成純函式：床可以餵假 _fai_ph 進來驗閘會不會咬。
-static func phase_report(ph: Dictionary, total_us: int) -> String:
+# ★★★`parent_map` 可覆寫（預設 ＝ `PHASE_PARENT`）：床要驗「把某個兒子改回根會不會紅」，
+#   而 `PHASE_PARENT` 是 const 改不動 ⇒ 沒有這個縫，成對對照的【會紅】那一格就做不出來。
+static func phase_report(ph: Dictionary, total_us: int, parent_map: Dictionary = PHASE_PARENT) -> String:
 	var self_us: Dictionary = {}
 	var unregistered: Array = []
 	for name in ph:
 		self_us[name] = int(ph[name])
-		if not PHASE_PARENT.has(name):
+		if not parent_map.has(name):
 			unregistered.append(String(name))
 	for name in ph:
-		var parent: String = String(PHASE_PARENT.get(name, ""))
+		var parent: String = String(parent_map.get(name, ""))
 		if parent == "" or parent == "*multi":
 			continue        # ★"*multi" 不參與減法
 		if self_us.has(parent):
@@ -899,7 +904,7 @@ static func phase_report(ph: Dictionary, total_us: int) -> String:
 	var rows: Array = []
 	var multi_rows: Array = []
 	for name in ph:
-		var is_multi: bool = String(PHASE_PARENT.get(name, "")) == "*multi"
+		var is_multi: bool = String(parent_map.get(name, "")) == "*multi"
 		var row := {"n": String(name), "self": int(self_us[name]), "tot": int(ph[name])}
 		if is_multi:
 			multi_rows.append(row)
@@ -934,7 +939,27 @@ static func phase_report(ph: Dictionary, total_us: int) -> String:
 			absent.append(String(name))
 	if not absent.is_empty():
 		out += "｜[本輪未出現] " + "、".join(absent) + " "
+	# ★★★機械守恆（systems 立 2026-09-10，取代「第四條規矩」）：
+	#   **所有【根】相位的 tot 相加 ≤ 容器總時** —— 根相位在時間上應該是【不重疊的分割】。
+	#   ★它一條抓到今天三次同型：①`loop1.factions` 六個檢查點登記成兄弟
+	#     ②`indep.weakest_prey` 被兩個外層共用 ③`solo_engine` 與 `solo` 巢狀卻都是根。
+	#   ★★`*multi` 列【不算進這個和】（依定義會重複）—— 這句要印在訊息裡，
+	#     否則下一個人會以為守恆式漏了它們。
+	var root_sum: int = 0
+	var root_rows: Array = []
+	for name in ph:
+		if String(parent_map.get(name, "")) != "":
+			continue
+		root_sum += int(ph[name])
+		root_rows.append({"n": String(name), "tot": int(ph[name])})
 	var head: String = "登記 %d/%d" % [ph.size() - unregistered.size(), ph.size()]
+	if root_sum > total_us:
+		root_rows.sort_custom(func(a, b): return int(a["tot"]) > int(b["tot"]))
+		var top3: Array = []
+		for i in range(mini(3, root_rows.size())):
+			top3.append("%s=%dus" % [root_rows[i]["n"], root_rows[i]["tot"]])
+		head += " ★★★根守恆破：Σ根 tot %dus > 容器總時 %dus（超出 %dus）" % [
+			root_sum, total_us, root_sum - total_us] 			+ "｜貢獻最大的三個根：" + "、".join(top3) 			+ "（★成因＝登記表宣稱的樹與 code 的巢狀不一致；★★`*multi` 列不算進這個和，不是漏了）"
 	if not unregistered.is_empty():
 		# ★閘：沒登記的名字【具名紅】—— 沒有這一條，這張手抄表會安靜地過期
 		head += " ★★未登記相位（請登記進 PHASE_PARENT）：" + "、".join(unregistered)
