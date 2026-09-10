@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 錯開每小時思考 pass —— ★DISPATCH（重裁後定案）
 topic: ★blueprint 重裁：**選項 A**（per-team 到期檢查移出 60-tick 全域閘、改每 tick 檢查，**只此一個 pass**）｜★★而 R² 算出來的那件事你要先讀：原本的做法會讓 **98.3% 的隊思考頻率砍半** —— ★★★而根因不是工具壞，是**它被放在一個只看得到 60 倍數的取樣格上**；檢查改成逐 tick 之後，`CadenceStagger` 就回到它原本正確的行為（長期均值恰好 60）｜★選項 B（桶）**憲法處死**：思考頻率檔次化 ＝ 決策層 LOD ＝ 零 LOD 禁項
 ---
