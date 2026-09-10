@@ -28,39 +28,61 @@ extends SceneTree
 func _initialize() -> void:
 	_run(); quit()
 
+const SPIKE_THRESHOLD_US: int = 100_000   # 母體門檻，沿用PHASE_SPIKE_US同量級
+
 func _run() -> void:
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 90
 	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "res://config/warring_states.json"
 	var seed_val: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
+	# ★界限第45條(2026-09-10 systems)：這個數字會被拿來做決定⇒儀器開/關兩態都要跑，
+	#   不接受「附一句誤差」——驗phase_timing這個opt-in旗標本身有沒有污染量測。
+	var phase_on: bool = (OS.get_environment("BED_PHASE_TIMING") if OS.has_environment("BED_PHASE_TIMING") else "1") == "1"
 	seed(seed_val)
 	Probe.arm()
 	var state: WorldState = MeasureBedHelper.arm_and_setup(cfg, true)
-	SimRunner.phase_timing = true   # ★開啟既有production儀器，非新增tap
+	SimRunner.phase_timing = phase_on   # ★開/關既有production儀器，非新增tap
 	var runner := SimRunner.new()
 	var ticks: int = days * WorldState.TICKS_PER_DAY
 	var no_player := Vector2i(-1, -1)
 
-	print("=== frame_time_who_freezes_bed: config=%s days=%d ticks=%d seed=%d phase_timing=ON ===" % [cfg, days, ticks, seed_val])
+	print("=== frame_time_who_freezes_bed(重測,舊數字作廢): config=%s days=%d ticks=%d seed=%d phase_timing=%s ===" % [
+		cfg, days, ticks, seed_val, "ON" if phase_on else "OFF"])
 	print("★方法論：headless量單tick耗時代理frame耗時，理由見檔頭註解——非真GUI實測")
+	print("★同窗參數(config/seed/days)照抄舊卷(2026-09-10-frame-time-who-freezes)，以便回答「現在還卡不卡」")
 
 	var global_max_us: int = 0
 	var global_max_tick: int = -1
+	var all_dts: Array = []   # 全窗每tick耗時(us)，無論是否過spike門檻——算min/p50/p95/max用
 	for tick in range(ticks):
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(state, no_player)
 		var dt: int = Time.get_ticks_usec() - t0
+		all_dts.append(dt)
 		if dt > global_max_us:
 			global_max_us = dt
 			global_max_tick = tick
 
-	print("\n=== 結果(窗=%.2f天/%d ticks) ===" % [float(ticks) / float(WorldState.TICKS_PER_DAY), ticks])
-	print("①②③④的原始資料＝上面[PhaseSpike]/[TickPerf]逐行輸出(production既有格式，本床沒有額外parse)")
-	print("全窗單tick最大耗時=%dus(%.1fms)　發生於tick=%d(day=%.2f)" % [
-		global_max_us, float(global_max_us) / 1000.0, global_max_tick, float(global_max_tick) / float(WorldState.TICKS_PER_DAY)])
-	if float(global_max_us) / 1000.0 < 5000.0:
+	print("\n=== 結果(窗=%.2f天/%d ticks，phase_timing=%s) ===" % [
+		float(ticks) / float(WorldState.TICKS_PER_DAY), ticks, "ON" if phase_on else "OFF"])
+	if phase_on:
+		print("②④原始資料＝上面[PhaseSpike]/[FaiPhase]/[TickPerf]逐行輸出(production既有格式，本床沒有額外parse)")
+
+	all_dts.sort()
+	var n: int = all_dts.size()
+	var over_spike: int = 0
+	for v in all_dts:
+		if int(v) > SPIKE_THRESHOLD_US: over_spike += 1
+	print("①全窗單tick耗時分布(母體=%d ticks)：min=%dus p50=%dus p95=%dus max=%dus(%.2fs)　>%dms母體(spike)=%d(%.3f%%)" % [
+		n, all_dts[0], all_dts[n / 2], all_dts[int(float(n) * 0.95)], all_dts[n - 1],
+		float(all_dts[n - 1]) / 1000000.0, SPIKE_THRESHOLD_US / 1000, over_spike, 100.0 * float(over_spike) / float(n)])
+	print("全窗單tick最大耗時=%dus(%.3fs)　發生於tick=%d(day=%.2f)" % [
+		global_max_us, float(global_max_us) / 1000000.0, global_max_tick, float(global_max_tick) / float(WorldState.TICKS_PER_DAY)])
+	if over_spike == 0:
+		print("★★★母體=0(全窗無單tick超過%dms)——不可判有沒有『卡』，不是『沒有卡頓』" % (SPIKE_THRESHOLD_US / 1000))
+	if float(global_max_us) / 1000000.0 < 5.0:
 		print("★★量到的最壞單tick遠小於5秒(用戶抱怨的5-10秒)⇒本卷這個世界配置/窗口沒有重現用戶情況")
 		print("  ⇒ 該問的是【用戶跑的是什麼設定】(config/世界規模/隊數)，不是「用戶記錯了」")
 	else:
-		print("★★★量到的單tick耗時達到用戶抱怨量級(>=5秒)——見上方[PhaseSpike]逐系統拆解找兇手")
+		print("★★★量到的單tick耗時仍達到用戶抱怨量級(>=5秒)——見上方[PhaseSpike]逐系統拆解找兇手")
 
 	print("\n=== frame_time_who_freezes_bed DONE ===")
