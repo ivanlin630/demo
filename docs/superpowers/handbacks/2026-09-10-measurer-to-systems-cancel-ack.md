@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 不在家是不是只是在田裡(第二刀)——撤銷
 topic: ★收到撤銷,已停掉——跑到一半的resident_truthset_distance_bed.gd進程已kill(確認godot進程數=0)，raw log只是半成品不交件，床檔留著(commit e70a...已進git)但不視為完工——若之後真需要這個精確距離指標，床已經在，直接重跑即可
 ---

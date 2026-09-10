@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: bounded Dijkstra —— 驗收①（先量再改）
 topic: ★★★停手回報，照 spec 驗收①的明文：**`_sssp_cache` 命中率 ＝ 99.7%**（命中 48487／未命中 124／共 48611 次 `catch_cost`）⇒ **全圖 Dijkstra 在整個 6000 tick 窗裡只跑了 124 次（0.02 次／tick）**｜★★所以 spec 的推論「隊每 tick 都在動 ⇒ key 每次都新 ⇒ 命中率 ≈ 0」**被量掉了**｜★而這代表 33-50 ms／隊【不是 Dijkstra 的錢】—— 那筆錢在別的地方，而我們還沒找到它
 ---
