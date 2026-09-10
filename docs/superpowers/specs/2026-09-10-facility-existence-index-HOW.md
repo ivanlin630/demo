@@ -86,3 +86,52 @@ owner: systems ｜ 2026-09-10 ｜ 觸發：效能線第十輪（★數字點名�
 ★★★而本票**不宣稱**世界會快 83%：**短路省下的是【gating 的那 99.4%】，
   而 `_supply_chain` 之外還有 16.6% 的世界** —— ⑤那一格就是為了把這句話變成數字。
 ```
+
+---
+
+## ⑤ ★★★R² 回件：**(2) 抓到真的漏 —— 而正解是【接既有的失效機制】，不是自己列一份**
+
+### (1)(3) 過
+
+```
+★等價成立，且**不需要逐呼叫端各驗**：R² 追 `_rebuild_owner_outpost`（world_state.gd:318-324）——
+  `_oo_map` 只在 `outpost_level > 0` 時記錄 ⇒ `own_outpost_tile == null` **精確等於**
+  「沒有任何 tile 同時滿足 `outpost_level>0 AND outpost_owner==team_id`」＝ 三個 AND 的前兩個。
+⇒ ★★而他把我的疑慮直接拆掉：**索引正確性是【資料結構的屬性】，不是【呼叫端的屬性】**
+  ⇒ ★★★今早那 670 次 shadow 驗的是「索引 vs 裸掃一致」，**這個結論天然可攜到任何呼叫端**。
+(3) `_team_has_facility` 對 `_supply_chain` 是**黑盒** ⇒ 本票不碰語意，成立；§②的中間態疑慮**不成立**。
+```
+
+### (2) ★★★我列的失效條件**漏了兩個，而兩個都是真的**
+
+```
+①★**拆除據點**（outpost_system.gd:490-497）：只寫 `outpost_type=""`／`outpost_level=0`／
+  `OwnerOutpostIndex.invalidate()`／`set_owner(tile,-1,"demolish")`
+  ⇒ ★★★**個別設施子欄位（`weaponsmith_level` 等）完全沒有被歸零**
+  ⇒ 若聚合索引只監聽「設施子欄位寫入」⇒ **拆除據點不會讓它失效**。
+②★**隊伍滅亡**：`erase_teams` **直接寫 `outpost_owner = -1`、繞過 `OutpostOwnerBank.set_owner`**
+  （`owner_outpost_index.gd:20` 的 chokepoint③ 註解自己寫明「繞過 bank」）
+  ⇒ 若失效條件掛在 `set_owner` 上 ⇒ **隊伍滅亡不會觸發它**。
+```
+
+**★★★修正後的失效策略（照 R² 的要求：接既有的，不重造）**：
+
+```
+`OwnerOutpostIndex.epoch` **共用** —— 它的三個 chokepoint 已經涵蓋
+  ①owner 真變 ②`outpost_level` 跨 0 ③`erase_teams` 死亡釋放
+★★而**只加一條本票自己需要的**：**設施子欄位的寫入點**
+  （★因為設施等級 0→1 不會動 owner、也不會讓 `outpost_level` 跨 0 ⇒ epoch 不會變）
+  ⇒ ★★★而那些寫入點要**裸掃列出**（`weaponsmith_level` 這一族的 `=` 賦值），
+    **列舉本身是這張票的一半** —— 漏一個，索引就會**安靜地給舊答案**。
+```
+
+---
+
+## ⑥ ★而 R² 順手挖到一個**與本票無關、但更該記的東西**
+
+```
+★**拆除據點時，個別設施等級沒有被歸零** —— 只有 `outpost_level` 歸 0。
+⇒ ★★所以那格 tile 上**留著 `weaponsmith_level=2` 這種殘值**。
+⇒ ★★★而它的後果**我沒有查**：若有人在同一格**重建**據點，那些設施等級**是不是就直接繼承了**？
+  ⇒ **標【未驗】並記入 `known_issues`** —— 本票**不處理**（它是世界行為，不是效能）。
+```

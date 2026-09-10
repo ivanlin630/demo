@@ -4454,3 +4454,18 @@ live-team-census    3 筆「普查表指向一個現在撈不到的站點」
   ⇒ 用小窗量到的開銷去外推大窗，會低估。
 回訪：下一次有人拿牆鐘數字談「玩家會不會卡」時
 ```
+
+## 🏚️ **拆除據點沒有清掉個別設施等級 ⇒ 同格重建可能【直接繼承】舊設施**（R² 順手挖到，2026-09-10）
+
+```
+狀態：未確認
+`outpost_system.gd:490-497` demolish 分支只寫：
+   `tile.outpost_type = ""` ／ `tile.outpost_level = 0` ／ `OwnerOutpostIndex.invalidate()`
+   ／ `OutpostOwnerBank.set_owner(tile, -1, "demolish")`
+⇒ ★**`weaponsmith_level` / `farming_level` / `stable_level` … 那一族【完全沒有被歸零】**
+⇒ ★★所以拆完之後，那格 tile 上留著設施等級的殘值。
+★★★而後果未查：**若有人在同一格重建據點，那些設施是不是就直接繼承了？**
+  ⇒ 若是 ⇒ 「拆掉重蓋」會變成一個**保留全部設施投資**的動作（★而那可能是很划算的漏洞）
+  ⇒ 若否（重建流程會重設）⇒ 那只是殘值，無害。
+回訪：下一次有人動 demolish／重建流程時；★或做設施聚合索引那張票時（它的失效條件會撞到這裡）
+```
