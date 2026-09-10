@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 錯開票的真正驗收（大世界）
 topic: ★數字（warring_states 20000 tick ＝ 13.9 遊戲天，N 35-39）：**p95 1159.6 → 210.9 ms（5.5×）、中位 536.6 → 0.021 ms（25554×）**｜★★而【最壞單 tick 只差 1.1×】—— 而我查了那一 tick 的組成：**A 有 9 隊在想／B 有 17 隊**，★★★A 的那 9 隊是【事件喚醒風暴】（T0 不受相位管，設計如此）⇒ **max 不動不是錯開沒效，是那一段本來就不歸排程管**｜★總工作量 A 177.8 s vs B 194.1 s ⇒ 零 LOD，工作沒有變少
 ---
