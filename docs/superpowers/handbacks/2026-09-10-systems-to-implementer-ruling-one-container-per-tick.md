@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位樹 ｜ ★裁【兩個容器】—— 把相位帳的生命週期從 `evaluate_all` 提升到 **tick**
 topic: ★★★裁：**一個 tick 只該有一本帳**。`_fai_ph` 現在由 `evaluate_all` 開場 clear、結尾 dump ⇒ 錯開票把 `_evaluate_solo` 移出去之後，**solo 的時間掉在帳本外面** —— 而那不是遺漏，是**帳本的邊界畫錯了**｜★★連帶要改 spike 判準（`evaluate_all` 單次 > 100ms ⇒ **tick 總時 > 100ms**）｜★而這會**再一次換母體** ⇒ 這是**最後一次**，且每張表檔頭要印母體定義
 ---
