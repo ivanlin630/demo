@@ -35,18 +35,21 @@ func _test_net_value() -> void:
 	var ph := {"loop1.assign_tasks": 1000, "assign.leader_unified": 400, "assign.members": 250}
 	var rep: String = FactionAISystem.phase_report(ph, 1000)
 	print("    %s" % rep.substr(0, 150))
-	_ok(rep.contains("loop1.assign_tasks=self350us"),
+	_ok(rep.contains("loop1.assign_tasks=self350us/"),
 		"②父 self ＝ 1000 − 400 − 250 ＝ 350（★兒子只減【直接】子，不重複減孫）")
-	_ok(rep.contains("assign.leader_unified=self400us"), "②葉子的 self ＝ 它自己的 total")
+	_ok(rep.contains("assign.leader_unified=self400us/"), "②葉子的 self ＝ 它自己的 total")
 	# ★★"*multi"：不參與減法，且輸出要具名標示
-	var ph2 := {"loop1.assign_tasks": 1000, "unified.rank": 900}
+	var ph2 := {"loop1.assign_tasks": 1000, "gather.market": 900}   # ★unified.rank 已按呼叫端拆開、不再 multi
 	var rep2: String = FactionAISystem.phase_report(ph2, 1000)
 	print("    multi：%s" % rep2.substr(0, 150))
-	_ok(rep2.contains("loop1.assign_tasks=self1000us"),
+	_ok(rep2.contains("loop1.assign_tasks=self1000us/"),
 		"★★multi 不被減進父親（否則父親會被【多減】而看起來很乾淨）")
 	# ★訂正：multi 現在【分段印】（systems §③：它的 self 恆等於 tot ⇒ 不可與真淨值同排行榜）
-	_ok(rep2.contains("[multi・不參與淨值・self≡tot]") and rep2.contains("unified.rank=tot900us"),
+	_ok(rep2.contains("[multi・不參與淨值・self≡tot]") and rep2.contains("gather.market=tot900us"),
 		"★★multi 列【分段印】且標明 self≡tot（★★★混在同一排序裡＝同一張表兩種口徑）")
+	# ★systems §①：self==tot 有兩種意思 ⇒ 印【已登記兒子數】當場分得出來
+	_ok(rep.contains("loop1.assign_tasks=self350us/tot1000us(kids"),
+		"★每一列印【已登記兒子數】—— 分得出「真的沒有兒子」與「兒子沒被登記」")
 	_sections += 1
 
 func _test_unregistered_gate() -> void:

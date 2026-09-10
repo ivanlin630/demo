@@ -485,7 +485,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	# force reeval：threat 觸發即反應（繞 _decide_unified cadence 節流——threat 非 _should_reeval 內建 trigger）。
 	# side-effect（_wire_threat_task/flee_from_pos/threat.dispatch tap/specimen）由 _decide_unified commit loop 承（DRY）。
 	team.decision_eval_next_tick = state.world.current_tick
-	_decide_unified(state, team)
+	_decide_unified(state, team, "threat")
 
 # 融合 threat：threat option 的 aux target 接線（DEFEND=prosperity_target / 求和=order_target+order_task）。
 # _evaluate_threat（non-unified）與 _decide_unified（unified）共用 → 兩路 threat 反應接線一致（DRY）。
@@ -864,7 +864,12 @@ const PHASE_PARENT: Dictionary = {
 	#   ★★保守：寧可少減（父親偏大、誠實標出來），也不要多減而看起來很乾淨。
 	"indep.weakest_prey": "*multi",
 	# ── ★多外層共用 ⇒ 不參與減法（見上方 "*multi" 的理由）──
-	"unified.rank": "*multi", "unified.to_task": "*multi", "unified.prosp": "*multi",
+	# ★unified.rank 按呼叫端拆開 ⇒ ★★這一族【不再有 multi】（每個鍵都有真父親）
+	"unified.rank.from_leader": "assign.leader_unified",
+	"unified.rank.from_member": "member.unified",
+	"unified.rank.from_solo": "loop2.solo",
+	"unified.rank.from_threat": "loop3.threat",
+	"unified.to_task": "*multi", "unified.prosp": "*multi",
 	"gather.head": "*multi", "gather.threat": "*multi", "gather.weak_prey": "*multi",
 	"gather.market": "*multi", "gather.home_food": "*multi", "gather.aid": "*multi",
 	"gather.strong_farm": "*multi", "gather.readiness_prey": "*multi",
@@ -897,8 +902,16 @@ static func phase_report(ph: Dictionary, total_us: int) -> String:
 	multi_rows.sort_custom(func(a, b): return int(a["tot"]) > int(b["tot"]))
 	var out: String = ""
 	var negatives: Array = []
+	# ★【已登記兒子數】欄（systems §①）：★★self==tot 有兩種意思 ——
+	#   「它真的沒有兒子」與「它的兒子沒被登記」⇒ 印出兒子數就當場分得出來。
+	var kid_count: Dictionary = {}
+	for nm in PHASE_PARENT:
+		var par: String = String(PHASE_PARENT[nm])
+		if par != "" and par != "*multi":
+			kid_count[par] = int(kid_count.get(par, 0)) + 1
 	for r in rows:
-		out += "%s=self%dus/tot%dus " % [r["n"], int(r["self"]), int(r["tot"])]
+		out += "%s=self%dus/tot%dus(kids%d) " % [r["n"], int(r["self"]), int(r["tot"]),
+			int(kid_count.get(String(r["n"]), 0))]
 		if int(r["self"]) < 0:
 			negatives.append(String(r["n"]))
 	# ★★multi 列【分段印】：它的 self 依定義恆等於 tot ⇒ 與真正的淨值【不是同一種量】
@@ -3004,7 +3017,7 @@ func _assign_tasks(state: WorldState, f) -> void:
 	# A2b：leader 隊戰術執行走統一引擎（取代 徵收/外交/攻擊/掠奪 手 cascade + note_bypass）。
 	# 徵收/外交(faction_duty)+攻擊(faction_duty+intent_fit 加成)+貿易/囤貨/生產/駐守/survival/threat 全 rank_scored 競秤。
 	# 立國(上)已 pre-empt；player_cmd(上)PRIO_PLAYER 已蓋。conquest scaffolding faction_id==-1 leader 不觸。
-	_decide_unified(state, leader_team)
+	_decide_unified(state, leader_team, "leader")
 	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_unified", _ta)
 	_assign_member_tasks(state, f)
 	if SimRunner.phase_timing: _fai_pht("assign.members", _ta)
@@ -3026,10 +3039,10 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		# threat/preempt/survival scaffolding（序3.5 反龜縮保）。掠奪 option → 成員 raid 接回（縫#3 結清）。
 		if SimRunner.phase_timing:
 			var _tu: int = Time.get_ticks_usec()
-			_decide_unified(state, mt)
+			_decide_unified(state, mt, "member")
 			_fai_pht("member.unified", _tu)
 		else:
-			_decide_unified(state, mt)
+			_decide_unified(state, mt, "member")
 
 # A2c-1：consolidate target 決策抽出（非 dispatch，供 DecisionContext.gather 算 consolidate_target_id）。
 # 逐條件鏡射 _try_consolidate_merge:1421-1442（target 兩支）；回 absorber_id / leader_team_id / -1。
@@ -3062,7 +3075,13 @@ func uses_unified(team: TeamData) -> bool:
 	return team.tags.has(TeamData.TAG_MERCHANT) or team.tags.has(TeamData.TAG_PRODUCE)
 
 # 切片隊走引擎決策 → 設 task（取代舊 member/solo 派工）。
-func _decide_unified(state: WorldState, team: TeamData) -> void:
+# ★★★按【呼叫端】拆計時鍵（systems 裁 2026-09-10）：unified.rank 之前是 "*multi"
+#   ⇒ 它不參與減法 ⇒ ★含它的父親（assign.leader_unified 82.8s）的 self【仍含著那筆錢】
+#   ⇒ ★★「保守少減」把不確定性從【父親偏大】搬到了【榜首不可用】——而榜首正是我們最想看的那一格。
+#   ⇒ ★★★所以每個呼叫端一個鍵，而【每個鍵都有真父親】：這一族不再有 multi。
+#   ★src 沒帶 ⇒ 鍵變成 unified.rank.from_unknown ⇒ 它【不在 PHASE_PARENT】⇒ 未登記具名紅
+#     （★★而那是刻意的：新呼叫端不該靜默地混進某個父親）。
+func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown") -> void:
 	# ⑦ 統一重評 gate（修每小時過頻）：IDLE/stuck/crisis/命令新仍即時，否則 cadence 節流。
 	if not _should_reeval(state, team):
 		return
@@ -3185,7 +3204,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			#   ⇒ ★★★而那正是這一輪母體錯的【結構版本】：不是我挑錯窗，是儀器本身只留得下前面那段
 			#   ⇒ 撈不到表時要分得出「funnel 沒 fire」與「cap 早就滿了」（床會印樣本數）
 			}, 20000)
-	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank", _tr)
+	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank.from_" + src, _tr)
 	# ★取樣放在計時【終點之後】⇒ `bump_sample` 自己的成本不進 `unified.rank`。
 	# ★★依賴 `phase_timing`：關掉時 `_tr/_tr0` 都是 0 ⇒ 本 sample 不運作（★這個前提寫進 dump，
 	#   否則有人只開 `Probe.enabled` 會拿到空的而以為「沒有慢的呼叫」）。
@@ -3967,7 +3986,7 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 	# 統一決策引擎切片：商隊-tag solo 隊走 DecisionEngine（取代舊 solo 計分 + MERCHANT_TRADE_BONUS）。
 	if uses_unified(team):                          # ← hoist 到 IDLE gate 前(unified 退 latch)
 		_solo_ran_engine = true                     # ★這條路【真的跑引擎】—— 成本歸因用
-		_decide_unified(state, team)
+		_decide_unified(state, team, "solo")
 		return
 	# ⑦ 統一重評 gate（收斂到單一 _should_reeval predicate；IDLE/stuck/crisis/命令新即時，否則 cadence 節流）。
 	if not _should_reeval(state, team):
