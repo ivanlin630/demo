@@ -113,6 +113,28 @@ func _initialize() -> void:
 			print("%-40s %10d %12.3f %14.1f" % [row[0], int(row[1]), float(row[2]) / 1e6,
 				float(row[2]) / float(row[1])])
 	# ★★★四段要跟【整支的碼表】比（涵蓋全部呼叫端），不是跟只涵蓋 path 迴圈那 1116 次的 `rbf_*` 比
+	# ★★★一次子問題展開（`_resolve_resource_prereq`）切四段
+	print("")
+	print("★一次子問題展開四段")
+	print("%-44s %10s %12s %14s" % ["段", "次數", "總計(s)", "us/次"])
+	var rp: Array = [
+		["①前置滿檢查（effective_holding+need_keep）", GoalResolver.rp_need_n, GoalResolver.rp_need_us],
+		["②市場（_nearest_market_outpost_with）", GoalResolver.mkt_n, GoalResolver.mkt_us],
+		["③地形候選段（含逐地形找最近格）", GoalResolver.rp_terr_n, GoalResolver.rp_terr_us],
+		["　└其中 find_nearest_terrain_tile", GoalResolver.rp_find_n, GoalResolver.rp_find_us],
+		["④尾段（折現比較＋_mk_candidate）", GoalResolver.rp_tail_n, GoalResolver.rp_tail_us]]
+	for row in rp:
+		if int(row[1]) == 0:
+			print("%-44s %10s %12.3f %14s" % [row[0], "★0 次", float(row[2]) / 1e6, "不可判"])
+		else:
+			print("%-44s %10d %12.3f %14.1f" % [row[0], int(row[1]), float(row[2]) / 1e6,
+				float(row[2]) / float(row[1])])
+	var rp_sum: float = GoalResolver.rp_need_us + GoalResolver.mkt_us + GoalResolver.rp_terr_us + GoalResolver.rp_tail_us
+	print("★守恆⑥：①+②+③+④ = %.3f s（母體 %d 次）vs **整支** %.3f s（母體 %d 次）⇒ 差 %.3f s" % [
+		rp_sum / 1e6, GoalResolver.rp_all_n, GoalResolver.rp_all_us / 1e6, GoalResolver.rp_all_n,
+		(GoalResolver.rp_all_us - rp_sum) / 1e6])
+	print("   ★而 `rrp_*`（只涵蓋外層呼叫端）%.3f s／%d 次 —— ★★母體不同的量不可相減（今天第二次）" % [
+		GoalResolver.rrp_us / 1e6, GoalResolver.rrp_n])
 	# ★★★遞迴：一次頂層呼叫【之內】的展開與重複（★兩個原始數都印，母體不足印不可判）
 	if GoalResolver.rec_top_n == 0:
 		print("★★★遞迴展開：**不可判**（頂層呼叫 0 次）")

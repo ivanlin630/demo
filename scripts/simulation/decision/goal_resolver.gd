@@ -781,6 +781,17 @@ static var rec_top_n: int = 0           # 頂層呼叫數
 static var rec_calls_sum: int = 0
 static var rec_distinct_sum: int = 0
 static var rec_depth_hist: Dictionary = {}   # 深度分佈（★不是只有平均）
+# ★★★把【一次子問題展開】切開（切點：依它實際做的四件事）
+static var rp_need_us: float = 0.0      # ①前置滿檢查（`effective_holding` ＋ `need_keep`）
+static var rp_need_n: int = 0
+static var rp_terr_us: float = 0.0      # ②地形候選段（`harvest_terrains` ＋ 自家據點 ＋ 逐地形找最近格）
+static var rp_terr_n: int = 0
+static var rp_find_us: float = 0.0      # ③其中的 `find_nearest_terrain_tile`（★每個地形候選一次）
+static var rp_find_n: int = 0
+static var rp_tail_us: float = 0.0      # ④尾段（折現比較 ＋ `_mk_candidate`）
+static var rp_tail_n: int = 0
+static var rp_all_us: float = 0.0
+static var rp_all_n: int = 0
 # ★★★同一 tick 內【同一組輸入】重複算幾次（★母體地板在算式之前）
 static var _rep_tick: int = -1
 static var _rep_rrp_seen: Dictionary = {}
@@ -863,6 +874,16 @@ static func _reset_cross_run() -> Dictionary:
 	rec_calls_sum = 0
 	rec_distinct_sum = 0
 	rec_depth_hist = {}
+	rp_need_us = 0.0
+	rp_need_n = 0
+	rp_terr_us = 0.0
+	rp_terr_n = 0
+	rp_find_us = 0.0
+	rp_find_n = 0
+	rp_tail_us = 0.0
+	rp_tail_n = 0
+	rp_all_us = 0.0
+	rp_all_n = 0
 	_rep_tick = -1
 	_rep_rrp_seen = {}
 	_rep_rbf_seen = {}
@@ -906,13 +927,22 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		_rrp_depth += 1
 		if _rrp_depth > _rec_maxd:
 			_rec_maxd = _rrp_depth
+	var _rpA: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	if SimRunner.phase_timing:
+		rp_all_n += 1        # ★整支（涵蓋全部呼叫端）——四段要跟它比（母體 3507），不是跟只涵蓋外層 1318 次的 `rrp_*` 比
+	var _rpC: int = 0   # ★尾段的起點：宣告在函式層（★它被 if 區塊【外面】的 return 讀到）
 	var res: String = String(prereq.get("res", ""))
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 組件 E 泛化：qty 走通用 need_keep（任 res）。
 	if Probe.enabled: Probe.bump("goal.res_prereq.entry")
-	if ResourceSystem.effective_holding(state, team, res) >= NeedOracle.need_keep(state, team, res, lv):
+	var _rp_sat: bool = ResourceSystem.effective_holding(state, team, res) >= NeedOracle.need_keep(state, team, res, lv)
+	if SimRunner.phase_timing:
+		rp_need_us += float(Time.get_ticks_usec() - _rpA)
+		rp_need_n += 1
+	if _rp_sat:
 		if Probe.enabled: Probe.bump("goal.res_prereq.satisfied")
 		if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
+		if SimRunner.phase_timing: rp_all_us += float(Time.get_ticks_usec() - _rpA)
 		return {}   # 前置滿
 	# ── 取得手段 1：買（S2，市場取得不需定位；belief-gated）──
 	if not ctx.has_specie:
@@ -930,6 +960,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		if mp != Vector2i(-1, -1):
 			if Probe.enabled: Probe.bump("goal.res_prereq.buy_wins")
 			if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
+			if SimRunner.phase_timing: rp_all_us += float(Time.get_ticks_usec() - _rpA)
 			return _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
 		if Probe.enabled: Probe.bump("goal.res_prereq.no_market")
 	# ── 取得手段 2：採@地形（S3，買不到→定位取得）——★地形集合由真相源導出，不查表。
@@ -944,8 +975,10 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		if not _fall_seen.has(_dk):
 			_fall_seen[_dk] = true
 			Probe.bump("goal.res_fall_distinct.%s" % res)
+	var _rpB: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var terr_cands: Array = harvest_terrains(res)
 	if not terr_cands.is_empty():
+		# ★★★又一顆 production 熱路徑上的 `.new()`（同族第三顆）——本輪只量不改
 		var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 		var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 		# ★★【已滿足】不是布林，是同一個比較（血證 2026-08-25）：
@@ -968,7 +1001,11 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		var best_pos: Vector2i = Vector2i(-1, -1)
 		var best_v: float = -1.0
 		for tc in terr_cands:
+			var _rpF: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 			var p: Vector2i = find_nearest_terrain_tile(state, team, String(tc["terrain"]), seek_range_tiles(state, team))   # 純地形=公共地理
+			if SimRunner.phase_timing:
+				rp_find_us += float(Time.get_ticks_usec() - _rpF)
+				rp_find_n += 1
 			if p == Vector2i(-1, -1) or p == team.tile_pos:
 				continue
 			var delay: float = float(FactionAISystem._hex_dist(team.tile_pos, p)) / FactionAISystem.FOOD_BRIDGE_MOVE_PER_DAY
@@ -978,6 +1015,11 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 				best_v = v
 				best_pos = p
 		# ★自家產地的值：delay = 0（人已經在那裡），同一支 option_value。
+		if SimRunner.phase_timing:
+			rp_terr_us += float(Time.get_ticks_usec() - _rpB)
+			rp_terr_n += 1
+		if SimRunner.phase_timing:
+			_rpC = Time.get_ticks_usec()
 		var own_v: float = DiscountedFlow.option_value(own_yield, 0.0, 0.0, d, h) if own_yield > 0.0 else -1.0
 		if own_v >= best_v and own_v > 0.0:
 			if Probe.enabled:
@@ -988,6 +1030,10 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 					"own_v": snappedf(own_v, 0.001), "best_alt_v": snappedf(best_v, 0.001),
 					"tick": state.world.current_tick}, 30)
 			if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
+			if SimRunner.phase_timing:
+				if _rpC != 0: rp_tail_us += float(Time.get_ticks_usec() - _rpC)
+				if _rpC != 0: rp_tail_n += 1
+			if SimRunner.phase_timing: rp_all_us += float(Time.get_ticks_usec() - _rpA)
 			return {}   # ★自家產地已經不輸給任何替代 ⇒ 再跑一趟無益
 		if Probe.enabled:
 			if best_pos == Vector2i(-1, -1):
@@ -999,11 +1045,19 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		# ★裁② guard：pos == team.tile_pos（隊已站產地）= same-tile founding，無母隊就地 outpost-build 路 → 已於上面 continue（followup）。
 		if best_pos != Vector2i(-1, -1):
 			if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
+			if SimRunner.phase_timing:
+				if _rpC != 0: rp_tail_us += float(Time.get_ticks_usec() - _rpC)
+				if _rpC != 0: rp_tail_n += 1
+			if SimRunner.phase_timing: rp_all_us += float(Time.get_ticks_usec() - _rpA)
 			return _mk_delegate_candidate(state, team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx,
 				{"build_type": "civilian", "target": best_pos})
 	elif Probe.enabled:
 		Probe.bump("goal.harvest.not_terrain_produced." + res)   # ★B 型：地形本來就不產（缺的是【製造】那條手段）
 	if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
+	if SimRunner.phase_timing:
+		if _rpC != 0: rp_tail_us += float(Time.get_ticks_usec() - _rpC)
+		if _rpC != 0: rp_tail_n += 1
+	if SimRunner.phase_timing: rp_all_us += float(Time.get_ticks_usec() - _rpA)
 	return {}   # S3 無取得手段（產=S4 設施 / same-tile founding=followup）
 
 # ★★把 means-end 磚接進決策（systems 裁 2026-08-25，spec §3）。
