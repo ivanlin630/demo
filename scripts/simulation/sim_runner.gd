@@ -94,6 +94,9 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	#   ★旗擋重入 ⇒ 這一句在第二 tick 之後是一個 bool 比較。
 	if not state.registry_migrated:
 		state.migrate_registry_anchor()
+	# ★自動登記 stub（systems 裁）：沒有它，世界只會失去居民不會取得 ⇒ 地基隨時間崩壞。
+	#   ★★成本：O(隊數) 的欄位比較，且【已登記的隊直接 continue】。
+	state.auto_register_stub_sweep()
 	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick（不計時，非真 tick）
 	if state.game_over:
 		return "game_over"

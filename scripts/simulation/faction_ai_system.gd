@@ -604,7 +604,14 @@ func _is_resident_team(state: WorldState, team: TeamData) -> bool:
 # ★★★shadow（spec 驗收④）：新謂詞 vs 舊站位判定【逐次比對】＋母體地板，
 #   因為裸掃只到同函式體粒度 —— 跨函式的漏網要靠【跑起來的世界】逼出來。
 static func is_resident_static(state: WorldState, team: TeamData) -> bool:
-	var now: bool = state.is_registered_resident(team) and team.tags.has(TeamData.TAG_PRODUCE) 		and team.work_outpost == team.tile_pos
+	# ★★★語意（systems 裁 2026-09-10 §②）：登記是【持久】的 —— 隊走開【不會】失去居民身分。
+	#   ★這正是「錨 vs 站位」的唯一差別；★★而它是【真的行為改變】：
+	#     舊判定下離家的生產隊當場變非居民，登記制下它仍是居民（直到退租／據點消失）。
+	#   ⇒ ★★★所以驗收⑥「行為未變」在【離家的居民】這一格上**不成立**，而那是本裁定的內容，
+	#     不是實作走樣 —— 差異量在交件裡逐項報。
+	var now: bool = state.is_registered_resident(team) and team.tags.has(TeamData.TAG_PRODUCE)
+	if Probe.enabled and now and team.work_outpost != team.tile_pos:
+		Probe.bump("registry.resident.away")   # ★★「登記了但人不在」＝錨真正做的事，量得到才談得上價值
 	if Probe.enabled:
 		var was: bool = legacy_resident_by_position(state, team)
 		Probe.bump("registry.shadow.resident.n")                     # ★母體：比過幾次（沒有它，「零不一致」沒有鑑別力）

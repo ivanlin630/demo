@@ -591,6 +591,24 @@ func migrate_registry_anchor() -> void:
 		if FactionAISystem.legacy_resident_by_position(self, t):
 			t.work_outpost = t.tile_pos
 
+# ★★★自動登記 stub（systems 裁 2026-09-10）—— ★它【明文是 stub】，不是最終機制。
+#   ★病：spec 原本寫「登記只會由遷移產生」⇒ 世界【單向流失居民】（只會失去、不會取得）
+#     ⇒ 實測 `Team0` 在 t=0 還沒站上自家據點，之後站上去了而**永遠不會登記**
+#     ⇒ ★★那不是「動詞還沒來」，是【地基本身會隨時間崩壞】：窗越長差距越大。
+#   ⇒ 本 stub ＝ ④b「上門請求（村主秤）」的**永遠答應版**：
+#     一支 PRODUCE 隊站上（自家 OR 同 faction 的）據點 ⇒ 自動登記。
+#   ★★★而它的 tap 次數就是【④b 上線後該歸零的量】—— 驗收判準寫在 ④b：
+#     `registry.auto_register_stub` 歸零 ＝ stub 真的被秤取代（而不是被忘記）。
+func auto_register_stub_sweep() -> void:
+	for tid in teams:
+		var t: TeamData = teams[tid]
+		if t.work_outpost != Vector2i(-1, -1):
+			continue
+		if FactionAISystem.legacy_resident_by_position(self, t):
+			t.work_outpost = t.tile_pos
+			if Probe.enabled:
+				Probe.bump("registry.auto_register_stub")   # ★④b 上線後這個數字該歸零
+
 # ── S5 tags 單寫者 chokepoint ─────────────────────────────────
 # ★★★訂正（systems 量測 2026-09-10，登記錨 ④a spec §⑥）：舊註解寫「軍隊/生產/流亡，movement 讀決策」
 #   —— ★三個裡有兩個是假的。量法＝全庫裸符號掃：

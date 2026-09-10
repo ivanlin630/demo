@@ -205,10 +205,17 @@ func tick_all(state: WorldState, team_ids: Array, cadence: int = -1) -> void:
 #   ⇒ 遷移之後兩者的真值集合逐隊相同 ⇒ 換讀登記欄是【行為中性】的
 #   ⇒ ★而不搬它 ＝ 明知同一個問題有第二份答案還讓它繼續分岔。
 # ★shadow 同 resident 那支：新舊逐次比對＋母體（spec 驗收④）。
+# ★★★裁定（systems 2026-09-10）：本支【退出登記錨 slice 1】—— 理由不是「先擱著」：
+#   生產權／勞力池是卡③ ＝ slice 2 的東西，把它拉進 slice 1 是排序錯了。
+#   ★而它退出的實證理由留在這裡：舊軸【不要求 TAG_PRODUCE】而登記軸要求
+#     ⇒ 兩者從來不是同一個集合（warring 1500t：322/489 不一致）
+#   ★★systems 的自我更正逐字留著：「兩支函式的身體相同，不代表它們的母體相同」
+#     —— 差別在【呼叫它們之前的那一個條件】。
+# ⇒ 行為＝舊實作；★★★而 shadow 比對【留著】（純觀測、不改回傳）：它就是 slice 2 的現成對照組。
 func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
-	var now: bool = state.registered_at(team, tile.tile_pos)
+	var now: bool = _legacy_works_tile_by_position(state, team, tile)
 	if Probe.enabled:
-		var was: bool = _legacy_works_tile_by_position(state, team, tile)
+		var was: bool = state.registered_at(team, tile.tile_pos)   # ★登記版（slice 2 的候選），純觀測
 		Probe.bump("registry.shadow.works.n")
 		if was != now:
 			Probe.bump("registry.shadow.works.mismatch")
@@ -216,6 +223,7 @@ func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> b
 				"team": team.team_id, "was": was, "now": now,
 				"tile_owner": tile.outpost_owner,
 				"reg": "%d,%d" % [team.work_outpost.x, team.work_outpost.y]}, 200)
+		Probe.add_amount("registry.shadow.works.reg_says", 1.0 if state.registered_at(team, tile.tile_pos) else 0.0)
 		if now:
 			Probe.bump("yield.works_tile_pass")   # ★既有 tap 語意保留（放行才記）
 	return now

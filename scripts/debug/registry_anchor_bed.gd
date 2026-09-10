@@ -52,8 +52,12 @@ func _initialize() -> void:
 			"" if mism.is_empty() else " ⇒ " + ", ".join(mism.slice(0, 5))])
 
 	# ②★母體地板（兩者皆 0 ⇒ ①自動成立 ⇒ 不可判）
-	_ok("②母體地板", residents > 0 and lodgers > 0,
-		"居民 %d 支／其中房客（登記在別人的據點）%d 支 —— ★兩者皆 0 ⇒ ①不可判" % [residents, lodgers])
+	# ★★★裁定（systems 2026-09-10 §③）：房客那一格【目前無論哪個 config 都不可判】
+	#   ⇒ 明寫不可判，★不要用「沒有不一致」冒充綠；★★它要等世界真的長出房客（攻擊門／④b）。
+	_ok("②母體地板（居民）", residents > 0,
+		"居民 %d 支（★0 ⇒ ①自動成立 ⇒ 不可判）" % residents)
+	print("  ★②-b 房客母體：%d 支 ⇒ %s" % [lodgers,
+		"可判" if lodgers > 0 else "★★【不可判】—— 三個 config 在 t=0 房客都是 0，掛著等世界長出房客（不硬湊）"])
 
 	# ③★★讀者真的切過去了：清空一支隊的登記 ⇒ 在【每一個】讀者處都變非居民
 	var victim: TeamData = null
@@ -72,16 +76,23 @@ func _initialize() -> void:
 		sites.append(["is_resident_static", FactionAISystem.is_resident_static(st, victim)])
 		sites.append(["WorldState.is_registered_resident", st.is_registered_resident(victim)])
 		sites.append(["DecisionContext.is_resident", DecisionContext.gather(st, victim, false).is_resident])
-		sites.append(["Manufacturing._team_works_tile", ManufacturingSystem.new()._team_works_tile(st, victim, tile)])
+		# ★`_team_works_tile` 已【退出本票】（systems 裁：它屬 slice 2）⇒ 它【不該】跟著翻
+		#   ⇒ ★★所以它在這裡是【反向對照】：翻了才是錯（那代表本票偷偷改了生產權）。
+		var works_after: bool = ManufacturingSystem.new()._team_works_tile(st, victim, tile)
 		var still: Array = []
 		for s in sites:
 			if bool(s[1]):
 				still.append(String(s[0]))
-		_ok("③讀者逐站點名", before_ctx and before_works and still.is_empty(),
-			"清空 Team%d 的登記 ⇒ 逐站：%s（清空前 ctx=%s works=%s ★沒有這一格就分不出『本來就是 false』）" % [
+		_ok("③讀者逐站點名", before_ctx and still.is_empty() and works_after == before_works,
+			"清空 Team%d 的登記 ⇒ 登記讀者：%s；★反向對照 `_team_works_tile` %s（清空前 ctx=%s works=%s）" % [
 				victim.team_id, "全部變非居民" if still.is_empty() else "仍為居民：" + ", ".join(still),
+				"沒跟著翻（正確：它已退出本票）" if works_after == before_works else "★跟著翻了＝本票偷改了生產權",
 				before_ctx, before_works])
 
+	# ★★★重新 arm：①③ 那兩段【自己動手清空過登記】⇒ 它們會在 shadow 桶裡留下
+	#   「舊 true 新 false」的假不一致 —— ★而那是【床自己造的】，不是世界的。
+	#   ⇒ 量測窗要跟被量的東西對齊（同一族教訓：窗貼著被量的東西）。
+	Probe.arm()
 	# ④★shadow：跑一窗，新謂詞 vs 舊站位判定逐次比對（★先驗比對次數 > 0）
 	var st2 := _make()
 	var runner := SimRunner.new()
@@ -93,8 +104,20 @@ func _initialize() -> void:
 	var wm: int = int(Probe.counts.get("registry.shadow.works.mismatch", 0))
 	_ok("④shadow 母體地板", rn > 0 and wn > 0,
 		"resident 比對 %d 次／works 比對 %d 次（★0 次 ⇒ 『零不一致』沒有鑑別力）" % [rn, wn])
-	_ok("④shadow 零不一致", rm == 0 and wm == 0,
-		"resident 不一致 %d／works 不一致 %d" % [rm, wm])
+	# ★★★語意變更之後，shadow 不再是「零不一致」閘，而是【差異量表】：
+	#   ①resident：登記制是【持久】的 ⇒ 離家的居民在舊判定下是 false、登記制下仍是 true
+	#     ⇒ ★不一致【是預期的】，而它的【方向】必須單向（was=false&now=true 才對；反向＝真的壞了）
+	#   ②works：本支已退出本票（行為＝舊實作）⇒ 這裡的不一致只是 slice 2 的參考量
+	var wrong_dir: int = 0
+	for d in Probe.samples.get("registry.shadow.resident.detail", []):
+		if bool(d.get("was", false)) and not bool(d.get("now", false)):
+			wrong_dir += 1
+	_ok("④resident 差異只准單向", wrong_dir == 0,
+		"resident 不一致 %d 筆，其中【舊 true 新 false】%d 筆（★後者＝居民憑空消失＝真的壞了）" % [rm, wrong_dir])
+	print("  ★④-b works 不一致 %d/%d（本支已退出本票，行為＝舊實作 ⇒ 此為 slice 2 的參考量）" % [wm, wn])
+	print("  ★④-c 自動登記 stub 觸發 %d 次（★④b 上線後這個數字該歸零）／【登記了但人不在】%d 次" % [
+		int(Probe.counts.get("registry.auto_register_stub", 0)),
+		int(Probe.counts.get("registry.resident.away", 0))])
 	if rm > 0 or wm > 0:
 		print("    ★不一致樣本（前 5）：")
 		for d in Probe.samples.get("registry.shadow.resident.detail", []).slice(0, 5):
