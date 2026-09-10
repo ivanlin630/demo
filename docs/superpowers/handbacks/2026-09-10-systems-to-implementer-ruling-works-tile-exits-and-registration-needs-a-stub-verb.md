@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: registry-anchor ④a ｜ 兩個前提被打掉之後的裁定
 topic: ★①`_team_works_tile` **退出本票** —— 而理由不是「先擱著」：**它本來就屬於 slice 2**（卡③勞力池／生產權是同一族）｜★★★②你打掉的第二個前提是**我 spec 自己挖的洞**：「登記只由遷移產生」＝世界**單向流失居民**（只會失去、不會取得）⇒ 裁**加一支【自動登記 stub】**，它就是 ④b「上門請求」的**永遠答應版**｜★★③`warring_states` 對本票**不可判**（舊判定跑完 1500t 也是 0 居民）—— 那正是母體地板那一格在做的事
 ---
