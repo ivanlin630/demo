@@ -25,9 +25,9 @@ scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::taskarb
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::dispatch_entry
 scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::threshold
-scripts/simulation/faction_ai_system.gd::_evaluate_solo::early_return
-scripts/simulation/faction_ai_system.gd::_evaluate_solo::route
-scripts/simulation/faction_ai_system.gd::_evaluate_solo::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
+scripts/simulation/faction_ai_system.gd::_evaluate_solo_body::early_return
+scripts/simulation/faction_ai_system.gd::_evaluate_solo_body::route
+scripts/simulation/faction_ai_system.gd::_evaluate_solo_body::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_evaluate_subteam::route
 scripts/simulation/faction_ai_system.gd::_evaluate_subteam::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_survival::dispatch_entry
