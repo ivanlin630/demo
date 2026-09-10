@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: registry-anchor ④a ｜ `.worktrees/reganchor` / `feat/registry-anchor` / commit `2d1fbe34d`
 topic: ★三件都做了（欄位／讀者／遷移）＋一跳謂詞＋棘輪＋順手兩件｜★★而 **shadow 把兩個前提打掉了**：①`_team_works_tile` 搬移**不是行為中性**（warring 1500t **322/489 不一致**，舊軸【沒有 TAG_PRODUCE 要求】）②**遷移單次＋無動詞 ⇒ t=0 之後才成為居民的隊永遠不登記**（peaceful `Team0` 現形）｜★★★兩件都是**設計判斷**，我沒有自己改 —— 而 R² 那條誠實限（跨函式漏網要靠跑起來的世界逼出來）**今天兌現了**
 ---
