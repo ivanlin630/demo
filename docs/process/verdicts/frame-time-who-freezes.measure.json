@@ -1,0 +1,35 @@
+{
+  "token": "frame-time-who-freezes",
+  "slice": "可慢不可卡——誰凍住那5-10秒",
+  "date": "2026-09-10",
+  "measured_at_head": "e00913568起跑(dirty=4，implementer WIP，非我的床)",
+  "measured_at_head_note": "★引用時請並排寫head(04_qa今天立的紀律)——本卷=e00913568附近",
+  "touches": [],
+  "world": "warring_states / seed=1337 / 90天/129600 ticks，SimRunner.phase_timing=true(既有opt-in旗標)",
+  "bed": "scripts/debug/frame_time_who_freezes_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-10-frame-time-who-freezes.txt"],
+  "specimen_trace": null,
+  "methodology_note": "★★★headless非GUI——用ObserverBridge.tick_step的12ms-budget-不可切割語意(observer_bridge.gd:26-36)論證單tick max耗時≈真實frame最壞耗時的極接近代理，systems獨立確認同結論(2026-09-10-systems-to-measurer-the-instrument-already-exists-dont-go-through-gui.md)。用production既有chrome：SimRunner.phase_timing(sim_runner.gd:110/137-139)，零新增tap。",
+
+  "answer": {
+    "verdict": "★★★決定性：問題是真的，不是用戶記錯——單tick耗時中位數(spike樣本內)已達7.78秒，p95=15.45秒，max=26.65秒，遠超用戶抱怨的5-10秒門檻。週期性極強：每60 tick(=1小時，WorldState.TICKS_PER_HOUR=60)固定發生一次，從第一小時(tick=60)就存在，貫穿整個90天窗(2160次PhaseSpike超過100ms門檻，幾乎每小時一次)。兇手：near.faction_ai系統，幾乎每次spike貢獻80-95%的耗時。★★幅度隨隊數增長惡化(day1 teams=63時spike量級0.4-9秒→day90 teams=135時8-26秒)——支持『尖峰∝隊數』，即【切片修法有效】的判斷方向。",
+    "①每tick耗時分布(僅spike樣本，即>100ms的2160筆)": {
+      "母體": "2160筆(90天×24小時≈2160小時，幾乎每小時一次)",
+      "min": "0.18秒", "p50": "7.78秒", "p95": "15.45秒", "max": "26.65秒",
+      ">1秒比例": "99.7%(2153/2160)", ">5秒比例": "74.6%(1612/2160，★中位數本身就落在用戶抱怨區間)", ">10秒比例": "33.5%(723/2160)"
+    },
+    "②尖峰裡面是誰(讀[PhaseSpike]逐系統拆解，抽樣多筆一致)": "near.faction_ai系統——幾乎每一筆spike樣本裡都是最大貢獻者，佔dt的80-95%(例：tick=90780 dt=17166886us，其中near.faction_ai=15117727us=88%；tick=129600 dt=9659549us，near.faction_ai=9056249us=94%)",
+    "③週期性": "★★★固定60-tick(=1小時)週期，從tick=60(第一小時)就出現，貫穿全部90天窗——不是月級pass，是逐小時的faction_ai批次計算",
+    "④尖峰時的母體": "teams隨遊戲進行從day1的~52-63隊漲到day90的130-137隊；[TickPerf]日報顯示avg也隨隊數惡化(day1 avg=43ms→day90 avg=166ms)，max隨隊數惡化更明顯(day1 max=9.27秒→day88 max=25.09秒)——★幅度與隊數正相關，支持切片修法方向"
+  },
+
+  "honest_limits": [
+    "★①本卷不下修法結論——它只回答『誰在凍』與『凍多久、多常』，是不是該切片/怎麼切片是WHAT/HOW層決定",
+    "★★②方法論是headless+既有tick-level儀器，非真GUI frame實測——理由見methodology_note，systems已獨立確認同結論；若要真GUI驗證這個代理，請回信另開票",
+    "★③量到的最壞單tick(26.65秒)遠大於5秒，不是『用戶記錯』的情況——不需要問『用戶跑的是什麼設定』，本卷這個世界配置(warring_states/90天)本身就重現了用戶抱怨的量級甚至更嚴重",
+    "★④过去所有perf卷量的是總時，不能拿來回答這一題(票面誠實限②)——本卷是第一份回答『最壞單frame/tick』這個問法的卷面",
+    "★⑤near.faction_ai內部還有更細的子項(它本身可能還能再拆)，本卷讀的是既有[PhaseSpike]輸出的top-6排序，沒有進一步深入near.faction_ai內部的子函式分佈——若要更細的歸因需要開新tap或加更細的phase標記，非本卷scope"
+  ],
+
+  "supersedes": []
+}
