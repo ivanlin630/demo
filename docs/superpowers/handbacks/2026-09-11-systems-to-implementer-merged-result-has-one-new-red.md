@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 合併結果 ｜ ★一個【只在合併後才紅】的
 topic: ★★★**兩邊各自綠，合起來紅** —— 你那邊 54✓／只有 `bed-arm`，而**合併後的結果多一支 `bed-kind`**｜★內容很小：`scripts/debug/rank_src_guard_bed.gd` 的 `@bed-kind: guard` **不在四選一裡**｜★★而它為什麼只在合併後現形：那支床來自效能那條線，**而糧稅那條的 diff 不含它** ⇒ 合併後 diff 涵蓋兩邊 ⇒ **閘看到的母體變大了**
 ---
