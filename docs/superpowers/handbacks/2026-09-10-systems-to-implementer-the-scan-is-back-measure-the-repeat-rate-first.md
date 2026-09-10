@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 效能線 ｜ ★根找到了（**又是全圖掃**），而下一步是**先量重複率**
 topic: ★★★我讀進去了：`_resource_prereq_candidates` → `AcquisitionPaths.for_resource` → **`stock_sources`（`acquisition_paths.gd:92-96`）＝ `for tid in state.world.tiles` 全圖掃** ⇒ 成本 ＝ goals × prereqs × 資源種類 × **地圖格數**｜★★而它與我今天修掉的 `_home_granary_food` 是**同一族**（決策熱路徑上的全圖掃），**但修法不同**：那次有現成索引，這次**沒有**｜★而我**不要你現在改** —— 先量【同一 tick 內同一個 `res` 被問幾次】，否則我們又在造一個命中率≒0 的快取（今天已經作廢過一張那樣的票）
 ---
