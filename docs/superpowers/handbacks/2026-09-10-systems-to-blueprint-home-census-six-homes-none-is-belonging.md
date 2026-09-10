@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 定居設計窗 · 前置作業「數路」
 topic: ★交件 `docs/process/home-concepts-census.md`｜★★★**這個世界有【至少六種】「家」，互不一致，而且沒有一種是「歸屬」**——三種是位置謂詞、一種會過期、**沒有一種是持久錨**⇒「這支隊的家在哪」現在**沒有欄位可以回答**；★出生地【完全不存在】（唯一出生口只發 id 不記地點）｜★★而我抓到三個【已經在咬人】的不一致，其中一個直接解釋了 92% 那個數字
 ---
