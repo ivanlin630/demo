@@ -1,0 +1,40 @@
+[FaiPhase] tick=19800 total=1039529 us | loop1.factions=425427us loop3.orders_ambition=412437us loop1.assign_tasks=381639us unified.rank=379050us assign.members=215451us member.unified=215158us assign.leader_unified=166080us loop3.misc=137609us 
+[PhaseSpike] tick=19800 dt=1955180 us teams=87 | near.faction_ai=1039997us near.interact=581547us solo_think=248063us near.vision=31456us near.reactions=19096us near.consume=10842us 
+[Exhaust] Team77 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person132 torso: healthy → wounded
+[Pursuit] Team20 追擊 Team77 +1傷亡 (straggler_kill=2)
+[Combat Start] Team21 vs Team85
+[Combat Start] Team20 vs Team94
+[FaiPhase] tick=19860 total=498463 us | loop1.factions=200008us loop1.assign_tasks=158969us assign.members=158764us member.unified=158546us unified.rank=155981us loop3.orders_ambition=127692us loop3.misc=124705us gather.home_food=40548us 
+[PhaseSpike] tick=19860 dt=1110027 us teams=87 | near.faction_ai=498921us near.interact=275959us solo_think=247261us near.vision=29866us near.reactions=19116us near.economy=17411us 
+[Market@(2, 21)] Team113  outpost owner Team29 成交
+[Exhaust] Team94 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person149 right_arm: healthy → wounded
+[Pursuit] Team20 追擊 Team94 +1傷亡 (straggler_kill=2)
+[Exhaust] Team85 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person142 torso: healthy → wounded
+[Pursuit] Team21 追擊 Team85 +1傷亡 (straggler_kill=1)
+[Combat Start] Team20 vs Team94
+[FaiPhase] tick=19920 total=1050535 us | loop1.factions=486386us loop1.assign_tasks=418646us unified.rank=415343us loop3.orders_ambition=241640us assign.leader_unified=219347us assign.members=199205us member.unified=198945us loop3.misc=187085us 
+[PhaseSpike] tick=19920 dt=2300587 us teams=86 | near.faction_ai=1051183us solo_think=465976us near.messages=365565us near.interact=312416us near.vision=30521us near.economy=26086us 
+[Claim] Team32 於 (10, 25) 領回 coin=0.00 goods=6.0
+[Market@(10, 25)] Team32  outpost owner Team40 成交
+[Exhaust] Team94 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person149 torso: healthy → wounded
+[Pursuit] Team20 追擊 Team94 +1傷亡 (straggler_kill=2)
+[Combat Start] Team21 vs Team85
+[Combat Start] Team20 vs Team94
+[FaiPhase] tick=19980 total=1194450 us | loop3.orders_ambition=500326us loop1.factions=362594us loop1.assign_tasks=320006us assign.members=319781us member.unified=319522us unified.rank=316136us loop3.misc=245834us gather.home_food=127749us 
+[PhaseSpike] tick=19980 dt=2840988 us teams=86 | near.faction_ai=1285027us solo_think=814536us near.messages=599278us near.vision=41949us near.reactions=31322us near.economy=28437us 
+
+模式        最壞單 tick solo   p95      中位(非零)   總 solo 秒   隊數/合格N
+A 錯開         1717.5 ms    210.9 ms    0.021 ms    177.84 s   85/35
+B 強制同批     1842.9 ms   1159.6 ms  536.631 ms    194.09 s   86/39
+★最壞那一 tick 的組成：A 有 9 隊在想／B 有 17 隊在想
+★★p95：B/A ＝ 5.5×｜中位：B/A ＝ 25553.9× —— ★★★而【典型 tick】才是玩家每秒感受到的東西
+★最壞單 tick：B/A ＝ 1.1×（★預期量級：秒 → 百毫秒）
+★★總工作量（總 solo 秒）A 177.84 s vs B 194.09 s —— ★★★零 LOD：工作沒有變少，只是攤開
+  PASS: 錯開讓【p95 單 tick】掉了 5.5 倍（排程主導的那一段）
+  ★注意：最壞單 tick 只差 1.1× —— ★★而它多半由【事件喚醒風暴】造成（T0 不受相位管，設計如此）
+=== DONE === SECTIONS=1/1 FAILS=0
+
