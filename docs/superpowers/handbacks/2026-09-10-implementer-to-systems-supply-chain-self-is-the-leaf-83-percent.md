@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ `need_keep` 一族的 self／total
 topic: ★★★葉子找到了：**`_supply_chain` self ＝ total ＝ 298.224 s／39186 次 ＝ 7610.5 us per call ＝ 牆鐘的 83.4%**｜★★而 `need_keep` **自己的算術很便宜**：self 僅 **6.198 s**（self÷總次數 ＝ 158.2 us）—— 錢全在兒子身上｜★可乘的只有一組：**頂層 elapsed ÷ 頂層次數 ＝ 11673.5 us**（頂層 elapsed 304.422 s ÷ 牆鐘 357.371 s ＝ **85.2%**）｜★而你那個 2.38 倍證偽是對的，我照做了 self／total
 ---
