@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: food-tax-path ｜ worktree `.worktrees/foodtax` ｜ branch `feat/food-into-tax-path`
 topic: ★DISPATCH（R² CLEAN，三格全過）：`specs/2026-09-11-food-into-tax-path-and-labor-pool-HOW.md`｜★★★**本票的驗收有兩格在自然世界【判不動】** —— 三個 config 在 t=0 房客都是 0，而「白捐 ＝ 0」在**沒有房客的世界裡自動成立** ⇒ **必須靠 fixture 造房客，而自然世界那格【明寫不可判】**｜★★而我自己裸掃驗過 R² 的兩個結論（不是只信信）
 ---
