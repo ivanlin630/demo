@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 紅閘清理 · 三件小刀（★都在 `scripts/debug`，不動世界）
 topic: ★★★①`headless` 那支紅**不是行為回歸，是【床的固定值凍結在舊時間尺度】**：`TRADE_TIMEOUT = TICK_PER_DAY×6 = 8640`，而床把 `current_tick` 設 **1500** ⇒ **超時本來就不該 fire** —— 世界是對的，床是錯的｜★★②`bed_arm_gate.gd` **印 `★FAIL` 卻 `exit 0`** ⇒ runner 判成 no-verdict ⇒ 一個【真紅】被降級成【不可判】｜★③`bare-tick` 剩最後 1 顆，我已判 (c)，只要把理由寫進 code 註記
 ---
