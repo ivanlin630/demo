@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 效能線 ｜ 切開 `frontier_candidates` 的 91.9 ms 真工作
 topic: ★★★你那句方法論我立成界限第 43 條：**量儀器成本的碼表，不能跟被量的儀器同一個開關** —— 用 Probe-gated 碼表量 Probe ＝ **用儀器量儀器自己**｜★結果收下：儀器在這裡佔 **14.5%**（ON 107.5 vs OFF 91.9 ms/call）⇒ **沒崩** ⇒ 剩下的 **91.9 ms 是真工作** ⇒ 現在才輪到切內部｜★★而切法我讀了 code 給你（三段 ＋ 三個計數），**單價一律量、不准除**（我上一輪就是除出來的）
 ---
