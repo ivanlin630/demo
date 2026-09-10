@@ -716,6 +716,10 @@ static var pb_sub_n: int = 0
 static var pb_ready_us: float = 0.0     # ④ready／stock 分支：`_mk_candidate`
 static var pb_ready_n: int = 0
 static var paths_hist: Dictionary = {}  # ★paths/call 的分佈（不是平均）
+static var scan_us: float = 0.0         # ★①查表：`_facility_of_level_key` ＋ `GoalRegistry.REGISTRY` 線性掃
+static var scan_n: int = 0
+static var rbf_us: float = 0.0          # ★②計算：`_resolve_build_facility` 身體
+static var rbf_n: int = 0
 
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
@@ -742,6 +746,10 @@ static func _reset_cross_run() -> Dictionary:
 	pb_ready_us = 0.0
 	pb_ready_n = 0
 	paths_hist = {}
+	scan_us = 0.0
+	scan_n = 0
+	rbf_us = 0.0
+	rbf_n = 0
 	if fr_calls != 0: cleared["GoalResolver.fr_*"] = fr_calls
 	fr_calls = 0
 	fr_goalloop_us = 0.0
@@ -917,6 +925,8 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 			#   ★不靠 default 湊：`_resolve_build_facility` 的 default 剛好也是 1.5，
 			#   但【靠 default 達成的相等】在有人改 default 時會靜默斷掉。
 			#   ★路徑：systems 曾依舊錨定案 1.0，blueprint 修錨後改判 1.5；兩組實測都在交件信裡。
+			# ★★★拆歧義（systems 2026-09-10）：`REGISTRY` 線性掃與 resolver 身體【本來在同一個碼表裡】
+			#   ⇒ 那個 33.8 ms 答不出「它是【查表】還是【計算】」——而兩者的修法完全不同。
 			var _fs0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 			var _fname: String = _facility_of_level_key(blocked)
 			var _fdef: Dictionary = {"facility": _fname}
@@ -925,9 +935,17 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 				if String(_rd.get("facility", "")) == _fname:
 					_fdef = _rd
 					break
+			var _rb0: int = 0
+			if SimRunner.phase_timing:
+				_rb0 = Time.get_ticks_usec()
+				scan_us += float(_rb0 - _fs0)      # ①查表：`_facility_of_level_key` ＋ REGISTRY 線性掃
+				scan_n += 1
 			var fc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt, _fdef)
 			if SimRunner.phase_timing:
-				pb_fac_us += float(Time.get_ticks_usec() - _fs0)
+				var _rb1: int = Time.get_ticks_usec()
+				rbf_us += float(_rb1 - _rb0)        # ②計算：resolver 身體
+				rbf_n += 1
+				pb_fac_us += float(_rb1 - _fs0)
 				pb_fac_n += 1
 			var _pp0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 			# ★★★本票的【世界層價值】只在這一格（systems 最後一格）：

@@ -78,6 +78,20 @@ func _initialize() -> void:
 		else:
 			print("%-34s %10d %12.3f %14.1f" % [row[0], int(row[1]), float(row[2]) / 1e6,
 				float(row[2]) / float(row[1])])
+	# ★★★拆歧義：查表 vs 計算（systems 2026-09-10）
+	if GoalResolver.scan_n == 0 or GoalResolver.rbf_n == 0:
+		print("★★★查表 vs 計算：**不可判** —— 查表 %d 次／resolver %d 次（母體地板在算式之前）" % [
+			GoalResolver.scan_n, GoalResolver.rbf_n])
+	else:
+		print("★★★拆歧義：①查表（_facility_of_level_key ＋ REGISTRY 線性掃）%d 次／%.3f s／%.1f us；②計算（_resolve_build_facility 身體）%d 次／%.3f s／%.1f us ⇒ 查表佔 %.2f%%" % [
+			GoalResolver.scan_n, GoalResolver.scan_us / 1e6,
+			GoalResolver.scan_us / float(GoalResolver.scan_n),
+			GoalResolver.rbf_n, GoalResolver.rbf_us / 1e6,
+			GoalResolver.rbf_us / float(GoalResolver.rbf_n),
+			100.0 * GoalResolver.scan_us / maxf(1.0, GoalResolver.scan_us + GoalResolver.rbf_us)])
+		print("★守恆④：①+② = %.3f s vs facility 段 %.3f s（差 %.3f s）" % [
+			(GoalResolver.scan_us + GoalResolver.rbf_us) / 1e6, GoalResolver.pb_fac_us / 1e6,
+			(GoalResolver.pb_fac_us - GoalResolver.scan_us - GoalResolver.rbf_us) / 1e6])
 	print("★守恆③：四段和 %.3f s vs 迴圈身體 %.3f s（差 %.3f s）" % [
 		pb_sum / 1e6, GoalResolver.path_us / 1e6, (GoalResolver.path_us - pb_sum) / 1e6])
 	var ph_parts: Array = []
