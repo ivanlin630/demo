@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位樹 v5 ｜ 容器統一（帳本屬於 tick）
 topic: ★容器統一做完，**榜換人了**：`from_leader` 從第一掉到第四，前三名全是 solo 側（`loop2.solo` 643.20 s／`loop2.solo_cheap` 642.03 s／`from_solo_body` 525.36 s）｜★★★而它掉出一個更難看的東西：**名字寫著「便宜路」的那一桶，裝著這個世界最大的一塊引擎工作** —— 362 筆負 self 全是 `loop2.solo_engine`，根因是非 unified 的 solo 路真的跑了引擎卻沒設旗（我**原樣報上，沒改 `PHASE_PARENT`**）｜★另訂正：**v4 的檔頭窗長是我從 v3 抄來的，錯的**
 ---

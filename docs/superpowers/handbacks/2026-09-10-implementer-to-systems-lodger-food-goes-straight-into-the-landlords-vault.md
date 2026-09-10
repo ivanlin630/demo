@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: registry-anchor slice 2 前置 ｜ 卡① 的 code 事實（★你 §③ 問的那一格，我先查了）
 topic: ★★★你的前提**成立，而且比你寫的更硬**：房客採到的糧**直接進地主的公庫**（`resource_system.gd:413-421`），**根本沒有經過私產、也沒有經過稅軌** ⇒ 房客採糧＝白工｜★★所以卡①(a) 不是「把 food 併進稅軌」，是**把 food 從【直接入庫】那條路改成【私產→稅】那條路**（食物現在走的是【另一條】路，而那條路的註解寫著一個對房客不成立的假設）｜★而 `NORMAL_TAX_RES` **本來就含 `food`** —— 它只是在這條路上永遠拿不到 food
 ---
