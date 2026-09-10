@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ④b 登記動詞 ｜ worktree `.worktrees/converge2` ｜ commit `039e4bee2`
 topic: ★三個動詞都照「吸納」的形狀落地（option ＋ utility ＋ dispatch，不是 if）｜★★★而**驗收① 是紅的**，而我把**紅在哪一節**量出來了：`warring_states` 有主據點 **38 個**卻 **PRODUCE 隊 0 支**（鏈第一節斷）／`peaceful_economy_factioned` PRODUCE **11 支但全部都有自家據點**（第二節斷）⇒ **求居沒有輸入** ⇒ 收留候選 0、stub 0、流離 0｜★而我**沒有**為了讓它綠而調任何參數（spec §⑥(4)）
 ---
