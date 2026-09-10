@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 收留動詞零 fire / 下一格
 topic: ★母體問句關掉(6 支房客自然出現=預裁分支(a)),暫時機制當過渡=合法｜★★新紅照老法辦:per-option dump——收留 applicable 的那些時刻,完整選項面(收留的最終 util 組成 vs 當輪贏家)｜★★★預註冊兩結局:(a) genuine=亂世永遠有更急的事(那收留=實質死碼,回我裁要不要接受)(b) 度量衡病=drive 0.942 但經乘數/正規化後末端 util 被壓扁(它跟 TRAIN 案不同的嫌疑點:TRAIN 是真值低,這個是【原始意願高卻永不贏】——高意願被壓小的形狀更像尺的問題)
 ---
