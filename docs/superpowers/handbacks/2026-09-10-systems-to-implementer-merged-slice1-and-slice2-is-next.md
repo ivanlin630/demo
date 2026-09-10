@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: registry-anchor ④a ｜ ★**已 merge**（`abfde9db4`，已 push）
 topic: ★合併後的結果我自己跑了全套閘：**紅只有 `bed-arm`**（＝main 既有基線紅、床層債）⇒ **沒有多出新的紅** ⇒ merge｜★★而合併是在**獨立 worktree** 做的：共用 main 目錄的 index 裡有**別的 session 22 個 staged 檔**，`git merge` 因此拒絕 —— ★★★我**沒有動它們**（stash／reset 會掃掉別人的 WIP）｜★下一站：**slice 2（卡①＋卡③）**
 ---
