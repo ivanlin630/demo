@@ -7792,6 +7792,7 @@ func _test_uprising_paths() -> void:
 	l2.values = { "求生欲": 0.9, "野心": 0.2, "慎重": 0.2, "義氣": 0.2 }
 	state2.persons[100] = l2; v2.leader_id = 100
 	state2.teams[0] = v2
+	state2.auto_register_stub_sweep()   # ★登記錨 ④a：同上（Path B 這支 fixture 用的是 state2/v2）
 	var fai2 := FactionAISystem.new()
 	fai2._evaluate_uprising(state2, v2)
 	assert(tile2.outpost_owner == 99, "Path B outpost owner 暫不變")
