@@ -819,6 +819,83 @@ static func _reset_cross_run() -> Dictionary:
 	_mk_path = "other"
 	return {"checked": 6, "cleared": cleared}
 
+# ★★★相位樹（HOW spec 2026-09-10）：★在有父子關係之前，「下一個要修誰」無法回答 ——
+#   印全之後的總計欄是【巢狀】的，用它排序＝把父親和兒子放進同一個排行榜。
+#   ⇒ 這張表讓輸出多一欄【淨值 self_us ＝ total − Σ(直接子相位)】，排序改用它。
+#
+# ★手抄的誠實限（★★寫在表旁邊，不是只寫在 spec 裡）：
+#   下面那支閘只擋【沒登記的名字】，★★★擋不住【登記成錯誤的父親】—— 那要靠 review
+#   與「self_us 不得為負」那一格。
+#
+# ★★★而 "*multi" 是 R² 挖出來的第三種成因的處置：
+#   一個名字若【可能從多個外層被觸發】（gather.* 從 DecisionContext.gather 內部標，
+#   而 gather() 不是只被一條路徑呼叫；unified.* 同理，四個入口都會走到），
+#   ⇒ 它【不得】被登記成任何一個父親的兒子：登記成 "*multi"、**從減法裡排除**、輸出具名標示。
+#   ⇒ ★理由：負值是【看得見】的症狀，而同一個成因也會造出【正的、但錯的】淨值
+#     （被多個外層共用的子相位被減進它只屬於一部分的那個父親）⇒ ★★沒有任何一格會紅。
+#   ⇒ ★★★寧可少減（父親偏大、誠實標出來），也不要多減而看起來很乾淨。
+const PHASE_PARENT: Dictionary = {
+	# ── 根（_evaluate_all_body 直接呼叫）──
+	"loop1.factions": "", "loop1.assign_tasks": "", "loop1.update_goals": "",
+	"loop1.member_snap": "", "loop1.infra": "", "loop1.diplo": "", "loop1.betray": "",
+	"loop2.indep_strategy": "", "loop2.member_strategy": "", "loop2b.merge": "",
+	"loop3.threat": "", "loop3.survival": "", "loop3.pursuit": "", "loop3.prosperity": "",
+	"loop3.outpost": "", "loop3.orders_ambition": "", "loop3.misc": "",
+	# ★loop2.solo 現在【不在 evaluate_all 裡】（錯開票移出去了）⇒ 它的帳在另一個容器
+	#   ⇒ 登記為根，而它與本表其餘列【不可相加】（分母不同）。
+	"loop2.solo": "", "loop2.solo_engine": "", "loop2.solo_cheap": "",
+	# ── loop1.assign_tasks 的兒子 ──
+	"assign.player_cmd": "loop1.assign_tasks",
+	"assign.leader_lifecycle": "loop1.assign_tasks",
+	"assign.leader_unified": "loop1.assign_tasks",
+	"assign.members": "loop1.assign_tasks",
+	"member.unified": "assign.members",
+	# ── loop1.infra 的兒子 ──
+	"infra.facility": "loop1.infra", "infra.new_loc": "loop1.infra",
+	# ── loop2.indep_strategy 的兒子 ──
+	"indep.weakest_prey": "loop2.indep_strategy",
+	# ── ★多外層共用 ⇒ 不參與減法（見上方 "*multi" 的理由）──
+	"unified.rank": "*multi", "unified.to_task": "*multi", "unified.prosp": "*multi",
+	"gather.head": "*multi", "gather.threat": "*multi", "gather.weak_prey": "*multi",
+	"gather.market": "*multi", "gather.home_food": "*multi", "gather.aid": "*multi",
+	"gather.strong_farm": "*multi", "gather.readiness_prey": "*multi",
+}
+
+# ★把相位表算成【可排序的報告】。★★抽成純函式：床可以餵假 _fai_ph 進來驗閘會不會咬。
+static func phase_report(ph: Dictionary, total_us: int) -> String:
+	var self_us: Dictionary = {}
+	var unregistered: Array = []
+	for name in ph:
+		self_us[name] = int(ph[name])
+		if not PHASE_PARENT.has(name):
+			unregistered.append(String(name))
+	for name in ph:
+		var parent: String = String(PHASE_PARENT.get(name, ""))
+		if parent == "" or parent == "*multi":
+			continue        # ★"*multi" 不參與減法
+		if self_us.has(parent):
+			self_us[parent] = int(self_us[parent]) - int(ph[name])
+	var rows: Array = []
+	for name in ph:
+		rows.append({"n": String(name), "self": int(self_us[name]), "tot": int(ph[name]),
+			"multi": String(PHASE_PARENT.get(name, "")) == "*multi"})
+	rows.sort_custom(func(a, b): return int(a["self"]) > int(b["self"]))
+	var out: String = ""
+	var negatives: Array = []
+	for r in rows:
+		out += "%s=self%dus/tot%dus%s " % [r["n"], int(r["self"]), int(r["tot"]),
+			"(multi:不參與淨值)" if r["multi"] else ""]
+		if int(r["self"]) < 0 and not r["multi"]:
+			negatives.append(String(r["n"]))
+	var head: String = "登記 %d/%d" % [ph.size() - unregistered.size(), ph.size()]
+	if not unregistered.is_empty():
+		# ★閘：沒登記的名字【具名紅】—— 沒有這一條，這張手抄表會安靜地過期
+		head += " ★★未登記相位（請登記進 PHASE_PARENT）：" + "、".join(unregistered)
+	if not negatives.is_empty():
+		# ★★★負值紅燈要把【三種成因】並列，否則下一個人只會去改父子表
+		head += " ★★★self_us 為負：" + "、".join(negatives) 			+ "（三種成因：①父子表寫錯 ②相位區間重疊 ③★這個名字代表不只一件事 —— " 			+ "gather.* / unified.* 是第三種的候選，處置是【拆開計時鍵】不是改父子表）"
+	return "%s | %s" % [head, out]
+
 func _fai_pht(name: String, t0: int) -> int:
 	var now: int = Time.get_ticks_usec()
 	_fai_ph[name] = int(_fai_ph.get(name, 0)) + (now - t0)
@@ -840,21 +917,15 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	if _zoom:
 		var total: int = Time.get_ticks_usec() - _zt
 		if total > 100_000:   # 同 PHASE_SPIKE_US 量級
-			var parts: Array = []
-			for ph in _fai_ph:
-				parts.append({"n": ph, "us": int(_fai_ph[ph])})
-			parts.sort_custom(func(a, b): return int(a["us"]) > int(b["us"]))
 			# ★★★印【全部】子相位，不只前 8 名（systems 2026-09-10）：
 			#   ★前 8 名以外的東西【看不到】⇒ 而「剩下 83% 裡有沒有更大的一筆」正是要問的。
 			#   ★★而這是儀器改動：不改任何判斷、不改任何門檻。
-			var top: String = ""
-			for i in range(parts.size()):
-				top += "%s=%dus " % [parts[i]["n"], parts[i]["us"]]
+			var top: String = phase_report(_fai_ph, total)
 			# ★★★標籤誠實限：自從「錯開」票把 _evaluate_solo 移出 evaluate_all 之後，
 			#   loop2.solo* 是【上次 hourly dump 以來累積的】，不是「這一 tick 的」——
 			#   ⇒ 而 total 仍然只算 evaluate_all 這一次。兩者的分母不同，讀的人要知道。
 			print("[FaiPhase] tick=%d total=%d us | phases=%d | %s" % [
-				state.world.current_tick, total, parts.size(), top])
+				state.world.current_tick, total, _fai_ph.size(), top])
 	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
 	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
 	SpecimenTracer.heartbeat_sweep(state)
