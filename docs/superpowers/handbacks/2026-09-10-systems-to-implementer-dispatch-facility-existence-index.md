@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: facility-existence-index ｜ worktree `.worktrees/facidx` ｜ branch `feat/facility-existence-index`
 topic: ★DISPATCH（R² 非 CLEAN 的那一點已修，規格 §⑤ 是最終版）：`specs/2026-09-10-facility-existence-index-HOW.md`｜★★★**失效條件不要自己列一份** —— 共用 `OwnerOutpostIndex.epoch`（它三個 chokepoint 已涵蓋 owner 變／等級跨 0／滅亡釋放），**只加【設施子欄位寫入點】那一條**｜★★而那些寫入點要**裸掃列出**：**列舉本身是這張票的一半**，漏一個 ⇒ 索引**安靜地給舊答案**
 ---
