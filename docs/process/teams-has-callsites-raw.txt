@@ -1,0 +1,350 @@
+# state.teams.has( 呼叫點【母體 dump】——★只撈母體＋上下文三行，【不分類】
+# 理由（systems 指示 2026-09-10）：「當存活守衛用」vs「純存在檢查」是【語意】差別，
+#   判準要先由 systems/R² 定下來，否則會變成「我分完再重分一次」。
+# 母體：grep 'state.teams.has(' scripts/simulation scripts/data --include=*.gd
+# 共 86 處
+
+scripts/simulation/ambush_system.gd:29  check_ambush
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/belief_system.gd:270  reconcile_firsthand
+    		if sid == obs_id or c["source_type"] == "親見": continue
+    		if not state.teams.has(sid): continue   # 死 source（claim 存活過來源隊）→ 不更新口碑，免 known_reputations 重注入死 i
+    		var rep: float = float((c["value"] as Dictionary).get("population_est", -1.0))
+scripts/simulation/equipment_system.gd:8  tick_all
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/event_system.gd:19  process_events
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/faction_ai_system.gd:374  _commit_conquest_attack
+    func _commit_conquest_attack(state: WorldState, team: TeamData, prey_id: int) -> bool:
+    	if prey_id == -1 or not state.teams.has(prey_id): return false
+    	var leader: PersonData = state.persons.get(team.leader_id)
+scripts/simulation/faction_ai_system.gd:424  _tick_conquest_scout
+    	var prey_id: int = team.prosperity_target_id
+    	if prey_id == -1 or not state.teams.has(prey_id):
+    		TaskArbiter.release(team)   # prey 已滅 → 收手回常規
+scripts/simulation/faction_ai_system.gd:622  _has_resident_team_on_tile
+    	for tid in state.teams_on_tile(tile.tile_pos):
+    		if not state.teams.has(tid): continue
+    		var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd:1009  _evaluate_all_body
+    	for sub_id in merge_queue:
+    		if not state.teams.has(sub_id):
+    			continue
+scripts/simulation/faction_ai_system.gd:1034  _evaluate_all_body
+    	for tid in state.teams.keys():   # keys() 快照 → 滅團可安全 erase
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/faction_ai_system.gd:1597  _precond_met
+    			# 與旁 force_ge_target 的 best_estimate 一致。★<999 near-vacuous(真可達語意)=另評,記 known_issues,不擴本刀。
+    			if target_id == -1 or not state.teams.has(target_id):
+    				return false
+scripts/simulation/faction_ai_system.gd:1808  _report_to_leader
+    		Probe.bump("mreport.skip.自己就是領袖"); Probe.bump("mreport.skip.自己就是領袖." + event); return
+    	if not state.teams.has(f.leader_team_id):
+    		Probe.bump("mreport.skip.領袖不在名冊"); Probe.bump("mreport.skip.領袖不在名冊." + event); return
+scripts/simulation/faction_ai_system.gd:3528  _return_is_hopeless
+    func _return_is_hopeless(state: WorldState, sub: TeamData, xd: Dictionary) -> bool:
+    	if not state.teams.has(sub.parent_team_id):
+    		xd["abandon_reason"] = "parent_gone"
+scripts/simulation/faction_ai_system.gd:3694  _try_join_target
+    func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool:
+    	if target_id == -1 or not state.teams.has(target_id):
+    		return false
+scripts/simulation/faction_ai_system.gd:4232  _find_trade_target
+    		if tid == merchant.team_id: continue
+    		if not state.teams.has(tid): continue
+    		var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd:4285  _has_independent
+    	for tid in state.team_discovered.get(from_team_id, []):
+    		if state.teams.has(tid) and state.teams[tid].faction_id == -1:
+    			return true
+scripts/simulation/faction_ai_system.gd:4293  _nearest_independent
+    	for tid in state.team_discovered.get(from_team.team_id, []):
+    		if not state.teams.has(tid): continue
+    		var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd:4425  cleanup_extinct_teams
+    	for tid in state.teams_pending_erase:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/faction_ai_system.gd:5982  _richest_member
+    	for mid in f.member_team_ids:
+    		if mid == f.leader_team_id or not state.teams.has(mid):
+    			continue
+scripts/simulation/faction_ai_system.gd:7060  _evaluate_uprising
+    	# 玩家是 owner → forced event
+    	if old_owner_id != -1 and state.teams.has(old_owner_id):
+    		var oid_team: TeamData = state.teams[old_owner_id]
+scripts/simulation/faction_ai_system.gd:7336  _evaluate_owner_contact
+    	var owner_id: int = tile.outpost_owner if tile else -1
+    	if owner_id == -1 or not state.teams.has(owner_id):
+    		_trigger_defection_evaluation(state, team, "owner_gone")
+scripts/simulation/game_setup.gd:700  _setup_explicit_teams
+    		var tid: int = int(t_cfg["id"])
+    		if cfg_to_actual.has(fid2) and state.teams.has(tid):
+    			state.set_team_faction(state.teams[tid], cfg_to_actual[fid2])   # ★用 actual id 入正確 faction（查不到=沿舊
+scripts/simulation/game_setup.gd:803  _setup_player
+    	var pteam_id: int = int(pcfg.get("team_id", -1))
+    	if pteam_id == -1 or not state.teams.has(pteam_id):
+    		push_warning("player.team_id=%d 不存在" % pteam_id)
+scripts/simulation/interaction_system.gd:81  process_on_arrival
+    	for arrived_id in arrived_ids:
+    		if not state.teams.has(arrived_id):
+    			continue
+scripts/simulation/interaction_system.gd:92  process_on_arrival
+    				continue
+    			if not state.teams.has(other_id):
+    				continue
+scripts/simulation/interaction_system.gd:137  process_colocated_residency
+    	for tid in ordered:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/interaction_system.gd:154  process_colocated_residency
+    				continue
+    			if not state.teams.has(oid):
+    				continue
+scripts/simulation/interaction_system.gd:174  process_on_move
+    	for moved_id in moved_ids:
+    		if not state.teams.has(moved_id):
+    			continue
+scripts/simulation/interaction_system.gd:185  process_on_move
+    				continue
+    			if not state.teams.has(other_id):
+    				continue
+scripts/simulation/interaction_system.gd:199  _tick_readiness
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/interaction_system.gd:245  _try_interact
+    func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
+    	if not state.teams.has(id_a) or not state.teams.has(id_b):
+    		return   # 本 tick 內滅團/合併移除 → id 仍留掃描迴圈，避免 state.teams[id] Out of bounds
+scripts/simulation/interaction_system.gd:626  _try_merge
+    	# reset merger task (safe even if erased — GDScript ref stays valid)
+    	if state.teams.has(merger_id):
+    		TaskArbiter.release(merger)
+scripts/simulation/interaction_system.gd:1354  _write_tier2_intel
+    	# G3c-2 觀察吃技能：observer 戰術低 → 看不懂武裝 → armed_est 疊誤判（cred 仍 1.0）
+    	var obs_leader2: PersonData = state.persons.get((state.teams.get(obs_id) as TeamData).leader_id) if
+    	var tactic: float = float(obs_leader2.skills.get("戰術", 0.0)) if obs_leader2 else 0.0
+scripts/simulation/invariant_audit.gd:119  _check_no_dangling_team_id
+    		var t: TeamData = state.teams[tid]
+    		if t.combat_target != -1 and not state.teams.has(t.combat_target):
+    			out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
+scripts/simulation/invariant_audit.gd:121  _check_no_dangling_team_id
+    			out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
+    		if t.social_target != -1 and not state.teams.has(t.social_target):
+    			out.append("懸空 Team%d.social_target=%d 不存在" % [tid, t.social_target])
+scripts/simulation/invariant_audit.gd:123  _check_no_dangling_team_id
+    			out.append("懸空 Team%d.social_target=%d 不存在" % [tid, t.social_target])
+    		if t.order_target_id != -1 and not state.teams.has(t.order_target_id):
+    			out.append("懸空 Team%d.order_target_id=%d 不存在" % [tid, t.order_target_id])
+scripts/simulation/invariant_audit.gd:125  _check_no_dangling_team_id
+    			out.append("懸空 Team%d.order_target_id=%d 不存在" % [tid, t.order_target_id])
+    		if t.parent_team_id != -1 and not state.teams.has(t.parent_team_id):
+    			out.append("懸空 Team%d.parent_team_id=%d 不存在" % [tid, t.parent_team_id])
+scripts/simulation/invariant_audit.gd:129  _check_no_dangling_team_id
+    		for k in t.known_reputations:
+    			if k is int and not state.teams.has(k):
+    				out.append("懸空 Team%d.known_reputations 含死 Team%d" % [tid, k]); break
+scripts/simulation/invariant_audit.gd:132  _check_no_dangling_team_id
+    		for k in t.strategic_assignments:
+    			if k is int and k != -1 and not state.teams.has(k):
+    				out.append("懸空 Team%d.strategic_assignments 含死 Team%d" % [tid, k]); break
+scripts/simulation/invariant_audit.gd:136  _check_no_dangling_team_id
+    		for did in state.team_discovered[obs]:
+    			if not state.teams.has(did):
+    				out.append("懸空 team_discovered[%d] 含死 Team%d" % [obs, did]); break
+scripts/simulation/manpower_system.gd:273  tick_all
+    	for tid in state.teams.keys():
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/manufacturing_system.gd:135  tick_all
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/message_system.gd:102  propagate_on_arrival
+    	for arrived_id in arrived_ids:
+    		if not state.teams.has(arrived_id):
+    			continue
+scripts/simulation/message_system.gd:106  propagate_on_arrival
+    		for other_id in all_team_ids:
+    			if other_id == arrived_id or not state.teams.has(other_id):
+    				continue
+scripts/simulation/movement_system.gd:41  process
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/movement_system.gd:64  process
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/npc_ai_system.gd:61  vendetta_target
+    	var foe: PersonData = state.persons.get(int(edge.get("target", -1)))
+    	if foe == null or foe.team_id == leader.team_id or not state.teams.has(foe.team_id):
+    		return -1
+scripts/simulation/npc_combat_system.gd:71  process_ongoing_combat
+    	for tid in all_team_ids:
+    		if processed.has(tid) or not state.teams.has(tid):
+    			continue
+scripts/simulation/npc_combat_system.gd:75  process_ongoing_combat
+    		var enemy_id: int = team.combat_target
+    		if enemy_id == -1 or not state.teams.has(enemy_id):
+    			if enemy_id != -1:
+scripts/simulation/npc_combat_system.gd:89  tick_critical_npcs
+    	for tid in all_team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/npc_combat_system.gd:453  _end_combat
+    		var _village_survives: bool = _flip_on_loser_village \
+    			and state.teams.has(loser_id) \
+    			and state.teams[loser_id].population >= GOVERN_SURVIVE_MIN
+scripts/simulation/npc_combat_system.gd:537  _force_retreat
+    	# 決勝在潰逃非對撞：潰得越慘(低 readiness)、控地越徹底、俘越多。確定性、守恆（anon→captive 轉移）。
+    	if state.teams.has(pursuer_id) and state.teams.has(retreater_id):
+    		var _cap: int = AnonTierSystem.capture_routed_as_captive(state, state.teams[pursuer_id], retreater
+scripts/simulation/npc_combat_system.gd:555  _force_retreat
+    		var _village_survives_fr: bool = _flip_on_retreater_village \
+    			and state.teams.has(retreater_id) \
+    			and state.teams[retreater_id].population >= GOVERN_SURVIVE_MIN
+scripts/simulation/npc_combat_system.gd:585  _apply_pursuit
+    func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
+    	if not state.teams.has(winner_id) or not state.teams.has(loser_id):
+    		return
+scripts/simulation/player_api_mapper.gd:568  map_player_snapshot
+    	var focus_valid: bool = focus_team_id != -1 and focus_member_id != -1 \
+    		and state.teams.has(focus_team_id) and state.persons.has(focus_member_id)
+    	var cursor_valid: bool = cursor_q != -1 and cursor_r != -1 \
+scripts/simulation/player_command_api.gd:20  _check_controlled_team
+    	var p: PersonData = state.persons[state.player_id]
+    	if not state.teams.has(p.team_id):
+    		return PlayerApiMapper.map_command_result(false, "no_controlled_team", "no controlled team", {})
+scripts/simulation/player_command_api.gd:55  execute_action
+    		"team":
+    			if not state.teams.has(target_team_id):
+    				return PlayerApiMapper.map_command_result(false, "invalid_target", "target team not found", {})
+scripts/simulation/player_command_api.gd:64  execute_action
+    				return PlayerApiMapper.map_command_result(false, "invalid_target", "member_id required", {})
+    			if target_team_id == -1 or not state.teams.has(target_team_id):
+    				return PlayerApiMapper.map_command_result(false, "invalid_target", "team_id required for member 
+scripts/simulation/player_command_system.gd:415  _action_confirm_trade
+    	var tid2: int = int(state.player_state.get("pending_trade_target", -1))
+    	if tid2 < 0 or not state.teams.has(tid2):
+    		return { "ok": false, "msg": "無待確認貿易" }
+scripts/simulation/player_command_system.gd:427  _action_submit_trade_offer
+    		return { "ok": false, "msg": "無待送出的出價" }
+    	if not state.teams.has(tid):
+    		return { "ok": false, "msg": "目標隊伍不存在" }
+scripts/simulation/player_query_api.gd:30  get_team_details
+    		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+    	if not state.teams.has(team_id):
+    		return PlayerApiMapper.map_query_envelope(false, "invalid_team", "team not found", {})
+scripts/simulation/player_query_api.gd:61  get_member_details
+    		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+    	if not state.teams.has(team_id):
+    		return PlayerApiMapper.map_query_envelope(false, "invalid_team", "team not found", {})
+scripts/simulation/player_query_api.gd:97  get_trade_preview
+    	var pt_id: int     = p.team_id
+    	if not state.teams.has(target_team_id):
+    		return PlayerApiMapper.map_query_envelope(false, "invalid_team", "team not found", {})
+scripts/simulation/player_query_api.gd:121  get_trade_direct_preview
+    	var pt_id: int    = p.team_id
+    	if not state.teams.has(target_team_id):
+    		return PlayerApiMapper.map_query_envelope(false, "invalid_team", "team not found", {})
+scripts/simulation/player_query_api.gd:157  get_available_actions
+    			"forced interaction expired", {})
+    	if team_id != -1 and not state.teams.has(team_id):
+    		return PlayerApiMapper.map_query_envelope(false, "invalid_team", "team not found", {})
+scripts/simulation/player_query_api.gd:180  _check_player_with_team
+    	var p: PersonData = state.persons[state.player_id]
+    	if not state.teams.has(p.team_id):
+    		return {"code": "no_controlled_team", "msg": "no controlled team"}
+scripts/simulation/player_query_api.gd:208  _build_available_actions
+    	var ptid: int = p.team_id if p != null else -1
+    	if focus_team_id != -1 and focus_team_id != ptid and state.teams.has(focus_team_id):
+    		var team_actions: Array[String] = cmd_sys.get_available_actions(state, focus_team_id)
+scripts/simulation/player_query_api.gd:472  pt_tile_self
+    func pt_tile_self(state: WorldState, ptid: int) -> HexTileData:
+    	if ptid == -1 or not state.teams.has(ptid): return null
+    	var pt: TeamData = state.teams[ptid]
+scripts/simulation/population_system.gd:102  check_overflow_for_team
+    func check_overflow_for_team(state: WorldState, tid: int) -> void:
+    	if not state.teams.has(tid):
+    		return
+scripts/simulation/resource_system.gd:71  collect_resources
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/resource_system.gd:190  resolve_consumption
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/resource_system.gd:349  flush_forage_episodes
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/sim_runner.gd:443  _step2a_strategic_move
+    	for tid in team_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/sim_runner.gd:475  _step3c_read_market_board
+    	for tid in arrived_ids:
+    		if not state.teams.has(tid):
+    			continue
+scripts/simulation/strategic_ai_system.gd:144  _nearest_independent
+        for tid in state.team_discovered.get(from_team.team_id, []):
+            if not state.teams.has(tid): continue
+            var t: TeamData = state.teams[tid]
+scripts/simulation/vision_system.gd:167  _write_tier01
+    	#   ★★對手也要在【觀察者自己的視野】內，才記得下「打誰」；否則只記「在打」。
+    	if tgt.combat_target != -1 and obs_team != null and state.teams.has(tgt.combat_target):
+    		var _foe: TeamData = state.teams[tgt.combat_target]
+scripts/simulation/world_events.gd:69  emit
+    		var id: int = int(tid)
+    		if id == -1 or not state.teams.has(id):
+    			continue
+scripts/simulation/world_events.gd:83  emit
+    			var id2: int = int(tid2)
+    			if id2 == -1 or not state.teams.has(id2):
+    				continue
+scripts/simulation/decision/commitment_fields.gd:83  unfinished
+    	# ③上級指派且對象還在
+    	if team.order_target_id != -1 and state.teams.has(team.order_target_id):
+    		# ★`order` 沒有進度事實可讀（上級指派只有「對象還在」這個布林）
+scripts/simulation/decision/decision_context.gd:292  gather
+    	var _vfoe: int = NpcAiSystem.new().vendetta_target(state, ldr) if ldr != null else -1
+    	c.feud_target_id = _vfoe if (_vfoe != -1 and state.teams.has(_vfoe)) else -1
+    	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
+scripts/simulation/decision/decision_context.gd:765  gather
+    	if c.intent == "征服" and c.has_weak_prey \
+    			and (c.intent_target == -1 or not state.teams.has(c.intent_target)):
+    		c.intent_target = _prey
+scripts/simulation/decision/decision_context.gd:849  gather
+    	var _jhost: int = c.strong_neighbor_id if c.strong_neighbor_id != -1 else c.consolidate_target_id
+    	if _jhost != -1 and state.teams.has(_jhost):
+    		# ★god-view follow-up：jhost 位讀 belief（同 1119/Slice D position 範式）。無 belief（positionless/斷視線太舊）
+scripts/simulation/decision/goal_resolver.gd:368  _distribute_candidates
+    		var rid: int = int(o.get("origin_team", -1))
+    		if rid == team.team_id or not state.teams.has(rid):
+    			continue
+scripts/simulation/decision/goal_resolver.gd:407  _distribute_candidates
+    		Probe.bump_sample("diag.dist_pick", {"lord": team.team_id, "lord_fac": team.faction_id,
+    			"rid": int(best["rid"]), "rid_fac": (state.teams[int(best["rid"])].faction_id if state.teams.has(
+    			"mpos": str(best["mpos"]), "oid": int(best["oid"])}, 32)
+scripts/simulation/decision/options.gd:212  (top)
+    			var host: int = _hc.strong_neighbor_id if _hc.strong_neighbor_id != -1 else _hc.consolidate_targe
+    			if host == -1 or not state.teams.has(host): return {"task": TeamData.TASK_IDLE, "target": Vector2
+    			# belief_pos 內部分流：strong_neighbor(跨-faction)→belief / consolidate(同-faction)→known_member_states。
+scripts/simulation/decision/options.gd:230  (top)
+    			var prey: int = _ac.absorb_target_id
+    			if prey == -1 or not state.teams.has(prey): return {"task": TeamData.TASK_IDLE, "target": Vector2
+    			var prey_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, prey)   # 弱鄰位置走 belief（同-fa
+scripts/simulation/decision/options.gd:342  (top)
+    				else (_ac.intent_target if _ac.intent_target != -1 else _ac.feud_target_id)
+    			if atid == -1 or not state.teams.has(atid):
+    				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
