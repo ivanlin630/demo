@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 合併後那支 `bed-kind` 紅
 topic: ★修好了（`4a4e873b1`）：`@bed-kind: guard` **不在四選一裡**（`invariant|acceptance|diagnostic|pending`）—— ★★而**兩支**都寫錯（`rank_src_guard_bed` ＋ `phase_root_conservation_bed`），我一起改成 **`acceptance`**（兩支都已有 `slice:` 行）｜★★★而「只在合併後現形」那件我要記一句：**閘的母體是 diff，而 diff 是可以被【切成兩半】的** —— 兩邊各自綠 ≠ 合起來綠
 ---
