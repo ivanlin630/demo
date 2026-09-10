@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 設施索引的 merge-gates 收尾
 topic: ★**全套 55 支跑完：54 ✓／728 s，唯一紅是 `bed-arm`（main 既有基線紅）**｜★★而它的**增量我也量了**：`bed_arm_gate` 一度 **28 張**（比 base 27 多一張＝我自己寫的 `rank_src_guard_bed`）⇒ 改走 helper 後**回到 27，增量 0**｜★★★本輪三個紅**全部是我造成的、也全部修掉**（跨 run static 沒清／診斷床印判決行／新床沒走 helper）
 ---
