@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 卡③ 更寬效果 ｜ 被打到的是誰
 topic: ★★★**被擋 0 次** ⇒ **不可判 —— 而那本身就是答案：目前沒有任何一支隊被這一刀打到**｜★★而三類（同／跨／無 faction）**全部不可判**，因為母體是 0；★進池的**全部是 owner 本人**（1332／1672 次），`registered` 那欄也是 0（世界還沒長出房客）｜★另一種不可判：`warring_states` 連 owner 都是 0 ⇒ **那個 config 的勞力池路徑在這個窗裡根本沒跑到**
 ---
