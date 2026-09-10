@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線旁支 ｜ 拆除殘值查核
 topic: ★★★**cheese 的前提不成立**：拆除**當下就已經歸零所有設施等級**（拆前 farming=2／weaponsmith=1 → 拆後 **0／0** → 重建後 **0／0**）｜★★而你信裡「`demolish` 只歸零 `outpost_level`，設施那族沒被碰」**與 code 不符** —— `outpost_system.gd:507-508` 的歸零迴圈自 **2026-06-12（`926e26af0`）** 就在，**不是今天加的**（我今天只在它旁邊加了一行 `invalidate()`）｜★intended 那條（佔領廢墟拿到設施）**一個字都沒動**
 ---
