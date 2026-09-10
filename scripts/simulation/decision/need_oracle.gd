@@ -261,11 +261,19 @@ static func _supply_chain(state: WorldState, team: TeamData, res: String) -> flo
 
 # 設施 gating：隊「自家」outpost 有此製造設施（非 positional——掃 team 擁有的 outpost，讀自家 need 側）。
 static func _team_has_facility(state: WorldState, team: TeamData, level_key: String) -> bool:
-	for tid in state.world.tiles:   # gate-ok: 掃 tiles 只查【自家設施】＝legit-self
-		var tile: HexTileData = state.world.tiles[tid]
-		if tile.outpost_owner == team.team_id and tile.outpost_level > 0 and int(tile.get(level_key)) > 0:
-			return true
-	return false
+	# ★★★索引化（HOW spec 2026-09-10）：舊實作是 `for tid in state.world.tiles` 全圖掃，
+	#   實測 194190 次 × 631 格 ≈ 1.23 億次 tile 訪問 ＝ 這條路的 99.4%。
+	#   ★語意等價可證明：這是**存在量詞**，而聚合對存在量詞是精確的（見索引檔頭）。
+	#   ★★舊實作保留為具名對照 `FacilityExistenceIndex.legacy_has`（shadow 用）。
+	var now: bool = state.team_has_facility_indexed(team.team_id, level_key)
+	if FacilityExistenceIndex.shadow:
+		var was: bool = FacilityExistenceIndex.legacy_has(state, team.team_id, level_key)
+		FacilityExistenceIndex.shadow_checks += 1
+		if was != now:
+			FacilityExistenceIndex.shadow_fails += 1
+			print("[FacilityShadowFAIL] team=%d key=%s legacy=%s index=%s" % [
+				team.team_id, level_key, was, now])
+	return now
 
 # ── 貿易 demand（★S3）：市場「有效」買單（非幽靈：過期單不供產，僅履約排序用）+ 致富野心。綁 deal 側。──
 # 讀 team_known 親聞 order_buy（感知鐵律：聽過才算，非 god-view）。過期單濾除＝非幽靈視圖（R²#1-issue）。

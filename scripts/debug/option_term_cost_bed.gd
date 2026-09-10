@@ -22,6 +22,10 @@ func _initialize() -> void:
 	if not probe_on:
 		Probe.enabled = false
 	SimRunner.phase_timing = true
+	# ★★★驗收①：shadow 逐次比對（★母體地板：比對次數要 > 0）
+	FacilityExistenceIndex.shadow = OS.get_environment("OT_SHADOW") == "1"
+	# ★★成對對照（驗收③）：OT_SHORT=0 ⇒ 關掉短路 ⇒ 成本必須回到現況量級
+	FacilityExistenceIndex.short_circuit = OS.get_environment("OT_SHORT") != "0"
 	var runner := SimRunner.new()
 	var _w0: int = Time.get_ticks_usec()
 	for _i in range(ticks):
@@ -267,6 +271,16 @@ func _initialize() -> void:
 	# ★★★這一輪唯一要的數字（systems）：子樹佔【整個世界跑一遍】的幾成
 	#   ★分子分母必須同一個母體：兩者都涵蓋【這一窗的全部 tick】（不是 spike 母體）
 	print("")
+	print("★★★設施索引：shadow 比對 %d 次／不一致 %d 次（★0 次 ⇒ 不可判）｜舊掃 tile 訪問 %d｜短路=%s" % [
+		FacilityExistenceIndex.shadow_checks, FacilityExistenceIndex.shadow_fails,
+		FacilityExistenceIndex.legacy_visits, "ON" if FacilityExistenceIndex.short_circuit else "OFF"])
+	var _teams_with: int = 0
+	for _tid in st.teams:
+		if st.own_outpost_tile(int(_tid)) != null:
+			_teams_with += 1
+	print("★★母體：有據點的隊 %d／%d（%.1f%%）⇒ 短路吃掉的是另外那 %.1f%%" % [
+		_teams_with, st.teams.size(), 100.0 * float(_teams_with) / maxf(1.0, float(st.teams.size())),
+		100.0 - 100.0 * float(_teams_with) / maxf(1.0, float(st.teams.size()))])
 	print("★★★子樹佔比：frontier 總 %.3f s ÷ 牆鐘總 %.3f s ＝ **%.2f%%**（%d tick ＝ %.1f 遊戲天，%d 隊）" % [
 		DecisionEngine.frontier_us_total / 1e6, _wall_us / 1e6,
 		100.0 * DecisionEngine.frontier_us_total / maxf(1.0, _wall_us),

@@ -50,6 +50,8 @@ const _FLAG_DEFAULTS: Dictionary = {
 	"PathSystem.suppress_observe_noise": false,
 	"OwnerOutpostIndex.shadow": false,
 	"OwnerCampIndex.shadow": false,
+	"FacilityExistenceIndex.shadow": false,
+	"FacilityExistenceIndex.short_circuit": true,   # ★成對對照旗標（關掉 ⇒ 成本必須回到現況量級）
 	"FactionAISystem.trace_infra": false,
 	"FactionAISystem._mk_verify": false,
 	"WorldState.driver_ledger_enabled": false,
@@ -87,6 +89,7 @@ static func _sweep() -> Dictionary:
 		NpcCombatSystem._reset_cross_run(),
 		OwnerOutpostIndex._reset_cross_run(),
 		OwnerCampIndex._reset_cross_run(),
+		FacilityExistenceIndex._reset_cross_run(),
 		SimRunner._reset_cross_run(),
 		WorldState._reset_cross_run(),
 		PopulationSystem._reset_cross_run(),
@@ -108,6 +111,8 @@ static func _read_flag(name: String):
 		"PathSystem.suppress_observe_noise": return PathSystem.suppress_observe_noise
 		"OwnerOutpostIndex.shadow": return OwnerOutpostIndex.shadow
 		"OwnerCampIndex.shadow": return OwnerCampIndex.shadow
+		"FacilityExistenceIndex.shadow": return FacilityExistenceIndex.shadow
+		"FacilityExistenceIndex.short_circuit": return FacilityExistenceIndex.short_circuit
 		"FactionAISystem.trace_infra": return FactionAISystem.trace_infra
 		"FactionAISystem._mk_verify": return FactionAISystem._mk_verify
 		"WorldState.driver_ledger_enabled": return WorldState.driver_ledger_enabled

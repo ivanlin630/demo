@@ -121,7 +121,10 @@ var _oo_map: Dictionary = {}      # team_id → tile_id（owner=-1 亦入表，�
 var _oo_epoch: int = 0            # 0 = 尚未建（OwnerOutpostIndex.epoch 從 1 起）
 # ★own-camp-in-decision-model：L0 營地的姊妹索引（★不與 _oo_map 共用——欄位不同，見 owner_camp_index.gd）
 var _oc_map: Dictionary = {}      # team_id → tile_id（camp_team_id -1 不入表：無主營地不屬於任何隊）
-var _oc_epoch: int = 0            # 0 = 尚未建（OwnerCampIndex.epoch 從 1 起）
+var _oc_epoch: int = 0
+var _fx_map: Dictionary = {}      # team_id → {level_key: true}（聚合：跨該隊所有據點）
+var _fx_epoch_oo: int = 0
+var _fx_epoch_fx: int = 0            # 0 = 尚未建（OwnerCampIndex.epoch 從 1 起）
 var _next_faction_id: int = 0
 # beast pseudo-team id counter（負區段，避開正常 team id）。★per-world（非 BeastSystem instance var，
 # 亦禁 static var）：每 world fresh init → per-seed 決定性 + 每 beast 唯一遞減 id。舊 instance var 令每
@@ -314,6 +317,35 @@ func _rebuild_owner_camp() -> void:
 			_oc_map[t.camp_team_id] = tile_id
 	_oc_epoch = OwnerCampIndex.epoch
 	if Probe.enabled: Probe.bump("owner_camp.rebuild")
+
+# ★★★聚合設施索引：owner → {level_key: true}（存在量詞 ⇒ 聚合精確，見 FacilityExistenceIndex 檔頭）
+#   失效 ＝ `OwnerOutpostIndex.epoch` ＋ `FacilityExistenceIndex.epoch` 兩者任一變動。
+func team_has_facility_indexed(team_id: int, level_key: String) -> bool:
+	# ★(1) 短路：這支隊根本沒有任何據點 ⇒ 三個 AND 的前兩個不可能成立 ⇒ 必為 false
+	#   （★`_oo_map` 只在 outpost_level>0 時記錄 ⇒ null ⇔ 沒有任何自家據點）
+	if FacilityExistenceIndex.short_circuit and own_outpost_tile(team_id) == null:
+		return false
+	if _fx_epoch_oo != OwnerOutpostIndex.epoch or _fx_epoch_fx != FacilityExistenceIndex.epoch:
+		_rebuild_facility_existence()
+	var m = _fx_map.get(team_id, null)
+	return m != null and bool((m as Dictionary).get(level_key, false))
+
+func _rebuild_facility_existence() -> void:
+	_fx_map.clear()
+	for tile_id in world.tiles:
+		var t: HexTileData = world.tiles[tile_id]
+		if t.outpost_level <= 0:
+			continue
+		var owner: int = t.outpost_owner
+		var m: Dictionary = _fx_map.get(owner, {})
+		for f in OutpostSystem.FACILITY_DEF:
+			var key: String = String((OutpostSystem.FACILITY_DEF[f] as Dictionary)["current_level_key"])
+			if int(t.get(key)) > 0:
+				m[key] = true
+		_fx_map[owner] = m
+	_fx_epoch_oo = OwnerOutpostIndex.epoch
+	_fx_epoch_fx = FacilityExistenceIndex.epoch
+	if Probe.enabled: Probe.bump("facility_existence.rebuild")
 
 func _rebuild_owner_outpost() -> void:
 	_oo_map.clear()
