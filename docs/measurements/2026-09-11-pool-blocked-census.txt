@@ -2,10 +2,12 @@
 # 床：scripts/debug/pool_blocked_census_bed.gd（worktree `.worktrees/converge2`，基於 origin/main）
 # 窗：3000 tick ＝ 2.1 遊戲天｜seed 4242｜Probe=ON
 
-config                     進池(owner)  進池(registered)  **被擋**  同faction  跨faction  無faction
-warring_states                      0                0        0        —          —          —
-peaceful_economy                 1332                0        0        —          —          —
-peaceful_economy_factioned       1672                0        0        —          —          —
+★★★每一行是【一個獨立的世界】——★跨行相減沒有意義（本檔補這一欄就是為了讓那個減法做不出來）
+config                     進池(owner)  進池(registered)  **被擋**   ⇒ 該 config 進池總數
+warring_states                      0                0        0    ⇒ 0
+peaceful_economy                 1332                0        0    ⇒ 1332
+peaceful_economy_factioned       1672                0        0    ⇒ 1672
+（`_in_pool` 只有三個出口：owner／registered／blocked ⇒ 三欄在【同一行內】相加就是全部）
 
 # ★★★答案：**被擋 0 次 ⇒ 不可判 —— 而那本身就是答案：目前沒有任何一支隊被這一刀打到。**
 #   ★母體地板照 systems §②：①＝0 ⇒ 不可判（★而不是「效果良好」）。
