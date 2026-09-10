@@ -1,0 +1,89 @@
+# 相位樹 v6：★設旗修正之後（非 unified 的 solo 路不再被歸進「便宜桶」）
+#
+# ★★★母體定義（逐字，直接來自 dump 行）：
+#   母體 ＝【一個 tick 的總時 > 100000 us】的 tick
+#   樣本 N ＝ 1121／分母 ＝ 47100 tick ＝ 2.38%｜runner 段數 2：1056/43200、65/3900
+#   ★分段的理由：`spike#`／`tick_seen` 是【每個 SimRunner 實例】的計數 ⇒ 一支床跑多個 runner 時它會重來
+#     ⇒ ★★取「最後一行」當分母是錯的（那只是最後一個 runner 的）——v5 只有一段所以沒被抓到
+#   窗：warring_states｜43200 tick ＝ 30 遊戲天（＋床的第二段 3900 tick）｜隊數 49 → 103
+#   ★★跑到底（rc=0）
+#
+# ★與 v5 可逐格相比嗎：**母體定義逐字相同**（tick 總時 > 100000us）⇒ ★可比，
+#   但要記得 v6 多了第二段 runner（分母 47100 vs 42072）⇒ ★★總量欄本來就會偏大一點。
+★未登記相位：0 個
+★★負 self：0 筆
+
+phase                                 出現    self 總計(s)  self max(ms)     tot 總計(s)  kids
+loop2.solo                          1120        645.43        2428.8        791.87     1
+unified.rank.from_solo_body         1003        530.83        2042.3        530.83     0
+loop2.solo_engine                   1117        260.97        1336.0        791.80     1
+unified.rank.from_leader             713        250.10        1687.3        250.10     0
+unified.rank.from_member             778        191.91        1189.3        191.91     0
+loop3.orders_ambition                784        176.13         895.8        176.13     0
+loop3.misc                           784        168.36         832.1        168.36     0
+unified.rank.from_solo               491        146.44         974.9        146.44     0
+loop3.threat                         784         52.20        1559.4         72.78     1
+infra.new_loc                        781         43.45         129.6         43.45     0
+loop2.indep_strategy                 784         33.49         154.1         33.49     0
+unified.rank.from_threat             161         20.59        1102.7         20.59     0
+loop3.survival                       784         18.71         279.4         18.71     0
+loop2.member_strategy                784         18.32          99.3         18.32     0
+infra.facility                       781          8.63          32.8          8.63     0
+unified.rank.from_subteam            120          6.83         181.0          6.83     0
+member.unified                       784          3.91          40.0        195.82     1
+loop2.subteam                        782          2.77        1524.0          9.59     1
+loop1.infra                          784          2.21           8.3         54.29     2
+assign.leader_unified                784          1.72          59.7        251.82     1
+loop1.update_goals                   784          1.33           7.9          1.33     0
+loop3.outpost                        784          1.28          50.6          1.28     0
+loop1.betray                         784          0.68           2.9          0.68     0
+loop1.diplo                          784          0.29           1.9          0.29     0
+assign.members                       784          0.24           0.7        196.07     1
+loop1.member_snap                    784          0.24           0.6          0.24     0
+loop3.pursuit                        784          0.18           1.7          0.18     0
+loop2b.merge                         784          0.18           7.1          0.18     0
+loop3.prosperity                     784          0.17           0.9          0.17     0
+loop1.assign_tasks                   784          0.04           0.1        447.95     4
+loop2.solo_cheap                     378          0.03           0.5          0.03     0
+assign.player_cmd                    784          0.02           0.1          0.02     0
+loop1.factions                       784          0.01           0.0        504.80     6
+assign.leader_lifecycle              784          0.01           0.4          0.01     0
+
+【multi 段】self≡tot：gather.home_food 291.57s／gather.market 195.24s／gather.threat 44.79s／gather.head 37.56s／gather.weak_prey 35.06s／indep.weakest_prey 27.64s／gather.readiness_prey 27.42s／gather.strong_farm 21.45s／gather.aid 13.04s／unified.to_task 8.26s
+
+# ★① 設旗修正做了什麼（★這一格是本檔的全部理由）
+```
+                    v5（設旗前）        v6（設旗後）
+loop2.solo_cheap    self 642.03 s       self **0.03 s**（378 次）
+loop2.solo_engine   self −170.87 s      self 260.97 s／tot 791.80／kids 1
+負 self             **362 筆**          **0 筆**
+⇒ ★「便宜桶」裡的 642 秒【全部】是引擎工作 —— 它一次都沒有進過 engine 桶。
+⇒ ★★而 cheap 桶剩下的 0.03 s 才是它名字說的東西（真正的早退：玩家隊／戰鬥中／無 leader）。
+⇒ ★★★所以那兩顆計數（`solo.cheap`／`solo.engine`）在修正之前**不是不準，是反的**。
+```
+
+# ★② 而修好之後看到的第一件事：**兩個容器互相包含**
+```
+`loop2.solo`        self 645.43／tot 791.87／kids 1（兒子＝`from_solo`）
+`loop2.solo_engine` self 260.97／tot 791.80／kids 1（兒子＝`from_solo_body`）
+★兩者的 tot 幾乎相同（791.87 vs 791.80）——因為它們量的是**同一段工作**：
+  `loop2.solo`（`:7573` 包住 `_evaluate_solo` 的呼叫）與 `solo_engine`（`_evaluate_solo` 內部分桶）
+  **是巢狀的**，而 `PHASE_PARENT` 把它們**都登記成根**。
+⇒ ★★所以這張表的根列【不可相加】：solo 那一塊會被算兩次。
+⇒ ★★★本檔只報這個事實，不改登記（同一條規矩：先原樣報上）。
+```
+
+# ★③ 榜（母體完整＋歸類修正之後）
+```
+1. loop2.solo                    645.43 s   ← ★與 3 巢狀，見 §②
+2. unified.rank.from_solo_body   530.83 s
+3. loop2.solo_engine             260.97 s   ← ★與 1 巢狀
+4. unified.rank.from_leader      250.10 s
+5. unified.rank.from_member      191.91 s
+6. loop3.orders_ambition         176.13 s
+7. loop3.misc                    168.36 s
+8. unified.rank.from_solo        146.44 s
+⇒ ★把巢狀那兩列摺起來看：**solo 側的 rank（`from_solo_body` 530.83 ＋ `from_solo` 146.44 ＝ 677.3 s）
+  是全表最大的一塊**，而 leader/member 兩條加起來是 442.0 s。
+⇒ ★★`from_unknown` 仍是 **0 次**。
+```
