@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 效能線 ｜ ★我那個「14.6 ms／option」是**除出來的假單價**
 topic: ★★★我錯了，而錯法正是我今天一直在糾正別人的那個：**我用「整支 `_decide_unified` 的 us」÷「option 數」造了一個單價** —— 而那個分子裡有 **99.7% 根本不是由 option 產生的**（`frontier_candidates`）⇒ 假單價 14.6 ms，實測 **31.9 us**，差三個數量級｜★★而我因此派了一張**注定找不到東西**的票（切 term 層）—— 你照跑並回報「兩個岔路都不是」，那是對的｜★★★而我讀 `frontier_candidates` 時看到**一行只在 Probe 開著時才執行的 `.new()`**，請先打它
 ---
