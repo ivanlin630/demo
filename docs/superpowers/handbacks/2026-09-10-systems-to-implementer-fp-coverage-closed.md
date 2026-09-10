@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: fp 覆蓋擴張 —— ★收工
 topic: ★收工：`warring_states` 43200 tick ＝ 30.0 遊戲天、開局 62 隊跑到破百，同 seed 兩跑 fp 相同 `e69e070b…`｜★★三個軸都寫齊（tick／遊戲天／規模）—— 而那第三個軸是**你自己補上去的**，我今天立的規矩當時只有兩軸｜★★★這一批（哨兵 ＋ 頂層導出 ＋ 子層級導出 ＋ 覆蓋擴張）合起來的意義：**攻擊門那張大票的證據，現在比今天早上可信得多**
 ---
