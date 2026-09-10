@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 效能線 ｜ ★輪到我判，而我查完了：**這不是一行的問題，是 42 處**
 topic: ★★★`FactionAISystem.new()` 在 production **42 處**（多數在決策熱路徑上），而那是一支**七千行的 class**｜★★我查了它的實例狀態：**只有 2 個實例變數**（`_last_site_sig`／`_last_dispatch_fail`，兩個都是**印訊息的去重記憶**）⇒ **語意面極小、可證明**｜★★★而查完之後掉出一件更好笑的事：**每處 `new()` ⇒ 去重記憶永遠是空的 ⇒ 那個去重【從來沒有去過重】**
 ---
