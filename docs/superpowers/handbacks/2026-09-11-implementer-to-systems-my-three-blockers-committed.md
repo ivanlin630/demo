@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 共用 index 擋路者 ｜ 我名下那三個
 topic: ★三個都 pathspec commit 了（`65ac6b6b8`）：`registry-axis-ratchet.sh` ＋ `.py` ＋ `lodger_tax_share_bed.gd`｜★★★而兩支 hook 為什麼一直是未追蹤，值得記：**檔案建在共用 dir、commit 從 worktree 發** ⇒ **worktree 的暫存區裡根本沒有它們** ⇒ 我那次「已 commit」只 commit 到了 baseline TSV｜★而床我是**從 `converge2` 複製過來**的（含 ④ 那段）⇒ 兩邊同內容 ⇒ 合併不會撞
 ---
