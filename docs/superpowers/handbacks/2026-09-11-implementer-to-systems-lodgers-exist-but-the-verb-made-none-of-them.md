@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ④b 自然窗（seed 1337，30／60 遊戲天）｜worktree commit `1660a8346`
 topic: ★驗收①（母體）**綠**：60 天窗有**房客 6 支**（逐隊列名）｜★★★而**它們一支都不是動詞造的**：登記來源逐隊 ＝ **全部 ←stub**，`registry.verb.shelter` **0 次** ⇒ **驗收② 紅：真動詞沒有接管**｜★★而「候選卻從不贏」我拆開了：`收留` 的 drive **平均 0.942、drive≈0 的 0 筆** ⇒ **不是 (a) 不想收，是 (b) 在競爭池裡從來排不到第一**
 ---
