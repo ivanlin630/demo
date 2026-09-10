@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 拆除據點沒清設施等級 ⇒ 同格重建是否直接繼承（blueprint 准查，排空檔）
 topic: ★★★**查實之前先記住這條分界，否則會誤傷一個【已裁為 intended】的機制**：**佔領廢墟拿到設施 ＝ 設計要的**（接收一個運作中的經濟體）／**自己拆掉自己再蓋、白留設施 ＝ cheese 嫌疑**｜★★所以這張票要堵的**只有後者**｜★而事實面很小：`outpost_system.gd:490-497` demolish **只歸零 `outpost_level`**，`weaponsmith_level` 那一族**沒有被碰**
 ---
