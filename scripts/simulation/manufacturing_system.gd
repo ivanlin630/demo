@@ -200,18 +200,34 @@ func tick_all(state: WorldState, team_ids: Array, cadence: int = -1) -> void:
 			else:
 				Probe.bump("manufacture.batch_partial")
 
-# 生產權：owner 本人或同 faction（軍屯/派駐居民團代工）
+# 生產權：★★★登記錨 ④a 一起搬（R① §(3)）——
+#   理由不是「順手」，是它與 `is_resident_static` 的【識別軸完全相同】（owner 本人 or 同 faction）
+#   ⇒ 遷移之後兩者的真值集合逐隊相同 ⇒ 換讀登記欄是【行為中性】的
+#   ⇒ ★而不搬它 ＝ 明知同一個問題有第二份答案還讓它繼續分岔。
+# ★shadow 同 resident 那支：新舊逐次比對＋母體（spec 驗收④）。
 func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
+	var now: bool = state.registered_at(team, tile.tile_pos)
+	if Probe.enabled:
+		var was: bool = _legacy_works_tile_by_position(state, team, tile)
+		Probe.bump("registry.shadow.works.n")
+		if was != now:
+			Probe.bump("registry.shadow.works.mismatch")
+			Probe.bump_sample("registry.shadow.works.detail", {
+				"team": team.team_id, "was": was, "now": now,
+				"tile_owner": tile.outpost_owner,
+				"reg": "%d,%d" % [team.work_outpost.x, team.work_outpost.y]}, 200)
+		if now:
+			Probe.bump("yield.works_tile_pass")   # ★既有 tap 語意保留（放行才記）
+	return now
+
+# 舊的站位／同 faction 判定 —— ★保留為【具名對照】（同 legacy_resident_by_position 的理由）。
+func _legacy_works_tile_by_position(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
 	if tile.outpost_owner == team.team_id:
 		return true
 	var owner: TeamData = state.teams.get(tile.outpost_owner)
 	if owner == null:
 		return false
-	var allowed: bool = owner.faction_id == team.faction_id and team.faction_id != -1
-	# Task1 A 探針：同 faction 代工放行（治權隨旗後村民代 owner 生產＝收益鏈點火）
-	if allowed and Probe.enabled:
-		Probe.bump("yield.works_tile_pass")
-	return allowed
+	return owner.faction_id == team.faction_id and team.faction_id != -1
 
 # 成品流向公庫（tile 為自家 outpost）；無 outpost fallback 進 team
 func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> void:

@@ -193,6 +193,13 @@ var unrest_turns: int = 0
 var work_morale: float = 1.0   # 工作態度係數 [0.5,1.5]，reaction 統計寫入，產出系統消費
 var faction_id: int = -1
 var tile_pos: Vector2i = Vector2i.ZERO
+# ★★★登記錨 ④a（HOW spec 2026-09-10 §①）：「我的工作據點」＝居住／雇傭契約的【唯一真值】。
+#   ★型別就是【單一座標】而不是陣列 —— 卡④明文「一隊一登記」，
+#     ★★把規則寫進型別比寫進註解硬：後者靠人記得，前者靠語言。
+#   ★★★(-1,-1) ＝ 沒有登記（＝不是任何一座村的居民）。
+#   ★本票【不加動詞】（招攬／請求／離開／驅逐＝④b）⇒ 現階段它只由【遷移】產生、
+#     只因【據點消失】而失效。
+var work_outpost: Vector2i = Vector2i(-1, -1)
 var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
 # flee 位移根治：FLEE 派出時設=威脅 belief 位（感知鐵律）；mover 朝遠離此位算 away-tile。release 清。(-1,-1)=無威脅可逃離。
 var flee_from_pos: Vector2i = Vector2i(-1, -1)

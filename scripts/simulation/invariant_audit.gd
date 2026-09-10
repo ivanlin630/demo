@@ -7,6 +7,7 @@ static func check(state: WorldState) -> Array[String]:
 	_check_population(state, violations)
 	_check_faction_bidir(state, violations)
 	_check_subteam_bidir(state, violations)
+	_check_no_grandparent(state, violations)   # ★登記錨 ④a：一跳假設的守衛
 	_check_roster_bidir(state, violations)
 	_check_anon_cohort(state, violations)
 	_check_captive_cohort(state, violations)
@@ -54,6 +55,21 @@ static func _check_subteam_bidir(state: WorldState, out: Array[String]) -> void:
 				out.append("subteam 懸空 Team%d.subteam_ids 含已不存在 Team%d" % [pid, cid])
 			elif child.parent_team_id != pid:
 				out.append("subteam 雙向破 Team%d 列子隊 Team%d 但其 parent_team_id=%d" % [pid, cid, child.parent_team_id])
+
+# ★★★「不遞迴」的機制支持（登記錨 ④a §⑩(1)，R² 建議、systems 裁做）：
+#   `registered_or_parent_at` 是【一跳】—— 而今天「沒有子隊的子隊」只有機率支持
+#   （決策層限縮子隊），★沒有任何一處結構性地阻斷兩層。
+#   ⇒ 這條守的不是今天，是【哪天有人意外造出兩層】的那天：
+#     ★★否則一跳假設會在某個角落悄悄失真，而**沒有任何一格會紅**。
+static func _check_no_grandparent(state: WorldState, out: Array[String]) -> void:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id == -1:
+			continue
+		var parent: TeamData = state.teams.get(t.parent_team_id)
+		if parent != null and parent.parent_team_id != -1:
+			out.append("兩層子隊 Team%d.parent=Team%d 而它自己的 parent=%d ⇒ registered_or_parent_at 的【一跳】假設失真" % [
+				tid, t.parent_team_id, parent.parent_team_id])
 
 # roster 雙向：named_members / leader_id 內每人 team_id 須回指本隊（forward）；
 # 且凡 person.team_id!=-1 須在該隊 roster（leader 或 named）（reverse，slice3）。

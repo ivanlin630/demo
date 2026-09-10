@@ -1,0 +1,13 @@
+# 登記錨 ④a 棘輪 baseline：手寫識別軸的【存量】（新增的一律具名紅）
+# ★key＝正規化 code 文字（不是行號 —— 行號會漂，而漂掉的錨會讓表看起來已經維護過）
+# ★★每列帶【它為什麼還留著】；存量只准變少（少了也會紅，逼人把該列刪掉而不是讓表發霉）
+# ★★★裸掃 `outpost_owner ==` 全庫 33 處，其中大多數是【所有權問句】不是【自己人問句】
+#   ⇒ 本表的母體是【複合軸】那一族（parent 軸 or 同函式體內 owner+faction）
+# axis	owner	norm-text
+resident-axis	legacy_resident_by_position＝遷移與 shadow 的具名對照，必須保留原樣	if (home_tile != null and home_tile.outpost_owner == team.team_id) else 0.0
+resident-axis	legacy_resident_by_position＝遷移與 shadow 的具名對照，必須保留原樣	if tile.outpost_owner == team.team_id:
+resident-axis	legacy_resident_by_position＝遷移與 shadow 的具名對照，必須保留原樣	if t.outpost_owner == leader_team.team_id:
+resident-axis	legacy_resident_by_position＝遷移與 shadow 的具名對照，必須保留原樣	if tile.outpost_owner == team.team_id: continue
+resident-axis	_legacy_works_tile_by_position＝同上（對照消失不會有任何一格紅）	if tile.outpost_owner == team.team_id:
+resident-axis	_faction_owns 的【同 faction】那一軸＝第三種問題（能不能動工），本票明文保留	if tile.outpost_owner == team_id: return true
+resident-axis	scripts/simulation/decision/decision_context.gd	if _btile != null and _btile.outpost_owner == team.team_id and _btile.outpost_level > 0:

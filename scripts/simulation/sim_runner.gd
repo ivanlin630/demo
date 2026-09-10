@@ -89,6 +89,11 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		print("[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=%d ——" % state.player_id
 			+ " 該世界仍帶玩家中心行為（豁免 gate 生效、玩家隊 leader 死可凍世界）。"
 			+ "觀察者長跑請於 setup 後清 state.player_id=-1（見 exam_12mo_bed._strip_player）。")
+	# ★★★登記錨 ④a §③ 遷移的第二個入口：不經 `GameSetup.setup` 的世界（載檔／床自組）
+	#   也必須在【第一個 tick】拿到登記，否則它們會以「全世界都不是居民」開跑。
+	#   ★旗擋重入 ⇒ 這一句在第二 tick 之後是一個 bool 比較。
+	if not state.registry_migrated:
+		state.migrate_registry_anchor()
 	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick（不計時，非真 tick）
 	if state.game_over:
 		return "game_over"

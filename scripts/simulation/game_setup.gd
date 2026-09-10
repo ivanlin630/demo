@@ -73,6 +73,9 @@ static func setup(state: WorldState, config: Dictionary) -> void:
 	# ★★★貨幣創世（第⑨票 2026-09-06）：初始 coin 批【用推導不用手選】。
 	_apply_money_genesis(state)
 
+	# ★★★登記錨 ④a §③：世界建好的這一刻把【現況】搬進登記欄。
+	#   ★沒有這一句，新欄位上線那一刻全世界同時失去居民身分。
+	state.migrate_registry_anchor()
 	print("[GameSetup] 完成：%d teams, %d factions, %d persons" %
 		[state.teams.size(), state.factions.size(), state.persons.size()])
 
