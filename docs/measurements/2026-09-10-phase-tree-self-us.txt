@@ -1,0 +1,51 @@
+# 相位樹：淨值 self_us 排序表（★本輪產出＝一份可排序的表，不含任何修法建議）
+# ★跑到底了：warring_states｜BW_TICKS=12000 ＝ 8.3 遊戲天｜A/B 兩模式各一趟，DONE 正常收尾（沒有被砍）
+# 樣本：396 筆 [FaiPhase]（只在 evaluate_all 單次 total > 100ms 時印 ⇒ spike 母體，不是全體 tick）
+# evaluate_all 單次 total：中位 883.8 ms／max 8292.9 ms
+# ★★未登記相位：無（全部登記）
+# ★★★loop2.solo 不在本表（錯開票把 _evaluate_solo 移出 evaluate_all）: solo 的帳在另一個容器，兩表不可相加
+# multi ＝ 可能從多個外層觸發 ⇒ 不參與父親的減法（它的 self 恆等於 tot）
+
+phase                          出現   self 總計(s)  self max(ms)   tot 總計(s)  註
+loop1.factions                   396       252.33       4161.6       252.33  
+unified.rank                     396       232.38       6068.0       232.38  multi:不參與淨值
+assign.leader_unified            396       143.16       2377.2       143.16  
+member.unified                   396        84.51       1684.5        84.51  
+loop3.orders_ambition            396        70.36        787.6        70.36  
+gather.home_food                 396        46.47       1458.0        46.47  multi:不參與淨值
+gather.market                    396        42.66       1601.5        42.66  multi:不參與淨值
+loop3.threat                     396        29.19       3530.5        29.19  
+loop3.misc                       396        25.26        464.5        25.26  
+infra.new_loc                    396        19.39        134.5        19.39  
+indep.weakest_prey               396         5.65         88.1         5.65  
+loop2.member_strategy            396         5.18         84.0         5.18  
+gather.head                      396         4.64        120.2         4.64  multi:不參與淨值
+gather.weak_prey                 396         3.49        264.8         3.49  multi:不參與淨值
+infra.facility                   396         3.35         21.1         3.35  
+gather.threat                    396         2.67         49.2         2.67  multi:不參與淨值
+gather.readiness_prey            396         2.48         42.7         2.48  multi:不參與淨值
+loop3.survival                   396         1.84         58.2         1.84  
+gather.strong_farm               396         1.52         21.8         1.52  multi:不參與淨值
+unified.to_task                  396         1.43         67.9         1.43  multi:不參與淨值
+loop1.infra                      396         0.94          6.3        23.69  
+gather.aid                       396         0.66          9.0         0.66  multi:不參與淨值
+loop3.outpost                    396         0.52         38.7         0.52  
+loop1.update_goals               396         0.39          1.9         0.39  
+loop1.betray                     396         0.24          1.5         0.24  
+assign.members                   396         0.12          0.7        84.63  
+loop1.member_snap                396         0.10          0.5         0.10  
+loop1.diplo                      396         0.09          0.6         0.09  
+loop3.pursuit                    396         0.07          0.3         0.07  
+loop3.prosperity                 396         0.07          0.7         0.07  
+
+# ★負的 self_us（原樣列出，★★未改 PHASE_PARENT —— 「改哪一格」取決於是三種成因的哪一種）：
+#   ★診斷（file:line 證據，只報不改）：indep.weakest_prey 在 :1767 累加，
+#     而 _evaluate_independent_strategy【被兩個外層呼叫】：
+#       :1048 獨立隊分支 => 計時鍵 loop2.indep_strategy
+#       :1078 勢力成員分支 => 計時鍵 loop2.member_strategy
+#     => indep.weakest_prey 同時吃到兩邊的時間，而它只被減進 loop2.indep_strategy
+#     => 這是三種成因的【第三種】：這個名字代表不只一件事（多外層共用）
+#   ★★處置候選（systems 決定，我不動）：登記成 "*multi"（保守、少減）
+#     或【拆開計時鍵】(indep.weakest_prey.from_indep / .from_member)
+#   ★★★而它是相位樹第一次跑就抓到的東西 —— 而在有 self_us 之前它【看不見】
+#   loop2.indep_strategy：350 次
