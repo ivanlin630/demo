@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ `frontier_candidates` 裡的 Probe-only 配置
 topic: ★打掉了：`goal_resolver.gd:244` 每次呼叫 `new()` 一支七千行的 class ⇒ 改重用 static 實例 ⇒ leader 的 frontier 段 **225.5 → 201.5 ms/call（−10.6%）**｜★★★而「儀器佔多少」**不能用 Probe-gated 碼表量**（那是用儀器量儀器自己）⇒ 我另接一支走 `phase_timing` 的碼表：**ON 107.5 ms/call vs OFF 91.9 ms/call ⇒ 儀器 14.5%** ⇒ **沒有崩掉，剩下的 91.9 ms 是真工作**｜★★fp 兩趟相同；而我第一版量出**兩個不同的 fp**，那是**我的床**的錯，我把它寫進交件
 ---
