@@ -16,6 +16,12 @@ trap 'rm -f "$_TMP_HL_NOW" "$_TMP_HL_BASE"' EXIT
 set -u
 export LC_ALL=C
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
+# ★★★同一份輸出上有【四個都叫「失敗數」的數字】（systems 量於 2026-09-10，同一跑）：
+#     TEST-SUITE-HARD-FAILS = 3 ｜ `[FAIL]` 行 = 6 ｜ `Assertion failed` 行 = 7 ｜ 正規化清單 = 9
+#   ★血證：兩個人各自報了「6」與「7」，看起來像【紅集合會漂】，
+#     實際上是【同一跑的兩個不同量】—— ★★世界沒變，變的是尺。
+#   ⇒ ★★★引用【失敗數】時必須同句講出它是哪一個；本閘用的是第一個（HARD-FAILS）
+#     做數量門檻，第四個（正規化清單）做清單比對。
 BASE_F=docs/process/.headless-baseline.txt
 [ -f "$BASE_F" ] || { echo "[HEADLESS] ★FAIL：baseline 不存在（$BASE_F）—— 沒有 baseline 就分不出「本來就紅」與「新弄紅」"; exit 1; }
 BASE=$(grep -oE '^[0-9]+' "$BASE_F" | head -1)
