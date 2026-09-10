@@ -1,4 +1,10 @@
 extends SceneTree
+# ★★★作廢公告（2026-09-10）：本床讀的 `solo.engine`／`solo.cheap`／`loop2.solo_*` 四個量，
+#   在 `faction_ai_system.gd` 的非 unified solo 路【設旗修正】之前**一直是錯的**：
+#   那條路真的跑了引擎卻被歸進 cheap 桶 ⇒ ★本床在該修正之前產出的任何
+#   「每隊 X us／早退 vs 跑引擎」結論**全部作廢**，必須重跑。
+#   ⇒ ★★而這行留在這裡的理由：作廢公告要貼在【產出它的工具】上，
+#     ★★★否則下一個人會拿舊結論當基準，而舊結論看起來完全正常。
 # @bed-kind: diagnostic
 # slice: solo 思考的【每隊成本 × 規模】三個點（systems 2026-09-10 要的那三格）
 #

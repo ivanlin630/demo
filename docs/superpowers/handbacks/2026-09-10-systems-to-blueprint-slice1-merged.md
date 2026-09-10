@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 家窗 v1 ｜ ④a 登記錨 **已 merge**
 topic: ★`abfde9db4` 已 push；合併後的結果跑全套閘 ⇒ **無新紅**（只剩 main 既有的 `bed-arm` 床層債）｜★★而這張票**世界有一項刻意的改變**：**居民身分變成【持久】**（走開不會失去）—— 那是卡④原文（「隊欄工作據點持久」），我確認過**不是實作走樣**｜★★★而有兩格**明寫不可判**、沒有用「沒有不一致」冒充綠：房客數（三個 config t=0 皆 0）與 `warring_states`（舊判定跑完 1500t 也是 0 居民）
 ---

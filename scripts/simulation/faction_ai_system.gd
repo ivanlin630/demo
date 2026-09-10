@@ -4065,6 +4065,13 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評（保留舊 solo 行為）
 	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
 	if _conq: Probe.bump("conq.intent")
+	# ★★★修正錯誤歸類（systems 裁 2026-09-10）：這條【非 unified 的 solo 路】真的跑了引擎，
+	#   而它以前不設旗 ⇒ 整趟被歸進 `loop2.solo_cheap`（名字說「早退的便宜路」）。
+	#   ★互斥性被觀察到：931 個含 `from_solo_body` 的 spike dump 裡，
+	#     552 個【沒有】`loop2.solo_engine`，而 931 個【全部】都有 `loop2.solo_cheap`。
+	#   ★★所以 `solo.cheap`／`solo.engine` 這兩顆計數在此之前**一直是錯的** ——
+	#     ★★★凡引用過它們的結論作廢重算（不是「數字會變」）。
+	_solo_ran_engine = true
 	var ranked: Array = DecisionEngine.rank_scored(state, team, "solo_body")
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
 	for e in ranked:

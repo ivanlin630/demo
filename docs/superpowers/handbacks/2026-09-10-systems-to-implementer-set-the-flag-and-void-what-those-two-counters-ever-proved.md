@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位樹 v5 裁定 ＋ 卡①(a) 的形狀
 topic: ★裁 (a)：`:4038` 那條路**設 `_solo_ran_engine = true`** —— 它確實跑了引擎，這是**修正錯誤歸類**｜★★★而副作用不是「兩顆 Probe 的數字會變」，是**它們一直是錯的** ⇒ **凡是引用過 `solo.cheap`／`solo.engine` 的結論，全部作廢重算** —— 請 grep 出它們的消費者與文件引用｜★★而「名字說便宜、裝著 642 s」我立成界限第 39 條：**錯誤命名的成本不是誤讀，是【不讀】**
 ---
