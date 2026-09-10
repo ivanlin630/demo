@@ -46,6 +46,39 @@ static var sc_gap_us: float = 0.0
 static var sc_gap_n: int = 0
 static var sc_empty_n: int = 0
 
+# ★跨 run 清除（CrossRunReset 單一呼叫點）：本檔的量測 static 全部在這裡清。
+#   ★★`_prof_stack`／`nk_depth_hist` 是閘抓到的兩顆 —— ★★★而它們正是「新加一個沒清的 static」那一族。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if nk_all_n != 0 or not _prof_stack.is_empty() or not nk_depth_hist.is_empty():
+		cleared["NeedOracle.nk_*"] = "%d/%d/%d" % [nk_all_n, _prof_stack.size(), nk_depth_hist.size()]
+	nk_self_us = 0.0
+	nk_self_n = 0
+	nk_supply_us = 0.0
+	nk_supply_n = 0
+	nk_constr_us = 0.0
+	nk_constr_n = 0
+	nk_all_n = 0
+	nk_depth = 0
+	nk_top_n = 0
+	nk_maxdepth = 0
+	nk_depth_hist = {}
+	_prof_stack = []
+	nk_tot_us = 0.0
+	nk_selft_us = 0.0
+	nk_topt_us = 0.0
+	sc_tot_us = 0.0
+	sc_selft_us = 0.0
+	sc_n = 0
+	sc_gate_us = 0.0
+	sc_gate_n = 0
+	sc_gate_tiles = 0.0
+	sc_match_us = 0.0
+	sc_gap_us = 0.0
+	sc_gap_n = 0
+	sc_empty_n = 0
+	return {"checked": 1, "cleared": cleared}
+
 static func need_keep(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
 	# ★★★perf tap（`payoff-derive-bridge` 驗收 #5）：spec 明寫「重算不是取用」
 	#   ⇒ ★「多一次呼叫」是這個設計【已知的代價】，而代價要有數字。

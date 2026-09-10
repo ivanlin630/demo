@@ -1,0 +1,26 @@
+# 拆除據點會不會留下設施等級殘值？（★本輪只交事實，未動 production code）
+# 床：scripts/debug/demolish_facility_residue_bed.gd｜warring_states｜走 production 的完工分支
+#   （`OutpostSystem._complete_construction`，★不是床自己模擬一份）
+
+拆前：  outpost_level=1  owner=0   farming=2  weaponsmith=1
+拆後：  outpost_level=0  owner=-1  farming=**0**  weaponsmith=**0**
+重建後：outpost_level=1  owner=0   farming=**0**  weaponsmith=**0**
+★母體地板：拆除段【發生了】（level 1→0）、重建段【發生了】（0→1）⇒ 兩段都真的走到，可判。
+
+# ★★★答案（對應 systems 的三問）
+# ①重建流程會不會重設設施等級？⇒ **不需要重設** —— **拆除當下就已經歸零**。
+#   `outpost_system.gd:507-508`：`for fac_name in FACILITY_DEF: tile.set(current_level_key, 0)`
+#   ⇒ ★★而 systems 信裡寫「demolish 只歸零 `outpost_level`，設施那族沒被碰」——**與 code 不符**。
+#     `git log -S` 查實：那個歸零迴圈自 **2026-06-12（`926e26af0` FACILITY_DEF v2）** 就在，
+#     ★★★**不是今天加的**（我今天只在它旁邊加了一行 `FacilityExistenceIndex.invalidate()`）。
+# ②拆掉重蓋，設施會不會保留？⇒ **不會**（重建後 farming=0／weaponsmith=0）。
+# ③能不能被自己觸發（cheese）？⇒ **前提不成立** —— 沒有殘值可以被繼承，
+#   ⇒ ★所以「自拆自建白留設施」這條 cheese **在現行 code 上不存在**。
+#   ★★而 systems 明令保護的那條（**佔領別人的廢墟拿到設施 ＝ intended**）**本輪一個字都沒動**。
+
+# ★誠實限
+# ①本床用**直接建構**的方式造出「有設施的據點」（`tile.farming_level = 2` 等），
+#   而不是走完整的建造流程 ⇒ ★它驗的是【拆除/重建對設施欄位做了什麼】，**不是**建造流程本身。
+# ②`demolish` 那條路我走的是 `_complete_construction(action="demolish")`；
+#   ★★若還有**別的拆除入口**（例如攻陷/滅亡路徑）不經過它 ⇒ 本床答不到那些 —— **明寫沒查**。
+# ③本輪**未動 production code**（照票 §③④）。

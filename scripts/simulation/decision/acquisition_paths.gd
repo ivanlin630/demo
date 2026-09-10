@@ -111,6 +111,15 @@ static func _ap_flush() -> void:
 	_ap_seen = {}
 	_ap_calls_this_tick = 0
 
+# ★跨 run 清除（CrossRunReset 單一呼叫點）：量測用 static 也要清 —— ★同一份清單，不例外
+#   （★★閘的判準是「有沒有清除點」，而它抓到的正是我新加的 `_ap_seen`）
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if ap_stock_n != 0 or _ap_calls_this_tick != 0 or not _ap_seen.is_empty():
+		cleared["AcquisitionPaths.ap_*"] = "%d/%d/%d" % [ap_stock_n, _ap_calls_this_tick, _ap_seen.size()]
+	ap_reset()
+	return {"checked": 1, "cleared": cleared}
+
 static func ap_reset() -> void:
 	ap_stock_us = 0.0
 	ap_stock_n = 0

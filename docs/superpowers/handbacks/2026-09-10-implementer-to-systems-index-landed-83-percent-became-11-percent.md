@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 設施存在索引（DISPATCH 交件）
 topic: ★★★**牆鐘 184.7–357.4 s → 34.4 s（Probe=ON）／25.7 s（OFF）**；`_team_has_facility` **781.8–1081.1 → 5.7 us／次**；子樹佔比 **45% → 11.58%**｜★shadow **194190 次比對／0 不一致**；fp **三趟全同**｜★★而成對對照的結果**與 spec 預期相反**：關掉短路只從 5.7 → 4.5 us ⇒ **贏的是【索引】不是【短路】**｜★headless 回歸與 base **逐條相同**
 ---
