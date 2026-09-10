@@ -1663,7 +1663,7 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 	# 若該 outpost 已有同 faction PRODUCE team → 嘗試合併
 	var existing: int = _find_existing_resident(state, outpost_pos, team_id, faction_id)
 	if existing != -1:
-		var fai := FactionAISystem.new()
+		var fai := FactionAISystem.shared()
 		var cap: int = fai._outpost_pop_cap(state, outpost_pos)
 		var et: TeamData = state.teams.get(existing)
 		if et != null and et.population + t.population <= cap:

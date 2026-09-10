@@ -806,6 +806,8 @@ static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
 	if not _a2b_remote_tribute_payers.is_empty():
 		cleared["FactionAISystem._a2b_remote_tribute_payers"] = _a2b_remote_tribute_payers.size()
+	if _shared_fai != null: cleared["FactionAISystem._shared_fai"] = 1
+	_shared_fai = null   # ★跨 run 靜態殘留：共享實例也要清（同一份清單，不例外）
 	if not _fai_ph.is_empty(): cleared["FactionAISystem._fai_ph"] = _fai_ph.size()
 	if not _mk_verify_rows.is_empty(): cleared["FactionAISystem._mk_verify_rows"] = _mk_verify_rows.size()
 	if not _churn_last.is_empty(): cleared["FactionAISystem._churn_last"] = _churn_last.size()
@@ -3076,7 +3078,7 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 # A2c-1：consolidate target 決策抽出（非 dispatch，供 DecisionContext.gather 算 consolidate_target_id）。
 # 逐條件鏡射 _try_consolidate_merge:1421-1442（target 兩支）；回 absorber_id / leader_team_id / -1。
 static func consolidate_target_of(state: WorldState, mt: TeamData, f) -> int:
-	var fai := FactionAISystem.new()
+	var fai := FactionAISystem.shared()
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	var absorber_id: int = fai._find_absorber(state, mt, f)
 	if absorber_id != -1:
@@ -4512,7 +4514,7 @@ func _calc_own_armed(state: WorldState, team: TeamData) -> int:
 	var anon_pop: int    = maxi(team.population - named_count, 0)
 	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)
 
-static func _hex_dist(a: Vector2i, b: Vector2i) -> int:   # ★perf cut1 A：純算術零 instance state → static（免 per-call FactionAISystem.new() alloc）
+static func _hex_dist(a: Vector2i, b: Vector2i) -> int:   # ★perf cut1 A：純算術零 instance state → static（免 per-call FactionAISystem.shared() alloc）
 	var dx := b.x - a.x
 	var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
@@ -4736,6 +4738,21 @@ func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileDat
 # ──────── 基建 dispatch ────────
 
 # 選址 diff print：同 faction 同址不重印（{ faction_id: "x_y" }）
+# ★★★共享實例（systems 裁 2026-09-10）：production 有 **42 處** `FactionAISystem.shared()`，
+#   而這是一支七千行的 class ⇒ ★每次決策都在配置它。
+#   ★★語意面極小且可證明：本 class 只有 **2 個實例變數**（下面兩個），
+#     兩個都是「上一次印過什麼」的去重記憶 —— 其餘狀態都是 `static var`（本來就共享）。
+#   ★★★而共享會讓那兩顆去重【第一次真的生效】：舊寫法每處 `new()` ⇒ 記憶永遠是空的
+#     ⇒ 每次都判「跟上次不一樣」⇒ 每次都印 ⇒ **去重機制在這 42 條路上等於不存在**。
+#   ⇒ ★所以 log 會變少，而那是它原本就被設計要做的事（交件要報行數差）。
+#   ★★debug/床不在範圍：那裡本來就該各自 `new()`（棘輪也只咬 production）。
+static var _shared_fai: FactionAISystem = null
+
+static func shared() -> FactionAISystem:
+	if _shared_fai == null:
+		_shared_fai = FactionAISystem.new()
+	return _shared_fai
+
 var _last_site_sig: Dictionary = {}
 # 派工失敗原因 diff print：同 faction 同原因連續不重印（{ faction_id: reason }）
 var _last_dispatch_fail: Dictionary = {}

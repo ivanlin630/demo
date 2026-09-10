@@ -66,7 +66,7 @@ func process(state: WorldState, team_ids: Array,
 		var team: TeamData = state.teams[tid]
 		# 居民鎖：PRODUCE + 在自家 outpost + task 不在脫離清單
 		if team.tags.has(TeamData.TAG_PRODUCE):
-			var fai := FactionAISystem.new()
+			var fai := FactionAISystem.shared()
 			# S-A：TASK_MERGE 納脫離清單（原缺→PRODUCE 居民 merger 被鎖在 outpost→永不到 absorber→pair_seen=0；
 			# JOIN 本在清單=能離開,MERGE 漏=asymmetry 根。整併=脫離現據點併大隊,語意同 JOIN 該放行）。
 			if fai._is_resident_team(state, team) \
@@ -365,7 +365,7 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 	if team.leader_id != state.player_id and state.world.tiles.has(tile_id):
 		var own_tile: HexTileData = state.world.tiles[tile_id]
 		if own_tile.outpost_owner == team.team_id and own_tile.outpost_level > 0:
-			FactionAISystem.new()._evaluate_storage_visit(state, team, own_tile)
+			FactionAISystem.shared()._evaluate_storage_visit(state, team, own_tile)
 	# C: 基建子隊抵達 → 依 task 啟動施工
 	if team.current_task in [TeamData.TASK_CONSTRUCT, TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]:
 		OutpostSystem.new().begin_subteam_construction(state, team)
@@ -401,7 +401,7 @@ func _flee_away_tile(state: WorldState, team: TeamData, from_pos: Vector2i) -> V
 		if state.world.tiles.get(p.x * 1000 + p.y) == null: break   # 邊界/無 tile → 停在最遠可達
 		best = p
 	# 自家 outpost 在遠離威脅側(away 同向)→ 優先逃向 home
-	var home: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var home: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 	if home != Vector2i(-1, -1):
 		var hd: Vector2i = home - team.tile_pos
 		if hd.x * away.x + hd.y * away.y > 0:   # home 在遠離威脅方向

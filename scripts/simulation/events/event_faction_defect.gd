@@ -28,7 +28,7 @@ func check(state: WorldState, team: TeamData) -> bool:
 	var distress_pressure: float = clampf(float(team.unrest_turns - DEFECT_UNREST_THRESHOLD) / float(DEFECT_UNREST_THRESHOLD), 0.0, 1.0) * 0.5 + 0.5
 	# loyalty_deficit：honor/trust 低→虧缺高（取兩者較低者、[0,1] 連續、非 0.35 硬 bool）
 	var loyalty_deficit: float = clampf((1.0 - minf(honor, trust)) , 0.0, 1.0)
-	var stay_benefit: float = FactionAISystem.new()._faction_stay_benefit(state, team)
+	var stay_benefit: float = FactionAISystem.shared()._faction_stay_benefit(state, team)
 	# ★iii 靶2：food_days=自隊自知 own food（感知鐵律）→ consequence-pricing（餓叛通往死→壓 util、野心叛後果非死→0）。
 	var food_days: float = ResourceSystem.effective_food(state, team) \
 		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)

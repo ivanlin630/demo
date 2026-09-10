@@ -43,9 +43,9 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 		var res: String = String(GoalRegistry.MAINTAIN_GOAL_RES[gt])
 		g["status"] = "active" if ResourceSystem.effective_holding(state, team, res) < NeedOracle.need_keep(state, team, res, lv) else "satisfied"
 	# ★S4/S7 設施發展 goal 掛退 lifecycle：desire≥threshold 且未建→掛；建成 or desire 掉→退（移除，免累積）。
-	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var own: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 	var otile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
-	var fai := FactionAISystem.new()
+	var fai := FactionAISystem.shared()
 	var kept: Array = []
 	# ★★★build goal 的【歸宿】逐筆記（systems 派 2026-08-26）：
 	#   ★上一顆 tap 迭代 `goal_state` ⇒ 被移除的 goal 不在裡面 ⇒ ★★母體本身把答案排除在外（我造的盲點）。
@@ -249,7 +249,7 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 	var _uo_fai: FactionAISystem = null
 	if Probe.enabled:
 		if _uo_fai_shared == null:
-			_uo_fai_shared = FactionAISystem.new()
+			_uo_fai_shared = FactionAISystem.shared()
 		_uo_fai = _uo_fai_shared
 	var _uo_otile: HexTileData = null
 	if Probe.enabled:
@@ -606,7 +606,7 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 		_rep_note(state, "%d|%s" % [team.team_id, f], true)   # ★同 tick 重複：(隊, facility)
 	# ★★★又一顆 production 熱路徑上的 `.new()`（同 `:742` 那族；本輪先【量】不改，因為它與
 	#   `_find_own_outpost` 的成本綁在同一個碼表裡 —— ★先分開才知道 new 佔多少。
-	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var own: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 	if SimRunner.phase_timing:
 		rb_own_us += float(Time.get_ticks_usec() - _rp1)
 		rb_own_n += 1
@@ -761,7 +761,7 @@ static var rbf_n: int = 0
 # ★★★把身體再切四段（切點由 implementer 定：依它實際做的四件事）
 static var rb_payoff_us: float = 0.0    # ①`derived_payoff`
 static var rb_payoff_n: int = 0
-static var rb_own_us: float = 0.0       # ②`FactionAISystem.new()._find_own_outpost`（★又一顆 production 熱路徑上的 .new()）
+static var rb_own_us: float = 0.0       # ②`FactionAISystem.shared()._find_own_outpost`（★又一顆 production 熱路徑上的 .new()）
 static var rb_own_n: int = 0
 static var rb_res_us: float = 0.0       # ③`material／tools` 的 `_resolve_resource_prereq` 遞迴
 static var rb_res_n: int = 0
@@ -952,7 +952,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		#   ⇒ 與 goal_resolver:244 那顆是同族，但那顆只在儀器開著時跑，**這一顆在 production 熱路徑上**。
 		var _mk0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		if _mkt_fai == null:
-			_mkt_fai = FactionAISystem.new()   # ★順手修（systems 裁）：本行原本【每次呼叫都 new 一支七千行的 class】
+			_mkt_fai = FactionAISystem.shared()   # ★順手修（systems 裁）：本行原本【每次呼叫都 new 一支七千行的 class】
 		var mp: Vector2i = _mkt_fai._nearest_market_outpost_with(state, team, res)
 		if SimRunner.phase_timing:
 			mkt_us += float(Time.get_ticks_usec() - _mk0)
@@ -979,7 +979,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 	var terr_cands: Array = harvest_terrains(res)
 	if not terr_cands.is_empty():
 		# ★★★又一顆 production 熱路徑上的 `.new()`（同族第三顆）——本輪只量不改
-		var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+		var own: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 		var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 		# ★★【已滿足】不是布林，是同一個比較（血證 2026-08-25）：
 		#   改成從真相源導出之後，「自家地形有產這個資源」幾乎恆真
@@ -1342,7 +1342,7 @@ static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: Dec
 	var terrain: String = String(prereq.get("terrain", ""))
 	var need_control: bool = bool(prereq.get("control", false))
 	# 已滿？隊在/擁有滿足條件 tile（own outpost terrain match）。
-	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var own: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 	var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 	if own_tile != null and (terrain == "" or own_tile.terrain == terrain):
 		return {}   # 已在/擁有 → 前置滿

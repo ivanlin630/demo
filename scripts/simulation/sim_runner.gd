@@ -465,7 +465,7 @@ func _step2_move_teams(state: WorldState, team_ids: Array,
 func _step2a_strategic_move(state: WorldState, team_ids: Array) -> void:
 	if OS.has_environment("STRAT_OVERLAY_OFF"):
 		return
-	var fai := FactionAISystem.new()
+	var fai := FactionAISystem.shared()
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue

@@ -43,7 +43,7 @@ static func _construction_facility_need(state: WorldState, team: TeamData, res: 
 		return 0.0   # scope:build-cost res only（material/tools；★禁擴 build-cost∩output≠∅ 的其他 res 無守衛）
 	if _construction_visiting.get(res, false):
 		return 0.0   # ★(b) re-entrancy:此 res 正算中→切環（graph-independent，防 material↔tools 跨環無限遞迴）
-	var own_pos: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var own_pos: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 	if own_pos == Vector2i(-1, -1):
 		return 0.0
 	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
@@ -63,7 +63,7 @@ static func _construction_facility_need(state: WorldState, team: TeamData, res: 
 		var cost_r: float = float(OutpostSystem.upgrade_cost(facility, cur + 1).get(res, 0))
 		if cost_r <= 0.0:
 			continue   # ★cost-guard 在 _facility_deficit 呼叫之前（只讀 build-cost 含此 res 的 facility）
-		var desire: float = FactionAISystem.new()._facility_deficit(state, team, facility, tile)   # 0-1 既有信號
+		var desire: float = FactionAISystem.shared()._facility_deficit(state, team, facility, tile)   # 0-1 既有信號
 		if desire < CONSTRUCTION_DESIRE_MIN:
 			continue   # 夠想才前瞻買料（desire 當 gate）
 		total += cost_r   # ★過閘=夠想建→全 build-cost（非 ×desire 稀釋；稀釋<全 cost=白買 v1 半破根）
@@ -81,7 +81,7 @@ static func _facility_output_res(facility: String) -> Array:
 static func max_material_facility_desire(state: WorldState, team: TeamData) -> float:
 	if state == null:
 		return 0.0
-	var own_pos: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var own_pos: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 	if own_pos == Vector2i(-1, -1):
 		return 0.0
 	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
@@ -97,7 +97,7 @@ static func max_material_facility_desire(state: WorldState, team: TeamData) -> f
 			continue
 		if float(OutpostSystem.upgrade_cost(facility, cur + 1).get("material", 0)) <= 0.0:
 			continue   # 只認 build-cost 含 material 的 facility（買料才有意義）
-		best = maxf(best, FactionAISystem.new()._facility_deficit(state, team, facility, tile))
+		best = maxf(best, FactionAISystem.shared()._facility_deficit(state, team, facility, tile))
 	return best
 
 # 流出向 need：貿易 demand（市場有效買單 + 野心 + 可載，綁 deal 側）。goods 只有此量（need_keep=0）。
