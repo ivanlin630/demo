@@ -1,0 +1,75 @@
+# 相位樹 v4：★把「不在樹上」的呼叫端納入母體之後的 self_us
+# 跑到底：warring_states｜6000 tick ＝ 4.2 遊戲天｜A/B 兩模式各一趟｜★675 筆 spike 樣本
+# 票：2026-09-10-systems-to-implementer-move-the-guard-to-the-real-mother.md（①納母體＋守衛移位）
+# ★未登記 0／★★負 self 0
+#
+# ★★★誠實限（沿用前三條，並加兩條新的）：
+#   ①spike 母體（>100ms 才印）⇒ 答的是【凍結的那些 tick 裡誰最貴】，不是【世界總共把時間花在哪】
+#   ②A/B 兩模式混在同一張表 ⇒ 只談相對大小，不談單一模式絕對值
+#   ③`from_solo`／`from_solo_body` 不在本表：solo 在 `evaluate_all` 之外，而本 dump 只印 evaluate_all 的 _fai_ph
+#   ④★★★v3（196 樣本）與 v4（675 樣本）**不可逐格相比**：樣本數本身變了
+#     （★分段計時的 Probe 讓每個 tick 變慢 ⇒ 更多 tick 越過 100ms 門檻 ⇒ 更多 dump）
+#     ⇒ ★只談【同一張表內部】的相對大小與樹的形狀，不談 v3→v4 的「變貴了/變便宜了」
+#   ⑤★口徑變了：`unified.rank.from_*` 的累加點從呼叫端（含之後 90 行）移進 `rank_scored`
+#     ⇒ 那 90 行（reorder／funnel／dump）現在留在父親的 self 裡（見下方 §③ 的數字）
+
+phase                                 出現    self 總計(s)  self max(ms)     tot 總計(s)  kids
+unified.rank.from_leader             618        218.89        2173.4        218.89     0
+unified.rank.from_member             680        182.96        1532.7        182.96     0
+loop3.orders_ambition                682        175.49        1013.8        175.49     0
+loop3.misc                           682        160.29         932.5        160.29     0
+loop3.threat                         682         52.22        1706.4         73.79     1
+infra.new_loc                        682         40.21         176.6         40.21     0
+loop2.indep_strategy                 682         32.18         166.5         32.18     0
+unified.rank.from_threat             143         21.57        2012.4         21.57     0
+loop3.survival                       682         18.18         367.4         18.18     0
+loop2.member_strategy                682         17.32          90.0         17.32     0
+infra.facility                       682          8.18          38.2          8.18     0
+unified.rank.from_subteam            110          7.05         246.0          7.05     0
+member.unified                       682          3.66          86.3        186.62     1
+loop2.subteam                        681          3.12        1423.4         10.17     1
+loop1.infra                          682          2.08          21.5         50.48     2
+assign.leader_unified                682          1.81          75.4        220.70     1
+loop3.outpost                        682          1.29          49.0          1.29     0
+loop1.update_goals                   682          1.23          16.5          1.23     0
+loop1.betray                         682          0.65           9.2          0.65     0
+loop1.diplo                          682          0.28           2.7          0.28     0
+assign.members                       682          0.23           6.1        186.85     1
+loop1.member_snap                    682          0.23           5.9          0.23     0
+loop2b.merge                         682          0.18           7.9          0.18     0
+loop3.pursuit                        682          0.18           1.6          0.18     0
+loop3.prosperity                     682          0.17           0.9          0.17     0
+loop1.assign_tasks                   682          0.04           0.2        407.62     4
+assign.player_cmd                    682          0.02           0.1          0.02     0
+loop1.factions                       682          0.01           0.1        460.50     6
+assign.leader_lifecycle              682          0.01           0.4          0.01     0
+
+【multi 段】self≡tot：gather.home_food 114.16s／gather.market 77.07s／indep.weakest_prey 26.12s／gather.head 14.45s／gather.threat 14.16s／gather.weak_prey 12.04s／gather.readiness_prey 9.31s／gather.strong_farm 7.25s／unified.to_task 7.23s／gather.aid 4.34s
+
+# ★① 守衛移位之後，母體完整了嗎
+```
+`unified.rank.from_subteam`：**107 次／6.79 s，父親 loop2.subteam** ⇒ ★它以前【不在任何一格】
+  （`loop2` 的子隊分支本來連相位鍵都沒有 ⇒ 子隊的工作整段在樹外）
+`unified.rank.from_solo_body`：★**不在本表** —— 它在 `evaluate_all` 之外的容器（誠實限③）
+  ⇒ ★★所以上一封那 55.62 s **只有一半被納進來**：subteam 這半進來了，solo_body 那半仍在另一個容器
+  ⇒ ★★★而這不是遺漏，是【兩個容器】的問題：要把它納進同一張表，得先決定 solo 的帳怎麼跟 evaluate_all 合併
+    （★本檔不做，也不建議做法）
+`from_unknown`：**0 次** ⇒ 沒有第三個沒報名的呼叫端（★而守衛現在守在 `rank_scored` 入口＝真母體）
+```
+
+# ★② 榜首有沒有換人
+```
+★沒有換人：`unified.rank.from_leader` 仍是第一（self 211.96 s）
+  ★★而第二名 `unified.rank.from_member`（178.40 s）與它的差距，比 v3 那張小得多
+  ⇒ ★★★但這句話【只能定性】—— 樣本數變了（誠實限④）⇒ 不可以說「差距縮小了 X%」
+```
+
+# ★③ 口徑變更的證據（★它本身是一格對照）
+```
+`assign.leader_unified`：self **1.75 s**／tot 213.71 s，兒子 `from_leader` tot 211.96 s
+  ⇒ 差 1.75 s ＝ **rank_scored 之後那 90 行**（reorder／funnel／specimen dump）
+  ⇒ ★拆鍵那一版它的 self 是 0.09 s（那時那 90 行被算進兒子）
+  ⇒ ★★所以「父親的 self 從 ~0 變成 1.75 s」正是移位【確實發生】的證據，
+    ★★★而它同時說明那 90 行只佔 0.8%（1.75 / 213.71）—— 舊口徑的偏差不大，但它掛在錯的名字下。
+`loop2.subteam`：self 3.12 s／tot 9.91 s／kids 1 ⇒ 新容器的樹接對了（兒子被減掉）
+```

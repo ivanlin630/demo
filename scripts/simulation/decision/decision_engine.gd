@@ -73,6 +73,12 @@ const ZEROWIN_WATCH: Array = [
 #   —— 那正是我們上一張票才剛拆掉的東西。
 #   ★沒帶 ⇒ "unknown"：它會在表上自成一列（★★而不是靜默混進某個父親）。
 static func rank_scored(state: WorldState, team: TeamData, src: String = "unknown") -> Array:
+	# ★★★守衛移位（systems 裁 2026-09-10）：`from_unknown ⇒ 未登記具名紅` 本來守在
+	#   `_decide_unified`，而那裡的母體只有 733 次 —— ★真母體是【本函式】的 1096 次
+	#   ⇒ 不經 `_decide_unified` 的呼叫端（subteam／solo_body）在守衛【外面】靜默了 55.62 s。
+	#   ⇒ ★★正解不是加例外也不是改名，是把守衛移到【母體的邊界】＝ 本函式入口。
+	#   ⇒ ★★★判準：這支守衛擋的集合，是不是我宣稱的那個集合？
+	var _tp: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var _t0: int = Time.get_ticks_usec() if Probe.enabled else 0
 	GoalResolver.ensure_maintain_goals(state, team)   # ★means-end S2（組件 A）:冪等確保 5 資源維持 goal + 更新 active/satisfied
 	var _t1: int = Time.get_ticks_usec() if Probe.enabled else 0
@@ -225,6 +231,10 @@ static func rank_scored(state: WorldState, team: TeamData, src: String = "unknow
 		Probe.add_amount("rank.seg.score." + src, float(_t3 - _t2))
 		Probe.add_amount("rank.seg.probe." + src, float(_t4 - _t3))
 		Probe.add_amount("rank.seg.options." + src, float(scored.size()))
+	# ★相位鍵在此累加（★口徑＝【貼著 rank_scored】，不含呼叫端後面的 reorder／funnel／dump
+	#   —— 舊的累加點在 faction_ai_system.gd 的 90 行之後，那個口徑比鍵的名字大）。
+	if SimRunner.phase_timing:
+		FactionAISystem._fai_pht_s("unified.rank.from_" + src, _tp)
 	return scored
 
 # ctx-taking 純打分 accessor（鏡射 rank_threat(ctx)）：不 gather、不寫 current_option、不 specimen tap。

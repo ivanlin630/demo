@@ -850,6 +850,7 @@ const PHASE_PARENT: Dictionary = {
 	# ★loop2.solo 現在【不在 evaluate_all 裡】（錯開票移出去了）⇒ 它的帳在另一個容器
 	#   ⇒ 登記為根，而它與本表其餘列【不可相加】（分母不同）。
 	"loop2.solo": "", "loop2.solo_engine": "", "loop2.solo_cheap": "",
+	"loop2.subteam": "",   # ★新容器（見 loop2 子隊分支）：它之前不存在 ⇒ 子隊的錢不在任何一格
 	# ── loop1.assign_tasks 的兒子 ──
 	"assign.player_cmd": "loop1.assign_tasks",
 	"assign.leader_lifecycle": "loop1.assign_tasks",
@@ -869,6 +870,12 @@ const PHASE_PARENT: Dictionary = {
 	"unified.rank.from_member": "member.unified",
 	"unified.rank.from_solo": "loop2.solo",
 	"unified.rank.from_threat": "loop3.threat",
+	# ★★★把 55.62 s 納進樹（systems 裁 2026-09-10）：這兩個呼叫端不經 `_decide_unified`
+	#   ⇒ 舊守衛看不到它們，而它們合計【比榜首還大】。
+	"unified.rank.from_subteam": "loop2.subteam",
+	# ★父親選 `loop2.solo_engine` 而不是 `loop2.solo`：前者才是【真的跑了引擎】那群的容器
+	#   （`_evaluate_solo` 薄包裝按早退/跑引擎分兩桶），而 rank_scored 只在後者發生。
+	"unified.rank.from_solo_body": "loop2.solo_engine",
 	"unified.to_task": "*multi", "unified.prosp": "*multi",
 	"gather.head": "*multi", "gather.threat": "*multi", "gather.weak_prey": "*multi",
 	"gather.market": "*multi", "gather.home_food": "*multi", "gather.aid": "*multi",
@@ -1074,7 +1081,14 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# 生命週期(spawn/combat/reward/cleanup)全在 encounter/npc_combat/beast_system，不評 strategy/solo/infra。
 		if team.beast_kind != "": continue
 		if team.parent_team_id != -1:
-			_evaluate_subteam(state, team, merge_queue)
+			# ★loop2 的子隊分支【本來沒有任何相位鍵】⇒ 子隊的工作整段在樹外
+			#   （而 `unified.rank.from_subteam` 需要一個真父親 ⇒ 先把容器造出來）。
+			if SimRunner.phase_timing:
+				var _tsub: int = Time.get_ticks_usec()
+				_evaluate_subteam(state, team, merge_queue)
+				_fai_pht("loop2.subteam", _tsub)
+			else:
+				_evaluate_subteam(state, team, merge_queue)
 		elif team.faction_id == -1:
 			# 獨立戰略層（統一決策第三塊）：野心獨立隊秤建國 intent，**置於 _evaluate_solo 前**——
 			# 戰略意圖（建國）優先於個體日常（SoloAI 貿易/紮營）。建國 dispatch(PRIO_DISPATCH) 後
@@ -3209,7 +3223,11 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 			#   ⇒ ★★★而那正是這一輪母體錯的【結構版本】：不是我挑錯窗，是儀器本身只留得下前面那段
 			#   ⇒ 撈不到表時要分得出「funnel 沒 fire」與「cap 早就滿了」（床會印樣本數）
 			}, 20000)
-	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank.from_" + src, _tr)
+	# ★★★這裡的累加點【已移走】（systems 裁 2026-09-10）：搬進 `DecisionEngine.rank_scored`
+	#   ＝ 全部 1096 次呼叫的真母體。舊點只看得到走本函式的 733 次。
+	#   ★副作用要講明：舊口徑含 rank_scored 之後那 90 行（reorder／funnel／dump）
+	#   ⇒ 那段時間現在留在父親（assign.leader_unified 等）的 self 裡 ⇒ ★★榜會動，而那是對的方向。
+	if SimRunner.phase_timing: _tr = Time.get_ticks_usec()
 	# ★★★呼叫計數（systems 裁 2026-09-10）：80.77 秒要拆成【幾次 × 每次幾微秒】——
 	#   ★「每次很貴」與「叫很多次」的下一張票【完全不同】，而總計那個數字兩種都長一樣。
 	#   ★★四個 from_* 一起加：否則只知道 leader 的形狀，分不出
@@ -3770,7 +3788,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 	if leader_p == null:
 		sub.move_target = parent.tile_pos   # 無腦 → 回家（lifecycle，不 capture）   # gate-ok: parent ＝這支子隊【自己的母隊】＝內部階層知識，非他隊
 		return
-	var ranked: Array = DecisionEngine.rank_scored(state, sub)   # 全框架 rank
+	var ranked: Array = DecisionEngine.rank_scored(state, sub, "subteam")   # 全框架 rank
 	for e in ranked:
 		var opt: String = e["opt"]
 		# ★歸建 = 服從母團 = lifecycle move（回母團集結/歸建），不進 obey/violation 統計（量測特判）。
@@ -4027,7 +4045,7 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評（保留舊 solo 行為）
 	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
 	if _conq: Probe.bump("conq.intent")
-	var ranked: Array = DecisionEngine.rank_scored(state, team)
+	var ranked: Array = DecisionEngine.rank_scored(state, team, "solo_body")
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
 	for e in ranked:
 		var opt: String = e["opt"]
