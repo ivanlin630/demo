@@ -1,0 +1,86 @@
+# 相位樹 v5：★容器統一（相位帳本屬於 tick，不屬於 evaluate_all）之後的 self_us
+#
+# ★★★母體定義（逐字，systems 立規 2026-09-10）：
+#   母體 ＝【一個 tick 的總時 > 100000 us】的 tick｜樣本 N ＝ 1063｜分母 ＝ 42072 tick（2.53%）
+#   ★分母 42072 < 窗長 43200：early-return 的 tick（game_over／awaiting_heir）不進計數
+#   窗：warring_states｜43200 tick ＝ 30 遊戲天｜單一模式｜隊數 49 → 103
+#   ★★跑到底（rc=0，非 OOM 被砍）
+#
+# ★★★與 v4【不可逐格相比】：母體定義變了（evaluate_all 單次 > 100ms ⇒ tick 總時 > 100ms）
+#   ⇒ 樣本 675 → 1063。★而 v4 的檔頭已同步訂正（它把窗誤寫成 6000 tick，實際也是 43200）。
+
+phase                                 出現    self 總計(s)  self max(ms)     tot 總計(s)  kids
+loop2.solo                          1062        643.20        3025.0        803.89     1
+loop2.solo_cheap                     990        642.03        3023.1        642.03     0
+unified.rank.from_solo_body          931        525.36        2457.3        525.36     0
+unified.rank.from_leader             635        234.52        2337.5        234.52     0
+unified.rank.from_member             697        190.68        1749.0        190.68     0
+loop3.orders_ambition                700        178.98         926.5        178.98     0
+loop3.misc                           700        168.21         796.7        168.21     0
+unified.rank.from_solo               488        160.69        1254.6        160.69     0
+loop3.threat                         700         52.46        1891.5         72.65     1
+infra.new_loc                        699         42.04         176.2         42.04     0
+loop2.indep_strategy                 700         33.62         162.2         33.62     0
+unified.rank.from_threat             149         20.19        1201.9         20.19     0
+loop3.survival                       700         18.94         278.6         18.94     0
+loop2.member_strategy                700         17.79          71.6         17.79     0
+infra.facility                       699          8.68          51.9          8.68     0
+unified.rank.from_subteam            110          6.98         174.3          6.98     0
+member.unified                       700          3.81          56.4        194.49     1
+loop2.subteam                        699          3.02        1603.1         10.00     1
+loop1.infra                          700          2.17          11.5         52.88     2
+assign.leader_unified                700          1.89          72.9        236.41     1
+loop1.update_goals                   700          1.32           8.8          1.32     0
+loop3.outpost                        700          1.27          43.4          1.27     0
+loop1.betray                         700          0.67           3.0          0.67     0
+loop1.diplo                          700          0.29           2.5          0.29     0
+loop1.member_snap                    700          0.24           3.5          0.24     0
+assign.members                       700          0.24           0.6        194.73     1
+loop2b.merge                         700          0.20           9.8          0.20     0
+loop3.pursuit                        700          0.19           0.6          0.19     0
+loop3.prosperity                     700          0.17           1.4          0.17     0
+loop1.assign_tasks                   700          0.04           0.2        431.21     4
+assign.player_cmd                    700          0.02           0.3          0.02     0
+loop1.factions                       700          0.01           0.0        486.63     6
+assign.leader_lifecycle              700          0.01           0.4          0.01     0
+loop2.solo_engine                    509       -170.87         621.4        161.82     1
+
+【multi 段】self≡tot：gather.home_food 295.46s／gather.market 192.70s／gather.threat 46.01s／gather.head 37.52s／gather.weak_prey 35.57s／gather.readiness_prey 27.57s／indep.weakest_prey 27.18s／gather.strong_farm 21.99s／gather.aid 13.46s／unified.to_task 8.47s
+
+# ★① 容器統一達成了什麼
+```
+`unified.rank.from_solo_body`：**931 次／self 525.36 s** ⇒ ★它第一次出現在**同一張表**上
+  （v4 之前它在另一本帳裡，完全看不到）
+`unified.rank.from_solo`：488 次／160.69 s（走 `_decide_unified` 的那條 solo 路）
+`from_unknown`：★**0 次** ⇒ 守衛在 `rank_scored` 入口，沒有沒報名的呼叫端
+⇒ ★★而榜【換人了】：v4 的第一名 `from_leader`（234.52 s）現在排到第四 ——
+  前三名是 `loop2.solo`(643.20)／`loop2.solo_cheap`(642.03)／`from_solo_body`(525.36)
+  ⇒ ★★★**solo 側就是這個世界最貴的一塊**，而在容器統一之前它一格都看不到。
+```
+
+# ★② 而這一版有 362 筆負 self —— ★★原樣報上來（不自行改 PHASE_PARENT）
+```
+負的只有一個相位：`loop2.solo_engine`（self −170.87 s／tot 161.82 s／kids 1）
+★根因（讀 code 查實，不是猜）：
+  `_evaluate_solo` 這層把 solo 分成兩桶：`_solo_ran_engine` 為真 ⇒ `loop2.solo_engine`，否則 `loop2.solo_cheap`
+  而 `_solo_ran_engine = true` **只在兩處**設：
+    `faction_ai_system.gd:4011`（`uses_unified` 那條路）／`:3127`（`_decide_unified` 內）
+  ★★但 `:4038` 的 `rank_scored(..., "solo_body")` 是【非 unified 的 solo 路】—— 它**真的跑了引擎**，
+    卻**沒有設旗** ⇒ 那一趟被歸進 `loop2.solo_cheap`，
+    而它的兒子 `from_solo_body` 掛在 `loop2.solo_engine` 底下 ⇒ 父親被減成負的。
+★★★證據（不是推論）：931 個含 `from_solo_body` 的 dump 裡，**552 個裡面根本沒有 `loop2.solo_engine`**，
+  而 **931 個全部都有 `loop2.solo_cheap`**。
+⇒ 而它比「表接錯」更值得講的一點：**`loop2.solo_cheap`（642 s）這個名字說它是「早退的便宜路」，
+  而它其實裝著這個世界最大的一塊引擎工作。** ★名字與內容相反的儀器，比沒有儀器更會誤導。
+⇒ 兩個候選處置（★我沒有動，等裁）：
+  (a) `:4038` 那條路也設 `_solo_ran_engine = true`（★它確實跑了引擎 ⇒ 這是【修正錯誤歸類】）
+  (b) `from_solo_body` 改掛 `loop2.solo`（外層容器）⇒ 不動兩桶的語意，但父親會偏大
+```
+
+# ★③ 守恆
+```
+四個 rank src 的次數（本窗）：leader 635／member 697／solo 488／solo_body 931／threat 149／subteam 110
+  ⇒ `unknown` **0 次**（★守衛已在入口）
+`assign.leader_unified` self 1.89 s／tot 236.41 s／kids 1 ⇒ 口徑仍貼著 rank_scored（那 90 行留在父親）
+`loop2.subteam` self 3.02／tot 10.00／kids 1 ⇒ 樹接對
+```

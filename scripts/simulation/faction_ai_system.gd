@@ -954,25 +954,15 @@ static func _fai_pht_s(name: String, t0: int) -> int:
 	_fai_ph[name] = int(_fai_ph.get(name, 0)) + (now - t0)
 	return now
 
+# ★★★帳本的生命週期【已提升到 tick】（systems 裁 2026-09-10）：
+#   舊寫法在這裡 `_fai_ph.clear()` ＋ 結尾 dump ⇒ 帳本綁在 `evaluate_all` 上
+#   ⇒ 而錯開票把 `_evaluate_solo` 移到 `sim_runner.tick_solo_think` 之後，
+#     ★solo 的時間【掉在帳本外面】—— 那不是漏接儀器，是**帳本的邊界畫錯了**。
+#   ⇒ ★★clear 與 dump 都搬到 `sim_runner`（tick 開始清、tick 結束判並印）
+#     ⇒ faction 側與 solo 側在【同一本帳】裡，self_us 才有意義。
+#   ⇒ ★★★而兩個容器的數字【永遠不可相加】，即使統一之後也不能回頭加舊表。
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
-	var _zt: int = 0
-	var _zoom: bool = SimRunner.phase_timing
-	if _zoom:
-		_fai_ph.clear()
-		_zt = Time.get_ticks_usec()
 	_evaluate_all_body(state, _team_ids)
-	if _zoom:
-		var total: int = Time.get_ticks_usec() - _zt
-		if total > 100_000:   # 同 PHASE_SPIKE_US 量級
-			# ★★★印【全部】子相位，不只前 8 名（systems 2026-09-10）：
-			#   ★前 8 名以外的東西【看不到】⇒ 而「剩下 83% 裡有沒有更大的一筆」正是要問的。
-			#   ★★而這是儀器改動：不改任何判斷、不改任何門檻。
-			var top: String = phase_report(_fai_ph, total)
-			# ★★★標籤誠實限：自從「錯開」票把 _evaluate_solo 移出 evaluate_all 之後，
-			#   loop2.solo* 是【上次 hourly dump 以來累積的】，不是「這一 tick 的」——
-			#   ⇒ 而 total 仍然只算 evaluate_all 這一次。兩者的分母不同，讀的人要知道。
-			print("[FaiPhase] tick=%d total=%d us | phases=%d | %s" % [
-				state.world.current_tick, total, _fai_ph.size(), top])
 	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
 	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
 	SpecimenTracer.heartbeat_sweep(state)

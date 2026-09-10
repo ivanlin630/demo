@@ -96,6 +96,11 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		return "awaiting_heir"
 	# #3 tick 計時：包真 tick 工作的 wall-time（含 encounter / ambush / 常規三路徑）
 	var _perf_t0: int = Time.get_ticks_usec()
+	# ★★★相位帳本屬於【tick】不屬於 evaluate_all（systems 裁 2026-09-10）：
+	#   在這裡清 ⇒ faction 側（evaluate_all）與 solo 側（tick_solo_think）落在【同一本帳】裡。
+	if phase_timing:
+		FactionAISystem._fai_ph.clear()
+		_fai_tick_seen += 1
 	var _perf_result: String = _advance_tick_body(state, player_pos)
 	# ★★★清除不得被【早退】跳過（殭屍窗群甲 §①(a)）：encounter 分支與伏擊 player_turn
 	#   都在 _step_cleanup_extinct_teams 之前 return ⇒ 待清除的隊會活過【整個 encounter】，
@@ -114,6 +119,15 @@ func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 	if dt_us > _perf_max_us:
 		_perf_max_us = dt_us
 	# 相位計時（opt-in）：spike tick 立即 dump 相位拆解（cadence spike 歸因用）
+	# ★★★[FaiPhase] 的判準主詞已從【evaluate_all 單次】改成【這個 tick 的總時】（systems 裁）
+	#   ⇒ ★母體變大（含 solo 的 tick 也會進來）；★★門檻值【不動】（改值＝再換一次母體）。
+	#   ⇒ ★★★每一行都印【母體定義＋樣本序號／分母】—— 跨表比較的前提是母體定義逐字相同，
+	#     而今天已經有兩次是靠人記得。
+	if phase_timing and dt_us > PHASE_SPIKE_US and not FactionAISystem._fai_ph.is_empty():
+		_fai_spike_n += 1
+		print("[FaiPhase] tick=%d total=%d us | 母體=tick總時>%dus | spike#=%d/%d tick | phases=%d | %s" % [
+			state.world.current_tick, dt_us, PHASE_SPIKE_US, _fai_spike_n, _fai_tick_seen,
+			FactionAISystem._fai_ph.size(), FactionAISystem.phase_report(FactionAISystem._fai_ph, dt_us)])
 	if phase_timing and dt_us > PHASE_SPIKE_US:
 		var parts: Array = []
 		for ph in _ph:
@@ -144,6 +158,8 @@ func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 static var phase_timing: bool = false
 const PHASE_SPIKE_US: int = 100_000   # TEST VALUE：spike 門檻（>此值 dump 相位拆解）
 var _ph: Dictionary = {}              # 本 tick 相位 → 累積 us
+var _fai_spike_n: int = 0             # ★進了母體的 tick 數（＝樣本數）
+var _fai_tick_seen: int = 0           # ★分母：phase_timing 開著時走過的 tick 數
 
 # 標記一段相位結束：累積 (now - t0) 到 name，回傳 now（鏈式計時下一段）
 func _pht(name: String, t0: int) -> int:

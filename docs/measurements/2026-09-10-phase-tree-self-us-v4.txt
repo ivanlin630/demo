@@ -1,11 +1,15 @@
 # 相位樹 v4：★把「不在樹上」的呼叫端納入母體之後的 self_us
-# 跑到底：warring_states｜6000 tick ＝ 4.2 遊戲天｜A/B 兩模式各一趟｜★675 筆 spike 樣本
+# ★★★訂正（2026-09-10，發現於 v5）：本檔原本寫「6000 tick ＝ 4.2 遊戲天｜A/B 兩模式」——**錯的**。
+#   實際窗＝`solo_stagger_bigworld_perf_bed` 的預設 **43200 tick ＝ 30 遊戲天、單一模式**（warring_states，隊數長到 103）。
+#   ★那兩個字是我從 v3 的檔頭抄過來的 —— ★★而這正是「母體定義要印在表上」那條規矩要防的事：
+#     ★★★抄來的檔頭與量出來的檔頭在畫面上長得一模一樣。
+# 跑到底：warring_states｜43200 tick ＝ 30 遊戲天｜單一模式｜★675 筆 spike dump（★分母未印 ⇒ 見下）
 # 票：2026-09-10-systems-to-implementer-move-the-guard-to-the-real-mother.md（①納母體＋守衛移位）
 # ★未登記 0／★★負 self 0
 #
 # ★★★誠實限（沿用前三條，並加兩條新的）：
 #   ①spike 母體（>100ms 才印）⇒ 答的是【凍結的那些 tick 裡誰最貴】，不是【世界總共把時間花在哪】
-#   ②A/B 兩模式混在同一張表 ⇒ 只談相對大小，不談單一模式絕對值
+#   ②（★訂正：本檔不是 A/B 兩模式，是單一模式 ⇒ 這一條在 v4 上不適用，留著是為了讓 v3 的讀者對得上）
 #   ③`from_solo`／`from_solo_body` 不在本表：solo 在 `evaluate_all` 之外，而本 dump 只印 evaluate_all 的 _fai_ph
 #   ④★★★v3（196 樣本）與 v4（675 樣本）**不可逐格相比**：樣本數本身變了
 #     （★分段計時的 Probe 讓每個 tick 變慢 ⇒ 更多 tick 越過 100ms 門檻 ⇒ 更多 dump）
