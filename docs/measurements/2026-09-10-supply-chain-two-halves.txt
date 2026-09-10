@@ -1,0 +1,24 @@
+# 葉子的兩半 —— ★★★答案：**99.4% 在設施 gating 的全圖掃**
+# 床：scripts/debug/option_term_cost_bed.gd｜warring_states｜3000 tick｜seed 4242｜Probe=ON
+# ★碼表走 `SimRunner.phase_timing`（界限 43）｜★★母體地板在算式之前（界限 44）
+
+`_supply_chain`：total 152.765 s ＝ self（39186 次／3898.5 us per call）
+  ①設施 gating `_team_has_facility`：**194190 次／151.823 s／781.8 us per call／平均掃 631 格**
+     ⇒ ★**99.4%**（151.823 ÷ 152.765）
+  ②配方比對：**0.684 s（0.4%）**
+  ③gap 迴圈（含巢狀 `need_keep`）：**★0 次／0.000 s**
+守恆⑧：①＋②＋③ ＝ 152.507 s vs total 152.765 s（差 0.258 s ＝ 0.17%）
+
+# ★★★三件事，逐條
+# ①**全圖掃這次是真的**：`need_oracle.gd:238` `for tid in state.world.tiles`
+#   ⇒ 每個 recipe group 一次 ⇒ **194190 次 × 631 格 ≈ 1.23 億次 tile 訪問**
+#   ⇒ ★而它答的問題是「**我自己有沒有這個設施**」—— ★★一個只跟【自己的據點】有關的問題，
+#     卻要掃**整張地圖**。（★★★systems 先前提名過另一支全圖掃 `stock_sources`，實測 0 次；
+#     **這一支不是他提名的，是數字自己點出來的**。）
+# ②**gap 那半在本窗一次都沒跑**（0 次）⇒ 每次 `_supply_chain` 都在 gating 之後
+#   因 `out_maxcoef` 空而提早返回 ⇒ ★所以**全部成本都花在「先確認我有沒有設施」上，而答案幾乎都是沒有**。
+# ③而巢狀 `need_keep`（13108 次）**不是**從這裡來的 —— 它來自 `_construction_facility_need`
+#   （`_facility_deficit` → `need_keep(outputs)`）⇒ ★兩條遞迴路要分開講。
+
+# 誠實限：①Probe=ON（本路儀器佔比未單獨量）②跑間噪音大（本趟牆鐘 184.7 s，前趟 357 s）⇒ 只看比例
+#   ③fp `16bb6924789c18ac031e61d34c2aeae7` 不變、零 RNG

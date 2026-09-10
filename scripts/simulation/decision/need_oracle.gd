@@ -36,6 +36,15 @@ static var nk_topt_us: float = 0.0       # ★頂層 elapsed 總和（★★這�
 static var sc_tot_us: float = 0.0        # `_supply_chain` total
 static var sc_selft_us: float = 0.0      # `_supply_chain` self（扣掉它自己引發的巢狀 need_keep）
 static var sc_n: int = 0
+# ★葉子的兩半（systems 2026-09-10）：①設施 gating（每個 recipe group 一次全圖掃）②配方比對＋gap
+#   ★★gap 那半【含巢狀 need_keep】⇒ 交件要標；★①順便記「平均掃幾格」（確認它真的是全圖）
+static var sc_gate_us: float = 0.0
+static var sc_gate_n: int = 0
+static var sc_gate_tiles: float = 0.0
+static var sc_match_us: float = 0.0
+static var sc_gap_us: float = 0.0
+static var sc_gap_n: int = 0
+static var sc_empty_n: int = 0
 
 static func need_keep(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
 	# ★★★perf tap（`payoff-derive-bridge` 驗收 #5）：spec 明寫「重算不是取用」
@@ -214,8 +223,16 @@ static func _supply_chain(state: WorldState, team: TeamData, res: String) -> flo
 		return 0.0   # food 終端無供應鏈；無 state 無法 gating/gap
 	# 同 out 多配方：per 下游-out 取「該隊設施可造」的 max 係數（不重複加總 out gap）
 	var out_maxcoef: Dictionary = {}
+	var _scg0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	var _scg_mark: float = sc_gate_us
 	for level_key in ManufacturingSystem.RECIPE_GROUPS:
-		if not _team_has_facility(state, team, level_key):
+		var _gk0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+		var _has: bool = _team_has_facility(state, team, level_key)
+		if SimRunner.phase_timing:
+			sc_gate_us += float(Time.get_ticks_usec() - _gk0)
+			sc_gate_n += 1
+			sc_gate_tiles += float(state.world.tiles.size())
+		if not _has:
 			continue   # ★設施 gating：無此製造設施的隊不背此供應鏈 need
 		for recipe in ManufacturingSystem.RECIPE_GROUPS[level_key]:
 			var inputs: Dictionary = recipe["in"]
@@ -224,13 +241,22 @@ static func _supply_chain(state: WorldState, team: TeamData, res: String) -> flo
 			var out: String = String(recipe["out"])
 			var coef: float = float(inputs[res])
 			out_maxcoef[out] = maxf(float(out_maxcoef.get(out, 0.0)), coef)   # 多配方取 max 不重複
+	if SimRunner.phase_timing:
+		sc_match_us += float(Time.get_ticks_usec() - _scg0) - (sc_gate_us - _scg_mark)
 	if out_maxcoef.is_empty():
+		if SimRunner.phase_timing:
+			sc_empty_n += 1
 		return 0.0
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var total: float = 0.0
+	var _gap0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	for out in out_maxcoef:
 		var gap: float = maxf(need_keep(state, team, out, lv) - float(team.resources.get(out, 0)), 0.0)   # ★gap 非 raw
 		total += gap * float(out_maxcoef[out])
+		if SimRunner.phase_timing:
+			sc_gap_n += 1
+	if SimRunner.phase_timing:
+		sc_gap_us += float(Time.get_ticks_usec() - _gap0)
 	return total
 
 # 設施 gating：隊「自家」outpost 有此製造設施（非 positional——掃 team 擁有的 outpost，讀自家 need 側）。

@@ -174,6 +174,20 @@ func _initialize() -> void:
 			NeedOracle.sc_tot_us / 1e6, NeedOracle.sc_selft_us / 1e6, NeedOracle.sc_n,
 			NeedOracle.sc_tot_us / float(NeedOracle.sc_n), NeedOracle.sc_selft_us / float(NeedOracle.sc_n),
 			100.0 * NeedOracle.sc_selft_us / maxf(1.0, NeedOracle.sc_tot_us)])
+	# ★★★葉子的兩半
+	if NeedOracle.sc_gate_n == 0:
+		print("★★★_supply_chain 兩半：**不可判**（gating 0 次）")
+	else:
+		print("★★★_supply_chain 兩半：①設施 gating（全圖掃）%d 次／%.3f s／%.1f us per call／平均掃 %.0f 格；②配方比對 %.3f s；③gap 迴圈（★含巢狀 need_keep）%d 次／%.3f s" % [
+			NeedOracle.sc_gate_n, NeedOracle.sc_gate_us / 1e6,
+			NeedOracle.sc_gate_us / float(NeedOracle.sc_gate_n),
+			NeedOracle.sc_gate_tiles / float(NeedOracle.sc_gate_n),
+			NeedOracle.sc_match_us / 1e6, NeedOracle.sc_gap_n, NeedOracle.sc_gap_us / 1e6])
+		print("   ★守恆⑧：①+②+③ = %.3f s vs `_supply_chain` total %.3f s（差 %.3f s）；★★提早返回（out_maxcoef 空）%d 次" % [
+			(NeedOracle.sc_gate_us + NeedOracle.sc_match_us + NeedOracle.sc_gap_us) / 1e6,
+			NeedOracle.sc_tot_us / 1e6,
+			(NeedOracle.sc_tot_us - NeedOracle.sc_gate_us - NeedOracle.sc_match_us - NeedOracle.sc_gap_us) / 1e6,
+			NeedOracle.sc_empty_n])
 	var nk3: float = NeedOracle.nk_self_us + NeedOracle.nk_supply_us + NeedOracle.nk_constr_us
 	print("★守恆⑦：三個加數和 %.3f s vs need_keep %.3f s（差 %.3f s）；①-a+①-b %.3f s vs 前置滿檢查 %.3f s（差 %.3f s）" % [
 		nk3 / 1e6, GoalResolver.rp_nk_us / 1e6, (GoalResolver.rp_nk_us - nk3) / 1e6,
