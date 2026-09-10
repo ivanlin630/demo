@@ -26,6 +26,30 @@ func _initialize() -> void:
 	for _i in range(ticks):
 		runner.advance_tick(st, Vector2i(-1, -1))
 
+	# ★★★frontier 內部三段（★碼表走 phase_timing，與 Probe 正交 —— 界限 43）
+	#   ★單價一律【量】不准【除】：每段自己的碼表 ÷ 它自己的迴圈次數。
+	var frc: float = maxf(1.0, float(GoalResolver.fr_calls))
+	print("")
+	print("★frontier 內部（%d 次呼叫）" % GoalResolver.fr_calls)
+	print("%-26s %14s %12s %14s %14s" % ["段", "總計(s)", "us/call", "迴圈次數", "us/迴圈次"])
+	print("%-26s %14.3f %12.1f %14d %14.1f" % ["①goal 迴圈（含②）", GoalResolver.fr_goalloop_us / 1e6,
+		GoalResolver.fr_goalloop_us / frc, GoalResolver.fr_goals_n,
+		GoalResolver.fr_goalloop_us / maxf(1.0, float(GoalResolver.fr_goals_n))])
+	print("%-26s %14.3f %12.1f %14d %14.1f" % ["②resource_prereq（巢狀）", GoalResolver.fr_res_us / 1e6,
+		GoalResolver.fr_res_us / frc, GoalResolver.fr_res_n,
+		GoalResolver.fr_res_us / maxf(1.0, float(GoalResolver.fr_res_n))])
+	print("%-26s %14.3f %12.1f %14d %14.1f" % ["③delegate 迴圈", GoalResolver.fr_deleg_us / 1e6,
+		GoalResolver.fr_deleg_us / frc, GoalResolver.fr_deleg_n,
+		GoalResolver.fr_deleg_us / maxf(1.0, float(GoalResolver.fr_deleg_n))])
+	print("%-26s %14.3f %12.1f %14s %14s" % ["④deliver_candidates", GoalResolver.fr_deliver_us / 1e6,
+		GoalResolver.fr_deliver_us / frc, "—", "—"])
+	var seg_sum: float = GoalResolver.fr_goalloop_us + GoalResolver.fr_deleg_us + GoalResolver.fr_deliver_us
+	print("★守恆：①+③+④ = %.3f s vs frontier 總計 %.3f s（差 %.3f s ＝ %.2f%%；★②巢狀在①內不另計）" % [
+		seg_sum / 1e6, DecisionEngine.frontier_us_total / 1e6,
+		(DecisionEngine.frontier_us_total - seg_sum) / 1e6,
+		100.0 * (DecisionEngine.frontier_us_total - seg_sum) / maxf(1.0, DecisionEngine.frontier_us_total)])
+	print("★★母體地板：goal 迴圈 %d 次／resource_prereq %d 次／delegate %d 次／產出 candidate %d 個（★0 ⇒ 明寫是 0）" % [
+		GoalResolver.fr_goals_n, GoalResolver.fr_res_n, GoalResolver.fr_deleg_n, GoalResolver.fr_out_n])
 	print("★★★frontier 碼表（不依賴 Probe）：%d 次／總計 %.2f s／**%.1f us per call**（Probe=%s）" % [
 		DecisionEngine.frontier_calls, DecisionEngine.frontier_us_total / 1e6,
 		DecisionEngine.frontier_us_total / maxf(1.0, float(DecisionEngine.frontier_calls)),

@@ -1,0 +1,25 @@
+# `GoalResolver.frontier_candidates` 內部三段（★單價一律【量】不准【除】）
+# 床：scripts/debug/option_term_cost_bed.gd｜warring_states｜3000 tick ＝ 2.1 遊戲天｜seed 4242
+# ★碼表走 `SimRunner.phase_timing`，**不走 `Probe.enabled`**（界限 43：量儀器的碼表不能跟被量的儀器同一個開關）
+# ★★★誠實限：本表是 **Probe=ON** 的數字，而這條路上的儀器佔比【已知是 14.5%】
+#   （同窗同 seed：ON 106–113 ms/call vs OFF 87.9 ms/call）⇒ ★不要把它讀成「91.9 全是這些段」
+# ★跑間噪音：同一支床三趟的 frontier 總時 62.36／62.76／66.76 s（±6%）⇒ 只談段與段的相對大小
+
+段                            總計(s)      us/call         迴圈次數      us/迴圈次
+①goal 迴圈（含②）             65.839     111591.1           3613       18222.7
+②resource_prereq（巢狀在①內）  30.452      51613.9           1318       23104.9
+③delegate 迴圈                 0.005          8.7           1165           4.4
+④deliver_candidates            0.868       1470.7             —            —
+
+★守恆：①＋③＋④ ＝ 66.712 s vs `frontier_candidates` 總計 66.755 s
+  ⇒ 差 **0.043 s ＝ 0.07%**；★差額的解釋：迴圈開始【之前】的頭段
+    （`TradeValuation.leader_vals`／`_uo_*` 準備／碼表自己的時鐘讀取）—— ★不是漏段
+    （真漏會隨最大的那段一起放大；本例差額是固定的萬分之七）。
+★★母體地板：goal 迴圈 **3613** 次／`_resource_prereq_candidates` **1318** 次／
+  delegate **1165** 次／產出 candidate **1197** 個（★全部 > 0；沒有一段是 0）
+
+# ★★★讀法（三句）
+# ①錢在 **goal 迴圈**：111.6 ms/call ＝ frontier 的 **98.6%**；delegate 與 deliver 合計 1.5%。
+# ②迴圈次數不大（每次呼叫 6.1 個 goal）⇒ ★**貴的是單價不是次數**：**一個 goal 要 18.2 ms**。
+# ③而單價的一半在 `_resource_prereq_candidates`：**23.1 ms／次**、1318 次 ＝ 30.45 s
+#   ＝ goal 迴圈的 **46.3%** ⇒ ★下一刀的位置（★而我不提修法）。

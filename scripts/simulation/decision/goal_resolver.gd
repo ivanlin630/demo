@@ -255,7 +255,12 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 	if Probe.enabled:
 		var _uo_own: Vector2i = _uo_fai._find_own_outpost(state, team)
 		_uo_otile = state.world.tiles.get(_uo_own.x * 1000 + _uo_own.y) if _uo_own != Vector2i(-1, -1) else null
+	var _fr_t0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	if SimRunner.phase_timing:
+		fr_calls += 1
 	for g in team.goal_state:
+		if SimRunner.phase_timing:
+			fr_goals_n += 1
 		if Probe.enabled: Probe.bump("goal.skip.seen" + _sday)   # ★分母：該日檢視過的 goal 數
 		if String(g.get("status", "")) != "active":
 			if Probe.enabled:
@@ -289,7 +294,11 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 			if kind == GoalRegistry.PREREQ_RESOURCE:
 				# ★接線（spec §3）：這個 caller 本來就在收集多個 candidate 進 rank 池
 				#   ⇒ 改 append_array，讓 means-end 的候選與既有手段【同池競爭】，不特別待遇。
+				var _rt0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 				var _rc2: Array = _resource_prereq_candidates(state, team, ctx, g, gt, payoff, prereq)
+				if SimRunner.phase_timing:
+					fr_res_us += float(Time.get_ticks_usec() - _rt0)
+					fr_res_n += 1
 				out.append_array(_rc2)
 				if not _rc2.is_empty(): _emitted_any = true
 				continue
@@ -304,15 +313,26 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 				Probe.bump("goal.skip.emitted_prereq" + _sday)
 			else:
 				Probe.bump("goal.skip.prereq_all_empty" + _sday)
+	var _fr_t1: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	if SimRunner.phase_timing:
+		fr_goalloop_us += float(_fr_t1 - _fr_t0)
 	# ★S5 委派 peer option（組件 D）：build/settle 型 candidate 產「派子隊做」變體並列 rank 池（跟自己做競 util）。
 	var delegated: Array = []
 	for c in out:
+		if SimRunner.phase_timing:
+			fr_deleg_n += 1
 		var dv: Dictionary = _delegate_variant(state, team, ctx, c)
 		if not dv.is_empty():
 			delegated.append(dv)
 	out.append_array(delegated)
+	var _fr_t2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	if SimRunner.phase_timing:
+		fr_deleg_us += float(_fr_t2 - _fr_t1)
 	# ★後勤 SLICE A：供給-delivery candidate（surplus holder 知有 demand 市場 → 送貨結買單，GATE-B 撮合物理送貨）。
 	out.append_array(_deliver_candidates(state, team, ctx, lv))
+	if SimRunner.phase_timing:
+		fr_deliver_us += float(Time.get_ticks_usec() - _fr_t2)
+		fr_out_n += out.size()
 	# ★資訊網 distribute side-dispatch：領主賑濟 distribute 已脫主 argmax（跟覓食競爭輸=同 herald/scout 舊病）→
 	#   移到 faction_ai._try_distribute_side 平行 side-action（領主下令派賑濟 convoy=directive、body 照覓食）。此處不再進主 rank 池。
 	return out
@@ -664,13 +684,36 @@ static var _fall_seen: Dictionary = {}
 # ★量測用的共用實例（只在 `Probe.enabled` 路徑上；★它不持有世界狀態）
 static var _uo_fai_shared: FactionAISystem = null
 
+# ★★★`frontier_candidates` 的內部碼表（systems 派 2026-09-10）——
+#   ★走 `SimRunner.phase_timing`，**不走 `Probe.enabled`**：界限 43（量儀器的碼表不能跟被量的儀器同一個開關）
+#   ★★單價一律【量】不准【除】：每一段自己的碼表 ÷ 它自己的迴圈次數。
+static var fr_calls: int = 0            # frontier_candidates 呼叫次數
+static var fr_goalloop_us: float = 0.0  # ①`for g in team.goal_state` 整圈
+static var fr_goals_n: int = 0          # 走過的 goal 數（★不是「有效的」）
+static var fr_res_us: float = 0.0       # ②`_resource_prereq_candidates`（★巢狀在①裡面）
+static var fr_res_n: int = 0
+static var fr_deleg_us: float = 0.0     # ③`_delegate_variant` 那一圈
+static var fr_deleg_n: int = 0
+static var fr_deliver_us: float = 0.0   # ④`_deliver_candidates`（★沒有它，守恆加不回去）
+static var fr_out_n: int = 0            # 產出的 candidate 數
+
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
 	if not _fall_seen.is_empty(): cleared["GoalResolver._fall_seen"] = _fall_seen.size()
 	_fall_seen.clear()
 	if _uo_fai_shared != null: cleared["GoalResolver._uo_fai_shared"] = 1
 	_uo_fai_shared = null   # ★跨 run 靜態殘留：量測用實例也要清（同一份清單，不例外）
-	return {"checked": 2, "cleared": cleared}
+	if fr_calls != 0: cleared["GoalResolver.fr_*"] = fr_calls
+	fr_calls = 0
+	fr_goalloop_us = 0.0
+	fr_goals_n = 0
+	fr_res_us = 0.0
+	fr_res_n = 0
+	fr_deleg_us = 0.0
+	fr_deleg_n = 0
+	fr_deliver_us = 0.0
+	fr_out_n = 0
+	return {"checked": 3, "cleared": cleared}
 
 static func harvest_terrains(res: String) -> Array:
 	var out: Array = []
