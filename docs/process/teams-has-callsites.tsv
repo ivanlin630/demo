@@ -1,0 +1,100 @@
+# state.teams.has( 呼叫點分類（判準：systems 2026-09-10 三類）
+# [G] 純存在問句：守完之後【不再對那支隊做事】（清 dangling ref／決定別的事）⇒ has() 是對的，不用改
+# [L] 存活守衛：守完之後【對那個 team 做事】（讀欄位／派任務／加總／寫入）⇒ has() 認不出 pending_erase ⇒ 要改 is_live_team
+# [M] 守衛＋取值：同一個運算式裡就讀它 ⇒ 分類屬 L，★但修法不同（要拆成兩步，會動到那一行的形狀）
+# [?] 判不出來 ——★一份沒有 [?] 的分類是可疑的（它表示分類者把不確定的塞進了某一類）
+#
+# ★★★這一欄是【機械代理判出來的草稿】，不是逐處人工判讀：
+#   代理＝守衛之後，同一函式內這個 id 有沒有被①取出那支隊②當參數派出去 ⇒ 有＝L
+#   ★而它的兩個已知限度都寫進 [?] 了：
+#     ①【跨函式】：守衛在 A、使用在呼叫端（_check_* / *_api.gd 那幾處）⇒ 本工具看不到 ⇒ [?]
+#     ②【只比較／記帳】：id 還出現但沒被取出來做事（語意問題）⇒ [?]
+#   ★★逐處人工覆核【還沒做】—— 這份是給判準的人先看數量級的。
+# 母體：86 處（docs/process/teams-has-callsites-raw.txt 有每處上下文三行）
+site	line	class	reason
+scripts/simulation/ambush_system.gd::check_ambush	29	L	守完之後【取出那支隊】做事 @31 var team: TeamData = state.teams[tid]
+scripts/simulation/belief_system.gd::reconcile_firsthand	270	L	守完之後把它【當參數派出去】 @276 obs_team.update_reputation(sid, TRUST_DELTA)
+scripts/simulation/equipment_system.gd::tick_all	8	L	守完之後【取出那支隊】做事 @10 var team: TeamData = state.teams[tid]
+scripts/simulation/event_system.gd::process_events	19	L	守完之後【取出那支隊】做事 @21 var team: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd::_commit_conquest_attack	374	L	守完之後【取出那支隊】做事 @380 var prey_t: TeamData = state.teams.get(prey_id)
+scripts/simulation/faction_ai_system.gd::_tick_conquest_scout	424	L	守完之後把它【當參數派出去】 @433 _commit_conquest_attack(state, team, prey_id)
+scripts/simulation/faction_ai_system.gd::_has_resident_team_on_tile	622	L	守完之後【取出那支隊】做事 @623 var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd::_evaluate_all_body	1009	L	守完之後【取出那支隊】做事 @1011 var sub: TeamData = state.teams[sub_id]
+scripts/simulation/faction_ai_system.gd::_evaluate_all_body	1034	L	守完之後【取出那支隊】做事 @1036 var team: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd::_precond_met	1597	L	守完之後把它【當參數派出去】 @1599 var tgt_pos: Vector2i = BeliefSystem.belief_pos(state, f.leader_team_i
+scripts/simulation/faction_ai_system.gd::_report_to_leader	1808	L	守完之後把它【當參數派出去】 @1814 var ok: bool = _dispatch_envoy(state, team, f.leader_team_id, "member_
+scripts/simulation/faction_ai_system.gd::_return_is_hopeless	3528	G	守完之後函式內不再出現 ⇒ 純存在問句／dangling 清理
+scripts/simulation/faction_ai_system.gd::_try_join_target	3694	L	守完之後把它【當參數派出去】 @3700 var join_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, 
+scripts/simulation/faction_ai_system.gd::_find_trade_target	4232	L	守完之後【取出那支隊】做事 @4233 var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd::_has_independent	4285	M	同一運算式裡就讀它（守衛＋取值）｜if state.teams.has(tid) and state.teams[tid].faction_id == -1:
+scripts/simulation/faction_ai_system.gd::_nearest_independent	4293	L	守完之後【取出那支隊】做事 @4294 var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd::cleanup_extinct_teams	4425	L	守完之後【取出那支隊】做事 @4427 _route_extinct_assets(state, state.teams[tid])
+scripts/simulation/faction_ai_system.gd::_richest_member	5982	L	守完之後把它【當參數派出去】 @5984 var snap: Dictionary = f.known_member_states.get(mid, {})
+scripts/simulation/faction_ai_system.gd::_evaluate_uprising	7060	L	守完之後【取出那支隊】做事 @7061 var oid_team: TeamData = state.teams[old_owner_id]
+scripts/simulation/faction_ai_system.gd::_evaluate_owner_contact	7336	L	守完之後把它【當參數派出去】 @7339 var snap: Dictionary = BeliefSystem.best_estimate(state, team.team_id,
+scripts/simulation/game_setup.gd::_setup_explicit_teams	700	L	守完之後【取出那支隊】做事 @701 state.set_team_faction(state.teams[tid], cfg_to_actual[fid2])
+scripts/simulation/game_setup.gd::_setup_player	803	L	守完之後【取出那支隊】做事 @806 var pteam: TeamData = state.teams[pteam_id]
+scripts/simulation/interaction_system.gd::process_on_arrival	81	L	守完之後【取出那支隊】做事 @85 var arrived: TeamData = state.teams[arrived_id]
+scripts/simulation/interaction_system.gd::process_on_arrival	92	L	守完之後【取出那支隊】做事 @94 var other: TeamData = state.teams[other_id]
+scripts/simulation/interaction_system.gd::process_colocated_residency	137	L	守完之後【取出那支隊】做事 @139 var t: TeamData = state.teams[tid]
+scripts/simulation/interaction_system.gd::process_colocated_residency	154	L	守完之後【取出那支隊】做事 @157 if (state.teams[oid] as TeamData).tile_pos != t.tile_pos:
+scripts/simulation/interaction_system.gd::process_on_move	174	L	守完之後【取出那支隊】做事 @178 var moved: TeamData = state.teams[moved_id]
+scripts/simulation/interaction_system.gd::process_on_move	185	L	守完之後【取出那支隊】做事 @187 var other: TeamData = state.teams[other_id]
+scripts/simulation/interaction_system.gd::_tick_readiness	199	L	守完之後【取出那支隊】做事 @201 var team: TeamData = state.teams[tid]
+scripts/simulation/interaction_system.gd::_try_interact	245	L	守完之後【取出那支隊】做事 @306 var a: TeamData = state.teams[id_a]
+scripts/simulation/interaction_system.gd::_try_merge	626	G	守完之後函式內不再出現 ⇒ 純存在問句／dangling 清理
+scripts/simulation/interaction_system.gd::_write_tier2_intel	1354	M	同一運算式裡就讀它（守衛＋取值）｜var obs_leader2: PersonData = state.persons.get((state.teams.get(obs_i
+scripts/simulation/invariant_audit.gd::_check_no_dangling_team_id	119	L	守完之後把它【當參數派出去】 @120 out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
+scripts/simulation/invariant_audit.gd::_check_no_dangling_team_id	121	L	守完之後把它【當參數派出去】 @122 out.append("懸空 Team%d.social_target=%d 不存在" % [tid, t.social_target])
+scripts/simulation/invariant_audit.gd::_check_no_dangling_team_id	123	L	守完之後把它【當參數派出去】 @124 out.append("懸空 Team%d.order_target_id=%d 不存在" % [tid, t.order_target_i
+scripts/simulation/invariant_audit.gd::_check_no_dangling_team_id	125	L	守完之後把它【當參數派出去】 @126 out.append("懸空 Team%d.parent_team_id=%d 不存在" % [tid, t.parent_team_id]
+scripts/simulation/invariant_audit.gd::_check_no_dangling_team_id	129	L	守完之後把它【當參數派出去】 @130 out.append("懸空 Team%d.known_reputations 含死 Team%d" % [tid, k]); break
+scripts/simulation/invariant_audit.gd::_check_no_dangling_team_id	132	L	守完之後把它【當參數派出去】 @133 out.append("懸空 Team%d.strategic_assignments 含死 Team%d" % [tid, k]); br
+scripts/simulation/invariant_audit.gd::_check_no_dangling_team_id	136	L	守完之後把它【當參數派出去】 @137 out.append("懸空 team_discovered[%d] 含死 Team%d" % [obs, did]); break
+scripts/simulation/manpower_system.gd::tick_all	273	L	守完之後【取出那支隊】做事 @275 var holder: TeamData = state.teams[tid]
+scripts/simulation/manufacturing_system.gd::tick_all	135	L	守完之後【取出那支隊】做事 @137 var team: TeamData = state.teams[tid]
+scripts/simulation/message_system.gd::propagate_on_arrival	102	L	守完之後【取出那支隊】做事 @104 var arrived_team: TeamData = state.teams[arrived_id]
+scripts/simulation/message_system.gd::propagate_on_arrival	106	L	守完之後【取出那支隊】做事 @108 var other_team: TeamData = state.teams[other_id]
+scripts/simulation/movement_system.gd::process	41	L	守完之後【取出那支隊】做事 @43 var team: TeamData = state.teams[tid]
+scripts/simulation/movement_system.gd::process	64	L	守完之後【取出那支隊】做事 @66 var team: TeamData = state.teams[tid]
+scripts/simulation/npc_ai_system.gd::vendetta_target	61	?	守完之後這個 id 還出現，但只是比較／記帳 @63 return foe.team_id
+scripts/simulation/npc_combat_system.gd::process_ongoing_combat	71	L	守完之後【取出那支隊】做事 @73 var team: TeamData = state.teams[tid]
+scripts/simulation/npc_combat_system.gd::process_ongoing_combat	75	L	守完之後【取出那支隊】做事 @79 var enemy: TeamData = state.teams[enemy_id]
+scripts/simulation/npc_combat_system.gd::tick_critical_npcs	89	L	守完之後【取出那支隊】做事 @91 var team: TeamData = state.teams[tid]
+scripts/simulation/npc_combat_system.gd::_end_combat	453	L	守完之後【取出那支隊】做事 @454 and state.teams[loser_id].population >= GOVERN_SURVIVE_MIN
+scripts/simulation/npc_combat_system.gd::_force_retreat	537	L	守完之後【取出那支隊】做事 @538 var _cap: int = AnonTierSystem.capture_routed_as_captive(state, state.
+scripts/simulation/npc_combat_system.gd::_force_retreat	555	L	守完之後【取出那支隊】做事 @556 and state.teams[retreater_id].population >= GOVERN_SURVIVE_MIN
+scripts/simulation/npc_combat_system.gd::_apply_pursuit	585	L	守完之後【取出那支隊】做事 @587 var winner: TeamData = state.teams[winner_id]
+scripts/simulation/player_api_mapper.gd::map_player_snapshot	568	L	守完之後把它【當參數派出去】 @575 "focused_member":     map_focused_member(state, focus_team_id, focus_m
+scripts/simulation/player_command_api.gd::_check_controlled_team	20	?	★守衛與使用【跨函式】：本函式只回狀態，真正對那支隊做事的是呼叫端 ⇒ 本工具（只看同一函式內）判不了
+scripts/simulation/player_command_api.gd::execute_action	55	L	守完之後把它【當參數派出去】 @57 result = _cmd_sys.execute_action(state, target_team_id, action_id)
+scripts/simulation/player_command_api.gd::execute_action	64	?	★守衛與使用【跨函式】：本函式只回狀態，真正對那支隊做事的是呼叫端 ⇒ 本工具（只看同一函式內）判不了
+scripts/simulation/player_command_system.gd::_action_confirm_trade	415	L	守完之後把它【當參數派出去】 @417 var result2 := _interaction.resolve_trade_direct(state, pt_id, tid2)
+scripts/simulation/player_command_system.gd::_action_submit_trade_offer	427	L	守完之後把它【當參數派出去】 @429 var result := PlayerTradeSystem.new().execute_offer(state, pt_id, tid,
+scripts/simulation/player_query_api.gd::get_team_details	30	L	守完之後【取出那支隊】做事 @36 var t: TeamData = state.teams[team_id]
+scripts/simulation/player_query_api.gd::get_member_details	61	L	守完之後把它【當參數派出去】 @64 var discovered: Array = state.team_discovered.get(p.team_id, [])
+scripts/simulation/player_query_api.gd::get_trade_preview	97	L	守完之後把它【當參數派出去】 @100 if target_team_id != pt_id and not discovered.has(target_team_id):
+scripts/simulation/player_query_api.gd::get_trade_direct_preview	121	L	守完之後把它【當參數派出去】 @124 if target_team_id != pt_id and not discovered.has(target_team_id):
+scripts/simulation/player_query_api.gd::get_available_actions	157	L	守完之後把它【當參數派出去】 @165 var actions := _build_available_actions(state, cmd_sys, team_id, membe
+scripts/simulation/player_query_api.gd::_check_player_with_team	180	?	★守衛與使用【跨函式】：本函式只回狀態，真正對那支隊做事的是呼叫端 ⇒ 本工具（只看同一函式內）判不了
+scripts/simulation/player_query_api.gd::_build_available_actions	208	L	守完之後【取出那支隊】做事 @227 var tgt_team: TeamData = state.teams.get(focus_team_id)
+scripts/simulation/player_query_api.gd::pt_tile_self	472	L	守完之後【取出那支隊】做事 @473 var pt: TeamData = state.teams[ptid]
+scripts/simulation/population_system.gd::check_overflow_for_team	102	L	守完之後【取出那支隊】做事 @104 var team: TeamData = state.teams[tid]
+scripts/simulation/resource_system.gd::collect_resources	71	L	守完之後【取出那支隊】做事 @77 var team: TeamData = state.teams[tid]
+scripts/simulation/resource_system.gd::resolve_consumption	190	L	守完之後【取出那支隊】做事 @192 var team: TeamData = state.teams[tid]
+scripts/simulation/resource_system.gd::flush_forage_episodes	349	L	守完之後【取出那支隊】做事 @351 var team: TeamData = state.teams[tid]
+scripts/simulation/sim_runner.gd::_step2a_strategic_move	443	L	守完之後【取出那支隊】做事 @445 var team: TeamData = state.teams[tid]
+scripts/simulation/sim_runner.gd::_step3c_read_market_board	475	L	守完之後【取出那支隊】做事 @478 var _t: TeamData = state.teams[tid]
+scripts/simulation/strategic_ai_system.gd::_nearest_independent	144	L	守完之後【取出那支隊】做事 @145 var t: TeamData = state.teams[tid]
+scripts/simulation/vision_system.gd::_write_tier01	167	L	守完之後【取出那支隊】做事 @168 var _foe: TeamData = state.teams[tgt.combat_target]
+scripts/simulation/world_events.gd::emit	69	L	守完之後【取出那支隊】做事 @85 var _tm = state.teams[id2]
+scripts/simulation/world_events.gd::emit	83	L	守完之後【取出那支隊】做事 @85 var _tm = state.teams[id2]
+scripts/simulation/decision/commitment_fields.gd::unfinished	83	L	守完之後把它【當參數派出去】 @87 return {"kind": "order", "site": str(team.order_target_id), "measurabl
+scripts/simulation/decision/decision_context.gd::gather	292	G	守完之後函式內不再出現 ⇒ 純存在問句／dangling 清理
+scripts/simulation/decision/decision_context.gd::gather	765	?	守完之後這個 id 還出現，但只是比較／記帳 @766 c.intent_target = _prey
+scripts/simulation/decision/decision_context.gd::gather	849	L	守完之後把它【當參數派出去】 @852 var _jpos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, _jh
+scripts/simulation/decision/goal_resolver.gd::_distribute_candidates	368	L	守完之後【取出那支隊】做事 @370 var resident: TeamData = state.teams[rid]
+scripts/simulation/decision/goal_resolver.gd::_distribute_candidates	407	M	同一運算式裡就讀它（守衛＋取值）｜"rid": int(best["rid"]), "rid_fac": (state.teams[int(best["rid"])].fac
+scripts/simulation/decision/options.gd::(top)	212	L	守完之後把它【當參數派出去】 @214 var host_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, 
+scripts/simulation/decision/options.gd::(top)	230	L	守完之後把它【當參數派出去】 @231 var prey_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, 
+scripts/simulation/decision/options.gd::(top)	342	L	守完之後把它【當參數派出去】 @344 var atid_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, 
