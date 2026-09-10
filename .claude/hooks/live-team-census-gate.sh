@@ -9,12 +9,21 @@ cd "$(dirname "$0")/../.." || exit 2
 TSV=docs/process/live-team-census.tsv
 FAILS=0
 
-live_sites() {   # 與普查表同一組過濾（子字串誤命中要排掉）
-  grep -rn "in state\.teams" scripts/simulation scripts/data --include=*.gd \
-    | grep -v "teams_on_tile" | grep -v "teams_by_tile" | grep -v "teams_pending_erase" \
-    | cut -d: -f1,2 | sort -u
+live_sites() {   # ★錨＝【檔名 ＋ 包著它的 func 名】，**不是行號** —— 行號會漂（systems 2026-09-10）。
+  #   ★★而 func 名本來就在普查表的第二欄：錨用已經在那裡的、不會漂的那一個。
+  for f in $(grep -rl "in state\.teams" scripts/simulation scripts/data --include=*.gd); do
+    awk -v F="$f" '
+      /^[[:space:]]*(static )?func [A-Za-z0-9_]+/ {
+        fn=$0; sub(/^[[:space:]]*(static )?func /,"",fn); sub(/\(.*/,"",fn)
+      }
+      /in state\.teams/ {
+        if ($0 ~ /teams_on_tile|teams_by_tile|teams_pending_erase/) next
+        if ($0 ~ /^[[:space:]]*#/) next
+        print F "	" fn
+      }' "$f"
+  done | sort
 }
-tsv_sites() { awk -F'\t' 'NR>1 && $1 ~ /^scripts\// {print $1}' "$TSV" | sort -u; }
+tsv_sites() { awk -F'\t' 'NR>1 && $1 ~ /^scripts\// { f=$1; sub(/:.*/,"",f); print f "\t" $2 }' "$TSV" | sort; }
 
 [ -f "$TSV" ] || { echo "[FAIL] 找不到普查表 $TSV"; exit 1; }
 N_LIVE=$(live_sites | wc -l); N_TSV=$(tsv_sites | wc -l)
@@ -24,7 +33,7 @@ if [ "$N_LIVE" -lt 30 ]; then
   exit 1
 fi
 
-MISSING=$(comm -23 <(live_sites) <(tsv_sites))
+MISSING=$(comm -23 <(live_sites | uniq) <(tsv_sites | uniq))
 if [ -n "$MISSING" ]; then
   echo "$MISSING" | while read -r s; do
     echo "[FAIL] 新的 state.teams 迭代站點沒有登記：$s —— ★它需要活著的還是全部的？逐站判，別留白"
@@ -33,7 +42,7 @@ if [ -n "$MISSING" ]; then
 fi
 # ★反向：表上有、現場沒有 ⇒ 門牌指錯（行號漂了／站點被刪）——兩種都要紅，
 #   ★★因為「錨指到別的地方」會讓這張表【看起來已經維護過】。
-STALE=$(comm -13 <(live_sites) <(tsv_sites) | grep -v "observer_query_api.gd\|sim_runner.gd\|state_fingerprint.gd\|resource_system.gd\|faction_ai_system.gd:4416")
+STALE=$(comm -13 <(live_sites | uniq) <(tsv_sites | uniq) | grep -v "observer_query_api.gd\|sim_runner.gd\|state_fingerprint.gd\|resource_system.gd\|cleanup_extinct_teams")
 if [ -n "$STALE" ]; then
   echo "$STALE" | while read -r s; do
     echo "[FAIL] 普查表指向一個現在撈不到的站點：$s —— 行號漂了或站點已刪，★表要跟著改"

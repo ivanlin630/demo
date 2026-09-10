@@ -12,6 +12,11 @@
   而 baseline 每列帶 owner ＋【觸發條件＝那一行被碰到時】——★★★不是日期：
   日期會過期而沒有人處理，觸發條件不會。
 
+★★★★baseline 的 key ＝【檔名 ＋那一行的正規化 code 文字（多重集計數）】，**不是行號**
+  （systems 2026-09-10）：行號會因為別人在上面加幾行而全部漂掉 ⇒ 12 筆假警報，
+  而母體【沒有變】。★而文字 key 同時讓「觸發條件＝那一行被碰到時」**變成機械為真**：
+  你動了那一行，文字就變了，豁免自動蒸發 —— 比行號【更符合】它本來的意圖。
+
 ★★★而 R² 的免費補強也在這支裡：`live_team(x)` 之後【下一行】沒有判 null ⇒ 具名警。
 """
 import io
@@ -113,8 +118,14 @@ def gd_files(dirs):
                     yield os.path.join(root, f).replace(os.sep, "/")
 
 
+def norm_code(txt):
+    """正規化那一行 code：去註解、去頭尾空白、內部空白收成一格。"""
+    return re.sub(r"\s+", " ", strip_comment(txt)).strip()
+
+
 def load_baseline(path):
-    got = set()
+    """回 {(file, normalized_code): 允許次數}。★key 不含行號（行號會漂）。"""
+    got = {}
     if not os.path.exists(path):
         return got
     for l in io.open(path, encoding="utf-8"):
@@ -122,28 +133,34 @@ def load_baseline(path):
             continue
         cols = l.rstrip("\n").split("\t")
         if len(cols) >= 2:
-            got.add("%s:%s" % (cols[0], cols[1]))
+            k = (cols[0], cols[1])
+            got[k] = got.get(k, 0) + 1
     return got
 
 
 def run(dirs, baseline_path, emit_baseline=False):
     base = load_baseline(baseline_path)
+    used = {}
+    file_lines = {}
     warns = []
     all_rows = []
     for p in gd_files(dirs):
         lines = io.open(p, encoding="utf-8", errors="replace").read().split("\n")
+        file_lines[p] = lines
         for (ln, cls, arg, why) in classify_file(p, lines):
             all_rows.append((p, ln, cls, arg, why))
             if cls == "G":
                 continue                      # ★純存在問句：本閘不咬（驗收④）
-            key = "%s:%d" % (p, ln)
-            if key in base:
+            key = (p, norm_code(lines[ln - 1]))
+            if used.get(key, 0) < base.get(key, 0):
+                used[key] = used.get(key, 0) + 1
                 continue                      # 存量豁免
             label = "需要人看" if cls == "?" else "該用 live_team()"
             warns.append("[RATCHET] %s:%d  [%s] %s ⇒ %s" % (p, ln, cls, why, label))
         for (ln, txt) in scan_live_team_null(p, lines):
-            key = "null:%s:%d" % (p, ln)
-            if key in base:
+            key = (p, "null:" + norm_code(txt))
+            if used.get(key, 0) < base.get(key, 0):
+                used[key] = used.get(key, 0) + 1
                 continue
             warns.append("[RATCHET] %s:%d  live_team() 之後沒有判 null ⇒ %s" % (p, ln, txt))
     if emit_baseline:
@@ -154,12 +171,14 @@ def run(dirs, baseline_path, emit_baseline=False):
             "# ★每列帶 owner ＋【觸發條件】＝【那一行被碰到時】(on-touch)；",
             "#   ★★不是日期：日期會過期而沒有人處理，觸發條件不會。",
             "# ★★★[G]（純存在問句）不在本表：本閘本來就不咬它。",
-            "site\tline\tclass\towner\ttrigger\treason",
+            "# ★key ＝ site ＋ code（正規化文字），**不是行號** —— 行號會漂，文字不會；",
+            "#   而動了那一行文字就變 ⇒ 豁免自動蒸發 ＝ on-touch 【機械為真】。",
+            "site\tcode\tclass\towner\ttrigger\treason",
         ]
         for (p, ln, cls, arg, why) in all_rows:
             if cls == "G":
                 continue
-            out.append("%s\t%d\t%s\tsystems\ton-touch:這一行被碰到時轉 live_team()\t%s" % (p, ln, cls, why))
+            out.append("%s\t%s\t%s\tsystems\ton-touch:這一行被碰到時轉 live_team()\t%s" % (p, norm_code(file_lines[p][ln - 1]), cls, why))
         io.open(baseline_path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
         return 0
     for w in warns:

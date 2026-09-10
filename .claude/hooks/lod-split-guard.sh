@@ -17,6 +17,9 @@
 #   而那正好是讓知識消失的機制 —— 閘不該獎勵刪註解。
 #
 # ★★★誠實限（兩條）：
+#   ★【詞界】：模式用 player_pos —— 舊版的裸 `player_pos` 會抓到
+#     `player_possess_prev`（它以 player_pos 開頭）⇒ 5 筆假陣性，而【把它們加進 allowlist 會把
+#     一支壞掉的偵測器藏起來】（systems 2026-09-10）。
 #   ①文字比對：有人把 player_pos 存進別的變數再比距離，它看不到。
 #   ②scripts/ui/ 【不掃】—— 憲法 §5③ 明文允許表現層 LOD（鏡頭旁畫細＝表現非模擬）。
 set -u
@@ -41,7 +44,7 @@ STRIP='{
 }'
 
 TMP=$(mktemp)
-grep -rn "player_pos" scripts/simulation/ scripts/data/ 2>/dev/null | awk -F: "$STRIP" > "$TMP"
+grep -rnE "\bplayer_pos\b" scripts/simulation/ scripts/data/ 2>/dev/null | awk -F: "$STRIP" > "$TMP"
 N=$(cut -f1,3 "$TMP" | sort -u | wc -l | tr -d ' ')
 echo "[LOD-SPLIT] player_pos 在 simulation+data 的非註解出現：$N 種（ui/ 不掃：憲法允許表現層 LOD）"
 while IFS=$'\t' read -r f ln code; do

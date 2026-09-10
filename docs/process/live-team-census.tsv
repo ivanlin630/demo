@@ -75,3 +75,4 @@ scripts/simulation/labor_system.gd:75	compute_alloc	C	同上（分配）
 scripts/simulation/manpower_system.gd:272	tick_all	C	兵役/人力逐隊 tick：對將死之隊做一次結算，後果不明
 scripts/simulation/population_system.gd:82	_mature_minors	C	讓一支這 tick 會被 erase 的隊的小孩成年——多半無害，★但「無害」是猜的
 scripts/simulation/resource_system.gd:348	flush_forage_episodes	C	R² 初判 [A]?；★我覆核後降成 C：清暫存/發覓食訊息對死者的後果我讀不出來
+scripts/simulation/faction_ai_system.gd:7467	tick_solo_think	A	★錯開票新增的思考迴圈（每 tick 到期才想）——已有 null 守衛，★★而 null 看不見 pending_erase：死判定但未清除的隊仍會進來想一次⇒ on-touch 轉 live_team()

@@ -78,20 +78,32 @@ if [ "${MG_NO_FETCH:-0}" != "1" ]; then
     UPSTREAM_N="$UPN"
   fi
 fi
+MG_BASE=".claude/hooks/.merge-gates-main-baseline"
+# ★★★main 基線紅數（blueprint 裁 2026-09-10）：「main 紅了沒有人發現」不能再靠
+#   誰去開一個 worktree 重跑才知道 —— ★紅的閘＝沒有閘：main 基線紅 ⇒ 每個 branch 都
+#   「跟 main 一樣紅」⇒ 閘零鑑別力，而它【比擋住更糟：它在默默放行】。
+# ★★而這個數字是【快取】⇒ 它會過期 ⇒ 所以連同 HEAD 一起印，並印出 main 已經走了幾個 commit
+#   （★★★把過期【變成看得見的】，而不是讓它安靜地騙人）。
+if [ -f "$MG_BASE" ]; then
+  IFS=$'	' read -r _b_head _b_red _b_when < "$MG_BASE"
+  _b_gap=$(git rev-list --count "$_b_head"..main 2>/dev/null || echo "?")
+  if [ "${_b_red:-0}" -gt 0 ] 2>/dev/null; then
+    echo "[MERGE-GATES] ★★★main 基線紅數 ＝ $_b_red（量於 $_b_head / $_b_when；main 之後又走了 $_b_gap 個 commit）"
+    echo "[MERGE-GATES]   ⇒ ★在它歸零之前，本輪的紅【不能直接算在你頭上】，而綠也【不代表 main 是綠的】。"
+  else
+    echo "[MERGE-GATES] main 基線紅數 ＝ 0（量於 $_b_head / $_b_when；main 之後又走了 $_b_gap 個 commit）"
+  fi
+else
+  echo "[MERGE-GATES] ★main 基線紅數【從未量過】—— 在 main、乾淨工作區跑一次本 runner 就會記下來"
+fi
 [ -f "$REG" ] || { echo "[MERGE-GATES] FAIL：註冊表不存在 $REG"; exit 1; }
 FAILED=(); TOTAL0=$SECONDS; N=0
-# ★★★2026-09-06:讀進來先剝 `
-`(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
-#   `expect` 會尾帶 `
-` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
+# ★★★2026-09-06:讀進來先剝 ``(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
+#   `expect` 會尾帶 `` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
 #   ★★而 .gitattributes 已 eol=lf ⇒ repo 的 blob 是乾淨的,壞的只有【工作區那一份】
 #   ⇒ ★★★所以修在【讀取端】:誰寫的都不會再毒到判準。
 while IFS=$'	' read -r id cmd purpose expect; do
-  id="${id%$'
-'}"; cmd="${cmd%$'
-'}"; purpose="${purpose%$'
-'}"; expect="${expect%$'
-'}"
+  id="${id%$''}"; cmd="${cmd%$''}"; purpose="${purpose%$''}"; expect="${expect%$''}"
   case "$id" in ''|'#'*) continue;; esac
   N=$((N+1)); T0=$SECONDS
   if [ -z "${expect:-}" ]; then
@@ -118,6 +130,12 @@ while IFS=$'	' read -r id cmd purpose expect; do
 done < "$REG"
 echo "───────────────────────────────"
 echo "[MERGE-GATES] 註冊表 $N 支｜總時 $((SECONDS-TOTAL0))s"
+# ★只有【在 main 上、且工作區乾淨】的那一輪才有資格更新基線（否則記的是某個人的工作區）
+if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+  printf '%s	%s	%s
+' "$(git rev-parse --short HEAD)" "${#FAILED[@]}" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$MG_BASE"
+  echo "[MERGE-GATES] ★已更新 main 基線紅數 ＝ ${#FAILED[@]}"
+fi
 if [ ${#FAILED[@]} -gt 0 ]; then
   echo "[MERGE-GATES] FAIL：${FAILED[*]}"
   echo "★註冊表在 $REG —— ★★新增閘＝往那裡加一行（★★★含 expect，否則直接 FAIL）"
