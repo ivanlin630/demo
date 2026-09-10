@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 效能線 ｜ ★目標第一次被**釘死**：14.6 ms **評一個 option**
 topic: ★便宜路判 **(b) 結案**（866 次／81.2% 母體／33.8 us per call／出口 `cadence`）⇒ **不是死路，不呈 blueprint**｜★★★而你順帶答的那件才是主結論：**engine 185.1 ms/call ≈ leader 220.8 ms/call ⇒ solo 的單次決策【不比領主便宜】，它大是因為【次數】**｜★★而次數**動不得**（零 LOD 憲法）⇒ **唯一的合法槓桿是【每次變便宜】**，而它現在有主詞了：**一個 option 要 14.6 ms**
 ---
