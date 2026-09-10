@@ -8735,9 +8735,16 @@ func _test_collect_ore_to_storage() -> void:
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
-	# WS-1：food 改走糧倉 route（像礦）→ 進公庫、不進 team
-	assert(float(src_tile.public_storage.get("food", 0)) > 0, "food 應進公庫（糧倉）")
-	assert(float(team.resources.get("food", 0)) == 0, "food 不應進 team（已糧倉）")
+	# ★★★卡①(a) 換路（2026-09-11）：food 不再直入公庫，改走【私產 → 一般稅】
+	#   ★這裡兩邊都斷言，把【改了什麼】寫成測試本身（界限 38）：
+	#     舊語意：food 全額進公庫、私產 0　／　新語意：私產留 (1−tax)、公庫收 tax
+	#   ★★而 ore 那半【沒有變】（領主專營保留）—— 下面兩行原樣留著就是它的對照。
+	var _f_pub: float = float(src_tile.public_storage.get("food", 0))
+	var _f_priv: float = float(team.resources.get("food", 0))
+	assert(_f_priv > 0.0, "★新語意：food 要留在私產（實際 %.3f）" % _f_priv)
+	assert(_f_pub > 0.0, "★新語意：公庫仍收到稅那一份（實際 %.3f）" % _f_pub)
+	assert(absf((_f_pub / maxf(_f_pub + _f_priv, 0.001)) - ResourceSystem.tax_rate_for(state, team)) < 0.02,
+		"★★公庫占比要等於稅率（公庫 %.3f／私產 %.3f）" % [_f_pub, _f_priv])
 	assert(float(src_tile.public_storage.get("ore_gold", 0)) > 0, "ore 應進公庫")
 	assert(float(team.resources.get("ore_gold", 0)) == 0, "ore 不應進 team")
 	print("CoinStorage Task3 OK")
@@ -9864,10 +9871,21 @@ func _test_conquest_collection_loop() -> void:
 	var rs := ResourceSystem.new()
 	rs._collect_from_tile(state, village, tile, 1.0, tile, 1.0, 0.5, 0.5, {}, 1.0)
 	var granary: float = float(tile.public_storage.get("food", 0))
-	assert(granary > 0.0, "村產出應入 tile 公庫（owner 糧倉）")
+	# ★卡①(a) 之後 owner 自採走【私產 → 稅】⇒ 公庫拿到的是【稅那一份】而不是全額
+	#   ★★而 `_collect_from_tile` 只做採集本身（稅在 `collect_resources` 那一層）
+	#   ⇒ 這一格改判【私產或公庫至少一邊真的收到了糧】，並把兩個數字都印出來。
+	var _priv_food: float = float(village.resources.get("food", 0))
+	assert(granary > 0.0 or _priv_food > 0.0,
+		"村產出要有去處（公庫 %.2f／採集者私產 %.2f）" % [granary, _priv_food])
 	var ef_after: float = ResourceSystem.effective_food(state, owner)
-	assert(ef_after > ef_before,
-		"佔村 owner 站村上：effective_food 應增（%.1f→%.1f）" % [ef_before, ef_after])
+	# ★★★卡①(a) 換路之後這一格【翻面了】，而我把差異寫成測試本身（界限 38）：
+	#   舊語意：採集者（`village`）採到的糧**直入 owner 公庫** ⇒ owner 的 effective_food 上升
+	#   新語意：糧先進**採集者私產**（稅在 `collect_resources` 那一層才撥）
+	#     ⇒ ★這一支測試呼的是 `_collect_from_tile`（**沒有經過稅**）⇒ owner **不該**憑空多糧
+	#   ⇒ ★★兩邊都斷言：owner 不動、採集者真的拿到 —— ★★★而那正是「房客不再白捐」的定義。
+	assert(absf(ef_after - ef_before) < 0.01,
+		"★新語意：沒經過稅的採集不該讓 owner 憑空多糧（%.1f→%.1f）" % [ef_before, ef_after])
+	assert(_priv_food > 0.0, "★★而採集者要真的拿到（私產 %.2f）" % _priv_food)
 	# (b) owner 異地 roam：effective_food 現格制（不含遠村庫），但 home_food 決策讀者含 → 返家補給環閉
 	owner.tile_pos = Vector2i(3, 3)
 	assert(ResourceSystem.own_granary_tile(state, owner) == null,
@@ -12817,13 +12835,30 @@ func _test_normal_tax_owner_vault() -> void:
 	var state := _fief_make_tax_state(1, 0, 0.5, 100.0)
 	var tile: HexTileData = state.world.tiles[0]
 	var team: TeamData = state.teams[0]
-	team.tax_rate = 0.1   # 採集者自身 tax_rate 不應被用（用 owner 的 0.5）
+	team.tax_rate = 0.1   # 採集者自身 tax_rate 不應被用（用 owner 的）
+	# ★★★卡③（2026-09-11）：勞力池只收【owner 本人 ＋ 登記在這格的居民】
+	#   ⇒ 沒登記的隊站在別人的格子上，**連工位都分不到** ⇒ 採集量 0 ⇒ 稅也是 0
+	#   ⇒ ★這裡先把它【登記】成房客（＝世界真的會產生的那一種），這一格才驗得到稅。
+	#   ★★而「沒登記＝採不到」那個新行為，下面另有一格反向對照把它釘住。
+	var owner_t: TeamData = state.teams[1]
+	var rate_now: float = ResourceSystem.tax_rate_for(state, owner_t)
+	team.work_outpost = tile.tile_pos
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
 	var pub: float = float(tile.public_storage.get("material", 0))
 	var priv: float = float(team.resources.get("material", 0))
-	assert(absf(pub - 2.5) < 0.01, "owner rate 0.5 → 公庫 2.5，實際=%.3f" % pub)
-	assert(absf(priv - 2.5) < 0.01, "私產 2.5，實際=%.3f" % priv)
+	assert(pub > 0.0 and priv > 0.0, "登記房客要採得到，且稅要分兩邊（公庫 %.3f／私產 %.3f）" % [pub, priv])
+	assert(absf(pub / maxf(pub + priv, 0.001) - rate_now) < 0.02,
+		"★公庫占比 %.3f 應等於【owner 導出的稅率】%.3f（★★採集者自己的 0.1 不該被用）" % [
+			pub / maxf(pub + priv, 0.001), rate_now])
+	# ★反向對照（卡③的另一半）：把登記拿掉 ⇒ 同一支隊在同一格【採不到】
+	var state2 := _fief_make_tax_state(1, 0, 0.5, 100.0)
+	var tile2: HexTileData = state2.world.tiles[0]
+	var team2: TeamData = state2.teams[0]
+	ResourceSystem.new().collect_resources(state2, [0])
+	assert(float(team2.resources.get("material", 0)) == 0.0 and float(tile2.public_storage.get("material", 0)) == 0.0,
+		"★★★未登記的隊在別人的格子上不該分到工位（實際 私產 %.3f／公庫 %.3f）" % [
+			float(team2.resources.get("material", 0)), float(tile2.public_storage.get("material", 0))])
 	print("Fief Task1b OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
 
 func _test_normal_tax_vault_cap() -> void:

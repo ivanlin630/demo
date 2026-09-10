@@ -410,7 +410,13 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 		#   ★★★而【②卸貨】單獨就足以打開那個鎖（spec 自己寫的：「②才是解鎖那一半」）：
 		#     採集照舊走 carry-limited 私產路（稅制不動），超載的部分在自家據點卸進公庫。
 		#   ⇒ 保留稅制、保留兩條不變量、鎖照樣開。★要不要改回①是 systems 的裁決，我只呈報。
-		if res in PUBLIC_RESOURCES or res == "food":
+		# ★★★卡①(a) 換路（HOW spec 2026-09-11）：**food 從【直入庫】改走【私產 → 一般稅】**。
+		#   ★病（量出來的）：房客採到的糧直接進【地主】公庫、不入 `gained` ⇒ 稅軌從未被觸發
+		#     ⇒ 房客採糧＝白工（它吃不到、也看不到那份糧）。
+		#   ★★而 `NORMAL_TAX_RES` 本來就含 food —— 它只是在這條路上永遠拿不到 food。
+		#   ★★★採集者 ＝ owner 時**結果等價**（自己付自己）；**房客**才會變：100% 沒收 → 按稅率分成。
+		#   ★礦／特殊物資維持直入庫（**領主專營**＝卡① 明文保留）。
+		if res in PUBLIC_RESOURCES:
 			# 礦/主糧進腳下 outpost 公庫（糧倉），over-cap drop = sink。
 			# food 進糧倉 = 等義「自己存自己村庫」（採集者即 owner→自存村庫），
 			# 故 food 不入 gained → 不再走一般稅 split（避免重複入庫）。
@@ -497,12 +503,42 @@ func _unload_excess_material(state: WorldState, team: TeamData, tile: HexTileDat
 			Probe.bump_pt("matunload.vault_full", "", team.team_id)
 			Probe.bump("harvest.vault_overflow_drop")
 
+# ★★★稅率導出（卡①(b)，HOW spec 2026-09-11）：★它必須是【一支函式】，不得變成新的死常數。
+#   ★只用既有八軸（人格鍵正典；單一消費者禁開新軸）：
+#     **貪婪↑ ⇒ 稅↑**（偏好積累）／**慎重↑ ⇒ 稅↓**（怕不滿 —— ★與「苛稅忍耐度讀慎重」對稱，
+#     ★★那一條是既有的信任前例：忍耐與克制讀同一軸，不是借殼）。
+#   ★★處境調變：**自家據點正在施工** ⇒ 需要料 ⇒ 稅↑（★而它是【當下狀態】不是新常數）。
+#   ★★★上下界：[TAX_MIN, TAX_MAX] —— ★而 0.3 這個舊死常數現在只是【中位】，不是預設答案。
+const TAX_BASE: float = 0.3      # ★舊死常數 ⇒ 現在是【中位錨】：人格在它兩側擺
+const TAX_PERSONALITY_SPAN: float = 0.25   # 貪婪−慎重 的滿幅擺動
+const TAX_BUILD_BUMP: float = 0.1          # 在建工程的處境調變
+const TAX_MIN: float = 0.05
+const TAX_MAX: float = 0.7
+
+static func tax_rate_for(state: WorldState, owner: TeamData) -> float:
+	if owner == null:
+		return TAX_BASE
+	var lp: PersonData = state.persons.get(owner.leader_id) if state != null else null
+	var greed: float = float(lp.values.get("貪婪", 0.5)) if lp != null else 0.5
+	var prudence: float = float(lp.values.get("慎重", 0.5)) if lp != null else 0.5
+	var rate: float = TAX_BASE + (greed - prudence) * TAX_PERSONALITY_SPAN
+	# ★處境：自家據點上有在建工程 ⇒ 缺料急迫 ⇒ 抽多一點（★讀當下世界，不是讀常數）
+	if state != null:
+		var ot: HexTileData = state.own_outpost_tile(owner.team_id)
+		if ot != null and ot.construction_team_id != -1:
+			rate += TAX_BUILD_BUMP
+	rate = clampf(rate, TAX_MIN, TAX_MAX)
+	owner.tax_rate = rate   # ★單一寫入點：其餘讀者（慢性不滿／特殊稅／UI）看到同一個值
+	return rate
+
 func _apply_normal_tax(state: WorldState, team: TeamData, tile: HexTileData,
 		gained: Dictionary) -> void:
 	if tile.outpost_level == 0:
 		return
 	var owner: TeamData = state.teams.get(tile.outpost_owner)
-	var rate: float = float(owner.tax_rate) if owner != null else float(team.tax_rate)
+	# ★★★卡①(b) 接線：`tax_rate` 原本是【零寫入點的死常數 0.3】⇒ 改由領主人格＋處境導出。
+	#   ★單一寫入點就在這裡（收稅的那一刻）⇒ 其餘讀者（不滿、特殊稅、UI）自動看到同一個值。
+	var rate: float = tax_rate_for(state, owner) if owner != null else float(team.tax_rate)
 	if rate <= 0.0:
 		return
 	var os := OutpostSystem.new()

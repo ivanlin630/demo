@@ -58,9 +58,19 @@ static func pool_of(state: WorldState, tile: HexTileData) -> float:
 	var p: float = 0.0
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
-		if t.tile_pos == tile.tile_pos and TeamData.TAG_PRODUCE in t.tags:
+		if t.tile_pos == tile.tile_pos and TeamData.TAG_PRODUCE in t.tags and _in_pool(state, t, tile):
 			p += labor_pop(t)
 	return maxf(p, 1.0)
+
+# ★★★卡③（HOW spec 2026-09-11）：勞力池原本【零 owner 檢查、零 faction 檢查】——
+#   站在那格的每一支 PRODUCE 隊都被算進去 ⇒ ★路過的隊在替地主白做工（白捐）。
+#   ⇒ 改成：**owner 隊本人 ＋ 登記在這格的居民**（登記錨 ④a 的第一個消費者）。
+#   ★★這是**行為改變**（卡③明文授權）；★★★而「登記在這格」用的是登記欄不是站位
+#     —— 走開的居民仍是這格的居民（那正是錨的意思）。
+static func _in_pool(state: WorldState, t: TeamData, tile: HexTileData) -> bool:
+	if tile.outpost_owner == t.team_id:
+		return true
+	return state.registered_at(t, tile.tile_pos)
 
 # rebalance（deterministic）：pool → 列 workstations → need 權重 → 比例+demand-cap+溢出串聯 → fill。
 # ★★★compute / persist 拆開（systems 重裁 2026-09-08）――
@@ -74,7 +84,7 @@ static func compute_alloc(state: WorldState, tile: HexTileData) -> Dictionary:
 	var pool: float = 0.0
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
-		if t.tile_pos == tile.tile_pos and TeamData.TAG_PRODUCE in t.tags:
+		if t.tile_pos == tile.tile_pos and TeamData.TAG_PRODUCE in t.tags and _in_pool(state, t, tile):
 			teams.append(t); pool += labor_pop(t)   # ★動員後只算未動員勞力（guns-vs-butter）
 	# 列 workstations（sorted key，deterministic）：active 採集資源 + active 製造設施。
 	var demand: Dictionary = {}
