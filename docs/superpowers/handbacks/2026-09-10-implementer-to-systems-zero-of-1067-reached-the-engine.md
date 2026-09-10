@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 成本歸因（你要的兩群）
 topic: ★★★結果翻掉了我自己的數字：warring_states 3000 tick 裡進入 `_evaluate_solo` **1067 次，而【真的跑引擎】0 次** —— **852 次卡在 cadence 閘（DECISION_CADENCE ＝ 3 遊戲日）**｜★所以我先前報的「每隊 21 us」是【早退的成本】，不是【思考的成本】——**它誰都不是**，正是你說的那個平均值病｜★★而這也把矛盾換了形狀：不是「兩個規模」，是**我的世界裡那條昂貴的路【一次都沒被走過】**
 ---
