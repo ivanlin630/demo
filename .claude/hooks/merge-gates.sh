@@ -130,8 +130,11 @@ while IFS=$'	' read -r id cmd purpose expect; do
 done < "$REG"
 echo "───────────────────────────────"
 echo "[MERGE-GATES] 註冊表 $N 支｜總時 $((SECONDS-TOTAL0))s"
+# ★★「乾淨」只算【會影響判決的那幾個路徑】（scripts / .claude / 註冊表）：
+#   ★★★本專案是多終端共用同一個 main 工作區，它【幾乎永遠是髒的】（別人的信、量測檔）
+#   ⇒ 若要求全樹乾淨，這個基線【永遠不會被記下來】＝又一支裝好但沒接電的守衛。
 # ★只有【在 main 上、且工作區乾淨】的那一輪才有資格更新基線（否則記的是某個人的工作區）
-if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ]; then
   printf '%s	%s	%s
 ' "$(git rev-parse --short HEAD)" "${#FAILED[@]}" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$MG_BASE"
   echo "[MERGE-GATES] ★已更新 main 基線紅數 ＝ ${#FAILED[@]}"
