@@ -119,3 +119,52 @@ static func _home_granary_food(state: WorldState, team: TeamData) -> float:
 ③★不改 `own_outpost_tile` ／ `OwnerOutpostIndex` 本身
 ④★★不宣稱本票解掉了單幀凍結（錯開票已經把單幀解掉了；本票是【吞吐】）
 ```
+
+---
+
+## ⑦ ★★★R² 回件（2026-09-10）：**CLEAN，直接 dispatch** —— 我標未驗的兩格都查完了
+
+### (1) 語意等價**是機制保證的**（界限第 16 條的正面答案）——三層都查過，沒有縫
+
+```
+①**同一個迭代序**：`world_state.gd:320 for tile_id in world.tiles`，與 `_home_granary_food`
+  原本那個迴圈是同一個字典、同一個天然 key 序；註解自己寫
+  「依 world.tiles 迭代序 → 每 owner 只留第一個命中＝**舊掃同一選擇**」。
+②★**staleness 檢查在【每一次呼叫】**：`world_state.gd:275`
+  `if _oo_epoch != OwnerOutpostIndex.epoch: _rebuild_owner_outpost()`
+  ⇒ **不是排程式重建**，是每次呼叫先比版號 ⇒ ★★**不存在「暫時還沒重建所以讀到舊值」的窗**。
+③★★★**所有會動 `outpost_owner`／`outpost_level` 的 production 寫入點都呼 `invalidate()`**
+  （R² 逐一查了所有真實 `=` 賦值，排除比較運算）：`outpost_owner_bank.gd:9 set_owner`、
+  `outpost_system.gd` 四處跨 0 事件、`game_setup.gd` 兩處初始佈點
+  ⇒ **沒有繞過 chokepoint 直接寫欄位卻不觸發失效的第二條路**。
+```
+
+### (2) 「一隊能不能有多個 outpost」＝**能**，★而答案就寫在索引自己的文件裡
+
+```
+`owner_outpost_index.gd:8` 逐字：「一隊多據點時回哪個 tile **取決於 tiles 的插入序**」
+⇒ ★**這句話的存在本身就是答案** —— 單一據點的世界不需要寫這句話。
+⇒ ★★所以 §③② 判 `need_oracle.gd:161` **不可盲換是對的**：
+  它要「有沒有**一個具備某項設施**的自家據點」，而索引只回第一個
+  ⇒ 第一個沒有、第二個有 ⇒ **索引會漏掉真正的答案**。
+⇒ ★★★**這一格不必再等驗證** —— 它已經被驗證了（間接透過索引自己的文件）。
+```
+
+### (3) 「把子相位印全」：★**它已經落地了，不是計畫**
+
+```
+`faction_ai_system.gd:840-857` —— `[FaiPhase]` 已改成印【全部】子相位
+（`:847` 註解逐字「印全部子相位,不只前8名(systems 2026-09-10)」）。
+```
+
+★★★**而 R² 順手讀到一件會影響本票數字的事（★它打到我自己的誠實限）**：
+
+```
+`:853-855` 註解：錯開票把 `_evaluate_solo` 移出 `evaluate_all` 之後，
+  **`loop2.solo*` 的累計時間與 `total` 的分母已經不同**（一個累積、一個單次）。
+⇒ ★所以 §⑤ 那句「`gather.home_food` ≒ 1.3s ÷ `loop2.solo` ≒ 7.6s ⇒ 約 17%」
+  **是跨分母相除** ⇒ ★★**那個 17% 不可引用**（界限第 22 條打到我自己身上）。
+⇒ ★★★修正：**本票不引用任何比例**，只引用 `gather.home_food` 的**絕對 us**
+  （1.29-1.51s，同一份 log 的同一行）—— 而「它是不是全部」這個問題，
+  等**印全之後的那一份 log** 回答。
+```
