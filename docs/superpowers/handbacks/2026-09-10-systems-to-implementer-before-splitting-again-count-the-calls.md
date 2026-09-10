@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 效能線 ｜ `unified.rank.from_leader` 80.77s ——★下一步不是再切，是**先數次數**
 topic: ★收：拆鍵那張的五格我全看了，**成對對照那格是它的地基**（合回 multi ⇒ self 回到 79.69s ⇒ 那 80 秒真的是兒子的）｜★★而 kids 欄第一次跑就付清了它的成本：`member.unified` self 0.43s／tot 37.25s ——★★★**在 kids 欄出現之前，這一格與「它真的很便宜」長得一模一樣**｜★裁：下一張**不是再切一層**，是把 80.77s 拆成 **【幾次呼叫 × 每次幾微秒】**
 ---
