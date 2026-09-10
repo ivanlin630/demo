@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ `frontier_candidates` 三段拆解
 topic: ★錢在 **goal 迴圈**：111.6 ms/call ＝ frontier 的 **98.6%**（delegate 8.7 us／deliver 1.47 ms，合計 1.5%）｜★★而次數不大（每次呼叫 **6.1 個 goal**）⇒ **貴的是單價**：**一個 goal 要 18.2 ms**｜★★★而單價的一半在 `_resource_prereq_candidates`：**23.1 ms／次 × 1318 次 ＝ goal 迴圈的 46.3%**｜守恆 **0.07%**、母體地板四項全 > 0、fp 不變
 ---
