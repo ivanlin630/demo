@@ -10993,7 +10993,11 @@ func _test_find_trade_partner_outpost_only() -> void:
 func _test_trade_timeout() -> void:
 	print("--- Engagement Task7b: 貿易 task 超時 → idle ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	state.world.current_tick = 1500
+	# ★★★床的固定值凍結在【舊的時間尺度】：TRADE_TIMEOUT ＝ TICK_PER_DAY×6 ＝ 8640，
+	#   而這裡原本寫死 1500 ⇒ 超時【本來就不該 fire】⇒ ★世界是對的，床是錯的。
+	#   ⇒ 由常數導出：★★寫字面值＝把「有人有權改它」這件事忘掉，
+	#   ★★★而時間統一 wave 已經改過一次（×5→1）—— 它會再改。
+	state.world.current_tick = FactionAISystem.TRADE_TIMEOUT + 1
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
 	state.world.tiles[0] = tile
 	var t := TeamData.new(); t.team_id = 0; t.faction_id = -1; t.tile_pos = Vector2i(0, 0)

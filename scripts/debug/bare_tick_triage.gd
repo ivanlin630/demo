@@ -113,6 +113,9 @@ func _run() -> void:
 		_mk("TICKS_PER_HOUR / 6", "c_whitelist", "★單位結構：遭遇動作＝10 分鐘＝1/6 小時。★★這個 6 不隨小時縮放——根怎麼改，一小時永遠是六個十分鐘"),
 		# ── (c) 白名單：根常數本身 ──
 		_mk("const TICKS_PER_DAY:", "c_whitelist", "根常數本身：hours()/days() 由它導出，改成 hours() 會循環定義"),
+		_mk("bare-tick-ok: 單位換算分子", "c_whitelist",
+			"★單位換算的【分子】：TICKS_PER_DAY ÷ 每格 tick 成本 ＝ tiles/day（MOVE_TILES_PER_DAY spec 的單位鐵則：用成本不用速度）",
+			false, "return float(WorldState.TICKS_PER_DAY) / float(maxi(x, 1))   # bare-tick-ok: 單位換算分子"),
 		_mk("const TICKS_PER_SECOND:", "c_whitelist", "★播放速率：每【真實秒】渲染幾個 world tick —— 量的是現實時間，不隨小時縮放"),
 		# ── (c) 白名單：曆法結構（是時間量，但不隨 tick 縮放）──
 		_mk("TICKS_PER_DAY / 24", "c_whitelist", "曆法結構：24＝一天幾小時（改根時它必須維持 24）"),

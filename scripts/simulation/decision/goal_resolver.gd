@@ -628,7 +628,10 @@ const SEEK_DAYS: float = 7.0
 #   「估算器禁手抄物理」，而批一① 正是為此把核心抽成 static。
 #   ★★單位鐵則：`move_cost_pure` 回的是【每格 tick 成本】⇒ TICKS_PER_DAY / cost 才是【格/天】。
 static func _tiles_per_day(state: WorldState, team: TeamData) -> float:
-	return float(WorldState.TICKS_PER_DAY) / float(maxi(MovementSystem.move_cost_pure(state, team, 1.0, null), 1))
+	# bare-tick-ok: 單位換算分子（TICKS_PER_DAY ÷ 每格 tick 成本 ＝ tiles/day）——
+	#   ★這正是 MOVE_TILES_PER_DAY spec 的單位鐵則：**用成本、不用速度**
+	#   （直接拿速度代會差約 TICKS_PER_DAY 倍）⇒ 它不是「裸 tick 常數」，是分子。
+	return float(WorldState.TICKS_PER_DAY) / float(maxi(MovementSystem.move_cost_pure(state, team, 1.0, null), 1))   # bare-tick-ok: 單位換算分子
 
 # ★這支隊「七天走得到」的格數。★地板 1：被 clamp 到最慢的隊【仍要看得到隔壁格】——
 #   否則本票把【慢】變成【瞎】，而那是新的病不是修好的舊病。
