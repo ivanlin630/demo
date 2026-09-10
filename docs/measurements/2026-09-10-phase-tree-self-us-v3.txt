@@ -1,0 +1,33 @@
+# 相位樹 v3：unified.rank 按【呼叫端】拆鍵之後的 self_us
+# 跑到底：warring_states｜6000 tick ＝ 4.2 遊戲天｜A/B 兩模式各一趟｜196 筆 spike 樣本
+# evaluate_all 單次 total：中位 867.2 ms／max 6796.0 ms｜★未登記 0／★★負值 0
+# ★★★誠實限（三條，systems 要求逐條留著）：
+#   ①spike 母體（>100ms 才印）⇒ 它答的是【凍結的那些 tick 裡誰最貴】，不是【世界總共把時間花在哪】
+#   ②A/B 兩模式混在同一張表 ⇒ 只談相對大小，不談單一模式絕對值
+#   ③from_solo 不會出現在本表：solo 在 evaluate_all 之外，而本 dump 只印 evaluate_all 的 _fai_ph
+
+phase                             出現   self 總計(s)  self max(ms)   tot 總計(s)  kids
+unified.rank.from_leader            188        80.77       1962.1        80.77  0
+unified.rank.from_member            192        36.82       1464.0        36.82  0
+loop3.orders_ambition               196        27.33        577.9        27.33  0
+loop3.threat                        196        10.81       1414.1        13.72  1
+loop3.misc                          196         9.65        396.6         9.65  0
+infra.new_loc                       196         9.21        101.7         9.21  0
+unified.rank.from_threat             18         2.91       1321.7         2.91  0
+loop2.member_strategy               196         2.20         84.8         2.20  0
+infra.facility                      196         1.39         17.4         1.39  0
+loop2.indep_strategy                196         1.34         67.5         1.34  0
+member.unified                      196         0.43         27.4        37.25  1
+loop1.infra                         196         0.41          5.9        11.01  2
+loop3.outpost                       196         0.25         32.8         0.25  0
+loop1.update_goals                  196         0.16          1.4         0.16  0
+loop1.betray                        196         0.10          1.0         0.10  0
+loop3.survival                      196         0.10         16.6         0.10  0
+
+【multi 段】self≡tot：gather.market 22.53s／gather.home_food 21.51s／indep.weakest_prey 2.50s／gather.head 2.02s／gather.weak_prey 1.94s／gather.readiness_prey 1.26s
+
+# ★守恆檢查（★★不寫「差不多」）：四個 from_* 的 tot 相加 ＝ 120.51s
+#   vs 拆之前 unified.rank tot ＝ 123.01s ⇒ 差 −2.50s（−2.0%）
+#   ★差額的兩個來源：①from_solo 不在本容器（見誠實限③）②牆鐘量測的跑間噪音
+# ★★成對對照：把四個鍵合回一個 multi ⇒ assign.leader_unified 的 self 回到 79.69s
+#   （拆開後它是 0.09s）⇒ ★★★證明那 80 秒【真的是 unified.rank 在它底下花的】
