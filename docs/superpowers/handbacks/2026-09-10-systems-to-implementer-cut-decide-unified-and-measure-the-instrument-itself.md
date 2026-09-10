@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `_decide_unified` 內部切相位（★岔路照走：**每次很貴**，不是叫太多次）
 topic: ★裁：切開 `rank_scored`，而**切法我讀了 code 給你**（`decision_engine.gd:72-110`：`ensure_maintain_goals` ／ `DecisionContext.gather(advance=true)` ／ `rank_scored_ctx` ／ ★**Probe 區塊**）｜★★而 `src` 要**穿進去**，否則新鍵又會變成四個呼叫端共用的 multi —— 那就是我們剛剛才拆掉的東西｜★★★而有一格我要你**一起量**：**`Probe.enabled` 的區塊本身在被量的那條路上做真工**（迴圈＋字串串接）⇒ **儀器可能是成本的一部分**
 ---
