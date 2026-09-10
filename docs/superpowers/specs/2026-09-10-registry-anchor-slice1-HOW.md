@@ -103,3 +103,53 @@ owner: systems ｜ 2026-09-10 ｜ **WHAT 授權**：blueprint 家窗 v1 卡④�
 ⇒ ★★★而它值得記的原因與今天的其他幾筆同族：**註解是【當時的意圖】，不是【現在的事實】**，
   而它會被下一個人當成事實引用（今天已經是第三次）。
 ```
+
+---
+
+## ⑦ ★★★R① 判決：**premise_contradiction 成立** —— 而它揭出的比「漏三站」大
+
+### (1) 母體確實不完整（R² 用**身體特徵**掃出來的三個）
+
+```
+①`resource_system.gd:469-473 _unload_excess_material`  判準＝**team OR parent**
+②`outpost_system.gd:791-799 _faction_owns`（呼叫端 `:774` ⇒ 子隊**腳下那格**）
+                                                        判準＝**team OR parent OR faction**
+③`manufacturing_system.gd:142/204-210 _team_works_tile` 判準＝**team OR faction**
+   ⇒ ★**與 `is_resident_static` 的識別軸【完全一樣】**，註解自己寫「生產權：owner 本人或同 faction」
+（＋候選：`player_command_system.gd:78-82 _can_invite_settle` 判準＝**team only** ⇒ 歸 ④b）
+```
+
+### (2) ★★★而真正的發現是：**「這支隊在這座村算不算自己人」有【四份】不同的答案**
+
+```
+   is_resident_static     team OR faction
+   _team_works_tile       team OR faction          ← ★同一個問題的第二份答案
+   _unload_excess_material team OR parent
+   _faction_owns          team OR parent OR faction
+   _can_invite_settle     team only
+⇒ ★**五個地方、四種識別軸，而沒有任何一處寫著它們為什麼不同。**
+⇒ ★★所以 R² 的那句要逐字留著：**「這次是三套真相不是兩套。」**
+```
+
+### (3) 本票的處置（★分三類，不含糊）
+
+```
+★**進本票**：③`_team_works_tile` —— ★★理由不是「順手」，是**它與本票的謂詞識別軸完全相同**
+  ⇒ 遷移之後兩者的真值集合**逐隊相同** ⇒ 換讀 `work_outpost` 是**行為中性**的
+  ⇒ ★★★而不搬它 ＝ 明知有第二份答案還讓它繼續分岔。
+★**不進本票、但要【記名上鎖】**：①②（parent 軸）——
+  ⇒ 它們問的**不是同一件事**（子隊對母隊 ≠ 居民對村）⇒ 搬不搬是**設計判斷**（呈 blueprint）
+  ⇒ 本票要做的是：**把它們的識別軸寫在 code 旁邊**（現在沒有任何一處寫），
+    並讓棘輪認得這個形狀 ⇒ ★**第五種軸不得再靜默出現**。
+★**歸 ④b**：`_can_invite_settle`（招攬前提檢查）—— 記名，本票不動。
+```
+
+### (4) ★R² 的誠實限我照收，並把它變成一格驗收
+
+```
+R²：裸掃只到「同函式體」粒度，**跨函式（守衛在 A、使用在呼叫端）看不到**。
+⇒ ★★而他自己給了正解，與我們今天在索引那張用過的同一支工具：
+  **上線後開 `shadow_check` 對照** —— 讓**真正跑起來的世界**把還沒被轉的地方逼出來。
+⇒ 驗收⑦：`work_outpost` 版與舊站位判定**逐次比對**，跑一窗 ⇒ **零不一致**；
+  ★★★並**先驗母體地板**（比對次數 > 0，否則「零不一致」沒有鑑別力）。
+```
