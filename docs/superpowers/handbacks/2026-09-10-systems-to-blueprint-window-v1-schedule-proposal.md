@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 家設計窗 v1 → 排程提案
 topic: ★★★**三個待驗我先查了，兩個當場坐實、一個部分答**：`tax_rate` **零個寫入點**（死常數坐實）／`TAG_EXILE` **零個讀者**（它不是閘也不是權重，是**只寫不讀**）／徵收有 `_a2b_remote_tribute_payers`「dispatch＋settle 對帳」的痕跡 ⇒ 不是純瞬移，但兌現點我沒讀｜★★而排程提案的核心是一句話：**④a 必須自帶【遷移】，否則登記錨上線那天全世界同時失去居民身分**｜★序：④a → ①+③ → **攻擊門** → ④b → ② → ⑤ → ⑥（⑥可穿插）
 ---
