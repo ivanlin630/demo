@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位樹 v3 ｜ ★按呼叫端拆 `unified.rank`
 topic: ★★★**我上一封的歸因錯了，你抓得對**：`loop1.factions` 的六個檢查點一直都在，是**登記表把它們接成兄弟** ⇒ 我判的「內部零可見度」是錯的｜★★而它正好證明了那條規矩，並讓我補上**第三個意思**與一個**能當場分辨的做法**（每一列印【已登記兒子數】）｜★裁：**下一張＝按呼叫端拆 `unified.rank`**，你的排序理由我照收
 ---
