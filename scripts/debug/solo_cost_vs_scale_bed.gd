@@ -22,6 +22,13 @@ func _initialize() -> void:
 	var runner := SimRunner.new()
 	# N 分桶 → [每隊 us…]
 	var buckets: Dictionary = {}
+	var eng_bucket: Dictionary = {}
+	var chp_bucket: Dictionary = {}
+	var _prev_eng: int = 0
+	var _prev_chp: int = 0
+	var _tot_eng: int = 0
+	var _tot_chp: int = 0
+	Probe.arm()
 	for i in range(ticks):
 		FactionAISystem._fai_ph.clear()
 		var before: Dictionary = {}
@@ -37,6 +44,24 @@ func _initialize() -> void:
 			if t.solo_think_last_tick != int(before.get(tid2, 0)):
 				x += 1
 		var us: int = int(FactionAISystem._fai_ph.get("loop2.solo", 0))
+		# ★★★兩群分開（systems 2026-09-10）：平均值把【早退】與【真的跑引擎】混成一個數
+		#   ⇒ 「每隊 21 us」誰都不是。這裡分別取：跑引擎那群的每次成本／早退那群的每次成本。
+		var eng_us: int = int(FactionAISystem._fai_ph.get("loop2.solo_engine", 0))
+		var chp_us: int = int(FactionAISystem._fai_ph.get("loop2.solo_cheap", 0))
+		var eng_n: int = int(Probe.counts.get("solo.engine", 0)) - _prev_eng
+		var chp_n: int = int(Probe.counts.get("solo.cheap", 0)) - _prev_chp
+		_prev_eng = int(Probe.counts.get("solo.engine", 0))
+		_prev_chp = int(Probe.counts.get("solo.cheap", 0))
+		if eng_n > 0:
+			if not eng_bucket.has((n_elig / 10) * 10):
+				eng_bucket[(n_elig / 10) * 10] = []
+			(eng_bucket[(n_elig / 10) * 10] as Array).append(float(eng_us) / float(eng_n))
+		if chp_n > 0:
+			if not chp_bucket.has((n_elig / 10) * 10):
+				chp_bucket[(n_elig / 10) * 10] = []
+			(chp_bucket[(n_elig / 10) * 10] as Array).append(float(chp_us) / float(chp_n))
+		_tot_eng += eng_n
+		_tot_chp += chp_n
 		if x <= 0 or us <= 0:
 			continue
 		var bucket: int = (n_elig / 10) * 10   # N 以 10 為一桶
@@ -53,6 +78,29 @@ func _initialize() -> void:
 		var med: float = float(arr[arr.size() / 2])
 		pts.append([int(k), med, arr.size()])
 		print("  %3d-%3d  %5d   %8.1f" % [int(k), int(k) + 9, arr.size(), med])
+	# ★★兩群各自的成本（systems 要的那一格）
+	print("")
+	print("★★兩群分開：進入 _evaluate_solo 共 %d 次｜其中【真的跑引擎】%d 次（%.1f%%）｜早退 %d 次" % [
+		_tot_eng + _tot_chp, _tot_eng,
+		100.0 * float(_tot_eng) / maxf(1.0, float(_tot_eng + _tot_chp)), _tot_chp])
+	print("★早退卡在哪一關：player=%d｜交戰中=%d｜無領袖=%d｜cadence(3 遊戲日)=%d" % [
+		int(Probe.counts.get("solo.exit.player", 0)), int(Probe.counts.get("solo.exit.in_combat", 0)),
+		int(Probe.counts.get("solo.exit.no_leader", 0)), int(Probe.counts.get("solo.exit.cadence", 0))])
+	var _acc: int = int(Probe.counts.get("solo.exit.player", 0)) + int(Probe.counts.get("solo.exit.in_combat", 0)) 		+ int(Probe.counts.get("solo.exit.no_leader", 0)) + int(Probe.counts.get("solo.exit.cadence", 0))
+	print("★★未歸類 %d 次（進入 %d − 已具名早退 %d − 跑引擎 %d）—— ★我的 tap 沒蓋到的 return，說出來不遮" % [
+		_tot_eng + _tot_chp - _acc - _tot_eng, _tot_eng + _tot_chp, _acc, _tot_eng])
+	print("N 桶      跑引擎那群 每次 us（中位）   早退那群 每次 us（中位）")
+	var eks: Array = eng_bucket.keys()
+	eks.sort()
+	for k in eks:
+		var ea: Array = eng_bucket[k]
+		ea.sort()
+		var ca: Array = chp_bucket.get(k, [])
+		ca.sort()
+		print("  %3d-%3d   %10.1f (n=%d)        %8.1f (n=%d)" % [int(k), int(k) + 9,
+			float(ea[ea.size() / 2]), ea.size(),
+			float(ca[ca.size() / 2]) if not ca.is_empty() else -1.0, ca.size()])
+	print("")
 	if pts.size() >= 2:
 		var a = pts[0]
 		var b = pts[-1]

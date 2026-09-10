@@ -2996,6 +2996,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	#   在起點與終點之間再呼叫一次時鐘 ＝ 把新加的量測算進 `unified.rank`，
 	#   ★而 `unified.rank` 正是本輪要歸因的那個數字（同上一顆 tap 的陷阱，只是這次是「量測自己的量測」）。
 	var _tr0: int = _tr
+	_solo_ran_engine = true                         # ★同上：走到 rank 就不是早退
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
 	# ★★★承諾再派 funnel（#10，2026-09-02）——★掛在【決策 entry】，而理由是 reviewer 給的硬的那個：
@@ -3835,17 +3836,37 @@ func _should_reeval(state: WorldState, team: TeamData) -> bool:
 		return true
 	return false   # 否則 cadence 節流
 
+# ★★★成本歸因用的薄包裝（systems 2026-09-10）：★平均值把【早退的隊】與【真的跑引擎的隊】
+#   混成一個數 ⇒ 「每隊 21 us」既不是早退的成本、也不是跑完的成本，它誰都不是。
+#   ⇒ 這一層把兩群分開計時／計數：solo.enter／solo.engine ＋ 相位 loop2.solo_engine／_cheap。
+#   ★★零行為改變：只包一層計時與計數（★零 RNG、不碰 state）。
+static var _solo_ran_engine: bool = false
+
 func _evaluate_solo(state: WorldState, team: TeamData) -> void:
+	var _t0: int = Time.get_ticks_usec()
+	_solo_ran_engine = false
+	if Probe.enabled: Probe.bump("solo.enter")
+	_evaluate_solo_body(state, team)
+	if _solo_ran_engine:
+		if Probe.enabled: Probe.bump("solo.engine")
+		_fai_ph["loop2.solo_engine"] = int(_fai_ph.get("loop2.solo_engine", 0)) + (Time.get_ticks_usec() - _t0)
+	else:
+		if Probe.enabled: Probe.bump("solo.cheap")
+		_fai_ph["loop2.solo_cheap"] = int(_fai_ph.get("loop2.solo_cheap", 0)) + (Time.get_ticks_usec() - _t0)
+
+func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id: return   # 玩家隊不受 SoloAI 控制
 	if team.combat_target != -1: return
 	var leader_p = state.persons.get(team.leader_id)
 	if leader_p == null: return
 	# 統一決策引擎切片：商隊-tag solo 隊走 DecisionEngine（取代舊 solo 計分 + MERCHANT_TRADE_BONUS）。
 	if uses_unified(team):                          # ← hoist 到 IDLE gate 前(unified 退 latch)
+		_solo_ran_engine = true                     # ★這條路【真的跑引擎】—— 成本歸因用
 		_decide_unified(state, team)
 		return
 	# ⑦ 統一重評 gate（收斂到單一 _should_reeval predicate；IDLE/stuck/crisis/命令新即時，否則 cadence 節流）。
 	if not _should_reeval(state, team):
+		if Probe.enabled: Probe.bump("solo.exit.cadence")   # ★DECISION_CADENCE ＝ 3 遊戲日
 		return
 	# 排下次重評：crisis 短 cadence（反射），常態全 cadence
 	team.decision_eval_next_tick = state.world.current_tick \
