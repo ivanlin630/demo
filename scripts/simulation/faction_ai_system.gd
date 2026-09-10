@@ -4740,6 +4740,15 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		return false
 	var pop: int = maxi(6, level * 4)   # TEST VALUE — 建造隊最小 6 人；pop*2 門檻=12(lv1)
 	if leader_team.population < pop * 2:
+		# ★逐筆 detail（照同函式材料軸 :4722 的同款式）：★★聚合 counter 說得出「被擋幾次」，
+		#   說不出【差多少人、誰在擋、當時多大】—— 而那正是「這個門檻該不該是 pop*2」要看的東西。
+		#   ★★★而門檻本身（pop*2、TEST VALUE）本票【不動】，只是讓它變得可量。
+		if Probe.enabled:
+			Probe.bump_sample("dispatch_fail.pop_detail", {"team": leader_team.team_id,
+				"faction": leader_team.faction_id, "pop": leader_team.population,
+				"need": pop * 2, "gap": pop * 2 - leader_team.population,
+				"level": level, "named": leader_team.named_members.size(),
+				"minor": leader_team.minor_population, "tick": state.world.current_tick}, 30)
 		_log_dispatch_fail(leader_team.faction_id,
 			"pop 不足: %d < %d" % [leader_team.population, pop * 2], cost)
 		if Probe.enabled: Probe.bump("funnel.build_gate.pop")
