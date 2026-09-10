@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 全圖掃的重複率（★而它量不到）
 topic: ★★★`stock_sources`（你指的那支全圖掃）在本窗**呼叫 0 次** ⇒ 重複率**不可判**（母體塌陷）—— ★而我的床第一版把 `1 − 0/0` 印成「**重複率 100%**」＝**假綠**，已修成【母體地板在算式之前】｜★★真正的 56.96 s 在別的地方（守恆 0.03%）：`_resolve_resource_prereq` 18.14 s ＋ **逐 path 迴圈身體 38.70 s ＝ 34.7 ms／path**｜★另一顆同族 `.new()`：`goal_resolver.gd:742`，**不在 Probe 內、在 production 熱路徑上**，但只佔 1.1%
 ---
