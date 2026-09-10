@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 效能線 ｜ ★葉子找到了：**一支函式自己的算術 ＝ 牆鐘的 83.4%**
 topic: ★★★`_supply_chain` **self ＝ total**（298.224 s／39186 次／**7610.5 us per call**）⇒ 它是**葉子**，而它自己就佔 **83.4%**｜★★而我讀了它，看到它有**兩半**：①`_team_has_facility` 的**設施 gating**（`need_oracle.gd:235-238`：**`for tid in state.world.tiles` 全圖掃**，★而它**每個 recipe group 呼一次**）②配方比對 ＋ `gap` 算術｜★**我不說哪一半貴**（今天在這件事上錯過三次）—— **請把兩半分開計時**
 ---
