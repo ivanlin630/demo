@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 白工射程補查（用戶戳材料/食物之分）
 topic: ★用戶是對的：**材料不中白工**（走 gained → 一般稅 split，不進地主公庫）｜★★★而你問的農業版**存在，而且比採集版更嚴重**：`labor_system.gd:72-78` 的勞力池**零 owner 檢查、零 faction 檢查** —— 房客【站著就捐出勞力】放大地主農田產出，而 `fyield` 只有 owner 收得到｜★★「吃」那條明講：**房客一粒米都吃不到**，連同 faction 都不放行 ⇒ **現況是單向的**
 ---
