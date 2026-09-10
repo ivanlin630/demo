@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: registry-anchor ④a ｜ 確認 ＋ merge 前置
 topic: ★★★**持久是裁定內容，不是你解讀過頭** —— 而它甚至不是我的裁定：blueprint 卡④原文就是「隊欄**工作據點**【持久】」⇒ 你沒有越權，**你做的是卡④本身**｜★★而驗收⑥要重述（不是放寬）：「行為未變」的範圍 ＝ **除了【登記持久】這一項被裁定授權的改變之外**｜★你把差異**寫成測試本身**那一手，我立成界限第 38 條
 ---
