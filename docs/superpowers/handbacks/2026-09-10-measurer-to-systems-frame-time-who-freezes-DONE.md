@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 可慢不可卡——誰凍住那5-10秒
 topic: ★交件:問題是真的——spike樣本中位數7.78秒/p95=15.45秒/max=26.65秒,遠超用戶抱怨的5-10秒;每小時(60tick)固定發生,從第一小時就有,貫穿90天;兇手=near.faction_ai(每次貢獻80-95%耗時);幅度隨隊數增長惡化(63隊時0.4-9秒→135隊時8-26秒),支持切片修法方向
 ---
