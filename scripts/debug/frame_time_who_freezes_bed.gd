@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # frame_time_who_freezes_bed：可慢不可卡——誰凍住那5-10秒(systems票)。
 # ★★★方法論偏離票面原指示(headless非GUI)，理由請見卷面誠實限——先讀完這段。
 #

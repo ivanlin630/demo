@@ -18,12 +18,12 @@ func _initialize() -> void:
 			break
 	if team == null:
 		print("★母體塌陷：找不到隊 ⇒ 不可判")
-		print("=== DONE === SECTIONS=0/1 FAILS=1")
+		print("=== 不可判（母體塌陷）——★純診斷床不下判決 ===")
 		quit(1)
 	var tile: HexTileData = st.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	if tile == null:
 		print("★母體塌陷：隊腳下沒有 tile ⇒ 不可判")
-		print("=== DONE === SECTIONS=0/1 FAILS=1")
+		print("=== 不可判（母體塌陷）——★純診斷床不下判決 ===")
 		quit(1)
 	tile.outpost_type = "civilian"
 	tile.outpost_level = 1
@@ -45,7 +45,7 @@ func _initialize() -> void:
 	var demolished: bool = tile.outpost_level == 0
 	if not demolished:
 		print("★★拆除【沒有發生】⇒ 本床不可判（不是「沒有殘值」）")
-		print("=== DONE === SECTIONS=0/1 FAILS=1")
+		print("=== 不可判（母體塌陷）——★純診斷床不下判決 ===")
 		quit(1)
 
 	# 重建（同一格、同一隊）
@@ -61,5 +61,5 @@ func _initialize() -> void:
 		"是" if (tile.farming_level == 0 and tile.weaponsmith_level == 0) or not rebuilt else "否",
 		tile.farming_level, tile.weaponsmith_level,
 		"發生了" if rebuilt else "★沒發生 ⇒ 該欄不可判"])
-	print("=== DONE === SECTIONS=1/1 FAILS=0")
+	print("=== 事實查核完畢（★純診斷：本床不下判決，判準在交件信與測量檔）===")
 	quit()
