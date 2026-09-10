@@ -80,12 +80,18 @@ if [ "${MG_NO_FETCH:-0}" != "1" ]; then
 fi
 [ -f "$REG" ] || { echo "[MERGE-GATES] FAIL：註冊表不存在 $REG"; exit 1; }
 FAILED=(); TOTAL0=$SECONDS; N=0
-# ★★★2026-09-06:讀進來先剝 ``(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
-#   `expect` 會尾帶 `` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
+# ★★★2026-09-06:讀進來先剝 `
+`(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
+#   `expect` 會尾帶 `
+` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
 #   ★★而 .gitattributes 已 eol=lf ⇒ repo 的 blob 是乾淨的,壞的只有【工作區那一份】
 #   ⇒ ★★★所以修在【讀取端】:誰寫的都不會再毒到判準。
 while IFS=$'	' read -r id cmd purpose expect; do
-  id="${id%$''}"; cmd="${cmd%$''}"; purpose="${purpose%$''}"; expect="${expect%$''}"
+  id="${id%$'
+'}"; cmd="${cmd%$'
+'}"; purpose="${purpose%$'
+'}"; expect="${expect%$'
+'}"
   case "$id" in ''|'#'*) continue;; esac
   N=$((N+1)); T0=$SECONDS
   if [ -z "${expect:-}" ]; then
@@ -101,7 +107,7 @@ while IFS=$'	' read -r id cmd purpose expect; do
   if [ $RC -ne 0 ]; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— $purpose"; printf '%s
 ' "$OUT" | tail -5; FAILED+=("$id")
-  elif ! printf '%s' "$OUT" | grep -qE "$expect"; then
+  elif ! printf '%s' "$OUT" | grep -qE -- "$expect"; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— ★★跑完了但【沒有印出它該印的結論】"
     echo "    expect: $expect"; printf '%s
 ' "$OUT" | tail -3
