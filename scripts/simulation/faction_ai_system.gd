@@ -844,10 +844,17 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			for ph in _fai_ph:
 				parts.append({"n": ph, "us": int(_fai_ph[ph])})
 			parts.sort_custom(func(a, b): return int(a["us"]) > int(b["us"]))
+			# ★★★印【全部】子相位，不只前 8 名（systems 2026-09-10）：
+			#   ★前 8 名以外的東西【看不到】⇒ 而「剩下 83% 裡有沒有更大的一筆」正是要問的。
+			#   ★★而這是儀器改動：不改任何判斷、不改任何門檻。
 			var top: String = ""
-			for i in range(mini(8, parts.size())):
+			for i in range(parts.size()):
 				top += "%s=%dus " % [parts[i]["n"], parts[i]["us"]]
-			print("[FaiPhase] tick=%d total=%d us | %s" % [state.world.current_tick, total, top])
+			# ★★★標籤誠實限：自從「錯開」票把 _evaluate_solo 移出 evaluate_all 之後，
+			#   loop2.solo* 是【上次 hourly dump 以來累積的】，不是「這一 tick 的」——
+			#   ⇒ 而 total 仍然只算 evaluate_all 這一次。兩者的分母不同，讀的人要知道。
+			print("[FaiPhase] tick=%d total=%d us | phases=%d | %s" % [
+				state.world.current_tick, total, parts.size(), top])
 	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
 	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
 	SpecimenTracer.heartbeat_sweep(state)
