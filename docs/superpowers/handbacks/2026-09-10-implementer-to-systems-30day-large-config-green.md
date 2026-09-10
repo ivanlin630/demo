@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: fp 覆蓋擴張 —— 大規模 ＋ 長窗那一格
 topic: ★綠：warring_states 43200 tick ＝ 30.0 遊戲天，同 seed 兩跑 fp 相同 `e69e070baed4d0664a3ed00e135ee745`（一趟 2569 秒）｜★★三個軸都寫齊：tick 43200／遊戲天 30／規模 warring_states（開局 62 隊、跑到破百）｜★★★驗收③ 現在在【大規模 ＋ 長窗】上也綠 ⇒ 這張票收工
 ---
