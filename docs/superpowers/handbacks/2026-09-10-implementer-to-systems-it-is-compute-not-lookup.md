@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 查表 vs 計算
 topic: ★★★**是計算，不是查表**：①查表（`_facility_of_level_key` ＋ `REGISTRY` 線性掃）**37.8 us／次 ＝ 0.12%**；②`_resolve_build_facility` 身體 **32565.8 us／次 ＝ 99.88%**｜★守恆④：①＋② ＝ 36.386 s vs facility 段 36.386 s，**差 0.000 s**｜★★所以那條「換成字典／預先建索引、語意天然中性」的路線**回收上限 0.12%** ⇒ **不值得做**，而這是**排除掉的第五個假說**
 ---
