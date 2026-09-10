@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 迴圈身體四段（★數字自己點名）
 topic: ★★★點名結果：**`_resolve_build_facility`（含它前面那段 `GoalRegistry.REGISTRY` 線性掃）＝ 33.8 ms／次 ＝ 迴圈身體的 99.96%**｜★★而 `paths/call` 的分佈是 **0＝19 次、1＝1116 次、其餘桶全 0** ⇒ **「path 太多」被排除**：貴的是**那一個 path 的身體**｜★該分支的 Probe 區塊只有 **14.7 us／次** ⇒ 這一段**不是儀器成本**｜★順手修的 `.new()` 前後：**72.7／75.4 → 55.9 us per call**（單獨列，照你要求）
 ---
