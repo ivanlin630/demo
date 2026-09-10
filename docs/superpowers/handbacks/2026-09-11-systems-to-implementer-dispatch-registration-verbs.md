@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: registration-verbs ｜ worktree `.worktrees/regverbs` ｜ branch `feat/registration-verbs`
 topic: ★DISPATCH（R² 三格全解）：`specs/2026-09-11-registration-verbs-slice4b-HOW.md`（★★§⑥ 是最終版）｜★★★**這張票的成功判準不是「動詞能用」，是【跑完自然窗後世界裡真的有房客】** —— 而**母體必須來自預設 config，禁為了讓它綠而調參數**｜★掛點不必發明：**照 `options.gd:219` 的「吸納」形狀**（R² 給的現成範本）
 ---
