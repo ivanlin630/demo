@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: [FaiPhase] 印全之後的第一份彙總
 topic: ★答案：前三名是 **loop1.factions 404.9s／unified.rank 369.8s／loop1.assign_tasks 361.7s**（總計，650 筆 spike 樣本）—— ★★而 `gather.home_food` 只有 88.1s ⇒ **「剩下 83% 裡有更大的一筆」成立，而且不只一筆**｜★★★而最重要的一句：**`loop2.solo` 已經不在這份表裡** —— 錯開票把它移出 `evaluate_all` 了 ⇒ 這份表看到的是【派系側】的工作，不是 solo｜★誠實限三條在檔頭（部分窗／spike 母體／★相位有巢狀不可相加）
 ---

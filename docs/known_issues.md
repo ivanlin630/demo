@@ -4386,3 +4386,43 @@ owner=systems（掛號，未開票）
    正是那條憲法級規矩要防的形狀 —— **單幀被一個「順手加的守衛」吃掉**。
 ```
 owner=systems（記錄，非缺陷）
+
+## 🚦 **merge-gate 在 main 上已經是紅的，而每一次 merge 都繼承它**（systems 2026-09-10 跑全套才發現）
+
+```
+狀態：已知未修
+在 origin/main（d55d3343c）上跑，★下列五支【與任何未 merge 的改動無關】——它們本來就紅：
+   bare-tick          1 筆【沒人判過】的裸 tick 候選（母體 185）
+   ki-status          新條目缺【狀態】欄（★今天新增的 known_issues 條目自己造成的）
+   headless           HARD-FAILS 3／baseline 3 但【清單不同】：
+                      多一行「Assertion failed: 超時應解除 TRADE，實際=貿易」
+   cross-run-static   FAIL
+   lod-split          4 筆【新的 player_pos 用法，沒人判過】
+                      （player_command_api.gd:187/193/196、state_fingerprint.gd:261
+                       ★＝今天 player_* 哨兵那張票留下的）
+★★而它是怎麼被發現的：一個 R²-CLEAN 的小 slice 落地後我跑全套 ⇒ 11 支紅
+  ⇒ ★★★而「是不是我弄紅的」**當下不可判** —— 我必須另開一個 origin/main 的 worktree
+    重跑一次才知道【五支本來就紅】。
+⇒ 病：**閘紅了而沒有人處置 ⇒ 它從【閘】變成【背景噪音】**，
+  而下一個【真紅】會被當成背景。
+⇒ 修法方向（未開票）：閘的判決要附【上一次綠的 HEAD】，
+  否則每個人都要自己重跑一次 baseline 才能歸因。
+回訪：下一次效能線收尾時
+```
+
+## 🔗 **棘輪／普查表的錨是【行號】，而行號會漂**（systems 2026-09-10，兩支閘同時發作）
+
+```
+狀態：已知未修
+live-team-ratchet   母體 86 處｜baseline 81 列｜★新增未豁免 12 處
+                    —— 而母體【沒有變】（仍是 86）⇒ 那 12 處幾乎確定是【行號漂了】，不是新 code
+live-team-census    3 筆「普查表指向一個現在撈不到的站點」
+                    （interaction_system.gd:953／npc_combat_system.gd:374／vision_system.gd:39）
+★baseline 的 key ＝ `file:line`（live_team_ratchet.py:139 `key = "%s:%d"`）
+  ⇒ ★★同一天有人在 faction_ai_system.gd 上面加了幾行，下面所有豁免【全部失效】
+  ⇒ ★★★而症狀是【閘對每一次編輯都亂咬】⇒ 人會開始不看它 ⇒ 閘死。
+⇒ 修法方向：key 改成 `file ＋ 那一行的正規化 code 文字（＋同檔出現次數）`
+  ⇒ ★而它同時讓「觸發條件＝那一行被碰到時」**變成機械為真**：
+    你動了那一行，文字就變了，豁免自動蒸發 —— 比行號【更符合】它本來的意圖。
+回訪：下一次動這兩支閘時
+```
