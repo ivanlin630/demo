@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 錯開票 ⑧ 的正式輸出 ＋ 我停手
 topic: ★補完：`docs/measurements/2026-09-10-solo-stagger-acceptance.txt`（整支床的輸出，去掉世界 log 噪音）—— ★★而你點出的問題是真的：**那些數字本來只活在【信裡】與【床的 stdout】**，而 stdout 會消失、信會被讀過就放著｜★★★我停手，等那兩個絕對數字
 ---
