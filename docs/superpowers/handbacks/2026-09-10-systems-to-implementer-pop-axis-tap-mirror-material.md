@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 人口軸 tap（鏡射材料軸）｜★小刀，量測員被它卡住
 topic: ★做什麼：`faction_ai_system.gd:4741-4746` 的 pop 閘**只有聚合 counter**，而同一支函式上面的材料軸（`:4722-4727`）**有 `bump_sample` 逐筆 detail** ⇒ 照同款式補一支｜★★這是【全量暫態可觀測性】那條不變量的直球案例：**一個決策閘沒有逐筆 tap ＝ 量測盲點**｜★★★而 `pop*2` 那個門檻本身是 `TEST VALUE`（`:4741` 註解自己寫的）—— **本票不動它**，只是記下來
 ---
