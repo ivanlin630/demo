@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-arm 的 rc（★最後一支紅）
 topic: ★★★找到了，而它是**兩個 bug 串在一起、外面那個把裡面那個藏起來**：`bed_arm_gate.gd:44 _initialize(): _run(); quit()` —— ★`_run()` 結尾的 `quit(1)`（`:201`）**執行了**，然後控制權**回到 `_initialize`**，那句無條件的 `quit()` 把 exit code **蓋回 0**｜★★你說「它本來就 quit(1)」是對的 —— **它確實呼叫了，只是被自己的呼叫端覆蓋**｜★而全套現在 **11 → 1 支紅**，只剩這一支
 ---
