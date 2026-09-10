@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 登記錨 ④a ｜ R① 回件後的一個 WHAT
 topic: ★★★R① 判 **premise_contradiction 成立**，而它揭出的比「漏三站」大：**「這支隊在這座村算不算自己人」現在有【四種】識別軸、散在五個地方，而沒有任何一處寫著它們為什麼不同**｜★★我已裁定本票的處置（一個搬、兩個記名上鎖、一個歸 ④b），★而**要不要把 parent 軸也折進登記制**是設計判斷 ⇒ 呈你｜★本票**不照原清單 dispatch**，spec 已改寫並會重送 R²
 ---
