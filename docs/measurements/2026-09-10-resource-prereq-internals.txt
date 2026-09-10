@@ -1,0 +1,36 @@
+# `_resource_prereq_candidates` 內部 —— ★★★而它推翻了「全圖掃是根」這個前提
+# 床：scripts/debug/option_term_cost_bed.gd｜warring_states｜3000 tick ＝ 2.1 遊戲天｜seed 4242
+# ★碼表走 `SimRunner.phase_timing`（界限 43：量儀器的碼表不能跟被量的儀器同一個開關）
+# ★★★跑間噪音【很大】：同一支床的 frontier 總時在 66／113／120／126 s 之間（本機有其他 session 同時在跑 godot）
+#   ⇒ ★只談【段與段的比例】，不談絕對秒數
+# ★儀器佔比（同窗同 seed，ON/OFF）：frontier 213.6 vs 168.2 ms/call ⇒ **約 21%**
+
+=== ① 「全圖掃」在本窗【一次都沒跑】===
+`AcquisitionPaths.stock_sources`（`acquisition_paths.gd:92` 的 `for tid in state.world.tiles`）
+  ⇒ **呼叫 0 次**（母體塌陷）
+⇒ ★★★所以「成本 ＝ goals × prereqs × 資源種類 × 地圖格數」這個形狀**在本窗不成立**：
+  它的入口是 `shape_of(res) == "stock"`，而本窗問的資源沒有走到那一支。
+⇒ ★而「同一 tick 內同一個 res 被問幾次」這個問題因此 **不可判**（母體 0）——
+  ★★**不是「重複率 100%」**。（★床第一版就是這樣印的：`1 − 0/0` ⇒ 假綠；已修成明寫不可判。）
+`producers_of` 那一段：1135 次／0.038 s／33.1 us per call ⇒ 也不是主因。
+
+=== ② 那 56.96 s 到底在哪（守恆到 0.03%）===
+段                                        次數        總計(s)       單價
+`_resolve_resource_prereq`                1318        18.141      13763.8 us/次
+`AcquisitionPaths.for_resource` 本身      1135         0.100         87.8 us/次
+★逐 path 迴圈【身體】                     1116 path    38.700      34677.7 us/path
+守恆：18.141 ＋ 0.100 ＋ 38.700 ＝ 56.941 vs `resource_prereq` 段 **56.961**（差 0.02 s ＝ 0.03%）
+⇒ ★★★**最大的一塊是【逐 path 的迴圈身體】：34.7 ms／path** ——
+  它裡面是 `_resolve_build_facility(...)` ＋ 一批 Probe-gated 的 `bump_sample`（帶 Dictionary）。
+
+=== ③ 另一顆同族的 `.new()`（★這一顆【不在 Probe 內】）===
+`goal_resolver.gd:742` `FactionAISystem.new()._nearest_market_outpost_with(...)`
+  ⇒ **每次呼叫都 new 一支七千行的 class**，而且它在 **production 熱路徑上**（不是儀器路徑）
+  ⇒ 實測：2694 次／0.203 s／**75.4 us per call ＝ `_resolve_resource_prereq` 的 1.1%**
+  ⇒ ★所以它是**真的浪費，但不是主犯** —— 本檔只報，不改。
+
+=== ④ 誠實限 ===
+①3000 tick（2.1 遊戲天）／單一 config／Probe=ON（本路儀器佔比 ≈21%）
+②跑間噪音 ±90%（見檔頭）⇒ 只看比例
+③`stock_sources` 的 0 次是【本窗】的事實 —— ★它不排除別的 config／別的窗會走到那一支
+  ⇒ ★★而要說「全圖掃不是根」，需要的是**它在有 stock 資源的世界裡也不是根**，本檔答不了那個。

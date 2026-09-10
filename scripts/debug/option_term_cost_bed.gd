@@ -50,6 +50,41 @@ func _initialize() -> void:
 		100.0 * (DecisionEngine.frontier_us_total - seg_sum) / maxf(1.0, DecisionEngine.frontier_us_total)])
 	print("★★母體地板：goal 迴圈 %d 次／resource_prereq %d 次／delegate %d 次／產出 candidate %d 個（★0 ⇒ 明寫是 0）" % [
 		GoalResolver.fr_goals_n, GoalResolver.fr_res_n, GoalResolver.fr_deleg_n, GoalResolver.fr_out_n])
+	print("★resource_prereq 內部：`_resolve_resource_prereq` %d 次／%.3f s／%.1f us per call" % [
+		GoalResolver.rrp_n, GoalResolver.rrp_us / 1e6,
+		GoalResolver.rrp_us / maxf(1.0, float(GoalResolver.rrp_n))])
+	print("★★其中 `_nearest_market_outpost_with`（★含每次 `FactionAISystem.new()`，**不在 Probe 內**）：%d 次／%.3f s／%.1f us per call ＝ 前者的 %.1f%%" % [
+		GoalResolver.mkt_n, GoalResolver.mkt_us / 1e6,
+		GoalResolver.mkt_us / maxf(1.0, float(GoalResolver.mkt_n)),
+		100.0 * GoalResolver.mkt_us / maxf(1.0, GoalResolver.rrp_us)])
+	# ★★★全圖掃的重複率（systems 派：memo 的價值全在這個數字上）
+	AcquisitionPaths._ap_flush()   # ★最後一個 tick 也要結清（★否則最後那一 tick 靜默消失）
+	var ap_t: float = maxf(1.0, float(AcquisitionPaths.ap_ticks_n))
+	print("")
+	print("★★★`for_resource` 本身 %d 次／%.3f s／%.1f us；★逐 path 迴圈身體 %d 個 path／%.3f s／%.1f us per path" % [
+		GoalResolver.acq_n, GoalResolver.acq_us / 1e6, GoalResolver.acq_us / maxf(1.0, float(GoalResolver.acq_n)),
+		GoalResolver.path_n, GoalResolver.path_us / 1e6,
+		GoalResolver.path_us / maxf(1.0, float(GoalResolver.path_n))])
+	print("★守恆②：rrp %.3f + for_resource %.3f + path 身體 %.3f = %.3f vs resource_prereq 段 %.3f s" % [
+		GoalResolver.rrp_us / 1e6, GoalResolver.acq_us / 1e6, GoalResolver.path_us / 1e6,
+		(GoalResolver.rrp_us + GoalResolver.acq_us + GoalResolver.path_us) / 1e6,
+		GoalResolver.fr_res_us / 1e6])
+	print("★★stock_sources（全圖掃）：%d 次／總計 %.3f s／%.1f us per call／平均每次掃 %.1f 格" % [
+		AcquisitionPaths.ap_stock_n, AcquisitionPaths.ap_stock_us / 1e6,
+		AcquisitionPaths.ap_stock_us / maxf(1.0, float(AcquisitionPaths.ap_stock_n)),
+		AcquisitionPaths.ap_tiles_scanned / maxf(1.0, float(AcquisitionPaths.ap_stock_n))])
+	print("★★producers_of 那一段（分開計時）：%d 次／總計 %.3f s／%.1f us per call" % [
+		AcquisitionPaths.ap_prod_n, AcquisitionPaths.ap_prod_us / 1e6,
+		AcquisitionPaths.ap_prod_us / maxf(1.0, float(AcquisitionPaths.ap_prod_n))])
+	# ★★★母體 0 時【不准印比率】：`1 − 0/0` 會印成「重複率 100%」——
+	#   而那是一個【看起來很有結論的假綠】。★母體地板要在算式之前，不是之後。
+	if AcquisitionPaths.ap_calls_sum == 0:
+		print("★★★同一 tick 內的重複率：**不可判** —— `stock_sources` 在本窗被呼叫 0 次（母體塌陷，不是重複率 100%）")
+	else:
+		print("★★★同一 tick 內的重複率：有查詢的 tick %d 個／平均每 tick 查 %.2f 次／相異 res %.2f 種 ⇒ 重複率 %.1f%%" % [
+			AcquisitionPaths.ap_ticks_n, float(AcquisitionPaths.ap_calls_sum) / ap_t,
+			float(AcquisitionPaths.ap_distinct_sum) / ap_t,
+			100.0 * (1.0 - float(AcquisitionPaths.ap_distinct_sum) / maxf(1.0, float(AcquisitionPaths.ap_calls_sum)))])
 	print("★★★frontier 碼表（不依賴 Probe）：%d 次／總計 %.2f s／**%.1f us per call**（Probe=%s）" % [
 		DecisionEngine.frontier_calls, DecisionEngine.frontier_us_total / 1e6,
 		DecisionEngine.frontier_us_total / maxf(1.0, float(DecisionEngine.frontier_calls)),

@@ -696,6 +696,14 @@ static var fr_deleg_us: float = 0.0     # ③`_delegate_variant` 那一圈
 static var fr_deleg_n: int = 0
 static var fr_deliver_us: float = 0.0   # ④`_deliver_candidates`（★沒有它，守恆加不回去）
 static var fr_out_n: int = 0            # 產出的 candidate 數
+static var mkt_us: float = 0.0          # ★`_nearest_market_outpost_with`（含它前面的 `.new()`）
+static var mkt_n: int = 0
+static var rrp_us: float = 0.0          # ★`_resolve_resource_prereq` 整支
+static var rrp_n: int = 0
+static var acq_us: float = 0.0          # ★`AcquisitionPaths.for_resource` 本身
+static var acq_n: int = 0
+static var path_us: float = 0.0         # ★逐 path 的迴圈【身體】（`_resolve_build_facility` ＋ taps）
+static var path_n: int = 0
 
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
@@ -703,6 +711,14 @@ static func _reset_cross_run() -> Dictionary:
 	_fall_seen.clear()
 	if _uo_fai_shared != null: cleared["GoalResolver._uo_fai_shared"] = 1
 	_uo_fai_shared = null   # ★跨 run 靜態殘留：量測用實例也要清（同一份清單，不例外）
+	mkt_us = 0.0
+	mkt_n = 0
+	rrp_us = 0.0
+	rrp_n = 0
+	acq_us = 0.0
+	acq_n = 0
+	path_us = 0.0
+	path_n = 0
 	if fr_calls != 0: cleared["GoalResolver.fr_*"] = fr_calls
 	fr_calls = 0
 	fr_goalloop_us = 0.0
@@ -739,7 +755,13 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 	if not ctx.has_specie:
 		if Probe.enabled: Probe.bump("goal.res_prereq.no_specie")
 	if ctx.has_specie:
+		# ★★★量測（不改行為）：這一行【每次呼叫都 new 一支七千行的 class】，而且它**不在 Probe 內**
+		#   ⇒ 與 goal_resolver:244 那顆是同族，但那顆只在儀器開著時跑，**這一顆在 production 熱路徑上**。
+		var _mk0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, res)
+		if SimRunner.phase_timing:
+			mkt_us += float(Time.get_ticks_usec() - _mk0)
+			mkt_n += 1
 		if mp != Vector2i(-1, -1):
 			if Probe.enabled: Probe.bump("goal.res_prereq.buy_wins")
 			return _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
@@ -822,7 +844,11 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: DecisionContext,
 		g: Dictionary, gt: String, payoff: float, prereq: Dictionary) -> Array:
 	var out: Array = []
+	var _rr0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var first: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, prereq)
+	if SimRunner.phase_timing:
+		rrp_us += float(Time.get_ticks_usec() - _rr0)
+		rrp_n += 1
 	if not first.is_empty():
 		out.append(first)
 		return out   # 買／採@地形已給出手段 ⇒ 不必再問製造（既有優先序不變）
@@ -830,7 +856,15 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 	var res: String = String(prereq.get("res", ""))
 	if res == "":
 		return out
-	for path in AcquisitionPaths.for_resource(state, team, res):
+	var _pl0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	var _paths: Array = AcquisitionPaths.for_resource(state, team, res)
+	if SimRunner.phase_timing:
+		acq_us += float(Time.get_ticks_usec() - _pl0)
+		acq_n += 1
+	var _bl0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	for path in _paths:
+		if SimRunner.phase_timing:
+			path_n += 1
 		var blocked: String = String(path.get("blocked_on", ""))
 		var pkind: String = String(path.get("kind", ""))
 		var _depth: int = int(path.get("depth", 0))   # ★懷疑點(i)：util 隨 depth 的分佈
@@ -1002,6 +1036,8 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 			Probe.bump("means_end.desperate_by_goal." + gt)
 			Probe.bump_sample("means_end.desperate", {"gt": gt, "res": res,
 				"food_days": snappedf(ctx.food_days, 0.01), "team": team.team_id}, 60)
+	if SimRunner.phase_timing:
+		path_us += float(Time.get_ticks_usec() - _bl0)   # ★迴圈身體（含 _resolve_build_facility 與 Probe taps）
 	return out
 
 # ★設施欄位 key → FACILITY_DEF 名（真相源反查，不建對照表）。

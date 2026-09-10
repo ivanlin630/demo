@@ -88,11 +88,58 @@ static func shape_of(res: String) -> String:
 			return "rate"
 	return String(SHAPE_TABLE.get(res, "unknown"))
 
+# ★★★量測（systems 派 2026-09-10）：碼表走 `SimRunner.phase_timing`，**不走 `Probe.enabled`**（界限 43）。
+#   ★要答的是「同一個 tick 內同一個 `res` 被問幾次」——★★因為 memo 的價值【全部】取決於重複率，
+#   而今天已經作廢過一張前提是「命中率≒0」的票（bounded Dijkstra，實測 99.7%）。
+static var ap_stock_us: float = 0.0
+static var ap_stock_n: int = 0          # `stock_sources` 呼叫次數
+static var ap_tiles_scanned: float = 0.0  # 累計掃過的格數（★確認它真的是全圖）
+static var ap_prod_us: float = 0.0      # `producers_of` 那一段（★與全圖掃分開計時）
+static var ap_prod_n: int = 0
+static var _ap_tick: int = -1
+static var _ap_seen: Dictionary = {}    # 本 tick 出現過的 res
+static var _ap_calls_this_tick: int = 0
+static var ap_ticks_n: int = 0          # 有查詢的 tick 數
+static var ap_calls_sum: int = 0        # Σ 每 tick 的查詢次數
+static var ap_distinct_sum: int = 0     # Σ 每 tick 的相異 res 數
+
+static func _ap_flush() -> void:
+	if _ap_calls_this_tick > 0:
+		ap_ticks_n += 1
+		ap_calls_sum += _ap_calls_this_tick
+		ap_distinct_sum += _ap_seen.size()
+	_ap_seen = {}
+	_ap_calls_this_tick = 0
+
+static func ap_reset() -> void:
+	ap_stock_us = 0.0
+	ap_stock_n = 0
+	ap_tiles_scanned = 0.0
+	ap_prod_us = 0.0
+	ap_prod_n = 0
+	_ap_tick = -1
+	_ap_seen = {}
+	_ap_calls_this_tick = 0
+	ap_ticks_n = 0
+	ap_calls_sum = 0
+	ap_distinct_sum = 0
+
 # ★stock 形狀的資源：回報【有這條手段】與【形狀】，但不算價值。
 static func stock_sources(state: WorldState, team: TeamData, res: String) -> Array:
 	var out: Array = []
 	if state == null or team == null:
 		return out
+	var _t0: int = 0
+	if SimRunner.phase_timing:
+		_t0 = Time.get_ticks_usec()
+		var _now_tick: int = state.world.current_tick
+		if _now_tick != _ap_tick:
+			_ap_flush()          # ★換 tick ⇒ 把上一個 tick 的（次數／相異數）結清
+			_ap_tick = _now_tick
+		_ap_seen[res] = true
+		_ap_calls_this_tick += 1
+		ap_stock_n += 1
+		ap_tiles_scanned += float(state.world.tiles.size())
 	for tid in state.world.tiles:   # gate-ok: 地理/礦脈=公共知識（同 find_nearest_terrain_tile 先例）
 		var t: HexTileData = state.world.tiles[tid]
 		if t == null:
@@ -109,6 +156,8 @@ static func stock_sources(state: WorldState, team: TeamData, res: String) -> Arr
 			#   ——【沒有正確的尺】；`stock_utility` 落地後那個理由消失。
 			"gain_daily": extraction_rate(t, res),
 			"value_compared": true})
+	if SimRunner.phase_timing:
+		ap_stock_us += float(Time.get_ticks_usec() - _t0)
 	return out
 
 # ★「製造」這條手段的候選路徑：回傳每條路徑【卡在哪一格】（blocked_on）。
@@ -139,6 +188,9 @@ static func for_resource(state: WorldState, team: TeamData, res: String,
 			sp["depth"] = _visited.size()
 			paths.append(sp)
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	var _pt0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	if SimRunner.phase_timing:
+		ap_prod_n += 1
 	for prod in producers_of(res):
 		var fk: String = String(prod["facility_key"])
 		var lvl: int = int(tile.get(fk)) if tile != null else 0
@@ -172,4 +224,6 @@ static func for_resource(state: WorldState, team: TeamData, res: String,
 		# ★★「無手段可取得」不得靜默（invariants 2026-08-25）
 		Probe.bump("means_end.no_means")
 		Probe.bump("means_end.no_means." + res)
+	if SimRunner.phase_timing:
+		ap_prod_us += float(Time.get_ticks_usec() - _pt0)   # ★與全圖掃分開計時（否則「全圖掃是主因」只是推論）
 	return paths
