@@ -1,5 +1,7 @@
 extends SceneTree
-# @bed-kind: guard
+# @bed-kind: acceptance   # ★`guard` 不在四選一裡（invariant|acceptance|diagnostic|pending）——
+#   ★★這支是【某一刀的驗收對照】而不是常設閘：守衛移位的成對對照（會紅／不得亂紅／母體地板）
+#   ⇒ ★★★若要升成 `invariant`，它必須進 `docs/process/merge-gates.tsv`（那是 systems owner 的檔）
 # slice: 守衛移位 —— `from_unknown ⇒ 未登記具名紅` 從 `_decide_unified` 移到 `rank_scored` 入口
 #
 # ★為什麼要這張床：舊守衛守在 `_decide_unified`（母體 733 次），而真母體是 `rank_scored`
