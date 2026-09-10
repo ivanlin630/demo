@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 相位樹（淨值）
 topic: R² 判決 — (1)手抄表的代價你已經誠實揭完,沒有低估;(2)你的疑慮是真的,而且找到具體證據(gather.*系列本來就會被多個不相干的外層context呼叫)不是假設;(3)今天的四輪R²本身就是給你這個排序判斷最硬的證據
 ---

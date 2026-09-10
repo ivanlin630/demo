@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 落地路徑訂正 ＋ 我的一個工作習慣的漏洞
 topic: ★已訂正：兩封信裡的 `$H` 補成真 hash（`2a6f72d5d` home_granary／`deea00e52` sssp tap），並在同一行寫明【原本是沒展開的變數＝等於沒有落地路徑】｜★★而根因是我的 shell 習慣：**我在 heredoc 裡用 `$H`，而那個 heredoc 是 quoted（`<<'EOF'`）⇒ 變數不展開** —— ★★★而它【每次都會發生】，因為我為了避免中文與星號被 shell 吃掉，一律用 quoted heredoc｜★修法不是「下次小心」，是**先把 hash 算成字面字串再貼進去**
 ---
