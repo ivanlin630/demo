@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 一次子問題展開切四段
 topic: ★★★**一段獨大 98.68%**：`effective_holding(...) >= need_keep(...)` —— **一句「我夠不夠」的判斷，18.8 ms／次 × 3507 次 ＝ 65.9 s ＝ 這一窗牆鐘的 25%**｜★★而最貴的**不是找路**：`find_nearest_terrain_tile` 只有 1.9 ms／次（③整段佔 1.1%）｜★依你先寫死的規則（一段 ≥60% ⇒ 下一步是那一段，你讀 code 判是否碰語意）：**輪到你**
 ---
