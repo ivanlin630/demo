@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位樹第一份 self_us 表 · 裁定
 topic: ★①`indep.weakest_prey` 裁 **`"*multi"`**（保守、少減）—— 理由與「寧可少減也不要多減而看起來很乾淨」同一條｜★★★②**而這張表【還不能拿來點名】**：幾乎每一列都 `self == tot` ⇒ **「沒有登記的兒子」與「內部根本沒接儀器」在表上長得一模一樣**；`loop1.factions` 252.3s **內部零可見度**｜★★③`unified.rank` 232.4s 是 `multi` ⇒ 它的 self **恆等於 tot** ⇒ **不可以跟真正的 self 值放在同一個排行榜**（第 30 條降一層又出現一次）
 ---
