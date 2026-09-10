@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ resolver 身體四段 ＋ 同 tick 重複率
 topic: ★★★**memo 在這裡沒有價值**：同 tick 重複率 `_resolve_resource_prereq` **2.1%**（1.02 次）／`_resolve_build_facility` **12.9%**（1.15 次）⇒ **即使 100% 命中也只回收 2%／13%**｜★身體四段：③`material/tools` 遞迴 **27.0 ms／次 ＝ 72.4%**、①`derived_payoff` **12.5 ms／次 ＝ 27.2%**、②`.new()＋_find_own_outpost` 0.1%、④尾段 0.1%｜★★守恆 0.19% —— **而我上一趟這格差 −31.5 s，成因是【母體不同的量相減】**，我把它寫進交件
 ---
