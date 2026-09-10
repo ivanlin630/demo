@@ -254,6 +254,12 @@ $cp950 = [System.Text.Encoding]::GetEncoding(950)
 $proc = Start-Process -FilePath $exe -ArgumentList $args `
     -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr `
     -NoNewWindow -PassThru
+# EXIT CODE, PART 1 (2026-09-10, measured). Touching .Handle here is LOAD-BEARING, not a
+# nicety: without it PS 5.1 hands back a Process object with no cached handle and
+# $proc.ExitCode reads as $null forever after (measured: null with and without redirection,
+# with and without WaitForExit). `exit $null` is exit 0 -- which is exactly how 27 gates
+# came to be incapable of failing on rc. Do not "clean up" this line.
+$null = $proc.Handle
 $sb = New-Object System.Text.StringBuilder
 $script:pos = 0
 function Pump-Out {
@@ -375,3 +381,18 @@ if ((-not $skipCacheGuard) -and (Test-Path $cacheFile)) {
         }
     }
 }
+
+# EXIT CODE PROPAGATION (2026-09-10, systems; implementer measured it).
+# This wrapper never returned the child's exit code, so EVERY gate that runs through it
+# came back rc=0 -- 27 of the 55 registry rows. bed_arm_gate.gd already called quit(1) and
+# the runner still saw success; only the expect-string check stood between a red bed and a
+# green gate. That is the "installed but not wired" shape: the runner HAS an rc check and
+# it was reading a constant.
+# Distinct codes, because the three outcomes need different handling:
+#   97 = wrapper could not start (already used above)   98 = killed at the timeout deadline
+#   otherwise = whatever the bed itself returned.
+if ($timedOut) { exit 98 }
+$childRc = 0
+try { $childRc = [int]$proc.ExitCode } catch { $childRc = 0 }
+[Console]::Error.WriteLine("[godot.ps1] child exit=$childRc")
+exit $childRc

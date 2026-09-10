@@ -89,3 +89,48 @@ if res in PUBLIC_RESOURCES or res == "food":
   ⇒ 用戶問的「用不用 17 的設施加成」**部分**在 §②① 回答了（代工投料放行），
     而【產能加成怎麼算】要另掃 —— **標未查**。
 ```
+
+---
+
+## ⑥ ★★★補查（blueprint 2026-09-10，用戶戳「只有特殊物資直入公庫，食物材料按稅分公私」）
+
+### (1) 白工的射程：★用戶是對的，材料不中；而**農業版比採集版更嚴重**
+
+```
+★**材料**：走 `gained` → 一般稅 split（私產＋稅）⇒ **不進地主公庫** ⇒ 不中白工。
+★★**食物／PUBLIC_RESOURCES**：`resource_system.gd:413-418` 直入腳下糧倉、不走稅
+  ⇒ 白工射程 ＝ **food ＋ PUBLIC_RESOURCES，且僅在【站在地主據點格上採收】時**。
+```
+
+★★★**而農業版（blueprint 問的 farm_yield）—— 它存在，而且比採集版更徹底**：
+
+```gdscript
+# resource_system.gd:131（產出端，owner-gate）
+if tile.farming_level > 0 and tile.outpost_owner == team.team_id:
+    var flabor: float = LaborSystem.farm_labor(tile)
+    var fyield: float = float(tile.farming_level) * FARM_UNIT_YIELD * flabor * ...
+
+# labor_system.gd:72-78（勞力池，★★★零 owner 檢查、零 faction 檢查）
+for tid in state.teams:
+    var t: TeamData = state.teams[tid]
+    if t.tile_pos == tile.tile_pos and TeamData.TAG_PRODUCE in t.tags:
+        teams.append(t); pool += labor_pop(t)
+```
+
+```
+⇒ ★**房客的人力被算進那格的勞力池** ⇒ 放大 `farm_labor` ⇒ 放大 `fyield`
+  ⇒ ★★而 `fyield` 只有 **owner** 收得到（`:131` owner-gate、一 tile 一次）。
+⇒ ★★★**採集版至少是房客【自己選擇去採】；農業版是【站著就捐出勞力】** —— 完全被動。
+⇒ ★而它的射程也更寬：勞力池**連 faction 都不檢查** ⇒ **任何** PRODUCE 隊站在那格都算進去。
+```
+
+### (2) 「吃」那條，明講（★供養契約的地基）
+
+```
+`resource_system.gd:584-588 own_granary_tile`：腳下 ＋ `outpost_level > 0` ＋ **`outpost_owner == team.team_id`**
+  ⇒ 有效糧（`effective_food`）＝ 私產 ＋ **自家** 糧倉；`:601`／`:614` 的消耗端同一支。
+⇒ ★★★**登記房客【一粒米都吃不到】地主的糧倉** —— 連同 faction 都不放行
+  （★對照：代工投料那條 `_team_works_tile` 放行同 faction，**吃這條沒有對應的放行**）。
+⇒ ★所以現況的形狀是：**同勢力房客【出力】放行、【取食】完全不放行**
+  —— ★★而這正是「供養契約」要填的那個洞：**它現在是單向的**。
+```
