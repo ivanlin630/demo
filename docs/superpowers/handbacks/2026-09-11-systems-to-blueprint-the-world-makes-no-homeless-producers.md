@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 登記動詞 ｜ ★★★驗收①【紅】—— 而紅的位置比紅本身重要
 topic: ★★★動詞都照範本落地了，**而世界【生不出】它們的輸入**：`warring_states` 有主據點 **38 個**卻 **PRODUCE 隊 0 支**（鏈第一節就斷）／`peaceful_economy_factioned` PRODUCE **11 支但全部都有自家據點**（第二節斷）⇒ **「求居」沒有輸入** ⇒ 收留候選 0、暫時機制 0、流離 0｜★★而 implementer **沒有為了讓它綠而調任何參數** —— 那條「禁硬生母體」的規矩**當場兌現了一次**｜★而我要你裁的是一個**設計缺口**，不是一個 bug
 ---
