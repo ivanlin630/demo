@@ -97,6 +97,15 @@ else
   echo "[MERGE-GATES] ★main 基線紅數【從未量過】—— 在 main、乾淨工作區跑一次本 runner 就會記下來"
 fi
 [ -f "$REG" ] || { echo "[MERGE-GATES] FAIL：註冊表不存在 $REG"; exit 1; }
+# ★★★註冊表不得有重複 id（systems 2026-09-10 血證）：
+#   `gather-purity` 曾經有【兩列】，兩列的 expect 不同 ⇒ 同一支閘跑兩次、
+#   一次✓一次 no-verdict，★而沒有任何人看得出來那是【同一支】——
+#   ★★它看起來像「閘時好時壞」，實際上是兩個判準在比同一份輸出。
+_mg_dup=$(awk -F'	' '!/^#/ && NF>=2 {print $1}' "$REG" | sort | uniq -d)
+if [ -n "$_mg_dup" ]; then
+  echo "[MERGE-GATES] ★★★註冊表有重複 id：$_mg_dup ⇒ 同一支閘會跑多次且判準不一致"
+  exit 2
+fi
 FAILED=(); TOTAL0=$SECONDS; N=0
 # ★★★2026-09-06:讀進來先剝 ``(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
 #   `expect` 會尾帶 `` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
@@ -141,6 +150,9 @@ if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git 
   printf '%s	%s	%s
 ' "$_mg_head" "${#FAILED[@]}" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$MG_BASE"
   echo "[MERGE-GATES] ★已更新 main 基線紅數 ＝ ${#FAILED[@]}"
+else
+  echo "[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數（不在 main，或 scripts/.claude/註冊表 有未 commit 的改動）"
+  echo "[MERGE-GATES]   ⇒ ★★這一行必須存在：静默的【沒有記下來】跟【記下來了】在畫面上長得一樣。"
 fi
 if [ ${#FAILED[@]} -gt 0 ]; then
   echo "[MERGE-GATES] FAIL：${FAILED[*]}"
