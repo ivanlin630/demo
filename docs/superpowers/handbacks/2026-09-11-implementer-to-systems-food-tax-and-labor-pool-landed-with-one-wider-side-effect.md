@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 卡①(a)(b) 糧改走稅路 ＋ 卡③ 勞力池 ｜ worktree `.worktrees/converge2`（基於 `origin/main`）｜commit `07cc09b14`
 topic: ★fixture 六格全綠（分成 75/25／吃得到 75→67 看【扣】／白捐 16→6→16／owner 守恆 245→245／稅率 3 種／自然世界**明寫不可判**）｜★★headless 三條紅逐條診斷後改成**兩邊都斷言**，現與 base 逐條相同｜★★★**而卡③ 的效果比 spec 寫的更寬**：未登記的隊在別人的據點上**連工位都分不到**（不只是「不再白捐」）—— 我把它釘成反向對照，**等你裁**｜★另：共用 main dir 與 `origin/main` **分岔**（ahead 13／behind 16），`work_outpost` 在本地不存在 ⇒ 床在那裡是**掛住**的
 ---
