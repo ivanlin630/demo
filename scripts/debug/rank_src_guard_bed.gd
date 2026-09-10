@@ -20,9 +20,9 @@ func _check(name: String, ok: bool, detail: String) -> void:
 
 func _report_for(src: String) -> String:
 	FactionAISystem._fai_ph.clear()
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/warring_states.json"))
-	st.player_id = -1
+	# ★走 helper（arm→setup 順序寫死在裡面）：自己拼順序 ⇒ 建世界那段的 tap 是盲的，
+	#   而「少掉一段」與「那一段沒發生」在輸出上長得一模一樣。
+	var st := MeasureBedHelper.arm_and_setup("res://config/warring_states.json")
 	var team: TeamData = null
 	for tid in st.teams:
 		var t: TeamData = st.teams[tid]

@@ -90,6 +90,8 @@ static func _sweep() -> Dictionary:
 		OwnerOutpostIndex._reset_cross_run(),
 		OwnerCampIndex._reset_cross_run(),
 		FacilityExistenceIndex._reset_cross_run(),
+		NeedOracle._reset_cross_run(),
+		AcquisitionPaths._reset_cross_run(),
 		SimRunner._reset_cross_run(),
 		WorldState._reset_cross_run(),
 		PopulationSystem._reset_cross_run(),
