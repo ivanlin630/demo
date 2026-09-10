@@ -72,6 +72,10 @@ const ZEROWIN_WATCH: Array = [
 # ★★★src 要【穿進來】（systems 2026-09-10）：否則新的分段鍵會變成四個呼叫端共用的 multi
 #   —— 那正是我們上一張票才剛拆掉的東西。
 #   ★沒帶 ⇒ "unknown"：它會在表上自成一列（★★而不是靜默混進某個父親）。
+# ★不依賴 Probe 的 frontier 碼表（見 `rank_scored_ctx` 內的理由）：ON/OFF 兩趟才比得出儀器成本。
+static var frontier_us_total: float = 0.0
+static var frontier_calls: int = 0
+
 static func rank_scored(state: WorldState, team: TeamData, src: String = "unknown") -> Array:
 	# ★★★守衛移位（systems 裁 2026-09-10）：`from_unknown ⇒ 未登記具名紅` 本來守在
 	#   `_decide_unified`，而那裡的母體只有 733 次 —— ★真母體是【本函式】的 1096 次
@@ -84,7 +88,7 @@ static func rank_scored(state: WorldState, team: TeamData, src: String = "unknow
 	var _t1: int = Time.get_ticks_usec() if Probe.enabled else 0
 	var ctx: DecisionContext = DecisionContext.gather(state, team, true)   # ★真決策評估入口 → 推進 EWMA（advance=true）
 	var _t2: int = Time.get_ticks_usec() if Probe.enabled else 0
-	var scored: Array = rank_scored_ctx(ctx, team.current_option, state, team)   # ★means-end:傳 state/team 供 goal frontier hook
+	var scored: Array = rank_scored_ctx(ctx, team.current_option, state, team, src)   # ★means-end:傳 state/team 供 goal frontier hook
 	var _t3: int = Time.get_ticks_usec() if Probe.enabled else 0
 	# ★★★flee-to-safety 驗收③：【因為沒有 believed 目的地而改派去哪】—— ★記【去向分布】不只記備戰。
 	#   ★★只記「備戰幾次」會漏掉「其實跑去覓食了」那種答案，而那正是「恐懼有沒有被吞掉」要看的。
@@ -240,16 +244,53 @@ static func rank_scored(state: WorldState, team: TeamData, src: String = "unknow
 # ctx-taking 純打分 accessor（鏡射 rank_threat(ctx)）：不 gather、不寫 current_option、不 specimen tap。
 # 融合驗 harness 手構 ctx 驗 rank（繞世界 setup，deterministic）；rank_scored 委派此避重複 loop。
 # ★means-end（組件 G）：加 optional state/team 供 goal frontier hook（harness 手構 ctx 無此→null→hook skip）。
-static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", state: WorldState = null, team: TeamData = null) -> Array:
+# ★★★逐 option／逐 term 計時（systems 2026-09-10：目標第一次有主詞＝【評一個 option 要 14.6 ms】）。
+#   ★`src` 一樣穿進來 —— 否則四個呼叫端又混成一桶（今天已經拆過兩次）。
+#   ★★分佈用【直方圖桶】不用 `bump_sample`：後者是 first-N ⇒ 長跑時前 N 筆會被開局的便宜呼叫佔滿
+#     （★同一族血證：`bump_sample` 的 cap 讓瀕死隊那幾筆永遠寫不進來）。
+#   ★★★而 min／max 走 `Probe.peaks`（單調），中位數只能報【落在哪一桶】—— 桶中位不是真中位，要明講。
+static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", state: WorldState = null, team: TeamData = null, src: String = "unknown") -> Array:
 	var scored: Array = []
 	var idx: int = 0
+	if Probe.enabled:
+		Probe.bump("optterm.calls")        # ★母體地板：逐 option 樣本涵蓋了幾次 rank_scored_ctx 呼叫
 	# ★持守統一 Slice 1：current_option 承諾慣性讀 persist_strength（人格加權沉沒成本，取代 flat COMMITMENT_BONUS）。
 	# 迴圈前算一次（cadence 級，per-team 定值）；harness 無 team → 退回 flat（測不破）。
 	var _persist: float = PersistStrength.compute(state, team) if team != null else COMMITMENT_BONUS
-	for opt in DecisionOptions.applicable(ctx):
+	# ★★★逐 option 量出來只有 ~27 us/option，而上一輪從段計時推出的是 14.6 ms/option
+	#   ⇒ 差三個數量級 ⇒ **錢不在 option 迴圈裡** ⇒ 把 `rank_scored_ctx` 自己再切三段找它。
+	var _s0: int = Time.get_ticks_usec() if Probe.enabled else 0
+	var _applicable: Array = DecisionOptions.applicable(ctx)
+	var _s1: int = Time.get_ticks_usec() if Probe.enabled else 0
+	if Probe.enabled:
+		Probe.add_amount("ctxseg.applicable." + src, float(_s1 - _s0))
+		Probe.add_amount("ctxseg.options." + src, float(_applicable.size()))
+	for opt in _applicable:
 		var u: float = 0.0
+		var _ot0: int = Time.get_ticks_usec() if Probe.enabled else 0
 		for tw in DecisionOptions.terms_of(opt):
+			var _tt0: int = Time.get_ticks_usec() if Probe.enabled else 0
 			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
+			if Probe.enabled:
+				var _tdt: int = Time.get_ticks_usec() - _tt0
+				Probe.add_amount("optterm.term_us." + String(tw[0]), float(_tdt))
+				Probe.bump("optterm.term_n." + String(tw[0]))
+				Probe.note("optterm.term_max." + String(tw[0]), float(_tdt))
+		if Probe.enabled:
+			var _odt: int = Time.get_ticks_usec() - _ot0
+			Probe.add_amount("optterm.opt_us." + opt, float(_odt))
+			Probe.bump("optterm.opt_n." + opt)
+			Probe.note("optterm.opt_max." + opt, float(_odt))
+			Probe.add_amount("optterm.src_us." + src, float(_odt))
+			Probe.bump("optterm.src_n." + src)
+			# ★分佈：直方圖桶（★不是平均 —— 平均會把「一個 option 特別貴」藏起來）
+			var _b: String = "ge100ms"
+			if _odt < 100: _b = "lt100us"
+			elif _odt < 1000: _b = "lt1ms"
+			elif _odt < 5000: _b = "lt5ms"
+			elif _odt < 20000: _b = "lt20ms"
+			elif _odt < 100000: _b = "lt100ms"
+			Probe.bump("optterm.opt_hist." + _b)
 		# 需求金字塔重構：五層急迫度一致性係數(§3)統一調變全 23 option。純乘一係數，不改 term 內部。
 		# ★乘在 COMMITMENT_BONUS 之前（承諾慣性是決策層加成，不受需求調變）。
 		var _coeff: float = NeedHierarchy.consistency_coeff(opt, ctx.need_urgency, ctx.leader_values)
@@ -286,6 +327,15 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	# ★means-end 長程規劃（組件 G，HOW §8）：goal frontier candidates 追加進同一 rank 池（sort 前→與 static option 同 argmax 競爭）。
 	# ★S1 骨架：GoalResolver.frontier_candidates stub 回 []→此迴圈 no-op→byte-identical。harness 無 state/team(null)→skip。
 	# S2+ candidate util 護欄（HOW §8 must-fix①）：走 dev_urgency 壓制 + 上界<survival boost（發展慾望絕不蓋活命）。
+	var _s2: int = Time.get_ticks_usec() if Probe.enabled else 0
+	if Probe.enabled:
+		Probe.add_amount("ctxseg.optloop." + src, float(_s2 - _s1))
+	# ★★★這一段的計時【不依賴 Probe】（systems 2026-09-10 的問題要這樣才答得出來）：
+	#   `frontier_candidates` 內部有【只在 Probe 開著時才跑】的量測工作（`_unit_overlap_tap` 等）
+	#   ⇒ ★用 Probe-gated 的碼表量它，等於用儀器量儀器自己 —— 永遠看不到「關掉會少多少」。
+	#   ⇒ ★★所以這一支走 `SimRunner.phase_timing`（與 `Probe.enabled` 正交）
+	#     ⇒ ★★★同窗同 seed 跑 Probe ON / OFF 兩趟，差額就是【儀器在這一段的成本】。
+	var _fr0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	if state != null and team != null:
 		for cand in GoalResolver.frontier_candidates(state, team, ctx):
 			if Probe.enabled:
@@ -336,10 +386,19 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	#   ★★配上推導後 ＝ 秤【說了平手】之後的合法裁決 ⇒ 採。
 	#   ⇒ 規則：真值相等時選【成本低者】（`_estimate_delay_days`，決定性、不用隨機），
 	#     ★★★仍然相等才回到 applicable 順序 —— 排序保持全序、可重現。
+	if SimRunner.phase_timing:
+		frontier_us_total += float(Time.get_ticks_usec() - _fr0)
+		frontier_calls += 1
+	var _s3: int = Time.get_ticks_usec() if Probe.enabled else 0
+	if Probe.enabled:
+		Probe.add_amount("ctxseg.frontier." + src, float(_s3 - _s2))
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		if a["d"] != b["d"]: return a["d"] < b["d"]
 		return a["i"] < b["i"])   # tiebreak：成本 → applicable 順序
+	if Probe.enabled:
+		Probe.add_amount("ctxseg.sort." + src, float(Time.get_ticks_usec() - _s3))
+		Probe.bump("ctxseg.calls." + src)
 	# ★★won_argmax（systems 要）：【產出】≠【贏】。
 	#   emitted > 0 且 fp 不變 可以同時為真，而最危險的解釋是
 	#   「接上了、有產出、但【從不改變結果】」——沒這顆 tap 就分不出來。

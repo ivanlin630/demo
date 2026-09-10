@@ -19,7 +19,7 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.has_goods or ctx.has_arb,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			var tgt: Vector2i = FactionAISystem.new()._merchant_trade_target(state, team)
+			var tgt: Vector2i = FactionAISystem.shared()._merchant_trade_target(state, team)
 			# ★god-view Slice C：belief-gate 後無已知市集→(-1,-1)。只 roaming merchant→IDLE（無市集去=無事可做）；
 			# ★resident 擺攤 (-1,-1)=合法原地交易（PRODUCE 居民站自家村待客）→保 TASK_TRADE，防村攤關門(r3 regression)。
 			if tgt == Vector2i(-1, -1) and not FactionAISystem.is_resident_static(state, team):
@@ -84,7 +84,7 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.population <= FactionAISystem.FORAGE_VIABLE_POP and ctx.has_forage_tile,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			return {"task": TeamData.TASK_FORAGE, "target": FactionAISystem.new()._find_forage_tile(state, team)},
+			return {"task": TeamData.TASK_FORAGE, "target": FactionAISystem.shared()._find_forage_tile(state, team)},
 	},
 	"自救建田": {
 		"affinity": [0.8, 0.0, 0.0, 0.0, 0.2], "sets": {"survival": true, "passive_survival": true},
@@ -151,7 +151,7 @@ static var REGISTRY: Dictionary = {
 					or ctx.food_days < ctx.desperation_entry_threshold \
 					or (ctx.current_task == TeamData.TASK_RETURN_HOME and ctx.food_days < DecisionTerms.RETURN_HYSTERESIS_DAYS)),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.new()._find_own_outpost(state, team)},
+			return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.shared()._find_own_outpost(state, team)},
 	},
 	"掠奪": {
 		"affinity": [0.4, 0.0, 0.0, 0.5, 0.1], "sets": {"survival": true},
@@ -159,7 +159,7 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.has_weak_prey,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			var pid: int = FactionAISystem.new()._find_weakest_prey(state, team)
+			var pid: int = FactionAISystem.shared()._find_weakest_prey(state, team)
 			if pid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			# god-view 位置根治：敵情走 belief last-seen（含 staleness）；無 belief/過期→撲空棄（不移向真值/自身）。
 			var pid_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, pid)
@@ -186,10 +186,10 @@ static var REGISTRY: Dictionary = {
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 攻取據村：TASK_ATTACK 到村格 → 戰勝 capture 自動翻旗（既有）→ 次 cadence has_own_outpost
 			# → 生產/駐守 + _evaluate_outpost_residency 派駐（既有）接手 → 食引擎點火。不新造據點系統。
-			var vid: int = FactionAISystem.new()._find_occupy_target(state, team)
+			var vid: int = FactionAISystem.shared()._find_occupy_target(state, team)
 			if vid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			# ★#7 佔村→打村格（outpost tile 靜態真值：物理設施非隊瞬時位置；belief last-seen 可能覓食位=打空地）。
-			var vpos: Vector2i = FactionAISystem.new()._find_own_outpost(state, state.teams[vid])
+			var vpos: Vector2i = FactionAISystem.shared()._find_own_outpost(state, state.teams[vid])
 			if vpos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_ATTACK, "target": vpos, "combat_target": vid},
 	},
@@ -248,7 +248,7 @@ static var REGISTRY: Dictionary = {
 		#     是【同一家族的延伸】：那條擋「原地重紮」，這條擋「別處重紮」。
 			return ctx.has_farmable_tile and not ctx.has_own_outpost 				and ctx.own_camp_pos == Vector2i(-1, -1),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
+			var ft: Vector2i = FactionAISystem.shared()._find_unowned_farmable_tile(state, team)
 			if ft == Vector2i(-1, -1):
 				# ★R² 保險 tap：applicable 算過可以、to_task 真呼時卻沒地了（同函式、不同時間點；
 				#   中間可能被同 tick 別隊佔走）。「證明不出會發生」≠「不會發生」→ 留一個看得見的 tap。
@@ -304,7 +304,7 @@ static var REGISTRY: Dictionary = {
 			if not _ctx.can_expand: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			var _ldr: PersonData = state.persons.get(team.leader_id)
 			var _tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(_ctx.expand_pos))
-			var _type: String = FactionAISystem.new()._pick_outpost_type(state, team, _ldr, _tile)
+			var _type: String = FactionAISystem.shared()._pick_outpost_type(state, team, _ldr, _tile)
 			return {"delegate": true, "task": TeamData.TASK_BUILD, "target": _ctx.expand_pos,
 				"build_type": _type, "settler": _ctx.expand_settler},
 	},
@@ -314,7 +314,7 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.food_days < ctx.desperation_entry_threshold and ctx.has_aid_target,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			var aid: int = FactionAISystem.new()._find_aid_target(state, team)
+			var aid: int = FactionAISystem.shared()._find_aid_target(state, team)
 			if aid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			# 社交意圖：設 social_target 非 combat_target（resolver 讀 social_target）。位置走 belief（無/過期→撲空）。
 			var aid_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, aid)
@@ -361,7 +361,7 @@ static var REGISTRY: Dictionary = {
 			if f4 == null:
 				if Probe.enabled: Probe.bump("levyfun.notgt.沒有勢力")
 				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
-			var rt: int = FactionAISystem.new()._richest_member(state, f4)
+			var rt: int = FactionAISystem.shared()._richest_member(state, f4)
 			if rt == -1 or rt == team.team_id:
 				if Probe.enabled: Probe.bump("levyfun.notgt.沒有可徵對象" if rt == -1 else "levyfun.notgt.最富的是自己")
 				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
@@ -381,7 +381,7 @@ static var REGISTRY: Dictionary = {
 					and not ctx.diplo_target_on_cooldown,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 派系指定最近獨立隊外交（非戰，不設 combat_target）。
-			var dt: int = FactionAISystem.new()._nearest_independent(state, team)
+			var dt: int = FactionAISystem.shared()._nearest_independent(state, team)
 			if dt == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			var dt_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, dt)   # 外交 target(跨-faction)走 belief last-seen
 			if dt_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
@@ -400,7 +400,7 @@ static var REGISTRY: Dictionary = {
 					and ctx.has_specie and ctx.has_buyable_food and not ctx.home_food_productive,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 到最近市集 outpost 走既有 TASK_TRADE；到場 _resolve_market 餓隊 food local_value 高→買 food。
-			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost(state, team)
+			var mp: Vector2i = FactionAISystem.shared()._nearest_market_outpost(state, team)
 			if mp == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_TRADE, "target": mp},
 	},
@@ -418,7 +418,7 @@ static var REGISTRY: Dictionary = {
 			return ctx.food_days >= ctx.desperation_entry_threshold \
 					and ctx.material_shortfall > 0.0 and ctx.has_material_market and ctx.has_specie,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, "material")
+			var mp: Vector2i = FactionAISystem.shared()._nearest_market_outpost_with(state, team, "material")
 			if mp == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_TRADE, "target": mp},
 	},
@@ -439,7 +439,7 @@ static var REGISTRY: Dictionary = {
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# Fix B：移向視野內可達糧源（wild_game 遠格/糧市 pos）。複用 TASK_FORAGE（移動+抵達覓食）。
 			# 抵達後本地覓食/買糧於 next cadence 引擎重秤自然承接（零新 try_set 落點；憲法閘 baseline 不變）。
-			var fst: Vector2i = FactionAISystem.new()._find_food_seek_target(state, team)
+			var fst: Vector2i = FactionAISystem.shared()._find_food_seek_target(state, team)
 			if fst == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_FORAGE, "target": fst},
 	},
@@ -454,9 +454,9 @@ static var REGISTRY: Dictionary = {
 					and (ctx.has_arb or ctx.has_food_market),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 致富囤貨：到市集 hub 低買囤積（複用 TASK_TRADE，target=市集 outpost）；無市集則退貿易對象。
-			var hub: Vector2i = FactionAISystem.new()._nearest_market_outpost(state, team)
+			var hub: Vector2i = FactionAISystem.shared()._nearest_market_outpost(state, team)
 			if hub == Vector2i(-1, -1):
-				hub = FactionAISystem.new()._merchant_trade_target(state, team)
+				hub = FactionAISystem.shared()._merchant_trade_target(state, team)
 			if hub == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_TRADE, "target": hub},
 	},

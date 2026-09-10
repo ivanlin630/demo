@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 殭屍窗群乙（玩家的互動對象清單）
 topic: ★R² 送審：`specs/2026-09-10-zombie-window-group-B-player-targets-HOW.md`｜★★普查只點名一站，而我去看的時候發現它【不完整】：有【兩個寫入端】（`interaction_system:298` 普查沒點到）＋【一個沒人做的清除】（`erase_teams` 清 `team_intel` 卻不清 `player_pending_targets`）⇒ 玩家看到的不是「活了一 tick 的殭屍」，是**一個指向已刪除物件的 id**｜★★★我要你打的第一格是【我標未驗的那一格】：我只讀了 `interaction_system` 的 append 兩行，沒讀它的語境
 ---

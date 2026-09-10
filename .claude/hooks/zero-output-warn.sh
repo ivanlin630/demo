@@ -55,9 +55,16 @@ o=$(find "$D" -maxdepth 1 -name '*.md' -mmin -20 2>/dev/null | while read -r f; 
 #     一份 .measure.json／一張量測表躺在 repo 裡，而沒有任何信提到它 ⇒ 下游不知道它存在。
 #   ★★而「支線結束」沒有明確時刻，【產物出現】有 ⇒ 觸發點選產物不選「結束」。
 #   ★★★訊息要【點名那個檔】：說「你有產物沒出貨」而不說是哪一份 ⇒ 讀的人還要自己找。
+# ★★★監看清單加上 `docs/superpowers/specs`（systems 2026-09-10，★用戶戳「那為啥要我提醒」）：
+#   ★本 hook 上面那段問的是【你近 20 分鐘有沒有寄出過任何信】，
+#     而在一條快鄰的鏈上那個條件【幾乎永遠成立】⇒ ★★它在我最忙的時候結構性失明。
+#   ★★★而下面這段【產物落地卻沒信提到它】本來就是正確的形狀（而且會點名哪一份），
+#     它只是沒有監看 spec 目錄 ⇒ 【規格改完沒派】這一類掉在外面。
+#   ⇒ ★修法是【在既有清單加一個路徑】，不是新增一支閘
+#     （★★用戶 2026-09-10：「我不想要一直往上加閘」—— 而加一支只會讓原本那支也開始被忽略）。
 _arts=""
 if [ -f "$_cf" ]; then
-  _arts=$(git log --since="20 minutes ago" --name-only --pretty=format: -- docs/measurements docs/process/verdicts 2>/dev/null           | grep -E '\.(measure\.json|tsv|txt|jsonl)$' | sort -u | head -6)
+  _arts=$(git log --since="20 minutes ago" --name-only --pretty=format: -- docs/measurements docs/process/verdicts docs/superpowers/specs 2>/dev/null           | grep -E '\.(measure\.json|tsv|txt|jsonl|md)$' | sort -u | head -6)
 fi
 if [ -n "$_arts" ]; then
   _unshipped=""

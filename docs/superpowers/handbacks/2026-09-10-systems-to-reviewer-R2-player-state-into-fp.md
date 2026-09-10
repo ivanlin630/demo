@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: player_* 進 fp 當哨兵
 topic: ★R² 送審：`specs/2026-09-10-player-state-into-fp-as-sentinel-HOW.md`（blueprint 已裁 WHAT）｜★★而我把裁定的措辭【精確化】了，請你打這一格：blueprint 寫「sim 永遠不該寫／讀 player_*」，★而我查到 sim **確實會寫**（外交提案／流民求投靠／繼承事件／遭遇前置），只是那些路徑都 gate 在 `player_id != -1` ⇒ 我把它改寫成「**可以對玩家說話，但只在有玩家時**」｜★★★而哨兵同時會抓到一個更兇的東西：那些路徑用 `str(randi())` 產 event id ⇒ 沒 gate 住的話會在無玩家跑裡【消耗全域 RNG】
 ---

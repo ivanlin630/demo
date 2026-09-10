@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: fp 導出檢查往子層級再做一次
 topic: ★R² 送審：`specs/2026-09-10-fp-subfield-derived-check-HOW.md`（implementer 自提的技術債第一名，我同意並補了排序理由）｜★★排序理由：**攻擊門那張大票會大幅改動 team 行為，而它的驗收會用到 fp** ⇒ 若 `_emit_teams` 漏掉某個 TeamData 欄位，那張票的「fp 變了／沒變」**都不可信** ⇒ 先讓儀器可信，再拿它去量大改動｜★★★而驗收③是今天那個坑的直接對照：**在註解裡提到假欄位 ⇒ 它仍必須留在排除清單裡**
 ---

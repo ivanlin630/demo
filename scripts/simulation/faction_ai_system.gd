@@ -836,6 +836,8 @@ static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
 	if not _a2b_remote_tribute_payers.is_empty():
 		cleared["FactionAISystem._a2b_remote_tribute_payers"] = _a2b_remote_tribute_payers.size()
+	if _shared_fai != null: cleared["FactionAISystem._shared_fai"] = 1
+	_shared_fai = null   # ★跨 run 靜態殘留：共享實例也要清（同一份清單，不例外）
 	if not _fai_ph.is_empty(): cleared["FactionAISystem._fai_ph"] = _fai_ph.size()
 	if not _mk_verify_rows.is_empty(): cleared["FactionAISystem._mk_verify_rows"] = _mk_verify_rows.size()
 	if not _churn_last.is_empty(): cleared["FactionAISystem._churn_last"] = _churn_last.size()
@@ -879,7 +881,10 @@ const PHASE_PARENT: Dictionary = {
 	"loop3.outpost": "", "loop3.orders_ambition": "", "loop3.misc": "",
 	# ★loop2.solo 現在【不在 evaluate_all 裡】（錯開票移出去了）⇒ 它的帳在另一個容器
 	#   ⇒ 登記為根，而它與本表其餘列【不可相加】（分母不同）。
-	"loop2.solo": "", "loop2.solo_engine": "", "loop2.solo_cheap": "",
+	# ★★★裁定（systems 2026-09-10）：`solo_engine`／`solo_cheap` 是 `loop2.solo` 的【兩個桶】——
+	#   它們與它是巢狀的（`:7573` 包住 `_evaluate_solo` 的呼叫，兩個桶在它內部分帳）
+	#   ⇒ 登記成根 ⇒ 它們的 tot 與 `loop2.solo` 幾乎相同 ⇒ ★根列相加會把 solo 那塊算兩次。
+	"loop2.solo": "", "loop2.solo_engine": "loop2.solo", "loop2.solo_cheap": "loop2.solo",
 	"loop2.subteam": "",   # ★新容器（見 loop2 子隊分支）：它之前不存在 ⇒ 子隊的錢不在任何一格
 	# ── loop1.assign_tasks 的兒子 ──
 	"assign.player_cmd": "loop1.assign_tasks",
@@ -913,15 +918,17 @@ const PHASE_PARENT: Dictionary = {
 }
 
 # ★把相位表算成【可排序的報告】。★★抽成純函式：床可以餵假 _fai_ph 進來驗閘會不會咬。
-static func phase_report(ph: Dictionary, total_us: int) -> String:
+# ★★★`parent_map` 可覆寫（預設 ＝ `PHASE_PARENT`）：床要驗「把某個兒子改回根會不會紅」，
+#   而 `PHASE_PARENT` 是 const 改不動 ⇒ 沒有這個縫，成對對照的【會紅】那一格就做不出來。
+static func phase_report(ph: Dictionary, total_us: int, parent_map: Dictionary = PHASE_PARENT) -> String:
 	var self_us: Dictionary = {}
 	var unregistered: Array = []
 	for name in ph:
 		self_us[name] = int(ph[name])
-		if not PHASE_PARENT.has(name):
+		if not parent_map.has(name):
 			unregistered.append(String(name))
 	for name in ph:
-		var parent: String = String(PHASE_PARENT.get(name, ""))
+		var parent: String = String(parent_map.get(name, ""))
 		if parent == "" or parent == "*multi":
 			continue        # ★"*multi" 不參與減法
 		if self_us.has(parent):
@@ -929,7 +936,7 @@ static func phase_report(ph: Dictionary, total_us: int) -> String:
 	var rows: Array = []
 	var multi_rows: Array = []
 	for name in ph:
-		var is_multi: bool = String(PHASE_PARENT.get(name, "")) == "*multi"
+		var is_multi: bool = String(parent_map.get(name, "")) == "*multi"
 		var row := {"n": String(name), "self": int(self_us[name]), "tot": int(ph[name])}
 		if is_multi:
 			multi_rows.append(row)
@@ -964,7 +971,27 @@ static func phase_report(ph: Dictionary, total_us: int) -> String:
 			absent.append(String(name))
 	if not absent.is_empty():
 		out += "｜[本輪未出現] " + "、".join(absent) + " "
+	# ★★★機械守恆（systems 立 2026-09-10，取代「第四條規矩」）：
+	#   **所有【根】相位的 tot 相加 ≤ 容器總時** —— 根相位在時間上應該是【不重疊的分割】。
+	#   ★它一條抓到今天三次同型：①`loop1.factions` 六個檢查點登記成兄弟
+	#     ②`indep.weakest_prey` 被兩個外層共用 ③`solo_engine` 與 `solo` 巢狀卻都是根。
+	#   ★★`*multi` 列【不算進這個和】（依定義會重複）—— 這句要印在訊息裡，
+	#     否則下一個人會以為守恆式漏了它們。
+	var root_sum: int = 0
+	var root_rows: Array = []
+	for name in ph:
+		if String(parent_map.get(name, "")) != "":
+			continue
+		root_sum += int(ph[name])
+		root_rows.append({"n": String(name), "tot": int(ph[name])})
 	var head: String = "登記 %d/%d" % [ph.size() - unregistered.size(), ph.size()]
+	if root_sum > total_us:
+		root_rows.sort_custom(func(a, b): return int(a["tot"]) > int(b["tot"]))
+		var top3: Array = []
+		for i in range(mini(3, root_rows.size())):
+			top3.append("%s=%dus" % [root_rows[i]["n"], root_rows[i]["tot"]])
+		head += " ★★★根守恆破：Σ根 tot %dus > 容器總時 %dus（超出 %dus）" % [
+			root_sum, total_us, root_sum - total_us] 			+ "｜貢獻最大的三個根：" + "、".join(top3) 			+ "（★成因＝登記表宣稱的樹與 code 的巢狀不一致；★★`*multi` 列不算進這個和，不是漏了）"
 	if not unregistered.is_empty():
 		# ★閘：沒登記的名字【具名紅】—— 沒有這一條，這張手抄表會安靜地過期
 		head += " ★★未登記相位（請登記進 PHASE_PARENT）：" + "、".join(unregistered)
@@ -3081,7 +3108,7 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 # A2c-1：consolidate target 決策抽出（非 dispatch，供 DecisionContext.gather 算 consolidate_target_id）。
 # 逐條件鏡射 _try_consolidate_merge:1421-1442（target 兩支）；回 absorber_id / leader_team_id / -1。
 static func consolidate_target_of(state: WorldState, mt: TeamData, f) -> int:
-	var fai := FactionAISystem.new()
+	var fai := FactionAISystem.shared()
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	var absorber_id: int = fai._find_absorber(state, mt, f)
 	if absorber_id != -1:
@@ -4517,7 +4544,7 @@ func _calc_own_armed(state: WorldState, team: TeamData) -> int:
 	var anon_pop: int    = maxi(team.population - named_count, 0)
 	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)
 
-static func _hex_dist(a: Vector2i, b: Vector2i) -> int:   # ★perf cut1 A：純算術零 instance state → static（免 per-call FactionAISystem.new() alloc）
+static func _hex_dist(a: Vector2i, b: Vector2i) -> int:   # ★perf cut1 A：純算術零 instance state → static（免 per-call FactionAISystem.shared() alloc）
 	var dx := b.x - a.x
 	var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
@@ -4741,6 +4768,21 @@ func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileDat
 # ──────── 基建 dispatch ────────
 
 # 選址 diff print：同 faction 同址不重印（{ faction_id: "x_y" }）
+# ★★★共享實例（systems 裁 2026-09-10）：production 有 **42 處** `FactionAISystem.shared()`，
+#   而這是一支七千行的 class ⇒ ★每次決策都在配置它。
+#   ★★語意面極小且可證明：本 class 只有 **2 個實例變數**（下面兩個），
+#     兩個都是「上一次印過什麼」的去重記憶 —— 其餘狀態都是 `static var`（本來就共享）。
+#   ★★★而共享會讓那兩顆去重【第一次真的生效】：舊寫法每處 `new()` ⇒ 記憶永遠是空的
+#     ⇒ 每次都判「跟上次不一樣」⇒ 每次都印 ⇒ **去重機制在這 42 條路上等於不存在**。
+#   ⇒ ★所以 log 會變少，而那是它原本就被設計要做的事（交件要報行數差）。
+#   ★★debug/床不在範圍：那裡本來就該各自 `new()`（棘輪也只咬 production）。
+static var _shared_fai: FactionAISystem = null
+
+static func shared() -> FactionAISystem:
+	if _shared_fai == null:
+		_shared_fai = FactionAISystem.new()
+	return _shared_fai
+
 var _last_site_sig: Dictionary = {}
 # 派工失敗原因 diff print：同 faction 同原因連續不重印（{ faction_id: reason }）
 var _last_dispatch_fail: Dictionary = {}

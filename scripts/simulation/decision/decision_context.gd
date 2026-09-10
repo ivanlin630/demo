@@ -293,7 +293,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
 	c.has_manufacturing_facility = FactionAISystem.has_manufacturing_facility(state, team)   # S1 製造 precondition
 	# ★復甦 R2 §2B.1：料備妥產糧設施自救建設（build-as-survival）——viable + genuine util 供「自救建田」option。
-	var _rescue: Dictionary = FactionAISystem.new()._food_rescue_eval(state, team)
+	var _rescue: Dictionary = FactionAISystem.shared()._food_rescue_eval(state, team)
 	c.can_rescue_build = bool(_rescue["viable"])
 	c.rescue_build_util = float(_rescue["util"])
 	# ★製造 bootstrap 子根②：produce_pull=自家可造 outputs 的 worst-shortfall ratio（belief demand-responsive，
@@ -344,7 +344,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 				_btile.idle_employ_next_tick = state.world.current_tick + LaborSystem.LABOR_CADENCE
 				if Probe.enabled: Probe.bump("gather.write.idle_employ_next_tick." + ("advance" if advance else "observe"))
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
-	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
+	c.has_home_outpost = FactionAISystem.shared()._find_own_outpost(state, team) != Vector2i(-1, -1)
 	c.current_task = team.current_task   # ★GATE-A 二刀 touch0：自身 current_task（返家 hysteresis；自身欄非 god-view）
 	# threat（F-D6 un-stub）：視野內最高敵威脅（belief-based ThreatAssessment，含逼近/敵意/距離衰減）。
 	# 餵 threat_pressure term → unified 隊(商隊/生產)遇逼近敵會 FLEE（威脅真驅動非死 stub）。
@@ -403,7 +403,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 				Probe.bump("flee.no_dest_above_threshold")
 	c.is_resident = FactionAISystem.is_resident_static(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.threat", _tg)
-	var _fa := FactionAISystem.new()
+	var _fa := FactionAISystem.shared()
 	var _prey: int = _fa._find_weakest_prey(state, team)
 	c.has_weak_prey = _prey != -1
 	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
@@ -808,7 +808,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			team.consolidate_target_cache = ct
 			if Probe.enabled: Probe.bump("gather.write.consolidate_target_cache." + ("advance" if advance else "observe"))
 			# §HOW-7 吸納 target（強方 pull，capacity-bound 弱鄰）
-			team.absorb_target_cache = FactionAISystem.new()._find_absorb_target(state, team)
+			team.absorb_target_cache = FactionAISystem.shared()._find_absorb_target(state, team)
 			if Probe.enabled: Probe.bump("gather.write.absorb_target_cache." + ("advance" if advance else "observe"))
 			team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
 			if Probe.enabled: Probe.bump("gather.write.consolidate_eval_next_tick." + ("advance" if advance else "observe"))

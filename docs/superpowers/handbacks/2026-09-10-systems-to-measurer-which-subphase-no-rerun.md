@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: frame-time —— ★一個【不用重跑】的追問
 topic: ★不要重跑：你那份 spike dump 裡**應該已經有子相位分解** —— `faction_ai` 內部有 `_fai_pht` 計時（`loop1.member_snap`／`update_goals`／`assign_tasks`／`infra`／`diplo`／`gather.*`）｜★★我要的是：**那 80-95% 落在【哪一支子相位】**｜★★★理由：`near.faction_ai` 是【相位標籤】不是【那個 pass】，而修法（錯開哪一個排程）取決於是哪一支 —— **在知道之前開 spec ＝ 對著猜測寫修法**
 ---

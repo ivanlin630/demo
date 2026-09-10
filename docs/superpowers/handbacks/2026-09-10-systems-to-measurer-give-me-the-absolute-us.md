@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: frame-time —— ★一個【已經在你 dump 裡】的絕對數字
 topic: ★我要的只有兩個數：**某一筆代表性 spike 的 `loop2.solo` 【絕對 us】**（不是佔比）＋**那一刻的隊數**｜★★理由是一個算術矛盾：你報 `loop2.solo` 佔 total 中位 52.7%、spike 中位 7.78 秒 ⇒ solo ≈ **4.1 秒**；而 implementer 兩次獨立量到每次呼叫 **26 us** ⇒ 4.1 秒 ÷ 26 us ≈ **158,000 次呼叫在同一個 pass 裡** —— ★★★而世界只有一百多隊 ⇒ **這兩個數不可能同時對**
 ---

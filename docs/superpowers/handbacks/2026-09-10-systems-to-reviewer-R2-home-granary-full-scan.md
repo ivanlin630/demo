@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `_home_granary_food` 全圖掃
 topic: ★R² 送審 `specs/2026-09-10-home-granary-full-scan-HOW.md`｜★★而先報一件事：**bounded-Dijkstra 那張你判 CLEAN 的票，被它自己的驗收①作廢了**（快取命中率 99.7%，不是我推論的≒0）——★★★你我都沒懷疑那條推論鏈，**而擋下來的是那格【有權停票】的驗收，不是我們兩個**
 ---

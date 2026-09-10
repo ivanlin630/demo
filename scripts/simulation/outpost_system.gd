@@ -465,6 +465,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			if FACILITY_DEF.has(fac):
 				var key: String = FACILITY_DEF[fac]["current_level_key"]
 				tile.set(key, mini(int(tile.get(key)) + 1, 3))
+				FacilityExistenceIndex.invalidate()   # ★設施 0→1 不動 owner、不讓 outpost_level 跨 0 ⇒ 共用 epoch 抓不到
 				print("[Outpost] 設施完工 %s Lv%d at (%d,%d)" % [
 					fac, int(tile.get(key)), tile.tile_pos.x, tile.tile_pos.y])
 		"crude_camp":
@@ -505,6 +506,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				(tmk as Dictionary).erase(demo_tid)
 			for fac_name in FACILITY_DEF:
 				tile.set(FACILITY_DEF[fac_name]["current_level_key"], 0)
+				FacilityExistenceIndex.invalidate()
 			tile.stable_progress = 0.0
 			tile.garrison.clear()
 			tile.prisoners.clear()
@@ -761,6 +763,7 @@ func demolish_facility(_state: WorldState, tile: HexTileData, facility: String) 
 	if int(tile.get(key)) <= 0:
 		return
 	tile.set(key, 0)
+	FacilityExistenceIndex.invalidate()
 	if facility == "stable":
 		tile.stable_progress = 0.0
 	print("[Outpost] 拆除設施 %s at (%d,%d)" % [facility, tile.tile_pos.x, tile.tile_pos.y])

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: live_team 便捷式 ＋ 新增行棘輪閘
 topic: ★R² 送審：`specs/2026-09-10-live-team-ratchet-HOW.md`（blueprint 裁 WHAT＝棘輪不改寫）｜★★這張的核心不是介面，是一個【判斷】：87% 是預設寫法 ⇒ **逐處修是錯的處置**（改完 75 處，第 76 處仍然會寫 `has()`）｜★★★而我要你打的是驗收④：**判準若只看 `has(` 就會把 [G] 純存在守衛也咬進去** —— 那一格是這支閘最容易做錯的地方，而我只寫了「機械代理」四個字
 ---

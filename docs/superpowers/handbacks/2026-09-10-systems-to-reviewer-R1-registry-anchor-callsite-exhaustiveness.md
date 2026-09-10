@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 登記錨 ④a
 topic: ★★★**R①（factcheck 前提）**：本票唯一的未驗前提是**「按站位判定的呼叫點清單是完整的」** —— 而我列的是**我掃到的**，不是**窮盡的**｜★★漏一站的後果不是「少改一處」，是**兩套真相並存而沒有任何一格會紅**（那一站繼續讀站位、其餘讀登記）｜★spec：`specs/2026-09-10-registry-anchor-slice1-HOW.md`
 ---

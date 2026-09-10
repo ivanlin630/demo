@@ -1,0 +1,32 @@
+# 設施存在索引：改前／改後（★所有數字同一支床、同 seed、同窗）
+# 床：scripts/debug/option_term_cost_bed.gd｜warring_states｜3000 tick｜seed 4242
+# ★★★跑間噪音大是這條線的常態，而**這次的差距大到噪音吃不掉**（見下）
+
+                                   改前（本日多趟）        改後
+`_team_has_facility` us／次        781.8 ／ 1081.1        **5.7**
+`_supply_chain` self us／次        3898.5 ／ 7610.5       **40.1**
+子樹（frontier）÷ 牆鐘             44.99% ／ 45.84%       **11.58%**
+牆鐘總時（Probe=ON）               184.7 ／ 250.3 ／ 357.4  **34.4 s**
+牆鐘總時（Probe=OFF）              236.7（早前一趟）        **25.7 s**
+呼叫次數（不變）                    gating 194190／supply 39186（★語意沒動 ⇒ 次數逐字相同）
+
+=== 驗收 ===
+①★★★語意逐次相同：shadow **194190 次比對／0 不一致**（★母體地板：> 0 ✅）
+②成本：見上表；★舊掃的 tile 訪問實測 **122,533,890 次**（≈1.23 億，與先前估算吻合）
+③★成對對照（把短路關掉）：gating **5.7 → 4.5 us／次** ⇒ ★★★**沒有回到現況量級**
+   ⇒ ★而這是一個**與 spec 預期相反**的結果，值得寫死：
+     **贏的不是短路，是索引** —— 短路只省掉「查表」那一步（69% 的隊沒有據點），
+     而**兩條路現在都不掃地圖**了。★★真正的對照組是 shadow 那一趟（它仍跑舊掃）：**1081.1 us／次**。
+④fp：**16bb6924789c18ac031e61d34c2aeae7** —— 三趟（新／關短路／Probe OFF）**全部相同**
+⑤★牆鐘：ON 34.4 s／OFF 25.7 s（★★兩種狀態都跑，界限 45）
+⑥★母體：**有據點的隊 18／58（31.0%）**⇒ 短路能吃掉的是另外 **69.0%** 的呼叫
+
+=== 失效點（★裸掃列出，這是本票的一半）===
+掃法：對 8 個 `current_level_key`（`farming/manufacturing/apothecary/mint/stable/smelter/weaponsmith/armorsmith_level`）
+  ①`\.(key)\s*(=|\+=|-=)` 直接賦值 ②`.set(` 帶變數鍵（★而變數鍵那一族逐處看上下文）
+production 命中 **3 處**，全部已呼 `FacilityExistenceIndex.invalidate()`：
+  `outpost_system.gd:467`（設施完工 +1）／`:508`（拆除據點時各設施歸零）／`:764`（拆單一設施）
+★非 tile 的同名欄位：`village_estimate.gd:29`（`VillageEstimate.farming_level`）⇒ **不是世界狀態，不影響索引**
+★★debug／床直寫 `tile.farming_level = N`（32 處在 `headless_test.gd` 等）**不會 invalidate**
+  ⇒ ★★★而那正是 shadow 存在的理由：它會在床上把 stale 抓出來（本輪 0 不一致）
+共用失效：`OwnerOutpostIndex.epoch`（owner 變／`outpost_level` 跨 0／`erase_teams` 死亡釋放）

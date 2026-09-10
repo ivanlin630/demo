@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 登記錨 ④a（v2，R① contradiction 後改寫）
 topic: ★R² 送審改寫版：三類處置（③進本票／①②一跳推導／`_can_invite_settle` 歸 ④b）＋ **四軸對照表**（blueprint 明文要求的必帶附件）＋ 驗收⑦ `shadow_check`｜★★★而我要你優先打**一跳推導的落法**：blueprint 裁「登記欄唯一真值、查詢時多查一跳、**不給子隊發第二份登記**」—— 我把它落成兩支具名謂詞 ＋ 棘輪擋手寫組合，而**我不確定這樣夠不夠擋住第五種軸**
 ---

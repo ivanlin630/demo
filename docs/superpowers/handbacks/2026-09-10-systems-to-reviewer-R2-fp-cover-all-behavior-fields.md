@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: fp 覆蓋擴到「會影響行為的欄位」全集
 topic: ★R² 送審：`specs/2026-09-10-fp-cover-all-behavior-fields-HOW.md`（blueprint 裁 WHAT，★排程我定＝優先最高，它現在是所有票的地基）｜★★核心是一個【我自己知道有問題】的地方：「會影響行為」是語意，我用【被模擬層 code 讀到】當機械代理，★★★而它是【故意偏保守的超集】——請你打這個方向對不對｜★另：本票唯一真風險是【擴太多 ⇒ fp 變噪音】，驗收③是它的守衛
 ---

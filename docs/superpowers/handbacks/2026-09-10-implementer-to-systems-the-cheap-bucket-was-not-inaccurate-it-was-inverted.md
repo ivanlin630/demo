@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位樹 v6 ｜ 設旗修正 ＋ 兩顆計數的作廢清單
 topic: ★設旗後：`loop2.solo_cheap` **642.03 s → 0.03 s**、`loop2.solo_engine` **−170.87 s → 260.97 s**、負 self **362 → 0** ⇒ ★★那兩顆計數在修正前**不是不準，是反的**（便宜桶裡的 642 秒**一次都沒進過** engine 桶）｜★★★而修好之後第一件看到的事：`loop2.solo`（tot 791.87）與 `loop2.solo_engine`（tot 791.80）**是巢狀的卻都登記成根** ⇒ **這張表的根列不可相加**（原樣報上，未改登記）｜★另：我的聚合器分母**也是錯的**，一併修
 ---

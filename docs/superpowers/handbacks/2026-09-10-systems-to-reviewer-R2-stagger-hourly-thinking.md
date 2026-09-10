@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 錯開每小時的思考 pass
 topic: ★R² 送審：`specs/2026-09-10-stagger-hourly-thinking-pass-HOW.md`（blueprint 已裁 WHAT＝接受世界改變）｜★★主詞兩半都點名了：**同批到期點 ＝ `sim_runner.gd:315` 的全域閘 `% NEAR_CADENCE`（不是某支排程忘了錯開，是根本沒有 per-team 排程）**；**主兇子相位 ＝ `loop2.solo`（1814/2160 筆排第一，中位數佔 52.7%）**｜★★★而修法用【既有工具】`CadenceStagger`，不造新東西 —— 我上一版提「team_id % 60」是沒先查有沒有現成的，已對 blueprint 訂正
 ---

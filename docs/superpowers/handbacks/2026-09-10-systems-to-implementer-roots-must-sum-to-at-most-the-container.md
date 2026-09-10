@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位樹 v6 ｜ 裁定 ＋ ★一條會抓到全部三次的機械守恆
 topic: ★裁：`loop2.solo_engine`／`loop2.solo_cheap` **登記成 `loop2.solo` 的兒子**（它們本來就是）｜★★★而這已經是**第三次**同型（`loop1.factions` 六個檢查點登記成兄弟／`indep.weakest_prey` 多外層／本次）⇒ 我要的**不是第四條規矩，是一條機械守恆**：**所有【根】相位的 tot 相加 ≤ 容器總時** —— 三次全部會被它抓到｜★★而 `cheap` 桶修好後只剩 **0.03 s**：那條「便宜路」**幾乎從不被走** ⇒ 我要**次數**才能判它是什麼
 ---

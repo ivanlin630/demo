@@ -1,0 +1,33 @@
+# 42 處 `FactionAISystem.new()` → 一支共享實例：★量出來的三件事
+# 床：scripts/debug/option_term_cost_bed.gd｜warring_states｜3000 tick｜seed 4242｜Probe=ON
+# ★★★跑間噪音大（本機多 session 同跑）⇒ **絕對秒數不可比**，下面一律用【同一趟內的比值】
+
+=== ① 熱路徑：**看不出差別**（★而這是結論，不是「沒量到」）===
+                                改前(optterm16)        改後(optterm17)
+`need_keep` 那一段 總計/牆鐘      65.871 / 261.328      78.141 / 313.893
+  ⇒ 佔牆鐘                       **25.21%**            **24.89%**
+`need_keep` us/次                18782.8               22281.6   ← ★兩趟牆鐘差 20%，此欄不可比
+frontier 子樹 ÷ 牆鐘             44.99%                44.68%
+⇒ ★★所以「42 處配置」在這條路上**不是可觀測的成本**：比值一致到 0.3 個百分點。
+⇒ ★★★而這是**第九個被排除的假說** —— ★配置很貴是個很順口的說法，而它在這裡不成立。
+
+=== ② fp：**不變**（★「只改分配、不改世界」的硬證據）===
+`16bb6924789c18ac031e61d34c2aeae7`（改前改後相同）
+
+=== ③ ★★★log 行數：**沒有變少** —— systems 的 §③ 推論被量掉 ===
+`[Site]`（那兩顆去重記憶唯一的輸出）：**31 → 31**
+全檔差異只有三類，且都與去重無關：
+  `[TREE]` 4 → 10（★dirty 檔清單變長 ＝ 我這輪改了更多檔）
+  `[PhaseSpike]` 68 → 72／`[FaiPhase]` 68 → 72（★機器較慢 ⇒ 更多 tick 越過 100ms 門檻）
+★根因（讀 code 查實）：那兩顆去重記憶所在的兩個 print 點，
+  **一直都跑在 `SimRunner._faction_ai_system` 這支【長命實例】上**（`sim_runner.gd:600`）
+  ⇒ ★★它們**本來就在去重** —— 而那 42 處 `new()` 是**別的呼叫端**，它們不印這兩種訊息。
+⇒ ★★★所以「去重從來沒去過重」在**這兩顆**上**不成立**；
+  它成立的前提是「印訊息的那支實例每次都是新的」，而實測**不是**。
+
+=== ④ 存量清單（42 處，逐檔）===
+options.gd 16／goal_resolver.gd 8／need_oracle.gd 4／decision_context.gd 4／movement_system.gd 3／
+faction_ai_system.gd 2／diplomatic_ai_system.gd 2／sim_runner.gd 1／interaction_system.gd 1／
+events/event_faction_defect.gd 1  ＝ **42**（★全部換成 `FactionAISystem.shared()`；
+  ★★唯一保留 `new()` 的是 `shared()` 工廠自己那一行；★★★debug/床不在範圍，明寫）
+棘輪：`.claude/hooks/fai-new-ratchet.sh`（自檢 4/4：production 紅／`shared()` 不紅／debug 不咬／工廠豁免）

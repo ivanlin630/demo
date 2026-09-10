@@ -10,13 +10,99 @@ class_name NeedOracle
 # （TARGET_PER_POP，防中間態 target=0 全隊倒貨/價格鎖死，R²#5）。reader 全切 oracle = S4。
 
 # 保留向 need：自用(消耗品) + 供應鏈(中間品下游 gap 傳導)。
+# ★★★三個加數各自的碼表（★單價量、不准除）
+static var nk_self_us: float = 0.0
+static var nk_self_n: int = 0
+static var nk_supply_us: float = 0.0
+static var nk_supply_n: int = 0
+static var nk_constr_us: float = 0.0
+static var nk_constr_n: int = 0
+static var nk_all_n: int = 0
+# ★★★遞迴扇出：`need_keep` → `_supply_chain`（:183）→ `need_keep(out)` 逐個配方產出
+#   ⇒ ★「每次很慢」與「一次查詢被展開很多次」是兩個結論，而總時把它們壓成同一個數字。
+static var nk_depth: int = 0
+static var nk_top_n: int = 0            # 頂層（depth 0 進入）次數
+static var nk_maxdepth: int = 0
+static var nk_depth_hist: Dictionary = {}
+# ★★★self ／ total（systems 2026-09-10）：`need_keep` 是**函式遞迴** ⇒ 父親的數字含著兒子的
+#   ⇒ ★與相位樹上那件事**完全同一件**，只是換一個容器。
+#   ★★做法：一個「目前這一層的兒子累計」堆疊 —— 每一層退出時
+#     `self = elapsed − 兒子累計`，再把自己的 elapsed 加進【父親】的兒子累計。
+#   ★★★只有【頂層 elapsed】可以拿來跟牆鐘比；只有 self 可以拿來排序。
+static var _prof_stack: Array = []
+static var nk_tot_us: float = 0.0        # 全部呼叫的 elapsed 總和（★含重複計算，不可乘）
+static var nk_selft_us: float = 0.0      # 全部呼叫的 self 總和（★這個才可排序）
+static var nk_topt_us: float = 0.0       # ★頂層 elapsed 總和（★★這個才可跟牆鐘比）
+static var sc_tot_us: float = 0.0        # `_supply_chain` total
+static var sc_selft_us: float = 0.0      # `_supply_chain` self（扣掉它自己引發的巢狀 need_keep）
+static var sc_n: int = 0
+# ★葉子的兩半（systems 2026-09-10）：①設施 gating（每個 recipe group 一次全圖掃）②配方比對＋gap
+#   ★★gap 那半【含巢狀 need_keep】⇒ 交件要標；★①順便記「平均掃幾格」（確認它真的是全圖）
+static var sc_gate_us: float = 0.0
+static var sc_gate_n: int = 0
+static var sc_gate_tiles: float = 0.0
+static var sc_match_us: float = 0.0
+static var sc_gap_us: float = 0.0
+static var sc_gap_n: int = 0
+static var sc_empty_n: int = 0
+
 static func need_keep(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
 	# ★★★perf tap（`payoff-derive-bridge` 驗收 #5）：spec 明寫「重算不是取用」
 	#   ⇒ ★「多一次呼叫」是這個設計【已知的代價】，而代價要有數字。
 	#   ★★計數決定性（不受並跑影響）；★★★時間必須獨佔才有意義 ⇒ 床端分開報。
 	var _t0: int = Time.get_ticks_usec() if Probe.enabled else 0
-	var _r: float = _self_use(state, team, res, leader_values) + _supply_chain(state, team, res) \
-		+ _construction_facility_need(state, team, res, leader_values)
+	# ★★★拆歧義（systems 2026-09-10）：`need_keep` 是三個加數，而它們綁在同一個碼表裡
+	#   ⇒ 那 18.8 ms 答不出「是誰貴」。★碼表走 `SimRunner.phase_timing`（界限 43：與 Probe 正交）。
+	if SimRunner.phase_timing:
+		_prof_stack.push_back(0.0)
+		if nk_depth == 0:
+			nk_top_n += 1
+		nk_depth += 1
+		if nk_depth > nk_maxdepth:
+			nk_maxdepth = nk_depth
+		var _dkey: String = str(nk_depth)
+		nk_depth_hist[_dkey] = int(nk_depth_hist.get(_dkey, 0)) + 1
+	var _n0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	var _a: float = _self_use(state, team, res, leader_values)
+	var _n1: int = 0
+	if SimRunner.phase_timing:
+		_n1 = Time.get_ticks_usec()
+		nk_self_us += float(_n1 - _n0)
+		nk_self_n += 1
+	if SimRunner.phase_timing:
+		_prof_stack.push_back(0.0)   # ★`_supply_chain` 自己的一層（它是遞迴源）
+	var _sc0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	var _b: float = _supply_chain(state, team, res)
+	if SimRunner.phase_timing:
+		var _sce: float = float(Time.get_ticks_usec() - _sc0)
+		var _scc: float = float(_prof_stack.pop_back())
+		sc_tot_us += _sce
+		sc_selft_us += (_sce - _scc)
+		sc_n += 1
+		if not _prof_stack.is_empty():
+			_prof_stack[_prof_stack.size() - 1] = float(_prof_stack[_prof_stack.size() - 1]) + _sce
+	var _n2: int = 0
+	if SimRunner.phase_timing:
+		_n2 = Time.get_ticks_usec()
+		nk_supply_us += float(_n2 - _n1)
+		nk_supply_n += 1
+	var _c: float = _construction_facility_need(state, team, res, leader_values)
+	if SimRunner.phase_timing:
+		nk_constr_us += float(Time.get_ticks_usec() - _n2)
+		nk_constr_n += 1
+		nk_all_n += 1
+	var _r: float = _a + _b + _c
+	if SimRunner.phase_timing:
+		var _elapsed: float = float(Time.get_ticks_usec() - _n0)
+		var _child: float = float(_prof_stack.pop_back())
+		nk_tot_us += _elapsed
+		nk_selft_us += (_elapsed - _child)
+		if _prof_stack.is_empty():
+			nk_topt_us += _elapsed          # ★頂層：這一筆才是真的牆鐘貢獻
+		else:
+			_prof_stack[_prof_stack.size() - 1] = float(_prof_stack[_prof_stack.size() - 1]) + _elapsed
+		if nk_depth > 0:
+			nk_depth -= 1
 	if Probe.enabled:
 		Probe.bump("perf.need_keep.calls")
 		Probe.add_amount("perf.need_keep.us", float(Time.get_ticks_usec() - _t0))
@@ -43,7 +129,7 @@ static func _construction_facility_need(state: WorldState, team: TeamData, res: 
 		return 0.0   # scope:build-cost res only（material/tools；★禁擴 build-cost∩output≠∅ 的其他 res 無守衛）
 	if _construction_visiting.get(res, false):
 		return 0.0   # ★(b) re-entrancy:此 res 正算中→切環（graph-independent，防 material↔tools 跨環無限遞迴）
-	var own_pos: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var own_pos: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 	if own_pos == Vector2i(-1, -1):
 		return 0.0
 	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
@@ -63,7 +149,7 @@ static func _construction_facility_need(state: WorldState, team: TeamData, res: 
 		var cost_r: float = float(OutpostSystem.upgrade_cost(facility, cur + 1).get(res, 0))
 		if cost_r <= 0.0:
 			continue   # ★cost-guard 在 _facility_deficit 呼叫之前（只讀 build-cost 含此 res 的 facility）
-		var desire: float = FactionAISystem.new()._facility_deficit(state, team, facility, tile)   # 0-1 既有信號
+		var desire: float = FactionAISystem.shared()._facility_deficit(state, team, facility, tile)   # 0-1 既有信號
 		if desire < CONSTRUCTION_DESIRE_MIN:
 			continue   # 夠想才前瞻買料（desire 當 gate）
 		total += cost_r   # ★過閘=夠想建→全 build-cost（非 ×desire 稀釋；稀釋<全 cost=白買 v1 半破根）
@@ -81,7 +167,7 @@ static func _facility_output_res(facility: String) -> Array:
 static func max_material_facility_desire(state: WorldState, team: TeamData) -> float:
 	if state == null:
 		return 0.0
-	var own_pos: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var own_pos: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)
 	if own_pos == Vector2i(-1, -1):
 		return 0.0
 	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
@@ -97,7 +183,7 @@ static func max_material_facility_desire(state: WorldState, team: TeamData) -> f
 			continue
 		if float(OutpostSystem.upgrade_cost(facility, cur + 1).get("material", 0)) <= 0.0:
 			continue   # 只認 build-cost 含 material 的 facility（買料才有意義）
-		best = maxf(best, FactionAISystem.new()._facility_deficit(state, team, facility, tile))
+		best = maxf(best, FactionAISystem.shared()._facility_deficit(state, team, facility, tile))
 	return best
 
 # 流出向 need：貿易 demand（市場有效買單 + 野心 + 可載，綁 deal 側）。goods 只有此量（need_keep=0）。
@@ -137,8 +223,16 @@ static func _supply_chain(state: WorldState, team: TeamData, res: String) -> flo
 		return 0.0   # food 終端無供應鏈；無 state 無法 gating/gap
 	# 同 out 多配方：per 下游-out 取「該隊設施可造」的 max 係數（不重複加總 out gap）
 	var out_maxcoef: Dictionary = {}
+	var _scg0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	var _scg_mark: float = sc_gate_us
 	for level_key in ManufacturingSystem.RECIPE_GROUPS:
-		if not _team_has_facility(state, team, level_key):
+		var _gk0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+		var _has: bool = _team_has_facility(state, team, level_key)
+		if SimRunner.phase_timing:
+			sc_gate_us += float(Time.get_ticks_usec() - _gk0)
+			sc_gate_n += 1
+			sc_gate_tiles += float(state.world.tiles.size())
+		if not _has:
 			continue   # ★設施 gating：無此製造設施的隊不背此供應鏈 need
 		for recipe in ManufacturingSystem.RECIPE_GROUPS[level_key]:
 			var inputs: Dictionary = recipe["in"]
@@ -147,22 +241,39 @@ static func _supply_chain(state: WorldState, team: TeamData, res: String) -> flo
 			var out: String = String(recipe["out"])
 			var coef: float = float(inputs[res])
 			out_maxcoef[out] = maxf(float(out_maxcoef.get(out, 0.0)), coef)   # 多配方取 max 不重複
+	if SimRunner.phase_timing:
+		sc_match_us += float(Time.get_ticks_usec() - _scg0) - (sc_gate_us - _scg_mark)
 	if out_maxcoef.is_empty():
+		if SimRunner.phase_timing:
+			sc_empty_n += 1
 		return 0.0
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var total: float = 0.0
+	var _gap0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	for out in out_maxcoef:
 		var gap: float = maxf(need_keep(state, team, out, lv) - float(team.resources.get(out, 0)), 0.0)   # ★gap 非 raw
 		total += gap * float(out_maxcoef[out])
+		if SimRunner.phase_timing:
+			sc_gap_n += 1
+	if SimRunner.phase_timing:
+		sc_gap_us += float(Time.get_ticks_usec() - _gap0)
 	return total
 
 # 設施 gating：隊「自家」outpost 有此製造設施（非 positional——掃 team 擁有的 outpost，讀自家 need 側）。
 static func _team_has_facility(state: WorldState, team: TeamData, level_key: String) -> bool:
-	for tid in state.world.tiles:   # gate-ok: 掃 tiles 只查【自家設施】＝legit-self
-		var tile: HexTileData = state.world.tiles[tid]
-		if tile.outpost_owner == team.team_id and tile.outpost_level > 0 and int(tile.get(level_key)) > 0:
-			return true
-	return false
+	# ★★★索引化（HOW spec 2026-09-10）：舊實作是 `for tid in state.world.tiles` 全圖掃，
+	#   實測 194190 次 × 631 格 ≈ 1.23 億次 tile 訪問 ＝ 這條路的 99.4%。
+	#   ★語意等價可證明：這是**存在量詞**，而聚合對存在量詞是精確的（見索引檔頭）。
+	#   ★★舊實作保留為具名對照 `FacilityExistenceIndex.legacy_has`（shadow 用）。
+	var now: bool = state.team_has_facility_indexed(team.team_id, level_key)
+	if FacilityExistenceIndex.shadow:
+		var was: bool = FacilityExistenceIndex.legacy_has(state, team.team_id, level_key)
+		FacilityExistenceIndex.shadow_checks += 1
+		if was != now:
+			FacilityExistenceIndex.shadow_fails += 1
+			print("[FacilityShadowFAIL] team=%d key=%s legacy=%s index=%s" % [
+				team.team_id, level_key, was, now])
+	return now
 
 # ── 貿易 demand（★S3）：市場「有效」買單（非幽靈：過期單不供產，僅履約排序用）+ 致富野心。綁 deal 側。──
 # 讀 team_known 親聞 order_buy（感知鐵律：聽過才算，非 god-view）。過期單濾除＝非幽靈視圖（R²#1-issue）。

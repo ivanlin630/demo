@@ -1,0 +1,31 @@
+# 逐 path 迴圈身體四段 —— ★★★數字點名：`_resolve_build_facility` 是 99.96%
+# 床：scripts/debug/option_term_cost_bed.gd｜warring_states｜3000 tick ＝ 2.1 遊戲天｜seed 4242｜Probe=ON
+# ★碼表走 `SimRunner.phase_timing`（界限 43）｜★★跑間噪音大（frontier 總時 66–126 s）⇒ 只談比例
+# ★★★母體地板在算式之前：次數 0 的段【明寫 0】，不印任何以 0 為分母的比率（界限 44）
+
+段                                              次數        總計(s)        us/次
+①facility（REGISTRY 掃 ＋ `_resolve_build_facility`）  1116        37.702      33783.5
+②facility 分支的 Probe 區塊（★儀器自己）             1116         0.016         14.7
+③material 遞迴 `_resolve_resource_prereq`         ★0 次         0.000       不可判
+④ready／stock 的 `_mk_candidate`                  ★0 次         0.000       不可判
+守恆③：四段和 37.719 s vs 迴圈身體 37.734 s（差 0.015 s ＝ 0.04%）
+
+★★paths/call 分佈（桶，★不是平均）：**0＝19 次、1＝1116 次**、2to3／4to7／8to15／ge16 全部 **0**
+⇒ ★★★**每次呼叫只有一個 path** ⇒ 「path 太多」這條路**被排除**：貴的是**那一個 path 的身體**。
+
+# ★① 數字點名的結果
+#   `_resolve_build_facility`（含它前面那段 `GoalRegistry.REGISTRY` 線性掃）＝ **33.8 ms／次**
+#   ＝ 迴圈身體的 **99.96%** ＝ `resource_prereq` 段（55.36 s）的 **68%**
+#   ⇒ 而 Probe 區塊只有 **14.7 us／次** ⇒ ★這一段的成本**不是儀器**。
+# ★② 另外兩個分支（material 遞迴／ready）在本窗 **0 次** —— ★明寫 0，不是「便宜」。
+
+# === 順手修的那一行（systems 裁：併進本票、單獨列前後數字）===
+`goal_resolver.gd:742` `FactionAISystem.new()._nearest_market_outpost_with(...)`
+  ⇒ 改成重用 static 實例（★它是無狀態查詢；跨 run reset 一併清）
+  改前：72.7／75.4 us per call（兩趟）
+  改後：**55.9 us per call**
+  ⇒ ★而它佔 `_resolve_resource_prereq` 從 1.1% → **0.9%** —— ★★真金白銀，但它從來不是主犯，
+    ★★★而這一行單獨列出來的理由就是：**不列它就會被 33.8 ms 那個大數字蓋掉，然後永遠沒人回來修。**
+
+# 誠實限：①本窗單一 config ②Probe=ON（本路儀器 ≈21%，但本段的儀器只佔 14.7 us／次）
+#   ③`.new()` 的前後差落在跑間噪音同量級 ⇒ ★只當「方向正確」，不當「精確回收量」

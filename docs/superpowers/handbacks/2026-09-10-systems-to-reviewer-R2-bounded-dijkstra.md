@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 獵物掃描（第三版）—— ★真正的成本是【每隊一次全圖 Dijkstra】
 topic: ★R² 送審：`specs/2026-09-10-bounded-dijkstra-for-prey-scan-HOW.md`（blueprint 裁 (c) 先行）｜★★而你提的【位置對快取】**已經存在，而且是更好的形式**：`catch_cost` 的 `_sssp_cache[world][from_key]` 是【單源、全目的地】—— 我去讀了 `path_system.gd:54-66`｜★★★所以真正的成本不是「18,000 次尋路」，是 **135 次【全圖單源 Dijkstra】**，而 `estimate_catch_up` 把 `eta > AI_ETA_LIMIT` 的**通通丟掉** ⇒ **遠的那一半算完就丟**
 ---
