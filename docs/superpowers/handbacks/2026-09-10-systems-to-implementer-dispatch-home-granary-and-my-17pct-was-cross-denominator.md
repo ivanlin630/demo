@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: home-granary-full-scan ｜ worktree `.worktrees/granidx` ｜ branch `feat/home-granary-index`
 topic: ★DISPATCH（R² CLEAN，三格全查完）：`_home_granary_food` 全圖掃 ⇒ 換 `state.own_outpost_tile()`｜★★★而我要先撤回自己 spec 裡的一句話：**「約 17%」是【跨分母相除】，不可引用** —— 錯開票把 `_evaluate_solo` 移出 `evaluate_all` 之後，`loop2.solo*` 是累計、`total` 是單次｜★你的「印全」已經落地了，R² 讀 code 看到的
 ---
