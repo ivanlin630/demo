@@ -582,25 +582,48 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 	#       被讀成「又開始想蓋了」，實際是「又開始想買料了」）。
 	#   ★分母＝進入本函式的次數（不是 `facility_resolve_empty`，那只是三種歸宿之一）；
 	#     三種歸宿逐日各自加總 == 分母。
+	# ★★★整支的碼表（★涵蓋【全部】呼叫端）——上一趟守恆差 −31 s 的成因就在這裡：
+	#   `rbf_*` 只量了【從 path 迴圈進來的 1116 次】，而本函式**另外還被 goal 迴圈直接呼叫**
+	#   ⇒ 四段的母體是 1779 次 ⇒ ★兩個母體不同的量【不可以相減】。
+	var _rball0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	if SimRunner.phase_timing:
+		rb_all_n += 1
 	var _rday: String = ".day.%03d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY)
 	if Probe.enabled: Probe.bump_pt("resolver.entry", _rday, team.team_id)
 	var f: String = String(def.get("facility", ""))
 	var fdef: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
 	if fdef.is_empty():
 		if Probe.enabled: Probe.bump_pt("resolver.empty_no_fdef", _rday, team.team_id)
+		if SimRunner.phase_timing: rb_all_us += float(Time.get_ticks_usec() - _rball0)
 		return {}
+	var _rp0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var payoff: float = derived_payoff(state, team, def)   # ★§8.1 導出（舊：`def.payoff` flat 常數）
+	var _rp1: int = 0
+	if SimRunner.phase_timing:
+		_rp1 = Time.get_ticks_usec()
+		rb_payoff_us += float(_rp1 - _rp0)
+		rb_payoff_n += 1
+		_rep_note(state, "%d|%s" % [team.team_id, f], true)   # ★同 tick 重複：(隊, facility)
+	# ★★★又一顆 production 熱路徑上的 `.new()`（同 `:742` 那族；本輪先【量】不改，因為它與
+	#   `_find_own_outpost` 的成本綁在同一個碼表裡 —— ★先分開才知道 new 佔多少。
 	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	if SimRunner.phase_timing:
+		rb_own_us += float(Time.get_ticks_usec() - _rp1)
+		rb_own_n += 1
 	var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 	# F 已建 → satisfied（無 candidate）。
 	if own_tile != null and int(own_tile.get(fdef.get("current_level_key", ""))) > 0:
 		if Probe.enabled: Probe.bump_pt("resolver.empty_already_built", _rday, team.team_id)
+		if SimRunner.phase_timing: rb_all_us += float(Time.get_ticks_usec() - _rball0)
 		return {}
 	# 前置 1：resource build-cost（material/tools）——缺→接 S2/S3 資源鏈（need_keep 已含 construction need）。
 	var cost: Dictionary = OutpostSystem.upgrade_cost(f, 1)
+	var _rr2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	for res in ["material", "tools"]:
 		if float(cost.get(res, 0)) > 0.0:
 			var c: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, {"kind": GoalRegistry.PREREQ_RESOURCE, "res": res})
+			if SimRunner.phase_timing:
+				rb_res_n += 1
 			if not c.is_empty():
 				# ★★★非空【但不是 build】：這是那條騙過我們一次的路（`task` 多半是貿易/製造）。
 				#   ⇒ 單獨一格，★不得跟真 build candidate 合計。
@@ -608,8 +631,15 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 					Probe.bump_pt("resolver.resource_candidate", _rday, team.team_id)
 					Probe.bump("resolver.resource_candidate.res." + String(res))
 					Probe.bump("resolver.resource_candidate.task." + String((c.get("to_task", {}) as Dictionary).get("task", "(無task欄)")))
+				if SimRunner.phase_timing:
+					rb_res_us += float(Time.get_ticks_usec() - _rr2)   # ★早退路徑也要結帳（否則這一段的帳只記得走完的那些）
+				if SimRunner.phase_timing: rb_all_us += float(Time.get_ticks_usec() - _rball0)
 				return c   # first-unsatisfied resource → 取得 frontier（買/採）
 	# 前置 2：facility outpost-type（需 allowed_outpost type outpost）——無合適 type→建 outpost frontier。
+	var _rt3: int = 0
+	if SimRunner.phase_timing:
+		_rt3 = Time.get_ticks_usec()
+		rb_res_us += float(_rt3 - _rr2)
 	var allowed: Array = fdef.get("allowed_outpost", [])
 	if own_tile == null or not (own_tile.outpost_type in allowed):
 		# ★A1 裁②：same-tile founding（隊站空 tile 建 new outpost）無母隊就地 outpost-build 路 → 移除 candidate，靜默。
@@ -624,10 +654,12 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 			else:
 				Probe.bump_pt("resolver.empty_wrong_outpost_type", _rday, team.team_id)
 				Probe.bump("resolver.empty_wrong_outpost_type.have." + String(own_tile.outpost_type) + ".need." + str(allowed))
+		if SimRunner.phase_timing: rb_all_us += float(Time.get_ticks_usec() - _rball0)
 		return {}
 	# 前置 3：manpower pop（既有 build pop 門檻）——不足→靜默（S4 最小，passive 繁殖增，無主動 recruit task）。
 	if team.population < GoalRegistry.FACILITY_BUILD_POP_MIN:
 		if Probe.enabled: Probe.bump_pt("resolver.empty_pop_below_min", _rday, team.team_id)
+		if SimRunner.phase_timing: rb_all_us += float(Time.get_ticks_usec() - _rball0)
 		return {}
 	# ★A1 全滿 → facility 建：
 	# owner 在場（team 站 own outpost）→ **defer 給 infra path**（不生 candidate）。infra desire-based _pick_facility
@@ -635,11 +667,17 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 	# （goal REGISTRY-order 就地建會壟斷 build slot→礦村建 workshop 非 mint→15360 regression；量測坐實。）
 	if team.tile_pos == own_tile.tile_pos:
 		if Probe.enabled: Probe.bump_pt("resolver.empty_defer_infra", _rday, team.team_id)   # ★不是失敗：交給 infra path 就地建
+		if SimRunner.phase_timing: rb_all_us += float(Time.get_ticks_usec() - _rball0)
 		return {}
 	# owner 不在場（own outpost 在別格）→ facility candidate（派子隊 remote 真移動→抵達→建，_dispatch_facility_builder）。
 	if Probe.enabled: Probe.bump_pt("resolver.build_candidate", _rday, team.team_id)   # ★★唯一算「成功」的那種
-	return _mk_delegate_candidate(state, team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
+	var _tailc: Dictionary = _mk_delegate_candidate(state, team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
 		{"facility": f, "target": own_tile.tile_pos})
+	if SimRunner.phase_timing:
+		rb_tail_us += float(Time.get_ticks_usec() - _rt3)
+		rb_tail_n += 1
+	if SimRunner.phase_timing: rb_all_us += float(Time.get_ticks_usec() - _rball0)
+	return _tailc
 
 # ★S2/S3 資源型前置 resolution：未滿→取得 candidate（S2 買 / S3 採@地形定位）。
 # ★舊版：`const SEEK_TILE_RANGE = 30`（TEST VALUE）——2026-09-09 刪。
@@ -720,6 +758,52 @@ static var scan_us: float = 0.0         # ★①查表：`_facility_of_level_key
 static var scan_n: int = 0
 static var rbf_us: float = 0.0          # ★②計算：`_resolve_build_facility` 身體
 static var rbf_n: int = 0
+# ★★★把身體再切四段（切點由 implementer 定：依它實際做的四件事）
+static var rb_payoff_us: float = 0.0    # ①`derived_payoff`
+static var rb_payoff_n: int = 0
+static var rb_own_us: float = 0.0       # ②`FactionAISystem.new()._find_own_outpost`（★又一顆 production 熱路徑上的 .new()）
+static var rb_own_n: int = 0
+static var rb_res_us: float = 0.0       # ③`material／tools` 的 `_resolve_resource_prereq` 遞迴
+static var rb_res_n: int = 0
+static var rb_tail_us: float = 0.0      # ④尾段（allowed／pop／defer 判斷 ＋ `_mk_delegate_candidate`）
+static var rb_tail_n: int = 0
+static var rb_all_us: float = 0.0       # ★整支（涵蓋全部呼叫端）——四段要跟它比，不是跟 `rbf_*` 比
+static var rb_all_n: int = 0
+# ★★★同一 tick 內【同一組輸入】重複算幾次（★母體地板在算式之前）
+static var _rep_tick: int = -1
+static var _rep_rrp_seen: Dictionary = {}
+static var _rep_rrp_calls: int = 0
+static var rep_rrp_ticks: int = 0
+static var rep_rrp_calls_sum: int = 0
+static var rep_rrp_distinct_sum: int = 0
+static var _rep_rbf_seen: Dictionary = {}
+static var _rep_rbf_calls: int = 0
+static var rep_rbf_calls_sum: int = 0
+static var rep_rbf_distinct_sum: int = 0
+
+static func _rep_flush() -> void:
+	if _rep_rrp_calls > 0 or _rep_rbf_calls > 0:
+		rep_rrp_ticks += 1
+		rep_rrp_calls_sum += _rep_rrp_calls
+		rep_rrp_distinct_sum += _rep_rrp_seen.size()
+		rep_rbf_calls_sum += _rep_rbf_calls
+		rep_rbf_distinct_sum += _rep_rbf_seen.size()
+	_rep_rrp_seen = {}
+	_rep_rbf_seen = {}
+	_rep_rrp_calls = 0
+	_rep_rbf_calls = 0
+
+static func _rep_note(state: WorldState, key: String, is_rbf: bool) -> void:
+	var t: int = state.world.current_tick
+	if t != _rep_tick:
+		_rep_flush()
+		_rep_tick = t
+	if is_rbf:
+		_rep_rbf_seen[key] = true
+		_rep_rbf_calls += 1
+	else:
+		_rep_rrp_seen[key] = true
+		_rep_rrp_calls += 1
 
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
@@ -748,6 +832,26 @@ static func _reset_cross_run() -> Dictionary:
 	paths_hist = {}
 	scan_us = 0.0
 	scan_n = 0
+	rb_payoff_us = 0.0
+	rb_payoff_n = 0
+	rb_own_us = 0.0
+	rb_own_n = 0
+	rb_res_us = 0.0
+	rb_res_n = 0
+	rb_tail_us = 0.0
+	rb_tail_n = 0
+	rb_all_us = 0.0
+	rb_all_n = 0
+	_rep_tick = -1
+	_rep_rrp_seen = {}
+	_rep_rbf_seen = {}
+	_rep_rrp_calls = 0
+	_rep_rbf_calls = 0
+	rep_rrp_ticks = 0
+	rep_rrp_calls_sum = 0
+	rep_rrp_distinct_sum = 0
+	rep_rbf_calls_sum = 0
+	rep_rbf_distinct_sum = 0
 	rbf_us = 0.0
 	rbf_n = 0
 	if fr_calls != 0: cleared["GoalResolver.fr_*"] = fr_calls
@@ -878,6 +982,8 @@ static func _resource_prereq_candidates(state: WorldState, team: TeamData, ctx: 
 		g: Dictionary, gt: String, payoff: float, prereq: Dictionary) -> Array:
 	var out: Array = []
 	var _rr0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	if SimRunner.phase_timing:
+		_rep_note(state, "%d|%s" % [team.team_id, String(prereq.get("res", ""))], false)
 	var first: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, prereq)
 	if SimRunner.phase_timing:
 		rrp_us += float(Time.get_ticks_usec() - _rr0)

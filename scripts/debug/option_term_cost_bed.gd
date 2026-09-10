@@ -58,7 +58,8 @@ func _initialize() -> void:
 		GoalResolver.mkt_us / maxf(1.0, float(GoalResolver.mkt_n)),
 		100.0 * GoalResolver.mkt_us / maxf(1.0, GoalResolver.rrp_us)])
 	# ★★★全圖掃的重複率（systems 派：memo 的價值全在這個數字上）
-	AcquisitionPaths._ap_flush()   # ★最後一個 tick 也要結清（★否則最後那一 tick 靜默消失）
+	AcquisitionPaths._ap_flush()   # ★最後一個 tick 也要結清
+	GoalResolver._rep_flush()      # ★同上（★最後一個 tick 的重複統計不能靜默消失）（★否則最後那一 tick 靜默消失）
 	var ap_t: float = maxf(1.0, float(AcquisitionPaths.ap_ticks_n))
 	print("")
 	# ★★★迴圈身體四段（★母體地板在算式之前：次數 0 ⇒ 明寫 0，不印任何以 0 為分母的比率）
@@ -92,6 +93,44 @@ func _initialize() -> void:
 		print("★守恆④：①+② = %.3f s vs facility 段 %.3f s（差 %.3f s）" % [
 			(GoalResolver.scan_us + GoalResolver.rbf_us) / 1e6, GoalResolver.pb_fac_us / 1e6,
 			(GoalResolver.pb_fac_us - GoalResolver.scan_us - GoalResolver.rbf_us) / 1e6])
+	# ★★★_resolve_build_facility 身體四段（★母體地板在算式之前）
+	print("")
+	print("★_resolve_build_facility 身體四段")
+	print("%-40s %10s %12s %14s" % ["段", "次數", "總計(s)", "us/次"])
+	var rb: Array = [
+		["①derived_payoff", GoalResolver.rb_payoff_n, GoalResolver.rb_payoff_us],
+		["②FactionAISystem.new()._find_own_outpost", GoalResolver.rb_own_n, GoalResolver.rb_own_us],
+		["③material/tools 遞迴 _resolve_resource_prereq", GoalResolver.rb_res_n, GoalResolver.rb_res_us],
+		["④尾段（判斷＋_mk_delegate_candidate）", GoalResolver.rb_tail_n, GoalResolver.rb_tail_us]]
+	var rb_sum: float = 0.0
+	for row in rb:
+		rb_sum += float(row[2])
+		if int(row[1]) == 0:
+			print("%-40s %10s %12.3f %14s" % [row[0], "★0 次", float(row[2]) / 1e6, "不可判"])
+		else:
+			print("%-40s %10d %12.3f %14.1f" % [row[0], int(row[1]), float(row[2]) / 1e6,
+				float(row[2]) / float(row[1])])
+	# ★★★四段要跟【整支的碼表】比（涵蓋全部呼叫端），不是跟只涵蓋 path 迴圈那 1116 次的 `rbf_*` 比
+	print("★守恆⑤：四段和 %.3f s（母體 %d 次）vs 整支 %.3f s（母體 %d 次）⇒ 差 %.3f s" % [
+		rb_sum / 1e6, GoalResolver.rb_payoff_n, GoalResolver.rb_all_us / 1e6, GoalResolver.rb_all_n,
+		(GoalResolver.rb_all_us - rb_sum) / 1e6])
+	print("   ★而 `rbf_*`（只涵蓋 path 迴圈進來的）%.3f s／%d 次 —— ★★母體不同的量【不可相減】" % [
+		GoalResolver.rbf_us / 1e6, GoalResolver.rbf_n])
+	# ★★同一 tick 內【同一組輸入】重複算幾次（★母體 0 ⇒ 明寫不可判，不印比率）
+	if GoalResolver.rep_rrp_calls_sum == 0:
+		print("★★★同 tick 重複（_resolve_resource_prereq，鍵＝隊+res）：**不可判**（母體 0 次）")
+	else:
+		print("★★★同 tick 重複（_resolve_resource_prereq，鍵＝隊+res）：%d 個 tick／呼叫 %d 次／相異 %d 個 ⇒ 重複率 %.1f%%（同一組輸入平均算 %.2f 次）" % [
+			GoalResolver.rep_rrp_ticks, GoalResolver.rep_rrp_calls_sum, GoalResolver.rep_rrp_distinct_sum,
+			100.0 * (1.0 - float(GoalResolver.rep_rrp_distinct_sum) / float(GoalResolver.rep_rrp_calls_sum)),
+			float(GoalResolver.rep_rrp_calls_sum) / maxf(1.0, float(GoalResolver.rep_rrp_distinct_sum))])
+	if GoalResolver.rep_rbf_calls_sum == 0:
+		print("★★★同 tick 重複（_resolve_build_facility，鍵＝隊+facility）：**不可判**（母體 0 次）")
+	else:
+		print("★★★同 tick 重複（_resolve_build_facility，鍵＝隊+facility）：呼叫 %d 次／相異 %d 個 ⇒ 重複率 %.1f%%（同一組輸入平均算 %.2f 次）" % [
+			GoalResolver.rep_rbf_calls_sum, GoalResolver.rep_rbf_distinct_sum,
+			100.0 * (1.0 - float(GoalResolver.rep_rbf_distinct_sum) / float(GoalResolver.rep_rbf_calls_sum)),
+			float(GoalResolver.rep_rbf_calls_sum) / maxf(1.0, float(GoalResolver.rep_rbf_distinct_sum))])
 	print("★守恆③：四段和 %.3f s vs 迴圈身體 %.3f s（差 %.3f s）" % [
 		pb_sum / 1e6, GoalResolver.path_us / 1e6, (GoalResolver.path_us - pb_sum) / 1e6])
 	var ph_parts: Array = []
