@@ -1000,11 +1000,30 @@ static func _idle_employ_value(state: WorldState, team: TeamData, tile: HexTileD
 # own_granary_tile 只在 team 站在自家據點時回傳；返家補給 gate 須在「離家」時也讀得到家糧 →
 # 仿 _find_own_outpost 掃法（不限本格），無自家 outpost → 0。
 static func _home_granary_food(state: WorldState, team: TeamData) -> float:
+	# ★★★效能 arc B 漏掉的那一份複製品（spec 2026-09-10）：這裡本來是全圖掃，
+	#   而它模仿的 `_find_own_outpost` 早就換成 O(1) 索引了 ⇒ ★它仿的是【被換掉之前】的版本。
+	#   ★★語意等價【不是我宣告的】：own_outpost_tile 的既有註解自己寫「等價替換舊全圖掃；
+	#     語意＝tiles 迭代序第一個符合者」—— 而這個迴圈正是同一個「迭代序第一個符合者」。
+	#   ★★★而最壞路徑正好是多數：沒有自家 outpost 的隊【掃完整張圖】才回 0
+	#     （量測員：day60 不在家的 13 隊裡 12 隊沒有自家 outpost）。
+	var tile: HexTileData = state.own_outpost_tile(team.team_id)
+	if OwnerOutpostIndex.shadow:
+		# ★驗收①用【既有的驗證器】，不自己另寫比對（_find_own_outpost 就是這樣驗的）
+		OwnerOutpostIndex.shadow_check("home_granary_food", team.team_id,
+			_scan_home_granary_tile_legacy(state, team.team_id),
+			tile.tile_pos if tile != null else Vector2i(-1, -1))
+	return float(tile.public_storage.get("food", 0)) if tile != null else 0.0
+
+# ★舊全圖掃，★★只在 shadow 模式下被呼叫（production 路徑不走它）——
+#   它存在的唯一理由是【當對照組】，而對照組要跟被對照的東西住在一起。
+static func _scan_home_granary_tile_legacy(state: WorldState, team_id: int) -> Vector2i:
 	for tile_id in state.world.tiles:   # gate-ok: 掃 tiles 只查【自家糧倉】＝legit-self
 		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
-			return float(tile.public_storage.get("food", 0))
-	return 0.0
+		if tile.outpost_level > 0 and tile.outpost_owner == team_id:
+			OwnerOutpostIndex.legacy_visits += 1
+			return tile.tile_pos
+		OwnerOutpostIndex.legacy_visits += 1
+	return Vector2i(-1, -1)
 
 
 # ★覓食日產的【單一源】：站在這格、選「覓食」之後真正拿得到的食物日流。
