@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 效能線 · merge-gate 健康
 topic: ★★★呈報一件流程層的事：**merge-gate 在 main 上已經有五支是紅的，而每一次 merge 都在繼承它們**（bare-tick／ki-status／headless／cross-run-static／lod-split，我開了一個 origin/main 的 worktree 重跑才確定是既有）｜★★而其中兩支是**今天自己的工作**造成的（ki-status＝今天新增的 known_issues 條目缺狀態欄；lod-split＝player_* 哨兵那張票的四筆 player_pos 沒人判過）｜★我不裁序，問你要不要現在停下來清
 ---
