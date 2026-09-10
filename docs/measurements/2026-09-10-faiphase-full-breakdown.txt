@@ -1,0 +1,33 @@
+# [FaiPhase] 全相位彙總（★「印全」之後的第一份）
+# 來源：warring_states｜本跑到 tick 18660（≒12.9 遊戲天）
+#   ★★背景跑被【系統記憶體不足】殺掉 ⇒ 不是跑滿 20000 ⇒ 這是【部分窗】，寫出來不遮。
+# 樣本：650 筆 [FaiPhase]（★只在 evaluate_all 單次 total > 100ms 時才印 ⇒ 這是 spike 母體，不是全體 tick）
+# ★★★標籤誠實限：錯開票把 _evaluate_solo 移出 evaluate_all 之後，
+#   loop2.solo* 是【上次 dump 以來累積】而 total 只算 evaluate_all 這一次 ⇒ 兩者分母不同，不可相除。
+# evaluate_all 單次 total：中位 953.4 ms／max 7946.2 ms
+
+phase                          出現次數   總計(s)    最大單次(ms)
+loop1.factions                    650     404.87       4100.8
+unified.rank                      650     369.75       5690.0
+loop1.assign_tasks                650     361.74       3997.3
+assign.leader_unified             650     206.00       2274.1
+assign.members                    650     155.67       1723.0
+member.unified                    650     155.47       1722.5
+loop3.orders_ambition             650     129.00        711.2
+gather.home_food                  650      88.05       1354.7
+gather.market                     650      65.77       1607.3
+loop3.misc                        650      65.64        438.4
+loop3.threat                      650      51.19       3227.7
+loop1.infra                       650      41.55        156.7
+infra.new_loc                     650      33.33        122.8
+indep.weakest_prey                650      11.79        130.1
+loop2.indep_strategy              650      10.98        128.9
+loop2.member_strategy             650      10.32        102.0
+gather.head                       650       9.17        123.6
+infra.facility                    650       6.59         47.1
+gather.weak_prey                  650       6.45        282.5
+gather.threat                     650       6.21         68.4
+gather.readiness_prey             650       4.89         50.9
+loop3.survival                    650       4.86        183.8
+unified.to_task                   650       3.62         82.9
+gather.strong_farm                650       3.29         38.1
