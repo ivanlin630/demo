@@ -1,0 +1,25 @@
+# `need_keep` 一族的 self ／ total（★函式遞迴上的同一件事：父親的數字含著兒子的）
+# 床：scripts/debug/option_term_cost_bed.gd｜warring_states｜3000 tick｜seed 4242｜Probe=ON
+# ★碼表走 `SimRunner.phase_timing`（界限 43）｜★★做法＝「目前這一層的兒子累計」堆疊，
+#   每層退出時 `self = elapsed − 兒子累計`，再把自己的 elapsed 加進【父親】的兒子累計。
+
+`need_keep`：total **419.014 s**（★含重複，**不可乘**）／**self 6.198 s**／頂層 elapsed **304.422 s**
+             頂層 **26078** 次／總 **39186** 次
+  ⇒ ★可乘的只有一組：**頂層 elapsed ÷ 頂層次數 ＝ 11673.5 us**
+  ⇒ ★★self ÷ 總次數 ＝ **158.2 us** ⇒ **`need_keep` 自己的算術很便宜**，錢在它的兒子身上。
+`_supply_chain`：total **298.224 s**／**self 298.224 s**／**39186** 次
+  ⇒ **7610.5 us per call（self 佔 ~100%）** ⇒ ★★★**它就是那片葉子**。
+
+# ★★★兩個可以拿來跟牆鐘比的數字（★同一趟，母體相同）
+#   `need_keep` 頂層 elapsed 304.422 s ÷ 牆鐘 357.371 s ＝ **85.2%**
+#   `_supply_chain` self      298.224 s ÷ 牆鐘 357.371 s ＝ **83.4%**
+#   （對照：frontier 子樹 ÷ 牆鐘 ＝ 45.84%）
+# ⇒ ★所以 `need_keep` **不是那 45% 子樹裡的一段** —— 它比子樹大，因為**全世界都在問它**
+#   （頂層 26078 次，而 goal_resolver 只貢獻 3507 ＝ 13.4%）。
+
+# === 誠實限（★三條，逐條）===
+# ①★`_construction_facility_need` 的 **self 還沒分出來**：它沒有自己的堆疊層，
+#   而它會**間接回呼 `need_keep`**（`_facility_deficit` → need_keep(outputs)，code 註解自述）
+#   ⇒ 它的時間目前被拆成【巢狀 need_keep】＋【混在 need_keep self 裡的一小塊】⇒ ★下一刀才分得開。
+# ②Probe=ON；★★這條路上的儀器佔比**沒有單獨量過**（frontier 那條是 14.5%／21%，不可直接套用）—— 明寫。
+# ③跑間噪音大（本窗牆鐘 357 s，前幾趟 261–327 s）⇒ ★只看比例。

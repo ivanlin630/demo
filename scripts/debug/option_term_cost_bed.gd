@@ -157,6 +157,23 @@ func _initialize() -> void:
 			NeedOracle.nk_top_n, NeedOracle.nk_all_n,
 			float(NeedOracle.nk_all_n) / float(NeedOracle.nk_top_n), NeedOracle.nk_maxdepth,
 			"、".join(_nh)])
+	# ★★★self ／ total（★只有頂層 elapsed 能跟牆鐘比；只有 self 能排序；★★不准「總次數 × total 單價」）
+	if NeedOracle.nk_top_n == 0:
+		print("★★★need_keep self/total：**不可判**（頂層 0 次）")
+	else:
+		print("★★★need_keep：total %.3f s／**self %.3f s**／頂層 elapsed %.3f s｜頂層 %d 次／總 %d 次" % [
+			NeedOracle.nk_tot_us / 1e6, NeedOracle.nk_selft_us / 1e6, NeedOracle.nk_topt_us / 1e6,
+			NeedOracle.nk_top_n, NeedOracle.nk_all_n])
+		print("   ⇒ ★頂層 elapsed／頂層次數 ＝ %.1f us（★★這一個才可以乘頂層次數）；self／總次數 ＝ %.1f us" % [
+			NeedOracle.nk_topt_us / float(NeedOracle.nk_top_n),
+			NeedOracle.nk_selft_us / maxf(1.0, float(NeedOracle.nk_all_n))])
+	if NeedOracle.sc_n == 0:
+		print("★★★_supply_chain self/total：**不可判**（0 次）")
+	else:
+		print("★★★_supply_chain：total %.3f s／**self %.3f s**／%d 次 ⇒ total %.1f us、self %.1f us per call（self 佔 %.1f%%）" % [
+			NeedOracle.sc_tot_us / 1e6, NeedOracle.sc_selft_us / 1e6, NeedOracle.sc_n,
+			NeedOracle.sc_tot_us / float(NeedOracle.sc_n), NeedOracle.sc_selft_us / float(NeedOracle.sc_n),
+			100.0 * NeedOracle.sc_selft_us / maxf(1.0, NeedOracle.sc_tot_us)])
 	var nk3: float = NeedOracle.nk_self_us + NeedOracle.nk_supply_us + NeedOracle.nk_constr_us
 	print("★守恆⑦：三個加數和 %.3f s vs need_keep %.3f s（差 %.3f s）；①-a+①-b %.3f s vs 前置滿檢查 %.3f s（差 %.3f s）" % [
 		nk3 / 1e6, GoalResolver.rp_nk_us / 1e6, (GoalResolver.rp_nk_us - nk3) / 1e6,

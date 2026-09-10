@@ -24,6 +24,18 @@ static var nk_depth: int = 0
 static var nk_top_n: int = 0            # 頂層（depth 0 進入）次數
 static var nk_maxdepth: int = 0
 static var nk_depth_hist: Dictionary = {}
+# ★★★self ／ total（systems 2026-09-10）：`need_keep` 是**函式遞迴** ⇒ 父親的數字含著兒子的
+#   ⇒ ★與相位樹上那件事**完全同一件**，只是換一個容器。
+#   ★★做法：一個「目前這一層的兒子累計」堆疊 —— 每一層退出時
+#     `self = elapsed − 兒子累計`，再把自己的 elapsed 加進【父親】的兒子累計。
+#   ★★★只有【頂層 elapsed】可以拿來跟牆鐘比；只有 self 可以拿來排序。
+static var _prof_stack: Array = []
+static var nk_tot_us: float = 0.0        # 全部呼叫的 elapsed 總和（★含重複計算，不可乘）
+static var nk_selft_us: float = 0.0      # 全部呼叫的 self 總和（★這個才可排序）
+static var nk_topt_us: float = 0.0       # ★頂層 elapsed 總和（★★這個才可跟牆鐘比）
+static var sc_tot_us: float = 0.0        # `_supply_chain` total
+static var sc_selft_us: float = 0.0      # `_supply_chain` self（扣掉它自己引發的巢狀 need_keep）
+static var sc_n: int = 0
 
 static func need_keep(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
 	# ★★★perf tap（`payoff-derive-bridge` 驗收 #5）：spec 明寫「重算不是取用」
@@ -33,6 +45,7 @@ static func need_keep(state: WorldState, team: TeamData, res: String, leader_val
 	# ★★★拆歧義（systems 2026-09-10）：`need_keep` 是三個加數，而它們綁在同一個碼表裡
 	#   ⇒ 那 18.8 ms 答不出「是誰貴」。★碼表走 `SimRunner.phase_timing`（界限 43：與 Probe 正交）。
 	if SimRunner.phase_timing:
+		_prof_stack.push_back(0.0)
 		if nk_depth == 0:
 			nk_top_n += 1
 		nk_depth += 1
@@ -47,7 +60,18 @@ static func need_keep(state: WorldState, team: TeamData, res: String, leader_val
 		_n1 = Time.get_ticks_usec()
 		nk_self_us += float(_n1 - _n0)
 		nk_self_n += 1
+	if SimRunner.phase_timing:
+		_prof_stack.push_back(0.0)   # ★`_supply_chain` 自己的一層（它是遞迴源）
+	var _sc0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var _b: float = _supply_chain(state, team, res)
+	if SimRunner.phase_timing:
+		var _sce: float = float(Time.get_ticks_usec() - _sc0)
+		var _scc: float = float(_prof_stack.pop_back())
+		sc_tot_us += _sce
+		sc_selft_us += (_sce - _scc)
+		sc_n += 1
+		if not _prof_stack.is_empty():
+			_prof_stack[_prof_stack.size() - 1] = float(_prof_stack[_prof_stack.size() - 1]) + _sce
 	var _n2: int = 0
 	if SimRunner.phase_timing:
 		_n2 = Time.get_ticks_usec()
@@ -59,8 +83,17 @@ static func need_keep(state: WorldState, team: TeamData, res: String, leader_val
 		nk_constr_n += 1
 		nk_all_n += 1
 	var _r: float = _a + _b + _c
-	if SimRunner.phase_timing and nk_depth > 0:
-		nk_depth -= 1
+	if SimRunner.phase_timing:
+		var _elapsed: float = float(Time.get_ticks_usec() - _n0)
+		var _child: float = float(_prof_stack.pop_back())
+		nk_tot_us += _elapsed
+		nk_selft_us += (_elapsed - _child)
+		if _prof_stack.is_empty():
+			nk_topt_us += _elapsed          # ★頂層：這一筆才是真的牆鐘貢獻
+		else:
+			_prof_stack[_prof_stack.size() - 1] = float(_prof_stack[_prof_stack.size() - 1]) + _elapsed
+		if nk_depth > 0:
+			nk_depth -= 1
 	if Probe.enabled:
 		Probe.bump("perf.need_keep.calls")
 		Probe.add_amount("perf.need_keep.us", float(Time.get_ticks_usec() - _t0))
