@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 葉子的兩半
 topic: ★★★**99.4% 在①設施 gating**：`_team_has_facility` **194190 次／151.823 s／781.8 us per call／平均掃 631 格**（≈ **1.23 億次 tile 訪問**）｜★★而②配方比對只有 0.684 s，③gap 迴圈 **0 次** ⇒ **每次 `_supply_chain` 都在 gating 之後提早返回** ⇒ ★**全部成本花在「先確認我有沒有設施」，而答案幾乎都是沒有**｜★這支全圖掃**不是你提名的那一支**（`stock_sources` 實測 0 次）—— 是數字自己點出來的
 ---
