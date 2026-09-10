@@ -1,0 +1,47 @@
+# 相位樹 v2：★父子接對之後的 self_us（★★上一版把 loop1.factions 的六個內部檢查點接成了兄弟）
+# 跑到底：warring_states｜6000 tick ＝ 4.2 遊戲天｜A/B 兩模式各一趟｜195 筆 spike 樣本
+# evaluate_all 單次 total：中位 865.6 ms／max 5813.9 ms
+# ★本輪未出現的已登記相位：loop2.solo、loop2.solo_cheap、loop2.solo_engine、unified.prosp
+
+【真淨值段】（可排序）
+phase                          出現   self 總計(s)  self max(ms)  tot 總計(s)
+assign.leader_unified            195        82.83       1696.7        82.83
+member.unified                   195        37.70       1313.1        37.70
+loop3.orders_ambition            195        27.63        578.8        27.63
+loop3.threat                     195        14.13       2309.1        14.13
+loop3.misc                       195         9.57        304.1         9.57
+infra.new_loc                    195         9.42         99.3         9.42
+loop2.member_strategy            195         2.27        100.6         2.27
+infra.facility                   195         1.42         17.7         1.42
+loop2.indep_strategy             195         1.37         64.8         1.37
+loop1.infra                      195         0.42          5.2        11.25
+loop3.outpost                    195         0.25         34.7         0.25
+loop1.update_goals               195         0.17          2.7         0.17
+loop1.betray                     195         0.11          1.1         0.11
+loop3.survival                   195         0.10         15.9         0.10
+assign.members                   195         0.05          0.4        37.75
+loop1.member_snap                195         0.04          0.4         0.04
+loop1.diplo                      195         0.04          0.5         0.04
+loop3.pursuit                    195         0.03          0.3         0.03
+loop3.prosperity                 195         0.03          0.3         0.03
+loop1.assign_tasks               195         0.01          0.1       120.60
+
+★★★而【真淨值段】要跟這一條一起讀：multi 列【不參與減法】
+#   ⇒ 包含 multi 子相位的父親，它的 self 仍然【含著那筆錢】
+#   ⇒ 例：assign.leader_unified 82.8s 裡【含 unified.rank 在它底下花的時間】
+#   ⇒ ★所以「82.8s 是它自己的」這句話【不成立】——它是「它自己的 ＋ 它底下 multi 的」
+#   ⇒ ★★要拆開，唯一的辦法是【按呼叫端拆計時鍵】(unified.rank.from_leader / .from_member / .from_solo)
+#   ⇒ ★★★而那是下一張票，不是這一輪（本輪產出仍然只是【表】）
+
+【multi 段】★self≡tot，不與上段同排行榜（它可能從多個外層被觸發）
+unified.rank                     195            -            -       123.01
+gather.market                    195            -            -        23.09
+gather.home_food                 195            -            -        21.96
+indep.weakest_prey               195            -            -         2.56
+gather.head                      195            -            -         2.10
+gather.weak_prey                 195            -            -         1.85
+gather.readiness_prey            195            -            -         1.25
+gather.threat                    195            -            -         1.05
+gather.strong_farm               195            -            -         0.66
+unified.to_task                  195            -            -         0.52
+gather.aid                       195            -            -         0.25
