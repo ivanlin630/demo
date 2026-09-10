@@ -836,8 +836,14 @@ static func _reset_cross_run() -> Dictionary:
 #   ⇒ ★★★寧可少減（父親偏大、誠實標出來），也不要多減而看起來很乾淨。
 const PHASE_PARENT: Dictionary = {
 	# ── 根（_evaluate_all_body 直接呼叫）──
-	"loop1.factions": "", "loop1.assign_tasks": "", "loop1.update_goals": "",
-	"loop1.member_snap": "", "loop1.infra": "", "loop1.diplo": "", "loop1.betray": "",
+	"loop1.factions": "",
+	# ★★★訂正（systems 2026-09-10 §②）：這六個是【loop1.factions 迴圈【內部】的檢查點】，
+	#   而我第一版把它們全登記成【根】⇒ loop1.factions 的 self 恆等於 tot
+	#   ⇒ ★「沒有登記的兒子」與「內部根本沒接儀器」在表上長得一模一樣，
+	#   ★★而它讓 252 秒看起來【零可見度】—— 其實可見度一直都在，是我的表把它們接成了兄弟。
+	"loop1.member_snap": "loop1.factions", "loop1.update_goals": "loop1.factions",
+	"loop1.assign_tasks": "loop1.factions", "loop1.infra": "loop1.factions",
+	"loop1.diplo": "loop1.factions", "loop1.betray": "loop1.factions",
 	"loop2.indep_strategy": "", "loop2.member_strategy": "", "loop2b.merge": "",
 	"loop3.threat": "", "loop3.survival": "", "loop3.pursuit": "", "loop3.prosperity": "",
 	"loop3.outpost": "", "loop3.orders_ambition": "", "loop3.misc": "",
@@ -853,7 +859,10 @@ const PHASE_PARENT: Dictionary = {
 	# ── loop1.infra 的兒子 ──
 	"infra.facility": "loop1.infra", "infra.new_loc": "loop1.infra",
 	# ── loop2.indep_strategy 的兒子 ──
-	"indep.weakest_prey": "loop2.indep_strategy",
+	# ★裁定（systems 2026-09-10）：改 "*multi" —— _evaluate_independent_strategy 被兩個外層呼叫
+	#   （:1048 獨立隊 ／ :1078 成員）⇒ 這個鍵同時吃兩邊 ⇒ 只減進其中一個父親就是【多減】。
+	#   ★★保守：寧可少減（父親偏大、誠實標出來），也不要多減而看起來很乾淨。
+	"indep.weakest_prey": "*multi",
 	# ── ★多外層共用 ⇒ 不參與減法（見上方 "*multi" 的理由）──
 	"unified.rank": "*multi", "unified.to_task": "*multi", "unified.prosp": "*multi",
 	"gather.head": "*multi", "gather.threat": "*multi", "gather.weak_prey": "*multi",
@@ -876,17 +885,35 @@ static func phase_report(ph: Dictionary, total_us: int) -> String:
 		if self_us.has(parent):
 			self_us[parent] = int(self_us[parent]) - int(ph[name])
 	var rows: Array = []
+	var multi_rows: Array = []
 	for name in ph:
-		rows.append({"n": String(name), "self": int(self_us[name]), "tot": int(ph[name]),
-			"multi": String(PHASE_PARENT.get(name, "")) == "*multi"})
+		var is_multi: bool = String(PHASE_PARENT.get(name, "")) == "*multi"
+		var row := {"n": String(name), "self": int(self_us[name]), "tot": int(ph[name])}
+		if is_multi:
+			multi_rows.append(row)
+		else:
+			rows.append(row)
 	rows.sort_custom(func(a, b): return int(a["self"]) > int(b["self"]))
+	multi_rows.sort_custom(func(a, b): return int(a["tot"]) > int(b["tot"]))
 	var out: String = ""
 	var negatives: Array = []
 	for r in rows:
-		out += "%s=self%dus/tot%dus%s " % [r["n"], int(r["self"]), int(r["tot"]),
-			"(multi:不參與淨值)" if r["multi"] else ""]
-		if int(r["self"]) < 0 and not r["multi"]:
+		out += "%s=self%dus/tot%dus " % [r["n"], int(r["self"]), int(r["tot"])]
+		if int(r["self"]) < 0:
 			negatives.append(String(r["n"]))
+	# ★★multi 列【分段印】：它的 self 依定義恆等於 tot ⇒ 與真正的淨值【不是同一種量】
+	#   ⇒ ★★★混在同一個排序裡＝在同一張表上引進第二種口徑（第 30 條降一層又出現一次）。
+	out += "｜[multi・不參與淨值・self≡tot] "
+	for r in multi_rows:
+		out += "%s=tot%dus " % [r["n"], int(r["tot"])]
+	# ★登記了但這次【沒出現】的相位也要印（0）——★★「因為太小所以沒印」會讓讀表的人
+	#   以為那個父親不存在。
+	var absent: Array = []
+	for name in PHASE_PARENT:
+		if not ph.has(name):
+			absent.append(String(name))
+	if not absent.is_empty():
+		out += "｜[本輪未出現] " + "、".join(absent) + " "
 	var head: String = "登記 %d/%d" % [ph.size() - unregistered.size(), ph.size()]
 	if not unregistered.is_empty():
 		# ★閘：沒登記的名字【具名紅】—— 沒有這一條，這張手抄表會安靜地過期

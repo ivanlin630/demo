@@ -44,7 +44,9 @@ func _test_net_value() -> void:
 	print("    multi：%s" % rep2.substr(0, 150))
 	_ok(rep2.contains("loop1.assign_tasks=self1000us"),
 		"★★multi 不被減進父親（否則父親會被【多減】而看起來很乾淨）")
-	_ok(rep2.contains("multi:不參與淨值"), "★★輸出【具名標示】那一列不參與淨值")
+	# ★訂正：multi 現在【分段印】（systems §③：它的 self 恆等於 tot ⇒ 不可與真淨值同排行榜）
+	_ok(rep2.contains("[multi・不參與淨值・self≡tot]") and rep2.contains("unified.rank=tot900us"),
+		"★★multi 列【分段印】且標明 self≡tot（★★★混在同一排序裡＝同一張表兩種口徑）")
 	_sections += 1
 
 func _test_unregistered_gate() -> void:
