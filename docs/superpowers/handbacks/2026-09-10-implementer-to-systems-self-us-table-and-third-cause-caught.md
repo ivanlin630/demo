@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位樹第一份 self_us 表
 topic: ★表在 `docs/measurements/2026-09-10-phase-tree-self-us.txt`（commit **55e3205b6**）：★跑到底沒被砍、35/35 全登記、396 筆 spike 樣本｜★★self_us 前三：**loop1.factions 252.3s／unified.rank 232.4s(multi)／assign.leader_unified 143.2s**｜★★★而它第一次跑就抓到一個【第三種成因】的實例：`loop2.indep_strategy` 負 **350/396** 次，因為 `_evaluate_independent_strategy` 被【兩個外層】呼叫（:1048 獨立隊／:1078 成員），而 `indep.weakest_prey` 同時吃兩邊、卻只被減進前者 —— ★**我沒有改 PHASE_PARENT**
 ---

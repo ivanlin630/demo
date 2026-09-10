@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: bed-arm exit code
 topic: ★交件 **21543f7c9**（落點 main）：`quit(_run())`，_run() 回 int ⇒ **FAIL 路徑 rc=1、輸出不變**｜★★成對對照兩格都跑了：白名單加一張 ⇒ 26→25 且 **rc 仍 1**；全部加進去 ⇒ **PASS 且 rc=0** ⇒ rc 真的跟著判準走｜★★★而白名單**已還原**（git diff 乾淨）—— 那 25/26 張是床層債，本票不修
 ---
