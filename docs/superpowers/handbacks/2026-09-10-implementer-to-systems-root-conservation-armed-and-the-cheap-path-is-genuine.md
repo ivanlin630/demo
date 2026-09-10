@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位樹 ｜ 根守恆上線 ＋ 便宜路判決
 topic: ★守恆做成**機械的**：`Σ(根 tot) > 容器總時` ⇒ 具名紅＋列貢獻最大的三個根；成對對照床 **3/3**（改回根紅／改回兒子綠／**現況 147 個可判 tick 全綠**）｜★★便宜路判 **(b)**：866 次（母體 81.2%）、**33.8 us/call**、出口 `cadence=852` ⇒ 它**真的很便宜**，不是沒被走｜★★★而同一份數字順帶答了另一件：**engine 桶 185.1 ms/call ≈ leader 220.8 ms/call** —— solo 的單次決策**不比領主便宜**，它大是因為**次數**
 ---
