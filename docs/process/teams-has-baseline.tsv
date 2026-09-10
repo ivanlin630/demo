@@ -1,0 +1,86 @@
+# state.teams.has( 存量 baseline（棘輪閘豁免）
+# 判準來源：docs/process/teams-has-callsites.tsv 表頭那套（不是重新發明的）
+# ★每列帶 owner ＋【觸發條件】＝【那一行被碰到時】(on-touch)；
+#   ★★不是日期：日期會過期而沒有人處理，觸發條件不會。
+# ★★★[G]（純存在問句）不在本表：本閘本來就不咬它。
+site	line	class	owner	trigger	reason
+scripts/simulation/ambush_system.gd	29	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @31 var team: TeamData = state.teams[tid]
+scripts/simulation/belief_system.gd	270	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @276 obs_team.update_reputation(sid, TRUST_DELTA)
+scripts/simulation/equipment_system.gd	8	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @10 var team: TeamData = state.teams[tid]
+scripts/simulation/event_system.gd	19	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @21 var team: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd	374	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @380 var prey_t: TeamData = state.teams.get(prey_id)
+scripts/simulation/faction_ai_system.gd	424	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @433 _commit_conquest_attack(state, team, prey_id)
+scripts/simulation/faction_ai_system.gd	622	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @623 var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd	1008	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @1010 var sub: TeamData = state.teams[sub_id]
+scripts/simulation/faction_ai_system.gd	1033	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @1035 var team: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd	1596	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @1598 var tgt_pos: Vector2i = BeliefSystem.belief_pos(state, f.leader_team_i
+scripts/simulation/faction_ai_system.gd	1807	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @1813 var ok: bool = _dispatch_envoy(state, team, f.leader_team_id, "member_
+scripts/simulation/faction_ai_system.gd	3693	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @3699 var join_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, 
+scripts/simulation/faction_ai_system.gd	4231	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @4232 var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd	4284	M	systems	on-touch:這一行被碰到時轉 live_team()	if state.teams.has(tid) and state.teams[tid].faction_id == -1:
+scripts/simulation/faction_ai_system.gd	4292	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @4293 var t: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd	4424	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @4426 _route_extinct_assets(state, state.teams[tid])
+scripts/simulation/faction_ai_system.gd	5981	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @5983 var snap: Dictionary = f.known_member_states.get(mid, {})
+scripts/simulation/faction_ai_system.gd	7059	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @7060 var oid_team: TeamData = state.teams[old_owner_id]
+scripts/simulation/faction_ai_system.gd	7335	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @7338 var snap: Dictionary = BeliefSystem.best_estimate(state, team.team_id,
+scripts/simulation/game_setup.gd	700	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @701 state.set_team_faction(state.teams[tid], cfg_to_actual[fid2])
+scripts/simulation/game_setup.gd	803	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @806 var pteam: TeamData = state.teams[pteam_id]
+scripts/simulation/interaction_system.gd	81	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @85 var arrived: TeamData = state.teams[arrived_id]
+scripts/simulation/interaction_system.gd	92	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @94 var other: TeamData = state.teams[other_id]
+scripts/simulation/interaction_system.gd	137	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @139 var t: TeamData = state.teams[tid]
+scripts/simulation/interaction_system.gd	154	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @157 if (state.teams[oid] as TeamData).tile_pos != t.tile_pos:
+scripts/simulation/interaction_system.gd	174	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @178 var moved: TeamData = state.teams[moved_id]
+scripts/simulation/interaction_system.gd	185	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @187 var other: TeamData = state.teams[other_id]
+scripts/simulation/interaction_system.gd	199	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @201 var team: TeamData = state.teams[tid]
+scripts/simulation/interaction_system.gd	245	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @306 var a: TeamData = state.teams[id_a]
+scripts/simulation/interaction_system.gd	1354	M	systems	on-touch:這一行被碰到時轉 live_team()	var obs_leader2: PersonData = state.persons.get((state.teams.get(obs_i
+scripts/simulation/invariant_audit.gd	119	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @120 out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
+scripts/simulation/invariant_audit.gd	121	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @122 out.append("懸空 Team%d.social_target=%d 不存在" % [tid, t.social_target])
+scripts/simulation/invariant_audit.gd	123	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @124 out.append("懸空 Team%d.order_target_id=%d 不存在" % [tid, t.order_target_i
+scripts/simulation/invariant_audit.gd	125	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @126 out.append("懸空 Team%d.parent_team_id=%d 不存在" % [tid, t.parent_team_id]
+scripts/simulation/invariant_audit.gd	129	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @130 out.append("懸空 Team%d.known_reputations 含死 Team%d" % [tid, k]); break
+scripts/simulation/invariant_audit.gd	132	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @133 out.append("懸空 Team%d.strategic_assignments 含死 Team%d" % [tid, k]); br
+scripts/simulation/invariant_audit.gd	136	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @137 out.append("懸空 team_discovered[%d] 含死 Team%d" % [obs, did]); break
+scripts/simulation/manpower_system.gd	273	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @275 var holder: TeamData = state.teams[tid]
+scripts/simulation/manufacturing_system.gd	135	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @137 var team: TeamData = state.teams[tid]
+scripts/simulation/message_system.gd	102	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @104 var arrived_team: TeamData = state.teams[arrived_id]
+scripts/simulation/message_system.gd	106	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @108 var other_team: TeamData = state.teams[other_id]
+scripts/simulation/movement_system.gd	41	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @43 var team: TeamData = state.teams[tid]
+scripts/simulation/movement_system.gd	64	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @66 var team: TeamData = state.teams[tid]
+scripts/simulation/npc_ai_system.gd	61	?	systems	on-touch:這一行被碰到時轉 live_team()	只比較／記帳 @63 return foe.team_id
+scripts/simulation/npc_combat_system.gd	71	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @73 var team: TeamData = state.teams[tid]
+scripts/simulation/npc_combat_system.gd	75	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @79 var enemy: TeamData = state.teams[enemy_id]
+scripts/simulation/npc_combat_system.gd	89	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @91 var team: TeamData = state.teams[tid]
+scripts/simulation/npc_combat_system.gd	453	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @454 and state.teams[loser_id].population >= GOVERN_SURVIVE_MIN
+scripts/simulation/npc_combat_system.gd	537	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @538 var _cap: int = AnonTierSystem.capture_routed_as_captive(state, state.
+scripts/simulation/npc_combat_system.gd	555	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @556 and state.teams[retreater_id].population >= GOVERN_SURVIVE_MIN
+scripts/simulation/npc_combat_system.gd	585	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @587 var winner: TeamData = state.teams[winner_id]
+scripts/simulation/player_api_mapper.gd	568	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @575 "focused_member":     map_focused_member(state, focus_team_id, focus_m
+scripts/simulation/player_command_api.gd	55	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @57 result = _cmd_sys.execute_action(state, target_team_id, action_id)
+scripts/simulation/player_command_system.gd	415	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @417 var result2 := _interaction.resolve_trade_direct(state, pt_id, tid2)
+scripts/simulation/player_command_system.gd	427	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @429 var result := PlayerTradeSystem.new().execute_offer(state, pt_id, tid,
+scripts/simulation/player_query_api.gd	30	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @36 var t: TeamData = state.teams[team_id]
+scripts/simulation/player_query_api.gd	61	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @64 var discovered: Array = state.team_discovered.get(p.team_id, [])
+scripts/simulation/player_query_api.gd	97	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @100 if target_team_id != pt_id and not discovered.has(target_team_id):
+scripts/simulation/player_query_api.gd	121	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @124 if target_team_id != pt_id and not discovered.has(target_team_id):
+scripts/simulation/player_query_api.gd	157	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @165 var actions := _build_available_actions(state, cmd_sys, team_id, membe
+scripts/simulation/player_query_api.gd	208	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @227 var tgt_team: TeamData = state.teams.get(focus_team_id)
+scripts/simulation/player_query_api.gd	472	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @473 var pt: TeamData = state.teams[ptid]
+scripts/simulation/population_system.gd	102	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @104 var team: TeamData = state.teams[tid]
+scripts/simulation/resource_system.gd	71	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @77 var team: TeamData = state.teams[tid]
+scripts/simulation/resource_system.gd	190	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @192 var team: TeamData = state.teams[tid]
+scripts/simulation/resource_system.gd	349	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @351 var team: TeamData = state.teams[tid]
+scripts/simulation/sim_runner.gd	454	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @456 var team: TeamData = state.teams[tid]
+scripts/simulation/sim_runner.gd	486	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @489 var _t: TeamData = state.teams[tid]
+scripts/simulation/strategic_ai_system.gd	144	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @145 var t: TeamData = state.teams[tid]
+scripts/simulation/vision_system.gd	167	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @168 var _foe: TeamData = state.teams[tgt.combat_target]
+scripts/simulation/world_events.gd	69	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @85 var _tm = state.teams[id2]
+scripts/simulation/world_events.gd	83	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @85 var _tm = state.teams[id2]
+scripts/simulation/decision/commitment_fields.gd	83	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @87 return {"kind": "order", "site": str(team.order_target_id), "measurabl
+scripts/simulation/decision/decision_context.gd	765	?	systems	on-touch:這一行被碰到時轉 live_team()	只比較／記帳 @766 c.intent_target = _prey
+scripts/simulation/decision/decision_context.gd	849	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @852 var _jpos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, _jh
+scripts/simulation/decision/goal_resolver.gd	368	L	systems	on-touch:這一行被碰到時轉 live_team()	取出那支隊 @370 var resident: TeamData = state.teams[rid]
+scripts/simulation/decision/goal_resolver.gd	407	M	systems	on-touch:這一行被碰到時轉 live_team()	"rid": int(best["rid"]), "rid_fac": (state.teams[int(best["rid"])].fac
+scripts/simulation/decision/options.gd	212	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @214 var host_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, 
+scripts/simulation/decision/options.gd	230	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @231 var prey_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, 
+scripts/simulation/decision/options.gd	342	L	systems	on-touch:這一行被碰到時轉 live_team()	當參數派出去 @344 var atid_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, 

@@ -90,6 +90,16 @@ func is_live_team(tid: int) -> bool:
 #   interaction_system:298）。★★抽在這裡是因為那兩處各有自己的額外前提
 #   （前者 combat_target == -1、後者 current_task 非 diplomacy/loot），
 #   ★★★共用的只有【它還活著嗎】—— 而普查上次只點到其中一邊，那正是分兩份的下場。
+# ★★★便捷式（HOW spec 2026-09-10「改人不如改路」）：取一支【可用的】隊，一步到位。
+#   ★呼叫端：`var t := state.live_team(tid)` ／ `if t == null: continue`
+#   ★★它比 `has()` ＋ `[]` 兩步【更短】—— 寫法要贏在人體工學，不贏在紀律：
+#     86 處 `state.teams.has(` 裡有 87% 是「守完之後真的對那支隊做事」，
+#   ★★★而那不是 75 個 bug，是【一個在殭屍窗打開時才錯的習慣】—— 所以換路，不逐處修。
+func live_team(tid: int) -> TeamData:
+	if not is_live_team(tid):
+		return null
+	return teams.get(tid)
+
 func can_be_player_target(tid: int) -> bool:
 	return is_live_team(tid)
 
