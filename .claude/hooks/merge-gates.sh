@@ -133,10 +133,13 @@ echo "[MERGE-GATES] 註冊表 $N 支｜總時 $((SECONDS-TOTAL0))s"
 # ★★「乾淨」只算【會影響判決的那幾個路徑】（scripts / .claude / 註冊表）：
 #   ★★★本專案是多終端共用同一個 main 工作區，它【幾乎永遠是髒的】（別人的信、量測檔）
 #   ⇒ 若要求全樹乾淨，這個基線【永遠不會被記下來】＝又一支裝好但沒接電的守衛。
+# ★★★記的是【開跑那一刻的 HEAD】（$_mg_head）而不是結束時的：
+#   一輪要跑十分鐘，期間別人（或我自己）很可能又 commit 了
+#   ⇒ 用結束時的 HEAD 會把【根本沒被跑過的 code】記成已經量過。
 # ★只有【在 main 上、且工作區乾淨】的那一輪才有資格更新基線（否則記的是某個人的工作區）
 if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ]; then
   printf '%s	%s	%s
-' "$(git rev-parse --short HEAD)" "${#FAILED[@]}" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$MG_BASE"
+' "$_mg_head" "${#FAILED[@]}" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$MG_BASE"
   echo "[MERGE-GATES] ★已更新 main 基線紅數 ＝ ${#FAILED[@]}"
 fi
 if [ ${#FAILED[@]} -gt 0 ]; then

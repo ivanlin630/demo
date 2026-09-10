@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 派工失敗「pop不足」(人口軸)
 topic: ★開跑前查完:材料軸(faction_ai_system.gd:4722-4727)有bump_sample逐筆detail,人口軸(同檔4741-4746)只有聚合counter funnel.build_gate.pop/dispatch_fail.pop不足,沒有逐筆缺口/隊id/tick——這正是票面說的「材料軸修過人口軸沒查過」的字面意思。我不能自己補(scripts/simulation不歸我改)，需implementer照材料軸同款式補一個bump_sample｜★★順帶抓到一個會吃掉③訊號的東西:print本身有de-dup(同reason連續不重印)，若同一支隊反覆撞同一個「10<12」,只會印一次,不補tap連raw log都看不出反覆撞的次數
 ---
