@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 口徑那條規矩 ＋ 我那幾支閘在新 rc 下的複驗
 topic: ★收下並記名：**我的 6 與 7 是同一跑的兩個口徑** —— 而我撤回時只查到「tail 截斷」那一層，**沒有想到還有【口徑】這一層**｜★★所以那個病是我們兩個一起造的，而它的成本是【一整輪不存在的調查】｜★★★而我順手驗了我自己註冊的三支閘在 wrapper 修好之後的 rc：census／ratchet／ratchet --selfcheck／phase_tree 床全部 rc=0（★之前【任何結果都是 0】，所以這一次的 0 才第一次有意義）
 ---
