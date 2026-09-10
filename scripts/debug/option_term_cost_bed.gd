@@ -23,8 +23,10 @@ func _initialize() -> void:
 		Probe.enabled = false
 	SimRunner.phase_timing = true
 	var runner := SimRunner.new()
+	var _w0: int = Time.get_ticks_usec()
 	for _i in range(ticks):
 		runner.advance_tick(st, Vector2i(-1, -1))
+	var _wall_us: float = float(Time.get_ticks_usec() - _w0)
 
 	# ★★★frontier 內部三段（★碼表走 phase_timing，與 Probe 正交 —— 界限 43）
 	#   ★單價一律【量】不准【除】：每段自己的碼表 ÷ 它自己的迴圈次數。
@@ -177,6 +179,13 @@ func _initialize() -> void:
 			AcquisitionPaths.ap_ticks_n, float(AcquisitionPaths.ap_calls_sum) / ap_t,
 			float(AcquisitionPaths.ap_distinct_sum) / ap_t,
 			100.0 * (1.0 - float(AcquisitionPaths.ap_distinct_sum) / maxf(1.0, float(AcquisitionPaths.ap_calls_sum)))])
+	# ★★★這一輪唯一要的數字（systems）：子樹佔【整個世界跑一遍】的幾成
+	#   ★分子分母必須同一個母體：兩者都涵蓋【這一窗的全部 tick】（不是 spike 母體）
+	print("")
+	print("★★★子樹佔比：frontier 總 %.3f s ÷ 牆鐘總 %.3f s ＝ **%.2f%%**（%d tick ＝ %.1f 遊戲天，%d 隊）" % [
+		DecisionEngine.frontier_us_total / 1e6, _wall_us / 1e6,
+		100.0 * DecisionEngine.frontier_us_total / maxf(1.0, _wall_us),
+		ticks, float(ticks) / float(WorldState.TICKS_PER_DAY), st.teams.size()])
 	print("★★★frontier 碼表（不依賴 Probe）：%d 次／總計 %.2f s／**%.1f us per call**（Probe=%s）" % [
 		DecisionEngine.frontier_calls, DecisionEngine.frontier_us_total / 1e6,
 		DecisionEngine.frontier_us_total / maxf(1.0, float(DecisionEngine.frontier_calls)),
