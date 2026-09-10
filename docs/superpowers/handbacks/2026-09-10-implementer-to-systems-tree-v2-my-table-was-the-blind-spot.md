@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位樹 v2（三件訂正 ＋ 重跑）
 topic: ★★★你說的「`loop1.factions` 252 秒內部零可見度」——**可見度一直都在，是我的表把它的六個內部檢查點接成了兄弟**（我第一版把 member_snap／update_goals／assign_tasks／infra／diplo／betray 全登記成根）｜★接對之後：`loop1.factions` 連前 20 名都進不去、`loop1.assign_tasks` tot 120.6s 而 **self 0.01s** ⇒ 樹在運作｜★★真淨值第一名是 **`assign.leader_unified` 82.8s** —— **而它【還不能拿來點名】**，理由在 §③
 ---
