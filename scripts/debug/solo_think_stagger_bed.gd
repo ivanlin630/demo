@@ -8,7 +8,7 @@ extends SceneTree
 
 var _fails: int = 0
 var _sections: int = 0
-const EXPECT_SECTIONS: int = 5
+const EXPECT_SECTIONS: int = 6
 const CAD: int = 60
 
 func _initialize() -> void:
@@ -18,6 +18,7 @@ func _initialize() -> void:
 	_test_spike_paired()
 	_test_t0_not_delayed()
 	_test_no_one_reads_phase()
+	_test_cost_model()
 	if _sections != EXPECT_SECTIONS:
 		_fails += 1
 		push_error("[FAIL] 只跑完 %d/%d 段 —— 中途崩掉" % [_sections, EXPECT_SECTIONS])
@@ -249,3 +250,87 @@ func _scan(dir_path: String, hits: Array) -> void:
 				f.close()
 		name = dir.get_next()
 	dir.list_dir_end()
+
+# ── ★★★成本模型（systems 要的那一格）：★在【同一跑之內】，不跨模式 ────────
+#   用戶的問題是「還會不會卡 5-10 秒」，而集中度只答「有沒有攤開」。
+#   ⇒ 這一格把集中度【翻譯成秒數】：逐 tick 記 (x=幾隊在想, y=tick wall-time)
+#     ⇒ 印出 y 對 x 的關係 ⇒ 把 x=9（錯開後）與 x=17（同批）代進去。
+#   ★而它不需要兩個世界：A 與 B 都來自同一個分布。
+func _test_cost_model() -> void:
+	print("-- ★成本模型（同一跑內）：x=幾隊在想 → y=tick 花多久 --")
+	var st := _mk("warring_states")
+	var runner := SimRunner.new()
+	var by_x: Dictionary = {}          # x → [y…]（★只收【非整點】tick：整點還扛著別的每小時工作）
+	var hour_us: Array = []
+	var eligible: int = 0
+	var offsets: Array = []
+	for i in range(600):
+		var is_hour: bool = (st.world.current_tick + 1) % CAD == 0
+		var t0: int = Time.get_ticks_usec()
+		runner.advance_tick(st, Vector2i(-1, -1))
+		var dt: int = Time.get_ticks_usec() - t0
+		var x: int = 0
+		eligible = 0
+		for tid in st.teams:
+			var t: TeamData = st.teams[tid]
+			if t.beast_kind == "" and t.parent_team_id == -1 and t.faction_id == -1:
+				eligible += 1
+				if i == 300:
+					offsets.append(t.solo_think_next_tick % CAD)
+			if t.solo_think_last_tick == st.world.current_tick:
+				x += 1
+		if is_hour:
+			hour_us.append(dt)
+			continue
+		if not by_x.has(x):
+			by_x[x] = []
+		(by_x[x] as Array).append(dt)
+	var xs: Array = by_x.keys()
+	xs.sort()
+	var pts: Array = []
+	for x in xs:
+		var arr: Array = by_x[x]
+		arr.sort()
+		pts.append([int(x), int(arr[arr.size() / 2]), arr.size()])
+		print("    x=%2d 隊在想 ⇒ y 中位 %8.3f ms（n=%d）" % [int(x), float(arr[arr.size() / 2]) / 1000.0, arr.size()])
+	hour_us.sort()
+	print("    ★整點 tick（還扛著其餘每小時工作）中位 %.1f ms／max %.1f ms" % [
+		float(hour_us[hour_us.size() / 2]) / 1000.0, float(hour_us[-1]) / 1000.0])
+	# ★線性外推：★★只用【樣本夠多】的 x 點 —— 床第一次跑時 x=3 只有 1 筆（139 ms），
+	#   而那一筆讓斜率變成 46 ms/隊 ⇒ ★★★單樣本點會把整條模型帶走，這種外推是假的。
+	var solid: Array = []
+	for pt in pts:
+		if int(pt[2]) >= 10:
+			solid.append(pt)
+	if solid.size() < 2:
+		print("    ★樣本夠多（n≥10）的 x 點只有 %d 個 ⇒ 【算不出可信的斜率】，不外推。" % solid.size())
+		_ok(false, "★成本模型【不可判】：可信 x 點不足（這不是綠，是沒測到）")
+		_sections += 1
+		return
+	var lo = solid[0]
+	var hi = solid[-1]
+	var k: float = 0.0
+	if int(hi[0]) != int(lo[0]):
+		k = float(int(hi[1]) - int(lo[1])) / float(int(hi[0]) - int(lo[0]))
+	var base: float = float(int(lo[1])) - k * float(int(lo[0]))
+	print("    ⇒ 成本模型（只用 n≥10 的點：x=%d 與 x=%d）y ≒ %.3f ＋ %.3f·x ms" % [
+		int(lo[0]), int(hi[0]), base / 1000.0, k / 1000.0])
+	print("    ⇒ 代入 x=9（錯開後 max）＝%.3f ms｜x=17（強制同批 max）＝%.3f ms" % [
+		(base + k * 9.0) / 1000.0, (base + k * 17.0) / 1000.0])
+	print("    ★★★而這一跑【沒有重現 26 秒】：整點 tick 中位 %.1f ms 由【其餘每小時工作】扛著，"
+		% (float(hour_us[hour_us.size() / 2]) / 1000.0))
+	print("       不是 solo 思考（solo 每隊只要 %.3f ms）⇒ 用戶感受得到的秒數要量測員在真 run 上量。"
+		% (k / 1000.0))
+	_ok(solid.size() >= 2, "★成本模型用了 %d 個樣本夠多的 x 點" % solid.size())
+	# ★★systems §③：N 與 offset 分布 —— 9 到底是不是理論極限
+	print("    ★★這一跑真正走這條路的隊 N=%d ⇒ 理論期望 x ≒ N/%d = %.2f" % [eligible, CAD, float(eligible) / float(CAD)])
+	var hist: Dictionary = {}
+	for o in offsets:
+		var b: int = int(o) / 10
+		hist[b] = int(hist.get(b, 0)) + 1
+	var hl: Array = []
+	for b in range(6):
+		hl.append("%d-%d:%d" % [b * 10, b * 10 + 9, int(hist.get(b, 0))])
+	print("    ★offset 直方圖（tick 300 當下，%d 隊）：%s" % [offsets.size(), " ".join(PackedStringArray(hl))])
+	_ok(eligible > 0, "★母體地板：真的有 %d 隊走這條路（否則上面兩行沒有意義）" % eligible)
+	_sections += 1
