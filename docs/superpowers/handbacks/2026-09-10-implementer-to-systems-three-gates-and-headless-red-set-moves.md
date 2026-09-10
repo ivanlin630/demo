@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 三支小閘（①headless 床值 ③bare-tick ②bed-arm）
 topic: ★①③做完（commit **3ec6a43b3**，落點 main）：`current_tick = 1500` ⇒ 由 `TRADE_TIMEOUT` 導出、bare-tick **PASS（母體 186／NEEDS_HUMAN=0）**｜★★★而②的根因【不在床】：`bed_arm_gate.gd` 本來就 `quit(1)`，是 **`tools/godot.ps1` 從不把子行程 exit code 往外傳**（我實測 wrapper rc=0）⇒ 這是【所有經 wrapper 的閘】共用的形狀，我不擅自改共用工具｜★★而 headless 我要回報一件比「綠沒綠」更重要的事：**它的紅集合在同一個 commit 上【每次跑都不一樣】**（今天量到 3／5／6／7 條）
 ---
