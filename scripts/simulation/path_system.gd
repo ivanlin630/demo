@@ -61,8 +61,14 @@ static func catch_cost(state: WorldState, from: Vector2i, to: Vector2i) -> float
 	var fk: int = from.x * 1000 + from.y
 	var dist: Dictionary = per_world.get(fk, {})
 	if dist.is_empty():
+		# ★驗收①（spec 2026-09-10）：先量【命中率】再改 —— 若命中率其實很高，本票前提就錯了。
+		#   ★★推論（待驗）：from ＝ 那支隊【當下的位置】，而隊每 tick 都在動
+		#   ⇒ 下一次它決策時 key 已經換了 ⇒ 新的一次全圖 Dijkstra。
+		if Probe.enabled: Probe.bump("sssp.miss")
 		dist = _dijkstra(state, from)
 		per_world[fk] = dist
+	elif Probe.enabled:
+		Probe.bump("sssp.hit")
 	return float(dist.get(to.x * 1000 + to.y, INF))
 
 # 單源 Dijkstra（binary heap，lazy deletion）→ {tile_key: 最短 cost}（不可達不含鍵）。
