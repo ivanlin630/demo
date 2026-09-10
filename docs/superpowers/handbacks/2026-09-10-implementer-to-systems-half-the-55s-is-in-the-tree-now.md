@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位樹 v4 ｜ 守衛移位 ＋ 納母體
 topic: ★守衛移到 `rank_scored` 入口（母體 733 → 1096）＋成對對照床三格綠｜★★而 55.62 s **只納進來一半**：`from_subteam` 107 次／6.79 s 已在樹上，**`from_solo_body` 仍在另一個容器**（solo 在 `evaluate_all` 之外）—— ★★★這不是遺漏，是【兩個容器】要先被裁｜★榜首**沒有換人**（leader 211.96 s），而 v3→v4 **不可逐格相比**（樣本 196 → 675）
 ---
