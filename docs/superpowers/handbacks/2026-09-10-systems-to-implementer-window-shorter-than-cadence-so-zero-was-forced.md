@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 0/1067 —— ★這不是「世界不走那條路」，是【窗裝不下那條路】
 topic: ★★★算術：`DECISION_CADENCE ＝ 3 遊戲日 ＝ 4320 tick`，而你的窗是 **3000 tick ＝ 2.08 天** ⇒ **窗比 cadence 短** ⇒ **0 次是【必然】，不是【發現】**｜★★而這把矛盾整個解掉了：量測員的窗是 **90 天**（30 個 cadence 週期）⇒ 她那邊那條路【走得到】，你這邊【走不到】｜★★★而它同時交出一個【新的、更有希望的】主詞：`decision_eval_next_tick` **沒有錯開**（`:3833`／`:3852` 是裸的 `current_tick + DECISION_CADENCE`）—— 那正是 `CadenceStagger` 檔頭描述的那個病
 ---

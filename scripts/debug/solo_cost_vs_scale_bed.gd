@@ -28,6 +28,8 @@ func _initialize() -> void:
 	var _prev_chp: int = 0
 	var _tot_eng: int = 0
 	var _tot_chp: int = 0
+	var _eng_per_tick: Array = []
+	var _cad_hist: Dictionary = {}
 	Probe.arm()
 	for i in range(ticks):
 		FactionAISystem._fai_ph.clear()
@@ -62,6 +64,12 @@ func _initialize() -> void:
 			(chp_bucket[(n_elig / 10) * 10] as Array).append(float(chp_us) / float(chp_n))
 		_tot_eng += eng_n
 		_tot_chp += chp_n
+		# ★★★③到期時刻分布：真的跑進引擎的隊，落在 DECISION_CADENCE 週期的哪一段？
+		#   ⇒ 若【每 3 天一大批同時到期】，主詞就找到了（而修法與錯開票同形）。
+		if eng_n > 0:
+			_eng_per_tick.append(eng_n)
+			var phase_b: int = int((st.world.current_tick % 4320) / 432)   # 3 遊戲日切 10 段
+			_cad_hist[phase_b] = int(_cad_hist.get(phase_b, 0)) + eng_n
 		if x <= 0 or us <= 0:
 			continue
 		var bucket: int = (n_elig / 10) * 10   # N 以 10 為一桶
@@ -89,6 +97,21 @@ func _initialize() -> void:
 	var _acc: int = int(Probe.counts.get("solo.exit.player", 0)) + int(Probe.counts.get("solo.exit.in_combat", 0)) 		+ int(Probe.counts.get("solo.exit.no_leader", 0)) + int(Probe.counts.get("solo.exit.cadence", 0))
 	print("★★未歸類 %d 次（進入 %d − 已具名早退 %d − 跑引擎 %d）—— ★我的 tap 沒蓋到的 return，說出來不遮" % [
 		_tot_eng + _tot_chp - _acc - _tot_eng, _tot_eng + _tot_chp, _acc, _tot_eng])
+	# ③ 到期時刻分布
+	if not _eng_per_tick.is_empty():
+		_eng_per_tick.sort()
+		var _sum: int = 0
+		for v in _eng_per_tick:
+			_sum += int(v)
+		print("★③跑進引擎的 tick 數 %d｜單 tick 最多 %d 隊｜中位 %d 隊｜總計 %d 隊次" % [
+			_eng_per_tick.size(), int(_eng_per_tick[-1]), int(_eng_per_tick[_eng_per_tick.size() / 2]), _sum])
+		var hb: Array = []
+		for b in range(10):
+			hb.append("%d:%d" % [b, int(_cad_hist.get(b, 0))])
+		print("★★③到期時刻分布（3 遊戲日切 10 段，值＝隊次）：%s" % " ".join(PackedStringArray(hb)))
+		print("   ⇒ ★若集中在一兩段 ⇒【每 3 天一大批同時到期】＝ 主詞找到了；平均散開 ⇒ 不是它")
+	else:
+		print("★③【沒有任何隊跑進引擎】⇒ 這一格不可判（★窗是否 ≥3 個 cadence 週期？）")
 	print("N 桶      跑引擎那群 每次 us（中位）   早退那群 每次 us（中位）")
 	var eks: Array = eng_bucket.keys()
 	eks.sort()
