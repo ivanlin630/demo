@@ -46,7 +46,13 @@ func _initialize() -> void:
 	print("                        ②這一行字你知道它在說什麼嗎（看不懂的列進人話層清單）")
 	print("                        ③★你想知道、而畫面上沒有的（★這一格最重要：只有真人給得出）")
 	if n_err > 0:
-		print("★★而那 %d 顆錯的位置在跑完之後才會揭曉（見檔尾 WALK_ANSWER 行，★先別看）。" % n_err)
+		# ★答案【只在檔尾】：正文零標記（★★v1 在那一格印記號 ⇒ 對照恆真）
+		print("")
+		print("=== 埋錯答案（走查完再看）===")
+		for e in seeded:
+			print("  %s" % String(e))
+		print("  ★選它的理由：food_days 與同頁的 food_stock【互相矛盾】⇒ 兩個數字一除就對不上，")
+		print("    ★★所以它落在【有可能被抓到】的區間 —— 而不是一顆沒有人能發現的錯。")
 		print("WALK_ANSWER %s" % str(seeded))
 	quit()
 
@@ -123,24 +129,49 @@ func _page_map() -> Dictionary:
 			continue
 		var c: PackedStringArray = l.split("\t")
 		if c.size() >= 4:
-			out[String(c[0])] = { "pages": String(c[2]), "status": String(c[1]), "who": String(c[3]) }
+			# ★第五欄＝中文顯示名（systems 已填滿 119 欄）——★★三個畫面同一張表取名，
+			#   否則同一個欄位在 REPL／GUI／走查叫三個名字 ⇒ ★★★用戶無法交叉比對，
+			#   而交叉比對正是走查唯一的工具。
+			out[String(c[0])] = { "pages": String(c[2]), "status": String(c[1]), "who": String(c[3]),
+				"label": String(c[4]) if c.size() >= 5 else "" }
 	f.close()
 	return out
 
-# ★種錯：★★不改查詢面、只改【畫面上的那個值】—— 走查驗的是人眼，不是機制
+# ★種錯（v2）：★★種進去的值必須與真值【同型且合理】——
+#   ★★★v1 的做法（換成「★（本頁埋的錯：這個值是假的）」）讓對照【恆真】：
+#     用戶不是「看出來」，是【被告知】⇒ 那個練習量不到任何東西。
+#   ⇒ 規矩：數值乘倍數／位移（且不得等於真值）、布林翻面、字串換成另一個真的任務名、
+#     陣列少一個元素 —— ★任何「一看形式就知道是假的」都是同一個病換個樣子。
+#   ★而【選哪一格】也有判準（systems 加的）：它要有可能被抓到 ——
+#     ⇒ 選 food_days（糧食還能撐幾天）：★★它與同頁的 food_stock（庫存糧）互相矛盾，
+#       用戶把兩個數字一除就知道對不上 ⇒ ★★★這一格【落在可判的區間】，
+#       而不是一個「沒有人能發現、然後被讀成用戶不夠仔細」的錯。
 func _seed_errors(fields: Dictionary, n: int) -> Array:
 	if n <= 0 or fields.is_empty():
 		return []
-	var keys: Array = fields.keys()
-	keys.sort()
+	var prefer: Array = ["food_days", "population", "coin"]
 	var picked: Array = []
-	# 決定性挑選（★可重跑）：取字典序中段那一個
-	var idx: int = int(keys.size() / 3)
-	for i in mini(n, keys.size()):
-		var k: String = String(keys[(idx + i * 7) % keys.size()])
-		fields[k] = "★（本頁埋的錯：這個值是假的）"
-		picked.append(k)
+	for k in prefer:
+		if picked.size() >= n:
+			break
+		if fields.has(k) and (fields[k] is float or fields[k] is int):
+			var before = fields[k]
+			var after = _plausible_mutation(before)
+			if str(after) == str(before):
+				continue        # ★不得等於真值（否則那一格根本沒被種）
+			fields[k] = after
+			picked.append("%s：%s → %s" % [k, str(before), str(after)])
 	return picked
+
+# ★同型且合理的變造（★★不引入任何「看形式就知道是假的」記號）
+func _plausible_mutation(v):
+	if v is float:
+		return snappedf(float(v) * 2.7 + 3.0, 0.001)
+	if v is int:
+		return int(v) * 3 + 7
+	if v is bool:
+		return not bool(v)
+	return v
 
 func _print_page(page: String, page_map: Dictionary, fields: Dictionary) -> void:
 	print("")
@@ -153,11 +184,13 @@ func _print_page(page: String, page_map: Dictionary, fields: Dictionary) -> void
 		if not String(meta["pages"]).contains(page):
 			continue
 		shown += 1
+		var label: String = String(meta.get("label", ""))
+		var shown_name: String = ("%s（%s）" % [label, name]) if label != "" else name
 		if fields.has(name):
-			print("  %-32s %s" % [name, _fmt(fields[name])])
+			print("  %-38s %s" % [shown_name, _fmt(fields[name])])
 		else:
 			# ★天窗：具名 TODO，不靜默 —— 沉默的空白會被讀成「這個世界沒有這個東西」
-			print("  %-32s ★未接出（%s）" % [name, String(meta["who"])])
+			print("  %-38s ★未接出（%s）" % [shown_name, String(meta["who"])])
 	if shown == 0:
 		print("  （這一頁沒有欄位 —— ★而那本身是一個要回報的發現）")
 
