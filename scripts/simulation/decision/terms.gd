@@ -391,7 +391,17 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var _want_labor: float = 1.0 - _slack
 			# 糧：養不養得起（食物天數低 ⇒ 多一張嘴是負擔）
 			var _food_ok: float = clampf(ctx.food_days / maxf(DecisionContext.SLACK_COMFORT_DAYS, 0.001), 0.0, 1.0)
-			return clampf(_want_labor * _food_ok, 0.0, 1.0)
+			var _sd: float = clampf(_want_labor * _food_ok, 0.0, 1.0)
+			# ★★★候選了卻從不贏，有兩個成因而總數答不出來（30 天窗：候選 15、贏 0）：
+			#   (a) drive 本身就 ≈0（不缺工位／糧不夠）(b) drive 不低但被別的 option 壓過
+			#   ⇒ ★把【成分】記下來（純觀測、有界 cap）：idle_labor／food_days／drive
+			if Probe.enabled:
+				Probe.bump_sample("shelter.drive_components", {
+					"idle_labor": snappedf(ctx.idle_labor, 0.01), "pop": ctx.population,
+					"food_days": snappedf(ctx.food_days, 0.01),
+					"want_labor": snappedf(_want_labor, 0.001), "food_ok": snappedf(_food_ok, 0.001),
+					"drive": snappedf(_sd, 0.001)}, 100)
+			return _sd
 		"seek_shelter_drive":
 			# ★★求居者側：**沒有家的生產隊**想找一個村住下（★而它的價值隨【自己有多缺】升高）。
 			#   ★距離折現走既有的 `DiscountedFlow`（不新增旋鈕）。

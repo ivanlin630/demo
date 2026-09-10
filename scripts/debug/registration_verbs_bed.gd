@@ -10,9 +10,12 @@ extends SceneTree
 func _initialize() -> void:
 	var ticks: int = int(OS.get_environment("RV_TICKS")) if OS.has_environment("RV_TICKS") else 8640
 	var cfg: String = OS.get_environment("RV_CONFIG") if OS.has_environment("RV_CONFIG") else "warring_states"
-	print("=== ④b 登記動詞（%d tick ＝ %.1f 遊戲天，%s，★預設 config 未改）===" % [
-		ticks, float(ticks) / float(WorldState.TICKS_PER_DAY), cfg])
-	seed(4242)
+	print("=== ④b 登記動詞（%d tick ＝ %.1f 遊戲天，%s，seed=%s，★預設 config 未改）===" % [
+		ticks, float(ticks) / float(WorldState.TICKS_PER_DAY), cfg,
+		OS.get_environment("RV_SEED") if OS.has_environment("RV_SEED") else "4242"])
+	# ★★★窗長是這張票的前提之一：★昨天的普查（seed 1337、快照 day 10/20/30/45/60）量到
+	#   PRODUCE 隊數 6 → 14 → 22 ⇒ **生產隊是【長出來的】** ⇒ 6 天的窗在它們出生【之前】。
+	seed(int(OS.get_environment("RV_SEED")) if OS.has_environment("RV_SEED") else 4242)
 	var st := MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
 	var runner := SimRunner.new()
 	for _i in range(ticks):
@@ -34,6 +37,25 @@ func _initialize() -> void:
 	print("")
 	print("★①母體：居民 %d 支／**房客 %d 支** %s" % [residents, lodgers.size(),
 		"⇒ " + str(lodgers) if not lodgers.is_empty() else "⇒ ★★★紅：動詞沒有真的接上世界"])
+	# ★★★房客是【怎麼】登記的（stub／動詞／遷移在結果上長得一樣 ⇒ 必須分開追）
+	var stub_teams: Dictionary = {}
+	for d in Probe.samples.get("registry.src.stub", []):
+		stub_teams[int(d.get("team", -1))] = true
+	var verb_teams: Dictionary = {}
+	for d2 in Probe.samples.get("registry.verb.shelter", []):
+		verb_teams[int(d2.get("guest", -1))] = true
+	var src_lines: Array = []
+	for tid5 in st.teams:
+		var t5: TeamData = st.teams[tid5]
+		if not st.is_registered_resident(t5):
+			continue
+		var src: String = "★來源不明（遷移或其他）"
+		if verb_teams.has(int(tid5)):
+			src = "收留動詞"
+		elif stub_teams.has(int(tid5)):
+			src = "stub"
+		src_lines.append("Team%d←%s" % [int(tid5), src])
+	print("★①-b 登記來源逐隊：%s" % str(src_lines))
 	# ②stub 是否被真動詞接管
 	print("★②stub %d 次／收留動詞 %d 次（同 faction %d／跨 faction %d）／流離 %d 次" % [
 		int(Probe.counts.get("registry.auto_register_stub", 0)),
@@ -47,6 +69,24 @@ func _initialize() -> void:
 		int(Probe.counts.get("optpool.win.收留", 0)),
 		int(Probe.counts.get("decision.opt_applicable.求居", 0)),
 		int(Probe.counts.get("optpool.win.求居", 0))])
+	# ★★★「候選了卻從不贏」的兩個成因（★總數答不出來）：(a) drive ≈0 (b) drive 不低但被壓過
+	var comps: Array = Probe.samples.get("shelter.drive_components", [])
+	if comps.is_empty():
+		print("★③-b 收留 drive 成分：**不可判**（0 筆樣本 ⇒ 那一格根本沒被算過）")
+	else:
+		var zero_drive: int = 0
+		var sum_drive: float = 0.0
+		var max_drive: float = 0.0
+		for cd in comps:
+			var dv: float = float(cd.get("drive", 0.0))
+			sum_drive += dv
+			max_drive = maxf(max_drive, dv)
+			if dv <= 0.001:
+				zero_drive += 1
+		print("★③-b 收留 drive 成分（樣本 %d 筆，first-N cap 100）：drive≈0 的 %d 筆（%.1f%%）／平均 %.3f／最大 %.3f" % [
+			comps.size(), zero_drive, 100.0 * float(zero_drive) / float(comps.size()),
+			sum_drive / float(comps.size()), max_drive])
+		print("   ★前 3 筆：%s" % str(comps.slice(0, 3)))
 	# ⑥一隊一登記（動詞上線後重驗）
 	var multi: int = 0
 	for tid in st.teams:

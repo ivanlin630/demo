@@ -640,6 +640,10 @@ func auto_register_stub_sweep() -> void:
 			t.work_outpost = t.tile_pos
 			if Probe.enabled:
 				Probe.bump("registry.auto_register_stub")   # ★④b 上線後這個數字該歸零
+				# ★★★來源要可追（2026-09-11）：光看「房客 2 支」答不出**它們是怎麼登記的** ——
+				#   stub／動詞／遷移三條路在結果上長得一模一樣。
+				Probe.bump_sample("registry.src.stub", {"team": t.team_id,
+					"tile": [t.tile_pos.x, t.tile_pos.y], "tick": world.current_tick}, 300)
 
 # ── S5 tags 單寫者 chokepoint ─────────────────────────────────
 # ★★★訂正（systems 量測 2026-09-10，登記錨 ④a spec §⑥）：舊註解寫「軍隊/生產/流亡，movement 讀決策」
