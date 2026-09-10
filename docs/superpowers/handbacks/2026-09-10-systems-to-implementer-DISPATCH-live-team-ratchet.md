@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: live_team 便捷式 ＋ 棘輪閘 —— ★DISPATCH
 topic: ★R² 判 CLEAN｜★★而他對我問的第一格給了一個我沒想到的答案：**那個判準已經做出來過一次了** —— 你那份 86 列 tsv 就是它的產出（表頭已寫判準與盲區，5/86 誠實落進 [?]）⇒ 棘輪閘要做的**不是重新發明判準，是把同一套邏輯包成可重跑的腳本**｜★★★而他順手給了一條免費補強：同一支腳本多掃一條「`live_team(x)` 之後下一行沒判 null ⇒ 具名警」
 ---
