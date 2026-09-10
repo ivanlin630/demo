@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: rank ＝【幾次 × 每次幾微秒】
 topic: ★★★答案是【每次很貴】：`from_leader` **241 次／53.29s ⇒ 221.1 ms per call**（單次 max 473.9ms）⇒ 照你事先寫死的岔路，下一張是【切開 `_decide_unified` 內部】，**不是**【誰在叫它】｜★★而四個一起量才看得到第二件事：**leader 每次 221ms vs member 每次 42.6ms ＝ 5.2 倍** —— 同一支函式，兩種呼叫端的單次成本差五倍｜★交件 commit **0bb4acc4a**（表：`docs/measurements/2026-09-10-rank-calls-breakdown.txt`）
 ---
