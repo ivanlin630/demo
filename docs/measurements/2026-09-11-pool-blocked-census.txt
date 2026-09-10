@@ -1,0 +1,19 @@
+# 卡③「更寬效果」打到誰（★systems 要數字不要推論）
+# 床：scripts/debug/pool_blocked_census_bed.gd（worktree `.worktrees/converge2`，基於 origin/main）
+# 窗：3000 tick ＝ 2.1 遊戲天｜seed 4242｜Probe=ON
+
+config                     進池(owner)  進池(registered)  **被擋**  同faction  跨faction  無faction
+warring_states                      0                0        0        —          —          —
+peaceful_economy                 1332                0        0        —          —          —
+peaceful_economy_factioned       1672                0        0        —          —          —
+
+# ★★★答案：**被擋 0 次 ⇒ 不可判 —— 而那本身就是答案：目前沒有任何一支隊被這一刀打到。**
+#   ★母體地板照 systems §②：①＝0 ⇒ 不可判（★而不是「效果良好」）。
+# ★★三個附帶事實（★它們是這個 0 的解釋，不是藉口）：
+#   ①進池的**全部是 owner 本人**（1332／1672 次）⇒ 目前沒有「站在別人據點上工作」這種情形
+#   ②`registered` 那一欄也是 **0** ⇒ 與登記錨那輪量到的「房客 0」一致（世界還沒長出房客）
+#   ③`warring_states` 連 owner 都是 **0** ⇒ ★那個 config 在這個窗裡**勞力池路徑根本沒跑到**
+#     （★★沒有 PRODUCE 隊站在據點上）⇒ 它對本題**也不可判**，理由與前兩個不同 —— 分開寫
+# ★而「改前 vs 改後」：被擋的隊次在舊規則下**全部會被算進池**（舊規則只看站位＋PRODUCE）
+#   ⇒ 既然被擋 ＝ 0，**改前改後在自然世界裡沒有差別**。
+# ★★★唯一能觀察到這個效果的地方仍是 fixture（`lodger_tax_share_bed`：池 16 →（取消登記）6）。
