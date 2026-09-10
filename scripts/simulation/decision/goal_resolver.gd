@@ -790,6 +790,10 @@ static var rp_find_us: float = 0.0      # ③其中的 `find_nearest_terrain_til
 static var rp_find_n: int = 0
 static var rp_tail_us: float = 0.0      # ④尾段（折現比較 ＋ `_mk_candidate`）
 static var rp_tail_n: int = 0
+static var rp_hold_us: float = 0.0      # ①-a `effective_holding`
+static var rp_hold_n: int = 0
+static var rp_nk_us: float = 0.0        # ①-b `need_keep`
+static var rp_nk_n: int = 0
 static var rp_all_us: float = 0.0
 static var rp_all_n: int = 0
 # ★★★同一 tick 內【同一組輸入】重複算幾次（★母體地板在算式之前）
@@ -884,6 +888,10 @@ static func _reset_cross_run() -> Dictionary:
 	rp_tail_n = 0
 	rp_all_us = 0.0
 	rp_all_n = 0
+	rp_hold_us = 0.0
+	rp_hold_n = 0
+	rp_nk_us = 0.0
+	rp_nk_n = 0
 	_rep_tick = -1
 	_rep_rrp_seen = {}
 	_rep_rbf_seen = {}
@@ -935,9 +943,20 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 組件 E 泛化：qty 走通用 need_keep（任 res）。
 	if Probe.enabled: Probe.bump("goal.res_prereq.entry")
-	var _rp_sat: bool = ResourceSystem.effective_holding(state, team, res) >= NeedOracle.need_keep(state, team, res, lv)
+	# ★拆歧義：`effective_holding` 與 `need_keep` 原本綁在同一個碼表裡（複合段答不出誰貴）
+	var _eh: float = ResourceSystem.effective_holding(state, team, res)
+	var _ehT: int = 0
 	if SimRunner.phase_timing:
-		rp_need_us += float(Time.get_ticks_usec() - _rpA)
+		_ehT = Time.get_ticks_usec()
+		rp_hold_us += float(_ehT - _rpA)
+		rp_hold_n += 1
+	var _nk: float = NeedOracle.need_keep(state, team, res, lv)
+	var _rp_sat: bool = _eh >= _nk
+	if SimRunner.phase_timing:
+		var _nkT: int = Time.get_ticks_usec()
+		rp_nk_us += float(_nkT - _ehT)
+		rp_nk_n += 1
+		rp_need_us += float(_nkT - _rpA)
 		rp_need_n += 1
 	if _rp_sat:
 		if Probe.enabled: Probe.bump("goal.res_prereq.satisfied")

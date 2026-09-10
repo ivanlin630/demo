@@ -10,13 +10,57 @@ class_name NeedOracle
 # （TARGET_PER_POP，防中間態 target=0 全隊倒貨/價格鎖死，R²#5）。reader 全切 oracle = S4。
 
 # 保留向 need：自用(消耗品) + 供應鏈(中間品下游 gap 傳導)。
+# ★★★三個加數各自的碼表（★單價量、不准除）
+static var nk_self_us: float = 0.0
+static var nk_self_n: int = 0
+static var nk_supply_us: float = 0.0
+static var nk_supply_n: int = 0
+static var nk_constr_us: float = 0.0
+static var nk_constr_n: int = 0
+static var nk_all_n: int = 0
+# ★★★遞迴扇出：`need_keep` → `_supply_chain`（:183）→ `need_keep(out)` 逐個配方產出
+#   ⇒ ★「每次很慢」與「一次查詢被展開很多次」是兩個結論，而總時把它們壓成同一個數字。
+static var nk_depth: int = 0
+static var nk_top_n: int = 0            # 頂層（depth 0 進入）次數
+static var nk_maxdepth: int = 0
+static var nk_depth_hist: Dictionary = {}
+
 static func need_keep(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
 	# ★★★perf tap（`payoff-derive-bridge` 驗收 #5）：spec 明寫「重算不是取用」
 	#   ⇒ ★「多一次呼叫」是這個設計【已知的代價】，而代價要有數字。
 	#   ★★計數決定性（不受並跑影響）；★★★時間必須獨佔才有意義 ⇒ 床端分開報。
 	var _t0: int = Time.get_ticks_usec() if Probe.enabled else 0
-	var _r: float = _self_use(state, team, res, leader_values) + _supply_chain(state, team, res) \
-		+ _construction_facility_need(state, team, res, leader_values)
+	# ★★★拆歧義（systems 2026-09-10）：`need_keep` 是三個加數，而它們綁在同一個碼表裡
+	#   ⇒ 那 18.8 ms 答不出「是誰貴」。★碼表走 `SimRunner.phase_timing`（界限 43：與 Probe 正交）。
+	if SimRunner.phase_timing:
+		if nk_depth == 0:
+			nk_top_n += 1
+		nk_depth += 1
+		if nk_depth > nk_maxdepth:
+			nk_maxdepth = nk_depth
+		var _dkey: String = str(nk_depth)
+		nk_depth_hist[_dkey] = int(nk_depth_hist.get(_dkey, 0)) + 1
+	var _n0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	var _a: float = _self_use(state, team, res, leader_values)
+	var _n1: int = 0
+	if SimRunner.phase_timing:
+		_n1 = Time.get_ticks_usec()
+		nk_self_us += float(_n1 - _n0)
+		nk_self_n += 1
+	var _b: float = _supply_chain(state, team, res)
+	var _n2: int = 0
+	if SimRunner.phase_timing:
+		_n2 = Time.get_ticks_usec()
+		nk_supply_us += float(_n2 - _n1)
+		nk_supply_n += 1
+	var _c: float = _construction_facility_need(state, team, res, leader_values)
+	if SimRunner.phase_timing:
+		nk_constr_us += float(Time.get_ticks_usec() - _n2)
+		nk_constr_n += 1
+		nk_all_n += 1
+	var _r: float = _a + _b + _c
+	if SimRunner.phase_timing and nk_depth > 0:
+		nk_depth -= 1
 	if Probe.enabled:
 		Probe.bump("perf.need_keep.calls")
 		Probe.add_amount("perf.need_keep.us", float(Time.get_ticks_usec() - _t0))

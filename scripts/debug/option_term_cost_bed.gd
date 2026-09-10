@@ -130,6 +130,38 @@ func _initialize() -> void:
 			print("%-44s %10d %12.3f %14.1f" % [row[0], int(row[1]), float(row[2]) / 1e6,
 				float(row[2]) / float(row[1])])
 	var rp_sum: float = GoalResolver.rp_need_us + GoalResolver.mkt_us + GoalResolver.rp_terr_us + GoalResolver.rp_tail_us
+	print("")
+	print("★★★「我夠不夠」那句再拆（★母體地板在算式之前）")
+	print("%-40s %10s %12s %14s" % ["段", "次數", "總計(s)", "us/次"])
+	var nk: Array = [
+		["①-a effective_holding", GoalResolver.rp_hold_n, GoalResolver.rp_hold_us],
+		["①-b need_keep（＝下面三個加數）", GoalResolver.rp_nk_n, GoalResolver.rp_nk_us],
+		["　├ _self_use", NeedOracle.nk_self_n, NeedOracle.nk_self_us],
+		["　├ _supply_chain", NeedOracle.nk_supply_n, NeedOracle.nk_supply_us],
+		["　└ _construction_facility_need", NeedOracle.nk_constr_n, NeedOracle.nk_constr_us]]
+	for row in nk:
+		if int(row[1]) == 0:
+			print("%-40s %10s %12.3f %14s" % [row[0], "★0 次", float(row[2]) / 1e6, "不可判"])
+		else:
+			print("%-40s %10d %12.3f %14.1f" % [row[0], int(row[1]), float(row[2]) / 1e6,
+				float(row[2]) / float(row[1])])
+	if NeedOracle.nk_top_n == 0:
+		print("★★★need_keep 扇出：**不可判**（頂層 0 次）")
+	else:
+		var _nh: Array = []
+		var _nhk: Array = NeedOracle.nk_depth_hist.keys()
+		_nhk.sort()
+		for k3 in _nhk:
+			_nh.append("深度%s=%d" % [k3, int(NeedOracle.nk_depth_hist[k3])])
+		print("★★★need_keep 扇出：頂層 %d 次／全部 %d 次 ⇒ **每次查詢展開 %.1f 次**；最深 %d 層；%s" % [
+			NeedOracle.nk_top_n, NeedOracle.nk_all_n,
+			float(NeedOracle.nk_all_n) / float(NeedOracle.nk_top_n), NeedOracle.nk_maxdepth,
+			"、".join(_nh)])
+	var nk3: float = NeedOracle.nk_self_us + NeedOracle.nk_supply_us + NeedOracle.nk_constr_us
+	print("★守恆⑦：三個加數和 %.3f s vs need_keep %.3f s（差 %.3f s）；①-a+①-b %.3f s vs 前置滿檢查 %.3f s（差 %.3f s）" % [
+		nk3 / 1e6, GoalResolver.rp_nk_us / 1e6, (GoalResolver.rp_nk_us - nk3) / 1e6,
+		(GoalResolver.rp_hold_us + GoalResolver.rp_nk_us) / 1e6, GoalResolver.rp_need_us / 1e6,
+		(GoalResolver.rp_need_us - GoalResolver.rp_hold_us - GoalResolver.rp_nk_us) / 1e6])
 	print("★守恆⑥：①+②+③+④ = %.3f s（母體 %d 次）vs **整支** %.3f s（母體 %d 次）⇒ 差 %.3f s" % [
 		rp_sum / 1e6, GoalResolver.rp_all_n, GoalResolver.rp_all_us / 1e6, GoalResolver.rp_all_n,
 		(GoalResolver.rp_all_us - rp_sum) / 1e6])
