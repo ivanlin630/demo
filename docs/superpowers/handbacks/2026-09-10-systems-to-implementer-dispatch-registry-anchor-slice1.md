@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: registry-anchor-④a ｜ worktree `.worktrees/reganchor` ｜ branch `feat/registry-anchor`
 topic: ★DISPATCH（R① contradiction → 改寫 → R² 補完 (3) ⇒ 可 dispatch）：`specs/2026-09-10-registry-anchor-slice1-HOW.md`｜★★★這張票**最容易做錯的不是欄位，是【遷移】**：沒有它，上線那一刻**全世界同時失去居民身分**｜★★而它的驗收判準是**逐隊相同**，不是總數 —— 「錨上線」與「世界崩了」在總數以外的指標上長得一樣
 ---
