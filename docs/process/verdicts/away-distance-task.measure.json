@@ -1,0 +1,35 @@
+{
+  "token": "away-distance-task",
+  "slice": "不在家是不是只是在田裡——離家距離+task補測",
+  "date": "2026-09-10",
+  "measured_at_head": "ba0a5ebbd起跑",
+  "touches": [],
+  "world": "warring_states / seed=1337 / 60天，5次快照(同上一卷可比)",
+  "bed": "scripts/debug/away_distance_task_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-10-away-distance-task.txt"],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★★★意外發現，推翻本票原本的框架：day60的13支『不在家』隊裡，12支(92%)『無自家outpost可比』(_find_own_outpost回傳(-1,-1))，只有1支(team36)真的量到距離=3(剛好卡在田間半徑邊界)。這不是『遠派vs在田裡』的問題——是【方法論落差】：_find_own_outpost(faction_ai_system.gd:6628)只查『team自己擁有』的outpost，而is_resident_static(判定是不是居民的那個謂詞)的『家』定義更寬鬆(自己的outpost 或 同faction其他隊的outpost都算)。這12支隊的resident身分很可能是透過『同faction outpost』那個分支取得的，本身從未擁有自己的outpost，所以_find_own_outpost找不到，不是bug，是我用錯了跟is_resident_static語意不匹配的查詢函式。",
+    "day60逐隊明細": {
+      "有距離可算(1隊)": "team36: dist=3(田間半徑邊界內) task=貿易",
+      "無自家outpost可比(12隊)": "team44(建設)/48(覓食)/50(貿易)/51(貿易)/55(貿易)/87(覓食)/132(迎戰)/133(覓食)/140(迎戰)/150(建設)/285(貿易)/369(貿易)"
+    },
+    "day10-45的trend": "day10:0隊有距離2隊無/day20:0有3無/day30:0有4無/day45:0有6無——★★★全程幾乎每一支都是『無自家outpost可比』，day60的1隊有距離是首次出現，非典型"
+  },
+
+  "root_cause_reframe": {
+    "本票原假設": "『不在家』是遠派(決策層問題)還是在田間半徑內(非問題)——二選一",
+    "本卷實測發現": "★★★第三種情況佔壓倒性多數：這些隊根本沒有『自己的』outpost可比距離。它們的resident身分(在稍早某個snapshot時刻曾經is_resident_static=true)極可能是站在【同faction的其他隊擁有的outpost】上取得的，離開那個位置後，_find_own_outpost(只認自己是owner)自然找不到參照點。",
+    "這對『在田裡vs遠派』這個問題意味著": "問題問法本身可能需要調整——不是量『離自己的家多遠』，是要量『離上次待過的那個outpost多遠』，或者乾脆用is_resident_static實際比對的邏輯(owner_id==team.team_id 或 owner.faction_id==team.faction_id)重新定義'家'再算距離。本卷用錯了查詢函式，誠實回報，不硬套結論。"
+  },
+
+  "honest_limits": [
+    "★①本卷不下修法結論",
+    "★★②方法論落差：_find_own_outpost只查『team自己擁有』的outpost，與is_resident_static的『家』定義(自己的或同faction的)不一致——本卷的『無自家outpost可比』結果，準確地說是『這支隊自己沒有outpost』，不是『附近沒有outpost』，兩者混為一談會誤導。若要真的回答『在田裡vs遠派』，需要換一個更貼近is_resident_static語意的outpost查詢(掃全部同faction outpost取最近距離)，本卷未做，跑法建議留給systems裁是否要補測",
+    "★③唯一有距離可算的team36(dist=3)剛好卡在我操作定義的田間半徑邊界(≤3=非問題)——樣本量n=1不能當趨勢，只是誠實列出",
+    "★④day10-45全程無隊有距離可比，day60才出現1筆——可能純粹是這支隊剛好自己也蓋了outpost，非系統性變化，本卷未深究"
+  ],
+
+  "supersedes": []
+}
