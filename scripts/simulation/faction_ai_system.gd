@@ -3121,7 +3121,12 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 	#   ★而 `unified.rank` 正是本輪要歸因的那個數字（同上一顆 tap 的陷阱，只是這次是「量測自己的量測」）。
 	var _tr0: int = _tr
 	_solo_ran_engine = true                         # ★同上：走到 rank 就不是早退
+	var _tr0_rank: int = Time.get_ticks_usec() if Probe.enabled else 0
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
+	# ★★★量測窗要【貼著被量的東西】：第一版我把終點放在 90 行之後的 Probe 區塊，
+	#   ⇒ 那個 us/call 裡混進了 reorder／funnel／specimen dump ——
+	#   ★而它會讓「rank 每次 222ms」這種【看起來很有解釋力】的數字進到交件裡。
+	var _rank_us: int = (Time.get_ticks_usec() - _tr0_rank) if Probe.enabled else 0
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
 	# ★★★承諾再派 funnel（#10，2026-09-02）——★掛在【決策 entry】，而理由是 reviewer 給的硬的那個：
 	#   `TaskArbiter.release()` 的簽名【連 state 都沒有】(task_arbiter.gd:161)
@@ -3205,6 +3210,16 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 			#   ⇒ 撈不到表時要分得出「funnel 沒 fire」與「cap 早就滿了」（床會印樣本數）
 			}, 20000)
 	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank.from_" + src, _tr)
+	# ★★★呼叫計數（systems 裁 2026-09-10）：80.77 秒要拆成【幾次 × 每次幾微秒】——
+	#   ★「每次很貴」與「叫很多次」的下一張票【完全不同】，而總計那個數字兩種都長一樣。
+	#   ★★四個 from_* 一起加：否則只知道 leader 的形狀，分不出
+	#     「leader 特別貴」與「rank 本來就貴、只是 leader 叫得多」。
+	#   ★★★而每次的 us 也逐次記（peak/分布）：Probe.note 取的是 peak（同 add_amount 取和，兩者不同）。
+	if Probe.enabled:
+		Probe.bump("rank.calls." + src)
+		Probe.add_amount("rank.us." + src, float(_rank_us))
+		Probe.note("rank.us_max." + src, float(_rank_us))
+		Probe.bump("rank.teams." + src + ".%04d" % int(team.team_id))
 	# ★取樣放在計時【終點之後】⇒ `bump_sample` 自己的成本不進 `unified.rank`。
 	# ★★依賴 `phase_timing`：關掉時 `_tr/_tr0` 都是 0 ⇒ 本 sample 不運作（★這個前提寫進 dump，
 	#   否則有人只開 `Probe.enabled` 會拿到空的而以為「沒有慢的呼叫」）。
