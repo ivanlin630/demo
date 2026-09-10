@@ -205,6 +205,10 @@ var perceived_power_ratio: float = 0.0
 const WINNABLE_PPR_FLOOR: float = 0.5   # TEST VALUE — ppr 下限(避除小爆;ppr<此=我遠強→winnable 飽和)
 var winnable: float = 0.0
 var is_resident: bool = false
+# ★④b 登記動詞用（見 gather 內的理由）
+var shelter_seeker_id: int = -1     # 村主側：站在我據點上而未登記的 PRODUCE 隊
+var shelter_host_id: int = -1       # 求居者側：我知道的別人據點的 owner
+var shelter_host_pos: Vector2i = Vector2i(-1, -1)
 # 野心階梯（序3 rung_task 溶入）：archetype/rung 當 weight 驅動 option（非查表塞 task）。
 # ambient_train_drive = FORCE-archetype 累積/擴張階練兵 base（低 magnitude 讓位緊急決策）。
 var archetype: String = ""
@@ -402,6 +406,38 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			else:
 				Probe.bump("flee.no_dest_above_threshold")
 	c.is_resident = FactionAISystem.is_resident_static(state, team)
+	# ★★★④b 登記動詞（HOW spec 2026-09-11）：兩個 ctx 欄位，一個給村主、一個給求居者。
+	#   ★都走【既有的 belief／位置】—— 不新增感知通道（感知鐵律）。
+	#   ①村主側：**站在我自家據點上、且沒有登記在這裡的 PRODUCE 隊**（＝上門的人）
+	#   ②求居者側：**我知道的、別人擁有的據點**（`team_tile_known` ＝ 親眼看過的格，非 god-view）
+	c.shelter_seeker_id = -1
+	c.shelter_host_id = -1
+	c.shelter_host_pos = Vector2i(-1, -1)
+	var _my_tile: HexTileData = state.own_outpost_tile(team.team_id)
+	if _my_tile != null and _my_tile.tile_pos == team.tile_pos:
+		var _ids: Array = state.teams.keys(); _ids.sort()   # ★決定性：id 序，不看字典順序
+		for _sid in _ids:
+			var _s: TeamData = state.teams[_sid]
+			if _s.team_id == team.team_id or _s.beast_kind != "":
+				continue
+			if _s.tile_pos != _my_tile.tile_pos or not _s.tags.has(TeamData.TAG_PRODUCE):
+				continue
+			if state.registered_at(_s, _my_tile.tile_pos):
+				continue
+			c.shelter_seeker_id = _s.team_id
+			break
+	if team.tags.has(TeamData.TAG_PRODUCE) and team.work_outpost == Vector2i(-1, -1):
+		var _known: Dictionary = state.team_tile_known.get(team.team_id, {})   # ★tid → true（親見/relay 的格）
+		var _best_d: int = 1 << 30
+		for _tid2 in _known:
+			var _t2: HexTileData = state.world.tiles.get(int(_tid2))
+			if _t2 == null or _t2.outpost_level <= 0 or _t2.outpost_owner == -1 or _t2.outpost_owner == team.team_id:
+				continue
+			var _d2: int = FactionAISystem._hex_dist(team.tile_pos, _t2.tile_pos)
+			if _d2 < _best_d:
+				_best_d = _d2
+				c.shelter_host_id = _t2.outpost_owner
+				c.shelter_host_pos = _t2.tile_pos
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.threat", _tg)
 	var _fa := FactionAISystem.shared()
 	var _prey: int = _fa._find_weakest_prey(state, team)

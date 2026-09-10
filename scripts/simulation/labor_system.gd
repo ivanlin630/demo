@@ -69,8 +69,26 @@ static func pool_of(state: WorldState, tile: HexTileData) -> float:
 #     —— 走開的居民仍是這格的居民（那正是錨的意思）。
 static func _in_pool(state: WorldState, t: TeamData, tile: HexTileData) -> bool:
 	if tile.outpost_owner == t.team_id:
+		if Probe.enabled: Probe.bump("pool.in.owner")
 		return true
-	return state.registered_at(t, tile.tile_pos)
+	if state.registered_at(t, tile.tile_pos):
+		if Probe.enabled: Probe.bump("pool.in.registered")
+		return true
+	# ★★★被這一刀擋掉的是誰（systems 要數字不要推論 2026-09-11）：
+	#   ★分三類記：同 faction／跨 faction／無 faction —— ★★而「合計」答不出「誰被打到」。
+	#   ★★★這些隊在【改前】是會被算進池的（舊規則只看站位＋PRODUCE）⇒ 本計數就是【改前拿得到工位】的那一群。
+	if Probe.enabled:
+		var owner: TeamData = state.teams.get(tile.outpost_owner)
+		var cls: String = "no_faction"
+		if owner != null and t.faction_id != -1 and owner.faction_id == t.faction_id:
+			cls = "same_faction"
+		elif owner != null and t.faction_id != -1 and owner.faction_id != t.faction_id:
+			cls = "cross_faction"
+		elif owner == null:
+			cls = "no_owner"
+		Probe.bump("pool.blocked." + cls)
+		Probe.add_amount("pool.blocked_labor." + cls, labor_pop(t))   # ★被擋掉的【勞力量】不只是次數
+	return false
 
 # rebalance（deterministic）：pool → 列 workstations → need 權重 → 比例+demand-cap+溢出串聯 → fill。
 # ★★★compute / persist 拆開（systems 重裁 2026-09-08）――

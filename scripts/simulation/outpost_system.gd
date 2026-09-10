@@ -507,6 +507,14 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			for fac_name in FACILITY_DEF:
 				tile.set(FACILITY_DEF[fac_name]["current_level_key"], 0)
 				FacilityExistenceIndex.invalidate()
+			# ★★★④b：據點滅 ⇒ 登記在它上面的隊【全部流離】（★逐隊清，不是等它們自己發現）
+			#   ★理由：登記是【隊 ↔ 據點】的契約，而契約的對象消失了 ⇒ 契約失效
+			#   ★★而這是「只進不出」那條的**唯一合法出口**（其餘出口：自願離開／驅逐，都在後面的票）
+			for _rid in state.teams:
+				var _rt: TeamData = state.teams[_rid]
+				if _rt.work_outpost == tile.tile_pos:
+					_rt.work_outpost = Vector2i(-1, -1)
+					if Probe.enabled: Probe.bump("registry.verb.displaced")
 			tile.stable_progress = 0.0
 			tile.garrison.clear()
 			tile.prisoners.clear()

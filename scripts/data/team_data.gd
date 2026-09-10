@@ -30,6 +30,11 @@ const TASK_GOVERN      := "治理"
 const TASK_HOLD        := "守城"
 const TASK_MIGRATE     := "遷徙"
 const TASK_CONSTRUCT   := "建造"
+# ★★★④b 登記動詞（2026-09-11）：兩個新 task
+#   `TASK_SHELTER`＝村主收留（把上門的隊登記進自己的村）／`TASK_SEEK_HOME`＝求居（走去某個村問）
+#   ★它們與「吸納」同形狀：option ＋ utility ＋ dispatch（★不是 if）
+const TASK_SHELTER     := "收留"
+const TASK_SEEK_HOME   := "求居"
 const TASK_UPGRADE     := "升級"
 const TASK_EXPAND      := "擴建"
 const TASK_CONVOY      := "運輸"   # ★後勤 SLICE A：供給-delivery convoy（porter 把 surplus 物理送到 demand 市場結買單）

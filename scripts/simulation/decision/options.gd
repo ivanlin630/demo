@@ -216,6 +216,33 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_JOIN, "target": host_pos,
 				"social_target": host, "order_target": host},
 	},
+	# ★★★④b 登記動詞：收留（村主秤）／求居（無家生產隊）——★照「吸納」的形狀掛（R² 給的現成範本）
+	"收留": {
+		"affinity": [0.2, 0.2, 0.3, 0.2, 0.1], "sets": {},
+		"terms": [["shelter_drive", "shelter"]],
+		# ★硬條件只有「有沒有人上門」——★★收不收由 util 決定（禁補丁閘）
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.shelter_seeker_id != -1,
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			var _sc: DecisionContext = DecisionContext.gather(state, team)
+			if _sc.shelter_seeker_id == -1:
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_SHELTER, "target": team.tile_pos,
+				"social_target": _sc.shelter_seeker_id, "order_target": _sc.shelter_seeker_id},
+	},
+	"求居": {
+		"affinity": [0.5, 0.1, 0.1, 0.2, 0.1], "sets": {},
+		"terms": [["seek_shelter_drive", "seek_shelter"]],
+		# ★belief-gated：只認【自己知道的】據點（`team_tile_known`）—— 感知鐵律
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.shelter_host_id != -1 and not ctx.has_own_outpost,
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			var _qc: DecisionContext = DecisionContext.gather(state, team)
+			if _qc.shelter_host_pos == Vector2i(-1, -1):
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_SEEK_HOME, "target": _qc.shelter_host_pos,
+				"social_target": _qc.shelter_host_id, "order_target": _qc.shelter_host_id},
+	},
 	# S-A §HOW-7：強方擴張 pull「吸納」（強隊主動吸弱鄰，擴張-class @PRIO_DISPATCH，非 survival）。
 	"吸納": {
 		"affinity": [0.0, 0.0, 0.4, 0.3, 0.3], "sets": {"strategic_selfinit": true},

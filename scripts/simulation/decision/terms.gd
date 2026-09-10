@@ -380,6 +380,25 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 				+ float(ctx.leader_values.get("信義", 0.5)) * PACIFY_D \
 				- float(ctx.leader_values.get("好戰", 0.5)) * PACIFY_E
 			return _base_c * _sevc * (1.0 - ctx.winnable)
+		"shelter_drive":
+			# ★★★④b 村主秤（收不收上門的人）：**主驅動 ＝ 現況**（缺工位 ⇒ 想收／糧不夠 ⇒ 不想收），
+			#   ★人格只在 weight 那一側調變（`shelter` 權重讀貪婪）——★★禁把貪婪當主驅動
+			#     （同一個軸兩個方向都說得通 ＝ 拿錯軸；systems 自我診斷、R² 同意）。
+			#   ★★★禁寫成「符合條件就收」：這裡回的是**連續的價值**，硬條件只有「有沒有人上門」。
+			if opt != "收留" or ctx.shelter_seeker_id == -1: return 0.0
+			# 工位缺口：`idle_labor` 是【多出來的勞力】⇒ 它 > 0 表示不缺人 ⇒ 想收的動機低
+			var _slack: float = clampf(ctx.idle_labor / maxf(float(ctx.population), 1.0), 0.0, 1.0)
+			var _want_labor: float = 1.0 - _slack
+			# 糧：養不養得起（食物天數低 ⇒ 多一張嘴是負擔）
+			var _food_ok: float = clampf(ctx.food_days / maxf(DecisionContext.SLACK_COMFORT_DAYS, 0.001), 0.0, 1.0)
+			return clampf(_want_labor * _food_ok, 0.0, 1.0)
+		"seek_shelter_drive":
+			# ★★求居者側：**沒有家的生產隊**想找一個村住下（★而它的價值隨【自己有多缺】升高）。
+			#   ★距離折現走既有的 `DiscountedFlow`（不新增旋鈕）。
+			if opt != "求居" or ctx.shelter_host_id == -1: return 0.0
+			var _homeless: float = 1.0 if not ctx.has_own_outpost else 0.0
+			var _hunger: float = clampf((2.0 * DecisionContext.SLACK_COMFORT_DAYS - ctx.food_days) 				/ maxf(2.0 * DecisionContext.SLACK_COMFORT_DAYS, 0.001), 0.0, 1.0)
+			return clampf(_homeless * (0.4 + 0.6 * _hunger), 0.0, 1.0)
 		"absorb_drive":
 			# §HOW-8 完整 utility：資源可負擔(resource_slack) × 期待收益(absorb_yield) × 擴展需求(ambition_gap)。
 			# 個性(野心+仁慈)在 weight。擴張-class 公平競秤（禁硬優勢；征服真划算而贏=保留不動）。
@@ -460,6 +479,11 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 			* clampf(1.0 - float(v.get("野心", 0.5)), JOIN_LOW_AMBITION_FLOOR, 1.0)
 		"camp":              return float(v.get("野心", 0.5)) * 0.4 \
 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
+		# ★④b：人格只 MODULATE（多一個人＝多一份稅 ⇒ 貪婪加分；慎重＝怕養不起 ⇒ 減分）
+		#   ★★主驅動在 drive 那一側（缺工位／糧夠不夠），這裡只是傾向。
+		"shelter":           return clampf(0.3 + float(v.get("貪婪", 0.5)) * 0.5 			- float(v.get("慎重", 0.5)) * 0.2, 0.0, 1.5)
+		# ★求居：求生欲（找個地方活下去）＋ 低野心（有野心的自己開村）
+		"seek_shelter":      return clampf(float(v.get("求生欲", 0.5)) * 0.6 			+ (1.0 - float(v.get("野心", 0.5))) * 0.4, 0.0, 1.5)
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"buymaterial":       return clampf(float(v.get("貪婪", 0.5)), 0.3, 1.0)   # 貪婪→建設/軍火投資傾向（穿人格秤，非 flat）

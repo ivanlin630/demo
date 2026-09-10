@@ -3351,6 +3351,24 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 				team.current_option = opt   # 承諾追蹤（下 cadence commitment 保 sticky sustain）
 				return
 			continue   # 起建失敗（料被消耗/slot 滿）→ 試次佳（覓食…、失敗案留）
+		# ★★★④b 收留（村主秤贏了）：**當場登記**上門的那支隊（★動作本身是即時的，不需要走位移）
+		#   ★而它為什麼放在這裡而不是寫成 if：**收不收由 util 決定**（`shelter_drive`），
+		#     ★★這裡只執行【已經被秤選中】的結果 —— 與「吸納」同一種形狀。
+		if opt == "收留":
+			var _seek_id: int = int(td.get("social_target", -1))
+			var _seek: TeamData = state.teams.get(_seek_id)
+			var _host_tile: HexTileData = state.own_outpost_tile(team.team_id)
+			if _seek == null or _host_tile == null or _seek.tile_pos != _host_tile.tile_pos 					or state.registered_at(_seek, _host_tile.tile_pos):
+				continue   # ★對象走了／已經登記 ⇒ 不可派，試次佳（不是失敗）
+			_seek.work_outpost = _host_tile.tile_pos   # ★一隊一登記：直接覆寫（單值欄位天然保證）
+			if Probe.enabled:
+				Probe.bump("registry.verb.shelter")
+				Probe.bump("registry.verb.shelter.same_faction" if _seek.faction_id == team.faction_id 					else "registry.verb.shelter.cross_faction")
+				Probe.bump_sample("registry.verb.shelter", {
+					"host": team.team_id, "guest": _seek_id, "tick": state.world.current_tick,
+					"same_faction": _seek.faction_id == team.faction_id}, 200)
+			team.current_option = opt
+			return
 		# ★means-end S5 委派：delegate candidate 贏 → 派子隊執行 action，母隊留守（本 cadence 畢）；派失敗→試次佳。
 		if td.get("delegate", false):
 			if _dispatch_goal_delegate(state, team, td):
