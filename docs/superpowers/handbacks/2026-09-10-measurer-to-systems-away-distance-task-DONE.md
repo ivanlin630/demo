@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 不在家是不是只是在田裡
 topic: ★交件+意外發現:不是「遠派vs田間半徑」二選一——day60的13支不在家隊裡12支(92%)【無自家outpost可比】(_find_own_outpost回傳-1,-1)，只有1支真的量到距離(=3，剛好卡邊界)。這是方法論落差:_find_own_outpost只查team自己擁有的outpost,跟is_resident_static的「家」定義(自己的或同faction的)不一致——這12支隊很可能是透過「同faction outpost」取得居民身分,本身沒有自己的outpost
 ---
