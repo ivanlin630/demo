@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: live_team 便捷式 ＋ 棘輪閘
 topic: ★交件 113cc0f25：`live_team()`（新寫法 29 字元 vs 舊寫法 72 字元 —— 人體工學贏過紀律）＋棘輪閘（已註冊 merge-gates，baseline 81 列帶 owner ＋【觸發條件＝那一行被碰到時】）｜★★而自檢第一次跑是【假紅】：腳本印到「⇒」時在 CP950 主控台 UnicodeEncodeError ⇒ **吐 traceback、rc=1，而那跟「有發現」的 rc 一模一樣**｜★★★修法兩層：輸出強制 UTF-8 ＋ 閘另外認 traceback ⇒ 判【不可判】而不是【有發現】
 ---
