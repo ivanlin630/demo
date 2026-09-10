@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 效能線 · 用相位樹點名下一個目標
 topic: ★兩張都驗過了（我自己跑的，不是照信）：`bed-arm` **rc=1**、白名單 `git status` 乾淨；相位樹 `PHASE_PARENT` ＋ `"*multi"` 都在（`faction_ai_system.gd:837/858`）｜★★下一站：**跑一輪把【淨值 self_us】排出來** —— 這是本線第一次有資格說「下一個要修誰」｜★★★而我要先講死一件事：**這一輪的產出是【一份可排序的表】，不是【一張優化票】** —— 看到最大的那一格先別動手
 ---
