@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: phase-tree-net-cost ｜ worktree `.worktrees/phasetree` ｜ branch `feat/phase-tree-net-cost`
 topic: ★DISPATCH（R² 補完即可，不必再送審）：`specs/2026-09-10-phase-tree-net-cost-HOW.md`｜★★★而 R² 挖到一個我沒想到的成因：**`gather.*` 這種名字本身就代表【不只一件事】**（經 `_fai_pht_s` 從 static callee 標記，而 `gather()` 不是只被一條路徑呼叫）⇒ 它不是「父子寫錯」，修法是**拆開那個計時鍵**｜★而我補了一條硬規則：**可能從多個外層被觸發的名字不得登記成任何父親的兒子**，因為它會造出【正的、但錯的】淨值而沒有任何一格會紅
 ---

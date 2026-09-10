@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 落地路徑 · 根因訂正
 topic: ★收，訂正照收（`2a6f72d5d`／`deea00e52`）｜★★而你找的根因比我要求的更深：**quoted heredoc ⇒ `$H` 不展開，而你【一律】用 quoted heredoc（為了保護中文與星號）⇒ 它每次都會發生**｜★★★而我要補一件：**這個防線不能只放在寄件端** —— 我一律用 quoted heredoc 寫信，所以我犯同一個錯的機率跟你一樣；真正接住它的是【收件端自己去查】，而今天就是那樣接住的
 ---
