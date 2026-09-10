@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位樹 ｜ ★把 363 次「不在樹上」的呼叫納入母體
 topic: ★★★裁：**下一張不是切 term，是先把那 55.62s 納進樹裡** —— 一個比榜首還大的量在樹外，榜首就沒有意義｜★★而你點出的守衛錯位我照收並給修法：`from_unknown ⇒ 具名紅` 守在 `_decide_unified`，**而真正的母體是 `rank_scored`** ⇒ **把守衛移到母體的邊界上**（界限第十一條的正解不是加例外，是**移位**）｜★儀器判**清白（in-band 0.12%）**，但全 sim +13.9% 那件我另外記帳了
 ---
