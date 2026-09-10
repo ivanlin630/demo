@@ -469,7 +469,11 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 func _unload_excess_material(state: WorldState, team: TeamData, tile: HexTileData) -> void:
 	if tile == null or tile.outpost_level == 0:
 		return
-	if not (tile.outpost_owner == team.team_id or (team.parent_team_id != -1 and tile.outpost_owner == team.parent_team_id)):
+	# ★★★登記錨 ④a §②：手寫的 `owner == team_id or owner == parent_team_id` 改走【具名謂詞】。
+	#   ★它問的是【組織隸屬】（子隊能不能卸進母隊的公庫），不是居住契約
+	#   ⇒ 所以走一跳推導，而不是要求子隊自己有一份登記（blueprint 裁：權利沿母隊流下來）。
+	#   ★★ctx 是必要參數：denied 的紅燈要有主詞，否則卸貨／施工／自救三件事混成一個數字。
+	if not state.registered_or_parent_at(team, tile.tile_pos, "unload"):
 		return   # ★別人的據點不卸（否則等於把料送給對方）
 	var have: float = float(team.resources.get("material", 0))
 	if have <= 0.0:

@@ -791,10 +791,13 @@ func begin_subteam_construction(state: WorldState, team: TeamData) -> bool:
 			return _subteam_upgrade_facility(state, team, tile, fac)
 	return false
 
-func _faction_owns(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
-	if tile.outpost_owner == team.team_id:
-		return true
-	if tile.outpost_owner == team.parent_team_id and team.parent_team_id != -1:
+# ★★★登記錨 ④a §⑨：這支問的是【能不能在這格動工】（含初次建造與主隊自己的緊急自救建設），
+#   ★它比居住權寬（同 faction 可代建）⇒ 是【第三種問題】，不是居民謂詞的複製。
+#   ⇒ 本人／母隊那兩軸走具名的一跳謂詞（不得再手寫 owner == parent_team_id）；
+#     ★★同 faction 那一軸【留在這裡】—— 它正是本謂詞與居民謂詞的差別所在。
+#   ★ctx：`"construct"`（子隊升級／擴建）／`"food_rescue"`（主隊自己餓了就地蓋產糧設施）。
+func _faction_owns(state: WorldState, team: TeamData, tile: HexTileData, ctx: String) -> bool:
+	if state.registered_or_parent_at(team, tile.tile_pos, ctx):
 		return true
 	var owner: TeamData = state.teams.get(tile.outpost_owner)
 	if owner == null:
@@ -804,7 +807,7 @@ func _faction_owns(state: WorldState, team: TeamData, tile: HexTileData) -> bool
 func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData, target_level: int) -> bool:
 	if tile.outpost_level == 0 or target_level <= tile.outpost_level or target_level > 3:
 		return false
-	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
+	if not _faction_owns(state, team, tile, "construct") or tile.construction_team_id != -1:
 		return false
 	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][target_level - 1]
 	if not _can_afford(team, tile, cost, "subteam_upgrade"):
@@ -834,7 +837,7 @@ func _subteam_upgrade_facility(state: WorldState, team: TeamData, tile: HexTileD
 	if tile.outpost_level == 0:
 		if Probe.enabled: Probe.bump_pt("wall.reject_outpost_level0", _wday, team.team_id)   # 物理：沒有據點可擴建
 		return false
-	if not _faction_owns(state, team, tile):
+	if not _faction_owns(state, team, tile, "construct"):
 		if Probe.enabled: Probe.bump_pt("wall.reject_not_owner", _wday, team.team_id)        # 物理：不是自己的地
 		return false
 	if tile.construction_team_id != -1:

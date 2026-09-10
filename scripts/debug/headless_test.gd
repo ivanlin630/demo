@@ -7220,16 +7220,26 @@ func _test_is_resident_detection() -> void:
 	var r := TeamData.new(); r.team_id = 0; r.tile_pos = Vector2i(5,5)
 	r.faction_id = 10; r.tags = [TeamData.TAG_PRODUCE]
 	state.teams[0] = r
+	# ★★★登記錨 ④a：居民身分現在由【登記欄】答 ⇒ 手搭的 fixture 要先讓【真的那支機制】跑一次。
+	#   ★這裡呼叫的是 production 的 stub sweep（世界每 tick 跑的那一支），不是手動塞欄位
+	#   ⇒ ★★若改成 `r.work_outpost = ...` 手塞，這個測試就再也測不到 sweep 有沒有壞。
+	state.auto_register_stub_sweep()
 	var fai := FactionAISystem.new()
 	assert(fai._is_resident_team(state, r), "案例 1：同 faction PRODUCE 應為居民")
-	# Test 2: PRODUCE team on outpost, different faction → 非居民
+	# ★★★案例 2／3 的期望【被裁定改掉了】（systems 2026-09-10）：登記是【持久】的 ——
+	#   ⇒ 改 faction／走開都【不會】當場失去居民身分（退租／驅逐是 ④b 的動詞，本票沒有）。
+	#   ★而我不把斷言翻成一句「應為居民」就算了：那樣讀的人看不出【改了什麼】
+	#   ⇒ 兩邊都斷言：舊站位判定說 false ／ 登記制說 true ＝ 把差異寫成測試本身。
+	# Test 2: 同一支隊改 faction → 站位判定不再認它，登記仍在
 	r.faction_id = 20
-	assert(not fai._is_resident_team(state, r), "案例 2：異 faction 不算居民")
-	# Test 3: PRODUCE team not on outpost → 非居民
+	assert(not FactionAISystem.legacy_resident_by_position(state, r), "案例 2：舊站位判定應說『異 faction 不算居民』")
+	assert(fai._is_resident_team(state, r), "案例 2'：登記制下仍是居民（沒有驅逐動詞 ⇒ ④b 才會改變這一格）")
+	# Test 3: 走開 → 站位判定說不是，登記制說仍是（★這正是錨 vs 站位的唯一差別）
 	r.faction_id = 10
 	r.tile_pos = Vector2i(8, 8)
-	assert(not fai._is_resident_team(state, r), "案例 3：非 outpost 不算居民")
-	# Test 4: Non-PRODUCE team on outpost → 非居民
+	assert(not FactionAISystem.legacy_resident_by_position(state, r), "案例 3：舊站位判定應說『非 outpost 不算居民』")
+	assert(fai._is_resident_team(state, r), "案例 3'：登記制下走開仍是居民（★沒有這一格，錨等於站位）")
+	# Test 4: Non-PRODUCE team on outpost → 非居民（★這一格【沒有變】：登記制仍要求 PRODUCE）
 	r.tile_pos = Vector2i(5, 5)
 	r.tags = ["軍隊"]
 	assert(not fai._is_resident_team(state, r), "案例 4：非 PRODUCE 不算居民")
@@ -7424,6 +7434,7 @@ func _test_uprising_trigger() -> void:
 	l.values = { "求生欲": 0.9, "野心": 0.2, "慎重": 0.2, "義氣": 0.2 }
 	state.persons[100] = l; v.leader_id = 100
 	state.teams[0] = v
+	state.auto_register_stub_sweep()   # ★登記錨 ④a：起義判定讀「居民」⇒ fixture 要先跑真的 sweep
 	var fai := FactionAISystem.new()
 	fai._evaluate_uprising(state, v)
 	assert(v.current_task == TeamData.TASK_REVOLT, "應觸發起義，實際 task=%s" % v.current_task)
@@ -7758,6 +7769,7 @@ func _test_uprising_paths() -> void:
 	l.values = { "野心": 0.9, "慎重": 0.7, "義氣": 0.3, "求生欲": 0.2 }
 	state.persons[100] = l; v.leader_id = 100
 	state.teams[0] = v
+	state.auto_register_stub_sweep()   # ★登記錨 ④a：起義判定讀「居民」⇒ fixture 要先跑真的 sweep
 	var fai := FactionAISystem.new()
 	fai._evaluate_uprising(state, v)
 	assert(tile.outpost_owner == 0, "Path A 應 outpost = village，實際=%d" % tile.outpost_owner)
@@ -7780,6 +7792,7 @@ func _test_uprising_paths() -> void:
 	l2.values = { "求生欲": 0.9, "野心": 0.2, "慎重": 0.2, "義氣": 0.2 }
 	state2.persons[100] = l2; v2.leader_id = 100
 	state2.teams[0] = v2
+	state2.auto_register_stub_sweep()   # ★登記錨 ④a：同上（Path B 這支 fixture 用的是 state2/v2）
 	var fai2 := FactionAISystem.new()
 	fai2._evaluate_uprising(state2, v2)
 	assert(tile2.outpost_owner == 99, "Path B outpost owner 暫不變")
