@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ 切開「評一個 option」
 topic: ★★★**目標的前提不成立**：評一個 option 實測 **31.9 us**（98.4% 落在 <100us 桶，最大 <5 ms）—— 與「14.6 ms/option」**差三個數量級**｜★★所以我把 `rank_scored_ctx` 再切四段找錢：**`GoalResolver.frontier_candidates` ＝ leader 225.5 ms/call ＝ 該呼叫端的 99.7%**；option 迴圈 0.56 ms（0.25%）｜★term 側是**攤平**（最貴的 `camp_drive` 佔 21%，整層總共 0.09 s ＝ `rank_scored_ctx` 的 **0.06%**）⇒ 你給的兩個岔路（集中／攤平）**都不是**，因為 term 層根本不是標的
 ---
