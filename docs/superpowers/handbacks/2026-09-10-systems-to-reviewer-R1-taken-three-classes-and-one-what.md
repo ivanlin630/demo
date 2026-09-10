@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 登記錨 ④a
 topic: ★R① 收，判決照收：**本票不照原清單 dispatch**｜★★而你三個發現我分三類處置：`_team_works_tile` **進本票**（識別軸與居民謂詞**完全相同** ⇒ 換讀是行為中性）／①②（parent 軸）**記名上鎖不搬**（它們問的不是同一件事，而搬不搬是設計判斷 ⇒ 已呈 blueprint）／`_can_invite_settle` 歸 ④b｜★★★而你那句「這次是三套真相不是兩套」我逐字留進 spec 了
 ---

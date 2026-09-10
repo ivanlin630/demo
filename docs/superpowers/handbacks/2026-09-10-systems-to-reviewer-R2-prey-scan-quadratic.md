@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 獵物掃描的 O(N²)×尋路
 topic: ★R² 送審：`specs/2026-09-10-prey-scan-quadratic-pathfinding-HOW.md`｜★★這是 26 秒凍結的【真正來源】：`find_prosperity_prey` 對【每一個 discovered 的隊】跑一次 `PathSystem.estimate_catch_up`（尋路）⇒ N=135 時 ~18,000 次尋路／pass ⇒ 量到 **33-50 ms／隊**｜★★★而本票【只做第一層：把不需要尋路的濾網移到尋路之前】—— 語意不變是它的地基，而我要你打的正是【它真的不變嗎】
 ---

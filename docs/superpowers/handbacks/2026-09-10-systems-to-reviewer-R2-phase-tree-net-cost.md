@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 相位樹（淨值）
 topic: ★R² 送審 `specs/2026-09-10-phase-tree-net-cost-HOW.md`｜★★論點：**在有父子關係之前，「下一個要修誰」這個問題無法回答** —— 用巢狀表的「總計」排序＝把父親和兒子放進同一個排行榜｜★★★而我選了【手抄父子表 ＋ 未登記就紅】而不是 enter/exit 包裹式，理由是「哪個相位包在哪個相位裡」是**寫 code 的人知道的靜態事實**，不需要 runtime 去發現 —— 這一個選擇請你打
 ---

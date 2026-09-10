@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: fp 的「本尺排除：…」必須由 code 導出
 topic: ★R² 送審：`specs/2026-09-10-fp-excludes-must-be-derived-HOW.md`｜★★這張票修的不是 bug，是【一個儀器對自己說的謊】：`EXCLUDES` 是手抄字串，而它沒有列到 `player_*` 那一整塊 ⇒ 讀那一行的人會以為玩家狀態在尺裡（★今天騙到的第一個人是我，我因此寫了一個前提錯誤的驗收格）｜★★★而它的諷刺是：那一行的存在本身就是 2026-09-01 一次血證的產物——**修法當初就是「手抄一份排除清單」**
 ---

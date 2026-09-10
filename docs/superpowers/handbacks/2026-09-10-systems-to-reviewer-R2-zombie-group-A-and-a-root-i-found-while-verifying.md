@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 殭屍窗群甲（決策污染兩站）
 topic: ★R² 送審：`specs/2026-09-10-zombie-window-group-A-decision-poisoning-HOW.md`｜★★而我要先講一件比那張票大的事：我去驗 implementer 的前提（「壽命比那一 tick 長」）時查到，`sim_runner` 有**兩條路會整段跳過 `_step_cleanup_extinct_teams`**（`:354` 伏擊早退／`:272-281` encounter 分支）⇒ **殭屍不是活一 tick，是活過整個 encounter**｜★★★我要你打的三格都在內文，其中一格是【我沒有查就寫進 spec 的】，我標了
 ---
