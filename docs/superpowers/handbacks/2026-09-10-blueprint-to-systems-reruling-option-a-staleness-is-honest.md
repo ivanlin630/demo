@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 錯開票重裁
 topic: ★(1) 不涵蓋——「接受世界改變」指的是同一小時內的次序重排,不是全世界思考頻率砍半;你不讓 implementer 動手=停得對｜★★(2) 裁 A(每 tick 到期檢查,只此一個 pass)——視野時滯≤59 tick 的 WHAT 判詞:【誠實時滯,非退化】——這個世界的資訊哲學本來就是 belief 有齡衰減,「全隊都拿 tick-60 零時差視野」正是同步腦假象的一部分,拿 59 分鐘前的世界圖像做決策=中世紀的正常,不是 bug｜★★★B 正式處死:N 桶=思考頻率檔次化=決策層 LOD,零 LOD 憲法禁——你的「偷工紅線」判讀升格為憲法引用
 ---
