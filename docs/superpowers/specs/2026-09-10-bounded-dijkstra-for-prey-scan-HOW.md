@@ -96,3 +96,81 @@ cost_bound ＝ AI_ETA_LIMIT × max_relative_speed ÷ BASE_MOVE_TICKS
 ⇒ ★★★三次改寫的共同教訓：**我前兩次都沒有去讀那支函式的內部。**
    —— 而 R² 第二次替我讀了一層，第三次是我自己讀的。
 ```
+
+---
+
+## ⑥ ★★★R² 回件（2026-09-10）：**CLEAN，直接 dispatch** —— 而我那兩格「未驗」他都給了確定答案
+
+### (2) 上界【不用猜】：`estimate_catch_up` 用的速度函式是 `path_system` 自己那支簡化版
+
+```
+`path_system.gd:183-187`（★不是 movement_system 那支含坐騎/車輛/地形/超載的完整版）：
+    static func _team_speed_mult(team: TeamData) -> float:
+        var mult: float = 1.0
+        mult *= clampf(1.0 - team.fatigue, 0.1, 1.0)
+        # Hook 預留 speed_class（未實作）
+        return mult
+⇒ ★**只有疲勞懲罰** ⇒ 回傳值的數學上界 ＝ **1.0**（fatigue=0）。
+⇒ ★★而 `:256 relative_speed` 要嘛 ＝ self_speed（≤1.0）要嘛 ＝ self−target（只會更小）
+   ⇒ **全函式的 relative_speed 上界就是 1.0**，不是一個要另外查證的世界常數。
+⇒ ★★★所以 `cost_bound` 是【可證明的】，不是估的：
+     cost_bound = AI_ETA_LIMIT × MAX_SPEED_MULT ÷ BASE_MOVE_TICKS = 1200 × 1.0 ÷ 240 = 5.0
+```
+
+**R² 的要求（防未來 drift）＋★我補的第二個 drift 源**：
+
+```
+①★R²：**不要把 `1.0` 寫成裸數字** —— `_team_speed_mult` 檔頭自己標著
+  「Hook 預留 speed_class（未實作）」⇒ 將來接上坐騎/載具時上界就不再是 1.0，
+  ★★而 `cost_bound` 會【悄悄變太緊】——語意壞掉而**沒有任何報錯**。
+  ⇒ 做法：`const MAX_SPEED_MULT := 1.0` 放在 `_team_speed_mult` **旁邊**（兩處一起看得到），
+    `cost_bound` 讀這個常數。
+②★★★而我補一個 R² 沒點名的【同型 drift 源】：**`BASE_MOVE_TICKS` 也不是 240**
+  —— `movement_system.gd:5 const BASE_MOVE_TICKS := TimeScale.MOVE_TICKS_PER_HEX`
+  ⇒ ★它是【時間尺度】的函式（時間統一 wave 已經改過它一次：×5→1）。
+  ⇒ ★★所以 **`cost_bound` 絕不可以寫成字面 `5.0`**，必須在執行期由那三個具名量算出來。
+  ⇒ ★★★**同一個形狀有兩個來源，R² 點名了一個** —— 而只修一個的結果，
+    是下一次動 TimeScale 的人把語意改壞而閘全綠。
+```
+
+### (3) 「還有沒有別的維度」：★**code 自己的註解已經回答了**（我沒讀到那幾行）
+
+```
+`path_system.gd:26-33` 逐字寫著：
+  「terrain 只在 world gen / game_setup 寫，runtime 永不變 → cost 圖靜態
+   → 單源最短路算一次永續有效」／「若未來 runtime 改地形，須呼 clear_sssp()」
+⇒ ★這是設計時就確認過的不變量，不是本票要驗的東西。
+⇒ ★★R² 查實：`_dijkstra`/`catch_cost` 的唯一輸入是 `state.world.tiles` 的地形
+  （經 `TERRAIN_COST` 換算）⇒ **沒有第二個會變的維度**。
+⇒ ★★★而 `clear_sssp()`（:36）已經存在且已被接上（:50）
+  ⇒ key 多一維【不影響它】（整層清）。
+```
+
+★**而我自己讀 caller 圖時補到的一格（R² 沒提，它讓本票更便宜）**：
+
+```
+`catch_cost` **全庫只有一個 caller**：`estimate_catch_up:246`。
+⇒ ★所以實務上【只會存在一個 cost_limit 值】
+  ⇒ ★★`cost_limit` 進 key **不會造成記憶體翻倍**（不是每個 from 存兩份全圖）——
+    它是一張**便宜的保險**，防的是「將來有人用不同上界呼叫」那一天。
+⇒ ★★★而反過來也成立：**上界可以無條件套用**，不必做成 opt-in 參數的兩條路徑。
+```
+
+### (1) 命中率：★R² 同意「先量再改」，並給一個**支持「可能不是 0」**的線索
+
+```
+★我的推論（隊每 tick 都在動 ⇒ from key 常換 ⇒ 命中率≒0）只對【正在移動的隊】成立。
+★★而 `_sssp_cache` 的 key **只認位置、不認是哪支隊在問**（:58 `per_world.get(fk, {})`）
+  ⇒ 命中不只來自「同一隊回到原位」，也來自**別的隊剛好從同一格查過**
+    （例如多支隊在同一個 outpost 待命輪流決策 ⇒ 互相命中彼此的快取）。
+⇒ ★★★驗收①的量法補一刀（判準不變，只是【怎麼切】）：
+   **不要只報一個全域命中率** —— 拆成【移動中的隊】vs【駐守/待命的隊】兩組分別報，
+   否則一個混合平均數會把「我的假設在哪一半成立」蓋掉。
+```
+
+### 其餘
+
+```
+驗收②~⑥、③風險段、④不做的事：R² 無異議。
+blueprint 裁 (c) 先行、拒 (a) K-cap（排程器不得決定誰先活）：記錄在案，無異議。
+```
