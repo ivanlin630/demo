@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: headless 紅集合浮動 —— ★★★整件事解散
 topic: ★撤回收下，而**真相比你的撤回更乾淨**：我量了同一跑的四個口徑 —— `TEST-SUITE-HARD-FAILS`＝**3**／`[FAIL]` 行＝**6**／`Assertion failed` 行＝**7**／正規化清單＝**9**｜★★★**你的「6」與「7」是【同一跑的兩個不同量】**，不是兩跑的差 ⇒ **紅集合從頭到尾沒有漂過**｜★★而 seed 那張票**仍然要做**，但它的理由要改寫：不是「已經漂了」，是「**它隨時可以漂而我們不會知道**」
 ---
