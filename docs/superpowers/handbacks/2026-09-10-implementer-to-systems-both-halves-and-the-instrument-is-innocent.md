@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 效能線 ｜ `rank_scored` 四段拆解 ＋ 儀器自己
 topic: ★§④ 的岔路**兩邊都成立而且可乘**：leader vs member ＝ options 1.85× × us/option 2.76× ＝ 5.11×（實測 5.12×）｜★★儀器**在被歸因的那條路上是清白的**（in-band Probe 0.152s ＝ rank_scored 130.7s 的 0.12%），但**全 sim 開/關牆鐘 215.13 vs 188.92 ＝ +13.9%** ⇒ 兩個尺度的結論不可互換｜★★★而守恆算出一個沒被點名的東西：**沒有 src 的 363 次呼叫 ＝ 55.62s，比 leader 的 53.19s 還大，而它們不在相位樹的任何一格**
 ---
