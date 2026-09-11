@@ -235,12 +235,21 @@ static func calc_readiness(state: WorldState, team: TeamData) -> float:
 # de-patch 閘7：calc_attack_score 刪除——production/征服 arc 零 caller 孤兒（攻擊決策已溶進引擎
 # intent_fit/attack_drive，見 terms/ctx）。孤兒 score 公式退役。
 
-static func find_prosperity_prey(state: WorldState, team: TeamData, leader: PersonData) -> int:
-	var greed: float = float(leader.values.get("貪婪", 0.5))
-	var cruelty: float = float(leader.values.get("殘忍", 0.5))
-	var ambition: float = float(leader.values.get("野心", 0.5))
+# ★★★攻擊門降級（HOW spec 2026-09-10-attack-applicable-demote-to-feasibility §④）：
+#   把這支函式切成【可行性】與【偏好】兩半，而**只掃一次**（★兩次掃 ＝ 兩倍 `estimate_catch_up`，
+#   而那支是尋路；★★本函式本來就每次 gather 都跑，所以重用它是唯一不加成本的切法）。
+#   ★可行性那一半**零人格**：discovered／非己／非同派系／有 belief／**belief_pos 非 (-1,-1)**／
+#     reachable／養得起這趟（`TRIP_FOOD_FLOOR`，既有常數）。
+#   ★★`belief_pos` 那一條是 spec §④ 硬要求：**門與 `to_task` 必須用同一組條件**，
+#     否則門開了而 `to_task` 拿不到位置 ⇒ 回 `TASK_IDLE` ＝ 手不聽腦的教科書複製。
+#   ★★★偏好那一半（人格加權 argmax）**原樣保留**，只是改成在可行集合上取。
+static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -> Dictionary:
+	var feasible: Array = []      # [{id, eta_days}]（★零人格，供門與 fallback target 用）
 	var best_id: int = -1
 	var best_score: float = 0.0
+	var greed: float = float(leader.values.get("貪婪", 0.5)) if leader != null else 0.0
+	var cruelty: float = float(leader.values.get("殘忍", 0.5)) if leader != null else 0.0
+	var ambition: float = float(leader.values.get("野心", 0.5)) if leader != null else 0.0
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var prey: TeamData = state.teams.get(tid)
@@ -248,8 +257,17 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		if prey.faction_id != -1 and prey.faction_id == team.faction_id: continue
 		# G3-targeting：無情報 → 不評估（禁 god-view；不知道的打不了）
 		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
+		# ★★★spec §④ 硬要求：`belief_pos` 進【上游】守衛 ⇒ 門與 to_task 用同一組條件。
+		#   ★副作用（R² 先記）：下面那段「已知存在但位置不明 ⇒ border 0.3」對這條路
+		#   **從此不會執行** —— ★★不是壞掉，是被新守衛架空；原意對別的呼叫路徑仍適用，不要刪。
+		var prey_pos_gate: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
+		if prey_pos_gate == Vector2i(-1, -1):
+			if Probe.enabled: Probe.bump("attack.infeasible.no_belief_pos")
+			continue
 		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid, true)
-		if not catch_result.reachable: continue
+		if not catch_result.reachable:
+			if Probe.enabled: Probe.bump("attack.infeasible.unreachable")
+			continue
 		# 價值/弱點從 belief 估（偽裝低報 armed → 看似弱 → 誘殺載體）
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
 		var pop_est: float = float(bel.get("population_est", 0.0))
@@ -280,6 +298,14 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		var trip: float = clampf(
 			ResourceSystem.effective_food(state, team) / maxf(trip_need, 0.001),
 			TRIP_FOOD_FLOOR, 1.0)
+		# ★養得起這趟才算可行（沿用既有 TRIP_FOOD_FLOOR，不新增旋鈕）
+		if trip <= TRIP_FOOD_FLOOR:
+			if Probe.enabled: Probe.bump("attack.infeasible.cannot_afford_trip")
+			continue
+		feasible.append({"id": tid, "eta_days": eta_days})
+		if Probe.enabled: Probe.bump("attack.feasible.candidate")
+		if leader == null:
+			continue   # ★無領袖的隊拿不到人格分數 ⇒ 只進可行集合（spec 風險④：行為新增，要分開報）
 		# ③歸屬（belief claim 語意，可傳/可過時/可騙）：禁讀 prey.faction_id 真值——
 		# belief 錯 → 照打（捅馬蜂窩）/被嚇阻 = G3 戲劇，不防呆。
 		var own: float
@@ -312,7 +338,12 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		if score > best_score:
 			best_score = score
 			best_id = tid
-	return best_id
+	return {"feasible": feasible, "best_id": best_id}
+
+
+# ★舊介面保留（17 個既有呼叫點不動）：偏好那一半的 argmax。
+static func find_prosperity_prey(state: WorldState, team: TeamData, leader: PersonData) -> int:
+	return int(attack_scan(state, team, leader)["best_id"])
 
 # belief 財富估：tier2 有資源估 → sum/100；tier0/1 只有 resource_scale(0-3) → 粗估；皆無 → 0。TEST VALUE。
 static func _belief_richness(bel: Dictionary) -> float:
@@ -3415,6 +3446,23 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		if Probe.enabled and opt in ["迎戰", "求和"]: Probe.bump("threat.dispatch." + opt)   # ★「備戰」已下架
 		# 序6 probe 遷移：成員征服攻擊實派 + 徵收實派（舊 hand-cascade 探針已刪 → 引擎路重掛，供驗魂）。
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
+		# ★★★驗收③強弱矩陣（spec §⑤）：每一筆攻擊 fire 記 `self_armed / target_armed_est` ——
+		#   ★**只報分布不設門檻**（世界該長怎樣是 blueprint 的）；★★而 target 那一半走 **belief 估**
+		#   （偽裝低報 armed ⇒ 看似弱 ⇒ 誘殺，正是資訊網有意義的那條路）。
+		if Probe.enabled and opt == "攻擊":
+			var _atk_tid: int = int(td.get("combat_target", -1))
+			if _atk_tid != -1:
+				var _bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, _atk_tid)
+				var _ldr3: PersonData = state.persons.get(team.leader_id)
+				var _tgt_armed: float = BeliefSystem.estimate_armed(_bel,
+					float(_bel.get("population_est", 0.0)),
+					_ldr3.values if _ldr3 != null else {})
+				var _self_armed: float = float(NpcCombatSystem.new().calc_armed(state, team))
+				Probe.bump_sample("attack.armed_ratio", {"tick": state.world.current_tick,
+					"team": team.team_id, "target": _atk_tid,
+					"self_armed": snappedf(_self_armed, 0.01),
+					"target_armed_est": snappedf(_tgt_armed, 0.01),
+					"ratio": snappedf(_self_armed / maxf(_tgt_armed, 0.01), 0.01)}, 200)
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
 		# ★★★而【無勢力的隊也可能派徵收】—— 舊 tap 有 `faction_id != -1` 的前提，
 		#   ★所以「dispatch 數」少算了那一群；★★這一格把它補起來，並【與舊 tap 並排】不取代它
