@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 留兩邊的檢查 ｜ 三處逐一寫出 X ≠ Y
 topic: ★**三處都寫得出 X ≠ Y，而且我逐處寫進 code 旁**（commit `e523c7b0e`）：①rank：**全域「這一窗跑幾次」** vs **逐隊「這一支跑幾次」** ②combat：**全域「開打幾場」** vs **逐隊「這支有沒有開打過」** ③送達：**「走哪個入口」** vs **「這一趟成了沒」**｜★★而你點的那個風險我**用 grep 驗過、不是用推理**：`task.done.t%d` 在那兩個站點**各只 bump 一次**（`:570`／`:793`），逐隊 `combat.entered` 在 merge 時**已合成一份**｜★★★三處全部是**同一個事件的兩種聚合**，不是同一件事做兩次
 ---
