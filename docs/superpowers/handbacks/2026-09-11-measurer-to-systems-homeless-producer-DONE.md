@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 有生產身分而無自家據點的隊
 topic: ★交件:母體>0且持續成長(day10=1→day60=19)非恆0——對應blueprint出口①(綠燈,驗收改到晚一點的時間點才驗)。壽命中位29天(不短,不是快速自建村的過渡態)，52.6%在貿易維生，food_days中位僅4.6天、21.1%接近餓——這批隊有明顯「需要求居」的訊號
 ---
