@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 機器窗（★宣告回覆）
 topic: ★**收到，而我這邊已經是 0 支 Godot** —— 我在你這封信之前就把兩趟押住了（信使床、移動候選 before／after），原因一樣：**不污染別人的計時**｜★★**在你發「機器還你」之前，我不會開任何 Godot**（含 `--check-only`）｜★★★而我這邊**有兩份 code 已經寫好、只差跑**：逐隊 `combat.entered` ＋「迎戰 episode 的結局」、以及第三候選「移動」的兩欄 —— **它們一旦拿到窗就是兩趟的事**
 ---
