@@ -45,13 +45,19 @@ func _initialize() -> void:
 	var no_player := Vector2i(-1, -1)
 
 	# ★★★母體自己變小比那個 0 更值得問（systems 2026-09-11）：**無家的生產隊 8 → 4，是找到家了還是死了？**
-	#   ⇒ ★這兩個答案方向完全相反 ⇒ 把【窗首那一批】釘住，窗末逐支分桶。
-	#   ★★母體＝**窗首**就無家的 PRODUCE 隊（★後來才變無家的不在內，這是刻意的：要追同一批）。
+	#   ⇒ ★這兩個答案方向完全相反 ⇒ 釘住【曾經無家的生產隊】那一批，窗末逐支分桶。
+	#   ★★第一版用【窗首快照】⇒ 量到 **0 支** —— 因為**生產隊是長出來的**（窗首還沒有）
+	#     ⇒ ★★★那個 0 是【母體定義造成的】，不是世界的事實 ⇒ 改成**逐日累積首見**。
+	#   ★成本：每日一次（不是每 tick），母體只進不出。
 	var cohort: Dictionary = {}
-	for tid0 in st.teams:
-		var t0: TeamData = st.teams[tid0]
-		if t0.tags.has(TeamData.TAG_PRODUCE) and st.own_outpost_tile(t0.team_id) == null 				and t0.work_outpost == Vector2i(-1, -1):
-			cohort[tid0] = true
+	# ★★★systems 2026-09-11 §②③：戰鬥要三個數才說得出話，幀數要【分佈】不是總量。
+	#   ①戰鬥【開始】數（conq.combat_entered，production 既有）②平均長度（本床逐 tick 數在戰中的隊，
+	#     ÷2 ＝ 場次·tick，再除以開始數 ⇒ ★母體寫在畫面上）③滅團數（extinct.*，已有）
+	#   ★★而 `結束` 這一個數字分不出「開打變少／打不完／結束定義變了」三種世界。
+	#   ④每 tick 的 `rank_scored` 次數【分佈】：★總量只漲三成而尾部漲一倍 ⇒ 要看集中度。
+	var rank_per_tick: Array = []
+	var combat_team_ticks: int = 0
+	var _rank_prev: int = 0
 	var live: Dictionary = {}        # team_id → {task, target, start, start_fd, start_dist, arrived}
 	var forage_rows: Array = []      # ①逐筆
 	var ep_start: Dictionary = {}    # task → 長程 episode 起算數
@@ -61,6 +67,17 @@ func _initialize() -> void:
 
 	for tick in range(ticks):
 		runner.advance_tick(st, no_player)
+		var _rank_now: int = int(Probe.counts.get("engine.rank_scored.calls", 0))
+		rank_per_tick.append(_rank_now - _rank_prev)
+		_rank_prev = _rank_now
+		for tidk in st.teams:
+			if (st.teams[tidk] as TeamData).combat_target != -1:
+				combat_team_ticks += 1
+		if st.world.current_tick % WorldState.TICKS_PER_DAY == 0:
+			for tidc0 in st.teams:
+				var tc0: TeamData = st.teams[tidc0]
+				if tc0.tags.has(TeamData.TAG_PRODUCE) and tc0.work_outpost == Vector2i(-1, -1) 						and st.own_outpost_tile(tc0.team_id) == null:
+					cohort[tidc0] = true   # ★首見即入列（母體只進不出 ⇒ 窗末才問它們去了哪）
 		for tid in st.teams:
 			var t: TeamData = st.teams[tid]
 			var cur: String = t.current_task
@@ -190,10 +207,30 @@ func _initialize() -> void:
 		else:
 			c_still += 1                    # ★仍然無家
 	print("")
-	print("★⑥窗首無家生產隊 %d 支的去向：仍無家 %d｜登記寄居 %d｜自己有家 %d｜不再存在 %d" % [
+	print("★⑥【曾經無家】的生產隊 %d 支的去向（逐日累積首見）：仍無家 %d｜登記寄居 %d｜自己有家 %d｜不再存在 %d" % [
 		cohort.size(), c_still, c_lodge, c_own, c_gone])
 	print("   ★★『不再無家』與『不再存在』方向完全相反 —— 只看窗末剩幾支分不出來，所以這一格逐支分桶")
 	print("   ★誠實限：『不再存在』含滅團與被併兩種，這一輪**沒有再分**")
+	# ── ⑦戰鬥三個數 ＋ ⑧每 tick rank 分佈 ──
+	var _c_start: int = int(Probe.counts.get("conq.combat_entered", 0))
+	var _c_end: int = int(Probe.counts.get("combat.ended_n", 0))
+	var _c_extinct: int = int(Probe.counts.get("extinct.starve", 0)) + int(Probe.counts.get("extinct.combat", 0)) 		+ int(Probe.counts.get("extinct.other", 0))
+	var _len_txt: String = "不可判(開始數 0)"
+	if _c_start > 0:
+		_len_txt = "%.1f tick（母體＝開始 %d 場；長度＝Σ逐 tick 在戰隊數 ÷2 ÷ 開始數）" % [
+			float(combat_team_ticks) / 2.0 / float(_c_start), _c_start]
+	print("")
+	print("★⑦戰鬥三個數：開始 %d 場｜結束 %d 場｜平均長度 %s｜滅團 %d" % [
+		_c_start, _c_end, _len_txt, _c_extinct])
+	print("   ★『結束』一個數字分不出三種世界（開打變少／打不完／結束定義變了）⇒ 三個數一起看")
+	var rp: Array = rank_per_tick.duplicate()
+	rp.sort()
+	var _n: int = rp.size()
+	if _n > 0:
+		print("★⑧每 tick `rank_scored` 次數分佈（母體＝%d tick）：p50=%d p95=%d max=%d｜總量 %d" % [
+			_n, int(rp[_n / 2]), int(rp[int(float(_n) * 0.95)]), int(rp[_n - 1]),
+			int(Probe.counts.get("engine.rank_scored.calls", 0))])
+		print("   ★★尾部（p95／max）與總量分開看 —— ★★★總量漲三成而尾部漲一倍 ＝【集中度】變了，不是每次變貴")
 	print("★>2 秒幀數 = %d / %d" % [SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
