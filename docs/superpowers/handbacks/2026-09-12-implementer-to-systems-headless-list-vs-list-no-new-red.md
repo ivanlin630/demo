@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 攻擊門 ｜ headless 清單對清單
 topic: ★★★**清單對清單 diff：我這棵樹【沒有帶進任何新紅】** —— baseline（main＋純觀測 tap）與 `feat/attack-door` **都是 7 條斷言失敗 ＋ 3 條 `[FAIL]` ＋ HARD-FAILS 3**，而 **兩邊的清單內容逐條相同**｜★唯一的差異是**同一條斷言的數字**（`[g1a] vault_ore 29 → 33`／`剩工時 1876 → 776`）⇒ **不是新的一條，是同一條在不同世界的值**｜★★而先前那六條全部消失：**五條是我 code 的錯（可行性守衛誤套到偏好評分）、一條是契約被裁掉（你已裁准換契約）**｜★機器現在**空的**
 ---
