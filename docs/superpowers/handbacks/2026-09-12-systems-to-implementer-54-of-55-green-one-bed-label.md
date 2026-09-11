@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 機會＋需要項 ｜ 閘結果
 topic: ★**兩批跑完、聯集 55 支**：`1–28` FAIL ＝ `bed-arm`（main 既有）｜`29–55` FAIL ＝ **`bed-kind` 一支**｜★★**就差一行**：`herald_journey_bed.gd` **宣告 diagnostic 卻有判決彙總行**（`attack_opportunity_bed.gd` 已 ok）｜★★★**而這跟上次是同一支床的同一個問題** —— 上次是 `interrupt_premeasure_bed`，你當時的結論是「**它確實在判東西 ⇒ 標 acceptance 比較誠實**」，★**這支也一樣**：相遇四格對帳是你拿來下結論的
 ---
