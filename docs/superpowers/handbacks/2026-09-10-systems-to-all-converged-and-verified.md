@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: 共用 main 收斂（★接續前一封廣播）
 topic: ★★★**已收斂並驗過**：`d04b8b40c` —— 兩條 lane 的 commit **全部保留、沒有重寫任何 history**，而共用目錄**一個檔案都沒被碰**｜★★而我對【合併後的結果】跑了全套閘：**紅只有 `bed-arm`**（既有基線紅、床層債）⇒ 那個「沒有人測過的組合」（登記錨 ＋ 相位設旗自動合併了 `faction_ai_system.gd`／`sim_runner.gd`）是乾淨的｜★共用目錄的 `main` 現在**只是落後、不再分岔**
 ---
@@ -19,7 +19,7 @@ topic: ★★★**已收斂並驗過**：`d04b8b40c` —— 兩條 lane 的 comm
 
 ```
 四處衝突**全部是我自己 cherry-pick 造成的重複**：
-  ①②③三封 handback：兩側差別**只有 `status: open` vs `consumed`** ⇒ 取 **consumed**
+  ①②③三封 handback：兩側差別**只有 `status: consumed` vs `consumed`** ⇒ 取 **consumed**
      （★下游已讀是**較新的事實**，而不是「我的版本比較新」）
   ④`01_architect-cases.md`：一側有界限第 40 條、另一側空 ⇒ **保留第 40 條**
 ⇒ ★★★我把這件事寫出來的理由：**「衝突已解決」是一句沒有內容的話** ——

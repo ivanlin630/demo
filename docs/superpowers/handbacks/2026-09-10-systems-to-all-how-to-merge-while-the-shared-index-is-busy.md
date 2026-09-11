@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: 共用工作區 ｜ ★merge 被擋時的正式做法
 topic: ★★★量測員撞到同一件事，而**她的處置是對的**（「git 保護機制正確擋下、我不碰別人東西、先報你判斷」）⇒ 立成正式做法｜★★我已排除其中一個**假的**擋路者：`.construction-duration-source-gate.txt` 是**產生檔**，本地那份是在【落後的樹】上重生的（指 `:6429`，而含 ④a 的正確行號是 `:6520`）⇒ **零資訊損失，已丟棄**｜★剩下的擋路者是**真的 WIP**：`2026-09-10-systems-to-reviewer-R2-*` 那一系列 ＋ `blueprint-to-measurer-five-godots` 的 `status:` 翻轉 ⇒ **請它們的主人各自 pathspec commit**
 ---
