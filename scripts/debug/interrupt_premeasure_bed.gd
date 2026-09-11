@@ -25,8 +25,13 @@ const LONG_TILES: int = 3
 #      都掛在 encounter，而目標隊會移動 ⇒ move_target 是 belief 位，可能過期）
 #   ③【到座標型】其餘（含★求居：目標是村的格子，抵達才算）：成功＝ tile_pos == move_target
 # ★而每一列都要印出【它用的是哪一把尺】—— 否則下一個人會把三種尺的數字放在一起比。
-const EXCLUDED_TASKS: Array = ["紮營"]
-const ENCOUNTER_TASKS: Array = ["信使", "外交", "徵收", "投靠", "掠奪", "迎戰", "攻擊"]
+# ★★★blueprint 裁（2026-09-11）：**成功 ＝ 該任務自己的完成定義，禁一把全域尺**。
+#   已裁定的四個，成功由 production 端的完成點自己記（`task.done.t<隊>.<task>`）：
+#     貿易＝成交（interaction_system 兩個 fire 點都掛）／信使＝送達被讀取（_deliver_order／_deliver_envoy_proposal）
+#     求居＝見到領主（decision_context 領主認出上門者那一刻，★記在求居者身上）／紮營＝立營成立（establish_crude_camp）
+#   ★其餘任務【尺未定】⇒ 照樣列出來（用到場當參考值），但**不進基準** ——
+#   ★★因為把一把不對的尺加總進基準，等於把污染乘上去（23.3% 那個基線就是這樣壞掉的）。
+const RULED_TASKS: Array = ["貿易", "信使", "求居", "紮營"]
 
 func _initialize() -> void:
 	var ticks: int = int(OS.get_environment("IP_TICKS")) if OS.has_environment("IP_TICKS") else 43200
@@ -56,18 +61,13 @@ func _initialize() -> void:
 				if not prev.is_empty():
 					_close(prev, st, t, ep_start, ep_arrive, ep_len, forage_rows, false)
 				live[tid] = {"task": cur, "target": t.move_target, "start": st.world.current_tick,
+					"done0": int(Probe.counts.get("task.done.t%d.%s" % [tid, cur], 0)),
 					"start_fd": _food_days(st, t), "team": tid,
 					"start_dist": FactionAISystem._hex_dist(t.tile_pos, t.move_target) if t.move_target != Vector2i(-1, -1) else -1,
 					"arrived": false}
 			else:
-				if cur in ENCOUNTER_TASKS:
-					# ★遇到人型：成功＝與目標隊同格（目標會移動 ⇒ 不能用座標）
-					var _tgt_id: int = t.order_target_id if t.order_target_id != -1 else t.combat_target
-					var _tgt: TeamData = st.teams.get(_tgt_id)
-					if _tgt != null and _tgt.tile_pos == t.tile_pos:
-						live[tid]["arrived"] = true
-				elif t.move_target != Vector2i(-1, -1) and t.tile_pos == t.move_target:
-					live[tid]["arrived"] = true
+				if t.move_target != Vector2i(-1, -1) and t.tile_pos == t.move_target:
+					live[tid]["arrived"] = true   # ★參考值（尺未定的任務才用它）
 	# ★窗末仍在進行中的 episode 自成一類（★它不是失敗，是窗太短）
 	for tid2 in live:
 		var t2: TeamData = st.teams.get(tid2)
@@ -109,7 +109,10 @@ func _initialize() -> void:
 	keys.sort()
 	var base_start: int = 0
 	var base_arr: int = 0
-	print("   ★每一列的【尺】：遇＝與目標隊同格相遇／到＝抵達 move_target（紮營已退出母體：它的成功在腳下那格）")
+	print("   ★母體仍是【長程】（起算時目標距離 ≥3 格）⇒ ★★紮營多半沒有 move_target ⇒ 它的列會是 0/不可判，")
+	print("   　　那是【母體造成的】不是世界的事實（它的成功在腳下那格，不在遠處）")
+	print("   ★每一列的【尺】：完＝該任務自己的完成定義（貿易成交／信使送達／求居見到領主／紮營立營）")
+	print("   　　　　　　　　　考＝【尺未定】，用到場當參考值 ⇒ ★★不進基準")
 	print("   %-8s %4s %8s %8s %10s %10s %12s" % ["task", "尺", "起算", "成功", "成功率", "窗末未完", "中位長(天)"])
 	for k in keys:
 		var s0: int = int(ep_start[k])
@@ -118,15 +121,15 @@ func _initialize() -> void:
 		var rate: String = "不可判(母體0)" if s0 == 0 else ("%.1f%%" % (100.0 * float(a0) / float(s0)))
 		var avgd: String = "-" if s0 == 0 else ("%.2f" % (float(int(ep_len.get(k, 0))) / float(s0) / float(WorldState.TICKS_PER_DAY)))
 		print("   %-8s %4s %8d %8d %10s %10d %12s" % [String(k),
-			"遇" if String(k) in ENCOUNTER_TASKS else "到", s0, a0, rate, c0, avgd])
-		if String(k) != TeamData.TASK_SEEK_HOME:
-			base_start += s0
+			"完" if String(k) in RULED_TASKS else "考", s0, a0, rate, c0, avgd])
+		if String(k) != TeamData.TASK_SEEK_HOME and String(k) in RULED_TASKS:
+			base_start += s0   # ★基準只由【尺已裁定】的任務組成（求居是被評的對象，不進基準）
 			base_arr += a0
 	print("")
 	if base_start == 0:
 		print("   ★★★基準【不可判】：其他長程任務的 episode 母體 = 0（★不是「基準是 0%%」）")
 	else:
-		print("   ★★★基準（★不含求居）：到場 %d / 起算 %d = **%.1f%%**" % [
+		print("   ★★★基準（★只含尺已裁定的任務、不含求居）：成功 %d / 起算 %d = **%.1f%%**" % [
 			base_arr, base_start, 100.0 * float(base_arr) / float(base_start)])
 		var sk_s: int = int(ep_start.get(TeamData.TASK_SEEK_HOME, 0))
 		var sk_a: int = int(ep_arrive.get(TeamData.TASK_SEEK_HOME, 0))
@@ -181,14 +184,15 @@ func _close(ep: Dictionary, st: WorldState, t: TeamData, ep_start: Dictionary, e
 		ep_len: Dictionary, forage_rows: Array, cut: bool) -> void:
 	var k: String = String(ep["task"])
 	var length: int = st.world.current_tick - int(ep["start"])
-	if k in EXCLUDED_TASKS:
-		return   # ★它的成功不在座標上 ⇒ 退出母體（★★留在表上＝用錯的尺量出一個真的 0）
 	if int(ep["start_dist"]) >= LONG_TILES:
 		ep_start[k] = int(ep_start.get(k, 0)) + 1
 		ep_len[k] = int(ep_len.get(k, 0)) + length
-		var _hit: bool = bool(ep["arrived"])
-		if not _hit and not (k in ENCOUNTER_TASKS):
-			_hit = t.tile_pos == Vector2i(ep["target"])
+		var _hit: bool = false
+		if k in RULED_TASKS:
+			# ★用它自己的完成定義：episode 期間那顆完成計數有沒有前進
+			_hit = int(Probe.counts.get("task.done.t%d.%s" % [int(ep["team"]), k], 0)) > int(ep["done0"])
+		else:
+			_hit = bool(ep["arrived"]) or t.tile_pos == Vector2i(ep["target"])
 		if _hit:
 			ep_arrive[k] = int(ep_arrive.get(k, 0)) + 1
 	if k == TeamData.TASK_FORAGE:

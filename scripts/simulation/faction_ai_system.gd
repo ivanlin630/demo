@@ -6445,6 +6445,8 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 		return false
 	if tile.terrain == "mountain":
 		return false
+	# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：紮營＝立營成立（腳下那格）。
+	if Probe.enabled: Probe.bump("task.done.t%d.%s" % [team.team_id, TeamData.TASK_CAMP])
 	tile.camp_level = 1
 	if Probe.enabled:
 		Probe.bump("camp.built")   # ★gate3：紮營次數（要與 L0→L1 晉級率、L0 廢棄率一起看）

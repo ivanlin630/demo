@@ -554,6 +554,8 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 # ②a 信使送達：envoy 遇 target → 委派 belief resolver（同 judge，與同格偶遇同源）。
 # 冗餘去重：母隊 pending_proposal 為權威，proposal_id 首達生效、後到 no-op。送達後信使歸隊。
 func _deliver_envoy_proposal(state: WorldState, envoy_id: int, target_id: int) -> void:
+	# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：信使＝送達（被目標讀取）。
+	if Probe.enabled: Probe.bump("task.done.t%d.%s" % [envoy_id, TeamData.TASK_HERALD])
 	var envoy: TeamData = state.teams[envoy_id]
 	var target: TeamData = state.teams[target_id]
 	var mother: TeamData = state.teams.get(envoy.parent_team_id)
@@ -773,6 +775,7 @@ func _levy_settle_tap(state: WorldState, collector: TeamData, payer: TeamData,
 	Probe.note_levy(collector.team_id, payer.team_id, state.world.current_tick)
 
 func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> void:
+	if Probe.enabled: Probe.bump("task.done.t%d.%s" % [messenger_id, TeamData.TASK_HERALD])
 	var messenger: TeamData = state.teams[messenger_id]
 	var target: TeamData    = state.teams[target_id]
 	var order: String = messenger.order_task if messenger.order_task != "" else TeamData.TASK_IDLE
@@ -854,6 +857,11 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 	var _dealt: bool = absf(float(a.resources.get("coin", 0)) - a_coin_before) > 0.001
 	if _dealt:
 		print("[Market] Team%d <-> Team%d 巧遇成交" % [a.team_id, b.team_id])
+		# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：貿易＝成交。
+		#   ★兩個成交 fire 點都要掛（巧遇 ＋ 市集到場），否則母體漏一半。
+		if Probe.enabled:
+			Probe.bump("task.done.t%d.%s" % [a.team_id, TeamData.TASK_TRADE])
+			Probe.bump("task.done.t%d.%s" % [b.team_id, TeamData.TASK_TRADE])
 		# 漏斗站6探針：成交主體分流（R²#7：ARCHETYPE_TRADE 分流，TAG_MERCHANT 全0）
 		Probe.bump("trade.deal")
 		if a.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE or b.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
@@ -940,6 +948,8 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 		dealt = true
 	if dealt:
 		print("[Market@%s] Team%d ↔ outpost owner Team%d 成交" % [str(tile.tile_pos), visitor.team_id, owner_id])
+		if Probe.enabled:
+			Probe.bump("task.done.t%d.%s" % [visitor.team_id, TeamData.TASK_TRADE])
 		Probe.bump("trade.deal")
 		Probe.bump("trade.deal_market")
 		if visitor.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
