@@ -95,6 +95,7 @@ func _initialize() -> void:
 					_close(prev, st, t, ep_start, ep_arrive, ep_len, forage_rows, false)
 				live[tid] = {"task": cur, "target": t.move_target, "start": st.world.current_tick,
 					"done0": int(Probe.counts.get("task.done.t%d.%s" % [tid, cur], 0)),
+					"fight0": int(Probe.counts.get("combat.entered.t%d" % tid, 0)),
 					"start_fd": _food_days(st, t), "team": tid,
 					"start_dist": FactionAISystem._hex_dist(t.tile_pos, t.move_target) if t.move_target != Vector2i(-1, -1) else -1,
 					"arrived": false}
@@ -249,6 +250,9 @@ func _initialize() -> void:
 			_mn, int(mv[_mn / 2]), int(mv[int(float(_mn) * 0.95)]), int(mv[_mn - 1]), _mvsum])
 		print("   ★尋路快取：hit %d／miss %d（★★miss 才是真的算，hit 只是查表）" % [
 			int(Probe.counts.get("path.cache_hit", 0)), int(Probe.counts.get("path.cache_miss", 0))])
+	print("★⑩迎戰 episode 的結局：真的開打 %d 段｜沒有開打 %d 段（母體＝所有迎戰 episode，含短程）" % [
+		int(Probe.counts.get("defend.ep.fought", 0)), int(Probe.counts.get("defend.ep.no_fight", 0))])
+	print("   ★『迎戰變多而開打變少』只有這一格分得開（嚇阻／改求和 vs 根本沒接上）")
 	print("★>2 秒幀數 = %d / %d" % [SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
@@ -275,6 +279,13 @@ func _close(ep: Dictionary, st: WorldState, t: TeamData, ep_start: Dictionary, e
 			_hit = bool(ep["arrived"]) or t.tile_pos == Vector2i(ep["target"])
 		if _hit:
 			ep_arrive[k] = int(ep_arrive.get(k, 0)) + 1
+	if k == TeamData.TASK_DEFEND:
+		# ★迎戰 episode 的結局：這一段裡【有沒有真的開打】（逐隊 combat.entered 前進）
+		#   ★★「迎戰變多而開打變少」只有這一格分得開：是嚇阻／改求和，還是根本沒接上。
+		if int(Probe.counts.get("combat.entered.t%d" % int(ep["team"]), 0)) > int(ep["fight0"]):
+			Probe.bump("defend.ep.fought")
+		else:
+			Probe.bump("defend.ep.no_fight")
 	if k == TeamData.TASK_FORAGE:
 		# ★記憶體：完整結束的只留【兩個數】，逐筆只留前 20 筆
 		#   （★★上一趨被 OS 當低記憶體殺掉，而那會讓整個窗白跑）
