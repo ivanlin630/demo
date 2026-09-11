@@ -94,7 +94,11 @@ if printf '%s' "$_cmd" | grep -qE 'git[[:space:]]+(commit|add|merge|rebase|mv)';
         ★沒有這一格，刪鎖＝把別人正在寫的 index 砍掉
      ② 檔案大小 = 0 bytes（有內容的 lock 要另外處理，★不可刪）
      ③ 已經數分鐘沒有變動
-   ⇒ 三驗全過 ⇒ rm -f .git/index.lock
+   ★★★④【刪之前先取證】：cat .git/COMMIT_EDITMSG —— 那裡躺著【那次夭折的 commit 訊息全文】，
+        而我們的訊息自帶角色 ⇒ ★它會直接說出兇手是誰。
+        ★★它會被【下一次成功的 commit】覆寫 ⇒ 先讀、抄進你的收屍信、再刪
+        （血證 2026-09-11：systems 13:17 遇鎖、13:20 自己 commit ⇒ 證據當場沒了）。
+   ⇒ 四步做完 ⇒ rm -f .git/index.lock
    ★★★而「我做不到」有兩種：【權限不足】與【這個 session 的工具受限】——★兩者長得一樣。
      ⇒ 別替別人宣告做不到；★誰能做用【試】的，不要用【猜】的（血證 2026-09-07：
        systems 說「沒有權限」，implementer 同機同帳號一試就刪掉了）。"
