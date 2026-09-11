@@ -13,8 +13,8 @@ if ! git rev-parse --verify -q "$BR" >/dev/null; then
   echo "[TREE-DIV] 跳過：branch $BR 不存在（★這不是綠，是【沒量】）"
   echo "[TREE-DIV] PASS"; exit 0
 fi
-STAT=$(git diff HEAD "$BR" --shortstat -- scripts/simulation scripts/data 2>/dev/null)
-NF=$(git diff HEAD "$BR" --name-only -- scripts/simulation scripts/data 2>/dev/null | grep -c . || true)
+STAT=$(git --no-optional-locks diff HEAD "$BR" --shortstat -- scripts/simulation scripts/data 2>/dev/null)
+NF=$(git --no-optional-locks diff HEAD "$BR" --name-only -- scripts/simulation scripts/data 2>/dev/null | grep -c . || true)
 if [ "$NF" = "0" ]; then
   echo "[TREE-DIV] ✓ production 樹差 ＝ 0（main 與 $BR 一致）"
 else
@@ -22,7 +22,7 @@ else
   echo "   ⇒ ★這【不一定是問題】：branch 上的 WIP 也長這樣"
   echo "   ⇒ ★★問題在【沒有人知道哪些是 WIP、哪些是「帳上記 landed 而樹上沒有」】"
   echo "   ⇒ ★★★處置＝樹對帳專段（逐檔三分），不是在別的刀裡順手撿"
-  git diff HEAD "$BR" --name-only -- scripts/simulation scripts/data 2>/dev/null | sed 's/^/   ⚠ /' | head -25
+  git --no-optional-locks diff HEAD "$BR" --name-only -- scripts/simulation scripts/data 2>/dev/null | sed 's/^/   ⚠ /' | head -25
 fi
 echo "[TREE-DIV] ★誠實限①：只比 scripts/simulation 與 scripts/data —— docs／debug 床的差【不在母體】"
 echo "[TREE-DIV] ★誠實限②：只比【一個】branch（$BR）；別的 branch 有沒有東西，本閘看不見"

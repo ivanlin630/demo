@@ -24,9 +24,9 @@ echo "[MERGE-GATES] ★判決同時寫入 $MG_LOG（外層 shell 若被殺，結
 #   ⇒ ★★沒有 provenance 的「35/35 全綠」【不能】被引用成「main 是綠的」。
 #   ★★★不拒絕執行（改自己的 slice 時本來就該髒）——改成【標明適用範圍】。
 _mg_head=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
-_mg_reg=$(git status --porcelain -- "$REG" 2>/dev/null | head -c1)
-_mg_run=$(git status --porcelain -- .claude/hooks 2>/dev/null | head -c1)
-_mg_code=$(git status --porcelain -- scripts tools 2>/dev/null | grep -v '^??' | wc -l | tr -d ' ')
+_mg_reg=$(git --no-optional-locks status --porcelain -- "$REG" 2>/dev/null | head -c1)
+_mg_run=$(git --no-optional-locks status --porcelain -- .claude/hooks 2>/dev/null | head -c1)
+_mg_code=$(git --no-optional-locks status --porcelain -- scripts tools 2>/dev/null | grep -v '^??' | wc -l | tr -d ' ')
 echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code"
 if [ -n "$_mg_reg$_mg_run" ]; then
   echo "[MERGE-GATES] ★★本次判決【只適用於你的工作區】——註冊表或 runner 有未 commit 的修改"
@@ -146,7 +146,7 @@ echo "[MERGE-GATES] 註冊表 $N 支｜總時 $((SECONDS-TOTAL0))s"
 #   一輪要跑十分鐘，期間別人（或我自己）很可能又 commit 了
 #   ⇒ 用結束時的 HEAD 會把【根本沒被跑過的 code】記成已經量過。
 # ★只有【在 main 上、且工作區乾淨】的那一輪才有資格更新基線（否則記的是某個人的工作區）
-if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ]; then
+if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git --no-optional-locks status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ]; then
   printf '%s	%s	%s
 ' "$_mg_head" "${#FAILED[@]}" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$MG_BASE"
   echo "[MERGE-GATES] ★已更新 main 基線紅數 ＝ ${#FAILED[@]}"

@@ -107,7 +107,7 @@ else
   #   而【閘在 commit 之前不會鎮】就是【閘不會鎮】。⇒ 母體 = merge-base 到【工作樹】,
   #   ★再加【未追蹤檔】―― 新床天生是 untracked,而那正是本閘最要擋的那一類。
   _mb="$(git merge-base origin/main HEAD 2>/dev/null || echo HEAD)"
-  FILES="$( { git diff --name-only --diff-filter=AM "$_mb" -- 'scripts/debug/*.gd' 2>/dev/null
+  FILES="$( { git --no-optional-locks diff --name-only --diff-filter=AM "$_mb" -- 'scripts/debug/*.gd' 2>/dev/null
               git ls-files --others --exclude-standard -- 'scripts/debug/*.gd' 2>/dev/null
             } | sort -u )"
 fi
