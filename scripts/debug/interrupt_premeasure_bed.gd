@@ -63,38 +63,28 @@ func _initialize() -> void:
 
 	# ── ① 覓食 episode：起訖 food_days ──
 	print("")
-	print("★①覓食 episode（母體＝所有覓食 episode，★含被窗切掉的，最後一欄標明）")
-	print("   母體 = %d 段" % forage_rows.size())
-	if forage_rows.is_empty():
-		print("   ★★母體 0 ⇒ 【不可判】——★★★而「沒有人覓食」與「覓食沒效果」是兩個完全不同的結論")
+	print("★①覓食 episode（母體＝所有覓食 episode，★含被窗切掉的）")
+	print("   母體 = %d 段（其中被窗切掉 %d 段）" % [forage_n, forage_cut_n])
+	if forage_deltas.is_empty():
+		print("   ★★完整結束的 episode = 0 ⇒ 【不可判】（★★★「沒人覓食」與「覓食沒效果」是兩個結論）")
 	else:
-		var deltas: Array = []
-		var lens: Array = []
+		var ds: Array = forage_deltas.duplicate(); ds.sort()
+		var ls: Array = forage_lens.duplicate(); ls.sort()
 		var up: int = 0
-		var closed: int = 0
-		for r in forage_rows:
-			if bool(r["cut"]): continue
-			closed += 1
-			var d: float = float(r["end_fd"]) - float(r["start_fd"])
-			deltas.append(d); lens.append(int(r["len"]))
-			if d > 0.5: up += 1
-		if closed == 0:
-			print("   ★★完整結束的 episode = 0（全被窗切掉）⇒ 【不可判】")
-		else:
-			deltas.sort(); lens.sort()
-			print("   完整結束 %d 段（其餘 %d 段被窗切掉）" % [closed, forage_rows.size() - closed])
-			print("   Δfood_days：min=%.2f 中位=%.2f max=%.2f ｜ ★上升 >0.5 天的段數 = %d / %d (%.1f%%)" % [
-				deltas[0], deltas[deltas.size() / 2], deltas[deltas.size() - 1],
-				up, closed, 100.0 * float(up) / float(closed)])
-			print("   episode 長度（tick）：min=%d 中位=%d max=%d ｜ 中位 = %.2f 遊戲天" % [
-				int(lens[0]), int(lens[lens.size() / 2]), int(lens[lens.size() - 1]),
-				float(lens[lens.size() / 2]) / float(WorldState.TICKS_PER_DAY)])
-		print("   ★逐筆前 20：")
-		for r2 in forage_rows.slice(0, 20):
-			print("     team=%d 起 tick=%d 訖 tick=%d 長=%d tick food_days %.2f → %.2f (Δ%+.2f)%s" % [
-				int(r2["team"]), int(r2["start"]), int(r2["end"]), int(r2["len"]),
-				float(r2["start_fd"]), float(r2["end_fd"]),
-				float(r2["end_fd"]) - float(r2["start_fd"]), "　★被窗切掉" if bool(r2["cut"]) else ""])
+		for d in ds:
+			if float(d) > 0.5: up += 1
+		print("   完整結束 %d 段｜Δfood_days：min=%.2f 中位=%.2f max=%.2f ｜ ★上升 >0.5 天 = %d (%.1f%%)" % [
+			ds.size(), float(ds[0]), float(ds[ds.size() / 2]), float(ds[ds.size() - 1]),
+			up, 100.0 * float(up) / float(ds.size())])
+		print("   episode 長度（tick）：min=%d 中位=%d max=%d ｜ 中位 = %.2f 遊戲天" % [
+			int(ls[0]), int(ls[ls.size() / 2]), int(ls[ls.size() - 1]),
+			float(int(ls[ls.size() / 2])) / float(WorldState.TICKS_PER_DAY)])
+	print("   ★逐筆前 %d 筆（★★前 N 筆、不是隨機樣本）：" % forage_rows.size())
+	for r2 in forage_rows:
+		print("     team=%d 起 tick=%d 訖 tick=%d 長=%d tick food_days %.2f → %.2f (Δ%+.2f)%s" % [
+			int(r2["team"]), int(r2["start"]), int(r2["end"]), int(r2["len"]),
+			float(r2["start_fd"]), float(r2["end_fd"]),
+			float(r2["end_fd"]) - float(r2["start_fd"]), "　★被窗切掉" if bool(r2["cut"]) else ""])
 
 	# ── ② 長程任務到場率（基準） ──
 	print("")
@@ -127,11 +117,33 @@ func _initialize() -> void:
 		else:
 			print("   ★求居：到場 %d / 起算 %d = %.1f%%（★★門檻 ＝ 基準，不是拍出來的 30%%）" % [
 				sk_a, sk_s, 100.0 * float(sk_a) / float(sk_s)])
+	# ── ③ 驗收欄（這一刀的副作用守衛）：★餓死率不得上升、★★無登記隊數不得歸零 ──
+	#   ★兩個數字都是【跟同窗對照】用的：本片只負責把它們印出來，
+	#   ★★而【上升沒上升】只有兩趨相減才答得出來。
+	var _starve_team: int = int(Probe.counts.get("extinct.starve", 0))
+	var _starve_person: int = int(Probe.counts.get("death.starve_named_hunger", 0))
+	var _homeless: int = 0
+	var _registered: int = 0
+	for tid3 in st.teams:
+		var t3: TeamData = st.teams[tid3]
+		if st.own_outpost_tile(t3.team_id) != null: continue
+		if t3.work_outpost == Vector2i(-1, -1): _homeless += 1
+		else: _registered += 1
+	print("")
+	print("★③副作用守衛：隊滅絕於餓 %d｜有名角色餓死 %d｜窗末無自家據點的隊：未登記 %d ・已登記寄居 %d" % [
+		_starve_team, _starve_person, _homeless, _registered])
+	print("   ★未登記歸零＝消滅遊商階層（blueprint 明文禁）⇒ 這一欄应該保持非 0"
+		+ ("　★★本窗＝0，要當成紅看" if _homeless == 0 else ""))
 	print("★>2 秒幀數 = %d / %d" % [SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
 	print("[TEST-SUITE-COMPLETE]")
 	quit(0)
+
+var forage_n: int = 0
+var forage_cut_n: int = 0
+var forage_deltas: Array = []
+var forage_lens: Array = []
 
 func _close(ep: Dictionary, st: WorldState, t: TeamData, ep_start: Dictionary, ep_arrive: Dictionary,
 		ep_len: Dictionary, forage_rows: Array, cut: bool) -> void:
@@ -143,9 +155,18 @@ func _close(ep: Dictionary, st: WorldState, t: TeamData, ep_start: Dictionary, e
 		if bool(ep["arrived"]) or t.tile_pos == Vector2i(ep["target"]):
 			ep_arrive[k] = int(ep_arrive.get(k, 0)) + 1
 	if k == TeamData.TASK_FORAGE:
-		forage_rows.append({"team": int(ep["team"]), "start": int(ep["start"]),
-			"end": st.world.current_tick, "len": length, "start_fd": float(ep["start_fd"]),
-			"end_fd": _food_days(st, t), "cut": cut})
+		# ★記憶體：完整結束的只留【兩個數】，逐筆只留前 20 筆
+		#   （★★上一趨被 OS 當低記憶體殺掉，而那會讓整個窗白跑）
+		forage_n += 1
+		if cut:
+			forage_cut_n += 1
+		else:
+			forage_deltas.append(_food_days(st, t) - float(ep["start_fd"]))
+			forage_lens.append(length)
+		if forage_rows.size() < 20:
+			forage_rows.append({"team": int(ep["team"]), "start": int(ep["start"]),
+				"end": st.world.current_tick, "len": length, "start_fd": float(ep["start_fd"]),
+				"end_fd": _food_days(st, t), "cut": cut})
 
 func _food_days(st: WorldState, t: TeamData) -> float:
 	var need: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
