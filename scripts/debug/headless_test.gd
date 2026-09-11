@@ -15196,9 +15196,31 @@ func _test_intent_fit_gather_and_options() -> void:
 	var ctx: DecisionContext = DecisionContext.gather(state, t)
 	assert(ctx.intent == "致富", "獨立隊 solo_intent → ctx.intent=致富，實際=%s" % ctx.intent)
 	assert("囤貨" in DecisionOptions.applicable(ctx), "致富+餘糧+arb → 囤貨 applicable")
-	# 征服 intent + target → 攻擊 applicable（非只 faction_stakes）。
+	# ★★★契約已變（HOW spec 2026-09-10-attack-applicable-demote-to-feasibility，blueprint 授權）：
+	#   舊：`征服 + intent_target` **就是一道門**；新：三道舊門**降級成 term**
+	#   （directive→`faction_duty`／征服→`intent_fit`／血仇→`feud_pull`），
+	#   而**門本身**改成 `attack_target_id != -1`（＝可行性掃描的產物）。
+	#   ★所以舊斷言測的是【已被裁掉的契約】⇒ 這裡**換成測新契約**，並**補上互補的兩格**，
+	#   ★★讓覆蓋率不因為改測而縮水（★★★改測最容易偷偷少測一格）。
 	var c2 := DecisionContext.new(); c2.intent = "征服"; c2.intent_target = 9
-	assert("攻擊" in DecisionOptions.applicable(c2), "征服+target → 攻擊 applicable（非只 faction_stakes）")
+	# ①新契約：光有 intent／target **不再**開門（門要可行性；這正是 IDLE 陷阱的來源被堵掉）
+	assert(not ("攻擊" in DecisionOptions.applicable(c2)),
+		"★新契約：征服+intent_target 但【無可行目標】⇒ 攻擊【不】applicable（門＝可行性）")
+	# ②新契約：有可行目標 ⇒ 開門（★而 `attack_target_id` 正是 gather 那一次掃描的產物）
+	var c2b := DecisionContext.new(); c2b.intent = "征服"; c2b.intent_target = 9
+	c2b.attack_target_id = 9
+	assert("攻擊" in DecisionOptions.applicable(c2b),
+		"★新契約：有 attack_target_id ⇒ 攻擊 applicable（門與 target 同一個判斷）")
+	# ③★原意圖沒有消失：征服 intent 仍然**透過 term** 影響 util（它從許可證變成秤上的重量）
+	var c2c := DecisionContext.new(); c2c.intent = "征服"; c2c.intent_target = 9
+	c2c.food_days = 20.0; c2c.leader_values = {"野心": 0.8, "好戰": 0.7}
+	# ★這三個前提是 `_intent_fit` 的征服路本來就要的（`terms.gd:461-464`：cap × readiness_factor）——
+	#   ★★我第一版漏了它們 ⇒ 斷言紅；而那是**我的 fixture 沒擺好**，不是世界的事實
+	#   ⇒ ★★★正好是 systems 說的那條：**先寫出這條床的意圖，再判缺的是前提還是世界**。
+	c2c.self_armed_ratio = 1.0
+	c2c.readiness = 0.8; c2c.readiness_thr_eff = 0.5
+	assert(DecisionTerms.eval("intent_fit", c2c, "攻擊") > 0.0,
+		"★★征服 intent 仍然餵 intent_fit term（降級≠消失）")
 	print("intent gather + options OK")
 
 func _test_intent_fit_enrich_beats_build() -> void:
