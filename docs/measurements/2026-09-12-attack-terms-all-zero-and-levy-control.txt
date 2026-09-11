@@ -1,0 +1,82 @@
+# 攻擊 util 的組成 ＋ 徵收的【非面對面】對照（世代 3／★3 天窗）
+# 床：.worktrees/herald/scripts/debug/herald_journey_bed.gd｜warring_states｜4320 tick ＝ 3 天｜seed 1337
+# ★趟次誠實：30 天→day 21 死／15 天→day 13 死／10 天→**day 2 死**（遊戲行程漲到 8.8 GB）⇒ 縮到 3 天跑成
+#   ⇒ ★★所以母體比上一卷小（面對面 251 vs 754）——★★★但這一卷問的是【結構】不是【比率】，小母體夠用。
+#
+# ═══════ ①★★★「恰好 0」的來源：**加法那半本身全是 0** ═══════
+#   攻擊 util：**零 final 1238 次／非零 23 次**
+#   被誰壓成 0：**terms_sum 1238**｜coeff **0**｜fail_mult **0**｜later **0**
+#   ⇒ ★**不是乘數殺的** —— `coeff`（0.30〜0.64）與 `fail_mult`（1.0）都正常，
+#     ★★**是四個 term 的 drive 同時 ＝ 0.000**（而它們的 weight 都非 0：0.35〜1.41）
+#   ⇒ ★★★照 systems 的判準：**這是「接線」型，不是「評價」型** ——
+#     世界不是「評估後覺得不划算」，是**根本沒有任何一項在說話**。
+#
+# ═══════ ②那四項為什麼是 0（★code 逐字，非推論） ═══════
+#   `terms.gd:327` `faction_duty`：`"攻擊" in ctx.faction_stakes and faction_attack_target != -1` 否則 **0**
+#   `terms.gd:336` `attack_drive`：`if opt != "攻擊" or "攻擊" not in ctx.faction_stakes: return 0.0`
+#   `terms.gd:461` `intent_fit`  ：需要 `ctx.intent == "征服"`（或匱乏＋弱 prey 那條）否則 **0**
+#   `terms.gd:322` `feud_pull`   ：`return ctx.strongest_feud`（沒仇 ⇒ **0**）
+#   ⇒ ★★★**四項全部是【授權形狀】**：派系令／派系令／征服身分／歷史仇
+#     —— ★**沒有任何一項在秤「他弱、我缺、我夠得著」**。
+#   ⇒ ★★所以攻擊門那張票把**門**從授權降成可行性之後，
+#     **秤上仍然只有授權** ⇒ 門開了而秤永遠給 0 ⇒ ★★★**這是同一個病的下一層，不是新病**。
+#
+# ═══════ ③徵收的對照（systems 要的那一格） ═══════
+#   **面對面 153／251 ＝ 61.0%**　vs　**全部 rank 469／1395 ＝ 33.6%**
+#   ⇒ ★兩個母體並排 ⇒ **差額 ＋27.4 個百分點才是「面對面造成的」**
+#   ⇒ ★★單看「面對面六成」講不出這句（全域本來就有三分之一是徵收）。
+
+
+
+★對照【徵收佔比】：面對面 153／251 ＝ 61.0%　vs　全部 rank 469／1395 ＝ 33.6%
+   ★兩個母體（面對面 vs 全部） ★★差額才是【面對面造成的】，單看六成講不出這句
+★攻擊 util 的組成（★『低』與『恰好 0』是兩種病）：
+   零 final 1238 次／非零 23 次｜被誰壓成 0：{terms_sum:1238, coeff:0, fail_mult:0, later:0}
+   ★★結構：四個 term 相【加】，之後乘 coeff、乘 fail_mult  ★★★一個 0 的乘數就殺掉全部
+     terms=["faction_duty:d=0.000 w=0.869", "attack_drive:d=0.000 w=0.737", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.504"]｜after_weight=0 coeff=0.548 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=0.861", "attack_drive:d=0.000 w=0.737", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.487"]｜after_weight=0 coeff=0.534 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=0.952", "attack_drive:d=0.000 w=0.849", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.548"]｜after_weight=0 coeff=0.301 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=1.403", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.772"]｜after_weight=0 coeff=0.427 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.493", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.354"]｜after_weight=0 coeff=0.299 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=1.409", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.773"]｜after_weight=0 coeff=0.452 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=0.937", "attack_drive:d=0.000 w=0.690", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.482"]｜after_weight=0 coeff=0.341 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.784", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.532"]｜after_weight=0 coeff=0.484 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=0.649", "attack_drive:d=0.000 w=1.240", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.764"]｜after_weight=0 coeff=0.635 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.465", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.367"]｜after_weight=0 coeff=0.35 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.785", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.516"]｜after_weight=0 coeff=0.418 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.887", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.551"]｜after_weight=0 coeff=0.523 fail=1 final=0
+★★★面對面現場（母體＝迎戰姿態 ＋ 目標還活著 ＋ 同格的【決策時刻】共 251 次；樣本上限 150，實收 150）
+   贏家分佈：{ "徵收": 153, "maintain_tools:resource": 4, "併入": 3, "乞食": 1, "外交": 17, "覓食": 31, "紮根": 3, "survival": 17, "掠奪": 10, "求和": 1, "紮營": 1, "建設": 10 }
+   ★★★三個桶：攻擊可選而秤選別的 243｜秤選了攻擊 0｜攻擊根本不可選 8
+      對帳：243 + 0 + 8 = 251 vs 母體 251  OK
+   ★那一桶的三道門（可讀的那一半）：{ "faction_directive.off": 8, "intent.致富": 8, "feud.lt_min": 8 }
+      ★★門的另一半（target 存不存在）本卷【沒有評】—— 它要 gather，而那會岔 RNG
+   ★★三種世界：**贏的是攻擊/迎戰卻沒打成**（派不出去）／**贏的是別的**（壓根沒在想打）／
+     **打不贏所以不打**（util 低）—— ★贏家分佈先把第二種分出來
+   tick=120 team=10(pop4 rdy1.00) vs 55(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=0.802", "囤貨=0.412", "訓練=0.242", "掠奪=0.209", "攻擊=0.000"]
+   tick=120 team=12(pop4 rdy1.00) vs 56(pop1 rdy1.00) 贏=maintain_tools:resource ｜ top5=["maintain_tools:resource=0.958", "build_workshop:resource=0.958", "build_apothecary:resource=0.913", "build_stable:resource=0.879", "買料=0.051"]
+   tick=120 team=55(pop1 rdy1.00) vs 50(pop3 rdy1.00) 贏=併入 ｜ top5=["併入=2.835", "乞食=2.660", "紮營=2.633", "遷移找糧=2.500", "求和=0.718"]
+   tick=120 team=56(pop1 rdy1.00) vs 51(pop3 rdy1.00) 贏=乞食 ｜ top5=["乞食=2.641", "紮營=2.623", "併入=2.500", "求和=0.662", "迎戰=0.569"]
+   tick=180 team=10(pop4 rdy1.00) vs 55(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.051", "囤貨=0.467", "訓練=0.273", "掠奪=0.232", "攻擊=0.000"]
+   tick=180 team=12(pop4 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=0.975", "囤貨=0.474", "訓練=0.280", "掠奪=0.169", "攻擊=0.000"]
+   tick=240 team=10(pop4 rdy1.00) vs 55(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.124", "囤貨=0.509", "訓練=0.297", "掠奪=0.249", "攻擊=0.000"]
+   tick=240 team=12(pop4 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.041", "囤貨=0.509", "訓練=0.301", "掠奪=0.179", "攻擊=0.000"]
+   tick=420 team=12(pop4 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.094", "囤貨=0.534", "訓練=0.316", "掠奪=0.186", "攻擊=0.000"]
+   tick=420 team=13(pop9 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.155", "掠奪=0.376", "攻擊=0.000", "外交=0.862", "建設=0.232"]
+   tick=420 team=14(pop8 rdy1.00) vs 56(pop1 rdy1.00) 贏=外交 ｜ top5=["外交=0.621", "建設=0.386", "紮根=0.205", "掠奪=0.110", "求和=0.049"]
+   tick=540 team=12(pop4 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.124", "囤貨=0.554", "訓練=0.328", "掠奪=0.192", "攻擊=0.000"]
+   tick=600 team=12(pop4 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.153", "囤貨=0.568", "訓練=0.336", "掠奪=0.196", "攻擊=0.000"]
+   tick=600 team=13(pop9 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.207", "掠奪=0.392", "攻擊=0.000", "外交=0.860", "建設=0.231"]
+   tick=600 team=14(pop8 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.001", "掠奪=0.108", "攻擊=0.000", "建設=0.303", "紮根=0.203"]
+   tick=660 team=12(pop4 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.172", "囤貨=0.579", "訓練=0.343", "掠奪=0.199", "攻擊=0.000"]
+   tick=660 team=13(pop9 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.244", "掠奪=0.403", "攻擊=0.000", "外交=0.859", "建設=0.230"]
+   tick=660 team=14(pop8 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=0.939", "掠奪=0.102", "攻擊=0.000", "建設=0.214", "紮根=0.197"]
+   tick=720 team=10(pop4 rdy1.00) vs 55(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.179", "囤貨=0.540", "訓練=0.315", "掠奪=0.261", "攻擊=0.000"]
+   tick=720 team=13(pop9 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.273", "掠奪=0.412", "攻擊=0.000", "外交=0.858", "建設=0.229"]
+   tick=720 team=14(pop8 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=0.841", "掠奪=0.093", "攻擊=0.000", "紮根=0.187", "建設=0.129"]
+   tick=720 team=24(pop8 rdy1.00) vs 43(pop10 rdy1.00) 贏=覓食 ｜ top5=["覓食=0.427", "紮營=0.179", "掠奪=0.248", "建設=0.210", "迎戰=0.028"]
+   tick=780 team=10(pop4 rdy1.00) vs 55(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.221", "囤貨=0.563", "訓練=0.329", "掠奪=0.271", "攻擊=0.000"]
+   tick=780 team=13(pop9 rdy1.00) vs 56(pop1 rdy1.00) 贏=徵收 ｜ top5=["徵收=1.294", "掠奪=0.418", "攻擊=0.000", "外交=0.857", "建設=0.229"]
+   tick=780 team=14(pop8 rdy1.00) vs 56(pop1 rdy1.00) 贏=紮根 ｜ top5=["紮根=0.180", "建設=0.122", "求和=0.096", "掠奪=0.085", "迎戰=0.018"]
+
+★
