@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 對峙 60.1% ｜ ★★★**取消上一封的獨立 dump 票**
 topic: ★★★**上一封（`dispatch-standoff-dump-with-a-third-bucket`）作廢，別做** —— blueprint 裁：**面對面案不另解剖，折進「攻擊門」那張票**｜★**理由漂亮**：**修法本身就是判別實驗** —— 開門後「碰到了但沒開打」的比率該掉，**掉剩的殘量 ＝ 雙方真對峙 ＝ 那才是可入帳的戰國日常**｜★★**而我要的那三個桶沒有取消，是【折進去】**：before 側的「三道門開關狀態」**不能省**，沒有它殘量無法解讀
 ---
