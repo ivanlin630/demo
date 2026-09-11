@@ -1,0 +1,115 @@
+# 求居漏斗 before／after（commit 優先序隨需求那一刀）
+# 床：scripts/debug/registration_verbs_bed.gd｜warring_states｜43200 tick ＝ 30 遊戲天｜seed 1337｜Probe=ON
+# before ＝ main（e44f98fba 的樹）｜after ＝ feat/interrupt-not-replace
+#
+# ═══════ 逐站並排（★單位：次；★★兩欄之間只能逐站比，不能跨站相減） ═══════
+#   站                     before   after
+#   ①求居進候選              436     787
+#   ②求居贏 argmax            59       5      ★★往下掉了
+#   ③決策說要派出             59       5
+#   ③-b `try_set` 成功        17       5      ★★★noop 42 → 0（被「覓食」擋的那一站**消失了**）
+#   ④真的走到                  4       0
+#   ⑤抵達時仍是求居者           0       0
+#   ⑧真的登記                  0       0
+#
+# ═══════ 三個結論 ═══════
+# ①★★★**這一刀打中的那一站，真的被打掉了**：`try_set` noop **42 → 0**
+#   ⇒ 舊制下 42 次「引擎選了求居而任務從沒被設上」⇒ 現在**0 次**；5 次派出全部成功設上。
+# ②★★而**漏斗的瓶頸換位置了**：②贏 argmax **59 → 5**、④真的走到 **4 → 0**
+#   ⇒ ★這不是同一個病被修好又壞掉，是**另外兩站**現在成為主要損耗。
+#   ⇒ ★★**我不解釋原因**（它需要 per-option util 的逐筆，而這一輪沒量）——
+#     ★★★而可觀察的伴隨事實是：窗末【無自家據點的 PRODUCE 隊】**8 → 4**（母體本身變小了）。
+# ③★**身分在途中被換掉**這一站**沒有被修**，只是換了兇手：
+#   before：抵達時 task=覓食（@80 壓過來）｜after：抵達時 task=**建設**
+#   ⇒ ★★而建設與求居**同為 50** ⇒ 走的是**同層 self-replace**（引擎換掉自己派的任務）
+#   ⇒ ★★★所以 systems 入庫的那半（「插斷非取代 ＝ 承諾要活過釋放」）**仍然需要** ——
+#     這一輪的資料就是它的證據。
+#
+# ═══════ 儀器誠實限（★這一條會誤導人，先寫） ═══════
+# ★表三最後那行「優先序並排」印的是 `DecisionOptions.priority_for`（**REGISTRY 靜態值**）
+#   ⇒ after 那趟它**仍然印 覓食=80** —— 而這一刀改的是 `priority_for_need`（**當下需求導出**）
+#   ⇒ ★★**只看那一行會以為什麼都沒變**。下一版床要把兩個值並排印。
+# ★★>2 秒幀數：**298 → 511**（前一輪是 321 → 518）⇒ **兩輪一致 ⇒ 這個變差是真的、不是雜訊**
+# ★fp：`4b080cea…` → `cb5d9244…`（行為改變，裁定接受）
+#
+
+═══════ BEFORE ═══════
+漏斗Ａ【單位：支】—— 窗末快照（★不可與下面的『次』相減）
+   PRODUCE 隊          10
+   其中無自家據點        8   （2）
+   其中知道別人據點      8   （0）
+★★漏斗Ｂ【單位：次】—— 事件計數（★逐站相減）
+   求居進候選          436
+   求居贏 argmax        59   （377）
+   決策說要派出         59   （0）
+   -b `try_set` 成功    17   （42 ＝ noop 42；被誰擋：["覓食×42"]）★★這一站是逐筆表揭出來的
+   真的走到              4   （55）★★最大的一站
+   抵達時仍是求居者      0   （4，逐筆表二）
+   領主看到求居者        0   （0）
+   收留贏 argmax         0   （0）
+   真的登記              0   （0）
+
+★表一：求居【逐筆去向】共 2 筆（窗 43200 tick／30.0 遊戲天／seed 1337／warring_states）
+   結束狀態彙總：{ "走到了": 1, "改去做別的": 1 }
+   team=41 出發 tick=34740 最後仍求居 tick=38736 結束＝走到了
+   team=41 出發 tick=43080 最後仍求居 tick=43199 結束＝改去做別的:乞食
+
+★表二：抵達時的狀態 共 1 筆
+   team=41 抵達 tick=38737 task=覓食 option=覓食 已登記=false host_owner=109
+
+★表三：`try_set` 拒絕理由（母體＝求居 try_set 失敗 42 次；樣本上限 150 筆，實收 42 筆）
+   理由彙總（arbiter 自己走的分支，非我歸納）：{ "優先序不足": 42 }
+   ★★餓／不餓分欄：{ "優先序不足.不餓": 41, "優先序不足.餓": 1 }（餓的定義＝food_days < DecisionTerms.DESPERATION_DAYS 3.0）
+   ★★★優先序並排（單一來源 DecisionOptions.priority_for）：求居=50 覓食=80 收留=50 ｜ THREAT 門檻=70 SURVIVAL=80 DISPATCH=50
+
+★表四：【身分在途中被換掉】（母體＝所有 current_task 寫入路：try_set／try_set_defy／release／transition）
+   逐路徑：{ "try_set": 2 } ｜ 逐路徑×換成什麼：{ "try_set.覓食": 1, "try_set.乞食": 1 }
+   ★誠實限：`release()` 拿不到 state  那一條路的 tick 印 -1（不是 tick 0）
+
+★convoy.rewrite.* 計數（陽性對照）：{ "convoy.rewrite.try_set": 6, "convoy.rewrite.try_set.乞食": 6, "convoy.rewrite.release": 5, "convoy.rewrite.release.idle": 5 }
+★>2 秒的幀數 = **298 / 43200**（★終線是這個計數歸零，不是平均變好）
+★fp=4b080cea8aa5f8ce97e7ad9ef6822c58
+=== DONE === SECTIONS=1/1 FAILS=0
+
+
+
+═══════ AFTER ═══════
+漏斗Ａ【單位：支】—— 窗末快照（★不可與下面的『次』相減）
+   PRODUCE 隊           8
+   其中無自家據點        4   （4）
+   其中知道別人據點      4   （0）
+★★漏斗Ｂ【單位：次】—— 事件計數（★逐站相減）
+   求居進候選          787
+   求居贏 argmax         5   （782）
+   決策說要派出          5   （0）
+   -b `try_set` 成功     5   （0 ＝ noop 0；被誰擋：（無））★★這一站是逐筆表揭出來的
+   真的走到              0   （5）★★最大的一站
+   抵達時仍是求居者      0   （0，逐筆表二）
+   領主看到求居者        0   （0）
+   收留贏 argmax         0   （0）
+   真的登記              0   （0）
+
+★表一：求居【逐筆去向】共 1 筆（窗 43200 tick／30.0 遊戲天／seed 1337／warring_states）
+   結束狀態彙總：{ "走到了": 1 }
+   team=48 出發 tick=35580 最後仍求居 tick=35939 結束＝走到了
+
+★表二：抵達時的狀態 共 1 筆
+   team=48 抵達 tick=35940 task=建設 option=建設 已登記=false host_owner=41
+
+★表三：`try_set` 拒絕理由（母體＝求居 try_set 失敗 0 次；樣本上限 150 筆，實收 0 筆）
+   理由彙總（arbiter 自己走的分支，非我歸納）：{  }
+   ★★餓／不餓分欄：{  }（餓的定義＝food_days < DecisionTerms.DESPERATION_DAYS 3.0）
+   ★（0 筆  本窗求居沒有被 `try_set` 擋過 —— ★★而那跟「求居根本沒贏過」是兩件事）
+   ★★★優先序並排（單一來源 DecisionOptions.priority_for）：求居=50 覓食=80 收留=50 ｜ THREAT 門檻=70 SURVIVAL=80 DISPATCH=50
+
+★表四：【身分在途中被換掉】（母體＝所有 current_task 寫入路：try_set／try_set_defy／release／transition）
+   逐路徑：{ "try_set": 1 } ｜ 逐路徑×換成什麼：{ "try_set.建設": 1 }
+   ★誠實限：`release()` 拿不到 state  那一條路的 tick 印 -1（不是 tick 0）
+
+★convoy.rewrite.* 計數（陽性對照）：全 0（本窗沒有 RETURN 期的 porter 被改寫）
+★>2 秒的幀數 = **511 / 43200**（★終線是這個計數歸零，不是平均變好）
+★fp=cb5d92447913daf0ccba6af0dbcda1dc
+=== DONE === SECTIONS=1/1 FAILS=0
+WARNING: [LEVY] faction=6 補評估撞上限 8
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
