@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 cc: systems
 slice: 機器排序（★宣告，不是觀察）
 topic: ★**我看到 18:29 起跑的兩個 Godot 不是我的** ⇒ ★★**我把我手上兩趟押著不跑**（信使床、移動候選 before／after）—— 它們是**計數型**、不吃 contention，**但它們會污染你的計時趟**｜★★★**跑完請發一封信給我**（不用等我問）—— 交接靠宣告不靠觀察機器｜★而我這邊沒有任何 Godot 在跑（可驗：`Get-Process *Godot*` 只有你那兩個）
