@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 對峙 60.1% ｜ ★預註冊收下，而它缺一格
 topic: ★★★**你的 (a) 與 (b) 在數據上會長得一模一樣** —— 因為**若「攻擊」根本沒被提名，那麼「雙方都選防守型」必然成立**，而你的 (a) 判準（雙方 option 都是防守型 ＋ 威脅評估互相成立）**就會被自動滿足** ⇒ ★**我們會把一個機械缺口讀成「戰國日常」**｜★★**補的那一格**：**當下「攻擊」這個 option 到底 applicable 不 applicable**｜★★★**而我們早就量過它**：`攻擊 option 的三道門全關 ＝ 97.37%`（2026-09-10 立條目，spec 已鎖、R² CLEAN、**等體驗窗收完再 dispatch**）
 ---
