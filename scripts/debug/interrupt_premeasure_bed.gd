@@ -44,6 +44,14 @@ func _initialize() -> void:
 	var runner := SimRunner.new()
 	var no_player := Vector2i(-1, -1)
 
+	# ★★★母體自己變小比那個 0 更值得問（systems 2026-09-11）：**無家的生產隊 8 → 4，是找到家了還是死了？**
+	#   ⇒ ★這兩個答案方向完全相反 ⇒ 把【窗首那一批】釘住，窗末逐支分桶。
+	#   ★★母體＝**窗首**就無家的 PRODUCE 隊（★後來才變無家的不在內，這是刻意的：要追同一批）。
+	var cohort: Dictionary = {}
+	for tid0 in st.teams:
+		var t0: TeamData = st.teams[tid0]
+		if t0.tags.has(TeamData.TAG_PRODUCE) and st.own_outpost_tile(t0.team_id) == null 				and t0.work_outpost == Vector2i(-1, -1):
+			cohort[tid0] = true
 	var live: Dictionary = {}        # team_id → {task, target, start, start_fd, start_dist, arrived}
 	var forage_rows: Array = []      # ①逐筆
 	var ep_start: Dictionary = {}    # task → 長程 episode 起算數
@@ -169,6 +177,23 @@ func _initialize() -> void:
 		int(Probe.counts.get("arbiter.try_set.calls", 0)),
 		int(Probe.counts.get("engine.rank_scored.calls", 0))])
 	print("   ★這兩顆是【次數】—— ★★單價要另外量（相位樹），兩者相乘才是時間")
+	# ★窗首那一批的去向（★分桶，而不是只看窗末還剩幾支）
+	var c_gone: int = 0; var c_own: int = 0; var c_lodge: int = 0; var c_still: int = 0
+	for tidc in cohort:
+		var tc: TeamData = st.teams.get(tidc)
+		if tc == null:
+			c_gone += 1                     # ★不再存在（滅團／被併）
+		elif st.own_outpost_tile(tc.team_id) != null:
+			c_own += 1                      # ★自己有家了
+		elif tc.work_outpost != Vector2i(-1, -1):
+			c_lodge += 1                    # ★登記寄居成功
+		else:
+			c_still += 1                    # ★仍然無家
+	print("")
+	print("★⑥窗首無家生產隊 %d 支的去向：仍無家 %d｜登記寄居 %d｜自己有家 %d｜不再存在 %d" % [
+		cohort.size(), c_still, c_lodge, c_own, c_gone])
+	print("   ★★『不再無家』與『不再存在』方向完全相反 —— 只看窗末剩幾支分不出來，所以這一格逐支分桶")
+	print("   ★誠實限：『不再存在』含滅團與被併兩種，這一輪**沒有再分**")
 	print("★>2 秒幀數 = %d / %d" % [SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
