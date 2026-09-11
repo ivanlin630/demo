@@ -114,7 +114,7 @@ MG_FROM="${MG_FROM:-0}"; MG_TO="${MG_TO:-0}"
 if [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; then
   echo "[MERGE-GATES] ★★★PARTIAL：本輪只跑第 ${MG_FROM:-1}–${MG_TO:-末} 支 ⇒ **不可當 merge 判決**"
 fi
-FAILED=(); TOTAL0=$SECONDS; N=0
+FAILED=(); TOTAL0=$SECONDS; N=0; RUN_N=0
 # ★★★2026-09-06:讀進來先剝 ``(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
 #   `expect` 會尾帶 `` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
 #   ★★而 .gitattributes 已 eol=lf ⇒ repo 的 blob 是乾淨的,壞的只有【工作區那一份】
@@ -125,6 +125,7 @@ while IFS=$'	' read -r id cmd purpose expect; do
   N=$((N+1)); T0=$SECONDS
   if [ "$MG_FROM" != "0" ] && [ "$N" -lt "$MG_FROM" ]; then continue; fi
   if [ "$MG_TO" != "0" ] && [ "$N" -gt "$MG_TO" ]; then continue; fi
+  RUN_N=$((RUN_N+1))
   if [ -z "${expect:-}" ]; then
     echo "[MERGE-GATES] ✗ $id —— ★沒有 expect 欄：不能有「沒有判準也算過」的路徑"
     FAILED+=("$id(no-expect)"); continue
@@ -148,7 +149,12 @@ while IFS=$'	' read -r id cmd purpose expect; do
   fi
 done < "$REG"
 echo "───────────────────────────────"
+if [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; then
+  echo "[MERGE-GATES] ★★★PARTIAL：【實跑 $RUN_N 支】（註冊表 $N 支）｜總時 $((SECONDS-TOTAL0))s"
+  echo "[MERGE-GATES]   ⇒ ★**不可當 merge 判決** —— 判決需要各批的【聯集】覆蓋整張註冊表。"
+else
 echo "[MERGE-GATES] 註冊表 $N 支｜總時 $((SECONDS-TOTAL0))s"
+fi
 # ★★「乾淨」只算【會影響判決的那幾個路徑】（scripts / .claude / 註冊表）：
 #   ★★★本專案是多終端共用同一個 main 工作區，它【幾乎永遠是髒的】（別人的信、量測檔）
 #   ⇒ 若要求全樹乾淨，這個基線【永遠不會被記下來】＝又一支裝好但沒接電的守衛。
