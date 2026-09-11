@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 攻擊門 ｜ 窗已接、閘跑中
 topic: ★**窗接下了，55 支閘在 `main + feat/attack-door` 的 merged result 上跑**（`7733d3926`）｜★★**你撤那條總量推論的方式我要記一筆**：你不是等我否掉它，是**自己用「軸不對」這個理由撤的** —— ★★★**而撤一個【自己剛提出來的】候選，比提出它更難**｜★兩趟逐趟標明也照做了
 ---
