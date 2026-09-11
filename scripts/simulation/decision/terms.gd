@@ -15,6 +15,12 @@ const RETURN_HYSTERESIS_DAYS: float = 5.0   # ★GATE-A 二刀:返家途中撐�
 const CLAIM_REF_AMT: float = 20.0        # = TradeValuation.BASE_PRICE["food"](2.0) × 10
 const CLAIM_DIST_HALF: float = 6.0       # = SimRunner.NEAR_CADENCE(60) / 10
 const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-trade 軟壓(能但很少)
+# ★★★機會＋需要（2026-09-12）的三顆 TEST VALUE —— ★它們是【真參數】：
+#   在真實量上劃線＝設計選擇（世界答不出「多肥才算肥」）⇒ 留在這裡並標明。
+const ATTACK_LOOT_REF: float = 3.0      # TEST VALUE — `_belief_richness` 的「算肥」參考值（tier0/1 的 resource_scale 是 0..3）
+const ATTACK_OPP_LOOT_W: float = 0.6    # TEST VALUE — 機會（對方肥）在這一項裡的份量
+const ATTACK_OPP_NEED_W: float = 0.4    # TEST VALUE — 需要（自己餓）在這一項裡的份量
+const ATTACK_CAUTION_W: float = 0.8     # TEST VALUE — 慎重壓低的斜率（★MODULATE 真值，非 boost 常數）
 const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× weight(loot 0..1) → loot util ≈ 0..1，危時不碾壓 survival(≥2)
 const DESPERATION_DAYS: float = 3.0    # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
 #   （食物低於此才入絕境 option，對齊 WARNING_DAYS）
@@ -212,6 +218,27 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 貿易移出 → 野心 magnitude 不再同步抬貿易，霸主(野心高)與商人(貪婪高)才分得開。
 			if opt not in ["生產", "建設"]: return 0.0
 			return clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
+		"attack_opportunity":
+			# ★★★秤上第一個【非授權】的攻擊訊號（HOW spec 2026-09-12-attack-opportunity-drive）：
+			#   ★病因：另外四項全是授權形狀（派系令／派系令／征服身分／歷史仇）⇒ 沒授權時 util 恆 0
+			#   ⇒ ★★門降級成可行性之後，**秤上仍然只有授權** ⇒ 這一項補的就是那個缺口。
+			#   ★★★三條硬規則（spec §②）：①資產只讀 belief ②需求走 need oracle ③贏率用既有 capability 接地。
+			if opt != "攻擊" or ctx.attack_target_id == -1: return 0.0
+			# ①機會 ＝ belief 估的對方資產（`_belief_richness`；tier 分層天然在它裡面）
+			var _loot: float = clampf(ctx.attack_loot_est / ATTACK_LOOT_REF, 0.0, 1.0)
+			# ②需要 ＝ 自身糧食缺口（★連續量：越餓越想搶；★★用既有的 food_days／絕境門檻，不新增旋鈕）
+			var _need: float = clampf(1.0 - ctx.food_days / maxf(ctx.desperation_entry_threshold, 0.01), 0.0, 1.0)
+			# ③贏率 ＝ 既有 capability 接地（無牙 ⇒ 0 ⇒ 整項 0：送死沒人幹）
+			var _odds: float = ctx.attack_win_odds
+			# ★★人格 MODULATE【真值】而不是 boost 常數（禁 crank）：好戰／貪婪放大、慎重壓低
+			var _mart: float = float(ctx.leader_values.get("好戰", 0.5))
+			var _greed2: float = float(ctx.leader_values.get("貪婪", 0.5))
+			var _caut: float = float(ctx.leader_values.get("慎重", 0.5))
+			var _person: float = clampf(0.5 + (maxf(_mart, _greed2) - 0.5) - (_caut - 0.5) * ATTACK_CAUTION_W, 0.0, 1.5)
+			# ★★★「機會」與「需要」相加再乘贏率與人格 ——
+			#   ★相加：肥而不餓也值得打（機會）／餓而對方不肥也值得打（需要）
+			#   ★★乘贏率：打不贏就別打（既有接地）⇒ 無牙隊整項 0（★不是壓低，是 0）
+			return (ATTACK_OPP_LOOT_W * _loot + ATTACK_OPP_NEED_W * _need) * _odds * _person
 		"loot_drive":
 			if opt != "掠奪": return 0.0
 			if not ctx.has_weak_prey: return 0.0
@@ -502,6 +529,10 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"buymaterial":       return clampf(float(v.get("貪婪", 0.5)), 0.3, 1.0)   # 貪婪→建設/軍火投資傾向（穿人格秤，非 flat）
+		"attack_opportunity":
+			# ★人格已經在 eval 裡 MODULATE 過（好戰／貪婪／慎重）⇒ weight 保持中性 1.0，
+			#   ★★否則同一組人格會被乘兩次（與 `intent_fit` 同理，逐字沿用它的理由）。
+			return 1.0
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
 		"idle_employ":       return 1.0   # ★B idle-labor：genuine 期望產出全在 eval/ctx（無人格 crank，中性 weight，乙教訓）
 		"help":              return 1.0   # ★資訊網 S-herald：人格 MODULATE 已在 help_drive eval（求生欲/野心/義氣）、weight 中性

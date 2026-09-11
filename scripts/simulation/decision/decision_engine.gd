@@ -363,6 +363,20 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			_cmp["terms"] = _terms_row
 			_cmp["opt"] = opt
 			if opt == "攻擊":
+				# ★★★驗收②④⑦要的三欄（spec 2026-09-12）：分布活著／授權群 vs 無授權群／tier 分桶
+				#   ★「有非零值」不算過 —— **全部同一個數也叫非零**，那是另一個常數 ⇒ 要【變異】
+				var _authed: bool = ("攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1) 					or (ctx.intent == "征服" and ctx.intent_target != -1) 					or (ctx.strongest_feud >= DecisionOptions.FEUD_ATTACK_MIN and ctx.feud_target_id != -1)
+				_cmp["authed"] = _authed
+				_cmp["tier"] = ctx.attack_belief_tier
+				_cmp["loot_est"] = snappedf(ctx.attack_loot_est, 0.001)
+				_cmp["odds"] = snappedf(ctx.attack_win_odds, 0.001)
+				Probe.bump("attack.util.%s.%s" % ["authed" if _authed else "unauthed",
+					"zero" if absf(u) < 0.0005 else "nonzero"])
+				if absf(u) >= 0.0005:
+					Probe.bump_sample("attack.nonzero_util", {"u": snappedf(u, 0.001),
+						"tier": ctx.attack_belief_tier, "loot": snappedf(ctx.attack_loot_est, 0.001),
+						"authed": _authed}, 300)
+					Probe.bump("attack.util.tier%d.nonzero" % ctx.attack_belief_tier)
 				# ★★分開的樣本鍵：攻擊的組成不要混進收留那一桶（兩個母體、兩個問題）
 				Probe.bump_sample("attack.composition", _cmp, 150)
 				Probe.bump("attack.cmp.zero_final" if absf(u) < 0.0005 else "attack.cmp.nonzero_final")

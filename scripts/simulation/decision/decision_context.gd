@@ -229,6 +229,11 @@ var prosperity_prey_id: int = -1
 # ★★★攻擊門降級（spec §④）：門的條件與目標的來源【綁死成同一個判斷】——
 #   `attack_target_id != -1` 就是新的 applicable，而 `to_task` 讀同一個欄位
 #   ⇒ ★不可能出現「門開了、目標是 -1、回 TASK_IDLE」那個手不聽腦的形狀。
+# ★★★機會＋需要（HOW spec 2026-09-12）：**秤上第一個【非授權】的攻擊訊號**。
+#   ★三個原料分開存 —— ★★驗收⑦要能分桶看「知道得多的隊是不是挑得更準」。
+var attack_loot_est: float = 0.0       # belief 估的對方資產（`_belief_richness`）
+var attack_win_odds: float = 0.0       # 贏率：既有 capability 接地，不新造戰力公式
+var attack_belief_tier: int = -1       # -1 ＝ 無 belief
 var attack_feasible: bool = false      # 可行集合非空（零人格：知道/看得到/追得上/養得起）
 var attack_target_id: int = -1
 # ★★★逐筆淘汰理由（systems：判準要可證偽）—— 每一次 nO 都要指得出是哪一種不可行
@@ -880,6 +885,14 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 					_be = float(_fc2["eta_days"])
 					c.attack_target_id = int(_fc2["id"])
 			if Probe.enabled: Probe.bump("attack.target_leaderless")
+	# ★★★機會＋需要的三個原料（HOW spec 2026-09-12-attack-opportunity-drive）：
+	#   ★只在有 target 時算；★★**零新狀態** —— 全部走既有函式（`_belief_richness`／既有 capability 接地）。
+	#   ★★★資產只讀 **belief**（感知鐵律：禁 god-view 直讀對方 `resources`／`population`）。
+	if c.attack_target_id != -1:
+		var _abel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, c.attack_target_id)
+		c.attack_loot_est = FactionAISystem._belief_richness(_abel)   # ★tier 分層天然在它裡面（R² §⑤）
+		c.attack_belief_tier = int(_abel.get("tier", -1))             # ★驗收⑦：分桶看「知道得多的挑得更準」
+		c.attack_win_odds = clampf(c.self_armed_ratio / DecisionTerms.VIABLE_ARMED_RATIO, 0.0, 1.0)
 	# ★★★成對反事實【不用開關】（spec 驗收⑥）：舊三門的判準所需欄位**全部還在 ctx 裡**
 	#   ⇒ ★同一次 gather 同時算【新門】與【舊門】⇒ 一趟就給出兩個率，
 	#   ★★而且是**逐字同母體**（不必跑兩趟、不必留一個會腐爛的旗標）。
