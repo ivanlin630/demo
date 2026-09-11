@@ -3201,6 +3201,25 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 	#   ★而它會讓「rank 每次 222ms」這種【看起來很有解釋力】的數字進到交件裡。
 	var _rank_us: int = (Time.get_ticks_usec() - _tr0_rank) if Probe.enabled else 0
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
+	# ★★★面對面卻沒人動手（systems 2026-09-12）：迎戰 193 段裡 **60.1% 是「碰到了但沒開打」**
+	#   ⇒ ★那是**決策層**的事，而決策問題的老規矩是：**先逐筆 dump per-option util，不要靜態讀 code 開藥**。
+	#   ★★取樣條件就是那個現場：**自己在迎戰姿態、目標還活著、而且【同格】**。
+	#   ★★★三格分得出三種世界：**打不贏所以不打／想打但派不出去／壓根沒考慮打**
+	#     ⇒ 所以這裡要記【前五名 option 與它們的 util】＋【贏的是誰】（派不派得出去由下游 try_set tap 接）。
+	#   ★純觀測：Probe-gated、零 RNG、不進任何判斷。
+	if Probe.enabled and team.current_task == TeamData.TASK_DEFEND and team.prosperity_target_id != -1:
+		var _fo: TeamData = state.teams.get(team.prosperity_target_id)
+		if _fo != null and _fo.tile_pos == team.tile_pos:
+			var _top: Array = []
+			for _i in range(mini(5, ranked.size())):
+				_top.append("%s=%.3f" % [String(ranked[_i]["opt"]), float(ranked[_i]["u"])])
+			Probe.bump("faceoff.total")
+			Probe.bump("faceoff.winner." + (String(ranked[0]["opt"]) if not ranked.is_empty() else "(空)"))
+			Probe.bump_sample("faceoff", {"tick": state.world.current_tick, "team": team.team_id,
+				"target": team.prosperity_target_id, "top5": _top,
+				"winner": String(ranked[0]["opt"]) if not ranked.is_empty() else "(空)",
+				"my_pop": team.population, "their_pop": _fo.population,
+				"my_ready": snappedf(team.readiness, 0.01), "their_ready": snappedf(_fo.readiness, 0.01)}, 150)
 	# ★★★承諾再派 funnel（#10，2026-09-02）——★掛在【決策 entry】，而理由是 reviewer 給的硬的那個：
 	#   `TaskArbiter.release()` 的簽名【連 state 都沒有】(task_arbiter.gd:161)
 	#   ⇒ ★★它【技術上做不到】呼 rank_scored/DecisionEngine —— 不是「比較不容易死循環」

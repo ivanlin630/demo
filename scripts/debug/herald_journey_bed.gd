@@ -174,6 +174,26 @@ func _run() -> void:
 	print("   ★★★『736 → 1』分不出的兩種世界，就是②與③ —— 而它們的處置完全不同")
 	print("   ★切段鍵 ＝【連續持有 TASK_DEFEND 的一段】（不是目標 id）⇒ 欄位抖動不會切段")
 	print("   ★★段內【目標換人】次數合計 %d —— ★★★若它很大，表示一段裡其實追過好幾個對象" % _sw)
+	# ── ★面對面卻沒人動手：逐筆 per-option util（systems 2026-09-12）──
+	var fo: Array = Probe.samples.get("faceoff", [])
+	var fo_win: Dictionary = {}
+	for kf in Probe.counts:
+		var ksf: String = String(kf)
+		if ksf.begins_with("faceoff.winner."):
+			fo_win[ksf.replace("faceoff.winner.", "")] = int(Probe.counts[kf])
+	print("")
+	print("★★★面對面現場（母體＝迎戰姿態 ＋ 目標還活著 ＋ 同格的【決策時刻】共 %d 次；樣本上限 150，實收 %d）" % [
+		int(Probe.counts.get("faceoff.total", 0)), fo.size()])
+	print("   贏家分佈：%s" % str(fo_win))
+	print("   ★★三種世界：**贏的是攻擊/迎戰卻沒打成**（派不出去）／**贏的是別的**（壓根沒在想打）／")
+	print("     **打不贏所以不打**（util 低）—— ★贏家分佈先把第二種分出來")
+	for rf in fo.slice(0, 25):
+		print("   tick=%d team=%d(pop%d rdy%.2f) vs %d(pop%d rdy%.2f) 贏=%s ｜ top5=%s" % [
+			int(rf["tick"]), int(rf["team"]), int(rf["my_pop"]), float(rf["my_ready"]),
+			int(rf["target"]), int(rf["their_pop"]), float(rf["their_ready"]),
+			String(rf["winner"]), str(rf["top5"])])
+	if fo.is_empty():
+		print("   ★（0 筆 ⇒ 本窗沒有任何【同格對峙的決策時刻】—— ★★而那與「有對峙但沒打」是兩件事）")
 	print("")
 	print("★逐筆（全收）：")
 	for r2 in rows:
