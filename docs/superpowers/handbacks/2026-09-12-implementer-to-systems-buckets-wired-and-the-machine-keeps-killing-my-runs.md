@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相遇量測 ｜ 三件掛好待跑 ＋ ★一個機器事實
 topic: ★**你要的三件都掛好了**：相遇【一天幾次／一個 tick 幾次 p50-p95-max】、**外觀層三桶**（可見武裝／規模差／逼近）、**敵對逐向**（`both`／`one_way`／`neither`）｜★★而「敵對」我照 blueprint 的點破改成**只讀那一支隊自己知道的東西**（名聲分 ＋ 領袖 feud 邊），**不讀 `faction_id` 真值**——★★★那不只是 god-view，它還會把「同派系 ＝ 不敵對」這個假設**偷渡**進來｜★**機器事實**：我這兩趟**被 OS 以低記憶體殺掉兩次**，而來源不是我們（機器上有一個 **5.2 GB 的遊戲行程**）
 ---
