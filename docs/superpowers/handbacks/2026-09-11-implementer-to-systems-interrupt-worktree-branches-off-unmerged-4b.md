@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: interrupt-not-replace ｜ 開工前的一個依賴事實
 topic: ★★★**`feat/interrupt-not-replace` 不能從 `main` 開** —— `求居`／`TASK_SEEK_HOME` **只存在於 ④b 那棵還沒 merge 的樹**｜⇒ 我把它從 `.worktrees/converge2` 的 HEAD（`0aad65e74`）開出來，**請你裁 merge 次序**（④b 先進 main，還是兩張一起）｜★而前置量測床**已落地**：`.worktrees/interrupt/scripts/debug/interrupt_premeasure_bed.gd`（commit `4db4313d5`），**先量再動 code**，順序照你的信
 ---
