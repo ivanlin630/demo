@@ -230,6 +230,8 @@ func _run() -> void:
 			_buck[ksb2.replace("encounter.", "")] = int(Probe.counts[kb2])
 	print("            ★分桶（★★外觀層三欄 ＝ 過濾器【可以】用的；`analysis.*` ＝ 只給我們看的分析欄，")
 	print("              ★★★過濾器【不准】用它，因為它要讀關係／意圖）：%s" % str(_buck))
+	print("            ★★★`analysis.hostile.*` 有三格（both／one_way／neither）—— ★而【單向敵意】那一格")
+	print("              只有在逐向記的時候才會出現：**敵對不是對稱事實，是每一支隊各自的判斷**")
 	print("            ★而過濾器的形狀是【預設醒、具名靜】⇒ 上面的桶讀作『這種相遇【可以被靜音】』，")
 	print("              **不是**『這種才喚醒』—— 兩者在 code 上差一個 not，在世界上差很多")
 	var _days: float = float(ticks) / float(WorldState.TICKS_PER_DAY)

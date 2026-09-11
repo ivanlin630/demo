@@ -1754,6 +1754,28 @@ func _note_encounter_buckets(state: WorldState, id_a: int, id_b: int) -> void:
 	#   ★只讀 move_target 這個外觀事實（它就是它正在走的方向），不讀意圖欄位。
 	var _toward: bool = (b.move_target == a.tile_pos) or (a.move_target == b.tile_pos)
 	Probe.bump("encounter.approach." + ("toward" if _toward else "passing"))
-	# ④★分析欄（★不是過濾判準）：敵對與否 —— 它要讀 faction 關係，**過濾器不准用**
-	var _hostile: bool = a.faction_id != b.faction_id or a.faction_id == -1 or b.faction_id == -1
-	Probe.bump("encounter.analysis.hostile." + ("yes" if _hostile else "no"))
+	# ④★分析欄（★不是過濾判準）：敵對 —— ★★★而它**要兩個方向**（blueprint 點破，systems 轉達）：
+	#   **敵對不是世界裡的對稱事實，是每一支隊【各自的關係判斷】** ⇒ 一個布林就已經在假設對稱。
+	#   ⇒ ★這裡逐向記：A 視 B 為敵／B 視 A 為敵，而判準用**那一支隊自己讀得到的東西**：
+	#     ①它對對方的名聲分（`known_reputations`，低 ＝ 不信任）②它領袖對對方領袖的 feud 邊
+	#   ⇒ ★★於是多出一個真實存在的桶：**單向敵意**（一方當敵人、另一方沒有）。
+	#   ★★★而這一欄**過濾器不准用**（它讀關係），它只給我們看 —— 命名為 `analysis.*` 就是這個意思。
+	var _h_ab: bool = _views_as_foe(state, a, b)
+	var _h_ba: bool = _views_as_foe(state, b, a)
+	var _hk: String = "both" if (_h_ab and _h_ba) else ("one_way" if (_h_ab or _h_ba) else "neither")
+	Probe.bump("encounter.analysis.hostile." + _hk)
+
+
+# ★「甲把乙當敵人嗎」——★逐向、且只讀【甲自己知道的東西】（名聲分／領袖的 feud 邊）。
+#   ★★不讀 `faction_id` 真值：那是 god-view，而且它把「同派系 ＝ 不敵對」這個假設偷渡進來。
+func _views_as_foe(state: WorldState, me: TeamData, other: TeamData) -> bool:
+	if float(me.known_reputations.get(other.team_id, 0.5)) < 0.35:
+		return true
+	var ldr: PersonData = state.persons.get(me.leader_id)
+	if ldr == null:
+		return false
+	var fe: Dictionary = RelationGraph.strongest(ldr.relation_edges, "feud")
+	if fe.is_empty():
+		return false
+	# ★邊的欄位是 `target`（relation_graph.gd:3 的逐字定義），不是 `other_id` —— 查過再寫
+	return int(fe.get("target", -1)) == other.leader_id and float(fe.get("intensity", 0.0)) > 0.0
