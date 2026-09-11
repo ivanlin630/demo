@@ -77,6 +77,11 @@ static var frontier_us_total: float = 0.0
 static var frontier_calls: int = 0
 
 static func rank_scored(state: WorldState, team: TeamData, src: String = "unknown") -> Array:
+	# ★★★「面對面的那一刻有沒有人在思考」（systems 2026-09-12 的第四種可能）：
+	#   ★全域計數答不了「**這一支隊**在那段期間跑了幾次決策」⇒ 逐隊鍵。
+	if Probe.enabled:
+		Probe.bump("engine.rank_scored.calls")
+		Probe.bump("engine.rank.t%d" % team.team_id)
 	# ★★★守衛移位（systems 裁 2026-09-10）：`from_unknown ⇒ 未登記具名紅` 本來守在
 	#   `_decide_unified`，而那裡的母體只有 733 次 —— ★真母體是【本函式】的 1096 次
 	#   ⇒ 不經 `_decide_unified` 的呼叫端（subteam／solo_body）在守衛【外面】靜默了 55.62 s。

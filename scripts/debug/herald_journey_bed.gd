@@ -46,6 +46,7 @@ func _run() -> void:
 				if not dlive.has(tid):
 					dlive[tid] = {"team": tid, "oid": -1, "start": st.world.current_tick, "met": false,
 						"target_switches": 0, "last_oid": -1,
+						"rank_at_met": -1,
 						"fight0": int(Probe.counts.get("combat.entered.t%d" % tid, 0))}
 				var _ep: Dictionary = dlive[tid]
 				var _dk: int = t.prosperity_target_id
@@ -57,6 +58,9 @@ func _run() -> void:
 					_ep["last_oid"] = _dk
 					var _dt: TeamData = st.teams.get(_dk)
 					if _dt != null and _dt.tile_pos == t.tile_pos:
+						if not bool(_ep["met"]):
+							# ★第一次碰到面的【那一刻】記下決策計數 ⇒ 之後的差額 ＝ 碰面之後想過幾次
+							_ep["rank_at_met"] = int(Probe.counts.get("engine.rank.t%d" % tid, 0))
 						_ep["met"] = true
 			elif dlive.has(tid):
 				_close_defend(dlive[tid], st, drows)
@@ -171,6 +175,17 @@ func _run() -> void:
 		"OK" if d_notarget + d_nomeet + d_met_nofight + d_met_fight == d_tot else "★不符"])
 	var _sw: int = 0
 	for dr2 in drows: _sw += int(dr2.get("switches", 0))
+	# ★★★systems 的第四種可能：**碰到了、但那一刻根本沒有人在做決策** ⇒ 開門也用不到
+	var _met_n: int = 0
+	var _met_zero_rank: int = 0
+	for dr3 in drows:
+		if not bool(dr3["met"]): continue
+		_met_n += 1
+		if int(dr3.get("ranks_after_met", -1)) <= 0: _met_zero_rank += 1
+	print("   ★★★★碰到面之後【有沒有人在思考】：碰到面 %d 段，其中**碰面後一次決策都沒跑 %d 段**（%.1f%%）" % [
+		_met_n, _met_zero_rank, 100.0 * float(_met_zero_rank) / maxf(float(_met_n), 1.0)])
+	print("      ★這一格答 systems 的第四種可能：**開門也用不到，因為沒人有機會用那個提名**")
+	print("      ★★而『相遇不發事件』是窮盡 grep 查的：`WorldEvents.emit(` 全庫 16 個呼叫點，無一是相遇")
 	print("   ★★★『736 → 1』分不出的兩種世界，就是②與③ —— 而它們的處置完全不同")
 	print("   ★切段鍵 ＝【連續持有 TASK_DEFEND 的一段】（不是目標 id）⇒ 欄位抖動不會切段")
 	print("   ★★段內【目標換人】次數合計 %d —— ★★★若它很大，表示一段裡其實追過好幾個對象" % _sw)
@@ -232,8 +247,12 @@ func _close_defend(ep: Dictionary, st: WorldState, drows: Array) -> void:
 	var fought: bool = int(Probe.counts.get("combat.entered.t%d" % tid, 0)) > int(ep["fight0"])
 	if fought:
 		ep["met"] = true   # ★開打必經相遇（同信使那條：門鈴只有一條路）⇒ 取樣看不到最後一刻
+	var _ranks_after_met: int = -1
+	if int(ep.get("rank_at_met", -1)) >= 0:
+		_ranks_after_met = int(Probe.counts.get("engine.rank.t%d" % tid, 0)) - int(ep["rank_at_met"])
 	drows.append({"team": tid, "oid": int(ep["oid"]), "start": int(ep["start"]),
-		"met": bool(ep["met"]), "fought": fought, "switches": int(ep.get("target_switches", 0))})
+		"met": bool(ep["met"]), "fought": fought, "switches": int(ep.get("target_switches", 0)),
+		"ranks_after_met": _ranks_after_met})
 
 func _open_n(groups: Dictionary) -> int:
 	return (groups["open_far"] as Array).size() + (groups["open_mid"] as Array).size() 		+ (groups["open_near"] as Array).size()
