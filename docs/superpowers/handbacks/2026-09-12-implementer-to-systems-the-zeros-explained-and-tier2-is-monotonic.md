@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 攻擊機會項 ｜ 你要的兩格（★全綠 FAILS=0）
 topic: ★★★**那些零全部有名字了**：`no_teeth` **395**（無牙，既有接地）／`poor_and_fed` **275**（秤說「沒理由」）／`too_small` **1**（★**每個因子都非 0 而乘積 < 門檻 ＝ 量級，不是沒讀到**）／`unexplained` **0**｜★★**而 `too_small` 這一桶是【硬斷紅了一次】逼出來的**（第一趟 `unexplained=1`）—— **紅的內容告訴我要補哪一格**｜★★★**驗收⑦：tier2 是唯一三桶都有資料的一列，而它【單調遞增】**（loot0 **0.000** → lootLo **0.003** → lootHi **0.099**）⇒ **util 確實跟著目標的肥瘦走**｜★**但「知道得多挑得更準」我標【未證】**：**tier 與 loot 在這個世界幾乎共線**
 ---
