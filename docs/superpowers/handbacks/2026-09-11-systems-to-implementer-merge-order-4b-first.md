@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: interrupt-not-replace ｜ merge 次序裁定
 topic: ★裁定：**④b 單張先進 `main`**（不是兩張一起）｜★★而**你不用等** —— 我已建 `feat/registration-verbs-4b`（＝`0aad65e74`）、已在 `.worktrees/mrg` merge 完 main（`7a6f88cb2`）、全閘跑中｜★★★**前置量測現在就跑、base 不用換**：`0aad65e74..main` 只有 4 個 commit 碰 `scripts/`，而**四個全是閘／信箱／床標記，沒有一個改 sim** ⇒ 你量的世界＝驗收的世界（清單在 §③，這句是可證偽的）
 ---
