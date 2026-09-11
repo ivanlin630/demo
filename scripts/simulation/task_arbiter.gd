@@ -104,6 +104,21 @@ static func _note_seek_loss(team: TeamData, path: String, new_task: String,
 #     `ENGINE_SOURCES` 白名單比對（`:127-128`）⇒ ★★★把 option 名塞進去會【改掉行為】。
 #   ★所以新增一個【有預設值】的參數 ⇒ 59 個既有 caller 一個都不用改（★★簽名相容）。
 #   ★★而它【只餵計數】—— 不進任何判斷、不寫進 state。
+# ★★★任務在途中【被換掉】的通用計數（信使票 §②：分三桶，而桶要由 arbiter 自己的分支決定）：
+#   (a) same_level ＝ 同層 self-replace（★求居案的兇手：「建設」@50 換掉「求居」@50）
+#   (b) higher     ＝ 更高優先序搶走
+#   (c) release／transition ＝ 另外兩條寫入路
+#   ★純觀測：Probe-gated、零 RNG、不進判斷、不寫 state。
+#   ★★鍵含【原任務】⇒ 一支床可以問任何一個任務「它都死在哪一條路上」。
+static func _note_task_lost(team: TeamData, bucket: String, new_task: String, source: String) -> void:
+	if new_task == team.current_task or team.current_task == TeamData.TASK_IDLE:
+		return
+	Probe.bump("lost.%s.%s" % [team.current_task, bucket])
+	Probe.bump("lost.%s.%s.to.%s" % [team.current_task, bucket, new_task])
+	Probe.bump("lost.t%d.%s.%s" % [team.team_id, team.current_task, bucket])
+	Probe.bump_sample("lost." + team.current_task, {"team": team.team_id, "bucket": bucket,
+		"to": new_task, "by": source, "prio": team.task_priority}, 200)
+
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "", _opt: String = "") -> bool:
 	# ★★★求居半的追蹤（systems 2026-09-11）：★「流浪隊有沒有真的走到」與「它半路被別的事搶走」
@@ -169,6 +184,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		#   release／transition 是在賦值【之前】呼叫，所以活著）⇒ ★★儀器裝好但【沒接電】。
 		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
 		if Probe.enabled: _note_seek_loss(team, "try_set", new_task, _source, _opt, state.world.current_tick)
+		if Probe.enabled: _note_task_lost(team, "higher", new_task, "try_set")
 		team.current_task = new_task
 		team.move_target = move_target
 		team.task_priority = priority
@@ -194,6 +210,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		#   release／transition 是在賦值【之前】呼叫，所以活著）⇒ ★★儀器裝好但【沒接電】。
 		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
 		if Probe.enabled: _note_seek_loss(team, "try_set", new_task, _source, _opt, state.world.current_tick)
+		if Probe.enabled: _note_task_lost(team, "same_level", new_task, "try_set")
 		team.current_task = new_task
 		team.move_target = move_target
 		team.task_priority = priority
@@ -210,6 +227,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			#   release／transition 是在賦值【之前】呼叫，所以活著）⇒ ★★儀器裝好但【沒接電】。
 			if Probe.enabled: _note_convoy_rewrite(team, "try_set_defy", new_task)
 			if Probe.enabled: _note_seek_loss(team, "try_set_defy", new_task, _source, _opt, state.world.current_tick)
+			if Probe.enabled: _note_task_lost(team, "defy", new_task, "try_set_defy")
 			team.current_task = new_task
 			team.move_target = move_target
 			team.task_priority = priority
@@ -244,6 +262,7 @@ static func release(team: TeamData) -> void:
 		if _m_order: Probe.bump("commit.release_with.order")
 		Probe.bump("commit.release_with_commitment" if (_m_corvee or _m_convoy or _m_order) else "commit.release_clean")
 	if Probe.enabled: _note_seek_loss(team, "release", TeamData.TASK_IDLE, team.task_reason, "", -1)
+	if Probe.enabled: _note_task_lost(team, "release", TeamData.TASK_IDLE, team.task_reason)
 	if Probe.enabled: _note_convoy_rewrite(team, "release", TeamData.TASK_IDLE)
 	team.current_task = TeamData.TASK_IDLE
 	team.move_target = Vector2i(-1, -1)
@@ -277,6 +296,7 @@ static func transition(state: WorldState, team: TeamData, new_task: String, prio
 	if team.task_priority >= PRIO_THREAT and priority < team.task_priority:
 		return                                                # emergency-respect：擋外部低 prio in-place stomp
 	if Probe.enabled: _note_seek_loss(team, "transition", new_task, _source, "", state.world.current_tick)
+	if Probe.enabled: _note_task_lost(team, "transition", new_task, _source)
 	if Probe.enabled: _note_convoy_rewrite(team, "transition", new_task)
 	team.current_task = new_task
 	team.task_priority = priority

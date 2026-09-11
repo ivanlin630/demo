@@ -554,6 +554,10 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 # ②a 信使送達：envoy 遇 target → 委派 belief resolver（同 judge，與同格偶遇同源）。
 # 冗餘去重：母隊 pending_proposal 為權威，proposal_id 首達生效、後到 no-op。送達後信使歸隊。
 func _deliver_envoy_proposal(state: WorldState, envoy_id: int, target_id: int) -> void:
+	# ★★★送達 ＝ 信使這趟旅程的完成定義（blueprint 裁 2026-09-11）；★這是全庫兩個送達入口之一。
+	if Probe.enabled:
+		Probe.bump("herald.delivered.envoy")
+		Probe.bump("task.done.t%d.%s" % [envoy_id, TeamData.TASK_HERALD])
 	var envoy: TeamData = state.teams[envoy_id]
 	var target: TeamData = state.teams[target_id]
 	var mother: TeamData = state.teams.get(envoy.parent_team_id)
@@ -773,6 +777,10 @@ func _levy_settle_tap(state: WorldState, collector: TeamData, payer: TeamData,
 	Probe.note_levy(collector.team_id, payer.team_id, state.world.current_tick)
 
 func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> void:
+	# ★★★送達（同派系那條入口，interaction_system:390-393 的 same_faction 分支裡）
+	if Probe.enabled:
+		Probe.bump("herald.delivered.order")
+		Probe.bump("task.done.t%d.%s" % [messenger_id, TeamData.TASK_HERALD])
 	var messenger: TeamData = state.teams[messenger_id]
 	var target: TeamData    = state.teams[target_id]
 	var order: String = messenger.order_task if messenger.order_task != "" else TeamData.TASK_IDLE
