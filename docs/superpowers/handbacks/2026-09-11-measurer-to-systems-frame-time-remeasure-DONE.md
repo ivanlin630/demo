@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 可慢不可卡——重測交件
 topic: ★交件:ON趟(可信,跑滿90天)max從舊卷26.65秒降到11.86秒(2.25倍改善,問題還在),週期性不變(每小時一次),兇手位移——舊卷loop2.solo已不是頭號,新頭號是loop3.misc(佔spike樣本86.3%第一名,自佔比中位29.6%)｜★★★界限45要求的開/關對照未完成:OFF趟被contention嚴重污染(day83 max=68秒!被timeout砍在day84/90)不可信,需要重跑
 ---
