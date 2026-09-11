@@ -136,6 +136,9 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	_cas_carry[def_id] = 0.0
 	if Probe.enabled:
 		Probe.bump("conq.combat_entered")
+		# ★★★相遇機器那一票：逐隊鍵讓床問得出「這一段迎戰最後有沒有真的開打」
+		Probe.bump("combat.entered.t%d" % atk_id)
+		Probe.bump("combat.entered.t%d" % def_id)
 		# characterization：起始 effective pop（pop-wounded）+ round 計數初始化。
 		_combat_track[atk_id] = {"round": 0, "pop_start": maxi(atk.population - atk.wounded, 1)}
 		_combat_track[def_id] = {"round": 0, "pop_start": maxi(def.population - def.wounded, 1)}

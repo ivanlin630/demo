@@ -27,11 +27,28 @@ func _run() -> void:
 	var no_player := Vector2i(-1, -1)
 
 	var live: Dictionary = {}     # team_id → 進行中的 episode
+	var dlive: Dictionary = {}    # 迎戰 episode（同上，但目標是【威脅隊】）
+	var drows: Array = []
 	var rows: Array = []          # 逐筆（★全收，母體是數十不是數千）
 	for tick in range(ticks):
 		runner.advance_tick(st, no_player)
 		for tid in st.teams:
 			var t: TeamData = st.teams[tid]
+			# ★★★相遇機器（blueprint 併案 2026-09-11）：迎戰照【互斥且窮盡、可對帳】的既有形狀加三格
+			#   ①迎戰姿態起算 ②同格相遇（★這一格才是門鈴）③轉換成開打
+			#   ⇒ ★三個數字才分得出兩種世界：**沒碰到**（相遇機制的病）vs **碰到了但沒打**（決策的病）
+			if t.current_task == TeamData.TASK_DEFEND:
+				var _dk: int = t.prosperity_target_id
+				if not dlive.has(tid) or int(dlive[tid]["oid"]) != _dk:
+					if dlive.has(tid): _close_defend(dlive[tid], st, drows)
+					dlive[tid] = {"team": tid, "oid": _dk, "start": st.world.current_tick, "met": false,
+						"fight0": int(Probe.counts.get("combat.entered.t%d" % tid, 0))}
+				var _dt: TeamData = st.teams.get(_dk)
+				if _dt != null and _dt.tile_pos == t.tile_pos:
+					dlive[tid]["met"] = true
+			elif dlive.has(tid):
+				_close_defend(dlive[tid], st, drows)
+				dlive.erase(tid)
 			if t.current_task == TeamData.TASK_HERALD:
 				if not live.has(tid) or int(live[tid]["oid"]) != t.order_target_id:
 					if live.has(tid):
@@ -57,6 +74,8 @@ func _run() -> void:
 				live.erase(tid)
 	for tid2 in live:
 		_close(live[tid2], st, rows, true)
+	for tid3 in dlive:
+		_close_defend(dlive[tid3], st, drows)
 
 	# ── 逐站分桶 ──
 	var n: int = rows.size()
@@ -113,6 +132,32 @@ func _run() -> void:
 		print("   ★★★母體非 0 而送達 0 ⇒ **與負斷言一致**（★仍是觀測、不是證明）")
 	else:
 		print("   ★★★**負斷言被推翻**：這一類有送達 ⇒ 存在第三條路，要找出它")
+	# ── ★迎戰：三格（互斥且窮盡 ⇒ 相加 ＝ 起算，可對帳）──
+	var d_met_fight: int = 0
+	var d_met_nofight: int = 0
+	var d_nomeet: int = 0
+	var d_notarget: int = 0
+	for dr in drows:
+		if int(dr["oid"]) == -1:
+			d_notarget += 1          # ★連目標都沒有（★★它既不是「沒碰到」也不是「碰到沒打」，自成一格）
+		elif not bool(dr["met"]):
+			d_nomeet += 1
+		elif bool(dr["fought"]):
+			d_met_fight += 1
+		else:
+			d_met_nofight += 1
+	var d_tot: int = drows.size()
+	print("")
+	print("★★★迎戰三格（母體＝迎戰 episode %d 段；★互斥且窮盡 ⇒ 相加必須等於母體）：" % d_tot)
+	print("   ①沒有目標        %5d" % d_notarget)
+	print("   ②沒有碰到面      %5d   ★這是【相遇機制】的那一側" % d_nomeet)
+	print("   ③碰到了但沒開打  %5d   ★★這是【決策】的那一側" % d_met_nofight)
+	print("   ④碰到且開打      %5d" % d_met_fight)
+	print("   對帳：%d + %d + %d + %d = %d vs 母體 %d ⇒ %s" % [
+		d_notarget, d_nomeet, d_met_nofight, d_met_fight,
+		d_notarget + d_nomeet + d_met_nofight + d_met_fight, d_tot,
+		"OK" if d_notarget + d_nomeet + d_met_nofight + d_met_fight == d_tot else "★不符"])
+	print("   ★★★『736 → 1』分不出的兩種世界，就是②與③ —— 而它們的處置完全不同")
 	print("")
 	print("★逐筆（全收）：")
 	for r2 in rows:
@@ -128,6 +173,14 @@ func _run() -> void:
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
 	print("[TEST-SUITE-COMPLETE]")
+
+func _close_defend(ep: Dictionary, st: WorldState, drows: Array) -> void:
+	var tid: int = int(ep["team"])
+	var fought: bool = int(Probe.counts.get("combat.entered.t%d" % tid, 0)) > int(ep["fight0"])
+	if fought:
+		ep["met"] = true   # ★開打必經相遇（同信使那條：門鈴只有一條路）⇒ 取樣看不到最後一刻
+	drows.append({"team": tid, "oid": int(ep["oid"]), "start": int(ep["start"]),
+		"met": bool(ep["met"]), "fought": fought})
 
 func _open_n(groups: Dictionary) -> int:
 	return (groups["open_far"] as Array).size() + (groups["open_mid"] as Array).size() 		+ (groups["open_near"] as Array).size()
