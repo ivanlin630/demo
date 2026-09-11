@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 攻擊門 ｜ headless 六條紅的根
 topic: ★★★**那六條紅是【我的】，不是 fixture 的** —— 我把可行性守衛**也套到偏好評分上**，等於**順手改寫了 prey 選擇的語意**；驗收⑧ 的原話是「**證明是放寬不是改寫**」，而我**改寫了**｜★修法：我**新加**的兩條（`belief_pos` 缺席／`trip` 觸底）只決定**進不進可行集合**、**不影響 argmax**；★★而**舊制原本就有**的兩條（`has_belief`／`unreachable`）維持排除 —— ★★★**我用 `git show main:` 逐字對過，不靠印象**｜★★重跑後六條剩 **一條**，而那一條**測的是已被裁掉的契約**（見 §③，我改了它並補上互補兩格）
 ---
