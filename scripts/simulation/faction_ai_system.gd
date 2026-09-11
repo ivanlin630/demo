@@ -3443,7 +3443,7 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		# ★★★批次一之④：把【被擋的是哪一個 option】帶進 arbiter（★只餵計數，不進判斷）——
 		#   ★這裡是【引擎統一路唯一的 try_set】⇒ 一個站點就覆蓋所有 option，
 		#   ★★而不必動 `_source`（它會寫進 `task_reason` 並與 `ENGINE_SOURCES` 比對）。
-		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "unified", opt)
+		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "unified", opt)
 		if _lvf_this:
 			# ★★★第四型手不聽腦：`try_set` 可能 no-op（priority 被更高的佔住）——
 			#   ★而它【不會報錯】，只是這一次派工靜靜地沒發生
@@ -3921,7 +3921,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 					HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
 				return
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
-		if not TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for(opt), "subteam"):   # ★① 單一源(subteam survival @80 preempt,team19 換子隊 bug 收)
+		if not TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam"):   # ★① 單一源(subteam survival @80 preempt,team19 換子隊 bug 收)
 			continue
 		_stamp_survival_commit(state, sub, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		_commit_settle_site(state, sub, td)   # ★§4a 紮根 commit-hook（try_set 已成功才到此）
@@ -3949,7 +3949,7 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 	if join_pos == Vector2i(-1, -1):
 		return false   # 無 belief 位 → 不 JOIN dispatch（禁 fallback live）
 	if not TaskArbiter.try_set(state, team, TeamData.TASK_JOIN, join_pos, \
-			DecisionOptions.priority_for("併入"), "subteam"):   # ★① 單一源第5路(grep 抓:JOIN=併入 survival-class @80,非 @50)
+			DecisionOptions.priority_for_need(state, team, "併入"), "subteam"):   # ★① 單一源第5路(grep 抓:JOIN=併入 survival-class @80,非 @50)
 		return false
 	_stamp_survival_commit(state, team, "併入")   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 	state.set_social_target(team, target_id)
@@ -4178,7 +4178,7 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
-		if not TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "solo"):   # ★① 單一源(solo survival @80 preempt 安頓)
+		if not TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo"):   # ★① 單一源(solo survival @80 preempt 安頓)
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # Fix2b 早退 tap
 			continue
 		_stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
@@ -6445,6 +6445,8 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 		return false
 	if tile.terrain == "mountain":
 		return false
+	# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：紮營＝立營成立（腳下那格）。
+	if Probe.enabled: Probe.bump("task.done.t%d.%s" % [team.team_id, TeamData.TASK_CAMP])
 	tile.camp_level = 1
 	if Probe.enabled:
 		Probe.bump("camp.built")   # ★gate3：紮營次數（要與 L0→L1 晉級率、L0 廢棄率一起看）
@@ -6521,7 +6523,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
-		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "survival")   # ★① 單一源(收 @80)
+		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival")   # ★① 單一源(收 @80)
 		if Probe.enabled and opt == "併入":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
 			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
 		if not _surv_ok:

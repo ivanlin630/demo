@@ -136,6 +136,10 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	_cas_carry[def_id] = 0.0
 	if Probe.enabled:
 		Probe.bump("conq.combat_entered")
+		# ★★★逐隊鍵（systems：迎戰 episode 18→70 而開打 391→81，兩者方向相反 ⇒ 要看【迎戰的結局】）：
+		#   ★有了它，床才問得出「這一段迎戰，最後有沒有真的開打」——★★而那是全局計數答不出來的。
+		Probe.bump("combat.entered.t%d" % atk_id)
+		Probe.bump("combat.entered.t%d" % def_id)
 		# characterization：起始 effective pop（pop-wounded）+ round 計數初始化。
 		_combat_track[atk_id] = {"round": 0, "pop_start": maxi(atk.population - atk.wounded, 1)}
 		_combat_track[def_id] = {"round": 0, "pop_start": maxi(def.population - def.wounded, 1)}

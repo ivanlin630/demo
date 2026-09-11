@@ -426,6 +426,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 				continue
 			if state.registered_at(_s, _my_tile.tile_pos):
 				continue
+			# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：求居＝見到領主。
+			#   ★成功記在【求居者】身上（它才是那趟旅程的主詞），不是記在領主身上。
+			if Probe.enabled and _s.current_task == TeamData.TASK_SEEK_HOME:
+				Probe.bump("task.done.t%d.%s" % [_s.team_id, TeamData.TASK_SEEK_HOME])
 			c.shelter_seeker_id = _s.team_id
 			c.shelter_seeker_task = _s.current_task     # ★它是【為什麼】站在這裡（求居？還是路過）
 			c.shelter_seeker_opt = _s.current_option
