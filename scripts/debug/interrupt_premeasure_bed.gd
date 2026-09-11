@@ -1,5 +1,8 @@
 extends SceneTree
-# @bed-kind: diagnostic
+# @bed-kind: acceptance
+# slice: 優先序隨需求（前置量測 ＋ before／after 驗收欄）
+# ★★★原本標 diagnostic，而它【確實在判東西】（到場率／episode 長度／副作用三欄都是我拿來下結論的）
+#   ⇒ ★有判決通道就不是純診斷 —— 改標 acceptance 比較誠實（systems 2026-09-11）。
 # 前置量測（HOW spec 2026-09-11-interrupt-not-replace §③ ＋ §⑦(2)）：★動 code 之前先答兩題，
 #   ★★而它們【都可能讓那張票停下來】。
 #

@@ -1,5 +1,6 @@
 extends SceneTree
 # @bed-kind: acceptance
+# slice: 優先序隨需求（commit priority from need, not set membership）
 # 成對對照（HOW 2026-09-11 interrupt 票 §④④，systems 定）：
 #   ★格一【真餓】：food_days < 人格化絕境門檻 ⇒ 覓食仍持 PRIO_SURVIVAL(80) ⇒ 求居(50) **被擋**
 #   ★格二【吃飽】：food_days 遠高於門檻       ⇒ 覓食降為 PRIO_DISPATCH(50) ⇒ 求居 **換得上**
