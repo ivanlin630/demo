@@ -275,13 +275,22 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		# ★★★spec §④ 硬要求：`belief_pos` 進【上游】守衛 ⇒ 門與 to_task 用同一組條件。
 		#   ★副作用（R² 先記）：下面那段「已知存在但位置不明 ⇒ border 0.3」對這條路
 		#   **從此不會執行** —— ★★不是壞掉，是被新守衛架空；原意對別的呼叫路徑仍適用，不要刪。
+		# ★★★【第二版修正】（headless 六條紅買來的）：可行性守衛**只決定「進不進可行集合」**，
+		#   ★**不再把候選從【偏好評分】裡刪掉** —— 上一版我用 `continue` 把它們一起刪了，
+		#   ⇒ ★★那等於**順手改寫了 prey 選擇的語意**（trip 下限本來是【軟折價】不是【排除】，
+		#     而 belief_pos 缺席本來走「border 0.3」那條既有分支）
+		#   ⇒ ★★★驗收⑧ 的原話是「舊三門路徑的既有測試必須全綠 ⇒ 證明是**放寬**不是**改寫**」，
+		#     而我上一版**改寫了**。這一版把兩件事分開：`_feas` 只影響門，不影響 argmax。
+		var _feas: bool = true
 		var prey_pos_gate: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
 		if prey_pos_gate == Vector2i(-1, -1):
 			why["no_belief_pos"] = int(why["no_belief_pos"]) + 1
 			if Probe.enabled: Probe.bump("attack.infeasible.no_belief_pos")
-			continue
+			_feas = false
 		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid, true)
 		if not catch_result.reachable:
+			# ★這一條是【舊制原本就有】的排除（`git show main:` 逐字對過）⇒ 維持 `continue`，
+			#   ★★只有【我新加的】兩條（`belief_pos` 缺席／`trip` 觸底）才改成軟的。
 			why["unreachable"] = int(why["unreachable"]) + 1
 			if Probe.enabled: Probe.bump("attack.infeasible.unreachable")
 			continue
@@ -289,7 +298,7 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
 		var pop_est: float = float(bel.get("population_est", 0.0))
 		# 無 armed_est belief → 人格化迷霧 fallback（讀 leader 人格，非埋死「陌生=滿武裝」）
-		var armed_est: float = BeliefSystem.estimate_armed(bel, pop_est, leader.values)
+		var armed_est: float = BeliefSystem.estimate_armed(bel, pop_est, leader.values if leader != null else {})
 		var richness: float = _belief_richness(bel)
 		# capability grounding（裁2）：弱點比 self ARMED 非 self POP → 無牙商隊 self_armed≈0 →
 		# 任何有武裝 prey 皆非「相對弱」→ weakness→0（不再被誘攻；鎖來自戰力非 tag-label）。
@@ -300,7 +309,7 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		# ★★★god-view 1a Fix A：border 這一格原本讀 `prey.tile_pos`（live 真位）餵進 score。
 		#   ★改成讀 belief_pos；★★而 `_is_border_adjacent` 的簽名同時改成吃【兩個 Vector2i】
 		#   ⇒ ★★★那支函式從此【拿不到】TeamData，也就拿不到 live 值 —— 防線在型別上，不在紀律上。
-		var prey_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
+		var prey_pos: Vector2i = prey_pos_gate   # ★同一次查詢重用（★不要查兩次 belief）
 		if prey_pos == Vector2i(-1, -1):
 			# ★★★這【不是】違規桶，是【合法的第三種結果】（systems 訂正 2026-09-02）：
 			#   `has_belief` ＝ claims 非空；`belief_pos` ＝ 需 claim 帶 tile_pos 且未過期 ⇒ 兩個不同條件
@@ -315,13 +324,16 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		var trip: float = clampf(
 			ResourceSystem.effective_food(state, team) / maxf(trip_need, 0.001),
 			TRIP_FOOD_FLOOR, 1.0)
-		# ★養得起這趟才算可行（沿用既有 TRIP_FOOD_FLOOR，不新增旋鈕）
+		# ★養得起這趟才算【可行】（沿用既有 TRIP_FOOD_FLOOR，不新增旋鈕）——
+		#   ★★而它**不從評分裡刪掉這個候選**：`trip` 本來就是連續折價（clamp 在下限、非零），
+		#   ★★★既有測試逐字測了「糧低 → trip ＝下限（非零）→ **仍中選**」⇒ 排除它就是改寫語意。
 		if trip <= TRIP_FOOD_FLOOR:
 			why["cannot_afford"] = int(why["cannot_afford"]) + 1
 			if Probe.enabled: Probe.bump("attack.infeasible.cannot_afford_trip")
-			continue
-		feasible.append({"id": tid, "eta_days": eta_days})
-		if Probe.enabled: Probe.bump("attack.feasible.candidate")
+			_feas = false
+		if _feas:
+			feasible.append({"id": tid, "eta_days": eta_days})
+			if Probe.enabled: Probe.bump("attack.feasible.candidate")
 		if leader == null:
 			continue   # ★無領袖的隊拿不到人格分數 ⇒ 只進可行集合（spec 風險④：行為新增，要分開報）
 		# ③歸屬（belief claim 語意，可傳/可過時/可騙）：禁讀 prey.faction_id 真值——
