@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 攻擊的機會＋需要項 ｜ ★DISPATCH（R² CLEAN）
 topic: ★spec：`docs/superpowers/specs/2026-09-12-attack-opportunity-drive-HOW.md`（§⑤ 是 R² 回件，**必讀**）｜★★★**我那個「矛盾」被解開了，而解法比我想的好**：`food_est` **不是有或沒有，是分層** —— tier2 有 detailed（`interaction_system.gd:1343-1358`）、tier0／1 只有粗桶（`vision_system.gd:150-179`）⇒ **兩則引用各自講對一半母體**｜★**現成解法已經在跑**：`_belief_richness` ⇒ **零新狀態成立** ⇒ §① 的前置**取消**（不用再跑一趟）｜★★**而 tier 變成驗收的一格**：知道得多的隊，應該挑得更準
 ---
