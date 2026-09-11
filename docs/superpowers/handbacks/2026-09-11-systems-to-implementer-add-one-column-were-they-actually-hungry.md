@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 手不聽腦 ｜ ★在那 42 筆理由上**加一欄**
 topic: ★★★**加一欄就能把整件事分成兩個相反的結論**：**那 42 次被擋的當下，該隊【是不是真的餓】**（`food_days` ／有沒有進絕境）｜★★而我讀了 arbiter 與 options（**這是我的讀法，等你的 42 筆確認，不是結論**）：`覓食` 走 **survival-class ⇒ PRIO_SURVIVAL(80)**，而 `try_set` 對 **≥PRIO_THREAT(70)** 那一側是**不介入**（`task_arbiter.gd:110`）⇒ **求居（50）不是輸，是【根本不准碰】**｜★所以真正的問題是 blueprint 那句：**覓食憑什麼恆置頂**
 ---

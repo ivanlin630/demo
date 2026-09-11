@@ -1,0 +1,117 @@
+# 求居被擋的【逐筆】卷：42 筆拒絕理由 ＋「當下是不是真的餓」那一欄
+# 床：.worktrees/converge2/scripts/debug/registration_verbs_bed.gd（commit 7daf8bc32＋字面修正）
+# 世界：warring_states（★預設 config 未改）｜43200 tick ＝ 30 遊戲天｜seed 1337｜Probe=ON
+# ★母體定義：表三母體＝「求居 option 的 try_set 回 false」的次數（42）；樣本上限 150 ⇒ 實收 42＝全收
+#            表四母體＝所有 current_task 寫入路（try_set／try_set_defy／release／transition）
+# ★★同機另有長跑（measurer 的 homeless_producer_bed，pid 17656）⇒ 【>2 秒幀數與任何絕對 us 都要當成含 contention】
+#
+# ═══════ 三個主結論 ═══════
+# ①★理由 100% 單一：**「優先序不足」42／42** —— 不是持守擋班、不是 crisis 免疫窗、不是戰鬥鎖（那三支各 0 次）
+#   ⇒ ★★機制＝最單純的那一條：`priority(50) > team.task_priority(80)` 不成立，
+#     而同層 self-replace 要求【相等】⇒ 50≠80 ⇒ 落到最後的 `優先序不足` return false。
+#   ⇒ ★★★systems 讀到的「≥PRIO_THREAT 那一側不介入」（task_arbiter 持守段）**本窗一次都沒 fire** ——
+#     結論（求居連比都不比）一樣，但**經過的是另一條分支**，而下一張票要改的是【這一條】。
+# ②★★★被擋的當下【41／42 不餓】：food_days 中位 ≈ 19 天、最大 22.87，只有 1 筆是絕境（1.80）
+#   ⇒ 「真餓先吃」在這 42 筆裡**不成立** —— 擋住求居的是一個【已經吃飽很久】的覓食任務。
+# ③★★team 65 在 tick 20160…37494（17334 tick ＝ 12 遊戲天）的**每一次取樣**，現任都是 覓食@80
+#   ⇒ ★誠實限：這是【cadence 取樣】，不是逐 tick 連續證據 ⇒ 「覓食 episode 從不結束」**尚待前置量測床確認**
+#     （`.worktrees/interrupt/scripts/debug/interrupt_premeasure_bed.gd` 的 ① 正是量這個）。
+#   ⇒ ★★但它已經足以把 interrupt 票的前提**改個方向**：問題不是「吃了 food_days 不上升」（它上升到 22 天），
+#     ★★★而是**需求消失了、任務沒有被釋放**。
+#
+# ═══════ 我自己的一顆錯（★先寫，因為它會污染別人引用） ═══════
+# ★第一版印出「覓食=50」—— 那**不是世界的事實**，是我寫進床裡的字面被打成 U+899A（覚）而非 U+8993（覓）
+#   ⇒ `priority_for("覚食")` 在 REGISTRY 查無 ⇒ 落到預設 PRIO_DISPATCH 50。
+# ★★抓到它的是**標籤自己看起來不對**（印成「食=50」少一個字），不是數字不對 ——
+#   ★★★而數字 50 本身**完全合理**（它是預設值），所以【只看數字的話這一格會被當成真的】。
+# ⇒ 修正後（同一支床、1440 tick 微跑，★這一行不依賴窗長）：
+#   **求居=50　覓食=80　收留=50　｜　THREAT 門檻=70　SURVIVAL=80　DISPATCH=50**
+#
+# ═══════ 陽性對照與純觀測證據 ═══════
+# ★fp = 4b080cea8aa5f8ce97e7ad9ef6822c58 —— 與【加這批探針之前】那一趟**逐字相同** ⇒ 儀器沒有改世界
+# ★★convoy.rewrite.try_set = 6（★舊 code 在結構上**不可能**出現這一列：那三處是賦值之後才呼叫，
+#   而 `_note_convoy_rewrite` 的 `new_task == team.current_task` 早退因此恆真）⇒ **接上電的直接證據**
+# ★★★>2 秒幀數 = 247 / 43200（含 contention）
+#
+
+漏斗Ａ【單位：支】—— 窗末快照（★不可與下面的『次』相減）
+   PRODUCE 隊          10
+   其中無自家據點        8   （2）
+   其中知道別人據點      8   （0）
+★★漏斗Ｂ【單位：次】—— 事件計數（★逐站相減）
+   求居進候選          436
+   求居贏 argmax        59   （377）
+   決策說要派出         59   （0）
+   -b `try_set` 成功    17   （42 ＝ noop 42；被誰擋：["覓食×42"]）★★這一站是逐筆表揭出來的
+   真的走到              4   （55）★★最大的一站
+   抵達時仍是求居者      0   （4，逐筆表二）
+   領主看到求居者        0   （0）
+   收留贏 argmax         0   （0）
+   真的登記              0   （0）
+
+★表一：求居【逐筆去向】共 2 筆（窗 43200 tick／30.0 遊戲天／seed 1337／warring_states）
+   結束狀態彙總：{ "走到了": 1, "改去做別的": 1 }
+   team=41 出發 tick=34740 最後仍求居 tick=38736 結束＝走到了
+   team=41 出發 tick=43080 最後仍求居 tick=43199 結束＝改去做別的:乞食
+
+★表二：抵達時的狀態 共 1 筆
+   team=41 抵達 tick=38737 task=覓食 option=覓食 已登記=false host_owner=109
+
+★表三：`try_set` 拒絕理由（母體＝求居 try_set 失敗 42 次；樣本上限 150 筆，實收 42 筆）
+   理由彙總（arbiter 自己走的分支，非我歸納）：{ "優先序不足": 42 }
+   ★★餓／不餓分欄：{ "優先序不足.不餓": 41, "優先序不足.餓": 1 }（餓的定義＝food_days < DecisionTerms.DESPERATION_DAYS 3.0）
+   tick=20160 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=5.71 絕境=false persist=0.119 現任reason=unified
+   tick=20640 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=22.87 絕境=false persist=0.130 現任reason=unified
+   tick=21600 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=22.21 絕境=false persist=0.153 現任reason=unified
+   tick=22709 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=21.46 絕境=false persist=0.172 現任reason=unified
+   tick=23825 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=20.67 絕境=false persist=0.172 現任reason=unified
+   tick=24918 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.92 絕境=false persist=0.172 現任reason=unified
+   tick=25020 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=4.83 絕境=false persist=0.172 現任reason=unified
+   tick=25500 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.50 絕境=false persist=0.172 現任reason=unified
+   tick=25860 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.25 絕境=false persist=0.172 現任reason=unified
+   tick=25920 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.21 絕境=false persist=0.172 現任reason=unified
+   tick=25980 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.17 絕境=false persist=0.172 現任reason=unified
+   tick=26040 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.12 絕境=false persist=0.172 現任reason=unified
+   tick=26100 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.08 絕境=false persist=0.172 現任reason=unified
+   tick=26160 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.04 絕境=false persist=0.172 現任reason=unified
+   tick=26220 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=19.00 絕境=false persist=0.172 現任reason=unified
+   tick=26280 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=18.96 絕境=false persist=0.172 現任reason=unified
+   tick=26340 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=18.92 絕境=false persist=0.172 現任reason=unified
+   tick=26400 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=18.87 絕境=false persist=0.172 現任reason=unified
+   tick=26460 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=18.83 絕境=false persist=0.172 現任reason=unified
+   tick=26520 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=18.79 絕境=false persist=0.172 現任reason=unified
+   tick=26580 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=18.75 絕境=false persist=0.172 現任reason=unified
+   tick=27702 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=18.00 絕境=false persist=0.172 現任reason=unified
+   tick=28560 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=17.37 絕境=false persist=0.172 現任reason=unified
+   tick=29647 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=16.62 絕境=false persist=0.172 現任reason=unified
+   tick=30748 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=15.87 絕境=false persist=0.172 現任reason=unified
+   tick=31839 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=15.12 絕境=false persist=0.172 現任reason=unified
+   tick=32920 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=14.37 絕境=false persist=0.172 現任reason=unified
+   tick=32940 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=14.33 絕境=false persist=0.172 現任reason=unified
+   tick=34066 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=13.58 絕境=false persist=0.172 現任reason=unified
+   tick=35201 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=12.79 絕境=false persist=0.172 現任reason=unified
+   tick=36322 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=12.00 絕境=false persist=0.172 現任reason=unified
+   tick=37494 team=65 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=11.21 絕境=false persist=0.172 現任reason=unified
+   tick=39300 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=22.21 絕境=false persist=0.018 現任reason=unified
+   tick=39360 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=22.17 絕境=false persist=0.020 現任reason=unified
+   tick=39420 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=16.63 絕境=false persist=0.022 現任reason=unified
+   tick=39480 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=12.47 絕境=false persist=0.024 現任reason=unified
+   tick=39540 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=9.35 絕境=false persist=0.026 現任reason=unified
+   tick=39600 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=7.01 絕境=false persist=0.028 現任reason=unified
+   tick=39660 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=14.00 絕境=false persist=0.030 現任reason=unified
+   tick=39720 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=10.50 絕境=false persist=0.032 現任reason=unified
+   tick=39780 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=18.18 絕境=false persist=0.034 現任reason=unified
+   tick=40260 team=41 理由=優先序不足 現任=覓食(prio80) 求居prio=50 food_days=1.80 絕境=true persist=0.049 現任reason=unified
+   ★★★優先序並排（單一來源 DecisionOptions.priority_for）：求居=50 食=50 收留=50 ｜ THREAT 門檻=70 SURVIVAL=80 DISPATCH=50
+
+★表四：【身分在途中被換掉】（母體＝所有 current_task 寫入路：try_set／try_set_defy／release／transition）
+   逐路徑：{ "try_set": 2 } ｜ 逐路徑×換成什麼：{ "try_set.覓食": 1, "try_set.乞食": 1 }
+   tick=38737 team=41 path=try_set 換成=覓食 由誰=unified option=覓食 現任prio=50
+   tick=43200 team=41 path=try_set 換成=乞食 由誰=unified option=乞食 現任prio=50
+   ★誠實限：`release()` 拿不到 state  那一條路的 tick 印 -1（不是 tick 0）
+
+★convoy.rewrite.* 計數（陣性對照）：{ "convoy.rewrite.try_set": 6, "convoy.rewrite.try_set.乞食": 6, "convoy.rewrite.release": 5, "convoy.rewrite.release.idle": 5 }
+★>2 秒的幀數 = **247 / 43200**（★終線是這個計數歸零，不是平均變好）
+★fp=4b080cea8aa5f8ce97e7ad9ef6822c58
+=== DONE === SECTIONS=1/1 FAILS=0
+
