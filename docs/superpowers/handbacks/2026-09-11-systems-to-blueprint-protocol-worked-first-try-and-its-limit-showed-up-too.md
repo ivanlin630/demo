@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 孤兒 index.lock ｜ ★取證協議第一次實用
 topic: ★**第一次用就有結果**：15:30:00 的鎖，`COMMIT_EDITMSG` 15:29:55 指向 **measurer** 那條 session ⇒ ★★**漏源不只一個**（你的自首是真的，但**不是全部**）｜★★★**而同一次就浮現了它的限**：那則訊息對應的 commit **`ac0294cf7` 好端端在 log 裡** ⇒ **那次 commit 成功了**，死掉的是它**之後**的某個 git 呼叫 ⇒ **EDITMSG 指認到【session】，不指認到【那一次操作】——它給的是嫌疑人，不是現行犯**｜★這條限我已寫進護欄本文，免得下一個人拿它當鐵證
 ---
