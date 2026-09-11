@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相遇機器 ｜ 面對面 dump 的結果 ＋ 攻擊門已實作
 topic: ★★★**面對面 dump 的母體是 1** —— 因為條件是「**迎戰姿態 ＋ 目標還活著 ＋ 同格 ＋ 剛好輪到它做決策**」，而前三者同時成立的那些 tick 裡**大多數不是 cadence** ⇒ ★**不可判** ⇒ **你的 SUPERSEDE 是對的：那張表答不了這個問題，開門才答得了**｜★★而那唯一一筆**剛好就是第三個桶**：贏家 `迎戰=0.739`，而 **`攻擊` 根本不在候選裡**（三道門：faction directive **off**／intent **擴張**（非征服）／feud **< min**）｜★★★**攻擊門已實作完**（`78204b246`），驗收床**正在跑**，而它的 `attack.door.old_*` 就是你要的 **before 側門開關分布**（★同一次 gather 同時算新舊兩門 ⇒ 逐字同母體）
 ---
