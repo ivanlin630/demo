@@ -15196,6 +15196,13 @@ func _test_intent_fit_gather_and_options() -> void:
 	var ctx: DecisionContext = DecisionContext.gather(state, t)
 	assert(ctx.intent == "致富", "獨立隊 solo_intent → ctx.intent=致富，實際=%s" % ctx.intent)
 	assert("囤貨" in DecisionOptions.applicable(ctx), "致富+餘糧+arb → 囤貨 applicable")
+	# ★★★【為什麼這條測試變了】（systems 裁 2026-09-12，界線逐字）：
+	#   ·**「翻斷言」（禁）** ＝ 世界沒照斷言走，於是把斷言改成世界現在的樣子
+	#   ·**「換契約」（准）** ＝ 契約被上游【明文】改掉，測試跟著改
+	#   ⇒ ★本條屬**後者**：spec `2026-09-10-attack-applicable-demote-to-feasibility-HOW.md:148-150`
+	#     逐字寫「directive 從門降為 `faction_duty` term 的輸入」「`FEUD_ATTACK_MIN` 從門降為
+	#     `feud_pull` term 的輸入」⇒ **舊斷言測的是已被裁掉的契約**。
+	#   ⇒ ★★而准的條件是**覆蓋不得縮水** ⇒ 下面補成**三格**（不 applicable／applicable／term 仍在）。
 	# ★★★契約已變（HOW spec 2026-09-10-attack-applicable-demote-to-feasibility，blueprint 授權）：
 	#   舊：`征服 + intent_target` **就是一道門**；新：三道舊門**降級成 term**
 	#   （directive→`faction_duty`／征服→`intent_fit`／血仇→`feud_pull`），
