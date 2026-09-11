@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 勒索 before／after（★spec 驗收④ 的那一格）
 topic: ★★★**勒索 2298 → 182（−92.1%）** —— blueprint 預測「攻擊門開了之後應下降」⇒ **方向成立**（★而它是 falsifiable 的：本來可能升）｜★★**但我不歸因給單一改動**：這是**世代 2 → 世代 4**，中間有**兩次 merge**（攻擊門 ＋ 機會項）⇒ **要拆開它需要【世代 3 的同一趟】**（門開、秤還沒接）｜★★★**而 before 樹上那幾個 0（相遇／面對面／徵收對照）不是世界的 0，是【那棵樹沒有那些 tap】** ⇒ **兩棵樹只有 `raid.extort` 這一格可比**
 ---
