@@ -244,6 +244,14 @@ func _treat_wounded(state: WorldState, team: TeamData) -> void:
 func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	if not state.teams.has(id_a) or not state.teams.has(id_b):
 		return   # 本 tick 內滅團/合併移除 → id 仍留掃描迴圈，避免 state.teams[id] Out of bounds
+	# ★★★在有人提議「讓相遇發事件」之前，先量它【一天幾次】（systems 2026-09-12）：
+	#   ★這個數決定那是【一格小修】還是【一場喚醒風暴】——而我們有前例（`bigworld p95 5× max ＝ wake storm`）。
+	#   ★★母體 ＝ 這支函式的每一次呼叫（＝本 tick 被判定為「同格互動」的每一【對】）。
+	#   ★★★而它不等於「不同的兩支隊碰面次數」：**同一對在連續 tick 會重複計**（＝喚醒風暴的分子，正是要的那個）。
+	if Probe.enabled:
+		Probe.bump("encounter.pair_calls")
+		Probe.bump("encounter.pair_calls.d%04d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY))
+		_note_encounter_buckets(state, id_a, id_b)
 	_vision.reveal_encounter(state, id_a, id_b)
 	_write_tier2_intel(state, id_a, id_b)
 	_write_tier2_intel(state, id_b, id_a)
@@ -555,7 +563,14 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 # 冗餘去重：母隊 pending_proposal 為權威，proposal_id 首達生效、後到 no-op。送達後信使歸隊。
 func _deliver_envoy_proposal(state: WorldState, envoy_id: int, target_id: int) -> void:
 	# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：信使＝送達（被目標讀取）。
-	if Probe.enabled: Probe.bump("task.done.t%d.%s" % [envoy_id, TeamData.TASK_HERALD])
+	#   ★這是全庫**兩個**送達入口之一（另一個是 same_faction 分支的 `_deliver_order`）
+	#   ⇒ ★★`herald.delivered.*` 分流計數與 `task.done.*` 兩顆都留（前者答「走哪個入口」，後者答「這一趟成了沒」）。
+	# ★留兩邊的檢查：**X ≠ Y** —— `herald.delivered.*` 答「**走哪一個送達入口**」（全庫只有兩個），
+	#   `task.done.t<id>.信使` 答「**這一趟成了沒**」（床用它算 episode 成功）；
+	#   ★而 `task.done` 在這個站點**只 bump 一次**（已 grep 確認：:570／:793 各一）⇒ ★★沒有重複計數。
+	if Probe.enabled:
+		Probe.bump("herald.delivered.envoy")
+		Probe.bump("task.done.t%d.%s" % [envoy_id, TeamData.TASK_HERALD])
 	var envoy: TeamData = state.teams[envoy_id]
 	var target: TeamData = state.teams[target_id]
 	var mother: TeamData = state.teams.get(envoy.parent_team_id)
@@ -775,7 +790,10 @@ func _levy_settle_tap(state: WorldState, collector: TeamData, payer: TeamData,
 	Probe.note_levy(collector.team_id, payer.team_id, state.world.current_tick)
 
 func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> void:
-	if Probe.enabled: Probe.bump("task.done.t%d.%s" % [messenger_id, TeamData.TASK_HERALD])
+	# ★★★送達（同派系那條入口，:390-393 的 `same_faction` 分支裡）＝ 信使的完成定義
+	if Probe.enabled:
+		Probe.bump("herald.delivered.order")
+		Probe.bump("task.done.t%d.%s" % [messenger_id, TeamData.TASK_HERALD])
 	var messenger: TeamData = state.teams[messenger_id]
 	var target: TeamData    = state.teams[target_id]
 	var order: String = messenger.order_task if messenger.order_task != "" else TeamData.TASK_IDLE
@@ -1722,3 +1740,54 @@ func _resolve_pacify(state: WorldState, pacifier: TeamData, village: TeamData) -
 			p.stress = maxf(p.stress - 0.05, 0.0)
 			LoyaltyBank.adjust(p, 0.02, "pacify")
 	UnrestBank.reduce(village, 1, "pacify")
+
+
+# ★★★相遇分桶（systems 2026-09-12；★一趟答兩個問題：總量 ＋ 各謂詞能篩掉多少）
+#   ★桶用【未來那個過濾器會用的謂詞】，而 blueprint 的硬條件是**只准外觀層便宜謂詞**
+#     （可見武裝／規模／逼近），**禁讀 tag／意圖**。
+#   ★★而「敵對與否」**不是**合法的過濾判準（它要讀關係／意圖）——
+#     ★★★它在這裡**只當分析欄**，我把它與外觀層三欄**分開命名**（`analysis.*`），
+#     免得下一個人把分析欄當成設計。
+#   ★★★而過濾器的形狀是【預設醒、具名靜】⇒ 這裡記的是「**這種相遇【會被靜音】**」的候選比例，
+#     不是「這種才喚醒」—— 兩者在 code 上差一個 `not`，在世界上差很多。
+func _note_encounter_buckets(state: WorldState, id_a: int, id_b: int) -> void:
+	var a: TeamData = state.teams[id_a]
+	var b: TeamData = state.teams[id_b]
+	# ①可見武裝（外觀層）：雙方是否任一方有戰力外顯 ⇒ 無武裝相遇是【靜音候選】
+	var _ca: float = float(NpcCombatSystem.new().calc_armed(state, a))
+	var _cb: float = float(NpcCombatSystem.new().calc_armed(state, b))
+	Probe.bump("encounter.armed." + ("both" if _ca > 0.0 and _cb > 0.0 else ("one" if _ca > 0.0 or _cb > 0.0 else "none")))
+	# ②規模差（外觀層）：人數比（大者/小者）
+	var _hi: float = float(maxi(a.population, b.population))
+	var _lo: float = float(maxi(mini(a.population, b.population), 1))
+	var _ratio: float = _hi / _lo
+	Probe.bump("encounter.sizegap." + ("lt2" if _ratio < 2.0 else ("lt4" if _ratio < 4.0 else "ge4")))
+	# ③逼近（外觀層）：對方的 move_target 是不是【我腳下這一格】⇒ 朝我來 vs 路過
+	#   ★只讀 move_target 這個外觀事實（它就是它正在走的方向），不讀意圖欄位。
+	var _toward: bool = (b.move_target == a.tile_pos) or (a.move_target == b.tile_pos)
+	Probe.bump("encounter.approach." + ("toward" if _toward else "passing"))
+	# ④★分析欄（★不是過濾判準）：敵對 —— ★★★而它**要兩個方向**（blueprint 點破，systems 轉達）：
+	#   **敵對不是世界裡的對稱事實，是每一支隊【各自的關係判斷】** ⇒ 一個布林就已經在假設對稱。
+	#   ⇒ ★這裡逐向記：A 視 B 為敵／B 視 A 為敵，而判準用**那一支隊自己讀得到的東西**：
+	#     ①它對對方的名聲分（`known_reputations`，低 ＝ 不信任）②它領袖對對方領袖的 feud 邊
+	#   ⇒ ★★於是多出一個真實存在的桶：**單向敵意**（一方當敵人、另一方沒有）。
+	#   ★★★而這一欄**過濾器不准用**（它讀關係），它只給我們看 —— 命名為 `analysis.*` 就是這個意思。
+	var _h_ab: bool = _views_as_foe(state, a, b)
+	var _h_ba: bool = _views_as_foe(state, b, a)
+	var _hk: String = "both" if (_h_ab and _h_ba) else ("one_way" if (_h_ab or _h_ba) else "neither")
+	Probe.bump("encounter.analysis.hostile." + _hk)
+
+
+# ★「甲把乙當敵人嗎」——★逐向、且只讀【甲自己知道的東西】（名聲分／領袖的 feud 邊）。
+#   ★★不讀 `faction_id` 真值：那是 god-view，而且它把「同派系 ＝ 不敵對」這個假設偷渡進來。
+func _views_as_foe(state: WorldState, me: TeamData, other: TeamData) -> bool:
+	if float(me.known_reputations.get(other.team_id, 0.5)) < 0.35:
+		return true
+	var ldr: PersonData = state.persons.get(me.leader_id)
+	if ldr == null:
+		return false
+	var fe: Dictionary = RelationGraph.strongest(ldr.relation_edges, "feud")
+	if fe.is_empty():
+		return false
+	# ★邊的欄位是 `target`（relation_graph.gd:3 的逐字定義），不是 `other_id` —— 查過再寫
+	return int(fe.get("target", -1)) == other.leader_id and float(fe.get("intensity", 0.0)) > 0.0

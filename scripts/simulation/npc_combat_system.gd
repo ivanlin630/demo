@@ -135,9 +135,13 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	_cas_carry[atk_id] = 0.0
 	_cas_carry[def_id] = 0.0
 	if Probe.enabled:
+		# ★留兩邊的檢查：**X ≠ Y** —— `conq.combat_entered` 答「全世界開打幾場」，
+		#   `combat.entered.t<id>` 答「**這一支隊**有沒有開打過」；★而逐隊那顆**只有一份**
+		#   （兩張票各自加過，merge 時已合成一份 ⇒ ★★沒有重複 bump）。
 		Probe.bump("conq.combat_entered")
 		# ★★★逐隊鍵（systems：迎戰 episode 18→70 而開打 391→81，兩者方向相反 ⇒ 要看【迎戰的結局】）：
 		#   ★有了它，床才問得出「這一段迎戰，最後有沒有真的開打」——★★而那是全局計數答不出來的。
+		#   ★★★而同一顆鍵也是「相遇機器」那一票要用的（兩張票撞同一個需求 ⇒ 留一份）。
 		Probe.bump("combat.entered.t%d" % atk_id)
 		Probe.bump("combat.entered.t%d" % def_id)
 		# characterization：起始 effective pop（pop-wounded）+ round 計數初始化。

@@ -351,7 +351,10 @@ static var REGISTRY: Dictionary = {
 	# 序4 vendetta 溶入：feud_pull term 掛入 → 血仇成攻擊的一個 weight 驅力（衝動 leader 血仇高→攻擊贏 rank）。
 	"攻擊": {
 		"affinity": [0.1, 0.1, 0.0, 0.6, 0.2], "sets": {"stakes": true},
-		"terms": [["faction_duty", "faction_duty"], ["attack_drive", "attack"], ["intent_fit", "intent_fit"], ["feud_pull", "feud"]],
+		# ★★★加第五項【機會＋需要】（HOW spec 2026-09-12-attack-opportunity-drive）：
+		#   ★前四項全是**授權形狀** ⇒ 沒授權時 util 恆 0（實測 1238/1238 來自 terms_sum）
+		#   ⇒ ★★授權四項**保留**，角色從【唯一來源】變成【加成】；這一項讓「沒有令也沒有仇」時分數不再是 0。
+		"terms": [["faction_duty", "faction_duty"], ["attack_drive", "attack"], ["intent_fit", "intent_fit"], ["feud_pull", "feud"], ["attack_opportunity", "attack_opportunity"]],
 		# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
 		# means-end：征服 intent 隊亦開攻擊（非只 faction_stakes），target=intent_target/weak_prey。
 		# 序4 血仇路：強血仇(≥FEUD_ATTACK_MIN)+可見仇敵 → 攻擊 applicable（衝動 leader 拉隊打仇人）。
