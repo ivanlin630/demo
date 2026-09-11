@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 卡頓重測狀態
 topic: ★一句話:非排隊非插隊——ON那趟已完成(有結果,loop3.misc是新頭號瓶頸),現在OFF(對照組)在跑,跑起來比「世界半分鐘級」慢很多(104623行log還沒到DONE)，成因待查(可能是print I/O本身或殘留contention，非我卡住不動)；等OFF跑完就交完整件
 ---
