@@ -100,6 +100,28 @@ func _run() -> void:
 		if ks.begins_with("attack.util.tier") and ks.ends_with(".nonzero"):
 			t_row[ks.replace("attack.util.", "").replace(".nonzero", "")] = int(Probe.counts[k])
 	print("★⑦非零 util 的 belief tier 分桶：%s" % str(t_row))
+	# ★★★驗收⑦ 的真判準：**同一 tier 內，util 有沒有跟著 loot 走**（★「tier2 比較多」證明不了這件事）
+	print("★⑦-b 逐 tier × 逐 loot 桶的**平均 util**（母體各自標；★空桶印【不可判】不印 0）：")
+	for _t in [-1, 0, 1, 2]:
+		var _row: String = "   tier%d：" % _t
+		for _lb in ["loot0", "lootLo", "lootHi"]:
+			var _n: int = int(Probe.counts.get("attack.tier%d.%s.n" % [_t, _lb], 0))
+			var _sum: float = Probe.amount("attack.tier%d.%s.usum" % [_t, _lb])
+			_row += "%s=%s(n=%d) " % [_lb, ("不可判" if _n == 0 else "%.3f" % (_sum / float(_n))), _n]
+		print(_row)
+	print("   ★判準：**同一列裡 lootHi 的平均要高於 loot0**（跟著肥瘦走）；")
+	print("     ★★而 tier2 那一列的【落差】應該比 tier0/1 大（知道得多 ⇒ 分得更開）——★★★這是觀察不是目標")
+	# ★★剩下的零是什麼（systems：一半的母體沒有解釋我不收）
+	var _zb: Dictionary = {}
+	for _k in Probe.counts:
+		var _ks: String = String(_k)
+		if _ks.begins_with("attack.opp.zero_by."):
+			_zb[_ks.replace("attack.opp.zero_by.", "")] = int(Probe.counts[_k])
+	print("★①-b 那些零是什麼（機會項的零，逐因分類）：%s" % str(_zb))
+	_ok(int(_zb.get("unexplained", 0)) == 0,
+		"①-b **沒有「無法解釋」的零**（有就是我漏了一種來源）")
+	print("   ★★注意母體不同：這一格分類的是【機會項自己的零】，")
+	print("     而『零 final』是【五項相加之後】的零 —— ★★★兩個數不可互相相減")
 	print("   ★這一格是【觀察】不是【目標】——★★不准為了讓它好看而調 tier 權重（禁 crank）")
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=%d" % _fails)

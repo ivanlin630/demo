@@ -372,6 +372,12 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				_cmp["odds"] = snappedf(ctx.attack_win_odds, 0.001)
 				Probe.bump("attack.util.%s.%s" % ["authed" if _authed else "unauthed",
 					"zero" if absf(u) < 0.0005 else "nonzero"])
+				# ★★★驗收⑦ 的真判準（systems：本票最有意思的那一格）：
+				#   ★「tier2 比較多」證明不了「挑得更準」—— ★★要看的是**同一 tier 內，util 有沒有跟著 loot 走**
+				#   ⇒ 逐 tier × 逐 loot 桶記 util 的和與次數（★事後除 ＝ 每一桶的平均，母體各自標）
+				var _lb: String = "loot0" if ctx.attack_loot_est < 0.001 else ("lootLo" if ctx.attack_loot_est < 1.0 else "lootHi")
+				Probe.add_amount("attack.tier%d.%s.usum" % [ctx.attack_belief_tier, _lb], u)
+				Probe.bump("attack.tier%d.%s.n" % [ctx.attack_belief_tier, _lb])
 				if absf(u) >= 0.0005:
 					Probe.bump_sample("attack.nonzero_util", {"u": snappedf(u, 0.001),
 						"tier": ctx.attack_belief_tier, "loot": snappedf(ctx.attack_loot_est, 0.001),

@@ -238,7 +238,19 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# ★★★「機會」與「需要」相加再乘贏率與人格 ——
 			#   ★相加：肥而不餓也值得打（機會）／餓而對方不肥也值得打（需要）
 			#   ★★乘贏率：打不贏就別打（既有接地）⇒ 無牙隊整項 0（★不是壓低，是 0）
-			return (ATTACK_OPP_LOOT_W * _loot + ATTACK_OPP_NEED_W * _need) * _odds * _person
+			var _opp: float = (ATTACK_OPP_LOOT_W * _loot + ATTACK_OPP_NEED_W * _need) * _odds * _person
+			# ★★★「剩下的零是什麼」（systems 2026-09-12：★一半的母體沒有解釋我不收）：
+			#   ★零有**四種來源**，而它們的處置完全不同 ⇒ 逐筆分類，不是只數一個 0。
+			if Probe.enabled and absf(_opp) < 0.0005:
+				if absf(_odds) < 0.0005:
+					Probe.bump("attack.opp.zero_by.no_teeth")          # 贏率 0：無牙（★既有接地，設計如此）
+				elif absf(_loot) < 0.0005 and absf(_need) < 0.0005:
+					Probe.bump("attack.opp.zero_by.poor_and_fed")      # 目標不肥 ＋ 自己不餓（★秤說「沒理由」）
+				elif absf(_person) < 0.0005:
+					Probe.bump("attack.opp.zero_by.personality")       # 極端慎重被 clamp 到 0
+				else:
+					Probe.bump("attack.opp.zero_by.unexplained")       # ★★★這一桶非 0 ＝ 我漏了一種，要查
+			return _opp
 		"loot_drive":
 			if opt != "掠奪": return 0.0
 			if not ctx.has_weak_prey: return 0.0
