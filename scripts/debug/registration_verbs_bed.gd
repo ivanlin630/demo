@@ -307,8 +307,8 @@ func _initialize() -> void:
 		print("   ★（0 筆 ⇒ 本窗沒有任何求居者走到 —— ★★而那與「走到了但沒被看見」是兩件事）")
 	# ★★★表三：`try_set` 拒絕的【逐筆理由】（systems：不要歸納，全部貼上來）
 	#   ★加了一欄【當下是不是真的餓】—— ★★它把同一批數字分成兩個相反的結論：
-	#     真餓 ⇒ 【覚食優先是對的】，問題在「求居永遠等不到不餓的那一天」；
-	#     不餓 ⇒ 【覚食恆置頂】，而那是一個沒有人授權的硬順序。
+	#     真餓 ⇒ 【覓食優先是對的】，問題在「求居永遠等不到不餓的那一天」；
+	#     不餓 ⇒ 【覓食恆置頂】，而那是一個沒有人授權的硬順序。
 	print("")
 	var deny_rows: Array = Probe.samples.get("seek.deny", [])
 	var deny_tot: int = 0
@@ -334,8 +334,8 @@ func _initialize() -> void:
 			str(rd["絕境"]), float(rd["persist"]), String(rd["現任reason"])])
 	if deny_rows.is_empty():
 		print("   ★（0 筆 ⇒ 本窗求居沒有被 `try_set` 擋過 —— ★★而那跟「求居根本沒贏過」是兩件事）")
-	print("   ★★★優先序並排（單一來源 DecisionOptions.priority_for）：求居=%d 覚食=%d 收留=%d ｜ THREAT 門檻=%d SURVIVAL=%d DISPATCH=%d" % [
-		DecisionOptions.priority_for("求居"), DecisionOptions.priority_for("覚食"),
+	print("   ★★★優先序並排（單一來源 DecisionOptions.priority_for）：求居=%d 覓食=%d 收留=%d ｜ THREAT 門檻=%d SURVIVAL=%d DISPATCH=%d" % [
+		DecisionOptions.priority_for("求居"), DecisionOptions.priority_for("覓食"),
 		DecisionOptions.priority_for("收留"), TaskArbiter.PRIO_THREAT,
 		TaskArbiter.PRIO_SURVIVAL, TaskArbiter.PRIO_DISPATCH])
 	# ★★★表四：身分在途中被換掉——換成什麼、走哪條寫入路、由誰換的
@@ -363,14 +363,14 @@ func _initialize() -> void:
 	if lost_rows.is_empty():
 		print("   ★（0 筆）")
 	print("   ★誠實限：`release()` 拿不到 state ⇒ 那一條路的 tick 印 -1（不是 tick 0）")
-	# ★順手的陣性對照：`convoy.rewrite.*` 的 try_set 列【舊 code 結構上不可能出現】（早退恆真），
+	# ★順手的陽性對照：`convoy.rewrite.*` 的 try_set 列【舊 code 結構上不可能出現】（早退恆真），
 	#   本趨修完之後它若非 0 ⇒ ★★那就是【接上電】的直接證據。
 	var cvr: Dictionary = {}
 	for kc in Probe.counts:
 		if String(kc).begins_with("convoy.rewrite."):
 			cvr[String(kc)] = int(Probe.counts[kc])
 	print("")
-	print("★convoy.rewrite.* 計數（陣性對照）：%s" % (str(cvr) if not cvr.is_empty() else "全 0（本窗沒有 RETURN 期的 porter 被改寫）"))
+	print("★convoy.rewrite.* 計數（陽性對照）：%s" % (str(cvr) if not cvr.is_empty() else "全 0（本窗沒有 RETURN 期的 porter 被改寫）"))
 	print("★⑧>2 秒的幀數 = **%d / %d**（★終線是這個計數歸零，不是平均變好）" % [
 		SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★⑦fp=%s" % StateFingerprint.compute(st))
