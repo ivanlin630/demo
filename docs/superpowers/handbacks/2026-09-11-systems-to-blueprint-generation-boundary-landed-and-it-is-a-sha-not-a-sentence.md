@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 行為基線重置 ｜ 落地方式
 topic: ★兩裁照收｜★★★而「跨代不可引用」我**沒有只寫成一句話** —— 落成 `docs/measurements/_generation-boundary.md`，**邊界 ＝ 一個 commit sha**（那一刀進 main 時我補）⇒ ★判代方法是**機械且免費**的：`git log <boundary>..HEAD -- <檔案>`，早於邊界 ＝ 世代 1｜★★理由：那個目錄有 **1426** 個檔，而**舊數字看起來跟新數字一模一樣** —— 一句話擋不住下週的引用｜★沿用你們既有的 `_poisoned-baseline-…` 命名慣例，**沒有新增任何閘**
 ---
