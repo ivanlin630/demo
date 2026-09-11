@@ -3210,6 +3210,29 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 	if Probe.enabled and team.current_task == TeamData.TASK_DEFEND and team.prosperity_target_id != -1:
 		var _fo: TeamData = state.teams.get(team.prosperity_target_id)
 		if _fo != null and _fo.tile_pos == team.tile_pos:
+			# ★★★三個桶要互斥且窮盡（systems 2026-09-12 §②），而**第三個桶有一個免費且精確的判準**：
+			#   `ranked` 只含【applicable 的 option】⇒ ★**「攻擊」不在 ranked 裡 ＝ 它根本不可選**
+			#   ⇒ ★★不必再 gather 一次（那會岔 RNG），也不必自己重算三道門。
+			#   ★★★而三道門的【可讀那一半】照樣記下來，供分辨是哪一道關著：
+			#     (a) 派系 directive：faction.goals 含「攻擊」 (b) intent 型別 (c) 血仇強度
+			var _atk_listed: bool = false
+			for _e in ranked:
+				if String(_e["opt"]) == "攻擊": _atk_listed = true
+			var _f = state.factions.get(team.faction_id) if team.faction_id != -1 else null
+			var _gate_faction: bool = _f != null and ("攻擊" in _f.goals)
+			var _intent: String = ""
+			if _f != null:
+				_intent = String((_f.intent as Dictionary).get("type", ""))
+			var _ldr2: PersonData = state.persons.get(team.leader_id)
+			var _feud: float = 0.0
+			if _ldr2 != null:
+				var _fe2: Dictionary = RelationGraph.strongest(_ldr2.relation_edges, "feud")
+				_feud = float(_fe2.get("intensity", 0.0)) if not _fe2.is_empty() else 0.0
+			Probe.bump("faceoff.atk_listed" if _atk_listed else "faceoff.atk_absent")
+			if not _atk_listed:
+				Probe.bump("faceoff.gate.faction_directive." + ("on" if _gate_faction else "off"))
+				Probe.bump("faceoff.gate.intent." + (_intent if _intent != "" else "(無)"))
+				Probe.bump("faceoff.gate.feud." + ("ge_min" if _feud >= DecisionOptions.FEUD_ATTACK_MIN else "lt_min"))
 			var _top: Array = []
 			for _i in range(mini(5, ranked.size())):
 				_top.append("%s=%.3f" % [String(ranked[_i]["opt"]), float(ranked[_i]["u"])])
@@ -3219,7 +3242,10 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 				"target": team.prosperity_target_id, "top5": _top,
 				"winner": String(ranked[0]["opt"]) if not ranked.is_empty() else "(空)",
 				"my_pop": team.population, "their_pop": _fo.population,
-				"my_ready": snappedf(team.readiness, 0.01), "their_ready": snappedf(_fo.readiness, 0.01)}, 150)
+				"my_ready": snappedf(team.readiness, 0.01), "their_ready": snappedf(_fo.readiness, 0.01),
+				"atk_listed": _atk_listed, "gate_faction": _gate_faction, "intent": _intent,
+				"feud": snappedf(_feud, 0.01), "their_task": _fo.current_task,
+				"their_target_is_me": _fo.prosperity_target_id == team.team_id}, 150)
 	# ★★★承諾再派 funnel（#10，2026-09-02）——★掛在【決策 entry】，而理由是 reviewer 給的硬的那個：
 	#   `TaskArbiter.release()` 的簽名【連 state 都沒有】(task_arbiter.gd:161)
 	#   ⇒ ★★它【技術上做不到】呼 rank_scored/DecisionEngine —— 不是「比較不容易死循環」

@@ -185,6 +185,23 @@ func _run() -> void:
 	print("★★★面對面現場（母體＝迎戰姿態 ＋ 目標還活著 ＋ 同格的【決策時刻】共 %d 次；樣本上限 150，實收 %d）" % [
 		int(Probe.counts.get("faceoff.total", 0)), fo.size()])
 	print("   贏家分佈：%s" % str(fo_win))
+	# ★★★三個桶（互斥且窮盡、對帳；★沒有「其他」桶）
+	var _b3: int = int(Probe.counts.get("faceoff.atk_absent", 0))      # ③攻擊根本不可選
+	var _listed: int = int(Probe.counts.get("faceoff.atk_listed", 0))
+	var _b2: int = int(Probe.counts.get("faceoff.winner.攻擊", 0))     # ②秤選了攻擊（沒開打由上游四格接）
+	var _b1: int = _listed - _b2                                       # ①可選而秤選了別的
+	var _tot3: int = _b1 + _b2 + _b3
+	print("   ★★★三個桶：①攻擊可選而秤選別的 %d｜②秤選了攻擊 %d｜③攻擊根本不可選 %d" % [_b1, _b2, _b3])
+	print("      對帳：%d + %d + %d = %d vs 母體 %d ⇒ %s" % [_b1, _b2, _b3, _tot3,
+		int(Probe.counts.get("faceoff.total", 0)),
+		"OK" if _tot3 == int(Probe.counts.get("faceoff.total", 0)) else "★不符"])
+	var _gates: Dictionary = {}
+	for kg in Probe.counts:
+		var ksg: String = String(kg)
+		if ksg.begins_with("faceoff.gate."):
+			_gates[ksg.replace("faceoff.gate.", "")] = int(Probe.counts[kg])
+	print("   ★③那一桶的三道門（可讀的那一半）：%s" % str(_gates))
+	print("      ★★門的另一半（target 存不存在）本卷【沒有評】—— 它要 gather，而那會岔 RNG")
 	print("   ★★三種世界：**贏的是攻擊/迎戰卻沒打成**（派不出去）／**贏的是別的**（壓根沒在想打）／")
 	print("     **打不贏所以不打**（util 低）—— ★贏家分佈先把第二種分出來")
 	for rf in fo.slice(0, 25):
