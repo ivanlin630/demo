@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ④b ｜「收留」組成 ＋ 輸給誰
 topic: ★★★**落進 (a) genuine**：組成 `drive 0.942 → ×weight 0.481 → ×coeff 0.347 → ×failure 0.347` —— **沒有任何一步把它壓扁**（`fail_mult` ＝ 1.000，兩個乘數都是既有機制）｜★★它輸給的是**補給／維持類**：**返家補給×302、maintain_tools×180**（名次多在 7–9）｜★而末端 0.35 vs 贏家 0.62 差的是**價值**不是**量級**（同尺 1.8 倍，不是數量級）⇒ **不是度量衡病** ⇒ 要不要接受「亂世的領主沒空收人」是 **blueprint 的裁量**
 ---
