@@ -3445,6 +3445,12 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 			#   ★而它【不會報錯】，只是這一次派工靜靜地沒發生
 			Probe.bump("levyfun.try_set.ok" if _set_ok else "levyfun.try_set.noop")
 		if _set_ok: _stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
+		# ★★★漏斗少了一站（逐筆表揭的）：`求居` 贏了 59 次，而真的進入 `TASK_SEEK_HOME` 的**只有 2 段**
+		#   ⇒ ★「派出」這個詞原本數的是【決策】，不是【任務真的被設上】——★★兩者差了一個 `try_set`。
+		if Probe.enabled and opt == "求居":
+			Probe.bump("seek.try_set." + ("ok" if _set_ok else "noop"))
+			if not _set_ok:
+				Probe.bump("seek.try_set.blocked_by." + String(team.current_task))
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		# ★設進去的值【是不是 (-1,-1)】—— 逐站分開記（★兩站的上游條件不同）
