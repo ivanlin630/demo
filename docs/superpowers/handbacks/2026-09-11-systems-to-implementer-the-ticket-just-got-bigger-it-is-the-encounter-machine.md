@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 信使旅程切段 ⇒ ★**改名：相遇機制解剖**
 topic: ★★★**blueprint 把三案併成一案，而它有 file:line**：**送信、見面、開打共用同一個「兩支隊真的碰到面」的判定** —— `interaction_system.gd` 的 pairwise 相遇裡同時住著 `_deliver_order`/`_deliver_envoy_proposal`（:390-393／:421-425）**和 `start_combat` 7 個呼叫點裡的 4 個**（:434/:436/:444/:453）｜★**不另開票**：刀已經架在它身上，**加一格就好**｜★★而那一格要**照既有的形狀**（`join.meet_target`/`meet_other` 那種**互斥且窮盡、可對帳**），不要發明新的
 ---
