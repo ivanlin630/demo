@@ -4331,7 +4331,13 @@ owner=systems
 code(options.gd:332-334) 三道門：
   ①派系叫我打（上級授權）②我的 intent 標籤是征服（身分授權）③我對某人有仇≥0.5（歷史授權）
 ★★★沒有任何一道是【他弱、我缺、我夠得著】⇒「強打弱掠奪」不是被秤壓低，是提名不到。
-★而攻擊 option 有完整四 term 效用秤(faction_duty/attack_drive/intent_fit/feud_pull)
+★~~而攻擊 option 有完整四 term 效用秤~~ ⇒ ★★★**2026-09-12 訂正：四個 term 本身也全是【授權形狀】**
+  `faction_duty` 要派系令／`attack_drive` **也**要派系令／`intent_fit` 要征服身分／`feud_pull` 要有仇
+  ⇒ ★攻擊 util 零 final **1238 次、全部來自 `terms_sum`**（係數與失敗乘數都正常）
+  ⇒ ★★**門降級了，而秤沒有** ⇒ 同一個病的下一層，不是新病
+  ⇒ ★★★而我們當時把【term 存在】讀成【秤是好的】——
+    **接了電，而四條線接到同一個開關上**。
+（原句保留）而攻擊 option 有完整四 term 效用秤(faction_duty/attack_drive/intent_fit/feud_pull)
   ⇒ 引擎存在而 97.37% 不被叫到 ＝【離散硬閘 pre-empt 連續引擎】的教科書形狀。
 ★②門對派系 member 恆關（intent 只填給獨立隊與 faction leader，decision_context:753-761）【待驗】
 ★②門本身是 argmax 離散標籤 ⇒ 45%想征服的隊，門是全關不是分數低（序5 死常數人格化的同形）

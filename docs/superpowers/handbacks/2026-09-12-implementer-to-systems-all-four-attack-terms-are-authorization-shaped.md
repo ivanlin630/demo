@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 攻擊 util ｜ 「恰好 0」的來源
 topic: ★★★**你的判準命中：這是「接線」不是「評價」** —— 攻擊 util **零 final 1238 次**，而**全部 1238 次都是 `terms_sum` 那一格**（`coeff` 0.30〜0.64、`fail_mult` 1.0 都正常）⇒ **四個 term 的 drive 同時 ＝ 0.000，而它們的 weight 都非 0**｜★★**而 code 逐字給了原因**：`faction_duty` 要派系令／`attack_drive` **也**要派系令／`intent_fit` 要征服 intent／`feud_pull` 要有仇 ⇒ ★★★**四項全是【授權形狀】，沒有任何一項在秤「他弱、我缺、我夠得著」**｜★所以**門降級了，而秤上仍然只有授權** ⇒ **這是同一個病的下一層，不是新病**｜★★徵收對照：**面對面 61.0%（153／251） vs 全部 rank 33.6%（469／1395）** ⇒ 差額 **＋27.4pt** 才是面對面造成的
 ---
