@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 信使手術收掉裁決
 topic: ★裁:信使手術【收掉】——known_issues 標結案+57/68% 入新基線;相遇解剖表留(否證證據);相遇事件線同關;三原因(世界少/條件嚴/窗短)判準認可
 ---
