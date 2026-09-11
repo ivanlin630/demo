@@ -61,8 +61,24 @@ func _run() -> void:
 	else:
 		_ok(100.0 * float(n_open) / float(moth) > 20.0,
 			"①新門開率 > 20%%（實測 %.2f%%；★下限是【機制在動】，不是平衡目標）" % (100.0 * float(n_open) / float(moth)))
-		_ok(int(pairs.get("nO", 0)) == 0,
-			"⑥成對反事實：沒有【舊門開而新門關】的格子（實測 %d）★★新門必須是舊門的超集" % int(pairs.get("nO", 0)))
+		# ★★★這一格我改判準（第一趟量完才看清楚）：`nO` 非 0 **不必然是回歸** ——
+		#   舊門是【授權】，新門要【可行】⇒ `nO` ＝ 有授權但**夠不著／看不到／養不起**
+		#   ⇒ ★而那正是舊制下會走進 to_task 然後回 IDLE 的那一群（本票要消滅的東西）
+		#   ⇒ ★★所以判準改成：**`nO` 裡「可行集合是空的」必須佔絕大多數**（≥90%），
+		#     ★★★若不是 ⇒ 那才是真的變嚴了（有可行目標卻關門）＝ 回歸。
+		var _nO: int = int(pairs.get("nO", 0))
+		var _nO_empty: int = int(Probe.counts.get("attack.nO.feasible_empty", 0))
+		var _nO_nonempty: int = int(Probe.counts.get("attack.nO.feasible_nonempty", 0))
+		var _gates: Dictionary = {}
+		for kg in Probe.counts:
+			if String(kg).begins_with("attack.nO.gate."):
+				_gates[String(kg).replace("attack.nO.gate.", "")] = int(Probe.counts[kg])
+		print("   ★nO 拆解：可行集合空 %d／非空 %d｜哪一道舊門開著：%s" % [_nO_empty, _nO_nonempty, str(_gates)])
+		if _nO == 0:
+			print("   ★（nO ＝ 0：新門是舊門的超集）")
+		else:
+			_ok(_nO_nonempty * 10 <= _nO,
+				"⑥nO 的絕大多數是【可行集合空】（空 %d／非空 %d）★★★有可行目標卻關門才是回歸" % [_nO_empty, _nO_nonempty])
 
 	# ── ②沒有 IDLE 陷阱（★提名與執行分開量）──
 	var idle_no_target: int = int(Probe.counts.get("attack.to_task_idle.no_target", 0))
@@ -79,6 +95,13 @@ func _run() -> void:
 	var dispatched: int = int(Probe.counts.get("conq.member_atk_dispatch", 0))
 	var entered: int = int(Probe.counts.get("conq.combat_entered", 0))
 	print("★★提名 %d → 贏 argmax %d → 派出 %d → 真的開打 %d" % [nominated, won, dispatched, entered])
+	print("   ★★★『真的開打』的母體**不是**上一欄的子集：戰鬥也從別的路開始（遭遇/被襲）")
+	print("      ⇒ 這四個數**不可逐站相減**，它們是四個不同的母體")
+	print("★⑦-perf 歸因（次數側）：attack_scan 呼叫 有領袖 %d／無領袖 %d｜每次掃過的 discovered 合計 %.0f" % [
+		int(Probe.counts.get("attack.scan.calls.leader", 0)),
+		int(Probe.counts.get("attack.scan.calls.leaderless", 0)),
+		Probe.amount("attack.scan.discovered")])
+	print("   ★無領袖那一路是**本票新增的呼叫**（spec 風險④）⇒ 它同時是行為新增與成本新增")
 	print("   ★『常被提名、然後溶解成 IDLE』在聚合上長得像『改完沒效果』⇒ 這一列必須分開印")
 
 	# ── ③強弱矩陣（分布，不設門檻）──

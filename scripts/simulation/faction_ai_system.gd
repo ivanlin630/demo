@@ -244,6 +244,12 @@ static func calc_readiness(state: WorldState, team: TeamData) -> float:
 #     否則門開了而 `to_task` 拿不到位置 ⇒ 回 `TASK_IDLE` ＝ 手不聽腦的教科書複製。
 #   ★★★偏好那一半（人格加權 argmax）**原樣保留**，只是改成在可行集合上取。
 static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -> Dictionary:
+	# ★★★perf 歸因（spec 風險⑥①：候選母體暴增 ⇒ 每次掃都做 `estimate_catch_up`＝尋路）：
+	#   ★分開記【有領袖】與【無領袖】——★★無領袖那一路是**本票新增的呼叫**，
+	#   ★★★而「總掃描次數」與「每次掃幾個候選」是兩個結論，所以兩個都記。
+	if Probe.enabled:
+		Probe.bump("attack.scan.calls." + ("leader" if leader != null else "leaderless"))
+		Probe.add_amount("attack.scan.discovered", float((state.team_discovered.get(team.team_id, []) as Array).size()))
 	var feasible: Array = []      # [{id, eta_days}]（★零人格，供門與 fallback target 用）
 	var best_id: int = -1
 	var best_score: float = 0.0

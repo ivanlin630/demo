@@ -886,6 +886,18 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		Probe.bump("attack.door.new_" + ("open" if _new_open else "closed"))
 		Probe.bump("attack.door.old_" + ("open" if _old_open else "closed"))
 		Probe.bump("attack.door.pair.%s%s" % ["N" if _new_open else "n", "O" if _old_open else "o"])
+		# ★★★`nO`（舊門開而新門關）要能被解讀，不能只有一個數：
+		#   ★假說：舊門是**授權**（不管打不打得到），新門要**可行** ⇒ `nO` ＝【有授權但夠不著／看不到／養不起】
+		#   ⇒ ★★而那正是舊制下會走進 `to_task` 然後回 IDLE 的那一群（＝本票要消滅的東西）
+		#   ⇒ ★★★所以這一格**非 0 不一定是回歸** —— 但要有數字才判得出來，故逐筆記哪一道舊門開著。
+		if _old_open and not _new_open:
+			Probe.bump("attack.nO.feasible_empty" if not c.attack_feasible else "attack.nO.feasible_nonempty")
+			if "攻擊" in c.faction_stakes and c.faction_attack_target != -1:
+				Probe.bump("attack.nO.gate.faction")
+			if c.intent == "征服" and c.intent_target != -1:
+				Probe.bump("attack.nO.gate.intent")
+			if c.strongest_feud >= DecisionOptions.FEUD_ATTACK_MIN and c.feud_target_id != -1:
+				Probe.bump("attack.nO.gate.feud")
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.readiness_prey", _tg)
 	# 併入/吸納 target（cadence gate 1 日共用，防每 tick O(N) finder churn）。非子隊才算。
 	c.consolidate_target_id = -1
