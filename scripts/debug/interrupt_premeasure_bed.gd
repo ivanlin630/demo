@@ -57,6 +57,9 @@ func _initialize() -> void:
 	#   ④每 tick 的 `rank_scored` 次數【分佈】：★總量只漲三成而尾部漲一倍 ⇒ 要看集中度。
 	var rank_per_tick: Array = []
 	var combat_team_ticks: int = 0
+	# ★★★systems 的第三候選（★比相位樹便宜）：**移動** —— 長程 episode +75% ⇒ 同時在路上的隊變多，
+	#   而 `rank_scored` 的次數**看不到移動的成本**。⇒ 量【每 tick 在路上的隊數】分佈 ＋ 尋路快取命中。
+	var moving_per_tick: Array = []
 	var _rank_prev: int = 0
 	var live: Dictionary = {}        # team_id → {task, target, start, start_fd, start_dist, arrived}
 	var forage_rows: Array = []      # ①逐筆
@@ -70,9 +73,14 @@ func _initialize() -> void:
 		var _rank_now: int = int(Probe.counts.get("engine.rank_scored.calls", 0))
 		rank_per_tick.append(_rank_now - _rank_prev)
 		_rank_prev = _rank_now
+		var _mv: int = 0
 		for tidk in st.teams:
-			if (st.teams[tidk] as TeamData).combat_target != -1:
+			var _tk: TeamData = st.teams[tidk]
+			if _tk.combat_target != -1:
 				combat_team_ticks += 1
+			if _tk.move_target != Vector2i(-1, -1) and _tk.tile_pos != _tk.move_target:
+				_mv += 1
+		moving_per_tick.append(_mv)
 		if st.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 			for tidc0 in st.teams:
 				var tc0: TeamData = st.teams[tidc0]
@@ -231,6 +239,16 @@ func _initialize() -> void:
 			_n, int(rp[_n / 2]), int(rp[int(float(_n) * 0.95)]), int(rp[_n - 1]),
 			int(Probe.counts.get("engine.rank_scored.calls", 0))])
 		print("   ★★尾部（p95／max）與總量分開看 —— ★★★總量漲三成而尾部漲一倍 ＝【集中度】變了，不是每次變貴")
+	var mv: Array = moving_per_tick.duplicate()
+	mv.sort()
+	var _mn: int = mv.size()
+	if _mn > 0:
+		var _mvsum: int = 0
+		for v in moving_per_tick: _mvsum += int(v)
+		print("★⑨在路上的隊數（每 tick，母體＝%d tick）：p50=%d p95=%d max=%d｜隊·tick 總量 %d" % [
+			_mn, int(mv[_mn / 2]), int(mv[int(float(_mn) * 0.95)]), int(mv[_mn - 1]), _mvsum])
+		print("   ★尋路快取：hit %d／miss %d（★★miss 才是真的算，hit 只是查表）" % [
+			int(Probe.counts.get("path.cache_hit", 0)), int(Probe.counts.get("path.cache_miss", 0))])
 	print("★>2 秒幀數 = %d / %d" % [SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
