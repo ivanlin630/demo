@@ -575,6 +575,35 @@ const PRIORITY_ALLOWED: Array = [
 	TaskArbiter.PRIO_DISPATCH, TaskArbiter.PRIO_PLAYER, TaskArbiter.PRIO_THREAT, TaskArbiter.PRIO_SURVIVAL,
 ]
 
+# ★★★commit 優先序來自【當下的需求強度】，不是【這個 option 在哪個集合裡】。
+#   ★血證（docs/measurements/2026-09-11-seek-deny-reasons.txt）：try_set 拒絕 42/42 皆「優先序不足」，
+#   而被擋的當下 41/42 不餓（food_days 中位 ≈ 19 天、最大 22.87）
+#   ⇒ ★★一支【吃飽 22 天】的覛食仍持 80，而求居永遠是 50 ⇒ 連比都不比。
+#   ⇒ ★★★修法不是把求居調高（那是 crank，而且會讓求居打斷真的絕境覛食），
+#     是讓 survival-set 的 commit 優先序【隨需求衰減】。
+# ★兩條護欄（blueprint 背書）：①絕境覛食仍碾壓一切（fd < 門檻 ⇒ 仍回 80）
+#   ②food_days=1.80 那筆是合法樣本 ⇒ 它在門檻以下，這一刀碰不到它。
+# ★★門檻不是新常數：用既有的單一計算點 DecisionTerms.desperation_entry_threshold（人格化，
+#   同一批 survival option 的 applicable 共讀那一支）。
+# ★★★opt == "survival"（FLEE）不適用：它的需求軸是威脅、不是糖食——
+#   拿糖食平安去降一個逃命任務的優先序，是換一個病。
+static func priority_for_need(state: WorldState, team: TeamData, opt: String) -> int:
+	var base: int = priority_for(opt)
+	if base != TaskArbiter.PRIO_SURVIVAL: return base   # 顯式 "priority" 欄／threat／預設一律不碰
+	if opt == "survival": return base                   # 威脅軸：不由糖食導出
+	var pop: int = team.population
+	if pop <= 0: return base
+	var _need: float = maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var fd: float = ResourceSystem.effective_food(state, team) / _need
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var thr: float = DecisionTerms.desperation_entry_threshold(leader.values if leader != null else {})
+	var out: int = TaskArbiter.PRIO_SURVIVAL if fd < thr else TaskArbiter.PRIO_DISPATCH
+	if Probe.enabled:
+		Probe.bump("commitprio.%s.%d" % [opt, out])
+		Probe.bump_sample("commitprio", {"opt": opt, "team": team.team_id, "prio": out,
+			"food_days": snappedf(fd, 0.01), "thr": snappedf(thr, 0.01)}, 150)
+	return out
+
 static func priority_for(opt: String) -> int:
 	# ★§4a REDO：REGISTRY 通用 optional 欄 "priority" 優先——set membership（在哪些 rank 清單競爭）
 	# 與 commit priority（committed 後誰能打斷）本是兩件事，原本被此函式綁死。長工期的發展型
