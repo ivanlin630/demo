@@ -17,6 +17,16 @@ extends SceneTree
 # env：IP_TICKS（預設 43200 ＝ 30 天）／IP_SEED（預設 1337）／IP_CONFIG（預設 warring_states）
 
 const LONG_TILES: int = 3
+# ★★★每個任務用【它自己的成功判準】（systems 2026-09-11，血證＝紮營 0%）：
+#   ①【就地型】紮營：成功＝腳下那格能立營（faction_ai_system:6297-6300／:6442-6447 全函式沒有 move_target）
+#     ⇒ 用「走到 move_target」量它，那個 0 是【尺的 0】不是世界的 0 ⇒ **退出母體**。
+#   ②【遇到人型】信使／外交／徵收／投靠／掠奪／迎戰／攻擊：成功＝**與目標隊同格相遇**
+#     （interaction_system:390 _deliver_order／:421 _deliver_envoy_proposal／:386 _resolve_tribute…
+#      都掛在 encounter，而目標隊會移動 ⇒ move_target 是 belief 位，可能過期）
+#   ③【到座標型】其餘（含★求居：目標是村的格子，抵達才算）：成功＝ tile_pos == move_target
+# ★而每一列都要印出【它用的是哪一把尺】—— 否則下一個人會把三種尺的數字放在一起比。
+const EXCLUDED_TASKS: Array = ["紮營"]
+const ENCOUNTER_TASKS: Array = ["信使", "外交", "徵收", "投靠", "掠奪", "迎戰", "攻擊"]
 
 func _initialize() -> void:
 	var ticks: int = int(OS.get_environment("IP_TICKS")) if OS.has_environment("IP_TICKS") else 43200
@@ -50,7 +60,13 @@ func _initialize() -> void:
 					"start_dist": FactionAISystem._hex_dist(t.tile_pos, t.move_target) if t.move_target != Vector2i(-1, -1) else -1,
 					"arrived": false}
 			else:
-				if t.move_target != Vector2i(-1, -1) and t.tile_pos == t.move_target:
+				if cur in ENCOUNTER_TASKS:
+					# ★遇到人型：成功＝與目標隊同格（目標會移動 ⇒ 不能用座標）
+					var _tgt_id: int = t.order_target_id if t.order_target_id != -1 else t.combat_target
+					var _tgt: TeamData = st.teams.get(_tgt_id)
+					if _tgt != null and _tgt.tile_pos == t.tile_pos:
+						live[tid]["arrived"] = true
+				elif t.move_target != Vector2i(-1, -1) and t.tile_pos == t.move_target:
 					live[tid]["arrived"] = true
 	# ★窗末仍在進行中的 episode 自成一類（★它不是失敗，是窗太短）
 	for tid2 in live:
@@ -93,14 +109,16 @@ func _initialize() -> void:
 	keys.sort()
 	var base_start: int = 0
 	var base_arr: int = 0
-	print("   %-8s %8s %8s %10s %10s %12s" % ["task", "起算", "到場", "到場率", "窗末未完", "中位長(天)"])
+	print("   ★每一列的【尺】：遇＝與目標隊同格相遇／到＝抵達 move_target（紮營已退出母體：它的成功在腳下那格）")
+	print("   %-8s %4s %8s %8s %10s %10s %12s" % ["task", "尺", "起算", "成功", "成功率", "窗末未完", "中位長(天)"])
 	for k in keys:
 		var s0: int = int(ep_start[k])
 		var a0: int = int(ep_arrive.get(k, 0))
 		var c0: int = int(ep_cut.get(k, 0))
 		var rate: String = "不可判(母體0)" if s0 == 0 else ("%.1f%%" % (100.0 * float(a0) / float(s0)))
 		var avgd: String = "-" if s0 == 0 else ("%.2f" % (float(int(ep_len.get(k, 0))) / float(s0) / float(WorldState.TICKS_PER_DAY)))
-		print("   %-8s %8d %8d %10s %10d %12s" % [String(k), s0, a0, rate, c0, avgd])
+		print("   %-8s %4s %8d %8d %10s %10d %12s" % [String(k),
+			"遇" if String(k) in ENCOUNTER_TASKS else "到", s0, a0, rate, c0, avgd])
 		if String(k) != TeamData.TASK_SEEK_HOME:
 			base_start += s0
 			base_arr += a0
@@ -134,6 +152,20 @@ func _initialize() -> void:
 		_starve_team, _starve_person, _homeless, _registered])
 	print("   ★未登記歸零＝消滅遊商階層（blueprint 明文禁）⇒ 這一欄应該保持非 0"
 		+ ("　★★本窗＝0，要當成紅看" if _homeless == 0 else ""))
+	# ── ④ 下游與歸因（systems 2026-09-11 要的兩格）──
+	#   ★①逃跑變多有沒有下游後果：戰鬥結束數／滅團數（含分因）
+	#   ★★②幀數歸因的【次數側】：try_set 與 rank_scored 被叫幾次（單價側在相位樹，不在這張床）
+	print("")
+	print("★④下游：戰鬥結束 %d｜殲滅判定 %d｜滅團 合計 %d（餓 %d／戰 %d／其他 %d）" % [
+		int(Probe.counts.get("combat.ended_n", 0)), int(Probe.counts.get("combat.str_ratio_annih_n", 0)),
+		int(Probe.counts.get("extinct.starve", 0)) + int(Probe.counts.get("extinct.combat", 0))
+			+ int(Probe.counts.get("extinct.other", 0)),
+		int(Probe.counts.get("extinct.starve", 0)), int(Probe.counts.get("extinct.combat", 0)),
+		int(Probe.counts.get("extinct.other", 0))])
+	print("★⑤幀數歸因（次數側）：try_set 呼叫 %d 次｜rank_scored 呼叫 %d 次" % [
+		int(Probe.counts.get("arbiter.try_set.calls", 0)),
+		int(Probe.counts.get("engine.rank_scored.calls", 0))])
+	print("   ★這兩顆是【次數】—— ★★單價要另外量（相位樹），兩者相乘才是時間")
 	print("★>2 秒幀數 = %d / %d" % [SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
@@ -149,10 +181,15 @@ func _close(ep: Dictionary, st: WorldState, t: TeamData, ep_start: Dictionary, e
 		ep_len: Dictionary, forage_rows: Array, cut: bool) -> void:
 	var k: String = String(ep["task"])
 	var length: int = st.world.current_tick - int(ep["start"])
+	if k in EXCLUDED_TASKS:
+		return   # ★它的成功不在座標上 ⇒ 退出母體（★★留在表上＝用錯的尺量出一個真的 0）
 	if int(ep["start_dist"]) >= LONG_TILES:
 		ep_start[k] = int(ep_start.get(k, 0)) + 1
 		ep_len[k] = int(ep_len.get(k, 0)) + length
-		if bool(ep["arrived"]) or t.tile_pos == Vector2i(ep["target"]):
+		var _hit: bool = bool(ep["arrived"])
+		if not _hit and not (k in ENCOUNTER_TASKS):
+			_hit = t.tile_pos == Vector2i(ep["target"])
+		if _hit:
 			ep_arrive[k] = int(ep_arrive.get(k, 0)) + 1
 	if k == TeamData.TASK_FORAGE:
 		# ★記憶體：完整結束的只留【兩個數】，逐筆只留前 20 筆

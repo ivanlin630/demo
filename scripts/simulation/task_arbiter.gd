@@ -108,6 +108,10 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "", _opt: String = "") -> bool:
 	# ★★★求居半的追蹤（systems 2026-09-11）：★「流浪隊有沒有真的走到」與「它半路被別的事搶走」
 	#   是兩個不同的斷點，而它們在結果上都長成「領主沒看到求居者」。
+	# ★幀數歸因用（systems 2026-09-11）：★★「一次很貴」與「被叫很多次」是兩個結論，
+	#   而總時把它們壓成同一個數字 ⇒ 這一顆只數【呼叫次數】，單價由相位樹那邊出。
+	if Probe.enabled:
+		Probe.bump("arbiter.try_set.calls")
 	if Probe.enabled and team.current_task == TeamData.TASK_SEEK_HOME and new_task != TeamData.TASK_SEEK_HOME:
 		Probe.bump("seek.preempt_attempt." + String(new_task))
 	if team.combat_target != -1:
