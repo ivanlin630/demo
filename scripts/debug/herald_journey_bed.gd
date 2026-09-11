@@ -67,16 +67,19 @@ func _run() -> void:
 	# ★★而還要再切一刀：**起算距離 0** 與 **起算距離 > 0** 是兩群完全不同的信使
 	#   （前者生成時就站在目標身上 ⇒ 當場送達；後者才是「旅程」）——
 	#   ★★★把它們混在一個平均裡，會把「遠的送不到」洗成「大部分送到了」。
-	var groups: Dictionary = {"closed_far": [], "closed_near": [], "open_far": [], "open_near": []}
+	var groups: Dictionary = {"closed_far": [], "closed_mid": [], "closed_near": [],
+		"open_far": [], "open_mid": [], "open_near": []}
 	for r in rows:
-		var kk: String = ("open_" if bool(r["cut"]) else "closed_") + ("near" if int(r["dist0"]) <= 0 else "far")
+		# ★三段而不是兩段：0 格（生成時就站在目標身上）／1-2 格（一步到）／≥3 格（★真的遠行，與別卷同母體）
+		var _d: int = int(r["dist0"])
+		var _seg: String = "near" if _d <= 0 else ("mid" if _d < 3 else "far")
+		var kk: String = ("open_" if bool(r["cut"]) else "closed_") + _seg
 		(groups[kk] as Array).append(r)
 	print("")
 	print("★①母體：信使 episode 共 %d 段（完整結束 %d／窗末未完 %d）" % [
-		n, n - (groups["open_far"] as Array).size() - (groups["open_near"] as Array).size(),
-		(groups["open_far"] as Array).size() + (groups["open_near"] as Array).size()])
+		n, n - _open_n(groups), _open_n(groups)])
 	print("   ★分四群：起算距離 >0 ＝【真的有旅程】／起算距離 0 ＝【生成時就站在目標身上】")
-	for gk in ["closed_far", "closed_near", "open_far", "open_near"]:
+	for gk in ["closed_far", "closed_mid", "closed_near", "open_far", "open_mid", "open_near"]:
 		var g: Array = groups[gk]
 		var at_c: int = 0; var mt: int = 0; var dl: int = 0
 		for r2 in g:
@@ -126,6 +129,9 @@ func _run() -> void:
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
 	print("[TEST-SUITE-COMPLETE]")
 
+func _open_n(groups: Dictionary) -> int:
+	return (groups["open_far"] as Array).size() + (groups["open_mid"] as Array).size() 		+ (groups["open_near"] as Array).size()
+
 func _lost_of(tid: int) -> Dictionary:
 	var out: Dictionary = {}
 	for b in ["same_level", "higher", "defy", "release", "transition"]:
@@ -145,6 +151,11 @@ func _close(ep: Dictionary, st: WorldState, rows: Array, cut: bool) -> void:
 				exit_kind = b if exit_kind == "未知" else exit_kind + "+" + b
 	if delivered and not cut:
 		exit_kind = "送達後" + ("（" + exit_kind + "）" if exit_kind != "未知" else "")
+	# ★★★儀器限（本輪自己抓到）：第一版量到【送達 9 而相遇只有 2】—— ★送達必經相遇（門鈴只有那一條路）
+	#   ⇒ 差額不是世界，是**我的取樣看不到最後那一刻**：送達當下任務被 release ⇒ 下一次掃描時它已經不是信使
+	#   ⇒ ★★與求居案「抵達即失去身分」同族 ⇒ **送達 ⇒ 相遇必為真**（由機制推得，不是我補洞）。
+	if delivered:
+		ep["met"] = true
 	rows.append({"team": tid, "start": int(ep["start"]), "oid": int(ep["oid"]),
 		"same_faction": bool(ep["same_faction"]), "reason": String(ep["reason"]),
 		"dist0": int(ep["dist0"]), "at_cell": bool(ep["at_cell"]), "met": bool(ep["met"]),
