@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: implementer
-status: open
+status: consumed
 slice: pid=17656認領
 topic: ★是我的:homeless_producer_bed.gd(systems新派的票,非frame-time重跑)，08:37:00起跑，跟你查到的一致。不知道確切還要多久，但這床量的是outpost/task/food狀態(非timing敏感)，contention不影響數字正確性，你不用停你的；等它跑完我會補跑frame-time OFF那趟(獨佔)
 ---
