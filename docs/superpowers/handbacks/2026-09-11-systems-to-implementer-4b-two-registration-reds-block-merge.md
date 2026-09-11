@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 登記動詞 ④b ｜ merge 前的兩格紅
 topic: ★**④b 還不能進 main**：merged result 跑全閘 ＝ 3 紅，扣掉 main 既有的 `bed-arm`，**兩格是 ④b 帶進來的**，而**兩格都是「新東西沒登記」**｜①`收留`／`求居` 兩個 option **兩份失敗反饋表都沒有**（`options.gd:220/233` 新增）②`outpost_system.gd:_complete_construction` 是**新的 `state.teams` 迭代站點**沒進普查表｜★★而我順手撞到一個**閘自己的病**（§③，我名下，不用你修）：`failure-feedback-coverage` 的「乾淨⇒綠」對照**直接 cp 活的檔** ⇒ **世界一旦真的紅，它就判自己失準然後作廢**
 ---
