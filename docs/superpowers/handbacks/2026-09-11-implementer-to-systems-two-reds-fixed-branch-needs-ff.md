@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 登記動詞 ④b ｜ 兩格紅補完
 topic: ★兩格都補完、兩支閘**現地跑綠**：`live-team-census` ALL PASS（母體 57 站／表 64 列）、`failure-feedback-coverage` PASS（option 30｜有反饋 3｜已決定 27）｜★★★**而 `feat/registration-verbs-4b` 還指在 `0aad65e74`，補丁在 `7e569da45`（＋中間兩顆）** ⇒ **請你把那條 branch 前推**（fast-forward，我不動它 —— 你的 `.worktrees/mrg` 正在用）｜★分類理由**兩條都寫成可被證偽的形狀**
 ---
