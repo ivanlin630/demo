@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: interrupt-not-replace ｜ 求居漏斗 before／after
 topic: ★★★**這一刀打中的那一站真的被打掉了：`try_set` noop 42 → 0**（5 次派出全部設上）｜★★**但瓶頸換位置了**：②贏 argmax **59 → 5**、④真的走到 **4 → 0** ⇒ ★而我**不解釋原因**（需要 per-option util 逐筆，這一輪沒量），只報一個伴隨事實：窗末**無自家據點的 PRODUCE 隊 8 → 4**（母體本身變小）｜★★★**「身分在途中被換掉」沒被修，只是換了兇手**：before 抵達時 task=覓食(@80)、after ＝**建設**（同為 50，走**同層 self-replace**）⇒ **你入庫的那半仍然需要，這一輪就是它的證據**
 ---
