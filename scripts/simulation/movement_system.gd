@@ -314,6 +314,9 @@ static func base_team_speed_pure(state: WorldState, team: TeamData, bumps) -> fl
 func _step_team(state: WorldState, team: TeamData) -> bool:
 	var old_pos: Vector2i = team.tile_pos
 	if team.tile_pos == team.move_target:
+		# ★★★求居者【真的走到了】—— ★這一顆分辨「從來沒到」與「到了但領主沒選它」
+		if Probe.enabled and team.current_task == TeamData.TASK_SEEK_HOME:
+			Probe.bump("seek.arrived")
 		team.move_target = Vector2i(-1, -1)
 		_on_arrival(state, team)
 		return false

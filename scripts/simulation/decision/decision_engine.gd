@@ -267,10 +267,21 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		Probe.add_amount("ctxseg.options." + src, float(_applicable.size()))
 	for opt in _applicable:
 		var u: float = 0.0
+		# ★★★組成 dump（systems＋blueprint 2026-09-11）：**只印最終 util 答不出它在哪一步被壓扁**
+		#   ⇒ 對「收留」逐步記：drive → weight → coeff → failure → persist → 末端
+		#   ★純觀測（Probe-gated、不改 u、零 RNG）；★★只在它 applicable 的時刻記（母體不被稀釋）
+		var _cmp: Dictionary = {} if (Probe.enabled and opt == "收留") else {}
+		var _cmp_on: bool = Probe.enabled and opt == "收留"
 		var _ot0: int = Time.get_ticks_usec() if Probe.enabled else 0
 		for tw in DecisionOptions.terms_of(opt):
 			var _tt0: int = Time.get_ticks_usec() if Probe.enabled else 0
-			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
+			var _wv: float = DecisionTerms.weight(tw[1], ctx.leader_values)
+			var _dv: float = DecisionTerms.eval(tw[0], ctx, opt)
+			u += _wv * _dv
+			if _cmp_on:
+				_cmp["drive"] = snappedf(_dv, 0.001)
+				_cmp["weight"] = snappedf(_wv, 0.001)
+				_cmp["after_weight"] = snappedf(u, 0.001)
 			if Probe.enabled:
 				var _tdt: int = Time.get_ticks_usec() - _tt0
 				Probe.add_amount("optterm.term_us." + String(tw[0]), float(_tdt))
@@ -295,11 +306,18 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# ★乘在 COMMITMENT_BONUS 之前（承諾慣性是決策層加成，不受需求調變）。
 		var _coeff: float = NeedHierarchy.consistency_coeff(opt, ctx.need_urgency, ctx.leader_values)
 		u *= _coeff
+		if _cmp_on:
+			_cmp["coeff"] = snappedf(_coeff, 0.001)
+			_cmp["after_coeff"] = snappedf(u, 0.001)
 		# ★執行失敗反饋（用戶立法 2026-08-21）：同一原因反覆撞 → 連續折價（非硬 cooldown、非新 term 線）。
 		# ★乘在 survival/threat 破頂【加法】boost 之前 → 絕境仍能壓過折價再試（FLOOR + 加法 boost 雙保險，
 		# 不得絕對否決）。未接線的 option 恆 1.0 ＝ 對其餘 option 零行為。
 		if team != null:
-			u *= FailureMemory.mult_for_option(state, team, opt, ctx)
+			var _fm: float = FailureMemory.mult_for_option(state, team, opt, ctx)
+			u *= _fm
+			if _cmp_on:
+				_cmp["fail_mult"] = snappedf(_fm, 0.001)
+				_cmp["after_fail"] = snappedf(u, 0.001)
 		# 層0 安全氣囊（★插在 coeff 乘法之後——寫死此序：coeff 前會被 0.15 floor 打折失效）：
 		# 極低糧時 survival-class 加法超量級破頂，隨 food→0 線性放大，奪回 argmax。全 SURVIVAL_OPTION_SET 等量加
 		# (不改 survival-class 內部相對序，只集體破頂)。food_days=FLOOR 時加成=0 平滑銜接無 flip-flop。
@@ -322,6 +340,15 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			if _coeff < 1.0: Probe.bump("decision.opt_coeff_pressed." + opt)   # coeff 確隨急迫度變(非恆1)
 		if opt == current_option:
 			u += _persist   # ★持守統一：flat COMMITMENT_BONUS → persist_strength（bonus-collapse）
+			if _cmp_on: _cmp["persist"] = snappedf(_persist, 0.001)
+		if _cmp_on:
+			_cmp["final"] = snappedf(u, 0.001)
+			Probe.bump_sample("shelter.composition", _cmp, 100)
+			Probe.add_amount("shelter.cmp.drive_sum", float(_cmp.get("drive", 0.0)))
+			Probe.add_amount("shelter.cmp.after_weight_sum", float(_cmp.get("after_weight", 0.0)))
+			Probe.add_amount("shelter.cmp.after_coeff_sum", float(_cmp.get("after_coeff", 0.0)))
+			Probe.add_amount("shelter.cmp.final_sum", float(_cmp.get("final", 0.0)))
+			Probe.bump("shelter.cmp.n")
 		scored.append({"u": u, "i": idx, "opt": opt, "d": 0.0})
 		idx += 1
 	# ★means-end 長程規劃（組件 G，HOW §8）：goal frontier candidates 追加進同一 rank 池（sort 前→與 static option 同 argmax 競爭）。
@@ -402,6 +429,30 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	# ★★won_argmax（systems 要）：【產出】≠【贏】。
 	#   emitted > 0 且 fp 不變 可以同時為真，而最危險的解釋是
 	#   「接上了、有產出、但【從不改變結果】」——沒這顆 tap 就分不出來。
+	# ★★★「收留輸給誰」（systems 2026-09-11）：★只印「收留很低」分不出【它低】與【這個 tick 大家都低】
+	#   ⇒ **同一個 tick、同一支隊，把贏家的 util 與收留的 util 並排**，並逐 option 統計它輸給誰幾次。
+	#   ★純觀測：不改 `scored`、不改順序、零 RNG。
+	if Probe.enabled and not scored.is_empty():
+		var _sh_i: int = -1
+		for _si in range(scored.size()):
+			if String(scored[_si]["opt"]) == "收留":
+				_sh_i = _si
+				break
+		if _sh_i >= 0:
+			var _win_o: String = String(scored[0]["opt"])
+			var _win_u: float = float(scored[0]["u"])
+			var _sh_u: float = float(scored[_sh_i]["u"])
+			Probe.bump("shelter.rank.%d" % mini(_sh_i + 1, 9))   # ★名次（有界 key，第 9 名以後併一桶）
+			if _sh_i > 0:
+				Probe.bump("shelter.lost_to." + _win_o)          # ★★它輸給誰（逐 option，不是平均）
+			else:
+				Probe.bump("shelter.won")
+			Probe.bump_sample("shelter.side_by_side", {
+				"tick": state.world.current_tick if state != null else -1,
+				"team": team.team_id if team != null else -1,
+				"winner": _win_o, "winner_u": snappedf(_win_u, 0.001),
+				"shelter_u": snappedf(_sh_u, 0.001), "rank": _sh_i + 1,
+				"n_options": scored.size()}, 150)
 	if Probe.enabled and not scored.is_empty():
 		var _w: Dictionary = (scored[0].get("cand", {}) as Dictionary)
 		if bool(_w.get("means_end", false)):

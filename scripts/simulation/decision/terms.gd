@@ -396,7 +396,12 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   (a) drive 本身就 ≈0（不缺工位／糧不夠）(b) drive 不低但被別的 option 壓過
 			#   ⇒ ★把【成分】記下來（純觀測、有界 cap）：idle_labor／food_days／drive
 			if Probe.enabled:
+				# ★★★上門的那支隊【是不是因為求居而來】—— ★否則「有人站在我村上」可能只是路過
+				Probe.bump("shelter.seeker_present")
+				Probe.bump("shelter.seeker_task." + String(ctx.shelter_seeker_task))
 				Probe.bump_sample("shelter.drive_components", {
+					"seeker_task": String(ctx.shelter_seeker_task),
+					"seeker_opt": String(ctx.shelter_seeker_opt),
 					"idle_labor": snappedf(ctx.idle_labor, 0.01), "pop": ctx.population,
 					"food_days": snappedf(ctx.food_days, 0.01),
 					"want_labor": snappedf(_want_labor, 0.001), "food_ok": snappedf(_food_ok, 0.001),

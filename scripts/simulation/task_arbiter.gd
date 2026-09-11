@@ -76,6 +76,10 @@ static func _note_convoy_rewrite(team: TeamData, path: String, new_task: String)
 #   ★★而它【只餵計數】—— 不進任何判斷、不寫進 state。
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "", _opt: String = "") -> bool:
+	# ★★★求居半的追蹤（systems 2026-09-11）：★「流浪隊有沒有真的走到」與「它半路被別的事搶走」
+	#   是兩個不同的斷點，而它們在結果上都長成「領主沒看到求居者」。
+	if Probe.enabled and team.current_task == TeamData.TASK_SEEK_HOME and new_task != TeamData.TASK_SEEK_HOME:
+		Probe.bump("seek.preempt_attempt." + String(new_task))
 	if team.combat_target != -1:
 		if Probe.enabled:
 			Probe.bump("arbiter.deny.戰鬥鎖")

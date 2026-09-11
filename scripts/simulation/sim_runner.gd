@@ -124,6 +124,12 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 	_perf_accum_us += dt_us
 	_perf_count += 1
+	# ★★★終線是一個【計數歸零】（用戶包絡，systems 轉達 2026-09-11）：
+	#   **「單幀 > 2 秒」的次數 ＝ 0** —— ★它不是「平均變好」也不是「倍數改善」。
+	#   ⇒ 所以這顆計數**永遠開著**（不吃 `phase_timing`／`Probe`）：★它是驗收的主詞，不是診斷。
+	frames_total += 1
+	if dt_us > FRAME_BUDGET_US:
+		frames_over_budget += 1
 	if dt_us > _perf_max_us:
 		_perf_max_us = dt_us
 	# 相位計時（opt-in）：spike tick 立即 dump 相位拆解（cadence spike 歸因用）
@@ -148,9 +154,10 @@ func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 			state.world.current_tick, dt_us, state.teams.size(), top])
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:
 		var avg_us: int = _perf_accum_us / _perf_count
-		print("[TickPerf] day=%d avg=%d us max=%d us ticks=%d teams=%d factions=%d" % [
+		print("[TickPerf] day=%d avg=%d us max=%d us ticks=%d teams=%d factions=%d | ★>2s 幀數=%d/%d" % [
 			state.world.current_tick / WorldState.TICKS_PER_DAY, avg_us, _perf_max_us,
-			_perf_count, state.teams.size(), state.factions.size()])
+			_perf_count, state.teams.size(), state.factions.size(),
+			frames_over_budget, frames_total])
 		_perf_accum_us = 0
 		_perf_count = 0
 		_perf_max_us = 0
@@ -166,6 +173,15 @@ func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 static var phase_timing: bool = false
 const PHASE_SPIKE_US: int = 100_000   # TEST VALUE：spike 門檻（>此值 dump 相位拆解）
 var _ph: Dictionary = {}              # 本 tick 相位 → 累積 us
+# ★★★終線計數（見 `_record_tick_perf` 的理由）：**> 2 秒的幀數**，以及它的分母
+const FRAME_BUDGET_US: int = 2_000_000   # ★用戶包絡：單幀 2 秒
+static var frames_over_budget: int = 0
+static var frames_total: int = 0
+
+static func frames_reset() -> void:
+	frames_over_budget = 0
+	frames_total = 0
+
 var _fai_spike_n: int = 0             # ★進了母體的 tick 數（＝樣本數）
 var _fai_tick_seen: int = 0           # ★分母：phase_timing 開著時走過的 tick 數
 
@@ -236,6 +252,9 @@ static var _registry_assumptions_checked: bool = false
 #   ★沒有人會刻意預設它們為 true ⇒ 屬累積型，清。
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
+	if frames_over_budget != 0 or frames_total != 0:
+		cleared["SimRunner.frames_*"] = "%d/%d" % [frames_over_budget, frames_total]
+	frames_reset()
 	if _registry_assumptions_checked: cleared["SimRunner._registry_assumptions_checked"] = true
 	if _observer_guard_warned: cleared["SimRunner._observer_guard_warned"] = true
 	_registry_assumptions_checked = false

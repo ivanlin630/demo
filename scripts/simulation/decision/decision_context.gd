@@ -209,6 +209,8 @@ var is_resident: bool = false
 var shelter_seeker_id: int = -1     # 村主側：站在我據點上而未登記的 PRODUCE 隊
 var shelter_host_id: int = -1       # 求居者側：我知道的別人據點的 owner
 var shelter_host_pos: Vector2i = Vector2i(-1, -1)
+var shelter_seeker_task: String = ""   # ★上門者當下的 task（分辨「來問的」與「路過的」）
+var shelter_seeker_opt: String = ""
 # 野心階梯（序3 rung_task 溶入）：archetype/rung 當 weight 驅動 option（非查表塞 task）。
 # ambient_train_drive = FORCE-archetype 累積/擴張階練兵 base（低 magnitude 讓位緊急決策）。
 var archetype: String = ""
@@ -425,6 +427,8 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			if state.registered_at(_s, _my_tile.tile_pos):
 				continue
 			c.shelter_seeker_id = _s.team_id
+			c.shelter_seeker_task = _s.current_task     # ★它是【為什麼】站在這裡（求居？還是路過）
+			c.shelter_seeker_opt = _s.current_option
 			break
 	if team.tags.has(TeamData.TAG_PRODUCE) and team.work_outpost == Vector2i(-1, -1):
 		var _known: Dictionary = state.team_tile_known.get(team.team_id, {})   # ★tid → true（親見/relay 的格）

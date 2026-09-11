@@ -87,6 +87,60 @@ func _initialize() -> void:
 			comps.size(), zero_drive, 100.0 * float(zero_drive) / float(comps.size()),
 			sum_drive / float(comps.size()), max_drive])
 		print("   ★前 3 筆：%s" % str(comps.slice(0, 3)))
+	# ★★★兩半分開數：求居（流浪隊主動去問）vs 收留（領主答應）
+	var seek_disp: int = int(Probe.counts.get("registry.verb.seek_dispatch", 0))
+	var present: int = int(Probe.counts.get("shelter.seeker_present", 0))
+	var tasks: Array = []
+	for k7 in Probe.counts:
+		var ks7: String = String(k7)
+		if ks7.begins_with("shelter.seeker_task."):
+			tasks.append("%s×%d" % [ks7.replace("shelter.seeker_task.", ""), int(Probe.counts[k7])])
+	tasks.sort()
+	print("★③-e 兩半：求居**真的被派出** %d 次｜領主看到有人上門 %d 次｜上門者當下的 task：%s" % [
+		seek_disp, present, str(tasks) if not tasks.is_empty() else "（無）"])
+	var pre: Array = []
+	for k8 in Probe.counts:
+		var ks8: String = String(k8)
+		if ks8.begins_with("seek.preempt_attempt."):
+			pre.append("%s×%d" % [ks8.replace("seek.preempt_attempt.", ""), int(Probe.counts[k8])])
+	pre.sort()
+	print("   ★③-f 求居的下場：**真的走到** %d 次｜半路被別的 task 搶（try_set 嘗試）：%s" % [
+		int(Probe.counts.get("seek.arrived", 0)), str(pre) if not pre.is_empty() else "（無）"])
+	print("   ★★★若求居 dispatch ＝ 0 ⇒ 「領主沒空收人」那個結論是在**錯的那一端**下的")
+	# ★★★收留輸給誰（★同 tick 同隊並排；★★逐 option 統計，不是平均）
+	var sbs: Array = Probe.samples.get("shelter.side_by_side", [])
+	if sbs.is_empty():
+		print("★③-c 收留輸給誰：**不可判**（0 筆並排樣本）")
+	else:
+		var lost: Array = []
+		for k6 in Probe.counts:
+			var ks6: String = String(k6)
+			if ks6.begins_with("shelter.lost_to."):
+				lost.append("%s×%d" % [ks6.replace("shelter.lost_to.", ""), int(Probe.counts[k6])])
+		lost.sort()
+		var ranks: Array = []
+		for r6 in range(1, 10):
+			var rc: int = int(Probe.counts.get("shelter.rank.%d" % r6, 0))
+			if rc > 0:
+				ranks.append("第%d名×%d" % [r6, rc])
+		print("★③-c 收留：贏 %d 次｜名次分布 %s" % [int(Probe.counts.get("shelter.won", 0)), str(ranks)])
+		print("   ★輸給誰：%s" % str(lost))
+		print("   ★★並排樣本（前 3，同 tick 同隊）：%s" % str(sbs.slice(0, 3)))
+	# ★★★組成：drive → weight → coeff → failure → 末端（★哪一步掉最多，答案就在那一步）
+	var cmp_n: int = int(Probe.counts.get("shelter.cmp.n", 0))
+	if cmp_n == 0:
+		print("★③-d 收留 util 組成：**不可判**（0 筆 ⇒ 它連被算過都沒有）")
+	elif cmp_n < 10:
+		print("★③-d 收留 util 組成：★★樣本太小（%d 筆 < 10）—— ★而「它連被考慮的機會都很少」本身是另一種病" % cmp_n)
+	else:
+		var n_f: float = float(cmp_n)
+		print("★③-d 收留 util 組成（母體 %d 筆，只在它 applicable 的時刻）：" % cmp_n)
+		print("   drive %.3f → ×weight → %.3f → ×coeff → %.3f → ×failure → 末端 %.3f" % [
+			Probe.amount("shelter.cmp.drive_sum") / n_f,
+			Probe.amount("shelter.cmp.after_weight_sum") / n_f,
+			Probe.amount("shelter.cmp.after_coeff_sum") / n_f,
+			Probe.amount("shelter.cmp.final_sum") / n_f])
+		print("   ★逐筆前 3：%s" % str(Probe.samples.get("shelter.composition", []).slice(0, 3)))
 	# ⑥一隊一登記（動詞上線後重驗）
 	var multi: int = 0
 	for tid in st.teams:
@@ -122,6 +176,8 @@ func _initialize() -> void:
 	print("★★母體拆解：世界上有主據點 %d 個｜PRODUCE 隊 %d 支｜其中【無自家據點】%d 支｜其中【知道別人據點】%d 支" % [
 		outposts_n, produce_n, produce_homeless, homeless_with_known_host])
 	print("   ⇒ ★求居的前置鏈是：PRODUCE ∧ 無自家據點 ∧ 知道一個別人的據點 —— 上面四個數字說明它斷在哪一節")
+	print("★⑧>2 秒的幀數 = **%d / %d**（★終線是這個計數歸零，不是平均變好）" % [
+		SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★⑦fp=%s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=%d" % (0 if not lodgers.is_empty() else 1))
 	quit(0 if not lodgers.is_empty() else 1)

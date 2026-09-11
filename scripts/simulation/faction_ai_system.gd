@@ -879,6 +879,8 @@ const PHASE_PARENT: Dictionary = {
 	"loop2.indep_strategy": "", "loop2.member_strategy": "", "loop2b.merge": "",
 	"loop3.threat": "", "loop3.survival": "", "loop3.pursuit": "", "loop3.prosperity": "",
 	"loop3.outpost": "", "loop3.orders_ambition": "", "loop3.misc": "",
+	# ★★★「其他」桶的三個具名子相位（父＝`loop3.misc`；★沒登記會被根守恆式咬，而那正是它該做的事）
+	"misc.equip_mobilize": "loop3.misc", "misc.mounts": "loop3.misc", "misc.ambient": "loop3.misc",
 	# ★loop2.solo 現在【不在 evaluate_all 裡】（錯開票移出去了）⇒ 它的帳在另一個容器
 	#   ⇒ 登記為根，而它與本表其餘列【不可相加】（分母不同）。
 	# ★★★裁定（systems 2026-09-10）：`solo_engine`／`solo_cheap` 是 `loop2.solo` 的【兩個桶】——
@@ -1379,13 +1381,18 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			_evaluate_owner_contact(state, team)
 			_tick_resident_unrest(state, team)   # ★SLICE B D:deficit→unrest / fed→relief（餵現成 defection≥20）
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.outpost", _t3)
+		# ★★★切開「其他」桶（systems 2026-09-11）：`loop3.misc` 佔 spike 樣本 86.3%、自佔比中位 29.6%
+		#   ⇒ ★而那不是「其他很貴」，是**我們沒有把它切開** —— 切點依它實際做的四件事：
+		#     ①裝備／動員維護 ②拉 mount ③ambient 決策（rank_ambient ＋ dispatch）④其餘殘量
 		_update_mobilization(team, state)   # ★军民混编 Slice B：先更新動員比（equip/guard 讀）
 		_update_equip_order(state, team)
 		# anon_combat_skill / anon_wage 改 computed（AnonTierSystem），不再主動更新
 		_update_armor_config(team)
 		_update_guard_ratio(team, state)
+		if SimRunner.phase_timing: _t3 = _fai_pht("misc.equip_mobilize", _t3)
 		# 出征前自動從自家 outpost 公庫拉 mount
 		_auto_withdraw_mounts(state, team)
+		if SimRunner.phase_timing: _t3 = _fai_pht("misc.mounts", _t3)
 		# G2c：野心階梯常態行為（最低優先，只填 idle）。
 		# 序3：rung_task 查表撕除 → 引擎 rank（archetype/rung 當 weight，train_drive 讀之）。
 		# 序3 follow-up：rank_scored_ctx → rank_ambient（收窄至 AMBIENT_OPTION_SET）。ambient 不二次猜
@@ -1405,7 +1412,8 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 					if _tk == TeamData.TASK_TRADE:
 						Probe.bump("trade.dispatch.ambient")   # 漏斗站4
 					break
-		if SimRunner.phase_timing: _fai_pht("loop3.misc", _t3)
+			if SimRunner.phase_timing: _t3 = _fai_pht("misc.ambient", _t3)
+		if SimRunner.phase_timing: _fai_pht("loop3.misc", _t3)   # ★殘量（四段之外的部分）
 
 # ──────── Tag 權限 ────────
 
@@ -3386,6 +3394,14 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
+		# ★★★兩半要分開數（systems 2026-09-11）：★「領主沒空收人」這個結論只有在
+		#   **流浪隊真的去問過**的前提下才成立 ⇒ 這裡數【求居真的被派出去】幾次。
+		if Probe.enabled and opt == "求居":
+			Probe.bump("registry.verb.seek_dispatch")
+			Probe.bump_sample("registry.verb.seek_dispatch", {
+				"team": team.team_id, "host": int(td.get("order_target", -1)),
+				"tick": state.world.current_tick,
+				"dist": FactionAISystem._hex_dist(team.tile_pos, td.get("target", Vector2i(-1, -1)))}, 150)
 		team.current_option = opt   # 承諾追蹤實際派出
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
