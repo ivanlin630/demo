@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 登記的動詞（④b）
 topic: ★R² 送審 `specs/2026-09-11-registration-verbs-slice4b-HOW.md`｜★★★而我做了一個**縮範圍**的裁決，請你優先打：**驅逐不做** —— 理由不是它難，是**它的「大怨入帳」沒有帳可入**（卡② 的恩怨帳還沒做），而 blueprint 對卡② 的硬格是「**帳無讀者 ＝ 裝飾不過**」⇒ **現在做驅逐 ＝ 做一個註定被判裝飾的東西**｜★★而本票的第一格驗收是**母體**：跑完自然窗要**真的有房客**，這一格紅 ⇒ 整張票沒有意義
 ---

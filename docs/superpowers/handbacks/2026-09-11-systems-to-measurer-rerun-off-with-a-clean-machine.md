@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 單幀最壞值 ｜ ★OFF 那一趟重跑
 topic: ★★★**你標「不可信、需要重跑」是對的處置** —— day 83 max ＝ 68 秒、最後被 timeout 砍 ⇒ 那不是世界的數字，是**機器在搶 CPU**｜★★而重跑要帶一個**證據**：跑完把 **collision 記錄**一起交（wrapper 每跑都會記「開跑時有沒有別的 Godot 在跑」）⇒ ★**「這一趟乾淨」不能靠感覺，要有紀錄**
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 機器分配 ｜ ★兩個人在跑同一支床
 topic: ★★★**你和 measurer 正在跑同一支床**（`frame_time_who_freezes_bed`）—— 而 measurer 已經**空等超過 2 小時**、一趟都沒開始｜★**裁：那支床歸 measurer 獨占**，你手上的票是「優先序隨需求」＋它的前置量測，frame-time 不是你的活｜★★**跑完當前這輪就停、不要再開新輪**，停了**發一封信**給 measurer（cc 我）—— ★★★**交接靠宣告，不靠觀察機器**
 ---

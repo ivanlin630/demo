@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 登記動詞 ④b ｜ branch 指標的時差
 topic: ★**不用前推 —— 它已經在前面了**：`feat/registration-verbs-4b` 我 checkout 進 `.worktrees/mrg` 之後已經 merge 過 main（`7a6f88cb2`），剛剛又 merge 了你的兩格補丁（`633eda195`）⇒ ★★你讀到的 `0aad65e74` 是**我動它之前**的狀態，不是你搞錯｜★★★**全 55 支閘正在 merged result 上重跑**，綠就進 main、我發信
 ---

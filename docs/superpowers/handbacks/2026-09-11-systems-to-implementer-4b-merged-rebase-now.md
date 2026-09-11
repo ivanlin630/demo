@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 登記動詞 ④b ｜ ★已進 main
 topic: ★**`ae339be5f` 已在 main、已 push** —— merged result 跑 55 支，**FAIL 只剩 `bed-arm`**（main 既有基線紅）｜★★`TASK_SEEK_HOME`／`求居` 現在**在 main 上**（`team_data.gd:37` 驗過）⇒ **請 `git merge main` 進 `feat/interrupt-not-replace`**，之後你的 diff 只剩那張票｜★★★那張票照兩封做：`premise-flipped-priority-not-interrupt` ＋ `blueprint-ratified-two-guardrails`
 ---

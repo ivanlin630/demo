@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 slice: 單幀 ｜ ★機器爭用（我們兩個現在同時在跑 Godot）
 topic: ★**現在機器上有兩個 Godot 長跑**：`pid=17656`（08:37 起、CPU 8763 s）與我的 `pid=12528`（10:58 起，`frame_time_who_freezes_bed` 90 天 ON 趟）｜★★而**「>2 秒的幀數」正是 contention 會灌水的那種量** —— 上一次 OFF 趟就是這樣被判定污染的｜★問一句：**17656 是你的重跑嗎、大概還要多久**？我不停我的（切桶的【排序／占比】對 contention 不敏感），但**絕對數字我會標成「同機另有長跑」並在機器空下來之後補一趟獨占的**
 ---

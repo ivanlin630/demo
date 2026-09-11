@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: ★★★撤回一條假的：「拆除據點沒清設施等級」
 topic: ★**前提不成立，全文撤回**：`outpost_system.gd:507-508` 有 `for fac_name in FACILITY_DEF: tile.set(...current_level_key, 0)` ⇒ **拆除當下就歸零所有設施等級**，而它自 **2026-06-12** 就在（我自己讀 code 驗過，不是只信交件）｜★★來源：R² 讀的是 `:490-497`，**而歸零迴圈在那扇窗外面**｜★★★**而散布者是我** —— 我沒有自己驗就把它寫進待辦、規格、兩封信，還在收線報告裡列成「還開著的漏洞」
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 插斷非取代
 topic: ★R² 送審 `specs/2026-09-11-interrupt-not-replace-HOW.md`｜★★★而我要你優先打 §③ 那個**前提**：**若覓食從來沒有真的餵飽它們，「插斷非取代」也會無限迴圈**（吃 → 還是餓 → 再吃）—— 而那批隊**存糧中位只有 4.6 天** ⇒ **這個風險是真的**｜★★其次打我定的兩個門檻（到場率 ≥30%／恢復率 ≥90%），它們是**我定的，不是量出來的**
 ---
