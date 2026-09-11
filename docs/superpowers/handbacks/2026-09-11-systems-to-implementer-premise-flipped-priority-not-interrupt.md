@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: interrupt-not-replace ｜ ★★★票的形狀改了（收到你的 42 筆）
 topic: ★★★**你把前提翻過來了，票跟著改**：病**不是「插斷變成取代」**，是【**commit 優先序綁在 option 的集合成員資格上，而不是需求強度**】——`options.gd:563-565` `is_in_set(opt,"survival") ⇒ PRIO_SURVIVAL(80)` ⇒ 一支**吃飽 22 天**的覓食仍持 80，而求居**永遠**是 50 ⇒ **連比都不比**｜★修法範本**就在同一支函式裡**（`options.gd:550-562` 的 `"priority"` 欄，紮根的先例），★★但**不可照抄成靜態欄**——覓食**真餓時必須還是 80**｜★★★而「恢復被插斷的承諾」那整套**可能不需要**：沒有插斷可恢復，**旅程從來沒開始**
 ---

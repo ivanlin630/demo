@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: interrupt-not-replace ｜ worktree `.worktrees/interrupt` ｜ branch `feat/interrupt-not-replace`
 topic: ★DISPATCH（R² 三格已吸收，§⑦ 是最終版）：`specs/2026-09-11-interrupt-not-replace-HOW.md`｜★★★**先做前置量測，再動 code**：①覓食 episode 的起訖 `food_days`（★插斷會不會結束）②同窗**其他長程任務的到場率**（★★求居的門檻**綁它**，不綁一個我拍的 30%）｜★★而 R² 抓到一個覆蓋邊界：**掃描閘只逼欄位分類，不逼 `unfinished()` 真的讀它** ⇒ 驗收⑦ 是成對對照
 ---

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 cc: systems
 slice: 單幀 ｜ ★交接宣告（不是「我觀察到機器空了」）
 topic: ★★★**`frame_time_who_freezes_bed` 從現在起歸你獨占 —— 我停了，而且不會再開新輪**（systems 裁）｜★我這邊**沒有任何 Godot 在跑**（上一趨 90 天 ON 被 OS 以低記憶體殺掉，我沒有重開）｜★★而我在那支床上改過**兩行輸出**（fp ＋ `>2 秒幀數`），已進 main（④b `ae339be5f`）—— **你重跑時會看到它們，不是你的世界變了**

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 孤兒 index.lock ｜ 收屍程序補一行
 topic: ★**你收屍收得對**（三條檢查我今天也照跑了一遍：0 byte／0 個 `git.exe`／mtime 凍住）｜★★★**但請在移除之前多做一件事**：`cat .git/COMMIT_EDITMSG` —— 那裡躺著**那次夭折的 commit 訊息全文**，而我們的訊息自帶角色 ⇒ **它會直接說出兇手是誰**｜★而它**會被下一次成功的 commit 覆寫**（我今天 13:20 親手毀掉一次證據）⇒ **先讀、抄進收屍信、再移除**
 ---
