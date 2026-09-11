@@ -1,5 +1,13 @@
 extends SceneTree
-# @bed-kind: diagnostic
+# @bed-kind: acceptance
+# slice: 相遇機器（信使旅程切段 ＋ 迎戰四格 ＋ 相遇頻率分桶）
+# ★★★為什麼從 diagnostic 改成 acceptance（★與 `interrupt_premeasure_bed` 同一個理由，同一個病）：
+#   **它確實在判東西** —— 迎戰四格的**對帳**（互斥且窮盡、相加必須等於母體）、
+#   出口分桶的守恆、以及「碰面後有沒有人在思考」那兩個數，**都是我拿來下結論的**。
+#   ⇒ ★**有判決通道就不是純診斷** ⇒ 標 acceptance 比較誠實。
+#   ⇒ ★★而這是**同一支床的同一個問題第二次**（上次是 premeasure）——
+#     ★★★所以我這次寫下**判準**而不只是改標籤：
+#     **床上只要有一行「對帳 OK／不符」或「必須等於」，它就是 acceptance。**
 # 信使旅程切段（HOW spec 2026-09-11-herald-journey-segments）：★這一票【只量不修】。
 #
 # ★為什麼只量：同卷已證「尺可信」（fp 逐字相同、紮營 0% → 79.2%）⇒ 2.2% 是世界的事實
