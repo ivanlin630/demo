@@ -80,6 +80,10 @@ static func rank_scored(state: WorldState, team: TeamData, src: String = "unknow
 	# ★★★「面對面的那一刻有沒有人在思考」（systems 2026-09-12 的第四種可能）：
 	#   ★全域計數（幀數歸因用：次數與單價要分開量）答不了「**這一支隊**在那段期間跑了幾次決策」
 	#   ⇒ ★★兩顆都留：全域那顆是 main 來的、逐隊那顆是本票要的。
+	# ★★★留兩邊的檢查（systems 2026-09-12 要的那一句）：**X ≠ Y**
+	#   ·`engine.rank_scored.calls` 答的是 **X ＝「全世界這一窗跑了幾次 rank」**（幀數歸因的總量側）
+	#   ·`engine.rank.t<id>`        答的是 **Y ＝「這一支隊在某段期間跑了幾次」**（碰面後有沒有人在思考）
+	#   ⇒ ★**X ≠ Y**：它們是**同一個事件的兩種聚合**，不是同一件事做兩次（★★沒有重複執行、沒有同鍵重複 bump）。
 	if Probe.enabled:
 		Probe.bump("engine.rank_scored.calls")
 		Probe.bump("engine.rank.t%d" % team.team_id)

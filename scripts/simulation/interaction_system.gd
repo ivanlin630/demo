@@ -565,6 +565,9 @@ func _deliver_envoy_proposal(state: WorldState, envoy_id: int, target_id: int) -
 	# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：信使＝送達（被目標讀取）。
 	#   ★這是全庫**兩個**送達入口之一（另一個是 same_faction 分支的 `_deliver_order`）
 	#   ⇒ ★★`herald.delivered.*` 分流計數與 `task.done.*` 兩顆都留（前者答「走哪個入口」，後者答「這一趟成了沒」）。
+	# ★留兩邊的檢查：**X ≠ Y** —— `herald.delivered.*` 答「**走哪一個送達入口**」（全庫只有兩個），
+	#   `task.done.t<id>.信使` 答「**這一趟成了沒**」（床用它算 episode 成功）；
+	#   ★而 `task.done` 在這個站點**只 bump 一次**（已 grep 確認：:570／:793 各一）⇒ ★★沒有重複計數。
 	if Probe.enabled:
 		Probe.bump("herald.delivered.envoy")
 		Probe.bump("task.done.t%d.%s" % [envoy_id, TeamData.TASK_HERALD])
