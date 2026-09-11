@@ -330,6 +330,9 @@ func _run() -> void:
 	print("★誠實限：①出口桶取自 arbiter 自己的分支計數（same_level／higher／defy／release／transition），")
 	print("   ★★『個位數不判方向』——本卷只報數、不報趨勢；②窗末未完單獨一類；")
 	print("   ★★★③負斷言只能被逐筆【推翻】，一致不等於證明（可能只是本窗沒發生）")
+	# ★勒索 fire（blueprint 預測攻擊門開了之後**應下降**）：★這裡只印數字，
+	#   ★★**判它升降要 before／after 兩趟**（before ＝ 攻擊門之前那棵樹）⇒ 單趟只能報數。
+	print("★勒索 fire（`raid.extort`）：%d（★單趟不可判升降 —— 要同窗同 seed 的 before／after）" % 		int(Probe.counts.get("raid.extort", 0)))
 	print("★>2 秒幀數 = %d / %d" % [SimRunner.frames_over_budget, SimRunner.frames_total])
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=0")
