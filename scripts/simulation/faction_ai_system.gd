@@ -1381,6 +1381,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			_evaluate_owner_contact(state, team)
 			_tick_resident_unrest(state, team)   # ★SLICE B D:deficit→unrest / fed→relief（餵現成 defection≥20）
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.outpost", _t3)
+		# ★★★父相位要涵蓋【整段】，不是【殘量】：`phase_report` 會把兒子的 tot 從父親身上減掉
+		#   ⇒ 若 `loop3.misc` 只累殘量，減完就是【負 self】—— ★而那正是驗收第②條禁的東西。
+		#   ★★所以記一支【整段起點】：父 tot ＝整段、self ＝整段 − 四個具名子相位 ＝真正的殘量。
+		var _t3_misc0: int = _t3
 		# ★★★切開「其他」桶（systems 2026-09-11）：`loop3.misc` 佔 spike 樣本 86.3%、自佔比中位 29.6%
 		#   ⇒ ★而那不是「其他很貴」，是**我們沒有把它切開** —— 切點依它實際做的四件事：
 		#     ①裝備／動員維護 ②拉 mount ③ambient 決策（rank_ambient ＋ dispatch）④其餘殘量
@@ -1413,7 +1417,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 						Probe.bump("trade.dispatch.ambient")   # 漏斗站4
 					break
 			if SimRunner.phase_timing: _t3 = _fai_pht("misc.ambient", _t3)
-		if SimRunner.phase_timing: _fai_pht("loop3.misc", _t3)   # ★殘量（四段之外的部分）
+		if SimRunner.phase_timing: _fai_pht("loop3.misc", _t3_misc0)   # ★父＝整段（self 會是四段之外的殘量）
 
 # ──────── Tag 權限 ────────
 
