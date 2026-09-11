@@ -1,0 +1,115 @@
+# 世代 4／30 天長窗（★遊戲關掉之後第一趟長窗，free 20 GB）
+# 床：.worktrees/herald/scripts/debug/herald_journey_bed.gd（acceptance）｜43200 tick ＝ 30 天｜seed 1337
+# ★fp = 65a0e85ca5282fed6d6e1cf544c5db20｜世代 4（`c6c9704ac` ＝ 機會項已 merge）
+# ★★不可與世代 2／3 的數字互比（門與秤都換過）——★★★每一格都標世代與窗。
+#
+# ═══════ ①★★★信使：`closed_far` 母體終於非 0（那一格的答案是「窗要夠長」） ═══════
+#   closed_far（起算 ≥3 格）**7 段｜送達 4 ＝ 57.1%**
+#   closed_mid（1-2 格）    **19 段｜送達 13 ＝ 68.4%**
+#   closed_near（0 格）      5 段｜送達 4 ＝ 80.0%
+#   ⇒ ★**「信使 2.2%」那個舊數字徹底作廢**（它是 `move_target` 切段造成的，已於世代 2 撤回）
+#   ⇒ ★★**有旅程的信使，送達率 57〜68%** —— 而窗末未完 55 段單獨一類、不進分母。
+#   ★送達入口分流：同派系 `_deliver_order` **6**／`envoy_proposal` **58**
+#   ★★§③(ii) 負斷言（跨派系且 reason≠envoy）：**母體 0 ⇒ 不可判**（第三次量到同一個「不可判」）
+#
+# ═══════ ②迎戰四格（278 段，對帳 OK） ═══════
+#   沒有目標 **26**｜沒有碰到面 **127（45.7%）**｜碰到了但沒開打 **123（44.2%）**｜碰到且開打 **2**
+#   ⇒ ★世代 3（10 天）是 31／26；世代 2（30 天）是 59／116 —— ★★**三卷世代不同、不可比**，各自成立。
+#   ★段內目標換人合計 **729**／278 段 ⇒ 一段裡平均換過 2.6 個對象。
+#
+# ═══════ ③碰面後有沒有人在思考（★systems 的第四種可能，第二次確認） ═══════
+#   碰到面 **125 段**：那一 tick 有跑決策 **124／125**｜碰面後一小時內一次都沒跑 **2／76**
+#   ⇒ ★★**大母體再確認一次**：面對面的那一刻**幾乎每次都有人在思考**。
+#
+# ═══════ ④相遇頻率（世代 4） ═══════
+#   總 **29746 對·tick**／30 天 ⇒ **每日 991.5**（★世代 3 的 10 天窗是 541.7／日 —— ★★兩個世代不可比）
+#   每 tick：**p50 0｜p95 0｜max 81**（母體 43200 tick）
+#   分桶：`passing` **13057（43.9%）**｜`armed.none` **6373（21.4%）**｜`sizegap<2` 14476｜
+#     ★分析欄：敵意 `neither` 23469｜**`one_way` 4293（14.4%）**｜`both` 1984
+#
+# ═══════ ⑤攻擊 util（世代 4，母體 11840） ═══════
+#   零 **6414**／非零 **5426（45.8%）**｜被誰壓成 0：`terms_sum` **6390**｜`coeff` 0｜`fail_mult` 0｜
+#   **`later` 24** ⇒ ★★**新出現的一格**：`after_weight > 0` 而 final ≈ 0（★乘數把它壓到 0）——
+#     ⇒ **24 筆，佔 0.4%**，★★★**本卷不下結論，但它證明那個分類【還在工作】**。
+#   ★逐筆可見機會項真的在貢獻：`attack_opportunity:d=0.248` ⇒ `final=0.132`
+#
+# ═══════ ⑥對峙現場（6622 次） ═══════
+#   攻擊可選而秤選了別的 **3553（53.7%）**｜秤選了攻擊 **8**｜攻擊根本不可選 **3061（46.2%）**
+#   ⇒ ★「根本不可選」比世代 3 的 15.4% 高很多 —— ★★**而那是取樣放寬造成的**（現在任何別家隊同格都算
+#     對峙，包含「我根本沒在盯它」的情況）⇒ ★★★**兩卷的「不可選率」不可互比**。
+#   贏家分佈：**徵收 2635｜外交 682｜求和 638｜建設 405｜survival 359｜迎戰 355｜…｜攻擊 8**
+#   ★徵收對照：**面對面 39.8%（2635／6622）vs 全部 rank 20.5%（4280／20922）** ⇒ 差 **＋19.3pt**
+#
+# ═══════ ⑦勒索（★單趟，不可判升降） ═══════
+#   `raid.extort` **182** ⇒ ★**要 before／after 兩趟**才判得出 blueprint 那句「應下降」——**尚未跑 before**。
+
+
+
+★母體：信使 episode 共 86 段（完整結束 31／窗末未完 55）
+   ★分四群：起算距離 >0 ＝【真的有旅程】／起算距離 0 ＝【生成時就站在目標身上】
+   closed_far   母體   7 ｜到格   3｜相遇   4｜送達   4 ｜送達率 57.1%
+   closed_mid   母體  19 ｜到格   7｜相遇  13｜送達  13 ｜送達率 68.4%
+   closed_near  母體   5 ｜到格   5｜相遇   5｜送達   4 ｜送達率 80.0%
+   open_far     母體   0 ｜到格   0｜相遇   0｜送達   0 ｜送達率 不可判(母體0)
+   open_mid     母體   9 ｜到格   5｜相遇   5｜送達   1 ｜送達率 11.1%
+   open_near    母體  46 ｜到格  46｜相遇  46｜送達  42 ｜送達率 91.3%
+   ★『抵達了但沒相遇』只在【有旅程】那一群有意義 —— ★★而那正是求居案的同族（到了但沒見到人）
+★出口分桶（★加總必須 ＝ 母體；沒有「其他」這一桶）：{ "送達後（release）": 21, "higher": 3, "release": 7, "窗末未完": 55 }
+   守恆：分桶加總 86 vs 母體 86  OK
+★送達入口分流：同派系 order 6 次｜envoy_proposal 58 次
+★★★spec §(ii) 那個負斷言（跨派系 ＋ task_reason != envoy_proposal）：
+   母體 0 段；其中送達 0 段
+   ★母體 0  **不可判**（★★而那與「它們都送不到」是兩個結論）
+
+★★★迎戰三格（母體＝迎戰 episode 278 段；★互斥且窮盡  相加必須等於母體）：
+   沒有目標           26
+   沒有碰到面        127   ★這是【相遇機制】的那一側
+   碰到了但沒開打    123   ★★這是【決策】的那一側
+   碰到且開打          2
+   對帳：26 + 127 + 123 + 2 = 278 vs 母體 278  OK
+   ★★★★碰到面之後【有沒有人在思考】：碰到面 125 段，其中**碰面後一次決策都沒跑 6 段**（4.8%）
+      ★★兩個數（systems 要的）：碰到面的【那一 tick】有跑決策 124／125 段
+         碰面後【一個遊戲小時】內一次都沒跑：2／76 段（★母體＝活過那一小時的段）
+         ★★★相遇【一天幾次】：總 29746 對·tick（★同一對連續 tick 會重複計 ＝ 喚醒風暴的分子）
+            一個 tick 幾次：p50=0 p95=0 max=81（母體＝43200 tick）
+            ★分桶（★★外觀層三欄 ＝ 過濾器【可以】用的；`analysis.*` ＝ 只給我們看的分析欄，
+              ★★★過濾器【不准】用它，因為它要讀關係／意圖）：{ "armed.both": 10998, "sizegap.lt4": 3766, "approach.toward": 16689, "analysis.hostile.neither": 23469, "sizegap.lt2": 14476, "armed.one": 12375, "approach.passing": 13057, "sizegap.ge4": 11504, "armed.none": 6373, "analysis.hostile.one_way": 4293, "analysis.hostile.both": 1984 }
+            ★★★`analysis.hostile.*` 有三格（both／one_way／neither）—— ★而【單向敵意】那一格
+              只有在逐向記的時候才會出現：**敵對不是對稱事實，是每一支隊各自的判斷**
+            ★而過濾器的形狀是【預設醒、具名靜】 上面的桶讀作『這種相遇【可以被靜音】』，
+              **不是**『這種才喚醒』—— 兩者在 code 上差一個 not，在世界上差很多
+             每日 991.5 對·tick（母體＝30 天）
+      ★這一格答 systems 的第四種可能：**開門也用不到，因為沒人有機會用那個提名**
+      ★★而『相遇不發事件』是窮盡 grep 查的：`WorldEvents.emit(` 全庫 16 個呼叫點，無一是相遇
+   ★★★『736 → 1』分不出的兩種世界，就是與 —— 而它們的處置完全不同
+   ★切段鍵 ＝【連續持有 TASK_DEFEND 的一段】（不是目標 id） 欄位抖動不會切段
+   ★★段內【目標換人】次數合計 729 —— ★★★若它很大，表示一段裡其實追過好幾個對象
+
+
+★對照【徵收佔比】：面對面 2635／6622 ＝ 39.8%　vs　全部 rank 4280／20922 ＝ 20.5%
+   ★兩個母體（面對面 vs 全部） ★★差額才是【面對面造成的】，單看六成講不出這句
+★攻擊 util 的組成（★『低』與『恰好 0』是兩種病）：
+   零 final 6414 次／非零 5426 次｜被誰壓成 0：{terms_sum:6390, coeff:0, fail_mult:0, later:24}
+   ★★結構：四個 term 相【加】，之後乘 coeff、乘 fail_mult  ★★★一個 0 的乘數就殺掉全部
+     terms=["faction_duty:d=0.000 w=0.869", "attack_drive:d=0.000 w=0.737", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.504", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.548 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=0.861", "attack_drive:d=0.000 w=0.737", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.487", "attack_opportunity:d=0.248 w=1.000"]｜after_weight=0.248 coeff=0.534 fail=1 final=0.132
+     terms=["faction_duty:d=0.000 w=0.952", "attack_drive:d=0.000 w=0.849", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.548", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.301 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=1.403", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.772", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.427 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.493", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.354", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.299 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=1.409", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.773", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.452 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=0.937", "attack_drive:d=0.000 w=0.690", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.482", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.341 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.784", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.532", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.484 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=0.649", "attack_drive:d=0.000 w=1.240", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.764", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.635 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.465", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.367", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.35 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.785", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.516", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.418 fail=1 final=0
+     terms=["faction_duty:d=0.000 w=1.000", "attack_drive:d=0.000 w=0.887", "intent_fit:d=0.000 w=1.000", "feud_pull:d=0.000 w=0.551", "attack_opportunity:d=0.000 w=1.000"]｜after_weight=0 coeff=0.523 fail=1 final=0
+★★★面對面現場（母體＝迎戰姿態 ＋ 目標還活著 ＋ 同格的【決策時刻】共 6622 次；樣本上限 150，實收 150）
+   贏家分佈：{ "徵收": 2635, "maintain_tools:resource": 328, "併入": 36, "乞食": 5, "外交": 682, "覓食": 145, "紮根": 79, "survival": 359, "掠奪": 114, "建設": 405, "求和": 638, "紮營": 33, "歸建": 47, "迎戰": 355, "遷移找糧": 1, "maintain_food:resource": 246, "貿易": 92, "deliver_material": 2, "買糧": 86, "maintain_material:resource": 116, "maintain_material:location:delegate": 25, "領取": 19, "maintain_weapons:resource": 144, "攻擊": 8, "返家補給": 22 }
+   ★★★三個桶：攻擊可選而秤選別的 3553｜秤選了攻擊 8｜攻擊根本不可選 3061
+      對帳：3553 + 8 + 3061 = 6622 vs 母體 6622  OK
+   ★那一桶的三道門（可讀的那一半）：{ "faction_directive.off": 3061, "intent.致富": 2483, "feud.lt_min": 3061, "intent.(無)": 572, "intent.防衛": 6 }
+      ★★門的另一半（target 存不存在）本卷【沒有評】—— 它要 gather，而那會岔 RNG
+   ★★三種世界：**贏的是攻擊/迎戰卻沒打成**（派不出去）／**贏的是別的**（壓根沒在想打）／
+     **打不贏所以不打**（util 低）—— ★贏家分佈先把第二種分出來
+
+★
