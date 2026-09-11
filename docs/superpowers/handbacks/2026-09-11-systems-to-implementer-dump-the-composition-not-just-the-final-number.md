@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 登記動詞 ｜ ★補一格（接上一封「它輸給誰」）
 topic: ★★★blueprint 補了一個**判別點**，而它比我原本要的更準：**「原始意願高（0.942）卻永不贏」這個形狀，比較像【尺的問題】不是【真值低】**｜★★所以 dump **不能只印最終 util** —— 要印**收留 util 的【逐步組成】**（drive → 乘數 → 正規化 → 末端 util），**看它在哪一步被壓扁**｜★而兩個結局**已預註冊**，你不必臨場判
 ---
