@@ -1,0 +1,187 @@
+# 前置量測（interrupt 票 §③／§⑦(2)）＋ 這一刀的 before／after
+# 床：scripts/debug/interrupt_premeasure_bed.gd｜warring_states｜43200 tick ＝ 30 遊戲天｜seed 1337｜★預設 config 未改
+# before ＝ main（④b 已 merge，commit e44f98fba 的樹）｜after ＝ feat/interrupt-not-replace（commit 優先序隨需求）
+# ★母體定義（兩趟逐字相同）：episode＝同一隊在 current_task 上連續停留的一段；
+#   長程＝episode 起算時 move_target 與所在格 hex 距離 ≥ 3；到場＝存續期間任一 tick tile_pos == move_target；
+#   ★被窗切掉的 episode 單獨一列、不進分母。
+#
+# ═══════ 四個結論 ═══════
+# ①★★★【比本票更大的發現，systems 要我單獨報】**這個世界的長程到場率本來就很低**：
+#   before 87／374 ＝ **23.3%**；after 116／655 ＝ **17.7%**
+#   ⇒ ★也就是說「出發了卻到不了」是**全域常態**，不是求居專有的病。
+#   ⇒ ★★而它直接影響驗收①的讀法：門檻綁基準 ⇒ **門檻本身只有兩成**。
+# ②★求居在兩趟都是【母體 0】—— 沒有任何一段 SEEK_HOME 的長程 episode
+#   ⇒ ★★所以「到場率」這一格**這張床答不出來**（不是 0%，是不可判）⇒ 由漏斗床（registration_verbs_bed）接手。
+# ③★★★我上一封的懷疑【被自己的量測否定】：「覓食 episode 從不結束」**不成立** ——
+#   episode 長度中位 **479 tick ＝ 0.33 遊戲天**（after 420 tick）⇒ ★大多數覓食段**很快就結束**
+#   ★★而 max ＝ 39000 tick（27 天）⇒ team 65 那一段是**長尾**，不是常態。
+#   ⇒ ★★★所以擋住求居的不是「一段永不結束的覓食」，是**每個 cadence 又選一次覓食**（重複進入）。
+# ④★★而「覓食真的會餵飽」這句也要收窄：**Δfood_days 中位是 −0.25（負的）**，
+#   只有 **11.4%（after 18.2%）** 的段上升超過半天。
+#   ⇒ ★誠實限：**Δfood_days 不等於「覓食產出」** —— 它是這段期間**全部收支**的淨變化
+#     （吃掉、賣掉、人口變動都在裡面）⇒ 它**不能**單獨用來判覓食有沒有效。
+#     ★★能說的只有：**覓食段結束時，多數隊的存糧天數沒有變多。**
+#
+# ═══════ 副作用守衛（驗收②③） ═══════
+# ★餓死：before 隊滅絕於餓 0／有名角色餓死 0；after 同為 0／0 ⇒ **不升**（★而兩邊都是 0＝這一格本窗沒有鑑別力，要講明）
+# ★★無登記隊數：before 92（寄居 2）→ after 83（寄居 2）⇒ **沒有歸零** ⇒ 遊商階層還在（blueprint 的目標校準）
+# ★★★fp：before 4b080cea8aa5f8ce97e7ad9ef6822c58 → after cb5d92447913daf0ccba6af0dbcda1dc ⇒ **變了（裁定接受）**
+# ★>2 秒幀數：before 321／43200 → after 518／43200 ⇒ ★★**變差了，要單獨追**（同機無其他長跑；但它與終線那條線相衝）
+#
+
+═══════ BEFORE（main）═══════
+迎戰)
+[SoloAI] Team113 → 建設 (建設)
+[SoloAI] Team271 → 迎戰 (迎戰)
+[SoloAI] Team312 → 建設 (建設)
+[SoloAI] Team317 → 外交 (求和)
+[SoloAI] Team333 → 覓食 (覓食)
+[Horse] Outpost (2, 21) 捕野馬 +1
+[Horse] Outpost (4, 27) 捕野馬 +1
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (8, 15) 捕野馬 +1
+[Horse] Outpost (9, 20) 捕野馬 +1
+[Horse] Outpost (10, 25) 捕野馬 +1
+[Horse] Outpost (15, 13) 捕野馬 +1
+[Horse] Outpost (19, 2) 捕野馬 +1
+[Horse] Outpost (22, 4) 捕野馬 +1
+[Horse] Outpost (24, 15) 捕野馬 +1
+[TickPerf] day=30 avg=68177 us max=6197221 us ticks=1440 teams=114 factions=13 | ★>2s 幀數=321/43200
+
+★覓食 episode（母體＝所有覓食 episode，★含被窗切掉的）
+   母體 = 553 段（其中被窗切掉 18 段）
+   完整結束 535 段｜Δfood_days：min=-340.02 中位=-0.25 max=86.21 ｜ ★上升 >0.5 天 = 61 (11.4%)
+   episode 長度（tick）：min=2 中位=479 max=39000 ｜ 中位 = 0.33 遊戲天
+   ★逐筆前 20 筆（★★前 N 筆、不是隨機樣本）：
+     team=6 起 tick=60 訖 tick=420 長=360 tick food_days 31.21 → 30.96 (Δ-0.25)
+     team=8 起 tick=60 訖 tick=420 長=360 tick food_days 34.68 → 34.43 (Δ-0.25)
+     team=15 起 tick=60 訖 tick=420 長=360 tick food_days 39.02 → 38.77 (Δ-0.25)
+     team=18 起 tick=60 訖 tick=420 長=360 tick food_days 31.21 → 30.96 (Δ-0.25)
+     team=21 起 tick=60 訖 tick=420 長=360 tick food_days 34.68 → 34.43 (Δ-0.25)
+     team=24 起 tick=60 訖 tick=420 長=360 tick food_days 39.02 → 38.77 (Δ-0.25)
+     team=30 起 tick=60 訖 tick=420 長=360 tick food_days 31.21 → 30.96 (Δ-0.25)
+     team=31 起 tick=60 訖 tick=420 長=360 tick food_days 31.21 → 30.96 (Δ-0.25)
+     team=8 起 tick=420 訖 tick=480 長=60 tick food_days 34.43 → 34.39 (Δ-0.04)
+     team=30 起 tick=420 訖 tick=480 長=60 tick food_days 30.96 → 30.92 (Δ-0.04)
+     team=3 起 tick=60 訖 tick=540 長=480 tick food_days 31.21 → 30.87 (Δ-0.33)
+     team=6 起 tick=420 訖 tick=540 長=120 tick food_days 30.96 → 30.87 (Δ-0.08)
+     team=11 起 tick=60 訖 tick=540 長=480 tick food_days 39.02 → 38.69 (Δ-0.33)
+     team=31 起 tick=420 訖 tick=540 長=120 tick food_days 30.96 → 30.87 (Δ-0.08)
+     team=48 起 tick=101 訖 tick=540 長=439 tick food_days 6.21 → 5.87 (Δ-0.33)
+     team=48 起 tick=540 訖 tick=597 長=57 tick food_days 5.87 → 5.87 (Δ+0.00)
+     team=11 起 tick=540 訖 tick=600 長=60 tick food_days 38.69 → 38.65 (Δ-0.04)
+     team=5 起 tick=60 訖 tick=780 長=720 tick food_days 162.46 → 61.96 (Δ-100.50)
+     team=19 起 tick=60 訖 tick=780 長=720 tick food_days 31.21 → 30.71 (Δ-0.50)
+     team=22 起 tick=60 訖 tick=780 長=720 tick food_days 205.32 → 61.96 (Δ-143.36)
+
+★長程任務到場率（母體＝episode 開始時目標距離  3 格的 episode；★被窗切掉的單獨列、不進分母）
+   task           起算       到場        到場率       窗末未完       中位長(天)
+   idle            5        0       0.0%          0         0.61
+   return_home        4        3      75.0%          0         3.19
+   乞食              1        0       0.0%          0         0.21
+   信使             45        4       8.9%          0         0.44
+   偵查             20        2      10.0%          0         0.74
+   外交             52       12      23.1%          1         0.62
+   安頓             11        5      45.5%          0         1.01
+   建設             10        1      10.0%          0         0.45
+   徵收             15        3      20.0%          2         1.49
+   投靠              2        0       0.0%          0         0.06
+   掠奪              1        0       0.0%          0         0.04
+   擴建              8        7      87.5%          0         2.57
+   攻擊              1        1     100.0%          0         2.17
+   紮營             24        0       0.0%          0         0.15
+   覓食              4        0       0.0%          1         0.92
+   貿易            113       30      26.5%          9         1.31
+   迎戰             18        6      33.3%          0         0.97
+   逃跑             33        9      27.3%          1         1.03
+   運輸              7        4      57.1%          1         0.83
+
+   ★★★基準（★不含求居）：到場 87 / 起算 374 = **23.3%**
+   ★求居：母體 0  不可判（★而這本身就是那 42 次沒上路的後果）
+
+★副作用守衛：隊滅絕於餓 0｜有名角色餓死 0｜窗末無自家據點的隊：未登記 92 已登記寄居 2
+   ★未登記歸零＝消滅遊商階層（blueprint 明文禁） 這一欄該保持非 0
+★>2 秒幀數 = 321 / 43200
+★fp = 4b080cea8aa5f8ce97e7ad9ef6822c58
+=== DONE === SECTIONS=1/1 FAILS=0
+[TEST-SUITE-COMPLETE]
+
+
+
+═══════ AFTER（本票）═══════
+外交 (求和)
+[SoloAI] Team72 → 迎戰 (迎戰)
+[SoloAI] Team78 → 外交 (求和)
+[SoloAI] Team111 → 貿易 (maintain_food:resource)
+[SoloAI] Team124 → 迎戰 (迎戰)
+[SoloAI] Team127 → 迎戰 (迎戰)
+[SoloAI] Team170 → 投靠 (併入)
+[SoloAI] Team185 → 乞食 (乞食)
+[SoloAI] Team213 → 投靠 (併入)
+[Horse] Outpost (5, 20) 捕野馬 +1
+[Horse] Outpost (15, 13) 捕野馬 +1
+[Horse] Outpost (18, 18) 捕野馬 +1
+[Horse] Outpost (22, 4) 捕野馬 +1
+[Horse] Outpost (23, 1) 捕野馬 +1
+[Horse] Outpost (26, 7) 捕野馬 +1
+[TickPerf] day=30 avg=74122 us max=7328809 us ticks=1440 teams=109 factions=11 | ★>2s 幀數=518/43200
+
+★覓食 episode（母體＝所有覓食 episode，★含被窗切掉的）
+   母體 = 395 段（其中被窗切掉 10 段）
+   完整結束 385 段｜Δfood_days：min=-143.36 中位=-0.21 max=41.16 ｜ ★上升 >0.5 天 = 70 (18.2%)
+   episode 長度（tick）：min=2 中位=420 max=36120 ｜ 中位 = 0.29 遊戲天
+   ★逐筆前 20 筆（★★前 N 筆、不是隨機樣本）：
+     team=3 起 tick=60 訖 tick=120 長=60 tick food_days 31.21 → 31.17 (Δ-0.04)
+     team=11 起 tick=60 訖 tick=120 長=60 tick food_days 39.02 → 38.98 (Δ-0.04)
+     team=15 起 tick=60 訖 tick=120 長=60 tick food_days 39.02 → 38.98 (Δ-0.04)
+     team=18 起 tick=60 訖 tick=120 長=60 tick food_days 31.21 → 31.17 (Δ-0.04)
+     team=19 起 tick=60 訖 tick=120 長=60 tick food_days 31.21 → 31.17 (Δ-0.04)
+     team=21 起 tick=60 訖 tick=120 長=60 tick food_days 34.68 → 34.64 (Δ-0.04)
+     team=24 起 tick=60 訖 tick=120 長=60 tick food_days 39.02 → 38.98 (Δ-0.04)
+     team=25 起 tick=60 訖 tick=120 長=60 tick food_days 39.02 → 38.98 (Δ-0.04)
+     team=6 起 tick=60 訖 tick=420 長=360 tick food_days 31.21 → 30.96 (Δ-0.25)
+     team=8 起 tick=60 訖 tick=420 長=360 tick food_days 34.68 → 34.43 (Δ-0.25)
+     team=30 起 tick=60 訖 tick=420 長=360 tick food_days 31.21 → 30.96 (Δ-0.25)
+     team=31 起 tick=60 訖 tick=420 長=360 tick food_days 31.21 → 30.96 (Δ-0.25)
+     team=8 起 tick=420 訖 tick=480 長=60 tick food_days 34.43 → 34.39 (Δ-0.04)
+     team=30 起 tick=420 訖 tick=480 長=60 tick food_days 30.96 → 30.92 (Δ-0.04)
+     team=6 起 tick=420 訖 tick=540 長=120 tick food_days 30.96 → 30.87 (Δ-0.08)
+     team=31 起 tick=420 訖 tick=540 長=120 tick food_days 30.96 → 30.87 (Δ-0.08)
+     team=48 起 tick=101 訖 tick=540 長=439 tick food_days 6.21 → 5.87 (Δ-0.33)
+     team=48 起 tick=540 訖 tick=597 長=57 tick food_days 5.87 → 5.87 (Δ+0.00)
+     team=5 起 tick=60 訖 tick=780 長=720 tick food_days 162.46 → 61.96 (Δ-100.50)
+     team=6 起 tick=540 訖 tick=780 長=240 tick food_days 30.87 → 30.71 (Δ-0.17)
+
+★長程任務到場率（母體＝episode 開始時目標距離  3 格的 episode；★被窗切掉的單獨列、不進分母）
+   task           起算       到場        到場率       窗末未完       中位長(天)
+   idle            1        0       0.0%          1         0.71
+   return_home        5        2      40.0%          1         1.86
+   乞食              5        1      20.0%          0         0.28
+   信使             39        4      10.3%          0         0.48
+   偵查             22       10      45.5%          0         0.84
+   外交             77        4       5.2%          0         0.22
+   安頓             29        2       6.9%          1         0.81
+   建設              6        2      33.3%          1         0.90
+   徵收             76        8      10.5%          2         0.65
+   投靠              2        0       0.0%          0         0.17
+   掠奪              5        0       0.0%          1         0.35
+   擴建              8        7      87.5%          0         3.19
+   紮營              6        0       0.0%          0         0.25
+   覓食             16        0       0.0%          0         0.59
+   貿易            178       41      23.0%         11         1.07
+   迎戰             70        5       7.1%          0         0.23
+   逃跑             72        8      11.1%          4         0.90
+   運輸             38       22      57.9%          2         0.93
+
+   ★★★基準（★不含求居）：到場 116 / 起算 655 = **17.7%**
+   ★求居：母體 0  不可判（★而這本身就是那 42 次沒上路的後果）
+
+★副作用守衛：隊滅絕於餓 0｜有名角色餓死 0｜窗末無自家據點的隊：未登記 83 已登記寄居 2
+   ★未登記歸零＝消滅遊商階層（blueprint 明文禁） 這一欄該保持非 0
+★>2 秒幀數 = 518 / 43200
+★fp = cb5d92447913daf0ccba6af0dbcda1dc
+=== DONE === SECTIONS=1/1 FAILS=0
+[TEST-SUITE-COMPLETE]
+WARNING: [LEVY] faction=6 補評估撞上限 8
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
