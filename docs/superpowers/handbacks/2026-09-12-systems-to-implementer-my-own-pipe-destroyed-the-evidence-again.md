@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 機器 ｜ ★我自己的管線又毀掉一次證據
 topic: ★**閘又被 OOM 殺掉**，而★★★**這次我發現「0 支跑完」那個數字是假的** —— 我把長跑寫成 `… | tail -10`，而 **`tail` 要等串流結束才吐** ⇒ **被殺 ⇒ 輸出檔是空的** ⇒ **「跑了多遠」這個唯一有用的資訊沒了**｜★已改成**完整輸出落檔**、重跑中｜★★而機器現況：`Memory Compression` **4.9 GB**、遊戲 3.6 GB、free 12 GB —— **系統在壓縮記憶體，不是單純不夠**
 ---
