@@ -3316,7 +3316,8 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 			Probe.bump("faceoff.total")
 			Probe.bump("faceoff.winner." + (String(ranked[0]["opt"]) if not ranked.is_empty() else "(空)"))
 			Probe.bump_sample("faceoff", {"tick": state.world.current_tick, "team": team.team_id,
-				"target": team.prosperity_target_id, "top5": _top,
+				"target": _fo.team_id,   # ★對峙的【那一支】（★上一版誤記 prosperity_target_id ⇒ 放寬取樣後它常是 -1）
+				"my_defend_target": team.prosperity_target_id, "top5": _top,
 				"winner": String(ranked[0]["opt"]) if not ranked.is_empty() else "(空)",
 				"my_pop": team.population, "their_pop": _fo.population,
 				"my_ready": snappedf(team.readiness, 0.01), "their_ready": snappedf(_fo.readiness, 0.01),
