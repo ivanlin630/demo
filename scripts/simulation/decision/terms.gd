@@ -249,7 +249,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 				elif absf(_person) < 0.0005:
 					Probe.bump("attack.opp.zero_by.personality")       # 極端慎重被 clamp 到 0
 				else:
-					Probe.bump("attack.opp.zero_by.unexplained")       # ★★★這一桶非 0 ＝ 我漏了一種，要查
+					# ★★★第五種（實測 1 筆逼我補的）：**每一個因子都非 0，而乘積小於門檻**
+					#   ⇒ ★它不是「秤沒在讀」，是**讀到了但值很小**（機會小 × 贏率小 × 人格壓低）
+					#   ⇒ ★★所以它**不該**跟「無牙」「沒理由」放同一桶：**那兩桶是結構，這一桶是量級**。
+					Probe.bump("attack.opp.zero_by.too_small")
 			return _opp
 		"loot_drive":
 			if opt != "掠奪": return 0.0

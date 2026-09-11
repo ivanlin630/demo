@@ -119,7 +119,9 @@ func _run() -> void:
 			_zb[_ks.replace("attack.opp.zero_by.", "")] = int(Probe.counts[_k])
 	print("★①-b 那些零是什麼（機會項的零，逐因分類）：%s" % str(_zb))
 	_ok(int(_zb.get("unexplained", 0)) == 0,
-		"①-b **沒有「無法解釋」的零**（有就是我漏了一種來源）")
+		"①-b **沒有「無法解釋」的零**（有就是我漏了一種來源）★第一趟這格是紅的：1 筆 ⇒ 逼出第五種【量級】")
+	print("   ★五桶的語意不同：`no_teeth`／`poor_and_fed` 是**結構**（秤說沒理由）、")
+	print("     `personality` 是**人格**、★★`too_small` 是**量級**（每個因子都非 0 而乘積小於門檻）")
 	print("   ★★注意母體不同：這一格分類的是【機會項自己的零】，")
 	print("     而『零 final』是【五項相加之後】的零 —— ★★★兩個數不可互相相減")
 	print("   ★這一格是【觀察】不是【目標】——★★不准為了讓它好看而調 tier 權重（禁 crank）")
