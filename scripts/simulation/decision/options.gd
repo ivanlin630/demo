@@ -355,21 +355,32 @@ static var REGISTRY: Dictionary = {
 		# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
 		# means-end：征服 intent 隊亦開攻擊（非只 faction_stakes），target=intent_target/weak_prey。
 		# 序4 血仇路：強血仇(≥FEUD_ATTACK_MIN)+可見仇敵 → 攻擊 applicable（衝動 leader 拉隊打仇人）。
+		# ★★★門從【授權清單】降級為【可行性】（HOW spec 2026-09-10-attack-applicable-demote-to-feasibility）：
+		#   舊三門全是授權（上級令／身分標籤／歷史仇）—— **沒有一道是「他弱、我缺、我夠得著」**，
+		#   而同一個 option 掛著四個 term 的秤 ⇒ ★**秤在 97.37% 的時間不會被叫到**。
+		#   ★★新門 ＝ `attack_target_id != -1`，而那個欄位的來源【就是可行性掃描】
+		#   ⇒ ★★★門的條件與目標的來源是**同一個判斷** ⇒ 不可能門開了而 to_task 回 IDLE。
+		#   ★舊三門沒有消失：directive 降成 `faction_duty` term、血仇降成 `feud_pull` term、
+		#     征服 intent 降成 `intent_fit` term —— **它們從許可證變成秤上的重量**。
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ("攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1) \
-					or (ctx.intent == "征服" and ctx.intent_target != -1) \
-					or (ctx.strongest_feud >= FEUD_ATTACK_MIN and ctx.feud_target_id != -1),
+			return ctx.attack_target_id != -1,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 多源攻擊 target（優先序 faction directive > 征服 intent > 血仇 fallback）。序4 vendetta 溶入：
 			# 純血仇驅動時 target=仇敵（feud_target_id），非粗取 _nearest_independent。ctx gather 取三源
 			# （鏡射 迎戰/求和 局部 gather 法，避改 to_task 簽名 17 caller）。
 			var _ac: DecisionContext = DecisionContext.gather(state, team)
-			var atid: int = _ac.faction_attack_target if _ac.faction_attack_target != -1 \
-				else (_ac.intent_target if _ac.intent_target != -1 else _ac.feud_target_id)
+			# ★★★讀【與門同一個欄位】（spec §④）：三源優先序已搬進 gather 算一次，
+			#   ★這裡不再自己組 target —— 門用一組條件、執行用另一組，正是 IDLE 陷阱的來源。
+			var atid: int = _ac.attack_target_id
 			if atid == -1 or not state.teams.has(atid):
+				if Probe.enabled: Probe.bump("attack.to_task_idle.no_target")
 				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			var atid_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, atid)   # 攻擊 target 走 belief last-seen
-			if atid_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			if atid_pos == Vector2i(-1, -1):
+				# ★這一格【應該永遠不會發生】：`belief_pos` 已經是可行性掃描的守衛之一
+				#   ⇒ ★★所以它非 0 就是【門與執行又岔開了】的紅燈，不是世界的事實。
+				if Probe.enabled: Probe.bump("attack.to_task_idle.no_belief_pos")
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_ATTACK, "target": atid_pos, "combat_target": atid},
 	},
 	"徵收": {
