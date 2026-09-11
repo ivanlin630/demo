@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★一個可能比攻擊門大的東西
 topic: ★★★**這個世界的事件系統，只在【已經發生】之後才喚醒，不在【即將發生】的時刻** —— 全庫 `WorldEvents.emit(` **23 個呼叫點**（production 16 個逐字列出），**沒有一個是「相遇」**；最近的是 `combat_engaged`，而那是**已經開打之後**｜★而喚醒只有一條路（`pending_rethink` 的唯一寫入點就是 `emit` 自己）｜★★所以「兩支敵隊面對面而沒人動手」可能**根本不需要有人決定不打** —— **那一刻沒有人在思考**｜★**我沒有下結論**：runtime 那一半在排隊，而我也要求先量「相遇一天幾次」
 ---
