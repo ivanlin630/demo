@@ -1,0 +1,49 @@
+{
+  "token": "frame-time-remeasure",
+  "slice": "可慢不可卡——重測(舊數字作廢,設施索引優化後10倍快)",
+  "date": "2026-09-11",
+  "measured_at_head": "c542138fc(ON趟)",
+  "measured_at_head_note": "★引用時並排寫head——舊卷(2026-09-10-frame-time-who-freezes)在e00913568附近，本卷ON在c542138fc，OFF趟因contention污染不採用其head",
+  "touches": [],
+  "world": "warring_states / seed=1337 / 90天/129600 ticks(同舊卷參數，可比)",
+  "bed": "scripts/debug/frame_time_who_freezes_bed.gd",
+  "raw_logs": [
+    "docs/measurements/2026-09-10-frame-time-remeasure-phaseON.txt(完整跑滿90天)",
+    "docs/measurements/2026-09-10-frame-time-remeasure-phaseOFF.txt(★污染，只到day84/90=93%被GODOT_TIMEOUT砍，不採用)"
+  ],
+  "specimen_trace": null,
+
+  "answer": {
+    "verdict": "★★★ON趟(可信)：全窗中位數從舊卷的7.78秒暴跌到447us(約17400倍改善)——世界整體確實快了非常多。但max只從26.65秒降到11.86秒(約2.25倍改善)，仍遠超用戶抱怨的5-10秒下限。週期性不變：仍是每小時(60-tick)固定一次，從第一小時就有，貫穿全窗，spike比例1.817%(2355/129600 ticks)。★★★兇手位移：舊卷的loop2.solo已不是頭號瓶頸，新頭號是loop3.misc(faction_ai_system.gd:1381-1408，自佔total比例中位29.6%、86.3%的spike樣本裡它是self最大的葉節點)——內容含_update_mobilization/_update_equip_order/_update_armor_config/_update_guard_ratio/_auto_withdraw_mounts，以及對TASK_IDLE隊的DecisionContext.gather+rank_ambient呼叫。",
+    "①ON趟全窗分布(母體=129600 ticks，非僅spike樣本)": {
+      "min": "67us", "p50": "447us", "p95": "2591us", "max": "11859372us(11.86秒)",
+      ">100ms母體(spike)": "2355(1.817%)",
+      "與舊卷比較(誠實限②要求，同窗參數才比)": "舊卷p50(spike樣本內)=7.78秒 vs 新卷p50(全窗)=447us——★不同母體定義(舊卷只挑spike樣本算p50，新卷是全部tick)，不可直接相減；但兩者的max可比(都是全窗真max)：26.65秒→11.86秒，改善2.25倍，問題還在但變輕"
+    },
+    "②誰在凍(新頭號=loop3.misc，非舊卷的loop2.solo)": {
+      "self最大葉節點排名(N=2355)": "loop3.misc 2032次(86.3%) / unified.rank.from_solo_body 173次(7.3%) / loop2.solo_engine 85次(3.6%)",
+      "loop3.misc佔total比例": "min=9.8% p50=29.6% max=99.7%",
+      "loop3.misc範圍(faction_ai_system.gd:1381-1408)": "_update_mobilization+_update_equip_order+_update_armor_config+_update_guard_ratio+_auto_withdraw_mounts，加上對TASK_IDLE隊的DecisionContext.gather(state,team,not uses_unified)+DecisionEngine.rank_ambient呼叫——★這段本身沒有再往下細分子相位，若要更精確歸因需要implementer在這5+1段之間再插phase tag"
+    },
+    "③週期性": "不變——固定60-tick(1小時)週期，從tick=60起，貫穿全部90天窗(ON趟驗證)",
+    "④尖峰母體": "teams從day1~52隊漲到day90~115隊，spike幅度同步惡化(day1 dt=0.12-1.58秒→day90 dt=5.7-11.9秒)，與舊卷同型結論：幅度∝隊數，支持切片修法方向未變"
+  },
+
+  "instrument_on_off_check": {
+    "界限第45條要求": "Probe/phase_timing開關兩態都要跑，驗證儀器本身有沒有污染量測",
+    "本輪結果": "★★★OFF趟(對照組)被contention嚴重污染，不可用於乾淨對比——day80-84期間avg飆到334-452ms(遠高於ON趟同期水準)、max飆到37.5-68.1秒(遠超ON趟全窗max=11.86秒)，且只跑到day84/90(93%)就被GODOT_TIMEOUT(21600s)砍。teams數(167-171)比ON趟最終值(115-137)更高，顯示OFF趟world evolution走得更遠但wall-clock效率遠低於ON趟——這是外部contention(同時段有其他worktree的重活跑，如.worktrees/converge2)造成的，不是phase_timing旗標本身的污染信號。",
+    "結論": "★本輪未能完成乾淨的開/關對比——需要在contention更乾淨的時段重跑OFF趟(或兩趟都重跑以確保同等條件)才能回答『phase_timing本身有沒有污染量測』這個問題。ON趟本身的數字(可信，跑滿90天無timeout)可以先用；OFF趟數字不採用，不得引用其max/avg。"
+  },
+
+  "honest_limits": [
+    "★①本卷不下修法結論——是否要進一步拆loop3.misc是WHAT/HOW層決定",
+    "★★②舊卷與本卷母體定義不同(舊卷只算spike樣本的p50，本卷算全部tick)——不可直接相減改善倍數，本卷已在answer①分開講",
+    "★★★③界限45要求的開/關對照，本輪因OFF趟被contention污染而未達成——需要重跑，跑法(何時重跑/要不要縮短窗)留給systems/blueprint裁，我不會自己找『安靜時段』去賭",
+    "★④loop3.misc內部沒有再細分——若要更精確定位(5個_update_*函式 vs DecisionContext.gather+rank_ambient哪個更貴)，需要implementer加更細的phase tag，本卷指到range，不代為猜測誰佔多數",
+    "★⑤本卷只用了1個seed(1337)，同舊卷"
+  ],
+
+  "supersedes": [
+    "docs/process/verdicts/frame-time-who-freezes.measure.json 的所有絕對數字(max=26.65s/p50=7.78s等)——systems已裁定作廢，因為量在設施索引優化前的慢十倍世界上"
+  ]
+}
