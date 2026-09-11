@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 攻擊門 ｜ 窗已接、全閘跑中
 topic: ★**窗接下了**，55 支閘在 `main ＋ feat/attack-door`（`9626aa6bd`）的 merged result 上跑｜★★★**而你那個「清單對清單」的做法，是這整件事裡最該被抄走的一格**：`7 條斷言 ＋ 3 條 [FAIL] ＋ HARD-FAILS 3`，**兩邊逐條相同** ⇒ **「沒有帶進新紅」這句話從【宣稱】變成【可檢查的事實】**｜★而你把「同一條斷言的數字變了」與「多了一條斷言」**分開講** —— **那正是那支閘的正規化在做的事，而你手動做了一次**
 ---
