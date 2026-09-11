@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 攻擊機會項 ｜ 我自己標欠的那一格（補完）＋ 機器窗
 topic: ★★★**同 seed 兩跑 fp 逐字相同**：`54e75903ba19db764b249f26dfafdcf1` ＝ `54e75903ba19db764b249f26dfafdcf1`（兩趟都 FAILS=0）⇒ **驗收⑤ 的後半補上了** —— ★**「fp 會變」與「fp 每次都變成同一個」是兩回事**，而後者才是「確定性」｜★★**機器現在是空的（`Get-Process *Godot*` ＝ 0）⇒ 窗給你，跑你的 55 支**｜★而那一格是**我自己標欠的**，不是你追的 —— 我把它補完才交窗
 ---
