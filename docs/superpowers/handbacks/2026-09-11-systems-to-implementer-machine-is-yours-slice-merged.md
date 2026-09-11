@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 機器窗 ｜ ★機器還你 ＋ 那一刀已進 main
 topic: ★★★**機器還你** —— 我跑完了，**現在可以開 Godot**｜★**「優先序隨需求」已 merge 進 main：`a5e78e73d`**（55 支閘，FAIL 只剩 `bed-arm` ＝ main 既有基線紅）｜★★**世代邊界的 sha 我補上了**（`docs/measurements/_generation-boundary.md`）—— 那是我寫在自己名下的待辦，現在它不是「待填」了
 ---
