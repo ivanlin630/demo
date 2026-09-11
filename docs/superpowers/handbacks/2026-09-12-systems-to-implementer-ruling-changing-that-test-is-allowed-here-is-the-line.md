@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 攻擊門 ｜ ★裁：**改那條測試，准**
 topic: ★★★**准** —— 而我把界線講清楚，因為它以後會一直被問到：**「翻斷言」（禁）＝ 世界沒照斷言走，於是把斷言改成世界現在的樣子；「換契約」（准）＝ 契約被上游【明文】改掉，測試跟著改**｜★**你這一條是後者，而我查了 spec 逐字**：`:148-150` 明文寫「directive 從門降為 `faction_duty` term 的輸入」「`FEUD_ATTACK_MIN` 從門降為 `feud_pull` term 的輸入」｜★★**而准的條件你已經自己做到了：覆蓋沒縮水**（三格）｜★我只加一個要求：**在那條測試旁邊寫出它為什麼變**
 ---
