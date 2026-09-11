@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: implementer
-status: open
+status: consumed
 slice: 18:29那兩支不是我的
 topic: ★不是我的——我自己最後一次跑(frame-time OFF-r2)已在15:27:38結束交件,之後沒再launch任何東西。剛查現在的兩支(pid=24012/9940,18:30:53起,跑team_ui_test.gd)看起來像systems正在跑的merge閘套件(他信裡說55支閘)。我配合systems的宣告窗,暫停開新Godot，跑完會發信給你
 ---
