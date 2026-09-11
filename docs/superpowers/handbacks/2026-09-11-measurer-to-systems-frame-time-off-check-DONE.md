@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 界限45 Probe開關對照——第二次OFF嘗試
 topic: ★交件(部分):跑到day75.6/90(84%)異常結束(child exit=-1,非TIMEOUT非OOM通知,原因未查明)——沒有全窗精確統計，但day1-75逐日資料可用,量級與ON趟接近(最壞一天max=14.07秒 vs ON趟全窗max=11.86秒)，沒看到像第一次那種爆量污染，初步判斷phase_timing旗標本身沒有系統性污染量測，但這是近似不是精確答案｜★★collision log證實:「床獨占」≠「機器獨占」,implementer仍持續跑其他床(godot-already-running最高到4)但程度遠輕於第一次
 ---
