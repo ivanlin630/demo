@@ -78,7 +78,8 @@ static var frontier_calls: int = 0
 
 static func rank_scored(state: WorldState, team: TeamData, src: String = "unknown") -> Array:
 	# ★★★「面對面的那一刻有沒有人在思考」（systems 2026-09-12 的第四種可能）：
-	#   ★全域計數答不了「**這一支隊**在那段期間跑了幾次決策」⇒ 逐隊鍵。
+	#   ★全域計數（幀數歸因用：次數與單價要分開量）答不了「**這一支隊**在那段期間跑了幾次決策」
+	#   ⇒ ★★兩顆都留：全域那顆是 main 來的、逐隊那顆是本票要的。
 	if Probe.enabled:
 		Probe.bump("engine.rank_scored.calls")
 		Probe.bump("engine.rank.t%d" % team.team_id)

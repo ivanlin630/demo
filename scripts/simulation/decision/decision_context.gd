@@ -226,6 +226,13 @@ var need_urgency: PackedFloat32Array = PackedFloat32Array()
 var readiness: float = 0.0
 var readiness_thr_eff: float = 0.0
 var prosperity_prey_id: int = -1
+# ★★★攻擊門降級（spec §④）：門的條件與目標的來源【綁死成同一個判斷】——
+#   `attack_target_id != -1` 就是新的 applicable，而 `to_task` 讀同一個欄位
+#   ⇒ ★不可能出現「門開了、目標是 -1、回 TASK_IDLE」那個手不聽腦的形狀。
+var attack_feasible: bool = false      # 可行集合非空（零人格：知道/看得到/追得上/養得起）
+var attack_target_id: int = -1
+# ★★★逐筆淘汰理由（systems：判準要可證偽）—— 每一次 nO 都要指得出是哪一種不可行
+var attack_scan_why: Dictionary = {}         # 優先序：faction 令 > 富 prey > 血仇(★需 belief_pos) > eta 最小
 # A2a 子隊旗（一旗兩用）：parent_team_id != -1 → ①服從母團(歸建 duty option) ②不自主發起戰略 option(戰略-gate)。
 # 非子隊 is_subteam=false → 歸建 option/戰略-gate 對其無效（零成員/solo 行為變）。
 var is_subteam: bool = false
@@ -426,6 +433,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 				continue
 			if state.registered_at(_s, _my_tile.tile_pos):
 				continue
+			# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：求居＝見到領主。
+			#   ★成功記在【求居者】身上（它才是那趟旅程的主詞），不是記在領主身上。
+			if Probe.enabled and _s.current_task == TeamData.TASK_SEEK_HOME:
+				Probe.bump("task.done.t%d.%s" % [_s.team_id, TeamData.TASK_SEEK_HOME])
 			c.shelter_seeker_id = _s.team_id
 			c.shelter_seeker_task = _s.current_task     # ★它是【為什麼】站在這裡（求居？還是路過）
 			c.shelter_seeker_opt = _s.current_option
@@ -822,12 +833,87 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			FactionAISystem.RELIEF_FLOOR, 1.0)
 		c.readiness_thr_eff = _thr * _hunger_relief
 		# 富 prey target（find_prosperity_prey：has_belief/reachable 守衛在內；征服攻擊 target 用此非 _nearest）。
-		c.prosperity_prey_id = FactionAISystem.find_prosperity_prey(state, team, ldr)
+		# ★只掃一次：可行集合與人格 argmax 同源（兩次掃 ＝ 兩倍尋路）
+		var _ascan: Dictionary = FactionAISystem.attack_scan(state, team, ldr)
+		c.prosperity_prey_id = int(_ascan["best_id"])
+		var _afeas: Array = _ascan["feasible"]
+		c.attack_feasible = not _afeas.is_empty()
+		c.attack_scan_why = _ascan.get("why", {})
+		# ★★三個既有來源的優先序不變（語意不變，只是搬到 gather 算一次）；
+		#   ★★★而血仇那一條要補 `belief_pos` 檢查（R² 抓到的第三條 IDLE 路：
+		#   `vendetta_target` 整支沒碰 BeliefSystem ⇒ 仇人跑到天涯海角照樣回 id）。
+		var _feud_ok: int = -1
+		if c.feud_target_id != -1 				and BeliefSystem.belief_pos(state, team.team_id, c.feud_target_id) != Vector2i(-1, -1):
+			_feud_ok = c.feud_target_id
+		elif c.feud_target_id != -1 and Probe.enabled:
+			Probe.bump("attack.feud_target_positionless")
+		if c.faction_attack_target != -1:
+			c.attack_target_id = c.faction_attack_target
+		elif c.prosperity_prey_id != -1:
+			c.attack_target_id = c.prosperity_prey_id
+		elif _feud_ok != -1:
+			c.attack_target_id = _feud_ok
+		elif not _afeas.is_empty():
+			# ★fallback ＝ 可行集合裡 eta 最小者（spec：沒有它，和平人格＋無令＋無仇 ⇒ 門開而 target -1）
+			var _best_eta: float = 1e30
+			for _fc in _afeas:
+				if float(_fc["eta_days"]) < _best_eta:
+					_best_eta = float(_fc["eta_days"])
+					c.attack_target_id = int(_fc["id"])
+			if Probe.enabled: Probe.bump("attack.target_from_fallback")
 		# 征服攻擊 target 改用富 prey（取代 weak_prey fallback；faction leader 指定 target 不覆蓋）。
 		# 4b：richness/border/logistics 富選勝「只挑最弱」。無富 prey → 保留 weak_prey fallback（intent 段已設）。
 		if c.intent == "征服" and c.prosperity_prey_id != -1 \
 				and (c.intent_target == -1 or c.intent_target == _prey):
 			c.intent_target = c.prosperity_prey_id
+	elif team.population > 0:
+		# ★★★spec 風險④（行為新增，要分開報）：`find_prosperity_prey` 吃 leader ⇒ **無領袖的隊以前永遠打不了**。
+		#   ★而可行性那一半【零人格】⇒ 它們現在第一次拿得到 target（走 fallback：eta 最小者）。
+		#   ★★計數分開記 ⇒ 交件不把它混進總門開率裡。
+		var _ascan_nl: Dictionary = FactionAISystem.attack_scan(state, team, null)
+		var _afeas_nl: Array = _ascan_nl["feasible"]
+		c.attack_feasible = not _afeas_nl.is_empty()
+		if not _afeas_nl.is_empty():
+			var _be: float = 1e30
+			for _fc2 in _afeas_nl:
+				if float(_fc2["eta_days"]) < _be:
+					_be = float(_fc2["eta_days"])
+					c.attack_target_id = int(_fc2["id"])
+			if Probe.enabled: Probe.bump("attack.target_leaderless")
+	# ★★★成對反事實【不用開關】（spec 驗收⑥）：舊三門的判準所需欄位**全部還在 ctx 裡**
+	#   ⇒ ★同一次 gather 同時算【新門】與【舊門】⇒ 一趟就給出兩個率，
+	#   ★★而且是**逐字同母體**（不必跑兩趟、不必留一個會腐爛的旗標）。
+	if Probe.enabled:
+		var _old_open: bool = ("攻擊" in c.faction_stakes and c.faction_attack_target != -1) 				or (c.intent == "征服" and c.intent_target != -1) 				or (c.strongest_feud >= DecisionOptions.FEUD_ATTACK_MIN and c.feud_target_id != -1)
+		var _new_open: bool = c.attack_target_id != -1
+		Probe.bump("attack.door.new_" + ("open" if _new_open else "closed"))
+		Probe.bump("attack.door.old_" + ("open" if _old_open else "closed"))
+		Probe.bump("attack.door.pair.%s%s" % ["N" if _new_open else "n", "O" if _old_open else "o"])
+		# ★★★`nO`（舊門開而新門關）要能被解讀，不能只有一個數：
+		#   ★假說：舊門是**授權**（不管打不打得到），新門要**可行** ⇒ `nO` ＝【有授權但夠不著／看不到／養不起】
+		#   ⇒ ★★而那正是舊制下會走進 `to_task` 然後回 IDLE 的那一群（＝本票要消滅的東西）
+		#   ⇒ ★★★所以這一格**非 0 不一定是回歸** —— 但要有數字才判得出來，故逐筆記哪一道舊門開著。
+		if _old_open and not _new_open:
+			Probe.bump("attack.nO.feasible_empty" if not c.attack_feasible else "attack.nO.feasible_nonempty")
+			# ★★★逐筆具名（systems 2026-09-12）：**每一筆都要指出是哪一種不可行**；
+			#   ★★而「三種都不是」那一筆就是**真的紅** —— 所以 `scanned` 也要記：
+			#   `scanned == 0` ＝ **連一個可掃的對象都沒有**（第四種，★它不是那三種，但也不是紅）。
+			var _w: Dictionary = c.attack_scan_why
+			Probe.bump_sample("attack.nO", {"tick": state.world.current_tick, "team": team.team_id,
+				"scanned": int(_w.get("scanned", 0)),
+				"same_faction": int(_w.get("same_faction", 0)),
+				"no_belief": int(_w.get("no_belief", 0)),
+				"no_belief_pos": int(_w.get("no_belief_pos", 0)),
+				"unreachable": int(_w.get("unreachable", 0)),
+				"cannot_afford": int(_w.get("cannot_afford", 0)),
+				"old_gate": ("faction" if ("攻擊" in c.faction_stakes and c.faction_attack_target != -1)
+					else ("intent" if (c.intent == "征服" and c.intent_target != -1) else "feud"))}, 300)
+			if "攻擊" in c.faction_stakes and c.faction_attack_target != -1:
+				Probe.bump("attack.nO.gate.faction")
+			if c.intent == "征服" and c.intent_target != -1:
+				Probe.bump("attack.nO.gate.intent")
+			if c.strongest_feud >= DecisionOptions.FEUD_ATTACK_MIN and c.feud_target_id != -1:
+				Probe.bump("attack.nO.gate.feud")
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.readiness_prey", _tg)
 	# 併入/吸納 target（cadence gate 1 日共用，防每 tick O(N) finder churn）。非子隊才算。
 	c.consolidate_target_id = -1

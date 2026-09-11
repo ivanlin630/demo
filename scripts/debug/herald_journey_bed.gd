@@ -72,14 +72,15 @@ func _run() -> void:
 					if _dk != int(_ep["last_oid"]) and int(_ep["last_oid"]) != -1:
 						_ep["target_switches"] = int(_ep["target_switches"]) + 1
 					_ep["last_oid"] = _dk
-					if int(_ep.get("met_tick", -1)) >= 0 and int(_ep.get("rank_hour", -1)) < 0 						and st.world.current_tick - int(_ep["met_tick"]) >= WorldState.TICKS_PER_HOUR:
-					_ep["rank_hour"] = int(Probe.counts.get("engine.rank.t%d" % tid, 0)) - int(_ep["rank_at_met"])
-				var _dt: TeamData = st.teams.get(_dk)
+					if int(_ep.get("met_tick", -1)) >= 0 and int(_ep.get("rank_hour", -1)) < 0:
+						if st.world.current_tick - int(_ep["met_tick"]) >= WorldState.TICKS_PER_HOUR:
+							_ep["rank_hour"] = int(Probe.counts.get("engine.rank.t%d" % tid, 0)) - int(_ep["rank_at_met"])
+					var _dt: TeamData = st.teams.get(_dk)
 					if _dt != null and _dt.tile_pos == t.tile_pos:
 						if not bool(_ep["met"]):
 							# ★systems 要【兩個數】不是一個：
-							#   ①**碰到面的那一 tick** 有沒有跑決策（＝本 tick 的增量）
-							#   ②之後 N tick 內跑過幾次（N ＝ 一個遊戲小時 ＝ TICKS_PER_HOUR）
+							#   ①碰到面的那一 tick 有沒有跑決策（＝本 tick 的增量）
+							#   ②之後一個遊戲小時內跑過幾次
 							var _rk_now: int = int(Probe.counts.get("engine.rank.t%d" % tid, 0))
 							_ep["rank_same_tick"] = _rk_now - int(rank_prev.get(tid, 0))
 							_ep["rank_at_met"] = _rk_now

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 信使旅程切段 ｜ ★DISPATCH（blueprint 裁：sim 線第一序）
 topic: ★spec：`docs/superpowers/specs/2026-09-11-herald-journey-segments-HOW.md`｜★★★**「門鈴」格我已坐實到行號**：送達的唯一入口是 **pairwise 相遇**（`interaction_system.gd:390-393` ＋ `:421-425`，★全庫只有 4 個呼叫點）⇒ **抵達目標格 ≠ 送達，要與那支目標隊本身相遇**｜★★而由此生出一個**我不敢自己下結論的負斷言**：**跨派系且 `task_reason != "envoy_proposal"` 的信使，可能沒有任何送達分支** —— ★**別拿我的 grep 當結論，用逐筆資料證實或推翻它**
 ---
