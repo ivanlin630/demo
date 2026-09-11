@@ -38,14 +38,26 @@ func _run() -> void:
 			#   ①迎戰姿態起算 ②同格相遇（★這一格才是門鈴）③轉換成開打
 			#   ⇒ ★三個數字才分得出兩種世界：**沒碰到**（相遇機制的病）vs **碰到了但沒打**（決策的病）
 			if t.current_task == TeamData.TASK_DEFEND:
-				var _dk: int = t.prosperity_target_id
-				if not dlive.has(tid) or int(dlive[tid]["oid"]) != _dk:
-					if dlive.has(tid): _close_defend(dlive[tid], st, drows)
-					dlive[tid] = {"team": tid, "oid": _dk, "start": st.world.current_tick, "met": false,
+				# ★★★切段鍵【只認 task 的連續段】（systems 2026-09-11 的質疑：同一個缺陷會不會也在這張表裡）
+				#   ★第一版用 `prosperity_target_id` 當鍵 ⇒ 目標被清成 -1 再回填就會切一刀
+				#     ⇒ **母體灌大、而「沒有目標」那一格會吃到切段的碎片**（與信使那個 `move_target` 同族）
+				#   ★★這一版：一段 ＝ 連續持有 `TASK_DEFEND` 的那一段；
+				#     目標／相遇／開打都改成【這一段裡曾經發生過】⇒ **鍵不可能因為欄位抖動而切段**。
+				if not dlive.has(tid):
+					dlive[tid] = {"team": tid, "oid": -1, "start": st.world.current_tick, "met": false,
+						"target_switches": 0, "last_oid": -1,
 						"fight0": int(Probe.counts.get("combat.entered.t%d" % tid, 0))}
-				var _dt: TeamData = st.teams.get(_dk)
-				if _dt != null and _dt.tile_pos == t.tile_pos:
-					dlive[tid]["met"] = true
+				var _ep: Dictionary = dlive[tid]
+				var _dk: int = t.prosperity_target_id
+				if _dk != -1:
+					if int(_ep["oid"]) == -1:
+						_ep["oid"] = _dk            # ★「這一段曾經有過目標」
+					if _dk != int(_ep["last_oid"]) and int(_ep["last_oid"]) != -1:
+						_ep["target_switches"] = int(_ep["target_switches"]) + 1
+					_ep["last_oid"] = _dk
+					var _dt: TeamData = st.teams.get(_dk)
+					if _dt != null and _dt.tile_pos == t.tile_pos:
+						_ep["met"] = true
 			elif dlive.has(tid):
 				_close_defend(dlive[tid], st, drows)
 				dlive.erase(tid)
@@ -157,7 +169,11 @@ func _run() -> void:
 		d_notarget, d_nomeet, d_met_nofight, d_met_fight,
 		d_notarget + d_nomeet + d_met_nofight + d_met_fight, d_tot,
 		"OK" if d_notarget + d_nomeet + d_met_nofight + d_met_fight == d_tot else "★不符"])
+	var _sw: int = 0
+	for dr2 in drows: _sw += int(dr2.get("switches", 0))
 	print("   ★★★『736 → 1』分不出的兩種世界，就是②與③ —— 而它們的處置完全不同")
+	print("   ★切段鍵 ＝【連續持有 TASK_DEFEND 的一段】（不是目標 id）⇒ 欄位抖動不會切段")
+	print("   ★★段內【目標換人】次數合計 %d —— ★★★若它很大，表示一段裡其實追過好幾個對象" % _sw)
 	print("")
 	print("★逐筆（全收）：")
 	for r2 in rows:
@@ -180,7 +196,7 @@ func _close_defend(ep: Dictionary, st: WorldState, drows: Array) -> void:
 	if fought:
 		ep["met"] = true   # ★開打必經相遇（同信使那條：門鈴只有一條路）⇒ 取樣看不到最後一刻
 	drows.append({"team": tid, "oid": int(ep["oid"]), "start": int(ep["start"]),
-		"met": bool(ep["met"]), "fought": fought})
+		"met": bool(ep["met"]), "fought": fought, "switches": int(ep.get("target_switches", 0))})
 
 func _open_n(groups: Dictionary) -> int:
 	return (groups["open_far"] as Array).size() + (groups["open_mid"] as Array).size() 		+ (groups["open_near"] as Array).size()
