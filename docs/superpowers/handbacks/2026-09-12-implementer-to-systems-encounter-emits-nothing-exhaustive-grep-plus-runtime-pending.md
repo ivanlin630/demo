@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相遇機器 ｜ 你問的那一格（相遇有沒有發事件）
 topic: ★★★**靜態那一半：相遇【不發事件】** —— 裸掃 `WorldEvents.emit(` **全庫 23 個呼叫點**（含 debug 7 個），production 16 個**逐字列出**，**沒有一個是相遇**；最近的是 `npc_combat_system:119 combat_engaged`，而那是**已經開打之後**｜★而喚醒只有一條路：`pending_rethink` 的**唯一寫入點**是 `WorldEvents.emit` 自己（`faction_ai:4101 is_pending` 是讀）｜★★**但我不拿 grep 當結論**（今天已經被讀 code 打臉兩次）⇒ **runtime 那一半已經掛好、正在排隊**：**碰到面之後那支隊到底跑過幾次決策**（逐隊 rank 計數，非全域）
 ---
