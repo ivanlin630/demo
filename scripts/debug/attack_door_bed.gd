@@ -74,6 +74,21 @@ func _run() -> void:
 			if String(kg).begins_with("attack.nO.gate."):
 				_gates[String(kg).replace("attack.nO.gate.", "")] = int(Probe.counts[kg])
 		print("   ★nO 拆解：可行集合空 %d／非空 %d｜哪一道舊門開著：%s" % [_nO_empty, _nO_nonempty, str(_gates)])
+		# ★★★逐筆具名（systems 要的可證偽形狀）：每一筆指出是哪一種不可行；
+		#   ★「三種都不是」而且 `scanned > 0` ⇒ **真的紅**（有對象、沒被任何守衛刷掉、門卻關著）
+		var _rows: Array = Probe.samples.get("attack.nO", [])
+		var _unexplained: int = 0
+		print("   ★nO 逐筆（母體 %d，樣本上限 300，實收 %d）：" % [_nO, _rows.size()])
+		for _r in _rows:
+			var _named: bool = int(_r["no_belief_pos"]) > 0 or int(_r["unreachable"]) > 0 				or int(_r["cannot_afford"]) > 0 or int(_r["no_belief"]) > 0 				or int(_r["same_faction"]) > 0 or int(_r["scanned"]) == 0
+			if not _named: _unexplained += 1
+			print("     tick=%d team=%d 舊門=%s｜掃過 %d｜同派系 %d 無 belief %d 無位置 %d 追不上 %d 養不起 %d%s" % [
+				int(_r["tick"]), int(_r["team"]), String(_r["old_gate"]), int(_r["scanned"]),
+				int(_r["same_faction"]), int(_r["no_belief"]), int(_r["no_belief_pos"]),
+				int(_r["unreachable"]), int(_r["cannot_afford"]),
+				"　★★★三種都不是 ＝ 真的紅" if not _named else ""])
+		_ok(_unexplained == 0,
+			"⑥nO 逐筆【每一筆都指得出哪一種不可行】（無法解釋的 %d 筆）★★★有一筆解釋不了就是紅" % _unexplained)
 		if _nO == 0:
 			print("   ★（nO ＝ 0：新門是舊門的超集）")
 		else:

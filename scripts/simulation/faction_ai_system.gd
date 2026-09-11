@@ -251,6 +251,10 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		Probe.bump("attack.scan.calls." + ("leader" if leader != null else "leaderless"))
 		Probe.add_amount("attack.scan.discovered", float((state.team_discovered.get(team.team_id, []) as Array).size()))
 	var feasible: Array = []      # [{id, eta_days}]（★零人格，供門與 fallback target 用）
+	# ★★★逐【呼叫】記淘汰理由（systems 2026-09-12：判準要可證偽 ⇒ 每一筆 nO 要指得出是哪一種不可行）
+	#   ★★而「掃過幾個」與「因為什麼被刷掉」是兩件事 ⇒ `scanned` 與四個理由分開記。
+	var why: Dictionary = {"scanned": 0, "same_faction": 0, "no_belief": 0,
+		"no_belief_pos": 0, "unreachable": 0, "cannot_afford": 0}
 	var best_id: int = -1
 	var best_score: float = 0.0
 	var greed: float = float(leader.values.get("貪婪", 0.5)) if leader != null else 0.0
@@ -260,18 +264,25 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		if tid == team.team_id: continue
 		var prey: TeamData = state.teams.get(tid)
 		if prey == null: continue
-		if prey.faction_id != -1 and prey.faction_id == team.faction_id: continue
+		why["scanned"] = int(why["scanned"]) + 1
+		if prey.faction_id != -1 and prey.faction_id == team.faction_id:
+			why["same_faction"] = int(why["same_faction"]) + 1
+			continue
 		# G3-targeting：無情報 → 不評估（禁 god-view；不知道的打不了）
-		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
+		if not BeliefSystem.has_belief(state, team.team_id, tid):
+			why["no_belief"] = int(why["no_belief"]) + 1
+			continue
 		# ★★★spec §④ 硬要求：`belief_pos` 進【上游】守衛 ⇒ 門與 to_task 用同一組條件。
 		#   ★副作用（R² 先記）：下面那段「已知存在但位置不明 ⇒ border 0.3」對這條路
 		#   **從此不會執行** —— ★★不是壞掉，是被新守衛架空；原意對別的呼叫路徑仍適用，不要刪。
 		var prey_pos_gate: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
 		if prey_pos_gate == Vector2i(-1, -1):
+			why["no_belief_pos"] = int(why["no_belief_pos"]) + 1
 			if Probe.enabled: Probe.bump("attack.infeasible.no_belief_pos")
 			continue
 		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid, true)
 		if not catch_result.reachable:
+			why["unreachable"] = int(why["unreachable"]) + 1
 			if Probe.enabled: Probe.bump("attack.infeasible.unreachable")
 			continue
 		# 價值/弱點從 belief 估（偽裝低報 armed → 看似弱 → 誘殺載體）
@@ -306,6 +317,7 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 			TRIP_FOOD_FLOOR, 1.0)
 		# ★養得起這趟才算可行（沿用既有 TRIP_FOOD_FLOOR，不新增旋鈕）
 		if trip <= TRIP_FOOD_FLOOR:
+			why["cannot_afford"] = int(why["cannot_afford"]) + 1
 			if Probe.enabled: Probe.bump("attack.infeasible.cannot_afford_trip")
 			continue
 		feasible.append({"id": tid, "eta_days": eta_days})
@@ -344,7 +356,7 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		if score > best_score:
 			best_score = score
 			best_id = tid
-	return {"feasible": feasible, "best_id": best_id}
+	return {"feasible": feasible, "best_id": best_id, "why": why}
 
 
 # ★舊介面保留（17 個既有呼叫點不動）：偏好那一半的 argmax。

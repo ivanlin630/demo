@@ -230,7 +230,9 @@ var prosperity_prey_id: int = -1
 #   `attack_target_id != -1` 就是新的 applicable，而 `to_task` 讀同一個欄位
 #   ⇒ ★不可能出現「門開了、目標是 -1、回 TASK_IDLE」那個手不聽腦的形狀。
 var attack_feasible: bool = false      # 可行集合非空（零人格：知道/看得到/追得上/養得起）
-var attack_target_id: int = -1         # 優先序：faction 令 > 富 prey > 血仇(★需 belief_pos) > eta 最小
+var attack_target_id: int = -1
+# ★★★逐筆淘汰理由（systems：判準要可證偽）—— 每一次 nO 都要指得出是哪一種不可行
+var attack_scan_why: Dictionary = {}         # 優先序：faction 令 > 富 prey > 血仇(★需 belief_pos) > eta 最小
 # A2a 子隊旗（一旗兩用）：parent_team_id != -1 → ①服從母團(歸建 duty option) ②不自主發起戰略 option(戰略-gate)。
 # 非子隊 is_subteam=false → 歸建 option/戰略-gate 對其無效（零成員/solo 行為變）。
 var is_subteam: bool = false
@@ -836,6 +838,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.prosperity_prey_id = int(_ascan["best_id"])
 		var _afeas: Array = _ascan["feasible"]
 		c.attack_feasible = not _afeas.is_empty()
+		c.attack_scan_why = _ascan.get("why", {})
 		# ★★三個既有來源的優先序不變（語意不變，只是搬到 gather 算一次）；
 		#   ★★★而血仇那一條要補 `belief_pos` 檢查（R² 抓到的第三條 IDLE 路：
 		#   `vendetta_target` 整支沒碰 BeliefSystem ⇒ 仇人跑到天涯海角照樣回 id）。
@@ -892,6 +895,19 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		#   ⇒ ★★★所以這一格**非 0 不一定是回歸** —— 但要有數字才判得出來，故逐筆記哪一道舊門開著。
 		if _old_open and not _new_open:
 			Probe.bump("attack.nO.feasible_empty" if not c.attack_feasible else "attack.nO.feasible_nonempty")
+			# ★★★逐筆具名（systems 2026-09-12）：**每一筆都要指出是哪一種不可行**；
+			#   ★★而「三種都不是」那一筆就是**真的紅** —— 所以 `scanned` 也要記：
+			#   `scanned == 0` ＝ **連一個可掃的對象都沒有**（第四種，★它不是那三種，但也不是紅）。
+			var _w: Dictionary = c.attack_scan_why
+			Probe.bump_sample("attack.nO", {"tick": state.world.current_tick, "team": team.team_id,
+				"scanned": int(_w.get("scanned", 0)),
+				"same_faction": int(_w.get("same_faction", 0)),
+				"no_belief": int(_w.get("no_belief", 0)),
+				"no_belief_pos": int(_w.get("no_belief_pos", 0)),
+				"unreachable": int(_w.get("unreachable", 0)),
+				"cannot_afford": int(_w.get("cannot_afford", 0)),
+				"old_gate": ("faction" if ("攻擊" in c.faction_stakes and c.faction_attack_target != -1)
+					else ("intent" if (c.intent == "征服" and c.intent_target != -1) else "feud"))}, 300)
 			if "攻擊" in c.faction_stakes and c.faction_attack_target != -1:
 				Probe.bump("attack.nO.gate.faction")
 			if c.intent == "征服" and c.intent_target != -1:
