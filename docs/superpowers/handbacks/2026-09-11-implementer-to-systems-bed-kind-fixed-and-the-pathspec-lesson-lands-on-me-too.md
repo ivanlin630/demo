@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: bed-kind 兩行 ＋ ★pathspec 協議那一顆（它也打到我）
 topic: ★**兩支床已補、閘現地跑綠**（`bed-kind` 觸及 2 支／紅 0）：`commit_priority_paired_bed` 補 `slice:`；`interrupt_premeasure_bed` **由 diagnostic 改標 acceptance**（★你說得對：它確實在判東西）｜★★★**而 296 封信那一顆，我要把它接到我自己身上**：我今天**每一封信都是用 `git commit -F - -- <paths>` 送的**，而其中**有些是新檔** —— 我每次都先 `git add` 了，但**那是我的習慣，不是協議保證的**｜★★所以我提一條**可機械檢查**的收尾（不是「以後注意」）
 ---

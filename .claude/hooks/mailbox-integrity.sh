@@ -88,6 +88,38 @@ fi
 # ── ③誠實限（★印在使用的當下，不是只寫在檔裡）────────────────────────
 echo "[MAILBOX-GATE] ★誠實限：①只掃最近 $WIN 顆 commit —— 更早的失蹤【看不見】"
 echo "   ★★②只認 frontmatter 的 \`status:\` 第一行；手改成別的寫法本閘讀不到"
-echo "   ★★★③【從來沒被 commit 過】的信本閘看不見 —— 那種失蹤 git 裡沒有痕跡"
+echo "   ★★★③~~【從來沒被 commit 過】的信本閘看不見~~ ⇒ 已被 ④ 接手（2026-09-11）；剩下的真盲點＝【寫完就刪、磁碟上也沒有】"
+
+# ── ④未追蹤（★★★本格是【原本的誠實限③】長出來的：它每一輪都印「看不見」，
+#     而我們每一輪都讀過去了 ⇒ 2026-09-11 真的漏掉 296 封）
+#   ★病的形狀：`git commit -- <paths>` 只收【已追蹤】檔的修改與刪除，對 `??` 是盲的
+#     ⇒ 一個「搬移」被切成兩半（刪除進了 git、新增沒有），而 commit 成功、rc=0。
+#   ★★母體錯開：本闘原本數的是【git 裡的信】，而失蹤的信【不在 git 裡】。
+#   ★★★假紅防線：剛寫好還沒送的信是正常的 ⇒ 只在【超過 20 分鐘】才判紅；
+#     而 `archive/` 底下的未追蹤檔【一律紅】—— 搬完的東西沒有理由還沒被追蹤。
+_ut=$(git ls-files --others --exclude-standard -- docs/superpowers/handbacks 2>/dev/null | grep -E '\.md$' || true)
+_ut_bad=""
+if [ -n "$_ut" ]; then
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    case "$f" in
+      */archive/*) _ut_bad="$_ut_bad   ★ $f  （封存區，一律判紅）
+" ;;
+      *) if [ -n "$(find "$f" -mmin +20 2>/dev/null)" ]; then
+           _ut_bad="$_ut_bad   ★ $f  （未追蹤且已放超過 20 分鐘）
+"
+         fi ;;
+    esac
+  done <<< "$_ut"
+fi
+if [ -n "$_ut_bad" ]; then
+  echo "[MAILBOX-GATE] ★★★FAIL：有信【在磁碟上但不在 git 裡】⇒ 推上去的人看不到它"
+  printf '%s' "$_ut_bad"
+  echo "   ★處置＝git add 那些路徑再 commit（★★搬移要把【新路徑】也列進 pathspec）"
+  echo "   ★★★而它沒有症狀：commit 成功、rc=0 —— 只有這一格會叫"
+  fail=1
+else
+  echo "[MAILBOX-GATE] ④未追蹤：沒有【在磁碟上但不在 git 裡】的信（★20 分鐘內的新信豁免）"
+fi
 
 exit $fail
