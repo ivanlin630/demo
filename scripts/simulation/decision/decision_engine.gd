@@ -280,8 +280,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# ★★★組成 dump（systems＋blueprint 2026-09-11）：**只印最終 util 答不出它在哪一步被壓扁**
 		#   ⇒ 對「收留」逐步記：drive → weight → coeff → failure → persist → 末端
 		#   ★純觀測（Probe-gated、不改 u、零 RNG）；★★只在它 applicable 的時刻記（母體不被稀釋）
-		var _cmp: Dictionary = {} if (Probe.enabled and opt == "收留") else {}
-		var _cmp_on: bool = Probe.enabled and opt == "收留"
+		# ★★★「低」與「恰好 0」是兩種病（systems 2026-09-12）：低 ＝ 評價；**恰好 0.000 而且反覆** ＝ 接線。
+		#   ★而本函式的結構是：**四個 term 相【加】，之後乘 `coeff`、乘 `fail_mult`（、乘 persist）**
+		#   ⇒ ★★**一個 0 的乘數就能把全部殺掉** ⇒ 逐項 dump 必須**同時**記【加法那半】與【乘法那半】。
+		#   ⇒ ★★★所以「攻擊」比照「收留」開組成 dump（Probe-gated、不改 u、零 RNG）。
+		var _cmp: Dictionary = {} if (Probe.enabled and opt in ["收留", "攻擊"]) else {}
+		var _cmp_on: bool = Probe.enabled and opt in ["收留", "攻擊"]
+		var _terms_row: Array = []
 		var _ot0: int = Time.get_ticks_usec() if Probe.enabled else 0
 		for tw in DecisionOptions.terms_of(opt):
 			var _tt0: int = Time.get_ticks_usec() if Probe.enabled else 0
@@ -289,6 +294,8 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			var _dv: float = DecisionTerms.eval(tw[0], ctx, opt)
 			u += _wv * _dv
 			if _cmp_on:
+				# ★逐 term 一列（★上一版只留最後一個 term 的 drive/weight ⇒ 四個 term 誰是 0 看不出來）
+				_terms_row.append("%s:d=%.3f w=%.3f" % [String(tw[0]), _dv, _wv])
 				_cmp["drive"] = snappedf(_dv, 0.001)
 				_cmp["weight"] = snappedf(_wv, 0.001)
 				_cmp["after_weight"] = snappedf(u, 0.001)
@@ -353,7 +360,23 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			if _cmp_on: _cmp["persist"] = snappedf(_persist, 0.001)
 		if _cmp_on:
 			_cmp["final"] = snappedf(u, 0.001)
-			Probe.bump_sample("shelter.composition", _cmp, 100)
+			_cmp["terms"] = _terms_row
+			_cmp["opt"] = opt
+			if opt == "攻擊":
+				# ★★分開的樣本鍵：攻擊的組成不要混進收留那一桶（兩個母體、兩個問題）
+				Probe.bump_sample("attack.composition", _cmp, 150)
+				Probe.bump("attack.cmp.zero_final" if absf(u) < 0.0005 else "attack.cmp.nonzero_final")
+				if absf(u) < 0.0005:
+					# ★★★把「誰把它壓成 0」分類：加法那半就是 0／coeff 是 0／fail_mult 是 0
+					var _aw: float = float(_cmp.get("after_weight", 0.0))
+					var _cf: float = float(_cmp.get("coeff", 1.0))
+					var _fmv: float = float(_cmp.get("fail_mult", 1.0))
+					if absf(_aw) < 0.0005: Probe.bump("attack.zero_by.terms_sum")
+					elif absf(_cf) < 0.0005: Probe.bump("attack.zero_by.coeff")
+					elif absf(_fmv) < 0.0005: Probe.bump("attack.zero_by.fail_mult")
+					else: Probe.bump("attack.zero_by.later_stage")
+			if opt == "收留":
+				Probe.bump_sample("shelter.composition", _cmp, 100)   # ★只收留（★攻擊有自己的桶，不要混母體）
 			Probe.add_amount("shelter.cmp.drive_sum", float(_cmp.get("drive", 0.0)))
 			Probe.add_amount("shelter.cmp.after_weight_sum", float(_cmp.get("after_weight", 0.0)))
 			Probe.add_amount("shelter.cmp.after_coeff_sum", float(_cmp.get("after_coeff", 0.0)))
@@ -442,6 +465,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	# ★★★「收留輸給誰」（systems 2026-09-11）：★只印「收留很低」分不出【它低】與【這個 tick 大家都低】
 	#   ⇒ **同一個 tick、同一支隊，把贏家的 util 與收留的 util 並排**，並逐 option 統計它輸給誰幾次。
 	#   ★純觀測：不改 `scored`、不改順序、零 RNG。
+	# ★★★「面對面六成是徵收」要一個對照（systems 2026-09-12）：**非面對面時徵收佔幾成？**
+	#   ⇒ ★這裡記【全部 rank 的贏家分佈】（母體 ＝ 每一次 rank，不分場合）
+	#   ⇒ ★★而面對面那一桶已經另外有 `faceoff.winner.*` ⇒ **兩個母體並排就是對照**
+	#     （★★★同一個量、兩個母體 —— 不是兩個量）。
+	if Probe.enabled and not scored.is_empty():
+		Probe.bump("rank.winner_all." + String(scored[0]["opt"]))
+		Probe.bump("rank.winner_all.__total")
 	if Probe.enabled and not scored.is_empty():
 		var _sh_i: int = -1
 		for _si in range(scored.size()):

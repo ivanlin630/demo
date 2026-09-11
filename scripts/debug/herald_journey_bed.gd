@@ -256,6 +256,32 @@ func _run() -> void:
 		if ksf.begins_with("faceoff.winner."):
 			fo_win[ksf.replace("faceoff.winner.", "")] = int(Probe.counts[kf])
 	print("")
+	# ★★★對照：非面對面時的贏家分佈（systems 2026-09-12 要的那一格）
+	#   ★同一個量、兩個母體 —— 面對面 754 次 vs 全部 rank N 次。
+	var _wall: Dictionary = {}
+	var _wtot: int = int(Probe.counts.get("rank.winner_all.__total", 0))
+	for kw in Probe.counts:
+		var ksw: String = String(kw)
+		if ksw.begins_with("rank.winner_all.") and not ksw.ends_with("__total"):
+			_wall[ksw.replace("rank.winner_all.", "")] = int(Probe.counts[kw])
+	var _lev_all: int = int(_wall.get("徵收", 0))
+	var _lev_face: int = int(Probe.counts.get("faceoff.winner.徵收", 0))
+	var _face_tot: int = int(Probe.counts.get("faceoff.total", 0))
+	print("")
+	print("★對照【徵收佔比】：面對面 %d／%d ＝ %.1f%%　vs　全部 rank %d／%d ＝ %.1f%%" % [
+		_lev_face, _face_tot, 100.0 * float(_lev_face) / maxf(float(_face_tot), 1.0),
+		_lev_all, _wtot, 100.0 * float(_lev_all) / maxf(float(_wtot), 1.0)])
+	print("   ★兩個母體（面對面 vs 全部）⇒ ★★差額才是【面對面造成的】，單看六成講不出這句")
+	print("★攻擊 util 的組成（★『低』與『恰好 0』是兩種病）：")
+	print("   零 final %d 次／非零 %d 次｜被誰壓成 0：{terms_sum:%d, coeff:%d, fail_mult:%d, later:%d}" % [
+		int(Probe.counts.get("attack.cmp.zero_final", 0)), int(Probe.counts.get("attack.cmp.nonzero_final", 0)),
+		int(Probe.counts.get("attack.zero_by.terms_sum", 0)), int(Probe.counts.get("attack.zero_by.coeff", 0)),
+		int(Probe.counts.get("attack.zero_by.fail_mult", 0)), int(Probe.counts.get("attack.zero_by.later_stage", 0))])
+	print("   ★★結構：四個 term 相【加】，之後乘 coeff、乘 fail_mult ⇒ ★★★一個 0 的乘數就殺掉全部")
+	for _ac in Probe.samples.get("attack.composition", []).slice(0, 12):
+		print("     terms=%s｜after_weight=%s coeff=%s fail=%s final=%s" % [
+			str(_ac.get("terms", [])), str(_ac.get("after_weight", "-")), str(_ac.get("coeff", "-")),
+			str(_ac.get("fail_mult", "-")), str(_ac.get("final", "-"))])
 	print("★★★面對面現場（母體＝迎戰姿態 ＋ 目標還活著 ＋ 同格的【決策時刻】共 %d 次；樣本上限 150，實收 %d）" % [
 		int(Probe.counts.get("faceoff.total", 0)), fo.size()])
 	print("   贏家分佈：%s" % str(fo_win))
