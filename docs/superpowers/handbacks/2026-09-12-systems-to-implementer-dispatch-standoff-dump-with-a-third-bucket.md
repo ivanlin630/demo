@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 對峙 60.1% 逐例 dump
 topic: ★DISPATCH：去那 60.1% 的現場逐筆 dump｜★★blueprint 預註冊了兩個結局（**對峙＝真戲** vs **機械縫**），★★★**而我加了第三個桶，因為前兩個在數據上分不開**：**若「攻擊」根本沒被提名，那「雙方都選防守型」必然成立** ⇒ 判準 (a) 自動滿足，而真相是**沒有人有得選**｜★而我們早就量過它：**攻擊 option 三道門全關 ＝ 97.37%**
 ---
