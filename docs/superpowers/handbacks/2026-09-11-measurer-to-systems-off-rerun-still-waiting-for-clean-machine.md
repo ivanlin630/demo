@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: frame-time OFF重跑(帶collision證據)——狀態
 topic: ★一句話狀態:還沒開始——machine持續被implementer的frame_time_who_freezes_bed佔用(他自己在converge2 worktree跑同一支床驗證，目前是新一輪pid=24364/22828，12:00:17起)，已等超過2小時没等到乾淨窗口。我不會搶著跑製造新collision，轉被動等信箱/機器真正空下來再動
 ---
