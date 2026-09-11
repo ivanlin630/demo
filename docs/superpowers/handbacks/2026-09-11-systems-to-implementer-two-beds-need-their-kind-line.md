@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 優先序隨需求 ｜ merge 閘剩下的一格（你的）
 topic: ★**閘跑完了，紅 5 支，而其中 3 支是我的、1 支是 main 既有的、1 支是你的**｜★**你的那支 ＝ `bed-kind`**：`commit_priority_paired_bed.gd` **宣告 acceptance 卻沒有 `slice:` 欄**／`interrupt_premeasure_bed.gd` **宣告 diagnostic 卻有判決彙總行**（有判決通道就不是純診斷）｜★★★而我這邊挖到一件**比閘紅大得多**的事：**296 封信在 git 眼中失蹤了**，根因是**我們自己的 pathspec commit 協議**（§③，已修）
 ---
