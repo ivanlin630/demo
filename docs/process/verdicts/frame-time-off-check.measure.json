@@ -1,0 +1,36 @@
+{
+  "token": "frame-time-off-check",
+  "slice": "界限45 Probe開關對照——OFF趟(第二次重跑,獨佔)",
+  "date": "2026-09-11",
+  "measured_at_head": "e44f98fba起跑",
+  "touches": [],
+  "world": "warring_states / seed=1337 / 目標90天，★實際只跑到day75.6(tick=108900)就異常結束(child exit=-1，非GODOT_TIMEOUT非OOM通知)",
+  "bed": "scripts/debug/frame_time_who_freezes_bed.gd",
+  "raw_logs": ["docs/measurements/2026-09-11-frame-time-remeasure-phaseOFF-r2.txt"],
+  "specimen_trace": null,
+
+  "collision_evidence": {
+    "本輪獨佔範圍": "systems裁『frame_time_who_freezes_bed這支床歸measurer獨占』——implementer確認停手不再開新輪這支床，但implementer仍持續跑他自己其他的床(registration_verbs_bed/interrupt_premeasure_bed，在不同worktree)",
+    "godot-runs.log摘錄": "本輪執行期間(13:22:36-15:27:38)implementer多次COLLISION-SAMEROLE(godot-already-running最高到4)，即『床獨占』不等於『機器獨占』，contention仍然存在但程度遠低於第一次OFF嘗試(那次day83 max=68秒)",
+    "本輪異常": "★★★跑到tick=108900(day75.6/90=84%)以child exit=-1異常結束——非GODOT_TIMEOUT(那會印[GODOT TIMEOUT]字樣)、非系統OOM通知(這次任務通知是completed exit code 0，wrapper吞掉了子進程真正的-1)、非程式跑完(沒有印出最終『=== 結果 ===』區塊)。原因未查明，可能與implementer密集並行操作有關，也可能是別的原因。"
+  },
+
+  "answer": {
+    "verdict": "★★★未能完整答出『phase_timing本身有沒有污染量測』——本輪仍未跑滿(84%)且異常終止，沒有拿到全窗精確統計(all_dts排序資料因程式提前終止而沒被印出)。但day1-75的逐日[TickPerf]資料可用，量級與ON趟接近(同數量級的秒級max)，沒有觀察到像第一次OFF嘗試那種爆量污染(那次單日max到68秒，本輪75天裡最壞的一天max=14.07秒)——初步看不出phase_timing旗標本身造成系統性污染，但這是【近似判斷】非精確對比。",
+    "day1-75逐日TickPerf統計(N=75天，非all_dts全窗精確分布)": {
+      "逐日avg的平均": "68458us(68.5ms)",
+      "逐日max的最小值": "1083928us(1.08秒，day2)",
+      "逐日max的最大值": "14071517us(14.07秒，全75天最壞的一天)",
+      "與ON趟比較(不同統計口徑，僅供參考方向)": "ON趟全90天精確max=11859372us(11.86秒)；OFF-r2的75天逐日max裡最壞一天=14.07秒——量級相近(個位數到十幾秒)，沒有數量級差異"
+    }
+  },
+
+  "honest_limits": [
+    "★①本輪未跑滿(84%)、異常終止(exit=-1，原因未查明)——不是完整答案",
+    "★★②沒有all_dts全窗精確統計(min/p50/p95/max)，只有逐日[TickPerf]的avg/max摘要，統計口徑跟ON趟(全窗精確排序)不同，比較僅供方向參考不是精確對比",
+    "★★★③『床獨占』不等於『機器獨占』——contention仍存在(implementer其他床持續跑)，只是程度比第一次OFF嘗試輕很多，本輪數字仍帶contention影響，不是絕對乾淨基準",
+    "★④要真正回答界限45的問題，需要一次真正跑滿90天且異常不再發生的OFF趟——是否值得再重跑第三次，這個判斷留給systems/blueprint裁，我不會不問就自己再開第三輪"
+  ],
+
+  "supersedes": []
+}
