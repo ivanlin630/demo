@@ -69,6 +69,36 @@ static func _note_convoy_rewrite(team: TeamData, path: String, new_task: String)
 		"from": team.current_task, "to": new_task, "from_prio": team.task_priority,
 		"reason": team.task_reason, "persist": snappedf(team.persist_strength, 0.001)}, 40)
 
+# ★★★求居被擋的【逐筆】卷（systems 2026-09-11 兩封：①arbiter 自己回的理由，逐字、不歸納
+#   ②加一欄「被擋的當下該隊是不是【真的餓】」—— ★那一欄把同一批數字分成兩個相反的結論）。
+#   ★純觀測：Probe-gated、零 RNG、不進任何判斷、不寫 state。
+#   ★★理由字串直接取自【這支函式裡的分支】⇒ 它不是我的歸納，是 arbiter 自己走的那一條。
+static func _note_seek_deny(state: WorldState, team: TeamData, priority: int, reason: String) -> void:
+	var _pop: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var _fd: float = ResourceSystem.effective_food(state, team) / _pop
+	Probe.bump("seek.deny." + reason)
+	Probe.bump("seek.deny.%s.%s" % [reason, "餓" if _fd < DecisionTerms.DESPERATION_DAYS else "不餓"])
+	Probe.bump_sample("seek.deny", {
+		"tick": state.world.current_tick, "team": team.team_id, "理由": reason,
+		"現任": team.current_task, "現任prio": team.task_priority, "求居prio": priority,
+		"food_days": snappedf(_fd, 0.01), "絕境": _fd < DecisionTerms.DESPERATION_DAYS,
+		"persist": snappedf(team.persist_strength, 0.001), "現任reason": team.task_reason}, 150)
+
+# ★★★身分在途中被換掉（17 → 4 之間）：換成什麼、走哪一條路、由誰換的。
+#   ★窮盡＝對一支【已存在】的隊，`current_task` 的寫入路只有 try_set／release／transition
+#     （同 `_note_convoy_rewrite` 的窮盡註記，`grep -rn "current_task = "` 已驗）。
+#   ★★`release()` 拿不到 state ⇒ 那條路的 tick 記 -1（誠實限要寫，不要讓讀表的人以為是 tick 0）。
+static func _note_seek_loss(team: TeamData, path: String, new_task: String,
+		source: String, opt: String, tick: int) -> void:
+	if team.current_task != TeamData.TASK_SEEK_HOME or new_task == TeamData.TASK_SEEK_HOME:
+		return
+	Probe.bump("seek.lost." + path)
+	Probe.bump("seek.lost.%s.%s" % [path, new_task])
+	Probe.bump_sample("seek.lost", {"tick": tick, "team": team.team_id, "path": path,
+		"換成": new_task, "由誰": source, "option": opt,
+		"現任prio": team.task_priority}, 150)
+
+
 # ★★★`_opt`（2026-09-05 批次一之④）：★把【被擋的是哪一個 option】帶進來。
 #   ★★為什麼不改 `_source`：`_source` 會被寫進 `team.task_reason`，而那個值要跟
 #     `ENGINE_SOURCES` 白名單比對（`:127-128`）⇒ ★★★把 option 名塞進去會【改掉行為】。
@@ -85,6 +115,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			Probe.bump("arbiter.deny.戰鬥鎖")
 			Probe.bump("arbiter.deny.戰鬥鎖.by." + _source)
 			if _opt != "": Probe.bump("arbiter.deny.戰鬥鎖.opt." + _opt)
+			if _opt == "求居": _note_seek_deny(state, team, priority, "戰鬥鎖")
 		return false   # 戰鬥鎖絕對（combat 結束流程清 combat_target）
 	# crisis-override 免疫窗：剛 crisis-released 的 task 短時間禁重委派（防同 cadence release-then-instant-recommit：
 	# defection「等待新領主」/solo FLEE 子系統立刻打回原 task → survival 永無機會）。只擋「同一 task」→ survival
@@ -95,6 +126,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			Probe.bump("arbiter.deny.crisis免疫窗")
 			Probe.bump("arbiter.deny.crisis免疫窗.by." + _source)
 			if _opt != "": Probe.bump("arbiter.deny.crisis免疫窗.opt." + _opt)
+			if _opt == "求居": _note_seek_deny(state, team, priority, "crisis免疫窗")
 		return false
 	# ★持守統一 Slice 3 門檻式（§6）：committed progressive 動作（persist_strength 高）擋【非危機】搶班，完成優先。
 	# 危機 axis（任一側 ≥PRIO_THREAT：combat/survival/threat）不介入=守命/背水一戰；玩家命令（PRIO_PLAYER）authority 不擋；
@@ -125,17 +157,22 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			Probe.bump("arbiter.deny.持守擋班")
 			Probe.bump("arbiter.deny.持守擋班.by." + _source)
 			if _opt != "": Probe.bump("arbiter.deny.持守擋班.opt." + _opt)
+			if _opt == "求居": _note_seek_deny(state, team, priority, "持守擋班")
 		return false
 	if team.current_task == TeamData.TASK_IDLE or priority > team.task_priority:
 		# 漏斗站4探針（純觀測）：TRADE 在途被搶 → 記誰搶走（new_task|source）
 		if Probe.enabled and team.current_task == TeamData.TASK_TRADE \
 				and new_task != TeamData.TASK_TRADE:
 			Probe.bump("trade.preempt.%s|%s" % [new_task, _source])
+		# ★★★這一行原本在【賦值之後】才呼叫（舊 :134/:155/:166）⇒ `_note_convoy_rewrite` 的
+		#   `new_task == team.current_task` 早退【恆真】⇒ ★**try_set 那三條路的 convoy 探針從來沒有計過**（而
+		#   release／transition 是在賦值【之前】呼叫，所以活著）⇒ ★★儀器裝好但【沒接電】。
+		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
+		if Probe.enabled: _note_seek_loss(team, "try_set", new_task, _source, _opt, state.world.current_tick)
 		team.current_task = new_task
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
-		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
 		team.task_start_tick = state.world.current_tick
 		return true
 	# A1a source-gated equal-priority self-replace：引擎每 cadence 的 rank[0] 同層換掉
@@ -152,11 +189,15 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			return true   # 不重蓋 task_start_tick（單源，timeout 不歸零）；move_target 更新無關 timeout
 		if Probe.enabled and team.current_task == TeamData.TASK_TRADE:
 			Probe.bump("trade.preempt.%s|%s" % [new_task, _source])   # 漏斗站4 parity
+		# ★★★這一行原本在【賦值之後】才呼叫（舊 :134/:155/:166）⇒ `_note_convoy_rewrite` 的
+		#   `new_task == team.current_task` 早退【恆真】⇒ ★**try_set 那三條路的 convoy 探針從來沒有計過**（而
+		#   release／transition 是在賦值【之前】呼叫，所以活著）⇒ ★★儀器裝好但【沒接電】。
+		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
+		if Probe.enabled: _note_seek_loss(team, "try_set", new_task, _source, _opt, state.world.current_tick)
 		team.current_task = new_task
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
-		if Probe.enabled: _note_convoy_rewrite(team, "try_set", new_task)
 		team.task_start_tick = state.world.current_tick
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
@@ -164,10 +205,14 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		var leader: PersonData = state.persons.get(team.leader_id)
 		if leader != null and _defiance_check(leader):
 			print("[抗命] Team%d leader 棄玩家命令 → %s" % [team.team_id, new_task])
+			# ★★★這一行原本在【賦值之後】才呼叫（舊 :134/:155/:166）⇒ `_note_convoy_rewrite` 的
+			#   `new_task == team.current_task` 早退【恆真】⇒ ★**try_set 那三條路的 convoy 探針從來沒有計過**（而
+			#   release／transition 是在賦值【之前】呼叫，所以活著）⇒ ★★儀器裝好但【沒接電】。
+			if Probe.enabled: _note_convoy_rewrite(team, "try_set_defy", new_task)
+			if Probe.enabled: _note_seek_loss(team, "try_set_defy", new_task, _source, _opt, state.world.current_tick)
 			team.current_task = new_task
 			team.move_target = move_target
 			team.task_priority = priority
-			if Probe.enabled: _note_convoy_rewrite(team, "try_set_defy", new_task)
 			team.task_reason = "defy_" + _source
 			team.task_start_tick = state.world.current_tick
 			return true
@@ -179,6 +224,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		Probe.bump("arbiter.deny.優先序不足")
 		Probe.bump("arbiter.deny.優先序不足.by." + _source)
 		if _opt != "": Probe.bump("arbiter.deny.優先序不足.opt." + _opt)
+		if _opt == "求居": _note_seek_deny(state, team, priority, "優先序不足")
 	return false
 
 
@@ -197,6 +243,7 @@ static func release(team: TeamData) -> void:
 		if _m_convoy: Probe.bump("commit.release_with.convoy")
 		if _m_order: Probe.bump("commit.release_with.order")
 		Probe.bump("commit.release_with_commitment" if (_m_corvee or _m_convoy or _m_order) else "commit.release_clean")
+	if Probe.enabled: _note_seek_loss(team, "release", TeamData.TASK_IDLE, team.task_reason, "", -1)
 	if Probe.enabled: _note_convoy_rewrite(team, "release", TeamData.TASK_IDLE)
 	team.current_task = TeamData.TASK_IDLE
 	team.move_target = Vector2i(-1, -1)
@@ -229,6 +276,7 @@ static func transition(state: WorldState, team: TeamData, new_task: String, prio
 		return                                                # crisis-免疫（補 transition 洩漏，對齊 try_set:45）
 	if team.task_priority >= PRIO_THREAT and priority < team.task_priority:
 		return                                                # emergency-respect：擋外部低 prio in-place stomp
+	if Probe.enabled: _note_seek_loss(team, "transition", new_task, _source, "", state.world.current_tick)
 	if Probe.enabled: _note_convoy_rewrite(team, "transition", new_task)
 	team.current_task = new_task
 	team.task_priority = priority

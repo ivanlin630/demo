@@ -86,4 +86,10 @@ func _run() -> void:
 	else:
 		print("★★★量到的單tick耗時仍達到用戶抱怨量級(>=5秒)——見上方[PhaseSpike]逐系統拆解找兇手")
 
+	# 儀器不得改世界（純觀測的唯一硬證據）：同 seed 同窗下，phase_timing ON／OFF 兩趟的 fp 必須相同。
+	#   ★★而這一格【必須兩趟都跑才有意義】—— 單獨一趟印出來的 fp 只是一串字，不構成對照。
+	print("★fp(phase_timing=%s) = %s" % ["ON" if phase_on else "OFF", StateFingerprint.compute(state)])
+	print("★★終線計數（永遠開著、不吃 phase_timing）：>2秒幀數=%d / %d tick" % [
+		SimRunner.frames_over_budget, SimRunner.frames_total])
+
 	print("\n=== frame_time_who_freezes_bed DONE ===")
