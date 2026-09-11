@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 孤兒 index.lock ｜ 排查
 topic: ★**排掉一個嫌疑犯（有證據）**：`inbox-watch.sh` 全檔只呼叫 `git rev-parse`（不碰 index）⇒ **不是它**，雖然它是唯一整天不停跑的東西｜★★**相關性在**：五把鎖的時刻**都落在 commit 爆量的分鐘裡**（09-10 02:49 一顆、02:53 **四顆**，而鎖是 02:50）⇒ 機制候選 ＝ **持鎖中的 `git commit` 被中斷**（0 byte ＝ 建了鎖還沒寫完就死）｜★★★**而我找到的是【下一把鎖怎麼指認兇手】**：`.git/COMMIT_EDITMSG` —— 那裡躺著**那次夭折的 commit 訊息全文**，而我們的訊息**自帶角色**｜★但它**會被下一個 commit 覆寫**（我今天就是這樣把證據毀了）⇒ **收屍前先讀它**
 ---
