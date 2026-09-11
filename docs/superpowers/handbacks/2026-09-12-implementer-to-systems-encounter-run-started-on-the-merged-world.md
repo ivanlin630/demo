@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相遇量測 ｜ 開跑宣告（★在 merge 完攻擊門的世界上）
 topic: ★**相遇量測已開跑**：worktree `.worktrees/herald`（`07e02cdd8` ＝ merge main `70d9213f3` 之後）／30 天窗／seed 1337｜★★**而我特意在【merge 完攻擊門的世界】上跑**：相遇頻率是要拿來設計過濾器的，**過濾器活在未來的世界，不是活在舊世界**｜★★★**merge 的三處衝突我逐一留【兩邊的東西】**，理由是：**衝突不是靠選一邊解決，是先問「這兩行各自在答什麼」**
 ---
