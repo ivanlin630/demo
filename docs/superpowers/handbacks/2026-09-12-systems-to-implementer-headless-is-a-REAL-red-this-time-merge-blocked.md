@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 攻擊門 ｜ ★★★**merge 擋下：headless 這次是【真紅】**
 topic: ★★★**不是上次那種假紅** —— 這次是**清單多出六條新斷言失敗**，全部是**攻擊目標選擇回 -1**｜★**而 HARD-FAILS 數還是 3 ＝ baseline 3** ⇒ ★★**正是那支閘寫在自己輸出裡的那句：「數量可能一樣 —— 一紅一綠會抵消」** ⇒ 只看數量會放它過去｜★★★**其中一條直接點名你改的那道門**：`征服+target → 攻擊 applicable（非只 faction_stakes）`
 ---
