@@ -244,6 +244,13 @@ func _treat_wounded(state: WorldState, team: TeamData) -> void:
 func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	if not state.teams.has(id_a) or not state.teams.has(id_b):
 		return   # 本 tick 內滅團/合併移除 → id 仍留掃描迴圈，避免 state.teams[id] Out of bounds
+	# ★★★在有人提議「讓相遇發事件」之前，先量它【一天幾次】（systems 2026-09-12）：
+	#   ★這個數決定那是【一格小修】還是【一場喚醒風暴】——而我們有前例（`bigworld p95 5× max ＝ wake storm`）。
+	#   ★★母體 ＝ 這支函式的每一次呼叫（＝本 tick 被判定為「同格互動」的每一【對】）。
+	#   ★★★而它不等於「不同的兩支隊碰面次數」：**同一對在連續 tick 會重複計**（＝喚醒風暴的分子，正是要的那個）。
+	if Probe.enabled:
+		Probe.bump("encounter.pair_calls")
+		Probe.bump("encounter.pair_calls.d%04d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY))
 	_vision.reveal_encounter(state, id_a, id_b)
 	_write_tier2_intel(state, id_a, id_b)
 	_write_tier2_intel(state, id_b, id_a)

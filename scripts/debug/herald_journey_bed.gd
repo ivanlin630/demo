@@ -26,12 +26,18 @@ func _run() -> void:
 	var runner := SimRunner.new()
 	var no_player := Vector2i(-1, -1)
 
+	var rank_prev: Dictionary = {}   # team_id → 上一 tick 結束時的逐隊 rank 計數（★答「那一 tick 有沒有想」）
 	var live: Dictionary = {}     # team_id → 進行中的 episode
 	var dlive: Dictionary = {}    # 迎戰 episode（同上，但目標是【威脅隊】）
 	var drows: Array = []
 	var rows: Array = []          # 逐筆（★全收，母體是數十不是數千）
 	for tick in range(ticks):
 		runner.advance_tick(st, no_player)
+		# ★上一 tick 結束時的逐隊決策計數（★下一輪用它算「那一 tick 的增量」）
+		#   ⇒ 放在掃描【之前】更新 ⇒ 掃描當下 rank_prev 仍是【上一 tick 末】的值
+		var _rank_snapshot: Dictionary = {}
+		for tidp in st.teams:
+			_rank_snapshot[tidp] = int(Probe.counts.get("engine.rank.t%d" % tidp, 0))
 		for tid in st.teams:
 			var t: TeamData = st.teams[tid]
 			# ★★★相遇機器（blueprint 併案 2026-09-11）：迎戰照【互斥且窮盡、可對帳】的既有形狀加三格
@@ -46,7 +52,7 @@ func _run() -> void:
 				if not dlive.has(tid):
 					dlive[tid] = {"team": tid, "oid": -1, "start": st.world.current_tick, "met": false,
 						"target_switches": 0, "last_oid": -1,
-						"rank_at_met": -1,
+						"rank_at_met": -1, "rank_same_tick": -1, "met_tick": -1, "rank_hour": -1,
 						"fight0": int(Probe.counts.get("combat.entered.t%d" % tid, 0))}
 				var _ep: Dictionary = dlive[tid]
 				var _dk: int = t.prosperity_target_id
@@ -56,11 +62,18 @@ func _run() -> void:
 					if _dk != int(_ep["last_oid"]) and int(_ep["last_oid"]) != -1:
 						_ep["target_switches"] = int(_ep["target_switches"]) + 1
 					_ep["last_oid"] = _dk
-					var _dt: TeamData = st.teams.get(_dk)
+					if int(_ep.get("met_tick", -1)) >= 0 and int(_ep.get("rank_hour", -1)) < 0 						and st.world.current_tick - int(_ep["met_tick"]) >= WorldState.TICKS_PER_HOUR:
+					_ep["rank_hour"] = int(Probe.counts.get("engine.rank.t%d" % tid, 0)) - int(_ep["rank_at_met"])
+				var _dt: TeamData = st.teams.get(_dk)
 					if _dt != null and _dt.tile_pos == t.tile_pos:
 						if not bool(_ep["met"]):
-							# ★第一次碰到面的【那一刻】記下決策計數 ⇒ 之後的差額 ＝ 碰面之後想過幾次
-							_ep["rank_at_met"] = int(Probe.counts.get("engine.rank.t%d" % tid, 0))
+							# ★systems 要【兩個數】不是一個：
+							#   ①**碰到面的那一 tick** 有沒有跑決策（＝本 tick 的增量）
+							#   ②之後 N tick 內跑過幾次（N ＝ 一個遊戲小時 ＝ TICKS_PER_HOUR）
+							var _rk_now: int = int(Probe.counts.get("engine.rank.t%d" % tid, 0))
+							_ep["rank_same_tick"] = _rk_now - int(rank_prev.get(tid, 0))
+							_ep["rank_at_met"] = _rk_now
+							_ep["met_tick"] = st.world.current_tick
 						_ep["met"] = true
 			elif dlive.has(tid):
 				_close_defend(dlive[tid], st, drows)
@@ -88,6 +101,7 @@ func _run() -> void:
 			elif live.has(tid):
 				_close(live[tid], st, rows, false)
 				live.erase(tid)
+		rank_prev = _rank_snapshot
 	for tid2 in live:
 		_close(live[tid2], st, rows, true)
 	for tid3 in dlive:
@@ -184,6 +198,23 @@ func _run() -> void:
 		if int(dr3.get("ranks_after_met", -1)) <= 0: _met_zero_rank += 1
 	print("   ★★★★碰到面之後【有沒有人在思考】：碰到面 %d 段，其中**碰面後一次決策都沒跑 %d 段**（%.1f%%）" % [
 		_met_n, _met_zero_rank, 100.0 * float(_met_zero_rank) / maxf(float(_met_n), 1.0)])
+	var _same_tick_yes: int = 0
+	var _hour_zero: int = 0
+	var _hour_n: int = 0
+	for dr4 in drows:
+		if not bool(dr4["met"]): continue
+		if int(dr4.get("rank_same_tick", -1)) > 0: _same_tick_yes += 1
+		var _rh: int = int(dr4.get("rank_hour", -1))
+		if _rh >= 0:
+			_hour_n += 1
+			if _rh == 0: _hour_zero += 1
+	print("      ★★兩個數（systems 要的）：①碰到面的【那一 tick】有跑決策 %d／%d 段" % [_same_tick_yes, _met_n])
+	print("         ②碰面後【一個遊戲小時】內一次都沒跑：%d／%d 段（★母體＝活過那一小時的段）" % [
+		_hour_zero, _hour_n])
+	print("         ★★★相遇【一天幾次】：總 %d 對·tick（★同一對連續 tick 會重複計 ＝ 喚醒風暴的分子）" % int(Probe.counts.get("encounter.pair_calls", 0)))
+	var _days: float = float(ticks) / float(WorldState.TICKS_PER_DAY)
+	print("            ⇒ 每日 %.1f 對·tick（母體＝%.0f 天）" % [
+		float(Probe.counts.get("encounter.pair_calls", 0)) / maxf(_days, 1.0), _days])
 	print("      ★這一格答 systems 的第四種可能：**開門也用不到，因為沒人有機會用那個提名**")
 	print("      ★★而『相遇不發事件』是窮盡 grep 查的：`WorldEvents.emit(` 全庫 16 個呼叫點，無一是相遇")
 	print("   ★★★『736 → 1』分不出的兩種世界，就是②與③ —— 而它們的處置完全不同")
@@ -252,7 +283,8 @@ func _close_defend(ep: Dictionary, st: WorldState, drows: Array) -> void:
 		_ranks_after_met = int(Probe.counts.get("engine.rank.t%d" % tid, 0)) - int(ep["rank_at_met"])
 	drows.append({"team": tid, "oid": int(ep["oid"]), "start": int(ep["start"]),
 		"met": bool(ep["met"]), "fought": fought, "switches": int(ep.get("target_switches", 0)),
-		"ranks_after_met": _ranks_after_met})
+		"ranks_after_met": _ranks_after_met, "rank_same_tick": int(ep.get("rank_same_tick", -1)),
+		"rank_hour": int(ep.get("rank_hour", -1))})
 
 func _open_n(groups: Dictionary) -> int:
 	return (groups["open_far"] as Array).size() + (groups["open_mid"] as Array).size() 		+ (groups["open_near"] as Array).size()
