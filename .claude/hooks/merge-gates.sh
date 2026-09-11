@@ -106,6 +106,14 @@ if [ -n "$_mg_dup" ]; then
   echo "[MERGE-GATES] ★★★註冊表有重複 id：$_mg_dup ⇒ 同一支閘會跑多次且判準不一致"
   exit 2
 fi
+# ★★★分批跑（systems 2026-09-12）：這台機器與用戶的遊戲共用，整包跑被 OOM 殺過兩次。
+#   `MG_FROM` / `MG_TO`（第幾支，1-based，含頭含尾）⇒ 只跑那一段。
+#   ★而它有一個危險：**跑一半也會印完成**，人會把它讀成【綿了】。
+#   ⇒ ★★所以分批時**橫幅印 PARTIAL**，且結尾明文寫【不可當 merge 判決】。
+MG_FROM="${MG_FROM:-0}"; MG_TO="${MG_TO:-0}"
+if [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; then
+  echo "[MERGE-GATES] ★★★PARTIAL：本輪只跑第 ${MG_FROM:-1}–${MG_TO:-末} 支 ⇒ **不可當 merge 判決**"
+fi
 FAILED=(); TOTAL0=$SECONDS; N=0
 # ★★★2026-09-06:讀進來先剝 ``(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
 #   `expect` 會尾帶 `` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
@@ -115,6 +123,8 @@ while IFS=$'	' read -r id cmd purpose expect; do
   id="${id%$''}"; cmd="${cmd%$''}"; purpose="${purpose%$''}"; expect="${expect%$''}"
   case "$id" in ''|'#'*) continue;; esac
   N=$((N+1)); T0=$SECONDS
+  if [ "$MG_FROM" != "0" ] && [ "$N" -lt "$MG_FROM" ]; then continue; fi
+  if [ "$MG_TO" != "0" ] && [ "$N" -gt "$MG_TO" ]; then continue; fi
   if [ -z "${expect:-}" ]; then
     echo "[MERGE-GATES] ✗ $id —— ★沒有 expect 欄：不能有「沒有判準也算過」的路徑"
     FAILED+=("$id(no-expect)"); continue
