@@ -251,6 +251,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	if Probe.enabled:
 		Probe.bump("encounter.pair_calls")
 		Probe.bump("encounter.pair_calls.d%04d" % int(state.world.current_tick / WorldState.TICKS_PER_DAY))
+		_note_encounter_buckets(state, id_a, id_b)
 	_vision.reveal_encounter(state, id_a, id_b)
 	_write_tier2_intel(state, id_a, id_b)
 	_write_tier2_intel(state, id_b, id_a)
@@ -1727,3 +1728,32 @@ func _resolve_pacify(state: WorldState, pacifier: TeamData, village: TeamData) -
 			p.stress = maxf(p.stress - 0.05, 0.0)
 			LoyaltyBank.adjust(p, 0.02, "pacify")
 	UnrestBank.reduce(village, 1, "pacify")
+
+
+# ★★★相遇分桶（systems 2026-09-12；★一趟答兩個問題：總量 ＋ 各謂詞能篩掉多少）
+#   ★桶用【未來那個過濾器會用的謂詞】，而 blueprint 的硬條件是**只准外觀層便宜謂詞**
+#     （可見武裝／規模／逼近），**禁讀 tag／意圖**。
+#   ★★而「敵對與否」**不是**合法的過濾判準（它要讀關係／意圖）——
+#     ★★★它在這裡**只當分析欄**，我把它與外觀層三欄**分開命名**（`analysis.*`），
+#     免得下一個人把分析欄當成設計。
+#   ★★★而過濾器的形狀是【預設醒、具名靜】⇒ 這裡記的是「**這種相遇【會被靜音】**」的候選比例，
+#     不是「這種才喚醒」—— 兩者在 code 上差一個 `not`，在世界上差很多。
+func _note_encounter_buckets(state: WorldState, id_a: int, id_b: int) -> void:
+	var a: TeamData = state.teams[id_a]
+	var b: TeamData = state.teams[id_b]
+	# ①可見武裝（外觀層）：雙方是否任一方有戰力外顯 ⇒ 無武裝相遇是【靜音候選】
+	var _ca: float = float(NpcCombatSystem.new().calc_armed(state, a))
+	var _cb: float = float(NpcCombatSystem.new().calc_armed(state, b))
+	Probe.bump("encounter.armed." + ("both" if _ca > 0.0 and _cb > 0.0 else ("one" if _ca > 0.0 or _cb > 0.0 else "none")))
+	# ②規模差（外觀層）：人數比（大者/小者）
+	var _hi: float = float(maxi(a.population, b.population))
+	var _lo: float = float(maxi(mini(a.population, b.population), 1))
+	var _ratio: float = _hi / _lo
+	Probe.bump("encounter.sizegap." + ("lt2" if _ratio < 2.0 else ("lt4" if _ratio < 4.0 else "ge4")))
+	# ③逼近（外觀層）：對方的 move_target 是不是【我腳下這一格】⇒ 朝我來 vs 路過
+	#   ★只讀 move_target 這個外觀事實（它就是它正在走的方向），不讀意圖欄位。
+	var _toward: bool = (b.move_target == a.tile_pos) or (a.move_target == b.tile_pos)
+	Probe.bump("encounter.approach." + ("toward" if _toward else "passing"))
+	# ④★分析欄（★不是過濾判準）：敵對與否 —— 它要讀 faction 關係，**過濾器不准用**
+	var _hostile: bool = a.faction_id != b.faction_id or a.faction_id == -1 or b.faction_id == -1
+	Probe.bump("encounter.analysis.hostile." + ("yes" if _hostile else "no"))

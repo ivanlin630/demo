@@ -26,6 +26,8 @@ func _run() -> void:
 	var runner := SimRunner.new()
 	var no_player := Vector2i(-1, -1)
 
+	var enc_per_tick: Array = []     # ★一個 tick 幾次相遇（p50／p95／max ＝ 喚醒風暴的形狀）
+	var _enc_prev: int = 0
 	var rank_prev: Dictionary = {}   # team_id → 上一 tick 結束時的逐隊 rank 計數（★答「那一 tick 有沒有想」）
 	var live: Dictionary = {}     # team_id → 進行中的 episode
 	var dlive: Dictionary = {}    # 迎戰 episode（同上，但目標是【威脅隊】）
@@ -33,6 +35,9 @@ func _run() -> void:
 	var rows: Array = []          # 逐筆（★全收，母體是數十不是數千）
 	for tick in range(ticks):
 		runner.advance_tick(st, no_player)
+		var _enc_now: int = int(Probe.counts.get("encounter.pair_calls", 0))
+		enc_per_tick.append(_enc_now - _enc_prev)
+		_enc_prev = _enc_now
 		# ★上一 tick 結束時的逐隊決策計數（★下一輪用它算「那一 tick 的增量」）
 		#   ⇒ 放在掃描【之前】更新 ⇒ 掃描當下 rank_prev 仍是【上一 tick 末】的值
 		var _rank_snapshot: Dictionary = {}
@@ -212,6 +217,21 @@ func _run() -> void:
 	print("         ②碰面後【一個遊戲小時】內一次都沒跑：%d／%d 段（★母體＝活過那一小時的段）" % [
 		_hour_zero, _hour_n])
 	print("         ★★★相遇【一天幾次】：總 %d 對·tick（★同一對連續 tick 會重複計 ＝ 喚醒風暴的分子）" % int(Probe.counts.get("encounter.pair_calls", 0)))
+	var ept: Array = enc_per_tick.duplicate()
+	ept.sort()
+	if not ept.is_empty():
+		print("            一個 tick 幾次：p50=%d p95=%d max=%d（母體＝%d tick）" % [
+			int(ept[ept.size() / 2]), int(ept[int(float(ept.size()) * 0.95)]),
+			int(ept[ept.size() - 1]), ept.size()])
+	var _buck: Dictionary = {}
+	for kb2 in Probe.counts:
+		var ksb2: String = String(kb2)
+		if ksb2.begins_with("encounter.armed.") or ksb2.begins_with("encounter.sizegap.") 				or ksb2.begins_with("encounter.approach.") or ksb2.begins_with("encounter.analysis."):
+			_buck[ksb2.replace("encounter.", "")] = int(Probe.counts[kb2])
+	print("            ★分桶（★★外觀層三欄 ＝ 過濾器【可以】用的；`analysis.*` ＝ 只給我們看的分析欄，")
+	print("              ★★★過濾器【不准】用它，因為它要讀關係／意圖）：%s" % str(_buck))
+	print("            ★而過濾器的形狀是【預設醒、具名靜】⇒ 上面的桶讀作『這種相遇【可以被靜音】』，")
+	print("              **不是**『這種才喚醒』—— 兩者在 code 上差一個 not，在世界上差很多")
 	var _days: float = float(ticks) / float(WorldState.TICKS_PER_DAY)
 	print("            ⇒ 每日 %.1f 對·tick（母體＝%.0f 天）" % [
 		float(Probe.counts.get("encounter.pair_calls", 0)) / maxf(_days, 1.0), _days])
