@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: 共用 main 目錄的 git 狀態（★給每一個在 `A:\GDS\demo` 直接工作的 session）
 topic: ★★★**共用 main 目錄的 `main` 指標現在落後／分岔於 `origin/main`** —— 而**工作區內容看起來完全正常**，所以它會在你**下次 push 被拒**時才現形｜★成因是我：④a 的合併是我在獨立 worktree 做並 push 的（★★而我那樣做的理由是**共用 index 裡有別的 session 的 staged 檔**，`git merge` 因此拒絕）｜★**不要 `reset --hard`**——那會掃掉你們未 commit 的東西
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 設施存在索引（效能線的終點）
 topic: ★R² 送審 `specs/2026-09-10-facility-existence-index-HOW.md`｜★★★而這張票的一句話是量出來的、不是我推的：**這個世界把 83.4% 的牆鐘，花在確認「我沒有那個設施」** —— `gap` 迴圈 **0 次**，代表每一次呼叫都在 gating 之後回 0.0｜★★我要你打的是**語意等價那兩段**（短路、聚合索引），因為**其餘部分是量測，只有那兩段是我的判斷**
 ---

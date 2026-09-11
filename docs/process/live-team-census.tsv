@@ -33,6 +33,7 @@ scripts/simulation/npc_combat_system.gd:151	team_strength	A	★把護衛隊的�
 scripts/simulation/npc_combat_system.gd:374	_end_combat	A	戰後找護衛隊
 scripts/simulation/outpost_system.gd:261	_has_resident_on_tile	A	據點有沒有居民＝殭屍會讓它看起來有人住
 scripts/simulation/outpost_system.gd:369	_tick_construction	A	挑正在施工的隊推進工程
+scripts/simulation/outpost_system.gd:513	_complete_construction	B	★④b：據點滋 ⇒ 登記在它上面的隊全部流離；契約解除要掃【全部】的紀錄（死隊身上的 work_outpost 也是殘留）
 scripts/simulation/outpost_system.gd:850	_has_control	A	據點控制權判定
 scripts/simulation/player_api_mapper.gd:352	map_location_context	A	★玩家可見面：殭屍隊會在「這格有誰」裡閃現一 tick
 scripts/simulation/player_api_mapper.gd:743	map_subteam_panel	A	★玩家可見面：子隊面板

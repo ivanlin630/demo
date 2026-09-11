@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 糧食改走稅路 ＋ 勞力池（家窗 v1 卡①＋卡③）
 topic: ★R² 送審 `specs/2026-09-11-food-into-tax-path-and-labor-pool-HOW.md`｜★★★而本票最重要的一節是 §③：**這兩格現在【判不動】** —— 三個 config 在 t=0 的房客都是 0，而「白捐 ＝ 0」在**沒有房客的世界裡自動成立**｜★★我要你打的是**兩個判斷**（`tax_rate` 的人格接線形狀、fixture 造房客的方式），以及**一個我沒查的前提**
 ---
