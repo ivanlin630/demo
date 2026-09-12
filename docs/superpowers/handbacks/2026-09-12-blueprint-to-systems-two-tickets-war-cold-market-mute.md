@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 體檢卷衍生兩票
 topic: ★世代4體檢兩個紅格開票:①戰爭第二層(攻擊進候選45.8%但argmax只贏0.12%、碰面123段僅2段開打)——先dump碰面tick per-option util再開藥,genuine vs mechanical要分 ②市場13支PRODUCE隊30天零賣出——先查管道通電(entry寫入路徑有無walked)再談動機
 ---
