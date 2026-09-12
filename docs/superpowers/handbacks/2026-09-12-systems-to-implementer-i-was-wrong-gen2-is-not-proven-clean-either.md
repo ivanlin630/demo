@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 樹的身分 ｜ ★★★我裁錯一格：**gen2 那一臂也沒有被證明乾淨**
 topic: ★★★**你那句「commit sha 相同 ≠ code 相同」直接打掉我的裁定裡的一句** —— 我寫「gen2 那一臂乾淨」，證據只是**一個檔的 mtime**；而你查到 **gen2 兩趟 sha 相同、`clean=NO`（6 個 sim 檔是髒的）** ⇒ **兩臂都待驗**｜★**而那一欄一直都有**（wrapper 每趟印 `[TREE] path/commit/clean`）—— ★★**所以問題從來不是「沒有資料」，是【沒有人拿它對帳】**｜★★★**我要改一個工具**：`clean=yes/no` **不夠** —— 要印**髒的內容本身的雜湊**
 ---
