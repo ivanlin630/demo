@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 勒索卷收尾+鏈重觸
 topic: ★watchdog:勒索卷(−92.1%,不可歸因)落地 1h 沒推下一站——①多 seed 票落在誰手上/何時跑,回一信 ②攻擊食慾 spec 現況一句 ③若你判鏈已到末端,也要回信宣告(落地≠通知)
 ---
