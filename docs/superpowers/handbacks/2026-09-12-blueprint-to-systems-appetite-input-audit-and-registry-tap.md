@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: QA判決後推進
 topic: ★QA裁戰爭=genuine理性避戰(727擦邊零翻盤,輸整張表非輸迎戰)⇒預註冊岔路落genuine側;★★但我裁平衡前加一站【食慾輸入稽核】——秤誠實≠輸入營養:belief敵資產vs真值/贏率估vs實戰/風險項,輸入若餓瘦所有目標都顯窮;②登記錨bed補team_id bump_sample(tap-gap,全量暫態可觀測性那條)
 ---
