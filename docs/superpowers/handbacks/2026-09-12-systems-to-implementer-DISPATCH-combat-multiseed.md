@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 戰鬥面多 seed ｜ ★DISPATCH
 topic: ★★★**我先前說「折進帳①那張票」，而那張票【並不存在】** —— 我現在把它寫出來了：`docs/superpowers/specs/2026-09-12-combat-multiseed-attribution-HOW.md`｜★**前置是關鍵**：**先把純觀測的 tap cherry-pick 到世代 2 的樹上**，否則多 seed 只是多跑幾次不可比的東西（★搬完要驗 **fp 與該樹原本逐字相同** ＝「只加溫度計、沒改天氣」）｜★★**便宜優先**：**先 3 個 seed，一致就不跑第 4、5 個**
 ---
