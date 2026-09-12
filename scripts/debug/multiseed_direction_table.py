@@ -57,18 +57,22 @@ METRICS = [("開打", r"開打 conq\.combat_entered\s*=\s*(\d+)"),
 
 def read_run(path):
     txt = io.open(path, encoding="utf-8", errors="replace").read()
-    tree = "?"
+    tree, chash = "?", ""
     for ln in txt.splitlines():
-        if "[TREE]" in ln:
-            mc = re.search(r"commit=(\w+)", ln)
-            mk = re.search(r"clean=(\S+)", ln)
-            if mc:
-                tree = mc.group(1) + "/" + (mk.group(1) if mk else "?")
-            break
+        if "[TREE]" not in ln or "commit=" not in ln:
+            continue
+        mc = re.search(r"commit=(\w+)", ln)
+        mk = re.search(r"clean=(\S+)", ln)
+        mh = re.search(r"codehash=(\w+)", ln)
+        tree = mc.group(1) + "/" + (mk.group(1) if mk else "?")
+        # ★★★codehash 是 2026-09-12 11:09 才加的 ⇒ **在那之前跑完的趟次永遠拿不到**。
+        #   ★所以「沒有 codehash」不是一種值，是【證據不存在】—— 兩者不可混。
+        chash = mh.group(1) if mh else ""
+        break
     if "[TEST-SUITE-COMPLETE]" not in txt:
         # ★沒有完成標記 = 本輪無結果（不是 0、不是紅）
         # ★★而【樹的身分】照樣要回：**污染與跑不跑得完無關**
-        return {"tree": tree, "done": False}
+        return {"tree": tree, "chash": chash, "done": False}
     out = {}
     for name, pat in METRICS:
         m = re.search(pat, txt)
@@ -76,6 +80,7 @@ def read_run(path):
     m = re.search(r"★fp = ([0-9a-f]+)", txt)
     out["fp"] = m.group(1) if m else "?"
     out["tree"] = tree
+    out["chash"] = chash
     out["done"] = True
     return out
 
@@ -117,15 +122,25 @@ def main():
         else "★★★不足 ⇒ 下面的表【不可下結論】，只是進度"))
     for k in sorted(runs):
         v = runs[k]
-        print("   %s/%s : %s" % (k[0], k[1], ("未完成（無結果） tree=" + v["tree"]) if not v["done"] else
+        print("   %s/%s : %s" % (k[0], k[1], ("未完成（無結果） tree=" + v["tree"] + ("/" + v["chash"] if v["chash"] else "/無codehash")) if not v["done"] else
                                  " ".join("%s=%s" % (n, v[n]) for n, _ in METRICS)
-                                 + " fp=" + v["fp"][:8] + " tree=" + v["tree"]))
+                                 + " fp=" + v["fp"][:8] + " tree=" + v["tree"]
+                                 + ("/" + v["chash"] if v["chash"] else "/無codehash")))
 
     # ★★★一臂之内【樹的身分】必須一致，否則這三趟**不是同一臂**。
     #   ★血證 2026-09-12：我在量測進行中往被量的 worktree commit 了 sim code，
     #   ★★而**兩趟都跑完、都有 fp、都印 DONE** —— 症狀是零。
     for a in arms:
-        ts = sorted({v["tree"] for k, v in runs.items() if k[0] == a})
+        mine = [v for k, v in runs.items() if k[0] == a]
+        hs = sorted({v["chash"] for v in mine if v["chash"]})
+        if len(hs) > 1:
+            red = True
+            print("★★★【紅】臂 %s 的 codehash 不一致：%s（★直接證據）" % (a, " vs ".join(hs)))
+        elif len(hs) < len(mine):
+            print("★臂 %s 裡有 %d/%d 趟**沒有 codehash**（跑在它加進來之前）" % (
+                a, len(mine) - len(hs), len(mine)))
+            print("   ⇒ ★★那幾趟只能停在 sha 與 mtime 的【間接證據】，**追溯不回來**")
+        ts = sorted({v["tree"] for v in mine})
         if len(ts) > 1:
             red = True
             print("★★★【紅】臂 %s 的各趟**不是同一棵樹**：%s" % (a, " vs ".join(ts)))
