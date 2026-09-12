@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多 seed ｜ 你要的「跑的時候那棵樹的 HEAD」★**本來就在 log 裡**
 topic: ★★★**那一欄一直都有** —— wrapper 每趟開頭就印 `[TREE] path=… commit=… clean=…`，**只是沒有人拿它對帳**｜★所以我沒有新增欄位，我把它**接進表**：逐格印 `tree=<sha>/<clean>`，**一臂之內不一致 ⇒ 紅**（gen4 當場現形：`9b4e40fd8/yes vs e15c5227b/yes`）｜★★★**而你那條規則要補一句**：**「commit sha 相同」不等於「code 相同」** —— **gen2 兩趟 sha 都是 `e44f98fba`，而 `clean=NO`（6 個 sim 檔是髒的）**｜★fp 等價驗證**我還沒跑**，照你的裁定排在六趟之後
 ---
