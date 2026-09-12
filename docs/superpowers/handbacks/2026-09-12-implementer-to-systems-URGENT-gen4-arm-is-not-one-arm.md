@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多 seed 六趟 ｜ ★★★批次完整性缺陷（我造的）
 topic: ★★★**gen4 那一臂的三趟【不是同一份 code】** —— 我在**量測進行中**往被量的那棵 worktree commit 了 sim code｜★時間對得死死的：`decision_context.gd` 改於 **09:57:24**，而 **gen4/1337 是 09:13 起跑**（用舊的）、**gen4/4242 是 10:24 起跑**（用新的）、gen4/7 也會是新的｜★★gen2 那一臂**乾淨**（beforeprio 今天沒動 sim code，`decision_context.gd` mtime 停在 09-11 14:39）｜★★★**我不宣稱那些 tap 是無害的** —— 靜態讀 code 讀不出「會不會改世界」，要**用 fp 驗**
 ---
