@@ -1,0 +1,71 @@
+{
+  "token": "gen4-30day-checkup",
+  "slice": "世代4 30日全面體檢——答應用戶的新世界第一份報告",
+  "date": "2026-09-12",
+  "measured_at_head": "跑在c6c9704ac(攻擊食慾merge,世代4起點)之後——三支床分別測於5c93e130d/8dc75706f附近，皆晚於c6c9704ac，同一世代",
+  "touches": [],
+  "world": "warring_states / seed=1337 / 30天(economic_window實際跑到day29/30=96.7%，其餘兩支跑滿)",
+  "beds": [
+    "scripts/debug/herald_journey_bed.gd（既有acceptance床，implementer所有——涵蓋①戰爭②信使）",
+    "scripts/debug/economic_window_4cell_bed.gd（既有床——市場窗）",
+    "scripts/debug/gen4_checkup_registry_ledger_bed.gd（本卷新寫——③登記錨④守恆+specimen）"
+  ],
+  "raw_logs": [
+    "docs/measurements/2026-09-12-gen4-herald-journey.txt",
+    "docs/measurements/2026-09-12-gen4-economic-window.txt",
+    "docs/measurements/2026-09-12-gen4-checkup-registry-ledger.txt"
+  ],
+  "specimen_trace": "docs/measurements/2026-09-12-gen4-checkup.specimen.jsonl（全隊取樣，供QA故事稽核）",
+
+  "answer": {
+    "verdict": "★★★世代4整體：信使機制穩定(送達率跟舊基線分毫不差)，帳結構守恆PASS，但戰爭依然幾乎打不起來(只是原因換了)，登記錨機制剛起步(4.2%)，市場農隊零賣出——四格裡有一格(信使)可視為綠燈，一格(帳)綠燈，兩格(戰爭/登記)是「還在長」非恆0，市場窗額外揭露一個新問題(農隊零賣出)。",
+
+    "①戰爭打不打得起來": {
+      "攻擊util零/非零": "零6414次／非零5426次（非零佔45.8%）——比舊世代(97.37%全關)大幅改善",
+      "但真正贏的次數": "秤選了攻擊僅8次／全部6622次rank(0.12%)——攻擊可選而秤選別的3553次(53.7%)、攻擊根本不可選3061次(46.2%)",
+      "迎戰278段對帳OK": "沒目標26／沒碰到面127／碰到但沒開打123／碰到且開打僅2",
+      "verdict": "★戰爭依然幾乎打不起來，但根因已轉移：舊世代是【根本不進候選】(97.37%全關)，世代4是【進了候選但幾乎總是輸給別的選項】(0.12%贏)+【碰面後極少真的開打】(2/125碰面段=1.6%)"
+    },
+
+    "②信使送達(對照世代4既有基線57.1%/68.4%)": {
+      "closed_far(≥3格,完整結束)": "母體7 送達4 送達率57.1%——與已知基線逐字相同",
+      "closed_mid(1-2格,完整結束)": "母體19 送達13 送達率68.4%——與已知基線逐字相同",
+      "closed_near(0格,完整結束)": "母體5 送達4 送達率80.0%",
+      "open_mid/open_near(窗末未完)": "另計，不進closed分母",
+      "verdict": "★★★信使機制穩定——本輪讀數與既有基線分毫不差，可視為綠燈，機制沒有退化"
+    },
+
+    "③佃農有沒有家(登記錨，新API：work_outpost/is_registered_resident)": {
+      "day1": "0/63(0.0%)", "day10": "0/88(0.0%)", "day20": "1/110(0.9%)", "day30": "5/120(4.2%)",
+      "累計auto_register_stub觸發": "5次（★b上線後應趨於0，本輪仍在初期）",
+      "登記了但人不在(累計事件次數非隊數)": "496次——已登記的5支隊在30天窗內合計496次被記錄成不在登記位置",
+      "verdict": "★母體持續成長非恆0(同人口卷已知模式)，但仍很小(day30僅4.2%)——登記錨機制剛起步；已登記的隊仍大量時間不在崗，這是【新機制上線後】的第一手讀數，與舊謂詞(TAG_PRODUCE+own_outpost_tile)量到的數字不能直接比較(不同謂詞/不同版本世界)"
+    },
+
+    "④帳能不能對上": {
+      "InvariantAudit.check": "開場PASS(空)、收場(day30)PASS(空)——結構性不變量(population/faction/subteam/roster/anon_cohort/captive_cohort/no_dangling_team_id)全程守恆",
+      "CoinAudit.total": "開場42624.00 → 收場42624.00，變化=-0.00（★觀察量非恆等式，30天內幾乎沒有淨變化，可能反映流動性偏低，與市場窗發現的農隊零賣出/高拒買率方向一致）",
+      "verdict": "★結構性帳本乾淨(綠燈)；coin總量近乎不動這件事本身待進一步解讀(不是壞消息也不是好消息，只是觀察量)"
+    },
+
+    "市場窗(economic_window_4cell_bed，額外揭露)": {
+      "成交量": "嘗試3019／成交799／market撮合128／零撮合2027",
+      "★農隊收入": "★★★entry筆數=0——13支PRODUCE隊母體，30天窗內整輪零賣出entry(真0，非資料缺陷)",
+      "拒買率": "路過潛在買方拒買material 39.4%整體、food的mine_zero高達99.3%(幾乎沒人對food出得起自己估的價)",
+      "verdict": "★★★新發現：農隊(13支)30天內完全沒有賣出過任何東西——這是本輪體檢額外揭露的問題，值得標出給下一輪追查"
+    }
+  },
+
+  "honest_limits": [
+    "★①本卷只回答『現在讀數是什麼』，不下WHAT/HOW層修法結論",
+    "★★②economic_window實際只跑到day29/30(96.7%)，非完整30天，如實聲明",
+    "★★★③登記錨(work_outpost)與舊謂詞(TAG_PRODUCE+own_outpost_tile，見resident-identity-vs-position/homeless-producer卷)是不同機制版本(登記制上線前後)，數字不可跨版本直接比較——本卷只報世代4讀數，舊卷只作對照欄並標世代(照票面世代紀律)",
+    "★④CoinAudit.total前後幾乎不變(42624.00→42624.00)未深究成因，可能是巧合抵銷也可能反映流動性問題，本卷只如實記錄",
+    "★⑤農隊零賣出是本卷意外發現，非派卷原本要的四格之一——如實標出但未深究根因，留給下一票",
+    "★⑥單seed(1337)，同前幾卷限制"
+  ],
+
+  "next_station": "to:qa 故事稽核specimen(docs/measurements/2026-09-12-gen4-checkup.specimen.jsonl) → qa判決 → blueprint彙整用戶報告",
+
+  "supersedes": []
+}
