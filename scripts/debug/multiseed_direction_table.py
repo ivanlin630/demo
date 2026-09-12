@@ -27,6 +27,12 @@ SCRATCH = os.environ.get("SCRATCH") or os.path.join(
 #   「上一張票用的是 0.5」—— **不准回頭改這一張的判準**。
 REL_RANGE_MAX = 0.5
 
+# ★★★【宣告式母體】：預期跑哪幾個 seed 是**寫在這裡**的，不是從檔案推出來的。
+#   ★若母體靠【發現】，那麼「第三個 seed 從頭到尾沒跑過」會被印成
+#   「2 臂 x 2 seed，全部完成」—— **一張看起來很完整的半張表**。
+#   ★★驅動器的 seed 清單：1337, 4242, 7（可用 EXPECT_SEEDS 覆蓋）。
+EXPECT_SEEDS_DEFAULT = "1337,4242,7"   # ★不在 import 期固定：main() 每次重讀（同一個檔已經犯過一次：SCRATCH）
+
 METRICS = [("開打", r"開打 conq\.combat_entered\s*=\s*(\d+)"),
            ("結束", r"結束 combat\.ended_n\s*=\s*(\d+)"),
            ("滅團", r"滅團 合計\s*=\s*(\d+)"),
@@ -48,6 +54,7 @@ def read_run(path):
 
 def main():
     runs = {}
+    expect = [x for x in (os.environ.get("EXPECT_SEEDS") or EXPECT_SEEDS_DEFAULT).split(",") if x]
     scratch = os.environ.get("SCRATCH") or SCRATCH   # ★每次呼叫重讀：否則對照會掃到真的 scratchpad
     for p in sorted(glob.glob(os.path.join(scratch, "cm_gen*_s*.log"))):
         m = re.search(r"cm_(gen\d)_s(\d+)\.log$", p.replace("\\", "/"))
@@ -57,7 +64,11 @@ def main():
         runs[(m.group(1), m.group(2))] = r        # None = 未完成
 
     arms = sorted({k[0] for k in runs})
-    seeds = sorted({k[1] for k in runs})
+    seeds = sorted(set(expect) | {k[1] for k in runs})
+    missing = [x for x in expect if not any(k[1] == x for k in runs)]
+    if missing:
+        print("★★★宣告的 seed 裡有 %d 個**連 log 都沒有**：%s" % (len(missing), ", ".join(missing)))
+        print("   ⇒ ★這不是「跑了沒變化」，是【根本還沒跑】—— 兩者在半張表上長得一模一樣")
     print("★母體：%d 臂 x %d seed = %d 格；★★而【實際完成】的格數才是分母" % (
         len(arms), len(seeds), len(arms) * len(seeds)))
     done = sum(1 for v in runs.values() if v)
@@ -147,6 +158,7 @@ def _run_case(name, rows, expect_key):
         for (arm, seed), v in rows.items():
             _fixture(tmp, arm, seed, v)
         os.environ["SCRATCH"] = tmp
+        os.environ["EXPECT_SEEDS"] = "1,2,3"   # ★自檢的輸入要自己凍結，不從外面拿
         buf = _io.StringIO()
         with contextlib.redirect_stdout(buf):
             main()
