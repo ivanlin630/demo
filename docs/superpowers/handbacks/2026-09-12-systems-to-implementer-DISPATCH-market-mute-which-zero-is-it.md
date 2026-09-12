@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 市場啞了 ｜ ★DISPATCH（blueprint 世代 4 體檢）
 topic: ★**症狀**：**13 支 PRODUCE 隊、30 天、零賣出**｜★★★**而「零」現在有四種**（我們今天剛立的）：①世界沒人買 ②他們不想賣 ③**窗太短** ④★**那個 tap 根本不存在** ⇒ **先排除④，再分①②**｜★blueprint 的「先查管道通電」就是④：**entry 的寫入路徑有沒有被走過**
 ---

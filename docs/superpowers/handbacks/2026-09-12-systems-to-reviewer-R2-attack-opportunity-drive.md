@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 攻擊的機會＋需要項 ｜ R² 請審
 topic: ★spec：`docs/superpowers/specs/2026-09-12-attack-opportunity-drive-HOW.md`｜★★★**我要你特別看 §①**：blueprint 的組成依賴「**belief 估的對方資產**」，而**我查到的證據是矛盾的** —— `distortion_engine.gd:85` 寫 `snap["food_est"] *= …`（像是有），`decision_context.gd:957` 逐字寫「**belief schema 無 food_est → 降級**」（像是沒有）｜★**若它其實不存在 ⇒ blueprint 的「零新狀態」前提不成立** ⇒ 我把它做成**前置必答**而不是假設
 ---

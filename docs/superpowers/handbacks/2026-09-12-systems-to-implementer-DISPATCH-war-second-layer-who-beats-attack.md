@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 戰爭第二層 ｜ ★DISPATCH（blueprint 世代 4 體檢）
 topic: ★**症狀**：攻擊**進候選 45.8%**，而 **argmax 只贏 0.12%**；碰面 **123 段只有 2 段開打**｜★★★**所以問題不再是「攻擊有沒有分數」，是【它輸給誰、差多少】** ⇒ **dump 不能只印攻擊的 util，要印【前三名 ＋ 贏家】**｜★★而 genuine／mechanical 的分法我給一個**便宜的判準**：**攻擊的名次分布** —— 常在第 2、3 名且差距小 ＝ **邊際**（genuine）；**永遠墊底** ＝ **有東西在壓它**（mechanical）
 ---

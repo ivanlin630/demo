@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 slice: 世代4 30日全面體檢卷
 topic: ★派卷:攻擊食慾已 merge(c6c9704ac)=世代4開張,排卷條件到——世代4 上跑 30 日全面體檢(市場窗+故事稽核),這是答應用戶的【新世界第一份報告】;排程你自裁(implementer 手上另有多 seed 票,機器與用戶共用照舊讓路)
 ---
