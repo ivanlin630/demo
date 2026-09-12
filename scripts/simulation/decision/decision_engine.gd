@@ -489,6 +489,33 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	#   ⇒ ★這裡記【全部 rank 的贏家分佈】（母體 ＝ 每一次 rank，不分場合）
 	#   ⇒ ★★而面對面那一桶已經另外有 `faceoff.winner.*` ⇒ **兩個母體並排就是對照**
 	#     （★★★同一個量、兩個母體 —— 不是兩個量）。
+	# ★★★第二層：**攻擊輸給誰、差多少**（systems 2026-09-12）——
+	#   ★症狀：進候選 45.8%、argmax 只贏 0.12% ⇒ 問題不再是「有沒有分數」。
+	#   ★★而 genuine／mechanical 的便宜判準是**名次分布**：
+	#     常在第 2、3 名且差距小 ＝ **邊際**（genuine）／**永遠墊底** ＝ **有東西在壓它**（mechanical）。
+	if Probe.enabled and not scored.is_empty():
+		var _ai: int = -1
+		for _i2 in range(scored.size()):
+			if String(scored[_i2]["opt"]) == "攻擊":
+				_ai = _i2
+				break
+		if _ai >= 0:
+			var _au: float = float(scored[_ai]["u"])
+			var _wu: float = float(scored[0]["u"])
+			var _rank_b: String = "r1" if _ai == 0 else ("r2" if _ai == 1 else ("r3" if _ai == 2 else 				("r4_10" if _ai < 10 else "r11plus")))
+			Probe.bump("attack.rank." + _rank_b)
+			Probe.bump("attack.rank.of%d" % scored.size())   # ★名次要配母體：第 5 名在 6 個候選裡＝墊底
+			if _ai > 0:
+				Probe.bump("attack.lost_to." + String(scored[0]["opt"]))
+				var _gap: float = _wu - _au
+				var _gb: String = "lt10pct" if _wu > 0.0001 and _gap / _wu < 0.1 else 					("lt50pct" if _wu > 0.0001 and _gap / _wu < 0.5 else "ge50pct")
+				Probe.bump("attack.gap." + _gb)
+			var _top3: Array = []
+			for _i3 in range(mini(3, scored.size())):
+				_top3.append("%s=%.3f" % [String(scored[_i3]["opt"]), float(scored[_i3]["u"])])
+			Probe.bump_sample("attack.rank_row", {"rank": _ai + 1, "of": scored.size(),
+				"attack_u": snappedf(_au, 0.001), "winner": String(scored[0]["opt"]),
+				"winner_u": snappedf(_wu, 0.001), "top3": _top3}, 200)
 	if Probe.enabled and not scored.is_empty():
 		Probe.bump("rank.winner_all." + String(scored[0]["opt"]))
 		Probe.bump("rank.winner_all.__total")

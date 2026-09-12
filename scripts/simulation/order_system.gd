@@ -87,6 +87,10 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 	Probe.bump("order.placed")
 	Probe.bump("order.placed.%s_%s" % [kind, res])
 	Probe.bump("trade.post_" + kind)   # 漏斗站1：張貼 buy/sell 分流（純觀測）
+	# ★★★「零賣出」是哪一種 0（systems 2026-09-12）：★**第一站的計數比最後一站重要**
+	#   ——「沒有人賣」與「賣不掉」在成交數 ＝ 0 上長得一樣，而**前者是動機、後者是撮合**。
+	#   ⇒ 逐隊鍵：這一支隊**到底有沒有想賣過**（★全域計數答不了「是哪 13 支」）。
+	Probe.bump("mkt.t%d.post_%s" % [team.team_id, kind])
 	return oid
 
 # WS-2b：把訂單登錄到發起隊最近自家市集 outpost tile 的看板（可見性鏡像）。
@@ -131,13 +135,16 @@ func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: Strin
 			escrowed = true
 			if Probe.enabled:
 				Probe.bump("mkt.escrow.post")
+				Probe.bump("mkt.t%d.escrow_post" % team.team_id)
 				Probe.add_amount("mkt.escrow.qty", moved)
 			# ★★★而【押不到整單】要被看見：`remove()` 有 clampf 保底 ⇒ 存量不足時只押到有的部分
 			#   ⇒ 若不記，「押了 5 件」與「想押 10 件只押到 5」印出來一樣。
 			if moved < float(qty) and Probe.enabled:
 				Probe.bump("mkt.escrow.partial")
+				Probe.bump("mkt.t%d.escrow_post" % team.team_id)
 				Probe.add_amount("mkt.escrow.short", float(qty) - moved)
 		elif Probe.enabled:
+			Probe.bump("mkt.t%d.escrow_none" % team.team_id)
 			Probe.bump("mkt.escrow.nothing")   # ★存量 0 ⇒ 一件都押不到（★單仍掛，而板上沒貨）
 	tile.market_orders.append({
 		"order_id": oid, "kind": kind, "res": res, "escrowed": escrowed,

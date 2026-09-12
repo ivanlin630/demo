@@ -879,6 +879,7 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 		#   ★兩個成交 fire 點都要掛（巧遇 ＋ 市集到場），否則母體漏一半。
 		if Probe.enabled:
 			Probe.bump("task.done.t%d.%s" % [a.team_id, TeamData.TASK_TRADE])
+			Probe.bump("mkt.t%d.deal" % a.team_id)   # ★逐隊成交（「賣不掉」那一端）
 			Probe.bump("task.done.t%d.%s" % [b.team_id, TeamData.TASK_TRADE])
 		# 漏斗站6探針：成交主體分流（R²#7：ARCHETYPE_TRADE 分流，TAG_MERCHANT 全0）
 		Probe.bump("trade.deal")
@@ -968,6 +969,7 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 		print("[Market@%s] Team%d ↔ outpost owner Team%d 成交" % [str(tile.tile_pos), visitor.team_id, owner_id])
 		if Probe.enabled:
 			Probe.bump("task.done.t%d.%s" % [visitor.team_id, TeamData.TASK_TRADE])
+			Probe.bump("mkt.t%d.deal" % visitor.team_id)   # ★逐隊成交（「賣不掉」那一端）
 		Probe.bump("trade.deal")
 		Probe.bump("trade.deal_market")
 		if visitor.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
