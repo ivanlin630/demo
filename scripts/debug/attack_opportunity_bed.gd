@@ -1,4 +1,5 @@
 extends SceneTree
+
 # @bed-kind: acceptance
 # slice: 攻擊的【機會＋需要】項（HOW spec 2026-09-12-attack-opportunity-drive）
 #
@@ -9,6 +10,9 @@ extends SceneTree
 # env：AO_TICKS（預設 4320 ＝ 3 天；★機器吃緊時縮窗，數字照樣可判方向）／AO_SEED（1337）
 
 var _fails: int = 0
+
+# ★校準曲線的母體地板：低於它一律印【不可判】——★理由是 systems 那句「不要用 2 筆畫一條曲線」。
+const CALIB_MIN_N: int = 20
 
 func _initialize() -> void:
 	_run(); quit(0 if _fails == 0 else 1)
@@ -160,6 +164,16 @@ func _run() -> void:
 			_d[String(k).replace("appetite.dir.", "")] = int(Probe.counts[k])
 	print("   ②雜訊（同向率，★粗判：以「是否 > 1.0」二分；精確版要離線算）：%s" % str(_d))
 	print("      ★ET/et ＝ 同向｜Et/eT ＝ 反向；★★同向率低 ⇒ 秤在讀噪音 ⇒ 方向性是假的")
+	# ── ★②-a 贏率估 vs 實戰（★systems 指定：先報母體，母體不足就明說不可判）──
+	var _fought: int = int(Probe.counts.get("combat.ended_n", 0))
+	print("   ★②-a 贏率校準的母體＝本窗**真的打完的仗** %d 場" % _fought)
+	if _fought < CALIB_MIN_N:
+		print("      ⇒ ★**不可判**（母體 < %d）★★而『不可判』與『贏率估得不准』是兩個結論" % CALIB_MIN_N)
+		print("      ⇒ ★★★逐場配對（開打時的 `attack_win_odds` ↔ 實際勝負）**本卷刻意沒接**：")
+		print("         接了也只能拿 %d 筆畫校準曲線，而那條曲線會比沒有更誤導人。" % _fought)
+		print("         母體真的上到 %d 場那天，配對接線才是下一張票。" % CALIB_MIN_N)
+	else:
+		print("      ⇒ ★母體夠了（≥ %d）⇒ **逐場配對接線是下一張票**，本卷只報母體" % CALIB_MIN_N)
 	print("   ★★★而【風險項】在本實作裡**沒有獨立欄位**（風險折在贏率裡）")
 	print("      ⇒ ★所以「風險恆大把胃口壓平」這一格 **不適用**，而不是 0 —— 我不編一個欄位來填表")
 	print("★fp = %s" % StateFingerprint.compute(st))
