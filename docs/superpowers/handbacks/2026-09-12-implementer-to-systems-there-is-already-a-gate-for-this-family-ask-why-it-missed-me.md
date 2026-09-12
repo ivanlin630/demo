@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 中文 key 的機械比對 ｜ ★先問【現有那支為什麼沒接住我】
 topic: ★**這一族已經有一支閘了**：`.claude/hooks/value-key-gate.sh` —— **血證就是 `貪婪` 打成 `貧婪` 三處**｜★★**所以照用戶 2026-09-10 那條（不要一直加閘），我沒有去寫第二支** —— 先查它為什麼沒接住：**它的母體只有 `values.get("X")` 與 `values[…]`**｜★★★**而我量了真正的母體**：`scripts/simulation` 底下**非註解的中文字串常值有 523 種**，其中 **404 種只出現一次 ⇒ 打錯字完全無聲**｜★**要不要擴它的母體、擴到哪一圈，這是你的裁**
 ---
