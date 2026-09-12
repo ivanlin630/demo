@@ -15,9 +15,26 @@ import io, os, re, sys, glob
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-SCRATCH = os.environ.get("SCRATCH") or os.path.join(
-    os.environ.get("TEMP", "."), "claude", "A--GDS-demo",
-    "f32c580a-c82d-42ec-8bd1-74440a31cd93", "scratchpad")
+# ★★★【結構解】這一檔**不再有 import 期就成形的設定常數**。
+#   ★理由：同一個檔已經犯過兩次（SCRATCH、EXPECT_SEEDS）——
+#   ★★**第二次就不是失誤，是這個檔的結構在邀請它**（systems 2026-09-12）。
+#   ⇒ 下面兩支**每次呼叫才解析**；想拿設定就只能經過它們。
+#   ⇒ ★★★而它有一個會紅的證明：`--selftest` 的④ 格在 **import 之後**才改環境，
+#     若哪天有人又把它寫回模組層常數，那一格會紅。
+
+def _scratch():
+    return os.environ.get("SCRATCH") or os.path.join(
+        os.environ.get("TEMP", "."), "claude", "A--GDS-demo",
+        "f32c580a-c82d-42ec-8bd1-74440a31cd93", "scratchpad")
+
+
+def _expect_seeds():
+    # ★驅動器真實的 seed 清單（讀 Win32_Process 命令列查證，不是猜）
+    return [x for x in (os.environ.get("EXPECT_SEEDS") or "1337,4242,7").split(",") if x]
+
+
+def _expect_arms():
+    return [x for x in (os.environ.get("EXPECT_ARMS") or "gen2,gen4").split(",") if x]
 
 # ★幅度地板（systems 裁 2026-09-12）：**相對極差 ＝（最大幅度 − 最小幅度）／中位幅度**
 # ★★不用倍數比（max/min）：它對小數字過度敏感 —— −80%% vs −8%% 是 10 倍，
@@ -31,7 +48,6 @@ REL_RANGE_MAX = 0.5
 #   ★若母體靠【發現】，那麼「第三個 seed 從頭到尾沒跑過」會被印成
 #   「2 臂 x 2 seed，全部完成」—— **一張看起來很完整的半張表**。
 #   ★★驅動器的 seed 清單：1337, 4242, 7（可用 EXPECT_SEEDS 覆蓋）。
-EXPECT_SEEDS_DEFAULT = "1337,4242,7"   # ★不在 import 期固定：main() 每次重讀（同一個檔已經犯過一次：SCRATCH）
 
 METRICS = [("開打", r"開打 conq\.combat_entered\s*=\s*(\d+)"),
            ("結束", r"結束 combat\.ended_n\s*=\s*(\d+)"),
@@ -54,8 +70,9 @@ def read_run(path):
 
 def main():
     runs = {}
-    expect = [x for x in (os.environ.get("EXPECT_SEEDS") or EXPECT_SEEDS_DEFAULT).split(",") if x]
-    scratch = os.environ.get("SCRATCH") or SCRATCH   # ★每次呼叫重讀：否則對照會掃到真的 scratchpad
+    expect = _expect_seeds()
+    expect_arms = _expect_arms()
+    scratch = _scratch()
     for p in sorted(glob.glob(os.path.join(scratch, "cm_gen*_s*.log"))):
         m = re.search(r"cm_(gen\d)_s(\d+)\.log$", p.replace("\\", "/"))
         if not m:
@@ -63,12 +80,19 @@ def main():
         r = read_run(p)
         runs[(m.group(1), m.group(2))] = r        # None = 未完成
 
-    arms = sorted({k[0] for k in runs})
+    arms = sorted(set(expect_arms) | {k[0] for k in runs})
     seeds = sorted(set(expect) | {k[1] for k in runs})
-    missing = [x for x in expect if not any(k[1] == x for k in runs)]
-    if missing:
-        print("★★★宣告的 seed 裡有 %d 個**連 log 都沒有**：%s" % (len(missing), ", ".join(missing)))
+    # ★★★【宣告式母體】：掃到的少於宣告的 ⇒ **紅**（systems 要求成硬的）。
+    #   ★發現式母體會把「沒發生」變成「不存在」，而**不存在的東西不會出現在表上**。
+    absent = [(a, sd) for a in expect_arms for sd in expect if (a, sd) not in runs]
+    unfinished = [k for k, v in runs.items() if not v]
+    red = bool(absent) or bool(unfinished)
+    if absent:
+        print("★★★【紅】宣告 %d 格，而其中 %d 格**連 log 都沒有**：%s" % (
+            len(expect_arms) * len(expect), len(absent),
+            ", ".join("%s/%s" % c for c in absent)))
         print("   ⇒ ★這不是「跑了沒變化」，是【根本還沒跑】—— 兩者在半張表上長得一模一樣")
+        print("   ⇒ ★★而缺席的那一格不會自己跳出來，所以沒有人會發現它缺席")
     print("★母體：%d 臂 x %d seed = %d 格；★★而【實際完成】的格數才是分母" % (
         len(arms), len(seeds), len(arms) * len(seeds)))
     done = sum(1 for v in runs.values() if v)
@@ -82,7 +106,7 @@ def main():
 
     if len(arms) != 2:
         print("★臂數 != 2 ⇒ 方向表不可判（它的定義就是兩臂相比）")
-        return
+        return 1
     a, b = arms
     print("")
     print("★★★方向表（%s → %s；★只印符號：↑ / ↓ / ＝ / 不可判）" % (a, b))
@@ -120,6 +144,10 @@ def main():
     print("")
     print("★★而「同向」只說【方向】在這幾個 seed 上穩，**不說原因** ——")
     print("   兩臂之間差的是【一整代 code】，不是一個開關 ⇒ 禁止寫單因歸因句。")
+    if red:
+        print("★★★【紅】宣告的格子沒到齊（缺 %d 格／未完成 %d 格）⇒ 這張表**不是結果**。" % (
+            len(absent), len(unfinished)))
+    return 1 if red else 0
 
 
 # ────────────────────────────────────────────────────────────────────────
@@ -159,11 +187,37 @@ def _run_case(name, rows, expect_key):
             _fixture(tmp, arm, seed, v)
         os.environ["SCRATCH"] = tmp
         os.environ["EXPECT_SEEDS"] = "1,2,3"   # ★自檢的輸入要自己凍結，不從外面拿
+        os.environ["EXPECT_ARMS"] = "gen2,gen4"
         buf = _io.StringIO()
         with contextlib.redirect_stdout(buf):
-            main()
+            rc = main()   # ★對照裡只能呼叫，不能 sys.exit（否則第一格就結束整個程序而 rc 還是 0）
         got = _verdict_of(buf.getvalue())
         return (expect_key in got), got
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def _case_post_import_env():
+    """★★★結構解的【會紅的證明】（systems 2026-09-12 要求）：
+    在 **import 之後** 才把宣告改成四個 seed，而磁碟上只有三個。
+    ★若哪天有人又把設定寫回模組層常數，這一格會紅（改不動 ⇒ 看不到第四個）。
+    ★★同時也是【宣告式母體】的對照：缺格必須具名、必須紅（回傳碼 1）。
+    """
+    import tempfile, shutil, io as _io, contextlib
+    tmp = tempfile.mkdtemp(prefix="ms_pc_")
+    try:
+        for arm, v in (("gen2", 100), ("gen4", 150)):
+            for sd in ("1", "2", "3"):
+                _fixture(tmp, arm, sd, v)
+        os.environ["SCRATCH"] = tmp
+        os.environ["EXPECT_ARMS"] = "gen2,gen4"
+        os.environ["EXPECT_SEEDS"] = "1,2,3,4"      # ★第四個磁碟上沒有
+        buf = _io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = main()
+        out = buf.getvalue()
+        named = ("gen2/4" in out) and ("gen4/4" in out)
+        return (rc == 1 and named), ("rc=%d｜有具名缺格=%s" % (rc, named))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -192,18 +246,33 @@ def selftest():
                             ("gen2", "3"): 100, ("gen4", "3"): 10}, "幅度不可引用"),
     ]
     bad = 0
+    ran = 0
     print("★★★逐結論陽性對照（每一種結論都要能亮一次）  判準：相對極差 ≥ %.2f ⇒ 幅度不可引用" % REL_RANGE_MAX)
     for name, rows, expect in cases:
         ok, got = _run_case(name, rows, expect)
         print("   %-14s %s  實得：%s" % (name, "[OK]" if ok else "[FAIL]", got))
+        ran += 1
         if not ok:
             bad += 1
 
-    print("=== SELFTEST === 對照 %d 組｜FAILS=%d" % (len(cases), bad))
+    ok5, got5 = _case_post_import_env()
+    ran += 1
+    if not ok5:
+        bad += 1
+    print("   %-14s %s  實得：%s" % ("⑤ import 後改宣告", "[OK]" if ok5 else "[FAIL]", got5))
+
+    # ★★★【對照本身的母體】：跑過的格數必須等於宣告的格數。
+    #   ★血證：有一次對照因為裡面誤寫 `sys.exit` 而**第一格就結束整個程序**，
+    #   ★★而它印了標題、一格也沒跑、**回傳碼還是 0** ⇒ 靜默 no-op 被讀成全綠。
+    declared = len(cases) + 1
+    if ran != declared:
+        print("=== SELFTEST === ★★★【紅】宣告 %d 組，而實際跑了 %d 組 ⇒ 對照自己沒跑完" % (declared, ran))
+        return 1
+    print("=== SELFTEST === 對照 %d 組（宣告 %d，對得上）｜FAILS=%d" % (ran, declared, bad))
     return 1 if bad else 0
 
 
 if __name__ == "__main__":
     if "--selftest" in sys.argv:
         sys.exit(selftest())
-    main()
+    sys.exit(main())
