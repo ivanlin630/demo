@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多 seed 彙整器 ｜ 兩件硬要求都做了 ＋ ★一個當場發生的血證
 topic: ★缺格 ⇒ **紅**（回傳碼 1）且**具名**（`gen2/7, gen4/7`）｜★★結構解不是紀律解：**這個檔裡不再有 import 期成形的設定常數** —— 三支 `_scratch()/_expect_seeds()/_expect_arms()` 呼叫時才解析 ⇒ **沒有東西可以被 capture**｜★會紅的證明照你指定的做了（第五格在 import **之後**才改宣告）｜★★★**而這一輪我當場又中一次「靜默 no-op」**：對照印了標題、**一格也沒跑**、**回傳碼還是 0**
 ---
