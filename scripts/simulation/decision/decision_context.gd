@@ -893,6 +893,27 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.attack_loot_est = FactionAISystem._belief_richness(_abel)   # ★tier 分層天然在它裡面（R² §⑤）
 		c.attack_belief_tier = int(_abel.get("tier", -1))             # ★驗收⑦：分桶看「知道得多的挑得更準」
 		c.attack_win_odds = clampf(c.self_armed_ratio / DecisionTerms.VIABLE_ARMED_RATIO, 0.0, 1.0)
+		# ★★★輸入營養稽核（HOW 2026-09-12：**秤誠實 ≠ 輸入有營養**）——
+		#   ★三種形狀分開量：①系統性低估（估/真 比值）②雜訊（同向率）③值域壓縮（估的離散度）
+		#   ★★★而這一格**讀了真值** ⇒ **它是【分析欄】，只進 Probe、不進 ctx、不回頭餵秤**
+		#     （★感知鐵律：隊伍不得知道「他其實很有錢」；觀察者可以）。
+		if Probe.enabled:
+			var _tgt_t: TeamData = state.teams.get(c.attack_target_id)
+			if _tgt_t != null:
+				var _true_rich: float = (float(_tgt_t.resources.get("coin", 0))
+					+ float(_tgt_t.resources.get("food", 0))
+					+ float(_tgt_t.resources.get("material", 0))) / 100.0
+				Probe.bump_sample("appetite.input", {"est": snappedf(c.attack_loot_est, 0.001),
+					"true": snappedf(_true_rich, 0.001), "tier": c.attack_belief_tier,
+					"odds": snappedf(c.attack_win_odds, 0.001)}, 400)
+				Probe.add_amount("appetite.est_sum", c.attack_loot_est)
+				Probe.add_amount("appetite.true_sum", _true_rich)
+				Probe.bump("appetite.n")
+				# ★同向率（②雜訊）：以各自的中位替代量（★用「是否高於自己的長期均值」當粗判——
+				#   ★★而精確版要離線算，交件會標這是【粗判】）
+				var _hi_est: bool = c.attack_loot_est > 1.0
+				var _hi_true: bool = _true_rich > 1.0
+				Probe.bump("appetite.dir.%s%s" % ["E" if _hi_est else "e", "T" if _hi_true else "t"])
 	# ★★★成對反事實【不用開關】（spec 驗收⑥）：舊三門的判準所需欄位**全部還在 ctx 裡**
 	#   ⇒ ★同一次 gather 同時算【新門】與【舊門】⇒ 一趟就給出兩個率，
 	#   ★★而且是**逐字同母體**（不必跑兩趟、不必留一個會腐爛的旗標）。

@@ -125,6 +125,43 @@ func _run() -> void:
 	print("   ★★注意母體不同：這一格分類的是【機會項自己的零】，")
 	print("     而『零 final』是【五項相加之後】的零 —— ★★★兩個數不可互相相減")
 	print("   ★這一格是【觀察】不是【目標】——★★不准為了讓它好看而調 tier 權重（禁 crank）")
+	# ── ★★★輸入營養稽核（三種形狀分開；★這一段全部是【分析欄】：讀了真值，不回頭餵秤）──
+	var rows: Array = Probe.samples.get("appetite.input", [])
+	print("")
+	print("★★★輸入有沒有營養（★三種形狀的處置不同 ⇒ 分開量）")
+	print("   母體 %d 次（樣本上限 400，實收 %d）" % [int(Probe.counts.get("appetite.n", 0)), rows.size()])
+	if rows.is_empty():
+		print("   ★母體 0 ⇒ **不可判**（★★而那與「輸入沒營養」是兩個結論）")
+	else:
+		var ests: Array = []
+		var trues: Array = []
+		var ratios: Array = []
+		for r in rows:
+			ests.append(float(r["est"]))
+			trues.append(float(r["true"]))
+			if float(r["true"]) > 0.001:
+				ratios.append(float(r["est"]) / float(r["true"]))
+		ests.sort(); trues.sort()
+		var _sd: float = 0.0
+		var _m: float = 0.0
+		for v in ests: _m += float(v)
+		_m /= float(ests.size())
+		for v in ests: _sd += (float(v) - _m) * (float(v) - _m)
+		_sd = sqrt(_sd / float(ests.size()))
+		print("   ①系統性低估：估中位 %.3f｜真值中位 %.3f｜%s" % [
+			ests[ests.size() / 2], trues[trues.size() / 2],
+			("估／真 中位 %.3f" % [ratios[ratios.size() / 2]] if ratios.size() >= 2 else "★估／真 母體不足 ⇒ 不可判")])
+		print("   ③值域壓縮：估的 mean %.3f｜sd %.3f｜min %.3f｜max %.3f" % [
+			_m, _sd, ests[0], ests[ests.size() - 1]])
+		print("      ★★『單調但很淺』正是這一形狀的症狀（tier2 的 0.000→0.003→0.099）")
+	var _d: Dictionary = {}
+	for k in Probe.counts:
+		if String(k).begins_with("appetite.dir."):
+			_d[String(k).replace("appetite.dir.", "")] = int(Probe.counts[k])
+	print("   ②雜訊（同向率，★粗判：以「是否 > 1.0」二分；精確版要離線算）：%s" % str(_d))
+	print("      ★ET/et ＝ 同向｜Et/eT ＝ 反向；★★同向率低 ⇒ 秤在讀噪音 ⇒ 方向性是假的")
+	print("   ★★★而【風險項】在本實作裡**沒有獨立欄位**（風險折在贏率裡）")
+	print("      ⇒ ★所以「風險恆大把胃口壓平」這一格 **不適用**，而不是 0 —— 我不編一個欄位來填表")
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=%d" % _fails)
 	print("[TEST-SUITE-COMPLETE]")
