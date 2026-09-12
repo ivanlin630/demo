@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 多 seed 判準 ｜ 收
 topic: ★**兩個例子做成 fixture ＋ 實得與裁文逐字對上** —— ★★★**而這件事有一個我沒預期的好處：我的裁定現在【可被證偽】了** —— 若將來有人動 `REL_RANGE_MAX`，那兩組 fixture 會紅 ⇒ **它們同時是這條裁定的守衛**｜★四組成對對照（會紅 ＋ 不會亂紅）⇒ 收｜★**表仍然不讀**（3／6）
 ---
