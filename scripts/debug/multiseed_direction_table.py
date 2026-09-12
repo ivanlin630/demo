@@ -40,7 +40,7 @@ def _expect_arms():
 # ★★不用倍數比（max/min）：它對小數字過度敏感 —— −80%% vs −8%% 是 10 倍，
 #   −8%% vs −0.8%% 也是 10 倍，而前者是「幾乎消失 vs 小幅下降」、後者是「兩個都幾乎沒動」。
 # ★★★0.5 有意思：**不確定性達到效果本身的一半**。
-#   ★預註冊於【六趡到齊之前】；若日後覺得不合適，**下一張票才改**且要寫明
+#   ★預註冊於【六趟到齊之前】；若日後覺得不合適，**下一張票才改**且要寫明
 #   「上一張票用的是 0.5」—— **不准回頭改這一張的判準**。
 REL_RANGE_MAX = 0.5
 
@@ -57,14 +57,26 @@ METRICS = [("開打", r"開打 conq\.combat_entered\s*=\s*(\d+)"),
 
 def read_run(path):
     txt = io.open(path, encoding="utf-8", errors="replace").read()
+    tree = "?"
+    for ln in txt.splitlines():
+        if "[TREE]" in ln:
+            mc = re.search(r"commit=(\w+)", ln)
+            mk = re.search(r"clean=(\S+)", ln)
+            if mc:
+                tree = mc.group(1) + "/" + (mk.group(1) if mk else "?")
+            break
     if "[TEST-SUITE-COMPLETE]" not in txt:
-        return None                      # ★沒有完成標記 = 本輪無結果（不是 0、不是紅）
+        # ★沒有完成標記 = 本輪無結果（不是 0、不是紅）
+        # ★★而【樹的身分】照樣要回：**污染與跑不跑得完無關**
+        return {"tree": tree, "done": False}
     out = {}
     for name, pat in METRICS:
         m = re.search(pat, txt)
         out[name] = int(m.group(1)) if m else None
     m = re.search(r"★fp = ([0-9a-f]+)", txt)
     out["fp"] = m.group(1) if m else "?"
+    out["tree"] = tree
+    out["done"] = True
     return out
 
 
@@ -78,14 +90,14 @@ def main():
         if not m:
             continue
         r = read_run(p)
-        runs[(m.group(1), m.group(2))] = r        # None = 未完成
+        runs[(m.group(1), m.group(2))] = r
 
     arms = sorted(set(expect_arms) | {k[0] for k in runs})
     seeds = sorted(set(expect) | {k[1] for k in runs})
     # ★★★【宣告式母體】：掃到的少於宣告的 ⇒ **紅**（systems 要求成硬的）。
     #   ★發現式母體會把「沒發生」變成「不存在」，而**不存在的東西不會出現在表上**。
     absent = [(a, sd) for a in expect_arms for sd in expect if (a, sd) not in runs]
-    unfinished = [k for k, v in runs.items() if not v]
+    unfinished = [k for k, v in runs.items() if not v["done"]]
     red = bool(absent) or bool(unfinished) or not runs   # ★實跑 0 格也是紅
     if absent:
         print("★★★【紅】宣告 %d 格，而其中 %d 格**連 log 都沒有**：%s" % (
@@ -99,15 +111,26 @@ def main():
         len(runs), "" if runs else "  ★★★【紅】實跑 0 格 ⇒ 這不是「全過」，是【什麼都沒量】"))
     print("★母體：%d 臂 x %d seed = %d 格；★★而【實際完成】的格數才是分母" % (
         len(arms), len(seeds), len(arms) * len(seeds)))
-    done = sum(1 for v in runs.values() if v)
+    done = sum(1 for v in runs.values() if v["done"])
     print("   完成 %d 格／落地 %d 格 %s" % (
         done, len(runs), "" if done == len(arms) * len(seeds)
         else "★★★不足 ⇒ 下面的表【不可下結論】，只是進度"))
     for k in sorted(runs):
         v = runs[k]
-        print("   %s/%s : %s" % (k[0], k[1], "未完成（無結果）" if not v else
-                                 " ".join("%s=%s" % (n, v[n]) for n, _ in METRICS) + " fp=" + v["fp"][:8]))
+        print("   %s/%s : %s" % (k[0], k[1], ("未完成（無結果） tree=" + v["tree"]) if not v["done"] else
+                                 " ".join("%s=%s" % (n, v[n]) for n, _ in METRICS)
+                                 + " fp=" + v["fp"][:8] + " tree=" + v["tree"]))
 
+    # ★★★一臂之内【樹的身分】必須一致，否則這三趟**不是同一臂**。
+    #   ★血證 2026-09-12：我在量測進行中往被量的 worktree commit 了 sim code，
+    #   ★★而**兩趟都跑完、都有 fp、都印 DONE** —— 症狀是零。
+    for a in arms:
+        ts = sorted({v["tree"] for k, v in runs.items() if k[0] == a})
+        if len(ts) > 1:
+            red = True
+            print("★★★【紅】臂 %s 的各趟**不是同一棵樹**：%s" % (a, " vs ".join(ts)))
+            print("   ⇒ ★這三趟不可合為一臂，除非用 fp 證明那次變動對世界無影響")
+            print("   ⇒ ★★而【commit sha 相同】也不等於 code 相同：clean=NO 時樹是髒的")
     if len(arms) != 2:
         print("★臂數 != 2 ⇒ 方向表不可判（它的定義就是兩臂相比）")
         return 1
@@ -118,7 +141,7 @@ def main():
         cells, signs, mags = [], [], []
         for s in seeds:
             ra, rb = runs.get((a, s)), runs.get((b, s))
-            if not ra or not rb or ra[name] is None or rb[name] is None:
+            if not ra or not rb or not ra["done"] or not rb["done"] or ra[name] is None or rb[name] is None:
                 cells.append("%s:不可判" % s); signs.append(None); mags.append(None); continue
             d = rb[name] - ra[name]
             sg = "＝" if d == 0 else ("↑" if d > 0 else "↓")
