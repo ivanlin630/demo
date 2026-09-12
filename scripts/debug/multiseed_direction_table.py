@@ -85,6 +85,27 @@ def read_run(path):
     return out
 
 
+def _self_identity():
+    """★分析器自報身分（★★跟【跑的時候那棵樹】同一個道理）。
+    ★理由：systems 2026-09-12 把規則從【對象】改成【角色】：
+      **量測進行中，被量的樹與量測器都不動** ——
+    ★★而這支分析器就是量測鏈的一環（它只讀跑完的 log，碰不到那幾趟，
+      而【碰不到】要是一句**可查證的宣告**，不是一句自述）。
+    """
+    import subprocess
+    here = os.path.dirname(os.path.abspath(__file__))
+    def _git(*a):
+        try:
+            return subprocess.check_output(("git",) + a, cwd=here,
+                                           stderr=subprocess.DEVNULL).decode("utf-8", "replace").strip()
+        except Exception:
+            return "?"
+    sha = _git("rev-parse", "--short", "HEAD")
+    rel = "scripts/debug/" + os.path.basename(__file__)
+    dirty = _git("status", "--porcelain", "--", rel)
+    return sha, ("dirty" if dirty else "clean")
+
+
 def main():
     runs = {}
     expect = _expect_seeds()
@@ -112,6 +133,9 @@ def main():
         print("   ⇒ ★★而缺席的那一格不會自己跳出來，所以沒有人會發現它缺席")
     # ★★★通則（systems 立 2026-09-12）：**任何自檢／閘的輸出必須包含【實跑 N】，而 N ＝ 0 ⇒ 紅**。
     #   ★理由：**「一格也沒跑」與「全部通過」在畫面上長得一樣** —— 都是沒紅字 ＋ 回傳碼 0。
+    _sha, _st = _self_identity()
+    print("★分析器自報：%s @ %s/%s（★只讀跑完的 log，不參與任何一趟）" % (
+        os.path.basename(__file__), _sha, _st))
     print("★【實跑】掃到並解析的 log：%d 格%s" % (
         len(runs), "" if runs else "  ★★★【紅】實跑 0 格 ⇒ 這不是「全過」，是【什麼都沒量】"))
     print("★母體：%d 臂 x %d seed = %d 格；★★而【實際完成】的格數才是分母" % (
@@ -264,6 +288,19 @@ def _case_post_import_env():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+# ★★★【字形相近的錯字】黑名單：鍵 = 錯的碼位，值 = 對的碼位。
+#   ★理由：我今天在這一支檔裡把同一個字打錯 **五次**（U+8DA1 不等於 U+8D9F），
+#   ★★而它在 CP950 主控台是亂碼 ⇒ **看不出來**，每次都是逐字比碼位才抓到。
+#   ★★★所以把它從【靠記得】變成【表上一格】—— 同一族：覺／覓、滋團／滅團。
+CONFUSABLES = {0x8DA1: 0x8D9F}
+
+
+def _case_no_confusables():
+    src = io.open(os.path.abspath(__file__), encoding="utf-8").read()
+    hits = [(hex(bad), src.count(chr(bad))) for bad in CONFUSABLES if chr(bad) in src]
+    return (not hits), ("本檔無黑名單字" if not hits else "中彈：%s" % hits)
+
+
 def selftest():
     cases = [
         # ①真趨勢：三 seed 同向、幅度相近
@@ -297,6 +334,12 @@ def selftest():
         if not ok:
             bad += 1
 
+    ok6, got6 = _case_no_confusables()
+    ran += 1
+    if not ok6:
+        bad += 1
+    print("   %-14s %s  實得：%s" % ("⑥ 錯字碼位", "[OK]" if ok6 else "[FAIL]", got6))
+
     ok5, got5 = _case_post_import_env()
     ran += 1
     if not ok5:
@@ -306,7 +349,7 @@ def selftest():
     # ★★★【對照本身的母體】：跑過的格數必須等於宣告的格數。
     #   ★血證：有一次對照因為裡面誤寫 `sys.exit` 而**第一格就結束整個程序**，
     #   ★★而它印了標題、一格也沒跑、**回傳碼還是 0** ⇒ 靜默 no-op 被讀成全綠。
-    declared = len(cases) + 1
+    declared = len(cases) + 2
     if ran == 0:
         print("=== SELFTEST === ★★★【紅】實跑 0 組 ⇒ 對照什麼都沒測（而它看起來跟全綠一樣）")
         return 1
