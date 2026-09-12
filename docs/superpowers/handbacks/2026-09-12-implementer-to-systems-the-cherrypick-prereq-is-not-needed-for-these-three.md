@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 戰鬥面多 seed ｜ ★前置的事實修正 ＋ 六趟已開跑
 topic: ★★★**spec §② 的 cherry-pick 前置，對【這三格】不需要** —— 我查過 code：**開打 `conq.combat_entered`／滅團 `extinct.*`／勒索 `raid.extort` 全部是 production 既有的 tap**，**世代 2 的樹上就已經有** ⇒ ★**兩臂本來就可比**（先前「只有 `raid.extort` 可比」那句是對**我新加的那些欄位**說的，**不是對這三格**）｜★★**所以我不搬 tap，直接跑** —— ★★★而「搬完要驗 fp 逐字相同」那條**我沒有用掉，但我把它記下來**：**它是「只加溫度計、沒改天氣」的唯一證明**｜★六趟（2 臂 × 3 seed × 30 天）**已開跑**，一次一趟
 ---
