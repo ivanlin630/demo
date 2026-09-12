@@ -124,7 +124,11 @@ def main():
     #   ★發現式母體會把「沒發生」變成「不存在」，而**不存在的東西不會出現在表上**。
     absent = [(a, sd) for a in expect_arms for sd in expect if (a, sd) not in runs]
     unfinished = [k for k, v in runs.items() if not v["done"]]
-    red = bool(absent) or bool(unfinished) or not runs   # ★實跑 0 格也是紅
+    reasons = []                                   # ★紅的【具名理由】，不是一個旗標
+    if absent: reasons.append("缺 %d 格連 log 都沒有" % len(absent))
+    if unfinished: reasons.append("%d 格未完成" % len(unfinished))
+    if not runs: reasons.append("實跑 0 格")
+    red = bool(reasons)
     if absent:
         print("★★★【紅】宣告 %d 格，而其中 %d 格**連 log 都沒有**：%s" % (
             len(expect_arms) * len(expect), len(absent),
@@ -158,6 +162,7 @@ def main():
         mine = [v for k, v in runs.items() if k[0] == a]
         hs = sorted({v["chash"] for v in mine if v["chash"]})
         if len(hs) > 1:
+            reasons.append("臂 %s 的 codehash 不一致" % a)
             red = True
             print("★★★【紅】臂 %s 的 codehash 不一致：%s（★直接證據）" % (a, " vs ".join(hs)))
         elif len(hs) < len(mine):
@@ -166,6 +171,7 @@ def main():
             print("   ⇒ ★★那幾趟只能停在 sha 與 mtime 的【間接證據】，**追溯不回來**")
         ts = sorted({v["tree"] for v in mine})
         if len(ts) > 1:
+            reasons.append("臂 %s 的各%s不是同一棵樹" % (a, chr(0x8D9F)))
             red = True
             print("★★★【紅】臂 %s 的各趟**不是同一棵樹**：%s" % (a, " vs ".join(ts)))
             print("   ⇒ ★這三趟不可合為一臂，除非用 fp 證明那次變動對世界無影響")
@@ -211,8 +217,10 @@ def main():
     print("★★而「同向」只說【方向】在這幾個 seed 上穩，**不說原因** ——")
     print("   兩臂之間差的是【一整代 code】，不是一個開關 ⇒ 禁止寫單因歸因句。")
     if red:
-        print("★★★【紅】宣告的格子沒到齊（缺 %d 格／未完成 %d 格）⇒ 這張表**不是結果**。" % (
-            len(absent), len(unfinished)))
+        # ★紅的理由要【逐條列出】：第一版我把它寫成固定句「缺 N 格／未完成 N 格」，
+        #   ★★結果六趟全到齊時它印「缺 0 格／未完成 0 格」而還是紅 ⇒ **標籤與數字對不上**。
+        #   ★★★而那正是我前一小時才寫進 specimen_bed 的那一條病。
+        print("★★★【紅】這張表**不是結果** —— 理由：%s" % "；".join(reasons))
     return 1 if red else 0
 
 
@@ -292,7 +300,7 @@ def _case_post_import_env():
 #   ★理由：我今天在這一支檔裡把同一個字打錯 **五次**（U+8DA1 不等於 U+8D9F），
 #   ★★而它在 CP950 主控台是亂碼 ⇒ **看不出來**，每次都是逐字比碼位才抓到。
 #   ★★★所以把它從【靠記得】變成【表上一格】—— 同一族：覺／覓、滋團／滅團。
-CONFUSABLES = {0x8DA1: 0x8D9F}
+CONFUSABLES = {0x8DA1: 0x8D9F, 0x8DA0: 0x8D9F}   # ★第六次打錯時才發現還有第二個鄰居
 
 
 def _case_no_confusables():
