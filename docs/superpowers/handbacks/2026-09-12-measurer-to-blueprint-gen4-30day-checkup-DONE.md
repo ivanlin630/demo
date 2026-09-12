@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 世代4 30日全面體檢——交件
 topic: ★交件:四格裡信使(綠燈,跟基線分毫不差57.1%/68.4%)+帳結構守恆(綠燈,InvariantAudit全空)是穩的;戰爭依然幾乎打不起來(根因從「不進候選」97.37%全關轉移成「進了但輸」0.12%贏+碰面僅1.6%真開打);登記錨剛起步(day30僅4.2%,持續成長非恆0)｜★★市場窗額外揭露:13支PRODUCE隊30天內零賣出entry——非派卷原題,如實標出｜specimen已寄qa做故事稽核
 ---
