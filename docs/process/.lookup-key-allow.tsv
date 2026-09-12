@@ -6,4 +6,3 @@
 格	allow	-	player_command_api.gd 拿它對訊息做子字串比對（"格子不存在"）；★它脆但【有配對】：配的是 player_command_system 的訊息字面，不是一個會回 default 的字典
 致富(levy)	allow	-	headless_test 的 assert 期望值；★它配的是被測 code 印出來的字串，打錯會【當場紅】而不是靜默
 要做的事	allow	-	specimen_tracer 寫進 dump 的欄位標籤（只寫不讀）；★打錯只是標籤難看，不改任何行為
-賣貨	todo	implementer	docs/superpowers/handbacks/2026-09-12-implementer-to-systems-lookup-key-gate-extended-and-it-caught-a-live-one.md

@@ -2,7 +2,8 @@ extends SceneTree
 
 # 指標 specimen 決策 tracer — measure 床（spec 交付核心：用 tracer measure 錨→行為）。
 # 兩問（藍圖指定）：
-#   1. 致富 intent fire 沒？fire 了 winner 有沒 = 貿易/賣貨 action？斷在哪？
+#   1. 致富 intent fire 沒？fire 了 winner 有沒 = `貿易` action？斷在哪？
+#      （★原本寫「貿易/賣貨」，而 `賣貨` 不是 option：設計詞不是實作 key）
 #   2. potential-conqueror：征服 intent→攻擊鏈卡哪？
 # 純觀測（tracer 零改決策）。econ_bed 商隊 = merchant specimen（unified 全捕）；
 # warring 高野心 leader = conqueror specimen（commander intent 捕；攻擊 dispatch 觀 Probe/task）。
@@ -54,8 +55,12 @@ func _diagnose_merchant(state: WorldState, mid: int) -> void:
 		float(t.resources.get("coin", 0)) if t != null else -1,
 		float(t.resources.get("goods", 0)) if t != null else -1])
 	var w: Dictionary = SpecimenTracer.winner_hist
-	var traded: int = int(w.get("貿易", 0)) + int(w.get("賣貨", 0))
-	print("[診斷] winner=貿易/賣貨 次數=%d / 全決策=%d" % [traded, SpecimenTracer.decision_count])
+	# ★`賣貨` 從來不是一個 option —— 它是【設計文件裡的詞】被當成實作的 key（systems 裁 2026-09-12）。
+	#   ★★它不是打錯字：註冊表裡只有 `貿易` 與 `囤貨`，而 `.get` 永遠回 0
+	#   ⇒ 這行宣稱數兩個，實際一直只在數 `貿易`。
+	#   ★★★而不准改成 `囤貨` —— **那是反向行為**（囤著不賣）。
+	var traded: int = int(w.get("貿易", 0))
+	print("[診斷] winner=貿易 次數=%d / 全決策=%d" % [traded, SpecimenTracer.decision_count])
 	if SpecimenTracer.decision_count == 0:
 		print("[診斷結論] specimen 零決策捕到 → unified 路徑未觸（斷在 dispatch 前，非決策層）")
 	elif traded == 0:
