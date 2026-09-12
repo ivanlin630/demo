@@ -19,9 +19,13 @@ SCRATCH = os.environ.get("SCRATCH") or os.path.join(
     os.environ.get("TEMP", "."), "claude", "A--GDS-demo",
     "f32c580a-c82d-42ec-8bd1-74440a31cd93", "scratchpad")
 
-# ★幅度地板：逐 seed 的相對變化最大／最小 >= 它，就判【幅度不可引用】。
-# ★★它是在看到數字【之前】定的 —— 看到數字才決定「這個差距算大」那叫挑。
-MAG_SPREAD_MAX = 10
+# ★幅度地板（systems 裁 2026-09-12）：**相對極差 ＝（最大幅度 − 最小幅度）／中位幅度**
+# ★★不用倍數比（max/min）：它對小數字過度敏感 —— −80%% vs −8%% 是 10 倍，
+#   −8%% vs −0.8%% 也是 10 倍，而前者是「幾乎消失 vs 小幅下降」、後者是「兩個都幾乎沒動」。
+# ★★★0.5 有意思：**不確定性達到效果本身的一半**。
+#   ★預註冊於【六趡到齊之前】；若日後覺得不合適，**下一張票才改**且要寫明
+#   「上一張票用的是 0.5」—— **不准回頭改這一張的判準**。
+REL_RANGE_MAX = 0.5
 
 METRICS = [("開打", r"開打 conq\.combat_entered\s*=\s*(\d+)"),
            ("結束", r"結束 combat\.ended_n\s*=\s*(\d+)"),
@@ -90,13 +94,17 @@ def main():
         elif len(set(known)) > 1:
             verdict = "★★蝴蝶（seed 之間符號就翻了 ⇒ 這條軸講不出因果）"
         else:
-            km = [m for m in mags if m is not None]
-            lo, hi = min(km), max(km)
-            if hi > 0.0 and lo > 0.0 and hi / lo >= MAG_SPREAD_MAX:
-                verdict = ("★★★趨勢成立【而幅度不可引用】（逐 seed 相對變化 %.2f ~ %.2f，"
-                           "差 %.1f 倍 ≥ %d）" % (lo, hi, hi / lo, MAG_SPREAD_MAX))
+            km = sorted(m for m in mags if m is not None)
+            lo, hi = km[0], km[-1]
+            med = km[len(km) // 2] if len(km) % 2 else (km[len(km) // 2 - 1] + km[len(km) // 2]) / 2.0
+            rel = (hi - lo) / med if med > 0.0 else 0.0
+            if rel >= REL_RANGE_MAX:
+                verdict = ("★★★趨勢成立【而幅度不可引用】（逐 seed 幅度 %s；"
+                           "相對極差 %.2f ≥ %.2f —— 不確定性達到效果本身的一半）"
+                           % (", ".join("%.2f" % m for m in km), rel, REL_RANGE_MAX))
             else:
-                verdict = "★真趨勢（符號同向，且逐 seed 幅度 %.2f ~ %.2f 未跨量級）" % (lo, hi)
+                verdict = ("★真趨勢（符號同向；逐 seed 幅度 %s；相對極差 %.2f < %.2f）"
+                           % (", ".join("%.2f" % m for m in km), rel, REL_RANGE_MAX))
         print("   %-4s %s ｜ %s" % (name, "  ".join(cells), verdict))
     print("")
     print("★★而「同向」只說【方向】在這幾個 seed 上穩，**不說原因** ——")
@@ -160,27 +168,24 @@ def selftest():
                     ("gen2", "3"): 100, ("gen4", "3"): 140}, "蝴蝶"),
         # ③幅度不可引用：同向而幅度跨量級（★這裡刻意取【明顯高於地板】的一組，
         #   因為這一格要證的是【接線通不通】，不是地板定在哪）
-        ("③幅度不可引用", {("gen2", "1"): 100, ("gen4", "1"): 105,
-                            ("gen2", "2"): 100, ("gen4", "2"): 200,
-                            ("gen2", "3"): 100, ("gen4", "3"): 300}, "幅度不可引用"),
+        # ★①-b systems 同一封給的**不該紅**那組：−79%%／−70%%／−85%%
+        #   ★★中位 0.79、極差 0.15 ⇒ 0.19 ⇒ 應判真趨勢（成對對照：會紅 ＋ 不會亂紅）
+        ("①-b 不該紅", {("gen2", "1"): 100, ("gen4", "1"): 21,
+                        ("gen2", "2"): 100, ("gen4", "2"): 30,
+                        ("gen2", "3"): 100, ("gen4", "3"): 15}, "真趨勢"),
+        # ★③ 直接用 systems 裁文裡的例子：−79%%／−12%%／−90%%
+        #   ★★中位 0.79、極差 0.78 ⇒ 相對極差 0.99 ⇒ 應判第三種
+        ("③幅度不可引用", {("gen2", "1"): 100, ("gen4", "1"): 21,
+                            ("gen2", "2"): 100, ("gen4", "2"): 88,
+                            ("gen2", "3"): 100, ("gen4", "3"): 10}, "幅度不可引用"),
     ]
     bad = 0
-    print("★★★逐結論陽性對照（每一種結論都要能亮一次）  地板 MAG_SPREAD_MAX=%d" % MAG_SPREAD_MAX)
+    print("★★★逐結論陽性對照（每一種結論都要能亮一次）  判準：相對極差 ≥ %.2f ⇒ 幅度不可引用" % REL_RANGE_MAX)
     for name, rows, expect in cases:
         ok, got = _run_case(name, rows, expect)
         print("   %-14s %s  實得：%s" % (name, "[OK]" if ok else "[FAIL]", got))
         if not ok:
             bad += 1
-
-    # ★★地板校準（★這一格不是對照，是把【歧異】攤開）：
-    #   systems 舉的例子是 −79%／−12%／−90% ⇒ 幅度比 0.90／0.12 ＝ 7.5 倍。
-    #   ⇒ 它在現行地板（10）下判不出第三種。**地板該定多少是 systems 的裁決**，不是我看資料挑的。
-    _, got = _run_case("地板校準", {("gen2", "1"): 100, ("gen4", "1"): 21,
-                                     ("gen2", "2"): 100, ("gen4", "2"): 88,
-                                     ("gen2", "3"): 100, ("gen4", "3"): 10}, "@@never@@")
-    print("   ★地板校準：systems 的例子（−79%%／−12%%／−90%%，幅度比 7.5 倍）在地板 %d 下判成：" % MAG_SPREAD_MAX)
-    print("      %s" % got)
-    print("      ⇒ ★這【不是】對照的紅綠，是一個**待裁**：地板要 10 還是 ≤7.5，歸 systems。")
 
     print("=== SELFTEST === 對照 %d 組｜FAILS=%d" % (len(cases), bad))
     return 1 if bad else 0
