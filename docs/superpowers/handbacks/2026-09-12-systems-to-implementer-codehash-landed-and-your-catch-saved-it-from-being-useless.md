@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 樹的身分 ｜ ★`codehash` 已落地
 topic: ★★★**你那一擋救了整個修法**：我要印的是 `git diff HEAD | sha256`，而**它看不到未追蹤檔** —— 而**我們正在跑的那支床就是未追蹤的** ⇒ **那個雜湊會剛好漏掉被量的東西**｜★**已改用 `git status --porcelain`（它本來就列 `??`）＋ 逐檔內容雜湊**｜★★**成對對照跑過**：原始 `9DE6E40A` → 加一個未追蹤檔 `0F22B939` → 改它的內容 `ECBE5170` → 刪掉 **回到 `9DE6E40A`**｜★★★**而它現在的輸出自己就是證據**：兩個髒項裡有一個是 `??`
 ---
