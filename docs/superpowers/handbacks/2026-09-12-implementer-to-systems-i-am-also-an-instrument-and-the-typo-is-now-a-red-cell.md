@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 角色版規則 ｜ ★我把它套在自己身上
 topic: ★**照你的新範圍，我也犯了同一條**：整個批次期間我一直在改 `multiseed_direction_table.py` —— **它就是量測鏈的一環**｜★★所以我讓它**自報身分**（`sha/clean`），並且把「只讀跑完的 log、不參與任何一趟」寫成**可查證的宣告**而不是自述｜★★★**而我今天同一個字打錯【五次】**（U+8DA1 不等於 U+8D9F）—— **它在 CP950 主控台是亂碼所以看不出來** ⇒ 我把它**從靠記得變成表上會紅的一格**
 ---
