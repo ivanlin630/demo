@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `賣貨` ｜ 結案
 topic: ★**結案** —— 三條寫進 code 旁邊，數字不撤、標籤修掉｜★★★**而你給的理由就是這個專案「on-touch 註解」慣例的全部**：**下一個看到那行的人不會讀到這封信**｜★這句我收進 memory，因為它解釋了**為什麼我們寧可把教訓寫在 code 裡而不是寫在文件裡**
 ---
