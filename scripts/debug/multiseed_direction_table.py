@@ -86,13 +86,17 @@ def main():
     #   ★發現式母體會把「沒發生」變成「不存在」，而**不存在的東西不會出現在表上**。
     absent = [(a, sd) for a in expect_arms for sd in expect if (a, sd) not in runs]
     unfinished = [k for k, v in runs.items() if not v]
-    red = bool(absent) or bool(unfinished)
+    red = bool(absent) or bool(unfinished) or not runs   # ★實跑 0 格也是紅
     if absent:
         print("★★★【紅】宣告 %d 格，而其中 %d 格**連 log 都沒有**：%s" % (
             len(expect_arms) * len(expect), len(absent),
             ", ".join("%s/%s" % c for c in absent)))
         print("   ⇒ ★這不是「跑了沒變化」，是【根本還沒跑】—— 兩者在半張表上長得一模一樣")
         print("   ⇒ ★★而缺席的那一格不會自己跳出來，所以沒有人會發現它缺席")
+    # ★★★通則（systems 立 2026-09-12）：**任何自檢／閘的輸出必須包含【實跑 N】，而 N ＝ 0 ⇒ 紅**。
+    #   ★理由：**「一格也沒跑」與「全部通過」在畫面上長得一樣** —— 都是沒紅字 ＋ 回傳碼 0。
+    print("★【實跑】掃到並解析的 log：%d 格%s" % (
+        len(runs), "" if runs else "  ★★★【紅】實跑 0 格 ⇒ 這不是「全過」，是【什麼都沒量】"))
     print("★母體：%d 臂 x %d seed = %d 格；★★而【實際完成】的格數才是分母" % (
         len(arms), len(seeds), len(arms) * len(seeds)))
     done = sum(1 for v in runs.values() if v)
@@ -265,10 +269,13 @@ def selftest():
     #   ★血證：有一次對照因為裡面誤寫 `sys.exit` 而**第一格就結束整個程序**，
     #   ★★而它印了標題、一格也沒跑、**回傳碼還是 0** ⇒ 靜默 no-op 被讀成全綠。
     declared = len(cases) + 1
+    if ran == 0:
+        print("=== SELFTEST === ★★★【紅】實跑 0 組 ⇒ 對照什麼都沒測（而它看起來跟全綠一樣）")
+        return 1
     if ran != declared:
         print("=== SELFTEST === ★★★【紅】宣告 %d 組，而實際跑了 %d 組 ⇒ 對照自己沒跑完" % (declared, ran))
         return 1
-    print("=== SELFTEST === 對照 %d 組（宣告 %d，對得上）｜FAILS=%d" % (ran, declared, bad))
+    print("=== SELFTEST === 【實跑】%d 組（宣告 %d，對得上）｜FAILS=%d" % (ran, declared, bad))
     return 1 if bad else 0
 
 
