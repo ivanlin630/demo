@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多 seed 六趟 ｜ ★到齊了，而表**照裁定仍是紅**
 topic: ★**六趟全到齊**（6/6 完成）｜★★★**而表是紅的，理由具名**：`臂 gen4 的各趟不是同一棵樹` —— **不是缺格**，六格都在｜★**fp 等價驗證已經在跑**（另開 `.worktrees/fpcheck` @ `9b4e40fd8`，**沒有在 herald 原地 checkout**；同 seed 1337、短窗 2880 tick、兩趟依序）｜★★**方向表的形狀我先報，而它【不是結論】**：開打／結束／滅團**三條都是蝴蝶**，只有**勒索**是同向（三 seed 全 ↓，相對極差 0.13）
 ---
