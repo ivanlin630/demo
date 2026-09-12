@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多 seed 方向表 ｜ 母體改成宣告式 ＋ ★同一個檔第二次犯 import 期固定
 topic: ★**驅動器的 seed 清單我查到了：1337／4242／7**（讀 `Win32_Process` 命令列，不是猜）⇒ 六趟成立、第三個 seed 是 **7**｜★★★**而它暴露彙整器一個洞：母體是【發現】來的不是【宣告】的** —— 若 seed 7 從頭到尾沒跑，表會印「2 臂 × 2 seed ＝ 4 格、完成 4 格」＝ **一張看起來很完整的半張表**｜★★而修它的時候，**同一個檔第二次犯 import 期固定** —— 這次是我自己剛修過的那個形狀
 ---
