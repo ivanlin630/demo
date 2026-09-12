@@ -178,6 +178,13 @@ fi
 if [ -n "${STALE_NOTE:-}" ]; then
   echo "[MERGE-GATES] PASS（$N/${UPSTREAM_N:-?}）—— $STALE_NOTE"
   echo "[MERGE-GATES] ★★這【不是】「全部通過」：★★★缺的那幾支【沒有跑過】，而它們正是最新加的（多半在守你剛做的東西）"
+elif [ "${RUN_N:-0}" = "0" ]; then
+  # ★★★【實跑 0 格 ＝ 紅】（systems 立 2026-09-12）：
+  #   「一支也沒跑」與「全部通過」在畫面上一樣 —— 兩者都是**沒有紅字 ＋ rc=0**。
+  #   ★而這支工具自己就有這個洞：`MG_FROM=999` ⇒ 跑 0 支 ⇒ 印 PASS、rc=0。
+  echo "[MERGE-GATES] ★★★紅：【實跑 0 支】—— 這不是「全過」，是【什麼都沒跑】"
+  echo "[MERGE-GATES]   ⇒ 檢查 MG_FROM/MG_TO 是不是把整張註冊表濾掉了"
+  exit 1
 elif [ -n "${FORK_NOTE:-}" ]; then
   echo "[MERGE-GATES] PASS：本地這 $N 支全部通過｜${FORK_NOTE}"
 else
