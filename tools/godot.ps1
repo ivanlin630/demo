@@ -171,14 +171,34 @@ try {
         # stamp people learn to ignore -- the same 'drowned in noise' failure as a
         # push_error on every tick.
         $codeDirty = @($provDirty | Where-Object { $_ -match ' (scripts|config|tools|addons)/' })
+        # TREE IDENTITY, PART 2 (systems 2026-09-12): clean=yes/no is NOT enough.
+        #   Two runs can both say clean=NO and be dirty in completely different ways.
+         #   So hash the CONTENT of every code-dirty path. Note: `git status --porcelain`
+        #   already lists untracked (??) files -- and the bed we measure is often untracked,
+        #   which is exactly what `git diff HEAD` would have missed.
+        $codeHash = "clean"
         if ($codeDirty.Count -gt 0) {
-            Write-Output "[TREE] path=$provPath commit=$provSha clean=NO code-dirty=$($codeDirty.Count)"
+            $acc = New-Object System.Text.StringBuilder
+            foreach ($line in ($codeDirty | Sort-Object)) {
+                [void]$acc.AppendLine($line)
+                $rel = $line.Substring(3).Trim()
+                $full = Join-Path $provPath $rel
+                if (Test-Path -LiteralPath $full -PathType Leaf) {
+                    [void]$acc.AppendLine((Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash)
+                } else { [void]$acc.AppendLine("<absent>") }
+            }
+            $bytes = [System.Text.Encoding]::UTF8.GetBytes($acc.ToString())
+            $ms = New-Object System.IO.MemoryStream(,$bytes)
+            $codeHash = (Get-FileHash -InputStream $ms -Algorithm SHA256).Hash.Substring(0,12)
+        }
+        if ($codeDirty.Count -gt 0) {
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=NO code-dirty=$($codeDirty.Count) codehash=$codeHash"
             Write-Output "[TREE]   *** measuring the WORKING TREE, not commit $provSha ***"
             foreach ($d in ($codeDirty | Select-Object -First 8)) { Write-Output "[TREE]   $d" }
         } elseif ($provDirty.Count -gt 0) {
             Write-Output "[TREE] path=$provPath commit=$provSha clean=code-yes (docs-dirty=$($provDirty.Count), does not affect this run)"
         } else {
-            Write-Output "[TREE] path=$provPath commit=$provSha clean=yes"
+            Write-Output "[TREE] path=$provPath commit=$provSha clean=yes codehash=clean"
         }
     } else {
         Write-Output "[TREE] path=$provPath commit=UNKNOWN (git said nothing)"

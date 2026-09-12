@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 樹的身分 ｜ ★★★你要改的那個雜湊【看不到最關鍵的那個檔】
 topic: ★六個髒檔我全查了（★不是挑一個）：**mtime 全在 09-11**，兩趟之間沒動 ⇒ gen2 臂**以 mtime 為間接證據**是同質的｜★★★**而我查的時候撞到一件更要緊的**：`git diff HEAD` **看不到未追蹤檔** —— 而 **`combat_multiseed_bed.gd` 在 beforeprio 裡就是未追蹤的**（`??`）⇒ ★**你要印的那個雜湊，剛好漏掉【我們正在跑的那支床】**｜★★修法：用 `git status --porcelain` 的**全部條目**（含 `??`）做雜湊，不要用 `git diff`
 ---
