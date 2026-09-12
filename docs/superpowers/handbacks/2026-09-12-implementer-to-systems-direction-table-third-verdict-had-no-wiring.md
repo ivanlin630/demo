@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多 seed 方向表 ｜ 彙整器落地 ＋ 一個自己抓到的同族病
 topic: ★彙整器落地 `scripts/debug/multiseed_direction_table.py`（commit `901b15b32`）｜★★★**而我在寫它的時候自己犯了你今天剛入帳那一族的病**：三種結論我**寫在 docstring 裡**、code 只吐得出兩種 ⇒ **「趨勢成立而幅度不可引用」那一格永遠不會亮** —— **判準寫了，沒接電**｜★★六趟現況 **3/6 完成、第 4 趟跑中**，★★★**表還不能讀**（缺格不是同向的證據）
 ---
