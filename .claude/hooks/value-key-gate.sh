@@ -35,7 +35,26 @@ if [ "${1:-}" = "--selfcheck" ]; then
   printf '%s\n' "$a" | grep -qx "這是註解裡的假鍵" && { echo "[VALUE-KEY] ★SELFCHECK FAIL：註解裡的鍵仍被算成讀點"; exit 3; }
   printf '%s\n' "$a" | grep -qx "野心" || { echo "[VALUE-KEY] ★SELFCHECK FAIL：同一檔的真讀點被濾掉了（過濾太兇）"; exit 3; }
   printf '%s\n' "$b" | grep -qx "這是真的壞鍵" || { echo "[VALUE-KEY] ★SELFCHECK FAIL：code 裡的壞鍵抓不到 ⇒ 本閘沒有鑑別力"; exit 3; }
-  echo "[VALUE-KEY] SELFCHECK PASS（註解不算讀點／同檔真讀點保留／code 壞鍵仍抓得到）"
+  # ── ★第二段的成對對照（systems 配套②）：寫一個【單次查表 key】必須紅；
+  #    ★★把它变成出現兩次必須綠 —— **只驗會紅那一邊，證明不了它平常不亂咬**。
+  printf 'var a = d.get("單次假鍵", 0)
+' > "$T/c.gd"
+  _S1="$(python .claude/hooks/lookup_key_scan.py "$T/c.gd" 2>&1)"
+  printf '%s
+' "$_S1" | grep -q '^HIT	單次假鍵' || {
+    echo "[LOOKUP-KEY] ★SELFCHECK FAIL：單次查表 key 抓不到 ⇒ 本段沒有鑑別力"; exit 3; }
+  printf 'var a = d.get("單次假鍵", 0)
+var b = d.get("單次假鍵", 0)
+' > "$T/c.gd"
+  _S2="$(python .claude/hooks/lookup_key_scan.py "$T/c.gd" 2>&1)"
+  printf '%s
+' "$_S2" | grep -q '^HIT	單次假鍵' && {
+    echo "[LOOKUP-KEY] ★SELFCHECK FAIL：出現兩次的 key 也被抓 ⇒ 它會亂咬"; exit 3; }
+  printf '%s
+' "$_S2" | grep -q '^POP	[1-9]' || {
+    echo "[LOOKUP-KEY] ★SELFCHECK FAIL：母體 0 ⇒ 【什麼都沒掃到】被讀成通過"; exit 3; }
+  rm -f "$T/c.gd"
+  echo "[VALUE-KEY] SELFCHECK PASS（註解不算讀點／同檔真讀點保留／單次查表 key 成對／code 壞鍵仍抓得到）"
   exit 0
 fi
 
@@ -103,4 +122,50 @@ if [ -n "$BAD_BED" ]; then
   done
 fi
 [ "$RC" -eq 0 ] && echo "[VALUE-KEY] PASS：產線所有 values.get 的鍵都存在（正典 $(printf '%s\n' "$CANON" | grep -c .) 鍵）"
-exit "$RC"
+# ★不在這裡 exit：第二段要接在後面（★第一版我就是在這裡 exit ⇒ 第二段【裝好了沒接電】）
+
+# ══════════════════════════════════════════════════════════════════════
+# ★第二段（systems 裁 2026-09-12）：**查表位置的中文 key，全庫只出現一次的**
+#   ★為什麼擴在這支而不是新寫一支：用戶 2026-09-10 立過「不要一直加閘」——
+#     ★★而這一族本來就是這支的族（血證 `貪婪`→`貧婪` 回 default、code 照跑）。
+#   ★★★它沒接住今天那兩次（`覚`／U+8DA1），不是它壞，是**母體只含 values.get**。
+# ══════════════════════════════════════════════════════════════════════
+AL=docs/process/.lookup-key-allow.tsv
+if ! SCAN="$(python .claude/hooks/lookup_key_scan.py 2>&1)"; then
+  echo "[LOOKUP-KEY] ★FAIL：掃描器沒跑起來 ⇒ ★本段【沒有判過】（不是通過）"
+  printf '%s\n' "$SCAN"; exit 1
+fi
+POP="$(printf '%s\n' "$SCAN" | awk -F'\t' '$1=="POP"{print $2}')"
+# ★★★實跑 N ＝ 0 必須紅：「一個都沒掃到」與「全部通過」在畫面上長得一樣
+if [ -z "$POP" ] || [ "$POP" -eq 0 ]; then
+  echo "[LOOKUP-KEY] ★FAIL：母體 0 ⇒ ★這不是「全過」，是【什麼都沒掃到】（掃描器或路徑壞了）"; exit 1
+fi
+HITS="$(printf '%s\n' "$SCAN" | awk -F'\t' '$1=="HIT"{print $2"\t"$3}')"
+LK_BAD=0; LK_TODO=0; LK_ALLOW=0
+while IFS=$'\t' read -r k loc; do
+  [ -z "$k" ] && continue
+  kind="$(awk -F'\t' -v k="$k" '$1==k{print $2}' "$AL" 2>/dev/null)"
+  case "$kind" in
+    allow) LK_ALLOW=$((LK_ALLOW+1));;
+    todo)
+      tk="$(awk -F'\t' -v k="$k" '$1==k{print $4}' "$AL")"
+      if [ ! -f "$tk" ]; then
+        echo "[LOOKUP-KEY] ★FAIL：\"$k\" 掛 kind=todo 而 ticket 不存在（$tk）⇒ 它沒真的掛在追蹤上"; LK_BAD=1
+      else
+        echo "[LOOKUP-KEY] ⏳已知未修 \"$k\"（$loc ← $tk）"; LK_TODO=$((LK_TODO+1))
+      fi;;
+    *)
+      echo "[LOOKUP-KEY] ✗ \"$k\"（$loc）—— 在【查表位置】卻全庫只出現一次"
+      echo "   ⇒ ★key 天生成對（一次寫、一次讀）⇒ 只出現一次 ＝ 要嘛剛加還沒被讀，要嘛【它是打錯的那一半】"
+      echo "   ⇒ ★★無害就進 $AL（kind=allow ＋【為什麼無害】）；真缺陷 kind=todo ＋ owner ＋ 存在的 ticket"
+      LK_BAD=1;;
+  esac
+done <<< "$HITS"
+if [ "$LK_BAD" -ne 0 ]; then
+  echo "[LOOKUP-KEY] ★FAIL（母體 $POP 種查表 key；豁免 $LK_ALLOW／已知未修 $LK_TODO）"
+  exit 1
+fi
+echo "[LOOKUP-KEY] PASS：查表位置的單次中文 key 都已具名處置（母體 $POP／豁免 $LK_ALLOW／已知未修 $LK_TODO）"
+
+if [ "$RC" -ne 0 ] || [ "$LK_BAD" -ne 0 ]; then exit 1; fi
+exit 0
