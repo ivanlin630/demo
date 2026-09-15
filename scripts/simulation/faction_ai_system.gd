@@ -3707,6 +3707,11 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		#   ★★早期窗正是 `confident_enough` 最容易為假的時候
 		#   ⇒ ★★★驗收格④若不分流，**會綠，而綠的原因是舊補丁不是新機制**。
 		#   ⇒ 這裡只數【秤選出來、而且真的被設上】的那一條。
+		if Probe.enabled:
+			# ★★★逐 option 的派工結果（systems 2026-09-16 要的第 ② 個數）：
+			#   ★**「某 option 贏了」與「它真的被派出去」是兩個數** —— 這一族數的是後者。
+			#   ★★而它必須涵蓋【所有】派工迴圈，否則差額量的是 tap 覆蓋率不是世界行為（血證在 09-15）。
+			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _set_ok else "noop"])
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.unified." + ("ok" if _set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _set_ok else "recon.dispatch.noop")
@@ -4188,6 +4193,8 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 				return
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
 		var _sub_set_ok: bool = TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam", opt)
+		if Probe.enabled:
+			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _sub_set_ok else "noop"])
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.subteam." + ("ok" if _sub_set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _sub_set_ok else "recon.dispatch.noop")
@@ -4449,6 +4456,8 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
 		var _solo_set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo", opt)
+		if Probe.enabled:
+			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _solo_set_ok else "noop"])
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.solo." + ("ok" if _solo_set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _solo_set_ok else "recon.dispatch.noop")
@@ -6798,6 +6807,8 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 				if _maybe_request_join_player(state, team):
 					return
 		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival", opt)   # ★① 單一源(收 @80)
+		if Probe.enabled:
+			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _surv_ok else "noop"])
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.survival." + ("ok" if _surv_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _surv_ok else "recon.dispatch.noop")

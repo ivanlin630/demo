@@ -545,6 +545,71 @@ func _run() -> void:
 	# ══════════ §C 生產隊三母體（第二張票）—— ★窗末再印一次完整版 ══════════
 	_snapshot_c(st, ticks / WorldState.TICKS_PER_DAY)
 
+	# ══════════ §E 誰贏走了 argmax／誰真的被派出去（systems 2026-09-16 的兩個數）══════════
+	# ★①「偵查會輸」綠了，而**它輸給的不是攻擊**（偵查 util 遠高於攻擊）⇒ **誰贏走的？**
+	#   ⇒ ★若是覓食／生產／貿易 ⇒ 正常（世界大部分時候在幹活）；★★若集中在一兩個 ⇒ 下一張票的線索。
+	# ★★②**攻擊還會不會發生** —— ★★★這是本票【直接觸的量】：
+	#   單位對齊＋壓縮之後，**若攻擊一次都派不出去 ⇒ 我們修好了單位，卻把攻擊殺死了**。
+	#   ★而 before/after 的 util 數值**不可直接比**（舊尺的 72% 是舊尺上的幾何）
+	#   ⇒ ★★所以問的不是「變高還變低」，是**【還會不會發生】**。
+	print("")
+	print("★§E-① argmax 贏家分布（母體＝`rank.winner_all.__total` ＝ %d）" % [
+		int(Probe.counts.get("rank.winner_all.__total", 0))])
+	var wrows: Array = []
+	for k in Probe.counts:
+		var ks6: String = String(k)
+		if ks6.begins_with("rank.winner_all.") and not ks6.ends_with("__total"):
+			wrows.append([ks6.replace("rank.winner_all.", ""), int(Probe.counts[k])])
+	wrows.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	var wtxt: Array = []
+	for i in range(mini(12, wrows.size())):
+		wtxt.append("%s=%d" % [wrows[i][0], int(wrows[i][1])])
+	print("   前 12 名：%s" % " ".join(wtxt))
+	print("   ★★注意母體不同：`rank.winner_all` 與 `optpool.win.*` 是兩個計數點 ⇒ **不要互相相除**。")
+
+	print("★§E-② 逐 option【真的被派出去】幾次（ok/noop）—— ★『贏了』與『被派出去』是兩個數")
+	var drows: Array = []
+	for k2 in Probe.counts:
+		var ks7: String = String(k2)
+		if ks7.begins_with("dispatch.") and ks7.ends_with(".ok"):
+			var _o: String = ks7.substr(9, ks7.length() - 12)
+			drows.append([_o, int(Probe.counts[k2]), int(Probe.counts.get("dispatch." + _o + ".noop", 0))])
+	drows.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	var dtxt: Array = []
+	for i in range(mini(12, drows.size())):
+		dtxt.append("%s=%d/%d" % [drows[i][0], int(drows[i][1]), int(drows[i][2])])
+	print("   前 12 名：%s" % " ".join(dtxt))
+	var atk_ok: int = int(Probe.counts.get("dispatch.攻擊.ok", 0))
+	print("   ★★★**攻擊真的被派出去 ＝ %d 次**（noop %d）" % [
+		atk_ok, int(Probe.counts.get("dispatch.攻擊.noop", 0))])
+	print("      ★若這個數是 0 ⇒ **單位修好了，而攻擊被殺死了** —— 那必須在 merge 前知道。")
+	print("      ★★而本床**不對它下判決**：它是 merge 判準的輸入，不是本票的驗收格。")
+
+	# ★★★【攻擊也要一張拒絕表】（systems 2026-09-16 的第②個數的下一問）：
+	#   ★`dispatch.攻擊.ok = 0` 而 `noop > 0` ⇒ **它有走到仲裁，每一次都被擋**
+	#   ⇒ ★★【沒人想打】與【想打但派不出去】是兩個完全不同的世界，
+	#   ★★★而它們在「攻擊沒發生」這一句上長得一模一樣。
+	for _o2 in ["偵查", "攻擊"]:
+		var rows2: Array = []
+		var tot2: int = 0
+		for k8 in Probe.counts:
+			var ks8: String = String(k8)
+			if ks8.begins_with("arbiter.deny.") and ks8.ends_with(".opt." + _o2):
+				rows2.append("%s=%d" % [ks8.replace("arbiter.deny.", "").replace(".opt." + _o2, ""),
+					int(Probe.counts[k8])])
+				tot2 += int(Probe.counts[k8])
+		var hold2: Array = []
+		for k9 in Probe.counts:
+			var ks9: String = String(k9)
+			var pfx9: String = "arbiter.deny.優先序不足.opt." + _o2 + ".holder."
+			if ks9.begins_with(pfx9):
+				hold2.append("%s=%d" % [ks9.replace(pfx9, ""), int(Probe.counts[k9])])
+		print("   [DENY] %s：派出 %d／no-op %d｜理由 %s（合計 %d）｜擋它的現任 task %s" % [
+			_o2, int(Probe.counts.get("dispatch." + _o2 + ".ok", 0)),
+			int(Probe.counts.get("dispatch." + _o2 + ".noop", 0)),
+			(" ".join(rows2) if not rows2.is_empty() else "（空）"), tot2,
+			(" ".join(hold2) if not hold2.is_empty() else "（空）")])
+
 	# ══════════ §D 人口驟降後的攻擊率（★預先登記、**不入判**）══════════
 	# ★`ref = 自家人口 × …` ⇒ **人口掉了，ref 就變小** ⇒ 同一個目標看起來更肥
 	#   ⇒ ★★打殘的隊可能變得更愛攻擊 —— **可能是好戲（困獸猶鬥），也可能是病（越輸越瘋）**。
