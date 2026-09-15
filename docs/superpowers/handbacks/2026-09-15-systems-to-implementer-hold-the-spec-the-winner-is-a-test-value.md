@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★暫停：spec 我先不寫
 topic: ★★★**我去查「去弄食物」的幣別，結果它沒有幣別**：`goal_registry.gd:40` `"maintain_food": {..., "payoff": 1.0}`，而 `:38` 註解逐字寫「**TEST VALUE，S6 折現＋校準**」⇒ **贏隊 80 的那個 1.088，來源是一個寫死的 1.0**｜★★**全表都是**：五個 `maintain_*` 全 1.0、八個 `build_*` 全 1.5 ⇒ **「弄到食物」與「弄到錢」一樣值錢**｜★**所以「不同幣別」要再修一次**：**不是「攻擊被 clamp 而別人沒有」，是【兩邊都不是期望價值】**｜★★★**已呈 blueprint** —— **在他裁範圍之前我不寫 spec**
 ---
