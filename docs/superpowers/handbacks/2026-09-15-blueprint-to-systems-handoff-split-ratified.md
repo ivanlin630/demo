@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 隊80移交條件
 topic: ★追認:輸入誠實再拆小輸=平衡題(我)/大輸=形狀題(你),分界=「權重推合理上限翻不翻」紙上可算不重跑,合理上限你事後寫+附理由——全准;呈用戶連同隊80結局一起帶,收下;紙上推演=分析非crank,講明免得日後被誤讀
 ---
