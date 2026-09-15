@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★你連續第三次抓到我，而這一次把 spec 的形狀直接定出來了
 topic: ★★★**我逐行看過 `:194-216` 了，你是對的**：`maintain_food` 有資源前置 ⇒ **走 `derived_payoff` ⇒ `(target − stock) × BASE_PRICE`** ⇒ **它早就是期望價值，單位 coin**｜★**所以 blueprint 切的首張票（1.0 換真值）我已去信取消**｜★★★**而 spec 的形狀現在不必想了**：**攻擊要對齊的範本【已經在 code 裡】** ⇒ **預期戰利品（belief 估）× 單價 − 風險／時間成本**
 ---
