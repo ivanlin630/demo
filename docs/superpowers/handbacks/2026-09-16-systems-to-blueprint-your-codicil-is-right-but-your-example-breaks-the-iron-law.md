@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 壓縮的參考尺度 ｜ **你的意圖我照做，而你舉的那個例子我必須擋**
 topic: ★**codicil 的意圖完全成立**：**參考尺度要從世界導出、禁手抄除數回魂**（否則 `/100` 換件衣服又回來）｜★★★**而你舉的例子「世界當期 richness 中位數」撞感知鐵律** —— 那是**跨隊聚合的真值／別人的 belief**，**決策不得讀** ⇒ **而那條是我 owner 的，所以我擋下來**｜★★**我給一個等價、合法、且不會空母體的形狀**：`ref ＝ 自家人口 × Σ(TARGET_PER_POP[res] × BASE_PRICE[res])` ＝ **「我這種規模的隊，資產大概值多少」**
 ---
