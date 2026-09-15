@@ -526,6 +526,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			Probe.bump_sample("attack.won", {"team": team.team_id,
 				"tick": state.world.current_tick}, 400)
 			Probe.bump("attack.won_n")
+			# ★★★【第③種】贏了卻沒被派出去 ＝ **手不聽腦**（systems 2026-09-15）。
+			#   ★而判法要是**機械的**：當下 tick 結束時的 `current_task` 是不是攻擊；
+			#   ★★這裡只能看【當下】（派工在這一行之後）⇒ 故另記一筆「當時的 task」，
+			#   ★★★**由床去對帳**，不在這裡下結論。
+			Probe.bump_sample("attack.won_task", {"team": team.team_id,
+				"tick": state.world.current_tick,
+				"task_before": String(team.current_task)}, 400)
 	if Probe.enabled and not scored.is_empty():
 		var _sh_i: int = -1
 		for _si in range(scored.size()):

@@ -901,6 +901,16 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.attack_loot_est = FactionAISystem._belief_richness(_abel)   # ★tier 分層天然在它裡面（R² §⑤）
 		c.attack_belief_tier = int(_abel.get("tier", -1))             # ★驗收⑦：分桶看「知道得多的挑得更準」
 		c.attack_win_odds = clampf(c.self_armed_ratio / DecisionTerms.VIABLE_ARMED_RATIO, 0.0, 1.0)
+		# ★★★【第①種「餓而有牙卻沒搶」：**視野裡沒有目標**】（systems 2026-09-15）
+		#   ★而它**在因子樣本裡永遠不會出現** —— 因子 tap 只在【有目標】時 fire
+		#   ⇒ ★★**不在這裡單獨記，那一格就永遠是 0**（而 0 會被讀成「沒有這種情況」）。
+		if Probe.enabled and c.attack_target_id == -1:
+			var _nd0: float = clampf(1.0 - c.food_days / maxf(c.desperation_entry_threshold, 0.01), 0.0, 1.0)
+			if _nd0 >= 0.0005 and c.attack_win_odds >= 0.0005:
+				Probe.bump("hungry_armed.no_target")
+				Probe.bump_sample("hungry_armed.no_target_rows", {"team": c.team_id,
+					"tick": c.tick, "need": snappedf(_nd0, 0.001),
+					"odds": snappedf(c.attack_win_odds, 0.001)}, 200)
 		# ★★★輸入營養稽核（HOW 2026-09-12：**秤誠實 ≠ 輸入有營養**）——
 		#   ★三種形狀分開量：①系統性低估（估/真 比值）②雜訊（同向率）③值域壓縮（估的離散度）
 		#   ★★★而這一格**讀了真值** ⇒ **它是【分析欄】，只進 Probe、不進 ctx、不回頭餵秤**
