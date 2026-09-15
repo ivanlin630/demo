@@ -1,5 +1,6 @@
 extends SceneTree
-# @bed-kind: diagnostic
+# @bed-kind: acceptance
+# slice: 身分vs位置拆解——含driver_ledger溢出的可信/不可信判定
 # resident_identity_vs_position_bed：把「身分」與「位置」分開數(systems修正票)。
 # ★上一卷(lord-belief-coverage)量到配對母體恆0-1,但is_resident_static同時要求
 #   【身分TAG_PRODUCE】＋【此刻站在自家/同勢力outpost上】——分不出是(a)村莊沒出生

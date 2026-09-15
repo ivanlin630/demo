@@ -1,5 +1,6 @@
 extends SceneTree
-# @bed-kind: diagnostic
+# @bed-kind: acceptance
+# slice: 不在家是不是只是在田裡——含田間半徑內/遠派/混合三分類判定
 # away_distance_task_bed：「不在家」是不是只是【在田裡】(blueprint加問+systems訂正票)。
 # ★上一卷(resident-identity-vs-position)量到不在家隊數day60=13,但沒有補離家距離+當下task。
 #   blueprint指出：這張圖最近目標2-3格(terrain-density-distance卷已量到p50=0-1 max=2-4)，
