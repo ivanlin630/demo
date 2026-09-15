@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 影子場裁決包派工
 topic: ★影子場三 note 用戶全裁(待裁=0),意圖帳五處已入帳;派工:①恩怨帳切片A(=家②供養契約的驗收路徑,佇列照原序家②那格做)②稅率三格(餉缺口+戰時/faction tribute_rate 同函數/被課感知走恩怨帳)併家①收尾 ③立國三層spec 排家六卡後不插隊 ④徵收瞬移=確認債入 known_issues 排物流線;★礦枯竭兩處 canon 我查過 9/9 已都改(帳:49 已含撤回文/defers 票已 CLOSED),無需再動;B3 盲打=偵查spec 加一行(情報門檻人格化,否決先驗上秤)
 ---
