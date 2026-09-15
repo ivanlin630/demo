@@ -122,4 +122,31 @@ else
   echo "[MAILBOX-GATE] ④未追蹤：沒有【在磁碟上但不在 git 裡】的信（★20 分鐘內的新信豁免）"
 fi
 
+# ── ⑤長期未消費（systems 2026-09-15）──────────────────────
+#   ★血證：systems 的 fp 預註冊信躺了 **61 小時**，而發現它的是 blueprint。
+#   ★★而本闘原本的母體是【回退／刪除／未追蹤】—— **沒有一格在看「open 躺多久」**。
+#   ★★★寄件人對【未消費】沒有可見性 ⇒ 而「有人替我盯」不是制度。
+_STALE_H="${MAILBOX_STALE_HOURS:-12}"
+_stale=""
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  case "$(head -8 "$f" 2>/dev/null | grep -m1 '^status:')" in
+    *open*) ;;
+    *) continue ;;
+  esac
+  if [ -n "$(find "$f" -mmin +$((_STALE_H*60)) 2>/dev/null)" ]; then
+    _to=$(head -8 "$f" 2>/dev/null | grep -m1 '^to:' | sed 's/^to: *//')
+    _stale="$_stale   ★ $(basename "$f")  → to:${_to}
+"
+  fi
+done <<< "$(ls -1 docs/superpowers/handbacks/*.md 2>/dev/null)"
+if [ -n "$_stale" ]; then
+  echo "[MAILBOX-GATE] ★★★⑤長期未消費：以下信 status:open 超過 ${_STALE_H} 小時"
+  printf '%s' "$_stale"
+  echo "   ★這不是紅（警告）—— 有些信就是要放著；★★但**寄件人要看得到它還躺在那裡**"
+  echo "   ★★★血證：fp 預註冊信躺 61 小時，而發現的人不是寄件人"
+else
+  echo "[MAILBOX-GATE] ⑤長期未消費：無（門檻 ${_STALE_H} 小時）"
+fi
+
 exit $fail
