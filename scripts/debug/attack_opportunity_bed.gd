@@ -274,6 +274,26 @@ func _run() -> void:
 	print("   輸給誰：%s" % str(lost))
 	print("   距第一名的差：%s（lt10pct ＝ 擦邊）" % str(gapb))
 	print("   ⇒ ★★【擦邊輸】與【輸很多】是兩種病：前者是權重，後者是那一項根本不夠格")
+	# ★★★具名：那幾支【餓且有牙】的隊，它們的攻擊輸給誰（systems 2026-09-15）
+	#   ★聚合說的是「通常輸給誰」；具名說的是「**一支該打而不打的隊在想什麼**」。
+	var watch: Dictionary = {}
+	for r in frows:
+		if float(r["need"]) >= 0.0005 and float(r["odds"]) >= 0.0005:
+			watch[int(r.get("team", -9))] = true
+	var rows2: Array = Probe.samples.get("attack.rank_row", [])
+	var hit: int = 0
+	for r in rows2:
+		if not watch.has(int(r.get("team", -9))): continue
+		hit += 1
+		if hit <= 15:
+			print("   隊 %d @tick %d：攻擊排第 %d／%d｜attack_u=%.3f｜贏家 %s(%.3f)｜top3 %s" % [
+				int(r.get("team", -9)), int(r.get("tick", -9)), int(r["rank"]), int(r["of"]),
+				float(r["attack_u"]), String(r["winner"]), float(r["winner_u"]), str(r["top3"])])
+	print("   ★具名列母體：盯的隊 %d 支｜`attack.rank_row` 樣本 %d 筆｜命中 %d 筆" % [
+		watch.size(), rows2.size(), hit])
+	if hit == 0:
+		print("   ★★【命中 0】⇒ **這不是「它沒輸」，是【那支隊沒被 rank_row 取樣到】** ——")
+		print("      `attack.rank_row` 上限 200 且是 first-N，**兩者在這行字上長得一樣**")
 	# ★★★【軌跡】餓且有牙的隊，它們的 need 隨時間怎麼走，有沒有真的去搶（systems 2026-09-15）
 	if not frows.is_empty():
 		var traj: Dictionary = {}

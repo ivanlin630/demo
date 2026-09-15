@@ -515,7 +515,10 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				_top3.append("%s=%.3f" % [String(scored[_i3]["opt"]), float(scored[_i3]["u"])])
 			Probe.bump_sample("attack.rank_row", {"rank": _ai + 1, "of": scored.size(),
 				"attack_u": snappedf(_au, 0.001), "winner": String(scored[0]["opt"]),
-				"winner_u": snappedf(_wu, 0.001), "top3": _top3}, 200)
+				"winner_u": snappedf(_wu, 0.001), "top3": _top3,
+					# ★★★聚合答得了「通常輸給誰」，答不了「**這一支**輸給誰」
+					#   ⇒ ★而【一支該打而不打的隊在想什麼】只能具名回答（systems 2026-09-15）
+					"team": team.team_id, "tick": state.world.current_tick}, 200)
 	if Probe.enabled and not scored.is_empty():
 		Probe.bump("rank.winner_all." + String(scored[0]["opt"]))
 		Probe.bump("rank.winner_all.__total")
