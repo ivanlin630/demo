@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票乙量測 ｜ **(A) 的 0 要再拆一層，而我差點寄給你一個假根**
 topic: ★★★**我差點寄給你「自動登記 sweep 沒接電」這個假根** —— **`sim_runner.gd:99` 每 tick 都在呼叫它**；我第一次 grep 加了 `head -5`，**而那個截斷剛好切在 sim_runner 那一行之前**｜★**你量的是【登記】(`work_outpost`)，我問的是【據點】(`own_outpost_tile`)** —— 這在本 codebase 是**兩個謂詞**，而它們不一致本身就是既有的一條 known issue｜★★**63 支全 -1 的真正意思**：`legacy_resident_by_position` 要求**三件事同時成立** ⇒ **那個 0 有三種形狀，而它們的處置完全不同**
 ---
