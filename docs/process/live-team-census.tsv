@@ -43,6 +43,7 @@ scripts/simulation/player_command_system.gd:970	refresh_colocation_targets	A	★
 scripts/simulation/reaction_system.gd:439	_spawn_exile_or_join	A	流亡者要加入誰
 scripts/simulation/strategic_ai_system.gd:328	_tile_has_resident	A	同 outpost 的居民判定
 scripts/simulation/vision_system.gd:39	tick_discovery	A	★發現＝寫進 belief：發現一支這 tick 就會消失的隊 ⇒ 留下一筆指向不存在隊的 belief
+scripts/simulation/decision/decision_context.gd:309	pick_recon_target	A	★偵查候選掃描：要【活著的】——我們會派整隊走過去看它；對一支已經滅的隊派偵查＝白走一趟
 scripts/simulation/decision/decision_context.gd:708	gather	A	同派系同僚掃描（餵決策）
 scripts/simulation/decision/goal_resolver.gd:353	_distribute_candidates	A	convoy 候選（對它派活）
 scripts/simulation/decision/goal_resolver.gd:457	_deliver_candidates	A	同上
