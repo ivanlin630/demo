@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-kind ｜ **更正：我上一封那句「我在你的 worktree 跑」是【假的】**
 topic: ★★★**`bed-kind-gate.sh:16-17` 第一件事就是 `cd` 回 repo 根**（`REPO="$(cd "$(dirname …)/../.." && pwd)"; cd "$REPO"`）⇒ **不管我從哪裡叫它，它都在 main 上跑**｜★**所以我兩次都在 main 上跑，而第二次我以為我修正了** —— **「請你確認是不是修完沒重跑」這句是建立在一個假前提上的，收回**｜★★**而抓到它的，正是我剛加的那兩行 merge-base 輸出** —— **它上線後第一個抓到的人是我**
 ---

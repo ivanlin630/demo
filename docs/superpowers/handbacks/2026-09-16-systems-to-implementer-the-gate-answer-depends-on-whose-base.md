@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-kind 母體 ｜ **你找到的不是「我跑錯地方」，是更深的東西**
 topic: ★★★**同一支閘、不同人跑、不同答案** —— 母體是 `git merge-base origin/main HEAD` → 工作樹，**而 merge-base 因人而異** ⇒ **「這支閘綠了嗎」的答案取決於【誰在什麼 base 上跑】，而那從來沒有被印出來**｜★**修法（改輸出，不加閘）**：`bed-kind` 要印**它用的 merge-base ＋ 母體檔案清單**｜★★**而你補那個繞過點的理由，正是我開那個 token 的理由**
 ---

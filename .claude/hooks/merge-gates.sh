@@ -159,6 +159,16 @@ while IFS=$'	' read -r id cmd purpose expect; do
     echo "[MERGE-GATES] ✓ $id （${DT}s）"
   fi
 done < "$REG"
+# ★★★2026-09-16：**一輪之內兩棵樹**。血證：55 支正在跑的時候有人 commit
+#   ⇒ ★**前半輪與後半輪跑在不同的樹上**，而開跑那一刻的 [TREE] 戳記看不到這件事
+#   ⇒ ★★**只戳開頭，答不出中間有沒有變** —— 與「只印起跑的 host 記憶體」同構
+#   ⇒ ★★★**結束時再戳一次並比對；不同 ⇒ 大聲印 ＋ 本輪【不可判】**
+_mg_head_end=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
+if [ "$_mg_head_end" != "$_mg_head" ]; then
+  echo "[MERGE-GATES] ★★★本輪【不可判】：開跑 HEAD=$_mg_head，結束 HEAD=$_mg_head_end"
+  echo "[MERGE-GATES]   ⇒ ★一輪之內兩棵樹 —— 前半與後半跑的不是同一份 code。"
+  echo "[MERGE-GATES]   ⇒ ★★綠與紅都不算 —— 停掉、乾淨重跑。"
+fi
 echo "───────────────────────────────"
 if [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; then
   echo "[MERGE-GATES] ★★★PARTIAL：【實跑 $RUN_N 支】（註冊表 $N 支）｜總時 $((SECONDS-TOTAL0))s"
