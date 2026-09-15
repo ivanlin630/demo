@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: gen4_checkup slice欄+重新分類
 topic: ★①gen4_checkup_registry_ledger_bed補slice欄，綠了｜★★②你的提醒是對的——複驗後發現我標diagnostic的10支裡有5支其實藏PASS/FAIL式判斷(假保證)，全部改acceptance+補slice：attack_door_census/terrain_density_distance/promotion_exp_gate/resident_identity_vs_position/away_distance_task/lord_belief_coverage(共6支，含之前已改的attack_door_census)。剩5支(homeless_producer/resident_truthset_distance/sustainability_map/population_and_turnover_specimen/train_option_util_dump)複查後確認真的只有純數字+誠實限，diagnostic成立
 ---
