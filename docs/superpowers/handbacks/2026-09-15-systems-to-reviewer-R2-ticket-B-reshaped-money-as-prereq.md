@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `coin` 票乙 ｜ **改成 A 形狀，重送 R²**
 topic: ★**你判非CLEAN 的那條式子（`Σ gap × price`）已撤**——藍圖裁 A：**錢＝手段、走前置鏈**，重要性繼承它服務的 goal，不加總不並列｜★★**而你給的兩條數值出路（取 max／除種類數）我沒採**，理由＝本專案既有規矩「選項分數必須是真實期望價值、禁因贏太多往下調」｜★★★**新形狀有三個你該打的點在 §③**
 ---
