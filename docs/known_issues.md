@@ -4703,33 +4703,35 @@ implementer 量到：**63/63 支隊 `work_outpost == (-1,-1)`**。
 ⇒ **那條分支【從來沒被走過】**。
 ★**我把一個兩子句條件的第二半當成了全部** —— 同日第二次同型。
 
-## ★★★全世界【生產隊】＝ 0 支（2026-09-15）
+## 【第一天】沒有生產隊（2026-09-15，★標題已更正）
 
-狀態：已知未修
-回訪：據點類型分佈回報時，複審日 2026-09-22
+狀態：未確認
+回訪：量測窗 2026-09-22（30 天重跑）
 
-implementer 量到：**(a) PRODUCE 隊 ＝ 0 支**／**(b) 【擁有】據點 ＝ 18 支**（地形 forest 16 / plains 2）／
-**【登記】＝ 0 支**／交集 0。
+★★★**更正（同日）**：我原寫「全世界生產隊 ＝ 0 ⇒ 三個動詞【整個窗裡】一次都沒成功」
+—— **字面成立、意義誤導**：那個窗是 **1440 tick ＝ 1 個遊戲天**
+（`coin_as_prereq_bed.gd:58`），而世代 4 體檢卷是 **30 天**、同一個 `warring_states.json`
+（`gen4_checkup_registry_ledger_bed.gd:19`）且量到 **13 支**。
+⇒ ★**13（30 天）與 0（1 天）完全相容 —— 沒有一份卷在騙。**
+⇒ ★★**而蓋一個據點本來就要好幾天** ⇒ 第一天沒人完工安頓是【預期】不是【斷鏈】
+⇒ ★★★**我把一個「還沒發生」報成了「不會發生」。**
 
-★**而 `TAG_PRODUCE` 的寫入點只有三個**（裸掃全庫，production 側）：
-`interaction_system.gd:1691`（安頓 settle）、`:1718`（convert_resident）、
-`outpost_system.gd:545`（`_auto_settle_builder` —— ★★**而它只在 `outpost_type == "civilian"` 時給 PRODUCE，
-否則給 MILITARY**）。**世界生成端一個都沒有** ⇒ 生產隊完全依賴這三個動詞。
-⇒ **PRODUCE ＝ 0 代表這三個動詞在整個窗裡一次都沒成功。**
+**第一天的事實（仍然有用，但只能這樣引用）**：
+PRODUCE 隊 0／擁有據點 18 支（地形 forest 16 / plains 2；類型 **civilian 11 / military 7**）／
+登記 0／非平原據點母體 16 支且 `maintain_food` **16/16 satisfied**
+⇒ ★**那 14 支「沒被問」不是斷點 —— 問了也會說不用**（第一天起始糧還夠）。
 
-★★★**連帶全部空掉**（凡以 `TAG_PRODUCE` 為門的）：登記錨、
-`labor_system.gd:33/:61` 的共址勞力池、`interaction_system.gd:664/:719` 的居民特別稅、
-`faction_ai_system.gd:5296/:5341/:7496` 的各迴圈、`decision_context.gd:445/:457`。
+**仍然成立的結構事實**（與窗無關）：
+`TAG_PRODUCE` 的 production 側寫入點只有三個 —— `interaction_system.gd:1691`（安頓）、
+`:1718`（convert_resident）、`outpost_system.gd:545`（完工安頓，★**只在 `outpost_type == "civilian"` 時給**）；
+**世界生成端一個都不給**。
+★★**待答**：那 11 個 `civilian` 據點怎麼來的（genesis 預置／建造完工／奪取）——
+**預置 ⇒ 沒有建造子隊可安頓，合理；完工 ⇒ 那才是真的斷了。**
+⇒ **30 天重跑票**：`docs/superpowers/handbacks/2026-09-15-systems-to-implementer-REDO-on-a-window-where-the-verbs-can-fire.md`
 
-★★**而測試裡從來不空**：約 80 處 debug/fixture **手動指派** `TAG_PRODUCE`
-⇒ ★**測試母體與真實母體系統性不同** ⇒ **沒有任何一支測試會發現真世界沒有生產隊。**
-
-**待答（決定性的下一個數）**：那 18 個據點的 `outpost_type` 分佈，以及它們怎麼來的
-（建造完工／genesis／奪取）。★**若大多數不是 `civilian` ⇒ 建造者都拿到 MILITARY
-⇒ 永遠不會有生產隊，而農田（需 `allowed_outpost: ["civilian"]`）也建不起來。**
-★★**而 farming 要 `allowed_outpost: ["civilian"]`**（`outpost_system.gd:100`）
-⇒ **若 (b) 成立，「農田限平原」那把刀砂不到人 —— 因為前一道門（要有據點）就沒人通過。**
-
+★★**而測試裡從來不空**：約 80 處 fixture 手動指派 `TAG_PRODUCE`
+⇒ **測試母體與真實母體系統性不同**；
+★★★**而今天又多一層：連量測床自己也會因為【窗太短】而系統性看不到它。**
 
 ## 11 支隊沒有【幾乎每支隊都該有】的 maintain goal（2026-09-15，推論非觀測）
 

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 兩個收口的數 ｜ ★★★**迴圈收乾淨了：它們只是還不餓**
 topic: ★**①那 18 個據點**：`{civilian: 11, military: 7}` ⇒ ★★**PRODUCE ＝ 0 不是因為「全是 military」** —— **有 11 個 civilian**｜★★★**②那 16 支的 `maintain_food` 狀態 × 有沒有被問**：**`{沒被問/satisfied: 14, 被問過/satisfied: 2}`** ⇒ **16/16 全部 satisfied**｜★**所以「14 支沒被問」不是斷點** —— **它們不缺糧，不必問** ⇒ ★★**我上一封說「斷點在買之前」那句要收回**｜★★★**真正的結論是【窗太短】**：第一天大家的起始糧還夠，**那把刀會咬，只是還沒咬到**
 ---
