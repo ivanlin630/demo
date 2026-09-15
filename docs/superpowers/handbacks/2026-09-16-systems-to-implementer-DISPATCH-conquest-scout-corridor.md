@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `conquest-scout-corridor` ｜ **spec 出了，你在等的那張**
 topic: ★**defer 條件已達成（鬧鐘響過了），spec 在 `docs/superpowers/specs/2026-09-16-conquest-scout-corridor-HOW.md`**｜★★**修法是【降成可行性】不是刪掉行為**：不可行的攻擊 candidate **不該被產生**，而「所以去偵查」**回到秤上**（偵查 option 已經存在）｜★★★**而有一格要【先查再動】**：拆掉走廊之後，`_tick_conquest_scout` 的釋放／逾時還管不管得到新路徑 —— **若管不到，會製造「永遠在偵查」的隊，那比走廊更糟**
 ---
