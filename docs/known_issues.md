@@ -4662,6 +4662,13 @@ live-team-census    3 筆「普查表指向一個現在撈不到的站點」
 - **★★`BASE_PRICE` 也缺 coin，而 `trade_valuation.gd:173-175` 用函式內特判補上**
   ⇒ **表與函式兩份真相**；★**補表不是修法**（交易迴圈會把 coin 當可買賣商品 ⇒ 型別錯）。
   ⇒ **de-patch 方向＝取價單一入口**。
+- **★★★同一張表同時是【價格】又是【可交易集合】**（2026-09-15 補）：六處把 `BASE_PRICE.keys()`
+  當「可交易品清單」迭代 —— ★**而這個危險已經被人手工繞開三次、繞漏了三處**：
+  `interaction_system.gd:1324`／`:1331`／`player_api_mapper.gd:860` 有 `res == "coin"` 守衛，
+  `interaction_system.gd:1289`（巧遇賣 surplus）／`player_trade_system.gd:39`／`:45` **沒有**。
+  ★★`player_api_mapper.gd:859` 的註解**自己說出了病名**：「可交易白名單：限 `BASE_PRICE` 項」。
+  ⇒ **那三個守衛是化石**：知道 coin 不該進交易集合，卻在自己那一處排除、不修型別。
+  ⇒ 處置＝票甲（把集合獨立列舉拆出來、刪化石守衛；★**新集合不准是 `BASE_PRICE.keys()` 的別名**）。
 - **★★★通則（同型會再犯）**：**per-resource 表的預設 `0`，語意上是「不存在」不是「零」**
   ⇒ 一個資源在表裡缺席，全鏈都會**靜默地**把它當不存在，而**缺席不會叫**。
 - **待查（另立，未開票）**：`maintain_material` **85% 的 payoff 恰好 0**（implementer 2026-09-15 側報，

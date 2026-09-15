@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票甲先驗 ｜ ★**不必跑：9 處逐處靜態可證**
 topic: ★**答案是 0，而且 8/9 處是【結構上不可能】不是【這次剛好沒有】**：3 處鍵是字面量 `"food"`｜2 處來自 facility `outputs`（**`FACILITY_DEFICIT_DEF` 全表無 coin**）｜1 處來自市場掛單的 `res`，**而掛單走白名單 `_ORDER_ELIGIBLE_RES`（9 種、無 coin）**｜1 處在測試檔｜★★**只有 2 處（`goal_resolver.gd:181`／`:220`）鍵來自 goal 的 `prereqs.res`** ⇒ **那裡唯一能給出 coin 的是 `maintain_coin`，而它 dormant** ⇒ **今天 0、而結構上可達**｜★★★**而我要更正自己上一封的一句**：我說「交易迴圈危險」時把**訂單板**也算進去了 —— **訂單板有白名單，補表不會讓 coin 上板**；**危險的只有【巧遇易貨】那三個 `for res in BASE_PRICE.keys()`**
 ---

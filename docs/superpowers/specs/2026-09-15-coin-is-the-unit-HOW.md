@@ -1,6 +1,6 @@
 ---
 owner: systems
-status: 裁定版（v2 — 原「補一行常數」版【撤銷】）
+status: 裁定版 v3（v1「補一行常數」撤銷；v2 的票甲【改形狀】——見 §票甲）
 date: 2026-09-15
 supersedes: 本檔 v1（`BASE_PRICE["coin"] = 1.0`）
 ---
@@ -54,20 +54,57 @@ need_oracle.gd:82     need_keep = _self_use + _supply_chain + _construction_faci
 ⇒ 補丁把洞遮起來，洞在**其餘 37 處照樣開著**，而且從此沒人會再撞到它。
 ⇒ **de-patch 方向＝取價單一入口，不是再加一個特判。**
 
-# 票甲：取價單一真相（seam 收斂）
+# 票甲【改形狀】：把「可交易品集合」從價目表裡拆出來
 
-**★先驗先行**（沿用 v1 的「先驗後修」紀律）：
-- 38 處中 **C 類「固定鍵索引」8 處讀得出字面鍵** ⇒ **靜態可判**，直接列表。
-- **A 類「單鍵 `.get(res, ...)`」9 處的 `res` 是變數** ⇒ **要 runtime**：
-  量「這 9 個呼叫點中 `res == "coin"` 的次數」。
-- **若全 0** ⇒ 不一致是**潛伏**（給未來的陷阱），**不是現行 bug**
-  ⇒ 修法降級成機械收斂：`.get(res, 0.0)` → `local_value()`／共用取價函式，**零行為變**。
-- **若非 0** ⇒ 有現行 bug，逐處判，**不准整批套同一個修法**。
+## 先驗已結案：答案 0，而且是**結構上不可能**，不是「這次剛好沒有」
 
-**驗收必有一格**：★★**fp 不變＝等價，而等價不證明被走到**
-⇒ 要一顆 tap 證「新路徑真的被走到」——`local_value()` 內 `:180-190` 已有同型 tap 可抄。
+implementer 逐處靜態證了 9 處（`2026-09-15-implementer-to-systems-pre-verify-answered-statically-...`）：
+3 處鍵是字面量 `"food"`｜2 處來自 `FACILITY_DEFICIT_DEF` 的 outputs（全表無 coin）｜
+1 處來自市場掛單（走獨立白名單 `order_system.gd:8 _ORDER_ELIGIBLE_RES`，9 種無 coin）｜1 處在測試檔｜
+★**只有 `goal_resolver.gd:181`／`:220` 兩處的鍵來自 goal 的 `prereqs.res`** ——
+**今天 0（唯一能給出 coin 的 `maintain_coin` 是 dormant），而票乙讓它復活的那一刻這兩處就會拿到 coin。**
+⇒ 照 v2 寫的判準：**潛伏，不是現行** ⇒ **原本的「收斂 9 處取價點」不是重點。**
 
-**不在範圍**：不拆 `local_value():173` 的特判（收斂完才談）。
+## ★★★真正該收斂的是【一張表同時是價格、又是可交易集合】
+
+`BASE_PRICE` 被當成「可交易品清單」迭代 —— ★**而這張表兼作清單的病，已經有人撞過三次，
+並且是用【逐處手工排除 coin】繞開的**：
+
+```
+interaction_system.gd:1289  巧遇賣 surplus   for res in BASE_PRICE.keys()   ❌ 無 coin 守衛
+interaction_system.gd:1324  易貨 give        for give_res in ...            ✅ if give_res == "coin": continue
+interaction_system.gd:1331  易貨 pay         for pay_res in ...             ✅ if pay_res == "coin" or ...
+player_trade_system.gd:39   sellable 清單    for res in ...                 ❌ 無
+player_trade_system.gd:45   prices 價目      for res in ...                 ❌ 無（★但這處是【映射】語意，見下）
+player_api_mapper.gd:860    玩家可交易項     for res in ...                 ✅ if res == "coin": continue
+                            ★★而它上一行的註解直接寫著
+                            「可交易白名單：限 BASE_PRICE 項（coin 另列 face value）」
+```
+
+★**那三個手工守衛就是化石**：寫它們的人**知道** coin 不該進交易集合，
+而他們的修法是**在自己那一處排除**，不是修型別 ⇒ **守漏了三處**。
+⇒ ★★**與 `local_value():173` 的特判、與兩張表的缺席，是同一個病的第三次現形。**
+
+## 本票要做的
+
+1. **獨立列出「可交易品集合」**（例如 `TRADEABLE_RES`），六處迭代改讀它。
+2. **刪掉那三個手工 coin 守衛** —— 它們是補丁化石，型別修好後就是死碼。
+3. ★**區分兩種語意，不要一刀切**：
+   - **集合語意**（誰可以被買賣）＝ `:1289`／`:1324`／`:1331`／`player_trade_system.gd:39`／`player_api_mapper.gd:860`
+   - **映射語意**（每個東西多少錢）＝ `player_trade_system.gd:45` 的 `prices`
+     ⇒ ★★**價目表裡有 coin＝1.0 是【對的】**，它不該被當成「可賣清單」處理。
+
+## ★★★硬約束：新集合**不准**寫成 `BASE_PRICE.keys()` 的別名
+
+`const TRADEABLE_RES = BASE_PRICE.keys()` ＝ **換個名字的同一張表** ⇒ 票乙補 coin 照樣炸。
+⇒ **必須是獨立列舉的字面清單**，且驗收要有一格直接證明**它不含 coin**（負向 fixture）。
+
+## ★驗收：本票【今天不會改變任何數字】
+
+拆出來的集合今天**恰好等於** `BASE_PRICE.keys()`（因為 coin 還沒進表）⇒ **fp 應逐位元不變**。
+★★**而那正是它能先做的理由**：**零差別的今天，防的是票乙的明天** ——
+與既有那條「預防性 de-patch：修一個還沒發生的 bug，排在它能 fire 之前」同形。
+⇒ ★★★**必須在 handback 講死「這張票不會改善任何症狀」**，否則它會被當成解法、然後驗收落空。
 
 # 票乙：coin 的需求是衍生的（機制）
 
@@ -91,10 +128,18 @@ need_oracle.gd:82     need_keep = _self_use + _supply_chain + _construction_faci
 
 **序**：**票乙等票甲** —— 它要用取價函式，而取價現在有兩份真相。
 
+★**票乙上線那一刻會活過來的兩處**：`goal_resolver.gd:181`／`:220`
+（鍵來自 goal 的 `prereqs.res`，而唯一能給出 coin 的是 `maintain_coin`）
+⇒ **票乙必須把這兩處一起驗**，否則「復活」的第一個效果會出現在一個沒人盯的地方。
+
+★★**票甲做完之後，型別就講得通了**：`local_value():173` 說「coin ＝ 1.0」**留著是對的** ——
+**coin 有價格、但不在可交易集合裡**，而那正是「計價單位」該有的型別。
+⇒ 所以 v2 寫的「票甲收斂完才談拆 :173」**修正為：不拆**。
+
 # 不做 / 另立
 
 - **不**補 `BASE_PRICE["coin"]`。
-- **不**碰 `local_value():173`（票甲收斂完才談）。
+- **不**拆 `local_value():173` —— 票甲把集合拆出去之後，它就是**單位定義**的正確位置（v2 此條已修正）。
 - `maintain_material` **85% payoff ＝ 0**（implementer 側報，未查）⇒ **另立一條**，不併本票。
 - `faction_ai_system.gd:4654` 的逐鍵迴圈：implementer 已查證 coin gap ＝ 0 ⇒ **安全**，
   但它在票甲後應一併走取價函式。
