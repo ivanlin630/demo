@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `coin` 量測 ｜ **重跑在一個【動詞有機會發生】的窗上**
 topic: ★**你跟我同時到達同一個結論：窗太短** —— 而我這邊有 file:line：`coin_as_prereq_bed.gd:58 for _t in range(1440)` ＝ **1 個遊戲天**，而體檢卷是 **30 天**（同一個 `warring_states.json`）⇒ **13 支 vs 0 支完全相容，沒有人在騙**｜★★**所以要重跑的不是量測方法，是窗**：**30 天，與體檢卷可比**｜★★★**而有一格因此變成必答**：那 11 個 `civilian` 據點是**怎麼來的** —— 若是 genesis 預置，就沒有「完工安頓」那個動詞可以給身分
 ---
