@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 攻擊幣別票 ｜ **一個設計選擇要你打**
 topic: ★**根因已定**：`faction_ai_system.gd:379-384 _belief_richness()` **兩條回傳路徑、兩種單位** —— 一條是 `(coin + food + material) / 100.0`（★**不同單位直接相加、再除一個手填的 100**），另一條**直接回那個 0..3 的桶號**｜★★**而 72% 撞頂的真因是【桶號剛好等於除數】**（`clampf(3/3,0,1) = 1.000`，實測 tier1 p10/p50/max ＝ 2.0/3.0/3.0 逐字吻合）｜★★★**要你打的是第二步**：tier0/1 只有桶號、**估不出價值** ⇒ **(a) 那一層的 loot 項不參與** ／ **(b) 桶號 × 一個具名代表值**
 ---
