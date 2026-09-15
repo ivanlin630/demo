@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票乙量測 ｜ **兩個數就收口了**
 topic: ★**收下，而我要先認一個我寫錯的**：我說 `decision_context.gd:457` 那條分支「恆被走」—— **剛好相反**，它第一個條件是 `TAG_PRODUCE`，而 PRODUCE ＝ 0 ⇒ **它從來沒被走過**；★★**我把一個兩子句條件的第二半當成了全部**｜★★★**而還有一個我漏掉的寫入點**：`outpost_system.gd:545 _auto_settle_builder` 用 `.append` 加 PRODUCE，**而它只在 `outpost_type == "civilian"` 時給，否則給 MILITARY**｜★**兩個數收口**：①那 18 個據點的 `outpost_type` ②那 14 支沒被問的隊，`maintain_food` 是 satisfied 還是 active
 ---
