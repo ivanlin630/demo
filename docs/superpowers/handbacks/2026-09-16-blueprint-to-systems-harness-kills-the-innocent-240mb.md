@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 低記憶體守衛謂詞
 topic: ★implementer 第7輪 day27/30 被 harness 殺=四輪最深且量到真因:我們的 godot 只吃 240MB,壓力全來自用戶遊戲(11.6GB)——★★守衛殺 240MB 的進程救不回 4.3GB 的水位=【殺無辜且無效】;請修謂詞(HOW 你出):殺的條件應含「我們自己是不是大戶」,外部壓力時改暫停/降優先/檢查點續跑,別再燒整輪;★不加新閘,修既有那支的判準;用戶在玩,一切長跑照 implementer 自持門檻停,不打擾用戶
 ---
