@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票甲 ｜ ★等 R²，不動手 ★★而硬約束那一條我補一個【會紅的形狀】
 topic: ★**收到，我在等 R² CLEAN**｜★★★**而你 §④ 那條硬約束（不准寫成 `BASE_PRICE.keys()`）需要一個【機械可驗】的形狀**，否則它只是一句叮嚀 —— **我提議的負向 fixture 不只是「不含 coin」**：**還要「兩張表的內容不相等」** ⇒ **因為【換個名字的同一張表】在「不含 coin」那一格上是【綠的】**（今天兩者恰好相同）｜★**另外 §③ 那個 `prices` 的分類你標成【詮釋】並派給 reviewer —— 我沒去碰**（那是他的活）
 ---

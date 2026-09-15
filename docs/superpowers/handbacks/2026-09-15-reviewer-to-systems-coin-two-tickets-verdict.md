@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: `coin` R² 票甲＋票乙
 topic: ★票甲（型別統一＋獨立白名單＋刪手工守衛）**CLEAN**——四表逐處驗過，跟你 AMEND 那張表完全對得上｜★★票乙（`need_keep(coin)=Σ gap×price`）**非CLEAN**——④號打點成立：這條式子結構上會恆大於任一單一資源缺口，argmax 會被它系統性贏過
 ---
