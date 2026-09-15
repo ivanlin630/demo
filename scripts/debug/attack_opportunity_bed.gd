@@ -295,11 +295,48 @@ func _run() -> void:
 			print("   隊 %d @tick %d：攻擊排第 %d／%d｜attack_u=%.3f｜贏家 %s(%.3f)｜top3 %s" % [
 				int(r.get("team", -9)), int(r.get("tick", -9)), int(r["rank"]), int(r["of"]),
 				float(r["attack_u"]), String(r["winner"]), float(r["winner_u"]), str(r["top3"])])
+	# ★★★【逐列紙上推演】（systems 2026-09-15 改寫判準）：
+	#   ★舊：用【聚合 gap】算「推到上限會不會翻」⇒ **它假設那個差是穩定的，而它不是**。
+	#   ★★新：**逐列** ⇒ 「在 N 次評分裡，有【幾次】推到上限就會翻」。
+	#   ★★★而【合理上限】是**裁決**：`AO_WEIGHT_CEIL` 沒給 ⇒ **印不可判**，
+	#     **床不自己挑一個數字** —— 否則那個數字三個月後會變成沒人記得為什麼的線。
+	if hit > 0:
+		if not OS.has_environment("AO_WEIGHT_CEIL"):
+			print("   ★逐列紙上推演：**不可判**（未給 `AO_WEIGHT_CEIL`）—— ★★上限是裁決，床不挑")
+		else:
+			var ceil_w: float = float(OS.get_environment("AO_WEIGHT_CEIL"))
+			var flip: int = 0
+			var seen: int = 0
+			for r in rows2:
+				if not watch.has(int(r.get("team", -9))): continue
+				seen += 1
+				if float(r["attack_u"]) * ceil_w > float(r["winner_u"]): flip += 1
+			print("   ★★★逐列紙上推演（上限 ×%.2f，由裁決給）：**%d / %d 次會翻**" % [
+				ceil_w, flip, seen])
+			print("      ★近似：把 `attack_u` 整個乘上限 —— **這是最寬鬆的假設**")
+			print("      （因為只有機會項會被權重放大，而這裡假裝整個 util 都會）")
+			print("      ⇒ ★★**0 次會翻 ⇒ 形狀題（這句很硬）**｜**多數會翻 ⇒ 平衡題**｜k 小 ⇒ 要講出 k／N")
 	print("   ★具名列母體：盯的隊 %d 支｜`attack.rank_row` 樣本 %d 筆｜命中 %d 筆" % [
 		watch.size(), rows2.size(), hit])
 	if hit == 0:
 		print("   ★★【命中 0】⇒ **這不是「它沒輸」，是【那支隊沒被 rank_row 取樣到】** ——")
 		print("      `attack.rank_row` 上限 200 且是 first-N，**兩者在這行字上長得一樣**")
+	# ★★★四格對帳（systems 2026-09-15）：沒目標／打不贏／秤上輸了／贏了卻沒派出去
+	#   ★而①與④的 tap 在別處（ctx / engine）—— **它們有記，而床一直沒印**
+	#   ⇒ ★★★又一次【裝好了沒接電】：**tap 在跑，而沒有人看得到它**。
+	print("")
+	print("★★★四格（餓而有牙卻沒搶）：")
+	print("   ①沒有目標：%d 次（樣本 %d）—— ★genuine：**不是不想搶，是沒人可搶**" % [
+		int(Probe.counts.get("hungry_armed.no_target", 0)),
+		(Probe.samples.get("hungry_armed.no_target_rows", []) as Array).size()])
+	var _wt: Array = Probe.samples.get("attack.won_task", [])
+	var _already: int = 0
+	for r in _wt:
+		if String(r.get("task_before", "")) == TeamData.TASK_ATTACK: _already += 1
+	print("   ④贏了的次數：%d（樣本 %d）｜其中當時 task 已經是攻擊的：%d" % [
+		int(Probe.counts.get("attack.won_n", 0)), _wt.size(), _already])
+	print("      ★★【贏了卻沒派出去】要看【贏之後】的 task，而這一行只看得到【當下】")
+	print("      ⇒ ★★★所以這格是 **部分證據**，不是判決；要完整得在派工後再量一次")
 	# ★★★【軌跡】餓且有牙的隊，它們的 need 隨時間怎麼走，有沒有真的去搶（systems 2026-09-15）
 	if not frows.is_empty():
 		var traj: Dictionary = {}
