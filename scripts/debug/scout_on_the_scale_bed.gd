@@ -21,6 +21,17 @@ extends SceneTree
 #   ·晚窗 ＝ 全窗 − 早窗（同一趟的前綴／後綴，★中途不 reset ⇒ 沒有 reset 的效應不對稱問題）
 #
 # env：SC_TICKS（預設 43200 ＝ 30 天）／SC_EARLY_DAYS（預設 7）／SC_SEED（預設 1337）／SC_CONFIG
+#
+# ★★★【跑法硬要求】：30 天窗必須明示 `GODOT_TIMEOUT=1800`（或更大）。
+#   `tools/godot.ps1:84` 的預設是 **360 秒** ⇒ 30 天窗會在 **day 8 左右被殺**。
+#   ★★而被殺的輸出長得像一份完整的日誌（只是短）——
+#   ★★★**被殺 ≠ 紅 ≠ 綠**：看到 `[GODOT TIMEOUT ... process killed]` 就是**本輪無結果**，
+#     不得當成「沒有紅」也不得當成「世界就長這樣」。
+#
+# ★★【贏】與【真的被設上】必須在**同一個母體、同一個呼叫點**上量（systems 2026-09-15）——
+#   ★否則兩者的差額量的是【tap 的覆蓋率】，不是【世界的行為】。
+#   （血證：`rank_scored` 有四個呼叫端，而第一版只在 `unified` 裝了 tap
+#     ⇒ 差額長得跟「贏了卻沒派出去」一模一樣，而它是我沒接電的那三個迴圈。）
 
 func _initialize() -> void:
 	_run(); quit(0 if _fails == 0 else 1)
@@ -247,6 +258,31 @@ func _run() -> void:
 		_ok(eng_noop == deny_total,
 			"對帳：no-op %d ＝ 拒絕計數合計 %d（★不等 ⇒ 有一條拒絕路徑沒有 tap，或 opt 沒傳到）" % [
 				eng_noop, deny_total])
+	# ★★★再往下鴽一維：**是誰發的那一手把它擋下來**（`arbiter.deny.<原因>.by.<來源>`）
+	#   ★照實報，**不預先認定**；★★而比例（例如 11/52）**單輪單窗不可引用** —— 只報數。
+	var by_rows: Array = []
+	# ★`.by.` 與 `.opt.` 是**兩個不同的鍵**：
+	#   ★★`arbiter.deny.<原因>.by.<來源>` 沒有帶 option ⇒ **它混了所有 option**。
+	#   ⇒ ★★★所以這一欄必須標明【母體不同】：它答的是「這個原因總共擋了誰發的手」，
+	#     **不是「擋偵查的是誰發的手」** —— 兩者不可互相代替。
+	for k in Probe.counts:
+		var ks3: String = String(k)
+		if ks3.begins_with("arbiter.deny.優先序不足.by."):
+			by_rows.append("%s=%d" % [ks3.replace("arbiter.deny.優先序不足.by.", ""), int(Probe.counts[k])])
+	print("   「優先序不足」是誰發的手（★母體＝**全部 option**，不只偵查）：%s" % [
+		(" ".join(by_rows) if not by_rows.is_empty() else "（空）")])
+	print("      ★★而偵查自己的那一份在上面那行（`.opt.偵查`）—— 兩個鍵沒有交集，**禁相除**。")
+	# ★★★而 systems 真正要問的是【擋它的是誰】—— ★`.by.` 答不了（那是發起方）。
+	#   ★★擋住它的是**現任的 task**，而那顆 tap 本輪才裝（`arbiter.deny.優先序不足.opt.<opt>.holder.<task>`）。
+	var holder_rows: Array = []
+	for k in Probe.counts:
+		var ks4: String = String(k)
+		if ks4.begins_with("arbiter.deny.優先序不足.opt.偵查.holder."):
+			holder_rows.append("%s=%d" % [
+				ks4.replace("arbiter.deny.優先序不足.opt.偵查.holder.", ""), int(Probe.counts[k])])
+	print("   ★★★**擋住偵查的是哪一個現任 task**（母體＝偵查被「優先序不足」拒絕的那幾次）：%s" % [
+		(" ".join(holder_rows) if not holder_rows.is_empty() else "（空）")])
+	print("      ★而本床**不對這一欄下任何評價** —— 要不要擠掉現任那個 task，是下一張票的事。")
 	print("   ★★而【怎麼修】不在本床的職權：**禁止為了讓它被設上而調優先序**（systems 裁）——")
 	print("      ★★★先問是誰擋住它；擠掉它之前要先知道被擠掉的那個東西該不該被擠掉。")
 

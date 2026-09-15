@@ -246,6 +246,13 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		Probe.bump("arbiter.deny.優先序不足")
 		Probe.bump("arbiter.deny.優先序不足.by." + _source)
 		if _opt != "": Probe.bump("arbiter.deny.優先序不足.opt." + _opt)
+		# ★★★【擋它的是誰】（systems 問的那一問，2026-09-15）：
+		#   ★`.by.<來源>` 答的是【發起這一手的是誰】（unified／solo…）—— **那是被拒的那一方**；
+		#   ★★【擋住它的】是**現任的那個 task 與它的 priority** —— 兩者是不同的問題，
+		#   ★★★而把 `.by.` 當成答案會把【誰想做】讀成【誰擋路】。純觀測：零 RNG、不寫 state。
+		Probe.bump("arbiter.deny.優先序不足.holder." + String(team.current_task))
+		if _opt != "":
+			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".holder." + String(team.current_task))
 		if _opt == "求居": _note_seek_deny(state, team, priority, "優先序不足")
 	return false
 
