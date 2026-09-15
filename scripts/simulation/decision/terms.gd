@@ -17,7 +17,11 @@ const CLAIM_DIST_HALF: float = 6.0       # = SimRunner.NEAR_CADENCE(60) / 10
 const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-trade 軟壓(能但很少)
 # ★★★機會＋需要（2026-09-12）的三顆 TEST VALUE —— ★它們是【真參數】：
 #   在真實量上劃線＝設計選擇（世界答不出「多肥才算肥」）⇒ 留在這裡並標明。
-const ATTACK_LOOT_REF: float = 3.0      # TEST VALUE — `_belief_richness` 的「算肥」參考值（tier0/1 的 resource_scale 是 0..3）
+# ★★★`ATTACK_LOOT_REF = 3.0` **已刪除**（2026-09-16，攻擊幣別 final 刀二）：
+#   ★它是校準在【舊的 0..3 桶號尺度】上的常數 —— 而單位對齊後 `_belief_richness` 回傳的是
+#     **coin 當量（破百）** ⇒ `clampf(100+/3, 0, 1)` ⇒ ★★**整支飽和成 1.0、完全失去鑑別力**。
+#   ⇒ ★★★**刪掉而不是改值**：改值會讓下一個人以為它還有校準的餘地，
+#     而**新尺上它根本沒有意義** —— 正確的作法是與 score 那一刀**同一個壓縮**。
 const ATTACK_OPP_LOOT_W: float = 0.6    # TEST VALUE — 機會（對方肥）在這一項裡的份量
 const ATTACK_OPP_NEED_W: float = 0.4    # TEST VALUE — 需要（自己餓）在這一項裡的份量
 const ATTACK_CAUTION_W: float = 0.8     # TEST VALUE — 慎重壓低的斜率（★MODULATE 真值，非 boost 常數）
@@ -101,6 +105,16 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
 # ★資訊網 S-herald：野心(傲氣 proxy)抑制求援傾向的係數（modulation coeff、非 fire-crank；高野心=獨立少開口）。
 const HELP_PRIDE_SUPPRESS: float = 0.6   # TEST VALUE — 野心 1.0→求援傾向 ×0.4（傲慢撐；野心 0→不抑制）。rationale:傲vs務實分化強度
+# ★★★全盲目標的【先驗】（票 2026-09-15，systems 三道守衛）：
+#   ①**具名**（不埋在式子裡）②**TEST VALUE ＋ 明寫「世界答不出，所以這是設計選擇」**
+#   ③★★**它是【先驗】不是【替代值】** ⇒ **真情報到手後必須被取代、不得繼續參與**
+#     （★實作上由同一個謂詞保證：有可定價分項 ⇒ 它就不再是偵查候選）
+#   ★★★正當性判準：**問「世界答得出來嗎」** ——
+#     答得出而你手填 ＝ 掩蓋（禁）｜答不出而你手填並誠實標示 ＝ 設計選擇（合法）
+#     ⇒ ★「對一個**毫無情報**的目標預設它值多少」⇒ **沒有情報就是前提** ⇒ 定義上不可導出 ⇒ 合法。
+const SCOUT_VALUE_BLIND_PRIOR: float = 120.0   # TEST VALUE —— 全盲目標的期望 coin 當量先驗
+#   （★量級參考：桶 1 的下界 50 單位、桶 2 是 200 —— 而全盲連桶號都沒有，
+#     ★★所以這個數字只能是【設計選擇】：取兩桶之間。**世界答不出「看不見的人值多少」**。）
 const SCOUT_AMBITION_NEGLECT: float = 0.5   # TEST VALUE — 野心 1.0→偵察傾向 ×0.5（擴張疏忽內政）。modulation coeff 非 fire-crank
 const ABSORB_DRIVE_BASE: float = 1.0         # TEST VALUE — T3 正規化：吸納量級→[0,1]（1.2→1.0）
 const REP_MAGNET_W: float = 1.0              # TEST VALUE — 名聲磁鐵 §3 投靠加成權重（高名聲 host 翻贏逃）
@@ -203,6 +217,21 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var _hon: float = float(ctx.leader_values.get("義氣", 0.5))       # proxy 依附/信任本勢力
 			var _pmult: float = (0.4 + _srv * 0.6) * (1.0 - _amb * HELP_PRIDE_SUPPRESS) * (0.5 + _hon * 0.5)
 			return ctx.help_need_severity * clampf(_pmult, 0.0, 1.5)
+		"recon_value":
+			# ★★★偵查（攻擊目標版）：**解鎖資訊的期望價值 × 折現** —— 已在 ctx 算好
+			#   ★人格 MODULATE：**慎重↑願意先看再動**（而好戰↑懶得偵）
+			#   ★★而它**不是 boost 常數**：乘的是一個真實值（ctx.recon_value_est）。
+			#   ★★★**禁走廊**：它只負責報一個 util，**派不派由 argmax 決定**。
+			if opt != "偵查": return 0.0
+			if ctx.recon_target_id == -1: return 0.0
+			# ★★★人格【不在這裡再乘一次】：慎重已經進了折現的 δ
+			#   （`pick_recon_target` 走 `DiscountedFlow.delta_of`）⇒ ★在這裡再乘一個慎重，
+			#   就是**同一個人格數一件事算兩次**。
+			#   ★★人格的另一個合法通道是 `weight("recon", ...)` —— 而那裡用【計謀／好戰】，不碰慎重。
+			# ★正規化：用【一天生計的價值】當分母 —— ★★與 `goal_resolver` 的 UNIT 同一把尺
+			var _unit2: float = maxf(float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+				* float(TradeValuation.BASE_PRICE.get("food", 1.0)), 0.001)
+			return clampf(ctx.recon_value_est / _unit2, 0.0, 1.5)
 		"scout_drive":
 			# ★資訊網 S-scout 偵察 util（genuine + 人格）：base=真 info_staleness（belief age/norm、DERIVED 非死常數）
 			# ×人格 MODULATE：統領/責任↑盯子民 / 野心↑擴張疏忽內政↓。→ per-option dump 顯 關切型多查 vs 野心型少查。
@@ -225,7 +254,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   ★★★三條硬規則（spec §②）：①資產只讀 belief ②需求走 need oracle ③贏率用既有 capability 接地。
 			if opt != "攻擊" or ctx.attack_target_id == -1: return 0.0
 			# ①機會 ＝ belief 估的對方資產（`_belief_richness`；tier 分層天然在它裡面）
-			var _loot: float = clampf(ctx.attack_loot_est / ATTACK_LOOT_REF, 0.0, 1.0)
+			# ★★★刀二：與 `faction_ai_system` 的 score **同一個單調壓縮、同一把尺**
+			#   （`ref` ＝ 觀察者自己的 `reference_wealth`）。
+			#   ★為什麼要 [0,1]：這條式子把 `_loot` 與 `_need`／`_odds`／人格【相乘】，
+			#     而那些都是 [0,1] ⇒ `_loot` 也必須是，**而且要保住鑑別力**。
+			#   ★★而 72% 撞頂那個現場**就是這一行** —— 我們一路挖到根因（單位混用）修好了根因，
+			#     ★★★**卻差點把【當初發現問題的地方】留在原地。**
+			var _loot: float = FactionAISystem.richness_compressed(ctx.attack_loot_est, ctx.reference_wealth)
 			# ②需要 ＝ 自身糧食缺口（★連續量：越餓越想搶；★★用既有的 food_days／絕境門檻，不新增旋鈕）
 			var _need: float = clampf(1.0 - ctx.food_days / maxf(ctx.desperation_entry_threshold, 0.01), 0.0, 1.0)
 			# ③贏率 ＝ 既有 capability 接地（無牙 ⇒ 0 ⇒ 整項 0：送死沒人幹）
@@ -542,6 +577,10 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"expand":            return float(v.get("野心", 0.5)) * 0.6 			+ (1.0 - float(v.get("慎重", 0.5))) * 0.4
 		"rooting":           return float(v.get("野心", 0.5)) * 0.4 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("慎重", 0.5)) * 0.3
 		"feud":              return 0.3 + float(v.get("好戰", 0.5)) * 0.5
+		# ★偵查：人格只 MODULATE【先看再動的傾向】—— 計謀↑重情報／好戰↑懶得偵。
+		#   ★★**不碰慎重**：慎重已經是折現的 δ，在這裡再寫一次就是重複計兩次。
+		"recon":             return clampf(0.2 + float(v.get("計謀", 0.5)) * 0.6 \
+			- (float(v.get("好戰", 0.5)) - 0.5) * 0.4, 0.0, 1.5)
 		"faction_duty":      return _duty_factor(float(v.get("_loyalty", 0.5)), float(v.get("野心", 0.5)))
 		"levy":              return 0.2 + float(v.get("貪婪", 0.5)) * 0.5 + float(v.get("好戰", 0.5)) * 0.3
 		"diplo":             return 0.2 + float(v.get("義氣", 0.5)) * 0.5 + float(v.get("計謀", 0.5)) * 0.3

@@ -253,7 +253,7 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 	var feasible: Array = []      # [{id, eta_days}]（★零人格，供門與 fallback target 用）
 	# ★★★逐【呼叫】記淘汰理由（systems 2026-09-12：判準要可證偽 ⇒ 每一筆 nO 要指得出是哪一種不可行）
 	#   ★★而「掃過幾個」與「因為什麼被刷掉」是兩件事 ⇒ `scanned` 與四個理由分開記。
-	var why: Dictionary = {"scanned": 0, "same_faction": 0, "no_belief": 0,
+	var why: Dictionary = {"scanned": 0, "same_faction": 0, "no_belief": 0, "no_priced_belief": 0, "thin_intel_refused": 0,
 		"no_belief_pos": 0, "unreachable": 0, "cannot_afford": 0}
 	var best_id: int = -1
 	var best_score: float = 0.0
@@ -299,7 +299,54 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		var pop_est: float = float(bel.get("population_est", 0.0))
 		# 無 armed_est belief → 人格化迷霧 fallback（讀 leader 人格，非埋死「陌生=滿武裝」）
 		var armed_est: float = BeliefSystem.estimate_armed(bel, pop_est, leader.values if leader != null else {})
-		var richness: float = _belief_richness(bel)
+		# ★★★【型別可行性】（票：攻擊幣別 2026-09-15）：
+		#   ★沒有可定價分項（只有 `resource_scale` 或什麼都沒有）的目標
+		#   ⇒ **結構上不產生成攻擊 candidate** —— **不是「少加一項」**
+		#   ⇒ ★★因為 `score` 是加總：**「少一項」與「那一項等於 0」逐位元相同**
+		#   ⇒ ★★★**而它們要去的地方是【偵查】，不是【被當成很窮的攻擊目標】**。
+		# ★★★【admission 分層】（票：攻擊幣別 final 2026-09-16）—— **三層，不是兩層**：
+		#   ★【零情報】（連桶號都沒有）⇒ **對任何人都不可行** ⇒ **結構排除**
+		#     ★★必須是結構排除、不是少加一項 —— `score` 是加總，「少一項」與「那一項＝0」逐位元相同。
+		#   ★【薄情報】（只有桶號）⇒ **由人格決定**：`confident_enough(…, 慎重)`
+		#     ⇒ ★★膽大者可盲打，慎重者該目標不可行 —— **這一層不是世界規則，是人格。**
+		#   ★【有可定價分項】⇒ 照常。
+		var _has_priced: bool = belief_has_priced_items(bel)
+		var _scale_est: int = int(bel.get("resource_scale", -1))
+		# ★★★【零情報的排除【不在這裡】】（systems 裁 2026-09-16，實測坐實後刪碼）：
+		#   ★我本來在這裡加了 `if bel.is_empty(): continue` —— ★★而它**一次都沒 fire**
+		#     （`attack.excluded.zero_intel = 0`，2 天窗、同輪薄情報 admitted 5211）
+		#   ⇒ 因為 `has_belief()` 的守衛在【上面】（本函式較早處）就把「連 claim 都沒有」的目標擋掉了。
+		#   ⇒ ★★★**死碼會讓下一個人以為這一格有人守著** —— **真正守著它的是 `has_belief`。**
+		#     所以這裡不留 assert、不留空殼，只留這段字說明**守衛在哪**。
+		# ★★(b) 與 (c) **走同一道 admission**（systems 2026-09-16）——
+		#   ★它們在 epistemic 上對等（都答不出「它多肥」）⇒ **對等必須落實到門上，不能只寫在 spec 裡**；
+		#   ★★結果可以是通過，**但不能繞過它** —— 若這導致行為改變，驗收會看到，**而那正是我們要的**。
+		if not _has_priced:
+			var _caution_adm: float = float(leader.values.get("慎重", 0.5)) if leader != null else 0.5
+			var _thin_admit: bool = BeliefSystem.confident_enough(state, team.team_id, tid, _caution_adm)
+			if Probe.enabled:
+				Probe.bump("attack.thin_intel." + ("admitted" if _thin_admit else "refused"))
+				Probe.bump_sample("attack.thin_intel.rows", {"team": team.team_id, "target": tid,
+					"caution": snappedf(_caution_adm, 0.01), "admit": _thin_admit,
+					"scale": _scale_est, "tick": state.world.current_tick}, 300)
+			if not _thin_admit:
+				why["thin_intel_refused"] = int(why.get("thin_intel_refused", 0)) + 1
+				continue
+		# ★★薄情報的 x 走桶的下界（**不是 0**）—— 「看不清」不等於「很窮」。
+		# ★三種形狀的 x：有分項 ⇒ 逐項定價；只有桶號 ⇒ 桶下界；(b) 無資產欄 ⇒ **0，而那是「不知道」不是「很窮」**
+		#   ★★(b) 與「桶 0」在【值】上相同，而在【語意】上不同 —— 已回報 systems，標【待驗】。
+		var _x_raw: float = 0.0
+		if _has_priced:
+			_x_raw = belief_richness_coin(bel)
+		elif _scale_est >= 0:
+			_x_raw = bucket_floor(_scale_est)
+		var _ref_mine: float = reference_wealth(state, team)
+		var richness: float = richness_compressed(_x_raw, _ref_mine)
+		if Probe.enabled:
+			Probe.bump_sample("attack.richness.rows", {"team": team.team_id, "target": tid,
+				"x": snappedf(_x_raw, 0.1), "ref": snappedf(_ref_mine, 0.1),
+				"compressed": snappedf(richness, 0.001), "thin": not _has_priced,
+				"tick": state.world.current_tick}, 300)
 		# capability grounding（裁2）：弱點比 self ARMED 非 self POP → 無牙商隊 self_armed≈0 →
 		# 任何有武裝 prey 皆非「相對弱」→ weakness→0（不再被誘攻；鎖來自戰力非 tag-label）。
 		var self_armed_f: float = float(NpcCombatSystem.new().calc_armed(state, team))
@@ -375,13 +422,91 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 static func find_prosperity_prey(state: WorldState, team: TeamData, leader: PersonData) -> int:
 	return int(attack_scan(state, team, leader)["best_id"])
 
-# belief 財富估：tier2 有資源估 → sum/100；tier0/1 只有 resource_scale(0-3) → 粗估；皆無 → 0。TEST VALUE。
-static func _belief_richness(bel: Dictionary) -> float:
-	if bel.has("coin_est") or bel.has("food_est") or bel.has("material_est"):
-		return (float(bel.get("coin_est", 0.0)) + float(bel.get("food_est", 0.0)) + float(bel.get("material_est", 0.0))) / 100.0
-	if bel.has("resource_scale"):
-		return float(bel.get("resource_scale", 0))
+# ★★★belief 財富估 ＝ **coin 當量**（票：攻擊幣別 2026-09-15）
+#   ★舊形狀：`(coin_est + food_est + material_est) / 100` —— **不同單位裸和，再除一個手填的 100**
+#     ⇒ ★★而右邊那條路（`maintain_*` 的 `derived_payoff`）早就是 `缺口 × BASE_PRICE` ＝ coin
+#     ⇒ ★★★**同一個決策的兩側用兩種幣別 ⇒ 相減沒有意義**（今天為這句記過一次）。
+#   ★新形狀：**`Σ 各項估值 × BASE_PRICE[該項]`** —— **單位從價目表來，不是手填的**。
+# ★★★【CAP 是設計參數，不是單位定義】（R² 更正 systems，2026-09-16）：
+#   ★可重複使用的測試：**把這個數換成別的值，世界會不會不一樣？**
+#     不會 ⇒ 單位（例：`coin = 1.0`，零自由度，只是重新定義單位）
+#     會   ⇒ **參數** —— 而 CAP 換成 0.5／2.0，**財富項對弱點與邊境的相對重要性就變了**
+#   ⇒ ★★它是【誠實具名的設計參數】，與 `SCOUT_VALUE_BLIND_PRIOR` 同族；
+#   ⇒ ★★★**守衛不同**：先驗那一條是「真情報到手後必須被取代」，
+#     而 CAP **不是先驗** ⇒ 它的守衛是【**改它要重跑驗收**】。
+const TEAM_RICHNESS_CAP: float = 1.0   # TEST VALUE —— ★這是**相對重要性的選擇**，不是量出來的
+
+# ★【桶號的下界】單一計算點（`vision_system.gd:176-184` 的分桶：≥50／≥200／≥600）。
+#   ★★桶的單位是【總量 N 件】，而我們要的是 **coin 價值的下界**。
+#   ★★★**下界 ＝ N × 最便宜的單價** —— ★這是零假設的：
+#     任何組合都 ≥「全部都是最便宜那一種」的價值，**不需要知道它到底是什麼組合**。
+#
+# ★★★而【為什麼不是 N】要寫清楚（systems 2026-09-16 抓到的）：
+#   ★寫 `N` 也是下界，但它成立是靠「所有單價 ≥ 1」—— **那是一個沒有被寫下來的巧合**
+#   ⇒ ★★**若日後有人加一個單價 0.5 的資源，`N` 這個下界會【悄悄變成錯的】，而不會有任何東西紅。**
+#   ⇒ ★★★所以這裡**從 `BASE_PRICE` 自己算出最低單價** —— **那個前提從此不需要成立，它變成算式的一部分。**
+#     （同一個病的另一個面貌：上一版把它收成單一計算點，防的是【副本】drift；
+#       這一版防的是【前提】drift —— ★而前提比副本更難發現，因為它根本沒有寫在 code 裡。）
+static var _min_base_price_cache: float = -1.0
+
+static func min_base_price() -> float:
+	if _min_base_price_cache < 0.0:
+		var m: float = INF
+		for res in TradeValuation.BASE_PRICE:
+			m = minf(m, float(TradeValuation.BASE_PRICE[res]))
+		_min_base_price_cache = m if m < INF else 1.0
+	return _min_base_price_cache
+
+# ★桶的【件數】下界（`vision_system` 的分界本身）—— 與價分開，因為它們是兩個不同的東西。
+static func bucket_units(scale: int) -> float:
+	if scale >= 3: return 600.0
+	if scale == 2: return 200.0
+	if scale == 1: return 50.0
 	return 0.0
+
+static func bucket_floor(scale: int) -> float:
+	return bucket_units(scale) * min_base_price()
+
+# ★【我的參考尺度】：自家人口 × Σ(TARGET_PER_POP × BASE_PRICE)
+#   ★★所以 `richness` 從此是【**相對於我**】：窮小隊看中等村是肥羊，大國看不上眼。
+#   ★★★而它有一個已知的副作用（**預先登記，不入判**）：
+#     **人口驟降 ⇒ ref 變小 ⇒ 打殘的隊會覺得所有人都變肥** —— 可能是好戲，也可能是病。
+static func reference_wealth(state: WorldState, team: TeamData) -> float:
+	var per_pop: float = 0.0
+	for res in TradeValuation.TARGET_PER_POP:
+		per_pop += float(TradeValuation.TARGET_PER_POP[res]) * float(TradeValuation.BASE_PRICE.get(String(res), 0.0))
+	return maxf(float(team.population) * per_pop, 1.0)
+
+# ★單調壓縮：`CAP × (x/ref) / (1 + x/ref)` —— ★★**單調**（大的永遠比小的大）
+#   ⇒ ★★★取代硬 clamp：hard clamp 會把【比較性】毀掉（兩個都頂到就分不出來）。
+#   ★已知代價（誠實標）：主操作區（0.1×–3× ref）分辨力還在，**極端尾（>10× ref）被壓平**。
+static func richness_compressed(x: float, ref: float) -> float:
+	var r: float = maxf(x, 0.0) / maxf(ref, 0.001)
+	return TEAM_RICHNESS_CAP * r / (1.0 + r)
+
+static func belief_richness_coin(bel: Dictionary) -> float:
+	var total: float = 0.0
+	for res in ["coin", "food", "material"]:
+		var k: String = String(res) + "_est"
+		if not bel.has(k):
+			continue
+		# ★coin 的價 ＝ 1.0（**它是計價單位**，`trade_valuation.gd:173` 早有同一條特判）
+		#   ⇒ ★★這裡【不】走 `BASE_PRICE.get(res, 0.0)`：那會把 coin 算成 0（今天抓過）。
+		var unit: float = 1.0 if String(res) == "coin" else float(TradeValuation.BASE_PRICE.get(String(res), 0.0))
+		total += float(bel.get(k, 0.0)) * unit
+	return total
+
+# ★★★【型別可行性】：這份 belief 有沒有**可定價的分項**？
+#   ★只有 `resource_scale`（0..3 的桶號）或什麼都沒有 ⇒ **答不出 coin 當量**
+#   ⇒ ★★而處置**不是回 0** —— **`score` 是加總，「少一項」與「那一項＝0」逐位元相同**
+#     ⇒ ★★★**必須由呼叫端【結構排除】這個目標**（不產生成攻擊 candidate）。
+static func belief_has_priced_items(bel: Dictionary) -> bool:
+	return bel.has("coin_est") or bel.has("food_est") or bel.has("material_est")
+
+# ★舊名保留為薄包裝：★★而它**只在有分項時才有意義** ——
+#   呼叫端必須先問 `belief_has_priced_items()`，否則拿到的 0 是【答不出】不是【很窮】。
+static func _belief_richness(bel: Dictionary) -> float:
+	return belief_richness_coin(bel)
 
 # ★★★簽名吃【兩個 Vector2i】不是兩個 TeamData（god-view 1a Fix A，2026-09-02）：
 #   ★呼叫端負責決定那個位置從哪來（自己＝live 合法／他隊＝belief）；
@@ -3585,6 +3710,19 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		#   ★這裡是【引擎統一路唯一的 try_set】⇒ 一個站點就覆蓋所有 option，
 		#   ★★而不必動 `_source`（它會寫進 `task_reason` 並與 `ENGINE_SOURCES` 比對）。
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "unified", opt)
+		# ★★★【偵查的來源分流】（systems 裁 2026-09-15）：另一條路是 `_commit_conquest_attack` 的走廊
+		#   （`g3.scout_dispatch`，`task_reason == "scout"`）—— ★而它**也會讓偵查出現**，
+		#   ★★早期窗正是 `confident_enough` 最容易為假的時候
+		#   ⇒ ★★★驗收格④若不分流，**會綠，而綠的原因是舊補丁不是新機制**。
+		#   ⇒ 這裡只數【秤選出來、而且真的被設上】的那一條。
+		if Probe.enabled:
+			# ★★★逐 option 的派工結果（systems 2026-09-16 要的第 ② 個數）：
+			#   ★**「某 option 贏了」與「它真的被派出去」是兩個數** —— 這一族數的是後者。
+			#   ★★而它必須涵蓋【所有】派工迴圈，否則差額量的是 tap 覆蓋率不是世界行為（血證在 09-15）。
+			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _set_ok else "noop"])
+		if Probe.enabled and opt == "偵查":
+			Probe.bump("recon.dispatch.unified." + ("ok" if _set_ok else "noop"))
+			Probe.bump("recon.dispatch.ok" if _set_ok else "recon.dispatch.noop")
 		if _lvf_this:
 			# ★★★第四型手不聽腦：`try_set` 可能 no-op（priority 被更高的佔住）——
 			#   ★而它【不會報錯】，只是這一次派工靜靜地沒發生
@@ -4062,7 +4200,13 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 					HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
 				return
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
-		if not TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam"):   # ★① 單一源(subteam survival @80 preempt,team19 換子隊 bug 收)
+		var _sub_set_ok: bool = TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam", opt)
+		if Probe.enabled:
+			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _sub_set_ok else "noop"])
+		if Probe.enabled and opt == "偵查":
+			Probe.bump("recon.dispatch.subteam." + ("ok" if _sub_set_ok else "noop"))
+			Probe.bump("recon.dispatch.ok" if _sub_set_ok else "recon.dispatch.noop")
+		if not _sub_set_ok:
 			continue
 		_stamp_survival_commit(state, sub, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		_commit_settle_site(state, sub, td)   # ★§4a 紮根 commit-hook（try_set 已成功才到此）
@@ -4319,7 +4463,13 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
-		if not TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo"):   # ★① 單一源(solo survival @80 preempt 安頓)
+		var _solo_set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo", opt)
+		if Probe.enabled:
+			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _solo_set_ok else "noop"])
+		if Probe.enabled and opt == "偵查":
+			Probe.bump("recon.dispatch.solo." + ("ok" if _solo_set_ok else "noop"))
+			Probe.bump("recon.dispatch.ok" if _solo_set_ok else "recon.dispatch.noop")
+		if not _solo_set_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # Fix2b 早退 tap
 			continue
 		_stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
@@ -6664,7 +6814,12 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
-		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival")   # ★① 單一源(收 @80)
+		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival", opt)   # ★① 單一源(收 @80)
+		if Probe.enabled:
+			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _surv_ok else "noop"])
+		if Probe.enabled and opt == "偵查":
+			Probe.bump("recon.dispatch.survival." + ("ok" if _surv_ok else "noop"))
+			Probe.bump("recon.dispatch.ok" if _surv_ok else "recon.dispatch.noop")
 		if Probe.enabled and opt == "併入":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
 			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
 		if not _surv_ok:

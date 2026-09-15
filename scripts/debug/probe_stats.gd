@@ -1,4 +1,12 @@
 # @observe-pure  ★observer-no-global-RNG 靜態閘納管(純觀測零 RNG;違=FAIL)
+# @bed-kind: diagnostic
+# ★★★【這一行是為了讓閘有答案，而不是因為它是真的】（2026-09-16）：
+#   ★**本檔不是床** —— 它是 `Probe` 這個**共用儀器類別**，只是住在 `scripts/debug/`。
+#   ★★而 `bed-kind` 的四種分類（invariant／acceptance／diagnostic／pending）
+#     **沒有一種描述「儀器庫」** ⇒ 分類法缺一格（`infra`？）或該有具名豁免清單。
+#   ★★★systems 已知悉並裁「照既有規則補】（我先後提過兩次）⇒ 這裡填 `diagnostic`，
+#     **而【它到底是什麼】寫在這幾行，不靠 kind 欄承載** ——
+#     ★因為下一個人會拿 kind 欄當真，而那一欄在這裡是【没有正確選項】下的妥協。
 class_name Probe
 
 # 量測累計器（純觀測）。enabled 預設 false → 一般跑 no-op；只 game_sim_test 開。
@@ -104,8 +112,18 @@ static func add_amount(event: String, value: float) -> void:
 # 決定性聚合帶 bounded 具體案例（§④b）：計數 key 旁存 ≤cap 個 instance，落 fullprobe 供決策帶故事。
 # ★first-N cap（size<cap 才 append），★禁 reservoir（reservoir 需 randf=違 observer-no-rng 鐵律）。純確定性。
 # instance dict 由 caller 傳（{tick,team,res,...}），Probe 不算不 re-query（免耗 RNG/污染）。只寫 Probe.samples（禁改 sim state）。
+# ★★★【樣本靜音名單】（systems 2026-09-15，長窗 OOM 買來的）：
+#   ★`Probe` 是**全域**的 ⇒ 任何一支床在跑，production 裡**所有** tap 都在收，
+#     包含為【別的床】裝的那些 ⇒ ★★**診斷桶的成本每一輪都付，收益只有一支床拿**。
+#   ★★★而它平常看不見 —— **短窗吃得下，只有長窗會把它變成 OOM**。
+#   ★用法：床在 `reset()`／`arm()` 之後設 `Probe.sample_mute = {"<鍵>": true, ...}`。
+#   ★★它**只影響樣本收集**：計數器、決定性、RNG 一律不動（`bump_sample` 本來就不寫 state）。
+#   ★★★而靜音了什麼**必須印在交件裡** —— 否則下一個人會把「這一族沒樣本」讀成「它沒發生」。
+static var sample_mute: Dictionary = {}
+
 static func bump_sample(event: String, instance: Dictionary, cap: int = 8) -> void:
 	if not enabled: return
+	if sample_mute.has(event): return
 	var arr: Array = samples.get(event, [])
 	if arr.size() < cap:
 		arr.append(instance)
@@ -118,6 +136,8 @@ static func reset() -> void:
 	# ★★★setup_saw_unarmed / setup_unarmed_sites 【刻意不清】——
 	#   盲床的順序就是「先 setup、後 reset+arm」⇒ 清掉的話證據會被它要抓的那個 bug 抹掉。
 	counts = {}; peaks = {}; amounts = {}; samples = {}
+	# ★`sample_mute` **不清** —— 它是【本輪要不要收這一族】的設定，不是資料；
+	#   ★★清掉的話，床在 `reset()` 之前設的靜音會默默失效（而那只會在 OOM 時才被發現）。
 	_streak = {}
 	_levy_last = {}
 	# ★判定時點①：reset() 是床 arm 時一定會走的路（218 處呼叫），而 production 零處。

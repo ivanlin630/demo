@@ -167,6 +167,11 @@ static func rank_scored(state: WorldState, team: TeamData, src: String = "unknow
 			Probe.bump("optpool.cand." + String(_r4["opt"]))
 		if not scored.is_empty():
 			Probe.bump("optpool.win." + String(scored[0]["opt"]))
+			# ★【人口驟降後的攻擊率】那一欄要的分子（預先登記、不入判，systems 2026-09-16）：
+			#   ★★逐隊記「攻擊贏了幾次」——★鍵數 ≤ 隊數（有界），不是逐日的交叉積。
+			#   ★★★而它答的是【誰在攻擊】，分母（誰的人口掉了）由床在窗末算 —— 兩者都要有主詞。
+			if String(scored[0]["opt"]) == "攻擊" and team != null:
+				Probe.bump("optpool.win.攻擊.t%d" % team.team_id)
 			# ★★★存活四分的兩格儀器（systems 判準 2026-09-05）——
 			#   ★連勝：接在【同一個「贏」的定義】上（`optpool.win.*` 就是卷面「誰在贏」那一節的來源）
 			#     ⇒ ★★否則「連勝」與「誰在贏」會是兩個不同的母體，而卷面會把它們並排。
@@ -284,8 +289,8 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		#   ★而本函式的結構是：**四個 term 相【加】，之後乘 `coeff`、乘 `fail_mult`（、乘 persist）**
 		#   ⇒ ★★**一個 0 的乘數就能把全部殺掉** ⇒ 逐項 dump 必須**同時**記【加法那半】與【乘法那半】。
 		#   ⇒ ★★★所以「攻擊」比照「收留」開組成 dump（Probe-gated、不改 u、零 RNG）。
-		var _cmp: Dictionary = {} if (Probe.enabled and opt in ["收留", "攻擊"]) else {}
-		var _cmp_on: bool = Probe.enabled and opt in ["收留", "攻擊"]
+		var _cmp: Dictionary = {} if (Probe.enabled and opt in ["收留", "攻擊", "偵查"]) else {}
+		var _cmp_on: bool = Probe.enabled and opt in ["收留", "攻擊", "偵查"]
 		var _terms_row: Array = []
 		var _ot0: int = Time.get_ticks_usec() if Probe.enabled else 0
 		for tw in DecisionOptions.terms_of(opt):
@@ -395,6 +400,25 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 					elif absf(_cf) < 0.0005: Probe.bump("attack.zero_by.coeff")
 					elif absf(_fmv) < 0.0005: Probe.bump("attack.zero_by.fail_mult")
 					else: Probe.bump("attack.zero_by.later_stage")
+			if opt == "偵查":
+				# ★★★單位驗收（spec §3）：偵查與攻擊的 util **要能並排着讀** ⇒ 兩邊都要有分布，
+				#   ★而不是只印【偵查有沒有 fire】—— ★★fire 率答不出【它是不是輸得很惨】。
+				_cmp["value_est"] = snappedf(ctx.recon_value_est, 0.001)
+				_cmp["blind"] = ctx.recon_used_blind_prior
+				_cmp["target"] = ctx.recon_target_id
+				Probe.bump_sample("recon.composition", _cmp, 150)
+				Probe.bump("recon.cmp." + ("blind" if ctx.recon_used_blind_prior else "bucket"))
+			if opt == "偵查" or opt == "攻擊":
+				# ★共用一把尺的 util 直方圖（★★同一組桶界 ⇒ 兩個分布可直接對照）
+				var _ub: String = "u0"
+				if u >= 1.0: _ub = "ge1"
+				elif u >= 0.5: _ub = "ge0.5"
+				elif u >= 0.2: _ub = "ge0.2"
+				elif u >= 0.05: _ub = "ge0.05"
+				elif u >= 0.0005: _ub = "gt0"
+				Probe.bump("uhist." + opt + "." + _ub)
+				Probe.add_amount("usum." + opt, u)
+				Probe.bump("un." + opt)
 			if opt == "收留":
 				Probe.bump_sample("shelter.composition", _cmp, 100)   # ★只收留（★攻擊有自己的桶，不要混母體）
 			Probe.add_amount("shelter.cmp.drive_sum", float(_cmp.get("drive", 0.0)))

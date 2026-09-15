@@ -537,6 +537,29 @@ static var REGISTRY: Dictionary = {
 	# 主決策 winner 不變（移除本就 rank 3/4 的 loser 對 argmax 中性、determinism-neutral）。
 	# 野心階梯溶入（序3）：FORCE-archetype 累積階練兵（原 rung_task ACCUMULATE×FORCE→TASK_TRAIN）。
 	# archetype/rung 當 weight（ambient_train_drive）驅動，非查表塞 task。
+	# ★★★【偵查】進主 argmax（票：攻擊幣別＋偵查進秤 2026-09-15）：
+	#   ★被型別排除出攻擊候選的目標（只有桶號或全盲）⇒ **該去偵查**
+	#   ★★**而它與其他選項同一個 argmax 比** —— **禁走廊**：
+	#     舊制是 `faction_ai_system` 裡直接 `try_set(TASK_SCOUT)`（不經秤）。
+	#   ★★★**它會輸** —— 而那正是「進秤」的意思：**輸了就不該派**。
+	"偵查": {
+		"affinity": [0.2, 0.2, 0.1, 0.2, 0.3], "sets": {"ambient": true},
+		"terms": [["recon_value", "recon"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			# ★★★**不用 `can_send_scout`**：那道閘問的是【有沒有多的 named 可以派【斥候子隊】】，
+			#   而這裡的動作是**整隊自己走過去** —— ★兩者不是同一件事。
+			#   ★★而【整隊走一趥】的代價就是它該在秤上輸掉的理由，不該在 applicable 裡先擋。
+			return ctx.recon_target_id != -1,
+		# ★★★【目標必須跟著走】：`to_task` 拿不到 ctx，而【秤比的目標】與【派出去的目標】
+		#   必須是同一個 ⇒ 兩邊**呼叫同一支** `DecisionContext.pick_recon_target`（純函式、不耗 RNG、不寫 state）。
+		#   ★★不一致**不會有任何東西紅** —— 它只會讓決策與行為默默地分家。
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			var _rp: Dictionary = DecisionContext.pick_recon_target(state, team)
+			if int(_rp["id"]) == -1:
+				if Probe.enabled: Probe.bump("recon.to_task_idle.no_target")
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_SCOUT, "target": _rp["pos"], "order_target": int(_rp["id"])},
+	},
 	"訓練": {
 		"affinity": [0.0, 0.1, 0.0, 0.7, 0.2], "sets": {"ambient": true, "strategic_selfinit": true},
 		"terms": [["train_drive", "train"]],
