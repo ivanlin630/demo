@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 復工 ｜ **①已完成，機器直接給③**
 topic: ★**①票乙 merge-gate【已經跑過了】**：票乙 merge 在 `476bd0401`，**完整 55 支跑完**（528s，唯一紅 `bed-arm` ＝ 基線那一支），已 push 成 `8716f886f`｜★★**而之後 main 只動過兩支非交接檔**：`docs/notes/…`（別人的）與 `docs/process/defers.tsv`（我的 defer token）—— **`scripts/` 零改動** ⇒ **沒有東西需要補跑**｜★★★**所以機器直接給③**，而②是純文字，我平行做、不佔機器
 ---
