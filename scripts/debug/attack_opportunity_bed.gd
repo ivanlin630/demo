@@ -318,6 +318,20 @@ func _run() -> void:
 			print("      ⇒ ★★**0 次會翻 ⇒ 形狀題（這句很硬）**｜**多數會翻 ⇒ 平衡題**｜k 小 ⇒ 要講出 k／N")
 	print("   ★具名列母體：盯的隊 %d 支｜`attack.rank_row` 樣本 %d 筆｜命中 %d 筆" % [
 		watch.size(), rows2.size(), hit])
+	# ★★★贏家的 util 分佈（systems 2026-09-15 指定）：**與攻擊的【可達上限】相比**
+	#   ★假說：`need` 幾乎恒 0 ⇒ 有效上限 ＝ 0.6 × odds × person
+	#   ★★而它是【上限】不是平均 —— loot 要撞頂才拿得到 0.6。
+	if not rows2.is_empty():
+		var wus: Array = []
+		for r in rows2: wus.append(float(r["winner_u"]))
+		wus.sort()
+		print("")
+		print("★★★贏家 util 分佈（n=%d）：p25 %.3f｜中位 %.3f｜p75 %.3f｜max %.3f" % [
+			wus.size(), wus[wus.size() / 4], wus[wus.size() / 2],
+			wus[(wus.size() * 3) / 4], wus[wus.size() - 1]])
+		print("   ★對照：攻擊的有效上限 ＝ 0.6 × odds × person（中位帶入約 0.27）")
+		print("   ⇒ ★★贏家中位 ≫ 上限 ⇒ **攻擊的天花板低於別人的日常值**（形狀題成立）")
+		print("   ⇒ ★★★贏家中位 ≈ 或 < 上限 ⇒ **那個假說錯了**，輸的原因在別處")
 	if hit == 0:
 		print("   ★★【命中 0】⇒ **這不是「它沒輸」，是【那支隊沒被 rank_row 取樣到】** ——")
 		print("      `attack.rank_row` 上限 200 且是 first-N，**兩者在這行字上長得一樣**")
@@ -325,7 +339,8 @@ func _run() -> void:
 	#   ★而①與④的 tap 在別處（ctx / engine）—— **它們有記，而床一直沒印**
 	#   ⇒ ★★★又一次【裝好了沒接電】：**tap 在跑，而沒有人看得到它**。
 	print("")
-	print("★★★四格（餓而有牙卻沒搶）：")
+	print("★★★四格（餓而有牙卻沒搶）：★**四格全印，即使某一格是 0**")
+	print("   ★理由（systems 2026-09-15）：**「0」與「沒印」在畫面上長得一樣** —— 今天為這句付過四次學費")
 	print("   ①沒有目標：%d 次（樣本 %d）—— ★genuine：**不是不想搶，是沒人可搶**" % [
 		int(Probe.counts.get("hungry_armed.no_target", 0)),
 		(Probe.samples.get("hungry_armed.no_target_rows", []) as Array).size()])
@@ -333,6 +348,8 @@ func _run() -> void:
 	var _already: int = 0
 	for r in _wt:
 		if String(r.get("task_before", "")) == TeamData.TASK_ATTACK: _already += 1
+	print("   ②有目標而打不贏：見下方 `odds` 分佈與名次（★**不畫門檻**：「低」是裁決不是量測）")
+	print("   ③秤上輸了：見下方名次分桶與「輸給誰」（★這一格是決策層的事實，不是手不聽腦）")
 	print("   ④贏了的次數：%d（樣本 %d）｜其中當時 task 已經是攻擊的：%d" % [
 		int(Probe.counts.get("attack.won_n", 0)), _wt.size(), _already])
 	print("      ★★【贏了卻沒派出去】要看【贏之後】的 task，而這一行只看得到【當下】")
