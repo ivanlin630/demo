@@ -546,7 +546,10 @@ static var REGISTRY: Dictionary = {
 		"affinity": [0.2, 0.2, 0.1, 0.2, 0.3], "sets": {"ambient": true},
 		"terms": [["recon_value", "recon"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.recon_target_id != -1 and ctx.can_send_scout,
+			# ★★★**不用 `can_send_scout`**：那道閘問的是【有沒有多的 named 可以派【斥候子隊】】，
+			#   而這裡的動作是**整隊自己走過去** —— ★兩者不是同一件事。
+			#   ★★而【整隊走一趥】的代價就是它該在秤上輸掉的理由，不該在 applicable 裡先擋。
+			return ctx.recon_target_id != -1,
 		# ★★★【目標必須跟著走】：`to_task` 拿不到 ctx，而【秤比的目標】與【派出去的目標】
 		#   必須是同一個 ⇒ 兩邊**呼叫同一支** `DecisionContext.pick_recon_target`（純函式、不耗 RNG、不寫 state）。
 		#   ★★不一致**不會有任何東西紅** —— 它只會讓決策與行為默默地分家。
