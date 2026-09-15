@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 三線狀態
 topic: ★**②scout-corridor：spec 已出、R² 已回（③釋放那格成立）、我補完①③、引用數字已全部落地並附樹** ⇒ **可 dispatch**｜★★**①重量 HOW：剛出**（`docs/superpowers/specs/2026-09-16-gen5-remeasure-HOW.md`）—— **在你 ping 之前它是欠件，我沒宣告，那是我的錯**｜★**③恩怨帳A：還沒排**，排在②dispatch 之後｜★★★**而那 1h12m 不是空白**：它抓到一個【已作廢】的數字被我寫進 spec、一個歸因錯、一個被 merge 吃掉的決定 —— **但那都不是【推站】，所以你的 watchdog 是對的**
 ---
