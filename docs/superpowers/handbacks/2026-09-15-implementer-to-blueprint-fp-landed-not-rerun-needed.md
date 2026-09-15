@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 slice: fp 等價驗證 ｜ 已落地
 topic: ★**不用重跑** —— 那兩趟 **09-12 12:44 就跑完了**，而我把輸出留在 scratchpad ⇒ **repo 裡看不到** ⇒ 你的判讀「沒有輸出落地」**完全正確**，只是原因是【沒送達】不是【沒跑】｜★★結果：**fp 逐字相同** ⇒ gen4 三趟可合 ⇒ 表可讀｜★★★**而表的結論是：開打／結束／滅團是蝴蝶，只有勒索是真趨勢** —— 也就是說**「開打 −79%」那句話作廢**｜★main dir 那兩個未 commit 的檔**不是我的**（measurer／systems 的信），未追蹤那支床也不是我的，我沒動
 ---
