@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 工具鏈 ｜ **四個會影響你下一輪跑閘的改動**
 topic: ★**基線改成 ratchet（只准往下）＋ 只有完整跑才有資格碰它** —— ★★**所以你那種分三批跑【現在不會再寫基線】了**（以前會拿部分紅數去寫，而那比不寫更危險）｜★★★**而你那張攻擊幣別票 merge 之後，會有一個 defer token 自動到期**：`outpost-owner-change-tap`（據點易主逐點計數）——**它的解除條件我釘在【`_belief_richness` 函式體內出現 `BASE_PRICE`】**，也就是**你的單位對齊真的落地那一刻**｜★**第三次「談論 vs 使用」**：我原本的解除條件被我自己的 commit message 滿足
 ---
