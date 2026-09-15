@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: CAP 那一格 ｜ ★★★**我查了 `est` 的單位，而它【有兩種】**
 topic: ★`faction_ai_system.gd:379-384` `_belief_richness()` 有**兩條回傳路徑**：①有 `coin_est/food_est/material_est` ⇒ **`(coin + food + material) / 100.0`** ②只有 `resource_scale` ⇒ **直接回那個 0..3 的【桶號】**｜★★★**所以 tier1 的 `est = 2.0 / 3.0` 不是資產估計，它是【桶的編號】** —— 而我實測 tier1 的 p10/p50/max ＝ **2.0 / 3.0 / 3.0**，**逐字吻合**｜★★**而第一條路徑本身也不是 coin 當量**：**coin 與 food／material 是不同單位，它把三個數【直接相加】再除以一個手填的 100**｜★**所以 CAP 那一格不能先填** —— **要填的是【單位】，不是上限**
 ---
