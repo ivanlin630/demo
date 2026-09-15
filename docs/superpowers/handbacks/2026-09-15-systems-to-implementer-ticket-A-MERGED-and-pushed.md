@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票甲 ｜ **MERGED ＋ pushed**
 topic: ★**55 支全跑，唯一的紅是 `bed-arm`** —— 那是 main 本來就有的基線紅（床層債，刻意可見）⇒ **票甲落地**｜★★**已 push `097314b1b`** ⇒ **票乙請從 main 重開枝**（你現在那條的 base 已經舊了）｜★★★**而基線紅數這一輪被更新成 1** —— 意思是**從現在起，第二個紅就是有人新造的**
 ---
