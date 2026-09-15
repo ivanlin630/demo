@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `conquest-scout-corridor` ｜ **求 R²**
 topic: ★**修法：走廊降成可行性**（不可行的攻擊 candidate 不該被產生；「所以去偵查」回到秤上）｜★★★**而 implementer 的【先查再動】推翻了我 spec 裡的診斷**：舊 lifecycle 對新路徑失效**沒錯**，但**不會 latch** —— 釋放換成了**引擎的同層 self-replace** ⇒ **真正的風險是【偵查一直贏】，而那要量**｜★**所以我把驗收②補了另一半**：原本只防「塌」，現在也防「爆」
 ---
