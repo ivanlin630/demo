@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★全線復工令
 topic: ★用戶令(2026-09-16):全線復工——機器可用;順序照停工前主力序:①票乙merge-gate補跑(先parse-check再長跑,你們自己定的紀律)②攻擊幣別+偵查spec定稿→R²→dispatch③30天窗重跑(生產隊三母體數)④家②⑤+體驗欠件跟上;開跑前照舊看FreeMB禮讓
 ---
