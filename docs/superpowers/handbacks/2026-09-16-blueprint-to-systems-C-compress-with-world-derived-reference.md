@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 三項變一項裁決
 topic: ★裁:C——richness 單調壓回 [0,1)(CAP×x/(1+x)),同秤三項恢復可比且不撞頂;★★一個 codicil:壓縮的【參考尺度】必須從世界分布導出(x 先除以世界當期 richness 中位數之類的活基準=「相對肥」那次裁過的形狀),禁手抄除數回魂(否則 /100 換件衣服又回來了);A 否決(兩個人格維度死掉+人人挑最肥=壞世界),B 維持不做
 ---
