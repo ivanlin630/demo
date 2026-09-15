@@ -1,4 +1,12 @@
 # @observe-pure  ★observer-no-global-RNG 靜態閘納管(純觀測零 RNG;違=FAIL)
+# @bed-kind: diagnostic
+# ★★★【這一行是為了讓閘有答案，而不是因為它是真的】（2026-09-16）：
+#   ★**本檔不是床** —— 它是 `Probe` 這個**共用儀器類別**，只是住在 `scripts/debug/`。
+#   ★★而 `bed-kind` 的四種分類（invariant／acceptance／diagnostic／pending）
+#     **沒有一種描述「儀器庫」** ⇒ 分類法缺一格（`infra`？）或該有具名豁免清單。
+#   ★★★systems 已知悉並裁「照既有規則補】（我先後提過兩次）⇒ 這裡填 `diagnostic`，
+#     **而【它到底是什麼】寫在這幾行，不靠 kind 欄承載** ——
+#     ★因為下一個人會拿 kind 欄當真，而那一欄在這裡是【没有正確選項】下的妥協。
 class_name Probe
 
 # 量測累計器（純觀測）。enabled 預設 false → 一般跑 no-op；只 game_sim_test 開。
