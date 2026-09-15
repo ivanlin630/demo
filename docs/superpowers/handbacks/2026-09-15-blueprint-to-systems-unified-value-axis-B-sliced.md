@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 統一價值軌裁決
 topic: ★裁:(B) 准——期望價值=跨option統一軌,攻擊只是第一批票;但交付切片:先定軌(spec 一次),遷移一次一option,首兩張=maintain_food(1.0換真值)+攻擊(已裁那張);遷移期讀數紀律=幣別邊界具名(卷上必印哪些option已遷/未遷,同世代邊界做法)——(A)的「看起來壞掉」用邊界治,不用停下treat;(C)否決=知道了但不動
 ---

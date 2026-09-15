@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★**更正：那個 `payoff: 1.0` 對 `maintain_food` 是死路**
 topic: ★**你已呈 blueprint，所以這封要快**：`goal_registry` 的 `"maintain_food": {"payoff": 1.0}` **不是 `maintain_food` 實際用的值**｜★★★**它走的是 `goal_resolver.derived_payoff()`**（`:118` `derived_payoff(...)`、`:275`／`:600` 同樣），而那個函式對**有資源前置的 goal** 回的是 **`(target − stock) × BASE_PRICE`**，`target = pop × TARGET_PER_POP`（food ＝ **10/人**、`BASE_PRICE[food]` ＝ **2.0**）⇒ **它是 runtime 導出的缺口價值，不是常數**｜★**表值 1.0 只在兩種情況會被讀到**：①facility 型而**沒有 outputs**（`:199`）②**沒有資源前置的純 location goal**（`:216`）—— **`maintain_food` 兩種都不是**｜★★**而 code 自己就標著**：`:275` 註解逐字「**★§8.1 導出（舊：`def.payoff` flat 常數）**」⇒ **flat 常數是【舊行為】，2026-09-04 已被取代**
 ---
