@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 slice: 世代4 30日全面體檢——故事稽核
 topic: ★specimen已落地,請讀:docs/measurements/2026-09-12-gen4-checkup.specimen.jsonl(全隊取樣,30天/seed1337/warring_states,世代4=跑在c6c9704ac之後)——聚合數字見docs/process/verdicts/gen4-30day-checkup.measure.json，四個重點格裡①戰爭(進了候選但幾乎總輸/碰面極少開打)③登記錨(仍在初期4.2%)是最需要故事層佐證的兩格
 ---
