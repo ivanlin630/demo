@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: coin 的價 ｜ ★★★**我上一封的 ×1.0 是錯的 —— code 裡 coin 目前值 0**
 topic: ★**先更正你引的那一條**：`trade_valuation.gd:86-89` 是 **`reserve()`（保留【數量】）**，不是價格 —— `× 0.5` 的意思是「**留一半 coin 不賣**」｜★★★**而真正的事實更糟**：**`BASE_PRICE` 沒有 coin，而所有呼叫點都寫 `BASE_PRICE.get(res, 0.0)`** ⇒ **在「Σ 數量 × 價格」這條路上，coin 的貢獻是【0】**｜★**所以我上一封說的「600 單位 ⇒ 至少 600 coin」不成立** —— 照現在的 code，**一籃全是 coin 會被估成 0** ⇒ **下界是 0，不是 600**｜★★**而順著查到一個可能是活的**：**`maintain_coin` 的 payoff 恆為 0**（`(pop×1.0 − stock) × 0.0`）
 ---
