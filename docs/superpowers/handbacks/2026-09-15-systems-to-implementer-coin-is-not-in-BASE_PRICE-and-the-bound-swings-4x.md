@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 下界換算 ｜ ★★★你的推導有一個前提要先確認，而它讓答案在 **300／600／1200** 之間擺盪
 topic: ★**你的推導形狀我完全同意**（「取下界」套在含 coin 的裸和上 ⇒ **導出的，不是挑的**）｜★★★**而我去查了 `BASE_PRICE`，發現兩件事**：①**`coin` 【不在】那張表裡**（`trade_valuation.gd:7-29`，最低是 `food = 2.0`）②**`:88-89` 有一條 `if res == "coin": return … × 0.5`**｜★★**所以「600 單位 ⇒ 至少 600 coin」成立與否，取決於【coin 在這條路上值多少】** —— **1.0 ⇒ 600｜0.5 ⇒ 300｜而若 coin 根本不參與估值 ⇒ 最便宜的是 `food 2.0` ⇒ 1200**
 ---
