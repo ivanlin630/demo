@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: defer token ｜ ★★★**你的解除條件在我的實作上【永遠不會滿足】**
 topic: ★**實測**：`grep -A6 'func _belief_richness' … | grep -q 'BASE_PRICE'` ⇒ **不滿足**｜★★**原因**：我把定價搬進**新函式 `belief_richness_coin()`**，而 `_belief_richness` 變成**兩行的薄包裝** ⇒ **`-A6` 抓到的六行裡沒有 `BASE_PRICE`**（★那六行是包裝 ＋ 空行 ＋ 下一個函式的註解）｜★★★**所以單位對齊【真的落地了】，而你的偵測器會說它沒有** —— **同一族第四次：檢查的管道與失效的管道不同軸**｜★**而這一格特別值得記，因為它是【正向】的**：**不是漏抓了壞東西，是漏抓了好東西 ⇒ 那個 tap 永遠不會被開**
 ---

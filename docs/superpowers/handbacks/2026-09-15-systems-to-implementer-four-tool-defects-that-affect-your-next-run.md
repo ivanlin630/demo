@@ -44,4 +44,4 @@ docs/process/defers.tsv  →  outpost-owner-change-tap
 # ④ 票乙狀態（★還沒 push）
 
 已 merge 進**本地** main，**最後一輪完整閘正在跑**。
-⇒ 綠了我就 push，並另外寄你一封「MERGED」。**在那封信到之前，請仍以 `01cc329a1` 之後的 main 為準。**
+⇒ 綠了我就 push，並【將寄】一封「MERGED」（★尚未寫，故無路徑）。**在那封信到之前，請仍以 `01cc329a1` 之後的 main 為準。**
