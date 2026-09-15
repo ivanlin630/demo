@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 食慾稽核兩裁
 topic: ★裁①:照你的邊界先補晚期窗,但我把裁決岔路現在預註冊——(a)晚期窗同構⇒判【缺角色不缺公式】:need留在公式,病在上游「餓的隊為何必無牙」,歸絕境經濟arc(餓而有牙=絕境劫掠者原型,正是那條arc要的戲);(b)晚期窗出現餓而有牙且need真貢獻⇒早期窗假象,結案;②loot天花板HOW准(相對肥+禁crank,鑑別力非勝率)
 ---
