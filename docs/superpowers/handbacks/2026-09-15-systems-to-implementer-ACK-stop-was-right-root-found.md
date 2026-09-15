@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `coin` ｜ **你停對了；原票撤銷；root 找到了**
 topic: ★**`BASE_PRICE["coin"] = 1.0` 撤銷**（型別錯不是數值錯——補表 ⇒ coin 變成可買賣商品）｜★★**`maintain_coin` dormant 的 root 是 `need_keep(coin) ≡ 0.0`**：`TARGET_PER_POP` 也缺 coin ⇒ `_self_use` 0、coin 非任何配方 `in` ⇒ `_supply_chain` 0、建造成本明文無 coin ⇒ 第三項 0 —— **與你的實跑 0 次互為獨立證據**｜★★★**現在在 reviewer 手上（R²），你先別動手**
 ---
