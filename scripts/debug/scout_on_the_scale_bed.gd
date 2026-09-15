@@ -54,6 +54,32 @@ static func _feasible_has(scan: Dictionary, tid: int) -> bool:
 		if int((f as Dictionary).get("id", -1)) == tid: return true
 	return false
 
+# ★★★【記憶體探針】（systems 2026-09-15，三輪被殺後裝）：逐日印鍵數與進程記憶體。
+#   ★run2（timeout 2700）死在 day 21、run3（timeout 9000）**同樹同 seed** 死在 day 14（OOM）
+#   ⇒ ★★世界是決定性的 ⇒ 兩輪到 day 14 為止吃的記憶體一樣
+#   ⇒ ★★★**差異不在世界，在【機器當下有多少可用記憶體】** —— 而這台機器與用戶的遊戲共用。
+#   ★而 `bump_pt`（`probe_stats.gd:89-93`）記的是**兩個獨立的鍵**：
+#     `event+day_suffix` 與 `event+".team."+id` —— **不是 team×day 的交叉積**
+#     ⇒ 鍵數 ≈ 71×天數 **＋** 71×隊數（相加），而不是相乘。
+#     ★★但它仍然**對天數無界** ⇒ 這顆探針量的就是那個成長率。
+static func _mem_line(day: int) -> void:
+	var n_samples_inst: int = 0
+	for k in Probe.samples:
+		n_samples_inst += (Probe.samples[k] as Array).size()
+	print("[MEM] day=%d counts_keys=%d samples_keys=%d samples_inst=%d amounts_keys=%d static_mem_MB=%.1f" % [
+		day, Probe.counts.size(), Probe.samples.size(), n_samples_inst, Probe.amounts.size(),
+		float(OS.get_static_memory_usage()) / 1048576.0])
+	# ★★★**指認到鍵** —— ★「樣本在長」答不出【哪一個在長】，
+	#   而修法（調 cap／滑動窗）必須知道是哪一個。★★取前五大，每日一行。
+	var tops: Array = []
+	for k in Probe.samples:
+		tops.append([String(k), (Probe.samples[k] as Array).size()])
+	tops.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	var top_txt: Array = []
+	for i in range(mini(5, tops.size())):
+		top_txt.append("%s=%d" % [tops[i][0], int(tops[i][1])])
+	print("[MEM]   top5_samples: %s" % " ".join(top_txt))
+
 func _run() -> void:
 	var ticks: int = int(OS.get_environment("SC_TICKS")) if OS.has_environment("SC_TICKS") else 43200
 	var early_days: int = int(OS.get_environment("SC_EARLY_DAYS")) if OS.has_environment("SC_EARLY_DAYS") else 7
@@ -157,6 +183,7 @@ func _run() -> void:
 	print("   ★★（藍圖規則：戰爭類讀數的窗必須蓋過【偵查時代】⇒ 早窗與全窗都印，不只印一個）")
 	for _t in range(early_ticks):
 		runner.advance_tick(st, no_player)
+		if (_t + 1) % WorldState.TICKS_PER_DAY == 0: _mem_line((_t + 1) / WorldState.TICKS_PER_DAY)
 	var e_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
 	var e_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
 	var e_moth: int = int(Probe.counts.get("optpool.mother", 0))
@@ -166,6 +193,7 @@ func _run() -> void:
 	var e_cor: int = int(Probe.counts.get("g3.scout_dispatch", 0))
 	for _t in range(ticks - early_ticks):
 		runner.advance_tick(st, no_player)
+		if (_t + 1) % WorldState.TICKS_PER_DAY == 0: _mem_line((early_ticks + _t + 1) / WorldState.TICKS_PER_DAY)
 	var f_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
 	var f_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
 	var f_moth: int = int(Probe.counts.get("optpool.mother", 0))
