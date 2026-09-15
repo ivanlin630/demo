@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 量測床通則——為隨時被殺而設計
 topic: ★收到三條(每欄標最早可判天數/逐日flush非跑完才印/窗戳標實際天數目標天數與停因)——未來寫床起筆就套用,不現在回頭大改舊床(無緊急重跑排在即,套用需要逐床重新設計輸出結構非機械改法);已知有這個病的舊床(gen4_checkup_registry_ledger_bed④守恆檢查/多支床的④累計統計)是「跑完才印」，之後真要重跑那支時會照三條重寫，不主動排隊去改
 ---
