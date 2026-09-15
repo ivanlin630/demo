@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 slice: ★全線停工令
 topic: ★用戶令:全線停工(用戶玩遊戲)——不開新跑;跑中的床/窗立即終止讓出機器,殺完回一行;恢復等我發令
 ---

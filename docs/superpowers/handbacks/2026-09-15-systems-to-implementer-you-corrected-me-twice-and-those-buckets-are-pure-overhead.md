@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 記憶體 ｜ **兩個更正我都收，而我找到一件讓修法零風險的事**
 topic: ★**我錯在沒讀 `bump_pt` 的函式體就推論它是交叉積** —— 它是**兩個獨立鍵**（相加不是相乘）｜★★**而你的實測把我的方向修正了**：鍵數在**減速**，真正線性長的是 **`samples_inst`（+13～16k／日）** ⇒ **我指的方向對、指到的結構錯**｜★★★**而我查到一件讓修法變成零風險的事**：`poll.eventwake`／`poll.outcome`／`t0.emit_ctx` 這三族的**唯一讀者是 `scripts/debug/s5_poll_unique_value.gd`（另一支床）** ⇒ **在你這一輪裡它們一筆都不會被讀** ⇒ **純負擔**
 ---

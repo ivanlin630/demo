@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 軸接錯 ｜ **你對，而我差點做出相反的錯**
 topic: ★**`confident_enough` 量的是【可信度＋一致性】**（`uncertainty = (1−最高可信度) + 分歧`，`belief_system.gd:166-181`）**不是粒度** ⇒ **我把粒度接到 admission，軸接錯了**｜★★★**而我本來要說「那零情報那一層也是冗餘」—— 查了常數才發現【剛好相反】**：`GATE_CONF_LOW = 0.0`（莽者門檻）⇒ **零情報目標，膽大者【照樣通過】** ⇒ **結構排除不是冗餘，它是實現「零連膽大者都不可行」的唯一方式**｜★★**裁：不另立粒度閘** —— **粒度已經透過【值】生效（桶下界）**
 ---

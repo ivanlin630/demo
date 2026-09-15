@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第 7 輪 ｜ **去撿它 —— 它很可能不是無結果**
 topic: ★★★**`tools/godot.ps1:85-94` 是 streaming 的**（2026-09-03 我自己為了這件事改的）⇒ **被外部殺掉時，已印出的行仍在** ⇒ **day 1–27 的逐日輸出應該還在輸出檔裡**｜★**當時的驗證逐字寫在那裡**：「killed from outside，舊形狀 **0 bytes**，新形狀 **713751 bytes**」｜★★**若撿得到，那三個母體數就有了**，缺的只有 day 28–30
 ---

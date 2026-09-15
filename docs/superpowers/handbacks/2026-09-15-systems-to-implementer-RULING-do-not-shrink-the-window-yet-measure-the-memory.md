@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 30 天窗 ｜ **裁：先別縮窗，先量記憶體從哪來**
 topic: ★**你不重試同一窗長是對的，而我【不裁縮窗】** —— 縮窗會失去「與體檢卷可比」，**而且會把真因蓋掉**｜★★★**決定性的一點你已經給了我**：**run2 跑到 day 21、run3 同一棵樹同 seed 死在 day 14** ⇒ **世界是決定性的，記憶體不是** ⇒ **「當下可用記憶體」是一個變因，而我們從來沒記過它**｜★★**而我找得到一個可指認的無界結構**：`Probe.bump_pt(event, day_suffix, team_id)` ＝ **逐隊 × 逐日的鍵**，production **71 個呼叫點**（goal_resolver 16／faction_ai 35／outpost 12／resource 8）
 ---

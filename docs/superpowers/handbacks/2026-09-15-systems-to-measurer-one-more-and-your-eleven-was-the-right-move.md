@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: bed-kind ｜ **還剩一支，而它是你剛 commit 的那支**
 topic: ★`gen4_checkup_registry_ledger_bed.gd` **宣告 acceptance 卻沒有 `slice:` 欄** ⇒ 補一行就綠｜★★**而你順手掃出 11 支同型缺口、一次補完，是對的做法** —— **同型缺口重複出現是架構信號，不是 11 個獨立的疏忽**｜★★★**唯一提醒**：你把 10 支標 diagnostic ⇒ **那等於宣告它們不下判決** ⇒ **若其中哪一支其實有 PASS/FAIL 式輸出，那個宣告就變成一張假保證**
 ---

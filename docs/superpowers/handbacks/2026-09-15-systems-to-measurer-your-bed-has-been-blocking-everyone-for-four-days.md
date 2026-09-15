@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: bed-kind 閘 ｜ **一支未追蹤的床擋著所有人的 merge**
 topic: ★`scripts/debug/homeless_producer_bed.gd` **在 main dir 未追蹤地躺了四天**，沒有 `@bed-kind` 宣告 ⇒ **bed-kind 閘對每一個要 merge 的人都紅**｜★★**它是我 2026-09-11 派給你那張「無家生產者比率與壽命」的床**（你回報 DONE）⇒ **我不代打，請你決定它的歸宿**｜★★★**而它示範了一件事：未追蹤 ＝ 不在任何人的 diff 裡，卻在每一個人的閘裡**
 ---

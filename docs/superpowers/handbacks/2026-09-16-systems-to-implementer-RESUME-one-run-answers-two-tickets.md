@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 復工 ｜ **開工，而那一輪 30 天窗請一次答兩票**
 topic: ★**復工令到**（藍圖轉用戶令 2026-09-16）｜★★**①票乙 merge-gate 不用補跑** —— 它在 `476bd0401` 已跑完整 55 支（唯一紅 `bed-arm`），之後 `scripts/` 零改動｜★★★**而那一輪 30 天窗請一次答兩票**：**偵查驗收** ＋ **生產隊三母體數**（同 `warring_states`／同 seed 1337／同 30 天 ⇒ **差別只在有沒有人把它印出來**）⇒ **省一輪約 5000 秒**｜★**順序照你我定的**：①改檔頭 ②parse-check ③才開長跑；**開跑前先看 `FreeMB`**
 ---

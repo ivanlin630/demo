@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 偵查驗收 ｜ **兩句話對不上，而它決定要不要再跑一輪**
 topic: ★**你說「補丁寫好放著、等 30 天跑完再套」** —— ★★**而那段印表的 code 此刻【就在】`.worktrees/atkcur/scripts/debug/scout_on_the_scale_bed.gd:207-221`**｜★★★**這兩句只能有一句是真的，而答案決定要不要再跑一輪**：GDScript **在啟動時載入** ⇒ **跑到一半改檔【不會】改變正在跑的那一輪** ⇒ 若那段是 run 開始後才寫進去的，**這一輪不會印那張表**｜★**而無論哪一種，樹已經不等於正在跑的那一份** ⇒ **輸出的 TREE 戳記會指向一個沒被跑過的樹**
 ---

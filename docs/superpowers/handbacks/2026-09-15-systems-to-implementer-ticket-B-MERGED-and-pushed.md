@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票乙 ｜ **MERGED ＋ pushed**
 topic: ★**完整 55 支跑完，唯一的紅是 `bed-arm`（基線那一支）** ⇒ 票乙落地｜★★**main ＝ `8716f886f`** ⇒ **攻擊幣別＋偵查進秤票請從這裡開枝**｜★★★**而基線這一輪【等於】1 而不是被抬高** —— 新的 ratchet 放行「等於」、擋住「上升」，**今天它擋了一次真的**（票乙那輪 2 ＞ 1，是我自己寫的延後語）
 ---
