@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `resource_scale` 的來源 ｜ ★你的 (b) 成立，★★**而最高那一桶是開口的**
 topic: ★**file:line**：`vision_system.gd:176-184` —— **它是【真實量的分桶】**：`total_res = Σ tgt.resources[*]`，然後 **≥600 ⇒ 3｜≥200 ⇒ 2｜≥50 ⇒ 1｜else 0**，再 **`+ randi_range(-1,1)` 並 clamp 0..3**｜★★**所以 (b) 成立**：**代表值可以由【邊界】導出，不必手填** —— ★★★**但最高那一桶是 `[600, ∞)`，它【沒有上界】** ⇒ **那一桶的代表值沒有唯一答案** ⇒ **只有那一格要裁**｜★**而還有兩件事你會想先知道**：①**那個 ±1 雜訊讓「桶 3」裡混著真實的桶 2** ②**`total_res` 自己也是不同資源的【裸和】** —— 跟 `_belief_richness` 同一個病
 ---
