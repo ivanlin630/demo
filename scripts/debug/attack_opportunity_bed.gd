@@ -225,6 +225,29 @@ func _run() -> void:
 		print("   ★★★而 `est` 與 `loot` 要一起看：`loot = clamp(est / %.1f, 0, 1)`" % DecisionTerms.ATTACK_LOOT_REF)
 		print("      ⇒ ★若 est 中位遠小於參考值，**loot 就會在中位列近乎 0** ——")
 		print("        而那時【分布不窄】與【中位列被壓扁】**同時成立**，它們不矛盾。")
+	# ★★★【(a)/(b) 的分水嶺】—— 由床自己印，不靠我離線算（systems 2026-09-15）：
+	#   ★要回答的是【筆數】不是【有沒有】—— **出現 1 筆與出現 100 筆是兩個答案**：
+	#   ★★1 筆不是【早期窗假象】，是【罕見但存在】—— 兩者對絕境經濟的意義完全不同。
+	if not frows.is_empty():
+		var hungry_armed: int = 0
+		var need_contrib: int = 0
+		var hungry_n: int = 0
+		var armed_n: int = 0
+		for r in frows:
+			var _nd: float = float(r["need"])
+			var _od: float = float(r["odds"])
+			if _nd >= 0.0005: hungry_n += 1
+			if _od >= 0.0005: armed_n += 1
+			if _nd >= 0.0005 and _od >= 0.0005:
+				hungry_armed += 1
+				if float(r["opp"]) > 0.0: need_contrib += 1
+		print("")
+		print("★★★【分水嶺】餓（need>0）且有牙（odds>0）的列：**%d / %d**（%.1f%%）" % [
+			hungry_armed, frows.size(), 100.0 * float(hungry_armed) / float(frows.size())])
+		print("   其中 `need` 真的進到 util 裡的（opp > 0）：**%d 筆**" % need_contrib)
+		print("   兩邊的邊緣：餓的列 %d｜有牙的列 %d（★兩個數加起來超過母體才可能有交集）" % [
+			hungry_n, armed_n])
+		print("   ⇒ ★★報【筆數＋母體】，**分界不在這支床裡定** —— 它是裁決，不是量測。")
 	# ★★★因子逐列 TSV（systems 2026-09-15 問「淺」的來源）——
 	#   ★聚合答不了逐桶平均：要算 tier2 的 loot 逐桶 util，必須有逐列值。
 	print("")
