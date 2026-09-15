@@ -249,7 +249,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 					"est": snappedf(ctx.attack_loot_est, 0.001),
 					"loot": snappedf(_loot, 0.001), "need": snappedf(_need, 0.001),
 					"odds": snappedf(_odds, 0.001), "person": snappedf(_person, 0.001),
-					"opp": snappedf(_opp, 0.0001)}, 400)
+					"opp": snappedf(_opp, 0.0001),
+					"tier": ctx.attack_belief_tier}, 400)
 				Probe.bump("attack.opp.factors_n")
 			# ★★★「剩下的零是什麼」（systems 2026-09-12：★一半的母體沒有解釋我不收）：
 			#   ★零有**四種來源**，而它們的處置完全不同 ⇒ 逐筆分類，不是只數一個 0。

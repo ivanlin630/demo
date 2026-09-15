@@ -199,6 +199,15 @@ func _run() -> void:
 		print("   ★★★而 `est` 與 `loot` 要一起看：`loot = clamp(est / %.1f, 0, 1)`" % DecisionTerms.ATTACK_LOOT_REF)
 		print("      ⇒ ★若 est 中位遠小於參考值，**loot 就會在中位列近乎 0** ——")
 		print("        而那時【分布不窄】與【中位列被壓扁】**同時成立**，它們不矛盾。")
+	# ★★★因子逐列 TSV（systems 2026-09-15 問「淺」的來源）——
+	#   ★聚合答不了逐桶平均：要算 tier2 的 loot 逐桶 util，必須有逐列值。
+	print("")
+	print("★因子逐列（TSV：est/loot/need/odds/person/opp/tier）")
+	print("FACTORS_TSV	est	loot	need	odds	person	opp	tier")
+	for r in frows:
+		print("FACTORS_TSV	%.3f	%.3f	%.3f	%.3f	%.3f	%.4f	%d" % [
+			float(r["est"]), float(r["loot"]), float(r["need"]), float(r["odds"]),
+			float(r["person"]), float(r["opp"]), int(r.get("tier", -9))])
 	# ── ★逐列原始樣本（讓等級相關可以離線算）──
 	var arows: Array = Probe.samples.get("appetite.input", [])
 	print("")
