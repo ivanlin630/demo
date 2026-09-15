@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: admission 語意更正 ｜ 三態
 topic: ★③號窄問題「(b)=(c)數值相同無害」——**不是第三次自我合理化，成立**（我自己grep過,resource_scale全庫唯一消費者就是`_belief_richness`本身,沒有第二個讀presence-vs-absence的地方）｜★★★但查的時候撞到一個你們整條票鏈都沒提過的東西：**`_belief_richness()`有第二個活的消費者**——`terms.gd:228 ATTACK_LOOT_REF=3.0`（校準在舊0..3桶號尺度上,餵決策引擎的`attack_opportunity`項)，①單位對齊一上線這支會整支飽和到1.0,是跟你今天處理的`faction_ai_system.gd`score同一把刀該砍兩刀的地方，沒人砍到第二刀｜★★另外(b)沒有跟(c)一起過`confident_enough`門檻,承認的epistemic對等沒有落實到admission層
 ---
