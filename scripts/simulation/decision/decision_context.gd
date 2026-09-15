@@ -242,6 +242,14 @@ var attack_win_odds: float = 0.0       # 贏率：既有 capability 接地，不
 var attack_belief_tier: int = -1       # -1 ＝ 無 belief
 var attack_feasible: bool = false      # 可行集合非空（零人格：知道/看得到/追得上/養得起）
 var attack_target_id: int = -1
+# ★★★【偵查進秤】（票：攻擊幣別＋偵查 2026-09-15）：
+#   ★被【型別可行性】排除出攻擊候選的目標（只有桶號或無資料）
+#     ⇒ **它們不是「很窮」，是「看不清」** ⇒ 該去的地方是偵查。
+#   ★★而它**進同一個 argmax**（禁走廊：不得排除完就直接 `try_set(TASK_SCOUT)`）。
+var recon_target_id: int = -1
+var recon_target_pos: Vector2i = Vector2i(-1, -1)
+var recon_value_est: float = 0.0        # ★解鎖資訊的期望價值（coin 當量）× 折現
+var recon_used_blind_prior: bool = false   # ★★守衛③的逐筆證據：這一筆用的是不是先驗
 # ★★★逐筆淘汰理由（systems：判準要可證偽）—— 每一次 nO 都要指得出是哪一種不可行
 var attack_scan_why: Dictionary = {}         # 優先序：faction 令 > 富 prey > 血仇(★需 belief_pos) > eta 最小
 # A2a 子隊旗（一旗兩用）：parent_team_id != -1 → ①服從母團(歸建 duty option) ②不自主發起戰略 option(戰略-gate)。
@@ -284,6 +292,49 @@ var survival_stall_active: Array = []
 #   ★★【寫幾次】與【有沒有影響】是兩件事 ⇒ 先量前者：每處按 `advance` 分桶。
 #   ★★★Probe.bump 不耗 RNG、不改控制流 ⇒ 儀器不改變被觀測物。
 #   ★誠實限：tap 只答【這一行被跑到幾次】，不答【寫進去的值有沒有真的不同】。
+static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
+	# ★★★【單一選擇點】：gather 與 `to_task` **共用這一支** ——
+	#   ★否則兩邊各自挑一次，而【秤比的目標】與【派出去的目標】可能不同一個
+	#   ⇒ ★★而那種不一致**不會有任何東西紅** —— 它只會讓決策與行為默默地分家。
+	var out: Dictionary = {"id": -1, "pos": Vector2i(-1, -1), "value": 0.0, "blind": false}
+	var _recon_best: float = -1.0
+	# ★折現走**既有的** `DiscountedFlow`（spec 明定）：δ 讀【慎重】——
+	#   ★★而不是貪婪（用戶 2026-08-21 已裁「貪婪≠短視」）。
+	var _rldr: PersonData = state.persons.get(team.leader_id)
+	var _rdelta: float = DiscountedFlow.delta_of(_rldr.values if _rldr != null else {})
+	# ★★★【天數要是真的移速算出來的】：走 `GoalResolver._tiles_per_day`
+	#   （單一計算點，內部用【每格 tick 成本】非死常數）——
+	#   ★直接拿格數當天數會差一個速度倍數。
+	var _rtpd: float = maxf(GoalResolver._tiles_per_day(state, team), 0.01)
+	for _rid in state.teams:
+		var _rt: TeamData = state.teams[_rid]
+		if _rt == null or int(_rid) == team.team_id: continue
+		if _rt.faction_id == team.faction_id: continue
+		var _rbel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, int(_rid))
+		if _rbel.is_empty(): continue
+		# ★★守衛③：**有可定價分項的目標不是偵查候選** ⇒ 先驗在這一刻被取代
+		if FactionAISystem.belief_has_priced_items(_rbel): continue
+		var _rpos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, int(_rid))
+		if _rpos == Vector2i(-1, -1): continue   # ★不知道在哪 ⇒ 連去都去不了
+		var _blind: bool = not _rbel.has("resource_scale")
+		var _prior: float = DecisionTerms.SCOUT_VALUE_BLIND_PRIOR
+		if not _blind:
+			# ★桶的下界（`vision_system.gd:179-182`：≥50 / ≥200 / ≥600）—— ★★單位是【總量】
+			#   ⇒ ★★★而一籃總量 N 的東西，其 coin 價值的**下界**就是 N（全是 coin 時）。
+			var _sc: int = int(_rbel.get("resource_scale", 0))
+			_prior = 600.0 if _sc >= 3 else (200.0 if _sc == 2 else (50.0 if _sc == 1 else 0.0))
+		var _rdays: float = float(FactionAISystem._hex_dist(team.tile_pos, _rpos)) / _rtpd
+		# ★解鎖資訊的期望價值（coin 當量）× 折現：路上要走 `_rdays` 天 ⇒ δ^days。
+		#   ★★距離是真實量，折率是人格 —— ★★★兩者都不是旋鈕。
+		var _rval: float = _prior * pow(_rdelta, maxf(_rdays, 0.0))
+		if _rval > _recon_best:
+			_recon_best = _rval
+			out["id"] = int(_rid)
+			out["pos"] = _rpos
+			out["value"] = _rval
+			out["blind"] = _blind
+	return out
+
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
 	var c := DecisionContext.new()
 	var _tg: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
@@ -893,6 +944,21 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 					_be = float(_fc2["eta_days"])
 					c.attack_target_id = int(_fc2["id"])
 			if Probe.enabled: Probe.bump("attack.target_leaderless")
+	# ★★★【偵查候選】：從被型別排除的目標裡挑一個（票 2026-09-15）
+	#   ★價值 ＝ **解鎖資訊的期望價值（coin 當量）× 折現**
+	#   ★★有桶號 ⇒ 用**桶的下界**（同一條裁定：取下界，因為兩種錯的代價不對稱）
+	#   ★★★全盲 ⇒ `SCOUT_VALUE_BLIND_PRIOR`（具名先驗），**而這一筆會被標記**
+	var _rpick: Dictionary = pick_recon_target(state, team)
+	c.recon_target_id = int(_rpick["id"])
+	c.recon_target_pos = _rpick["pos"]
+	c.recon_value_est = float(_rpick["value"])
+	c.recon_used_blind_prior = bool(_rpick["blind"])
+	if Probe.enabled and c.recon_target_id != -1:
+		Probe.bump("recon.candidate")
+		Probe.bump("recon.candidate." + ("blind" if c.recon_used_blind_prior else "bucket"))
+		Probe.bump_sample("recon.rows", {"team": team.team_id, "target": c.recon_target_id,
+			"blind": c.recon_used_blind_prior, "value": snappedf(c.recon_value_est, 0.01),
+			"tick": state.world.current_tick}, 300)
 	# ★★★機會＋需要的三個原料（HOW spec 2026-09-12-attack-opportunity-drive）：
 	#   ★只在有 target 時算；★★**零新狀態** —— 全部走既有函式（`_belief_richness`／既有 capability 接地）。
 	#   ★★★資產只讀 **belief**（感知鐵律：禁 god-view 直讀對方 `resources`／`population`）。
