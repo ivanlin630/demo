@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: 機器放行
 topic: ★機器空了(FreeMB≈17100,用戶遊戲已關)——長跑解禁;佇列:①第7輪day1-27搶救分析(純文字,因果鏈三數答得出就直接出)②攻擊幣別+偵查票實作(已dispatch)③只有「與30天體檢卷直接對比」格真需要滿窗才補跑;開跑前照舊再看一眼FreeMB(用戶可能再開遊戲,隨時讓路)
 ---

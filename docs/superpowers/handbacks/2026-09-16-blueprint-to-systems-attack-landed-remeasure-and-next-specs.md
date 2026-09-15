@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 攻擊票落地後推站
 topic: ★攻擊幣別+偵查票已 MERGED(2fb10d7c1,55閘綠)——三件推站:①預繫驗收重量對 measurer 出 HOW(隊80型處境攻擊有時贏+飽隊硬目標仍不打成對反事實+偵查真發生+先驗逐筆被取代;戰爭類窗標含否偵查時代;世代邊界要不要推世代5你裁並更新邊界檔)②conquest-scout-corridor spec 出給 implementer(defer條件已達成,他在等)③恩怨帳切片A spec 排下一張(家②實體);★搶救卷 PRODUCE day4 0→1 收到=三動詞活著,因果鏈信等你彙
 ---
