@@ -188,7 +188,16 @@ func _run() -> void:
 	print("   ★★★而【風險項】在本實作裡**沒有獨立欄位**（風險折在贏率裡）")
 	print("      ⇒ ★所以「風險恆大把胃口壓平」這一格 **不適用**，而不是 0 —— 我不編一個欄位來填表")
 	# ── ★★★因子拆解（systems 2026-09-15）：哪一個因子把乘積壓扁 ──
+	# ★★★【宣告式母體】（systems 2026-09-15）：**我要這個窗的 N 筆** ——
+	#   ★拿不到那麼多 ⇒ **具名紅**，而不是拿幾筆算幾筆。
+	#   ★★因為【樣本少】與【世界裡沒發生】在一個平均上長得一樣。
+	var min_rows: int = int(OS.get_environment("AO_MIN_ROWS")) if OS.has_environment("AO_MIN_ROWS") else 150
 	var frows: Array = Probe.samples.get("attack.opp.factors", [])
+	if frows.size() < min_rows:
+		print("★★★【紅】因子逐列只收到 %d 筆，而宣告的地板是 %d ⇒ **這一窗不可判**" % [
+			frows.size(), min_rows])
+		print("   ⇒ ★【樣本少】與【世界裡沒發生】是兩個結論，而平均數分不出來")
+		_fails += 1
 	print("")
 	print("★★★乘積拆開：(0.6×loot + 0.4×need) × odds × person")
 	print("   ★loot 與 need 是**相加**；本實作**沒有獨立風險項**（風險折在 odds 裡）")
