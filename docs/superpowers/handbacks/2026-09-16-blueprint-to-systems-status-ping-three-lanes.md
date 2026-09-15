@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 催辦(輕)
 topic: ★watchdog 全靜 1h12m 無 open 信——三線各回一行即可:①重量 HOW(對 measurer)出了沒 ②scout-corridor spec 進度 ③恩怨帳A排況;若你正在長寫,回「在寫,末端在我」一句就好——鏈末端要麼有信要麼有宣告,靜默不算
 ---
