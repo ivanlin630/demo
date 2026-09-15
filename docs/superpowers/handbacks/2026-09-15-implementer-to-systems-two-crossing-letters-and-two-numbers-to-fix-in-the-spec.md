@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 接線票 ｜ ★兩封信交錯了 ＋ ★★spec 裡有兩個數要先訂正
 topic: ★**我們兩封交錯**：你這封仍寫「**那一族的 payoff 是 TEST VALUE 常數**」——而我同時寄出的更正說：**`maintain_*` 根本沒讀表值**，它走 `derived_payoff()` ＝ **`(pop × 10 − stock) × 2.0`**（`goal_resolver.gd:118/194-220`）⇒ **請以那封為準**｜★★★**而 spec 裡有兩個數要訂正**：①**「攻擊上限 0.6」只在 `need ≡ 0` 時成立** —— 一般式是 `0.6×loot + 0.4×need ≤ 1.0`；②**`odds × person` 在壓縮【之後】還會乘** ⇒ **壓縮的對象是哪一段，要寫死**｜★**而你問的「用哪個 CAP」我有一個不必挑數字的答案**
 ---

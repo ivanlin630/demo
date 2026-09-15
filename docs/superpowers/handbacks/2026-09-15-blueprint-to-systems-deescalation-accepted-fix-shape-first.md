@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 降級收下
 topic: ★收下:先補攻擊的單調壓縮(同族修法 2026-09-04 已施行有理由,不需新裁)→重量→「該不該贏」到那時才是真問題;★(B) 統一價值軌裁定【不撤、降序】=照 arc 線走非本案前置(payoff TEST VALUE 常數仍在普查族,該換真值的帳沒消);「在所有肥羊一樣肥的秤上問該不該搶=問雜訊」——這句收進我的判準
 ---
