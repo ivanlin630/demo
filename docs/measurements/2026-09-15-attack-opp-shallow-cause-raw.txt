@@ -1,0 +1,2464 @@
+﻿[TREE] path=A:\GDS\demo\.worktrees\herald commit=c7b2a774e clean=yes codehash=clean
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 攻擊【機會＋需要】驗收 ===
+★§A 方向性：肥而弱 util=0.300｜窮而弱 util=0.000
+  [OK] -a **肥的目標分數高於窮的**（秤真的在讀 belief 資產）
+  [OK] -b 窮的目標分數**不為負且更低**（★不是把所有目標都推高）
+★§A 需要：窮目標＋自己餓 util=0.133（vs 吃飽 0.000）
+  [OK] -c **自己餓時分數更高**（需要那一半有接上）
+  [OK] -d **無牙（贏率 0） 整項 0**（不是壓低，是 0）
+★人格：好戰 0.9  0.540｜中性  0.300｜慎重 0.9  0.108
+  [OK] ★人格 MODULATE 真值（好戰↑／慎重↓），非 boost 常數
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[Combat Start] Team-1000000 vs Team26
+[Ambush] NPC Team26 被 boar 伏擊
+[Combat Start] Team-1000001 vs Team40
+[Ambush] NPC Team40 被 boar 伏擊
+[Sub] Team0 派出子隊 Team49 leader=P1 advisors=[] (pop=3 cap=8 task=擴建)
+[Infra] Team0 派擴建子隊 Team49 → (10,19) stable
+[Site] 選址 (22, 7) score=498 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction1 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Sub] Team10 派出子隊 Team50 leader=P28 advisors=[] (pop=3 cap=7 task=擴建)
+[Infra] Team10 派擴建子隊 Team50 → (3,14) stable
+[Site] 選址 (17, 22) score=310 周邊資源={ "ore_gold": 15, "ore_iron": 124, "ore_silver": 60, "wild_horses": 7 } terrain=mountain
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Sub] Team12 派出子隊 Team51 leader=P32 advisors=[] (pop=3 cap=9 task=擴建)
+[Infra] Team12 派擴建子隊 Team51 → (18,1) stable
+[Site] 選址 (22, 7) score=406 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Sub] Team17 派出子隊 Team52 leader=P44 advisors=[] (pop=3 cap=14 task=擴建)
+[Infra] Team17 派擴建子隊 Team52 → (10,5) stable
+[Site] 選址 (22, 7) score=491 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 80(公庫0+私80) (需 { "material": 50, "tools": 0 })
+[Sub] Team22 派出子隊 Team53 leader=P59 advisors=[] (pop=3 cap=16 task=擴建)
+[Infra] Team22 派擴建子隊 Team53 → (4,27) stable
+[Site] Faction7 派工失敗: pop 不足: 8 < 12 (需 { "material": 50, "tools": 0 })
+[Outpost] Team29 設施施工 stable → Lv1 at (2,21)
+[Site] 選址 (22, 7) score=496 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction7 派工失敗: 資源不足 1.43x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[CampL0] Team1 紮營 L0 @(23,3)
+[CampL0] Team2 紮營 L0 @(21,9)
+[CampL0] Team4 紮營 L0 @(14,18)
+[CampL0] Team9 紮營 L0 @(17,17)
+[CampL0] Team13 紮營 L0 @(20,7)
+[Sub] Team14 派出子隊 Team54 leader=P37 advisors=[] (pop=1 cap=9 task=信使)
+[CampL0] Team14 紮營 L0 @(18,9)
+[CampL0] Team20 紮營 L0 @(10,6)
+[CampL0] Team23 紮營 L0 @(3,28)
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.75
+[Tick 60] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 60] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 60] Person 7 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 8 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 60] Person 10 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 11 (member/team4) → P1_comply | stress=0.00 loyalty=0.68
+[Tick 60] Person 12 (member/team4) → P1_comply | stress=0.00 loyalty=0.98
+[Tick 60] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 14 (member/team5) → P4_expand | stress=0.00 loyalty=0.97
+[Tick 60] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 60] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 18 (member/team6) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 60] Person 19 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 60] Person 21 (member/team7) → P1_comply | stress=0.00 loyalty=0.60
+[Tick 60] Person 22 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 23 (member/team8) → P1_comply | stress=0.00 loyalty=0.68
+[Tick 60] Person 24 (member/team8) → P1_comply | stress=0.00 loyalty=0.52
+[Tick 60] Person 25 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 26 (member/team9) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 60] Person 27 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Reaction] Person129 離團自立流亡 Team55 at (18,18)
+[Tick 60] Person 129 (leader/team55) → N1_flee | stress=0.15 loyalty=0.38
+[Tick 60] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 60] Person 31 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Reaction] Person130 離團自立流亡 Team56 at (19,8)
+[Tick 60] Person 130 (leader/team56) → N1_flee | stress=0.15 loyalty=0.38
+[Tick 60] Person 33 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 34 (member/team13) → P1_comply | stress=0.00 loyalty=0.71
+[Tick 60] Person 35 (member/team13) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 60] Person 36 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 38 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 39 (member/team15) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 60] Person 40 (leader/team16) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 41 (member/team16) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 60] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 60] Person 43 (leader/team17) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 45 (member/team17) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 46 (leader/team18) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 47 (member/team18) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 60] Person 48 (member/team18) → P4_expand | stress=0.00 loyalty=0.89
+[Tick 60] Person 49 (leader/team19) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 50 (member/team19) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 60] Person 51 (member/team19) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 60] Person 52 (leader/team20) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 53 (member/team20) → P1_comply | stress=0.00 loyalty=0.91
+[Tick 60] Person 54 (member/team20) → P1_comply | stress=0.00 loyalty=0.60
+[Tick 60] Person 55 (leader/team21) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 56 (member/team21) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 60] Person 57 (member/team21) → P1_comply | stress=0.00 loyalty=0.79
+[Tick 60] Person 58 (leader/team22) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 60 (member/team22) → P4_expand | stress=0.00 loyalty=0.59
+[Tick 60] Person 61 (leader/team23) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 62 (member/team23) → P1_comply | stress=0.00 loyalty=0.71
+[Tick 60] Person 63 (member/team23) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 60] Person 64 (leader/team24) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 65 (member/team24) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 60] Person 66 (leader/team25) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 67 (member/team25) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 60] Person 68 (leader/team26) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 69 (member/team26) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 60] Person 70 (leader/team27) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 71 (member/team27) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 60] Person 72 (member/team27) → P1_comply | stress=0.00 loyalty=0.59
+[Tick 60] Person 73 (leader/team28) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 74 (member/team28) → P4_expand | stress=0.00 loyalty=0.68
+[Tick 60] Person 75 (member/team28) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 60] Person 76 (leader/team29) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 77 (member/team29) → P4_expand | stress=0.00 loyalty=0.65
+[Tick 60] Person 78 (leader/team30) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 79 (member/team30) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 60] Person 80 (member/team30) → P1_comply | stress=0.00 loyalty=0.62
+[Tick 60] Person 81 (leader/team31) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 82 (member/team31) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 60] Person 83 (member/team31) → P1_comply | stress=0.00 loyalty=0.59
+[Tick 60] Person 84 (leader/team32) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 85 (member/team32) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 60] Person 86 (member/team32) → P1_comply | stress=0.00 loyalty=0.65
+[Tick 60] Person 87 (leader/team33) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 88 (member/team33) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 60] Person 89 (leader/team34) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 90 (member/team34) → P1_comply | stress=0.00 loyalty=0.56
+[Tick 60] Person 91 (member/team34) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 60] Person 92 (leader/team35) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 93 (member/team35) → P1_comply | stress=0.00 loyalty=0.88
+[Tick 60] Person 94 (member/team35) → P1_comply | stress=0.00 loyalty=0.91
+[Tick 60] Person 95 (leader/team36) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 96 (member/team36) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 60] Person 97 (member/team36) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 60] Person 98 (leader/team37) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 99 (member/team37) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 60] Person 100 (member/team37) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 60] Person 101 (leader/team38) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 102 (member/team38) → P1_comply | stress=0.00 loyalty=0.55
+[Tick 60] Person 103 (member/team38) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 60] Person 104 (leader/team39) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 105 (member/team39) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 60] Person 106 (leader/team40) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 107 (member/team40) → P4_expand | stress=0.00 loyalty=0.71
+[Tick 60] Person 108 (member/team40) → P1_comply | stress=0.00 loyalty=0.79
+[Tick 60] Person 109 (leader/team41) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 110 (member/team41) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 60] Person 111 (leader/team42) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 112 (member/team42) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 60] Person 113 (member/team42) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 60] Person 114 (leader/team43) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 115 (member/team43) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 60] Person 116 (member/team43) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 60] Person 117 (leader/team44) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 118 (member/team44) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 60] Person 119 (leader/team45) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 120 (member/team45) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 60] Person 121 (member/team45) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 60] Person 122 (leader/team46) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 123 (member/team46) → P1_comply | stress=0.00 loyalty=0.95
+[Tick 60] Person 124 (leader/team47) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 125 (member/team47) → P1_comply | stress=0.00 loyalty=0.95
+[Tick 60] Person 126 (member/team47) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 127 (leader/team48) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 128 (member/team48) → P1_comply | stress=0.00 loyalty=0.92
+[Tag] Team20 +軍隊 -生產
+[Tag] Team21 +軍隊 -生產
+[Tag] Team23 +軍隊 -生產
+[Tag] Team27 +軍隊 -生產
+[Tag] Team28 +軍隊 -生產
+[Tag] Team32 +軍隊 -生產
+[Tag] Team33 +軍隊 -生產
+[Tag] Team35 +軍隊 -生產
+[Tag] Team44 +軍隊 -生產
+[Tag] Team46 +軍隊 -生產
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team37 → 治理 (駐守)
+[SoloAI] Team39 → 貿易 (囤貨)
+[SoloAI] Team41 → 治理 (駐守)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team48 → 覓食 (覓食)
+[Equip] Team0 裝備 melee_low ×2
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×3
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×2
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team11 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team13 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×2
+[Equip] Team16 裝備 melee_low ×2
+[Equip] Team17 裝備 melee_low ×2
+[Equip] Team18 裝備 melee_low ×2
+[Equip] Team19 裝備 melee_low ×2
+[Equip] Team20 裝備 melee_low ×2
+[Equip] Team21 裝備 melee_low ×2
+[Equip] Team22 裝備 melee_low ×2
+[Equip] Team23 裝備 melee_low ×2
+[Equip] Team24 裝備 melee_low ×2
+[Equip] Team25 裝備 melee_low ×2
+[Equip] Team26 裝備 melee_low ×2
+[Equip] Team27 裝備 melee_low ×2
+[Equip] Team28 裝備 melee_low ×2
+[Equip] Team29 裝備 melee_low ×2
+[Equip] Team30 裝備 melee_low ×2
+[Equip] Team31 裝備 melee_low ×2
+[Equip] Team42 裝備 melee_low ×1
+[Equip] Team43 裝備 melee_low ×1
+[Equip] Team44 裝備 melee_low ×1
+[Equip] Team45 裝備 melee_low ×1
+[Equip] Team46 裝備 melee_low ×1
+[Equip] Team47 裝備 melee_low ×1
+[Equip] Team48 裝備 melee_low ×2
+[Equip] Team49 裝備 melee_low ×1
+[Equip] Team50 裝備 melee_low ×1
+[Equip] Team51 裝備 melee_low ×1
+[Equip] Team52 裝備 melee_low ×1
+[Equip] Team53 裝備 melee_low ×1
+[Combat Start] Team-1000002 vs Team9
+[Ambush] NPC Team9 被 boar 伏擊
+[Combat Start] Team-1000003 vs Team42
+[Ambush] NPC Team42 被 bear 伏擊
+[Site] 選址 (22, 7) score=507 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction0 派工失敗: 資源不足 1.60x: material 有 72(公庫32+私40) (需 { "material": 50, "tools": 0 })
+[Outpost] Team10 設施施工 stable → Lv1 at (18,18)
+[Diplomacy] Team11 背叛 Team10
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 77(公庫37+私40) (需 { "material": 50, "tools": 0 })
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 70(公庫30+私40) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (16, 1) score=326 周邊資源={ "ore_gold": 21, "ore_iron": 48, "ore_silver": 44, "wild_horses": 10 } terrain=mountain
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 70(公庫30+私40) (需 { "material": 50, "tools": 0 })
+[Outpost] Team26 設施施工 workshop → Lv1 at (22,4)
+[Site] 選址 (22, 7) score=499 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction6 派工失敗: 資源不足 1.26x: material 有 20(公庫0+私20) (需 { "material": 50, "tools": 0 })
+[StrategicAI] Faction3 首要目標: defend target=54
+[Tick 120] Person 1 (member/team49) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 120] Person 28 (member/team50) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 120] Person 32 (member/team51) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 120] Person 44 (member/team52) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 120] Person 59 (member/team53) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 120] Person 37 (member/team54) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 120] Person 129 (leader/team55) → P4_expand | stress=0.25 loyalty=0.36
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team55 → 投靠 (併入)
+[SoloAI] Team56 → 乞食 (乞食)
+[SoloAI] Team55 → 投靠 (併入)
+[SoloAI] Team56 → 乞食 (乞食)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team55 → 乞食 (乞食)
+[Combat Start] Team-1000004 vs Team37
+[Ambush] NPC Team37 被 boar 伏擊
+[Combat Start] Team-1000005 vs Team40
+[Ambush] NPC Team40 被 boar 伏擊
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 37(公庫0+私37) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team37 → 治理 (駐守)
+[SoloAI] Team40 → 貿易 (囤貨)
+[Combat Start] Team-1000006 vs Team42
+[Ambush] NPC Team42 被 bear 伏擊
+[Tick 360] Person 130 (leader/team56) → P4_expand | stress=0.20 loyalty=0.34
+[Harvest] Tick360 季節=春 base=1.1
+[Move] Team 6 抵達 (4,17)
+[Move] Team 8 抵達 (4,21)
+[Move] Team 13 抵達 (19,8)
+[Move] Team 14 抵達 (19,8)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 23 抵達 (3,28)
+[Move] Team 24 抵達 (19,2)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 46 抵達 (15,19)
+[Move] Team 54 抵達 (19,8)
+[Merge] Team14 ← Team54 完全合併 (pop=8)
+[Combat Start] Team-1000007 vs Team9
+[Ambush] NPC Team9 被 boar 伏擊
+[Combat Start] Team-1000008 vs Team26
+[Ambush] NPC Team26 被 boar 伏擊
+[Ambition] Team14 rung 0→1 (定居 cap=3)
+[Tick 420] Person 130 (leader/team56) → P1_comply | stress=0.15 loyalty=0.35
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team56 → 外交 (求和)
+[Move] Team 55 抵達 (18,18)
+[Ambition] Team1 rung 0→1 (商業 cap=3)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team39 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team46 → 建設 (建設)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 29 抵達 (2,21)
+[Move] Team 44 抵達 (19,12)
+[Move] Team 48 抵達 (16,9)
+[Tribute] Team12 徵收 Team13 rate=0.01
+[SoloAI] Team43 → 貿易 (囤貨)
+[Sub] Team32 派出子隊 Team57 leader=P85 advisors=[] (pop=3 cap=16 task=擴建)
+[Infra] Team32 派擴建子隊 Team57 → (13,23) stable
+[SoloAI] Team47 → 覓食 (覓食)
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team42 → 貿易 (囤貨)
+[Sub] Team38 派出子隊 Team58 leader=P102 advisors=[] (pop=3 cap=4 task=擴建)
+[Infra] Team38 派擴建子隊 Team58 → (12,17) stable
+[SoloAI] Team37 → 治理 (駐守)
+[SoloAI] Team34 → 貿易 (囤貨)
+[Sub] Team35 派出子隊 Team59 leader=P93 advisors=[] (pop=3 cap=13 task=擴建)
+[Infra] Team35 派擴建子隊 Team59 → (26,7) stable
+[SoloAI] Team48 → 覓食 (覓食)
+[Move] Team 37 抵達 (8,8)
+[Move] Team 41 抵達 (17,8)
+[Move] Team 56 抵達 (19,8)
+[Barter] Team59 40xmaterial <-> Team35 132xfood
+[Ambition] Team1 rung 1→2 (商業 cap=3)
+[Ambition] Team14 rung 1→2 (定居 cap=3)
+[Tick 600] Person 84 (leader/team32) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 600] Person 87 (leader/team33) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 600] Person 92 (leader/team35) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 600] Person 129 (leader/team55) → P1_comply | stress=0.00 loyalty=0.35
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 治理 (駐守)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team40 → 貿易 (囤貨)
+[Move] Team 9 抵達 (17,17)
+[Move] Team 17 抵達 (18,11)
+[Tribute] Team12 徵收 Team13 rate=0.01
+[Barter] Team38 10xfood <-> Team58 19xmaterial
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Ambition] Team14 rung 2→3 (定居 cap=3)
+[SoloAI] Team46 → 建設 (建設)
+[Sub] Team39 派出子隊 Team60 leader=P105 advisors=[] (pop=3 cap=14 task=擴建)
+[Infra] Team39 派擴建子隊 Team60 → (20,17) stable
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team41 → 治理 (駐守)
+[Move] Team 43 抵達 (19,2)
+[Market@(19, 2)] Team43  outpost owner Team22 成交
+[Barter] Team60 40xmaterial <-> Team39 68xfood
+[Order] Team0 sell material ×7 (oid=1)
+[Order] Team0 sell food ×1107 (oid=2)
+[Order] Team0 buy weapon_melee_low ×2 (oid=3)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=4)
+[Order] Team0 buy tools ×3 (oid=5)
+[Ambition] Team43 rung 0→1 (商業 cap=2)
+[SoloAI] Team39 → 貿易 (囤貨)
+[Sub] Team40 派出子隊 Team61 leader=P107 advisors=[] (pop=3 cap=37 task=擴建)
+[Infra] Team40 派擴建子隊 Team61 → (10,25) stable
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team55 → 外交 (求和)
+[Move] Team 0 抵達 (0,20)
+[Move] Team 5 抵達 (6,14)
+[Move] Team 10 抵達 (18,18)
+[Move] Team 12 抵達 (18,8)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 22 抵達 (18,3)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 45 抵達 (3,23)
+[Move] Team 46 抵達 (15,19)
+[Barter] Team40 17xfood <-> Team61 30xmaterial
+[Sub] Team0 派出子隊 Team62 leader=P2 advisors=[] (pop=3 cap=13 task=擴建)
+[Infra] Team0 派擴建子隊 Team62 → (10,19) farming
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Order] Team3 sell material ×30 (oid=6)
+[Order] Team3 buy weapon_melee_low ×6 (oid=7)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=8)
+[Order] Team3 buy tools ×3 (oid=9)
+[Ambition] Team4 rung 1→2 (定居 cap=2)
+[Order] Team11 sell material ×30 (oid=10)
+[Order] Team11 buy weapon_melee_low ×4 (oid=11)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=12)
+[Order] Team11 buy tools ×2 (oid=13)
+[Order] Team16 sell material ×30 (oid=14)
+[Order] Team16 buy weapon_melee_low ×5 (oid=15)
+[Order] Team16 buy weapon_ranged_low ×4 (oid=16)
+[Order] Team16 buy tools ×2 (oid=17)
+[Ambition] Team20 rung 0→4 (武力 cap=4)
+[Order] Team22 buy weapon_melee_low ×3 (oid=18)
+[Order] Team22 buy weapon_ranged_low ×3 (oid=19)
+[Order] Team22 buy material ×18 (oid=20)
+[Order] Team22 buy tools ×3 (oid=21)
+[Order] Team26 buy weapon_ranged_low ×3 (oid=22)
+[Order] Team26 buy material ×34 (oid=23)
+[Order] Team26 buy tools ×3 (oid=24)
+[Ambition] Team43 rung 1→2 (商業 cap=2)
+[Order] Team45 buy weapon_melee_low ×5 (oid=25)
+[Order] Team45 buy weapon_ranged_low ×4 (oid=26)
+[Order] Team45 buy tools ×2 (oid=27)
+[Order] Team46 buy weapon_melee_low ×4 (oid=28)
+[Order] Team46 buy weapon_ranged_low ×3 (oid=29)
+[Order] Team46 buy tools ×2 (oid=30)
+[Ambition] Team58 rung 0→1 (商業 cap=3)
+[Ambition] Team60 rung 0→1 (商業 cap=2)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team38 → 外交 (求和)
+[SoloAI] Team39 → 覓食 (覓食)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team55 → 外交 (求和)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 16 抵達 (19,8)
+[Move] Team 32 抵達 (12,24)
+[Move] Team 57 抵達 (13,23)
+[Move] Team 59 抵達 (26,7)
+[Site] Faction0 派工失敗: 資源不足 1.60x: material 有 53(公庫22+私31) (需 { "material": 50, "tools": 0 })
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Sub] Team33 派出子隊 Team63 leader=P88 advisors=[] (pop=1 cap=18 task=信使)
+[IndepStrategy] Team33 野心建國→派信使結盟 Team35 (野心=0.92)
+[Order] Team8 sell material ×30 (oid=31)
+[Order] Team8 buy weapon_melee_low ×5 (oid=32)
+[Order] Team8 buy weapon_ranged_low ×4 (oid=33)
+[Order] Team8 buy tools ×2 (oid=34)
+[Order] Team18 sell material ×30 (oid=35)
+[Order] Team18 buy weapon_melee_low ×5 (oid=36)
+[Order] Team18 buy weapon_ranged_low ×4 (oid=37)
+[Order] Team18 buy tools ×2 (oid=38)
+[Ambition] Team23 rung 0→4 (武力 cap=4)
+[Order] Team23 buy weapon_melee_low ×6 (oid=39)
+[Order] Team23 buy weapon_ranged_low ×4 (oid=40)
+[Order] Team23 buy tools ×3 (oid=41)
+[Order] Team41 sell material ×38 (oid=42)
+[Order] Team41 sell food ×1082 (oid=43)
+[Order] Team41 buy weapon_melee_low ×4 (oid=44)
+[Order] Team41 buy weapon_ranged_low ×3 (oid=45)
+[Order] Team41 buy tools ×2 (oid=46)
+[Order] Team47 buy weapon_melee_low ×6 (oid=47)
+[Order] Team47 buy weapon_ranged_low ×4 (oid=48)
+[Order] Team47 buy tools ×3 (oid=49)
+[Order] Team48 sell material ×5 (oid=50)
+[Order] Team48 buy weapon_melee_low ×5 (oid=51)
+[Order] Team48 buy weapon_ranged_low ×4 (oid=52)
+[Order] Team48 buy tools ×3 (oid=53)
+[Tick 840] Person 2 (member/team62) → P1_comply | stress=0.00 loyalty=0.76
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team37 → 治理 (駐守)
+[SoloAI] Team41 → 治理 (駐守)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team47 → 覓食 (覓食)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 外交 (求和)
+[Move] Team 14 抵達 (18,9)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 36 抵達 (24,15)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 48 抵達 (15,9)
+[Envoy] Team63 提案送達 Team35 → reject
+[Barter] Team40 35xmaterial <-> Team61 58xfood
+[CorveeL1] Team14 L0→L1 紮根工期 @(18,9) civilian (720 person-ticks)
+[Merge] Team33 ← Team63 完全合併 (pop=8)
+[Order] Team9 sell material ×30 (oid=54)
+[Order] Team9 buy weapon_melee_low ×5 (oid=55)
+[Order] Team9 buy weapon_ranged_low ×4 (oid=56)
+[Order] Team9 buy tools ×2 (oid=57)
+[Order] Team34 sell material ×35 (oid=58)
+[Order] Team34 buy weapon_melee_low ×6 (oid=59)
+[Order] Team34 buy weapon_ranged_low ×4 (oid=60)
+[Order] Team34 buy tools ×3 (oid=61)
+[Order] Team39 buy weapon_melee_low ×3 (oid=62)
+[Order] Team39 buy weapon_ranged_low ×2 (oid=63)
+[Order] Team39 buy material ×2 (oid=64)
+[Order] Team39 buy tools ×2 (oid=65)
+[Order] Team44 buy weapon_melee_low ×5 (oid=66)
+[Order] Team44 buy weapon_ranged_low ×4 (oid=67)
+[Order] Team44 buy tools ×2 (oid=68)
+[Order] Team51 buy weapon_ranged_low ×1 (oid=69)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team39 → 覓食 (覓食)
+[SoloAI] Team41 → 外交 (求和)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Move] Team 33 抵達 (26,6)
+[Move] Team 35 抵達 (26,6)
+[Move] Team 47 抵達 (15,16)
+[Diplomacy] Team1 背叛 Team0
+[Diplomacy] Team4 背叛 Team0
+[Ambition] Team1 rung 2→1 (商業 cap=3)
+[Order] Team15 sell material ×30 (oid=70)
+[Order] Team15 buy weapon_melee_low ×5 (oid=71)
+[Order] Team15 buy weapon_ranged_low ×4 (oid=72)
+[Order] Team15 buy tools ×2 (oid=73)
+[Order] Team25 sell material ×30 (oid=74)
+[Order] Team25 buy weapon_melee_low ×5 (oid=75)
+[Order] Team25 buy weapon_ranged_low ×4 (oid=76)
+[Order] Team25 buy tools ×2 (oid=77)
+[Order] Team36 sell material ×37 (oid=78)
+[Order] Team36 buy weapon_melee_low ×5 (oid=79)
+[Order] Team36 buy weapon_ranged_low ×4 (oid=80)
+[Order] Team36 buy tools ×2 (oid=81)
+[Ambition] Team61 rung 0→1 (武力 cap=4)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team41 → 外交 (求和)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 38 抵達 (10,19)
+[Move] Team 39 抵達 (19,16)
+[Move] Team 58 抵達 (12,17)
+[Move] Team 60 抵達 (20,17)
+[Order] Team4 sell material ×30 (oid=82)
+[Order] Team4 buy weapon_melee_low ×6 (oid=83)
+[Order] Team4 buy weapon_ranged_low ×5 (oid=84)
+[Order] Team4 buy tools ×3 (oid=85)
+[Order] Team19 sell material ×30 (oid=86)
+[Order] Team19 buy weapon_melee_low ×5 (oid=87)
+[Order] Team19 buy weapon_ranged_low ×4 (oid=88)
+[Order] Team19 buy tools ×2 (oid=89)
+[Order] Team24 buy weapon_melee_low ×4 (oid=90)
+[Order] Team24 buy weapon_ranged_low ×3 (oid=91)
+[Order] Team24 buy tools ×2 (oid=92)
+[Order] Team24 buy food ×1 (oid=93)
+[Order] Team37 sell food ×1066 (oid=94)
+[Order] Team37 buy weapon_melee_low ×6 (oid=95)
+[Order] Team37 buy weapon_ranged_low ×5 (oid=96)
+[Order] Team37 buy material ×8 (oid=97)
+[Order] Team37 buy tools ×4 (oid=98)
+[Order] Team59 buy weapon_melee_low ×1 (oid=99)
+[Order] Team59 buy weapon_ranged_low ×1 (oid=100)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team37 → 治理 (駐守)
+[SoloAI] Team43 → 覓食 (覓食)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team47 → 覓食 (覓食)
+[Combat Start] Team-1000009 vs Team36
+[Ambush] NPC Team36 被 boar 伏擊
+[Ambition] Team13 rung 0→1 (商業 cap=2)
+[Order] Team32 buy weapon_melee_low ×4 (oid=101)
+[Order] Team32 buy weapon_ranged_low ×3 (oid=102)
+[Order] Team32 buy material ×23 (oid=103)
+[Order] Team32 buy tools ×3 (oid=104)
+[Order] Team40 buy weapon_melee_low ×3 (oid=105)
+[Order] Team40 buy weapon_ranged_low ×2 (oid=106)
+[Order] Team40 buy tools ×1 (oid=107)
+[Order] Team58 buy weapon_melee_low ×1 (oid=108)
+[Order] Team58 buy weapon_ranged_low ×1 (oid=109)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team39 → 覓食 (覓食)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team43 → 覓食 (覓食)
+[SoloAI] Team55 → 外交 (求和)
+[Move] Team 24 抵達 (18,3)
+[Order] Team1 sell material ×30 (oid=110)
+[Order] Team1 buy weapon_melee_low ×4 (oid=111)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=112)
+[Order] Team1 buy tools ×2 (oid=113)
+[Order] Team2 sell material ×30 (oid=114)
+[Order] Team2 buy weapon_melee_low ×5 (oid=115)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=116)
+[Order] Team2 buy tools ×2 (oid=117)
+[Ambition] Team13 rung 1→2 (商業 cap=2)
+[Order] Team13 sell material ×30 (oid=118)
+[Order] Team13 buy weapon_melee_low ×5 (oid=119)
+[Order] Team13 buy weapon_ranged_low ×4 (oid=120)
+[Order] Team13 buy tools ×2 (oid=121)
+[Order] Team38 buy weapon_melee_low ×4 (oid=122)
+[Order] Team38 buy weapon_ranged_low ×3 (oid=123)
+[Order] Team38 buy tools ×3 (oid=124)
+[Order] Team42 buy weapon_melee_low ×6 (oid=125)
+[Order] Team42 buy weapon_ranged_low ×4 (oid=126)
+[Order] Team42 buy tools ×3 (oid=127)
+[SoloAI] Team1 → 外交 (求和)
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 覓食 (覓食)
+[Move] Team 17 抵達 (18,10)
+[Move] Team 23 抵達 (3,28)
+[Move] Team 26 抵達 (20,6)
+[Move] Team 41 抵達 (18,8)
+[Move] Team 44 抵達 (19,12)
+[Move] Team 46 抵達 (15,19)
+[Move] Team 56 抵達 (19,8)
+[Order] Team49 buy weapon_melee_low ×1 (oid=128)
+[Order] Team49 buy weapon_ranged_low ×1 (oid=129)
+[SoloAI] Team39 → 覓食 (覓食)
+[SoloAI] Team41 → 外交 (求和)
+[SoloAI] Team43 → 覓食 (覓食)
+[Move] Team 4 抵達 (12,19)
+[Move] Team 40 抵達 (9,24)
+[Market@(9, 24)] Team40  outpost owner Team22 成交
+[Combat Start] Team-1000010 vs Team34
+[Ambush] NPC Team34 被 boar 伏擊
+[Order] Team6 sell material ×30 (oid=130)
+[Order] Team6 buy weapon_melee_low ×5 (oid=131)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=132)
+[Order] Team6 buy tools ×2 (oid=133)
+[Order] Team10 sell food ×1088 (oid=134)
+[Order] Team10 buy weapon_ranged_low ×2 (oid=135)
+[Order] Team10 buy material ×27 (oid=136)
+[Order] Team10 buy tools ×2 (oid=137)
+[Order] Team12 sell weapon_melee_low ×1 (oid=138)
+[Order] Team12 buy weapon_ranged_low ×1 (oid=139)
+[Order] Team12 buy material ×17 (oid=140)
+[Order] Team12 buy tools ×1 (oid=141)
+[Order] Team20 sell material ×30 (oid=142)
+[Order] Team20 buy weapon_melee_low ×5 (oid=143)
+[Order] Team20 buy weapon_ranged_low ×4 (oid=144)
+[Order] Team20 buy tools ×2 (oid=145)
+[Order] Team28 buy weapon_melee_low ×5 (oid=146)
+[Order] Team28 buy weapon_ranged_low ×4 (oid=147)
+[Order] Team28 buy tools ×2 (oid=148)
+[Order] Team33 buy weapon_melee_low ×4 (oid=149)
+[Order] Team33 buy weapon_ranged_low ×3 (oid=150)
+[Order] Team33 buy tools ×3 (oid=151)
+[Order] Team35 buy weapon_melee_low ×3 (oid=152)
+[Order] Team35 buy weapon_ranged_low ×2 (oid=153)
+[Order] Team35 buy tools ×5 (oid=154)
+[Order] Team43 sell material ×40 (oid=155)
+[Order] Team43 buy weapon_melee_low ×6 (oid=156)
+[Order] Team43 buy weapon_ranged_low ×4 (oid=157)
+[Order] Team43 buy tools ×3 (oid=158)
+[Order] Team53 buy weapon_melee_low ×1 (oid=159)
+[Order] Team53 buy weapon_ranged_low ×1 (oid=160)
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team37 → 治理 (駐守)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 紮營 (紮營)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team43 → 覓食 (覓食)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Combat Start] Team-1000011 vs Team60
+[Ambush] NPC Team60 被 boar 伏擊
+[Order] Team29 sell food ×1271 (oid=161)
+[Order] Team29 buy weapon_ranged_low ×3 (oid=162)
+[Order] Team29 buy material ×18 (oid=163)
+[Order] Team29 buy tools ×3 (oid=164)
+[Order] Team30 sell material ×30 (oid=165)
+[Order] Team30 buy weapon_melee_low ×6 (oid=166)
+[Order] Team30 buy weapon_ranged_low ×4 (oid=167)
+[Order] Team30 buy tools ×3 (oid=168)
+[CampL0] Team41 紮營 L0 @(18,8)
+[Order] Team50 buy weapon_ranged_low ×1 (oid=169)
+[Ambition] Team52 rung 0→1 (商業 cap=2)
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team38 → 貿易 (囤貨)
+[CorveeL1] Team41 L0→L1 紮根工期 @(18,8) civilian (720 person-ticks)
+[SoloAI] Team41 → 建設 (紮根)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 外交 (求和)
+[Market] Team1 <-> Team3 巧遇成交
+[Order] Team7 sell material ×30 (oid=170)
+[Order] Team7 buy weapon_melee_low ×5 (oid=171)
+[Order] Team7 buy weapon_ranged_low ×4 (oid=172)
+[Order] Team7 buy tools ×2 (oid=173)
+[Order] Team14 buy weapon_melee_low ×4 (oid=174)
+[Order] Team14 buy weapon_ranged_low ×4 (oid=175)
+[Order] Team14 buy tools ×2 (oid=176)
+[Order] Team21 sell material ×30 (oid=177)
+[Order] Team21 buy weapon_melee_low ×5 (oid=178)
+[Order] Team21 buy weapon_ranged_low ×4 (oid=179)
+[Order] Team21 buy tools ×2 (oid=180)
+[Order] Team27 buy weapon_melee_low ×5 (oid=181)
+[Order] Team27 buy weapon_ranged_low ×4 (oid=182)
+[Order] Team27 buy tools ×2 (oid=183)
+[Order] Team56 buy food ×1 (oid=184)
+[SoloAI] Team41 → 建設 (紮根)
+[SoloAI] Team56 → 外交 (求和)
+[DayNight] Day 1 開始
+[Sub] Team43 派出子隊 Team64 leader=P115 advisors=[] (pop=2 cap=17 task=idle)
+[PopMgmt] Team43 超額 2 人，advisor Team115 帶走
+[Move] Team 7 抵達 (5,14)
+[Move] Team 11 抵達 (6,14)
+[Move] Team 32 抵達 (12,24)
+[Move] Team 37 抵達 (8,8)
+[Move] Team 38 抵達 (10,19)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 43 抵達 (18,3)
+[Move] Team 45 抵達 (3,23)
+[Move] Team 47 抵達 (15,16)
+[Move] Team 48 抵達 (15,9)
+[Move] Team 61 抵達 (10,25)
+[Order] Team5 sell material ×56 (oid=185)
+[Order] Team5 buy weapon_melee_low ×3 (oid=186)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=187)
+[Order] Team5 buy tools ×2 (oid=188)
+[Order] Team17 sell material ×17 (oid=189)
+[Order] Team17 buy weapon_melee_low ×2 (oid=190)
+[Order] Team17 buy weapon_ranged_low ×3 (oid=191)
+[Order] Team17 buy tools ×1 (oid=192)
+[Order] Team31 sell material ×30 (oid=193)
+[Order] Team31 buy weapon_melee_low ×6 (oid=194)
+[Order] Team31 buy weapon_ranged_low ×4 (oid=195)
+[Order] Team31 buy tools ×3 (oid=196)
+[Order] Team52 buy weapon_melee_low ×1 (oid=197)
+[Order] Team52 buy weapon_ranged_low ×1 (oid=198)
+[Order] Team57 buy weapon_melee_low ×1 (oid=199)
+[Order] Team57 buy weapon_ranged_low ×1 (oid=200)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team39 → 建設 (建設)
+[SoloAI] Team41 → 建設 (紮根)
+[SoloAI] Team43 → 覓食 (覓食)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team56 → 外交 (求和)
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (11, 26) 捕野馬 +1
+[Horse] Outpost (12, 17) 捕野馬 +1
+[Horse] Outpost (13, 19) 捕野馬 +1
+[Horse] Outpost (13, 23) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (15, 13) 捕野馬 +1
+[Horse] Outpost (16, 17) 捕野馬 +1
+[Horse] Outpost (22, 9) 捕野馬 +1
+[TickPerf] day=1 avg=10473 us max=1757818 us ticks=1440 teams=63 factions=8 | ★>2s 幀數=0/1440
+[Equip] Team64 裝備 melee_low ×1
+[Move] Team 12 抵達 (17,9)
+[Move] Team 36 抵達 (24,15)
+[Tribute] Team12 徵收 Team13 rate=0.01
+[Market] Team1 <-> Team3 巧遇成交
+[Ambition] Team1 rung 1→2 (商業 cap=3)
+[Order] Team60 buy weapon_melee_low ×1 (oid=201)
+[Order] Team60 buy weapon_ranged_low ×1 (oid=202)
+[Reaction] Person131 離團自立流亡 Team65 at (0,20)
+[Tick 1500] Person 131 (leader/team65) → N1_flee | stress=0.15 loyalty=0.39
+[Reaction] Person132 離團自立流亡 Team66 at (18,18)
+[Tick 1500] Person 132 (leader/team66) → N1_flee | stress=0.15 loyalty=0.32
+[Reaction] Person133 離團自立流亡 Team67 at (17,9)
+[Tick 1500] Person 133 (leader/team67) → N1_flee | stress=0.15 loyalty=0.41
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team41 → 建設 (紮根)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[Move] Team 0 抵達 (0,20)
+[Move] Team 24 抵達 (18,3)
+[Move] Team 41 抵達 (18,8)
+[Move] Team 55 抵達 (20,16)
+[Site] Faction0 派工失敗: 資源不足 1.60x: material 有 53(公庫0+私53) (需 { "material": 50, "tools": 0 })
+[Diplomacy] Team3 背叛 Team0
+[Tick 1560] Person 134 (member/team0) → P4_expand | stress=0.00 loyalty=0.72
+[Tick 1560] Person 131 (leader/team65) → P1_comply | stress=0.25 loyalty=0.38
+[Tick 1560] Person 133 (leader/team67) → P1_comply | stress=0.25 loyalty=0.40
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team41 → 建設 (紮根)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team65 → 投靠 (併入)
+[SoloAI] Team66 → 投靠 (併入)
+[SoloAI] Team67 → 覓食 (覓食)
+[SoloAI] Team65 → 投靠 (併入)
+[SoloAI] Team67 → 覓食 (覓食)
+[SoloAI] Team66 → 投靠 (併入)
+[Move] Team 17 抵達 (18,9)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 33 抵達 (26,6)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 40 抵達 (9,24)
+[Barter] Team26 2xarmor_low <-> Team1 16xmaterial
+[Site] Faction6 派工失敗: 資源不足 1.26x: material 有 36(公庫0+私36) (需 { "material": 50, "tools": 0 })
+[Sub] Team46 派出子隊 Team68 leader=P123 advisors=[] (pop=1 cap=6 task=信使)
+[IndepStrategy] Team46 野心建國→派信使結盟 Team4 (野心=0.95)
+[Ambition] Team13 rung 2→1 (商業 cap=2)
+[Order] Team53 buy food ×1 (oid=203)
+[Order] Team62 buy weapon_melee_low ×1 (oid=204)
+[Order] Team62 buy weapon_ranged_low ×1 (oid=205)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team39 → 建設 (建設)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team66 → 紮營 (紮營)
+[SoloAI] Team67 → 覓食 (覓食)
+[Move] Team 6 抵達 (5,14)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 39 抵達 (19,16)
+[Order] Team3 buy food ×1 (oid=206)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team37 → 治理 (駐守)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team67 → 覓食 (覓食)
+[Equip] Team68 裝備 melee_low ×1
+[Move] Team 4 抵達 (12,19)
+[Move] Team 11 抵達 (5,15)
+[Move] Team 16 抵達 (17,9)
+[Move] Team 35 抵達 (26,6)
+[Move] Team 56 抵達 (18,8)
+[SurvivalCamp] team=Team53 → 紮營 @(19,5)
+[Survival] Team53 warning days_left=3.0 擴建→紮營
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team67 → 覓食 (覓食)
+[Move] Team 43 抵達 (18,3)
+[Move] Team 46 抵達 (15,19)
+[Ambition] Team4 rung 2→1 (定居 cap=2)
+[Ambition] Team13 rung 1→0 (商業 cap=2)
+[CampL0] Team53 紮營 L0 @(19,5)
+[Ambition] Team56 rung 0→1 (商業 cap=2)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[SoloAI] Team3 → 建設 (建設)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team67 → 覓食 (覓食)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 38 抵達 (10,19)
+[Move] Team 44 抵達 (19,12)
+[Move] Team 67 抵達 (16,9)
+[SubAI] Team53 引擎→貿易 (maintain_food:resource)
+[SurvivalLoot] team=Team53 → 掠 Team51
+[Survival] Team53 warning days_left=2.9 貿易→掠奪
+[Tag] Team56 -流亡（恢復）
+[SoloAI] Team3 → 外交 (求和)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team67 → 覓食 (覓食)
+[SoloAI] Team45 → 覓食 (覓食)
+[Move] Team 1 抵達 (22,5)
+[Move] Team 24 抵達 (18,3)
+[Move] Team 33 抵達 (26,6)
+[Move] Team 40 抵達 (9,24)
+[Move] Team 41 抵達 (17,8)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 66 抵達 (19,17)
+[Extort] Team53 勒索 Team51，Team51 妥協給付
+[Ambition] Team41 rung 0→1 (定居 cap=1)
+[CampL0] Team66 紮營 L0 @(19,17)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team3 → 覓食 (覓食)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team40 → 貿易 (囤貨)
+[Sub] Team41 派出子隊 Team69 leader=P110 advisors=[] (pop=2 cap=6 task=運輸)
+[Convoy] Team41 派運輸子隊 Team69 送 material×17 → demand 市場(19,8)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 13 抵達 (17,9)
+[Move] Team 17 抵達 (17,9)
+[Move] Team 26 抵達 (22,4)
+[Move] Team 47 抵達 (14,15)
+[Move] Team 48 抵達 (15,9)
+[Order] Team23 sell material ×30 (oid=207)
+[Ambition] Team26 rung 0→1 (武力 cap=2)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team3 → 覓食 (覓食)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team39 → 建設 (建設)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team55 → 外交 (求和)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[Move] Team 6 抵達 (6,14)
+[Move] Team 56 抵達 (18,8)
+[Move] Team 65 抵達 (0,20)
+[Extort] Team53 勒索 Team51，Team51 妥協給付
+[Combat Start] Team-1000012 vs Team36
+[Ambush] NPC Team36 被 boar 伏擊
+[Ambition] Team67 rung 0→1 (定居 cap=2)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Move] Team 4 抵達 (12,19)
+[Move] Team 14 抵達 (16,11)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 37 抵達 (8,8)
+[Move] Team 46 抵達 (15,19)
+[Move] Team 64 抵達 (18,3)
+[Split] Team64 回歸失敗（母團滿員），獨立為新分團
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Ambition] Team4 rung 1→0 (定居 cap=2)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team36 → 貿易 (囤貨)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 67 抵達 (15,9)
+[Market] Team43 <-> Team22 巧遇成交
+[Extort] Team53 勒索 Team51，Team51 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Order] Team0 buy material ×11 (oid=208)
+[Order] Team42 buy food ×4 (oid=209)
+[Order] Team55 buy food ×1 (oid=210)
+[Order] Team61 buy weapon_melee_low ×1 (oid=211)
+[Order] Team61 buy weapon_ranged_low ×1 (oid=212)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[Tick 2160] Person 60 (member/team22) → P1_comply | stress=0.00 loyalty=0.60
+[Tag] Team66 -流亡（恢復）
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team55 → 外交 (求和)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team32 → 貿易 (maintain_tools:resource)
+[SoloAI] Team64 → 迎戰 (迎戰)
+[Move] Team 3 抵達 (21,4)
+[Move] Team 12 抵達 (18,8)
+[Move] Team 40 抵達 (9,24)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 45 抵達 (3,23)
+[Move] Team 53 抵達 (19,5)
+[Move] Team 66 抵達 (18,18)
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Ambition] Team24 rung 0→1 (定居 cap=2)
+[Ambition] Team66 rung 0→1 (定居 cap=2)
+[Tick 2220] Person 60 (member/team22) → P4_expand | stress=0.00 loyalty=0.60
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[SoloAI] Team43 → 紮營 (紮營)
+[Move] Team 0 抵達 (0,20)
+[Move] Team 28 抵達 (24,6)
+[Move] Team 38 抵達 (10,19)
+[Move] Team 47 抵達 (14,15)
+[Diplomacy] Team20 背叛 Team17
+[Ambition] Team20 rung 4→3 (武力 cap=4)
+[Ambition] Team24 rung 1→2 (定居 cap=2)
+[Ambition] Team26 rung 1→2 (武力 cap=2)
+[CampL0] Team43 紮營 L0 @(18,3)
+[SoloAI] Team1 → 貿易 (貿易)
+[Sub] Team3 派出子隊 Team70 leader=P8 advisors=[] (pop=2 cap=16 task=運輸)
+[Convoy] Team3 派運輸子隊 Team70 送 material×31 → demand 市場(22,4)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team39 → 建設 (建設)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team43 → 建設 (建設)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team55 → 乞食 (乞食)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Move] Team 33 抵達 (26,6)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Order] Team53 sell material ×2 (oid=213)
+[Order] Team69 sell material ×17 (oid=214)
+[Order] Team69 buy weapon_melee_low ×1 (oid=215)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Equip] Team70 裝備 melee_low ×1
+[Move] Team 4 抵達 (12,19)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 17 抵達 (16,9)
+[Move] Team 35 抵達 (26,6)
+[Move] Team 43 抵達 (18,3)
+[Move] Team 48 抵達 (14,9)
+[Move] Team 56 抵達 (18,8)
+[Move] Team 64 抵達 (18,3)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team32 → 貿易 (maintain_tools:resource)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team34 → 貿易 (囤貨)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 44 抵達 (19,12)
+[Move] Team 46 抵達 (15,19)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Order] Team65 buy food ×3 (oid=216)
+[Ambition] Team69 rung 0→1 (定居 cap=2)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team65 → 乞食 (乞食)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Move] Team 1 抵達 (22,5)
+[Move] Team 16 抵達 (17,9)
+[Move] Team 36 抵達 (24,15)
+[Move] Team 38 抵達 (10,19)
+[Move] Team 40 抵達 (9,24)
+[Extort] Team24 勒索 Team51，Team51 妥協給付
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team42 → 建設 (建設)
+[CorveeL1] Team43 L0→L1 紮根工期 @(18,3) military (720 person-ticks)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team64 → 外交 (求和)
+[Move] Team 27 抵達 (25,1)
+[Move] Team 32 抵達 (10,25)
+[Move] Team 39 抵達 (19,16)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 47 抵達 (14,15)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team51，Team51 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Order] Team43 buy food ×18 (oid=217)
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team32 → 貿易 (maintain_tools:resource)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team51，Team51 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Order] Team64 buy weapon_melee_low ×1 (oid=218)
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 迎戰 (迎戰)
+[SoloAI] Team37 → 治理 (駐守)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team51，Team51 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[StrategicAI] Faction0 受威脅，尋求結盟
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[DayNight] Day 2 開始
+[Move] Team 4 抵達 (12,19)
+[Move] Team 6 抵達 (6,14)
+[Move] Team 13 抵達 (17,9)
+[Move] Team 17 抵達 (15,9)
+[Move] Team 18 抵達 (15,9)
+[Move] Team 26 抵達 (24,2)
+[Move] Team 41 抵達 (17,8)
+[Move] Team 48 抵達 (15,9)
+[Move] Team 56 抵達 (17,9)
+[Move] Team 69 抵達 (19,8)
+[Tribute] Team17 徵收 Team18 rate=0.04
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team51，Team51 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Market@(19, 8)] Team69  outpost owner Team12 成交
+[Ambition] Team41 rung 0→1 (定居 cap=1)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 外交 (求和)
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (12, 17) 捕野馬 +1
+[Horse] Outpost (13, 19) 捕野馬 +1
+[Horse] Outpost (13, 23) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (15, 13) 捕野馬 +1
+[Horse] Outpost (16, 17) 捕野馬 +1
+[TickPerf] day=2 avg=14944 us max=1406819 us ticks=1440 teams=69 factions=8 | ★>2s 幀數=0/2880
+[Move] Team 12 抵達 (17,9)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 70 抵達 (22,4)
+[Tribute] Team17 徵收 Team18 rate=0.04
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team51，Team51 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Market@(22, 4)] Team70  outpost owner Team26 成交
+[Order] Team70 sell material ×13 (oid=219)
+[Order] Team70 buy weapon_melee_low ×1 (oid=220)
+[Sub] Team10 派出子隊 Team71 leader=P135 advisors=[] (pop=1 cap=4 task=偵查)
+[Reaction] Person136 離團自立流亡 Team72 at (17,9)
+[Tick 2940] Person 136 (leader/team72) → N1_flee | stress=0.15 loyalty=0.39
+[Tick 2940] Person 132 (leader/team66) → P1_comply | stress=0.00 loyalty=0.19
+[SoloAI] Team39 → 建設 (建設)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Move] Team 64 抵達 (18,3)
+[Tribute] Team17 徵收 Team18 rate=0.04
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team51，Team51 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 34(公庫9+私24) (需 { "material": 50, "tools": 0 })
+[Sub] Team20 派出子隊 Team73 leader=P53 advisors=[] (pop=1 cap=12 task=信使)
+[Sub] Team20 派出子隊 Team74 leader=P54 advisors=[] (pop=1 cap=8 task=信使)
+[IndepStrategy] Team20 野心建國→派信使結盟 Team48 (野心=0.93)
+[Order] Team26 buy material ×18 (oid=221)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Tag] Team55 -流亡（恢復）
+[SoloAI] Team20 → 覓食 (覓食)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team72 → 覓食 (覓食)
+[SoloAI] Team72 → 覓食 (覓食)
+[SoloAI] Team45 → 覓食 (覓食)
+[Move] Team 3 抵達 (20,3)
+[Move] Team 7 抵達 (6,14)
+[Move] Team 18 抵達 (16,9)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 38 抵達 (10,19)
+[Move] Team 43 抵達 (18,3)
+[Move] Team 47 抵達 (14,15)
+[Move] Team 65 抵達 (0,20)
+[Move] Team 68 抵達 (12,21)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[StrategicAI] Faction0 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 外交 (求和)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team48 → 迎戰 (迎戰)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 外交 (求和)
+[SoloAI] Team72 → 覓食 (覓食)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team33 → 建設 (建設)
+[Equip] Team73 裝備 melee_low ×1
+[Equip] Team74 裝備 melee_low ×1
+[Move] Team 14 抵達 (14,13)
+[Move] Team 32 抵達 (10,25)
+[Move] Team 44 抵達 (19,12)
+[Extort] Team24 勒索 Team43，Team43 妥協給付
+[Extort] Team24 勒索 Team64，Team64 妥協給付
+[Diplomacy] Team23 背叛 Team22
+[StrategicAI] Faction0 受威脅，尋求結盟
+[Tick 3120] Person 135 (member/team71) → P1_comply | stress=0.30 loyalty=0.42
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 外交 (求和)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 外交 (求和)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 外交 (求和)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[SoloAI] Team72 → 覓食 (覓食)
+[Sub] Team23 派出子隊 Team75 leader=P63 advisors=[] (pop=1 cap=17 task=信使)
+[Sub] Team23 派出子隊 Team76 leader=P62 advisors=[] (pop=1 cap=12 task=信使)
+[IndepStrategy] Team23 野心建國→派信使結盟 Team40 (野心=0.88)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 外交 (求和)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 外交 (求和)
+[SoloAI] Team72 → 覓食 (覓食)
+[SoloAI] Team36 → 貿易 (囤貨)
+[Move] Team 4 抵達 (12,19)
+[Move] Team 11 抵達 (6,14)
+[Move] Team 37 抵達 (8,8)
+[Move] Team 40 抵達 (9,24)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 55 抵達 (18,18)
+[Move] Team 71 抵達 (18,18)
+[Ambition] Team55 rung 0→1 (商業 cap=3)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team11 → 迎戰 (迎戰)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team23 → 建設 (建設)
+[SoloAI] Team38 → 外交 (求和)
+[SoloAI] Team43 → 建設 (紮根)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 外交 (求和)
+[SoloAI] Team55 → 外交 (求和)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 外交 (求和)
+[SoloAI] Team23 → 建設 (建設)
+[Equip] Team75 裝備 melee_low ×1
+[Equip] Team76 裝備 melee_low ×1
+[Move] Team 0 抵達 (0,20)
+[Move] Team 6 抵達 (6,14)
+[Move] Team 17 抵達 (16,9)
+[Move] Team 20 抵達 (13,8)
+[Move] Team 24 抵達 (18,4)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 38 抵達 (10,20)
+[Move] Team 53 抵達 (18,3)
+[Tribute] Team17 徵收 Team18 rate=0.04
+[Merge] Team22 ← Team53 完全合併 (pop=10)
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 42(公庫0+私42) (需 { "material": 50, "tools": 0 })
+[Order] Team39 buy food ×1 (oid=222)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team39 → 貿易 (maintain_tools:resource)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 乞食 (乞食)
+[SoloAI] Team48 → 外交 (求和)
+[SoloAI] Team55 → 外交 (求和)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 迎戰 (迎戰)
+[SoloAI] Team41 → 逃跑 (survival)
+[Move] Team 18 抵達 (15,9)
+[Move] Team 28 抵達 (24,6)
+[Move] Team 33 抵達 (26,6)
+[Move] Team 47 抵達 (14,15)
+[Move] Team 64 抵達 (18,3)
+[Move] Team 68 抵達 (12,22)
+[Move] Team 72 抵達 (16,9)
+[Move] Team 73 抵達 (12,9)
+[Move] Team 74 抵達 (12,9)
+[Ambition] Team72 rung 0→1 (定居 cap=1)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team23 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 乞食 (乞食)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 外交 (求和)
+[SoloAI] Team55 → 外交 (求和)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 21 抵達 (16,9)
+[Move] Team 23 抵達 (8,23)
+[Move] Team 51 抵達 (18,1)
+[Move] Team 70 抵達 (21,4)
+[Combat Start] Team-1000013 vs Team51
+[Ambush] NPC Team51 被 boar 伏擊
+[Combat Start] Team-1000014 vs Team74
+[Ambush] NPC Team74 被 bear 伏擊
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team1 → 貿易 (貿易)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team23 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 乞食 (乞食)
+[SoloAI] Team48 → 外交 (求和)
+[SoloAI] Team55 → 外交 (求和)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (6,14)
+[Move] Team 16 抵達 (17,9)
+[Move] Team 45 抵達 (3,23)
+[Move] Team 48 抵達 (15,9)
+[Move] Team 56 抵達 (17,9)
+[Move] Team 69 抵達 (17,8)
+[Move] Team 75 抵達 (9,22)
+[Move] Team 76 抵達 (9,22)
+[Combat Start] Team-1000015 vs Team74
+[Ambush] NPC Team74 被 bear 伏擊
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 乞食 (乞食)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team55 → 外交 (求和)
+[SoloAI] Team56 → 外交 (求和)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 7 抵達 (6,14)
+[Move] Team 11 抵達 (5,15)
+[Move] Team 35 抵達 (26,6)
+[Move] Team 71 抵達 (18,18)
+[Tribute] Team17 徵收 Team21 rate=0.01
+[Order] Team24 sell material ×1 (oid=223)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Tick 3540] Person 131 (leader/team65) → P2_produce | stress=0.15 loyalty=0.06
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team23 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team39 → 貿易 (maintain_tools:resource)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 乞食 (乞食)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team55 → 外交 (求和)
+[SoloAI] Team56 → 外交 (求和)
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team34 → 貿易 (囤貨)
+[Move] Team 4 抵達 (12,19)
+[Move] Team 24 抵達 (18,3)
+[Move] Team 38 抵達 (10,19)
+[Move] Team 41 抵達 (17,8)
+[Move] Team 66 抵達 (15,19)
+[Combat Start] Team-1000016 vs Team27
+[Ambush] NPC Team27 被 bear 伏擊
+[Ambition] Team41 rung 0→1 (定居 cap=1)
+[Ambition] Team52 rung 1→0 (商業 cap=2)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team43 → 乞食 (乞食)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 迎戰 (迎戰)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team65 → 乞食 (乞食)
+[Move] Team 12 抵達 (18,8)
+[Move] Team 18 抵達 (16,9)
+[Move] Team 20 抵達 (13,8)
+[Move] Team 36 抵達 (24,15)
+[Move] Team 43 抵達 (18,3)
+[Move] Team 46 抵達 (15,19)
+[Move] Team 47 抵達 (14,15)
+[Move] Team 64 抵達 (18,3)
+[Tribute] Team17 徵收 Team18 rate=0.04
+[Combat Start] Team-1000017 vs Team27
+[Ambush] NPC Team27 被 bear 伏擊
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team23 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team43 → 迎戰 (迎戰)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team64 → 迎戰 (迎戰)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 3 抵達 (20,3)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (6,14)
+[Move] Team 14 抵達 (12,15)
+[Move] Team 23 抵達 (8,23)
+[Move] Team 27 抵達 (25,1)
+[Move] Team 48 抵達 (15,9)
+[Move] Team 68 抵達 (12,23)
+[Move] Team 75 抵達 (9,21)
+[Move] Team 76 抵達 (9,21)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team32 → 貿易 (maintain_tools:resource)
+[Move] Team 8 抵達 (6,14)
+[Move] Team 71 抵達 (18,18)
+[Order] Team70 buy food ×1 (oid=224)
+[Order] Team75 sell material ×3 (oid=225)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 39 抵達 (18,18)
+[Move] Team 66 抵達 (15,19)
+[Move] Team 69 抵達 (16,9)
+[Market@(18, 18)] Team39  outpost owner Team10 成交
+[Tribute] Team17 徵收 Team21 rate=0.01
+[Diplomacy] Team10 → Team39: demand_tribute
+[Diplomacy] Team39 回應: refuse
+[Diplomacy] Team39 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05
+[Ambition] Team67 rung 1→0 (定居 cap=2)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team39 → 建設 (建設)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[SoloAI] Team66 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team37 → 治理 (駐守)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team55 → 迎戰 (迎戰)
+[SoloAI] Team56 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (12,19)
+[Move] Team 20 抵達 (13,8)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 38 抵達 (10,19)
+[Move] Team 47 抵達 (14,15)
+[Move] Team 51 抵達 (18,0)
+[Move] Team 64 抵達 (18,3)
+[Tribute] Team17 徵收 Team21 rate=0.01
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 1 抵達 (22,5)
+[Move] Team 18 抵達 (15,9)
+[Move] Team 49 抵達 (10,19)
+[Order] Team71 sell material ×2 (oid=226)
+[Order] Team73 sell material ×3 (oid=227)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team56 → 外交 (求和)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team45 → 覓食 (覓食)
+[Move] Team 21 抵達 (16,9)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 55 抵達 (18,18)
+[Move] Team 65 抵達 (0,20)
+[Move] Team 70 抵達 (20,3)
+[Merge] Team3 ← Team70 完全合併 (pop=10)
+[Order] Team74 sell material ×3 (oid=228)
+[Order] Team76 sell material ×3 (oid=229)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team43 → 迎戰 (迎戰)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team55 → 迎戰 (迎戰)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team64 → 迎戰 (迎戰)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team35 → 建設 (建設)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team55 → 迎戰 (迎戰)
+[SoloAI] Team56 → 外交 (求和)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction-1 派工失敗: 資源不足 1.69x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team42 → 掠奪 (掠奪)
+[SoloAI] Team40 → 逃跑 (survival)
+[Extort] Team42 勒索 Team40，Team40 妥協給付
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team55 → 迎戰 (迎戰)
+[SoloAI] Team56 → 外交 (求和)
+[Site] Faction-1 派工失敗: 資源不足 1.55x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team72 → 乞食 (乞食)
+[SoloAI] Team36 → 貿易 (囤貨)
+[DayNight] Day 3 開始
+[Move] Team 13 抵達 (15,12)
+[Move] Team 17 抵達 (15,9)
+[Move] Team 32 抵達 (10,25)
+[Move] Team 48 抵達 (15,9)
+[Move] Team 56 抵達 (15,9)
+[Move] Team 69 抵達 (17,8)
+[Move] Team 71 抵達 (18,18)
+[Extort] Team42 勒索 Team40，Team40 妥協給付
+[StrategicAI] Faction0 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team20 → 建設 (建設)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team48 → 建設 (建設)
+[SoloAI] Team55 → 迎戰 (迎戰)
+[SoloAI] Team56 → 外交 (求和)
+[SoloAI] Team72 → 乞食 (乞食)
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (13, 19) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (16, 17) 捕野馬 +1
+[TickPerf] day=3 avg=21657 us max=1930910 us ticks=1440 teams=73 factions=8 | ★>2s 幀數=0/4320
+
+★攻擊 util：零 662／非零 617（母體 1279 ＝ 每一次攻擊被評分；窗 4320 tick／seed 1337）
+  [OK] **非零不再是 0 次**（★病因是四項全授權  沒授權時恆 0）
+★非零 util 分布：n=300 mean=0.193 sd=0.134 min=0.001 max=0.549
+  [OK] **分布活著（sd > 0）**★★『有非零值』不算過——全同一個數是另一個常數
+★授權群 零22／非零21｜**無授權群 零640／非零596**
+  [OK] **無授權群 util 不再全為 0**（★★否則『加成』偷偷變回『唯一來源』）
+★非零 util 的 belief tier 分桶：{ "tier1": 205, "tier0": 18, "tier2": 394 }
+★-b 逐 tier × 逐 loot 桶的**平均 util**（母體各自標；★空桶印【不可判】不印 0）：
+   tier-1：loot0=不可判(n=0) lootLo=不可判(n=0) lootHi=不可判(n=0) 
+   tier0：loot0=0.012(n=297) lootLo=不可判(n=0) lootHi=不可判(n=0) 
+   tier1：loot0=不可判(n=0) lootLo=不可判(n=0) lootHi=0.201(n=240) 
+   tier2：loot0=0.000(n=15) lootLo=0.003(n=64) lootHi=0.099(n=663) 
+   ★判準：**同一列裡 lootHi 的平均要高於 loot0**（跟著肥瘦走）；
+     ★★而 tier2 那一列的【落差】應該比 tier0/1 大（知道得多  分得更開）——★★★這是觀察不是目標
+★-b 那些零是什麼（機會項的零，逐因分類）：{ "poor_and_fed": 275, "no_teeth": 395, "too_small": 1 }
+  [OK] -b **沒有「無法解釋」的零**（有就是我漏了一種來源）★第一趟這格是紅的：1 筆  逼出第五種【量級】
+   ★五桶的語意不同：`no_teeth`／`poor_and_fed` 是**結構**（秤說沒理由）、
+     `personality` 是**人格**、★★`too_small` 是**量級**（每個因子都非 0 而乘積小於門檻）
+   ★★注意母體不同：這一格分類的是【機會項自己的零】，
+     而『零 final』是【五項相加之後】的零 —— ★★★兩個數不可互相相減
+   ★這一格是【觀察】不是【目標】——★★不准為了讓它好看而調 tier 權重（禁 crank）
+
+★★★輸入有沒有營養（★三種形狀的處置不同  分開量）
+   母體 2154 次（樣本上限 400，實收 400）
+   系統性低估：估中位 0.022｜真值中位 9.010｜估／真 中位 0.355
+   值域壓縮：估的 mean 2.468｜sd 4.444｜min 0.000｜max 24.269
+      ★★『單調但很淺』正是這一形狀的症狀（tier2 的 0.000→0.003→0.099）
+   雜訊（同向率，★粗判：以「是否 > 1.0」二分；精確版要離線算）：{ "eT": 397, "ET": 1649, "et": 98, "Et": 10 }
+      ★ET/et ＝ 同向｜Et/eT ＝ 反向；★★同向率低  秤在讀噪音  方向性是假的
+   ★-a 贏率校準的母體＝本窗**真的打完的仗** 18 場
+       ★**不可判**（母體 < 20）★★而『不可判』與『贏率估得不准』是兩個結論
+       ★★★逐場配對（開打時的 `attack_win_odds`  實際勝負）**本卷刻意沒接**：
+         接了也只能拿 18 筆畫校準曲線，而那條曲線會比沒有更誤導人。
+         母體真的上到 20 場那天，配對接線才是下一張票。
+   ★★★而【風險項】在本實作裡**沒有獨立欄位**（風險折在贏率裡）
+       ★所以「風險恆大把胃口壓平」這一格 **不適用**，而不是 0 —— 我不編一個欄位來填表
+
+★★★乘積拆開：(0.6×loot + 0.4×need) × odds × person
+   ★loot 與 need 是**相加**；本實作**沒有獨立風險項**（風險折在 odds 裡）
+   母體 1279 次（樣本上限 400、實收 400；★first-N 不是隨機）
+   est     中位 0.0500｜min 0.0000｜max 24.2690｜恰好 0 的 167/400
+   loot    中位 0.0170｜min 0.0000｜max 1.0000｜恰好 0 的 167/400
+   need    中位 0.0000｜min 0.0000｜max 1.0000｜恰好 0 的 367/400
+   odds    中位 0.7410｜min 0.0000｜max 1.0000｜恰好 0 的 98/400
+   person  中位 0.6130｜min 0.0690｜max 1.0410｜恰好 0 的 0/400
+   opp     中位 0.0000｜min 0.0000｜max 0.5969｜恰好 0 的 242/400
+   ★★判法：**中位最靠近 0 的那一個因子，就是把乘積壓扁的那一個**
+   ★★★而 `est` 與 `loot` 要一起看：`loot = clamp(est / 3.0, 0, 1)`
+       ★若 est 中位遠小於參考值，**loot 就會在中位列近乎 0** ——
+        而那時【分布不窄】與【中位列被壓扁】**同時成立**，它們不矛盾。
+
+★因子逐列（TSV：est/loot/need/odds/person/opp/tier）
+FACTORS_TSV	est	loot	need	odds	person	opp	tier
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.681	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.620	0.2482	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.147	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.909	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.544	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.980	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.315	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.613	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	1.002	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.524	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.408	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.668	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.391	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.681	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.147	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.909	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.544	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.980	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.952	0.315	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.844	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.667	1.022	0.4087	1
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.568	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.192	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.612	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.447	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	2.000	0.667	0.000	0.417	0.914	0.1523	1
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.568	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.192	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.612	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.447	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	2.000	0.667	0.000	0.417	0.914	0.1523	1
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.681	0.3405	1
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.620	0.2482	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.147	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.544	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.583	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.980	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.476	0.315	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.613	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	1.002	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.408	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	17.632	1.000	1.000	0.000	0.702	0.0000	2
+FACTORS_TSV	14.074	1.000	1.000	0.000	0.499	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	17.632	1.000	1.000	0.000	0.702	0.0000	2
+FACTORS_TSV	14.074	1.000	1.000	0.000	0.499	0.0000	2
+FACTORS_TSV	17.632	1.000	1.000	0.000	0.702	0.0000	2
+FACTORS_TSV	14.074	1.000	1.000	0.000	0.499	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.521	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.909	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.544	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.583	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.476	0.315	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.613	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.370	0.392	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	17.319	1.000	1.000	0.000	0.702	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.544	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.583	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.476	0.315	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.192	0.0000	0
+FACTORS_TSV	0.023	0.008	0.000	1.000	0.583	0.0027	2
+FACTORS_TSV	0.023	0.008	0.000	0.741	0.980	0.0033	2
+FACTORS_TSV	0.046	0.015	0.000	0.417	0.315	0.0012	2
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.613	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.408	0.0000	0
+FACTORS_TSV	14.043	1.000	0.087	0.000	0.499	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.681	0.3405	1
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.620	0.2482	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.147	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.521	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.909	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.613	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	1.002	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.408	0.2042	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	2.000	0.667	0.000	0.741	0.844	0.2501	1
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.668	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.391	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.644	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.612	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.333	0.818	0.1636	1
+FACTORS_TSV	0.000	0.000	0.000	0.370	0.392	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.620	0.2482	1
+FACTORS_TSV	0.036	0.012	0.000	1.000	0.583	0.0042	2
+FACTORS_TSV	3.000	1.000	0.000	0.667	1.022	0.4087	1
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.391	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.333	0.818	0.1636	1
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.568	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.644	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.192	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.681	0.3405	1
+FACTORS_TSV	2.000	0.667	0.000	0.667	0.620	0.1655	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.521	0.0000	0
+FACTORS_TSV	0.022	0.007	0.000	1.000	0.583	0.0026	2
+FACTORS_TSV	0.022	0.007	0.000	0.741	0.980	0.0032	2
+FACTORS_TSV	0.022	0.007	0.000	0.417	0.315	0.0006	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.536	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.613	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	1.002	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.995	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.844	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.667	1.022	0.4087	1
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.788	0.0000	0
+FACTORS_TSV	4.605	1.000	0.000	0.000	0.949	0.0000	2
+FACTORS_TSV	3.568	1.000	0.000	0.000	1.041	0.0000	2
+FACTORS_TSV	3.568	1.000	0.000	0.000	0.891	0.0000	2
+FACTORS_TSV	3.461	1.000	0.000	0.000	0.644	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.509	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	17.077	1.000	0.127	0.000	0.499	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.370	0.392	0.0000	0
+FACTORS_TSV	9.648	1.000	0.000	0.000	1.041	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.509	0.0000	0
+FACTORS_TSV	0.022	0.007	0.000	1.000	0.583	0.0025	2
+FACTORS_TSV	0.022	0.007	0.000	0.741	0.980	0.0031	2
+FACTORS_TSV	0.022	0.007	0.000	0.417	0.315	0.0006	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.536	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.613	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.952	0.596	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	1.002	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.408	0.2042	1
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.995	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.844	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.668	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.612	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.788	0.0000	0
+FACTORS_TSV	2.000	0.667	0.000	0.417	0.914	0.1523	1
+FACTORS_TSV	2.000	0.667	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.909	0.0000	0
+FACTORS_TSV	2.000	0.667	0.000	1.000	0.544	0.2176	1
+FACTORS_TSV	0.021	0.007	0.000	0.741	0.980	0.0031	2
+FACTORS_TSV	0.039	0.013	0.000	0.417	0.315	0.0010	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.408	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.844	0.0000	0
+FACTORS_TSV	2.000	0.667	0.000	0.667	1.022	0.2725	1
+FACTORS_TSV	5.130	1.000	0.000	0.000	0.612	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.509	0.0000	0
+FACTORS_TSV	24.269	1.000	0.000	0.333	0.818	0.1636	2
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	18.111	1.000	0.103	0.000	0.702	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.681	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.147	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.521	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.909	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.544	0.3264	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.021	0.007	0.000	0.741	0.980	0.0030	2
+FACTORS_TSV	0.049	0.016	0.000	0.417	0.315	0.0013	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.536	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.613	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.844	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.667	1.022	0.4087	1
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.788	0.0000	0
+FACTORS_TSV	4.928	1.000	0.000	0.000	0.644	0.0000	2
+FACTORS_TSV	2.968	0.989	0.000	0.000	0.612	0.0000	2
+FACTORS_TSV	5.634	1.000	0.000	0.000	0.509	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.370	0.392	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	3.000	1.000	0.117	0.000	0.702	0.0000	1
+FACTORS_TSV	0.045	0.015	0.000	0.833	0.909	0.0068	2
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.021	0.007	0.000	0.741	0.980	0.0030	2
+FACTORS_TSV	0.050	0.017	0.000	0.417	0.315	0.0013	2
+FACTORS_TSV	0.051	0.017	0.000	0.741	0.613	0.0046	2
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.531	0.2126	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.844	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.788	0.0000	0
+FACTORS_TSV	2.000	0.667	0.000	0.000	0.192	0.0000	1
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.667	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	0.000	0.000	0.181	0.000	0.499	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.681	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.620	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	0.031	0.010	0.000	0.741	0.613	0.0029	2
+FACTORS_TSV	0.000	0.000	0.000	0.952	0.596	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	1.002	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.844	0.0000	0
+FACTORS_TSV	3.785	1.000	0.000	0.000	1.041	0.0000	2
+FACTORS_TSV	4.971	1.000	0.000	0.000	0.891	0.0000	2
+FACTORS_TSV	6.661	1.000	0.000	0.000	0.612	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.500	0.0000	0
+FACTORS_TSV	10.728	1.000	0.194	0.000	0.499	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.681	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.429	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.620	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	0.020	0.007	0.000	0.741	0.613	0.0018	2
+FACTORS_TSV	0.000	0.000	0.000	0.952	0.596	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.741	1.002	0.4453	1
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.069	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.844	0.3752	1
+FACTORS_TSV	0.000	0.000	0.000	0.667	1.022	0.0000	0
+FACTORS_TSV	3.208	1.000	0.000	0.000	0.949	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.568	0.0000	0
+FACTORS_TSV	2.255	0.752	0.000	0.000	0.509	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.667	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	10.728	1.000	0.208	0.000	0.499	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.429	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.844	0.3752	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.147	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.192	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.673	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.499	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.523	0.2092	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.521	0.0000	0
+FACTORS_TSV	0.045	0.015	0.000	0.833	0.909	0.0068	2
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.544	0.3264	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	2.000	0.667	0.000	0.667	0.531	0.1417	1
+FACTORS_TSV	2.000	0.667	0.000	0.741	0.844	0.2501	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.147	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.788	0.3942	1
+FACTORS_TSV	3.208	1.000	0.000	0.000	0.949	0.0000	2
+FACTORS_TSV	5.105	1.000	0.000	0.000	0.612	0.0000	2
+FACTORS_TSV	4.781	1.000	0.000	0.000	0.509	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	3.000	1.000	0.188	0.000	0.702	0.0000	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	7.718	1.000	0.000	0.833	0.408	0.2042	2
+FACTORS_TSV	2.000	0.667	0.000	0.741	0.844	0.2501	1
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.681	0.3405	1
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.568	0.0000	0
+FACTORS_TSV	4.085	1.000	0.000	0.000	0.644	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.667	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.620	0.0000	0
+FACTORS_TSV	0.021	0.007	0.000	1.000	0.583	0.0025	2
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	1.002	0.4453	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.844	0.3752	1
+FACTORS_TSV	5.105	1.000	0.000	0.000	0.612	0.0000	2
+FACTORS_TSV	0.021	0.007	0.000	0.000	0.447	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.818	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.429	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.620	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	2.000	0.667	0.000	0.741	0.613	0.1817	1
+FACTORS_TSV	0.000	0.000	0.000	0.952	0.596	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.531	0.2126	1
+FACTORS_TSV	7.718	1.000	0.000	0.833	0.408	0.2042	2
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.681	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.788	0.3942	1
+FACTORS_TSV	3.785	1.000	0.000	0.000	1.041	0.0000	2
+FACTORS_TSV	4.971	1.000	0.000	0.000	0.891	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.192	0.0000	0
+FACTORS_TSV	3.631	1.000	0.000	0.000	0.509	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	3.631	1.000	0.000	0.333	0.667	0.1335	2
+FACTORS_TSV	7.013	1.000	0.000	0.333	0.818	0.1636	2
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.500	0.0000	0
+FACTORS_TSV	3.000	1.000	0.275	0.000	0.499	0.0000	1
+FACTORS_TSV	2.000	0.667	0.000	0.667	0.620	0.1655	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.613	0.2725	1
+FACTORS_TSV	2.000	0.667	0.000	0.952	0.596	0.2272	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	1.002	0.4453	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.391	0.0000	0
+FACTORS_TSV	2.000	0.667	0.000	0.833	0.681	0.2270	1
+FACTORS_TSV	4.085	1.000	0.000	0.000	0.644	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.500	0.0000	0
+FACTORS_TSV	3.000	1.000	0.288	0.000	0.499	0.0000	1
+FACTORS_TSV	2.000	0.667	0.000	1.000	0.583	0.2334	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.613	0.2725	1
+FACTORS_TSV	3.000	1.000	0.000	0.952	0.596	0.3408	1
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	10.728	1.000	0.302	0.000	0.499	0.0000	2
+FACTORS_TSV	0.045	0.015	0.000	0.833	0.909	0.0068	2
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.583	0.3501	1
+FACTORS_TSV	0.050	0.017	0.000	0.741	0.980	0.0073	2
+FACTORS_TSV	3.000	1.000	0.000	0.417	0.315	0.0786	1
+FACTORS_TSV	5.105	1.000	0.000	0.833	0.536	0.2680	2
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.613	0.2725	1
+FACTORS_TSV	2.000	0.667	0.000	0.952	0.596	0.2272	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	1.002	0.0000	0
+FACTORS_TSV	7.718	1.000	0.000	0.833	0.408	0.2042	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.069	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.844	0.3752	1
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.147	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.788	0.3942	1
+FACTORS_TSV	5.105	1.000	0.000	0.000	0.612	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	7.013	1.000	0.000	0.000	0.818	0.0000	2
+FACTORS_TSV	2.000	0.667	0.000	0.417	0.914	0.1523	1
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.333	0.673	0.0000	0
+FACTORS_TSV	10.728	1.000	0.315	0.000	0.499	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.620	0.2482	1
+FACTORS_TSV	0.045	0.015	0.000	0.833	0.909	0.0068	2
+FACTORS_TSV	2.000	0.667	0.000	1.000	0.583	0.2334	1
+FACTORS_TSV	0.021	0.007	0.000	0.741	0.980	0.0031	2
+FACTORS_TSV	0.021	0.007	0.000	0.417	0.315	0.0006	2
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.613	0.2725	1
+FACTORS_TSV	3.000	1.000	0.000	0.952	0.596	0.3408	1
+FACTORS_TSV	2.000	0.667	0.000	0.667	0.531	0.1417	1
+FACTORS_TSV	7.718	1.000	0.000	0.833	0.408	0.2042	2
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.681	0.3405	1
+FACTORS_TSV	2.000	0.667	0.000	0.833	0.788	0.2628	1
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	3.000	1.000	0.328	0.000	0.499	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.459	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.429	0.0000	0
+FACTORS_TSV	2.000	0.667	0.000	0.667	0.620	0.1655	1
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.521	0.2317	1
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.544	0.3264	1
+FACTORS_TSV	7.312	1.000	0.000	1.000	0.583	0.3501	2
+FACTORS_TSV	7.312	1.000	0.000	0.741	0.980	0.4355	2
+FACTORS_TSV	7.312	1.000	0.000	0.417	0.315	0.0786	2
+FACTORS_TSV	0.029	0.010	0.000	0.741	0.613	0.0026	2
+FACTORS_TSV	3.000	1.000	0.000	0.952	0.596	0.3408	1
+FACTORS_TSV	7.718	1.000	0.000	0.833	0.408	0.2042	2
+FACTORS_TSV	3.000	1.000	0.000	1.000	0.995	0.5969	1
+FACTORS_TSV	7.262	1.000	1.000	0.000	0.506	0.0000	2
+FACTORS_TSV	11.461	1.000	1.000	0.000	0.901	0.0000	2
+FACTORS_TSV	18.643	1.000	1.000	0.000	0.371	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.681	0.3405	1
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.417	0.787	0.0000	0
+FACTORS_TSV	17.930	1.000	0.342	0.000	0.499	0.0000	2
+FACTORS_TSV	7.262	1.000	1.000	0.000	0.506	0.0000	2
+FACTORS_TSV	11.461	1.000	1.000	0.000	0.901	0.0000	2
+FACTORS_TSV	18.643	1.000	1.000	0.000	0.371	0.0000	2
+FACTORS_TSV	7.262	1.000	1.000	0.000	0.506	0.0000	2
+FACTORS_TSV	17.860	1.000	1.000	0.000	0.371	0.0000	2
+FACTORS_TSV	11.461	1.000	1.000	0.000	0.901	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.429	0.0000	0
+FACTORS_TSV	7.312	1.000	0.000	0.741	0.980	0.4355	2
+FACTORS_TSV	7.312	1.000	0.000	0.417	0.315	0.0786	2
+FACTORS_TSV	0.029	0.010	0.000	0.741	0.613	0.0026	2
+FACTORS_TSV	0.000	0.000	0.000	0.952	0.596	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.667	0.563	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	1.002	0.0000	0
+FACTORS_TSV	7.718	1.000	0.000	0.833	0.408	0.2042	2
+FACTORS_TSV	0.000	0.000	0.000	1.000	0.995	0.0000	0
+FACTORS_TSV	3.000	1.000	0.000	0.741	0.844	0.3752	1
+FACTORS_TSV	3.000	1.000	0.000	0.833	0.681	0.3405	1
+FACTORS_TSV	3.000	1.000	0.000	0.667	0.620	0.2482	1
+FACTORS_TSV	4.085	1.000	0.000	0.000	0.644	0.0000	2
+FACTORS_TSV	5.105	1.000	0.000	0.000	0.612	0.0000	2
+FACTORS_TSV	3.631	1.000	0.000	0.000	0.509	0.0000	2
+FACTORS_TSV	3.000	1.000	0.000	0.000	0.447	0.0000	1
+FACTORS_TSV	0.000	0.000	0.000	0.000	0.787	0.0000	0
+FACTORS_TSV	17.930	1.000	0.355	0.000	0.499	0.0000	2
+FACTORS_TSV	11.460	1.000	1.000	0.000	0.901	0.0000	2
+FACTORS_TSV	18.643	1.000	1.000	0.000	0.371	0.0000	2
+FACTORS_TSV	0.000	0.000	0.000	0.833	0.429	0.0000	0
+FACTORS_TSV	0.000	0.000	0.000	0.741	0.521	0.0000	0
+FACTORS_TSV	7.312	1.000	0.000	1.000	0.583	0.3501	2
+FACTORS_TSV	7.312	1.000	0.000	0.741	0.980	0.4355	2
+FACTORS_TSV	7.312	1.000	0.000	0.417	0.315	0.0786	2
+FACTORS_TSV	0.029	0.010	0.000	0.741	0.613	0.0026	2
+
+★逐列樣本（TSV：估值、真值、tier、贏率）—— ★★因為上一卷的同向率二分法
+   **沒有鑑別力**（門檻用絕對值 1.0，而兩個量尺度差兩個數量級），
+    ★★★要判雜訊必須用**等級相關**，而那需要逐列值——這就是那些值。
+APPETITE_TSV	est	true	tier	odds
+APPETITE_TSV	0.000	9.127	0	0.833
+APPETITE_TSV	3.000	22.678	1	0.667
+APPETITE_TSV	0.000	9.830	0	0.741
+APPETITE_TSV	0.000	22.678	0	0.833
+APPETITE_TSV	0.000	7.424	0	1.000
+APPETITE_TSV	0.000	9.127	0	0.741
+APPETITE_TSV	0.000	21.648	0	0.833
+APPETITE_TSV	0.000	9.127	0	0.741
+APPETITE_TSV	0.000	8.424	0	0.741
+APPETITE_TSV	0.000	8.830	0	1.000
+APPETITE_TSV	0.000	8.830	0	0.833
+APPETITE_TSV	0.000	9.127	0	1.000
+APPETITE_TSV	0.000	9.127	0	0.667
+APPETITE_TSV	0.000	9.127	0	0.833
+APPETITE_TSV	0.000	9.127	0	0.833
+APPETITE_TSV	3.000	22.678	1	0.667
+APPETITE_TSV	0.000	9.830	0	0.741
+APPETITE_TSV	0.000	9.830	0	0.741
+APPETITE_TSV	0.000	14.074	0	0.833
+APPETITE_TSV	0.000	14.074	0	0.833
+APPETITE_TSV	0.000	7.424	0	1.000
+APPETITE_TSV	0.000	7.424	0	1.000
+APPETITE_TSV	0.000	9.127	0	0.741
+APPETITE_TSV	0.000	9.127	0	0.741
+APPETITE_TSV	0.000	21.648	0	0.952
+APPETITE_TSV	0.000	21.648	0	0.952
+APPETITE_TSV	0.000	8.424	0	0.741
+APPETITE_TSV	0.000	8.830	0	1.000
+APPETITE_TSV	0.000	8.830	0	0.833
+APPETITE_TSV	3.000	8.424	1	1.000
+APPETITE_TSV	0.000	9.127	0	0.741
+APPETITE_TSV	0.000	9.127	0	0.741
+APPETITE_TSV	3.000	9.830	1	0.667
+APPETITE_TSV	3.000	9.830	1	0.667
+APPETITE_TSV	0.000	9.127	0	1.000
+APPETITE_TSV	0.000	9.127	0	0.667
+APPETITE_TSV	0.000	8.424	0	0.000
+APPETITE_TSV	0.000	8.424	0	0.000
+APPETITE_TSV	0.000	9.830	0	0.000
+APPETITE_TSV	0.000	9.830	0	0.000
+APPETITE_TSV	0.000	14.074	0	0.000
+APPETITE_TSV	0.000	14.074	0	0.000
+APPETITE_TSV	0.000	7.371	0	0.000
+APPETITE_TSV	0.000	7.371	0	0.000
+APPETITE_TSV	0.000	18.668	0	0.333
+APPETITE_TSV	0.000	18.668	0	0.333
+APPETITE_TSV	2.000	18.668	1	0.417
+APPETITE_TSV	2.000	18.668	1	0.417
+APPETITE_TSV	0.000	9.127	0	0.417
+APPETITE_TSV	0.000	9.127	0	0.417
+APPETITE_TSV	0.000	9.127	0	0.833
+APPETITE_TSV	3.000	22.678	1	0.667
+APPETITE_TSV	0.000	9.830	0	0.741
+APPETITE_TSV	0.000	14.074	0	0.833
+APPETITE_TSV	0.000	7.424	0	1.000
+APPETITE_TSV	0.000	9.127	0	0.741
+APPETITE_TSV	0.000	21.648	0	0.952
+APPETITE_TSV	0.000	8.424	0	0.741
+APPETITE_TSV	0.000	8.830	0	1.000
+APPETITE_TSV	0.000	8.830	0	0.833
+APPETITE_TSV	0.000	9.127	0	0.741
+APPETITE_TSV	3.000	9.830	1	0.667
+APPETITE_TSV	0.000	9.127	0	1.000
+APPETITE_TSV	0.000	9.127	0	0.667
+APPETITE_TSV	0.000	8.424	0	0.000
+APPETITE_TSV	0.000	9.830	0	0.000
+APPETITE_TSV	0.000	14.074	0	0.000
+APPETITE_TSV	0.000	7.371	0	0.000
+APPETITE_TSV	0.000	18.668	0	0.333
+APPETITE_TSV	2.000	18.668	1	0.417
+APPETITE_TSV	0.000	9.127	0	0.417
+APPETITE_TSV	0.000	8.424	0	0.000
+APPETITE_TSV	0.000	9.830	0	0.000
+APPETITE_TSV	0.000	14.074	0	0.000
+APPETITE_TSV	0.000	7.371	0	0.000
+APPETITE_TSV	0.000	18.668	0	0.333
+APPETITE_TSV	2.000	18.668	1	0.417
+APPETITE_TSV	0.000	9.127	0	0.417
+APPETITE_TSV	3.000	22.675	1	0.833
+APPETITE_TSV	3.000	22.675	1	0.667
+APPETITE_TSV	0.000	9.827	0	0.741
+APPETITE_TSV	0.000	0.000	2	1.000
+APPETITE_TSV	0.000	0.000	2	1.000
+APPETITE_TSV	0.000	9.124	0	0.741
+APPETITE_TSV	0.000	21.644	0	0.476
+APPETITE_TSV	0.000	9.124	0	0.741
+APPETITE_TSV	0.000	8.432	0	0.741
+APPETITE_TSV	0.000	8.827	0	0.833
+APPETITE_TSV	3.000	8.432	1	1.000
+APPETITE_TSV	17.632	14.040	2	0.000
+APPETITE_TSV	17.632	14.040	2	0.000
+APPETITE_TSV	17.632	14.040	2	0.000
+APPETITE_TSV	14.074	14.072	2	0.000
+APPETITE_TSV	14.074	14.072	2	0.000
+APPETITE_TSV	0.000	9.124	0	0.741
+APPETITE_TSV	3.000	8.432	1	1.000
+APPETITE_TSV	17.632	14.040	2	0.000
+APPETITE_TSV	14.074	14.072	2	0.000
+APPETITE_TSV	0.000	9.141	0	0.417
+APPETITE_TSV	17.632	14.040	2	0.000
+APPETITE_TSV	17.632	14.040	2	0.000
+APPETITE_TSV	14.074	14.072	2	0.000
+APPETITE_TSV	17.632	14.040	2	0.000
+APPETITE_TSV	17.632	14.040	2	0.000
+APPETITE_TSV	14.074	14.072	2	0.000
+APPETITE_TSV	0.000	22.273	0	0.741
+APPETITE_TSV	0.000	7.419	0	0.833
+APPETITE_TSV	0.000	0.000	2	1.000
+APPETITE_TSV	0.000	0.000	2	1.000
+APPETITE_TSV	0.000	21.641	0	0.476
+APPETITE_TSV	0.000	9.121	0	0.741
+APPETITE_TSV	17.319	14.039	2	0.000
+APPETITE_TSV	0.000	18.664	0	0.333
+APPETITE_TSV	0.000	9.121	0	0.370
+APPETITE_TSV	0.000	9.154	0	0.417
+APPETITE_TSV	17.319	14.039	2	0.000
+APPETITE_TSV	0.000	0.024	2	1.000
+APPETITE_TSV	0.000	0.024	2	1.000
+APPETITE_TSV	0.000	21.638	0	0.476
+APPETITE_TSV	14.039	14.013	2	0.000
+APPETITE_TSV	14.071	14.046	2	0.000
+APPETITE_TSV	0.000	9.817	0	0.000
+APPETITE_TSV	0.023	0.023	2	1.000
+APPETITE_TSV	0.023	0.023	2	0.741
+APPETITE_TSV	0.046	0.023	2	0.417
+APPETITE_TSV	0.000	9.810	0	0.741
+APPETITE_TSV	0.000	8.810	0	0.833
+APPETITE_TSV	14.043	14.042	2	0.000
+APPETITE_TSV	14.043	14.042	2	0.000
+APPETITE_TSV	3.000	9.106	1	0.833
+APPETITE_TSV	3.000	22.059	1	0.667
+APPETITE_TSV	0.000	9.807	0	0.741
+APPETITE_TSV	0.000	9.807	0	0.741
+APPETITE_TSV	0.000	7.406	0	0.833
+APPETITE_TSV	0.000	9.106	0	0.741
+APPETITE_TSV	0.000	8.459	0	0.741
+APPETITE_TSV	3.000	8.807	1	0.833
+APPETITE_TSV	3.000	9.807	1	1.000
+APPETITE_TSV	2.000	9.807	1	0.741
+APPETITE_TSV	0.000	9.106	0	1.000
+APPETITE_TSV	0.000	7.406	0	0.667
+APPETITE_TSV	18.511	14.040	2	0.000
+APPETITE_TSV	0.000	9.188	0	0.000
+APPETITE_TSV	0.000	14.008	0	0.000
+APPETITE_TSV	3.000	8.406	1	0.333
+APPETITE_TSV	0.000	9.106	0	0.370
+APPETITE_TSV	0.000	8.433	0	0.417
+APPETITE_TSV	3.000	22.057	1	0.667
+APPETITE_TSV	0.036	0.022	2	1.000
+APPETITE_TSV	3.000	9.804	1	0.667
+APPETITE_TSV	0.000	7.403	0	0.667
+APPETITE_TSV	3.000	18.650	1	0.333
+APPETITE_TSV	0.000	8.403	0	0.000
+APPETITE_TSV	0.000	9.185	0	0.000
+APPETITE_TSV	0.000	9.804	0	0.000
+APPETITE_TSV	3.000	9.100	1	0.833
+APPETITE_TSV	2.000	22.054	1	0.667
+APPETITE_TSV	0.000	18.395	0	0.741
+APPETITE_TSV	0.022	0.022	2	1.000
+APPETITE_TSV	0.022	0.022	2	0.741
+APPETITE_TSV	0.022	0.022	2	0.417
+APPETITE_TSV	0.000	10.100	0	0.833
+APPETITE_TSV	0.000	9.100	0	0.741
+APPETITE_TSV	0.000	8.454	0	0.741
+APPETITE_TSV	0.000	9.079	0	1.000
+APPETITE_TSV	0.000	9.079	0	0.741
+APPETITE_TSV	3.000	9.800	1	0.667
+APPETITE_TSV	0.000	9.800	0	0.833
+APPETITE_TSV	4.605	3.210	2	0.000
+APPETITE_TSV	3.568	3.787	2	0.000
+APPETITE_TSV	3.568	3.787	2	0.000
+APPETITE_TSV	3.461	3.210	2	0.000
+APPETITE_TSV	0.000	7.590	0	0.000
+APPETITE_TSV	3.000	21.618	1	0.000
+APPETITE_TSV	0.000	8.436	0	0.417
+APPETITE_TSV	17.077	14.098	2	0.000
+APPETITE_TSV	17.077	14.098	2	0.000
+APPETITE_TSV	0.000	9.100	0	0.370
+APPETITE_TSV	9.648	7.494	2	0.000
+APPETITE_TSV	0.000	7.590	0	0.000
+APPETITE_TSV	0.022	0.021	2	1.000
+APPETITE_TSV	0.022	0.021	2	0.741
+APPETITE_TSV	0.022	0.021	2	0.417
+APPETITE_TSV	0.000	10.097	0	0.833
+APPETITE_TSV	0.000	9.097	0	0.741
+APPETITE_TSV	0.000	8.412	0	0.952
+APPETITE_TSV	0.000	8.451	0	0.741
+APPETITE_TSV	3.000	8.797	1	0.833
+APPETITE_TSV	0.000	9.016	0	1.000
+APPETITE_TSV	0.000	9.016	0	0.741
+APPETITE_TSV	0.000	9.097	0	1.000
+APPETITE_TSV	17.074	14.157	2	0.000
+APPETITE_TSV	0.000	8.437	0	0.417
+APPETITE_TSV	0.000	14.004	0	0.000
+APPETITE_TSV	0.000	9.797	0	0.833
+APPETITE_TSV	2.000	18.645	1	0.417
+APPETITE_TSV	2.000	21.614	1	0.000
+APPETITE_TSV	0.000	6.427	0	0.833
+APPETITE_TSV	2.000	6.427	1	1.000
+APPETITE_TSV	0.021	0.021	2	0.741
+APPETITE_TSV	0.039	0.021	2	0.417
+APPETITE_TSV	0.000	8.449	0	0.833
+APPETITE_TSV	3.000	8.449	1	1.000
+APPETITE_TSV	0.000	9.013	0	0.741
+APPETITE_TSV	2.000	9.794	1	0.667
+APPETITE_TSV	24.269	18.643	2	0.333
+APPETITE_TSV	5.130	2.968	2	0.000
+APPETITE_TSV	0.000	8.794	0	0.000
+APPETITE_TSV	24.269	18.643	2	0.333
+APPETITE_TSV	0.000	8.438	0	0.417
+APPETITE_TSV	18.111	14.003	2	0.000
+APPETITE_TSV	18.111	14.003	2	0.000
+APPETITE_TSV	0.000	9.790	0	0.833
+APPETITE_TSV	0.000	9.790	0	0.741
+APPETITE_TSV	0.000	18.387	0	0.741
+APPETITE_TSV	0.000	4.285	0	0.833
+APPETITE_TSV	3.000	4.285	1	1.000
+APPETITE_TSV	3.000	7.336	1	1.000
+APPETITE_TSV	0.021	0.021	2	0.741
+APPETITE_TSV	0.049	0.021	2	0.417
+APPETITE_TSV	0.049	0.021	2	0.417
+APPETITE_TSV	0.000	10.091	0	0.833
+APPETITE_TSV	0.000	9.091	0	0.741
+APPETITE_TSV	3.000	8.446	1	1.000
+APPETITE_TSV	0.000	9.010	0	0.741
+APPETITE_TSV	3.000	9.790	1	0.667
+APPETITE_TSV	3.000	5.107	1	0.000
+APPETITE_TSV	0.000	9.790	0	0.833
+APPETITE_TSV	4.928	4.097	2	0.000
+APPETITE_TSV	4.928	4.097	2	0.000
+APPETITE_TSV	2.968	5.107	2	0.000
+APPETITE_TSV	5.634	2.354	2	0.000
+APPETITE_TSV	0.000	8.446	0	0.333
+APPETITE_TSV	0.000	9.091	0	0.370
+APPETITE_TSV	0.000	8.439	0	0.417
+APPETITE_TSV	3.000	5.107	1	0.000
+APPETITE_TSV	3.000	5.107	1	0.000
+APPETITE_TSV	0.045	0.020	2	0.833
+APPETITE_TSV	3.000	7.334	1	1.000
+APPETITE_TSV	0.021	0.020	2	0.741
+APPETITE_TSV	0.050	0.020	2	0.417
+APPETITE_TSV	0.050	0.020	2	0.417
+APPETITE_TSV	0.051	0.020	2	0.741
+APPETITE_TSV	3.000	9.017	1	0.667
+APPETITE_TSV	3.000	8.443	1	1.000
+APPETITE_TSV	0.000	9.024	0	0.741
+APPETITE_TSV	4.097	4.096	2	0.000
+APPETITE_TSV	12.262	11.475	2	0.000
+APPETITE_TSV	0.000	9.787	0	0.833
+APPETITE_TSV	0.000	9.787	0	0.833
+APPETITE_TSV	2.000	9.787	1	0.000
+APPETITE_TSV	3.000	21.604	1	0.000
+APPETITE_TSV	0.000	8.390	0	0.333
+APPETITE_TSV	0.000	8.443	0	0.333
+APPETITE_TSV	0.000	21.604	0	0.000
+APPETITE_TSV	0.000	21.604	0	0.000
+APPETITE_TSV	0.000	9.784	0	0.833
+APPETITE_TSV	0.000	9.085	0	0.667
+APPETITE_TSV	3.000	7.331	1	1.000
+APPETITE_TSV	0.050	0.020	2	0.741
+APPETITE_TSV	3.000	7.917	1	0.417
+APPETITE_TSV	3.000	7.917	1	0.417
+APPETITE_TSV	0.031	0.020	2	0.741
+APPETITE_TSV	0.000	8.401	0	0.952
+APPETITE_TSV	0.000	10.807	0	0.741
+APPETITE_TSV	3.000	8.441	1	1.000
+APPETITE_TSV	0.000	9.085	0	0.741
+APPETITE_TSV	0.000	8.387	0	0.333
+APPETITE_TSV	10.728	8.223	2	0.000
+APPETITE_TSV	3.785	3.782	2	0.000
+APPETITE_TSV	4.971	3.782	2	0.000
+APPETITE_TSV	6.661	5.105	2	0.000
+APPETITE_TSV	3.000	14.152	1	0.000
+APPETITE_TSV	3.000	14.152	1	0.000
+APPETITE_TSV	0.000	8.441	0	0.333
+APPETITE_TSV	0.000	9.038	0	0.667
+APPETITE_TSV	10.728	8.223	2	0.000
+APPETITE_TSV	10.728	8.223	2	0.000
+APPETITE_TSV	0.000	9.780	0	0.833
+APPETITE_TSV	0.000	9.780	0	0.833
+APPETITE_TSV	0.000	9.082	0	0.667
+APPETITE_TSV	3.000	7.328	1	1.000
+APPETITE_TSV	0.050	0.020	2	0.741
+APPETITE_TSV	3.000	7.916	1	0.417
+APPETITE_TSV	3.000	7.916	1	0.417
+APPETITE_TSV	0.020	0.020	2	0.741
+APPETITE_TSV	0.000	8.399	0	0.952
+APPETITE_TSV	3.000	9.104	1	0.741
+APPETITE_TSV	0.000	8.780	0	0.833
+APPETITE_TSV	3.000	8.438	1	1.000
+APPETITE_TSV	3.000	9.082	1	0.741
+APPETITE_TSV	0.000	9.051	0	0.667
+APPETITE_TSV	3.208	3.204	2	0.000
+APPETITE_TSV	0.000	8.384	0	0.000
+APPETITE_TSV	2.255	4.781	2	0.000
+APPETITE_TSV	2.255	4.781	2	0.000
+APPETITE_TSV	3.000	14.151	1	0.000
+APPETITE_TSV	3.000	14.151	1	0.000
+APPETITE_TSV	0.000	8.384	0	0.333
+APPETITE_TSV	0.000	8.438	0	0.333
+APPETITE_TSV	10.728	8.222	2	0.000
+APPETITE_TSV	10.728	8.222	2	0.000
+APPETITE_TSV	0.000	9.777	0	0.833
+APPETITE_TSV	3.000	7.326	1	1.000
+APPETITE_TSV	0.050	0.019	2	0.741
+APPETITE_TSV	3.000	7.915	1	0.417
+APPETITE_TSV	3.000	7.915	1	0.417
+APPETITE_TSV	3.000	8.435	1	1.000
+APPETITE_TSV	3.000	9.079	1	0.741
+APPETITE_TSV	3.000	9.161	1	0.000
+APPETITE_TSV	4.781	4.780	2	0.000
+APPETITE_TSV	0.000	9.777	0	0.741
+APPETITE_TSV	3.000	9.777	1	0.000
+APPETITE_TSV	0.000	8.435	0	0.333
+APPETITE_TSV	0.000	8.443	0	0.417
+APPETITE_TSV	0.000	7.382	0	0.333
+APPETITE_TSV	0.000	8.379	0	0.667
+APPETITE_TSV	3.000	8.379	1	0.667
+APPETITE_TSV	0.000	18.374	0	0.741
+APPETITE_TSV	0.045	0.019	2	0.833
+APPETITE_TSV	3.000	5.102	1	1.000
+APPETITE_TSV	3.000	7.323	1	1.000
+APPETITE_TSV	0.050	0.019	2	0.741
+APPETITE_TSV	3.000	7.914	1	0.417
+APPETITE_TSV	3.000	7.914	1	0.417
+APPETITE_TSV	2.000	9.004	1	0.667
+APPETITE_TSV	2.000	9.076	1	0.741
+APPETITE_TSV	0.000	9.774	0	0.741
+APPETITE_TSV	3.000	9.774	1	0.833
+APPETITE_TSV	3.000	9.774	1	0.833
+APPETITE_TSV	3.208	3.202	2	0.000
+APPETITE_TSV	5.105	5.102	2	0.000
+APPETITE_TSV	4.781	4.779	2	0.000
+APPETITE_TSV	4.781	4.779	2	0.000
+APPETITE_TSV	0.000	8.433	0	0.333
+APPETITE_TSV	3.000	4.277	1	0.000
+APPETITE_TSV	3.000	4.277	1	0.000
+APPETITE_TSV	3.000	7.320	1	1.000
+APPETITE_TSV	0.050	0.019	2	0.741
+APPETITE_TSV	3.000	7.913	1	0.417
+APPETITE_TSV	3.000	7.913	1	0.417
+APPETITE_TSV	7.718	10.794	2	0.833
+APPETITE_TSV	2.000	9.073	1	0.741
+APPETITE_TSV	3.631	4.778	2	0.000
+APPETITE_TSV	3.000	9.770	1	0.833
+APPETITE_TSV	3.000	9.770	1	0.833
+APPETITE_TSV	0.000	8.376	0	0.000
+APPETITE_TSV	4.085	4.081	2	0.000
+APPETITE_TSV	0.000	8.376	0	0.333
+APPETITE_TSV	0.000	8.430	0	0.333
+APPETITE_TSV	0.000	9.070	0	0.667
+APPETITE_TSV	0.021	0.018	2	1.000
+APPETITE_TSV	0.050	0.018	2	0.741
+APPETITE_TSV	3.000	7.928	1	0.417
+APPETITE_TSV	3.000	7.928	1	0.417
+APPETITE_TSV	3.000	9.134	1	0.741
+APPETITE_TSV	3.000	8.427	1	1.000
+APPETITE_TSV	3.000	9.070	1	0.741
+APPETITE_TSV	0.021	0.018	2	0.000
+APPETITE_TSV	5.105	5.100	2	0.000
+APPETITE_TSV	0.021	0.018	2	0.000
+APPETITE_TSV	0.021	0.018	2	0.000
+APPETITE_TSV	0.000	8.427	0	0.333
+APPETITE_TSV	0.000	9.085	0	0.833
+APPETITE_TSV	0.000	9.067	0	0.667
+APPETITE_TSV	3.000	7.943	1	1.000
+APPETITE_TSV	0.050	0.018	2	0.741
+APPETITE_TSV	3.000	7.943	1	0.417
+APPETITE_TSV	2.000	7.943	1	0.741
+APPETITE_TSV	0.000	8.385	0	0.952
+APPETITE_TSV	3.000	8.994	1	0.667
+APPETITE_TSV	7.718	10.787	2	0.833
+APPETITE_TSV	3.000	8.425	1	1.000
+APPETITE_TSV	0.000	9.764	0	0.833
+APPETITE_TSV	3.631	4.776	2	0.000
+APPETITE_TSV	3.000	7.943	1	0.000
+APPETITE_TSV	0.000	9.764	0	0.833
+APPETITE_TSV	3.000	9.764	1	0.833
+APPETITE_TSV	3.000	9.764	1	0.833
+APPETITE_TSV	3.000	9.764	1	0.833
+APPETITE_TSV	3.785	3.776	2	0.000
+APPETITE_TSV	4.971	3.776	2	0.000
+APPETITE_TSV	0.000	9.183	0	0.000
+APPETITE_TSV	3.631	4.776	2	0.000
+APPETITE_TSV	3.000	7.943	1	0.000
+APPETITE_TSV	3.631	4.776	2	0.333
+APPETITE_TSV	7.013	6.924	2	0.333
+APPETITE_TSV	0.000	9.085	0	0.667
+APPETITE_TSV	3.000	7.943	1	0.000
+APPETITE_TSV	3.000	7.943	1	0.000
+APPETITE_TSV	2.000	8.216	1	0.667
+APPETITE_TSV	3.000	7.957	1	1.000
+APPETITE_TSV	0.050	0.018	2	0.741
+APPETITE_TSV	3.000	7.957	1	0.417
+APPETITE_TSV	3.000	7.957	1	0.741
+APPETITE_TSV	2.000	8.383	1	0.952
+APPETITE_TSV	3.000	9.128	1	0.741
+APPETITE_TSV	3.000	8.216	1	1.000
+APPETITE_TSV	0.000	9.146	0	0.667
+APPETITE_TSV	3.000	8.216	1	0.000
+★fp = 54e75903ba19db764b249f26dfafdcf1
+=== DONE === SECTIONS=1/1 FAILS=0
+[TEST-SUITE-COMPLETE]
+
