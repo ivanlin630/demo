@@ -12,6 +12,12 @@ extends SceneTree
 #     ★★用【結構事實】篩，不用隊的情報標籤篩 —— 標籤是分類，候選集才是決策當下真的比較過的東西；
 #     ★★★否則【生成失敗】會混進【生成後輸掉】，把勝率稀釋或扭曲。
 #   ·④的早期窗 ＝ **第 0 天起算的前 SC_EARLY_DAYS 天**（★窗從哪一天起算必須印出來）
+#   ·★★★④【只認新機制】（systems 裁 2026-09-15）：偵查有**兩條來源** ——
+#     (A) 秤選出來（`optpool.win.偵查` / `recon.dispatch.engine.*`）
+#     (B) `_commit_conquest_attack` 的舊走廊（`g3.scout_dispatch`，`task_reason == "scout"`）
+#     ★(B) 在**早期窗最活躍**（`confident_enough` 最容易為假）
+#     ⇒ ★★若不分流，④**會綠，而綠的原因是舊補丁不是新機制**。
+#     ⇒ ★★★**兩個數都印**（不是只印新的）—— 因為它們的比例本身就是下一張票的證據。
 #   ·晚窗 ＝ 全窗 − 早窗（同一趟的前綴／後綴，★中途不 reset ⇒ 沒有 reset 的效應不對稱問題）
 #
 # env：SC_TICKS（預設 43200 ＝ 30 天）／SC_EARLY_DAYS（預設 7）／SC_SEED（預設 1337）／SC_CONFIG
@@ -145,6 +151,8 @@ func _run() -> void:
 	var e_moth: int = int(Probe.counts.get("optpool.mother", 0))
 	var e_acand: int = int(Probe.counts.get("optpool.cand.攻擊", 0))
 	var e_awin: int = int(Probe.counts.get("optpool.win.攻擊", 0))
+	var e_eng: int = int(Probe.counts.get("recon.dispatch.engine.ok", 0))
+	var e_cor: int = int(Probe.counts.get("g3.scout_dispatch", 0))
 	for _t in range(ticks - early_ticks):
 		runner.advance_tick(st, no_player)
 	var f_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
@@ -152,6 +160,8 @@ func _run() -> void:
 	var f_moth: int = int(Probe.counts.get("optpool.mother", 0))
 	var f_acand: int = int(Probe.counts.get("optpool.cand.攻擊", 0))
 	var f_awin: int = int(Probe.counts.get("optpool.win.攻擊", 0))
+	var f_eng: int = int(Probe.counts.get("recon.dispatch.engine.ok", 0))
+	var f_cor: int = int(Probe.counts.get("g3.scout_dispatch", 0))
 
 	print("")
 	print("★③④ 母體＝**候選集裡真的有偵查的那些次 argmax**（★不是隊的情報標籤）")
@@ -171,12 +181,20 @@ func _run() -> void:
 		_ok(f_win < f_cand,
 			"③-b 勝率 %.1f%% < 100%%（★★與上一格是同一件事的兩種寫法，成對自檢）" % [
 				100.0 * float(f_win) / maxf(float(f_cand), 1.0)])
+	print("")
+	print("★★★④的【來源分流】（systems 裁）—— ★兩個數都印，而④**只認左邊那一個**：")
+	print("   (A) 秤選出來且真的被設上：早窗 %d｜全窗 %d   `recon.dispatch.engine.ok`" % [e_eng, f_eng])
+	print("   (B) 舊走廊（`_commit_conquest_attack`）：早窗 %d｜全窗 %d   `g3.scout_dispatch`" % [e_cor, f_cor])
+	print("   ★★(B) 不進 `optpool.*` 母體（它不經 argmax）⇒ ③ 天然不被它污染；")
+	print("      而④若只看「偵查有沒有發生」就**會被它滿足** —— ★★★所以④的判準寫成 (A) > 0。")
 	if e_cand == 0:
 		_red("④ 早窗母體 0：第 0～%d 天【沒有一次 argmax 含偵查】⇒ **不可判**，不是綠" % early_days)
 	else:
 		_ok(e_win > 0,
-			"④早期窗偵查**真的出現過並贏過**（早窗贏 %d／候選 %d ＝ %.1f%%）" % [
+			"④-a 早期窗偵查**在秤上贏過**（早窗贏 %d／候選 %d ＝ %.1f%%）" % [
 				e_win, e_cand, 100.0 * float(e_win) / maxf(float(e_cand), 1.0)])
+		_ok(e_eng > 0,
+			"④-b 而且它**真的被派出去了**（早窗 (A)＝%d）—— ★贏 argmax ≠ 任務真的被設上" % e_eng)
 
 	# ── 單位：偵查與攻擊的 util 分布並排（★spec §3：不是只印有沒有 fire）──
 	print("")

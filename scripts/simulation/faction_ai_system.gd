@@ -3618,6 +3618,13 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		#   ★這裡是【引擎統一路唯一的 try_set】⇒ 一個站點就覆蓋所有 option，
 		#   ★★而不必動 `_source`（它會寫進 `task_reason` 並與 `ENGINE_SOURCES` 比對）。
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "unified", opt)
+		# ★★★【偵查的來源分流】（systems 裁 2026-09-15）：另一條路是 `_commit_conquest_attack` 的走廊
+		#   （`g3.scout_dispatch`，`task_reason == "scout"`）—— ★而它**也會讓偵查出現**，
+		#   ★★早期窗正是 `confident_enough` 最容易為假的時候
+		#   ⇒ ★★★驗收格④若不分流，**會綠，而綠的原因是舊補丁不是新機制**。
+		#   ⇒ 這裡只數【秤選出來、而且真的被設上】的那一條。
+		if Probe.enabled and opt == "偵查":
+			Probe.bump("recon.dispatch.engine." + ("ok" if _set_ok else "noop"))
 		if _lvf_this:
 			# ★★★第四型手不聽腦：`try_set` 可能 no-op（priority 被更高的佔住）——
 			#   ★而它【不會報錯】，只是這一次派工靜靜地沒發生
