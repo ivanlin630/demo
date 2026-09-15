@@ -284,8 +284,8 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		#   ★而本函式的結構是：**四個 term 相【加】，之後乘 `coeff`、乘 `fail_mult`（、乘 persist）**
 		#   ⇒ ★★**一個 0 的乘數就能把全部殺掉** ⇒ 逐項 dump 必須**同時**記【加法那半】與【乘法那半】。
 		#   ⇒ ★★★所以「攻擊」比照「收留」開組成 dump（Probe-gated、不改 u、零 RNG）。
-		var _cmp: Dictionary = {} if (Probe.enabled and opt in ["收留", "攻擊"]) else {}
-		var _cmp_on: bool = Probe.enabled and opt in ["收留", "攻擊"]
+		var _cmp: Dictionary = {} if (Probe.enabled and opt in ["收留", "攻擊", "偵查"]) else {}
+		var _cmp_on: bool = Probe.enabled and opt in ["收留", "攻擊", "偵查"]
 		var _terms_row: Array = []
 		var _ot0: int = Time.get_ticks_usec() if Probe.enabled else 0
 		for tw in DecisionOptions.terms_of(opt):
@@ -395,6 +395,25 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 					elif absf(_cf) < 0.0005: Probe.bump("attack.zero_by.coeff")
 					elif absf(_fmv) < 0.0005: Probe.bump("attack.zero_by.fail_mult")
 					else: Probe.bump("attack.zero_by.later_stage")
+			if opt == "偵查":
+				# ★★★單位驗收（spec §3）：偵查與攻擊的 util **要能並排着讀** ⇒ 兩邊都要有分布，
+				#   ★而不是只印【偵查有沒有 fire】—— ★★fire 率答不出【它是不是輸得很惨】。
+				_cmp["value_est"] = snappedf(ctx.recon_value_est, 0.001)
+				_cmp["blind"] = ctx.recon_used_blind_prior
+				_cmp["target"] = ctx.recon_target_id
+				Probe.bump_sample("recon.composition", _cmp, 150)
+				Probe.bump("recon.cmp." + ("blind" if ctx.recon_used_blind_prior else "bucket"))
+			if opt == "偵查" or opt == "攻擊":
+				# ★共用一把尺的 util 直方圖（★★同一組桶界 ⇒ 兩個分布可直接對照）
+				var _ub: String = "u0"
+				if u >= 1.0: _ub = "ge1"
+				elif u >= 0.5: _ub = "ge0.5"
+				elif u >= 0.2: _ub = "ge0.2"
+				elif u >= 0.05: _ub = "ge0.05"
+				elif u >= 0.0005: _ub = "gt0"
+				Probe.bump("uhist." + opt + "." + _ub)
+				Probe.add_amount("usum." + opt, u)
+				Probe.bump("un." + opt)
 			if opt == "收留":
 				Probe.bump_sample("shelter.composition", _cmp, 100)   # ★只收留（★攻擊有自己的桶，不要混母體）
 			Probe.add_amount("shelter.cmp.drive_sum", float(_cmp.get("drive", 0.0)))
