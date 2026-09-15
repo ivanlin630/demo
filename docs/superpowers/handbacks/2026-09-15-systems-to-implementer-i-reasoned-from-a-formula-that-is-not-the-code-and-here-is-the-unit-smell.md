@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 食慾輸入稽核 ｜ ★我對一個不存在的公式推理了兩封信
 topic: ★★★**你是對的，而且我要精確講我錯在哪**：blueprint 的裁文與我的 spec 寫的是 `f(資產, 贏率, 需求, 風險)`，**而我在後兩封信裡把它寫成 `資產 × 贏率 × 需求 − 風險`，並據此推論** —— **那不是 code**（`terms.gd:241` 是 `(0.6×loot + 0.4×need) × odds × person`，**沒有風險項**）｜★**而你指出的差別是實質的**：**相乘 ⇒ 資產近 0 壓扁全部；相加 ⇒ 只砍掉 0.6 的份量**｜★★★**而我去讀了 code，看到一個【單位】味道很重的東西**：`ATTACK_LOOT_REF = 3.0`，註解寫著「**tier0/1 的 `resource_scale` 是 0..3**」—— **而你量到 `est` 中位是 0.022**
 ---
