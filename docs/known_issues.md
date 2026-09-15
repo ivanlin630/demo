@@ -4657,7 +4657,14 @@ live-team-census    3 筆「普查表指向一個現在撈不到的站點」
 - **★`maintain_coin` 從不被提名**（實跑 0 次／4320 tick／seed 1337；靜態證：`need_keep(coin) ≡ 0.0`
   —— `trade_valuation.gd:30-51` 的 `TARGET_PER_POP` 缺 coin ⇒ `_self_use` 0；coin 非任何配方的 `in`
   ⇒ `_supply_chain` 0；`outpost_system.gd:9/:94` 明文建造無 coin ⇒ 第三項 0）
-  ⇒ **「這個世界的隊伍從來不會因為想要錢而做事」成立，而原因是沒有「想要錢」這個需求，不是錢沒有價格。**
+  ⇒ ★★★**撤回／限縮（2026-09-15 同日）**：我原寫「從來不會因為想要錢而做任何事」—— **太寬**。
+  `trade_valuation.gd:122-135` 的 `_urgency()` 已經接了真實薪資義務
+  （`need = SalarySystem.estimated_payroll(...)`，`coin_urg = 1 − coin/need`）⇒ 餵 `ask_price`
+  ⇒ **缺錢會讓隊伍賣得更急、折扣更深**。
+  ★**正確的句子**：**這個世界會因為缺錢而【賤賣】，但不會因為缺錢而【去賺】**
+  （需求只流進**定價**，沒有任何路流進**目標選擇**）。
+  ★★**而那行是我 2026-09-08 自己接的，旁邊還寫著「誠實限：payroll ≠ 全部的 coin 需求」** ——
+  我讀了同一支檔的另一段，就把一週前自己寫的限制忘了。
   ⇒ 處置＝spec `2026-09-15-coin-is-the-unit-HOW.md`（票甲取價單一真相 → 票乙 coin 需求衍生化）。
 - **★★`BASE_PRICE` 也缺 coin，而 `trade_valuation.gd:173-175` 用函式內特判補上**
   ⇒ **表與函式兩份真相**；★**補表不是修法**（交易迴圈會把 coin 當可買賣商品 ⇒ 型別錯）。
