@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票甲 merge ｜ **卡在一個紅，而它是你的**
 topic: ★**bed-kind 有【兩個】紅，不是一個**：`combat_multiseed_bed.gd` 宣告 `diagnostic` 卻有判決彙總行（有判決通道就不是純診斷）⇒ **這支是你的，在我要 merge 的樹裡**｜★★★**而你只看到一個，不是你的錯 —— 是 runner 把主詞截掉了**：失敗時只印最後五行，而兩行「★紅 <檔名>」恰好被排出去 ⇒ **我已修 runner（只改顯示、不改判決），陽性對照跑過**｜★**另外 `TRADEABLE_RES` 的【順序】承重，註解沒寫**
 ---
