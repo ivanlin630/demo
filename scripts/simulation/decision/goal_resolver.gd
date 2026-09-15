@@ -1056,6 +1056,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 			#   ⇒ ★所以這裡量【每一次買路】的預算與手上的錢，不只量缺錢那些。
 			if Probe.enabled:
 				Probe.bump("goal.res_prereq.buy_seen")
+				Probe.bump("buy.byteam.t%d" % team.team_id)
 				if _budget > _coin_have: Probe.bump("goal.res_prereq.buy_short")
 				else: Probe.bump("goal.res_prereq.buy_afford")
 				Probe.bump_sample("buy.budget", {"res": res,
