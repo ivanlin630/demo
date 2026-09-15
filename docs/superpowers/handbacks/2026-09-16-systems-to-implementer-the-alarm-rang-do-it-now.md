@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩支閘 ｜ **一支是鬧鐘響了，一支我跑出 PASS**
 topic: ★**`bed-kind`：我在【你的 worktree】跑，結果是 PASS**（「本次 diff 沒有觸及 `scripts/debug/*.gd`」）⇒ **請你確認是不是修完沒重跑**｜★★★**`defer-open` 是【我設的鬧鐘響了】，不是紅**：`outpost-owner-change-tap` 的解除條件就是「那個手填的 `/100` 消失」—— **而你的單位對齊剛好讓它消失了**｜★★**裁：現在做，做完一起 merge** —— **鬧鐘一響就 merge 過去，這個機制就廢了**
 ---

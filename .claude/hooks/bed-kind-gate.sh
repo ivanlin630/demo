@@ -111,6 +111,16 @@ else
               git ls-files --others --exclude-standard -- 'scripts/debug/*.gd' 2>/dev/null
             } | sort -u )"
 fi
+# ★★★2026-09-16：**母體依賴 base，而 base 沒有被印出來**。
+#   血證：同一支閘、systems 在 main 跑得到 PASS、implementer 在 worktree 跑得到紅，
+#   而兩人都以為自己是對的 —— ★**真因是 `merge-base` 不同**（他 `da70420b5`，我≈HEAD）。
+#   ⇒ ★★**「這支閘綠了嗎」是一個【依賴 base 的問題】** ⇒ **把 base 與母體印出來**，
+#     否則兩個人要花兩封信才找得到原因。
+echo "[BED-KIND] merge-base=$(git rev-parse --short "${_mb:-HEAD}" 2>/dev/null)｜origin/main=$(git rev-parse --short origin/main 2>/dev/null)｜HEAD=$(git rev-parse --short HEAD 2>/dev/null)"
+if [ -n "${FILES//[[:space:]]/}" ]; then
+  echo "[BED-KIND] 母體 $(printf '%s
+' "$FILES" | grep -c .) 支：$(printf '%s ' $FILES)"
+fi
 if [ -z "${FILES//[[:space:]]/}" ]; then
   echo "[BED-KIND] 本次 diff 沒有觸及 scripts/debug/*.gd（母體為空 ⇒ 沒有可判的東西）"
   echo "[BED-KIND] PASS"
