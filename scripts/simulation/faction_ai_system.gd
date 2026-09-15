@@ -312,22 +312,12 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		#   ★【有可定價分項】⇒ 照常。
 		var _has_priced: bool = belief_has_priced_items(bel)
 		var _scale_est: int = int(bel.get("resource_scale", -1))
-		# ★★★【零情報】收窄成「**連 claim 都沒有**」（systems 訂正 2026-09-16）：
-		#   ★舊寫法把「有 belief、但沒有資產欄」也判成零情報 ⇒ **把【遠距觀察】全部排除掉**
-		#   ⇒ ★★而那是這個世界**最常見的 belief 形狀**：`vision_system.gd:150` 的 `population_est`
-		#     是**無條件寫**的，而 `:173 if dist <= 1:` 才寫 `resource_scale`
-		#     ⇒ **不貼到臉上就沒有資產情報。**
-		#   ⇒ ★★★所以 `return 0.0` 的兩個來源要分開：
-		#     (a) 沒有 claim      ＝ **真・零情報** ⇒ 結構排除
-		#     (b) 有 claim 無資產欄 ＝ **不知道它多肥** ⇒ **不排除**，richness 缺席，
-		#          靠 `weakness`／`border` 競爭 —— **那是誠實的無知，不是判死。**
-		if bel.is_empty():
-			why["no_priced_belief"] = int(why.get("no_priced_belief", 0)) + 1
-			if Probe.enabled:
-				Probe.bump("attack.excluded.zero_intel")
-				Probe.bump_sample("scout.candidates", {"team": team.team_id, "target": tid,
-					"tier": int(bel.get("tier", -1)), "tick": state.world.current_tick}, 300)
-			continue
+		# ★★★【零情報的排除【不在這裡】】（systems 裁 2026-09-16，實測坐實後刪碼）：
+		#   ★我本來在這裡加了 `if bel.is_empty(): continue` —— ★★而它**一次都沒 fire**
+		#     （`attack.excluded.zero_intel = 0`，2 天窗、同輪薄情報 admitted 5211）
+		#   ⇒ 因為 `has_belief()` 的守衛在【上面】（本函式較早處）就把「連 claim 都沒有」的目標擋掉了。
+		#   ⇒ ★★★**死碼會讓下一個人以為這一格有人守著** —— **真正守著它的是 `has_belief`。**
+		#     所以這裡不留 assert、不留空殼，只留這段字說明**守衛在哪**。
 		# ★★(b) 與 (c) **走同一道 admission**（systems 2026-09-16）——
 		#   ★它們在 epistemic 上對等（都答不出「它多肥」）⇒ **對等必須落實到門上，不能只寫在 spec 裡**；
 		#   ★★結果可以是通過，**但不能繞過它** —— 若這導致行為改變，驗收會看到，**而那正是我們要的**。

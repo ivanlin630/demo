@@ -95,6 +95,22 @@ func _red(msg: String) -> void:
 	_fails += 1
 	push_error("[FAIL] %s" % msg)
 
+# ★★★【讀一個不存在的 Probe 鍵應該是【紅】不是【0】】（systems 通則 2026-09-16）：
+#   ★血證：床讀 `attack.excluded.no_priced_belief`，而那個鍵當天被改名成 `zero_intel`
+#     ⇒ **讀不到 ⇒ 印 0 ⇒ 看起來像「沒發生」** —— ★★而「沒發生」與「讀錯地方」在一個 0 上長得一樣。
+#   ★★★而**不是每個 0 都該紅**：`dispatch.攻擊.ok` 不存在是【它真的一次都沒成功】——合法的 0。
+#   ⇒ 所以分兩種讀法：
+#     `_must(k)` ＝ **母體／分母那一類**：這一輪若跑過就一定存在 ⇒ **缺 ⇒ 具名紅**
+#     `Probe.counts.get(k, 0)` ＝ **事件計數**：0 是合法答案
+var _key_missing: Array = []
+
+func _must(k: String) -> int:
+	if not Probe.counts.has(k):
+		_key_missing.append(k)
+		_red("★讀不到必存在的 Probe 鍵 `%s` ⇒ **不可判**（★不是 0：鍵被改名／tap 沒接電都長這樣）" % k)
+		return 0
+	return int(Probe.counts[k])
+
 static func _feasible_has(scan: Dictionary, tid: int) -> bool:
 	for f in (scan.get("feasible", []) as Array):
 		if int((f as Dictionary).get("id", -1)) == tid: return true
@@ -228,8 +244,7 @@ func _run() -> void:
 	#   `has_belief`（`faction_ai_system.gd:272`）在它【之前】 ⇒ 沒有 claim 的目標根本走不到它。
 	#   ⇒ ★所以這裡**把它的實跑次數印出來** —— **「裝了一支永遠不會 fire 的守衛」與「沒裝」一樣危險，
 	#     而且更難發現，因為它看起來在做事。**
-	print("   ★本票新加的結構排除實跑次數：`attack.excluded.zero_intel` ＝ %d" % [
-		int(Probe.counts.get("attack.excluded.zero_intel", 0))])
+	print("   ★（本票曾在此加一支結構排除，實測 0 次 fire ⇒ 2026-09-16 刪碼；真守衛是 `has_belief`）")
 
 	# ── 狀態1：(b) 有 claim、只有位置（**不該被排除**）──
 	BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, obs.team_id, "firsthand",
@@ -404,7 +419,7 @@ func _run() -> void:
 			if _d1 % 7 == 0: _snapshot_c(st, _d1)
 	var e_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
 	var e_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
-	var e_moth: int = int(Probe.counts.get("optpool.mother", 0))
+	var e_moth: int = _must("optpool.mother")
 	var e_acand: int = int(Probe.counts.get("optpool.cand.攻擊", 0))
 	var e_awin: int = int(Probe.counts.get("optpool.win.攻擊", 0))
 	var e_eng: int = int(Probe.counts.get("recon.dispatch.ok", 0))
@@ -419,7 +434,7 @@ func _run() -> void:
 			if _d2 % 7 == 0: _snapshot_c(st, _d2)
 	var f_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
 	var f_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
-	var f_moth: int = int(Probe.counts.get("optpool.mother", 0))
+	var f_moth: int = _must("optpool.mother")
 	var f_acand: int = int(Probe.counts.get("optpool.cand.攻擊", 0))
 	var f_awin: int = int(Probe.counts.get("optpool.win.攻擊", 0))
 	var f_eng: int = int(Probe.counts.get("recon.dispatch.ok", 0))
@@ -548,7 +563,7 @@ func _run() -> void:
 			row.append("%s=%d" % [b, int(Probe.counts.get("uhist.%s.%s" % [opt, b], 0))])
 		var usum: float = float(Probe.amounts.get("usum." + opt, 0.0))   # ★add_amount 落的是 `amounts` 不是 `counts`
 		print("   %s：n=%d 平均=%.4f｜%s" % [opt, tot, usum / maxf(float(tot), 1.0), " ".join(row)])
-	_ok(int(Probe.counts.get("un.偵查", 0)) > 0 and int(Probe.counts.get("un.攻擊", 0)) > 0,
+	_ok(_must("un.偵查") > 0 and _must("un.攻擊") > 0,
 		"單位-a 兩個分布**都有母體**（★任一邊 n=0 ⇒ 並排沒有意義，不可判）")
 
 	# ── 先驗用了幾次 vs 桶號用了幾次（★守衛③在真世界裡的聚合面）──
@@ -559,8 +574,9 @@ func _run() -> void:
 	print("   ★★而【聚合面答不出「同一個目標有沒有被取代」】—— 那是 §A ⑤ 的活，兩者不可互相代替。")
 	# ★★這一行原本讀 `attack.excluded.no_priced_belief` —— **那個鍵在 09-16 改名成 `zero_intel` 了**
 	#   ⇒ ★它會安靜地永遠印 0，而**「0 次」與「讀錯鍵」在畫面上長得一模一樣**。
-	print("   ★攻擊側結構排除：`attack.excluded.zero_intel` %d 次｜薄情報 admitted %d／refused %d" % [
-		int(Probe.counts.get("attack.excluded.zero_intel", 0)),
+	# ★`attack.excluded.zero_intel` 那支已於 2026-09-16 刪碼（死碼，`has_belief` 才是真守衛）
+	#   ⇒ ★★所以這裡**不再讀它** —— 讀一個已刪的鍵只會永遠印 0。
+	print("   ★薄情報 admission：admitted %d／refused %d（★零情報的排除由 `has_belief` 提供，不在本票）" % [
 		int(Probe.counts.get("attack.thin_intel.admitted", 0)),
 		int(Probe.counts.get("attack.thin_intel.refused", 0))])
 
@@ -576,7 +592,7 @@ func _run() -> void:
 	#   ⇒ ★★所以問的不是「變高還變低」，是**【還會不會發生】**。
 	print("")
 	print("★§E-① argmax 贏家分布（母體＝`rank.winner_all.__total` ＝ %d）" % [
-		int(Probe.counts.get("rank.winner_all.__total", 0))])
+		_must("rank.winner_all.__total")])
 	var wrows: Array = []
 	for k in Probe.counts:
 		var ks6: String = String(k)

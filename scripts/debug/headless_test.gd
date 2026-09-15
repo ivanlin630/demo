@@ -16998,7 +16998,14 @@ func _test_r1b_war_capability_relief() -> void:
 	st_b.factions[0] = f0
 	_r1b_add_prey(st_b, 1, Vector2i(2, 0), 7)
 	_r1b_add_prey(st_b, 2, Vector2i(0, 2), -1)
-	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": 7, "coin_est": 300.0}, 1.0, false)
+	# ★★★`coin_est` 300 → 4000（2026-09-16，攻擊幣別 final）：**只改數字，不改斷言。**
+	#   ★新尺的 `richness` 是【相對於我】：ref ＝ 攻擊者 pop(10) × Σ(TARGET_PER_POP×BASE_PRICE)(415.7) ≈ 4157
+	#   ⇒ **300 coin 對這支隊【不算富】**（compressed ≈ 0.067）⇒ 歸屬罰蓋過它 ⇒ 本格會紅
+	#   ⇒ ★★而這條測試驗的是「**統領扛得起戰爭 ⇒ 屬村罰減輕**」，**不是「300」這個數**
+	#   ⇒ ★★★所以把「富」寫成新尺上的富（4000 ⇒ compressed ≈ 0.49）＝ **意圖不變、只換算尺度**。
+	#   （★對照：前 6 條紅【不能】這樣修——那 6 條想驗的是「遠距目標能被選為 prey」，
+	#     而新制原本說不能 ⇒ ★那是 spec 錯，要改 code。判準：**fixture 想驗的那件事在新制下還成立嗎**）
+	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": 7, "coin_est": 4000.0}, 1.0, false)
 	BeliefSystem.record_claim(st_b, 0, 2, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": -1}, 1.0, false)
 	st_b.team_discovered[0] = [1, 2]
 	var pick_b: int = FactionAISystem.find_prosperity_prey(st_b, atk_b, st_b.persons[100])
