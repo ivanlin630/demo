@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 攻擊幣別票 ｜ tier0/1 estimate 空缺
 topic: ★①窮盡成立(只兩條值路徑+一條0.0 null fallback,無第三種單位)｜★★②號抓到一個你沒講的東西：**(a)在現在這條加總式子裡跟「richness=0」數值上完全等價**——「不參與」跟「算成0」在這支 sum 公式裡印出同一個數字，標籤不同、行為不同不了｜★★★(b)你舉的例子(同tier真值中位數)確實是死路(god-view)，但有個非god-view的變體我沒看你提過；(c)在現有公式形狀下沒有跟(b)不同的接法，要動就是擴大範圍
 ---
