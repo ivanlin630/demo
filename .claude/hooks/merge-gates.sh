@@ -137,7 +137,18 @@ while IFS=$'	' read -r id cmd purpose expect; do
   #   ⇒ ★★於是一支 exit 0、且印了 PASS 的閘被判 ✗ —— ★★★「談論一個字」與「用它下判決」在文字上不可分
   #   ⇒ 修法：★只信【exit code】＋【expect 命中】—— 兩者都是【結構化位置】，不是正文。
   if [ $RC -ne 0 ]; then
-    echo "[MERGE-GATES] ✗ $id （${DT}s）—— $purpose"; printf '%s
+    echo "[MERGE-GATES] ✗ $id （${DT}s）—— $purpose"
+    # ★★★2026-09-15：原本這裡只印【最後五行】⇒ 而【被點名的那幾行】常常在前面
+    #   ⇒ ★★【主詞被截掉】。血證：bed-kind 印了「紅 2 支」，
+    #   而那兩行「★紅 <檔名>」恰好被排出最後五行
+    #   ⇒ 讀的人只看到一個可歸因的原因就停了，漏掉另一支。
+    #   ⇒ ★【判決沒有主詞】不是閘的錯，是【這裡】把主詞丟掉的。
+    #   ★★只改【顯示】不改【判決】：判決仍然只信 exit code ＋ expect 命中。
+    _mg_named=$(printf '%s
+' "$OUT" | grep -E '紅 |FAIL：|違規|未宣告|缺【' | grep -vE '^\[MERGE-GATES\]' | tail -8)
+    if [ -n "$_mg_named" ]; then printf '%s
+' "$_mg_named"; fi
+    printf '%s
 ' "$OUT" | tail -5; FAILED+=("$id")
   elif ! printf '%s' "$OUT" | grep -qE -- "$expect"; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— ★★跑完了但【沒有印出它該印的結論】"

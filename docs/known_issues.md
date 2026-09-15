@@ -4654,6 +4654,9 @@ live-team-census    3 筆「普查表指向一個現在撈不到的站點」
 
 ## coin：per-resource 表的缺席＝靜默的 0（2026-09-15，systems）
 
+狀態：已知未修
+回訪：票乙（coin 需求走前置鏈）merge 後，複審日 2026-09-29
+
 - **★`maintain_coin` 從不被提名**（實跑 0 次／4320 tick／seed 1337；靜態證：`need_keep(coin) ≡ 0.0`
   —— `trade_valuation.gd:30-51` 的 `TARGET_PER_POP` 缺 coin ⇒ `_self_use` 0；coin 非任何配方的 `in`
   ⇒ `_supply_chain` 0；`outpost_system.gd:9/:94` 明文建造無 coin ⇒ 第三項 0）
@@ -4678,5 +4681,13 @@ live-team-census    3 筆「普查表指向一個現在撈不到的站點」
   ⇒ 處置＝票甲（把集合獨立列舉拆出來、刪化石守衛；★**新集合不准是 `BASE_PRICE.keys()` 的別名**）。
 - **★★★通則（同型會再犯）**：**per-resource 表的預設 `0`，語意上是「不存在」不是「零」**
   ⇒ 一個資源在表裡缺席，全鏈都會**靜默地**把它當不存在，而**缺席不會叫**。
-- **待查（另立，未開票）**：`maintain_material` **85% 的 payoff 恰好 0**（implementer 2026-09-15 側報，
-  母體＝`derived_payoff` 逐型計數）。假設之一＝ material 的 target 常已滿足；**未查證**。
+## `maintain_material` 有 85% 的 payoff 恰好 0（2026-09-15）
+
+狀態：未確認
+回訪：量測窗 2026-09-22
+
+implementer 2026-09-15 側報（母體＝`derived_payoff` 逐型計數，4320 tick／seed 1337）：
+`maintain_material` 194 次中 **85% payoff 恰好 0**（對照：`maintain_food` 只有 23%）。
+★**假設之一＝material 的 target 常已滿足** —— **未查證，只有數字**。
+★★**而 payoff＝0 與【沒被提名】是兩個不同的結論**（coin 是後者）
+⇒ 這一條要分清楚是哪一種，再談要不要開票。
