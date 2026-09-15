@@ -255,6 +255,25 @@ func _run() -> void:
 		print("   ⇒ ★★報【筆數＋母體】，**分界不在這支床裡定** —— 它是裁決，不是量測。")
 		print("      ★★★判法（systems 2026-09-15）：**這個判準能不能在【沒有人解釋】的情況下站得住？**")
 		print("         能 ⇒ 進工具（實跑 N、母體地板、fp 逐字比）｜不能 ⇒ 留在人手上，而人要寫理由。")
+	# ★★★【第②種】有目標、而攻擊輸給別人：**輸給誰、差多少**（systems 2026-09-15）
+	#   ★這一格不畫門檻：**「贏率低」是裁決不是量測** ⇒ 只報分佈與輸給誰。
+	var lost: Dictionary = {}
+	var rankb: Dictionary = {}
+	var gapb: Dictionary = {}
+	for k in Probe.counts:
+		var ks: String = String(k)
+		if ks.begins_with("attack.lost_to."):
+			lost[ks.replace("attack.lost_to.", "")] = int(Probe.counts[k])
+		elif ks.begins_with("attack.rank.") and not ks.begins_with("attack.rank.of"):
+			rankb[ks.replace("attack.rank.", "")] = int(Probe.counts[k])
+		elif ks.begins_with("attack.gap."):
+			gapb[ks.replace("attack.gap.", "")] = int(Probe.counts[k])
+	print("")
+	print("★★★攻擊的【名次】與【輸給誰】（★名次要配母體：第 5 名在 6 個候選裡＝墊底）")
+	print("   名次分桶：%s" % str(rankb))
+	print("   輸給誰：%s" % str(lost))
+	print("   距第一名的差：%s（lt10pct ＝ 擦邊）" % str(gapb))
+	print("   ⇒ ★★【擦邊輸】與【輸很多】是兩種病：前者是權重，後者是那一項根本不夠格")
 	# ★★★【軌跡】餓且有牙的隊，它們的 need 隨時間怎麼走，有沒有真的去搶（systems 2026-09-15）
 	if not frows.is_empty():
 		var traj: Dictionary = {}
