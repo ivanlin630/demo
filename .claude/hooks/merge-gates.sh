@@ -173,10 +173,28 @@ fi
 #   一輪要跑十分鐘，期間別人（或我自己）很可能又 commit 了
 #   ⇒ 用結束時的 HEAD 會把【根本沒被跑過的 code】記成已經量過。
 # ★只有【在 main 上、且工作區乾淨】的那一輪才有資格更新基線（否則記的是某個人的工作區）
-if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git --no-optional-locks status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ]; then
-  printf '%s	%s	%s
+# ★★★2026-09-15 第二個洞（同一段）：舊條件只看【分支＋工作區乾淨】，沒看【有沒有跑完】
+#   ⇒ ★一輪 **分批跑**（MG_FROM/MG_TO）會拿【邨分的紅數】去寫基線
+#   ⇒ ★★而配上剛加的 ratchet（降低就寫）**反而更壞**：分批跑的紅數天生較小
+#     ⇒ **基線會被一輪沒跑完的路静默地洗到 0**。
+#   ⇒ ★★★**只有完整跑的那一輪才有資格碰基線。**
+if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git --no-optional-locks status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ] && [ "$MG_FROM" = "0" ] && [ "$MG_TO" = "0" ]; then
+  # ★★★2026-09-15：基線【只准往下】（ratchet）—— 血證：本輪跑出一個【新】紅（defer-phrase），
+  #   而舊邏輯把它直接寫成新基線 1 → 2 ⇒ ★**新紅在它的第一輪就被洗進基線**
+  #   ⇒ ★★「第二個紅就是新造的」這條紀律會自己解體（門檻跟著錯誤一起往上走）。
+  #   ⇒ ★★★修法：**降低才自動寫入；上升要明示 `MG_BASELINE_RAISE=1`**（而且要印得大聲）。
+  _mg_prev=$(cut -f2 "$MG_BASE" 2>/dev/null | head -1)
+  case "$_mg_prev" in ''|*[!0-9]*) _mg_prev=-1 ;; esac
+  if [ "$_mg_prev" -ge 0 ] && [ ${#FAILED[@]} -gt "$_mg_prev" ] && [ "${MG_BASELINE_RAISE:-0}" != "1" ]; then
+    echo "[MERGE-GATES] ★★★基線【未更新】：本輪紅數 ${#FAILED[@]} ＞ 基線 $_mg_prev"
+    echo "[MERGE-GATES]   ⇒ ★基線只准往下（ratchet）—— **否則新紅會在它的第一輪就被洗進基線**，"
+    echo "[MERGE-GATES]     而「第二個紅就是新造的」這條紀律會自己解體。"
+    echo "[MERGE-GATES]   ⇒ ★★修掉那個紅，或者確定要抬門檻就跨 MG_BASELINE_RAISE=1 重跑（並在 commit 說明理由）。"
+  else
+    printf '%s	%s	%s
 ' "$_mg_head" "${#FAILED[@]}" "$(date -u +%Y-%m-%dT%H:%MZ)" > "$MG_BASE"
-  echo "[MERGE-GATES] ★已更新 main 基線紅數 ＝ ${#FAILED[@]}"
+    echo "[MERGE-GATES] ★已更新 main 基線紅數 ＝ ${#FAILED[@]}"
+  fi
 else
   echo "[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數（不在 main，或 scripts/.claude/註冊表 有未 commit 的改動）"
   echo "[MERGE-GATES]   ⇒ ★★這一行必須存在：静默的【沒有記下來】跟【記下來了】在畫面上長得一樣。"

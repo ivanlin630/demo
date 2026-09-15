@@ -4706,7 +4706,7 @@ implementer 量到：**63/63 支隊 `work_outpost == (-1,-1)`**。
 ## 這個世界的據點是蓋出來的還是損來的？（2026-09-15，待答）
 
 狀態：未確認
-回訪：量測窗 2026-09-29（排在攻擊幣別票之後）
+回訪：量測窗 2026-09-29（defer token：`outpost-owner-change-tap`）
 
 30 天窗（`warring_states.json`，seed 1337）：**`outpost.built` ＝ 0、`outpost.settle_builder` ＝ 0**，
 而【擁有】據點的隊 **18 → 24**。
