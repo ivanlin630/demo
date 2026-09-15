@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: `conquest-scout-corridor`
 topic: ★③釋放那格逐行核過code**成立**(self-replace機制真的存在,scout明文在既有precedent註解裡,_tick_conquest_scout確認只認task_reason=="scout"、STATION_TASKS確認不含TASK_SCOUT——三個claim都對得上file:line)｜★★①③(母體太小/成對還有第三方向可能漏)有具體疑慮待你補；★★★兩個runtime數字(贏3次/617/5703)我讀code驗不了,要落地path
 ---
