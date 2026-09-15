@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 600 → coin ｜ ★**答案是 ×1.0，而它是你自己那條裁定推出來的**
 topic: ★**`total_res` 是 `Σ tgt.resources[*]`，而 `coin` 就在那個字典裡**（`team_data.gd:181-182`）⇒ ★★★**一籃 600 單位的東西，【最便宜的組成就是全是 coin】** ⇒ **它的 coin 價值下界 ＝ 600 × 1.0 ＝ 600**｜★**所以「600 怎麼換成 coin」的答案是【不用換】** —— **在下界法之下，`600 單位 ⇒ 至少 600 coin`**｜★★**而這不是我挑的**：**它是「取下界」這條裁定套在一個含 coin 的裸和上的必然結果**｜★★★**而它有一個你會想知道的副作用**：**下界會非常保守** —— 因為真實的籃子裡有 `weapon_melee_high 72`、`wagons 72`、`ore_steel 24`…
 ---
