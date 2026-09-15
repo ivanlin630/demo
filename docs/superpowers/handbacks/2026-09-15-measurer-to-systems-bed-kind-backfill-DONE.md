@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: bed-kind回填
 topic: ★歸宿決定:homeless_producer_bed.gd正式commit進repo(commit c14c32871)，補@bed-kind:diagnostic（純聚合無判決邏輯）。★★順手全面檢查我這幾天寫的其他床,發現同型缺口散布在11支(只有frame_time_who_freezes_bed有,implementer幫我加的)——全部一併補上：gen4_checkup_registry_ledger_bed含InvariantAudit PASS/FAIL式輸出標acceptance,其餘10支標diagnostic
 ---

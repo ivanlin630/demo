@@ -4681,6 +4681,27 @@ live-team-census    3 筆「普查表指向一個現在撈不到的站點」
   ⇒ 處置＝票甲（把集合獨立列舉拆出來、刪化石守衛；★**新集合不准是 `BASE_PRICE.keys()` 的別名**）。
 - **★★★通則（同型會再犯）**：**per-resource 表的預設 `0`，語意上是「不存在」不是「零」**
   ⇒ 一個資源在表裡缺席，全鏈都會**靜默地**把它當不存在，而**缺席不會叫**。
+## ★★★兩套「該有多少」不一致：估值用 `TARGET_PER_POP`、需求用 `need_keep`（2026-09-15）
+
+狀態：已知未修
+回訪：開票時，複審日 2026-10-06
+
+implementer 實測（票乙床，買路 165 次）：**95/165 是【缺口 > 0 而單價 ＝ 0】**。
+★**成因**：`local_value` 的 `shortage` 用 `TradeValuation.TARGET_PER_POP`（每人配額），
+而 `NeedOracle.need_keep` 用【自用＋供應鏈＋建造】
+⇒ **一支隊可以同時「`need_keep` 說缺 23 個 material」與「`TARGET_PER_POP` 說它滿出來」**
+⇒ 價 0 ⇒ 預算 0 ⇒ **永遠買得起** ⇒ 「先弄到錢」那條路結構上不可能觸發。
+
+★★**而它們不是無關的兩張表**：`need_oracle.gd:249` 的 `_self_use` **末行就是**
+`pop × TARGET_PER_POP.get(res, 0.0)` ⇒ **`need_keep` 是 `local_value` 那個目標的【超集】**
+（多了供應鏈與建造）⇒ **修法方向：估值的 shortage 也該問 `need_keep`。**
+
+★**循環已查掉**（systems 2026-09-15）：`need_oracle` 全檔只讀 `TARGET_PER_POP` 與 `leader_vals`，
+**從不叫 `local_value`** ⇒ 單向依賴，改了不會成環。
+★★**真正的阻力是 perf**：`local_value` 呼叫極頻繁，而 `need_keep` 自己就掛著 perf tap
+⇒ **那張票的第一格是成本，不是正確性。**
+
+
 ## `maintain_material` 有 85% 的 payoff 恰好 0（2026-09-15）
 
 狀態：未確認
