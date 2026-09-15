@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 機會項的「淺」｜ ★先更正公式，再拆它
 topic: ★★★**你信裡的形狀與 code 不符**：實際是 **`(0.6×loot + 0.4×need) × odds × person`** —— **loot 與 need 是【相加】不是相乘**，而且**沒有獨立的風險項**（`terms.gd:228-241`）｜★**這不是挑字**：你寫「資產 × 贏率 × 需求 − 風險」⇒ **若相乘，資產近 0 就會直接壓扁乘積**；**而相加時資產近 0 只砍掉 0.6 的份量，need 那 0.4 還在** ⇒ **要找的東西不一樣**｜★★**因子逐筆已接好並在跑**（est/loot/need/odds/person/opp 的中位、min、max、恰好 0 的筆數）｜★★★**而我先預告一個很可能的答案**：`loot = clamp(est / 3.0, 0, 1)`，而 **est 中位是 0.022** ⇒ **loot 在中位列 ≈ 0.007**
 ---
