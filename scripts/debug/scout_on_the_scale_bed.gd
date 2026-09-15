@@ -242,6 +242,23 @@ func _run() -> void:
 	_ok(_minp > 0.0,
 		"下界-b 最低單價 > 0（★若有人加了一個 0 價資源，下界會塌成 0 ⇒ 這一格會紅）")
 
+	# ── ★★★【粒度那一半】成對（systems 裁 2026-09-16）──
+	#   ★裁定是「**粒度不擋人，它讓你估得低**」⇒ 粒度透過【值】生效，不透過閘。
+	#   ⇒ ★★所以要驗的是：**桶號 1 的目標與桶號 3 的目標，`richness` 不同且單調**
+	#   ⇒ ★★★**否則「粒度有生效」與「粒度被忽略」分不開** —— 兩者都會讓這一格沒有紅。
+	var _ref_obs: float = FactionAISystem.reference_wealth(fx, obs)
+	var _r1: float = FactionAISystem.richness_compressed(FactionAISystem.bucket_floor(1), _ref_obs)
+	var _r2: float = FactionAISystem.richness_compressed(FactionAISystem.bucket_floor(2), _ref_obs)
+	var _r3: float = FactionAISystem.richness_compressed(FactionAISystem.bucket_floor(3), _ref_obs)
+	print("   ★粒度→值（ref=%.1f）：桶1 richness=%.4f｜桶2 %.4f｜桶3 %.4f" % [_ref_obs, _r1, _r2, _r3])
+	_ok(_r1 < _r2 and _r2 < _r3,
+		"粒度-a 桶號越大 `richness` 越高且**嚴格單調**（★不是相等 ⇒ 粒度真的有生效）")
+	_ok(_r1 > 0.0,
+		"粒度-b 最小的桶也 **> 0**（★★若它是 0，「看不清」就又被算成「一無所有」了）")
+	_ok(_r3 < FactionAISystem.TEAM_RICHNESS_CAP,
+		"粒度-c 最大的桶仍 **< CAP**（★壓縮是漸近的，不會有人頂到天花板而分不出來）")
+	print("      ★★而這一格是【day 0 可判】：它純讀常數表與算式，**不需要跑世界**。")
+
 	# ── 狀態2：有桶號（resource_scale）—— ★仍然答不出 coin 當量 ──
 	BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, obs.team_id, "firsthand",
 		{"tile_pos": tgt.tile_pos, "resource_scale": 2}, 1.0, false)
