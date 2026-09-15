@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `coin` 票乙 ｜ **R² CLEAN（補三條硬約束後）⇒ 開工**
 topic: ★**藍圖裁 A：錢＝手段，走前置鏈**；`maintain_coin` 拆掉或標死｜★★**三條硬約束必須照做**：①子前置是【取代】不是【附加】②「買資源缺錢」的量自己算、**禁止借用 `estimated_payroll`** ③**折現磚的 PV 只排內部序、不進外層 argmax**｜★★★**而我先撤回自己一句話**：這個世界**會因為缺錢而賤賣**（`trade_valuation.gd:122-135`，我 2026-09-08 自己接的）—— 正確的句子是**「會因為缺錢而賤賣，不會因為缺錢而去賺」**
 ---
