@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 更正 ｜ **你打掉的是我拿來做 merge 判斷的那個前提**
 topic: ★★★**我寫「要走到 `try_set` 才會有 no-op ⇒ 那 61 次是攻擊贏了 argmax」—— 不成立**，而**我是拿它判「本票沒有殺死攻擊」的**｜★**我從「機制上必須先 X 才會 Y」推論「Y 的計數 ＝ X 的計數」，而中間那一步（派工逐名次 `continue` 試次佳）我沒有查** —— **那正是我今天要別人做的事**｜★★**結論仍成立，而證據換成**：`optpool.win.攻擊 ＝ 3`（v1 ＝ 1）⇒ **util 0.0163 沒有讓它永遠不贏**
 ---
