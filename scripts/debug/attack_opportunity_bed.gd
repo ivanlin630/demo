@@ -401,6 +401,27 @@ func _run() -> void:
 	for r in arows:
 		print("APPETITE_TSV	%.3f	%.3f	%d	%.3f" % [
 			float(r["est"]), float(r["true"]), int(r["tier"]), float(r["odds"])])
+	# ★★★goal payoff 逐型（systems 2026-09-15）：`maintain_coin` 是 dormant 還是恒 0？
+	var gseen: Dictionary = {}
+	var gzero: Dictionary = {}
+	for k in Probe.counts:
+		var ks2: String = String(k)
+		if ks2.begins_with("goal.payoff.seen."):
+			gseen[ks2.replace("goal.payoff.seen.", "")] = int(Probe.counts[k])
+		elif ks2.begins_with("goal.payoff.zero."):
+			gzero[ks2.replace("goal.payoff.zero.", "")] = int(Probe.counts[k])
+	print("")
+	print("★★★goal payoff 逐型（★【沒出現】與【出現而恒 0】是兩個結論）")
+	if gseen.is_empty():
+		print("   ★實跑 0 型 ⇒ **這不是「都正常」，是【這條路本輪沒跑到】**")
+	else:
+		for gt in gseen:
+			var gz: int = int(gzero.get(gt, 0))
+			print("   %-22s 出現 %5d 次｜payoff 恰好 0 的 %5d 次（%.0f%%）%s" % [
+				gt, int(gseen[gt]), gz, 100.0 * float(gz) / maxf(float(gseen[gt]), 1.0),
+				"   ← ★★恒 0" if gz == int(gseen[gt]) else ""])
+		if not gseen.has("maintain_coin"):
+			print("   ★★★`maintain_coin` **一次都沒出現** ⇒ 它是【dormant 註冊】，不是【恒 0 候選】")
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=%d" % _fails)
 	print("[TEST-SUITE-COMPLETE]")
