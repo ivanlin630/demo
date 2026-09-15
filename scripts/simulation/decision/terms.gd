@@ -250,7 +250,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 					"loot": snappedf(_loot, 0.001), "need": snappedf(_need, 0.001),
 					"odds": snappedf(_odds, 0.001), "person": snappedf(_person, 0.001),
 					"opp": snappedf(_opp, 0.0001),
-					"tier": ctx.attack_belief_tier}, 400)
+					"tier": ctx.attack_belief_tier,
+					# ★★★**筆數 ≠ 隊數**（血證 2026-09-15 晚期窗）：
+					#   晚期窗的「餓且有牙」22 筆裡，**21 筆指紋完全相同**
+					#   （odds/person/loot/tier 一模一樣，need 逐筆遞增）
+					#   ⇒ ★幾乎肯定是**同一支隊在連續 tick 被重複取樣**，
+					#   ⇒ ★★而當時**樣本沒有 team_id ⇒ 「22 筆是幾支隊」答不出來**。
+					"team": ctx.team_id, "tick": ctx.tick}, 400)
 				Probe.bump("attack.opp.factors_n")
 			# ★★★「剩下的零是什麼」（systems 2026-09-12：★一半的母體沒有解釋我不收）：
 			#   ★零有**四種來源**，而它們的處置完全不同 ⇒ 逐筆分類，不是只數一個 0。

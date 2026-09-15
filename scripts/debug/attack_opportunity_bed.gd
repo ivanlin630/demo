@@ -245,6 +245,11 @@ func _run() -> void:
 		print("★★★【分水嶺】餓（need>0）且有牙（odds>0）的列：**%d / %d**（%.1f%%）" % [
 			hungry_armed, frows.size(), 100.0 * float(hungry_armed) / float(frows.size())])
 		print("   其中 `need` 真的進到 util 裡的（opp > 0）：**%d 筆**" % need_contrib)
+		var ha_teams: Dictionary = {}
+		for r in frows:
+			if float(r["need"]) >= 0.0005 and float(r["odds"]) >= 0.0005:
+				ha_teams[int(r.get("team", -9))] = true
+		print("   ★★★而那些筆來自 **%d 支隊** —— **筆數 ≠ 隊數**（同一支隊連續 tick 會重複計）" % ha_teams.size())
 		print("   兩邊的邊緣：餓的列 %d｜有牙的列 %d（★兩個數加起來超過母體才可能有交集）" % [
 			hungry_n, armed_n])
 		print("   ⇒ ★★報【筆數＋母體】，**分界不在這支床裡定** —— 它是裁決，不是量測。")
@@ -254,11 +259,12 @@ func _run() -> void:
 	#   ★聚合答不了逐桶平均：要算 tier2 的 loot 逐桶 util，必須有逐列值。
 	print("")
 	print("★因子逐列（TSV：est/loot/need/odds/person/opp/tier）")
-	print("FACTORS_TSV	est	loot	need	odds	person	opp	tier")
+	print("FACTORS_TSV	est	loot	need	odds	person	opp	tier	team	tick")
 	for r in frows:
-		print("FACTORS_TSV	%.3f	%.3f	%.3f	%.3f	%.3f	%.4f	%d" % [
+		print("FACTORS_TSV	%.3f	%.3f	%.3f	%.3f	%.3f	%.4f	%d	%d	%d" % [
 			float(r["est"]), float(r["loot"]), float(r["need"]), float(r["odds"]),
-			float(r["person"]), float(r["opp"]), int(r.get("tier", -9))])
+			float(r["person"]), float(r["opp"]), int(r.get("tier", -9)),
+			int(r.get("team", -9)), int(r.get("tick", -9))])
 	# ── ★逐列原始樣本（讓等級相關可以離線算）──
 	var arows: Array = Probe.samples.get("appetite.input", [])
 	print("")

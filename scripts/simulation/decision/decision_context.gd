@@ -11,6 +11,12 @@ var food_days: float = 0.0
 var can_rescue_build: bool = false      # ★復甦 R2 §2B.1：料備妥產糧設施自救建設 viable（build-as-survival）
 var rescue_build_util: float = 0.0      # ★同上 genuine util（食安價值 frac × P(survive_to_harvest)）
 var population: int = 0
+# ★★★分析用身分欄（非 god-view：**隊伍當然知道自己是誰、現在幾點**）。
+#   ★血證 2026-09-15：晚期窗「餓且有牙 22 筆」裡 **21 筆指紋相同**
+#   ⇒ ★★幾乎肯定是同一支隊的連續 tick，**而當時答不出「幾支隊」**
+#   ⇒ ★★★**筆數 ≠ 隊數**；沒有這兩欄，任何「出現 N 筆」的量級都是不可判的。
+var team_id: int = -1
+var tick: int = 0
 var has_goods: bool = false
 var has_arb: bool = false
 # ★量級：當下可得的【最佳套利 gain】（has_arb 只說有沒有，這個說多少）。
@@ -291,6 +297,8 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _burn: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	c.food_days = ef / maxf(_burn, 0.001)
 	c.population = team.population
+	c.team_id = team.team_id
+	c.tick = state.world.current_tick
 	c.is_subteam = team.parent_team_id != -1   # A2a：子隊旗（歸建 directive + 戰略-gate）
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
 	var _arb: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
