@@ -64,7 +64,18 @@ func _run() -> void:
 	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/warring_states.json")
 	var runner := SimRunner.new()
 	var no_player := Vector2i(-1, -1)
+	# ★★★【晚期窗】（systems 2026-09-15）：`bump_sample` 是 **first-N**
+	#   ⇒ ★不管窗多長，樣本永遠來自【最早那一段】
+	#   ⇒ ★★而「餓的隊都沒牙」**很可能正是早期的樣子**。
+	#   ⇒ ★★★`AO_RESET_AT=<tick>` ⇒ 跑到那一刻把 Probe 清空，
+	#     **於是整份報告都只來自【那一刻之後】** —— 不是混兩種窗。
+	var reset_at: int = int(OS.get_environment("AO_RESET_AT")) if OS.has_environment("AO_RESET_AT") else -1
 	for _t in range(ticks):
+		if reset_at > 0 and _t == reset_at:
+			Probe.reset()
+			Probe.arm()
+			print("★【晚期窗】tick %d 清空 Probe ⇒ **下面每一個數字都只含 tick %d–%d**" % [
+				reset_at, reset_at, ticks])
 		runner.advance_tick(st, no_player)
 	var z: int = int(Probe.counts.get("attack.cmp.zero_final", 0))
 	var nz: int = int(Probe.counts.get("attack.cmp.nonzero_final", 0))
