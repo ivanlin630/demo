@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `coin` ｜ **原票撤銷 → 拆兩票**，求 R²
 topic: ★**我的原票（`BASE_PRICE["coin"] = 1.0`）形狀錯，已撤銷**｜★★**root 我靜態證出來了：`need_keep(coin) ≡ 0.0`**（`TARGET_PER_POP` 缺 coin ⇒ `_self_use` 0；coin 非任何配方 `in` ⇒ `_supply_chain` 0；建造成本明文無 coin ⇒ 第三項 0）⇒ **status 恆 satisfied ⇒ 永不提名**，與 implementer 實跑 0 次互為獨立證據｜★★★**真正的病＝同一形狀在兩張表上：per-resource 表的預設 0 在語意上是「不存在」不是「零」**，而 `local_value():173` 的 coin 特判**就是補丁閘**——遮住洞，洞在其餘 37 處照開
 ---

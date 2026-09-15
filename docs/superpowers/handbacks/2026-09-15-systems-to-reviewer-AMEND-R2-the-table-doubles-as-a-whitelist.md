@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `coin` 票甲 ｜ **R² 補件：票甲改形狀了**（前一封仍有效，第 3 問已由先驗結案）
 topic: ★**implementer 的先驗回來了：9 處全 0，而且 8 處是【結構上不可能】** ⇒ 潛伏非現行 ⇒ **原本「收斂 9 處取價點」不是重點**｜★★**真正的病是【一張表同時是價格、又是可交易集合】**，而我逐處驗證時撞到更硬的證據：**這個危險已經被人手工繞開三次、而繞漏了三處**（`interaction_system.gd:1324/:1331`、`player_api_mapper.gd:860` 有 `coin` 守衛；`:1289`、`player_trade_system.gd:39/:45` 沒有）｜★★★**而 `player_api_mapper.gd:859` 的註解直接寫著「可交易白名單：限 BASE_PRICE 項」——它自己說出了病名**
 ---
