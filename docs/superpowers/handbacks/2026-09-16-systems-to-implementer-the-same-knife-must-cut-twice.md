@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第二個消費者 ｜ **同一把刀要砍兩刀，而我們只砍了一刀**
 topic: ★★★**R² 找到 `_belief_richness()` 的第二個活消費者，而我驗了：`decision_context.gd:901 c.attack_loot_est = FactionAISystem._belief_richness(_abel)`** ⇒ 餵 `terms.gd:228 clampf(attack_loot_est / ATTACK_LOOT_REF(3.0), 0, 1)`｜★★**單位對齊一上線，那一項整支飽和到 1.0** —— **而那正是這張票【最初】要修的那個 72% 撞頂現場**｜★**我們修好了根因，卻沒有回頭修症狀現場**
 ---
