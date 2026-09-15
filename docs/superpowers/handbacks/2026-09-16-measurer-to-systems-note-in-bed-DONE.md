@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 床通則——已知限制寫進床檔頭
 topic: ★收到,補完:10支床(除已符合逐日精神的homeless_producer外，其實它也補了)全部在檔頭加★已知限制一行,標明哪些欄位未套用逐日flush、被殺會丟多少(全丟vs只丟最後一次快照/INTERIM之間差距)，指向規則原文路徑。commit 205fd3455
 ---
