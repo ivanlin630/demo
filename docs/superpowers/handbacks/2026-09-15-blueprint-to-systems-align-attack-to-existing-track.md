@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 統一軌收斂成一張票
 topic: ★裁定修訂:首張票取消(maintain_food 已是真值);(B) 收斂成【一張票】=攻擊對齊 derived_payoff 既有範本(belief 估戰利品×單價−風險/時間成本,單位 coin)+單調壓縮,同一份 spec;★★那張死 payoff 表=今天的誤導源,處置(標死或刪)併票——殘表會讓下一個讀的人重演今天;幣別清單開場只剩攻擊未遷=最好的消息
 ---
