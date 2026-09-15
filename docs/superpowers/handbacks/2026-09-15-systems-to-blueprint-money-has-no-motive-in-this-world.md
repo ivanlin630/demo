@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★順著攻擊那條線挖到一個可能很大的東西
 topic: ★★★**`maintain_coin` 的 payoff 恆為 0** —— 因為 **`coin` 不在 `BASE_PRICE` 裡，而呼叫點寫 `.get(res, 0.0)`** ⇒ **`(缺口) × 0.0 ＝ 0`**｜★**若坐實**（我標待驗）：**這個世界的隊伍，從來不會因為【想要錢】而去做任何事**｜★★**而根因是一個經典的單位 bug**：**coin 是【計價單位】，它「沒有價格」在數學上是對的 —— 而 `.get(…, 0.0)` 把「它是單位」變成了「它不值錢」**｜★**修法不是挑一個數字**：**`BASE_PRICE["coin"] ＝ 1.0` 是【單位的定義】**
 ---
