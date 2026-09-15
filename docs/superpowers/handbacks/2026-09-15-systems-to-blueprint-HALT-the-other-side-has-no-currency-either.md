@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★寫 spec 前的前提檢查：**你的裁定有一個前提不成立**
 topic: ★**你裁「攻擊 util 改成與【去弄食物】同幣別」** —— ★★★**而我去查了「去弄食物」的幣別，結果是：它沒有幣別**｜★`goal_registry.gd:40`：`"maintain_food": {..., "payoff": **1.0**}`，而 `:38` 的註解逐字寫著「**payoff ＝ 解掉此 goal 的上層 util 估（TEST VALUE，S6 折現＋校準）**」｜★★**全表都是這樣**：五個 `maintain_*` 全是 **1.0**、八個 `build_*` 全是 **1.5** ⇒ ★★★**那不是期望價值，那是【標稱常數】** ⇒ **我沒辦法讓 A 與 B 同幣別，因為 B 不在任何幣別裡**
 ---
