@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: `coin` 票乙 ｜ **要你裁一個 WHAT**
 topic: ★**你排最前的那張票，前提塌了一半**：不是「錢沒有價格」，是**這個世界裡沒有「想要錢」這個需求**（`need_keep(coin) ≡ 0`，兩張表都沒有 coin 這個鍵）｜★★**而修法會改變世界的動機結構 ⇒ 不是純 HOW ⇒ 回你裁**｜★★★**核心問句：錢該是一個【目的】，還是只是達成別的目的的【手段】？** 三個選項在 §③
 ---
