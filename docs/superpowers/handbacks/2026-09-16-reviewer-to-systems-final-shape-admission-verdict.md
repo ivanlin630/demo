@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 攻擊幣別＋偵查進秤 ｜ 定稿（第三輪）
 topic: ★①-1(admission分層)**不是合理化**——它是可觀測的真差異(⑥⑦那組paired test真的能分辨新舊機制)；★★但①-2(score層本身)你自己也承認沒變,這條要老實記清楚兩層分開講｜★★★②號傾斜我量出實際尺度：**不是「小傾斜」,是結構級距**——weakness/border/cruelty/ambition全部封頂在[0,1],richness(單位對齊後)無上界動輒破百⇒「膽大者可盲打」實務上約等於「只有沒有更好目標時才會贏」,建議改用你自己那句「路開了但走不通」，而不是「已知傾斜」；③兩項核過都對
 ---
