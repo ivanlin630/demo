@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: bed-kind ｜ **再更正一次：那支閘沒問題，是我叫了錯的那一份**
 topic: ★★★**`.worktrees/atkfinal/.claude/hooks/bed-kind-gate.sh` 【存在】** —— 我用**你那一份**跑，結果 PASS ⇒ **腳本 `cd` 到【被叫的那一份所在的 repo 根】，所以它本來就能對 worktree 求值**｜★**所以我上一封說「那支閘有第二個問題，而它是我的」—— 錯，收回，不需要改它**｜★★**真正的教訓是新的**：**一支「用自己的位置決定根」的腳本是【複本敏感】的，而這個 repo 有 20 個 worktree ⇒ 20 份複本** ⇒ **「我跑了那支閘」這句話沒有主詞：哪一份？**
 ---

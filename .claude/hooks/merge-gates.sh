@@ -27,6 +27,16 @@ _mg_head=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
 _mg_reg=$(git --no-optional-locks status --porcelain -- "$REG" 2>/dev/null | head -c1)
 _mg_run=$(git --no-optional-locks status --porcelain -- .claude/hooks 2>/dev/null | head -c1)
 _mg_code=$(git --no-optional-locks status --porcelain -- scripts tools 2>/dev/null | grep -v '^??' | wc -l | tr -d ' ')
+# ★★★2026-09-16：**runner 自己的指紋**。血證：implementer 寫「這一輪沒有印【不可判】
+#   ⇒ 開跑與結束是同一棵樹」—— ★**而那支偵測器根本不在他跑的那一份裡**
+#   （他 worktree 的 runner 227 行、0 個「不可判」；main 的 237 行、2 個）
+#   ⇒ ★★**他把「儀器沒裝」讀成了「沒發生」**。
+#   ⇒ ★★★**而這個 repo 有 20 個 worktree ⇒ 20 份複本、版本各不相同**
+#     ⇒ **「某個守衛沒叫」在複本不一致的期間【不可當證據】。**
+#   ⇒ 修法：**讓 runner 宣告自己是哪一份** —— **沉默就不再是證據，缺席變得可見。**
+_mg_self="$(git hash-object "${BASH_SOURCE[0]}" 2>/dev/null | cut -c1-8)"
+[ -z "$_mg_self" ] && _mg_self="?"
+echo "[MERGE-GATES] runner-self=$_mg_self lines=$(wc -l < "${BASH_SOURCE[0]}" | tr -d ' ')｜★兩人對照綠不綠之前，先對這一串"
 echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code"
 if [ -n "$_mg_reg$_mg_run" ]; then
   echo "[MERGE-GATES] ★★本次判決【只適用於你的工作區】——註冊表或 runner 有未 commit 的修改"
