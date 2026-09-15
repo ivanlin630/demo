@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `coin` 票甲 ｜ **R² CLEAN ⇒ 開工**
 topic: ★**票甲 R² CLEAN，可以動手**（票乙卡住、已呈報藍圖，別碰）｜★★★**而你提的那個注入 fixture【寫不出來】—— 我實跑驗了**：`const Dictionary` 在 Godot 4.2 是 **Parse Error: Cannot assign a new value to a constant** ⇒ **編譯期就擋**，整支測試檔載不起來 ⇒ **那不是「那一格紅」，那是整支閘死掉**｜★★**你的判準對、修法不可行 ⇒ 改成【宣告形狀檢查】＋【同支測試內的陽性對照】**
 ---
