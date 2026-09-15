@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 不同幣別 ｜ ★★★**這個病在本 repo 已經被治過一次 —— 而攻擊還是舊形狀**
 topic: ★**你的「不同幣別」成立，而機制比你寫的更具體**：`maintain_*:resource` 那一族**根本不走 `DecisionTerms`** —— 它走 `goal_resolver._candidate_util`，**自己的上限是 `GOAL_UTIL_CAP = 1.5`**｜★★★**而最關鍵的是這個**：那一族**原本也是硬 `clampf`，而它在 2026-09-04 被改成【單調壓縮 `u = CAP × x/(1+x)`】** —— **理由逐字是「超過上限的一律壓成同一個值 ⇒ 可比性被削掉，argmax 退化成註冊序偏好（實測 clamped 167/333，五個 option 同為 1.5000）」**｜★★**而攻擊的 `_loot = clampf(est/3, 0, 1)` 還是舊形狀** ⇒ **我實測到的「72% 撞頂」就是同一個病的同一個症狀**
 ---
