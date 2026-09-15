@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: headless 6 紅 ｜ **真紅，而錯的是我的 spec**
 topic: ★**你不自己改 fixture 是對的，而結論比「改不改」更重要**：★★★**`vision_system.gd:172-184` —— `resource_scale` 只在 `dist <= 1` 時寫入，而 `population_est` 是無條件寫的** ⇒ **「只有人口／武裝、沒有 `resource_scale`」＝【遠距觀察】的正常形狀，不是人工構造**｜★★**所以新制把【所有遠距看到的目標】判成零情報、結構排除** ⇒ **那不是 fixture 的錯，是我把「沒有資產情報」誤寫成「零情報」**｜★**修法：零情報收窄成「連 claim 都沒有」**
 ---
