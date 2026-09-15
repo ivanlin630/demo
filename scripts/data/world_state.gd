@@ -805,6 +805,13 @@ func erase_teams(tids: Array) -> void:
 	for tid in world.tiles:
 		var wt: HexTileData = world.tiles[tid]
 		if dead.has(wt.outpost_owner):
+			# ★★★這一站**繞過 `OutpostOwnerBank`**（`owner_outpost_index.gd:20` 早就記過這件事）
+			#   ⇒ ★所以易主計數要在這裡**單獨記一筆**，否則「原擁有者死了」會從事件表上消失，
+			#   ★★而它正是把端點差壓平的那一半（淨 +6 底下藏著多少次死亡釋放）。
+			if Probe.enabled:
+				Probe.bump("outpost.owner_change.shape.owned_to_unowned")
+				Probe.bump("outpost.owner_change.reason.death_release")
+				Probe.bump("outpost.owner_change.owned_to_unowned.death_release")
 			wt.outpost_owner = -1
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint③：繞過 bank 的直接 owner 寫
 	# 3. 其他隊指向任一 dead tid 的 ref 單趟全清（死隊間互指不清：隨 teams.erase 一併消失）

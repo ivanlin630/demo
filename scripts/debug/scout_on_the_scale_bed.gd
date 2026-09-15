@@ -674,6 +674,25 @@ func _run() -> void:
 		n_drop, atk_drop, n_keep, atk_keep])
 	print("   ★**只報數不報率**（單 seed 單窗）；★★而「掉了 30%%」這條線是我挑的，不是量出來的 ⇒ 它是個分組，不是判準。")
 
+	# ══════════ §F 據點易主：**事件數**不是端點差（defer token outpost-owner-change-tap）══════════
+	# ★「擁有據點的隊 18 → 24」是兩個端點的差 ⇒ ★★淨 +6 可以是 6 次易主，也可以是 10 次易主 ＋ 4 次死亡釋放。
+	# ★★★而【蓋出來的】那一半已有答案（outpost.built／settle_builder）⇒ 這一格補的是**【搶來的】那一半**。
+	print("")
+	print("★§F 據點易主（★**事件數**，不是端點差）")
+	var shapes: Array = []
+	for _sh in ["owned_to_owned", "unowned_to_owned", "owned_to_unowned"]:
+		shapes.append("%s=%d" % [_sh, int(Probe.counts.get("outpost.owner_change.shape." + _sh, 0))])
+	print("   形狀：%s" % " ".join(shapes))
+	print("      ★`owned_to_owned` 才是【搶來的】；`owned_to_unowned` 含死亡釋放 ⇒ **它是把端點差壓平的那一半**")
+	var reasons: Array = []
+	for k in Probe.counts:
+		var ks10: String = String(k)
+		if ks10.begins_with("outpost.owner_change.reason."):
+			reasons.append("%s=%d" % [ks10.replace("outpost.owner_change.reason.", ""), int(Probe.counts[k])])
+	reasons.sort()
+	print("   逐因：%s" % (" ".join(reasons) if not reasons.is_empty() else "（空）"))
+	print("   ★★而本床**不對它下判決** —— 它回答的是「這個世界的據點是蓋出來的還是搶來的」，那是別張票的輸入。")
+
 	print("")
 	# ★★★窗戳（systems 第 3 條）：**實際／目標／為什麼停** ——
 	#   ★`27/30 外部截斷` ≠ `30/30 完成` ≠ `27/30 自持門檻停`：
