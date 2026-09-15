@@ -3624,7 +3624,8 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		#   ⇒ ★★★驗收格④若不分流，**會綠，而綠的原因是舊補丁不是新機制**。
 		#   ⇒ 這裡只數【秤選出來、而且真的被設上】的那一條。
 		if Probe.enabled and opt == "偵查":
-			Probe.bump("recon.dispatch.engine." + ("ok" if _set_ok else "noop"))
+			Probe.bump("recon.dispatch.unified." + ("ok" if _set_ok else "noop"))
+			Probe.bump("recon.dispatch.ok" if _set_ok else "recon.dispatch.noop")
 		if _lvf_this:
 			# ★★★第四型手不聽腦：`try_set` 可能 no-op（priority 被更高的佔住）——
 			#   ★而它【不會報錯】，只是這一次派工靜靜地沒發生
@@ -4102,7 +4103,11 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 					HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
 				return
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
-		if not TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam"):   # ★① 單一源(subteam survival @80 preempt,team19 換子隊 bug 收)
+		var _sub_set_ok: bool = TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam", opt)
+		if Probe.enabled and opt == "偵查":
+			Probe.bump("recon.dispatch.subteam." + ("ok" if _sub_set_ok else "noop"))
+			Probe.bump("recon.dispatch.ok" if _sub_set_ok else "recon.dispatch.noop")
+		if not _sub_set_ok:
 			continue
 		_stamp_survival_commit(state, sub, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		_commit_settle_site(state, sub, td)   # ★§4a 紮根 commit-hook（try_set 已成功才到此）
@@ -4359,7 +4364,11 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
-		if not TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo"):   # ★① 單一源(solo survival @80 preempt 安頓)
+		var _solo_set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo", opt)
+		if Probe.enabled and opt == "偵查":
+			Probe.bump("recon.dispatch.solo." + ("ok" if _solo_set_ok else "noop"))
+			Probe.bump("recon.dispatch.ok" if _solo_set_ok else "recon.dispatch.noop")
+		if not _solo_set_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # Fix2b 早退 tap
 			continue
 		_stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
@@ -6704,7 +6713,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
-		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival")   # ★① 單一源(收 @80)
+		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival", opt)   # ★① 單一源(收 @80)
+		if Probe.enabled and opt == "偵查":
+			Probe.bump("recon.dispatch.survival." + ("ok" if _surv_ok else "noop"))
+			Probe.bump("recon.dispatch.ok" if _surv_ok else "recon.dispatch.noop")
 		if Probe.enabled and opt == "併入":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
 			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
 		if not _surv_ok:

@@ -151,7 +151,7 @@ func _run() -> void:
 	var e_moth: int = int(Probe.counts.get("optpool.mother", 0))
 	var e_acand: int = int(Probe.counts.get("optpool.cand.攻擊", 0))
 	var e_awin: int = int(Probe.counts.get("optpool.win.攻擊", 0))
-	var e_eng: int = int(Probe.counts.get("recon.dispatch.engine.ok", 0))
+	var e_eng: int = int(Probe.counts.get("recon.dispatch.ok", 0))
 	var e_cor: int = int(Probe.counts.get("g3.scout_dispatch", 0))
 	for _t in range(ticks - early_ticks):
 		runner.advance_tick(st, no_player)
@@ -160,7 +160,7 @@ func _run() -> void:
 	var f_moth: int = int(Probe.counts.get("optpool.mother", 0))
 	var f_acand: int = int(Probe.counts.get("optpool.cand.攻擊", 0))
 	var f_awin: int = int(Probe.counts.get("optpool.win.攻擊", 0))
-	var f_eng: int = int(Probe.counts.get("recon.dispatch.engine.ok", 0))
+	var f_eng: int = int(Probe.counts.get("recon.dispatch.ok", 0))
 	var f_cor: int = int(Probe.counts.get("g3.scout_dispatch", 0))
 
 	print("")
@@ -183,7 +183,7 @@ func _run() -> void:
 				100.0 * float(f_win) / maxf(float(f_cand), 1.0)])
 	print("")
 	print("★★★④的【來源分流】（systems 裁）—— ★兩個數都印，而④**只認左邊那一個**：")
-	print("   (A) 秤選出來且真的被設上：早窗 %d｜全窗 %d   `recon.dispatch.engine.ok`" % [e_eng, f_eng])
+	print("   (A) 秤選出來且真的被設上：早窗 %d｜全窗 %d   `recon.dispatch.ok`" % [e_eng, f_eng])
 	print("   (B) 舊走廊（`_commit_conquest_attack`）：早窗 %d｜全窗 %d   `g3.scout_dispatch`" % [e_cor, f_cor])
 	print("   ★★(B) 不進 `optpool.*` 母體（它不經 argmax）⇒ ③ 天然不被它污染；")
 	print("      而④若只看「偵查有沒有發生」就**會被它滿足** —— ★★★所以④的判準寫成 (A) > 0。")
@@ -195,6 +195,60 @@ func _run() -> void:
 				e_win, e_cand, 100.0 * float(e_win) / maxf(float(e_cand), 1.0)])
 		_ok(e_eng > 0,
 			"④-b 而且它**真的被派出去了**（早窗 (A)＝%d）—— ★贏 argmax ≠ 任務真的被設上" % e_eng)
+
+	# ── ★★★贏了卻沒被設上：**是誰擋的**（systems 2026-09-15）──
+	#   ★這是【查表】不是【重跑】：`task_arbiter.gd` 四條拒絕路徑本來就帶 `.opt.<選項>`
+	#     （戰鬥鎖 :131-135／crisis免疫窗 :146-150／持守擋班 :176-179／優先序不足 :245-249），
+	#     而引擎統一站點 `faction_ai_system.gd` 的 `try_set(..., "unified", opt)` 有把 opt 傳進去。
+	#   ★★而【贏 argmax】與【任務真的被設上】是兩個數 —— 差額就是「贏了卻沒變成行動」那一桶，
+	#     ★★★那是四桶分類裡**唯一**算「手不聽腦」的一桶（其餘三桶：沒目標／打不贏／秤上輸了）。
+	#   ★禁令（systems）：**不准為了讓它被設上而調優先序** —— 先問是誰擋住它。
+	print("")
+	print("★★★偵查【贏了卻沒被設上】是被誰擋的（★查表，不是新儀器）")
+	var deny_total: int = 0
+	var deny_rows: Array = []
+	for k in Probe.counts:
+		var ks: String = String(k)
+		if ks.begins_with("arbiter.deny.") and ks.ends_with(".opt.偵查"):
+			var reason: String = ks.replace("arbiter.deny.", "").replace(".opt.偵查", "")
+			deny_rows.append("%s=%d" % [reason, int(Probe.counts[k])])
+			deny_total += int(Probe.counts[k])
+	var eng_ok: int = int(Probe.counts.get("recon.dispatch.ok", 0))
+	var eng_noop: int = int(Probe.counts.get("recon.dispatch.noop", 0))
+	print("   派工結果：贏 argmax %d 次 → **走到 try_set %d 次** → 被設上 %d｜no-op %d" % [
+		f_win, eng_ok + eng_noop, eng_ok, eng_noop])
+	print("      ★三個數不是同一件事：【贏】【走到仲裁】【真的被設上】——")
+	print("      ★★而任何兩個之間的差額都有自己的原因，混起來就指不出斷點在哪。")
+	if eng_ok + eng_noop > f_win:
+		print("      ★★★【走到仲裁】比【贏】還多（%d > %d）⇒ **兩者不是同一個母體**：" % [
+			eng_ok + eng_noop, f_win])
+		print("         `optpool.win.*` 只記 `rank_scored` 那一條，而派工迴圈可以對同一次決策呼多次 `try_set`")
+		print("         ⇒ ★**禁相減** —— 相減出來的那個數不是【贏了卻沒派出去】，它什麼都不是。")
+	print("   拒絕理由逐條：%s ｜ 合計 %d" % [
+		(" ".join(deny_rows) if not deny_rows.is_empty() else "（空）"), deny_total])
+	# ★★★逐【派工迴圈】分開印：`rank_scored` 有**四個不同的呼叫端**
+	#   （unified／solo／subteam／survival）—— ★而 `optpool.win.*` 是四者共用的母體，
+	#   ⇒ ★★**只在其中一個站點裝 tap，差額會長得跟「贏了卻沒被設上」一模一樣**。
+	#   ★★★而那是【我的儀器】壞了，不是【世界】壞了—— 兩個是不同的結論。
+	var src_rows: Array = []
+	for src in ["unified", "solo", "subteam", "survival"]:
+		src_rows.append("%s=%d/%d" % [src,
+			int(Probe.counts.get("recon.dispatch.%s.ok" % src, 0)),
+			int(Probe.counts.get("recon.dispatch.%s.noop" % src, 0))])
+	print("   逐派工迴圈（ok/noop）：%s" % " ".join(src_rows))
+	print("   ★而【贏 argmax】減【走到 try_set】的差額＝**在派工之前就被 `continue` 掉的**")
+	print("      （偵查這條路的具名出口：`recon.to_task_idle.no_target` ＝ %d）" % [
+		int(Probe.counts.get("recon.to_task_idle.no_target", 0))])
+	if eng_noop > 0 and deny_rows.is_empty():
+		_red("拒絕表在偵查這條路上是**空的**，而 no-op 有 %d 次 ⇒ ★`_opt` 沒被傳進來"
+			% eng_noop + "（★★這是【儀器裝好但沒接電】那一族，不是「沒有人擋它」）")
+	else:
+		# ★對帳：no-op 的次數應該等於拒絕計數（★兩邊是同一個 try_set 的兩側）
+		_ok(eng_noop == deny_total,
+			"對帳：no-op %d ＝ 拒絕計數合計 %d（★不等 ⇒ 有一條拒絕路徑沒有 tap，或 opt 沒傳到）" % [
+				eng_noop, deny_total])
+	print("   ★★而【怎麼修】不在本床的職權：**禁止為了讓它被設上而調優先序**（systems 裁）——")
+	print("      ★★★先問是誰擋住它；擠掉它之前要先知道被擠掉的那個東西該不該被擠掉。")
 
 	# ── 單位：偵查與攻擊的 util 分布並排（★spec §3：不是只印有沒有 fire）──
 	print("")
