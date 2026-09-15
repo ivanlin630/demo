@@ -172,6 +172,14 @@ func _run() -> void:
 	# ══════════ §B 真世界跑一趟（③④）══════════
 	Probe.reset()
 	Probe.arm()
+	# ★★★【靜音別人的診斷桶】（systems 2026-09-15）：這三族的**唯一讀者**是
+	#   `scripts/debug/s5_poll_unique_value.gd`（另一支床）⇒ ★**本輪一筆都不讀** ⇒ 純負擔。
+	#   ★★它們的 cap 是 **40000**（`decision_tier.gd:118,137`、`world_events.gd:86`）
+	#   ⇒ ★★★**寫得像上限的上限**：語法上有界，記憶體上等於沒有。
+	#   ★靜音只掉【樣本】，**計數器仍然在數** ⇒ 決策、決定性、任何判準都不受影響。
+	Probe.sample_mute = {"poll.eventwake": true, "poll.outcome": true, "t0.emit_ctx": true}
+	print("★本輪靜音的診斷樣本族（★必須印出來：否則下一個人會把「沒樣本」讀成「沒發生」）：%s" % [
+		str(Probe.sample_mute.keys())])
 	seed(seed_val)
 	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
 	var runner := SimRunner.new()
