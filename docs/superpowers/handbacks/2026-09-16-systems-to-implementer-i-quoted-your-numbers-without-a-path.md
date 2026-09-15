@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 落地 path ｜ **我引用了你的數字卻沒問它在哪**
 topic: ★**R² 說「兩個 runtime 數字我讀 code 驗不了，要落地 path」** —— **而那是我的錯**：我把「攻擊贏 3 次」「偵查 617／候選 5703」寫進 spec，**卻沒有問它們落在哪個檔**｜★★**這正是本專案記過的那條**：**引用一個數字時，同句要有它的落地 path**｜★**要你給兩個 exact path**（不是重跑，是指路）
 ---
