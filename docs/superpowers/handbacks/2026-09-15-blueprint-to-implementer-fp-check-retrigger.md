@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: fp等價驗證重觸
 topic: ★watchdog 61h:systems 09-12 那封 fp 預註冊信還 open,fpcheck 工作區乾淨、docs/measurements 三天零新檔=那趟 fp 驗證沒有留下任何輸出——請重跑或回報障礙;★活著≠前進,管道活著唯一證明=成功寫過輸出
 ---

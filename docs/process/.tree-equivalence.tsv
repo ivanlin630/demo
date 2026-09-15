@@ -1,0 +1,5 @@
+# ★一臂之內樹不一致的【具名等價證明】。彙整器吃這張表。
+# ★★欄位：arm <TAB> tree_a <TAB> tree_b <TAB> fp <TAB> evidence(必須是存在的檔案)
+# ★★★它【不是豁免】：沒有 fp、或 evidence 檔不存在 ⇒ 照樣紅。
+#   而「兩棵樹不一樣」這件事永遠會被印出來 —— 只是從【紅】變成【已證等價】。
+gen4	9b4e40fd8/yes	e15c5227b/yes	e78693dff291755db5749f038f8987db	docs/measurements/2026-09-15-fp-equivalence-gen4-arm.md

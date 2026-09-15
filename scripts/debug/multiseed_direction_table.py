@@ -106,6 +106,32 @@ def _self_identity():
     return sha, ("dirty" if dirty else "clean")
 
 
+def _equivalence(arm, trees):
+    """★讀【具名的等價證明】：一臂之內樹不一致時，有沒有 fp 證過它們等價。
+    ★★**沒有 fp 或 evidence 檔不存在 ⇒ 不算證明**（照樣紅）。
+    ★★★而它不是豁免：「兩棵樹不一樣」永遠會被印出來，只是從【紅】變成【已證】。
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.abspath(os.path.join(here, "..", ".."))
+    tsv = os.path.join(root, "docs", "process", ".tree-equivalence.tsv")
+    if not os.path.exists(tsv):
+        return False, ""
+    want = set(trees)
+    for ln in io.open(tsv, encoding="utf-8"):
+        if ln.startswith("#") or not ln.strip():
+            continue
+        f = ln.rstrip().split("	")
+        if len(f) < 5 or f[0] != arm or set(f[1:3]) != want:
+            continue
+        if not f[3].strip():
+            return False, "無 fp"
+        ev = os.path.join(root, f[4].strip())
+        if not os.path.exists(ev):
+            return False, "evidence 檔不存在：%s" % f[4].strip()
+        return True, "fp %s｜%s" % (f[3][:12], f[4].strip())
+    return False, ""
+
+
 def main():
     runs = {}
     expect = _expect_seeds()
@@ -171,10 +197,17 @@ def main():
             print("   ⇒ ★★那幾趟只能停在 sha 與 mtime 的【間接證據】，**追溯不回來**")
         ts = sorted({v["tree"] for v in mine})
         if len(ts) > 1:
-            reasons.append("臂 %s 的各%s不是同一棵樹" % (a, chr(0x8D9F)))
+            _ok, _ev = _equivalence(a, ts)
+            if _ok:
+                print("★臂 %s 的各%s不是同一棵樹（%s）" % (a, chr(0x8D9F), " vs ".join(ts)))
+                print("   ⇒ ★★而已用 **fp 證明行為等價**：%s" % _ev)
+                print("   ⇒ ★★★這不是豁免：不一致照樣印出來，只是從【紅】變成【已證】")
+                continue
+            reasons.append("臂 %s 的各%s不是同一棵樹%s" % (
+                a, chr(0x8D9F), ("（%s）" % _ev if _ev else "")))
             red = True
-            print("★★★【紅】臂 %s 的各趟**不是同一棵樹**：%s" % (a, " vs ".join(ts)))
-            print("   ⇒ ★這三趟不可合為一臂，除非用 fp 證明那次變動對世界無影響")
+            print("★★★【紅】臂 %s 的各%s**不是同一棵樹**：%s" % (a, chr(0x8D9F), " vs ".join(ts)))
+            print("   ⇒ ★這三%s不可合為一臂，除非用 fp 證明那次變動對世界無影響" % chr(0x8D9F))
             print("   ⇒ ★★而【commit sha 相同】也不等於 code 相同：clean=NO 時樹是髒的")
     if len(arms) != 2:
         print("★臂數 != 2 ⇒ 方向表不可判（它的定義就是兩臂相比）")
@@ -309,6 +342,17 @@ def _case_no_confusables():
     return (not hits), ("本檔無黑名單字" if not hits else "中彈：%s" % hits)
 
 
+def _case_equivalence_needs_evidence():
+    """★等價證明的成對對照：**有證據才綠、沒證據必紅**。
+    ★★只驗「有證據會綠」等於把這個機制做成豁免。
+    """
+    ok1, ev1 = _equivalence("gen4", ["9b4e40fd8/yes", "e15c5227b/yes"])
+    ok2, _ = _equivalence("gen4", ["9b4e40fd8/yes", "不存在的樹/yes"])
+    ok3, _ = _equivalence("沒這個臂", ["9b4e40fd8/yes", "e15c5227b/yes"])
+    good = ok1 and (not ok2) and (not ok3)
+    return good, "真組=%s｜換一棵樹=%s｜換一個臂=%s（%s）" % (ok1, ok2, ok3, ev1)
+
+
 def selftest():
     cases = [
         # ①真趨勢：三 seed 同向、幅度相近
@@ -342,6 +386,12 @@ def selftest():
         if not ok:
             bad += 1
 
+    ok7, got7 = _case_equivalence_needs_evidence()
+    ran += 1
+    if not ok7:
+        bad += 1
+    print("   %-14s %s  實得：%s" % ("⑦ 等價要證據", "[OK]" if ok7 else "[FAIL]", got7))
+
     ok6, got6 = _case_no_confusables()
     ran += 1
     if not ok6:
@@ -357,7 +407,7 @@ def selftest():
     # ★★★【對照本身的母體】：跑過的格數必須等於宣告的格數。
     #   ★血證：有一次對照因為裡面誤寫 `sys.exit` 而**第一格就結束整個程序**，
     #   ★★而它印了標題、一格也沒跑、**回傳碼還是 0** ⇒ 靜默 no-op 被讀成全綠。
-    declared = len(cases) + 2
+    declared = len(cases) + 3
     if ran == 0:
         print("=== SELFTEST === ★★★【紅】實跑 0 組 ⇒ 對照什麼都沒測（而它看起來跟全綠一樣）")
         return 1
