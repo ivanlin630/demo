@@ -321,8 +321,10 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 		if not _blind:
 			# ★桶的下界（`vision_system.gd:179-182`：≥50 / ≥200 / ≥600）—— ★★單位是【總量】
 			#   ⇒ ★★★而一籃總量 N 的東西，其 coin 價值的**下界**就是 N（全是 coin 時）。
+			# ★走【單一計算點】`FactionAISystem.bucket_floor` —— ★★兩邊各寫一份的話桶意義會默默 drift，
+			#   ★★★而 drift 不會有任何東西紅（它只會讓攻擊側與偵查側對同一個桶估出不同的錢）。
 			var _sc: int = int(_rbel.get("resource_scale", 0))
-			_prior = 600.0 if _sc >= 3 else (200.0 if _sc == 2 else (50.0 if _sc == 1 else 0.0))
+			_prior = FactionAISystem.bucket_floor(_sc)
 		var _rdays: float = float(FactionAISystem._hex_dist(team.tile_pos, _rpos)) / _rtpd
 		# ★解鎖資訊的期望價值（coin 當量）× 折現：路上要走 `_rdays` 天 ⇒ δ^days。
 		#   ★★距離是真實量，折率是人格 —— ★★★兩者都不是旋鈕。

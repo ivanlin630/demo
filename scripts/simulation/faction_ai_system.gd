@@ -253,7 +253,7 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 	var feasible: Array = []      # [{id, eta_days}]（★零人格，供門與 fallback target 用）
 	# ★★★逐【呼叫】記淘汰理由（systems 2026-09-12：判準要可證偽 ⇒ 每一筆 nO 要指得出是哪一種不可行）
 	#   ★★而「掃過幾個」與「因為什麼被刷掉」是兩件事 ⇒ `scanned` 與四個理由分開記。
-	var why: Dictionary = {"scanned": 0, "same_faction": 0, "no_belief": 0, "no_priced_belief": 0,
+	var why: Dictionary = {"scanned": 0, "same_faction": 0, "no_belief": 0, "no_priced_belief": 0, "thin_intel_refused": 0,
 		"no_belief_pos": 0, "unreachable": 0, "cannot_afford": 0}
 	var best_id: int = -1
 	var best_score: float = 0.0
@@ -304,14 +304,41 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		#   ⇒ **結構上不產生成攻擊 candidate** —— **不是「少加一項」**
 		#   ⇒ ★★因為 `score` 是加總：**「少一項」與「那一項等於 0」逐位元相同**
 		#   ⇒ ★★★**而它們要去的地方是【偵查】，不是【被當成很窮的攻擊目標】**。
-		if not belief_has_priced_items(bel):
+		# ★★★【admission 分層】（票：攻擊幣別 final 2026-09-16）—— **三層，不是兩層**：
+		#   ★【零情報】（連桶號都沒有）⇒ **對任何人都不可行** ⇒ **結構排除**
+		#     ★★必須是結構排除、不是少加一項 —— `score` 是加總，「少一項」與「那一項＝0」逐位元相同。
+		#   ★【薄情報】（只有桶號）⇒ **由人格決定**：`confident_enough(…, 慎重)`
+		#     ⇒ ★★膽大者可盲打，慎重者該目標不可行 —— **這一層不是世界規則，是人格。**
+		#   ★【有可定價分項】⇒ 照常。
+		var _has_priced: bool = belief_has_priced_items(bel)
+		var _scale_est: int = int(bel.get("resource_scale", -1))
+		if not _has_priced and _scale_est < 0:
 			why["no_priced_belief"] = int(why.get("no_priced_belief", 0)) + 1
 			if Probe.enabled:
-				Probe.bump("attack.excluded.no_priced_belief")
+				Probe.bump("attack.excluded.zero_intel")
 				Probe.bump_sample("scout.candidates", {"team": team.team_id, "target": tid,
 					"tier": int(bel.get("tier", -1)), "tick": state.world.current_tick}, 300)
 			continue
-		var richness: float = belief_richness_coin(bel)
+		if not _has_priced:
+			var _caution_adm: float = float(leader.values.get("慎重", 0.5)) if leader != null else 0.5
+			var _thin_admit: bool = BeliefSystem.confident_enough(state, team.team_id, tid, _caution_adm)
+			if Probe.enabled:
+				Probe.bump("attack.thin_intel." + ("admitted" if _thin_admit else "refused"))
+				Probe.bump_sample("attack.thin_intel.rows", {"team": team.team_id, "target": tid,
+					"caution": snappedf(_caution_adm, 0.01), "admit": _thin_admit,
+					"scale": _scale_est, "tick": state.world.current_tick}, 300)
+			if not _thin_admit:
+				why["thin_intel_refused"] = int(why.get("thin_intel_refused", 0)) + 1
+				continue
+		# ★★薄情報的 x 走桶的下界（**不是 0**）—— 「看不清」不等於「很窮」。
+		var _x_raw: float = belief_richness_coin(bel) if _has_priced else bucket_floor(_scale_est)
+		var _ref_mine: float = reference_wealth(state, team)
+		var richness: float = richness_compressed(_x_raw, _ref_mine)
+		if Probe.enabled:
+			Probe.bump_sample("attack.richness.rows", {"team": team.team_id, "target": tid,
+				"x": snappedf(_x_raw, 0.1), "ref": snappedf(_ref_mine, 0.1),
+				"compressed": snappedf(richness, 0.001), "thin": not _has_priced,
+				"tick": state.world.current_tick}, 300)
 		# capability grounding（裁2）：弱點比 self ARMED 非 self POP → 無牙商隊 self_armed≈0 →
 		# 任何有武裝 prey 皆非「相對弱」→ weakness→0（不再被誘攻；鎖來自戰力非 tag-label）。
 		var self_armed_f: float = float(NpcCombatSystem.new().calc_armed(state, team))
@@ -392,6 +419,42 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 #     ⇒ ★★而右邊那條路（`maintain_*` 的 `derived_payoff`）早就是 `缺口 × BASE_PRICE` ＝ coin
 #     ⇒ ★★★**同一個決策的兩側用兩種幣別 ⇒ 相減沒有意義**（今天為這句記過一次）。
 #   ★新形狀：**`Σ 各項估值 × BASE_PRICE[該項]`** —— **單位從價目表來，不是手填的**。
+# ★★★【CAP 是設計參數，不是單位定義】（R² 更正 systems，2026-09-16）：
+#   ★可重複使用的測試：**把這個數換成別的值，世界會不會不一樣？**
+#     不會 ⇒ 單位（例：`coin = 1.0`，零自由度，只是重新定義單位）
+#     會   ⇒ **參數** —— 而 CAP 換成 0.5／2.0，**財富項對弱點與邊境的相對重要性就變了**
+#   ⇒ ★★它是【誠實具名的設計參數】，與 `SCOUT_VALUE_BLIND_PRIOR` 同族；
+#   ⇒ ★★★**守衛不同**：先驗那一條是「真情報到手後必須被取代」，
+#     而 CAP **不是先驗** ⇒ 它的守衛是【**改它要重跑驗收**】。
+const TEAM_RICHNESS_CAP: float = 1.0   # TEST VALUE —— ★這是**相對重要性的選擇**，不是量出來的
+
+# ★【桶號的下界】單一計算點（`vision_system.gd:176-184` 的分桶：≥50／≥200／≥600）。
+#   ★★單位是【總量】；而一籃總量 N 的東西，其 coin 價值的**下界**就是 N。
+#   ★★★收成一支是因為偵查側（`decision_context.pick_recon_target`）與這裡各寫一份的話，
+#     兩邊的【桶意義】會默默 drift，而 **drift 不會有任何東西紅**。
+static func bucket_floor(scale: int) -> float:
+	if scale >= 3: return 600.0
+	if scale == 2: return 200.0
+	if scale == 1: return 50.0
+	return 0.0
+
+# ★【我的參考尺度】：自家人口 × Σ(TARGET_PER_POP × BASE_PRICE)
+#   ★★所以 `richness` 從此是【**相對於我**】：窮小隊看中等村是肥羊，大國看不上眼。
+#   ★★★而它有一個已知的副作用（**預先登記，不入判**）：
+#     **人口驟降 ⇒ ref 變小 ⇒ 打殘的隊會覺得所有人都變肥** —— 可能是好戲，也可能是病。
+static func reference_wealth(state: WorldState, team: TeamData) -> float:
+	var per_pop: float = 0.0
+	for res in TradeValuation.TARGET_PER_POP:
+		per_pop += float(TradeValuation.TARGET_PER_POP[res]) * float(TradeValuation.BASE_PRICE.get(String(res), 0.0))
+	return maxf(float(team.population) * per_pop, 1.0)
+
+# ★單調壓縮：`CAP × (x/ref) / (1 + x/ref)` —— ★★**單調**（大的永遠比小的大）
+#   ⇒ ★★★取代硬 clamp：hard clamp 會把【比較性】毀掉（兩個都頂到就分不出來）。
+#   ★已知代價（誠實標）：主操作區（0.1×–3× ref）分辨力還在，**極端尾（>10× ref）被壓平**。
+static func richness_compressed(x: float, ref: float) -> float:
+	var r: float = maxf(x, 0.0) / maxf(ref, 0.001)
+	return TEAM_RICHNESS_CAP * r / (1.0 + r)
+
 static func belief_richness_coin(bel: Dictionary) -> float:
 	var total: float = 0.0
 	for res in ["coin", "food", "material"]:
