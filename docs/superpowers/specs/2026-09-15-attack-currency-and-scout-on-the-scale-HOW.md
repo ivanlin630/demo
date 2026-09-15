@@ -184,8 +184,17 @@ grep `team_intel` game_setup.gd ⇒ **零命中**（從不種【它值多少】�
 
 ```
 【零情報】`:384` 皆無資料   ⇒ ★**對任何人都不可行**（結構排除，連膣大者也不行）
+   ★★★**而它【不是冗餘】**（我差一步就删掉它）：`belief_system.gd:30 GATE_CONF_LOW = 0.0`
+     ⇒ **膣大者的門檻是 0** ⇒ `confidence 0 >= 0` ⇒ **真** ⇒ **零情報目標，膣大者照樣通過**
+     ⇒ ★**所以結構排除是【實現藍圖那條裁定的唯一方式】**，不是第二道閘。
 【薄情報】`:382` 只有 `resource_scale`
-   ⇒ ★★**admission 由人格門檻決定**：`BeliefSystem.confident_enough(state, team, prey, 慵重)`
+   ⇒ ★★★**更正（2026-09-16，實測抓到我接錯軸）**：**不擋人，走桁下界估值**
+     ★`confident_enough` 量的是【可信度＋一致性】（`belief_system.gd:166-181`：
+       `uncertainty = (1−最高 credibility) + 分歧`）—— **沒有一項是【夠不夠細】**
+     ⇒ ★★**親見的薄情報：credibility ≈ 1 ⇒ 兩種人格都過** （fixture 實測）
+     ⇒ ★★★**每個軸管它該管的**：**可信度 → admission；粒度 → 【值】**
+     ⇒ **不另立粒度閘** —— **粒度不該擋人，它該讓你【估得低】。**
+   ⇒ （舊文）**admission 由人格門檻決定**：`BeliefSystem.confident_enough(state, team, prey, 慵重)`
      **膣大者門檻低 ⇒ 可盲打；慵重者門檻高 ⇒ 該目標對他不可行**
    ⇒ ★★★**情報不足從【世界的性質】變成【這個人跟這個目標之間】的性質。**
 偵查照舊上秤（禁走廊不變）；`faction_ai_system.gd:440` 走廊票 **不撤**。
