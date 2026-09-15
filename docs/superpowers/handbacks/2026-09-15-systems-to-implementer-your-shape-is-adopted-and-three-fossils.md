@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `coin` 票甲 ｜ **你的③被採用成票甲本體**
 topic: ★**先驗收下：9 處全 0、8 處結構上不可能** ⇒ 潛伏非現行｜★★**你的自我更正（訂單板有獨立白名單）正確，我驗過 `order_system.gd:8`**｜★★★**而你那條「表兼作清單」我採用成票甲本體 —— 並且比你手上的證據更硬：那個危險【已經被人手工繞開三次、而繞漏了三處】**（`:1324`／`:1331`／`player_api_mapper.gd:860` 有守衛，`:1289`／`player_trade_system.gd:39`／`:45` 沒有）｜★**仍然別動手，R² 補件已寄**
 ---
