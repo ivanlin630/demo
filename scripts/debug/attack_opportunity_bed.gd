@@ -176,6 +176,39 @@ func _run() -> void:
 		print("      ⇒ ★母體夠了（≥ %d）⇒ **逐場配對接線是下一張票**，本卷只報母體" % CALIB_MIN_N)
 	print("   ★★★而【風險項】在本實作裡**沒有獨立欄位**（風險折在贏率裡）")
 	print("      ⇒ ★所以「風險恆大把胃口壓平」這一格 **不適用**，而不是 0 —— 我不編一個欄位來填表")
+	# ── ★★★因子拆解（systems 2026-09-15）：哪一個因子把乘積壓扁 ──
+	var frows: Array = Probe.samples.get("attack.opp.factors", [])
+	print("")
+	print("★★★乘積拆開：(0.6×loot + 0.4×need) × odds × person")
+	print("   ★loot 與 need 是**相加**；本實作**沒有獨立風險項**（風險折在 odds 裡）")
+	print("   母體 %d 次（樣本上限 400、實收 %d；★first-N 不是隨機）" % [
+		int(Probe.counts.get("attack.opp.factors_n", 0)), frows.size()])
+	if frows.is_empty():
+		print("   ★母體 0 ⇒ **不可判**（★★而那與「因子都是 0」是兩個結論）")
+	else:
+		for k in ["est", "loot", "need", "odds", "person", "opp"]:
+			var col: Array = []
+			for r in frows: col.append(float(r[k]))
+			col.sort()
+			var med: float = col[col.size() / 2]
+			var zero_n: int = 0
+			for v in col: if absf(float(v)) < 0.0005: zero_n += 1
+			print("   %-7s 中位 %.4f｜min %.4f｜max %.4f｜恰好 0 的 %d/%d" % [
+				k, med, col[0], col[col.size() - 1], zero_n, col.size()])
+		print("   ★★判法：**中位最靠近 0 的那一個因子，就是把乘積壓扁的那一個**")
+		print("   ★★★而 `est` 與 `loot` 要一起看：`loot = clamp(est / %.1f, 0, 1)`" % DecisionTerms.ATTACK_LOOT_REF)
+		print("      ⇒ ★若 est 中位遠小於參考值，**loot 就會在中位列近乎 0** ——")
+		print("        而那時【分布不窄】與【中位列被壓扁】**同時成立**，它們不矛盾。")
+	# ── ★逐列原始樣本（讓等級相關可以離線算）──
+	var arows: Array = Probe.samples.get("appetite.input", [])
+	print("")
+	print("★逐列樣本（TSV：估值、真值、tier、贏率）—— ★★因為上一卷的同向率二分法")
+	print("   **沒有鑑別力**（門檻用絕對值 1.0，而兩個量尺度差兩個數量級），")
+	print("   ⇒ ★★★要判雜訊必須用**等級相關**，而那需要逐列值——這就是那些值。")
+	print("APPETITE_TSV	est	true	tier	odds")
+	for r in arows:
+		print("APPETITE_TSV	%.3f	%.3f	%d	%.3f" % [
+			float(r["est"]), float(r["true"]), int(r["tier"]), float(r["odds"])])
 	print("★fp = %s" % StateFingerprint.compute(st))
 	print("=== DONE === SECTIONS=1/1 FAILS=%d" % _fails)
 	print("[TEST-SUITE-COMPLETE]")
