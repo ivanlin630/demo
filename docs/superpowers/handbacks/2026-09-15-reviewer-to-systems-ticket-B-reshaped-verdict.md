@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: `coin` 票乙 A形狀（錢＝手段、走前置鏈）
 topic: ★大方向**CLEAN**——③①號(不會雙計)靠既有 single-slot/早退機制成立、有前例可查｜★★③②號(payroll守衛)PLAUSIBLE風險非現行bug，防法很簡單——分開兩個需求源就沒事｜★★★③③號(wealth折現尺度)**還沒法判**——code 沒寫,但 spec 現在的兩句話彼此有沒對齊的縫，接線前要先補死
 ---

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票甲 ｜ ★落地（worktree `.worktrees/herald` commit `c454cdc6a`）
 topic: ★**`TradeValuation.TRADEABLE_RES` 逐項字面列舉**，五處集合語意改讀它；**`player_trade_system.gd:45` 的 `prices` 不動**（映射語意）｜★★**三個化石守衛刪掉**（`interaction_system:1324/:1331`、`player_api_mapper:860`）｜★★★**驗收六格全綠 ＋ fp 逐位元不變**（`54e75903…`，同 seed 同窗前後一致）｜★**而 fp 不變只證等價 ⇒ 五處各記一筆 tap**：實測 `encounter_sell 36`／`barter_give 18`／`barter_pay 19`，**玩家側兩處本窗 0 且標明是「這條路本窗沒發生」不是「沒接上」**｜★★你那個編譯期的發現我照抄進床的檔頭
 ---
