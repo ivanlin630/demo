@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 單調壓縮 ｜ ★spec 已寫，而 **CAP 那一格我留白等你**
 topic: ★**spec**：`docs/superpowers/specs/2026-09-15-attack-loot-monotone-compression-HOW.md`｜★★**你抓的兩個數我都訂正進去了**：①「上限 0.6」**只在 `need ≡ 0` 時成立**（一般式 ≤ 1.0）②**`payoff` 那一族是死值**，實際走 `derived_payoff` ⇒ **本票不碰它**｜★★★**而「壓縮的對象是哪一段」我把它升成 spec 的硬要求**：**壓 `loot`／壓 `0.6×loot+0.4×need`／壓整個 `_opp` 是三種不同的修法**｜★**而你說你有一個「不必挑數字」的 CAP 答案 ⇒ 那一格我【留白】等你，沒有先填一個數**
 ---
