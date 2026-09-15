@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★全線停工令
 topic: ★用戶令(2026-09-15):全線停工,用戶要玩遊戲——立即生效:①不開任何新跑 ②跑中的 godot/長跑就地終止讓出機器 ③純文字活(寫spec/寫信/讀code)可繼續但不佔機器 ④恢復令等我發;請你轉達 implementer/measurer(若他們信箱慢),誰手上有跑步誰自己殺
 ---
