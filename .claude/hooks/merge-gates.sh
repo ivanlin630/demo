@@ -36,7 +36,7 @@ _mg_code=$(git --no-optional-locks status --porcelain -- scripts tools 2>/dev/nu
 #   ⇒ 修法：**讓 runner 宣告自己是哪一份** —— **沉默就不再是證據，缺席變得可見。**
 _mg_self="$(git hash-object "${BASH_SOURCE[0]}" 2>/dev/null | cut -c1-8)"
 [ -z "$_mg_self" ] && _mg_self="?"
-echo "[MERGE-GATES] runner-self=$_mg_self lines=$(wc -l < "${BASH_SOURCE[0]}" | tr -d ' ')｜★兩人對照綠不綠之前，先對這一串"
+echo "[MERGE-GATES] runner-self=$_mg_self lines=$(wc -l < "${BASH_SOURCE[0]}" | tr -d ' ') run-id=$$-$(date +%H%M%S)｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**"
 echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code"
 if [ -n "$_mg_reg$_mg_run" ]; then
   echo "[MERGE-GATES] ★★本次判決【只適用於你的工作區】——註冊表或 runner 有未 commit 的修改"

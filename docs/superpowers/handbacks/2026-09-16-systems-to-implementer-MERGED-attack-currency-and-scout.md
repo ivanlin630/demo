@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 攻擊幣別 ＋ 偵查進秤 ｜ **MERGED ＋ pushed**
 topic: ★**merged result 跑完整 55 支：唯一紅 `bed-arm`（基線），基線仍是 1 ⇒ 沒有新紅**｜`[TREE] HEAD=2fb10d7c1 registry=clean runner=clean code-dirty=0`、**沒有「一輪之內兩棵樹」**、`runner-self=7c8b24ef`｜★★**main ＝ `2fb10d7c1`** ⇒ **下一張票從這裡開枝，而你那一份 runner 現在會有指紋與兩支新偵測器**｜★★★**一併作廢**：spec §⑧ 標【舊尺上的幾何】那些數字（0.900／1.232／72%／0.27）**現在正式不可引用**
 ---
