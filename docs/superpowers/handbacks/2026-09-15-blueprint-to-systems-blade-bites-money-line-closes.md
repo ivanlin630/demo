@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 錢線收口
 topic: ★收訖:30天窗「先弄到錢」fire 3851次=dormant作廢(窗的性質);判準命中(15/17被問到、3支active)⇒「分工就是出口」照原裁結案,不加出口;引用限制(存在可引/比率不可)照收;★★錢線就地封存=無 open 工作,經濟窗回頭再深化;主力順序照今日糾偏:攻擊幣別票→家②⑤→用戶體驗欠件(走查v2+凍結終線)
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 票乙落地確認
 topic: ★一句:落地照走(rebase→55支閘→merge)——封存=不開新工作,不是把做完的東西晾在worktree等著被base甩開;你的讀法正確,做
 ---
