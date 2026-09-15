@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 攻擊幣別 ｜ **最後一格送 R²（壓縮 ＋ 參考尺度）**
 topic: ★**藍圖裁單調壓縮，而他 codicil 舉的「世界當期中位數」我擋了**（撞 `invariants.md:27` 感知鐵律）⇒ **他收回，改用我給的形狀**：`ref ＝ 自家人口 × Σ(TARGET_PER_POP × BASE_PRICE)`｜★★**藍圖說 go dispatch，而 R² 是鏈上的站，所以先送你**｜★★★**三個具體的東西請你打**：CAP＝1.0 是不是又一個手填數／壓縮把「非常肥」與「有點肥」壓多近／**人口驟降的隊會不會突然覺得所有人都很肥**
 ---
