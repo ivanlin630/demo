@@ -1,6 +1,9 @@
 extends SceneTree
 # @bed-kind: acceptance
 # slice: 身分vs位置拆解——含driver_ledger溢出的可信/不可信判定
+# ★已知限制(2026-09-16系統床通則)：④累計授予/移除次數(掃driver_ledger)只在跑完後印,
+#   未套用逐日flush——被殺會全丟④(①②③逐快照print較無此問題)，見
+#   docs/superpowers/handbacks/2026-09-16-systems-to-measurer-design-for-death-three-rules.md
 # resident_identity_vs_position_bed：把「身分」與「位置」分開數(systems修正票)。
 # ★上一卷(lord-belief-coverage)量到配對母體恆0-1,但is_resident_static同時要求
 #   【身分TAG_PRODUCE】＋【此刻站在自家/同勢力outpost上】——分不出是(a)村莊沒出生

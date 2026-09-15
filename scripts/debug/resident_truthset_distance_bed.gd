@@ -1,5 +1,7 @@
 extends SceneTree
 # @bed-kind: diagnostic
+# ★已知限制(2026-09-16系統床通則)：彙總只在跑完後印,未套用逐日flush——
+#   被殺會全丟不只損失最後一天,見docs/superpowers/handbacks/2026-09-16-systems-to-measurer-design-for-death-three-rules.md
 # resident_truthset_distance_bed：不在家是不是只是在田裡(第二刀，systems裁定精確版)。
 # ★systems裁：is_resident_static沒有「家」欄位，是位置謂詞不是團屬性——正確參照是
 #   【謂詞自己的真值集合】，不是另找一個像家的欄位。

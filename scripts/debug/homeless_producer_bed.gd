@@ -1,5 +1,8 @@
 extends SceneTree
 # @bed-kind: diagnostic
+# ★已知限制(2026-09-16系統床通則)：②壽命統計/多數彙總只在跑完後印,未套用逐日flush——
+#   被殺會全丟不只損失最後一天。重跑前若要符合新通則需重寫輸出結構,見
+#   docs/superpowers/handbacks/2026-09-16-systems-to-measurer-design-for-death-three-rules.md
 # homeless_producer_bed：「有生產身分而無自家據點」的隊——出現率/壽命/怎麼活(systems票)。
 # ★謂詞逐字(票面硬要求，不用別的寫法)：
 #   TAG_PRODUCE in team.tags  且  state.own_outpost_tile(team.team_id) == null

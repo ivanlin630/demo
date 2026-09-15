@@ -1,5 +1,8 @@
 extends SceneTree
 # @bed-kind: diagnostic
+# ★已知限制(2026-09-16系統床通則)：①母體/②組成逐項dump全部只在跑完後印,
+#   未套用逐日flush——被殺會全丟不只損失最後一天,見
+#   docs/superpowers/handbacks/2026-09-16-systems-to-measurer-design-for-death-three-rules.md
 # train_option_util_dump_bed：TASK_TRAIN為什麼贏不了(systems票，blueprint裁優先序)。
 # ★第一件事不是量util，是拆「不被選」的兩個原因：
 #   (a)applicable=false(閘擋掉)——讀production既有tap decision.opt_applicable.訓練

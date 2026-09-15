@@ -1,6 +1,9 @@
 extends SceneTree
 # @bed-kind: acceptance
 # slice: 世代4 30日全面體檢——③佃農有沒有家(登記錨)④帳能不能對上(不變量+coin)
+# ★已知限制(2026-09-16系統床通則)：④收場InvariantAudit+CoinAudit只在跑完後印,
+#   未套用逐日flush——被殺會完全丟失④(連開場那半也對不上)，見
+#   docs/superpowers/handbacks/2026-09-16-systems-to-measurer-design-for-death-three-rules.md
 # gen4_checkup_registry_ledger_bed：世代4 30日全面體檢——③佃農有沒有家(登記錨)
 #   ④帳能不能對上(不變量+coin) + 故事稽核(specimen全隊dump)
 # ★①戰爭打不打得起來/②信使送達 由現成acceptance床(herald_journey_bed.gd)覆蓋，本床不重複。

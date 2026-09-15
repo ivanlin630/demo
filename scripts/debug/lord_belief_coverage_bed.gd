@@ -1,6 +1,10 @@
 extends SceneTree
 # @bed-kind: acceptance
 # slice: 領主belief覆蓋率——含低覆蓋成因(缺產生路徑vs沒更新)的判別分類
+# ★已知限制(2026-09-16系統床通則)：逐快照(day10/20/30/45/60)本身已逐次flush，
+#   但每次快照內的完整分布/判別文字要等該快照時刻才印——中途被殺只丟最後那次快照,
+#   非全丟,較符合通則但未逐日(只逐快照)，見
+#   docs/superpowers/handbacks/2026-09-16-systems-to-measurer-design-for-death-three-rules.md
 # lord_belief_coverage_bed：領主對自家居民的 belief 覆蓋率（systems 2026-09-09 派票）。
 # ★母體＝配對(領主隊,自家居民隊)，不是隊數：
 #   領主 = team.parent_team_id==-1 且 faction_id!=-1 且該faction.leader_team_id==自己

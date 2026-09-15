@@ -1,5 +1,8 @@
 extends SceneTree
 # @bed-kind: diagnostic
+# ★已知限制(2026-09-16系統床通則)：每20000tick有[INTERIM REPORT](較符合逐日flush精神)，
+#   但specimen jsonl要跑完才flush+write_jsonl——中途被殺會丟失全部specimen(k校驗story稽核)，
+#   純聚合部分靠INTERIM較安全，見docs/superpowers/handbacks/2026-09-16-systems-to-measurer-design-for-death-three-rules.md
 # population_and_turnover_specimen_bed：人口儀器卷(主線)+k校驗story稽核 兩票合併一輪跑。
 # ★人口卷六格現況(2026-09-09更新，commit 0ab03121三組儀器已merge)：
 #   ①出生 breed.born(全域,已有)／②成年 pop.mature.batches(隊次)/pop.mature.n(人次)

@@ -1,6 +1,8 @@
 extends SceneTree
 # @bed-kind: acceptance
 # slice: 強強互打——先數門,再談util（含『征服門永遠最弱』推論的PASS/FAIL式判定）
+# ★已知限制(2026-09-16系統床通則)：全部統計只在跑完後印,未套用逐日flush——
+#   被殺會全丟不只損失最後一天,見docs/superpowers/handbacks/2026-09-16-systems-to-measurer-design-for-death-three-rules.md
 # attack_door_census_bed：強強互打——先數門,再談util(systems票)。
 # ★第一格不是util分解,是【哪一道門開的】：攻擊option applicable=三道門之一
 #   (options.gd:331-334)：①派系directive(faction_attack_target來自
