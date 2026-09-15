@@ -1042,7 +1042,14 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 			#   ★取價走 `local_value()`（單一入口）⇒ coin 走得通（`:173` 回 1.0），
 			#     **不直接 `BASE_PRICE.get(res, 0.0)`**（那會把 coin 算成 0）。
 			var _qty_gap: float = maxf(_nk - _eh, 0.0)
-			var _unit_price: float = TradeValuation.local_value(team, res, state)
+			# ★★★取價用【中性參考價】（systems 裁 2026-09-15）—— **決定性理由是單位**：
+			#   `derived_payoff` 已經用 `BASE_PRICE` 把缺口換成 coin
+			#   ⇒ ★同一個決策的【收益】與【成本】**必須同幣別**，否則相減沒有意義。
+			#   ★★我第一版用 `local_value` ⇒ **左手市價、右手心價**：
+			#     庫存過剩的隊把它估成 0 ⇒ 預算 0 ⇒ **永遠買得起一個它根本不想買的東西**（實測 95/165 筆）。
+			#   ★★★而這裡 `res` 不會是 coin（`maintain_coin` 已拆）⇒ `.get(res, 0.0)` 的 coin 陷阱不適用；
+			#     **而板上的真實要價是【正解的下一步】** —— 它擞感知鐵律（未到場就讀得到要價＝god-view），歸貿易軌。
+			var _unit_price: float = float(TradeValuation.BASE_PRICE.get(res, 0.0))
 			var _budget: float = _qty_gap * _unit_price
 			var _coin_have: float = float(team.resources.get("coin", 0))
 			# ★★★【分辨】：這條新路 0 次有兩種原因 —— **沒接上** vs **世界裡沒發生**
