@@ -45,6 +45,13 @@ func _initialize() -> void:
 			var tile: HexTileData = st.world.tiles.get(t.work_outpost.x * 1000 + t.work_outpost.y)
 			if tile != null and tile.outpost_owner != t.team_id:
 				lodgers += 1
+				# ★★★tap-gap 補（不變量「全量暫態可觀測性」：code 改不准製造量測盲點）：
+				#   ★房客那一格先前只有【數量】—— 而「是哪一支、寄居在誰的據點」答不出來
+				#   ⇒ ★★逐筆記 team_id；而 `bump_sample` 是 **first-N** ⇒ **交件要同時報母體與樣本數**。
+				if Probe.enabled:
+					Probe.bump("anchor.lodger.n")
+					Probe.bump_sample("anchor.lodger", {"team": t.team_id,
+						"host_owner": tile.outpost_owner, "pos": str(t.work_outpost)}, 100)
 	_ok("①遷移逐隊相同", mism.is_empty(),
 		"%d 支隊逐隊比對；不一致 %d 筆%s" % [st.teams.size(), mism.size(),
 			"" if mism.is_empty() else " ⇒ " + ", ".join(mism.slice(0, 5))])
@@ -54,6 +61,9 @@ func _initialize() -> void:
 	#   ⇒ 明寫不可判，★不要用「沒有不一致」冒充綠；★★它要等世界真的長出房客（攻擊門／④b）。
 	_ok("②母體地板（居民）", residents > 0,
 		"居民 %d 支（★0 ⇒ ①自動成立 ⇒ 不可判）" % residents)
+	print("  ★②-c 房客逐筆（★母體 %d／樣本上限 100、實收 %d —— `bump_sample` 是 first-N）：%s" % [
+		int(Probe.counts.get("anchor.lodger.n", 0)), (Probe.samples.get("anchor.lodger", []) as Array).size(),
+		str((Probe.samples.get("anchor.lodger", []) as Array).slice(0, 10))])
 	print("  ★②-b 房客母體：%d 支 ⇒ %s" % [lodgers,
 		"可判" if lodgers > 0 else "★★【不可判】—— 三個 config 在 t=0 房客都是 0，掛著等世界長出房客（不硬湊）"])
 

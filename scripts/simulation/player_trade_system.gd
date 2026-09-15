@@ -36,7 +36,9 @@ func get_tradeable_resources(state: WorldState, pt_id: int, tgt_id: int) -> Dict
 
 	var sellable: Dictionary = {}
 	var _tgt_lv: Dictionary = TradeValuation.leader_vals(state, tgt)
-	for res in TradeValuation.BASE_PRICE.keys():
+	# ★票甲：【誰可以被買賣】讀集合；下方 `prices`（每個東西多少錢）**不動**（映射語義）
+	if Probe.enabled: Probe.bump("tradeable.read.player_sellable")
+	for res in TradeValuation.TRADEABLE_RES:
 		var qty: float = _sellable_qty(tgt, res, _tgt_lv, state)
 		if qty > 0.0:
 			sellable[res] = qty

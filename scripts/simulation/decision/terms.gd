@@ -239,6 +239,25 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   ★相加：肥而不餓也值得打（機會）／餓而對方不肥也值得打（需要）
 			#   ★★乘贏率：打不贏就別打（既有接地）⇒ 無牙隊整項 0（★不是壓低，是 0）
 			var _opp: float = (ATTACK_OPP_LOOT_W * _loot + ATTACK_OPP_NEED_W * _need) * _odds * _person
+			# ★★★【因子逐筆】（systems 2026-09-15）：資產估計已排除「窄」
+			#   ⇒ ★把乘積拆開，看**哪一個因子的中位最靠近 0** —— 它就是把乘積壓扁的那一個。
+			#   ★★而形狀要說清楚：**`(0.6×loot + 0.4×need) × odds × person`** ——
+			#     loot 與 need 是**相加**不是相乘，而本實作**沒有獨立的風險項**。
+			#   ★★★純分析欄：只進 Probe、不耗 RNG、不寫 state。
+			if Probe.enabled:
+				Probe.bump_sample("attack.opp.factors", {
+					"est": snappedf(ctx.attack_loot_est, 0.001),
+					"loot": snappedf(_loot, 0.001), "need": snappedf(_need, 0.001),
+					"odds": snappedf(_odds, 0.001), "person": snappedf(_person, 0.001),
+					"opp": snappedf(_opp, 0.0001),
+					"tier": ctx.attack_belief_tier,
+					# ★★★**筆數 ≠ 隊數**（血證 2026-09-15 晚期窗）：
+					#   晚期窗的「餓且有牙」22 筆裡，**21 筆指紋完全相同**
+					#   （odds/person/loot/tier 一模一樣，need 逐筆遞增）
+					#   ⇒ ★幾乎肯定是**同一支隊在連續 tick 被重複取樣**，
+					#   ⇒ ★★而當時**樣本沒有 team_id ⇒ 「22 筆是幾支隊」答不出來**。
+					"team": ctx.team_id, "tick": ctx.tick}, 400)
+				Probe.bump("attack.opp.factors_n")
 			# ★★★「剩下的零是什麼」（systems 2026-09-12：★一半的母體沒有解釋我不收）：
 			#   ★零有**四種來源**，而它們的處置完全不同 ⇒ 逐筆分類，不是只數一個 0。
 			if Probe.enabled and absf(_opp) < 0.0005:

@@ -11,6 +11,12 @@ var food_days: float = 0.0
 var can_rescue_build: bool = false      # ★復甦 R2 §2B.1：料備妥產糧設施自救建設 viable（build-as-survival）
 var rescue_build_util: float = 0.0      # ★同上 genuine util（食安價值 frac × P(survive_to_harvest)）
 var population: int = 0
+# ★★★分析用身分欄（非 god-view：**隊伍當然知道自己是誰、現在幾點**）。
+#   ★血證 2026-09-15：晚期窗「餓且有牙 22 筆」裡 **21 筆指紋相同**
+#   ⇒ ★★幾乎肯定是同一支隊的連續 tick，**而當時答不出「幾支隊」**
+#   ⇒ ★★★**筆數 ≠ 隊數**；沒有這兩欄，任何「出現 N 筆」的量級都是不可判的。
+var team_id: int = -1
+var tick: int = 0
 var has_goods: bool = false
 var has_arb: bool = false
 # ★量級：當下可得的【最佳套利 gain】（has_arb 只說有沒有，這個說多少）。
@@ -291,6 +297,8 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _burn: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	c.food_days = ef / maxf(_burn, 0.001)
 	c.population = team.population
+	c.team_id = team.team_id
+	c.tick = state.world.current_tick
 	c.is_subteam = team.parent_team_id != -1   # A2a：子隊旗（歸建 directive + 戰略-gate）
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
 	var _arb: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
@@ -893,6 +901,37 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.attack_loot_est = FactionAISystem._belief_richness(_abel)   # ★tier 分層天然在它裡面（R² §⑤）
 		c.attack_belief_tier = int(_abel.get("tier", -1))             # ★驗收⑦：分桶看「知道得多的挑得更準」
 		c.attack_win_odds = clampf(c.self_armed_ratio / DecisionTerms.VIABLE_ARMED_RATIO, 0.0, 1.0)
+		# ★★★【第①種「餓而有牙卻沒搶」：**視野裡沒有目標**】（systems 2026-09-15）
+		#   ★而它**在因子樣本裡永遠不會出現** —— 因子 tap 只在【有目標】時 fire
+		#   ⇒ ★★**不在這裡單獨記，那一格就永遠是 0**（而 0 會被讀成「沒有這種情況」）。
+		if Probe.enabled and c.attack_target_id == -1:
+			var _nd0: float = clampf(1.0 - c.food_days / maxf(c.desperation_entry_threshold, 0.01), 0.0, 1.0)
+			if _nd0 >= 0.0005 and c.attack_win_odds >= 0.0005:
+				Probe.bump("hungry_armed.no_target")
+				Probe.bump_sample("hungry_armed.no_target_rows", {"team": c.team_id,
+					"tick": c.tick, "need": snappedf(_nd0, 0.001),
+					"odds": snappedf(c.attack_win_odds, 0.001)}, 200)
+		# ★★★輸入營養稽核（HOW 2026-09-12：**秤誠實 ≠ 輸入有營養**）——
+		#   ★三種形狀分開量：①系統性低估（估/真 比值）②雜訊（同向率）③值域壓縮（估的離散度）
+		#   ★★★而這一格**讀了真值** ⇒ **它是【分析欄】，只進 Probe、不進 ctx、不回頭餵秤**
+		#     （★感知鐵律：隊伍不得知道「他其實很有錢」；觀察者可以）。
+		if Probe.enabled:
+			var _tgt_t: TeamData = state.teams.get(c.attack_target_id)
+			if _tgt_t != null:
+				var _true_rich: float = (float(_tgt_t.resources.get("coin", 0))
+					+ float(_tgt_t.resources.get("food", 0))
+					+ float(_tgt_t.resources.get("material", 0))) / 100.0
+				Probe.bump_sample("appetite.input", {"est": snappedf(c.attack_loot_est, 0.001),
+					"true": snappedf(_true_rich, 0.001), "tier": c.attack_belief_tier,
+					"odds": snappedf(c.attack_win_odds, 0.001)}, 400)
+				Probe.add_amount("appetite.est_sum", c.attack_loot_est)
+				Probe.add_amount("appetite.true_sum", _true_rich)
+				Probe.bump("appetite.n")
+				# ★同向率（②雜訊）：以各自的中位替代量（★用「是否高於自己的長期均值」當粗判——
+				#   ★★而精確版要離線算，交件會標這是【粗判】）
+				var _hi_est: bool = c.attack_loot_est > 1.0
+				var _hi_true: bool = _true_rich > 1.0
+				Probe.bump("appetite.dir.%s%s" % ["E" if _hi_est else "e", "T" if _hi_true else "t"])
 	# ★★★成對反事實【不用開關】（spec 驗收⑥）：舊三門的判準所需欄位**全部還在 ctx 裡**
 	#   ⇒ ★同一次 gather 同時算【新門】與【舊門】⇒ 一趟就給出兩個率，
 	#   ★★而且是**逐字同母體**（不必跑兩趟、不必留一個會腐爛的旗標）。

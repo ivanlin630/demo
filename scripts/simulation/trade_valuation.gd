@@ -27,6 +27,23 @@ const BASE_PRICE: Dictionary = {
 	"wagons":            72.0,   # in 59
 	"medicine":          12.0,   # in 6
 }
+# ★★★【可交易品集合】—— 與 `BASE_PRICE`（價目）**分開的兩種語意**（票甲 2026-09-15）。
+#   ★病灶不是那些 `.get(res, 0.0)`，是**六處把價目表當可交易清單迭代** ——
+#     一張表同時是【價格】與【可交易集合】⇒ **補一個價格就會擴大交易集合**。
+#   ★★而那個危險**已經被人手工繞開三次**（`interaction_system:1324/:1331`、`player_api_mapper:860`
+#     各自寫 `if res == "coin": continue`）⇒ **繞漏三處** ⇒ **修實例會長回來，修型別才不會**。
+#   ★★★**硬約束：這裡【不准】寫成 `BASE_PRICE.keys()`** ——
+#     那是換個名字的同一張表，票乙補 coin 照樣炸。**必須逐項字面列舉。**
+#   ★今天它恰好等於 `BASE_PRICE` 的鍵集（coin 本來就不在價目表裡）
+#     ⇒ **本票 fp 逐位元不變是【預期】，不是巧合**。
+const TRADEABLE_RES: Array = [
+	"food", "material", "herb", "goods", "gem",
+	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
+	"weapon_melee_low", "weapon_melee_high", "weapon_ranged_low", "weapon_ranged_high",
+	"tools", "arrows", "armor_low", "armor_high",
+	"horses", "mounts", "wagons", "medicine",
+]
+
 const TARGET_PER_POP: Dictionary = {
 	"food":              10.0,
 	"material":           5.0,

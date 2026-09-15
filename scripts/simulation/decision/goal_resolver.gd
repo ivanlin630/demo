@@ -273,6 +273,16 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 			if Probe.enabled: Probe.bump("goal.skip.no_def" + _sday)
 			continue
 		var payoff: float = derived_payoff(state, team, def)   # ★§8.1 導出（舊：`def.payoff` flat 常數）
+		# ★★★【每一種 goal 的 payoff 逐型計】（systems 2026-09-15 要驗 `maintain_coin` 恒 0）：
+		#   ★問題是【它到底有沒有進候選】與【進了是不是恒 0】—— **兩個不同的問題**，
+		#   ★★而 grep 只答得了「有沒有被引用」，答不了【runtime 有沒有跑到】。
+		if Probe.enabled:
+			Probe.bump("goal.payoff.seen." + gt)
+			if absf(payoff) < 0.0005:
+				Probe.bump("goal.payoff.zero." + gt)
+			Probe.bump_sample("goal.payoff.rows", {"gt": gt,
+				"payoff": snappedf(payoff, 0.001), "team": team.team_id,
+				"tick": state.world.current_tick}, 400)
 		if Probe.enabled:
 			_unit_overlap_tap(state, team, gt, def, _uo_fai, _uo_otile)
 		# ★S4 設施發展 goal（build_F）：walk build-cost/facility-type/manpower 前置→frontier or build_F action。
