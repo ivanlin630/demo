@@ -1288,7 +1288,10 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 			func(it): return int(it.get("qty", 0)) > 0)
 	# (2) 賣 surplus（保留人格 reserve）——巧遇次路（非市集格=無自家糧倉），賣隨身 team.resources。
 	# ★守恆：surplus 讀 team.resources（_execute_transfer 搬 team.resources）；糧倉貨走市集 resolver（TileBank）。
-	for res in TradeValuation.BASE_PRICE.keys():
+	# ★票甲：讀【可交易品集合】不讀價目表 —— ★★這一處本來就【沒有】coin 守衛
+	# ★★★fp 不變只證【等價】，不證【被走到】⇒ 每一處記一筆（systems 票甲 §④）
+	if Probe.enabled: Probe.bump("tradeable.read.encounter_sell")
+	for res in TradeValuation.TRADEABLE_RES:
 		var stock: float = float(seller.resources.get(res, 0))
 		var reserve: float = TradeValuation.reserve(seller, res, TradeValuation.leader_vals(state, seller), state)
 		var surplus: float = maxf(stock - reserve, 0.0)
@@ -1322,15 +1325,17 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 # 處理缺幣團互補 surplus（coin 路徑換不了）。不碰 coin，coin_eq 守恆。
 func _attempt_barter(state: WorldState, a: TeamData, b: TeamData) -> void:
 	# a 可給的（a surplus 且 b 缺=b 想要）
-	for give_res in TradeValuation.BASE_PRICE.keys():
-		if give_res == "coin": continue
+	# ★票甲：集合拆出來之後，那句手工 `if == "coin"` 是死碼 ⇒ 刪掉
+	if Probe.enabled: Probe.bump("tradeable.read.barter_give")
+	for give_res in TradeValuation.TRADEABLE_RES:
 		var a_surplus: float = maxf(float(a.resources.get(give_res, 0)) - TradeValuation.reserve(a, give_res, TradeValuation.leader_vals(state, a), state), 0.0)
 		if a_surplus <= 0.0: continue
 		# b 是否想要（b 對該 res 估值 > a 對該 res 估值,即 b 較缺）
 		if TradeValuation.local_value(b, give_res, state) <= TradeValuation.local_value(a, give_res, state): continue
 		# 找 b 能回付的（b surplus 且 a 想要）
-		for pay_res in TradeValuation.BASE_PRICE.keys():
-			if pay_res == "coin" or pay_res == give_res: continue
+		if Probe.enabled: Probe.bump("tradeable.read.barter_pay")
+		for pay_res in TradeValuation.TRADEABLE_RES:
+			if pay_res == give_res: continue
 			var b_surplus: float = maxf(float(b.resources.get(pay_res, 0)) - TradeValuation.reserve(b, pay_res, TradeValuation.leader_vals(state, b), state), 0.0)
 			if b_surplus <= 0.0: continue
 			if TradeValuation.local_value(a, pay_res, state) <= TradeValuation.local_value(b, pay_res, state): continue

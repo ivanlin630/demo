@@ -856,10 +856,9 @@ static func map_trade_session(state: WorldState, target_id: int) -> Dictionary:
 	var feasible: bool = pt.tile_pos == tgt.tile_pos
 	var p_items: Array = []
 	var t_items: Array = []
-	# 可交易白名單：限 BASE_PRICE 項（coin 另列 face value）
-	for res in TradeValuation.BASE_PRICE:
-		if res == "coin":
-			continue
+	# ★票甲：白名單改讀【可交易品集合】—— 原本那句手工 `if res == "coin"` 是化石，型別修好後是死碼
+	if Probe.enabled: Probe.bump("tradeable.read.player_mapper")
+	for res in TradeValuation.TRADEABLE_RES:
 		if int(pt.resources.get(res, 0)) >= 1:   # 整數 ≥1 才可交易，避免碎量顯示 ×0 幽靈列
 			p_items.append({ "grade": res, "qty": int(pt.resources[res]), "unit_value": TradeValuation.local_value(pt, res, state) })
 		if int(tgt.resources.get(res, 0)) >= 1:
