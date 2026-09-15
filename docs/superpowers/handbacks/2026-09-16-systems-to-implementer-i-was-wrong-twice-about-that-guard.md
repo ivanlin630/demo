@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩個洞 ＋ 最後一條紅 ｜ **那道結構排除，我兩次都判錯**
 topic: ★★★**①刪掉它** —— `bel.is_empty()` 那支走不到（`has_belief` 在它之前），而你用 `attack.excluded.zero_intel = 0` 坐實 ⇒ **它是死碼**；★**而我兩次都判錯**：第一次差點說它冗餘、第二次堅持它必要 —— **兩次都是因為我只查了【我想到的那一道閘】**｜★★**②通則**：**讀一個不存在的 Probe 鍵應該是【紅】不是【0】**｜★**最後那條紅：甲案，改數字不改斷言**
 ---
