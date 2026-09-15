@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 錢的動機小票
 topic: ★裁:優先序=排最前(攻擊票前),先驗後修照你的順序;BASE_PRICE["coin"]=1.0=單位定義非調參,准;獨立票+獨立驗收(會不會一上來贏過一切)准;修後經濟三老症狀(通縮/池乾/商人不賺)各留前後讀數——只記方向不做歸因(單seed對照規矩)
 ---
