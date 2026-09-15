@@ -76,6 +76,12 @@ func _run() -> void:
 			Probe.arm()
 			print("★【晚期窗】tick %d 清空 Probe ⇒ **下面每一個數字都只含 tick %d–%d**" % [
 				reset_at, reset_at, ticks])
+			# ★★★兩種結局的【效力不對稱】（systems 2026-09-15，寫在結論旁邊不是信裏）：
+			#   ★這一段是【這一趡的後段】，**不是【世界的晚期】**。
+			#   ⇒ ★★**出現**某個現象 ⇒ **它就是會發生**（出現就是出現）
+			#   ⇒ ★★★**仍然是 0** ⇒ **只能說「到這一刻為止仍是 0」** —— **不能證明它永遠不發生**。
+			print("   ⇒ ★★★效力不對稱：**出現就是出現**；**仍是 0 只能說「到 tick %d 為止仍是 0」**" % ticks)
+			print("      ★因為這一段是【這一趡的後段】，不是【世界的晚期】")
 		runner.advance_tick(st, no_player)
 	var z: int = int(Probe.counts.get("attack.cmp.zero_final", 0))
 	var nz: int = int(Probe.counts.get("attack.cmp.nonzero_final", 0))
