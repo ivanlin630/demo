@@ -36,6 +36,19 @@ extends SceneTree
 #
 # ★跨輪紀錄在 `docs/measurements/2026-09-15-scout-on-the-scale-run-ledger.md`（五輪、五種死法）。
 #
+# ★★【本床靜音了哪些高 cap 診斷族】（必須明示，systems 2026-09-15）：
+#   `poll.eventwake`、`poll.outcome`、`t0.emit_ctx`（cap 都是 40000）
+#   ★它們的唯一讀者是 `scripts/debug/s5_poll_unique_value.gd` ⇒ 本輪一筆不讀 ＝ 純負擔。
+#   ★★而靜音只掉樣本、計數器照數 ⇒ 判準不受影響；
+#   ★★★**但下一個人會把「這一族沒樣本」讀成「它沒發生」** ⇒ 所以輸出裡也印一行。
+#
+# ★★★【本床兼答第二張票】（systems 2026-09-16：不要為一個欄位另起一輪）：
+#   生產隊三母體數 —— ★全部是【讀世界狀態】，任何一輪 30 天窗都答得出，**差別只在有沒有人印**：
+#   ①PRODUCE 隊數（★逐日 ⇒ **它什麼時候從 0 變成非 0**；
+#     ★★而那把【還沒發生】與【不會發生】分開 —— 兩者在單一時點的快照上長得一模一樣）
+#   ②擁有據點的隊數 ＋ 地形 ＋ **`outpost_type`**（★那幾個 `civilian` 是預置還是蓋的）
+#   ③登記數（`work_outpost`）＋與前兩者的交集
+#
 # ★★★【跑法硬要求】：30 天窗必須明示 `GODOT_TIMEOUT=1800`（或更大）。
 #   `tools/godot.ps1:84` 的預設是 **360 秒** ⇒ 30 天窗會在 **day 8 左右被殺**。
 #   ★★而被殺的輸出長得像一份完整的日誌（只是短）——
@@ -76,6 +89,16 @@ static func _feasible_has(scan: Dictionary, tid: int) -> bool:
 #     `event+day_suffix` 與 `event+".team."+id` —— **不是 team×day 的交叉積**
 #     ⇒ 鍵數 ≈ 71×天數 **＋** 71×隊數（相加），而不是相乘。
 #     ★★但它仍然**對天數無界** ⇒ 這顆探針量的就是那個成長率。
+# ★★★票乙式的逐日數（systems 2026-09-16）：PRODUCE 隊數**逐日**印。
+#   ★純讀 `team.tags`，零 RNG、不寫 state。
+#   ★★而它要回答的不是「有幾隊」，是**「它什麼時候從 0 變成非 0」** ——
+#   ★★★單一時點的 0 答不出【還沒發生】與【不會發生】的差別。
+static func _produce_count(state: WorldState) -> int:
+	var n: int = 0
+	for t in state.teams.values():
+		if t != null and (TeamData.TAG_PRODUCE in t.tags): n += 1
+	return n
+
 static func _mem_line(day: int) -> void:
 	var n_samples_inst: int = 0
 	for k in Probe.samples:
@@ -205,7 +228,10 @@ func _run() -> void:
 	print("   ★★（藍圖規則：戰爭類讀數的窗必須蓋過【偵查時代】⇒ 早窗與全窗都印，不只印一個）")
 	for _t in range(early_ticks):
 		runner.advance_tick(st, no_player)
-		if (_t + 1) % WorldState.TICKS_PER_DAY == 0: _mem_line((_t + 1) / WorldState.TICKS_PER_DAY)
+		if (_t + 1) % WorldState.TICKS_PER_DAY == 0:
+			var _d1: int = (_t + 1) / WorldState.TICKS_PER_DAY
+			_mem_line(_d1)
+			print("[POP] day=%d produce_teams=%d teams=%d" % [_d1, _produce_count(st), st.teams.size()])
 	var e_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
 	var e_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
 	var e_moth: int = int(Probe.counts.get("optpool.mother", 0))
@@ -215,7 +241,10 @@ func _run() -> void:
 	var e_cor: int = int(Probe.counts.get("g3.scout_dispatch", 0))
 	for _t in range(ticks - early_ticks):
 		runner.advance_tick(st, no_player)
-		if (_t + 1) % WorldState.TICKS_PER_DAY == 0: _mem_line((early_ticks + _t + 1) / WorldState.TICKS_PER_DAY)
+		if (_t + 1) % WorldState.TICKS_PER_DAY == 0:
+			var _d2: int = (early_ticks + _t + 1) / WorldState.TICKS_PER_DAY
+			_mem_line(_d2)
+			print("[POP] day=%d produce_teams=%d teams=%d" % [_d2, _produce_count(st), st.teams.size()])
 	var f_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
 	var f_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
 	var f_moth: int = int(Probe.counts.get("optpool.mother", 0))
@@ -358,6 +387,45 @@ func _run() -> void:
 	print("   ★★而【聚合面答不出「同一個目標有沒有被取代」】—— 那是 §A ⑤ 的活，兩者不可互相代替。")
 	print("   ★攻擊側結構排除：`no_priced_belief` %d 次（★這是①在真世界裡的量）" % [
 		int(Probe.counts.get("attack.excluded.no_priced_belief", 0))])
+
+	# ══════════ §C 生產隊三母體（第二張票，systems 2026-09-16）══════════
+	# ★全部是【讀世界狀態】：零 RNG、不寫 state、不影響任何判準。
+	# ★★而三個數要**同一個時點**（窗末），否則交集讀不出來。
+	print("")
+	print("★§C 生產隊三母體（窗末快照，母體＝全隊名冊 %d 隊）" % st.teams.size())
+	var n_prod: int = 0
+	var n_own: int = 0
+	var n_reg: int = 0
+	var n_prod_own: int = 0
+	var n_own_reg: int = 0
+	var n_prod_reg: int = 0
+	var terr: Dictionary = {}
+	var otype: Dictionary = {}
+	for t in st.teams.values():
+		if t == null: continue
+		var is_prod: bool = TeamData.TAG_PRODUCE in t.tags
+		var tile: HexTileData = st.own_outpost_tile(t.team_id)
+		var has_own: bool = tile != null
+		var has_reg: bool = t.work_outpost != Vector2i(-1, -1)
+		if is_prod: n_prod += 1
+		if has_own:
+			n_own += 1
+			terr[tile.terrain] = int(terr.get(tile.terrain, 0)) + 1
+			var _ot: String = tile.outpost_type if tile.outpost_type != "" else "(空)"
+			otype[_ot] = int(otype.get(_ot, 0)) + 1
+		if has_reg: n_reg += 1
+		if is_prod and has_own: n_prod_own += 1
+		if has_own and has_reg: n_own_reg += 1
+		if is_prod and has_reg: n_prod_reg += 1
+	print("   ①PRODUCE 隊數 ＝ %d   ★而【什麼時候從 0 變成非 0】看上面逐日的 [POP] 行" % n_prod)
+	print("      ★★單一時點的 0 答不出【還沒發生】與【不會發生】的差別 —— 逐日那一欄才答得出。")
+	print("   ②擁有據點的隊數 ＝ %d｜地形 %s｜**outpost_type %s**" % [n_own, str(terr), str(otype)])
+	print("      ★`outpost_type` 那一欄就是「`civilian` 是預置還是蓋的」要的那個欄位。")
+	print("   ③登記數（work_outpost）＝ %d" % n_reg)
+	print("   ★交集：PRODUCE∩擁有 %d｜擁有∩登記 %d｜PRODUCE∩登記 %d" % [
+		n_prod_own, n_own_reg, n_prod_reg])
+	print("   ★★三個數是**同一個時點的快照**（窗末）—— 不同時點的三個數算不出交集。")
+	print("   ★★★而本床**不對這三個數下任何判決** —— 它們是別一張票的輸入。")
 
 	print("")
 	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)
