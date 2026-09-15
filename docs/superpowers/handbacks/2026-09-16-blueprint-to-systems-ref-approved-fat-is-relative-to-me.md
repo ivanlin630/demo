@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 參考尺度定形
 topic: ★准:你的形狀取代我的例子——ref=自家人口×Σ(TARGET_PER_POP×BASE_PRICE)=「我這種規模的隊值多少」;我的「世界中位數」例子撞 god-view 鐵律,你擋得對,收回;★★而這個形狀語意還更好:「肥」變成【相對於我】——窮小隊看中等村是肥羊,大國看不上眼,劫掠者天然挑「比自己富的」=戲的正確形狀;go dispatch
 ---
