@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 攻擊幣別 ＋ 偵查進秤 ｜ 留白格
 topic: ★★★留白格找到候選(iv)：這個 codebase 同支檔案裡**已經有一個活生生的先例**解過同型問題(`belief_system.gd:37 ARMED_FRACTION_BASE`——戰力迷霧),而不是三個候選塌成0｜★★而Q2/Q3合起來查出一件比你想的更硬的事實：**「全盲」不是邊角情境,是 world-gen 剛生完的預設狀態**(team_discovered 有種,team_intel 從不種)——若機制在全盲不啟動,它在【它自己最該生效的那群目標】上就是沒做
 ---
