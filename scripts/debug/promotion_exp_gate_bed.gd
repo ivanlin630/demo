@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # promotion_exp_gate_bed：晉升exp閘「門檻vs可達量」距離(systems派票+加掛三題，一次收完)。
 # ★本體：exp存量(anon_exp vs 門檻50/100/200) + 流量逐來源(exp.add.<source>系列tap，9446d70b已merge)
 # ★加掛①勒索四格(raid.extort/combat_at_outpost/combat_open_field/loot_noresolve，守恆式：四格加總==raid.resolve)

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # terrain_density_distance_bed：地形密度/資源分布——「這個世界存不存在值得跨越的距離」
 # (systems 2026-09-09派票，blueprint裁地基題)。★tick-0快照,不跑模擬。
 #

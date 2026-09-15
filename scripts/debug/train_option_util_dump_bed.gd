@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # train_option_util_dump_bed：TASK_TRAIN為什麼贏不了(systems票，blueprint裁優先序)。
 # ★第一件事不是量util，是拆「不被選」的兩個原因：
 #   (a)applicable=false(閘擋掉)——讀production既有tap decision.opt_applicable.訓練

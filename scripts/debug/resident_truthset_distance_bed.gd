@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # resident_truthset_distance_bed：不在家是不是只是在田裡(第二刀，systems裁定精確版)。
 # ★systems裁：is_resident_static沒有「家」欄位，是位置謂詞不是團屬性——正確參照是
 #   【謂詞自己的真值集合】，不是另找一個像家的欄位。

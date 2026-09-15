@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # attack_door_census_bed：強強互打——先數門,再談util(systems票)。
 # ★第一格不是util分解,是【哪一道門開的】：攻擊option applicable=三道門之一
 #   (options.gd:331-334)：①派系directive(faction_attack_target來自

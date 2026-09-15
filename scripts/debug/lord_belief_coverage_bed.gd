@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # lord_belief_coverage_bed：領主對自家居民的 belief 覆蓋率（systems 2026-09-09 派票）。
 # ★母體＝配對(領主隊,自家居民隊)，不是隊數：
 #   領主 = team.parent_team_id==-1 且 faction_id!=-1 且該faction.leader_team_id==自己

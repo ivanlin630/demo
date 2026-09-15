@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # sustainability_map_bed：養活力地圖(上一卷「存在性距離」的量綱修正，systems 2026-09-09票)。
 # ★predicate不發明，用code既有的GATE-A：decision_context.gd:641-655
 #   regen = ResourceSystem.REGEN_RATE[terrain]["food"] × tile.harvest_factor

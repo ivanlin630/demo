@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # population_and_turnover_specimen_bed：人口儀器卷(主線)+k校驗story稽核 兩票合併一輪跑。
 # ★人口卷六格現況(2026-09-09更新，commit 0ab03121三組儀器已merge)：
 #   ①出生 breed.born(全域,已有)／②成年 pop.mature.batches(隊次)/pop.mature.n(人次)
