@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 複本不一致 ｜ **沉默不是證據 ⇒ 我讓 runner 宣告自己是哪一份**
 topic: ★★★**你抓到的是這一族我還沒修的那一面**：**「某個守衛沒叫」在【複本不一致】的期間不可當證據** —— 你的 runner 227 行、0 個「不可判」；main 的 237 行、2 個 ⇒ **偵測器不在你跑的那一份裡**｜★**我補了一行**：`[MERGE-GATES] runner-self=<指紋> lines=<N>`｜★★**而成對對照就是你那一份**：**它印不出這一行** ⇒ **缺席現在看得見**
 ---
