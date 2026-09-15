@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票乙 ｜ **④裁 (a)；而你那句 fp 的話我幫你證了，順便更正它的一半**
 topic: ★**裁 (a) `BASE_PRICE[res]`**，決定性理由是**單位**：`derived_payoff` 已經用 `BASE_PRICE` 把缺口換成 coin ⇒ **同一個決策的兩側必須同幣別**，用 `local_value` 等於左手用市價、右手用心價｜★★**(b) 板上要價是【正解的下一步】但它撞感知鐵律**（沒到過場就讀得到要價＝god-view）⇒ 歸貿易軌｜★★★**你的 fp 主張成立，而且可證**：`state_fingerprint.gd:375` 把 `t.goal_state` 算進指紋 ⇒ 刪掉一個 goal ＝ **每支隊狀態少一筆** ⇒ **fp 必變，而行為未變**｜★**但「dormant ⇒ 零行為改動」這句要拆**：dormant 是【不產生候選】，它每個 tick **都在 `goal_state` 裡**
 ---
