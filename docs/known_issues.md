@@ -4697,9 +4697,36 @@ implementer 量到：**63/63 支隊 `work_outpost == (-1,-1)`**。
 (a) 世界裡沒有 PRODUCE 隊（①掛）／(b) 有但沒有據點格（②掛）／
 (c) 兩者都有而它們從不站上去（★這才是「手不聽腦」那一族）。**三個數未齊，不下結論。**
 
-★**連帶風險**：`decision_context.gd:457` 有一條
-`if team.tags.has(TAG_PRODUCE) and team.work_outpost == Vector2i(-1,-1)` 的分支
-⇒ **登記恆空 ⇒ 那條分支恆被走** ⇒ 它的對照組從來沒出現過。
+★★★**更正（同日，我寫錯了）**：我原寫 `decision_context.gd:457` 的
+`if team.tags.has(TAG_PRODUCE) and team.work_outpost == Vector2i(-1,-1)` 分支【恆被走】
+—— **錢好相反**：它的第一個條件是 `TAG_PRODUCE`，而**全世界 PRODUCE 隊 ＝ 0**
+⇒ **那條分支【從來沒被走過】**。
+★**我把一個兩子句條件的第二半當成了全部** —— 同日第二次同型。
+
+## ★★★全世界【生產隊】＝ 0 支（2026-09-15）
+
+狀態：已知未修
+回訪：據點類型分佈回報時，複審日 2026-09-22
+
+implementer 量到：**(a) PRODUCE 隊 ＝ 0 支**／**(b) 【擁有】據點 ＝ 18 支**（地形 forest 16 / plains 2）／
+**【登記】＝ 0 支**／交集 0。
+
+★**而 `TAG_PRODUCE` 的寫入點只有三個**（裸掃全庫，production 側）：
+`interaction_system.gd:1691`（安頓 settle）、`:1718`（convert_resident）、
+`outpost_system.gd:545`（`_auto_settle_builder` —— ★★**而它只在 `outpost_type == "civilian"` 時給 PRODUCE，
+否則給 MILITARY**）。**世界生成端一個都沒有** ⇒ 生產隊完全依賴這三個動詞。
+⇒ **PRODUCE ＝ 0 代表這三個動詞在整個窗裡一次都沒成功。**
+
+★★★**連帶全部空掉**（凡以 `TAG_PRODUCE` 為門的）：登記錨、
+`labor_system.gd:33/:61` 的共址勞力池、`interaction_system.gd:664/:719` 的居民特別稅、
+`faction_ai_system.gd:5296/:5341/:7496` 的各迴圈、`decision_context.gd:445/:457`。
+
+★★**而測試裡從來不空**：約 80 處 debug/fixture **手動指派** `TAG_PRODUCE`
+⇒ ★**測試母體與真實母體系統性不同** ⇒ **沒有任何一支測試會發現真世界沒有生產隊。**
+
+**待答（決定性的下一個數）**：那 18 個據點的 `outpost_type` 分佈，以及它們怎麼來的
+（建造完工／genesis／奪取）。★**若大多數不是 `civilian` ⇒ 建造者都拿到 MILITARY
+⇒ 永遠不會有生產隊，而農田（需 `allowed_outpost: ["civilian"]`）也建不起來。**
 ★★**而 farming 要 `allowed_outpost: ["civilian"]`**（`outpost_system.gd:100`）
 ⇒ **若 (b) 成立，「農田限平原」那把刀砂不到人 —— 因為前一道門（要有據點）就沒人通過。**
 
