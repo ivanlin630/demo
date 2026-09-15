@@ -538,6 +538,12 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 
 # C: 建造子隊完工後就地安頓為駐留 team（owner 已設為自己，加 tag、脫離母團）
 func _auto_settle_builder(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	# ★★★【完工安頓】是 **PRODUCE 身分的唯一來源之一** ⇒ 它有沒有 fire 要看得到：
+	#   ★若據點是【起始預置】，這個動詞就從來沒被走過
+	#   ⇒ ★★而那時【PRODUCE ＝ 0】是【沒有人完工】，**不是【寫入點壞了】**。
+	if Probe.enabled:
+		Probe.bump("outpost.settle_builder")
+		Probe.bump("outpost.settle_builder." + str(tile.outpost_type))
 	state.detach_subteam(team)   # 完工安頓脫離母團（雙向同步）
 	team.tags.erase(TeamData.TAG_SUBTEAM)
 	if tile.outpost_type == "civilian":

@@ -18,7 +18,6 @@ const MAINTAIN_GOAL_RES: Dictionary = {
 	"maintain_material": "material",
 	"maintain_tools":    "tools",
 	"maintain_weapons":  "weapon_melee_low",   # 代表性武器（S2 單 res；多武器型 goal-set 泛化=後續）
-	"maintain_coin":     "coin",
 }
 
 # ★S4 設施發展 goal → 對應 facility（8 座）。prereqs 由 GoalResolver 從 OutpostSystem.FACILITY_DEF 動態導
@@ -41,7 +40,14 @@ static var REGISTRY: Dictionary = {
 	"maintain_material": {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "material"}],         "payoff": 1.0},
 	"maintain_tools":    {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "tools"}],            "payoff": 1.0},
 	"maintain_weapons":  {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "weapon_melee_low"}], "payoff": 1.0},
-	"maintain_coin":     {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "coin"}],             "payoff": 1.0},
+	# ★★★`maintain_coin` **拆掉**（藍圖裁 A、票乙 2026-09-15）—— ★而理由要留著（殘表教訓）：
+	#   ★**錢不是與糧食並列的【目的】，是達成別的目的的【手段】** ⇒ 走 `prereqs` 鏈，
+	#     不在這張表裡當平行的維持目標（否則同一份需求會被數兩次）。
+	#   ★★**而它本來就是 dormant**：`need_keep(coin)` ≡ 0（`TARGET_PER_POP` 無 coin 鍵、
+	#     coin 非任何配方 `in`、建造成本無 coin）⇒ 恒 satisfied ⇒ **實跑 0 次**
+	#     （量測：`docs/measurements/2026-09-15-coin-blast-radius-and-maintain-coin.md`）
+	#   ★★★所以拆它【不改變任何行為】—— **而那正是可以拆的理由**；
+	#     若日後有人想把「想要錢」補回來，正確的地方是前置鏈，**不是這張表**。
 	# S4 設施發展 8 座（facility 標記，prereqs 動態導 FACILITY_DEF）。payoff 略高於 maintain（發展意圖）。
 	"build_farming":     {"facility": "farming",     "payoff": 1.5},
 	"build_workshop":    {"facility": "workshop",    "payoff": 1.5},
