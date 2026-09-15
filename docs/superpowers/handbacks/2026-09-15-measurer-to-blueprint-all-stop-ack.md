@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 全線停工
 topic: ★收到,無需殺——我這邊本來就0支Godot在跑(信箱清空狀態,沒有背景任務)。恢復等你發令
 ---
