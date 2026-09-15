@@ -253,9 +253,16 @@ func _init() -> void:
 				print("      ★母體裡的隊有走買路，**而樣本裡一筆都沒抓到**（`buy.budget` 是 first-N 上限 300）")
 				print("         ⇒ ★★**這不是分布，是取樣窗口** ⇒ 不可判")
 			else:
-				print("      ③分布（n=%d）：min %.3f｜中位 %.3f｜max %.3f｜**過 1 的 %d 筆**" % [
+				# ★★★【這個分布不可引用來回答「有沒有人過 1」】：
+				#   ★`buy.budget` 是 **first-N 上限 300** ⇒ 它只蓋到【最早那一段】
+				#   ⇒ ★★實測：計數說預算過 1 有上千次，**而這個樣本裡一筆都沒有**
+				#   ⇒ ★★★**要回答「有沒有人過 1」請讀計數（`buy_short`），不要讀這一行**。
+				print("      ③分布（n=%d，★first-N 早期窗）：min %.3f｜中位 %.3f｜max %.3f｜樣本裡過 1 的 %d 筆" % [
 					ratios.size(), ratios[0], ratios[ratios.size() / 2],
 					ratios[ratios.size() - 1], over1])
+				print("         ★★而【全窗計數】才是答案：預算 > 手上的錢 **%d 次** / 買路走到 %d 次" % [
+					int(Probe.counts.get("goal.res_prereq.buy_short", 0)),
+					int(Probe.counts.get("goal.res_prereq.buy_seen", 0))])
 	var _lst: Array = []
 	for k in setA: _lst.append("t%d(%s)" % [int(k), str(setA[k])])
 	print("   (A) 逐支：%s" % str(_lst.slice(0, 12)))
