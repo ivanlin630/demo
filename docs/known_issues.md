@@ -4651,3 +4651,18 @@ live-team-census    3 筆「普查表指向一個現在撈不到的站點」
   ⇒ 這類比較**必須分層**（可比母體的到場率 ＋ 新增那批是誰），否則會把成功判成失敗。
 回訪：blueprint 裁完排序後開票
 ```
+
+## coin：per-resource 表的缺席＝靜默的 0（2026-09-15，systems）
+
+- **★`maintain_coin` 從不被提名**（實跑 0 次／4320 tick／seed 1337；靜態證：`need_keep(coin) ≡ 0.0`
+  —— `trade_valuation.gd:30-51` 的 `TARGET_PER_POP` 缺 coin ⇒ `_self_use` 0；coin 非任何配方的 `in`
+  ⇒ `_supply_chain` 0；`outpost_system.gd:9/:94` 明文建造無 coin ⇒ 第三項 0）
+  ⇒ **「這個世界的隊伍從來不會因為想要錢而做事」成立，而原因是沒有「想要錢」這個需求，不是錢沒有價格。**
+  ⇒ 處置＝spec `2026-09-15-coin-is-the-unit-HOW.md`（票甲取價單一真相 → 票乙 coin 需求衍生化）。
+- **★★`BASE_PRICE` 也缺 coin，而 `trade_valuation.gd:173-175` 用函式內特判補上**
+  ⇒ **表與函式兩份真相**；★**補表不是修法**（交易迴圈會把 coin 當可買賣商品 ⇒ 型別錯）。
+  ⇒ **de-patch 方向＝取價單一入口**。
+- **★★★通則（同型會再犯）**：**per-resource 表的預設 `0`，語意上是「不存在」不是「零」**
+  ⇒ 一個資源在表裡缺席，全鏈都會**靜默地**把它當不存在，而**缺席不會叫**。
+- **待查（另立，未開票）**：`maintain_material` **85% 的 payoff 恰好 0**（implementer 2026-09-15 側報，
+  母體＝`derived_payoff` 逐型計數）。假設之一＝ material 的 target 常已滿足；**未查證**。

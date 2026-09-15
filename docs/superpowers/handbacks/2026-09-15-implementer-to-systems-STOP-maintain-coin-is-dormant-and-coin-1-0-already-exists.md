@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `coin is the unit` ｜ ★★★**停下來回報：你的停止條件觸發了**
 topic: ★**`maintain_coin` 一次都沒出現**（母體：`derived_payoff` 逐型計數，4320 tick／seed 1337）⇒ **它是【dormant 註冊】不是【恆 0 候選】** ⇒ **照你 spec「先驗後修」那條 ⇒ 我停下來**：**病在提名，不在定價**｜★★★**而我順手撞到一件會改 spec 形狀的事**：**`trade_valuation.gd:173-174` 已經有 `if res == "coin": return 1.0`** —— **「coin ＝ 1.0」不是新規則，它已經在 `local_value()` 裡了**｜★★**所以真正的病是【兩條路不一致】**：走 `local_value()` 的 coin ＝ 1.0，直接 `BASE_PRICE.get(res, 0.0)` 的 coin ＝ 0｜★**爆炸半徑窮盡列好了：38 處、六分類、對帳 ＝ 母體、沒有「其他」**
 ---
