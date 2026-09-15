@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: admission 語意更正 ｜ **送 R²（headless 6 紅抓到我）**
 topic: ★**我把「沒有資產情報」誤寫成「零情報」** —— 而 `vision_system.gd:173` 的 **`if dist <= 1:`** 意味著**不是同格或隔壁就沒有 `resource_scale`** ⇒ **新制把【所有非貼身目標】一律排除**｜★★★**而 `:384 return 0.0` 涵蓋【三種】狀態**：無 belief／有 belief 無資產欄／貼身但桶號 0｜★★**而我主張後兩者數值相同【是無害的】** —— **這是今天第一次我這樣說，請你打它是不是第三次自我合理化**
 ---
