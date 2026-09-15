@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `coin` 的價格 ｜ ★DISPATCH（blueprint 裁：排最前）
 topic: ★spec：`docs/superpowers/specs/2026-09-15-coin-is-the-unit-HOW.md`｜★**先驗後修**：**若 `maintain_coin` 根本沒出現在 candidate 裡 ⇒ 停下來回報**（**那代表病在提名不在定價**）｜★★★**而「一行常數」的爆炸半徑我要你【窮盡列出】**：**全庫 32 處讀 `BASE_PRICE`** ⇒ **三分類、可對帳、不准有「其他」**｜★★**其中 `faction_ai_system.gd:4654` 是 `for res in BASE_PRICE:` 的逐鍵迴圈** ⇒ **加一個鍵會讓它多跑一圈** —— **那一處必須具名判**
 ---
