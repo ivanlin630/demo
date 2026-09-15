@@ -519,6 +519,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	if Probe.enabled and not scored.is_empty():
 		Probe.bump("rank.winner_all." + String(scored[0]["opt"]))
 		Probe.bump("rank.winner_all.__total")
+		# ★★★【有沒有真的去搶】（systems 2026-09-15）：
+		#   ★知道「餓而有牙」存在之後，下一個問題是**它有沒有在某個點真的去搶**。
+		#   ★★而【一路餓到死也沒搶】比【互斥】更難看：**有牙、很餓、而仍然不搶**。
+		if String(scored[0]["opt"]) == "攻擊":
+			Probe.bump_sample("attack.won", {"team": team.team_id,
+				"tick": state.world.current_tick}, 400)
+			Probe.bump("attack.won_n")
 	if Probe.enabled and not scored.is_empty():
 		var _sh_i: int = -1
 		for _si in range(scored.size()):

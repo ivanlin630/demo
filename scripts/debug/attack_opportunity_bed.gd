@@ -255,6 +255,33 @@ func _run() -> void:
 		print("   ⇒ ★★報【筆數＋母體】，**分界不在這支床裡定** —— 它是裁決，不是量測。")
 		print("      ★★★判法（systems 2026-09-15）：**這個判準能不能在【沒有人解釋】的情況下站得住？**")
 		print("         能 ⇒ 進工具（實跑 N、母體地板、fp 逐字比）｜不能 ⇒ 留在人手上，而人要寫理由。")
+	# ★★★【軌跡】餓且有牙的隊，它們的 need 隨時間怎麼走，有沒有真的去搶（systems 2026-09-15）
+	if not frows.is_empty():
+		var traj: Dictionary = {}
+		for r in frows:
+			if float(r["need"]) < 0.0005 or float(r["odds"]) < 0.0005:
+				continue
+			var _tm: int = int(r.get("team", -9))
+			if not traj.has(_tm): traj[_tm] = []
+			(traj[_tm] as Array).append([int(r.get("tick", -9)), float(r["need"])])
+		var won: Dictionary = {}
+		for w in Probe.samples.get("attack.won", []):
+			won[int(w["team"])] = true
+		if not traj.is_empty():
+			print("")
+			print("★★★餓且有牙的隊的【軌跡】（need 隨 tick），並標它有沒有真的搶")
+			print("   ★【一路餓到死也沒搶】比【互斥】更難看：**有牙、很餓、而仍然不搶**")
+			for tm in traj:
+				var arr: Array = traj[tm]
+				arr.sort_custom(func(a, b): return a[0] < b[0])
+				print("   隊 %d：%d 筆｜tick %d→%d｜need %.3f→%.3f｜**%s**" % [
+					tm, arr.size(), arr[0][0], arr[arr.size() - 1][0],
+					arr[0][1], arr[arr.size() - 1][1],
+					("曾經搶了" if won.has(tm) else "★從來沒搶")])
+			print("   ★★母體邊界：`attack.won` 也是 first-N 樣本（實收 %d／累計 %d）" % [
+				(Probe.samples.get("attack.won", []) as Array).size(),
+				int(Probe.counts.get("attack.won_n", 0))])
+			print("      ⇒ ★★★**「從來沒搶」可能是【搶了而沒被取樣】** —— 兩者在這行字上長得一樣")
 	# ★★★因子逐列 TSV（systems 2026-09-15 問「淺」的來源）——
 	#   ★聚合答不了逐桶平均：要算 tier2 的 loot 逐桶 util，必須有逐列值。
 	print("")
