@@ -4681,6 +4681,29 @@ live-team-census    3 筆「普查表指向一個現在撈不到的站點」
   ⇒ 處置＝票甲（把集合獨立列舉拆出來、刪化石守衛；★**新集合不准是 `BASE_PRICE.keys()` 的別名**）。
 - **★★★通則（同型會再犯）**：**per-resource 表的預設 `0`，語意上是「不存在」不是「零」**
   ⇒ 一個資源在表裡缺席，全鏈都會**靜默地**把它當不存在，而**缺席不會叫**。
+## 全世界 63 支隊的【工作據點登記】全是空的（2026-09-15）
+
+狀態：未確認
+回訪：量測窗 2026-09-22
+
+implementer 量到：**63/63 支隊 `work_outpost == (-1,-1)`**。
+★**而自動登記是接著電的**：`sim_runner.gd:99` 每 tick 呼叫 `auto_register_stub_sweep()`
+（`game_setup.gd:78` ＋ `sim_runner.gd:96` 還有遷移）⇒ **不是「沒接線」**。
+★★`faction_ai_system.gd:691-705` 的謂詞要求【同時】：①`TAG_PRODUCE` ②站的格 `outpost_level > 0`
+③該格 owner 是自己或同 faction。而 sweep 每 tick 跑、登記持久
+⇒ ★★★**全 -1 ＝【整個窗裡從來沒有任何一支 PRODUCE 隊站在合格的據點格上】** —— 比「此刻沒有」強得多。
+
+**那個 0 有三種形狀，處置完全不同**：
+(a) 世界裡沒有 PRODUCE 隊（①掛）／(b) 有但沒有據點格（②掛）／
+(c) 兩者都有而它們從不站上去（★這才是「手不聽腦」那一族）。**三個數未齊，不下結論。**
+
+★**連帶風險**：`decision_context.gd:457` 有一條
+`if team.tags.has(TAG_PRODUCE) and team.work_outpost == Vector2i(-1,-1)` 的分支
+⇒ **登記恆空 ⇒ 那條分支恆被走** ⇒ 它的對照組從來沒出現過。
+★★**而 farming 要 `allowed_outpost: ["civilian"]`**（`outpost_system.gd:100`）
+⇒ **若 (b) 成立，「農田限平原」那把刀砂不到人 —— 因為前一道門（要有據點）就沒人通過。**
+
+
 ## 11 支隊沒有【幾乎每支隊都該有】的 maintain goal（2026-09-15，推論非觀測）
 
 狀態：未確認
