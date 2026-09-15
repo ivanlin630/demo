@@ -253,7 +253,7 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 	var feasible: Array = []      # [{id, eta_days}]（★零人格，供門與 fallback target 用）
 	# ★★★逐【呼叫】記淘汰理由（systems 2026-09-12：判準要可證偽 ⇒ 每一筆 nO 要指得出是哪一種不可行）
 	#   ★★而「掃過幾個」與「因為什麼被刷掉」是兩件事 ⇒ `scanned` 與四個理由分開記。
-	var why: Dictionary = {"scanned": 0, "same_faction": 0, "no_belief": 0,
+	var why: Dictionary = {"scanned": 0, "same_faction": 0, "no_belief": 0, "no_priced_belief": 0,
 		"no_belief_pos": 0, "unreachable": 0, "cannot_afford": 0}
 	var best_id: int = -1
 	var best_score: float = 0.0
@@ -299,7 +299,19 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		var pop_est: float = float(bel.get("population_est", 0.0))
 		# 無 armed_est belief → 人格化迷霧 fallback（讀 leader 人格，非埋死「陌生=滿武裝」）
 		var armed_est: float = BeliefSystem.estimate_armed(bel, pop_est, leader.values if leader != null else {})
-		var richness: float = _belief_richness(bel)
+		# ★★★【型別可行性】（票：攻擊幣別 2026-09-15）：
+		#   ★沒有可定價分項（只有 `resource_scale` 或什麼都沒有）的目標
+		#   ⇒ **結構上不產生成攻擊 candidate** —— **不是「少加一項」**
+		#   ⇒ ★★因為 `score` 是加總：**「少一項」與「那一項等於 0」逐位元相同**
+		#   ⇒ ★★★**而它們要去的地方是【偵查】，不是【被當成很窮的攻擊目標】**。
+		if not belief_has_priced_items(bel):
+			why["no_priced_belief"] = int(why.get("no_priced_belief", 0)) + 1
+			if Probe.enabled:
+				Probe.bump("attack.excluded.no_priced_belief")
+				Probe.bump_sample("scout.candidates", {"team": team.team_id, "target": tid,
+					"tier": int(bel.get("tier", -1)), "tick": state.world.current_tick}, 300)
+			continue
+		var richness: float = belief_richness_coin(bel)
 		# capability grounding（裁2）：弱點比 self ARMED 非 self POP → 無牙商隊 self_armed≈0 →
 		# 任何有武裝 prey 皆非「相對弱」→ weakness→0（不再被誘攻；鎖來自戰力非 tag-label）。
 		var self_armed_f: float = float(NpcCombatSystem.new().calc_armed(state, team))
@@ -375,13 +387,34 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 static func find_prosperity_prey(state: WorldState, team: TeamData, leader: PersonData) -> int:
 	return int(attack_scan(state, team, leader)["best_id"])
 
-# belief 財富估：tier2 有資源估 → sum/100；tier0/1 只有 resource_scale(0-3) → 粗估；皆無 → 0。TEST VALUE。
+# ★★★belief 財富估 ＝ **coin 當量**（票：攻擊幣別 2026-09-15）
+#   ★舊形狀：`(coin_est + food_est + material_est) / 100` —— **不同單位裸和，再除一個手填的 100**
+#     ⇒ ★★而右邊那條路（`maintain_*` 的 `derived_payoff`）早就是 `缺口 × BASE_PRICE` ＝ coin
+#     ⇒ ★★★**同一個決策的兩側用兩種幣別 ⇒ 相減沒有意義**（今天為這句記過一次）。
+#   ★新形狀：**`Σ 各項估值 × BASE_PRICE[該項]`** —— **單位從價目表來，不是手填的**。
+static func belief_richness_coin(bel: Dictionary) -> float:
+	var total: float = 0.0
+	for res in ["coin", "food", "material"]:
+		var k: String = String(res) + "_est"
+		if not bel.has(k):
+			continue
+		# ★coin 的價 ＝ 1.0（**它是計價單位**，`trade_valuation.gd:173` 早有同一條特判）
+		#   ⇒ ★★這裡【不】走 `BASE_PRICE.get(res, 0.0)`：那會把 coin 算成 0（今天抓過）。
+		var unit: float = 1.0 if String(res) == "coin" else float(TradeValuation.BASE_PRICE.get(String(res), 0.0))
+		total += float(bel.get(k, 0.0)) * unit
+	return total
+
+# ★★★【型別可行性】：這份 belief 有沒有**可定價的分項**？
+#   ★只有 `resource_scale`（0..3 的桶號）或什麼都沒有 ⇒ **答不出 coin 當量**
+#   ⇒ ★★而處置**不是回 0** —— **`score` 是加總，「少一項」與「那一項＝0」逐位元相同**
+#     ⇒ ★★★**必須由呼叫端【結構排除】這個目標**（不產生成攻擊 candidate）。
+static func belief_has_priced_items(bel: Dictionary) -> bool:
+	return bel.has("coin_est") or bel.has("food_est") or bel.has("material_est")
+
+# ★舊名保留為薄包裝：★★而它**只在有分項時才有意義** ——
+#   呼叫端必須先問 `belief_has_priced_items()`，否則拿到的 0 是【答不出】不是【很窮】。
 static func _belief_richness(bel: Dictionary) -> float:
-	if bel.has("coin_est") or bel.has("food_est") or bel.has("material_est"):
-		return (float(bel.get("coin_est", 0.0)) + float(bel.get("food_est", 0.0)) + float(bel.get("material_est", 0.0))) / 100.0
-	if bel.has("resource_scale"):
-		return float(bel.get("resource_scale", 0))
-	return 0.0
+	return belief_richness_coin(bel)
 
 # ★★★簽名吃【兩個 Vector2i】不是兩個 TeamData（god-view 1a Fix A，2026-09-02）：
 #   ★呼叫端負責決定那個位置從哪來（自己＝live 合法／他隊＝belief）；
