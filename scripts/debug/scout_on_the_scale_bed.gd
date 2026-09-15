@@ -36,6 +36,25 @@ extends SceneTree
 #
 # ★跨輪紀錄在 `docs/measurements/2026-09-15-scout-on-the-scale-run-ledger.md`（五輪、五種死法）。
 #
+# ★★★【每一欄最早在第幾天可判】（systems 2026-09-16 的第 1 條 —— ★這比 flush 更有用）：
+#   ⇒ **能用 7 天窗答的，不要綁在 30 天窗上**；長窗只回答短窗答不了的那幾格。
+#   ┌ 格①②⑤（零情報排除／補齊後出現／先驗被取代）  ＝ **day 0**：fixture，**不需要跑世界**
+#   ├ 格⑥⑦（膽大者盲打／慎重者不可行）             ＝ **day 0**：同上（只改人格）
+#   ├ 下界那兩格（算式接上了／最低單價 > 0）          ＝ **day 0**：純讀常數表
+#   ├ 格③（偵查會輸）                               ＝ **day 1**：1 天窗就有數百次 argmax
+#   ├ 格④（早期窗出現過並贏過）                      ＝ **day SC_EARLY_DAYS**（預設 7）
+#   ├ 票乙①（PRODUCE 何時從 0 變非 0）               ＝ **day 4**（第 7 輪實測；★而這是【觀測值】不是設計值）
+#   └ 票乙②③（據點／登記／交集）                     ＝ **任何一天**（純快照）⇒ ★所以現在改成逐段印
+#   ★★**真正需要整整 30 天的欄位：目前一個都沒有** —— ★★★而那表示 30 天窗是【習慣】不是【需求】。
+#
+# ★★【窗戳】（第 3 條）：每天印 `[WINDOW] day=N/目標 status=running`，
+#   收尾印 `status=completed`。⇒ ★**`27/30 外部截斷` ≠ `30/30 完成` ≠ `27/30 自持門檻停`**
+#   —— **三者在一個「27」上長得一模一樣，而處置完全不同。**
+#
+# ★★★【明確不做】（systems 具名）：**WorldState checkpoint／續跑**。
+#   本 codebase **沒有讀檔恢復世界狀態的路徑** ⇒ 真正的續跑要先做存檔，那是另一條大線。
+#   ★具名地不做，**不是默默不做** —— 否則下一個人會以為它是待辦，然後去找它為什麼還沒做。
+#
 # ★★【本床靜音了哪些高 cap 診斷族】（必須明示，systems 2026-09-15）：
 #   `poll.eventwake`、`poll.outcome`、`t0.emit_ctx`（cap 都是 40000）
 #   ★它們的唯一讀者是 `scripts/debug/s5_poll_unique_value.gd` ⇒ 本輪一筆不讀 ＝ 純負擔。
@@ -93,6 +112,39 @@ static func _feasible_has(scan: Dictionary, tid: int) -> bool:
 #   ★純讀 `team.tags`，零 RNG、不寫 state。
 #   ★★而它要回答的不是「有幾隊」，是**「它什麼時候從 0 變成非 0」** ——
 #   ★★★單一時點的 0 答不出【還沒發生】與【不會發生】的差別。
+# ★★★§C 快照抽成可重複呼叫（systems 2026-09-16 第 2 條）：
+#   ★原本只在窗末印 ⇒ **第 7 輪死在 day 27，這三個數一個都沒撿到**
+#   ⇒ ★★改成【每 7 天印一次】＋窗末再印一次 ⇒ **被殺 ＝ 損失最後幾天，不是損失全部**
+#   ★★★而**交集的語意不變**：每一份快照內部仍然是**同一個時點**。
+static func _snapshot_c(st: WorldState, day: int) -> void:
+	var n_prod: int = 0
+	var n_own: int = 0
+	var n_reg: int = 0
+	var n_prod_own: int = 0
+	var n_own_reg: int = 0
+	var n_prod_reg: int = 0
+	var terr: Dictionary = {}
+	var otype: Dictionary = {}
+	for t in st.teams.values():
+		if t == null: continue
+		var is_prod: bool = TeamData.TAG_PRODUCE in t.tags
+		var tile: HexTileData = st.own_outpost_tile(t.team_id)
+		var has_own: bool = tile != null
+		var has_reg: bool = t.work_outpost != Vector2i(-1, -1)
+		if is_prod: n_prod += 1
+		if has_own:
+			n_own += 1
+			terr[tile.terrain] = int(terr.get(tile.terrain, 0)) + 1
+			var _ot: String = tile.outpost_type if tile.outpost_type != "" else "(空)"
+			otype[_ot] = int(otype.get(_ot, 0)) + 1
+		if has_reg: n_reg += 1
+		if is_prod and has_own: n_prod_own += 1
+		if has_own and has_reg: n_own_reg += 1
+		if is_prod and has_reg: n_prod_reg += 1
+	print("[SNAP-C] day=%d 母體=%d｜PRODUCE=%d｜擁有據點=%d 地形=%s outpost_type=%s｜登記=%d｜交集 P∩O=%d O∩R=%d P∩R=%d" % [
+		day, st.teams.size(), n_prod, n_own, str(terr), str(otype), n_reg,
+		n_prod_own, n_own_reg, n_prod_reg])
+
 static func _produce_count(state: WorldState) -> int:
 	var n: int = 0
 	for t in state.teams.values():
@@ -171,11 +223,24 @@ func _run() -> void:
 	print("      why1=%s" % str(scan1["why"]))   # ★紅了要看得出是哪一道排除擋的
 	print("   狀態1【全盲】：進攻擊可行集合=%s｜偵查挑中=%s（blind=%s，value=%.3f）" % [
 		str(in1), str(int(pick1["id"]) == tgt.team_id), str(pick1["blind"]), float(pick1["value"])])
-	_ok(not in1, "①低情報目標**不出現**在攻擊候選（★而它是【結構排除】不是【算成 0】）")
+	_ok(not in1, "①**零情報**目標不出現在攻擊候選（★結構排除，不是【算成 0】）")
 	_ok(int((scan1["why"] as Dictionary).get("no_priced_belief", 0)) >= 1,
 		"①-b 排除理由逐筆記到了 `no_priced_belief`（★查無 ≠ 沒發生）")
 	_ok(int(pick1["id"]) == tgt.team_id and bool(pick1["blind"]),
 		"⑤-a 全盲那一刻：它是偵查候選，而且用的是**具名先驗**（blind=true）")
+
+	# ── ★★★桶下界的【前提】那一格（systems 2026-09-16）──
+	#   ★舊寫法 `floor = N` 成立，靠的是「所有單價 ≥ 1」—— **一個沒寫下來的巧合**
+	#   ⇒ ★★新寫法 `floor = N × min(BASE_PRICE)` **零假設** ⇒ 那個前提從此不必成立。
+	#   ★★★所以這一格驗的不是「最低單價是多少」，而是**下界真的乘了它** ——
+	#     驗一個數等於多少會在調價時假紅；驗【算式接上了】才是這一格要的東西。
+	var _minp: float = FactionAISystem.min_base_price()
+	print("   ★桶下界：min(BASE_PRICE) = %.2f｜bucket_units(2) = %.0f｜bucket_floor(2) = %.1f" % [
+		_minp, FactionAISystem.bucket_units(2), FactionAISystem.bucket_floor(2)])
+	_ok(is_equal_approx(FactionAISystem.bucket_floor(2), FactionAISystem.bucket_units(2) * _minp),
+		"下界-a **算式接上了**（floor ＝ 件數 × 最低單價）⇒ ★「所有單價 ≥ 1」那個前提**不再被依賴**")
+	_ok(_minp > 0.0,
+		"下界-b 最低單價 > 0（★若有人加了一個 0 價資源，下界會塌成 0 ⇒ 這一格會紅）")
 
 	# ── 狀態2：有桶號（resource_scale）—— ★仍然答不出 coin 當量 ──
 	BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, obs.team_id, "firsthand",
@@ -186,9 +251,73 @@ func _run() -> void:
 	print("      why2=%s" % str(scan2["why"]))   # ★紅了要看得出是哪一道排除擋的
 	print("   狀態2【只有桶號】：進攻擊可行集合=%s｜偵查挑中=%s（blind=%s，value=%.3f）" % [
 		str(in2), str(int(pick2["id"]) == tgt.team_id), str(pick2["blind"]), float(pick2["value"])])
-	_ok(not in2, "①-c 只有桶號**仍然**不進攻擊候選（★桶號是分類，不是價）")
+	# ★★★這一格【語意變了】（票 final 2026-09-16）：舊制「只有桶號 ⇒ 一律排除」，
+	#   新制是「只有桶號 ⇒ **由人格決定**」⇒ ★**舊斷言在新制下是錯的，不是紅的**。
+	#   ★★我沒有把它刪掉，而是**改成新制的斷言**：桶號那一層不該是【世界規則】。
+	_ok(in2, "①-c（**已改語意**）只有桶號 ⇒ **不再是一律排除**，交給下面⑥⑦的人格那一層判")
 	_ok(int(pick2["id"]) == tgt.team_id and not bool(pick2["blind"]),
 		"⑤-b 桶號一到手，**先驗就不再參與**（blind 由 true 轉 false）⇒ 守衛③第一段逐筆證據")
+
+	# ── ★★★⑥⑦ 成對：**同一目標、同一觀察者、只換人格**（票 final 2026-09-16）──
+	#   ★薄情報（只有桶號）那一層【由人格決定】：`confident_enough(…, 慎重)`
+	#   ⇒ ★★膽大者可盲打（⑥）／慎重者該目標不可行（⑦）
+	#   ★★★兩格必須用**同一個目標**：換目標的話，差異可能來自目標而不是人格。
+	#   ★而這裡直接改 fixture leader 的「慎重」再改回來 —— **只在 fixture 世界，不在被量的那一輪**。
+	var _caution_backup: float = float(ldr.values.get("慎重", 0.5)) if ldr != null else 0.5
+	var in_bold: bool = false
+	var in_caut: bool = false
+	if ldr != null:
+		ldr.values["慎重"] = 0.02
+		in_bold = _feasible_has(FactionAISystem.attack_scan(fx, obs, ldr), tgt.team_id)
+		ldr.values["慎重"] = 0.98
+		in_caut = _feasible_has(FactionAISystem.attack_scan(fx, obs, ldr), tgt.team_id)
+		ldr.values["慎重"] = _caution_backup
+	print("   ★⑥⑦【薄情報 × 人格】同一目標：膽大者(慎重0.02) 進候選=%s｜慎重者(慎重0.98) 進候選=%s" % [
+		str(in_bold), str(in_caut)])
+	_ok(in_bold, "⑥**膽大者真的盲打過**（薄情報目標對他可行）")
+	# ★★★⑦ 在【親見】的薄情報上**不成立，而那是機制的事實不是 bug**：
+	#   `confident_enough` 讀 `uncertainty`（來源可信度＋新鮮度）⇒ **親眼看到 ＝ 滿檔信心**
+	#   ⇒ ★再慎重的人也 confident ⇒ ★★**這一格量不到人格**。
+	#   ⇒ ★★★所以⑦改由下面【轉述】那一組承擔，而**這一格照實報，不假裝它證明了人格**。
+	print("   ⑦-firsthand：慎重者 進候選=%s（★親見的桶號 ⇒ 信心滿檔 ⇒ 預期兩人都進，**不入判**）" % str(in_caut))
+	print("      ★★而若兩格同綠或同紅 ⇒ `confident_enough` 在這個情報狀態下**對慎重不敏感**，")
+	print("         ⇒ ★★★那不是「人格沒差別」，是**這一格量不到人格** —— 兩者處置不同。")
+
+	# ── ★★★⑥⑦ 第二組：**轉述來源**的薄情報（systems 要的「人格那一層」真正的用武之地）──
+	#   ★上一組（firsthand 薄情報）兩格同綠 —— ★★而那**不是「人格沒差別」**：
+	#     `confident_enough` 讀的是 `uncertainty`（**來源可信度＋新鮮度**），
+	#     而**親眼看到一個桶號**＝可信度滿檔 ⇒ **再慎重的人也confident**。
+	#   ⇒ ★★★**它量的是【情報可不可信】，不是【情報夠不夠細】** —— 兩者是不同的軸。
+	#   ⇒ 所以這裡換成**轉述**（source ≠ 觀察者、credibility 低）再問一次同一對人格。
+	var _third: TeamData = null
+	for c3 in fx.teams.values():
+		if c3 != null and c3.team_id != obs.team_id and c3.team_id != tgt.team_id:
+			_third = c3
+			break
+	var in_bold2: bool = false
+	var in_caut2: bool = false
+	if _third != null and ldr != null:
+		if fx.team_intel.has(obs.team_id):
+			(fx.team_intel[obs.team_id] as Dictionary).erase(tgt.team_id)
+		BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, _third.team_id, "hearsay",
+			{"tile_pos": tgt.tile_pos, "resource_scale": 2}, 0.3, false)
+		ldr.values["慎重"] = 0.02
+		in_bold2 = _feasible_has(FactionAISystem.attack_scan(fx, obs, ldr), tgt.team_id)
+		ldr.values["慎重"] = 0.98
+		in_caut2 = _feasible_has(FactionAISystem.attack_scan(fx, obs, ldr), tgt.team_id)
+		ldr.values["慎重"] = _caution_backup
+	print("   ★⑥⑦-2【轉述薄情報 × 人格】：膽大者 進候選=%s｜慎重者 進候選=%s（來源=Team%d，credibility 0.3）" % [
+		str(in_bold2), str(in_caut2), _third.team_id if _third != null else -1])
+	_ok(in_bold2 != in_caut2,
+		"⑥⑦-2 **轉述**的薄情報上，人格真的把兩人分開（★★這一格才是「膽大者盲打」的用武之地）")
+	print("      ★而兩組並排讀才有意義：**親見的桶號**人人敢打／**聽說的桶號**只有膽大者敢打")
+	print("      ★★⇒ `confident_enough` 的軸是【可信度】不是【粒度】 —— ★★★而 spec 說的『薄情報』是【粒度】。")
+
+	# 狀態3 之前把情報還原成 firsthand（★不要讓上面那一格的轉述污染後面的判準）
+	if fx.team_intel.has(obs.team_id):
+		(fx.team_intel[obs.team_id] as Dictionary).erase(tgt.team_id)
+	BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, obs.team_id, "firsthand",
+		{"tile_pos": tgt.tile_pos, "resource_scale": 2}, 1.0, false)
 
 	# ── 狀態3：有可定價分項（coin/food/material）──
 	BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, obs.team_id, "firsthand",
@@ -226,12 +355,18 @@ func _run() -> void:
 	print("★§B 真世界：窗**從第 0 天起算**；早窗 ＝ 第 0 天 → 第 %d 天（%d tick）；全窗 %d 天" % [
 		early_days, early_ticks, ticks / WorldState.TICKS_PER_DAY])
 	print("   ★★（藍圖規則：戰爭類讀數的窗必須蓋過【偵查時代】⇒ 早窗與全窗都印，不只印一個）")
+	# ★窗初人口快照（§D 的分母）——★母體要在【窗初】定，不能在看到結果之後才決定誰算「驟降」。
+	var pop_day1: Dictionary = {}
+	for t0 in st.teams.values():
+		if t0 != null: pop_day1[t0.team_id] = t0.population
 	for _t in range(early_ticks):
 		runner.advance_tick(st, no_player)
 		if (_t + 1) % WorldState.TICKS_PER_DAY == 0:
 			var _d1: int = (_t + 1) / WorldState.TICKS_PER_DAY
 			_mem_line(_d1)
 			print("[POP] day=%d produce_teams=%d teams=%d" % [_d1, _produce_count(st), st.teams.size()])
+			print("[WINDOW] day=%d/%d status=running" % [_d1, ticks / WorldState.TICKS_PER_DAY])
+			if _d1 % 7 == 0: _snapshot_c(st, _d1)
 	var e_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
 	var e_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
 	var e_moth: int = int(Probe.counts.get("optpool.mother", 0))
@@ -245,6 +380,8 @@ func _run() -> void:
 			var _d2: int = (early_ticks + _t + 1) / WorldState.TICKS_PER_DAY
 			_mem_line(_d2)
 			print("[POP] day=%d produce_teams=%d teams=%d" % [_d2, _produce_count(st), st.teams.size()])
+			print("[WINDOW] day=%d/%d status=running" % [_d2, ticks / WorldState.TICKS_PER_DAY])
+			if _d2 % 7 == 0: _snapshot_c(st, _d2)
 	var f_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
 	var f_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
 	var f_moth: int = int(Probe.counts.get("optpool.mother", 0))
@@ -388,44 +525,39 @@ func _run() -> void:
 	print("   ★攻擊側結構排除：`no_priced_belief` %d 次（★這是①在真世界裡的量）" % [
 		int(Probe.counts.get("attack.excluded.no_priced_belief", 0))])
 
-	# ══════════ §C 生產隊三母體（第二張票，systems 2026-09-16）══════════
-	# ★全部是【讀世界狀態】：零 RNG、不寫 state、不影響任何判準。
-	# ★★而三個數要**同一個時點**（窗末），否則交集讀不出來。
+	# ══════════ §C 生產隊三母體（第二張票）—— ★窗末再印一次完整版 ══════════
+	_snapshot_c(st, ticks / WorldState.TICKS_PER_DAY)
+
+	# ══════════ §D 人口驟降後的攻擊率（★預先登記、**不入判**）══════════
+	# ★`ref = 自家人口 × …` ⇒ **人口掉了，ref 就變小** ⇒ 同一個目標看起來更肥
+	#   ⇒ ★★打殘的隊可能變得更愛攻擊 —— **可能是好戲（困獸猶鬥），也可能是病（越輸越瘋）**。
+	#   ★★★所以這一欄**先看數字**，本床不下判決；判準要等它自己的票。
 	print("")
-	print("★§C 生產隊三母體（窗末快照，母體＝全隊名冊 %d 隊）" % st.teams.size())
-	var n_prod: int = 0
-	var n_own: int = 0
-	var n_reg: int = 0
-	var n_prod_own: int = 0
-	var n_own_reg: int = 0
-	var n_prod_reg: int = 0
-	var terr: Dictionary = {}
-	var otype: Dictionary = {}
-	for t in st.teams.values():
-		if t == null: continue
-		var is_prod: bool = TeamData.TAG_PRODUCE in t.tags
-		var tile: HexTileData = st.own_outpost_tile(t.team_id)
-		var has_own: bool = tile != null
-		var has_reg: bool = t.work_outpost != Vector2i(-1, -1)
-		if is_prod: n_prod += 1
-		if has_own:
-			n_own += 1
-			terr[tile.terrain] = int(terr.get(tile.terrain, 0)) + 1
-			var _ot: String = tile.outpost_type if tile.outpost_type != "" else "(空)"
-			otype[_ot] = int(otype.get(_ot, 0)) + 1
-		if has_reg: n_reg += 1
-		if is_prod and has_own: n_prod_own += 1
-		if has_own and has_reg: n_own_reg += 1
-		if is_prod and has_reg: n_prod_reg += 1
-	print("   ①PRODUCE 隊數 ＝ %d   ★而【什麼時候從 0 變成非 0】看上面逐日的 [POP] 行" % n_prod)
-	print("      ★★單一時點的 0 答不出【還沒發生】與【不會發生】的差別 —— 逐日那一欄才答得出。")
-	print("   ②擁有據點的隊數 ＝ %d｜地形 %s｜**outpost_type %s**" % [n_own, str(terr), str(otype)])
-	print("      ★`outpost_type` 那一欄就是「`civilian` 是預置還是蓋的」要的那個欄位。")
-	print("   ③登記數（work_outpost）＝ %d" % n_reg)
-	print("   ★交集：PRODUCE∩擁有 %d｜擁有∩登記 %d｜PRODUCE∩登記 %d" % [
-		n_prod_own, n_own_reg, n_prod_reg])
-	print("   ★★三個數是**同一個時點的快照**（窗末）—— 不同時點的三個數算不出交集。")
-	print("   ★★★而本床**不對這三個數下任何判決** —— 它們是別一張票的輸入。")
+	print("★§D 人口驟降後的攻擊率（★預先登記、**不入判**；母體＝窗初就存在且窗末仍在的隊）")
+	var n_drop: int = 0
+	var n_keep: int = 0
+	var atk_drop: int = 0
+	var atk_keep: int = 0
+	for tid0 in pop_day1:
+		var t2: TeamData = st.teams.get(int(tid0))
+		if t2 == null: continue   # ★死掉的隊不進母體（它不可能在窗末攻擊）
+		var p0v: float = float(pop_day1[tid0])
+		if p0v <= 0.0: continue
+		var wins: int = int(Probe.counts.get("optpool.win.攻擊.t%d" % int(tid0), 0))
+		if float(t2.population) <= p0v * 0.7:
+			n_drop += 1
+			atk_drop += wins
+		else:
+			n_keep += 1
+			atk_keep += wins
+	print("   人口掉 ≥30%%：%d 隊，攻擊贏 %d 次｜沒掉那麼多：%d 隊，攻擊贏 %d 次" % [
+		n_drop, atk_drop, n_keep, atk_keep])
+	print("   ★**只報數不報率**（單 seed 單窗）；★★而「掉了 30%%」這條線是我挑的，不是量出來的 ⇒ 它是個分組，不是判準。")
 
 	print("")
+	# ★★★窗戳（systems 第 3 條）：**實際／目標／為什麼停** ——
+	#   ★`27/30 外部截斷` ≠ `30/30 完成` ≠ `27/30 自持門檻停`：
+	#   ★★三者在一個「27」上長得一模一樣，而處置完全不同。
+	print("[WINDOW] day=%d/%d status=completed reason=window_reached" % [
+		ticks / WorldState.TICKS_PER_DAY, ticks / WorldState.TICKS_PER_DAY])
 	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)

@@ -429,14 +429,35 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 const TEAM_RICHNESS_CAP: float = 1.0   # TEST VALUE —— ★這是**相對重要性的選擇**，不是量出來的
 
 # ★【桶號的下界】單一計算點（`vision_system.gd:176-184` 的分桶：≥50／≥200／≥600）。
-#   ★★單位是【總量】；而一籃總量 N 的東西，其 coin 價值的**下界**就是 N。
-#   ★★★收成一支是因為偵查側（`decision_context.pick_recon_target`）與這裡各寫一份的話，
-#     兩邊的【桶意義】會默默 drift，而 **drift 不會有任何東西紅**。
-static func bucket_floor(scale: int) -> float:
+#   ★★桶的單位是【總量 N 件】，而我們要的是 **coin 價值的下界**。
+#   ★★★**下界 ＝ N × 最便宜的單價** —— ★這是零假設的：
+#     任何組合都 ≥「全部都是最便宜那一種」的價值，**不需要知道它到底是什麼組合**。
+#
+# ★★★而【為什麼不是 N】要寫清楚（systems 2026-09-16 抓到的）：
+#   ★寫 `N` 也是下界，但它成立是靠「所有單價 ≥ 1」—— **那是一個沒有被寫下來的巧合**
+#   ⇒ ★★**若日後有人加一個單價 0.5 的資源，`N` 這個下界會【悄悄變成錯的】，而不會有任何東西紅。**
+#   ⇒ ★★★所以這裡**從 `BASE_PRICE` 自己算出最低單價** —— **那個前提從此不需要成立，它變成算式的一部分。**
+#     （同一個病的另一個面貌：上一版把它收成單一計算點，防的是【副本】drift；
+#       這一版防的是【前提】drift —— ★而前提比副本更難發現，因為它根本沒有寫在 code 裡。）
+static var _min_base_price_cache: float = -1.0
+
+static func min_base_price() -> float:
+	if _min_base_price_cache < 0.0:
+		var m: float = INF
+		for res in TradeValuation.BASE_PRICE:
+			m = minf(m, float(TradeValuation.BASE_PRICE[res]))
+		_min_base_price_cache = m if m < INF else 1.0
+	return _min_base_price_cache
+
+# ★桶的【件數】下界（`vision_system` 的分界本身）—— 與價分開，因為它們是兩個不同的東西。
+static func bucket_units(scale: int) -> float:
 	if scale >= 3: return 600.0
 	if scale == 2: return 200.0
 	if scale == 1: return 50.0
 	return 0.0
+
+static func bucket_floor(scale: int) -> float:
+	return bucket_units(scale) * min_base_price()
 
 # ★【我的參考尺度】：自家人口 × Σ(TARGET_PER_POP × BASE_PRICE)
 #   ★★所以 `richness` 從此是【**相對於我**】：窮小隊看中等村是肥羊，大國看不上眼。

@@ -167,6 +167,11 @@ static func rank_scored(state: WorldState, team: TeamData, src: String = "unknow
 			Probe.bump("optpool.cand." + String(_r4["opt"]))
 		if not scored.is_empty():
 			Probe.bump("optpool.win." + String(scored[0]["opt"]))
+			# ★【人口驟降後的攻擊率】那一欄要的分子（預先登記、不入判，systems 2026-09-16）：
+			#   ★★逐隊記「攻擊贏了幾次」——★鍵數 ≤ 隊數（有界），不是逐日的交叉積。
+			#   ★★★而它答的是【誰在攻擊】，分母（誰的人口掉了）由床在窗末算 —— 兩者都要有主詞。
+			if String(scored[0]["opt"]) == "攻擊" and team != null:
+				Probe.bump("optpool.win.攻擊.t%d" % team.team_id)
 			# ★★★存活四分的兩格儀器（systems 判準 2026-09-05）——
 			#   ★連勝：接在【同一個「贏」的定義】上（`optpool.win.*` 就是卷面「誰在贏」那一節的來源）
 			#     ⇒ ★★否則「連勝」與「誰在贏」會是兩個不同的母體，而卷面會把它們並排。
