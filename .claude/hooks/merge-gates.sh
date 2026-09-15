@@ -196,7 +196,13 @@ if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git 
     echo "[MERGE-GATES] ★已更新 main 基線紅數 ＝ ${#FAILED[@]}"
   fi
 else
-  echo "[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數（不在 main，或 scripts/.claude/註冊表 有未 commit 的改動）"
+  # ★★★2026-09-15：這一行原本只講【三個可能原因之一】而不講【是哪一個】
+  #   ⇒ ★又是【判決沒有主詞】（同一支檔今天已經為這件事修過一次）⇒ 逐條點名。
+  _mg_why=""
+  [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" != "main" ] && _mg_why="$_mg_why 不在 main"
+  [ -n "$(git --no-optional-locks status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ] && _mg_why="$_mg_why scripts/.claude/註冊表有未-commit 改動"
+  { [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; } && _mg_why="$_mg_why 本輪是分批跑（沒跑完整註冊表）"
+  echo "[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數 —— 原因：$_mg_why"
   echo "[MERGE-GATES]   ⇒ ★★這一行必須存在：静默的【沒有記下來】跟【記下來了】在畫面上長得一樣。"
 fi
 if [ ${#FAILED[@]} -gt 0 ]; then
