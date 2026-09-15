@@ -937,6 +937,50 @@ static func harvest_terrains(res: String) -> Array:
 #   （mountain 的 food 0.5 不需要被一個我拍的門檻擋掉 —— 它會自己輸給 plains 的 8.0。
 #    加門檻＝新旋鈕＝把比較的工作換成猜一個數。）
 
+# ★★★票乙：「先弄到錢」的候選（藍圖裁 A 2026-09-15）
+#   ★對外報的 util ＝ **繼承來的 payoff**（`_mk_candidate` 那把已驗的尺）——
+#     ★★**折現磚的 PV 只排【內部序】（選哪個手段），不進外層 argmax**（硬約束三）。
+#     理由：`flow_weight()` 回的是係數 ∈[0.5,1.5]、`option_value()` 的單位由 `daily_flow` 決定，
+#     **沒人驗過它與 `price × qty` 同單位** ⇒ 讓 PV 外流就是拿兩把不同的尺比大小。
+#   ★★★而今天【只有一個手段接得上】：**賣貨**（去同一個市集把 surplus 換錢）。
+#     ・**劫掠那條我沒接** —— 它的收益要用 belief 估的敵方資產，
+#       **而那個值目前不是 coin 當量**（正是攻擊票 `...-attack-loot-monotone-compression-HOW` 未解的那一格）
+#       ⇒ ★**接它就得手填一個換算係數 ⇒ 那是「估算器禁手抄物理」明文禁止的** ⇒ **不接**。
+#     ・⇒ ★★**所以今天內部序【只有一個候選】，PV 的鑑別力是 0** ——
+#       **結構在，而它今天排不出任何東西**：這句話要寫在交件裡，不是藏起來。
+static func _earn_money_candidate(state: WorldState, team: TeamData, ctx: DecisionContext,
+		g: Dictionary, gt: String, payoff: float, market_pos: Vector2i, shortfall: float) -> Dictionary:
+	if shortfall <= 0.0:
+		return {}
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	# ── 手段一：賣貨 ── ★可賣量走既有的 `reserve()`（人格保留），不另造門檻
+	var sell_value: float = 0.0
+	for r in TradeValuation.TRADEABLE_RES:
+		var _sur: float = ResourceSystem.effective_holding(state, team, String(r)) 			- TradeValuation.reserve(team, String(r), lv, state)
+		if _sur <= 0.0:
+			continue
+		sell_value += _sur * TradeValuation.local_value(team, String(r), state)
+	if sell_value <= 0.0:
+		return {}   # ★沒有可賣的東西 ⇒ 這條手段不存在（★不是「值 0」，是【沒有這個選項】）
+	# ★★內部序用折現磚：日流 ＝ 到手金額 ÷ 到手天數（★兩者都是真實量，不是捏的）
+	# ★到手天數走【既有的單一計算點】`_estimate_delay_days`（它內部用 `_tiles_per_day`，
+	#   ★★而那正是「移速不得手抄」那條立過的線）——**不另造一把尺**。
+	#   ★★★我第一版寫成 `PathSystem.estimate_catch_up_pos(...) if has_method(...) else {}`
+	#     ⇒ 那支函式**不存在** ⇒ **會靜默退回 eta ＝ 1.0 而沒有任何人會發現**（今天第 N 次同族）。
+	var _eta_days: float = maxf(_estimate_delay_days(state, team,
+		{"task": TeamData.TASK_TRADE, "target": market_pos}), 1.0)
+	var _gain_daily: float = minf(sell_value, shortfall) / _eta_days
+	var _pv: float = DiscountedFlow.pv(_gain_daily, DiscountedFlow.delta_of(lv), DiscountedFlow.HORIZON_DAYS) 		* DiscountedFlow.flow_weight("wealth", lv)
+	if Probe.enabled:
+		Probe.bump("earn.means.sell")
+		Probe.bump_sample("earn.means.rows", {"team": team.team_id, "means": "sell",
+			"pv": snappedf(_pv, 0.01), "sell_value": snappedf(sell_value, 0.01),
+			"eta_days": snappedf(_eta_days, 0.01)}, 200)
+	# ★★★PV 到此為止 —— **用完即丟**，下面回的 util 是 `_mk_candidate` 的繼承 payoff
+	return _mk_candidate(state, team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx,
+		{"task": TeamData.TASK_TRADE, "target": market_pos})
+
+
 static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: DecisionContext,
 		g: Dictionary, gt: String, payoff: float, prereq: Dictionary) -> Dictionary:
 	if SimRunner.phase_timing and _rec_depth > 0:
@@ -987,6 +1031,47 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 			mkt_us += float(Time.get_ticks_usec() - _mk0)
 			mkt_n += 1
 		if mp != Vector2i(-1, -1):
+			# ★★★票乙（藍圖裁 A 2026-09-15）：**錢＝手段，不是目的** ——
+			#   「買 X 缺錢」⇒ 這個 slot 回的是【先弄到錢】，**不是** TASK_TRADE。
+			#   ★硬約束一：**取代，不是附加** ⇒ 兩條路共用這一個 return 點，
+			#     ★★所以「同一個 (team, goal, res) 一次 resolve 只吐一個 candidate」
+			#       **由控制流保證**，不是靠紀律（而驗收仍然要 fixture 直接斷言它）。
+			#   ★★★硬約束二：缺多少錢**自己算** ——
+			#     `qty_gap × 取價 − 手上 coin`，**禁止借用 `SalarySystem.estimated_payroll`**
+			#     （它只服務薪資；借它會逼 `need > 0.0` 那個守衛去對採購壓力負責）。
+			#   ★取價走 `local_value()`（單一入口）⇒ coin 走得通（`:173` 回 1.0），
+			#     **不直接 `BASE_PRICE.get(res, 0.0)`**（那會把 coin 算成 0）。
+			var _qty_gap: float = maxf(_nk - _eh, 0.0)
+			var _unit_price: float = TradeValuation.local_value(team, res, state)
+			var _budget: float = _qty_gap * _unit_price
+			var _coin_have: float = float(team.resources.get("coin", 0))
+			# ★★★【分辨】：這條新路 0 次有兩種原因 —— **沒接上** vs **世界裡沒發生**
+			#   ⇒ ★所以這裡量【每一次買路】的預算與手上的錢，不只量缺錢那些。
+			if Probe.enabled:
+				Probe.bump("goal.res_prereq.buy_seen")
+				if _budget > _coin_have: Probe.bump("goal.res_prereq.buy_short")
+				else: Probe.bump("goal.res_prereq.buy_afford")
+				Probe.bump_sample("buy.budget", {"res": res,
+					"gap": snappedf(_qty_gap, 0.01), "unit": snappedf(_unit_price, 0.01),
+					"budget": snappedf(_budget, 0.01), "coin": snappedf(_coin_have, 0.01),
+					"team": team.team_id}, 300)
+			if _budget > _coin_have:
+				var _earn: Dictionary = _earn_money_candidate(
+					state, team, ctx, g, gt, payoff, mp, _budget - _coin_have)
+				if not _earn.is_empty():
+					if Probe.enabled:
+						Probe.bump("goal.res_prereq.earn_replaces_buy")
+						Probe.bump_sample("earn.rows", {"team": team.team_id, "res": res,
+							"budget": snappedf(_budget, 0.01), "coin": snappedf(_coin_have, 0.01),
+							"short": snappedf(_budget - _coin_have, 0.01),
+							"tick": state.world.current_tick}, 300)
+					if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
+					if SimRunner.phase_timing: rp_all_us += float(Time.get_ticks_usec() - _rpA)
+					return _earn
+				# ★湊不出任何賺錢手段 ⇒ **不假裝有** ⇒ 退回原本那條買路
+				#   （★★而「買不起卻仍回買」是誠實的：下游會在執行端撞牆並留下紀錄，
+				#     ★★★那比在這裡吐一個沒有手段的空 candidate 好——後者會變成一個永遠不動的目標。）
+				if Probe.enabled: Probe.bump("goal.res_prereq.earn_no_means")
 			if Probe.enabled: Probe.bump("goal.res_prereq.buy_wins")
 			if SimRunner.phase_timing and _rrp_depth > 0: _rrp_depth -= 1
 			if SimRunner.phase_timing: rp_all_us += float(Time.get_ticks_usec() - _rpA)
