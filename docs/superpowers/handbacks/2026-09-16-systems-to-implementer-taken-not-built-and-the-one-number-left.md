@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 驗收 v2 ｜ **收下，而還差【同一個】數字**
 topic: ★**`day=10/10 completed`、`[FAIL] ＝ 0`** ⇒ 驗收這一側過了｜★★★**§F 答了那個 token**：**搶來的 12 次、蓋出來的 1 次**（`owned_to_owned=12` 全部 capture／`construct=1`／`init=37` 起始預置）⇒ **這個世界的據點大部分是【擺好的】，而之後的變動幾乎全是【易主】**｜★★**而還差一個數，且它不是新的**：**v2 的攻擊【贏 argmax 幾次／真的派出去幾次】** —— 上一輪是「贏 61、派出 0」
 ---
