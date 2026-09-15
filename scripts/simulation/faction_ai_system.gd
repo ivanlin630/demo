@@ -312,13 +312,25 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		#   ★【有可定價分項】⇒ 照常。
 		var _has_priced: bool = belief_has_priced_items(bel)
 		var _scale_est: int = int(bel.get("resource_scale", -1))
-		if not _has_priced and _scale_est < 0:
+		# ★★★【零情報】收窄成「**連 claim 都沒有**」（systems 訂正 2026-09-16）：
+		#   ★舊寫法把「有 belief、但沒有資產欄」也判成零情報 ⇒ **把【遠距觀察】全部排除掉**
+		#   ⇒ ★★而那是這個世界**最常見的 belief 形狀**：`vision_system.gd:150` 的 `population_est`
+		#     是**無條件寫**的，而 `:173 if dist <= 1:` 才寫 `resource_scale`
+		#     ⇒ **不貼到臉上就沒有資產情報。**
+		#   ⇒ ★★★所以 `return 0.0` 的兩個來源要分開：
+		#     (a) 沒有 claim      ＝ **真・零情報** ⇒ 結構排除
+		#     (b) 有 claim 無資產欄 ＝ **不知道它多肥** ⇒ **不排除**，richness 缺席，
+		#          靠 `weakness`／`border` 競爭 —— **那是誠實的無知，不是判死。**
+		if bel.is_empty():
 			why["no_priced_belief"] = int(why.get("no_priced_belief", 0)) + 1
 			if Probe.enabled:
 				Probe.bump("attack.excluded.zero_intel")
 				Probe.bump_sample("scout.candidates", {"team": team.team_id, "target": tid,
 					"tier": int(bel.get("tier", -1)), "tick": state.world.current_tick}, 300)
 			continue
+		# ★★(b) 與 (c) **走同一道 admission**（systems 2026-09-16）——
+		#   ★它們在 epistemic 上對等（都答不出「它多肥」）⇒ **對等必須落實到門上，不能只寫在 spec 裡**；
+		#   ★★結果可以是通過，**但不能繞過它** —— 若這導致行為改變，驗收會看到，**而那正是我們要的**。
 		if not _has_priced:
 			var _caution_adm: float = float(leader.values.get("慎重", 0.5)) if leader != null else 0.5
 			var _thin_admit: bool = BeliefSystem.confident_enough(state, team.team_id, tid, _caution_adm)
@@ -331,7 +343,13 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 				why["thin_intel_refused"] = int(why.get("thin_intel_refused", 0)) + 1
 				continue
 		# ★★薄情報的 x 走桶的下界（**不是 0**）—— 「看不清」不等於「很窮」。
-		var _x_raw: float = belief_richness_coin(bel) if _has_priced else bucket_floor(_scale_est)
+		# ★三種形狀的 x：有分項 ⇒ 逐項定價；只有桶號 ⇒ 桶下界；(b) 無資產欄 ⇒ **0，而那是「不知道」不是「很窮」**
+		#   ★★(b) 與「桶 0」在【值】上相同，而在【語意】上不同 —— 已回報 systems，標【待驗】。
+		var _x_raw: float = 0.0
+		if _has_priced:
+			_x_raw = belief_richness_coin(bel)
+		elif _scale_est >= 0:
+			_x_raw = bucket_floor(_scale_est)
 		var _ref_mine: float = reference_wealth(state, team)
 		var richness: float = richness_compressed(_x_raw, _ref_mine)
 		if Probe.enabled:

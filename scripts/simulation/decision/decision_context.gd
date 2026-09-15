@@ -238,6 +238,9 @@ var prosperity_prey_id: int = -1
 # ★★★機會＋需要（HOW spec 2026-09-12）：**秤上第一個【非授權】的攻擊訊號**。
 #   ★三個原料分開存 —— ★★驗收⑦要能分桶看「知道得多的隊是不是挑得更準」。
 var attack_loot_est: float = 0.0       # belief 估的對方資產（`_belief_richness`）
+# ★★★【我的參考尺度】—— `terms.gd` 拿不到 `state`／`team`，而 `_loot` 要跟 score 那一刀
+#   **用同一把尺**（否則同一個世界會有兩種「多肥」的定義，★而那種 drift 不會有任何東西紅）。
+var reference_wealth: float = 1.0
 var attack_win_odds: float = 0.0       # 贏率：既有 capability 接地，不新造戰力公式
 var attack_belief_tier: int = -1       # -1 ＝ 無 belief
 var attack_feasible: bool = false      # 可行集合非空（零人格：知道/看得到/追得上/養得起）
@@ -902,6 +905,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		# ★只掃一次：可行集合與人格 argmax 同源（兩次掃 ＝ 兩倍尋路）
 		var _ascan: Dictionary = FactionAISystem.attack_scan(state, team, ldr)
 		c.prosperity_prey_id = int(_ascan["best_id"])
+		c.reference_wealth = FactionAISystem.reference_wealth(state, team)
 		var _afeas: Array = _ascan["feasible"]
 		c.attack_feasible = not _afeas.is_empty()
 		c.attack_scan_why = _ascan.get("why", {})

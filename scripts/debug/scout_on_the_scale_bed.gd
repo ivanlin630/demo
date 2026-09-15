@@ -214,7 +214,24 @@ func _run() -> void:
 
 	var ldr: PersonData = fx.persons.get(obs.leader_id)
 
-	# ── 狀態1：全盲（只有位置，沒有任何分項、沒有桶號）──
+	# ── ★★★狀態0：**連 claim 都沒有** ＝ 真・零情報（systems 訂正 2026-09-16）──
+	#   ★舊版這一格寫成「只有 tile_pos 的全盲」—— ★★而那在新制下是 **(b)「有 claim、不知道它多肥」**，
+	#   ★★★**不該被排除**（`vision_system.gd:150` 的 population_est 無條件寫 ⇒ 遠距 belief 就長這樣）。
+	var scan0: Dictionary = FactionAISystem.attack_scan(fx, obs, ldr)
+	var in0: bool = _feasible_has(scan0, tgt.team_id)
+	print("      why0=%s" % str(scan0["why"]))
+	print("   狀態0【連 claim 都沒有】：進攻擊可行集合=%s" % str(in0))
+	_ok(not in0, "①真・零情報（連 claim 都沒有）**不進攻擊候選**")
+	_ok(int((scan0["why"] as Dictionary).get("no_belief", 0)) >= 1,
+		"①-a 排除理由落在 **`no_belief`**（★★而那是【既有】的守衛，不是本票新加的）")
+	# ★★★而本票新加的那一支（`bel.is_empty()` ⇒ `attack.excluded.zero_intel`）**可能是死碼**：
+	#   `has_belief`（`faction_ai_system.gd:272`）在它【之前】 ⇒ 沒有 claim 的目標根本走不到它。
+	#   ⇒ ★所以這裡**把它的實跑次數印出來** —— **「裝了一支永遠不會 fire 的守衛」與「沒裝」一樣危險，
+	#     而且更難發現，因為它看起來在做事。**
+	print("   ★本票新加的結構排除實跑次數：`attack.excluded.zero_intel` ＝ %d" % [
+		int(Probe.counts.get("attack.excluded.zero_intel", 0))])
+
+	# ── 狀態1：(b) 有 claim、只有位置（**不該被排除**）──
 	BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, obs.team_id, "firsthand",
 		{"tile_pos": tgt.tile_pos}, 1.0, false)
 	var scan1: Dictionary = FactionAISystem.attack_scan(fx, obs, ldr)
@@ -223,9 +240,9 @@ func _run() -> void:
 	print("      why1=%s" % str(scan1["why"]))   # ★紅了要看得出是哪一道排除擋的
 	print("   狀態1【全盲】：進攻擊可行集合=%s｜偵查挑中=%s（blind=%s，value=%.3f）" % [
 		str(in1), str(int(pick1["id"]) == tgt.team_id), str(pick1["blind"]), float(pick1["value"])])
-	_ok(not in1, "①**零情報**目標不出現在攻擊候選（★結構排除，不是【算成 0】）")
-	_ok(int((scan1["why"] as Dictionary).get("no_priced_belief", 0)) >= 1,
-		"①-b 排除理由逐筆記到了 `no_priced_belief`（★查無 ≠ 沒發生）")
+	print("   狀態1【(b) 有 claim、無資產欄】：進攻擊可行集合=%s" % str(in1))
+	_ok(in1, "①-b **(b) 不被排除** —— ★「不知道它多肥」是【誠實的無知】，不是判死"
+		+ "（★★richness 缺席，靠 weakness／border 競爭）")
 	_ok(int(pick1["id"]) == tgt.team_id and bool(pick1["blind"]),
 		"⑤-a 全盲那一刻：它是偵查候選，而且用的是**具名先驗**（blind=true）")
 
@@ -350,7 +367,8 @@ func _run() -> void:
 	_ok(int(pick3["id"]) != tgt.team_id,
 		"⑤-c 真情報到手 ⇒ **它不再是偵查候選** ⇒ 守衛③【先驗必須被取代】逐筆坐實")
 	print("   ★★★而②若與①同紅／同綠 ⇒ 判準沒有鑑別力；兩格必須【方向相反】才算成對。")
-	_ok(in3 != in1, "②-b 成對檢查：①與②**方向相反**（★否則兩格量的是同一件事）")
+	_ok(in3 != in0, "②-b 成對檢查：**狀態0（真零情報）與狀態3（有分項）方向相反**"
+		+ "（★而狀態1／2 現在都在【可行】那一側，成對要拿真正的兩端比）")
 
 	# ══════════ §B 真世界跑一趟（③④）══════════
 	Probe.reset()
@@ -539,8 +557,12 @@ func _run() -> void:
 		int(Probe.counts.get("recon.candidate.bucket", 0)),
 		int(Probe.counts.get("recon.candidate", 0))])
 	print("   ★★而【聚合面答不出「同一個目標有沒有被取代」】—— 那是 §A ⑤ 的活，兩者不可互相代替。")
-	print("   ★攻擊側結構排除：`no_priced_belief` %d 次（★這是①在真世界裡的量）" % [
-		int(Probe.counts.get("attack.excluded.no_priced_belief", 0))])
+	# ★★這一行原本讀 `attack.excluded.no_priced_belief` —— **那個鍵在 09-16 改名成 `zero_intel` 了**
+	#   ⇒ ★它會安靜地永遠印 0，而**「0 次」與「讀錯鍵」在畫面上長得一模一樣**。
+	print("   ★攻擊側結構排除：`attack.excluded.zero_intel` %d 次｜薄情報 admitted %d／refused %d" % [
+		int(Probe.counts.get("attack.excluded.zero_intel", 0)),
+		int(Probe.counts.get("attack.thin_intel.admitted", 0)),
+		int(Probe.counts.get("attack.thin_intel.refused", 0))])
 
 	# ══════════ §C 生產隊三母體（第二張票）—— ★窗末再印一次完整版 ══════════
 	_snapshot_c(st, ticks / WorldState.TICKS_PER_DAY)
