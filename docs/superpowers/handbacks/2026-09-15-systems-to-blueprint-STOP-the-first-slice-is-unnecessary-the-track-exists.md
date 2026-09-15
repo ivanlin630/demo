@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ★★★快訊：**你切的第一張票不需要做**
 topic: ★★★**`maintain_food` 的 `payoff: 1.0` 是【死值】** —— 它實際走 `goal_resolver.derived_payoff()`，而那支對**有資源前置的 goal** 回的是 **`(目標存量 − 現有存量) × BASE_PRICE`**（★我已逐行看過 `:194-216`）⇒ **它【早就是】期望價值，單位是 coin**｜★**所以你切的首張「maintain_food（1.0 換真值）」⇒ 不必做**｜★★★**而更大的好消息是**：**你要的那條「統一價值軌」【已經存在於 code 裡】** ⇒ **攻擊不必發明幣別，照抄那個形狀即可**
 ---
