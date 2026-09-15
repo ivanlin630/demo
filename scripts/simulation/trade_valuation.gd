@@ -36,6 +36,10 @@ const BASE_PRICE: Dictionary = {
 #     那是換個名字的同一張表，票乙補 coin 照樣炸。**必須逐項字面列舉。**
 #   ★今天它恰好等於 `BASE_PRICE` 的鍵集（coin 本來就不在價目表裡）
 #     ⇒ **本票 fp 逐位元不變是【預期】，不是巧合**。
+#   ★★★**順序承載語義（first-match）** —— 賣出／易貨是**逐項比對、先中先贏**，
+#     ⇒ **重排這張清單會【靜默】改變行為**（而不會有任何東西紅）。
+#     ★新增品項請**附在尾端**，**不得重排**（★★字母排序看起來比較整齊 —— 而那正是危險所在）。
+#     ★★★今天它與 `BASE_PRICE` 的鍵序**逐項相同** —— **那正是 fp 逐位元不變的原因**。
 const TRADEABLE_RES: Array = [
 	"food", "material", "herb", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",

@@ -69,7 +69,11 @@ def read_run(path):
         #   ★所以「沒有 codehash」不是一種值，是【證據不存在】—— 兩者不可混。
         chash = mh.group(1) if mh else ""
         break
-    if "[TEST-SUITE-COMPLETE]" not in txt:
+    # ★完成記號有兩種：舊 log 用 `[TEST-SUITE-COMPLETE]`；
+    #   ★★而那個記號屬於【判決通道】，而這張床真的不下判決
+    #   ⇒ bed-kind 閘要求拿掉它 ⇒ 改印不帶判決語義的完成行。
+    #   ★★★兩種都收，**舊 log 不會因此變成「未完成」**（那會是一次静默的母體塔陷）。
+    if ("[TEST-SUITE-COMPLETE]" not in txt) and ("量測完成（本床不下判決）" not in txt):
         # ★沒有完成標記 = 本輪無結果（不是 0、不是紅）
         # ★★而【樹的身分】照樣要回：**污染與跑不跑得完無關**
         return {"tree": tree, "chash": chash, "done": False}
