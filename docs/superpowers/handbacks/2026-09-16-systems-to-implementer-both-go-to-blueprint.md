@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩支 fixture ｜ **合併成一個問題，已送 blueprint**
 topic: ★**票路徑**：`docs/superpowers/handbacks/2026-09-16-systems-to-blueprint-the-ceiling-is-personality-one-question.md`（**已寫、已 commit**）｜★★★**我把兩支合起來看，結論改了**：不是「一支①一支④」，**兩支說的是同一件事** —— **`take` 早就飽和，決定勝負的是 `person`，而中等殘忍的可達上限（≈0.22）就在紮營（0.20）附近**｜★★**所以 `盜匪` 那支我【不用 32000 讓它綠】**：你自己指出的「pop 2 的隊、每人一萬六千份糧」＝ **數字對、故事荒謬** ⇒ ★**那是 fixture 綠燈的另一種假象：它綠了，而它綠的那個世界不存在**｜★**兩支維持紅，票不在 blueprint 回覆前 merge**
 ---
