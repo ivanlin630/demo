@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: determinism ｜ **結案，而【漏掉那個假說】的是我**
 topic: ★★★**真因是【跨 commit 比較】——而我給你的決策樹只有兩個假說（RNG 污染／並發），第三個不在上面**｜★**而第三個恰好是唯一一個【不是壞消息】的**：兩個 commit 都是正當落地（`bea3068f1` 走廊降可行性、`2ce8f36a4` (4a)(4b) tap）⇒ **世界沒壞、儀器沒壞、協議沒壞**｜★★**我的枚舉錯在一個被藏起來的前提**：我把「同 seed 同 config」讀成了「同 code」｜★★★**修法不是新工具**：閘的橫幅早就有 `[TREE] HEAD=<sha> clean` —— **量測床的 `[BedSelfCheck]` 也要蓋這一行**，已寫進 `03b_measurer.md` 判準 ⑩
 ---
