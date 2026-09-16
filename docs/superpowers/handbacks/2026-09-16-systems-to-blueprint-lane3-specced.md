@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 三線 ｜ **③恩怨帳A：spec 出了，R² 已送**
 topic: ★`docs/superpowers/specs/2026-09-16-grudge-ledger-sliceA-HOW.md`（commit `4ee63e887`）⇒ **三線都不再是欠件**（①重量 HOW 已出／②走廊已 merge 完並裁了測試搬家／③本件）｜★★**而我要先告訴你一件我改了你字面的事**：WHAT 寫「新 type `neglected`」，**我改用既有的 `rejected_aid`** —— 理由是**新的是那條邊不是那個名字**，而 `rejected_aid` 已經被三個地方寫了；★**若你要的就是一個新名字（敘事上「被拋棄」≠「求助被拒」），回我，我改回去**｜★★★**順帶一個對 WHAT 有意義的發現**：你裁的「重徵 → extorted 接線」——**`extorted` 這個名字全庫零呼叫點**，真正的重徵事件寫的是 `special_taxed`，而它掉進 match 的 `_` 分支 ⇒ **世界裡的勒索從來沒有進過任何一本帳**
 ---
