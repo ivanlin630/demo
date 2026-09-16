@@ -71,6 +71,21 @@ var has_home_outpost: bool = false
 var home_restock_min: float = 0.0
 var current_task: String = ""   # ★GATE-A 二刀 touch0：team 自身 current_task（返家 hysteresis 用；自身欄非 god-view）
 var has_weak_prey: bool = false
+# ★★★掠奪的【搶得到多少】（票：掠奪走期望價值 2026-09-16）：
+#   ★走 belief 不走真值（**感知鐵律**，與攻擊同一條路徑）；
+#   ★★而它與 `attack_loot_est` 是**兩個目標**：攻擊看最富的、掠奪看最弱的
+#     ⇒ **同一把秤、不同的輸入** —— 那正是本票「同一把秤」的操作定義。
+#   ★★★`0.0` 這裡的意思是【belief 答不出它多肥】（沒有可定價分項）
+#     —— 而那與「它很窮」數值相同、語意不同（本專案記過的那一族），**故另記一個旗標**。
+var weak_prey_id: int = -1
+var weak_prey_richness_est: float = 0.0
+var weak_prey_priced: bool = false
+# ★★★【報復風險】（常態掠奪票 §2）：`ThreatAssessment._power_ratio(state, team, other)`
+#   ★**直接呼那一支，不另起一份** —— 它裡面**已經修過「技能維不對稱」那個舊 bug**
+#     （`threat_assessment.gd:95-98`）⇒ ★★**另寫一份就是重演它自己文檔裡記過的錯。**
+#   ★★★而它**在 `gather` 算**：`DecisionTerms.eval` 只拿得到 `ctx`，拿不到 `state`／`team`。
+var weak_prey_power_ratio: float = 0.0
+var attack_target_power_ratio: float = 0.0
 # capability grounding（藍圖 tag-soft-ruling 裁2）：self 有效武裝比（armed / pop）。
 # attack/loot eval 讀此→「打得動嗎」的世界事實（無牙商隊 attack eval 趨 0=送死沒人幹，非被禁）。
 # Task2 於 gather 填值（_calc_own_armed / pop）；terms.gd loot_drive/_intent_fit 疊 capability_factor。
@@ -526,6 +541,32 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _fa := FactionAISystem.shared()
 	var _prey: int = _fa._find_weakest_prey(state, team)
 	c.has_weak_prey = _prey != -1
+	# ★同一次 `_find_weakest_prey` 的結果直接用（**不重算**）；belief 讀法與攻擊側同源。
+	c.weak_prey_id = _prey
+	if _prey != -1:
+		var _wbel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, _prey)
+		c.weak_prey_priced = FactionAISystem.belief_has_priced_items(_wbel)
+		# ★★★【薄情報走桶的下界，不是 0】（systems 裁 2026-09-16；★**第三個消費者，接同一個計算點**）：
+		#   ★既有兩個：攻擊掃描 `faction_ai_system.gd:350`／偵查估值 `decision_context.gd:330`
+		#   ⇒ ★★**掠奪是第三個** —— 而它先前直接回 0 ⇒ 實測 `unpriced_prey = 379`（母體 3285）**恆 0**。
+		#   ★★★**「看不清」不等於「很窮」** —— 而這兩件事在一個 0 上長得一模一樣。
+		#   ★三種形狀：有分項 ⇒ 逐項定價｜只有桶號 ⇒ **桶下界**｜連資產欄都沒有 ⇒ **0**
+		#     （★★而最後那個 0 是「不知道」不是「很窮」—— 那條 systems 已標【待驗】，**不在本票**）
+		#   ★★**呼同一個 `bucket_floor`，不自己算** —— 各寫一份的話桶意義會默默 drift，**而 drift 不會有東西紅**。
+		var _wscale: int = int(_wbel.get("resource_scale", -1))
+		if c.weak_prey_priced:
+			c.weak_prey_richness_est = FactionAISystem.belief_richness_coin(_wbel)
+		elif _wscale >= 0:
+			c.weak_prey_richness_est = FactionAISystem.bucket_floor(_wscale)
+			if Probe.enabled: Probe.bump("raid.thin.bucket_floor")
+		else:
+			c.weak_prey_richness_est = 0.0   # ★誠實的 0：連桶號都沒有
+			if Probe.enabled: Probe.bump("raid.thin.no_scale")
+		# ★報復風險（常態掠奪票 §2）：**打得過但會反咬的鄰居，成本高；弱到不會回頭的，成本低**
+		#   ★直接呼 `ThreatAssessment._power_ratio`（belief-based、無估 fallback ＝ 視對方等強）
+		var _wt: TeamData = state.teams.get(_prey)
+		if _wt != null:
+			c.weak_prey_power_ratio = ThreatAssessment._power_ratio(state, team, _wt)
 	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
 	# 無牙商隊 armed≈0 → ratio≈0 → loot_drive/intent_fit capability_factor 壓平（送死沒人幹，非被禁）。
 	c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(float(team.population), 1.0)
@@ -973,6 +1014,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.attack_loot_est = FactionAISystem._belief_richness(_abel)   # ★tier 分層天然在它裡面（R² §⑤）
 		c.attack_belief_tier = int(_abel.get("tier", -1))             # ★驗收⑦：分桶看「知道得多的挑得更準」
 		c.attack_win_odds = clampf(c.self_armed_ratio / DecisionTerms.VIABLE_ARMED_RATIO, 0.0, 1.0)
+		# ★報復風險（同掠奪側；★兩邊一起接，否則又把它們拆回兩把秤）
+		var _at: TeamData = state.teams.get(c.attack_target_id)
+		if _at != null:
+			c.attack_target_power_ratio = ThreatAssessment._power_ratio(state, team, _at)
 		# ★★★【第①種「餓而有牙卻沒搶」：**視野裡沒有目標**】（systems 2026-09-15）
 		#   ★而它**在因子樣本裡永遠不會出現** —— 因子 tap 只在【有目標】時 fire
 		#   ⇒ ★★**不在這裡單獨記，那一格就永遠是 0**（而 0 會被讀成「沒有這種情況」）。
@@ -1120,6 +1165,34 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		# §6 主敘事標籤：team.plan_phase 來源接五層急迫度衍生(argmax)。GUI 讀 team.plan_phase 不變。
 		team.plan_phase = NeedHierarchy.narrative_label(team.need_urgency)
 		if Probe.enabled: Probe.bump("need.ewma_advance")   # ★憲法級 tap：實推進處（驗每隊每 tick ≤1）
+		# ★★★【raw 與 smoothed 成對印】（systems 2026-09-16）：★**只有成對才分得出**
+		#   「平滑吃掉尖峰」（raw≈1 而 smoothed≈0.1）與「它根本不算餓」（raw 本身就低）。
+		#   ★★母體 ＝ **餓的那些隊天**（逐字定義：`food_days < desperation_entry_threshold`）
+		#     —— ★★★**不是全世界平均**：**餓的隊與不餓的隊要相反的東西，平均把它們抵銷掉。**
+		#   ★「連續餓了幾個 cadence」是 EWMA 爬升的解釋變數（`α = 0.25` ⇒ 要 3–4 次才爬到 0.6）
+		#     ⇒ 用 `Probe.counts` 當計數器（★**不新增 static var** —— 那會踩 `cross-run-static` 閘）。
+		if Probe.enabled and _raw_need.size() == NeedHierarchy.N_LAYERS 				and team.need_urgency.size() == NeedHierarchy.N_LAYERS:
+			var _hk: String = "hstreak.t%d" % team.team_id
+			if c.food_days < c.desperation_entry_threshold:
+				var _streak: int = int(Probe.counts.get(_hk, 0)) + 1
+				Probe.counts[_hk] = _streak
+				Probe.bump("hungrypair.n")
+				Probe.bump("hungrypair.streak.%d" % mini(_streak, 9))
+				var _rs: float = float(_raw_need[NeedHierarchy.L_SURVIVAL])
+				var _ss: float = float(team.need_urgency[NeedHierarchy.L_SURVIVAL])
+				Probe.add_amount("hungrypair.raw_sum", _rs)
+				Probe.add_amount("hungrypair.smooth_sum", _ss)
+				# ★成對的桶（★**同一筆**）：raw 高／smoothed 低 ＝ 平滑吃掉尖峰
+				var _cls: String = "raw_lo"
+				if _rs >= 0.5 and _ss < 0.3: _cls = "raw_hi_smooth_lo"
+				elif _rs >= 0.5 and _ss >= 0.3: _cls = "both_hi"
+				Probe.bump("hungrypair.cls." + _cls)
+				Probe.bump_sample("hungrypair.rows", {"team": team.team_id,
+					"food_days": snappedf(c.food_days, 0.01),
+					"raw_surv": snappedf(_rs, 0.001), "smooth_surv": snappedf(_ss, 0.001),
+					"streak": _streak, "thresh": snappedf(c.desperation_entry_threshold, 0.01)}, 120)
+			else:
+				Probe.counts[_hk] = 0
 	else:
 		if Probe.enabled: Probe.bump("need.gather_readonly")   # ★唯讀路
 	# 邊角：從沒被 advance 過的隊（第一次就走唯讀路）→ ctx 給當下 raw 值（★只進 ctx、不寫 team），

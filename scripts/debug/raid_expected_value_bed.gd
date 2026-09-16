@@ -1,0 +1,256 @@
+extends SceneTree
+# @bed-kind: acceptance
+# slice: 掠奪走期望價值（HOW spec 2026-09-16-raid-expected-value-HOW.md §3）
+#
+# ★★★本床驗的是【同一把秤】：掠奪與攻擊用**同一個壓縮函數、同一個 `reference_wealth`**，
+#   只有輸入不同（攻擊看最富的 prey、掠奪看最弱的 prey）。
+# ★六格每格都要能紅（會紅的那一半寫在各格旁邊）。
+# ★★母體：本床是 **fixture 級**（直接造 ctx 呼 `DecisionTerms.eval`）⇒ **不跑世界、不耗 RNG**
+#   ⇒ ★★★所以它**答不了「真世界裡會不會 fire」** —— 那一格由長窗床負責，**本床不假裝它答得出**。
+#
+# ★★【誠實標·來自 spec §2b】：`odds` 兩邊共用同一個**盲**的贏率（只讀自己的武裝比，不讀對手）
+#   ⇒ **格3 的「同量級」只能證明【尺】相同，不能證明【值】對** ——
+#   ★★★**不要拿格3 綠了當成「贏率也對了」**（那是 `odds-must-read-the-target` 那張票）。
+
+func _initialize() -> void:
+	_run(); quit(0 if _fails == 0 else 1)
+
+var _fails: int = 0
+
+func _ok(cond: bool, msg: String) -> void:
+	if cond: print("  [OK] %s" % msg)
+	else:
+		_fails += 1
+		push_error("[FAIL] %s" % msg)
+
+# ★fixture ctx：只填本式子讀到的欄位 —— ★★其餘留預設，**免得我不小心把別的機制也餵進來**
+func _ctx(rich: float, food_days: float, armed_odds: float, vals: Dictionary) -> DecisionContext:
+	var c := DecisionContext.new()
+	c.has_weak_prey = true
+	c.weak_prey_id = 1
+	c.weak_prey_priced = true
+	c.weak_prey_richness_est = rich
+	c.attack_loot_est = rich                     # ★格3 要「同一個目標」⇒ 兩邊餵同一個身價
+	c.reference_wealth = 4157.0                  # ★pop 10 的隊（= 10 × Σ(TARGET_PER_POP×BASE_PRICE)）
+	c.food_days = food_days
+	c.desperation_entry_threshold = 3.0
+	c.attack_win_odds = armed_odds
+	c.self_armed_ratio = armed_odds * DecisionTerms.VIABLE_ARMED_RATIO
+	c.leader_values = vals
+	c.population = 10
+	return c
+
+func _run() -> void:
+	print("=== 掠奪走期望價值 驗收（fixture 級，不跑世界）===")
+	var neutral: Dictionary = {"好戰": 0.5, "殘忍": 0.5, "慎重": 0.5, "貪婪": 0.5}
+
+	# ── 格1：富 prey vs 窮 prey ⇒ util 分化 ──
+	var u_rich: float = DecisionTerms.eval("loot_drive", _ctx(4000.0, 10.0, 1.0, neutral), "掠奪")
+	var u_poor: float = DecisionTerms.eval("loot_drive", _ctx(100.0, 10.0, 1.0, neutral), "掠奪")
+	print("★格1 富 prey util=%.4f｜窮 prey util=%.4f" % [u_rich, u_poor])
+	_ok(u_rich > u_poor,
+		"格1 富 prey 的掠奪 util **高於**窮 prey（★相同 ⇒ 還是常數驅力，本票沒做到事）")
+
+	# ── 格2：同一 prey，自己餓 vs 不餓 ⇒ util 分化 ──
+	var u_hungry: float = DecisionTerms.eval("loot_drive", _ctx(1000.0, 0.5, 1.0, neutral), "掠奪")
+	var u_full: float = DecisionTerms.eval("loot_drive", _ctx(1000.0, 10.0, 1.0, neutral), "掠奪")
+	print("★格2 餓 util=%.4f｜不餓 util=%.4f" % [u_hungry, u_full])
+	_ok(u_hungry > u_full, "格2 **餓的時候更想搶**（★相同 ⇒ need 沒接上）")
+
+	# ── 格3：★同一個目標，掠奪 vs 攻擊 ⇒ **同量級** ──
+	#   ★把 need 歸零（food_days 遠大於門檻）⇒ 兩式只剩 (W × 身價項) × odds × person
+	#   ⇒ ★★比值 ＝ take/loot ＝ 壓縮後的 `LOOT_RATE` 效果 —— **那正是「同一把秤」的可檢查後果**
+	# ★★★第一版這一格紅了，而**紅的是我的 fixture 不是世界**：
+	#   `attack_opportunity`（`terms.gd:263`）第一行就是 `if opt != "攻擊" or ctx.attack_target_id == -1: return 0.0`
+	#   ⇒ ★我沒填 `attack_target_id` ⇒ 攻擊 util 恆 0 ⇒ 比值爆成 84126。
+	#   ★★而我**沒有把那個 0 當成發現** —— **「它不會攻擊」與「我沒給它目標」在一個 0 上長得一樣。**
+	var c3: DecisionContext = _ctx(4000.0, 99.0, 1.0, neutral)
+	c3.attack_target_id = 1        # ★同一個目標（與 weak_prey_id 同一隻）
+	var u_raid: float = DecisionTerms.eval("loot_drive", c3, "掠奪")
+	var u_atk: float = DecisionTerms.eval("attack_opportunity", c3, "攻擊")
+	var ratio: float = u_raid / maxf(u_atk, 0.000001)
+	print("★格3 同一目標：掠奪 util=%.6f｜攻擊 util=%.6f｜比值=%.4f（LOOT_RATE=%.2f）" % [
+		u_raid, u_atk, ratio, NpcCombatSystem.LOOT_RATE])
+	# ★★★【判準第二次改寫，而兩次都是 systems 自己的判準被推翻】（2026-09-16）：
+	#   ★v1：`0.1 < ratio < 1.0` —— 上界 1.0 是我手猜的，且把兩件事綁在一個斷言裡。
+	#   ★★v2：拆成「①同量級 ②方向 掠奪 < 攻擊」，理由是「搶只拿一部分、打下來拿整份」。
+	#   ★★★**而那個理由本身是錯的**（systems 查 `npc_combat_system._loot_resources`）：
+	#     **世界的結算逐字是【任何戰鬥勝方都只拿 `effective_loot` 比例】** ——
+	#     ★殲滅與潰逃控地**共用同一個函式** ⇒ **攻擊贏了也只拿 0.3–0.51 倍。**
+	#   ⇒ ★★所以攻擊的 loot 項也乘了 `effective_loot_rate` ⇒ **兩邊的即時收穫同源同尺**
+	#   ⇒ ★★★**v3 判準：對同一目標、同人格、`need` 都為 0 ⇒ 兩者【逐字相等】。**
+	#     ★會紅的那一半：**還有差** ⇒ **還有一條沒有同源的線** ⇒ 回報 systems。
+	#     ★★（而「打下來那塊地會持續產出」不在這一項裡：它由**佔村** option 的 `occupy_drive`
+	#       走 `DiscountedFlow` 表達 ⇒ 攻擊 option 再算一次就是**算兩次**。）
+	_ok(absf(u_raid - u_atk) < 0.0005,
+		"格3 **逐字相等**：掠奪 %.6f vs 攻擊 %.6f（差 %.6f）⇒ ★兩邊的 loot 項同源同尺" % [
+			u_raid, u_atk, absf(u_raid - u_atk)]
+		+ "｜★★★還有差 ⇒ **還有一條沒同源的線，回報 systems**")
+	print("   ★★而 `odds` 兩邊共用同一個【盲】的贏率（不讀對手）⇒ **這一格只證明尺相同，不證明值對**。")
+
+	# ── 格4：無牙 ⇒ util ≈ 0 ──
+	var u_toothless: float = DecisionTerms.eval("loot_drive", _ctx(4000.0, 0.5, 0.0, neutral), "掠奪")
+	print("★格4 無牙 util=%.6f" % u_toothless)
+	_ok(absf(u_toothless) < 0.0005,
+		"格4 無牙 ⇒ 掠奪 util ≈ 0（★**不是新功能，是不准退步**：舊制的 `cap` 也做得到）")
+
+	# ── 格5：人格只調製，不改三個輸入 ──
+	# ★★★【殘忍固定】（systems 裁 2026-09-16：殘忍進 `take`，因為結算端真的多給殘忍者）
+	#   ⇒ ★這一格要驗的是「**好戰／慎重**只調製、不漏進世界量」
+	#   ⇒ ★★所以**殘忍必須固定** —— 否則它會（正當地）改變 `take`，把這一格變成假紅。
+	var warlike: Dictionary = {"好戰": 1.0, "殘忍": 0.5, "慎重": 0.0, "貪婪": 0.5}
+	var meek: Dictionary = {"好戰": 0.0, "殘忍": 0.5, "慎重": 1.0, "貪婪": 0.5}
+	var u_war: float = DecisionTerms.eval("loot_drive", _ctx(1000.0, 5.0, 1.0, warlike), "掠奪")
+	var u_meek: float = DecisionTerms.eval("loot_drive", _ctx(1000.0, 5.0, 1.0, meek), "掠奪")
+	print("★格5 好戰殘忍 util=%.4f｜溫和謹慎 util=%.4f" % [u_war, u_meek])
+	_ok(u_war > u_meek, "格5-a 人格**有**調製（★兩者相同 ⇒ 人格沒接）")
+	# ★★而「只調製」怎麼驗：**兩人格的比值必須是一個【與身價無關】的常數**
+	#   ⇒ 換一個身價再算一次，比值不變 ⇒ 人格沒有漏進 take／need／odds。
+	var u_war2: float = DecisionTerms.eval("loot_drive", _ctx(200.0, 5.0, 1.0, warlike), "掠奪")
+	var u_meek2: float = DecisionTerms.eval("loot_drive", _ctx(200.0, 5.0, 1.0, meek), "掠奪")
+	var r1: float = u_war / maxf(u_meek, 0.000001)
+	var r2: float = u_war2 / maxf(u_meek2, 0.000001)
+	print("   人格比值：身價 1000 時 %.4f｜身價 200 時 %.4f" % [r1, r2])
+	_ok(absf(r1 - r2) < 0.001,
+		"格5-b **好戰／慎重**的比值與身價無關 ⇒ ★它們只乘在外面（★★殘忍不在這一格：它是物理，見格7）")
+
+	# ── ★★★格7：**能推翻 systems 那個裁定**的一格（他自己要求加的）──
+	#   ★裁定是「殘忍要進 take，因為世界真的多給殘忍者」。
+	#   ★★若它錯了，錯的樣子是**殘忍被平方**（物理乘一次、偏好再乘一次而兩者同源）
+	#   ⇒ ★★★所以這一格比的是：**util 比值 A** vs **結算端比值 B × person 比值** ——
+	#     **A ≈ 那個乘積 ⇒ 正常；A ≫ 它 ⇒ 平方了 ⇒ 回報，把 take 那層拿掉。**
+	var cruel0: Dictionary = {"好戰": 0.5, "殘忍": 0.0, "慎重": 0.5, "貪婪": 0.5}
+	var cruel1: Dictionary = {"好戰": 0.5, "殘忍": 1.0, "慎重": 0.5, "貪婪": 0.5}
+	var u_c0: float = DecisionTerms.eval("loot_drive", _ctx(1000.0, 99.0, 1.0, cruel0), "掠奪")
+	var u_c1: float = DecisionTerms.eval("loot_drive", _ctx(1000.0, 99.0, 1.0, cruel1), "掠奪")
+	var A: float = u_c1 / maxf(u_c0, 0.000001)
+	var B: float = NpcCombatSystem.effective_loot_rate(1.0) / NpcCombatSystem.effective_loot_rate(0.0)
+	# person ＝ clampf(0.5 + (max(好戰,殘忍) − 0.5) − (慎重 − 0.5)×ATTACK_CAUTION_W, 0, 1.5)
+	var p0: float = clampf(0.5 + (maxf(0.5, 0.0) - 0.5) - (0.5 - 0.5) * DecisionTerms.ATTACK_CAUTION_W, 0.0, 1.5)
+	var p1: float = clampf(0.5 + (maxf(0.5, 1.0) - 0.5) - (0.5 - 0.5) * DecisionTerms.ATTACK_CAUTION_W, 0.0, 1.5)
+	var expected: float = B * (p1 / maxf(p0, 0.000001))
+	print("★格7 殘忍 0 vs 1：util 比值 A=%.3f｜結算端比值 B=%.3f｜person 比值=%.3f｜B×person=%.3f" % [
+		A, B, p1 / maxf(p0, 0.000001), expected])
+	_ok(A > 1.0, "格7-a 殘忍**確實提高**掠奪 util（★否則 take 那層根本沒接上）")
+	_ok(A <= expected * 1.05,
+		"格7-b **A ≤ B×person**（%.3f ≤ %.3f）⇒ ★殘忍【沒有被平方】" % [A, expected * 1.05]
+		+ "｜★★★若這格紅 ⇒ **回報 systems：他裁錯了，`take` 那層要拿掉**")
+	print("   ★★而壓縮是次線性 ⇒ A 略小於 B×person 是**預期**的，不是缺陷。")
+
+	# ── 格6：tap 逐筆可 dump ──
+	Probe.reset(); Probe.arm()
+	DecisionTerms.eval("loot_drive", _ctx(1000.0, 1.0, 0.8, neutral), "掠奪")
+	var rows: Array = Probe.samples.get("raid.factors", [])
+	print("★格6 `raid.factors` 樣本 %d 筆｜`raid.eval` 母體 %d" % [
+		rows.size(), int(Probe.counts.get("raid.eval", 0))])
+	var has_all: bool = false
+	if rows.size() > 0:
+		var r: Dictionary = rows[0]
+		has_all = r.has("take") and r.has("need") and r.has("odds") and r.has("util")
+		print("   逐筆：%s" % str(r))
+	_ok(has_all, "格6 `take／need／odds／util` **逐筆都在**（★缺任一 ⇒ 違「全量暫態可觀測性」）")
+
+	_run_desperation_cell()
+
+	print("")
+	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)
+
+# ★★★【格8：絕境格】（blueprint 逐字要的，systems 派工 2026-09-16）——
+#   ★它守的不是「常態下誰會搶」（那是風格問題），是
+#     **「餓到快死的時候，人格能不能把一個人壓到不動」**
+#   ⇒ ★★**那是【人格是調製器還是閘】的分界線** ——
+#     而那條線一旦被跨過，**世界裡就會有一種「慫到餓死也不搶的隊」，而那不是人格，那是 bug。**
+# ★★★本格【建真世界跑 rank_scored】而不是只 eval 一個 term：
+#   **「贏得了嗎」需要一個真的對手** —— 只 eval 掠奪自己，答不出「贏」。
+# ★「絕境」用**世界自己的定義**（`food_days < desperation_entry_threshold`），不另造一個。
+# ★★「弱且肥」用**存在的世界**：鄰居 pop 3、food 依 `TARGET_PER_POP.food` 的倍數給
+#   —— ★★★**不用 32000 那種「數字對、故事荒謬」的世界**（systems／blueprint 都否決了）。
+static func _dsp_seed(t: TeamData, n: int) -> void:
+	var named: int = t.named_members.size() + (1 if t.leader_id != -1 else 0)
+	var want: int = maxi(n - named, 0)
+	var cur: int = AnonCohort.total(t.anon_cohorts)
+	if want - cur > 0: AnonCohort.add(t.anon_cohorts, "平民", "healthy", want - cur)
+
+func _dsp_world(fierce: float, prey_food: float, raider_food: float, farmable: bool = true) -> Dictionary:
+	# ★★★【走 `MeasureBedHelper.arm_and_new()`，不自己 `WorldState.new()`】（bed-arm 閘）：
+	#   ★那支閘的母體就是 `WorldState.new()` 的呼叫檔；而**手工組世界的正規入口是 `arm_and_new`**
+	#     （另一支 `arm_and_setup` 走 GameSetup，本格用不到 —— 我們要的是三格小世界不是整局）。
+	#   ★★**而白名單不是出路**：那份檔的檔頭逐字寫著「**新增床【不得】加進來**」
+	#     ⇒ ★★★**閘的訊息與白名單的檔頭在這一點上不一致，而我照【比較嚴的那一份】做。**
+	#   ★順序仍然是 arm → setup（`arm_and_new` 內建），所以本格原本就沒有盲點 —— 換入口是為了**可被閘看見**。
+	var state := MeasureBedHelper.arm_and_new()
+	for p in [Vector2i(4, 4), Vector2i(5, 4), Vector2i(3, 4)]:
+		var tl := HexTileData.new()
+		tl.tile_id = p.x * 1000 + p.y; tl.tile_pos = p; tl.terrain = "plains"
+		tl.outpost_owner = -1; tl.outpost_level = 0
+		if farmable: tl.resource_cap = {"food": 50.0}
+		else: tl.terrain = "mountain"   # ★診斷用：腳下沒有可耕地 ⇒ 紮營不 applicable
+		state.world.tiles[tl.tile_id] = tl
+	var prey := TeamData.new(); prey.team_id = 9; prey.tile_pos = Vector2i(3, 4)
+	_dsp_seed(prey, 3); prey.faction_id = -1; prey.resources = {"food": prey_food}
+	state.teams[9] = prey
+	var ldr := PersonData.new(); ldr.id = 1000; ldr.team_id = 1
+	# ★★★【兇者的軸換了】（blueprint 裁 2026-09-16）：**想不想搶 ＝ 好戰與貪財的事**
+	#   ⇒ ★這一格的「兇者」從 **殘忍 .9** 改成 **好戰 .9／貪婪 .9**（動機軸）
+	#   ⇒ ★★**而那正是我今天一直在講的那個病，這次落在我自己的驗收格上**：
+	#     **軸換了之後，寫著舊軸的那一格【當場失去鑑別力】** —— 實測它紅了（首選變回乞食）。
+	#   ★★★**殘忍不在這裡** —— 它只留在 `take` 的 `effective_loot_rate`（物理），見格7。
+	ldr.values = {"好戰": fierce, "貪婪": fierce, "野心": 0.5, "慎重": 0.5, "殘忍": 0.5}
+	state.persons[1000] = ldr
+	var t1 := TeamData.new(); t1.team_id = 1; t1.leader_id = 1000; t1.tile_pos = Vector2i(4, 4)
+	_dsp_seed(t1, 10); t1.tags = ["軍隊"]; t1.current_task = TeamData.TASK_IDLE
+	t1.resources = {"food": raider_food}; t1.armed_anon_ratio = 1.0
+	state.teams[1] = t1
+	state.team_discovered[1] = [9]
+	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 3, "armed_est": 1,
+		"food_est": prey_food, "tile_pos": Vector2i(3, 4), "last_tick": state.world.current_tick}, 1.0, false)
+	var ctx: DecisionContext = DecisionContext.gather(state, t1)
+	var rows: Array = []
+	var loot_u: float = -1.0
+	var top_u: float = -1.0
+	var top_opt: String = ""
+	for e in DecisionEngine.rank_scored(state, t1, "dspcell"):
+		rows.append("%s=%.4f" % [String(e["opt"]), float(e["u"])])
+		if top_opt == "": top_opt = String(e["opt"]); top_u = float(e["u"])
+		if String(e["opt"]) == "掠奪": loot_u = float(e["u"])
+	return {"table": " ".join(rows), "loot": loot_u, "top": top_opt, "top_u": top_u,
+		"food_days": ctx.food_days, "thresh": ctx.desperation_entry_threshold}
+
+func _run_desperation_cell() -> void:
+	# ★鄰居「合理富裕」＝ `TARGET_PER_POP.food(10) × pop 3 × 8` ＝ 240（★**八倍存量，不是二十七倍**）
+	var _rich: float = float(TradeValuation.TARGET_PER_POP.get("food", 10.0)) * 3.0 * 8.0
+	# ★★★【具名條件：腳下沒有可耕地】（systems 裁 2026-09-16）——
+	#   ★**「餓了不搶」與「餓了站在田上所以先種田」在【掠奪沒贏】這一句上長得一模一樣**
+	#   ⇒ ★★所以「有沒有可耕地」必須是**具名條件**，不是背景；有耕地那一版留在**診斷欄**。
+	var mid: Dictionary = _dsp_world(0.5, _rich, 0.0, false)
+	var cruel: Dictionary = _dsp_world(0.9, _rich, 0.0, false)
+	print("★格8 絕境（food_days=%.2f < 絕境線 %.2f）｜鄰居 pop3 food=%.0f｜**腳下無可耕地**" % [
+		float(mid["food_days"]), float(mid["thresh"]), _rich])
+	print("   中庸(好戰/貪婪 .5)：%s" % mid["table"])
+	print("   兇者(好戰/貪婪 .9)：%s" % cruel["table"])
+	_ok(float(mid["food_days"]) < float(mid["thresh"]),
+		"格8-前提 這個 fixture **真的在絕境裡**（★否則這一格問的不是絕境）")
+	# ★★★格8-a【非壓死】—— **這一條是憲法那一半**：
+	#   blueprint 要守的是「**不得慫到餓死也不動**」，**不是「必須選掠奪」**（後者是風格）。
+	#   ⇒ ★**所以判準是「首選落在求生類」**，而**不是**「首選＝掠奪」。
+	#   ★★而舊版把兩者綁在一句裡，於是它答的是風格、而我以為它在守憲法。
+	var _surv_kinds: Array = ["乞食", "掠奪", "併入", "覓食", "買糧", "遷移找糧", "投靠"]
+	_ok(String(mid["top"]) in _surv_kinds,
+		"格8-a ★**非壓死**：絕境＋中庸人格 ⇒ 首選落在**求生類**（實際＝%s）" % String(mid["top"])
+		+ "｜★★★紅了 ⇒ **人格把一個餓死邊緣的人壓到【不動】** ⇒ 回報 systems，不要自己改 `person`")
+	_ok(not (String(mid["top"]) in ["紮營", "建設", "生產"]),
+		"格8-a2 ★**成對的另一半**：首選**不是**紮營／建設／生產（實際＝%s）" % String(mid["top"]))
+	# ★★格8-b【人格有方向】—— 證明 `person` 在【調製】而不是在【開關】
+	_ok(float(cruel["loot"]) > float(mid["loot"]),
+		"格8-b 兇者的掠奪 util ＞ 中庸人格的（%.4f > %.4f）★這一格證明 `person` 是調製器" % [
+			float(cruel["loot"]), float(mid["loot"])])
+	# ★★★格8-c【兇者會搶】—— 實測 2.7204 vs 乞食 2.6516，**不是刀鋒**
+	_ok(String(cruel["top"]) == "掠奪",
+		"格8-c 兇者（好戰/貪婪 .9）＋無耕地絕境 ⇒ **首選＝掠奪**（實際＝%s）" % String(cruel["top"]))
+	# ★★★【診斷欄，不入判】：腳下**有**可耕地 —— ★它是**解釋變數**，不是判準。
+	#   ★★而「中等殘忍選乞食還是掠奪」也**不入判**：實測只差 1.2% ＝ **雜訊級，寫在刀鋒上的格會翻面**。
+	var mid_f: Dictionary = _dsp_world(0.5, _rich, 0.0, true)
+	var cruel_f: Dictionary = _dsp_world(0.9, _rich, 0.0, true)
+	print("   ★診斷（腳下**有**可耕地；不入判）中庸(好戰/貪婪 .5)：%s" % mid_f["table"])
+	print("   ★診斷（腳下**有**可耕地；不入判）兇者(好戰/貪婪 .9)：%s" % cruel_f["table"])
+	print("      ★★兩個人格在有耕地時都選**紮營** —— **而那不是「人格壓住了它」，是【它站在田上】。**")

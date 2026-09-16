@@ -79,6 +79,16 @@ extends SceneTree
 #   （血證：`rank_scored` 有四個呼叫端，而第一版只在 `unified` 裝了 tap
 #     ⇒ 差額長得跟「贏了卻沒派出去」一模一樣，而它是我沒接電的那三個迴圈。）
 
+# ★★★【這張床不在任何自動清單上】（systems 裁 2026-09-16）：
+#   ★它**不在** `docs/process/merge-gates.tsv` 裡 —— **而那是刻意的**：
+#     `SC_TICKS` 預設 43200（**30 天**），而它量的是**世界級行為**
+#     ⇒ ★★**縮短窗口會削掉它唯一的價值** —— **為了讓它進閘而縮短它，
+#       等於為了讓它跑得完而讓它什麼都測不到。**
+#   ⇒ ★★★它靠 **defer 鬧鐘**：`scout-on-the-scale-bed-unscheduled`
+#     （條件：**偵查／攻擊估值那條線再被改時**）⇒ 響了就**手動跑一輪 30 天**。
+#   ★**而這一行必須存在**：**「它有鬧鐘」與「它會自己跑」是兩件事** ——
+#     ★★而這張床自己就是血證：它寫好了、綠過、merge 進 main，然後**從此沒有人跑它**。
+
 func _initialize() -> void:
 	_run(); quit(0 if _fails == 0 else 1)
 
@@ -759,12 +769,185 @@ func _run() -> void:
 		atk_ok, int(Probe.counts.get("dispatch.攻擊.noop", 0))])
 	print("      ★若這個數是 0 ⇒ **單位修好了，而攻擊被殺死了** —— 那必須在 merge 前知道。")
 	print("      ★★而本床**不對它下判決**：它是 merge 判準的輸入，不是本票的驗收格。")
+	# ★★★【掠奪也要一行】（systems 2026-09-16 裁：merge 前要世界級 before/after）：
+	#   ★它不在【前 12 名】裡 ⇒ **它的數字從來沒有被印出來過** ——
+	#     ★★而 before/after 要比的正是它 ⇒ **沒印等於量不到**（而不是量到 0）。
+	var loot_ok: int = int(Probe.counts.get("dispatch.掠奪.ok", 0))
+	print("   ★★★**掠奪真的被派出去 ＝ %d 次**（noop %d）" % [
+		loot_ok, int(Probe.counts.get("dispatch.掠奪.noop", 0))])
+	print("      ★若這個數在【掠奪走期望價值】票後掉到 0 ⇒ **`ref` 選錯了**（systems 裁定的回報條件）。")
+	# ★★★【util 分布，不是次數】（systems 2026-09-16）：
+	#   ★**dispatch 次數相同，可以是「util 變了但排序沒變」** ⇒ 兩件事的下一步不同。
+	#   ★★所以印**無偏**的直方圖（全量計數）＋平均 —— **不是 `bump_sample` 那個 first-N。**
+	var _rn: int = int(Probe.counts.get("raid.util.n", 0))
+	var _rsum: float = float(Probe.amounts.get("raid.util.sum", 0.0))
+	var _hb: Array = []
+	for _bk in ["lt0.02", "lt0.05", "lt0.10", "lt0.20", "lt0.30", "lt0.50", "ge0.50"]:
+		_hb.append("%s=%d" % [_bk, int(Probe.counts.get("raid.util.hist." + _bk, 0))])
+	print("   ★掠奪 **drive** 分布（**無偏全量**；★注意：這是 `weight` 之前的值）：n=%d 平均=%.4f｜%s" % [
+		_rn, (_rsum / maxf(float(_rn), 1.0)), " ".join(_hb)])
+	# ★★★【乘完 weight 之後的 util —— 兩條 rank 路分開】（systems 2026-09-16 ③）
+	#   ★舊版只有 drive ⇒ `weight` 的改動它**結構上看不見** ⇒ 兩棵樹「相同」是恆真句不是證據。
+	#   ★★兩條路**不可混桶**：`rank_scored` 之後還乘 coeff／FailureMemory，`rank_survival` 兩者都沒有。
+	for _pth in ["scored", "survival"]:
+		var _pn: int = int(Probe.counts.get("raidu.%s.n" % _pth, 0))
+		var _ps: float = float(Probe.amounts.get("raidu.%s.sum" % _pth, 0.0))
+		var _ph: Array = []
+		for _bk2 in ["lt0.02", "lt0.05", "lt0.10", "lt0.20", "lt0.30", "lt0.50", "ge0.50"]:
+			_ph.append("%s=%d" % [_bk2, int(Probe.counts.get("raidu.%s.hist.%s" % [_pth, _bk2], 0))])
+		print("   ★★掠奪 util（**乘完 weight**）｜路徑 `%s`：n=%d 平均=%.4f｜%s" % [
+			_pth, _pn, (_ps / maxf(float(_pn), 1.0)), " ".join(_ph)])
+	# ★★★【掠奪在 `rank_survival` 那張表上怎麼贏的】（★世界裡真正發生的掠奪走這條路）
+	var _svp: int = int(Probe.counts.get("raidsurv.pop", 0))
+	var _svw: int = int(Probe.counts.get("raidsurv.won", 0))
+	var _rkq: Array = []
+	for _i2 in range(10):
+		var _c2: int = int(Probe.counts.get("raidsurv.rank.%d" % _i2, 0))
+		if _c2 > 0: _rkq.append("第%d名=%d" % [_i2 + 1, _c2])
+	print("   ★★★`rank_survival` 的表：掠奪在場 %d 次｜**它拿第一名 %d 次**｜名次分布：%s" % [
+		_svp, _svw, " ".join(_rkq)])
+	# ★★★【拆那兩個 0】（systems 2026-09-16）：★一個 0 有四種意思，**先分【沒有 prey】與【有 prey 但答不出身價】**
+	print("   ★掠奪的 0 是哪一種：`no_prey`=%d｜`unpriced_prey`=%d（母體 `raid.eval`=%d）" % [
+		int(Probe.counts.get("raid.zero.no_prey", 0)),
+		int(Probe.counts.get("raid.zero.unpriced_prey", 0)),
+		int(Probe.counts.get("raid.eval", 0))])
+	print("      ★★`raid.take.priced`=%d／`unpriced`=%d（★這兩顆是【有 prey 之後】才數的，母體不同）" % [
+		int(Probe.counts.get("raid.take.priced", 0)), int(Probe.counts.get("raid.take.unpriced", 0))])
+	# ★★★【新驗收格】：`take ＝ 0` 的筆數／母體（★舊的 `unpriced_prey` 恆不動，已作廢）
+	var _tz: int = int(Probe.counts.get("raid.take.zero", 0))
+	var _tp: int = int(Probe.counts.get("raid.take.pos", 0))
+	print("   ★★★**`take` 分布**：`take = 0` **%d** ／ `take > 0` **%d**（母體 %d ＝ `raid.eval`）" % [
+		_tz, _tp, _tz + _tp])
+	print("      ★這一格才對應「薄情報不再被當成零身價」—— **舊的 `unpriced_prey` 數的是 belief 的欄位，恆不動。**")
+	print("      ★★★薄情報的處置：走**桶下界** %d 次｜**連桶號都沒有**（誠實的 0）%d 次" % [
+		int(Probe.counts.get("raid.thin.bucket_floor", 0)),
+		int(Probe.counts.get("raid.thin.no_scale", 0))])
+	print("         ★驗收：`unpriced_prey` 應**下降但不歸零** —— 真的連桶號都沒有的目標仍然是 0。")
+	print("   ★併入的 0：`no_host_flow`=%d｜`flow_util_zero`=%d（母體 `join.eval`=%d）" % [
+		int(Probe.counts.get("join.zero.no_host_flow", 0)),
+		int(Probe.counts.get("join.zero.flow_util_zero", 0)),
+		int(Probe.counts.get("join.eval", 0))])
+	var _jf: Array = Probe.samples.get("join.factors", [])
+	for _i4 in range(mini(3, _jf.size())):
+		print("        併入逐筆：%s" % str(_jf[_i4]))
+	# ★★★【第幾順位被派出去】—— **「贏了」與「被輪到」在 `dispatch.*` 上長得一模一樣**
+	for _pp in ["solo", "survival"]:
+		var _pos_rows: Array = []
+		for _pi in range(10):
+			var _pc: int = int(Probe.counts.get("dpos.ok.%s.掠奪.pos%d" % [_pp, _pi], 0))
+			if _pc > 0: _pos_rows.append("第%d順位=%d" % [_pi + 1, _pc])
+		if not _pos_rows.is_empty():
+			print("   ★★掠奪在 `%s` 路被派出去的【順位】：%s" % [_pp, " ".join(_pos_rows)])
+	# ★★★【反事實的讀數】（systems 2026-09-16 ②）：`main_layer_of("掠奪")` 決定它的 need 類別，
+	#   而那一格【就是】本票改過的 affinity argmax ⇒ **改 affinity 會同時改派工重排。**
+	var _catrows: Array = []
+	for _ck2 in Probe.counts:
+		if String(_ck2).begins_with("reord.raid.cat."):
+			_catrows.append("%s=%d" % [String(_ck2).substr(15), int(Probe.counts[_ck2])])
+	print("   ★★★`main_layer_of(掠奪)` ＝ **L%d**｜`_need_category` 桶：%s" % [
+		NeedHierarchy.main_layer_of("掠奪"), " ".join(_catrows)])
+	print("   重排：呼叫 %d 次｜**真的改了順序 %d 次**｜掠奪在場 %d 次" % [
+		int(Probe.counts.get("reord.calls", 0)), int(Probe.counts.get("reord.changed", 0)),
+		int(Probe.counts.get("reord.raid.present", 0))])
+	print("      ★掠奪被**往前**移 %d 次｜往後 %d 次｜原位 %d 次｜**被移成第一個 %d 次**" % [
+		int(Probe.counts.get("reord.raid.moved_up", 0)),
+		int(Probe.counts.get("reord.raid.moved_down", 0)),
+		int(Probe.counts.get("reord.raid.same_pos", 0)),
+		int(Probe.counts.get("reord.raid.became_first", 0))])
+	# ★★★【level 不是 delta】：上一版只印了移動方向，而問題要的是「它最後排第幾」。
+	var _fp: Array = []
+	var _bp: Array = []
+	for _fi in range(10):
+		var _fc: int = int(Probe.counts.get("reord.raid.finalpos.%d" % _fi, 0))
+		var _bc: int = int(Probe.counts.get("reord.raid.beforepos.%d" % _fi, 0))
+		if _fc > 0: _fp.append("第%d=%d" % [_fi + 1, _fc])
+		if _bc > 0: _bp.append("第%d=%d" % [_fi + 1, _bc])
+	print("      ★★重排**後**掠奪的位置：%s" % " ".join(_fp))
+	print("      ★★重排**前**掠奪的位置：%s" % " ".join(_bp))
+	# ★★★【四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字】—— 補上
+	var _ds: Array = []
+	for _sname in ["unified", "subteam", "solo", "survival"]:
+		_ds.append("%s=%d/%d" % [_sname,
+			int(Probe.counts.get("dsrc.掠奪.%s.ok" % _sname, 0)),
+			int(Probe.counts.get("dsrc.掠奪.%s.noop" % _sname, 0))])
+	print("   ★★★掠奪派工的**來源站**（ok/noop）：%s" % " ".join(_ds))
+	print("      ★對帳：四站 ok 相加應該 ＝ `dispatch.掠奪.ok`（%d）" % loot_ok)
+	var _po: Array = Probe.samples.get("dpos.raid_passedover", [])
+	print("      被輪到的逐筆樣本 %d 筆（★first-N）：" % _po.size())
+	for _i5 in range(mini(5, _po.size())):
+		print("        %s" % str(_po[_i5]))
+	var _tb: Array = Probe.samples.get("raidsurv.table", [])
+	print("      逐筆樣本 %d 筆（★`bump_sample` ＝ **first-N，有偏** ⇒ 只能當【長相】不能當分布）：" % _tb.size())
+	for _i3 in range(mini(6, _tb.size())):
+		print("        %s" % str(_tb[_i3]))
+	# ★★★【被需求一致性壓掉的掠奪】（systems 逐字定義；★**不是 dispatch 次數**）
+	#   被壓掉 ＝ `u_with < winner_u ≤ u_without` —— **有 coeff 就輸、沒 coeff 就贏。**
+	#   ★母體 ＝ 掠奪 applicable 的次數；★★另外兩桶是**成對的另一半**：
+	#     `won_anyway`（有 coeff 也贏）與 `lost_anyway`（沒 coeff 也輸 ⇒ **不是這一格的錯**）。
+	var _sp: int = int(Probe.counts.get("raidsupp.pop", 0))
+	var _ss: int = int(Probe.counts.get("raidsupp.suppressed", 0))
+	var _cbs: Array = []
+	for _ck in ["lt0.2", "lt0.4", "lt0.6", "lt0.9", "ge0.9"]:
+		_cbs.append("%s=%d" % [_ck, int(Probe.counts.get("raidsupp.coeff." + _ck, 0))])
+	print("   ★★被 `consistency_coeff` 壓掉的掠奪 ＝ **%d** ／ 母體 %d（掠奪 applicable 的次數）" % [_ss, _sp])
+	print("      對帳：壓掉 %d ＋ 有 coeff 也贏 %d ＋ 沒 coeff 也輸 %d ＝ %d（母體 %d）" % [
+		_ss, int(Probe.counts.get("raidsupp.won_anyway", 0)),
+		int(Probe.counts.get("raidsupp.lost_anyway", 0)),
+		_ss + int(Probe.counts.get("raidsupp.won_anyway", 0)) + int(Probe.counts.get("raidsupp.lost_anyway", 0)), _sp])
+	print("      coeff 分布：%s" % " ".join(_cbs))
+	var _crs: Array = []
+	for _rk in ["lt0.50", "lt0.80", "lt0.99", "eq1.00", "ge1.00"]:
+		_crs.append("%s=%d" % [_rk, int(Probe.counts.get("raidsupp.coeffratio." + _rk, 0))])
+	print("      ★**掠奪 coeff ÷ 贏家 coeff**（★關鍵是【比】不是【值】：＝1 ⇒ 共同因子 ⇒ 不改排序）：%s" % " ".join(_crs))
+	# ★★★【真實世界的 urgency 落在哪一層】（systems 要的第①件）
+	var _un: int = int(Probe.counts.get("urg.n", 0))
+	var _hn: int = int(Probe.counts.get("urg.hungry.n", 0))
+	var _lname: Array = ["生存", "安全", "歸屬", "尊重", "自我實現"]
+	var _mrow: Array = []
+	var _hrow: Array = []
+	var _srow: Array = []
+	var _nfrow: Array = []
+	for _i in range(5):
+		_mrow.append("%s=%d" % [_lname[_i], int(Probe.counts.get("urg.main.L%d" % _i, 0))])
+		_hrow.append("%s=%d" % [_lname[_i], int(Probe.counts.get("urg.hungry.main.L%d" % _i, 0))])
+		_srow.append("%s=%.3f" % [_lname[_i], float(Probe.amounts.get("urg.sum.L%d" % _i, 0.0)) / maxf(float(_un), 1.0)])
+		_nfrow.append("%s=%d" % [_lname[_i], int(Probe.counts.get("urg.main.nofac.L%d" % _i, 0))])
+	print("★§E-④ **需求急迫度落在哪一層**（母體 ＝ rank 次數 %d）" % _un)
+	print("   主層分布：%s" % " ".join(_mrow))
+	print("   ★**餓的那些次**（`food_days < 絕境線`，母體 %d）主層：%s" % [_hn, " ".join(_hrow)])
+	print("      ★★「餓」用的是**世界自己的絕境線**，不是 urgency 自己 —— 否則這一行是同義反覆。")
+	print("   逐層平均急迫度：%s" % " ".join(_srow))
+	print("   ★★★**無 faction 的隊**主層分布：%s" % " ".join(_nfrow))
+	# ★★★【raw vs smoothed，成對、母體＝餓的那些隊天】（systems 2026-09-16）
+	var _hn2: int = int(Probe.counts.get("hungrypair.n", 0))
+	print("★§E-⑤ **餓的隊天：`raw[生存]` vs `smoothed[生存]`（成對同筆）** 母體 ＝ %d" % _hn2)
+	print("   定義逐字：`food_days < desperation_entry_threshold`（★與主層那一格同一個定義）")
+	print("   平均：raw=%.3f｜smoothed=%.3f" % [
+		float(Probe.amounts.get("hungrypair.raw_sum", 0.0)) / maxf(float(_hn2), 1.0),
+		float(Probe.amounts.get("hungrypair.smooth_sum", 0.0)) / maxf(float(_hn2), 1.0)])
+	print("   ★成對分類：`raw_hi_smooth_lo`（平滑吃掉尖峰）=%d｜`both_hi`=%d｜`raw_lo`（本來就不算餓）=%d" % [
+		int(Probe.counts.get("hungrypair.cls.raw_hi_smooth_lo", 0)),
+		int(Probe.counts.get("hungrypair.cls.both_hi", 0)),
+		int(Probe.counts.get("hungrypair.cls.raw_lo", 0))])
+	var _strk: Array = []
+	for _si in range(1, 10):
+		var _sc: int = int(Probe.counts.get("hungrypair.streak.%d" % _si, 0))
+		if _sc > 0: _strk.append("連%d=%d" % [_si, _sc])
+	print("   連續餓了幾個 cadence：%s" % " ".join(_strk))
+	var _hr: Array = Probe.samples.get("hungrypair.rows", [])
+	print("   逐筆樣本 %d 筆（★first-N）：" % _hr.size())
+	for _hi in range(mini(8, _hr.size())):
+		print("     %s" % str(_hr[_hi]))
+	print("      ★`need_hierarchy.gd:48-53`：`faction_id == -1` ⇒ **歸屬層直接給 1.0**")
+	print("      ⇒ ★★所有流浪／盜匪隊的歸屬層**恆滿檔**，而掠奪與紮營在那一層的 affinity **都是 0**")
+	print("      ⇒ ★★★**alignment 被那一層的滿檔吃掉** ⇒ 兩邊一起落到 coeff 下緣（＝共同因子）。")
+	print("      ★★同樣不在本床下判決：它是 merge 判準的輸入。")
 
 	# ★★★【攻擊也要一張拒絕表】（systems 2026-09-16 的第②個數的下一問）：
 	#   ★`dispatch.攻擊.ok = 0` 而 `noop > 0` ⇒ **它有走到仲裁，每一次都被擋**
 	#   ⇒ ★★【沒人想打】與【想打但派不出去】是兩個完全不同的世界，
 	#   ★★★而它們在「攻擊沒發生」這一句上長得一模一樣。
-	for _o2 in ["偵查", "攻擊"]:
+	for _o2 in ["偵查", "攻擊", "掠奪"]:
 		var rows2: Array = []
 		var tot2: int = 0
 		for k8 in Probe.counts:

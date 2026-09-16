@@ -578,8 +578,17 @@ func _probe_capture_by_task(capturer: TeamData) -> void:
 
 # 戰場 loot（以戰養戰 PAY）：勝方按 effective_loot 比例奪敗方資源（食+材+幣+貨+武）。守恆走 ResourceBank（in/out 對稱）。
 # 殲滅(_end_combat)與潰逃控地(_force_retreat)共用（潰逃佔多數戰局，兩路皆 PAY 才閉以戰養戰環）。
+# ★★★【單一計算點】（票：掠奪走期望價值 2026-09-16）：
+#   ★決策端要估「我搶得到多少」，而**估的量與執行的量必須同源**（本專案立法：估算器禁手抄物理）。
+#   ★★所以這條式子從 `_loot_resources` 裡抽出來 —— **不是讓 `terms.gd` 抄一份 `(1 + 殘忍×0.7)`**：
+#     ★★★抄一份的話，哪天有人調 0.7，**決策會繼續用舊的數，而不會有任何東西紅**。
+#   ★而殘忍在這裡是**物理**（世界真的多給殘忍者），不是偏好 ——
+#     偏好那一半住在 `weight("loot")`；**兩者是不同的作用，不是雙計**。
+static func effective_loot_rate(cruelty: float) -> float:
+	return LOOT_RATE * (1.0 + cruelty * 0.7)
+
 func _loot_resources(winner: TeamData, loser: TeamData, cruelty: float) -> void:
-	var effective_loot: float = LOOT_RATE * (1.0 + cruelty * 0.7)
+	var effective_loot: float = effective_loot_rate(cruelty)
 	for res in ["food", "material", "coin", "goods",
 				"weapon_melee_low", "weapon_melee_high",
 				"weapon_ranged_low", "weapon_ranged_high"]:

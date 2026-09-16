@@ -280,6 +280,28 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	if Probe.enabled:
 		Probe.add_amount("ctxseg.applicable." + src, float(_s1 - _s0))
 		Probe.add_amount("ctxseg.options." + src, float(_applicable.size()))
+	# ★逐次 rank 的掠奪讀數（Probe-gated；−1 ＝ 這一次掠奪不 applicable）
+	var _raid_u_with: float = -1.0
+	var _raid_coeff: float = -1.0
+	var _coeff_by_opt: Dictionary = {}
+	# ★★★【真實世界的 urgency 落在哪一層】（systems 2026-09-16 要的第①件）——
+	#   ★他先前把「若 urgency 落在生存層」這個**條件句**當事實用了，而**沒有人驗過它**。
+	#   ★★「餓」用**世界自己的絕境線**判（`food_days < desperation_entry_threshold`），
+	#     ★★★**不是用 urgency 自己** —— 否則「餓的隊主層是哪一層」就變成同義反覆。
+	if Probe.enabled and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
+		var _ml: int = 0
+		for _li in range(1, NeedHierarchy.N_LAYERS):
+			if ctx.need_urgency[_li] > ctx.need_urgency[_ml]: _ml = _li
+		Probe.bump("urg.n")
+		Probe.bump("urg.main.L%d" % _ml)
+		for _li2 in range(NeedHierarchy.N_LAYERS):
+			Probe.add_amount("urg.sum.L%d" % _li2, float(ctx.need_urgency[_li2]))
+		# ★有沒有 faction 分開數：`need_hierarchy.gd` 對 `faction_id == -1` 直接給歸屬 1.0
+		#   ⇒ ★★**每一支無 faction 的隊，歸屬層恆滿檔** —— 那會把 alignment 全部吃掉。
+		Probe.bump("urg.main.%s.L%d" % [("nofac" if team == null or team.faction_id == -1 else "fac"), _ml])
+		if ctx.food_days < ctx.desperation_entry_threshold:
+			Probe.bump("urg.hungry.n")
+			Probe.bump("urg.hungry.main.L%d" % _ml)
 	for opt in _applicable:
 		var u: float = 0.0
 		# ★★★組成 dump（systems＋blueprint 2026-09-11）：**只印最終 util 答不出它在哪一步被壓扁**
@@ -327,6 +349,12 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# 需求金字塔重構：五層急迫度一致性係數(§3)統一調變全 23 option。純乘一係數，不改 term 內部。
 		# ★乘在 COMMITMENT_BONUS 之前（承諾慣性是決策層加成，不受需求調變）。
 		var _coeff: float = NeedHierarchy.consistency_coeff(opt, ctx.need_urgency, ctx.leader_values)
+		if Probe.enabled and opt == "掠奪":
+			# ★★★【tap 位置訂正】（systems 2026-09-16 ③）：舊的 `raid.util` 記的是 `loot_drive` 的 **drive**，
+			#   而 `weight("loot")` 是在**這裡外面**乘的 ⇒ ★**weight 的改動那支 tap 結構上看不見**
+			#   ⇒ ★★兩棵樹印出逐字相同的分布，**那不是證據，是一個恆真句。**
+			#   ⇒ ★★★所以改記【乘完 weight 之後】—— 而且**兩條 rank 路各一桶**（見 `rank_survival`）。
+			DecisionEngine._raid_u_tap("scored", u)
 		u *= _coeff
 		if _cmp_on:
 			_cmp["coeff"] = snappedf(_coeff, 0.001)
@@ -426,6 +454,15 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			Probe.add_amount("shelter.cmp.after_coeff_sum", float(_cmp.get("after_coeff", 0.0)))
 			Probe.add_amount("shelter.cmp.final_sum", float(_cmp.get("final", 0.0)))
 			Probe.bump("shelter.cmp.n")
+		if Probe.enabled:
+			_coeff_by_opt[opt] = _coeff
+		if Probe.enabled and opt == "掠奪":
+			# ★★★【被需求一致性壓掉的掠奪】（systems 逐字定義 2026-09-16）——
+			#   ★記下這一次的 `coeff`，供 sort 之後算 `u_without = u_with / coeff`。
+			#   ★★**用【除】不是重算**：`coeff` 是一個純乘數 ⇒ 除法是【逐字精確】的，
+			#     而重算一次會引進「我有沒有抄對」這個新的錯誤來源。
+			_raid_u_with = u
+			_raid_coeff = _coeff
 		scored.append({"u": u, "i": idx, "opt": opt, "d": 0.0})
 		idx += 1
 	# ★means-end 長程規劃（組件 G，HOW §8）：goal frontier candidates 追加進同一 rank 池（sort 前→與 static option 同 argmax 競爭）。
@@ -503,6 +540,39 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	if Probe.enabled:
 		Probe.add_amount("ctxseg.sort." + src, float(Time.get_ticks_usec() - _s3))
 		Probe.bump("ctxseg.calls." + src)
+	# ★★★【被這一格壓掉的掠奪】（systems 逐字定義）：
+	#   `u_with` ＝ 含 `consistency_coeff` 的 rank util；`u_without` ＝ 同一次不含它
+	#   ⇒ **被壓掉 ＝ `u_with < winner_u ≤ u_without`**（有 coeff 就輸、沒 coeff 就贏）
+	#   ★★**母體 ＝ 掠奪 applicable 的次數**（不是 dispatch 次數 ——
+	#     ★★★dispatch 次數答的是「最後有沒有派出去」，而這裡問的是「秤上輸在哪一步」）。
+	if Probe.enabled and _raid_u_with >= 0.0 and _raid_coeff > 0.0 and not scored.is_empty():
+		var _wu: float = float(scored[0]["u"])
+		var _uwo: float = _raid_u_with / _raid_coeff
+		Probe.bump("raidsupp.pop")
+		if _raid_u_with < _wu and _wu <= _uwo:
+			Probe.bump("raidsupp.suppressed")
+		elif _raid_u_with >= _wu:
+			Probe.bump("raidsupp.won_anyway")
+		else:
+			Probe.bump("raidsupp.lost_anyway")   # ★沒有 coeff 也一樣輸 ⇒ 不是這一格的錯
+		var _cb: String = "ge0.9"
+		if _raid_coeff < 0.2: _cb = "lt0.2"
+		elif _raid_coeff < 0.4: _cb = "lt0.4"
+		elif _raid_coeff < 0.6: _cb = "lt0.6"
+		elif _raid_coeff < 0.9: _cb = "lt0.9"
+		Probe.bump("raidsupp.coeff." + _cb)
+		# ★★★【關鍵是【比】不是【值】】（systems 2026-09-16）——
+		#   ★兩邊同值 ⇒ **共同因子** ⇒ **不改排序**（那正是這一輪推翻「壓抑源」說法的那句話）。
+		#   ⇒ ★★所以記 `掠奪 coeff / 贏家 coeff`：**＝1 就是共同因子、<1 才是真的被相對壓低。**
+		var _wc: float = float(_coeff_by_opt.get(String(scored[0]["opt"]), -1.0))
+		if _wc > 0.0:
+			var _ratio: float = _raid_coeff / _wc
+			var _rb2: String = "ge1.00"
+			if _ratio < 0.5: _rb2 = "lt0.50"
+			elif _ratio < 0.8: _rb2 = "lt0.80"
+			elif _ratio < 0.99: _rb2 = "lt0.99"
+			elif _ratio < 1.01: _rb2 = "eq1.00"
+			Probe.bump("raidsupp.coeffratio." + _rb2)
 	# ★★won_argmax（systems 要）：【產出】≠【贏】。
 	#   emitted > 0 且 fp 不變 可以同時為真，而最危險的解釋是
 	#   「接上了、有產出、但【從不改變結果】」——沒這顆 tap 就分不出來。
@@ -725,7 +795,38 @@ static func reorder_same_need_first(ranked: Array) -> Array:
 			same.append(e)
 		else:
 			rest.append(e)
-	return same + rest
+	var out: Array = same + rest
+	# ★★★【反事實用的儀器】（systems 2026-09-16）：`_need_category` 讀 `main_layer_of`，
+	#   而 `main_layer_of` ＝ **affinity 那一列的 argmax** ⇒ ★**改 affinity 會【同時】改這裡的分類。**
+	#   ⇒ ★★所以要分得開「對齊度變了」與「它被歸到另一類了」，就得量**這個函式改變了多少順序**。
+	#   ★★★純觀測：只讀 `out` 與 `ranked`，不改回傳值。
+	if Probe.enabled:
+		Probe.bump("reord.calls")
+		Probe.bump("reord.topcat." + top_cat)
+		var _changed: bool = false
+		for _i in range(out.size()):
+			if String(out[_i].get("opt", "")) != String(ranked[_i].get("opt", "")):
+				_changed = true
+				break
+		if _changed: Probe.bump("reord.changed")
+		var _before: int = -1
+		var _after: int = -1
+		for _i2 in range(ranked.size()):
+			if String(ranked[_i2].get("opt", "")) == "掠奪": _before = _i2; break
+		for _i3 in range(out.size()):
+			if String(out[_i3].get("opt", "")) == "掠奪": _after = _i3; break
+		if _before >= 0:
+			Probe.bump("reord.raid.present")
+			Probe.bump("reord.raid.cat." + _need_category("掠奪"))
+			if _after < _before: Probe.bump("reord.raid.moved_up")
+			elif _after > _before: Probe.bump("reord.raid.moved_down")
+			else: Probe.bump("reord.raid.same_pos")
+			if _after == 0 and _before != 0: Probe.bump("reord.raid.became_first")
+			# ★★★【我上一版量錯了種類】：`moved_up`／`became_first` 都是**差**（delta），
+			#   而「21 次派工時它排第幾」要的是**位置**（level）—— ★**delta 答不了 level。**
+			Probe.bump("reord.raid.finalpos.%d" % mini(_after, 9))
+			Probe.bump("reord.raid.beforepos.%d" % mini(_before, 9))
+	return out
 
 static func rank(state: WorldState, team: TeamData) -> Array:
 	var out: Array = []
@@ -755,6 +856,8 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 		# 常態路 previous_task==current_task（_trigger_survival 設）→等價。
 		if DecisionOptions.to_task(state, team, opt).get("task") == team.previous_task:
 			u += _persist   # ★持守統一：flat COMMITMENT_BONUS → persist_strength（bonus-collapse）
+		if Probe.enabled and opt == "掠奪":
+			_raid_u_tap("survival", u)   # ★同一支 tap 的另一條路（★**兩條路的乘數清單不同 ⇒ 不可混桶**）
 		scored.append({"u": u, "i": idx, "opt": opt, "d": 0.0})
 		idx += 1
 	# ★這條路只有 static option（沒有 goal candidate）⇒ `d` 恆 0 ⇒ 排序等價於舊規則。
@@ -768,6 +871,26 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	#   乞食 的 sets 是 `{survival, passive_survival}` ⇒ ★★它【同時】在 rank_survival 的子集裡，
 	#   也在 rank_scored 的全 pool 裡 ⇒ ★★★只監一條會把另一條的命中讀成 0。
 	_beg_tap(ctx, scored, team, "beg.", state)
+	# ★★★【掠奪在【它真正競爭的那張表】上長什麼樣】（systems 2026-09-16 ⑤②）：
+	#   ★世界裡真正發生的掠奪是從**這一條**路出來的 ⇒ **只看 `rank_scored` 的表答不了「它怎麼贏的」。**
+	#   ★★整張表逐筆存（不是只存贏家）—— **只存贏家會讓「它輸給誰、差多少」永遠看不到。**
+	if Probe.enabled:
+		var _has_raid: bool = false
+		for e in scored:
+			if String(e["opt"]) == "掠奪": _has_raid = true; break
+		if _has_raid:
+			Probe.bump("raidsurv.pop")
+			Probe.bump("raidsurv." + ("won" if String(scored[0]["opt"]) == "掠奪" else "lost"))
+			var _rows: Array = []
+			var _rank_of: int = -1
+			for _j in range(scored.size()):
+				_rows.append("%s=%.4f" % [String(scored[_j]["opt"]), float(scored[_j]["u"])])
+				if String(scored[_j]["opt"]) == "掠奪": _rank_of = _j
+			Probe.bump("raidsurv.rank.%d" % mini(_rank_of, 9))
+			Probe.bump_sample("raidsurv.table", {
+				"team": team.team_id, "prev": team.previous_task,
+				"food_days": snappedf(ctx.food_days, 0.01),
+				"raid_rank": _rank_of, "table": " ".join(_rows)}, 120)
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	# ★★★【util 被算出來，然後在這一行丟掉】（2026-09-16）：
 	#   ★`scored` 每一筆都有 `u`，而舊回傳只留 `opt` ⇒ **派工端拿不到身價**
@@ -957,3 +1080,19 @@ static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: S
 	elif _gap < 1.0: Probe.bump(pfx + "gap.0.5to1")
 	elif _gap < 2.0: Probe.bump(pfx + "gap.1to2")
 	else: Probe.bump(pfx + "gap.ge2")
+
+# ★★★【掠奪 util 的直方圖 —— 兩條 rank 路各一桶】（systems 2026-09-16 ③）
+#   ★記的是**乘完 `weight` 之後**的值（舊版記 drive ⇒ weight 的改動看不見 ＝ 恆真句）。
+#   ★★**兩條路不可混桶**：`rank_scored_ctx` 之後還會乘 `coeff`／`FailureMemory`，
+#     而 `rank_survival` **兩者都沒有** ⇒ ★★★**混在一起的平均數，不是任何一條路的平均數。**
+static func _raid_u_tap(path: String, u: float) -> void:
+	Probe.bump("raidu.%s.n" % path)
+	Probe.add_amount("raidu.%s.sum" % path, u)
+	var _b: String = "ge0.50"
+	if u < 0.02: _b = "lt0.02"
+	elif u < 0.05: _b = "lt0.05"
+	elif u < 0.10: _b = "lt0.10"
+	elif u < 0.20: _b = "lt0.20"
+	elif u < 0.30: _b = "lt0.30"
+	elif u < 0.50: _b = "lt0.50"
+	Probe.bump("raidu.%s.hist.%s" % [path, _b])
