@@ -150,5 +150,87 @@ func _run() -> void:
 		print("   逐筆：%s" % str(r))
 	_ok(has_all, "格6 `take／need／odds／util` **逐筆都在**（★缺任一 ⇒ 違「全量暫態可觀測性」）")
 
+	_run_desperation_cell()
+
 	print("")
 	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)
+
+# ★★★【格8：絕境格】（blueprint 逐字要的，systems 派工 2026-09-16）——
+#   ★它守的不是「常態下誰會搶」（那是風格問題），是
+#     **「餓到快死的時候，人格能不能把一個人壓到不動」**
+#   ⇒ ★★**那是【人格是調製器還是閘】的分界線** ——
+#     而那條線一旦被跨過，**世界裡就會有一種「慫到餓死也不搶的隊」，而那不是人格，那是 bug。**
+# ★★★本格【建真世界跑 rank_scored】而不是只 eval 一個 term：
+#   **「贏得了嗎」需要一個真的對手** —— 只 eval 掠奪自己，答不出「贏」。
+# ★「絕境」用**世界自己的定義**（`food_days < desperation_entry_threshold`），不另造一個。
+# ★★「弱且肥」用**存在的世界**：鄰居 pop 3、food 依 `TARGET_PER_POP.food` 的倍數給
+#   —— ★★★**不用 32000 那種「數字對、故事荒謬」的世界**（systems／blueprint 都否決了）。
+static func _dsp_seed(t: TeamData, n: int) -> void:
+	var named: int = t.named_members.size() + (1 if t.leader_id != -1 else 0)
+	var want: int = maxi(n - named, 0)
+	var cur: int = AnonCohort.total(t.anon_cohorts)
+	if want - cur > 0: AnonCohort.add(t.anon_cohorts, "平民", "healthy", want - cur)
+
+func _dsp_world(cruel: float, prey_food: float, raider_food: float, farmable: bool = true) -> Dictionary:
+	var state := WorldState.new(); state.world = WorldData.new()
+	for p in [Vector2i(4, 4), Vector2i(5, 4), Vector2i(3, 4)]:
+		var tl := HexTileData.new()
+		tl.tile_id = p.x * 1000 + p.y; tl.tile_pos = p; tl.terrain = "plains"
+		tl.outpost_owner = -1; tl.outpost_level = 0
+		if farmable: tl.resource_cap = {"food": 50.0}
+		else: tl.terrain = "mountain"   # ★診斷用：腳下沒有可耕地 ⇒ 紮營不 applicable
+		state.world.tiles[tl.tile_id] = tl
+	var prey := TeamData.new(); prey.team_id = 9; prey.tile_pos = Vector2i(3, 4)
+	_dsp_seed(prey, 3); prey.faction_id = -1; prey.resources = {"food": prey_food}
+	state.teams[9] = prey
+	var ldr := PersonData.new(); ldr.id = 1000; ldr.team_id = 1
+	ldr.values = {"好戰": 0.5, "貪婪": 0.5, "野心": 0.5, "慎重": 0.5, "殘忍": cruel}
+	state.persons[1000] = ldr
+	var t1 := TeamData.new(); t1.team_id = 1; t1.leader_id = 1000; t1.tile_pos = Vector2i(4, 4)
+	_dsp_seed(t1, 10); t1.tags = ["軍隊"]; t1.current_task = TeamData.TASK_IDLE
+	t1.resources = {"food": raider_food}; t1.armed_anon_ratio = 1.0
+	state.teams[1] = t1
+	state.team_discovered[1] = [9]
+	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 3, "armed_est": 1,
+		"food_est": prey_food, "tile_pos": Vector2i(3, 4), "last_tick": state.world.current_tick}, 1.0, false)
+	var ctx: DecisionContext = DecisionContext.gather(state, t1)
+	var rows: Array = []
+	var loot_u: float = -1.0
+	var top_u: float = -1.0
+	var top_opt: String = ""
+	for e in DecisionEngine.rank_scored(state, t1, "dspcell"):
+		rows.append("%s=%.4f" % [String(e["opt"]), float(e["u"])])
+		if top_opt == "": top_opt = String(e["opt"]); top_u = float(e["u"])
+		if String(e["opt"]) == "掠奪": loot_u = float(e["u"])
+	return {"table": " ".join(rows), "loot": loot_u, "top": top_opt, "top_u": top_u,
+		"food_days": ctx.food_days, "thresh": ctx.desperation_entry_threshold}
+
+func _run_desperation_cell() -> void:
+	# ★鄰居「合理富裕」＝ `TARGET_PER_POP.food(10) × pop 3 × 8` ＝ 240（★**八倍存量，不是二十七倍**）
+	var _rich: float = float(TradeValuation.TARGET_PER_POP.get("food", 10.0)) * 3.0 * 8.0
+	var mid: Dictionary = _dsp_world(0.5, _rich, 0.0)
+	var cruel: Dictionary = _dsp_world(0.9, _rich, 0.0)
+	print("★格8 絕境（food_days=%.2f < 絕境線 %.2f）｜鄰居 pop3 food=%.0f" % [
+		float(mid["food_days"]), float(mid["thresh"]), _rich])
+	print("   殘忍.5：%s" % mid["table"])
+	print("   殘忍.9：%s" % cruel["table"])
+	_ok(float(mid["food_days"]) < float(mid["thresh"]),
+		"格8-前提 這個 fixture **真的在絕境裡**（★否則這一格問的不是絕境）")
+	_ok(String(mid["top"]) == "掠奪",
+		"格8-a ★**中等殘忍（.5）在絕境【搶得起來】**（實際首選＝%s，掠奪 %.4f vs 首選 %.4f）" % [
+			String(mid["top"]), float(mid["loot"]), float(mid["top_u"])]
+		+ "｜★★★若這格紅 ⇒ **`person` 變成了 GATE 而不是 MODULATE** ——"
+		+ "「任何人格都不該慫到餓死也不動」⇒ **回報 systems，不要自己改 `person`**")
+	_ok(String(cruel["top"]) == "掠奪",
+		"格8-b ★**成對**：兇者（殘忍 .9）同情境也搶（實際首選＝%s）" % String(cruel["top"]))
+	_ok(float(cruel["loot"]) > float(mid["loot"]),
+		"格8-c 兇的**贏更多**（%.4f > %.4f）★否則人格在絕境下完全沒作用" % [
+			float(cruel["loot"]), float(mid["loot"])])
+	# ★★★【診斷欄，不入判】：把「腳下有沒有可耕地」拆開 ——
+	#   ★上面那一格的 fixture **給了餓隊腳下一塊可耕地** ⇒ 紮營天然有力
+	#   ⇒ ★★「餓了不搶」與「餓了站在田上所以先種田」是兩個完全不同的答案，
+	#     ★★★而它們在「掠奪沒贏」這一句上長得一模一樣。
+	var mid_nf: Dictionary = _dsp_world(0.5, _rich, 0.0, false)
+	var cruel_nf: Dictionary = _dsp_world(0.9, _rich, 0.0, false)
+	print("   ★診斷（腳下**無**可耕地；不入判）殘忍.5：%s" % mid_nf["table"])
+	print("   ★診斷（腳下**無**可耕地；不入判）殘忍.9：%s" % cruel_nf["table"])
