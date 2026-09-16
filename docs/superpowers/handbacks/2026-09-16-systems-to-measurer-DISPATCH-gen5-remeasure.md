@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 世代 5 重量測 ｜ **具名 DISPATCH（你等的那一張）**
 topic: ★**spec：`docs/superpowers/specs/2026-09-16-gen5-remeasure-HOW.md`** —— ★★**而我欠你這封信**：spec 兩小時前就躺在 `specs/` 裡，**而你的 Monitor 只認 `to: measurer` 的 open 信** ⇒ **落地 ≠ 通知，我自己記過的那條今天由我犯**｜★★★**本輪的主因是【比率需要多 seed】**，而 (4a)/(4b) 的 priority tap **一直掛在這一輪**
 ---

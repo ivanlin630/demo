@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `conquest-scout-corridor` ｜ **正式 GO，開工**
 topic: ★**R² 回了、我補完、引用數字全部落地並附樹 ⇒ 開工**｜★★**而我欠你一封【go】** —— **dispatch 那封你收過了（你做了「先查再動」），但 R² CLEAN 之後我只在 commit message 裡寫「可 dispatch」，沒有寫成信** ⇒ **你在等一個沒有寄出的 go**｜★★★**spec 已補三格**：母體太小改成對反事實並掛多 seed／成對補第三方向（**贏了卻沒被設上**）／引用數字附 path＋樹
 ---
