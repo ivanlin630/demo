@@ -377,6 +377,12 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 					"util": snappedf(_rutil, 0.0001), "tick": ctx.tick}, 200)
 				# ★★「belief 答不出它多肥」與「它很窮」數值相同、語意不同 ⇒ 分開數
 				Probe.bump("raid.take." + ("priced" if ctx.weak_prey_priced else "unpriced"))
+				# ★★★【驗收格換掉】（systems 2026-09-16）：舊的「`unpriced_prey` 下降」**結構上不會動** ——
+				#   ★那顆數的是「**belief 沒有可定價分項**」（belief 的欄位），
+				#     **而修法改的是【估值的結果】** ⇒ ★★**判準看的欄位，跟修法改的欄位不是同一個。**
+				#   ⇒ ★★★這一顆才對應我們宣稱的那件事（「薄情報不再被當成零身價」）：
+				#     **`take` 有多少筆是 0**（母體與 `raid.eval` 相同）。
+				Probe.bump("raid.take." + ("zero" if _take <= 0.0 else "pos"))
 				# ★★★【無偏的 util 分布】（systems 2026-09-16 要的第二項）：
 				#   ★上面那個 `bump_sample` 是 **first-N（有偏）** ⇒ **它不能當分布用。**
 				#   ★★而要比的正是分布：**兩棵樹的 dispatch 次數相同，可以是「util 變了但排序沒變」**

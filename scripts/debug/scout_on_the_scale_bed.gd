@@ -731,6 +731,12 @@ func _run() -> void:
 		int(Probe.counts.get("raid.eval", 0))])
 	print("      ★★`raid.take.priced`=%d／`unpriced`=%d（★這兩顆是【有 prey 之後】才數的，母體不同）" % [
 		int(Probe.counts.get("raid.take.priced", 0)), int(Probe.counts.get("raid.take.unpriced", 0))])
+	# ★★★【新驗收格】：`take ＝ 0` 的筆數／母體（★舊的 `unpriced_prey` 恆不動，已作廢）
+	var _tz: int = int(Probe.counts.get("raid.take.zero", 0))
+	var _tp: int = int(Probe.counts.get("raid.take.pos", 0))
+	print("   ★★★**`take` 分布**：`take = 0` **%d** ／ `take > 0` **%d**（母體 %d ＝ `raid.eval`）" % [
+		_tz, _tp, _tz + _tp])
+	print("      ★這一格才對應「薄情報不再被當成零身價」—— **舊的 `unpriced_prey` 數的是 belief 的欄位，恆不動。**")
 	print("      ★★★薄情報的處置：走**桶下界** %d 次｜**連桶號都沒有**（誠實的 0）%d 次" % [
 		int(Probe.counts.get("raid.thin.bucket_floor", 0)),
 		int(Probe.counts.get("raid.thin.no_scale", 0))])
