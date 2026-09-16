@@ -119,8 +119,11 @@ static func _note_task_lost(team: TeamData, bucket: String, new_task: String, so
 	Probe.bump_sample("lost." + team.current_task, {"team": team.team_id, "bucket": bucket,
 		"to": new_task, "by": source, "prio": team.task_priority}, 200)
 
+# ★`_util` 與 `_opt` 同族：**有預設值 ⇒ 59 個既有 caller 一個都不用改**；
+#   ★★而它**不進任何判斷**（本刀只記錄與計數）—— ★★★要拿它當判準，是【白名單退休】那張票的事。
 static func try_set(state: WorldState, team: TeamData, new_task: String,
-		move_target: Vector2i, priority: int, _source: String = "", _opt: String = "") -> bool:
+		move_target: Vector2i, priority: int, _source: String = "", _opt: String = "",
+		_util: float = -1.0) -> bool:
 	# ★★★求居半的追蹤（systems 2026-09-11）：★「流浪隊有沒有真的走到」與「它半路被別的事搶走」
 	#   是兩個不同的斷點，而它們在結果上都長成「領主沒看到求居者」。
 	# ★幀數歸因用（systems 2026-09-11）：★★「一次很貴」與「被叫很多次」是兩個結論，
@@ -194,6 +197,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.task_priority = priority
 		team.task_reason = _source
 		team.task_start_tick = state.world.current_tick
+		team.task_util = _util        # ★設上那一刻的身價（-1.0 ＝ 呼叫端沒給）
 		return true
 	# A1a source-gated equal-priority self-replace：引擎每 cadence 的 rank[0] 同層換掉
 	# 引擎自己派的 task（腦選、手無條件執行）。兩側都要 engine-owned：新 source 在白名單、
@@ -220,6 +224,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.task_priority = priority
 		team.task_reason = _source
 		team.task_start_tick = state.world.current_tick
+		team.task_util = _util        # ★設上那一刻的身價（-1.0 ＝ 呼叫端沒給）
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
 	if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH:
@@ -237,6 +242,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			team.task_priority = priority
 			team.task_reason = "defy_" + _source
 			team.task_start_tick = state.world.current_tick
+			team.task_util = _util        # ★設上那一刻的身價（-1.0 ＝ 呼叫端沒給）
 			return true
 		if leader != null:
 			# 壓抑：慾望轉 stress/unrest（餵既有叛變管線；stress 進 desire 公式 → 憋多了爆）
@@ -259,10 +265,64 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		#     ★★★③**最關鍵**：`team.task_priority` 是**動態的**（survival-class 會隨時間衰減）
 		#       ⇒ **事後拿 task 名字反推 priority 會算錯**（measurer 聚合只定得出 163/621，450 卡在這）
 		#       ⇒ **這個二分【只在這一刻可算】** —— 離開這一行它就失去了那個數。
-		var _cls4: String = "4a" if team.task_priority > priority else "4b"
+		# ★★★三分不是二分（systems 訂正 2026-09-16）：
+		#   ★舊判準是「擋它的 ＞ 它自己 ⇒ (4a)；**否則** ⇒ (4b) 手不聽腦」
+		#   ⇒ ★★**那個「否則」把【＝】跟【＜】吐進同一個桶** ⇒ 16 筆 `80_vs_80` 全被報成手不聽腦。
+		#   ⇒ ★★★**同層被擋是【規則】不是【病】**：A1a 要求兩側 `task_reason` 都在 `ENGINE_SOURCES`
+		#     才准同層換手 ⇒ 它自成一格 **(4c)**，而 **(4b) 收窄成【嚴格更低】**。
+		var _cls4: String = "4a"
+		if team.task_priority == priority:
+			_cls4 = "4c"
+		elif team.task_priority < priority:
+			_cls4 = "4b"
 		Probe.bump("arbiter.deny.優先序不足." + _cls4)
+		# ★★★【指不出名字 ≠ 沒發生】（全量暫態可觀測性是不變量，用戶 2026-07-14 定）：
+		#   ★沒傳 `_opt` 的 `try_set` 站點，在逐 option 表上**看不見**
+		#   ⇒ ★★而「看不見」與「沒發生」在同一張表上長得一樣 —— **那就是量測盲點的定義**。
+		#   ⇒ ★★★所以這裡至少記下**它是哪個站點發的**（`_source` 本來就有傳）
+		#     —— **先讓盲點有名字，再決定要不要動 59 個 caller。**
+		if _opt == "" and (_cls4 == "4b" or _cls4 == "4c"):
+			Probe.bump("%s.unnamed.by.%s" % [_cls4, (_source if _source != "" else "(無來源)")])
 		if _opt != "":
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + "." + _cls4)
+			# ★★★(4b) 那幾筆要能【指名】（systems 2026-09-16）：
+			#   ★(4b) ＝ 贏了卻沒被設上，**而擋它的優先序比它低或同級** ⇒ **那正是手不聽腦的定義**
+			#   ⇒ ★★所以它不能只有一個總數：**是哪個 option、被誰擋、兩邊的 priority 各是多少**
+			#   ★★★而這三件事**只在這一刻同時存在**（`task_priority` 會衰減 ⇒ 事後反推會算錯）。
+			# ★★★同層那一格的真問題：**新的那個是不是比現任更該做？**
+			#   ★priority 答不出（兩邊一樣）⇒ 答得出的是 util
+			#   ★★而現任那一邊的 util **只有存下來才拿得到**（重算 ⇒ 觀測改變被觀測物）
+			#   ★★★`-1` ＝ 不知道 ⇒ **單獨一格**：**「沒得比」與「比了而新的較低」是兩個答案。**
+			if _cls4 == "4c":
+				var _cmp_u: String = "unknown"
+				if _util >= 0.0 and team.task_util >= 0.0:
+					if _util > team.task_util: _cmp_u = "new_higher"
+					elif _util < team.task_util: _cmp_u = "new_lower"
+					else: _cmp_u = "equal"
+				Probe.bump("4c.utilcmp." + _cmp_u)
+				# ★★★【遲滞的值不許手填】（systems 2026-09-16）：
+				#   ★它要從【擋得對的那幾筆的 util 差】推 ⇒ **所以要先把差值量出來**。
+				#   ★★而兩群的差值若**重疊** ⇒ **一個純量遲滞分不開它們**
+				#     ⇒ ★★★**那時要回報，不是硬挑一個數**。
+				#   ★量化到 0.01：鍵數有界（母體本來就小）且不靠 first-N 樣本。
+				if _cmp_u == "new_higher" or _cmp_u == "new_lower":
+					Probe.bump("4c.diff.%s.%.2f" % [_cmp_u, absf(_util - team.task_util)])
+				# ★★★defer `arbiter-same-tier-util-not-whitelist` 的【可證偽條件】（systems 2026-09-16）：
+				#   ★**擋錯樣本且 util 優勢 ≥ 0.1** —— 而 0.1 不是手填：
+				#     它是量化精度 0.01 的十倍（★分得出真差與尾數），
+				#     且仍低於【擋得對那群的最小值 0.21】（★★不會漏掉真衝突）。
+				#   ★★★而上一輪的教訓就在這一行：`new_higher` 是一個**布林**，
+				#     它把【高多少】丟掉了 ⇒ 3 筆「更該做」其實是平手（<0.005）。
+				if _cmp_u == "new_higher" and absf(_util - team.task_util) >= 0.1:
+					Probe.bump("4c.wrongblock_ge01")
+					Probe.bump("4c.wrongblock_ge01.opt." + (_opt if _opt != "" else "(無名)"))
+				if _opt != "":
+					Probe.bump("4c.utilcmp.%s.%s" % [_opt, _cmp_u])
+			if _cls4 == "4b" or _cls4 == "4c":
+				Probe.bump("%s.opt.%s" % [_cls4, _opt])
+				Probe.bump("%s.holder.%s" % [_cls4, String(team.current_task)])
+				Probe.bump("%s.pair.%s|%s|%d_vs_%d" % [
+					_cls4, _opt, String(team.current_task), priority, team.task_priority])
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".prio.%d_vs_%d" % [priority, team.task_priority])
 		if _opt != "":
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".holder." + String(team.current_task))
@@ -275,6 +335,9 @@ static func release(team: TeamData) -> void:
 	# ★§N 兩欄之①：【合法退場】次數（不該下降）。判準用欄位 proxy（release 拿不到 state）：
 	#   身上沒有任何未完成承諾標記 ＝ 這次卸任務沒有丟下任何東西。
 	#   ★①掉 ＝ 正當退場被誤擋 ＝ 回歸（latch 前兆）；②升 ＝ 想換 task 被擋住 ＝ 正是要的。
+	# ★清回【不知道】：★★留著上一個 task 的身價，下次同層比較就會拿一個**過期的數**去比 ——
+	#   ★★★那比沒有數更糟（它看起來像有答案）。
+	team.task_util = -1.0
 	if Probe.enabled:
 		# ★逐標記分開數：`order` 是【沒有進度事實】的那一類（見 CommitmentFields.measurable），
 		#   把它和工地／convoy 混在一個「帶著承諾」總數裡，會讓 ① 這一欄無法據以行動。
