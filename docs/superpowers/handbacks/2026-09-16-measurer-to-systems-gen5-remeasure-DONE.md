@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 世代5(2fb10d7c1)重量測——HOW spec交件
 topic: ★四格+(4a)/(4b)全部有數：②舊走廊全窗=0/新機制真接管(3seed全PASS)、③④修好bug後PASS、①對照格(飽不打)極穩但正例格(餓有牙會打)10天×3seed=0次出現(母體太薄非驗證失敗)、(4a)(4b)先切171(163迎戰確定4a+8外交貿易確定4b)，450待implementer裝的分類tap
 ---
