@@ -6743,7 +6743,9 @@ func _test_survival_prefs() -> void:
 	var ferocious := {"殘忍": 0.9, "好戰": 0.8, "義氣": 0.1, "野心": 0.2, "求生欲": 0.5}
 	var honorable := {"殘忍": 0.1, "好戰": 0.1, "義氣": 0.9, "信義": 0.8, "野心": 0.2}
 	var ambitious := {"殘忍": 0.2, "野心": 0.9, "統領": 0.6, "求生欲": 0.7, "義氣": 0.3}
-	assert(DecisionTerms.weight("loot", ferocious) > DecisionTerms.weight("loot", honorable), "兇者掠奪 weight 較高")
+	# ★驗收點搬家（同上）：掠奪的人格已住進 `loot_drive` 的 eval ⇒ `weight("loot")` 是中性常數
+	#   ⇒ ★**比 weight 問不出「兇者比較想搶」** —— 改問 drive 本身。
+	assert(_loot_drive_util(ferocious) > _loot_drive_util(honorable), "兇者掠奪 drive 較高")
 	assert(DecisionTerms.weight("join", honorable) > DecisionTerms.weight("join", ferocious), "義氣者投靠 weight 較高")
 	assert(DecisionTerms.weight("camp", ambitious) > DecisionTerms.weight("camp", ferocious), "野心者紮營 weight 較高")
 	print("survival prefs OK")
@@ -16112,15 +16114,44 @@ func _test_g1a_construct_zombie_recovery() -> void:
 		"[g1a] CONSTRUCT zombie 子隊未恢復: task=%s merge_queue=%s" % [sub.current_task, str(merge_queue)])
 	print("[g1a] CONSTRUCT zombie 恢復 OK (merged=%s task=%s)" % [str(merge_queue.has(201)), sub.current_task])
 
+# ★★★【驗收點搬家，不是改斷言】（systems 裁 2026-09-16，票：掠奪走期望價值）：
+#   ★這一支問的是「**人格 → 掠奪傾向**」，而那個關係**仍然成立** ——
+#     只是它搬去了 `loot_drive` 的 `_rperson`（好戰／殘忍放大、慎重壓低），
+#     ★★因為本票把人格搬進了 eval，`weight("loot")` 就**必須同一刀歸中性 1.0**
+#       （搬家做一半 ＝ 同一個東西同時活在兩個地方）。
+#   ⇒ ★★★所以 `weight("loot")` 現在是一個**常數** ——
+#     **不論人格怎麼變它都是 1.0** ⇒ **對著它斷言的測試不可能再有鑑別力。**
+#   ★而處置**不是刪、不是改斷言**，是**把測試搬到那個關係現在住的地方**。
+func _loot_drive_util(vals: Dictionary) -> float:
+	var c := DecisionContext.new()
+	c.has_weak_prey = true
+	c.weak_prey_id = 1
+	c.weak_prey_priced = true
+	c.weak_prey_richness_est = 1000.0
+	c.reference_wealth = 4157.0
+	c.food_days = 10.0                      # ★不餓 ⇒ `need` 出局 ⇒ 只剩人格與身價
+	c.desperation_entry_threshold = 3.0
+	c.attack_win_odds = 1.0                 # ★贏率拉滿 ⇒ 它不是這一格的變因
+	c.leader_values = vals
+	c.population = 10
+	return DecisionTerms.eval("loot_drive", c, "掠奪")
+
 func _test_p1_loot_term() -> void:
-	print("--- P1 掠奪 term/weight ---")
-	var cruel := {"殘忍": 0.9, "好戰": 0.8, "貪婪": 0.5}
-	var meek  := {"殘忍": 0.1, "好戰": 0.1, "貪婪": 0.2}
-	var w_cruel: float = DecisionTerms.weight("loot", cruel)
-	var w_meek:  float = DecisionTerms.weight("loot", meek)
-	assert(w_cruel > 0.6, "[p1] 殘忍 loot weight 太低 %.2f" % w_cruel)
-	assert(w_meek  < 0.2, "[p1] 溫和 loot weight 太高 %.2f" % w_meek)
-	print("[p1] loot term/weight OK cruel=%.2f meek=%.2f" % [w_cruel, w_meek])
+	print("--- P1 掠奪 term（人格 → 掠奪傾向；★驗收點已搬家，見上方長註）---")
+	var cruel := {"殘忍": 0.9, "好戰": 0.8, "貪婪": 0.5, "慎重": 0.5}
+	var meek  := {"殘忍": 0.1, "好戰": 0.1, "貪婪": 0.2, "慎重": 0.5}
+	var u_cruel: float = _loot_drive_util(cruel)
+	var u_meek:  float = _loot_drive_util(meek)
+	# ★意圖原封不動：兇者**想搶**、溫和者**不想搶** —— 換的是問它的地方，不是問題。
+	assert(u_cruel > u_meek * 2.0,
+		"[p1] 殘忍的掠奪 drive 該**顯著**高於溫和 cruel=%.4f meek=%.4f" % [u_cruel, u_meek])
+	assert(u_meek < u_cruel * 0.5,
+		"[p1] 溫和的掠奪 drive 太高 meek=%.4f cruel=%.4f" % [u_meek, u_cruel])
+	# ★★成對的另一半：`weight("loot")` 現在**必須**是中性 —— 它若又帶人格，就是雙計回來了。
+	assert(is_equal_approx(DecisionTerms.weight("loot", cruel), DecisionTerms.weight("loot", meek)),
+		"[p1] `weight(\"loot\")` 必須與人格無關（人格已住在 eval；兩者都帶 ＝ 乘兩次）")
+	print("[p1] loot drive OK cruel=%.4f meek=%.4f（weight 中性 %.2f）" % [
+		u_cruel, u_meek, DecisionTerms.weight("loot", cruel)])
 
 # ── P1 helpers：建隊 + 設 belief + 放 tile ──
 
