@@ -14,15 +14,33 @@ extends SceneTree
 func _initialize() -> void:
 	Probe.arm()   # ★arm 先於任何 fixture（bed-arm 閘）
 	_run()
-	quit(0 if _fails == 0 else 1)
+	# ★★★【不可判也不是綠】（systems 裁 2026-09-16）：
+	#   ★一個綠的格，要驗的是**它宣稱的東西** —— 而本切片有兩格**驗不了它宣稱的東西**
+	#   ⇒ ★★它們**不能安靜地不存在**，也不能改寫成一個比較容易的問題然後變綠
+	#   ⇒ ★★★所以 `[不可判]` 有**自己的離開碼**（2）：它與 `[FAIL]`（1）**是兩件事**，
+	#     而它與 `[OK]`（0）**更不是同一件事**。
+	if _fails > 0: quit(1)
+	elif _undec > 0: quit(2)
+	else: quit(0)
 
 var _fails: int = 0
+var _undec: int = 0
 
 func _ok(cond: bool, msg: String) -> void:
 	if cond: print("  [OK] %s" % msg)
 	else:
 		_fails += 1
 		push_error("[FAIL] %s" % msg)
+
+# ★【本切片不可判】＝ 這一格宣稱要驗的東西，**在本切片的 code 上不存在可達的路徑**。
+#   ★★處置不是刪掉它，也不是把它換成一個做得到的問題 —— **是把它留著、標明、並且不算綠。**
+func _undecidable(cell: String, claim: String, why: String, unblocks: String) -> void:
+	_undec += 1
+	push_error("[不可判] %s：%s" % [cell, claim])
+	print("  [不可判] %s ——" % cell)
+	print("       宣稱：%s" % claim)
+	print("       為什麼驗不了：%s" % why)
+	print("       什麼時候可判：%s" % unblocks)
 
 func _mk_person(id: int, vals: Dictionary) -> PersonData:
 	var p := PersonData.new(); p.id = id; p.values = vals
@@ -64,10 +82,19 @@ func _run() -> void:
 		+ "｜★★★這一格若哪天變綠不了（即 meek_i > 0），代表 systems 把 `FEUD_MIN` 移到累積之後 ——"
 		+ " **那時候要回來把這一格改寫成「累積後跨線」，而不是刪掉它**")
 
-	# ── 格2：十次小重徵 ⇒ 累積跨線（★`maxf` 版永遠到不了 —— 這一格就是對照本身）──
-	#   ★跨線判準用 systems §1.4b 的不等式：`I × W > h`，而 `h` 取最薄的那一端 ＝ `SPREAD_TOL`。
-	#   ★★人格取**義氣 0.9**：★那不是為了讓測試綠，是因為**中庸人格的邊不存在**（格2-0）
-	#     ⇒ **「疊加有沒有作用」只有在邊存在的人身上問得出來。**
+	# ── ★★★spec 的格2【本切片不可判】（systems 裁 2026-09-16）──
+	_undecidable("格2（spec 原文）",
+		"十次**小**重徵 ⇒ feud 累積到可觸發拒賣（★`maxf` 版永遠到不了 ＝ 它的對照）",
+		"`FEUD_MIN` 是**逐事件**門檻且在 `add_edge` **之前** ⇒ 小怨**一條邊都不產生**"
+		+ "（格2-0 實測 0.0000）⇒ **飽和疊加永遠收不到它要累積的東西**",
+		"切片B 第一項（門檻從【記錄】移到【行動】；它牽動 4 個 feud 讀者，要一起對齊）")
+	print("       ★★★原則（systems 立，比這張票大）：**門檻要放在【行動】上，不要放在【記錄】上** ——")
+	print("          放在記錄上 ⇒ 小事件永久消失 ⇒ 症狀是【公式接好了、床綠了、而世界裡一次也不會發生】。")
+
+	# ── 格2′：**邊已經存在的人**身上，疊加是不是飽和式（★這【不是】spec 的格2）──
+	#   ★★我上一版把這一格叫做「格2」而且讓它綠了 —— **而它驗的是「大怨會疊加」不是「小怨會累積」**
+	#     ⇒ ★★★**一個綠的格，要驗的是它宣稱的東西**；改名不是修辭，是**把它宣稱的範圍縮回它做得到的**。
+	#   ★人格取義氣 0.9 ⇒ 單次 0.30 × factor(1.03) ＝ 0.309 ≥ `FEUD_MIN` ⇒ **邊存在**，疊加才問得出來。
 	var stacker := _mk_person(3, {"義氣": 0.9, "好戰": 0.5, "慎重": 0.5})
 	var trace: Array = []
 	for i in range(10):
@@ -76,13 +103,13 @@ func _run() -> void:
 	var i10: float = RelationGraph.intensity_to(stacker.relation_edges, "feud", 99)
 	var w_mid: float = TradeValuation.grudge_weight({"義氣": 0.9, "慎重": 0.5})
 	var once: float = float(trace[0])
-	print("★格2 十次小重徵逐次：%s" % str(trace))
+	print("★格2′（**邊已存在者**的疊加）十次逐次：%s" % str(trace))
 	print("   一次=%.4f ⇒ 十次=%.4f｜W(中庸)=%.3f｜I×W=%.4f vs h(最薄)=%.3f" % [
 		once, i10, w_mid, i10 * w_mid, TradeValuation.SPREAD_TOL])
 	_ok(i10 > once + 0.001,
-		"格2-a 十次 > 一次（★★**相同 ⇒ 還是 `maxf`** —— 那正是這一格存在的理由）")
+		"格2′-a 十次 > 一次（★★**相同 ⇒ 還是 `maxf`** —— 那正是這一格存在的理由）")
 	_ok(i10 * w_mid > TradeValuation.SPREAD_TOL,
-		"格2-b 累積**跨過最薄的那一端**（I×W %.4f > h %.3f）" % [i10 * w_mid, TradeValuation.SPREAD_TOL])
+		"格2′-b 累積**跨過最薄的那一端**（I×W %.4f > h %.3f）" % [i10 * w_mid, TradeValuation.SPREAD_TOL])
 	# ★★★這一格問的是 systems 反解的**要求①**，而它逐字寫的是【中庸人格】
 	#   ⇒ ★上一版我拿了**義氣 0.9 的 W** 去驗它 ⇒ 0.0834 > 0.05 紅 ——
 	#     ★★而紅的是**我讀錯了判準的主詞**，不是世界：義氣 0.9 的人本來就該為小怨翻臉。
@@ -91,10 +118,10 @@ func _run() -> void:
 	print("   要求①（最弱的怨 × **中庸**人格）：%.3f × %.3f ＝ %.4f vs h(最薄) %.3f" % [
 		once_neutral, w_neutral, once_neutral * w_neutral, TradeValuation.SPREAD_TOL])
 	_ok(once_neutral * w_neutral <= TradeValuation.SPREAD_TOL,
-		"格2-c ★**成對的另一半**：**最弱的怨 × 中庸人格不該秒殺交易**（%.4f ≤ %.3f）" % [
+		"格2′-c ★**成對的另一半**：**最弱的怨 × 中庸人格不該秒殺交易**（%.4f ≤ %.3f）" % [
 			once_neutral * w_neutral, TradeValuation.SPREAD_TOL]
 		+ "｜★★這條不等式正是 `GRUDGE_PRICE_W_BASE` 的**來源**，不是它的裝飾")
-	_ok(i10 <= 1.0, "格2-d 飽和 ⇒ **永不破 1**（實測 %.4f）" % i10)
+	_ok(i10 <= 1.0, "格2′-d 飽和 ⇒ **永不破 1**（實測 %.4f）" % i10)
 
 	# ── 格6：`protect` 邊疊加兩次 ⇒ 飽和值（不是 max）──
 	#   ★疊加放在**共用點** ⇒ 它必須對 feud 以外的 type 也成立；★★只有 feud 改到 ⇒ 沒進共用點。
@@ -194,10 +221,21 @@ func _run() -> void:
 	_ok(g1 < g0 - 0.001, "格5-b **報恩事件後恩下降**（★沒降 ⇒ 消耗邊沒接上）")
 	_ok(taken > 0.0 and absf(taken - g0 * _w_of(sl)) < 0.0005,
 		"格5-c 消耗量 ＝ `grat × W`（實測 %.4f）★**零新常數**：讓掉多少就報掉多少" % taken)
+	_undecidable("格5-d（賠禮被收 ⇒ feud 降）",
+		"和解（賠禮＝offer，對方秤決定收不收）被收下 ⇒ **消耗對方的怨**",
+		"**求和今天沒有「被收下」這個狀態**：`interaction_system.gd:539-544` 的 `TASK_TRIBUTE_OFFER`"
+		+ " 只做 `release + cooldown`，那段註解自己寫著「真息兵行為＝backlog」"
+		+ "｜★★**而我沒有拿 `propose_alliance` 的 accept 頂替它** —— 結盟不是賠禮，"
+		+ "★★★**用一個假的 offer 讓這一格變綠，比讓它不可判更糟**",
+		"切片B（真息兵 handler：`sue_for_peace`／`offer_tribute`）")
 
 	print("")
 	print("★母體對帳：`grudge.form.feud`=%d｜`grudge.stack`=%d｜`grudge.consume.repay_trade`=%d｜`trade.grudge_markup.eval`=%d" % [
 		int(Probe.counts.get("grudge.form.feud", 0)), int(Probe.counts.get("grudge.stack", 0)),
 		int(Probe.counts.get("grudge.consume.repay_trade", 0)),
 		int(Probe.counts.get("trade.grudge_markup.eval", 0))])
-	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)
+	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
+	if _undec > 0:
+		print("★★★**本床在切片B 落地前【不是綠的】** —— 這是蓄意的：")
+		print("   ★「不可判」若換成綠，下一個人會以為那兩件事已經驗過了；")
+		print("   ★★而若換成 [FAIL]，它會跟【真的壞了】混在一起 ⇒ **兩種紅要分得開。**")
