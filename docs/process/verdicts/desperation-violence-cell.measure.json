@@ -1,0 +1,47 @@
+{
+  "token": "desperation-violence-cell",
+  "slice": "絕境暴力正例格——DISPATCH到期工單(desperation-violence-cell-remeasure，掠奪票merge後兌現)",
+  "date": "2026-09-17",
+  "measured_at_head": "seed1337=4725bb819｜seed2024=f2715361a｜seed777=9adc17db8——三個commit不同(其他角色期間落地過)，但已用git diff --stat確認scripts/simulation/在這三個sha之間【無變動】(空diff)，故三seed世界行為相同，可加總",
+  "touches": [],
+  "world": "warring_states / seed=1337,2024,777 / 10天窗，逐日採樣(非每7天，因本題無需呼叫gather/rank_scored_ctx，成本低)",
+  "beds": [
+    "scripts/debug/desperation_violence_cell_bed.gd（本卷新寫，acceptance）"
+  ],
+  "raw_logs": [
+    "docs/measurements/2026-09-17-desperation-violence-seed1337-raw.txt",
+    "docs/measurements/2026-09-17-desperation-violence-seed2024-raw.txt",
+    "docs/measurements/2026-09-17-desperation-violence-seed777-raw.txt"
+  ],
+  "specimen_trace": "無——純聚合existence讀數，不下behavior因果結論，照規免specimen",
+
+  "answer": {
+    "主問：餓且有牙的隊，會不會動手(搶TASK_LOOT或打TASK_ATTACK，任一)？": {
+      "seed1337": "母體(餓且有牙隊天數)=9｜動手=0(掠奪0/攻擊0)｜0.0%",
+      "seed2024": "母體=4｜動手=0(掠奪0/攻擊0)｜0.0%",
+      "seed777": "母體=5｜動手=0(掠奪0/攻擊0)｜0.0%",
+      "合計": "3seed母體共18(9+4+5)，動手共0次——三個seed一致，母體非0(不是「太薄不可判」)",
+      "verdict": "★母體=18(>0)，動手=0——18次機會、0次真的搶或打。這是掠奪估值換過後的新讀數，不是舊機制(不打折常數)的殘影(舊機制被本次merge推翻)。★不誇大成「永遠不會發生」——單窗10天×3seed，只能說「到此為止，18次機會一次都沒有」。"
+    },
+    "副問：餓/有牙各自頻率(非交集)": {
+      "seed1337": "採樣882隊天｜餓41(4.6%)｜有牙521(59.1%)",
+      "seed2024": "採樣880隊天｜餓30(3.4%)｜有牙518(58.9%)",
+      "seed777": "採樣878隊天｜餓42(4.8%)｜有牙496(56.5%)",
+      "合計": "採樣2640隊天｜餓113(4.3%)｜有牙1535(58.2%)｜獨立假設下期望交集=4.3%×58.2%×2640≈66，實測交集18＝0.27倍——同樣落在『餓與有牙負相關』的方向(呼應systems 2026-09-16在v2上發現的同一現象，本輪用新機制的世界獨立驗證了同一個定性結論)",
+      "verdict": "★餓本身稀少(4.3%)是母體小的主因，不是「有牙」稀少(58.2%很高)——這條線索與上一輪(掠奪merge前)一致，說明【餓與有牙負相關】不是舊機制的偶然，是這個世界結構性的現象(至少在兩個不同的掠奪估值機制下都成立)"
+    }
+  },
+
+  "honest_limits": [
+    "★本卷只讀『現在讀數是什麼』，不下WHAT/HOW修法結論，不調任何參數",
+    "★★母體=18，動手=0——18次機會不算多，只能排除『0是因為母體太薄』(母體確實>0)；不能排除『再多幾個seed會出現非0』",
+    "★★★與v2/v3(gen5_remeasure_bed.gd，掠奪merge前的舊機制)不可加總——本輪掠奪估值整個換過(上秤+貪婪軸+主觀成本)，是全新一輪，不是延續",
+    "★三個seed跑在三個不同的commit(4725bb819/f2715361a/9adc17db8)——已用git diff --stat驗證scripts/simulation/在這三者之間無變動，可視為同一個世界的三個seed，非跨commit污染(判準⑩已套用)",
+    "★本題不需要gather()/rank_scored_ctx()，只讀team.current_task，逐日採樣(比之前每7天更密)，母體數字因此不能與v2/v3的每7天採樣直接比密度",
+    "★單seed單窗；比率結論(0%)是existence層級的讀數，不是可長期引用的機率"
+  ],
+
+  "next_station": "to:systems——動手率0%(母體18)+餓與有牙負相關的獨立驗證，兩個結論都要不要往下追由你/blueprint判",
+
+  "supersedes": []
+}
