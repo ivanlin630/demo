@@ -16204,7 +16204,16 @@ func _mk_weak_prey_team(state: WorldState, pos: Vector2i) -> TeamData:
 #   ★★★所以把「弱肉」重寫成【新尺上的弱肉】—— **意圖不變（弱、可搶、值得搶），只換算尺度。**
 #     （先例：`coin_est 300→4000`。）
 	_seed_pop(t, 3)   # pop=3 < 10×0.7=7 → 弱
-	t.resources = {"food": 2000.0}   # ★200 → 2000
+	# ★★★【這個數字是為了讓搶【划算】，不是為了讓測試綠】（systems 裁 2026-09-16）：
+	#   ① **交叉點在 `food_est ≈ 4000`**（實測：掠奪 .1495 vs 紮營 .1475 —— **只差 0.002**）
+	#   ② **我設 8000 是為了離它夠遠**（實測 掠奪 .2014 vs 紮營 .1475 ＝ 領先 36%）
+	#   ③ ★**刀鋒上的 fixture 的綠是【運氣】** —— 任何一次無關改動都會讓它翻面，
+	#      ★★而翻面的時候，**下一個人會以為是他弄壞的。**
+	# ★★★而比「4000」有用的是這個**地標**（★systems 是**算**出來的不是量的 ⇒ **可被推翻**，別當結論）：
+	#   交叉點 food_est 4000 ⇒ 身價 8000 ⇒ ×`effective_loot_rate`(0.405) ⇒ **x/ref ≈ 0.78**（ref 4157）
+	#   ⇒ **「搶得過紮營」的門檻 ≈【對方的可搶身家接近我自己的參考財富】**
+	#   ⇒ ★**4000 會隨世界參數漂，而「≈ 我自己的身家」不會。**
+	t.resources = {"food": 8000.0}   # ★200 → 2000 → 8000
 	state.teams[902] = t
 	_p1_place_tile(state, pos)
 	var ldr2 := PersonData.new(); ldr2.id = 9020; ldr2.team_id = 902
@@ -16222,7 +16231,7 @@ func _p1_set_belief(state: WorldState, obs_id: int, prey: TeamData) -> void:
 	# 親見格式（legacy Dictionary path in _coerce）→ has_belief=true
 	state.team_intel[obs_id][prey.team_id] = {
 		"population_est": float(prey.population),
-		"food_est": 2000.0,   # ★跟著真值改 —— ★★決策讀的是 belief，只改真值等於沒改
+		"food_est": 8000.0,   # ★跟著真值改 —— ★★決策讀的是 belief，只改真值等於沒改
 		"tile_pos": prey.tile_pos,
 		"confidence": 1.0,
 		"last_tick": 0,
