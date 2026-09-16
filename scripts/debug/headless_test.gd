@@ -13807,6 +13807,16 @@ func _test_solo_commitment() -> void:
 	#   ★**而「承諾慣性本身還有沒有作用」不在這一格** ——
 	#     ★★它在**下面那一格**用 util 級量（有承諾 vs 無承諾的同一支隊），
 	#     ★★★**因為 task 級在常態下量不到，而量不到的東西不該被斷言。**
+	# ★★★【身價那一檔是【具名條件】，不是背景】（systems 2026-09-16）：
+	#   ★實測（常態、鄰居 pop 3、三拉桿接線後）：
+	#     `f = 240`（TARGET×8）尾部 0.0165｜`f = 1500`（×50）尾部 **0.0833**｜`f = 8000`（×267）尾部 **0.2244**
+	#     而對手 `紮營` ＝ **0.1984** ⇒ ★★**只有 `f = 8000` 那一檔，尾部人格才會搶。**
+	#   ⇒ ★★★**所以這一格鎖住的是【`f = 1500` 這一檔】** ——
+	#     **不寫出來的話，它就是一支「看情境而定」卻沒說是哪個情境的測試。**
+	#   ★而「`TARGET × 267` 算不算合理富裕」在 blueprint 手上（票已送）——
+	#     **若他說算，這一格會變成 ④，而那是【預期的】。**
+	assert(is_equal_approx(float(BeliefSystem.best_estimate(state, 0, 1).get("food_est", -1.0)), 1500.0),
+		"★具名條件：鄰居身價這一檔 ＝ `food_est 1500`（TARGET×50）—— 改了這個數，這一格問的就是另一件事")
 	var _cc: DecisionContext = DecisionContext.gather(state, team)
 	assert(_cc.food_days > _cc.desperation_entry_threshold,
 		"★具名條件：這一格問的是【常態】（food_days %.1f 高於絕境線 %.1f）" % [
@@ -13900,6 +13910,16 @@ func _test_solo_seek_home() -> void:
 	#     要它翻過紮營需要 `food ≈ 16000–32000`（pop 2–3 的鄰居）⇒ **數字對、故事荒謬** ⇒ 否決。
 	#   ★★★**若日後 blueprint 要那件事發生，這一格會變成 ④ —— 而那是【預期的】。**
 	#     **這一格鎖住的是【今天的事實】，不是永遠的設計。**
+	# ★★★【身價那一檔是【具名條件】，不是背景】（systems 2026-09-16）：
+	#   ★實測（常態、鄰居 pop 3、三拉桿接線後）：
+	#     `f = 240`（TARGET×8）尾部 0.0165｜`f = 1500`（×50）尾部 **0.0833**｜`f = 8000`（×267）尾部 **0.2244**
+	#     而對手 `紮營` ＝ **0.1984** ⇒ ★★**只有 `f = 8000` 那一檔，尾部人格才會搶。**
+	#   ⇒ ★★★**所以這一格鎖住的是【`f = 1500` 這一檔】** ——
+	#     **不寫出來的話，它就是一支「看情境而定」卻沒說是哪個情境的測試。**
+	#   ★而「`TARGET × 267` 算不算合理富裕」在 blueprint 手上（票已送）——
+	#     **若他說算，這一格會變成 ④，而那是【預期的】。**
+	assert(is_equal_approx(float(BeliefSystem.best_estimate(state, 1, 9).get("food_est", -1.0)), 1500.0),
+		"★具名條件：鄰居身價這一檔 ＝ `food_est 1500`（TARGET×50）—— 改了這個數，這一格問的就是另一件事")
 	var _c1: DecisionContext = DecisionContext.gather(state, t1)
 	assert(_c1.food_days > _c1.desperation_entry_threshold,
 		"★具名條件：這一格問的是【常態】（food_days %.1f 必須高於絕境線 %.1f）" % [
