@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 slice: ★全線復工令
 topic: ★用戶令:全線復工——機器可用;佇列照 systems HOW(世代5多seed戰爭面驗收在列);共機規矩照舊
 ---
