@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 slice: 全線狀態盤點(用戶令)
 topic: ★用戶要全線狀態——回三行:①手上在做什麼(審中的spec列名) ②卡著什麼(若有) ③下一個交付物;各角色都寄了,答自己的
 ---
