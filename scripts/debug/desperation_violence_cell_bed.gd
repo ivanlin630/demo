@@ -86,6 +86,30 @@ func _run() -> void:
 						if violence_samples.size() < 30:
 							violence_samples.append("day=%d team=%d food_days=%.2f armed=%.2f task=%s" % [
 								d, team.team_id, fd, armed, team.current_task])
+					# ★systems 2026-09-17問：那18筆各自的rank表(贏家/掠奪名次util/攻擊名次util)——
+					#   「不動手」是結果不是原因，原因寫在選了什麼上面。母體只有個位數/十位數,逐筆存不OOM。
+					var ctx: DecisionContext = DecisionContext.gather(st, team, false)
+					var scored: Array = DecisionEngine.rank_scored_ctx(ctx, team.current_option, st, team)
+					var winner_opt: String = String(scored[0]["opt"]) if not scored.is_empty() else ""
+					var winner_u: float = float(scored[0]["u"]) if not scored.is_empty() else 0.0
+					var loot_rank: int = -1
+					var loot_u: float = 0.0
+					var atk_rank: int = -1
+					var atk_u2: float = 0.0
+					for i in range(scored.size()):
+						var e: Dictionary = scored[i]
+						if String(e["opt"]) == "掠奪": loot_rank = i + 1; loot_u = float(e["u"])
+						if String(e["opt"]) == "攻擊": atk_rank = i + 1; atk_u2 = float(e["u"])
+					Probe.bump_sample("desperation_violence.rank18", {
+						"seed": seed_val, "day": d, "team": team.team_id,
+						"贏家opt": winner_opt, "贏家u": snappedf(winner_u, 0.0001),
+						"掠奪名次": (loot_rank if loot_rank > 0 else null), "掠奪u": (snappedf(loot_u, 0.0001) if loot_rank > 0 else null),
+						"攻擊名次": (atk_rank if atk_rank > 0 else null), "攻擊u": (snappedf(atk_u2, 0.0001) if atk_rank > 0 else null),
+						"掠奪不在候選集": loot_rank < 0, "攻擊不在候選集": atk_rank < 0,
+						"food_days": snappedf(fd, 0.01), "self_armed_ratio": snappedf(ctx.self_armed_ratio, 0.001),
+						"has_weak_prey": ctx.has_weak_prey, "weak_prey_id": ctx.weak_prey_id,
+						"當前task_snapshot": team.current_task,
+					}, 30)
 			print("[WINDOW] day=%d/%d status=running" % [d, days])
 			print("[DAILY] day=%d 累計：餓且有牙=%d 動手=%d(掠奪%d/攻擊%d)" % [
 				d, n_hungry_and_armed, n_violence, n_loot, n_attack])
@@ -104,6 +128,14 @@ func _run() -> void:
 	print("   逐筆(前%d筆)：" % mini(30, violence_samples.size()))
 	for s in violence_samples:
 		print("      %s" % s)
+	print("")
+	# ★systems 2026-09-17：那18筆各自的rank表——不動手是結果不是原因，原因在選了什麼上面
+	var rank_samples: Array = (Probe.samples.get("desperation_violence.rank18", []) as Array)
+	print("★逐筆rank表(母體=%d｜存了=%d｜%s)：" % [
+		n_hungry_and_armed, rank_samples.size(),
+		"未截斷" if rank_samples.size() >= n_hungry_and_armed else "★★被cap截斷!母體>cap"])
+	for s in rank_samples:
+		print("      %s" % str(s))
 	print("")
 	print("[WINDOW] day=%d/%d status=completed reason=window_reached" % [days, days])
 	print("=== desperation_violence_cell_bed DONE (seed=%d) ===" % seed_val)
