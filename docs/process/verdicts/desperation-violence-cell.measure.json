@@ -42,7 +42,7 @@
     "★三個seed跑在三棵不同的樹上(4725bb819/f2715361a/9adc17db8，逐一列出，不是同一棵樹)——逐對git diff --name-only比對scripts/=0個檔(中間commit只動hook/文件)，systems獨立覆核+跑陽性對照(同比法對docs/抓到5個檔證明非恆0)⇒就被量的世界而言同源，可加總；這是【查過】的結論不是【應該一樣】的假設(判準⑩)",
     "★本題不需要gather()/rank_scored_ctx()，只讀team.current_task，逐日採樣(比之前每7天更密)，母體數字因此不能與v2/v3的每7天採樣直接比密度",
     "★單seed單窗；比率結論(0%)是existence層級的讀數，不是可長期引用的機率",
-    "★★★population discrepancy(未解，如實報)：第一輪(seed1337無rank表)母體=9/4/5(共18)，第二輪(seed1337加了gather+rank_scored_ctx呼叫)同seed母體變成6/6/16(共28)——已排查：①三輪commit逐對git diff --stat scripts/simulation/皆=0(生產code沒變)②gather/rank_scored_ctx/decision_engine.gd/terms.gd/options.gd逐檔grep randf/randi=0命中(呼叫鏈本身不耗RNG)⇒兩個常見假說都排除了，根因未定；候選第三假說(未驗證)：本輪每天對~500+隊多呼叫一次gather+rank_scored_ctx，多的CPU工作量若碰到任何thread-timing依賴的引擎子系統(如pathfinding worker結果套用順序)可能移動軌跡而不需要耗RNG——本卷不下判定，如實報並建議systems決定是否值得再開一輪二分查"
+    "★★★population discrepancy(結案，非隨機噪音)：第一輪(4725bb819,無rank表)母體9/4/5(共18)；第二輪(495c497be,加gather+rank_scored_ctx)母體6/6/16(共28)。排查過程：①三輪commit逐對git diff --stat scripts/simulation/=0(生產code沒變)②gather/rank_scored_ctx/decision_engine.gd等逐檔grep randf/randi=0命中(不耗RNG)③decision_context.gd:433的idle_employ_next_tick寫入查過——它被`or not advance`正確閘住,advance=false時只走cache讀分支不會寫,排除④★★★可證偽測試(systems設計)：用第二輪那份床重跑seed1337，母體逐字重現=6(883/34/521/6，與第一次一字不差)⇒確定是【床版本】造成的deterministic差異，不是隨機噪音，也不是世界分岔——但『加的那段code具體透過哪一條路徑改變軌跡』這件事本身仍未定位到單一行(排除了三個候選機制，第四個真正的機制未找到)；★兩輪的母體因此不可互相引用(各自成組，本卷已標明)，但這不是儀器壞掉，是【觀測本身這次真的改變了被觀測物】(第5次同族，但機制細節懸而未決,不歸零成'不明原因'，是'已知會發生但未定位到哪一行')"
   ],
 
   "④逐筆rank表(systems 2026-09-17問，18筆各自的贏家/掠奪攻擊名次util/候選集/self_armed_ratio/weak_prey)": {
