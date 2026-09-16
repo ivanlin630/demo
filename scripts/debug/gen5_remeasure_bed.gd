@@ -118,6 +118,14 @@ func _run() -> void:
 	var full_hard_checked: int = 0
 	var full_hard_still_no_attack: int = 0
 	var full_hard_counterexample: String = ""
+	# ★systems 2026-09-16問的母體數(「太薄」與「空」是兩個結論，禁只報0次贏)：
+	#   逐team-day採樣，分開數【餓】【有牙】【餓且有牙(①正例格真母體)】，
+	#   ★母體>0而0次贏⇒才是驗證失敗候選；母體=0⇒不可判(且本身是上游發現)。
+	var n_sampled: int = 0
+	var n_hungry: int = 0
+	var n_armed: int = 0
+	var n_hungry_and_armed: int = 0
+	var n_hungry_armed_atk_applicable: int = 0
 
 	for tick in range(ticks):
 		runner.advance_tick(st, no_player)
@@ -135,10 +143,20 @@ func _run() -> void:
 					var need: float = maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 					var fd: float = ResourceSystem.effective_food(st, team) / need
 					var armed: float = FactionAISystem.new()._calc_own_armed(st, team)
-					if not found_hungry_teeth_win and fd < DecisionTerms.DESPERATION_DAYS and armed > 0.0:
+					n_sampled += 1
+					var is_hungry: bool = fd < DecisionTerms.DESPERATION_DAYS
+					var is_armed: bool = armed > 0.0
+					if is_hungry: n_hungry += 1
+					if is_armed: n_armed += 1
+					if is_hungry and is_armed:
+						n_hungry_and_armed += 1
 						var ctx: DecisionContext = DecisionContext.gather(st, team, false)
 						var scored: Array = DecisionEngine.rank_scored_ctx(ctx, team.current_option, st, team)
-						if not scored.is_empty() and String(scored[0]["opt"]) == "攻擊":
+						var atk_applicable: bool = false
+						for e in scored:
+							if String(e["opt"]) == "攻擊": atk_applicable = true
+						if atk_applicable: n_hungry_armed_atk_applicable += 1
+						if not found_hungry_teeth_win and not scored.is_empty() and String(scored[0]["opt"]) == "攻擊":
 							found_hungry_teeth_win = true
 							found_hungry_teeth_case = "day=%d team=%d food_days=%.2f armed=%.2f winner_u=%.4f" % [
 								d, team.team_id, fd, armed, float(scored[0]["u"])]
@@ -160,10 +178,15 @@ func _run() -> void:
 	print("[HOST] end FreeMB=%.0f" % (float(OS.get_static_memory_usage()) / 1048576.0))
 	print("")
 	print("★①paired反事實(真隊，非合成ctx，DecisionContext.gather+rank_scored_ctx)：")
-	if found_hungry_teeth_win:
+	print("   ★母體(systems 2026-09-16問的數，「太薄」與「空」是兩個結論)：")
+	print("      逐team-day採樣總數=%d｜餓(food_days<門檻)=%d｜有牙(armed>0)=%d｜★餓且有牙(①正例格真母體)=%d｜其中攻擊在候選集裡=%d" % [
+		n_sampled, n_hungry, n_armed, n_hungry_and_armed, n_hungry_armed_atk_applicable])
+	if n_hungry_and_armed == 0:
+		print("   ★★★母體=0⇒①正例格【不可判】——而這本身是發現：這個世界(此窗此seed)裡沒有『餓且有牙』的隊，這與『攻擊很少發生』是同一件事的上游")
+	elif found_hungry_teeth_win:
 		print("   ★★餓且有牙 ⇒ 攻擊贏argmax：出現過⇒%s" % found_hungry_teeth_case)
 	else:
-		print("   ★★餓且有牙 ⇒ 攻擊贏argmax：至今(窗=%d天)仍未出現(不能證明永遠不發生，只能說到此為止=0)" % days)
+		print("   ★★★母體>0(=%d)而0次贏⇒這才是【驗證失敗候選】(它們有機會而沒打)，非母體太薄" % n_hungry_and_armed)
 	print("   ★對照：飽(food_days>10)時仍不打攻擊argmax = %d/%d 次（反例：%s）" % [
 		full_hard_still_no_attack, full_hard_checked,
 		full_hard_counterexample if full_hard_counterexample != "" else "（無）"])
