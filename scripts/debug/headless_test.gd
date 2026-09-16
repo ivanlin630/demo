@@ -13777,7 +13777,7 @@ func _test_solo_commitment() -> void:
 	for tid in [1, 2]:
 		var o := TeamData.new(); o.team_id = tid; o.tile_pos = Vector2i(4+tid, 4)
 		o.last_tile_pos = o.tile_pos   # 不逼近 → threat_react 低
-		_seed_pop(o, 3); o.faction_id = -1
+		_seed_pop(o, 3); o.faction_id = -1; o.resources = {"food": 1500.0}   # ★新增身價（見下方 belief 的 food_est）
 		state.teams[tid] = o
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
 	_seed_pop(team, 8); team.tags = ["軍隊"]; team.current_task = TeamData.TASK_IDLE
@@ -13789,7 +13789,13 @@ func _test_solo_commitment() -> void:
 	state.teams[0] = team
 	state.team_discovered[0] = [1, 2]
 	for tid in [1, 2]:
-		BeliefSystem.record_claim(state, 0, tid, 0, "親見", {"population_est": 3, "armed_est": 1, "tile_pos": state.teams[tid].tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
+	# ★★★【第①類修正·續】而這兩支比上面那支多一層：**那個數字根本不存在。**
+	#   ★belief 只寫了 `population_est`／`armed_est` ⇒ `belief_has_priced_items()` ＝ false
+	#     ⇒ `weak_prey_priced` ＝ false ⇒ `weak_prey_richness_est` ＝ 0 ⇒ **take 恆 0**。
+	#   ★★所以改真值 `prey.resources` 是【沒有用的】——**決策讀 belief 不讀真值**（感知鐵律）。
+	#   ★★★⇒ 必須在 belief 裡把「這隻獵物身上有東西」講出來（`food_est`），
+	#     否則這支測試問的是「看到弱肉會不會搶」而世界看到的是**一隻身上什麼都沒有的弱肉**。
+		BeliefSystem.record_claim(state, 0, tid, 0, "親見", {"population_est": 3, "armed_est": 1, "food_est": 1500.0, "tile_pos": state.teams[tid].tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
 	fai._evaluate_solo(state, team)
 	assert(team.current_task == TeamData.TASK_LOOT, "掠奪 applicable + 承諾(current_option=掠奪) → 應續掠奪，實際=%s" % team.current_task)
 	assert(team.current_option == "掠奪", "選後 current_option 記錄承諾")
@@ -13825,7 +13831,13 @@ func _test_solo_seek_home() -> void:
 	ptile.tile_id = 3*1000+4; ptile.tile_pos = Vector2i(3,4); ptile.terrain = "plains"
 	state.world.tiles[ptile.tile_id] = ptile
 	var prey := TeamData.new(); prey.team_id = 9; prey.tile_pos = Vector2i(3,4)
-	_seed_pop(prey, 2); prey.faction_id = -1; prey.resources = {"food": 30.0}
+	# ★★★【第①類修正·續】而這兩支比上面那支多一層：**那個數字根本不存在。**
+	#   ★belief 只寫了 `population_est`／`armed_est` ⇒ `belief_has_priced_items()` ＝ false
+	#     ⇒ `weak_prey_priced` ＝ false ⇒ `weak_prey_richness_est` ＝ 0 ⇒ **take 恆 0**。
+	#   ★★所以改真值 `prey.resources` 是【沒有用的】——**決策讀 belief 不讀真值**（感知鐵律）。
+	#   ★★★⇒ 必須在 belief 裡把「這隻獵物身上有東西」講出來（`food_est`），
+	#     否則這支測試問的是「看到弱肉會不會搶」而世界看到的是**一隻身上什麼都沒有的弱肉**。
+	_seed_pop(prey, 2); prey.faction_id = -1; prey.resources = {"food": 1500.0}   # ★30 → 1500（舊值 60 coin ≈ 0.15 人份）
 	state.teams[9] = prey
 	var raider := PersonData.new(); raider.id = 1000; raider.team_id = 1
 	raider.values = {"好戰": 0.9, "貪婪": 0.9, "野心": 0.5, "求生欲": 0.5}
@@ -13835,7 +13847,7 @@ func _test_solo_seek_home() -> void:
 	t1.armed_anon_ratio = 1.0   # capability grounding（裁2）：掠奪需有戰力
 	state.teams[1] = t1
 	state.team_discovered[1] = [9]
-	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 2, "armed_est": 1, "tile_pos": Vector2i(3, 4), "last_tick": state.world.current_tick}, 1.0, false)   # G3：有情報才打（position-belief：claim 帶位置）
+	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 2, "armed_est": 1, "food_est": 1500.0, "tile_pos": Vector2i(3, 4), "last_tick": state.world.current_tick}, 1.0, false)   # ★★food_est 是新加的：舊 belief 無可定價分項 ⇒ take 恆 0   # G3：有情報才打（position-belief：claim 帶位置）
 	fai._evaluate_solo(state, t1)
 	assert(t1.current_task == TeamData.TASK_LOOT or t1.current_task == TeamData.TASK_ATTACK,
 		"好戰盜匪應 roving 非尋家，實際=%s" % t1.current_task)
@@ -16153,8 +16165,15 @@ func _mk_unified_meek_team(state: WorldState, pos: Vector2i) -> TeamData:
 func _mk_weak_prey_team(state: WorldState, pos: Vector2i) -> TeamData:
 	var t := TeamData.new(); t.team_id = 902; t.tags = [TeamData.TAG_PRODUCE]
 	t.tile_pos = pos; t.leader_id = 9020
+# ★★★【第①類修正：只改 fixture 的【數字】，斷言一個字不動】（票：掠奪走期望價值 2026-09-16）
+#   ★這些 fixture 寫在「掠奪＝常數驅力」的年代——那時 prey 有沒有東西**根本不影響 util**
+#     （`LOOT_DRIVE_BASE × cap` 恆滿檔）⇒ **所以沒有人需要給 prey 財產。**
+#   ★★新制下「有弱肉就會去搶」多了一個前提：**而且值得搶**；
+#     而 `ref` ＝ 一整隊的目標存量總值 ⇒ 舊值 200 食（＝400 coin）≈ **一個人的份**。
+#   ★★★所以把「弱肉」重寫成【新尺上的弱肉】—— **意圖不變（弱、可搶、值得搶），只換算尺度。**
+#     （先例：`coin_est 300→4000`。）
 	_seed_pop(t, 3)   # pop=3 < 10×0.7=7 → 弱
-	t.resources = {"food": 200.0}
+	t.resources = {"food": 2000.0}   # ★200 → 2000
 	state.teams[902] = t
 	_p1_place_tile(state, pos)
 	var ldr2 := PersonData.new(); ldr2.id = 9020; ldr2.team_id = 902
@@ -16172,7 +16191,7 @@ func _p1_set_belief(state: WorldState, obs_id: int, prey: TeamData) -> void:
 	# 親見格式（legacy Dictionary path in _coerce）→ has_belief=true
 	state.team_intel[obs_id][prey.team_id] = {
 		"population_est": float(prey.population),
-		"food_est": 200.0,
+		"food_est": 2000.0,   # ★跟著真值改 —— ★★決策讀的是 belief，只改真值等於沒改
 		"tile_pos": prey.tile_pos,
 		"confidence": 1.0,
 		"last_tick": 0,

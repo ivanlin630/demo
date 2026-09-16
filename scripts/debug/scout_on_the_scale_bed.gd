@@ -687,12 +687,20 @@ func _run() -> void:
 		atk_ok, int(Probe.counts.get("dispatch.攻擊.noop", 0))])
 	print("      ★若這個數是 0 ⇒ **單位修好了，而攻擊被殺死了** —— 那必須在 merge 前知道。")
 	print("      ★★而本床**不對它下判決**：它是 merge 判準的輸入，不是本票的驗收格。")
+	# ★★★【掠奪也要一行】（systems 2026-09-16 裁：merge 前要世界級 before/after）：
+	#   ★它不在【前 12 名】裡 ⇒ **它的數字從來沒有被印出來過** ——
+	#     ★★而 before/after 要比的正是它 ⇒ **沒印等於量不到**（而不是量到 0）。
+	var loot_ok: int = int(Probe.counts.get("dispatch.掠奪.ok", 0))
+	print("   ★★★**掠奪真的被派出去 ＝ %d 次**（noop %d）" % [
+		loot_ok, int(Probe.counts.get("dispatch.掠奪.noop", 0))])
+	print("      ★若這個數在【掠奪走期望價值】票後掉到 0 ⇒ **`ref` 選錯了**（systems 裁定的回報條件）。")
+	print("      ★★同樣不在本床下判決：它是 merge 判準的輸入。")
 
 	# ★★★【攻擊也要一張拒絕表】（systems 2026-09-16 的第②個數的下一問）：
 	#   ★`dispatch.攻擊.ok = 0` 而 `noop > 0` ⇒ **它有走到仲裁，每一次都被擋**
 	#   ⇒ ★★【沒人想打】與【想打但派不出去】是兩個完全不同的世界，
 	#   ★★★而它們在「攻擊沒發生」這一句上長得一模一樣。
-	for _o2 in ["偵查", "攻擊"]:
+	for _o2 in ["偵查", "攻擊", "掠奪"]:
 		var rows2: Array = []
 		var tot2: int = 0
 		for k8 in Probe.counts:
