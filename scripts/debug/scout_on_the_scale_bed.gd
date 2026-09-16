@@ -830,6 +830,26 @@ func _run() -> void:
 	print("      ★★「餓」用的是**世界自己的絕境線**，不是 urgency 自己 —— 否則這一行是同義反覆。")
 	print("   逐層平均急迫度：%s" % " ".join(_srow))
 	print("   ★★★**無 faction 的隊**主層分布：%s" % " ".join(_nfrow))
+	# ★★★【raw vs smoothed，成對、母體＝餓的那些隊天】（systems 2026-09-16）
+	var _hn2: int = int(Probe.counts.get("hungrypair.n", 0))
+	print("★§E-⑤ **餓的隊天：`raw[生存]` vs `smoothed[生存]`（成對同筆）** 母體 ＝ %d" % _hn2)
+	print("   定義逐字：`food_days < desperation_entry_threshold`（★與主層那一格同一個定義）")
+	print("   平均：raw=%.3f｜smoothed=%.3f" % [
+		float(Probe.amounts.get("hungrypair.raw_sum", 0.0)) / maxf(float(_hn2), 1.0),
+		float(Probe.amounts.get("hungrypair.smooth_sum", 0.0)) / maxf(float(_hn2), 1.0)])
+	print("   ★成對分類：`raw_hi_smooth_lo`（平滑吃掉尖峰）=%d｜`both_hi`=%d｜`raw_lo`（本來就不算餓）=%d" % [
+		int(Probe.counts.get("hungrypair.cls.raw_hi_smooth_lo", 0)),
+		int(Probe.counts.get("hungrypair.cls.both_hi", 0)),
+		int(Probe.counts.get("hungrypair.cls.raw_lo", 0))])
+	var _strk: Array = []
+	for _si in range(1, 10):
+		var _sc: int = int(Probe.counts.get("hungrypair.streak.%d" % _si, 0))
+		if _sc > 0: _strk.append("連%d=%d" % [_si, _sc])
+	print("   連續餓了幾個 cadence：%s" % " ".join(_strk))
+	var _hr: Array = Probe.samples.get("hungrypair.rows", [])
+	print("   逐筆樣本 %d 筆（★first-N）：" % _hr.size())
+	for _hi in range(mini(8, _hr.size())):
+		print("     %s" % str(_hr[_hi]))
 	print("      ★`need_hierarchy.gd:48-53`：`faction_id == -1` ⇒ **歸屬層直接給 1.0**")
 	print("      ⇒ ★★所有流浪／盜匪隊的歸屬層**恆滿檔**，而掠奪與紮營在那一層的 affinity **都是 0**")
 	print("      ⇒ ★★★**alignment 被那一層的滿檔吃掉** ⇒ 兩邊一起落到 coeff 下緣（＝共同因子）。")

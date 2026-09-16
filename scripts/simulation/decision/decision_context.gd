@@ -1150,6 +1150,34 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		# §6 主敘事標籤：team.plan_phase 來源接五層急迫度衍生(argmax)。GUI 讀 team.plan_phase 不變。
 		team.plan_phase = NeedHierarchy.narrative_label(team.need_urgency)
 		if Probe.enabled: Probe.bump("need.ewma_advance")   # ★憲法級 tap：實推進處（驗每隊每 tick ≤1）
+		# ★★★【raw 與 smoothed 成對印】（systems 2026-09-16）：★**只有成對才分得出**
+		#   「平滑吃掉尖峰」（raw≈1 而 smoothed≈0.1）與「它根本不算餓」（raw 本身就低）。
+		#   ★★母體 ＝ **餓的那些隊天**（逐字定義：`food_days < desperation_entry_threshold`）
+		#     —— ★★★**不是全世界平均**：**餓的隊與不餓的隊要相反的東西，平均把它們抵銷掉。**
+		#   ★「連續餓了幾個 cadence」是 EWMA 爬升的解釋變數（`α = 0.25` ⇒ 要 3–4 次才爬到 0.6）
+		#     ⇒ 用 `Probe.counts` 當計數器（★**不新增 static var** —— 那會踩 `cross-run-static` 閘）。
+		if Probe.enabled and _raw_need.size() == NeedHierarchy.N_LAYERS 				and team.need_urgency.size() == NeedHierarchy.N_LAYERS:
+			var _hk: String = "hstreak.t%d" % team.team_id
+			if c.food_days < c.desperation_entry_threshold:
+				var _streak: int = int(Probe.counts.get(_hk, 0)) + 1
+				Probe.counts[_hk] = _streak
+				Probe.bump("hungrypair.n")
+				Probe.bump("hungrypair.streak.%d" % mini(_streak, 9))
+				var _rs: float = float(_raw_need[NeedHierarchy.L_SURVIVAL])
+				var _ss: float = float(team.need_urgency[NeedHierarchy.L_SURVIVAL])
+				Probe.add_amount("hungrypair.raw_sum", _rs)
+				Probe.add_amount("hungrypair.smooth_sum", _ss)
+				# ★成對的桶（★**同一筆**）：raw 高／smoothed 低 ＝ 平滑吃掉尖峰
+				var _cls: String = "raw_lo"
+				if _rs >= 0.5 and _ss < 0.3: _cls = "raw_hi_smooth_lo"
+				elif _rs >= 0.5 and _ss >= 0.3: _cls = "both_hi"
+				Probe.bump("hungrypair.cls." + _cls)
+				Probe.bump_sample("hungrypair.rows", {"team": team.team_id,
+					"food_days": snappedf(c.food_days, 0.01),
+					"raw_surv": snappedf(_rs, 0.001), "smooth_surv": snappedf(_ss, 0.001),
+					"streak": _streak, "thresh": snappedf(c.desperation_entry_threshold, 0.01)}, 120)
+			else:
+				Probe.counts[_hk] = 0
 	else:
 		if Probe.enabled: Probe.bump("need.gather_readonly")   # ★唯讀路
 	# 邊角：從沒被 advance 過的隊（第一次就走唯讀路）→ ctx 給當下 raw 值（★只進 ctx、不寫 team），
