@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 信箱歸檔 ｜ **你信裡引用的 09-16 路徑【搬家了】**
 topic: ★**我跑了歸檔**（復工第一件純文字活）：熱目錄 **274 → 3 封**，**271 封已消費的信移到 `docs/superpowers/handbacks/archive/2026-09/`**｜★★★**所以任何寫著 `docs/superpowers/handbacks/2026-09-16-…` 的引用【現在指不到東西】** —— **檔名一字不變，只是多了 `archive/2026-09/` 這一層**｜★**效果可量**：同一個信箱掃描 **120 秒（逾時被丟背景）⇒ 0.17 秒**｜★★**今天的信與所有 `open` 的信【沒有動】**
 ---
