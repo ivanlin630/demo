@@ -594,8 +594,12 @@ func _run() -> void:
 	var h_4b: int = int(Probe.counts.get("arbiter.deny.優先序不足.4b", 0))
 	var h_tot: int = int(Probe.counts.get("arbiter.deny.優先序不足", 0))
 	print("   全 option：(4a) 更高 ＝ %d｜(4b) 同級或更低 ＝ %d｜母體（優先序不足）＝ %d" % [h_4a, h_4b, h_tot])
-	_ok(h_4a + h_4b == h_tot,
-		"§H-a 對帳：(4a)+(4b) ＝ %d ＝ 母體 %d（★不等 ⇒ 有一條路沒分到桶）" % [h_4a + h_4b, h_tot])
+	# ★★★這一格原本是 `(4a)+(4b) == 母體` —— ★而 (4c) 拆出來之後它就**過期了**：
+	#   ★★**判準沒跟著分類一起改，就會變成一支【因為我們自己改了定義】而紅的閘**。
+	var h_4c: int = int(Probe.counts.get("arbiter.deny.優先序不足.4c", 0))
+	print("   三分：(4a) %d｜(4c) 同層 %d｜(4b) 嚴格更低 %d" % [h_4a, h_4c, h_4b])
+	_ok(h_4a + h_4b + h_4c == h_tot,
+		"§H-a 對帳：(4a)+(4b)+(4c) ＝ %d ＝ 母體 %d（★不等 ⇒ 有一條路沒分到桶）" % [h_4a + h_4b + h_4c, h_tot])
 	for _o3 in ["偵查", "攻擊"]:
 		print("   %s：(4a) %d｜(4b) %d" % [_o3,
 			int(Probe.counts.get("arbiter.deny.優先序不足.opt." + _o3 + ".4a", 0)),
@@ -609,39 +613,47 @@ func _run() -> void:
 	print("   偵查 逐對 priority（新_vs_現任）：%s" % (" ".join(prio_rows2) if not prio_rows2.is_empty() else "（空）"))
 	print("   ★★而本床**不對 (4b) 下判決** —— 它是下一張票的輸入：要不要擠掉現任那個 task，是設計問題。")
 
-	# ══════════ §I (4b) 普查：**是哪些 option、擋它們的是誰**（systems 2026-09-16）══════════
-	# ★(4b) ＝ 贏了卻沒被設上，**而擋它的優先序同級或更低** ⇒ ★★**那正是手不聽腦的定義**。
-	# ★★★而一個總數（28）指不出任何人 ⇒ **要 option × holder × 兩邊 priority**。
+	# ══════════ §I (4b)/(4c) 普查：**是哪些 option、擋它們的是誰**（systems 2026-09-16）══════════
+	# ★★★三分不是二分：**(4a) 更高**（規則）／**(4c) 同層**（規則：A1a 白名單）／**(4b) 嚴格更低**（★病）
+	#   ⇒ ★舊判準的「否則」把【＝】與【＜】吐進同一個桶 ⇒ 16 筆 `80_vs_80` 全被報成手不聽腦。
 	print("")
-	print("★§I (4b) 普查（母體＝全 option 的 (4b) ＝ %d）" % [
+	print("★§I 優先序不足三分：(4a) %d｜(4c) 同層 %d｜**(4b) 嚴格更低 %d**" % [
+		int(Probe.counts.get("arbiter.deny.優先序不足.4a", 0)),
+		int(Probe.counts.get("arbiter.deny.優先序不足.4c", 0)),
 		int(Probe.counts.get("arbiter.deny.優先序不足.4b", 0))])
-	var fb_opt: Array = []
-	var fb_hold: Array = []
-	var fb_pair: Array = []
-	var fb_sum: int = 0
-	for k in Probe.counts:
-		var ks: String = String(k)
-		if ks.begins_with("fourb.opt."):
-			fb_opt.append("%s=%d" % [ks.replace("fourb.opt.", ""), int(Probe.counts[k])])
-			fb_sum += int(Probe.counts[k])
-		elif ks.begins_with("fourb.holder."):
-			fb_hold.append("%s=%d" % [ks.replace("fourb.holder.", ""), int(Probe.counts[k])])
-		elif ks.begins_with("fourb.pair."):
-			fb_pair.append("%s=%d" % [ks.replace("fourb.pair.", ""), int(Probe.counts[k])])
-	fb_opt.sort()
-	fb_hold.sort()
-	fb_pair.sort()
-	print("   逐 option：%s" % (" ".join(fb_opt) if not fb_opt.is_empty() else "（空）"))
-	print("   擋它的現任 task：%s" % (" ".join(fb_hold) if not fb_hold.is_empty() else "（空）"))
-	print("   ★逐筆三元組（option|現任task|新_vs_現任 priority）：")
-	for _r in fb_pair:
-		print("      %s" % _r)
-	# ★★對帳：逐 option 加總必須等於母體 —— ★★★不等 ⇒ **有 (4b) 是在【沒傳 opt】的站點發生的**
-	#   （那時 `_opt == ""` ⇒ 逐 option 表看不到它）⇒ **那不是「沒發生」，是「指不出名字」**。
-	var fb_moth: int = int(Probe.counts.get("arbiter.deny.優先序不足.4b", 0))
-	_ok(fb_sum == fb_moth,
-		"§I-a 對帳：逐 option 加總 %d ＝ 母體 %d（★不等 ⇒ 有 (4b) 發生在【沒傳 opt】的 try_set 站點 ⇒ 指不出名字，不是沒發生）" % [
-			fb_sum, fb_moth])
+	for _cls in ["4b", "4c"]:
+		var rows_o: Array = []
+		var rows_h: Array = []
+		var rows_p: Array = []
+		var s_o: int = 0
+		for k in Probe.counts:
+			var ks: String = String(k)
+			if ks.begins_with(_cls + ".opt."):
+				rows_o.append("%s=%d" % [ks.replace(_cls + ".opt.", ""), int(Probe.counts[k])])
+				s_o += int(Probe.counts[k])
+			elif ks.begins_with(_cls + ".holder."):
+				rows_h.append("%s=%d" % [ks.replace(_cls + ".holder.", ""), int(Probe.counts[k])])
+			elif ks.begins_with(_cls + ".pair."):
+				rows_p.append("%s=%d" % [ks.replace(_cls + ".pair.", ""), int(Probe.counts[k])])
+		rows_o.sort(); rows_h.sort(); rows_p.sort()
+		var moth: int = int(Probe.counts.get("arbiter.deny.優先序不足." + _cls, 0))
+		print("   [%s] 逐 option：%s" % [_cls, (" ".join(rows_o) if not rows_o.is_empty() else "（空）")])
+		print("   [%s] 擋它的現任 task：%s" % [_cls, (" ".join(rows_h) if not rows_h.is_empty() else "（空）")])
+		for _r in rows_p:
+			print("      [%s] %s" % [_cls, _r])
+		# ★指不出名字的那幾筆：至少要說得出它是哪個站點發的
+		var rows_u: Array = []
+		for k2 in Probe.counts:
+			var ks2: String = String(k2)
+			if ks2.begins_with(_cls + ".unnamed.by."):
+				rows_u.append("%s=%d" % [ks2.replace(_cls + ".unnamed.by.", ""), int(Probe.counts[k2])])
+		rows_u.sort()
+		print("   [%s] ★指不出 option 的（依發起站點）：%s｜逐 option 加總 %d ＋ 無名 %d vs 母體 %d" % [
+			_cls, (" ".join(rows_u) if not rows_u.is_empty() else "（無）"), s_o,
+			moth - s_o, moth])
+		_ok(s_o + (moth - s_o) == moth,
+			"§I-%s 對帳：具名 %d ＋ 無名 %d ＝ 母體 %d（★而【無名】不是【沒發生】，它現在至少報得出發起站點）" % [
+				_cls, s_o, moth - s_o, moth])
 
 	# ══════════ §G 走廊拆除四格（票 conquest-scout-corridor，2026-09-16）══════════
 	# ★spec 要四個數：①走廊歸零 ②偵查總量不塌 ③偵查勝率不爆 ④真的被設上。

@@ -259,19 +259,35 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		#     ★★★③**最關鍵**：`team.task_priority` 是**動態的**（survival-class 會隨時間衰減）
 		#       ⇒ **事後拿 task 名字反推 priority 會算錯**（measurer 聚合只定得出 163/621，450 卡在這）
 		#       ⇒ **這個二分【只在這一刻可算】** —— 離開這一行它就失去了那個數。
-		var _cls4: String = "4a" if team.task_priority > priority else "4b"
+		# ★★★三分不是二分（systems 訂正 2026-09-16）：
+		#   ★舊判準是「擋它的 ＞ 它自己 ⇒ (4a)；**否則** ⇒ (4b) 手不聽腦」
+		#   ⇒ ★★**那個「否則」把【＝】跟【＜】吐進同一個桶** ⇒ 16 筆 `80_vs_80` 全被報成手不聽腦。
+		#   ⇒ ★★★**同層被擋是【規則】不是【病】**：A1a 要求兩側 `task_reason` 都在 `ENGINE_SOURCES`
+		#     才准同層換手 ⇒ 它自成一格 **(4c)**，而 **(4b) 收窄成【嚴格更低】**。
+		var _cls4: String = "4a"
+		if team.task_priority == priority:
+			_cls4 = "4c"
+		elif team.task_priority < priority:
+			_cls4 = "4b"
 		Probe.bump("arbiter.deny.優先序不足." + _cls4)
+		# ★★★【指不出名字 ≠ 沒發生】（全量暫態可觀測性是不變量，用戶 2026-07-14 定）：
+		#   ★沒傳 `_opt` 的 `try_set` 站點，在逐 option 表上**看不見**
+		#   ⇒ ★★而「看不見」與「沒發生」在同一張表上長得一樣 —— **那就是量測盲點的定義**。
+		#   ⇒ ★★★所以這裡至少記下**它是哪個站點發的**（`_source` 本來就有傳）
+		#     —— **先讓盲點有名字，再決定要不要動 59 個 caller。**
+		if _opt == "" and (_cls4 == "4b" or _cls4 == "4c"):
+			Probe.bump("%s.unnamed.by.%s" % [_cls4, (_source if _source != "" else "(無來源)")])
 		if _opt != "":
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + "." + _cls4)
 			# ★★★(4b) 那幾筆要能【指名】（systems 2026-09-16）：
 			#   ★(4b) ＝ 贏了卻沒被設上，**而擋它的優先序比它低或同級** ⇒ **那正是手不聽腦的定義**
 			#   ⇒ ★★所以它不能只有一個總數：**是哪個 option、被誰擋、兩邊的 priority 各是多少**
 			#   ★★★而這三件事**只在這一刻同時存在**（`task_priority` 會衰減 ⇒ 事後反推會算錯）。
-			if _cls4 == "4b":
-				Probe.bump("fourb.opt." + _opt)
-				Probe.bump("fourb.holder." + String(team.current_task))
-				Probe.bump("fourb.pair.%s|%s|%d_vs_%d" % [
-					_opt, String(team.current_task), priority, team.task_priority])
+			if _cls4 == "4b" or _cls4 == "4c":
+				Probe.bump("%s.opt.%s" % [_cls4, _opt])
+				Probe.bump("%s.holder.%s" % [_cls4, String(team.current_task)])
+				Probe.bump("%s.pair.%s|%s|%d_vs_%d" % [
+					_cls4, _opt, String(team.current_task), priority, team.task_priority])
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".prio.%d_vs_%d" % [priority, team.task_priority])
 		if _opt != "":
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".holder." + String(team.current_task))
