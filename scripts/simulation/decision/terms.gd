@@ -268,7 +268,17 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#     而那些都是 [0,1] ⇒ `_loot` 也必須是，**而且要保住鑑別力**。
 			#   ★★而 72% 撞頂那個現場**就是這一行** —— 我們一路挖到根因（單位混用）修好了根因，
 			#     ★★★**卻差點把【當初發現問題的地方】留在原地。**
-			var _loot: float = FactionAISystem.richness_compressed(ctx.attack_loot_est, ctx.reference_wealth)
+			# ★★★【攻擊的 loot 項也要乘 `effective_loot_rate`】（systems 裁 2026-09-16，他自承改了本票範圍）：
+			#   ★世界的結算逐字是 —— **任何戰鬥勝方都只拿 `effective_loot` 比例**
+			#     （`npc_combat_system.gd:_loot_resources`，★**殲滅與潰逃控地共用同一個函式**）
+			#   ⇒ ★★舊寫法假設「打贏就拿到對方全部身家」，**而世界從來不是這樣結算的** ＝ 高估。
+			#   ★★★而這條修正的形狀是【把同源規則套到另一邊】，不是加一個成本項：
+			#     兩邊的即時收穫從此同源同尺 ⇒ **差別回到 `odds`（目標不同）與 `need`／`person`。**
+			#   ★那塊地沒有不見：「打下來會持續產出」由**佔村**（`options.gd` 的 `occupy_drive`，走 `DiscountedFlow`）
+			#     表達 ⇒ ★★攻擊 option 再把全額身家算進去**就是算兩次**。
+			var _acruel: float = float(ctx.leader_values.get("殘忍", 0.5))
+			var _loot_raw: float = ctx.attack_loot_est * NpcCombatSystem.effective_loot_rate(_acruel)
+			var _loot: float = FactionAISystem.richness_compressed(_loot_raw, ctx.reference_wealth)
 			# ②需要 ＝ 自身糧食缺口（★連續量：越餓越想搶；★★用既有的 food_days／絕境門檻，不新增旋鈕）
 			var _need: float = clampf(1.0 - ctx.food_days / maxf(ctx.desperation_entry_threshold, 0.01), 0.0, 1.0)
 			# ③贏率 ＝ 既有 capability 接地（無牙 ⇒ 0 ⇒ 整項 0：送死沒人幹）

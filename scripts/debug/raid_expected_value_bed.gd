@@ -69,18 +69,23 @@ func _run() -> void:
 	var u_raid: float = DecisionTerms.eval("loot_drive", c3, "掠奪")
 	var u_atk: float = DecisionTerms.eval("attack_opportunity", c3, "攻擊")
 	var ratio: float = u_raid / maxf(u_atk, 0.000001)
-	print("★格3 同一目標：掠奪 util=%.4f｜攻擊 util=%.4f｜比值=%.3f（LOOT_RATE=%.2f）" % [
+	print("★格3 同一目標：掠奪 util=%.6f｜攻擊 util=%.6f｜比值=%.4f（LOOT_RATE=%.2f）" % [
 		u_raid, u_atk, ratio, NpcCombatSystem.LOOT_RATE])
-	# ★★★【拆成兩個可判的半】（systems 2026-09-16）：
-	#   ★原本我寫成一個 `0.1 < ratio < 1.0` —— 而那個上界 **1.0 是我手猜的**：
-	#     它把【同量級】與【方向】綁在同一個斷言裡 ⇒ ★★紅了的時候**分不出是哪一半破**。
-	#   ⇒ ①**同量級** ∈ [0.1, 10]（★兩把不同的秤會差 10 倍以上，這是尺度題）
-	#   ⇒ ②**方向**：掠奪 < 攻擊（★搶一票只拿走 `LOOT_RATE` 的一部分，打下來拿的是整份）
-	_ok(ratio >= 0.1 and ratio <= 10.0,
-		"格3-① **同量級**：比值 %.3f ∈ [0.1, 10]（★出界 ⇒ 兩式還在兩把秤上，本票沒做到事）" % ratio)
-	_ok(ratio < 1.0,
-		"格3-② **方向**：掠奪 %.4f < 攻擊 %.4f（★反過來 ⇒ 搶比打還划算，而結算端 `LOOT_RATE`=%.2f 說不該）" % [
-			u_raid, u_atk, NpcCombatSystem.LOOT_RATE])
+	# ★★★【判準第二次改寫，而兩次都是 systems 自己的判準被推翻】（2026-09-16）：
+	#   ★v1：`0.1 < ratio < 1.0` —— 上界 1.0 是我手猜的，且把兩件事綁在一個斷言裡。
+	#   ★★v2：拆成「①同量級 ②方向 掠奪 < 攻擊」，理由是「搶只拿一部分、打下來拿整份」。
+	#   ★★★**而那個理由本身是錯的**（systems 查 `npc_combat_system._loot_resources`）：
+	#     **世界的結算逐字是【任何戰鬥勝方都只拿 `effective_loot` 比例】** ——
+	#     ★殲滅與潰逃控地**共用同一個函式** ⇒ **攻擊贏了也只拿 0.3–0.51 倍。**
+	#   ⇒ ★★所以攻擊的 loot 項也乘了 `effective_loot_rate` ⇒ **兩邊的即時收穫同源同尺**
+	#   ⇒ ★★★**v3 判準：對同一目標、同人格、`need` 都為 0 ⇒ 兩者【逐字相等】。**
+	#     ★會紅的那一半：**還有差** ⇒ **還有一條沒有同源的線** ⇒ 回報 systems。
+	#     ★★（而「打下來那塊地會持續產出」不在這一項裡：它由**佔村** option 的 `occupy_drive`
+	#       走 `DiscountedFlow` 表達 ⇒ 攻擊 option 再算一次就是**算兩次**。）
+	_ok(absf(u_raid - u_atk) < 0.0005,
+		"格3 **逐字相等**：掠奪 %.6f vs 攻擊 %.6f（差 %.6f）⇒ ★兩邊的 loot 項同源同尺" % [
+			u_raid, u_atk, absf(u_raid - u_atk)]
+		+ "｜★★★還有差 ⇒ **還有一條沒同源的線，回報 systems**")
 	print("   ★★而 `odds` 兩邊共用同一個【盲】的贏率（不讀對手）⇒ **這一格只證明尺相同，不證明值對**。")
 
 	# ── 格4：無牙 ⇒ util ≈ 0 ──
