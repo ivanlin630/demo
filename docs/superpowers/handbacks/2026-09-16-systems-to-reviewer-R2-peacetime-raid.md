@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 尾部人格在常態會搶 ｜ **R² 設計審**
 topic: ★spec：`docs/superpowers/specs/2026-09-16-peacetime-raid-tail-personality-HOW.md`｜★★**兩件都接在既有磚上**：①`DiscountedFlow.flow_weight("wealth") = 0.5 + 貪婪`（`discounted_flow.gd:35`）②新增 `subjective_cost`，而**它的值來自 belief 戰力比，不是常數**｜★★★**我最想被打的是 §2**：我**新增了一個成本項**，而這張秤上本來沒有成本 —— **加一個乘數是最容易的事，也是最容易變成 crank 的事**｜★**我自己招的**：「道德折價」那一半我沒接（沒有可讀來源），**而我把「沒做」寫在 spec 裡**
 ---
