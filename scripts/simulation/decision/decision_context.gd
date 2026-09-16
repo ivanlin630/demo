@@ -80,6 +80,12 @@ var has_weak_prey: bool = false
 var weak_prey_id: int = -1
 var weak_prey_richness_est: float = 0.0
 var weak_prey_priced: bool = false
+# ★★★【報復風險】（常態掠奪票 §2）：`ThreatAssessment._power_ratio(state, team, other)`
+#   ★**直接呼那一支，不另起一份** —— 它裡面**已經修過「技能維不對稱」那個舊 bug**
+#     （`threat_assessment.gd:95-98`）⇒ ★★**另寫一份就是重演它自己文檔裡記過的錯。**
+#   ★★★而它**在 `gather` 算**：`DecisionTerms.eval` 只拿得到 `ctx`，拿不到 `state`／`team`。
+var weak_prey_power_ratio: float = 0.0
+var attack_target_power_ratio: float = 0.0
 # capability grounding（藍圖 tag-soft-ruling 裁2）：self 有效武裝比（armed / pop）。
 # attack/loot eval 讀此→「打得動嗎」的世界事實（無牙商隊 attack eval 趨 0=送死沒人幹，非被禁）。
 # Task2 於 gather 填值（_calc_own_armed / pop）；terms.gd loot_drive/_intent_fit 疊 capability_factor。
@@ -556,6 +562,11 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		else:
 			c.weak_prey_richness_est = 0.0   # ★誠實的 0：連桶號都沒有
 			if Probe.enabled: Probe.bump("raid.thin.no_scale")
+		# ★報復風險（常態掠奪票 §2）：**打得過但會反咬的鄰居，成本高；弱到不會回頭的，成本低**
+		#   ★直接呼 `ThreatAssessment._power_ratio`（belief-based、無估 fallback ＝ 視對方等強）
+		var _wt: TeamData = state.teams.get(_prey)
+		if _wt != null:
+			c.weak_prey_power_ratio = ThreatAssessment._power_ratio(state, team, _wt)
 	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
 	# 無牙商隊 armed≈0 → ratio≈0 → loot_drive/intent_fit capability_factor 壓平（送死沒人幹，非被禁）。
 	c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(float(team.population), 1.0)
@@ -1003,6 +1014,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.attack_loot_est = FactionAISystem._belief_richness(_abel)   # ★tier 分層天然在它裡面（R² §⑤）
 		c.attack_belief_tier = int(_abel.get("tier", -1))             # ★驗收⑦：分桶看「知道得多的挑得更準」
 		c.attack_win_odds = clampf(c.self_armed_ratio / DecisionTerms.VIABLE_ARMED_RATIO, 0.0, 1.0)
+		# ★報復風險（同掠奪側；★兩邊一起接，否則又把它們拆回兩把秤）
+		var _at: TeamData = state.teams.get(c.attack_target_id)
+		if _at != null:
+			c.attack_target_power_ratio = ThreatAssessment._power_ratio(state, team, _at)
 		# ★★★【第①種「餓而有牙卻沒搶」：**視野裡沒有目標**】（systems 2026-09-15）
 		#   ★而它**在因子樣本裡永遠不會出現** —— 因子 tap 只在【有目標】時 fire
 		#   ⇒ ★★**不在這裡單獨記，那一格就永遠是 0**（而 0 會被讀成「沒有這種情況」）。

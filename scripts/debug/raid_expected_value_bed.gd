@@ -171,7 +171,7 @@ static func _dsp_seed(t: TeamData, n: int) -> void:
 	var cur: int = AnonCohort.total(t.anon_cohorts)
 	if want - cur > 0: AnonCohort.add(t.anon_cohorts, "平民", "healthy", want - cur)
 
-func _dsp_world(cruel: float, prey_food: float, raider_food: float, farmable: bool = true) -> Dictionary:
+func _dsp_world(fierce: float, prey_food: float, raider_food: float, farmable: bool = true) -> Dictionary:
 	var state := WorldState.new(); state.world = WorldData.new()
 	for p in [Vector2i(4, 4), Vector2i(5, 4), Vector2i(3, 4)]:
 		var tl := HexTileData.new()
@@ -184,7 +184,12 @@ func _dsp_world(cruel: float, prey_food: float, raider_food: float, farmable: bo
 	_dsp_seed(prey, 3); prey.faction_id = -1; prey.resources = {"food": prey_food}
 	state.teams[9] = prey
 	var ldr := PersonData.new(); ldr.id = 1000; ldr.team_id = 1
-	ldr.values = {"好戰": 0.5, "貪婪": 0.5, "野心": 0.5, "慎重": 0.5, "殘忍": cruel}
+	# ★★★【兇者的軸換了】（blueprint 裁 2026-09-16）：**想不想搶 ＝ 好戰與貪財的事**
+	#   ⇒ ★這一格的「兇者」從 **殘忍 .9** 改成 **好戰 .9／貪婪 .9**（動機軸）
+	#   ⇒ ★★**而那正是我今天一直在講的那個病，這次落在我自己的驗收格上**：
+	#     **軸換了之後，寫著舊軸的那一格【當場失去鑑別力】** —— 實測它紅了（首選變回乞食）。
+	#   ★★★**殘忍不在這裡** —— 它只留在 `take` 的 `effective_loot_rate`（物理），見格7。
+	ldr.values = {"好戰": fierce, "貪婪": fierce, "野心": 0.5, "慎重": 0.5, "殘忍": 0.5}
 	state.persons[1000] = ldr
 	var t1 := TeamData.new(); t1.team_id = 1; t1.leader_id = 1000; t1.tile_pos = Vector2i(4, 4)
 	_dsp_seed(t1, 10); t1.tags = ["軍隊"]; t1.current_task = TeamData.TASK_IDLE
@@ -208,29 +213,38 @@ func _dsp_world(cruel: float, prey_food: float, raider_food: float, farmable: bo
 func _run_desperation_cell() -> void:
 	# ★鄰居「合理富裕」＝ `TARGET_PER_POP.food(10) × pop 3 × 8` ＝ 240（★**八倍存量，不是二十七倍**）
 	var _rich: float = float(TradeValuation.TARGET_PER_POP.get("food", 10.0)) * 3.0 * 8.0
-	var mid: Dictionary = _dsp_world(0.5, _rich, 0.0)
-	var cruel: Dictionary = _dsp_world(0.9, _rich, 0.0)
-	print("★格8 絕境（food_days=%.2f < 絕境線 %.2f）｜鄰居 pop3 food=%.0f" % [
+	# ★★★【具名條件：腳下沒有可耕地】（systems 裁 2026-09-16）——
+	#   ★**「餓了不搶」與「餓了站在田上所以先種田」在【掠奪沒贏】這一句上長得一模一樣**
+	#   ⇒ ★★所以「有沒有可耕地」必須是**具名條件**，不是背景；有耕地那一版留在**診斷欄**。
+	var mid: Dictionary = _dsp_world(0.5, _rich, 0.0, false)
+	var cruel: Dictionary = _dsp_world(0.9, _rich, 0.0, false)
+	print("★格8 絕境（food_days=%.2f < 絕境線 %.2f）｜鄰居 pop3 food=%.0f｜**腳下無可耕地**" % [
 		float(mid["food_days"]), float(mid["thresh"]), _rich])
-	print("   殘忍.5：%s" % mid["table"])
-	print("   殘忍.9：%s" % cruel["table"])
+	print("   中庸(好戰/貪婪 .5)：%s" % mid["table"])
+	print("   兇者(好戰/貪婪 .9)：%s" % cruel["table"])
 	_ok(float(mid["food_days"]) < float(mid["thresh"]),
 		"格8-前提 這個 fixture **真的在絕境裡**（★否則這一格問的不是絕境）")
-	_ok(String(mid["top"]) == "掠奪",
-		"格8-a ★**中等殘忍（.5）在絕境【搶得起來】**（實際首選＝%s，掠奪 %.4f vs 首選 %.4f）" % [
-			String(mid["top"]), float(mid["loot"]), float(mid["top_u"])]
-		+ "｜★★★若這格紅 ⇒ **`person` 變成了 GATE 而不是 MODULATE** ——"
-		+ "「任何人格都不該慫到餓死也不動」⇒ **回報 systems，不要自己改 `person`**")
-	_ok(String(cruel["top"]) == "掠奪",
-		"格8-b ★**成對**：兇者（殘忍 .9）同情境也搶（實際首選＝%s）" % String(cruel["top"]))
+	# ★★★格8-a【非壓死】—— **這一條是憲法那一半**：
+	#   blueprint 要守的是「**不得慫到餓死也不動**」，**不是「必須選掠奪」**（後者是風格）。
+	#   ⇒ ★**所以判準是「首選落在求生類」**，而**不是**「首選＝掠奪」。
+	#   ★★而舊版把兩者綁在一句裡，於是它答的是風格、而我以為它在守憲法。
+	var _surv_kinds: Array = ["乞食", "掠奪", "併入", "覓食", "買糧", "遷移找糧", "投靠"]
+	_ok(String(mid["top"]) in _surv_kinds,
+		"格8-a ★**非壓死**：絕境＋中庸人格 ⇒ 首選落在**求生類**（實際＝%s）" % String(mid["top"])
+		+ "｜★★★紅了 ⇒ **人格把一個餓死邊緣的人壓到【不動】** ⇒ 回報 systems，不要自己改 `person`")
+	_ok(not (String(mid["top"]) in ["紮營", "建設", "生產"]),
+		"格8-a2 ★**成對的另一半**：首選**不是**紮營／建設／生產（實際＝%s）" % String(mid["top"]))
+	# ★★格8-b【人格有方向】—— 證明 `person` 在【調製】而不是在【開關】
 	_ok(float(cruel["loot"]) > float(mid["loot"]),
-		"格8-c 兇的**贏更多**（%.4f > %.4f）★否則人格在絕境下完全沒作用" % [
+		"格8-b 兇者的掠奪 util ＞ 中庸人格的（%.4f > %.4f）★這一格證明 `person` 是調製器" % [
 			float(cruel["loot"]), float(mid["loot"])])
-	# ★★★【診斷欄，不入判】：把「腳下有沒有可耕地」拆開 ——
-	#   ★上面那一格的 fixture **給了餓隊腳下一塊可耕地** ⇒ 紮營天然有力
-	#   ⇒ ★★「餓了不搶」與「餓了站在田上所以先種田」是兩個完全不同的答案，
-	#     ★★★而它們在「掠奪沒贏」這一句上長得一模一樣。
-	var mid_nf: Dictionary = _dsp_world(0.5, _rich, 0.0, false)
-	var cruel_nf: Dictionary = _dsp_world(0.9, _rich, 0.0, false)
-	print("   ★診斷（腳下**無**可耕地；不入判）殘忍.5：%s" % mid_nf["table"])
-	print("   ★診斷（腳下**無**可耕地；不入判）殘忍.9：%s" % cruel_nf["table"])
+	# ★★★格8-c【兇者會搶】—— 實測 2.7204 vs 乞食 2.6516，**不是刀鋒**
+	_ok(String(cruel["top"]) == "掠奪",
+		"格8-c 兇者（好戰/貪婪 .9）＋無耕地絕境 ⇒ **首選＝掠奪**（實際＝%s）" % String(cruel["top"]))
+	# ★★★【診斷欄，不入判】：腳下**有**可耕地 —— ★它是**解釋變數**，不是判準。
+	#   ★★而「中等殘忍選乞食還是掠奪」也**不入判**：實測只差 1.2% ＝ **雜訊級，寫在刀鋒上的格會翻面**。
+	var mid_f: Dictionary = _dsp_world(0.5, _rich, 0.0, true)
+	var cruel_f: Dictionary = _dsp_world(0.9, _rich, 0.0, true)
+	print("   ★診斷（腳下**有**可耕地；不入判）中庸(好戰/貪婪 .5)：%s" % mid_f["table"])
+	print("   ★診斷（腳下**有**可耕地；不入判）兇者(好戰/貪婪 .9)：%s" % cruel_f["table"])
+	print("      ★★兩個人格在有耕地時都選**紮營** —— **而那不是「人格壓住了它」，是【它站在田上】。**")
