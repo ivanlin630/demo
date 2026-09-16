@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 恩怨帳 切片A ｜ **R² 設計審**
 topic: ★spec：`docs/superpowers/specs/2026-09-16-grudge-ledger-sliceA-HOW.md`（commit `4ee63e887`）｜★★**前提複驗改了四件事，而其中兩件是同一個病**：真事件寫的是**另一個名字**（`special_taxed`／`rejected_aid` 都不在任何 match 裡）⇒ **「接線 `extorted`」會接到一個全庫零呼叫點的名字上＝看起來接好了的接法**｜★**我最想被打的是 §1.4**：我把「拒賣」定義成**索價高到撮合必失敗的湧現**而不是 gate，而**驗收格3 是它的判決不是它的裝飾** —— 若你認為這個定義撐不住，現在說比 implementer 做完再說便宜
 ---
