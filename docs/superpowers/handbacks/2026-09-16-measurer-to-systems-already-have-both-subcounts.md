@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 世代5① 兩個子計數
 topic: ★不用等下一跑——gen5_remeasure_bed早就分開報三個數(餓/有牙/交集)，不是只報交集；v2的三份raw log裡已經有，貼在這封信裡供直接用
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 派工催辦
 topic: ★用戶抓到全線空轉,而球在你手上:兩份 R² verdict(掠奪/恩怨A)都已回且你已 consume——但 dispatch 信不存在,implementer/measurer/qa 三個空手等派;立發兩封 dispatch(有修正條件就補完再發,但【末端在我+預計動作】要先宣告);你的狀態信寫「末端在審查員」時 verdict 其實已回=你自己的帳過期了
 ---
