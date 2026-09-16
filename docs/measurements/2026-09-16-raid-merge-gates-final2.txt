@@ -15,3 +15,26 @@
 
 [godot.ps1] child exit=1
 [MERGE-GATES] ✓ ki-anchor （2s）
+[MERGE-GATES] ✓ mailbox-integrity （112s）
+[MERGE-GATES] ✓ cherrypick-fidelity （6s）
+[MERGE-GATES] ✓ ki-status （29s）
+[MERGE-GATES] ✓ single-writer （2s）
+[MERGE-GATES] ✓ tree-div （1s）
+[MERGE-GATES] ✓ headless （50s）
+[MERGE-GATES] ✓ cross-run-static （24s）
+[MERGE-GATES] ✓ own-camp-link （5s）
+[MERGE-GATES] ✓ zero-caller （6s）
+[MERGE-GATES] ✓ exam-freeze （0s）
+[MERGE-GATES] ✓ print-join （0s）
+[MERGE-GATES] ✓ belief-freshness-invariant （5s）
+[MERGE-GATES] ✓ unified-commerce （5s）
+[MERGE-GATES] ✗ defer-open （14s）—— 延後裁定:解除條件已達成卻還躺著就紅(★散文裁定不受追蹤=會被遺忘;血證:零LOD排最後躺16天)
+    裁定：★世代5重量卷正例格（餓＋有牙 ⇒ 攻擊贏 argmax）3 seed×10 天＝**0 次**，而它是【結構造成的 0】：同一批數據裡掠奪是不打折的常數、攻擊是三層 [0,1] 連乘 ⇒ 餓且有牙的隊會去【搶】不會去【打】｜★★根因＝**我把票的單位當成問題的單位**（票在談攻擊，而 WHAT 問的是「絕境者會不會動手」⇒ 單位是【暴力動詞】不是【攻擊】）｜★★★訂正後的問法＝**餓且有牙的隊會不會動手（搶或打任一）**；副問＝【餓】與【有牙】各自的頻率（0 可以是兩條件很少同時成立，也可以是成立了但不動手，而這兩個在總數上長得一樣）
+    條件：掠奪走期望價值票 merge 後
+    ⇒ ★做它，或重新裁定並更新 defer_until —— ★★不要把 met_check 改鬆
+[DEFER-GATE] 延後裁定 54 筆
+[DEFER-GATE] FAIL
+[MERGE-GATES] ✓ defer-phrase （1s）
+[MERGE-GATES] ✓ modulo-phase （0s）
+[MERGE-GATES] ✓ ledger-drop-visible （5s）
+[MERGE-GATES] ✓ lod-split （2s）
