@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 絕境暴力正例格 ｜ **DISPATCH（到期工單，掠奪票已 merge）**
 topic: ★**它不是新工作，是一張【到期的工單】**：延後行 `desperation-violence-cell-remeasure` 的解除條件是「掠奪票 merge 後」，**而我剛 merge 了**（main `7b07e3800`）⇒ **行已收，工單兌現**｜★★★**而問法【改了】**：舊版問「餓＋有牙 ⇒ **攻擊**贏 argmax」**3 seed × 10 天 ＝ 0 次**，★**那個 0 是結構造成的**（掠奪當時是不打折的常數，攻擊是三層連乘）⇒ **新問法：餓且有牙的隊，會不會【動手】（搶或打任一）**｜★**標本在**：`docs/measurements/2026-09-16-gen5-remeasure-v3-seed{1337,2024,777}-raw.txt`（★**樹＝`2ce8f36a4` 之後，與 v2 不同棵 ⇒ 不得與 v2 加總**）
 ---

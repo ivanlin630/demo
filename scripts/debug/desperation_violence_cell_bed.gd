@@ -1,0 +1,109 @@
+extends SceneTree
+# @bed-kind: acceptance
+# slice: 絕境暴力正例格——DISPATCH到期工單(掠奪票merge後兌現，desperation-violence-cell-remeasure)
+#
+# ★問法改了(systems 2026-09-17)：舊版問「餓+有牙⇒攻擊贏argmax」3seed×10天=0次，
+#   那個0是結構造成的(掠奪當時是不打折的常數，攻擊是三層連乘)——追錯格。
+#   新問法：★餓且有牙的隊，會不會【動手】(搶=TASK_LOOT或打=TASK_ATTACK，任一)？
+# ★母體=餓(food_days<DESPERATION_DAYS)且有牙(armed>0)的隊天數；報：動手次數/母體。
+# ★副問(便宜,順跑)：【餓】與【有牙】各自的頻率(不是交集)——0可以是「兩條件很少同時
+#   成立」也可以是「成立了但不動手」，兩者在總數上長得一樣，缺這兩個數分不開。
+# ★★★這一輪與上一輪(v2/v3 gen5_remeasure_bed)不可加總——掠奪估值整個換過，
+#   舊的0次是被推翻的那個世界的讀數，不是這一輪的基準；本床是全新一輪，不引舊數字做差。
+# ★不需要呼叫DecisionContext.gather/rank_scored_ctx——「動手」只讀team.current_task，
+#   比對象是TASK_LOOT("掠奪")/TASK_ATTACK("攻擊")兩個task常數(spec原話「搶或打任一」)，
+#   零額外引擎呼叫，逐日採樣(比之前每7天一次的頻率高，因為這裡便宜)。
+#
+# env：BED_DAYS(預設10)／BED_SEED(預設1337)／BED_CONFIG(預設warring_states)
+# ★機器紀律(systems今天訂)：開跑前看FreeMB、一次跑一個、交件帶[BedSelfCheck] HEAD=<sha>。
+
+func _initialize() -> void:
+	_run(); quit()
+
+# ★03b_measurer.md判準⑩：比對兩份輸出前先證明它們是同一棵樹。
+func _bed_self_check_tree() -> void:
+	var out: Array = []
+	OS.execute("git", ["rev-parse", "--short", "HEAD"], out)
+	var sha: String = (out[0] as String).strip_edges() if not out.is_empty() else "UNKNOWN"
+	out.clear()
+	OS.execute("git", ["status", "--porcelain", "--", "scripts/simulation/"], out)
+	var dirty_lines: int = 0
+	if not out.is_empty():
+		for l in (out[0] as String).split("\n"):
+			if l.strip_edges() != "": dirty_lines += 1
+	print("[BedSelfCheck] HEAD=%s scripts/simulation-dirty=%d（%s）" % [
+		sha, dirty_lines, "clean" if dirty_lines == 0 else "★dirty!跟其他log比對前先確認同commit"])
+
+func _run() -> void:
+	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 10
+	var seed_val: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
+	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "warring_states"
+	print("=== desperation_violence_cell_bed: config=%s days=%d seed=%d ===" % [cfg, days, seed_val])
+	_bed_self_check_tree()
+	print("[HOST] start proc_static_MB=%.0f（★這不是系統FreeMB，是進程自身靜態記憶體——真FreeMB跑前另查）" % (float(OS.get_static_memory_usage()) / 1048576.0))
+
+	seed(seed_val)
+	Probe.reset(); Probe.arm()
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
+	var runner := SimRunner.new()
+	var no_player := Vector2i(-1, -1)
+	var ticks: int = days * WorldState.TICKS_PER_DAY
+
+	var n_sampled: int = 0
+	var n_hungry: int = 0
+	var n_armed: int = 0
+	var n_hungry_and_armed: int = 0
+	var n_violence: int = 0
+	var n_loot: int = 0
+	var n_attack: int = 0
+	var violence_samples: Array = []   # ★逐筆存最先撞到的幾筆(cap小,便宜)，讓「動手」讀出來像故事
+
+	for tick in range(ticks):
+		runner.advance_tick(st, no_player)
+		if (tick + 1) % WorldState.TICKS_PER_DAY == 0:
+			var d: int = (tick + 1) / WorldState.TICKS_PER_DAY
+			for tid in st.teams:
+				var team: TeamData = st.teams[tid]
+				if team == null or team.leader_id == -1: continue
+				var pop: int = team.population
+				if pop <= 0: continue
+				var need: float = maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+				var fd: float = ResourceSystem.effective_food(st, team) / need
+				var armed: float = FactionAISystem.new()._calc_own_armed(st, team)
+				n_sampled += 1
+				var is_hungry: bool = fd < DecisionTerms.DESPERATION_DAYS
+				var is_armed: bool = armed > 0.0
+				if is_hungry: n_hungry += 1
+				if is_armed: n_armed += 1
+				if is_hungry and is_armed:
+					n_hungry_and_armed += 1
+					var is_loot: bool = team.current_task == TeamData.TASK_LOOT
+					var is_atk: bool = team.current_task == TeamData.TASK_ATTACK
+					if is_loot: n_loot += 1
+					if is_atk: n_attack += 1
+					if is_loot or is_atk:
+						n_violence += 1
+						if violence_samples.size() < 30:
+							violence_samples.append("day=%d team=%d food_days=%.2f armed=%.2f task=%s" % [
+								d, team.team_id, fd, armed, team.current_task])
+			print("[WINDOW] day=%d/%d status=running" % [d, days])
+			print("[DAILY] day=%d 累計：餓且有牙=%d 動手=%d(掠奪%d/攻擊%d)" % [
+				d, n_hungry_and_armed, n_violence, n_loot, n_attack])
+
+	print("[HOST] end proc_static_MB=%.0f" % (float(OS.get_static_memory_usage()) / 1048576.0))
+	print("")
+	print("=== 結果(seed=%d，窗=%d天) ===" % [seed_val, days])
+	print("★母體/定義：逐team-day採樣總數=%d｜餓(food_days<%.2f)=%d｜有牙(armed>0)=%d｜★餓且有牙(本題母體)=%d" % [
+		n_sampled, DecisionTerms.DESPERATION_DAYS, n_hungry, n_armed, n_hungry_and_armed])
+	print("★★主問：餓且有牙的隊，會不會動手(搶TASK_LOOT或打TASK_ATTACK，任一)？")
+	if n_hungry_and_armed == 0:
+		print("   ★★★母體=0⇒本題【不可判】——不是綠也不是紅，是這個世界(此窗此seed)裡沒有『餓且有牙』的隊")
+	else:
+		print("   動手次數=%d／母體%d ＝ %.1f%%（掠奪%d次｜攻擊%d次）" % [
+			n_violence, n_hungry_and_armed, 100.0 * float(n_violence) / float(n_hungry_and_armed), n_loot, n_attack])
+	print("   逐筆(前%d筆)：" % mini(30, violence_samples.size()))
+	for s in violence_samples:
+		print("      %s" % s)
+	print("")
+	print("[WINDOW] day=%d/%d status=completed reason=window_reached" % [days, days])
+	print("=== desperation_violence_cell_bed DONE (seed=%d) ===" % seed_val)
