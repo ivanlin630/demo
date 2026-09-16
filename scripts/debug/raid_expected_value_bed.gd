@@ -172,7 +172,13 @@ static func _dsp_seed(t: TeamData, n: int) -> void:
 	if want - cur > 0: AnonCohort.add(t.anon_cohorts, "平民", "healthy", want - cur)
 
 func _dsp_world(fierce: float, prey_food: float, raider_food: float, farmable: bool = true) -> Dictionary:
-	var state := WorldState.new(); state.world = WorldData.new()
+	# ★★★【走 `MeasureBedHelper.arm_and_new()`，不自己 `WorldState.new()`】（bed-arm 閘）：
+	#   ★那支閘的母體就是 `WorldState.new()` 的呼叫檔；而**手工組世界的正規入口是 `arm_and_new`**
+	#     （另一支 `arm_and_setup` 走 GameSetup，本格用不到 —— 我們要的是三格小世界不是整局）。
+	#   ★★**而白名單不是出路**：那份檔的檔頭逐字寫著「**新增床【不得】加進來**」
+	#     ⇒ ★★★**閘的訊息與白名單的檔頭在這一點上不一致，而我照【比較嚴的那一份】做。**
+	#   ★順序仍然是 arm → setup（`arm_and_new` 內建），所以本格原本就沒有盲點 —— 換入口是為了**可被閘看見**。
+	var state := MeasureBedHelper.arm_and_new()
 	for p in [Vector2i(4, 4), Vector2i(5, 4), Vector2i(3, 4)]:
 		var tl := HexTileData.new()
 		tl.tile_id = p.x * 1000 + p.y; tl.tile_pos = p; tl.terrain = "plains"
