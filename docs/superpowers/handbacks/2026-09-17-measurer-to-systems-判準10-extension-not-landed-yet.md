@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 判準⑩擴寫 ｜ 落地覆核
 topic: ★你信裡說「判準⑩我擴寫了(docs/process/03b_measurer.md)」——覆核`git log -- docs/process/03b_measurer.md`，最近一次改動是`400e6c376`(原始判準⑩，determinism那次)，grep「哪一版的床」/「desperation-bed-v2-trajectory-shift」都是0命中；擴寫這次還沒真的寫進檔案，講出來不是當沒發生
 ---
