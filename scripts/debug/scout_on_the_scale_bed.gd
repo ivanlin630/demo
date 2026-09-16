@@ -594,8 +594,12 @@ func _run() -> void:
 	var h_4b: int = int(Probe.counts.get("arbiter.deny.優先序不足.4b", 0))
 	var h_tot: int = int(Probe.counts.get("arbiter.deny.優先序不足", 0))
 	print("   全 option：(4a) 更高 ＝ %d｜(4b) 同級或更低 ＝ %d｜母體（優先序不足）＝ %d" % [h_4a, h_4b, h_tot])
-	_ok(h_4a + h_4b == h_tot,
-		"§H-a 對帳：(4a)+(4b) ＝ %d ＝ 母體 %d（★不等 ⇒ 有一條路沒分到桶）" % [h_4a + h_4b, h_tot])
+	# ★★★這一格原本是 `(4a)+(4b) == 母體` —— ★而 (4c) 拆出來之後它就**過期了**：
+	#   ★★**判準沒跟著分類一起改，就會變成一支【因為我們自己改了定義】而紅的閘**。
+	var h_4c: int = int(Probe.counts.get("arbiter.deny.優先序不足.4c", 0))
+	print("   三分：(4a) %d｜(4c) 同層 %d｜(4b) 嚴格更低 %d" % [h_4a, h_4c, h_4b])
+	_ok(h_4a + h_4b + h_4c == h_tot,
+		"§H-a 對帳：(4a)+(4b)+(4c) ＝ %d ＝ 母體 %d（★不等 ⇒ 有一條路沒分到桶）" % [h_4a + h_4b + h_4c, h_tot])
 	for _o3 in ["偵查", "攻擊"]:
 		print("   %s：(4a) %d｜(4b) %d" % [_o3,
 			int(Probe.counts.get("arbiter.deny.優先序不足.opt." + _o3 + ".4a", 0)),
@@ -608,6 +612,74 @@ func _run() -> void:
 	prio_rows2.sort()
 	print("   偵查 逐對 priority（新_vs_現任）：%s" % (" ".join(prio_rows2) if not prio_rows2.is_empty() else "（空）"))
 	print("   ★★而本床**不對 (4b) 下判決** —— 它是下一張票的輸入：要不要擠掉現任那個 task，是設計問題。")
+
+	# ══════════ §I (4b)/(4c) 普查：**是哪些 option、擋它們的是誰**（systems 2026-09-16）══════════
+	# ★★★三分不是二分：**(4a) 更高**（規則）／**(4c) 同層**（規則：A1a 白名單）／**(4b) 嚴格更低**（★病）
+	#   ⇒ ★舊判準的「否則」把【＝】與【＜】吐進同一個桶 ⇒ 16 筆 `80_vs_80` 全被報成手不聽腦。
+	# ★★★同層那一格的真問題：**新的那個是不是比現任更該做？**
+	#   ★priority 答不出（兩邊一樣）⇒ 答得出的是 util（存在 `team.task_util`，設上那一刻寫的）。
+	#   ★★**`unknown` 自成一格**：「沒得比」與「比了而新的較低」是兩個答案。
+	print("")
+	var uc: Array = []
+	for _u in ["new_higher", "new_lower", "equal", "unknown"]:
+		uc.append("%s=%d" % [_u, int(Probe.counts.get("4c.utilcmp." + _u, 0))])
+	print("★§I-util 同層被擋時【新的與現任的 util 比較】：%s" % " ".join(uc))
+	# ★★★兩群的 util 差分佈（遲滞要從這裡推，不手填）。
+	for _cmp in ["new_higher", "new_lower"]:
+		var drows: Array = []
+		for k in Probe.counts:
+			var ks: String = String(k)
+			if ks.begins_with("4c.diff." + _cmp + "."):
+				drows.append("%s×%d" % [ks.replace("4c.diff." + _cmp + ".", ""), int(Probe.counts[k])])
+		drows.sort()
+		print("   [%s] util 差分佈：%s" % [_cmp, (" ".join(drows) if not drows.is_empty() else "（無）")])
+	# ★★★defer `arbiter-same-tier-util-not-whitelist` 的區別母體（systems 2026-09-16 重開）：
+	#   ★條件是**擋錯且優勢 ≥ 0.1** —— ★★而上一輪的 3 筆是 **< 0.005 的平手**
+	#   ⇒ ★★★**這一格是 0 不是「沒事」，是「那張票目前沒有母體」** —— 兩者要分開讀。
+	print("   ★defer 條件格（擋錯且優勢 ≥ 0.1）：%d 筆%s" % [
+		int(Probe.counts.get("4c.wrongblock_ge01", 0)),
+		"（★0 ⇒ 那張票目前沒有母體，不是「修好了」）" if int(Probe.counts.get("4c.wrongblock_ge01", 0)) == 0 else ""])
+	print("   ★★★**兩群若重疊 ⇒ 一個純量遲滞分不開它們** —— 那時要回報，不是硬挑一個數。")
+	print("   ★`new_higher` > 0 ⇒ **同層白名單擋住了一次【更該做的事】** —— ★★而本床不對它下判決（下一張票）。")
+
+	print("")
+	print("★§I 優先序不足三分：(4a) %d｜(4c) 同層 %d｜**(4b) 嚴格更低 %d**" % [
+		int(Probe.counts.get("arbiter.deny.優先序不足.4a", 0)),
+		int(Probe.counts.get("arbiter.deny.優先序不足.4c", 0)),
+		int(Probe.counts.get("arbiter.deny.優先序不足.4b", 0))])
+	for _cls in ["4b", "4c"]:
+		var rows_o: Array = []
+		var rows_h: Array = []
+		var rows_p: Array = []
+		var s_o: int = 0
+		for k in Probe.counts:
+			var ks: String = String(k)
+			if ks.begins_with(_cls + ".opt."):
+				rows_o.append("%s=%d" % [ks.replace(_cls + ".opt.", ""), int(Probe.counts[k])])
+				s_o += int(Probe.counts[k])
+			elif ks.begins_with(_cls + ".holder."):
+				rows_h.append("%s=%d" % [ks.replace(_cls + ".holder.", ""), int(Probe.counts[k])])
+			elif ks.begins_with(_cls + ".pair."):
+				rows_p.append("%s=%d" % [ks.replace(_cls + ".pair.", ""), int(Probe.counts[k])])
+		rows_o.sort(); rows_h.sort(); rows_p.sort()
+		var moth: int = int(Probe.counts.get("arbiter.deny.優先序不足." + _cls, 0))
+		print("   [%s] 逐 option：%s" % [_cls, (" ".join(rows_o) if not rows_o.is_empty() else "（空）")])
+		print("   [%s] 擋它的現任 task：%s" % [_cls, (" ".join(rows_h) if not rows_h.is_empty() else "（空）")])
+		for _r in rows_p:
+			print("      [%s] %s" % [_cls, _r])
+		# ★指不出名字的那幾筆：至少要說得出它是哪個站點發的
+		var rows_u: Array = []
+		for k2 in Probe.counts:
+			var ks2: String = String(k2)
+			if ks2.begins_with(_cls + ".unnamed.by."):
+				rows_u.append("%s=%d" % [ks2.replace(_cls + ".unnamed.by.", ""), int(Probe.counts[k2])])
+		rows_u.sort()
+		print("   [%s] ★指不出 option 的（依發起站點）：%s｜逐 option 加總 %d ＋ 無名 %d vs 母體 %d" % [
+			_cls, (" ".join(rows_u) if not rows_u.is_empty() else "（無）"), s_o,
+			moth - s_o, moth])
+		_ok(s_o + (moth - s_o) == moth,
+			"§I-%s 對帳：具名 %d ＋ 無名 %d ＝ 母體 %d（★而【無名】不是【沒發生】，它現在至少報得出發起站點）" % [
+				_cls, s_o, moth - s_o, moth])
 
 	# ══════════ §G 走廊拆除四格（票 conquest-scout-corridor，2026-09-16）══════════
 	# ★spec 要四個數：①走廊歸零 ②偵查總量不塌 ③偵查勝率不爆 ④真的被設上。

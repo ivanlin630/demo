@@ -3711,7 +3711,7 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		# ★★★批次一之④：把【被擋的是哪一個 option】帶進 arbiter（★只餵計數，不進判斷）——
 		#   ★這裡是【引擎統一路唯一的 try_set】⇒ 一個站點就覆蓋所有 option，
 		#   ★★而不必動 `_source`（它會寫進 `task_reason` 並與 `ENGINE_SOURCES` 比對）。
-		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "unified", opt)
+		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "unified", opt, float(e.get("u", -1.0)))
 		# ★★★【偵查的來源分流】（systems 裁 2026-09-15）：另一條路是 `_commit_conquest_attack` 的走廊
 		#   （`g3.scout_dispatch`，`task_reason == "scout"`）—— ★而它**也會讓偵查出現**，
 		#   ★★早期窗正是 `confident_enough` 最容易為假的時候
@@ -4202,7 +4202,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 					HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
 				return
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
-		var _sub_set_ok: bool = TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam", opt)
+		var _sub_set_ok: bool = TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam", opt, float(e.get("u", -1.0)))
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _sub_set_ok else "noop"])
 		if Probe.enabled and opt == "偵查":
@@ -4465,7 +4465,7 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
-		var _solo_set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo", opt)
+		var _solo_set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo", opt, float(e.get("u", -1.0)))
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _solo_set_ok else "noop"])
 		if Probe.enabled and opt == "偵查":
@@ -6798,7 +6798,12 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	#   ★食 inline 算（effective_food，零 gather 零 RNG——避第二 gather 岔世界 seed42 regression）。
 	_detect_survival_stall(state, team)
 	_detect_commitment_stall(state, team)   # ★承諾停滯偵測（第 4 個 decision entry：survival 路）
-	for opt in DecisionEngine.rank_survival(state, team):
+	# ★★★survival 那條路的 util 本來被丟掉了 ⇒ 現在讀孫生視圖（**同一次計算**，不是重算）。
+	var _surv_ranked: Array = DecisionEngine.rank_survival(state, team)
+	var _surv_u: Dictionary = {}
+	for _se in DecisionEngine.rank_survival_scored():
+		_surv_u[String(_se["opt"])] = float(_se["u"])
+	for opt in _surv_ranked:
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
 		# ★#5 tap 追加：【第四個可能的 FLEE 派發站】—— 它也不設 `flee_from_pos`。
@@ -6816,7 +6821,11 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
-		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival", opt)   # ★① 單一源(收 @80)
+		# ★★★這一站傳 `-1.0` （【不知道】）而不是 0：
+		#   ★舊註：「那個迴圈根本沒有 util」—— ★★**已不再成立**：`rank_survival` 內部算過 `u`，
+		#     只是在 return 那一行被丟掉 ⇒ 現在讀孫生視圖 `rank_survival_scored()`（**同一次計算**）。
+		#   ★★★而拿不到時仍然傳 -1（【不知道】）而不是 0 —— 0 是合法的 util，「沒得比」不是。
+		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival", opt, float(_surv_u.get(opt, -1.0)))   # ★① 單一源(收 @80)
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _surv_ok else "noop"])
 		if Probe.enabled and opt == "偵查":

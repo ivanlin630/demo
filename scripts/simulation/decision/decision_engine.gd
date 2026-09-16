@@ -769,9 +769,37 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	#   也在 rank_scored 的全 pool 裡 ⇒ ★★★只監一條會把另一條的命中讀成 0。
 	_beg_tap(ctx, scored, team, "beg.", state)
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
+	# ★★★【util 被算出來，然後在這一行丟掉】（2026-09-16）：
+	#   ★`scored` 每一筆都有 `u`，而舊回傳只留 `opt` ⇒ **派工端拿不到身價**
+	#   ⇒ ★★同層被擋時就答不出「新的那個是不是更該做」（實測 16 筆全落 `unknown`）。
+	#   ⇒ ★★★**修法是【不要丟】，不是【事後重算】** —— 重算會呼 `gather` ⇒ 觀測改變被觀測物。
+	#   ★而為了不動既有 caller：**`rank_survival` 的回傳形狀不變**，
+	#     另開 `rank_survival_scored()` 回完整列 —— **同一份計算、兩種視圖。**
+	_last_survival_scored = scored
 	var out: Array = []
 	for e in scored: out.append(e["opt"])
 	return out
+
+# ★孿生視圖：**與 `rank_survival` 同一次計算**（它剛剛算完就存在這裡）
+#   ★★所以呼叫順序是【先 `rank_survival`、再讀這支】—— **不是另外算一次**。
+#   ★★★而它是 static var ⇒ **單執行緒模擬下安全**；若哪天並行，這裡要改成回傳值傳遞。
+static var _last_survival_scored: Array = []
+
+static func rank_survival_scored() -> Array:
+	return _last_survival_scored
+
+# ★★★跨 run 清除點（`cross-run-static` 閘直接指名了這顆）：
+#   ★static var 在同一個行程裡**跨 run 活著** ⇒ 一支床跑兩個世界時，
+#   ★★第二個世界的第一次 `rank_survival_scored()` 會讀到**上一個世界的** util
+#   ⇒ ★★★**而那不會有任何東西紅** —— 它只會讓同層比較拿到一個別的世界的數。
+#   ★所以選【清除點】而不是【白名單】：白名單要的是「可查的根據」，
+#     而這顆**本來就該被清** —— 它是一次計算的殘留，不是設定。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _last_survival_scored.is_empty():
+		cleared["DecisionEngine._last_survival_scored"] = str(_last_survival_scored.size())
+	_last_survival_scored = []
+	return cleared
 
 # 融合 threat 子集排序（序1 溶入：non-unified _evaluate_threat 委派用，鏡射 rank_survival）。
 # 取 ctx（呼叫端已 gather，避重算）→ applicable ∩ THREAT_OPTION_SET → util 秤 → 降序。
