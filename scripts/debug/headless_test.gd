@@ -13798,10 +13798,49 @@ func _test_solo_commitment() -> void:
 	#   ★★★⇒ 必須在 belief 裡把「這隻獵物身上有東西」講出來（`food_est`），
 	#     否則這支測試問的是「看到弱肉會不會搶」而世界看到的是**一隻身上什麼都沒有的弱肉**。
 		BeliefSystem.record_claim(state, 0, tid, 0, "親見", {"population_est": 3, "armed_est": 1, "food_est": 1500.0, "tile_pos": state.teams[tid].tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
+	# ★★★【④類：斷言被 blueprint 裁定蓄意推翻】（2026-09-16，同「好戰盜匪」那一支）——
+	#   ★舊斷言：「掠奪 applicable ＋ 承諾 ⇒ 應續掠奪」＝ **承諾慣性可以把掠奪拉回首位**
+	#   ★★而實測：**常態＋合理富裕鄰居下，掠奪的 util 只有紮營的三分之一**
+	#     ⇒ **承諾慣性（`persist_strength`）不是為了跨越三倍差距而存在的** ——
+	#     ★★★**用它去跨三倍，等於把「防抖動」當成「翻盤」用，而那是兩件事。**
+	#   ⇒ **改成與盜匪那支同形：常態 ⇒ 不搶。**
+	#   ★**而「承諾慣性本身還有沒有作用」不在這一格** ——
+	#     ★★它在**下面那一格**用 util 級量（有承諾 vs 無承諾的同一支隊），
+	#     ★★★**因為 task 級在常態下量不到，而量不到的東西不該被斷言。**
+	var _cc: DecisionContext = DecisionContext.gather(state, team)
+	assert(_cc.food_days > _cc.desperation_entry_threshold,
+		"★具名條件：這一格問的是【常態】（food_days %.1f 高於絕境線 %.1f）" % [
+			_cc.food_days, _cc.desperation_entry_threshold])
 	fai._evaluate_solo(state, team)
-	assert(team.current_task == TeamData.TASK_LOOT, "掠奪 applicable + 承諾(current_option=掠奪) → 應續掠奪，實際=%s" % team.current_task)
-	assert(team.current_option == "掠奪", "選後 current_option 記錄承諾")
-	print("solo commitment OK")
+	assert(team.current_task != TeamData.TASK_LOOT,
+		"常態＋合理富裕鄰居 ⇒ **不搶**（實際=%s）★紅了 ⇒ 世界開始在常態下劫掠，回報 systems" % team.current_task)
+	# ★★成對：**承諾慣性仍然有作用**（util 級）——
+	#   同一支隊，`current_option` 是「掠奪」時的掠奪 util **必須高於**不是掠奪時的。
+	# ★★★【我自己的測試 bug，留著當警告】：上面那行 `_evaluate_solo` **會改寫 `current_option`**
+	#   ⇒ ★第一版我沒有把它設回來就量 ⇒ **兩次都是「無承諾」** ⇒ 量出 0.0381 ＝ 0.0381
+	#   ⇒ ★★而那個相等**看起來像「persist 沒接上」** —— **實際上是我把兩邊都設成了同一個條件。**
+	#   ⇒ ★★★**成對格的兩半必須各自把條件【設好】，不能假設前一行沒動過它。**
+	team.current_option = "掠奪"
+	var _u_with: float = _opt_util(DecisionEngine.rank_scored(state, team, "cmt_with"), "掠奪")
+	team.current_option = "紮營"
+	var _u_without: float = _opt_util(DecisionEngine.rank_scored(state, team, "cmt_without"), "掠奪")
+	team.current_option = "掠奪"
+	# ★★★【而這一格【不能】斷言「嚴格大於」——理由是機制自己說的】：
+	#   `PersistStrength._value()`：**持守強度 ＝ f(沉沒成本 progress, 人格 lean)**
+	#   ⇒ ★**這支隊的任務是【這一刻才被設上的】** ⇒ `progress ≈ 0` ⇒ **persist ≈ 0**
+	#   ⇒ ★★**「剛開始做的事沒有沉沒成本」是設計，不是缺陷** ——
+	#     ★★★**所以在這個 fixture 上斷言「有承諾一定比較高」，就是斷言一個機制說不會發生的事。**
+	#   ⇒ 這裡只斷言**它不會倒扣**（`>=`），並把實際值印出來讓它可被看見。
+	print("   承諾慣性：有承諾 %.4f｜無承諾 %.4f｜`persist_strength` ＝ %.4f（★剛設上的任務 progress≈0）" % [
+		_u_with, _u_without, PersistStrength.compute(state, team)])
+	assert(_u_with >= _u_without,
+		"承諾慣性**不得倒扣**：有承諾 %.4f ≥ 無承諾 %.4f" % [_u_with, _u_without])
+	print("solo commitment OK（★常態不搶；承諾慣性改用 util 級驗，因為 task 級在常態下量不到）")
+
+func _opt_util(ranked: Array, opt: String) -> float:
+	for e in ranked:
+		if String(e.get("opt", "")) == opt: return float(e.get("u", 0.0))
+	return -1.0
 
 func _test_solo_seek_home() -> void:
 	print("--- SoloAI 主動尋家 ---")
@@ -13850,10 +13889,39 @@ func _test_solo_seek_home() -> void:
 	state.teams[1] = t1
 	state.team_discovered[1] = [9]
 	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 2, "armed_est": 1, "food_est": 1500.0, "tile_pos": Vector2i(3, 4), "last_tick": state.world.current_tick}, 1.0, false)   # ★★food_est 是新加的：舊 belief 無可定價分項 ⇒ take 恆 0   # G3：有情報才打（position-belief：claim 帶位置）
+	# ★★★【④類：斷言被本票＋blueprint 裁定蓄意推翻】（2026-09-16）——
+	#   ★舊斷言：「好戰盜匪應 roving 非尋家」＝ **看到弱肉就一定去搶**（不問值不值得）
+	#   ★★而 blueprint 裁（`2026-09-16-blueprint-to-systems-cruelty-gates-style-not-survival.md`）：
+	#     **搶劫是【絕境行為】為主；常態好戰靠【尾部人格】，不靠人人微凶。**
+	#   ⇒ ★★★**常態 ＋ 合理富裕的鄰居 ⇒ 不搶，而那是【正解】不是缺陷。**
+	#   ★實測（四種人格組合 × 兩種身價，鄰居 pop 3）：**首選全部是紮營（0.1984）**，
+	#     掠奪最高 **0.0669**（好戰.9 殘忍.9、food 1500）⇒ **差 3 倍，不是刀鋒。**
+	#   ★★**而「兇者常態會搶」在本次實測中【量不到】** ——
+	#     要它翻過紮營需要 `food ≈ 16000–32000`（pop 2–3 的鄰居）⇒ **數字對、故事荒謬** ⇒ 否決。
+	#   ★★★**若日後 blueprint 要那件事發生，這一格會變成 ④ —— 而那是【預期的】。**
+	#     **這一格鎖住的是【今天的事實】，不是永遠的設計。**
+	var _c1: DecisionContext = DecisionContext.gather(state, t1)
+	assert(_c1.food_days > _c1.desperation_entry_threshold,
+		"★具名條件：這一格問的是【常態】（food_days %.1f 必須高於絕境線 %.1f）" % [
+			_c1.food_days, _c1.desperation_entry_threshold])
 	fai._evaluate_solo(state, t1)
-	assert(t1.current_task == TeamData.TASK_LOOT or t1.current_task == TeamData.TASK_ATTACK,
-		"好戰盜匪應 roving 非尋家，實際=%s" % t1.current_task)
-	print("solo seek home OK")
+	assert(t1.current_task != TeamData.TASK_LOOT,
+		"常態＋合理富裕鄰居 ⇒ **不搶**（實際=%s）★這一格若紅 ⇒ 世界開始在常態下劫掠，回報 systems" % t1.current_task)
+	print("solo seek home OK（★常態不搶；兇者常態會不會搶 ⇒ 見下方 util 級的成對格）")
+	# ★★成對的另一半：**人格有方向**（★util 級，因為 task 級在常態下量不到）
+	#   ★而人格要變動【真正會動 `person` 的那一個軸】：`person` 讀 `max(好戰, 殘忍)`
+	#   ⇒ ★★★**好戰已經 .9 的隊，改殘忍對 `person` 完全沒作用** —— 所以這裡改的是**好戰**。
+	var _mild: PersonData = PersonData.new(); _mild.id = 1001; _mild.team_id = 1
+	_mild.values = {"好戰": 0.3, "貪婪": 0.9, "野心": 0.5, "求生欲": 0.5}
+	state.persons[1001] = _mild
+	var _saved: int = t1.leader_id
+	var _u_fierce: float = DecisionTerms.eval("loot_drive", DecisionContext.gather(state, t1), "掠奪")
+	t1.leader_id = 1001
+	var _u_mild: float = DecisionTerms.eval("loot_drive", DecisionContext.gather(state, t1), "掠奪")
+	t1.leader_id = _saved
+	assert(_u_fierce > _u_mild,
+		"人格有方向：好戰.9 的掠奪 drive (%.4f) ＞ 好戰.3 的 (%.4f)★兩者相同 ⇒ 人格沒接上" % [
+			_u_fierce, _u_mild])
 
 # ── 文字 UI Phase 1: API 暴露 ──
 func _test_location_game_predator() -> void:
