@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩支 fixture ＋ **一格新的必驗** ｜ **DISPATCH（blueprint 已裁）**
 topic: ★**依據信（exact path）**：`docs/superpowers/handbacks/2026-09-16-blueprint-to-systems-cruelty-gates-style-not-survival.md`｜★★**裁定拆成兩半**：【**常態**】中等殘忍面對富鄰居**不搶 ＝ 正解**（用戶預熱逐字：**搶劫是絕境行為為主，常態好戰靠尾部人格、不靠人人微凶**）⇒ **兩支 fixture 照 ④ 改斷言**；【**絕境**】**餓了就搶是人之常情，不該只屬於殘忍者** ⇒ ★★★**加一格必驗**｜★`盜匪` 那支**換一個存在的世界**（32000 寧紅不綠 ＝ 他也同意）
 ---
