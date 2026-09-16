@@ -624,6 +624,16 @@ func _run() -> void:
 	for _u in ["new_higher", "new_lower", "equal", "unknown"]:
 		uc.append("%s=%d" % [_u, int(Probe.counts.get("4c.utilcmp." + _u, 0))])
 	print("★§I-util 同層被擋時【新的與現任的 util 比較】：%s" % " ".join(uc))
+	# ★★★兩群的 util 差分佈（遲滞要從這裡推，不手填）。
+	for _cmp in ["new_higher", "new_lower"]:
+		var drows: Array = []
+		for k in Probe.counts:
+			var ks: String = String(k)
+			if ks.begins_with("4c.diff." + _cmp + "."):
+				drows.append("%s×%d" % [ks.replace("4c.diff." + _cmp + ".", ""), int(Probe.counts[k])])
+		drows.sort()
+		print("   [%s] util 差分佈：%s" % [_cmp, (" ".join(drows) if not drows.is_empty() else "（無）")])
+	print("   ★★★**兩群若重疊 ⇒ 一個純量遲滞分不開它們** —— 那時要回報，不是硬挑一個數。")
 	print("   ★`new_higher` > 0 ⇒ **同層白名單擋住了一次【更該做的事】** —— ★★而本床不對它下判決（下一張票）。")
 
 	print("")
