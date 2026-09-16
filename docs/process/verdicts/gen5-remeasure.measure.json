@@ -12,15 +12,23 @@
     "docs/measurements/2026-09-16-gen5-remeasure-seed1337-raw.txt（UTF-16LE編碼，需iconv轉碼讀）",
     "docs/measurements/2026-09-16-gen5-remeasure-seed2024-raw.txt",
     "docs/measurements/2026-09-16-gen5-remeasure-seed777-raw.txt",
-    "docs/measurements/2026-09-16-gen5-remeasure-fixcheck-raw.txt（③fixture bug修好後的1天窗驗證）"
+    "docs/measurements/2026-09-16-gen5-remeasure-fixcheck-raw.txt（③fixture bug修好後的1天窗驗證）",
+    "docs/measurements/2026-09-16-gen5-remeasure-v2-seed1337-raw.txt（v2＝補①母體計數後重跑，同UTF-16LE）",
+    "docs/measurements/2026-09-16-gen5-remeasure-v2-seed2024-raw.txt",
+    "docs/measurements/2026-09-16-gen5-remeasure-v2-seed777-raw.txt"
   ],
   "specimen_trace": "無——純聚合existence/ratio讀數，不下behavior因果結論，照規免specimen",
 
   "answer": {
     "①處境攻擊成對反事實(真隊，非合成ctx，DecisionContext.gather+production rank_scored_ctx)": {
-      "餓且有牙⇒攻擊贏argmax": "3個seed×10天窗，每7天抽樣一次，至今皆=0次出現（不能證明永遠不發生，只能說到此為止未觀察到）",
+      "v2補母體計數(systems 2026-09-16問：「太薄」與「空」是兩個結論，要母體本身的數)": {
+        "seed1337": "採樣198隊天｜餓8｜有牙104｜★餓且有牙(真母體)=2｜其中攻擊在候選集裡=1｜贏argmax=0",
+        "seed2024": "採樣195隊天｜餓13｜有牙100｜★餓且有牙=3｜攻擊在候選集裡=3｜贏argmax=0",
+        "seed777": "採樣204隊天｜餓20｜有牙102｜★餓且有牙=4｜攻擊在候選集裡=2｜贏argmax=0",
+        "合計": "3個seed共9次『餓且有牙』樣本(母體>0，非空)，其中6次攻擊確實進了候選集(applicable)，但0次贏argmax"
+      },
       "對照·飽且仍不打": "seed1337 152/152｜seed2024 133/133｜seed777 139/139——三個seed全部0反例，對照格非常乾淨",
-      "verdict": "★對照格(飽不打)成對成立且極穩；★★正例格(餓有牙會打)在10天×3seed窗內未觀察到任何一次⇒不是「驗證失敗」而是「母體太薄」——本卷未拆解「food_days<門檻」與「armed>0」個別出現頻率，無法判斷是窗太短還是兩條件罕見同時成立，留給下一票加細分計數或延長窗"
+      "verdict": "★★★修正前一版判斷：母體=9(>0)，非『太薄不可判』⇒這是【驗證失敗候選】——餓且有牙的隊有機會打(6/9次攻擊真的進了候選集在跟別的選項比)，卻9次全部沒贏argmax；★對照格(飽不打)極穩成對成立；★但本卷不下WHAT/HOW修法結論(禁調參數)，只誠實報這是候選，需下一票追查是util算式問題還是別的選項系統性更優"
     },
 
     "②偵查三數(候選/贏/真設上)對帳": {
