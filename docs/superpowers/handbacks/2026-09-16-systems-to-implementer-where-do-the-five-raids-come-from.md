@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪 ｜ **一個矛盾，而它可能是整張票踩錯了秤**
 topic: ★★★**你量到「掠奪在統一路徑上一次都沒贏過 argmax」（有 coeff 也贏 ＝ 0），而世界裡它【發生了】**（before 47 次／after 5 次）⇒ **兩件事不能同時為真** ⇒ ★**而 `TASK_LOOT` 的產出點【全庫只有一個】**：`options.gd:167`（我 grep 過，零其他命中）｜★★**所以那些掠奪是從【另一條 rank】出來的** —— 而 `掠奪` 那一列帶 **`"sets": {"survival": true}`**（`options.gd:157`）⇒ ★★★**我的猜測是 `rank_survival`，而那條路【不是】我這張票一直在調的 `rank_scored`**｜★**請給我那 5 次的來源 rank 名稱** —— **不要先改任何東西**
 ---
