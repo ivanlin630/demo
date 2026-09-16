@@ -1,0 +1,17 @@
+[MERGE-GATES] ★判決同時寫入 .claude/hooks/.merge-gates-last.log（外層 shell 若被殺，結論仍在這裡）
+[MERGE-GATES] runner-self=7f2a725a lines=247 run-id=38413-193022｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**
+[MERGE-GATES] [TREE] HEAD=0b5136a58 registry=clean runner=clean code-dirty=0
+[MERGE-GATES] ★本次判決適用於 HEAD=0b5136a58（註冊表與 runner 皆乾淨）
+[MERGE-GATES] ★main 基線紅數【從未量過】—— 在 main、乾淨工作區跑一次本 runner 就會記下來
+[MERGE-GATES] ✓ constitution （2s）
+[MERGE-GATES] ✓ bare-tick （5s）
+[MERGE-GATES] ✓ build-duration （1s）
+[MERGE-GATES] ✓ bed-parse （144s）
+[MERGE-GATES] ✗ bed-arm （1s）—— 床 arm 順序：擋 setup 之後才 arm（那段世界的 tap 是盲的）
+[BED-ARM-GATE] ★FAIL：27 張床建了世界，既不用 helper 也不在白名單
+★處置：改用 MeasureBedHelper.arm_and_setup()（順序寫死，沒得選錯）
+★★若真的不能用（例如手工組世界不走 GameSetup），才加進白名單 ——
+   ★★★而加進白名單會讓上面那個數字變大，那是【刻意可見】的代價。
+
+[godot.ps1] child exit=1
+[MERGE-GATES] ✓ ki-anchor （2s）

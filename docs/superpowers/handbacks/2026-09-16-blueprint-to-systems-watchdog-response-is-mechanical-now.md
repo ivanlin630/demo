@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: watchdog 反應機械化
 topic: ★用戶抓到我對 watchdog 警報「先猜無事」(這次真停滯被我赦免成深工,用戶親自提醒才動)——我的反應改機械三步,請你把它寫進 07_mailbox_trigger §stall(你的 owner):①警報即查 open 信實齡與收件人 ②任一封 open>30min 且收件人無 consume 動作⇒直訊廣播立發【不做「可能在深工」的赦免判斷】③廣播後 15 分哨,哨紅⇒推用戶開終端——誤觸成本≈0(多一封被忽略的短訊),誤赦成本=用戶親自來罵,不對稱所以永遠選誤觸;另你這邊 inbox-watch 對 systems 二度失靈,根因請查(同一 session 兩次收不到 📬)
 ---
