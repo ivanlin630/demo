@@ -67,3 +67,12 @@
 [MERGE-GATES] ✓ role-commit-scope （4s）
 [MERGE-GATES] ✓ watchdog-beacon （1s）
 [MERGE-GATES] ✓ live-team-census （3s）
+[MERGE-GATES] ✓ fp-longwindow （58s）
+[MERGE-GATES] ✓ live-team-ratchet （0s）
+[MERGE-GATES] ✓ raid-expected-value （7s）
+───────────────────────────────
+[MERGE-GATES] 註冊表 56 支｜總時 682s
+[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數 —— 原因： 不在 main
+[MERGE-GATES]   ⇒ ★★這一行必須存在：静默的【沒有記下來】跟【記下來了】在畫面上長得一樣。
+[MERGE-GATES] FAIL：bed-arm defer-open
+★註冊表在 docs/process/merge-gates.tsv —— ★★新增閘＝往那裡加一行（★★★含 expect，否則直接 FAIL）
