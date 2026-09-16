@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 世代5重量測——(4a)/(4b) 621 次「優先序不足」分類
 topic: ★(4a)/(4b)靠聚合只能定163/621，450/621卡在survival-class動態衰減，需一顆逐筆tap才能收尾
 ---
