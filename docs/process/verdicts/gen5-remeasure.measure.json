@@ -44,20 +44,23 @@
     },
 
     "(4a)/(4b)——621次『優先序不足』擋攻擊，靜態上限先切一刀": {
-      "確定(4a)": "迎戰163次——priority_for=70(PRIO_THREAT)不衰減，恆>攻擊own_priority=50",
-      "確定(4b)手不聽腦": "外交6次+貿易2次=8次——priority_for=50(PRIO_DISPATCH)不衰減，與攻擊同層卻擋住",
-      "待逐筆(450次)": "覓食139/return_home137/逃跑106/投靠64/乞食4——五個survival-class holder，priority_for_need依當下food_days動態衰減(80或50)，聚合反推不出，事後不可算",
-      "後續": "已發handback給systems，systems裁定不加bump_sample(first-N偏差+今日曾OOM)、改請implementer在task_arbiter.gd deny點直接分類bump兩個計數鍵(`arbiter.deny.優先序不足.4a`/`.4b`)——已轉交，非本卷職權，本卷先把能定的171(163+8)寫死交件"
+      "本床靜態上限先切(day0，未跑implementer的tap前)": "確定(4a)：迎戰163次——priority_for=70不衰減｜確定(4b)：外交6+貿易2=8次——priority_for=50不衰減｜待逐筆450次：覓食139/return_home137/逃跑106/投靠64/乞食4(survival-class動態衰減，聚合分不出)",
+      "implementer裝的分類計數tap(deny當下直接分類，非樣本，systems裁定形狀)——收到的真數": {
+        "偵查(10天窗)": "(4a) 825 ／ (4b) 0",
+        "攻擊(10天窗)": "(4a) 659 ／ (4b) 0",
+        "全option(10天窗)": "(4a) 7678 ／ (4b) 28（對帳✅，2天窗與10天窗逐字相同⇒tap沒改變被觀測物）"
+      },
+      "兩邊獨立對得上": "本床171切分(163迎戰=4a／8外交貿易=4b)與implementer的真tap同向——攻擊真數(4a)659/(4b)0印證『擋住攻擊的幾乎全是正當高優先序』，本床靜態上限法向沒有錯，只是覆蓋不到survival-class那450"
     }
   },
 
   "honest_limits": [
     "★①本卷只讀『現在讀數是什麼』，不下WHAT/HOW修法結論，不調任何參數",
-    "★★①的正例格(餓有牙攻擊贏)10天×3seed=0次出現——母體太薄，未拆解兩條件個別出現率，不能排除是窗太短",
+    "★★①的正例格(餓有牙攻擊贏)：初版10天×3seed=0次出現且未拆母體(systems指出『太薄』與『空』是兩個結論)⇒本床加母體計數(n_hungry/n_armed/n_hungry_and_armed/atk_applicable)後重跑v2，v2結果見answer區另補一節",
     "★★②/④/(4a)(4b)全部與世代4以前數字不可比較(尺換了，_generation-boundary.md)",
     "★③本卷自己的bed在第一輪跑出3個假FAIL(已誠實記錄+修復+重驗，不是把假FAIL悄悄改掉當沒發生過)",
     "★★[HOST] FreeMB標籤有誤——印的其實是OS.get_static_memory_usage()(進程自身靜態記憶體)非系統可用記憶體；真正的系統FreeMB安全門檻是跑前用PowerShell另外查的(15276MB)，非本床內部那行，下一個讀這份卷的人請勿把床內[HOST]那行當系統FreeMB用",
-    "★450/621的(4a)/(4b)分類未定案，等implementer裝tap後才收尾——本卷交件時明確標『待implementer』，非『後來才發現』",
+    "★450/621的(4a)/(4b)分類已由implementer裝的分類計數tap收尾(見answer區真數)——本卷交件時原本明確標『待implementer』，非事後才發現要補",
     "★三seed跑法非langgraph平行，是PowerShell Start-Process各自獨立起Godot子進程+各自寫log，跑法非機器軌",
     "★raw_logs是UTF-16LE編碼(PowerShell `*>`重導向預設)，非CP950；下一個人讀請用iconv -f UTF-16LE -t UTF-8，不要用wrapper內建的CP950假設去讀"
   ],
