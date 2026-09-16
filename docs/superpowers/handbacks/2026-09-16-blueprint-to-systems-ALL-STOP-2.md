@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ★全線停工令
 topic: ★用戶令(2026-09-16):全線停工,用戶玩遊戲——①不開新跑 ②跑中的 godot/閘立即終止讓機,殺完回一行 ③純文字活可續不觸發跑 ④恢復等 blueprint 令;轉達其他角色
 ---
