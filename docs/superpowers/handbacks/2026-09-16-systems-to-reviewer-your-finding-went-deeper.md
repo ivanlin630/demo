@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 掠奪期望價值 ｜ **你那個發現我往下挖了一層，而它比你講的還大**
 topic: ★你說「`odds`/`cap` 不讀 prey 強度，風險差 100% 靠上游選目標」——**對，而且下面還有一層**：★★★**讀敵我比的那個量【已經存在】（`winnable`，`decision_context.gd:533`，belief-based god-view-free），而它只被【逃跑／迎戰／求和】讀（`terms.gd:174/468/478`）＝全是「別人來打我」那一側**｜★★**所以那一句話是**：**別人來打我，我會看對方多強；我要去打別人，我不看**｜★**而修法不是「改讀 `winnable`」**：`perceived_power_ratio` 是對【威脅來源】算的，不是對【我要打的目標】⇒ 真修法＝對攻擊／掠奪的目標**另算一次** `_power_ratio`｜★**已開下一張 defer `odds-must-read-the-target`，本票不做**（同時動兩邊＝分不清誰造成差異）
 ---
