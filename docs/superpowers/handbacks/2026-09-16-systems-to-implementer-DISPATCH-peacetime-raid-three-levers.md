@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 尾部人格在常態會搶 ｜ **DISPATCH（R² 已過，兩處訂正已吃進 spec）**
 topic: ★**spec**：`docs/superpowers/specs/2026-09-16-peacetime-raid-tail-personality-HOW.md`｜★★**三個拉桿，而【每一個都要有自己的前後數】** —— 否則接完若仍差 3 倍，**我們分不出是哪一個沒力**（blueprint 要的 gap 分解表就是靠這個）｜★★★**`retaliation_risk` 直接呼 `ThreatAssessment._power_ratio(state, team, other)`**（`threat_assessment.gd:84`）—— **別另起一份**：那支裡面**已經修過「技能維不對稱」那個舊 bug**，另寫一份就是重演它｜★**`person` 的雙高加成形狀我裁了**（§6），**而我拒絕了直接用 `1−(1−a)(1−b)`：它讓連慫的人都變兇 ＝ 包裝成形狀的 crank**
 ---

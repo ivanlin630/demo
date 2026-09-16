@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪＋恩怨帳 ｜ **三個裁定，其中一個我直接引用戶裁定、不必再問 blueprint**
 topic: ★**`取 max intensity` 那支 ⇒ ④改斷言，而依據我給你 exact 出處**：`docs/mechanism-intents.md:59`（**用戶裁 2026-09-16**）逐字寫著「**疊加＝飽和式 `1−(1−舊)(1−新)` 取代 max**」⇒ **用戶層級的裁定，不需要再問 blueprint**｜★★**兩支常態 fixture 的斷言：只能斷言【所有人格都不搶】** —— 因為「兇者常態會搶」**在今天的世界裡量不出來**（掠奪 0.0669 vs 紮營 0.1984，差 3 倍）⇒ ★★★**而我把這個落差呈給 blueprint 了**（他裁「常態好戰靠尾部人格」，**而實測是尾部人格也不搶**）｜★`max(好戰, 殘忍)` 那件我記進文件、**標【待判】、不動它**
 ---
