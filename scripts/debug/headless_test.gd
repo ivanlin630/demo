@@ -1020,9 +1020,19 @@ func _test_faction_attack_gate() -> void:
 	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
 	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # F1：belief 帶 tile_pos（鏡射 production vision/interaction/relay 皆寫位；scout guard 需位）
 	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200, "tile_pos": Vector2i(2, 0)}, 0.4, true)   # F1：belief 帶 tile_pos（鏡射 production relay 帶位）
-	FactionAISystem.new()._commit_conquest_attack(st_a, tm_a, 1)   # 序5：scout-verify scaffolding（prey=1）
-	assert(tm_a.prosperity_target_id == 1 and tm_a.current_task == TeamData.TASK_SCOUT,
-		"慎重者矛盾情報→派斥候查證，實際 target=%d task=%s" % [tm_a.prosperity_target_id, tm_a.current_task])
+	# ★★★【驗收點搬家】（走廊拆除票，2026-09-16）——★意圖不變：**慎重者面對矛盾情報不該直接打**。
+	#   ★舊地點：`_commit_conquest_attack` 把 task 改成 SCOUT（走廊）—— **那條路已拆**。
+	#   ★★新地點：`attack_scan` 的 candidate 生成端 —— **不可行的目標【不產生】**
+	#     ⇒ 而「所以去偵查」由偵查 option 在 argmax 上自己贏（本檔不跑 argmax，故不驗那一半）。
+	#   ★★★**不是刪掉這條測試**：刪掉會讓「慎重者不該直接打」這個意圖**失去守衛**。
+	var _scan_a: Dictionary = FactionAISystem.attack_scan(st_a, tm_a, st_a.persons[100])
+	var _in_a: bool = false
+	for _f in (_scan_a["feasible"] as Array):
+		if int((_f as Dictionary).get("id", -1)) == 1: _in_a = true
+	assert(not _in_a,
+		"慎重者矛盾情報→該目標不進攻擊候選，實際 feasible=%s" % str(_scan_a["feasible"]))
+	assert(int((_scan_a["why"] as Dictionary).get("thin_intel_refused", 0)) >= 1,
+		"★排除理由要落在 thin_intel_refused（查無 ≠ 沒發生），實際 why=%s" % str(_scan_a["why"]))
 	# B) 莽者(慎重低) 同矛盾 belief → 照衝（target 設）
 	var sb: Array = _attack_gate_scene(0.0)
 	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
@@ -1295,10 +1305,19 @@ func _test_scout_verification() -> void:
 	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
 	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民",
 		{"population_est": 4, "tile_pos": Vector2i(2, 0)}, 0.4, false)
-	FactionAISystem.new()._commit_conquest_attack(st_a, tm_a, 1)   # 序5：慎重未驗→派斥候（prey=1）
-	assert(tm_a.current_task == TeamData.TASK_SCOUT and tm_a.prosperity_target_id == 1,
-		"慎重者未驗情報→派斥候，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
-	assert(tm_a.move_target == Vector2i(2, 0), "斥候移向 prey best_estimate 位，實際 %s" % str(tm_a.move_target))
+	# ★★★【驗收點搬家】（走廊拆除票，2026-09-16）——★意圖不變：**慎重者面對未驗情報不該直接打**。
+	#   ★而「斥候移向 prey best_estimate 位」那一格**一併搬走**：
+	#     ★★舊制是走廊自己設 move_target；新制的偵查目標由 `DecisionContext.pick_recon_target` 挑，
+	#     ★★★而**那一段有它自己的驗收**（`scout_on_the_scale_bed` 的⑤先驗逐筆被取代）
+	#     ⇒ **這裡不重複驗它，也不假裝它還在這條路上。**
+	var _scan_v: Dictionary = FactionAISystem.attack_scan(st_a, tm_a, st_a.persons[100])
+	var _in_v: bool = false
+	for _f2 in (_scan_v["feasible"] as Array):
+		if int((_f2 as Dictionary).get("id", -1)) == 1: _in_v = true
+	assert(not _in_v,
+		"慎重者未驗情報→該目標不進攻擊候選，實際 feasible=%s" % str(_scan_v["feasible"]))
+	assert(int((_scan_v["why"] as Dictionary).get("thin_intel_refused", 0)) >= 1,
+		"★排除理由要落在 thin_intel_refused，實際 why=%s" % str(_scan_v["why"]))
 	# 斥候抵達親見（注入確定 claim）→ uncertainty 塌 → 下次評估轉攻擊（迴路收斂）
 	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # E1：belief 帶 tile_pos（攻擊路讀 belief_pos）
 	FactionAISystem.new()._commit_conquest_attack(st_a, tm_a, 1)   # 序5：親見壓 uncertainty→收斂轉攻（prey=1）
