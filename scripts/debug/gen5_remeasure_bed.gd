@@ -153,9 +153,29 @@ func _run() -> void:
 						var ctx: DecisionContext = DecisionContext.gather(st, team, false)
 						var scored: Array = DecisionEngine.rank_scored_ctx(ctx, team.current_option, st, team)
 						var atk_applicable: bool = false
+						var atk_u: float = -1.0
 						for e in scored:
-							if String(e["opt"]) == "攻擊": atk_applicable = true
+							if String(e["opt"]) == "攻擊":
+								atk_applicable = true; atk_u = float(e["u"])
 						if atk_applicable: n_hungry_armed_atk_applicable += 1
+						# ★systems 2026-09-16准開：≤9筆逐筆樣本，存【全option rank_scored】非只贏家+攻擊
+						#   （「攻擊輸了」與「攻擊輸給誰」是兩個結論，只存前兩名下一票要重跑）。cap個位數,OOM風險低。
+						var full_rank: Array = []
+						for e2 in scored:
+							full_rank.append("%s=%.4f" % [String(e2["opt"]), float(e2["u"])])
+						Probe.bump_sample("gen5.hungry_armed_full_rank", {
+							"seed": seed_val, "day": d, "team": team.team_id,
+							"food_days": snappedf(fd, 0.01), "armed": snappedf(armed, 0.01),
+							"attack_target_id": ctx.attack_target_id, "attack_win_odds": snappedf(ctx.attack_win_odds, 0.001),
+							"attack_loot_est": snappedf(ctx.attack_loot_est, 0.01),
+							"當前實際task_snapshot": team.current_task,
+							"攻擊applicable": atk_applicable,
+							"攻擊u": (snappedf(atk_u, 0.0001) if atk_applicable else null),
+							"贏家opt": (String(scored[0]["opt"]) if not scored.is_empty() else ""),
+							"贏家u": (snappedf(float(scored[0]["u"]), 0.0001) if not scored.is_empty() else null),
+							"gap_贏家u減攻擊u": (snappedf(float(scored[0]["u"]) - atk_u, 0.0001) if (atk_applicable and not scored.is_empty()) else null),
+							"全option_rank": full_rank,
+						}, 30)
 						if not found_hungry_teeth_win and not scored.is_empty() and String(scored[0]["opt"]) == "攻擊":
 							found_hungry_teeth_win = true
 							found_hungry_teeth_case = "day=%d team=%d food_days=%.2f armed=%.2f winner_u=%.4f" % [
@@ -187,6 +207,12 @@ func _run() -> void:
 		print("   ★★餓且有牙 ⇒ 攻擊贏argmax：出現過⇒%s" % found_hungry_teeth_case)
 	else:
 		print("   ★★★母體>0(=%d)而0次贏⇒這才是【驗證失敗候選】(它們有機會而沒打)，非母體太薄" % n_hungry_and_armed)
+	# ★systems裁：報「母體N、存了M」，不要靜默截斷(cap=30個位數,OOM風險低但仍誠實報)
+	var dumped: int = (Probe.samples.get("gen5.hungry_armed_full_rank", []) as Array).size()
+	print("   ★逐筆樣本(全option rank_scored)：母體=%d｜存了=%d｜%s" % [
+		n_hungry_and_armed, dumped, "未截斷" if dumped >= n_hungry_and_armed else "★★被cap截斷!母體>cap"])
+	for s in (Probe.samples.get("gen5.hungry_armed_full_rank", []) as Array):
+		print("      %s" % str(s))
 	print("   ★對照：飽(food_days>10)時仍不打攻擊argmax = %d/%d 次（反例：%s）" % [
 		full_hard_still_no_attack, full_hard_checked,
 		full_hard_counterexample if full_hard_counterexample != "" else "（無）"])
