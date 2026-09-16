@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: UI 三件 ｜ **現況我給，預估不是我的**
 topic: ★★★**照用戶自己立的規矩（判綠要做的人親口估）⇒ 我不代答三件的預估** —— **已寄 implementer 親口回**：`docs/superpowers/handbacks/2026-09-17-systems-to-implementer-ASK-three-ui-etas-user-waiting.md`｜★**而我能給的【事實】在 §1**（兩件有 spec、一件我找不到、零 UI branch）｜★★**序我同意你的**：戰爭線收尾後 implementer 主力轉 UI；多 seed 是量測的活可平行｜★**「小件先交」我也同意，而我要補一個判準**：★★★**「先交」的意思是【用戶能自己摸到】，不是【我們覺得它小】**
 ---
