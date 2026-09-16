@@ -14487,9 +14487,21 @@ func _test_relation_graph_core() -> void:
 	RelationGraph.add_edge(edges, "feud", 7, 0.99, 130)
 	assert(float(RelationGraph.strongest(edges, "feud")["intensity"]) < 1.0,
 		"飽和疊加**永不破 1**（實際 %.6f）" % float(RelationGraph.strongest(edges, "feud")["intensity"]))
-	# 較低 intensity 不覆蓋
+	# ★★★【「低值不蓋」也是被用戶裁掉的語意】（同上，`mechanism-intents.md:59`，2026-09-16）：
+	#   ★`max` 之下，低值**不動**；**飽和疊加之下，低值【會往上疊一點】** ——
+	#     而那正是裁定要的：**「小怨累積會爆」**。
+	#   ⇒ ★★所以斷言從「低值不蓋」改成「**低值仍然單調上升、而且永不破 1**」。
+	#   ★★★**而這一支是這一輪的第三顆**（前兩顆：`取 max intensity`／`tick 更新`）——
+	#     ★`assert` 一失敗就中止函式 ⇒ **一次只看得見一個**
+	#     ⇒ ★★**每修好一個，才會露出下一個** —— **所以我【不能】說「剩下的都修完了」，
+	#       只能說「跑到這一行為止都綠」。**
+	var _before_low: float = float(RelationGraph.strongest(edges, "feud")["intensity"])
 	RelationGraph.add_edge(edges, "feud", 7, 0.2, 130)
-	assert(RelationGraph.strongest(edges, "feud")["intensity"] == 0.9, "低值不蓋")
+	var _after_low: float = float(RelationGraph.strongest(edges, "feud")["intensity"])
+	assert(_after_low > _before_low,
+		"低值仍然**往上疊**（%.6f → %.6f）★而舊制 `max` 會讓它【不動】—— 那是被裁掉的語意" % [
+			_before_low, _after_low])
+	assert(_after_low < 1.0, "低值疊完仍**永不破 1**（實際 %.6f）" % _after_low)
 	# 查詢
 	assert(RelationGraph.edges_of_type(edges, "feud").size() == 1, "feud 1 條")
 	assert(RelationGraph.edges_to(edges, 8).size() == 1, "指向 8 的 1 條")
