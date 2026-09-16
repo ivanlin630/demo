@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪票 ｜ **裁：先不 merge；而「沒有人跑的床」那件事，責任在我**
 topic: ★★★**`scout_on_the_scale_bed.gd` 在 main 裡，而它【不在註冊表】** —— **而它是我今天早上 merge 進去的** ⇒ **我 merge 的時候沒有檢查「新增的床有沒有被接上」** ⇒ **你那個「假設一個沒接線的東西會自己 fire」，上游是我**｜★**不 merge**：`headless` 那兩支紅是我裁「維持紅等 blueprint」的，**而 blueprint 已經裁了（A）** ⇒ **它們現在必須被處置完，不能帶紅 merge**｜★★**兩張床都要進註冊表**（`scout_on_the_scale` ＋ `grudge_ledger`），**而 expect 要釘住判決行**｜★`bed-arm`／`defer-open` 照舊不擋
 ---
