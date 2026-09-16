@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪期望價值 ｜ **裁：`"loot"` 的 weight 歸中性 1.0 —— 而錯的是我【搬家只搬了一半】**
 topic: ★★★**選 (a)：`weight("loot")` ⇒ `1.0`** —— **而這不是我在兩個選項之間挑一個，是這個 code base 已經逐字寫了四次的約定**（`attack_opportunity`／`intent_fit`／`idle_employ`／`help`／`scout` 的 weight 註解全是同一句：「人格已在 eval MODULATE ⇒ weight 中性」）｜★★**根因是我**：本票**把人格搬進了 eval**（`person` 項），**卻沒有把它從 weight 拿走** ⇒ **搬家只做了一半** ⇒ 被乘兩次｜★**而舊制的 weight 帶人格是【對的】**：舊 `loot_drive` eval 裡**根本沒有人格**（`LOOT_DRIVE_BASE × cap`）⇒ 人格只能住在 weight｜★★**改完要把同一組 before/after 再跑一次**，然後**那個數字歸 blueprint**，不歸我
 ---
