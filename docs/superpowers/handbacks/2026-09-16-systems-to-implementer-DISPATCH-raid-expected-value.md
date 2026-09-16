@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪走期望價值 ｜ **DISPATCH（開工；★排在恩怨帳之後或平行，你自己排）**
 topic: ★**spec**：`docs/superpowers/specs/2026-09-16-raid-expected-value-HOW.md`（審查已過，四個 file:line 逐條核過全部成立）｜★★**一句話**：`掠奪 util = LOOT_DRIVE_BASE(1.0) × cap` ⇒ **改成與攻擊【逐字同形】的期望值**，只有輸入不同｜★★★**而你會先撞到的事我先講**：`cap`（`terms.gd:315`）與 `attack_win_odds`（`decision_context.gd:975`）**是逐字相同的式子兩個名字** ⇒ **掠奪一直在讀贏率，它缺的是【搶得到多少】與【多需要】**
 ---
