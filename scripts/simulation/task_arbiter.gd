@@ -263,6 +263,15 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		Probe.bump("arbiter.deny.優先序不足." + _cls4)
 		if _opt != "":
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + "." + _cls4)
+			# ★★★(4b) 那幾筆要能【指名】（systems 2026-09-16）：
+			#   ★(4b) ＝ 贏了卻沒被設上，**而擋它的優先序比它低或同級** ⇒ **那正是手不聽腦的定義**
+			#   ⇒ ★★所以它不能只有一個總數：**是哪個 option、被誰擋、兩邊的 priority 各是多少**
+			#   ★★★而這三件事**只在這一刻同時存在**（`task_priority` 會衰減 ⇒ 事後反推會算錯）。
+			if _cls4 == "4b":
+				Probe.bump("fourb.opt." + _opt)
+				Probe.bump("fourb.holder." + String(team.current_task))
+				Probe.bump("fourb.pair.%s|%s|%d_vs_%d" % [
+					_opt, String(team.current_task), priority, team.task_priority])
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".prio.%d_vs_%d" % [priority, team.task_priority])
 		if _opt != "":
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".holder." + String(team.current_task))

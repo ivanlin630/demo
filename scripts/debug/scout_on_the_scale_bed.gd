@@ -609,6 +609,40 @@ func _run() -> void:
 	print("   偵查 逐對 priority（新_vs_現任）：%s" % (" ".join(prio_rows2) if not prio_rows2.is_empty() else "（空）"))
 	print("   ★★而本床**不對 (4b) 下判決** —— 它是下一張票的輸入：要不要擠掉現任那個 task，是設計問題。")
 
+	# ══════════ §I (4b) 普查：**是哪些 option、擋它們的是誰**（systems 2026-09-16）══════════
+	# ★(4b) ＝ 贏了卻沒被設上，**而擋它的優先序同級或更低** ⇒ ★★**那正是手不聽腦的定義**。
+	# ★★★而一個總數（28）指不出任何人 ⇒ **要 option × holder × 兩邊 priority**。
+	print("")
+	print("★§I (4b) 普查（母體＝全 option 的 (4b) ＝ %d）" % [
+		int(Probe.counts.get("arbiter.deny.優先序不足.4b", 0))])
+	var fb_opt: Array = []
+	var fb_hold: Array = []
+	var fb_pair: Array = []
+	var fb_sum: int = 0
+	for k in Probe.counts:
+		var ks: String = String(k)
+		if ks.begins_with("fourb.opt."):
+			fb_opt.append("%s=%d" % [ks.replace("fourb.opt.", ""), int(Probe.counts[k])])
+			fb_sum += int(Probe.counts[k])
+		elif ks.begins_with("fourb.holder."):
+			fb_hold.append("%s=%d" % [ks.replace("fourb.holder.", ""), int(Probe.counts[k])])
+		elif ks.begins_with("fourb.pair."):
+			fb_pair.append("%s=%d" % [ks.replace("fourb.pair.", ""), int(Probe.counts[k])])
+	fb_opt.sort()
+	fb_hold.sort()
+	fb_pair.sort()
+	print("   逐 option：%s" % (" ".join(fb_opt) if not fb_opt.is_empty() else "（空）"))
+	print("   擋它的現任 task：%s" % (" ".join(fb_hold) if not fb_hold.is_empty() else "（空）"))
+	print("   ★逐筆三元組（option|現任task|新_vs_現任 priority）：")
+	for _r in fb_pair:
+		print("      %s" % _r)
+	# ★★對帳：逐 option 加總必須等於母體 —— ★★★不等 ⇒ **有 (4b) 是在【沒傳 opt】的站點發生的**
+	#   （那時 `_opt == ""` ⇒ 逐 option 表看不到它）⇒ **那不是「沒發生」，是「指不出名字」**。
+	var fb_moth: int = int(Probe.counts.get("arbiter.deny.優先序不足.4b", 0))
+	_ok(fb_sum == fb_moth,
+		"§I-a 對帳：逐 option 加總 %d ＝ 母體 %d（★不等 ⇒ 有 (4b) 發生在【沒傳 opt】的 try_set 站點 ⇒ 指不出名字，不是沒發生）" % [
+			fb_sum, fb_moth])
+
 	# ══════════ §G 走廊拆除四格（票 conquest-scout-corridor，2026-09-16）══════════
 	# ★spec 要四個數：①走廊歸零 ②偵查總量不塌 ③偵查勝率不爆 ④真的被設上。
 	# ★★而①在【拆之前就已經是 0】（10 天窗 v2 實測）⇒ **它不具鑑別力，照印但不當證據**。
