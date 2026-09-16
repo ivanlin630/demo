@@ -25,7 +25,15 @@ const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-tra
 const ATTACK_OPP_LOOT_W: float = 0.6    # TEST VALUE — 機會（對方肥）在這一項裡的份量
 const ATTACK_OPP_NEED_W: float = 0.4    # TEST VALUE — 需要（自己餓）在這一項裡的份量
 const ATTACK_CAUTION_W: float = 0.8     # TEST VALUE — 慎重壓低的斜率（★MODULATE 真值，非 boost 常數）
-const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× weight(loot 0..1) → loot util ≈ 0..1，危時不碾壓 survival(≥2)
+# ★★★`LOOT_DRIVE_BASE = 1.0` **已刪除**（票：掠奪走期望價值 2026-09-16）：
+#   ★它是一個「驅力基值」＝ **掠奪的 util 與世界無關**（只乘一個 capability cap）
+#   ⇒ ★★改成與攻擊**逐字同形**的期望值：`(W_take × take + W_need × need) × odds × person`。
+# ★★★`RAID_TAKE_FRACTION` **不是手填的** —— 它讀執行端真正搬走的比例：
+#   `npc_combat_system.gd` 的 `LOOT_RATE`（結算時 `effective_loot = LOOT_RATE × (1 + 殘忍×0.7)`
+#   逐資源乘在敗方存量上）⇒ **估算器與執行器讀同一個源**（本專案立法：估值禁手抄物理）。
+#   ★而【殘忍那一層】不在這裡乘：**人格只在 `person`／`weight` 調製，不改 `take` 這個世界量。**
+const RAID_LOOT_W: float = 0.6          # TEST VALUE — 與攻擊 ATTACK_OPP_LOOT_W 同形同值（同一把秤）
+const RAID_NEED_W: float = 0.4          # TEST VALUE — 同上
 const DESPERATION_DAYS: float = 3.0    # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
 #   （食物低於此才入絕境 option，對齊 WARNING_DAYS）
 const DESPERATION_SCALE: float = 1.2   # TEST VALUE — 絕境 drive 量級（對齊 survival-class 域，不碾壓 forage/restock）
@@ -311,9 +319,45 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"loot_drive":
 			if opt != "掠奪": return 0.0
 			if not ctx.has_weak_prey: return 0.0
-			# capability grounding：無牙→cap≈0 壓平（送死沒人幹）；武裝足→cap=1。
-			var cap: float = clampf(ctx.self_armed_ratio / VIABLE_ARMED_RATIO, 0.0, 1.0)
-			return LOOT_DRIVE_BASE * cap   # TEST VALUE
+			# ★★★與攻擊【逐字同形】，只有輸入不同（票：掠奪走期望價值 2026-09-16）：
+			#   攻擊：(0.6 × loot + 0.4 × need) × odds × person   ← 目標＝最富的 prey
+			#   掠奪：(0.6 × take + 0.4 × need) × odds × person   ← 目標＝最弱的 prey
+			#   ⇒ ★**同一個壓縮函數、同一個 `reference_wealth`** —— 那就是「同一把秤」的操作定義。
+			# ①搶得到多少：belief 身價 × 執行端真正搬走的比例（**讀 `LOOT_RATE`，不手填**）
+			# ★★★殘忍那一層**要乘**（systems 裁 2026-09-16）：結算端逐字是 `LOOT_RATE × (1 + 殘忍×0.7)`
+			#   ⇒ ★**世界真的會多給殘忍者** ⇒ 估算器不乘它，**就不是同源，是【同源減一項】**。
+			#   ★★而這不是雙計：**殘忍在這裡是【物理】**（真的拿到多少），
+			#     在 `weight("loot")` 是【偏好】（多想去搶）—— **同一個人格數，兩個不同的作用**。
+			#   ★★★而我**不抄那條式子**：走 `NpcCombatSystem.effective_loot_rate()` 這個單一計算點
+			#     —— **抄一份的話，哪天有人調 0.7，決策會繼續用舊的數而不會有東西紅。**
+			var _rcruel0: float = float(ctx.leader_values.get("殘忍", 0.5))
+			var _take_raw: float = ctx.weak_prey_richness_est * NpcCombatSystem.effective_loot_rate(_rcruel0)
+			var _take: float = FactionAISystem.richness_compressed(_take_raw, ctx.reference_wealth)
+			# ②需要：與攻擊**同源**（越餓越想搶）
+			var _rneed: float = clampf(1.0 - ctx.food_days / maxf(ctx.desperation_entry_threshold, 0.01), 0.0, 1.0)
+			# ③贏率：★**用 ctx 既有的那個欄位** —— `attack_win_odds` 與舊的 `cap` 是**逐字相同的式子兩個名字**
+			#   ⇒ ★★這裡刪掉那份重算（三處變兩處）。
+			var _rodds: float = ctx.attack_win_odds
+			# ④人格 MODULATE（★不加新常數）：好戰／殘忍放大、慎重壓低 —— ★★它不碰 take／need／odds。
+			var _rmart: float = float(ctx.leader_values.get("好戰", 0.5))
+			var _rcruel: float = _rcruel0   # ★同一個人格數：上面當【物理】用，這裡當【偏好】用
+			var _rcaut: float = float(ctx.leader_values.get("慎重", 0.5))
+			var _rperson: float = clampf(0.5 + (maxf(_rmart, _rcruel) - 0.5) - (_rcaut - 0.5) * ATTACK_CAUTION_W, 0.0, 1.5)
+			var _rutil: float = (RAID_LOOT_W * _take + RAID_NEED_W * _rneed) * _rodds * _rperson
+			# ★逐筆可 dump（全量暫態可觀測性）：缺任一項就答不出「是哪一個因子把它壓扁的」
+			if Probe.enabled:
+				Probe.bump("raid.eval")
+				Probe.bump_sample("raid.factors", {
+					"prey": ctx.weak_prey_id, "priced": ctx.weak_prey_priced,
+					"est": snappedf(ctx.weak_prey_richness_est, 0.1),
+					"take": snappedf(_take, 0.001), "need": snappedf(_rneed, 0.001),
+					"cruel": snappedf(_rcruel0, 0.01),
+					"loot_rate": snappedf(NpcCombatSystem.effective_loot_rate(_rcruel0), 0.001),
+					"odds": snappedf(_rodds, 0.001), "person": snappedf(_rperson, 0.001),
+					"util": snappedf(_rutil, 0.0001), "tick": ctx.tick}, 200)
+				# ★★「belief 答不出它多肥」與「它很窮」數值相同、語意不同 ⇒ 分開數
+				Probe.bump("raid.take." + ("priced" if ctx.weak_prey_priced else "unpriced"))
+			return _rutil
 		"occupy_drive":
 			# 佔村 = 要根據地：無自家 outpost 的流浪狼最需要（base_need=1），有 outpost 但征服 intent 弱驅（0.3）。
 			# 連續 util，與掠奪同 menu 秤 argmax（零新判斷器）。人格染色走 weight("occupy")。

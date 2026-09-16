@@ -71,6 +71,15 @@ var has_home_outpost: bool = false
 var home_restock_min: float = 0.0
 var current_task: String = ""   # ★GATE-A 二刀 touch0：team 自身 current_task（返家 hysteresis 用；自身欄非 god-view）
 var has_weak_prey: bool = false
+# ★★★掠奪的【搶得到多少】（票：掠奪走期望價值 2026-09-16）：
+#   ★走 belief 不走真值（**感知鐵律**，與攻擊同一條路徑）；
+#   ★★而它與 `attack_loot_est` 是**兩個目標**：攻擊看最富的、掠奪看最弱的
+#     ⇒ **同一把秤、不同的輸入** —— 那正是本票「同一把秤」的操作定義。
+#   ★★★`0.0` 這裡的意思是【belief 答不出它多肥】（沒有可定價分項）
+#     —— 而那與「它很窮」數值相同、語意不同（本專案記過的那一族），**故另記一個旗標**。
+var weak_prey_id: int = -1
+var weak_prey_richness_est: float = 0.0
+var weak_prey_priced: bool = false
 # capability grounding（藍圖 tag-soft-ruling 裁2）：self 有效武裝比（armed / pop）。
 # attack/loot eval 讀此→「打得動嗎」的世界事實（無牙商隊 attack eval 趨 0=送死沒人幹，非被禁）。
 # Task2 於 gather 填值（_calc_own_armed / pop）；terms.gd loot_drive/_intent_fit 疊 capability_factor。
@@ -526,6 +535,12 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _fa := FactionAISystem.shared()
 	var _prey: int = _fa._find_weakest_prey(state, team)
 	c.has_weak_prey = _prey != -1
+	# ★同一次 `_find_weakest_prey` 的結果直接用（**不重算**）；belief 讀法與攻擊側同源。
+	c.weak_prey_id = _prey
+	if _prey != -1:
+		var _wbel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, _prey)
+		c.weak_prey_priced = FactionAISystem.belief_has_priced_items(_wbel)
+		c.weak_prey_richness_est = FactionAISystem.belief_richness_coin(_wbel) if c.weak_prey_priced else 0.0
 	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
 	# 無牙商隊 armed≈0 → ratio≈0 → loot_drive/intent_fit capability_factor 壓平（送死沒人幹，非被禁）。
 	c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(float(team.population), 1.0)
