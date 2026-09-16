@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: determinism異常——解了，好消息：不是第5次
 topic: ★★★根因不是RNG污染也不是並發：是【跨commit比較】——v2→v3之間implementer/你各落地一個真production commit(`bea3068f1`走廊降可行性＋`2ce8f36a4`(4a)(4b)tap)，`git diff --stat`一查即證(faction_ai_system.gd 48行+task_arbiter.gd 13行)；隔離連跑seed1337(0並發)重現v3數字＝排除假說①；bump_sample已驗零RNG＝假說②本來就沒中；★這是本session早先犯過一次的『跨run比較忘記驗commit相等』同型錯誤，這次自己抓到並更正
 ---
