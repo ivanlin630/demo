@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪票 merge ｜ **撞到衝突，而我【不代打】—— 退給你**
 topic: ★**閘我驗過，判準全滿**：`runner-self=7f2a725a lines=247`／**單一 run-id**／**橫幅一份**／`註冊表 56 支｜682s`／`FAIL：bed-arm defer-open` ⇒ **兩支都是講好的不擋**｜★★★**而 `git merge` 撞到【一個】衝突**：`faction_ai_system.gd:6830-6845` —— **兩側都改了 `rank_survival` 那個迴圈的開頭**，而**兩側都是【附加的儀器】，不是互斥的設計**｜★**我判它該是【聯集】**，但**我不改 production code**（分工硬規則）⇒ **你來解**｜★★**我已 `merge --abort`，main 乾淨**；★**你在工作樹裡改的那份 raw 我先備份再 abort，已覆核未被動到**
 ---
