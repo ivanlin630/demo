@@ -367,6 +367,21 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 					"util": snappedf(_rutil, 0.0001), "tick": ctx.tick}, 200)
 				# ★★「belief 答不出它多肥」與「它很窮」數值相同、語意不同 ⇒ 分開數
 				Probe.bump("raid.take." + ("priced" if ctx.weak_prey_priced else "unpriced"))
+				# ★★★【無偏的 util 分布】（systems 2026-09-16 要的第二項）：
+				#   ★上面那個 `bump_sample` 是 **first-N（有偏）** ⇒ **它不能當分布用。**
+				#   ★★而要比的正是分布：**兩棵樹的 dispatch 次數相同，可以是「util 變了但排序沒變」**
+				#     ⇒ ★★★那兩件事的下一步完全不同 —— **只看次數分不出來。**
+				#   ★全量計數（每一次 eval 都進桶），零 RNG、不改 `_rutil`。
+				Probe.bump("raid.util.n")
+				Probe.add_amount("raid.util.sum", _rutil)
+				var _rb: String = "ge0.50"
+				if _rutil < 0.02: _rb = "lt0.02"
+				elif _rutil < 0.05: _rb = "lt0.05"
+				elif _rutil < 0.10: _rb = "lt0.10"
+				elif _rutil < 0.20: _rb = "lt0.20"
+				elif _rutil < 0.30: _rb = "lt0.30"
+				elif _rutil < 0.50: _rb = "lt0.50"
+				Probe.bump("raid.util.hist." + _rb)
 			return _rutil
 		"occupy_drive":
 			# 佔村 = 要根據地：無自家 outpost 的流浪狼最需要（base_need=1），有 outpost 但征服 intent 弱驅（0.3）。

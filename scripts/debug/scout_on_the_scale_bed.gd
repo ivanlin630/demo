@@ -694,6 +694,16 @@ func _run() -> void:
 	print("   ★★★**掠奪真的被派出去 ＝ %d 次**（noop %d）" % [
 		loot_ok, int(Probe.counts.get("dispatch.掠奪.noop", 0))])
 	print("      ★若這個數在【掠奪走期望價值】票後掉到 0 ⇒ **`ref` 選錯了**（systems 裁定的回報條件）。")
+	# ★★★【util 分布，不是次數】（systems 2026-09-16）：
+	#   ★**dispatch 次數相同，可以是「util 變了但排序沒變」** ⇒ 兩件事的下一步不同。
+	#   ★★所以印**無偏**的直方圖（全量計數）＋平均 —— **不是 `bump_sample` 那個 first-N。**
+	var _rn: int = int(Probe.counts.get("raid.util.n", 0))
+	var _rsum: float = float(Probe.amounts.get("raid.util.sum", 0.0))
+	var _hb: Array = []
+	for _bk in ["lt0.02", "lt0.05", "lt0.10", "lt0.20", "lt0.30", "lt0.50", "ge0.50"]:
+		_hb.append("%s=%d" % [_bk, int(Probe.counts.get("raid.util.hist." + _bk, 0))])
+	print("   ★掠奪 util 分布（**無偏全量**）：n=%d 平均=%.4f｜%s" % [
+		_rn, (_rsum / maxf(float(_rn), 1.0)), " ".join(_hb)])
 	print("      ★★同樣不在本床下判決：它是 merge 判準的輸入。")
 
 	# ★★★【攻擊也要一張拒絕表】（systems 2026-09-16 的第②個數的下一問）：
