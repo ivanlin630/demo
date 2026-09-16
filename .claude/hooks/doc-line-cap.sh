@@ -90,4 +90,27 @@ if [ "$warn" -gt 0 ]; then
 else
   echo "[doc-cap] ✅ 必讀區全部在上限內"
 fi
+
+# ================================================================
+# ★★★簡體形近字混入偵測（systems 2026-09-17，用戶問「為啥會遇到編碼問題」引出）
+#   ★**它不是編碼問題**：檔案一直是 UTF-8。真相是【簡體形近字】被打進字串，
+#     而 grep 只比對位元組 ⇒ 找不到／永不命中，而肉眼分不出來。
+#   ★★血證 2026-09-16：systems 搜尋 `停滞`（`滞` U+6EDE）而檔案裡是 `停滯`（U+6EEF）
+#     ⇒ 「找不到那一段」被誤讀成「那一段不存在」。
+#   ★★★【誠實限】：**這一格拓不到那一次** —— 那次的錯字在【指令列】上，不在檔案裡。
+#     **它拓得到的是更糟的那一種**：錯字被寫進 hook／spec／code 字串 ⇒ **永久失效而沒有人會發現**。
+# ================================================================
+SIMP_CHARS="滞决别场单发网转类规时实现应断检测树数点问题边过还这个们为说会来对从与样复机义买卖总结论变条级学习记录"
+simp_list=$(grep -rl "[$SIMP_CHARS]" docs .claude/hooks scripts   --include="*.md" --include="*.sh" --include="*.gd" --include="*.tsv"   --exclude-dir=archive --exclude-dir=_archive --exclude-dir=measurements 2>/dev/null \n  | grep -v "doc-line-cap.sh")   # ★排掉偵測器自己：它的對照表就是那些字（自我命中＝雜訊）
+simp_n=$(printf "%s" "$simp_list" | grep -c . )
+simp_hits=$(printf "%s" "$simp_list" | head -6 | sed 's/^/\n  ★/')
+
+if [ "$simp_n" -gt 0 ]; then
+  echo "[simp-lint] 🟡 簡體形近字混入 ${simp_n} 檔（warn-only）：$(printf "%b" "$simp_hits")"
+  echo "[simp-lint] ★它不是「編碼問題」—— 檔案是 UTF-8，錯的是【字】：簡體形近字肉眼分不出來，而 grep 只比位元組。"
+  echo "[simp-lint] ★★危害：寫進 hook／spec／code 字串後 ⇒ 那一行【永遠不命中】，而它不會紅。"
+  echo "[simp-lint] ★★★誠實限：本格只看【檔案裡】—— 打在指令列上的錯字它看不到。"
+else
+  echo "[simp-lint] ✅ 無簡體形近字混入"
+fi
 exit 0
