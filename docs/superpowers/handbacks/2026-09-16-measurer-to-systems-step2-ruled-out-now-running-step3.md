@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: determinism異常②步驟結果
 topic: ★②沒中——逐筆讀code(gen5_remeasure_bed.gd:151-178)，gather()/rank_scored_ctx()各呼叫一次,與v2完全相同,bump_sample的每個欄位都來自已算好的ctx/scored/atk_u/full_rank，零額外引擎呼叫；正在跑③(單獨連跑同seed 3次，跑前跑後都驗證0個並發godot進程)
 ---
