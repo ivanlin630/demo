@@ -3722,6 +3722,7 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 			#   ★**「某 option 贏了」與「它真的被派出去」是兩個數** —— 這一族數的是後者。
 			#   ★★而它必須涵蓋【所有】派工迴圈，否則差額量的是 tap 覆蓋率不是世界行為（血證在 09-15）。
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _set_ok else "noop"])
+			Probe.bump("dsrc.%s.unified.%s" % [opt, "ok" if _set_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.unified." + ("ok" if _set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _set_ok else "recon.dispatch.noop")
@@ -4205,6 +4206,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		var _sub_set_ok: bool = TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam", opt)
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _sub_set_ok else "noop"])
+			Probe.bump("dsrc.%s.subteam.%s" % [opt, "ok" if _sub_set_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.subteam." + ("ok" if _sub_set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _sub_set_ok else "recon.dispatch.noop")
@@ -4461,6 +4463,11 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 			if _dispatch_goal_delegate(state, team, td):
 				team.current_option = String(e["opt"])
 				return
+			# ★這個 `continue` 上一版【沒有】+1 ⇒ 前面失敗過卻被記成「第 1 順位」（我自承的儀器 bug）
+			if Probe.enabled:
+				Probe.bump("dpos.skip.solo.%s.delegate_fail" % opt)
+				_solo_skipped.append("%s:delegate_fail" % opt)
+				_solo_pos += 1
 			continue
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_IDLE, Vector2i(-1, -1), "idle_skip")   # Fix2b 早退 tap
@@ -4480,6 +4487,7 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 		var _solo_set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo", opt)
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _solo_set_ok else "noop"])
+			Probe.bump("dsrc.%s.solo.%s" % [opt, "ok" if _solo_set_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
 			if _solo_set_ok:
 				Probe.bump("dpos.ok.solo.%s.pos%d" % [opt, mini(_solo_pos, 9)])
 				if _solo_pos > 0 and opt == "掠奪":
@@ -6850,6 +6858,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival", opt)   # ★① 單一源(收 @80)
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _surv_ok else "noop"])
+			Probe.bump("dsrc.%s.survival.%s" % [opt, "ok" if _surv_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
 			if _surv_ok:
 				Probe.bump("dpos.ok.survival.%s.pos%d" % [opt, mini(_sv_pos, 9)])
 				if _sv_pos > 0 and opt == "掠奪":

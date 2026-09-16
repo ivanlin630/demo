@@ -822,6 +822,10 @@ static func reorder_same_need_first(ranked: Array) -> Array:
 			elif _after > _before: Probe.bump("reord.raid.moved_down")
 			else: Probe.bump("reord.raid.same_pos")
 			if _after == 0 and _before != 0: Probe.bump("reord.raid.became_first")
+			# ★★★【我上一版量錯了種類】：`moved_up`／`became_first` 都是**差**（delta），
+			#   而「21 次派工時它排第幾」要的是**位置**（level）—— ★**delta 答不了 level。**
+			Probe.bump("reord.raid.finalpos.%d" % mini(_after, 9))
+			Probe.bump("reord.raid.beforepos.%d" % mini(_before, 9))
 	return out
 
 static func rank(state: WorldState, team: TeamData) -> Array:

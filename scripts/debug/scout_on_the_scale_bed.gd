@@ -762,6 +762,24 @@ func _run() -> void:
 		int(Probe.counts.get("reord.raid.moved_down", 0)),
 		int(Probe.counts.get("reord.raid.same_pos", 0)),
 		int(Probe.counts.get("reord.raid.became_first", 0))])
+	# ★★★【level 不是 delta】：上一版只印了移動方向，而問題要的是「它最後排第幾」。
+	var _fp: Array = []
+	var _bp: Array = []
+	for _fi in range(10):
+		var _fc: int = int(Probe.counts.get("reord.raid.finalpos.%d" % _fi, 0))
+		var _bc: int = int(Probe.counts.get("reord.raid.beforepos.%d" % _fi, 0))
+		if _fc > 0: _fp.append("第%d=%d" % [_fi + 1, _fc])
+		if _bc > 0: _bp.append("第%d=%d" % [_fi + 1, _bc])
+	print("      ★★重排**後**掠奪的位置：%s" % " ".join(_fp))
+	print("      ★★重排**前**掠奪的位置：%s" % " ".join(_bp))
+	# ★★★【四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字】—— 補上
+	var _ds: Array = []
+	for _sname in ["unified", "subteam", "solo", "survival"]:
+		_ds.append("%s=%d/%d" % [_sname,
+			int(Probe.counts.get("dsrc.掠奪.%s.ok" % _sname, 0)),
+			int(Probe.counts.get("dsrc.掠奪.%s.noop" % _sname, 0))])
+	print("   ★★★掠奪派工的**來源站**（ok/noop）：%s" % " ".join(_ds))
+	print("      ★對帳：四站 ok 相加應該 ＝ `dispatch.掠奪.ok`（%d）" % loot_ok)
 	var _po: Array = Probe.samples.get("dpos.raid_passedover", [])
 	print("      被輪到的逐筆樣本 %d 筆（★first-N）：" % _po.size())
 	for _i5 in range(mini(5, _po.size())):
