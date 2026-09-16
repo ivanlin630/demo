@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 尾部人格在常態會搶
 topic: ★①②③三問都判過,無阻擋；★★★但查§2 retaliation_risk時撞到一件事：「目標belief戰力/我方戰力」**已經是一支既有函式**（`ThreatAssessment._power_ratio(state,team,other)`——泛型,吃任意TeamData,就是上一張票defer的那個「對target另算一次」要的東西），建議直接呼叫它,別另起一份新公式(否則會重演它自己文檔裡記過的skill不對稱舊bug)；★★另查§4的「同軸」前提**不成立**——`person`(`terms.gd:272`)實際是`maxf(好戰,貪婪)`不是`max(好戰,殘忍)`,「兇性容忍與person同軸」這句站不住,不影響設計本身但理由要換
 ---

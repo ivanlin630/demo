@@ -25,9 +25,10 @@ WHAT 來源: blueprint 裁 2026-09-16（`…-blueprint-to-systems-yes-the-tail-s
 ```
 util ＝ (W_loot × take × w_wealth + W_need × need) × odds × person × (1 − subjective_cost)
 subjective_cost ＝ **retaliation_risk × (1 − 兇性容忍)**
-  retaliation_risk ＝ ★**belief-based**（感知鐵律）：目標的 belief 戰力 ／ 我方戰力，clamp [0,1]
+  retaliation_risk ＝ ★★★**直接呼 `ThreatAssessment._power_ratio(state, team, other)`**（`threat_assessment.gd:84`）—— **泛型、吃任意 `TeamData`、已經是 belief-based**（無 belief fallback 用 self_pop＝視對方等強，禁讀真值），★**而它裡面已經修過【技能維不對稱】那個舊 bug**（`:95-98`）⇒ ★★**另起一份新公式＝重演它自己文檔裡記過的那個錯**（R² 抓到）。
+                     舊寫法（已廢）：~~belief-based~~（感知鐵律）：目標的 belief 戰力 ／ 我方戰力，clamp [0,1]
                      ⇒ **打一個打得過但會反咬的鄰居，成本高；打一個弱到不會回頭的，成本低**
-  兇性容忍        ＝ clamp(max(好戰, 殘忍), 0, 1)  ★**與 `person` 同軸（見 §4 待判）**
+  兇性容忍        ＝ clamp(max(好戰, 殘忍), 0, 1)  ★★**訂正（R² 2026-09-16）**：`person` 實際是 `maxf(好戰, 貪婪)`（`terms.gd:272`，**我核過**），**不是殘忍** ⇒ ★★★**殘忍根本不在 `person` 裡** ⇒ 「同軸」那個理由作廢；而【軸本身是對的】—— 正典要的就是**貪婪／好戰**尾部人格
 ```
 ★**禁**：把 `subjective_cost` 寫成常數、或用「距離」當 proxy（那是 `odds` 那一側的事）。
 ★★**而「道德折價」這一半我【不接】** —— **它今天沒有可讀的來源**（`信義`／`義氣` 是否該進來 ＝ WHAT）；

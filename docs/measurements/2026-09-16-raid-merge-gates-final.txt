@@ -1,0 +1,8 @@
+[MERGE-GATES] ★判決同時寫入 .claude/hooks/.merge-gates-last.log（外層 shell 若被殺，結論仍在這裡）
+[MERGE-GATES] runner-self=7f2a725a lines=247 run-id=58011-165641｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**
+[MERGE-GATES] [TREE] HEAD=412fdef2a registry=clean runner=clean code-dirty=1
+[MERGE-GATES] ★本次判決適用於 HEAD=412fdef2a（註冊表與 runner 皆乾淨）
+[MERGE-GATES] ★main 基線紅數【從未量過】—— 在 main、乾淨工作區跑一次本 runner 就會記下來
+[MERGE-GATES] ✓ constitution （2s）
+[MERGE-GATES] ✓ bare-tick （4s）
+[MERGE-GATES] ✓ build-duration （1s）
