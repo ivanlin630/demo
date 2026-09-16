@@ -4432,6 +4432,10 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 	_solo_ran_engine = true
 	var ranked: Array = DecisionEngine.rank_scored(state, team, "solo_body")
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
+	# ★【第幾順位被派出去】同 survival 路（systems 2026-09-16）：
+	#   ★★**贏 argmax 而派出去** 與 **前面的贏家派不出去、輪到它** 在 `dispatch.*` 上長得一模一樣。
+	var _solo_pos: int = 0
+	var _solo_skipped: Array = []
 	for e in ranked:
 		var opt: String = e["opt"]
 		# 序5 dissolve：征服 intent 攻擊 → dispatch-time scout-verify scaffolding（不確定→斥候、confident→打；
@@ -4460,14 +4464,31 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 			continue
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_IDLE, Vector2i(-1, -1), "idle_skip")   # Fix2b 早退 tap
+			if Probe.enabled:
+				Probe.bump("dpos.skip.solo.%s.idle_skip" % opt)
+				_solo_skipped.append("%s:idle_skip" % opt)
+				_solo_pos += 1
 			continue
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
+			if Probe.enabled:
+				Probe.bump("dpos.skip.solo.%s.finder_miss" % opt)
+				_solo_skipped.append("%s:finder_miss" % opt)
+				_solo_pos += 1
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
 		var _solo_set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo", opt)
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _solo_set_ok else "noop"])
+			if _solo_set_ok:
+				Probe.bump("dpos.ok.solo.%s.pos%d" % [opt, mini(_solo_pos, 9)])
+				if _solo_pos > 0 and opt == "掠奪":
+					Probe.bump_sample("dpos.raid_passedover", {"path": "solo", "pos": _solo_pos,
+						"skipped": " ".join(_solo_skipped)}, 60)
+			else:
+				Probe.bump("dpos.skip.solo.%s.arb_deny" % opt)
+				_solo_skipped.append("%s:arb_deny" % opt)
+				_solo_pos += 1
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.solo." + ("ok" if _solo_set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _solo_set_ok else "recon.dispatch.noop")
@@ -6798,6 +6819,12 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	#   ★食 inline 算（effective_food，零 gather 零 RNG——避第二 gather 岔世界 seed42 regression）。
 	_detect_survival_stall(state, team)
 	_detect_commitment_stall(state, team)   # ★承諾停滯偵測（第 4 個 decision entry：survival 路）
+	# ★★★【「被輪到」不是「被選中」】（systems 2026-09-16）：
+	#   ★`dispatch.<opt>.ok` 只數「有沒有派出去」 —— **贏 argmax 而派出去** 與
+	#     **前面的贏家派不出去、輪到它** 在那個計數上**長得一模一樣**。
+	#   ★★而在世界觀感上那是兩個完全不同的世界 ⇒ **記【第幾順位】與【前面那個為什麼失敗】。**
+	var _sv_pos: int = 0
+	var _sv_skipped: Array = []
 	for opt in DecisionEngine.rank_survival(state, team):
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
@@ -6809,6 +6836,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			Probe.bump("flee.dispatch_site.trigger_survival_NO_SET")
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # 路徑維 tap：finder 撲空 attempt（churn 現形）
+			if Probe.enabled:
+				Probe.bump("dpos.skip.survival.%s.finder_miss" % opt)
+				_sv_skipped.append("%s:finder_miss" % opt)
+			_sv_pos += 1
 			continue   # finder 撲空（無可派目標）→ 試次佳 option
 		# 投靠對象是玩家隊 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge（同 P2a W2）
 		if opt == "併入" and td.has("social_target"):
@@ -6819,6 +6850,15 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival", opt)   # ★① 單一源(收 @80)
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _surv_ok else "noop"])
+			if _surv_ok:
+				Probe.bump("dpos.ok.survival.%s.pos%d" % [opt, mini(_sv_pos, 9)])
+				if _sv_pos > 0 and opt == "掠奪":
+					Probe.bump_sample("dpos.raid_passedover", {"path": "survival", "pos": _sv_pos,
+						"skipped": " ".join(_sv_skipped)}, 60)
+			else:
+				Probe.bump("dpos.skip.survival.%s.arb_deny" % opt)
+				_sv_skipped.append("%s:arb_deny" % opt)
+				_sv_pos += 1
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.survival." + ("ok" if _surv_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _surv_ok else "recon.dispatch.noop")

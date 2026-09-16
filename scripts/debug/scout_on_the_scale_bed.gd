@@ -724,6 +724,32 @@ func _run() -> void:
 		if _c2 > 0: _rkq.append("第%d名=%d" % [_i2 + 1, _c2])
 	print("   ★★★`rank_survival` 的表：掠奪在場 %d 次｜**它拿第一名 %d 次**｜名次分布：%s" % [
 		_svp, _svw, " ".join(_rkq)])
+	# ★★★【拆那兩個 0】（systems 2026-09-16）：★一個 0 有四種意思，**先分【沒有 prey】與【有 prey 但答不出身價】**
+	print("   ★掠奪的 0 是哪一種：`no_prey`=%d｜`unpriced_prey`=%d（母體 `raid.eval`=%d）" % [
+		int(Probe.counts.get("raid.zero.no_prey", 0)),
+		int(Probe.counts.get("raid.zero.unpriced_prey", 0)),
+		int(Probe.counts.get("raid.eval", 0))])
+	print("      ★★`raid.take.priced`=%d／`unpriced`=%d（★這兩顆是【有 prey 之後】才數的，母體不同）" % [
+		int(Probe.counts.get("raid.take.priced", 0)), int(Probe.counts.get("raid.take.unpriced", 0))])
+	print("   ★併入的 0：`no_host_flow`=%d｜`flow_util_zero`=%d（母體 `join.eval`=%d）" % [
+		int(Probe.counts.get("join.zero.no_host_flow", 0)),
+		int(Probe.counts.get("join.zero.flow_util_zero", 0)),
+		int(Probe.counts.get("join.eval", 0))])
+	var _jf: Array = Probe.samples.get("join.factors", [])
+	for _i4 in range(mini(3, _jf.size())):
+		print("        併入逐筆：%s" % str(_jf[_i4]))
+	# ★★★【第幾順位被派出去】—— **「贏了」與「被輪到」在 `dispatch.*` 上長得一模一樣**
+	for _pp in ["solo", "survival"]:
+		var _pos_rows: Array = []
+		for _pi in range(10):
+			var _pc: int = int(Probe.counts.get("dpos.ok.%s.掠奪.pos%d" % [_pp, _pi], 0))
+			if _pc > 0: _pos_rows.append("第%d順位=%d" % [_pi + 1, _pc])
+		if not _pos_rows.is_empty():
+			print("   ★★掠奪在 `%s` 路被派出去的【順位】：%s" % [_pp, " ".join(_pos_rows)])
+	var _po: Array = Probe.samples.get("dpos.raid_passedover", [])
+	print("      被輪到的逐筆樣本 %d 筆（★first-N）：" % _po.size())
+	for _i5 in range(mini(5, _po.size())):
+		print("        %s" % str(_po[_i5]))
 	var _tb: Array = Probe.samples.get("raidsurv.table", [])
 	print("      逐筆樣本 %d 筆（★`bump_sample` ＝ **first-N，有偏** ⇒ 只能當【長相】不能當分布）：" % _tb.size())
 	for _i3 in range(mini(6, _tb.size())):

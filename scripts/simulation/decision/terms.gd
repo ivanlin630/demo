@@ -328,7 +328,17 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return _opp
 		"loot_drive":
 			if opt != "掠奪": return 0.0
-			if not ctx.has_weak_prey: return 0.0
+			# ★★★【一個 0 有四種意思】（systems 2026-09-16）：`_find_weakest_prey` 有**四道門**
+			#   （已 discovered ／ `has_belief` ／ reachable ／ `pop_est < 0.7×我方人口`）——
+			#   ★**任何一道關著都給你一個 0，而那四個 0 的意義完全不同。**
+			#   ★★這裡先分出最粗、也最重要的那一刀：**「沒有 prey」vs「有 prey 但身價答不出來」**
+			#     ⇒ ★★★**前者是【情報】問題，後者是【估值】問題 —— 修法完全不同。**
+			if not ctx.has_weak_prey:
+				if Probe.enabled: Probe.bump("raid.zero.no_prey")
+				return 0.0
+			if Probe.enabled and not ctx.weak_prey_priced:
+				# ★有 prey、而 belief 裡沒有任何可定價的分項 ⇒ `take` 恆 0 ⇒ util 恆 0
+				Probe.bump("raid.zero.unpriced_prey")
 			# ★★★與攻擊【逐字同形】，只有輸入不同（票：掠奪走期望價值 2026-09-16）：
 			#   攻擊：(0.6 × loot + 0.4 × need) × odds × person   ← 目標＝最富的 prey
 			#   掠奪：(0.6 × take + 0.4 × need) × odds × person   ← 目標＝最弱的 prey
@@ -404,9 +414,26 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   host 村的被動流（現成、無工期 ⇒ delay 0），名聲磁鐵降為【乘數】而非全部。
 			#   ⇒ 高名聲但自己快餓死的 host 不再自動拿高分（那正是舊式的缺陷）。
 			var _rep_mult: float = clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
-			return clampf(DiscountedFlow.flow_utility(ctx.join_host_flow, ctx.passive_food_daily,
+			var _jflow: float = clampf(DiscountedFlow.flow_utility(ctx.join_host_flow, ctx.passive_food_daily,
 				float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
-				ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP) * _rep_mult
+				ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP)
+			# ★★★【併入那個 0 也要被拆開】（systems 2026-09-16：兩個 option 同時剛好 0，通常是一個共同因子）
+			#   ★逐因子印：`host_flow`（有沒有 host／它有沒有飯）與 `rep_mult`（名聲乘數）
+			#   ⇒ ★★**「沒有 host」與「host 沒飯」在一個 0 上長得一樣**，而它們是兩種病。
+			if Probe.enabled:
+				Probe.bump("join.eval")
+				if _jflow <= 0.0:
+					Probe.bump("join.zero." + ("no_host_flow" if ctx.join_host_flow <= 0.0 else "flow_util_zero"))
+				Probe.bump_sample("join.factors", {
+					"host_flow": snappedf(ctx.join_host_flow, 0.001),
+					"passive": snappedf(ctx.passive_food_daily, 0.001),
+					"net_flow": snappedf(ctx.net_food_flow, 0.001),
+					"stock": snappedf(ctx.food_stock, 0.1),
+					"rep": snappedf(ctx.best_protector_rep, 0.001),
+					"rep_mult": snappedf(_rep_mult, 0.001),
+					"flow_util": snappedf(_jflow, 0.0001),
+					"util": snappedf(_jflow * _rep_mult, 0.0001)}, 120)
+			return _jflow * _rep_mult
 		"camp_drive":
 			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
 			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:
