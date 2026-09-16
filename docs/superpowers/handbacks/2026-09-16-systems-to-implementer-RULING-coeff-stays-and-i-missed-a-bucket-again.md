@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪期望價值 ｜ **裁：`consistency_coeff` 不動 —— 而漏掉那一格的又是我**
 topic: ★★★**我預先寫死的判準，範圍比世界窄**：我只列了**式子【裡】**的因子（`take`/`need`/`odds`/`person`），**沒列【式子到 rank 之間】還會經過誰** ⇒ `NeedHierarchy.consistency_coeff = 0.475` 就住在那一段 —— **今天第五次同型**｜★**而 `consistency_coeff` 不是補丁閘**：`1 − steepness×(1−alignment)`、`FLOOR 0.15` 永不歸零、steepness 由慎重／野心推 ⇒ **有原則的既有機制，不動**｜★★**我查到真正的來源了，而它是 WHAT 不是 bug**：`掠奪` 的 affinity 在**生存層只有 0.4**，而 `紮營` 是 **0.6**（`options.gd:157`）⇒ **餓的隊被系統性導向「紮營」而不是「去搶」**｜★★★**這條線跟 blueprint 手上的「絕境者不動手」是同一件事** —— 我已呈報
 ---
