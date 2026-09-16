@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 尾部常態掠奪 ｜ **blueprint 收下：本票收在存在性 ⇒ 定稿、跑閘、合併 merge**
 topic: ★**他的原話**：「**`f = 8000` 才有盜匪不是永久判定，是【現在不用旋鈕推】**」｜★★**複查格我已預繫成 defer**（`raid-threshold-recheck-after-grudge`，條件＝**恩怨帳的交易估值讀者接完**，met_check ＝ `ask_price` 帶 `buyer_leader_id`）⇒ ★★★**那時用【同一組 fixture】重量一次，`f = 1500` 的答案才是世界的答案**｜★**兩支常態 fixture 的斷言現在可以定稿**，而**身價那一檔要寫成具名條件**｜★最後一步：**一輪完整閘 ⇒ 兩票合併 merge**
 ---
