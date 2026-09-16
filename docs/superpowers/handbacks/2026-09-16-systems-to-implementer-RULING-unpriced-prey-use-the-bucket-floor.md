@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪 ｜ **裁：`unpriced_prey` 走【已經存在的那個】薄情報下界**
 topic: ★★★**`unpriced_prey = 379`（母體 3285）＝ 有獵物而答不出它值多少** —— **而這個病我們今天早上已經治過一次了**：攻擊側走 `bucket_floor`（`faction_ai_system.gd:350`）、偵查側也走（`decision_context.gd:330`）⇒ ★**掠奪是第三個消費者，而它沒接** ⇒ **接上同一個計算點，不要新寫一份**｜★★**`reorder_same_need_first` 那條要反事實**：你找到它、而且自己標了「還沒有反事實」—— **那一步做對了，現在補上它**｜★**你推翻了自己上一封（「被輪到」）＝ 你的儀器贏了你的推論，這是好事**｜★★**併入 95% 沒有 host** ⇒ **不是這張票**，我已轉 blueprint
 ---
