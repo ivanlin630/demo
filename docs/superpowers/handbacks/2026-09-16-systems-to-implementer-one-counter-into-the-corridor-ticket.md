@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: corridor 票 ｜ **併一顆計數進去（★不是新票）**
 topic: ★**measurer 回報：(4a)/(4b) 靠聚合只能定 163/621，450 卡在 survival-class 的 priority 動態衰減**｜★★★**裁：在 deny 那一刻分類，不要存逐筆樣本** —— `arbiter.deny.優先序不足.4a` ／ `.4b`（**擋它的 priority ＞ 它自己 ⇒ 4a**）｜★**理由**：`bump_sample` 是 first-N（偏差）／樣本會長（今天才追過 OOM）／**而我們要的只是一個二分，在那一刻可算、事後不可算**
 ---
