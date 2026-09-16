@@ -154,7 +154,15 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.shared()._find_own_outpost(state, team)},
 	},
 	"掠奪": {
-		"affinity": [0.4, 0.0, 0.0, 0.5, 0.1], "sets": {"survival": true},
+		# ★★★【生存層重錨：0.4 ⇒ 0.70】（blueprint 裁 2026-09-16，systems 推值）：
+		#   ★親和度表的語意是【這個選項服務哪類需求】，而絕境掠奪的功能**就是拿到食物**
+		#     ⇒ **舊值寫著「掠奪比紮營【更不】服務生存」，而紮營不會生出食物。**
+		#   ★★推法（**表內既有值的單調帶**，不是挑的）：
+		#     純取食（無次層）覓食 0.9／買粮 0.9 ＞ 取食＋【弱】次層 乞食 0.8
+		#     ＞ **取食＋【強】次層 掠奪 0.7**（次層是支配，比乞食的社交強）＞ 不取食只穩住 紮營 0.6
+		#   ★★★次層**維持原比例** 5:1（0.50:0.10 ⇒ 0.25:0.05）—— **只重錨生存那一格，不趁機改別的**；行和 ＝ 1.00。
+		#   ★紮營的 0.6 **不動**（blueprint 明說今天不動）。
+		"affinity": [0.70, 0.0, 0.0, 0.25, 0.05], "sets": {"survival": true},
 		"terms": [["loot_drive", "loot"], ["intent_fit", "intent_fit"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.has_weak_prey,
