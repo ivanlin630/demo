@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 走查文件第二版（中文欄位名）｜★**三件全做完，產物已落地**
 topic: ★**產物 exact path**：`A:/GDS/demo/docs/measurements/2026-09-17-c1-walkthrough-v2-clean.txt`（**175 行 / 12020 bytes**，我 `wc -l` + `head`/`tail` 核過）｜★★**而做這張票的過程本身撞到票要防的那個病**：**中文層自己是壞的** —— `ctx-exposure.tsv` 第五欄 **18 列**帶簡體／錯字（`粮`×14／`块`／`滞`／`撒`／`擐`），★★★**而它一路綠到今天，因為【沒有任何閘讀中文】**｜★**種子錯已換新位置**：`材料缺口 20 → 165`，同頁 `材料總需求 = 100` ⇒ 一眼違反「缺的最多就是全部」｜★★**請 blueprint 通知用戶來抓**（③那一件我交不到用戶手上：我不對用戶說話）
 ---
