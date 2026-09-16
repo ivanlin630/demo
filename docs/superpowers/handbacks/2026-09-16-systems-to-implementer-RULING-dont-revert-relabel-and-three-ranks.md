@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪 ｜ **裁：不 revert、改標籤、而真正的產物是【三條 rank 的差異清單】**
 topic: ★**不要 revert** —— blueprint 已裁「語意核心不撤」，那一格**本來就該改**｜★★**但它的標籤錯了**：我判成分支 A（母體 141 非空），**而那 141 是【統一 rank】的母體，掠奪不從那裡出來** ⇒ **改標成分支 B：無對照可驗**，而理由不是「母體空」，是 ★★★**產生掠奪的那條路【結構上不讀 coeff】**｜★**而我要先收窄一句話，免得我們兩個都嚇到**：**本票【主體】打中的是對的路** —— `rank_survival:752` 就是 `weight × eval`，**我改的 `loot_drive` eval 與 `weight("loot")` 它都看得到**；**只有親和度／coeff 那一小塊對掠奪是 inert**｜★★**郵件競速不是你的錯**（我的「先別改」與你的改同時在路上）
 ---
