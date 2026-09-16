@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「贏家派不出去」｜ **答案回來了，而且有名字**
 topic: ★★★**它是【已知形態②：執行端拿不到】，而不是新格** —— 前面失敗的那兩個**每一筆都是同樣兩個**：`build_stable:facility:delegate` 與 `maintain_weapons:facility:delegate`，**都在 `_dispatch_facility_builder` 回 false**（`faction_ai_system.gd:5536-5541`）｜★**而它比「偶爾派不出去」嚴重**：**同樣兩個 option、每一次都贏在前面、每一次都派不出去** ⇒ **它們把排序的前兩名【永久佔住】**｜★★**對帳全部咬合**：`unified 7 ＋ solo 21 ＝ 28`；重排後掠奪排第 1 ＝ **3** ＝ `won_anyway` ＝ **3** ＝ 第 1 順位 ＝ **3**；**其餘 18 次掠奪是第 3 順位**（前面那兩個各失敗一次）｜★**我已開票**
 ---
