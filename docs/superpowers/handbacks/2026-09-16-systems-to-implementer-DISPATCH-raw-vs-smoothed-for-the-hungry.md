@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 急迫管線 ｜ **條件量測（blueprint 升格）：那 41 個餓隊天，決策當刻的生存急迫**
 topic: ★★★**成對印**：`raw[生存]` 與 `smoothed[生存]` **同一刻、同一筆** —— **只有成對才分得出「平滑吃掉尖峰」與「它根本不算餓」**｜★**母體＝那 41 個「餓」的隊天**（不是全世界；★★**今天我剛因為用全世界平均回答逐隊問題而被 blueprint 打回**）｜★**已知背景**：`raw[生存] = (SURVIVAL_SATED_DAYS − food_days)/SURVIVAL_SATED_DAYS`（`need_hierarchy.gd:44`）⇒ **餓 ⇒ raw 應接近 1**；而 `urgency` 走 EWMA `α = 0.25`（`:20/:132`）⇒ **要 3–4 個 cadence 才爬到 0.6**｜★★**親和度 A 已定案**（`[0.70, 0, 0, 0.25, 0.05]`），**而我那條「coeff 分布不得變低」的驗收條件【作廢】**
 ---
