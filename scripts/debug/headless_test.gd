@@ -14478,11 +14478,15 @@ func _test_relation_graph_core() -> void:
 	var _sat: float = 1.0 - (1.0 - 0.5) * (1.0 - 0.9)   # ＝ 0.95
 	assert(absf(float(RelationGraph.strongest(edges, "feud")["intensity"]) - _sat) < 0.0001,
 		"飽和疊加 1−(1−0.5)(1−0.9) ＝ %.4f（★舊制 `max` 會是 0.9 —— 而那是被用戶裁掉的語意）" % _sat)
+	assert(RelationGraph.strongest(edges, "feud")["tick"] == 120, "tick 更新")
 	# ★成對的另一半：**飽和永不破 1** —— 疊一個 0.99 上去仍然 < 1
+	#   ★★★**放在 `tick 更新` 那一行【之後】**：它自己也是一次 `add_edge`（tick 130）
+	#     ⇒ ★**放在前面就會把下一行斷言的 tick 從 120 改成 130** ——
+	#     ★★而那支斷言驗的是【別的東西】，卻會因為我插隊而紅。
+	#   ⇒ ★★★**在共用 fixture 上追加步驟，等於改變它【後面每一行】的前提。**
 	RelationGraph.add_edge(edges, "feud", 7, 0.99, 130)
 	assert(float(RelationGraph.strongest(edges, "feud")["intensity"]) < 1.0,
 		"飽和疊加**永不破 1**（實際 %.6f）" % float(RelationGraph.strongest(edges, "feud")["intensity"]))
-	assert(RelationGraph.strongest(edges, "feud")["tick"] == 120, "tick 更新")
 	# 較低 intensity 不覆蓋
 	RelationGraph.add_edge(edges, "feud", 7, 0.2, 130)
 	assert(RelationGraph.strongest(edges, "feud")["intensity"] == 0.9, "低值不蓋")

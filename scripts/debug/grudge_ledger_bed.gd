@@ -167,7 +167,11 @@ func _run() -> void:
 		+ "（★若它仍產生邊 ⇒ 我留了一個永遠不會被觸發、卻看起來接好了的分支）")
 
 	# ── 格3／格4：交易逐方估值 ──
-	var state := WorldState.new(); state.world = WorldData.new()
+	# ★★★【走 `MeasureBedHelper.arm_and_new()`】（bed-arm 閘；同掠奪票那一刀）：
+	#   ★閘的母體就是 `WorldState.new()` 的呼叫檔 ⇒ 自己 new 會讓「未涵蓋」+1
+	#   ★★而白名單**不是**出路：那份檔的檔頭逐字寫「**新增床不得加進來**」
+	#   ⇒ ★★★手工組世界的正規入口是 `arm_and_new`（閘檔頭 :28 逐字列了它）。
+	var state := MeasureBedHelper.arm_and_new()
 	var seller := TeamData.new(); seller.team_id = 10; seller.leader_id = 1000
 	# ★★★`TeamData.population` 是**計算屬性**，直接賦值會被**靜默吞掉**（跑出來有 [SETTER-SWALLOWED]）
 	#   ⇒ 用 `AnonCohort` 真的放人進去。
