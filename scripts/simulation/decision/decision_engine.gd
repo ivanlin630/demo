@@ -788,6 +788,19 @@ static var _last_survival_scored: Array = []
 static func rank_survival_scored() -> Array:
 	return _last_survival_scored
 
+# ★★★跨 run 清除點（`cross-run-static` 閘直接指名了這顆）：
+#   ★static var 在同一個行程裡**跨 run 活著** ⇒ 一支床跑兩個世界時，
+#   ★★第二個世界的第一次 `rank_survival_scored()` 會讀到**上一個世界的** util
+#   ⇒ ★★★**而那不會有任何東西紅** —— 它只會讓同層比較拿到一個別的世界的數。
+#   ★所以選【清除點】而不是【白名單】：白名單要的是「可查的根據」，
+#     而這顆**本來就該被清** —— 它是一次計算的殘留，不是設定。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _last_survival_scored.is_empty():
+		cleared["DecisionEngine._last_survival_scored"] = str(_last_survival_scored.size())
+	_last_survival_scored = []
+	return cleared
+
 # 融合 threat 子集排序（序1 溶入：non-unified _evaluate_threat 委派用，鏡射 rank_survival）。
 # 取 ctx（呼叫端已 gather，避重算）→ applicable ∩ THREAT_OPTION_SET → util 秤 → 降序。
 # 無 commitment bonus（鏡射舊 _dispatch_threat_response 純 argmax；threat 每 cadence idle 才重觸發）。
