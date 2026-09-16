@@ -58,6 +58,13 @@ func _run() -> void:
 	else:
 		var ldr: PersonData = fx.persons.get(obs.leader_id)
 		if fx.team_intel.has(obs.team_id): (fx.team_intel[obs.team_id] as Dictionary).erase(tgt.team_id)
+		var disc: Array = fx.team_discovered.get(obs.team_id, [])
+		if not (tgt.team_id in disc):
+			disc.append(tgt.team_id); fx.team_discovered[obs.team_id] = disc
+		# ★state1（僅位置claim）——不能跳過：純erase intel是「連claim都沒有」＝真零情報＝
+		#   排除在攻擊/偵查候選之外（scout_on_the_scale_bed §A同款教訓），不是「先驗blind」那一格。
+		BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, obs.team_id, "firsthand",
+			{"tile_pos": tgt.tile_pos}, 1.0, false)
 		var pick_blind: Dictionary = DecisionContext.pick_recon_target(fx, obs)
 		var was_blind_pick: bool = int(pick_blind["id"]) == tgt.team_id and bool(pick_blind["blind"])
 		BeliefSystem.record_claim(fx, obs.team_id, tgt.team_id, obs.team_id, "firsthand",
