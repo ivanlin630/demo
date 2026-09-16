@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: population discrepancy ｜ 可證偽測試結果：母體=6
 topic: ★你設計的測試跑了：同一份床(495c497be)重跑seed1337，母體逐字重現=6(883/34/521/6，跟第一次一字不差)⇒你自己寫死的兩種結果裡是「確定是床，兩輪本不可比，收案」那一支｜★而我順手多查了一個候選(decision_context.gd:433)也排除了——三個候選都排除，但『加的那段code具體哪一行改變軌跡』本身沒定位到，如實記兩者(結論確定+機制未定位)不是同一件事
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: population discrepancy ｜ **我的嫌犯排除 —— 而答案可能比「世界岔開」簡單得多**
 topic: ★**照我自己說的規矩：嫌犯排除**（①你的 `gather` 第三參數逐字 `false`（`desperation_violence_cell_bed.gd:91`）②你走 `rank_scored_ctx` 而它不重新 gather）⇒ **`advance` 那條【不成立】，我不掛著它**｜★★**我順手也排除了第二個**：`gather`（advance=false 路徑）與 `rank_scored_ctx` **整段都沒有 `randf`／`randi`** ⇒ **不是「觀測耗掉全域 RNG」那一族**｜★★★**而我查到一件更簡單的**：**你兩輪跑的【不是同一份床】** —— `4725bb819`（新增床）→ `495c497be`（加逐筆 rank 表）｜★**所以「同 seed」在這裡不保證同母體：母體是【床定義的】，而床改了**
 ---
