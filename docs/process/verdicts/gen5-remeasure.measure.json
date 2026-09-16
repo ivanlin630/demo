@@ -1,0 +1,68 @@
+{
+  "token": "gen5-remeasure",
+  "slice": "世代5(2fb10d7c1)重量測——HOW spec docs/superpowers/specs/2026-09-16-gen5-remeasure-HOW.md",
+  "date": "2026-09-16",
+  "measured_at_head": "跑於f31560f43(3-seed跑本身在dbe0f2602/1802BCF附近，工作樹dirty於新床本身，均為2fb10d7c1後裔，已git merge-base --is-ancestor驗證)",
+  "touches": [],
+  "world": "warring_states / seed=1337,2024,777(多seed=本輪主因，答比率) / 10天窗(①②④/(4a)(4b)) + 1天窗補驗(③，day0存在性單seed即可)",
+  "beds": [
+    "scripts/debug/gen5_remeasure_bed.gd（本卷新寫，acceptance）"
+  ],
+  "raw_logs": [
+    "docs/measurements/2026-09-16-gen5-remeasure-seed1337-raw.txt（UTF-16LE編碼，需iconv轉碼讀）",
+    "docs/measurements/2026-09-16-gen5-remeasure-seed2024-raw.txt",
+    "docs/measurements/2026-09-16-gen5-remeasure-seed777-raw.txt",
+    "docs/measurements/2026-09-16-gen5-remeasure-fixcheck-raw.txt（③fixture bug修好後的1天窗驗證）"
+  ],
+  "specimen_trace": "無——純聚合existence/ratio讀數，不下behavior因果結論，照規免specimen",
+
+  "answer": {
+    "①處境攻擊成對反事實(真隊，非合成ctx，DecisionContext.gather+production rank_scored_ctx)": {
+      "餓且有牙⇒攻擊贏argmax": "3個seed×10天窗，每7天抽樣一次，至今皆=0次出現（不能證明永遠不發生，只能說到此為止未觀察到）",
+      "對照·飽且仍不打": "seed1337 152/152｜seed2024 133/133｜seed777 139/139——三個seed全部0反例，對照格非常乾淨",
+      "verdict": "★對照格(飽不打)成對成立且極穩；★★正例格(餓有牙會打)在10天×3seed窗內未觀察到任何一次⇒不是「驗證失敗」而是「母體太薄」——本卷未拆解「food_days<門檻」與「armed>0」個別出現頻率，無法判斷是窗太短還是兩條件罕見同時成立，留給下一票加細分計數或延長窗"
+    },
+
+    "②偵查三數(候選/贏/真設上)對帳": {
+      "seed1337": "候選5424／贏564／真設上(recon.dispatch.ok)361｜舊走廊g3.scout_dispatch=0",
+      "seed2024": "候選6411／贏741／真設上433｜舊走廊=0",
+      "seed777": "候選5529／贏731／真設上550｜舊走廊=0",
+      "對帳(no-op應等於偵查拒絕表合計)": "三個seed皆對上(787/787、1269/1269、613/613)⇒儀器健康，非未接電",
+      "贏≠設上+no-op(不可相減)": "已知現象(同scout_on_the_scale_bed血證)：rank_scored四個呼叫端(unified/solo/subteam/survival)共用同一母體，非交叉積，差額不是「贏了沒設上」，禁直接相減",
+      "verdict": "②-a recon.dispatch.engine.ok>0：三個seed全部PASS｜②-b舊走廊全窗=0：三個seed全部PASS——新機制真的接管了，不是舊補丁滿足的假綠"
+    },
+
+    "③先驗被取代逐筆證據(day0 fixture，單seed存在性即可)": {
+      "★首次跑(3個seed)全部假FAIL": "本床自身bug——erase intel後漏了『state1僅位置claim』就直接測blind pick，退化成『連claim都沒有』的真零情報(排除)，非世界問題",
+      "修復後驗證(seed1337,1天窗)": "情報到手前偵查挑中=true(blind=true)｜到手後偵查仍挑中=false",
+      "verdict": "★★修復後③-a③-b皆PASS——同一(觀察者,目標)對，先驗被真情報取代，逐筆非聚合坐實"
+    },
+
+    "④粒度桶1/2/3單調(day0純讀常數表，seed無關)": {
+      "seed1337驗證": "桶1=0.0292 桶2=0.1074 桶3=0.2652（CAP=1.00）",
+      "verdict": "④-a嚴格單調PASS｜④-b最小桶>0 PASS｜④-c最大桶<CAP PASS——與scout_on_the_scale_bed既有讀數一致，非新發現"
+    },
+
+    "(4a)/(4b)——621次『優先序不足』擋攻擊，靜態上限先切一刀": {
+      "確定(4a)": "迎戰163次——priority_for=70(PRIO_THREAT)不衰減，恆>攻擊own_priority=50",
+      "確定(4b)手不聽腦": "外交6次+貿易2次=8次——priority_for=50(PRIO_DISPATCH)不衰減，與攻擊同層卻擋住",
+      "待逐筆(450次)": "覓食139/return_home137/逃跑106/投靠64/乞食4——五個survival-class holder，priority_for_need依當下food_days動態衰減(80或50)，聚合反推不出，事後不可算",
+      "後續": "已發handback給systems，systems裁定不加bump_sample(first-N偏差+今日曾OOM)、改請implementer在task_arbiter.gd deny點直接分類bump兩個計數鍵(`arbiter.deny.優先序不足.4a`/`.4b`)——已轉交，非本卷職權，本卷先把能定的171(163+8)寫死交件"
+    }
+  },
+
+  "honest_limits": [
+    "★①本卷只讀『現在讀數是什麼』，不下WHAT/HOW修法結論，不調任何參數",
+    "★★①的正例格(餓有牙攻擊贏)10天×3seed=0次出現——母體太薄，未拆解兩條件個別出現率，不能排除是窗太短",
+    "★★②/④/(4a)(4b)全部與世代4以前數字不可比較(尺換了，_generation-boundary.md)",
+    "★③本卷自己的bed在第一輪跑出3個假FAIL(已誠實記錄+修復+重驗，不是把假FAIL悄悄改掉當沒發生過)",
+    "★★[HOST] FreeMB標籤有誤——印的其實是OS.get_static_memory_usage()(進程自身靜態記憶體)非系統可用記憶體；真正的系統FreeMB安全門檻是跑前用PowerShell另外查的(15276MB)，非本床內部那行，下一個讀這份卷的人請勿把床內[HOST]那行當系統FreeMB用",
+    "★450/621的(4a)/(4b)分類未定案，等implementer裝tap後才收尾——本卷交件時明確標『待implementer』，非『後來才發現』",
+    "★三seed跑法非langgraph平行，是PowerShell Start-Process各自獨立起Godot子進程+各自寫log，跑法非機器軌",
+    "★raw_logs是UTF-16LE編碼(PowerShell `*>`重導向預設)，非CP950；下一個人讀請用iconv -f UTF-16LE -t UTF-8，不要用wrapper內建的CP950假設去讀"
+  ],
+
+  "next_station": "to:qa 純聚合existence/ratio讀數，不下behavior因果結論，照規免specimen/免QA故事稽核 → to:systems 判(4a)/(4b)最終收尾+決定①正例格母體太薄是否需要下一票",
+
+  "supersedes": []
+}
