@@ -307,6 +307,15 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 				#   ★量化到 0.01：鍵數有界（母體本來就小）且不靠 first-N 樣本。
 				if _cmp_u == "new_higher" or _cmp_u == "new_lower":
 					Probe.bump("4c.diff.%s.%.2f" % [_cmp_u, absf(_util - team.task_util)])
+				# ★★★defer `arbiter-same-tier-util-not-whitelist` 的【可證偽條件】（systems 2026-09-16）：
+				#   ★**擋錯樣本且 util 優勢 ≥ 0.1** —— 而 0.1 不是手填：
+				#     它是量化精度 0.01 的十倍（★分得出真差與尾數），
+				#     且仍低於【擋得對那群的最小值 0.21】（★★不會漏掉真衝突）。
+				#   ★★★而上一輪的教訓就在這一行：`new_higher` 是一個**布林**，
+				#     它把【高多少】丟掉了 ⇒ 3 筆「更該做」其實是平手（<0.005）。
+				if _cmp_u == "new_higher" and absf(_util - team.task_util) >= 0.1:
+					Probe.bump("4c.wrongblock_ge01")
+					Probe.bump("4c.wrongblock_ge01.opt." + (_opt if _opt != "" else "(無名)"))
 				if _opt != "":
 					Probe.bump("4c.utilcmp.%s.%s" % [_opt, _cmp_u])
 			if _cls4 == "4b" or _cls4 == "4c":

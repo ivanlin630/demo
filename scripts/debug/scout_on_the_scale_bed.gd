@@ -633,6 +633,12 @@ func _run() -> void:
 				drows.append("%s×%d" % [ks.replace("4c.diff." + _cmp + ".", ""), int(Probe.counts[k])])
 		drows.sort()
 		print("   [%s] util 差分佈：%s" % [_cmp, (" ".join(drows) if not drows.is_empty() else "（無）")])
+	# ★★★defer `arbiter-same-tier-util-not-whitelist` 的區別母體（systems 2026-09-16 重開）：
+	#   ★條件是**擋錯且優勢 ≥ 0.1** —— ★★而上一輪的 3 筆是 **< 0.005 的平手**
+	#   ⇒ ★★★**這一格是 0 不是「沒事」，是「那張票目前沒有母體」** —— 兩者要分開讀。
+	print("   ★defer 條件格（擋錯且優勢 ≥ 0.1）：%d 筆%s" % [
+		int(Probe.counts.get("4c.wrongblock_ge01", 0)),
+		"（★0 ⇒ 那張票目前沒有母體，不是「修好了」）" if int(Probe.counts.get("4c.wrongblock_ge01", 0)) == 0 else ""])
 	print("   ★★★**兩群若重疊 ⇒ 一個純量遲滞分不開它們** —— 那時要回報，不是硬挑一個數。")
 	print("   ★`new_higher` > 0 ⇒ **同層白名單擋住了一次【更該做的事】** —— ★★而本床不對它下判決（下一張票）。")
 
