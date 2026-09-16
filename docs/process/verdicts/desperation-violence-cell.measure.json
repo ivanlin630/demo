@@ -2,7 +2,7 @@
   "token": "desperation-violence-cell",
   "slice": "絕境暴力正例格——DISPATCH到期工單(desperation-violence-cell-remeasure，掠奪票merge後兌現)",
   "date": "2026-09-17",
-  "measured_at_head": "seed1337=4725bb819｜seed2024=f2715361a｜seed777=9adc17db8——三個commit不同(其他角色期間落地過)，但已用git diff --stat確認scripts/simulation/在這三個sha之間【無變動】(空diff)，故三seed世界行為相同，可加總",
+  "measured_at_head": "三個seed跑在三棵不同的樹上(sha逐一列出：seed1337=4725bb819｜seed2024=f2715361a｜seed777=9adc17db8)，而三棵樹在scripts/上逐對差異=0(git diff --name-only逐對比對；中間的commit只動hook/文件，未碰production code；systems獨立覆核並跑陽性對照——同一比法對docs/抓到5個檔，證明比法不是恆0)⇒就被量的那個世界而言它們同源，故可加總。★這不是「應該一樣」的宣稱，是「查了什麼、查到什麼」的結果。",
   "touches": [],
   "world": "warring_states / seed=1337,2024,777 / 10天窗，逐日採樣(非每7天，因本題無需呼叫gather/rank_scored_ctx，成本低)",
   "beds": [
@@ -36,7 +36,7 @@
     "★本卷只讀『現在讀數是什麼』，不下WHAT/HOW修法結論，不調任何參數",
     "★★母體=18，動手=0——18次機會不算多，只能排除『0是因為母體太薄』(母體確實>0)；不能排除『再多幾個seed會出現非0』",
     "★★★與v2/v3(gen5_remeasure_bed.gd，掠奪merge前的舊機制)不可加總——本輪掠奪估值整個換過(上秤+貪婪軸+主觀成本)，是全新一輪，不是延續",
-    "★三個seed跑在三個不同的commit(4725bb819/f2715361a/9adc17db8)——已用git diff --stat驗證scripts/simulation/在這三者之間無變動，可視為同一個世界的三個seed，非跨commit污染(判準⑩已套用)",
+    "★三個seed跑在三棵不同的樹上(4725bb819/f2715361a/9adc17db8，逐一列出，不是同一棵樹)——逐對git diff --name-only比對scripts/=0個檔(中間commit只動hook/文件)，systems獨立覆核+跑陽性對照(同比法對docs/抓到5個檔證明非恆0)⇒就被量的世界而言同源，可加總；這是【查過】的結論不是【應該一樣】的假設(判準⑩)",
     "★本題不需要gather()/rank_scored_ctx()，只讀team.current_task，逐日採樣(比之前每7天更密)，母體數字因此不能與v2/v3的每7天採樣直接比密度",
     "★單seed單窗；比率結論(0%)是existence層級的讀數，不是可長期引用的機率"
   ],

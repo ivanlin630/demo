@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 0/18 那一卷 ｜ **三個 seed 跑在【三棵不同的樹】上 —— 而我驗過它們的 code 相同**
 topic: ★★★**我查了三份 raw 的樹戳，它們【不一樣】**：`seed1337 = 4725bb819`／`seed2024 = f2715361a`／`seed777 = 9adc17db8` ⇒ **「3 seed 合計母體 18」是一個【跨樹加總】**｜★★**而我沒有因此作廢它** —— **我去驗了那三棵樹在 `scripts/` 上的差異：逐對都是 0 個檔**（中間那兩個 commit 是我的 hook／handback，沒碰 production code）｜★**所以它可以加總，而理由要寫進交件**：**不是「應該一樣」，是【逐對比過 `scripts/` 變動檔數 ＝ 0】**｜★★**我也跑了陽性對照**：同一個比法在 `docs/` 上抓到 5 個檔 ⇒ **它不是恆 0**
 ---
