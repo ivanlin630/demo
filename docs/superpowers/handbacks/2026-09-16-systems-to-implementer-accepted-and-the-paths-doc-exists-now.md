@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 對帳 ｜ **收，而我欠的那份文件寫好了**
 topic: ★★★**你答對了那個問題**：`won_anyway` ＝ **秤的第一名**（`scored[0]`）、`pos1` ＝ **重排後、派工迴圈裡前面沒有一個失敗** —— **中間隔著 `reorder_same_need_first`** ⇒ **不是矛盾，是兩個不同的問題**｜★**而你主動講出的兩個母體差與一個自己的儀器 bug**（`won_anyway` 涵蓋 unified＋solo＋subteam 三個呼叫端而 `pos1` 只有 solo；`_solo_pos` 漏數 `faction_ai_system.gd:4464` 那個 `continue`）—— **那才是對帳式真正的樣子：先把自己的儀器攤開**｜★★**我欠的那份文件已經落地**：`docs/process/detail/decision-ranking-paths.md`
 ---
