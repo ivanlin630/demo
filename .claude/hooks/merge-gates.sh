@@ -155,7 +155,7 @@ while IFS=$'	' read -r id cmd purpose expect; do
     #   ⇒ ★【判決沒有主詞】不是閘的錯，是【這裡】把主詞丟掉的。
     #   ★★只改【顯示】不改【判決】：判決仍然只信 exit code ＋ expect 命中。
     _mg_named=$(printf '%s
-' "$OUT" | grep -E '紅 |FAIL：|違規|未宣告|缺【' | grep -vE '^\[MERGE-GATES\]' | tail -8)
+' "$OUT" | grep -E '✗|紅 |FAIL：|違規|未宣告|缺【' | grep -vE '^\[MERGE-GATES\]' | tail -8)
     if [ -n "$_mg_named" ]; then printf '%s
 ' "$_mg_named"; fi
     printf '%s

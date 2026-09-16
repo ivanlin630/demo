@@ -151,7 +151,22 @@ if [ "${_n:-0}" -gt 0 ]; then
 fi
 # ── diff：只報【綠→紅】 ────────────────────────────────
 alerts=0
-if [ -f "$BASELINE" ]; then
+# ★★★ baseline 的鍵必須唯一（systems 2026-09-17，implementer 實測引出）
+#   血證：舊 baseline 裡 4 支床各有 2–3 列 ⇒ 下面的 `head -1` 静默地挑了第一列
+#     ⇒ 實測報出 game_sim_test.gd（green → 60）—— 而 60 是秒數，不是判決。
+#   ★而它能造假警報，就同樣能蓋掉真的 —— 同一個 head -1。
+#   ★★所以這裡不是「選一個比較好的列」，是【無法比對就要大聲說】。
+_dupes=$(awk -F'	' '/^scripts\//{print $1}' "$BASELINE" 2>/dev/null | sort | uniq -d)
+if [ -n "$_dupes" ]; then
+  echo "[tier2] ✗ baseline 的鍵【不唯一】⇒ diff 結果不可信（本輪不報 diff）："
+  echo "$_dupes" | head -6 | sed 's/^/[tier2]     ★重複鍵：/'
+  echo "[tier2]   ★理由：比對用的是 head -1 ⇒ 它會静默地挑一列；能造假警報就能蓋掉真的。"
+  echo "[tier2]   ★★修法：重建 baseline（整表重寫、一床一列），不要手改那幾列。"
+  _dupe_bad=1
+else
+  _dupe_bad=0
+fi
+if [ "$_dupe_bad" = "0" ] && [ -f "$BASELINE" ]; then
   while IFS=$'\t' read -r bed v _rest; do
     case "$bed" in '#'*|'') continue;; esac
     old=$(awk -F'\t' -v b="$bed" '$1==b{print $2}' "$BASELINE" | head -1)
