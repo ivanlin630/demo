@@ -15,7 +15,10 @@
     "docs/measurements/2026-09-16-gen5-remeasure-fixcheck-raw.txt（③fixture bug修好後的1天窗驗證）",
     "docs/measurements/2026-09-16-gen5-remeasure-v2-seed1337-raw.txt（v2＝補①母體計數後重跑，同UTF-16LE）",
     "docs/measurements/2026-09-16-gen5-remeasure-v2-seed2024-raw.txt",
-    "docs/measurements/2026-09-16-gen5-remeasure-v2-seed777-raw.txt"
+    "docs/measurements/2026-09-16-gen5-remeasure-v2-seed777-raw.txt",
+    "docs/measurements/2026-09-16-gen5-remeasure-v3-seed1337-raw.txt（v3＝加逐筆全option樣本後重跑——★同seed②數字與v1/v2不同,見honest_limits determinism異常）",
+    "docs/measurements/2026-09-16-gen5-remeasure-v3-seed2024-raw.txt",
+    "docs/measurements/2026-09-16-gen5-remeasure-v3-seed777-raw.txt"
   ],
   "specimen_trace": "無——純聚合existence/ratio讀數，不下behavior因果結論，照規免specimen",
 
@@ -28,7 +31,13 @@
         "合計": "3個seed共9次『餓且有牙』樣本(母體>0，非空)，其中6次攻擊確實進了候選集(applicable)，但0次贏argmax"
       },
       "對照·飽且仍不打": "seed1337 152/152｜seed2024 133/133｜seed777 139/139——三個seed全部0反例，對照格非常乾淨",
-      "verdict": "★★★修正前一版判斷：母體=9(>0)，非『太薄不可判』⇒這是【驗證失敗候選】——餓且有牙的隊有機會打(6/9次攻擊真的進了候選集在跟別的選項比)，卻9次全部沒贏argmax；★對照格(飽不打)極穩成對成立；★但本卷不下WHAT/HOW修法結論(禁調參數)，只誠實報這是候選，需下一票追查是util算式問題還是別的選項系統性更優"
+      "verdict": "★★★修正前一版判斷：母體=9(>0)，非『太薄不可判』⇒這是【驗證失敗候選】——餓且有牙的隊有機會打(6/9次攻擊真的進了候選集在跟別的選項比)，卻9次全部沒贏argmax；★對照格(飽不打)極穩成對成立；★但本卷不下WHAT/HOW修法結論(禁調參數)，只誠實報這是候選，需下一票追查是util算式問題還是別的選項系統性更優",
+
+      "v3逐筆全option樣本(systems 2026-09-16准開，cap=30個位數)——★★★連帶發現一個determinism異常，見honest_limits": {
+        "母體/存了": "seed1337 母體4存4｜seed2024 母體4存4｜seed777 母體2存2——全部未截斷",
+        "★逐筆讀出來的故事": "9筆樣本中攻擊applicable的8筆，輸家幾乎全輸給『掠奪』(util常態4.6-5.2 vs 攻擊0.03-0.7，差距數倍到近十倍)或『買糧/紮營/求和/覓食』；只1筆(seed777 day10 team197)攻擊u=0(=0.0000，非小數，疑似該筆win_odds或loot_est把整項壓成0)",
+        "raw樣本(3seed合計10筆，非v2的9筆——見下方determinism異常說明)": "見raw_logs的v3-seed{1337,2024,777}『逐筆樣本』區塊，逐字保留未摘要"
+      }
     },
 
     "②偵查三數(候選/贏/真設上)對帳": {
@@ -65,6 +74,7 @@
   "honest_limits": [
     "★①本卷只讀『現在讀數是什麼』，不下WHAT/HOW修法結論，不調任何參數",
     "★★①的正例格(餓有牙攻擊贏)：初版10天×3seed=0次出現且未拆母體(systems指出『太薄』與『空』是兩個結論)⇒本床加母體計數(n_hungry/n_armed/n_hungry_and_armed/atk_applicable)後重跑v2，v2結果見answer區另補一節",
+    "★★★v3(加逐筆全option樣本)發現一個determinism異常，尚未查出根因，如實報不隱藏：v1與v2同seed1337跑出逐字相同的②數字(候選5424/贏564/dispatch.ok361)，v3同seed1337卻跑出不同數字(候選4928/贏504/dispatch.ok398)——v2→v3的程式diff只加了純算術/字串格式化+Probe.bump_sample(已讀probe_stats.gd:124-130確認bump_sample是純first-N append，零RNG，file:line查過非猜)，理論上不該改變世界軌跡；本卷未能定位確切原因，候選解釋：①跑v3時機上有其他角色的Godot進程並發(implementer busy beacon曾提示過)，若引擎內有任何timing/thread-order依賴的tie-break會造成非確定性，非本床code造成②本床gather/rank_scored_ctx呼叫鏈裡有我沒查到的RNG消耗點——本卷把兩個假說都列出，沒有下判定；★★★因此v3的②/population彙總數字不採信、不取代v2的9筆母體數，只把v3的逐筆全option文字內容當作『某一次有效世界快照的定性讀物』使用(那一刻的rank_scored計算本身仍是真的，只是它所在的世界軌跡與v2分岔)，已在另一封handback明確報給systems判斷是否要開票查",
     "★★②/④/(4a)(4b)全部與世代4以前數字不可比較(尺換了，_generation-boundary.md)",
     "★③本卷自己的bed在第一輪跑出3個假FAIL(已誠實記錄+修復+重驗，不是把假FAIL悄悄改掉當沒發生過)",
     "★★[HOST] FreeMB標籤有誤——印的其實是OS.get_static_memory_usage()(進程自身靜態記憶體)非系統可用記憶體；真正的系統FreeMB安全門檻是跑前用PowerShell另外查的(15276MB)，非本床內部那行，下一個讀這份卷的人請勿把床內[HOST]那行當系統FreeMB用",
