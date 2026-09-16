@@ -795,7 +795,34 @@ static func reorder_same_need_first(ranked: Array) -> Array:
 			same.append(e)
 		else:
 			rest.append(e)
-	return same + rest
+	var out: Array = same + rest
+	# ★★★【反事實用的儀器】（systems 2026-09-16）：`_need_category` 讀 `main_layer_of`，
+	#   而 `main_layer_of` ＝ **affinity 那一列的 argmax** ⇒ ★**改 affinity 會【同時】改這裡的分類。**
+	#   ⇒ ★★所以要分得開「對齊度變了」與「它被歸到另一類了」，就得量**這個函式改變了多少順序**。
+	#   ★★★純觀測：只讀 `out` 與 `ranked`，不改回傳值。
+	if Probe.enabled:
+		Probe.bump("reord.calls")
+		Probe.bump("reord.topcat." + top_cat)
+		var _changed: bool = false
+		for _i in range(out.size()):
+			if String(out[_i].get("opt", "")) != String(ranked[_i].get("opt", "")):
+				_changed = true
+				break
+		if _changed: Probe.bump("reord.changed")
+		var _before: int = -1
+		var _after: int = -1
+		for _i2 in range(ranked.size()):
+			if String(ranked[_i2].get("opt", "")) == "掠奪": _before = _i2; break
+		for _i3 in range(out.size()):
+			if String(out[_i3].get("opt", "")) == "掠奪": _after = _i3; break
+		if _before >= 0:
+			Probe.bump("reord.raid.present")
+			Probe.bump("reord.raid.cat." + _need_category("掠奪"))
+			if _after < _before: Probe.bump("reord.raid.moved_up")
+			elif _after > _before: Probe.bump("reord.raid.moved_down")
+			else: Probe.bump("reord.raid.same_pos")
+			if _after == 0 and _before != 0: Probe.bump("reord.raid.became_first")
+	return out
 
 static func rank(state: WorldState, team: TeamData) -> Array:
 	var out: Array = []

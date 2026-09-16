@@ -746,6 +746,22 @@ func _run() -> void:
 			if _pc > 0: _pos_rows.append("第%d順位=%d" % [_pi + 1, _pc])
 		if not _pos_rows.is_empty():
 			print("   ★★掠奪在 `%s` 路被派出去的【順位】：%s" % [_pp, " ".join(_pos_rows)])
+	# ★★★【反事實的讀數】（systems 2026-09-16 ②）：`main_layer_of("掠奪")` 決定它的 need 類別，
+	#   而那一格【就是】本票改過的 affinity argmax ⇒ **改 affinity 會同時改派工重排。**
+	var _catrows: Array = []
+	for _ck2 in Probe.counts:
+		if String(_ck2).begins_with("reord.raid.cat."):
+			_catrows.append("%s=%d" % [String(_ck2).substr(15), int(Probe.counts[_ck2])])
+	print("   ★★★`main_layer_of(掠奪)` ＝ **L%d**｜`_need_category` 桶：%s" % [
+		NeedHierarchy.main_layer_of("掠奪"), " ".join(_catrows)])
+	print("   重排：呼叫 %d 次｜**真的改了順序 %d 次**｜掠奪在場 %d 次" % [
+		int(Probe.counts.get("reord.calls", 0)), int(Probe.counts.get("reord.changed", 0)),
+		int(Probe.counts.get("reord.raid.present", 0))])
+	print("      ★掠奪被**往前**移 %d 次｜往後 %d 次｜原位 %d 次｜**被移成第一個 %d 次**" % [
+		int(Probe.counts.get("reord.raid.moved_up", 0)),
+		int(Probe.counts.get("reord.raid.moved_down", 0)),
+		int(Probe.counts.get("reord.raid.same_pos", 0)),
+		int(Probe.counts.get("reord.raid.became_first", 0))])
 	var _po: Array = Probe.samples.get("dpos.raid_passedover", [])
 	print("      被輪到的逐筆樣本 %d 筆（★first-N）：" % _po.size())
 	for _i5 in range(mini(5, _po.size())):
