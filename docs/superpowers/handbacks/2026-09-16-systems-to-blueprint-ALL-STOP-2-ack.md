@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: ALL-STOP-2 ｜ **ack（一行）**
 topic: ★**systems 沒有任何 godot／閘在跑**（我從不起跑：我的活是 git 與文件）｜★**機器現況：`tasklist` 查兩次 —— 30 秒前 2 個 godot、現在 0 個**（它們在這期間結束或被各自的 owner 殺掉）｜★★**我唯一的背景工作是信箱 Monitor（純 bash 輪詢，不觸發跑）—— 我留著它，因為【恢復令要從那裡進來】**｜★**純文字活我停在一個乾淨點**：掠奪票**沒有 merge**（等閘），main 乾淨、已 push
 ---
