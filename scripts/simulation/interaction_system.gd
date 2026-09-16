@@ -1079,7 +1079,10 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 		ask = board_price
 		if Probe.enabled: Probe.bump("board.price.used.buy")
 	elif owner != null:
-		ask = TradeValuation.ask_price(owner, res, commerce, owner_lv, state)
+		# ★恩怨進逐方估值（切片A §1.4）：買方是 `visitor` ⇒ 賣方對【這一個人】的恩怨進價。
+		#   ★★注意上面的 `board_price` 分支**不經過這裡** —— 板上自報價是掛單那一刻凍結的，
+		#     **那時候還不知道買方是誰** ⇒ 恩怨對它無效，而那是**正確的**（見 `order_system.gd`）。
+		ask = TradeValuation.ask_price(owner, res, commerce, owner_lv, state, visitor.leader_id)
 	else:
 		ask = float(TradeValuation.BASE_PRICE.get(res, 0.0))   # 無主 outpost → face value
 	# ★★★零價可成交（blueprint 裁 (a) 2026-09-07）——★理由：他裁過的「爛大街＝白送」
@@ -1126,6 +1129,10 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 	if q <= 0: Probe.bump("trade.market_bail.buy_withdraw_empty"); return false
 	ResourceBank.add(visitor, res, q, "market_buy_in")
 	ResourceBank.add(visitor, "coin", -(q * ask), "market_buy_coin_out")
+	# ★報恩：同上；★★只有【現算 ask】那條路會折價（板價那條 `buyer_leader_id = -1` ⇒ `grat` 沒進價）
+	#   —— 而 `repay_gratitude` 自己會在 `grat = 0` 時回 0，所以這裡不需要再判一次。
+	if owner != null:
+		NpcAiSystem.repay_gratitude(state, owner, visitor.leader_id)
 	if _is_escrow:
 		# ★★★紅線：外地掛單者【不在場】⇒ 錢【不得】直接進其 team.coin ⇒ 進【待領款帳】。
 		#   ★而貨從 escrow 扣（它本來就已經離開賣家的 resources —— 掛單當下就扣了）。
@@ -1297,8 +1304,22 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		var surplus: float = maxf(stock - reserve, 0.0)
 		if surplus <= 0.0: continue
 		# 液化：ask 折扣人格化(急鬆手/貪守價)；willing 對閉合邊際價差(SPREAD_TOL)。
-		var ask: float = TradeValuation.ask_price(seller, res, commerce, TradeValuation.leader_vals(state, seller), state)
+		# ★恩怨進逐方估值：巧遇面對面 ⇒ 賣方**知道對面是誰** ⇒ 傳買方領袖。
+		var ask: float = TradeValuation.ask_price(seller, res, commerce, TradeValuation.leader_vals(state, seller), state, buyer.leader_id)
 		var bid: float = TradeValuation.local_value(buyer, res, state)
+		# ★★★【`h` ＝ 這一筆的餘裕】（systems §1.4b）：拒賣發生 ⇔ `I × W > h`，而 **`h` 不是常數**
+		#   ⇒ ★沒有它的分佈，跑出來的「沒成交」分不出【機制錯】與【這批交易本來就沒餘裕】。
+		#   ★★這裡記的是**未加恩怨的基準 ask**（`ask_base`）對 bid 的比 —— 母體＝所有走到撮合的筆。
+		if Probe.enabled:
+			var _ask_base: float = TradeValuation.ask_price(seller, res, commerce, TradeValuation.leader_vals(state, seller), state)
+			if _ask_base > 0.0:
+				Probe.bump_sample("trade.spread_headroom", {
+					"h": snappedf(bid * (1.0 + TradeValuation.SPREAD_TOL) / _ask_base - 1.0, 0.001),
+					"blocked": ask > bid * (1.0 + TradeValuation.SPREAD_TOL),
+					"grudged": not is_equal_approx(ask, _ask_base),
+				})
+				if ask > bid * (1.0 + TradeValuation.SPREAD_TOL) and not is_equal_approx(ask, _ask_base):
+					Probe.bump("trade.grudge_refusal")   # ★湧現的拒賣（不是 gate 擋的）
 		# ★零價可成交（同上裁定）：`< 0` 擋負價；★★而 spread 那半【不動】——它是撮合條件不是定義域。
 		if ask < 0.0 or ask > bid * (1.0 + TradeValuation.SPREAD_TOL): continue
 		if Probe.enabled and ask == 0.0: Probe.bump("mkt.zero_price.match_allowed")
@@ -1313,6 +1334,8 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		qty = mini(qty, ms.carry_space_for_res(buyer, res))   # WS-3 carry 限（買方滿載即止買）
 		if qty <= 0: continue
 		_execute_transfer(seller, buyer, res, qty, ask)
+		# ★報恩＝**折價真的成交**（見 `NpcAiSystem.repay_gratitude` 的長註）
+		NpcAiSystem.repay_gratitude(state, seller, buyer.leader_id)
 		buyer_coin -= qty * ask
 		# 買方若是商隊 → 物品移到 inventory（之後高價賣出）
 		if buyer.tags.has(TeamData.TAG_MERCHANT):

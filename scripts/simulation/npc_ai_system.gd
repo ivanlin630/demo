@@ -12,8 +12,24 @@ const FEUD_HONOR_W := 0.7
 const FEUD_BELLIGERENCE_W := 0.4
 const FEUD_MIN := 0.30
 const FEUD_SPREAD_FACTOR := 0.6
+# ★★★【`extorted` 是一個死名字】（systems §0 訂正①，2026-09-16）：
+#   ★`write_memory(…, "extorted", …)` 的呼叫點**全庫 0 個**；
+#     真正的重徵事件寫的是 **`"special_taxed"`**（`interaction_system.gd:696`）
+#   ⇒ 它不在任何一個 match 裡 ⇒ 落進 `_` ⇒ **零邊、零標量、零 goal。**
+#   ★★所以這裡是**改名不加鍵**：留著 `extorted` 就是留一個永遠不會被觸發的分支
+#     ——★★★而那種分支**看起來像已經接好了**。
+#   ★嚴重度沿用 0.30：**這不是新數字，是同一個值換了正確的鍵。**
+# ★★`rejected_aid`（供養失守／求救不應）同一個病的第二例：三個寫入點全在，卻不在任何 match 裡。
+#   嚴重度 **0.325 ＝ (0.30 + 0.35) / 2** ——★**表內兩個相鄰值的中點**，不是挑一個數（TEST VALUE）。
+# ★★★`benefactor`（**受人援助**）是同一個病的**第三例**，而 systems 的 §0 沒有掃到它：
+#   `interaction_system.gd:1218/:1560`、`player_command_system.gd:1024` 三個寫入點，
+#   而 `kindness` 的**呼叫點只有 `salary_system.gd:229`（超額發薪）** ——
+#   ⇒ ★**「被救了一命」在今天的世界裡不產生任何 gratitude 邊。**
+#   ⇒ 而 WHAT 的三寫入第三條正是「**kindness 加呼叫點**」⇒ 同 §0 的處方：**用已經被寫的名字。**
 const FEUD_SEVERITY := {
-	"massacre": 1.0, "betrayal": 0.8, "subjugated": 0.5, "looted": 0.35, "extorted": 0.30,
+	"massacre": 1.0, "betrayal": 0.8, "subjugated": 0.5, "looted": 0.35,
+	"special_taxed": 0.30,
+	"rejected_aid": 0.325,   # TEST VALUE（推法＝表內相鄰兩值中點，非手填）
 }
 
 # A feud：唯一形成點。severity×個性 factor，FEUD_MIN gate。回 true=已結仇。
@@ -29,6 +45,11 @@ static func form_feud(victim: PersonData, perp_id: int, severity: float, tick: i
 	RelationGraph.add_edge(victim.relation_edges, "feud", perp_id, intensity, tick)
 	_activate_goal(victim, "revenge", perp_id)
 	Probe.bump("g2.feud_formed")
+	if Probe.enabled:
+		# ★逐 severity 記母體（★單一個 `g2.feud_formed` 答不出【是哪個名字接上了】——
+		#   而本切片改的正是名字 ⇒ 沒有這一格，接沒接上在總數裡長得一模一樣）。
+		Probe.bump("grudge.form.feud")
+		Probe.bump("grudge.form.feud.sev%.3f" % severity)
 	return true
 
 # A feud：滅族 → 同 faction 餘部繼承（弱於親歷）。事件當下（erase 前）呼。
@@ -93,11 +114,12 @@ func _write_relation_edge(p: PersonData, type: String, subject_id: int,
 		tick: int, intensity: float) -> void:
 	# G2a additive：對齊 _trigger_goals 映射，填 typed 邊。reader 在 G2b/G2d。
 	match type:
-		"betrayal", "looted", "extorted":
+		"betrayal", "looted", "special_taxed", "rejected_aid":
 			# A feud：改走 form_feud（severity×個性 gate）。bump 移進 form_feud（不雙計）。
 			NpcAiSystem.form_feud(p, subject_id, FEUD_SEVERITY.get(type, intensity), tick)
-		"kindness", "aided_in_battle":
+		"kindness", "aided_in_battle", "benefactor":
 			RelationGraph.add_edge(p.relation_edges, "gratitude", subject_id, intensity, tick)
+			if Probe.enabled: Probe.bump("grudge.form.gratitude." + type)
 		"master":
 			RelationGraph.add_edge(p.relation_edges, "protect", subject_id, intensity, tick)
 
@@ -115,7 +137,9 @@ func _update_relations(p: PersonData, type: String,
 		"master":            delta =  intensity * 0.5
 		"witnessed_atrocity":delta = -0.1
 		"looted":            delta = -intensity * 0.6
-		"extorted":          delta = -intensity * 0.5
+		"special_taxed":     delta = -intensity * 0.5   # ★原本寫 "extorted" ＝ 沒有人叫的名字
+		"rejected_aid":      delta = -intensity * 0.5   # ★同族：三個寫入點都落進 `_`
+		"benefactor":        delta =  intensity * 0.4   # ★受援＝善意，同 kindness 的係數
 		"aided_in_battle":   delta =  intensity * 0.5
 		_:                   delta = 0.0
 	var cur: float = float(p.relations.get(subject_id, 0.0))
@@ -123,9 +147,9 @@ func _update_relations(p: PersonData, type: String,
 
 func _trigger_goals(p: PersonData, type: String, subject_id: int) -> void:
 	match type:
-		"betrayal", "looted", "extorted":
+		"betrayal", "looted", "special_taxed", "rejected_aid":
 			_activate_goal(p, "revenge", subject_id)
-		"kindness", "aided_in_battle":
+		"kindness", "aided_in_battle", "benefactor":
 			_activate_goal(p, "gratitude", subject_id)
 		"master":
 			_activate_goal(p, "protect", subject_id)
@@ -172,8 +196,11 @@ func _goal_task_delta(goal_type: String, task: String) -> float:
 			if task in [TeamData.TASK_DIPLOMACY, TeamData.TASK_TRADE]: return 0.005
 		"revenge":
 			if task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]: return 0.005
-		"gratitude":
-			if task in [TeamData.TASK_DIPLOMACY, TeamData.TASK_TRADE]: return 0.003
+		# ★★★`gratitude` 的 `0.003` 已砍（WHAT 明文，用戶裁 2026-09-16）：
+		#   ★它是一個**掛在任務類別上的死常數**——「對誰有恩」在它裡面看不見
+		#   ⇒ 對恩人與對陌生人做同一件事，加的分**一模一樣**。
+		#   ★★恩的行為出口改由**逐方估值**承擔（`trade_valuation.ask_price` 讀 `gratitude` 邊折價）
+		#     ⇒ ★★★**那條路知道「對誰」，這條路不知道** —— 兩條並存只會讓後者稀釋前者。
 		"protect":
 			if task in [TeamData.TASK_ATTACK]: return 0.008
 	return 0.0
@@ -213,3 +240,28 @@ func _fallback_birth_goal(p: PersonData) -> String:
 	]
 	candidates.sort_custom(func(a, b): return a["value"] > b["value"])
 	return candidates[0]["type"]
+
+# ★★★【報恩 ⇒ 消耗恩】（恩怨帳切片A §1.2；WHAT：**消耗邊的是【事件】，被動與無不消耗**）
+#   ★「報恩」在本切片裡有且只有一個已存在的形狀：**折價真的成交了**
+#     （WHAT 列的四個形狀＝援助／**折價**／優先成交／替他打，而本切片只接了折價那條讀者線）。
+#   ★★所以呼叫端是【成交完成】那一刻，**不是 `ask_price` 被算出來的那一刻** ——
+#     ★★★算了價而沒成交＝**沒有報到恩**，那正是「被動不消耗」這條鐵則要擋的東西。
+# ★【消耗量怎麼來】：`grat × W`，兩個量**都已經在式子裡**（零新常數）——
+#   ★★它逐字等於**這一筆折價裡「因為恩」而讓掉的那個比例** ⇒ 讓掉多少＝報掉多少。
+#   ★★★（恩 0.6、中庸人格 W=0.15 ⇒ 每筆消耗 0.09 ⇒ 約七筆生意還完一次救命之恩；
+#     ★這個「七」不是我挑的，它是上面兩個數的後果 —— **要改請改那兩個數**。）
+static func repay_gratitude(state: WorldState, seller: TeamData, buyer_leader_id: int) -> float:
+	if state == null or seller == null or buyer_leader_id == -1 or seller.leader_id == -1:
+		return 0.0
+	var sl: PersonData = state.persons.get(seller.leader_id)
+	if sl == null:
+		return 0.0
+	var grat: float = RelationGraph.intensity_to(sl.relation_edges, "gratitude", buyer_leader_id)
+	if grat <= 0.0:
+		return 0.0
+	var w: float = TradeValuation.grudge_weight(sl.values)
+	var taken: float = RelationGraph.consume_edge(sl.relation_edges, "gratitude", buyer_leader_id, grat * w)
+	if Probe.enabled and taken > 0.0:
+		Probe.bump("grudge.consume.repay_trade")
+		Probe.add_amount("grudge.consume.repay_trade.amount", taken)
+	return taken

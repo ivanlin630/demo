@@ -62,6 +62,9 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 	#   ★零新公式、零新常數 —— 只是【算的時刻】從撮合當下提前到掛單當下。
 	var _leader = state.persons.get(team.leader_id)
 	var _commerce: float = float(_leader.skills.get("商業", 0.0)) if _leader else 0.0
+	# ★★★恩怨【不進】板上自報價（切片A §1.4 的必然推論，我寫出來免得下一個人以為漏接了）：
+	#   掛單這一刻**買方還不存在** ⇒ `buyer_leader_id` 只能是 `-1`
+	#   ⇒ ★**板價是「對所有人的價」，恩怨是「對這個人的價」** —— 兩者本來就不同層。
 	var declared_price: float = (
 		TradeValuation.ask_price(team, res, _commerce, TradeValuation.leader_vals(state, team), state)
 		if kind == "sell"

@@ -88,6 +88,26 @@ const GREED_HOLD_K: float = 0.2          # TEST VALUE — 貪婪賣方守價(折
 const DISCOUNT_MAX: float = 0.5          # TEST VALUE — 折扣上限(不倒貼)
 const SPREAD_TOL: float = 0.05           # TEST VALUE — willing 對成交容差(閉合邊際價差)
 
+# ── 恩怨進逐方估值（恩怨帳切片A §1.4）：對仇人加價、對恩人折價 ──
+# ★★★【係數不手填 —— 由跨線不等式反解】（systems §1.4b，2026-09-16）：
+#   拒賣發生 ⇔ `I × W > h`
+#     `I` ＝ 邊強度（★因 `NpcAiSystem.FEUD_MIN = 0.30`，**存在的怨一律 I ≥ 0.30**）
+#     `W` ＝ 賣方人格權重（本組常數）
+#     `h` ＝ 該筆交易的餘裕 ＝ `bid × (1+SPREAD_TOL) / ask_base − 1`
+#   ★★**`h` 不是常數**：`ask_base ≈ bid` 時 h ≈ 0.05；賣方折價時（`DISCOUNT_MAX=0.5`）h 可到 0.31
+#   ⇒ ★★★「拒賣太容易」與「拒賣太難」**兩個風險方向都是真的，它們分居 h 分佈的兩端**
+#     ⇒ 驗收必須印 `h` 的分佈，否則跑出來的數字分不出【機制錯】與【這批交易本來就沒餘裕】。
+#   反解：① 最弱的怨 × 中庸人格 不該秒殺交易 ⇒ 0.30 × W_mid ≤ 0.05 ⇒ W_mid ≤ 0.167
+#         ② 深仇     × 中庸人格 該能跨線     ⇒ 1.00 × W_mid > 0.05 ⇒ W_mid > 0.05
+#   ⇒ 取 W_mid = 0.15（落在 (0.05, 0.167]）
+# ★**三個數字是 TEST VALUE，而【反解的過程】不是** ——
+#   若日後 `SPREAD_TOL` 或 `FEUD_MIN` 改了，**重解這條不等式，不要拿數字去試。**
+# ★★第二軸是**慎重**不是好戰（★`form_feud` 的第二軸才是好戰）⇒ **開新常數名，不得沿用 `FEUD_*_W`**：
+#   那兩顆是為「結不結仇」校準的，這裡問的是「做不做你生意」。
+const GRUDGE_PRICE_W_BASE: float = 0.15      # TEST VALUE（反解得來，非手挑）
+const GRUDGE_PRICE_HONOR_W: float = 0.30     # TEST VALUE — 義氣高 ⇒ 恩怨對價格影響大
+const GRUDGE_PRICE_PRUDENCE_W: float = 0.30  # TEST VALUE — 慎重高 ⇒ 生意歸生意
+
 # 留底（不賣掉自己需要的）：food 按人格安全天數、coin 半留、非活命品液化人格化。單一源。
 # 候選1 helper：從 state 取隊領袖人格值(供 reserve 人格化)。null/無領袖→{}→BASE 目標。
 static func leader_vals(state: WorldState, team: TeamData) -> Dictionary:
@@ -181,12 +201,50 @@ static func _urgency(team: TeamData, state: WorldState) -> float:
 	return maxf(maxf(_food_urgency(team, state), coin_urg), turnover_urg)
 
 # ask 售價：折扣人格化——商業技能 + 急迫鬆手(折扣深)，貪婪守價(折扣收窄→部分談崩)。零 randf。
-static func ask_price(seller: TeamData, res: String, commerce: float, leader_values: Dictionary, state: WorldState) -> float:
+# ★★★`buyer_leader_id` 是**選填尾參**（恩怨帳切片A §1.4）：
+#   `-1` ⇒ **逐字等同今天的行為** ⇒ ★既有 5 個呼叫點不改語意、舊床不動也仍綠
+#   —— ★★而那正是我們要的對照（驗收格4 守的就是這一條）。
+static func ask_price(seller: TeamData, res: String, commerce: float, leader_values: Dictionary, state: WorldState,
+		buyer_leader_id: int = -1) -> float:
 	var greed: float = float(leader_values.get("貪婪", 0.5))
 	var discount: float = clampf(
 		commerce * COMMERCE_DISCOUNT_K + _urgency(seller, state) * URGENCY_DISCOUNT_K - (greed - 0.5) * GREED_HOLD_K,
 		0.0, DISCOUNT_MAX)
-	return local_value(seller, res, state) * (1.0 - discount)
+	return local_value(seller, res, state) * (1.0 - discount) * grudge_multiplier(seller, leader_values, state, buyer_leader_id)
+
+# ★★★【恩怨乘數】—— 對仇人 ×(1+I×W)、對恩人 ×(1−I×W)。
+#   ★**幅度就是邊強度本身**（不另開幅度常數）：`W` 只是人格權重。
+#   ★★**拒賣不是新機制**：索價高到買方出不起 ⇒ **撮合自然失敗** ⇒ 不加硬 gate（去補丁閘）。
+#     ⇒ ★★★若驗收格3 拿不出「湧現的拒賣」樣本，**那是這個定義不成立的證據，回報 systems，不要加 gate 補上。**
+#   ★異類並存不淨值（WHAT）：救命恩人殺我兄弟 ⇒ **兩條邊各自乘上去**，不先相減成一個淨值
+#     —— ★★淨值 0 沒戲，而「又恨又欠」正是戲。
+# ★★★【W 的單一計算點】—— 加價那一邊與**消耗**那一邊共讀。
+#   ★抄一份的話，哪天有人調 `GRUDGE_PRICE_HONOR_W`，
+#     **折價會變、而「折了多少算報了多少恩」不會變** ⇒ 兩邊悄悄走散，**不會有東西紅**。
+static func grudge_weight(leader_values: Dictionary) -> float:
+	var honor: float = float(leader_values.get("義氣", 0.5))
+	var prudence: float = float(leader_values.get("慎重", 0.5))
+	return clampf(GRUDGE_PRICE_W_BASE + honor * GRUDGE_PRICE_HONOR_W - prudence * GRUDGE_PRICE_PRUDENCE_W, 0.0, 1.0)
+
+static func grudge_multiplier(seller: TeamData, leader_values: Dictionary, state: WorldState,
+		buyer_leader_id: int) -> float:
+	if buyer_leader_id == -1 or state == null or seller == null or seller.leader_id == -1:
+		return 1.0
+	var sl: PersonData = state.persons.get(seller.leader_id)
+	if sl == null:
+		return 1.0
+	var w: float = grudge_weight(leader_values)
+	# ★per-target 查邊（**不得用 `strongest`**：我對 B 的怨若不是最強，B 在我眼裡就不是仇人）
+	var feud: float = RelationGraph.intensity_to(sl.relation_edges, "feud", buyer_leader_id)
+	var grat: float = RelationGraph.intensity_to(sl.relation_edges, "gratitude", buyer_leader_id)
+	var mult: float = (1.0 + feud * w) * (1.0 - clampf(grat * w, 0.0, 0.9))
+	if Probe.enabled and (feud > 0.0 or grat > 0.0):
+		Probe.bump("trade.grudge_markup.eval")
+		Probe.bump_sample("trade.grudge_markup", {
+			"feud": snappedf(feud, 0.001), "grat": snappedf(grat, 0.001),
+			"w": snappedf(w, 0.001), "mult": snappedf(mult, 0.001),
+		})
+	return mult
 
 # 唯一 local_value：coin 恆 face value；survival 不對稱(饑荒最高 5×)；非 survival clamp[-0.5,1.0]。
 # M4：state 給→stock 算 effective_holding(糧倉貨算進,不誤判短缺)；null→team.resources 私產。
