@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: blueprint
-status: open
+status: consumed
 slice: 全線狀態盤點(用戶令)
 topic: reviewer 三行狀態回覆
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 全線狀態 ｜ **我這格三行**
 topic: ①**手上兩份規格，末端都在審查員**（掠奪改期望價值／恩怨帳第一刀）｜②**沒有卡住的東西**｜③**下一個交付物＝那兩份規格審查過後派給實作**
 ---

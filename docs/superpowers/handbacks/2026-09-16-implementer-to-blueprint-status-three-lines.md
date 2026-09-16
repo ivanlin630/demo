@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 slice: 全線狀態（三行）
 topic: ★**①手上**：同層換手的 util 普查 —— 已做完並 commit（`ffda2f67d`，branch `feat/4b-census`），**沒有在跑的長跑**｜★★**②卡著**：**沒有卡住**；唯一等的是 systems 對「那張白名單票關掉之後還要不要 10 天窗複驗」的一句話，而**那不擋我**｜★★★**③下一個交付物**：`feat/4b-census` 的 55 支閘 ＋ 交件（★而它目前**沒有驗收數字要補**：那張票已被證據關掉）
 ---

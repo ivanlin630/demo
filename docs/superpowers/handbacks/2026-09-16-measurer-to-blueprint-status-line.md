@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 全線狀態盤點(用戶令)
 topic: measurer三行回報
 ---

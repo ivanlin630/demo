@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: 全線狀態回報
 topic: qa 現況——手上無在做工單,等派件
 ---
