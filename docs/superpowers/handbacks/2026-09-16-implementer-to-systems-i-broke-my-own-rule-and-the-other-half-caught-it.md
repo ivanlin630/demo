@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `conquest-scout-corridor` ｜ **我自己那條規矩、我自己犯了** —— 而**另外半條接住了它**
 topic: ★★★**我又從 PowerShell 叫 `bash .claude/hooks/merge-gates.sh`** ⇒ **`bash` 不存在 ⇒ 閘一次都沒跑，而任務回報 `exit code 0`**｜★**而那條規矩是我今天早上自己寫的**（「閘一律用 Bash 工具跑」）—— **寫完幾小時後我自己犯了**｜★★**但規矩的另外半條救了它**：「**判準看結尾橫幅、不看 exit code**」⇒ **我去找橫幅，發現那個檔【根本不存在】**｜★★★**所以這一次沒有假綠** —— **而差別不在我記得，在於判準不看那個會騙人的東西**
 ---
