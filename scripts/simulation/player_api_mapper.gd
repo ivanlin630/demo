@@ -794,8 +794,24 @@ static func map_global_messages(state: WorldState, n: int = 10) -> Array:
 	var start: int = maxi(0, state.global_messages.size() - n)
 	for i in range(start, state.global_messages.size()):
 		var m = state.global_messages[i]
-		msgs.append(m.get("description", str(m)) if m is Dictionary else str(m))
+		msgs.append(_describe_global_message(m))
 	return msgs
+
+# ★事件流的真實形狀是 MessageData（RefCounted），不是 Dictionary ——
+#   ★★原本只認 Dictionary，其餘走 `str(m)` ⇒ 真世界的每一則事件都印成 `<RefCounted#-922337…>`。
+#   ★★★而它一直是綠的：兩支床（agent_verbs_c1_bed:164／c1_info_reconciliation_bed:168）
+#     餵的是自己 append 的 Dictionary ——【測具的形狀】與【世界寫進去的形狀】不同，
+#     所以測到的永遠是那條不會在真世界走到的分支。
+static func _describe_global_message(m) -> String:
+	if m is Dictionary:
+		return String((m as Dictionary).get("description", str(m)))
+	if m is MessageData:
+		var md: MessageData = m
+		if md.description != "":
+			return md.description
+		# ★沒有描述也不要退回物件 id：說出它是哪一種事件，比印一個編號有用。
+		return "（%s 事件，沒有文字描述）" % (md.type if md.type != "" else "未具名")
+	return str(m)
 
 # ── Visible teams render ───────────────────────────────────────────────────────
 
