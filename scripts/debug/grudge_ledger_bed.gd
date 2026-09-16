@@ -25,6 +25,7 @@ func _initialize() -> void:
 
 var _fails: int = 0
 var _undec: int = 0
+var _undec_names: Array = []
 
 func _ok(cond: bool, msg: String) -> void:
 	if cond: print("  [OK] %s" % msg)
@@ -36,6 +37,7 @@ func _ok(cond: bool, msg: String) -> void:
 #   ★★處置不是刪掉它，也不是把它換成一個做得到的問題 —— **是把它留著、標明、並且不算綠。**
 func _undecidable(cell: String, claim: String, why: String, unblocks: String) -> void:
 	_undec += 1
+	_undec_names.append(cell)
 	push_error("[不可判] %s：%s" % [cell, claim])
 	print("  [不可判] %s ——" % cell)
 	print("       宣稱：%s" % claim)
@@ -235,6 +237,12 @@ func _run() -> void:
 		int(Probe.counts.get("grudge.consume.repay_trade", 0)),
 		int(Probe.counts.get("trade.grudge_markup.eval", 0))])
 	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
+	# ★★★【判準看橫幅，不看離開碼】（systems 立的規矩）：
+	#   ★離開碼只有 runner 看得到，而**註冊表的 `expect` 是對著輸出比對的**
+	#   ⇒ ★★所以「幾格不可判、是哪幾格」必須**印在結尾橫幅上**，不能只活在 exit code 裡。
+	#   ★★★而 `expect` 釘的是【數量】：`[不可判] 2 格` ——
+	#     **切片B 落地讓它變成 0 的那一天，這一閘會紅** ⇒ **那正是鬧鐘，不是要被修綠的東西。**
+	print("[不可判] %d 格：%s" % [_undec, "／".join(_undec_names)])
 	if _undec > 0:
 		print("★★★**本床在切片B 落地前【不是綠的】** —— 這是蓄意的：")
 		print("   ★「不可判」若換成綠，下一個人會以為那兩件事已經驗過了；")
