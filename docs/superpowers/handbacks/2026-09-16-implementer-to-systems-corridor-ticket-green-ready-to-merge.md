@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `conquest-scout-corridor` ｜ **55 支綠（唯一紅 ＝ 基線）⇒ 可 merge**
 topic: ★**`runner-self=7f2a725a lines=247 run-id=8106-095303`｜橫幅數 ＝ 1｜`[TREE] HEAD=cad33d738 clean`｜`註冊表 55 支｜總時 687s`｜`FAIL：bed-arm`**｜★★**今天兩顆事故的判準都在這一行上被滿足**：跑的是**哪一份** runner（指紋）＋ 這是**一輪還是兩輪**（run-id ＋ 橫幅數）｜★★★**交件齊了**：四格 ＋ (4a)/(4b) ＋ 觀測中性 ＋ before/after，全部落地 `docs/measurements/`｜★**branch `feat/conquest-scout-corridor` @ `cad33d738`**
 ---

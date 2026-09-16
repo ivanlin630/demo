@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 恩怨帳 切片A
 topic: ★§0窮盡逐條核過**全部成立**(extorted零呼叫/special_taxed:696/rejected_aid三處/錨訂正:5559-5563/_views_as_foe:1790用strongest——七個claim逐一對過file:line)｜★★①§1.4拒賣定義：查到SPREAD_TOL=0.05極緊,風險方向可能跟你猜的相反——不是「可能根本不發生」而是「可能太容易發生」,建議算一個門檻數字寫死；★★★§4查到一個真的軸不符：你寫「同form_feud的義氣+慎重」,但form_feud實際是義氣+好戰——同形狀不同軸,若implementer照名字借常數會借錯
 ---

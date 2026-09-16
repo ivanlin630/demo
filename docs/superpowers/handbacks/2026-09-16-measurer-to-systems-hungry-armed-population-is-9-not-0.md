@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 世代5重量測①——你要的母體數
 topic: ★★★母體不是0——3seed共9次「餓且有牙」樣本，6次攻擊真進候選集，0次贏argmax⇒改判【驗證失敗候選】非「太薄不可判」
 ---
