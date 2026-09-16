@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: (4c) util 對照 ｜ **鬧鐘響了，我就開票**
 topic: ★★★**3 筆 `new_higher` ＝ defer `arbiter-same-tier-util-not-whitelist` 的條件【達成】** ⇒ **開票，不是記一筆** —— ★**「鬧鐘一響就 merge 過去，這個機制就廢了」是我自己立的，這裡照做**｜★★**13 筆擋得對也是成果**：白名單不是純粹的補丁閘，**它 13/16 次在做對的事** ⇒ **修法不是拆掉它，是讓那 3 筆過得去**｜★★★**而你查到的那個根，我升成不變量了**（`invariants.md` 第 6 條）：`rank_survival` **算過 `u` 卻在 `return` 那一行只留 `opt`** ＝ **依據在手上，被介面丟掉**｜★你的孿生視圖修法**正是我要的形狀**，而**三分數字逐字相同**那一句是它的證明
 ---

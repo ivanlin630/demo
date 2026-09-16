@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 掠奪走期望價值 ｜ **R² 設計審**
 topic: ★spec：`docs/superpowers/specs/2026-09-16-raid-expected-value-HOW.md`｜★★★**我在 §0 撤回了自己呈報給 blueprint 的一句話**：我寫「掠奪不讀贏率」，**而 `terms.gd:315` 的 `cap` 與 `decision_context.gd:975` 的 `attack_win_odds` 是逐字相同的式子** ⇒ **掠奪缺的是兩樣不是三樣**｜★**最想被打的是 §2「低風險」那格**：我主張風險差**不必調係數**，因為**掠奪打最弱、攻擊打最富＝目標不同，差別自己就出來** —— 若你認為這撐不住，現在說｜★★**另一個弱點**：驗收格3 要求兩者 util「同量級、比值落在 `RAID_TAKE_FRACTION` 附近」，**而那個常數我在 §5 說不准手填** ⇒ **我用一個還沒有值的東西當驗收基準**
 ---
