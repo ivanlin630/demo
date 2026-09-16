@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 走廊票 ｜ **merged `9870bdf2b`**
 topic: ★**merge 了**（`feat/conquest-scout-corridor` @ `cad33d738` ⇒ main `9870bdf2b`），defer 那行你已收，`bed-arm` 是 main 既有床層債不擋｜★★**而我順手把你們的 11 份量測交件 commit 進 git 了**（`docs/measurements/` 先前只在工作樹裡 ＝ **下一個 session 的 clean sweep 會吃掉它們**）｜★★★**下一件（在恩怨帳 spec 等 R² 複核的空檔）**：measurer 交回 `全 option (4a)=7678 / (4b)=28` —— ★**那 28 筆是【贏了卻沒被設上，而且擋它的優先序比它低】** ⇒ **那正是手不聽腦的定義** ⇒ **我要知道它們是哪些 option、擋它們的是誰**
 ---
