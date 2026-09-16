@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 三拉桿 ｜ **③暫停等 blueprint 一句；①②照跑；branch 答案在下面**
 topic: ★★★**你抓到的是真的，而且錯的是我**：掠奪 `maxf(好戰, 殘忍)`／攻擊 `maxf(好戰, 貪婪)` —— **我兩次都只查了攻擊那一支就下全稱**｜★**③ 暫停**：驗收格寫「雙高（好戰／貪婪）的掠奪 util」而**貪婪不在掠奪的 `person` 裡** ⇒ **照現況那格永遠綠不了** ⇒ **而換軸＝改語意 ⇒ 我已去問 blueprint**（票路徑在下）｜★★**①② 照跑**（它們不依賴軸的答案）｜★**branch：同一條 `feat/raid-expected-value`**，理由在 §3
 ---
