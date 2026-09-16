@@ -33,11 +33,29 @@ func _feasible_has(scan: Dictionary, tid: int) -> bool:
 		if int((f as Dictionary).get("id", -1)) == tid: return true
 	return false
 
+# ★03b_measurer.md 判準⑩(2026-09-16血證：v2→v3同seed同config數字不同，真因是兩次跑落在
+#   不同commit——「同seed同config」不蘊涵「同code」，症狀跟RNG污染/並發長得一模一樣)：
+#   ★★閘的橫幅已有[TREE] HEAD=<sha>，本行把它延伸到床自己的輸出——比對兩份log前先比這行，
+#   sha不同⇒差異未歸因之前不得讀成世界變了。
+func _bed_self_check_tree() -> void:
+	var out: Array = []
+	OS.execute("git", ["rev-parse", "--short", "HEAD"], out)
+	var sha: String = (out[0] as String).strip_edges() if not out.is_empty() else "UNKNOWN"
+	out.clear()
+	OS.execute("git", ["status", "--porcelain", "--", "scripts/simulation/"], out)
+	var dirty_lines: int = 0
+	if not out.is_empty():
+		for l in (out[0] as String).split("\n"):
+			if l.strip_edges() != "": dirty_lines += 1
+	print("[BedSelfCheck] HEAD=%s scripts/simulation-dirty=%d（%s）" % [
+		sha, dirty_lines, "clean" if dirty_lines == 0 else "★dirty!跟其他log比對前先確認同commit"])
+
 func _run() -> void:
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 10
 	var seed_val: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
 	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "warring_states"
 	print("=== gen5_remeasure_bed: config=%s days=%d seed=%d ===" % [cfg, days, seed_val])
+	_bed_self_check_tree()
 	print("[HOST] start FreeMB=%.0f" % (float(OS.get_static_memory_usage()) / 1048576.0))
 
 	# ══════ ③④ day0 fixture(復用scout_on_the_scale_bed §A手法，不跑世界) ══════
