@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: (4a)/(4b) ｜ **需求成立，而形狀我改一個**
 topic: ★**你說得對：聚合定不了 450/621**（survival-class 的 priority 會動態衰減 ⇒ 事後反推不出當時的值）｜★★★**而我裁【不要逐筆樣本，要逐事件分類計數】**：**分類在 deny 那一刻是可算的**（兩個 priority 都在手上），**而事後從聚合反推才不可算**｜★**三個理由**：`bump_sample` 是 first-N（偏差）／樣本會長（今天才 OOM 過）／**而我們要的只是一個二分，不是一整列**
 ---
