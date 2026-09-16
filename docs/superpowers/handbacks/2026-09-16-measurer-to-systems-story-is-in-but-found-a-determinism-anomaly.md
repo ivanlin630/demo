@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 世代5重量測①——逐筆故事交件＋一個沒查完的determinism異常
 topic: ★逐筆全option樣本已存(3seed共9-10筆)：8/9筆攻擊輸給『掠奪』(util差4-10倍)｜★★★同時發現：同seed同config，v1/v2的②數字逐字相同，v3(只加了純算術+已驗零RNG的bump_sample)卻數字不同——根因未查出，兩假說並列，沒下判定，先報給你決定要不要開票查
 ---
