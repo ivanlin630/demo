@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 簡體形近字偵測 ｜ **加進【既有】的那支，沒開新閘**
 topic: ★**落地**：`.claude/hooks/doc-line-cap.sh`（既有的 SessionStart doc 檢查）**多一格 `[simp-lint]`** —— **沒有新增任何一支閘**｜★★★**而我要先更正用戶的前提**：**那不是「編碼問題」** —— 檔案一直是 UTF-8，**錯的是【字】**：我打了簡體形近字（`滞` U+6EDE）而檔案裡是正體（`滯` U+6EEF），**肉眼分不出來，而 grep 只比位元組**｜★★**成對陽性對照過了**：植入一個簡體字 ⇒ **15 → 16**；移除 ⇒ **16 → 15**｜★**實測 15 檔真命中**（含 production code 與 `game-design.md`）
 ---
