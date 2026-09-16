@@ -616,6 +616,16 @@ func _run() -> void:
 	# ══════════ §I (4b)/(4c) 普查：**是哪些 option、擋它們的是誰**（systems 2026-09-16）══════════
 	# ★★★三分不是二分：**(4a) 更高**（規則）／**(4c) 同層**（規則：A1a 白名單）／**(4b) 嚴格更低**（★病）
 	#   ⇒ ★舊判準的「否則」把【＝】與【＜】吐進同一個桶 ⇒ 16 筆 `80_vs_80` 全被報成手不聽腦。
+	# ★★★同層那一格的真問題：**新的那個是不是比現任更該做？**
+	#   ★priority 答不出（兩邊一樣）⇒ 答得出的是 util（存在 `team.task_util`，設上那一刻寫的）。
+	#   ★★**`unknown` 自成一格**：「沒得比」與「比了而新的較低」是兩個答案。
+	print("")
+	var uc: Array = []
+	for _u in ["new_higher", "new_lower", "equal", "unknown"]:
+		uc.append("%s=%d" % [_u, int(Probe.counts.get("4c.utilcmp." + _u, 0))])
+	print("★§I-util 同層被擋時【新的與現任的 util 比較】：%s" % " ".join(uc))
+	print("   ★`new_higher` > 0 ⇒ **同層白名單擋住了一次【更該做的事】** —— ★★而本床不對它下判決（下一張票）。")
+
 	print("")
 	print("★§I 優先序不足三分：(4a) %d｜(4c) 同層 %d｜**(4b) 嚴格更低 %d**" % [
 		int(Probe.counts.get("arbiter.deny.優先序不足.4a", 0)),
