@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `conquest-scout-corridor` ｜ 閘一輪跑完（橫幅 1 份）**紅 3**：基線 ＋ `defer-open`（鬧鐘）＋ ★**兩條 headless 在驗【走廊本身】**
 topic: ★**`[TREE] HEAD=2ce8f36a4 clean`｜`註冊表 55 支｜總時 538s`｜`FAIL：bed-arm headless defer-open`｜★橫幅只有 1 份**（先確認再讀數）｜★★★**兩條新紅【直接呼叫 `_commit_conquest_attack`】並斷言 `current_task == TASK_SCOUT`** —— **它們驗的就是本票刪掉的那條走廊**（`headless_test.gd:1299`／`:1024`）｜★★**而它們想驗的【意圖】仍然成立**（慎重者面對未驗情報不該直接打），**只是那件事的發生地點搬走了** ⇒ **這是「改 fixture 的數字」與「改我們在驗什麼」之外的第三種** —— **驗收點搬家**｜★**我不自己改，兩個選項列給你**
 ---
