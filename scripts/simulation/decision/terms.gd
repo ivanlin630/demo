@@ -638,8 +638,17 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"faction_duty":      return _duty_factor(float(v.get("_loyalty", 0.5)), float(v.get("野心", 0.5)))
 		"levy":              return 0.2 + float(v.get("貪婪", 0.5)) * 0.5 + float(v.get("好戰", 0.5)) * 0.3
 		"diplo":             return 0.2 + float(v.get("義氣", 0.5)) * 0.5 + float(v.get("計謀", 0.5)) * 0.3
-		"loot":              return float(v.get("殘忍", 0.5)) * 0.5 \
-			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("貪婪", 0.5)) * 0.2
+		# ★★★【歸中性 1.0】（systems 裁 2026-09-16）：
+		#   ★本票把人格搬進了 `loot_drive` 的 eval（`_rperson`）
+		#   ⇒ ★★**人格從 weight 搬進 eval 時，weight 必須【同一刀】歸中性**——
+		#     **搬家做一半＝同一個東西同時活在兩個地方，而那比留在原處更糟。**
+		#   ★★★舊制的 weight 帶人格是**對的**：舊 eval 是 `LOOT_DRIVE_BASE × cap`，**裡面沒有人格**
+		#     ⇒ 人格只能住在 weight。**是 eval 變了，所以 weight 要跟著變。**
+		#   ★而這不是設計選擇，是**對齊這個 code base 逐字寫了五次的約定**
+		#     （`attack_opportunity`／`intent_fit`／`idle_employ`／`help`／`scout` 的註解全是同一句）。
+		#   ★★症狀（實測 p1 fixture）：殘忍.9／好戰.8／貪婪.6 ⇒ 舊 weight ＝ 0.81
+		#     ⇒ **掠奪被壓低 19%**，而攻擊那一側明文避開了同一件事。
+		"loot":              return 1.0
 		"occupy":            return float(v.get("野心", 0.5)) * 0.5 \
 			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("統領", 0.0)) * 0.2
 		# S-A：+野心負向（野心高者不甘投靠→weight 疊 low-ambition factor；野心低+餓→投靠 util 高）。
