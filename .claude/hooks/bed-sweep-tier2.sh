@@ -62,6 +62,15 @@ LIST="docs/measurements/bed-sweep-list.txt"
 STAMP="$MAIN_ROOT/$STAMP"
 BASELINE_ABS="$MAIN_ROOT/$BASELINE"
 
+# ★★★不認得的旗標 ⇒ 直接退（systems 2026-09-17）。
+#   血證：我打 `--check`（少了 `-staleness`）⇒ 舊版落進【無參數】路徑
+#     ⇒ **直接跑了最貴的那一條（15–25 分鐘全掃）並蓋了時間戳**；
+#     implementer 用它探測時又把一次全掃變成孤兒。
+#   ★通則：**最貴的那條路不該是【打錯字的預設】**。
+case "${1:-}" in
+  ""|--check-staleness) : ;;
+  *) echo "[tier2] ✗ 不認得的旗標：$1"; echo "[tier2]   用法：（無參數）＝跑全掃（15–25 分）｜--check-staleness＝只查超期"; exit 2 ;;
+esac
 if [ "${1:-}" = "--check-staleness" ]; then
   if [ ! -f "$STAMP" ]; then
     echo "[tier2] ★從未跑過（找不到 $STAMP）"
@@ -158,7 +167,7 @@ alerts=0
 #   ★★所以這裡不是「選一個比較好的列」，是【無法比對就要大聲說】。
 # ★★★訂正（2026-09-17）：舊版只查 $BASELINE（diff 舊側），而重複鍵在 $TMP（新側）
 #   ⇒ ★它不是「表乾淨所以不亮」，是「看錯表所以永遠不亮」。
-_dupes=$( { awk -F'	' '/^scripts\//{print $1}' "$TMP" 2>/dev/null; awk -F'	' '/^scripts\//{print $1}' "$BASELINE" 2>/dev/null | sort -u; } | sort | uniq -d)
+_dupes=$( { awk -F'	' '/^scripts\//{print $1}' "$TMP" 2>/dev/null | sort | uniq -d; awk -F'	' '/^scripts\//{print $1}' "$BASELINE" 2>/dev/null | sort | uniq -d; } | sort -u)   # ★★★兩表【各自】查再聯集 —— 接起來再 uniq -d 會讓【每一支】都重複（實測 137 vs 4）⇒ _dupe_bad 恆真 ⇒ 告警静默關掉而畫面不紅
 if [ -n "$_dupes" ]; then
   echo "[tier2] ✗ baseline 的鍵【不唯一】⇒ diff 結果不可信（本輪不報 diff）："
   echo "$_dupes" | head -6 | sed 's/^/[tier2]     ★重複鍵：/'
