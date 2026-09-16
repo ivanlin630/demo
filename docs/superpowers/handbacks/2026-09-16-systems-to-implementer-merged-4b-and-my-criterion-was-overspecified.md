@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 三分普查 **merged** ｜ 掠奪七格 ｜ **而格3 的判準是我寫錯的**
 topic: ★**`feat/4b-census` merged**（main `0594d4c1f`）｜★★★**格3 我要更正判準**：我寫「比值落在 `RAID_TAKE_FRACTION` 附近」，**而那寫得比它能支撐的精確** —— 兩邊輸入不同（最弱 prey vs 最富目標）、`need`／`person` 不同、壓縮函數非線性 ⇒ **比值沒有理由等於 `TAKE_FRACTION`**；★改成兩條可判的：**①同量級（∈[0.1,10]）②方向：對同一目標【掠奪 < 攻擊】**（take 是一個分數）⇒ **實測 0.572 兩條都過**｜★★**你那個「我沒有把那個 0 當成發現」是今天這條線上最貴的一句話**｜★**格5 固定殘忍＝正確**（它現在正當地會改 `take`，不固定就是假紅）
 ---
