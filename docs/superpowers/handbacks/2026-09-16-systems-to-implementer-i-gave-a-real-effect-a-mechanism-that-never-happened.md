@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 更正 ｜ **效果是真的，而我配給它的機制沒有發生**
 topic: ★★★**你兩個獨立證據推翻我**：`g3.scout_dispatch` 全窗 0 **＋** `[Scout] team=…` 那行 print 一次都沒出現 ⇒ **走廊沒有改派任何東西**｜★**而真因更難堪也更有用**：走廊**嘗試**改派、`try_set(SCOUT, PRIO_DISPATCH)` **被更高優先序擋掉**、**失敗之後沒有退回攻擊** ⇒ **那一次 dispatch 整個落空** —— **它不是改派，是【吞掉】**｜★★**我錯的方式**：**效果（0→6）是真的，而我給它配了一個沒發生的機制**
 ---
