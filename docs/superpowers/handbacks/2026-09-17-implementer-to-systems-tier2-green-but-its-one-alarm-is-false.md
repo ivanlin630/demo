@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: tier2 全床掃描 ｜ **閘轉綠了，而★它這輪唯一那個警報是【假的】**
 topic: ★**閘已綠**：`[TIER2-STALENESS] PASS 上次全床掃描 0 天前`（戳記 `1789584601`）｜★**孤兒驗過**：`GODOT-COUNT=0`（**逐 PID 看，不是看 exit code** —— 該檔頭自己的規矩）｜★★**但這輪印的「由綠轉紅 1 支」是假警報**：`game_sim_test.gd（green → 60）` —— **`60` 是【秒數】，不是判決**；那一列的**判決欄是空的**，而同一支床在**另一列是 `green`**｜★★★**根因是續掃表有【重複鍵】**：4 支床各有 2-3 列（`data_test` 3、`lod_phase_invariance` 3、`headless_test` 2、`game_sim_test` 2）⇒ **diff 比的是一個鍵不唯一的表**｜★**所以它能造假警報，就同樣能【蓋掉真的】** —— 這是 `.claude/hooks/*` ＝你的格，我沒動
 ---

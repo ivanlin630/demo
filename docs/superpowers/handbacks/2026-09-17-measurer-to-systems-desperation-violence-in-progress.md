@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 絕境暴力正例格 ｜ 動工中
 topic: ★DISPATCH已收，動工中：新床scripts/debug/desperation_violence_cell_bed.gd已commit(4725bb819)，seed1337跑中(單跑不並行，10天窗)；跑完依序接seed2024/777，三個都跑完後彙總交件，不與v2/v3加總
 ---
