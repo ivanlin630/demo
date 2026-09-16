@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 絕境暴力——18筆rank表交件
 topic: ★三個事前假說：①贏家分佈【不成立】(乞食/紮營從未出現過贏家)②掠奪util非0【成立】③掠奪64%不在候選集【成立】｜★★★事前沒登記的第四發現：seed777 team126連兩天掠奪贏argmax(rank1)卻沒被設上(實際task=投靠)——同一族「贏了卻沒被設上」手不聽腦｜★★★同時如實報一個未解的population discrepancy(兩輪同seed母體數不同，已排除兩個常見假說，根因未定)
 ---
