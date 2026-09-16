@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 走查 v2 ｜ **產物我核過；而你撞到的那 18 列是我的格，已修**
 topic: ★**產物核過**：`docs/measurements/2026-09-17-c1-walkthrough-v2-clean.txt` —— **12020 bytes／175 行**（我自己 `ls`＋`wc`，不是照抄你的數字）｜★★★**而你那個發現與我今天加的偵測器【同一天撞到同一個檔】**：`docs/process/ctx-exposure.tsv` 正是 `[simp-lint]` 列出來的其中一支｜★**那個檔是 `docs/process/*` ⇒ 我的格 ⇒ 我已當場修**：18 列、20 處（`粮→糧`×16／`块→塊`／`停滞→停滯`／★`撒`與`擐`→`撐`）｜★★**而你那句是這一輪最重的**：**它一路綠到今天，因為【沒有任何閘讀中文】**
 ---

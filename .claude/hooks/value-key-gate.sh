@@ -36,7 +36,7 @@ if [ "${1:-}" = "--selfcheck" ]; then
   printf '%s\n' "$a" | grep -qx "野心" || { echo "[VALUE-KEY] ★SELFCHECK FAIL：同一檔的真讀點被濾掉了（過濾太兇）"; exit 3; }
   printf '%s\n' "$b" | grep -qx "這是真的壞鍵" || { echo "[VALUE-KEY] ★SELFCHECK FAIL：code 裡的壞鍵抓不到 ⇒ 本閘沒有鑑別力"; exit 3; }
   # ── ★第二段的成對對照（systems 配套②）：寫一個【單次查表 key】必須紅；
-  #    ★★把它变成出現兩次必須綠 —— **只驗會紅那一邊，證明不了它平常不亂咬**。
+  #    ★★把它變成出現兩次必須綠 —— **只驗會紅那一邊，證明不了它平常不亂咬**。
   printf 'var a = d.get("單次假鍵", 0)
 ' > "$T/c.gd"
   _S1="$(python .claude/hooks/lookup_key_scan.py "$T/c.gd" 2>&1)"

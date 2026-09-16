@@ -48,7 +48,7 @@
   ```
 - **持久跨 tick**：不因當下不能做而清（vs `FactionData.goals` 每 cadence `clear()`＝反模式）。
 - **★target 語意定案（次要3：防偷渡 plan-state）**：`goal_state` 只存**慾望本身**——`goal_type` +（若多實例）**最終目標** target（如 `build_weaponsmith` 的 facility_type、`acquire_material` 的 res）。**中繼 frontier 的具體 tile/子目標 target 由 resolver 每 tick 重算，絕不鎖進 goal_state**（定位型的「去哪塊 forest」每 tick 重選最近可達）。∴ 存的是「要什麼」非「怎麼走的第 N 步」＝**無 plan-state**（守 §9，vs 退役 S2 鎖 plan-state 被打斷就壞）。
-- **不重用既有 3 欄**（R① 坐实全不能用）：`PersonData.goals`（reaction 消費、與 decision 脫節）/`FactionData.goals`（每 cadence 重建）/`FactionData.strategic_goals`（`invariants:372` 禁當獨立權威）。**team-level 全新欄**。
+- **不重用既有 3 欄**（R① 坐實全不能用）：`PersonData.goals`（reaction 消費、與 decision 脫節）/`FactionData.goals`（每 cadence 重建）/`FactionData.strategic_goals`（`invariants:372` 禁當獨立權威）。**team-level 全新欄**。
 - **goal 生成/維護**（誰掛 goal 上去）：cadence 評估（人格×現況 → 掛「想要 X」慾望，util-driven 非硬派）。**基礎 goal-set**（WHAT §8）：資源維持（food/material/tools/weapons/coin 各「維持夠用」）+ 設施發展（每座設施「想要 F」）。**掛/退 goal 本身也走 util 門檻**（夠想才掛、達成/長期折零則退），非 scripted。
 - **決定性**：goal 掛/退 讀狀態+人格閾，禁 randf。
 - **invariants 新增**：goal_state = team-level means-end 唯一權威；跨 tick 持久；禁他處（faction tag/person goals）平行定 team goal。
@@ -111,7 +111,7 @@
 
 ## 5. 組件 D：委派 peer option（泛化 `_try_dispatch_or_invite`）
 
-- **現況**（R① 坐实）：`_try_dispatch_or_invite`（`faction_ai:554-570`）= 手評 heuristic（`ambition*0.5+military*0.3`）在 rank 池**外**跑，非 option。
+- **現況**（R① 坐實）：`_try_dispatch_or_invite`（`faction_ai:554-570`）= 手評 heuristic（`ambition*0.5+military*0.3`）在 rank 池**外**跑，非 option。
 - **改**：每個 frontier candidate 若可委派（該 action 能由子隊執行），resolver 產**兩變體**：`{delegate:false 自己做}` + `{delegate:true 派子隊做}`，**都進 rank 池競 util**（WHAT §4：委派跟自己做並列按 util 挑）。
 - 委派變體 util：含「母隊留守本業 + 子隊並行」的價值（多線紅利）；扣「餘力成本」（pop-guard 不夠則委派變體 not applicable）。
 - **餘力 gate 配額**（WHAT §4）：能同時跑幾線 = 既有 dispatch pop-guard（`MIN_PARENT_POP_AFTER_DISPATCH` 等）；窮隊少線、強權多線=寫實。跨線協調=隱式（util 排序+餘力 gate 自動分配，不建總參謀）。
@@ -121,7 +121,7 @@
 
 ## 6. 組件 E：need-chaining（NeedOracle 泛化）
 
-- **現況**（R① 坐实）：`_supply_chain`+`_construction_facility_need` 真有資源型 chaining，但硬 scope `CONSTRUCTION_COST_RES=["material","tools"]`。
+- **現況**（R① 坐實）：`_supply_chain`+`_construction_facility_need` 真有資源型 chaining，但硬 scope `CONSTRUCTION_COST_RES=["material","tools"]`。
 - **改**：資源型前置的 need 傳播**泛化**——goal 的 `resource` 前置 → 生 res-need → 若該 res 需製造/採集則遞迴其鏈（既有 `_supply_chain` DAG walk 精神，但由 GoalRegistry 驅動非硬 scope）。
 - **邊界**：NeedOracle 續管「資源數量 need」；**定位/人力/設施/子目標前置不塞 NeedOracle**（它 per-(team,res)→float 表達不了）——走 GoalResolver 的 per-kind handler。**分工清楚**：資源量→NeedOracle；非資源前置→Resolver。
 - **★兩 guard 聯集無環定案（次要5：兩張圖交叉安全論證）**：系統有兩張依賴圖 + 各自 re-entrancy guard——

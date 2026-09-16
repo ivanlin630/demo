@@ -30,7 +30,7 @@
 field	status	pages	who	中文顯示名
 leader_values	exposed	社交	player_query_api.get_decision_snapshot	領袖的價值觀
 desperation_entry_threshold	exposed	生存	player_query_api.get_decision_snapshot	走投無路的門檻
-food_days	exposed	生存	player_query_api.get_player_snapshot	糧食還能撐幾天
+food_days	exposed	生存	player_query_api.get_player_snapshot	存糧還能吃幾天
 can_rescue_build	exposed	生存	player_query_api.get_decision_snapshot	能不能援手施工
 rescue_build_util	exposed	生存	player_query_api.get_decision_snapshot	援手施工的劃算
 population	exposed	生存	player_query_api.get_decision_snapshot	人數
@@ -82,7 +82,7 @@ own_camp_pos	exposed	生存	player_query_api.get_decision_snapshot	自家營地�
 settle_resume_site	exposed	生存	player_query_api.get_decision_snapshot	未完工的工地
 settle_eta_days	exposed	生存	player_query_api.get_decision_snapshot	紮根還要幾天
 settle_site_quality	exposed	生存	player_query_api.get_decision_snapshot	紮根選址品質
-food_runway_days	exposed	生存	player_query_api.get_decision_snapshot	糧食跑道（還能撐幾天）
+food_runway_days	exposed	生存	player_query_api.get_decision_snapshot	算進收成後還能撐幾天
 can_expand	exposed	經濟	player_query_api.get_decision_snapshot	能不能分村
 expand_pos	exposed	經濟	player_query_api.get_decision_snapshot	分村選址
 expand_settler	exposed	經濟	player_query_api.get_decision_snapshot	派幾人去分村
