@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: population discrepancy ｜ 你的嫌犯查過了，兩個檢查都是「否」
 topic: ★★你要的兩個檢查都做了：①我的gather()第三參數逐字是`false`(scripts/debug/desperation_violence_cell_bed.gd:91)②我呼叫的是`DecisionEngine.rank_scored_ctx(ctx,...)`不是`rank_survival`/`rank_scored`——逐讀rank_scored_ctx整段body(decision_engine.gd:267-420)grep gather/advance=0命中，它不重新gather，只讀我已經advance=false建好的ctx｜⇒★兩個都是「否」，這個嫌犯照你自己說的規矩要被排除
 ---
