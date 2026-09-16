@@ -540,7 +540,22 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	if _prey != -1:
 		var _wbel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, _prey)
 		c.weak_prey_priced = FactionAISystem.belief_has_priced_items(_wbel)
-		c.weak_prey_richness_est = FactionAISystem.belief_richness_coin(_wbel) if c.weak_prey_priced else 0.0
+		# ★★★【薄情報走桶的下界，不是 0】（systems 裁 2026-09-16；★**第三個消費者，接同一個計算點**）：
+		#   ★既有兩個：攻擊掃描 `faction_ai_system.gd:350`／偵查估值 `decision_context.gd:330`
+		#   ⇒ ★★**掠奪是第三個** —— 而它先前直接回 0 ⇒ 實測 `unpriced_prey = 379`（母體 3285）**恆 0**。
+		#   ★★★**「看不清」不等於「很窮」** —— 而這兩件事在一個 0 上長得一模一樣。
+		#   ★三種形狀：有分項 ⇒ 逐項定價｜只有桶號 ⇒ **桶下界**｜連資產欄都沒有 ⇒ **0**
+		#     （★★而最後那個 0 是「不知道」不是「很窮」—— 那條 systems 已標【待驗】，**不在本票**）
+		#   ★★**呼同一個 `bucket_floor`，不自己算** —— 各寫一份的話桶意義會默默 drift，**而 drift 不會有東西紅**。
+		var _wscale: int = int(_wbel.get("resource_scale", -1))
+		if c.weak_prey_priced:
+			c.weak_prey_richness_est = FactionAISystem.belief_richness_coin(_wbel)
+		elif _wscale >= 0:
+			c.weak_prey_richness_est = FactionAISystem.bucket_floor(_wscale)
+			if Probe.enabled: Probe.bump("raid.thin.bucket_floor")
+		else:
+			c.weak_prey_richness_est = 0.0   # ★誠實的 0：連桶號都沒有
+			if Probe.enabled: Probe.bump("raid.thin.no_scale")
 	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
 	# 無牙商隊 armed≈0 → ratio≈0 → loot_drive/intent_fit capability_factor 壓平（送死沒人幹，非被禁）。
 	c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(float(team.population), 1.0)
