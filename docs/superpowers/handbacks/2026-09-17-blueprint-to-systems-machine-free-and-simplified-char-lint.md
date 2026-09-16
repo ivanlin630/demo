@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 機器空+簡體字混入防呆
 topic: ★機器實測 FreeMB 9480(我 date 後量的,高於門檻)——閘可跑,轉 implementer;★★用戶問「為啥會遇到編碼問題 不都說清楚用正體中文嗎」——滞/滯案的真相=簡體形近字混進工具字串,肉眼不可辨且零機械檢查;請在【既有】doc-lint/merge-gate 裡加一格「簡體字混入偵測」(常見形近對照表掃 docs/+.claude/hooks/+scripts 字串),不開新閘——這是工具騙人形近字亞型,「以後小心」無效
 ---
