@@ -583,6 +583,32 @@ func _run() -> void:
 	# ══════════ §C 生產隊三母體（第二張票）—— ★窗末再印一次完整版 ══════════
 	_snapshot_c(st, ticks / WorldState.TICKS_PER_DAY)
 
+	# ══════════ §H (4a)/(4b)：「贏了卻沒被設上」裡有一半不是病 ══════════
+	# ★(4a) 擋它的 priority **更高** ⇒ 階梯正常運作，**不是病**
+	# ★★(4b) **同級或更低** ⇒ ★★★**那才是手不聽腦**
+	# ★判準在 deny 那一刻算（`task_arbiter`）—— **事後算不出來**：
+	#   `task_priority` 是動態的（survival-class 會衰減）⇒ 拿 task 名字反推會算錯。
+	print("")
+	print("★§H (4a)/(4b)（★在 deny 當下分類，非事後反推）")
+	var h_4a: int = int(Probe.counts.get("arbiter.deny.優先序不足.4a", 0))
+	var h_4b: int = int(Probe.counts.get("arbiter.deny.優先序不足.4b", 0))
+	var h_tot: int = int(Probe.counts.get("arbiter.deny.優先序不足", 0))
+	print("   全 option：(4a) 更高 ＝ %d｜(4b) 同級或更低 ＝ %d｜母體（優先序不足）＝ %d" % [h_4a, h_4b, h_tot])
+	_ok(h_4a + h_4b == h_tot,
+		"§H-a 對帳：(4a)+(4b) ＝ %d ＝ 母體 %d（★不等 ⇒ 有一條路沒分到桶）" % [h_4a + h_4b, h_tot])
+	for _o3 in ["偵查", "攻擊"]:
+		print("   %s：(4a) %d｜(4b) %d" % [_o3,
+			int(Probe.counts.get("arbiter.deny.優先序不足.opt." + _o3 + ".4a", 0)),
+			int(Probe.counts.get("arbiter.deny.優先序不足.opt." + _o3 + ".4b", 0))])
+	var prio_rows2: Array = []
+	for k in Probe.counts:
+		var ks11: String = String(k)
+		if ks11.begins_with("arbiter.deny.優先序不足.opt.偵查.prio."):
+			prio_rows2.append("%s=%d" % [ks11.replace("arbiter.deny.優先序不足.opt.偵查.prio.", ""), int(Probe.counts[k])])
+	prio_rows2.sort()
+	print("   偵查 逐對 priority（新_vs_現任）：%s" % (" ".join(prio_rows2) if not prio_rows2.is_empty() else "（空）"))
+	print("   ★★而本床**不對 (4b) 下判決** —— 它是下一張票的輸入：要不要擠掉現任那個 task，是設計問題。")
+
 	# ══════════ §G 走廊拆除四格（票 conquest-scout-corridor，2026-09-16）══════════
 	# ★spec 要四個數：①走廊歸零 ②偵查總量不塌 ③偵查勝率不爆 ④真的被設上。
 	# ★★而①在【拆之前就已經是 0】（10 天窗 v2 實測）⇒ **它不具鑑別力，照印但不當證據**。

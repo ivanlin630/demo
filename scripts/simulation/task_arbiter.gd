@@ -251,6 +251,19 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		#   ★★【擋住它的】是**現任的那個 task 與它的 priority** —— 兩者是不同的問題，
 		#   ★★★而把 `.by.` 當成答案會把【誰想做】讀成【誰擋路】。純觀測：零 RNG、不寫 state。
 		Probe.bump("arbiter.deny.優先序不足.holder." + String(team.current_task))
+		# ★★★(4a)/(4b) **在 deny 那一刻分類**（systems 裁 2026-09-16）：
+		#   ★判準是**機械的**：**擋它的 priority ＞ 它自己 ⇒ (4a) 階梯正常運作**；
+		#     **同級或更低 ⇒ (4b) 那才是手不聽腦**。
+		#   ★★**為什麼不存逐筆樣本事後算**：
+		#     ①`bump_sample` 是 first-N ⇒ **偏差**；②樣本會長 ⇒ **今天才追過 OOM**；
+		#     ★★★③**最關鍵**：`team.task_priority` 是**動態的**（survival-class 會隨時間衰減）
+		#       ⇒ **事後拿 task 名字反推 priority 會算錯**（measurer 聚合只定得出 163/621，450 卡在這）
+		#       ⇒ **這個二分【只在這一刻可算】** —— 離開這一行它就失去了那個數。
+		var _cls4: String = "4a" if team.task_priority > priority else "4b"
+		Probe.bump("arbiter.deny.優先序不足." + _cls4)
+		if _opt != "":
+			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + "." + _cls4)
+			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".prio.%d_vs_%d" % [priority, team.task_priority])
 		if _opt != "":
 			Probe.bump("arbiter.deny.優先序不足.opt." + _opt + ".holder." + String(team.current_task))
 		if _opt == "求居": _note_seek_deny(state, team, priority, "優先序不足")
