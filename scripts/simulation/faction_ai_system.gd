@@ -4490,7 +4490,7 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 			Probe.bump("dsrc.%s.solo.%s" % [opt, "ok" if _solo_set_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
 			if _solo_set_ok:
 				Probe.bump("dpos.ok.solo.%s.pos%d" % [opt, mini(_solo_pos, 9)])
-				if _solo_pos > 0 and opt == "掠奪":
+				if _solo_pos > 0 and opt == "掠奪":   # gate-ok: 純觀測——它只守著下一行的 `Probe.bump_sample`，不影響任何決策；闘的「剥掉 Probe 呼叫」是【逐行】的，而這個守衛跨了一行
 					Probe.bump_sample("dpos.raid_passedover", {"path": "solo", "pos": _solo_pos,
 						"skipped": " ".join(_solo_skipped)}, 60)
 			else:
@@ -6861,7 +6861,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			Probe.bump("dsrc.%s.survival.%s" % [opt, "ok" if _surv_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
 			if _surv_ok:
 				Probe.bump("dpos.ok.survival.%s.pos%d" % [opt, mini(_sv_pos, 9)])
-				if _sv_pos > 0 and opt == "掠奪":
+				if _sv_pos > 0 and opt == "掠奪":   # gate-ok: 純觀測——它只守著下一行的 `Probe.bump_sample`，不影響任何決策；闘的「剥掉 Probe 呼叫」是【逐行】的，而這個守衛跨了一行
 					Probe.bump_sample("dpos.raid_passedover", {"path": "survival", "pos": _sv_pos,
 						"skipped": " ".join(_sv_skipped)}, 60)
 			else:
