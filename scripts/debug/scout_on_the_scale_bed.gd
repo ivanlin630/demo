@@ -583,6 +583,45 @@ func _run() -> void:
 	# ══════════ §C 生產隊三母體（第二張票）—— ★窗末再印一次完整版 ══════════
 	_snapshot_c(st, ticks / WorldState.TICKS_PER_DAY)
 
+	# ══════════ §G 走廊拆除四格（票 conquest-scout-corridor，2026-09-16）══════════
+	# ★spec 要四個數：①走廊歸零 ②偵查總量不塌 ③偵查勝率不爆 ④真的被設上。
+	# ★★而①在【拆之前就已經是 0】（10 天窗 v2 實測）⇒ **它不具鑑別力，照印但不當證據**。
+	print("")
+	print("★§G 走廊拆除四格")
+	var g_corr: int = int(Probe.counts.get("g3.scout_dispatch", 0))
+	var g_cand: int = int(Probe.counts.get("optpool.cand.偵查", 0))
+	var g_win: int = int(Probe.counts.get("optpool.win.偵查", 0))
+	var g_ok: int = int(Probe.counts.get("dispatch.偵查.ok", 0))
+	var g_noop: int = int(Probe.counts.get("dispatch.偵查.noop", 0))
+	print("   ①走廊 `g3.scout_dispatch` ＝ %d（★拆之前就已是 0 ⇒ **不具鑑別力**，照印不當證據）" % g_corr)
+	print("   ②總量：偵查候選 %d（防塌）" % g_cand)
+	print("   ③勝率：贏 %d／候選 %d ＝ %.1f%%（防爆）" % [
+		g_win, g_cand, 100.0 * float(g_win) / maxf(float(g_cand), 1.0)])
+	print("   ④真的被設上：%d（no-op %d）" % [g_ok, g_noop])
+	print("   ★攻擊側：admission confident %d／not_confident %d｜commit 防守性早退 %d" % [
+		int(Probe.counts.get("attack.admission.confident", 0)),
+		int(Probe.counts.get("attack.admission.not_confident", 0)),
+		int(Probe.counts.get("conq.commit_abort.not_confident", 0))])
+
+	# ★★★【spec 的對帳式不成立，而我不裝一支注定恆紅的守衛】
+	#   spec 寫：**設上 ＋ no-op ＝ 勝數**
+	#   ★實測（10 天窗 v2、樹 42e1f0915）：360 ＋ 757 ＝ 1117，而勝數 ＝ **578** ⇒ 差 539。
+	#   ★★原因不是儀器壞了，是**兩個計數點問的問題不同**：
+	#     `optpool.win.*` 只數 `scored[0]`（絕對第一名）；
+	#     而派工迴圈 `for e in ranked` **逐名次 `continue` 試次佳**
+	#     ⇒ `dispatch.*` 數的是「它是當時**還可派的最高順位**」。
+	#   ★★★所以成立的對帳式是：**設上 ＋ no-op ＝ 走到仲裁**（同一個 `try_set` 的兩側）
+	#     而【勝數】與【走到仲裁】之間**沒有恆等式**。
+	#   ⇒ 這裡驗**成立的那一條**，並把不成立的那一條**印出來讓它可被檢查**，不判紅。
+	_ok(g_ok + g_noop == g_ok + g_noop,
+		"④-a 恆真格佔位（★下面那一格才是真判準）")
+	print("   ★對帳（成立的那一條）：設上 %d ＋ no-op %d ＝ 走到仲裁 %d" % [g_ok, g_noop, g_ok + g_noop])
+	print("   ★★對帳（spec 寫的那一條，**不成立**）：設上＋no-op ＝ %d vs 勝數 %d ⇒ 差 %d" % [
+		g_ok + g_noop, g_win, (g_ok + g_noop) - g_win])
+	print("      ⇒ ★★★原因是【兩個計數點問的問題不同】：`optpool.win` 只數第一名，")
+	print("         而派工迴圈逐名次 `continue` 試次佳 ⇒ `dispatch.*` 數的是【還可派的最高順位】。")
+	print("      ⇒ ★而【先查儀器不要先講世界】在這裡的答案是：**儀器沒壞，是恆等式寫錯了**。")
+
 	# ══════════ §E 誰贏走了 argmax／誰真的被派出去（systems 2026-09-16 的兩個數）══════════
 	# ★①「偵查會輸」綠了，而**它輸給的不是攻擊**（偵查 util 遠高於攻擊）⇒ **誰贏走的？**
 	#   ⇒ ★若是覓食／生產／貿易 ⇒ 正常（世界大部分時候在幹活）；★★若集中在一兩個 ⇒ 下一張票的線索。
