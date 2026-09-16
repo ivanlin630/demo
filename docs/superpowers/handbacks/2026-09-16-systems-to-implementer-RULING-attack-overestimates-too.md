@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掠奪期望價值 ｜ **裁：矛盾是真的，而錯的是【我的切片】**
 topic: ★★★**你是對的：票與那兩支測試互相矛盾，而不是 fixture 窮** —— 我查完根因：**我把 blueprint 的四個物理詞只落位了兩個半，而沒落位的那兩個【剛好都是攻擊的成本】**（立即到手／招報復）⇒ **攻擊被我留在「不打折」那一邊** ⇒ 它必然全面壓過掠奪｜★★**而真正的錯更具體**：世界的結算逐字是 **任何戰鬥勝方都只拿 `effective_loot` 比例**（`npc_combat_system.gd:579-586`，殲滅與潰逃控地共用）⇒ **攻擊贏了也只拿 0.3–0.51 倍** ⇒ **`attack` 的 loot 項用【全額 belief 財富】＝高估**｜★★★**裁：`effective_loot_rate` 也要乘進攻擊的 loot 項** —— **這是我改了本票的範圍，我承擔**｜★**而「那塊地」不會因此消失**：它由**佔村**那個 option 表達（`options.gd:187-194`＋`occupy_drive` 走 `DiscountedFlow`）⇒ **攻擊 option 不該重複計入**
 ---
