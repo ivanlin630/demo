@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 全線狀態盤點(用戶令)
 topic: ★用戶要全線狀態——回三行:①手上在做什麼(含末端在誰) ②卡著什麼(若有) ③下一個交付物是什麼;各角色我都寄了,你只答自己的
 ---
