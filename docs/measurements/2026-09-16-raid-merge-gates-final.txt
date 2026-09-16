@@ -6,3 +6,19 @@
 [MERGE-GATES] ✓ constitution （2s）
 [MERGE-GATES] ✓ bare-tick （4s）
 [MERGE-GATES] ✓ build-duration （1s）
+[MERGE-GATES] ✓ bed-parse （106s）
+[MERGE-GATES] ✗ bed-arm （1s）—— 床 arm 順序：擋 setup 之後才 arm（那段世界的 tap 是盲的）
+[BED-ARM-GATE] ★FAIL：28 張床建了世界，既不用 helper 也不在白名單
+★處置：改用 MeasureBedHelper.arm_and_setup()（順序寫死，沒得選錯）
+★★若真的不能用（例如手工組世界不走 GameSetup），才加進白名單 ——
+   ★★★而加進白名單會讓上面那個數字變大，那是【刻意可見】的代價。
+
+[godot.ps1] child exit=1
+[MERGE-GATES] ✓ ki-anchor （2s）
+[MERGE-GATES] ✓ mailbox-integrity （89s）
+[MERGE-GATES] ✓ cherrypick-fidelity （4s）
+[MERGE-GATES] ✓ ki-status （25s）
+[MERGE-GATES] ✓ single-writer （1s）
+[MERGE-GATES] ✓ tree-div （1s）
+[MERGE-GATES] ✓ headless （43s）
+[MERGE-GATES] ✓ cross-run-static （24s）

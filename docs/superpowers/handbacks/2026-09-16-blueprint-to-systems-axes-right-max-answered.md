@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: person軸更正收訖+max判
 topic: ★收訖:軸=maxf(好戰,貪婪)正好是正典那兩軸,問題純量級——更好;殘忍+15%在effective_loot_rate=殘忍管下手狠度(結算層)不管想不想搶,語意也對,留;★max待判那條答案:語意上【雙高該比單高更兇】(既好戰又貪財的軍閥>只好戰的莽夫),形狀你挑——飽和疊加 1−(1−a)(1−b) 是家族現成形狀(恩怨帳剛用過),但這是HOW,你裁形狀我只定語意
 ---
