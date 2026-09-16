@@ -14466,10 +14466,22 @@ func _test_relation_graph_core() -> void:
 	RelationGraph.add_edge(edges, "feud", 7, 0.5, 100)
 	RelationGraph.add_edge(edges, "gratitude", 8, 0.3, 100)
 	assert(edges.size() == 2, "兩條邊")
-	# 同 type+target → 取 max intensity，不新增
+	# ★★★【`max` 已被用戶裁掉，改飽和疊加】——★出處逐字：
+	#   `docs/mechanism-intents.md:59`（**用戶裁 2026-09-16 影子場**）：
+	#   「**疊加＝飽和式 `1−(1−舊)(1−新)` 取代 max**
+	#     （小怨累積會爆／單次大怨直接高／永不破 1／順序無關／零常數）」
+	#   ⇒ ★★**這一行原本驗的正是【被用戶裁掉的那個語意】** ⇒ 改成驗飽和疊加的結果。
+	#   ★★★**出處寫在這裡而不是只寫在 commit 訊息裡** ——
+	#     **否則下一個人會以為是我們自己決定改掉 `max` 的。**
 	RelationGraph.add_edge(edges, "feud", 7, 0.9, 120)
 	assert(edges.size() == 2, "同邊不重複新增")
-	assert(RelationGraph.strongest(edges, "feud")["intensity"] == 0.9, "取 max intensity")
+	var _sat: float = 1.0 - (1.0 - 0.5) * (1.0 - 0.9)   # ＝ 0.95
+	assert(absf(float(RelationGraph.strongest(edges, "feud")["intensity"]) - _sat) < 0.0001,
+		"飽和疊加 1−(1−0.5)(1−0.9) ＝ %.4f（★舊制 `max` 會是 0.9 —— 而那是被用戶裁掉的語意）" % _sat)
+	# ★成對的另一半：**飽和永不破 1** —— 疊一個 0.99 上去仍然 < 1
+	RelationGraph.add_edge(edges, "feud", 7, 0.99, 130)
+	assert(float(RelationGraph.strongest(edges, "feud")["intensity"]) < 1.0,
+		"飽和疊加**永不破 1**（實際 %.6f）" % float(RelationGraph.strongest(edges, "feud")["intensity"]))
 	assert(RelationGraph.strongest(edges, "feud")["tick"] == 120, "tick 更新")
 	# 較低 intensity 不覆蓋
 	RelationGraph.add_edge(edges, "feud", 7, 0.2, 130)
