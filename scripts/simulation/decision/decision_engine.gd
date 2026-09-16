@@ -280,6 +280,9 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	if Probe.enabled:
 		Probe.add_amount("ctxseg.applicable." + src, float(_s1 - _s0))
 		Probe.add_amount("ctxseg.options." + src, float(_applicable.size()))
+	# ★逐次 rank 的掠奪讀數（Probe-gated；−1 ＝ 這一次掠奪不 applicable）
+	var _raid_u_with: float = -1.0
+	var _raid_coeff: float = -1.0
 	for opt in _applicable:
 		var u: float = 0.0
 		# ★★★組成 dump（systems＋blueprint 2026-09-11）：**只印最終 util 答不出它在哪一步被壓扁**
@@ -426,6 +429,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			Probe.add_amount("shelter.cmp.after_coeff_sum", float(_cmp.get("after_coeff", 0.0)))
 			Probe.add_amount("shelter.cmp.final_sum", float(_cmp.get("final", 0.0)))
 			Probe.bump("shelter.cmp.n")
+		if Probe.enabled and opt == "掠奪":
+			# ★★★【被需求一致性壓掉的掠奪】（systems 逐字定義 2026-09-16）——
+			#   ★記下這一次的 `coeff`，供 sort 之後算 `u_without = u_with / coeff`。
+			#   ★★**用【除】不是重算**：`coeff` 是一個純乘數 ⇒ 除法是【逐字精確】的，
+			#     而重算一次會引進「我有沒有抄對」這個新的錯誤來源。
+			_raid_u_with = u
+			_raid_coeff = _coeff
 		scored.append({"u": u, "i": idx, "opt": opt, "d": 0.0})
 		idx += 1
 	# ★means-end 長程規劃（組件 G，HOW §8）：goal frontier candidates 追加進同一 rank 池（sort 前→與 static option 同 argmax 競爭）。
@@ -503,6 +513,27 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	if Probe.enabled:
 		Probe.add_amount("ctxseg.sort." + src, float(Time.get_ticks_usec() - _s3))
 		Probe.bump("ctxseg.calls." + src)
+	# ★★★【被這一格壓掉的掠奪】（systems 逐字定義）：
+	#   `u_with` ＝ 含 `consistency_coeff` 的 rank util；`u_without` ＝ 同一次不含它
+	#   ⇒ **被壓掉 ＝ `u_with < winner_u ≤ u_without`**（有 coeff 就輸、沒 coeff 就贏）
+	#   ★★**母體 ＝ 掠奪 applicable 的次數**（不是 dispatch 次數 ——
+	#     ★★★dispatch 次數答的是「最後有沒有派出去」，而這裡問的是「秤上輸在哪一步」）。
+	if Probe.enabled and _raid_u_with >= 0.0 and _raid_coeff > 0.0 and not scored.is_empty():
+		var _wu: float = float(scored[0]["u"])
+		var _uwo: float = _raid_u_with / _raid_coeff
+		Probe.bump("raidsupp.pop")
+		if _raid_u_with < _wu and _wu <= _uwo:
+			Probe.bump("raidsupp.suppressed")
+		elif _raid_u_with >= _wu:
+			Probe.bump("raidsupp.won_anyway")
+		else:
+			Probe.bump("raidsupp.lost_anyway")   # ★沒有 coeff 也一樣輸 ⇒ 不是這一格的錯
+		var _cb: String = "ge0.9"
+		if _raid_coeff < 0.2: _cb = "lt0.2"
+		elif _raid_coeff < 0.4: _cb = "lt0.4"
+		elif _raid_coeff < 0.6: _cb = "lt0.6"
+		elif _raid_coeff < 0.9: _cb = "lt0.9"
+		Probe.bump("raidsupp.coeff." + _cb)
 	# ★★won_argmax（systems 要）：【產出】≠【贏】。
 	#   emitted > 0 且 fp 不變 可以同時為真，而最危險的解釋是
 	#   「接上了、有產出、但【從不改變結果】」——沒這顆 tap 就分不出來。

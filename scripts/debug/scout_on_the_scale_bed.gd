@@ -704,6 +704,21 @@ func _run() -> void:
 		_hb.append("%s=%d" % [_bk, int(Probe.counts.get("raid.util.hist." + _bk, 0))])
 	print("   ★掠奪 util 分布（**無偏全量**）：n=%d 平均=%.4f｜%s" % [
 		_rn, (_rsum / maxf(float(_rn), 1.0)), " ".join(_hb)])
+	# ★★★【被需求一致性壓掉的掠奪】（systems 逐字定義；★**不是 dispatch 次數**）
+	#   被壓掉 ＝ `u_with < winner_u ≤ u_without` —— **有 coeff 就輸、沒 coeff 就贏。**
+	#   ★母體 ＝ 掠奪 applicable 的次數；★★另外兩桶是**成對的另一半**：
+	#     `won_anyway`（有 coeff 也贏）與 `lost_anyway`（沒 coeff 也輸 ⇒ **不是這一格的錯**）。
+	var _sp: int = int(Probe.counts.get("raidsupp.pop", 0))
+	var _ss: int = int(Probe.counts.get("raidsupp.suppressed", 0))
+	var _cbs: Array = []
+	for _ck in ["lt0.2", "lt0.4", "lt0.6", "lt0.9", "ge0.9"]:
+		_cbs.append("%s=%d" % [_ck, int(Probe.counts.get("raidsupp.coeff." + _ck, 0))])
+	print("   ★★被 `consistency_coeff` 壓掉的掠奪 ＝ **%d** ／ 母體 %d（掠奪 applicable 的次數）" % [_ss, _sp])
+	print("      對帳：壓掉 %d ＋ 有 coeff 也贏 %d ＋ 沒 coeff 也輸 %d ＝ %d（母體 %d）" % [
+		_ss, int(Probe.counts.get("raidsupp.won_anyway", 0)),
+		int(Probe.counts.get("raidsupp.lost_anyway", 0)),
+		_ss + int(Probe.counts.get("raidsupp.won_anyway", 0)) + int(Probe.counts.get("raidsupp.lost_anyway", 0)), _sp])
+	print("      coeff 分布：%s" % " ".join(_cbs))
 	print("      ★★同樣不在本床下判決：它是 merge 判準的輸入。")
 
 	# ★★★【攻擊也要一張拒絕表】（systems 2026-09-16 的第②個數的下一問）：
