@@ -321,17 +321,25 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 		# ★★(b) 與 (c) **走同一道 admission**（systems 2026-09-16）——
 		#   ★它們在 epistemic 上對等（都答不出「它多肥」）⇒ **對等必須落實到門上，不能只寫在 spec 裡**；
 		#   ★★結果可以是通過，**但不能繞過它** —— 若這導致行為改變，驗收會看到，**而那正是我們要的**。
-		if not _has_priced:
-			var _caution_adm: float = float(leader.values.get("慎重", 0.5)) if leader != null else 0.5
-			var _thin_admit: bool = BeliefSystem.confident_enough(state, team.team_id, tid, _caution_adm)
-			if Probe.enabled:
-				Probe.bump("attack.thin_intel." + ("admitted" if _thin_admit else "refused"))
+		# ★★★【走廊降成可行性】（票 conquest-scout-corridor，2026-09-16）：
+		#   ★舊制：argmax 選了攻擊 → `_commit_conquest_attack` 發現 `confident_enough` 為假
+		#     → **直接 `try_set(TASK_SCOUT)`** ⇒ **在秤已經開口之後把結果改掉**＝第二條求解器。
+		#   ★★新制：**`confident_enough` 為假 ⇒ 這個攻擊 candidate 根本不產生**
+		#     ⇒ 「所以去偵查」**回到秤上**（偵查 option 已存在，不必再造一條路）。
+		#   ★★★而它與本專案剛落地的 admission 分層同構：**可信度那根軸管 admission**。
+		#   ★注意這是【擴大】：舊制只有薄情報走這道門，現在**所有攻擊候選**都走。
+		var _caution_adm: float = float(leader.values.get("慎重", 0.5)) if leader != null else 0.5
+		var _confident: bool = BeliefSystem.confident_enough(state, team.team_id, tid, _caution_adm)
+		if Probe.enabled:
+			Probe.bump("attack.admission." + ("confident" if _confident else "not_confident"))
+			if not _has_priced:
+				Probe.bump("attack.thin_intel." + ("admitted" if _confident else "refused"))
 				Probe.bump_sample("attack.thin_intel.rows", {"team": team.team_id, "target": tid,
-					"caution": snappedf(_caution_adm, 0.01), "admit": _thin_admit,
+					"caution": snappedf(_caution_adm, 0.01), "admit": _confident,
 					"scale": _scale_est, "tick": state.world.current_tick}, 300)
-			if not _thin_admit:
-				why["thin_intel_refused"] = int(why.get("thin_intel_refused", 0)) + 1
-				continue
+		if not _confident:
+			why["thin_intel_refused"] = int(why.get("thin_intel_refused", 0)) + 1
+			continue
 		# ★★薄情報的 x 走桶的下界（**不是 0**）—— 「看不清」不等於「很窮」。
 		# ★三種形狀的 x：有分項 ⇒ 逐項定價；只有桶號 ⇒ 桶下界；(b) 無資產欄 ⇒ **0，而那是「不知道」不是「很窮」**
 		#   ★★(b) 與「桶 0」在【值】上相同，而在【語意】上不同 —— 已回報 systems，標【待驗】。
@@ -561,21 +569,15 @@ func _commit_conquest_attack(state: WorldState, team: TeamData, prey_id: int) ->
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return false
 	var _caution: float = float(leader.values.get("慎重", 0.5))
-	# G3d-1/2 風險 gate：不確定 + 慎重 → 派斥候移向 prey best_estimate 位 → 親見壓謊 → 下次收斂。
+	# ★★★【走廊已拆】（票 conquest-scout-corridor，2026-09-16）：
+	#   ★這裡原本是：`confident_enough` 為假 ⇒ **直接 `try_set(TASK_SCOUT, …, "scout")`**
+	#     ⇒ ★★**那是在秤已經開口之後把結果改掉** —— 偵查進秤之後它成了【第二條求解器】。
+	#   ★★★修法是**降成可行性**：那道判斷搬到 `attack_scan` 的 candidate 生成端
+	#     ⇒ **不可行的攻擊目標【不會被產生】** ⇒ 而「所以去偵查」由**偵查 option 在秤上自己贏**。
+	#   ★所以這裡只剩一道**防守性早退**：若情報在 scan 與 commit 之間變差，**不派**（呼叫端試次佳），
+	#     ★★**而不是改派別的任務** —— **改派＝走廊的定義。**
 	if not BeliefSystem.confident_enough(state, team.team_id, prey_id, _caution):
-		var prey_t: TeamData = state.teams.get(prey_id)
-		# F1 感知鐵律：缺 belief tile_pos → sentinel (-1,-1)（禁默認 live 真位=god-view 回潮）。
-		var scout_pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, prey_id).get("tile_pos", Vector2i(-1, -1)) if prey_t else Vector2i(-1, -1)
-		if scout_pos == Vector2i(-1, -1):
-			return false   # 無 belief 位 → 不 scout（不瞎追 live）
-		if team.current_task == TeamData.TASK_SCOUT and team.prosperity_target_id == prey_id:
-			team.move_target = scout_pos   # 追蹤刷新：prey 移動 → 朝最新 best_estimate（不重派/不 spam log）
-			return true
-		if TaskArbiter.try_set(state, team, TeamData.TASK_SCOUT, scout_pos, TaskArbiter.PRIO_DISPATCH, "scout"):
-			team.prosperity_target_id = prey_id   # try_set 已設 move_target=scout_pos
-			print("[Scout] team=%d → verify prey=%d" % [team.team_id, prey_id])
-			Probe.bump("g3.scout_dispatch")
-			return true
+		if Probe.enabled: Probe.bump("conq.commit_abort.not_confident")
 		return false
 	# confident → 攻擊。若仍掛 scout（同 PRIO_DISPATCH 擋不住自身）→ 先 release 換手。
 	# combat_target 不預設：移動凍結 + interaction 早退會擋交戰；由 interaction_system 到達 start_combat 設。
