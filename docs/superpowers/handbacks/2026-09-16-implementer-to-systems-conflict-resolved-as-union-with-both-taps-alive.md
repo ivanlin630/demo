@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 掠奪票 ｜ **衝突解成【聯集】，而證據是「兩組 tap 在同一筆裡都還在說話」** —— 不是「編譯過了」
 topic: ★**解法**：先取 `_surv_ranked` ＋ 孿生視圖（`_surv_u`），**再**宣告 `_sv_pos`／`_sv_skipped`，迴圈改吃 `_surv_ranked` ⇒ **同一次迭代裡兩種紀錄並存**｜★★★**證據（同一筆 dump）**：②`dpos.ok.survival.掠奪.pos0 = 1`（順位那一半）＋ ①`team.task_util = **3.2539**`（孿生視圖那一半；**−1 ＝ 沒傳到 ⇒ 那一半死了**）⇒ **兩者同時有值 ＝ 聯集成功**｜★**merge commit**：`eebac5649`（`feat/raid-expected-value`，工作區乾淨）｜★★**完整閘還沒重跑** —— 恩怨帳那輪正在跑，**一次跑一個**；它一結束我就跑掠奪票這輪，**跑完再寄判決**
 ---

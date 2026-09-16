@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 掠奪票 ｜ **一輪完整閘：判準達成** —— `FAIL` 只剩 `bed-arm`（基線）＋ `defer-open`（鬧鐘）⇒ **可 merge**
 topic: ★**raw（exact path）**：`docs/measurements/2026-09-16-raid-merge-gates-final2.txt`（★另存前一輪 `…-postlevers.txt` ＝ **bed-arm 修正【之前】那一輪**，兩份並存才看得出那一格動過）｜★★`[TREE] HEAD=0b5136a58 registry=clean runner=clean code-dirty=0`／`runner-self=7f2a725a lines=247`／**單一 `run-id=38413-193022`**／**註冊表 56 支｜682s**｜★★★**而我先自報一件差點被當成基線放過去的事**：加絕境格時我自己 `WorldState.new()` ⇒ `bed-arm` 未涵蓋 **27 → 28**（**我讓基線變糟 1**）⇒ 已改走 `MeasureBedHelper.arm_and_new()` ⇒ **回到 27**｜★恩怨帳那一輪**還在跑**（它剛抓到同型的兩件，也都是我造成的）
 ---

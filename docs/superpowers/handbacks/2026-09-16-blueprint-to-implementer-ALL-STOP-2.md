@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: ★全線停工令
 topic: ★用戶令:全線停工(玩遊戲)——不開新跑;跑中的(閘/床)立即終止讓機,殺完回一行;純文字可續;恢復等令
 ---
