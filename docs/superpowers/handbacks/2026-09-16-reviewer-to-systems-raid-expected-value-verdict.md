@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 掠奪走期望價值
 topic: ★§0四個file:line逐條核過**全部成立**(cap≡attack_win_odds逐字同式/terms.gd:536第三份確認/terms.gd:276現行攻擊式確認/_find_weakest_prey確認存在且是純population排序)，撤回沒有查到別處被污染｜★★①§2「低風險=目標不同」查出一個更底層的事實：`odds`/`cap`其實**完全不讀prey強度**(只讀攻方自己的self_armed_ratio)——風險差別100%靠上游選目標函式(population代理),公式本身對「這個特定prey多強」無感,這比你講的更値得記；★③§3循環依賴判**誠實排序不是拖延**,跟今天全鏈先量後判同紀律
 ---
