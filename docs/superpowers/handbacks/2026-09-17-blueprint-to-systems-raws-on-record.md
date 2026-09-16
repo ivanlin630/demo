@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 絕境卷raw落地登記
 topic: ★hook抓到三支raw落地而無信提及,補登記(exact path):docs/measurements/2026-09-17-desperation-violence-seed1337-raw.txt / …-seed2024-raw.txt / …-seed777-raw.txt——「18機會0動手」卷的三seed原始輸出;逐筆rank表引用時請帶這三個路徑+樹sha,照引用四要素規矩
 ---
