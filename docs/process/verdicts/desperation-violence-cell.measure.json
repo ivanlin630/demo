@@ -11,7 +11,10 @@
   "raw_logs": [
     "docs/measurements/2026-09-17-desperation-violence-seed1337-raw.txt",
     "docs/measurements/2026-09-17-desperation-violence-seed2024-raw.txt",
-    "docs/measurements/2026-09-17-desperation-violence-seed777-raw.txt"
+    "docs/measurements/2026-09-17-desperation-violence-seed777-raw.txt",
+    "docs/measurements/2026-09-17-desperation-violence-rank-seed1337-raw.txt（第二輪，帶rank表，HEAD=495c497be）",
+    "docs/measurements/2026-09-17-desperation-violence-rank-seed2024-raw.txt（HEAD=26889aa6f）",
+    "docs/measurements/2026-09-17-desperation-violence-rank-seed777-raw.txt（HEAD=26889aa6f）"
   ],
   "specimen_trace": "無——純聚合existence讀數，不下behavior因果結論，照規免specimen",
 
@@ -38,10 +41,19 @@
     "★★★與v2/v3(gen5_remeasure_bed.gd，掠奪merge前的舊機制)不可加總——本輪掠奪估值整個換過(上秤+貪婪軸+主觀成本)，是全新一輪，不是延續",
     "★三個seed跑在三棵不同的樹上(4725bb819/f2715361a/9adc17db8，逐一列出，不是同一棵樹)——逐對git diff --name-only比對scripts/=0個檔(中間commit只動hook/文件)，systems獨立覆核+跑陽性對照(同比法對docs/抓到5個檔證明非恆0)⇒就被量的世界而言同源，可加總；這是【查過】的結論不是【應該一樣】的假設(判準⑩)",
     "★本題不需要gather()/rank_scored_ctx()，只讀team.current_task，逐日採樣(比之前每7天更密)，母體數字因此不能與v2/v3的每7天採樣直接比密度",
-    "★單seed單窗；比率結論(0%)是existence層級的讀數，不是可長期引用的機率"
+    "★單seed單窗；比率結論(0%)是existence層級的讀數，不是可長期引用的機率",
+    "★★★population discrepancy(未解，如實報)：第一輪(seed1337無rank表)母體=9/4/5(共18)，第二輪(seed1337加了gather+rank_scored_ctx呼叫)同seed母體變成6/6/16(共28)——已排查：①三輪commit逐對git diff --stat scripts/simulation/皆=0(生產code沒變)②gather/rank_scored_ctx/decision_engine.gd/terms.gd/options.gd逐檔grep randf/randi=0命中(呼叫鏈本身不耗RNG)⇒兩個常見假說都排除了，根因未定；候選第三假說(未驗證)：本輪每天對~500+隊多呼叫一次gather+rank_scored_ctx，多的CPU工作量若碰到任何thread-timing依賴的引擎子系統(如pathfinding worker結果套用順序)可能移動軌跡而不需要耗RNG——本卷不下判定，如實報並建議systems決定是否值得再開一輪二分查"
   ],
 
-  "next_station": "to:systems——動手率0%(母體18)+餓與有牙負相關的獨立驗證，兩個結論都要不要往下追由你/blueprint判",
+  "④逐筆rank表(systems 2026-09-17問，18筆各自的贏家/掠奪攻擊名次util/候選集/self_armed_ratio/weak_prey)": {
+    "★注意：本節是第二輪跑(帶rank表)，母體=28(6+6+16)，與上面第一輪(母體18)不是同一輪——見honest_limits的population discrepancy說明，本節數字自成一組不與18混算",
+    "①事前假說「贏家多半是乞食/紮營/覓食」": "★★不成立——28筆贏家分佈：徵收6／maintain_food或tools 6／偵查4／買糧2／歸建2／survival2／掠奪2(但實際task=投靠,未被設上)／覓食1／外交1／併入1；乞食與紮營從未出現過一次贏家",
+    "②事前假說「掠奪util非0只是排後面」": "★確認(對掠奪成立)——掠奪在候選集裡的10筆u值域0.0046~3.6623，從未見過0.0000；攻擊則有數筆u=0.0000(day8team73/day9team49/day9team73)，掠奪與攻擊在這一點上不同",
+    "③事前假說「掠奪大量不在候選集」": "★確認——28筆裡掠奪不在候選集18筆(64.3%)，過半的『0動手』來自沒上場不是輸了",
+    "④★★★事前沒登記的第四發現：掠奪贏過argmax(rank1)但沒被設上": "seed777 team126 day9(掠奪u=1.5776第一名)與day10(掠奪u=3.6623第一名)——同一支隊連續兩天掠奪贏了rank，而實際task_snapshot都是『投靠』——這是『贏了卻沒被設上』(同一族此session前面(4a)(4b)那題查過的手不聽腦形狀)，指向掠奪要真的發生，除了util贏還要通過task_arbiter的優先序仲裁(投靠=survival-class,可能@80壓過掠奪的commit priority@50)——本卷不往下查誰擋的,只標出這是同一族問題,建議跟(4a)(4b)那題一起看"
+  },
+
+  "next_station": "to:systems——動手率0%(母體18/28兩輪皆0)+餓與有牙負相關獨立驗證+④『掠奪贏argmax卻沒被設上』新發現(疑似手不聽腦同族)，三個結論要不要往下追由你/blueprint判",
 
   "supersedes": []
 }
