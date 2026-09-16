@@ -283,6 +283,25 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	# ★逐次 rank 的掠奪讀數（Probe-gated；−1 ＝ 這一次掠奪不 applicable）
 	var _raid_u_with: float = -1.0
 	var _raid_coeff: float = -1.0
+	var _coeff_by_opt: Dictionary = {}
+	# ★★★【真實世界的 urgency 落在哪一層】（systems 2026-09-16 要的第①件）——
+	#   ★他先前把「若 urgency 落在生存層」這個**條件句**當事實用了，而**沒有人驗過它**。
+	#   ★★「餓」用**世界自己的絕境線**判（`food_days < desperation_entry_threshold`），
+	#     ★★★**不是用 urgency 自己** —— 否則「餓的隊主層是哪一層」就變成同義反覆。
+	if Probe.enabled and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
+		var _ml: int = 0
+		for _li in range(1, NeedHierarchy.N_LAYERS):
+			if ctx.need_urgency[_li] > ctx.need_urgency[_ml]: _ml = _li
+		Probe.bump("urg.n")
+		Probe.bump("urg.main.L%d" % _ml)
+		for _li2 in range(NeedHierarchy.N_LAYERS):
+			Probe.add_amount("urg.sum.L%d" % _li2, float(ctx.need_urgency[_li2]))
+		# ★有沒有 faction 分開數：`need_hierarchy.gd` 對 `faction_id == -1` 直接給歸屬 1.0
+		#   ⇒ ★★**每一支無 faction 的隊，歸屬層恆滿檔** —— 那會把 alignment 全部吃掉。
+		Probe.bump("urg.main.%s.L%d" % [("nofac" if team == null or team.faction_id == -1 else "fac"), _ml])
+		if ctx.food_days < ctx.desperation_entry_threshold:
+			Probe.bump("urg.hungry.n")
+			Probe.bump("urg.hungry.main.L%d" % _ml)
 	for opt in _applicable:
 		var u: float = 0.0
 		# ★★★組成 dump（systems＋blueprint 2026-09-11）：**只印最終 util 答不出它在哪一步被壓扁**
@@ -429,6 +448,8 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			Probe.add_amount("shelter.cmp.after_coeff_sum", float(_cmp.get("after_coeff", 0.0)))
 			Probe.add_amount("shelter.cmp.final_sum", float(_cmp.get("final", 0.0)))
 			Probe.bump("shelter.cmp.n")
+		if Probe.enabled:
+			_coeff_by_opt[opt] = _coeff
 		if Probe.enabled and opt == "掠奪":
 			# ★★★【被需求一致性壓掉的掠奪】（systems 逐字定義 2026-09-16）——
 			#   ★記下這一次的 `coeff`，供 sort 之後算 `u_without = u_with / coeff`。
@@ -534,6 +555,18 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		elif _raid_coeff < 0.6: _cb = "lt0.6"
 		elif _raid_coeff < 0.9: _cb = "lt0.9"
 		Probe.bump("raidsupp.coeff." + _cb)
+		# ★★★【關鍵是【比】不是【值】】（systems 2026-09-16）——
+		#   ★兩邊同值 ⇒ **共同因子** ⇒ **不改排序**（那正是這一輪推翻「壓抑源」說法的那句話）。
+		#   ⇒ ★★所以記 `掠奪 coeff / 贏家 coeff`：**＝1 就是共同因子、<1 才是真的被相對壓低。**
+		var _wc: float = float(_coeff_by_opt.get(String(scored[0]["opt"]), -1.0))
+		if _wc > 0.0:
+			var _ratio: float = _raid_coeff / _wc
+			var _rb2: String = "ge1.00"
+			if _ratio < 0.5: _rb2 = "lt0.50"
+			elif _ratio < 0.8: _rb2 = "lt0.80"
+			elif _ratio < 0.99: _rb2 = "lt0.99"
+			elif _ratio < 1.01: _rb2 = "eq1.00"
+			Probe.bump("raidsupp.coeffratio." + _rb2)
 	# ★★won_argmax（systems 要）：【產出】≠【贏】。
 	#   emitted > 0 且 fp 不變 可以同時為真，而最危險的解釋是
 	#   「接上了、有產出、但【從不改變結果】」——沒這顆 tap 就分不出來。

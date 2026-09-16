@@ -719,6 +719,32 @@ func _run() -> void:
 		int(Probe.counts.get("raidsupp.lost_anyway", 0)),
 		_ss + int(Probe.counts.get("raidsupp.won_anyway", 0)) + int(Probe.counts.get("raidsupp.lost_anyway", 0)), _sp])
 	print("      coeff 分布：%s" % " ".join(_cbs))
+	var _crs: Array = []
+	for _rk in ["lt0.50", "lt0.80", "lt0.99", "eq1.00", "ge1.00"]:
+		_crs.append("%s=%d" % [_rk, int(Probe.counts.get("raidsupp.coeffratio." + _rk, 0))])
+	print("      ★**掠奪 coeff ÷ 贏家 coeff**（★關鍵是【比】不是【值】：＝1 ⇒ 共同因子 ⇒ 不改排序）：%s" % " ".join(_crs))
+	# ★★★【真實世界的 urgency 落在哪一層】（systems 要的第①件）
+	var _un: int = int(Probe.counts.get("urg.n", 0))
+	var _hn: int = int(Probe.counts.get("urg.hungry.n", 0))
+	var _lname: Array = ["生存", "安全", "歸屬", "尊重", "自我實現"]
+	var _mrow: Array = []
+	var _hrow: Array = []
+	var _srow: Array = []
+	var _nfrow: Array = []
+	for _i in range(5):
+		_mrow.append("%s=%d" % [_lname[_i], int(Probe.counts.get("urg.main.L%d" % _i, 0))])
+		_hrow.append("%s=%d" % [_lname[_i], int(Probe.counts.get("urg.hungry.main.L%d" % _i, 0))])
+		_srow.append("%s=%.3f" % [_lname[_i], float(Probe.amounts.get("urg.sum.L%d" % _i, 0.0)) / maxf(float(_un), 1.0)])
+		_nfrow.append("%s=%d" % [_lname[_i], int(Probe.counts.get("urg.main.nofac.L%d" % _i, 0))])
+	print("★§E-④ **需求急迫度落在哪一層**（母體 ＝ rank 次數 %d）" % _un)
+	print("   主層分布：%s" % " ".join(_mrow))
+	print("   ★**餓的那些次**（`food_days < 絕境線`，母體 %d）主層：%s" % [_hn, " ".join(_hrow)])
+	print("      ★★「餓」用的是**世界自己的絕境線**，不是 urgency 自己 —— 否則這一行是同義反覆。")
+	print("   逐層平均急迫度：%s" % " ".join(_srow))
+	print("   ★★★**無 faction 的隊**主層分布：%s" % " ".join(_nfrow))
+	print("      ★`need_hierarchy.gd:48-53`：`faction_id == -1` ⇒ **歸屬層直接給 1.0**")
+	print("      ⇒ ★★所有流浪／盜匪隊的歸屬層**恆滿檔**，而掠奪與紮營在那一層的 affinity **都是 0**")
+	print("      ⇒ ★★★**alignment 被那一層的滿檔吃掉** ⇒ 兩邊一起落到 coeff 下緣（＝共同因子）。")
 	print("      ★★同樣不在本床下判決：它是 merge 判準的輸入。")
 
 	# ★★★【攻擊也要一張拒絕表】（systems 2026-09-16 的第②個數的下一問）：
