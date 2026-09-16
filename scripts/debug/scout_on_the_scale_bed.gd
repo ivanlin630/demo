@@ -702,8 +702,32 @@ func _run() -> void:
 	var _hb: Array = []
 	for _bk in ["lt0.02", "lt0.05", "lt0.10", "lt0.20", "lt0.30", "lt0.50", "ge0.50"]:
 		_hb.append("%s=%d" % [_bk, int(Probe.counts.get("raid.util.hist." + _bk, 0))])
-	print("   ★掠奪 util 分布（**無偏全量**）：n=%d 平均=%.4f｜%s" % [
+	print("   ★掠奪 **drive** 分布（**無偏全量**；★注意：這是 `weight` 之前的值）：n=%d 平均=%.4f｜%s" % [
 		_rn, (_rsum / maxf(float(_rn), 1.0)), " ".join(_hb)])
+	# ★★★【乘完 weight 之後的 util —— 兩條 rank 路分開】（systems 2026-09-16 ③）
+	#   ★舊版只有 drive ⇒ `weight` 的改動它**結構上看不見** ⇒ 兩棵樹「相同」是恆真句不是證據。
+	#   ★★兩條路**不可混桶**：`rank_scored` 之後還乘 coeff／FailureMemory，`rank_survival` 兩者都沒有。
+	for _pth in ["scored", "survival"]:
+		var _pn: int = int(Probe.counts.get("raidu.%s.n" % _pth, 0))
+		var _ps: float = float(Probe.amounts.get("raidu.%s.sum" % _pth, 0.0))
+		var _ph: Array = []
+		for _bk2 in ["lt0.02", "lt0.05", "lt0.10", "lt0.20", "lt0.30", "lt0.50", "ge0.50"]:
+			_ph.append("%s=%d" % [_bk2, int(Probe.counts.get("raidu.%s.hist.%s" % [_pth, _bk2], 0))])
+		print("   ★★掠奪 util（**乘完 weight**）｜路徑 `%s`：n=%d 平均=%.4f｜%s" % [
+			_pth, _pn, (_ps / maxf(float(_pn), 1.0)), " ".join(_ph)])
+	# ★★★【掠奪在 `rank_survival` 那張表上怎麼贏的】（★世界裡真正發生的掠奪走這條路）
+	var _svp: int = int(Probe.counts.get("raidsurv.pop", 0))
+	var _svw: int = int(Probe.counts.get("raidsurv.won", 0))
+	var _rkq: Array = []
+	for _i2 in range(10):
+		var _c2: int = int(Probe.counts.get("raidsurv.rank.%d" % _i2, 0))
+		if _c2 > 0: _rkq.append("第%d名=%d" % [_i2 + 1, _c2])
+	print("   ★★★`rank_survival` 的表：掠奪在場 %d 次｜**它拿第一名 %d 次**｜名次分布：%s" % [
+		_svp, _svw, " ".join(_rkq)])
+	var _tb: Array = Probe.samples.get("raidsurv.table", [])
+	print("      逐筆樣本 %d 筆（★`bump_sample` ＝ **first-N，有偏** ⇒ 只能當【長相】不能當分布）：" % _tb.size())
+	for _i3 in range(mini(6, _tb.size())):
+		print("        %s" % str(_tb[_i3]))
 	# ★★★【被需求一致性壓掉的掠奪】（systems 逐字定義；★**不是 dispatch 次數**）
 	#   被壓掉 ＝ `u_with < winner_u ≤ u_without` —— **有 coeff 就輸、沒 coeff 就贏。**
 	#   ★母體 ＝ 掠奪 applicable 的次數；★★另外兩桶是**成對的另一半**：
