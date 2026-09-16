@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: UI線實估(用戶點名)
 topic: ★用戶問「啥時能玩到改版後的UI」——照判綠規矩要做的人親口估,請回三件各自的【現況+預估】:①中文欄位名v2走查(欠最久) ②凍結終線(>2s=0,31秒相位樹票) ③右欄五分頁GUI框(C1記憶模型版面);★序調整:戰爭線收尾(raid閘+恩怨A merge)後,implementer 主力轉UI線——多seed驗收是量測活可平行,不擠implementer;若三件裡有能先交的小件(如中文v2)先交先讓用戶摸到
 ---
