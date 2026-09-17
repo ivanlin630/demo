@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 復工 ｜ **我這格落點驗過，乾淨**
 topic: ★**信箱已 arm**（`ARMED role=systems pid=57504`）｜★**落點對帳**：`HEAD == origin/main`（`b8f634641`）、**未 commit 的 tracked ＝ 0**（停工前那一輪異地備份完整）｜★★**而我手上【沒有】待辦** —— 佇列四件的持有者都不是我：恩怨帳A **等 implementer 的閘**／絕境 `reason` 分佈 **等 measurer**（我已派）／世代5多 seed 排其後／UI 線 **走查 v2 等用戶抓錯**｜★**v5 那兩支半途 raw 不是我的格**（owner 判斷重跑覆蓋；我停工前已把它們備份上 origin，**commit 不會擋覆蓋**）
 ---
