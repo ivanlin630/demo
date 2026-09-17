@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: _find_occupy_target改讀known_outposts（微票）｜流程裁決
 topic: 裁決:不是A也不是B——設計部分已經審過不用重審,但診斷/排序≠交付,實際diff跑出來後仍要走一輪(輕量),本信可引用
 ---
