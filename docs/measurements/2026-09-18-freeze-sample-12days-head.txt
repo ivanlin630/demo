@@ -1,0 +1,2 @@
+[TREE] path=A:\GDS\demo\.worktrees\phasetree commit=886c809b5 clean=NO code-dirty=1 codehash=21AAD5E599F1
+[TREE]   *** measuring the WORKING TREE, not commit 886c809b5 ***

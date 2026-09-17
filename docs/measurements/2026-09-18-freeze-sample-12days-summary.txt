@@ -1,0 +1,39 @@
+[母體] 跑過 17280 幀（12 天）｜★>2 秒的幀 ＝ 176 幀（1.02%）｜最後隊數 106
+
+[凍結幀逐筆]（最多印 12 筆）
+   tick=4380 dt=2.38s teams=85 phases=44
+   tick=4680 dt=2.20s teams=86 phases=45
+   tick=4740 dt=2.55s teams=86 phases=43
+   tick=4800 dt=2.16s teams=85 phases=43
+   tick=5760 dt=2.32s teams=85 phases=43
+   tick=5820 dt=2.71s teams=87 phases=45
+   tick=5940 dt=2.16s teams=89 phases=44
+   tick=6000 dt=2.16s teams=89 phases=43
+   tick=6540 dt=2.06s teams=89 phases=43
+   tick=7020 dt=2.61s teams=91 phases=43
+   tick=7080 dt=2.27s teams=89 phases=44
+   tick=7140 dt=2.74s teams=90 phases=44
+
+[★self_us 排行（只含凍結幀；★★這是【淨值】不是總計）] 前 8 名
+   misc.equip_mobilize                self= 127.823s  total= 127.823s
+   unified.rank.from_solo_body        self= 126.340s  total= 126.340s
+   loop2.solo_engine                  self= 117.491s  total= 243.831s
+   unified.rank.from_leader           self=  72.819s  total=  72.819s
+   unified.rank.from_member           self=  61.123s  total=  61.123s
+   loop3.orders_ambition              self=  23.739s  total=  23.739s
+   loop2.indep_strategy               self=  18.241s  total=  18.241s
+   misc.ambient                       self=  15.237s  total=  15.237s
+
+[★multi 列：不參與淨值減法，單獨列出]（它們的時間【不在】任何父親的 self 裡）
+   gather.home_food                   total=  82.243s
+   gather.threat                      total=  58.204s
+   gather.readiness_prey              total=  54.475s
+   gather.weak_prey                   total=  46.485s
+   gather.head                        total=  41.078s
+   gather.aid                         total=  25.471s
+  [OK] ★母體非 0：這一輪真的有 >2 秒的幀（176／17280）
+  [OK] ★★凍結幀裡真的有 FactionAI 的相位資料（37 個相位名）｜★為 0  那些幀的時間不在這張表上（渲染／其他系統） 這張表回答不了那一幀
+-- 量測完成；[FAIL] 數 ＝ 0｜[不可判] 數 ＝ 0 --
+[TEST-SUITE-COMPLETE]
+
+[godot.ps1] child exit=0
