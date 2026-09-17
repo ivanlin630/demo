@@ -306,21 +306,31 @@ func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
 #   ⇒ ★而 harvest 要先跑，否則 store 恆空、恆回 {} ＝【假關閉】（看起來像修好了）
 func _find_trade_partner(state: WorldState, trader: TeamData) -> Dictionary:
     BeliefSystem.harvest_tile_known(state, trader)
-    var _known_tiles: Dictionary = state.team_tile_known.get(trader.team_id, {})
-    for tid in BeliefSystem.known_targets(state, trader.team_id):
-        if tid == trader.team_id: continue
+    # ★★★【那個自承的 CANDIDATE-LEAK 補完】（票：兩支姊妹 site 2026-09-18）——
+    #   ★舊版掃 `team_tile_known`（「我見過這塊地」）之後**直接 live 讀 `tile.outpost_owner`**
+    #     ⇒ ★★閘擋的是【地】，而讀到的是【那塊地上現在是誰的城】——**兩件事不同**（憲法 §1a）。
+    #   ⇒ ★★★改列舉**我自己看過的據點**（`known_outposts`），`owner_id` 來自**觀察當時**的子記錄。
+    # ★★★【列舉起點換成「我看過的據點」】（spec §2 逐字）——
+    #   ★舊版的外圈是 `known_targets`（我對【隊】有沒有 claim），內圈才掃地
+    #     ⇒ ★★「我親眼走過那座城、但從沒見過它的主人」這一類**永遠進不了候選集**
+    #       （而那正是前一票量到的【知道得太少】那一半）。
+    #   ⇒ ★★★改成外圈直接列舉據點知識：**看過城 ＝ 知道有這個交易對象**，
+    #     `owner_id` 來自**觀察當時**寫下的子記錄，不是現在的 live 值。
+    var _my_faction: FactionData = state.factions.get(trader.faction_id)
+    for _rec in BeliefSystem.known_outposts(state, trader.team_id):
+        var tid: int = int(_rec["owner_id"])
+        if tid == -1 or tid == trader.team_id: continue
+        # ★同陣營用【我自己陣營的名冊】判（自知，合法）——不讀對方的 `faction_id`（隸屬是組織層）
+        if _my_faction != null and _my_faction.member_team_ids.has(tid): continue
         var t: TeamData = state.teams.get(tid)
-        if t == null: continue
-        if t.faction_id != -1 and t.faction_id == trader.faction_id: continue
-        # W2: 對方有 outpost = 可交易（move_target 指 outpost tile，採購也可，不需對方有貨）
-        # ★只掃【我知道的 tile】—— 不知道的據點對我不存在
-        for tile_id in _known_tiles:
-            var tile: HexTileData = state.world.tiles.get(tile_id)
-            if tile == null: continue
-            if tile.outpost_owner != tid: continue
-            # W2 修正：tile 上要有居民團（村長）才派 — trader 到了才有人成交
-            if not _tile_has_resident(state, tile): continue
-            return { "team_id": tid, "outpost_pos": tile.tile_pos }
+        if t == null: continue   # ★對象已不存在（滅團）⇒ 不是「情報」問題，是那支隊真的沒了
+        var _pos: Vector2i = _rec["tile_pos"]
+        var tile: HexTileData = state.world.tiles.get(int(_pos.x) * 1000 + int(_pos.y))
+        if tile == null: continue
+        # W2 修正：tile 上要有居民團（村長）才派 — trader 到了才有人成交
+        # ★誠實限（本票不動、已回報）：`_tile_has_resident` 仍讀 live 佔格 ⇒ 同族的下一筆
+        if not _tile_has_resident(state, tile): continue
+        return { "team_id": tid, "outpost_pos": tile.tile_pos }
     if Probe.enabled: Probe.bump("trade.partner_none")
     return {}
 
