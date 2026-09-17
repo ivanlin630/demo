@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝存根與實貨分歧 ⇒ 檔頭逐字寫著「escrow 對帳不變量」
 
 # ★★★escrow 對帳不變量（B-v0）——★systems 問的「誰負責發現存根與實貨分歧」的答案。
 #

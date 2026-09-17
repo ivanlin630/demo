@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝「三個 firsthand 寫入點都寫 tile_pos」這條等式斷了 ⇒ 位置新鮮度的前提不成立（不是某一票的驗收）
 
 # ★★★反向斷言：**每個 production firsthand 寫入點的 snap 都含 `tile_pos`**
 #   （systems 裁 2026-09-05：新鮮度那一票【留發現不留機制】，而發現要被【焊住】）

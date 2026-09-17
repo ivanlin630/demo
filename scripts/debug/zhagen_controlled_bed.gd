@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance —— 紅＝own-camp 那一刀的回歸斷言破了（腿 A／B／C 各一條）⇒ 是那一票的驗收，不是全域不變量
+# slice: 紮營→紮根 銜接 own-camp（systems 派 2026-09-03，腿 B 由 blueprint 加）
 # @observe-pure
 # ★★★紮營→紮根 銜接：控制場景床（systems 派 2026-09-03，腿 B 由 blueprint 加）。
 #

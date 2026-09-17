@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝ledger 丟列不再可見 ⇒ 下游讀到的「0 筆」又會變成無法分辨「被丟掉」與「沒發生」
 
 # ★★★driver ledger 丟棄可見性（blueprint 守衛令 2026-09-05，全量觀測法）
 #   ★病：`WorldState.record_driver` 的 `pop_front` 【安靜地】丟舊列 ——

@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance —— 檔頭逐字「board-declared-price 驗收（spec 2026-09-07 §5）」⇒ 紅＝那一票的驗收沒過
+# slice: board-declared-price（spec 2026-09-07 §5）——★它守的是「價格能不能走完全程」：掛單→板 entry→親讀轉訊息→隨隊移動→relay deposit
 
 # ★★★board-declared-price 驗收（spec 2026-09-07 §5）
 #

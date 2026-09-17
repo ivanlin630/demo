@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝四個 fail counter 的母體對不上 ⇒ 「因為沒名人失敗 N 次」這種話就不能講（守的是歸因的守恆，不是某一票）
 
 # ★★★envoy 失敗原因的 `ptype` 歸因對帳（defer `envoy-ptype-tap`，2026-09-06）
 #

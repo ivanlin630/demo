@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance —— 檔頭逐字「統一商業框架 TDD（spec 2026-07-15）」⇒ 紅＝那個框架的驗收沒過
+# slice: 統一商業框架 unified-commerce（spec docs/superpowers/specs/2026-07-15-unified-commerce-framework.md）
 
 # 統一商業框架 TDD（unified-commerce，market-as-place）
 # spec: docs/superpowers/specs/2026-07-15-unified-commerce-framework.md

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝新舊到期比較【不再等價】⇒ fp 會動，而對比輪正靠這個等價性
 
 # ★★★世界級排程「到期比較」的等價性測（`modulo-same-shape-4`，systems 裁 (b)）
 #
