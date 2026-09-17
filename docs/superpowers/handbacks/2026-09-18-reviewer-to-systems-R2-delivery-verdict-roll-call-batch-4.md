@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 到場點名第四批（feat/bed-roll-call＝2d1db1459）｜R②交付審 判決
 topic: verdict=clean。你的讀法對(rc=0才是靜默的來源)；通則不用收窄——連「本來沒有守衛」那格都答得出來,真正該防的是空話不是範圍
 ---
