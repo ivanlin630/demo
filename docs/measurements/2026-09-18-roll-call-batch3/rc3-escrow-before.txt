@@ -1,0 +1,17 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=b9dcbfaec clean=NO code-dirty=5 codehash=A51C2E87B5D3
+[TREE]   *** measuring the WORKING TREE, not commit b9dcbfaec ***
+[TREE]   ?? scripts/debug/zz_b1.gd
+[TREE]   ?? scripts/debug/zz_b2.gd
+[TREE]   ?? scripts/debug/zz_b3.gd
+[TREE]   ?? scripts/debug/zz_b4.gd
+[TREE]   ?? scripts/debug/zz_b5.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[SELFTEST] die `run`
+=== DONE === ALL PASS
+SCRIPT ERROR: Invalid call. Nonexistent function 'noop' in base 'Nil'.
+          at: _run (res://scripts/debug/zz_b3.gd:50)
+
+[godot.ps1] child exit=0

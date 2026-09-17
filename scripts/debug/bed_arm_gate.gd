@@ -46,6 +46,25 @@ const SELF_EXEMPT: Array = [
 #   ⇒ ★一個真紅被降級成【不可判】，而兩者的處置完全相反。
 #   ⇒ ★★★修的是【誰決定 exit code】這件事，不是那一行 —— 若只在 FAIL 路徑加 return，
 #     下一個人新增第四條退出路徑時會再犯一次。
+
+# ★★★【免疫證據，印出來並釘進 expect】（systems 裁 2026-09-18，形狀同 zhagen／merchant）——
+#   ★本床**不加到場點名**，因為它已經免疫：**通過橫幅印在 `_run` 裡面**
+#     ⇒ `_run` 中途死掉 ⇒ **橫幅從來沒印** ⇒ expect 不命中 ⇒ 閘紅。
+#   ★★**實測（2026-09-18）**：注射 ⇒ 沒有橫幅、rc=0、8 秒就結束
+#     ⇒ ★**簽名不是 timeout** —— 控制權回到 `_initialize`、`quit()` 照樣執行（systems 的第三軸預測正確，
+#       而我原本猜的「timeout」是錯的）。原始輸出在 `docs/measurements/2026-09-18-roll-call-batch3/`。
+#   ★★★**而免疫的來源就是「橫幅的位置」** ⇒ 把它數出來釘進 expect：
+#     **哪天有人把那一行搬到 `_initialize`（很合理的重構）⇒ 免疫當天消失、而畫面不會紅**
+#     ⇒ 這個欄位變 false ⇒ expect 不命中 ⇒ 逼你回來判「現在要不要加到場點名」。
+func _immunity_banner_inside() -> bool:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/bed_arm_gate.gd")
+	var head: int = src.find("\nfunc _run(")
+	if head == -1:
+		return false
+	var tail: int = src.find("\nfunc ", head + 10)
+	var body: String = src.substr(head, (tail - head) if tail != -1 else src.length() - head)
+	return body.contains("BED-ARM-GATE] PASS")
+
 func _initialize() -> void:
 	quit(_run())
 
@@ -195,9 +214,11 @@ func _run() -> int:
 		print("   （設 BED_ARM_LIST=1 才列出全部；預設只印數字，避免每次跑洗版）")
 
 	if bad.is_empty():
-		print("[BED-ARM-GATE] PASS：沒有【新的】自己拼 arm 順序的床")
+		print("[BED-ARM-GATE] PASS：沒有【新的】自己拼 arm 順序的床｜[免疫] 橫幅在 _run 內＝%s" % str(_immunity_banner_inside()))
 		return 0
-	print("[BED-ARM-GATE] ★FAIL：%d 張床建了世界，既不用 helper 也不在白名單" % bad.size())
+	# ★免疫欄【兩條路徑都印】：這支閘目前是【常駐紅】（27 張未涵蓋）⇒ PASS 那一行今天跑不到，
+	#   ★★只印在 PASS 上等於「裝好了沒接電」——那正是這一整批在修的病。
+	print("[BED-ARM-GATE] ★FAIL：%d 張床建了世界，既不用 helper 也不在白名單｜[免疫] 橫幅在 _run 內＝%s" % [bad.size(), str(_immunity_banner_inside())])
 	for r in bad:
 		print("   ★ ", r)
 	print("★處置：改用 MeasureBedHelper.arm_and_setup()（順序寫死，沒得選錯）")

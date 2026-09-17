@@ -1,0 +1,23 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=b9dcbfaec clean=NO code-dirty=5 codehash=F1C0455BF489
+[TREE]   *** measuring the WORKING TREE, not commit b9dcbfaec ***
+[TREE]    M scripts/debug/bed_arm_gate.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/gateA_hysteresis_test.gd
+[TREE]    M scripts/debug/grudge_ledger_bed.gd
+[TREE]    M scripts/debug/ledger_drop_visible_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+  [PASS] 一致：checked=1 且三個分歧都 0（★judged 形狀是【checked>0 且三個都 0】）
+  [PASS] orphan_escrow=1（實得 1）—— ★貨卡死：市場有貨而沒有人的存根指向它
+  [PASS] orphan_stub=1（實得 1）—— ★賣家被騙：他的存根說貨在賣，而市場沒有
+  [PASS] qty_mismatch=1（實得 1）—— ★要決定信誰，而權威在 tile
+  [PASS] 空世界：checked=0 且分歧 0 —— ★★★而【那不是通過】：判準要求 checked>0
+     ★沒有這條，一個【什麼都沒有的世界】會讓「三個分歧都 0」永遠成立，
+        ★★而那正是「儀器裝好但沒接電」在【判準層】的長相。
+     ★★★而本測本身就是 `audit_escrow` 的 caller —— ★它先前【零 caller】（systems 實測抓到），
+        而【儀器裝好但沒接電】是既有 memory 裡的第 6 型。
+=== DONE === ALL PASS｜到場點名 1／1
+
+[godot.ps1] child exit=0
