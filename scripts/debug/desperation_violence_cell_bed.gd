@@ -90,14 +90,17 @@ func _run() -> void:
 					#   「不動手」是結果不是原因，原因寫在選了什麼上面。母體只有個位數/十位數,逐筆存不OOM。
 					var ctx: DecisionContext = DecisionContext.gather(st, team, false)
 					# ★追加票①(10筆take/need/odds/person)：不手抄terms.gd的公式——terms.gd:411-415
-					#   本來就有Probe.bump_sample("raid.factors",{take,need,odds,person,...})，我call
-					#   rank_scored_ctx時它會被同一次eval順便打進去；在call前後各記raid.factors陣列大小，
-					#   若變大就取最後一筆當這次的因子分解(讀production自己已經算好的值，非重算)。
-					var _raid_before: int = (Probe.samples.get("raid.factors", []) as Array).size()
+					#   本來就有Probe.bump_sample("raid.factors",{take,need,odds,person,...})，cap=200。
+					#   ★首次跑發現全部raid_factors_captured=false——production自己全世界所有隊每天
+					#   都在eval loot_drive,cap=200在day1就爆滿,first-N早就不收新的了(同一族坑，
+					#   systems今天講過很多次)。★修法：呼叫前先清空這一個key(只清這一格,不動其他Probe
+					#   狀態，純診斷結構零RNG零gameplay影響)，呼叫後任何新entry必為這一筆(我的for迴圈
+					#   逐team序列處理，呼叫之間不會有advance_tick插進來，不會被別隊污染)。
+					Probe.samples.erase("raid.factors")
 					var scored: Array = DecisionEngine.rank_scored_ctx(ctx, team.current_option, st, team)
 					var _raid_arr: Array = (Probe.samples.get("raid.factors", []) as Array)
 					var raid_factors: Dictionary = {}
-					if _raid_arr.size() > _raid_before:
+					if not _raid_arr.is_empty():
 						raid_factors = _raid_arr[_raid_arr.size() - 1]
 					var winner_opt: String = String(scored[0]["opt"]) if not scored.is_empty() else ""
 					var winner_u: float = float(scored[0]["u"]) if not scored.is_empty() else 0.0
