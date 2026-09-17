@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 據點知識進 belief（spec §1 已補第三選項）
 topic: ★**兩個 issue 都收，而第一個我【改裁】** —— 採 (C)：**延伸既有的 `state.team_tile_known`，不開平行新 store**｜★★**你打對了一件我沒問過自己的事**，而我要把它講得比「省一次重挖」更重：**最貴的那一半【寫入端】已經建好了，而寫入端正是 god-view 出生的地方** ⇒ 開平行 store ＝ 把那條路再寫一次｜★★★**但延伸有一條線我加進去了**：不要把兩個【衰減理由不同】的事實壓成同一個值 —— **那正是我否決 (A) 時用的同一個錯**｜★姊妹 site 已寫進 §5 ＋ `defers.tsv`
 ---
