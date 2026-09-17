@@ -349,11 +349,40 @@ func _score_riot(p: PersonData, _t: TeamData) -> float:
 	base -= float(p.values.get("慎重", 0.5)) * 0.2
 	return base
 
-func _score_defect(p: PersonData, _t: TeamData) -> float:
+# ★★★【讀者①：離心路徑】（恩怨帳切片A §1.5）——
+#   ★`_t` 這個參數**今天沒有被用到** ⇒ 改名 `t` 並讀 `t.leader_id`：
+#     對領主有怨 ⇒ 更想走；對領主有恩 ⇒ 更想留。
+#   ★★`p.loyalty` 那一項**不動** —— 兩者並存，不是取代
+#     （loyalty 是「對這個團」的，恩怨邊是「對這個人」的，★它們不是同一個東西）。
+# ★★★【W 怎麼來】（§4 要我照 §1.4 的形狀填並標 TEST VALUE）：
+#   形狀同 `trade_valuation.grudge_multiplier`：`BASE + 義氣×w1 − 慎重×w2`。
+#   ★而**量級**不是手挑的：這個函式裡既有的人格項是 `義氣 0.15`／`慎重 0.15`
+#   ⇒ **恩怨項取同一個量級**（W_mid ≈ 0.15 ⇒ 深仇 1.0 × 0.15 ＝ 0.15）
+#   ⇒ ★★**「一輩子的深仇」與「一個人的義氣」在離心分數上等重** —— 那是可以被推翻的選擇，不是隨手。
+const DEFECT_GRUDGE_W_BASE: float = 0.15      # TEST VALUE（量級對齊同函式既有人格項）
+const DEFECT_GRUDGE_HONOR_W: float = 0.30     # TEST VALUE
+const DEFECT_GRUDGE_PRUDENCE_W: float = 0.30  # TEST VALUE
+
+func _score_defect(p: PersonData, t: TeamData) -> float:
 	var base: float = p.stress * (1.0 - p.loyalty) * p.fear * 0.7
 	base += float(p.skills.get("計謀", 0.0)) * 0.2
 	base -= float(p.values.get("義氣", 0.5)) * 0.15
 	base -= float(p.values.get("慎重", 0.5)) * 0.15
+	if t != null and t.leader_id != -1 and t.leader_id != p.id:
+		var w: float = clampf(DEFECT_GRUDGE_W_BASE
+			+ float(p.values.get("義氣", 0.5)) * DEFECT_GRUDGE_HONOR_W
+			- float(p.values.get("慎重", 0.5)) * DEFECT_GRUDGE_PRUDENCE_W, 0.0, 1.0)
+		# ★per-target 查邊（**不得用 `strongest`**：§0 訂正④）
+		var feud: float = RelationGraph.intensity_to(p.relation_edges, "feud", t.leader_id)
+		var grat: float = RelationGraph.intensity_to(p.relation_edges, "gratitude", t.leader_id)
+		var term: float = (feud - grat) * w
+		base += term
+		if Probe.enabled and (feud > 0.0 or grat > 0.0):
+			Probe.bump("defect.grudge_term.eval")
+			Probe.bump_sample("defect.grudge_term", {
+				"feud": snappedf(feud, 0.001), "grat": snappedf(grat, 0.001),
+				"w": snappedf(w, 0.001), "term": snappedf(term, 0.001),
+			})
 	return base
 
 func _score_shirk(p: PersonData, _t: TeamData) -> float:

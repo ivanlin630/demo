@@ -14568,14 +14568,42 @@ func _test_relation_graph_core() -> void:
 	RelationGraph.add_edge(edges, "feud", 7, 0.5, 100)
 	RelationGraph.add_edge(edges, "gratitude", 8, 0.3, 100)
 	assert(edges.size() == 2, "兩條邊")
-	# 同 type+target → 取 max intensity，不新增
+	# ★★★【`max` 已被用戶裁掉，改飽和疊加】——★出處逐字：
+	#   `docs/mechanism-intents.md:59`（**用戶裁 2026-09-16 影子場**）：
+	#   「**疊加＝飽和式 `1−(1−舊)(1−新)` 取代 max**
+	#     （小怨累積會爆／單次大怨直接高／永不破 1／順序無關／零常數）」
+	#   ⇒ ★★**這一行原本驗的正是【被用戶裁掉的那個語意】** ⇒ 改成驗飽和疊加的結果。
+	#   ★★★**出處寫在這裡而不是只寫在 commit 訊息裡** ——
+	#     **否則下一個人會以為是我們自己決定改掉 `max` 的。**
 	RelationGraph.add_edge(edges, "feud", 7, 0.9, 120)
 	assert(edges.size() == 2, "同邊不重複新增")
-	assert(RelationGraph.strongest(edges, "feud")["intensity"] == 0.9, "取 max intensity")
+	var _sat: float = 1.0 - (1.0 - 0.5) * (1.0 - 0.9)   # ＝ 0.95
+	assert(absf(float(RelationGraph.strongest(edges, "feud")["intensity"]) - _sat) < 0.0001,
+		"飽和疊加 1−(1−0.5)(1−0.9) ＝ %.4f（★舊制 `max` 會是 0.9 —— 而那是被用戶裁掉的語意）" % _sat)
 	assert(RelationGraph.strongest(edges, "feud")["tick"] == 120, "tick 更新")
-	# 較低 intensity 不覆蓋
+	# ★成對的另一半：**飽和永不破 1** —— 疊一個 0.99 上去仍然 < 1
+	#   ★★★**放在 `tick 更新` 那一行【之後】**：它自己也是一次 `add_edge`（tick 130）
+	#     ⇒ ★**放在前面就會把下一行斷言的 tick 從 120 改成 130** ——
+	#     ★★而那支斷言驗的是【別的東西】，卻會因為我插隊而紅。
+	#   ⇒ ★★★**在共用 fixture 上追加步驟，等於改變它【後面每一行】的前提。**
+	RelationGraph.add_edge(edges, "feud", 7, 0.99, 130)
+	assert(float(RelationGraph.strongest(edges, "feud")["intensity"]) < 1.0,
+		"飽和疊加**永不破 1**（實際 %.6f）" % float(RelationGraph.strongest(edges, "feud")["intensity"]))
+	# ★★★【「低值不蓋」也是被用戶裁掉的語意】（同上，`mechanism-intents.md:59`，2026-09-16）：
+	#   ★`max` 之下，低值**不動**；**飽和疊加之下，低值【會往上疊一點】** ——
+	#     而那正是裁定要的：**「小怨累積會爆」**。
+	#   ⇒ ★★所以斷言從「低值不蓋」改成「**低值仍然單調上升、而且永不破 1**」。
+	#   ★★★**而這一支是這一輪的第三顆**（前兩顆：`取 max intensity`／`tick 更新`）——
+	#     ★`assert` 一失敗就中止函式 ⇒ **一次只看得見一個**
+	#     ⇒ ★★**每修好一個，才會露出下一個** —— **所以我【不能】說「剩下的都修完了」，
+	#       只能說「跑到這一行為止都綠」。**
+	var _before_low: float = float(RelationGraph.strongest(edges, "feud")["intensity"])
 	RelationGraph.add_edge(edges, "feud", 7, 0.2, 130)
-	assert(RelationGraph.strongest(edges, "feud")["intensity"] == 0.9, "低值不蓋")
+	var _after_low: float = float(RelationGraph.strongest(edges, "feud")["intensity"])
+	assert(_after_low > _before_low,
+		"低值仍然**往上疊**（%.6f → %.6f）★而舊制 `max` 會讓它【不動】—— 那是被裁掉的語意" % [
+			_before_low, _after_low])
+	assert(_after_low < 1.0, "低值疊完仍**永不破 1**（實際 %.6f）" % _after_low)
 	# 查詢
 	assert(RelationGraph.edges_of_type(edges, "feud").size() == 1, "feud 1 條")
 	assert(RelationGraph.edges_to(edges, 8).size() == 1, "指向 8 的 1 條")
