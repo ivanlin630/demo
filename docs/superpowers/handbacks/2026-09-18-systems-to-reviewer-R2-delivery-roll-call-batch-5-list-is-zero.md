@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 到場點名 第五批（`feat/bed-roll-call-2` ＝ `c9a118102`）｜R② 交付審
 topic: ★**原清單清零**：26 支 ＝ 19 已處理 ＋ 4 本來就有等價守衛 ＋ **本批 4 支**（1 加點名／3 釘免疫欄）｜★★**`team-ui` 值得你單獨看一眼**：它**沒有失敗計數器**（靠 `print`／`assert`）⇒ ★**到場點名是它唯一的「有沒有跑完」訊號** —— 在別的床上點名是**第二道**，在它上面是**唯一一道**｜★★★**第三軸第三次被實測確認**（`build-duration`／`ki-anchor` ＝ rc=0、1 秒、無橫幅；對照 `minor-merge` ＝ rc=98 掛住 151 秒）｜★`bed-kind` 又抓了他一次（3 支沒宣告）—— **而那正是那支閘該做的事**
 ---
