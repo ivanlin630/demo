@@ -1,4 +1,8 @@
 # @observe-pure
+# @bed-kind: pending —— ★本檔【不是床】：共用 helper，自己不判決／不印判決橫幅／無 `_ok`
+#   ⇒ ★★閘的四格問的是「這支床【紅】的時候代表什麼」，而它【不會自己紅】⇒ 那個問題對它沒有答案
+#   ⇒ 暫標 `pending`（★`pending` 的語意就是「還沒判」，而這裡確實還沒判 —— ★★不是拿它當萬用格）
+# blocker: bed-kind-has-no-slot-for-shared-helpers
 class_name MeasureBedHelper
 
 # ★★★量測床的世界建構入口（measurer 提案 2026-09-01：★「把規則變成沒得選，而非寫在註解裡靠記得」）。
