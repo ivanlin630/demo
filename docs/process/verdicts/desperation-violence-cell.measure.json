@@ -14,7 +14,11 @@
     "docs/measurements/2026-09-17-desperation-violence-seed777-raw.txt",
     "docs/measurements/2026-09-17-desperation-violence-rank-seed1337-raw.txt（第二輪，帶rank表，HEAD=495c497be）",
     "docs/measurements/2026-09-17-desperation-violence-rank-seed2024-raw.txt（HEAD=26889aa6f）",
-    "docs/measurements/2026-09-17-desperation-violence-rank-seed777-raw.txt（HEAD=26889aa6f）"
+    "docs/measurements/2026-09-17-desperation-violence-rank-seed777-raw.txt（HEAD=26889aa6f）",
+    "docs/measurements/2026-09-17-desperation-violence-v3-seed1337-raw.txt（第三輪bug版，raid_factors_captured全false，保留供對照，非用於交件數字）",
+    "docs/measurements/2026-09-17-desperation-violence-v4-seed1337-raw.txt（第三輪修好版，HEAD=96b7878f9附近，交件用這份）",
+    "docs/measurements/2026-09-17-desperation-violence-v4-seed2024-raw.txt",
+    "docs/measurements/2026-09-17-desperation-violence-v4-seed777-raw.txt"
   ],
   "specimen_trace": "無——純聚合existence讀數，不下behavior因果結論，照規免specimen",
 
@@ -42,6 +46,8 @@
     "★三個seed跑在三棵不同的樹上(4725bb819/f2715361a/9adc17db8，逐一列出，不是同一棵樹)——逐對git diff --name-only比對scripts/=0個檔(中間commit只動hook/文件)，systems獨立覆核+跑陽性對照(同比法對docs/抓到5個檔證明非恆0)⇒就被量的世界而言同源，可加總；這是【查過】的結論不是【應該一樣】的假設(判準⑩)",
     "★本題不需要gather()/rank_scored_ctx()，只讀team.current_task，逐日採樣(比之前每7天更密)，母體數字因此不能與v2/v3的每7天採樣直接比密度",
     "★單seed單窗；比率結論(0%)是existence層級的讀數，不是可長期引用的機率",
+    "★★★第三輪母體又不同(22，非18/28)——已知現象，不再重查：判準⑩已定(母體是床定義的，床變了母體會變)，這是第三次同型不是新謎，本輪自己的母體只跟自己比",
+    "★★★raid.factors cap bug(第三輪抓到並修好)：production的`raid.factors`bump_sample全局cap=200，全世界所有隊每天都在eval loot_drive，day1就爆滿，first-N後面收不到——v3版全部樣本raid_factors_captured=false，修法是呼叫前只清這一個Probe.samples key(v3→v4的population數字逐字不變，證明修法零gameplay影響)，systems已把這個坑記成`bump-sample-global-cap-first-n-blind`",
     "★★★population discrepancy(結案，非隨機噪音)：第一輪(4725bb819,無rank表)母體9/4/5(共18)；第二輪(495c497be,加gather+rank_scored_ctx)母體6/6/16(共28)。排查過程：①三輪commit逐對git diff --stat scripts/simulation/=0(生產code沒變)②gather/rank_scored_ctx/decision_engine.gd等逐檔grep randf/randi=0命中(不耗RNG)③decision_context.gd:433的idle_employ_next_tick寫入查過——它被`or not advance`正確閘住,advance=false時只走cache讀分支不會寫,排除④★★★可證偽測試(systems設計)：用第二輪那份床重跑seed1337，母體逐字重現=6(883/34/521/6，與第一次一字不差)⇒確定是【床版本】造成的deterministic差異，不是隨機噪音，也不是世界分岔——但『加的那段code具體透過哪一條路徑改變軌跡』這件事本身仍未定位到單一行(排除了三個候選機制，第四個真正的機制未找到)；★兩輪的母體因此不可互相引用(各自成組，本卷已標明)，但這不是儀器壞掉，是【觀測本身這次真的改變了被觀測物】(第5次同族，但機制細節懸而未決,不歸零成'不明原因'，是'已知會發生但未定位到哪一行')"
   ],
 
@@ -53,7 +59,36 @@
     "④★★★事前沒登記的第四發現：掠奪贏過argmax(rank1)但沒被設上": "seed777 team126 day9(掠奪u=1.5776第一名)與day10(掠奪u=3.6623第一名)——同一支隊連續兩天掠奪贏了rank，而實際task_snapshot都是『投靠』——這是『贏了卻沒被設上』(同一族此session前面(4a)(4b)那題查過的手不聽腦形狀)，指向掠奪要真的發生，除了util贏還要通過task_arbiter的優先序仲裁(投靠=survival-class,可能@80壓過掠奪的commit priority@50)——本卷不往下查誰擋的,只標出這是同一族問題,建議跟(4a)(4b)那題一起看"
   },
 
-  "next_station": "to:systems——動手率0%(母體18/28兩輪皆0)+餓與有牙負相關獨立驗證+④『掠奪贏argmax卻沒被設上』新發現(疑似手不聽腦同族)，三個結論要不要往下追由你/blueprint判",
+  "⑤第三輪(take/need/odds/person分解+18筆四道門原因分佈+通道三布林，commit=45adaf445起，本輪自己的母體=22，不與18/28混算)": {
+    "★母體": "seed1337=7｜seed2024=4｜seed777=11｜合計=22——本輪自己的數，不強湊18或28",
+    "在候選集(raid_factors_captured=true)": "6筆(seed1337:1｜seed2024:0｜seed777:5)｜不在候選集16筆(22-6=16，補①的分母是這16——上一輪的18/28是別的輪的母體，不可混)",
+    "★★★補①：不在候選集的原因分佈(16筆，四格相加=16)": {
+      "①不在team_discovered": "1筆",
+      "②has_belief=false(全部候選)": "0筆",
+      "③reachable=false(全部有belief的候選)": "10筆——最大宗",
+      "④pop_est≥0.7×我方(全部reachable的候選都不夠弱)": "5筆",
+      "驗證": "1+0+10+5=16，等於本輪不在候選集的母體，無差額"
+    },
+    "★★★ASK：10筆在候選集的take/need/odds/person(本輪實際6筆，非事前估的10——母體自己的數)": {
+      "逐筆": [
+        "seed1337 team53 day4：take=0.042 need=0.197 odds=1 person=0.458",
+        "seed777 team24 day3：take=0.042 need=0.241 odds=0.833 person=0.408",
+        "seed777 team24 day4：take=0 need=0.19 odds=0.833 person=0.408",
+        "seed777 team48 day9：take=0.019 need=0.248 odds=0.667 person=0.5",
+        "seed777 team73 day9：take=0.077 need=0.368 odds=1 person=0.377",
+        "seed777 team48 day10：take=0.001 need=0.581 odds=0.667 person=0.5"
+      ],
+      "★★★對照systems事前寫死的判準表": "6筆全部take<0.1(0.042/0.042/0/0.019/0.077/0.001)——全部落【take低】那格；odds全部≥0.667(遠高於0.3門檻)——沒有一筆落【odds低】；person全部在0.377~0.5之間(全部≥0.3門檻)——沒有一筆落【person低】",
+      "verdict": "★★★blueprint預註冊的『輸在person絕境仍壓=人格變成GATE=違憲』岔路——6筆裡0筆支持，全部是【take低】(目標太窮/情報太薄，修在估值輸入)。這一格照系統的判準表是乾淨的『世界的答案不用修』的相反——不是『只是輸給更值的事』(那需要take/odds/person都不低)，是target本身資產估得低，修法方向若要動，該動的是情報/估值輸入端，不是人格層"
+    },
+    "★★★補②(blueprint可證偽讀法)：通道三布林對照(在候選集6筆 vs 不在候選集16筆，逐筆算過非估算)": {
+      "在候選集(6筆)": "有政權可徵=3/6(50%)｜有幣可買且市場可達=6/6(100%)｜市場可達=6/6(100%)",
+      "不在候選集(16筆，逐筆算)": "有政權可徵=7/16(43.75%)｜有幣可買且市場可達=15/16(93.75%)｜市場可達=16/16(100%)",
+      "verdict": "★★★兩群通道比例相近(50%vs43.75%、100%vs93.75%、100%vs100%)，不是『上場輸掉的多半有通道、沒上場的多半沒有』那種鮮明對比——照blueprint自己寫的判準，這格落在【讀法不成立】那一支：有沒有通道看起來不是分界線；本卷只報數字，是否收案由blueprint/systems判"
+    }
+  },
+
+  "next_station": "to:systems——①動手率0%(三輪18/28/22母體皆0，各自成組)②餓與有牙負相關獨立驗證③掠奪贏argmax卻沒被設上④take低非person低(GATE岔路本輪未觀察到證據)⑤通道讀法兩群比例相近(blueprint的解釋傾向不成立)——五個結論要不要往下追、要不要收案，由你/blueprint判",
 
   "supersedes": []
 }
