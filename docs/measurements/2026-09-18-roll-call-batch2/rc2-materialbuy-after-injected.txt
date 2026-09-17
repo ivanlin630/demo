@@ -1,0 +1,30 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=67ac8f15f clean=NO code-dirty=6 codehash=E15B35E831BE
+[TREE]   *** measuring the WORKING TREE, not commit 67ac8f15f ***
+[TREE]    M scripts/debug/gateA_test.gd
+[TREE]    M scripts/debug/material_buy_test.gd
+[TREE]    M scripts/debug/ui_logic_test.gd
+[TREE]   ?? scripts/debug/zz_p1.gd
+[TREE]   ?? scripts/debug/zz_p2.gd
+[TREE]   ?? scripts/debug/zz_p3.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+--- full build-need（desire=gate 非稀釋）---
+  [PASS] 單一想建 weaponsmith → construction need=full 70（tools-demand cost80→70；非 ×desire 稀釋，got 70.0）
+[SELFTEST] ★故意讓 `_test_cap_clamps` 這一格在中途死掉
+--- buymaterial_drive 繫建設迫切 ---
+  [PASS] 建設迫切高(0.9) drive > 低(0.3)（買料繫建設前置，got hi=0.72 lo=0.24）
+  [PASS] 無 material 市場 → drive=0
+--- ★food-ok gate（防餓隊買料餓死）---
+  [PASS] 餓隊(food<DESPERATION) → 買料 not applicable（鏡射買糧互斥，餓時只買糧=防餓死）
+  [PASS] 食足(food>=DESPERATION)+缺料+市場+籌碼 → 買料 applicable
+  [PASS] 食足但不缺料 → not applicable（不亂買）
+--- 循環守衛 need_keep(material) 不遞迴爆 ---
+  [PASS] need_keep(material) 一次完成回有限值（cost-guard 前置=無遞迴，got 100.0）
+[roll-call]  ★**有格沒有跑完**：["_test_cap_clamps"] —— 執行期錯誤會靜默中止一支 func，而那看起來像綠
+=== DONE === 1 FAIL（★其中有格沒有執行）｜到場點名 4／5
+SCRIPT ERROR: Invalid call. Nonexistent function 'noop' in base 'Nil'.
+          at: _test_cap_clamps (res://scripts/debug/material_buy_test.gd:108)
+
+[godot.ps1] child exit=0

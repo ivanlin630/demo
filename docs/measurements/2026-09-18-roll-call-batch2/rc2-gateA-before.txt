@@ -1,0 +1,29 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=67ac8f15f clean=NO code-dirty=3 codehash=D4F9797657FC
+[TREE]   *** measuring the WORKING TREE, not commit 67ac8f15f ***
+[TREE]   ?? scripts/debug/zz_p1.gd
+[TREE]   ?? scripts/debug/zz_p2.gd
+[TREE]   ?? scripts/debug/zz_p3.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+--- plains 產糧家 空 granary → 返家補給 ---
+  [PASS] plains 產糧家+空 granary+食低 → 返家補給 applicable（非空-granary trap）
+  [PASS] restock_need=1.0（產糧家 drive 滿，回去採飽）
+--- forest 空 granary → 買糧 ---
+  [PASS] forest 非產糧家+空 granary → 返家補給 not applicable（空家不返）
+  [PASS] forest 非產糧家 → 買糧 applicable（正確離家買=多樣性）
+[SELFTEST] die `_test_granary_stock_drives`
+--- productive 算式 ---
+  [PASS] plains 家(food 8×1.0=8  burn 4)→ home_food_productive=true
+  [PASS] forest 家(food 3×1.0=3 < burn 4)→ home_food_productive=false
+--- 無 home outpost→false ---
+  [PASS] 無 home outpost → home_food_productive=false（無家不判產糧）
+--- ★買糧 gate（productive 偏好返家）---
+  [PASS] plains 產糧家 → 買糧 not applicable（結構偏好返家採飽，閉商隊 toss-up trap）
+  [PASS] forest 非產糧家 → 買糧 applicable（仍離家買=多樣性不誤鎖）
+=== DONE === ALL PASS
+SCRIPT ERROR: Invalid call. Nonexistent function 'noop' in base 'Nil'.
+          at: _test_granary_stock_drives (res://scripts/debug/zz_p3.gd:96)
+
+[godot.ps1] child exit=0

@@ -2,6 +2,36 @@ extends SceneTree
 # @bed-kind: invariant
 
 var _errors: int = 0
+const EXPECTED_CELLS: Array = ["_test_post_combat_hint", "_test_attack_select_hint", "_test_unit_color", "_test_constants", "_test_setup_sanity", "_test_vision_threshold", "_test_member_health_line", "_test_resource_trend", "_test_mode_keymap", "_test_feedback_format", "_test_log_strip"]
+
+# ★★★【到場點名 ＋ 陽性對照】（systems 派工；樣板同 `constitution_gate` 第一批）——
+#   ★病：GDScript 的執行期錯誤**只中止那一支 func**（coroutine 也一樣，`await` 不保護）⇒
+#     床照樣跑到最後、照樣印通過橫幅，而 runner 只看 exit code 與 expect ⇒ **兩者都通過**。
+#   ★★修法：每一格【自己的最後一行】打卡，末尾對名單，**少一格就把橫幅變成 FAIL**。
+#   ★★★用法必須是 `_selftest_gate("格名").noop()` —— 死亡要發生在【那一格自己的 frame】裡
+#     （★血證：放進被呼叫的 helper 裡 ⇒ 中止的是 helper、那一格照樣跑完 ⇒ 會誤判成「這裡沒有洞」）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
 
 func _initialize() -> void:
 	_test_constants()
@@ -15,11 +45,15 @@ func _initialize() -> void:
 	_test_post_combat_hint()
 	_test_attack_select_hint()
 	_test_unit_color()
-	print("\n=== UI Logic Test DONE === errors: %d" % _errors)
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if not _miss.is_empty(): _errors += 1
+	print("\n=== UI Logic Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
 
 # ── U10: 遭遇戰戰後提示組字 ──────────────────────────────────────────────────
 func _test_post_combat_hint() -> void:
+	_selftest_gate("_test_post_combat_hint").noop()
 	print("\n── U10. 戰後提示 ──")
 	var EncView = load("res://scripts/ui/encounter_view.gd")
 	var hint_subj: String = EncView._post_combat_hint({"can_subjugate": true})
@@ -35,8 +69,10 @@ func _test_post_combat_hint() -> void:
 	var summ: String = EncView._post_combat_summary({"winner_id": 0, "loser_id": 1})
 	_check("戰果摘要含勝負隊", summ.contains("Team0") and summ.contains("Team1"))
 	_check("空結果摘要 fallback「結束」", EncView._post_combat_summary({}) == "結束")
+	_cell("_test_post_combat_hint")
 
 func _test_attack_select_hint() -> void:
+	_selftest_gate("_test_attack_select_hint").noop()
 	print("\n── attack_select 提示 ──")
 	var EncView = load("res://scripts/ui/encounter_view.gd")
 	var h: String = EncView._attack_select_hint("torso")
@@ -46,12 +82,15 @@ func _test_attack_select_hint() -> void:
 	_check("顯當前部位", h.contains("torso"))
 
 # U17: 遭遇戰旗色（玩家藍/自家綠/敵紅，防再反）
+	_cell("_test_attack_select_hint")
 func _test_unit_color() -> void:
+	_selftest_gate("_test_unit_color").noop()
 	print("\n── U17. 遭遇戰旗色 ──")
 	var EncView = load("res://scripts/ui/encounter_view.gd")
 	_check("玩家=藍", EncView._unit_color(true, true) == Color.DODGER_BLUE)
 	_check("自家 anon=綠", EncView._unit_color(false, true) == Color.GREEN)
 	_check("敵=紅", EncView._unit_color(false, false) == Color.RED)
+	_cell("_test_unit_color")
 
 func _check(label: String, ok: bool) -> void:
 	if ok:
@@ -63,6 +102,7 @@ func _check(label: String, ok: bool) -> void:
 # ── Task 1: Simulation 常數 ──────────────────────────────────────────────────
 
 func _test_constants() -> void:
+	_selftest_gate("_test_constants").noop()
 	print("\n── Task1. Simulation 常數 ──")
 	_check("SALARY_INTERVAL >= 720", SalarySystem.SALARY_INTERVAL >= 720)
 	_check("SEASON_LENGTH >= 240", HarvestSystem.SEASON_LENGTH >= 240)
@@ -70,8 +110,10 @@ func _test_constants() -> void:
 	print("  ℹ harvest_system.gd SEASON_LENGTH  = %d" % HarvestSystem.SEASON_LENGTH)
 
 # ── Task 2: Test Setup ────────────────────────────────────────────────────────
+	_cell("_test_constants")
 
 func _test_setup_sanity() -> void:
+	_selftest_gate("_test_setup_sanity").noop()
 	print("\n── Task2. Test Setup ──")
 	const FOOD_START := 5000.0
 	const POP := 10
@@ -82,8 +124,10 @@ func _test_setup_sanity() -> void:
 	_check("統領=0.5 → cap=%d > 10 → 不分裂" % cap, cap > 10)
 
 # ── Task 3: 視野門檻 + 移動邊界 ──────────────────────────────────────────────
+	_cell("_test_setup_sanity")
 
 func _test_vision_threshold() -> void:
+	_selftest_gate("_test_vision_threshold").noop()
 	print("\n── Task3. 視野門檻 + 移動邊界 ──")
 	var state := WorldState.new()
 	var gen = load("res://scripts/simulation/world_generator.gd").new()
@@ -127,8 +171,10 @@ func _test_vision_threshold() -> void:
 		not state.world.tiles.has(out.x * 1000 + out.y))
 
 # ── chrome P2: status 成員健康一行 ───────────────────────────────────────────
+	_cell("_test_vision_threshold")
 
 func _test_member_health_line() -> void:
+	_selftest_gate("_test_member_health_line").noop()
 	print("\n── chrome. 成員健康一行 ──")
 	var members: Array = [
 		{ "name": "甲", "hp_status": "正常" },
@@ -141,31 +187,39 @@ func _test_member_health_line() -> void:
 	_check("全正常非空 line=%s" % ok_line, ok_line != "")
 
 # ── chrome P2: 資源趨勢箭頭 ──────────────────────────────────────────────────
+	_cell("_test_member_health_line")
 
 func _test_resource_trend() -> void:
+	_selftest_gate("_test_resource_trend").noop()
 	print("\n── chrome. 資源趨勢箭頭 ──")
 	_check("增→↑", TextUiMain._resource_trend(100.0, 120.0) == "↑")
 	_check("減→↓", TextUiMain._resource_trend(100.0, 80.0) == "↓")
 	_check("平→無", TextUiMain._resource_trend(100.0, 100.0) == "")
 
 # ── chrome P2: 模式 keymap ───────────────────────────────────────────────────
+	_cell("_test_resource_trend")
 
 func _test_mode_keymap() -> void:
+	_selftest_gate("_test_mode_keymap").noop()
 	print("\n── chrome. 模式 keymap ──")
 	_check("main 有鍵表", TextUiMain._mode_keymap("main") != "")
 	_check("interact 有鍵表", TextUiMain._mode_keymap("interact") != "")
 	_check("未知 mode fallback main", TextUiMain._mode_keymap("zzz") == TextUiMain._mode_keymap("main"))
 
 # ── chrome P2: feedback 行格式 ───────────────────────────────────────────────
+	_cell("_test_mode_keymap")
 
 func _test_feedback_format() -> void:
+	_selftest_gate("_test_feedback_format").noop()
 	print("\n── chrome. feedback 格式 ──")
 	_check("成功訊息含內容", TextUiMain._feedback_text(true, "獵得野味 +12").contains("獵得"))
 	_check("成敗異色", TextUiMain._feedback_color(true) != TextUiMain._feedback_color(false))
 
 # ── chrome P2: event LogStrip 組字 ───────────────────────────────────────────
+	_cell("_test_feedback_format")
 
 func _test_log_strip() -> void:
+	_selftest_gate("_test_log_strip").noop()
 	print("\n── chrome. event LogStrip ──")
 	var events: Array = [
 		{"type":"ui","msg":"A"}, {"type":"ui","msg":"B"}, {"type":"ui","msg":"C"}, {"type":"ui","msg":"D"}
@@ -173,3 +227,4 @@ func _test_log_strip() -> void:
 	var s: String = TextUiMain._log_strip_text(events, 3)
 	_check("顯最新 3 條（BCD）s=%s" % s, "D" in s and "C" in s and "B" in s)
 	_check("舊的 A 不顯", not ("A" in s))
+	_cell("_test_log_strip")

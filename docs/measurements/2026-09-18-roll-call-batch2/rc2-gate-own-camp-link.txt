@@ -1,0 +1,123 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=67ac8f15f clean=NO code-dirty=5 codehash=59A021CBD07E
+[TREE]   *** measuring the WORKING TREE, not commit 67ac8f15f ***
+[TREE]    M scripts/debug/gateA_test.gd
+[TREE]    M scripts/debug/material_buy_test.gd
+[TREE]    M scripts/debug/merchant_turnover_test.gd
+[TREE]    M scripts/debug/payroll_urgency_test.gd
+[TREE]    M scripts/debug/ui_logic_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 紮根控制場景床｜每腿母體 30｜手構世界（非 seed） ===
+[CorveeL1] Team1000 L0→L1 紮根工期 @(2,2) civilian (720 person-ticks)
+[CorveeL1] Team1001 L0→L1 紮根工期 @(4,2) civilian (720 person-ticks)
+[CorveeL1] Team1002 L0→L1 紮根工期 @(6,2) military (720 person-ticks)
+[CorveeL1] Team1003 L0→L1 紮根工期 @(8,2) military (720 person-ticks)
+[CorveeL1] Team1004 L0→L1 紮根工期 @(10,2) civilian (720 person-ticks)
+[CorveeL1] Team1005 L0→L1 紮根工期 @(12,2) civilian (720 person-ticks)
+[CorveeL1] Team1006 L0→L1 紮根工期 @(14,2) civilian (720 person-ticks)
+[CorveeL1] Team1007 L0→L1 紮根工期 @(16,2) civilian (720 person-ticks)
+[CorveeL1] Team1008 L0→L1 紮根工期 @(18,2) military (720 person-ticks)
+[CorveeL1] Team1009 L0→L1 紮根工期 @(20,2) military (720 person-ticks)
+[CorveeL1] Team1010 L0→L1 紮根工期 @(2,4) civilian (720 person-ticks)
+[CorveeL1] Team1011 L0→L1 紮根工期 @(4,4) civilian (720 person-ticks)
+[CorveeL1] Team1012 L0→L1 紮根工期 @(6,4) civilian (720 person-ticks)
+[CorveeL1] Team1013 L0→L1 紮根工期 @(8,4) civilian (720 person-ticks)
+[CorveeL1] Team1014 L0→L1 紮根工期 @(10,4) military (720 person-ticks)
+[CorveeL1] Team1015 L0→L1 紮根工期 @(12,4) military (720 person-ticks)
+[CorveeL1] Team1016 L0→L1 紮根工期 @(14,4) civilian (720 person-ticks)
+[CorveeL1] Team1017 L0→L1 紮根工期 @(16,4) civilian (720 person-ticks)
+[CorveeL1] Team1018 L0→L1 紮根工期 @(18,4) civilian (720 person-ticks)
+[CorveeL1] Team1019 L0→L1 紮根工期 @(20,4) civilian (720 person-ticks)
+[CorveeL1] Team1020 L0→L1 紮根工期 @(2,6) military (720 person-ticks)
+[CorveeL1] Team1021 L0→L1 紮根工期 @(4,6) military (720 person-ticks)
+[CorveeL1] Team1022 L0→L1 紮根工期 @(6,6) civilian (720 person-ticks)
+[CorveeL1] Team1023 L0→L1 紮根工期 @(8,6) civilian (720 person-ticks)
+[CorveeL1] Team1024 L0→L1 紮根工期 @(10,6) civilian (720 person-ticks)
+[CorveeL1] Team1025 L0→L1 紮根工期 @(12,6) civilian (720 person-ticks)
+[CorveeL1] Team1026 L0→L1 紮根工期 @(14,6) military (720 person-ticks)
+[CorveeL1] Team1027 L0→L1 紮根工期 @(16,6) military (720 person-ticks)
+[CorveeL1] Team1028 L0→L1 紮根工期 @(18,6) civilian (720 person-ticks)
+[CorveeL1] Team1029 L0→L1 紮根工期 @(20,6) civilian (720 person-ticks)
+
+═══ 腿 A：站在自家 L0 營地上 ＋ 已承諾紮根 ═══
+  母體（本腿建的隊數）= 30
+  ── zhagen tap（引擎自己的計數，與上面的母體對帳）──
+     zhagen.mother                    = 30
+     zhagen.applicable                = 30
+     zhagen.not_applicable            = 0
+     zhagen.false.can_settle_here     = 0
+     zhagen.false.no_resume_site      = 30
+     zhagen.false.no_own_camp         = 0
+     zhagen.appl_won                  = 30
+     zhagen.appl_lost                 = 0
+     輸給誰：（無）
+  ── 派發結果（分母 = 30）──
+     current_task 分布：建設=30
+     current_option 分布：紮根=30
+  ★★★判讀（表寫在數字之前）：
+     fire 且真 dispatch（task=建設）= 30 / 30
+     applicable 但沒贏 = 0（appl_lost）
+     ★贏了但【沒】dispatch = 0（appl_won 30  建設 30）★手不聽腦，單獨記
+     若三者對不起來  原樣回報形狀，不歸類
+  ── 前 5 列原始（★不解讀）──
+     t1000 站(2, 2) 營(2, 2) → task=建設 opt=紮根 move=(2, 2) corvee=(2, 2) committed=紮根
+     t1001 站(4, 2) 營(4, 2) → task=建設 opt=紮根 move=(4, 2) corvee=(4, 2) committed=紮根
+     t1002 站(6, 2) 營(6, 2) → task=建設 opt=紮根 move=(6, 2) corvee=(6, 2) committed=紮根
+     t1003 站(8, 2) 營(8, 2) → task=建設 opt=紮根 move=(8, 2) corvee=(8, 2) committed=紮根
+     t1004 站(10, 2) 營(10, 2) → task=建設 opt=紮根 move=(10, 2) corvee=(10, 2) committed=紮根
+
+═══ 腿 B：★不在★自家營地 ＋ 已承諾紮根 ═══
+  母體（本腿建的隊數）= 30
+  ── zhagen tap（引擎自己的計數，與上面的母體對帳）──
+     zhagen.mother                    = 30
+     zhagen.applicable                = 30
+     zhagen.not_applicable            = 0
+     zhagen.false.can_settle_here     = 30
+     zhagen.false.no_resume_site      = 30
+     zhagen.false.no_own_camp         = 0
+     zhagen.appl_won                  = 30
+     zhagen.appl_lost                 = 0
+     輸給誰：（無）
+  ── 派發結果（分母 = 30）──
+     current_task 分布：建設=30
+     current_option 分布：紮根=30
+  ★★★判讀（表寫在數字之前）：
+     走回去（move_target == 自家營地）= 30 / 30
+     不走回去、改做別的 = 0（見 current_option 分布）
+     不走回去、也不做別的（IDLE）= 0 ★又一個 IDLE latch 的話會出現在這裡
+     若三者對不起來  原樣回報形狀，不歸類
+  ── 前 5 列原始（★不解讀）──
+     t1000 站(4, 2) 營(2, 2) → task=建設 opt=紮根 move=(2, 2) corvee=(-1, -1) committed=紮根
+     t1001 站(6, 2) 營(4, 2) → task=建設 opt=紮根 move=(4, 2) corvee=(-1, -1) committed=紮根
+     t1002 站(8, 2) 營(6, 2) → task=建設 opt=紮根 move=(6, 2) corvee=(-1, -1) committed=紮根
+     t1003 站(10, 2) 營(8, 2) → task=建設 opt=紮根 move=(8, 2) corvee=(-1, -1) committed=紮根
+     t1004 站(12, 2) 營(10, 2) → task=建設 opt=紮根 move=(10, 2) corvee=(-1, -1) committed=紮根
+
+═══ 腿 C：出發之後營地被衰敗清掉  必須解承諾重秤 ═══
+  母體 = 30
+  第一步真的出發（t1 move_target == 舊營地）= 30 / 30
+  ★營地消失後【解承諾】（committed 變空或改別的）= 30 / 30（仍是紮根 = 0）
+     其中走既有出口（committed == ""）= 0｜tap survival.own_camp_lost_release = 30
+  ★★【卡在移動中】（t2 仍指向已消失的營地）= 0 / 30 ★★★這一格必須是 0
+  t2 current_task 分布：紮營=30
+     t3000 t1[task=建設 move=(2, 2) com=紮根] → t2[task=紮營 move=(4, 2) com=紮營 opt=紮營]
+     t3001 t1[task=建設 move=(4, 2) com=紮根] → t2[task=紮營 move=(6, 2) com=紮營 opt=紮營]
+     t3002 t1[task=建設 move=(6, 2) com=紮根] → t2[task=紮營 move=(8, 2) com=紮營 opt=紮營]
+     t3003 t1[task=建設 move=(8, 2) com=紮根] → t2[task=紮營 move=(10, 2) com=紮營 opt=紮營]
+     t3004 t1[task=建設 move=(10, 2) com=紮根] → t2[task=紮營 move=(12, 2) com=紮營 opt=紮營]
+
+--- ★回歸斷言（own-camp 那一刀的驗收，逐腿一條）---
+  [PASS] 腿A：站自家營地  紮根贏 30/30 且真 dispatch 30/30
+  [PASS] 腿B：不在營地  走回去 30/30（★修前是 0/30：原地重紮）
+  [PASS] 腿B：沒有 IDLE latch（idle=0）
+  [PASS] 腿C：第一步真的出發 30/30
+  [PASS] 腿C：營地消失後解承諾 30/30
+  [PASS] 腿C：★卡在移動中 = 0（必須 0）
+=== DONE === ALL PASS｜[免疫] _verdict 毒值預設 15 處（.get(…, -1)）
+[ARM-ORDER] OK：setup 執行時 Probe 已 armed（0 次未 armed）
+★誠實限：手構世界（非 organic）單 tick 決策快照（腿 B 的『走回去』看的是【這一 tick 派了什麼】，
+   ★★不是【走完全程】）每隊人格/糧況已打散（見 _mk_team），但仍是【我造的分布】不是世界的分布
+
+[godot.ps1] child exit=0

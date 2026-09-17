@@ -13,6 +13,36 @@ extends SceneTree
 # ★循環守衛結構(v1):build-cost res(material)∩facility-output res=∅→無遞迴。cap 防疊爆。
 
 var _fail: int = 0
+const EXPECTED_CELLS: Array = ["_test_full_build_need", "_test_cap_clamps", "_test_drive_rises_with_urgency", "_test_food_ok_gate", "_test_cycle_guard_terminates"]
+
+# ★★★【到場點名 ＋ 陽性對照】（systems 派工；樣板同 `constitution_gate` 第一批）——
+#   ★病：GDScript 的執行期錯誤**只中止那一支 func**（coroutine 也一樣，`await` 不保護）⇒
+#     床照樣跑到最後、照樣印通過橫幅，而 runner 只看 exit code 與 expect ⇒ **兩者都通過**。
+#   ★★修法：每一格【自己的最後一行】打卡，末尾對名單，**少一格就把橫幅變成 FAIL**。
+#   ★★★用法必須是 `_selftest_gate("格名").noop()` —— 死亡要發生在【那一格自己的 frame】裡
+#     （★血證：放進被呼叫的 helper 裡 ⇒ 中止的是 helper、那一格照樣跑完 ⇒ 會誤判成「這裡沒有洞」）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
 
 func _initialize() -> void:
 	_test_full_build_need()        # ①想建 weaponsmith(單一)→_construction_facility_need=full 80(非×desire 稀釋)
@@ -20,10 +50,14 @@ func _initialize() -> void:
 	_test_drive_rises_with_urgency() # ③buymaterial_drive 隨 construction 迫切升
 	_test_food_ok_gate()           # ★④food-ok gate:food<DESP→買料 not applicable;food>=DESP→applicable
 	_test_cycle_guard_terminates() # 循環守衛:need_keep(material) 一次完成不遞迴爆
-	if _fail == 0:
-		print("=== DONE === ALL PASS")
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if _fail == 0 and _miss.is_empty():
+		print("=== DONE === ALL PASS%s" % _suffix)
+	elif not _miss.is_empty():
+		print("=== DONE === %d FAIL（★其中有格沒有執行）%s" % [_fail + _miss.size(), _suffix])
 	else:
-		print("=== DONE === %d FAIL" % _fail)
+		print("=== DONE === %d FAIL%s" % [_fail, _suffix])
 	quit()
 
 func _ok(cond: bool, msg: String) -> void:
@@ -58,6 +92,7 @@ func _lv(team: TeamData, state: WorldState) -> Dictionary:
 
 # ① full build-need：單一 material-facility（其餘 maxed L3 skip）→ _construction_facility_need = 全 cost 80（非 ×desire）
 func _test_full_build_need() -> void:
+	_selftest_gate("_test_full_build_need").noop()
 	print("--- ①full build-need（desire=gate 非稀釋）---")
 	var w: Array = _mk(true, 0.0, 0.9)
 	var tile: HexTileData = w[0].world.tiles[5 * 1000 + 5]
@@ -68,7 +103,9 @@ func _test_full_build_need() -> void:
 	_ok(is_equal_approx(cn, 70.0), "單一想建 weaponsmith → construction need=full 70（tools-demand cost80→70；非 ×desire 稀釋，got %.1f）" % cn)
 
 # ② cap：多 material-facility → total clamp 到 CONSTRUCTION_MATERIAL_NEED_CAP
+	_cell("_test_full_build_need")
 func _test_cap_clamps() -> void:
+	_selftest_gate("_test_cap_clamps").noop()
 	print("--- ②cap 防疊爆 ---")
 	# military 全 material-facility L0（weaponsmith/armorsmith/smeltery 各 80 + stable 40 = 280）→ clamp 100。
 	var w: Array = _mk(true, 0.0, 0.9)
@@ -76,7 +113,9 @@ func _test_cap_clamps() -> void:
 	_ok(is_equal_approx(cn, NeedOracle.CONSTRUCTION_MATERIAL_NEED_CAP), "多 facility(full-cost 疊)→ total=CAP %.0f（防 over-buy，got %.1f）" % [NeedOracle.CONSTRUCTION_MATERIAL_NEED_CAP, cn])
 
 # ③ buymaterial_drive 隨 construction 迫切（material_build_urgency）升
+	_cell("_test_cap_clamps")
 func _test_drive_rises_with_urgency() -> void:
+	_selftest_gate("_test_drive_rises_with_urgency").noop()
 	print("--- ③buymaterial_drive 繫建設迫切 ---")
 	var lo := DecisionContext.new()
 	# ★need_total 必須一起餵（②票）：舊版只餵 shortfall=80 而 need_total=0
@@ -94,7 +133,9 @@ func _test_drive_rises_with_urgency() -> void:
 	_ok(DecisionTerms.eval("buymaterial_drive", no_mkt, "買料") == 0.0, "無 material 市場 → drive=0")
 
 # ★④ food-ok gate：餓隊(food<DESPERATION)買料 not applicable；食足(>=DESPERATION)applicable
+	_cell("_test_drive_rises_with_urgency")
 func _test_food_ok_gate() -> void:
+	_selftest_gate("_test_food_ok_gate").noop()
 	print("--- ★④food-ok gate（防餓隊買料餓死）---")
 	var appl: Callable = DecisionOptions.REGISTRY["買料"]["applicable"]
 	var hungry := DecisionContext.new()
@@ -112,8 +153,11 @@ func _test_food_ok_gate() -> void:
 	_ok(not appl.call(fed_nofit), "食足但不缺料 → not applicable（不亂買）")
 
 # 循環守衛：need_keep(material) 一次完成不無限遞迴（結構驗；build-cost∩output=∅）
+	_cell("_test_food_ok_gate")
 func _test_cycle_guard_terminates() -> void:
+	_selftest_gate("_test_cycle_guard_terminates").noop()
 	print("--- 循環守衛 need_keep(material) 不遞迴爆 ---")
 	var w: Array = _mk(true, 0.0, 0.9)
 	var need: float = NeedOracle.need_keep(w[0], w[1], "material", _lv(w[1], w[0]))
 	_ok(need >= 0.0 and need < 1e9, "need_keep(material) 一次完成回有限值（cost-guard 前置=無遞迴，got %.1f）" % need)
+	_cell("_test_cycle_guard_terminates")

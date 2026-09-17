@@ -42,6 +42,26 @@ func _seed_sell_order(state: WorldState, to_tid: int, res: String, qty: int, pri
 	arr.append(msg)
 	state.team_known[to_tid] = arr
 
+
+# ★★★【免疫證據，印出來並釘進 expect】（systems 裁 2026-09-18，形狀同 `zhagen_controlled_bed`）——
+#   ★本床**不加到場點名**，因為它已經免疫：**每一格都 inline 在 `_initialize` 裡**
+#     ⇒ 任何一格中途死掉 ⇒ **`_initialize` 自己被中止** ⇒ `quit()` 永遠到不了
+#     ⇒ ★★**進程掛住、被 wrapper timeout 殺（rc≠0）、通過橫幅從來沒印出來** ⇒ 閘紅。
+#   ★**實測**（原始輸出在 `docs/measurements/2026-09-18-roll-call-batch2/`）：
+#     inline 注射 ⇒ rc=98（timeout）、無橫幅；helper 注射 ⇒ 斷言紅或同樣掛住。
+#   ★★**而這個免疫的來源就是「格沒有被拆成自己的 func」** ——
+#     ⇒ 把【本地 `_test_*` func 的支數】數出來釘進 expect：
+#       **哪天有人把格重構成獨立函式（支數 > 0）⇒ 這個免疫【當天消失】而畫面不會紅**
+#       ⇒ expect 不命中 ⇒ 閘紅 ⇒ **逼你回來判「現在要不要加到場點名」**。
+#   ★★★**誠實限**：它擋的是【形狀變了】，擋不住【有人同時改形狀與 expect】——那是刻意行為，我們防的是疏忽。
+#   ★**另一個誠實限**：免疫的簽名是 **timeout**，不是 `FAIL` ——
+#     ★★**那比較慢、而且長得像效能問題**；★★★但它【確實是紅的】，這是本床不加點名的全部理由。
+func _inline_cell_shape_count() -> int:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/merchant_turnover_test.gd")
+	var re := RegEx.new()
+	re.compile("\nfunc _test_")
+	return re.search_all(src).size()
+
 func _initialize() -> void:
 	print("=== merchant_turnover: 四格 ===")
 	# ★★★一律用【真世界 + 跑一天】：
@@ -120,6 +140,7 @@ func _initialize() -> void:
 	_ok(u_after != u_farm, "★兩型可分辨")
 	_ok(is_equal_approx(u_farm, u_base), "★★非商隊回到基準 ⇒ 差額確實來自 turnover 項")
 
-	if _fail == 0: print("=== DONE === ALL PASS")
+	var _shape: int = _inline_cell_shape_count()
+	if _fail == 0: print("=== DONE === ALL PASS｜[免疫] 格 inline，本地 _test_* func ＝ %d 支" % _shape)
 	else: print("=== DONE === %d FAIL" % _fail)
 	quit()
