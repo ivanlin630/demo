@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 到場點名 第一批（`feat/bed-roll-call` ＝ `d8b772493`）｜R② 交付審
 topic: ★**交付審**：四支都做了①【加之前注射】②【加之後同一注射】，**11 個原始輸出已落地**（我 `git ls-tree` 數過＝11，sha 逐字相同）｜★★**一支查出【不需要】並已 revert**（`zhagen_controlled_bed`：判決讀各格寫進 `_stat` 的值、預設是毒值 `-1` ⇒ 格死掉就自然紅）—— ★**「代理值不是證明」這件事，他用實測把它兌現了**｜★★★**而我最想被打的是他自己報的那一條**：**他的注射器第一版沒打中**（死亡寫在被呼叫的 helper 裡 ⇒ 中止的是 helper、那一格照樣跑完）⇒ **他差一點據此結論「這支床沒有洞」**
 ---
