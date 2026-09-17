@@ -1,0 +1,44 @@
+[TREE] path=A:\GDS\demo\.worktrees\sister commit=474448362 clean=code-yes (docs-dirty=1, does not affect this run)
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 兩支姊妹 site 改讀 known_outposts 驗收（spec §3）===
+[TREE] HEAD=474448362 scripts-dirty=0（clean）
+1-a-｜商隊：對城主有 belief、沒走過那座城  交易對象 {  }
+  [OK] 1-a-前提 ★**我對城主確實有情報**（舊版正是靠這個把城撈進來）
+  [OK] 1-a- ★**商隊那支：沒看過的城不進候選集**（樣本 1／母體 1）｜★退回 live  它會在  紅
+1-a-｜產出隊：同上  shelter_host_id=-1
+  [OK] 1-a- ★**求居那支：沒看過的城不會變成 host**（樣本 1／母體 1）
+1-b-｜商隊：走過城、對城主 belief=(-1, -1)  交易對象 { "team_id": 2, "outpost_pos": (5, 5) }
+  [OK] 1-b-前提 ★**我對城主【沒有】任何情報**（舊版正是因此把它丟掉）
+  [OK] 1-b- ★★**商隊那支：走過的城算數了**（樣本 1／母體 1）｜★★★舊版外圈是 `known_targets`  這一類永遠進不了候選集
+1-b-｜產出隊：走過城  shelter_host_id=2 pos=(5, 5)
+  [OK] 1-b- ★**求居那支：走過的城成為 host**（樣本 1／母體 1）
+
+— 1-c：零 god-view（原始碼）—
+  [OK] 1-c-前提 找得到 `_find_trade_partner`
+  [OK] 1-c- ★**商隊那支不再 live 讀 `tile.outpost_owner`／`outpost_level`**
+  [OK] 1-c-b ★改讀具名介面 `known_outposts`
+  [OK] 1-c-前提 找得到求居那一段
+  [OK] 1-c- ★**求居那支不再 live 讀 tile 的 outpost 欄位**
+  [OK] 1-c-b ★改讀具名介面 `known_outposts`
+
+— 1-d：`find_nearest_known_tile` 逐字未改（★守「別修錯東西」）—
+  [OK] 1-d-前提 找得到 `find_nearest_known_tile`
+  [OK] 1-d ★★**它逐字未改**｜★它閘後讀的是 `t.terrain`，而**地形不會變** 「當時」與「現在」同一個值｜★★★判準是【那個欄位會不會變】，不是【有沒有在閘後讀 live】
+  [OK] 1-d-b ★**沒有被我順手「修」成讀據點知識**（它要的是地形不是據點）
+
+— 1-e：自家據點讀取逐字未改（6 處，內容錨）—
+1-e｜自家錨 5／5 仍在
+  [OK] 1-e ★★**自家據點的讀取逐字未改**（讀 `team.tile_pos`／自家 `_home`  合法，不是 god-view）｜★★★而 spec §5 自承：那份清單原本寫 8 處、實際 6 處，**另有 3 處是讀【別隊】live 值＝真違規**（已另開帳，不在本票）｜★「別動它」清單是【斷言】不是【豁免】
+  [不可判] 1-f（世界級） ——
+       宣稱：兩支的候選集在真世界裡都換了一批（各印三個數）
+       為什麼這次驗不了：本次以 BED_WORLD=0 執行（世界級那段要跑 warring_states 10 天）
+       怎麼驗：BED_WORLD=1 BED_DAYS=10 GODOT_TIMEOUT=3000 單獨跑一次；貼數時標【床的 commit】
+-- 量測完成；[FAIL] 數 ＝ 0｜[不可判] 數 ＝ 1｜到場點名 6／6 --
+[TEST-SUITE-COMPLETE]
+ERROR: [不可判] 1-f（世界級）：兩支的候選集在真世界裡都換了一批（各印三個數）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=0
