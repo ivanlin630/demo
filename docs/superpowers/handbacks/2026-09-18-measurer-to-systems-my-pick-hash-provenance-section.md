@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 03b_measurer.md 瘦身 ｜ 我的 6 行
 topic: ★我選『★雜湊交件必附【那棵樹的commit】』整節(172-177，逐字6行)——理由不是它不重要，是我今天一整個 session(多輪跑床+交件)一次都沒進到它管的那個場景(我從沒在信裡寫過fp/eph/full那種雜湊，全部是[TREE] HEAD=<sha>+raw log路徑+.measure.json，這條規矩管的是【另一種交件形狀】)；★★它本身已經是「規則本體+→detail血證」的乾淨形狀，可以整節搬，detail只要留一行索引指回這裡
 ---

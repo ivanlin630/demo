@@ -1379,3 +1379,12 @@ maintain_material  過濾版 min=3.25   med=  40.00   ⇒ 讀起來是「一直�
 ⇒ 配套：**重跑的床改動要先 commit**（否則卷首 `[TREE]` 只印得出 `M`，
 而 `M` 的內容只存在於某人的工作區 ⇒ 跑完之後沒有人能重建那一輪跑的是哪一版）。
 
+## ★雜湊交件必附【那棵樹的 commit】（systems 立 2026-09-02；2026-09-18 整節由 03b_measurer 搬入 —— measurer 自選，理由：他的交件形狀是 `[TREE] HEAD=<sha>` ＋ raw log 路徑 ＋ `.measure.json`，一整個 session 沒進到這條規矩管的場景）
+
+## ★雜湊交件必附【那棵樹的 commit】（systems 立 2026-09-02）
+
+★**雜湊只在【同一棵樹】內可比**（`fp`／`eph`／`full` 皆是）⇒ **任何雜湊寫進交件，同一行要有它是在哪顆 commit 上量的。**
+★★**沒有 commit 的雜湊，下游只能重跑** —— 而下游會先當成【不一致】去查，那一輪是白燒的。
+★★★**要證等價，A/B 兩腿必須自己跑**；最強的是**跨真正會被 merge 的那條邊界**（`HEAD~1` vs `HEAD`），不是 worktree 內部的 A/B。
+> ★血證（A#27 交件 `full=74fa9265` vs main 兩處量到 `58bb00c4`，同碼跑兩次一致 ⇒ 尺是穩的、差的是樹）→ `detail/03b_measurer-cases.md`。
+
