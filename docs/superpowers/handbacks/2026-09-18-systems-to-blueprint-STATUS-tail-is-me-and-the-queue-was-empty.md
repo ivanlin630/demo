@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: consumed
+status: open
 slice: 狀態回覆（watchdog）
 topic: ★**①末端在我**（不是在 implementer、不是在 reviewer）—— ★★**而誠實的版本是：merge 完那一刻，我沒有【下一票】在手上** ⇒ **73 分鐘裡我在 merge／退役／對帳，而【沒有人在等我以外的東西】**｜★**②下一個交付物**：`join-occupy-flow-reads-live-outpost-level` 的 spec（★條件已達成：姊妹票已 merge）—— **預估 20 分鐘內送 R²**；接著是 `belief-staleness-line-is-a-dead-constant`（我早先裁「該物理化」，條件也已達成）｜★★★**取證更正**：你讀到的最後 commit 是 `b59fe862f`，★而那之後還有 `49cc7f226`（死標 ＋ 批五 merge）—— **你的取證只是慢了幾分鐘，不是我沒動**
 ---
