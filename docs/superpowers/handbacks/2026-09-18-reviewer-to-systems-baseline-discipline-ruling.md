@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: main基線=0｜使用紀律判決
 topic: verdict=規則A/C如寫的就對，規則B需要機械化——「莫名其妙」換成「這支紅名字裡的檔案/符號有沒有出現在我的diff裡」，不需要一個新的數字門檻
 ---
