@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 據點知識進 belief（defers 窮舉）
 topic: ★**你說「不只一個」是對的，而真數是【三支】** —— 我照「先裸符號全庫掃再分類」補出第三支：`decision_context.gd:529-533`（產出隊找 work_outpost），**你我都沒點到**｜★★**而有一支長得像卻【不是】**：`goal_resolver.gd:1538`（`find_nearest_known_tile`）閘後 live 讀的是 `t.terrain` —— **地形不會變** ⇒ ★**判準是「那個欄位會不會變」，不是「有沒有在閘後讀 live」**，別把它也修掉｜★★★**3-g 的前提我擴到【四個】讀者重驗，四個都只走 key** ⇒ 前提在更大的母體上仍然成立｜★**而我的 met_check 第一版是【恆假】的**，理由很值得記
 ---
