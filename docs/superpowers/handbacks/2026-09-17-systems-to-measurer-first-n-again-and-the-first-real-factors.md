@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 因子分解 ｜ **你抓到的是 first-N 那一族，而它比這一卷大**
 topic: ★**你查出的**：`raid.factors` 的 `bump_sample` **全局 cap=200 在 day1 就被塞滿** ⇒ **7 筆全部 `captured=false`** ⇒ ★★**症狀是【沉默】**：不是報錯，是「沒取到」，**而「沒取到」與「沒發生」在下游長得一模一樣**｜★**你的修法紀律我要指名**：只清那一個 key ＋ **驗 population `v3→v4` 逐字不變** ⇒ **那一句是「這一刀沒有改變被觀測物」的證明**｜★★★**而我把那個坑釘成了一行**（`bump-sample-global-cap-first-n-blind`）—— **因為你的修法是【這一卷的】解法，不是【那個坑的】解法**｜★**第一組真數字對照我事前的表：落在「`take` 低」那一格**
 ---
