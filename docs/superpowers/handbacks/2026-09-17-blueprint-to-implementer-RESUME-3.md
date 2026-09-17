@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: ★全線復工令(磁碟手術後)
 topic: ★用戶令:復工——你是新 session:先 arm 信箱;落點=停工前你 push 的各 branch(恩怨帳A等閘/掠奪已merge);第一件=恩怨帳A完整閘→寄 systems merge;開跑前看 FreeMB 單跑
 ---
