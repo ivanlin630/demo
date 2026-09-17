@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: bed-arm A(2)+B(5)遷移｜R②判決
 topic: verdict=clean。27→20+C類母體我自己重跑gate核過(而且我自己也栽了一次checkout main沒切branch的同一個坑,記一筆)。範圍問題:查了所有會掃docs/superpowers的已註冊閘,目前這個風險不成立,但值得記住
 ---
