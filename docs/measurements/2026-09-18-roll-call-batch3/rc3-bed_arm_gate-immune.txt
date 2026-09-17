@@ -1,0 +1,49 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=b9dcbfaec clean=NO code-dirty=5 codehash=F1C0455BF489
+[TREE]   *** measuring the WORKING TREE, not commit b9dcbfaec ***
+[TREE]    M scripts/debug/bed_arm_gate.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/gateA_hysteresis_test.gd
+[TREE]    M scripts/debug/grudge_ledger_bed.gd
+[TREE]    M scripts/debug/ledger_drop_visible_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 床 arm 順序閘（母體＝【全部建世界的床】，遷移的與未遷移的都在）===
+母體 405 ＝ 已遷移(helper) 107 ＋ 未遷移(白名單) 271 ＋ ★未涵蓋 27
+[BED-ARM-GATE] 對帳：OK（母體 ＝ 三欄之和）
+[BED-ARM-GATE] 已遷移 107 ／ 未遷移 271  ★遷移進度看的是【兩個數字一起動】，不是單看一個
+[BED-ARM-GATE] ★白名單 271 張  這是【未納管存量】，★★不是【盲區規模】（★★★真盲須逐張查 setup 位置；檔頭 :16-21 有完整理由）
+[BED-ARM-GATE] ★FAIL：27 張床建了世界，既不用 helper 也不在白名單｜[免疫] 橫幅在 _run 內＝true
+   ★ scripts/debug/agent_verbs_c1_bed.gd
+   ★ scripts/debug/c1_ticket2_bed.gd
+   ★ scripts/debug/ctx_object_flatten_bed.gd
+   ★ scripts/debug/ctx_who_probe.gd
+   ★ scripts/debug/effect_events_carry_cause_bed.gd
+   ★ scripts/debug/fp_behavior_coverage_bed.gd
+   ★ scripts/debug/fp_excludes_derived_bed.gd
+   ★ scripts/debug/fp_longwindow_determinism_bed.gd
+   ★ scripts/debug/fp_subfield_derived_bed.gd
+   ★ scripts/debug/home_granary_index_bed.gd
+   ★ scripts/debug/is_live_team_predicate_bed.gd
+   ★ scripts/debug/live_team_bed.gd
+   ★ scripts/debug/means_end_s6_test.gd
+   ★ scripts/debug/midtick_erase_safety_bed.gd
+   ★ scripts/debug/observer_inspect_depth_bed.gd
+   ★ scripts/debug/plan_speed_move_cost_test.gd
+   ★ scripts/debug/player_fp_sentinel_bed.gd
+   ★ scripts/debug/pop_gate_tap_bed.gd
+   ★ scripts/debug/promote_kill_samples_bed.gd
+   ★ scripts/debug/query_returns_body_census_bed.gd
+   ★ scripts/debug/rank_calls_bed.gd
+   ★ scripts/debug/solo_cost_vs_scale_bed.gd
+   ★ scripts/debug/solo_stagger_bigworld_perf_bed.gd
+   ★ scripts/debug/solo_think_stagger_bed.gd
+   ★ scripts/debug/sssp_cache_hitrate_bed.gd
+   ★ scripts/debug/zombie_window_group_a_bed.gd
+   ★ scripts/debug/zombie_window_group_b_bed.gd
+★處置：改用 MeasureBedHelper.arm_and_setup()（順序寫死，沒得選錯）
+★★若真的不能用（例如手工組世界不走 GameSetup），才加進白名單 ——
+   ★★★而加進白名單會讓上面那個數字變大，那是【刻意可見】的代價。
+
+[godot.ps1] child exit=1

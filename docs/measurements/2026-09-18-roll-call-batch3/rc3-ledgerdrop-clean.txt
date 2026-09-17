@@ -1,0 +1,28 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=b9dcbfaec clean=NO code-dirty=3 codehash=1AEDD450E456
+[TREE]   *** measuring the WORKING TREE, not commit b9dcbfaec ***
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/gateA_hysteresis_test.gd
+[TREE]    M scripts/debug/ledger_drop_visible_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+  [PASS] 未超上限：ledger 有 64 列（實得 64）
+  [PASS] ★未超上限  dropped == 0（實得 0）—— ★★這條是【陰性對照】：沒有它，「恆常非 0」也會讓下面那條綠
+  [PASS] 超上限：ledger 停在 cap=8（實得 8）
+  [PASS] ★★★陽性對照：寫 100 列、cap 8  dropped == 92（實得 92）—— ★而【數字要對】不是「非 0 就好」：
+        ★「非 0 就好」對【少算】完全不敏感，而少算正是這個計數器唯一會壞的方式。
+  [PASS] clear 之後 ledger 空
+  [PASS] ★clear【不清】dropped（92 → 92）—— ★★它是「這個 process 曾經丟過」的證據；
+        ★★★跟著清掉的話，「清過之後的 0 筆」會【再一次】無法分辨是沒發生還是被丟掉。
+  [PASS] ★跨 run 重置歸零（實得 0）—— 那是唯一該歸零的邊界
+  [PASS] ★★而重置要【回報】它清掉了什麼（非零才報）—— 靜默歸零就是這整件事的病本身
+=== DONE === ALL PASS｜到場點名 4／4
+WARNING: [DRIVER-LEDGER] 開始丟棄舊列（cap=8）★從此任何從 ledger 讀出來的「0 筆」都可能是【被丟掉】而不是【沒發生】
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+WARNING: [DRIVER-LEDGER] 開始丟棄舊列（cap=8）★從此任何從 ledger 讀出來的「0 筆」都可能是【被丟掉】而不是【沒發生】
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+WARNING: [DRIVER-LEDGER] 開始丟棄舊列（cap=8）★從此任何從 ledger 讀出來的「0 筆」都可能是【被丟掉】而不是【沒發生】
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
+[godot.ps1] child exit=0

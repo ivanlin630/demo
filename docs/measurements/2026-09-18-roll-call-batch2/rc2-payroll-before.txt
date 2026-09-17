@@ -1,0 +1,15 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=67ac8f15f clean=NO code-dirty=5 codehash=E37990A5CAFC
+[TREE]   *** measuring the WORKING TREE, not commit 67ac8f15f ***
+[TREE]    M scripts/debug/gateA_test.gd
+[TREE]    M scripts/debug/material_buy_test.gd
+[TREE]    M scripts/debug/ui_logic_test.gd
+[TREE]   ?? scripts/debug/zz_q1.gd
+[TREE]   ?? scripts/debug/zz_q2.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== payroll_urgency: 三格 ===
+[SELFTEST] die `inline`
+
+[GODOT TIMEOUT 360s - process killed]

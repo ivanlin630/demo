@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝分帶對帳或定義域斷言破了 ⇒ 物價的值域語意不成立
 
 # ★★★物價【拆閥之後】的分帶對帳與定義域斷言（第⑩票 2026-09-06）
 #
@@ -14,11 +15,42 @@ extends SceneTree
 #      不是 bug：若 food 大量落在這桶，農隊賣糧收入歸零。
 
 var _fail: int = 0
+const EXPECTED_CELLS: Array = ["_run"]
+
+# ★★★【到場點名】（systems 派工；本支的格【藏在 `_run` 裡】而橫幅印在 `_initialize`）——
+#   ★實測（2026-09-18）：讓 `_run` 中途死掉 ⇒ **通過橫幅照印、rc=0** ⇒ 「跑完了」與「死在一半」長得一樣。
+#   ★★**`1／1` 不是「只有一格」，是【這支床的格粒度就是 `_run`】** —— 格是 inline 在 `_run` 裡的，
+#     能被獨立點名的最小單位就是 `_run` 本身；要更細得先把格拆成 func（那是另一票）。
+#   ★★★用法必須是 `_selftest_gate("格名").noop()`（死亡要發生在那一格自己的 frame 裡）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
 
 func _initialize() -> void:
 	_run()
-	if _fail == 0: print("=== DONE === ALL PASS")
-	else: print("=== DONE === %d FAIL" % _fail)
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if _fail == 0 and _miss.is_empty(): print("=== DONE === ALL PASS%s" % _suffix)
+	else: print("=== DONE === %d FAIL%s" % [_fail + _miss.size(), _suffix])
 	quit()
 
 func _ok(cond: bool, msg: String) -> void:
@@ -34,6 +66,7 @@ func _mk(pop: int, res: String, stock: float) -> TeamData:
 	return t
 
 func _run() -> void:
+	_selftest_gate("_run").noop()
 	var state: WorldState = MeasureBedHelper.arm_and_new()
 	# [pop, res, stock, 期望帶]
 	# ★★★而【不寫「期望帶」那一欄】：`team.population` 與 `TARGET_PER_POP` 的互動我沒有逐案算過，
@@ -76,3 +109,4 @@ func _run() -> void:
 	print("           ⇒ 那要靠長跑床的比例讀數，★不是這支單元床能答的。")
 
 	Probe.enabled = false
+	_cell("_run")

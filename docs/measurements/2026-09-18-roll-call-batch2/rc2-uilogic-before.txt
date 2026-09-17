@@ -1,0 +1,69 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=67ac8f15f clean=NO code-dirty=3 codehash=D4F9797657FC
+[TREE]   *** measuring the WORKING TREE, not commit 67ac8f15f ***
+[TREE]   ?? scripts/debug/zz_p1.gd
+[TREE]   ?? scripts/debug/zz_p2.gd
+[TREE]   ?? scripts/debug/zz_p3.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+
+── Task1. Simulation 常數 ──
+  PASS: SALARY_INTERVAL >= 720
+  PASS: SEASON_LENGTH >= 240
+   salary_system.gd SALARY_INTERVAL = 10080
+   harvest_system.gd SEASON_LENGTH  = 129600
+
+── Task2. Test Setup ──
+  PASS: 初始食物撐 > 30 天 (208.3天)
+  PASS: 統領=0.5 → cap=32 > 10 → 不分裂
+[SELFTEST] die `_test_vision_threshold`
+
+── chrome. 成員健康一行 ──
+  PASS: 摘要傷員（乙重傷）line=成員傷: 乙(重傷)、丙(輕傷)
+  PASS: 全正常非空 line=成員: 全員正常
+
+── chrome. 資源趨勢箭頭 ──
+  PASS: 增→↑
+  PASS: 減→↓
+  PASS: 平→無
+
+── chrome. 模式 keymap ──
+  PASS: main 有鍵表
+  PASS: interact 有鍵表
+  PASS: 未知 mode fallback main
+
+── chrome. feedback 格式 ──
+  PASS: 成功訊息含內容
+  PASS: 成敗異色
+
+── chrome. event LogStrip ──
+  PASS: 顯最新 3 條（BCD）s=B | C | D
+  PASS: 舊的 A 不顯
+
+── U10. 戰後提示 ──
+  PASS: can_subjugate → 含「J收編」
+  PASS: 不可收編 → 僅按任意鍵（無 J）
+  PASS: 提示永遠含「離開」字樣
+  PASS: 有戰利品 → 含「K」拿戰利品
+  PASS: 有戰利品 → 含「L」留下
+  PASS: 無戰利品 → 不含「拿戰利品」
+  PASS: 戰果摘要含勝負隊
+  PASS: 空結果摘要 fallback「結束」
+
+── attack_select 提示 ──
+  PASS: 含 ↑↓選部位
+  PASS: 含 Enter 攻擊
+  PASS: 含 Esc 取消
+  PASS: 顯當前部位
+
+── U17. 遭遇戰旗色 ──
+  PASS: 玩家=藍
+  PASS: 自家 anon=綠
+  PASS: 敵=紅
+
+=== UI Logic Test DONE === errors: 0
+SCRIPT ERROR: Invalid call. Nonexistent function 'noop' in base 'Nil'.
+          at: _test_vision_threshold (res://scripts/debug/zz_p1.gd:101)
+
+[godot.ps1] child exit=0

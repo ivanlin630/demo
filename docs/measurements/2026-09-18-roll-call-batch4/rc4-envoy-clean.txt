@@ -1,0 +1,26 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=1416d0d3f clean=NO code-dirty=8 codehash=FC17ACF6DFC9
+[TREE]   *** measuring the WORKING TREE, not commit 1416d0d3f ***
+[TREE]    M scripts/debug/belief_freshness_invariant_test.gd
+[TREE]    M scripts/debug/board_price_carry_test.gd
+[TREE]    M scripts/debug/envoy_ptype_reconcile_test.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/raid_expected_value_bed.gd
+[TREE]    M scripts/debug/valuation_clamp_reconcile_test.gd
+[TREE]    M scripts/debug/wage_penalty_test.gd
+[TREE]    M scripts/debug/world_schedule_due_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+  ── 對帳（★真的印出來）──
+     總計=8 ｜ alliance=3 ｜ member_report=5 ｜ Σ=8
+  [PASS] Σ(各 ptype) == 總計：3 + 5 == 8
+  [PASS] ★逐桶【數字要對】不是「非零就好」：alliance=3(期望3) member_report=5(期望5)
+  [PASS] ★★★兩種 ptype 【都】造得出來 —— 沒有這條，「Σ 對得上」只是在說【只有一個桶】
+     ★本測只覆蓋 1/4 個原因；未覆蓋：["不知道對方在哪", "母隊只剩一人", "沒有可派的名人"]
+        ★★它們要真實世界狀態（belief 缺位／人力不足）才觸發 ——
+        ★★★在單元床裡硬造＝造假前提；覆蓋它們要靠長跑床，而【那不是這支的工作】。
+         ★所以這支的 PASS 【不代表四個原因的 ptype 歸因都對】，只代表【接線形狀對】。
+=== DONE === ALL PASS｜到場點名 1／1
+
+[godot.ps1] child exit=0

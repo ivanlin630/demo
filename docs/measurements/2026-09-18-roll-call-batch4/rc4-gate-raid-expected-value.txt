@@ -1,0 +1,48 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=1416d0d3f clean=NO code-dirty=6 codehash=81E9CA00AD62
+[TREE]   *** measuring the WORKING TREE, not commit 1416d0d3f ***
+[TREE]    M scripts/debug/belief_freshness_invariant_test.gd
+[TREE]    M scripts/debug/board_price_carry_test.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/raid_expected_value_bed.gd
+[TREE]    M scripts/debug/valuation_clamp_reconcile_test.gd
+[TREE]    M scripts/debug/world_schedule_due_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 掠奪走期望價值 驗收（fixture 級，不跑世界）===
+★格1 富 prey util=0.0841｜窮 prey util=0.0029
+  [OK] 格1 富 prey 的掠奪 util **高於**窮 prey（★相同  還是常數驅力，本票沒做到事）
+★格2 餓 util=0.1933｜不餓 util=0.0266
+  [OK] 格2 **餓的時候更想搶**（★相同  need 沒接上）
+★格3 同一目標：掠奪 util=0.084127｜攻擊 util=0.084127｜比值=1.0000（LOOT_RATE=0.30）
+  [OK] 格3 **逐字相等**：掠奪 0.084127 vs 攻擊 0.084127（差 0.000000） ★兩邊的 loot 項同源同尺｜★★★還有差  **還有一條沒同源的線，回報 systems**
+   ★★而 `odds` 兩邊共用同一個【盲】的贏率（不讀對手） **這一格只證明尺相同，不證明值對**。
+★格4 無牙 util=0.000000
+  [OK] 格4 無牙  掠奪 util  0（★**不是新功能，是不准退步**：舊制的 `cap` 也做得到）
+★格5 好戰殘忍 util=0.0746｜溫和謹慎 util=0.0053
+  [OK] 格5-a 人格**有**調製（★兩者相同  人格沒接）
+   人格比值：身價 1000 時 14.0000｜身價 200 時 14.0000
+  [OK] 格5-b **好戰／慎重**的比值與身價無關  ★它們只乘在外面（★★殘忍不在這一格：它是物理，見格7）
+★格7 殘忍 0 vs 1：util 比值 A=1.624｜結算端比值 B=1.700｜person 比值=2.000｜B×person=3.400
+  [OK] 格7-a 殘忍**確實提高**掠奪 util（★否則 take 那層根本沒接上）
+  [OK] 格7-b **A  B×person**（1.624  3.570） ★殘忍【沒有被平方】｜★★★若這格紅  **回報 systems：他裁錯了，`take` 那層要拿掉**
+   ★★而壓縮是次線性  A 略小於 B×person 是**預期**的，不是缺陷。
+★格6 `raid.factors` 樣本 1 筆｜`raid.eval` 母體 1
+   逐筆：{ "prey": 1, "priced": true, "est": 1000, "take": 0.089, "need": 0.667, "cruel": 0.5, "loot_rate": 0.405, "odds": 0.8, "person": 0.5, "util": 0.128, "tick": 0 }
+  [OK] 格6 `take／need／odds／util` **逐筆都在**（★缺任一  違「全量暫態可觀測性」）
+★格8 絕境（food_days=0.00 < 絕境線 3.00）｜鄰居 pop3 food=240｜**腳下無可耕地**
+   中庸(好戰/貪婪 .5)：乞食=2.6516 掠奪=2.6028 建設=0.0976 攻擊=0.0885 迎戰=0.0176 求和=0.0000
+   兇者(好戰/貪婪 .9)：掠奪=4.3445 乞食=2.6516 攻擊=0.1971 建設=0.0976 迎戰=0.0316 求和=0.0000
+  [OK] 格8-前提 這個 fixture **真的在絕境裡**（★否則這一格問的不是絕境）
+  [OK] 格8-a ★**非壓死**：絕境＋中庸人格  首選落在**求生類**（實際＝乞食）｜★★★紅了  **人格把一個餓死邊緣的人壓到【不動】**  回報 systems，不要自己改 `person`
+  [OK] 格8-a2 ★**成對的另一半**：首選**不是**紮營／建設／生產（實際＝乞食）
+  [OK] 格8-b 兇者的掠奪 util ＞ 中庸人格的（4.3445 > 2.6028）★這一格證明 `person` 是調製器
+  [OK] 格8-c 兇者（好戰/貪婪 .9）＋無耕地絕境  **首選＝掠奪**（實際＝掠奪）
+   ★診斷（腳下**有**可耕地；不入判）中庸(好戰/貪婪 .5)：紮營=2.7313 乞食=2.6516 掠奪=2.6028 建設=0.0976 攻擊=0.0885 迎戰=0.0176 求和=0.0000
+   ★診斷（腳下**有**可耕地；不入判）兇者(好戰/貪婪 .9)：掠奪=4.3445 紮營=2.7313 乞食=2.6516 攻擊=0.1971 建設=0.0976 迎戰=0.0316 求和=0.0000
+      ★★兩個人格在有耕地時都選**紮營** —— **而那不是「人格壓住了它」，是【它站在田上】。**
+
+-- 量測完成；[FAIL] 數 ＝ 0｜[免疫] 橫幅在 _run 內＝true --
+
+[godot.ps1] child exit=0

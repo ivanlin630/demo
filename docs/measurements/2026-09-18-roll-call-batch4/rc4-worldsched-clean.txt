@@ -1,0 +1,24 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=1416d0d3f clean=NO code-dirty=4 codehash=00362D78CD3A
+[TREE]   *** measuring the WORKING TREE, not commit 1416d0d3f ***
+[TREE]    M scripts/debug/board_price_carry_test.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/valuation_clamp_reconcile_test.gd
+[TREE]    M scripts/debug/world_schedule_due_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+  [PASS] harvest daily      新舊 fire tick 完全相同（60 次）
+  [PASS] harvest monthly    新舊 fire tick 完全相同（3 次）
+  [PASS] overflow monthly   新舊 fire tick 完全相同（3 次）
+     ★★這一條是【fp 逐位元不變】的理由 —— 而它是【算出來的】不是【假設的】。
+  ── 外層 cadence 改成 500（不整除 1440）──
+     舊制 fire 次數 = 0 ｜ 新制 fire 次數 = 9
+  [PASS] ★舊制幾乎整段不 fire(0 次)、新制照常補上(9 次) —— ★★這才是這張票買到的東西
+        ★★★沒有這條，「新舊完全相同」會【自己證明自己什麼都沒改】。
+  [PASS] ★第一次呼叫（t=360、next=43200）【不 fire】
+        ★★這條就是 fp 實跑 A/B 抓到的那個坑：原本初值 0  第一次必 fire，
+           而舊制在 t=360 不 fire（360 % 1440 != 0） ★★★世界從第一天就岔開。
+=== DONE === ALL PASS｜到場點名 1／1
+
+[godot.ps1] child exit=0

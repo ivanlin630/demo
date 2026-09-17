@@ -1,0 +1,25 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=b9dcbfaec clean=NO code-dirty=5 codehash=A51C2E87B5D3
+[TREE]   *** measuring the WORKING TREE, not commit b9dcbfaec ***
+[TREE]   ?? scripts/debug/zz_b1.gd
+[TREE]   ?? scripts/debug/zz_b2.gd
+[TREE]   ?? scripts/debug/zz_b3.gd
+[TREE]   ?? scripts/debug/zz_b4.gd
+[TREE]   ?? scripts/debug/zz_b5.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+--- returning+food 3-5→applicable ---
+  [PASS] returning+food 4(band[3,5))→返家補給 applicable（撐返家不漂回，破 oscillation）
+--- 非 returning+food 3-5→false ---
+  [PASS] 非 returning(idle)+food 4→返家補給 not applicable（hysteresis 只對 returning，不亂拉正常隊）
+[SELFTEST] die `_test_released_above_band`
+--- food<3→trigger ---
+  [PASS] 非 returning+food 2(<3)→返家補給 applicable（原 trigger 不變）
+--- productive returning restock_need 1.0 ---
+  [PASS] productive returning → restock_need=1.0（drive 撐 rank 撐住返家）
+=== DONE === ALL PASS
+SCRIPT ERROR: Invalid call. Nonexistent function 'noop' in base 'Nil'.
+          at: _test_released_above_band (res://scripts/debug/zz_b1.gd:70)
+
+[godot.ps1] child exit=0

@@ -1,0 +1,16 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=b9dcbfaec clean=NO code-dirty=3 codehash=1AEDD450E456
+[TREE]   *** measuring the WORKING TREE, not commit b9dcbfaec ***
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/gateA_hysteresis_test.gd
+[TREE]    M scripts/debug/ledger_drop_visible_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[SELFTEST] ★故意讓 `_run` 這一格在中途死掉
+[roll-call]  ★**有格沒有跑完**：["_run"] —— 執行期錯誤會靜默中止一支 func，而那看起來像綠
+=== DONE === 1 FAIL｜到場點名 0／1
+SCRIPT ERROR: Invalid call. Nonexistent function 'noop' in base 'Nil'.
+          at: _run (res://scripts/debug/escrow_audit_test.gd:73)
+
+[godot.ps1] child exit=0

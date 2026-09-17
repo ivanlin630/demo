@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance —— 檔頭逐字「統一商業框架 TDD（spec 2026-07-15）」⇒ 紅＝那個框架的驗收沒過
+# slice: 統一商業框架 unified-commerce（spec docs/superpowers/specs/2026-07-15-unified-commerce-framework.md）
 
 # 統一商業框架 TDD（unified-commerce，market-as-place）
 # spec: docs/superpowers/specs/2026-07-15-unified-commerce-framework.md
@@ -6,6 +8,37 @@ extends SceneTree
 # 賣入 owner buy 單(owner.coin→visitor)；order_id 直沖；min(單餘,現貨);無單不賣;SURVIVAL 有單才賣;守恆。
 
 var _fail: int = 0
+const EXPECTED_CELLS: Array = ["_test_visitor_buy_from_stock", "_test_visitor_sell_to_buyorder", "_test_order_id_direct_settle", "_test_survival_no_order_no_sell", "_test_conservation", "_test_integration_step3c_fires", "_test_probe_full_funnel", "_test_member_tax_conservation", "_test_no_stock_seizure_path", "_test_combo_taxed_buyer_deals"]
+
+# ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17，樣板同 constitution_gate／ui_flow_test）——
+#   ★病：GDScript 的執行期錯誤**只中止那一支 func**（coroutine 也一樣，`await` 不保護）⇒
+#     床照樣跑到最後、照樣印通過橫幅，而 runner 只看 exit code 與 expect ⇒ **兩者都通過**。
+#   ★★修法：每一格【自己的最後一行】打卡，末尾對名單，**少一格就把橫幅變成 FAIL**。
+#   ★★★用法必須是 `_selftest_gate("格名").noop()` —— 死亡要發生在【那一格自己的 frame】裡
+#     （★血證：放進被呼叫的 helper ⇒ 中止的是 helper，那一格照樣跑完 ⇒ 會誤判成「這裡沒有洞」）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
+
 
 func _initialize() -> void:
 	_test_visitor_buy_from_stock()
@@ -18,10 +51,15 @@ func _initialize() -> void:
 	_test_member_tax_conservation()
 	_test_combo_taxed_buyer_deals()
 	_test_no_stock_seizure_path()   # ★★★新增反向斷言：存量沒收走廊【不得存在】
-	if _fail == 0:
-		print("=== DONE === ALL PASS")
+	# ★`N／N` 印在【同一行】：runner 逐行比對 expect，分兩行寫的話沒被挑中的那半等於沒有被守。
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if _fail == 0 and _miss.is_empty():
+		print("=== DONE === ALL PASS%s" % _suffix)
+	elif not _miss.is_empty():
+		print("=== DONE === %d FAIL（★其中有格沒有執行）%s" % [_fail + _miss.size(), _suffix])
 	else:
-		print("=== DONE === %d FAIL" % _fail)
+		print("=== DONE === %d FAIL%s" % [_fail, _suffix])
 	quit()
 
 func _ok(cond: bool, msg: String) -> void:
@@ -89,6 +127,7 @@ func _give_construction_demand(state: WorldState, team: TeamData, pos: Vector2i)
 
 # ── TDD1：訪客到市場 outpost → 向 stock 買（deal fire，扣 storage，coin→owner，守恆）──
 func _test_visitor_buy_from_stock() -> void:
+	_selftest_gate("_test_visitor_buy_from_stock").noop()
 	print("--- TDD1：訪客買 owner sell 單/stock（coin→owner）---")
 	var s := _mk_state()
 	_mk_person(s, 100); _mk_person(s, 200)
@@ -128,7 +167,9 @@ func _test_visitor_buy_from_stock() -> void:
 	_ok(float(tile.public_storage.get("material", 0)) < 100.0, "public_storage material 扣減（%.0f）" % float(tile.public_storage.get("material", 0)))
 
 # ── TDD2：★訪客賣 → 向 owner buy 單賣（貨入 storage，owner.coin→visitor，套利閉合）──
+	_cell("_test_visitor_buy_from_stock")
 func _test_visitor_sell_to_buyorder() -> void:
+	_selftest_gate("_test_visitor_sell_to_buyorder").noop()
 	print("--- TDD2：★訪客賣入 owner buy 單（owner.coin→visitor）---")
 	var s := _mk_state()
 	_mk_person(s, 100); _mk_person(s, 200)
@@ -146,7 +187,9 @@ func _test_visitor_sell_to_buyorder() -> void:
 	_ok(float(tile.public_storage.get("goods", 0)) > 0.0, "貨入 public_storage（%.0f）" % float(tile.public_storage.get("goods", 0)))
 
 # ── TDD3：履約 order_id 直沖（成交即沖 active_orders + board，不掛幽靈）──
+	_cell("_test_visitor_sell_to_buyorder")
 func _test_order_id_direct_settle() -> void:
+	_selftest_gate("_test_order_id_direct_settle").noop()
 	print("--- TDD3：order_id 直沖 active_orders + board ---")
 	var s := _mk_state()
 	_mk_person(s, 100); _mk_person(s, 200)
@@ -171,7 +214,9 @@ func _test_order_id_direct_settle() -> void:
 	_ok(board_rem < 30, "board entry order_id=42 同步直沖（qty_remaining=%d）" % board_rem)
 
 # ── TDD4：SURVIVAL_GOODS 無單不賣（活命糧不買穿：storage 有 food 但無 sell 單 → 不成交）──
+	_cell("_test_order_id_direct_settle")
 func _test_survival_no_order_no_sell() -> void:
+	_selftest_gate("_test_survival_no_order_no_sell").noop()
 	print("--- TDD4：SURVIVAL 無單不賣（食物不買穿）---")
 	var s := _mk_state()
 	_mk_person(s, 100); _mk_person(s, 200)
@@ -187,7 +232,9 @@ func _test_survival_no_order_no_sell() -> void:
 	_ok(absf(float(tile.public_storage.get("food", 0)) - food0) < 0.001, "★food 無 sell 單 → 不賣（storage food %.0f 不動）" % float(tile.public_storage.get("food", 0)))
 
 # ── TDD5：守恆——成交總 coin + 總 goods 不生不滅 ──
+	_cell("_test_survival_no_order_no_sell")
 func _test_conservation() -> void:
+	_selftest_gate("_test_conservation").noop()
 	print("--- TDD5：市場成交守恆（coin↔goods 只搬）---")
 	var s := _mk_state()
 	_mk_person(s, 100); _mk_person(s, 200)
@@ -208,12 +255,14 @@ func _test_conservation() -> void:
 	_ok(absf(coin1 - coin0) < 0.001, "★總 coin 守恆（%.2f→%.2f）" % [coin0, coin1])
 	_ok(absf(mat1 - mat0) < 0.001, "★總 material 守恆（%.2f→%.2f）" % [mat0, mat1])
 	_ok(absf(goods1 - goods0) < 0.001, "★總 goods 守恆（%.2f→%.2f）" % [goods0, goods1])
+	_cell("_test_conservation")
 
 func _tot_coin(owner: TeamData, visitor: TeamData, tile: HexTileData) -> float:
 	return float(owner.resources.get("coin", 0)) + float(visitor.resources.get("coin", 0)) + float(tile.public_storage.get("coin", 0))
 
 # ── ★整合測（wiring-fix）：SimRunner._step3c_read_market_board → 新 resolver 真 fire（非死碼）──
 func _test_integration_step3c_fires() -> void:
+	_selftest_gate("_test_integration_step3c_fires").noop()
 	print("--- ★整合：SimRunner._step3c → market-as-place resolver 真 fire ---")
 	Probe.enabled = true; Probe.reset()
 	var s := _mk_state()
@@ -235,7 +284,9 @@ func _test_integration_step3c_fires() -> void:
 	Probe.enabled = false
 
 # ── ★probe 全 funnel 可觀測（observability-fix）：成交 bump deal/deal_market/order_fulfilled；bail 分因可觀測 ──
+	_cell("_test_integration_step3c_fires")
 func _test_probe_full_funnel() -> void:
+	_selftest_gate("_test_probe_full_funnel").noop()
 	print("--- ★probe 全 funnel：成交計數口徑 + bail 分因 ---")
 	# (a) 成交 → order_fulfilled + deal + deal_market bump（鏡射舊路口徑）
 	Probe.enabled = true; Probe.reset()
@@ -267,7 +318,9 @@ func _test_probe_full_funnel() -> void:
 	Probe.enabled = false
 
 # ── coin combo：成員稅守恆（person.coin→team.coin 池間搬，留 floor）──
+	_cell("_test_probe_full_funnel")
 func _test_member_tax_conservation() -> void:
+	_selftest_gate("_test_member_tax_conservation").noop()
 	# ★★★改測【所得稅守恆】（spec §4 #1：改測不刪 —— 刪測試＝把閘變綠）
 	#   ★舊測驗的是「存量稅：person.coin → team.coin，且留 floor」——★★而那條路已整支退場。
 	#   ★★★新規則是【源扣繳】：team 只淨支出 net，稅額【從未離開團庫】
@@ -310,7 +363,9 @@ func _test_member_tax_conservation() -> void:
 
 # ── ★★★反向斷言（spec §4 #1b）：把「這條路是【故意】拿掉的」焊成可執行的測試 ──
 #   ★未來有人重新引入【存量抽取】（team.coin 低就抽 named 成員 p.coin）會【自動變紅】
+	_cell("_test_member_tax_conservation")
 func _test_no_stock_seizure_path() -> void:
+	_selftest_gate("_test_no_stock_seizure_path").noop()
 	print("--- ★★★反向斷言：team.coin=0 而成員有私產 ⇒ 不存在把存量拉回團庫的機制 ---")
 	var s := _mk_state()
 	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.9, "慎重": 0.1}
@@ -338,7 +393,9 @@ func _test_no_stock_seizure_path() -> void:
 	print("     ★★若這兩條變紅 ⇒ 有人重新引入了【存量沒收】走廊 —— 那是禁令，不是優化")
 
 # ── ★combo：市場有 sell stock + 買方經稅有 coin → deal fire（no_coin binding 破）──
+	_cell("_test_no_stock_seizure_path")
 func _test_combo_taxed_buyer_deals() -> void:
+	_selftest_gate("_test_combo_taxed_buyer_deals").noop()
 	# ★★★改測不刪（spec §4 #1b）：原場景「team.coin=0 起手 → 抽成員【既有】私產 → 買得成」
 	#   ★在新規則下【結構上不成立】—— 而那不是這支測試壞了，是【那條路被刻意拿掉了】。
 	#   ★★所以正向改成：**發薪後 team.coin 的增量來自【本次薪資流量的扣繳】**。
@@ -375,4 +432,5 @@ func _test_combo_taxed_buyer_deals() -> void:
 		"★★gross(%.3f) − 扣繳(%.3f) ＝ 成員收到(%.3f) ⇒ 三者對得起來" % [gross, withheld, got])
 	_ok(absf((tc0 - tc1) - got) < 0.001,
 		"★★★團庫流出(%.3f) ＝ 成員收到(%.3f) ⇒ 稅額從未離開團庫" % [tc0 - tc1, got])
+	_cell("_test_combo_taxed_buyer_deals")
 

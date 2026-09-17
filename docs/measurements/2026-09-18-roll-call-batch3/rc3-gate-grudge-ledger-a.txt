@@ -1,0 +1,66 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=b9dcbfaec clean=NO code-dirty=5 codehash=F1C0455BF489
+[TREE]   *** measuring the WORKING TREE, not commit b9dcbfaec ***
+[TREE]    M scripts/debug/bed_arm_gate.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/gateA_hysteresis_test.gd
+[TREE]    M scripts/debug/grudge_ledger_bed.gd
+[TREE]    M scripts/debug/ledger_drop_visible_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 恩怨帳 切片A 驗收（fixture 級，不跑世界）===
+★格1 義氣0.9 feud=0.3090｜義氣0.1 feud=0.0000（母體：各 1 次重徵）
+  [OK] 格1 人格**進了 feud 強度**（★兩者相同  `form_feud` 的個性 factor 沒作用）
+★格2-0 中庸人格 × 十次小重徵  feud=0.0000（單次 intensity 0.225 < FEUD_MIN 0.30  逐事件被丟）
+  [OK] 格2-0 ★**釘住現況**：中庸人格的小怨**一條邊都不產生**  飽和疊加收不到輸入｜★★★這一格若哪天變綠不了（即 meek_i > 0），代表 systems 把 `FEUD_MIN` 移到累積之後 —— **那時候要回來把這一格改寫成「累積後跨線」，而不是刪掉它**
+  [不可判] 格2（spec 原文） ——
+       宣稱：十次**小**重徵  feud 累積到可觸發拒賣（★`maxf` 版永遠到不了 ＝ 它的對照）
+       為什麼驗不了：`FEUD_MIN` 是**逐事件**門檻且在 `add_edge` **之前**  小怨**一條邊都不產生**（格2-0 實測 0.0000） **飽和疊加永遠收不到它要累積的東西**
+       什麼時候可判：切片B 第一項（門檻從【記錄】移到【行動】；它牽動 4 個 feud 讀者，要一起對齊）
+       ★★★原則（systems 立，比這張票大）：**門檻要放在【行動】上，不要放在【記錄】上** ——
+          放在記錄上  小事件永久消失  症狀是【公式接好了、床綠了、而世界裡一次也不會發生】。
+★格2′（**邊已存在者**的疊加）十次逐次：[0.309, 0.523, 0.67, 0.772, 0.842, 0.891, 0.925, 0.948, 0.964, 0.975]
+   一次=0.3090  十次=0.9752｜W(中庸)=0.270｜I×W=0.2633 vs h(最薄)=0.050
+  [OK] 格2′-a 十次 > 一次（★★**相同  還是 `maxf`** —— 那正是這一格存在的理由）
+  [OK] 格2′-b 累積**跨過最薄的那一端**（I×W 0.2633 > h 0.050）
+   要求（最弱的怨 × **中庸**人格）：0.300 × 0.150 ＝ 0.0450 vs h(最薄) 0.050
+  [OK] 格2′-c ★**成對的另一半**：**最弱的怨 × 中庸人格不該秒殺交易**（0.0450  0.050）｜★★這條不等式正是 `GRUDGE_PRICE_W_BASE` 的**來源**，不是它的裝飾
+  [OK] 格2′-d 飽和  **永不破 1**（實測 0.9752）
+★格6 protect 疊兩次 0.4  0.6400（飽和式 0.6400；`maxf` 版會是 0.4000）
+  [OK] 格6 **飽和疊加進了共用點**（★等於 0.4  只有 feud 改到）
+   `special_taxed`  feud 邊 0.3570   寫入點：interaction_system.gd:696（重徵）
+   `rejected_aid`  feud 邊 0.3868   寫入點：interaction_system.gd:1533／player_command_system.gd:1003／sim_runner.gd:381（求救不應）
+   `benefactor`  gratitude 邊 0.5000   寫入點：interaction_system.gd:1218/:1560／player_command_system.gd:1024（★受人援助——systems 的 §0 沒掃到這一個）
+★格7 接上的名字 3／母體 3
+  [OK] 格7 三個名字**各產生一條邊**（★邊數 0  名字又沒接上——那正是本票要修的病）
+  [OK] 格7-b ★**成對的另一半**：`extorted` 是死名字  **不再有分支接它**（★若它仍產生邊  我留了一個永遠不會被觸發、卻看起來接好了的分支）
+★格3 base_ask=5.4727｜對仇人=7.3937｜對第三方=5.4727｜買方 bid=6.0727｜**h（這一筆的餘裕）=0.1651**
+  [OK] 格3-a 對加害者**索價升高**
+  [OK] 格3-b ★**對照**：對第三方**照原價賣**（★也變貴  是全域變貴不是恩怨）
+  [OK] 格3-c **撮合自然失敗 ＝ 湧現的拒賣**（7.394 > 6.376）★不是硬 gate 擋的｜★★★拿不出樣本  **回報 systems：這個定義不成立，不要加 gate 補上**
+  [OK] 格3-c2 ★**同一筆餘裕下，對第三方【成得了交】**（5.473  6.376）｜★★沒有這一半，「拒賣」與【這筆交易本來就做不成】長得一模一樣
+   ★★而 `h` 不是常數：`ask_base  bid` 時它`SPREAD_TOL`，賣方折價時可到 0.3 ——
+      ★★★沒有它的分佈，「沒成交」分不出【機制錯】與【這批交易本來就沒餘裕】。
+  [OK] 格4 `buyer_leader_id = -1`  **索價逐字等同舊值**（★變了  預設路徑被改到，5 個既有呼叫點全中招）
+★格5 恩 0.6000 → 被動(只算價) 0.6000 → 報恩事件後 0.3660（消耗 0.2340）
+  [OK] 格5-a ★**被動不消耗**（★★降了  **鐵則破**：算一次價就等於報了一次恩）
+  [OK] 格5-b **報恩事件後恩下降**（★沒降  消耗邊沒接上）
+  [OK] 格5-c 消耗量 ＝ `grat × W`（實測 0.2340）★**零新常數**：讓掉多少就報掉多少
+  [不可判] 格5-d（賠禮被收  feud 降） ——
+       宣稱：和解（賠禮＝offer，對方秤決定收不收）被收下  **消耗對方的怨**
+       為什麼驗不了：**求和今天沒有「被收下」這個狀態**：`interaction_system.gd:539-544` 的 `TASK_TRIBUTE_OFFER` 只做 `release + cooldown`，那段註解自己寫著「真息兵行為＝backlog」｜★★**而我沒有拿 `propose_alliance` 的 accept 頂替它** —— 結盟不是賠禮，★★★**用一個假的 offer 讓這一格變綠，比讓它不可判更糟**
+       什麼時候可判：切片B（真息兵 handler：`sue_for_peace`／`offer_tribute`）
+
+★母體對帳：`grudge.form.feud`=0｜`grudge.stack`=0｜`grudge.consume.repay_trade`=1｜`trade.grudge_markup.eval`=2
+-- 量測完成；[FAIL] 數 ＝ 0｜[不可判] 數 ＝ 2｜[免疫] 橫幅在 _run 內＝true --
+[不可判] 2 格：格2（spec 原文）／格5-d（賠禮被收  feud 降）
+★★★**本床在切片B 落地前【不是綠的】** —— 這是蓄意的：
+   ★「不可判」若換成綠，下一個人會以為那兩件事已經驗過了；
+   ★★而若換成 [FAIL]，它會跟【真的壞了】混在一起  **兩種紅要分得開。**
+ERROR: [不可判] 格2（spec 原文）：十次**小**重徵  feud 累積到可觸發拒賣（★`maxf` 版永遠到不了 ＝ 它的對照）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [不可判] 格5-d（賠禮被收  feud 降）：和解（賠禮＝offer，對方秤決定收不收）被收下  **消耗對方的怨**
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=0

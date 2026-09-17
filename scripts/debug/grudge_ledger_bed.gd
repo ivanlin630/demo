@@ -11,6 +11,25 @@ extends SceneTree
 #   ★**它不證明那三個寫入點在真世界裡會 fire** —— 那由世界床的 `grudge.form.*` 母體回答。
 #   ★★而「全 0 是母體塌陷，不是答案」：每一格都印【發生了幾次／母體多大】。
 
+
+# ★★★【免疫證據，印出來並釘進 expect】（systems 裁 2026-09-18，形狀同 zhagen／merchant）——
+#   ★本床**不加到場點名**，因為它已經免疫：**通過橫幅印在 `_run` 裡面**
+#     ⇒ `_run` 中途死掉 ⇒ **橫幅從來沒印** ⇒ expect 不命中 ⇒ 閘紅。
+#   ★★**實測（2026-09-18）**：注射 ⇒ 沒有橫幅、rc=0、8 秒就結束
+#     ⇒ ★**簽名不是 timeout** —— 控制權回到 `_initialize`、`quit()` 照樣執行（systems 的第三軸預測正確，
+#       而我原本猜的「timeout」是錯的）。原始輸出在 `docs/measurements/2026-09-18-roll-call-batch3/`。
+#   ★★★**而免疫的來源就是「橫幅的位置」** ⇒ 把它數出來釘進 expect：
+#     **哪天有人把那一行搬到 `_initialize`（很合理的重構）⇒ 免疫當天消失、而畫面不會紅**
+#     ⇒ 這個欄位變 false ⇒ expect 不命中 ⇒ 逼你回來判「現在要不要加到場點名」。
+func _immunity_banner_inside() -> bool:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/grudge_ledger_bed.gd")
+	var head: int = src.find("\nfunc _run(")
+	if head == -1:
+		return false
+	var tail: int = src.find("\nfunc ", head + 10)
+	var body: String = src.substr(head, (tail - head) if tail != -1 else src.length() - head)
+	return body.contains("量測完成；[FAIL] 數")
+
 func _initialize() -> void:
 	Probe.arm()   # ★arm 先於任何 fixture（bed-arm 閘）
 	_run()
@@ -245,7 +264,7 @@ func _run() -> void:
 		int(Probe.counts.get("grudge.form.feud", 0)), int(Probe.counts.get("grudge.stack", 0)),
 		int(Probe.counts.get("grudge.consume.repay_trade", 0)),
 		int(Probe.counts.get("trade.grudge_markup.eval", 0))])
-	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
+	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d｜[免疫] 橫幅在 _run 內＝%s --" % [_fails, _undec, str(_immunity_banner_inside())])
 	# ★★★【判準看橫幅，不看離開碼】（systems 立的規矩）：
 	#   ★離開碼只有 runner 看得到，而**註冊表的 `expect` 是對著輸出比對的**
 	#   ⇒ ★★所以「幾格不可判、是哪幾格」必須**印在結尾橫幅上**，不能只活在 exit code 裡。

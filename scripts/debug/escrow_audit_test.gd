@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝存根與實貨分歧 ⇒ 檔頭逐字寫著「escrow 對帳不變量」
 
 # ★★★escrow 對帳不變量（B-v0）——★systems 問的「誰負責發現存根與實貨分歧」的答案。
 #
@@ -12,14 +13,49 @@ extends SceneTree
 #   orphan_escrow 貨卡死 ／ orphan_stub 賣家被騙 ／ qty_mismatch 要決定信誰
 
 var _fail: int = 0
+const EXPECTED_CELLS: Array = ["_run"]
+
+# ★★★【到場點名】（systems 派工；本支的格【藏在 `_run` 裡】而橫幅印在 `_initialize`）——
+#   ★實測（2026-09-18）：讓 `_run` 中途死掉 ⇒ **`=== DONE === ALL PASS` 照印、rc=0**
+#     ⇒ ★★「跑完了」與「死在一半」在畫面上一模一樣。
+#   ★★★★**`1／1` 不是「只有一格」，是【這支床的格粒度就是 `_run`】**（systems 要求寫明 2026-09-18）——
+#     ★下一個人看到 `1／1` 很容易以為點名沒做完；★★真相是：格是 inline 在 `_run` 裡的，
+#     **能被獨立點名的最小單位就是 `_run` 本身**。要更細，得先把格拆成 func（那是另一票）。
+#   ★★★這一支的點名粒度只能是 `_run`（格是 inline 的）——
+#     **1／1 看起來很小，但它守的正是那個洞**：`_run` 沒跑完 ⇒ 0／1 ⇒ 橫幅變 FAIL。
+#   ★用法必須是 `_selftest_gate("格名").noop()`（死亡要發生在那一格自己的 frame 裡）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
 func _ok(c: bool, m: String) -> void:
 	if c: print("  [PASS] %s" % m)
 	else: _fail += 1; print("  [FAIL] %s" % m)
 
 func _initialize() -> void:
 	_run()
-	if _fail == 0: print("=== DONE === ALL PASS")
-	else: print("=== DONE === %d FAIL" % _fail)
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if _fail == 0 and _miss.is_empty(): print("=== DONE === ALL PASS%s" % _suffix)
+	else: print("=== DONE === %d FAIL%s" % [_fail + _miss.size(), _suffix])
 	quit()
 
 func _mk() -> WorldState:
@@ -38,6 +74,7 @@ func _team(s: WorldState, tid: int) -> TeamData:
 	return t
 
 func _run() -> void:
+	_selftest_gate("_run").noop()
 	# ── ①一致：存根與實貨對得上 ⇒ 三個分歧都 0，而 checked > 0 ──
 	var s1 := _mk()
 	var t1 := _tile(s1, Vector2i(1, 1), 9)
@@ -94,3 +131,4 @@ func _run() -> void:
 	print("     ★★★而本測本身就是 `audit_escrow` 的 caller —— ★它先前【零 caller】（systems 實測抓到），")
 	print("        而【儀器裝好但沒接電】是既有 memory 裡的第 6 型。")
 	Probe.enabled = false
+	_cell("_run")

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝出現了 baseline 沒有的新閘（或母體為 0）⇒ 破的是「引擎不長新補丁閘」這條憲法級約束
 
 # ★★★ 沙盒憲法防閘 v2（site-freeze，抓全閘型）：零殘留 + 真統一證明機制。
 # v1 只抓 TaskArbiter task 指派；v2 加值閘（RNG-in-decision / override early-return / 硬門檻）
@@ -99,14 +100,71 @@ func _initialize() -> void:
 			print(fp)
 		print("[CONSTITUTION-GATE] BASELINE-MISSING（enumerate=%d，寫入 %s 後 re-run）" % [current.size(), BASELINE])
 	elif added.is_empty():
-		print("[CONSTITUTION-GATE] PASS (sites=%d, removed=%d)" % [current.size(), removed.size()])
+		_cell("verdict")
+		# ★★★【母體 floor】（implementer 揭 2026-09-17，陽性對照逼出來的）：
+		#   ★把 `_scan()` 殺掉之後，`current` ＝ 空 ⇒ `added` 也空 ⇒ **它照樣印 PASS（sites=0）**
+		#   ⇒ ★★「全世界一個閘都沒有」與「一個新閘都沒加」**走同一條 PASS**。
+		#   ⇒ ★★★恆空與恆滿是同一個病：**上線前要問母體什麼時候會空**，而這裡的答案是「掃描死掉時」。
+		var _ok_roll: bool = _roll_call_ok()
+		if current.is_empty():
+			print("[CONSTITUTION-GATE] FAIL：★母體為 0（sites=0）—— 掃描沒有跑到東西，這不是「沒有違規」")
+		elif not _ok_roll:
+			print("[CONSTITUTION-GATE] FAIL：★到場點名不齊 —— 有一格沒有執行（見上一行）")
+		else:
+			# ★★★`N／N` 印在【通過橫幅那一行】上 —— 因為 runner 是【逐行】比對 expect：
+			#   分兩行寫的話，expect 只能挑一個，而**沒被挑中的那個等於沒有被守**。
+			print("[CONSTITUTION-GATE] PASS (sites=%d, removed=%d)｜到場點名 %d／%d" % [
+				current.size(), removed.size(), _cells_ran.size(), EXPECTED_CELLS.size()])
 	else:
 		for fp in added:
 			print("[gate] ❌ 新增閘: %s" % fp)
 		print("[CONSTITUTION-GATE] FAIL：新增 %d 個閘。溶入引擎/統一，或呈報系統更新 baseline。" % added.size())
 	quit()
 
+
+# ★★★【陽性對照：故意讓一格中途死掉】（systems 派工 2026-09-17）——
+#   ★用途：證明「這一格【沒有執行】」與「它【通過了】」在畫面上分不分得出來。
+#   ★★觸發：`BED_SELFTEST_DIE=<格名>`（預設回 `self` ⇒ 正常執行只多一次 no-op 呼叫，零輸出零 RNG）。
+#   ★★★**用法必須是 `_selftest_gate("格名").noop()`** —— 死亡要發生在【那一格自己的 frame】裡。
+#     ★血證（2026-09-17，我第一版寫錯）：把 `nothing.die()` 放在**被呼叫的 helper** 裡，
+#     **中止的是 helper，呼叫它的那一格照樣跑完** ⇒ 我差一點據此得出「這支床沒有洞」的結論。
+#     ⇒ **「我的注射器沒打中」與「這裡沒有病」長得一模一樣。**
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉（執行期錯誤中止【呼叫它的那一格】）" % cell)
+	return null
+
+func noop() -> void:
+	pass
+
+# ★★★【到場點名】（systems 派工 2026-09-17，規範見 03_implementer 要件③）——
+#   ★病：GDScript 的執行期錯誤**只中止那一支 func**，床照樣跑到最後、照樣印它的通過橫幅
+#     ⇒ **「沒有失敗」與「沒有執行」在畫面上一模一樣**，而 runner 只看 exit code 與 expect ⇒ 兩者都通過。
+#   ★★修法：每一格自報到場，末尾對名單，**少一格就把橫幅改成 FAIL**
+#     ⇒ ★★★而 `N／N` 要進 `merge-gates.tsv` 的 expect（**不是**在 runner 加掃描：
+#       runner 2026-09-02 已因為「自由文字掃 FAIL 字樣」被閘自己的說明文字反咬過）。
+const EXPECTED_CELLS: Array = ["scan", "baseline", "verdict"]
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+# 回傳 true ＝ 全員到齊。★印在通過橫幅【之前】，而橫幅本身由 caller 依它決定。
+func _roll_call_ok() -> bool:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if missing.is_empty():
+		print("[gate] 到場點名 %d／%d ★每一格都跑完了" % [_cells_ran.size(), EXPECTED_CELLS.size()])
+		return true
+	print("[gate] ❌ 到場點名 %d／%d ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % [
+		_cells_ran.size(), EXPECTED_CELLS.size(), str(missing)])
+	return false
+
 func _scan() -> Dictionary:
+	_selftest_gate("scan").noop()
 	var out: Dictionary = {}
 	var dfile := RegEx.new(); dfile.compile(DECISION_FILE_RE)
 	var dfunc := RegEx.new(); dfunc.compile(DECISION_FUNC_RE)
@@ -122,6 +180,7 @@ func _scan() -> Dictionary:
 	var gv_map := RegEx.new(); gv_map.compile(GV_MAPSCAN_RE)
 	var res: Array = [dfile, dfunc, disp, func_re, rng, ta, thr, early, route, gvfile, gv_ts, gv_map]
 	_walk(SCAN_DIR, res, out)
+	_cell("scan")
 	return out
 
 func _walk(dir_path: String, res: Array, out: Dictionary) -> void:
@@ -302,9 +361,11 @@ func _strip_observation(line: String, carry: int) -> Array:
 	return [s2, 0]
 
 func _load_baseline() -> Dictionary:
+	_selftest_gate("baseline").noop()
 	var out: Dictionary = {}
 	var f := FileAccess.open(BASELINE, FileAccess.READ)
 	if f == null:
+		_cell("baseline")
 		return out
 	while not f.eof_reached():
 		var line: String = f.get_line().strip_edges()
@@ -316,4 +377,5 @@ func _load_baseline() -> Dictionary:
 		if line != "":
 			out[line] = true
 	f.close()
+	_cell("baseline")
 	return out

@@ -1,0 +1,22 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=1416d0d3f clean=NO code-dirty=6 codehash=81E9CA00AD62
+[TREE]   *** measuring the WORKING TREE, not commit 1416d0d3f ***
+[TREE]    M scripts/debug/belief_freshness_invariant_test.gd
+[TREE]    M scripts/debug/board_price_carry_test.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/raid_expected_value_bed.gd
+[TREE]    M scripts/debug/valuation_clamp_reconcile_test.gd
+[TREE]    M scripts/debug/world_schedule_due_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== belief 新鮮度等式 反向斷言 ===
+  ★陽性對照：故意寫一筆不帶 tile_pos 的親見 claim  計數 0 → 1
+  ★★production 路跑完：計數 1 → 1（★不得上升）
+     等式仍成立：每一次親見都帶 tile_pos
+  ★★★母體：本段實際發生的親見寫入相關計數 = 24
+
+★★★總計 FAIL = 0｜[免疫] 橫幅在 _run 內＝true
+[TEST-SUITE-COMPLETE]
+
+[godot.ps1] child exit=0

@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance —— 紅＝own-camp 那一刀的回歸斷言破了（腿 A／B／C 各一條）⇒ 是那一票的驗收，不是全域不變量
+# slice: 紮營→紮根 銜接 own-camp（systems 派 2026-09-03，腿 B 由 blueprint 加）
 # @observe-pure
 # ★★★紮營→紮根 銜接：控制場景床（systems 派 2026-09-03，腿 B 由 blueprint 加）。
 #
@@ -24,6 +26,18 @@ extends SceneTree
 #
 # ★★★三條紀律：①禁猜（拿到分支名/數字前不提「大概是因為」）②母體與命中同印
 #   ③`fp` 不比（手構世界本來就不在 organic 那條線上）
+
+# ★★★【本床不需要「到場點名」，而理由必須寫下來】（實測 2026-09-18，systems 裁）——
+#   ★同批其他三支床有這個洞：執行期錯誤**只中止那一支 func**，床照樣跑完、照樣印通過橫幅。
+#   ★★**這一支沒有**，而它的免疫**不是「寫得比較小心」**：
+#     `_verdict()` 讀的是各格寫進 `_stat` 的值，而預設值是 **`-1`（毒值）**
+#     ⇒ 某一格死掉 ⇒ 鍵缺 ⇒ `-1` ⇒ 與 `N_PER_LEG` 比對的斷言**自然紅**。
+#     **實測**：殺 `_report_c` ⇒ `=== DONE === 3 FAIL`／殺 `_report`(腿A) ⇒ `=== DONE === 1 FAIL`
+#     （原始輸出：`docs/measurements/2026-09-18-roll-call-batch1/rc-zh-before*.txt`）
+#   ★★★**而這個免疫【很脆】**：把 `.get(k, -1)` 改成 `.get(k, 0)`
+#     ⇒ **免疫當天消失，而且【不會紅】** —— 0 是一個合法的讀數，它不會讓任何斷言警覺。
+#   ⇒ **動 `_verdict` 裡那幾個 `.get(..., -1)` 之前先想清楚**：
+#     **你動的不只是預設值，是這支床「格沒跑完會不會被發現」的唯一機制。**
 
 const N_PER_LEG: int = 30
 const GRID: int = 24
@@ -312,6 +326,31 @@ func _ok(cond: bool, msg: String) -> void:
 	if cond: print("  [PASS] %s" % msg)
 	else: _fail += 1; print("  [FAIL] %s" % msg)
 
+
+# ★★★【免疫證據，印出來並釘進 expect】（systems 裁 2026-09-18）——
+#   ★本床不加到場點名，因為它已經免疫；★★而免疫靠的是 `_verdict` 讀 `_stat` 時的**毒值預設 `-1`**。
+#   ⇒ **把「毒值有幾處」數出來印在通過橫幅那一行**，`merge-gates.tsv` 的 expect 釘住那個數
+#     ⇒ ★★★有人把 `.get(k, -1)` 順手改成 `.get(k, 0)` ⇒ 數字變了 ⇒ **expect 不命中 ⇒ 閘紅**。
+#   ★這比「全庫 grep 一個 pattern 的新閘」好：**零新閘**（騎在 runner 已經信任的 expect 上）、
+#     **盯的是這支床自己的不變量**（不會被別處的合法寫法反咬）。
+#   ★**誠實限**：它只擋【數量變了】，擋不住【有人同時改數量與 expect】——
+#     ★★而那是刻意行為；**我們防的是疏忽，不是防人。**
+func _poison_default_count() -> int:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/zhagen_controlled_bed.gd")
+	# ★★★【自我指涉的陷阱】（2026-09-18 實測，我第一版踩了）：
+	#   ★第一版寫 `src.find("func _verdict")` ⇒ **它先命中的是【這一行程式碼自己】**
+	#     （這支 helper 的原始碼裡就有那個字串），於是 body ＝ helper 自己 ⇒ 數出來 **0 處**。
+	#   ★★而 **0 處**看起來像「毒值不見了」⇒ **我差一點把自己的定位錯誤讀成一個發現**。
+	#   ⇒ 用**行首 ＋ 完整簽章**定位（`\nfunc _verdict() -> void:`）——它只可能出現在定義那一行。
+	var head: int = src.find("\nfunc _verdict() -> void:")
+	if head == -1:
+		return -1   # ★找不到判決函式本身就該紅（-1 不會等於 expect 釘的數）
+	var tail: int = src.find("\nfunc ", head + 10)
+	var body: String = src.substr(head, (tail - head) if tail != -1 else src.length() - head)
+	var re := RegEx.new()
+	re.compile("\\.get\\([^,]+,\\s*-1\\)")
+	return re.search_all(body).size()
+
 func _verdict() -> void:
 	print("")
 	print("--- ★回歸斷言（own-camp 那一刀的驗收，逐腿一條）---")
@@ -329,7 +368,9 @@ func _verdict() -> void:
 		"腿C：營地消失後解承諾 %d/%d" % [int(_stat.get("c_released", -1)), N_PER_LEG])
 	_ok(int(_stat.get("c_stuck", -1)) == 0,
 		"腿C：★卡在移動中 = %d（必須 0）" % int(_stat.get("c_stuck", -1)))
+	# ★免疫證據印在【通過橫幅同一行】：runner 逐行比對 expect，分兩行寫沒被挑中的那半等於沒有被守。
+	var _poison: int = _poison_default_count()
 	if _fail == 0:
-		print("=== DONE === ALL PASS")
+		print("=== DONE === ALL PASS｜[免疫] _verdict 毒值預設 %d 處（.get(…, -1)）" % _poison)
 	else:
-		print("=== DONE === %d FAIL" % _fail)
+		print("=== DONE === %d FAIL｜[免疫] _verdict 毒值預設 %d 處" % [_fail, _poison])
