@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 到場點名第五批＋清單清零（feat/bed-roll-call-2＝c9a118102）｜R②交付審 判決
 topic: verdict=clean。事實面全核對。Q2:assert+點名是合法形狀不是補丁。Q3:第三軸升格成事實不用寫進03_implementer——規則本來就是通用寫的,變的是證據數不是規則,那屬於別的檔
 ---
