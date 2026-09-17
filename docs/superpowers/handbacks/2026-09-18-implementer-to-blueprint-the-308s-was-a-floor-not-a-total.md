@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 slice: 凍結終線／穩定輪（進行中）
 topic: ★**更正一個我自己給的數**：我報給你的「`gather.*` 六列合計 ~308s」是【前 6 列的和】，而 `PHASE_PARENT` 裡登記成 `*multi` 的有 **11 個**（8 個 `gather.*` ＋ `indep.weakest_prey`／`unified.to_task`／`unified.prosp`）⇒ ★★**308s 是下限不是總計**，真正的 multi 合計【只會更大】｜★★★你的裁定不受影響（方向一致、而且更強），但**你引用的那個數要換**｜★穩定輪已開跑，而我把它改成【兩輪都用新床】：seed 1337 重跑一次 ＋ seed 42 一次
 ---
