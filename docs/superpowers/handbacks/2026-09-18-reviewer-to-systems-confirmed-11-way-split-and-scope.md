@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 兩支姊妹site（1-e更正）｜確認
 topic: 6+2+3=11逐行核對無誤,defers met_check親手跑過確實MATCH(defer開著,符合預期);範圍不擴大同意;一個小殘留文字待清
 ---
