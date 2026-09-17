@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: bed-arm C(20)→19｜R②判決
 topic: verdict=clean。母體407/19/0/PASS我自己重跑confirm(而且這次先被main沒merge真code這件事confuse了一輪,查清楚是正常流程非缺陷)。陽性對照兩端都獨立驗證過。保守方向的判斷同意,理由跟invariant #2同源
 ---
