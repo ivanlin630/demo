@@ -73,7 +73,7 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 ### ★★★③ 到場點名 —— 而且要寫進 **expect 字串本身**（2026-09-17，implementer 自報、reviewer 複現）
 
 ★**①（結尾標記）只證明【外層跑法跑完了】，不證明【每一格都跑過】。**
-★**病灶**：GDScript 執行期錯誤【只中止那一支 func】，外層 driver／彙總／exit code 全部正常 ⇒ 該格斷言一個都沒跑而末行照印 `[FAIL] ＝ 0`（血證＋最小 repro → `detail/03_implementer-cases.md`）。
+★**病灶**：GDScript 執行期錯誤【只中止那一支 func】，外層 driver／彙總／exit code 全部正常 ⇒ 該格斷言一個都沒跑而末行照印 `[FAIL] ＝ 0`（★★**`await` 的 async cell 一樣中毒 —— reviewer 另寫 await 版 repro 複現：只中止那個 coroutine，`_init` 繼續 await 下一格、照印 0**；血證＋兩支 repro → `detail/03_implementer-cases.md`）。
 **寫法**：每格結束時自報到場，末尾對名單並印 `N／N`，**而 `N／N` 要出現在註冊表的 `expect` 裡**。
 ★**為什麼長在 expect 而不是 runner 加掃描**：runner 只信【exit code】與【expect 命中】，而這個洞讓兩者都通過 ⇒ **補丁只能長在那條已經被信任的路徑上**；★★**且 runner 2026-09-02 才因自由文字掃 `FAIL` 被閘自己的說明文字反咬過** ⇒ 不走回頭路。
 

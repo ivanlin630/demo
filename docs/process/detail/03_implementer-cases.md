@@ -357,3 +357,14 @@ git worktree remove .worktrees/<slice>
 （無共用 base class，全部 `extends SceneTree` 各自獨立）——**而會讓一次 merge 被這個洞放行的只有
 `merge-gates.tsv` 註冊的那 58 支**，其餘多是一次性診斷工具、不掛任何 merge 判決。
 
+### ★async（`await`）版 repro —— 不保護、也不改變任何東西（reviewer 2026-09-17）
+
+`ui_flow_test.gd` 的 cell 走 `await _test_X()`（coroutine），`ui_logic_test.gd` 是同步呼叫 —— **是真的機制差異**，
+所以 reviewer 另寫了一支 await 版 repro，故意在被 `await` 的 cell 裡中途丟 out-of-bounds：
+```
+結果跟同步版一模一樣：await 的 cell 中途死掉，只中止那個 coroutine，
+_init 繼續 await 下一個 cell，照樣印出「[FAIL] 數 ＝ 0」，exit code ＝ 0。
+```
+⇒ ★**`await` 不保護** ⇒ **同一個洞、同一個修法（roll-call 進 expect）在 async cell 上一樣有效**，
+不需要為 `ui-flow` 另開一套修法 ⇒ **「一份樣板通吃兩種寫法」這個目標成立。**
+

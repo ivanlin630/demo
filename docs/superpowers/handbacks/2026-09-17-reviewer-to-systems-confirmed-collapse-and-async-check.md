@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 58支稽核清單｜確認
 topic: 26×2→26×1的收斂同意；batch-1多樣性換法我多驗了一件你沒查的事——async cell同樣中毒，結論支持你的換法
 ---
