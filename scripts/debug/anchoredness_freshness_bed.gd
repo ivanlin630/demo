@@ -16,12 +16,22 @@ extends SceneTree
 # env：BED_DAYS（6-e 的天數，預設 3）／BED_SEED（預設 1337）／BED_CONFIG（預設 warring_states）
 
 var _fails: int = 0
+var _undec: int = 0
 
 func _initialize() -> void:
 	_run()
-	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)
+	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
 	print("[TEST-SUITE-COMPLETE]")
 	quit(1 if _fails > 0 else 0)
+
+# ★【不可判】＝ 這一格宣稱要驗的東西，**這一次執行沒有去驗** ⇒ 留著、標明、而且不算綠。
+func _undecidable(cell: String, claim: String, why: String, how: String) -> void:
+	_undec += 1
+	push_error("[不可判] %s：%s" % [cell, claim])
+	print("  [不可判] %s ——" % cell)
+	print("       宣稱：%s" % claim)
+	print("       為什麼這次驗不了：%s" % why)
+	print("       怎麼驗：%s" % how)
 
 func _ok(cond: bool, msg: String) -> void:
 	if cond: print("  [OK] %s" % msg)
@@ -164,6 +174,15 @@ func _cell_d_gates_verbatim() -> void:
 
 # ── 6-e：世界級 —— 兩種行為都真的發生 ──
 func _cell_e_world() -> void:
+	# ★★★同前一票的作法：世界級那一段要跑 warring_states（10 天 ~40 分鐘），
+	#   不放進每輪都要跑的閘 —— ★而【跳過】會讓它與「驗過且通過」在畫面上一模一樣
+	#   ⇒ 標成【不可判】＋ expect 釘住 1。
+	if OS.get_environment("BED_WORLD") == "0":
+		_undecidable("6-e（世界級）",
+			"世界裡錨定與無錨兩種行為都發生，且【在位置已過期的區間裡】兩種都出現",
+			"本次以 BED_WORLD=0 執行（世界級那一段 ~40 分鐘，不適合每輪都跑）",
+			"BED_WORLD=1 BED_DAYS=10 GODOT_TIMEOUT=3000 單獨跑一次；交件貼數時標【床的 commit】")
+		return
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 3
 	var seed_val: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
 	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "warring_states"

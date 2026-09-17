@@ -1,0 +1,41 @@
+[TREE] path=A:\GDS\demo\.worktrees\anchor commit=af7ee8173 clean=NO code-dirty=1 codehash=60017F826411
+[TREE]   *** measuring the WORKING TREE, not commit af7ee8173 ***
+[TREE]    M scripts/debug/anchoredness_freshness_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 錨定性讓情報保鮮 驗收（spec §6.4）===
+[TREE] HEAD=af7ee8173 scripts-dirty=1（★dirty：跟別份輸出比對前先確認同 commit）
+[常數] BELIEF_STALE_TICKS=4320（3.0 天）｜基準旅行者=6.00 tiles/day｜最慢=2.00 tiles/day
+
+6-a｜同樣 5 天：believed 駐紮 value=11.7506／believed 移動中 value=1.3936（比值 8.43×）
+  [OK] 6-a ★**同齡之下，被相信駐紮的目標其舊座標更值錢**（樣本 2／母體 2）
+  [OK] 6-a-b ★**而且差距顯著（>2×）**｜★相等  錨定分檔沒有接上（這正是反向那一半）
+6-b｜錨定目標：5 天=11.750561／50 天=0.128360／500 天=0.00129518
+  [OK] 6-b-a ★**錨定的也單調遞減**（★駐紮的隊會拔營）
+  [OK] 6-b-b ★★**而且永不為 0**  沒有「不過期」這一檔｜★★★歸零／不過期  那則 belief 變成**不可證偽**，永遠掉不到會被重新偵查的價值
+6-c｜claim 已 10.0 天（> 過期線）｜`appearance()` 今天回 activity=unknown state=stale｜而偵查價值：駐紮=3.084406／移動=0.354197
+  [OK] 6-c-前提 ★**這個坑是真的**：同一則 claim 經 `appearance()` 今天回 `unknown`（state=stale）｜★前提不成立  下一句證不到東西
+  [OK] 6-c ★★**過期的 activity 仍然讀得到、仍然走慢線**｜★★★誤用 `appearance()`  回 UNKNOWN  退回快線  這一句會紅
+6-f｜claim **沒有 activity 欄位**（從未觀察到）value=1.393563｜對照：移動中=1.393563、駐紮=11.750561
+  [OK] 6-f ★**「沒看過」＝ 快線**（與 believed 移動中逐字同值）
+  [OK] 6-f-b ★★**而且它不等於錨定**｜★寫成 `.get("activity", ACT_SETTLED)`  這一句會紅（那會讓「沒看過」變成「看過它駐紮」＝ §1a 明文禁的 default-pass）
+
+— 6-d：兩道門與 `BELIEF_STALE_TICKS` 逐字未改 —
+  [OK] 6-d-前提 找得到 `_find_weakest_prey`
+  [OK] 6-d-a ★掠奪第一道門逐字未改
+  [OK] 6-d-b ★掠奪第二道門逐字未改
+  [OK] 6-d-c ★攻擊側那道門逐字未改
+  [OK] 6-d-d ★★**全域過期線 `BELIEF_STALE_TICKS` 逐字未改**｜★★★把錨定性做在這條線上  駐紮目標的舊座標會**直接通過攻擊門** ＝ spec §2 擋下的隔空作用
+  [OK] 6-d-e ★`appearance()` 的過期行為逐字未改（它唯一的生產消費者靠的正是這個）
+  [不可判] 6-e（世界級） ——
+       宣稱：世界裡錨定與無錨兩種行為都發生，且【在位置已過期的區間裡】兩種都出現
+       為什麼這次驗不了：本次以 BED_WORLD=0 執行（世界級那一段 ~40 分鐘，不適合每輪都跑）
+       怎麼驗：BED_WORLD=1 BED_DAYS=10 GODOT_TIMEOUT=3000 單獨跑一次；交件貼數時標【床的 commit】
+-- 量測完成；[FAIL] 數 ＝ 0｜[不可判] 數 ＝ 1 --
+[TEST-SUITE-COMPLETE]
+ERROR: [不可判] 6-e（世界級）：世界裡錨定與無錨兩種行為都發生，且【在位置已過期的區間裡】兩種都出現
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=0
