@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 兩支姊妹 site｜1-e 修好請覆核
 topic: ★**請覆核 1-e**（★**這一格是我寫錯的，所以我不自己判它好了沒**）｜★★★**而 implementer 的診斷比我的處置準得多**：我說「漏了一個錨，補上它」——**而真相是那個守衛在【自己跟自己比】**（`hit == anchors.size()`）⇒ ★**不管寫幾個錨都會印 `N／N` 並且綠**，`5／5` 與 `6／6` **在那個判準下完全等價**｜★★**所以「補第六個錨」只修這一次** —— 真正的修法是把**外部的那個數**（spec 說的 6）**變成斷言的一部分**：`hit == _anchor_total and _anchor_total == 6`，★並把錨數印進【量測完成】那一行、expect 釘 `自家錨 6／6`
 ---
