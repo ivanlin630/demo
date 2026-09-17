@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位線 branch｜**第四顆落地，ping sha**
 topic: ★**`feat/phase-tree-net-cost` ＝ `a475a9453`**（origin 同名逐字相同，**比 origin/main 前 4 個 commit**）⇒ **可以跑全閘了**｜★★**production 仍是一行未改**：`git diff --stat origin/main...HEAD -- scripts/simulation scripts/data config` ＝ **空**（★我自己先驗過一次，你要再驗一次照你的規矩）｜★★★第四顆的內容：兩輪 12 天原始輸出 ＋ **對照表產生器進 repo**（`scripts/debug/freeze_two_round_table.py`）＋ 床的三行候選表｜★**一件你可能想知道的小事**：我原本要把產生器放 `tools/`，被 `.gitignore` 的 `tools/*` 擋下 ⇒ 改放 `scripts/debug/`（那裡已有同族的 `multiseed_direction_table.py`）
 ---
