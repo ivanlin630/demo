@@ -107,6 +107,19 @@ func _run() -> void:
 		"6-a ★**同齡之下，被相信駐紮的目標其舊座標更值錢**（樣本 2／母體 2）")
 	_ok(v_settled / maxf(v_moving, 0.000001) > 2.0,
 		"6-a-b ★**而且差距顯著（>2×）**｜★相等 ⇒ 錨定分檔沒有接上（這正是反向那一半）")
+	# ★★★判準是「有沒有理由留在那裡」不是「這一刻動沒動」（systems 裁 2026-09-17）
+	#   ⇒ `BUILDING` 與 `SETTLED` **同一條慢線**；`IDLE` 與 `MOVING` **同一條快線**。
+	#   ★★下面第二列是**守衛**：`IDLE` 一旦被偷偷算成錨定，它就會紅。
+	var v_building: float = _value_of(5 * day, BeliefSystem.ACT_BUILDING)
+	var v_idle: float = _value_of(5 * day, BeliefSystem.ACT_IDLE)
+	print("6-a-c｜同樣 5 天：工地中=%.6f（駐紮=%.6f）｜靜止=%.6f（移動中=%.6f）" % [
+		v_building, v_settled, v_idle, v_moving])
+	_ok(absf(v_building - v_settled) < 0.000001,
+		"6-a-c ★**`BUILDING` 與 `SETTLED` 逐字同值**（工地綁死在那一格 ⇒ 同樣是留下來的理由）")
+	_ok(absf(v_idle - v_moving) < 0.000001,
+		"6-a-d ★★**守衛：`IDLE` 與 `MOVING` 逐字同值**（＝ IDLE 沒有被偷偷算進錨定）"
+		+ "｜★★★`IDLE` 只說【上一步沒動】，而 belief 的 activity 凍在觀察當下"
+		+ " ⇒ 拿它當錨會**隨年齡越錯越多**，方向與本票要的訊號相反")
 
 	# ── 6-b：錨定也單調遞減、也永不為 0 ──
 	var a5: float = _value_of(5 * day, BeliefSystem.ACT_SETTLED)
@@ -202,6 +215,19 @@ func _cell_e_world() -> void:
 	var u_stale: int = int(Probe.counts.get("recon.unanchored.stale", 0))
 	print("6-e｜母體（偵查候選評估次數）=%d｜錨定=%d／無錨=%d｜其中位置已過期=%d" % [elig, anch, unanch, stale])
 	print("     ★交叉（本票真正改變行為的區間）：錨定∧過期=%d／無錨∧過期=%d" % [a_stale, u_stale])
+	# ★六檔 activity 的分佈（★即使我們不用 IDLE，那個數字也要在 —— 下次有人問，查得到）
+	var acts: Array = [BeliefSystem.ACT_COMBAT, BeliefSystem.ACT_MOVING, BeliefSystem.ACT_BUILDING,
+		BeliefSystem.ACT_SETTLED, BeliefSystem.ACT_IDLE, BeliefSystem.ACT_UNKNOWN, "no_field"]
+	var parts: Array = []
+	var act_sum: int = 0
+	for a in acts:
+		var n: int = int(Probe.counts.get("recon.act." + String(a), 0))
+		act_sum += n
+		parts.append("%s=%d" % [String(a), n])
+	print("     ★activity 分佈：%s｜合計=%d" % [" ／ ".join(parts), act_sum])
+	_ok(act_sum == elig,
+		"6-e-e ★**分桶加總 ＝ 母體**（%d ＝ %d）｜★不等 ⇒ 有第七種 activity 沒有桶，而它現在正被靜默歸成無錨" % [
+			act_sum, elig])
 	_ok(elig > 0,
 		"6-e-母體 ★母體非 0（=%d）｜★★母體塌陷 ⇒ 下面兩句的綠與紅都不算數" % elig)
 	_ok(anch > 0,

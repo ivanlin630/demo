@@ -382,14 +382,24 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 		#   ★★★**讀的是 `_rbel` 這一次 `best_estimate` 的同一個 dict**（位置／年齡／活動同源，不變量 #6）——
 		#     ★**不能走 `BeliefSystem.appearance()`**：它自己會在 `BELIEF_STALE_TICKS` 上把 activity
 		#     改寫成 `ACT_UNKNOWN` ⇒ **錨定性會在最需要它的那一刻剛好不在**（而它那個行為有既有消費者，不動它）。
-		var _ranchored: bool = _rbel.has("activity") \
-			and String(_rbel["activity"]) == BeliefSystem.ACT_SETTLED
+		# ★★★判準 ＝「**有沒有理由留在那裡**」，不是「這一刻動沒動」（systems 裁 2026-09-17）：
+		#   `SETTLED`＝在自己據點/營地上；`BUILDING`＝工地綁死在那一格 tile（要蓋就得在那裡）。
+		#   ★**`IDLE` 不算** —— 它只說【上一步沒動】，**沒有任何東西讓它下一步也不動**；
+		#     ★★而 belief 的 activity 凍在觀察當下 ⇒ 拿 IDLE 當錨會**隨年齡越錯越多**，
+		#     **而我們要的正好是一個隨年齡仍站得住的訊號** ⇒ 方向相反。
+		var _ract: String = String(_rbel.get("activity", "")) if _rbel.has("activity") else ""
+		var _ranchored: bool = _ract == BeliefSystem.ACT_SETTLED \
+			or _ract == BeliefSystem.ACT_BUILDING
 		var _rdrift: float = MovementSystem.slowest_tiles_per_day() if _ranchored \
 			else MovementSystem.baseline_tiles_per_day()
 		var _rfresh: float = DecisionTerms.recon_freshness_factor(
 			_rage, _rdrift, VisionSystem.vision_range(state, team))
 		if Probe.enabled:
 			Probe.bump("recon.anchored" if _ranchored else "recon.unanchored")
+			# ★★依 activity 分桶（六檔都有桶，含「這則 claim 沒有 activity 欄位」那一檔）——
+			#   ★**即使我們不用 `IDLE`，那個數字也要在**：下次有人問「IDLE 多大」，
+			#   ★★答案要**查得到**，而不是再燒一次 40 分鐘的世界跑。
+			Probe.bump("recon.act." + (_ract if _ract != "" else "no_field"))
 			# ★★★交叉那一格：**錨定 ∧ 位置已過期** —— 本票真正想改變的區間就是它。
 			#   ★只數「錨定有沒有發生」會在【情報還新鮮】的窗口裡拿到綠，
 			#     而那個綠**不落在修法真正改變行為的區間上**。
