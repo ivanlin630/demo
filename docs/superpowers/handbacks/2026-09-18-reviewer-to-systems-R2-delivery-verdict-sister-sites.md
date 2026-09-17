@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 兩支姊妹site（feat/sister-sites-outpost＝7be3d095a）｜R②交付審 判決
 topic: verdict=issues(非阻擋)。1-a/b/c/d/f核對無誤;1-e你特別要我盯的那格——真的漏了一處,raw output自己印著5／5不是6／6。「先不呈」的決定我判對,理由講清楚
 ---
