@@ -89,7 +89,16 @@ func _run() -> void:
 					# ★systems 2026-09-17問：那18筆各自的rank表(贏家/掠奪名次util/攻擊名次util)——
 					#   「不動手」是結果不是原因，原因寫在選了什麼上面。母體只有個位數/十位數,逐筆存不OOM。
 					var ctx: DecisionContext = DecisionContext.gather(st, team, false)
+					# ★追加票①(10筆take/need/odds/person)：不手抄terms.gd的公式——terms.gd:411-415
+					#   本來就有Probe.bump_sample("raid.factors",{take,need,odds,person,...})，我call
+					#   rank_scored_ctx時它會被同一次eval順便打進去；在call前後各記raid.factors陣列大小，
+					#   若變大就取最後一筆當這次的因子分解(讀production自己已經算好的值，非重算)。
+					var _raid_before: int = (Probe.samples.get("raid.factors", []) as Array).size()
 					var scored: Array = DecisionEngine.rank_scored_ctx(ctx, team.current_option, st, team)
+					var _raid_arr: Array = (Probe.samples.get("raid.factors", []) as Array)
+					var raid_factors: Dictionary = {}
+					if _raid_arr.size() > _raid_before:
+						raid_factors = _raid_arr[_raid_arr.size() - 1]
 					var winner_opt: String = String(scored[0]["opt"]) if not scored.is_empty() else ""
 					var winner_u: float = float(scored[0]["u"]) if not scored.is_empty() else 0.0
 					var loot_rank: int = -1
@@ -100,12 +109,46 @@ func _run() -> void:
 						var e: Dictionary = scored[i]
 						if String(e["opt"]) == "掠奪": loot_rank = i + 1; loot_u = float(e["u"])
 						if String(e["opt"]) == "攻擊": atk_rank = i + 1; atk_u2 = float(e["u"])
+					# ★追加票②：18筆不在候選集的原因分佈——外部呼production既有predicate分類(不手抄belief/path
+					#   物理，只重跑同一組if-continue的判斷順序，仿resident_truthset_distance_bed手法)：
+					#   逐個team_discovered候選看它卡在哪一道門(has_belief/reachable/pop_est)，
+					#   取「這支隊所有候選裡走得最遠的那一道」為此隊此刻的阻擋原因。
+					var block_reason: String = ""
+					if loot_rank < 0:
+						var _disc: Array = st.team_discovered.get(team.team_id, [])
+						if _disc.is_empty():
+							block_reason = "①不在team_discovered"
+						else:
+							var _furthest: int = 0   # 0=沒人過has_belief 1=過has_belief沒人reachable 2=過reachable沒人夠弱
+							for _tid3 in _disc:
+								if _tid3 == team.team_id: continue
+								if not BeliefSystem.has_belief(st, team.team_id, _tid3): continue
+								if _furthest < 1: _furthest = 1
+								if not PathSystem.estimate_catch_up(st, team, _tid3, true).reachable: continue
+								if _furthest < 2: _furthest = 2
+								var _bel3: Dictionary = BeliefSystem.best_estimate(st, team.team_id, _tid3)
+								var _pop3: float = float(_bel3.get("population_est", 0.0))
+								if _pop3 < float(team.population) * 0.7: _furthest = 3
+							match _furthest:
+								0: block_reason = "②has_belief=false(全部候選)"
+								1: block_reason = "③reachable=false(全部有belief的候選)"
+								2: block_reason = "④pop_est≥0.7×我方(全部reachable的候選都不夠弱)"
+								_: block_reason = "(異常:furthest=3卻loot_rank<0,回報)"
+					# ★追加票②(blueprint讀法)：通道三布林——照票面定義逐字用，不代換更嚴格的production applicable
+					var has_regime: bool = team.faction_id != -1
+					var has_market: bool = ctx.has_food_market
+					var has_coin_and_market: bool = float(team.resources.get("coin", 0.0)) > 0.0 and ctx.has_food_market
 					Probe.bump_sample("desperation_violence.rank18", {
 						"seed": seed_val, "day": d, "team": team.team_id,
 						"贏家opt": winner_opt, "贏家u": snappedf(winner_u, 0.0001),
 						"掠奪名次": (loot_rank if loot_rank > 0 else null), "掠奪u": (snappedf(loot_u, 0.0001) if loot_rank > 0 else null),
 						"攻擊名次": (atk_rank if atk_rank > 0 else null), "攻擊u": (snappedf(atk_u2, 0.0001) if atk_rank > 0 else null),
 						"掠奪不在候選集": loot_rank < 0, "攻擊不在候選集": atk_rank < 0,
+						"掠奪不在候選集原因": (block_reason if loot_rank < 0 else null),
+						"take": raid_factors.get("take", null), "need_raid": raid_factors.get("need", null),
+						"odds_raid": raid_factors.get("odds", null), "person_raid": raid_factors.get("person", null),
+						"raid_factors_captured": not raid_factors.is_empty(),
+						"有政權可徵": has_regime, "有幣可買且市場可達": has_coin_and_market, "市場可達": has_market,
 						"food_days": snappedf(fd, 0.01), "self_armed_ratio": snappedf(ctx.self_armed_ratio, 0.001),
 						"has_weak_prey": ctx.has_weak_prey, "weak_prey_id": ctx.weak_prey_id,
 						"當前task_snapshot": team.current_task,
