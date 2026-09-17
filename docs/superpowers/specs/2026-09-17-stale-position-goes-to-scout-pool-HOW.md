@@ -69,3 +69,33 @@ WHAT 來源: blueprint 裁 2026-09-17 —— **過期位置的目標是「情報
 ⇒ ★★**但不在本票** —— **它是 `BeliefSystem` 的全域語意，動它會影響所有讀者**
 ⇒ **已開票**：`belief-staleness-line-is-a-dead-constant`
 ```
+
+## §5 ★★★R² 補三點（2026-09-17，都是精度缺口不是方向）
+
+### ① 行號漂移 ⇒ 重錨（★R² 核實過的）
+```
+`belief_system.gd:106-142`（`has_belief` 與 `belief_pos` 兩分支皆過 staleness gate）
+`path_system.gd:246-250`（`estimate_catch_up` 走同一個 `belief_pos` gate）
+`decision/decision_context.gd:335-336`（`pick_recon_target` 的 `continue`）
+```
+
+### ② ★★**`freshness_factor` 的速度要傳【目標】的 team，不是觀察者的**
+```
+`GoalResolver._tiles_per_day(state, team)`（`goal_resolver.gd:707`）是**通用函式：吃誰的 team 就算誰的速度**
+★**而 `decision_context.gd:326` 現有的呼叫傳的是【觀察者】**（算「我要走幾天」）
+⇒ ★★**本票的 `freshness_factor` 要傳【目標的 team】**（算「它三天可以跑多遠」）
+⇒ ★★★**不要照抄旁邊那一行** —— **兩個呼叫長得一模一樣而意思相反。**
+```
+
+### ③ ★★★格2 拆成兩格（★我原本把兩件事寫成一件）
+```
+`record_claim` 的註解自承（`belief_system.gd:190-227` → `known_issues:784`）：
+  **「有 claim 不代表有位置」** —— **轉述型 claim（`message_system.gd:277` relay）可能不帶 `tile_pos`**
+⇒ ★**所以「完全沒有 claim 才 `continue`」擋不住【有 claim 但沒有位置】那一類。**
+**拆成兩格**：
+  **格2a**：**沒有任何 claim 的目標 ⇒ 不在候選集**
+  **格2b**：★★**有 claim 但【從未有過 `tile_pos`】的目標 ⇒ 也不在候選集**
+     ⇒ ★★★**而這一類要有名字**（tap：`recon.skip.claim_without_pos`）——
+       **因為它與「位置過期」在畫面上長得一模一樣，而兩者的下一站相反**：
+       **過期 ⇒ 去看一眼；從未有過 ⇒ 連要去哪裡都不知道。**
+```
