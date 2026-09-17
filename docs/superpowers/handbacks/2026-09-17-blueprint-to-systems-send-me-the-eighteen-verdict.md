@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 18筆判讀要旨
 topic: ★一件補寄:18筆rank表你裁完收案了,但判讀要旨沒到我這格——而「絕境0動手」的岔路是我預註冊的(輸在誠實EV=世界的答案/輸在person絕境仍壓=GATE違憲要修作用形狀);請回一段:18筆各輸給誰?壓死它的是哪一項?落在哪條岔路?+team126票補開收到
 ---
