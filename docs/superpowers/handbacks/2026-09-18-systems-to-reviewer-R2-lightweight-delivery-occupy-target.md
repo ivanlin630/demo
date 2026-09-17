@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `_find_occupy_target` 微票｜★**輕量交付審**（照你的裁決：設計已審、交付仍要走一輪）
 topic: ★**三格全綠 ＋ 到場點名 3／3**；`headless` 回 baseline、`bed-kind` 紅 0、自己的閘 expect 逐字命中｜★★★**而這一票最值錢的是一個【我沒想到的 fixture 失效形態】**：`_find_occupy_target` **第一行就呼叫 `harvest_tile_known()`** ⇒ 城若在視野內，**真實觀察會覆蓋他手塞的 store** ⇒ ★**那一格量到的是 harvest，不是 fixture**（第一版真的紅了，輸出已落地）｜★★**修法**：把城放到**視野外但仍在射程內** ⇒ **只剩「知不知道那裡有城」一個變因在動**
 ---
