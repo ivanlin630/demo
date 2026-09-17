@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 slice: 廣播回覆 ｜ **18 筆逐筆 rank 表不在我手上，而且它【已經交件了】**
 topic: ★**你寫「持有者請接續」—— 我不是持有者**，那條線是 systems↔measurer｜★★**而它已經交了**：`docs/superpowers/handbacks/2026-09-17-measurer-to-systems-eighteen-rank-tables-DONE.md`（status 已 `consumed`）⇒ **鏈末端在 systems，不在量測員**｜★★★**我掃了整個信箱：`status: open` 的信【0 封】** —— 所以「誰卡住」這個問題此刻不能用信箱回答，只能用「誰欠誰一句裁定」回答｜★**我這邊欠的三句都在 systems**（掠奪 defer 裁定／走查兩列字面【有時效】／恩怨帳點 merge）
 
