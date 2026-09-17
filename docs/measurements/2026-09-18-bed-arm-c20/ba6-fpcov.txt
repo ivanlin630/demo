@@ -1,0 +1,138 @@
+[TREE] path=A:\GDS\demo\.worktrees\bedarm7 commit=6a86e37c5 clean=NO code-dirty=2 codehash=75B3409DF7AA
+[TREE]   *** measuring the WORKING TREE, not commit 6a86e37c5 ***
+[TREE]    M scripts/debug/bed_arm_gate.gd
+[TREE]    M scripts/debug/fp_behavior_coverage_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== fp 行為欄位覆蓋床 ===
+--  清單是生成的（★假欄位：在模擬層被讀  進尺；只在 print 裡被讀  不進尺）--
+  PASS: 母體地板：模擬層原始碼掃到 1207526 字（空母體不得判綠）
+  PASS: 一個真的被讀的欄位在母體裡找得到
+  PASS: ★輸出行真的被剝掉了（Probe. 一行都不剩）
+  PASS: ★print 行也一樣（★★否則「只被 print 讀到」的欄位會被誤判成進尺）
+--  觸發樣本：今天被點名的設施等級必須在尺內 --
+  PASS: HexTileData.apothecary_level 進尺
+  PASS: HexTileData.mint_level 進尺
+  PASS: HexTileData.armorsmith_level 進尺
+  PASS: HexTileData.manufacturing_level 進尺
+  PASS: HexTileData.farming_level 進尺
+  PASS: TeamData.anon_treasury 進尺（★匿名層的錢，之前不在尺裡）
+--  數字對帳：進尺 ＋ 三類豁免 ＝ var 欄位總數（差額必須 0）--
+    TeamData     進尺 106 ＋ cadence 17 ＋ ephemeral 4 ＋ 觀測  4 ＝ 131（總 131）
+  PASS: TeamData 差額為 0
+    PersonData   進尺  25 ＋ cadence  1 ＋ ephemeral 0 ＋ 觀測  0 ＝ 26（總 26）
+  PASS: PersonData 差額為 0
+    FactionData  進尺  15 ＋ cadence  7 ＋ ephemeral 0 ＋ 觀測  0 ＝ 22（總 22）
+  PASS: FactionData 差額為 0
+    HexTileData  進尺  41 ＋ cadence  2 ＋ ephemeral 0 ＋ 觀測  0 ＝ 43（總 43）
+  PASS: HexTileData 差額為 0
+    WorldData    進尺   3 ＋ cadence  6 ＋ ephemeral 0 ＋ 觀測  0 ＝ 9（總 9）
+  PASS: WorldData 差額為 0
+--  豁免要有證據（沒有證據的豁免 ＝ 不豁免）--
+    (c) 觀測/未讀候選：["anon_wage", "commit_stall_id", "commit_stall_target", "protector_rep"]
+  PASS: (c) anon_wage 的讀取點全部落在輸出位置（剝掉輸出行後找不到它）
+  PASS: (c) commit_stall_id 的讀取點全部落在輸出位置（剝掉輸出行後找不到它）
+  PASS: (c) commit_stall_target 的讀取點全部落在輸出位置（剝掉輸出行後找不到它）
+  PASS: (c) protector_rep 的讀取點全部落在輸出位置（剝掉輸出行後找不到它）
+  PASS: (b) cadence 由後綴規則導出，抓到 17 欄（★規則不是名單，會跟著世界長大）
+  PASS: (b) ambition_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) colocate_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) consolidate_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) decision_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) expand_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) extraction_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) goal_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) indep_infra_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) info_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) order_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) prosperity_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) report_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) residency_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) salary_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) solo_think_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) subteam_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+  PASS: (b) threat_eval_next_tick 真的符合後綴規則（不是有人手動塞進來的）
+[MoneyGenesis] 初始 coin 總量 = 2880.0
+   = Σpop(30) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：3 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 2880.0 vs 推導 2880.0（差 0.0000）
+[GameSetup] 完成：3 teams, 3 factions, 9 persons
+[Site] 選址 (3, 2) score=412 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Site] 選址 (3, 2) score=419 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction1 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Site] 選址 (3, 2) score=426 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction2 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 1 (civilian/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 2 (civilian/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 3 (leader/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 4 (civilian/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 5 (civilian/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 6 (leader/team2) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 7 (civilian/team2) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 8 (civilian/team2) → P4_expand | stress=0.00 loyalty=0.80
+    (a) food_runway 清空前 9999.000 ／ 推進 20 tick 後 14.958
+  PASS: (a) ephemeral：清空之後【被算回來】 它是快取不是狀態
+--  決定論（短窗；★長窗那半跑在另一支長跑，見交件）--
+[MoneyGenesis] 初始 coin 總量 = 2880.0
+   = Σpop(30) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：3 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 2880.0 vs 推導 2880.0（差 0.0000）
+[GameSetup] 完成：3 teams, 3 factions, 9 persons
+[Site] 選址 (3, 2) score=412 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Site] 選址 (3, 2) score=419 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction1 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Site] 選址 (3, 2) score=426 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction2 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 1 (civilian/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 2 (civilian/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 3 (leader/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 4 (civilian/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 5 (civilian/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 6 (leader/team2) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 7 (civilian/team2) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 8 (civilian/team2) → P4_expand | stress=0.00 loyalty=0.80
+[Equip] Team0 裝備 melee_low ×2
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team2 裝備 melee_low ×2
+[MoneyGenesis] 初始 coin 總量 = 2880.0
+   = Σpop(30) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：3 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 2880.0 vs 推導 2880.0（差 0.0000）
+[GameSetup] 完成：3 teams, 3 factions, 9 persons
+[Site] 選址 (3, 2) score=412 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Site] 選址 (3, 2) score=419 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction1 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Site] 選址 (3, 2) score=426 周邊資源={ "ore_iron": 330, "ore_gold": 52, "wild_horses": 9, "herb": 2 } terrain=mountain
+[Site] Faction2 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 1 (civilian/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 2 (civilian/team0) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 3 (leader/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 4 (civilian/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 5 (civilian/team1) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 6 (leader/team2) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 7 (civilian/team2) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 60] Person 8 (civilian/team2) → P4_expand | stress=0.00 loyalty=0.80
+[Equip] Team0 裝備 melee_low ×2
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team2 裝備 melee_low ×2
+  PASS: 同 seed 兩跑 fp 相同（200 tick ＝ 0.14 遊戲天）
+    ★fp 計算成本：10.59 ms／次（3 隊）｜200 tick 跑＋一次 hash＝75.5 ms
+--  上一張票的哨兵仍然有效 --
+  PASS: 注入偷寫  player 段仍然當場變（哨兵沒被這次擴張蓋掉）
+=== DONE === SECTIONS=6/6 FAILS=0
+
+[godot.ps1] child exit=0

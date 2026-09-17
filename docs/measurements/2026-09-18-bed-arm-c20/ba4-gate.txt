@@ -1,0 +1,22 @@
+[TREE] path=A:\GDS\demo\.worktrees\bedarm7 commit=6a86e37c5 clean=NO code-dirty=1 codehash=EE501306519C
+[TREE]   *** measuring the WORKING TREE, not commit 6a86e37c5 ***
+[TREE]    M scripts/debug/bed_arm_gate.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 床 arm 順序閘（母體＝【全部建世界的床】，遷移的與未遷移的都在）===
+母體 407 ＝ 已遷移(helper) 116 ＋ 未遷移(白名單) 271 ＋ ★本閘不適用 19 ＋ ★未涵蓋 1
+[BED-ARM-GATE] ★本閘不適用 19 張 ＝ 【檔內零 `Probe` 字面】的床 —— 對它們而言 arm 順序沒有後果
+[BED-ARM-GATE] ★★誠實限：這個判準是【字面掃描】  若某支床【透過別的 helper 間接讀 Probe】，它會被低估成不適用
+[BED-ARM-GATE] ★★★而它是【推導】不是【名單】：那支床哪天開始碰 Probe，它自動掉回『未涵蓋』 閘紅
+[BED-ARM-GATE] 對帳：OK（母體 ＝ 三欄之和）
+[BED-ARM-GATE] 已遷移 116 ／ 未遷移 271  ★遷移進度看的是【兩個數字一起動】，不是單看一個
+[BED-ARM-GATE] ★白名單 271 張  這是【未納管存量】，★★不是【盲區規模】（★★★真盲須逐張查 setup 位置；檔頭 :16-21 有完整理由）
+[BED-ARM-GATE] ★FAIL：1 張床建了世界，既不用 helper 也不在白名單｜[免疫] 橫幅在 _run 內＝true
+   ★ scripts/debug/fp_behavior_coverage_bed.gd
+★處置：改用 MeasureBedHelper.arm_and_setup()（順序寫死，沒得選錯）
+★★若真的不能用（例如手工組世界不走 GameSetup），才加進白名單 ——
+   ★★★而加進白名單會讓上面那個數字變大，那是【刻意可見】的代價。
+
+[godot.ps1] child exit=1

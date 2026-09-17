@@ -35,6 +35,12 @@ static func arm_and_setup(cfg, strip_player: bool = true) -> WorldState:
 #   ⇒ 給它們一支對應的入口：arm 先發生，回一個空 WorldState 讓床自己填。
 #   ★★★沒有這一支的話，手工床只有兩條路：不走 helper（閘紅）或進白名單（盲區 +1）——
 #     兩條都不對。
+# ★★★【一支床建【多個】世界時，不要無腦逐個套這兩支】（implementer 血證 2026-09-18）——
+#   ★`Probe.arm()` ＝ `reset()` ＋ `enabled` ⇒ ★★**每建一個世界就 arm 一次，會把上一個世界的樣本清掉**。
+#   ★血證：`promote_kill_samples_bed` 的 `_mk()` 一段裡建好幾個世界並【跨世界比對樣本】
+#     ⇒ 我把 `_mk()` 整支換成 `arm_and_new()` ⇒ 中間那次 reset 清掉了要比的證據 ⇒ 兩格當場紅。
+#   ⇒ ★★★正確形狀：**每一段的【第一個】世界走這裡（arm 先、順序寫死），同段後續用 `WorldState.new()`**
+#     —— **arm 仍然先於世界，而證據不會被自己清掉。**
 static func arm_and_new() -> WorldState:
 	Probe.arm()
 	var state := WorldState.new()

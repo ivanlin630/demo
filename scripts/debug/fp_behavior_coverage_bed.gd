@@ -34,9 +34,12 @@ func _ok(cond: bool, msg: String) -> void:
 
 func _world(ticks: int, cfg: String) -> WorldState:
 	seed(1337)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/%s.json" % cfg))
-	st.player_id = -1
+	# ★★★本床【不讀 Probe】，所以 arm 順序對它沒有後果 —— 而 bed-arm 閘的「不適用」判準
+	#   是【檔內零 `Probe` 字面】（刻意保守）⇒ ★本床有一句斷言的**字串裡**提到 `Probe.bump(`（:52）
+	#   ⇒ ★★它會被判成「適用」。**與其去放寬那條保守判準，不如把這裡遷了** ——
+	#     遷移成本 ≈ 0，而放寬判準會讓【真的有讀 Probe 的床】有機會溜過去。
+	#   ★★★下面 :151 那個 `WorldState.new()` 是另一段的世界，本床不讀 Probe ⇒ 不需要 arm，維持原樣。
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
 	var runner := SimRunner.new()
 	for _t in range(ticks):
 		runner.advance_tick(st, Vector2i(-1, -1))

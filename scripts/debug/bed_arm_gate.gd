@@ -116,6 +116,29 @@ func _builds_world(path: String) -> bool:
 	f.close()
 	return hit
 
+
+# ★★★【第三種結果：本閘不適用】（systems 裁 2026-09-18；implementer 的第二個軸）——
+#   ★本閘存在的理由是「arm 要先於 setup，否則**那段世界的 tap 是盲的**」
+#     ⇒ ★★**對一支【從來不碰 `Probe`】的床，那個盲區沒有任何後果** ——
+#       它不是「還沒遷移」，是**這條規則對它不適用**。
+#   ★★★而它必須是【推導】不是【宣告】：**不進任何名單，由閘自己掃** ——
+#     ★進名單的話，哪天那支床開始讀 `Probe`，名單不會自己更新
+#       ⇒ 免疫消失而沒有人知道；推導 ⇒ 那一天它自動掉回「需要遷移」⇒ 閘紅 ⇒ 有人被叫醒。
+#   ★判準【刻意保守】：**檔內只要出現過 `Probe` 字面就算【適用】**（不管是讀是寫、是不是註解）
+#     ⇒ ★★誠實限：**本判準是字面掃描** —— 若某支床透過【別的 helper】間接讀 Probe，
+#       它會被誤判成「不適用」。★★★這個限制印在閘的輸出裡，不只寫在這裡。
+func _touches_probe(path: String) -> bool:
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return true   # ★讀不到 ⇒ 保守當成【適用】（讀不到不是通過）
+	var hit: bool = false
+	while not f.eof_reached():
+		if f.get_line().find("Probe") >= 0:
+			hit = true
+			break
+	f.close()
+	return hit
+
 func _uses_helper(path: String) -> bool:
 	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null:
@@ -180,6 +203,7 @@ func _run() -> int:
 	var ok: Array = []
 	var listed: Array = []
 	var bad: Array = []
+	var na: Array = []      # ★第三種結果：本閘不適用（這支床不碰 Probe）
 	for fp in files:
 		var rel: String = String(fp).replace("res://", "")
 		if rel in SELF_EXEMPT:
@@ -191,6 +215,10 @@ func _run() -> int:
 			ok.append(rel)
 		elif wl.has(rel):
 			listed.append(rel)
+		elif not _touches_probe(String(fp)):
+			# ★★★推導出來的，不是宣告的：它不在任何名單裡
+			#   ⇒ 那支床哪天開始讀 Probe，這一格【自動】掉回 bad ⇒ 閘紅 ⇒ 有人被叫醒
+			na.append(rel)
 		else:
 			bad.append(rel)
 
@@ -198,11 +226,18 @@ func _run() -> int:
 	# ★★★systems 裁定 2026-09-01：遷移過的床【不准掉出母體】。
 	#   ⇒ 已遷移 / 未遷移【兩個數字都印】：遷移數上升、未遷移數下降，
 	#     ★兩邊都看得見，才分得出【修好了】與【不見了】。
-	print("母體 %d ＝ 已遷移(helper) %d ＋ 未遷移(白名單) %d ＋ ★未涵蓋 %d"
-		% [pop.size(), ok.size(), listed.size(), bad.size()])
-	var acct_ok: bool = pop.size() == (ok.size() + listed.size() + bad.size())
-	print("[BED-ARM-GATE] 對帳：%s（母體 ＝ 三欄之和）%s"
-		% ["OK" if acct_ok else "★MISMATCH", "" if acct_ok else " ⇒ ★有東西被靜默吐掉，先修這個"])
+	print("母體 %d ＝ 已遷移(helper) %d ＋ 未遷移(白名單) %d ＋ ★本閘不適用 %d ＋ ★未涵蓋 %d"
+		% [pop.size(), ok.size(), listed.size(), na.size(), bad.size()])
+	print("[BED-ARM-GATE] ★本閘不適用 %d 張 ＝ 【檔內零 `Probe` 字面】的床 —— 對它們而言 arm 順序沒有後果"
+		% na.size())
+	print("[BED-ARM-GATE] ★★誠實限：這個判準是【字面掃描】 ⇒ 若某支床【透過別的 helper 間接讀 Probe】，它會被低估成不適用")
+	print("[BED-ARM-GATE] ★★★而它是【推導】不是【名單】：那支床哪天開始碰 Probe，它自動掉回『未涵蓋』⇒ 閘紅")
+	if na.size() > 0 and OS.has_environment("BED_ARM_LIST"):
+		for r in na:
+			print("   · ", r)
+	var acct_ok: bool = pop.size() == (ok.size() + listed.size() + na.size() + bad.size())
+	print("[BED-ARM-GATE] 對帳：%s（母體 ＝ 四欄之和）%s"
+		% ["OK" if acct_ok else "★MISMATCH", "" if acct_ok else " ⇒ ★有東西被靜默吐掉，先修這個"])   # ★四欄之和
 	print("[BED-ARM-GATE] 已遷移 %d ／ 未遷移 %d ⇒ ★遷移進度看的是【兩個數字一起動】，不是單看一個"
 		% [ok.size(), listed.size()])
 	# ★★★這個數字必印 —— 而它是【未納管存量】不是【盲區規模】（檔頭 :16-21 已訂正過一次，
