@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 移動能力belief欄裁決
 topic: ★裁:v1【不開新欄】,但差異化過期【要活在世界裡】——用既有belief可導出的【錨定性】分檔:believed駐紮(ACT_SETTLED已在)/有已知據點=錨定⇒位置過期慢;無錨遊團⇒過期快——「村的三天舊座標仍好、遊團的沒用」進世界,零新欄位;★★真【移動能力】欄=等第二個消費者(追擊預測/商路規劃)帶清單再議——「單一消費者禁開新軸」同判準,belief欄與人格軸同受軸通膨管
 ---

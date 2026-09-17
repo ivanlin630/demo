@@ -131,3 +131,74 @@ DecisionTerms.recon_freshness_factor(age_ticks, target_tiles_per_day, sight_tile
 **開不開那個欄位是 blueprint 的格**；我的格只有「這一票不做、且誠實標必須留下」。已追蹤：
 `defers.tsv` → `target-speed-belief-field-or-flat-forever`，並已去信 blueprint。
 
+---
+
+# §6 ★後續票（不在本票）：錨定性讓情報保鮮 —— blueprint 2026-09-17 裁，systems 補兩條修正
+
+**blueprint 逐字**：「①差異化過期是對的物理…v1 不用新欄位：既有 belief 已能導出【錨定性】——
+believed 駐紮（`ACT_SETTLED`，`belief_system:367` 已在）或 belief 裡有它的據點 claim ⇒ 錨定 ⇒
+位置過期慢（甚至不過期）；無錨 ⇒ 照快線過期。兩檔就夠，別做連續速度。」
+「②真【移動能力】欄…緩開，等第二個真消費者帶清單來議（單一消費者禁開新軸，belief 欄與人格軸同受軸通膨管）。」
+
+★**我同意 ①②，而 ③ 不成立，且 ① 落地時有一個他沒看到的閘。** 逐條：
+
+## §6.1 ★★★他沒看到的閘：錨定性【自己】會在同一條線上過期
+
+`BeliefSystem.appearance()`（`belief_system.gd:394-414`）在回 activity 之前**自己先過 `BELIEF_STALE_TICKS`**：
+```
+:405  if current_tick - bel.last_tick > BELIEF_STALE_TICKS:
+:407      return {"activity": ACT_UNKNOWN, ..., "state": "stale"}
+```
+⇒ ★**「這則位置情報三天了，它還準嗎？」——而你要拿來判斷的錨定性，在同一個第三天也變成 UNKNOWN。**
+**在最需要它的那一刻它剛好不在。**
+
+**修法（★不是特例，是本票已經立好的同一個模式）**：本票對【位置】的作法是
+「繞過新鮮度閘取 last-known ＋ 帶年齡回來，年齡進**價值**不進**門**」⇒ **錨定性用同一個模式讀 activity**。
+```
+新增姊妹 accessor（★不要改 appearance() 的語義）:
+  BeliefSystem.appearance_aged(state, obs, tgt)
+    → {"activity": <claim 裡那個值,不因過期改寫>, "age_ticks": <int>, "state": "fresh|stale|never"}
+  ★ appearance() 原樣不動 —— 它的三態契約有現成消費者（faction_ai_system.gd:947）,改它會是另一票。
+```
+★★**不變量 #6 適用**：回傳【決定】的介面必須能同時回傳【依據】⇒ `age_ticks` **必須跟 activity 同一次回傳**，
+不得讓呼叫端事後自己去 `best_estimate` 再算一次年齡（那會變成兩次讀、兩個可能不同的 tick）。
+★★★**而這不是 fallback 到 live**：讀的仍然是 belief claim，只是**舊的**；§1a 禁的是退回真值，不是禁止使用舊情報。
+
+## §6.2 ★「甚至不過期」不採 —— 只降斜率，不設無限期
+
+本票 §1 已立：`freshness_factor` **單調遞減、永不歸零**。錨定性**對稱地**只准動**斜率**：
+```
+錨定（believed ACT_SETTLED 或有據點 claim） ⇒ 慢線衰減
+無錨                                        ⇒ 快線衰減
+★兩者都仍然單調遞減、都永不歸零、都沒有「不過期」這一檔
+```
+**三個理由**：
+1. ★**錨定的隊會拔營** —— 「不過期」讓一則**已經錯了的** belief 變成**不可證偽**（它永遠不會掉到會被重新偵查的價值）。
+2. ★★**它會從後門鬆開攻擊門**：`_find_weakest_prey` 的 reachable 走 `belief_pos`，而 `belief_pos` 吃的就是
+   `BELIEF_STALE_TICKS`。若「不過期」是做在 `BeliefSystem` 那條線上 ⇒ **駐紮目標的舊座標會直接通過攻擊門** ⇒
+   **正是本票 §2 明文擋下的那件事**（隔空作用）。
+3. ★★★**而這正是 ① 的兩個落點不同義**：
+   | 落點 | 影響範圍 | 本票立場 |
+   |---|---|---|
+   | (A) 錨定性餵 `freshness_factor`（偵查目標的**價值折扣**） | 只有偵查選點 | ★**就做這個** |
+   | (B) 錨定性改 `BELIEF_STALE_TICKS`（`BeliefSystem` 的**全域閘**） | 所有讀者，含攻擊/掠奪門 | ★**不做** —— 它是 `defers.tsv` → `belief-staleness-line-is-a-dead-constant`，且會違反 §2 |
+
+## §6.3 ★他的 ③ 不成立（時態問題，不是對錯問題）
+
+blueprint ③：「你 §5④ 的誠實標被①解掉」。
+★**裁定之後、實作之前，誠實標照留。** 現在世界裡沒有任何一行 code 讀錨定性去調過期速度
+⇒ 「快慢只活在函式裡」**此刻仍然是真的**。
+★★**解除條件寫成機械的**：`defers.tsv` → `target-speed-belief-field-or-flat-forever` 那一行的 met_check，
+待本節落地後改寫成「`freshness_factor` 的呼叫端讀得到錨定性」；
+在那之前它就該亮著 —— ★★★**「裁過了」和「接上了」是兩件事**（同族血證：我立的「床要標版本」規矩在立規當天四支 raw 全沒帶）。
+
+## §6.4 驗收（★每格能紅）
+
+| 格 | 內容 | 反向（機制關掉要變紅） |
+|---|---|---|
+| 6-a | 同齡（5 天）兩個目標：believed `ACT_SETTLED` vs believed `ACT_MOVING` ⇒ 前者 `freshness_factor` **顯著高** | 拔掉錨定分檔 ⇒ 兩者相等 |
+| 6-b | 錨定目標的 `freshness_factor` 在 age→大 時**仍單調遞減且 > 0** | 若有人做成「不過期」⇒ 這格紅 |
+| 6-c | ★**錨定性本身是舊的也讀得到**：activity claim 已 > `BELIEF_STALE_TICKS` 的錨定目標，仍走慢線 | 若誤用 `appearance()` ⇒ 回 `ACT_UNKNOWN` ⇒ 退回快線 ⇒ 這格紅（★這格就是 §6.1 那個閘的守衛） |
+| 6-d | ★★**兩道門逐字未改**：`_find_weakest_prey` / 攻擊 scan 的 `belief_pos` 判斷 diff **為空** | 若有人走 (B) 落點 ⇒ 這格紅 |
+| 6-e | 世界級：錨定目標的舊座標**被沿用**、無錨目標的舊座標**被重新偵查**（各至少 1 例，帶 tap） | 全世界只有一種行為 ⇒ 紅 |
+
