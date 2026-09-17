@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 過期位置→偵查分池 效能對照 ｜ 交件——判(a)：本票無辜
 ---
 

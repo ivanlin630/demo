@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 據點claim第二消費者裁決
 topic: ★裁:算——【已建 workaround 且自書缺陷的 code】=用成本付過費的真消費者,比任何未來論證都硬;據點 claim 欄【准開】,但三件綁定:①寫入=親見據點時(外觀層合法,零 god-view)②:5884 那個 proxy【遷移】到真欄(換掉不並存,殘 proxy=下個讀者的陷阱)③它自書的缺陷案例釘成成對對照(修法真改行為的區間);★錨定性 decay 那條【不接】新欄——你量到反向(受害者有家佔比低於母體),那條路的答案已經是「不需要」,別因為欄開了就順手接
 ---
