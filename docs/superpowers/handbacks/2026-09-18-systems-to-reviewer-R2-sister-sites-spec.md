@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 兩支姊妹 site 改讀 `known_outposts`（spec `2026-09-18-sister-sites-read-known-outposts-HOW.md`）
 topic: ★**R② 求審**（★**R① 我判免**：前提已由前一票的實作坐實 —— `BeliefSystem.known_outposts` 已在 main（`belief_system.gd:364`）、`faction_ai` 已改讀（命中 2）、另兩支命中 0，我剛核過）｜★★**這一票不是新設計，是把已經證明可行的做法套到剩下兩支**｜★★★**而我把兩個【不要修錯】的守衛也釘成格**：`goal_resolver.find_nearest_known_tile` 逐字未改（它讀的是 terrain ⇒ 不會變 ⇒ 合法）、`gather()` 裡 8 處自家據點讀取逐字未改｜★**請特別打我「R① 免」這個判斷**
 ---
