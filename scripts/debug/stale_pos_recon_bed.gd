@@ -19,14 +19,25 @@ extends SceneTree
 # env：BED_DAYS（格4 的天數，預設 8）／BED_SEED（預設 1337）／BED_CONFIG（預設 warring_states）
 
 var _fails: int = 0
+var _undec: int = 0
 
 func _initialize() -> void:
 	_run()
 	# ★閘的判準看【橫幅】不看離開碼（systems 立 2026-09-16）：
 	#   ★★沒有結尾標記的話，「FAIL=0」與「根本沒跑」長得一模一樣。
-	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)
+	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
 	print("[TEST-SUITE-COMPLETE]")
 	quit(1 if _fails > 0 else 0)
+
+# ★【不可判】＝ 這一格宣稱要驗的東西，**這一次執行沒有去驗** ——
+#   ★★處置不是刪掉它、也不是把它改成一個做得到的問題，是**留著、標明、而且不算綠**。
+func _undecidable(cell: String, claim: String, why: String, how: String) -> void:
+	_undec += 1
+	push_error("[不可判] %s：%s" % [cell, claim])
+	print("  [不可判] %s ——" % cell)
+	print("       宣稱：%s" % claim)
+	print("       為什麼這次驗不了：%s" % why)
+	print("       怎麼驗：%s" % how)
 
 func _ok(cond: bool, msg: String) -> void:
 	if cond: print("  [OK] %s" % msg)
@@ -178,6 +189,18 @@ func _recon_value_with_age(age_ticks: int) -> float:
 
 # ── 格4：世界級 —— 絕境那批隊，偵查有沒有【上場】 ──────────────
 func _cell4_world() -> void:
+	# ★★★【為什麼它有開關，而關掉時不是綠】：實測 `warring_states` 跑到第 9 天要 ~1800 秒
+	#   （隊數 69→101、avg tick 36ms→239ms），★而**絕境的隊要到第 8~10 天才出現**
+	#   ⇒ 縮天數 ＝ 母體 0 ＝ 這一格什麼都沒驗到。
+	#   ★★所以：merge-gate 那一輪用 `BED_WORLD=0` 跑（秒級、fixture 五格），
+	#     而這一格**標成【不可判】而不是跳過** —— 跳過會讓它與「驗過且通過」在畫面上一模一樣。
+	#   ★★★閘的 `expect` 會把【不可判 ＝ 1】釘住 ⇒ 哪天有人把它悄悄拿掉，閘會紅。
+	if OS.get_environment("BED_WORLD") == "0":
+		_undecidable("格4（世界級）",
+			"絕境那批隊把【位置過期的目標】排進偵查候選、且偵查真的上場",
+			"本次以 BED_WORLD=0 執行（世界級那一段要 ~30 分鐘，不適合放進每次都要跑的閘）",
+			"BED_WORLD=1 BED_DAYS=10 GODOT_TIMEOUT=3000 單獨跑一次；交件貼數時標【床的 commit】")
+		return
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 8
 	var seed_val: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
 	var cfg: String = OS.get_environment("BED_CONFIG") if OS.has_environment("BED_CONFIG") else "warring_states"

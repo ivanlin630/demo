@@ -88,7 +88,14 @@ if [ "${MG_NO_FETCH:-0}" != "1" ]; then
     UPSTREAM_N="$UPN"
   fi
 fi
-MG_BASE=".claude/hooks/.merge-gates-main-baseline"
+# ★★★2026-09-17（systems，merge 時自撞）：這個路徑原本是【相對】的 ——
+#   而 `.claude/hooks/*` 是 gitignored ⇒ 基線檔【只存在於主工作區】。
+#   ⇒ 在【暫時 merge worktree】裡跑（★而那正是唯一判 merge 的地方），它找不到檔
+#     ⇒ 每一次 merge 都印「★main 基線紅數【從未量過】」⇒ ★★**分不出【本票造成的紅】與【main 本來就紅】**
+#     ⇒ 正是上面那段 blueprint 裁定要防的事（「紅的閘＝沒有閘…它在默默放行」）
+#   ⇒ ★★★修法是【接線】不是加閘：一律解析到【主工作區】的那一份。
+_mg_common=$(git rev-parse --git-common-dir 2>/dev/null || echo ".git")
+MG_BASE="$(dirname "$_mg_common")/.claude/hooks/.merge-gates-main-baseline"
 # ★★★main 基線紅數（blueprint 裁 2026-09-10）：「main 紅了沒有人發現」不能再靠
 #   誰去開一個 worktree 重跑才知道 —— ★紅的閘＝沒有閘：main 基線紅 ⇒ 每個 branch 都
 #   「跟 main 一樣紅」⇒ 閘零鑑別力，而它【比擋住更糟：它在默默放行】。

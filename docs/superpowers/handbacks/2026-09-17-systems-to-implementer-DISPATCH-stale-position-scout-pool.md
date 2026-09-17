@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 過期位置 → 偵查分池 ｜ **DISPATCH（R² issues 已補完）**
 topic: ★**spec**：`docs/superpowers/specs/2026-09-17-stale-position-goes-to-scout-pool-HOW.md`（★**§5 是 R² 補的三點，開工前先讀那一節**）｜★★★**一句話**：`pick_recon_target` 的 `if _rpos == Vector2i(-1,-1): continue`（`decision_context.gd:335-336`）**把「位置過期」的目標丟掉了** —— **而偵查的存在理由【正是】去解決它**｜★★**兩道攻擊性的門逐字不改**（放寬＝隔空作用，違反感知鐵律）｜★**而 R² 抓到一個我寫錯的地方**：`freshness_factor` 的速度要傳**目標**的 team，**而旁邊那一行現有呼叫傳的是觀察者** —— **兩個呼叫長得一模一樣而意思相反**
 ---

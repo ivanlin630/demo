@@ -223,6 +223,7 @@ static func _resource_weight(key: String) -> float:
 #   ★★**為什麼這不是一顆會腐爛的裸 tick**（bare-tick 閘判 (c) 白名單，systems 2026-09-17）：
 #     `BASE_MOVE_TICKS = TimeScale.MOVE_TICKS_PER_HEX`（:5）⇒ **分子與分母都由時間尺度導出**
 #     ⇒ **它們的比值不隨時間尺度縮放改變** ⇒ 這是單位換算，與 `goal_resolver.gd:711` 同一個鐵則。
+#       （用【每格成本】不用【速度】）。
 #   ★★★**而標記必須寫在 `return` 那一行的【行尾】** —— 白名單規則比對的是【同一行】；
 #     寫在前一行 ⇒ **理由對、規則看不見** ⇒ 閘照樣紅（2026-09-17 血證）。
 static func baseline_tiles_per_day() -> float:
