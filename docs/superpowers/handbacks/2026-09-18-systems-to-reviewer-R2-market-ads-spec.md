@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 市集會自我廣告（spec `2026-09-18-markets-advertise-themselves-HOW.md`）｜R② 求審
 topic: ★**blueprint 裁 (b)**，形狀照我畫的（傳聞可帶「那裡有市集」，不帶規模／歸屬／軍情）｜★★**管線已經有一半**：`msg_market_pos` ＋ `harvest_tile_known` 的 relay 路徑**早就把那些地點寫成「見過這塊地」** ⇒ 本票只是加一個**交易專屬**的子記錄｜★★★**而我把這一票最大的風險寫在 §4 而不是事後**：**它的效果完全掛在訊息真的送得到**，而我手上的帳寫著資訊網「whole-world distribute 未通（49 隊床 deliver=0）」⇒ ★**我要求【先跑分母再動 code】：若「收到過 market 類訊息的觀察者」≈ 0，這一票應該暫停而不是硬做**
 ---
