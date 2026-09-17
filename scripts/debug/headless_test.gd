@@ -11029,6 +11029,7 @@ func _test_find_trade_partner_outpost_only() -> void:
 	no_op.tile_pos = Vector2i(9, 9)
 	state.teams[2] = no_op
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
+	tile.outpost_level = 1   # ★真實世界裡「有主人」必然伴隨 level>0；新 code 兩個都讀（舊 code 只讀 owner）
 	state.world.tiles[0] = tile
 	state.team_discovered[0] = [2, 1]   # 2 先掃但無 outpost → 應跳過
 	# ★★★fixture 補 belief（god-view 真違規④修法之後）：候選母體從 `team_discovered`
@@ -11037,6 +11038,13 @@ func _test_find_trade_partner_outpost_only() -> void:
 	#   ⇒ 補 fixture 讓它變合理，★★★不是翻斷言
 	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "tile_pos": with_op.tile_pos}, 1.0, false)
 	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 5, "tile_pos": no_op.tile_pos}, 1.0, false)
+	# ★★★fixture 再補一階（姊妹 site 票 2026-09-18）：候選母體從「對隊有 claim ＋ 走過某塊它的地」
+	#   換成 `BeliefSystem.known_outposts`（＝★我【親眼看過那座城】，owner 來自觀察當時的子記錄）
+	#   ⇒ ★★這一代剝掉的是【不用看過那座城也知道它是誰的】⇒ **補【看過】，不是翻斷言**
+	#   ⇒ ★★★走正式寫入路徑 `harvest_tile_known`（trader 站在 (0,0) ⇒ 視野內）——**不手塞 Dictionary**，
+	#     因為手塞的 `true` 只代表「見過這塊地」，而這一票要的是「見過**那座城**」。
+	#   ★下一代還會有人站在這裡：那時要補的大概是【它現在還在不在】。
+	BeliefSystem.harvest_tile_known(state, trader)
 	var partner: Dictionary = StrategicAiSystem.new()._find_trade_partner(state, trader)
 	assert(not partner.is_empty() and int(partner["team_id"]) == 1, "應選有 outpost 的 Team1，實際=%s" % str(partner))
 	assert(partner["outpost_pos"] == Vector2i(0, 0), "outpost_pos 應 (0,0)")
@@ -11741,14 +11749,20 @@ func _test_trade_partner_requires_resident() -> void:
 	owner.tile_pos = Vector2i(8, 8)   # owner 本人不在 outpost tile
 	state.teams[1] = owner
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(3, 3); tile.outpost_owner = 1
+	tile.outpost_level = 1   # ★同 Task7a：新 code 讀 owner ＋ level 兩個
 	state.world.tiles[3003] = tile
 	state.team_discovered[0] = [1]
 	# ★同上：候選母體改讀 belief ⇒ 補 claim。★意圖＝【限居民團 tile】不是【測無 belief】
 	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "tile_pos": owner.tile_pos}, 1.0, false)
-	# ★★★而還要補【tile 已知】：outpost 在 (3,3)、trader 在 (5,5) ⇒ ★hex 距離 4 > VISION_RADIUS 3
+	# ★★★而還要補【tile 已知】：outpost 在 (3,3)、trader 原本在 (5,5) ⇒ ★hex 距離 4 > VISION_RADIUS 3
 	#   ⇒ ★★harvest 掃不到它 ⇒ 新 code【正確地】不知道那個據點存在
 	#   ⇒ ★★★本測的意圖是【限居民團 tile】，不是【測看不見的據點】⇒ 補「這格我看過」讓意圖成立
-	state.team_tile_known[0] = {3003: true}
+	# ★★2026-09-18（姊妹 site 票）再補一階：★**舊寫法是手塞 `{3003: true}`**，
+	#   而那個 `true` 只說「我見過這塊地」—— ★新 code 要的是【我見過那座城】（owner／level 子記錄）
+	#   ⇒ ★★★改成【把 trader 放到看得見的距離，走正式的 `harvest_tile_known`】：
+	#     **fixture 要製造的是「他真的看過」這個事實，不是一個長得像它的字典。**
+	trader.tile_pos = Vector2i(4, 4)   # ★hex 距 (3,3) ＝ 1 ⇒ 在視野內（原 (5,5) 距 4 ＞ VISION_RADIUS 3）
+	BeliefSystem.harvest_tile_known(state, trader)
 	var sai := StrategicAiSystem.new()
 	# A: outpost 有 owner 但 tile 上無居民團 → 不選
 	var partner_a: Dictionary = sai._find_trade_partner(state, trader)
