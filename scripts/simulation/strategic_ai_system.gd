@@ -304,6 +304,13 @@ func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
 #   ①候選母體：`team_discovered` → `BeliefSystem.known_targets`（我知道的東西）
 #   ②outpost 位置：★不再掃 `state.world.tiles` 全圖，改掃 `state.team_tile_known`（belief tile store）
 #   ⇒ ★而 harvest 要先跑，否則 store 恆空、恆回 {} ＝【假關閉】（看起來像修好了）
+# @production-callers: 0（刻意：測試專用 scaffolding；★真管線見 `_merchant_trade_target` → `team_market_known`）
+#   ★★★為什麼留著不刪：刪掉會丟掉 `headless` 的覆蓋，而它是未來「交易決策真的去讀交易對象」時的現成座位。
+#   ★★為什麼要標：**它看起來像「商隊怎麼找交易對象」** ⇒ ★下一個人（包括我）會量它、以為量到了世界
+#     —— ★★★2026-09-18 血證：我拿它量出「貿易對手可見度掉到 1/8」並差點呈上去要裁，
+#     而那支函式【今天沒有任何 production 呼叫點】（`sim_runner` 對 strategic_ai 的唯一入口是 `tick()`，而 tick 不走它）。
+#   ★追蹤：`defers.tsv` → `trade-partner-finder-has-no-production-caller`
+#     （解除條件 ＝ 有人真的把它接進 production ⇒ 那天 `defer-open` 會亮）。
 func _find_trade_partner(state: WorldState, trader: TeamData) -> Dictionary:
     BeliefSystem.harvest_tile_known(state, trader)
     # ★★★【那個自承的 CANDIDATE-LEAK 補完】（票：兩支姊妹 site 2026-09-18）——
