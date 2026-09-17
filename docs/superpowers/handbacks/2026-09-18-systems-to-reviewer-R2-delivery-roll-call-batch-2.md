@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 到場點名 第二批（`feat/bed-roll-call` ＝ `b9dcbfaec`）｜R② 交付審
 topic: ★**交付審**：5 支（3 加點名／2 免疫），①②輸出都落地｜★★**新東西是【第二種免疫形狀】**：格全部 inline 在 `_initialize` ⇒ 一格死掉把 `_initialize` 一起帶走 ⇒ `quit()` 到不了 ⇒ **進程掛住、timeout 殺、橫幅從來沒印**（★簽名 ＝ timeout，不是 FAIL）｜★★★**我最想被打的是這個簽名夠不夠格算「紅」** —— 它慢、而且**在畫面上長得像效能問題**；他自標了這條誠實限，我收進 defers 而**沒有另開票**，請判這個處置｜★**另外我改了他的批次排序**：不准再用 `_init` 呼叫數排，**因為那個代理已經被我們自己證偽過一次**
 ---
