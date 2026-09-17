@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 錨定性讓情報保鮮（spec §6）｜ R①三前提 + R②快審
 topic: verdict=clean（三前提皆真，P3反而比你自認的更站得住；一個非阻擋的簡化建議留給你裁）
 ---

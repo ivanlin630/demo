@@ -154,15 +154,29 @@ believed 駐紮（`ACT_SETTLED`，`belief_system:367` 已在）或 belief 裡有
 
 **修法（★不是特例，是本票已經立好的同一個模式）**：本票對【位置】的作法是
 「繞過新鮮度閘取 last-known ＋ 帶年齡回來，年齡進**價值**不進**門**」⇒ **錨定性用同一個模式讀 activity**。
+
+★★★**R② 2026-09-17 修正（reviewer 提、systems 採納，我原本的版本比較差）**：
+**不新增姊妹 accessor** —— `appearance()` 整支只是 `best_estimate()` 的 wrapper，而 `best_estimate()`
+**本身不過期**（`belief_system.gd:144-161`，回的是 claim 的 `value`，`activity` 與 `last_tick` 都在裡面）
+⇒ **呼叫端直接讀 `best_estimate()` 就有原值**，跟本票 §1 讓 `pick_recon_target` 直接讀 `tile_pos`/`last_tick`
+**是同一次呼叫、同一個 dict**。
 ```
-新增姊妹 accessor（★不要改 appearance() 的語義）:
-  BeliefSystem.appearance_aged(state, obs, tgt)
-    → {"activity": <claim 裡那個值,不因過期改寫>, "age_ticks": <int>, "state": "fresh|stale|never"}
-  ★ appearance() 原樣不動 —— 它的三態契約有現成消費者（faction_ai_system.gd:947）,改它會是另一票。
+呼叫端（decision_context.gd，本票 §1 已經在那裡呼叫 best_estimate 了）:
+  var bel := BeliefSystem.best_estimate(state, 觀察者, 目標)
+    bel["tile_pos"]   ← 本票 §1 已在用
+    bel["last_tick"]  ← 本票 §1 已在用（算年齡）
+    bel["activity"]   ← ★本節新增的讀取，**同一次讀、同一個 tick**
+★ appearance() 逐字不動 —— 它唯一的生產消費者 faction_ai_system.gd:934-935 有一道
+  `if state != "fresh": continue` 的邀請門，靠的正是它現在的過期行為（reviewer 窮舉核實）。
 ```
-★★**不變量 #6 適用**：回傳【決定】的介面必須能同時回傳【依據】⇒ `age_ticks` **必須跟 activity 同一次回傳**，
-不得讓呼叫端事後自己去 `best_estimate` 再算一次年齡（那會變成兩次讀、兩個可能不同的 tick）。
-★★★**而這不是 fallback 到 live**：讀的仍然是 belief claim，只是**舊的**；§1a 禁的是退回真值，不是禁止使用舊情報。
+★★**這比我原本的版本更符合不變量 #6**：#6 要的是「決定與依據同一次計算」。
+新增 `appearance_aged()` 會讓呼叫端對**同一則 claim 讀兩次**（位置一次、活動一次）
+⇒ 兩次讀之間在型別上沒有東西保證是同一則 claim。**一次 `best_estimate` 才是 #6 的正解。**
+★★★**三態在呼叫端處理**：`bel` 沒有 `activity` 這個 key ＝ **從未觀察到** ⇒ **走快線（無錨）**。
+★**不得寫成 `.get("activity", ACT_SETTLED)` 之類的預設** —— 那會讓「沒看過」變成「看過它駐紮」，
+是 §1a 明文禁的 default-pass。
+★★★**而這整段都不是 fallback 到 live**：讀的仍然是 belief claim，只是**舊的**；
+§1a 禁的是退回真值，不是禁止使用舊情報。
 
 ## §6.2 ★「甚至不過期」不採 —— 只降斜率，不設無限期
 
@@ -198,7 +212,8 @@ blueprint ③：「你 §5④ 的誠實標被①解掉」。
 |---|---|---|
 | 6-a | 同齡（5 天）兩個目標：believed `ACT_SETTLED` vs believed `ACT_MOVING` ⇒ 前者 `freshness_factor` **顯著高** | 拔掉錨定分檔 ⇒ 兩者相等 |
 | 6-b | 錨定目標的 `freshness_factor` 在 age→大 時**仍單調遞減且 > 0** | 若有人做成「不過期」⇒ 這格紅 |
-| 6-c | ★**錨定性本身是舊的也讀得到**：activity claim 已 > `BELIEF_STALE_TICKS` 的錨定目標，仍走慢線 | 若誤用 `appearance()` ⇒ 回 `ACT_UNKNOWN` ⇒ 退回快線 ⇒ 這格紅（★這格就是 §6.1 那個閘的守衛） |
+| 6-c | ★**錨定性本身是舊的也讀得到**：activity claim 已 > `BELIEF_STALE_TICKS` 的錨定目標，仍走慢線 | 若誤用 `appearance()` ⇒ 回 `ACT_UNKNOWN` ⇒ 退回快線 ⇒ 這格紅（★這格就是 §6.1 那個閘的守衛，**修法改成直接讀 `best_estimate` 之後它照樣有效**——它守的是「有沒有走錯那條路」，不是守某一支函式） |
+| 6-f | ★★**從未觀察過 activity 的目標走【快線】**（`bel` 無 `activity` key） | 若有人寫了 `.get("activity", <某個錨定值>)` ⇒ 這格紅（default-pass 守衛） |
 | 6-d | ★★**兩道門逐字未改**：`_find_weakest_prey` / 攻擊 scan 的 `belief_pos` 判斷 diff **為空** | 若有人走 (B) 落點 ⇒ 這格紅 |
 | 6-e | 世界級：錨定目標的舊座標**被沿用**、無錨目標的舊座標**被重新偵查**（各至少 1 例，帶 tap） | 全世界只有一種行為 ⇒ 紅 |
 
