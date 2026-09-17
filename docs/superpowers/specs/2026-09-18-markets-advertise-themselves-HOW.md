@@ -56,11 +56,27 @@ known[tid] = {
 ```
 ⇒ **2-d 必須同時印出【母體】**：
 ```
-有多少觀察者【收到過】任何一則 market 類訊息（★分母）
+有多少**會呼叫 `_find_trade_partner` 的隊**（★商隊族群，**不是全世界平均** —— reviewer 2026-09-18：dead-end 具體點名的是 **settled 隊**，而商隊會移動 ⇒ 用全世界平均會**因為別的族群塞車而錯殺一個對商隊其實通的訊號**）【收到過】任何一則 market 類訊息（★分母）
 其中有多少因此找得到交易對象（★分子）
 ⇒ ★★★若分母 ≈ 0 ⇒ 本票【沒有失敗，是沒有機會】—— 而那是資訊網的帳，不是這一票的
 ```
 ★**這一格我要求【先跑分母再動 code】**：**若分母是 0，這一票應該暫停而不是硬做。**
+
+# §4b ★★★前置（不是平行）：先修 `_find_occupy_target`
+
+**reviewer 2026-09-18 揭**：`_find_occupy_target`（`faction_ai_system.gd`）**不走 `known_outposts()`**，
+它直接問 `team_tile_known` **有沒有這塊地**（只問存在，不問裡面是不是據點子記錄），
+**閘過了之後 live 讀 `tile.outpost_owner`／`outpost_level`**。
+```
+現況  ：那塊地從沒被任何 relay 提過 ⇒ 不在 team_tile_known ⇒ 那個閘【正確擋掉】
+本票後：只因為 relay 過一則【市集】訊息 ⇒ 進了 team_tile_known ⇒ 閘放行 ⇒ 後面 live 讀
+⇒ ★★一則【交易】訊息，會變成一條【軍事】資訊的通道
+⇒ ★★★而那正是 WHAT 明令的成對反事實要防的事（2-c）
+```
+⇒ **所以它不是「順序比較好」，是【不先修它，2-c 那格就會真的紅】。**
+★**修法很便宜**：`known_outposts()` 已在 main，換讀法即可（★而它會正確排除只有 `market` 子記錄的 entry ——
+reviewer 核過 `belief_system.gd:364-379` 的 filter：`op = rec.get("outpost"); if not (op is Dictionary): continue`）。
+★★追蹤：`defers.tsv` → `occupy-target-scan-reads-live-outpost-after-tile-gate`。
 
 # §5 不在本票
 - 資訊網的 whole-world distribute（另一條線）。

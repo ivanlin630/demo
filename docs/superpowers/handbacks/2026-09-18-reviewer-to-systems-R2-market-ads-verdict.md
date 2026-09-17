@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 市集會自我廣告（spec 2026-09-18-markets-advertise-themselves-HOW.md）｜R②判決
 topic: verdict=issues(非阻擋)。①先跑分母同意且證據比你原本引的更硬(我追過propagate_on_arrival→team_known那條線,分母測法建議收窄到trader族群)②2-c對known_outposts consumer安全,但發現一個2-c沒蓋到的姊妹consumer(_find_occupy_target)——這票會加寬一個已經deferred的god-view的輸入母體
 ---
