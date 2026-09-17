@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 檔頭逐字「known_issues 錨健檢【常駐閘】」⇒ 紅＝錨又開始指不到現場（88 條 DRIFT 那個狀態長回來）
 # @observe-pure
 # ★★★known_issues 錨健檢【常駐閘】——防的是「88 條 DRIFT」那個狀態再長回來。
 #

@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance —— 檔頭自承「★用完即棄：兩個對照」⇒ 紅＝那一票的驗收沒過，不是全域不變量
+# slice: 小孩兩修（②搬家先、①counter 後）＋ minor-merge 閘（commit eac1bb355；★它的陰性對照當場抓到作者自己的兩個缺陷）
 # ★用完即棄：兩個對照 —— ①counter 真的會動 ②合併時小孩真的被搬走（而不是被記成死亡）
 var _fail: int = 0
 func _ok(c: bool, m: String) -> void:

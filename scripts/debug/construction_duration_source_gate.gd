@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 檔頭逐字「工期單一真值【常駐斷言】」⇒ 紅＝有寫入點繞過唯一入口（不是某一票的驗收）
 # @observe-pure
 # ★★★工期單一真值【常駐斷言】（systems 裁定 2026-09-01，S6 phase2 §4）。
 #
