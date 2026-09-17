@@ -324,14 +324,60 @@ static func harvest_tile_known(state: WorldState, team: TeamData) -> void:
 				continue
 			var tid: int = p.x * 1000 + p.y
 			if state.world.tiles.has(tid):
-				known[tid] = true
+				# ★★★【兩個事實，兩條線】（票：據點知識進 belief 2026-09-17）——
+				#   「我見過這塊地」**不會過期**（地不會走）⇒ ★key 存在，語意逐字不變；
+				#   「它當時有一座 L 級據點、屬於 T」**會過期**（可能被拆／易主）⇒ ★★自己的時戳、自己的線。
+				#   ★★★把兩者壓成同一個值 ＝ 把兩個層混回去（spec §1 否決 (A) 時用的同一個錯）。
+				var _rec = known.get(tid)
+				var _entry: Dictionary = _rec if _rec is Dictionary else {}
+				var _t: HexTileData = state.world.tiles[tid]   # gate-ok: 這裡【就是觀察發生的那一刻】（bounded vision，非全圖掃）
+				if _t.outpost_level > 0 and _t.outpost_owner != -1:
+					_entry["outpost"] = {
+						"owner_id": int(_t.outpost_owner),
+						"level": int(_t.outpost_level),
+						"last_tick": int(state.world.current_tick),
+					}
+					known[tid] = _entry
+				else:
+					# ★親見「那裡現在沒有據點」⇒ **擦掉舊子記錄**（拆掉了就是拆掉了）——
+					#   ★★不擦的話，被拆掉的城會永遠留在別人的知識裡，而那不是過期，是**錯**。
+					if _entry.has("outpost"):
+						_entry.erase("outpost")
+					known[tid] = _entry if not _entry.is_empty() else true
 	# relay：team_known tile 訊息 pos（reuse market pos extractor）→ known
 	for msg in state.team_known.get(team.team_id, []):
 		var mpos: Vector2i = msg_market_pos(msg)
 		if mpos == Vector2i(-999, -999):
 			continue
-		known[mpos.x * 1000 + mpos.y] = true
+		# ★★relay 只說「有這麼一個地方」⇒ **只記 key、不得寫據點子記錄**（§1a 三態在地點上的樣子：
+		#   **見過這塊地 ≠ 看過它上面有什麼**）。★而已經親見過的格不得被 relay 蓋掉 ⇒ 只在缺席時寫。
+		var _mid: int = mpos.x * 1000 + mpos.y
+		if not known.has(_mid):
+			known[_mid] = true
 	state.team_tile_known[team.team_id] = known
+
+# ★★★【列舉我自己看過的據點】（spec §2②：這個名字是三支同病灶 site 將來的機械判準，別改名）
+#   ★回的是**觀察者的知識**，不是世界的真相：沒看過的據點**不在裡面**（即使它存在），
+#   ★★看過但已經很舊的**仍然在裡面**（★據點不會自己走 —— 它的舊，跟「隊的位置舊了」不是同一種舊）。
+#   ★★★**不借 `BELIEF_STALE_TICKS`**：那條線問的是「它現在還在那裡嗎」，
+#     而這裡問的是「我知不知道有這座城」——**兩個問題的衰減理由不同。**
+static func known_outposts(state: WorldState, observer_id: int) -> Array:
+	var out: Array = []
+	var known: Dictionary = state.team_tile_known.get(observer_id, {})
+	for tid in known:
+		var rec = known[tid]
+		if not (rec is Dictionary):
+			continue   # ★值還是 `true` ＝ 見過這塊地、但沒看到據點（或那是 relay 來的）
+		var op = rec.get("outpost")
+		if not (op is Dictionary):
+			continue
+		out.append({
+			"tile_pos": Vector2i(int(tid) / 1000, int(tid) % 1000),
+			"owner_id": int(op.get("owner_id", -1)),
+			"level": int(op.get("level", 0)),
+			"last_tick": int(op.get("last_tick", 0)),
+		})
+	return out
 
 # ★★★從 `faction_ai_system.gd` 搬過來（systems 裁 2026-09-02）：★純解析 msg dict，零狀態 ⇒ 零行為。
 #   ★搬它的理由不是整理，是【解掉 belief_system ↔ faction_ai 的相互引用】。
