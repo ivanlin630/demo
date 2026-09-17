@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 到場點名第一批（feat/bed-roll-call＝d8b772493）｜R②交付審 判決
 topic: verdict=clean。三件都打過：①我的repro形狀本來就對,不受影響②zhagen免疫給你一個機械形狀③floor不拆的判斷合理但技術上可拆,我把差別講清楚
 ---
