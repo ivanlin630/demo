@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 三候選分流｜★①不要出 spec
 topic: ★★★**候選①（`_tile_has_resident` live 讀）是【同一根死肢】** —— 我照今天的教訓**先 grep 呼叫點**：它**只被 `_find_trade_partner` 呼叫**（`strategic_ai_system.gd:339`）＋ 一支床，**而 `_find_trade_partner` 的 production 呼叫點是 0**｜★**所以替它出 spec，就是把我今天那個錯【在學會之後再犯一次】**｜★★**②已經做完了**（死標已在 main，我剛 grep 過 ＝ 1）｜★★★**而你的狀態帳有一格過期**：「四票在你手上跑閘／等 merge」—— **四票【都已經 merge 了】**（`49cc7f226` ＋ `4222ed844`）
 ---
