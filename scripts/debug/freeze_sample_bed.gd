@@ -138,11 +138,32 @@ func _run() -> void:
 		#   ★★★所以這裡把它做成一行【可比的數】，而不是一段要人自己去加總的附註。
 		var top_self: int = int(rows[0]["self"]) if not rows.is_empty() else 0
 		var top_name: String = String(rows[0]["n"]) if not rows.is_empty() else "—"
-		print("\n[★★候選對比] 排行第一 %s self=%.3fs　vs　★`*multi` 合計=%.3fs（%d 列）⇒ multi／第一 ＝ %.2f×" % [
-			top_name, float(top_self) / 1e6,
-			float(multi_total) / 1e6, mrows.size(),
-			float(multi_total) / float(maxi(top_self, 1))])
-		print("     ★這一行存在的理由：`*multi` 不會出現在排行裡，而它可能比排行第一【大】。")
+		# ★★★【三行候選表】（blueprint 2026-09-18 把我的誠實限升級成硬要求）：
+		#   排行第一（self）／父子合計最大的那一塊（total）／`*multi` 合計 —— ★三塊【並排比，誰大修誰】。
+		#   ★★第二行寫成【total 最大的非-multi 相位】而不是寫死 `loop2.solo_engine`：
+		#     blueprint 點名的是那一塊，但寫死名字的表在相位改名的那天會【安靜地少一行】。
+		#   ★★★【② 的母體是「印出來的那 N 個候選」，不是全部相位】——★這一句是被資料改過的：
+		#     我第一版寫「total 最大的非-multi 相位」，而 total 最大的永遠是【根】（`loop1.factions`
+		#     的 total ＝ 整個 FactionAI）⇒ ★★那一行會恆等於「全部」，是個【恆真的候選】。
+		#     ⇒ 改成在【同一批候選】裡比：②＝這 N 個裡子樹最大的那一個（根的 self 很小，本來就進不了榜）。
+		var sub_name: String = "—"
+		var sub_tot: int = 0
+		for r in rows.slice(0, mini(topn, rows.size())):
+			if int(r["tot"]) > sub_tot:
+				sub_tot = int(r["tot"]); sub_name = String(r["n"])
+		# ★用 [1][2][3] 不用 ①②③：★★實測 ①②③ 在本管道的輸出裡【會整個消失】
+		#   （2026-09-18 三天煙霧跑：「⇒ ③／① ＝」印出來變成「／ ＝」）⇒ 一張要拿來裁決的表，
+		#   ★★★它的【行號會不會活著送到讀的人面前】跟數字一樣重要。
+		print("
+[★★★目標候選表（三行並排，★誰大修誰；本床【不】裁）]")
+		print("   [1] 排行第一(self)       %-30s %8.3fs" % [top_name, float(top_self) / 1e6])
+		print("   [2] 父子合計最大(total)  %-30s %8.3fs" % [sub_name, float(sub_tot) / 1e6])
+		print("   [3] ★`*multi` 合計       %-30s %8.3fs" % ["(%d 列相加)" % mrows.size(), float(multi_total) / 1e6])
+		print("   => [3]/[1] = %.2fx   [3]/[2] = %.2fx" % [
+			float(multi_total) / float(maxi(top_self, 1)),
+			float(multi_total) / float(maxi(sub_tot, 1))])
+		print("     ★這張表存在的理由：`*multi` 不參與減法 ⇒ 它【永遠不會排第一】，")
+		print("     ★★而它可能是最大的一塊 —— 只看排行挑目標，最大的錢會站在排行外面。")
 
 	# ★★★可判性：只有「有凍結幀」才算量到；★而本床不判「該修誰」——那是下一票
 	_ok(SimRunner.frames_over_budget > 0,
