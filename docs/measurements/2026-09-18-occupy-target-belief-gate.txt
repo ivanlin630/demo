@@ -1,0 +1,25 @@
+[TREE] path=A:\GDS\demo\.worktrees\occupy commit=dc1deb639 clean=NO code-dirty=2 codehash=BA814734174B
+[TREE]   *** measuring the WORKING TREE, not commit dc1deb639 ***
+[TREE]    M scripts/simulation/faction_ai_system.gd
+[TREE]   ?? scripts/debug/occupy_target_belief_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 佔村掃改讀 known_outposts 驗收 ===
+[TREE] HEAD=dc1deb639 scripts-dirty=2（★dirty）
+b｜親眼走過那座城（已知據點 1 筆） 佔村目標 = 2
+  [OK] b-前提 ★harvest **真的**寫下了據點子記錄（owner=2）—— ★前提不成立的話下一句證不到東西
+  [OK] b ★**看過的敵據點仍然進候選**（樣本 1／母體 1）｜★不進  我修過頭了
+a｜那塊地只有 market 子記錄（已知據點 0 筆） 佔村目標 = -1
+  [OK] a-前提 ★`known_outposts()` **不把 market 子記錄當據點**（0 筆）
+  [OK] a ★★**只有 market 子記錄的地不進佔村候選**（樣本 0／母體 1）｜★★★進了  一則【交易】訊息變成一條【軍事】資訊的通道
+
+— c：別修錯東西（原始碼內容錨）—
+  [OK] c- ★`goal_resolver.find_nearest_known_tile` 逐字未改（它閘後讀的是 `terrain`，**地形不會變**）
+c｜`gather()` 自家錨 6／6 仍在
+  [OK] c- ★★`gather()` 的自家據點讀取【6 處】逐字未改｜★★★分母寫死 6（來自 spec §5）而不是 `anchors.size()` —— **自己跟自己比的守衛不是守衛**
+-- 量測完成；[FAIL] 數 ＝ 0｜到場點名 3／3 --
+[TEST-SUITE-COMPLETE]
+
+[godot.ps1] child exit=0

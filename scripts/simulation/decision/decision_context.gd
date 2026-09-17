@@ -590,17 +590,24 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			c.shelter_seeker_opt = _s.current_option
 			break
 	if team.tags.has(TeamData.TAG_PRODUCE) and team.work_outpost == Vector2i(-1, -1):
-		var _known: Dictionary = state.team_tile_known.get(team.team_id, {})   # ★tid → true（親見/relay 的格）
+		# ★★★【閘過了不等於可以讀 live】（票：兩支姊妹 site 2026-09-18）——
+		#   ★舊版：`team_tile_known` 只回答「我有沒有見過這塊地」，**不分那裡有什麼、是誰的**，
+		#     而閘過之後直接 live 讀 `_t2.outpost_level`／`_t2.outpost_owner`
+		#     ⇒ ★★**「我走過那塊地」被當成「我知道現在那裡有一座誰的城」** ——
+		#       憲法 §1a：belief 閘只授權【要不要評估】，**不授權讀它的 live 值**。
+		#   ⇒ ★★★改讀**我自己看過的據點**（`known_outposts`：親見時寫、relay 不寫、自帶時戳）。
+		#   ★同族第三支（前一票做掉 `faction_ai`，本票補這支與 `strategic_ai`）。
 		var _best_d: int = 1 << 30
-		for _tid2 in _known:
-			var _t2: HexTileData = state.world.tiles.get(int(_tid2))
-			if _t2 == null or _t2.outpost_level <= 0 or _t2.outpost_owner == -1 or _t2.outpost_owner == team.team_id:
+		for _rec in BeliefSystem.known_outposts(state, team.team_id):
+			var _oid: int = int(_rec["owner_id"])
+			if _oid == -1 or _oid == team.team_id:
 				continue
-			var _d2: int = FactionAISystem._hex_dist(team.tile_pos, _t2.tile_pos)
+			var _p2: Vector2i = _rec["tile_pos"]
+			var _d2: int = FactionAISystem._hex_dist(team.tile_pos, _p2)
 			if _d2 < _best_d:
 				_best_d = _d2
-				c.shelter_host_id = _t2.outpost_owner
-				c.shelter_host_pos = _t2.tile_pos
+				c.shelter_host_id = _oid
+				c.shelter_host_pos = _p2
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.threat", _tg)
 	var _fa := FactionAISystem.shared()
 	var _prey: int = _fa._find_weakest_prey(state, team)
