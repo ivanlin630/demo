@@ -390,6 +390,11 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 			_rage, _rdrift, VisionSystem.vision_range(state, team))
 		if Probe.enabled:
 			Probe.bump("recon.anchored" if _ranchored else "recon.unanchored")
+			# ★★★交叉那一格：**錨定 ∧ 位置已過期** —— 本票真正想改變的區間就是它。
+			#   ★只數「錨定有沒有發生」會在【情報還新鮮】的窗口裡拿到綠，
+			#     而那個綠**不落在修法真正改變行為的區間上**。
+			if _rage > BeliefSystem.BELIEF_STALE_TICKS:
+				Probe.bump("recon.anchored.stale" if _ranchored else "recon.unanchored.stale")
 		var _rval: float = _prior * pow(_rdelta, maxf(_rdays, 0.0)) * _rfresh
 		# ★儀器：這一筆是不是【本票之前會被丟掉】的那一類（位置已過期）——
 		#   ★★沒有這一格的話，「偵查候選變多了」分不出是本票生效還是世界剛好情報變好。

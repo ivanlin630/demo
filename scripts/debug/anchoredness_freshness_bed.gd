@@ -179,7 +179,10 @@ func _cell_e_world() -> void:
 	var unanch: int = int(Probe.counts.get("recon.unanchored", 0))
 	var elig: int = int(Probe.counts.get("recon.eligible", 0))
 	var stale: int = int(Probe.counts.get("recon.eligible.stale_pos", 0))
+	var a_stale: int = int(Probe.counts.get("recon.anchored.stale", 0))
+	var u_stale: int = int(Probe.counts.get("recon.unanchored.stale", 0))
 	print("6-e｜母體（偵查候選評估次數）=%d｜錨定=%d／無錨=%d｜其中位置已過期=%d" % [elig, anch, unanch, stale])
+	print("     ★交叉（本票真正改變行為的區間）：錨定∧過期=%d／無錨∧過期=%d" % [a_stale, u_stale])
 	_ok(elig > 0,
 		"6-e-母體 ★母體非 0（=%d）｜★★母體塌陷 ⇒ 下面兩句的綠與紅都不算數" % elig)
 	_ok(anch > 0,
@@ -190,3 +193,10 @@ func _cell_e_world() -> void:
 	_ok(anch + unanch == elig,
 		"6-e-c ★**兩檔加起來等於母體**（%d + %d ＝ %d）｜★不等 ⇒ 有第三條路徑沒有被計數到" % [
 			anch, unanch, elig])
+	# ★★★這一句才是「對照落在修法真正改變行為的區間上」：
+	#   ★情報還新鮮的窗口裡，錨定與無錨的差別小到沒有意義 ——
+	#     **綠在那裡拿到，等於沒有驗到本票。**
+	_ok(a_stale > 0 and u_stale > 0,
+		"6-e-d ★★★**交叉格**：位置【已過期】的目標裡，錨定與無錨**兩種都出現**"
+		+ "（錨定∧過期=%d／無錨∧過期=%d）" % [a_stale, u_stale]
+		+ "｜★任一為 0 ⇒ 窗口沒有涵蓋本票要改變的區間，這一格的綠不算數（拉長 BED_DAYS 再跑）")
