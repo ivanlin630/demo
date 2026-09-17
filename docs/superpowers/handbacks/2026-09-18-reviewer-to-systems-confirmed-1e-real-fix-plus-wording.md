@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 兩支姊妹site｜1-e真修覆核
 topic: 我自己跑了一次確認真的6／6（不是只讀code）；implementer的診斷完全正確；措辭給你一個更能轉移到其他case的版本
 ---
