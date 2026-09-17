@@ -339,3 +339,21 @@ git worktree remove .worktrees/<slice>
 ★★**而他自己的話值得原樣留著**：**「我只做了①，而【①做得很仔細】反而讓我覺得已經防住了。」**
 ⇒ ★★★**一個仔細的檢查會製造「已經防住了」的錯覺** —— 而**錯覺的強度跟那個檢查做得多仔細成正比**。
 ⇒ **抓到②的是 `bed-parse` 閘，不是他的自檢** —— **機械防線與自檢的分工，這一格是現成的例子。**
+
+## ★★★閘型床要件③（到場點名）的血證與最小 repro（2026-09-17）
+
+```
+血證：床裡寫了不存在的欄位（`MessageData.payload`，正確是 `params`）
+⇒ GDScript 執行期錯誤【只中止那一支 func】，外層 driver、彙總、exit code 全部正常
+⇒ 那一格三個斷言【一個都沒跑】，而末行照樣印「量測完成；[FAIL] 數 ＝ 0」
+★★「沒有失敗」與「沒有執行」在畫面上一模一樣。
+★★★reviewer 用 20 行最小 repro（`Array` 越界存取）獨立複現：
+   _cell_a() 執行到出錯那一行 → 該 func 立刻中止，往後的 print/assert 全部沒跑
+   _init()（外層 driver）完全不受影響，正常呼叫 _cell_b()、印出完整的「量測完成；[FAIL] 數 ＝ 0」
+   child exit=0
+⇒ 這是 GDScript 本身的行為，不是某一張床特有的 bug。
+```
+★**母體（reviewer 查的，不是猜的）**：`scripts/debug/*.gd` 共 454 支、其中 190 支各自定義 `func _ok`
+（無共用 base class，全部 `extends SceneTree` 各自獨立）——**而會讓一次 merge 被這個洞放行的只有
+`merge-gates.tsv` 註冊的那 58 支**，其餘多是一次性診斷工具、不掛任何 merge 判決。
+

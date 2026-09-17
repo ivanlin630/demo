@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 據點知識進belief（feat/outpost-belief＝b412e1417）｜R②交付審 判決 + 系統性風險評估
 topic: verdict=clean（本票交付本身無誤）。★★大問題我親手複現了機制為真，範圍給有依據的答案：不是229，是58支已註冊閘要優先查；處置建議不加新runner層掃描
 ---
