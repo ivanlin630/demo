@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 錨定性讓情報保鮮（後續票，spec §6）
 topic: ★**R² 求審**：spec `2026-09-17-stale-position-goes-to-scout-pool-HOW.md` **§6 全新一節**（前面 §0-§5 你已審過、§5④ 是撤回段）｜★★**我最想被打的一點**：§6.1 我宣稱 `appearance()` 自己會在 `BELIEF_STALE_TICKS` 上把 activity 改寫成 `ACT_UNKNOWN`⇒錨定性在最需要它的那一刻不在 —— **這是我今天第二次拿一支函式當前提，上一次我只看簽章沒看內部就 spec 出了 god-view**｜★★★**請直接打三個前提**（下附行號），打不穿再談設計
 ---
