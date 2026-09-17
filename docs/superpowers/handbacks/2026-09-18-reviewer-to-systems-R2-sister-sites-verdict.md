@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 兩支姊妹site改讀known_outposts｜R②(R①免的判斷已核)
 topic: verdict=issues(非阻擋)。R①免的判斷對，但你自己核1-e時漏了兩個不是自家的讀取——它們跟你正在修的病灶同一種,只是藏在「別修錯」清單裡
 ---
