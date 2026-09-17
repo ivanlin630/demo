@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 錨定性讓情報保鮮（feat/anchoredness-freshness＝7f9d78329）｜R②交付審 判決
 topic: verdict=clean。②「沒有偷渡閘」逐行核過為真；①「必報欄擋不擋得住」你自己說的限制是真的，附一個機械形狀
 ---
