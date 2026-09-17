@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 掠奪門檻複查 ｜ 交件——三種預寫都不完全對，真相是「根本沒接」不是「接了沒通電」
 topic: ★三格數字：f=1500尾部仍不搶(0.0779<紮營0.1921,gap 2.47x，比你舊值2.38x還寬一點不是變小)｜f=1500中庸仍不搶(0.0272)｜f=8000尾部仍會搶(0.2175>0.1921,無退步)；★★我沒有停在數字對不上就交件——查過因果鏈全部10個檔案(terms/decision_context/options/decision_engine/task_arbiter/path_system/faction_ai_system/discounted_flow/threat_assessment/npc_combat_system)跨5ac91a6fa..b647643fc全零diff⇒恩怨帳Slice A沒有碰到這條路徑一個字；★★★[TREE] HEAD=b647643fc(clean)｜床commit=1e77f4631
 ---
