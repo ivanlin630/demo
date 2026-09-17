@@ -1,0 +1,19 @@
+﻿[TREE] path=A:\GDS\demo commit=5cfe8001d clean=NO code-dirty=1 codehash=DFAE3E1A511F
+[TREE]   *** measuring the WORKING TREE, not commit 5cfe8001d ***
+[TREE]   ?? scripts/debug/raid_threshold_recheck_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 掠奪門檻複查：恩怨帳Slice A merge後，同一組fixture三格 ===
+★f=1500 尾部(好戰/貪婪.9)：food_days=11.4(門檻2.3，常態) 掠奪=0.0779 紮營=0.1921 首選=紮營(0.1921)
+   完整表：紮營=0.1921 建設=0.0950 掠奪=0.0779 攻擊=0.0779
+★f=1500 中庸(.5/.5)：food_days=11.4(門檻3.0，常態) 掠奪=0.0272 紮營=0.1921 首選=紮營(0.1921)
+   完整表：紮營=0.1921 建設=0.0950 掠奪=0.0272 攻擊=0.0272
+★f=8000 尾部(好戰/貪婪.9)：food_days=11.4(門檻2.3，常態) 掠奪=0.2175 紮營=0.1921 首選=掠奪(0.2175)
+   完整表：掠奪=0.2175 攻擊=0.2175 紮營=0.1921 建設=0.0950
+
+-- 三種預寫結果對號 --
+★判：尾部在1500仍不搶、但差距有變  方向對量級不夠  交新gap表，不准調係數
+-- 完成 --
+
