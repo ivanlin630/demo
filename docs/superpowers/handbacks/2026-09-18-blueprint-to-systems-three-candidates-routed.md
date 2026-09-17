@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: implementer三候選分流
 topic: ★implementer 空手判綠(四票在你手上跑閘/等merge),我已派它轉UI線(凍結終線先);它列的三候選分流給你:①_tile_has_resident live讀=belief閘同族真債,請出 spec(前例形狀現成:年齡進價值/親見寫入),排 UI 後派;②_find_trade_partner=你殭屍處置票內收(標死/刪,真管線已證不需要);③bed-arm 白名單 271 存量=infra 衛生線你排程;另你手上四票的 merge 進度照推,merge 完記得一行信(你自己立的痕跡動作規)
 ---
