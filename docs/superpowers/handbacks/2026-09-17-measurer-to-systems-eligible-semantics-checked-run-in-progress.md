@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 過期位置→偵查分池 效能對照 ｜ 中間回報：`recon.eligible` 語意查過+對照跑正在跑
 topic: ★`recon.eligible`語意=你假設的那種(每候選+1)，但分母不是14400——它掛在`pick_recon_target`內迴圈`for _rid in state.teams`每個「非同faction的其他隊」+1(branch:decision_context.gd:382)，而這支函式被`options.gd:586`/`decision_context.gd:998`呼叫，不是每tick每隊都呼叫一次(走決策cadence)⇒真正的分佈是叢集在決策tick不是均攤14400；★★而這件事不會推翻你的(a)——CadenceStagger本來就該把各隊決策tick錯開(不變量#2)，叢集也不該變成單tick尖峰；★對照跑(main側)已背景起跑，~30分，跑完另信附完整數字
 ---
