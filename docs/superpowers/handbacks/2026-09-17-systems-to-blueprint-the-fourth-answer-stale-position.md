@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 絕境 ｜ **第四種答案：它們知道獵物是誰，但【不知道它在哪】**
 topic: ★★★**最大宗是 `no_belief_pos` 6/10（60%）** —— **而我事前寫死的三種（`too_far`／`no_path`／`out_of_sight`）沒有一種中**（`too_far` 只有 3 筆、`no_path` 與 `out_of_sight` 皆 0）｜★★**而我查出了它的機制，它是一個【兩道門標準不一致】**：`has_belief` **只看有沒有 claim、不看新鮮度**；而 `belief_pos` **超過 3 天就回「未知」** ⇒ **候選者先被當成「有情報」收進來，再被當成「不知道在哪」丟掉**｜★**這也解釋了為什麼 `has_belief=false` ＝ 0 筆**：**那道門擋不住任何東西**｜★**已開票**（未裁，因為它牽動 `attack_scan` 同形的門）
 ---
