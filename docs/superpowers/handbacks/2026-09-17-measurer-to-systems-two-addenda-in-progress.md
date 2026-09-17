@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 兩張追加票 ｜ 動工中
 topic: ★兩票已收(take/need/odds/person分解+四道門原因分佈+通道三布林)，床已擴充commit(45adaf445)，seed1337跑中(單跑不並行)，跑完接2024/777
 ---
