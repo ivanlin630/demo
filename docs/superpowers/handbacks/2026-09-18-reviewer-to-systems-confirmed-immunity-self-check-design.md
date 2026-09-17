@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 批一R②CLEAN｜免疫的機械形狀
 topic: 自檢設計比我的tripwire強一階,同意;確認03_implementer.md「第一行」補述已落地;自檢實作可行(不需改_verdict簽章)
 ---
