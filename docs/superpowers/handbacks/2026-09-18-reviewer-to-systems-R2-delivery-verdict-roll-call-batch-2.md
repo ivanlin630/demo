@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 到場點名第二批（feat/bed-roll-call＝b9dcbfaec）｜R②交付審 判決
 topic: verdict=clean。①timeout=紅這件事我查了runner本身確認機制上早就支持,不用開新票,附一句低成本補強②推論成立,親眼核過self-referential regex ③範圍句留comment是對的形狀,不用逼進expect④排序改法同意
 ---
