@@ -13,11 +13,44 @@ extends SceneTree
 #   至少要造出【兩種 ptype × 同一個原因】—— 否則「Σ 對得上」只是在說「只有一個桶」。
 
 var _fail: int = 0
+const EXPECTED_CELLS: Array = ["_run"]
+
+# ★★★【到場點名】（systems 派工 2026-09-18；★reviewer 把這一族叫做【靜默變綠】那一種）——
+#   ★病的完整形狀：`_initialize` 與 `_run` **共用一個 `_fail` 計數** ⇒ `_run` 中途死掉時
+#     計數**停在假的 0** ⇒ 外層照印 `=== DONE === ALL PASS`、**rc 也是 0**
+#     ⇒ ★★**runner 的兩道防線（exit code ／ expect 命中）全部通過 ＝ 靜默變綠**。
+#   ★★★**這比前兩種形狀兇**：毒值型至少會印 FAIL、`quit(_run())` 型至少沒有橫幅 —— **這一種什麼都不缺。**
+#   ★★**`1／1` 不是「只有一格」，是【這支床的格粒度就是 `_run`】**（格是 inline 在 `_run` 裡的）。
+#   ★用法必須是 `_selftest_gate("格名").noop()`（死亡要發生在那一格自己的 frame 裡）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
 
 func _initialize() -> void:
 	_run()
-	if _fail == 0: print("=== DONE === ALL PASS")
-	else: print("=== DONE === %d FAIL" % _fail)
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if _fail == 0 and _miss.is_empty(): print("=== DONE === ALL PASS%s" % _suffix)
+	else: print("=== DONE === %d FAIL%s" % [_fail + _miss.size(), _suffix])
 	quit()
 
 func _ok(cond: bool, msg: String) -> void:
@@ -27,6 +60,7 @@ func _ok(cond: bool, msg: String) -> void:
 const REASONS: Array = ["目標不在名冊", "不知道對方在哪", "母隊只剩一人", "沒有可派的名人"]
 
 func _run() -> void:
+	_selftest_gate("_run").noop()
 	var state: WorldState = MeasureBedHelper.arm_and_new()
 	var fa := FactionAISystem.new()
 
@@ -63,3 +97,4 @@ func _run() -> void:
 	print("        ⇒ ★所以這支的 PASS 【不代表四個原因的 ptype 歸因都對】，只代表【接線形狀對】。")
 
 	Probe.enabled = false
+	_cell("_run")

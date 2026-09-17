@@ -1,0 +1,28 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=1416d0d3f clean=NO code-dirty=4 codehash=00362D78CD3A
+[TREE]   *** measuring the WORKING TREE, not commit 1416d0d3f ***
+[TREE]    M scripts/debug/board_price_carry_test.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/valuation_clamp_reconcile_test.gd
+[TREE]    M scripts/debug/world_schedule_due_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+     pop=1 res=food      stock= 999.0  price=0.000
+     pop=4 res=food      stock=  60.0  price=0.000
+     pop=8 res=food      stock=   0.0  price=10.000
+     pop=4 res=food      stock=   2.0  price=9.200
+     pop=8 res=material  stock=   0.0  price=8.000
+  ── 對帳（★真的印出來，不心算）──
+     deep_glut=1 ｜ glut=1 ｜ over_hi=0 ｜ normal=3 ｜ Σ=5 ｜ calls=5 ｜ price_zero=2
+  [PASS] 四桶互斥且窮盡：5 == calls 5
+  [PASS] ★上臂桶【恆 0】(over_hi=0)：shortage <= 1.0  放大後恰好等於上界、永不超過
+        ★★它非 0 ＝【推導錯了】(stock 變可負／放大係數改了) —— 那才是要停下來的時刻，
+           ★★★而【拆上臂 fp 逐位元不變】這條驗收，靠的就是這個推導。
+  [PASS] ★★價格恆 >= 0（本輪最小 0.000）—— floor 是【定義域】不是閥
+  [PASS] ★深過剩桶非空(1) 且【價格真的落到 0】(2 次) —— ★★沒有這條，『>= 0』在【從來不到 0】時也綠
+        ★★★而「food 大量落在深過剩桶」是 regime change 的入口（農隊賣糧收入歸零），
+            那要靠長跑床的比例讀數，★不是這支單元床能答的。
+=== DONE === ALL PASS｜到場點名 1／1
+
+[godot.ps1] child exit=0

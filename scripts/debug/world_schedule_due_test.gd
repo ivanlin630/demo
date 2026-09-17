@@ -10,11 +10,42 @@ extends SceneTree
 #   舊制【整段不 fire】而新制【到期後第一次補上】—— ★沒有這條，這張票等於什麼都沒做。
 
 var _fail: int = 0
+const EXPECTED_CELLS: Array = ["_run"]
+
+# ★★★【到場點名】（systems 派工；本支的格【藏在 `_run` 裡】而橫幅印在 `_initialize`）——
+#   ★實測（2026-09-18）：讓 `_run` 中途死掉 ⇒ **通過橫幅照印、rc=0** ⇒ 「跑完了」與「死在一半」長得一樣。
+#   ★★**`1／1` 不是「只有一格」，是【這支床的格粒度就是 `_run`】** —— 格是 inline 在 `_run` 裡的，
+#     能被獨立點名的最小單位就是 `_run` 本身；要更細得先把格拆成 func（那是另一票）。
+#   ★★★用法必須是 `_selftest_gate("格名").noop()`（死亡要發生在那一格自己的 frame 裡）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
 
 func _initialize() -> void:
 	_run()
-	if _fail == 0: print("=== DONE === ALL PASS")
-	else: print("=== DONE === %d FAIL" % _fail)
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if _fail == 0 and _miss.is_empty(): print("=== DONE === ALL PASS%s" % _suffix)
+	else: print("=== DONE === %d FAIL%s" % [_fail + _miss.size(), _suffix])
 	quit()
 
 func _ok(cond: bool, msg: String) -> void:
@@ -48,6 +79,7 @@ func _new_fire_ticks(total: int, outer: int, cadence: int) -> Array:
 	return out
 
 func _run() -> void:
+	_selftest_gate("_run").noop()
 	var DAY: int = WorldState.TICKS_PER_DAY          # 1440
 	var MONTH: int = WorldState.TICKS_PER_MONTH      # 43200
 	var HARVEST_OUTER: int = DAY / 4                 # 360（_step4c_harvest_tick 的外層）
@@ -87,3 +119,4 @@ func _run() -> void:
 		"③★第一次呼叫（t=%d、next=%d）【不 fire】" % [HARVEST_OUTER, MONTH])
 	print("        ★★這條就是 fp 實跑 A/B 抓到的那個坑：原本初值 0 ⇒ 第一次必 fire，")
 	print("           而舊制在 t=%d 不 fire（%d %% 1440 != 0）⇒ ★★★世界從第一天就岔開。" % [HARVEST_OUTER, HARVEST_OUTER])
+	_cell("_run")

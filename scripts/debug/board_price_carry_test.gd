@@ -12,11 +12,42 @@ extends SceneTree
 #   ⇒ 所以每一格都印【分母】，而分母為 0 時判【不可判】而不是判綠。
 
 var _fail: int = 0
+const EXPECTED_CELLS: Array = ["_run"]
+
+# ★★★【到場點名】（systems 派工；本支的格【藏在 `_run` 裡】而橫幅印在 `_initialize`）——
+#   ★實測（2026-09-18）：讓 `_run` 中途死掉 ⇒ **通過橫幅照印、rc=0** ⇒ 「跑完了」與「死在一半」長得一樣。
+#   ★★**`1／1` 不是「只有一格」，是【這支床的格粒度就是 `_run`】** —— 格是 inline 在 `_run` 裡的，
+#     能被獨立點名的最小單位就是 `_run` 本身；要更細得先把格拆成 func（那是另一票）。
+#   ★★★用法必須是 `_selftest_gate("格名").noop()`（死亡要發生在那一格自己的 frame 裡）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
 
 func _initialize() -> void:
 	_run()
-	if _fail == 0: print("=== DONE === ALL PASS")
-	else: print("=== DONE === %d FAIL" % _fail)
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if _fail == 0 and _miss.is_empty(): print("=== DONE === ALL PASS%s" % _suffix)
+	else: print("=== DONE === %d FAIL%s" % [_fail + _miss.size(), _suffix])
 	quit()
 
 func _ok(cond: bool, msg: String) -> void:
@@ -32,6 +63,7 @@ func _mk_outpost(state: WorldState, pos: Vector2i, owner: int) -> HexTileData:
 	return t
 
 func _run() -> void:
+	_selftest_gate("_run").noop()
 	var state: WorldState = MeasureBedHelper.arm_and_new()
 	var os := OrderSystem.new()
 
@@ -140,3 +172,4 @@ func _run() -> void:
 	var after_proxy: int = int(Probe.counts.get("trade.arb_proxy.buy", 0))
 	print("     去價後 proxy 計數 %d → %d ｜ best 空? %s" % [before_proxy, after_proxy, str(best_noprice.is_empty())])
 	_ok(after_proxy > before_proxy, "★沒有 price 就退回舊 proxy（哨兵 -1.0 真的在分辨「沒帶到」與「價是 0」）")
+	_cell("_run")

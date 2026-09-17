@@ -1,0 +1,45 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=1416d0d3f clean=NO code-dirty=6 codehash=81E9CA00AD62
+[TREE]   *** measuring the WORKING TREE, not commit 1416d0d3f ***
+[TREE]    M scripts/debug/belief_freshness_invariant_test.gd
+[TREE]    M scripts/debug/board_price_carry_test.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/raid_expected_value_bed.gd
+[TREE]    M scripts/debug/valuation_clamp_reconcile_test.gd
+[TREE]    M scripts/debug/world_schedule_due_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+  [PASS] 前提：seller 真的有人（pop=5）──沒這格，下面每一個價格都是在量一個空
+[Order] Team2 sell goods ×10 (oid=1)
+  [PASS] 掛單成功 oid=1
+  ──  原生掛單 → 板 entry ──
+     分母（板上原生 entry 數）= 1
+  [PASS] 板上恰有 1 筆原生 entry（★分母不是 0）
+     native price = 12.6000
+  [PASS] 原生 entry 的 price 欄存在且非哨兵（-1.0 ＝ 沒帶到）
+  [PASS] ★★★自報價 > 0：不能拿 0 去驗【值沒變】——否則一個【到處寫 0】的 bug 會全部通過
+  ──  出發前看到的價 vs 到場用的價 ──
+     出發前(message.params.price) = 12.6000 ｜ 到場(entry.price) = 12.6000
+  [PASS] 訊息載體帶得到價（★這一格紅＝order_system:286 漏抄，spec §2 原本沒列到的那站）
+  [PASS] 兩個時刻同價（凍結語意）
+  ──  relay deposit → 遠處的板 ──
+     分母（relayed entry 數）= 1
+     帶得到價 = 1 / 1
+  [PASS] relayed entry 帶價比例 == 1.0（§5）
+  [PASS] 跨兩次載體轉換後價格未變
+  ──  套利剩餘：兩邊各要有正數（★不是「有欄位」）──
+[Order] Team4 buy goods ×10 (oid=2)
+     buyer 自報 bid = 30.0000（缺貨  該高）
+  [PASS] 買單自報價 > 0（★缺貨方的估值不該是 0）
+     third 自評 goods = 0.0000 ｜ 剩餘 = (30.0000  0.0000) × qty
+  [PASS] ★賣邊：他報的價高於我的估值  套利單被選中（★而舊式子在 own_val==0 時 gain==0  選不出來）
+  [PASS] 選中的是那張買單的發起隊
+     tap: arb_surplus.buy=1 arb_proxy.buy=0
+  [PASS] ★走的是【剩餘】那條路，不是舊 proxy（★沒有這格，公式換了但沒被走到分不出來）
+  ──  鑑別力（★把機制關掉，這條還會綠嗎）──
+     去價後 proxy 計數 0 → 1 ｜ best 空? true
+  [PASS] ★沒有 price 就退回舊 proxy（哨兵 -1.0 真的在分辨「沒帶到」與「價是 0」）
+=== DONE === ALL PASS｜到場點名 1／1
+
+[godot.ps1] child exit=0

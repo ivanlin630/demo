@@ -12,6 +12,24 @@ extends SceneTree
 #   ⇒ **格3 的「同量級」只能證明【尺】相同，不能證明【值】對** ——
 #   ★★★**不要拿格3 綠了當成「贏率也對了」**（那是 `odds-must-read-the-target` 那張票）。
 
+
+# ★★★【免疫證據，印出來並釘進 expect】（systems 裁 2026-09-18；形狀同 bed_arm／grudge）——
+#   ★本床**不加到場點名**：**通過橫幅印在 `_run` 裡面** ⇒ `_run` 中途死掉 ⇒ **橫幅從來沒印**
+#     ⇒ expect 不命中 ⇒ 閘紅。★★實測（2026-09-18）：注射 ⇒ 無橫幅、rc=0、20 秒結束
+#     （★**簽名不是 timeout**：控制權回到 `_initialize`、`quit()` 照跑）。
+#   ★★★**而 rc=0 表示 runner 的第一道防線（`RC -ne 0`）抓不到** ⇒ **只剩 expect 這一條在守**
+#     ⇒ **expect 釘的字串必須印在【最後一格之後】**，否則這支床會靜默變綠。
+#   ★免疫來源 ＝ 橫幅的位置 ⇒ 把它印出來釘進 expect：
+#     **有人把那一行搬到 `_initialize`（很合理的重構）⇒ 免疫當天消失、而畫面不會紅** ⇒ 這一欄變 false ⇒ 紅。
+func _immunity_banner_inside() -> bool:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/raid_expected_value_bed.gd")
+	var head: int = src.find("\nfunc _run(")
+	if head == -1:
+		return false
+	var tail: int = src.find("\nfunc ", head + 10)
+	var body: String = src.substr(head, (tail - head) if tail != -1 else src.length() - head)
+	return body.contains("量測完成；[FAIL] 數")
+
 func _initialize() -> void:
 	_run(); quit(0 if _fails == 0 else 1)
 
@@ -153,7 +171,7 @@ func _run() -> void:
 	_run_desperation_cell()
 
 	print("")
-	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)
+	print("-- 量測完成；[FAIL] 數 ＝ %d｜[免疫] 橫幅在 _run 內＝%s --" % [_fails, str(_immunity_banner_inside())])
 
 # ★★★【格8：絕境格】（blueprint 逐字要的，systems 派工 2026-09-16）——
 #   ★它守的不是「常態下誰會搶」（那是風格問題），是

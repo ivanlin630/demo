@@ -1,0 +1,60 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=1416d0d3f clean=NO code-dirty=8 codehash=FC17ACF6DFC9
+[TREE]   *** measuring the WORKING TREE, not commit 1416d0d3f ***
+[TREE]    M scripts/debug/belief_freshness_invariant_test.gd
+[TREE]    M scripts/debug/board_price_carry_test.gd
+[TREE]    M scripts/debug/envoy_ptype_reconcile_test.gd
+[TREE]    M scripts/debug/escrow_audit_test.gd
+[TREE]    M scripts/debug/raid_expected_value_bed.gd
+[TREE]    M scripts/debug/valuation_clamp_reconcile_test.gd
+[TREE]    M scripts/debug/wage_penalty_test.gd
+[TREE]    M scripts/debug/world_schedule_due_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+  ──  有錢卻不發（★懲罰必須發生）──
+[Salary] Team1 薪水結算 coin=99999.6
+[Salary] Team1 薪水結算 coin=99999.2
+[Salary] Team1 薪水結算 coin=99998.8
+     coin 充足 = 100000 ｜ 忠誠 0.8000 → 0.7820
+     reason: paid_full=0 willful=3 unpayable=0
+  [PASS] ★情境真的造出來了：`underpaid_willful` > 0（不是付滿）
+  [PASS] ★★且【沒有人被付滿】──否則情境是混的
+  [PASS] ★★★懲罰真的發生：忠誠 0.8000 → 0.7820（必須下降）
+  [PASS] ★★有錢的隊不得被判成【付不出】
+  ──  無幣村（★忠誠流失必須為 0）──
+[Salary] Team2 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team2 薪水結算 coin=0.0
+[Salary] Team2 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team2 薪水結算 coin=0.0
+[Salary] Team2 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team2 薪水結算 coin=0.0
+     coin = 0 ｜ 忠誠 0.8000 → 0.8000 ｜ unrest 0 → 0
+     reason: paid_full=0 willful=0 unpayable=3 ｜ unrest.suppressed=3
+  [PASS] ★無幣村：忠誠【沒有】流失
+  [PASS] ★★無幣村：unrest【沒有】增加（同一把刀的另一半）
+  [PASS] ★★★母體：`unpayable_local` > 0 —— 沒有這格，「忠誠沒掉」分不出【修好了】與【根本沒發薪】
+  ──  玩家領主定零薪（★不得被豁免）──
+[Salary] Team3 薪水結算 coin=100000.0
+[Salary] Team3 薪水結算 coin=100000.0
+[Salary] Team3 薪水結算 coin=100000.0
+     coin 充足 = 100000 ｜ salary=0 ｜ 忠誠 0.8000 → 0.7100
+     reason: paid_full=0 willful=3 unpayable=0
+  [PASS] ★玩家領主定零薪  判【不肯付】（★★若軸鍵在 npc_salary_mult，這格會紅）
+  [PASS] ★★★懲罰真的落在玩家領主身上：忠誠 0.8000 → 0.7100
+  [PASS] ★團庫有錢  不得被判成【付不出】
+  ──  貪婪領主＋窮村（★換軸的真陽性對照）──
+[Salary] Team4 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team4 薪水結算 coin=0.0
+[Salary] Team4 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team4 薪水結算 coin=0.0
+[Salary] Team4 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team4 薪水結算 coin=0.0
+     coin = 0 （→ budget_ratio = 0 【每一期】）｜mult 0.8 （→ wage_ratio 0.8）
+     忠誠 0.8000 → 0.7820 ｜ willful=3 unpayable=3
+  [PASS] ★貪婪領主在窮村【仍然要罰】──沒錢不是定低薪的免死金牌（改前這格必紅）
+  [PASS] ★★工資軸 tap 點了：underpaid_willful > 0
+  [PASS] ★★★母體：unpayable_local > 0  預算軸真的卡了（★這格舊版也綠，它不是鑑別格）
+=== DONE === ALL PASS｜到場點名 1／1
+
+[godot.ps1] child exit=0

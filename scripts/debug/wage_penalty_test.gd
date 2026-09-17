@@ -9,14 +9,47 @@ extends SceneTree
 #   ——沒有它們，「不扣忠誠」的兩種（付滿了 vs 付不起）印出來一樣。
 
 var _fail: int = 0
+const EXPECTED_CELLS: Array = ["_run"]
+
+# ★★★【到場點名】（systems 派工 2026-09-18；★reviewer 把這一族叫做【靜默變綠】那一種）——
+#   ★病的完整形狀：`_initialize` 與 `_run` **共用一個 `_fail` 計數** ⇒ `_run` 中途死掉時
+#     計數**停在假的 0** ⇒ 外層照印 `=== DONE === ALL PASS`、**rc 也是 0**
+#     ⇒ ★★**runner 的兩道防線（exit code ／ expect 命中）全部通過 ＝ 靜默變綠**。
+#   ★★★**這比前兩種形狀兇**：毒值型至少會印 FAIL、`quit(_run())` 型至少沒有橫幅 —— **這一種什麼都不缺。**
+#   ★★**`1／1` 不是「只有一格」，是【這支床的格粒度就是 `_run`】**（格是 inline 在 `_run` 裡的）。
+#   ★用法必須是 `_selftest_gate("格名").noop()`（死亡要發生在那一格自己的 frame 裡）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_missing() -> Array:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return missing
 func _ok(c: bool, m: String) -> void:
 	if c: print("  [PASS] %s" % m)
 	else: _fail += 1; print("  [FAIL] %s" % m)
 
 func _initialize() -> void:
 	_run()
-	if _fail == 0: print("=== DONE === ALL PASS")
-	else: print("=== DONE === %d FAIL" % _fail)
+	var _miss: Array = _roll_call_missing()
+	var _suffix: String = "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+	if _fail == 0 and _miss.is_empty(): print("=== DONE === ALL PASS%s" % _suffix)
+	else: print("=== DONE === %d FAIL%s" % [_fail + _miss.size(), _suffix])
 	quit()
 
 func _mk_team(state: WorldState, tid: int, coin: float, greed_v: float, honor_v: float) -> Array:
@@ -41,6 +74,7 @@ func _mk_team(state: WorldState, tid: int, coin: float, greed_v: float, honor_v:
 	return [t, m]
 
 func _run() -> void:
+	_selftest_gate("_run").noop()
 	var state: WorldState = MeasureBedHelper.arm_and_new()
 	state.world.current_tick = SalarySystem.SALARY_INTERVAL * 3
 	var ss := SalarySystem.new()
@@ -161,3 +195,4 @@ func _run() -> void:
 		"★④貪婪領主在窮村【仍然要罰】――沒錢不是定低薪的免死金牌（改前這格必紅）")
 	_ok(w4 > 0, "★★④工資軸 tap 點了：underpaid_willful > 0")
 	_ok(u4 > 0, "★★★④母體：unpayable_local > 0 ⇒ 預算軸真的卡了（★這格舊版也綠，它不是鑑別格）")
+	_cell("_run")
