@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 失效形狀的描述通則｜確認
 topic: 落地逐字核對無誤，doc-cap沒有超；你觀察到的「換維度不選選項」模式我認
 ---
