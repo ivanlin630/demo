@@ -7472,16 +7472,28 @@ func _find_occupy_target(state: WorldState, team: TeamData) -> int:
 			#   跟著 Probe 開關走 ⇒ ★★關掉 Probe 時行為不同（觀測改變被觀測物的另一種形態）
 			if Probe.enabled: Probe.bump("occupy.scan_kill_nopos")
 			continue
-		# ★★所有權/control 查 belief store（team_tile_known），★★★不是 state.world.tiles 全圖
-		var _tk: Dictionary = state.team_tile_known.get(team.team_id, {})
+		# ★★★【閘過了不等於可以讀 live】（票：佔村掃改讀 known_outposts 2026-09-18）——
+		#   ★舊版：`team_tile_known.has(tile_id)` 只問「**我有沒有見過這塊地**」，
+		#     閘過之後**直接 live 讀** `tile.outpost_level`／`tile.outpost_owner`
+		#     ⇒ ★★「我走過那塊地」被當成「我知道**現在**那裡有一座**誰的**城」（憲法 §1a）。
+		#   ★★★**而現在它不只是原則問題**：`market-ads` 會讓 relay 把**更多 tile** 寫進 `team_tile_known`
+		#     ⇒ 那個只問存在的閘會放行 ⇒ **一則【交易】訊息會變成一條【軍事】資訊的通道**。
+		#   ⇒ 改讀**我自己看過的據點**（`known_outposts`：親見才寫子記錄、relay 只寫 key）。
 		var _tile_id: int = tpos.x * 1000 + tpos.y
-		if not _tk.has(_tile_id):
+		var _op_rec: Dictionary = {}
+		for _rec in BeliefSystem.known_outposts(state, team.team_id):
+			var _rp: Vector2i = _rec["tile_pos"]
+			if int(_rp.x) * 1000 + int(_rp.y) == _tile_id:
+				_op_rec = _rec
+				break
+		if _op_rec.is_empty():
+			# ★這一格涵蓋兩種：①那塊地我沒見過 ②★見過、但**沒看過它上面有城**（例如只有 market 子記錄）
 			if Probe.enabled: Probe.bump("occupy.scan_kill_tile_unknown")
 			continue
 		# 可據=站在自家 outpost 的定居村（村格）；已是自己的不算
-		var tile: HexTileData = state.world.tiles.get(_tile_id)
-		if tile == null or tile.outpost_level == 0 or tile.outpost_owner != tid: continue
-		if tile.outpost_owner == team.team_id: continue
+		#   ★★owner／level 讀【觀察當時】寫下的子記錄，不是現在的 live 值
+		if int(_op_rec.get("level", 0)) == 0 or int(_op_rec.get("owner_id", -1)) != tid: continue
+		if int(_op_rec.get("owner_id", -1)) == team.team_id: continue
 		Probe.bump("occupy.scan_outpost_target")   # DIAG：站自家 outpost 的候選
 		if not BeliefSystem.has_belief(state, team.team_id, tid):
 			Probe.bump("occupy.scan_kill_nobel"); continue   # 無情報→不選（禁 god-view）
