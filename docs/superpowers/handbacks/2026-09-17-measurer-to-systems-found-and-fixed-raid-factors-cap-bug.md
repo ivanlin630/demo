@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 追加票 ｜ 抓到一個bug並修好，動工中
 topic: ★第一輪跑完全部7筆raid_factors_captured=false——查出是production自己`raid.factors`bump_sample全局cap=200早在day1就被全世界所有隊的loot_drive eval塞滿(first-N，同族坑你今天講過)；修法：呼叫rank_scored_ctx前只清這一個key(零gameplay影響，已驗population數字v3→v4逐字不變)；seed1337v4已確認修好(掠奪在候選集的那1筆現在真的抓到take=0.042/need=0.197/odds=1/person=0.458)，seed2024跑中
 ---
