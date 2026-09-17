@@ -82,14 +82,32 @@ func _test_negative_message() -> void:
 
 func _test_no_hot_path_cost() -> void:
 	print("-- ④ 零熱路徑成本：phase_timing 關閉時不得做任何額外工作 --")
-	var f := FileAccess.open("res://scripts/simulation/faction_ai_system.gd", FileAccess.READ)
-	var src: String = f.get_as_text() if f != null else ""
-	if f != null:
+	# ★★★【錨換成「去找它，而不是假設它在哪」】（2026-09-18 修）——
+	#   ★舊版寫死在 `faction_ai_system.gd` 裡找 `phase_report(_fai_ph`，而**呼叫點已經搬到
+	#     `sim_runner.gd`** ⇒ ★★這一格從那天起就紅，★★★**而沒有人看到，因為這支床沒有註冊成閘**。
+	#   ⇒ 新版**掃 `scripts/simulation/` 找呼叫點**：★找不到才是母體地板（真的沒有人呼叫它）。
+	#   ★★而守衛的內容不變：**呼叫點必須在 `phase_timing` 那道旗標底下**。
+	var files: Array = ["res://scripts/simulation/sim_runner.gd",
+		"res://scripts/simulation/faction_ai_system.gd"]
+	var found_path: String = ""
+	var before: String = ""
+	for fp in files:
+		var f := FileAccess.open(String(fp), FileAccess.READ)
+		if f == null:
+			continue
+		var src: String = f.get_as_text()
 		f.close()
-	var idx: int = src.find("phase_report(_fai_ph")
-	_ok(idx > 0, "④找得到呼叫點（母體地板）")
-	# ★呼叫點前面 400 字內必須有 `if _zoom`（＝phase_timing 那道旗標）
-	var before: String = src.substr(maxi(0, idx - 400), mini(400, idx))
-	_ok(before.contains("if _zoom"),
-		"④phase_report 只在 phase_timing 開啟時被呼叫（★關閉時零額外工作）")
+		var idx: int = src.find("phase_report(")
+		# ★跳過定義本身（`static func phase_report(`）
+		while idx > 0 and src.substr(maxi(0, idx - 20), 20).contains("func "):
+			idx = src.find("phase_report(", idx + 1)
+		if idx > 0:
+			found_path = String(fp)
+			before = src.substr(maxi(0, idx - 400), mini(400, idx))
+			break
+	print("     呼叫點：%s" % (found_path if found_path != "" else "★找不到"))
+	_ok(found_path != "", "④找得到呼叫點（母體地板）—— ★掃 scripts/simulation/，不假設它住在哪一個檔")
+	_ok(before.contains("phase_timing"),
+		"④phase_report 只在 `phase_timing` 開啟時被呼叫（★關閉時零額外工作）"
+		+ "｜★這一格守的是【旗標在不在】，不是【它在哪一個檔】")
 	_sections += 1

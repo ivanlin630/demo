@@ -1,0 +1,33 @@
+[TREE] path=A:\GDS\demo\.worktrees\phasetree commit=819f3b7a3 clean=NO code-dirty=1 codehash=E9F6F7EDC405
+[TREE]   *** measuring the WORKING TREE, not commit 819f3b7a3 ***
+[TREE]    M scripts/debug/phase_tree_net_cost_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 相位樹床 ===
+--  淨值：父的 self ＝ total  直接子 --
+    登記 3/3 | assign.leader_unified=self400us/tot400us(kids1) loop1.assign_tasks=self350us/tot1000us(kids4) assign.members=self250us/tot250us(kids1) ｜[mult
+  PASS: 父 self ＝ 1000  400  250 ＝ 350（★兒子只減【直接】子，不重複減孫）
+  PASS: 葉子的 self ＝ 它自己的 total
+    multi：登記 2/2 | loop1.assign_tasks=self1000us/tot1000us(kids4) ｜[multi不參與淨值self≡tot] gather.market=tot900us ｜[本輪未出現] loop1.factions、loop1.member_snap、loop1
+  PASS: ★★multi 不被減進父親（否則父親會被【多減】而看起來很乾淨）
+  PASS: ★★multi 列【分段印】且標明 self≡tot（★★★混在同一排序裡＝同一張表兩種口徑）
+  PASS: ★每一列印【已登記兒子數】—— 分得出「真的沒有兒子」與「兒子沒被登記」
+--  閘會咬：沒登記的名字  具名紅；登記後回綠 --
+  PASS: 新 tap 沒登記  【具名】亮（名字要印出來，不是只說「有一個」）
+  PASS: ★成對：全部登記過  不亮（不亂咬）
+  PASS: 印出【已登記／實際出現】兩個數字（★相等才算表是完整的）
+  PASS: ★空母體：印 0/0 而不是假裝正常（★★母體地板）
+-- ★★★負值：紅燈訊息必須把【三種成因】並列 --
+    登記 2/2 ★★★self_us 為負：loop1.infra（三種成因：父子表寫錯 相位區間重疊 ★這個名字代表不只一件事 —— gather.* / unified.* 是第三種的候選，處置是【拆開計時鍵】不是改父子表） | infra.facility=self400us/tot400us(kids0) loop1.infra=self-300us/tot100us(kids2) ｜[multi不參與淨值self≡tot] ｜[本輪未出現] loop1.fa
+  PASS: 負值被具名
+  PASS: ★★★三種成因並列（★否則下一個看到紅燈的人只會去改父子表，而問題可能不在那）
+  PASS: ★點名第三種的候選族群與它的【處置】
+--  零熱路徑成本：phase_timing 關閉時不得做任何額外工作 --
+     呼叫點：res://scripts/simulation/sim_runner.gd
+  PASS: 找得到呼叫點（母體地板）—— ★掃 scripts/simulation/，不假設它住在哪一個檔
+  PASS: phase_report 只在 `phase_timing` 開啟時被呼叫（★關閉時零額外工作）｜★這一格守的是【旗標在不在】，不是【它在哪一個檔】
+=== DONE === SECTIONS=4/4 FAILS=0
+
+[godot.ps1] child exit=0
