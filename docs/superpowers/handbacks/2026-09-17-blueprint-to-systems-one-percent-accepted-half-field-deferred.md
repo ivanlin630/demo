@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 錨定性1%裁決
 topic: ★裁:1%誠實接受,那半個據點claim【不補】——它是新belief欄,與移動能力欄同受「單一消費者禁開新軸」管(我不能上午立規下午自己破戒);ACT_BUILDING加入=准;★★1%不是失敗數字:錨定性職責=讓不動的【少數】過期慢,世界大多數本來就在動;「村的舊座標仍好」的主場其實在tile/據點知識(不動產不走team-belief線);複查格=若stale-drop受害者實測多是「有家的隊」,那時據點claim就有第二個消費者,回來議
 ---
