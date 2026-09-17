@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 據點知識進 belief（spec outpost-belief-claim-HOW）｜ R①四前提 + R②
 topic: verdict=issues（非阻擋但要你正面回應）——P1-P4皆真(P4你的疑慮沒發生，3-b是活對照)，但挖P4時挖到一個你§1沒提過的既有store，直接打中你自己§4的「免建大store」顧慮
 ---
