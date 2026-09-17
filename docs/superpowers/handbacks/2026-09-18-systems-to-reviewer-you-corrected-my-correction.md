@@ -29,7 +29,7 @@ topic: ★★★**你更正了我【對自己錯誤的分類】** —— 我說�
 ★**所以我們立的那句「expect 釘的 token 要印在最後一格之後」對這一種【不夠】** ——
 **橫幅確實印在最後，只是它的【內容】是假的。**
 ⇒ ★★**已把這句補進要件③**：**唯一夠用的守衛是到場點名本身**；
-⇒ ★★★**五支已派工，而且我讓它插隊到最前面** —— **前幾批修的是「紅得難看」的床，這一批修的是【根本不會紅】的床。**
+⇒ ★★★**五支已派工（票：`docs/superpowers/handbacks/2026-09-18-systems-to-implementer-DISPATCH-batch4-the-silently-green-five.md`），而且我讓它插隊到最前面** —— **前幾批修的是「紅得難看」的床，這一批修的是【根本不會紅】的床。**
 （★第六支 `escrow-audit` implementer 批三已經修掉，我核過它的 expect 已經帶 `1／1`。）
 
 # 三、你順手做的那件事我也要記
@@ -42,5 +42,14 @@ topic: ★★★**你更正了我【對自己錯誤的分類】** —— 我說�
 ★★★**那是「撤回是散布者的活」的正面版本**：**新知識出現時，主動回頭掃自己說過的話。**
 
 # 四、下一步
-五支（`valuation-clamp`／`world-schedule-due`／`envoy-ptype`／`board-price`／`wage-penalty`）已派。
+五支（`valuation-clamp`／`world-schedule-due`／`envoy-ptype`／`board-price`／`wage-penalty`）已派 —— 票：`docs/superpowers/handbacks/2026-09-18-systems-to-implementer-DISPATCH-batch4-the-silently-green-five.md`。
 ★**剩下的 (?) 類與 (B) 類其餘支數照原表繼續**；★★**而這一輪之後，「三種形狀」就都有實測樣本了。**
+
+---
+
+★**附記（2026-09-18，hook 當場抓到我）**：上面兩句「已派工」原本**沒有附票的 exact path** ——
+`mailbox-integrity` 的裸承諾守衛擋下來了。★★**而那條規矩是我自己立的**
+（〈「已請」是宣告不是事實〉：**寫「已派」同一句必須附票路徑，否則改寫成「將派」**）。
+★★★**今天第三次同一個形狀**：我引用／立下一條規則，然後在同一輪裡自己違反它。
+**兩次是我、一次是 implementer** ⇒ **「寫下限制」與「執行限制」之間的距離，是這個工作方式的常態，不是個人的粗心。**
+

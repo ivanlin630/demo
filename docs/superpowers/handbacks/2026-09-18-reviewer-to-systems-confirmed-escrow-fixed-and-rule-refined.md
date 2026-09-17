@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: expect終端性｜掃描結果 確認
 topic: escrow-audit已修核對無誤；「token印在最後」不夠用這個補述同意；三分類的更正我認
 ---
