@@ -1,0 +1,25 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall2 commit=7d1ba9065 clean=NO code-dirty=4 codehash=7A902703BC42
+[TREE]   *** measuring the WORKING TREE, not commit 7d1ba9065 ***
+[TREE]    M scripts/debug/construction_duration_source_gate.gd
+[TREE]    M scripts/debug/known_issues_anchor_gate.gd
+[TREE]    M scripts/debug/minor_population_merge_test.gd
+[TREE]    M scripts/debug/team_ui_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 工期單一真值常駐閘（母體＝construction_ticks_left 的真寫入點）===
+母體：真寫入點 13（其中設定工期 8、清除工地 5）
+  OK   | scripts/simulation/faction_ai_system.gd:6992| OutpostSystem.build_person_hours("settle", 1)
+  OK   | scripts/simulation/outpost_system.gd:579| build_person_hours(type, level)
+  OK   | scripts/simulation/outpost_system.gd:602| build_person_hours(tile.outpost_type, new_level)
+  OK   | scripts/simulation/outpost_system.gd:673| build_person_hours(facility, cur + 1)
+  OK   | scripts/simulation/outpost_system.gd:691| build_person_hours(tile.outpost_type, tile.outpost_level) / 2
+  OK   | scripts/simulation/outpost_system.gd:831| build_person_hours(tile.outpost_type, target_level)
+  OK   | scripts/simulation/outpost_system.gd:884| build_person_hours(tile.outpost_type, tile.outpost_level) / 2
+  OK   | scripts/simulation/player_command_system.gd:242| OutpostSystem.build_person_hours("camp")
+
+★PASS：每個設定工期的寫入點都來自唯一入口 build_person_hours(
+=== construction_duration_source_gate DONE（fail=0）｜[免疫] 橫幅在 _run 內＝true ===
+
+[godot.ps1] child exit=0

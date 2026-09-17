@@ -1,0 +1,28 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall2 commit=7d1ba9065 clean=NO code-dirty=4 codehash=7A902703BC42
+[TREE]   *** measuring the WORKING TREE, not commit 7d1ba9065 ***
+[TREE]    M scripts/debug/construction_duration_source_gate.gd
+[TREE]    M scripts/debug/known_issues_anchor_gate.gd
+[TREE]    M scripts/debug/minor_population_merge_test.gd
+[TREE]    M scripts/debug/team_ui_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== TEAM UI TEST START ===
+
+-- members_detail snapshot --
+  [OK] members_detail: 3 members, fields present, values correct
+
+-- team_stats snapshot --
+  [OK] team_stats: food_qty=200 cap=50.0 count=1
+
+-- TeamUiHelper rendering --
+  [OK] render_quick_card
+  [OK] render_health_detail
+  [OK] render_equipment_detail
+  [OK] render_stats_detail
+  [OK] render_three_columns
+  [OK] render_member_list_row
+=== TEAM UI TEST DONE ===｜到場點名 3／3
+
+[godot.ps1] child exit=0

@@ -24,6 +24,24 @@ const ENTRY: String = "build_person_hours("
 var _fail := 0
 var _rows: Array = []
 
+
+# ★★★【免疫證據，印出來並釘進 expect】（systems 裁 2026-09-18；形狀同 bed_arm／grudge）——
+#   ★本床**不加到場點名**：**通過橫幅印在 `_run` 裡面** ⇒ `_run` 中途死掉 ⇒ **橫幅從來沒印**
+#     ⇒ expect 不命中 ⇒ 閘紅。
+#   ★★**實測（2026-09-18 ①注射）**：注射 ⇒ **無橫幅、rc=0、1 秒結束**
+#     ⇒ ★**簽名不是 timeout**（控制權回到 `_initialize`、`quit()` 照跑）
+#     ⇒ ★★★**rc=0 ⇒ runner 第一道防線（`RC -ne 0`）抓不到 ⇒ 只剩 expect 這一條在守**
+#       ⇒ **expect 釘的字串必須印在【最後一格之後】**，否則這支床會靜默變綠。
+#   ★免疫來源 ＝ 橫幅的位置：有人把那一行搬到 `_initialize` ⇒ 這一欄變 false ⇒ 閘紅。
+func _immunity_banner_inside() -> bool:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/construction_duration_source_gate.gd")
+	var head: int = src.find("\nfunc _run(")
+	if head == -1:
+		return false
+	var tail: int = src.find("\nfunc ", head + 10)
+	var body: String = src.substr(head, (tail - head) if tail != -1 else src.length() - head)
+	return body.contains("construction_duration_source_gate DONE")
+
 func _initialize() -> void:
 	_run(); quit()
 
@@ -114,4 +132,4 @@ func _run() -> void:
 	var wf := FileAccess.open(path, FileAccess.WRITE)
 	if wf != null:
 		wf.store_string("\n".join(PackedStringArray(out)) + "\n"); wf.close()
-	print("=== construction_duration_source_gate DONE（fail=%d）===" % _fail)
+	print("=== construction_duration_source_gate DONE（fail=%d）｜[免疫] 橫幅在 _run 內＝%s ===" % [_fail, str(_immunity_banner_inside())])

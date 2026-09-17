@@ -5,6 +5,20 @@ func _ok(c: bool, m: String) -> void:
 	if c: print("  [PASS] %s" % m)
 	else: _fail += 1; print("  [FAIL] %s" % m)
 
+
+# ★★★【免疫證據，印出來並釘進 expect】（systems 裁 2026-09-18；形狀同 merchant／payroll）——
+#   ★本床**不加到場點名**：**每一格都 inline 在 `_initialize` 裡** ⇒ 一格死掉 ⇒ `_initialize` 一起死
+#     ⇒ `quit()` 到不了 ⇒ ★★**進程掛住、被 wrapper timeout 殺（rc≠0）、通過橫幅從來沒印**。
+#   ★**實測（2026-09-18 的①注射）**：inline 注射 ⇒ **rc=98、掛住 151 秒、無橫幅**
+#     （原始輸出：`docs/measurements/2026-09-18-roll-call-batch5/`）。
+#   ★★★免疫來源 ＝ **格沒有被拆成自己的 func** ⇒ 把【本地 `_test_*` func 的支數】釘進 expect：
+#     **有人把格重構成獨立函式（很合理的重構）⇒ 免疫當天消失而畫面不會紅** ⇒ 這一欄會變 ⇒ 閘紅。
+func _inline_cell_shape_count() -> int:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/minor_population_merge_test.gd")
+	var re := RegEx.new()
+	re.compile("\\nfunc _test_")
+	return re.search_all(src).size()
+
 func _initialize() -> void:
 	var state: WorldState = MeasureBedHelper.arm_and_new()
 	# ── ①陽性對照：一支帶小孩的隊直接滅團 ⇒ counter 必須動
@@ -50,6 +64,7 @@ func _initialize() -> void:
 	_ok(_minors_before == _minors_after + int(Probe.amount("erase.minors_lost")),
 		"②★★守恆：小孩不憑空消失（前 %d == 後 %d + 損失 %.0f）"
 		% [_minors_before, _minors_after, Probe.amount("erase.minors_lost")])
-	if _fail == 0: print("=== DONE === ALL PASS")
+	var _shape: int = _inline_cell_shape_count()
+	if _fail == 0: print("=== DONE === ALL PASS｜[免疫] 格 inline，本地 _test_* func ＝ %d 支" % _shape)
 	else: print("=== DONE === %d FAIL" % _fail)
 	quit()

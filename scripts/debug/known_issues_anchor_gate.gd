@@ -20,6 +20,24 @@ const KI: String = "res://docs/known_issues.md"
 const KI_ARCHIVE: String = "res://docs/archive/resolved_issues.md"
 const SRC_DIRS: Array = ["res://scripts"]
 
+
+# ★★★【免疫證據，印出來並釘進 expect】（systems 裁 2026-09-18；形狀同 bed_arm／grudge）——
+#   ★本床**不加到場點名**：**通過橫幅印在 `_run` 裡面** ⇒ `_run` 中途死掉 ⇒ **橫幅從來沒印**
+#     ⇒ expect 不命中 ⇒ 閘紅。
+#   ★★**實測（2026-09-18 ①注射）**：注射 ⇒ **無橫幅、rc=0、1 秒結束**
+#     ⇒ ★**簽名不是 timeout**（控制權回到 `_initialize`、`quit()` 照跑）
+#     ⇒ ★★★**rc=0 ⇒ runner 第一道防線（`RC -ne 0`）抓不到 ⇒ 只剩 expect 這一條在守**
+#       ⇒ **expect 釘的字串必須印在【最後一格之後】**，否則這支床會靜默變綠。
+#   ★免疫來源 ＝ 橫幅的位置：有人把那一行搬到 `_initialize` ⇒ 這一欄變 false ⇒ 閘紅。
+func _immunity_banner_inside() -> bool:
+	var src: String = FileAccess.get_file_as_string("res://scripts/debug/known_issues_anchor_gate.gd")
+	var head: int = src.find("\nfunc _run(")
+	if head == -1:
+		return false
+	var tail: int = src.find("\nfunc ", head + 10)
+	var body: String = src.substr(head, (tail - head) if tail != -1 else src.length() - head)
+	return body.contains("KI-ANCHOR-GATE] PASS")
+
 func _initialize() -> void:
 	_run(); quit()
 
@@ -136,7 +154,7 @@ func _run() -> void:
 		print("   ★★處置＝去看真正做那件事的符號是誰，把錨改指過去；★★★別把它當「機制實存」的證據")
 
 	if bad.is_empty():
-		print("[KI-ANCHOR-GATE] PASS：%d 個相異新錨全部指得到現場（★WARN 不擋，見上）" % seen.size())
+		print("[KI-ANCHOR-GATE] PASS：%d 個相異新錨全部指得到現場（★WARN 不擋，見上）｜[免疫] 橫幅在 _run 內＝%s" % [seen.size(), str(_immunity_banner_inside())])
 		return
 	print("[KI-ANCHOR-GATE] ★FAIL：%d 個新錨指不到" % bad.size())
 	for b in bad: print("   ★ ", b)
