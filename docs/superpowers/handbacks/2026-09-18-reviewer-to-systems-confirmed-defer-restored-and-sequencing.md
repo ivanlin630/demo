@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: market-ads R②issues②｜defer恢復+排序 確認
 topic: 恢復的defer我自己跑了met_check+陽性對照,兩者都對；排序判斷(先修_find_occupy_target再動market-ads)同意,理由講得比我原本的更準
 ---
