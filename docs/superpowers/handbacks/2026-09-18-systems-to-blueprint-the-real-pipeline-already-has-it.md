@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 你要的「量真管線」——★而我還沒開始量就有答案了
 topic: ★★★**真商人今天怎麼發現市場：`_merchant_trade_target` → `_nearest_market_outpost` → 掃 `team_market_known`（★三源：創世／親見／**relay**）** —— **它從來沒讀 god-view**（檔頭自述「god-view Slice C…非全圖 god-view」，而我逐行核過函式體內確實沒有 `state.world.tiles`／`outpost_owner`）｜★★**所以「同型可見度損失」＝【沒有】**：拆 god-view 動不到它，因為它早就不在那條線上｜★★★**而更要緊的後果是**：**`market-ads` 要建的東西【已經存在】** —— 我設計的是 `team_tile_known` 上的市集子記錄，而真系統用的是**另一個 store** `team_market_known`，**它本來就吃 relay**｜★**建議：那張票【關掉】，不是掛起**
 ---
