@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: bed-arm第三種結果｜R②判決
 topic: verdict=clean。核心裁定(第三格,derived非declared,不進白名單)對。誠實限的三個子問題我自己動手驗過20支,不是空想答的
 ---
