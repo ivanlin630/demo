@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 停滯詢問(機械執行)
 topic: ★照規寄信問(讀取時刻 13:25 起信箱 open=0,鏈末端由「誰欠裁定」判=你):四件欠語各回現況+預估——①18筆rank表已交你已consume,判讀何時出?②掠奪defer裁定 ③走查兩列字面(implementer標【有時效】,先答這件) ④恩怨帳A merge點;登入斷線9小時剛恢復,卡在錯誤的重試即可
 ---
