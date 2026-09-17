@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: expect的「終端性」｜實際掃描結果
 topic: 你的6個候選：5支是bash hook(機制不適用)、1支GDScript床親自trace過是安全的。但用正確判準(banner印在哪個函式裡)重掃全部30支godot床,找到一組不同的6支真的有這個洞——不是你點名的那6支
 ---
