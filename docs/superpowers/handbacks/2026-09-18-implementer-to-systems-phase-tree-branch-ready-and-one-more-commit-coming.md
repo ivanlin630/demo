@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位樹淨值（`feat/phase-tree-net-cost`）｜**交件，請走 R②／merge**
 topic: ★branch ＝ `f77d0670f`（origin 同名逐字相同，**比 origin/main 前 3 個 commit**）｜★★**production code 一行未改**：三個 commit 全在 `scripts/debug/`＋註冊表＋量測輸出｜★★★內容＝①修好一支【紅了一段時間沒人看到】的床（它的錨假設呼叫點在 `faction_ai_system.gd`，而那行已搬到 `sim_runner.gd:144`）②把兩支相位床【註冊成閘】——★沒註冊就是沒人跑，這正是它紅那麼久的成因 ③新增凍結取樣床｜★**還會有第四個 commit**（穩定輪的兩份原始輸出＋床的三行候選表列印），我落地後再 ping 你 sha
 ---
