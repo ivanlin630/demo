@@ -94,6 +94,33 @@ const DESP_ENTRY_SURVIVAL: float = 0.6   # TEST VALUE — 求生欲(懼死)對 e
 const DESP_ENTRY_BOLD: float = 0.6       # TEST VALUE — 好戰(膽/冒險)反向斜率
 const DESP_ENTRY_LO: float = 0.5         # TEST VALUE — 膽大下限乘子(撐到 1.5 天才進)
 const DESP_ENTRY_HI: float = 1.7         # TEST VALUE — 謹慎/懼上限乘子(5.1 天早進)
+# ★★★【情報新鮮度因子】（票：過期位置 → 偵查分池 2026-09-17）——
+#   ★它回答的**不是**「這份情報還算不算數」（那是一道門），而是
+#   **「我照著這份舊情報走過去，還找得到它的機率有多高」**。
+#   ⇒ ★★所以年齡進的是【價值】不是【門】：**單調遞減、永不為 0**。
+#     **歸零 ＝ 我只是把那道靜默的門換了個地方蓋。**
+# ★★★【物理同源，零新旋鈕】（〈估算器禁手抄物理〉）——三個量全部是既有的：
+#   ① 目標在這段時間裡可能跑多遠：`r_move = 速度(tiles/day) × 年齡(day)`
+#   ② 我走到那個舊位置時看得到多遠：`r_see`（觀察者自己的視野 ＝ 自知，合法）
+#   ③ 六角格數：半徑 k 之內共 `1 + 3k(k+1)` 格（六角網格的恆等式，不是我選的係數）
+#   ⇒ **找得到的機率 ≈ 我看得到的格數 ÷ 它可能所在的格數**，上限 1。
+# ★**壞掉會長什麼樣**（而不是「別亂改」）：
+#   ★★若哪天它回 0 ⇒ 症狀是「舊情報的目標【整批】從偵查候選裡消失」，
+#     而畫面上它與「根本沒有候選」一模一樣 —— **不紅、不報，只是偵查默默不再上場**。
+#   ★★★若把 `target_tiles_per_day` 傳成【觀察者】的速度 ⇒ 症狀是
+#     「我跑得快 ⇒ 別人的舊情報就不值錢」，那句話沒有物理意義（它算的是**它**會跑多遠）。
+static func recon_freshness_factor(age_ticks: int, target_tiles_per_day: float, sight_tiles: int) -> float:
+	var days: float = maxf(float(age_ticks), 0.0) / float(WorldState.TICKS_PER_DAY)   # bare-tick-ok: 單位換算分母（tick → day）
+	var r_move: float = maxf(target_tiles_per_day, 0.0) * days
+	var r_see: float = maxf(float(sight_tiles), 0.0)
+	if r_move <= r_see:
+		return 1.0   # ★還沒跑出我的視野 ⇒ 去那裡就看得到，沒有折價的理由
+	return _hexes_within(r_see) / _hexes_within(r_move)
+
+# 六角網格：半徑 k 之內的格數（含中心）＝ 1 + 3k(k+1)。★恆 ≥ 1 ⇒ 上面那個比值**永遠 > 0**。
+static func _hexes_within(k: float) -> float:
+	return 1.0 + 3.0 * k * (k + 1.0)
+
 static func desperation_entry_threshold(leader_values: Dictionary) -> float:
 	var caution: float = float(leader_values.get("慎重", 0.5))
 	var survival: float = float(leader_values.get("求生欲", 0.5))
