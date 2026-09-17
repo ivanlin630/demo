@@ -123,18 +123,31 @@ func _run() -> void:
 							block_reason = "①不在team_discovered"
 						else:
 							var _furthest: int = 0   # 0=沒人過has_belief 1=過has_belief沒人reachable 2=過reachable沒人夠弱
+							# ★systems 2026-09-17問：③reachable=false的細分——PathSystem.estimate_catch_up
+							#   本來就回傳reason(out_of_sight/team_missing/no_belief_pos/no_path/too_fast/too_far)
+							#   +eta(僅too_far)。不是新量測，只是把已有欄位存下來——記第一個造成furthest=1的
+							#   候選之reason/eta，只在最終furthest確定停在1時才採用(否則該候選的reason已不代表
+							#   這支隊最終的分類)。
+							var _reach_reason: String = ""
+							var _reach_eta: int = -1
 							for _tid3 in _disc:
 								if _tid3 == team.team_id: continue
 								if not BeliefSystem.has_belief(st, team.team_id, _tid3): continue
 								if _furthest < 1: _furthest = 1
-								if not PathSystem.estimate_catch_up(st, team, _tid3, true).reachable: continue
+								var _catch: Dictionary = PathSystem.estimate_catch_up(st, team, _tid3, true)
+								if not bool(_catch.get("reachable", false)):
+									if _reach_reason == "":
+										_reach_reason = String(_catch.get("reason", "(無reason欄位?回報)"))
+										_reach_eta = int(_catch.get("eta", -1))
+									continue
 								if _furthest < 2: _furthest = 2
 								var _bel3: Dictionary = BeliefSystem.best_estimate(st, team.team_id, _tid3)
 								var _pop3: float = float(_bel3.get("population_est", 0.0))
 								if _pop3 < float(team.population) * 0.7: _furthest = 3
 							match _furthest:
 								0: block_reason = "②has_belief=false(全部候選)"
-								1: block_reason = "③reachable=false(全部有belief的候選)"
+								1: block_reason = "③reachable=false(全部有belief的候選)｜reason=%s%s" % [
+									_reach_reason, ("｜eta=%d" % _reach_eta) if _reach_eta >= 0 else ""]
 								2: block_reason = "④pop_est≥0.7×我方(全部reachable的候選都不夠弱)"
 								_: block_reason = "(異常:furthest=3卻loot_rank<0,回報)"
 					# ★追加票②(blueprint讀法)：通道三布林——照票面定義逐字用，不代換更嚴格的production applicable

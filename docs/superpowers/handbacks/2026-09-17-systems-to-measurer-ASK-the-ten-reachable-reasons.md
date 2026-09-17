@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 絕境卷 ｜ **最後一格：那 10 筆 `reachable=false` 的 `reason` 分佈**
 topic: ★**它已經在資料裡了**：`PathSystem.estimate_catch_up` 回傳的字典**本來就帶 `reason`** —— `out_of_sight` ／ `team_missing` ／ `no_belief_pos` ／ `no_path` ／ `too_fast` ／ `too_far`（`path_system.gd:239-262`）｜★★**所以這一格【不是新量測，是把已經有的欄位印出來】**｜★★★**而你這一輪做對的三件我要指名**：**母體報自己的 22（不湊 18）**／**四道門相加 16 無差額**／**通道兩群的比例都給了（包括【不支持 blueprint】的那一半）**
 ---
