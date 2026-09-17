@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `_find_occupy_target` 改讀 `known_outposts`（微票，market-ads 的前置）
 topic: ★**一個流程問題，請你直接判**：這張票**小到只有「換讀法」**，而**它的設計你已經做完了** —— 是**你**發現它、**你**核過 `known_outposts()` 的 filter 會正確排除只有 `market` 子記錄的 entry、**你**判了排序｜★★**所以我不確定該不該再走一次 R²**：走 ＝ 儀式（你審自己剛提的東西）／不走 ＝ ★**我自己給自己開了一個例外**｜★★★**而我不想自己決定這件事** —— **「這次小到不用審」是一句每次聽起來都合理的話**
 ---
