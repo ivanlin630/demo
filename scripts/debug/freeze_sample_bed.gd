@@ -123,11 +123,26 @@ func _run() -> void:
 	if not multi_sum.is_empty():
 		print("\n[★multi 列：不參與淨值減法，單獨列出]（它們的時間【不在】任何父親的 self 裡）")
 		var mrows: Array = []
+		var multi_total: int = 0
 		for k in multi_sum:
 			mrows.append({"n": k, "tot": int(multi_sum[k])})
+			multi_total += int(multi_sum[k])
 		mrows.sort_custom(func(a, b): return int(a["tot"]) > int(b["tot"]))
-		for r in mrows.slice(0, mini(6, mrows.size())):
+		# ★★★【全部印，不截斷】（blueprint 裁 2026-09-18）——兩輪要【逐列對照】，
+		#   截斷會讓對照在第 7 列以後變成「兩邊都沒有資料」而不是「兩邊都穩」。
+		for r in mrows:
 			print("   %-34s total=%8.3fs" % [String(r["n"]), float(r["tot"]) / 1e6])
+		# ★★★【`*multi` 必須進候選對比】（blueprint 裁 2026-09-18）——
+		#   ★理由是本床誠實限②【我自己標的】：multi 不參與減法 ⇒ **它的時間不在任何父親的 self 裡**
+		#   ⇒ ★★它天生【站在排行外面】：只看排行去挑優化目標，就會漏掉一塊可能比第一名還大的時間。
+		#   ★★★所以這裡把它做成一行【可比的數】，而不是一段要人自己去加總的附註。
+		var top_self: int = int(rows[0]["self"]) if not rows.is_empty() else 0
+		var top_name: String = String(rows[0]["n"]) if not rows.is_empty() else "—"
+		print("\n[★★候選對比] 排行第一 %s self=%.3fs　vs　★`*multi` 合計=%.3fs（%d 列）⇒ multi／第一 ＝ %.2f×" % [
+			top_name, float(top_self) / 1e6,
+			float(multi_total) / 1e6, mrows.size(),
+			float(multi_total) / float(maxi(top_self, 1))])
+		print("     ★這一行存在的理由：`*multi` 不會出現在排行裡，而它可能比排行第一【大】。")
 
 	# ★★★可判性：只有「有凍結幀」才算量到；★而本床不判「該修誰」——那是下一票
 	_ok(SimRunner.frames_over_budget > 0,
