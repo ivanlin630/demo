@@ -245,27 +245,88 @@ func _cell_1f_world() -> void:
 	for _t in range(days * WorldState.TICKS_PER_DAY):
 		runner.advance_tick(st, Vector2i(-1, -1))
 	var sai := StrategicAiSystem.new()
-	var only_new: int = 0
-	var only_old: int = 0
-	var both: int = 0
+	# ★★★【兩把尺，而第一把與迭代順序無關】（systems 裁 2026-09-18）——
+	#   ★舊卷面只比【第一個回傳的 partner】，而兩版的迭代順序不同
+	#     ⇒ ★★「只有舊版有 N」裡混了【順序差異】與【知識差異】，**而兩者要人做的事相反**
+	#       （知識差異 ⇒ 世界真的變小，要 WHAT 裁；順序差異 ⇒ 我的尺在抖，換尺就好）。
+	#   ⇒ ①**存在性**：每個觀察者「找不找得到【任何】交易對象」—— **不問是誰 ⇒ 順序改變不了它**
+	#     ②**候選集合**：把兩版的【全部】合格對象各列一遍再取差集 —— **完整比較**
 	var obs: int = 0
+	var new_any: int = 0
+	var old_any: int = 0
+	var both_any: int = 0
+	var neither: int = 0
+	var set_only_new: int = 0
+	var set_only_old: int = 0
+	var set_common: int = 0
+	var first_differs: int = 0
 	for tid in st.teams:
 		var team: TeamData = st.teams[tid]
 		if team == null or team.leader_id == -1 or team.population <= 0: continue
 		obs += 1
-		var new_p: Dictionary = sai._find_trade_partner(st, team)
-		var old_p: Dictionary = _legacy_trade_partner(st, team)
-		var n: int = int(new_p.get("team_id", -1))
-		var o: int = int(old_p.get("team_id", -1))
-		if n != -1 and o != -1 and n == o: both += 1
-		elif n != -1 and n != o: only_new += 1
-		elif o != -1 and o != n: only_old += 1
-	print("1-f｜觀察者 %d 支｜商隊那支：只有新版有=%d／只有舊版有=%d／兩者相同=%d" % [obs, only_new, only_old, both])
+		var n: int = int(sai._find_trade_partner(st, team).get("team_id", -1))
+		var o: int = int(_legacy_trade_partner(st, team).get("team_id", -1))
+		if n != -1: new_any += 1
+		if o != -1: old_any += 1
+		if n != -1 and o != -1:
+			both_any += 1
+			if n != o: first_differs += 1
+		if n == -1 and o == -1: neither += 1
+		var sn: Array = _new_partner_set(st, team)
+		var so: Array = _legacy_partner_set(st, team)
+		for x in sn:
+			if so.has(x): set_common += 1
+			else: set_only_new += 1
+		for x in so:
+			if not sn.has(x): set_only_old += 1
+	print("1-f-①【存在性，與順序無關】觀察者 %d 支｜新版找得到=%d／舊版找得到=%d／兩版都有=%d／兩版都沒有=%d" % [
+		obs, new_any, old_any, both_any, neither])
+	print("1-f-①b ★兩版都找得到、但【第一個】不同 = %d 支（★這就是舊卷面把順序差異混進去的那一塊）" % first_differs)
+	print("1-f-②【候選集合，逐對象】只有新版 = %d／只有舊版 = %d／兩版都有 = %d" % [
+		set_only_new, set_only_old, set_common])
 	_ok(obs > 0, "1-f-母體 ★母體非 0（%d 支）" % obs)
-	_ok(only_new + only_old > 0,
-		"1-f ★**候選集真的換了一批**（只有新版 %d／只有舊版 %d／相同 %d）" % [only_new, only_old, both]
-		+ "｜★三個數全 0 ⇒ 兩版行為完全一樣 ⇒ 要解釋（這一票沒有改變任何事）")
+	_ok(set_only_new + set_only_old > 0,
+		"1-f ★**候選集真的換了一批**（集合層：只有新版 %d／只有舊版 %d／共有 %d）" % [
+			set_only_new, set_only_old, set_common]
+		+ "｜★全 0 ⇒ 兩版行為完全一樣 ⇒ 要解釋（這一票沒有改變任何事）")
 	_cell("1-f")
+
+
+# ★新版【全部】合格對象（把 `_find_trade_partner` 的 early-return 拿掉 ⇒ 集合而不是第一個）
+func _new_partner_set(state: WorldState, trader: TeamData) -> Array:
+	BeliefSystem.harvest_tile_known(state, trader)
+	var out: Array = []
+	var my_faction: FactionData = state.factions.get(trader.faction_id)
+	for rec in BeliefSystem.known_outposts(state, trader.team_id):
+		var tid: int = int(rec["owner_id"])
+		if tid == -1 or tid == trader.team_id: continue
+		if my_faction != null and my_faction.member_team_ids.has(tid): continue
+		if state.teams.get(tid) == null: continue
+		var pos: Vector2i = rec["tile_pos"]
+		var tile: HexTileData = state.world.tiles.get(int(pos.x) * 1000 + int(pos.y))
+		if tile == null: continue
+		if not StrategicAiSystem.new()._tile_has_resident(state, tile): continue
+		if not out.has(tid): out.append(tid)
+	return out
+
+# ★舊版【全部】合格對象（同樣拿掉 early-return）
+func _legacy_partner_set(state: WorldState, trader: TeamData) -> Array:
+	BeliefSystem.harvest_tile_known(state, trader)
+	var out: Array = []
+	var known_tiles: Dictionary = state.team_tile_known.get(trader.team_id, {})
+	for tid in BeliefSystem.known_targets(state, trader.team_id):
+		if tid == trader.team_id: continue
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		if t.faction_id != -1 and t.faction_id == trader.faction_id: continue
+		for tile_id in known_tiles:
+			var tile: HexTileData = state.world.tiles.get(tile_id)   # gate-ok: debug 對照基準（production 不走）
+			if tile == null: continue
+			if tile.outpost_owner != tid: continue
+			if not StrategicAiSystem.new()._tile_has_resident(state, tile): continue
+			if not out.has(tid): out.append(tid)
+			break
+	return out
 
 # ★舊版 `_find_trade_partner` 的逐字複本（★只在這支床裡，當對照用；production 已不走這條）
 func _legacy_trade_partner(state: WorldState, trader: TeamData) -> Dictionary:
