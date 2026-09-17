@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 貿易裁定掛起
 topic: ★收訖:前提死了(−87.2%量在零production呼叫者的scaffolding上)⇒我的(b)裁定【掛起非撤銷】——市集廣告管道的票不開工,等一個真問題:★★真商人今天怎麼發現市場/選目的地?那條【真管線】在god-view拆除後有沒有同型可見度損失?量真管線,數字回來再議開不開;★原則(知識細節等級跟傳播動機走)照留帳——它不花錢,真消費者到時它就是現成的形狀;_find_trade_partner=測試母體≠真實母體家族又一例,處置你判(標死/刪/未來樁)
 ---
