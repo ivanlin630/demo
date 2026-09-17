@@ -1,0 +1,78 @@
+[MERGE-GATES] ★判決同時寫入 .claude/hooks/.merge-gates-last.log（外層 shell 若被殺，結論仍在這裡）
+[MERGE-GATES] runner-self=7f2a725a lines=247 run-id=52809-171706｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**
+[MERGE-GATES] [TREE] HEAD=b3aef454d registry=clean runner=clean code-dirty=0
+[MERGE-GATES] ★本次判決適用於 HEAD=b3aef454d（註冊表與 runner 皆乾淨）
+[MERGE-GATES] ★main 基線紅數【從未量過】—— 在 main、乾淨工作區跑一次本 runner 就會記下來
+[MERGE-GATES] ✓ constitution （2s）
+[MERGE-GATES] ✓ bare-tick （4s）
+[MERGE-GATES] ✓ build-duration （1s）
+[MERGE-GATES] ✓ bed-parse （110s）
+[MERGE-GATES] ✗ bed-arm （1s）—— 床 arm 順序：擋 setup 之後才 arm（那段世界的 tap 是盲的）
+[BED-ARM-GATE] ★FAIL：28 張床建了世界，既不用 helper 也不在白名單
+★處置：改用 MeasureBedHelper.arm_and_setup()（順序寫死，沒得選錯）
+★★若真的不能用（例如手工組世界不走 GameSetup），才加進白名單 ——
+   ★★★而加進白名單會讓上面那個數字變大，那是【刻意可見】的代價。
+
+[godot.ps1] child exit=1
+[MERGE-GATES] ✓ ki-anchor （2s）
+[MERGE-GATES] ✓ mailbox-integrity （89s）
+[MERGE-GATES] ✓ cherrypick-fidelity （4s）
+[MERGE-GATES] ✓ ki-status （25s）
+[MERGE-GATES] ✓ single-writer （2s）
+[MERGE-GATES] ✓ tree-div （0s）
+[MERGE-GATES] ✓ headless （48s）
+[MERGE-GATES] ✓ cross-run-static （23s）
+[MERGE-GATES] ✓ own-camp-link （6s）
+[MERGE-GATES] ✓ zero-caller （6s）
+[MERGE-GATES] ✓ exam-freeze （0s）
+[MERGE-GATES] ✓ print-join （0s）
+[MERGE-GATES] ✓ belief-freshness-invariant （5s）
+[MERGE-GATES] ✓ unified-commerce （4s）
+[MERGE-GATES] ✗ defer-open （13s）—— 延後裁定:解除條件已達成卻還躺著就紅(★散文裁定不受追蹤=會被遺忘;血證:零LOD排最後躺16天)
+    裁定：★世代5重量卷正例格（餓＋有牙 ⇒ 攻擊贏 argmax）3 seed×10 天＝**0 次**，而它是【結構造成的 0】：同一批數據裡掠奪是不打折的常數、攻擊是三層 [0,1] 連乘 ⇒ 餓且有牙的隊會去【搶】不會去【打】｜★★根因＝**我把票的單位當成問題的單位**（票在談攻擊，而 WHAT 問的是「絕境者會不會動手」⇒ 單位是【暴力動詞】不是【攻擊】）｜★★★訂正後的問法＝**餓且有牙的隊會不會動手（搶或打任一）**；副問＝【餓】與【有牙】各自的頻率（0 可以是兩條件很少同時成立，也可以是成立了但不動手，而這兩個在總數上長得一樣）
+    條件：掠奪走期望價值票 merge 後
+    ⇒ ★做它，或重新裁定並更新 defer_until —— ★★不要把 met_check 改鬆
+[DEFER-GATE] 延後裁定 54 筆
+[DEFER-GATE] FAIL
+[MERGE-GATES] ✓ defer-phrase （0s）
+[MERGE-GATES] ✓ modulo-phase （1s）
+[MERGE-GATES] ✓ ledger-drop-visible （4s）
+[MERGE-GATES] ✓ lod-split （2s）
+[MERGE-GATES] ✓ valuation-clamp （5s）
+[MERGE-GATES] ✓ world-schedule-due （4s）
+[MERGE-GATES] ✓ envoy-ptype （4s）
+[MERGE-GATES] ✓ mailbox-size （1s）
+[MERGE-GATES] ✓ mailbox-broadcast （0s）
+[MERGE-GATES] ✓ board-price （4s）
+[MERGE-GATES] ✓ swallow-setter （1s）
+[MERGE-GATES] ✓ tier2-sweep-staleness （0s）
+[MERGE-GATES] ✓ minor-merge （4s）
+[MERGE-GATES] ✓ escrow-audit （5s）
+[MERGE-GATES] ✓ computed-prop （2s）
+[MERGE-GATES] ✓ bed-kind （3s）
+[MERGE-GATES] ✓ wage-penalty （4s）
+[MERGE-GATES] ✓ payroll-urgency （5s）
+[MERGE-GATES] ✓ merchant-turnover （20s）
+[MERGE-GATES] ✓ team-ui （5s）
+[MERGE-GATES] ✓ ui-flow （8s）
+[MERGE-GATES] ✓ ui-logic （5s）
+[MERGE-GATES] ✓ value-key （3s）
+[MERGE-GATES] ✓ plan-speed （5s）
+[MERGE-GATES] ✓ material-buy （4s）
+[MERGE-GATES] ✓ gateA （5s）
+[MERGE-GATES] ✓ gateA-hysteresis （4s）
+[MERGE-GATES] ✓ restock-burn （21s）
+[MERGE-GATES] ✓ failure-feedback-coverage （18s）
+[MERGE-GATES] ✓ gather-purity （5s）
+[MERGE-GATES] ✓ role-commit-scope （2s）
+[MERGE-GATES] ✓ watchdog-beacon （1s）
+[MERGE-GATES] ✓ live-team-census （3s）
+[MERGE-GATES] ✓ fp-longwindow （46s）
+[MERGE-GATES] ✓ live-team-ratchet （0s）
+[MERGE-GATES] ✓ raid-expected-value （4s）
+───────────────────────────────
+[MERGE-GATES] 註冊表 56 支｜總時 555s
+[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數 —— 原因： 不在 main
+[MERGE-GATES]   ⇒ ★★這一行必須存在：静默的【沒有記下來】跟【記下來了】在畫面上長得一樣。
+[MERGE-GATES] FAIL：bed-arm defer-open
+★註冊表在 docs/process/merge-gates.tsv —— ★★新增閘＝往那裡加一行（★★★含 expect，否則直接 FAIL）

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 恩怨帳 切片A ｜ **DISPATCH（開工）**
 topic: ★**spec**：`docs/superpowers/specs/2026-09-16-grudge-ledger-sliceA-HOW.md`（審查已過，我照他抓到的兩點改完：跨線門檻反解、第二軸訂正）｜★★**這一票的核心不是加功能，是【接上兩個世界一直在寫、而沒有人聽得懂的名字】**：勒索寫的是 `special_taxed`、求救不應寫的是 `rejected_aid`，**兩個都不在任何 match 裡** ⇒ 落進 `_` ⇒ 零邊零標量零 goal｜★★★**而我欠你一句交代**：審查回來之後我沒有立刻派工，**是我自己造的斷點**——沒有人在等我，我卻把它當成「等複核」
 ---

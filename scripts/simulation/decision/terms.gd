@@ -25,7 +25,15 @@ const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-tra
 const ATTACK_OPP_LOOT_W: float = 0.6    # TEST VALUE — 機會（對方肥）在這一項裡的份量
 const ATTACK_OPP_NEED_W: float = 0.4    # TEST VALUE — 需要（自己餓）在這一項裡的份量
 const ATTACK_CAUTION_W: float = 0.8     # TEST VALUE — 慎重壓低的斜率（★MODULATE 真值，非 boost 常數）
-const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× weight(loot 0..1) → loot util ≈ 0..1，危時不碾壓 survival(≥2)
+# ★★★`LOOT_DRIVE_BASE = 1.0` **已刪除**（票：掠奪走期望價值 2026-09-16）：
+#   ★它是一個「驅力基值」＝ **掠奪的 util 與世界無關**（只乘一個 capability cap）
+#   ⇒ ★★改成與攻擊**逐字同形**的期望值：`(W_take × take + W_need × need) × odds × person`。
+# ★★★`RAID_TAKE_FRACTION` **不是手填的** —— 它讀執行端真正搬走的比例：
+#   `npc_combat_system.gd` 的 `LOOT_RATE`（結算時 `effective_loot = LOOT_RATE × (1 + 殘忍×0.7)`
+#   逐資源乘在敗方存量上）⇒ **估算器與執行器讀同一個源**（本專案立法：估值禁手抄物理）。
+#   ★而【殘忍那一層】不在這裡乘：**人格只在 `person`／`weight` 調製，不改 `take` 這個世界量。**
+const RAID_LOOT_W: float = 0.6          # TEST VALUE — 與攻擊 ATTACK_OPP_LOOT_W 同形同值（同一把秤）
+const RAID_NEED_W: float = 0.4          # TEST VALUE — 同上
 const DESPERATION_DAYS: float = 3.0    # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
 #   （食物低於此才入絕境 option，對齊 WARNING_DAYS）
 const DESPERATION_SCALE: float = 1.2   # TEST VALUE — 絕境 drive 量級（對齊 survival-class 域，不碾壓 forage/restock）
@@ -260,7 +268,19 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#     而那些都是 [0,1] ⇒ `_loot` 也必須是，**而且要保住鑑別力**。
 			#   ★★而 72% 撞頂那個現場**就是這一行** —— 我們一路挖到根因（單位混用）修好了根因，
 			#     ★★★**卻差點把【當初發現問題的地方】留在原地。**
-			var _loot: float = FactionAISystem.richness_compressed(ctx.attack_loot_est, ctx.reference_wealth)
+			# ★★★【攻擊的 loot 項也要乘 `effective_loot_rate`】（systems 裁 2026-09-16，他自承改了本票範圍）：
+			#   ★世界的結算逐字是 —— **任何戰鬥勝方都只拿 `effective_loot` 比例**
+			#     （`npc_combat_system.gd:_loot_resources`，★**殲滅與潰逃控地共用同一個函式**）
+			#   ⇒ ★★舊寫法假設「打贏就拿到對方全部身家」，**而世界從來不是這樣結算的** ＝ 高估。
+			#   ★★★而這條修正的形狀是【把同源規則套到另一邊】，不是加一個成本項：
+			#     兩邊的即時收穫從此同源同尺 ⇒ **差別回到 `odds`（目標不同）與 `need`／`person`。**
+			#   ★那塊地沒有不見：「打下來會持續產出」由**佔村**（`options.gd` 的 `occupy_drive`，走 `DiscountedFlow`）
+			#     表達 ⇒ ★★攻擊 option 再把全額身家算進去**就是算兩次**。
+			var _acruel: float = float(ctx.leader_values.get("殘忍", 0.5))
+			var _loot_raw: float = ctx.attack_loot_est * NpcCombatSystem.effective_loot_rate(_acruel)
+			# ★拉桿①同源接在攻擊側（**兩邊一起接**）
+			var _w_wealth_a: float = DiscountedFlow.flow_weight("wealth", ctx.leader_values)
+			var _loot: float = FactionAISystem.richness_compressed(_loot_raw, ctx.reference_wealth) * _w_wealth_a
 			# ②需要 ＝ 自身糧食缺口（★連續量：越餓越想搶；★★用既有的 food_days／絕境門檻，不新增旋鈕）
 			var _need: float = clampf(1.0 - ctx.food_days / maxf(ctx.desperation_entry_threshold, 0.01), 0.0, 1.0)
 			# ③贏率 ＝ 既有 capability 接地（無牙 ⇒ 0 ⇒ 整項 0：送死沒人幹）
@@ -269,11 +289,19 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var _mart: float = float(ctx.leader_values.get("好戰", 0.5))
 			var _greed2: float = float(ctx.leader_values.get("貪婪", 0.5))
 			var _caut: float = float(ctx.leader_values.get("慎重", 0.5))
-			var _person: float = clampf(0.5 + (maxf(_mart, _greed2) - 0.5) - (_caut - 0.5) * ATTACK_CAUTION_W, 0.0, 1.5)
+			# ★雙高加成同源接在攻擊側（**兩個動詞都套**；軸本來就是 好戰／貪婪）
+			var _ahi: float = maxf(_mart, _greed2)
+			var _alo: float = minf(_mart, _greed2)
+			var _ad: float = _ahi + (1.0 - _ahi) * maxf(_alo - 0.5, 0.0)
+			var _person: float = clampf(0.5 + (_ad - 0.5) - (_caut - 0.5) * ATTACK_CAUTION_W, 0.0, 1.5)
 			# ★★★「機會」與「需要」相加再乘贏率與人格 ——
 			#   ★相加：肥而不餓也值得打（機會）／餓而對方不肥也值得打（需要）
 			#   ★★乘贏率：打不贏就別打（既有接地）⇒ 無牙隊整項 0（★不是壓低，是 0）
-			var _opp: float = (ATTACK_OPP_LOOT_W * _loot + ATTACK_OPP_NEED_W * _need) * _odds * _person
+			# ★拉桿②同源接在攻擊側；★★兇性容忍用**攻擊現行的那一組軸**（`max(好戰, 貪婪)`）——
+			#   **同一條規矩：先不要在同一票裡動兩個軸。**
+			var _atol: float = clampf(_ad, 0.0, 1.0)   # ★同一個 `d`
+			var _acost: float = clampf(ctx.attack_target_power_ratio * (1.0 - _atol), 0.0, 1.0)
+			var _opp: float = (ATTACK_OPP_LOOT_W * _loot + ATTACK_OPP_NEED_W * _need) * _odds * _person * (1.0 - _acost)
 			# ★★★【因子逐筆】（systems 2026-09-15）：資產估計已排除「窄」
 			#   ⇒ ★把乘積拆開，看**哪一個因子的中位最靠近 0** —— 它就是把乘積壓扁的那一個。
 			#   ★★而形狀要說清楚：**`(0.6×loot + 0.4×need) × odds × person`** ——
@@ -310,10 +338,112 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return _opp
 		"loot_drive":
 			if opt != "掠奪": return 0.0
-			if not ctx.has_weak_prey: return 0.0
-			# capability grounding：無牙→cap≈0 壓平（送死沒人幹）；武裝足→cap=1。
-			var cap: float = clampf(ctx.self_armed_ratio / VIABLE_ARMED_RATIO, 0.0, 1.0)
-			return LOOT_DRIVE_BASE * cap   # TEST VALUE
+			# ★★★【一個 0 有四種意思】（systems 2026-09-16）：`_find_weakest_prey` 有**四道門**
+			#   （已 discovered ／ `has_belief` ／ reachable ／ `pop_est < 0.7×我方人口`）——
+			#   ★**任何一道關著都給你一個 0，而那四個 0 的意義完全不同。**
+			#   ★★這裡先分出最粗、也最重要的那一刀：**「沒有 prey」vs「有 prey 但身價答不出來」**
+			#     ⇒ ★★★**前者是【情報】問題，後者是【估值】問題 —— 修法完全不同。**
+			if not ctx.has_weak_prey:
+				if Probe.enabled: Probe.bump("raid.zero.no_prey")
+				return 0.0
+			if Probe.enabled and not ctx.weak_prey_priced:
+				# ★有 prey、而 belief 裡沒有任何可定價的分項 ⇒ `take` 恆 0 ⇒ util 恆 0
+				Probe.bump("raid.zero.unpriced_prey")
+			# ★★★與攻擊【逐字同形】，只有輸入不同（票：掠奪走期望價值 2026-09-16）：
+			#   攻擊：(0.6 × loot + 0.4 × need) × odds × person   ← 目標＝最富的 prey
+			#   掠奪：(0.6 × take + 0.4 × need) × odds × person   ← 目標＝最弱的 prey
+			#   ⇒ ★**同一個壓縮函數、同一個 `reference_wealth`** —— 那就是「同一把秤」的操作定義。
+			# ①搶得到多少：belief 身價 × 執行端真正搬走的比例（**讀 `LOOT_RATE`，不手填**）
+			# ★★★殘忍那一層**要乘**（systems 裁 2026-09-16）：結算端逐字是 `LOOT_RATE × (1 + 殘忍×0.7)`
+			#   ⇒ ★**世界真的會多給殘忍者** ⇒ 估算器不乘它，**就不是同源，是【同源減一項】**。
+			#   ★★而這不是雙計：**殘忍在這裡是【物理】**（真的拿到多少），
+			#     在 `weight("loot")` 是【偏好】（多想去搶）—— **同一個人格數，兩個不同的作用**。
+			#   ★★★而我**不抄那條式子**：走 `NpcCombatSystem.effective_loot_rate()` 這個單一計算點
+			#     —— **抄一份的話，哪天有人調 0.7，決策會繼續用舊的數而不會有東西紅。**
+			var _rcruel0: float = float(ctx.leader_values.get("殘忍", 0.5))
+			var _take_raw: float = ctx.weak_prey_richness_est * NpcCombatSystem.effective_loot_rate(_rcruel0)
+			# ★★★【拉桿①：戰利品的【未來價值】】（常態掠奪票 §1，用戶正典：**誠實接線，不 crank**）：
+			#   ★走**既有的折現磚** `DiscountedFlow.flow_weight("wealth", …)` ＝ `0.5 + 貪婪`
+			#   ⇒ ★★**它是【權重】不是【加成】**：不改變「搶得到多少」，只改變**這個人有多在意那筆錢**
+			#     （貪婪 .9 ⇒ ×1.4／貪婪 .1 ⇒ ×0.6 ⇒ **中性 .5 ⇒ ×1.0，逐字不變**）。
+			#   ★★★**兩邊一起接**（掠奪與攻擊）—— **否則又把它們拆回兩把秤**（上一張票剛合起來）。
+			var _w_wealth: float = DiscountedFlow.flow_weight("wealth", ctx.leader_values)
+			var _take: float = FactionAISystem.richness_compressed(_take_raw, ctx.reference_wealth) * _w_wealth
+			# ②需要：與攻擊**同源**（越餓越想搶）
+			var _rneed: float = clampf(1.0 - ctx.food_days / maxf(ctx.desperation_entry_threshold, 0.01), 0.0, 1.0)
+			# ③贏率：★**用 ctx 既有的那個欄位** —— `attack_win_odds` 與舊的 `cap` 是**逐字相同的式子兩個名字**
+			#   ⇒ ★★這裡刪掉那份重算（三處變兩處）。
+			var _rodds: float = ctx.attack_win_odds
+			# ④人格 MODULATE（★不加新常數）：好戰／殘忍放大、慎重壓低 —— ★★它不碰 take／need／odds。
+			var _rmart: float = float(ctx.leader_values.get("好戰", 0.5))
+			# ★★★【殘忍已從動機項移出】（blueprint 裁 2026-09-16）：
+			#   **想不想搶 ＝ 好戰與貪財的事；搶得多狠 ＝ 殘忍的事。**
+			#   ⇒ ★舊註解寫「同一個人格數，上面當物理用、這裡當偏好用」—— **後半已作廢**：
+			#     ★★殘忍**只留在 `take` 的 `effective_loot_rate`（物理）**，**不再進 `person`（偏好）**。
+			#   ⇒ ★★★**所以「殘忍出現兩次不是雙計」那句話現在更強了：它只出現一次。**
+			var _rcaut: float = float(ctx.leader_values.get("慎重", 0.5))
+			# ★★★【雙高加成 `d`】（blueprint 定語意／systems 裁形狀 2026-09-16）：
+			#   語意：**雙高該比單高更兇** —— 既好戰又貪財的軍閥 ＞ 只好戰的莽夫。
+			#   形狀：`d = hi + (1 − hi) × max(lo − 0.5, 0)`（★飽和疊加的展開式，只在**第二軸也高於中性**時加成）
+			#     單高 (.9,.5) ⇒ .90（**與接線前逐字相同 ＝ 不是整體上移、不是 crank**）
+			#     雙高 (.9,.9) ⇒ .94｜中間 (.9,.7) ⇒ .92（單調）｜慫的 (.1,.1) ⇒ .10（**慫的人沒有變兇**）
+			#   ★★systems **拒絕了**直接用 `1−(1−a)(1−b)`：那會讓 `d ≥ max` 恆成立
+			#     ⇒ **連慫的人也變兇 ＝ 一個被包裝成形狀的 crank。**
+			#   ★★★【軸】（blueprint 裁 2026-09-16）：**想不想搶 ＝ 好戰與貪財的事；搶得多狠 ＝ 殘忍的事**
+			#     ⇒ **掠奪的動機軸改成 `maxf(好戰, 貪婪)`、與攻擊同軸**；
+			#       **殘忍從動機項移出，只留結算層 `effective_loot_rate`（物理，不動）。**
+			var _rgreed: float = float(ctx.leader_values.get("貪婪", 0.5))
+			var _rhi: float = maxf(_rmart, _rgreed)
+			var _rlo: float = minf(_rmart, _rgreed)
+			var _rd: float = _rhi + (1.0 - _rhi) * maxf(_rlo - 0.5, 0.0)
+			var _rperson: float = clampf(0.5 + (_rd - 0.5) - (_rcaut - 0.5) * ATTACK_CAUTION_W, 0.0, 1.5)
+			# ★★★【拉桿②：主觀成本】（§2）—— **值必須來自世界，禁常數、禁用距離當 proxy**
+			#   `subjective_cost ＝ retaliation_risk × (1 − 兇性容忍)`
+			#   ★`retaliation_risk` ＝ `ThreatAssessment._power_ratio`（**belief-based**，在 `gather` 算好）
+			#     ⇒ **打一個打得過但會反咬的鄰居，成本高；打一個弱到不會回頭的，成本低。**
+			#   ★★`兇性容忍` **沿用掠奪【現行】的那一組軸**（`max(好戰, 殘忍)`）——
+			#     ★★★**交件標**：**「兇性容忍目前沿用掠奪現行軸，待『軸』的裁定後與 `person` 同步。」**
+			#     （systems 已去問 blueprint：掠奪讀殘忍、攻擊讀貪婪，兩側本來就不同軸。）
+			#   ★而「道德折價」那一半**沒有接** —— 它今天沒有可讀的來源（`信義`／`義氣` 是否該進來 ＝ WHAT）
+			#     ⇒ **寫在這裡讓「沒做」可被看見。**
+			var _rtol: float = clampf(_rd, 0.0, 1.0)   # ★用**同一個 `d`** ⇒ 不再有「同一票兩個軸組」
+			var _rcost: float = clampf(ctx.weak_prey_power_ratio * (1.0 - _rtol), 0.0, 1.0)
+			var _rutil: float = (RAID_LOOT_W * _take + RAID_NEED_W * _rneed) * _rodds * _rperson * (1.0 - _rcost)
+			# ★逐筆可 dump（全量暫態可觀測性）：缺任一項就答不出「是哪一個因子把它壓扁的」
+			if Probe.enabled:
+				Probe.bump("raid.eval")
+				Probe.bump_sample("raid.factors", {
+					"prey": ctx.weak_prey_id, "priced": ctx.weak_prey_priced,
+					"est": snappedf(ctx.weak_prey_richness_est, 0.1),
+					"take": snappedf(_take, 0.001), "need": snappedf(_rneed, 0.001),
+					"cruel": snappedf(_rcruel0, 0.01),
+					"loot_rate": snappedf(NpcCombatSystem.effective_loot_rate(_rcruel0), 0.001),
+					"odds": snappedf(_rodds, 0.001), "person": snappedf(_rperson, 0.001),
+					"util": snappedf(_rutil, 0.0001), "tick": ctx.tick}, 200)
+				# ★★「belief 答不出它多肥」與「它很窮」數值相同、語意不同 ⇒ 分開數
+				Probe.bump("raid.take." + ("priced" if ctx.weak_prey_priced else "unpriced"))
+				# ★★★【驗收格換掉】（systems 2026-09-16）：舊的「`unpriced_prey` 下降」**結構上不會動** ——
+				#   ★那顆數的是「**belief 沒有可定價分項**」（belief 的欄位），
+				#     **而修法改的是【估值的結果】** ⇒ ★★**判準看的欄位，跟修法改的欄位不是同一個。**
+				#   ⇒ ★★★這一顆才對應我們宣稱的那件事（「薄情報不再被當成零身價」）：
+				#     **`take` 有多少筆是 0**（母體與 `raid.eval` 相同）。
+				Probe.bump("raid.take." + ("zero" if _take <= 0.0 else "pos"))
+				# ★★★【無偏的 util 分布】（systems 2026-09-16 要的第二項）：
+				#   ★上面那個 `bump_sample` 是 **first-N（有偏）** ⇒ **它不能當分布用。**
+				#   ★★而要比的正是分布：**兩棵樹的 dispatch 次數相同，可以是「util 變了但排序沒變」**
+				#     ⇒ ★★★那兩件事的下一步完全不同 —— **只看次數分不出來。**
+				#   ★全量計數（每一次 eval 都進桶），零 RNG、不改 `_rutil`。
+				Probe.bump("raid.util.n")
+				Probe.add_amount("raid.util.sum", _rutil)
+				var _rb: String = "ge0.50"
+				if _rutil < 0.02: _rb = "lt0.02"
+				elif _rutil < 0.05: _rb = "lt0.05"
+				elif _rutil < 0.10: _rb = "lt0.10"
+				elif _rutil < 0.20: _rb = "lt0.20"
+				elif _rutil < 0.30: _rb = "lt0.30"
+				elif _rutil < 0.50: _rb = "lt0.50"
+				Probe.bump("raid.util.hist." + _rb)
+			return _rutil
 		"occupy_drive":
 			# 佔村 = 要根據地：無自家 outpost 的流浪狼最需要（base_need=1），有 outpost 但征服 intent 弱驅（0.3）。
 			# 連續 util，與掠奪同 menu 秤 argmax（零新判斷器）。人格染色走 weight("occupy")。
@@ -335,9 +465,26 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   host 村的被動流（現成、無工期 ⇒ delay 0），名聲磁鐵降為【乘數】而非全部。
 			#   ⇒ 高名聲但自己快餓死的 host 不再自動拿高分（那正是舊式的缺陷）。
 			var _rep_mult: float = clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
-			return clampf(DiscountedFlow.flow_utility(ctx.join_host_flow, ctx.passive_food_daily,
+			var _jflow: float = clampf(DiscountedFlow.flow_utility(ctx.join_host_flow, ctx.passive_food_daily,
 				float(ctx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
-				ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP) * _rep_mult
+				ctx.leader_values, ctx.net_food_flow, ctx.food_stock), 0.0, CAMP_MARGINAL_CAP)
+			# ★★★【併入那個 0 也要被拆開】（systems 2026-09-16：兩個 option 同時剛好 0，通常是一個共同因子）
+			#   ★逐因子印：`host_flow`（有沒有 host／它有沒有飯）與 `rep_mult`（名聲乘數）
+			#   ⇒ ★★**「沒有 host」與「host 沒飯」在一個 0 上長得一樣**，而它們是兩種病。
+			if Probe.enabled:
+				Probe.bump("join.eval")
+				if _jflow <= 0.0:
+					Probe.bump("join.zero." + ("no_host_flow" if ctx.join_host_flow <= 0.0 else "flow_util_zero"))
+				Probe.bump_sample("join.factors", {
+					"host_flow": snappedf(ctx.join_host_flow, 0.001),
+					"passive": snappedf(ctx.passive_food_daily, 0.001),
+					"net_flow": snappedf(ctx.net_food_flow, 0.001),
+					"stock": snappedf(ctx.food_stock, 0.1),
+					"rep": snappedf(ctx.best_protector_rep, 0.001),
+					"rep_mult": snappedf(_rep_mult, 0.001),
+					"flow_util": snappedf(_jflow, 0.0001),
+					"util": snappedf(_jflow * _rep_mult, 0.0001)}, 120)
+			return _jflow * _rep_mult
 		"camp_drive":
 			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
 			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:
@@ -584,8 +731,17 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"faction_duty":      return _duty_factor(float(v.get("_loyalty", 0.5)), float(v.get("野心", 0.5)))
 		"levy":              return 0.2 + float(v.get("貪婪", 0.5)) * 0.5 + float(v.get("好戰", 0.5)) * 0.3
 		"diplo":             return 0.2 + float(v.get("義氣", 0.5)) * 0.5 + float(v.get("計謀", 0.5)) * 0.3
-		"loot":              return float(v.get("殘忍", 0.5)) * 0.5 \
-			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("貪婪", 0.5)) * 0.2
+		# ★★★【歸中性 1.0】（systems 裁 2026-09-16）：
+		#   ★本票把人格搬進了 `loot_drive` 的 eval（`_rperson`）
+		#   ⇒ ★★**人格從 weight 搬進 eval 時，weight 必須【同一刀】歸中性**——
+		#     **搬家做一半＝同一個東西同時活在兩個地方，而那比留在原處更糟。**
+		#   ★★★舊制的 weight 帶人格是**對的**：舊 eval 是 `LOOT_DRIVE_BASE × cap`，**裡面沒有人格**
+		#     ⇒ 人格只能住在 weight。**是 eval 變了，所以 weight 要跟著變。**
+		#   ★而這不是設計選擇，是**對齊這個 code base 逐字寫了五次的約定**
+		#     （`attack_opportunity`／`intent_fit`／`idle_employ`／`help`／`scout` 的註解全是同一句）。
+		#   ★★症狀（實測 p1 fixture）：殘忍.9／好戰.8／貪婪.6 ⇒ 舊 weight ＝ 0.81
+		#     ⇒ **掠奪被壓低 19%**，而攻擊那一側明文避開了同一件事。
+		"loot":              return 1.0
 		"occupy":            return float(v.get("野心", 0.5)) * 0.5 \
 			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("統領", 0.0)) * 0.2
 		# S-A：+野心負向（野心高者不甘投靠→weight 疊 low-ambition factor；野心低+餓→投靠 util 高）。

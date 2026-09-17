@@ -62,6 +62,15 @@ LIST="docs/measurements/bed-sweep-list.txt"
 STAMP="$MAIN_ROOT/$STAMP"
 BASELINE_ABS="$MAIN_ROOT/$BASELINE"
 
+# ★★★不認得的旗標 ⇒ 直接退（systems 2026-09-17）。
+#   血證：我打 `--check`（少了 `-staleness`）⇒ 舊版落進【無參數】路徑
+#     ⇒ **直接跑了最貴的那一條（15–25 分鐘全掃）並蓋了時間戳**；
+#     implementer 用它探測時又把一次全掃變成孤兒。
+#   ★通則：**最貴的那條路不該是【打錯字的預設】**。
+case "${1:-}" in
+  ""|--check-staleness) : ;;
+  *) echo "[tier2] ✗ 不認得的旗標：$1"; echo "[tier2]   用法：（無參數）＝跑全掃（15–25 分）｜--check-staleness＝只查超期"; exit 2 ;;
+esac
 if [ "${1:-}" = "--check-staleness" ]; then
   if [ ! -f "$STAMP" ]; then
     echo "[tier2] ★從未跑過（找不到 $STAMP）"
@@ -151,8 +160,28 @@ if [ "${_n:-0}" -gt 0 ]; then
 fi
 # ── diff：只報【綠→紅】 ────────────────────────────────
 alerts=0
-if [ -f "$BASELINE" ]; then
-  while IFS=$'\t' read -r bed v _rest; do
+# ★★★ baseline 的鍵必須唯一（systems 2026-09-17，implementer 實測引出）
+#   血證：舊 baseline 裡 4 支床各有 2–3 列 ⇒ 下面的 `head -1` 静默地挑了第一列
+#     ⇒ 實測報出 game_sim_test.gd（green → 60）—— 而 60 是秒數，不是判決。
+#   ★而它能造假警報，就同樣能蓋掉真的 —— 同一個 head -1。
+#   ★★所以這裡不是「選一個比較好的列」，是【無法比對就要大聲說】。
+# ★★★訂正（2026-09-17）：舊版只查 $BASELINE（diff 舊側），而重複鍵在 $TMP（新側）
+#   ⇒ ★它不是「表乾淨所以不亮」，是「看錯表所以永遠不亮」。
+_dupes=$( { awk -F'	' '/^scripts\//{print $1}' "$TMP" 2>/dev/null | sort | uniq -d; awk -F'	' '/^scripts\//{print $1}' "$BASELINE" 2>/dev/null | sort | uniq -d; } | sort -u)   # ★★★兩表【各自】查再聯集 —— 接起來再 uniq -d 會讓【每一支】都重複（實測 137 vs 4）⇒ _dupe_bad 恆真 ⇒ 告警静默關掉而畫面不紅
+if [ -n "$_dupes" ]; then
+  echo "[tier2] ✗ baseline 的鍵【不唯一】⇒ diff 結果不可信（本輪不報 diff）："
+  echo "$_dupes" | head -6 | sed 's/^/[tier2]     ★重複鍵：/'
+  echo "[tier2]   ★理由：比對用的是 head -1 ⇒ 它會静默地挑一列；能造假警報就能蓋掉真的。"
+  echo "[tier2]   ★★修法：重建 baseline（整表重寫、一床一列），不要手改那幾列。"
+  _dupe_bad=1
+else
+  _dupe_bad=0
+fi
+if [ "$_dupe_bad" = "0" ] && [ -f "$BASELINE" ]; then
+  # ★★真根（implementer 成對對照證實）：IFS=$'	' read 會把連續 tab 併成一個
+  #   ⇒ 空欄一出現，後面每一欄整排左移 ⇒ v 拿到的是【秒數】（green → 60）
+  #   ★修法：先用 awk 切好再送進來（awk -F 不併欄），分隔符用 |
+  while IFS='|' read -r bed v; do
     case "$bed" in '#'*|'') continue;; esac
     old=$(awk -F'\t' -v b="$bed" '$1==b{print $2}' "$BASELINE" | head -1)
     [ -z "$old" ] && { echo "[tier2] ＋新床：$bed（$v）"; continue; }
@@ -160,7 +189,7 @@ if [ -f "$BASELINE" ]; then
       echo "[tier2] ★★由綠轉紅：$bed（$old → $v）"
       alerts=$((alerts+1))
     fi
-  done < <(grep '^scripts/' "$TMP")
+  done < <(awk -F'	' '/^scripts\//{print $1 "|" $2}' "$TMP")
 else
   echo "[tier2] 首次建立 baseline（本次不報 diff）"
 fi

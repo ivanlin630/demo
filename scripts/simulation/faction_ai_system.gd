@@ -3722,6 +3722,7 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 			#   ★**「某 option 贏了」與「它真的被派出去」是兩個數** —— 這一族數的是後者。
 			#   ★★而它必須涵蓋【所有】派工迴圈，否則差額量的是 tap 覆蓋率不是世界行為（血證在 09-15）。
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _set_ok else "noop"])
+			Probe.bump("dsrc.%s.unified.%s" % [opt, "ok" if _set_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.unified." + ("ok" if _set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _set_ok else "recon.dispatch.noop")
@@ -4205,6 +4206,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		var _sub_set_ok: bool = TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for_need(state, sub, opt), "subteam", opt, float(e.get("u", -1.0)))
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _sub_set_ok else "noop"])
+			Probe.bump("dsrc.%s.subteam.%s" % [opt, "ok" if _sub_set_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.subteam." + ("ok" if _sub_set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _sub_set_ok else "recon.dispatch.noop")
@@ -4432,6 +4434,10 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 	_solo_ran_engine = true
 	var ranked: Array = DecisionEngine.rank_scored(state, team, "solo_body")
 	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
+	# ★【第幾順位被派出去】同 survival 路（systems 2026-09-16）：
+	#   ★★**贏 argmax 而派出去** 與 **前面的贏家派不出去、輪到它** 在 `dispatch.*` 上長得一模一樣。
+	var _solo_pos: int = 0
+	var _solo_skipped: Array = []
 	for e in ranked:
 		var opt: String = e["opt"]
 		# 序5 dissolve：征服 intent 攻擊 → dispatch-time scout-verify scaffolding（不確定→斥候、confident→打；
@@ -4457,17 +4463,40 @@ func _evaluate_solo_body(state: WorldState, team: TeamData) -> void:
 			if _dispatch_goal_delegate(state, team, td):
 				team.current_option = String(e["opt"])
 				return
+			# ★這個 `continue` 上一版【沒有】+1 ⇒ 前面失敗過卻被記成「第 1 順位」（我自承的儀器 bug）
+			if Probe.enabled:
+				Probe.bump("dpos.skip.solo.%s.delegate_fail" % opt)
+				_solo_skipped.append("%s:delegate_fail" % opt)
+				_solo_pos += 1
 			continue
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_IDLE, Vector2i(-1, -1), "idle_skip")   # Fix2b 早退 tap
+			if Probe.enabled:
+				Probe.bump("dpos.skip.solo.%s.idle_skip" % opt)
+				_solo_skipped.append("%s:idle_skip" % opt)
+				_solo_pos += 1
 			continue
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
+			if Probe.enabled:
+				Probe.bump("dpos.skip.solo.%s.finder_miss" % opt)
+				_solo_skipped.append("%s:finder_miss" % opt)
+				_solo_pos += 1
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
 		var _solo_set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "solo", opt, float(e.get("u", -1.0)))
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _solo_set_ok else "noop"])
+			Probe.bump("dsrc.%s.solo.%s" % [opt, "ok" if _solo_set_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
+			if _solo_set_ok:
+				Probe.bump("dpos.ok.solo.%s.pos%d" % [opt, mini(_solo_pos, 9)])
+				if _solo_pos > 0 and opt == "掠奪":   # gate-ok: 純觀測——它只守著下一行的 `Probe.bump_sample`，不影響任何決策；閘的「剥掉 Probe 呼叫」是【逐行】的，而這個守衛跨了一行
+					Probe.bump_sample("dpos.raid_passedover", {"path": "solo", "pos": _solo_pos,
+						"skipped": " ".join(_solo_skipped)}, 60)
+			else:
+				Probe.bump("dpos.skip.solo.%s.arb_deny" % opt)
+				_solo_skipped.append("%s:arb_deny" % opt)
+				_solo_pos += 1
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.solo." + ("ok" if _solo_set_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _solo_set_ok else "recon.dispatch.noop")
@@ -6798,11 +6827,21 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	#   ★食 inline 算（effective_food，零 gather 零 RNG——避第二 gather 岔世界 seed42 regression）。
 	_detect_survival_stall(state, team)
 	_detect_commitment_stall(state, team)   # ★承諾停滯偵測（第 4 個 decision entry：survival 路）
-	# ★★★survival 那條路的 util 本來被丟掉了 ⇒ 現在讀孫生視圖（**同一次計算**，不是重算）。
+	# ★★★【聯集，不是二選一】（merge 2026-09-16）：兩側都在這一行上加東西，
+	#   而**它們要的是同一次迭代裡的【兩種紀錄】** ——
+	#   ①main：survival 那條路的 util（讀**孿生視圖**，同一次計算不是重算；不變量 #6）
+	#   ②branch：**第幾順位**與**前面那個為什麼失敗**（「被輪到 ≠ 被選中」）
+	#   ★解錯的樣子**不是編譯失敗**，是【安靜地讓其中一組 tap 不再 fire】
+	#     ⇒ ★★所以 merge 後的證據不是「編譯過了」，是**同一筆 dump 裡兩組都還在說話**。
+	# ①main 那一半：孿生視圖（★`rank_survival_scored()` 讀的是【剛剛那一次】的 scored，不是重算）
 	var _surv_ranked: Array = DecisionEngine.rank_survival(state, team)
 	var _surv_u: Dictionary = {}
 	for _se in DecisionEngine.rank_survival_scored():
 		_surv_u[String(_se["opt"])] = float(_se["u"])
+	# ②branch 那一半：`dispatch.<opt>.ok` 只數「有沒有派出去」——
+	#   **贏 argmax 而派出去** 與 **前面的贏家派不出去、輪到它** 在那個計數上長得一模一樣。
+	var _sv_pos: int = 0
+	var _sv_skipped: Array = []
 	for opt in _surv_ranked:
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
@@ -6814,6 +6853,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			Probe.bump("flee.dispatch_site.trigger_survival_NO_SET")
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # 路徑維 tap：finder 撲空 attempt（churn 現形）
+			if Probe.enabled:
+				Probe.bump("dpos.skip.survival.%s.finder_miss" % opt)
+				_sv_skipped.append("%s:finder_miss" % opt)
+			_sv_pos += 1
 			continue   # finder 撲空（無可派目標）→ 試次佳 option
 		# 投靠對象是玩家隊 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge（同 P2a W2）
 		if opt == "併入" and td.has("social_target"):
@@ -6828,6 +6871,16 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "survival", opt, float(_surv_u.get(opt, -1.0)))   # ★① 單一源(收 @80)
 		if Probe.enabled:
 			Probe.bump("dispatch.%s.%s" % [opt, "ok" if _surv_ok else "noop"])
+			Probe.bump("dsrc.%s.survival.%s" % [opt, "ok" if _surv_ok else "noop"])   # ★四站共用一個 `dispatch.*` 鍵 ⇒ 來源沒有名字
+			if _surv_ok:
+				Probe.bump("dpos.ok.survival.%s.pos%d" % [opt, mini(_sv_pos, 9)])
+				if _sv_pos > 0 and opt == "掠奪":   # gate-ok: 純觀測——它只守著下一行的 `Probe.bump_sample`，不影響任何決策；閘的「剥掉 Probe 呼叫」是【逐行】的，而這個守衛跨了一行
+					Probe.bump_sample("dpos.raid_passedover", {"path": "survival", "pos": _sv_pos,
+						"skipped": " ".join(_sv_skipped)}, 60)
+			else:
+				Probe.bump("dpos.skip.survival.%s.arb_deny" % opt)
+				_sv_skipped.append("%s:arb_deny" % opt)
+				_sv_pos += 1
 		if Probe.enabled and opt == "偵查":
 			Probe.bump("recon.dispatch.survival." + ("ok" if _surv_ok else "noop"))
 			Probe.bump("recon.dispatch.ok" if _surv_ok else "recon.dispatch.noop")

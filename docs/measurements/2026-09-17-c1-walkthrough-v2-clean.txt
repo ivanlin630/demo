@@ -1,0 +1,175 @@
+
+╔══════════════════════════════════════════════════════════════════╗
+║ 世界沙盒 · 文字版畫面走查（C1 票②）                              ║
+╚══════════════════════════════════════════════════════════════════╝
+★★★開場先講明：**這一份裡埋了 1 顆已知錯**（N 講明、位置不講）。
+   抓到幾顆算幾顆；漏抓的那一顆所在的【那一頁】重審，不整份作廢。
+   ★為什麼要先講：暗埋＝對你設局，而信任是體驗窗的本錢。
+
+┌─ 常駐狀態列 ────────────────────────────────────────────────────
+│ 我是誰：張忠（隊：Team0）
+│ 在哪　：格 (0, 20)
+│ 在做啥：掠奪（意向：防衛）
+│ 現在　：第 2 天（tick 2880／每日 1440）｜速度：由呼叫端控制（advance_ticks）
+│ （除錯用·資料出處）["get_player_snapshot", "get_decision_snapshot", "get_world_clock"]
+└──────────────────────────────────────────────────────────────────
+
+━━━ 【生存】頁 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  營地要等幾天才有糧（camp_flow_delay_days）        5.333
+  營地的糊口底（camp_forage_floor）              7.200
+  營地選址品質（camp_site_quality_mult）         1.000
+  營地預估收益（camp_target_est）                {8 鍵} { "_kind": "village_estimate", "terrain": "forest", "outpost
+  能不能援手施工（can_rescue_build）              false
+  能不能就地紮根（can_settle_here）               false
+  走投無路的門檻（desperation_entry_threshold）   3.452
+  可開的田在哪（farmable_pos）                   (1, 18)
+  逃往哪裡（flee_dest）                        (-1, -1)
+  現有糧食還能吃幾天（food_days）                   178.806
+  糧食淨流算下來還能撐幾天（food_runway_days）         541.154
+  找糧要耗幾天（food_seek_delay_days）           0.000
+  打算去哪找糧（food_seek_target）               (0, 20)
+  庫存糧（food_stock）                        1287.400
+  覓食地點（forage_pos）                       (-1, -1)
+  在這裡覓食拿得到多少（forage_yield_here）          7.200
+  走過去覓食拿得到多少（forage_yield_target）        0.000
+  市上買得到糧（has_buyable_food）               true
+  有沒有能開的田（has_farmable_tile）             true
+  附近有沒有能覓的地（has_forage_tile）             false
+  在世上有沒有家（has_home_outpost）              true
+  腳下是不是自家據點（has_own_outpost）             true
+  家裡的糧倉（home_food）                       800.000
+  家裡還產不產糧（home_food_productive）          false
+  值不值得回家補給（home_restock_min）             36.000
+  投靠別人的糧流（join_host_flow）                0.000
+  當下需求的急迫度（need_urgency）                 [0, 0, 0, 0.7626953125, 0]
+  糧食淨流（進減耗）（net_food_flow）               -2.091
+  佔下那塊地的糧流（occupy_target_flow）           0.000
+  自家營地在哪（own_camp_pos）                   (-1, -1)
+  每日自動進糧（passive_food_daily）             4.025
+  人數（population）                         9
+  援手施工的劃算（rescue_build_util）             0.000
+  紮根還要幾天（settle_eta_days）                0.000
+  未完工的工地（settle_resume_site）             (-1, -1)
+  紮根選址品質（settle_site_quality）            0.000
+  生存停滯中（survival_stall_active）           （無）
+  隊伍慌張程度（team_panic）                     0.000
+
+━━━ 【經濟】頁 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  兩地價差賺多少（arb_gain）                      0.000
+  能不能分村（can_expand）                      false
+  分村的建造成本（expand_build_cost）             0.000
+  抽人走對本村的損失（expand_home_marginal）        0.000
+  分村選址（expand_pos）                       (-1, -1)
+  派幾人去分村（expand_settler）                 0
+  新村的邊際產出（expand_site_marginal）          0.000
+  距糧市多遠（food_market_dist）                2
+  糧市在哪（food_market_pos）                  (1, 18)
+  有無兩地價差（has_arb）                        false
+  市上買得到糧（has_buyable_food）               true
+  附近有糧市（has_food_market）                 true
+  手上有貨（has_goods）                        false
+  有沒有工坊（has_manufacturing_facility）      false
+  附近有材料市（has_material_market）            false
+  腳下是不是自家據點（has_own_outpost）             true
+  身上有錢（has_specie）                       true
+  把閒人用起來值多少（idle_employ_value）           0.000
+  閒置人手（idle_labor）                       0.000
+  是不是商隊（is_merchant）                     false
+  工程缺料的急迫度（material_build_urgency）       1.000
+  材料總需求（material_need_total）             100.000
+  材料缺口（material_shortfall）               165.000
+  當下需求的急迫度（need_urgency）                 [0, 0, 0, 0.7626953125, 0]
+  寄賣待收金額（pending_claim_amt）              0.000
+  寄賣待收錢（pending_claim_coin）              0.000
+  距寄賣地多遠（pending_claim_dist）             0.000
+  寄賣待收貨（pending_claim_goods）             0.000
+  寄賣在哪裡（pending_claim_pos）               (-1, -1)
+  生產的拉力（produce_pull）                    0.000
+  資源寬裕（resource_slack）                   0.357
+
+━━━ 【威脅】頁 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  派系要打誰（faction_attack_target）           -1
+  仇家是誰（feud_target_id）                   -1
+  逃往哪裡（flee_dest）                        (-1, -1)
+  有沒有可佔的地（has_occupy_target）             false
+  旁邊有沒有強鄰（has_strong_neighbor）           false
+  附近有沒有弱雞（has_weak_prey）                 true
+  佔下那塊地的糧流（occupy_target_flow）           0.000
+  想佔哪一塊（occupy_target_id）                -1
+  看起來強弱比（perceived_power_ratio）          0.111
+  看上的肥羊（prosperity_prey_id）              55
+  戰備程度（readiness）                        0.556
+  戰備門檻（readiness_thr_eff）                0.549
+  自己武裝比例（self_armed_ratio）               0.444
+  強鄰是誰（strong_neighbor_id）               -1
+  最深的仇（strongest_feud）                   0.000
+  本隊戰力（team_strength）                    1.916
+  受到的威脅（threat）                          0.000
+  威脅來自誰（threat_id）                       55
+  威脅在哪（threat_pos）                       (0, 20)
+  對威脅的反應強度（threat_react）                 0.056
+  威脅多大才會動（threat_threshold）              0.112
+  打不打得贏（winnable）                        0.889
+
+━━━ 【社交】頁 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  想吸收誰（absorb_target_id）                 55
+  吸收拿得到什麼（absorb_yield）                  0.050
+  援助對象（aid_target_id）                    -1
+  平時練兵的動力（ambient_train_drive）           0.000
+  野心與現狀的落差（ambition_gap）                 2
+  人格原型（archetype）                        商業
+  最好的主子名聲（best_protector_rep）            0.500
+  派得出使者嗎（can_send_herald）                true
+  想整併誰（consolidate_target_id）            -1
+  邦交對象還在冷卻（diplo_target_on_cooldown）     false
+  派系要打誰（faction_attack_target）           -1
+  派系要跟誰談（faction_diplo_target）           -1
+  派系交代的利害（faction_stakes）                （無）
+  派系要向誰納貢（faction_tribute_target）        -1
+  仇家是誰（feud_target_id）                   -1
+  有沒有值得投靠的人（has_acceptable_join_host）    false
+  有沒有人要援（has_aid_target）                 false
+  旁邊有沒有強鄰（has_strong_neighbor）           false
+  有沒有人可練（has_trainable）                  true
+  別人有多需要幫忙（help_need_severity）           0.000
+  求援的是誰（help_target_id）                  -1
+  求援的在哪（help_target_pos）                 (-1, -1)
+  現主子的名聲（host_protector_rep）             0.500
+  目前的意向（intent）                          防衛
+  意向對象（intent_target）                    -1
+  是不是居民（is_resident）                     false
+  是不是分隊（is_subteam）                      false
+  投靠別人的糧流（join_host_flow）                0.000
+  領袖的忠誠（leader_loyalty）                  1.000
+  領袖的價值觀（leader_values）                  {11 鍵} { "野心": 0.42181235551834, "求生欲": 0.50444436073303, "義氣": 0.4
+  安撫對象還在冷卻（pacify_target_on_cooldown）    false
+  需求層級（rung）                             0
+  強鄰是誰（strong_neighbor_id）               -1
+  最深的仇（strongest_feud）                   0.000
+
+━━━ 【記憶】頁 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  營地選址品質（camp_site_quality_mult）         1.000
+  派得出斥候嗎（can_send_scout）                 true
+  邦交對象還在冷卻（diplo_target_on_cooldown）     false
+  安撫對象還在冷卻（pacify_target_on_cooldown）    false
+  情報有多舊（scout_staleness）                 0.000
+  想打探誰（scout_target_id）                  -1
+  想打探哪裡（scout_target_pos）                (-1, -1)
+
+━━━ 【補充母體】（★結構上不在 119 列裡的東西）━━━━━━━━━━━━━━
+  事件流（最近 5 則）：
+    · Team22 向 Team24 徵收（rate=0.05）
+    · Team41 售 material ×19
+    · Team22 向 Team24 徵收（rate=0.05）
+    · Team68 徵 weapon_melee_low ×1
+    · Team17 向 Team18 徵收（rate=0.04）
+  關係圖全貌：★未接出（todo:docs/superpowers/specs/2026-09-10-observer-inspect-depth-HOW.md）
+
+── 走查結束 ──
+★要你簽的三件（spec §3）：①這個欄位放這一頁，你找得到嗎
+                        ②這一行字你知道它在說什麼嗎（看不懂的列進人話層清單）
+                        ③★你想知道、而畫面上沒有的（★這一格最重要：只有真人給得出）
+
+=== 埋錯答案（走查完再看）===
+  材料缺口（material_shortfall）：20 → 165　｜對帳夥伴＝材料總需求（material_need_total）（值 100）｜鐵則：材料缺口不可能【大於】材料總需求（缺的最多就是全部）
+WALK_ANSWER ["材料缺口（material_shortfall）：20 → 165　｜對帳夥伴＝材料總需求（material_need_total）（值 100）｜鐵則：材料缺口不可能【大於】材料總需求（缺的最多就是全部）"]

@@ -6743,7 +6743,9 @@ func _test_survival_prefs() -> void:
 	var ferocious := {"殘忍": 0.9, "好戰": 0.8, "義氣": 0.1, "野心": 0.2, "求生欲": 0.5}
 	var honorable := {"殘忍": 0.1, "好戰": 0.1, "義氣": 0.9, "信義": 0.8, "野心": 0.2}
 	var ambitious := {"殘忍": 0.2, "野心": 0.9, "統領": 0.6, "求生欲": 0.7, "義氣": 0.3}
-	assert(DecisionTerms.weight("loot", ferocious) > DecisionTerms.weight("loot", honorable), "兇者掠奪 weight 較高")
+	# ★驗收點搬家（同上）：掠奪的人格已住進 `loot_drive` 的 eval ⇒ `weight("loot")` 是中性常數
+	#   ⇒ ★**比 weight 問不出「兇者比較想搶」** —— 改問 drive 本身。
+	assert(_loot_drive_util(ferocious) > _loot_drive_util(honorable), "兇者掠奪 drive 較高")
 	assert(DecisionTerms.weight("join", honorable) > DecisionTerms.weight("join", ferocious), "義氣者投靠 weight 較高")
 	assert(DecisionTerms.weight("camp", ambitious) > DecisionTerms.weight("camp", ferocious), "野心者紮營 weight 較高")
 	print("survival prefs OK")
@@ -13777,7 +13779,7 @@ func _test_solo_commitment() -> void:
 	for tid in [1, 2]:
 		var o := TeamData.new(); o.team_id = tid; o.tile_pos = Vector2i(4+tid, 4)
 		o.last_tile_pos = o.tile_pos   # 不逼近 → threat_react 低
-		_seed_pop(o, 3); o.faction_id = -1
+		_seed_pop(o, 3); o.faction_id = -1; o.resources = {"food": 1500.0}   # ★新增身價（見下方 belief 的 food_est）
 		state.teams[tid] = o
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
 	_seed_pop(team, 8); team.tags = ["軍隊"]; team.current_task = TeamData.TASK_IDLE
@@ -13789,11 +13791,66 @@ func _test_solo_commitment() -> void:
 	state.teams[0] = team
 	state.team_discovered[0] = [1, 2]
 	for tid in [1, 2]:
-		BeliefSystem.record_claim(state, 0, tid, 0, "親見", {"population_est": 3, "armed_est": 1, "tile_pos": state.teams[tid].tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
+	# ★★★【第①類修正·續】而這兩支比上面那支多一層：**那個數字根本不存在。**
+	#   ★belief 只寫了 `population_est`／`armed_est` ⇒ `belief_has_priced_items()` ＝ false
+	#     ⇒ `weak_prey_priced` ＝ false ⇒ `weak_prey_richness_est` ＝ 0 ⇒ **take 恆 0**。
+	#   ★★所以改真值 `prey.resources` 是【沒有用的】——**決策讀 belief 不讀真值**（感知鐵律）。
+	#   ★★★⇒ 必須在 belief 裡把「這隻獵物身上有東西」講出來（`food_est`），
+	#     否則這支測試問的是「看到弱肉會不會搶」而世界看到的是**一隻身上什麼都沒有的弱肉**。
+		BeliefSystem.record_claim(state, 0, tid, 0, "親見", {"population_est": 3, "armed_est": 1, "food_est": 1500.0, "tile_pos": state.teams[tid].tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
+	# ★★★【④類：斷言被 blueprint 裁定蓄意推翻】（2026-09-16，同「好戰盜匪」那一支）——
+	#   ★舊斷言：「掠奪 applicable ＋ 承諾 ⇒ 應續掠奪」＝ **承諾慣性可以把掠奪拉回首位**
+	#   ★★而實測：**常態＋合理富裕鄰居下，掠奪的 util 只有紮營的三分之一**
+	#     ⇒ **承諾慣性（`persist_strength`）不是為了跨越三倍差距而存在的** ——
+	#     ★★★**用它去跨三倍，等於把「防抖動」當成「翻盤」用，而那是兩件事。**
+	#   ⇒ **改成與盜匪那支同形：常態 ⇒ 不搶。**
+	#   ★**而「承諾慣性本身還有沒有作用」不在這一格** ——
+	#     ★★它在**下面那一格**用 util 級量（有承諾 vs 無承諾的同一支隊），
+	#     ★★★**因為 task 級在常態下量不到，而量不到的東西不該被斷言。**
+	# ★★★【身價那一檔是【具名條件】，不是背景】（systems 2026-09-16）：
+	#   ★實測（常態、鄰居 pop 3、三拉桿接線後）：
+	#     `f = 240`（TARGET×8）尾部 0.0165｜`f = 1500`（×50）尾部 **0.0833**｜`f = 8000`（×267）尾部 **0.2244**
+	#     而對手 `紮營` ＝ **0.1984** ⇒ ★★**只有 `f = 8000` 那一檔，尾部人格才會搶。**
+	#   ⇒ ★★★**所以這一格鎖住的是【`f = 1500` 這一檔】** ——
+	#     **不寫出來的話，它就是一支「看情境而定」卻沒說是哪個情境的測試。**
+	#   ★而「`TARGET × 267` 算不算合理富裕」在 blueprint 手上（票已送）——
+	#     **若他說算，這一格會變成 ④，而那是【預期的】。**
+	assert(is_equal_approx(float(BeliefSystem.best_estimate(state, 0, 1).get("food_est", -1.0)), 1500.0),
+		"★具名條件：鄰居身價這一檔 ＝ `food_est 1500`（TARGET×50）—— 改了這個數，這一格問的就是另一件事")
+	var _cc: DecisionContext = DecisionContext.gather(state, team)
+	assert(_cc.food_days > _cc.desperation_entry_threshold,
+		"★具名條件：這一格問的是【常態】（food_days %.1f 高於絕境線 %.1f）" % [
+			_cc.food_days, _cc.desperation_entry_threshold])
 	fai._evaluate_solo(state, team)
-	assert(team.current_task == TeamData.TASK_LOOT, "掠奪 applicable + 承諾(current_option=掠奪) → 應續掠奪，實際=%s" % team.current_task)
-	assert(team.current_option == "掠奪", "選後 current_option 記錄承諾")
-	print("solo commitment OK")
+	assert(team.current_task != TeamData.TASK_LOOT,
+		"常態＋合理富裕鄰居 ⇒ **不搶**（實際=%s）★紅了 ⇒ 世界開始在常態下劫掠，回報 systems" % team.current_task)
+	# ★★成對：**承諾慣性仍然有作用**（util 級）——
+	#   同一支隊，`current_option` 是「掠奪」時的掠奪 util **必須高於**不是掠奪時的。
+	# ★★★【我自己的測試 bug，留著當警告】：上面那行 `_evaluate_solo` **會改寫 `current_option`**
+	#   ⇒ ★第一版我沒有把它設回來就量 ⇒ **兩次都是「無承諾」** ⇒ 量出 0.0381 ＝ 0.0381
+	#   ⇒ ★★而那個相等**看起來像「persist 沒接上」** —— **實際上是我把兩邊都設成了同一個條件。**
+	#   ⇒ ★★★**成對格的兩半必須各自把條件【設好】，不能假設前一行沒動過它。**
+	team.current_option = "掠奪"
+	var _u_with: float = _opt_util(DecisionEngine.rank_scored(state, team, "cmt_with"), "掠奪")
+	team.current_option = "紮營"
+	var _u_without: float = _opt_util(DecisionEngine.rank_scored(state, team, "cmt_without"), "掠奪")
+	team.current_option = "掠奪"
+	# ★★★【而這一格【不能】斷言「嚴格大於」——理由是機制自己說的】：
+	#   `PersistStrength._value()`：**持守強度 ＝ f(沉沒成本 progress, 人格 lean)**
+	#   ⇒ ★**這支隊的任務是【這一刻才被設上的】** ⇒ `progress ≈ 0` ⇒ **persist ≈ 0**
+	#   ⇒ ★★**「剛開始做的事沒有沉沒成本」是設計，不是缺陷** ——
+	#     ★★★**所以在這個 fixture 上斷言「有承諾一定比較高」，就是斷言一個機制說不會發生的事。**
+	#   ⇒ 這裡只斷言**它不會倒扣**（`>=`），並把實際值印出來讓它可被看見。
+	print("   承諾慣性：有承諾 %.4f｜無承諾 %.4f｜`persist_strength` ＝ %.4f（★剛設上的任務 progress≈0）" % [
+		_u_with, _u_without, PersistStrength.compute(state, team)])
+	assert(_u_with >= _u_without,
+		"承諾慣性**不得倒扣**：有承諾 %.4f ≥ 無承諾 %.4f" % [_u_with, _u_without])
+	print("solo commitment OK（★常態不搶；承諾慣性改用 util 級驗，因為 task 級在常態下量不到）")
+
+func _opt_util(ranked: Array, opt: String) -> float:
+	for e in ranked:
+		if String(e.get("opt", "")) == opt: return float(e.get("u", 0.0))
+	return -1.0
 
 func _test_solo_seek_home() -> void:
 	print("--- SoloAI 主動尋家 ---")
@@ -13825,7 +13882,13 @@ func _test_solo_seek_home() -> void:
 	ptile.tile_id = 3*1000+4; ptile.tile_pos = Vector2i(3,4); ptile.terrain = "plains"
 	state.world.tiles[ptile.tile_id] = ptile
 	var prey := TeamData.new(); prey.team_id = 9; prey.tile_pos = Vector2i(3,4)
-	_seed_pop(prey, 2); prey.faction_id = -1; prey.resources = {"food": 30.0}
+	# ★★★【第①類修正·續】而這兩支比上面那支多一層：**那個數字根本不存在。**
+	#   ★belief 只寫了 `population_est`／`armed_est` ⇒ `belief_has_priced_items()` ＝ false
+	#     ⇒ `weak_prey_priced` ＝ false ⇒ `weak_prey_richness_est` ＝ 0 ⇒ **take 恆 0**。
+	#   ★★所以改真值 `prey.resources` 是【沒有用的】——**決策讀 belief 不讀真值**（感知鐵律）。
+	#   ★★★⇒ 必須在 belief 裡把「這隻獵物身上有東西」講出來（`food_est`），
+	#     否則這支測試問的是「看到弱肉會不會搶」而世界看到的是**一隻身上什麼都沒有的弱肉**。
+	_seed_pop(prey, 2); prey.faction_id = -1; prey.resources = {"food": 1500.0}   # ★30 → 1500（舊值 60 coin ≈ 0.15 人份）
 	state.teams[9] = prey
 	var raider := PersonData.new(); raider.id = 1000; raider.team_id = 1
 	raider.values = {"好戰": 0.9, "貪婪": 0.9, "野心": 0.5, "求生欲": 0.5}
@@ -13835,11 +13898,50 @@ func _test_solo_seek_home() -> void:
 	t1.armed_anon_ratio = 1.0   # capability grounding（裁2）：掠奪需有戰力
 	state.teams[1] = t1
 	state.team_discovered[1] = [9]
-	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 2, "armed_est": 1, "tile_pos": Vector2i(3, 4), "last_tick": state.world.current_tick}, 1.0, false)   # G3：有情報才打（position-belief：claim 帶位置）
+	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 2, "armed_est": 1, "food_est": 1500.0, "tile_pos": Vector2i(3, 4), "last_tick": state.world.current_tick}, 1.0, false)   # ★★food_est 是新加的：舊 belief 無可定價分項 ⇒ take 恆 0   # G3：有情報才打（position-belief：claim 帶位置）
+	# ★★★【④類：斷言被本票＋blueprint 裁定蓄意推翻】（2026-09-16）——
+	#   ★舊斷言：「好戰盜匪應 roving 非尋家」＝ **看到弱肉就一定去搶**（不問值不值得）
+	#   ★★而 blueprint 裁（`2026-09-16-blueprint-to-systems-cruelty-gates-style-not-survival.md`）：
+	#     **搶劫是【絕境行為】為主；常態好戰靠【尾部人格】，不靠人人微凶。**
+	#   ⇒ ★★★**常態 ＋ 合理富裕的鄰居 ⇒ 不搶，而那是【正解】不是缺陷。**
+	#   ★實測（四種人格組合 × 兩種身價，鄰居 pop 3）：**首選全部是紮營（0.1984）**，
+	#     掠奪最高 **0.0669**（好戰.9 殘忍.9、food 1500）⇒ **差 3 倍，不是刀鋒。**
+	#   ★★**而「兇者常態會搶」在本次實測中【量不到】** ——
+	#     要它翻過紮營需要 `food ≈ 16000–32000`（pop 2–3 的鄰居）⇒ **數字對、故事荒謬** ⇒ 否決。
+	#   ★★★**若日後 blueprint 要那件事發生，這一格會變成 ④ —— 而那是【預期的】。**
+	#     **這一格鎖住的是【今天的事實】，不是永遠的設計。**
+	# ★★★【身價那一檔是【具名條件】，不是背景】（systems 2026-09-16）：
+	#   ★實測（常態、鄰居 pop 3、三拉桿接線後）：
+	#     `f = 240`（TARGET×8）尾部 0.0165｜`f = 1500`（×50）尾部 **0.0833**｜`f = 8000`（×267）尾部 **0.2244**
+	#     而對手 `紮營` ＝ **0.1984** ⇒ ★★**只有 `f = 8000` 那一檔，尾部人格才會搶。**
+	#   ⇒ ★★★**所以這一格鎖住的是【`f = 1500` 這一檔】** ——
+	#     **不寫出來的話，它就是一支「看情境而定」卻沒說是哪個情境的測試。**
+	#   ★而「`TARGET × 267` 算不算合理富裕」在 blueprint 手上（票已送）——
+	#     **若他說算，這一格會變成 ④，而那是【預期的】。**
+	assert(is_equal_approx(float(BeliefSystem.best_estimate(state, 1, 9).get("food_est", -1.0)), 1500.0),
+		"★具名條件：鄰居身價這一檔 ＝ `food_est 1500`（TARGET×50）—— 改了這個數，這一格問的就是另一件事")
+	var _c1: DecisionContext = DecisionContext.gather(state, t1)
+	assert(_c1.food_days > _c1.desperation_entry_threshold,
+		"★具名條件：這一格問的是【常態】（food_days %.1f 必須高於絕境線 %.1f）" % [
+			_c1.food_days, _c1.desperation_entry_threshold])
 	fai._evaluate_solo(state, t1)
-	assert(t1.current_task == TeamData.TASK_LOOT or t1.current_task == TeamData.TASK_ATTACK,
-		"好戰盜匪應 roving 非尋家，實際=%s" % t1.current_task)
-	print("solo seek home OK")
+	assert(t1.current_task != TeamData.TASK_LOOT,
+		"常態＋合理富裕鄰居 ⇒ **不搶**（實際=%s）★這一格若紅 ⇒ 世界開始在常態下劫掠，回報 systems" % t1.current_task)
+	print("solo seek home OK（★常態不搶；兇者常態會不會搶 ⇒ 見下方 util 級的成對格）")
+	# ★★成對的另一半：**人格有方向**（★util 級，因為 task 級在常態下量不到）
+	#   ★而人格要變動【真正會動 `person` 的那一個軸】：`person` 讀 `max(好戰, 殘忍)`
+	#   ⇒ ★★★**好戰已經 .9 的隊，改殘忍對 `person` 完全沒作用** —— 所以這裡改的是**好戰**。
+	var _mild: PersonData = PersonData.new(); _mild.id = 1001; _mild.team_id = 1
+	_mild.values = {"好戰": 0.3, "貪婪": 0.9, "野心": 0.5, "求生欲": 0.5}
+	state.persons[1001] = _mild
+	var _saved: int = t1.leader_id
+	var _u_fierce: float = DecisionTerms.eval("loot_drive", DecisionContext.gather(state, t1), "掠奪")
+	t1.leader_id = 1001
+	var _u_mild: float = DecisionTerms.eval("loot_drive", DecisionContext.gather(state, t1), "掠奪")
+	t1.leader_id = _saved
+	assert(_u_fierce > _u_mild,
+		"人格有方向：好戰.9 的掠奪 drive (%.4f) ＞ 好戰.3 的 (%.4f)★兩者相同 ⇒ 人格沒接上" % [
+			_u_fierce, _u_mild])
 
 # ── 文字 UI Phase 1: API 暴露 ──
 func _test_location_game_predator() -> void:
@@ -16128,15 +16230,44 @@ func _test_g1a_construct_zombie_recovery() -> void:
 		"[g1a] CONSTRUCT zombie 子隊未恢復: task=%s merge_queue=%s" % [sub.current_task, str(merge_queue)])
 	print("[g1a] CONSTRUCT zombie 恢復 OK (merged=%s task=%s)" % [str(merge_queue.has(201)), sub.current_task])
 
+# ★★★【驗收點搬家，不是改斷言】（systems 裁 2026-09-16，票：掠奪走期望價值）：
+#   ★這一支問的是「**人格 → 掠奪傾向**」，而那個關係**仍然成立** ——
+#     只是它搬去了 `loot_drive` 的 `_rperson`（好戰／殘忍放大、慎重壓低），
+#     ★★因為本票把人格搬進了 eval，`weight("loot")` 就**必須同一刀歸中性 1.0**
+#       （搬家做一半 ＝ 同一個東西同時活在兩個地方）。
+#   ⇒ ★★★所以 `weight("loot")` 現在是一個**常數** ——
+#     **不論人格怎麼變它都是 1.0** ⇒ **對著它斷言的測試不可能再有鑑別力。**
+#   ★而處置**不是刪、不是改斷言**，是**把測試搬到那個關係現在住的地方**。
+func _loot_drive_util(vals: Dictionary) -> float:
+	var c := DecisionContext.new()
+	c.has_weak_prey = true
+	c.weak_prey_id = 1
+	c.weak_prey_priced = true
+	c.weak_prey_richness_est = 1000.0
+	c.reference_wealth = 4157.0
+	c.food_days = 10.0                      # ★不餓 ⇒ `need` 出局 ⇒ 只剩人格與身價
+	c.desperation_entry_threshold = 3.0
+	c.attack_win_odds = 1.0                 # ★贏率拉滿 ⇒ 它不是這一格的變因
+	c.leader_values = vals
+	c.population = 10
+	return DecisionTerms.eval("loot_drive", c, "掠奪")
+
 func _test_p1_loot_term() -> void:
-	print("--- P1 掠奪 term/weight ---")
-	var cruel := {"殘忍": 0.9, "好戰": 0.8, "貪婪": 0.5}
-	var meek  := {"殘忍": 0.1, "好戰": 0.1, "貪婪": 0.2}
-	var w_cruel: float = DecisionTerms.weight("loot", cruel)
-	var w_meek:  float = DecisionTerms.weight("loot", meek)
-	assert(w_cruel > 0.6, "[p1] 殘忍 loot weight 太低 %.2f" % w_cruel)
-	assert(w_meek  < 0.2, "[p1] 溫和 loot weight 太高 %.2f" % w_meek)
-	print("[p1] loot term/weight OK cruel=%.2f meek=%.2f" % [w_cruel, w_meek])
+	print("--- P1 掠奪 term（人格 → 掠奪傾向；★驗收點已搬家，見上方長註）---")
+	var cruel := {"殘忍": 0.9, "好戰": 0.8, "貪婪": 0.5, "慎重": 0.5}
+	var meek  := {"殘忍": 0.1, "好戰": 0.1, "貪婪": 0.2, "慎重": 0.5}
+	var u_cruel: float = _loot_drive_util(cruel)
+	var u_meek:  float = _loot_drive_util(meek)
+	# ★意圖原封不動：兇者**想搶**、溫和者**不想搶** —— 換的是問它的地方，不是問題。
+	assert(u_cruel > u_meek * 2.0,
+		"[p1] 殘忍的掠奪 drive 該**顯著**高於溫和 cruel=%.4f meek=%.4f" % [u_cruel, u_meek])
+	assert(u_meek < u_cruel * 0.5,
+		"[p1] 溫和的掠奪 drive 太高 meek=%.4f cruel=%.4f" % [u_meek, u_cruel])
+	# ★★成對的另一半：`weight("loot")` 現在**必須**是中性 —— 它若又帶人格，就是雙計回來了。
+	assert(is_equal_approx(DecisionTerms.weight("loot", cruel), DecisionTerms.weight("loot", meek)),
+		"[p1] `weight(\"loot\")` 必須與人格無關（人格已住在 eval；兩者都帶 ＝ 乘兩次）")
+	print("[p1] loot drive OK cruel=%.4f meek=%.4f（weight 中性 %.2f）" % [
+		u_cruel, u_meek, DecisionTerms.weight("loot", cruel)])
 
 # ── P1 helpers：建隊 + 設 belief + 放 tile ──
 
@@ -16181,8 +16312,24 @@ func _mk_unified_meek_team(state: WorldState, pos: Vector2i) -> TeamData:
 func _mk_weak_prey_team(state: WorldState, pos: Vector2i) -> TeamData:
 	var t := TeamData.new(); t.team_id = 902; t.tags = [TeamData.TAG_PRODUCE]
 	t.tile_pos = pos; t.leader_id = 9020
+# ★★★【第①類修正：只改 fixture 的【數字】，斷言一個字不動】（票：掠奪走期望價值 2026-09-16）
+#   ★這些 fixture 寫在「掠奪＝常數驅力」的年代——那時 prey 有沒有東西**根本不影響 util**
+#     （`LOOT_DRIVE_BASE × cap` 恆滿檔）⇒ **所以沒有人需要給 prey 財產。**
+#   ★★新制下「有弱肉就會去搶」多了一個前提：**而且值得搶**；
+#     而 `ref` ＝ 一整隊的目標存量總值 ⇒ 舊值 200 食（＝400 coin）≈ **一個人的份**。
+#   ★★★所以把「弱肉」重寫成【新尺上的弱肉】—— **意圖不變（弱、可搶、值得搶），只換算尺度。**
+#     （先例：`coin_est 300→4000`。）
 	_seed_pop(t, 3)   # pop=3 < 10×0.7=7 → 弱
-	t.resources = {"food": 200.0}
+	# ★★★【這個數字是為了讓搶【划算】，不是為了讓測試綠】（systems 裁 2026-09-16）：
+	#   ① **交叉點在 `food_est ≈ 4000`**（實測：掠奪 .1495 vs 紮營 .1475 —— **只差 0.002**）
+	#   ② **我設 8000 是為了離它夠遠**（實測 掠奪 .2014 vs 紮營 .1475 ＝ 領先 36%）
+	#   ③ ★**刀鋒上的 fixture 的綠是【運氣】** —— 任何一次無關改動都會讓它翻面，
+	#      ★★而翻面的時候，**下一個人會以為是他弄壞的。**
+	# ★★★而比「4000」有用的是這個**地標**（★systems 是**算**出來的不是量的 ⇒ **可被推翻**，別當結論）：
+	#   交叉點 food_est 4000 ⇒ 身價 8000 ⇒ ×`effective_loot_rate`(0.405) ⇒ **x/ref ≈ 0.78**（ref 4157）
+	#   ⇒ **「搶得過紮營」的門檻 ≈【對方的可搶身家接近我自己的參考財富】**
+	#   ⇒ ★**4000 會隨世界參數漂，而「≈ 我自己的身家」不會。**
+	t.resources = {"food": 8000.0}   # ★200 → 2000 → 8000
 	state.teams[902] = t
 	_p1_place_tile(state, pos)
 	var ldr2 := PersonData.new(); ldr2.id = 9020; ldr2.team_id = 902
@@ -16200,7 +16347,7 @@ func _p1_set_belief(state: WorldState, obs_id: int, prey: TeamData) -> void:
 	# 親見格式（legacy Dictionary path in _coerce）→ has_belief=true
 	state.team_intel[obs_id][prey.team_id] = {
 		"population_est": float(prey.population),
-		"food_est": 200.0,
+		"food_est": 8000.0,   # ★跟著真值改 —— ★★決策讀的是 belief，只改真值等於沒改
 		"tile_pos": prey.tile_pos,
 		"confidence": 1.0,
 		"last_tick": 0,

@@ -1,0 +1,10 @@
+[tier2] 全床掃描開始（137 支）
+[tier2] ＋新床：scripts/debug/data_test.gd（not-a-bed）
+[tier2] ★★由綠轉紅：scripts/debug/game_sim_test.gd（green → 60）
+[tier2] ＋新床：scripts/debug/lod_phase_invariance_test.gd（timeout）
+[tier2] ＋新床：scripts/debug/data_test.gd（not-a-bed）
+[tier2] ＋新床：scripts/debug/lod_phase_invariance_test.gd（timeout）
+[tier2] ＋新床：scripts/debug/data_test.gd（timeout-persistent）
+[tier2] ＋新床：scripts/debug/lod_phase_invariance_test.gd（timeout-persistent）
+[tier2] baseline 只收判決列:收 135 支｜★丟 8 支 no-verdict(timeout/hang/crash) 或 CONTENDED
+[tier2] 完成：143 支｜★綠→紅 1 支｜baseline 已更新｜時間戳已蓋
