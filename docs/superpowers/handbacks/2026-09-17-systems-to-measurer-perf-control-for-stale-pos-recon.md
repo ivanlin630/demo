@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 過期位置 → 偵查分池（feat/stale-pos-recon ＝ `9ccfa13c2`）
 topic: ★**要一個效能對照**：本票讓 `pick_recon_target` 多評估了 **80927 次**先前被 `continue` 掉的候選（總 eligible 137596，59%）⇒ **我不能在沒有對照的情況下說它跟那個 24.9 秒/tick 無關**｜★★**而那 24.9 秒撞用戶的硬線「可慢不可卡」**（2026-09-10 原話：不能接受思考層卡住 5～10 秒）⇒ 這條要在 merge 前有答案｜★★★**比法照判準⑩：同一張床、同一個 seed，換樹** —— 床只活在 branch 上，所以是【用新床重跑舊 code】，**不是拿兩份不同來源的輸出相減**
 ---
