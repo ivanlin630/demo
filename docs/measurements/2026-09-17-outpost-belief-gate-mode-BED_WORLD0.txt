@@ -1,0 +1,45 @@
+[TREE] path=A:\GDS\demo\.worktrees\outpost commit=2de02ef1d clean=yes codehash=clean
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 據點知識進 belief 驗收（spec §3）===
+[TREE] HEAD=2de02ef1d scripts-dirty=0（clean）
+3-a｜對城主有 belief（(11, 11)）、從未走過那座城  迴避集 []
+  [OK] 3-a-前提 ★**我對城主【確實】有情報**（舊版正是靠這個把城放進集合）｜★前提不成立  下一句的綠是空的
+  [OK] 3-a ★**知道得太多那一半消失了**：沒看過的城**不在**迴避集（樣本 1／母體 1）｜★★退回 proxy  它會在  這一句會紅
+3-b｜親眼走過那座城、對城主的 belief=(-1, -1)  迴避集 [(5, 5)]
+  [OK] 3-b-前提 ★**我對城主【沒有】任何情報**（舊版正是因此把城丟掉）
+  [OK] 3-b ★★**知道得太少那一半也消失了**：走過的城**在**迴避集（樣本 1／母體 1）｜★★★這一格是【沒有人寫下來過】的那個方向
+3-d-｜從沒觀察過任何據點  迴避集 []（世界上確實有一座城）
+  [OK] 3-d- ★**沒看過  空集**（★★不是 fallback 到全圖）｜★空集不是失敗，是誠實：不知道的城對我不存在
+3-d-｜同一則據點知識已 33.0 天（過期線 3.0 天） 迴避集 [(5, 5)]
+  [OK] 3-d--前提 ★這則知識**真的**已經超過那條線（33.0 天）
+  [OK] 3-d- ★★**看過但很舊  仍在集合裡**（★據點不會自己走）｜★★★借了 `BELIEF_STALE_TICKS` 那條線  這一句會紅（那條線問的是「它現在還在那裡嗎」，而這裡問的是「我知不知道有這座城」）
+3-d-｜城被拆掉、觀察者再看一眼  已知據點 1 → 0
+  [OK] 3-d- ★**親見「那裡沒有城了」會擦掉舊子記錄**｜★★不擦  被拆的城永遠留在別人的知識裡，而**那不是過期，是錯**
+3-h｜只從 relay 聽說過 (5,5)：key 在＝true｜已知據點 0 筆
+  [OK] 3-h-前提 ★relay **確實**讓那塊地進了 `team_tile_known`（否則下一句證不到東西）
+  [OK] 3-h ★★**relay 不寫據點子記錄**：聽說有那個地方 ≠ 看過它上面有什麼｜★★★寫了  情報會憑空長出【我從沒看見的城】
+3-g｜加值之後：key 仍在＝true｜值已變成 Dictionary＝true｜for-in 走得到 37 格
+  [OK] 3-g-a ★**key 存在的語意逐字不變**（四個既有讀者全部只走 key）
+  [OK] 3-g-b ★前提：那一格的值**確實**已經變成 Dictionary（否則下一句沒驗到東西）
+  [OK] 3-g-c ★**`for-in-dict` 走得到每一格**（37／37）｜★值換形狀時把 `has()`/走訪弄壞  這裡會紅
+
+— 3-c／3-e：原始碼 —
+  [OK] 3-c-前提 找得到 `_enemy_outpost_positions`
+  [OK] 3-c-a ★**全圖掃已經刪掉**（★★殘留 ＝ 下一個讀者的陷阱）
+  [OK] 3-c-b ★**不再 live 讀 `tile.outpost_owner`／`outpost_level`**
+  [OK] 3-c-c ★**改讀具名的列舉介面**（`known_outposts` 這個名字是三支同病灶 site 將來的機械判準）
+  [OK] 3-e ★★**錨定判準逐字未改，而且 `decision_context` 沒有去碰新欄**｜★blueprint 明令：**欄開了 ≠ 每個想用的地方都該接**（他量到反向數字：受害者側佔比低於母體側  那條路的答案已經是「不需要」）
+  [不可判] 3-f（世界級） ——
+       宣稱：真世界裡兩個方向都發生：有城【因為我走過】而進集合、也有城【因為我沒走過】而不進集合
+       為什麼這次驗不了：本次以 BED_WORLD=0 執行（世界級那一段要跑 warring_states 10 天）
+       怎麼驗：BED_WORLD=1 BED_DAYS=10 GODOT_TIMEOUT=3000 單獨跑一次；交件貼數時標【床的 commit】
+  [OK] 到場點名 ★每一格都跑完了（6／6）
+-- 量測完成；[FAIL] 數 ＝ 0｜[不可判] 數 ＝ 1 --
+[TEST-SUITE-COMPLETE]
+ERROR: [不可判] 3-f（世界級）：真世界裡兩個方向都發生：有城【因為我走過】而進集合、也有城【因為我沒走過】而不進集合
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=0
