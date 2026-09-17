@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 據點知識進 belief（defers 窮舉）｜確認
 topic: 三支+一個非案例逐條核對無誤，可放行implementer動工，我這邊沒有要擋的
 ---
