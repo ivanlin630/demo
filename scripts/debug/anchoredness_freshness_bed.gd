@@ -18,6 +18,20 @@ extends SceneTree
 var _fails: int = 0
 var _undec: int = 0
 
+# ★★★【觀測戳記】—— **不是門檻**（底下沒有任何斷言讀它；數字變小【不會】讓這支床變紅）。
+# OBSERVED @ 7f9d78329（BED_WORLD=1 BED_DAYS=10 BED_SEED=1337 BED_CONFIG=warring_states）：
+#   錨定 ＝ 9.7%（13320/136843）／`settled` 單獨 ＝ 0.59%（801）
+# ★**為什麼要有它**：「9.7%」這個數字**不含判斷所需的資訊**，
+#   而「比上次少了 8.7 個百分點」含 —— 孤立的數字要讀者自己去猜「這樣算小嗎」。
+# ★★**規矩**：
+#   改戳記 ⇒ **要在【同一顆 commit】裡寫理由**（為什麼這個新數字才是參考點）
+#   不改戳記 ⇒ ★完全可以：**Δ 變大正是這個機制在工作**，不是待辦事項。
+# ★★★**而它唯一的死法是【每次跑完順手把戳記改成這次的數】** ⇒ Δ 恆為 0
+#   ⇒ 而 Δ0 在畫面上跟「真的沒變」長得一模一樣
+#   ⇒ **所以 Δ 那一行會把戳記的 commit 一起印出來**：「這戳記是這一輪剛換的」看得見，不必翻 git log。
+const OBSERVED_ANCHORED_PCT: float = 9.7
+const OBSERVED_AT_COMMIT: String = "7f9d78329"
+
 func _initialize() -> void:
 	_run()
 	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
@@ -225,6 +239,10 @@ func _cell_e_world() -> void:
 		act_sum += n
 		parts.append("%s=%d" % [String(a), n])
 	print("     ★activity 分佈：%s｜合計=%d" % [" ／ ".join(parts), act_sum])
+	# ★非門檻的觀測行：本次 vs 戳記 vs Δ（★戳記的 commit 一起印，別省 —— 見檔頭）
+	var pct: float = 100.0 * float(anch) / float(maxi(elig, 1))
+	print("     [錨定規模] 本次 %.1f%%（%d/%d）｜戳記 %.1f%% @%s｜Δ %+.1fpt" % [
+		pct, anch, elig, OBSERVED_ANCHORED_PCT, OBSERVED_AT_COMMIT, pct - OBSERVED_ANCHORED_PCT])
 	_ok(act_sum == elig,
 		"6-e-e ★**分桶加總 ＝ 母體**（%d ＝ %d）｜★不等 ⇒ 有第七種 activity 沒有桶，而它現在正被靜默歸成無錨" % [
 			act_sum, elig])
