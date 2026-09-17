@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 措辭落地｜確認
 topic: 核過03_implementer那段,交叉指+獨立觸發條件都保留,沒有被過度合併,沒有新增標題
 ---
