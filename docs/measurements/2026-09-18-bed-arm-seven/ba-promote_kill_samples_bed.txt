@@ -1,0 +1,30 @@
+[TREE] path=A:\GDS\demo\.worktrees\bedarm7 commit=e806aaaef clean=NO code-dirty=2 codehash=D52239F8E974
+[TREE]   *** measuring the WORKING TREE, not commit e806aaaef ***
+[TREE]    M scripts/debug/plan_speed_move_cost_test.gd
+[TREE]    M scripts/debug/promote_kill_samples_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== PROMOTE KILL SAMPLES ===
+--  三個分支各有 bounded 樣本 --
+    promote.kill.not_enough_bodies     計數 0｜樣本 0
+    promote.kill.not_enough_exp        計數 0｜樣本 0
+    promote.kill.not_enough_res        計數 1｜樣本 1
+  PASS: promote.kill.not_enough_res 有 bounded 樣本（不是只有 bump）
+--  成對對照：差 5 與差 45 要分得出來 --
+    樣本 1 筆｜short 值：[45]
+-- b 有界：撞 200 次不得無界累積 --
+    撞 200 次  計數 1｜樣本 1（上限 64）
+  PASS: b 樣本有界（1  64）
+=== DONE === SECTIONS=3/3 FAILS=4
+ERROR: [FAIL] promote.kill.not_enough_bodies 有 bounded 樣本（不是只有 bump）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] promote.kill.not_enough_exp 有 bounded 樣本（不是只有 bump）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] 差 5 與差 45 在樣本裡可分辨（實得 [45]）—— 只印分支名的話這格白做
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] b 計數照樣是全量 200（樣本有界≠計數截斷）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=0

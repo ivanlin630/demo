@@ -1,5 +1,7 @@
 extends SceneTree
-# @bed-kind: diagnostic
+# @bed-kind: acceptance —— ★bed-kind 閘揭（2026-09-18）：它有【判決通道】就不是純診斷；
+#   而它確實在判一件事：★「命中率 > 50% ⇒ 前提錯了 ⇒ 本票不該硬改，停下來回報」
+#   ⇒ 紅＝那張票的前提不成立（不是全域不變量，也不是「工具壞了」）
 # slice: 驗收①（先量再改）：_sssp_cache 的命中率
 #
 # ★spec 明文：**若命中率其實很高 ⇒ 本票前提就錯了，停下來回報，不要硬改。**
@@ -11,11 +13,11 @@ func _initialize() -> void:
 	var cfg: String = OS.get_environment("SC_CONFIG") if OS.has_environment("SC_CONFIG") else "warring_states"
 	print("=== _sssp_cache 命中率（%d tick ＝ %.1f 遊戲天，%s）===" % [
 		ticks, float(ticks) / float(WorldState.TICKS_PER_DAY), cfg])
-	Probe.arm()
 	seed(4242)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/%s.json" % cfg))
-	st.player_id = -1
+	# ★★★【走 `MeasureBedHelper.arm_and_setup()`】（bed-arm 閘）——★順序寫死（arm → setup），沒得選錯。
+	#   ★這支床本來就在 setup 之前 arm，行為不變；改走 helper 是**把「順序對」從【記得】換成【做不到做錯】**。
+	#   ★★helper 內建 `_strip_player()`（原本這裡手寫 `st.player_id = -1`）⇒ 逐字同義。
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
 	var runner := SimRunner.new()
 	for i in range(ticks):
 		runner.advance_tick(st, Vector2i(-1, -1))

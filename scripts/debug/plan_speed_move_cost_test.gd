@@ -49,7 +49,11 @@ func _mk_team(st: WorldState, tid: int, pos: Vector2i) -> TeamData:
 
 # 中性 / 慢 / 快 三隊（同一個世界，只差它們自己的狀態）
 func _mk_world() -> Dictionary:
-	var st := WorldState.new()
+	# ★★★【arm 先於建世界】（bed-arm 閘，2026-09-18 本票）——
+	#   ★這支床**會讀 `Probe`**，而 `Probe.arm()` 若晚於世界建好，**那段世界的 tap 是盲的**
+	#     ⇒ 讀出來的「0 次」分不出【沒發生】與【沒在看】。
+	#   ★★`arm_and_new()` 把順序寫死（arm → `WorldState.new()`）⇒ **沒得選錯**。
+	var st := MeasureBedHelper.arm_and_new()
 	_put_tile(st, Vector2i(0, 0), "plains")
 	_put_tile(st, Vector2i(1, 0), "mountain")
 	_put_tile(st, Vector2i(2, 0), "plains")

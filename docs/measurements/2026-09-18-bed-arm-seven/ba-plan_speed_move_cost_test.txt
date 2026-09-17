@@ -1,0 +1,30 @@
+[TREE] path=A:\GDS\demo\.worktrees\bedarm7 commit=e806aaaef clean=NO code-dirty=2 codehash=D52239F8E974
+[TREE]   *** measuring the WORKING TREE, not commit e806aaaef ***
+[TREE]    M scripts/debug/plan_speed_move_cost_test.gd
+[TREE]    M scripts/debug/promote_kill_samples_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== PLAN SPEED FROM REAL MOVE COST ===
+--  計畫天數要分得出快慢 --
+  中性 dist=20 days=4.76 (tiles/day=4.20)
+  慢隊 dist=19 days=9.50 (tiles/day=2.00)
+  快隊 dist=18 days=1.49 (tiles/day=12.10)
+  PASS: 慢隊每格天數(0.5000) > 中性(0.2382)
+  PASS: 快隊每格天數(0.0826) < 中性(0.2382)
+  PASS: 快隊每格天數(0.0826) < 舊平版估 0.5000
+  PASS: 反向對照：三隊【不】共用同一個每格天數（共用＝仍是平版常數）
+--  單位健全性（差 1440 倍＝接錯，差 1-9 倍＝發現）--
+  PASS: neutral 比舊常數 2.10 倍 < 20（100 倍＝單位接錯）
+  PASS: neutral tiles/day=4.20 落在 clamp 可達區間 [2,18]
+  PASS: slow 比舊常數 1.00 倍 < 20（100 倍＝單位接錯）
+  PASS: slow tiles/day=2.00 落在 clamp 可達區間 [2,18]
+  PASS: fast 比舊常數 6.05 倍 < 20（100 倍＝單位接錯）
+  PASS: fast tiles/day=12.10 落在 clamp 可達區間 [2,18]
+--  rootdiff.* 三格：決策端不得動它，執行端必須動它 --
+  PASS: 決策端呼叫 5 次，三格計數不變
+  PASS: 反向對照：執行端呼叫一次，三格計數【都】增加（否則『不變』是恆真式）
+=== DONE === SECTIONS=3/3 FAILS=0
+
+[godot.ps1] child exit=0

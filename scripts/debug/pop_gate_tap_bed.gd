@@ -29,11 +29,11 @@ func _ok(cond: bool, msg: String) -> void:
 
 func _test_tap_fires() -> void:
 	print("-- ① 真的會 fire，而且逐筆有 detail --")
-	Probe.arm()
 	seed(4242)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/warring_states.json"))
-	st.player_id = -1
+	# ★★★【走 `MeasureBedHelper.arm_and_setup()`】（bed-arm 閘）——★順序寫死（arm → setup），沒得選錯。
+	#   ★這支床本來就在 setup 之前 arm，行為不變；改走 helper 是**把「順序對」從【記得】換成【做不到做錯】**。
+	#   ★★helper 內建 `_strip_player()`（原本這裡手寫 `st.player_id = -1`）⇒ 逐字同義。
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/warring_states.json")
 	var runner := SimRunner.new()
 	for _i in range(3000):
 		runner.advance_tick(st, Vector2i(-1, -1))

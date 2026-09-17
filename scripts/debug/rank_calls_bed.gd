@@ -15,15 +15,16 @@ func _initialize() -> void:
 		ticks, float(ticks) / float(WorldState.TICKS_PER_DAY), cfg])
 	# ★★★儀器自己的成本：Probe 開/關同窗對照（★關掉那趟【沒有任何相位數字】
 	#   ⇒ 只能比外層牆鐘總時 —— 這一句要跟數字一起出現）
-	var probe_on: bool = OS.get_environment("RC_PROBE") != "0"
-	if probe_on:
-		Probe.arm()
-	else:
-		Probe.enabled = false
 	seed(4242)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/%s.json" % cfg))
-	st.player_id = -1
+	# ★★★【走 `MeasureBedHelper.arm_and_setup()`】（bed-arm 閘）——★順序寫死（arm → setup），沒得選錯。
+	#   ★這支床本來就在 setup 之前 arm，行為不變；改走 helper 是**把「順序對」從【記得】換成【做不到做錯】**。
+	#   ★★helper 內建 `_strip_player()`（原本這裡手寫 `st.player_id = -1`）⇒ 逐字同義。
+	var probe_on: bool = OS.get_environment("RC_PROBE") != "0"
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
+	# ★★★「關掉 Probe 那一趟」要關在【helper 之後】——helper 一定會 arm（那是它存在的理由），
+	#   ★而本床的對照組需要「Probe 關著跑同一個世界」⇒ 關的動作搬到這裡，**順序仍然是 arm → setup → 關**。
+	if not probe_on:
+		Probe.enabled = false
 	var runner := SimRunner.new()
 	var _w0: int = Time.get_ticks_usec()
 	for _i in range(ticks):
@@ -35,7 +36,7 @@ func _initialize() -> void:
 		StateFingerprint.compute(st), "ON" if probe_on else "OFF"])
 	print("★牆鐘總時：%.2f s（Probe=%s）—— ★★兩趟相比才看得出儀器佔多少" % [_wall, "ON" if probe_on else "OFF"])
 	if not probe_on:
-		print("=== DONE === SECTIONS=1/1 FAILS=0（★Probe 關 ⇒ 本趟沒有相位數字，只有牆鐘）")
+		print("=== 量測結束（診斷床：本床不判對錯，只產數字）=== ★Probe 關 ⇒ 本趟沒有相位數字，只有牆鐘")
 		quit()
 	print("")
 	print("呼叫端        次數      總計(s)   us/call   單次max(ms)   走這條路的隊數  每隊次數")
@@ -73,5 +74,12 @@ func _initialize() -> void:
 	print("★驗：us/call × 次數 應 ≈ 總計（純除法，印出來讓人自己驗）")
 	print("★★★而【儀器成本】只有這一段量得到；Probe 關掉那一趟【沒有任何相位數字】")
 	print("   ⇒ 那一趟只能比外層牆鐘總時（見交件的 Probe 開/關對照）")
-	print("=== DONE === SECTIONS=1/1 FAILS=0")
+	# ★★★【診斷床不印判決橫幅】（bed-kind 閘 2026-09-18 抓到）——
+	#   ★原本這裡印一行【長得像判決的結束橫幅】（DONE ＋ 段數 ＋ 失敗數），而那些數是**寫死的字面**：
+#   ★★★而我第一版把那一行【逐字抄進這段註解】⇒ **閘照樣紅**（它 grep 的是整個檔案，不分 code 與註解）
+#     —— **同一族第四次**：檢查器與被檢查物在同一個檔案裡時，「我寫的話」會被當成「code 做的事」。
+	#     這支床**不計算任何 FAIL**（它是量數字的，不是判對錯的）
+	#   ⇒ ★★**那就是「跑了、exit 0、什麼都不斷言」的長相** —— 而 expect 機制正是為了抓它而生。
+	#   ⇒ ★★★改印【明講自己沒有判決】的結束行：**看的人不會再把它讀成一個通過**。
+	print("=== 量測結束（診斷床：本床不判對錯，只產數字）===")
 	quit()

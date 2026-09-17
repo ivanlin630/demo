@@ -21,9 +21,12 @@ func _initialize() -> void:
 	print("=== solo 成本 × 規模（%d tick ＝ %.1f 遊戲天，%s）===" % [
 		ticks, float(ticks) / float(WorldState.TICKS_PER_DAY), cfg])
 	seed(4242)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/%s.json" % cfg))
-	st.player_id = -1
+	# ★★★【真缺陷：原本的 `Probe.arm()` 在 `GameSetup.setup()` 【之後】】（bed-arm 閘，2026-09-18）——
+	#   ★後果不是形式問題：**setup 那一段世界的 tap 是盲的** ⇒ 那段時間的計數恆 0，
+	#     ★★而「0 次」與「沒在看」在卷面上長得一模一樣。
+	#   ⇒ 改走 `arm_and_setup()`：arm 先於 setup，★★★**而這會讓本床的數字改變（變成本來就該有的那個）**。
+	#   ★helper 內建 `_strip_player()`（原本手寫 `st.player_id = -1`）⇒ 逐字同義。
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
 	SimRunner.phase_timing = true
 	var runner := SimRunner.new()
 	# N 分桶 → [每隊 us…]
@@ -36,7 +39,6 @@ func _initialize() -> void:
 	var _tot_chp: int = 0
 	var _eng_per_tick: Array = []
 	var _cad_hist: Dictionary = {}
-	Probe.arm()
 	for i in range(ticks):
 		FactionAISystem._fai_ph.clear()
 		var before: Dictionary = {}
@@ -144,5 +146,12 @@ func _initialize() -> void:
 			print("★★★判讀：【超線性】—— 每隊成本隨 N 長 ⇒ ★它就是 26 秒的形狀")
 	else:
 		print("★樣本只有 %d 個 N 桶 ⇒ 【不可判】（窗不夠長，N 沒長起來）" % pts.size())
-	print("=== DONE === SECTIONS=1/1 FAILS=0")
+	# ★★★【診斷床不印判決橫幅】（bed-kind 閘 2026-09-18 抓到）——
+	#   ★原本這裡印一行【長得像判決的結束橫幅】（DONE ＋ 段數 ＋ 失敗數），而那些數是**寫死的字面**：
+#   ★★★而我第一版把那一行【逐字抄進這段註解】⇒ **閘照樣紅**（它 grep 的是整個檔案，不分 code 與註解）
+#     —— **同一族第四次**：檢查器與被檢查物在同一個檔案裡時，「我寫的話」會被當成「code 做的事」。
+	#     這支床**不計算任何 FAIL**（它是量數字的，不是判對錯的）
+	#   ⇒ ★★**那就是「跑了、exit 0、什麼都不斷言」的長相** —— 而 expect 機制正是為了抓它而生。
+	#   ⇒ ★★★改印【明講自己沒有判決】的結束行：**看的人不會再把它讀成一個通過**。
+	print("=== 量測結束（診斷床：本床不判對錯，只產數字）===")
 	quit()

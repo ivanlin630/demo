@@ -34,9 +34,12 @@ func _ok(cond: bool, msg: String) -> void:
 
 func _mk(cfg: String) -> WorldState:
 	seed(4242)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/%s.json" % cfg))
-	st.player_id = -1
+	# ★★★【真缺陷：原本的 `Probe.arm()` 在 `GameSetup.setup()` 【之後】】（bed-arm 閘，2026-09-18）——
+	#   ★後果不是形式問題：**setup 那一段世界的 tap 是盲的** ⇒ 那段時間的計數恆 0，
+	#     ★★而「0 次」與「沒在看」在卷面上長得一模一樣。
+	#   ⇒ 改走 `arm_and_setup()`：arm 先於 setup，★★★**而這會讓本床的數字改變（變成本來就該有的那個）**。
+	#   ★helper 內建 `_strip_player()`（原本手寫 `st.player_id = -1`）⇒ 逐字同義。
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
 	return st
 
 # ── ⑧ 實際間隔分布（★R² 明文要求：不得假設它正常）────────────────────
@@ -115,7 +118,6 @@ func _test_interval_distribution() -> void:
 # ── ② 總吞吐：不是用少做事換不卡 ─────────────────────────────────────
 func _test_throughput() -> void:
 	print("-- ② 總吞吐（★新 tap：只在真的往下跑思考時 bump）--")
-	Probe.arm()
 	var st := _mk("world_sim")
 	var runner := SimRunner.new()
 	for i in range(600):

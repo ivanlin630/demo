@@ -1,0 +1,888 @@
+[TREE] path=A:\GDS\demo\.worktrees\bedarm7 commit=e806aaaef clean=NO code-dirty=7 codehash=305B9172A1A4
+[TREE]   *** measuring the WORKING TREE, not commit e806aaaef ***
+[TREE]    M scripts/debug/plan_speed_move_cost_test.gd
+[TREE]    M scripts/debug/pop_gate_tap_bed.gd
+[TREE]    M scripts/debug/promote_kill_samples_bed.gd
+[TREE]    M scripts/debug/rank_calls_bed.gd
+[TREE]    M scripts/debug/solo_cost_vs_scale_bed.gd
+[TREE]    M scripts/debug/solo_think_stagger_bed.gd
+[TREE]    M scripts/debug/sssp_cache_hitrate_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== solo 成本 × 規模（1500 tick ＝ 1.0 遊戲天，warring_states）===
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[Sub] Team0 派出子隊 Team49 leader=P1 advisors=[] (pop=3 cap=8 task=擴建)
+[Infra] Team0 派擴建子隊 Team49 → (10,19) stable
+[Site] 選址 (22, 7) score=498 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction1 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Sub] Team10 派出子隊 Team50 leader=P28 advisors=[] (pop=3 cap=7 task=擴建)
+[Infra] Team10 派擴建子隊 Team50 → (3,14) stable
+[Site] 選址 (17, 22) score=280 周邊資源={ "ore_gold": 15, "ore_iron": 124, "ore_silver": 60, "wild_horses": 7 } terrain=mountain
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Sub] Team12 派出子隊 Team51 leader=P32 advisors=[] (pop=3 cap=9 task=擴建)
+[Infra] Team12 派擴建子隊 Team51 → (18,1) stable
+[Site] 選址 (22, 7) score=396 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Sub] Team17 派出子隊 Team52 leader=P44 advisors=[] (pop=3 cap=14 task=擴建)
+[Infra] Team17 派擴建子隊 Team52 → (10,5) stable
+[Site] 選址 (22, 7) score=461 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 80(公庫0+私80) (需 { "material": 50, "tools": 0 })
+[Outpost] Team26 設施施工 workshop → Lv1 at (22,4)
+[Site] 選址 (22, 7) score=489 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction6 派工失敗: 資源不足 1.26x: material 有 20(公庫0+私20) (需 { "material": 50, "tools": 0 })
+[Site] Faction7 派工失敗: pop 不足: 8 < 12 (需 { "material": 50, "tools": 0 })
+[Outpost] Team29 設施施工 stable → Lv1 at (2,21)
+[Site] 選址 (22, 7) score=496 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction7 派工失敗: 資源不足 1.43x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[CampL0] Team2 紮營 L0 @(21,9)
+[CampL0] Team20 紮營 L0 @(10,6)
+[CampL0] Team23 紮營 L0 @(3,28)
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.75
+[Tick 60] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 60] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 60] Person 7 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 8 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 60] Person 10 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 11 (member/team4) → P1_comply | stress=0.00 loyalty=0.68
+[Tick 60] Person 12 (member/team4) → P1_comply | stress=0.00 loyalty=0.98
+[Tick 60] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 14 (member/team5) → P4_expand | stress=0.00 loyalty=0.97
+[Tick 60] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 60] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 18 (member/team6) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 60] Person 19 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 60] Person 21 (member/team7) → P1_comply | stress=0.00 loyalty=0.60
+[Tick 60] Person 22 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 23 (member/team8) → P1_comply | stress=0.00 loyalty=0.68
+[Tick 60] Person 24 (member/team8) → P1_comply | stress=0.00 loyalty=0.52
+[Tick 60] Person 25 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 26 (member/team9) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 60] Person 27 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Reaction] Person129 離團自立流亡 Team53 at (18,18)
+[Tick 60] Person 129 (leader/team53) → N1_flee | stress=0.15 loyalty=0.38
+[Tick 60] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 60] Person 31 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Reaction] Person130 離團自立流亡 Team54 at (19,8)
+[Tick 60] Person 130 (leader/team54) → N1_flee | stress=0.15 loyalty=0.38
+[Tick 60] Person 33 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 34 (member/team13) → P1_comply | stress=0.00 loyalty=0.71
+[Tick 60] Person 35 (member/team13) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 60] Person 36 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 37 (member/team14) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 38 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 39 (member/team15) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 60] Person 40 (leader/team16) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 41 (member/team16) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 60] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 60] Person 43 (leader/team17) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 45 (member/team17) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 46 (leader/team18) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 47 (member/team18) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 60] Person 48 (member/team18) → P4_expand | stress=0.00 loyalty=0.89
+[Tick 60] Person 49 (leader/team19) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 50 (member/team19) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 60] Person 51 (member/team19) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 60] Person 52 (leader/team20) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 53 (member/team20) → P1_comply | stress=0.00 loyalty=0.91
+[Tick 60] Person 54 (member/team20) → P1_comply | stress=0.00 loyalty=0.60
+[Tick 60] Person 55 (leader/team21) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 56 (member/team21) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 60] Person 57 (member/team21) → P1_comply | stress=0.00 loyalty=0.79
+[Tick 60] Person 58 (leader/team22) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 59 (member/team22) → P4_expand | stress=0.00 loyalty=0.83
+[Tick 60] Person 60 (member/team22) → P4_expand | stress=0.00 loyalty=0.59
+[Tick 60] Person 61 (leader/team23) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 62 (member/team23) → P1_comply | stress=0.00 loyalty=0.71
+[Tick 60] Person 63 (member/team23) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 60] Person 64 (leader/team24) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 65 (member/team24) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 60] Person 66 (leader/team25) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 67 (member/team25) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 60] Person 68 (leader/team26) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 69 (member/team26) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 60] Person 70 (leader/team27) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 71 (member/team27) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 60] Person 72 (member/team27) → P1_comply | stress=0.00 loyalty=0.59
+[Tick 60] Person 73 (leader/team28) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 74 (member/team28) → P4_expand | stress=0.00 loyalty=0.68
+[Tick 60] Person 75 (member/team28) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 60] Person 76 (leader/team29) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 77 (member/team29) → P4_expand | stress=0.00 loyalty=0.65
+[Tick 60] Person 78 (leader/team30) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 79 (member/team30) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 60] Person 80 (member/team30) → P1_comply | stress=0.00 loyalty=0.62
+[Tick 60] Person 81 (leader/team31) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 82 (member/team31) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 60] Person 83 (member/team31) → P1_comply | stress=0.00 loyalty=0.59
+[Tick 60] Person 84 (leader/team32) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 85 (member/team32) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 60] Person 86 (member/team32) → P1_comply | stress=0.00 loyalty=0.65
+[Tick 60] Person 87 (leader/team33) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 88 (member/team33) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 60] Person 89 (leader/team34) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 90 (member/team34) → P1_comply | stress=0.00 loyalty=0.56
+[Tick 60] Person 91 (member/team34) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 60] Person 92 (leader/team35) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 93 (member/team35) → P1_comply | stress=0.00 loyalty=0.88
+[Tick 60] Person 94 (member/team35) → P1_comply | stress=0.00 loyalty=0.91
+[Tick 60] Person 95 (leader/team36) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 96 (member/team36) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 60] Person 97 (member/team36) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 60] Person 98 (leader/team37) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 99 (member/team37) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 60] Person 100 (member/team37) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 60] Person 101 (leader/team38) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 102 (member/team38) → P1_comply | stress=0.00 loyalty=0.55
+[Tick 60] Person 103 (member/team38) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 60] Person 104 (leader/team39) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 105 (member/team39) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 60] Person 106 (leader/team40) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 107 (member/team40) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 60] Person 108 (member/team40) → P1_comply | stress=0.00 loyalty=0.79
+[Tick 60] Person 109 (leader/team41) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 110 (member/team41) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 60] Person 111 (leader/team42) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 112 (member/team42) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 60] Person 113 (member/team42) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 60] Person 114 (leader/team43) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 115 (member/team43) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 60] Person 116 (member/team43) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 60] Person 117 (leader/team44) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 118 (member/team44) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 60] Person 119 (leader/team45) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 120 (member/team45) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 60] Person 121 (member/team45) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 60] Person 122 (leader/team46) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 123 (member/team46) → P1_comply | stress=0.00 loyalty=0.95
+[Tick 60] Person 124 (leader/team47) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 125 (member/team47) → P1_comply | stress=0.00 loyalty=0.95
+[Tick 60] Person 126 (member/team47) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 127 (leader/team48) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 128 (member/team48) → P1_comply | stress=0.00 loyalty=0.92
+[Tag] Team20 +軍隊 -生產
+[Tag] Team21 +軍隊 -生產
+[Tag] Team23 +軍隊 -生產
+[Tag] Team27 +軍隊 -生產
+[Tag] Team28 +軍隊 -生產
+[Tag] Team32 +軍隊 -生產
+[Tag] Team33 +軍隊 -生產
+[Tag] Team35 +軍隊 -生產
+[Tag] Team44 +軍隊 -生產
+[Tag] Team46 +軍隊 -生產
+[SoloAI] Team36 → 偵查 (偵查)
+[SoloAI] Team37 → 偵查 (偵查)
+[SoloAI] Team39 → 貿易 (囤貨)
+[SoloAI] Team41 → 偵查 (偵查)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team45 → 覓食 (覓食)
+[SoloAI] Team46 → 建設 (建設)
+[FaiPhase] tick=60 total=1688861 us | 母體=tick總時>100000us | spike#=1/60 tick | phases=44 | 登記 44/44 | unified.rank.from_member=self326427us/tot326427us(kids0) unified.rank.from_leader=self250349us/tot250349us(kids0) unified.rank.from_threat=self230339us/tot230339us(kids0) loop3.threat=self209029us/tot439368us(kids1) unified.rank.from_solo_body=self96920us/tot96920us(kids0) misc.ambient=self79491us/tot79491us(kids0) loop2.indep_strategy=self65766us/tot65766us(kids0) infra.new_loc=self58598us/tot58598us(kids0) loop3.outpost=self46681us/tot46681us(kids0) misc.equip_mobilize=self24169us/tot24169us(kids0) member.unified=self12041us/tot338468us(kids1) assign.leader_unified=self7339us/tot257688us(kids1) infra.facility=self6873us/tot6873us(kids0) loop2.member_strategy=self6290us/tot6290us(kids0) loop2.solo_engine=self4738us/tot101658us(kids1) loop1.infra=self4272us/tot69743us(kids2) loop3.orders_ambition=self3238us/tot3238us(kids0) loop3.survival=self1471us/tot1471us(kids0) loop1.update_goals=self1158us/tot1158us(kids0) loop1.betray=self1066us/tot1066us(kids0) loop1.diplo=self456us/tot456us(kids0) loop3.misc=self350us/tot104313us(kids3) assign.members=self348us/tot338816us(kids1) misc.mounts=self303us/tot303us(kids0) loop1.member_snap=self252us/tot252us(kids0) loop3.pursuit=self195us/tot195us(kids0) loop3.prosperity=self189us/tot189us(kids0) loop1.assign_tasks=self58us/tot596616us(kids4) assign.player_cmd=self44us/tot44us(kids0) loop2.solo=self29us/tot101687us(kids3) loop1.factions=self18us/tot669309us(kids6) loop2.subteam=self11us/tot11us(kids1) assign.leader_lifecycle=self10us/tot10us(kids0) loop2b.merge=self5us/tot5us(kids0) ｜[multi不參與淨值self≡tot] gather.weak_prey=tot273045us gather.head=tot159673us gather.readiness_prey=tot140584us gather.home_food=tot81019us gather.market=tot80258us indep.weakest_prey=tot67412us gather.threat=tot58492us gather.strong_farm=tot31820us gather.aid=tot10778us unified.to_task=tot6082us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=60 dt=1688861 us teams=55 | near.faction_ai=1505523us solo_think=102030us near.reactions=34733us near.economy=13252us near.vision=12324us near.consume=10612us 
+[SoloAI] Team48 → 覓食 (覓食)
+[Equip] Team0 裝備 melee_low ×2
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×3
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×2
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team11 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team13 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×2
+[Equip] Team15 裝備 melee_low ×2
+[Equip] Team16 裝備 melee_low ×2
+[Equip] Team17 裝備 melee_low ×2
+[Equip] Team18 裝備 melee_low ×2
+[Equip] Team19 裝備 melee_low ×2
+[Equip] Team20 裝備 melee_low ×2
+[Equip] Team21 裝備 melee_low ×2
+[Equip] Team22 裝備 melee_low ×3
+[Equip] Team23 裝備 melee_low ×2
+[Equip] Team24 裝備 melee_low ×2
+[Equip] Team25 裝備 melee_low ×2
+[Equip] Team26 裝備 melee_low ×2
+[Equip] Team27 裝備 melee_low ×2
+[Equip] Team28 裝備 melee_low ×2
+[Equip] Team29 裝備 melee_low ×2
+[Equip] Team30 裝備 melee_low ×2
+[Equip] Team31 裝備 melee_low ×2
+[Equip] Team42 裝備 melee_low ×1
+[Equip] Team43 裝備 melee_low ×1
+[Equip] Team44 裝備 melee_low ×1
+[Equip] Team45 裝備 melee_low ×1
+[Equip] Team46 裝備 melee_low ×1
+[Equip] Team47 裝備 melee_low ×1
+[Equip] Team48 裝備 melee_low ×2
+[Equip] Team49 裝備 melee_low ×1
+[Equip] Team50 裝備 melee_low ×1
+[Equip] Team51 裝備 melee_low ×1
+[Equip] Team52 裝備 melee_low ×1
+[Combat Start] Team-1000000 vs Team37
+[Ambush] NPC Team37 被 boar 伏擊
+[Site] 選址 (22, 7) score=507 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain
+[Site] Faction0 派工失敗: 資源不足 1.60x: material 有 72(公庫32+私40) (需 { "material": 50, "tools": 0 })
+[Outpost] Team10 設施施工 stable → Lv1 at (18,18)
+[Diplomacy] Team11 背叛 Team10
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 77(公庫37+私40) (需 { "material": 50, "tools": 0 })
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 70(公庫30+私40) (需 { "material": 50, "tools": 0 })
+[Tick 120] Person 1 (member/team49) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 120] Person 28 (member/team50) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 120] Person 32 (member/team51) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 120] Person 44 (member/team52) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 120] Person 129 (leader/team53) → P4_expand | stress=0.25 loyalty=0.36
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team53 → 投靠 (併入)
+[SoloAI] Team54 → 乞食 (乞食)
+[FaiPhase] tick=120 total=407076 us | 母體=tick總時>100000us | spike#=2/120 tick | phases=44 | 登記 44/44 | unified.rank.from_member=self84038us/tot84038us(kids0) unified.rank.from_leader=self82510us/tot82510us(kids0) infra.new_loc=self36139us/tot36139us(kids0) unified.rank.from_solo_body=self25769us/tot25769us(kids0) unified.rank.from_threat=self17279us/tot17279us(kids0) loop3.threat=self12140us/tot29419us(kids1) misc.equip_mobilize=self10282us/tot10282us(kids0) loop2.member_strategy=self6459us/tot6459us(kids0) member.unified=self5841us/tot89879us(kids1) loop2.solo_engine=self5805us/tot31574us(kids1) infra.facility=self5053us/tot5053us(kids0) loop1.infra=self2713us/tot43905us(kids2) loop2.indep_strategy=self2503us/tot2503us(kids0) loop3.outpost=self1831us/tot1831us(kids0) assign.leader_unified=self1614us/tot84124us(kids1) loop3.orders_ambition=self940us/tot940us(kids0) loop1.update_goals=self825us/tot825us(kids0) loop1.betray=self684us/tot684us(kids0) assign.members=self320us/tot90199us(kids1) loop1.diplo=self315us/tot315us(kids0) loop1.member_snap=self280us/tot280us(kids0) loop3.survival=self258us/tot258us(kids0) misc.mounts=self179us/tot179us(kids0) loop3.pursuit=self111us/tot111us(kids0) loop3.prosperity=self95us/tot95us(kids0) loop3.misc=self61us/tot10522us(kids3) loop1.assign_tasks=self56us/tot174419us(kids4) assign.player_cmd=self30us/tot30us(kids0) loop2.solo=self19us/tot31600us(kids3) loop1.factions=self14us/tot220442us(kids6) loop2.subteam=self10us/tot10us(kids1) assign.leader_lifecycle=self10us/tot10us(kids0) loop2.solo_cheap=self7us/tot7us(kids0) loop2b.merge=self5us/tot5us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot33937us gather.head=tot26297us gather.home_food=tot17761us gather.threat=tot11980us gather.weak_prey=tot11756us gather.strong_farm=tot7243us gather.market=tot7128us indep.weakest_prey=tot4488us gather.aid=tot3913us unified.to_task=tot3653us ｜[本輪未出現] misc.ambient、unified.rank.from_solo、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=120 dt=407076 us teams=56 | near.faction_ai=286368us solo_think=31838us near.vision=20326us near.economy=18410us near.reactions=14489us near.consume=9375us 
+[SoloAI] Team53 → 投靠 (併入)
+[SoloAI] Team54 → 乞食 (乞食)
+[Combat Start] Team-1000001 vs Team9
+[Ambush] NPC Team9 被 boar 伏擊
+[SoloAI] Team37 → 偵查 (偵查)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team45 → 偵查 (偵查)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team53 → 乞食 (乞食)
+[FaiPhase] tick=180 total=340998 us | 母體=tick總時>100000us | spike#=3/180 tick | phases=43 | 登記 43/43 | unified.rank.from_leader=self83382us/tot83382us(kids0) unified.rank.from_solo_body=self60957us/tot60957us(kids0) infra.new_loc=self31675us/tot31675us(kids0) unified.rank.from_member=self23899us/tot23899us(kids0) loop2.indep_strategy=self20721us/tot20721us(kids0) misc.equip_mobilize=self13255us/tot13255us(kids0) loop2.member_strategy=self6873us/tot6873us(kids0) misc.ambient=self4148us/tot4148us(kids0) loop2.solo_engine=self3652us/tot64609us(kids1) infra.facility=self2586us/tot2586us(kids0) loop1.infra=self2032us/tot36293us(kids2) assign.leader_unified=self1671us/tot85053us(kids1) member.unified=self1423us/tot25322us(kids1) loop3.orders_ambition=self962us/tot962us(kids0) loop1.update_goals=self692us/tot692us(kids0) loop3.outpost=self572us/tot572us(kids0) loop1.betray=self555us/tot555us(kids0) loop1.diplo=self330us/tot330us(kids0) loop1.member_snap=self292us/tot292us(kids0) loop3.survival=self283us/tot283us(kids0) assign.members=self243us/tot25565us(kids1) misc.mounts=self185us/tot185us(kids0) loop3.pursuit=self120us/tot120us(kids0) loop3.threat=self111us/tot111us(kids1) loop3.prosperity=self108us/tot108us(kids0) loop3.misc=self88us/tot17676us(kids3) loop1.assign_tasks=self40us/tot110699us(kids4) assign.player_cmd=self33us/tot33us(kids0) loop2.solo=self21us/tot64630us(kids3) loop2.subteam=self14us/tot14us(kids1) loop1.factions=self13us/tot148874us(kids6) assign.leader_lifecycle=self8us/tot8us(kids0) loop2b.merge=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] indep.weakest_prey=tot22638us gather.readiness_prey=tot16580us gather.head=tot13006us gather.weak_prey=tot11840us gather.home_food=tot9747us gather.threat=tot6258us gather.market=tot6063us gather.strong_farm=tot3065us gather.aid=tot1838us unified.to_task=tot179us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=180 dt=340998 us teams=56 | near.faction_ai=197563us solo_think=64918us near.vision=26253us near.economy=12905us near.reactions=12755us near.interact=8943us 
+[Site] Faction2 派工失敗: 資源不足 1.70x: material 有 37(公庫0+私37) (需 { "material": 50, "tools": 0 })
+[FaiPhase] tick=240 total=223476 us | 母體=tick總時>100000us | spike#=4/240 tick | phases=40 | 登記 40/40 | unified.rank.from_leader=self39340us/tot39340us(kids0) infra.new_loc=self37094us/tot37094us(kids0) misc.equip_mobilize=self19946us/tot19946us(kids0) loop2.member_strategy=self12181us/tot12181us(kids0) misc.ambient=self9663us/tot9663us(kids0) loop2.indep_strategy=self7095us/tot7095us(kids0) unified.rank.from_member=self6981us/tot6981us(kids0) infra.facility=self3144us/tot3144us(kids0) loop1.infra=self2411us/tot42649us(kids2) member.unified=self1502us/tot8483us(kids1) loop1.update_goals=self1038us/tot1038us(kids0) loop3.outpost=self979us/tot979us(kids0) loop3.orders_ambition=self953us/tot953us(kids0) assign.leader_unified=self919us/tot40259us(kids1) loop3.survival=self417us/tot417us(kids0) loop1.betray=self395us/tot395us(kids0) assign.members=self351us/tot8834us(kids1) loop1.member_snap=self339us/tot339us(kids0) misc.mounts=self328us/tot328us(kids0) loop1.diplo=self307us/tot307us(kids0) loop3.prosperity=self197us/tot197us(kids0) loop3.pursuit=self196us/tot196us(kids0) loop3.threat=self194us/tot194us(kids1) loop3.misc=self138us/tot30075us(kids3) loop1.assign_tasks=self50us/tot49192us(kids4) assign.player_cmd=self40us/tot40us(kids0) loop1.factions=self18us/tot93938us(kids6) loop2.subteam=self15us/tot15us(kids1) loop2b.merge=self12us/tot12us(kids0) assign.leader_lifecycle=self9us/tot9us(kids0) ｜[multi不參與淨值self≡tot] indep.weakest_prey=tot10243us gather.readiness_prey=tot6531us gather.head=tot5608us gather.threat=tot2498us gather.home_food=tot2489us gather.weak_prey=tot2360us gather.market=tot2350us gather.strong_farm=tot1298us gather.aid=tot804us unified.to_task=tot510us ｜[本輪未出現] loop2.solo、loop2.solo_engine、loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.rank.from_solo_body、unified.prosp 
+[PhaseSpike] tick=240 dt=223476 us teams=55 | near.faction_ai=147349us near.vision=16578us near.reactions=13649us near.consume=13309us near.economy=11021us near.interact=9561us 
+[FaiPhase] tick=300 total=101824 us | 母體=tick總時>100000us | spike#=5/300 tick | phases=26 | 登記 26/26 | misc.equip_mobilize=self15983us/tot15983us(kids0) loop2.member_strategy=self7381us/tot7381us(kids0) loop2.indep_strategy=self2750us/tot2750us(kids0) loop3.outpost=self656us/tot656us(kids0) loop3.orders_ambition=self498us/tot498us(kids0) loop1.update_goals=self413us/tot413us(kids0) member.unified=self408us/tot408us(kids1) loop3.survival=self366us/tot366us(kids0) loop1.member_snap=self244us/tot244us(kids0) misc.mounts=self240us/tot240us(kids0) assign.members=self221us/tot629us(kids1) assign.leader_unified=self145us/tot145us(kids1) loop3.pursuit=self136us/tot136us(kids0) loop3.threat=self131us/tot131us(kids1) loop3.prosperity=self117us/tot117us(kids0) loop1.infra=self82us/tot82us(kids2) loop3.misc=self74us/tot16297us(kids3) loop1.diplo=self73us/tot73us(kids0) loop1.betray=self72us/tot72us(kids0) loop1.assign_tasks=self32us/tot857us(kids4) assign.player_cmd=self31us/tot31us(kids0) loop2b.merge=self20us/tot20us(kids0) assign.leader_lifecycle=self20us/tot20us(kids0) loop1.factions=self11us/tot1752us(kids6) loop2.subteam=self10us/tot10us(kids1) ｜[multi不參與淨值self≡tot] indep.weakest_prey=tot5461us ｜[本輪未出現] misc.ambient、loop2.solo、loop2.solo_engine、loop2.solo_cheap、infra.facility、infra.new_loc、unified.rank.from_leader、unified.rank.from_member、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.rank.from_solo_body、unified.to_task、unified.prosp、gather.head、gather.threat、gather.weak_prey、gather.market、gather.home_food、gather.aid、gather.strong_farm、gather.readiness_prey 
+[PhaseSpike] tick=300 dt=101824 us teams=55 | near.faction_ai=30786us near.vision=17732us near.economy=16372us near.reactions=13313us near.consume=6696us near.interact=6519us 
+[Combat Start] Team-1000002 vs Team39
+[Ambush] NPC Team39 被 boar 伏擊
+[Tick 360] Person 130 (leader/team54) → P4_expand | stress=0.20 loyalty=0.34
+[Harvest] Tick360 季節=春 base=1.1
+[FaiPhase] tick=360 total=119362 us | 母體=tick總時>100000us | spike#=6/360 tick | phases=28 | 登記 28/28 | misc.equip_mobilize=self13727us/tot13727us(kids0) loop2.member_strategy=self6745us/tot6745us(kids0) loop2.indep_strategy=self2982us/tot2982us(kids0) loop3.outpost=self583us/tot583us(kids0) loop3.orders_ambition=self461us/tot461us(kids0) member.unified=self372us/tot372us(kids1) loop1.update_goals=self363us/tot363us(kids0) loop3.survival=self262us/tot262us(kids0) assign.members=self227us/tot599us(kids1) loop1.member_snap=self225us/tot225us(kids0) misc.mounts=self203us/tot203us(kids0) assign.leader_unified=self153us/tot153us(kids1) loop3.pursuit=self144us/tot144us(kids0) loop3.threat=self105us/tot105us(kids1) loop3.prosperity=self105us/tot105us(kids0) loop3.misc=self80us/tot14010us(kids3) loop1.diplo=self69us/tot69us(kids0) loop1.infra=self66us/tot66us(kids2) loop1.betray=self59us/tot59us(kids0) loop1.assign_tasks=self32us/tot815us(kids4) assign.player_cmd=self24us/tot24us(kids0) loop2.subteam=self13us/tot13us(kids1) loop1.factions=self11us/tot1608us(kids6) assign.leader_lifecycle=self7us/tot7us(kids0) loop2b.merge=self6us/tot6us(kids0) loop2.solo_cheap=self6us/tot6us(kids0) loop2.solo=self3us/tot9us(kids3) ｜[multi不參與淨值self≡tot] indep.weakest_prey=tot5259us ｜[本輪未出現] misc.ambient、loop2.solo_engine、infra.facility、infra.new_loc、unified.rank.from_leader、unified.rank.from_member、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.rank.from_solo_body、unified.to_task、unified.prosp、gather.head、gather.threat、gather.weak_prey、gather.market、gather.home_food、gather.aid、gather.strong_farm、gather.readiness_prey 
+[PhaseSpike] tick=360 dt=119362 us teams=56 | near.faction_ai=27701us near.vision=25966us near.reactions=20433us near.economy=12542us near.move=10894us near.interact=7249us 
+[Move] Team 6 抵達 (4,17)
+[Move] Team 8 抵達 (4,21)
+[Move] Team 13 抵達 (19,8)
+[Move] Team 14 抵達 (19,8)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 23 抵達 (3,28)
+[Move] Team 24 抵達 (18,3)
+[Move] Team 27 抵達 (21,4)
+[Move] Team 28 抵達 (22,6)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 46 抵達 (15,19)
+[Combat Start] Team-1000003 vs Team40
+[Ambush] NPC Team40 被 boar 伏擊
+[Tick 420] Person 107 (member/team40) → P4_expand | stress=0.00 loyalty=0.77
+[Tick 420] Person 130 (leader/team54) → P1_comply | stress=0.15 loyalty=0.35
+[SoloAI] Team39 → 貿易 (囤貨)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=420 total=595788 us | 母體=tick總時>100000us | spike#=7/420 tick | phases=43 | 登記 43/43 | loop2.member_strategy=self83980us/tot83980us(kids0) unified.rank.from_solo_body=self37885us/tot37885us(kids0) misc.equip_mobilize=self22743us/tot22743us(kids0) unified.rank.from_member=self21533us/tot21533us(kids0) loop2.indep_strategy=self19411us/tot19411us(kids0) unified.rank.from_leader=self15638us/tot15638us(kids0) loop2.solo_engine=self12994us/tot50879us(kids1) infra.new_loc=self10553us/tot10553us(kids0) member.unified=self1924us/tot23457us(kids1) loop3.orders_ambition=self1601us/tot1601us(kids0) infra.facility=self1289us/tot1289us(kids0) loop3.outpost=self892us/tot892us(kids0) loop1.infra=self720us/tot12562us(kids2) loop1.update_goals=self618us/tot618us(kids0) loop3.survival=self583us/tot583us(kids0) assign.leader_unified=self523us/tot16161us(kids1) misc.mounts=self318us/tot318us(kids0) assign.members=self304us/tot23761us(kids1) loop1.betray=self301us/tot301us(kids0) loop1.member_snap=self258us/tot258us(kids0) loop3.pursuit=self200us/tot200us(kids0) loop1.diplo=self186us/tot186us(kids0) loop3.threat=self173us/tot173us(kids1) loop3.prosperity=self169us/tot169us(kids0) loop3.misc=self88us/tot23149us(kids3) assign.player_cmd=self50us/tot50us(kids0) loop1.assign_tasks=self37us/tot40018us(kids4) loop2.subteam=self14us/tot14us(kids1) loop1.factions=self13us/tot53956us(kids6) loop2.solo=self11us/tot50895us(kids3) assign.leader_lifecycle=self9us/tot9us(kids0) loop2b.merge=self5us/tot5us(kids0) loop2.solo_cheap=self5us/tot5us(kids0) ｜[multi不參與淨值self≡tot] indep.weakest_prey=tot95443us gather.readiness_prey=tot10070us gather.threat=tot7417us gather.head=tot7217us gather.weak_prey=tot6231us gather.strong_farm=tot3277us gather.market=tot2568us gather.home_food=tot2565us gather.aid=tot2216us unified.to_task=tot137us ｜[本輪未出現] misc.ambient、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=420 dt=595788 us teams=56 | near.move=275834us near.faction_ai=185427us solo_think=51041us near.economy=21218us near.vision=17224us near.reactions=16460us 
+[Move] Team 53 抵達 (18,18)
+[Combat Start] Team-1000004 vs Team42
+[Ambush] NPC Team42 被 bear 伏擊
+[Sub] Team22 派出子隊 Team55 leader=P59 advisors=[] (pop=3 cap=17 task=擴建)
+[Infra] Team22 派擴建子隊 Team55 → (4,27) stable
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team39 → 貿易 (囤貨)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team45 → 偵查 (偵查)
+[SoloAI] Team46 → 建設 (建設)
+[FaiPhase] tick=480 total=471104 us | 母體=tick總時>100000us | spike#=8/480 tick | phases=44 | 登記 44/44 | unified.rank.from_solo_body=self86316us/tot86316us(kids0) unified.rank.from_member=self82754us/tot82754us(kids0) unified.rank.from_leader=self78994us/tot78994us(kids0) infra.new_loc=self72706us/tot72706us(kids0) misc.equip_mobilize=self17816us/tot17816us(kids0) infra.facility=self9121us/tot9121us(kids0) loop2.indep_strategy=self8282us/tot8282us(kids0) loop2.member_strategy=self7683us/tot7683us(kids0) member.unified=self5583us/tot88337us(kids1) misc.ambient=self5189us/tot5189us(kids0) loop1.infra=self4628us/tot86455us(kids2) loop2.solo_engine=self2968us/tot89284us(kids1) assign.leader_unified=self1897us/tot80891us(kids1) loop3.orders_ambition=self1571us/tot1571us(kids0) loop1.update_goals=self1398us/tot1398us(kids0) loop1.betray=self1211us/tot1211us(kids0) loop3.outpost=self1099us/tot1099us(kids0) loop1.diplo=self522us/tot522us(kids0) assign.members=self330us/tot88667us(kids1) loop3.survival=self301us/tot301us(kids0) loop1.member_snap=self266us/tot266us(kids0) misc.mounts=self206us/tot206us(kids0) loop3.pursuit=self130us/tot130us(kids0) loop3.misc=self127us/tot23338us(kids3) loop3.threat=self125us/tot125us(kids1) loop3.prosperity=self121us/tot121us(kids0) loop1.assign_tasks=self56us/tot169665us(kids4) assign.player_cmd=self40us/tot40us(kids0) loop1.factions=self21us/tot259538us(kids6) loop2.solo=self21us/tot89310us(kids3) loop2.subteam=self13us/tot13us(kids1) assign.leader_lifecycle=self11us/tot11us(kids0) loop2b.merge=self5us/tot5us(kids0) loop2.solo_cheap=self5us/tot5us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot29764us gather.head=tot20945us gather.home_food=tot15195us gather.threat=tot11650us indep.weakest_prey=tot10958us gather.weak_prey=tot9900us gather.market=tot7540us gather.strong_farm=tot5577us gather.aid=tot2646us unified.to_task=tot732us ｜[本輪未出現] unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=480 dt=471104 us teams=57 | near.faction_ai=303310us solo_think=89571us near.vision=18813us near.interact=13483us near.reactions=12570us near.economy=12123us 
+[Move] Team 7 抵達 (6,14)
+[Move] Team 29 抵達 (2,21)
+[Move] Team 44 抵達 (19,12)
+[Move] Team 48 抵達 (16,9)
+[Tribute] Team12 徵收 Team13 rate=0.01
+[Combat Start] Team-1000005 vs Team26
+[Ambush] NPC Team26 被 boar 伏擊
+[Site] 選址 (16, 1) score=296 周邊資源={ "ore_gold": 21, "ore_iron": 48, "ore_silver": 44, "wild_horses": 10 } terrain=mountain
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 71(公庫31+私40) (需 { "material": 50, "tools": 0 })
+[Tick 540] Person 59 (member/team55) → P1_comply | stress=0.00 loyalty=0.84
+[SoloAI] Team42 → 貿易 (囤貨)
+[FaiPhase] tick=540 total=804369 us | 母體=tick總時>100000us | spike#=9/540 tick | phases=42 | 登記 42/42 | unified.rank.from_member=self83560us/tot83560us(kids0) unified.rank.from_leader=self53314us/tot53314us(kids0) loop2.indep_strategy=self34154us/tot34154us(kids0) misc.equip_mobilize=self26501us/tot26501us(kids0) loop2.member_strategy=self24114us/tot24114us(kids0) infra.new_loc=self19508us/tot19508us(kids0) member.unified=self5857us/tot89417us(kids1) unified.rank.from_solo_body=self4418us/tot4418us(kids0) infra.facility=self2499us/tot2499us(kids0) loop1.infra=self1485us/tot23492us(kids2) loop3.orders_ambition=self1091us/tot1091us(kids0) loop3.outpost=self934us/tot934us(kids0) loop2.solo_engine=self902us/tot5320us(kids1) assign.leader_unified=self852us/tot54166us(kids1) loop1.update_goals=self762us/tot762us(kids0) loop3.survival=self464us/tot464us(kids0) loop1.betray=self454us/tot454us(kids0) assign.members=self346us/tot89763us(kids1) misc.mounts=self334us/tot334us(kids0) loop1.member_snap=self235us/tot235us(kids0) loop1.diplo=self226us/tot226us(kids0) loop3.pursuit=self195us/tot195us(kids0) loop3.prosperity=self172us/tot172us(kids0) loop3.threat=self161us/tot161us(kids1) loop3.misc=self93us/tot26928us(kids3) loop1.assign_tasks=self51us/tot144012us(kids4) loop2.subteam=self27us/tot27us(kids1) assign.player_cmd=self24us/tot24us(kids0) loop1.factions=self12us/tot169193us(kids6) loop2b.merge=self8us/tot8us(kids0) assign.leader_lifecycle=self8us/tot8us(kids0) loop2.solo=self4us/tot5324us(kids3) ｜[multi不參與淨值self≡tot] indep.weakest_prey=tot51710us gather.head=tot14495us gather.weak_prey=tot14030us gather.readiness_prey=tot13464us gather.home_food=tot10573us gather.threat=tot6553us gather.market=tot3152us gather.strong_farm=tot2985us gather.aid=tot1565us unified.to_task=tot360us ｜[本輪未出現] misc.ambient、loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=540 dt=804369 us teams=57 | near.move=443715us near.faction_ai=258512us near.vision=44672us near.reactions=16861us near.economy=10497us near.interact=10308us 
+[SoloAI] Team43 → 貿易 (囤貨)
+[Sub] Team32 派出子隊 Team56 leader=P85 advisors=[] (pop=3 cap=16 task=擴建)
+[Infra] Team32 派擴建子隊 Team56 → (13,23) stable
+[SoloAI] Team47 → 覓食 (覓食)
+[SoloAI] Team36 → 偵查 (偵查)
+[SoloAI] Team42 → 貿易 (囤貨)
+[Sub] Team38 派出子隊 Team57 leader=P102 advisors=[] (pop=3 cap=4 task=擴建)
+[Infra] Team38 派擴建子隊 Team57 → (12,17) stable
+[SoloAI] Team37 → 偵查 (偵查)
+[SoloAI] Team34 → 貿易 (囤貨)
+[Sub] Team35 派出子隊 Team58 leader=P93 advisors=[] (pop=3 cap=13 task=擴建)
+[Infra] Team35 派擴建子隊 Team58 → (26,7) stable
+[SoloAI] Team48 → 覓食 (覓食)
+[Move] Team 54 抵達 (19,7)
+[Barter] Team58 40xmaterial <-> Team35 132xfood
+[Combat Start] Team-1000006 vs Team26
+[Ambush] NPC Team26 被 boar 伏擊
+[Tick 600] Person 84 (leader/team32) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 600] Person 87 (leader/team33) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 600] Person 92 (leader/team35) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 600] Person 129 (leader/team53) → P1_comply | stress=0.00 loyalty=0.35
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team36 → 偵查 (偵查)
+[SoloAI] Team38 → 掠奪 (掠奪)
+[Sub] Team40 派出子隊 Team59 leader=P107 advisors=[] (pop=3 cap=36 task=擴建)
+[Infra] Team40 派擴建子隊 Team59 → (10,25) stable
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=600 total=653915 us | 母體=tick總時>100000us | spike#=10/600 tick | phases=42 | 登記 42/42 | unified.rank.from_solo_body=self180375us/tot180375us(kids0) unified.rank.from_member=self105773us/tot105773us(kids0) infra.new_loc=self69758us/tot69758us(kids0) unified.rank.from_leader=self62656us/tot62656us(kids0) loop2.indep_strategy=self46106us/tot46106us(kids0) misc.equip_mobilize=self24006us/tot24006us(kids0) loop2.member_strategy=self14847us/tot14847us(kids0) loop2.solo_engine=self13844us/tot194219us(kids1) infra.facility=self6992us/tot6992us(kids0) member.unified=self5576us/tot111349us(kids1) loop1.infra=self3641us/tot80391us(kids2) loop3.outpost=self2235us/tot2235us(kids0) assign.leader_unified=self2074us/tot64730us(kids1) loop3.orders_ambition=self1605us/tot1605us(kids0) loop1.update_goals=self1488us/tot1488us(kids0) loop1.betray=self953us/tot953us(kids0) assign.members=self466us/tot111815us(kids1) loop1.diplo=self407us/tot407us(kids0) loop1.member_snap=self350us/tot350us(kids0) loop3.survival=self326us/tot326us(kids0) misc.mounts=self213us/tot213us(kids0) loop3.threat=self139us/tot139us(kids1) loop3.pursuit=self138us/tot138us(kids0) loop3.prosperity=self109us/tot109us(kids0) loop3.misc=self68us/tot24287us(kids3) loop1.assign_tasks=self60us/tot176652us(kids4) loop2.subteam=self40us/tot40us(kids1) assign.player_cmd=self36us/tot36us(kids0) loop2.solo=self33us/tot194252us(kids3) loop1.factions=self23us/tot260264us(kids6) assign.leader_lifecycle=self11us/tot11us(kids0) loop2b.merge=self5us/tot5us(kids0) ｜[multi不參與淨值self≡tot] indep.weakest_prey=tot52969us gather.weak_prey=tot34473us gather.readiness_prey=tot32352us gather.head=tot25850us gather.threat=tot16820us gather.home_food=tot14263us gather.market=tot9520us gather.strong_farm=tot7399us gather.aid=tot4824us unified.to_task=tot435us ｜[本輪未出現] misc.ambient、loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=600 dt=653915 us teams=61 | near.faction_ai=352257us solo_think=194610us near.interact=36930us near.vision=21309us near.reactions=14732us near.move=8596us 
+[SoloAI] Team45 → 偵查 (偵查)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team40 → 貿易 (囤貨)
+[Move] Team 17 抵達 (18,11)
+[Tribute] Team12 徵收 Team13 rate=0.01
+[Extort] Team38 勒索 Team57，Team57 妥協給付
+[Barter] Team40 18xfood <-> Team59 31xmaterial
+[Extort] Team41 勒索 Team51，Team51 妥協給付
+[Site] Faction4 派工失敗: 資源不足 1.44x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Ambition] Team20 rung 0→4 (武力 cap=4)
+[SoloAI] Team37 → 偵查 (偵查)
+[SoloAI] Team38 → 外交 (求和)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team54 → 迎戰 (迎戰)
+[FaiPhase] tick=660 total=579041 us | 母體=tick總時>100000us | spike#=11/660 tick | phases=43 | 登記 43/43 | unified.rank.from_solo_body=self124897us/tot124897us(kids0) unified.rank.from_member=self120843us/tot120843us(kids0) unified.rank.from_leader=self76335us/tot76335us(kids0) infra.new_loc=self57826us/tot57826us(kids0) misc.equip_mobilize=self26499us/tot26499us(kids0) loop2.solo_engine=self21124us/tot146021us(kids1) loop2.member_strategy=self9183us/tot9183us(kids0) member.unified=self8661us/tot129504us(kids1) misc.ambient=self7627us/tot7627us(kids0) infra.facility=self7284us/tot7284us(kids0) loop2.indep_strategy=self5131us/tot5131us(kids0) loop1.infra=self3586us/tot68696us(kids2) loop3.orders_ambition=self1786us/tot1786us(kids0) assign.leader_unified=self1388us/tot77723us(kids1) loop3.outpost=self1175us/tot1175us(kids0) loop1.update_goals=self1159us/tot1159us(kids0) loop1.betray=self813us/tot813us(kids0) assign.members=self391us/tot129895us(kids1) loop3.survival=self358us/tot358us(kids0) loop1.diplo=self318us/tot318us(kids0) loop1.member_snap=self309us/tot309us(kids0) misc.mounts=self218us/tot218us(kids0) loop3.pursuit=self129us/tot129us(kids0) loop3.threat=self128us/tot128us(kids1) loop3.prosperity=self127us/tot127us(kids0) loop3.misc=self88us/tot34432us(kids3) loop1.assign_tasks=self54us/tot207720us(kids4) assign.player_cmd=self36us/tot36us(kids0) loop2.subteam=self27us/tot27us(kids1) loop2.solo=self24us/tot146045us(kids3) loop1.factions=self16us/tot279031us(kids6) assign.leader_lifecycle=self12us/tot12us(kids0) loop2b.merge=self5us/tot5us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot47187us gather.weak_prey=tot32995us gather.head=tot27960us gather.threat=tot18661us gather.home_food=tot18118us gather.strong_farm=tot10963us gather.market=tot9662us indep.weakest_prey=tot8959us gather.aid=tot6959us unified.to_task=tot430us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=660 dt=579041 us teams=60 | near.faction_ai=332855us solo_think=146347us near.vision=26461us near.interact=20197us near.economy=14952us near.reactions=14501us 
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team39 → 貿易 (囤貨)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team44 → 建設 (建設)
+[Move] Team 43 抵達 (19,2)
+[Market@(19, 2)] Team43  outpost owner Team22 成交
+[Extort] Team41 勒索 Team51，Team51 妥協給付
+[Order] Team0 sell material ×7 (oid=1)
+[Order] Team0 sell food ×1107 (oid=2)
+[Order] Team0 buy weapon_melee_low ×2 (oid=3)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=4)
+[Order] Team0 buy tools ×3 (oid=5)
+[Ambition] Team43 rung 0→1 (商業 cap=2)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team54 → 迎戰 (迎戰)
+[FaiPhase] tick=720 total=482208 us | 母體=tick總時>100000us | spike#=12/720 tick | phases=43 | 登記 43/43 | unified.rank.from_member=self59910us/tot59910us(kids0) infra.new_loc=self59315us/tot59315us(kids0) unified.rank.from_leader=self53141us/tot53141us(kids0) misc.equip_mobilize=self43670us/tot43670us(kids0) unified.rank.from_solo_body=self40056us/tot40056us(kids0) loop2.member_strategy=self37576us/tot37576us(kids0) misc.ambient=self15958us/tot15958us(kids0) loop2.indep_strategy=self15332us/tot15332us(kids0) loop3.orders_ambition=self12746us/tot12746us(kids0) loop2.solo_engine=self12458us/tot52514us(kids1) infra.facility=self11273us/tot11273us(kids0) member.unified=self4379us/tot64289us(kids1) loop1.infra=self3118us/tot73706us(kids2) loop1.update_goals=self1054us/tot1054us(kids0) assign.leader_unified=self1043us/tot54184us(kids1) loop3.outpost=self988us/tot988us(kids0) loop1.betray=self819us/tot819us(kids0) loop3.survival=self682us/tot682us(kids0) loop1.diplo=self380us/tot380us(kids0) misc.mounts=self357us/tot357us(kids0) assign.members=self353us/tot64642us(kids1) loop1.member_snap=self269us/tot269us(kids0) loop3.threat=self233us/tot233us(kids1) loop3.pursuit=self220us/tot220us(kids0) loop3.prosperity=self212us/tot212us(kids0) loop3.misc=self168us/tot60153us(kids3) loop1.assign_tasks=self48us/tot118922us(kids4) assign.player_cmd=self38us/tot38us(kids0) loop2.subteam=self29us/tot29us(kids1) loop1.factions=self16us/tot195166us(kids6) loop2.solo=self13us/tot52527us(kids3) assign.leader_lifecycle=self10us/tot10us(kids0) loop2b.merge=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] indep.weakest_prey=tot44641us gather.readiness_prey=tot32694us gather.head=tot14700us gather.threat=tot13849us gather.weak_prey=tot11695us gather.home_food=tot9066us gather.strong_farm=tot8108us gather.aid=tot5793us gather.market=tot5770us unified.to_task=tot234us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=720 dt=482208 us teams=60 | near.faction_ai=324588us solo_think=52750us near.move=27198us near.vision=21443us near.reactions=14343us near.economy=9891us 
+[Move] Team 0 抵達 (0,20)
+[Move] Team 5 抵達 (6,14)
+[Move] Team 10 抵達 (18,18)
+[Move] Team 16 抵達 (19,8)
+[Move] Team 20 抵達 (10,6)
+[Move] Team 30 抵達 (13,20)
+[Move] Team 46 抵達 (15,19)
+[Barter] Team40 35xmaterial <-> Team59 59xfood
+[Extort] Team41 勒索 Team51，Team51 妥協給付
+[Sub] Team0 派出子隊 Team60 leader=P2 advisors=[] (pop=3 cap=13 task=擴建)
+[Infra] Team0 派擴建子隊 Team60 → (10,19) farming
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Order] Team3 sell material ×30 (oid=6)
+[Order] Team3 buy weapon_melee_low ×6 (oid=7)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=8)
+[Order] Team3 buy tools ×3 (oid=9)
+[Order] Team11 sell material ×30 (oid=10)
+[Order] Team11 buy weapon_melee_low ×4 (oid=11)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=12)
+[Order] Team11 buy tools ×2 (oid=13)
+[Order] Team16 sell material ×30 (oid=14)
+[Order] Team16 buy weapon_melee_low ×5 (oid=15)
+[Order] Team16 buy weapon_ranged_low ×4 (oid=16)
+[Order] Team16 buy tools ×2 (oid=17)
+[Order] Team22 sell material ×12 (oid=18)
+[Order] Team22 sell food ×1116 (oid=19)
+[Order] Team22 buy weapon_melee_low ×2 (oid=20)
+[Order] Team22 buy weapon_ranged_low ×3 (oid=21)
+[Order] Team22 buy tools ×3 (oid=22)
+[Order] Team26 buy weapon_ranged_low ×3 (oid=23)
+[Order] Team26 buy material ×34 (oid=24)
+[Order] Team26 buy tools ×3 (oid=25)
+[Ambition] Team43 rung 1→2 (商業 cap=2)
+[Order] Team45 buy weapon_melee_low ×5 (oid=26)
+[Order] Team45 buy weapon_ranged_low ×4 (oid=27)
+[Order] Team45 buy tools ×2 (oid=28)
+[Order] Team46 buy weapon_melee_low ×4 (oid=29)
+[Order] Team46 buy weapon_ranged_low ×3 (oid=30)
+[Order] Team46 buy tools ×2 (oid=31)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team36 → 偵查 (偵查)
+[SoloAI] Team37 → 偵查 (偵查)
+[SoloAI] Team38 → 外交 (求和)
+[Sub] Team39 派出子隊 Team61 leader=P105 advisors=[] (pop=3 cap=14 task=擴建)
+[Infra] Team39 派擴建子隊 Team61 → (20,17) stable
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team43 → 貿易 (囤貨)
+[SoloAI] Team45 → 偵查 (偵查)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team53 → 外交 (求和)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=780 total=1419289 us | 母體=tick總時>100000us | spike#=13/780 tick | phases=43 | 登記 43/43 | unified.rank.from_solo_body=self229392us/tot229392us(kids0) unified.rank.from_member=self134158us/tot134158us(kids0) infra.new_loc=self90830us/tot90830us(kids0) loop3.orders_ambition=self52876us/tot52876us(kids0) unified.rank.from_leader=self49787us/tot49787us(kids0) misc.equip_mobilize=self34079us/tot34079us(kids0) loop2.solo_engine=self31031us/tot260423us(kids1) loop2.member_strategy=self18952us/tot18952us(kids0) member.unified=self17432us/tot151590us(kids1) loop2.indep_strategy=self13818us/tot13818us(kids0) infra.facility=self13366us/tot13366us(kids0) loop1.infra=self5421us/tot109617us(kids2) loop1.update_goals=self1768us/tot1768us(kids0) loop3.outpost=self1559us/tot1559us(kids0) assign.leader_unified=self1347us/tot51134us(kids1) loop1.betray=self1273us/tot1273us(kids0) loop1.diplo=self490us/tot490us(kids0) loop3.survival=self452us/tot452us(kids0) assign.members=self402us/tot151992us(kids1) loop1.member_snap=self362us/tot362us(kids0) misc.mounts=self240us/tot240us(kids0) loop3.threat=self159us/tot159us(kids1) loop3.pursuit=self158us/tot158us(kids0) loop3.prosperity=self145us/tot145us(kids0) loop3.misc=self80us/tot34399us(kids3) loop1.assign_tasks=self58us/tot203240us(kids4) loop2.solo=self52us/tot260506us(kids3) assign.player_cmd=self43us/tot43us(kids0) loop2.solo_cheap=self31us/tot31us(kids0) loop2.subteam=self29us/tot29us(kids1) loop1.factions=self19us/tot316769us(kids6) assign.leader_lifecycle=self13us/tot13us(kids0) loop2b.merge=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot61600us gather.head=tot36894us gather.threat=tot28411us indep.weakest_prey=tot27962us gather.weak_prey=tot22934us gather.home_food=tot22710us gather.strong_farm=tot13850us gather.market=tot13458us gather.aid=tot8170us unified.to_task=tot7839us ｜[本輪未出現] misc.ambient、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=780 dt=1419289 us teams=62 | near.move=619137us near.faction_ai=440939us solo_think=261001us near.reactions=25933us near.vision=23874us near.interact=22460us 
+[Move] Team 7 抵達 (6,14)
+[Move] Team 22 抵達 (19,2)
+[Move] Team 23 抵達 (3,28)
+[Move] Team 24 抵達 (19,2)
+[Move] Team 32 抵達 (12,24)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 56 抵達 (13,23)
+[Move] Team 58 抵達 (26,7)
+[Barter] Team61 40xmaterial <-> Team39 67xfood
+[Site] Faction0 派工失敗: 資源不足 1.60x: material 有 53(公庫22+私31) (需 { "material": 50, "tools": 0 })
+[Diplomacy] Team3 背叛 Team0
+[Diplomacy] Team4 背叛 Team0
+[Sub] Team22 派出子隊 Team62 leader=P60 advisors=[] (pop=3 cap=20 task=擴建)
+[Infra] Team22 派擴建子隊 Team62 → (4,27) farming
+[Sub] Team33 派出子隊 Team63 leader=P88 advisors=[] (pop=1 cap=18 task=信使)
+[IndepStrategy] Team33 野心建國→派信使結盟 Team35 (野心=0.92)
+[Order] Team8 sell material ×30 (oid=32)
+[Order] Team8 buy weapon_melee_low ×5 (oid=33)
+[Order] Team8 buy weapon_ranged_low ×4 (oid=34)
+[Order] Team8 buy tools ×2 (oid=35)
+[Order] Team18 sell material ×30 (oid=36)
+[Order] Team18 buy weapon_melee_low ×5 (oid=37)
+[Order] Team18 buy weapon_ranged_low ×4 (oid=38)
+[Order] Team18 buy tools ×2 (oid=39)
+[Ambition] Team23 rung 0→4 (武力 cap=4)
+[Order] Team23 buy weapon_melee_low ×6 (oid=40)
+[Order] Team23 buy weapon_ranged_low ×4 (oid=41)
+[Order] Team23 buy tools ×3 (oid=42)
+[Order] Team41 sell material ×40 (oid=43)
+[Order] Team41 buy weapon_melee_low ×4 (oid=44)
+[Order] Team41 buy weapon_ranged_low ×3 (oid=45)
+[Order] Team41 buy tools ×2 (oid=46)
+[Order] Team47 buy weapon_melee_low ×6 (oid=47)
+[Order] Team47 buy weapon_ranged_low ×4 (oid=48)
+[Order] Team47 buy tools ×3 (oid=49)
+[Order] Team48 sell material ×5 (oid=50)
+[Order] Team48 buy weapon_melee_low ×5 (oid=51)
+[Order] Team48 buy weapon_ranged_low ×4 (oid=52)
+[Order] Team48 buy tools ×3 (oid=53)
+[Tick 840] Person 2 (member/team60) → P1_comply | stress=0.00 loyalty=0.76
+[SoloAI] Team39 → 外交 (求和)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team47 → 覓食 (覓食)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team53 → 迎戰 (迎戰)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=840 total=1082640 us | 母體=tick總時>100000us | spike#=14/840 tick | phases=43 | 登記 43/43 | unified.rank.from_member=self180486us/tot180486us(kids0) unified.rank.from_leader=self161960us/tot161960us(kids0) unified.rank.from_solo_body=self149546us/tot149546us(kids0) infra.new_loc=self115063us/tot115063us(kids0) loop3.orders_ambition=self65884us/tot65884us(kids0) misc.equip_mobilize=self50836us/tot50836us(kids0) loop2.indep_strategy=self35382us/tot35382us(kids0) loop2.solo_engine=self34840us/tot184386us(kids1) misc.ambient=self29993us/tot29993us(kids0) infra.facility=self20662us/tot20662us(kids0) member.unified=self16063us/tot196549us(kids1) loop2.member_strategy=self13795us/tot13795us(kids0) loop1.infra=self6030us/tot141755us(kids2) loop3.outpost=self3065us/tot3065us(kids0) assign.leader_unified=self2815us/tot164775us(kids1) loop1.update_goals=self2319us/tot2319us(kids0) loop1.betray=self1794us/tot1794us(kids0) loop3.survival=self732us/tot732us(kids0) loop1.diplo=self730us/tot730us(kids0) assign.members=self426us/tot196975us(kids1) loop1.member_snap=self401us/tot401us(kids0) misc.mounts=self368us/tot368us(kids0) loop3.pursuit=self287us/tot287us(kids0) loop3.threat=self248us/tot248us(kids1) loop3.misc=self233us/tot81430us(kids3) loop3.prosperity=self209us/tot209us(kids0) loop1.assign_tasks=self74us/tot361890us(kids4) loop2.subteam=self73us/tot73us(kids1) assign.player_cmd=self52us/tot52us(kids0) loop2.solo=self44us/tot184430us(kids3) loop1.factions=self25us/tot508914us(kids6) assign.leader_lifecycle=self14us/tot14us(kids0) loop2b.merge=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot85676us gather.weak_prey=tot53317us gather.head=tot46907us indep.weakest_prey=tot38759us gather.threat=tot36616us gather.home_food=tot36472us gather.strong_farm=tot22859us gather.market=tot18503us gather.aid=tot11526us unified.to_task=tot6141us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=840 dt=1082640 us teams=64 | near.faction_ai=711624us solo_think=184828us near.move=90721us near.vision=33257us near.interact=14615us near.reactions=13715us 
+[Move] Team 14 抵達 (18,9)
+[Move] Team 31 抵達 (2,22)
+[Move] Team 48 抵達 (15,9)
+[Tribute] Team12 徵收 Team14 rate=0.03
+[Tribute] Team22 徵收 Team24 rate=0.03
+[Envoy] Team63 提案送達 Team35 → reject
+[Barter] Team40 17xfood <-> Team59 31xmaterial
+[Combat Start] Team-1000007 vs Team50
+[Ambush] NPC Team50 被 boar 伏擊
+[Diplomacy] Team13 背叛 Team12
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 51(公庫17+私34) (需 { "material": 50, "tools": 0 })
+[Diplomacy] Team23 背叛 Team22
+[Merge] Team33 ← Team63 完全合併 (pop=8)
+[Order] Team9 sell material ×30 (oid=54)
+[Order] Team9 buy weapon_melee_low ×5 (oid=55)
+[Order] Team9 buy weapon_ranged_low ×4 (oid=56)
+[Order] Team9 buy tools ×2 (oid=57)
+[Order] Team34 sell material ×35 (oid=58)
+[Order] Team34 buy weapon_melee_low ×6 (oid=59)
+[Order] Team34 buy weapon_ranged_low ×4 (oid=60)
+[Order] Team34 buy tools ×3 (oid=61)
+[Order] Team39 buy weapon_melee_low ×3 (oid=62)
+[Order] Team39 buy weapon_ranged_low ×2 (oid=63)
+[Order] Team39 buy material ×2 (oid=64)
+[Order] Team39 buy tools ×2 (oid=65)
+[Order] Team44 buy weapon_melee_low ×5 (oid=66)
+[Order] Team44 buy weapon_ranged_low ×4 (oid=67)
+[Order] Team44 buy tools ×2 (oid=68)
+[Order] Team51 buy weapon_ranged_low ×1 (oid=69)
+[Tick 900] Person 60 (member/team62) → P1_comply | stress=0.00 loyalty=0.60
+[SoloAI] Team3 → 貿易 (貿易)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team39 → 外交 (求和)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team42 → 貿易 (囤貨)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team48 → 覓食 (覓食)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=900 total=1329417 us | 母體=tick總時>100000us | spike#=15/900 tick | phases=44 | 登記 44/44 | unified.rank.from_solo_body=self315766us/tot315766us(kids0) unified.rank.from_member=self139070us/tot139070us(kids0) infra.new_loc=self121337us/tot121337us(kids0) unified.rank.from_leader=self103195us/tot103195us(kids0) misc.equip_mobilize=self71642us/tot71642us(kids0) loop3.orders_ambition=self63095us/tot63095us(kids0) loop2.indep_strategy=self45791us/tot45791us(kids0) loop2.solo_engine=self43680us/tot359446us(kids1) loop2.member_strategy=self19759us/tot19759us(kids0) infra.facility=self18315us/tot18315us(kids0) misc.ambient=self14898us/tot14898us(kids0) unified.rank.from_subteam=self8610us/tot8610us(kids0) loop1.infra=self7928us/tot147580us(kids2) member.unified=self7051us/tot146121us(kids1) loop2b.merge=self3641us/tot3641us(kids0) assign.leader_unified=self2587us/tot105782us(kids1) loop1.update_goals=self2442us/tot2442us(kids0) loop1.betray=self1895us/tot1895us(kids0) loop3.outpost=self1244us/tot1244us(kids0) loop3.survival=self798us/tot798us(kids0) loop1.diplo=self754us/tot754us(kids0) misc.mounts=self462us/tot462us(kids0) assign.members=self434us/tot146555us(kids1) loop1.member_snap=self384us/tot384us(kids0) loop3.pursuit=self263us/tot263us(kids0) loop3.prosperity=self257us/tot257us(kids0) loop3.threat=self232us/tot232us(kids1) loop3.misc=self171us/tot87173us(kids3) loop2.subteam=self161us/tot8771us(kids1) loop1.assign_tasks=self78us/tot252482us(kids4) loop2.solo=self70us/tot359516us(kids3) assign.player_cmd=self49us/tot49us(kids0) loop1.factions=self24us/tot405561us(kids6) assign.leader_lifecycle=self18us/tot18us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot85064us indep.weakest_prey=tot53793us gather.head=tot45526us gather.threat=tot37826us gather.home_food=tot34617us gather.weak_prey=tot33535us gather.strong_farm=tot21926us gather.market=tot21556us gather.aid=tot13615us unified.to_task=tot784us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.prosp 
+[PhaseSpike] tick=900 dt=1329417 us teams=64 | near.faction_ai=640269us solo_think=360238us near.move=181462us near.vision=38806us near.interact=38692us near.reactions=20908us 
+[Move] Team 33 抵達 (26,6)
+[Move] Team 35 抵達 (26,6)
+[Move] Team 37 抵達 (10,6)
+[Move] Team 47 抵達 (15,16)
+[Order] Team15 sell material ×30 (oid=70)
+[Order] Team15 buy weapon_melee_low ×5 (oid=71)
+[Order] Team15 buy weapon_ranged_low ×4 (oid=72)
+[Order] Team15 buy tools ×2 (oid=73)
+[Order] Team25 sell material ×30 (oid=74)
+[Order] Team25 buy weapon_melee_low ×5 (oid=75)
+[Order] Team25 buy weapon_ranged_low ×4 (oid=76)
+[Order] Team25 buy tools ×2 (oid=77)
+[Order] Team36 sell material ×37 (oid=78)
+[Order] Team36 buy weapon_melee_low ×5 (oid=79)
+[Order] Team36 buy weapon_ranged_low ×4 (oid=80)
+[Order] Team36 buy tools ×2 (oid=81)
+[SoloAI] Team3 → 貿易 (貿易)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team36 → 偵查 (偵查)
+[CorveeL1] Team37 L0→L1 紮根工期 @(10,6) civilian (720 person-ticks)
+[SoloAI] Team37 → 建設 (紮根)
+[SoloAI] Team39 → 貿易 (囤貨)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=960 total=944709 us | 母體=tick總時>100000us | spike#=16/960 tick | phases=43 | 登記 43/43 | unified.rank.from_solo_body=self223990us/tot223990us(kids0) unified.rank.from_member=self124076us/tot124076us(kids0) infra.new_loc=self112529us/tot112529us(kids0) unified.rank.from_leader=self80283us/tot80283us(kids0) misc.equip_mobilize=self70287us/tot70287us(kids0) loop2.solo_engine=self43733us/tot267723us(kids1) loop3.orders_ambition=self39502us/tot39502us(kids0) loop2.member_strategy=self30455us/tot30455us(kids0) infra.facility=self17561us/tot17561us(kids0) misc.ambient=self12993us/tot12993us(kids0) loop2.indep_strategy=self12752us/tot12752us(kids0) member.unified=self9171us/tot133247us(kids1) loop1.infra=self7078us/tot137168us(kids2) loop1.update_goals=self2391us/tot2391us(kids0) assign.leader_unified=self1839us/tot82122us(kids1) loop1.betray=self1499us/tot1499us(kids0) loop3.outpost=self1257us/tot1257us(kids0) loop1.diplo=self1016us/tot1016us(kids0) loop3.survival=self831us/tot831us(kids0) misc.mounts=self465us/tot465us(kids0) loop1.member_snap=self444us/tot444us(kids0) assign.members=self441us/tot133688us(kids1) loop3.prosperity=self315us/tot315us(kids0) loop3.pursuit=self271us/tot271us(kids0) loop3.threat=self226us/tot226us(kids1) loop3.misc=self198us/tot83943us(kids3) loop1.assign_tasks=self77us/tot215961us(kids4) loop2.subteam=self60us/tot60us(kids1) assign.player_cmd=self59us/tot59us(kids0) loop2.solo=self44us/tot267767us(kids3) loop1.factions=self24us/tot358503us(kids6) assign.leader_lifecycle=self15us/tot15us(kids0) loop2b.merge=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot85610us gather.threat=tot39576us gather.head=tot36584us indep.weakest_prey=tot34530us gather.home_food=tot31940us gather.weak_prey=tot31118us gather.strong_farm=tot21048us gather.market=tot14418us gather.aid=tot14235us unified.to_task=tot601us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=960 dt=944709 us teams=63 | near.faction_ai=530776us solo_think=268326us near.vision=41705us near.reactions=27339us near.interact=26159us near.economy=15394us 
+[Move] Team 11 抵達 (5,13)
+[Move] Team 34 抵達 (9,14)
+[Move] Team 57 抵達 (12,17)
+[Move] Team 59 抵達 (10,25)
+[Tribute] Team12 徵收 Team14 rate=0.03
+[Tribute] Team22 徵收 Team24 rate=0.03
+[Combat Start] Team-1000008 vs Team34
+[Ambush] NPC Team34 被 boar 伏擊
+[Sub] Team42 派出子隊 Team64 leader=P112 advisors=[] (pop=1 cap=19 task=信使)
+[Sub] Team42 派出子隊 Team65 leader=P113 advisors=[] (pop=1 cap=1 task=信使)
+[IndepStrategy] Team42 野心建國→派信使結盟 Team32 (野心=0.62)
+[Ambition] Team3 rung 0→1 (商業 cap=3)
+[Order] Team4 sell material ×30 (oid=82)
+[Order] Team4 buy weapon_melee_low ×6 (oid=83)
+[Order] Team4 buy weapon_ranged_low ×5 (oid=84)
+[Order] Team4 buy tools ×3 (oid=85)
+[Order] Team19 sell material ×30 (oid=86)
+[Order] Team19 buy weapon_melee_low ×5 (oid=87)
+[Order] Team19 buy weapon_ranged_low ×4 (oid=88)
+[Order] Team19 buy tools ×2 (oid=89)
+[Order] Team24 sell material ×30 (oid=90)
+[Order] Team24 buy weapon_melee_low ×4 (oid=91)
+[Order] Team24 buy weapon_ranged_low ×3 (oid=92)
+[Order] Team24 buy tools ×2 (oid=93)
+[Order] Team37 buy weapon_melee_low ×6 (oid=94)
+[Order] Team37 buy weapon_ranged_low ×5 (oid=95)
+[Order] Team37 buy material ×8 (oid=96)
+[Order] Team37 buy tools ×4 (oid=97)
+[Order] Team59 buy weapon_melee_low ×1 (oid=98)
+[Order] Team59 buy weapon_ranged_low ×1 (oid=99)
+[SoloAI] Team3 → 貿易 (貿易)
+[SoloAI] Team4 → 偵查 (偵查)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team37 → 建設 (紮根)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team47 → 覓食 (覓食)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=1020 total=849856 us | 母體=tick總時>100000us | spike#=17/1020 tick | phases=44 | 登記 44/44 | unified.rank.from_solo_body=self138671us/tot138671us(kids0) unified.rank.from_member=self100395us/tot100395us(kids0) infra.new_loc=self79255us/tot79255us(kids0) unified.rank.from_leader=self76882us/tot76882us(kids0) misc.equip_mobilize=self64596us/tot64596us(kids0) loop3.orders_ambition=self45226us/tot45226us(kids0) loop2.member_strategy=self26180us/tot26180us(kids0) loop2.solo_engine=self25814us/tot164485us(kids1) loop2.indep_strategy=self24843us/tot24843us(kids0) infra.facility=self13814us/tot13814us(kids0) misc.ambient=self10834us/tot10834us(kids0) loop1.infra=self5150us/tot98219us(kids2) member.unified=self5101us/tot105496us(kids1) assign.leader_unified=self4070us/tot80952us(kids1) loop3.outpost=self2820us/tot2820us(kids0) loop1.update_goals=self1763us/tot1763us(kids0) loop1.betray=self1078us/tot1078us(kids0) loop3.survival=self708us/tot708us(kids0) loop1.diplo=self654us/tot654us(kids0) assign.members=self452us/tot105948us(kids1) loop1.member_snap=self408us/tot408us(kids0) misc.mounts=self403us/tot403us(kids0) loop3.pursuit=self247us/tot247us(kids0) loop3.threat=self236us/tot236us(kids1) loop3.prosperity=self226us/tot226us(kids0) loop3.misc=self174us/tot76007us(kids3) loop2.subteam=self99us/tot99us(kids1) loop1.assign_tasks=self66us/tot187024us(kids4) assign.player_cmd=self46us/tot46us(kids0) loop2.solo=self36us/tot164527us(kids3) loop1.factions=self20us/tot289166us(kids6) assign.leader_lifecycle=self12us/tot12us(kids0) loop2b.merge=self9us/tot9us(kids0) loop2.solo_cheap=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot60055us indep.weakest_prey=tot39369us gather.weak_prey=tot36527us gather.head=tot26994us gather.threat=tot25185us gather.home_food=tot25167us gather.strong_farm=tot14143us gather.market=tot11690us gather.aid=tot9018us unified.to_task=tot637us ｜[本輪未出現] unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=1020 dt=849856 us teams=66 | near.faction_ai=467723us solo_think=164898us near.interact=65767us near.move=53959us near.vision=38116us near.reactions=17513us 
+[Ambition] Team3 rung 1→2 (商業 cap=3)
+[Order] Team32 buy weapon_melee_low ×4 (oid=100)
+[Order] Team32 buy weapon_ranged_low ×3 (oid=101)
+[Order] Team32 buy material ×23 (oid=102)
+[Order] Team32 buy tools ×3 (oid=103)
+[Order] Team40 sell material ×36 (oid=104)
+[Order] Team40 buy weapon_melee_low ×3 (oid=105)
+[Order] Team40 buy weapon_ranged_low ×2 (oid=106)
+[Order] Team40 buy tools ×1 (oid=107)
+[Order] Team58 buy weapon_melee_low ×1 (oid=108)
+[Order] Team58 buy weapon_ranged_low ×1 (oid=109)
+[Ambition] Team61 rung 0→1 (商業 cap=2)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[SoloAI] Team3 → 貿易 (貿易)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team34 → 貿易 (囤貨)
+[SoloAI] Team36 → 偵查 (偵查)
+[SoloAI] Team37 → 建設 (紮根)
+[SoloAI] Team39 → 外交 (求和)
+[Sub] Team40 派出子隊 Team66 leader=P108 advisors=[] (pop=3 cap=16 task=擴建)
+[Infra] Team40 派擴建子隊 Team66 → (10,25) stable
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team53 → 外交 (求和)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=1080 total=710142 us | 母體=tick總時>100000us | spike#=18/1080 tick | phases=43 | 登記 43/43 | unified.rank.from_solo_body=self233348us/tot233348us(kids0) loop2.solo_engine=self70704us/tot304052us(kids1) infra.new_loc=self67902us/tot67902us(kids0) unified.rank.from_leader=self57472us/tot57472us(kids0) misc.equip_mobilize=self56325us/tot56325us(kids0) unified.rank.from_member=self45366us/tot45366us(kids0) loop3.orders_ambition=self29896us/tot29896us(kids0) loop2.member_strategy=self9975us/tot9975us(kids0) loop2.indep_strategy=self8494us/tot8494us(kids0) infra.facility=self7530us/tot7530us(kids0) misc.ambient=self7311us/tot7311us(kids0) member.unified=self3026us/tot48392us(kids1) loop1.infra=self2791us/tot78223us(kids2) loop1.update_goals=self1432us/tot1432us(kids0) loop3.outpost=self1039us/tot1039us(kids0) assign.leader_unified=self987us/tot58459us(kids1) loop3.survival=self614us/tot614us(kids0) loop1.betray=self553us/tot553us(kids0) loop2.subteam=self466us/tot466us(kids1) misc.mounts=self347us/tot347us(kids0) loop1.diplo=self333us/tot333us(kids0) loop1.member_snap=self329us/tot329us(kids0) assign.members=self257us/tot48649us(kids1) loop3.pursuit=self212us/tot212us(kids0) loop3.prosperity=self198us/tot198us(kids0) loop3.threat=self186us/tot186us(kids1) loop3.misc=self157us/tot64140us(kids3) loop2.solo=self54us/tot304106us(kids3) loop1.assign_tasks=self49us/tot107207us(kids4) assign.player_cmd=self39us/tot39us(kids0) loop1.factions=self17us/tot188094us(kids6) assign.leader_lifecycle=self11us/tot11us(kids0) loop2b.merge=self7us/tot7us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot67233us gather.head=tot34369us gather.threat=tot28339us gather.home_food=tot26919us gather.weak_prey=tot24982us gather.strong_farm=tot17482us gather.market=tot14506us indep.weakest_prey=tot12210us gather.aid=tot10462us unified.to_task=tot319us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=1080 dt=710142 us teams=66 | near.faction_ai=305202us solo_think=304678us near.vision=30523us near.interact=18226us near.reactions=15761us near.economy=13242us 
+[Equip] Team64 裝備 melee_low ×1
+[Move] Team 26 抵達 (20,6)
+[Move] Team 38 抵達 (10,19)
+[Tribute] Team22 徵收 Team24 rate=0.03
+[Order] Team1 sell material ×30 (oid=110)
+[Order] Team1 buy weapon_melee_low ×4 (oid=111)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=112)
+[Order] Team1 buy tools ×2 (oid=113)
+[Order] Team2 sell material ×30 (oid=114)
+[Order] Team2 buy weapon_melee_low ×5 (oid=115)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=116)
+[Order] Team2 buy tools ×2 (oid=117)
+[Order] Team13 sell material ×30 (oid=118)
+[Order] Team13 buy weapon_melee_low ×5 (oid=119)
+[Order] Team13 buy weapon_ranged_low ×4 (oid=120)
+[Order] Team13 buy tools ×2 (oid=121)
+[Order] Team38 buy weapon_melee_low ×4 (oid=122)
+[Order] Team38 buy weapon_ranged_low ×3 (oid=123)
+[Order] Team38 buy material ×14 (oid=124)
+[Order] Team38 buy tools ×3 (oid=125)
+[Order] Team42 buy weapon_melee_low ×4 (oid=126)
+[Order] Team42 buy weapon_ranged_low ×3 (oid=127)
+[Order] Team42 buy tools ×2 (oid=128)
+[SoloAI] Team3 → 貿易 (貿易)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team40 → 外交 (求和)
+[SoloAI] Team41 → 偵查 (偵查)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=1140 total=689559 us | 母體=tick總時>100000us | spike#=19/1140 tick | phases=43 | 登記 43/43 | unified.rank.from_solo_body=self139338us/tot139338us(kids0) unified.rank.from_leader=self59080us/tot59080us(kids0) misc.equip_mobilize=self53144us/tot53144us(kids0) loop3.orders_ambition=self42727us/tot42727us(kids0) loop2.member_strategy=self34793us/tot34793us(kids0) infra.new_loc=self31549us/tot31549us(kids0) misc.ambient=self28996us/tot28996us(kids0) loop2.solo_engine=self28670us/tot168008us(kids1) unified.rank.from_member=self26413us/tot26413us(kids0) loop2.indep_strategy=self18645us/tot18645us(kids0) infra.facility=self4116us/tot4116us(kids0) member.unified=self1532us/tot27945us(kids1) loop1.infra=self1521us/tot37186us(kids2) loop3.outpost=self1398us/tot1398us(kids0) loop1.update_goals=self1008us/tot1008us(kids0) assign.leader_unified=self982us/tot60062us(kids1) loop3.survival=self511us/tot511us(kids0) loop2.subteam=self347us/tot347us(kids1) loop1.member_snap=self345us/tot345us(kids0) assign.members=self340us/tot28285us(kids1) loop1.betray=self337us/tot337us(kids0) loop1.diplo=self305us/tot305us(kids0) misc.mounts=self284us/tot284us(kids0) loop3.pursuit=self177us/tot177us(kids0) loop3.misc=self173us/tot82597us(kids3) loop3.threat=self167us/tot167us(kids1) loop3.prosperity=self152us/tot152us(kids0) loop1.assign_tasks=self70us/tot88469us(kids4) assign.player_cmd=self40us/tot40us(kids0) loop2.solo=self30us/tot168038us(kids3) loop1.factions=self16us/tot127666us(kids6) assign.leader_lifecycle=self12us/tot12us(kids0) loop2b.merge=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot47394us indep.weakest_prey=tot45140us gather.threat=tot19839us gather.head=tot19334us gather.weak_prey=tot17854us gather.home_food=tot17657us gather.strong_farm=tot11572us gather.market=tot10729us gather.aid=tot8685us unified.to_task=tot244us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=1140 dt=689559 us teams=66 | near.faction_ai=310466us solo_think=168379us near.move=120650us near.vision=32748us near.interact=16156us near.reactions=15511us 
+[SoloAI] Team41 → 掠奪 (掠奪)
+[Move] Team 13 抵達 (18,10)
+[Move] Team 17 抵達 (18,10)
+[Move] Team 20 抵達 (9,7)
+[Move] Team 39 抵達 (19,17)
+[Move] Team 44 抵達 (19,12)
+[Move] Team 46 抵達 (15,19)
+[Diplomacy] Team27 背叛 Team26
+[Order] Team49 buy weapon_melee_low ×1 (oid=129)
+[Order] Team49 buy weapon_ranged_low ×1 (oid=130)
+[Ambition] Team57 rung 0→1 (商業 cap=3)
+[SoloAI] Team3 → 貿易 (貿易)
+[SoloAI] Team4 → 偵查 (偵查)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team39 → 外交 (求和)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team53 → 覓食 (覓食)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=1200 total=1224913 us | 母體=tick總時>100000us | spike#=20/1200 tick | phases=42 | 登記 42/42 | unified.rank.from_solo_body=self161694us/tot161694us(kids0) unified.rank.from_member=self113933us/tot113933us(kids0) misc.equip_mobilize=self79309us/tot79309us(kids0) unified.rank.from_leader=self68794us/tot68794us(kids0) infra.new_loc=self51087us/tot51087us(kids0) loop2.solo_engine=self45483us/tot207177us(kids1) loop2.member_strategy=self39662us/tot39662us(kids0) loop2.indep_strategy=self31290us/tot31290us(kids0) infra.facility=self9415us/tot9415us(kids0) loop3.orders_ambition=self9225us/tot9225us(kids0) member.unified=self3894us/tot117827us(kids1) loop1.infra=self3344us/tot63846us(kids2) loop1.update_goals=self1546us/tot1546us(kids0) assign.leader_unified=self1407us/tot70201us(kids1) loop1.betray=self1300us/tot1300us(kids0) loop3.outpost=self1186us/tot1186us(kids0) loop3.survival=self909us/tot909us(kids0) loop2.subteam=self750us/tot750us(kids1) loop1.diplo=self513us/tot513us(kids0) misc.mounts=self459us/tot459us(kids0) loop1.member_snap=self402us/tot402us(kids0) assign.members=self385us/tot118212us(kids1) loop3.pursuit=self244us/tot244us(kids0) loop3.prosperity=self230us/tot230us(kids0) loop3.threat=self208us/tot208us(kids1) loop3.misc=self125us/tot79893us(kids3) loop1.assign_tasks=self69us/tot188557us(kids4) assign.player_cmd=self60us/tot60us(kids0) loop2.solo=self37us/tot207214us(kids3) loop1.factions=self21us/tot256185us(kids6) assign.leader_lifecycle=self15us/tot15us(kids0) loop2b.merge=self12us/tot12us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot102392us indep.weakest_prey=tot60632us gather.threat=tot38084us gather.weak_prey=tot37725us gather.head=tot26718us gather.home_food=tot22376us gather.strong_farm=tot18304us gather.aid=tot11622us gather.market=tot10096us unified.to_task=tot340us ｜[本輪未出現] misc.ambient、loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=1200 dt=1224913 us teams=66 | near.move=483655us near.faction_ai=422094us solo_think=207718us near.vision=31322us near.economy=18790us near.reactions=14531us 
+[Move] Team 3 抵達 (22,4)
+[Move] Team 14 抵達 (19,8)
+[Move] Team 23 抵達 (3,28)
+[Move] Team 28 抵達 (22,6)
+[Move] Team 32 抵達 (12,24)
+[Move] Team 61 抵達 (20,17)
+[Market@(22, 4)] Team3  outpost owner Team26 成交
+[Tribute] Team22 徵收 Team24 rate=0.03
+[Order] Team6 sell material ×30 (oid=131)
+[Order] Team6 buy weapon_melee_low ×5 (oid=132)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=133)
+[Order] Team6 buy tools ×2 (oid=134)
+[Order] Team10 sell food ×1088 (oid=135)
+[Order] Team10 buy weapon_ranged_low ×2 (oid=136)
+[Order] Team10 buy material ×27 (oid=137)
+[Order] Team10 buy tools ×2 (oid=138)
+[Order] Team12 buy weapon_ranged_low ×1 (oid=139)
+[Order] Team12 buy material ×17 (oid=140)
+[Order] Team12 buy tools ×2 (oid=141)
+[Order] Team20 sell material ×30 (oid=142)
+[Order] Team20 buy weapon_melee_low ×5 (oid=143)
+[Order] Team20 buy weapon_ranged_low ×4 (oid=144)
+[Order] Team20 buy tools ×2 (oid=145)
+[Order] Team28 buy weapon_melee_low ×5 (oid=146)
+[Order] Team28 buy weapon_ranged_low ×4 (oid=147)
+[Order] Team28 buy tools ×2 (oid=148)
+[Order] Team33 buy weapon_melee_low ×4 (oid=149)
+[Order] Team33 buy weapon_ranged_low ×3 (oid=150)
+[Order] Team33 buy tools ×3 (oid=151)
+[Order] Team35 buy weapon_melee_low ×3 (oid=152)
+[Order] Team35 buy weapon_ranged_low ×2 (oid=153)
+[Order] Team35 buy tools ×5 (oid=154)
+[Order] Team43 sell material ×9 (oid=155)
+[Order] Team43 buy weapon_melee_low ×6 (oid=156)
+[Order] Team43 buy weapon_ranged_low ×4 (oid=157)
+[Order] Team43 buy tools ×3 (oid=158)
+[Order] Team54 buy food ×1 (oid=159)
+[SoloAI] Team3 → 貿易 (囤貨)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team23 → 貿易 (囤貨)
+[SoloAI] Team33 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team37 → 建設 (紮根)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=1260 total=1068650 us | 母體=tick總時>100000us | spike#=21/1260 tick | phases=43 | 登記 43/43 | unified.rank.from_solo_body=self197052us/tot197052us(kids0) unified.rank.from_leader=self112534us/tot112534us(kids0) unified.rank.from_member=self107827us/tot107827us(kids0) infra.new_loc=self93086us/tot93086us(kids0) loop3.orders_ambition=self82270us/tot82270us(kids0) misc.equip_mobilize=self71702us/tot71702us(kids0) loop2.solo_engine=self31907us/tot228959us(kids1) misc.ambient=self29241us/tot29241us(kids0) infra.facility=self16141us/tot16141us(kids0) loop2.member_strategy=self15574us/tot15574us(kids0) loop2.indep_strategy=self12891us/tot12891us(kids0) member.unified=self6192us/tot114019us(kids1) loop1.infra=self5174us/tot114401us(kids2) assign.leader_unified=self1885us/tot114419us(kids1) loop1.update_goals=self1597us/tot1597us(kids0) loop3.outpost=self1211us/tot1211us(kids0) loop1.betray=self1153us/tot1153us(kids0) loop3.survival=self860us/tot860us(kids0) loop1.diplo=self732us/tot732us(kids0) loop2.subteam=self455us/tot455us(kids1) misc.mounts=self432us/tot432us(kids0) assign.members=self355us/tot114374us(kids1) loop1.member_snap=self324us/tot324us(kids0) loop3.pursuit=self252us/tot252us(kids0) loop3.misc=self238us/tot101613us(kids3) loop3.prosperity=self232us/tot232us(kids0) loop3.threat=self227us/tot227us(kids1) loop1.assign_tasks=self64us/tot228910us(kids4) assign.player_cmd=self39us/tot39us(kids0) loop2.solo=self38us/tot228997us(kids3) loop1.factions=self18us/tot347135us(kids6) assign.leader_lifecycle=self14us/tot14us(kids0) loop2b.merge=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot69131us gather.weak_prey=tot40448us gather.threat=tot35384us gather.head=tot31407us gather.home_food=tot25416us indep.weakest_prey=tot20158us gather.strong_farm=tot18818us gather.market=tot16932us gather.aid=tot11705us unified.to_task=tot922us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=1260 dt=1068650 us teams=66 | near.faction_ai=564374us solo_think=229395us near.move=150200us near.vision=44146us near.reactions=21860us near.economy=17417us 
+[Move] Team 40 抵達 (9,24)
+[Diplomacy] Team28 背叛 Team26
+[Order] Team29 sell food ×1271 (oid=160)
+[Order] Team29 buy weapon_ranged_low ×3 (oid=161)
+[Order] Team29 buy material ×18 (oid=162)
+[Order] Team29 buy tools ×3 (oid=163)
+[Order] Team30 sell material ×30 (oid=164)
+[Order] Team30 buy weapon_melee_low ×6 (oid=165)
+[Order] Team30 buy weapon_ranged_low ×4 (oid=166)
+[Order] Team30 buy tools ×3 (oid=167)
+[StrategicAI] Faction6 受威脅，尋求結盟
+[SoloAI] Team3 → 覓食 (覓食)
+[SoloAI] Team4 → 偵查 (偵查)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team27 → 建設 (建設)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team42 → 建設 (建設)
+[SoloAI] Team43 → 貿易 (貿易)
+[SoloAI] Team47 → 貿易 (囤貨)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=1320 total=803661 us | 母體=tick總時>100000us | spike#=22/1320 tick | phases=43 | 登記 43/43 | unified.rank.from_solo_body=self153329us/tot153329us(kids0) unified.rank.from_member=self87099us/tot87099us(kids0) misc.equip_mobilize=self80680us/tot80680us(kids0) unified.rank.from_leader=self67097us/tot67097us(kids0) infra.new_loc=self61786us/tot61786us(kids0) loop2.indep_strategy=self33229us/tot33229us(kids0) loop2.solo_engine=self31756us/tot185085us(kids1) loop3.orders_ambition=self30524us/tot30524us(kids0) misc.ambient=self26063us/tot26063us(kids0) loop2.member_strategy=self16343us/tot16343us(kids0) infra.facility=self10315us/tot10315us(kids0) member.unified=self4722us/tot91821us(kids1) loop1.infra=self3815us/tot75916us(kids2) loop1.update_goals=self1836us/tot1836us(kids0) assign.leader_unified=self1685us/tot68782us(kids1) loop1.betray=self1197us/tot1197us(kids0) loop3.outpost=self1181us/tot1181us(kids0) loop3.survival=self725us/tot725us(kids0) loop1.diplo=self438us/tot438us(kids0) misc.mounts=self419us/tot419us(kids0) assign.members=self416us/tot92237us(kids1) loop1.member_snap=self413us/tot413us(kids0) loop2.subteam=self408us/tot408us(kids1) loop3.pursuit=self242us/tot242us(kids0) loop3.prosperity=self225us/tot225us(kids0) loop3.threat=self211us/tot211us(kids1) loop3.misc=self206us/tot107368us(kids3) loop1.assign_tasks=self68us/tot161153us(kids4) loop2.solo=self53us/tot185138us(kids3) assign.player_cmd=self51us/tot51us(kids0) loop1.factions=self22us/tot240975us(kids6) assign.leader_lifecycle=self15us/tot15us(kids0) loop2b.merge=self10us/tot10us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot77554us indep.weakest_prey=tot37685us gather.threat=tot36602us gather.weak_prey=tot31672us gather.head=tot29875us gather.home_food=tot25607us gather.strong_farm=tot23458us gather.aid=tot15487us gather.market=tot8818us unified.to_task=tot615us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=1320 dt=803661 us teams=66 | near.faction_ai=433905us solo_think=185735us near.messages=59691us near.vision=42560us near.reactions=24949us near.economy=20661us 
+[Tribute] Team22 徵收 Team24 rate=0.03
+[Order] Team7 sell material ×30 (oid=168)
+[Order] Team7 buy weapon_melee_low ×5 (oid=169)
+[Order] Team7 buy weapon_ranged_low ×4 (oid=170)
+[Order] Team7 buy tools ×2 (oid=171)
+[Order] Team14 sell material ×30 (oid=172)
+[Order] Team14 buy weapon_melee_low ×5 (oid=173)
+[Order] Team14 buy weapon_ranged_low ×4 (oid=174)
+[Order] Team14 buy tools ×2 (oid=175)
+[Order] Team21 sell material ×30 (oid=176)
+[Order] Team21 buy weapon_melee_low ×5 (oid=177)
+[Order] Team21 buy weapon_ranged_low ×4 (oid=178)
+[Order] Team21 buy tools ×2 (oid=179)
+[Order] Team27 buy weapon_melee_low ×5 (oid=180)
+[Order] Team27 buy weapon_ranged_low ×4 (oid=181)
+[Order] Team27 buy tools ×2 (oid=182)
+[Order] Team56 buy weapon_melee_low ×1 (oid=183)
+[Order] Team56 buy weapon_ranged_low ×1 (oid=184)
+[StrategicAI] Faction6 受威脅，尋求結盟
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team27 → 建設 (建設)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team43 → 貿易 (貿易)
+[FaiPhase] tick=1380 total=570974 us | 母體=tick總時>100000us | spike#=23/1380 tick | phases=43 | 登記 43/43 | unified.rank.from_leader=self90467us/tot90467us(kids0) misc.equip_mobilize=self81124us/tot81124us(kids0) unified.rank.from_solo_body=self78384us/tot78384us(kids0) infra.new_loc=self50425us/tot50425us(kids0) unified.rank.from_member=self44870us/tot44870us(kids0) loop3.orders_ambition=self37643us/tot37643us(kids0) loop2.solo_engine=self19903us/tot98287us(kids1) loop2.member_strategy=self15290us/tot15290us(kids0) loop2.indep_strategy=self13638us/tot13638us(kids0) infra.facility=self8896us/tot8896us(kids0) loop1.infra=self3266us/tot62587us(kids2) member.unified=self1944us/tot46814us(kids1) assign.leader_unified=self1902us/tot92369us(kids1) loop1.update_goals=self1850us/tot1850us(kids0) loop3.outpost=self973us/tot973us(kids0) loop1.betray=self829us/tot829us(kids0) loop3.survival=self634us/tot634us(kids0) loop1.diplo=self512us/tot512us(kids0) misc.mounts=self353us/tot353us(kids0) loop1.member_snap=self310us/tot310us(kids0) assign.members=self278us/tot47092us(kids1) loop3.pursuit=self210us/tot210us(kids0) loop3.prosperity=self196us/tot196us(kids0) loop3.threat=self181us/tot181us(kids1) loop2.subteam=self117us/tot117us(kids1) loop3.misc=self104us/tot81581us(kids3) loop1.assign_tasks=self66us/tot139599us(kids4) assign.player_cmd=self53us/tot53us(kids0) loop2.solo_cheap=self34us/tot34us(kids0) loop2.solo=self29us/tot98350us(kids3) loop1.factions=self22us/tot205709us(kids6) assign.leader_lifecycle=self19us/tot19us(kids0) loop2b.merge=self10us/tot10us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot45684us indep.weakest_prey=tot20676us gather.threat=tot20079us gather.head=tot16403us gather.weak_prey=tot16096us gather.home_food=tot12233us gather.strong_farm=tot9723us gather.aid=tot6670us gather.market=tot6484us unified.to_task=tot375us ｜[本輪未出現] misc.ambient、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=1380 dt=570974 us teams=66 | near.faction_ai=358016us solo_think=98820us near.vision=39638us near.reactions=17157us near.interact=16629us near.economy=14158us 
+[DayNight] Day 1 開始
+[Sub] Team43 派出子隊 Team67 leader=P115 advisors=[] (pop=2 cap=17 task=idle)
+[PopMgmt] Team43 超額 2 人，advisor Team115 帶走
+[Move] Team 7 抵達 (6,14)
+[Move] Team 37 抵達 (10,6)
+[Move] Team 42 抵達 (9,24)
+[Move] Team 43 抵達 (19,2)
+[Move] Team 48 抵達 (15,9)
+[Diplomacy] Team20 背叛 Team17
+[Split] Team67 回歸失敗（母團滿員），獨立為新分團
+[Order] Team5 sell material ×56 (oid=185)
+[Order] Team5 buy weapon_melee_low ×3 (oid=186)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=187)
+[Order] Team5 buy tools ×2 (oid=188)
+[Order] Team17 sell material ×17 (oid=189)
+[Order] Team17 buy weapon_melee_low ×2 (oid=190)
+[Order] Team17 buy weapon_ranged_low ×3 (oid=191)
+[Order] Team17 buy tools ×1 (oid=192)
+[Order] Team31 sell material ×30 (oid=193)
+[Order] Team31 buy weapon_melee_low ×6 (oid=194)
+[Order] Team31 buy weapon_ranged_low ×4 (oid=195)
+[Order] Team31 buy tools ×3 (oid=196)
+[Order] Team52 buy weapon_melee_low ×1 (oid=197)
+[Order] Team52 buy weapon_ranged_low ×1 (oid=198)
+[Order] Team57 buy weapon_melee_low ×1 (oid=199)
+[Order] Team57 buy weapon_ranged_low ×1 (oid=200)
+[StrategicAI] Faction6 受威脅，尋求結盟
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team38 → 貿易 (囤貨)
+[SoloAI] Team39 → 覓食 (覓食)
+[SoloAI] Team40 → 貿易 (囤貨)
+[SoloAI] Team41 → 掠奪 (掠奪)
+[SoloAI] Team43 → 覓食 (覓食)
+[SoloAI] Team44 → 建設 (建設)
+[SoloAI] Team46 → 建設 (建設)
+[SoloAI] Team54 → 迎戰 (迎戰)
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (11, 26) 捕野馬 +1
+[Horse] Outpost (12, 17) 捕野馬 +1
+[Horse] Outpost (13, 19) 捕野馬 +1
+[Horse] Outpost (13, 23) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (15, 13) 捕野馬 +1
+[Horse] Outpost (16, 17) 捕野馬 +1
+[Horse] Outpost (22, 9) 捕野馬 +1
+[FaiPhase] tick=1440 total=893007 us | 母體=tick總時>100000us | spike#=24/1440 tick | phases=45 | 登記 45/45 | unified.rank.from_solo_body=self202372us/tot202372us(kids0) unified.rank.from_leader=self115836us/tot115836us(kids0) unified.rank.from_member=self88375us/tot88375us(kids0) misc.equip_mobilize=self70414us/tot70414us(kids0) infra.new_loc=self58948us/tot58948us(kids0) loop3.orders_ambition=self46370us/tot46370us(kids0) loop2.member_strategy=self41651us/tot41651us(kids0) loop2.solo_engine=self32008us/tot234380us(kids1) loop2.indep_strategy=self22217us/tot22217us(kids0) misc.ambient=self16262us/tot16262us(kids0) infra.facility=self10355us/tot10355us(kids0) unified.rank.from_subteam=self6760us/tot6760us(kids0) assign.leader_unified=self6489us/tot122325us(kids1) loop3.threat=self6178us/tot11866us(kids1) unified.rank.from_threat=self5688us/tot5688us(kids0) member.unified=self4602us/tot92977us(kids1) loop1.infra=self3666us/tot72969us(kids2) loop1.update_goals=self1831us/tot1831us(kids0) loop3.outpost=self1680us/tot1680us(kids0) loop1.betray=self935us/tot935us(kids0) loop3.survival=self681us/tot681us(kids0) loop1.diplo=self519us/tot519us(kids0) loop1.member_snap=self366us/tot366us(kids0) assign.members=self358us/tot93335us(kids1) misc.mounts=self353us/tot353us(kids0) loop2.subteam=self296us/tot7056us(kids1) loop2b.merge=self241us/tot241us(kids0) loop3.pursuit=self205us/tot205us(kids0) loop3.prosperity=self192us/tot192us(kids0) loop3.misc=self155us/tot87184us(kids3) loop1.assign_tasks=self61us/tot215778us(kids4) assign.player_cmd=self45us/tot45us(kids0) loop2.solo=self42us/tot234422us(kids3) loop1.factions=self21us/tot292419us(kids6) assign.leader_lifecycle=self12us/tot12us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot79955us indep.weakest_prey=tot56970us gather.threat=tot38278us gather.weak_prey=tot37397us gather.head=tot31952us gather.home_food=tot24372us gather.strong_farm=tot22234us gather.aid=tot15412us gather.market=tot11768us unified.to_task=tot1379us ｜[本輪未出現] loop2.solo_cheap、unified.rank.from_solo、unified.prosp 
+[PhaseSpike] tick=1440 dt=893007 us teams=67 | near.faction_ai=518775us solo_think=234825us near.vision=42234us near.reactions=17574us near.move=16235us near.economy=14958us 
+[TickPerf] day=1 avg=12914 us max=1688861 us ticks=1440 teams=67 factions=8 | ★>2s 幀數=0/1440
+[Equip] Team67 裝備 melee_low ×1
+[Move] Team 12 抵達 (19,8)
+[Tribute] Team22 徵收 Team24 rate=0.03
+[Site] Faction3 派工失敗: 資源不足 1.60x: material 有 77(公庫19+私58) (需 { "material": 50, "tools": 0 })
+[Order] Team60 buy weapon_melee_low ×1 (oid=201)
+[Order] Team60 buy weapon_ranged_low ×1 (oid=202)
+[StrategicAI] Faction6 受威脅，尋求結盟
+[Reaction] Person131 離團自立流亡 Team68 at (0,20)
+[Tick 1500] Person 131 (leader/team68) → N1_flee | stress=0.15 loyalty=0.39
+[Reaction] Person132 離團自立流亡 Team69 at (18,18)
+[Tick 1500] Person 132 (leader/team69) → N1_flee | stress=0.15 loyalty=0.32
+[Reaction] Person133 離團自立流亡 Team70 at (19,8)
+[Tick 1500] Person 133 (leader/team70) → N1_flee | stress=0.15 loyalty=0.41
+[SoloAI] Team4 → 偵查 (偵查)
+[SoloAI] Team13 → 迎戰 (迎戰)
+[SoloAI] Team39 → 覓食 (覓食)
+[SoloAI] Team41 → 逃跑 (survival)
+[SoloAI] Team43 → 覓食 (覓食)
+[SoloAI] Team54 → 外交 (求和)
+[FaiPhase] tick=1500 total=1364243 us | 母體=tick總時>100000us | spike#=25/1500 tick | phases=43 | 登記 43/43 | loop3.threat=self207572us/tot207572us(kids1) unified.rank.from_solo_body=self144185us/tot144185us(kids0) unified.rank.from_leader=self124828us/tot124828us(kids0) misc.equip_mobilize=self91018us/tot91018us(kids0) unified.rank.from_member=self82933us/tot82933us(kids0) infra.new_loc=self67340us/tot67340us(kids0) loop2.solo_engine=self40158us/tot184343us(kids1) loop2.member_strategy=self20502us/tot20502us(kids0) loop2.indep_strategy=self15095us/tot15095us(kids0) loop3.orders_ambition=self12811us/tot12811us(kids0) infra.facility=self11866us/tot11866us(kids0) member.unified=self4794us/tot87727us(kids1) loop1.infra=self3918us/tot83124us(kids2) assign.leader_unified=self1919us/tot126747us(kids1) loop1.update_goals=self1512us/tot1512us(kids0) loop3.outpost=self1398us/tot1398us(kids0) loop3.survival=self858us/tot858us(kids0) loop1.betray=self631us/tot631us(kids0) misc.mounts=self543us/tot543us(kids0) loop1.diplo=self516us/tot516us(kids0) assign.members=self335us/tot88062us(kids1) loop1.member_snap=self308us/tot308us(kids0) loop3.pursuit=self290us/tot290us(kids0) loop3.prosperity=self273us/tot273us(kids0) loop2.subteam=self173us/tot173us(kids1) loop3.misc=self148us/tot91709us(kids3) loop2.solo_cheap=self59us/tot59us(kids0) loop1.assign_tasks=self55us/tot214908us(kids4) loop2.solo=self37us/tot184439us(kids3) assign.player_cmd=self34us/tot34us(kids0) loop1.factions=self19us/tot301018us(kids6) assign.leader_lifecycle=self10us/tot10us(kids0) loop2b.merge=self6us/tot6us(kids0) ｜[multi不參與淨值self≡tot] gather.readiness_prey=tot221197us gather.head=tot115284us gather.threat=tot102636us gather.home_food=tot92421us gather.weak_prey=tot91520us gather.strong_farm=tot56592us gather.market=tot51928us gather.aid=tot34075us indep.weakest_prey=tot29026us unified.to_task=tot1147us ｜[本輪未出現] misc.ambient、unified.rank.from_solo、unified.rank.from_threat、unified.rank.from_subteam、unified.prosp 
+[PhaseSpike] tick=1500 dt=1364243 us teams=70 | near.faction_ai=1016390us solo_think=184969us near.move=47632us near.vision=41867us near.reactions=21149us near.economy=16875us 
+N 桶      樣本   每隊 solo 成本中位(us)
+   10- 19     16       61.0
+   20- 29    447       34.0
+   30- 39      1    26348.4
+
+★★兩群分開：進入 _evaluate_solo 共 692 次｜其中【真的跑引擎】188 次（27.2%）｜早退 504 次
+★早退卡在哪一關：player=0｜交戰中=0｜無領袖=0｜cadence(3 遊戲日)=479
+★★未歸類 25 次（進入 692  已具名早退 479  跑引擎 188）—— ★我的 tap 沒蓋到的 return，說出來不遮
+★跑進引擎的 tick 數 43｜單 tick 最多 14 隊｜中位 1 隊｜總計 188 隊次
+★★到期時刻分布（3 遊戲日切 10 段，值＝隊次）：0:22 1:66 2:70 3:30 4:0 5:0 6:0 7:0 8:0 9:0
+    ★若集中在一兩段 【每 3 天一大批同時到期】＝ 主詞找到了；平均散開  不是它
+N 桶      跑引擎那群 每次 us（中位）   早退那群 每次 us（中位）
+   10- 19      12707.3 (n=2)            56.0 (n=14)
+   20- 29      18853.0 (n=40)            29.0 (n=417)
+   30- 39      30723.8 (n=1)            59.0 (n=1)
+
+★N 成長 2.3×  每隊成本 431.94×
+★★★判讀：【超線性】—— 每隊成本隨 N 長  ★它就是 26 秒的形狀
+=== DONE === SECTIONS=1/1 FAILS=0
+
+[godot.ps1] child exit=0

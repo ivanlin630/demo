@@ -1,0 +1,26 @@
+[TREE] path=A:\GDS\demo\.worktrees\bedarm7 commit=e806aaaef clean=NO code-dirty=7 codehash=E5399CEEF32B
+[TREE]   *** measuring the WORKING TREE, not commit e806aaaef ***
+[TREE]    M scripts/debug/plan_speed_move_cost_test.gd
+[TREE]    M scripts/debug/pop_gate_tap_bed.gd
+[TREE]    M scripts/debug/promote_kill_samples_bed.gd
+[TREE]    M scripts/debug/rank_calls_bed.gd
+[TREE]    M scripts/debug/solo_cost_vs_scale_bed.gd
+[TREE]    M scripts/debug/solo_think_stagger_bed.gd
+[TREE]    M scripts/debug/sssp_cache_hitrate_bed.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+SCRIPT ERROR: Parse Error: Identifier "probe_on" not declared in the current scope.
+          at: GDScript::reload (res://scripts/debug/rank_calls_bed.gd:31)
+SCRIPT ERROR: Parse Error: Identifier "probe_on" not declared in the current scope.
+          at: GDScript::reload (res://scripts/debug/rank_calls_bed.gd:32)
+SCRIPT ERROR: Parse Error: Identifier "probe_on" not declared in the current scope.
+          at: GDScript::reload (res://scripts/debug/rank_calls_bed.gd:33)
+ERROR: Failed to load script "res://scripts/debug/rank_calls_bed.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2726)
+
+[godot.ps1] unresolved class_name type(s) above, while the cache HAS ENTRIES: A:\GDS\demo\.worktrees\bedarm7\.godot\global_script_class_cache.cfg
+[godot.ps1] two causes look identical here: (a) cache is STALE (new class_name added
+[godot.ps1] without --import) or (b) that type genuinely does not exist. Try --import first.
+[godot.ps1] child exit=1
