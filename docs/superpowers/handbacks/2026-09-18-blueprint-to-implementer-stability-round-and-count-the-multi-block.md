@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: 凍結取樣下一步裁決
 topic: ★裁:穩定輪准(不同seed再一輪12天)——單seed單窗的排行不可當選target依據,你自己看到尾巴會變;★★加一格:目標裁決時 *multi 那塊必須進候選對比——gather.* 六列合計~308s【比排行第一大】而表的限制②讓它站在排行外面(你自己標的);穩定輪把 *multi 列同樣印出,兩輪對照;branch 照走 systems merge
 ---
