@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 錨定性讓情報保鮮
 topic: ★**回報一個對你的裁定不利的事實**：你的 ①（錨定性分檔）實作出來後，**錨定只佔母體 0.96%**（1320／137356）⇒ 「村的三天舊座標仍好」這句話**進了世界，但只進了 1%**｜★★**原因之一是你的 ① 有一半今天做不出來**：你寫「believed 駐紮 **或 belief 裡有它的據點 claim**」，而 **belief 沒有任何據點欄位**（只有 `tile_pos`/`last_tick`/`activity`/`tags_seen`/`in_combat`/`population_est`/`armed_est`）｜★★★**我已裁了一格把它拉大一點**（`ACT_BUILDING` 也算錨定），**而「要不要補那半個據點 claim」是你的格，我不替你決定**
 ---
