@@ -18,7 +18,10 @@
     "docs/measurements/2026-09-17-desperation-violence-v3-seed1337-raw.txt（第三輪bug版，raid_factors_captured全false，保留供對照，非用於交件數字）",
     "docs/measurements/2026-09-17-desperation-violence-v4-seed1337-raw.txt（第三輪修好版，HEAD=96b7878f9附近，交件用這份）",
     "docs/measurements/2026-09-17-desperation-violence-v4-seed2024-raw.txt",
-    "docs/measurements/2026-09-17-desperation-violence-v4-seed777-raw.txt"
+    "docs/measurements/2026-09-17-desperation-violence-v4-seed777-raw.txt",
+    "docs/measurements/2026-09-17-desperation-violence-v5-seed1337-raw.txt（HEAD=5ac91a6fa，§⑥用）",
+    "docs/measurements/2026-09-17-desperation-violence-v5-seed2024-raw.txt（ALL-STOP時半途，本session HEAD=5f97d8ce9/GODOT_TIMEOUT=600重跑覆蓋完成，最終落地時HEAD已推進到b647643fc，§⑥用）",
+    "docs/measurements/2026-09-17-desperation-violence-v5-seed777-raw.txt（本session新跑，HEAD=df04a6bba，§⑥用）"
   ],
   "specimen_trace": "無——純聚合existence讀數，不下behavior因果結論，照規免specimen",
 
@@ -88,7 +91,28 @@
     }
   },
 
-  "next_station": "to:systems——①動手率0%(三輪18/28/22母體皆0，各自成組)②餓與有牙負相關獨立驗證③掠奪贏argmax卻沒被設上④take低非person低(GATE岔路本輪未觀察到證據)⑤通道讀法兩群比例相近(blueprint的解釋傾向不成立)——五個結論要不要往下追、要不要收案，由你/blueprint判",
+  "⑥ASK的答案：10筆reachable=false的reason細分+too_far的eta(v5三跑，commit範圍5ac91a6fa~b647643fc；ALL-STOP中斷seed2024重跑覆蓋完成、seed777補齊)": {
+    "★母體核對": "v5三seed：seed1337=7｜seed2024=4｜seed777=11｜合計=22——與§⑤逐字重現(不是新母體，是同一批的補測)；不在候選集16筆四道門①1②0③10④5亦逐字重現，驗證v5三跑與§⑤同源",
+    "★★10筆reachable=false逐reason細分(相加=10，無差額)": {
+      "no_belief_pos": "6筆——最大宗(60%)",
+      "too_far": "3筆——eta(tick)=1364/2408/4622，換算天(÷1440)=0.95d/1.67d/3.21d(AI_ETA_LIMIT=1200tick=0.83d門檻，皆略超，非天涯海角)",
+      "too_fast": "1筆",
+      "no_path": "0筆",
+      "out_of_sight": "0筆",
+      "team_missing": "0筆",
+      "驗證": "6+3+1+0+0+0=10 ✓"
+    },
+    "★★★對照systems事前寫死的三種讀法——三支全部不成立，真相是第四種": {
+      "too_far為主？": "否(3/10=30%，非過半)",
+      "no_path為主？": "否(0筆)",
+      "out_of_sight為主？": "否(0筆)——且與②has_belief=false(0筆)一致，兩者都是0，儀器沒打架(非優先修儀器)",
+      "實際": "★no_belief_pos為主(6/10=60%)——這不是systems事前寫死的三選項裡的任何一個,是第四種(有discovered、有belief存在，但belief裡沒有位置分量——已知過期或從未記錄座標)，不硬塞進三選項，另立一格報"
+    },
+    "★判準⑩自查(v5三跑跨三個commit：seed1337=5ac91a6fa/seed2024最終=b647643fc(其WIP一度被implementer 48997afb4意外掃入其commit,內容未受影響,已如實記錄非我重寫history)/seed777=df04a6bba)": "git diff --stat 5ac91a6fa..b647643fc逐查scripts/debug/desperation_violence_cell_bed.gd／path_system.gd／decision_engine.gd／task_arbiter.gd／belief_system.gd／faction_ai_system.gd全空——本題因果路徑零變動；期間主線曾落地恩怨帳Slice A(trade_valuation/npc_ai_system等)但不在本題因果路徑上，且三seed母體/四道門數字與ALL-STOP前已交件的§⑤逐字重現(非僅推理,是實測比對)⇒可信同源",
+    "verdict": "★systems的三個預註冊讀法都不是答案，真相是【沒有belief位置座標】(60%)——這與②的關係是：②問『有沒有claim存在』全部0筆(沒有『完全不知道這隊』的情況)，本格問『存在但沒有位置』佔6/10——是belief的【位置分量】缺失，不是【存在分量】缺失，兩者是感知鐵律1a講的兩種不同的unknown(有claim但位置unknown是合法第三態，非god-view違規)"
+  },
+
+  "next_station": "to:systems——①動手率0%(三輪18/28/22母體皆0，各自成組)②餓與有牙負相關獨立驗證③掠奪贏argmax卻沒被設上④take低非person低(GATE岔路本輪未觀察到證據)⑤通道讀法兩群比例相近(blueprint的解釋傾向不成立)⑥reachable=false真相是no_belief_pos(60%)非三個預註冊讀法之一——六個結論要不要往下追、要不要收案，由你/blueprint判",
 
   "supersedes": []
 }
