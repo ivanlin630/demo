@@ -224,6 +224,16 @@ static func baseline_tiles_per_day() -> float:
 	# bare-tick-ok: 單位換算分子（TICKS_PER_DAY ÷ 每格 tick 成本 ＝ tiles/day），同 GoalResolver._tiles_per_day 的鐵則
 	return float(WorldState.TICKS_PER_DAY) / float(maxi(BASE_MOVE_TICKS, 1))
 
+# ★★★【最慢的那一端】（票：錨定性讓情報保鮮 2026-09-17）——
+#   ★用途：估一個**被相信駐紮著**的目標「這段時間會飄多遠」。
+#   ★★它不是新旋鈕：`MAX_MOVE_TICKS` 是這個世界**本來就有**的移動成本上界（:7 ＝ BASE×3）
+#     ⇒ 「錨定 ⇒ 用最慢的那一端估」與「無錨 ⇒ 用基準旅行者估」是**同一把尺的兩端**。
+#   ★★★**它仍然 > 0** —— 駐紮的隊會拔營；速度取 0 會讓那則 belief 變成**不可證偽**
+#     （永遠掉不到會被重新偵查的價值），而那正是 spec §6.2 擋下的「不過期」。
+static func slowest_tiles_per_day() -> float:
+	# bare-tick-ok: 單位換算分子（同上）
+	return float(WorldState.TICKS_PER_DAY) / float(maxi(MAX_MOVE_TICKS, 1))
+
 static func move_cost_pure(state: WorldState, team: TeamData, time_mult: float, bumps) -> int:
 	var speed: float = team_speed_pure(state, team, bumps) * time_mult
 	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y

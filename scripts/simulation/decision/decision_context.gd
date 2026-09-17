@@ -373,8 +373,23 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 		#     後者要讀目標的 live 地形／疲勞／載重（憲法 §1a 禁）。★★視野是**我自己的**（自知，合法）。
 		#   ★★★**與旁邊那一行 `_rtpd` 不是同一件事**：`_rtpd` 是「**我**要走幾天」（觀察者），
 		#     這裡問的是「**它**這段時間跑得多遠」——**兩個呼叫長得像，意思相反。**
+		# ★★★【錨定性】（spec §6）：**被相信駐紮著**的目標，它的舊座標掉價慢；遊團掉價快。
+		#   ★三態在這裡處理，而**沒有 default-pass**：
+		#     有 `activity` 且 ＝ `ACT_SETTLED` ⇒ 錨定（慢線）
+		#     有 `activity` 但不是            ⇒ 無錨（快線）
+		#     ★★**沒有 `activity` 這個 key ＝ 從未觀察到 ⇒ 也走快線** ——
+		#       寫成 `.get("activity", ACT_SETTLED)` 會讓「沒看過」變成「看過它駐紮」＝ §1a 明文禁的 default-pass。
+		#   ★★★**讀的是 `_rbel` 這一次 `best_estimate` 的同一個 dict**（位置／年齡／活動同源，不變量 #6）——
+		#     ★**不能走 `BeliefSystem.appearance()`**：它自己會在 `BELIEF_STALE_TICKS` 上把 activity
+		#     改寫成 `ACT_UNKNOWN` ⇒ **錨定性會在最需要它的那一刻剛好不在**（而它那個行為有既有消費者，不動它）。
+		var _ranchored: bool = _rbel.has("activity") \
+			and String(_rbel["activity"]) == BeliefSystem.ACT_SETTLED
+		var _rdrift: float = MovementSystem.slowest_tiles_per_day() if _ranchored \
+			else MovementSystem.baseline_tiles_per_day()
 		var _rfresh: float = DecisionTerms.recon_freshness_factor(
-			_rage, MovementSystem.baseline_tiles_per_day(), VisionSystem.vision_range(state, team))
+			_rage, _rdrift, VisionSystem.vision_range(state, team))
+		if Probe.enabled:
+			Probe.bump("recon.anchored" if _ranchored else "recon.unanchored")
 		var _rval: float = _prior * pow(_rdelta, maxf(_rdays, 0.0)) * _rfresh
 		# ★儀器：這一筆是不是【本票之前會被丟掉】的那一類（位置已過期）——
 		#   ★★沒有這一格的話，「偵查候選變多了」分不出是本票生效還是世界剛好情報變好。
