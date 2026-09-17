@@ -1,0 +1,82 @@
+[MERGE-GATES] ★判決同時寫入 A:/GDS/demo/.claude/hooks/.merge-gates-raidev.log（外層 shell 若被殺，結論仍在這裡）
+[MERGE-GATES] runner-self=7f2a725a lines=247 run-id=32301-023414｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**
+[MERGE-GATES] [TREE] HEAD=eebac5649 registry=clean runner=clean code-dirty=0
+[MERGE-GATES] ★本次判決適用於 HEAD=eebac5649（註冊表與 runner 皆乾淨）
+[MERGE-GATES] ★main 基線紅數【從未量過】—— 在 main、乾淨工作區跑一次本 runner 就會記下來
+[MERGE-GATES] ✓ constitution （2s）
+[MERGE-GATES] ✓ bare-tick （5s）
+[MERGE-GATES] ✓ build-duration （1s）
+[MERGE-GATES] ✓ bed-parse （110s）
+[MERGE-GATES] ✗ bed-arm （2s）—— 床 arm 順序：擋 setup 之後才 arm（那段世界的 tap 是盲的）
+[BED-ARM-GATE] ★FAIL：27 張床建了世界，既不用 helper 也不在白名單
+★處置：改用 MeasureBedHelper.arm_and_setup()（順序寫死，沒得選錯）
+★★若真的不能用（例如手工組世界不走 GameSetup），才加進白名單 ——
+   ★★★而加進白名單會讓上面那個數字變大，那是【刻意可見】的代價。
+
+[godot.ps1] child exit=1
+[MERGE-GATES] ✓ ki-anchor （2s）
+[MERGE-GATES] ✓ mailbox-integrity （114s）
+[MERGE-GATES] ✓ cherrypick-fidelity （11s）
+[MERGE-GATES] ✓ ki-status （39s）
+[MERGE-GATES] ✓ single-writer （2s）
+[MERGE-GATES] ✓ tree-div （0s）
+[MERGE-GATES] ✓ headless （53s）
+[MERGE-GATES] ✓ cross-run-static （24s）
+[MERGE-GATES] ✓ own-camp-link （5s）
+[MERGE-GATES] ✓ zero-caller （7s）
+[MERGE-GATES] ✓ exam-freeze （0s）
+[MERGE-GATES] ✓ print-join （0s）
+[MERGE-GATES] ✓ belief-freshness-invariant （5s）
+[MERGE-GATES] ✓ unified-commerce （5s）
+[MERGE-GATES] ✗ defer-open （16s）—— 延後裁定:解除條件已達成卻還躺著就紅(★散文裁定不受追蹤=會被遺忘;血證:零LOD排最後躺16天)
+[DEFER-GATE] ✓ facility-delegate-always-fails（條件未達成：下一輪排程（★不擋掠奪票；而它已有逐筆樣本與具名根因，可直接開工））
+[DEFER-GATE] ✓ scout-on-the-scale-bed-unscheduled（條件未達成：偵查／攻擊估值那條線再被改時（`richness_compressed`／`bucket_floor`／`attack_win_odds` 任一被改））
+[DEFER-GATE] ✓ raid-threshold-recheck-after-grudge（條件未達成：恩怨帳切片A 的交易估值讀者接完（`ask_price` 帶 `buyer_leader_id`））
+[DEFER-GATE] 延後裁定 57 筆
+[DEFER-GATE] FAIL
+[MERGE-GATES] ✓ defer-phrase （0s）
+[MERGE-GATES] ✓ modulo-phase （1s）
+[MERGE-GATES] ✓ ledger-drop-visible （4s）
+[MERGE-GATES] ✓ lod-split （2s）
+[MERGE-GATES] ✓ valuation-clamp （4s）
+[MERGE-GATES] ✓ world-schedule-due （6s）
+[MERGE-GATES] ✓ envoy-ptype （7s）
+[MERGE-GATES] ✓ mailbox-size （0s）
+[MERGE-GATES] ✓ mailbox-broadcast （0s）
+[MERGE-GATES] ✓ board-price （5s）
+[MERGE-GATES] ✓ swallow-setter （0s）
+[MERGE-GATES] ✗ tier2-sweep-staleness （1s）—— ★Tier2 全床掃描【停了要有人知道】：上次跑 >7 天即紅（本閘不跑掃描，只驗它還活著）
+[tier2] ★★超期：上次全床掃描在 8 天前（上限 7 天）
+[tier2]   ⇒ 這道閘的意義＝【掃描停了要有人知道】，不是掃描本身
+[tier2]   ★★★而它同時【就是觸發器】：merge 一定會發生，所以它一定會被跑到
+[tier2]     修法：bash .claude/hooks/bed-sweep-tier2.sh
+[MERGE-GATES] ✓ minor-merge （4s）
+[MERGE-GATES] ✓ escrow-audit （5s）
+[MERGE-GATES] ✓ computed-prop （2s）
+[MERGE-GATES] ✓ bed-kind （3s）
+[MERGE-GATES] ✓ wage-penalty （4s）
+[MERGE-GATES] ✓ payroll-urgency （5s）
+[MERGE-GATES] ✓ merchant-turnover （21s）
+[MERGE-GATES] ✓ team-ui （4s）
+[MERGE-GATES] ✓ ui-flow （9s）
+[MERGE-GATES] ✓ ui-logic （5s）
+[MERGE-GATES] ✓ value-key （4s）
+[MERGE-GATES] ✓ plan-speed （4s）
+[MERGE-GATES] ✓ material-buy （5s）
+[MERGE-GATES] ✓ gateA （5s）
+[MERGE-GATES] ✓ gateA-hysteresis （4s）
+[MERGE-GATES] ✓ restock-burn （20s）
+[MERGE-GATES] ✓ failure-feedback-coverage （18s）
+[MERGE-GATES] ✓ gather-purity （5s）
+[MERGE-GATES] ✓ role-commit-scope （2s）
+[MERGE-GATES] ✓ watchdog-beacon （1s）
+[MERGE-GATES] ✓ live-team-census （4s）
+[MERGE-GATES] ✓ fp-longwindow （42s）
+[MERGE-GATES] ✓ live-team-ratchet （0s）
+[MERGE-GATES] ✓ raid-expected-value （4s）
+───────────────────────────────
+[MERGE-GATES] 註冊表 56 支｜總時 616s
+[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數 —— 原因： 不在 main
+[MERGE-GATES]   ⇒ ★★這一行必須存在：静默的【沒有記下來】跟【記下來了】在畫面上長得一樣。
+[MERGE-GATES] FAIL：bed-arm defer-open tier2-sweep-staleness
+★註冊表在 docs/process/merge-gates.tsv —— ★★新增閘＝往那裡加一行（★★★含 expect，否則直接 FAIL）
