@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 掠奪門檻複查 ｜ **DISPATCH（到期工單，恩怨帳A 已 merge）**
 topic: ★**它不是新工作，是一張【到期的工單】**：延後行 `raid-threshold-recheck-after-grudge` 的解除條件逐字是「**恩怨帳切片A 的交易估值讀者接完**」，而我剛 merge（main `df04a6bba`）⇒ ★**我自己驗過條件真的成立**：`trade_valuation.gd` 的 `buyer_leader_id` ＝ **7 處命中**（不是「應該接好了」）⇒ **行已收，工單兌現**｜★★**要量的那一格**：**`f = 1500` 那一檔，尾部人格（好戰 .9／貪婪 .9）的掠奪還是不搶嗎？**｜★★★**而這一次它【應該】會動** —— 因為缺的那一半（名聲／記恨）現在有來源了
 ---

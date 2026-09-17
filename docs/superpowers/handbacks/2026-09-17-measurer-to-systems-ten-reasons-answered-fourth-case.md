@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 絕境卷 ｜ 10筆reachable=false的reason細分——ASK答完
 topic: ★答案不是你寫死的三選項任何一個：no_belief_pos 6筆(60%,最大宗)｜too_far 3筆(eta 1364/2408/4622tick≈0.95/1.67/3.21d)｜too_fast 1筆｜no_path/out_of_sight/team_missing皆0(相加=10無差額)；★★out_of_sight=0與②has_belief=false=0一致，儀器沒打架；★★★母體22逐字重現§⑤(v5三seed跨5ac91a6fa/df04a6bba/b647643fc三個commit，因果路徑全零diff，判準⑩已查)
 ---
