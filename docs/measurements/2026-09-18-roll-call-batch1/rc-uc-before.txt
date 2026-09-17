@@ -1,0 +1,63 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=ae943f173 clean=NO code-dirty=4 codehash=1BFA3F2913F6
+[TREE]   *** measuring the WORKING TREE, not commit ae943f173 ***
+[TREE]    M scripts/debug/constitution_gate.gd
+[TREE]    M scripts/debug/ui_flow_test.gd
+[TREE]    M scripts/debug/unified_commerce_test.gd
+[TREE]   ?? scripts/debug/zz_uc_before_probe.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+--- TDD1：訪客買 owner sell 單/stock（coin→owner）---
+[Market@(1, 1)] Team2  outpost owner Team1 成交
+  [PASS] 訪客得 material（0→19）
+  [PASS] owner 收到的 coin == 成交量 × ask（0.00 == 19 × 0.0000）★而 ask 為 0 時它就是 0
+  [PASS] ★★★【真的成交過 0 元】：換手 19 件而 ask=0.0000 —— ★這是 systems 要的【正數】，「5 紅轉綠」不夠
+        ★★而【零價成交仍然是成交】：貨換手、守恆成立、只是價金為 0。
+  [PASS] public_storage material 扣減（81）
+--- TDD2：★訪客賣入 owner buy 單（owner.coin→visitor）---
+[Market@(1, 1)] Team2  outpost owner Team1 成交
+  [PASS] ★訪客賣得 coin（0→480，套利閉合）
+  [PASS] owner.coin 付出（500→20）
+  [PASS] 貨入 public_storage（16）
+--- TDD3：order_id 直沖 active_orders + board ---
+[Market@(1, 1)] Team2  outpost owner Team1 成交
+  [PASS] active_orders order_id=42 直沖（qty_remaining=11，<30 或已移除）
+  [PASS] board entry order_id=42 同步直沖（qty_remaining=11）
+--- TDD4：SURVIVAL 無單不賣（食物不買穿）---
+  [PASS] ★food 無 sell 單 → 不賣（storage food 200 不動）
+[SELFTEST] 故意讓 `_test_conservation` 這一格在中途死掉
+--- ★整合：SimRunner._step3c → market-as-place resolver 真 fire ---
+[Market@(3, 3)] Team2  outpost owner Team1 成交
+  [PASS] ★整合：step3c→resolver 真 fire，visitor 買到 food（96）
+  [PASS] ★deal_market probe 動（=1，非死碼）
+--- ★probe 全 funnel：成交計數口徑 + bail 分因 ---
+[Market@(1, 1)] Team2  outpost owner Team1 成交
+  [PASS] trade.deal bump（=1）
+  [PASS] trade.deal_market bump（=1）
+  [PASS] ★order_fulfilled bump（單填滿=1，鏡射舊路）
+  [PASS] trade.meet bump（到市場會合=1）
+  [PASS] ★bail 分因可觀測: buy_no_coin bump（=1）
+--- ★所得稅守恆：源扣繳＝團庫少流出（不是兩池間搬）---
+[Salary] Team1 薪水結算 coin=998.5
+  [PASS] 有發薪：團庫流出 1.47、成員收到 1.47
+  [PASS] ★源扣繳：團庫流出(1.469) ＝ 成員收到(1.469)（稅額從未離開團庫）
+  [PASS] ★人格梯度：貪婪 rate(0.520) > 慎重 rate(0.000)
+  [PASS] ★★而貪婪那端【沒有貼在 clamp 上界】(0.520 < 0.700) —— 否則梯度是假的
+--- ★所得稅：team.coin 的保留額來自【本次薪資流量】的扣繳 ---
+[Salary] Team2 薪水結算 coin=495.6
+  [PASS] 有發薪：成員共收到 4.41
+  [PASS] 團庫有流出：500.0 → 495.6
+  [PASS] ★扣繳額 = 4.77（★★非 0 才證明稅真的發生了）
+  [PASS] ★★gross(9.180)  扣繳(4.774) ＝ 成員收到(4.406)  三者對得起來
+  [PASS] ★★★團庫流出(4.406) ＝ 成員收到(4.406)  稅額從未離開團庫
+--- ★★★反向斷言：team.coin=0 而成員有私產  不存在把存量拉回團庫的機制 ---
+[Salary] Team1 薪水結算 coin=0.0
+  [PASS] ★成員私產【未被動用】(300.0 → 300.0) —— ★★這條路是【故意】拿掉的（spec §5b 硬禁令）
+  [PASS] ★★★團庫仍是 0（0.000）—— ★而那是【genuine 貧困】不是 bug：正路只有賣貨／anon 池／領袖徵收
+     ★★若這兩條變紅  有人重新引入了【存量沒收】走廊 —— 那是禁令，不是優化
+=== DONE === ALL PASS
+SCRIPT ERROR: Invalid call. Nonexistent function 'noop' in base 'Nil'.
+          at: _test_conservation (res://scripts/debug/zz_uc_before_probe.gd:204)
+
+[godot.ps1] child exit=0

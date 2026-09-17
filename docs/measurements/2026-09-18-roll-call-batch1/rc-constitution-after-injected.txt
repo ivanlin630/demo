@@ -1,0 +1,90 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall commit=ae943f173 clean=NO code-dirty=1 codehash=F8369A9360B3
+[TREE]   *** measuring the WORKING TREE, not commit ae943f173 ***
+[TREE]    M scripts/debug/constitution_gate.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[SELFTEST] ★故意讓 `scan` 這一格在中途死掉（執行期錯誤中止【呼叫它的那一格】）
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_context.gd::_home_granary_food::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_ambient::dispatch_entry
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_scored::dispatch_entry
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_scored::threshold
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_scored_ctx::dispatch_entry
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_scored_ctx::early_return
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_scored_ctx::threshold
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_survival::dispatch_entry
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_survival::early_return
+[gate] removed (de-patch 進度): scripts/simulation/decision/decision_engine.gd::rank_threat::dispatch_entry
+[gate] removed (de-patch 進度): scripts/simulation/decision/need_oracle.gd::_team_has_facility::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/decision/options.gd::applicable::route
+[gate] removed (de-patch 進度): scripts/simulation/diplomatic_ai_system.gd::_calc_diplomacy_score::threshold
+[gate] removed (de-patch 進度): scripts/simulation/diplomatic_ai_system.gd::consider_betrayal::rng
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_assign_tasks::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_begin_village_relocate::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_check_discipline::rng
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_check_ore_surplus::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_commit_conquest_attack::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_decide_subteam::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_decide_subteam::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_decide_unified::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_enemy_outpost_positions::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_all_body::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_all_body::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_all_body::threshold
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::threshold
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::dispatch_entry
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::threshold
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_outpost_residency::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_solo_body::early_return
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_solo_body::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_solo_body::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_subteam::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_subteam::threshold
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_survival::dispatch_entry
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_survival::early_return
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_survival::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_survival::threshold
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_threat::dispatch_entry
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_threat::early_return
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_threat::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_threat::threshold
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_uprising::early_return
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_uprising::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_uprising::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_evaluate_uprising::threshold
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_faction_has_workshop::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_find_own_outpost::gv_mapscan
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_maybe_request_join_player::rng
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_trigger_defection_evaluation::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_trigger_survival::route
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_trigger_survival::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_try_invite_nearby_exile::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_try_join_target::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::_try_resume_construction::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/faction_ai_system.gd::consolidate_target_of::gv_teamstate
+[gate] removed (de-patch 進度): scripts/simulation/interaction_system.gd::_clear_aid_task::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/interaction_system.gd::_convert_to_resident::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/interaction_system.gd::_deliver_order::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/interaction_system.gd::_execute_settlement::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/outpost_system.gd::_begin_facility_construction::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/outpost_system.gd::_subteam_upgrade_level::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/outpost_system.gd::demolish_with_control::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/outpost_system.gd::start_build::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/outpost_system.gd::start_demolish::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/outpost_system.gd::start_upgrade_level::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/player_command_system.gd::_action_camp::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/player_command_system.gd::_action_order_subteam::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/player_command_system.gd::_action_respond_aid_request::taskarbiter
+[gate] removed (de-patch 進度): scripts/simulation/sim_runner.gd::_advance_tick_body::taskarbiter
+[gate] 類型分布: {  }
+[gate]  到場點名 2／3 ★**有格沒有跑完**：["scan"] —— 執行期錯誤會靜默中止一支 func，而那看起來像綠
+[CONSTITUTION-GATE] FAIL：★母體為 0（sites=0）—— 掃描沒有跑到東西，這不是「沒有違規」
+SCRIPT ERROR: Invalid call. Nonexistent function 'noop' in base 'Nil'.
+          at: _scan (res://scripts/debug/constitution_gate.gd:163)
+
+[godot.ps1] child exit=0

@@ -43,7 +43,7 @@
 #      啟用觸發記在 `docs/known_issues.md`（狀態：已知未實裝）＝production 指名率 ≥ 50%。
 #
 # 欄位：id 	 指令 	 用途（一句） 	 ★expect（必須出現在輸出裡的 regex）
-constitution	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/constitution_gate.gd	憲法 site-freeze：禁新增引擎外 task 指派	CONSTITUTION-GATE\] PASS
+constitution	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/constitution_gate.gd	憲法 site-freeze：禁新增引擎外 task 指派	CONSTITUTION-GATE\] PASS .*到場點名 3／3
 bare-tick	bash .claude/hooks/bare-tick-gate.sh .	裸 tick：擋【新出現而沒人判過】的形狀（NEEDS_HUMAN=0，★不是總數）	BARE-TICK-GATE\] PASS
 build-duration	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd	工期單一真值：擋「有人再開第二張工期表」	construction_duration_source_gate DONE
 bed-parse	bash .claude/hooks/bed-parse-gate.sh .	床可載入：擋 parse error 的床（★壞掉的床＝假守衛）	BED-PARSE-GATE\]
@@ -61,7 +61,7 @@ zero-caller	bash .claude/hooks/zero-caller-guard.sh	零 caller 的守衛函式(�
 exam-freeze	bash .claude/hooks/exam-freeze-gate.sh	考程樹凍結:GO 落地→該段卷跑完,禁 merge 改世界的東西(scripts/simulation|scripts/data|config);★儀器/doc/handback 照常;★★誠實限=沒有凍結檔時它什麼都沒驗;★★★陽性對照做過(偽造凍結窗+世界路徑改動⇒FAIL 且指名檔案)	\[EXAM-FREEZE\] PASS
 print-join	bash .claude/hooks/print-join-guard.sh	禁 print(換行 join(...)):Godot 單次 print 截在 16383 字元且【被截的輸出看起來完全正常】;★只抓換行 join(單行內 join 幾欄不危險,抓它只是雜訊);★★誠實限=先組成變數再 print 的形狀看不到;★★★陽性對照做過(quoted heredoc 寫探針⇒FAIL 指名檔案;★第一版探針被 printf 把 \n 解成真換行而靜默失效)	\[PRINT-JOIN\] PASS
 belief-freshness-invariant	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/belief_freshness_invariant_test.gd	反向斷言：每個 production firsthand 寫入點都帶 tile_pos（★③收束的殘留物——機制拆了，等式要有人守）	總計 FAIL = 0
-unified-commerce	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/unified_commerce_test.gd	統一商業+團內稅:源扣繳守恆/人格梯度不貼上界/★§5b 存量沒收走廊【不得存在】的反向斷言(★這支【從來不在表上】——它既有的斷言也一直沒人跑,同型第三次)	=== DONE === ALL PASS
+unified-commerce	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/unified_commerce_test.gd	統一商業+團內稅:源扣繳守恆/人格梯度不貼上界/★§5b 存量沒收走廊【不得存在】的反向斷言(★這支【從來不在表上】——它既有的斷言也一直沒人跑,同型第三次)	=== DONE === ALL PASS｜到場點名 10／10
 defer-open	bash .claude/hooks/defer-gate.sh	延後裁定:解除條件已達成卻還躺著就紅(★散文裁定不受追蹤=會被遺忘;血證:零LOD排最後躺16天)	\[DEFER-GATE\] PASS
 defer-phrase	bash .claude/hooks/defer-phrase-guard.sh	新出現的【延後語】必須有對應 defer token(★defer-open 只追蹤【已進表的】,而【裁定寫在散文裡從沒進表】它看不見——那正是「零LOD排最後」躺16天的原形)	\[DEFER-PHRASE\] PASS
 modulo-phase	bash .claude/hooks/modulo-phase-guard.sh	禁【新出現的】裸 `current_tick % INTERVAL` 當閘(第⑦票):far pass 每 600 才跑,而 10080k % 600 全非 0 ⇒ 遠隊發薪日整個落在相位縫裡=一次都沒發(不是少發);★判準用 sim_runner SYSTEMS registry 自己的 shape 欄(state=每 tick 跑到⇒安全／teams=被相位過濾⇒會掉縫);★★誠實限=文字比對,tick 存進別的變數再取模看不到;★★★陽性對照真的跑到(注入新形狀⇒FAIL 且指名 file:line;複製一行既有形狀⇒次數 4→5 也 FAIL;還原⇒PASS)	\[MODULO-PHASE\] PASS
@@ -83,7 +83,7 @@ wage-penalty	powershell -NoProfile -File ./tools/godot.ps1 --headless --script s
 payroll-urgency	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/payroll_urgency_test.gd	★賣方 coin 急迫度接真實 payroll 不是手抄 pop×10；★★第三格【值對】逐位元比對獨立重算，抓「方向對、公式錯」（漏 anon_total / 稅率算兩次）；★★★床自帶誠實限量測（payroll==0 的隊佔比）	=== DONE === ALL PASS
 merchant-turnover	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/merchant_turnover_test.gd	★商人持貨機會成本＝當下最佳套利 gain，分子分母兩邊都全域；★★母體鐵則用 ambition_archetype 不用 TAG_MERCHANT（後者在 warring_states 恒為 0）；★★★母體在【它可能存在的時刻】量（day0 全部 archetype 為空，day1 才有）	=== DONE === ALL PASS
 team-ui	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/team_ui_test.gd	team 面板/成員列渲染回歸;★涵蓋率=只涵蓋 TeamUiHelper 渲染與 members_detail/team_stats 快照,不涵蓋模擬;★★中途崩不算綠(39 個 assert,崩了就印不出 DONE);★★★實跑 6s	=== TEAM UI TEST DONE ===
-ui-flow	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/ui_flow_test.gd	UI 互動流程回歸(30+ 個 flow:交易/招募/繼承/裝備/子隊派工…);★涵蓋率=只涵蓋 UI 可達性與字串,不涵蓋決策;★★expect 綁 errors: 0(只綁 DONE 會讓 errors:3 也算綠);★★★實跑 8s	=== UI Flow Test DONE === errors: 0
+ui-flow	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/ui_flow_test.gd	UI 互動流程回歸(30+ 個 flow:交易/招募/繼承/裝備/子隊派工…);★涵蓋率=只涵蓋 UI 可達性與字串,不涵蓋決策;★★expect 綁 errors: 0(只綁 DONE 會讓 errors:3 也算綠);★★★實跑 8s	=== UI Flow Test DONE === errors: 0｜到場點名 26／26
 ui-logic	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/ui_logic_test.gd	UI 純邏輯回歸(視野門檻/顏色/keymap/log strip/趨勢字串);★涵蓋率同上,只涵蓋展示層;★★expect 綁 errors: 0;★★★實跑 6s	=== UI Logic Test DONE === errors: 0
 value-key	bash .claude/hooks/value-key-gate.sh	人格鍵正典：擋 values.get 讀不存在的鍵（回 default 而 code 照跑）;★正典從 person_data.gd 讀出不抄清單;★★注入鍵(_loyalty/_is_merchant)算正典判準=全庫真有人寫過;★★★床-only 非正典鍵只 WARN(那是另一種病:餵世界不會產生的輸入)	\[VALUE-KEY\] PASS
 plan-speed	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/plan_speed_move_cost_test.gd	計畫層移速必須來自執行端真成本:擋「決策與執行用不同的數」回歸;★涵蓋率=只涵蓋 goal_resolver 那一處用法(別處移速估未普查);★★含 Probe 計數不被決策端污染的成對對照(執行端呼叫必須增加);★★★總結行同時答【跑完了嗎】與【驗過了嗎】(SECTIONS=n/3)	=== DONE === SECTIONS=3/3 FAILS=0

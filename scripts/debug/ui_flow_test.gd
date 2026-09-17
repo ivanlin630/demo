@@ -3,6 +3,40 @@ extends SceneTree
 
 var _errors: int = 0
 
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed"]
+
+# ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
+#   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
+#     reviewer 寫了 await 版 repro —— 中途丟錯**只中止那個 coroutine**，
+#     `_initialize` 繼續 await 下一格、照樣印 `errors: 0`、exit code ＝ 0。
+#   ⇒ ★★**同一份樣板通吃同步與 async**：打卡寫在【格自己的最後一行】，中途死掉就點不到名。
+#   ★★★用法必須是 `_selftest_gate("格名").noop()` —— 死亡要發生在【那一格自己的 frame】裡
+#     （★血證：把死亡放在被呼叫的 helper 裡，中止的是 helper，那一格照樣跑完）。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_suffix() -> String:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		_errors += 1
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func／coroutine，而那看起來像綠" % str(missing))
+	return "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+
+
 func _initialize() -> void:
 	await _test_harness_smoke()
 	await _test_u19_forced_auto_enter()
@@ -30,11 +64,13 @@ func _initialize() -> void:
 	await _test_q7_5_dispatch_subteam_task()
 	await _test_q7_6_faction_gate_leader()
 	await _test_n1_subteam_promote_anon_hint()
-	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
+	var _suffix: String = _roll_call_suffix()
+	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
 
 # P4-2:self/原地動作(hunt)應在 self-actions(目標選擇階段直接可選),不混進 team-target 行動清單。
 func _test_interact_self_team_split() -> void:
+	_selftest_gate("_test_interact_self_team_split").noop()
 	print("\n── P4-2 互動 self/team 動作分離 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -64,8 +100,10 @@ func _test_interact_self_team_split() -> void:
 	for a in node._interact_action_split()["team"]: team_ids.append(a.get("action_id", ""))
 	_check("team 行動清單不含 hunt", not ("hunt" in team_ids))
 	await _free_ui(node)
+	_cell("_test_interact_self_team_split")
 
 func _test_train_action_reachable() -> void:
+	_selftest_gate("_test_train_action_reachable").noop()
 	print("\n── 訓練 self-action 可達 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -78,8 +116,10 @@ func _test_train_action_reachable() -> void:
 	for a in node._interact_action_split()["self"]: self_ids.append(a.get("action_id",""))
 	_check("train 在 self-actions", "train" in self_ids)
 	await _free_ui(node)
+	_cell("_test_train_action_reachable")
 
 func _test_camp_action_reachable() -> void:
+	_selftest_gate("_test_camp_action_reachable").noop()
 	print("\n── 紮營 self-action 可達 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -107,8 +147,10 @@ func _test_camp_action_reachable() -> void:
 	for a in node._interact_action_split()["self"]: self_ids2.append(a.get("action_id",""))
 	_check("距離太近時 camp 不列（N-3 gate）", not ("camp" in self_ids2))
 	await _free_ui(node)
+	_cell("_test_camp_action_reachable")
 
 func _test_join_request_ui() -> void:
+	_selftest_gate("_test_join_request_ui").noop()
 	print("\n── join_request 收留 UI ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -127,7 +169,9 @@ func _test_join_request_ui() -> void:
 	await _free_ui(node)
 
 # Q7-1：forced choose_heir → UI DTO responses 列候選（非只拒絕）→ 選擇 → leader 接位 + forced 清
+	_cell("_test_join_request_ui")
 func _test_forced_choose_heir_ui() -> void:
+	_selftest_gate("_test_forced_choose_heir_ui").noop()
 	print("\n── Q7-1 forced choose_heir UI ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -159,7 +203,9 @@ func _test_forced_choose_heir_ui() -> void:
 	await _free_ui(node)
 
 # Q7-2：forced aid_request → UI DTO responses 含 give（非只拒絕）→ 選 give → 守恆轉糧 + forced 清
+	_cell("_test_forced_choose_heir_ui")
 func _test_forced_aid_request_ui() -> void:
+	_selftest_gate("_test_forced_aid_request_ui").noop()
 	print("\n── Q7-2 forced aid_request UI ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -192,7 +238,9 @@ func _test_forced_aid_request_ui() -> void:
 # A-1：記名招募在 TextUI 主場景可達。
 # 真路徑：recruit action 回 menu payload（has_willing_named/willing_members/anon_available）；
 # team-target handler 須消費此 payload → 進招募子模式 → 玩家選記名 → recruit_named 經 execute_action_with_target 真執行。
+	_cell("_test_forced_aid_request_ui")
 func _test_recruit_named_reachable() -> void:
+	_selftest_gate("_test_recruit_named_reachable").noop()
 	print("\n── A-1 記名招募 TextUI 可達 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -243,8 +291,10 @@ func _test_recruit_named_reachable() -> void:
 	_check("recruit_named 執行：成員轉到玩家隊", st.persons[43211].team_id == ptid)
 	_check("recruit_named 執行：coin 扣 150", abs(coin_before - float(st.teams[ptid].resources.get("coin", 0)) - 150.0) < 0.01)
 	await _free_ui(node)
+	_cell("_test_recruit_named_reachable")
 
 func _test_capabilities_shown() -> void:
+	_selftest_gate("_test_capabilities_shown").noop()
 	print("\n── 隊能力讀數顯示 ──")
 	var node = await _make_ui()
 	node._refresh()
@@ -256,7 +306,9 @@ func _test_capabilities_shown() -> void:
 	await _free_ui(node)
 
 # 公庫面板：自家 outpost + 雙向資源 → 顯存入/取出 + food
+	_cell("_test_capabilities_shown")
 func _test_storage_panel_ui() -> void:
+	_selftest_gate("_test_storage_panel_ui").noop()
 	print("\n── 公庫面板 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -275,7 +327,9 @@ func _test_storage_panel_ui() -> void:
 	await _free_ui(node)
 
 # outpost 面板：自家 outpost → 顯設施/棄置行動列
+	_cell("_test_storage_panel_ui")
 func _test_outpost_build_abandon() -> void:
+	_selftest_gate("_test_outpost_build_abandon").noop()
 	print("\n── outpost build_facility/abandon ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -291,7 +345,9 @@ func _test_outpost_build_abandon() -> void:
 	await _free_ui(node)
 
 # faction 面板：玩家為 leader → 顯徵用國庫
+	_cell("_test_outpost_build_abandon")
 func _test_faction_extract_treasury() -> void:
+	_selftest_gate("_test_faction_extract_treasury").noop()
 	print("\n── faction extract_treasury ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -303,8 +359,10 @@ func _test_faction_extract_treasury() -> void:
 	var s: String = node._build_faction_str()
 	_check("faction 面板顯提幣", s.contains("提幣") or s.contains("徵用") or s.contains("國庫"))
 	await _free_ui(node)
+	_cell("_test_faction_extract_treasury")
 
 func _test_member_equip_flow() -> void:
+	_selftest_gate("_test_member_equip_flow").noop()
 	print("\n── 成員裝備 flow ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -321,8 +379,10 @@ func _test_member_equip_flow() -> void:
 	_check("成員裝上武器", st.persons[99001].equipment["hand_1"].get("grade","") == "weapon_melee_low")
 	_check("status 含武裝比例", node._state_label.text.contains("比例"))
 	await _free_ui(node)
+	_cell("_test_member_equip_flow")
 
 func _test_armed_ratio_cmd() -> void:
+	_selftest_gate("_test_armed_ratio_cmd").noop()
 	print("\n── 設武裝比例 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -332,8 +392,10 @@ func _test_armed_ratio_cmd() -> void:
 	var ptid: int = st.persons[st.player_id].team_id
 	_check("ratio 設為 0.6", abs(st.teams[ptid].armed_anon_ratio - 0.6) < 0.01)
 	await _free_ui(node)
+	_cell("_test_armed_ratio_cmd")
 
 func _test_armed_count_shown() -> void:
+	_selftest_gate("_test_armed_count_shown").noop()
 	print("\n── 自隊武裝數顯示 ──")
 	var node = await _make_ui()
 	node._refresh()
@@ -342,7 +404,9 @@ func _test_armed_count_shown() -> void:
 
 # U15：遭遇戰 overlay 顯示中，主畫面 _input 須一律不處理（否則戰後按 Q→quit 閃退、WASD 漂游標）。
 # 測：overlay visible → 送 KEY_W → _cursor 不動（證 guard early-return）。
+	_cell("_test_armed_count_shown")
 func _test_u15_overlay_input_guard() -> void:
+	_selftest_gate("_test_u15_overlay_input_guard").noop()
 	print("\n── U15 overlay 輸入守衛 ──")
 	var node = await _make_ui()
 	node._encounter_view.visible = true
@@ -357,8 +421,10 @@ func _test_u15_overlay_input_guard() -> void:
 	node._input(ev)
 	_check("overlay 隱藏時 KEY_W 移游標（_cursor 變）", node._cursor != before)
 	await _free_ui(node)
+	_cell("_test_u15_overlay_input_guard")
 
 func _test_player_status_label() -> void:
+	_selftest_gate("_test_player_status_label").noop()
 	print("\n── 玩家隊狀態 label（非任務）──")
 	var node = await _make_ui()
 	node._refresh()
@@ -367,7 +433,9 @@ func _test_player_status_label() -> void:
 	await _free_ui(node)
 
 # Q7-3：戰後 loot_pool 非空 → [K]take_loot 經 bridge 真把戰利品入庫、清 last_encounter_result。
+	_cell("_test_player_status_label")
 func _test_q7_3_take_loot_flow() -> void:
+	_selftest_gate("_test_q7_3_take_loot_flow").noop()
 	print("\n── Q7-3 戰後 take_loot 端到端 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -398,7 +466,9 @@ func _test_q7_3_take_loot_flow() -> void:
 	await _free_ui(node)
 
 # Q7-5：子隊派遣可選非 IDLE 任務。command 介面不變,UI 經 set_player_input("sub_task", 選定) 真派出帶任務子隊。
+	_cell("_test_q7_3_take_loot_flow")
 func _test_q7_5_dispatch_subteam_task() -> void:
+	_selftest_gate("_test_q7_5_dispatch_subteam_task").noop()
 	print("\n── Q7-5 子隊派遣帶任務 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -430,7 +500,9 @@ func _test_q7_5_dispatch_subteam_task() -> void:
 	await _free_ui(node)
 
 # Q7-6：非 faction leader → 面板不顯 [A]目標 [B]徵收率（display 對齊 command 權限）；leader 則顯。
+	_cell("_test_q7_5_dispatch_subteam_task")
 func _test_q7_6_faction_gate_leader() -> void:
+	_selftest_gate("_test_q7_6_faction_gate_leader").noop()
 	print("\n── Q7-6 faction 設定鈕 gate leader ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -453,7 +525,9 @@ func _test_q7_6_faction_gate_leader() -> void:
 	await _free_ui(node)
 
 # N-1：全 anon 隊（leader + anon,無命名非 leader 成員）開子隊面板 → 引導去互動選單 promote_anon。
+	_cell("_test_q7_6_faction_gate_leader")
 func _test_n1_subteam_promote_anon_hint() -> void:
+	_selftest_gate("_test_n1_subteam_promote_anon_hint").noop()
 	print("\n── N-1 子隊面板 promote_anon 引導 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -476,6 +550,7 @@ func _test_n1_subteam_promote_anon_hint() -> void:
 	var s_empty: String = node._build_subteam_str()
 	_check("無 anon 時退回舊死路字", s_empty.contains("（無：需命名非 leader 成員）"))
 	await _free_ui(node)
+	_cell("_test_n1_subteam_promote_anon_hint")
 
 func _check(label: String, ok: bool) -> void:
 	print(("  PASS: " if ok else "  FAIL: ") + label)
@@ -494,6 +569,7 @@ func _free_ui(node: Node) -> void:
 	await process_frame
 
 func _test_harness_smoke() -> void:
+	_selftest_gate("_test_harness_smoke").noop()
 	print("\n── harness smoke ──")
 	var node = await _make_ui()
 	_check("node 實例化", node != null)
@@ -505,7 +581,9 @@ func _test_harness_smoke() -> void:
 # U19：對玩家的 forced_event → _process 應自動進互動模式（否則玩家無從回應 → 卡死）。
 # 真路徑：snapshot.forced_interaction 由 map_forced_interaction(state.player_forced_event) 產生；
 # _process 早段 `if not is_advancing(): return` → 須先 request_advance 才會跑到 forced 偵測分支。
+	_cell("_test_harness_smoke")
 func _test_u19_forced_auto_enter() -> void:
+	_selftest_gate("_test_u19_forced_auto_enter").noop()
 	print("\n── U19 forced 自動進互動 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -521,7 +599,9 @@ func _test_u19_forced_auto_enter() -> void:
 # U21：互動選單 >9 項時 [.] 翻頁後 KEY_1 應選到全域第 10 項（解 10+ 選不到的 bug）。
 # 真路徑：pending_targets 來自 state.player_pending_targets，由 refresh_colocation_targets
 # 掃同格（tile_pos == 玩家、combat_target == -1）填入，與 team_discovered 無關。
+	_cell("_test_u19_forced_auto_enter")
 func _test_u21_interact_paging() -> void:
+	_selftest_gate("_test_u21_interact_paging").noop()
 	print("\n── U21 互動選單分頁 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -552,7 +632,9 @@ func _test_u21_interact_paging() -> void:
 # U12：交易確認顯示真有資源（解過去顯「無資源」的 GUI 路徑 bug）。
 # 真路徑：_build_trade_str → query_trade_direct_preview → InteractionSystem.preview_trade。
 # preview API 需 target 在玩家 team_discovered 內，否則回 not_visible（無 preview）。
+	_cell("_test_u21_interact_paging")
 func _test_u12_trade_str() -> void:
+	_selftest_gate("_test_u12_trade_str").noop()
 	print("\n── U12 交易顯示有資源 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -577,7 +659,9 @@ func _test_u12_trade_str() -> void:
 	await _free_ui(node)
 
 # offer-builder：建構出價後 _build_trade_str 應顯雙欄(給/要)+天平，且非舊「無可交換」
+	_cell("_test_u12_trade_str")
 func _test_trade_offer_builder() -> void:
+	_selftest_gate("_test_trade_offer_builder").noop()
 	print("\n── 交易 offer-builder ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -597,7 +681,9 @@ func _test_trade_offer_builder() -> void:
 	await _free_ui(node)
 
 # hunt：腳下 tile 有 wild_game → snapshot.available_actions 應含 hunt（P1 Layer 6 self/tile 動作）。
+	_cell("_test_trade_offer_builder")
 func _test_hunt_action_listed() -> void:
+	_selftest_gate("_test_hunt_action_listed").noop()
 	print("\n── hunt 動作可選 ──")
 	var node = await _make_ui()
 	var st = node._bridge.get_state()
@@ -614,3 +700,4 @@ func _test_hunt_action_listed() -> void:
 		ids.append(a.get("action_id", ""))
 	_check("腳下 wild_game → available_actions 含 hunt", "hunt" in ids)
 	await _free_ui(node)
+	_cell("_test_hunt_action_listed")
