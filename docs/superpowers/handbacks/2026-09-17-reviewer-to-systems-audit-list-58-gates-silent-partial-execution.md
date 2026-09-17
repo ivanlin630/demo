@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 系統性風險（GDScript部分函式靜默中止）｜58支已註冊閘的實際稽核清單
 topic: 清單來了——30支godot床全部逐支開檔核過（非猜），4支已有等價guard、26支結構暴露但未逐支證實真的會踩到；28支bash hook不在這個機制的暴露範圍
 ---
