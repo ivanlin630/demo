@@ -24,6 +24,8 @@ const EXPECTED_CELLS: Array = ["1-a", "1-b", "1-c", "1-d", "1-e", "1-f"]
 #   ⇒ 每格自己的最後一行打卡，末尾對名單，少一格就把橫幅變 FAIL。
 #   ★用法必須是 `_selftest_gate("格名").noop()` —— 死亡要發生在那一格自己的 frame 裡。
 var _cells_ran: Array = []
+var _anchor_hit: int = 0
+var _anchor_total: int = 0
 
 func _cell(name: String) -> void:
 	if not _cells_ran.has(name):
@@ -49,8 +51,11 @@ func _roll_call_missing() -> Array:
 func _initialize() -> void:
 	_run()
 	var _miss: Array = _roll_call_missing()
-	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d｜到場點名 %d／%d --" % [
-		_fail + _miss.size(), _undec, _cells_ran.size(), EXPECTED_CELLS.size()])
+	# ★★★錨數印在【通過橫幅這一行】上（systems 裁 2026-09-18）：
+	#   ★★這樣「錨陣列少寫一個」本身就會讓 expect 不命中 ⇒ **閘紅**，
+	#   而不是靠人去把 `5` 跟 `6` 放在一起看。
+	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d｜到場點名 %d／%d｜自家錨 %d／%d --" % [
+		_fail + _miss.size(), _undec, _cells_ran.size(), EXPECTED_CELLS.size(), _anchor_hit, _anchor_total])
 	print("[TEST-SUITE-COMPLETE]")
 	quit(1 if (_fail + _miss.size()) > 0 else 0)
 
@@ -213,13 +218,24 @@ func _cell_1e_self_home_untouched() -> void:
 		"var _home_now := VillageEstimate.make(_home.terrain, _home.outpost_level, _home.farming_level",
 		"var _home_after := VillageEstimate.make(_home.terrain, _home.outpost_level, _home.farming_level",
 		"maxi(_ptile.outpost_level if _ptile != null else 1, 1), 0, team.population))",
+		# ★★★第六個錨（systems 揭 2026-09-18）——★**床自己印著「5／5」，而 spec 說的是 6 處**：
+		#   ★我寫了 5 個錨、它們全中 ⇒ 卷面印 `5／5` ⇒ **看起來完美**，
+		#   ★★而「5 不等於 6」這件事**一直在卷面上**，只是沒有人（包含我）把那兩個數放在一起看。
+		#   ⇒ **少掉的那一行是 `can_settle_here` 判斷式裡的 `_uf.outpost_level == 0`** ——
+		#     **它完全沒有守衛**：有人動了那個 condition，這一格不會紅。
+		"and _uf.camp_level == 1 and _uf.outpost_level",
 	]
 	var hit: int = 0
 	for a in anchors:
+		if a.strip_edges().begins_with("#"): continue   # ★註解行不是錨
 		if dc.contains(a): hit += 1
 		else: print("     ★沒找到錨：%s" % a.substr(0, 60))
-	print("1-e｜自家錨 %d／%d 仍在" % [hit, anchors.size()])
-	_ok(hit == anchors.size(),
+	_anchor_hit = hit
+	_anchor_total = 0
+	for a in anchors:
+		if not a.strip_edges().begins_with("#"): _anchor_total += 1
+	print("1-e｜自家錨 %d／%d 仍在（★spec §5 說的是 6 處 ⇒ 這兩個數都要是 6）" % [hit, _anchor_total])
+	_ok(hit == _anchor_total and _anchor_total == 6,
 		"1-e ★★**自家據點的讀取逐字未改**（讀 `team.tile_pos`／自家 `_home` ⇒ 合法，不是 god-view）"
 		+ "｜★★★而 spec §5 自承：那份清單原本寫 8 處、實際 6 處，**另有 3 處是讀【別隊】live 值＝真違規**（已另開帳，不在本票）"
 		+ "｜★「別動它」清單是【斷言】不是【豁免】")

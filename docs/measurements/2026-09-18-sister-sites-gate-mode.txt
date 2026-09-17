@@ -1,10 +1,12 @@
-[TREE] path=A:\GDS\demo\.worktrees\sister commit=474448362 clean=code-yes (docs-dirty=1, does not affect this run)
+[TREE] path=A:\GDS\demo\.worktrees\sister commit=278d0b900 clean=NO code-dirty=1 codehash=BAEC14BCB73E
+[TREE]   *** measuring the WORKING TREE, not commit 278d0b900 ***
+[TREE]    M scripts/debug/sister_sites_outpost_bed.gd
 [SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
 [SCALE]   *** a tick count without its day-conversion is not a number ***
 Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
  
 === 兩支姊妹 site 改讀 known_outposts 驗收（spec §3）===
-[TREE] HEAD=474448362 scripts-dirty=0（clean）
+[TREE] HEAD=278d0b900 scripts-dirty=1（★dirty）
 1-a-｜商隊：對城主有 belief、沒走過那座城  交易對象 {  }
   [OK] 1-a-前提 ★**我對城主確實有情報**（舊版正是靠這個把城撈進來）
   [OK] 1-a- ★**商隊那支：沒看過的城不進候選集**（樣本 1／母體 1）｜★退回 live  它會在  紅
@@ -30,13 +32,13 @@ Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
   [OK] 1-d-b ★**沒有被我順手「修」成讀據點知識**（它要的是地形不是據點）
 
 — 1-e：自家據點讀取逐字未改（6 處，內容錨）—
-1-e｜自家錨 5／5 仍在
+1-e｜自家錨 6／6 仍在（★spec §5 說的是 6 處  這兩個數都要是 6）
   [OK] 1-e ★★**自家據點的讀取逐字未改**（讀 `team.tile_pos`／自家 `_home`  合法，不是 god-view）｜★★★而 spec §5 自承：那份清單原本寫 8 處、實際 6 處，**另有 3 處是讀【別隊】live 值＝真違規**（已另開帳，不在本票）｜★「別動它」清單是【斷言】不是【豁免】
   [不可判] 1-f（世界級） ——
        宣稱：兩支的候選集在真世界裡都換了一批（各印三個數）
        為什麼這次驗不了：本次以 BED_WORLD=0 執行（世界級那段要跑 warring_states 10 天）
        怎麼驗：BED_WORLD=1 BED_DAYS=10 GODOT_TIMEOUT=3000 單獨跑一次；貼數時標【床的 commit】
--- 量測完成；[FAIL] 數 ＝ 0｜[不可判] 數 ＝ 1｜到場點名 6／6 --
+-- 量測完成；[FAIL] 數 ＝ 0｜[不可判] 數 ＝ 1｜到場點名 6／6｜自家錨 6／6 --
 [TEST-SUITE-COMPLETE]
 ERROR: [不可判] 1-f（世界級）：兩支的候選集在真世界裡都換了一批（各印三個數）
    at: push_error (core/variant/variant_utility.cpp:1091)
