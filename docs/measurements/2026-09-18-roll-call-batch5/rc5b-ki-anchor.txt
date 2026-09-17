@@ -1,0 +1,21 @@
+[TREE] path=A:\GDS\demo\.worktrees\rollcall2 commit=a20d6a04c clean=NO code-dirty=3 codehash=9AC4A2575BB2
+[TREE]   *** measuring the WORKING TREE, not commit a20d6a04c ***
+[TREE]    M scripts/debug/construction_duration_source_gate.gd
+[TREE]    M scripts/debug/known_issues_anchor_gate.gd
+[TREE]    M scripts/debug/minor_population_merge_test.gd
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+[KI-ANCHOR-GATE] 母體＝known_issues(330118 字) ＋ archive(116609 字)　★兩份都掃，否則搬家會【靜默縮小母體】
+=== known_issues 錨健檢 ===
+錨形式四欄（★兩個人可以用兩個定義數同一件事  這裡不挑一個）：
+  L1 `檔.gd::符號`  = 64（相異 51）★最好：符號跟著語意走
+  L2 `檔.gd`（檔級） = 96 ★可接受：不會因編輯指錯，但要人自己找
+  L3 `檔.gd:行號`    = 87 ★★會漂：行號跟著編輯走
+  L4 `簡稱:行號`     = 50 ★★★最模糊：連是哪個檔都要猜
+[KI-ANCHOR-GATE] ★註記：會漂的錨（L3+L4）137 個  【還沒遷移的規模】（★不是通過，是還沒做）
+   ★★行號跟著【編輯】走  每次 code 一改就可能再指錯；符號跟著【語意】走。
+[KI-ANCHOR-GATE] PASS：51 個相異新錨全部指得到現場（★WARN 不擋，見上）｜[免疫] 橫幅在 _run 內＝true
+
+[godot.ps1] child exit=0

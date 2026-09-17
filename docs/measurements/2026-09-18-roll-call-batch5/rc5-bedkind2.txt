@@ -1,0 +1,10 @@
+[BED-KIND] 陽性對照通過（6 格紅 + 3 格反向綠，涵蓋 §3b 全部四條；含【真實床原句】的 diagnostic 紅）
+[BED-KIND] 已標記 108 / 456（★存量規模可見；★★要它下降得靠別的機制,不是靠印）
+[BED-KIND] merge-base=7d1ba9065｜origin/main=8d24a08c7｜HEAD=a20d6a04c
+[BED-KIND] 母體 4 支：scripts/debug/construction_duration_source_gate.gd scripts/debug/known_issues_anchor_gate.gd scripts/debug/minor_population_merge_test.gd scripts/debug/team_ui_test.gd 
+[BED-KIND] ok  scripts/debug/construction_duration_source_gate.gd
+[BED-KIND] ok  scripts/debug/known_issues_anchor_gate.gd
+[BED-KIND] ok  scripts/debug/minor_population_merge_test.gd
+[BED-KIND] ok  scripts/debug/team_ui_test.gd
+[BED-KIND] 本次觸及 4 支｜紅 0 支
+[BED-KIND] PASS

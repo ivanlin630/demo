@@ -3,15 +3,47 @@
 extends SceneTree
 # @bed-kind: invariant
 
+const EXPECTED_CELLS: Array = ["_test_members_detail_snapshot", "_test_team_stats_snapshot", "_test_helper_rendering"]
+
+# ★★★【到場點名】（要件③；樣板同批一～批四）——
+#   ★實測（2026-09-18 的①注射）：讓 `_test_team_stats_snapshot` 中途死掉
+#     ⇒ **`=== TEAM UI TEST DONE ===` 照印、rc=0、7 秒** ⇒ 「跑完了」與「死在一半」長得一模一樣。
+#   ★★這支床**沒有失敗計數器**（它靠 print 與 assert）⇒ 點名就是它唯一的「有沒有跑完」訊號。
+#   ★★★用法必須是 `_selftest_gate("格名").noop()` —— 死亡要發生在【那一格自己的 frame】裡。
+var _cells_ran: Array = []
+
+func _cell(name: String) -> void:
+	if not _cells_ran.has(name):
+		_cells_ran.append(name)
+
+func noop() -> void:
+	pass
+
+func _selftest_gate(cell: String) -> Object:
+	if OS.get_environment("BED_SELFTEST_DIE") != cell:
+		return self
+	print("[SELFTEST] ★故意讓 `%s` 這一格在中途死掉" % cell)
+	return null
+
+func _roll_call_suffix() -> String:
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(c): missing.append(c)
+	if not missing.is_empty():
+		print("[roll-call] ❌ ★**有格沒有跑完**：%s —— 執行期錯誤會靜默中止一支 func，而那看起來像綠" % str(missing))
+	return "｜到場點名 %d／%d" % [_cells_ran.size(), EXPECTED_CELLS.size()]
+
+
 func _initialize() -> void:
 	print("=== TEAM UI TEST START ===")
 	_test_members_detail_snapshot()
 	_test_team_stats_snapshot()
 	_test_helper_rendering()
-	print("=== TEAM UI TEST DONE ===")
+	print("=== TEAM UI TEST DONE ===%s" % _roll_call_suffix())
 	quit()
 
 func _test_members_detail_snapshot() -> void:
+	_selftest_gate("_test_members_detail_snapshot").noop()
 	print("\n-- members_detail snapshot --")
 	var state := WorldState.new()
 	var runner := SimRunner.new()
@@ -71,8 +103,10 @@ func _test_members_detail_snapshot() -> void:
 	assert(absf(float(member1.get("stress", -1)) - 0.2) < 0.001, "member1 stress correct")
 
 	print("  [OK] members_detail: 3 members, fields present, values correct")
+	_cell("_test_members_detail_snapshot")
 
 func _test_team_stats_snapshot() -> void:
+	_selftest_gate("_test_team_stats_snapshot").noop()
 	print("\n-- team_stats snapshot --")
 	var state := WorldState.new()
 	var runner := SimRunner.new()
@@ -111,8 +145,10 @@ func _test_team_stats_snapshot() -> void:
 
 	print("  [OK] team_stats: food_qty=%d cap=%.1f count=%d" % [
 		ts.get("food_qty"), ts.get("carry_capacity"), ts.get("member_count")])
+	_cell("_test_team_stats_snapshot")
 
 func _test_helper_rendering() -> void:
+	_selftest_gate("_test_helper_rendering").noop()
 	print("\n-- TeamUiHelper rendering --")
 	var member: Dictionary = {
 		"id": 0,
@@ -192,3 +228,4 @@ func _test_helper_rendering() -> void:
 	assert(row.contains("[隊長]"), "member_list_row has role tag")
 	assert(row.contains("TestHero"), "member_list_row has name")
 	print("  [OK] render_member_list_row")
+	_cell("_test_helper_rendering")
