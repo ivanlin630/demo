@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 1-e措辭+merge順序｜確認
 topic: 措辭核對landed且交叉指回invariants(不是平行規則)；merge順序同意——憲法修正不該被行為後果的裁決卡住,而既有merge閘battery(含headless-regression)已經是安全網,不需要額外等
 ---
