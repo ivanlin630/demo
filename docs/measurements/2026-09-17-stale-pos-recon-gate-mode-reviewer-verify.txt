@@ -1,0 +1,50 @@
+[REVIEWER-VERIFY] role=reviewer commit=9ccfa13c2 worktree=.worktrees/stalepos clean=yes
+[REVIEWER-VERIFY] 目的=補系統(systems)點出的缺口:閘註冊的BED_WORLD=0 expect從未被跑過驗證;本檔=獨立驗證跑法,非measurer產出
+[REVIEWER-VERIFY] 指令=BED_WORLD=0 powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/stale_pos_recon_bed.gd
+
+[TREE] path=A:\GDS\demo\.worktrees\stalepos commit=9ccfa13c2 clean=yes codehash=clean
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 過期位置 → 偵查分池 驗收 ===
+[TREE] HEAD=9ccfa13c2 scripts/simulation-dirty=0（clean）
+
+— fixture：BELIEF_STALE_TICKS=4320（=3.0 天）—
+格1｜claim 年齡 5760 tick（4.0 天）＞ 過期線 4320  belief_pos 今天回 (-1, -1)｜偵查候選 id=21 value=2.160
+  [OK] 格1-前提 這一筆**真的是過期的**（`belief_pos` 回 (-1,-1)）｜★前提不成立的話，下一句的綠是【沒有驗到東西】的綠
+  [OK] 格1 ★**位置過期的目標出現在偵查候選集裡**（樣本 1／母體 1）｜★★不出現  還在被 `decision_context.gd` 那一行 `continue` 掉
+  [OK] 格1-b ★候選帶的是【last-known 位置】(5,5) 而不是 (-1,-1)｜★沒有這一半，偵查會被派去一個不存在的座標
+  [OK] 格1-c 它的價值 > 0（★=0  名義上在候選集、實際上永遠選不到）
+格2a｜世界上只有一個目標且它【沒有任何 claim】 偵查候選 id=-1
+  [OK] 格2a ★**沒有任何 claim 的目標仍然不在候選集**（樣本 0／母體 1）｜★出現  門拆過頭了：連「這支隊存在」都變成 god-view
+格2b｜有 claim（1 天前、不帶位置） 偵查候選 id=-1｜`recon.skip.claim_without_pos` +1
+  [OK] 格2b ★**有 claim 但從未有過 `tile_pos` 的目標也不在候選集**（樣本 0／母體 1）
+  [OK] 格2b-名字 ★★**這一類有自己的計數**（`recon.skip.claim_without_pos`）｜★★★沒有名字的話它與「位置過期」在畫面上一模一樣，而兩者下一站相反
+格2b-對照｜同一個目標補上 tile_pos 之後  偵查候選 id=23
+  [OK] 格2b-對照 ★**補上位置就變成候選**  上一句擋掉的是【沒有位置】，不是【這個目標】
+
+— 格3：新鮮度因子 —
+格3｜v=1.00 tiles/day sight=3  f(0d)=1.000000 f(3d)=1.000000 f(30d)=0.013257 f(3650d)=0.00000093
+  [OK] 格3-a ★年齡越大  因子越小（單調遞減）
+  [OK] 格3-b ★★**永不為 0**（十年前的情報仍是情報）｜★歸零  我又做出一道靜默的門，只是換了個地方
+  [OK] 格3-c 因子不放大價值（1）
+格3-d｜同樣 5 天：目標慢(0.5)=1.000000 vs 目標快(4.0)=0.029342
+  [OK] 格3-d ★★★**它讀的是【目標】的移動能力**：跑得快的目標，舊情報更不值錢｜★傳成觀察者的速度  這一句會紅（兩個呼叫長得一模一樣而意思相反）
+格3-e｜同一目標：情報 2 天 value=8.2930／情報 20 天 value=0.0893
+  [OK] 格3-e ★年齡進到了**候選的價值**上（而且舊的那個仍 > 0  還在秤上，只是排後面）
+  [不可判] 格4（世界級） ——
+       宣稱：絕境那批隊把【位置過期的目標】排進偵查候選、且偵查真的上場
+       為什麼這次驗不了：本次以 BED_WORLD=0 執行（世界級那一段要 ~30 分鐘，不適合放進每次都要跑的閘）
+       怎麼驗：BED_WORLD=1 BED_DAYS=10 GODOT_TIMEOUT=3000 單獨跑一次；交件貼數時標【床的 commit】
+
+— 格5：兩道攻擊性的門逐字未改 —
+  [OK] 格5-前提 找得到 `_find_weakest_prey`（★找不到  下面兩句的綠是空的）
+  [OK] 格5-a ★掠奪的第一道門（`has_belief`）**逐字未改**
+  [OK] 格5-b ★掠奪的第二道門（`reachable`）**逐字未改**
+  [OK] 格5-c ★★攻擊側那道門（`belief_pos == (-1,-1)`  不可行）**逐字未改**｜★★★放寬它＝讓隊直接打一個它不知道在哪的目標＝隔空作用（違反感知鐵律）
+-- 量測完成；[FAIL] 數 ＝ 0｜[不可判] 數 ＝ 1 --
+[TEST-SUITE-COMPLETE]
+ERROR: [不可判] 格4（世界級）：絕境那批隊把【位置過期的目標】排進偵查候選、且偵查真的上場
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
