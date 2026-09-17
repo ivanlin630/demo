@@ -329,11 +329,33 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 		if _rt == null or int(_rid) == team.team_id: continue
 		if _rt.faction_id == team.faction_id: continue
 		var _rbel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, int(_rid))
-		if _rbel.is_empty(): continue
+		if _rbel.is_empty():
+			# ★格2a：**連一筆 claim 都沒有** ⇒ 不是候選（連它存不存在都不該由真值告訴我）
+			if Probe.enabled: Probe.bump("recon.skip.no_claim")
+			continue
 		# ★★守衛③：**有可定價分項的目標不是偵查候選** ⇒ 先驗在這一刻被取代
 		if FactionAISystem.belief_has_priced_items(_rbel): continue
-		var _rpos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, int(_rid))
-		if _rpos == Vector2i(-1, -1): continue   # ★不知道在哪 ⇒ 連去都去不了
+		# ★★★【這裡不走 `belief_pos()`】（票 2026-09-17）——
+		#   `belief_pos()` 是**攻擊性動作**的位置通道：它超過 `BELIEF_STALE_TICKS` 就回 (-1,-1)，
+		#   而那對「要不要打」是對的（不知道它現在在哪就不能打 ＝ 隔空作用）。
+		#   ★**但偵查的存在理由【正是】位置過期** ⇒ 在這一支裡沿用那道閘，
+		#     等於**把唯一能解決過期的動詞、用過期本身擋掉**（舊註解「不知道在哪⇒連去都去不了」
+		#     把兩件事寫成一件：★★「不知道它【現在】在哪」是真的，「不知道它在哪」是假的 ——
+		#     **我知道它三天前在哪，而我可以去那裡看一眼**）。
+		#   ⇒ ★★★所以這裡取 **last-known 位置（不經新鮮度閘）**，年齡改走【價值】。
+		var _rpos: Vector2i = _rbel.get("tile_pos", Vector2i(-1, -1))
+		if _rpos == Vector2i(-1, -1):
+			# ★格2b：**有 claim 但從未有過 `tile_pos`**（轉述型 relay 可能不帶位置）——
+			#   ★★它與「位置過期」在畫面上一模一樣，而**兩者的下一站相反**：
+			#     過期 ⇒ 去看一眼；從未有過 ⇒ **連要去哪裡都不知道** ⇒ 必須有自己的名字。
+			if Probe.enabled: Probe.bump("recon.skip.claim_without_pos")
+			continue
+		# ★情報年齡：`last_tick` 是【親見】才會寫的欄位 ⇒ 轉述來的 claim 可能沒有它。
+		#   ★★沒有 ⇒ **不知道有多舊**，而「未知」不得 default-pass（憲法 §1a：unknown 一律不通過）
+		#   ⇒ 這裡的誠實處置是**當成最舊**（age 從世界開始算），它仍在秤上、只是排最後。
+		var _rage: int = state.world.current_tick - int(_rbel.get("last_tick", 0))
+		if not _rbel.has("last_tick") and Probe.enabled: Probe.bump("recon.age_unknown")
+		_rage = maxi(_rage, 0)
 		var _blind: bool = not _rbel.has("resource_scale")
 		var _prior: float = DecisionTerms.SCOUT_VALUE_BLIND_PRIOR
 		if not _blind:
@@ -346,7 +368,19 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 		var _rdays: float = float(FactionAISystem._hex_dist(team.tile_pos, _rpos)) / _rtpd
 		# ★解鎖資訊的期望價值（coin 當量）× 折現：路上要走 `_rdays` 天 ⇒ δ^days。
 		#   ★★距離是真實量，折率是人格 —— ★★★兩者都不是旋鈕。
-		var _rval: float = _prior * pow(_rdelta, maxf(_rdays, 0.0))
+		# ★★★再乘【情報新鮮度】：舊情報不是「不算數」，是「照著它走過去，撲空的機率比較高」。
+		#   ★速度用**基準旅行者**（`MovementSystem.baseline_tiles_per_day()`）而不是目標那支隊的真速度 ——
+		#     後者要讀目標的 live 地形／疲勞／載重（憲法 §1a 禁）。★★視野是**我自己的**（自知，合法）。
+		#   ★★★**與旁邊那一行 `_rtpd` 不是同一件事**：`_rtpd` 是「**我**要走幾天」（觀察者），
+		#     這裡問的是「**它**這段時間跑得多遠」——**兩個呼叫長得像，意思相反。**
+		var _rfresh: float = DecisionTerms.recon_freshness_factor(
+			_rage, MovementSystem.baseline_tiles_per_day(), VisionSystem.vision_range(state, team))
+		var _rval: float = _prior * pow(_rdelta, maxf(_rdays, 0.0)) * _rfresh
+		# ★儀器：這一筆是不是【本票之前會被丟掉】的那一類（位置已過期）——
+		#   ★★沒有這一格的話，「偵查候選變多了」分不出是本票生效還是世界剛好情報變好。
+		if Probe.enabled:
+			Probe.bump("recon.eligible")
+			if _rage > BeliefSystem.BELIEF_STALE_TICKS: Probe.bump("recon.eligible.stale_pos")
 		if _rval > _recon_best:
 			_recon_best = _rval
 			out["id"] = int(_rid)

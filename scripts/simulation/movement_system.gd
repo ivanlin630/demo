@@ -211,6 +211,19 @@ static func _resource_weight(key: String) -> float:
 #   sink 是【必填】⇒ 呼叫端一定要明講自己是執行端(傳陣列)還是決策端(傳 null)。
 # ★★★而 bump 本身留在計算裡、只是改成「附進 sink」：條件（tile 存在／wagons>0／
 #   named 找得到）全在函式內部 —— 把條件搬到呼叫端就是把物理抄第二份。
+# ★★★【不讀任何他隊 live 欄位的「一支隊大概走多快」】（票：過期位置 → 偵查分池 2026-09-17）
+#   ★為什麼需要這一支：估「**別人**三天能跑多遠」時，`move_cost_pure(state, 那支隊, …)` 會讀
+#     它的 live `tile_pos`（地形）、`fatigue`、載重 ——★★而憲法 §1a 逐字寫著
+#     「決策路徑上用到的**每一個他隊欄位**都必須是 belief 欄位」，且它自己點名
+#     「**最會漏的地方是被呼叫出去的小函式**：呼叫端那一行看起來乾淨，live 讀藏在裡面」。
+#   ⇒ ★★★所以對**他隊**只能用這個【基準旅行者】速度：它只由 `BASE_MOVE_TICKS` 換算，
+#     **不讀任何一支隊的狀態** —— 誠實地對應「我不知道它累不累、載了多少」。
+#   ★**壞掉會長什麼樣**：若有人把它換成「目標那支隊的真速度」，畫面上**不會紅**，
+#     只會變成一個更「準」的估計 —— 而那個準是偷來的。
+static func baseline_tiles_per_day() -> float:
+	# bare-tick-ok: 單位換算分子（TICKS_PER_DAY ÷ 每格 tick 成本 ＝ tiles/day），同 GoalResolver._tiles_per_day 的鐵則
+	return float(WorldState.TICKS_PER_DAY) / float(maxi(BASE_MOVE_TICKS, 1))
+
 static func move_cost_pure(state: WorldState, team: TeamData, time_mult: float, bumps) -> int:
 	var speed: float = team_speed_pure(state, team, bumps) * time_mult
 	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
