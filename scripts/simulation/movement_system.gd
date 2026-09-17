@@ -220,9 +220,12 @@ static func _resource_weight(key: String) -> float:
 #     **不讀任何一支隊的狀態** —— 誠實地對應「我不知道它累不累、載了多少」。
 #   ★**壞掉會長什麼樣**：若有人把它換成「目標那支隊的真速度」，畫面上**不會紅**，
 #     只會變成一個更「準」的估計 —— 而那個準是偷來的。
+#   ★★**為什麼這不是一顆會腐爛的裸 tick**（bare-tick 閘判 (c) 白名單，systems 2026-09-17）：
+#     `BASE_MOVE_TICKS = TimeScale.MOVE_TICKS_PER_HEX`（:5）⇒ **分子與分母都由時間尺度導出**
+#     ⇒ **它們的比值不隨時間尺度縮放改變** ⇒ 這是單位換算，與 `goal_resolver.gd:711` 同一個鐵則
+#       （用【每格成本】不用【速度】）。
 static func baseline_tiles_per_day() -> float:
-	# bare-tick-ok: 單位換算分子（TICKS_PER_DAY ÷ 每格 tick 成本 ＝ tiles/day），同 GoalResolver._tiles_per_day 的鐵則
-	return float(WorldState.TICKS_PER_DAY) / float(maxi(BASE_MOVE_TICKS, 1))
+	return float(WorldState.TICKS_PER_DAY) / float(maxi(BASE_MOVE_TICKS, 1))   # bare-tick-ok: 單位換算分子
 
 static func move_cost_pure(state: WorldState, team: TeamData, time_mult: float, bumps) -> int:
 	var speed: float = team_speed_pure(state, team, bumps) * time_mult
