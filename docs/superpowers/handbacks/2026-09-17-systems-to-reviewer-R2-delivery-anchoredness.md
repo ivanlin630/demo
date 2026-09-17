@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 錨定性讓情報保鮮（`feat/anchoredness-freshness` ＝ `7f9d78329`）｜R② 交付審
 topic: ★**交付審**（spec §6 全節，含我裁的 §6.5 判準與新加的 §6.7）｜★★**要你當硬點打的是這件事**：**同一份六格驗收，在兩個世界差十倍的版本上【都全綠】** —— 只認 `SETTLED` 時錨定 0.96%，加 `BUILDING` 後 9.7%（而 `SETTLED` 自己只有 0.59%）⇒ **我的驗收表分辨不出「幾乎沒裝」與「真的裝了」**｜★★★**我的處置是【必報欄】不是【門檻】**（不准再加閘），請你打這個處置夠不夠｜★sha 對帳：`e638cb1dd → 7f9d78329`，**有 code 變更**（判準＋tap），他主動標了
 ---
