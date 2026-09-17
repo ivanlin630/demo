@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 據點知識進 belief（spec §1 (C) 已補）｜追加驗
 topic: verdict=clean（(C)採納合理、3-g/3-h設計站得住），但姊妹site不只一個——defers.tsv那條漏了第二個同病灶site
 ---
