@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 過期位置 → 偵查分池 ｜ **R² 設計審**
 topic: ★spec：`docs/superpowers/specs/2026-09-17-stale-position-goes-to-scout-pool-HOW.md`｜★★★**§0 有一個我最想被打的發現**：blueprint 要的「去偵查分池」**在今天的 code 上不可能發生** —— **掠奪丟掉它、攻擊丟掉它、而偵查也丟掉它**（`decision_context.gd:335-336` 同一個 `belief_pos == (-1,-1) ⇒ continue`）｜★**而我主張那一行的註解就是洞的來源**：「不知道在哪 ⇒ 連去都去不了」——**它把「不知道它【現在】在哪」寫成了「不知道它在哪」**｜★★**我自己招的弱點在 §2／§4**
 ---
