@@ -5873,20 +5873,29 @@ func _site_resources_nearby(state: WorldState, pos: Vector2i) -> Dictionary:
 
 # 敵 outpost 位置集（非同 faction 的有主據點）。選址迴圈 hoist 用：候選 tile 對此小集取
 # min-dist，取代原 per-candidate 全圖掃（同集合同 min 值 = 行為不變，純複雜度收斂）。
+# ★★★【proxy 換成真欄】（票：據點知識進 belief 2026-09-17，blueprint 裁）——
+#   ★舊版：**全圖掃真實 tile** ＋ live 讀 `outpost_level`／`outpost_owner`，
+#     再用「我對【主人】有沒有 belief」當代理 ⇒ ★★**那道閘擋的是主人，不是地點**。
+#   ⇒ 它有**兩個方向**的錯，而舊註解只寫了一個：
+#     ①**知道得太多**：沒看過那座城，卻因為在千里外見過它的主人 ⇒ 它對我存在（★舊註解有寫）
+#     ②**知道得太少**：★**親眼走過那座敵城**、但從沒見過主人 ⇒ 它對我不存在（★★沒有人寫下來過）
+#   ⇒ 現在改讀【我自己看過的據點】：`BeliefSystem.known_outposts`（親見時寫、relay 不寫）。
+#   ★**同陣營判定用【我自己陣營的名冊】**（自知，合法），
+#     ★★不是去讀對方的 `faction_id` —— 隸屬是組織層，§1a：不得因為決策需要就把它變成可見。
 func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array:
 	var out: Array = []
-	for tile_id in state.world.tiles:   # gate-ok: 團隊已核可過（followup-fixed 63d93aab）
-		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.outpost_level == 0: continue
-		var owner: TeamData = state.teams.get(tile.outpost_owner)
-		if owner == null: continue
-		if owner.faction_id == leader_team.faction_id and owner.faction_id != -1: continue
-		# ★god-view follow-up（belief-gate，store-free proxy）：只納「觀察者對 owner 有 belief（見過/聞得）」的敵據點
-		# →只避已知敵、未見敵不避（更多衝突湧現，合鐵律）。belief-about-owner=imperfect proxy（belief_pos 給 owner 隊
-		# last-seen 非據點位；owner 可 roam），但軟 penalty 容忍高、免建 team_outpost_known 大 store（R² 判 proxy 可接受）。
-		# 全圖 loop 結構保留（hoist perf：候選對此集取 min-dist），belief filter 加 loop 內。
-		if BeliefSystem.belief_pos(state, leader_team.team_id, owner.team_id) == Vector2i(-1, -1): continue
-		out.append(tile.tile_pos)
+	var my_faction: FactionData = state.factions.get(leader_team.faction_id)
+	for rec in BeliefSystem.known_outposts(state, leader_team.team_id):
+		var oid: int = int(rec["owner_id"])
+		if oid == leader_team.team_id:
+			continue
+		if my_faction != null and my_faction.member_team_ids.has(oid):
+			continue   # 自家人的據點不用避
+		out.append(rec["tile_pos"])
+	if Probe.enabled:
+		Probe.bump("outpost_belief.avoid_call")
+		Probe.note("outpost_belief.avoid_set_size", float(out.size()))
+		if out.is_empty(): Probe.bump("outpost_belief.avoid_empty")
 	return out
 
 # ──────── 基建主決策 ────────
