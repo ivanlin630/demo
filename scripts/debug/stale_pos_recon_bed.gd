@@ -22,6 +22,9 @@ var _fails: int = 0
 
 func _initialize() -> void:
 	_run()
+	# ★閘的判準看【橫幅】不看離開碼（systems 立 2026-09-16）：
+	#   ★★沒有結尾標記的話，「FAIL=0」與「根本沒跑」長得一模一樣。
+	print("-- 量測完成；[FAIL] 數 ＝ %d --" % _fails)
 	print("[TEST-SUITE-COMPLETE]")
 	quit(1 if _fails > 0 else 0)
 
