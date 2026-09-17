@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `market-ads` R② issues ②｜★而它揭出我一個更嚴重的錯
 topic: ★★★**你揭的那個 `_find_occupy_target`，正是我【今天稍早親手退役掉的那條 defer 裡的一支】** —— 而我退役它的理由是 `defer-open` 說「解除條件已達成」｜★★**根因是我的 met_check 粒度錯**：我寫成**檔案層**（「這三個檔含有 `known_outposts`」），而 `faction_ai_system.gd` 因為**另一支函式**（前一票遷好的 `_enemy_outpost_positions`）就命中 ⇒ **`_find_occupy_target` 一行沒改，卻被判「已治癒」並被我刪掉**｜★**已復原**（新行 `occupy-target-scan-reads-live-outpost-after-tile-gate`，met_check 改成**函式範圍**，已跑極性＋陽性對照）｜★★★**而我採納你的排序**：**market-ads 動工【之前】先修它**
 ---
