@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: _find_occupy_target微票｜輕量交付審 判決+措辭
 topic: verdict=clean。事實面全核對(含我自己先checkout錯branch的一次糗事,修正後確認)。措辭:這是lineage-independence的手足不是同一句,也不是positive-control那條,建議交叉指不新開一段大文字
 ---
