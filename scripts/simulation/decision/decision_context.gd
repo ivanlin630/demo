@@ -360,35 +360,6 @@ var survival_stall_active: Array = []
 #   ★★【寫幾次】與【有沒有影響】是兩件事 ⇒ 先量前者：每處按 `advance` 分桶。
 #   ★★★Probe.bump 不耗 RNG、不改控制流 ⇒ 儀器不改變被觀測物。
 #   ★誠實限：tap 只答【這一行被跑到幾次】，不答【寫進去的值有沒有真的不同】。
-# ★★★【(丙-2) 單一計算點】最高威脅目標 —— ★`gather` 與 `options.gd` 的 `to_task` **呼的是同一支**。
-#   ★動機（量到的）：`to_task` 那九處每一處只讀 1–3 個欄位，卻付了【整份 `gather`】的錢
-#     （整份含數個 O(隊數) 的掃描）⇒ 這不是「快取沒做好」，是**根本不必蒐集那一整份**。
-#   ★★而它**不是快取**：不重用舊值、不跳過任何計算 ⇒ **「同樣輸入得到同樣輸出」是【構造保證】**，
-#     不是「跑 fp 跑到相同為止」的經驗保證。
-#   ★★★純函式：**不寫 state、不耗 global RNG**（沿用 `pick_recon_target` 立下的形狀）。
-# 回傳：{id:int, pos:Vector2i, score:float, power_ratio:float}；無目標 ⇒ id=-1／pos=(-1,-1)。
-static func pick_threat_target(state: WorldState, team: TeamData) -> Dictionary:
-	var out: Dictionary = {"id": -1, "pos": Vector2i(-1, -1), "score": 0.0, "power_ratio": 0.0}
-	var best_t: float = 0.0
-	var best_id: int = -1
-	for tid in state.team_discovered.get(team.team_id, []):
-		if tid == team.team_id: continue
-		var other: TeamData = state.teams.get(tid)
-		if other == null: continue
-		var sc: float = ThreatAssessment.score(state, team, other)
-		if sc > best_t:
-			best_t = sc; best_id = tid
-	out["score"] = best_t
-	out["id"] = best_id
-	if best_id != -1:
-		var ot: TeamData = state.teams.get(best_id)
-		if ot != null:
-			# A1 感知鐵律：threat DEFEND/求和 move target = belief last-seen（敵脫視→追 last-seen 非瞬鎖 live 真位）。
-			out["pos"] = BeliefSystem.belief_pos(state, team.team_id, best_id)
-			# S1.5：純戰力比（belief-based，god-view-free）供 S2 winnable（禁拿 threat_react 當 proxy）。
-			out["power_ratio"] = ThreatAssessment._power_ratio(state, team, ot)
-	return out
-
 static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 	# ★★★【單一選擇點】：gather 與 `to_task` **共用這一支** ——
 	#   ★否則兩邊各自挑一次，而【秤比的目標】與【派出去的目標】可能不同一個
@@ -627,13 +598,25 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	# ★失聯帳本 defensive 真 consumer：警覺期內→威脅門檻降（餵既有 threat gate、備戰/防衛更易 fire；非新平行旋鈕）。
 	if team.contact_vigilant_until > state.world.current_tick:
 		c.threat_threshold = maxf(c.threat_threshold - CONTACT_VIGILANCE_THREAT_DROP, 0.0)
-	# ★(丙-2)：本段搬進 `pick_threat_target()`，而 `gather` 在這裡【呼它】——
-	#   ★★`gather` 是【組合者】不是第二個實作：這裡若留下一份 inline 算式，就變成兩份會 drift 的算式。
-	var _thrpick: Dictionary = pick_threat_target(state, team)
-	c.threat_react = float(_thrpick["score"])
-	c.threat_id = int(_thrpick["id"])
-	c.threat_pos = _thrpick["pos"]
-	c.perceived_power_ratio = float(_thrpick["power_ratio"])
+	var _best_t: float = 0.0
+	var _best_id: int = -1
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var _other: TeamData = state.teams.get(tid)
+		if _other == null: continue
+		var _t: float = ThreatAssessment.score(state, team, _other)
+		if _t > _best_t:
+			_best_t = _t; _best_id = tid
+	c.threat_react = _best_t
+	c.threat_id = _best_id
+	if _best_id != -1:
+		var _ot: TeamData = state.teams.get(_best_id)
+		if _ot != null:
+			# A1 感知鐵律：threat DEFEND/求和 move target = belief last-seen（敵脫視→追 last-seen 非瞬鎖 live 真位）。
+			# 鏡射攻擊 options.gd:194 belief_pos；threat_pos 無其他消費者（只 :294/:305 move target）故全域改此源。
+			c.threat_pos = BeliefSystem.belief_pos(state, team.team_id, _best_id)
+			# S1.5：純戰力比（belief-based，god-view-free）供 S2 winnable（禁拿 threat_react 當 proxy）。
+			c.perceived_power_ratio = ThreatAssessment._power_ratio(state, team, _ot)
 	# ★★★flee-to-safety：FLEE 的 applicable 從「有威脅座標」升級為「有威脅座標【且】有 believed 目的地」。
 	if c.threat_pos != Vector2i(-1, -1):
 		c.flee_dest = FactionAISystem.flee_destination_static(state, team)

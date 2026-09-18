@@ -543,11 +543,10 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.threat_react >= ctx.threat_threshold and not ctx.is_resident,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			# ★(丙-2)：只要 threat 那兩欄 ⇒ 呼【單一計算點】，不再重蒐集整份 gather
-			var _dc: Dictionary = DecisionContext.pick_threat_target(state, team)
-			if int(_dc["id"]) == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
-			return {"task": TeamData.TASK_DEFEND, "target": _dc["pos"],
-				"prosperity_target": int(_dc["id"])},
+			var _dc: DecisionContext = DecisionContext.gather(state, team)
+			if _dc.threat_id == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_DEFEND, "target": _dc.threat_pos,
+				"prosperity_target": _dc.threat_id},
 	},
 	"求和": {
 		"affinity": [0.1, 0.7, 0.2, 0.0, 0.0], "sets": {"threat": true},
@@ -556,11 +555,10 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.threat_react >= ctx.threat_threshold and not ctx.pacify_target_on_cooldown,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			# ★(丙-2)：同上，呼同一支單一計算點
-			var _pc: Dictionary = DecisionContext.pick_threat_target(state, team)
-			if int(_pc["id"]) == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
-			return {"task": TeamData.TASK_DIPLOMACY, "target": _pc["pos"],
-				"order_target": int(_pc["id"]), "order_task": TeamData.TASK_TRIBUTE_OFFER},
+			var _pc: DecisionContext = DecisionContext.gather(state, team)
+			if _pc.threat_id == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_DIPLOMACY, "target": _pc.threat_pos,
+				"order_target": _pc.threat_id, "order_task": TeamData.TASK_TRIBUTE_OFFER},
 	},
 	# ★資訊網 Part2 (a) side-action（de-patch）：求援/偵察 **脫離主 argmax**（原 REGISTRY entry 移除）——
 	# 派 1 anon 跑腿=平行 side-action（派信使≠放棄自救、村莊邊覓食邊派人求救；逼進單 task argmax=category error）。
