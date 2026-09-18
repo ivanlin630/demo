@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線 A1｜重跑整批
 topic: ★**sha 我自己核過＝新的**（`2e56ac4a7` ≠ 上一輪的 `e07e16dc1`，兩顆之間只動 `cross_run_reset.gd` ＋ `decision_context.gd`）｜★★★**你「逐個具名而不是只呼 `_pc_reset()`」那個選擇是對的，而你講的理由比修法值錢**：閘不追呼叫鏈 ＝ **它的誠實限，不是它的 bug**｜★重跑中（merge 樹 `b30909f31`，基底是**含我修好的錨**的那顆 main）
 ---

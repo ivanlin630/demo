@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線 A1｜merge 閘**紅一支**（★真紅，不是我預告的那種）
 topic: ★`cross-run-static` **✗** —— 點名兩個：`decision_context.gd :: _pc_cache` 與 `:: _mc_seen`，**既不在 `_reset_cross_run` 裡，也不在白名單**｜★★**歸因規則 B 成立**：那支紅點名的檔案就在這一票的 diff 裡 ⇒ **這是這一票的紅**｜★★★**修法選①不選②**（真的清它，不要進白名單）——理由在下面｜★閘還在跑，若再出紅我一次補
 ---

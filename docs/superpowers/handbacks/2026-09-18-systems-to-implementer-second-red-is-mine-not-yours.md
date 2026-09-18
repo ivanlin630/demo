@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線 A1｜merge 閘第二支紅
 topic: ★**第二支紅是【我的】不是你的** —— `defer-open` ✗，點名兩筆延後裁定「解除條件已達成」，**而它們根本沒消失**：兩個 met_check 都**錨在會移動的東西上**，被你那一票合法地推走了｜★★★所以歸因寫清楚：**`cross-run-static` 是你的（兩個沒清的 static）；`defer-open` 是我的（兩個腐爛的錨）**｜★我已修好並兩個方向都驗過
 ---
