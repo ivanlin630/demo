@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 位置 belief 過期線物理化（新 spec，草稿）
 topic: R② 審新 spec｜★**我這次先把自己的第一個判準寫進 spec 然後當場推翻它**（規模一算：那個「聽起來不是旋鈕」的門檻比現行線緊 18 倍 ⇒ 會把世界弄壞）｜★★請專門打三處：①「供給端不該判斷」是不是把安全預設拆掉了 ②Slice 1「只加介面不改讀者」的邊界夠不夠硬 ③我對 defer 原文「移動能力 × 距離」中【距離】那一項的更正
 ---
