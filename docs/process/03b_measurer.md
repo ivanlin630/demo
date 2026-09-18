@@ -7,11 +7,7 @@
 > **acceptance／診斷跑標準 `full_probe` 床，全維度一次抓齊**（結構化 JSON，不靠 print 刮）；★`full_probe` **只在 acceptance／診斷床**，非每 sim／每 headless（perf）。
 > ★原文與理由（A2c-1 卡死根因＝量不了）→ `detail/03b_measurer-cases.md` 同標題節
 
-## ★現況檔 `docs/process/status/*` ⏸**已停更**（O1，2026-08-21）
-> ★**別再寫入**；誰在線改用 `bash .claude/hooks/peers.sh`（讀 lock 租約，**推導不手寫**）。
-> ★★**病根**：它是「不會過期的手寫狀態」，所以爛了 —— 對照 `.busy.*` beacon 帶心跳會自動過期。
-> ★★★**刪不刪已改由 `docs/process/defers.tsv: status-files-delete` 追**（met_check ＝連續 30 天沒人改過）
->    —— **原本那句「觀察至 2026-08-28 就刪」寫在散文裡沒有人追，逾期 10 天，而屆時證據還反過來（有人在用）。**
+## ★現況檔 `docs/process/status/*` ⏸**已停更** —— ★別再寫入；誰在線用 `bash .claude/hooks/peers.sh`（讀 lock 租約）；刪不刪由 `defers.tsv: status-files-delete` 追（血證／病根 → detail）
 
 ## 身分
 
@@ -65,10 +61,9 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 
 ## ★併行量測（多工單不序列阻塞，2026-07-09 用戶定案，Part B）
 
-mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 跑完才下一）。改**背景併行**：
-- 收多工單 → 各 bed **`run_in_background` launch**（Bash/Monitor 背景跑）、**非同步收、誰完先收誰**，不序列阻塞。
-- **併發上限 ~2-3 條**（sim compute-bound、godot 進程搶 CPU + import lock → 超過 thrash 反慢）。超額排隊等 slot。
-- 各工單仍守鐵律6（單工單一封完整信）；併行=跨工單不互等，非單工單分批。
+多工單**不序列阻塞**：各 bed `run_in_background` launch、非同步收、誰完先收誰；
+★**併發上限 ~2-3 條**（compute-bound ＋ import lock，超過 thrash 反慢），超額排隊等 slot；
+★★各工單仍守鐵律 6（單工單一封完整信）——**併行＝跨工單不互等，不是單工單分批**。
 
 > ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
 
@@ -118,14 +113,9 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 
 ---
 
-## ★長工作 beacon —— **★2026-09-06 起【不要手寫】，wrapper 自己蓋章**
-
-★**舊制要人手寫 `.busy.<role>`，而 2026-09-06 稽核發現【一個都沒被寫過】** ⇒ 護欄母體恆空、
-**上線至今一次沒響，而它防的事（兩支 Godot 同跑污染 perf）當天正在發生。**
-⇒ ★★**現在 `tools/godot.ps1` 起跑自己寫、每 10s 續期（心跳）、結束刪，並把時窗寫進 `.claude/hooks/.godot-runs.log`。**
-★★★**你要做的只有一件**：**確認你那棵 worktree 的 `tools/godot.ps1` 是新版**
-（`grep -c 'BUSY BEACON' <worktree>/tools/godot.ps1`）—— **舊版的樹跑的 Godot 一筆都不會被記到，**
-**而「log 裡沒有紀錄」＝【那棵樹沒有新版 wrapper】或【真的沒跑】，兩者長得一樣。**
+## ★長工作 beacon —— **【不要手寫】**：`tools/godot.ps1` 自己蓋章＋每 10s 心跳，時窗寫進 `.claude/hooks/.godot-runs.log`
+★**你唯一要做的**：確認你那棵 worktree 的 wrapper 是新版（`grep -c 'BUSY BEACON' <worktree>/tools/godot.ps1`）
+—— ★★**「log 裡沒有紀錄」＝【那棵樹是舊版】或【真的沒跑】，兩者長得一樣**（舊制手寫版上線至今一筆沒寫過＝母體恆空，血證 → detail）。
 
 > ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）；★環境紀元 → `docs/process/env-epochs.tsv`
 
@@ -174,15 +164,13 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 
 ★**指定一個驗收指標＝下了一個「效果會現形在哪」的【假設】，不是定義。** ⇒ **三讀：①真的沒效果 ②★效果在【下一格】 ③★★母體塌陷【或★★★儀器沒跑到】——「跑到一半被砍、分段輸出的第一段還沒到」與「沒發生」印出來一模一樣（血證：checkpoint 間隔 20000 tick 而跑死在之前 ⇒ 分段吐值退化回【只在最後吐】）⇒ ★分段輸出的【間隔必須小於你預期能跑到的長度】；讀任何 0 之前先確認【輸出真的印到了那一段】。規則＝先往下一格找。**
 ★★**判準⑨的真問題【不是窗長，是機會母體】**——「窗 ≥ 一週期」只是**週期型**取得非空母體的手段：★**latch**（卡住不自解，無週期）問**窗內有幾次進入 latch 的機會**（`near_death=97`）；★★**crash-check**（崩了當場現形）**只需母體非零，窗長無本質差異**（`trade.meet` 上界代理）。
-⇒ ★★★**任何型的「命中 0」都必須與【機會母體】同印**，否則「沒發生」與「母體是 0」長得一樣（★而母體＝1 是「幾乎沒母體」，不是「驗過了」）。
-> ★血證（差集 0 vs `scan_kill_tile_unknown=161`／`near_death=97`／peaceful `trade.meet=1`）→ `detail/03b_measurer-cases.md`。
+⇒ ★★★**任何型的「命中 0」都必須與【機會母體】同印**，否則「沒發生」與「母體是 0」長得一樣（★而母體＝1 是「幾乎沒母體」，不是「驗過了」）。　★血證（差集 0 vs `scan_kill_tile_unknown=161`／`near_death=97`／peaceful `trade.meet=1`）→ `detail/03b_measurer-cases.md`。
 
 ## ★★★證據等級（blueprint 立 2026-09-02）：★**兩支互不知道的儀器指到同一個數 ＝ 最強**
 ★**強→弱**：①**兩盲交叉驗證** ②同床雙向對照（陽性＋陰性）③單一量測＋誠實限 ★★④「數字看起來合理」＝**不是證據**。★血證：`乞食` 全 pool 贏 6 次（#12 床）＝ flee 表 `top_乞食 = 6`（#5 床），★★兩支床互不知道對方存在 —— **合理性是我對世界的預期；兩盲同數是世界對兩個問法給了同一個答案。**
 
 ## ★★★命名紀律：**桶名／欄位名只准宣稱【判準本身】**（blueprint 立 2026-09-02）
-★**標籤宣稱的比量測支持的多 ⇒ 三個月後它會變成一個沒人查的「事實」。**（血證：`stuck-task` 的判準只有 `survival_committed_option != ""`＝**有承諾**，而名字宣稱**卡住** ⇒「已承諾、正在路上、仍近死」也被叫 stuck；★該叫 `has-committed-option` 類。）
-★★**改名的代價一起付**：舊輸出會對不上 ⇒ **改名時在床／tap 檔頭寫「舊名 → 新名、自哪一顆 commit 起」**，否則舊量測檔變成不可解讀。
+★**標籤宣稱的比量測支持的多 ⇒ 三個月後它會變成一個沒人查的「事實」。**（血證：`stuck-task` 的判準只有 `survival_committed_option != ""`＝**有承諾**，而名字宣稱**卡住** ⇒「已承諾、正在路上、仍近死」也被叫 stuck；★該叫 `has-committed-option` 類。）　★★**改名的代價一起付**：舊輸出會對不上 ⇒ **改名時在床／tap 檔頭寫「舊名 → 新名、自哪一顆 commit 起」**，否則舊量測檔變成不可解讀。
 
 ## ★★★★有 cap 的來源：**「缺席」不是缺席的證據**，**飽和值就是溢出的簽名**（systems 立 2026-09-05）
 > ★**機械偵測**：**每窗的 `seen` 增量恰好等於 cap ⇒ 一定溢出過**（不是巧合）；
@@ -190,11 +178,6 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 > ★**三條紀律 ＋ 血證（`driver_ledger` cap=4096 害三個已交付結論作廢）→ `detail/03b_measurer-cases.md`**
 
 ## ★★★方向註記（2026-09-07 取代原「誠實限：貨幣量未過校驗」——blueprint 裁 (a) 解除降級）
-
 > **「週轉絕對量受 `k-symptom-A/B` 抑制，偏低方向已知。」**
-
-★**用法**：涉幣卷面**照常下結論**，只是**絕對量**要帶這行。★★**它不是降級**：
-誠實限說「這個數字【不能用】」⇒ 只能等；方向註記說「這個數字【可以用】，而我們知道它往哪邊偏」⇒ ★**可交付**。
-★★★**撤除條件**：`k-symptom-A-five-resources-never-candidate`／`k-symptom-B-weapon-util-never-wins`
-兩票關掉時這行跟著撤（★已寫進那兩票；**「撤註記」本身要有人做**）。
-★**由來與完整理由（原誠實限為何解除）→ `detail/03b_measurer-cases.md`**
+★**用法**：涉幣卷面**照常下結論**，只是**絕對量**帶這行。★★**它不是降級**：誠實限說「這個數字【不能用】」⇒ 只能等；方向註記說「【可以用】，而我們知道它往哪邊偏」⇒ **可交付**。
+★★★**撤除條件**：`k-symptom-A-five-resources-never-candidate`／`k-symptom-B-weapon-util-never-wins` 兩票關掉時跟著撤（已寫進那兩票；**「撤註記」本身要有人做**）。★由來與完整理由 → `detail/03b_measurer-cases.md`
