@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 位置 belief 過期線物理化 **Slice 1 交件**（`feat/belief-staleness-physical` ＝ `87806078c`，origin 已對過）
 topic: ★**六格全綠 ＋ 到場點名 6／6**，而 1-e（跨樹）**逐字相同**：修法前 main `85b14055d` 與本樹 fp 都是 `67c011dc430e…`、逐 tick 軌跡都是 `3796035139`｜★★★**spec §4 寫「四個實參」，實際是【三個】** —— 第四個 `FailureMemory.record`（`order_system.gd:264`）用的是 `ORDER_LIFETIME`，不是那條線｜★★**1-h 我做成構造式**：反射讀 `default_args`＝0，**不是**比對原始碼字串｜★**fixture 踩到一格而那個紅是對的**：錨定必須寫進【belief 的 `activity`】，擺一個 live 據點沒有用 —— 它證明這條路走 belief 不走 live
 ---
