@@ -1,0 +1,63 @@
+=== 兩輪凍結取樣對照（★由原始輸出解析產生，不是手算）===
+A: seed=1337  docs/measurements/2026-09-18-freeze-sample-12days-seed1337.txt
+B: seed=42  docs/measurements/2026-09-18-freeze-sample-12days-seed42.txt
+
+[前提檢查]
+  床（tree HEAD）：A=f77d0670f(dirty=0)  B=f77d0670f(dirty=0)  ⇒ ✅ 同一支床
+  窗口：A=warring_states 12天  B=warring_states 12天 ⇒ ✅ 同窗口
+  ★唯一該不同的：seed（1337 vs 42）⇒ ✅
+
+[母體]
+  輪      總幀        >2s 幀          比例         最後隊數
+  A(1337) 17280     189            1.09%      106
+  B(42)  17280     141            0.82%      98
+  ★凍結幀 dt 最大（印出來的前 12 筆內）：A=3.65s  B=2.68s
+     ★★這是【印出來的前 12 筆】的最大值，不是全部 189／141 幀的最大值 —— 床只印前 12 筆。
+
+[★self_us 排行：兩輪並排]（★單位秒；★★只含 >2s 的幀）
+  相位                                   A self     B self       B/A   名次 A→B
+  misc.equip_mobilize                 136.320     86.571     0.64×   1→1
+  unified.rank.from_solo_body         130.779     70.255     0.54×   2→2
+  loop2.solo_engine                   120.195     48.532     0.40×   3→3
+  unified.rank.from_leader             75.603     21.243     0.28×   4→5  ★換位
+  unified.rank.from_member             65.198     43.685     0.67×   5→4  ★換位
+  loop3.orders_ambition                25.222     14.448     0.57×   6→6
+  loop2.indep_strategy                 19.240     11.864     0.62×   7→7
+  infra.new_loc                        16.483     10.037     0.61×   8→8
+  ★誠實限：床只印【前 8 名】⇒ 一個相位在某輪缺席，可能是【掉出前 8】不是【沒有時間】。
+
+[★`*multi` 列：兩輪並排]（★它們不參與淨值減法 ⇒ 永遠不會出現在上面那張排行裡）
+  相位                                  A total    B total       B/A
+  gather.home_food                     83.911     34.485     0.41×
+  gather.threat                        60.178     33.514     0.56×
+  gather.readiness_prey                57.448     30.404     0.53×
+  gather.weak_prey                     48.877     24.948     0.51×
+  gather.head                          42.159     19.026     0.45×
+  gather.aid                           26.537     14.963     0.56×
+  gather.strong_farm                   24.563     12.758     0.52×
+  indep.weakest_prey                   19.426     12.061     0.62×
+  gather.market                         4.771      2.844     0.60×
+  unified.to_task                       3.968      1.736     0.44×
+
+[★★★目標候選表（三行並排；blueprint 2026-09-18 硬要求）]
+  候選塊                          A(seed 1337)     B(seed 42)       B/A
+  ① 排行第一(self)                      136.320         86.571     0.64× A=misc.equip_mobilize B=misc.equip_mobilize
+  ② 父子合計最大(total)                   250.973        118.788     0.47× A=loop2.solo_engine B=loop2.solo_engine
+  ③ ★*multi 合計                      371.838        186.739     0.50× A=10列 B=10列
+
+  ★同一張表【除以各自的凍結幀數】（A 189 幀／B 141 幀）⇒ 單位：秒／凍結幀
+  候選塊                                  A 每幀           B 每幀       B/A
+  ① 排行第一                             0.7213         0.6140     0.85×
+  ② 父子合計最大                           1.3279         0.8425     0.63×
+  ③ ★*multi 合計                       1.9674         1.3244     0.67×
+  ⇒ ③／① ＝ A 2.73×　B 2.16×
+  ⇒ ③／② ＝ A 1.48×　B 1.57×
+  ★這三行【並排比】的理由：③ 不參與減法 ⇒ 它永遠不會排第一，而它可能是最大的一塊。
+
+[穩定性判讀（★機械算，不是我的印象）]
+  排行第一是否同一個相位：✅ 是（A=misc.equip_mobilize／B=misc.equip_mobilize）
+  前五名集合是否相同：✅ 相同
+    A 前五：misc.equip_mobilize > unified.rank.from_solo_body > loop2.solo_engine > unified.rank.from_leader > unified.rank.from_member
+    B 前五：misc.equip_mobilize > unified.rank.from_solo_body > loop2.solo_engine > unified.rank.from_member > unified.rank.from_leader
+  前五名【順序】是否相同：❌ 不同（★順序不穩 ⇒ 只用一輪挑目標會挑錯）
+  ★★兩輪各自【最大的那一塊】：A=③　B=③ ⇒ ✅ 同一塊
