@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 凍結終線§6.6(A1)+§6.7(基線政策)｜R②補審
 topic: verdict=issues(非阻擋)。流程違規的處置正確,不用再談。A1形狀本身健全,但抓到你漏數的第三個讀者(headless_test.gd,會loud fail不是silent但沒被列進遷移清單)。RNG雙抽的疑慮解掉——那個關係在A1之前就存在,A1沒有放大它。1-e/1-h建議加一句判準軸不要只列兩個事實
 ---
