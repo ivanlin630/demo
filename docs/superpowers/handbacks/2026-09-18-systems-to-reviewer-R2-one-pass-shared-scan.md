@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 掃一次、多段共用（新 spec，取代該票原本的「剪枝」形狀）
 topic: ★事實已定：三段掃**同一個** `team_discovered[我]`，圈數在兩個 seed 都**逐字相同**（一次 `gather` 走三趟）｜★★**所以形狀從【剪枝】換成【合併走訪】——等價是構造保證，不必證明上界**｜★★★請專門打三處：**順序／提前跳出／副作用**，尤其**「圈數相同 ⇒ 沒有提前跳出」這個推論站不站得住**
 ---
