@@ -128,5 +128,42 @@ status: draft — 待 R②
 
 ★**錨要核【正確的那個呼叫式還在】，不是核【沒有別的東西】**（缺席式判準恆假，今天已證）。
 
+## §6.6 ★★★第四條通道：`gather(advance=false)` 會【耗掉 global RNG】（implementer 量到 2026-09-18）
+
+```
+gather → ThreatAssessment.score → _approach_score → PathSystem.observe_velocity → randf()
+path_system.gd:222  observed_speed = actual_speed * (1.0 + (randf() - 0.5) * noise_factor)
+⇒ ★少呼一次 gather ＝ 少抽一個亂數 ＝ 之後所有隨機事件整條錯位（與回傳值無關）
+⇒ ★★我與 implementer 的清單上【都沒有這一條】（只列了「寫入」與「cadence」）
+```
+★**範圍更正**：`obs["speed"]` **不是全域沒人讀** —— `path_system.gd:291 predict_intercept` 讀它。
+⇒ 「threat 這條路上被丟掉」成立；「純粹只是燒掉一個亂數」**寬了一格**，而**它會改變處置**。
+
+**裁 (A1) lazy**：`observe_velocity` 不再算 speed／不再抽亂數（回 `{visible, direction, noise_factor}`），把抽取搬進 `PathSystem.observed_speed(...)`，由**唯一的消費者** `predict_intercept` 自己呼。
+★**判準一句話：【抽亂數的地方】與【用那個值的地方】必須是同一個地方。**
+★★**否決 (A2)（在本票內）**：它會改掉所有觀測雜訊的值，而本票是效能票；A2 解的「同 tick 兩次觀測不一致」是真問題 ⇒ **獨立票**。
+★★★**A1 仍然讓世界改變一次** ⇒ systems 呈報 blueprint，票裡不得自行吞掉。
+
+★**範圍更正②（implementer 更正 systems，同一小時）**：`observed_speed` 的 production 消費者是**兩處**——
+`path_system.gd:291 predict_intercept` ＋ `path_system.gd:257 estimate_catch_up`（另有 `headless_test.gd:9262` 斷言）
+⇒ ★我寫的「唯一的消費者」**窄了一格**，新的 `observed_speed()` **兩支都要呼**。
+⇒ ★★**成因**：我 grep 出呼叫點清單之後**只核了其中一個**就下結論 —— **清單看到了，沒有逐個核。**
+⇒ ★★★**「寬一格」與「窄一格」是同一個病**：斷言的範圍不等於證據的範圍（今天這一對一人一次，都被對方接住）。
+
+**WHAT 核准（blueprint 2026-09-18）**：准，最小修，世界改變一次。★歸類為「觀測儀器禁耗 global RNG」家族第 4 例，
+拆掉的是**【被呼叫幾次 ⇒ 世界演化】**這條耦合 ⇒ **what-if／預演／UI 預覽的前置正當性**。**綁兩個條件**：
+①修後**三跑 byte-identical**（該家族既有驗法）②**跨這顆 commit 的單 seed 前後對照不可歸因** ⇒ 卷面註明。
+⇒ ★**基線作廢一次**：既有 fp 基線全部重錨（含床裡的 `3951597c0fd9…`），
+**1-e 的比較對象換成修法後的新基線，並在床裡標明是哪一顆 commit 開始。**
+
+## §6.7 ★1-e 與 1-h 的【基線政策不一樣】（implementer 自陳盲區，2026-09-18）
+
+```
+1-h（注射陰陽）  驗【旗標的效果】 ⇒ 兩邊只差一個變因 ⇒ ★同輪比，不釘歷史字串（釘了 ⇒ 合法改動也打紅 ＝ 噪音）
+1-e（語意零改變）驗【這次修法有沒有改變世界】 ⇒ ★★必須【跨樹】比
+                ⇒ ★★★1-e 就是要釘住「修法前那棵樹」的 fp 字串，並標明是哪一顆 commit
+```
+★**「不要釘死歷史基線」是對 1-h 講的，不是對 1-e 講的** —— 把 1-e 改成同輪比較會讓它**永遠綠**。
+
 ★格 1-e（fp 逐字相同）**不鬆綁**：(丙) 的賣點就是不改語意，**它一動 fp ＝ 修法錯了，不是判準太嚴**。
 ★★注射點**禁耗 global RNG**（既有硬規）。診斷計數器留成**預設關閉且關閉時零成本**的開關。
