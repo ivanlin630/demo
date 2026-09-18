@@ -54,8 +54,12 @@ MAX_MOVE_TICKS = 720                          ⇒ 最慢的一端          = 2 �
                                     tolerance_tiles: float) -> Dictionary   ← ★★★【必填、無預設值】
   { pos, age_ticks, drift_tiles, blind }
     blind ＝ (沒看過) or (drift_tiles > tolerance_tiles)   ← 判斷仍然做，但尺是呼叫端給的
-    drift_tiles ＝ age_ticks × baseline_tiles_per_day() ÷ TICKS_PER_DAY   ← ★分母是物理，不是旋鈕
-    ★錨定過的目標（ACT_SETTLED／ACT_BUILDING）用【最慢那一端】估（既有形狀，前票已立）
+    drift_tiles ＝ age_ticks × 【目標可能速度】÷ TICKS_PER_DAY   ← ★分母是物理，不是旋鈕
+    ★★★【目標可能速度】＝兩檔（WHAT 裁 2026-09-18，★零新欄位）：
+        錨定（believed 駐紮／建設中，讀【已 merged 的錨定性】）⇒ 最慢那一端（MAX_MOVE_TICKS ⇒ 2 格/日）
+        無錨                                                  ⇒ 基準速度（baseline ⇒ 6 格/日）
+      ★降斜率、★★不歸零（速度取 0 ⇒ 那則 belief 變成不可證偽，永遠掉不到會被重新偵查的價值）
+      ★★★錨定性自身同線過期（它不是一個永久標籤）
 ★既有 `belief_pos()` 一行不動 ⇒ 格 1-e：fp 與逐 tick 行為軌跡【逐字相同】
 ```
 ★**理由**：這一票只造尺，不量東西。**造尺的票不准同時改世界** —— 否則「尺對不對」與「世界變好沒」會混在同一個 fp 裡。
@@ -102,6 +106,9 @@ MAX_MOVE_TICKS = 720                          ⇒ 最慢的一端          = 2 �
   §1a 尾巴逐字「哪些欄位能進 belief 由 WHAT 定」⇒ 那一格是 blueprint 的
   （defer：target-speed-belief-field-or-flat-forever）
 ```
+★**誠實標（WHAT 2026-09-18 改寫，貼著事實）**：不是「在函式裡成立、在世界裡不成立」，而是
+**「兩檔分化【在】世界裡，連續分化【不在】」** —— ★前者由錨定性驅動、已 merged；後者要新欄位，等付費證據。
+
 ★★**而 defer 原文寫「有效期由【移動能力 × 距離】推」—— 我在這裡更正【距離】那一項**：
 **「我離它多遠」不影響「它還在不在那裡」**（漂移只跟 時間×速度 有關）。距離影響的是**我要不要為此出動**，
 那是**決策層**的事。⇒ 本票只物理化 **時間×速度**，距離不進 belief 層。
