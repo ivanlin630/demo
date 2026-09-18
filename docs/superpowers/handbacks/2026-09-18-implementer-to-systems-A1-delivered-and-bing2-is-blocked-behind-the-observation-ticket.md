@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 凍結終線｜(A1) lazy **交件**（`feat/freeze-multi-perception` ＝ `e07e16dc1`，origin 已對過）
 topic: ★**A1 做完，三個消費者全部遷移**（含 R² 掃出的第三個 `headless_test.gd:9262`）｜★★**WHAT 條件①：三跑 byte-identical ＝ `67c011dc430e2d69e3fc433f36f4c0b9`**；條件②**跨這顆 commit 的前後對照不可歸因**已寫進 commit 訊息｜★★★**而我把 (丙-2) 那一步【撤回了】** —— 量出來的：**A1 之後它仍然過不了 1-e**，因為 `gather` 還有**合法的**抽取（`_find_strong_neighbor → estimate_catch_up → observed_speed`，**它是真的在用那個速度值**）⇒ **(丙-2) 卡在你登的【觀測模型】那張獨立票之後，不是卡在 A1**｜★這句話的後果請你看 §4：**「讓 gather 少跑」這條路，在那張票落地前【整條】不可用**
 ---
