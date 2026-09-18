@@ -211,6 +211,7 @@ static func position_estimate(state: WorldState, observer_id: int, target_id: in
 
 
 static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictionary:
+	if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.sub.best_estimate")   # ★§1：重複子呼叫樁
 	var cs: Array = claims(state, obs_id, tgt_id)
 	if Probe.enabled: Probe.bump("bel.best_call")
 	if cs.is_empty(): return {}

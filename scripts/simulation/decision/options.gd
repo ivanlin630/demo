@@ -395,6 +395,7 @@ static var REGISTRY: Dictionary = {
 		#   ★舊三門沒有消失：directive 降成 `faction_duty` term、血仇降成 `feud_pull` term、
 		#     征服 intent 降成 `intent_fit` term —— **它們從許可證變成秤上的重量**。
 		"applicable": func(ctx: DecisionContext) -> bool:
+			if Probe.enabled: Probe.bump("gseg.read.decision.attack")   # ★§1 量測樁
 			return ctx.attack_target_id != -1,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 多源攻擊 target（優先序 faction directive > 征服 intent > 血仇 fallback）。序4 vendetta 溶入：
@@ -403,6 +404,7 @@ static var REGISTRY: Dictionary = {
 			var _ac: DecisionContext = DecisionContext.gather(state, team)
 			# ★★★讀【與門同一個欄位】（spec §④）：三源優先序已搬進 gather 算一次，
 			#   ★這裡不再自己組 target —— 門用一組條件、執行用另一組，正是 IDLE 陷阱的來源。
+			if Probe.enabled: Probe.bump("gseg.read.decision.attack")   # ★§1 量測樁
 			var atid: int = _ac.attack_target_id
 			if atid == -1 or not state.teams.has(atid):
 				if Probe.enabled: Probe.bump("attack.to_task_idle.no_target")

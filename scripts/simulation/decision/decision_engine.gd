@@ -400,6 +400,9 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				#   ★「有非零值」不算過 —— **全部同一個數也叫非零**，那是另一個常數 ⇒ 要【變異】
 				var _authed: bool = ("攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1) 					or (ctx.intent == "征服" and ctx.intent_target != -1) 					or (ctx.strongest_feud >= DecisionOptions.FEUD_ATTACK_MIN and ctx.feud_target_id != -1)
 				_cmp["authed"] = _authed
+				# ★★★這一塊的 `ctx.attack_*` 讀取【全部餵給 Probe】＝**診斷讀，不是決策讀**
+				#   ⇒ 單獨記一個桶：★若不分開，「有人讀過」會被診斷自己撐起來。
+				if Probe.enabled: Probe.bump("gseg.read.diag.attack")
 				_cmp["tier"] = ctx.attack_belief_tier
 				_cmp["loot_est"] = snappedf(ctx.attack_loot_est, 0.001)
 				_cmp["odds"] = snappedf(ctx.attack_win_odds, 0.001)

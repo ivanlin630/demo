@@ -30,6 +30,9 @@ static var _mc_on: bool = false
 #   ★★所以改用【構造保證】的量法：**在那一次呼叫的前後各取一次全世界指紋**，不同就是寫了。
 #     它不依賴任何人的清單完不完整 —— 漏掉的寫入點一樣會讓指紋變。
 #   ★★★代價：每次 observe 呼叫多算兩次 fp ⇒ **只在診斷跑開**，預設關閉、零成本。
+# ★★★【把計數綁在 gather 之內】：這些掃描在 gather 之外也有呼叫端，
+#   ⇒ 全域計數會把【別人的呼叫】算進「每次 gather 幾圈」，那個除法會騙人。
+static var _in_gather: bool = false
 static var _w_probe: bool = false
 static var _w_calls: int = 0        # advance=false 的呼叫次數
 static var _w_dirty: int = 0        # ★其中【指紋變了】的次數 ＝ 真的寫了世界
@@ -497,6 +500,7 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 	return out
 
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
+	if Probe.enabled: _in_gather = true     # ★量測旗標：Probe 關著時連這個賦值都不做
 	var _w_fp0: String = ""
 	var _w_cad0: String = ""
 	if _w_probe and not advance:
@@ -628,6 +632,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _best_t: float = 0.0
 	var _best_id: int = -1
 	for tid in state.team_discovered.get(team.team_id, []):
+		if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.scan.threat_inline.iter")   # ★§0 補量：第四條走訪
 		if tid == team.team_id: continue
 		var _other: TeamData = state.teams.get(tid)
 		if _other == null: continue
@@ -1073,6 +1078,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		if _sf != null and _sf.leader_team_id == team.team_id:   # 只領主探子民（在乎自家人）
 			var _norm: float = float(BeliefSystem.SCOUT_TIMEOUT)
 			for _mid in state.teams:
+				if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.scan.home_food.iter")   # ★§1 母體樁（★不同母體）
 				if _mid == team.team_id: continue
 				var _mt: TeamData = state.teams[_mid]
 				if _mt.faction_id != team.faction_id: continue
@@ -1150,6 +1156,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.readiness_thr_eff = _thr * _hunger_relief
 		# 富 prey target（find_prosperity_prey：has_belief/reachable 守衛在內；征服攻擊 target 用此非 _nearest）。
 		# ★只掃一次：可行集合與人格 argmax 同源（兩次掃 ＝ 兩倍尋路）
+		# ★★★【§1 第三欄的量測樁】（只在 Probe 開著時記，production 零成本）：
+		#   這一行是 `gather.readiness_prey` 段裡最貴的東西（它自己的註解：兩次掃 ＝ 兩倍尋路）。
+		#   ⇒ 與【讀取點】的計數對照 ⇒ 回答「算了但這次沒人讀」有多少。
+		if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.compute.attack_scan")
 		var _ascan: Dictionary = FactionAISystem.attack_scan(state, team, ldr)
 		c.prosperity_prey_id = int(_ascan["best_id"])
 		c.reference_wealth = FactionAISystem.reference_wealth(state, team)
@@ -1431,6 +1441,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _mc_d: int = Time.get_ticks_usec() - _mc_t0
 		_mc_us += _mc_d
 		if _mc_is_repeat: _mc_repeat_us += _mc_d
+	if Probe.enabled: _in_gather = false
 	return c
 
 # ★把自己攤平成 {欄位名: 值}（B1 用）。★用 get_property_list 而不是手抄清單：
@@ -1489,12 +1500,14 @@ static func _readable(v, depth: int = 0):
 static func _max_threat(state: WorldState, team: TeamData) -> float:
 	var best: float = 0.0
 	for tid in state.team_discovered.get(team.team_id, []):
+		if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.scan.threat.iter")   # ★§1 母體樁
 		var other: TeamData = state.teams.get(tid)
 		if other == null: continue
 		if other.faction_id == team.faction_id and team.faction_id != -1: continue
 		if float(team.known_reputations.get(tid, ThreatAssessment.REPUTATION_NEUTRAL)) \
 				>= ThreatAssessment.REPUTATION_NEUTRAL:
 			continue   # neutral/盟不算威脅（避 threat 壓過 join/camp 絕境）
+		if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.maxthreat.scored")   # ★過濾後真的算 score 的元素
 		var t: float = ThreatAssessment.score(state, team, other)
 		if t > best: best = t
 	return clampf(best, 0.0, 1.0)
