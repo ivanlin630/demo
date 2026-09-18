@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 位置belief過期線物理化｜R②判決
 topic: verdict=clean(1個非阻擋建議)。①供給端不判斷後的安全預設用【必填無預設參數】converted成語言強制,不用純靠人記②Slice1邊界1-e本身就是構造保證不用list③距離更正對,公式本身也印證了這個判斷
 ---

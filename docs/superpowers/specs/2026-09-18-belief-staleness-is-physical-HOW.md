@@ -41,15 +41,19 @@ MAX_MOVE_TICKS = 720                          ⇒ 最慢的一端          = 2 �
 
 ★★★**誠實限（我自己先講）**：供給端硬切**是一個保守的預設** —— 拆掉它，預設就從【安全】變成【不安全】：
 **有讀者忘了定容忍度，就會拿 18 天前的位置去攻擊，而它不會紅**。
-⇒ 所以 Slice 2 的規矩是：**遷一個讀者＝在那個呼叫點明寫它的容忍度**，★**沒有預設值可用**（給了預設值，忘記定的人就會沉默地吃到它）。
+⇒ ★★★**處置（R② 2026-09-18 升級成構造）：容忍度是【必填、無預設值】的參數** —— **忘記定 ＝ GDScript 層級的缺參數錯誤，不是靜默通過**。
+★這不是回到供給端硬切（那條我否決了）：**尺仍然是呼叫端給的**，變的只是**「有沒有拿尺」這個動作從【靠記得】換成【沒有就跑不動】**。
+★★R② 的原話留著：「**紅的形式是【執行期缺參數】而不是【閘紅】**」—— **能在語言層紅的，就不要留給閘。**
 ★而 `belief_pos()` 現在把**「沒看過」與「過期」都回成 `(-1,-1)`** —— 新介面的 `blind` 欄位把這兩件事分開，**那是本票順手修掉的一個真混淆**（兩者該做的事不同：沒看過 ⇒ 去偵查；過期 ⇒ 可能還堪用）。
 
 # §3 切片
 
 ## Slice 1（本票）：加介面，**不改任何既有讀者**
 ```
-新增 BeliefSystem.position_estimate(state, observer_team_id, target_id) -> Dictionary
+新增 BeliefSystem.position_estimate(state, observer_team_id, target_id,
+                                    tolerance_tiles: float) -> Dictionary   ← ★★★【必填、無預設值】
   { pos, age_ticks, drift_tiles, blind }
+    blind ＝ (沒看過) or (drift_tiles > tolerance_tiles)   ← 判斷仍然做，但尺是呼叫端給的
     drift_tiles ＝ age_ticks × baseline_tiles_per_day() ÷ TICKS_PER_DAY   ← ★分母是物理，不是旋鈕
     ★錨定過的目標（ACT_SETTLED／ACT_BUILDING）用【最慢那一端】估（既有形狀，前票已立）
 ★既有 `belief_pos()` 一行不動 ⇒ 格 1-e：fp 與逐 tick 行為軌跡【逐字相同】
@@ -83,6 +87,7 @@ MAX_MOVE_TICKS = 720                          ⇒ 最慢的一端          = 2 �
 | 1-d | ★`belief_pos()` 逐字未改（內容錨，正面式） | 錨消失 ⇒ Slice 1 越界改了讀者 ⇒ 紅 |
 | 1-e | ★★fp 與逐 tick 行為軌跡**逐字相同**（本票只加介面） | 不同 ⇒ 越界 |
 | 1-f | ★★★`anchoredness_freshness_bed.gd:195` 的內容錨（現在釘「`BELIEF_STALE_TICKS` 逐字未改」）**同票更新**，不是刪掉 | 刪掉 ⇒ 紅（錨被拿掉＝守衛消失） |
+| 1-h | ★★★`tolerance_tiles` **沒有預設值**：造一個少傳那個參數的呼叫 ⇒ **必須跑不動**（陽性對照） | 少傳也能跑 ⇒ 有人給了預設值 ⇒ 紅 |
 | 1-g | 到場點名 ＋ expect 釘 `N／N` | 少一格 ⇒ 紅 |
 
 ★格 1-f 的意思要講明白：**那個錨現在會擋住這一票，而那是它在做它的工作** ——
