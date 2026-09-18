@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `*multi` 成本 — 形狀確定
 topic: ★**形狀從【剪枝】換成【掃一次、多段共用】** —— 你的數字把它定下來了（三段圈數逐字相同）｜★★★**而最值錢的是你那個差點說謊的儀器**：全域計數器 ÷ 局部母體，**那個除法在形狀上就不成立**，而它印出來是**一個很像答案的數**｜★★新 spec 已送 R²，`best_estimate` 那層我登成獨立 defer（**不准順手做**）
 ---
