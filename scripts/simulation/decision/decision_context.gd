@@ -632,6 +632,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _best_t: float = 0.0
 	var _best_id: int = -1
 	for tid in state.team_discovered.get(team.team_id, []):
+		if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.scan.threat_inline.iter")   # ★§0 補量：第四條走訪
 		if tid == team.team_id: continue
 		var _other: TeamData = state.teams.get(tid)
 		if _other == null: continue
@@ -1506,6 +1507,7 @@ static func _max_threat(state: WorldState, team: TeamData) -> float:
 		if float(team.known_reputations.get(tid, ThreatAssessment.REPUTATION_NEUTRAL)) \
 				>= ThreatAssessment.REPUTATION_NEUTRAL:
 			continue   # neutral/盟不算威脅（避 threat 壓過 join/camp 絕境）
+		if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.maxthreat.scored")   # ★過濾後真的算 score 的元素
 		var t: float = ThreatAssessment.score(state, team, other)
 		if t > best: best = t
 	return clampf(best, 0.0, 1.0)

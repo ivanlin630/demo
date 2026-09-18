@@ -119,18 +119,25 @@ func _run() -> void:
 	var it_attack: int = int(Probe.counts.get("gseg.scan.attack.iter", 0))
 	var it_prey: int = int(Probe.counts.get("gseg.scan.prey.iter", 0))
 	var it_threat: int = int(Probe.counts.get("gseg.scan.threat.iter", 0))
+	var it_thr2: int = int(Probe.counts.get("gseg.scan.threat_inline.iter", 0))
 	var it_home: int = int(Probe.counts.get("gseg.scan.home_food.iter", 0))
 	var sub_be: int = int(Probe.counts.get("gseg.sub.best_estimate", 0))
+	var mt_scored: int = int(Probe.counts.get("gseg.maxthreat.scored", 0))
 	print()
 	print("[★★★母體：四段各自掃了幾圈]（每次 gather 平均）")
 	print("   readiness_prey(attack_scan)  %10d 圈｜每次 %.2f" % [it_attack, float(it_attack) / float(maxi(calls, 1))])
 	print("   weak_prey(_find_weakest_prey)%10d 圈｜每次 %.2f" % [it_prey, float(it_prey) / float(maxi(calls, 1))])
 	print("   threat(_max_threat)          %10d 圈｜每次 %.2f" % [it_threat, float(it_threat) / float(maxi(calls, 1))])
+	print("   threat(★行內那條 :634)          %10d 圈｜每次 %.2f  ★★§0 漏數的第四條" % [it_thr2, float(it_thr2) / float(maxi(calls, 1))])
 
 	print("   home_food(scout 迴圈)        %10d 圈｜每次 %.2f  ★母體不同（state.teams）" % [it_home, float(it_home) / float(maxi(calls, 1))])
 	print("   共用子呼叫 best_estimate      %10d 次｜每次 %.2f" % [sub_be, float(sub_be) / float(maxi(calls, 1))])
-	var same3: bool = (it_attack == it_prey and it_prey == it_threat)
-	print("   ⇒ ★前三段的圈數是否【逐字相同】：%s" % ("★是 ⇒ 同一個母體被掃了三次" if same3 else "否 ⇒ 母體不同或有提前跳出"))
+	var same3: bool = (it_attack == it_prey and it_prey == it_threat and it_threat == it_thr2)
+	print("   ⇒ ★【四條】走訪的圈數是否逐字相同：%s" % ("★是 ⇒ 同一個母體被掃了四次" if same3 else "否"))
+	print("   ★★★_max_threat 過濾後真的算 score 的元素 ＝ %d／%d 圈（p ＝ %.3f）" % [
+		mt_scored, it_threat, float(mt_scored) / float(maxi(it_threat, 1))])
+	print("      ⇒ 合併共用後 threat.score_n 的預期比值 ＝ 1／(1+p) ＝ %.3f（★不是 0.5）" % [
+		1.0 / (1.0 + float(mt_scored) / float(maxi(it_threat, 1)))])
 	if it_attack == 0 or it_prey == 0 or it_threat == 0:
 		_undec += 1
 		push_error("[不可判] 有掃描的圈數是 0 ⇒ 母體為 0，上面的比較沒有意義")
