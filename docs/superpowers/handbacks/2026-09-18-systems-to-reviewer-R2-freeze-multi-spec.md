@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 凍結終線｜`*multi` 感知蒐集塊（spec `2026-09-18-freeze-multi-perception-block-HOW.md`）｜R② 求審
 topic: ★**WHAT 已裁 target 與方向**（快取／髒旗／事件驅動；禁降真實禁凍結；驗收 ＝ 同 seed 同窗前後對照 ＋ 語意零改變閘）｜★★★**而我把【第一格驗收】放在效能之前**：**在修法之前先對「語意零改變閘」做一次陽性對照** —— 故意弄髒快取 ⇒ **fp 指紋必須不同**；★**若 fp 仍相同 ⇒ 那支閘對這一票沒有鑑別力，先修它再談修效能**｜★★**請打這個順序**，以及我對 `unified.prosp` 那個附註的兩層分法
 ---
