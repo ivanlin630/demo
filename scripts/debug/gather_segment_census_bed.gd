@@ -14,13 +14,13 @@ extends SceneTree
 #   ②占比：★**不是絕對秒數** —— 單輪排行不可依，那是 WHAT 立過的規矩
 #   ③「算了但沒人讀」：★**本床報這一欄**（構造式：算過幾次 vs 被讀過幾次）——
 #     ★★而「讀」要分成【決策讀】與【診斷讀】兩欄，理由見下面那一段。
-#     ★★★仍未量的是「段內掃描實際跑幾圈」，我標明它而不是留白 —— 留白會被讀成 0。
+#     ★★★而「段內掃描實際跑幾圈」這一輪也量了（母體那一塊）。
 #
 # ★誠實限：
 #   ①`phase_timing` 打開本身有成本 ⇒ **絕對秒數不可跨「開／關」比較**；本床只用它算【占比】。
 #   ②`gather.*` 這 8 個檢查點是**順序執行**的計時樁 ⇒ 它們的「執行次數」≈ gather 呼叫次數，
 #     ★**真正有意義的是【段內那些 O(隊數) 掃描實際跑了幾圈】，而那需要在掃描裡加計數器**
-#     ⇒ 那一格**本床沒有**，標【未量】。
+#     ⇒ ★這一輪【量了】：見輸出的「母體：四段各自掃了幾圈」那一塊。
 #   ③本床只看 FactionAI 的相位表 —— 一次 gather 裡不屬於這張表的時間不在上面。
 #
 # env：GS_DAYS（預設 8）／GS_SEED（預設 1337）／GS_CONFIG（預設 warring_states）
@@ -111,7 +111,28 @@ func _run() -> void:
 	print("      全部餵給 Probe ⇒ 那是【觀測】不是【決策】。把它算進「有人讀」，會讓一個")
 	print("      沒有任何決策在用的欄位看起來是必要的 —— ★量「讀」這個方法本身有這個坑。")
 
-	print("
-[★還沒量的那一欄，★★標明而不是留白]（留白會被讀成 0）")
-	print("   段內 O(隊數) 掃描【實際跑幾圈】：★仍未量 —— 要在掃描裡加計數器；")
-	print("      ★★上面的『每次呼叫』是【段】的平均，不是【圈】的成本")
+	print()
+	# ── ★★★母體那一格（systems 裁 2026-09-18：先問事實，不先挑判準列）──
+	#   問題：那幾段是不是【各自重跑同一個母體】的掃描？
+	#   ⇒ 若是 ⇒ 真正的頭是「掃描本身」⇒ 形狀＝掃一次多段共用（★輸入相同輸出相同，等價，免證上界）
+	#   ⇒ 若母體各不相同 ⇒ 回到原表（有可證上界則剪枝，否則結案）
+	var it_attack: int = int(Probe.counts.get("gseg.scan.attack.iter", 0))
+	var it_prey: int = int(Probe.counts.get("gseg.scan.prey.iter", 0))
+	var it_threat: int = int(Probe.counts.get("gseg.scan.threat.iter", 0))
+	var it_home: int = int(Probe.counts.get("gseg.scan.home_food.iter", 0))
+	var sub_be: int = int(Probe.counts.get("gseg.sub.best_estimate", 0))
+	print()
+	print("[★★★母體：四段各自掃了幾圈]（每次 gather 平均）")
+	print("   readiness_prey(attack_scan)  %10d 圈｜每次 %.2f" % [it_attack, float(it_attack) / float(maxi(calls, 1))])
+	print("   weak_prey(_find_weakest_prey)%10d 圈｜每次 %.2f" % [it_prey, float(it_prey) / float(maxi(calls, 1))])
+	print("   threat(_max_threat)          %10d 圈｜每次 %.2f" % [it_threat, float(it_threat) / float(maxi(calls, 1))])
+
+	print("   home_food(scout 迴圈)        %10d 圈｜每次 %.2f  ★母體不同（state.teams）" % [it_home, float(it_home) / float(maxi(calls, 1))])
+	print("   共用子呼叫 best_estimate      %10d 次｜每次 %.2f" % [sub_be, float(sub_be) / float(maxi(calls, 1))])
+	var same3: bool = (it_attack == it_prey and it_prey == it_threat)
+	print("   ⇒ ★前三段的圈數是否【逐字相同】：%s" % ("★是 ⇒ 同一個母體被掃了三次" if same3 else "否 ⇒ 母體不同或有提前跳出"))
+	if it_attack == 0 or it_prey == 0 or it_threat == 0:
+		_undec += 1
+		push_error("[不可判] 有掃描的圈數是 0 ⇒ 母體為 0，上面的比較沒有意義")
+
+	print("   ★註：上面「每次呼叫」是【段】的平均；【圈】的成本見上面那一塊。")

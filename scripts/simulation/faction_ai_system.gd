@@ -261,6 +261,7 @@ static func attack_scan(state: WorldState, team: TeamData, leader: PersonData) -
 	var cruelty: float = float(leader.values.get("殘忍", 0.5)) if leader != null else 0.0
 	var ambition: float = float(leader.values.get("野心", 0.5)) if leader != null else 0.0
 	for tid in state.team_discovered.get(team.team_id, []):
+		if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.scan.attack.iter")   # ★§1 母體樁
 		if tid == team.team_id: continue
 		var prey: TeamData = state.teams.get(tid)
 		if prey == null: continue
@@ -7387,6 +7388,7 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 	var best_pop: float = 999999.0
 	var best_food: float = -1.0
 	for tid in state.team_discovered.get(team.team_id, []):
+		if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.scan.prey.iter")   # ★§1 母體樁
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
