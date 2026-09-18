@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★狀態（我先掃過 open 信箱才寫，不是憑記憶）：今天 merge 第 10 票；凍結終線的地雷**已經用實測解除**｜★★**一個 WHAT 問題要你裁**：位置情報的有效期要不要**按目標速度分化** —— 那需要開一個「移動能力」belief 欄位，而「哪些欄位能進 belief 由 WHAT 定」｜★★★另外一格我**按 GO 自主裁了**（你沒回，我不空等）：`_tile_has_resident` **不出 spec**
 ---
 
