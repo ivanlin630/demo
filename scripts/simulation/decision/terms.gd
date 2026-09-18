@@ -287,6 +287,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			#   ★病因：另外四項全是授權形狀（派系令／派系令／征服身分／歷史仇）⇒ 沒授權時 util 恆 0
 			#   ⇒ ★★門降級成可行性之後，**秤上仍然只有授權** ⇒ 這一項補的就是那個缺口。
 			#   ★★★三條硬規則（spec §②）：①資產只讀 belief ②需求走 need oracle ③贏率用既有 capability 接地。
+			if Probe.enabled: Probe.bump("gseg.read.decision.attack")   # ★§1 量測樁
 			if opt != "攻擊" or ctx.attack_target_id == -1: return 0.0
 			# ①機會 ＝ belief 估的對方資產（`_belief_richness`；tier 分層天然在它裡面）
 			# ★★★刀二：與 `faction_ai_system` 的 score **同一個單調壓縮、同一把尺**
@@ -400,6 +401,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var _rneed: float = clampf(1.0 - ctx.food_days / maxf(ctx.desperation_entry_threshold, 0.01), 0.0, 1.0)
 			# ③贏率：★**用 ctx 既有的那個欄位** —— `attack_win_odds` 與舊的 `cap` 是**逐字相同的式子兩個名字**
 			#   ⇒ ★★這裡刪掉那份重算（三處變兩處）。
+			if Probe.enabled: Probe.bump("gseg.read.decision.attack")   # ★§1 量測樁
 			var _rodds: float = ctx.attack_win_odds
 			# ④人格 MODULATE（★不加新常數）：好戰／殘忍放大、慎重壓低 —— ★★它不碰 take／need／odds。
 			var _rmart: float = float(ctx.leader_values.get("好戰", 0.5))

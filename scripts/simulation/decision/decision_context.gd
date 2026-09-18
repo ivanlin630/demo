@@ -1135,6 +1135,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		c.readiness_thr_eff = _thr * _hunger_relief
 		# 富 prey target（find_prosperity_prey：has_belief/reachable 守衛在內；征服攻擊 target 用此非 _nearest）。
 		# ★只掃一次：可行集合與人格 argmax 同源（兩次掃 ＝ 兩倍尋路）
+		# ★★★【§1 第三欄的量測樁】（只在 Probe 開著時記，production 零成本）：
+		#   這一行是 `gather.readiness_prey` 段裡最貴的東西（它自己的註解：兩次掃 ＝ 兩倍尋路）。
+		#   ⇒ 與【讀取點】的計數對照 ⇒ 回答「算了但這次沒人讀」有多少。
+		if Probe.enabled: Probe.bump("gseg.compute.attack_scan")
 		var _ascan: Dictionary = FactionAISystem.attack_scan(state, team, ldr)
 		c.prosperity_prey_id = int(_ascan["best_id"])
 		c.reference_wealth = FactionAISystem.reference_wealth(state, team)
