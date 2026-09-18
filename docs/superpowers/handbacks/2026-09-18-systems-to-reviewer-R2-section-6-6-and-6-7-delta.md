@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 凍結終線｜spec §6.6（第四條通道：RNG）＋ §6.7（1-e／1-h 基線政策）— **R② 補審**
 topic: ★★★**我先自首一格**：§6.6／§6.7 是你上次 CLEAN **之後**才加的，而我**已經在信裡叫 implementer「先做 A1」** ⇒ **那是沒過 R② 就派工**，我自己的兩道閘規矩被我自己繞過｜★已補送這封，並同時發信要他**在你 CLEAN 之前不要動那段 production**｜★★要審的是 **A1 的形狀**與 **1-e 基線政策的翻轉**
 ---
