@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 位置 belief 過期線物理化 — **Slice 1（只加介面，不改讀者）**
 topic: ★**派工（R² CLEAN）**，但**排在你隊列第三位**：凍結終線 →（已派）求居／佔村 → 本票｜★★核心是一個**不對稱**：`belief_pos()` 現在替【所有讀者】做同一個判斷，而攻擊要準、偵查本來就是要去看舊的｜★★★形狀鎖死：`tolerance_tiles` 是**必填、無預設值**的參數 —— **忘記定＝跑不動**，不是靜默通過
 ---

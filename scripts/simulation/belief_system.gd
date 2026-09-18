@@ -141,6 +141,75 @@ static func belief_pos(state: WorldState, observer_id: int, target_id: int) -> V
 		return Vector2i(-1, -1)
 	return bel.get("tile_pos", Vector2i(-1, -1))
 
+# ★★★【位置估計：事實 ＋ 年齡 ＋ 漂移，判斷交給呼叫端】（spec 2026-09-18 Slice 1）
+#
+# ★病：`belief_pos()` 在【供給端】硬切 —— 超過 `BELIEF_STALE_TICKS` 一律回 `(-1,-1)`
+#   ⇒ **所有讀者被迫共用同一條 3 天線**，而他們要做的事不一樣：
+#     攻擊／追擊要準（打空＝浪費一次行軍）｜偵查**就是要去看舊的**｜外交只要大概方向。
+#   ⇒ ★★所以這支**不替讀者判斷**，它回【事實 ＋ 年齡 ＋ 漂移估計】，尺由呼叫端給。
+#
+# ★★★`tolerance_tiles` **沒有預設值**（R² 2026-09-18 升級成構造）：
+#   拆掉供給端硬切之後，預設就從【安全】變成【不安全】——「忘了定容忍度」會變成
+#   「拿 18 天前的位置去攻擊，而它不會紅」。
+#   ⇒ **沒有預設值 ⇒ 忘記傳＝GDScript 層級的缺參數錯誤**，★**能在語言層紅的，就不要留給閘**。
+#
+# ★回傳：{ pos, age_ticks, drift_tiles, blind }
+#   `pos == (-1,-1)`＝**從沒看過**（age_ticks ＝ -1）｜`pos` 有值而 `blind`＝**看過但太舊**
+#   ⇒ ★★這兩件事 `belief_pos()` 都回 `(-1,-1)`，而它們該做的事不同
+#     （沒看過 ⇒ 去偵查；過期 ⇒ 可能還堪用）—— 本票順手把這個真混淆分開。
+#
+# ★漂移 ＝ 年齡 × 【目標可能速度】÷ TICKS_PER_DAY，而速度是**兩檔**（WHAT 裁 2026-09-18，零新欄位）：
+#   相信它**錨定**（駐紮／建設中）⇒ 最慢的那一端（`slowest_tiles_per_day`）
+#   無錨                        ⇒ 基準速度（`baseline_tiles_per_day`）
+#   ★★**降斜率、不歸零**：速度取 0 會讓那則 belief 變成不可證偽，永遠掉不到會被重新偵查的價值。
+#   ★★★**錨定性自身同線過期**——這裡直接呼 `appearance()`，而它超過線就回 `ACT_UNKNOWN`
+#     ⇒ 「錨定不是永久標籤」這件事**沿用既有實作**，不另寫第二份。
+#
+# ★§1a 自檢：分子 `age_ticks` ＝ 觀察者自己的 belief 欄位；分母是世界常數（不讀任何隊的 live 狀態）。
+#   ★★目標【特有】的速度不進來 —— 那要先有「移動能力」belief 欄位，而那一格是 WHAT 的
+#     （defer：target-speed-belief-field-or-flat-forever）。
+static func position_estimate(state: WorldState, observer_id: int, target_id: int,
+		tolerance_tiles: float) -> Dictionary:
+	var out: Dictionary = {"pos": Vector2i(-1, -1), "age_ticks": -1,
+		"drift_tiles": INF, "blind": true}
+	var obs: TeamData = state.teams.get(observer_id)
+	var tgt: TeamData = state.teams.get(target_id)
+	if obs == null or tgt == null:
+		return out
+	var now: int = state.world.current_tick
+	var pos: Vector2i = Vector2i(-1, -1)
+	var last_tick: int = -1
+	# ★兩條來源與 `belief_pos()` 同源：同-faction 走名冊、跨-faction 走 belief
+	#   ★★而這裡【不套】那條 3 天線 —— 那正是本票要交給呼叫端的東西。
+	if tgt.faction_id != -1 and tgt.faction_id == obs.faction_id:
+		var f = state.factions.get(obs.faction_id)
+		if f != null:
+			var kms: Dictionary = f.known_member_states.get(target_id, {})
+			if not kms.is_empty():
+				pos = kms.get("tile_pos", Vector2i(-1, -1))
+				last_tick = int(kms.get("last_tick", -1))
+	else:
+		var bel: Dictionary = best_estimate(state, observer_id, target_id)
+		if not bel.is_empty():
+			pos = bel.get("tile_pos", Vector2i(-1, -1))
+			last_tick = int(bel.get("last_tick", -1))
+	if pos == Vector2i(-1, -1) or last_tick < 0:
+		if Probe.enabled: Probe.bump("pos_est.never")
+		return out          # ★從沒看過：pos 空、age -1 ⇒ 與「過期」分得開
+	var age: int = maxi(now - last_tick, 0)
+	var act: String = String(appearance(state, observer_id, target_id).get("activity", ACT_UNKNOWN))
+	var anchored: bool = (act == ACT_SETTLED or act == ACT_BUILDING)
+	var speed: float = MovementSystem.baseline_tiles_per_day()
+	if anchored:
+		speed = MovementSystem.slowest_tiles_per_day()
+	var drift: float = float(age) * speed / float(WorldState.TICKS_PER_DAY)
+	if Probe.enabled:
+		Probe.bump("pos_est.anchored" if anchored else "pos_est.moving")
+		if drift > tolerance_tiles: Probe.bump("pos_est.blind_stale")
+	return {"pos": pos, "age_ticks": age, "drift_tiles": drift,
+		"blind": drift > tolerance_tiles}
+
+
 static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictionary:
 	if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.sub.best_estimate")   # ★§1：重複子呼叫樁
 	var cs: Array = claims(state, obs_id, tgt_id)
@@ -379,6 +448,18 @@ static func known_outposts(state: WorldState, observer_id: int) -> Array:
 			"last_tick": int(op.get("last_tick", 0)),
 		})
 	return out
+
+# ★★★「我【看過】那個位置上、屬於那支隊的據點嗎？」—— `known_outposts` 的一層過濾，**不是第二份實作**。
+#   ★為什麼要 owner 這一格：閘只確認「我對那支隊有 belief」，
+#     而【那座城是不是它的】是另一件事（姊妹票已經走過這個分界）。
+#   ★★找不到 ⇒ 回空字典 ⇒ 呼叫端該讓那項估算【不成立】，
+#     ★★★**不是退回 live**（§1a：`unknown` 一律不通過、禁 default-pass）。
+static func known_outpost_at(state: WorldState, observer_id: int, pos: Vector2i,
+		owner_id: int) -> Dictionary:
+	for rec in known_outposts(state, observer_id):
+		if rec["tile_pos"] == pos and int(rec["owner_id"]) == owner_id:
+			return rec
+	return {}
 
 # ★★★從 `faction_ai_system.gd` 搬過來（systems 裁 2026-09-02）：★純解析 msg dict，零狀態 ⇒ 零行為。
 #   ★搬它的理由不是整理，是【解掉 belief_system ↔ faction_ai 的相互引用】。

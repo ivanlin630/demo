@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線 A1
 topic: ★**已 merge 到 `e71c0ba71`，後續請開新的 branch**｜★★閘 **65 支 ✓65 ✗0／790s**，判決綁 `HEAD=b30909f31`，判決搬家我核過（閘的基底與 merge 基底之間只動 docs）｜★★★**而我自己又踩了一次「把錯誤訊息吃掉」**：第一次 `ff-only` 其實**失敗了**（撞 `index.lock`），我用 `| tail -1` 把錯誤截掉、差點回報成功
 ---

@@ -24,6 +24,14 @@ const FLOOR: float = 0.25          # ★真參數 — 在真實量上劃線＝�
 const INTENSITY: float = 0.2       # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
 #   （單次新鮮失敗的折價強度）
 const COUNT_CAP: int = 3           # ★真參數 — 在真實量上劃線＝設計選擇。世界答不出「應該幾天／該折多少」——而答不出就是它該留的證明。
+
+# ★★★【乞食被拒的記憶 TTL】——本票（2026-09-18）把它從 `BeliefSystem.BELIEF_STALE_TICKS` 拆出來。
+#   ★原本三個呼叫端【借】那條線，而 `interaction_system.gd:1558` 的註解自己寫著理由：
+#     「TTL＝BELIEF_STALE_TICKS（＝3 天）：不是挑一個數字，是【借這件事自己的週期】」
+#   ⇒ ★★而那條線正要變成 per-observer 的【函式】（位置漂移物理化）⇒ **沒有「一個數字」可借了**。
+#   ⇒ ★★★不先拆的話，下一票動位置線會【靜默改掉】乞食記憶的長度，而沒有人會知道。
+#   ★值與拆之前【逐字相同】（3 天）⇒ 本次行為零改變（驗收格 1-b 釘這件事）。
+const AID_REFUSED_TTL_TICKS: int = WorldState.TICKS_PER_DAY * 3   # TEST VALUE — 與原借用值相同
 #   （count_factor 上限：連撞加深到此為止）
 
 # ★接線表（A1 五族照抄的地方就是這張表）：決策 option → 它依賴的那件事的失敗 key。
