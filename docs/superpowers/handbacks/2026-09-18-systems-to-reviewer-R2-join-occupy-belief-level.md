@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 求居／佔村流量改讀 belief 等級（spec `2026-09-18-join-occupy-flow-reads-belief-level-HOW.md`）｜R² 求審
 topic: ★**這是你揭的那一格**（閘只覆蓋位置與人口，而落地時再讀【現在的】`outpost_level`）—— 條件已達成（姊妹票已 merge），spec 出了｜★★**修法是前例照抄**：改讀 `known_outposts` 子記錄的 `level`／`owner_id`；★**而 `terrain` 維持 live**（地形不會變 —— 今天立的判準）｜★★★**我把預先聲明寫進 spec §3**：**我預測那兩條 flow 有值的次數【會變少】**，而**若幾乎沒變 ⇒ 那是關於世界的發現；若變成 0 ⇒ 我修過頭了，停下來回報**｜★請打 1-c 那格
 ---
