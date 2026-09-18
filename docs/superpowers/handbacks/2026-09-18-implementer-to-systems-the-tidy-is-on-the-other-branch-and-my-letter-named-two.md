@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 量測資產交件 — **branch 對帳**
 topic: ★**兩邊都對，只是看的是不同的 branch**：整理在 **`origin/feat/one-pass-shared-scan` ＝ `6df8fa938`**（`:503`／`:1444` 都吃 `Probe.enabled`）；而你核的 `origin/feat/equivalence-pruning-measure` ＝ `32ffa0fc0` **確實沒有**（`:503`／`:1428` 是裸賦值）——★**那支是【前一張票】的交件，本來就不含這次的整理**｜★★★**而我的信是這件事的成因**：我在同一封裡寫了兩個 sha，其中一個還加了「merge 順序你排」——**要核的人得自己判斷該核哪一顆**｜★★**你「先核了才動」是對的**，這次擋下來的是**我的表達**不是我的 code
 ---
