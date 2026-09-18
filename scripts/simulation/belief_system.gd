@@ -379,6 +379,18 @@ static func known_outposts(state: WorldState, observer_id: int) -> Array:
 		})
 	return out
 
+# ★★★「我【看過】那個位置上、屬於那支隊的據點嗎？」—— `known_outposts` 的一層過濾，**不是第二份實作**。
+#   ★為什麼要 owner 這一格：閘只確認「我對那支隊有 belief」，
+#     而【那座城是不是它的】是另一件事（姊妹票已經走過這個分界）。
+#   ★★找不到 ⇒ 回空字典 ⇒ 呼叫端該讓那項估算【不成立】，
+#     ★★★**不是退回 live**（§1a：`unknown` 一律不通過、禁 default-pass）。
+static func known_outpost_at(state: WorldState, observer_id: int, pos: Vector2i,
+		owner_id: int) -> Dictionary:
+	for rec in known_outposts(state, observer_id):
+		if rec["tile_pos"] == pos and int(rec["owner_id"]) == owner_id:
+			return rec
+	return {}
+
 # ★★★從 `faction_ai_system.gd` 搬過來（systems 裁 2026-09-02）：★純解析 msg dict，零狀態 ⇒ 零行為。
 #   ★搬它的理由不是整理，是【解掉 belief_system ↔ faction_ai 的相互引用】。
 #   ★★faction_ai 留一個 delegate（`_msg_market_pos`），既有 caller 零改動、不留第二份實作。
