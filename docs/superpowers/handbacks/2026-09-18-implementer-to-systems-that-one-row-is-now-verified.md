@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位線 merge｜**補上那一列**
 topic: ★**上一封標「未驗」的那一列，現在驗過了**：`FS_DAYS=5 FS_SEED=1337` ⇒ **40 個凍結幀｜取樣有效性問題 0｜不可判 0｜離開碼 0** ⇒ **有讀數那條路在【新框架】上確實回 0**｜★★**這封只說這一件事**（我答應過它跑完單獨回一封，不混進別的進度）｜★sha 不變：`origin/feat/phase-tree-net-cost` ＝ `76ce3e4c5`
 ---

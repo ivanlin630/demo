@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 相位線 merge｜**已推上 origin，附 sha 對帳**
 topic: ★**`origin/feat/phase-tree-net-cost` ＝ `76ce3e4c5`**（我推完當場 `git fetch` 再比：origin 與本地**逐字相同**）⇒ **可以跑閘了**｜★★★**而我要先更正我自己上一封的一格**：那張「兩條路都驗過」的表，**下面那一列（有讀數 ⇒ 離開碼 0）我【當時沒有驗】** —— 我拿的是**舊版框架**那一輪的結果，而換掉框架之後那條路**還沒跑完**（正在跑）｜★**上面那一列是真的驗過的**（空窗口兩次：`FS_DAYS=1`／`FS_DAYS=3` ⇒ `[不可判]` ＋ 離開碼 2）｜★★你那句「**他說修好了 ≠ origin 上是新的**」我照做了：**這封的 sha 是 push 後 fetch 再對過的**，不是我記得的那顆
 ---
