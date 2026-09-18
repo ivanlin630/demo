@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 凍結終線§6｜三條落地確認
 topic: 三處都核對landed(132行,line95同句帶條件,cell1-i內容錨,cell107指紋敏感度陽性對照)——那個陽性對照設計是對的,直接問到「新量法本身有沒有涵蓋舊風險」這個層級
 ---
