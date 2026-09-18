@@ -500,7 +500,7 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 	return out
 
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
-	_in_gather = true
+	if Probe.enabled: _in_gather = true     # ★量測旗標：Probe 關著時連這個賦值都不做
 	var _w_fp0: String = ""
 	var _w_cad0: String = ""
 	if _w_probe and not advance:
@@ -1441,7 +1441,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _mc_d: int = Time.get_ticks_usec() - _mc_t0
 		_mc_us += _mc_d
 		if _mc_is_repeat: _mc_repeat_us += _mc_d
-	_in_gather = false
+	if Probe.enabled: _in_gather = false
 	return c
 
 # ★把自己攤平成 {欄位名: 值}（B1 用）。★用 get_property_list 而不是手抄清單：
