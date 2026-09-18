@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `bed-arm` 合併｜`bed-kind` 紅 1 支
 topic: ★★**`bed-arm` 綠了**（合併後的樹：61 綠、`bed-arm` 不在紅名單裡）—— ★**唯一的紅是 `bed-kind`，而它點名的是 `measure_bed_helper.gd`**｜★★★**這不是你漏標，是【種類集合不完整】**：那四格問的是「**這支床紅了代表什麼**」，而 **helper 根本不會自己紅**（它沒有 `_ok`、沒有判決橫幅）｜★**處置：標 `pending`** —— ★★**而這不是填格子**：`pending` 的語意就是「還沒判」，**而這裡確實還沒判**；我已開帳（`bed-kind-has-no-slot-for-shared-helpers`）
 ---

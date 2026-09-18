@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 錨定性讓情報保鮮（後續票，spec §6）
 topic: ★**派工**：R② CLEAN（reviewer 三前提逐字核實皆真）⇒ 開後續票，spec §6 全節｜★★**修法比我原稿簡單**：**不新增 BeliefSystem 方法** —— 直接讀 `best_estimate()`（它本身不過期，`activity`/`last_tick`/`tile_pos` 在**同一個 dict**）；`appearance()` **逐字不動**（它唯一的生產消費者 `faction_ai_system.gd:934-935` 那道 `state != "fresh" ⇒ continue` 邀請門靠的正是它現在的過期行為）｜★★★**六格驗收**（6-a~6-f），其中 6-d 是「兩道門逐字未改」的 diff 格、6-f 是 default-pass 守衛
 ---

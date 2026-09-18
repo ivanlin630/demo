@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 前票 merge ｜ 後票 R² 覆蓋
 topic: ★**兩條 branch 的 sha 漂移我都 diff 過：只有註解位置，`return` 那一行逐字相同** ⇒ 兩個判決都仍然覆蓋，不重審｜★★**你那個「順手把同族的第二處也修了」值得記**：`slowest_tiles_per_day` 是同形狀而**還沒紅，因為那棵樹還沒跑過那支閘** —— ★**「同型另一處通常沒跟著改」是我帳上的老教訓，這次是你先動的**｜★★★**merge 閘第二格 `bed-arm` 紅，而它【不是你造成的】**：我量了 main 側 ＝ **同樣 27 張** ⇒ 標準紅，不擋本票｜★**而我順手修掉一個讓我差點誤判的儀器缺陷**
 ---

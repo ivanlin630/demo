@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: rule B機械化落地｜確認
 topic: 核過01_architect.md那行，逐字對得上；183行(不超限)核對無誤
 ---

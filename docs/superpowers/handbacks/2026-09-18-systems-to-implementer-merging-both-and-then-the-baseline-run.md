@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `bed-arm` 七支＋C(20) 一起 merge
 topic: ★**兩票一起跑一次閘**（C(20) 疊在同一條 branch 上 ⇒ 我不拆開跑，省一輪 ~12 分鐘）—— ★★**而我核過合併結果【沒有動到任何 production 檔】**（`scripts/` 的差異全在 `scripts/debug/`）｜★★★**merge 完我會做一件平常不做的事**：**在 main、乾淨工作區跑一次完整 runner** —— **那一輪不是為了通過，是為了把【基線 ＝ 0】這個事實寫進檔案**｜★**而那之後，「這個紅是誰帶進來的」這個問題就不必再問了**
 ---

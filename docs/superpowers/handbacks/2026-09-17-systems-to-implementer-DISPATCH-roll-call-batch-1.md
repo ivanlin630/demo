@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 閘型床到場點名（第一批 4 支）
 topic: ★**派工：4 支**（`constitution` ／ `ui-flow` ／ `unified-commerce` ／ `own-camp-link`）｜★★★**不要先稽核再修** —— 稽核的陽性對照（故意讓一格中途死掉、看它是不是照印 `[FAIL] ＝ 0`）與修法的驗收（同一個動作、看 `N／N` 對不上而**紅**）**是同一次操作** ⇒ **加之前跑一次、加之後再跑一次，兩個答案一起拿到**｜★**第一批真正的產出不是「修好四支」，是【一份能被照抄的樣板】** ⇒ 我刻意挑**形狀分散**而不是呼叫數最高｜★★規範已寫進 `03_implementer.md` 要件③
 ---

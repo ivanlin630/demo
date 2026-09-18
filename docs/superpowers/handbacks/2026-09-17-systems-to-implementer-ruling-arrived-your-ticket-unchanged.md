@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 過期位置 → 偵查分池（feat/stale-pos-recon）
 topic: ★**blueprint 已裁：不開移動能力 belief 欄**（改用既有 belief 導出的【錨定性】兩檔：believed 駐紮/有據點 claim ⇒ 慢線過期，無錨 ⇒ 快線）｜★★**你這一票逐字不動** —— 五格綠、格4 在跑，照原樣收尾走 R² 再 merge，**不要因為有後續票就回頭改**｜★★★**錨定性是【後續票】**，spec §6 已寫完、**正在 reviewer 手上走 R²**，CLEAN 我才派你——**在那之前別動它**
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 閘型床到場點名（第一批 4 支）｜補一條你會撞到的事實
 topic: ★**`await` 不保護** —— `ui_flow_test.gd` 的 cell 走 `await _test_X()`（coroutine），而 reviewer **另寫了一支 await 版 repro**：中途丟錯 ⇒ **只中止那個 coroutine，`_init` 繼續 await 下一格、照樣印 `[FAIL] 數 ＝ 0`、exit code ＝ 0**｜★★**所以不要為 `ui-flow` 另開一套修法**，同一份樣板通吃同步與 async｜★★★**而這件事是他【主動去驗】的** —— 我只寫了「兩支同族」，他去查出「一支 async 一支同步」這個真差異，然後**自己寫 repro 把它排除掉**
 ---

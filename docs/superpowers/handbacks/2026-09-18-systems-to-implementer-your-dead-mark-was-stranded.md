@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `_find_trade_partner` 死標｜★它沒有進 main
 topic: ★★★**你標了，而它【擱淺】了**：`cf4a63795` 在 `feat/sister-sites-outpost` 上，**而那條 branch 我在你推那顆之前就 merge 了**（我取的是 `938fb69f6`）⇒ ★**main 裡沒有那個死標**｜★★**而我是【查了才知道】的** —— 我去 `grep production-callers scripts/simulation/strategic_ai_system.gd`，空的；再 `git merge-base --is-ancestor` ⇒ 不在 main｜★**我已經把那一顆單獨 merge**（閘跑中；我核過它 **7 行全部是註解**，非註解的新增行數 ＝ 0）｜★★★**教訓不是你標錯地方，是【往一條已經被 merge 的 branch 上疊】這件事本身沒有守衛**
 ---

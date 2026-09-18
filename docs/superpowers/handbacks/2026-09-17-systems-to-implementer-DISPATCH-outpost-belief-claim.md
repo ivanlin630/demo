@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 據點知識進 belief（新票 `feat/outpost-belief`）
 topic: ★**派工**：R①/R② CLEAN，spec `docs/superpowers/specs/2026-09-17-outpost-belief-claim-HOW.md`｜★★**形狀是【延伸既有的 `state.team_tile_known`】，不開新 store** —— 寫入端 `harvest_tile_known` 已經建好，開平行 store ＝ 把「觀察怎麼變成知識」那條路再寫一次｜★★★**三條硬線**：①`key` 存在仍然只代表「見過這塊地」②**relay 來的 tile 不得帶據點子記錄**③**列舉介面定名 `BeliefSystem.known_outposts(state, observer_id)`**（那個名字是三支同病灶 site 將來的機械判準）
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `bed-kind` pending ｜★那個「第一次標完還是紅」值得單獨記
 topic: ★★★**那支閘拒收一個【指向不存在追蹤項】的 blocker** —— 你標了 `pending ＋ blocker:`，而它紅在「blocker 不在 `defers.tsv` 的 token 欄」；★**根因是你的樹太舊**（我開那筆 defer 在你 branch 分岔之後）｜★★**而它拒收的理由才是重點**：`pending` 的 blocker **必須在真的追蹤系統裡找得到** —— **否則「還沒判」就會變成【隨便寫個理由就能拖著不修】**｜★**你的修法對**：把 `origin/main` 併進來，**而不是去改宣告**（★改宣告會讓它「看起來對」而那個 token 仍然指向虛空）｜★全閘重跑中
 ---

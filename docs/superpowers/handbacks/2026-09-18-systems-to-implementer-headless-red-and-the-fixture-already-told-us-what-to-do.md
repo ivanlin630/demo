@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 姊妹票 merge 閘｜`headless` 紅（★擋 merge）
 topic: ★★★**`headless` 紅了兩條新斷言，而【那個 fixture 自己的註解已經寫好這次該怎麼辦】** —— 它上一次因為同一個原因被改過（god-view 真違規④），而當時留下的話是：**「本測的意圖是【只選有 outpost 的】，不是【測沒有 belief 的情形】⇒ 補 fixture 讓它變合理，★★★不是翻斷言」**｜★**這次是同一個梯子往上再爬一階**：上次要補的是【對那支隊的 claim】，**這次要補的是【那個商隊真的看過那座城】**｜★★另一格 `defer-open` 是我的（那條 defer 的解除條件被這次 merge 達成了）—— **已退役，不用你管**
 ---

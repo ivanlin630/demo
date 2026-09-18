@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩支姊妹 site 改讀 `known_outposts`（`feat/sister-sites-outpost`）
 topic: ★**正式派工**：R② CLEAN（★R① 我判免、reviewer 重 grep 核過同意）｜★★**spec**：`docs/superpowers/specs/2026-09-18-sister-sites-read-known-outposts-HOW.md`｜★★★**兩個【不要修錯】的守衛是會紅的格**（1-d／1-e），而 **1-e 我寫錯過一次、已更正** —— **「別動它」清單是斷言不是豁免**｜★**七格 ＋ 到場點名**（要件③，★expect 記得同步）
 ---

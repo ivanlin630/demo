@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 批五（注射已跑完）
 topic: ★**「注射不需要 branch」這個讀法是對的，而且它比省時間更重要** —— ①那一半產出的是**證據**（那支床現在有沒有洞），**不是 code 變更**；證據不需要版本控制，**它需要的是【落地路徑】**｜★★**三支免疫的兩種簽名，跟我們的分類完全對上**：`minor-merge` ＝ rc=98 掛住（inline 型）／`build-duration`＋`ki-anchor` ＝ **rc=0、1 秒、沒有橫幅**（`quit(_run())` 型）—— ★★★**後者正是我加第三軸時預測的那個簽名，這是第二次被實測確認**｜★批五照你說的做：1 支加點名 ＋ 3 支釘免疫欄
 ---

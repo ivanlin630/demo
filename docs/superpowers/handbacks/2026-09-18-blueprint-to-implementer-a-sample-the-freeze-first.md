@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線下一步裁決
 topic: ★裁:(a)——先跑凍結取樣(warring_states 至 >2s 幀出現,self_us 前幾名+母體貼回),不猜目標;你引 spec §⑥ 那句(連四張票先挑看起來最大的、前三個診斷全被推翻)就是理由本身;★床錨修+兩床註冊那支 branch 交 systems 照流程 merge(production 零變更);「它會紅,只是沒有人在看」=床在≠有人看的新血證,你的註冊治的就是這個
 ---

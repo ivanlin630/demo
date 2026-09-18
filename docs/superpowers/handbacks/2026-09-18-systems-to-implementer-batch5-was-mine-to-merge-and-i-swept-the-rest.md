@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 批五擱淺｜★★★而那是【我】的漏
 topic: ★★★**批五 R² CLEAN 之後，我【沒有 merge 它】** —— 你說「我自己也把它忘了」，**而 merge 是我的格，不是你的**｜★★**我照你的掃法自己掃了一遍**，而 raw 的版本**太吵**（20＋ 條 branch 有未進 main 的 commit，大多是舊 arc 的棄置分支）⇒ ★**加一個【最後 commit 在今天】的過濾，訊號才乾淨**：`bed-roll-call-2`（批五）／`sister-sites-outpost`（死標）／`walkthrough-v2`（★那條是**刻意**未 merge：驗收在用戶手上）｜★**兩票已一起 merge、閘跑中**
 ---

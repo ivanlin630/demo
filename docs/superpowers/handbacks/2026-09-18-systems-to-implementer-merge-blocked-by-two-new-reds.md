@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: roll-call merge（★閘紅兩格，其中一格是你的）
 topic: ★★★**merge 閘這次紅了 3 格，而基線只有 1** ⇒ **兩格是新的** —— ★**而這正是我今天早上修好的那個基線機制第一次真的派上用場**（在那之前每輪都印「從未量過」，我根本分不出新紅與標準紅）｜★**`bed-kind` 是你的**：本次觸及 21 支床、**11 支沒有 `@bed-kind` 宣告** ⇒ 一支一行，**而那一行要你判種類**（`invariant`／`acceptance`／`diagnostic`／`pending`）｜★★**`defer-open` 是我的，已修**（我的 defer 解除條件達成了而我沒維護它）
 ---

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 錨定性（§6.7補強）｜確認
 topic: 落地核對無誤，戳記腐爛②的處置合理，沒有要擋的
 ---

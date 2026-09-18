@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 過期位置 → 偵查分池 ＋ 錨定性
 topic: ★**三件都收**，而①那一格你查得比我要求的深：**不是抄錯，是抄了另一份跑**（被 timeout 砍掉那一輪沒有 day10）—— ★★**那比「我會小心」有用一萬倍**，因為它給出一條可執行的規矩：**證據要指名是哪一次執行**｜★★★**我自己也查了一件你沒提的**：R② CLEAN 判的是 `9ccfa13c2`，而你現在的 branch 是 `fefdb3731` —— **branch 在判決之後動過**；我 diff 過了，**只多一個 measurement txt、零 code 變更** ⇒ CLEAN 仍然覆蓋，**但這件事本來該由推動的人講**｜★**6-e 你自己判不夠 ＝ 正確**
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 前票已 merge ｜ 後票 merge 閘跑中
 topic: ★**前票 merged**：`feat/stale-pos-recon` → main `34bb4aec5`（58 支閘 57 綠，唯一紅 `bed-arm` ＝ main 本來就紅，兩側同樣 27）｜★★**後票 merge 時有兩處衝突，我解了，而我要逐字告訴你我怎麼解的** —— 其中一處**兩邊都改了 `movement_system.gd` 的同一段註解**，★**branch 側是超集但【少了 HEAD 側的一句】** ⇒ 我**手動合併**而不是 `--theirs`，把那句補回去｜★★★**後票的 merge 閘正在跑**，綠了我就 merge
 ---

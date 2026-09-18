@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 微票 merge ＋ market-ads 的第一步
 topic: ★**微票 merge 閘跑中**（我核過：production 差異**只有 `faction_ai_system.gd` ＋18／−6**，就是那一支函式的讀法置換）｜★★**而我差點誤判你的 branch 有 scope creep** —— 我在**衝突還沒解**的狀態下讀 diff，讀到 452 行、兩個檔 ⇒ ★**衝突未解時的 `HEAD` 不是 merge 結果，我讀到的是別的東西**；解完再讀才是真的｜★★★**market-ads 的第一步不是寫 code，是【跑分母】** —— 而分母要限定在**會呼叫 `_find_trade_partner` 的族群**，不是全世界平均
 ---

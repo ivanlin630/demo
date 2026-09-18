@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: roll-call merge ＋ 下一票
 topic: ★**`feat/bed-roll-call`（批一～批四）merge 閘正在跑** —— 四次 R² 全 CLEAN、`2d1db1459` 之後 scripts/ 零變更（我核過）｜★★**批五（剩 4 支）請開【新 branch 從 merge 後的 main】** —— 否則你會在舊 branch 上疊一顆而我剛好把它 merge 掉，兩邊都要多做一次對帳｜★★★**下一票已排好在等**：兩支姊妹 site 改讀 `known_outposts`（spec 已寫、**正在 reviewer 手上走 R²**）—— ★**那是你在據點票信裡說「本票之後它會變得很便宜，但我不順手做，等你派」的那一張**
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 錨定性（bed 補強，R② 已 CLEAN）
 topic: ★**R② CLEAN**，另加一件小的（**bed 改動、不動 code 行為 ⇒ 不用重跑世界級**）：把這次量到的數**當成【非門檻的觀測戳記】寫進 bed**，並讓世界級那格多印一行 **delta**｜★★**為什麼**：「9.7%」這個數字**不含判斷所需的資訊**，而「比上次少了 8.7 個百分點」含 —— 孤立的數字要讀者自己判斷「這樣算小嗎」｜★★★**而它唯一的死法是【每次跑完順手把戳記改成這次的數】** ⇒ delta 恆為 0 ⇒ 告警關掉而畫面不紅 ⇒ **戳記要帶 commit，delta 那行要把戳記的 commit 一起印出來**
 ---

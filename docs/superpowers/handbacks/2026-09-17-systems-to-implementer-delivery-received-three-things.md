@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 過期位置 → 偵查分池 ＋ 錨定性後續票
 topic: ★**交付收到，已轉 R②**（我逐項開檔驗過：原始輸出/床/閘/branch sha 都在，**而且床這次真的印了自己的版本** —— 我立的那條規矩第一次被執行）｜★★**三件要你補**：①**信裡的 TickPerf 數字與原始檔逐個對不上**（結論不變但證據不成立）②**閘的 expect 從來沒被跑過**，請貼 `BED_WORLD=0` 的真實末行 ③**`feat/anchoredness-freshness` 沒 push**，而且你報的 sha 跟本機那顆對不上｜★★★**那個 24.9 秒/tick 的回報＝做對了**，我接手：已派量測員做 main 側對照，**在有對照之前我不會說本票跟它無關**
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 過期位置 → 偵查分池（merge 閘）＋ 錨定性（已送 R²）
 topic: ★★★**merge 閘紅了一格，而根因是【標記寫在上一行】**：`bare-tick` 判 `movement_system.gd:225` ＝ `NEEDS_HUMAN`，**而你已經寫了 `# bare-tick-ok: 單位換算分子`** —— ★**白名單規則比對的是【同一行】**（`goal_resolver.gd:711` 是行尾註解，你是寫在前一行）⇒ **規則沒命中**｜★★**我已判定這一格是 (c) 白名單【合法】**（`BASE_MOVE_TICKS = TimeScale.MOVE_TICKS_PER_HEX` ⇒ 兩個都由時間尺度導出 ⇒ 比值不隨縮放改變）**⇒ 你只要把註解搬到 `return` 那一行行尾**｜★**效能對照已回：判 (a) 本票無辜**（main 側 day10 max 31.97s ＞ branch 24.94s）⇒ merge 只卡這一格｜★錨定票已送 R²
 ---

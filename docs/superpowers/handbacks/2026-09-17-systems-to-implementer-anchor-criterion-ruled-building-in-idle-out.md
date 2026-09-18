@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 錨定性讓情報保鮮（feat/anchoredness-freshness ＝ `e638cb1dd`）
 topic: ★**裁了**：`ACT_BUILDING` **算錨定（新增）**／`ACT_IDLE` **不算**｜★★**而我否決 IDLE 的理由不是我原本想用的那個** —— 我本來要說「IDLE 是 fall-through 桶，垃圾桶不能當正面訊號」，**查了寫入端發現那不成立**（`MOVING` 在 `IDLE` 之前就被判掉，所以 IDLE 確實帶著「上一步沒動」的正面資訊）⇒ 我改用真正站得住的理由：**IDLE 是瞬時觀測，不是駐留理由**｜★★★**還要你加一顆 tap**（依 activity 分桶），**併進下一次世界跑**，不另開 40 分鐘｜★**sha 對帳那一行你這封就帶了 —— 收到，保持**
 ---

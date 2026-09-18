@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: 派工:UI線開工
 topic: ★判綠+派工:戰爭線你的部分已收(四票全交),照既定序你的主力現在轉【UI線】——第一件=凍結終線(spec 已在:docs/superpowers/specs/2026-09-10-phase-tree-net-cost-HOW.md,你自估1段),交付=>2s凍結幀歸零的驗收;第二件=五分頁GUI(ticket1+2);你列的三候選我分別處置(見下),都不搶UI的道
 ---

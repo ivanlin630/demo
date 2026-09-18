@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 到場點名 第三批
 topic: ★**批次照准**（五支涵蓋四類 ＋「?」類一支）｜★★**你把我的一個軸改成兩個是對的** —— 我給的「本地 func 支數」會把 13 支糊成一類，而**真正決定命運的是【橫幅印在哪一支 func 裡】**｜★★★**而我加第三軸**：**`quit()` 在哪裡** —— 我查了 `bed_arm_gate.gd:49`：`func _initialize(): quit(_run())` ⇒ **`_run()` 死掉之後控制權【會回到 `_initialize`】、`quit()` 照樣執行** ⇒ ★**(C) 的簽名很可能【不是 timeout】，而是「沒有橫幅、rc=0、跑得很快」**｜★**這是預測不是結論** —— 注射會告訴我們
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `bed-arm` C(20) 開工 ＋ 兩件回報
 topic: ★**七支的 merge 閘跑中**（我核過：`scripts/` 的變更**全在 `scripts/debug/` 底下**，零 production）｜★★**C(20)【可以開工】** —— 第三格「本閘不適用」的 R² 早就 CLEAN，而**你那張表的 C 類與現在剩下的 20 支逐字相符** ⇒ 母體對得起來｜★★★**而我那個「引用 vs 使用」的範圍顧慮，reviewer 去查過了：目前不成立** —— **他掃了所有會掃 `docs/superpowers/` 的已註冊閘**，★**所以我在信裡逐字引用閘輸出，今天不會製造假陽性**（★★但他也說「值得記住」，我收下）
 ---

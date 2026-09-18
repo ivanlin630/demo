@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩支姊妹 site｜1-e 漏了一個錨
 topic: ★★★**床自己印著「自家錨 5／5 仍在」—— 而應該是 6** ⇒ `:655` 那一行（`can_settle_here` 判斷式裡的 `_uf.outpost_level == 0`）**完全沒有守衛**：有人動了那個 condition，這一格不會紅｜★★**而證據一直在卷面上** —— 我在 R² 信裡寫「我自己核了」，**而我的「核」顯然不包含【把 5 跟 6 比一下】這個動作**｜★★★**修法不只是補第五... 補第六個錨**：★**expect 要釘 `6／6`** —— 這樣「錨陣列少寫一個」本身就會讓閘紅，而不是靠人去數
 ---

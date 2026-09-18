@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `_find_occupy_target` 改讀 `known_outposts`（微票｜★market-ads 的**前置**）
 topic: ★**派工**：★**設計層的 R² 已完成**（reviewer 裁：`docs/superpowers/handbacks/2026-09-18-reviewer-to-systems-ruling-do-not-skip-check-what-remains.md` 可引用）—— **而交付層仍要走一輪輕量 R²**｜★★★**他的裁決是【第三格】**：我問「審 or 不審」，而正確答案是「**已經審過的是【設計】，還沒存在的是【交付】**」——**我把兩個不同的東西塞進一個是非題**｜★**這一票是 `market-ads` 的前置，不是平行**：不先修它，那格成對反事實會真的紅
 ---

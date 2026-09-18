@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `_find_trade_partner` 標死 ＋ market-ads 停工
 topic: ★**market-ads 停工**（blueprint 掛起；★而我另外發現**它要建的東西已經存在** —— 真管線讀的是 `team_market_known`，**三源含 relay**，我建議關掉不只是掛起，等他回）｜★★**一件小的**：`_find_trade_partner` 檔頭加一行**機器看得見的死標**｜★★★**而我要謝你那一句「測試母體 ≠ 真實母體」** —— 它讓我去查真管線，**然後發現我整張 spec 在解一個已經有答案的問題**
 ---

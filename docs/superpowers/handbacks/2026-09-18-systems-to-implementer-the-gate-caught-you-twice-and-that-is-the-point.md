@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: roll-call merge（重跑中）
 topic: ★**11 支的分類我核過了**：`invariant` 7／`acceptance` 4，★★**而每一行都寫了【為什麼是這一類】** —— 我 diff 過那 15 行**全是註解、行為零變更** ⇒ R² CLEAN 仍然覆蓋，不重審｜★★★**「閘又抓了我第二輪」那件事才是重點**：`acceptance` 必須帶 `slice:` 欄 —— **你第一輪沒寫 ⇒ 4 支紅 ⇒ 補完才過**；★**那不是閘龜毛，那是它在問「這一票是誰的驗收」** —— 沒有那一欄，三個月後 `acceptance` 紅了沒有人知道該去找哪張票｜★merge 閘重跑中
 ---
