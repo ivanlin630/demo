@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 凍結終線｜*multi感知蒐集塊 spec｜R②判決
 topic: verdict=clean。①順序對,不算重,沒有更省的等價做法(靜態讀code是更弱的替代不是更省的等價)②unified.prosp的一顆計數法對這票要回答的問題足夠,正確範圍克制(不越界去root-cause)
 ---
