@@ -43,6 +43,33 @@ static func _w_reset() -> void:
 #     need_urgency/plan_phase)。⇒ ★★**兩份手抄清單比一份更會 drift** ⇒ 刪掉我那支，改呼它。
 #   ★★★為什麼需要它：`StateFingerprint` 的排除清單自己寫著 `cadence 排程欄(*_eval_next_tick)`
 #     ⇒ 實測(+1 四個 cadence 欄)指紋【逐字不動】⇒ 只用指紋量「有沒有寫世界」會把 cadence 重排讀成沒寫入。
+# ★★★跨 run 清除（`CrossRunReset` 單一呼叫點會呼它）——**選①：真的清它，不進白名單**。
+#   ★理由（systems 2026-09-18）：白名單是給【故意跨 run 存活】的東西用的，而這三個不是：
+#     `_pc_cache` ＝ 注射器上一次算出來的值 ⇒ 跨 run 留著＝**把上一輪的世界帶進下一輪**
+#     `_mc_seen`  ＝ "team:tick" → 次數      ⇒ 跨 run 留著會讓【重複率】那個數字**失真**
+#     `_g_*` 已經刪掉，這裡只剩量測用的三組。
+#   ★★而它們正是「留著會**靜默**污染下一輪量測」的那種 static —— ★★★靜默，所以要靠閘不是靠記得。
+#   ★閘的判準是【名字有沒有出現在這支函式裡】⇒ 這裡**逐個具名**，不要只呼 `_pc_reset()` 了事。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _pc_cache.is_empty(): cleared["DecisionContext._pc_cache"] = _pc_cache.size()
+	if not _mc_seen.is_empty(): cleared["DecisionContext._mc_seen"] = _mc_seen.size()
+	if _pc_hits != 0 or _pc_divergent != 0:
+		cleared["DecisionContext._pc_counters"] = _pc_hits + _pc_divergent
+	if _mc_calls != 0 or _mc_repeat != 0:
+		cleared["DecisionContext._mc_counters"] = _mc_calls + _mc_repeat
+	if _w_calls != 0 or _w_dirty != 0 or _w_cad_dirty != 0:
+		cleared["DecisionContext._w_counters"] = _w_calls + _w_dirty + _w_cad_dirty
+	_pc_reset()
+	_mc_reset()
+	_w_reset()
+	# ★旗標（`_pc_fault_stale_prey`／`_mc_on`／`_w_probe`）＝【設定】，同 WorldState 的做法：**只印不清**
+	#   —— ★★而它們預設就是關的；若某一輪跑完仍是開的，那是呼叫端沒關，**印出來讓人看見**。
+	if _pc_fault_stale_prey or _mc_on or _w_probe:
+		cleared["DecisionContext.flags_left_on"] = "%s/%s/%s" % [
+			str(_pc_fault_stale_prey), str(_mc_on), str(_w_probe)]
+	return {"checked": 3, "cleared": cleared}
+
 static func _mc_reset() -> void:
 	_mc_calls = 0; _mc_repeat = 0; _mc_seen.clear()
 	_mc_us = 0; _mc_repeat_us = 0; _mc_max_per_tick = 0; _mc_tick_now = -1; _mc_tick_calls = 0
