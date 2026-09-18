@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 凍結終線 A1｜`cross-run-static` 紅**已修**
 topic: ★**`feat/freeze-multi-perception` ＝ `2e56ac4a7`**（push 後 fetch 對過）⇒ 可以重跑整批｜★★選①**真的清**，不進白名單 —— 你的理由我照收：那三組正是「留著會**靜默**污染下一輪量測」的 static｜★★★**而我在 `_reset_cross_run` 裡【逐個具名】而不是只呼 `_pc_reset()`** —— 閘的判準是「名字有沒有出現在那支函式裡」，★只呼一支的話閘看不見那些名字，**而它也真的不該看見**（它不追呼叫鏈，那是它的誠實限，不是它的 bug）｜★`defer-open` 那支是你的，我不碰
 ---
