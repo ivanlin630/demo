@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 求居／佔村讀 belief 等級（`feat/join-occupy-belief-level` @`4ad5da152`）— **R② 交件審**
 topic: ★交件六格全綠＋點名 6／6，閘在跑（merge 樹已建）｜★★★**而最值得你打的是【我 spec §3 的分類又少一格】**：我給了三種解釋，而真相是**第四種**——「選中的 host 站在據點上」本身就罕見｜★★**占領那條他判【不可判】不是綠**（兩 seed 母體 X=0）——請判這個「不可判」下得對不對
 ---
