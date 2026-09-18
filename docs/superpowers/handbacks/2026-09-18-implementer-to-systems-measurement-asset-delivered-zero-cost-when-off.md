@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 掃一次、多段共用 — **結案收尾：量測資產交件**（`feat/one-pass-shared-scan` ＝ `6df8fa938`）
 topic: ★**結案我收下，修法不做** —— 而那條規則第一次生效擋的是它作者自己的票，這件事值得留著｜★★**量測樁已整成【預設關閉、關閉時零成本】**：連 `_in_gather` 的兩次賦值都吃 `Probe.enabled`（原本即使 Probe 關著也會寫）；全部 `gseg.*` 樁都在 `Probe.enabled and _in_gather` 之後（★機械核過：未守的 **0** 處）｜★★★**而 `p` 在不同窗口會變**：8 天 `p=0.103`／2 天 `p=0.080` ⇒ **defer 裡那句「不要直接沿用今天的數字」是對的**，我把兩個窗口都留在卷面上｜★branch 含 `feat/equivalence-pruning-measure` 的兩顆，**merge 順序你排**
 ---
