@@ -815,9 +815,18 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _hpop: float = float(BeliefSystem.best_estimate(state, team.team_id, c.strong_neighbor_id).get("population_est", 0.0))
 		if _hpos != Vector2i(-1, -1) and _hpop > 0.0:
 			var _htile: HexTileData = state.world.tiles.get(_hpos.x * 1000 + _hpos.y)
-			if _htile != null and _htile.outpost_level > 0:
+			# ★★★據點【等級】改讀 belief 子記錄（observer 觀察【當時】寫下的值）——
+			#   ★`outpost_level` 會變（升級／拆除／被攻陷）⇒ 讀 live 等於知道【現在】，而我只該知道【當時】。
+			#   ★★而同一行的 `terrain` **維持 live**：地形不會變 ⇒ 那半合法，不要一起修掉。
+			#   ★★★沒有子記錄（我沒看過那座城）⇒ 這項流量【不成立、留 0】，**不是退回 live**。
+			var _hrec: Dictionary = BeliefSystem.known_outpost_at(
+				state, team.team_id, _hpos, c.strong_neighbor_id)
+			if _htile != null and not _hrec.is_empty() and int(_hrec["level"]) > 0:
 				c.join_host_flow = MarginalEconomy._inflow_est(VillageEstimate.make(
-					_htile.terrain, _htile.outpost_level, 0, int(_hpop))) / maxf(_hpop, 1.0) 					* float(team.population)   # host 的人均流 × 我要帶過去的人數
+					_htile.terrain, int(_hrec["level"]), 0, int(_hpop))) / maxf(_hpop, 1.0) 					* float(team.population)   # host 的人均流 × 我要帶過去的人數
+			elif Probe.enabled and _htile != null and _hrec.is_empty():
+				# ★「見過那支隊、但沒看過它的城」＝合法第三結果（★不是違規桶，也不是「沒有城」）
+				Probe.bump("belief.join_host_outpost_unseen")
 		elif Probe.enabled:
 			# ★「知道它存在、但不知道它在哪/多大」＝合法第三結果（不是違規桶）
 			Probe.bump("belief.join_host_positionless")
@@ -826,9 +835,15 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _vpop: float = float(BeliefSystem.best_estimate(state, team.team_id, c.occupy_target_id).get("population_est", 0.0))
 		if _vpos != Vector2i(-1, -1) and _vpop > 0.0:
 			var _vtile: HexTileData = state.world.tiles.get(_vpos.x * 1000 + _vpos.y)
-			if _vtile != null:
+			# ★同上：等級走 belief 子記錄、terrain 維持 live、沒看過那座城 ⇒ 留 0 不退回 live。
+			#   ★★`maxi(..., 1)` 這個下界是【既有公式】，本票只換資料來源、不動公式（spec §4）。
+			var _vrec: Dictionary = BeliefSystem.known_outpost_at(
+				state, team.team_id, _vpos, c.occupy_target_id)
+			if _vtile != null and not _vrec.is_empty():
 				c.occupy_target_flow = MarginalEconomy._inflow_est(VillageEstimate.make(
-					_vtile.terrain, maxi(_vtile.outpost_level, 1), 0, int(_vpop)))
+					_vtile.terrain, maxi(int(_vrec["level"]), 1), 0, int(_vpop)))
+			elif Probe.enabled and _vtile != null:
+				Probe.bump("belief.occupy_target_outpost_unseen")
 		elif Probe.enabled:
 			Probe.bump("belief.occupy_target_positionless")
 	c.food_stock = ResourceSystem.effective_food(state, team)
