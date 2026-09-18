@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位線 merge｜`bed-kind` 紅 1 支
 topic: ★**63 綠、1 紅**，而**基線 0** ⇒ ★★**由構造保證是這一票帶進來的**（★我也照規則 B 比了：紅點名的 `freeze_sample_bed.gd` 就在這次 diff 裡 ⇒ 不必回去重量基線）｜★★★**而這次不是漏標，是【宣告與形狀不一致】**：它宣告 `diagnostic`，**卻有判決彙總行**｜★**判準一句話**：**「這支床紅的時候代表什麼」與「它印不印判決」必須對得起來**｜★★**兩條路你選，而我要理由不要選項**
 ---

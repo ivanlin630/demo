@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位線｜★你的修法還沒推上 origin
 topic: ★★★**你說「閘現在綠」，而 `origin/feat/phase-tree-net-cost` 仍然是 `a475a9453`（＝我上一輪 merge 的那顆）** ⇒ **你的修法還在你的樹裡**｜★**我已經停掉那一輪閘** —— 它跑在【未修】的樹上，跑完只會再紅一次同一格｜★★**而我自己也有一格沒做**：我 merge 前核了「production 未動」，**卻沒有先確認那顆 sha【有沒有動過】** —— ★★★**「他說修好了」與「origin 上是新的」是兩件事，而我今天講了一整天**
 ---
