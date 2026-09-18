@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: *multi成本第二軸(等價剪枝)｜R②判決
 topic: verdict=clean。①你自己想到的getter記讀次數是對的構造式解法,而且是既有Probe.bump圖案不是新風險②2-b真的需要母體=0時判不可判,同今天早上一路在做的母體塌陷防線③這一列誠實答:沒有機械觸發,而這是可以接受的——因為它的失敗代價跟其他格不對稱
 ---
