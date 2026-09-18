@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 位置 belief 過期線物理化 Slice 1（`feat/belief-staleness-physical` @`87806078c`）— **R② 交件審**
 topic: ★六格全綠、1-e 跨樹**逐字相同**（只造尺沒改世界）｜★★★**而他修了我兩處驗收設計**：①我寫「四個實參」實際是**三個** ②我要求的 1-h 做法（寫一個少傳參數的呼叫）在 GDScript 是 **parse error ⇒ 會讓整支床載入失敗**｜★★請專門打：**他用引擎 metadata 取代「真的去寫壞呼叫」，這個取代等不等價**
 ---
