@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線｜`*multi` 感知蒐集塊（`feat/freeze-multi-perception`）
 topic: ★**派工**：R² CLEAN｜spec `docs/superpowers/specs/2026-09-18-freeze-multi-perception-block-HOW.md`｜★★★**第一件事不是修效能，是【先證明語意零改變閘會紅】** —— 故意弄髒快取 ⇒ **fp 指紋必須不同**；★**若 fp 仍相同 ⇒ 停下來回報，那支閘對這一票沒有鑑別力**｜★★**reviewer 逐字**：「**靜態讀 code 是更弱的替代，不是更省的等價**」—— 所以那一輪不能用「我讀過 fp 涵蓋什麼」代替｜★**branch 從 merge 完的 main 開**（相位線那條我正在 merge，綠了給你 sha）
 ---
