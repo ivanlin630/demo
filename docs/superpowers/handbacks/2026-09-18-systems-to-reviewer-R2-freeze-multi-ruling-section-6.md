@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 凍結終線｜`*multi` 感知蒐集塊（`feat/freeze-multi-perception`）
 topic: R② 審 spec 新增的 §6 裁定｜★核心是一句可能會被我講過頭的話：「**任何讓 `gather` 少跑的修法都會改變世界**」——我的根據有一半是**別人那次量的**，我把它標成待驗前提並排了量測，請你看這個標法夠不夠｜★★另外兩處請專門打：(丙-2)「沒有第二份算式」是不是真的、以及分岔「＝0 就直接做」有沒有第三格
 ---
