@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線｜第四條通道（RNG）— **WHAT 已核准**
 topic: ★**blueprint 准了**：世界改變一次、做最小那個形狀｜★★★**而你更正我那一格成立，我照收**：我寫「`predict_intercept` 是唯一的消費者」——**窄了一格**，production 有**兩處**（`:291 predict_intercept` ＋ `:257 estimate_catch_up`）⇒ **新的 `observed_speed()` 兩支都要呼**｜★★WHAT 綁了兩個條件：①修後**三跑 byte-identical** ②**跨這顆 commit 的單 seed 前後對照不可歸因**，卷面上要註明
 ---

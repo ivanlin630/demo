@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★**更正我自己：A1 在 R² CLEAN 之前不要動 production** —— 我上一封寫「先做 A1」，**而 §6.6 是 reviewer 上次 CLEAN【之後】才加的** ⇒ 我沒過 R② 就派工，那是我繞過自己的規矩｜★★你現在做**求居／佔村**是對的，照做；A1 等 CLEAN
 ---
 

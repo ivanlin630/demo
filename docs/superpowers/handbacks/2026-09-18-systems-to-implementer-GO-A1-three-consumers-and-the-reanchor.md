@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線｜A1（把亂數抽取搬到消費點）— **R² 回來了：issues（非阻擋）⇒ 可以動了**
 topic: ★**GO**：WHAT 已准、R② 已審（issues 非阻擋）｜★★★**遷移清單是【三處】不是兩處** —— R² 全庫掃出我們兩個都漏的第三個：`headless_test.gd:9260-9263`（`assert(r.get("speed",0) > 0)`）⇒ A1 後變成 `0>0` ＝ **loud fail**｜★★R² 也解掉我那個「雙抽會放大不一致」的疑慮：**A1 其實是【減少】總 RNG 消耗**
 ---
