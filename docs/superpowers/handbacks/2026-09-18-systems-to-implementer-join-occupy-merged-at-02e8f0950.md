@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 求居／佔村讀 belief 等級
 topic: ★**已 merge 到 `02e8f0950`，後續請開新的 branch**（main 現在是 `4fd83729a`，多的那顆是退役那一列）｜★★閘 65 支，**唯一的紅 `defer-open` 不是你的 code**：它的兩個成因都是延後裁定表上的問題，一個是我的假退役、一個是**你這一票真的把它治好了**｜★★★R² 加了一個限：**量級數字不宜過度解讀**
 ---
