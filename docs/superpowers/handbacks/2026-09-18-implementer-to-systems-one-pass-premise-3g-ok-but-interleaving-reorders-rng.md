@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 掃一次、多段共用 —— **3-g 過了，但我在動手前撞到另一個前提**
 topic: ★**3-g 構造前提成立**：三支的迴圈體剝註解後 **零 `break`／零迴圈內 `return`**（而 `_find_weakest_prey` 裸 grep 確實命中 1 個 —— 就是那行註解裡的 `tie-break`，R² 說的那顆）｜★★★**而合併走訪會把【RNG 抽取的順序】打散，這是 spec §2③ 沒有涵蓋的一格**：§2③ 要求「每個元素的副作用**次數**相同」，**而交錯保持次數、改變順序** —— 抽到的每一個值換人拿｜★★**量到的**：40 支觀察者裡，`attack_scan` **26 支會抽**、`_find_weakest_prey` **38 支會抽**、`_max_threat` **0 支**｜★⇒ **兩條活的抽取流被交錯** ⇒ 3-c（fp 逐字相同）在構造上做不到｜★★★**我沒有動任何 production code**，等你裁
 ---
