@@ -9,6 +9,14 @@ extends SceneTree
 #   env：FPLW_TICKS（預設 86400）／FPLW_CONFIG（預設 demo：3 隊，讓 60 天跑得動）
 
 var _fails: int = 0
+# ★★★【到場點名：這一行本來是【字面】的 `SECTIONS=1/1`】——
+#   ★它印出來的數字【不可能不同意】：無論那一段有沒有真的走完，它都印 1/1，
+#     而註冊表的 expect 又正好釘 `SECTIONS=1/1` ⇒ **閘以為自己在查出席，其實在查一個常數**。
+#   ★★這比「沒有點名」更糟：沒有點名的床，看的人知道它沒有；
+#     ★★★而假點名的床，**看的人以為它有**。
+#   ⇒ 修法：真的數跑完的段數，與【常數期望】比；不等 ⇒ 自己紅。
+var _sections: int = 0
+const EXPECT_SECTIONS: int = 1
 
 func _initialize() -> void:
 	var ticks: int = int(OS.get_environment("FPLW_TICKS")) if OS.has_environment("FPLW_TICKS") else 86400
@@ -26,7 +34,12 @@ func _initialize() -> void:
 		_fails += 1
 		push_error("[FAIL] ★長窗兩跑 fp 不同 ⇒ 擴進來的欄位裡有【噪音源】"
 			+ "（★處置照 spec §④①：把分岔那欄丟進 (a)(b) 證據流程，不要退回手抄清單）")
-	print("=== DONE === SECTIONS=1/1 FAILS=%d" % _fails)
+	_sections += 1          # ★這一段真的走到底了才數
+	if _sections != EXPECT_SECTIONS:
+		_fails += 1
+		push_error("[FAIL] 只跑完 %d/%d 段 —— ★中途離開與通過在卷面上長得一樣" % [
+			_sections, EXPECT_SECTIONS])
+	print("=== DONE === SECTIONS=%d/%d FAILS=%d" % [_sections, EXPECT_SECTIONS, _fails])
 	quit()
 
 func _run_fp(ticks: int, cfg: String) -> String:
