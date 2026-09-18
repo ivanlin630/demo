@@ -212,7 +212,7 @@ func _run() -> void:
 	_ok(w_calls > 0,
 		"e-前提 ★**母體非 0**：這一輪真的有 `advance=false` 的呼叫（%d 次）" % w_calls
 		+ "｜★★為 0 ⇒ 下一句話會【恆綠】，那不是綠是瞎")
-	print("   ★其中【cadence／cache 影子雜湊】變了 %d 次（★指紋看不見這一類）" % DecisionContext._w_cad_dirty)
+	print("   ★其中【EphemeralStateHash】變了 %d 次（★指紋看不見這一類）" % DecisionContext._w_cad_dirty)
 	_ok(w_dirty == 0 and DecisionContext._w_cad_dirty == 0,
 		"e ★★★**`advance=false` 一次都沒有寫世界**（指紋 %d／%d｜cadence 影子 %d／%d）" % [
 			w_dirty, w_calls, DecisionContext._w_cad_dirty, w_calls]
@@ -228,17 +228,19 @@ func _run() -> void:
 	_selftest_gate("f-cadence-control").noop()
 	print()
 	print("— f：e 那個 0 的陽性對照（★手動動 cadence 欄位）—")
+	print("   [第二把尺 涵蓋] %s" % EphemeralStateHash.COVERS)
+	print("   [第二把尺 盲區] %s" % EphemeralStateHash.BLIND)
 	seed(_seed)
 	var fs: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % _cfg)
 	var frunner := SimRunner.new()
 	for _fi in range(200):
 		frunner.advance_tick(fs, Vector2i(-1, -1))
-	var cad0: int = DecisionContext._w_cadence_hash(fs)
+	var cad0: String = EphemeralStateHash.compute(fs)
 	var fp0: String = StateFingerprint.compute(fs)
 	var ftid: int = -1
 	for k in fs.teams: ftid = k; break
 	fs.teams[ftid].consolidate_eval_next_tick += 1
-	var cad1: int = DecisionContext._w_cadence_hash(fs)
+	var cad1: String = EphemeralStateHash.compute(fs)
 	var fp1: String = StateFingerprint.compute(fs)
 	print("   cadence 欄 +1 ⇒ 影子雜湊 %s｜指紋 %s" % [
 		"★變了" if cad1 != cad0 else "❌沒變", "變了" if fp1 != fp0 else "★沒變（已知盲區）"])

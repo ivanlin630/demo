@@ -37,32 +37,12 @@ static var _w_cad_dirty: int = 0    # ★cadence／cache 影子雜湊變了的�
 static func _w_reset() -> void:
 	_w_calls = 0; _w_dirty = 0; _w_cad_dirty = 0
 
-# ★★★【影子雜湊：專門看指紋【看不見】的那些欄位】
-#   ★為什麼要它：`StateFingerprint` 的排除清單自己寫著 **cadence 排程欄(*_eval_next_tick)**
-#     ⇒ 實測（+1 四個 cadence 欄，指紋逐字不動）⇒ **指紋對 cadence 寫入是【設計上】瞎的**
-#     ⇒ ★★只用指紋量「有沒有寫世界」，會把 cadence 重排讀成【沒有寫入】。
-#   ★★★而 cadence 重排正是本票的地雷（少呼一次 gather ＝ 少推一次下次評估時間）
-#     ⇒ 這支把那些欄位【逐一抓出來】自己雜湊，補上指紋的盲區。
-#   ★誠實限：它是一份【手抄清單】（指紋那支是導出的，這支不是）
-#     ⇒ 新增一個 cadence 欄而沒有加進來 ⇒ 它看不到 ⇒ ★★所以床裡有一格陽性對照釘著它。
-static func _w_cadence_hash(state: WorldState) -> int:
-	var parts: PackedStringArray = PackedStringArray()
-	var tids: Array = state.teams.keys()
-	tids.sort()
-	for tid in tids:
-		var tm: TeamData = state.teams[tid]
-		parts.append("%d|%d|%d|%d|%d|%s" % [
-			tid, tm.consolidate_eval_next_tick, tm.expand_eval_next_tick,
-			tm.consolidate_target_cache, tm.absorb_target_cache, str(tm.expand_site_cached)])
-	var keys: Array = state.world.tiles.keys()
-	keys.sort()
-	for k in keys:
-		var tl: HexTileData = state.world.tiles[k]
-		parts.append("t%d|%d|%d|%f|%s" % [
-			k, tl.labor_eval_next_tick, tl.idle_employ_next_tick,
-			tl.idle_employ_cached, str(tl.labor_alloc)])
-	return hash("
-".join(parts))
+# ★★★【指紋看不見的那一半，用既有的那把尺】(systems 2026-09-18)
+#   ★我本來自己寫了一支 `_w_cadence_hash` —— 而 `EphemeralStateHash`(scripts/debug) **已經在做同一件事**，
+#     而且它的 COVERS 是我那組欄位的【超集】(多了 food_runway/persist_strength/food_flow_avg/
+#     need_urgency/plan_phase)。⇒ ★★**兩份手抄清單比一份更會 drift** ⇒ 刪掉我那支，改呼它。
+#   ★★★為什麼需要它：`StateFingerprint` 的排除清單自己寫著 `cadence 排程欄(*_eval_next_tick)`
+#     ⇒ 實測(+1 四個 cadence 欄)指紋【逐字不動】⇒ 只用指紋量「有沒有寫世界」會把 cadence 重排讀成沒寫入。
 static func _mc_reset() -> void:
 	_mc_calls = 0; _mc_repeat = 0; _mc_seen.clear()
 	_mc_us = 0; _mc_repeat_us = 0; _mc_max_per_tick = 0; _mc_tick_now = -1; _mc_tick_calls = 0
@@ -491,11 +471,11 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
 	var _w_fp0: String = ""
-	var _w_cad0: int = 0
+	var _w_cad0: String = ""
 	if _w_probe and not advance:
 		_w_calls += 1
 		_w_fp0 = StateFingerprint.compute(state)
-		_w_cad0 = _w_cadence_hash(state)
+		_w_cad0 = EphemeralStateHash.compute(state)
 	var _mc_t0: int = 0
 	var _mc_is_repeat: bool = false
 	if _mc_on:
@@ -1403,7 +1383,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	if _w_probe and not advance and _w_fp0 != "":
 		if StateFingerprint.compute(state) != _w_fp0:
 			_w_dirty += 1
-		if _w_cadence_hash(state) != _w_cad0:
+		if EphemeralStateHash.compute(state) != _w_cad0:
 			_w_cad_dirty += 1
 	if _mc_on:
 		var _mc_d: int = Time.get_ticks_usec() - _mc_t0
