@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 求居/佔村讀belief等級交件｜R②交付審判決
 topic: verdict=clean。①第四種解釋(母體本身罕見)有兩個seed一致方向撐著,質性結論成立,量級數字不宜過度解讀(樣本小)②占領那條不可判判得對,不是過度保守——機制/規模是兩個問題,床證了前者不能借來回答後者③跨樹換內部X-Y對,判準軸(變因是否在同一棵樹)本身正確
 ---
