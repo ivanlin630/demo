@@ -1,5 +1,82 @@
 class_name DecisionContext
 
+# ★★★【陽性對照專用的故障注入 —— 預設關閉，且本票交件前會【整段刪掉】】
+#   spec §1 要求：在動修法【之前】先證明「語意零改變閘（fp 指紋）」對【快取回一個過期的蒐集結果】
+#   這件事**會紅**。★而這一票要做的快取還不存在 ⇒ 先用一個【永不失效的快取】當故障源，
+#   ★★它正是快取修法做錯時的樣子：**同樣的輸入不再得到同樣的輸出**。
+#   ★★★兩層判準（不能只看 fp 有沒有變）：
+#     (1) 注射有沒有【咬到】＝ `_pc_divergent > 0`（快取值與當下重算值不同的次數）
+#     (2) 咬到之後 fp 有沒有【不同】 —— 只有 (1) 成立，(2) 的陰性才有意義。
+static var _pc_fault_stale_prey: bool = false
+static var _pc_cache: Dictionary = {}       # team_id → 上一次算出來的 weak_prey 那一組值
+static var _pc_hits: int = 0                # 讀到快取的次數
+static var _pc_divergent: int = 0           # ★快取值 ≠ 當下重算值的次數（＝注射真的咬到了）
+# ★★★【量測：gather() 在同一個 tick 裡被同一支隊重複呼叫幾次】——★只數，不改行為。
+#   ★動機：`options.gd` 的每一個 `to_task` lambda 都【再 gather 一次】，
+#     而引擎排序時已經 gather 過一次了 ⇒ 懷疑同 tick 同隊有重複的整份蒐集。
+#   ★★這是「先量再開藥」：**在知道重複率之前，不知道快取該做在哪一層**。
+static var _mc_calls: int = 0
+static var _mc_repeat: int = 0        # 同一 (team,tick) 的第 2 次以後
+static var _mc_seen: Dictionary = {}  # "team:tick" → 次數
+static var _mc_us: int = 0            # 全部 gather 的總耗時
+static var _mc_repeat_us: int = 0     # ★其中【重複那些次】的耗時（＝理論上可省的上限）
+static var _mc_max_per_tick: int = 0  # 單一 tick 裡最多幾次 gather
+static var _mc_tick_now: int = -1
+static var _mc_tick_calls: int = 0
+static var _mc_on: bool = false
+# ★★★【決定性量測】：`gather(advance=false)` 到底有沒有【寫世界】。
+#   ★為什麼不用「數 tap」：tap 是一份【清單】，而清單會漏（`LaborSystem.ensure_fresh` 那兩個寫入點
+#     在 known_issues 的名單上，卻【沒有任何 gather.write.* tap】）⇒ 只數 tap 會量出一個【假的 0】。
+#   ★★所以改用【構造保證】的量法：**在那一次呼叫的前後各取一次全世界指紋**，不同就是寫了。
+#     它不依賴任何人的清單完不完整 —— 漏掉的寫入點一樣會讓指紋變。
+#   ★★★代價：每次 observe 呼叫多算兩次 fp ⇒ **只在診斷跑開**，預設關閉、零成本。
+static var _w_probe: bool = false
+static var _w_calls: int = 0        # advance=false 的呼叫次數
+static var _w_dirty: int = 0        # ★其中【指紋變了】的次數 ＝ 真的寫了世界
+static var _w_cad_dirty: int = 0    # ★cadence／cache 影子雜湊變了的次數
+static func _w_reset() -> void:
+	_w_calls = 0; _w_dirty = 0; _w_cad_dirty = 0
+
+# ★★★【指紋看不見的那一半，用既有的那把尺】(systems 2026-09-18)
+#   ★我本來自己寫了一支 `_w_cadence_hash` —— 而 `EphemeralStateHash`(scripts/debug) **已經在做同一件事**，
+#     而且它的 COVERS 是我那組欄位的【超集】(多了 food_runway/persist_strength/food_flow_avg/
+#     need_urgency/plan_phase)。⇒ ★★**兩份手抄清單比一份更會 drift** ⇒ 刪掉我那支，改呼它。
+#   ★★★為什麼需要它：`StateFingerprint` 的排除清單自己寫著 `cadence 排程欄(*_eval_next_tick)`
+#     ⇒ 實測(+1 四個 cadence 欄)指紋【逐字不動】⇒ 只用指紋量「有沒有寫世界」會把 cadence 重排讀成沒寫入。
+# ★★★跨 run 清除（`CrossRunReset` 單一呼叫點會呼它）——**選①：真的清它，不進白名單**。
+#   ★理由（systems 2026-09-18）：白名單是給【故意跨 run 存活】的東西用的，而這三個不是：
+#     `_pc_cache` ＝ 注射器上一次算出來的值 ⇒ 跨 run 留著＝**把上一輪的世界帶進下一輪**
+#     `_mc_seen`  ＝ "team:tick" → 次數      ⇒ 跨 run 留著會讓【重複率】那個數字**失真**
+#     `_g_*` 已經刪掉，這裡只剩量測用的三組。
+#   ★★而它們正是「留著會**靜默**污染下一輪量測」的那種 static —— ★★★靜默，所以要靠閘不是靠記得。
+#   ★閘的判準是【名字有沒有出現在這支函式裡】⇒ 這裡**逐個具名**，不要只呼 `_pc_reset()` 了事。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not _pc_cache.is_empty(): cleared["DecisionContext._pc_cache"] = _pc_cache.size()
+	if not _mc_seen.is_empty(): cleared["DecisionContext._mc_seen"] = _mc_seen.size()
+	if _pc_hits != 0 or _pc_divergent != 0:
+		cleared["DecisionContext._pc_counters"] = _pc_hits + _pc_divergent
+	if _mc_calls != 0 or _mc_repeat != 0:
+		cleared["DecisionContext._mc_counters"] = _mc_calls + _mc_repeat
+	if _w_calls != 0 or _w_dirty != 0 or _w_cad_dirty != 0:
+		cleared["DecisionContext._w_counters"] = _w_calls + _w_dirty + _w_cad_dirty
+	_pc_reset()
+	_mc_reset()
+	_w_reset()
+	# ★旗標（`_pc_fault_stale_prey`／`_mc_on`／`_w_probe`）＝【設定】，同 WorldState 的做法：**只印不清**
+	#   —— ★★而它們預設就是關的；若某一輪跑完仍是開的，那是呼叫端沒關，**印出來讓人看見**。
+	if _pc_fault_stale_prey or _mc_on or _w_probe:
+		cleared["DecisionContext.flags_left_on"] = "%s/%s/%s" % [
+			str(_pc_fault_stale_prey), str(_mc_on), str(_w_probe)]
+	return {"checked": 3, "cleared": cleared}
+
+static func _mc_reset() -> void:
+	_mc_calls = 0; _mc_repeat = 0; _mc_seen.clear()
+	_mc_us = 0; _mc_repeat_us = 0; _mc_max_per_tick = 0; _mc_tick_now = -1; _mc_tick_calls = 0
+
+static func _pc_reset() -> void:
+	_pc_cache.clear(); _pc_hits = 0; _pc_divergent = 0
+
 # 統一決策引擎：一隊一次蒐集的唯讀快照。
 # term 函式從這裡讀驅力輸入；leader 人格 values 是 w_term 權重來源。
 # 簽名對齊真實 code：effective_food/own_granary_tile（static, ResourceSystem）、
@@ -420,6 +497,28 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 	return out
 
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
+	var _w_fp0: String = ""
+	var _w_cad0: String = ""
+	if _w_probe and not advance:
+		_w_calls += 1
+		_w_fp0 = StateFingerprint.compute(state)
+		_w_cad0 = EphemeralStateHash.compute(state)
+	var _mc_t0: int = 0
+	var _mc_is_repeat: bool = false
+	if _mc_on:
+		_mc_calls += 1
+		_mc_t0 = Time.get_ticks_usec()
+		var _mtick: int = state.world.current_tick
+		if _mtick != _mc_tick_now:
+			_mc_tick_now = _mtick; _mc_tick_calls = 0
+		_mc_tick_calls += 1
+		if _mc_tick_calls > _mc_max_per_tick: _mc_max_per_tick = _mc_tick_calls
+		var _mk: String = "%d:%d" % [team.team_id, _mtick]
+		var _mn: int = int(_mc_seen.get(_mk, 0))
+		if _mn > 0:
+			_mc_repeat += 1
+			_mc_is_repeat = true
+		_mc_seen[_mk] = _mn + 1
 	var c := DecisionContext.new()
 	var _tg: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var ldr: PersonData = state.persons.get(team.leader_id)
@@ -638,6 +737,27 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _wt: TeamData = state.teams.get(_prey)
 		if _wt != null:
 			c.weak_prey_power_ratio = ThreatAssessment._power_ratio(state, team, _wt)
+	# ★★★【陽性對照故障注入 ②】（預設關閉；交件前整段刪掉）——★永不失效的快取。
+	#   ★★第一版注在 `scout_*`：欄位確實被改髒了（14 次），★**而行為軌跡逐 tick 完全相同**
+	#     ⇒ 那一輪【什麼都沒證明】（世界本來就沒變，所以 fp 相同是【對的】）。
+	#   ⇒ ★★★注射點必須落在【會翻轉決策勝負】的欄位上 —— `weak_prey_*` 餵掠奪／攻擊的**目標選擇**。
+	if _pc_fault_stale_prey:
+		if _pc_cache.has(team.team_id):
+			var _pcv: Array = _pc_cache[team.team_id]
+			_pc_hits += 1
+			var _pcd: bool = bool(_pcv[0]) != c.has_weak_prey
+			if int(_pcv[1]) != c.weak_prey_id: _pcd = true
+			if not is_equal_approx(float(_pcv[3]), c.weak_prey_richness_est): _pcd = true
+			if not is_equal_approx(float(_pcv[4]), c.weak_prey_power_ratio): _pcd = true
+			if _pcd: _pc_divergent += 1
+			c.has_weak_prey = bool(_pcv[0])
+			c.weak_prey_id = int(_pcv[1])
+			c.weak_prey_priced = bool(_pcv[2])
+			c.weak_prey_richness_est = float(_pcv[3])
+			c.weak_prey_power_ratio = float(_pcv[4])
+		else:
+			_pc_cache[team.team_id] = [c.has_weak_prey, c.weak_prey_id, c.weak_prey_priced,
+				c.weak_prey_richness_est, c.weak_prey_power_ratio]
 	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
 	# 無牙商隊 armed≈0 → ratio≈0 → loot_drive/intent_fit capability_factor 壓平（送死沒人幹，非被禁）。
 	c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(float(team.population), 1.0)
@@ -1287,6 +1407,15 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		if _pp != null and int(_pp.team_id) == team.team_id:
 			team.ctx_snapshot = c.snapshot_dict()
 			team.ctx_snapshot_tick = state.world.current_tick
+	if _w_probe and not advance and _w_fp0 != "":
+		if StateFingerprint.compute(state) != _w_fp0:
+			_w_dirty += 1
+		if EphemeralStateHash.compute(state) != _w_cad0:
+			_w_cad_dirty += 1
+	if _mc_on:
+		var _mc_d: int = Time.get_ticks_usec() - _mc_t0
+		_mc_us += _mc_d
+		if _mc_is_repeat: _mc_repeat_us += _mc_d
 	return c
 
 # ★把自己攤平成 {欄位名: 值}（B1 用）。★用 get_property_list 而不是手抄清單：
