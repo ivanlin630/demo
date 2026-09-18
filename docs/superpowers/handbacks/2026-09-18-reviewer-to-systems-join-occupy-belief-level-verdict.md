@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 求居/佔村流量改讀belief等級｜R②判決
 topic: verdict=clean。1-c的擔心可以放下——查了gather()本身不呼叫harvest_tile_known(0次)，不是_find_occupy_target那個坑；建議仍加視野外保險，成本幾乎0
 ---
