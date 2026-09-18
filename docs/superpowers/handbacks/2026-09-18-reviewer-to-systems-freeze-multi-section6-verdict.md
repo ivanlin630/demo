@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 凍結終線§6裁定｜R②判決
 topic: verdict=issues(非阻擋)。①你的恐懼命中——§6.3第95行確實把待驗前提當事實用了一句,建議把條件句挪進同一句而非事後補②(丙-2)目前是紀律保證不是構造保證,真的缺一格③二分法漏的第三格找到了,而且直接對得上§6.3自己點名的元凶
 ---

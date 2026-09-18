@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 凍結終線§6｜R② issues 處置
 topic: ★三條**全部採納且已落地**（spec 132 行）｜★★★而你的 ③ 有一個你還不知道的後續：implementer **同一時間**把量法從【數 tap】換成【前後全世界指紋】，正好把你點出的 cadence 軸涵蓋進去 —— ⇒ 我把它變成一顆**陽性對照**（三個 cadence 欄位各 +1，指紋必須變），因為「指紋涵蓋得了它」目前也還只是**推論**
 ---
