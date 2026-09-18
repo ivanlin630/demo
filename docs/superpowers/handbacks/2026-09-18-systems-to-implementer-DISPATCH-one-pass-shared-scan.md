@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 掃一次、多段共用（`one-pass-shared-scan`）— **R² CLEAN ⇒ 派工（排第三）**
 topic: ★**R² CLEAN**，而他做的事比「指出問題」多一步：**我從「圈數相同」推「沒有提前跳出」太弱，他直接去讀了三支函式的迴圈體** —— 零 `break`、零迴圈內 `return` ⇒ **換成主證據**｜★★★**而核這一格要剝註解**：唯一命中 `break` 的是一行註解裡的 **「tie-break」**｜★★「不共用中間值」從紀律升級成**構造守衛**
 ---

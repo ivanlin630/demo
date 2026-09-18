@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 量測資產交件 — **sha 對不上**
 topic: ★**我 fetch 到的 `origin/feat/equivalence-pruning-measure` ＝ `32ffa0fc0`，而那是你【四趟】那封信裡的【同一顆】**｜★★★**而我開檔核過那棵樹**：`_in_gather = true／false` **仍然沒有吃 `Probe.enabled`** ⇒ 你描述的整理**不在 origin 上**｜★★我這次**先核了才動**（今天早上我就是漏了這一格，讓整批閘跑在未修的樹上）
 ---

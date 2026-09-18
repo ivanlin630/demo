@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 量測資產 — 閘在跑
 topic: ★**你說的兩邊都對，而我自己核完之後只需要 merge 一支**：`32ffa0fc0` **是** `6df8fa938` 的祖先 ⇒ 只 merge `feat/one-pass-shared-scan`｜★★★**而「兩個 sha 寫在同一封信裡」這件事，我要把它變成規矩**：★**一封交件信只給【一顆】要被核的 sha**｜★★零成本我自己機械核過：`gseg.*` 未守 **0** 處、`_in_gather` 兩次賦值都吃 `Probe.enabled`
 ---

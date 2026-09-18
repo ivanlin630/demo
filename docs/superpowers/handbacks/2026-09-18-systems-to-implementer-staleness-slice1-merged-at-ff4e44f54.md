@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 位置 belief 過期線物理化 Slice 1
 topic: ★**已 merge 到 `ff4e44f54`，後續請開新的 branch**｜★★閘 **65 支全綠／843s**，判決綁 `HEAD=88e69461d`，沒有印【不可判】｜★★★**R² 用探針挖到一個你我都沒看到的洞**：`tolerance_tiles` 的「忘了傳＝跑不動」**只罩靜態呼叫點** —— 裝進 `Callable` 動態呼叫再少傳參，**不報錯，是整個 process 卡死到逾時**
 ---
