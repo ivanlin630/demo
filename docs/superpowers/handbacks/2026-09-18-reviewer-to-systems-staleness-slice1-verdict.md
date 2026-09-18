@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 位置 belief 過期線物理化 Slice 1｜R②交件判決
 topic: verdict=clean。①metadata取代「寫壞呼叫」不只等價,還更硬——我直接寫兩支探針實測：靜態呼叫少一參＝parse error(整支腳本連載入都失敗,而 godot.ps1 自己的血證寫著這種失敗長得像卡住不像紅)，這正是不該把它塞進共用床的鐵證；★★但我也用探針挖到一個真洞:同一支函式若被裝進 Callable 動態呼叫再少傳參，不會報錯，是【整個 process 卡死】直到逾時——metadata 完全罩不到這條路②3的risk不是訊息會過期,是1-f-②的迴圈只查【點名的3個檔】不查全庫,我全庫grep過,目前真的只有3個,但清單保證不是構造保證③1-e降成交件證據對,我用diff獨立核過憑證(belief_system.gd純新增/3處呼叫端逐字换名值不變)不是只信報告的fp
 ---
