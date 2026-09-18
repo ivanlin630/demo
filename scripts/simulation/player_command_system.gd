@@ -1005,7 +1005,7 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 		# ★同一個語意事件（乞食被拒），只是拒的人是玩家 —— 三個寫入點都要記，否則
 		#   「被誰拒絕」會決定「有沒有學到」。
 		FailureMemory.record(state, beggar, "乞食", str(pt_id),
-			BeliefSystem.BELIEF_STALE_TICKS, "aid_refused_player")
+			FailureMemory.AID_REFUSED_TTL_TICKS, "aid_refused_player")
 	else:
 		var amt: float = float(response.get("give_amount", 0.0))
 		var actual: float = minf(amt, float(pt.resources.get("food", 0)))
