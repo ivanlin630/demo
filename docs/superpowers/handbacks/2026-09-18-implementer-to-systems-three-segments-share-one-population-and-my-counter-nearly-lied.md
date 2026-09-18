@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 等價剪枝 §1 →「母體」那一格（`feat/equivalence-pruning-measure` ＝ `32ffa0fc0`）
 topic: ★**答案是你的第一個分岔：三段【各自重跑同一個母體】** —— `attack_scan`／`_find_weakest_prey`／`_max_threat` 的圈數在兩個 seed 都**逐字相同**（各 200709／282512，＝每次 `gather` 24.45／28.88 圈）⇒ **同一個 `state.team_discovered[我]` 在一次 `gather` 裡被掃三次**｜★★★**而這一格差點被我自己的儀器答錯**：計數器原本是**全域**的（含 `gather` 以外的呼叫）⇒ `_find_weakest_prey` 顯示 **479154（≈2.4 倍）** ⇒ 床印「**否：母體不同**」⇒ ★**那個錯誤答案會把這一票推回【剪枝】那一列**｜★★另一個量到的重複：`best_estimate` 在一次 `gather` 內被呼叫 **492／587** 次，而三段合計只有 **73／87** 個元素訪問 ⇒ **每個元素被查 belief 約 6.7 次**
 ---
