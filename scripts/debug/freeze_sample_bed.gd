@@ -20,20 +20,34 @@ extends SceneTree
 #
 # env：FS_DAYS（預設 12）／FS_SEED（預設 1337）／FS_CONFIG（預設 warring_states）／FS_TOP（預設 8）
 
-var _fails: int = 0
+# ★★★【為什麼這支是 `diagnostic`，而它【本來】長得像在判決】（systems 2026-09-18 點名，我答）：
+#   ★`bed-kind` 問的是「**你紅的時候代表什麼**」。這支床紅（或不可判）的時候，答案是：
+#     **「這一輪【沒有量到東西】——不要讀下面那張表」**
+#     ⇒ ★★那是【儀器沒有讀數】，不是【世界壞了】，也不是【被測的東西不合格】
+#     ⇒ 照 systems 自己給的語意（diagnostic ＝ 它紅 ＝ 觀測工具壞了／世界變了），**它就是 diagnostic**。
+#   ★★而讓閘紅的東西其實是**框架的完成橫幅與失敗計數行**（★這裡【不逐字引用】那兩個字串：
+#     閘是【整個檔案】在 grep，它不剝註解 ⇒ ★★★我解釋這個病的句子會自己讓這一格紅
+#     —— 同族第四次了，前三次：`src.find("func _verdict")` 命中自己那一行、
+#     兩支床的來源檢查被我引用禁用字串判紅）——
+#     ★★★我把橫幅拿掉了，**但沒有拿掉「這一輪有沒有量到東西」這個訊號**：
+#     它改用**離開碼**（有讀數 0／沒讀數 2）。
+#   ★理由是這支床從第一天就寫著的那件事：**「命中 ＝ 0」與「一切正常」在印出來的表上長得一模一樣**
+#     ⇒ 只把橫幅刪掉、讓它安靜地回 0，等於把那個陷阱重新裝回去。
 var _undec: int = 0
+var _sample_bad: int = 0
 
 func _initialize() -> void:
 	_run()
-	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
-	print("[TEST-SUITE-COMPLETE]")
-	quit(1 if _fails > 0 else 0)
+	print("-- 取樣結束；★取樣有效性問題 ＝ %d 項｜[不可判] ＝ %d 項（★離開碼 0＝有讀數／2＝沒讀數）--" % [
+		_sample_bad, _undec])
+	quit(2 if (_sample_bad + _undec) > 0 else 0)
 
-func _ok(cond: bool, msg: String) -> void:
-	if cond: print("  [OK] %s" % msg)
+# ★不是 `_ok`：它判的是【這一輪的取樣有沒有效】，不是【世界對不對】。
+func _sample(cond: bool, msg: String) -> void:
+	if cond: print("  [取樣有效] %s" % msg)
 	else:
-		_fails += 1
-		push_error("[FAIL] %s" % msg)
+		_sample_bad += 1
+		push_error("[取樣無效] %s" % msg)
 
 func _undecidable(claim: String, why: String, how: String) -> void:
 	_undec += 1
@@ -166,10 +180,10 @@ func _run() -> void:
 		print("     ★★而它可能是最大的一塊 —— 只看排行挑目標，最大的錢會站在排行外面。")
 
 	# ★★★可判性：只有「有凍結幀」才算量到；★而本床不判「該修誰」——那是下一票
-	_ok(SimRunner.frames_over_budget > 0,
+	_sample(SimRunner.frames_over_budget > 0,
 		"★母體非 0：這一輪真的有 >2 秒的幀（%d／%d）" % [
 			SimRunner.frames_over_budget, SimRunner.frames_total])
-	_ok(not rows.is_empty(),
+	_sample(not rows.is_empty(),
 		"★★凍結幀裡真的有 FactionAI 的相位資料（%d 個相位名）" % rows.size()
 		+ "｜★為 0 ⇒ 那些幀的時間不在這張表上（渲染／其他系統）⇒ 這張表回答不了那一幀")
 
