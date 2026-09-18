@@ -1612,6 +1612,11 @@ outpost.l0_to_l1 = 0（實測）      ← 沒有隊靠紮根取得 outpost
 **重現**（`specimen_neutrality_bed.gd` 兩段式 A/B 比 fp）：seed1337、**7 specimens**、1200 tick → 首次分岔 **tick 439**（1 specimen/300 tick 零分岔＝要夠多 specimen＋夠久才炸，與 measurer 觀察一致）。
 **元凶隔離**：跳過 `capture_options` → **1200 tick 全同**。∴分岔源＝`options.gd::DecisionOptions` 對每個候選呼 `DecisionOptions.to_task`，而 `to_task` 的 closure 會呼 **`DecisionContext.gather`，gather 會寫 state**。
 **寫入點清單（implementer 讀出、file:line）**：`decision_context.gd::gather()` `team.need_urgency = NeedHierarchy.ewma_update(...)`（**非冪等 EWMA**）／`:606` `plan_phase`／`:233` `LaborSystem.ensure_fresh`→`rebalance` 寫 `tile.labor_alloc`＋`labor_eval_next_tick`（**cadence 重排**）／`:243-247` `idle_employ_cached`/`idle_employ_next_tick`／`:546-549` `consolidate/absorb_target_cache`＋`consolidate_eval_next_tick`（§4b 另有 `expand_*` 同族）。
+★★**訂正（systems 2026-09-18，implementer 實測）：上面清單的 ②（`LaborSystem.ensure_fresh` 寫 `tile.labor_alloc`＋`labor_eval_next_tick`）****在【觀測路徑】上已經不成立** —— `labor_system.gd:29` `if not advance:` 走唯讀、`:43` 的 `rebalance` **只在 `advance`**、`:46-50` cadence 到期且快取空時**純算回傳不寫世界**。
+★**而整條的現況是量出來的，不是讀出來的**：`gather(advance=false)` 在 **1200 tick／seed 1337／65 隊** 的窗口裡呼叫 **95 次**、**寫世界 0 次**（量法＝**每次呼叫前後取全世界指紋**，★不依賴任何寫入點清單的完整性）。
+★★★**這一條記錄自己示範了為什麼要那樣量**：清單上的 ② **全庫沒有任何 `gather.write.*` tap** ⇒ **照清單數 tap 會數出一個【假的 0】**，而「沒有訊號」與「沒有發生」長得一模一樣。
+★**誠實限**：0 是**一個窗口**的結果，不是「`gather` 是純讀的」這種全稱句 ⇒ 正在做成守衛（含母體 95 一起印：母體＝0 會讓那格恆綠）。
+
 **已排除**：只還原 `need_urgency` 仍分岔；再加還原 team/tile cache 群**仍分岔** → 尚有別的寫入點（或多點合成）。**進行中**：`compute_domains` 前後比對指名域。
 **★架構層意涵（比 specimen bug 大）**：`gather` 命名/語義是「取脈絡」但**實為 mutator**（EWMA 推進＋cache 寫＋**cadence 重排**）→ ①觀測器不可能「只看不碰」（[[feedback_observer_no_global_rng]] 同族第 4 例：LOD→RNG→specimen→gather-write）②任何未來的 what-if/預演/UI 預覽呼 `to_task` 都會改世界 ③cadence 重排使**呼叫次數本身**改變後續排程＝與呼叫者無關的耦合。修法方向（investigation 收斂後定）：gather 拆 pure-read vs commit 兩段，或給 observe-mode 抑制寫（**但抑制清單＝易漏的黑名單**，優先前者）。
 
