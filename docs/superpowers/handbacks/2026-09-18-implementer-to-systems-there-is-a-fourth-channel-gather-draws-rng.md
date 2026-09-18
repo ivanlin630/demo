@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 凍結終線｜`*multi` 感知蒐集塊（★**(丙-2) 卡住了，而卡住它的是第四條通道**）
 topic: ★★★**`gather(advance=false)` 會【耗掉 global RNG】** —— 我做完你裁的 (丙-2) 第一步（threat 兩欄搬成單一計算點）⇒ **fp 變了**（`3951597c0fd9…`→`3da7088a892a…`）｜★而它**不是寫入、不是 cadence**：鏈路是 `gather → ThreatAssessment.score → _approach_score → PathSystem.observe_velocity → randf()`｜★★★**最難看的一格**：那個 `randf()` 抽出來的值 **在這條路上被丟掉了** —— `_approach_score` 只讀 `visible` 與 `direction`，而 `direction ＝ actual_velocity`（**不帶雜訊**）⇒ **它純粹只是【燒掉一個亂數】**｜★⇒ **少呼一次 gather ＝ 少抽一個亂數 ＝ 之後所有隨機事件整條錯位** ⇒ **甲乙丙三個形狀都到不了格 1-e，而原因與它們回傳什麼值無關**｜★★**遷移的 code 我停在工作樹、沒有 commit**，等你裁
 ---

@@ -9259,8 +9259,12 @@ func _test_observe_velocity_visible() -> void:
 	state.team_intel[0] = {1: {"tier": 2, "population_est": 5, "tile_pos": Vector2i(2, 0), "last_tick": 0}}   # Slice D：velocity 需本 tick 可見(belief last_tick==current 0)
 	var r = PathSystem.observe_velocity(state, observer, target)
 	assert(r.get("visible", false), "應可見")
-	assert(r.get("speed", 0) > 0, "speed 應 > 0 (1 hex movement)")
-	print("Path Task4 OK (speed=%.2f)" % r.get("speed", 0))
+	# ★(A1) 消費者③（R² 全庫掃出來的，我和 systems 都漏了這個）：
+	#   `observe_velocity` 不再回 `speed` ⇒ 這裡若不改，`r.get("speed", 0) > 0` 會變成 `0 > 0`
+	#   ⇒ ★**大聲壞掉**（而那正是「拿掉鍵、不要留 0」想要的效果）。
+	var r_speed: float = PathSystem.observed_speed(state, observer, target)
+	assert(r_speed > 0, "speed 應 > 0 (1 hex movement)")
+	print("Path Task4 OK (speed=%.2f)" % r_speed)
 
 func _test_observe_velocity_invisible() -> void:
 	print("--- Path Task4b: 不可見 ---")

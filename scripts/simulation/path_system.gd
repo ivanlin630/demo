@@ -216,17 +216,39 @@ static func observe_velocity(state: WorldState, observer: TeamData, target: Team
 	var actual_velocity: Vector2i = Vector2i(0, 0)
 	if target.last_tile_pos != Vector2i(-999, -999):
 		actual_velocity = target.tile_pos - target.last_tile_pos
-	var actual_speed: float = float(_hex_dist(Vector2i.ZERO, actual_velocity))
-	# 雜訊：距離越遠 speed 估越粗（觀測儀器采樣期間 suppress → 零 RNG，非擾動）
-	var observed_speed: float = actual_speed
-	if not suppress_observe_noise:
-		observed_speed = actual_speed * (1.0 + (randf() - 0.5) * noise_factor)
+	# ★★★【lazy：抽亂數的地方 ＝ 用那個值的地方】(systems 裁 A1／blueprint 准／R² 已審 2026-09-18)
+	#   ★病（量到的，不是讀出來的）：本函式**每次呼叫都抽一個 `randf()`** 去做 `speed` 的觀測雜訊，
+	#     而最大宗的呼叫者 `ThreatAssessment._approach_score` **只讀 `visible` 與 `direction`**
+	#     ⇒ 它付了那個亂數的錢卻不用那個值。
+	#   ★★而代價不是效能，是**決定論**：`DecisionContext.gather()` 走這條路
+	#     ⇒ **「gather 被呼叫幾次」被耦合進世界演化**（少呼一次＝少抽一次＝之後所有隨機事件錯位）
+	#     ⇒ ★★★任何「讓 gather 少跑幾次」的效能修法【在構造上】都過不了「語意零改變」。
+	#   ⇒ 修法：本函式**不再算 speed、不再抽亂數**；要 speed 的人自己呼 `observed_speed()`。
+	#   ★`speed` 這個鍵**從回傳裡拿掉**（★**不是留一個 0**）——
+	#     留 0 會讓漏改的呼叫端**安靜地拿到錯的值**；拿掉 ⇒ 它們會**大聲壞掉**。
+	#     ★★而這正是 R² 掃出第三個呼叫端（`headless_test.gd:9262`）時用的判準。
 	return {
 		"visible": true,
-		"speed": observed_speed,
 		"direction": actual_velocity,
 		"noise_factor": noise_factor,
 	}
+
+# ★★★觀測速度（**唯一抽那個亂數的地方**）—— ★三個消費者各自呼它：
+#   `estimate_catch_up`／`predict_intercept`／`headless_test`（R² 全庫掃出來的第三個）。
+#   ★★它**不重算方向**：`direction` 就是真 velocity，速度是它的長度 ⇒ 沿用同一份觀測、不留第二份實作。
+#   ★誠實限：**同一 tick 內呼兩次會得到兩個不同的值**（每次各抽一次）——
+#     ★★這在修法【前】就已經是這樣（本次只搬家、不改觀測模型）；
+#     ★★★「同 tick 兩次觀測不一致」systems 已登成【獨立票】，**效能票不偷渡觀測模型的修改**。
+static func observed_speed(state: WorldState, observer: TeamData, target: TeamData,
+		trusted: bool = false) -> float:
+	var obs: Dictionary = observe_velocity(state, observer, target, trusted)
+	if not obs.get("visible", false):
+		return 0.0
+	var actual_speed: float = float(_hex_dist(Vector2i.ZERO, obs.get("direction", Vector2i.ZERO)))
+	# 雜訊：距離越遠 speed 估越粗（觀測儀器采樣期間 suppress → 零 RNG，非擾動）
+	if suppress_observe_noise:
+		return actual_speed
+	return actual_speed * (1.0 + (randf() - 0.5) * float(obs.get("noise_factor", 0.0)))
 
 # ────────── catch-up ──────────
 
@@ -254,7 +276,8 @@ static func estimate_catch_up(state: WorldState, self_team: TeamData, target_id:
 		return { "reachable": false, "reason": "no_path" }
 	var obs: Dictionary = observe_velocity(state, self_team, target_team, trusted)
 	var self_speed: float = _team_speed_mult(self_team)
-	var target_speed: float = float(obs.get("speed", 0.0))
+	# ★(A1) 消費者①：speed 現在自己去要 —— 抽亂數的地方 ＝ 用那個值的地方
+	var target_speed: float = observed_speed(state, self_team, target_team, trusted)
 	var direction: Vector2i = obs.get("direction", Vector2i.ZERO)
 	var moving_away: bool = _is_moving_away_observed(self_team, target_team, direction)
 	if moving_away and target_speed >= self_speed:
@@ -288,7 +311,8 @@ static func predict_intercept(state: WorldState, attacker: TeamData,
 		return BeliefSystem.belief_pos(state, attacker.team_id, target.team_id)
 	# 以下本 tick 可見（observe_velocity visible）→ live 位/velocity 合法。
 	var direction: Vector2i = obs.get("direction", Vector2i.ZERO)
-	var target_speed: float = float(obs.get("speed", 0.0))
+	# ★(A1) 消費者②
+	var target_speed: float = observed_speed(state, attacker, target)
 	if direction == Vector2i.ZERO or target_speed < 0.1:
 		return target.tile_pos
 	var path: Dictionary = find_path(state, attacker.tile_pos, target.tile_pos)

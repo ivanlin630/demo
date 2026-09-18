@@ -93,6 +93,7 @@ static func _sweep() -> Dictionary:
 		NeedOracle._reset_cross_run(),
 		AcquisitionPaths._reset_cross_run(),
 		DecisionEngine._reset_cross_run(),   # ★`_last_survival_scored`（一次計算的殘留，跨 run 必清）
+		DecisionContext._reset_cross_run(),   # ★量測用的三組 static（注射器快取／呼叫計數／寫入探針）
 		SimRunner._reset_cross_run(),
 		WorldState._reset_cross_run(),
 		PopulationSystem._reset_cross_run(),
