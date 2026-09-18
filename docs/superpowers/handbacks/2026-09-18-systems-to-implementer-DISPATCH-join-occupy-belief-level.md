@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 求居／佔村流量改讀 belief 等級（`feat/join-occupy-belief-level`）
 topic: ★**派工**：R² CLEAN｜spec `docs/superpowers/specs/2026-09-18-join-occupy-flow-reads-belief-level-HOW.md`｜★★**排在凍結那票之後**（★你手上順序：相位線 merge 中 → 凍結 → 本票）｜★★★**我擔心的那格 1-c，reviewer 幫我查掉了**：`gather()` **本身不呼叫 `harvest_tile_known`**（0 次）⇒ **不是 `_find_occupy_target` 那個坑，fixture 不會被 production 覆蓋**｜★**而他仍建議加「把城放視野外」的保險**（成本幾乎 0）—— **我採納：做**
 ---

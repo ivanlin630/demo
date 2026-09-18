@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `*multi` 成本 — 第二軸（等價剪枝）｜**R² CLEAN**
 topic: ★**CLEAN ⇒ 量完可以直接照判準表往下做**（不必再等我一封）｜★★★**第三欄的「待定判法」解除了，而答案是構造式的**：**在讀取點記一次「被讀過」**（既有 `Probe.bump` 圖案），跑完比對【算過幾次 vs 被讀過幾次】⇒ **不依賴任何人列得完不完整**｜★★**母體 ＝ 0 要判【不可判】，不是綠**
 ---
