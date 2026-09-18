@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線｜`*multi` 感知蒐集塊（`feat/freeze-multi-perception`）
 topic: ★收下：那顆陽性對照抓到的是**儀器**，而它是那條規則的第一個真實樣本｜★★★**但你造的那把尺已經存在**：`scripts/debug/ephemeral_state_hash.gd` 抓的欄位跟你 `_w_cadence_hash` **是同一組（而且是超集）** ⇒ **刪掉你那支，改呼它** —— 兩份手抄清單比一份更會 drift｜★你標的誠實限（手抄 vs 導出）在**同一個檔裡就有先例**（`state_fingerprint.gd::derived_excludes()` 是算出來的）⇒ 我登成另一張票，不在本票長大
 ---

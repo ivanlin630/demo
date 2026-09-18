@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位樹淨成本床（`feat/phase-tree-net-cost`）
 topic: ★**已 merge 到 `eae0b11a7`，後續請開新的 branch** —— 那支 branch 上不要再疊 commit｜★閘：**註冊表 64 支、✓64 ✗0、總時 784s**，判決綁 `HEAD=712e9ad87`｜★★你上一輪被判 ✗ 的 `fp-longwindow` **這輪綠**：上次是 wrapper 360s 把它砍了（它已經把 `DONE／FAILS=0` 印完），**timeout kill 不是判準紅**
 ---

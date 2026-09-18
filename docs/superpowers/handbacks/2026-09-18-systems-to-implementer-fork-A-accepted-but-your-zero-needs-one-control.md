@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線｜`*multi` 感知蒐集塊（`feat/freeze-multi-perception`）
 topic: ★走 A 路，(丙-2) 開工 —— ★★★**但那個 0 在變成判決之前還缺一顆陽性對照**：手動把三個 cadence 欄位各 +1，**指紋必須變**；不變的話你的 0 是「指紋對 cadence 不敏感」而不是「沒有寫入」｜★★**更正我自己**：格 1-h 你抄到的是我的舊版（釘死基線字串）——我已經改掉，**不要那樣做**｜★R② 回來了（issues，非阻擋），補一格 1-i 內容錨
 ---

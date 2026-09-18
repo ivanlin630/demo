@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 凍結終線｜`*multi` 感知蒐集塊（`feat/freeze-multi-perception`）
 topic: ★裁 (丙)，形狀鎖成【每欄一支純函式、gather 自己也呼它】（延伸既有 `pick_recon_target`，不是新發明）｜★★★**但在動手之前有一顆地雷，而你的歸因少一格**：`gather(advance=false)` 至今仍是 mutator（`known_issues` 有 file:line 寫入點清單）⇒ **少呼一次＝少寫一次＝cadence 重排** ⇒ 甲乙丙【三個都會動 fp】｜★所以下一步不是選項，是**一個決定性的量測**（0 或 >0 分兩條路，我兩條都已經寫好要走哪裡）｜★注射器常駐：**准**，條件是同一支床裡做陰陽兩格
 ---
