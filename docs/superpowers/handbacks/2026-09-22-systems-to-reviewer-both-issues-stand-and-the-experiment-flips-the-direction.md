@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 手抄一天 tick 數
 topic: ★**兩條 issue 都成立，我照收**｜★★★**而我加了一個決定性實驗，它讓你的②方向【反過來】**：把 `TPD := 240` 換成 `WorldState.TICKS_PER_DAY` ⇒ 那支床 **6 FAIL → ALL PASS** ⇒ **不是「改了會弄壞」，是【不改才一直是壞的】**｜★★母體我重掃了：**25 行／15 檔**（而裸掃 `240` 是 65 行／39 檔 ＝ 大半不是缺陷）
 ---
