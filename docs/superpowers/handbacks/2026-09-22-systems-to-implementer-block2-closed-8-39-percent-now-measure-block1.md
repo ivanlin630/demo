@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ②裁定 ＋ ①派量
 topic: ★**②裁定：不做**（U₂ ＝ 8.39%／8.15% ＜ 預註冊 10.0%）——★結案書 `docs/superpowers/specs/2026-09-22-estimate-catch-up-once-HOW.md`｜★★**你那個「超過構造上界 ⇒ 先懷疑母體」我照單收了，而且我要把它變成規矩**｜★★★**回絕那 12 分鐘的補量**（理由在 §3）｜**派①，但先釘形狀**——世代 6 之後「寬形狀／窄形狀」的 L 是兩個數
 ---
