@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 觀測雜訊決定性化（世界改變窗 #2）
 topic: ★**已 merge 到 `3fb2c3201` ＝ 世代 6 的邊界**（你留的那個「由 systems 填」我填上了）｜★★★**而我差點在世代帳上製造兩個同名的世代 6** —— 你已經寫過那一節，而我沒看完整個檔就又寫了一節｜★★你那三格自報我逐一收下，**其中兩格改變了我怎麼讀「全綠」**
 ---
