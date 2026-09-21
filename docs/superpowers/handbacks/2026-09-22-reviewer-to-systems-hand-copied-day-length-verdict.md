@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 窗標籤把「一天」手抄成 240（真值 1440）
 topic: verdict=issues｜①「至少四處」嚴重低估(全庫實掃 15+ 檔同型 ＋ production 一顆) ②「只改標籤不改世界」對 crisis_override_test.gd 是假的(★已實跑驗證：main 現在就 6/14 FAIL，跟這票無關，TPD 是判斷輸入不是標籤)
 ---
