@@ -295,7 +295,50 @@ static func observed_speed(state: WorldState, observer: TeamData, target: TeamDa
 # ★live god-view leak（11 production caller：finder 族 + envoy tracking + threat_assessment；Slice D 待修）：
 # 讀 live target.tile_pos = god-view（斷視線仍瞬鎖真位）。非死碼（前註「零 caller」是 systems grep glob-bug 誤，已訂正）。
 # belief-gate（Slice D：caller 傳 belief 位 or last_tick 新鮮 gate，鏡射 _refresh_attack_pursuit:269-291）前勿加新 caller。
+# ────────── per-gather memo（票：七處共用 estimate_catch_up）──────────
+# ★為什麼要它：同一次 gather 內，7 個呼叫點用【同一把鑰匙】重算同一個問題
+#   —— 量到的重算佔比 D₇ ＝ 0.695／0.699，而那幾次呼叫佔 gather 的 27.5%。
+# ★★生命期只有【一次 gather】：位置與 belief 會變，跨 gather 共用就是錯的答案。
+# ★★★而正確性【不依賴清空有沒有被跑到】：每筆帶 gather_seq，讀的時候比對，
+#   seq 不符視同 miss ⇒ 就算清空被跳過／旗標卡住／上一次 gather 中途炸掉，
+#   舊值也永遠回不來。★判準句：問的不是「清空會不會被跳過」，是「被跳過了還會不會錯」。
+static var _catchmemo: Dictionary = {}
+static var _catchmemo_seq: int = 0
+static var catchmemo_enabled: bool = true   # ★A5 的旗標：關掉 ⇒ 每次都重算
+
+static var _catchmemo_active: bool = false
+
+static func catchmemo_begin_gather() -> void:
+	# ★★★這三行【無條件】執行（spec §4b）——seq 遞增是整個正確性唯一承重的那一行。
+	_catchmemo_seq += 1
+	_catchmemo.clear()
+	_catchmemo_active = true
+
+static func catchmemo_end_gather() -> void:
+	# ★★★為什麼需要這一支（實作時量到的，spec 沒寫）：
+	#   `seq` 只在 gather【開始】時改變 ⇒ ★gather【結束之後】的呼叫仍會命中那次 gather 的 memo。
+	#   而同一 tick 內移動已經執行、位置已經變 ⇒ ★★那是【過期的 eta／reachable】。
+	#   實測：1 天窗裡 gather 外的呼叫有 6134 次（總 18048 − gather 內 11914）——不是零頭。
+	#   ⇒ spec §4 寫的是「生命期＝一次 gather 之內」，所以這是【把實作拉回 spec】不是改設計。
+	# ★同樣【無條件】：掛在 Probe 後面就會讓 production 的 memo 永遠不關。
+	_catchmemo_active = false
+
 static func estimate_catch_up(state: WorldState, self_team: TeamData, target_id: int,
+		trusted: bool = false) -> Dictionary:
+	if not catchmemo_enabled or not _catchmemo_active:
+		return _estimate_catch_up_impl(state, self_team, target_id, trusted)
+	var _k: String = "%d:%d:%s" % [self_team.team_id, target_id, str(trusted)]
+	var _e: Dictionary = _catchmemo.get(_k, {})
+	if int(_e.get("seq", -1)) == _catchmemo_seq:
+		if Probe.enabled: Probe.bump("catchmemo.hit")   # ★tap 可以閘控（記帳），語意不行
+		return _e["v"]
+	if Probe.enabled: Probe.bump("catchmemo.miss")
+	var _v: Dictionary = _estimate_catch_up_impl(state, self_team, target_id, trusted)
+	_catchmemo[_k] = {"seq": _catchmemo_seq, "v": _v}
+	if Probe.enabled: Probe.note("catchmemo.size_max", float(_catchmemo.size()))
+	return _v
+
+static func _estimate_catch_up_impl(state: WorldState, self_team: TeamData, target_id: int,
 		trusted: bool = false) -> Dictionary:
 	if not trusted and not state.team_discovered.get(self_team.team_id, []).has(target_id):
 		return { "reachable": false, "reason": "out_of_sight" }
