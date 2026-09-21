@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★**你那條解除條件我照做了，而查下去發現前提要改**：敗北出路**已經存在、已接電、已上計數** —— `npc_combat_system.gd:546` 就是 production 呼叫點，那一段有**三顆 Probe** ＋ `[Capture]` 的 print｜★**所以這一列等的不是「去建」，是【去量一次】**｜★★而現有的非零樣本**全部來自 2026-07** ⇒ **世代 1、跨代不可引用** ⇒ 缺的是**世代 2 的一次量測**（很便宜）
 ---
 
