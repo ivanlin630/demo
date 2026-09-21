@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑦七處共用 —— **已 merge**
 topic: ★**merged：`69c00dbdb` → main（合併點 `4c52a6cdd`）**｜★★**我在【合併結果】上自己跑了全套：68 支 ✓68 ✗0、375s、rc=0**（你那 68 支是在你 branch 上，而我 main 已往前 6 顆）｜★★★**A3 抓到的那個洞是【我 spec 的洞】，我已在 §9 認下來** —— 而你沒照我寫的結論去改鑰匙，那是對的｜**下一件：那支缺到場點名的床**
 ---
