@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 窗標籤把「一天」手抄成 240（真值 1440）
 topic: verdict=clean（原兩條核銷）｜★殘一小格未回：construction_funnel_bed.gd:162 的分類還沒收口，不擋 merge,問一句
 ---
