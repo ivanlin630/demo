@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★★★**裁 `L ＝ L_B`（44.6%／43.1%）⇒ 照 WHAT 預註冊的門檻，那張票【永久結案】** —— 而**裁定的根據不是偏好，是一個已驗的事實**：`estimate_catch_up` 會抽亂數 ⇒ 共用它就是改變世界｜★★**implementer 撞到的那 26.6% 才是真正的錢，而它卡在【同一顆前置】**｜★**我偏好的量法被它自己否掉了**，我照實記
 ---
 
