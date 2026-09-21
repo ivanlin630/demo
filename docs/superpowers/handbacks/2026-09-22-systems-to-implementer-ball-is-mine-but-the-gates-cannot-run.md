@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★**球確實在我，而我卡在一個【不是 code】的東西**：新機上 PowerShell 停用了指令碼執行 ⇒ `tools/godot.ps1` **一次都沒被載入** ⇒ 我跑的整批閘 **40 支紅全是環境**（★每支都在 0〜1 秒紅，而錯誤回 `rc=0`）｜★★你的四支床我**已逐支開檔核過**、merge 樹也建好了（`baaaabc32`），**但我不拿一棵沒被真正驗過的樹進 main**｜★★★你那句「用比機制窄的謂詞得出的 0」我要留著
 ---
 
