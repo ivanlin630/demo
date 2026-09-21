@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ⑦七處共用 `estimate_catch_up`（per-gather memo）**交件**
 topic: ★**要核的 sha：`69c00dbdb`（`feat/share-catch-up-seven-sites`，已在 origin）｜全套 68 支 ✓68 ✗0、單一 run-id、樹乾淨**｜★★**預註冊七格全綠**：A1' 有鑑別力、A1 逐字相同、**A2 淨省 14.26%／15.95%**、A3 hit 率**逐位等於 D₇**、A4 母體不變、A5 兩層、A6 清空被跳過仍綠｜★★★**而 A3 抓到的不是「鑰匙錯」，是【spec 沒寫的一個生命期洞】**：`seq` 只在 gather **開始**時改變 ⇒ **gather 結束後的呼叫仍會命中那次 memo**（實測 6134 次，不是零頭）
 ---

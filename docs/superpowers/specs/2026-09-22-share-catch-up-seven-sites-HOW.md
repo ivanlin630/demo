@@ -1,7 +1,7 @@
 ---
 slice: ⑦一次 `gather` 內共用 `estimate_catch_up` 的結果（七個呼叫點）
 owner: systems
-status: R² 第二輪=issues（不 halt）→ 已補 §4c 與 §6'（逐格配置）⇒ 待 reviewer 確認 CLEAN 才 dispatch
+status: **MERGED 2026-09-22**（`69c00dbdb` → main；★合併結果上全套 68 支綠、375s、rc=0）
 基於: implementer 規模量測 2026-09-22（世代 6／HW-2，兩個 seed）；WHAT 預註冊門檻（U₇ ≥ 10.0% ⇒ 開修法票）
 ---
 
@@ -203,3 +203,26 @@ docs/measurements/2026-09-22-U7-u7-s1337-gen6-HW2.log.gz       99569 bytes ✔
 docs/measurements/2026-09-22-U7-u7-s77-gen6-HW2.log.gz         96179 bytes ✔
 smoke2（未歸因 1233 那輪）／smoke3（錯假設那輪）／smoke4（修好那輪）      ✔
 ```
+
+---
+
+# §9 ★★★落地後補記：**A3 抓到的是【我這份 spec 的洞】，不是實作的錯**
+
+```
+我在 §4a 寫：「清在進入 ＋ 每筆帶 seq、讀時比對 ⇒ **正確性完全不依賴清空路徑**」，
+並下了判準句：「問的不是【清空會不會被跳過】，是【被跳過了還會不會錯】。」
+★★★而那句話**預設了「每一次呼叫都在某一次 gather 裡面」** ——
+   `seq` 只在 gather【開始】時改變 ⇒ **gather 結束【之後】的呼叫，key 一樣 ⇒ 仍然命中那次 memo**
+   ⇒ 而同一 tick 內移動已執行、位置已變 ⇒ **過期的 eta／reachable**
+   ⇒ 實測不是零頭：1 天窗 gather 外呼叫 **6134 次**（總 18048 − gather 內 11914）
+⇒ ★**這是我的老毛病：二分法少一格**（「這一次」／「下一次」，漏掉**【不在任何一次裡面】**）
+```
+**修法（implementer 做的，形狀正確）**：加**無條件**的 `_catchmemo_active`
+（`catchmemo_begin_gather()` 開、`catchmemo_end_gather()` 關，兩者都不掛 `Probe.enabled`）
+⇒ 把生命期拉回 §4 寫的「一次 gather 之內」。★**這是把實作拉回 spec，不是改設計。**
+
+★★**而指出它的是 A3**（hit 率 0.5505 對不上 D₇ 0.69）——
+而 **A3 是設計來抓【鑰匙錯】的，這次抓到的是【母體範圍錯】**。
+⇒ ★★★**構造交叉驗的價值就在這裡：它不知道自己在抓什麼，它只知道兩個數該相等。**
+★而 implementer **沒有照 spec 那句「差很多 ⇒ 鑰匙錯了」直接去改鑰匙**，
+他先問「為什麼兩個數對不上」⇒ 才看到生命期超界。★★**照著我寫的結論去修，會修錯地方。**
