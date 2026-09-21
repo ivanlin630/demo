@@ -500,6 +500,12 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 	return out
 
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
+	# ★★★【無條件】——不得掛在 `Probe.enabled` 後面（spec §4b，R² 兩輪都打這一格）：
+	#   ★`Probe.enabled` 預設 false ⇒ 照樣造句寫成 `if Probe.enabled:` 會讓
+	#     production 永不遞增 ⇒ memo 的舊值【全部變成命中】⇒ 回傳任意舊 tick 的 eta。
+	#   ★★而 A1～A6 除了 A1／A1' 都在 Probe 開之下跑 ⇒ ★★★地雷與驗收的盲點會互相掩護。
+	#   ⇒ 記帳可以閘，語意不可以。壞掉的樣子：**沒有人會看到錯誤，只會拿到過期的答案**。
+	PathSystem.catchmemo_begin_gather()
 	if Probe.enabled: _in_gather = true     # ★量測旗標：Probe 關著時連這個賦值都不做
 	var _w_fp0: String = ""
 	var _w_cad0: String = ""
@@ -1441,6 +1447,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		var _mc_d: int = Time.get_ticks_usec() - _mc_t0
 		_mc_us += _mc_d
 		if _mc_is_repeat: _mc_repeat_us += _mc_d
+	PathSystem.catchmemo_end_gather()   # ★無條件（同 begin：語意不得依附量測旗標）
 	if Probe.enabled: _in_gather = false
 	return c
 

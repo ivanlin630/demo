@@ -51,6 +51,10 @@ func _run() -> void:
 	print("=== `gather` 分段普查（config=%s days=%d seed=%d）★只量不改 ===" % [cfg, days, seed_val])
 	_bed_self_check_tree()
 
+	# ★A2／A5：用環境變數關掉 memo（★關的是 memo，不是 tap）
+	if OS.has_environment("MEMO_OFF") and OS.get_environment("MEMO_OFF") == "1":
+		PathSystem.catchmemo_enabled = false
+		print("[MEMO] ★★本輪 memo 關閉（A5 陽性對照）")
 	seed(seed_val)
 	Probe.reset(); Probe.arm()
 	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
@@ -76,6 +80,15 @@ func _run() -> void:
 			gather_us += int(total[k])
 			rows.append({"n": k, "us": int(total[k])})
 	rows.sort_custom(func(a, b): return int(a["us"]) > int(b["us"]))
+
+	# ── A3/A4/A5 的讀數（★Probe 開之下才有） ──
+	var _h: int = int(Probe.counts.get("catchmemo.hit", 0))
+	var _m: int = int(Probe.counts.get("catchmemo.miss", 0))
+	print("[MEMO] hit=%d miss=%d ⇒ hit率=%.4f（A3：應 ≈ D7 0.69；差很多 ⇒ 鑰匙錯了,別調門檻）" % [
+		_h, _m, float(_h) / float(maxi(_h + _m, 1))])
+	print("[MEMO] A4 母體：estimate_catch_up 總呼叫=%d（hit+miss；★應與 912861 同量級）" % [_h + _m])
+	print("[MEMO] size_max=%.0f｜memo_enabled=%s" % [
+		float(Probe.peaks.get("catchmemo.size_max", 0.0)), str(PathSystem.catchmemo_enabled)])
 
 	print("\n[母體] gather 被呼叫 %d 次｜最後隊數 %d｜跑了 %d 天" % [calls, st.teams.size(), days])
 	if calls == 0 or gather_us == 0:
