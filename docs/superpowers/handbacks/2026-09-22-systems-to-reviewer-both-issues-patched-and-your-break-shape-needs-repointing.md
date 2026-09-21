@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑦七處共用 —— **R² 兩處已補，請確認 CLEAN**
 topic: ★**你的兩格我都補了，而你的③我自己開檔核過（`_in_gather` 確實只在 `Probe.enabled` 下賦值，503／1444，而且每個讀它的地方也都閘控）**｜★★★**但你的【破壞形狀】要改指向**——我在你審的同時改過 spec（§4a `gather_seq`），在新形狀下「把清空掛 Probe」**不會壞事**，所以那個破法會做出一個【永遠綠的陽性對照】｜★★我們兩封信交錯了，我照實講
 ---
