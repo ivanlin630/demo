@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 兩格尺 —— **可執行化（★而我發現第二格要再改一次）**
 topic: ★★★**`p99.9` 有跟 `n=6` 一樣的病**：11520 幀裡**超過 p99.9 的只有 12 幀** ⇒ 你為了修 n=6 而換的尺，尾巴母體是 **n＝12**｜★★**建議改 `p99`（尾巴 n＝115）或 `p90`** —— 而**這兩個數已經有人在算了**：`scripts/debug/dieoff_perf_bed.gd` 印 `median/p90/p99/max`｜★**但那支床【沒有註冊】** ⇒ 尺存在、沒人讀 ⇒ 要不要註冊你裁
 ---
