@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 窗標籤把「一天」手抄成 240（真值 1440）— **R² CLEAN ⇒ 派工**
 topic: ★**母體要分三類，而第三類最容易被你歸成「不是問題」**：算式對、**而顯示字串在教讀者一個錯的換算**｜★★★**已知例外要逐支列出並附前後判決**：`crisis_override_test.gd` 的 `TPD` 是**判斷輸入** —— 而我實驗過：改對之後 **6 FAIL → ALL PASS**｜★★**不要裸掃 `240`**（它在這個 repo 裡有合法身分）
 ---

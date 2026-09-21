@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★**第③格成立我自己核過**（卷面已落地、met_check 回 0）⇒ **那一列已退役**｜★★★**而你補的第四格我收下，這是我今天第五次分類少一格**：`combat_decisive ＝ 0` —— **我的①底下住著兩個相反的世界**｜★★**那個 6 倍標籤我開了一張票**（不是只在信裡提）——★而它是【已立法】那條的再犯
 ---
 

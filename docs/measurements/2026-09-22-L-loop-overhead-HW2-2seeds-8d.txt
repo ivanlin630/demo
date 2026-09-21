@@ -1,0 +1,33 @@
+# 迴圈開銷佔比 L —— 方法(甲)分段計時（★不是 systems 偏好的(乙)，理由見卷面最後一節）
+# 四要素＋硬體戳
+#   窗   ：8 天（GS_DAYS=8；★此處「天」＝ WorldState.TICKS_PER_DAY=1440 的真天）
+#   種子 ：1337 與 77（★兩顆，WHAT 立的規矩：單輪排行不可依）
+#   config：warring_states（GS_CONFIG 預設）
+#   樹   ：1a5560fe0 ＋【本次量測用的計時樁】（拋棄樹 A:/GDS/_gt2，★樁不進 main）
+#   硬體 ：HW-2 AMD Ryzen 7 5800X3D 8-Core　★L 是【比例】⇒ 跨機有效
+#   床   ：scripts/debug/gather_segment_census_bed.gd（既有資產，我只加 LTIME 三行輸出）
+
+# T_seg ＝ gather.readiness_prey + gather.threat + gather.weak_prey（四條走訪所在的三段）
+# T_calc  ＝ ThreatAssessment.score（兩處）+ BeliefSystem.best_estimate（兩處）
+# T_catch ＝ PathSystem.estimate_catch_up（兩處）★分類有歧義的就是這一桶
+
+  seed   T_seg(s)  T_calc(s)  T_catch(s)    L_A%    L_B%        圈數   gather呼叫
+  1337     40.671     11.696      10.818    71.2    44.6    206119       8312
+    77     46.434     13.669      12.741    70.6    43.1    247758       8653
+
+# ★門檻 57.1%（systems 預註冊）⇒ ★★兩種讀法【跨在門檻兩側】，兩顆種子皆然
+#   L_A（estimate_catch_up 算【走訪】）= 71.2% / 70.6%  ← 門檻之上
+#   L_B（estimate_catch_up 算【計算】）= 44.6% / 43.1%  ← 門檻之下
+
+# ★對照①【儀器成本】：基線(無樁) 三段合計 40.127s vs 有樁 40.672s ⇒ +1.36%
+#   ⇒ systems 擔心的「計時樁與被測量同量級」在這裡【不成立】：真圈數 824476（4×206119），
+#     每圈 48.7us，而 Time.get_ticks_usec() 遠低於 1us。
+# ★對照②【世界沒被擾動】：有樁版圈數 206119、gather 呼叫 8312 ——與基線【逐字相同】
+
+# ★★★誠實限
+#  ①兩個 L 都是【上界】：迴圈體內我沒有具名包住的計算（has_belief／belief_pos／
+#    estimate_armed／評分算式）被算進走訪那一側 ⇒ 真值比表上的小。
+#    ⇒ L_B 的上界 43.1~44.6% 已在門檻【之下】⇒ 在讀法 B 下結論是確定的。
+#    ⇒ L_A 只有上界在門檻【之上】⇒ 讀法 A 下【不可判】，需要把剩下的計算也具名包住。
+#  ②T_seg 是三個相位的總額，相位裡還有不屬於那四條走訪的敘述 ⇒ 分母偏大 ⇒ L 偏小。
+#  ③8 天窗、warring_states；不同 config 的隊數分布會改變每次 gather 的圈數（24.8 vs 28.6）。
