@@ -1,5 +1,5 @@
 extends SceneTree
-# @bed-kind: gate
+# @bed-kind: invariant   # ★宣告 invariant ⇒ 必須在 merge-gates.tsv 裡（本閘已註冊）
 # slice: 一天有多長＝單一真值（票：窗標籤把「一天」手抄成 240，真值 1440）
 #
 # ★這支床擋什麼：**把 240 當【週期】用**（`/ 240`／`% 240`／`240 * N`）——

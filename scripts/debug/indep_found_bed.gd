@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 獨立戰略層 bed（plan Task2 Step3）：野心獨立隊建國 → established 1→多 / CONQUER 0→小正 / 不 over-found。
 # warring_states config（多獨立隊），跑數月，量：

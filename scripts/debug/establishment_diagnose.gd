@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # (a) measure-first 探真因（藍圖 2026-06-29「default 世界無征服者=核心 gap，別猜」）。
 # 量：為何 8 派系 2yr 只 1 立國。立國 gate = 統領≥0.4(-野心折扣) + 野心≥0.7-0.1 + readiness≥0.7 + member≥2。

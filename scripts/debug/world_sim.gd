@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 純 NPC 世界長期量測台。無玩家 → 不觸發絕後 game_over → 世界跑滿 max_ticks。
 # 量因果脊椎長期 emergent（立國/vendetta/誘殺/scout/鑄幣）。純觀測。

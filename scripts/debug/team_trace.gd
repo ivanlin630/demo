@@ -1,3 +1,4 @@
+# @bed-kind: diagnostic
 class_name TeamTrace
 
 # 行為遙測：對 watched team 每取樣點印一行結構化快照（狀態 + 決策）。

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 戰國 seed（藍圖 roadmap 2026-06-29）：多派系活世界 = commander 協同驗證床 + G3/欺敵/玩家面前置。
 # 純 NPC 觀測（不驅動 player）。量 commander-v2 意圖分布 + 立國/攻擊/背叛 emergent + 守恆。

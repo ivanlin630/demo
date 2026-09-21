@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 征服名vs實 measure（measure-first，spec 2026-07-01-conquest-name-vs-deed）。
 # 純觀測：warring seed（好戰隊多）跑 → 量「想=征服」的獨立隊在 _decide_unified 實際 winner

@@ -1,3 +1,4 @@
+# @bed-kind: diagnostic
 class_name SpineTrace
 
 # 時間軸脊椎 dump（純讀，仿 TeamTrace 風格）。對 WATCHED team + auto-pick named 印分脊椎結構化行。

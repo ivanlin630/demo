@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # rung2→3 立國卡點 measure（藍圖 2026-07-01「instrument T32 型,為何不進 rung3,別猜」）。
 # rung3(STATE) target 需：food≥pop×2.4×7 + pop≥EXPAND_MIN_POP(8) + 在 faction 且 member_teams≥STATE_MIN(2) + ambition_cap≥3(野心≥0.55)。

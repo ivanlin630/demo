@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 餓死 measure（藍圖 2026-06-30「餓死=經濟底債優先，instrument 一隊食物收支，別猜」）。
 # 量：戰國 seed 能人(野心≥0.6+統領≥0.4)的食物收支月軌跡——food/pop/burn(pop×2.4)/income(Δ+burn 推)/

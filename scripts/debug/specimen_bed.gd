@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 指標 specimen 決策 tracer — measure 床（spec 交付核心：用 tracer measure 錨→行為）。
 # 兩問（藍圖指定）：

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 後期 scaling 測床（P0 加固前後對照）。量三指標 vs N（隊數階梯）：
 #   1. evaluate_all wall-time — faction AI 核心 O(N²)/hr（_has_hostile_within 全掃）。加固=空間索引 Task 3。

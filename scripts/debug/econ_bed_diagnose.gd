@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 經濟食物統一 — 乾淨 bed 驗整環（econ-food-unify Task 2）。
 # 隔離 fixture：

@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: crisis override（深餓未緩 ⇒ crisis TRUE；委派免疫窗）
 
 # famine crisis-override TDD（spec 2026-07-19-task-flee-stall-detection，泛化 ②）。
 # OUTCOME-based：committed 任何 task 深餓(food<CRISIS_FLOOR)未緩(committed N 天 food 沒回升≥RELIEF_MIN)

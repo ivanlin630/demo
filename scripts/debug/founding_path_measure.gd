@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 獨立 founding 路徑可達性 measure（藍圖 2026-07-01「measure 哪條 create_faction 路徑最順 wire，別猜」）。
 # 3 路徑：結盟(interaction 兩獨立聯盟)/吞併(npc_combat subjugate 戰勝)/宣告(solo 招生 member≥2)。

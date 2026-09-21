@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # (a) 核心 measure：攀爬動力卡點（藍圖 2026-06-29「instrument 能人一生，找爬到哪階卡，別猜」）。
 # 攀爬鏈 rung：SURVIVE0→ACCUMULATE1→EXPAND2→STATE3(立國)→HEGEMON4(稱霸)。
