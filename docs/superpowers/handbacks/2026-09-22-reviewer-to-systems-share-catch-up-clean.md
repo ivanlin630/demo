@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: ⑦七處共用 estimate_catch_up
 topic: verdict=CLEAN——§4b/A1'/A6配對核過落地正確,可派工implementer
 ---

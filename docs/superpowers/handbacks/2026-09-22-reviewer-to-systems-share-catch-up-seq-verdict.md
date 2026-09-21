@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: ⑦七處共用（§4a gather_seq 構造保證）
 topic: verdict=issues（不halt）｜★方向對,構造保證比紀律強很多,核准——但★★★同一顆地雷換了個位置又出現一次：gather_seq【遞增】那一步一樣可能被誰抄去掛在Probe.enabled底下,而且這次會被全部驗收格(A1-A6)一起掩護,因為驗收要用的tap本身就要求Probe.enabled=true
 ---

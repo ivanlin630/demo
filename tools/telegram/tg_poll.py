@@ -24,7 +24,14 @@ API   = "https://api.telegram.org/bot%s/getUpdates" % TOKEN
 # 舊版病：lock 心跳新鮮就 exit ⇒ 舊 poller 只要活著，新的永遠 arm 不起來，唯一出路是手動殺。
 # ★這支是最該修的一隻：getUpdates 是【帶 offset 的獨佔消費】——
 #   一支「讀取端已死、但進程還在」的 poller 會把用戶的 Telegram 訊息吃掉並丟進虛空，而且不冒煙。
-# 決策：同 session 且心跳新鮮 → 安靜退出（覆蓋仍在，已驗）；否則搶佔（新的當家）。
+# ★★★2026-09-22 訂正（blueprint 實測回報）：舊決策是「同 session 且心跳新鮮 → 安靜退出」，
+#   而它預設【心跳新鮮 ⇒ 管道活著】—— **這個 build 的 Monitor 忽略 persistent、30 分鐘一律到期**：
+#   wrapper 被殺、python 子程序還活著、lock 心跳仍新鮮，而 **stdout 已經送不到任何人**
+#   ⇒ 它會繼續帶 offset 消費 getUpdates ⇒ **用戶的訊息被吃掉並丟進虛空**（正是上面自己寫的那個病）。
+#   ⇒ ★新決策：**一律換血接手（不問死活，同 session 也一樣）** —— 與 `inbox-watch.sh` 的 arm 語意 v3 同規則。
+#   ★★【管道活著的唯一證明是【成功寫過 stdout】】，process 在、心跳新都不算。
+#   ★★★換血瞬間兩支並存一輪是可接受的：前任下一輪讀 lock 發現不是自己就讓位，
+#   最多重複喚醒一次；**遺失比重複貴**（同本檔下方那一行的理由）。
 # 迴圈每輪重讀 lock，不是自己就讓位自退（孤兒自己清掉自己）。
 STALE = 90
 MYSID = os.environ.get("CLAUDE_CODE_SESSION_ID", "")
@@ -38,9 +45,12 @@ def read_lock():
 
 _pid, _sid = read_lock()
 _fresh = os.path.exists(LOCK) and (time.time() - os.path.getmtime(LOCK)) < STALE
-if _fresh and MYSID and _sid and _sid == MYSID:
-    print("[tg-poll] ✅ 覆蓋仍在（同 session，poller pid=%s 心跳新鮮，已驗）→ 本次不重複 arm" % _pid, flush=True)
-    sys.exit(0)
+# ★不再因為【同 session 且心跳新鮮】而自退（見上方訂正）。
+# ★★守衛要輸出【已處置的結果】，不要輸出【要被解讀的狀態】。
+if _fresh and _pid:
+    print("[tg-poll] ♻ 換血接手：前任 pid=%s 心跳新鮮%s——"
+          "★而【心跳新鮮】證不了【它的 stdout 送得到】（Monitor 30 分鐘到期會殺 wrapper）"
+          % (_pid, "（同 session）" if (MYSID and _sid == MYSID) else ""), flush=True)
 # ★協議版本戳（跨代縫第三案例，2026-08-25）：欄數判代對「舊版也寫同欄數」無效
 #   ⇒ 顯式自報版本。偵測規則（向後相容，不會對現役版本誤報）：
 #     欄數 < 2            ⇒ 確定舊代
@@ -52,6 +62,9 @@ try:
     _prev_parts = open(LOCK).read().strip().split("	")
 except Exception:
     _prev_parts = []
+# ★lock 裡的 pid 是 **Windows PID**（本檔是原生 python.exe，非 MSYS 程序）
+#   ⇒ 手動清孤兒用 `taskkill //PID <pid> //F` 是有效的；
+#   ★★而包著它的 bash wrapper 是 MSYS pid，兩者不同——別拿 `jobs`／`kill` 的 pid 去 taskkill。
 open(LOCK, "w").write("%d	%s	proto=%d" % (os.getpid(), MYSID, PROTO))
 def _prev_is_old_gen():
     """前任是否為【不會自退】的舊代。★兩個 poller 並存 = 互搶 getUpdates offset = 訊息靜默遺失。"""

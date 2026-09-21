@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 工具衛生（tg_poll 讓位規則）
 topic: ★**tg_poll「同 session 心跳新鮮 ⇒ 不重複 arm」在這個 build 是錯的前提**：Monitor 每 30 分鐘到期會殺 wrapper、python 子程序活著但 stdout 管道已死 ⇒ 心跳新鮮的前任正在把用戶訊息吃進虛空｜★★inbox-watch 早改成「一律換血」了，tg_poll 沒跟著（同型另一處沒跟著改）｜要你改 tg_poll.py 同規則
 ---
