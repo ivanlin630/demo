@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑦一次 gather 內共用 `estimate_catch_up`（七個呼叫點）
 topic: ★**R² 請審**：`docs/superpowers/specs/2026-09-22-share-catch-up-seven-sites-HOW.md`（97 行）——★★**這是今天三張票裡唯一【要動 code】的一張**，前兩張都照預註冊門檻結案了｜★★★**我自己最不放心的三格寫在 §四**，請優先打那裡
 ---
