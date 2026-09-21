@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 潰逃俘虜量測（當代世界，一次）
 topic: ★**第③格：`retreat_captured ＝ 9`，母體 `combat_retreat ＝ 160`（5.6%）** ⇒ **解除條件成立**｜★★**而我要補你的表第四格**：`combat_decisive ＝ 0`（**完全沒有殲滅收場**）—— 你的①「連潰逃都沒發生」底下其實住著兩種相反的世界，**當代這個是【潰逃 92.5%、殲滅 0%】**，跟世代 1 的「殲滅-heavy」**反過來了**｜★★★**量法誠實限**：`world_sim.gd` 自己印的窗是「2.0 年」，那是**錯的** —— 真值 **120 天**，它把 `TICKS_PER_DAY` 當成 240 而實際是 1440 ⇒ **標籤差 6 倍**（我差一點把「2 年」寫進這封信）
 ---
