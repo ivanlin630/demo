@@ -237,3 +237,34 @@ estimate_catch_up 佔 T_seg 的 ★26.6%，而它在【兩條走訪裡用同樣�
   ⇒ **每個元素約 6.7 次 belief 查詢** —— ★★**這是第二層重複，另登 defer，不在本票**
   （★★★理由：它的修法是「少查一次」，而那正是今天證明過會踩通道的形狀 ⇒ 要獨立驗）
 - `home_food`（不同母體）｜跨 tick 快取（既有 defer）｜觀測雜訊決定性化（WHAT 已排序）
+
+---
+
+# §10 ★★★2026-09-22：**這張票的結案理由被後來那顆 merge 推翻了**（status 我沒有動——等 WHAT 裁）
+
+```
+★§9.2 把 L 裁成 L_B，而我當時寫明「裁定不是偏好」，靠的是這個事實：
+    estimate_catch_up → observed_speed() → randf() ⇒ 共用結果 ＝ 少抽一次 ⇒ 改變世界
+★★而觀測雜訊決定性化（世代 6 邊界 `3fb2c3201`）落地之後，那個事實沒了。逐行核過：
+    path_system.gd 剝註解後 randf/randi/rand_range ⇒【零命中】
+    observed_speed (path_system.gd:274-291) ⇒ observation_noise01(tick, obs_id, tgt_id) 純雜湊
+    讀取路徑每一站：_visible_this_tick → BeliefSystem.best_estimate｜belief_pos｜catch_cost｜MovementSystem
+      ⇒ belief_system.gd／movement_system.gd 剝註解後 RNG 零命中
+    ★vision_system.gd 仍有兩顆（:148 randf_range、:183 randi_range），而它們都在 `_write_tier01`
+      （vision_system.gd:138）＝【寫入】路徑 ⇒ **不在這條讀取路徑上**
+⇒ ★★★分類會從【計算】翻到【走訪】，而那正是過門檻的那一側
+```
+
+★**我沒有自己把 status 改回 open**——「永久結案」是 WHAT 預註冊的話，
+綁【那句話】還是綁【那個理由】不是我能裁的，已呈報：
+`docs/superpowers/handbacks/2026-09-22-systems-to-blueprint-pre-registered-thresholds-and-a-closure-whose-reason-died.md`
+
+★★**另一件會讓這題自己消失、而我明說不拿它當答案的事**：
+```
+①（本票，一圈形態）的 L【取決於②（estimate_catch_up 只算一次）有沒有做】
+⇒ ②落地 ⇒ estimate_catch_up 不再是重複成本 ⇒ 從①的走訪側被移走 ⇒ ①的 L 被拉回不過門檻側
+⇒ ★★①②不是獨立的兩張票：**先做誰，會改變另一張票的分母**
+```
+
+★★★**三個數字全部作廢、不得引用**（§0／§9.1 的 S＝54.6%、E＝26.6%、L＝71.2%／44.6%）——
+它們是 **世代 5 ＋ HW-1**，而現在是 **世代 6 ＋ HW-2**：★世代邊界廢掉邏輯量，硬體邊界廢掉時間量，**這裡兩者都跨了**。
