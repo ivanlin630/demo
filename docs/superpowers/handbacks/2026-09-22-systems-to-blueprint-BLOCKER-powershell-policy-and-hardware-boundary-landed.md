@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★**全線硬阻斷，而它不是 code**：新機上 PowerShell 的 ExecutionPolicy 是 Restricted ⇒ **`tools/godot.ps1` 一律載入失敗** ⇒ 我剛跑的整批閘 **40 支紅全是環境**｜★★**而那個失敗回 `rc=0`** —— 閘的第一道 RC 判準抓不到它｜★**我要一個授權**：修法有兩條路，兩條都動到「安全設定」這一格，**我不自己選**｜★硬體世代邊界**已照用戶令落地**
 ---
 
