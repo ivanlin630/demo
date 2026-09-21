@@ -2088,3 +2088,34 @@ spec `docs/superpowers/specs/2026-09-22-share-catch-up-seven-sites-HOW.md`（97 
 ②單調量**往不可能的方向動**（加一列而數字變小）⇒ 兩次數法不是同一個量
 ③缺口是**固定值**而不是雜訊（恆為 1233）⇒ 有一條路徑系統性地跳過
 ★**三個都不是靠注意力，是靠【量之前先寫下預期形狀】。**
+
+**⑲ ⑦七處共用：R² 兩輪 issues → CLEAN，已派工。★而兩輪都打在同一顆地雷上**
+```
+第一輪：`_in_gather` 是 `Probe.enabled` 閘控的（decision_context.gd:503／1444，我開檔核過，
+        且每個讀它的地方也都閘控）⇒ 它就站在 gather() 的 entry／exit 旁邊
+     ⇒ memo 清空若【照樣造句】⇒ **production 永不清空**，而 key 不含 tick ⇒ 回傳任意舊 tick 的答案
+第二輪：★★★**同一顆地雷換到【`_gather_seq` 遞增】那一行，而且更兇**：
+        `Probe.enabled` **預設 false**（probe_stats.gd:14），
+        而 A3／A5 第一層／A6 都要讀 tap ⇒ **結構上只能跑 Probe 開**
+     ⇒ 遞增若也掛那門檻 ⇒ **遞增在測試時發生、production 不發生** ⇒ **A1～A6 全部綠**
+     ⇒ ★bug 只在玩家／一般 headless 跑法發作 —— **地雷與【整張驗收表】互相掩護**
+```
+★★★**而我第一輪的修法是【再寫一句規矩】——那還是紀律，而規矩沒有東西在檢查它。**
+第二輪我改成找一個**事實**把它變成會紅的一格：
+**指紋床 `world_fp_snapshot_bed.gd` 裡零個 `Probe` 參照**（我核過，reviewer 也獨立核過）
+⇒ **A1／A1' 原生就跑在 `Probe.enabled = false`（＝production 配置）**
+⇒ 遞增一旦被閘控，**A1 當場紅** ⇒ 「不得依附 Probe」**從文件上的規矩變成會紅的一格**。
+★並在 §6' 逐格標配置，且明寫誠實限：**A3～A6 沒有覆蓋 Probe 關那條路，覆蓋它的只有 A1／A1'**。
+★★通則（我入 memory）：**問「這一行在 production 的預設值下會不會執行」**，不是「我記得不要掛 Probe」。
+
+**⑳ 修 `tg_poll.py`：一律換血接手（★插隊做，因為它在吃用戶的訊息）**
+病：「同 session 且心跳新鮮 ⇒ 安靜退出」預設【心跳新鮮 ⇒ 管道活著】，
+而這個 build 的 Monitor **30 分鐘一律到期**會殺 wrapper ⇒ python 還活著、lock 心跳仍新鮮、
+**而 stdout 已送不到任何人** ⇒ 它繼續帶 offset 消費 `getUpdates` ⇒ **用戶訊息被吃進虛空**。
+⇒ 改成與 `inbox-watch` 同規則（一律換血），輸出從「✅ 覆蓋仍在」（要被解讀的狀態）
+改成「♻ 換血接手」（已處置的結果）。★並註明 lock 裡是 **Windows PID**（原生 python.exe，`taskkill //PID` 有效），
+而包著它的 bash wrapper 是 MSYS pid —— 兩者不同。
+★★★**我沒有實測，而我明講理由**：跑它會**真的消費用戶頻道裡的訊息** ⇒ 那是 blueprint 的工具，我不替他按。
+我做的是 `ast.parse` PASS ＋ 確認退出路徑已不存在 ＋ 確認搶佔後無殘留 `sys.exit`；
+執行期那三件（第二次必印 ARMED／lock pid 換新／前任讓位）**只有他 arm 得到**。
+★「同型另一處通常沒跟著改」又中一次 —— **而這次是 blueprint 接住的**。

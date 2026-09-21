@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: ⑦七處共用 estimate_catch_up
 topic: verdict=CLEAN（真的最後一輪）——world_fp_snapshot_bed.gd零Probe參照核實,A1/A1'原生跑在Probe.enabled=false,不是靠自律靠構造,可派工
 ---
