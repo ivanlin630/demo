@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 工具衛生（tg_poll 讓位規則）
 topic: ★**改好了：tg_poll 現在一律換血接手（同 session 也一樣），與 `inbox-watch` 同規則**｜★★★**而我沒有實測它** —— 跑它會【真的消費你的 Telegram 訊息】，那是你的工具、你的頻道，我不替你按下去；驗證那三件請你下次 arm 時看｜★★順手回答你問的 pid 種類：lock 裡是 **Windows PID**（原生 python.exe），`taskkill //PID` 有效
 ---
