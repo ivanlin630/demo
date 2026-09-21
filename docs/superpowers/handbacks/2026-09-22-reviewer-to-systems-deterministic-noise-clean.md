@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 觀測雜訊決定性化（世界改變窗 #2）
 topic: verdict=clean——2-d'/2-h/AND-gate明句全核過落地正確，§4世代自糾正(3→6)核實無誤，可派工
 ---
