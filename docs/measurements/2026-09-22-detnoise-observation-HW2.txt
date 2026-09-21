@@ -1,0 +1,39 @@
+# 觀測雜訊決定性化（窗 #2）驗收卷面
+# 四要素＋硬體戳
+#   窗   ：20000 tick（13.89 遊戲天）＝ 2-f 主比對｜5000 tick（3.47 天）＝ 2-e／2-c
+#          ★「天」＝ TICKS_PER_DAY=1440 的真天
+#   種子 ：20260922（WFP_SEED）
+#   config：warring_states
+#   樹   ：feat/deterministic-observation-noise（舊臂＝其 parent 74c370d84，拋棄樹 A:/GDS/_gt3）
+#   硬體 ：HW-2 AMD Ryzen 7 5800X3D 8-Core
+
+## 2-f 世界會變一次（★這一票【就是】要變；沒變才是紅）
+20000 tick：舊 3c69fea3a0747037c4d875b83d096205 ⇒ 新 14e5eacdb195c419fdb8d567b5c00963
+ 5000 tick：舊 675d1ca85dda1503c05b47ca931ae2a5 ⇒ 新 d15f1b7f437d22cd8c2dfbb70ad35387
+
+## 2-e 呼叫次數不再影響取值（★★附陽性對照，5000 tick 窗）
+                       final_fp                              注射真正到達
+舊 code N=0   675d1ca85dda1503c05b47ca931ae2a5                0
+舊 code N=3   3f9bf74f4ac5ddd2717db0ee78e36600              249   ← ★陽性對照【點火】：測法有牙
+新 code N=0   d15f1b7f437d22cd8c2dfbb70ad35387                0
+新 code N=3   d15f1b7f437d22cd8c2dfbb70ad35387              249   ← ★★同樣 249 次注射,fp 逐字相同
+
+## 2-c 三跑 byte-identical（新 code，5000 tick）
+run1/2/3 final_fp = d15f1b7f437d22cd8c2dfbb70ad35387（三者相同）
+run1/2/3 traj_fp  = d73138b0f6d0748e8d7d48e9c30e7ddb1b36ea6a585942e174a01456c8194d08（三者相同）
+
+## 純函式層（驗收床 deterministic_observation_noise_bed.gd，fail=0｜到場點名 6／6）
+跨語言釘值 3／3   ← ★設計時用 Python 鏡像算的三個值,GDScript 必須逐位吻合
+2-a 同 tick 同 pair 兩次 ⇒ 逐字相同
+2-b seed 對照：呼叫 500 次後的下一個 randf 與對照相同 ⇒ 不耗 global RNG
+2-d' 5 個 lag(1,2,3,5,8) × 4000 tick = 20000 組 ⇒ 相等 0 組
+2-h 同一 tick 1560 個 pair ⇒ 1560 個相異值
+2-d n=26400 min=0.0000 p25=0.2556 med=0.5050 p75=0.7475 max=1.0000 mean=0.5017
+    單調檢查：target_id 遞增 50 步中上升 26 步（單調＝0 或 49）
+
+## ★★★兩個【我自己造的對照一開始沒打中】的紀錄
+①第一版注射挑的 pair 互相看不見 ⇒ observed_speed 開頭就 return ⇒ 連 randf 都沒到
+  ⇒ 舊 code 的 fp 也沒變 ⇒ 陽性對照不點火,而那個綠讀起來就是「這裡沒有問題」
+②第二版改成掃全部 pair 找可見的 ⇒ 每 tick O(N²) ⇒ 撞 900s 逾時（守衛貴到跑不完）
+  ⇒ 第三版：候選改 team_discovered + 每 tick 掃描預算 24 ⇒ 249 次到達,兩臂都跑得完
+★所以卷面上「注射真正到達 N 次」那一欄是必要的：N=0 要判【不可判】,不是綠

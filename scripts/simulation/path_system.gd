@@ -239,6 +239,38 @@ static func observe_velocity(state: WorldState, observer: TeamData, target: Team
 #   ★誠實限：**同一 tick 內呼兩次會得到兩個不同的值**（每次各抽一次）——
 #     ★★這在修法【前】就已經是這樣（本次只搬家、不改觀測模型）；
 #     ★★★「同 tick 兩次觀測不一致」systems 已登成【獨立票】，**效能票不偷渡觀測模型的修改**。
+# ────────── 決定性觀測雜訊（窗 #2）──────────
+# ★回傳 [0,1)，取代 observed_speed 裡的 randf()。三條必要性質：
+#   ①同 tick ＋ 同 pair ⇒ 同值（本票的功能）
+#   ②不同 tick／不同 pair ⇒ 像雜訊（不得隨 team_id 單調、不得短 lag 重複）
+#   ③★不得耗 global RNG —— 否則這一票什麼都沒解
+# ★★為什麼自己寫混合函式而不用 Godot 的 hash()：
+#   hash() 的實作是【引擎版本的內部細節】⇒ 它變了我們的世界就跟著變，而沒有人會發現；
+#   寫在 repo 裡的混合函式，它變了是【一顆 commit】。
+# ★★★為什麼每一步都 & _NOISE_M63：GDScript 的 >> 是【算術位移】，負數會把符號位帶進來
+#   ⇒ 不夾的話，對負 id 的分佈形狀會與正 id 不同。team_id 目前非負，
+#   而「目前非負」不是不變量 —— 別把它當前提。
+# ★★★五個乘法常數寫成【有號等值的十進位】而不是 0x… 十六進位：
+#   它們都 > 2^63 ⇒ 超過 int64 上界 ⇒ ★GDScript 對那種字面的處理與設計時的假設不同，
+#   而後果是【安靜地換成另一個雜湊】（實測：三個跨語言釘值全錯、分佈 mean 從 0.50 歪到 0.59）。
+#   ⇒ ★★抓到它的是驗收床的【跨語言釘值】那一格，不是讀出來的。
+const _NOISE_M63: int = 0x7FFFFFFFFFFFFFFF
+
+static func _noise_mix(x: int) -> int:
+	var h: int = x & _NOISE_M63
+	h = ((h ^ (h >> 30)) * -4658895280553007687) & _NOISE_M63
+	h = ((h ^ (h >> 27)) * -7723592293110705685) & _NOISE_M63
+	return (h ^ (h >> 31)) & _NOISE_M63
+
+static func observation_noise01(tick: int, observer_id: int, target_id: int) -> float:
+	# ★三個輸入各自先混一次再組合：直接相加會讓 (a,b) 與 (b,a)、以及
+	#   (tick+1, id) 與 (tick, id+1) 這種【對角線】碰撞。
+	var h: int = _noise_mix(tick * -7046029254386353131)
+	h = _noise_mix(h ^ _noise_mix(observer_id * -4417276706812531889 + 0x165667B19E3779F9))
+	h = _noise_mix(h ^ _noise_mix(target_id * 0x27D4EB2F165667C5 - 8796714831421723037))
+	# 取低 53 位（雙精度尾數寬度）轉 float：只取低位會帶進低位週期
+	return float(h & 0x1FFFFFFFFFFFFF) / 9007199254740992.0
+
 static func observed_speed(state: WorldState, observer: TeamData, target: TeamData,
 		trusted: bool = false) -> float:
 	var obs: Dictionary = observe_velocity(state, observer, target, trusted)
@@ -248,7 +280,15 @@ static func observed_speed(state: WorldState, observer: TeamData, target: TeamDa
 	# 雜訊：距離越遠 speed 估越粗（觀測儀器采樣期間 suppress → 零 RNG，非擾動）
 	if suppress_observe_noise:
 		return actual_speed
-	return actual_speed * (1.0 + (randf() - 0.5) * float(obs.get("noise_factor", 0.0)))
+	# ★★★決定性觀測雜訊（窗 #2）：雜訊來源從 randf() 換成 (tick, observer, target) 推出的雜湊。
+	#   ★病（量出來的）：原本每次呼叫抽一次 randf() ⇒ ①同一 tick 問兩次會得到兩個不同的觀測速度
+	#     ②抽取次數綁在【呼叫次數】上 ⇒ 任何「少呼叫一次」的修法都會讓整條隨機序列錯位。
+	#   ★★壞掉會長什麼樣（不是寫「別亂改」）：若有人把 observation_noise01 的輸入改成只吃 tick，
+	#     ★同一 tick 內【全世界所有 pair 拿到同一個雜訊】—— 而它【不會紅】，
+	#     因為「同 tick 同 pair 同值」那一格會【平凡通過】。守它的是驗收床的 2-h 那一格。
+	#   ★★★noise_factor 不動：本票只換血統，不調參數。
+	var n: float = observation_noise01(state.world.current_tick, observer.team_id, target.team_id)
+	return actual_speed * (1.0 + (n - 0.5) * float(obs.get("noise_factor", 0.0)))
 
 # ────────── catch-up ──────────
 
