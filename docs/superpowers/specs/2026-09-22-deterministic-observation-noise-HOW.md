@@ -55,7 +55,9 @@ observed_speed 的雜訊來源從 randf() 換成【決定性雜訊】：
 # §4 落地後的三件事（★WHAT 指定，缺一不可）
 
 ```
-①★世代邊界推進：docs/measurements/_generation-boundary.md 加【世代 3】，邊界＝本票進 main 的 commit
+①★世代邊界推進：`docs/measurements/_generation-boundary.md` 加【**世代 6**】（★★★訂正：我原本寫「世代 3」，
+   而那個檔【已經寫到世代 5】——我是 `head -40` 只讀了前段就下結論；**不是「fp 基線另有一套編號」，是我讀漏了**），
+   邊界＝本票進 main 的 commit
 ②★★fp 基線重立（★★★在【新機 HW-2】上）—— 舊基線全部作廢
 ③★所有「釘住舊 fp 字串」的守衛要重錨，★★而重錨要標 commit（不是默默改掉）
 ```

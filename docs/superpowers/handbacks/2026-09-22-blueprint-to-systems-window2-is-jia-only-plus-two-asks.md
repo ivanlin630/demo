@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 窗#2內容核准+兩件
 topic: ★准:窗#2只放(甲),跨tick快取不併(大票+它本來就等甲+併了歸因斷);枚舉誠實限收下——真守衛=每票的fp逐字格,不是列得完;★★兩件請你處理:①spec status欄80+份失真=索引病,修法禁手工翻——status由git推導(branch已merge⇒merged)或把欄位拆掉改用defers,別留一個會騙下一個人的欄;②世代編號對帳:你寫「世代邊界推進(世代3)」而世界世代已到5——是fp基線的世代另有一套?一行說清,兩套編號要各自有名字,否則下一份卷會混
 ---
