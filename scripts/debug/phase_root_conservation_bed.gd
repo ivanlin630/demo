@@ -12,6 +12,12 @@ extends SceneTree
 
 var fails: int = 0
 var sections: int = 0
+# ★★★【分母原本是「跑了幾段」而不是「該跑幾段」】——
+#   原式：`SECTIONS=%d/%d` ＝ (sections − fails) / sections
+#   ⇒ ★中途崩在第 1 段之後，它印的是 `1/1`：**看起來完美**。
+#   ⇒ ★★這與「拿量到的數去跟產生它的陣列比」是同一個病（自己跟自己比）。
+#   ⇒ 修法：分母改成【常數期望】，少跑就紅。
+const EXPECT_SECTIONS: int = 3
 
 func _check(name: String, ok: bool, detail: String) -> void:
 	sections += 1
@@ -73,5 +79,8 @@ func _initialize() -> void:
 		"可判 tick %d 個（★0 ⇒ 不可判，不是綠）／破 %d 個%s" % [
 			judged, broke, "" if first_break == "" else "｜首例：" + first_break])
 
-	print("=== DONE === SECTIONS=%d/%d FAILS=%d" % [sections - fails, sections, fails])
+	if sections != EXPECT_SECTIONS:
+		fails += 1
+		push_error("[FAIL] 只跑完 %d/%d 段 —— ★中途崩掉與通過長得一樣" % [sections, EXPECT_SECTIONS])
+	print("=== DONE === SECTIONS=%d/%d FAILS=%d" % [sections, EXPECT_SECTIONS, fails])
 	quit(1 if fails > 0 else 0)

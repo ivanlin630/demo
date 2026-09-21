@@ -16,6 +16,9 @@ extends SceneTree
 # env：BED_DAYS（6-e 的天數，預設 3）／BED_SEED（預設 1337）／BED_CONFIG（預設 warring_states）
 
 var _fails: int = 0
+# ★★★到場點名（分母＝常數期望，不是「跑了幾段」）——見 stale_pos_recon_bed 檔頭的同一段理由。
+var _sections: int = 0
+const EXPECT_SECTIONS: int = 2
 var _undec: int = 0
 
 # ★★★【觀測戳記】—— **不是門檻**（底下沒有任何斷言讀它；數字變小【不會】讓這支床變紅）。
@@ -34,7 +37,11 @@ const OBSERVED_AT_COMMIT: String = "7f9d78329"
 
 func _initialize() -> void:
 	_run()
-	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
+	if _sections != EXPECT_SECTIONS:
+		_fails += 1
+		push_error("[FAIL] ★只跑完 %d／%d 段" % [_sections, EXPECT_SECTIONS])
+	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d｜到場點名 %d／%d --" % [
+		_fails, _undec, _sections, EXPECT_SECTIONS])
 	print("[TEST-SUITE-COMPLETE]")
 	quit(1 if _fails > 0 else 0)
 
@@ -171,8 +178,8 @@ func _run() -> void:
 		"6-f-b ★★**而且它不等於錨定**｜★寫成 `.get(\"activity\", ACT_SETTLED)` ⇒ 這一句會紅"
 		+ "（那會讓「沒看過」變成「看過它駐紮」＝ §1a 明文禁的 default-pass）")
 
-	_cell_d_gates_verbatim()
-	_cell_e_world()
+	_cell_d_gates_verbatim(); _sections += 1
+	_cell_e_world(); _sections += 1
 
 # ── 6-d：兩道門 ＋ 那條全域線逐字未改 ──
 func _cell_d_gates_verbatim() -> void:

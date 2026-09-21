@@ -19,13 +19,23 @@ extends SceneTree
 # env：BED_DAYS（格4 的天數，預設 8）／BED_SEED（預設 1337）／BED_CONFIG（預設 warring_states）
 
 var _fails: int = 0
+# ★★★到場點名：★執行期錯誤會【靜默中止一支 func】，而那在卷面上與「跑完且通過」長得一樣。
+#   ⇒ 數【真的走完的段】，與【常數期望】比 —— ★分母寫死常數，不是拿跑了幾段當分母
+#     （分母＝跑了幾段 ⇒ 崩在第一段也會印「1/1」＝自己跟自己比）。
+var _sections: int = 0
+const EXPECT_SECTIONS: int = 3
 var _undec: int = 0
 
 func _initialize() -> void:
 	_run()
 	# ★閘的判準看【橫幅】不看離開碼（systems 立 2026-09-16）：
 	#   ★★沒有結尾標記的話，「FAIL=0」與「根本沒跑」長得一模一樣。
-	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d --" % [_fails, _undec])
+	if _sections != EXPECT_SECTIONS:
+		_fails += 1
+		push_error("[FAIL] ★只跑完 %d／%d 段 —— 中途中止與通過在卷面上長得一樣" % [
+			_sections, EXPECT_SECTIONS])
+	print("-- 量測完成；[FAIL] 數 ＝ %d｜[不可判] 數 ＝ %d｜到場點名 %d／%d --" % [
+		_fails, _undec, _sections, EXPECT_SECTIONS])
 	print("[TEST-SUITE-COMPLETE]")
 	quit(1 if _fails > 0 else 0)
 
@@ -82,9 +92,9 @@ func _claim_at(state: WorldState, obs: int, tgt: int, at_tick: int, fields: Dict
 func _run() -> void:
 	print("=== 過期位置 → 偵查分池 驗收 ===")
 	_bed_self_check_tree()
-	_cells_fixture()
-	_cell4_world()
-	_cell5_gates_verbatim()
+	_cells_fixture(); _sections += 1
+	_cell4_world(); _sections += 1
+	_cell5_gates_verbatim(); _sections += 1
 
 # ── 格1／格2a／格2b／格3 ─────────────────────────────────────
 func _cells_fixture() -> void:
