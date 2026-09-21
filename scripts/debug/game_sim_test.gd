@@ -147,22 +147,22 @@ func _run_game_sim_test() -> void:
 
 		_collect_stats(state, tick + 1)
 
-		if (tick + 1) % 240 == 0:
+		if (tick + 1) % WorldState.TICKS_PER_DAY == 0:
 			TeamTrace.dump(state, tick + 1)
 			SpineTrace.dump(state, tick + 1)
 			var pt: TeamData = state.teams.get(TEAM_PLAYER)
 			if pt != null:
 				print("[DBG named] tick=%d Team0 named_count=%d population=%d persons_total=%d" % [
 					tick + 1, pt.named_members.size(), pt.population, state.persons.size()])
-		if (tick + 1) % 240 == 0:
-			var day: int = (tick + 1) / 240
+		if (tick + 1) % WorldState.TICKS_PER_DAY == 0:
+			var day: int = (tick + 1) / WorldState.TICKS_PER_DAY
 			if day % 5 == 0 or day <= 5 or day >= 28:
 				_print_daily_status(state, day)
 			else:
 				_print_daily_brief(state, day)
 
-		if (tick + 1) % (240 * 5) == 0:
-			_print_faction_matrix(state, (tick + 1) / 240, fid_a, fid_b)
+		if (tick + 1) % (WorldState.TICKS_PER_DAY * 5) == 0:
+			_print_faction_matrix(state, (tick + 1) / WorldState.TICKS_PER_DAY, fid_a, fid_b)
 
 		if (tick + 1) % 50 == 0:
 			_check_invariants_periodic(state)

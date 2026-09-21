@@ -22,8 +22,9 @@ func _run() -> void:
 	if state.player_id != -1:
 		print("[WARN] player_id=%d（預期 -1 無玩家）" % state.player_id)
 	var max_ticks: int = int(config.get("max_ticks", 172800))
-	print("[world_sim] max_ticks=%d (%.1f 年) teams=%d" % [
-		max_ticks, max_ticks / 86400.0, state.teams.size()])
+	print("[world_sim] max_ticks=%d (%.1f 天 = %.2f 年) teams=%d" % [
+		max_ticks, float(max_ticks) / float(WorldState.TICKS_PER_DAY),
+		float(max_ticks) / float(WorldState.TICKS_PER_DAY * 360), state.teams.size()])
 
 	var no_player := Vector2i(-1, -1)
 	var alive_zero_streak := 0
@@ -33,13 +34,13 @@ func _run() -> void:
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
 		# 月取樣（長跑免 log 爆）
-		if (tick + 1) % (240 * 30) == 0:
-			var month: int = (tick + 1) / (240 * 30)
+		if (tick + 1) % (WorldState.TICKS_PER_DAY * 30) == 0:
+			var month: int = (tick + 1) / (WorldState.TICKS_PER_DAY * 30)
 			print("[world_sim] === 月 %d (tick=%d) 存活隊=%d ===" % [month, tick + 1, state.teams.size()])
 			TeamTrace.dump(state, tick + 1)
 			SpineTrace.dump(state, tick + 1)
 		# 周期不變量
-		if (tick + 1) % 240 == 0:
+		if (tick + 1) % WorldState.TICKS_PER_DAY == 0:
 			_check_inv(state, tick + 1)
 		# 世界全滅 → 提早收尾（連續 3 取樣存活 0）
 		if state.teams.is_empty():

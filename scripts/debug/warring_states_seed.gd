@@ -55,8 +55,8 @@ func _run() -> void:
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
-		if (tick + 1) % (240 * 30) == 0:
-			var month: int = (tick + 1) / (240 * 30)
+		if (tick + 1) % (WorldState.TICKS_PER_DAY * 30) == 0:
+			var month: int = (tick + 1) / (WorldState.TICKS_PER_DAY * 30)
 			print("[戰國] 月%d tick=%d teams=%d factions=%d established=%d 意圖=%s" % [
 				month, tick + 1, state.teams.size(), state.factions.size(),
 				_established_count(state), str(_intent_histogram(state))])

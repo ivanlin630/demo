@@ -30,7 +30,8 @@ func _run() -> void:
 		lp.values["野心"] = maxf(float(lp.values.get("野心", 0.5)), 0.7)
 		_boosted += 1
 	# measure cap：夠獨立隊爬野心階 + belief 鋪開觸 prosperity，不需跑滿 2 年（可 override）。
-	var max_ticks: int = mini(int(config.get("max_ticks", 172800)), 240 * 60)
+	# ★窗長【不變】＝ 14400 tick ＝ 10 天（原寫 `240 * 60`，而那個 240 是手抄的一天；真值 1440）
+	var max_ticks: int = mini(int(config.get("max_ticks", 172800)), WorldState.TICKS_PER_DAY * 10)
 	print("[measure] max_ticks=%d teams=%d factions=%d 好戰獨立 boost=%d" % [
 		max_ticks, state.teams.size(), state.factions.size(), _boosted])
 
@@ -80,9 +81,9 @@ func _run() -> void:
 					if near_id != -1 and state.teams.has(near_id):
 						sum_dist += fai._hex_dist(t2.tile_pos, state.teams[near_id].tile_pos)
 						dist_n += 1
-		if (tick + 1) % (240 * 30) == 0:
+		if (tick + 1) % (WorldState.TICKS_PER_DAY * 30) == 0:
 			print("[measure] 月%d tick=%d teams=%d conq.intent=%d winner_loot=%d prosp_reached=%d" % [
-				(tick + 1) / (240 * 30), tick + 1, state.teams.size(),
+				(tick + 1) / (WorldState.TICKS_PER_DAY * 30), tick + 1, state.teams.size(),
 				int(Probe.counts.get("conq.intent", 0)),
 				int(Probe.counts.get("conq.winner_loot", 0)),
 				int(Probe.counts.get("conq.prosperity_reached", 0))])

@@ -10,7 +10,8 @@ extends SceneTree
 const LADDER: Array = [100, 200, 400]
 const MAP_RADIUS: int = 16          # 3R²+3R+1 ≈ 817 tiles > 2×max_N → 隊分散 → hostile-within 近全掃 = worst-case O(N²)
 const EVAL_REPS: int = 5            # evaluate_all 重複取平均（去單次噪）
-const TICK_RUN: int = 240           # 整合跑 1 day → 1 次 TickPerf flush
+const TICK_RUN: int = 240           # ★240 tick ＝ 4 小時（原註寫「1 day」——那是手抄的一天；真值 TICKS_PER_DAY=1440）
+                                    # ★★窗長【不動】：這是 perf 床，改窗會改它量到的數字（不是標籤票的範圍）
 const DIEOFF_RATIO: float = 0.3     # 滅團潮：erase 30% 隊，量 erase 尖峰
 
 func _initialize() -> void:

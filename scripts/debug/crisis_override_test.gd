@@ -6,7 +6,7 @@ extends SceneTree
 # 純 detection 直測 _famine_crisis。
 
 var _fail: int = 0
-const TPD := 240   # WorldState.TICKS_PER_DAY
+const TPD := WorldState.TICKS_PER_DAY   # ★原為手抄 240，而它自己的註解就寫著它該是什麼
 
 func _initialize() -> void:
 	_test_crisis_fires_stuck_famine()

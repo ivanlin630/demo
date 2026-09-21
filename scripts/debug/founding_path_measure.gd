@@ -42,7 +42,7 @@ func _run() -> void:
 	GameSetup.setup(state, config)
 	var no_player := Vector2i(-1, -1)
 	# 跑 2 月讓 discovered/belief 鋪開
-	for _t in range(240 * 60):
+	for _t in range(WorldState.TICKS_PER_DAY * 10):   # ★14400 tick ＝ 10 天（原寫 240*60 並註「2 月」）
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")

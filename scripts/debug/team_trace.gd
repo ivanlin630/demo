@@ -6,7 +6,7 @@ class_name TeamTrace
 const WATCHED: Array = [0, 1, 2, 4]   # game_sim_test: 慎重leader / 居民 / 好戰leader / 流亡
 
 static func dump(state: WorldState, tick: int) -> void:
-	var day: int = tick / 240
+	var day: int = tick / WorldState.TICKS_PER_DAY
 	for tid in WATCHED:
 		var t: TeamData = state.teams.get(tid)
 		if t == null:

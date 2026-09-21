@@ -49,7 +49,7 @@ func _run() -> void:
 	var no_player := Vector2i(-1, -1)
 	_diag(state, "t=0 (setup 當下)")
 	# 跑 60 天看 readiness/member 演化
-	for tick in range(240 * 60):
+	for tick in range(WorldState.TICKS_PER_DAY * 10):   # ★14400 tick ＝ 10 天（原寫 240*60 並註「60 天」）
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
