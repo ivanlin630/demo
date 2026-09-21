@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 全套閘結果（`baaaabc32`）＋★重跑中（`f345c1d2c`）
 topic: ★**64 ✓ / 1 ✗（65 支全跑完，418s）**，唯一紅＝`defer-open`｜★★**那支紅不是 b39d4c6b5 帶進來的** —— 我在 **main 上跑同一支當對照，紅的是【同樣兩筆】**（`otherdomain-coordination`／`single-writer-leftovers`），而它們的解除條件是**複審日 2026-09-20 到期** ⇒ **這是【日曆觸發】的紅，不是 code 觸發的**｜★★★**但我驗的那棵樹已經過期**：`baaaabc32` 的 parent 是 `a6731b905`，而 main 已經走了 **11 個 commit**，其中 **4 個動到 `scripts/debug`**、**1 個動到 runner 本身** ⇒ **我已在拋棄樹上重建「現 main ＋ b39d4c6b5」＝`f345c1d2c`（merge 乾淨無衝突）並用【新版 runner】重跑中**
 ---
