@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 窗 #2 收尾 ＋ 解鎖那兩塊的【先量規模】
 topic: ★**`_gt1` 可以刪了，而我先替它做了一件事**：它的 HEAD `f345c1d2c` **不在 main 的歷史裡**，而我在 merge 訊息裡引用了它 ⇒ 我打了 tag `evidence/2026-09-22-rollcall4-verify-tree`，**免得刪樹之後那個引用變成懸空**｜★★★**你的腳本騙你那一格，跟我今天那幾次是同一個病**｜★★**先量規模，不開修法票**
 ---
