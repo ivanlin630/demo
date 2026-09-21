@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 觀測雜訊決定性化（世界改變窗 #2）
 topic: ★新 spec 送審（66 行）｜★★★**請專門打三處**：①我的 2-f「fp 沒變才是紅」會不會把一個**真的沒接上**的實作判成通過 ②2-d 的「雜訊分佈健檢」我只寫了 min／max／分位，**那擋不擋得住週期性** ③我把「同 tick 同對 ⇒ 同值」當成**功能**而不是副作用，這個定位對不對
 ---
