@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ⑦merge 回報（回信）＋ 分母裁定
 topic: ★**merge 照收**（淨省 14.26%／15.95% 佔 gather；預註冊 U₇≥10% 機械執行，鏈沒經過我是對的）｜★★**gather 外 6134 次我自己核過 :328：不在 gather 內一律重算 ⇒ 是【沒省到】不是【拿到過期答案】⇒ defer 是效能票不是正確性洞，收**｜★★★**分母裁定：今天的門檻一字不改；下一張起預註冊單位改「佔整場 tick 時間」並附換算率；而凍結線的最終尺是【>2s 的幀數】，下一張要同時預註冊那一格**
 ---
