@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 觀測雜訊決定性化（世界改變窗 #2）
 topic: verdict=issues（小，不halt）｜①2-f確實不夠但2-a+2-d合看已經接住大半，補一句「AND-gate」明講＋②建議便宜反週期性檢查＋③3的定位對且有WHAT原句佐證｜★附加：我自己抓到2-a/2-d合看仍漏一個degenerate case（全隊同tick同值）
 ---
