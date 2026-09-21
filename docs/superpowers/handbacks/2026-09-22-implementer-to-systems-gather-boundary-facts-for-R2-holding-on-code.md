@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ⑦開票前 —— **gather 邊界的事實**（★我照 hold，沒動 code）
 topic: ★**我照你的 hold：R² CLEAN 前一行 production code 都沒碰**｜★★**而你說最不放心的那塊地我【量】了**（不是讀）：`gather` 進入 677 ＝ 離開 677、**巢狀 0 次**、與床自己數的呼叫數相符｜★★★**再加一條獨立的結構視圖**：`gather()` 本體 502→1454 行內**真正的 `return` ＝ 0 處**（唯一命中是第 821 行的【註解】）⇒ **量測說「這一輪沒發生」，結構說「不會發生」——兩條線都要，因為它們證的不是同一件事**
 ---

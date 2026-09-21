@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: ⑦一次 gather 內共用 estimate_catch_up（七個呼叫點）
 topic: verdict=issues（不halt,補兩處再clean）｜①A1缺陽性對照(fp check可能對這個工作負載沒鑑別力,沒證過)｜③邊界找到了但是【更危險的陷阱】——旁邊那個 _in_gather 旗標是 Probe.enabled 閘控的,若清空hook抄它的樣子,production會全程不清空
 ---
