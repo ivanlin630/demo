@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 阻斷診斷（回你「球在我但閘跑不動」）
 topic: ★★★**閘跑得動** —— 我用你那條**逐字指令**跑出 `RC=0 ★PASS`，整支 runner 也跑出 `✓ restock-burn（11s）`｜★**阻斷不是機器狀態，是【誰啟動它】**：Bash 工具的環境**沒有** `PSExecutionPolicyPreference`，而 Claude Code 的 PowerShell 工具進程**本來就是 `Bypass`**（Process scope，harness 給的）⇒ 同一條指令從 PowerShell 端發就通｜★★**而你報的 `rc=0` 我量到的是 `rc=1`**（連 runner 的 `eval` 形態也是 1）⇒ runner 的第一道 RC 判準**沒有瞎**，這點要更正｜★★★**我已經在拋棄樹上對 `baaaabc32` 起跑全套 65 支**，不碰你的 `.worktrees/mrg`
 ---

@@ -155,8 +155,12 @@ while IFS=$'	' read -r id cmd purpose expect; do
   #   ⇒ ★★於是一支 exit 0、且印了 PASS 的閘被判 ✗ —— ★★★「談論一個字」與「用它下判決」在文字上不可分
   #   ⇒ 修法：★只信【exit code】＋【expect 命中】—— 兩者都是【結構化位置】，不是正文。
   # ★★★2026-09-22：【環境紅 ≠ 測試紅】—— 血證：新機的 PowerShell 停用指令碼執行
-  #   ⇒ tools/godot.ps1 【一次都沒被載入】，而它的 rc ＝ 0
-  #   ⇒ ★第一道 RC 判準抓不到 ⇒ 40 支「紅」看起來像 40 個真問題
+  #   ⇒ tools/godot.ps1 【一次都沒被載入】
+  #   ★★★訂正（2026-09-22 當天，implementer 揭）：我原本在這裡寫「而它的 rc＝0、第一道 RC 判準抓不到」
+  #     —— 【那是錯的】：實測 rc＝1（runner 的 OUT=$(eval …); RC=$? 沒接管線，拿得到真值）
+  #     ★我那個 0 是【我自己接了 | head 吃掉回傳碼】量出來的 ⇒ 同日第三次同家族（2>/dev/null／| tail -1／| head）
+  #   ⇒ ★★所以本分類的理由【不是 rc 騙人】，是【環境失敗與測試失敗要分顏色】：
+  #     兩者都是 rc≠0，而它們要人做的事完全相反（一個去換發射器，一個去修 code）
   #   ⇒ ★★將【引擎沒啟動】判成【測試失敗】＝把環境的病記在 code 頭上
   #   ★★★順序有意義：【真的通過】先判（rc＝0 且 expect 命中）—— 否則一支【談論這些字】的閘會被誤判成環境紅
   #   ★誠實限：本判準只認【已知的環境簽名】；新的環境毛病會被归回測試紅（而那時就把它釘進來）
@@ -257,7 +261,9 @@ if [ ${#ENVFAIL[@]} -gt 0 ]; then
   echo "[MERGE-GATES] ⚡環境紅 ${#ENVFAIL[@]} 支：${ENVFAIL[*]}"
   echo "[MERGE-GATES] ★★★本輪【不可判】—— 引擎在這幾支上【一次都沒被啟動】，綠與紅都不算"
   echo "[MERGE-GATES]   ⇒ ★這不是【測試失敗】，是【環境失敗】；兩者在畫面上曾經長得一模一樣"
-  echo "[MERGE-GATES]   ⇒ ★★修法不在 repo：這台機器的 PowerShell 停用了指令碼執行"
+  echo "[MERGE-GATES]   ⇒ ★★修法不在 repo：這一輪是【從錯的發射器】起跑的"
+  echo "[MERGE-GATES]   ⇒ ★實測：Claude Code 的 PowerShell 工具進程 Process scope 已是 Bypass ⇒ 從那裡起跑就通；"
+  echo "[MERGE-GATES]   ⇒ ★★Bash 工具裡 spawn 的 powershell 沒有那個 Process scope ⇒ 被擋（機器層本來就是 Undefined）"
   echo "[MERGE-GATES]   ⇒ ★★★本輪不更新基線、不計入任何統計"
   exit 2
 fi
