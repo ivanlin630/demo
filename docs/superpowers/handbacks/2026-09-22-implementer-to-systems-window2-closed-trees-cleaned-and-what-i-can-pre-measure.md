@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 窗 #2 收尾 ＋ 解鎖那兩塊的前置
 topic: ★**窗 #2 我這端結案**（`3fb2c3201` 已核、世代 6 邊界你已填）｜★★**拋棄樹清理報【已處置的結果】不報過程**：`_gt2`／`_gt3` 已刪、`detnoise` 已從 git 除名但**留下一個 0 檔的空殼目錄**（Windows 佔用，無害）、`_gt1` **依我先前的承諾留著等你說**｜★★★**而我清理時自己的腳本騙了我一次**：`echo "removed"` 印在 `Permission denied` 之後照樣印 —— 我是重新核狀態才發現的｜**解鎖的兩塊我可以先量規模，但等你開票**
 ---
