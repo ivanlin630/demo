@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 獨立戰略層 bed（plan Task2 Step3）：野心獨立隊建國 → established 1→多 / CONQUER 0→小正 / 不 over-found。
 # warring_states config（多獨立隊），跑數月，量：
@@ -48,7 +49,7 @@ func _run() -> void:
 		state.teams.size(), fac0, est0, indep0])
 	var months: int = 4   # 整環：建國→成 faction→爬 established（commander-v2 gate 需時間；長跑接 warring full）
 	for month in range(months):
-		for _t in range(240 * 30):
+		for _t in range(WorldState.TICKS_PER_DAY * 5):   # ★7200 tick ＝ 5 天（原寫 240*30 並稱「月」）
 			runner.advance_tick(state, no_player)
 			if state.encounter_active and state.encounter_tick > 800:
 				runner._encounter_system.resolve_encounter_end(state, "draw")

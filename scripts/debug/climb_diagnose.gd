@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # (a) 核心 measure：攀爬動力卡點（藍圖 2026-06-29「instrument 能人一生，找爬到哪階卡，別猜」）。
 # 攀爬鏈 rung：SURVIVE0→ACCUMULATE1→EXPAND2→STATE3(立國)→HEGEMON4(稱霸)。
@@ -48,7 +49,7 @@ func _run() -> void:
 
 	# 跑 12 月，月取樣能人軌跡
 	for month in range(12):
-		for _t in range(240 * 30):
+		for _t in range(WorldState.TICKS_PER_DAY * 5):   # ★7200 tick ＝ 5 天（原寫 240*30 並稱「月」——240 是手抄的一天）
 			runner.advance_tick(state, no_player)
 			if state.encounter_active and state.encounter_tick > 800:
 				runner._encounter_system.resolve_encounter_end(state, "draw")

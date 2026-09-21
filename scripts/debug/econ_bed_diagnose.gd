@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 經濟食物統一 — 乾淨 bed 驗整環（econ-food-unify Task 2）。
 # 隔離 fixture：
@@ -57,7 +58,7 @@ func _run() -> void:
 
 	var trade_fired := {0: false, 1: false}
 	for month in range(6):
-		for _t in range(240 * 30):
+		for _t in range(WorldState.TICKS_PER_DAY * 5):   # ★7200 tick ＝ 5 天（原寫 240*30 並稱「月」）
 			runner.advance_tick(state, anchor_pos)
 			for tid in [0, 1]:
 				var t: TeamData = state.teams.get(tid)

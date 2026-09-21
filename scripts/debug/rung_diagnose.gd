@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # rung2→3 立國卡點 measure（藍圖 2026-07-01「instrument T32 型,為何不進 rung3,別猜」）。
 # rung3(STATE) target 需：food≥pop×2.4×7 + pop≥EXPAND_MIN_POP(8) + 在 faction 且 member_teams≥STATE_MIN(2) + ambition_cap≥3(野心≥0.55)。
@@ -58,7 +59,7 @@ func _run() -> void:
 		if _is_capable(state, state.teams[tid]): capable.append(tid)
 	print("[rung] 能人 = %s" % str(capable))
 	for month in range(10):
-		for _t in range(240 * 30):
+		for _t in range(WorldState.TICKS_PER_DAY * 5):   # ★7200 tick ＝ 5 天（原寫 240*30 並稱「月」）
 			runner.advance_tick(state, no_player)
 			if state.encounter_active and state.encounter_tick > 800:
 				runner._encounter_system.resolve_encounter_end(state, "draw")

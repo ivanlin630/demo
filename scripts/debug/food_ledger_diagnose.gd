@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 餓死 measure（藍圖 2026-06-30「餓死=經濟底債優先，instrument 一隊食物收支，別猜」）。
 # 量：戰國 seed 能人(野心≥0.6+統領≥0.4)的食物收支月軌跡——food/pop/burn(pop×2.4)/income(Δ+burn 推)/
@@ -58,7 +59,7 @@ func _run() -> void:
 		var fam_before: Dictionary = {}
 		for tid in capable:
 			fam_before[tid] = int(state.teams[tid].famine_days) if state.teams.has(tid) else -1
-		for _t in range(240 * 30):
+		for _t in range(WorldState.TICKS_PER_DAY * 5):   # ★7200 tick ＝ 5 天（原寫 240*30 並稱「月」）
 			runner.advance_tick(state, no_player)
 			if state.encounter_active and state.encounter_tick > 800:
 				runner._encounter_system.resolve_encounter_end(state, "draw")

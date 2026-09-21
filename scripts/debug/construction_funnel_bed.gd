@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # ★施工漏斗 ①②段的【非零證據 + 對帳】床（systems 派 2026-08-26）。
 #   ★判準三條（他寫死的）：①每段都要有分母 ②`fp` 不變 ③每顆 counter 至少非零過一次，
 #     ★恆 0 的要講明是【掛錯位置】還是【那條路不可達】——本床把兩者分開印，不替它選。
@@ -159,7 +160,7 @@ func _run() -> void:
 			int(tk), int(per_team[tk]), lo_avail, hi_avail])
 	lines.append("  ★★右欄是【嘗試當下】的公庫＋私產，不是期末存量 —— 兩者不可互換。")
 	# systems2026-08-26 founding-silence-recheck: attempt樣本逐日筆數(day=tick/TICKS_PER_DAY)
-	lines.append("  ★逐日筆數(day=tick/240)：")
+	lines.append("  ★逐日筆數(day=tick/%d)：" % WorldState.TICKS_PER_DAY)
 	var per_day: Dictionary = {}
 	for a3 in atts:
 		var dd: int = int(a3.get("tick", -1)) / WorldState.TICKS_PER_DAY

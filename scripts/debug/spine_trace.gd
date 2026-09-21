@@ -1,3 +1,4 @@
+# @bed-kind: diagnostic
 class_name SpineTrace
 
 # 時間軸脊椎 dump（純讀，仿 TeamTrace 風格）。對 WATCHED team + auto-pick named 印分脊椎結構化行。
@@ -5,7 +6,7 @@ class_name SpineTrace
 const WATCHED: Array = [0, 1, 2, 3, 4]   # 統領/商隊/敵軍/生產村/流亡
 
 static func dump(state: WorldState, tick: int) -> void:
-	var day: int = tick / 240
+	var day: int = tick / WorldState.TICKS_PER_DAY
 	for tid in WATCHED:
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue

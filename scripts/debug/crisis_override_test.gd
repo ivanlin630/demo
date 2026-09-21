@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: crisis override（深餓未緩 ⇒ crisis TRUE；委派免疫窗）
 
 # famine crisis-override TDD（spec 2026-07-19-task-flee-stall-detection，泛化 ②）。
 # OUTCOME-based：committed 任何 task 深餓(food<CRISIS_FLOOR)未緩(committed N 天 food 沒回升≥RELIEF_MIN)
@@ -6,7 +8,7 @@ extends SceneTree
 # 純 detection 直測 _famine_crisis。
 
 var _fail: int = 0
-const TPD := 240   # WorldState.TICKS_PER_DAY
+const TPD := WorldState.TICKS_PER_DAY   # ★原為手抄 240，而它自己的註解就寫著它該是什麼
 
 func _initialize() -> void:
 	_test_crisis_fires_stuck_famine()

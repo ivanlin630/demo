@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # 指標 specimen 決策 tracer — measure 床（spec 交付核心：用 tracer measure 錨→行為）。
 # 兩問（藍圖指定）：
@@ -38,7 +39,7 @@ func _run_merchant() -> void:
 
 	var anchor_pos := Vector2i(5, 5)   # econ_bed 近區錨（同 econ_bed_diagnose）
 	# 短窗（10 天）→ 每日 flush 印可讀 timeline（sim_runner 日邊界呼 flush）
-	for _t in range(240 * 10):
+	for _t in range(2400):   # ★2400 tick ＝ 1.67 天（原寫 240*10 並註「10 天」——240 是手抄的一天，真值 1440；★窗長不動）
 		runner.advance_tick(state, anchor_pos)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
@@ -99,7 +100,7 @@ func _run_conqueror() -> void:
 	# conqueror 為 commander/military，攻擊 winner 非 unified/survival 路徑（plan scope 不捕）
 	# → 觀 intent_hist(想什麼) + task/Probe(做什麼)。
 	var no_player := Vector2i(-1, -1)
-	for _t in range(240 * 25):
+	for _t in range(6000):   # ★6000 tick ＝ 4.17 天（原寫 240*25；★窗長不動）
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")

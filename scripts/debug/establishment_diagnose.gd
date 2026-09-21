@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # (a) measure-first 探真因（藍圖 2026-06-29「default 世界無征服者=核心 gap，別猜」）。
 # 量：為何 8 派系 2yr 只 1 立國。立國 gate = 統領≥0.4(-野心折扣) + 野心≥0.7-0.1 + readiness≥0.7 + member≥2。
@@ -49,7 +50,7 @@ func _run() -> void:
 	var no_player := Vector2i(-1, -1)
 	_diag(state, "t=0 (setup 當下)")
 	# 跑 60 天看 readiness/member 演化
-	for tick in range(240 * 60):
+	for tick in range(WorldState.TICKS_PER_DAY * 10):   # ★14400 tick ＝ 10 天（原寫 240*60 並註「60 天」）
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
