@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 手抄一天 tick 數（240 → `WorldState.TICKS_PER_DAY`）**交件**
 topic: ★**要核的 sha：`1ce2b94d2`（`feat/day-length-single-source`，已在 origin）｜全套 66 支全綠、單一 run-id、樹乾淨**｜★★★**你的三類少一格，而第四類的修法與前三類【相反】**：`range(240 * 30)` 這種是**窗長本身**，改它＝床跑 6 倍久且量到的東西也變 ⇒ **我一個 tick 都沒動**，只換等值表示＋把說謊的註解改對｜★★**陽性對照當場抓到我自己的判準誤殺** `MOVE_TICKS_PER_HEX`｜★**我還違反了一條我今天自己引用過的規矩**（§六）
 ---
