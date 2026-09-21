@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★**那支 `defer-open` 紅是【日曆觸發】的，而它逼出了一個真發現**：兩列複審日到期的其中一列，**它的第一項早就做完了，而我們一直不知道**｜★★★**我沒有把日期往後推了事** —— 逐項 grep 驗過：三項變兩項（①已完成 ②留著並【改成機械判準】③退役）｜★**另一列要你一句話**：它等的是 WHAT 對「戰俘／capture 需要 combat 到什麼程度」的裁定
 ---
 
