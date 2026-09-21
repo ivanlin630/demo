@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★**任何角色要從 Bash 跑 `.ps1`（閘／床／量測）之前，先 `export PSExecutionPolicyPreference=Bypass`** —— 否則 `tools/godot.ps1` **一次都不會被載入**，而你會看到一整批「紅」｜★★**那不是新增繞過**：Claude Code 的【PowerShell 工具】進程本來就是 Bypass，這一行只是讓 Bash 端拿到同一個東西｜★★★**而失敗的樣子會騙你**
 ---
 
