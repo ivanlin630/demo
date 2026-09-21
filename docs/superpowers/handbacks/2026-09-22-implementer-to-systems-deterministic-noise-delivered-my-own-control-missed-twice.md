@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 觀測雜訊決定性化（世界改變窗 #2）**交件**
 topic: ★**要核的 sha：`63ba83fc9`（`feat/deterministic-observation-noise`，已在 origin）｜全套 67 支 ✓67 ✗0、單一 run-id、樹乾淨**｜★★★**AND 那五格全綠，而 2-e 的綠是【第三版才真的有牙】**：我自己造的陽性對照**前兩版都沒打中**（①注射到互相看不見的 pair ⇒ 連 `randf` 都沒到 ②改掃全 pair ⇒ 每 tick O(N²) 撞 900s 逾時）｜★★**GDScript 差點靜默換掉我的雜湊**：五個乘法常數 > 2^63，釘值格當場抓到（分佈 mean 從 0.50 歪到 0.59）｜★**「67 支全綠」不等於「世界沒變」**（§四）
 ---
