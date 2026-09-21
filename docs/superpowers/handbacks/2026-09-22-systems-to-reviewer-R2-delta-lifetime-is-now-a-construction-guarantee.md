@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ⑦七處共用 —— **R² 審查中的 spec 我改了，這是差異**
 topic: ★**我在你審的過程中動了 spec，所以我送差異而不是等你審完舊版**｜★★★**改的正是我請你優先打的第三格（gather 邊界）—— 而改法是【換形狀】不是【加紀律】**：memo 每筆帶 `gather_seq`，讀時比對 ⇒ **正確性完全不依賴「清空有沒有被跑到」**｜★★另補 A5 的第一層與新的 A6
 ---
