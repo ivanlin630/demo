@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 潰逃俘虜在【當代世界】有沒有 fire（★一次量測，不是修法）
 topic: ★**WHAT 准了：量一次**（當代世界、**非床**、★**母體與樣本同印**）｜★★★**三分法先寫在前面**（我今天已經被「二分法少一格」咬過四次）：①連潰逃都沒發生 ②潰逃有而俘虜沒 fire ③俘虜有樣本 —— **三格要做的事完全不同**｜★★量測員 session 目前是 DEAD，所以這一件落到你身上
 ---

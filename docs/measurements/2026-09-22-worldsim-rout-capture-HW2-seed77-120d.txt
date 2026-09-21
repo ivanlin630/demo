@@ -1,0 +1,42 @@
+# 潰逃俘虜：當代世界一次量測（★母體與樣本同印）
+# 四要素＋硬體戳
+#   窗   ：172800 tick ＝ ★120 天（4 個月）—— TICKS_PER_DAY=1440（wrapper 的 [SCALE] 戳）
+#   ★★注意：world_sim.gd 自己印的是「2.0 年」，那是【錯的】——
+#     它用 max_ticks/86400.0 換算（假設 240 tick/day），而真值是 1440 ⇒ 標籤差 6 倍。
+#     ★★★月取樣也同病：它每 240*30=7200 tick 印一次「月 N」，實際是【每 5 天】一次。
+#     ⇒ 本卷面一律用 [SCALE] 的真換算，不用 harness 的標籤。
+#   種子 ：77（config/world_sim.json，explicit mode）
+#   config：config/world_sim.json（teams=8 起始）
+#   樹   ：1a5560fe0（＝ merge 352c711a4 的其中一個 parent；跑在拋棄樹 A:/GDS/_gt2，跑完 status 乾淨）
+#   硬體 ：HW-2 AMD Ryzen 7 5800X3D 8-Core
+#   raw  ：docs/measurements/2026-09-22-worldsim-rout-capture-HW2-seed77-120d-RAW.log.gz（★gzip：原始 4.0MB/80715 行 → 301KB）
+
+## 漏斗（逐級，全部來自 ProbeSummary）
+[ProbeSummary] capture.by_attack            = 1
+[ProbeSummary] capture.by_other             = 2
+[ProbeSummary] capture.total                = 9
+[ProbeSummary] conq.combat_entered          = 173
+[ProbeSummary] conq.combat_retreat          = 160
+[ProbeSummary] conq.retreat_captured        = 9
+[ProbeSummary] conq.retreat_no_capture      = 151
+
+## ★conq.combat_decisive ＝ 未出現（＝從未 bump ＝ 0）
+#  陽性對照：同一輪 ProbeSummary 印出 17 個其他 conq.* key ⇒ Probe 路徑活著，這個 0 是真的 0 不是儀器沒接
+
+## 9 筆 capture 逐筆（★集中度：7 隊參與，top-1 ＝ 2/9 ＝ 22%）
+[Capture] Team0 控地俘 Team5 潰逃殘部 +3 (rd=0.20)
+[Capture] Team11 控地俘 Team4 潰逃殘部 +1 (rd=0.04)
+[Capture] Team100 控地俘 Team0 潰逃殘部 +6 (rd=0.12)
+[Capture] Team0 控地俘 Team5 潰逃殘部 +1 (rd=1.00)
+[Capture] Team5 控地俘 Team1 潰逃殘部 +1 (rd=0.52)
+[Capture] Team104 控地俘 Team0 潰逃殘部 +2 (rd=0.12)
+[Capture] Team2 控地俘 Team0 潰逃殘部 +2 (rd=0.14)
+[Capture] Team3 控地俘 Team139 潰逃殘部 +1 (rd=1.00)
+[Capture] Team3 控地俘 Team135 潰逃殘部 +1 (rd=1.00)
+
+## 不變量違反（★本輪順帶觀測，非本票標的）
+# 累計 34 例 / 30 行，全部同型：
+     22 違反 1 例:懸空 Team144.order_target_id=0 不存在
+      4 違反 2 例:懸空 Team144.order_target_id=0 不存在
+      2 違反 1 例:懸空 Team152.order_target_id=0 不存在
+      2 違反 1 例:懸空 Team138.order_target_id=0 不存在

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 到場點名④
 topic: ★**已 merge 到 `352c711a4`，後續請開新的 branch**｜★★**判決由兩半拼起來，我把血統寫清楚**：60 支用你在 `f345c1d2c` 上的判決（那棵樹與本樹之間**只動 docs**）＋ 5 支【會讀 `defers.tsv` 的】由我在**本樹**重跑｜★★★**而你那句「零支環境紅 ⇒ 綠 ≠ 那個分類被驗過」我要補一格**：它的**陰性方向**正是被你這一輪驗掉的
 ---
