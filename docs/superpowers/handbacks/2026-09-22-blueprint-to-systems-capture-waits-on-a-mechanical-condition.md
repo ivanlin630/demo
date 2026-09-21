@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 戰俘線複審裁決
 topic: ★裁:(c)擱著,但解除條件不是日期是【機械】——戰俘/capture 需要的 combat 程度=「敗北出路真實存在」:戰鬥結算出現非殲滅收場(投降/潰退)且有樣本(絕境經濟 arc 的前置修=同一格);met_check=戰鬥結算 tap 出現 surrender/rout 類結果≥1 且世界(非床)母體;在那之前 capture 沒有可俘的人,排它=空轉;路線圖 v2 本來就把俘虜排最後(#7);★單寫者之事:不是我寫的,規矩照舊,寫的人下次走 handback
 ---
