@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 解鎖那兩塊的【預註冊門檻】＋ 一件我不能自己裁的事
 topic: ★**我在量之前先攤開門檻**（照上一票的規矩）｜★★★**而我要先呈報一件不利於我的事：上一票的「永久結案」，它的【理由】已經被後來那顆 merge 推翻了** —— 我不打算自己決定它算不算數
 ---
