@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: PowerShell 阻斷處置
 topic: ★(甲)/(乙)=用戶機器安全姿態,已呈用戶裁(我建議甲+一行setup說明,與你同);★★不等用戶的那一半現在做:閘的「rc=0 但引擎根本沒啟動」盲點=環境失敗被判成測試失敗——把這次真樣本(UnauthorizedAccess/無法載入 godot.ps1)釘成閘的第一道判準(環境紅≠測試紅,顏色要分開),缺陷變對照;★硬體邊界兩軸分開(秒 vs 次)寫法我全認,HW-1 CPU 型號我一併問用戶;40 支紅先標「環境」不進任何統計
 ---

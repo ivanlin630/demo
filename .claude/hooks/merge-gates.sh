@@ -132,6 +132,7 @@ if [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; then
   echo "[MERGE-GATES] ★★★PARTIAL：本輪只跑第 ${MG_FROM:-1}–${MG_TO:-末} 支 ⇒ **不可當 merge 判決**"
 fi
 FAILED=(); TOTAL0=$SECONDS; N=0; RUN_N=0
+ENVFAIL=()
 # ★★★2026-09-06:讀進來先剝 ``(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
 #   `expect` 會尾帶 `` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
 #   ★★而 .gitattributes 已 eol=lf ⇒ repo 的 blob 是乾淨的,壞的只有【工作區那一份】
@@ -153,6 +154,22 @@ while IFS=$'	' read -r id cmd purpose expect; do
   #   ⇒ ★而閘【自己的說明文字】裡就有那個字（例：bare-tick 檔頭解釋什麼情況會 FAIL）
   #   ⇒ ★★於是一支 exit 0、且印了 PASS 的閘被判 ✗ —— ★★★「談論一個字」與「用它下判決」在文字上不可分
   #   ⇒ 修法：★只信【exit code】＋【expect 命中】—— 兩者都是【結構化位置】，不是正文。
+  # ★★★2026-09-22：【環境紅 ≠ 測試紅】—— 血證：新機的 PowerShell 停用指令碼執行
+  #   ⇒ tools/godot.ps1 【一次都沒被載入】，而它的 rc ＝ 0
+  #   ⇒ ★第一道 RC 判準抓不到 ⇒ 40 支「紅」看起來像 40 個真問題
+  #   ⇒ ★★將【引擎沒啟動】判成【測試失敗】＝把環境的病記在 code 頭上
+  #   ★★★順序有意義：【真的通過】先判（rc＝0 且 expect 命中）—— 否則一支【談論這些字】的閘會被誤判成環境紅
+  #   ★誠實限：本判準只認【已知的環境簽名】；新的環境毛病會被归回測試紅（而那時就把它釘進來）
+  _mg_env=0
+  if ! { [ $RC -eq 0 ] && printf '%s' "$OUT" | grep -qE -- "$expect"; }; then
+    if printf '%s' "$OUT" | grep -qE 'UnauthorizedAccess|已停用指令碼執行|running scripts is disabled|無法載入.*\.ps1|cannot be loaded|這一輪沒有真的重跑'; then _mg_env=1; fi
+  fi
+  if [ "$_mg_env" = "1" ]; then
+    echo "[MERGE-GATES] ⚡ENV $id （${DT}s）—— ★★★環境失敗：引擎【一次都沒被啟動】（PowerShell 停用指令碼執行）"
+    printf '%s
+' "$OUT" | grep -E 'UnauthorizedAccess|已停用指令碼執行|無法載入|沒有真的重跑' | head -2
+    ENVFAIL+=("$id"); continue
+  fi
   if [ $RC -ne 0 ]; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— $purpose"
     # ★★★2026-09-15：原本這裡只印【最後五行】⇒ 而【被點名的那幾行】常常在前面
@@ -231,6 +248,18 @@ else
   { [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; } && _mg_why="$_mg_why 本輪是分批跑（沒跑完整註冊表）"
   echo "[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數 —— 原因：$_mg_why"
   echo "[MERGE-GATES]   ⇒ ★★這一行必須存在：静默的【沒有記下來】跟【記下來了】在畫面上長得一樣。"
+fi
+# ★★★2026-09-22：【環境紅】先於【測試紅】報，而且它讓本輪【不可判】
+#   ★理由：引擎沒啟動的那幾支，網與紅【都不算】—— 它們根本沒有被執行過
+#   ★★而剩下那幾支的網也不能拿來充數：【部分樣本的綠】不是【全部通過】
+#   ★★★且它【不進任何統計】：不進 FAILED、不更新基線紅數
+if [ ${#ENVFAIL[@]} -gt 0 ]; then
+  echo "[MERGE-GATES] ⚡環境紅 ${#ENVFAIL[@]} 支：${ENVFAIL[*]}"
+  echo "[MERGE-GATES] ★★★本輪【不可判】—— 引擎在這幾支上【一次都沒被啟動】，綠與紅都不算"
+  echo "[MERGE-GATES]   ⇒ ★這不是【測試失敗】，是【環境失敗】；兩者在畫面上曾經長得一模一樣"
+  echo "[MERGE-GATES]   ⇒ ★★修法不在 repo：這台機器的 PowerShell 停用了指令碼執行"
+  echo "[MERGE-GATES]   ⇒ ★★★本輪不更新基線、不計入任何統計"
+  exit 2
 fi
 if [ ${#FAILED[@]} -gt 0 ]; then
   echo "[MERGE-GATES] FAIL：${FAILED[*]}"
