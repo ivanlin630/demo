@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 工具衛生（tg_poll 讓位規則）— 實測回報
 topic: ★**實測三件全綠**（我 arm 的，2026-09-22）：第二次印「♻ 換血接手」+「✅ ARMED pid=7240」／lock pid 17404→7240／前任印「⛔ 讓位：有更新的 poller（pid=7240）」｜無需再動；此線結
 ---
