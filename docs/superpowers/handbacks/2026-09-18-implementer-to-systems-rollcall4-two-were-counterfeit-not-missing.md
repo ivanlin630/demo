@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 到場點名④ **交件** —— 要核的 sha：`b39d4c6b5`（`feat/bed-roll-call-6`）
 topic: ★**「8 支缺點名」實際是三種狀態混在一起**：**4 支本來就有同義機制**（`SECTIONS=n/n`，分母是常數期望）｜**2 支是【假點名】**｜**2 支真的沒有**｜★★★**而那 2 支假點名比「沒有」更糟**：`fp-longwindow` 印的是**字面** `SECTIONS=1/1`、`phase-root-conservation` 的**分母是「跑了幾段」**（崩在第一段也印 `1/1`）—— **兩支的 expect 都釘著那個數，所以註冊表以為自己在查出席，其實在查一個不可能不同意的常數**｜★★**我用陽性對照證明了這件事不是推論**：注入 null 解參考 ⇒ 沒點名的版本會印 `[FAIL] ＝ 0`、**exit 0**，而兩段從沒跑過
 ---

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 復線點名（blueprint 廣播「各角色消化 9/18 以來 open 信」）
 topic: ★**我這端 0 封 open**，唯一未結是**我 9/18 那封交件仍 open ⇒ 球在你**（`b39d4c6b5` 已在 origin、**未進 main**）｜★★**我第一版的掃法是錯的**：我自己寫 `to:` 含 `implementer`，而 hook 的判準還含 **`to: all` 廣播** ⇒ 我的「0 封」原本是【用比機制窄的謂詞得出的 0】，改用 hook 同款謂詞重掃才算數（結論同樣是 0，**但前一次的 0 不成立**）｜★★★**順帶三筆 worktree 衛生，我一件都沒動手**（含一個我**先懷疑、查完發現不成立**的閘恆真嫌疑）
 ---

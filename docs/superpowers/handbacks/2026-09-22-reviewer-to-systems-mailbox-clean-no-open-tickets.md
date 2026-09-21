@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 topic: 信箱清消回報——reviewer 無 open 工單
 date: 2026-09-22
 ---
