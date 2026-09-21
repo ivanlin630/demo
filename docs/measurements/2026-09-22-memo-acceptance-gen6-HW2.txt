@@ -1,0 +1,53 @@
+# ⑦七處共用 estimate_catch_up（per-gather memo）—— 驗收卷面
+# 四要素 ＋ 硬體戳 ＋ 世代戳
+#   窗：A1/A1'/A6 = 5000 tick(3.47 真天)｜A2/A3/A4/A5 = 8 天
+#   種子：A1 族 20260922 與 77｜A2 族 1337 與 77｜config warring_states
+#   樹：feat/share-catch-up-seven-sites @ 69c00dbdb（baseline = 其 parent origin/main 55973b471）
+#   硬體：HW-2 AMD Ryzen 7 5800X3D｜世代：世代 6（邊界 3fb2c3201）
+#   ★配置欄（spec §6'）：A1/A1' 跑在 Probe.enabled=false（唯一 production 視角）；其餘 Probe 開
+
+## A1'（陽性對照，★比 A1 先跑）——破法＝把 seq 遞增掛到 if Probe.enabled: 後面
+  seed 20260922  破壞版 247793447159e603db8aa1e37770b87c ≠ 正版 d15f1b7f437d22cd8c2dfbb70ad35387
+  seed 77        破壞版 2d95caca4dfe7090977b048f7a2c6bb8 ≠ 正版 c5f7ffb8a6e35160c1ec8115473b5b45
+  ⇒ ★這個窗對這種 bug【有鑑別力】⇒ A1 可以當硬閘
+
+## A1（等價，硬閘；★極性與窗 #2 相反：變了就是紅）
+  seed 20260922  baseline d15f1b7f… ＝ 本票 d15f1b7f…（逐字相同）
+  seed 77        baseline c5f7ffb8… ＝ 本票 c5f7ffb8…（逐字相同）
+
+## A2（淨值，硬閘）
+  seed        memo關(s)   memo開(s)    淨省
+  1337          89.013      76.318    14.26%
+    77          84.573      71.083    15.95%
+  ⇒ ≥ 10.0%（★毛值 19.13% 扣掉查表成本後仍過門檻）
+
+## A3（鑰匙對不對，構造交叉驗）
+  seed 1337  hit=634232 miss=278629 ⇒ hit率 0.6948 ＝ D7 0.6948（逐位相同）
+  seed   77  hit=546675 miss=235547 ⇒ hit率 0.6989 ＝ D7 0.6989（逐位相同）
+
+## A4（母體衛生）
+  gather 呼叫：memo 開/關兩邊皆 9237（seed1337）／8707（seed77）⇒ 控制流未被改
+  size_max = 16（1 天窗）
+
+## A5（陽性對照，兩層）
+  第一層：MEMO_OFF=1 ⇒ catchmemo.hit = 0（★先證旗標真的關得掉）
+  第二層：關掉後 gather 成本回到 89.0/84.6 秒（＝ A2 的 baseline 那一欄）
+
+## A6（生命期：清空被跳過仍須綠）
+  注射：拿掉 _catchmemo.clear()（seq 仍遞增）
+  seed 20260922 fp = d15f1b7f…｜seed 77 fp = c5f7ffb8… ⇒ ★與 baseline 逐字相同
+  ⇒ 正確性確實掛在 seq 比對，不是掛在清空路徑
+
+## ★★★實作時量到一個 spec 沒寫的洞（已修，形狀寫在 code 註解）
+seq 只在 gather【開始】時改變 ⇒ gather 結束後的呼叫仍會命中那次 gather 的 memo,
+而同一 tick 內移動已執行、位置已變 ⇒ 過期的 eta/reachable。
+實測：1 天窗 gather 外呼叫 6134 次（總 18048 − gather 內 11914）⇒ 不是零頭。
+★指出它的是 A3：hit 率 0.5505 對不上 D7 0.69；加無條件 _catchmemo_active 旗標後
+  hit 率 0.6846 ＝ D7 0.6846（逐位相同）。
+⇒ A3 設計來抓「鑰匙錯」,這次抓到的是「母體範圍錯」——同一格,不同病。
+
+## ★誠實限
+①A3/A4/A5/A6 結構上只能在 Probe 開之下跑 ⇒ ★覆蓋 production 路徑的只有 A1/A1'。
+②A2 的淨值在 Probe 開之下量（計時需要樁）,兩臂同配置 ⇒ 比的是同一個世界。
+③A1/A6 窗 5000 tick；更長窗是否仍等價未驗。
+④memo 只服務 gather 內呼叫；gather 外那 6134 次仍逐次重算（★本票不碰）。
