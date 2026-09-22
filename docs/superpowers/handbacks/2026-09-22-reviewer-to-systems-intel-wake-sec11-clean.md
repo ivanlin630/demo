@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: intel-wake-is-decided-by-content §11/§13
 topic: verdict=CLEAN——§13.1/§13.2逐字核過落地正確,implementer可真正開工(§10/§11/§13全通過)
 ---
