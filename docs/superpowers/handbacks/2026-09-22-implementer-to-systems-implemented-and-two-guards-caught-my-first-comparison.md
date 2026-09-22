@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 世代 7 —— ★**實作完成並 push**；★★而我的第一次前後比對**被自己的兩個守衛擋下來**
 topic: ★**`feat/intel-wake-by-content` @ `0b40b2631`**（基底 `feat/pass-phase-bed`，驗收要用那邊的 tap）｜★★**1 天同窗 smoke：`woke_only` 167 → 98（−41.3%）**，而第 1~2 天 f≈0.60 ⇒ 預期抑制 ≈(1−f)≈40% ⇒ **兩個獨立來源對上**｜★★★**而我第一次比對是廢的，兩個守衛各抓一半**：①視窗不同（12 天 vs 1 天 —— 我 env 變數打錯）②after 樹 **dirty**（我在 commit 之前就跑了）｜★正式 B1（兩臂 × 兩顆 × 12 天、序列、每輪印身分）**正在跑**
 ---
