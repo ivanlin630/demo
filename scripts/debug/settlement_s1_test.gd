@@ -1,5 +1,5 @@
 extends SceneTree
-# settlement S1 TDD — 死亡釋放(S1a) + 目標池擴充撿现成(S1b)。
+# settlement S1 TDD — 死亡釋放(S1a) + 目標池擴充撿現成(S1b)。
 # ①S1a erase 後死團 owned tile owner=-1  ②目標池含 -1 outpost 候選(belief-gate)
 # ③端到端：團站 -1 outpost 3 天 → 既有 timer set_owner 認領  ④regression：有主/settle-convert 不動。
 
@@ -47,7 +47,7 @@ func _t1_erase_release() -> void:
 	_ok(t_free.outpost_owner == -1, "本無主 tile 不動")
 	_ok(not state.teams.has(dead_tid), "死團已 erase")
 
-# ② S1b：belief-known(-1) 既有 outpost 進 home-seeking 目標池（撿现成優先）
+# ② S1b：belief-known(-1) 既有 outpost 進 home-seeking 目標池（撿現成優先）
 func _t2_target_pool_reclaim() -> void:
 	print("--- ② S1b 目標池含 -1 outpost 候選 ---")
 	var fai := FactionAISystem.new()
@@ -57,13 +57,13 @@ func _t2_target_pool_reclaim() -> void:
 	var ghost := _mk_tile(state, Vector2i(8,8), "plains", -1, 1)   # 無主既有 outpost
 	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(4,4)
 	state.teams[0] = team
-	# 未知鬼城 → 撿现成不觸(感知鐵律)，回 fallback 腳下空地
+	# 未知鬼城 → 撿現成不觸(感知鐵律)，回 fallback 腳下空地
 	_ok(fai._find_unowned_farmable_tile(state, team) == Vector2i(4,4), \
 		"未 belief-known 鬼城 → 不撿(感知鐵律)、fallback 空地")
-	# belief-known(discovered)後 → 撿现成優先，回鬼城位
+	# belief-known(discovered)後 → 撿現成優先，回鬼城位
 	state.team_market_known[0] = {ghost.tile_id: true}
 	_ok(fai._find_unowned_farmable_tile(state, team) == Vector2i(8,8), \
-		"belief-known -1 outpost → 撿现成優先(目標池納)")
+		"belief-known -1 outpost → 撿現成優先(目標池納)")
 	# 鬼城被他隊認領(owner!=-1) → 退出候選、回 fallback
 	ghost.outpost_owner = 3
 	_ok(fai._find_unowned_farmable_tile(state, team) == Vector2i(4,4), \
@@ -71,7 +71,7 @@ func _t2_target_pool_reclaim() -> void:
 
 # ③ 端到端：團站 -1 outpost 滿 OUTPOST_TAKEOVER_DAYS → 既有 timer set_owner（不新增動詞）
 func _t3_end_to_end_takeover() -> void:
-	print("--- ③ 撿现成端到端(既有 timer 認領) ---")
+	print("--- ③ 撿現成端到端(既有 timer 認領) ---")
 	var fai := FactionAISystem.new()
 	var state := WorldState.new(); state.world = WorldData.new()
 	var ghost := _mk_tile(state, Vector2i(8,8), "plains", -1, 1)

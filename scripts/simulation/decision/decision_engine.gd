@@ -978,7 +978,7 @@ static func decide(state: WorldState, team: TeamData) -> String:
 
 # ★★★#12 乞食 dump 的單一實作（純觀測，Probe-gated）——
 #   ★兩條 rank 路共用一份 ⇒ ★★定義不會分歧（兩份實作就會出現「兩邊數字不一致而沒人知道為什麼」）。
-#   ★★★prefix 分開两條路：`beg.`＝rank_survival（絕境階梯）、`begu.`＝rank_scored（統一全 pool）。
+#   ★★★prefix 分開兩條路：`beg.`＝rank_survival（絕境階梯）、`begu.`＝rank_scored（統一全 pool）。
 static func _beg_tap(ctx: DecisionContext, scored: Array, team: TeamData, pfx: String, state: WorldState) -> void:
 	if not Probe.enabled or team == null:
 		return
