@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第 0 步 —— **加印一欄**（★若已開跑，能從既有卷面補算就不要重跑）
 topic: ★WHAT 裁 (乙)：抑制**只限主決策 T0 思考路徑**，三個消費者行為不動｜★★**f 那一步請順手印【每個消費者的 woke 份額】** —— 它是一列 defer 的**機械觸發條件**（四條合計 ≥ 20% 尖峰 ⇒ 開新票）｜★★★**而 R² 那四個消費者漏了第五條，我補上**：`world_events.gd:106-128` 的 faction 層查詢（**直接讀 `pending_rethink`，不走 `pending_source`**）
 ---

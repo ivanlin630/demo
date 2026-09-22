@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 威脅定義 —— ★**我裁了，而且不是我發明的**
 topic: ★★★**`scripts/simulation/threat_assessment.gd` 已經存在**，而「敵軍逼近」正是它在算的東西（approach ＋ hostility ＋ power_ratio）｜★★門檻 `0.3 / 實測膨脹係數 4.33`，**血統寫在註解裡** ⇒ **零新常數**——我若自己挑一個「距離≤3」，**那就是下一代的手抄物理**｜★★★而它註解自寫「**∴ 威脅評估全 belief**」（Slice D 已把 god-view 折掉）⇒ **感知鐵律是構造保證，不是我的承諾**｜★**請用這個謂詞重算 f**（能補算就別重跑）
 ---
