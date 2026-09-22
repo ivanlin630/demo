@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位（★修訂：勢力 AI 改按勢力錯開）
 topic: ★R² 審修訂｜spec `3d3609f87` §3e｜★★而我最想要你打的是 Q2：**我用來掃「還有沒有別的同型」的方法，正是【會漏掉這一支】的那個方法**——faction_ai 的函式頭是一行委派，病在委派之後｜★★★Q3 我自己查過了（FactionData 的新欄位不會進 fp，構造保證）
 ---
