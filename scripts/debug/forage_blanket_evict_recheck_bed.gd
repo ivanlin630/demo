@@ -13,8 +13,7 @@ func _run() -> void:
 	var seed_val: int = int(OS.get_environment("SPECIMEN_SEED")) if OS.has_environment("SPECIMEN_SEED") else 1337
 	var months: int = int(OS.get_environment("SPECIMEN_MONTHS")) if OS.has_environment("SPECIMEN_MONTHS") else 3
 	seed(seed_val)
-	Probe.enabled = true
-	Probe.reset()
+	Probe.arm()   # ★bed-arm閘要求(systems 2026-09-22)：arm helper 取代裸 enabled=true;reset()，行為不變
 	FactionAISystem._a2b_remote_tribute_payers.clear()
 	var state := WorldState.new()
 	var runner := SimRunner.new()
