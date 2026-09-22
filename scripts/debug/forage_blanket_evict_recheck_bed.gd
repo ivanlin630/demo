@@ -1,3 +1,4 @@
+# @bed-kind: diagnostic
 # forage_blanket_evict_recheck_bed：subteam-idle①複驗——「覓食subteam抵達後被blanket歸建」症狀
 # 在main HEAD(世代6/HW-2)量：subteam.forage_arrived(①-b母體)、merge.forage_blanket_evicted(①-a分子)、
 # collect.forage_subteam_task_collected(①-a分母:真的採集次數)。純觀測，不改production邏輯。
@@ -13,14 +14,13 @@ func _run() -> void:
 	var seed_val: int = int(OS.get_environment("SPECIMEN_SEED")) if OS.has_environment("SPECIMEN_SEED") else 1337
 	var months: int = int(OS.get_environment("SPECIMEN_MONTHS")) if OS.has_environment("SPECIMEN_MONTHS") else 3
 	seed(seed_val)
-	Probe.arm()   # ★bed-arm閘要求(systems 2026-09-22)：arm helper 取代裸 enabled=true;reset()，行為不變
-	FactionAISystem._a2b_remote_tribute_payers.clear()
-	var state := WorldState.new()
-	var runner := SimRunner.new()
 	var config_path: String = OS.get_environment("WARRING_CONFIG") if OS.get_environment("WARRING_CONFIG") != "" else "res://config/warring_states.json"
 	var config: Dictionary = GameSetup.load_config(config_path)
 	config["seed"] = seed_val
-	GameSetup.setup(state, config)
+	var state: WorldState = MeasureBedHelper.arm_and_setup(config)   # ★bed-arm閘要求(systems 2026-09-22修正符號)
+	print(MeasureBedHelper.arm_order_report())
+	FactionAISystem._a2b_remote_tribute_payers.clear()
+	var runner := SimRunner.new()
 
 	var total_ticks: int = months * WorldState.TICKS_PER_MONTH
 	var no_player := Vector2i(-1, -1)
