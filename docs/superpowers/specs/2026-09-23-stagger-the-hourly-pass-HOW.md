@@ -110,7 +110,7 @@ seed42（…seed42-v3-faiadd.log:8139-8141）
 | 6 | `consumption` | 純 per-team |
 | 7 | `salary` | 迴圈本體純 per-team；唯一碰 `state.teams.size()` 的是 Probe 診斷 |
 | 8 | `fatigue` | 第一輪：可錯開 |
-| 9 | `faction_ai` | ★前置票之後才成立（`16c5e0409`） |
+| 9 | ~~`faction_ai`~~ | ★★★**2026-09-23 撤回：它是【勢力粒度】，不能按隊錯開 —— 見 §3e** |
 | 10 | `info_dispatch` | 正確用 `for tid in team_ids`，且**自己已經有 per-team cadence** |
 | 11 | `training` | 第一輪：可錯開 |
 | 12 | `reactions` | 雙層 for 是 O(N×M) 的效率訊號，不是跨隊訊號 |
@@ -118,6 +118,45 @@ seed42（…seed42-v3-faiadd.log:8139-8141）
 | 14 | `events` | 第一輪：可錯開 |
 
 ★**12 ＋ 14 ＝ 26**，與 registry 的 26 個 entry 對得上（外加 forced_event 區塊 ＝ 量測表的 27 格）。
+
+
+### ★★★3e `faction_ai` 退出錯開組：**粒度不匹配**（2026-09-23，★實證 ＋ 既有守衛會紅）
+
+```gdscript
+faction_ai_system.gd:1218  _faction_due(state, f, batch)
+  for mid in f.member_team_ids: if batch.has(int(mid)): return true   ← ★【任一】成員在批次裡就算到期
+faction_ai_system.gd:1267-1275  到期之後做的是【整個勢力】的活：
+  for mid in f.member_team_ids: BeliefSystem.best_estimate(...)  ／ _update_goals(f) ／ _assign_tasks(f)
+```
+
+⇒ 按**隊**錯開之後，一個 M 人勢力的成員散落在 60 個相位裡
+⇒ 它會在 **min(M, 60)** 個批次裡被判到期 ⇒ **整個勢力的活每小時做 ~M 次**。
+
+★**這不是「慢」，是【同一件事被做了 M 次】＝行為改變**。
+★★實測佐證：同一棵樹、同一支床、20000 tick ⇒ 樁臂 ~350s／錯開臂 >600s（≥1.7×），
+而 log 行數持續前進 ⇒ **是慢不是卡**。
+★★★**而抓它的守衛早就在註冊表上**：`faction-drive-once`（expect `per_hour_max=1`），
+它是 implementer 兩票前寫的**回歸柵欄**，註解逐字：「它守的是【散相位之後仍然要是 1】」。
+
+#### ★修法：給 `faction_ai` **勢力粒度**的相位
+
+```
+★每個【勢力】每小時一次，相位由 faction_id 派生（頻率不動 ⇒ 不變量 #8 的計數欄仍成立）
+★★新欄位 FactionData.pass_next_tick（`_next_tick` 後綴 ⇒ 分類器自動排除在 fp 外；進存檔）
+★★★_run_systems 每 tick 另算一份 due_factions —— 與 due_teams 同紀律：
+    照 state.factions 的順序過濾、不得用 Set 重建、空就 continue
+```
+
+★**不可以只把 `grp` 改成 `hour` 再在內部自己判到期**：那樣它只在 `% 60 == 0` 被呼叫
+⇒ 相位不是 60 倍數的勢力**永遠等不到** ⇒ **§2 那個取樣格的坑，換個地方再踩一次**。
+
+★★**通則（已寫進 `invariants.md` #8 的推論）**：
+**錯開的【單位】必須等於系統的【粒度】** —— 判準句是
+**「這支系統一次呼叫做的是【一隊】的活，還是【一群】的活？」**
+
+★★★**其餘 13 支我逐支讀過函式頭**：都是進函式就 `for tid in team_ids` ⇒ 隊粒度 ⇒ 不受影響。
+（`reaction_system` 的內層 `for pid in state.persons` 是 O(N×M) 的效率寫法，
+但**總工作量不隨錯開改變** ⇒ 不是同一個病。）
 
 ### 3c `faction_snapshot`：用【擺位】解，不改 code
 
