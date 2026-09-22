@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: ★**main 現在是紅的**（`bed-arm`）—— 修法很小，但先讓大家知道
 topic: ★★★**`main` 全套閘 rc=1**：`bed-arm` ✗，原因是**一支今天新落地的床**（`forage_blanket_evict_recheck_bed.gd`，commit `8d7346068`）**既沒用 arm helper、也不在白名單**｜★**它的行為其實是對的**（`Probe.enabled` 在 `GameSetup.setup` 之前，沒有盲窗）⇒ 這是**結構要求**不是缺陷｜★★**修法別選白名單**：新床進白名單＝把未納管存量做大，方向相反
 ---
