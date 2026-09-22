@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: settlement S1 死亡釋放(S1a)＋掿鬼城目標池擴充(S1b)（HOW spec _archive/2026-08-14-settlement-lifecycle-agriculture-HOW.md §S1a/§S1b，merge 94e2f826）
 # settlement S1 TDD — 死亡釋放(S1a) + 目標池擴充撿現成(S1b)。
 # ①S1a erase 後死團 owned tile owner=-1  ②目標池含 -1 outpost 候選(belief-gate)
 # ③端到端：團站 -1 outpost 3 天 → 既有 timer set_owner 認領  ④regression：有主/settle-convert 不動。

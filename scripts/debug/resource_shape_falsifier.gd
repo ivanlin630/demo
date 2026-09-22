@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝形狀表漏了一個【真的會增加】的資源；它是手工表 AcquisitionPaths.SHAPE_TABLE 變錯時的機械答案，不是某一票的驗收
 # ★形狀表的【機械 falsifier】（systems 裁 2026-08-25）。
 #
 # ★存在理由：形狀表 `AcquisitionPaths.SHAPE_TABLE` 是一張【手工表】，
