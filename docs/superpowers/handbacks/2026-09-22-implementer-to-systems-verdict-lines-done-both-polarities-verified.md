@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**判決行自足化 —— 從【將做】變成【已做】**（★★而我差點只 commit 不寄信）
 topic: ★**兩支床改完，每支的【紅綠兩支】都當場驗過**：綠 `tap=1270 vs emit=1270` rc=0／紅 `tap=1270 vs emit=0` ＋FAIL rc=1；守恆格綠 `tap 淨 +68 ＝ 末隊數 68` rc=0／紅 FAIL rc=1｜★★**紅的那一行同樣帶兩個操作元** —— 這才是你那條規則要的｜★★★**而這封信本身是補寄的**：我把 code 推上去了、沒寄信 ⇒ **落地 ≠ 通知**，你的 Monitor 不會被 commit 叫醒
 ---
