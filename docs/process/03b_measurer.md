@@ -1,4 +1,5 @@
 # 03b_measurer.md — 量測員（Measurer）職責正典
+> ★**每一節的血證／案例都在 `detail/03b_measurer-cases.md` 的【同標題節】**；★環境紀元 → `docs/process/env-epochs.tsv`。（★systems 2026-09-22：原本這句話重複 8 行，收成 1 行——★★而這一行是為了付 invariants 新增一條的行數，不是白省的。）
 
 > pipeline 位置：`implementer(03) → 【量測員】 → QA 故事性稽核 → 藍圖判`（原 QA release-gate 2026-07-09 砍；2026-07-14 QA 以**故事性判官**加回=量測後讀你的**全量 specimen trace** 判 motive→action→outcome，見下 §⑤ + `04_qa §第五職`）。maker/checker 的 **maker 側**。
 > 一句話：**你產獨立數字 + 全量 specimen trace，QA 讀 trace 判故事、藍圖讀數字判/升。你不判、不改 code。**
@@ -16,7 +17,6 @@
   ```powershell
   .\tools\godot.ps1 --path .worktrees/<slice> --headless --script scripts/debug/hand_obeys_brain_bed.gd
 
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
 
 ## ★★★母體與分布 —— 五條（2026-08-26 收攏四條，09-09 補五；★三節合一，因為它們是同一件事的面）
 
@@ -44,7 +44,6 @@
 2. **★HOB bed 慢（4×一個月 warring≈500s）：跑前設 `GODOT_TIMEOUT=600`**，否則 wrapper 360s 預設誤殺 → **假 perf 迴歸 → 假 reject**（A2a 血教訓）。
 3. **`[GODOT TIMEOUT]` = bed 被殺 ≠ 迴歸。** 區分「量到迴歸」vs「沒量到（工具超時/flake）」。沒量到 → 報「量測不完整」給藍圖 halt，**別當迴歸、別讓 QA 拿空報告判**。
 
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
 
 ## ★★分層量測協議：迭代快 / 確認慢（用戶定 2026-07-12，砍重跑浪費）
 
@@ -53,7 +52,6 @@
 **Tier 1｜迭代用（秒級，code 還在改時只用這個）**：
 - **控制場景床**（手構最小 WorldState，如 `consolidation_decision_trace.gd`）→ 機制/邏輯/因果。**查因果 > organic 聚合**（decision-trace 秒級且更有料，本 session 驗兩次）。 ★**同 process 多輪的床要先量【跨輪共享量】**：**第二輪跑兩次（一次不清、一次先清）取差額** —— 免記鍵，且「先清的第二輪 ≡ 第一輪」順便證明沒有別的東西在漂。★★**跨世界比較（修前世界沒有那支儀器）先證【儀器等價】再比數字**（詳 detail）。
 
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
 
 ## ★診斷通則：量不到某湧現 → 先查補丁閘（用戶定 2026-07-09）
 
@@ -65,7 +63,6 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 ★**併發上限 ~2-3 條**（compute-bound ＋ import lock，超過 thrash 反慢），超額排隊等 slot；
 ★★各工單仍守鐵律 6（單工單一封完整信）——**併行＝跨工單不互等，不是單工單分批**。
 
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
 
 ## Scope：要產哪些數字
 
@@ -74,7 +71,6 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 - **constitution_gate**：無新增違憲 try_set（sites ⊆ baseline）。
 - **sanity**（`headless_test` / `game_sim_multi`）：≥1000 tick 無 SCRIPT ERROR、關鍵 print 出現、無崩。
 
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
 
 ## ★量測可溯源協議（用戶定 2026-07-13，全量測角色遵守）
 
@@ -82,7 +78,6 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 
 ### 三條硬規
 
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）
 
 ### ★★★第四條：**長跑卷面的檔名要帶【該輪的識別】，不得同名覆寫**（systems 立 ／ measurer 同意即刻採用，2026-09-09）
 
@@ -117,7 +112,6 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 ★**你唯一要做的**：確認你那棵 worktree 的 wrapper 是新版（`grep -c 'BUSY BEACON' <worktree>/tools/godot.ps1`）
 —— ★★**「log 裡沒有紀錄」＝【那棵樹是舊版】或【真的沒跑】，兩者長得一樣**（舊制手寫版上線至今一筆沒寫過＝母體恆空，血證 → detail）。
 
-> ★血證／案例 → `detail/03b_measurer-cases.md`（同標題節）；★環境紀元 → `docs/process/env-epochs.tsv`
 
 ## ★★★判準七條（★2026-09-01 整節搬入 `detail/03b_measurer-cases.md`，此處留表列）
 ★**每一條都有血證，全文在 detail** —— 這裡只留【判準本身】，撞到了再去讀成因。
@@ -152,7 +146,6 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 | ★★★**世界一旦分岔，下游聚合指標全部不可比** —— 不是量測 bug，是「兩個不同的世界」 | ★★★世界一旦分岔，下游聚合指標全部不可比（同日） |
 | ★★**量測紀律五條**（同 commit／`id` 為鍵是狀態非事件／產能 vs 存貨分開／停滯 fire 要留「曾成功過」的證據／同一物理量只能一個模型／★⑥聚合掉在第一格時永遠要問「上一格」） | ★★★量測紀律五條（2026-08-25 從 `invariants.md` 搬入並壓縮） |
 
-> ★**全部血證／案例 → `detail/03b_measurer-cases.md`（同標題節）**
 
 ## ★開跑前先 grep `known_issues`（blueprint 立 2026-09-01）
 ★**要量一件事之前，先 `grep docs/known_issues.md` ★★【與 `docs/archive/resolved_issues.md`】（2026-09-02 起雙目標：已結案的搬進 archive，只查前者會重造）** —— ★★**它可能已經被記過，而你正要重新量它。**

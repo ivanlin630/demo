@@ -179,5 +179,3 @@
 | ★**真 detach 的代價是【沒有完成通知】** ⇒ **launch 之後【同一個回合】就 arm 一個盯結果的 Monitor**（「我會記得」在同型第三次後已被證偽）。★★**過濾器要同時涵蓋 PASS 與 FAIL** —— 只盯 PASS 的話，紅了會【安靜地沒有通知】。 | ★★★真 detach 之後，立刻 arm 一個盯結果的 Monitor（blueprint 揭 2026-09-06，同型第三次） |
 
 > ★**全部血證／原文 → `detail/01_architect-cases.md`（同標題節，字串逐字保留）**
-
----

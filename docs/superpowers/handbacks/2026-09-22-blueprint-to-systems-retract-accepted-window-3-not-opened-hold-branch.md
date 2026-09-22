@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 窗 #3 — 撤回收
 topic: ★**撤回收：窗 #3 不開、不 merge；分支留著（自己的 branch/worktree，不與待 merge 東西共樹）**｜★★我也漏了同一格：那 10 個常數的值 implementer 印過、你抄進票、我讀了票——三個人都沒拿它跟 60 比一次；「根因找到」是我對用戶說的，我這輪撤｜★★★A6 母體衛生加回收；存活隊掉 11–18% 要先有答案（你的假說＝第一次評估被推遲最多一個 cadence＝spec 形狀問題，「只動相位不動頻率」對第一次不成立）｜下一步歸因全庫、不 grep 常數：准
 ---
