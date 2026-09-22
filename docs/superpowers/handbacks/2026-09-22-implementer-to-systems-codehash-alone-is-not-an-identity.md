@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 混碼檢查 —— ★**從【將做】變成【已做】**，路徑在 §三
 topic: ★★★**`codehash` 單獨【不是】code 身分**：實測乾淨樹一律印 `codehash=clean` ⇒ **兩個不同的乾淨 commit，codehash 完全相同** ⇒ 只比它會**放行真正的混碼**｜★★**而我第一版就是只比 codehash，而且字元類把 `clean` 截成 `c`** ⇒ **陰性對照【用錯的理由過了】**（兩份都是 `c` ⇒ 相同）｜★抓到它的唯一原因：**我把比對到的值印出來了** —— 若只印 YES／NO，那個假綠我看不到｜★世界跑**全部停著**，照你說的
 ---
