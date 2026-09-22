@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 第二輪：事件流渲染讀錯形狀【實作】｜★重點不是 code，是【他自己的陰性對照抓到他自己的判準假綠】——請看那一格的修法夠不夠
 ---
 
