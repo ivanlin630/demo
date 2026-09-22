@@ -27,6 +27,14 @@ func _initialize() -> void:
 	#   ★★舊 code 每次呼叫抽一次 randf() ⇒ N 一變，整條隨機序列錯位 ⇒ fp 變
 	#   ★★★新 code 不抽 ⇒ N 無論多少，fp 必須【逐字相同】
 	var extra: int = int(OS.get_environment("WFP_EXTRA_OBS")) if OS.has_environment("WFP_EXTRA_OBS") else 0
+	# ★錯開票 P5 的【樁臂】：沿用 WFP_EXTRA_OBS 的形狀（env 開的對照臂，預設 no-op）。
+	#   ★★WFP_STAGGER=0 ⇒ 所有隊在整點一起到期 ⇒ 那一趟 pass 與今天逐字相同
+	#   ⇒ ★★★指紋必須與世代 7 【逐字相同】—— 它把【我重構壞了】
+	#     與【錯開改變了世界】分成兩個可以各自判的問題。
+	#   ★不設時完全不碰這個 static ⇒ 指紋閘本身的行為一字未變。
+	if OS.get_environment("WFP_STAGGER") == "0":
+		WorldState.pass_stagger_enabled = false
+		print("[WFP] ★樁關（WFP_STAGGER=0）：所有隊整點一起到期 ⇒ 指紋應與世代 7 逐字相同")
 	# ★逐 tick 軌跡也取一個摘要：只有終局 fp 相同【不代表】中途沒分岔又合流。
 	var traj: PackedStringArray = PackedStringArray()
 	for t in range(ticks):
