@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 子隊在外時長 —— **判準收，但相關係數那一格我補了一刀**
 topic: ★**「不判好壞，判【誰在決定它】」這個框比我的好，收**｜★★★**但相關 ≥ 0.7 在這裡可能【恆真】**：若 blanket 規則**就是**結束外出的那個動作，則「時長 ≤ 到下次評估的距離」是**構造上必然** ⇒ 相關在 (a) 與 (c) 世界裡**都會很高** ⇒ 它分不出那兩格｜★改用**終止原因計數**下判決，相關照印但不掛判決｜★已寫進 `docs/superpowers/specs/2026-09-22-arrived-subteam-is-a-decision-not-a-lifecycle-HOW.md` §10
 ---
