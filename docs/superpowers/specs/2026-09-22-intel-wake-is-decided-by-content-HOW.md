@@ -214,3 +214,64 @@ static func emit(state, kind, subjects, wake_thinking: bool = true) -> void:
 ⇒ ★**若這四條非思考路徑合計 ≥ 20% 的尖峰** ⇒ **開新票各自裁**
 ⇒ ★★**不是「有人記得」** —— 已登進 `docs/process/defers.tsv`（`t0-wake-nonthinking-consumers`）
 ```
+
+---
+
+# §11 ★★★威脅定義：**不自己發明 —— 用已經存在的那把秤**（systems 裁 2026-09-22）
+
+```
+implementer 量出：**f 不是一個數字，是【定義的函數】**
+   f(敵意) = 0.093｜f(距離≤3) = 0.753｜f(敵意且距離≤3) = 0.084
+⇒ ★我的 `f > 0.6 ⇒ 不做` 門檻，**第二個定義過不了、另兩個輕鬆過**
+⇒ ★★**所以「要不要做」等價於「威脅怎麼定義」** —— 而那是我的欄。
+```
+
+## §11.1 ★★★而這把秤**已經存在**：`scripts/simulation/threat_assessment.gd`
+
+```gdscript
+ThreatAssessment.score(state, self_team, other) -> float
+   raw = approach*1.0 + hostility*1.0 + (power_ratio-1.0)*0.5   # ★「敵軍逼近」正是它在算的
+const THREAT_BASE_THRESHOLD := 0.3 / THREAT_INFLATION_MEASURED   # = 0.3 / 4.33
+```
+★**四個理由，每一個都是今天已經踩過的坦**：
+```
+①**零新常數**：門檻是 `0.3 / 實測膨脅係數`，**血統寫在註解裡**
+   ⇒ ★我若自己挺一個「距離≤3」，**那就是下一代的手抄物理**（用戶立法禁止）
+②**感知鐵律是構造保證不是承諾**：該檔註解自寫「**∴ 威脅評估全 belief**」
+   （Slice D 已經把 `dist_factor` 那條 god-view 折掉）⇒ ★★**它已經被審過一次了**
+③**它是秤不是闘** ⇒ ★★★正是 WHAT 說的「**急症走秤**」的喚醒版
+④**不造第二支** ⇒ ★**第二支從出生就開始 drift，而 drift 不會紅**
+```
+
+## §11.2 ★★介面形狀的硬規（★R² 要的那一句，用這個形狀重寫）
+
+```
+`score()` 的簽章吃 `other: TeamData` ⇒ **取 handle 需要 `state.teams.get(tgt_id)`**
+⇒ ★★★**允許：取 handle 並【整個】交給 `ThreatAssessment.score`**
+   **禁止：在威脅判定路徑上【讀它任何一個欄位】**（兵力／位置／意圖）
+⇒ ★仍然禁止使用或延伸 `belief_system.gd:264-271` 的 `_o`／`_t`（§9 不變）
+★★**判準句不變**：「如果這隊其實被騙了，這個判斷會不會跟著錯？】**答案必須是「會」**
+   ⇒ ★★★`score()` 內部走 `BeliefSystem.best_estimate` ⇒ **答案是「會」** ✅
+```
+
+## §11.3 ★重量 f（★★因為定義已經換了）
+
+```
+★先前三個 f 都是**候選定義**；現在定義確定為：
+   **`ThreatAssessment.score(...) >= THREAT_BASE_THRESHOLD`**
+⇒ ★★**請用這個謂詞重算 f**（★舊卷面能補算就不要重跑）
+⇒ ★**預期（寫在看數字之前）**：`score` 合了 hostility＋approach＋power
+   ⇒ 形狀最接近**合取**（f ≈ 0.084）⇒ **預期 f 落在 0.05 ~ 0.20**
+   ⇒ ★★★**若實測落在 0.6 以上 ⇒ 我的形狀理解錯了** ⇒ **回報，不要改定義去遷就門檻**
+```
+
+## §11.4 ★WHAT 點的三種情況，**只有一種在這個母體裡**
+
+```
+WHAT：「敵軍逼近／盟友被襲／剐掠目標是自己」
+★而 implementer 量到：那 5386 次 **全部是位置情報**（emit 條件 ＝ `fields.has("tile_pos")`）
+⇒ ★★**「盟友被襲」與「剐掠目標是自己」根本不在這個母體裡** ——
+   它們走其餘 11 種事件，而那些 **一律維持瞬醒**（`wake_thinking` 預設 true）
+⇒ ★★★**所以本票的抑制面比裁定的字面還窄** —— 這是好事，但要說出來。
+```
+
