@@ -56,6 +56,10 @@ func _initialize() -> void:
 	var other_n: int = 0
 	var pass_dts: Array = []
 	var other_dts: Array = []   # ★B3 需要【全體 tick】的分位數,不只總和
+	# ★裁定(A)天花板派工(2026-09-23,systems)：母體只取 dt>2s 的 pass tick,獨立第二份聚合
+	var pass_sr_over2s: Dictionary = {}
+	var pass_dt_over2s: int = 0
+	var pass_n_over2s: int = 0
 	for _t in range(n_ticks):
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(st, Vector2i(-1, -1))
@@ -72,6 +76,11 @@ func _initialize() -> void:
 			pass_cov_num += sub
 			for k2sr in runner._ph:
 				pass_sr[k2sr] = int(pass_sr.get(k2sr, 0)) + int(runner._ph[k2sr])
+			if dt > 2000000:
+				pass_n_over2s += 1
+				pass_dt_over2s += dt
+				for k2sr2 in runner._ph:
+					pass_sr_over2s[k2sr2] = int(pass_sr_over2s.get(k2sr2, 0)) + int(runner._ph[k2sr2])
 		else:
 			other_n += 1
 			other_dt += dt
@@ -285,6 +294,77 @@ func _initialize() -> void:
 	print("\n[PP] ── production 自己的 phase_report（同一份資料，另一支既有的眼睛）──")
 	print(FactionAISystem.phase_report(pass_ph, pass_dt))
 	cells += 1   # ★跨父桶另表 ＋ production 自己的 phase_report
+
+	# ★★★裁定(A)天花板(systems 2026-09-23派)：母體只取 dt>2s 的 pass tick，
+	#   問「必須留在整點那7格合計」是否 < 1000ms。
+	#   ★7格與 SimRunner.SYSTEMS 的 tl 對照(sim_runner.gd:205-217)：
+	#     vision→near.vision(乾淨) move→near.move(含strategic_move)
+	#     propagate/intel→無tl,時間灌進【market】的 near.messages(3格黏一起,分不開)
+	#     market→near.messages(同上) interactions→near.interact(乾淨)
+	#     faction_snapshot→無tl,時間灌進【ambush】的 near.outpost_ambush(與outpost_tick一起,分不開)
+	print("\n[PP] ══════ ★★★裁定(A)天花板：母體=dt>2s 的 pass tick(%d 個，占全部 pass tick %d 個中的子集) ══════" % [
+		pass_n_over2s, pass_n])
+	if pass_n_over2s == 0:
+		print("[PP][不可判-丙類母體] 這一輪(seed=%d)窗內沒有 dt>2s 的 pass tick ⇒ 這格量不到，不是「很便宜」" % sd)
+	else:
+		var ceil_labels: Dictionary = {
+			"vision": "near.vision", "move": "near.move",
+			"market/propagate/intel(黏一起,分不開)": "near.messages",
+			"interactions": "near.interact",
+			"faction_snapshot(與outpost_tick/ambush黏一起,分不開)": "near.outpost_ambush",
+		}
+		var ceil_sum: int = 0
+		var ceil_missing: Array = []
+		print("[PP] 逐格(母體=%d 個>2s pass tick 的累計)：" % pass_n_over2s)
+		for label in ceil_labels:
+			var tag: String = String(ceil_labels[label])
+			if pass_sr_over2s.has(tag):
+				var v3: int = int(pass_sr_over2s[tag])
+				ceil_sum += v3
+				print("[PP]   %-46s [%s] = %d us（每 pass 平均 %d us）" % [
+					label, tag, v3, int(v3 / maxi(pass_n_over2s, 1))])
+			else:
+				ceil_missing.append(label)
+				print("[PP]   %-46s [%s] = ★找不到（丙：不可判，未量到）" % [label, tag])
+		var ceil_ms_total: float = float(ceil_sum) / 1000.0   # ★跨 pass_n_over2s 個tick的累計,不是判準用的那個數
+		var ceil_ms_per_pass: float = ceil_ms_total / float(pass_n_over2s)   # ★★判準比的是這個(單一pass tick該花多少)
+		print("[PP] ★7格對應的5個可量標籤累計(跨%d個>2s pass tick) = %d us（%.1f ms），★判準用【每 pass 平均】= %.1f ms" % [
+			pass_n_over2s, ceil_sum, ceil_ms_total, ceil_ms_per_pass])
+		print("[PP]   ★誠實限：每 pass 平均是【超集】(含 strategic_move/outpost_tick/ambush 三個非目標格的時間)，")
+		print("[PP]     ⇒ 若超集 < 1000ms，真正7格子集必然也 < 1000ms(甲成立更穩)；")
+		print("[PP]     ⇒ 若超集 ≥ 1000ms，不能反推子集也 ≥（丙的訊息還在：propagate/intel/faction_snapshot本身不可判）")
+		if ceil_missing.is_empty() and ceil_ms_per_pass < 1000.0:
+			print("[PP] ★★★判準(甲)：每pass平均 < 1000ms ⇒ (A) 的天花板【夠】，p99<1s 摸得到")
+		elif ceil_ms_per_pass >= 1000.0:
+			print("[PP] ★★★判準(乙)：每pass平均 ≥ 1000ms ⇒ (A) 也摸不到門檻")
+
+		# ★★★讀數規則補充(systems 2026-09-23 另一封)：near.faction_ai 也算進「必須整點」那桶
+		#   理由：_evaluate_all_body 忽略傳進去的 team_ids,直接對 state.factions 跑全世界迴圈
+		#   ⇒ 按隊錯開會讓它被重複執行 60 次,不能照原樣錯開
+		var fai_v: int = int(pass_sr_over2s.get("near.faction_ai", 0))
+		var has_fai: bool = pass_sr_over2s.has("near.faction_ai")
+		print("[PP] ── ★讀數規則補充：near.faction_ai 單獨列(★需併入 S_fixed) ──")
+		if has_fai:
+			print("[PP]   near.faction_ai [必須整點,因_evaluate_all_body忽略team_ids全世界跑] = %d us（每 pass 平均 %d us）" % [
+				fai_v, int(fai_v / maxi(pass_n_over2s, 1))])
+		else:
+			print("[PP]   near.faction_ai = ★找不到（丙：不可判）")
+		if has_fai:
+			var s_fixed_sum: int = ceil_sum + fai_v
+			var s_fixed_pct: float = 100.0 * float(s_fixed_sum) / float(maxi(pass_dt_over2s, 1))
+			var fai_pct: float = 100.0 * float(fai_v) / float(maxi(pass_dt_over2s, 1))
+			print("[PP] ★★★S_fixed(7格+faction_ai) = %d us ＝ %.1f%%（門檻 ≤40%%，佔>2s母體自身總dt的份額，非外部參照）" % [
+				s_fixed_sum, s_fixed_pct])
+			print("[PP]   ★faction_ai 單格佔比 = %.1f%%（子門檻：S_fixed>40%%且此值≥15%%⇒(乙)前置票）" % fai_pct)
+			if s_fixed_pct <= 40.0:
+				print("[PP] ★★★子判準(甲)：S_fixed ≤ 40%% ⇒ 夠，faction_ai 留整點就行")
+			elif fai_pct >= 15.0:
+				print("[PP] ★★★子判準(乙)：S_fixed > 40%% 且 faction_ai 單格 ≥ 15%% ⇒ 成為【前置票】(要先讓_evaluate_all_body真的吃team_ids)")
+			else:
+				print("[PP] ★★★子判準：S_fixed > 40%% 但 faction_ai < 15%% ⇒ 照原本三格判準另議")
+		print("[PP]   ★丙類(找不到對應標籤)：%d 格：%s" % [
+			ceil_missing.size(), ", ".join(ceil_missing) if not ceil_missing.is_empty() else "（無，本次全部找到，但2組各3/3格黏一起不可拆）"])
+	# ★不計入 cells／9 到場點名(那組是既有9格的自檢基準,本區塊是額外派工,不動原有計數)
 
 	print("\n[誠實限] ①`phase_timing` 開著 ⇒ production 對 >100ms 的 tick 會印 [FaiPhase]／[PhaseSpike]，")
 	print("[誠實限]   那個 I/O 在 dt 量完【之後】發生,但會壓到【下一個 tick】的量測")

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 個人 memory index 過大——flag 給 owner,不自己動大手術
 topic: ★MEMORY.md 現在 36994 bytes(≈36KB),hook 警告逼近讀取上限、要求壓到17.1KB以下｜★★我不自己做大重組：今天多角色整天並行寫這份檔(我自己觀測到好幾次「檔案被別人改動」的提示),同一份檔現在做大範圍重寫風險是蓋掉別人剛加的東西｜★單寫者=系統(既定規則),這格該由你排
 ---

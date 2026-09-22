@@ -1209,13 +1209,47 @@ static func _fai_pht_s(name: String, t0: int) -> int:
 #   ⇒ ★★clear 與 dump 都搬到 `sim_runner`（tick 開始清、tick 結束判並印）
 #     ⇒ faction 側與 solo 側在【同一本帳】裡，self_us 才有意義。
 #   ⇒ ★★★而兩個容器的數字【永遠不可相加】，即使統一之後也不能回頭加舊表。
-func evaluate_all(state: WorldState, _team_ids: Array) -> void:
-	_evaluate_all_body(state, _team_ids)
+func evaluate_all(state: WorldState, team_ids: Array) -> void:
+	_evaluate_all_body(state, team_ids)
 	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
 	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
 	SpecimenTracer.heartbeat_sweep(state)
 
-func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
+# ★這一批隊有沒有觸及這個派系。三格（軍是可比較的量就不會只有兩格）：
+#   ①有成員在這一批裡        ⇒ due
+#   ②沒成員在這批，但【有活成員】 ⇒ 不 due（等它那一批輪到再做）
+#   ③連一個活成員都沒有        ⇒ ★due —— 舊碼會驅動它，為了【零行為改變】這裡也驅動。
+# ★★我【沒有】去證明「零活成員的派系不存在」——證不如構造：兩種情況都接住，
+#   那個問題就不影響正確性。（而今天批次＝全部隊 ⇒ ③在今天等價於舊行為。）
+# ★★★散相位落地後③要重新檢視：那時「不在這批」與「不存在」仍然是兩件事，而②已經分開它們。
+static func _faction_due(state: WorldState, f, batch: Dictionary) -> bool:
+	var has_live: bool = false
+	for mid in f.member_team_ids:
+		if batch.has(int(mid)):
+			return true
+		if state.teams.has(mid):
+			has_live = true
+	return not has_live
+
+# ★每派系每小時的驅動次數（spec §3-②）：判準＝【恆為 1】。
+#   ★★它是【回歸柵欄】不是陽性對照：今天不散相位本來就該是 1，
+#   它守的是【散相位之後仍然要是 1】——那正是「重複執行」這個危害的直接守衛。
+#   ★★★Probe.note 存的是 max ⇒ 注射「同一小時驅動兩次」時這一格會【讀到 2】，
+#     而不是只「有紅」——有紅可能是別的斷言紅。
+static var _drive_hour: int = -1
+static var _drive_count: Dictionary = {}
+
+static func _note_faction_drive(state: WorldState, fid: int) -> void:
+	var hour: int = state.world.current_tick / WorldState.TICKS_PER_HOUR
+	if hour != _drive_hour:
+		_drive_hour = hour
+		_drive_count.clear()
+	var n: int = int(_drive_count.get(fid, 0)) + 1
+	_drive_count[fid] = n
+	Probe.note("faction.drive.per_hour_max", float(n))
+	Probe.bump("faction.drive.total")
+
+func _evaluate_all_body(state: WorldState, team_ids: Array) -> void:
 	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,T3追查)：本函式呼叫次數+factions是否為空+代表性tick值
 		Probe.bump("evaluate_all_body.entry")
 		Probe.add_amount("evaluate_all_body.factions_size_sum", float(state.factions.size()))
@@ -1223,8 +1257,20 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			"mod_infra": state.world.current_tick % INFRA_INTERVAL, "n_factions": state.factions.size()}, 5)
 		Probe.note("evaluate_all_body.last_tick", state.world.current_tick)
 	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	# ★★★本函式必須【真的吃它拿到的那批隊】（spec 2026-09-23）：
+	#   舊寫法 `for fid in state.factions` 跑全世界，而呼叫端傳進來的 team_ids 完全沒用。
+	#   ⇒ 散相位之下它會【每一批都重跑整個世界】——★不是漏做，是【重複執行】。
+	# ★★而迴圈順序是【設計約束】不是意圖句：這裡仍然走 `state.factions` 的原順序，
+	#   只把【不屬於這一批】的派系 `continue` 掉。
+	#   ⇒ ★★★順序相等是【構造保證】，不是事後靠指紋去發現。
+	var _batch: Dictionary = {}
+	for _bt in team_ids:
+		_batch[int(_bt)] = true
 	for fid in state.factions:
 		var f = state.factions[fid]
+		if not _faction_due(state, f, _batch):
+			continue
+		_note_faction_drive(state, int(fid))
 		var _tf: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		for mid in f.member_team_ids:
 			var snap: Dictionary = BeliefSystem.best_estimate(state, f.leader_team_id, mid)

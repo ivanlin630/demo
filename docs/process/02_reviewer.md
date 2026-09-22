@@ -41,6 +41,18 @@
 - 「這是**延伸統一**還是**在框架裡開分支繞過**？」
 - 缺此 lens = 放行冗餘（血證：join/整併 過審，用戶才在設計對話看穿）。
 
+## ★★★分類依據：**shape／簽章欄不作數，逐函式體核**（blueprint 令 2026-09-23）
+
+- ★血證（同一天、同一個地方騙了兩次）：
+  `SYSTEMS` 的 `shape` 欄標 `teams`，而 `faction_ai` 實際是 **world-scoped**；
+  函式簽章寫 `_team_ids: Array`，而函式體【完全不看它】
+  （`faction_ai_system.gd:1218`，體 392 行，`_team_ids` 出現 2 次且都不是迴圈）。
+- ⇒ **綱要與簽章都會說謊，只有函式體不會。**
+- ★★而底線前綴的參數（`_team_ids`）是【刻意不用】的明示記號
+  ⇒ 看到它就要問：**那呼叫端以為它在做什麼？**
+- ★★★而追委派要追到底：`sim_runner` 那層大多是兩行轉發存根，
+  而系統入口（例：`evaluate_all`）可能還是包裝（→ `_evaluate_all_body`）。
+
 ## ★機制意圖帳 + 負斷言協議（用戶立法 2026-08-14、R①/R² 必查）
 - **意圖表對照**：R①/R² 審**改既有機制的 spec** → 必對照 `docs/mechanism-intents.md`（WHAT 權威方向表、code 服從表/表只服從用戶）。**code/spec 與表不符=drift → 呈報**（非默認 code 對）。
 - **★負斷言協議**：任何「**X 不存在 / X-only / 從不 fire / 零 caller**」型斷言 **必附窮盡搜索證據**（搜詞 + 範圍、no-head/no-glob-限制、exhaustive）。無證據的負斷言=`premise_contradiction` 級 refute。（血證：systems「capture=encounter-only」grep 過 set_owner 看到 takeover 反證卻沒整合、用戶記憶抓第 6 次；`reference_measurement_protocol` grep-glob/head-截斷家族）。
