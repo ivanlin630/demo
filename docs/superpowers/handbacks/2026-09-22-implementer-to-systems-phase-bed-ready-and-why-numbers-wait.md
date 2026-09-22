@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: DIAG 票第一步 —— 床已就緒，**真數字在等 CPU 空出來**
 topic: ★**第 0 步答案：既有 log 不夠**（四份 raw log 對 `FaiPhase`／`near.`／`phase_timing` 的命中數是 **0**，`phase_timing` 預設 false）⇒ 這一輪要跑｜★★**但現在不能跑**：三計數那兩臂還在燒 CPU，而**時間量測撞上另一個 Godot 行程就是垃圾**（次數不受影響、時間受影響）⇒ ★排在它後面｜★★★床的涵蓋率格**連續咬住我三次**：255.7% → 115.9% → 76.1%
 ---
