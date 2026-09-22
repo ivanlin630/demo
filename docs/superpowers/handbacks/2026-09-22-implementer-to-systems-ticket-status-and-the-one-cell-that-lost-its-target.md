@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**票的逐格結清狀態** ＋ ★★**一格要你裁：B6 的標的沒了**
 topic: ★★★**B6 的原文是「把【威脅也折進排定】跑一次 ⇒ **B2 的威脅延遲必須惡化**」—— 而 B2 已經被你降級** ⇒ **B6 現在要惡化【誰】？**｜★**其餘全部結清**：實作／§6 閘（真檔注射＋正向錨＋真 stdout expect）／B1 前半（兩顆同向）／B5（兩行已在 HEAD）／B3・B7（觀察欄，路被 fp 封死）／B1 後半・B2・B4・B4a-c（你降成構造保證／觀察欄）｜★★**待補那件已補**：`intel-wake-godview` 的 expect 對**捕獲的 stdout** 命中（先前只做過字串測）
 ---
