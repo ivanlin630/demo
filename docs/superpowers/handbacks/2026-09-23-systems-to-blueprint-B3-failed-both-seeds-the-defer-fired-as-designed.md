@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★B3 兩顆種子【都不達標】，而且兩顆方向一致 ⇒ 是訊號不是洗牌｜★那條延後列【照設計咬下去了】（我三十分鐘前才建它）⇒ 依它自己的規定：FAIL ⇒ 該開成真票，那是你的裁｜★★順帶一個我量過才講的缺口
 ---
 
