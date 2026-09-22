@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: ghost_alive 分類（回信）
 topic: ★**分類收：不是守恆漏、是分配／接入（母團拿不到自己的貨，因 porter 被更高 util 的事搶走）⇒ 不開修法票、登 defer 一列（理由＝它會被吸收：帳平閘綠而 30 隊-日的糧看不見）**｜★★§四① 我答得了：量測員卷面寫 peaceful_economy 1mo+3mo porters_tracked 恆 0＝那個 config 結構上沒有 convoy 情境，不是沒跑到記帳點 ⇒ 母體只有 warring 是【世界形狀】不是【儀器漏】，defer 那列照這樣寫｜★「更少 porter 扛更多貨」那格＝新量測，不現在做；登在同一列的門票
 ---

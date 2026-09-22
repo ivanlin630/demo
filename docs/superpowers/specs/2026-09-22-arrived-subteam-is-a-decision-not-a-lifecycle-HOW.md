@@ -1,7 +1,7 @@
 ---
 slice: 子隊抵達 ＝ **一個決策點**，不是一條生命週期規則（`subteam-idle` de-patch）
 owner: systems
-status: 待 R²（reviewer）→ CLEAN 才 dispatch
+status: R² 第一輪=issues → ★★★**降級為【先前置量測】**（§7：驗證母體 1 種、受影響母體 24 種）—— 數字回來前不 dispatch
 基於: 量測員世代 6／HW-2 症狀複驗（evicted/arrived ＝ 97.6%／100%，13–15 個 distinct parent 反覆）；WHAT 裁定 2026-09-22（手不聽腦第三型，先查補丁閘，de-patch 不加補丁）
 ---
 
@@ -80,4 +80,60 @@ A5【等價性】★對**未觸及的任務型別**（非 FORAGE），全世界�
 ③本票只改「抵達」這一個觸發點；★**其他 pre-empt 引擎的 lifecycle 規則沒有普查**
    ⇒ ★★而 `_evaluate_subteam` 裡在它之前還有數個 `return`（HERALD／SCOUT／CONVOY／SETTLE／ESCORT／discipline）
    ⇒ ★★★**它們是不是同一族，本票沒有回答** —— 若要回答，那是一次普查，不是這一票
+```
+
+---
+
+# §7 ★★★R² 第一輪的硬發現：**我驗的母體 ≠ 我要改的母體**（reviewer 2026-09-22，我數過了，比他說的更大）
+
+```
+★我把這一票當成「覓食子隊的問題」—— 而 3972 那條 blanket 管的是
+  **【任何沒有專屬分支的 task type】**，不是 FORAGE。
+★★我實際數過（`team_data.gd` 的 `const TASK_*` ∩ `_evaluate_subteam` 3904-3971 的分支）：
+    task 型別總數        ＝ **36**
+    有專屬分支的         ＝ **11**（BUILD／CONSTRUCT／CONVOY／ESCORT／EXPAND／FORAGE／HERALD／MIGRATE／SCOUT／SETTLE／UPGRADE）
+    IDLE 走它自己那條    ＝ 1
+    ⇒ ★★★**落到 blanket 的 ＝ 24 種**：
+      ATTACK BEG CAMP DEFEND DIPLOMACY FLEE GOVERN HOLD JOIN LOOT MANUFACTURE MERGE
+      PACIFY PATROL PRODUCE REST RETURN_HOME REVOLT SEEK_HOME SHELTER TRADE TRAIN TRIBUTE TRIBUTE_OFFER
+⇒ **我驗證了 1 種，而我要改的行為涵蓋 24 種。**
+```
+★**而 A1–A4 的 tap 全部是 FORAGE-scoped** ⇒ 驗收會綠，而**另外 23 種沒有任何一格看得到**。
+★★另一層（reviewer 指出）：`merge_queue` 是**全域共用 list**（`:1315`／`:1377`）
+⇒ 歸建**時機**一變，**佇列順序**就可能變 ⇒ 影響面不只本隊。
+⇒ ★★★**這正好解釋了我自己在送審信裡那個疑問**：我問「A5（未觸及型別指紋逐字相同）是不是注定會紅」
+   —— **答案是：在目前這個 spec 下，它注定會紅，因為根本沒有『未觸及的型別』。**
+
+## §7.1 ★訂正：**先量，再決定這是哪一張票**
+
+```
+★**前置量測（在任何行為改動之前）**：在現 main 加一顆**按 task 型別分類**的 tap
+    `merge.blanket_evicted.<task>` ＋ `subteam.arrived.<task>`
+⇒ ★★它把「影響面未知」變成一個數：**24 種裡，實際上有幾種真的會抵達並被歸建？**
+⇒ ★★★**而那個數決定這是哪一張票**：
+   ・若實際只有少數幾種會發生 ⇒ 本票的影響面是可控的 ⇒ 照 §3 的 de-patch 做
+   ・若 24 種裡有一大半都在發生 ⇒ **這不是一張 slice，是一條 arc** ⇒ 退回 WHAT 重新排
+★**在這顆數字回來之前，本票不 dispatch。**
+```
+
+## §7.2 ★★同族，而我原本把它匿名丟進「六個 return」（reviewer 訂正）
+
+```
+`faction_ai_system.gd:3943-3951` —— CONSTRUCT／UPGRADE／EXPAND：
+   抵達後未轉 BUILD ⇒ **給一次重試，逾時才 release/merge**
+   而那個逾時是 `const CONSTRUCT_TRANSIT_TIMEOUT: int = 10 * TICKS_PER_DAY  # TEST VALUE`
+⇒ ★**同病同型**：也是「抵達之後怎麼辦」被寫成規則而不是決策，
+   ★★而且它還多一顆**死常數**（★且註解自己標著 TEST VALUE）
+⇒ ★★★**我原本把它跟另外五個 return 混在一起寫成「沒普查」** —— 那是**匿名化一個已知同型**。
+   現在點名：**它與本票同族**，而**是否併票由 §7.1 的數字決定**。
+```
+
+## §7.3 ★A1 的門檻改法（reviewer ①）
+
+```
+★原本我寫「降到 < 50%」—— 而 **50% 是我隨手挑的**（我在送審信裡已經承認）
+⇒ ★★改成**錨在量測基線 ＋ 多 seed 變異**：
+   ①先量 baseline（現 main，按 task 型別）②門檻寫成「**相對 baseline 下降 ≥ X 個標準差**」
+   ③★**而 X 與 baseline 都在前置量測回來之後、實作之前預註冊**
+⇒ ★★★**不是「看完數字再挑門檻」** —— 是「**先有 baseline 才知道門檻該用什麼單位**」。
 ```

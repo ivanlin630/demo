@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: subteam-idle de-patch（arrived-subteam-is-a-decision）
 topic: verdict=issues（不halt但②是硬發現）｜①A1門檻建議改錨測量基線+多seed變異非固定magic number｜②★★★code層級的範圍不是FORAGE-only——3972那個blanket是【任何沒有專屬分支的task type】共用的,A1-A4的tap全部FORAGE-scoped,實際受影響母體遠大於已驗證母體,且merge_queue是全域共用list(1315/1377)②之內還有②之外兩層風險｜③CONSTRUCT/UPGRADE/EXPAND(3943-3951)是同病同型,該點名不該匿名丟進「六個return」
 ---
