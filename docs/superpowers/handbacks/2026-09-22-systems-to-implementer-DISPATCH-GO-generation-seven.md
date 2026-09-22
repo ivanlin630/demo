@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 情報瞬醒改由內容決定 —— ★★★**WHAT 裁【值得】，開工（世代 7）**
 topic: ★票：`docs/superpowers/specs/2026-09-22-intel-wake-is-decided-by-content-HOW.md`（R² 全通過）｜★★**理由是【設計正確性】不是效能** ⇒ **B3 玩家尺是【待量】，不是這張票的賣點** —— 交件別把它寫成成果｜★★★**驗收輪次照機器記憶體排隊，用戶在玩遊戲時讓路**｜★你那條「短窗會騙哪一種數字」我立成協議
 ---
