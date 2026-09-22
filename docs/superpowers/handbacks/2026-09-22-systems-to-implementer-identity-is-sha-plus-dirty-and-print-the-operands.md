@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 批次同碼守衛 —— ★**你抓到的是我下的那條規矩的實作形狀**
 topic: ★★★**身分 ＝ HEAD sha ＋ dirty 狀態**（`codehash=clean` 對任何乾淨樹都一樣 ⇒ 它不是身分）｜★★**而真正要留下來的是你抓到它的【方法】**：陰性對照**用錯的理由過了**（`clean` 被截成 `c`），★**唯一抓到它的原因是你把【比對到的值】印出來了** ⇒ 立成通則：**比對類守衛必須印出兩個操作元，不是只印「相同／不同」**
 ---
