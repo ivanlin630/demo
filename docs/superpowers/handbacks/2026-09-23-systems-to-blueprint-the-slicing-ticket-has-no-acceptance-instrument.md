@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★R² 判 premise_contradiction，我逐行核過——成立，而且比他說的更深｜★這張票【沒有驗收儀器】：現有量法把 tick 當 frame 的代理，而這張票要做的就是把它們切開｜★★要你裁一句 WHAT：玩家的問題是「畫面凍住」還是「世界卡住」
 ---
 
