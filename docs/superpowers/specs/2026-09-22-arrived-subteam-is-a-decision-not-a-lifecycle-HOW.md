@@ -1,7 +1,7 @@
 ---
 slice: 子隊抵達 ＝ **一個決策點**，不是一條生命週期規則（`subteam-idle` de-patch）
 owner: systems
-status: R² 第一輪=issues → ★★★**降級為【先前置量測】**（§7：驗證母體 1 種、受影響母體 24 種）—— 數字回來前不 dispatch
+status: ★**前置量測已回**（§8）⇒ 裁定【slice，不是 arc】；門檻已預註冊（§8.3）⇒ **待 R² 再確認 → CLEAN 才 dispatch**
 基於: 量測員世代 6／HW-2 症狀複驗（evicted/arrived ＝ 97.6%／100%，13–15 個 distinct parent 反覆）；WHAT 裁定 2026-09-22（手不聽腦第三型，先查補丁閘，de-patch 不加補丁）
 ---
 
@@ -136,4 +136,55 @@ A5【等價性】★對**未觸及的任務型別**（非 FORAGE），全世界�
    ①先量 baseline（現 main，按 task 型別）②門檻寫成「**相對 baseline 下降 ≥ X 個標準差**」
    ③★**而 X 與 baseline 都在前置量測回來之後、實作之前預註冊**
 ⇒ ★★★**不是「看完數字再挑門檻」** —— 是「**先有 baseline 才知道門檻該用什麼單位**」。
+```
+
+---
+
+# §8 ★★★前置量測回來了 —— **它同時解決了範圍問題，也打掉了我的靜態清單**
+
+```
+        seed1337                    seed77
+  EXPAND   arrived 1420  evicted 0    arrived 1337  evicted 0   ← ★最大宗（七成以上），而它【一次都沒被歸建】
+  SCOUT    arrived  325  evicted 54   arrived  274  evicted 29  ← ★★歸建的主力
+  HERALD   arrived  246  evicted 0    arrived  108  evicted 0
+  FORAGE   arrived    3  evicted 3    arrived    9  evicted 9   （100%，但次數是個位數）
+  CONVOY / TRIBUTE / DEFEND / CAMP：個位數
+  合計     arrived 1999  evicted 59   arrived 1744  evicted 44   ⇒ ★**整體歸建率 ≈ 3%**
+  ★有抵達的型別 ＝ **7／36**（兩顆種子一致）
+```
+
+## §8.1 ★★★**我的「24 種」是錯的**（而量測員沒有把數字對齊成我的 —— 對的）
+
+```
+★我用靜態掃 3904-3971 的 `TeamData.TASK_*` 當成「有專屬分支 ⇒ 不受 blanket 管」
+⇒ ★★而 **SCOUT 的分支是 `if task == SCOUT and task_reason == "info_scout"`** ——
+   **只有 info_scout 會 return，其餘 SCOUT 子隊【照樣落到 blanket】**
+⇒ ★★★而它正是**歸建的主力**（54／29，佔全部 evicted 的九成）
+⇒ **我把主力排除在母體之外了。**
+★這正是那條認識論界限：**靜態讀得出「什麼存在」，讀不出「哪條路會走到」** ——
+  ★★而 `HERALD`／`CONVOY`／`EXPAND` 同理（它們的分支也帶條件），只是它們碰巧 evicted＝0。
+★★★**量測員原樣呈報差額、不替我圓** —— 那是對的做法，我把它記在這裡。
+```
+
+## §8.2 ★裁定：**是 slice，不是 arc**（依 §7.1 預先寫下的判準）
+
+```
+判準原文：「少數幾種 ⇒ 影響面可控，照 §3 的 de-patch 做｜一大半都在發生 ⇒ 是 arc，退回 WHAT」
+⇒ ★**7／36 有抵達，而其中只有 4~5 種真的被歸建，整體 3%** ⇒ **少數 ⇒ slice**
+⇒ ★★**而最大宗的 EXPAND（七成抵達）一次都沒進過這條 blanket**
+   ⇒ **這條規則不是「抵達規則」，它是一條只咬到落單者的 fallback** ⇒ **風險比我原先怕的低**
+```
+
+## §8.3 ★A1 的門檻（現在有 baseline 了，**在實作之前預註冊**）
+
+```
+baseline（世代 6／HW-2、8 天窗、warring、兩顆種子）：
+  ★整體 evicted/arrived ＝ **2.95%／2.52%**
+  ★★SCOUT ＝ **16.6%／10.6%**（歸建主力）｜FORAGE ＝ **100%／100%**（次數個位數）
+**門檻**：
+  ①【主】**SCOUT 的 evicted/arrived 下降 ≥ 一半**（16.6→≤8.3、10.6→≤5.3）
+     —— ★理由：它是唯一**既有量又有比率**的型別；FORAGE 的 100% 分母只有 3／9，**動一格就翻**
+  ②【副】整體 evicted/arrived **不得上升**
+  ③★★★**FORAGE 不設門檻，只做觀察欄** —— **分母個位數的比率不可當判準**
+     （★而我上一版把 FORAGE 當主角，正是因為我只量了它）
 ```

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 子隊 blanket 歸建 —— 逐 task 型別（**純量測，只量不判**）
 topic: ★★★**36 種 task 裡【實際會抵達】的只有 7 種**（兩顆種子都是 7）｜★★**而最大宗那一種根本沒被 blanket 歸建**：`TASK_EXPAND` 抵達 **1420／1337 次、歸建 0 次** —— 抵達的都在更前面的 `return` 就離開了｜★**合計 arrived 1999／1744，evicted 只有 59／44（≈3%）**｜★**你信裡寫 24 種，我掃到 36 種常數** —— 我沒有把數字對齊成你的，差額原樣呈報
 ---
