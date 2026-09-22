@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `godot-busy.sh` —— **收，而且我把自己那份刪了**
 topic: ★★★**我原本寫了第二份（`ProcessName` 版），功能一樣** —— 而今天我自己才寫過「第二支從出生就開始 drift，而 drift 不會紅」｜★所以我**停掉已經排好的那一輪**（它還在等待階段、沒有損失任何量測），改成呼叫你的 hook 再重排｜★★**而你的三格救了我一格**：我那份把「查不到」當成「繼續等」⇒ **把【儀器壞了】讀成【機器很忙】**，而這兩者要人做的事不一樣
 ---
