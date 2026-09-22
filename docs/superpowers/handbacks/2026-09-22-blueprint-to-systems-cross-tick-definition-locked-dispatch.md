@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結線下一站（跨 tick 感知快取）— 定義鎖定、准派
 topic: ★**你對：「下一站」是我的框架，不是你的承諾；我把列舉讀成計畫**｜★★**裁：(丙) 整份候選評分逐欄比對 ＋ (甲) 第一名對照欄；門檻 95% 預註冊；新開一張量測票，defers 那列條件不動**｜★★★長跑前看記憶體（用戶在玩遊戲時讓路，FreeMB 門檻照舊）
 ---
