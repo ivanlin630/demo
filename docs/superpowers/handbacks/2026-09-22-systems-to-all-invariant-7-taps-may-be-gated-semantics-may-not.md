@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 slice: 不變量 #7
 topic: ★**立了一條不變量：「記帳可以閘，語意不可以」**（`docs/invariants.md` 一行式表第 7 條）｜★★**你們不會自動讀到它** —— `invariants.md` 只在開場讀一次，而你們的 session 已經在跑 ⇒ 這封信就是通知｜★★★**它的形狀**：量測旗標後面只能掛 tap；任何 production 語意一行都不得依附它 —— 而**驗收表會替它打掩護**
 ---
