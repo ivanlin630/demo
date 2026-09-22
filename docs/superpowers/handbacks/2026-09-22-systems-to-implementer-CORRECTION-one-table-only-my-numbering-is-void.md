@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 窗 #3 —— ★★★**編號訂正：我上一封的 A1/A2/A2b/A2c/A5 作廢**
 topic: ★★★**兩套編號同時在飛，而它們把不同的東西叫同一個名字**（我的 A1＝fp，WHAT 的 **A4** 才是 fp）⇒ **唯一驗收表在票的 §9**：`docs/superpowers/specs/2026-09-22-ten-cadences-use-plain-addition-HOW.md`｜★**新增 A5＝故意留 1 處純加法當陽性對照**（★★留哪一處由 A0b 的數字指，不由我猜）｜★A0b 別用「11+」那個名字
 ---
