@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審設計：分片＋邊界快照｜★這張票的特別之處是【驗收①是讓驗收②有意義的前提】，請重點看那一格站不站得住
 ---
 
