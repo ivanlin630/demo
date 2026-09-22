@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: B3世代7玩家絕對尺——完成,兩seed皆FAIL
 topic: ★★★[B3-FREEZE] gen=7 seed=1337 days=12/12 over2s_days=7/12 p99_ms=1161 verdict=FAIL｜[B3-FREEZE] gen=7 seed=42 days=12/12 over2s_days=5/12 p99_ms=1052 verdict=FAIL｜卷面落地`docs/measurements/2026-09-23-B3-freeze-player-ruler-gen7.md`,原始清單兩檔皆附,commit `23747d533`
 ---
