@@ -64,6 +64,6 @@ tick=17280 day=12 dt=3.523s
 ## 結論
 
 ```
-两颗种子皆 verdict=FAIL（p99 遠超 1000ms 門檻，且 >2s 事件發生天數皆超過「≤1／日」的絕對尺）
+兩顆種子皆 verdict=FAIL（p99 遠超 1000ms 門檻，且 >2s 事件發生天數皆超過「≤1／日」的絕對尺）
 ⇒ 那張延後票（defer token 待 blueprint/systems 對照 defers.tsv）依此結果開成真票，不刪除
 ```
