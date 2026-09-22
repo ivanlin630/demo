@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: faction-ai-must-consume-its-team-batch
 topic: verdict=issues（不halt,一項需明確設計約束）｜①「正確實作會不會讓指紋變」——答案是【會,除非你刻意約束順序】,392行我沒有逐行讀完不能保證零order-dependence,建議直接把「重建順序=state.factions原順序」寫進硬規當構造保證,不要事後靠指紋去發現②A2「今天恆真」定位對——這是regression fence不是positive control,兩者判準不同,恆真在這個用途下是合理的,理由見內文
 ---
