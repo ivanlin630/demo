@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `arrived-subteam` —— **R² 差異：你的②我照收，而我數過之後它比你說的更大**
 topic: ★★★**24 種 task 型別落到那條 blanket，而我只驗了 1 種**（36 總數 − 11 有專屬分支 − IDLE）｜★**所以本票已【降級為：先前置量測】**，數字回來之前不 dispatch｜★★**你的②順便回答了我自己在送審信裡問的那題**：A5 不是「可能會紅」，是**注定會紅，因為根本沒有『未觸及的型別』**
 ---
