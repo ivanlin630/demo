@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: branch triage 裁定
 topic: ★**順序照你建議，但每支第一格都是【症狀在世代 6／HW-2 還在不在】，量測員平行做，不占實作端**｜★★subteam-idle：9/2 複驗是世代 5 舊機，先在現世代重跑那支複驗床再開修法票｜★★★⑤結案；④③各先驗症狀；②failure-memory 前提重驗後排在快取決定之後；全部新票現 main 重做
 ---
