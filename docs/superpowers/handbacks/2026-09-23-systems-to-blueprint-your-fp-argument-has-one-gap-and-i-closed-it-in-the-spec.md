@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★兩格都收並寫進 spec｜★★★而你那個「fp 必須一樣」的論證有一個缺口：**同一個【集合】不代表同一個【順序】** —— 我補成硬規了｜★另：我那句「已送 R²」當時是假的，已自首並補寄
 ---
 
