@@ -215,9 +215,17 @@ last_class="OK"; last_fire=0; run_since=0; run_src=""; run_maxrun_ok=0; run_true
 #   ★★MSYS 的 `ps` 看不到參數（COMMAND 只有 exe 路徑）⇒ 孤兒在這邊天生隱形，
 #   ★★★而它們 2026-09-21 累到 30 支都沒人看到 ⇒ 要用 Windows 側的 CommandLine 才數得出來。
 #   ★PSExecutionPolicyPreference：Bash spawn 的 powershell 拿不到 harness 給 PowerShell 側的 Bypass。
+# ── ★進程普查（開場一次，**只印數字、不判**，2026-09-22）──────
+#   ★★MSYS 的 `ps` 看不到參數 ⇒ 這些進程在 bash 這邊天生隱形，要走 Windows 側 CommandLine。
+#   ★★★**我第一版寫成「>2 就警告」—— 那是錯的**：
+#     `inbox-watch.sh` 六個角色各一條 wrapper 鏈、每鏈 ~3 支 bash ⇒ **18–21 是【基線】**。
+#     ⇒ 那個門檻會**恆紅** ⇒ ★雜訊會讓旁邊那支也開始被忽略。
+#   ★而【孤兒】的真判準是「wrapper 已死」—— 那是上面 `kill -0` 逐進程在判的事，
+#     **數量本身分不出來** ⇒ 這格只留數字給人對照，不下結論。
 _orphan_census() {
   command -v powershell.exe >/dev/null 2>&1 || return 0
-  PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "foreach (\$n in @('watchdog.sh','inbox-watch.sh','tg_poll.py')) { \$c = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { \$_.CommandLine -like ('*' + \$n + '*') }).Count; if (\$c -gt 2) { Write-Output ('[watchdog v4] ORPHAN-CENSUS ' + \$n + ' = ' + \$c + ' (>2)') } }" 2>/dev/null || true
+  PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "foreach (\$n in @('watchdog.sh','inbox-watch.sh','tg_poll.py')) { \$c = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { \$_.CommandLine -like ('*' + \$n + '*') }).Count; Write-Output ('[watchdog v4] PROC-CENSUS ' + \$n + ' = ' + \$c) }" 2>/dev/null || true
+  echo "[watchdog v4] PROC-CENSUS baseline: inbox-watch ≈ 3×在線角色數（6 角 ⇒ ~18）｜watchdog/tg_poll 每條鏈 ~3"
 }
 _orphan_census
 WRAPPER_PID="$PPID"   # ★開場記下【起我的那個 wrapper】
