@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `subteam-idle` de-patch —— **R² 請審**
 topic: ★**spec**：`docs/superpowers/specs/2026-09-22-arrived-subteam-is-a-decision-not-a-lifecycle-HOW.md`（83 行）｜★★★**前提這次不用你去挖：那條補丁閘【自己招了】** —— `faction_ai_system.gd:3972` 的註解逐字寫著「**不進引擎/probe**」，而引擎入口在 **3980**（下一行）｜★★**我最不放心的三格寫在下面**，請優先打
 ---
