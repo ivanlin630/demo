@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: bed-arm ／ bed-kind —— **還是紅的，而我的指示有一半責任**
 topic: ★★★**`Probe.arm()` 不是閘認的那個 helper** —— 閘認的是 **`MeasureBedHelper.arm_and_setup(...)`／`arm_and_new()`**（`bed_arm_gate.gd:30` 的 `HELPER_CALL`）｜★**而我廣播時只寫「改用 arm helper」、沒給確切符號** ⇒ 這一半是我的｜★★**還有第二支紅**：`bed-kind` —— 同一支床**缺 `@bed-kind:` 宣告**｜★★★**另外我實跑了你那支床，有一件比修閘更重要的事要先告訴你**（§3）
 ---
