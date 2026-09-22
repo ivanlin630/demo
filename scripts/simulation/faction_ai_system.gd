@@ -1217,11 +1217,21 @@ static func _fai_pht_s(name: String, t0: int) -> int:
 #   ⇒ ★所以這支謓詞不得叫 due —— 兩種「到期」共用同一個字，
 #     下一個人改其中一邊時不會知道另一邊存在。
 func evaluate_all(state: WorldState, team_ids: Array) -> void:
+	# ★三份都跑 —— 否則床的行為會變（它們原本一次呼叫就拿到三個迴圈）。
 	evaluate_factions(state, factions_of(state, team_ids))
+	evaluate_loop2(state, team_ids)
+	evaluate_loop3(state, team_ids)
+
+# ★loop2／loop3 的公開入口：registry 各自一列，吃 due_teams。
+func evaluate_loop2(state: WorldState, team_ids: Array) -> void:
+	_loop2_teams(state, team_ids)
+
+func evaluate_loop3(state: WorldState, team_ids: Array) -> void:
+	_loop3_teams(state, team_ids)
 
 # ★★★勢力粒度的入口：吃【這顆 tick 到期的勢力】。
 func evaluate_factions(state: WorldState, faction_ids: Array) -> void:
-	_evaluate_all_body(state, faction_ids)
+	_loop1_factions(state, faction_ids)
 	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
 	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
 	SpecimenTracer.heartbeat_sweep(state)
@@ -1271,7 +1281,16 @@ static func factions_of(state: WorldState, team_ids: Array) -> Array:
 			out.append(fid)
 	return out
 
-func _evaluate_all_body(state: WorldState, faction_ids: Array) -> void:
+# ★★★按粒度拆三份（systems 裁 2026-09-23 §3f）。
+#   舊的 `_evaluate_all_body` 是【三個不同粒度的系統穿著同一個名字】：
+#     loop1 勢力粒度｜loop2 隊粒度｜loop3 隊粒度
+#   ★而 loop2／loop3 舊寫法吃的是 `state.teams`（全世界）不是批次
+#     ⇒ 勢力相位之後每小時被呼叫 ~8 次 ⇒ 全世界掃 8 遍
+#     ⇒ ★★實測：faction_ai 佔總增量 102.7%（cost 2.3 倍而 batch_sum 不變）
+#   ★★★registry 上那一列叫 `faction_ai` —— 而它跑的是勢力＋兩個 per-team 系統
+#     ⇒ 「綱要與簽章都會說謊」這一次說謊的是【名字】。
+
+func _loop1_factions(state: WorldState, faction_ids: Array) -> void:
 	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,T3追查)：本函式呼叫次數+factions是否為空+代表性tick值
 		Probe.bump("evaluate_all_body.entry")
 		Probe.add_amount("evaluate_all_body.factions_size_sum", float(state.factions.size()))
@@ -1381,8 +1400,15 @@ func _evaluate_all_body(state: WorldState, faction_ids: Array) -> void:
 		if SimRunner.phase_timing: _fai_pht("loop1.betray", _tf)
 
 	if SimRunner.phase_timing: _t = _fai_pht("loop1.factions", _t)
+
+# ★loop2（隊粒度）：子隊評估／獨立策略／成員策略 ＋ merge_queue 的消費。
+#   ★★吃【這一批】：舊寫法 `for tid in state.teams` 是全世界。
+func _loop2_teams(state: WorldState, team_ids: Array) -> void:
+	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var merge_queue: Array = []
-	for tid in state.teams:
+	for tid in team_ids:
+		if not state.teams.has(tid):
+			continue
 		var team: TeamData = state.teams[tid]
 		# 野獸(beast_kind!="")不進決策迴圈：非-agent 無「腦」不該經引擎的秤（憲法決策模型）。
 		# 生命週期(spawn/combat/reward/cleanup)全在 encounter/npc_combat/beast_system，不評 strategy/solo/infra。
@@ -1468,7 +1494,11 @@ func _evaluate_all_body(state: WorldState, faction_ids: Array) -> void:
 				sub.move_target = parent.tile_pos
 
 	if SimRunner.phase_timing: _t = _fai_pht("loop2b.merge", _t)
-	for tid in state.teams.keys():   # keys() 快照 → 滅團可安全 erase
+
+# ★loop3（隊粒度）：滅團／繼承／野心與訂單排程／威脅／據點／雜項。
+func _loop3_teams(state: WorldState, team_ids: Array) -> void:
+	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	for tid in team_ids:   # ★吃【這一批】不是全世界；due_teams 本來就是 keys() 的子序列
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]

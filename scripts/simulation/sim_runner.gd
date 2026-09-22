@@ -221,7 +221,12 @@ static var SYSTEMS: Array = [
 	{"name": "consumption", "grp": "stag",      "fn": "_step6_resolve_consumption","shape": "teams_cadence", "tl": ""},
 	{"name": "salary", "grp": "stag",           "fn": "_step6c_salary",            "shape": "teams",         "tl": ""},
 	{"name": "fatigue", "grp": "stag",          "fn": "_step6d_fatigue",           "shape": "teams_cadence", "tl": "near.consume"},
+	# ★★★三列【連續】佔住原本 faction_ai 那一格，照 loop1 → loop2 → loop3 的順序。
+	#   ★舊寫法是【三個粒度穿同一個名字】：loop1 勢力、loop2／loop3 隊。
+	#   ★★樁關掉時三者對所有隊同時到期 ⇒ 順序與今天逐字相同 ⇒ P5 就是這件事的檢測器。
 	{"name": "faction_ai", "grp": "stag",       "fn": "_step6b_faction_ai",        "shape": "factions",      "tl": "near.faction_ai"},
+	{"name": "fai_loop2",  "grp": "stag",       "fn": "_step6b_fai_loop2",         "shape": "teams",         "tl": ""},
+	{"name": "fai_loop3",  "grp": "stag",       "fn": "_step6b_fai_loop3",         "shape": "teams",         "tl": ""},
 	{"name": "info_dispatch", "grp": "stag",    "fn": "_step6b2_info_dispatch",    "shape": "teams",         "tl": "near.faction_ai"},
 	{"name": "training", "grp": "stag",         "fn": "_step6f_training",          "shape": "teams",         "tl": ""},
 	{"name": "strategic_ai", "grp": "hour",     "fn": "_step6e_strategic_ai",      "shape": "state",         "tl": "near.strategic_ai"},
@@ -788,6 +793,13 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 # ★錯開票 (乙)：收【勢力 id】不是隊 id —— 因為這支系統本來就是勢力粒度的。
 func _step6b_faction_ai(state: WorldState, faction_ids: Array) -> void:
 	_faction_ai_system.evaluate_factions(state, faction_ids)
+
+# ★拆三份（§3f）：loop2／loop3 是【隊粒度】⇒ 吃 due_teams，回到按隊錯開。
+func _step6b_fai_loop2(state: WorldState, team_ids: Array) -> void:
+	_faction_ai_system.evaluate_loop2(state, team_ids)
+
+func _step6b_fai_loop3(state: WorldState, team_ids: Array) -> void:
+	_faction_ai_system.evaluate_loop3(state, team_ids)
 
 func _step6b2_info_dispatch(state: WorldState, team_ids: Array) -> void:
 	# ★資訊網 Part2 (a) side-action：求援/偵察 平行 side-dispatch（脫主 argmax、每 team 評 mini-util cost-benefit）。
