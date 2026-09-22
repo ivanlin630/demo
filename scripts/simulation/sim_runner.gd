@@ -385,6 +385,17 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, hour_tick: 
 			continue
 		# ★錯開組吃【這顆 tick 到期的隊】；整點組仍吃全部隊。
 		var batch: Array = teams if is_hour else due_teams
+		# ★★★診斷用：逐支系統的【呈叫次數】（純記帳，Probe 之下）。
+	#   ★為什麼數呈叫次數而不用 phase_timing：_pht 是【鏈式】的
+	#     （_t = _pht(label, _t)，每個 label 記的是「上一個檢查點到現在」），
+	#     而本票讓整點組的 entry 在非整點 tick 被 continue 掉 ⇒ 它們的 _pht 也被跳過
+	#     ⇒ ★★下一個有 label 的 entry 會把【被跳過那段的時間】一起吃進自己的帳
+	#     ⇒ ★★★相位表會【系統性歸錯帳】，而它看起來完全正常。
+	#   ★而【計數】不怕這件事，也不怕機器忙：分母不會隨世界長大
+	#     ⇒ 短窗就答得了（比率才需要全窗）。
+		if Probe.enabled:
+			Probe.bump("syscall." + sname)
+			Probe.add_amount("sysbatch." + sname, float(batch.size()))
 		# near-only pre-hook：move 前擷取 player 舊位（供 move 後偵測玩家移動清 pending target）。
 		if sname == "strategic_move":
 			player_old = _get_player_tile_pos(state)

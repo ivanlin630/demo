@@ -158,7 +158,26 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 	var mean_rate: float = sum_rate / float(maxi(per_team_total.size(), 1))
 	print("   隊數=%d｜間距樣本=%d｜相位尖峰=%d｜clamp 最壞率=%.4f 平均率=%.4f" % [
 		per_team_total.size(), gaps.size(), peak, worst, mean_rate])
-	return {"gaps": gaps, "peak": peak, "teams": per_team_total.size(),
+	# ★★★逐支系統的呈叫次數（systems 2026-09-23：數呈叫次數，不猜、不用 phase_timing）。
+	#   ★【計數】不怕短窗也不怕機器忙：分母不會隨世界長大。
+	var calls: Dictionary = {}
+	var bsum: Dictionary = {}
+	for k2 in Probe.counts.keys():
+		var k2s: String = String(k2)
+		if k2s.begins_with("syscall."):
+			calls[k2s.substr(8)] = int(Probe.counts[k2])
+	for k3 in Probe.amounts.keys():
+		var k3s: String = String(k3)
+		if k3s.begins_with("sysbatch."):
+			bsum[k3s.substr(9)] = float(Probe.amounts[k3])
+	var names: Array = calls.keys()
+	names.sort()
+	print("   ★逐支系統呈叫次數（共 %d 支）：" % names.size())
+	for nm in names:
+		var c2: int = int(calls[nm])
+		var avg: float = float(bsum.get(nm, 0.0)) / float(maxi(c2, 1))
+		print("     %-18s calls=%-7d 平均批次=%.1f" % [String(nm), c2, avg])
+	return {"calls": calls, "gaps": gaps, "peak": peak, "teams": per_team_total.size(),
 		"clamp_worst": worst, "clamp_mean": mean_rate,
 		"dup": int(Probe.counts.get("pass.dup_in_cycle", 0)),
 		"n_real": n_real, "n_beast": n_beast, "n_sub": n_sub}
