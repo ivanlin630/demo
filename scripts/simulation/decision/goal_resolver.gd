@@ -25,7 +25,7 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 	# ★S7 cadence-gate：goal 生成/掛退每 GOAL_EVAL_CADENCE tick 一次（goal_state 持久跨 tick，frontier 每 decide 重驗 holding）。
 	if state.world.current_tick < team.goal_eval_next_tick:
 		return   # gate-ok: guard cadence early-return（perf 節流，非決策閘）
-	team.goal_eval_next_tick = state.world.current_tick + GOAL_EVAL_CADENCE
+	team.goal_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, team.team_id, GOAL_EVAL_CADENCE)
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var have: Dictionary = {}
 	for g in team.goal_state:

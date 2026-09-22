@@ -627,7 +627,7 @@ func _tick_conquest_scout(state: WorldState, team: TeamData) -> void:
 # 已在反應 task 中則重評威脅是否仍在，無則回 idle。
 func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	if state.world.current_tick < team.threat_eval_next_tick: return
-	team.threat_eval_next_tick = state.world.current_tick + THREAT_CADENCE
+	team.threat_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, team.team_id, THREAT_CADENCE)
 	if team.combat_target != -1: return
 	if team.current_task == TeamData.TASK_REVOLT:
 		# 起義（流亡路徑）是瞬時事件，結算已完成 → 釋放回常規 AI
@@ -859,7 +859,7 @@ func _has_inflight_settler(state: WorldState, owner: TeamData, tile: HexTileData
 # cadence 評估：掃自家無居民 outpost，依個性派子隊或邀流亡
 func _evaluate_outpost_residency(state: WorldState, team: TeamData) -> void:
 	if state.world.current_tick < team.residency_eval_next_tick: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
-	team.residency_eval_next_tick = state.world.current_tick + RESIDENCY_CADENCE
+	team.residency_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, team.team_id, RESIDENCY_CADENCE)
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	for tile_id in state.world.tiles:   # gate-ok: 掃 tiles 讀【地形/據點】＝公共地理，非他隊動態；legit-geo
@@ -2703,7 +2703,7 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		# ★perf：cadence-gate（per-team 錯開）——side-dispatch 每日評一次非每 tick（scout O(teams) 掃 per leader 昂貴）。
 		if state.world.current_tick < team.info_eval_next_tick:
 			continue
-		team.info_eval_next_tick = state.world.current_tick + INFO_DISPATCH_CADENCE
+		team.info_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, team.team_id, INFO_DISPATCH_CADENCE)
 		_try_promote_advisor(state, team)   # ★主動升匿名：領主 genuine 提拔補班底(bounded)→先於 dispatch 令新 advisor 當 tick 可用、解 named-scarcity
 		_try_herald_side(state, team)
 		_try_scout_side(state, team)
@@ -4160,7 +4160,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 	# ★D5 cadence gate（效能）：子隊決策非逐 tick，比照 threat cadence，攤平 gather+rank 成本。
 	if state.world.current_tick < sub.subteam_eval_next_tick:
 		return
-	sub.subteam_eval_next_tick = state.world.current_tick + SUBTEAM_CADENCE
+	sub.subteam_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, sub.team_id, SUBTEAM_CADENCE)
 	_detect_survival_stall(state, sub)   # ② 絕境階梯 DETECT（單一源全 5 路決策 entry 之一：subteam）
 	_detect_commitment_stall(state, sub)   # ★承諾停滯偵測（同 entry，讀進度事實）
 	var parent: TeamData = state.teams.get(sub.parent_team_id)
@@ -4376,7 +4376,7 @@ func _should_reeval(state: WorldState, team: TeamData) -> bool:
 		# 事件喚醒仍在上方最前面（被襲/情報/餓線照樣瞬醒）。
 		if team.current_task in TRAVEL_TASKS and team.move_target != Vector2i(-1, -1) 				and team.tile_pos != team.move_target:
 			if Probe.enabled: Probe.bump("reeval.skip_in_transit")
-			team.decision_eval_next_tick = state.world.current_tick + DECISION_CADENCE
+			team.decision_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, team.team_id, DECISION_CADENCE)
 			return false
 		if Probe.enabled: Probe.bump("reeval.cadence")
 		return true

@@ -500,6 +500,7 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 	return out
 
 static func gather(state: WorldState, team: TeamData, advance: bool = false) -> DecisionContext:
+	if SimRunner.ft_on: SimRunner.ft_teams_this_tick[team.team_id] = true   # ★記帳（量測旗標下），非語意
 	# ★★★【無條件】——不得掛在 `Probe.enabled` 後面（spec §4b，R² 兩輪都打這一格）：
 	#   ★`Probe.enabled` 預設 false ⇒ 照樣造句寫成 `if Probe.enabled:` 會讓
 	#     production 永不遞增 ⇒ memo 的舊值【全部變成命中】⇒ 回傳任意舊 tick 的 eta。
@@ -611,7 +612,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 				c.idle_employ_value = DecisionContext._idle_employ_value(state, team, _btile, c.idle_labor, c.leader_values)
 				_btile.idle_employ_cached = c.idle_employ_value
 				if Probe.enabled: Probe.bump("gather.write.idle_employ_cached." + ("advance" if advance else "observe"))
-				_btile.idle_employ_next_tick = state.world.current_tick + LaborSystem.LABOR_CADENCE
+				_btile.idle_employ_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, _btile.tile_id, LaborSystem.LABOR_CADENCE)
 				if Probe.enabled: Probe.bump("gather.write.idle_employ_next_tick." + ("advance" if advance else "observe"))
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	c.has_home_outpost = FactionAISystem.shared()._find_own_outpost(state, team) != Vector2i(-1, -1)
@@ -867,7 +868,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		#   ★★★代價（誠實限）：觀測讀到的可能是【過時的快取】――
 		#     而那正是【觀測不改世界】的價錢，不是 bug。
 		if advance and state.world.current_tick >= team.expand_eval_next_tick:
-			team.expand_eval_next_tick = state.world.current_tick + FactionAISystem.INFRA_INTERVAL
+			team.expand_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, team.team_id, FactionAISystem.INFRA_INTERVAL)
 			if Probe.enabled: Probe.bump("gather.write.expand_eval_next_tick." + ("advance" if advance else "observe"))
 			var _loc: Dictionary = _fa._evaluate_new_outpost_location(state, team)
 			team.expand_site_cached = _loc.get("pos", Vector2i(-1, -1)) if not _loc.is_empty() else Vector2i(-1, -1)
@@ -1327,7 +1328,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			# §HOW-7 吸納 target（強方 pull，capacity-bound 弱鄰）
 			team.absorb_target_cache = FactionAISystem.shared()._find_absorb_target(state, team)
 			if Probe.enabled: Probe.bump("gather.write.absorb_target_cache." + ("advance" if advance else "observe"))
-			team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
+			team.consolidate_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, team.team_id, FactionAISystem.CONSOLIDATE_CADENCE)
 			if Probe.enabled: Probe.bump("gather.write.consolidate_eval_next_tick." + ("advance" if advance else "observe"))
 		c.consolidate_target_id = team.consolidate_target_cache
 		c.absorb_target_id = team.absorb_target_cache

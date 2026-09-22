@@ -121,7 +121,23 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	return _perf_result
 
 # #3 tick 計時：本 tick wall-time 累積 + 日邊界 flush（`[TickPerf] avg/max us, teams/factions`）
+# ★量測樁（拋棄分支專用，不進 main）：每 tick 的 (決策隊數, dt)＋逐 tick 序列
+static var ft_samples: PackedInt32Array = PackedInt32Array()
+static var ft_on: bool = false
+static var ft_teams_this_tick: Dictionary = {}
+static var ft_series: PackedInt32Array = PackedInt32Array()
+static var ft_due_hits: Dictionary = {}
+static var ft_spike_min: int = 11
+
 func _record_tick_perf(state: WorldState, dt_us: int) -> void:
+	if ft_on:
+		var _nd: int = ft_teams_this_tick.size()
+		ft_samples.append(_nd)
+		ft_samples.append(dt_us)
+		ft_series.append(state.world.current_tick)
+		ft_series.append(_nd)
+		ft_series.append(state.teams.size())
+		ft_teams_this_tick.clear()
 	_perf_accum_us += dt_us
 	_perf_count += 1
 	# ★★★終線是一個【計數歸零】（用戶包絡，systems 轉達 2026-09-11）：

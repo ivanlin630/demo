@@ -159,7 +159,7 @@ static func compute_alloc(state: WorldState, tile: HexTileData) -> Dictionary:
 # 寫回（persist）――★只有真推進的路徑才呼它。
 static func rebalance(state: WorldState, tile: HexTileData) -> void:
 	tile.labor_alloc = compute_alloc(state, tile)
-	tile.labor_eval_next_tick = state.world.current_tick + LABOR_CADENCE
+	tile.labor_eval_next_tick = CadenceStagger.next_tick(state.world.current_tick, state.world.current_tick, tile.tile_id, LABOR_CADENCE)
 
 static func _workstation_need(state: WorldState, teams: Array, key: String, tile: HexTileData) -> float:
 	# ★labor v2 T1 食物真邊際分配：食物組(gather:food + farm)合併 need=food_need 單一(double-count keep、
