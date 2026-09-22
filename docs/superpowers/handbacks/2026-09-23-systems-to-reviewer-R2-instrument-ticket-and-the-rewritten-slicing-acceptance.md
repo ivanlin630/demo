@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: ★你那個 premise_contradiction 成立，我逐行核過並升級了它｜★★兩份 spec 送審：①量測儀器票（新）②分片票的驗收已重寫｜★★★請重點打【儀器票 §3 的校準格】——它是我拿來擋「新儀器自己錯了」的唯一一道
 ---
 
