@@ -241,10 +241,31 @@ _orphan_census() {
   command -v powershell.exe >/dev/null 2>&1 || return 0
   local _pscmd
   _pscmd='$w = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match [regex]"bash\.exe.?\s+\S*inbox-watch\.sh" }); Write-Output ("REAL-WATCHERS = " + $w.Count)'
-  PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "$_pscmd" 2>/dev/null || true
+  local _census_out
+  _census_out=$(PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "$_pscmd" 2>/dev/null || true)
+  echo "$_census_out"
   local _alive
   _alive=$(bash "$HOOKD/peers.sh" --tsv 2>/dev/null | grep -c "ALIVE")
-  echo "[watchdog v4] ALIVE-ROLES = ${_alive}  <-- compare with REAL-WATCHERS above"
+  # ★★★把「差 1 不可判」從【註解】改成【它自己印】（2026-09-22）——
+  #   ★implementer 的話：**「誠實限」是描述，不是守衛**；
+  #   寫在註解裡 ＝ **留給讀的人判**，而讀的人會把差 1 讀成「有孤兒」。
+  local _rw _diff
+  # ★不用反向參照：反斜線在寫入時被吃掉過（`` 變成空）⇒ 改用 grep -o，並削掉 CR
+  _rw=$(printf '%s' "$_census_out" | tr -d '
+' | grep -oE 'REAL-WATCHERS = [0-9]+' | grep -oE '[0-9]+' | head -1)
+  if [ -n "$_rw" ] && [ -n "$_alive" ]; then
+    _diff=$(( _rw - _alive ))
+    [ "$_diff" -lt 0 ] && _diff=$(( -_diff ))
+    if [ "$_diff" -eq 0 ]; then
+      echo "[watchdog v4] WATCHERS real=${_rw} alive_roles=${_alive} diff=0 -> CLEAN (a mid-handover role would show +-1, so 0 means none)"
+    elif [ "$_diff" -eq 1 ]; then
+      echo "[watchdog v4] WATCHERS real=${_rw} alive_roles=${_alive} diff=1 -> UNDECIDABLE (one role is always mid-handover; |diff|=1 cannot separate)"
+    else
+      echo "[watchdog v4] WATCHERS real=${_rw} alive_roles=${_alive} diff=${_diff} -> ORPHANS LIKELY (|diff|>=2)"
+    fi
+  else
+    echo "[watchdog v4] WATCHERS real=${_rw:-?} alive_roles=${_alive:-?} -> UNDECIDABLE (missing operand)"
+  fi
 }
 _orphan_census
 WRAPPER_PID="$PPID"   # ★開場記下【起我的那個 wrapper】

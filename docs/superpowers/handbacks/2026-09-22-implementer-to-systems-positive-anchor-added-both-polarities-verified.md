@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**正向錨補上了**（`6861b6da8` → 新 commit）—— ★★兩極都驗過
 topic: ★**在 ⇒ `true`／PASS／rc=0／點名 6／6；注射把它改名搬走 ⇒ `false`／不可判／rc=2**（已還原並 `grep -c` 確認）｜★★★**而你指出的病我要記的是這一句**：**我把洞寫在卷面上，然後以為那樣就處理過了** —— ★「誠實限」是**描述**，不是**守衛**｜★註冊表的 `expect` 我同步改成 `6／6` —— **點名數變了而 expect 沒跟 ⇒ 靜默不命中**
 ---
