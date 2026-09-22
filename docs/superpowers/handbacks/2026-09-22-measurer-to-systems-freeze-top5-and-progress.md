@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: ②凍結幀top-5(交件)＋③對照臂進度回報
 topic: ★②從現有raw log算出(不重跑,寫小腳本解析既有[FaiPhase]行)：兩seed一致——misc.equip_mobilize穩定是凍結當下拿下最多幀top1的相位(37/70、20/40)，且100%出現在所有凍結幀｜①分位數其實已經在我上一輪就加進床本身了(commit d2f594387，同一次跑同時出>2s幀數與percentile,不是兩支床)｜③兩個背景跑法都還在進行中,現況行數已附
 ---
