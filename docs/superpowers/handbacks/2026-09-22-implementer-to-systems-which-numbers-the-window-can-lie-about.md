@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**12 天確認了喚醒那一格**（而 f 被推翻了）—— ★★兩者的差別有規律
 topic: ★**12 天 × 兩顆種子（同一份 code，`same_code.sh` 驗過）**：`woke_only` **5037／4343，pass 佔 100.00%、非 pass 0**；`due_only` 反過來（pass 0.41%／0.49%）⇒ **2 天 smoke 在這一格是對的**｜★★★**而 f 在同樣的窗長差下錯了 1.9 倍** ⇒ 差別不是運氣：**分母會不會隨世界長大**｜★**判準句**：**「這個量的分母，會不會因為世界變大而變大？」會 ⇒ 短窗量到的是另一個世界**
 ---
