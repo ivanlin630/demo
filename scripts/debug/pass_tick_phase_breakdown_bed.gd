@@ -55,6 +55,7 @@ func _initialize() -> void:
 	var other_dt: int = 0
 	var other_n: int = 0
 	var pass_dts: Array = []
+	var other_dts: Array = []   # ★B3 需要【全體 tick】的分位數,不只總和
 	for _t in range(n_ticks):
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(st, Vector2i(-1, -1))
@@ -74,6 +75,7 @@ func _initialize() -> void:
 		else:
 			other_n += 1
 			other_dt += dt
+			other_dts.append(dt)
 
 	print("\n[PP] ★母體：pass tick %d 個（期望 %d）｜非 pass tick %d 個｜共 %d tick（%d 天）" % [
 		pass_n, int(n_ticks / PASS), other_n, n_ticks, days])
@@ -87,6 +89,25 @@ func _initialize() -> void:
 	print("[PP] 非 pass tick：平均=%d us｜合計=%d us" % [int(other_dt / maxi(other_n, 1)), other_dt])
 	print("[PP] ★pass ÷ 非pass（平均）= %.0f×" % [
 		float(pass_dt) / float(maxi(pass_n, 1)) / maxf(float(other_dt) / float(maxi(other_n, 1)), 1.0)])
+	# ── ★★★B3 玩家尺（systems 派：要量的只有這一格）──
+	#   ★終線是【計數歸零】：`>2s` 幀數 ＝ 0（用戶包絡）;★★而 median／p99 一起印,
+	#     因為「幀數 0」與「p99 很糟但剛好在線下」在單一個數字上長得一樣。
+	#   ★★★母體 ＝ **全部 tick**（pass ＋ 非 pass）—— 玩家感受到的是幀,不是 pass。
+	var all_dts: Array = []
+	for _d1 in pass_dts: all_dts.append(_d1)
+	for _d2 in other_dts: all_dts.append(_d2)
+	all_dts.sort()
+	var over2s: int = 0
+	for _v in all_dts:
+		if int(_v) > 2000000: over2s += 1
+	print("\n[PP] ★★★B3 玩家尺（母體＝全部 %d 個 tick）：>2s 幀數=%d｜median=%d us｜p99=%d us｜max=%d us" % [
+		all_dts.size(), over2s, _q(all_dts, 0.5), _q(all_dts, 0.99), int(all_dts[all_dts.size() - 1])])
+	print("[PP]   ★終線是【>2s 幀數 ＝ 0】;★★p99／median 一起印 —— 幀數 0 與「p99 剛好在線下」單看一個數字一樣")
+	if all_dts.size() != pass_n + other_n:
+		push_error("[PP][FAIL] B3 母體 %d ≠ pass %d + 非pass %d ⇒ 有 tick 沒被收進來" % [
+			all_dts.size(), pass_n, other_n])
+		fail += 1
+	cells += 1
 	cells += 1
 
 	# ── ★★★self 化（★用 production 自己的 `PHASE_PARENT`，不自己發明巢狀表）──
@@ -269,9 +290,9 @@ func _initialize() -> void:
 	print("[誠實限]   那個 I/O 在 dt 量完【之後】發生,但會壓到【下一個 tick】的量測")
 	print("[誠實限] ②相位只涵蓋有掛 label 的段落 ⇒ 見涵蓋率那一格,不可當成 100%%")
 	print("[誠實限] ③時間數字只能跟【同一顆 CPU】的數字比（見卷首 [HW] 行）")
-	print("=== pass_tick_phase_breakdown DONE（fail=%d｜到場點名 %d／8）===" % [fail, cells])
-	if cells != 8:
-		push_error("[FAIL] 到場點名 %d／8 ⇒ 有格沒跑到" % cells)
+	print("=== pass_tick_phase_breakdown DONE（fail=%d｜到場點名 %d／9）===" % [fail, cells])
+	if cells != 9:
+		push_error("[FAIL] 到場點名 %d／9 ⇒ 有格沒跑到" % cells)
 		fail += 1
 	quit(1 if fail > 0 else 0)
 
