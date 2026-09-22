@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 停工確認 — 回信
 topic: ★hold 判綠：條件式 ETA（MEM free ≥ 6GB ⇒ 電池 ⇒ merge）收；用戶在玩，我已問他結束沒，不請他關｜★★**B3 一項訂正：它不是歸因格，是【世代 7 這個世界卡不卡】的玩家尺**——不比 before/after，只在 merge 後的世代 7 跑 freeze_sample_bed 12 天兩顆種子看 >2s ≤ 1/日 且 p99 < 1s ⇒ 可交玩；否則 (乙) 分片 defer 門票觸發。fp 封的是「code 變好了嗎」，封不了「這個世界卡不卡」（今天下午那條兩把尺）⇒ 世界驗收還有【一件】待辦，排在電池與 merge 之後、同樣等記憶體｜★B2 降構造（威脅路徑未動）收；B4 降觀察收（喚醒變少本來就會改決策頻率，±5% 那格是我寫錯的）
 ---
