@@ -1224,14 +1224,14 @@ func evaluate_all(state: WorldState, team_ids: Array) -> void:
 
 # ★loop2／loop3 的公開入口：registry 各自一列，吃 due_teams。
 func evaluate_loop2(state: WorldState, team_ids: Array) -> void:
-	_loop2_teams(state, team_ids)
+	_evaluate_loop2_teams(state, team_ids)
 
 func evaluate_loop3(state: WorldState, team_ids: Array) -> void:
-	_loop3_teams(state, team_ids)
+	_evaluate_loop3_teams(state, team_ids)
 
 # ★★★勢力粒度的入口：吃【這顆 tick 到期的勢力】。
 func evaluate_factions(state: WorldState, faction_ids: Array) -> void:
-	_loop1_factions(state, faction_ids)
+	_evaluate_loop1_factions(state, faction_ids)
 	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
 	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
 	SpecimenTracer.heartbeat_sweep(state)
@@ -1290,7 +1290,7 @@ static func factions_of(state: WorldState, team_ids: Array) -> Array:
 #   ★★★registry 上那一列叫 `faction_ai` —— 而它跑的是勢力＋兩個 per-team 系統
 #     ⇒ 「綱要與簽章都會說謊」這一次說謊的是【名字】。
 
-func _loop1_factions(state: WorldState, faction_ids: Array) -> void:
+func _evaluate_loop1_factions(state: WorldState, faction_ids: Array) -> void:
 	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,T3追查)：本函式呼叫次數+factions是否為空+代表性tick值
 		Probe.bump("evaluate_all_body.entry")
 		Probe.add_amount("evaluate_all_body.factions_size_sum", float(state.factions.size()))
@@ -1403,7 +1403,7 @@ func _loop1_factions(state: WorldState, faction_ids: Array) -> void:
 
 # ★loop2（隊粒度）：子隊評估／獨立策略／成員策略 ＋ merge_queue 的消費。
 #   ★★吃【這一批】：舊寫法 `for tid in state.teams` 是全世界。
-func _loop2_teams(state: WorldState, team_ids: Array) -> void:
+func _evaluate_loop2_teams(state: WorldState, team_ids: Array) -> void:
 	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var merge_queue: Array = []
 	# ★★★迴圈頭保持原樣（走 state.teams 的【當下】快照），錯開只是【過濾】。
@@ -1505,7 +1505,7 @@ func _loop2_teams(state: WorldState, team_ids: Array) -> void:
 	if SimRunner.phase_timing: _t = _fai_pht("loop2b.merge", _t)
 
 # ★loop3（隊粒度）：滅團／繼承／野心與訂單排程／威脅／據點／雜項。
-func _loop3_teams(state: WorldState, team_ids: Array) -> void:
+func _evaluate_loop3_teams(state: WorldState, team_ids: Array) -> void:
 	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	# ★同 loop2：迴圈頭保持 keys() 快照（滅團可安全 erase），錯開只是過濾。
 	var _bset3: Dictionary = {}
