@@ -101,7 +101,13 @@ fi
 #     **它拓得到的是更糟的那一種**：錯字被寫進 hook／spec／code 字串 ⇒ **永久失效而沒有人會發現**。
 # ================================================================
 SIMP_CHARS="滞决别场单发网转类规时实现应断检测树数点问题边过还这个们为说会来对从与样复机义买卖总结论变条级学习记录两颗种"
-simp_list=$(grep -rl "[$SIMP_CHARS]" docs .claude/hooks scripts   --include="*.md" --include="*.sh" --include="*.gd" --include="*.tsv"   --exclude-dir=archive --exclude-dir=_archive --exclude-dir=measurements 2>/dev/null \n  | grep -v "doc-line-cap.sh")   # ★排掉偵測器自己：它的對照表就是那些字（自我命中＝雜訊）
+simp_list=$(grep -rl "[$SIMP_CHARS]" docs .claude/hooks scripts   --include="*.md" --include="*.sh" --include="*.gd" --include="*.tsv"   --exclude-dir=archive --exclude-dir=_archive 2>/dev/null \n  | grep -v "doc-line-cap.sh")   # ★排掉偵測器自己：它的對照表就是那些字（自我命中＝雜訊）
+# ★★★2026-09-23：拿掉 `--exclude-dir=measurements`（用戶硬規：正體中文無例外）。
+#   ★而它是【零成本】的：用本閘自己的 include 過濾量過——納入前後都是 13 檔，**零新增**。
+#   ★★因為本閘只掃 *.md *.sh *.gd *.tsv，而那個目錄底下的命中全在 *.txt。
+#   ★★★systems 自訂：我先前報的「16 檔」是用【不帶 include 過濾】的 grep 量的
+#     ⇒ 量的不是要被決定的那件事。判準句：**量的時候要用【那支閘自己的過濾】**。
+#   ★代價：未來寫在 measurements 裡的 .md 卷面會被掃到 —— 那正是目的。
 simp_n=$(printf "%s" "$simp_list" | grep -c . )
 simp_hits=$(printf "%s" "$simp_list" | head -6 | sed 's/^/\n  ★/')
 

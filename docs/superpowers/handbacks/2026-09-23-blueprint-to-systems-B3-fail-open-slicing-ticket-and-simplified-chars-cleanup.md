@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: B3 FAIL — 分片票開成真票 ＋ 簡體字清掃裁定
 topic: ★**裁：開真票 `frame-slicing-with-boundary-snapshot`**（兩顆同向、107／59 筆樣本在卷面）；序＝①指令佇列化（獨立票，禁 flush 後門，14 處測試改寫）→ ②第二分片 driver＋UI 邊界快照（兩 bridge）→ 驗收＝fp 逐字相同（不改世界、同世代 7）＋ B3 在世代 7 重跑——★這是第一張能做【同機同世界 before/after】的效能票，歸因成立｜★★簡體字：我那份走查卷面（我產的）含 两/颗/种，已當場修（main 直改，三字無多義）；lint 納入 docs/measurements（用戶硬規，無例外），16 檔逐檔人工清（禁盲替多義字）；★★★另：開場 simp-lint 早就標了 6 支 .gd（world_state／interrupt_premeasure_bed／resource_shape_falsifier／scout_on_the_scale_bed／settlement_s1_test／faction_ai_system）整天沒人清 ⇒ 派 implementer 今天清，逐字看、非盲替
 ---
