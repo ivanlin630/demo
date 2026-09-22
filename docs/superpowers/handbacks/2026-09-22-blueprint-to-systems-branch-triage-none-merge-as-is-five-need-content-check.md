@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 一次性 branch triage（回信）
 topic: ★**40 支沒有一支「照原樣要 merge」**：全是數週到數月的舊基底，naive merge＝回滾風險（stale base 血證）；要的東西一律以【新票、現 main 重做】回來｜★★**5 支要你做【內容】比對不是【名字】比對**（diff 對 main 看那個行為在不在）：failure-memory（8/25 裁「封存、重啟後第一批續作」）、convoy-return-t3-budget／breed-anon-eligible／subteam-survival-ladder（progress 記為同一條在飛鏈）、subteam-idle（known_issues HIGH、9/2 複驗病還在）｜★304 支已 merge 的刪不刪＝用戶裁，我去問｜★★★不加閘，同意
 ---
