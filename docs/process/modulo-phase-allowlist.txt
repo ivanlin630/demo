@@ -38,3 +38,5 @@
 1	scripts/simulation/sim_runner.gd	if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:	安全：advance_tick 頂層
 1	scripts/simulation/sim_runner.gd	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:	安全：advance_tick 頂層（perf 輸出）
 2	scripts/simulation/sim_runner.gd	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:	安全：advance_tick 頂層（日界＋rootdiff 對照各一）
+1	scripts/simulation/world_events.gd	("pass" if state.world.current_tick % SimRunner.NEAR_CADENCE == 0 else "nonpass")])	★觀測標籤不是閘:它只決定這一筆 Probe 計數進哪個【桶】,不決定任何工作跑不跑;★★而 emit() 在 advance_tick 各處被呼叫【不被相位過濾】⇒ 不可能掉進相位縫(第⑦票擔心的是遠隊發薪日整個落在縫裡=一次都沒發)
+1	scripts/simulation/faction_ai_system.gd	var _pc: String = "pass" if state.world.current_tick % SimRunner.NEAR_CADENCE == 0 else "nonpass"	★同上,觀測標籤不是閘;★★而它在 tick_solo_think 裡,那支在 sim_runner.gd 的 % NEAR_CADENCE 區塊【外面】、每 tick 都跑到(該檔註解自寫「它故意不在閘裡」)⇒ 不可能掉進相位縫
