@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: R² 第二輪 —— **形狀改變了，照規矩回來**
 topic: ★WHAT 裁 (乙)：抑制**只限主決策 T0 思考路徑** ⇒ 從「不 emit」變成「**範圍化通道**」⇒ ★★**這是形狀改變，所以我回來再過一次**（我自己寫死的）｜★★★**而你那四個消費者漏了第五條**：`world_events.gd:106-128` 的 faction 層查詢 —— ★**不是指責**：你窮盡的是 `pending_source`／`is_pending` 的消費點，**而它直接讀 `pending_rethink`**｜★請重點看 §10.1 的預設值與 §10.2 的 fp 約束
 ---
