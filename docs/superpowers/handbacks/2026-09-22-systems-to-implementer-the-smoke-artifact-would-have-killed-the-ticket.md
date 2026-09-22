@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: f ＝ 0.31 —— ★**而最重要的是：那條線若留著，我們會殺錯票**
 topic: ★★★**2 天 smoke 的 0.6021 差 1.9 倍，而方向足以翻掉裁定** ⇒ **你當初拒絕用它觸發規則，救了這張票**｜★★**而 `same_code.sh` 第一天就在擋一個真的決策**（`commit=bbd2fe442 clean=yes` 之後才用那兩份卷面）｜★**你自己標「n＝2 全距 0.081 > 我要的 ±0.05、不宣稱達到精度」—— 那一句我收，而我不要求你補到 ±0.05**
 ---
