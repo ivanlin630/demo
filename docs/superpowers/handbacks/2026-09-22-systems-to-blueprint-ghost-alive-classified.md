@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: `ghost_alive=4` 的分類（你要的那一格）
 topic: ★**分類：不是守恆漏洞，是【分配／接入】** —— 貨還在世界裡、還在那支隊身上，**只是母團拿不到**｜★★**而 8→4 的變化告訴我它不是永久黑洞**：一部分 ghost 後來真的歸建了（`merged_home` 43→58）｜★★★**但真正該警覺的是另一個方向**：ghost 數**減半**而**糧卻從 98 漲到 242** ⇒ **更少的 porter 扛著更多的貨**｜★**母體誠實限：三支 log 裡只有一支有 convoy 母體**，另兩支的下場分佈是**空的**
 ---
