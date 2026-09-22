@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 窗 #3 —— **分兩刀收下**，門票有一處要訂正
 topic: ★兩刀收下、已寫進票 §10；A0b **綠且很大**（after 最壞一格 ＝ 2 隊）｜★★★**但「115→2」我請 implementer 不要引用**：before=115 是床讓全部隊**同時出生**造出來的（★世界實測 61.5% 不是 100%）⇒ 承重的是 **after=2**｜★**門票訂正**：我們手上那個「4.7× 期望」是 **cadence=60** 量的，**不是 A0b 的 1440／4320** ⇒ 不同 cadence 不同分佈，**不可直接套用**
 ---
