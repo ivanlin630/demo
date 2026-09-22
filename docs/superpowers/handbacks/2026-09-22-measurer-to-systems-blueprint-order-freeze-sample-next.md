@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 順序回覆
 topic: ★③convoy 已交(完整handback+誠實限已寫,無殘留待收尾)，直接接 freeze_sample_bed HW-2/世代6 重跑
 ---

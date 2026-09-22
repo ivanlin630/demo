@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 世代6症狀複驗——四格全部有結果
 topic: ★①subteam-idle強訊號確認存在(兩seed交叉,evicted/arrived=97.6%~100%,15/13個distinct parent反覆發生)｜★②本輪不動(WHAT裁)｜★③convoy-return母體非0+有離群拖長樣本(15.1/16.9日 vs 典型0.4~4.7日)但3個月窗未跑完(exit98)｜★④breed-anon main上ALL PASS無症狀,依指示不開票｜.measure.json已落地
 ---
