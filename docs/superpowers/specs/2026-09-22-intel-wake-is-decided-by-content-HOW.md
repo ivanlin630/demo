@@ -1,7 +1,7 @@
 ---
 slice: 情報瞬醒改由**內容**決定（威脅才瞬醒，其餘折進下一次排定思考）
 owner: systems
-status: ★**R² CLEAN**（2026-09-22）⇒ **第 0 步（量 f）已派**：`docs/superpowers/handbacks/2026-09-22-systems-to-implementer-DISPATCH-step-zero-measure-f-only.md`；★★★**實作未派** —— 等 WHAT 回 §8.3（三個無關消費者要不要連帶延遲），★形狀若改變要回頭再過一次 R²
+status: ★**WHAT 裁 (乙)：限定思考路徑**（2026-09-22）⇒ ★★★**形狀改變 ⇒ 已送回 R² 再審一次**；第 0 步（量 f）已派且不受影響；★實作仍 hold
 基於: DIAG 票 `2026-09-22-the-hourly-whole-world-pass-DIAG.md` §11；WHAT 裁定 2026-09-22（喚醒語意）
 ---
 
@@ -162,3 +162,55 @@ R² 窮盡了全部消費點（`scripts/simulation/`，排除 debug）——★*
    ⇒ ★若它不紅，代表 fingerprint 跟舊標記**混雜命中或漏抓**（★該機制有 collision 前科）。
 ```
 
+---
+
+# §10 ★★★WHAT 裁 (乙)：**抑制限定在主決策 T0 思考路徑** —— 形狀改變 ⇒ **本票回頭再過一次 R²**
+
+```
+裁定：INDEP_INFRA／LADDER／GOAL **行為不動**；
+     「共用同一根水管」不是改它們的理由；它們該不該對非威脅情報變遲鈍 ＝ **另一張票**
+⇒ ★★這改變了修法形狀（從「不 emit」變成「範圍化」）
+⇒ ★★★照本票 §7 與我自己對 R² 的承諾：**形狀改變 ⇒ 回頭再過一次 R²**。
+```
+
+## §10.1 ★設計（HOW 自治）：**emit 端一個旗標，預設維持現狀**
+
+```gdscript
+# world_events.gd:64
+static func emit(state, kind, subjects, wake_thinking: bool = true) -> void:
+    for tid in subjects:
+        state.pending_rethink[id] = true                  # ★三個既有消費者：一行都不動
+        if wake_thinking: state.pending_think[id] = true  # ★新：只有思考路徑讀它
+# belief_system.gd:293 —— ★唯一傳 false 的呼叫點
+```
+★★★**為什麼預設 `true`**：**任何未來新增的 emit 都會【自動】維持瞬醒**
+   ⇒ **構造保證** —— 不會因為有人漏改一處而靜默失去瞬醒（★清單保證會）。
+★**思考路徑改讀 `pending_think`**：`faction_ai_system.gd:8081` 的 `_woke`
+   ⇒ ★★**它仍然吃得到其餘 11 種事件**（被襲等）—— **護欄①不受影響**
+
+## §10.2 ★★★兩條硬約束（★讀 code 才看得到，不讀會踩）
+
+```
+①**新集合必須在同一點清空**：`world_events.gd:171 state.pending_rethink.clear()`
+   ⇒ ★`world_events.gd:6` 明寫：**pending_rethink 不入 `state_fingerprint` 的正當性基礎
+     ＝【單 tick 內清空】** ⇒ ★★**新集合不同步清 ⇒ 它就得入 fp** ⇒ **fp 語意當場破掉**
+②**`world_state.gd:156` 旁邊加欄位**，且**同樣不入 `state_fingerprint`**（理由同①）
+```
+
+## §10.3 ★我發現 R² 的四個消費者**漏了第五條路徑**
+
+```
+`world_events.gd:106-128`：**faction 層的查詢**（★直接讀 `pending_rethink`，換一個索引）
+  註解自己寫著：「**這不是第二套機制 —— 它讀的是同一份 `pending_rethink`**」，服務**五支 T3 節點**
+⇒ ★**它算不算「主決策 T0 思考路徑」？** —— **裁定的字面沒有涵蓋它**
+⇒ ★★★**我用 WHAT 自己的原則預設處置：不動它**（保守側 ＝ 行為不變）
+⇒ **它繼續讀 `pending_rethink`** ⇒ 行為零改變；★**並列進同一列 defer**。
+```
+
+## §10.4 defer（★**觸發條件寫成機械的**）
+
+```
+本票量 f 那一步**順手印每個消費者的 woke 份額**（含 §10.3 的 faction 路徑）
+⇒ ★**若這四條非思考路徑合計 ≥ 20% 的尖峰** ⇒ **開新票各自裁**
+⇒ ★★**不是「有人記得」** —— 已登進 `docs/process/defers.tsv`（`t0-wake-nonthinking-consumers`）
+```

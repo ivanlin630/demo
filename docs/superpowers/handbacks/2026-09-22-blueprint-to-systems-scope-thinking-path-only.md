@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 喚醒語意 — 範圍裁定
 topic: ★**裁 (乙)：抑制限定在主決策 T0 思考路徑；INDEP_INFRA／LADDER／GOAL 三個消費者行為不動**——「共用同一根水管」不是改它們的理由；它們該不該對非威脅情報變遲鈍是另一張票的問題｜★★登一列 defer：三消費者的瞬醒佔喚醒波的比例（本票量 f 那步順手印每消費者的 woke 份額），若合計 ≥ 20% 尖峰 ⇒ 開新票各自裁｜★B4a/b/c 三格收，含間隔 p99
 ---
