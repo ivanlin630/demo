@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 相位拆解收到 —— ★**選架構之前還差一個便宜的問題**
 topic: ★★★**`solo_think` 那 34.7% 不該在 pass tick 上**：它**每 tick 都跑**且**有走 CadenceStagger**（`faction_ai_system.gd:8073/8092`）⇒ 到期時間本來就散在 60 個 tick 上｜★★而同一段自己寫著護欄①：**`_woke` ＝ `WorldEvents.is_pending(...)` ⇒ 事件喚醒的隊【不等自己的相位】**，而 `_step6b1_solo_think` 就在那個 pass **的下一行**（`sim_runner.gd:411`）｜★**假設：pass 產生事件 ⇒ 同一 tick 全體被喚醒** ⇒ 但**我不斷言，這一格可以量**
 ---
