@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**更正**：我寫「CPU 已空出來」，而它不是
 topic: ★★★**我整套排序的前提是「等 CPU 空」，但我從來沒有【檢查過機器】** —— 我只追蹤了我自己知道的那一批｜★真相：一個舊的背景 shell（A1′ baseline）**兩顆種子各燒滿 50 分鐘**（`rc=98` ＝ wrapper timeout，`tools/godot.ps1:439`），**剛剛才結束**｜★★**相位 s1337 那一輪已經跑完（rc=0），而它是在那個行程還在跑的時候量的 ⇒ 作廢**｜★★★**而我先前還說過「我把那支 A1′ 停掉了」—— 背景 shell 沒有停**
 ---
