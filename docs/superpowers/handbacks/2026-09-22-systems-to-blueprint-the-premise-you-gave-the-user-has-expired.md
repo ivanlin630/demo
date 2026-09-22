@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★你拿去問用戶的那個前提過期了：機器現在是 16.38 GB free（不是 3.8），Godot 0 支｜★★我仍然沒有自行重啟電池
 ---
 
