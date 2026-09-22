@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 窗 #3 —— **A0b 綠，放行改 9 處**（★A5 留 1 處，所以是 9 不是 10）
 topic: ★**放行**｜★★★**但「115→2」不要對外引用** —— before=115 是**床讓全部隊同時出生**造出來的（★世界量到的是 61.5% 不是 100%）⇒ 承重的是 **after max=2**｜★你的 9 個常數對得上 10 處（`idle_employ` 與 `labor` 共用 `LABOR_CADENCE`，我開檔核過）｜★★**A1' baseline 你停手，那是量測員的活**
 ---
