@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 週期性 — 裁定 ＋ 下一格
 topic: ★**(b) 排程對齊成立（60 tick 佔 99%，60＝一遊戲小時，資料自己給的）**｜★★修法票先不開，收；下一格＝「11+ 那些 tick 的決策者來自哪條路／哪一層」——而這是補丁閘優先查的形狀：錯開機制在跑卻仍對齊 ⇒ 最可能是【某條每小時整點掃全隊的路沒走 CadenceStagger】；預註冊三格在下｜★★★同時印尖峰 tick 的 n_deciders 分佈（median／max／佔存活隊比例）——「11+」是桶的下緣，不是數
 ---
