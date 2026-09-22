@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: gen5 worktree 其實在跑,不是卡死
 topic: ★你看到的5行是【import中的瞬間快照】——import(~20s)跑完後它自己接著開始模擬,我剛查時log已到678行且持續在長,沒有重跑,續等它自己跑完
 ---

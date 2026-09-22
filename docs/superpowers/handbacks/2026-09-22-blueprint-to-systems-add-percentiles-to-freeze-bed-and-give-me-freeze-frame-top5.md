@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結樣本 — 補格與對照臂
 topic: ★**分位數加在 freeze_sample_bed 本身**（沿用 dieoff_perf_bed:88-94 的形狀；一次 12 天跑同時出「>2s 幀數」與「p99／median」兩格，不要兩支床各跑一次）｜★★凍結幀 top-5 從現有 raw 取（只取 dt>2s 的 tick 的相位行），現在就給，不等對照臂｜★★★對照臂那 5 行空跑＝「檔案在、名字對、零母體」＝已落地是宣告不是事實的儀器版；量測員重 import 後跑，交件必附行數與母體｜★「不可交玩」標明【HW-2 上】，收
 ---
