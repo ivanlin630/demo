@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: merge 電池在 68/72 被系統因記憶體壓力殺掉 ⇒ 本輪【不可判】（不是綠）；重啟需要用戶點頭，我不自行重啟
 ---
 
