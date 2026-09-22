@@ -1,0 +1,36 @@
+{
+  "slice": "凍結樣本 gen5 vs gen6 同機對照(HW-2)——完整四輪(2seed x 2gen)",
+  "bed": "scripts/debug/freeze_sample_bed.gd",
+  "window": "12天(17280 tick)",
+  "hardware_stamp": "[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16",
+  "gen6": {
+    "commit": "6d264fd01",
+    "world_note": "世代6邊界(3fb2c3201)後的production code,含觀測雜訊決定性化等票",
+    "seed1337": {"hit": 78, "population": 17280, "ratio": "0.45%", "median_us": 160, "p90_us": 271, "p99_us": 1037830, "max_us": 4175875, "final_teams": 117},
+    "seed42":   {"hit": 45, "population": 17280, "ratio": "0.26%", "median_us": 154, "p90_us": 241, "p99_us": 1059552, "max_us": 3055013, "final_teams": 113}
+  },
+  "gen5": {
+    "commit": "06426b0b1",
+    "world_note": "世代6邊界的父commit,worktree .worktrees/gen5-freeze-recheck,percentile patch本地覆蓋(不進歷史)",
+    "seed1337": {"hit": 57, "population": 17280, "ratio": "0.33%", "median_us": 153, "p90_us": 262, "p99_us": 968711, "max_us": 3557259, "final_teams": 108},
+    "seed42":   {"hit": 68, "population": 17280, "ratio": "0.39%", "median_us": 152, "p90_us": 216, "p99_us": 1238812, "max_us": 3106010, "final_teams": 112}
+  },
+  "share_vs_rank_control": {
+    "target_phase": "misc.equip_mobilize",
+    "seed1337": {"freeze_median_pct": 20.51, "control_median_pct": 17.44, "delta_pp": 3.07},
+    "seed42":   {"freeze_median_pct": 17.31, "control_median_pct": 17.38, "delta_pp": -0.07},
+    "verdict": "排名富集(52.9%vs33.3%)大半是尺寸效應;佔比對照兩seed不一致(一有小幅富集一無)⇒訊號不夠穩,不指名優化目標"
+  },
+  "honest_limit": "★gen5/gen6是【兩個不同的世界】(觀測雜訊決定性化票2-f明文要求fp改變,卷面記3c69fea3…⇒14e5eacd…)⇒同機排除了硬體confound但排除不了世界差異confound；★★兩seed方向不一致：seed1337顯示gen6全指標更卡(78幀/median160/p99 1.04s/max4.18s > gen5 57幀/median153/p99 0.97s/max3.56s)，seed42方向部分相反(gen6 45幀 < gen5 68幀；p99 gen6 1.06s < gen5 1.24s；median/p90 gen6略高)⇒沒有跨seed一致的方向，無法下「世代6的世界比較忙」或「code變快/變慢」的穩定結論。要比code本身需挑不改變世界(fp逐字相同)的票做同世界對照，本輪未做。",
+  "raw_logs": [
+    "docs/measurements/freeze-sample-12days-gen6hw2-seed1337-v2perf.log",
+    "docs/measurements/freeze-sample-12days-gen6hw2-seed42-v2perf.log",
+    "docs/measurements/freeze-sample-12days-gen5hw2-seed1337.log",
+    "docs/measurements/freeze-sample-12days-gen5hw2-seed42.log",
+    "docs/measurements/freeze-top5-seed1337.txt",
+    "docs/measurements/freeze-top5-seed42.txt",
+    "docs/measurements/freeze-share-vs-rank-seed1337.txt",
+    "docs/measurements/freeze-share-vs-rank-seed42.txt"
+  ],
+  "summary": "四輪(2gen x 2seed)全部完整跑完(17280/17280,child exit=0)。方向不一致⇒無法下gen5/gen6孰快孰慢的結論(這本身也是本輪的產出:證明這條比較路徑在構造上走不通)。share-vs-rank確認尺寸效應假說,原本排名富集訊號不夠穩。"
+}
