@@ -221,7 +221,7 @@ static var SYSTEMS: Array = [
 	{"name": "consumption", "grp": "stag",      "fn": "_step6_resolve_consumption","shape": "teams_cadence", "tl": ""},
 	{"name": "salary", "grp": "stag",           "fn": "_step6c_salary",            "shape": "teams",         "tl": ""},
 	{"name": "fatigue", "grp": "stag",          "fn": "_step6d_fatigue",           "shape": "teams_cadence", "tl": "near.consume"},
-	{"name": "faction_ai", "grp": "stag",       "fn": "_step6b_faction_ai",        "shape": "teams",         "tl": "near.faction_ai"},
+	{"name": "faction_ai", "grp": "stag",       "fn": "_step6b_faction_ai",        "shape": "factions",      "tl": "near.faction_ai"},
 	{"name": "info_dispatch", "grp": "stag",    "fn": "_step6b2_info_dispatch",    "shape": "teams",         "tl": "near.faction_ai"},
 	{"name": "training", "grp": "stag",         "fn": "_step6f_training",          "shape": "teams",         "tl": ""},
 	{"name": "strategic_ai", "grp": "hour",     "fn": "_step6e_strategic_ai",      "shape": "state",         "tl": "near.strategic_ai"},
@@ -323,6 +323,32 @@ static func _note_pass_gap(tid: int, cur: int) -> void:
 # ★★★哪些隊在這顆 tick 到期。
 #   ★回傳必須是 `all_teams` 的【子序列】：照 state.teams.keys() 的順序過濾，
 #     ★★不得用 Dictionary／Set 重建 —— 同一集合 ≠ 同一順序，而順序決定先到先得。
+# ★★★勢力粒度的到期（錯開票 (乙)，systems 裁 2026-09-23）。
+#   ★為什麼不能跟著成員隊：faction_ai 只要批次裡有一個成員到期，
+#     就把【整個勢力】的活做一遛 ⇒ 隊粒度錯開之下，
+#     一個 M 成員的勢力每小時被做 ~M 次而不是 1 次。
+#   ⇒ ★★那不是「慢」是【重複執行】（行為改變），
+#     而 faction-drive-once 那一列的 per_hour_max=1 就是來擋這個的。
+#   ★★★而【不能只把 grp 改回 hour】：那樣 faction_ai 只在 % 60 == 0 被呼叫，
+#     相位不是 60 倍數的勢力永遠等不到 —— 正是 §2 那個取樣格的坑，換個地方再踩一次。
+func _collect_due_factions(state: WorldState, cur: int, hour_tick: bool) -> Array:
+	var due: Array = []
+	for fid in state.factions:
+		var f = state.factions[fid]
+		if f == null:
+			continue
+		if not WorldState.pass_stagger_enabled:
+			if hour_tick:
+				due.append(fid)
+			continue
+		if f.pass_next_tick == 0:
+			f.pass_next_tick = CadenceStagger.next_tick(cur, cur, int(fid), NEAR_CADENCE)
+			continue
+		if cur >= f.pass_next_tick:
+			due.append(fid)
+			f.pass_next_tick = CadenceStagger.next_tick(cur, cur, int(fid), NEAR_CADENCE)
+	return due
+
 func _collect_due_teams(state: WorldState, all_teams: Array, cur: int, hour_tick: bool) -> Array:
 	var due: Array = []
 	for tid in all_teams:
@@ -359,7 +385,7 @@ func _collect_due_teams(state: WorldState, all_teams: Array, cur: int, hour_tick
 			team.pass_next_tick = CadenceStagger.next_tick(cur, cur, int(tid), NEAR_CADENCE)
 	return due
 
-func _run_systems(state: WorldState, teams: Array, due_teams: Array, hour_tick: bool,
+func _run_systems(state: WorldState, teams: Array, due_teams: Array, due_factions: Array, hour_tick: bool,
 		cadence: int, vmult: float, smult: float, t_in: int) -> Dictionary:
 	check_registry_assumptions()   # ★首次 dispatch 檢查一次（旗標短路，之後零成本）
 	var _t: int = t_in
@@ -381,10 +407,14 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, hour_tick: 
 		#   ★已知確實會在空批次下做事的一支：manufacturing_system.gd:132 的假設檢查
 		#   （掛在 for 之前、由 Probe.enabled 守）⇒ 不跳過的話每小時被評 60 次而不是 1 次。
 		#   ★★因此跳過必須在 _pht 之前（否則相位計時表會多出 60 倍的零成本取樣點）。
-		if not is_hour and due_teams.is_empty():
+		# ★空批次判斷要【跟著該列的粒度】：faction_ai 吃勢力批次，其餘吃隊批次。
+		#   ★★用錯邊的話：有勢力到期而沒隊到期時 faction_ai 會被跳過（静默漏做）。
+		var is_fac: bool = String(sys["shape"]) == "factions"
+		var batch_empty: bool = due_factions.is_empty() if is_fac else due_teams.is_empty()
+		if not is_hour and batch_empty:
 			continue
 		# ★錯開組吃【這顆 tick 到期的隊】；整點組仍吃全部隊。
-		var batch: Array = teams if is_hour else due_teams
+		var batch: Array = due_factions if is_fac else (teams if is_hour else due_teams)
 		# ★★★診斷用：逐支系統的【呈叫次數】（純記帳，Probe 之下）。
 	#   ★為什麼數呈叫次數而不用 phase_timing：_pht 是【鏈式】的
 	#     （_t = _pht(label, _t)，每個 label 記的是「上一個檢查點到現在」），
@@ -401,6 +431,7 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, hour_tick: 
 			player_old = _get_player_tile_pos(state)
 		match String(sys["shape"]):
 			"vision":        call(fn, state, batch, vmult)
+			"factions":      call(fn, state, due_factions)
 			"teams":         call(fn, state, batch)
 			"teams_cadence": call(fn, state, batch, cadence)
 			"moved":         call(fn, state, moved, batch)
@@ -476,6 +507,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	var hour_tick: bool = cur_t % NEAR_CADENCE == 0
 	var all_teams: Array = state.teams.keys()
 	var due_teams: Array = _collect_due_teams(state, all_teams, cur_t, hour_tick)
+	var due_factions: Array = _collect_due_factions(state, cur_t, hour_tick)
 	if hour_tick:
 		# ★驗收②的機具：每隊【真的被排進這個 pass 幾次】——
 		#   ★★分班拆掉之後這格應該【逐隊相同】，而「應該相同」要被量不是被相信。
@@ -519,8 +551,8 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		if phase_timing: _t = _pht("near.forced_event", _t)
 	# ★第⑧票：單一 pass 走 SYSTEMS registry（含分組 _pht + glue）。
 	#   ★★錯開票：整點 tick 跑兩組；非整點 tick 只在【有隊到期】時跑錯開組。
-	if hour_tick or not due_teams.is_empty():
-		var pass_r: Dictionary = _run_systems(state, all_teams, due_teams, hour_tick,
+	if hour_tick or not due_teams.is_empty() or not due_factions.is_empty():
+		var pass_r: Dictionary = _run_systems(state, all_teams, due_teams, due_factions, hour_tick,
 			NEAR_CADENCE, time_vision_mult, time_speed_mult, _t)
 		_t = pass_r["t"]
 		if pass_r["result"] == "player_turn": return "player_turn"   # 伏擊起 encounter → 交還 bridge
@@ -745,8 +777,9 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 				if p: LoyaltyBank.adjust(p, -FATIGUE_LOYALTY_PENALTY, "fatigue")
 
 
-func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
-	_faction_ai_system.evaluate_all(state, team_ids)
+# ★錯開票 (乙)：收【勢力 id】不是隊 id —— 因為這支系統本來就是勢力粒度的。
+func _step6b_faction_ai(state: WorldState, faction_ids: Array) -> void:
+	_faction_ai_system.evaluate_factions(state, faction_ids)
 
 func _step6b2_info_dispatch(state: WorldState, team_ids: Array) -> void:
 	# ★資訊網 Part2 (a) side-action：求援/偵察 平行 side-dispatch（脫主 argmax、每 team 評 mini-util cost-benefit）。

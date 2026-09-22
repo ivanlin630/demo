@@ -1209,8 +1209,14 @@ static func _fai_pht_s(name: String, t0: int) -> int:
 #   ⇒ ★★clear 與 dump 都搬到 `sim_runner`（tick 開始清、tick 結束判並印）
 #     ⇒ faction 側與 solo 側在【同一本帳】裡，self_us 才有意義。
 #   ⇒ ★★★而兩個容器的數字【永遠不可相加】，即使統一之後也不能回頭加舊表。
+# ★既有 API（床與測試仍用它）：從【隊批次】推出勢力集合再做。
+#   ★★production 路徑已改走 evaluate_factions（勢力粒度相位）。
 func evaluate_all(state: WorldState, team_ids: Array) -> void:
-	_evaluate_all_body(state, team_ids)
+	evaluate_factions(state, factions_of(state, team_ids))
+
+# ★★★勢力粒度的入口：吃【這顆 tick 到期的勢力】。
+func evaluate_factions(state: WorldState, faction_ids: Array) -> void:
+	_evaluate_all_body(state, faction_ids)
 	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
 	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
 	SpecimenTracer.heartbeat_sweep(state)
@@ -1249,7 +1255,18 @@ static func _note_faction_drive(state: WorldState, fid: int) -> void:
 	Probe.note("faction.drive.per_hour_max", float(n))
 	Probe.bump("faction.drive.total")
 
-func _evaluate_all_body(state: WorldState, team_ids: Array) -> void:
+# ★從隊批次推出勢力集合，★★照 `state.factions` 的原順序回傳（構造保證）。
+static func factions_of(state: WorldState, team_ids: Array) -> Array:
+	var batch: Dictionary = {}
+	for t in team_ids:
+		batch[int(t)] = true
+	var out: Array = []
+	for fid in state.factions:
+		if _faction_due(state, state.factions[fid], batch):
+			out.append(fid)
+	return out
+
+func _evaluate_all_body(state: WorldState, faction_ids: Array) -> void:
 	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,T3追查)：本函式呼叫次數+factions是否為空+代表性tick值
 		Probe.bump("evaluate_all_body.entry")
 		Probe.add_amount("evaluate_all_body.factions_size_sum", float(state.factions.size()))
@@ -1263,12 +1280,13 @@ func _evaluate_all_body(state: WorldState, team_ids: Array) -> void:
 	# ★★而迴圈順序是【設計約束】不是意圖句：這裡仍然走 `state.factions` 的原順序，
 	#   只把【不屬於這一批】的派系 `continue` 掉。
 	#   ⇒ ★★★順序相等是【構造保證】，不是事後靠指紋去發現。
-	var _batch: Dictionary = {}
-	for _bt in team_ids:
-		_batch[int(_bt)] = true
+	var _due: Dictionary = {}
+	for _bf in faction_ids:
+		_due[int(_bf)] = true
+	# ★仍然走 `state.factions` 的原順序，只把不在這一批的 continue 掉。
 	for fid in state.factions:
 		var f = state.factions[fid]
-		if not _faction_due(state, f, _batch):
+		if not _due.has(int(fid)):
 			continue
 		_note_faction_drive(state, int(fid))
 		var _tf: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
