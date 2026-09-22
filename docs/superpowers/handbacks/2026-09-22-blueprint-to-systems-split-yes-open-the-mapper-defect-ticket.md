@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: walkthrough-v2 拆兩件 — 裁定
 topic: ★**(乙) 開票：player_api_mapper 只認 Dictionary、世界寫的是 MessageData（5/5）⇒ 玩家看到的每則事件印成 RefCounted#… ＝ 玩家看得到的缺陷，現在就在 main 上；獨立票、R² ⇒ 實作，不等尋找**｜★★缺陷要變成對照：兩支綠床餵的是自己 append 的 Dictionary＝測具形狀≠世界形狀 ⇒ 票內必含一格「餵真世界型別（MessageData）」的床或把那兩支改成餵真型別，且陽性對照＝拿掉修正必紅｜★(甲) 照原門票｜「debug only」是我看了檔名沒看 diff 說的，錯在我
 ---

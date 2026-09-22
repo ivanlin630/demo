@@ -1,0 +1,95 @@
+# 事件流渲染讀錯形狀（HOW spec）
+
+**開票**：blueprint 2026-09-22（(乙) 拆出獨立票，不等那場尋找）
+**狀態**：待 R²
+**範圍**：`scripts/simulation/player_api_mapper.gd` 一支函式 ＋ 兩支床的餵料形狀
+**不碰**：`feat/walkthrough-v2` 的診斷床（那是 (甲)，照原門票等用戶找完）
+
+---
+
+## §1 缺陷（file:line，兩邊都列出來比）
+
+**世界寫進去的形狀**——5／5 個 production 寫入點，零個 Dictionary：
+
+```
+faction_ai_system.gd:2387  var msg := MessageData.new()   → :2394 append
+faction_ai_system.gd:2495  var _msg := MessageData.new()  → :2502 append
+faction_ai_system.gd:2528  var msg := MessageData.new()   → :2535 append
+message_system.gd:42       var msg := MessageData.new()   → :61   append
+order_system.gd:412        var msg := MessageData.new()   → :433  append
+```
+
+**讀取端**——四個讀取點，三個已經用 MessageData 欄位，**只有一個**假設 Dictionary：
+
+```
+ui/popup_layer.gd:76          var m: MessageData = msg as MessageData   ✓
+simulation/message_system.gd:299  msg.type / msg.origin_tick            ✓
+ui/observer_bridge.gd:63          msgs[start-1].origin_tick             ✓
+simulation/player_api_mapper.gd:797                                      ★只有它
+    msgs.append(m.get("description", str(m)) if m is Dictionary else str(m))
+```
+
+⇒ **全庫一致認為那條流是 MessageData，唯一不同意的是那支【面向玩家】的函式**
+⇒ 玩家看到的事件清單，**每一則**都是 `<RefCounted#-922337…>`。
+
+## §2 為什麼它一直是綠的（★這一格比修法本身重要）
+
+```
+debug/agent_verbs_c1_bed.gd:164        st.global_messages.append({ "description": "測試事件 A" })
+debug/c1_info_reconciliation_bed.gd:168 st.global_messages.append({ "description": "E1" })
+```
+
+⇒ 兩支床餵的是**自己 append 的 Dictionary 字面量**
+⇒ ★**【測具的形狀】與【世界寫進去的形狀】不同**
+⇒ ★★它們 100% 覆蓋了一條 production **永遠不會走到**的分支
+⇒ ★★★**只修 §1 而不修這裡，等於把同一個盲點留給下一個人。**
+
+## §3 修法形狀（★不是改數值，是改接線）
+
+1. `map_global_messages` 必須認得 `MessageData`：有 `description` 就用它；
+   **沒有** `description` 時**說出它是哪一種事件**（`type`），★**不得退回印物件 id**。
+2. `Dictionary` 分支**保留**（legacy／observer 另一條 channel 可能仍有），
+   ★但它**不再是被測到的那一條**——見 4。
+3. ★**血統**：`feat/walkthrough-v2` 上已有一版（`player_api_mapper.gd` 17+／1−）
+   ⇒ **參考非基底**（那支分支另有門票，不得以它為 base）。
+4. ★★**缺陷要變成對照**（blueprint 令）：
+   `agent_verbs_c1_bed` 與 `c1_info_reconciliation_bed` 的餵料改成**真世界型別 `MessageData`**，
+   **或**新增一格餵 MessageData 的床。兩者擇一，理由寫進 code。
+
+## §4 判準（expect 行自帶操作元）
+
+床必須印出一行**自足**的判決行，同一行帶操作元，例如：
+
+```
+[GLOBALMSG] rendered=N  object_id_like=0  (N 則全部來自 MessageData)
+```
+
+★`object_id_like` ＝ 渲染結果裡命中 `RefCounted#` 或 `<Object#` 的則數。
+★★**不要只釘「ALL PASS」橫幅**：那一句由共用旗標決定，某格中途死掉它照印。
+
+## §5 陽性對照（★兩層）
+
+```
+① 先證明注射會致死：把 §3-1 的 MessageData 分支拿掉 ⇒ 新那一格必須【紅】，
+   且紅的那一行要印出 object_id_like=N（N>0）——★不是只印 FAIL。
+② 才用陰性結果下結論：還原後綠。
+★★注射要打在【被判的那一格】上，不是打在它呼叫的 helper 裡。
+```
+
+## §6 不變量
+
+```
+・這是 production 檔 ⇒ 落地要走【merged result 上的整份電池】，不是分支自檢。
+・零 sim 影響：它只在 observer／player 讀取路徑上，不寫任何世界狀態
+  ⇒ ★世界指紋不該變。★★而「不該變」要由電池的指紋那一格證明，不是由我宣稱。
+・全量暫態可觀測性：本票不新增 decision／resource／state ⇒ 無新 tap 義務。
+```
+
+## §7 誠實限
+
+```
+★本票只掃了 global_messages 這一條流的讀取點（4 個，已逐一列出）。
+  observer_messages 那條 channel 我【沒有】做同樣的掃 ⇒ 若那裡也有形狀假設，本票看不到它。
+★★「5／5 寫入點都是 MessageData」是【現在】的事實；它不保證以後沒有人 append Dictionary
+  ⇒ 這正是保留 Dictionary 分支的理由，也是為什麼床要餵【真型別】而不是兩種都餵。
+```
