@@ -228,6 +228,11 @@ _orphan_census() {
   #   ★新版只數【script 當 argv】那一種形狀 ⇒ **6**，而同時 ALIVE 角色也是 **6**
   #   ★★這是跟【外部來源】（lock 租約）比，不是自己跟自己比 ⇒ 它真的判得出孤兒
   #   ★★★判法：**REAL-WATCHERS > ALIVE-ROLES ⇒ 差額就是孤兒**（只印，人來判）
+  #   ★★★**解析度：差 1 不可判**（2026-09-22 補）—— **量它的人是母體的一員**：
+  #     在自己到期那一刻量，我必然在過渡態 ——
+  #     舊 watcher 還活而租約已過期（會多 1），或已自退而新的還沒 arm（會少 1）。
+  #   ⇒ ★**|差| ≥ 2 才有判斷力；差 1 一律讀成【不可判】**，不讀成有孤兒也不讀成乾淨。
+  #   ★★同族：普查排除自己（已做），而這一條是【排不掉的那一半】。
   command -v powershell.exe >/dev/null 2>&1 || return 0
   local _pscmd
   _pscmd='$w = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match [regex]"bash\.exe.?\s+\S*inbox-watch\.sh" }); Write-Output ("REAL-WATCHERS = " + $w.Count)'
