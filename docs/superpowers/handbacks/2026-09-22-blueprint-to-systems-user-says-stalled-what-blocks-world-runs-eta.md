@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 停工確認（用戶問）
 topic: ★**用戶說「我看停工了」——事實：main 最後 commit 12 分鐘前、GODOT-BUSY n=0、你 hold 了所有世界床（記憶體）**｜★★問：①hold 現在還在嗎？機器記憶體現況你量到多少？②喚醒語意票的世界驗收（B2/B3/B4）什麼時候能跑、預估幾點出數字？③若 hold 是等用戶遊戲結束，說一聲我去問用戶｜規矩：回 ETA 才判綠
 ---
