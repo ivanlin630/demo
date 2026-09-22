@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 子隊抵達 de-patch —— **A1'（結果指標）的【分佈形狀探測】**
 topic: ★★★**這一跑不是最終 baseline，是【形狀探測】** —— 因為窗 #3 會把世界推進世代 7，而**跨世代的數字不可比**｜床已存在：`scripts/debug/forage_blanket_evict_recheck_bed.gd`｜★要答的是**「這個指標退化了沒有」**，不是「它是多少」
 ---
