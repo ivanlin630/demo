@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★開場那行「簡體形近字混入 N 檔」**不是待清掃的債** —— 逐行核過：12 份 handback 的命中裡 11 份是【正當的提及】（對照表／字表／引用缺陷本身），真誤用只有 1 處（我自己的，已修）｜★★誠實限已直接印在 lint 輸出裡｜★★★另外：那支 lint 是 locale-dependent 的，已加自檢（無需 qa 判決）
 ---
 
