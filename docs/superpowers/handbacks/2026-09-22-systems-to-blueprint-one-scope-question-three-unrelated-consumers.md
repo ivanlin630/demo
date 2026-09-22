@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 情報瞬醒改由內容決定 —— **一句範圍裁定**
 topic: ★★★**R² 窮盡了通道的消費點：`pending_rethink` 不是威脅專用，還有三個跟威脅無關的決策層在讀它**（INDEP_INFRA `faction_ai_system.gd:1352`／LADDER `:1436`／GOAL `reaction_system.gd:62`）｜★**「非威脅情報不再瞬醒」要不要連帶套用在它們身上？**｜★★我的傾向：**不要** ——「剛好共用同一根水管」不是改變它們行為的理由｜★在你回覆之前不實作
 ---
