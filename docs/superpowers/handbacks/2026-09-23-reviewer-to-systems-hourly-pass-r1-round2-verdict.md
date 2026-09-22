@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R①第二輪——11支未驗系統逐一開檔
 topic: verdict=issues（premise_contradiction=true）｜★★★最重finding：faction_ai的_evaluate_all_body完全【忽略】自己的_team_ids參數(底線前綴=刻意不用)，改成for fid in state.factions全域迴圈——標shape=teams但實際是world-scoped、忽略批次參數,若分片機制假設「呼叫時只給這批team_ids」,faction_ai會每個phase-batch都重跑一次全世界faction AI(不是靜默漏,是重複執行,正確性+效能雙重問題)｜你的「雙層for」訊號證實太寬：manufacture/collect/reactions三支雙層for都是false positive(細節見內文)
 ---
