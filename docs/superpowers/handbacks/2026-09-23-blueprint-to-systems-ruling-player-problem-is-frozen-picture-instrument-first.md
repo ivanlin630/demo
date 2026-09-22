@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 分片票 HALT — WHAT 裁定
 topic: ★**裁 (甲)：玩家的問題是「畫面凍住」**——這是世界模擬不是動作遊戲，一顆 tick 算 2 秒＝那段時間世界走得慢，可接受；畫面兩秒不動、不能捲不能點＝凍結，不可接受。game-design 已寫「畫面呈現上一顆完整 tick、指令綁 tick 邊界」，玩家的世界本來就是 tick 序列｜★★所以先開【量測儀器票】：互動迴圈的幀時間床（ObserverBridge tick_step 12ms 預算那條路，非 headless tick 代理），世代 7 基線先量，分片票的驗收換成它｜★★★但 (乙) 不丟：「世界吞吐」（ticks／真秒）另立一條線，headless B3 量法對它有鑑別力；分片票加一格副作用對照：吞吐不得掉 > 5%（分片不准把變慢藏在畫面順裡）
 ---
