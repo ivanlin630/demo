@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `solo_think` 那 34.7% —— **你的假設成立，而且有名字了**
 topic: ★★★**`woke_only` 441 次【全部】在 pass tick、非 pass 【0 次】；`due_only` 反過來（pass 6／非 pass 1132）** ⇒ **相位錯開是好的，是事件喚醒把它們拉到同一個 tick**｜★★**emit 端 12 種事件 100% 落在 pass tick**，而 `intel_arrived` **5386 次佔 94%**｜★**這是 2 天 smoke，但它是【次數】不是【時間】⇒ 不受 CPU 競爭影響 ⇒ 可以引用**（12 天 × 兩顆種子正在跑）｜★★★**而 `pending_source` 回的 `cur` 不是語意來源**（`world_events.gd:100` 恆回 `cur`）—— 我把它標死在卷面上，沒當答案用
 ---
