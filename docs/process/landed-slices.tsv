@@ -16,41 +16,32 @@
 #    production 0 行，`git merge-base --is-ancestor` 為否。★沒有任何機制能修這一條，只能具名。
 #
 # slice_id	commit	date
+#
+# ★★★2026-09-22【它靜默空轉了很久】—— systems 回頭掃自己的帳時抓到：
+#   舊生成指令要的是 `merge <ascii名>`，而這裡的 merge 訊息一律是 `merge: <中文>（feat/xxx @sha）`
+#   ⇒ ★**冒號就殺了它**（`merge ` 後面要 `[A-Za-z0-9]`）⇒ **近期所有 merge 一筆都沒進來**；
+#   而檔上是 55 筆、舊 pattern 重跑是 66 筆 ⇒ **連檔本身也是舊的，沒人重生成過**。
+#   ⇒ ★★**失效是靜默的**：閘只在【token 命中清單】時紅 ⇒ 清單永遠不長 ⇒ **到期的延後判決永遠不會被抓**。
+#   ⇒ ★★★修法：生成改成**聯集**（舊 `merge <名>` ∪ 從 `feat/<名>` 取）——
+#     **拿掉對【訊息寫法】的依賴**，而 branch 名本來就在每一則 merge 訊息裡、本來就是 ascii。
+#   ★加寬只會**多列**不會少列 ⇒ 對閘而言只會【更易紅】，而那正是它本來該做的事。
+#
+# ★新生成指令（聯集）：git log --format="%H|%ad|%s" --date=short --all 之後，
+#   對每行取 `|merge ([A-Za-z0-9][\w.-]*)`，取不到再取 `|merge[:：]?.*?feat/([A-Za-z0-9][\w.-]*)`。
+#   （完整 python 版記在 docs/progress.md 2026-09-22 那一節）
+#
 117	f0f84469	2026-08-26
-act	abaf519b	2026-08-26
-attempt	38d1d98a	2026-08-26
+4b-census	0594d4c1	2026-09-16
+A	8077cf09	2026-09-01
 B	dbc31952	2026-08-03
-cadence	d5fbd6de	2026-07-13
-cadence-stagger	b57df261	2026-08-27
-call_us	5c4c8b52	2026-08-27
-care-loop	a575c4fa	2026-08-11
-clamp	82e554f3	2026-08-26
-convoy	c0bad05e	2026-08-21
+B-v0	ecf818c4	2026-09-07
 EWMA	a0a9ae0a	2026-08-20
 F0	8df7d33d	2026-08-07
 F1	b677e0b5	2026-08-07
 F2	5950ce65	2026-08-07
 F3	11429026	2026-08-07
 F4	1cd5cfbf	2026-08-07
-gather-dirty-flag	a47c07c3	2026-08-27
-goal-fate	0bdb0cd9	2026-08-26
-iii	e74ce5ce	2026-08-11
-infra	c6d0d12b	2026-08-26
-key	b9bac234	2026-08-26
-labor-slice	eb20531d	2026-08-19
-ladder	e8744da4	2026-08-26
-ladder-dissolve	6d6ccd60	2026-08-26
-local-value	6e39995a	2026-08-26
-market-fill	ef846435	2026-08-27
-material-trajectory	1958f645	2026-08-26
-mfg	2c25a82c	2026-08-03
-observer-no-global-RNG	26a4f8b9	2026-07-29
-own_granary	e210c00a	2026-08-15
-pick_empty	1e392747	2026-08-26
-quantity	0d9343dd	2026-08-27
-recovery-path	73b2a943	2026-08-06
-reserve-assertion	0829d04e	2026-08-26
-resolver	9f551096	2026-08-26
+LOD	821d42dc	2026-09-01
 S1a	4d30073a	2026-08-27
 S1b	c26c5ca4	2026-08-27
 S1c	e3cefcf3	2026-08-27
@@ -60,14 +51,86 @@ S4b	41999987	2026-08-28
 S5a	dbd18b6a	2026-09-01
 S5b	9fb63ebe	2026-09-01
 S5c	acbb425d	2026-09-01
+S6	53fee2a8	2026-09-01
+SLICE	2fef2081	2026-08-01
+act	abaf519b	2026-08-26
+attempt	38d1d98a	2026-08-26
+band	f50d2fa8	2026-09-02
+bed-roll-call-6	352c711a	2026-09-22
+belief-staleness-physical	ff4e44f5	2026-09-18
+cadence	d5fbd6de	2026-07-13
+cadence-stagger	b57df261	2026-08-27
+call_us	5c4c8b52	2026-08-27
+care-loop	a575c4fa	2026-08-11
+clamp	82e554f3	2026-08-26
+conquest-scout-corridor	9870bdf2	2026-09-16
+convoy	c0bad05e	2026-08-21
+crisis-bed-rollcall	77177b3f	2026-09-22
+cross-run-static	6fb1bd10	2026-09-07
+day-length-single-source	f235c08c	2026-09-22
+declamp-price	2b102f03	2026-09-07
+deterministic-observation-noise	3fb2c320	2026-09-22
+e1-annihilation	5498faa7	2026-06-19
+e3-player-exit	d30c1ef5	2026-06-19
+envoy-ptype-tap	46efcd8c	2026-09-06
+faction-cohesion	031a5bea	2026-08-05
+flee-to-safety	c50c0ca0	2026-09-02
+freeze-multi-perception	e71c0ba7	2026-09-18
+g1a-mint-obs	02ac04b3	2026-06-19
+g1b-orders	11f0e20a	2026-06-19
+g1d-merchant	a3c987b0	2026-06-19
+g2a-relation-graph	8df367fd	2026-06-19
+g2b-ambition-ladder	792ab277	2026-06-19
+g2c-rung-task	f602874d	2026-06-19
+g2d-vendetta	8c640077	2026-06-19
+g3a-belief-accessor	a577e833	2026-06-19
+gather-dirty-flag	a47c07c3	2026-08-27
+goal-fate	0bdb0cd9	2026-08-26
+godview	ff01ec79	2026-09-02
+grudge-ledger-a	df04a6bb	2026-09-17
+guard	3101fec8	2026-09-01
+iii	e74ce5ce	2026-08-11
+implementer	633eda19	2026-09-11
+infra	c6d0d12b	2026-08-26
+interrupt-not-replace	48476d25	2026-09-11
+join-occupy-belief-level	02e8f095	2026-09-18
+key	b9bac234	2026-08-26
+labor-slice	eb20531d	2026-08-19
+ladder	e8744da4	2026-08-26
+ladder-dissolve	6d6ccd60	2026-08-26
+leader-succession	b3aa8ffd	2026-06-19
+local-value	6e39995a	2026-08-26
+lord-care-loop	401dae27	2026-08-05
+main	7a6f88cb	2026-09-11
+market-fill	ef846435	2026-08-27
+market-thickness-v0	cd70364e	2026-09-07
+material-trajectory	1958f645	2026-08-26
+mfg	2c25a82c	2026-08-03
+missing-contact-ledger	70cfcd73	2026-08-05
+modulo-same-shape-4	29f1788b	2026-09-06
+money-genesis	211a5cb0	2026-09-07
+observer-no-global-RNG	26a4f8b9	2026-07-29
+old-growth-forest	21b9d234	2026-09-03
+one-pass-shared-scan	94d56ad1	2026-09-18
+own_granary	e210c00a	2026-08-15
+phase-tree-net-cost	eae0b11a	2026-09-18
+pick_empty	1e392747	2026-08-26
+position-belief	6aa3ee18	2026-07-15
+quantity	0d9343dd	2026-08-27
+raid-expected-value	7b07e380	2026-09-17
+recovery-path	73b2a943	2026-08-06
+reserve-assertion	0829d04e	2026-08-26
+resolver	9f551096	2026-08-26
 settlement	f003ebe5	2026-08-20
+share-catch-up-seven-sites	4c52a6cd	2026-09-22
 skip-reason	ff66bf2e	2026-08-26
 slice	5b8d6c00	2026-08-14
-SLICE	2fef2081	2026-08-01
 stale-test	900bb952	2026-08-26
 storage-fits	22a5f237	2026-08-26
+swallowing-setters-stage-a	5af5d776	2026-09-07
 t0-emit-ordering	7baca0a6	2026-08-28
 tools-family	02f28a55	2026-08-26
+ui-state-decoupling	6e166024	2026-06-04
 unified.rank.calls	4830aa9b	2026-08-26
 unload	64de9feb	2026-08-26
 wire-in-specimen-trace	228d54e9	2026-08-26

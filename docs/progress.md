@@ -2267,3 +2267,31 @@ diff：3 檔、+63 行、零刪除
 ★已登 defer `perf-bed-invocation-never-verified-end-to-end`。
 ★★**而它的 met_check 我第一版就踩了今天的老病**：錨在 `[perf] ticks=` ⇒ **命中的是我自己在協議文件裡引用的格式字串** ⇒ 寫下去當場就綠（假退役）。
 ⇒ 改錨在【未驗標記】（協議裡那句「還沒驗到」消失才算解除），★並當場驗極性（FALSE＝正確）＋跑陽性對照（回填後會變綠 ✔）。
+
+**㉝ ★★★`landed-slices.tsv`（那份「機械生成、不靠人記得」的已落地清單）**靜默空轉很久了****
+```
+★病：舊生成指令要 `merge <ascii名>`，而這裡的 merge 訊息一律是 `merge: <中文>（feat/xxx @sha）`
+   ⇒ **冒號就殺了它**（`merge ` 後面要 `[A-Za-z0-9]`）⇒ **近期所有 merge 一筆都沒進來**
+★★而檔上是 **55 筆**、舊 pattern 重跑是 **66 筆** ⇒ **連檔本身也是舊的，沒人重生成過**
+★★★**失效是靜默的**：`bare-tick-gate` 只在【token 命中清單】時紅
+   ⇒ 清單永遠不長 ⇒ **到期的延後判決永遠不會被抓**（而畫面上一切正常）
+```
+**修法＝拿掉對【訊息寫法】的依賴**（不是要求大家改寫 commit message）：
+```
+生成改成**聯集**：舊 `merge <名>` ∪ 從 `feat/<名>` 取
+  —— ★branch 名**本來就在每一則 merge 訊息裡、本來就是 ascii**
+⇒ 55 → **104 筆**；今天 5 顆全部進來（bed-roll-call-6／crisis-bed-rollcall／
+   day-length-single-source／deterministic-observation-noise／share-catch-up-seven-sites）
+★消費者我掃過兩條（`.claude/hooks/bare-tick-gate.sh:84`、`scripts/debug/bare_tick_triage.gd:19` 的字彙註解），
+  ★★並確認**加寬只會多列不會少列** ⇒ 對閘而言只會【更易紅】，而那正是它本來該做的事
+★★★合併結果上重跑全套：**68 支 ✓68 ✗0｜402s｜rc=0**
+```
+★同族：**裝好但沒接電**／**同型另一處沒跟著改**／**失效是靜默的**——
+而這一次它壞在**一個標點符號**上，而那個標點是**我們自己的 merge 訊息習慣**。
+
+**㉞ ★順手修掉兩份我自己的過期 status**
+`2026-09-22-deterministic-observation-noise-HOW.md`（`3fb2c3201`）與
+`2026-09-22-hand-copied-day-length-HOW.md`（`f235c08c8`）**東西早就 merge 了，狀態還寫「draft — 待 R②」**。
+★而全庫還有 **~23 份**同樣寫著「待 R²」的舊 spec —— ★★**我沒有開大掃除**：
+`specs/_README.md` 早就寫了「這個目錄的 `status:` 欄不是索引」，
+★★★而正解不是去維護那個欄位，是**用機械生成的 `landed-slices.tsv`**（見上一節）。

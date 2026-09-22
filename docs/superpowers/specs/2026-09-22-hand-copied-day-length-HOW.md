@@ -1,7 +1,7 @@
 ---
 slice: 窗標籤把「一天」手抄成 240（真值 1440）⇒ ★所有「天／月／年」標籤差 6 倍
 owner: systems
-status: draft — 待 R②
+status: **MERGED 2026-09-22**（`f235c08c8` → main）—— ★原本還寫著「draft — 待 R②」，而東西早就 merge 了：systems 2026-09-22 回頭掃自己的帳時抓到
 基於: implementer 2026-09-22 量潰逃俘虜時自己攔下（`world_sim.gd` 印「2.0 年」而真值 120 天）
 ---
 
