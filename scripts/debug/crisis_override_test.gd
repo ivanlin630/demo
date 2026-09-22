@@ -8,6 +8,13 @@ extends SceneTree
 # 純 detection 直測 _famine_crisis。
 
 var _fail: int = 0
+# ★★★到場點名（票：這支床缺的那一格）——
+#   ★病：GDScript 的執行期錯誤【只中止那一支 func】，_initialize 會照樣往下跑，
+#     而 `_fail` 是共用的 ⇒ 停在 0 ⇒ 末行照印 `ALL PASS`、`quit()` 回 0
+#     ⇒ ★★註冊表 expect 釘的又正好是那句 ⇒ **runner 兩道防線一起通過 ＝ 靜默變綠**。
+#   ★★★分母是【常數期望】不是「跑了幾格」——自己跟自己比等於沒比。
+var _cells: Array = []
+const EXPECT_CELLS: int = 8
 const TPD := WorldState.TICKS_PER_DAY   # ★原為手抄 240，而它自己的註解就寫著它該是什麼
 
 func _initialize() -> void:
@@ -19,11 +26,17 @@ func _initialize() -> void:
 	_test_lazy_baseline_reset()
 	_test_five_stuck_tasks()
 	_test_release_immunity()
-	if _fail == 0:
-		print("=== DONE === ALL PASS")
-	else:
-		print("=== DONE === %d FAIL" % _fail)
-	quit()
+	if _cells.size() != EXPECT_CELLS:
+		_fail += 1
+		push_error("[FAIL] 到場點名 %d／%d —— 有格沒跑完（只中止那一支 func，外層照樣往下跑）" % [
+			_cells.size(), EXPECT_CELLS])
+		for n in ["_test_crisis_fires_stuck_famine", "_test_no_fire_recovered", "_test_no_fire_not_deep",
+				"_test_no_fire_before_ndays", "_test_no_fire_idle", "_test_lazy_baseline_reset",
+				"_test_five_stuck_tasks", "_test_release_immunity"]:
+			if not _cells.has(n): push_error("[FAIL]   缺席：%s" % n)
+	print("=== DONE === fail=%d｜到場點名 %d／%d ===" % [_fail, _cells.size(), EXPECT_CELLS])
+	# ★rc 也要說話：原本 `quit()` 恆回 0 ⇒ 6 FAIL 的那一天 rc 仍是 0（我自己跑過）
+	quit(1 if _fail > 0 else 0)
 
 func _ok(cond: bool, msg: String) -> void:
 	if cond:
@@ -50,29 +63,39 @@ func _test_crisis_fires_stuck_famine() -> void:
 	# food=2 → food_days=2/(5*0.8)=0.5 < CRISIS_FLOOR;committed 8 天(>N);baseline 0.5 未緩(Δ0)
 	var w: Array = _mk(TeamData.TASK_BUILD, 2.0, 5, 0, 8 * TPD, 0.5)
 	_ok(FactionAISystem.new()._famine_crisis(w[0], w[1]), "committed build 深餓(0.5)N天未緩 → crisis TRUE")
+	_cells.append("_test_crisis_fires_stuck_famine")   # ★★★記在【這一格自己的 frame】最後一行：
+	#   寫在外層呼叫之後 ⇒ 該格中途死掉、控制權回外層 ⇒ append 照樣跑 ⇒ 8／8 假點名。
 
 func _test_no_fire_recovered() -> void:
 	print("--- 不 fire：food 回升(緩解) ---")
 	# food=12 → food_days=3.0 > CRISIS_FLOOR;baseline 0.5 → Δ2.5≥RELIEF → 緩解
 	var w: Array = _mk(TeamData.TASK_BUILD, 12.0, 5, 0, 8 * TPD, 0.5)
 	_ok(not FactionAISystem.new()._famine_crisis(w[0], w[1]), "food 回升(3.0>FLOOR,Δ2.5緩) → 不 fire")
+	_cells.append("_test_no_fire_recovered")   # ★★★記在【這一格自己的 frame】最後一行：
+	#   寫在外層呼叫之後 ⇒ 該格中途死掉、控制權回外層 ⇒ append 照樣跑 ⇒ 8／8 假點名。
 
 func _test_no_fire_not_deep() -> void:
 	print("--- 不 fire：非深餓(食>CRISIS_FLOOR) ---")
 	# food=8 → food_days=2.0 > CRISIS_FLOOR 1.5（未達深餓）
 	var w: Array = _mk(TeamData.TASK_BUILD, 8.0, 5, 0, 8 * TPD, 2.0)
 	_ok(not FactionAISystem.new()._famine_crisis(w[0], w[1]), "food_days 2.0 > CRISIS_FLOOR → 不 fire（淺餓 boost 域）")
+	_cells.append("_test_no_fire_not_deep")   # ★★★記在【這一格自己的 frame】最後一行：
+	#   寫在外層呼叫之後 ⇒ 該格中途死掉、控制權回外層 ⇒ append 照樣跑 ⇒ 8／8 假點名。
 
 func _test_no_fire_before_ndays() -> void:
 	print("--- 不 fire：committed 未到 N 天 ---")
 	# 深餓未緩但只 committed 2 天(<N)
 	var w: Array = _mk(TeamData.TASK_BUILD, 2.0, 5, 0, 2 * TPD, 0.5)
 	_ok(not FactionAISystem.new()._famine_crisis(w[0], w[1]), "committed 2 天<N → 不 fire（給時間工作）")
+	_cells.append("_test_no_fire_before_ndays")   # ★★★記在【這一格自己的 frame】最後一行：
+	#   寫在外層呼叫之後 ⇒ 該格中途死掉、控制權回外層 ⇒ append 照樣跑 ⇒ 8／8 假點名。
 
 func _test_no_fire_idle() -> void:
 	print("--- 不 fire：IDLE（無 committed task，自然 re-rank）---")
 	var w: Array = _mk(TeamData.TASK_IDLE, 2.0, 5, 0, 8 * TPD, 0.5)
 	_ok(not FactionAISystem.new()._famine_crisis(w[0], w[1]), "IDLE → 不 fire（無 task 可 release）")
+	_cells.append("_test_no_fire_idle")   # ★★★記在【這一格自己的 frame】最後一行：
+	#   寫在外層呼叫之後 ⇒ 該格中途死掉、控制權回外層 ⇒ append 照樣跑 ⇒ 8／8 假點名。
 
 func _test_lazy_baseline_reset() -> void:
 	print("--- baseline lazy 蓋 + task change 重置 ---")
@@ -86,6 +109,8 @@ func _test_lazy_baseline_reset() -> void:
 	_ok(not fa._famine_crisis(state, t), "新 task episode 首呼 → 蓋 baseline 回 false（還沒到 N 天）")
 	_ok(t.crisis_committed_tick == t.task_start_tick, "首呼蓋 crisis_committed_tick=task_start_tick")
 	_ok(is_equal_approx(t.crisis_committed_food, 0.5), "首呼蓋 baseline food_days=0.5")
+	_cells.append("_test_lazy_baseline_reset")   # ★★★記在【這一格自己的 frame】最後一行：
+	#   寫在外層呼叫之後 ⇒ 該格中途死掉、控制權回外層 ⇒ append 照樣跑 ⇒ 8／8 假點名。
 
 func _test_five_stuck_tasks() -> void:
 	print("--- 5 種 stuck-task 皆可 crisis（OUTCOME 非 task-type）---")
@@ -94,6 +119,8 @@ func _test_five_stuck_tasks() -> void:
 		_ok(FactionAISystem.new()._famine_crisis(w[0], w[1]), "stuck task=%s 深餓未緩 → crisis TRUE（OUTCOME-based）" % task)
 
 # release 免疫窗：擋同 task 重委派（防 instant-recommit）、放別 task（survival 接住）。
+	_cells.append("_test_five_stuck_tasks")   # ★★★記在【這一格自己的 frame】最後一行：
+	#   寫在外層呼叫之後 ⇒ 該格中途死掉、控制權回外層 ⇒ append 照樣跑 ⇒ 8／8 假點名。
 func _test_release_immunity() -> void:
 	print("--- release 免疫窗：擋同 task 重委派、放別 task ---")
 	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 1000
@@ -113,3 +140,5 @@ func _test_release_immunity() -> void:
 	t2.crisis_released_task = TeamData.TASK_FLEE; t2.crisis_released_until = 1000 + 480
 	_ok(TaskArbiter.try_set(state, t2, TeamData.TASK_FLEE, Vector2i(1, 1), TaskArbiter.PRIO_SURVIVAL, "solo"),
 		"免疫窗過期(1500>1480) → 同 task 可再委派")
+	_cells.append("_test_release_immunity")   # ★★★記在【這一格自己的 frame】最後一行：
+	#   寫在外層呼叫之後 ⇒ 該格中途死掉、控制權回外層 ⇒ append 照樣跑 ⇒ 8／8 假點名。
