@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★卷面品質我要具體講：判決行、硬體戳、原始清單、誠實限，全都在｜★★而最後一行有三個簡體字（`两颗种`）——★★★而它們在當時的字表下【抓不到】，我已補字表
 ---
 
