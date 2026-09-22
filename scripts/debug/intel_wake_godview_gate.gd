@@ -79,6 +79,26 @@ func _initialize() -> void:
 			if code.find(b) >= 0:
 				hits.append("行 %d：%s" % [k + 1, ln.strip_edges()])
 				break
+	# ── ★★★正向錨（systems 2026-09-22）：**被守的東西必須還在這裡** ──
+	#   ★沒有它，這支閘是【恆真】的：它證明的是「`record_claim` 裡沒有 god-view 讀」，
+	#     而威脅判定一旦搬到別的函式，那句話**自動成立** ⇒ 畫面永遠是綠的。
+	#   ★★所以「找不到負向錨 ⇒ 不可判」只做對一半 —— **這是另一半**。
+	var guarded_found: bool = false
+	for gi in range(fn_start, fn_end):
+		var gl: String = String(lines[gi])
+		var gc: String = gl
+		var gh: int = gc.find("#")
+		if gh >= 0: gc = gc.substr(0, gh)
+		if gc.find("ThreatAssessment" + ".score") >= 0:
+			guarded_found = true
+			break
+	print("[GV] ★★★正向錨：`ThreatAssessment.score` 在 `record_claim` 內 ＝ %s" % str(guarded_found))
+	if not guarded_found:
+		push_error("[GV][不可判] 威脅判定不在 `record_claim` 裡了 ⇒ ★本閘變成恆真 ⇒ **不是綠**")
+		quit(2)
+		return
+	cells += 1
+
 	print("[GV] 掃到違規 %d 處（★掃的是 `record_claim` 內、gate-ok 區塊外）" % hits.size())
 	for h in hits: print("[GV]   ★%s" % String(h))
 	if hits.size() > 0:
@@ -134,9 +154,9 @@ func _initialize() -> void:
 	cells += 1
 
 	print("[GV] ★★誠實限：本閘只掃 `record_claim`；威脅判定若被搬到別的函式，★錨會失效而畫面是綠的")
-	print("=== INTEL-WAKE-GODVIEW-GATE %s（fail=%d｜到場點名 %d／5）===" % [
+	print("=== INTEL-WAKE-GODVIEW-GATE %s（fail=%d｜到場點名 %d／6）===" % [
 		"PASS" if fail == 0 else "FAIL", fail, cells])
-	if cells != 5:
-		push_error("[GV][FAIL] 到場點名 %d／5 ⇒ 有格沒跑到" % cells)
+	if cells != 6:
+		push_error("[GV][FAIL] 到場點名 %d／6 ⇒ 有格沒跑到" % cells)
 		fail += 1
 	quit(1 if fail > 0 else 0)
