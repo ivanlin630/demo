@@ -92,9 +92,13 @@ func _claim_at(state: WorldState, obs: int, tgt: int, at_tick: int, fields: Dict
 func _run() -> void:
 	print("=== 過期位置 → 偵查分池 驗收 ===")
 	_bed_self_check_tree()
-	_cells_fixture(); _sections += 1
-	_cell4_world(); _sections += 1
-	_cell5_gates_verbatim(); _sections += 1
+	# ★★★記帳搬進各格自己的 frame（2026-09-22）：原本是 `_cellX(); _sections += 1`，
+	#   而 GDScript 的執行期錯誤【只中止那一支 func】⇒ 控制權回到這裡 ⇒ ★`_sections += 1` 照樣跑
+	#   ⇒ ★★那一格一個斷言都沒跑，而點名照印滿分 ＝ 假點名。
+	#   ⇒ ★★★判準不是「記在哪一行」，是【工作與記帳之間有沒有 frame 邊界】。
+	_cells_fixture()
+	_cell4_world()
+	_cell5_gates_verbatim()
 
 # ── 格1／格2a／格2b／格3 ─────────────────────────────────────
 func _cells_fixture() -> void:
@@ -187,6 +191,7 @@ func _cells_fixture() -> void:
 	print("格3-e｜同一目標：情報 2 天 value=%.4f／情報 20 天 value=%.4f" % [v_new, v_old])
 	_ok(v_new > v_old and v_old > 0.0,
 		"格3-e ★年齡進到了**候選的價值**上（而且舊的那個仍 > 0 ⇒ 還在秤上，只是排後面）")
+	_sections += 1   # ★死在本格 ⇒ 這一行跟著不執行（記帳與工作同一個 frame）
 
 func _recon_value_with_age(age_ticks: int) -> float:
 	var day: int = WorldState.TICKS_PER_DAY
@@ -210,6 +215,11 @@ func _cell4_world() -> void:
 			"絕境那批隊把【位置過期的目標】排進偵查候選、且偵查真的上場",
 			"本次以 BED_WORLD=0 執行（世界級那一段要 ~30 分鐘，不適合放進每次都要跑的閘）",
 			"BED_WORLD=1 BED_DAYS=10 GODOT_TIMEOUT=3000 單獨跑一次；交件貼數時標【床的 commit】")
+		# ★★★記帳也要放在【這條合法的提早離開路徑】上：
+		#   到場點名問的是「這一格有沒有跑完它該做的事」，而【自己宣告不可判】就是它該做的事。
+		#   ★漏了這一行 ⇒ 閘跑法（BED_WORLD=0）會印 2／3 ⇒ 把【合法跳過】誤報成【死掉】。
+		#   ★★這正是「死掉」與「自己決定不做」的分界：前者不該記帳，後者該。
+		_sections += 1
 		return
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 8
 	var seed_val: int = int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337
@@ -274,6 +284,7 @@ func _cell4_world() -> void:
 		+ "｜★這一句與上一句的差別＝【絕境那一格】vs【整個世界】")
 
 # ── 格5：掠奪／攻擊那兩道門逐字未改 ──────────────────────────
+	_sections += 1   # ★死在本格 ⇒ 這一行跟著不執行（記帳與工作同一個 frame）
 func _cell5_gates_verbatim() -> void:
 	print("\n— 格5：兩道攻擊性的門逐字未改 —")
 	var src: String = FileAccess.get_file_as_string("res://scripts/simulation/faction_ai_system.gd")
@@ -290,3 +301,4 @@ func _cell5_gates_verbatim() -> void:
 	_ok(src.contains("if prey_pos_gate == Vector2i(-1, -1):"),
 		"格5-c ★★攻擊側那道門（`belief_pos == (-1,-1)` ⇒ 不可行）**逐字未改**"
 		+ "｜★★★放寬它＝讓隊直接打一個它不知道在哪的目標＝隔空作用（違反感知鐵律）")
+	_sections += 1   # ★死在本格 ⇒ 這一行跟著不執行（記帳與工作同一個 frame）
