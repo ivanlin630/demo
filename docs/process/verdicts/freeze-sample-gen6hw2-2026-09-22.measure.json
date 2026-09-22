@@ -1,0 +1,26 @@
+{
+  "slice": "凍結樣本在 HW-2／世代6 重跑（派工：2026-09-22-systems-to-measurer-DISPATCH-freeze-sample-rerun-on-HW2.md）",
+  "measured_at_head": "69875dfad",
+  "touches": [],
+  "generation_stamp": "世代6（邊界 3fb2c3201），HW-2（AMD Ryzen 7 5800X3D 8C/16T）",
+  "raw_logs": [
+    "docs/measurements/freeze-sample-12days-gen6hw2-seed1337.log",
+    "docs/measurements/freeze-sample-12days-gen6hw2-seed42.log"
+  ],
+  "bed": "scripts/debug/freeze_sample_bed.gd",
+  "window": "12 天（17280 tick）",
+  "hit_definition": "dt > SimRunner.FRAME_BUDGET_US（2s）",
+  "seed1337": {
+    "this_run_gen6_hw2": {"hit": 70, "population": 17280, "ratio": "0.405%"},
+    "baseline_gen5_hw1": {"hit": 176, "population": 17280, "ratio": "1.02%"},
+    "raw_baseline_file": "docs/measurements/2026-09-18-freeze-sample-12days-seed1337.txt"
+  },
+  "seed42": {
+    "this_run_gen6_hw2": {"hit": 40, "population": 17280, "ratio": "0.231%"},
+    "baseline_gen5_hw1": {"hit": 141, "population": 17280, "ratio": "0.82%"},
+    "raw_baseline_file": "docs/measurements/2026-09-18-freeze-sample-12days-seed42.txt"
+  },
+  "honest_limit": "★方法論疑慮(未經systems裁定,先誠實揭露)：命中定義=dt>2.0秒(絕對牆鐘門檻)。跨機比較「幀數/比率」被裁定為邏輯量有效，但這個特定命中判準本身是【絕對時間門檻】——CPU越快，同一份工作量下自然會有越少幀跨過2秒線，即使code完全沒變。所以這次70/40 vs 176/141的下降，理論上一部分或全部可能單純來自HW-2比HW-1快，而不是世代6的gather相關merge改善了什麼。本輪沒有辦法把「硬體變快」與「code變好」分開——需要在【同一台機器】上分別跑世代5 code與世代6 code才能拆解，本輪不做這個(超出派工範圍)。",
+  "incomplete": [],
+  "summary": "兩seed皆完成(17280/17280)，幀數與比率皆明顯下降(seed1337 -60.2%, seed42 -71.6%)，方向與規模一致；但誠實限：無法排除純硬體加速的confound，下降幅度不能單獨歸因於世代6的行為改動"
+}
