@@ -10,6 +10,8 @@ extends SceneTree
 var _fails: int = 0
 var _sections: int = 0
 const EXPECT_SECTIONS: int = 5
+# ★事件流那一段餵進去幾則——判決行的 rendered 要跟這顆常數比，不跟自己比。
+const GM_FED: int = 3
 
 func _initialize() -> void:
 	# ★★★命令與查詢的信封【鍵名不同】：command → "payload"、query → "data"
@@ -161,13 +163,42 @@ func _test_event_stream() -> void:
 	print("-- ★事件流 wrapper（機制早有、只接了 GUI）--")
 	var w: Array = _mk()
 	var st: WorldState = w[0]
-	st.global_messages.append({ "description": "測試事件 A" })
-	st.global_messages.append({ "description": "測試事件 B" })
+	# ★★★餵料用【真世界型別】MessageData，不是自己 append 的 Dictionary 字面量。
+	#   舊版餵 Dictionary ⇒ 100% 覆蓋了一條 production 【永遠不會走到】的分支，
+	#   而真正被走的那一條把每一則都渲成 <RefCounted#…>。
+	#   ★這支床本身就是發現那個盲點的證物 ⇒ 改它＝構造保證（下次有人重構讀取端，這格自動會紅）。
+	st.global_messages.append(_msg("測試事件 A", "test_a"))
+	st.global_messages.append(_msg("測試事件 B", "test_b"))
+	# ★第三則：有 type 、無 description ⇒ 認定【說出型別】而不是退回物件 id。
+	st.global_messages.append(_msg("", "order_buy"))
 	var q := PlayerQueryApi.new()
 	var r: Dictionary = q.get_event_stream(st, 5)
 	var events: Array = r.get("data", {}).get("events", [])
 	print("    get_event_stream(5) → ok=%s｜events=%s" % [str(r.get("ok", false)), str(events)])
 	_ok(bool(r.get("ok", false)), "★event wrapper 回 ok")
-	_ok(events.size() == 2 and String(events[1]).contains("B"),
+	_ok(events.size() == GM_FED and String(events[1]).contains("B"),
 		"★agent 層【讀得到】事件流（之前唯一呼叫點是 ui/sim_bridge，REPL 碰不到）")
+	# ── ★判決行：同一行自帶操作元，不靠共用旗標 ──
+	#   ★★object_id_like ＝ 渲染結果裡命中 RefCounted# 或 Object# 的則數。
+	#   ★★★rendered 要跟【餵進去的常數 GM_FED】比，不是跟它自己比——
+	#     否則母體塌陷時 rendered=0 / object_id_like=0 會是【空的綠】。
+	var oid: int = 0
+	for e in events:
+		var es: String = String(e)
+		if es.contains("RefCounted#") or es.contains("Object#"):
+			oid += 1
+	print("[GLOBALMSG] rendered=%d  object_id_like=%d  (餵料 %d 則全部是 MessageData)" % [
+		events.size(), oid, GM_FED])
+	_ok(events.size() == GM_FED, "★★母體：渲染出 %d 則，與餵進去的 %d 則相符" % [events.size(), GM_FED])
+	_ok(oid == 0, "★★★零物件 id：玩家看到的是內容，不是 <RefCounted#…>")
+	_ok(events.size() > 2 and String(events[2]).contains("order_buy"),
+		"★無 description 的事件說出【型別】（order_buy），而不是退回物件 id")
 	_sections += 1
+
+# ★真世界型別的最小造物（欄位跟 production 寫入點同形）
+func _msg(desc: String, type: String) -> MessageData:
+	var m := MessageData.new()
+	m.type = type
+	m.description = desc
+	m.origin_team_id = 9
+	return m

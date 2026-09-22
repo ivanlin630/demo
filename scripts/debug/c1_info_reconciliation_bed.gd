@@ -165,8 +165,18 @@ func _test_section2() -> void:
 	p.id = 1
 	st.persons[1] = p
 	st.player_id = 1
-	st.global_messages.append({ "description": "E1" })
+	# ★★★餵料用【真世界型別】MessageData（5／5 production 寫入點的形狀），
+	#   不是自己 append 的 Dictionary 字面量——舊餵料讓這格覆蓋了一條
+	#   production 永遠不會走到的分支，而真正被走的那一條渲成 <RefCounted#…>。
+	var _e1 := MessageData.new()
+	_e1.type = "test_e1"
+	_e1.description = "E1"
+	st.global_messages.append(_e1)
 	var r: Dictionary = q.get_event_stream(st, 3)
-	_ok(bool(r.get("ok", false)) and (r.get("data", {}).get("events", []) as Array).size() == 1,
+	var _evs: Array = r.get("data", {}).get("events", [])
+	_ok(bool(r.get("ok", false)) and _evs.size() == 1,
 		"②事件流在 agent 層讀得到（本票補的 wrapper）")
+	# ★不只驗【讀得到】，驗【讀到的是內容】：舊版這裡會是 <RefCounted#…>。
+	_ok(_evs.size() == 1 and String(_evs[0]) == "E1",
+		"②渲染出的是 description「E1」而不是物件 id（實測：%s）" % str(_evs))
 	_sections += 1
