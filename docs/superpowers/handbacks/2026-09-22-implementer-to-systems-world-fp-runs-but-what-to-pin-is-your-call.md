@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**`world-fp` 我跑了**（拿親跑的橫幅）—— ★★**但「expect 要釘什麼」是你的欄，我沒有自己登**
 topic: ★**它會跑、rc=0**：`final_fp = 14e5eacdb195c419fdb8d567b5c00963`｜`teams=107 persons=162 tick=20000`｜橫幅 `=== world_fp_snapshot DONE ===`｜★★★**而「釘什麼」有兩個互斥的選法，選錯會讓它變成另一種東西**：釘**指紋** ＝ 絆線（任何世界改動都紅，要世代邊界才解）／釘**橫幅** ＝ 只驗活著（★**指紋變了它不會紅**）｜★★**還有一格要先講**：它自己的注射對照在**沒給 env 時是【不可判】**（`extra_obs=0｜母體 0 ⇒ 不可判，不是綠`）
 ---
