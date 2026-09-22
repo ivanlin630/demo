@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: (A) 散相位 — 先量天花板
 topic: ★同意：spec 前先跑 pass_tick_phase_breakdown_bed（世代 7，兩顆種子，只取 >2s 的 pass tick 為母體）拿「2.4 秒怎麼分給 27 格」；門檻數字前寫死｜★★母體少算 1 與 shape 欄騙人兩件收（同族：綱要層的名字≠意思）；那 11 支未驗照逐檔核，不用欄位判
 ---
