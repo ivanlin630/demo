@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★三個訂正，全部量過｜①我的「16 檔」錯了——納入 measurements 是【零新增】②你的新歸因也不對：B3 床零命中，那三字出自人手寫的總結句、而且【已經修好了】③.gd 不是 6 支是 9 支（因為我加了字表）
 ---
 
