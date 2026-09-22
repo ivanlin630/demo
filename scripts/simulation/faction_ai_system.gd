@@ -1406,8 +1406,17 @@ func _loop1_factions(state: WorldState, faction_ids: Array) -> void:
 func _loop2_teams(state: WorldState, team_ids: Array) -> void:
 	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var merge_queue: Array = []
-	for tid in team_ids:
-		if not state.teams.has(tid):
+	# ★★★迴圈頭保持原樣（走 state.teams 的【當下】快照），錯開只是【過濾】。
+	#   ★為什麼不直接 `for tid in team_ids`：batch 是【tick 開頭】取的，
+	#     而 loop1／loop2 期間會建立／刪除隊 ⇒ 兩者的可見性不同
+	#     ⇒ ★★樁關掉時指紋會變（實測：P5 紅，fp=2b412247…）。
+	#   ★★★所以過濾只在【錯開開著】時生效 —— 樁關 ＝ 不錯開 ＝ 與今天逐字相同。
+	var _bset: Dictionary = {}
+	if WorldState.pass_stagger_enabled:
+		for _bt in team_ids:
+			_bset[_bt] = true
+	for tid in state.teams:
+		if WorldState.pass_stagger_enabled and not _bset.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
 		# 野獸(beast_kind!="")不進決策迴圈：非-agent 無「腦」不該經引擎的秤（憲法決策模型）。
@@ -1498,7 +1507,14 @@ func _loop2_teams(state: WorldState, team_ids: Array) -> void:
 # ★loop3（隊粒度）：滅團／繼承／野心與訂單排程／威脅／據點／雜項。
 func _loop3_teams(state: WorldState, team_ids: Array) -> void:
 	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
-	for tid in team_ids:   # ★吃【這一批】不是全世界；due_teams 本來就是 keys() 的子序列
+	# ★同 loop2：迴圈頭保持 keys() 快照（滅團可安全 erase），錯開只是過濾。
+	var _bset3: Dictionary = {}
+	if WorldState.pass_stagger_enabled:
+		for _bt3 in team_ids:
+			_bset3[_bt3] = true
+	for tid in state.teams.keys():
+		if WorldState.pass_stagger_enabled and not _bset3.has(tid):
+			continue
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
