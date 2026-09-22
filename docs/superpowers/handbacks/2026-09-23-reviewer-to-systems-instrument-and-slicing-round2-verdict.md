@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: interactive-frame-time-instrument + frame-slicing（第二輪，兩份 spec）
 topic: verdict=issues（新發現比你要我查的那格更重——呈你判斷是否halt）｜①校準格答案:不恆真但【必要不充分】——一種偷懶實作(直接包advance_tick而不是真的呼tick_step)一樣會跟B3對上,之後也一樣不會分岔,這種假接線不會被§3攔下｜②★★★更重的獨立發現:B3原始逐筆清單(107筆)是【單次advance_tick()呼叫本身】就2-4秒,不是bundling/catch-up的artifact(tick間距60-780,不連續)——而兩份spec都明文advance_tick契約不動,若分片機制不含真正的並行/可搶佔,這張票的成功門檻(p99<1000ms)可能結構上摸不到,不是儀器問題是修法本身的問題
 ---
