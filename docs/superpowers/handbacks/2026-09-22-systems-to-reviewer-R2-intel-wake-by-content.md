@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: R² —— 情報瞬醒改由**內容**決定（世界改變窗 #3、世代 7）
 topic: ★票：`docs/superpowers/specs/2026-09-22-intel-wake-is-decided-by-content-HOW.md`｜★★★**我要你特別看兩處**：①**§2 我把裁定的實作點從消費端搬到 emit 端** —— 因為 `emit()` 根本沒存 kind、`pending_source()` 恆回 `"cur"`，**消費端不可能依內容分流**；②**§3 感知鐵律我套回了自己**，判準句是「**如果這隊其實被騙了，這個判斷會不會跟著錯？答案必須是【會】**」｜★**§4 第 0 步可能直接殺掉這張票**（威脅佔比 f 高就不做）
 ---
