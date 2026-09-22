@@ -161,9 +161,35 @@ registry 加一欄 `"grp"`：`"hour"` 或 `"stag"`。`_run_systems` 每 tick 都
 for sys in SYSTEMS:
     var is_hour: bool = String(sys.get("grp", "hour")) == "hour"
     if is_hour and not hour_tick: continue        # ★連它的 glue 與 _pht 一起跳過
+    if not is_hour and due_teams.is_empty(): continue   # ★★★見下，這一行不是最佳化
     var batch: Array = all_teams if is_hour else due_teams
     …（match shape 的部分逐字不動）…
 ```
+
+★★★**空批次那一行是【構造保證】，不是最佳化**。
+
+我原本要寫的理由是「`LaborSystem.ensure_fresh` 會全域掃，所以空批次不是 no-op」——
+**開檔之後那個理由不成立**，如實記在這裡：`ensure_fresh(state, tile, advance)`
+吃的是**單一 tile**，由 `collect`／`manufacture` 的 per-team 迴圈**內部**呼叫
+（`resource_system.gd:70` 與 `manufacturing_system.gd:123` 都是進函式就 `for tid in team_ids`）
+⇒ 批次為空時那個迴圈一次都不跑，`ensure_fresh` 不會被呼叫。
+
+★**真正的理由是【我不想靠 14 支系統各自剛好是 no-op】**：那是清單保證，
+而清單保證會因為**有人漏列一支**而變綠。一行 `continue` 是構造保證 ——
+它對「某一支系統在空批次下其實會做事」這件事**不敏感**。
+
+★★已知確實會在空批次下做事的一支（所以這一行不是假想）：
+`manufacturing_system.gd:132` 的 `_manufacture_is_cadence_compensated()` 假設檢查
+掛在 `for` **之前**、由 `Probe.enabled` 守。不跳過的話，它每小時被評 60 次而不是 1 次。
+★它不影響指紋（Probe 在 production 是關的），但它影響**量測那一輪**的成本與計數。
+
+```
+不跳過的後果①：相位計時表上多出 60 倍的零成本取樣點 ⇒ 每格平均值被稀釋（★儀器改變被觀測物）
+不跳過的後果②：★樁關掉時，非整點 tick 仍然走進那 14 支的函式本體
+             ⇒ §4e 的「指紋逐字相同」變成【要逐支證明】的事，而不是【構造上成立】的事
+```
+
+★★★因此跳過必須在 `_pht` **之前**。
 
 ★**為什麼是一個迴圈而不是兩個 pass**：兩個 pass 會讓「整點組與錯開組的相對順序」
 變成**另一份要維護的知識**。一個迴圈 ⇒ 順序就是 registry 順序，**永遠**。
