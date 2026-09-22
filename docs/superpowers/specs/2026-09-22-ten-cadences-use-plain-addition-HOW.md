@@ -1,0 +1,75 @@
+---
+slice: 10 處 cadence 改走 `CadenceStagger` —— **世界改變窗 #3（世代 7）**
+owner: systems
+status: 待 R²（reviewer）→ CLEAN 才 dispatch
+基於: 凍結線根因（尖峰佔存活隊 61.5%／62.4%，間距 60 tick 佔 99%）；WHAT 核准 2026-09-22（開窗 #3、零新旋鈕、加窄閘、序插最前）
+---
+
+# §1 ★★★病（機制，file:line 全在）
+
+```
+`CadenceStagger.next_tick()` ＝ `(cycle+1)*cadence + _mix(team_id, cycle) % cadence`
+  ⇒ ★**offset 逐 cycle 變化** ⇒ 同相的隊**下一輪就分開**
+**而純加法** `next = current_tick + CONST`
+  ⇒ ★★**同一 tick 決策的隊，下一次還是同一 tick** ⇒ **相位永遠不變**
+  ⇒ ★★★**世界生成時所有隊幾乎同時出生 ⇒ 從一開始就同相 ⇒ 永遠不分開**
+⇒ **量到的後果**：尖峰 **72／63 隊 ＝ 存活隊的 61.5%／62.4%**，間距 **60 tick 佔 99.3%／98.9%**
+⇒ 而**凍結幀 100% 落在 11+ 桶**（★該桶 77.4%／82.6% 未凍結 ⇒ **必要非充分**）
+```
+
+# §2 要改的 10 處（★逐一，這就是範圍）
+
+```
+faction_ai_system.gd:630   threat_eval_next_tick      ｜:862  residency_eval_next_tick
+faction_ai_system.gd:2706  info_eval_next_tick        ｜:4163 subteam_eval_next_tick
+faction_ai_system.gd:4379  decision_eval_next_tick
+labor_system.gd:162        labor_eval_next_tick        ← ★**tile-scoped**
+decision_context.gd:614    idle_employ_next_tick       ← ★**tile-scoped**
+decision_context.gd:870    expand_eval_next_tick      ｜:1330 consolidate_eval_next_tick
+goal_resolver.gd:28        goal_eval_next_tick
+```
+★**對照**：全庫 `*_next_tick =` 共 **33 處已走錯開**、**10 處純加法**、22 處其他（資料重排／零值初始化）。
+
+# §3 ★★★錯開的【鍵】——**兩處不是隊，要指定**
+
+```
+`next_tick(current_tick, last_eval_tick, team_id, cadence)` 的第三參數是**混合用的身分**
+★8 處是隊 ⇒ 傳 `team.team_id`
+★★**2 處是 tile**（`labor_system.gd:162`／`decision_context.gd:614`）
+   ⇒ ★**傳 `tile.tile_id`**（`scripts/data/tile_data.gd:3  var tile_id: int = 0` —— ★訂正：檔名是 `tile_data.gd`（`class_name HexTileData`），我第一版寫成 `hex_tile_data.gd` 是錯的，寫完自己查才發現 —— 穩定整數身分，已存在）
+   ⇒ ★★**不要用座標拼一個數** —— ★★★**那是手抄身分**，而 `tile_id` 就是為此存在的
+⇒ **零新旋鈕**（WHAT 明令）：**不新增任何常數**，cadence 值一個都不動
+```
+
+# §4 ★★驗收（**預註冊**）
+
+```
+A1【預期會紅的紅】**fp 會改變** ⇒ 這是**世界改變窗 #3、世代 7 的邊界**
+   ★★而 `2-f` 式的「沒變才是紅」適用：**fp 沒變 ⇒ 修法沒生效**
+A2【主，硬閘】**尖峰佔存活隊比例大幅下降**：從 **61.5%／62.4%** 降到 **< 20%**（兩顆種子）
+   ★門檻理由：**均勻錯開在 60 個格子上，~115 隊 ⇒ 期望每格 ~2 隊 ≈ 2%**
+   ⇒ ★★**20% 是一個【寬鬆到不可能靠雜訊達成】的門檻**，不是我挑一個好看的數
+A3【副作用對照，硬閘】★**決策頻率不變**：每隊在整個窗內的決策**次數**與修法前**同量級**
+   ⇒ ★★★**錯開改的是【何時】不是【多久一次】** —— 若次數變了，代表我改到了 cadence 而不是相位
+A4【母體衛生】存活隊數曲線與修法前同量級（★掉了代表世界被改壞，不是被錯開）
+A5【>2s 幀數】★**只作觀察欄，不設門檻** —— 理由：**11+ 是必要非充分**，
+   ⇒ 消掉尖峰**應該**讓凍結消失，★★**但那是推論** ⇒ 讓數字自己說，不預先綁定
+```
+
+# §5 ★★閘（WHAT 核准加；**形狀窄**）
+
+```
+禁 `*_next_tick = …current_tick + …`（★限 `scripts/simulation/`，★★排除 22 處「其他」形態）
+★★★**陽性對照**：**在修法前的樹上跑，那 10 處必須紅** —— 否則閘沒有鑑別力
+★而這一格是必要的：**這個病躲過了我兩輪靜態掃**（`% 60 == 0`／經過時間比較都零命中）
+  ⇒ **它長得像正確的排程** ⇒ **人眼看不出來，只能靠機械**
+```
+
+# §6 ★誠實限
+
+```
+①**A5 不設門檻** ⇒ 本票**不保證凍結消失**，只保證**尖峰消失**
+②那 22 處「其他」我**沒有逐處讀** ⇒ ★若其中有同病者，本票漏掉它們（閘會在下次碰到時抓）
+③`tile_id` 的穩定性我**只讀了宣告**（`var tile_id: int = 0`）⇒ ★★**沒有驗它在世界重生成後是否穩定**
+   ⇒ **實作時要確認**（若它會變，錯開會每次重生成就換相位 —— 那仍然可接受，但要知道）
+```

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 卡頓根因 — 三件裁定
 topic: ★**①修法＝那 10 處改走 CadenceStagger.next_tick（零新旋鈕）；改變世界 ⇒ 開世界改變窗 #3、世代 7；驗收預註冊在下（含一格「決策頻率不變」的副作用對照）**｜★★**②閘：加，因為沒有既有 hook 覆蓋、前例在旁（bed-arm）；形狀窄：禁 `*_next_tick = current_tick + …`，陽性對照＝修前那 10 處必須紅**｜★★★**③序：插在指令佇列化之前；窗 #3 只放它（佇列化若剛好好了就搭，不等）**
 ---
