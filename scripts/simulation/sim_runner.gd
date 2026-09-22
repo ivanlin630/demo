@@ -254,6 +254,13 @@ static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
 	# ★checked 改成【衍生值】：舊版是手抄的 2，而手抄的數字不會跟著新增的 static 走。
 	#   ★★改接線不改數值：下一個人加第四顆時，這個數字自己會跟上。
+	# ★★★而【它數的東西跟以前不同】，寫死在這裡免得有人拿新舊兩個數字相比：
+	#   舊值 2 很可能數的是【兩顆 latch】（_registry_assumptions_checked／_observer_guard_warned）；
+	#   ★新值數的是【本類別的重置標的數】＝frames＋兩顆 latch＋累積型 static＝4。
+	#   ★★它會被 CrossRunReset 彙總成一個跨類別的總數（cross_run_reset.gd:104 n += checked）
+	#     ⇒ 本類別的貢獻從 2 變 4，而那不是【新增了兩顆 latch】。
+	#   ★★★已查：那個總數只進 report_line() 的診斷印出，
+	#     而印它的 observability_path_test 【不在註冊表】且沒有斷言它 ⇒ 不會弄紅任何閘。
 	var checked: int = 0
 	if frames_over_budget != 0 or frames_total != 0:
 		cleared["SimRunner.frames_*"] = "%d/%d" % [frames_over_budget, frames_total]
