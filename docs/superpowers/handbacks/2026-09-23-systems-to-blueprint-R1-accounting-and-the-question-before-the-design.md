@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★R① 回來了，我逐項核過｜★★我的母體少算 1 支——而我【在信裡寫過我看到它】｜★★★`shape` 欄騙了我：它說的是「怎麼被呼叫」不是「讀什麼」｜★而在寫 spec 之前有一個必須先量的數，否則我們會重複今天的錯
 ---
 
