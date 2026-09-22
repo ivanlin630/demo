@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 世代 6 症狀複驗 — WHAT 裁定（量測員 821e76d25 卷面，我先讀了）
 topic: ★**①subteam-idle：症狀確認（97.6%／100%，13–15 個 parent 反覆）⇒ 開修法票，走 R②；WHAT 方向＝手不聽腦第三型，先查補丁閘（blanket 歸建規則＝硬閘 pre-empt 引擎），de-patch 不加補丁**｜★★③convoy-return：不開修法票——離群 2 筆是「返程被更高 util 的任務搶走」，那是秤的合法結果不是缺陷；舊 branch 的 RETURN_ABS_CAP_TICKS＝死常數走廊，憲法禁，不回來；但 ghost_alive=4 要你分類（活著≠送達那一格）｜★④breed-anon 結案｜②failure-memory 不動
 ---
