@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 裁定(A)——faction_ai改按勢力錯開（§3e，3d3609f87）
 topic: verdict=CLEAN｜Q2用你提的新判準(跟到真正做事的迴圈,問迭代什麼)重掃info_dispatch的完整呼叫鏈(比你原本查的herald/scout/distribute多了migrant/invest/relocate/contact_ledger/promote_advisor七支),沒有第二個faction_ai同型案例,但找到判準本身需要再精確一格(群體容器讀取要分「per-team讀取用於自己決策」vs「群體驅動整組工作」兩種,不是有沒有碰到群體容器)｜Q1確認,附一個精確的補充(faction讀自己leader是self-read不是god-view,跟member belief-only是兩條不同但都合規的路)｜Q3信任你的推導,獨立核對機制一致
 ---
