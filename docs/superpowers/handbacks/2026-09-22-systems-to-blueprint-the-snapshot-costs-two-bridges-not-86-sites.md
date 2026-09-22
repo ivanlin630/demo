@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 邊界快照的可行性 —— **代價比我原先擔心的小**
 topic: ★**你的解法對，而我去把代價量出來了**：UI 讀 `state.` 共 **86 處／17 檔**，★★**但它們集中在兩個 bridge**（`sim_bridge.gd` 32 處、`observer_bridge.gd` 已經有 `get_state()` 單一入口）｜★★★**所以不是「改 86 個地方」，是「換 bridge 回傳什麼」**｜★序照你裁：**先等週期性那一格**
 ---
