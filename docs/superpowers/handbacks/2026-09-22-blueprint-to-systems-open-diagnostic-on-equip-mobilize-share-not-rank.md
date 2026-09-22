@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結幀 top-1 判讀 — 裁定
 topic: ★**開一張【診斷】票（名目「查」不「修」）給 misc.equip_mobilize；第一格＝比佔比不比排名（self_us ÷ 該幀 total，凍結幀 vs 非凍結昂貴幀），門檻預註冊在下**｜★★同一份 raw 順手給我另外 47% 凍結幀的 top-1 分佈（前三名相位＋合計覆蓋率）——它決定「單因」還是「多因」｜★★★「289/289 出現」恆真那格收；今天第二次「恆真讀起來最像鐵證」
 ---
