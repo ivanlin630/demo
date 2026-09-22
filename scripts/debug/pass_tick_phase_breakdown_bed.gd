@@ -215,24 +215,31 @@ func _initialize() -> void:
 		solo_sub, sr_solo, float(solo_sub) / maxf(float(sr_solo), 1.0)])
 	print("[PP]   其餘根總和      = %d us ｜ 第二本 near.faction_ai = %d us ｜ 比值 = %.3f" % [
 		rest_sub, sr_fai, float(rest_sub) / maxf(float(sr_fai), 1.0)])
-	print("[PP]   ★門檻是 systems 的欄；我只在比值落在 [0.5, 1.5] 之外時標【需人看】")
+	# ★★★膠水佔比單獨一欄（systems 裁）：外層減內層 ＝ 沒掛 label 的膠水碼。
+	#   ★不單獨印的話，膠水長大時會被帶寬【安靜吸收】—— 而那正是帶寬存在的副作用。
+	var glue_fai: float = 100.0 * float(sr_fai - rest_sub) / maxf(float(sr_fai), 1.0)
+	var glue_solo: float = 100.0 * float(sr_solo - solo_sub) / maxf(float(sr_solo), 1.0)
+	print("[PP]   ★膠水佔比（外層 − 內層 ÷ 外層）：near.faction_ai = %.2f%%｜solo_think = %.2f%%" % [
+		glue_fai, glue_solo])
+	print("[PP]   ★★門檻（systems 定）＝ [0.85, 1.05]：上界 1.05 是【構造推導】——",
+		"內層 ⊆ 外層 ⇒ 比值 > 1 在構造上不可能，那是重複計數，不是品味問題")
 	var r1: float = float(solo_sub) / maxf(float(sr_solo), 1.0)
 	var r2: float = float(rest_sub) / maxf(float(sr_fai), 1.0)
 	if sr_solo == 0 or sr_fai == 0:
 		push_error("[PP][不可判] 第二本缺 solo_think／near.faction_ai ⇒ 互驗沒有對象")
 		fail += 1
-	elif r1 < 0.5 or r1 > 1.5 or r2 < 0.5 or r2 > 1.5:
-		push_error("[PP][需人看] 互驗比值 %.3f／%.3f 落在 [0.5,1.5] 之外 ⇒ ★兩本帳其中一本在說謊" % [r1, r2])
+	elif r1 < 0.85 or r1 > 1.05 or r2 < 0.85 or r2 > 1.05:
+		push_error("[PP][需人看] 互驗比值 %.3f／%.3f 落在 [0.85,1.05] 之外 ⇒ ★兩本帳其中一本在說謊" % [r1, r2])
 		fail += 1
 	# ── ★★★陽性對照：證明這個互驗【真的會紅】（★一次就過的檢查沒有鑑別力）──
 	#   ★做法：把 `loop2.solo` 子樹【故意錯歸】到另一邊（＝「有人把 solo 登記成 faction_ai 的兒子」）
 	#   ⇒ 比值必須因此跑出 [0.5, 1.5]。★★用的是【同一份真實資料】,不是我捏的數字。
 	var r2_bad: float = float(rest_sub + solo_sub) / maxf(float(sr_fai), 1.0)
-	var ctrl_fires: bool = (r2_bad < 0.5 or r2_bad > 1.5)
+	var ctrl_fires: bool = (r2_bad < 0.85 or r2_bad > 1.05)
 	print("[PP]   ★陽性對照（把 solo 子樹錯歸給 near.faction_ai）：比值 = %.3f ⇒ %s" % [
 		r2_bad, "會紅 ✔（互驗有鑑別力）" if ctrl_fires else "★不會紅 ✘（互驗對這種錯歸不敏感）"])
-	print("[PP]   ★★而它【只贏 %.3f】—— 這個帶寬對【這一種】錯歸幾乎不敏感。" % absf(r2_bad - 1.5))
-	print("[PP]   ★★★門檻是 systems 的欄；我只回報：現在的 [0.5,1.5] 是【勉強】點火，不是穩穩點火。")
+	print("[PP]   ★★它贏了 %.3f（上界 1.05）—— ★舊帶寬 [0.5,1.5] 只贏 0.03 ＝ 幾乎沒有鑑別力。" % absf(r2_bad - 1.05))
+	print("[PP]   ★★★而上界 1.05 同時是【重複計數偵測器】：比值 > 1.05 就是內層大於外層。")
 	if not ctrl_fires:
 		push_error("[PP][FAIL] 陽性對照沒點火 ⇒ ★這個互驗對【歸錯父親】不敏感,綠了也不代表兩本一致")
 		fail += 1
