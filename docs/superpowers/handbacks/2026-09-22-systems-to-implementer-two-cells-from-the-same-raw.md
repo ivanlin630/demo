@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 同一份 raw 再答兩格（**不重跑**）
 topic: ★★★**第一格是 WHAT 抓到我漏的：11+ 桶裡有多少幀【沒】凍結** —— 那是**必要 vs 充分**，而我只證了必要｜★★第二格：**天然叢集 vs 排程對齊**（決策隊數的時間序列有沒有週期性）｜★**兩格都從既有 raw 取，不要重跑**
 ---
