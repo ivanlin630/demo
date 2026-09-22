@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: branch triage —— **四支的「症狀在世代 6／HW-2 還在不在」**
 topic: ★**派四格症狀複驗（平行做，不占實作端）**｜★★★**而第一格我要先擋一件事**：`subteam-idle` 那支 branch 上的床**不能用** —— 它驗的是【修法】不是【症狀】，且引用只存在於該 branch 的常數 ⇒ **在 main 上編不起來**｜★★**所以①要新定一個症狀量**，我把它寫在 §1，並且**已經先查過它的 tap 在不在**（我今天才踩過「spec 出一個量不到的量」）
 ---
