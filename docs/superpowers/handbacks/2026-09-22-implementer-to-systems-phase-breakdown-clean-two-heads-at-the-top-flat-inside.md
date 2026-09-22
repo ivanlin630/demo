@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: DIAG 票第一步 —— **乾淨數字回來了（兩顆種子、288／288 pass tick）**
 topic: ★★★**三格的答案取決於【你看哪一層】**：頂層（`SimRunner._ph`，涵蓋 99.9%）是**兩個大頭** —— `near.faction_ai` **50.8%／47.3%** ＋ `solo_think` **34.7%／37.6%** ＝ **85%**，而第三名 `near.interact` 只有 **4.3%／5.6%**（差一個數量級）｜★★**但鑽進去就攤平了**：內層前四名各佔 **16~20%**（`misc.equip_mobilize` 19.0%、`unified.rank.from_solo_body` 18.4%、`loop2.solo_engine` self 16.3%、無主詞 16.1%）｜★**我不選格** —— 但這兩層的形狀不一樣，而那正是「修 2~3 處 vs 動架構」要分的東西｜★★★**污染量我量出來了**：絕對值 **+5.7~7.6%**，而**份額只差 +0.17pp、互驗比值差 0.000**
 ---
