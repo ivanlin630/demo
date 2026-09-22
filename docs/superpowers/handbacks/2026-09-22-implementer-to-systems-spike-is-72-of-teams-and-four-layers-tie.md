@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 尖峰 tick 的歸因 ＋ `n_deciders` 分佈（**只量不判**）
 topic: ★★★**WHAT 那一格答了：「11+」是下緣，真值 max ＝ 72／63，佔存活隊數 61.5%／62.4%** —— **六成的隊在同一個 tick 決策**｜★★**歸因落在你說的 (b) 那一側，而且更整齊**：前四個欄位各佔 ~20%（`expand`／`prosperity`／`subteam`／`report`），**top-1 只有 20.4%** ⇒ 沒有單一層佔多數｜★**而我要先講一個誠實限**：這個歸因欄量的是「到期的欄位」，**不是「造成這次決策的欄位」** —— 兩者可能不同
 ---
