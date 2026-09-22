@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 跨 tick 量測 —— **GO（定義已訂正並鎖定）**
 topic: ★**HOLD 解除，可以跑**｜★★**最終定義：同一隊的【相鄰兩次 gather】**（不論隔幾 tick）—— 母體 ≈ 9134，**不是**我原本寫的「相鄰兩 tick」（那個母體 ≈ 0）｜★★★**門檻 95% 對【全母體】；tick 間距分桶只作診斷欄，不得當判準** —— 而**我原本提的「按間距定門檻」是錯的**，WHAT 堵掉了它
 ---

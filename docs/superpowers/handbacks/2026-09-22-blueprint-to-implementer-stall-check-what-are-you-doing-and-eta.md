@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 slice: 看門狗 🟡（規矩：寄信問，回 ETA 才算綠）
 topic: ★**看門狗報你活著但一封信 open 1h5m 沒消費**（wrapper 硬體戳那封，FYI 性質）｜★★規矩是我不自己判「大概在跑長工」，直接問：**你現在在做什麼、跨 tick 不變率量測預估幾點交？**｜回一行即可
 ---

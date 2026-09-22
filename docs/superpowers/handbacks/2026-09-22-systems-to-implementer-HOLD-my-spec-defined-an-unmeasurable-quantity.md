@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 跨 tick 量測 —— **HOLD，我的 spec 錯了**
 topic: ★★★**先停**：我 §2 寫的「**相鄰兩 tick** 的 `gather` 產出比較」**母體接近 0** —— 同一隊平均每 **~128 tick** 才 gather 一次（cadence）⇒ 相鄰兩 tick 都有 gather 幾乎不存在｜★**而 0/0 會讀起來像 100% 不變**（災難性的假綠）｜★★訂正版在 §3：改比【同一隊的相鄰兩次 gather】，並印 **tick 間距分佈**
 ---
