@@ -3902,6 +3902,11 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 # ──────── 子團自主 AI ────────
 
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	# ★measurer症狀複驗tap(2026-09-22,subteam-idle①-b母體)：覓食subteam抵達次數,不論後續是否被歸建。
+	if Probe.enabled and sub.current_task == TeamData.TASK_FORAGE and sub.move_target == Vector2i(-1, -1):
+		Probe.bump("subteam.forage_arrived")
+		Probe.bump_sample("subteam.forage_arrived_sample", {"team": sub.team_id,
+			"parent": sub.parent_team_id, "tick": state.world.current_tick}, 1000)
 	# ★★convoy 票儀器（2026-08-25）：systems 立的「margin 轉不動的量」＝ RETURN 期間 task 還是不是運輸。
 	#   ★★掛在【這裡】而不是 `_tick_convoy` 裡：`_tick_convoy` 的呼叫條件本身就是
 	#   `current_task == TASK_CONVOY` ⇒ 在那裡數分母 ＝ 只數到「task 還是運輸的」
@@ -3966,6 +3971,9 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 		return
 	# 抵達目標格 → 歸建（lifecycle，不進引擎/probe）
 	if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE:
+		# ★measurer症狀複驗tap(2026-09-22,subteam-idle①-a分子)：覓食subteam抵達後被此blanket歸建。
+		if Probe.enabled and sub.current_task == TeamData.TASK_FORAGE:
+			Probe.bump("merge.forage_blanket_evicted")
 		merge_queue.append(sub.team_id)
 		return
 	# idle → 引擎決策（cadence-gated；A2a 取代 _evaluate_idle_subteam 手 argmax + _check_deviation randf）

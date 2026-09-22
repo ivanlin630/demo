@@ -88,7 +88,10 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 					var draw: float = minf(pool_food, pool_food * L0_FORAGE_MULT * day_fraction)
 					TileBank.pool_set(tile, "food", pool_food - draw, "l0_forage_drain")
 					ResourceBank.add(team, "food", draw, "l0_forage")
-					if Probe.enabled: Probe.bump("collect.l0_forage_ran")   # ★measurer L3 tap(2026-08-21,確認被動採集鏈真的有跑)
+					if Probe.enabled:
+						Probe.bump("collect.l0_forage_ran")   # ★measurer L3 tap(2026-08-21,確認被動採集鏈真的有跑)
+						if team.current_task == TeamData.TASK_FORAGE and team.parent_team_id != -1:
+							Probe.bump("collect.forage_subteam_task_collected")   # ★measurer症狀複驗tap(2026-09-22,subteam-idle①-a分母:真的採集次數)
 				tile.camp_ticks_left = L0_DECAY_DAYS * WorldState.TICKS_PER_DAY   # 有人在=不棄置
 			elif Probe.enabled:
 				Probe.bump("collect.no_outpost_no_camp_zero_food")   # ★measurer L3 tap：無據點且無camp→此cadence零被動食物
