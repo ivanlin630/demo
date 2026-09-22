@@ -1209,8 +1209,13 @@ static func _fai_pht_s(name: String, t0: int) -> int:
 #   ⇒ ★★clear 與 dump 都搬到 `sim_runner`（tick 開始清、tick 結束判並印）
 #     ⇒ faction 側與 solo 側在【同一本帳】裡，self_us 才有意義。
 #   ⇒ ★★★而兩個容器的數字【永遠不可相加】，即使統一之後也不能回頭加舊表。
-# ★既有 API（床與測試仍用它）：從【隊批次】推出勢力集合再做。
-#   ★★production 路徑已改走 evaluate_factions（勢力粒度相位）。
+# ★這是【床面向】的入口（傳隊、立即評估）。
+#   ★★production 【不走這裡】—— 它走 sim_runner 的 due_factions（勢力相位）。
+#   ★★★兩者的【到期】語意不同：
+#     這裡 ＝【批次裡有沒有我的成員】（_faction_in_batch）
+#     production ＝【這個勢力自己到期了嗎】（f.pass_next_tick）
+#   ⇒ ★所以這支謓詞不得叫 due —— 兩種「到期」共用同一個字，
+#     下一個人改其中一邊時不會知道另一邊存在。
 func evaluate_all(state: WorldState, team_ids: Array) -> void:
 	evaluate_factions(state, factions_of(state, team_ids))
 
@@ -1228,7 +1233,7 @@ func evaluate_factions(state: WorldState, faction_ids: Array) -> void:
 # ★★我【沒有】去證明「零活成員的派系不存在」——證不如構造：兩種情況都接住，
 #   那個問題就不影響正確性。（而今天批次＝全部隊 ⇒ ③在今天等價於舊行為。）
 # ★★★散相位落地後③要重新檢視：那時「不在這批」與「不存在」仍然是兩件事，而②已經分開它們。
-static func _faction_due(state: WorldState, f, batch: Dictionary) -> bool:
+static func _faction_in_batch(state: WorldState, f, batch: Dictionary) -> bool:
 	var has_live: bool = false
 	for mid in f.member_team_ids:
 		if batch.has(int(mid)):
@@ -1262,7 +1267,7 @@ static func factions_of(state: WorldState, team_ids: Array) -> Array:
 		batch[int(t)] = true
 	var out: Array = []
 	for fid in state.factions:
-		if _faction_due(state, state.factions[fid], batch):
+		if _faction_in_batch(state, state.factions[fid], batch):
 			out.append(fid)
 	return out
 
