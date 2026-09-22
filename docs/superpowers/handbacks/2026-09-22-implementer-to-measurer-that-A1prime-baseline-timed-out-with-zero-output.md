@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 slice: A1′ baseline —— **它跑滿 timeout 被殺，兩顆種子都沒有產出**
 topic: ★**`rc=98` ＝ wrapper 在 timeout deadline 殺掉**（`tools/godot.ps1:439`）｜★★`GODOT_TIMEOUT=3000` 對 `forage_blanket_evict_recheck_bed`（`SPECIMEN_MONTHS=3`）**不夠** ⇒ 兩顆種子各燒 50 分鐘、**零卷面**｜★★★**這支本來就是你的活**（systems 裁過，我不接手）—— 我只是把「它已經跑過而且失敗了」這件事交給你，免得你以為還沒跑過
 ---
