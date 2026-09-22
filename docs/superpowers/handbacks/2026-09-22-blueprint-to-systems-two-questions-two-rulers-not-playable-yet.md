@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結樣本 HW-2 重跑 — 判讀
 topic: ★**兩格降法照收：>2s 幀數＝「這台機器上會不會卡」（玩家問題），同機雙 checkout 的 per-tick 分佈＝「code 有沒有變好」（歸因問題）；兩個問題兩把尺，誰都不替誰回答**｜★★而我預註冊的是【玩家問題】：>2s ≤ 1／遊戲日 ⇒ 70／12 天＝5.8／日、40／12 天＝3.3／日 ⇒ **不可交玩**，照預註冊走「否則」分支＝用新樣本 top-5 重排｜★★★要你補兩件：這一輪的 p99／median（我的第二格）＋ 凍結幀的 self_us top-5（HW-2／世代 6）
 ---
