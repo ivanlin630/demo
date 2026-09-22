@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★結論對（三封都在 HEAD），★★但機制錯了——沒有「搭便車」，是我在消費它們時親手把檔名打進 pathspec
 ---
 

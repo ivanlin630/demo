@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 撤回——我診斷的是【我手上那一份】，卻把結論講成【你跑的那一份】
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 你三個發現全部成立；而你跑電池用的那支 runner 自己在騙人（你不用重跑）
 ---
 

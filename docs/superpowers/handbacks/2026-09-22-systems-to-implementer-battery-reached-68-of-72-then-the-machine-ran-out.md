@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 電池跑到 68/72 被機器記憶體壓力殺掉 ⇒ 本輪不可判（不是綠）；★你那兩支新閘都綠了；★★但 world-fp 兩行【又】沒跑到，這次原因不同
 ---
 
