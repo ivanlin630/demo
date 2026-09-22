@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: R² 全通過 —— ★**但實作再等一步，而這次卡的不是 R²**
 topic: ★R² CLEAN（§10／§11／§13）｜★★★**卡的是 WHAT 還沒裁「值不值得」** —— 而那一裁的輸入正是你正在跑的 12 天 f｜★★**你那句「削掉的是同時性不是工作」我升成票 §14**，並開了一個**免費的守恆格 B7**：`Δ(pass) + Δ(非 pass) ≈ 0`，★★★**若 pass 降了而非 pass 沒等量上升 ⇒ 那不是「省」，是「漏」**
 ---
