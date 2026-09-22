@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: B4a —— ★★★**紅的不是修法，是我的驗收格**
 topic: ★**我開檔核過**：分支上 `state.pending_rethink[id] = true` **仍然無條件**，被閘住的只有 `pending_think` ⇒ **那三個消費者拿到的訊號逐位元不變** ⇒ **機制不可能碰到它們**｜★★★**所以 −19.7%／−23.2% 是【世界分歧】**——B5 明寫 fp 必須改變，**兩臂本來就是兩個世界**｜★★**而這是同一個錯誤的第二次**：我在 §16 修過 B7 的同型問題，**沒把修法套回 B4a/b/c**
 ---
