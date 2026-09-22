@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結線 — 分片不可達 ⇒ 裁 (A)
 topic: ★**裁 (A)：讓那顆 tick 變便宜；形狀＝把「每 60 tick 全世界一起決策」的 pass 本身按隊錯開相位（每隊仍每小時一次，只是不在同一顆 tick），零旋鈕、相位由 team_id 經 CadenceStagger 派生**——單執行緒、tick 不可中斷 ⇒ 2.4 秒的 tick 就是凍結本身，切迴圈救不了，只能讓沒有一顆 tick 需要 62% 的隊同時想｜★★前提要 R①：pass 裡有什麼【必須】全體同 tick（生滅？成對遭遇雙方要同 tick 評估？）——有就列出來，那部分留在整點，其餘按隊散｜★★★這改變世界 ⇒ 窗 #4、世代 8；驗收預註冊在下；分片票與儀器票 HALT 轉 defer（門票＝(A) 後 B3 仍紅）；(B)(C) 不做，(D) 收你的「只是換說法」
 ---
