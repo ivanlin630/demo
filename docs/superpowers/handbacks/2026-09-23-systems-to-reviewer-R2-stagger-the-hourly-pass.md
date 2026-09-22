@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: R² 審設計｜spec `docs/superpowers/specs/2026-09-23-stagger-the-hourly-pass-HOW.md`（commit 77e28104a）｜★我自己最沒把握的五個點列在 §B，請優先打那五個｜★★其中一個我在寫的過程中已經自打臉一次（空批次那段），形狀還在，理由換了
 ---

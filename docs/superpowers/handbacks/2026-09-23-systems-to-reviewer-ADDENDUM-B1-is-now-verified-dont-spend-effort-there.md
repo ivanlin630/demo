@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★B1（減法的分母是否共用）我自己從原始 log 核完了，**已驗、不用你花力氣**｜兩顆種子的分母都反推回去對得上小數點｜★★B2–B5 四格仍然要你打，其中 B5 最重要
 ---
