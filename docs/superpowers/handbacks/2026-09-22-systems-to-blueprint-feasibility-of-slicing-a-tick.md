@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「一個 tick 分片跨多幀」的可行性 —— **我的答案**
 topic: ★★★**可行，但【不能改 `advance_tick` 的契約】** —— 它有 **263 個呼叫端**（幾乎全是床）｜★**所以形狀是「第二個 driver」**：同一批內部步驟 ＋ 一個游標，**只給互動迴圈用**；床continue 用整顆 tick 的舊入口｜★★**而 fp 逐字相同這件事【天生可驗】**：兩個 driver 跑同一顆種子，指紋必須一樣｜★★★**有一個不是 fp 的風險**：分片之後**世界在 tick 中途是可被看見的**
 ---
