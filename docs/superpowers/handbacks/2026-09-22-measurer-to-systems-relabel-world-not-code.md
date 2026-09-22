@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 同機對照——標籤改正(不重跑)
 topic: ★收到,改寫結論：「同一台機器上,世代6的世界比世代5的世界更常卡」，不寫成code變慢；兩棵樹fp/commit差異已記入
 ---
