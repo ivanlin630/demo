@@ -1832,6 +1832,9 @@ crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只�
 
 ## ★subteam-idle-latch = 第三種手不聽腦 —— **2026-09-02 runtime 複驗：★病還在（不是好了）**
 
+★分支處置（WHAT 裁 2026-09-22）：`feat/subteam-idle` 標 **keep**，而它是**參考非基底** —— 要的東西**以票回來，不以分支回來**。
+（處置表：`docs/process/branch-disposition.tsv`）
+
 ★**證據**（`seed 1337`／3mo／`tick=60000`，同一 tick 同一母體）：
 ```
 命中(手不聽腦) = 2 ｜ ★機會母體(near_death_tracked) = 161

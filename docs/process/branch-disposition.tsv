@@ -1,0 +1,46 @@
+# docs/process/branch-disposition.tsv —— 未合併分支處置（WHAT 裁 2026-09-22，沿用 3de95f9fb）
+# ★這份是【判斷】不是 git log 推得出來的東西 ⇒ 不能放進機械生成的 landed-slices.tsv。
+# ★★刪除一律用戶裁 —— 本檔只標記，不刪任何分支。
+# ★★★keep 以外的分支：要的東西【以票回來，不以分支回來】（清單是入口不是工單）。
+# 產生於 e5b90e488
+分支	處置	理由
+A2b	abandoned	WHAT 標放棄（3 個月、15 個 doc 檔、0 個 code 檔）
+L3-circuit-trade	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+a1-construction-dispatch-drop	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+breed-anon-eligible	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+camp-construction-duration	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+coin-circulation	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+command-tenure-growth	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+convoy-drop-enum	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+convoy-return-t3-budget	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+depatch-build-rights	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+desperation-ladder-feedback	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+establish-intent-redesign	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+eta-single-model	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+failure-memory-structural-identity	keep	排隊：重驗前提後開新票（WHAT 例外名單）；★未進 7 顆／已進 1 顆
+goal-delegate-build-diag	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+intel-wake-by-content	keep	在飛：合併電池待重跑（WHAT 例外名單）
+labor-marginal-food	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+loot-hunger-targeting	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+machine-A2a	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+market-liquidize	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+market-sticky	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+message-propagation-system	abandoned	4 個月：base 老到 naive merge 會 revert ⇒ 要救是重做不是合
+mortal-flee-famine	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+pass-phase-bed	archived-unmerged	★HOW 裁定：6 個檔全部都在 intel-wake-by-content 裡（同一件事的較早版本）⇒ 已被取代，不另註冊
+perf-market-memoize	closed-landed	★那 1 顆 commit 已等價進 main（patch-id 比對）⇒ 可關
+plan-phase-probe	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+player-trade-system	abandoned	4 個月：同上
+starvation-desperation-fix	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+subteam-idle	keep	票已開（WHAT 例外名單）
+subteam-survival-ladder	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+supply-seam-effective-holding	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+survival-execution-lock	abandoned	WHAT 標放棄
+team-interaction-system	abandoned	4 個月：同上
+teamlife-taps	keep	★HOW 裁定保留：隊生滅咽喉點記帳＋逐日逐因床，正對不變量#9；★動了 8 支 production 檔各一行 ⇒ 排在目前那票之後，自走 R²＋電池，不搭票
+ten-cadences	keep	HELD：已裁定非真凶，衛生票（WHAT 例外名單）
+threat-oracle-s2	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+tombstone-premeasure	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+walkthrough-v2	needs-call	★★★HOW 退回 WHAT：產物落地了、code 沒有 —— 量測檔 175 行逐位元在 main，但 c1_walkthrough.gd(167+/68-) 與 player_api_mapper.gd(17+/1-) 在 main 完全不存在，且 main 自 merge-base 起沒動過那兩個檔（0 commit）⇒ 不能以「產物已在 main」關掉
+weaponsmith	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
+workshop-followthrough	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門

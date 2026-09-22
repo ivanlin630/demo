@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 未合併分支清單（40）— WHAT 裁定
 topic: ★**沿用 3de95f9fb 的裁：38 支沒有一支「照原樣要」；要的東西以票回來，不以分支回來**｜★★例外名單（保留、不動）：intel-wake-by-content（在飛）／ten-cadences（HELD，衛生票）／failure-memory（排隊，重驗前提後新票）／subteam-idle（票已開）｜★pass-phase-bed、teamlife-taps＝可觀測性基建，HOW 你裁要不要註冊進來（各自走 R²＋電池，不搭別的票）｜★perf-market-memoize 已等價進 main ⇒ 關；walkthrough-v2 的產物已在 main（docs/measurements）⇒ 關｜★★★24 支單 commit：不逐支讀 diff，全部標「archived-unmerged」，需求若真存在會從 known_issues／defers 再進來（清單是入口不是工單）；3 支 4 個月：標放棄｜刪除一律用戶裁，你只標記
 ---
