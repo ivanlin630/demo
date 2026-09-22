@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★(A) 已派工（spec 寫完、R² clean、implementer 收到）｜★★你留的那個 R① 前提我答完了，其中「玩家回應窗口該掛哪個相位」我按 HOW 自己裁了：留整點、語意逐字不變，可逆的一行｜★★★天花板現在夠了：19.5%／26.9%（門檻 40%）
 ---
