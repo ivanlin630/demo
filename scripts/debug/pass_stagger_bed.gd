@@ -15,6 +15,7 @@ extends SceneTree
 const CAD: int = 60
 
 var _fails: int = 0
+var _cells: int = 0   # ★到場點名：由 _ok 自己數，不手抄 —— 手抄的數字不會跟著新增的格走
 
 func _initialize() -> void:
 	var days: int = int(OS.get_environment("SP_DAYS")) if OS.has_environment("SP_DAYS") else 3
@@ -42,11 +43,28 @@ func _initialize() -> void:
 	# ★clamp 觸發＝間距恰好等於 MIN_GAP（本票的排程把 last_eval 傳 cur ⇒ 夾住時 gap==MIN_GAP）
 	#   ★★這是【推論】不是直接量到的旗標，床把它講明白，不假裝是量到的。
 	var clamp_ratio: float = float(stag["clamp_worst"]) / maxf(float(stag["clamp_mean"]), 0.0001)
-	print("[PASSSTAG] gap_median=%d  gap_min=%d  gap_max=%d  peak_stag=%d  peak_stub=%d  clamp_ratio=%.2f" % [
-		g_med, g_min, g_max, int(stag["peak"]), int(stub["peak"]), clamp_ratio])
+	var stub_gaps: Array = stub["gaps"]
+	var stub_all60: bool = true
+	for gv in stub_gaps:
+		if int(gv) != CAD:
+			stub_all60 = false
+			break
+	print("[PASSSTAG] gap_median=%d  gap_min=%d  gap_max=%d  dup_in_cycle=%d  peak_stag=%d  peak_stub=%d  clamp_ratio=%.2f  stub_all60=%s" % [
+		g_med, g_min, g_max, int(stag["dup"]), int(stag["peak"]), int(stub["peak"]), clamp_ratio,
+		"1" if stub_all60 else "0"])
+	print("[PASSSTAG] ★母體（不變量#9）：錯開臂 真隊=%d 野獸=%d 在外子隊=%d｜對照臂 真隊=%d 野獸=%d 在外子隊=%d" % [
+		int(stag["n_real"]), int(stag["n_beast"]), int(stag["n_sub"]),
+		int(stub["n_real"]), int(stub["n_beast"]), int(stub["n_sub"])])
 	print("[PASSSTAG] ★判準：gap_median=60±1｜gap 全落在 [%d, %d]｜peak_stub 必須 >> peak_stag｜clamp_ratio<=3" % [
 		min_gap, CAD * 2 - 1])
 
+	# ★★★不變量#8：【頻率】拆成計數與間距兩欄，而【只守計數會全綠】。
+	#   ★計數是【構造保證】⇒ 判準是恰好一次，不是 median ±5%（鬆的那一格不會紅）。
+	#   ★★拆成兩個各自機械可判的條件：①沒有跳過週期（gap <= 2c-1）②同週期不得兩次。
+	_ok(int(stag["dup"]) == 0,
+		"P3 計數：同一週期內第二次 = %d（應 0）★與間距上界合起來就是【每週期恰好一次】" % int(stag["dup"]))
+	_ok(stub_all60,
+		"P3 對照臂（樁關）間距全部恰好 60 —— 不變量#8 的【純加法恆為 c】")
 	_ok(absi(g_med - CAD) <= 1, "P3 間距中位數 %d（應 60±1）" % g_med)
 	_ok(g_min >= min_gap and g_max <= CAD * 2 - 1,
 		"P3 間距全落在 [%d, %d]（實測 [%d, %d]）" % [min_gap, CAD * 2 - 1, g_min, g_max])
@@ -56,10 +74,11 @@ func _initialize() -> void:
 	_ok(int(stub["peak"]) > int(stag["peak"]) * 3,
 		"P6 陽性對照：樁關掉 ⇒ 尖峰回來（stub %d vs stag %d）" % [int(stub["peak"]), int(stag["peak"])])
 
-	print("=== pass_stagger DONE（fail=%d｜到場點名 4／4）===" % _fails)
+	print("=== pass_stagger DONE（fail=%d｜到場點名 %d）===" % [_fails, _cells])
 	quit(1 if _fails > 0 else 0)
 
 func _ok(cond: bool, msg: String) -> void:
+	_cells += 1
 	if cond:
 		print("  PASS: " + msg)
 	else:
@@ -80,6 +99,25 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 		runner.advance_tick(st, Vector2i(-1, -1))
 	WorldState.pass_stagger_enabled = true   # ★還原，免得污染同進程的下一臂
 
+	# ★★不變量#9：【每隊】沒有主詞就是錯的 —— state.teams 裡住著三種東西。
+	#   ★錯開的母體就是 state.teams.keys() 全體三種（本票不改母體）
+	#   ⇒ ★★★P1／P3 的分母包含野獸與在外子隊 ⇒ 卡面必須分別印出三者各幾個。
+	#   ★★這不是形式主義：peak 的分母若含 200 隻野獸，那個峰值的意義完全不同。
+	var n_real: int = 0
+	var n_beast: int = 0
+	var n_sub: int = 0
+	for tid0 in st.teams:
+		var t0: TeamData = st.teams[tid0]
+		if t0 == null:
+			continue
+		if String(t0.beast_kind) != "":
+			n_beast += 1
+		elif int(t0.parent_team_id) != -1:
+			n_sub += 1
+		else:
+			n_real += 1
+	print("   ★母體三欄：真隊=%d｜野獸=%d｜在外子隊=%d｜合計=%d" % [
+		n_real, n_beast, n_sub, st.teams.size()])
 	# 相位直方圖
 	var peak: int = 0
 	for ph in range(CAD):
@@ -121,4 +159,6 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 	print("   隊數=%d｜間距樣本=%d｜相位尖峰=%d｜clamp 最壞率=%.4f 平均率=%.4f" % [
 		per_team_total.size(), gaps.size(), peak, worst, mean_rate])
 	return {"gaps": gaps, "peak": peak, "teams": per_team_total.size(),
-		"clamp_worst": worst, "clamp_mean": mean_rate}
+		"clamp_worst": worst, "clamp_mean": mean_rate,
+		"dup": int(Probe.counts.get("pass.dup_in_cycle", 0)),
+		"n_real": n_real, "n_beast": n_beast, "n_sub": n_sub}

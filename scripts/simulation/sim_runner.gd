@@ -311,6 +311,14 @@ static func _note_pass_gap(tid: int, cur: int) -> void:
 	if prev < 0:
 		return
 	Probe.bump("pass.gap.%04d.%d" % [tid, cur - prev])
+	# ★不變量#8：【頻率】必須拆成兩欄 —— 計數與間距，而【只守計數會全綠】。
+	#   ★★而間距證不了計數：gap 可以是 30（clamp）⇒ 同一週期內兩次，
+	#   而那在間距直方圖上看起來完全正常。
+	#   ⇒ ★★★【每週期恰好一次】拆成兩個各自機械可判的條件：
+	#     ①gap 全部 <= 2*cadence-1  ⇒ 沒有【跳過一個週期】（已有斷言）
+	#     ②同一週期內不得有第二次 ⇒ 就是下面這一格
+	if prev / NEAR_CADENCE == cur / NEAR_CADENCE:
+		Probe.bump("pass.dup_in_cycle")
 
 # ★★★哪些隊在這顆 tick 到期。
 #   ★回傳必須是 `all_teams` 的【子序列】：照 state.teams.keys() 的順序過濾，
