@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 序1 威脅融合驗（5a repertoire／5b seeded warring dispatch 率／Task7 unified 主 rank 競爭）
 
 # ★ 序1 threat 融合驗（核心交付）。融合非刪雙關：
 #   5a repertoire：4 人格原型各由對應反應達成（FLEE/DEFEND/PREPARE/求和 皆可觸）+ 居民守衛（居民不可迎戰）。
@@ -25,7 +27,7 @@ func _mk_ctx(vals: Dictionary) -> DecisionContext:
 	var c := DecisionContext.new()
 	c.leader_values = vals
 	c.threat_react = 1.1   # ★S2 calibrate：高威脅(≥THREAT_BOOST_FLOOR 1.0，boost fires)→repertoire 各響應清晰
-	# ★鏡射 `decision_context.gd:309` —— ★★一起改，否則這支床會静默地量到舊尺的門檻。
+	# ★鏡射 `decision_context.gd:309` —— ★★一起改，否則這支床會靜默地量到舊尺的門檻。
 	c.threat_threshold = ThreatAssessment.THREAT_BASE_THRESHOLD + float(vals.get("慎重", 0.5)) * ThreatAssessment.THREAT_CAUTION_SPAN
 	c.threat_id = 1
 	c.threat_pos = Vector2i(2, 0)

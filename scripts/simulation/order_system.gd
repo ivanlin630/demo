@@ -164,7 +164,7 @@ func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: Strin
 			if int(_ao.get("order_id", -1)) == oid:
 				_ao["escrowed"] = true
 				# ★★★連【哪塊 tile】一起記：到期退貨要找回那批貨，
-				#   而【掃全圖 tile】既貴又會在 tile 被回收時静默漏掉。
+				#   而【掃全圖 tile】既貴又會在 tile 被回收時靜默漏掉。
 				_ao["escrow_tile"] = tile.tile_pos.x * 1000 + tile.tile_pos.y
 				break
 	Probe.bump("g1.board_register")

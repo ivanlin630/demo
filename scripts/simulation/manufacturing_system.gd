@@ -300,10 +300,10 @@ func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, lev
 					if from_vault > 0.0 and Probe.enabled:
 						Probe.bump("manufacture.vault_path.ok")                     # ★死水欄②
 						Probe.add_amount("manufacture.input_from_vault." + str(res), from_vault)
-			# ★★★以【實扣】為準，而不等的處置是 loud-fail 不是静默修補：
+			# ★★★以【實扣】為準，而不等的處置是 loud-fail 不是靜默修補：
 			#   R²：單執行緒同 tick 下，檢查與扣款之間沒有任何東西能改那兩個池
 			#   ⇒ 【不等】不是需要被處理的情況，是【不可能發生】的情況
-			#   ⇒ ★它一旦發生就是缺陷，而缺陷要吵。静默回滾/夾住/湊數會把
+			#   ⇒ ★它一旦發生就是缺陷，而缺陷要吵。靜默回滾/夾住/湊數會把
 			#     「不變量被違反」的訊號變成一次正常運作。
 			if absf((from_team + from_vault) - need) > 0.001:
 				push_error("[manufacture] 實扣 %.4f (私產 %.4f + 公庫 %.4f) != 應扣 %.4f res=%s team=%d"

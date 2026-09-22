@@ -83,7 +83,7 @@ func _init() -> void:
 	#   ★`fp` 不變只證【等價】，**不證【被走到】** ——
 	#   ★★「改完了而其實沒接上」會以 fp 不變的形式通過驗收。
 	print("")
-	print("★★★⑤新集合有沒有真的被走到（★跑一段真世界，不是静態推）")
+	print("★★★⑤新集合有沒有真的被走到（★跑一段真世界，不是靜態推）")
 	seed(1337)
 	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/warring_states.json")
 	var runner := SimRunner.new()
