@@ -269,6 +269,12 @@ var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
 #   ★★★逐 tick 檢查之後偏移相消 ⇒ 長期均值恰好 ＝ cadence。
 var solo_think_next_tick: int = 0        # 個體日常思考（loop2.solo）的下次到期 tick
 var solo_think_last_tick: int = 0        # ★上次真的想的 tick —— 驗收⑧（實際間隔分布）要它
+# ★每小時那一趡 pass 的下次到期 tick（錯開票 2026-09-23）。
+#   ★★只加這一個：`_next_tick` 字尾會被 `FpCoverage` 的 CADENCE_SUFFIXES 抓到
+#   ⇒ 自動排除在指紋外，而那正是 P5（樁關掉 ⇒ 指紋與世代 7 逐字相同）成立的前提。
+#   ★★★【不】加 pass_last_tick：它的用途是量間距，而 `_last_tick` 不在那三個字尾裡
+#     ⇒ 會進指紋 ⇒ 當場打死 P5。間距直方圖的【上次是哪顆 tick】放 Probe 那一層。
+var pass_next_tick: int = 0
 var decision_eval_next_tick: int = 0     # 重評 cadence 重構：下次決策重評 tick（週期閘，非-unified 解 IDLE-lock）
 var last_decision_tick: int = 0          # ⑦ 統一重評：上次跑決策 tick（directive_fresh 比對基準，截斷死循環）
 var crisis_latched: bool = false         # Fix2 crisis edge-trigger：進 crisis fire 一次(latch)，持續期落 cadence，離開解 latch

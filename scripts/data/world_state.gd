@@ -10,6 +10,12 @@ class_name WorldState
 #   ★★而【它的值】由 debug/time_const_check.gd 的根值凍結哨兵看著：改了會紅，
 #     紅了的處置是【確認有意並更新那一格】，不是拿掉守衛。
 const TICKS_PER_HOUR:   int   = 60           # ★唯一自由參數（1 tick = 1 分鐘，推導值）
+
+# ★樁（test-only）：關掉 ⇒ 所有隊在 % NEAR_CADENCE == 0 一起到期
+#   ⇒ 那一趡 pass 與今天逐字相同 ⇒ P5 的等價證明。
+#   ★★production 路徑【不讀設定檔】：它不是遊戲旋鈕，是陳性對照的開關。
+#   ★★★它把【我重構壞了】與【錯開改變了世界】分成兩個可以各自判的問題。
+static var pass_stagger_enabled: bool = true
 # ★S1b 白名單(c)：24 ＝【一天幾小時】的曆法結構，★不隨 tick 縮放 ——
 #   根旋鈕改成別的值時，這個 24 必須【維持 24】，否則「小時」就不是小時了。
 # TIER: n/a — 曆法基底（單位定義），不是節律

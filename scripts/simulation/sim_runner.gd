@@ -203,35 +203,35 @@ func _pht(name: String, t0: int) -> int:
 #   ★★而 registry 的 `lod` 欄一併移除 —— 留一個永遠是同一個值的欄位，下一個人會以為它有作用。
 const _LOD_FIELD_RETIRED: bool = true   # ★留一顆常數當【墓碑】，讓 grep `LOD_` 的人找得到這段註解
 static var SYSTEMS: Array = [
-	{"name": "vision",           "fn": "_step1b_update_vision",     "shape": "vision",        "tl": "near.vision"},
-	{"name": "equip",            "fn": "_step1c_update_equipment",  "shape": "teams",         "tl": "near.equip"},
-	{"name": "strategic_move",   "fn": "_step2a_strategic_move",    "shape": "teams",         "tl": ""},
-	{"name": "move",             "fn": "_step2_move_teams",         "shape": "move",          "tl": "near.move"},
-	{"name": "letters",          "fn": "_step_tick_letters",        "shape": "state",         "tl": ""},
-	{"name": "propagate",        "fn": "_step3_propagate_messages", "shape": "moved",         "tl": ""},
-	{"name": "intel",            "fn": "_step3b_exchange_intel",    "shape": "moved",         "tl": ""},
-	{"name": "market",           "fn": "_step3c_read_market_board", "shape": "arrived",       "tl": "near.messages"},
-	{"name": "interactions",     "fn": "_step4_resolve_interactions","shape": "moved",         "tl": "near.interact"},
-	{"name": "outpost_tick",     "fn": "_step4b_outpost_tick",      "shape": "state",         "tl": ""},
-	{"name": "faction_snapshot", "fn": "_step4e_faction_snapshot",  "shape": "teams",         "tl": ""},
-	{"name": "ambush",           "fn": "_step_ambush_check",        "shape": "teams",         "tl": "near.outpost_ambush"},
-	{"name": "collect",          "fn": "_step5_collect_resources",  "shape": "teams_cadence", "tl": ""},
-	{"name": "regen",            "fn": "_step5a_regenerate_tiles",  "shape": "regen",         "tl": ""},
-	{"name": "manufacture",      "fn": "_step5b_manufacture",       "shape": "teams_cadence", "tl": "near.economy"},
-	{"name": "consumption",      "fn": "_step6_resolve_consumption","shape": "teams_cadence", "tl": ""},
-	{"name": "salary",           "fn": "_step6c_salary",            "shape": "teams",         "tl": ""},
-	{"name": "fatigue",          "fn": "_step6d_fatigue",           "shape": "teams_cadence", "tl": "near.consume"},
-	{"name": "faction_ai",       "fn": "_step6b_faction_ai",        "shape": "teams",         "tl": "near.faction_ai"},
-	{"name": "info_dispatch",    "fn": "_step6b2_info_dispatch",    "shape": "teams",         "tl": "near.faction_ai"},
-	{"name": "training",         "fn": "_step6f_training",          "shape": "teams",         "tl": ""},
-	{"name": "strategic_ai",     "fn": "_step6e_strategic_ai",      "shape": "state",         "tl": "near.strategic_ai"},
+	{"name": "vision", "grp": "hour",           "fn": "_step1b_update_vision",     "shape": "vision",        "tl": "near.vision"},
+	{"name": "equip", "grp": "stag",            "fn": "_step1c_update_equipment",  "shape": "teams",         "tl": "near.equip"},
+	{"name": "strategic_move", "grp": "stag",   "fn": "_step2a_strategic_move",    "shape": "teams",         "tl": ""},
+	{"name": "move", "grp": "hour",             "fn": "_step2_move_teams",         "shape": "move",          "tl": "near.move"},
+	{"name": "letters", "grp": "hour",          "fn": "_step_tick_letters",        "shape": "state",         "tl": ""},
+	{"name": "propagate", "grp": "hour",        "fn": "_step3_propagate_messages", "shape": "moved",         "tl": ""},
+	{"name": "intel", "grp": "hour",            "fn": "_step3b_exchange_intel",    "shape": "moved",         "tl": ""},
+	{"name": "market", "grp": "hour",           "fn": "_step3c_read_market_board", "shape": "arrived",       "tl": "near.messages"},
+	{"name": "interactions", "grp": "hour",     "fn": "_step4_resolve_interactions","shape": "moved",         "tl": "near.interact"},
+	{"name": "outpost_tick", "grp": "hour",     "fn": "_step4b_outpost_tick",      "shape": "state",         "tl": ""},
+	{"name": "faction_snapshot", "grp": "hour", "fn": "_step4e_faction_snapshot",  "shape": "teams",         "tl": ""},
+	{"name": "ambush", "grp": "stag",           "fn": "_step_ambush_check",        "shape": "teams",         "tl": "near.outpost_ambush"},
+	{"name": "collect", "grp": "stag",          "fn": "_step5_collect_resources",  "shape": "teams_cadence", "tl": ""},
+	{"name": "regen", "grp": "hour",            "fn": "_step5a_regenerate_tiles",  "shape": "regen",         "tl": ""},
+	{"name": "manufacture", "grp": "stag",      "fn": "_step5b_manufacture",       "shape": "teams_cadence", "tl": "near.economy"},
+	{"name": "consumption", "grp": "stag",      "fn": "_step6_resolve_consumption","shape": "teams_cadence", "tl": ""},
+	{"name": "salary", "grp": "stag",           "fn": "_step6c_salary",            "shape": "teams",         "tl": ""},
+	{"name": "fatigue", "grp": "stag",          "fn": "_step6d_fatigue",           "shape": "teams_cadence", "tl": "near.consume"},
+	{"name": "faction_ai", "grp": "stag",       "fn": "_step6b_faction_ai",        "shape": "teams",         "tl": "near.faction_ai"},
+	{"name": "info_dispatch", "grp": "stag",    "fn": "_step6b2_info_dispatch",    "shape": "teams",         "tl": "near.faction_ai"},
+	{"name": "training", "grp": "stag",         "fn": "_step6f_training",          "shape": "teams",         "tl": ""},
+	{"name": "strategic_ai", "grp": "hour",     "fn": "_step6e_strategic_ai",      "shape": "state",         "tl": "near.strategic_ai"},
 	# ★LOD 紅線修（⑦ 之前的舊修）：個體反應層不再綁玩家位置（原 near 判定=距 player_pos<=3 →
 	# headless 傳 (-1,-1) 使全隊皆 far ⇒ 無玩家＝全世界零個體反應；有玩家＝遠隊零個體反應）。
 	# reactions 走 teams_cadence 拿 cadence。★★第⑧票之後只剩一個 cadence ⇒ trials 恆為 1。
-	{"name": "reactions",        "fn": "_step7_person_reactions",   "shape": "teams_cadence", "tl": ""},
-	{"name": "cleanup",          "fn": "_step7b_npc_goal_cleanup",  "shape": "teams",         "tl": "near.reactions"},
-	{"name": "events",           "fn": "_step8_generate_events",    "shape": "teams",         "tl": ""},
-	{"name": "emit",             "fn": "_step9_emit_messages",      "shape": "state",         "tl": "near.events_emit"},
+	{"name": "reactions", "grp": "stag",        "fn": "_step7_person_reactions",   "shape": "teams_cadence", "tl": ""},
+	{"name": "cleanup", "grp": "stag",          "fn": "_step7b_npc_goal_cleanup",  "shape": "teams",         "tl": "near.reactions"},
+	{"name": "events", "grp": "stag",           "fn": "_step8_generate_events",    "shape": "teams",         "tl": ""},
+	{"name": "emit", "grp": "hour",             "fn": "_step9_emit_messages",      "shape": "state",         "tl": "near.events_emit"},
 ]
 
 # ★第⑧票：單一 pass 的系統 loop（原本是 near/far 兩趟，而那兩趟的差別【就是分班本身】）。
@@ -274,8 +274,59 @@ static func check_registry_assumptions() -> void:
 #   ★原本靠它做三件事：①跳過 LOD_NEAR entry ②near-only glue（player_old／RecruitTutorial）
 #     ③phase_timing 只在 near 記。★★①隨 `lod` 欄一起消失；②③改成【無條件】——
 #     因為現在只有一趟，「只在其中一趟做」這個概念本身沒有指涉對象了。
-func _run_systems(state: WorldState, teams: Array, cadence: int, vmult: float, smult: float,
-		t_in: int) -> Dictionary:
+# ★★★量測層：team_id → 上次 pass 的 tick。
+#   ★它【不】在 TeamData 上：`_last_tick` 不在 FpCoverage 的 CADENCE_SUFFIXES 裡
+#     ⇒ 會進指紋 ⇒ 樁關掉時指紋也跟世代 7 不同 ⇒ 當場打死 P5 的等價證明。
+#   ★★不變量⑦：記帳可以掛 Probe.enabled，語意不可以 —— 這裡只有記帳。
+static var _pass_gap_last: Dictionary = {}
+
+# ★間距直方圖（P3）：逐隊，不是聚合。
+#   ★★第一次沒有間距可算 —— 那是【沒有】不是 0，不得記成 0。
+static func _note_pass_gap(tid: int, cur: int) -> void:
+	if not Probe.enabled:
+		return
+	Probe.bump("pass.phase.%02d" % (cur % NEAR_CADENCE))   # P1：tick%60 直方圖
+	var prev: int = int(_pass_gap_last.get(tid, -1))
+	_pass_gap_last[tid] = cur
+	if prev < 0:
+		return
+	Probe.bump("pass.gap.%04d.%d" % [tid, cur - prev])
+
+# ★★★哪些隊在這顆 tick 到期。
+#   ★回傳必須是 `all_teams` 的【子序列】：照 state.teams.keys() 的順序過濾，
+#     ★★不得用 Dictionary／Set 重建 —— 同一集合 ≠ 同一順序，而順序決定先到先得。
+func _collect_due_teams(state: WorldState, all_teams: Array, cur: int, hour_tick: bool) -> Array:
+	var due: Array = []
+	for tid in all_teams:
+		var team: TeamData = state.teams.get(tid)
+		if team == null:
+			continue
+		if not WorldState.pass_stagger_enabled:
+			# ★樁關：所有隊在整點一起到期 ⇒ 那一趡 pass 與今天逐字相同。
+			#   ★★且【不碰 pass_next_tick】⇒ 欄位恆為 0，存檔與行為都不變。
+			if hour_tick:
+				due.append(tid)
+			continue
+		if team.pass_next_tick == 0:
+			# ★首次【不當場跑】而是排一個錯開過的到期時間 ——
+			#   否則所有隊的第一次 pass 會擠在同一顆 tick，正是這張票要消滅的形狀。
+			# ★★已知副作用（spec §4b-1，本票接受）：第一次被推遲 [c/2, 2c) ＝ [30, 120)
+			#   ⇒ ★★★P3 的【第一個遊戲日】每隊會少一次（各自少，不同時）——
+			#     床要麼跳過第 1 天，要麼把第 1 天的期望寫成 23–24。
+			#     沒寫這一句的話，它會以「P3 紅」的樣子出現，而結論會被讀成「頻率被砂」。
+			team.pass_next_tick = CadenceStagger.next_tick(cur, cur, int(tid), NEAR_CADENCE)
+			continue
+		# ★★★必須是 >= 不是 ==：ambush 早退或任何原因讓一顆 tick 沒跑完，
+		#   == 會讓那一隊【從此再也不到期】—— 而那是靜默的：
+		#   它不會紅，它只會變窮然後餓死。
+		if cur >= team.pass_next_tick:
+			due.append(tid)
+			_note_pass_gap(int(tid), cur)
+			team.pass_next_tick = CadenceStagger.next_tick(cur, cur, int(tid), NEAR_CADENCE)
+	return due
+
+func _run_systems(state: WorldState, teams: Array, due_teams: Array, hour_tick: bool,
+		cadence: int, vmult: float, smult: float, t_in: int) -> Dictionary:
 	check_registry_assumptions()   # ★首次 dispatch 檢查一次（旗標短路，之後零成本）
 	var _t: int = t_in
 	var moved: Array = []
@@ -284,19 +335,35 @@ func _run_systems(state: WorldState, teams: Array, cadence: int, vmult: float, s
 	for sys in SYSTEMS:
 		var sname: String = sys["name"]
 		var fn: String = sys["fn"]
+		# ★★★錯開票（2026-09-23）：一個迴圈、兩組。
+		#   ★一個迴圈而不是兩個 pass：兩個 pass 會讓【整點組與錯開組的相對順序】
+		#   變成另一份要維護的知識；一個迴圈 ⇒ 順序就是 registry 順序，永遠。
+		var is_hour: bool = String(sys.get("grp", "hour")) == "hour"
+		if is_hour and not hour_tick:
+			continue
+		# ★★★空批次這一行是【構造保證】不是最佳化：
+		#   我不想靠「14 支系統各自剛好在空批次下是 no-op」——那是清單保證，
+		#   而清單保證會因為【有人漏列一支】而變綠。
+		#   ★已知確實會在空批次下做事的一支：manufacturing_system.gd:132 的假設檢查
+		#   （掛在 for 之前、由 Probe.enabled 守）⇒ 不跳過的話每小時被評 60 次而不是 1 次。
+		#   ★★因此跳過必須在 _pht 之前（否則相位計時表會多出 60 倍的零成本取樣點）。
+		if not is_hour and due_teams.is_empty():
+			continue
+		# ★錯開組吃【這顆 tick 到期的隊】；整點組仍吃全部隊。
+		var batch: Array = teams if is_hour else due_teams
 		# near-only pre-hook：move 前擷取 player 舊位（供 move 後偵測玩家移動清 pending target）。
 		if sname == "strategic_move":
 			player_old = _get_player_tile_pos(state)
 		match String(sys["shape"]):
-			"vision":        call(fn, state, teams, vmult)
-			"teams":         call(fn, state, teams)
-			"teams_cadence": call(fn, state, teams, cadence)
-			"moved":         call(fn, state, moved, teams)
+			"vision":        call(fn, state, batch, vmult)
+			"teams":         call(fn, state, batch)
+			"teams_cadence": call(fn, state, batch, cadence)
+			"moved":         call(fn, state, moved, batch)
 			"arrived":       call(fn, state, arrived)
 			"state":         call(fn, state)
 			"regen":         call(fn, state, cadence)
 			"move":
-				var mv: Dictionary = call(fn, state, teams, smult, cadence)
+				var mv: Dictionary = call(fn, state, batch, smult, cadence)
 				state.rebuild_team_tile_index()   # ★BOTH post-move rebuild（near+far 各一次；下游 co-location/hostile 查 post-move 位）
 				arrived = mv["arrived"]
 				moved = mv["moved"]
@@ -355,8 +422,16 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	#     ⇒ ★★差異只有一個來源；取折衷值會讓近隊也變 ⇒ 一次改兩件事，歸因不了。
 	#   ★★★而「遠」的定義是【離玩家遠】—— 無玩家世界裡「遠隊」＝【全部】，
 	#     今天已坐實一項後果（薪資相位病：遠隊四個發薪日一次都沒發），而那一類失效是【靜默】的。
-	if state.world.current_tick % NEAR_CADENCE == 0:
-		var all_teams: Array = state.teams.keys()
+	# ★★★錯開票（2026-09-23）：到期檢查必須跑在【每一顆 tick】上。
+	#   ★不得留在下面那個 `% NEAR_CADENCE` 閘的內側 —— 在閘裡檢查＝只看得到 60 的倍數
+	#   ⇒ CadenceStagger 的 offset 會被取樣格吃掉（offset≥1 就跳過一個檢查點 ⇒ 間隔 120）
+	#   ⇒ ★★頻率砍半，而那不是工具壞，是【它被放錯了取樣格】。
+	#   ★★★solo_think 那一票在 :403-409 留過這段字，逐字適用於本票。
+	var cur_t: int = state.world.current_tick
+	var hour_tick: bool = cur_t % NEAR_CADENCE == 0
+	var all_teams: Array = state.teams.keys()
+	var due_teams: Array = _collect_due_teams(state, all_teams, cur_t, hour_tick)
+	if hour_tick:
 		# ★驗收②的機具：每隊【真的被排進這個 pass 幾次】——
 		#   ★★分班拆掉之後這格應該【逐隊相同】，而「應該相同」要被量不是被相信。
 		if Probe.enabled:
@@ -397,9 +472,11 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 			state.player_forced_event = {}
 			state.player_forced_event_id = ""
 		if phase_timing: _t = _pht("near.forced_event", _t)
-		# ★第⑧票：單一 pass 走 SYSTEMS registry（含分組 _pht + glue）。
-		var pass_r: Dictionary = _run_systems(state, all_teams, NEAR_CADENCE,
-			time_vision_mult, time_speed_mult, _t)
+	# ★第⑧票：單一 pass 走 SYSTEMS registry（含分組 _pht + glue）。
+	#   ★★錯開票：整點 tick 跑兩組；非整點 tick 只在【有隊到期】時跑錯開組。
+	if hour_tick or not due_teams.is_empty():
+		var pass_r: Dictionary = _run_systems(state, all_teams, due_teams, hour_tick,
+			NEAR_CADENCE, time_vision_mult, time_speed_mult, _t)
 		_t = pass_r["t"]
 		if pass_r["result"] == "player_turn": return "player_turn"   # 伏擊起 encounter → 交還 bridge
 
