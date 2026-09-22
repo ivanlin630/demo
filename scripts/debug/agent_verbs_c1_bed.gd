@@ -182,13 +182,27 @@ func _test_event_stream() -> void:
 	#   ★★object_id_like ＝ 渲染結果裡命中 RefCounted# 或 Object# 的則數。
 	#   ★★★rendered 要跟【餵進去的常數 GM_FED】比，不是跟它自己比——
 	#     否則母體塌陷時 rendered=0 / object_id_like=0 會是【空的綠】。
+	#   ★★★★object_id_like 單獨【沒有鑑別力】——實測（2026-09-22 陰性對照 B）：
+	#     把 MessageData 分支拿掉、保留 Object 分支 ⇒ 三則全渲成
+	#     "(未知事件物件:RefCounted)"，而它沒有 "#" ⇒ object_id_like 仍然是 0
+	#     ⇒ 舊版判決行會【假綠】。⇒ 同一行還要帶【它真正在判的那個量】：
+	#     desc_ok＝渲染結果逖字等於餵進去的 description 的則數；
+	#     typed_ok＝無 description 那一則真的說出了型別的則數。
 	var oid: int = 0
 	for e in events:
 		var es: String = String(e)
 		if es.contains("RefCounted#") or es.contains("Object#"):
 			oid += 1
-	print("[GLOBALMSG] rendered=%d  object_id_like=%d  (餵料 %d 則全部是 MessageData)" % [
-		events.size(), oid, GM_FED])
+	var desc_ok: int = 0
+	for d in ["測試事件 A", "測試事件 B"]:
+		for e2 in events:
+			if String(e2) == String(d):
+				desc_ok += 1
+				break
+	var typed_ok: int = 1 if (events.size() > 2 and String(events[2]).contains("order_buy")) else 0
+	print("[GLOBALMSG] rendered=%d  object_id_like=%d  desc_ok=%d  typed_ok=%d  (餵料 %d 則全部是 MessageData)" % [
+		events.size(), oid, desc_ok, typed_ok, GM_FED])
+	_ok(desc_ok == 2, "★★desc_ok=%d（應 2）：有 description 的兩則逖字渲出來" % desc_ok)
 	_ok(events.size() == GM_FED, "★★母體：渲染出 %d 則，與餵進去的 %d 則相符" % [events.size(), GM_FED])
 	_ok(oid == 0, "★★★零物件 id：玩家看到的是內容，不是 <RefCounted#…>")
 	_ok(events.size() > 2 and String(events[2]).contains("order_buy"),
