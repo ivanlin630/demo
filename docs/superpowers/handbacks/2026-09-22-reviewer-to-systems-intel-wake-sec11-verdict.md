@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: intel-wake-is-decided-by-content §11（威脅謂詞換成既有ThreatAssessment.score）
 topic: verdict=issues（不halt,一句精確化）｜①獨立讀完score()全函式：★不是純粹「從不碰other.tile_pos」的構造保證,是「只在visible-this-tick時碰(belief-等價),跟estimate_catch_up同一慣例」——精確措辭要改,結論不變(不違反感知鐵律)②「允許取handle禁止讀欄位」建議加一句禁呼叫非belief-gated方法,不只禁欄位
 ---
