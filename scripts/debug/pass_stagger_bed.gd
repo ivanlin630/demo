@@ -52,6 +52,11 @@ func _initialize() -> void:
 	print("[PASSSTAG] gap_median=%d  gap_min=%d  gap_max=%d  dup_in_cycle=%d  peak_stag=%d  peak_stub=%d  clamp_ratio=%.2f  stub_all60=%s" % [
 		g_med, g_min, g_max, int(stag["dup"]), int(stag["peak"]), int(stub["peak"]), clamp_ratio,
 		"1" if stub_all60 else "0"])
+	print("[PASSSTAG] ★★★跨世界對照：Γbatch_sum 錯開=%d 樁關=%d（差 %.1f%%）｜Γcost 錯開=%.0fms 樁關=%.0fms（差 %.1f 倍）" % [
+		int(round(float(stag["tot_batch"]))), int(round(float(stub["tot_batch"]))),
+		100.0 * (float(stag["tot_batch"]) - float(stub["tot_batch"])) / maxf(float(stub["tot_batch"]), 1.0),
+		float(stag["tot_cost"]) / 1000.0, float(stub["tot_cost"]) / 1000.0,
+		float(stag["tot_cost"]) / maxf(float(stub["tot_cost"]), 1.0)])
 	print("[PASSSTAG] ★母體（不變量#9）：錯開臂 真隊=%d 野獸=%d 在外子隊=%d｜對照臂 真隊=%d 野獸=%d 在外子隊=%d" % [
 		int(stag["n_real"]), int(stag["n_beast"]), int(stag["n_sub"]),
 		int(stub["n_real"]), int(stub["n_beast"]), int(stub["n_sub"])])
@@ -182,7 +187,23 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 		var cost_us: float = float(Probe.amounts.get("syscost." + String(nm), 0.0))
 		print("     %-18s calls=%-7d batch_sum=%-8d cost_ms=%-9.1f 平均批次=%.2f" % [
 			String(nm), c2, int(round(float(bsum.get(nm, 0.0)))), cost_us / 1000.0, avg])
-	return {"calls": calls, "gaps": gaps, "peak": peak, "teams": per_team_total.size(),
+	# ★★★世界忙碌度（systems 2026-09-23）：兩臂是【兩個不同的世界】，
+	#   而多出來的時間可能是「世界變忙了」不是「迴圈變貴了」。
+	# ★正確的代理：Γbatch_sum ＝【實際處理的隊-次總量】
+	#   ⇒ ★★batch_sum 相同而 cost 不同 ⇒ 成本在【每次呼叫的固定開銷】
+	#   ⇒ ★★★batch_sum 變大        ⇒ 是【世界變忙】，不是迴圈的錯
+	var tot_calls: int = 0
+	var tot_batch: float = 0.0
+	var tot_cost: float = 0.0
+	for nm2 in names:
+		tot_calls += int(calls[nm2])
+		tot_batch += float(bsum.get(nm2, 0.0))
+		tot_cost += float(Probe.amounts.get("syscost." + String(nm2), 0.0))
+	print("   ★總量：Γcalls=%d  Γbatch_sum=%d  Γcost=%.1f ms｜世界：teams=%d persons=%d" % [
+		tot_calls, int(round(tot_batch)), tot_cost / 1000.0, st.teams.size(), st.persons.size()])
+	return {"calls": calls, "tot_calls": tot_calls, "tot_batch": tot_batch, "tot_cost": tot_cost,
+		"persons": st.persons.size(),
+		"gaps": gaps, "peak": peak, "teams": per_team_total.size(),
 		"clamp_worst": worst, "clamp_mean": mean_rate,
 		"dup": int(Probe.counts.get("pass.dup_in_cycle", 0)),
 		"n_real": n_real, "n_beast": n_beast, "n_sub": n_sub}
