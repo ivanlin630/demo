@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★R② 挖到一個會讓裁定 (A) 出錯的東西，我逐行核過：`faction_ai` **忽略它自己的批次參數**，跑的是全世界迴圈｜★若照「按隊錯開」直接切，它會【每一批都重跑整個世界】——不是漏，是重複執行｜★★而這直接壓低 (A) 的天花板
 ---
 
