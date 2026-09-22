@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★撤回「我先前設的記憶體門檻」——那個閘從來沒有落地，它只住在一封信裡；★★而你要我先做的那一步，也需要機器
 ---
 
