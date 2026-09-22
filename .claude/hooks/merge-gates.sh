@@ -85,6 +85,12 @@ if [ "${MG_NO_FETCH:-0}" != "1" ]; then
 ' "$LOCFULL") 2>/dev/null | sed 's/ *$//')
     [ -n "$DEFDIFF" ] && DEF_NOTE="★定義與 origin/main 不同（名字在、內容不一樣）：$DEFDIFF"
     [ -n "${DEF_NOTE:-}" ] && echo "[MERGE-GATES] $DEF_NOTE"   # ★無條件印：算了不印＝沒接電
+    # ★★★2026-09-22（systems，implementer 撞到）：這兩句原本【只掛在最後的 PASS 分支上】
+    #   ⇒ 只要有任何一支紅，FAILED 那段的 `exit 1` 就先走掉 ⇒ ★【少跑了哪幾支】整句消失。
+    #   ★血證：電池 2 紅 ⇒ implementer 是【自己用手 grep】才發現 world-fp 兩行沒跑到。
+    #   ⇒ ★★守衛的輸出不可以被【另一個守衛開火】吃掉 ⇒ 在這裡無條件印一次。
+    [ -n "${STALE_NOTE:-}" ] && echo "[MERGE-GATES] $STALE_NOTE ★★這幾支【沒有跑過】"
+    [ -n "${FORK_NOTE:-}" ] && echo "[MERGE-GATES] $FORK_NOTE"
     UPSTREAM_N="$UPN"
   fi
 fi
@@ -133,10 +139,14 @@ if [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; then
 fi
 FAILED=(); TOTAL0=$SECONDS; N=0; RUN_N=0
 ENVFAIL=()
-# ★★★2026-09-06:讀進來先剝 ``(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
-#   `expect` 會尾帶 `` ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
+# ★★★2026-09-06:讀進來先剝【CR＝0x0D】(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
+#   expect 會尾帶 0x0D ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
 #   ★★而 .gitattributes 已 eol=lf ⇒ repo 的 blob 是乾淨的,壞的只有【工作區那一份】
 #   ⇒ ★★★所以修在【讀取端】:誰寫的都不會再毒到判準。
+# ★★★2026-09-22 systems 自犯:上面那段【原本用一個真的 0x0D 位元組來說明 0x0D】,
+#   而編輯工具把它換成 0x0A ⇒ 下一行的 ${id%...} 變成剝換行 ⇒ read 早就剝掉了 ⇒ ★純 no-op。
+#   ⇒ ★★守衛死了、語法仍合法、不報錯;腐蝕方向是【綠→紅】(:174 expect 未命中不走 pass) 所以沒造假綠。
+#   ⇒ ★★★修法:文件裡【不要放那個位元組本身】,寫它的名字。改動本檔後必跑剝除的陽性對照。
 while IFS=$'	' read -r id cmd purpose expect; do
   id="${id%$''}"; cmd="${cmd%$''}"; purpose="${purpose%$''}"; expect="${expect%$''}"
   case "$id" in ''|'#'*) continue;; esac
@@ -206,6 +216,12 @@ if [ "$_mg_head_end" != "$_mg_head" ]; then
   echo "[MERGE-GATES] ★★★本輪【不可判】：開跑 HEAD=$_mg_head，結束 HEAD=$_mg_head_end"
   echo "[MERGE-GATES]   ⇒ ★一輪之內兩棵樹 —— 前半與後半跑的不是同一份 code。"
   echo "[MERGE-GATES]   ⇒ ★★綠與紅都不算 —— 停掉、乾淨重跑。"
+  # ★★★2026-09-22 訂正（systems 自己踩到）：原本這一段【只有 print】——
+  #   ⇒ 若所有閘都通過，下面照樣印「PASS：全部通過」而且 exit 0
+  #   ⇒ ★**同一輪同時印「本輪不可判」與「全部通過」，回 rc=0** ＝ 一個假綠
+  #   ⇒ ★★而「全部通過」這句在樹變過的那一輪【不指向任何一棵樹】
+  #   ⇒ 修法：立旗標，讓它像環境紅一樣【壓過】PASS，並用同一個離開碼 2（不可判）
+  _mg_undecidable=1
 fi
 echo "───────────────────────────────"
 if [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; then
@@ -265,10 +281,12 @@ if [ ${#ENVFAIL[@]} -gt 0 ]; then
   echo "[MERGE-GATES]   ⇒ ★實測：Claude Code 的 PowerShell 工具進程 Process scope 已是 Bypass ⇒ 從那裡起跑就通；"
   echo "[MERGE-GATES]   ⇒ ★★Bash 工具裡 spawn 的 powershell 沒有那個 Process scope ⇒ 被擋（機器層本來就是 Undefined）"
   echo "[MERGE-GATES]   ⇒ ★★★本輪不更新基線、不計入任何統計"
+  [ -n "${STALE_NOTE:-}" ] && echo "[MERGE-GATES]   ⇒ ★且本輪【少跑了】：$STALE_NOTE"
   exit 2
 fi
 if [ ${#FAILED[@]} -gt 0 ]; then
   echo "[MERGE-GATES] FAIL：${FAILED[*]}"
+  [ -n "${STALE_NOTE:-}" ] && echo "[MERGE-GATES]   ⇒ ★★且本輪【少跑了】：$STALE_NOTE ★紅與【沒跑】是兩件事，別把後者讀成前者的配菜"
   echo "★註冊表在 $REG —— ★★新增閘＝往那裡加一行（★★★含 expect，否則直接 FAIL）"
   exit 1
 fi
@@ -282,6 +300,10 @@ elif [ "${RUN_N:-0}" = "0" ]; then
   echo "[MERGE-GATES] ★★★紅：【實跑 0 支】—— 這不是「全過」，是【什麼都沒跑】"
   echo "[MERGE-GATES]   ⇒ 檢查 MG_FROM/MG_TO 是不是把整張註冊表濾掉了"
   exit 1
+elif [ "${_mg_undecidable:-0}" = "1" ]; then
+  echo "[MERGE-GATES] ★★★本輪【不可判】：每一支都通過了，★**但它們不是跑在同一棵樹上**"
+  echo "[MERGE-GATES]   ⇒ ★**不得當作 merge 判決** —— 乾淨重跑一輪再說。"
+  exit 2
 elif [ -n "${FORK_NOTE:-}" ]; then
   echo "[MERGE-GATES] PASS：本地這 $N 支全部通過｜${FORK_NOTE}"
 else

@@ -27,7 +27,7 @@ check_sect() {
   new=$((new+1))
   st=$(printf '%s' "$sect" | grep -oE '狀態：(已知未修|未確認|已知未實裝)' | head -1)
   if [ -z "$st" ]; then
-    echo "[KI-STATUS] ★FAIL：新條目缺【狀態】欄 ⇒ ${title:0:60}"
+    echo "[KI-STATUS] ★FAIL：新條目缺【狀態】欄 ⇒ $title"
     echo "   ⇒ ★把【未確認】寫成【已知未修】是在考卷上說謊的溫和版；沒寫則是連問都沒問"
     fail=$((fail+1)); return 0
   fi
@@ -47,22 +47,22 @@ check_sect() {
       #   ★回溯適用並擋住所有人的 merge ＝ 把【恆空】做成【恆滿】。
       #   ★★而不印它 ＝ 規則存在而永遠不會被用到。
       #   ⇒ 印名字 + 印總數，回填完成後再翻成硬擋。
-      echo "[KI-STATUS] ⚠未回填：【未確認】回訪沒有時鐘（需 YYYY-MM-DD 或 defers token）⇒ ${title:0:56}"
+      echo "[KI-STATUS] ⚠未回填：【未確認】回訪沒有時鐘（需 YYYY-MM-DD 或 defers token）⇒ $title"
       noclock=$((noclock+1)); return 0
     fi
   fi
   if [ "$st" = "狀態：已知未實裝" ] && ! printf '%s' "$sect" | grep -q '回訪：觸發事件'; then
-    echo "[KI-STATUS] ★FAIL：【已知未實裝】條目的回訪不是「觸發事件」⇒ ${title:0:60}"
+    echo "[KI-STATUS] ★FAIL：【已知未實裝】條目的回訪不是「觸發事件」⇒ $title"
     echo "   ⇒ ★刻意不做的東西，唯一該回來看它的時機就是【那個觸發發生時】；寫別的＝擱到沒人會回來的地方"
     fail=$((fail+1)); return 0
   fi
   if [ "$st" = "狀態：未確認" ] && ! printf '%s' "$sect" | grep -q '回訪：量測窗'; then
-    echo "[KI-STATUS] ★FAIL：【未確認】條目的回訪不是「量測窗」⇒ ${title:0:60}"
+    echo "[KI-STATUS] ★FAIL：【未確認】條目的回訪不是「量測窗」⇒ $title"
     echo "   ⇒ ★能把「未確認」變成別的東西的只有量測；寫別的＝擱到沒人會去量它的地方"
     fail=$((fail+1)); return 0
   fi
   if ! printf '%s' "$sect" | grep -q '回訪：'; then
-    echo "[KI-STATUS] ★FAIL：新條目缺【回訪條件】⇒ ${title:0:60}"; fail=$((fail+1))
+    echo "[KI-STATUS] ★FAIL：新條目缺【回訪條件】⇒ $title"; fail=$((fail+1))
   fi
 }
 
