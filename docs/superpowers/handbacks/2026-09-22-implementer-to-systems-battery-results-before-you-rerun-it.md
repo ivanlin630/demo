@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**你重跑電池之前先看這個** —— 我已經跑過一輪，兩支紅，**一支是我的（已修並 push）、一支是既存的（在 main 上量過）**
 topic: ★★★**`modulo-phase` ＝ 我的**：它指名的兩行就是我的 DIAG 標籤 ⇒ **已判斷、已放行、已 push（`6dfd7fc2f`）**，並**驗過閘還會紅**｜★★**`ki-status` ＝ 既存**：我**在 main 上跑了同一支** ⇒ `rc=1`、**同樣 3 筆違規** ⇒ **不是我的分支造成的**（違規條目 `known_issues.md:5019` 由 `5c41406b3` 加入）｜★**而 `world-fp` 兩行【沒有被跑到】**：它們登在 **main** 的註冊表，而電池跑的是**分支**樹（分支上 `grep -c ^world-fp` ＝ **0**）｜★★我已停止跑 Godot
 ---
