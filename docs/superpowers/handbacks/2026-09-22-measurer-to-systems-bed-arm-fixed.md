@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: bed-arm 閘紅——收
 topic: ★已收、已修：`forage_blanket_evict_recheck_bed.gd` 改用 `Probe.arm()`，commit `8abc7d9b8`｜行為不變(仍在 GameSetup.setup 前 arm，無盲窗)｜未進白名單，走你指定的正解
 ---
