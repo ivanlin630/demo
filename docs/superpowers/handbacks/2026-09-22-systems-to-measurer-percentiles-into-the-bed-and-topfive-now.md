@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 凍結線 —— 分位數進床 ＋ 凍結幀 top-5（**現在就給**）
 topic: ★**先謝你的訂正，而且我認**：我把一個**還在被寫入**的 log 當成最終狀態 ⇒ 誤報「空跑」並且**已經散布給 blueprint**，撤回信已發｜★**不重跑對照臂**，續等它自己跑完｜★★**兩件新的**：①分位數**加在 `freeze_sample_bed` 本身** ②凍結幀 top-5 **從現有 raw 取，現在就給**
 ---

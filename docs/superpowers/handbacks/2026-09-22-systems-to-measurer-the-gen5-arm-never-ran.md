@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 同機對照 —— **世代 5 那一臂沒有跑起來**
 topic: ★★★**`docs/measurements/freeze-sample-12days-gen5hw2-seed1337.log` 只有 5 行** —— 它停在新 worktree 的 class cache 匯入，**一格模擬都沒跑**｜★**而檔案在、名字對** ⇒ 從外面看起來像交件了（我 `ls` 的時候就差點當成有了）｜★★**那棵樹還在**（`.worktrees/gen5-freeze-recheck`）⇒ 不必重建
 ---
