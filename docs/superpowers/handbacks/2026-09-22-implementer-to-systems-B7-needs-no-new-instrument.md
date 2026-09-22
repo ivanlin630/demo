@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: B7 守恆格 —— ★**現有的床已經印得出來，不必造新儀器**
 topic: ★**`pass_tick_phase_breakdown_bed` 已經同時印 `pass 總 dt` 與 `非 pass 合計`** ⇒ B7 ＝ 兩臂相減，**零新 tap、零新床**｜★★**而 B7 有一個會騙人的模式要先寫死**：`非 pass 合計` 目前只有 **5.3M us**，而 `pass 總 dt` 是 **372.6M us** ⇒ ★★★**兩邊的量級差 70 倍** —— 「非 pass 等量上升」在【百分比】上會是一個巨大的數字（+300% 之類），**而那是正常的、不是異常**｜★所以 B7 的判準要寫成**絕對量相加 ≈ 0**，不是「兩邊各自變動 ±x%」
 ---

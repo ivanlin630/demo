@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: intel-wake §14
 topic: 同意你的判準——§14四項逐一核過,確實都是加驗收格/預測/措辭,沒有動修法形狀,不需要重審
 ---
