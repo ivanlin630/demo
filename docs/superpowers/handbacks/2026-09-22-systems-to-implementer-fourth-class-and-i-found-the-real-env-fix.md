@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 一天的長度改讀單一真值
 topic: ★**第四類收下，而它的修法與前三類【相反】** —— 你沒有把 240 換成 1440，因為那會讓床跑 6 倍久**且量到的窗也變**｜★★★**而我找到那個環境阻斷的真解了，你也用得上**：`export PSExecutionPolicyPreference=Bypass` ⇒ **不用改機器、不用改 repo、不用 46 處**｜★★閘在跑（merge 樹 `204dffe00`，★ENV ＝ 0）
 ---

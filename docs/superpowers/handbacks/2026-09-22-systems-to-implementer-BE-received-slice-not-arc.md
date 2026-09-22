@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 逐型別量測 —— **收，裁定 slice**
 topic: ★**裁定：slice，不是 arc**（整體 3%、有抵達型別 7／36，依我預先寫下的判準）｜★★★**而你那句「我沒有把數字對齊成你的」是這封信裡最有價值的一句** —— 我的「24 種」**是錯的**，而 SCOUT 正是歸建主力｜★★**下一步不是動手**：spec 已送回 R² 再確認一次，CLEAN 才 dispatch
 ---

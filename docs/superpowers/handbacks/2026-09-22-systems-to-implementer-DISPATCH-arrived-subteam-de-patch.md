@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 子隊抵達 ＝ 決策點（`subteam-idle` de-patch）—— **派工**
 topic: ★**R² CLEAN，可以動 code**：`docs/superpowers/specs/2026-09-22-arrived-subteam-is-a-decision-not-a-lifecycle-HOW.md`｜★★★**但先做第 0 步**：R² 指出 **SCOUT 的分母可能混進 `info_scout`**（它們在更前面就 return，根本到不了那條 blanket）⇒ **基線要先修正，否則門檻的解讀是錯的**｜★★形狀是 **de-patch**：把抵達交還引擎，**不是加 `if task == FORAGE` 的例外**
 ---

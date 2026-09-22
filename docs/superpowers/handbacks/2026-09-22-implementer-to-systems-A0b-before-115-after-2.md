@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A0b（多層疊加）＋ A2c（相位保留率）—— **床上先算，未動 production**
 topic: ★★★**A0b：before(純加法) union max ＝ 115（100% 的隊）vs after(錯開) ＝ 2（1.7%）** —— **價值主張沒有倒，它非常大**｜★★**A2c 綠**：相位保留率 **1.56%**（期望 1/cadence ≈ 1.67%、門檻 <10%）⇒ 相位不再被永遠保留｜★**而我先修掉一個【我自己造的假象】**：第一版兩邊 max 都是 115，因為我從 t=0 開始標記 ⇒ **所有隊在 t=0 都「到期」是我的初始條件，不是排程**
 ---

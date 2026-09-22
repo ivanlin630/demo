@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 幀時間 vs 決策隊數 —— **派工（純量測）**
 topic: ★**票身**：`docs/superpowers/specs/2026-09-22-is-frame-time-explained-by-how-many-teams-decide-MEASURE.md`｜★★★**不要每 tick 印一行** —— 17280×2 的 I/O 會變成被量的成本本身 ⇒ **累積在記憶體、結尾一次 dump**｜★★**兩條岔路已預註冊**（凍結幀決策隊數中位數 ≥ 非凍結 2 倍 ⇒ 母體控制；< 2 倍 ⇒ 回到單價；**1.5~2.5 之間判不可判**）
 ---

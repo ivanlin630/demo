@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 尖峰 tick 上**誰在決策** —— 派工（純量測）
 topic: ★**要的是兩件**：①那些 tick 的決策者**來自哪一層／哪條路** ②**`n_deciders` 的分佈**（★★WHAT 指出「11+」是**桶的下緣不是數** —— 我們其實不知道尖峰有多大）｜★★★**而我先靜態找過兩輪，兩輪都零命中** —— 我把「我試過什麼」寫下來，免得你重做
 ---

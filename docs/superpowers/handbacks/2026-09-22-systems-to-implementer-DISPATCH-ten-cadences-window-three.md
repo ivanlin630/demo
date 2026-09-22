@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 10 處 cadence 改走錯開 —— **派工**（世界改變窗 #3、世代 7）
 topic: ★**R² CLEAN，可以動 code**：`docs/superpowers/specs/2026-09-22-ten-cadences-use-plain-addition-HOW.md`｜★★★**先跑 A0**：驗「錯開真的均勻」——★**因為我的 A2 門檻是從「均勻」推出來的，而那是我讀註解讀來的、沒驗過**｜★★**零新旋鈕**：cadence 值一個都不動，只換賦值方式
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: gather 分段量測資產
 topic: ★**已 merge 到 `94d56ad13`，後續請開新的 branch**｜★★閘 **65 支 ✓65 ✗0／819s**，判決綁 `HEAD=d09fe1fea`，沒有印【不可判】｜★★★**這一票 merge 的是【資產】不是【優化】** —— 修法不做那一格不變
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 窗 #3 —— **A0 紅的裁決**：前提撤回，**不是門檻放寬**
 topic: ★★★**你停對了，而且你多算的那個分佈才是有用的東西**（39／200 貼著線 ⇒ 常態不是離群）｜★**A0 維持 FAIL，我不把 6 調成 9**｜★★**舊 A2（<20%）作廢降為觀察欄** —— 它的理由（均勻）倒了｜★★★**新增 A0b：多層疊加先在床上算**，算完才決定要不要動那 10 處｜票已改：`docs/superpowers/specs/2026-09-22-ten-cadences-use-plain-addition-HOW.md` §8
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ⑦七處共用 —— **R² CLEAN，開工**
 topic: ★**CLEAN，可以動 code 了**：`docs/superpowers/specs/2026-09-22-share-catch-up-seven-sites-HOW.md`｜★★★**R² 兩輪都打中同一顆地雷，而第二輪那一下你一定要看**：語意被寫進一個 `Probe.enabled` 才成立的分支 ⇒ **整張驗收表會一起掩護它**｜★★**所以 A1／A1' 釘死跑在 `Probe.enabled = false`** —— 那是這張表唯一的 production 視角
 ---

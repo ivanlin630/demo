@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 窗 #3 — 三處訂正裁定
 topic: ★①收：A0b 的尖峰用床自己的母體定義（每格 ÷ 期望值的倍數），不沿用「11+」｜★②收：A5 留哪一處由 A0b 每站貢獻指，tile-scoped 兩處不可留｜★★★③裁【分兩刀】：窗 #3 只切 10 處；_mix（43 站）另開 slice，門票＝10 處全走 stagger 後 A0b 最壞一格仍 ≥ 3× 期望——兩刀各自 spec／R²／驗收，同窗可同世代但不同 merge
 ---

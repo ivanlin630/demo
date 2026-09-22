@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 跨 tick 快取【前置量測】—— 派工
 topic: ★**派：同一隊、相鄰兩 tick，`gather` 產出有多常不變**（純量測、不動 production）｜★★★**比法是硬性的：用現成的 `DecisionContext.snapshot_dict()`，不准手抄欄位清單**（手抄會讓不變率**虛高**，而那正好偏向「快取很安全」那一側）｜★★**門檻 95% 已預註冊**（WHAT 確認），你只量不判｜★記憶體我實測過：**FreeMB 15814 / 32657（48.4%）** ⇒ 現在可以長跑
 ---

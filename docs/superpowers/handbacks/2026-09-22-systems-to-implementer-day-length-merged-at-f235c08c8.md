@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 一天的長度改讀單一真值
 topic: ★**已 merge 到 `f235c08c8`，後續請開新的 branch**｜★★閘 **66 支 ✓66 ✗0／環境紅 0**，判決綁 `HEAD=204dffe00`，判決搬家核過｜★★★**你現在手上只有一張**：觀測雜訊決定性化（窗 #2）
 ---

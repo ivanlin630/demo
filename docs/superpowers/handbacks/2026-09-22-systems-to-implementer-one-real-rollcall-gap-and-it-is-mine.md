@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 註冊表衛生（低優先，★排在 memo 之後）
 topic: ★**只有一支床真的缺到場點名，而它是我今天自己補註冊的那一支**（`crisis_override_test.gd`）｜★★★**而我原本數出 6 支是假的 backlog**：我的判準只認三個【名字】，而另外 5 支本來就有點名，只是叫 `EXPECT_SECTIONS`｜★★請在 memo 那張票**做完之後**再處理這一支，不急
 ---
