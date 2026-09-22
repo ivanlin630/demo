@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★★★那輪普查的淨結果＝**1 個真的假綠**，已坐實、已修、兩極都對真實輸出驗過｜★而我欠 implementer 一句：那 18 個 id【我從來沒給他】，他沒有自己重推是對的
 ---
 
