@@ -807,7 +807,7 @@ func erase_teams(tids: Array) -> void:
 		# §D4 A / reviewer R②：真累積器硬要求顯式 erase，非靠 start_combat 隱式重置）
 		NpcCombatSystem._cas_carry.erase(tid)
 	# 3a. settlement S1a 死亡釋放：dead tid owned outpost tile → outpost_owner=-1（鬼城解鎖，供他隊既有
-	# takeover timer 撿现成認領）。★R² 效率：單 pass over world.tiles 配 dead:Dictionary O(1) membership
+	# takeover timer 撿現成認領）。★R² 效率：單 pass over world.tiles 配 dead:Dictionary O(1) membership
 	# （非每 dead team 各掃全圖 O(dead×tiles)）。同 :315 for-otid-if-dead.has pattern。
 	for tid in world.tiles:
 		var wt: HexTileData = world.tiles[tid]

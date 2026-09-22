@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝形狀表漏了一個【真的會增加】的資源；它是手工表 AcquisitionPaths.SHAPE_TABLE 變錯時的機械答案，不是某一票的驗收
 # ★形狀表的【機械 falsifier】（systems 裁 2026-08-25）。
 #
 # ★存在理由：形狀表 `AcquisitionPaths.SHAPE_TABLE` 是一張【手工表】，
@@ -30,7 +31,7 @@ func _run() -> void:
 	# ★Probe 必須開：不開的話執行證明 counter 永遠是 0，
 	#   而我就會拿那個 0 去證明「沒執行」——★儀器沒開不等於事情沒發生。
 	# ★自測開關：故意不開 Probe ⇒ 對照應該【大叫 VOID】。
-	#   ★一個從沒 fire 過的守衛，跟沒有守衛一樣 —— 所以對照本身也要被驗过。
+	#   ★一個從沒 fire 過的守衛，跟沒有守衛一樣 —— 所以對照本身也要被驗過。
 	var selftest: bool = OS.get_environment("FALSIFIER_SELFTEST") == "1"
 	Probe.enabled = not selftest
 	Probe.reset()

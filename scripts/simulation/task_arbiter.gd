@@ -300,9 +300,9 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 					elif _util < team.task_util: _cmp_u = "new_lower"
 					else: _cmp_u = "equal"
 				Probe.bump("4c.utilcmp." + _cmp_u)
-				# ★★★【遲滞的值不許手填】（systems 2026-09-16）：
+				# ★★★【遲滯的值不許手填】（systems 2026-09-16）：
 				#   ★它要從【擋得對的那幾筆的 util 差】推 ⇒ **所以要先把差值量出來**。
-				#   ★★而兩群的差值若**重疊** ⇒ **一個純量遲滞分不開它們**
+				#   ★★而兩群的差值若**重疊** ⇒ **一個純量遲滯分不開它們**
 				#     ⇒ ★★★**那時要回報，不是硬挑一個數**。
 				#   ★量化到 0.01：鍵數有界（母體本來就小）且不靠 first-N 樣本。
 				if _cmp_u == "new_higher" or _cmp_u == "new_lower":

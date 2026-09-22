@@ -556,7 +556,7 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 		var _q2: float = minf(stock, float(o["qty"]))
 		var gain2: float
 		if _bid >= 0.0:
-			gain2 = (_bid - _mine2) * _q2   # ★卖掉手上的貨，賺的是【他出的價 − 我自己的估值】
+			gain2 = (_bid - _mine2) * _q2   # ★賣掉手上的貨，賺的是【他出的價 − 我自己的估值】
 			if Probe.enabled: Probe.bump("trade.arb_surplus.buy")
 		else:
 			gain2 = _mine2 * _q2

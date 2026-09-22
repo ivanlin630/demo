@@ -190,7 +190,7 @@ func _initialize() -> void:
 	print("")
 	print("★③副作用守衛：隊滅絕於餓 %d｜有名角色餓死 %d｜窗末無自家據點的隊：未登記 %d ・已登記寄居 %d" % [
 		_starve_team, _starve_person, _homeless, _registered])
-	print("   ★未登記歸零＝消滅遊商階層（blueprint 明文禁）⇒ 這一欄应該保持非 0"
+	print("   ★未登記歸零＝消滅遊商階層（blueprint 明文禁）⇒ 這一欄應該保持非 0"
 		+ ("　★★本窗＝0，要當成紅看" if _homeless == 0 else ""))
 	# ── ④ 下游與歸因（systems 2026-09-11 要的兩格）──
 	#   ★①逃跑變多有沒有下游後果：戰鬥結束數／滅團數（含分因）
