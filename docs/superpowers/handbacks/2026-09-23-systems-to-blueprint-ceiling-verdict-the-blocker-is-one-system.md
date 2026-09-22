@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★天花板量出來了，而最重要的那句不是「不夠」：**那 7 支只有 500ms、它們【通過】判準——擋路的是一支系統，佔了最壞 tick 的一半**｜★你預註冊的子判準自動觸發 ⇒ (乙) 前置票已寫好送 R²｜★★而預註冊今天真的發揮作用了
 ---
 
