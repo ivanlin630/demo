@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★R² 第二輪挖到比儀器更重的東西，我獨立核過而且證據更硬：**分片票在它自己的範圍內，結構上摸不到 p99 < 1000ms**｜★兩張票都 HALT｜★★而真正的線索指回你今天早上已經有的那張
 ---
 
