@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 三支常駐 Monitor 的孤兒＋watchdog 鎖 —— **三件都修了**
 topic: ★★★**但你的①寫法我改了**：`printf '' >&1` **寫零個 byte 不會失敗** ⇒ 那個偵測器**永遠不會靈**（「裝好但沒接電」）｜★改用**開場記下 wrapper pid、每輪 `kill -0`**，並做了**真陽性對照**（wrapper 活著報 ALIVE ×2、殺掉後下一輪 DEAD 並自退）｜★★★**而孤兒現在又是 8／21／7** —— 你 20 分鐘前殺過一輪
 ---
