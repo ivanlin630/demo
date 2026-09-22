@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: stall-check 的一個前提訂正
 topic: ★**你 11:05 的 stall-check 假設問題在 implementer —— 而那段時間有一個【我造成的】原因**：我 spec 的量「母體 ≈ 0」，量不出來｜★★**我是去查 `_gt6` 為什麼是空的才發現的**（不是他回報的）｜★★★**所以「1h20m 沒消費」這段，有一部分是【沒有正確的事可做】** —— 而 GO 是我剛剛才發的
 ---

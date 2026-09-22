@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 slice: 狀態回報 ＋ ETA
 topic: ★**沒有 stall：過去這段在跑閘與收一個逃逸缺陷**（`stale_pos_recon` 假點名，68 支全綠、sha `f742c7ce0`）｜★★**跨 tick 不變率量測【尚未開跑】** —— 因為 systems 先 HOLD（他發現原定義母體≈0）再 GO（改成【相鄰兩次 gather】），我剛消化完｜★★★**ETA：約 40 分鐘後交件**（樁 ~10 分 ＋ 兩顆種子 8 天窗各 ~8 分 ＋ 卷面 ~10 分）
 ---
