@@ -415,8 +415,8 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, due_faction
 			continue
 		# ★錯開組吃【這顆 tick 到期的隊】；整點組仍吃全部隊。
 		var batch: Array = due_factions if is_fac else (teams if is_hour else due_teams)
-		# ★★★診斷用：逐支系統的【呈叫次數】（純記帳，Probe 之下）。
-	#   ★為什麼數呈叫次數而不用 phase_timing：_pht 是【鏈式】的
+		# ★★★診斷用：逐支系統的【呼叫次數】（純記帳，Probe 之下）。
+	#   ★為什麼數呼叫次數而不用 phase_timing：_pht 是【鏈式】的
 	#     （_t = _pht(label, _t)，每個 label 記的是「上一個檢查點到現在」），
 	#     而本票讓整點組的 entry 在非整點 tick 被 continue 掉 ⇒ 它們的 _pht 也被跳過
 	#     ⇒ ★★下一個有 label 的 entry 會把【被跳過那段的時間】一起吃進自己的帳
@@ -426,6 +426,12 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, due_faction
 		if Probe.enabled:
 			Probe.bump("syscall." + sname)
 			Probe.add_amount("sysbatch." + sname, float(batch.size()))
+		# ★★★【這一次 call 自己的】耗時，不是 _pht 的鏈式區間。
+		#   ★_pht 是 `_t = _pht(label, _t)` —— 被 continue 掉的 entry 連 _pht 一起跳過
+		#     ⇒ 下一個有 label 的 entry 會把那段時間吃進自己的帳 ⇒ 系統性歸錯帳。
+		#   ★★這裡取的是 dispatch 兩側的區間 ⇒ 每一筆都有主詞，不會歸錯。
+		#   ★★★而它回答的是具體問題：38.9 倍的呼叫次數【乘在哪一支】。
+		var _sc0: int = Time.get_ticks_usec() if Probe.enabled else 0
 		# near-only pre-hook：move 前擷取 player 舊位（供 move 後偵測玩家移動清 pending target）。
 		if sname == "strategic_move":
 			player_old = _get_player_tile_pos(state)
@@ -445,6 +451,8 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, due_faction
 				moved = mv["moved"]
 				if _get_player_tile_pos(state) != player_old:
 					_player_cmd.clear_pending_targets(state)
+		if Probe.enabled:
+			Probe.add_amount("syscost." + sname, float(Time.get_ticks_usec() - _sc0))
 		# near-only post-hook：emit 後、near.events_emit _pht 前送 tutorial 投奔者。
 		if sname == "emit":
 			RecruitTutorial.new().check(state)

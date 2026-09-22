@@ -158,7 +158,7 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 	var mean_rate: float = sum_rate / float(maxi(per_team_total.size(), 1))
 	print("   隊數=%d｜間距樣本=%d｜相位尖峰=%d｜clamp 最壞率=%.4f 平均率=%.4f" % [
 		per_team_total.size(), gaps.size(), peak, worst, mean_rate])
-	# ★★★逐支系統的呈叫次數（systems 2026-09-23：數呈叫次數，不猜、不用 phase_timing）。
+	# ★★★逐支系統的呼叫次數（systems 2026-09-23：數呼叫次數，不猜、不用 phase_timing）。
 	#   ★【計數】不怕短窗也不怕機器忙：分母不會隨世界長大。
 	var calls: Dictionary = {}
 	var bsum: Dictionary = {}
@@ -172,15 +172,16 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 			bsum[k3s.substr(9)] = float(Probe.amounts[k3])
 	var names: Array = calls.keys()
 	names.sort()
-	print("   ★逐支系統呈叫次數（共 %d 支）：" % names.size())
+	print("   ★逐支系統呼叫次數（共 %d 支）：" % names.size())
 	for nm in names:
 		var c2: int = int(calls[nm])
 		var avg: float = float(bsum.get(nm, 0.0)) / float(maxi(c2, 1))
 		# ★★★印【總和】不是只印平均：守恆的宣稱若用【平均×次數】回推，
 		#   而平均是四捨五入過的 ⇒ 同一份資料 1.05 與 1.1 差 5.8%。
 		#   ★總和是【直接量到的】，平均是從它算出來的 ⇒ 要比就比總和。
-		print("     %-18s calls=%-7d batch_sum=%-8d 平均=%.2f" % [
-			String(nm), c2, int(round(float(bsum.get(nm, 0.0)))), avg])
+		var cost_us: float = float(Probe.amounts.get("syscost." + String(nm), 0.0))
+		print("     %-18s calls=%-7d batch_sum=%-8d cost_ms=%-9.1f 平均批次=%.2f" % [
+			String(nm), c2, int(round(float(bsum.get(nm, 0.0)))), cost_us / 1000.0, avg])
 	return {"calls": calls, "gaps": gaps, "peak": peak, "teams": per_team_total.size(),
 		"clamp_worst": worst, "clamp_mean": mean_rate,
 		"dup": int(Probe.counts.get("pass.dup_in_cycle", 0)),
