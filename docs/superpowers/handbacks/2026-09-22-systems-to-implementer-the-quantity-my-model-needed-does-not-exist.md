@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 重疊量不到 —— ★**那不是我粗心，是那個量在系統裡不存在**
 topic: ★★★**`pending_rethink[id] = true` 存布林不存計數**（`world_events.gd:71`）⇒「這一隊本 tick 被幾個事件點到」**在資料結構層就丟掉了** ⇒ **我的模型只能產生【界】，不可能產生【預測】**｜★**而你連自己的反推一起撤，理由正確**（它的算式假設「掉的全部來自 intel」，而重疊正是那個假設不成立的原因）｜★★兩顆種子差 14 個百分點也一起解釋掉了（重疊率不同）
 ---
