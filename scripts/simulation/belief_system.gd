@@ -356,6 +356,17 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 						Probe.bump("intelwake.f.ta.threat")
 					else:
 						Probe.bump("intelwake.f.ta.nonthreat")
+					# ★★★方向守衛（systems 裁 2026-09-22）：交叉表 (是否威脅 × 是否喚醒)。
+					#   ★★`_is_threat` 必須【獨立於 `_wake`】算一次 —— 若兩者共用同一個運算式,
+					#     比較方向一反、兩邊一起動 ⇒ **什麼都測不到**。
+					#   ★這是【刻意的重複】：tap 手上握一份【意圖】的獨立副本,
+					#     生產邏輯偏離它時交叉表才會破。
+					#   ★★★誠實限：若有人把【兩邊都】反過來,這個守衛也是瞎的
+					#     —— 它擋的是「生產邏輯單方面漂掉」,不是「有人故意改兩處」。
+					if _threat_score >= 0.0:
+						var _is_threat: bool = _threat_score >= ThreatAssessment.THREAT_BASE_THRESHOLD
+						Probe.bump("intelwake.pair." + ("T" if _is_threat else "N")
+							+ "." + ("wake" if _wake else "nowake"))
 	var firsthand: bool = source_type == "親見" and source_id == obs_id
 	# ★★★反向斷言（systems 裁 2026-09-05：留發現不留機制）——
 	#   ★實測：三個 production firsthand 寫入點全部同時寫 `tile_pos` ⇒ 等式成立

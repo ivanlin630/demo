@@ -125,12 +125,34 @@ func _initialize() -> void:
 		fail += 1
 	cells += 1
 
+	# ── ★★★方向守衛（systems 裁）：`wake=false ⟺ 非威脅` ──
+	#   ★它擋的是【比較方向被反轉】(`>=` 改 `<`)：那種改動**仍然是變數、仍然由門檻導出**
+	#     ⇒ B6 的文字檢查過得去,而語意整個反過來。
+	#   ★★它問的是【語意】不是【文字】⇒ 改寫成 `not (x < T)` 仍然綠。
+	#   ★★★而它只需要【一棵樹、一個短窗】⇒ 可以當 merge-gate（B1 不行）。
+	var _tw: int = int(Probe.counts.get("intelwake.pair.T.wake", 0))
+	var _tn: int = int(Probe.counts.get("intelwake.pair.T.nowake", 0))
+	var _nw: int = int(Probe.counts.get("intelwake.pair.N.wake", 0))
+	var _nn: int = int(Probe.counts.get("intelwake.pair.N.nowake", 0))
+	print("\n[IW] ★★★方向守衛：威脅×喚醒 = %d｜威脅×不喚醒 = %d｜非威脅×喚醒 = %d｜非威脅×不喚醒 = %d" % [
+		_tw, _tn, _nw, _nn])
+	if _tw + _tn + _nw + _nn == 0:
+		push_error("[IW][不可判] 方向守衛母體 0 ⇒ tap 沒接上（不是沒有情報）")
+		fail += 1
+	elif _tn != 0 or _nw != 0:
+		push_error("[IW][FAIL] 方向守衛破：威脅×不喚醒=%d、非威脅×喚醒=%d（兩者都必須是 0）⇒ ★比較方向反了" % [_tn, _nw])
+		fail += 1
+	else:
+		print("[IW]   ⇒ ✔ 威脅×不喚醒=%d 且 非威脅×喚醒=%d（母體 %d）⇒ wake=false ⟺ 非威脅" % [
+			_tn, _nw, _tw + _tn + _nw + _nn])
+	cells += 1
+
 	print("\n[誠實限] ①本床不判威脅,只給維度；★定義換一個,f 就換一個")
 	print("[誠實限] ②距離用【觀察者剛學到的位置】算 ⇒ 若情報是舊的/被扭曲的,這裡也跟著錯（★那是對的）")
 	print("[誠實限] ③母體＝emit 次數,不是【被喚醒的隊數】（一次 emit 只一個 subject,但隊可能已在 pending）")
-	print("=== intel_wake_threat_share DONE（fail=%d｜到場點名 %d／5）===" % [fail, cells])
-	if cells != 5:
-		push_error("[FAIL] 到場點名 %d／5 ⇒ 有格沒跑到" % cells)
+	print("=== intel_wake_threat_share DONE（fail=%d｜到場點名 %d／6）===" % [fail, cells])
+	if cells != 6:
+		push_error("[FAIL] 到場點名 %d／6 ⇒ 有格沒跑到" % cells)
 		fail += 1
 	quit(1 if fail > 0 else 0)
 
