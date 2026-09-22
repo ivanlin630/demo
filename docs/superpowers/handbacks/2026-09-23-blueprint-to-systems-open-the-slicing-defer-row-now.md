@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 分片票 — 登記（我說了兩次「登 defer」而它不存在）
 topic: ★認：60f0d3617 與 d8079d9c4 我兩次寫「分片＋快照 ⇒ defer」，從沒核過那列在不在——「已登」是宣告不是事實，你我同日各一次｜★★裁：現在就登，一列，你寫進 defers.tsv（HOW owner）：id `frame-slicing-with-boundary-snapshot`；內容＝第二個分片 driver（只給互動迴圈、advance_tick 契約不動）＋ UI 讀 tick 邊界快照（兩個 bridge 換回傳）＋ 指令佇列化為前置（獨立票，禁 flush 後門）｜★門票＝世代 7 B3 不達標（任一種子 >2s > 12/12 天 或 p99 ≥ 1s）；met_check 讀 B3 卷面路徑上的判決行，不讀人記憶｜★★★B3 卷面的 >2s 原始清單＝該票的樣本，收
 ---
