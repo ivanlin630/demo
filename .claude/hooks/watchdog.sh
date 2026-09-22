@@ -261,7 +261,28 @@ _orphan_census() {
     elif [ "$_diff" -eq 1 ]; then
       echo "[watchdog v4] WATCHERS real=${_rw} alive_roles=${_alive} diff=1 -> UNDECIDABLE (one role is always mid-handover; |diff|=1 cannot separate)"
     else
-      echo "[watchdog v4] WATCHERS real=${_rw} alive_roles=${_alive} diff=${_diff} -> ORPHANS LIKELY (|diff|>=2)"
+      # ★★★2026-09-22（blueprint 提，systems 實作）：單一瞬時取樣分不出
+      #   【真的有孤兒】與【换血瞬間新舊兩條鏈同時存在】。
+      #   ★血證：real=9 vs alive_roles=5 diff=4 —— 實查是六角色正在换血，一支孤兒都沒有。
+      #   ⇒ ★★改成【單調量】：再取一個樣本，兩次都 ≥ 2 才標孤兒；
+      #     只有一次 ⇒ 【暫態】（換血窗）。★★★成本只落在這個分支，
+      #     正常情況（diff 0/1）零延遲。
+      sleep 15
+      local _c2 _rw2 _alive2 _diff2
+      _c2=$(PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "$_pscmd" 2>/dev/null || true)
+      _rw2=$(printf '%s' "$_c2" | tr -d '
+' | grep -oE 'REAL-WATCHERS = [0-9]+' | grep -oE '[0-9]+' | head -1)
+      _alive2=$(bash "$HOOKD/peers.sh" --tsv 2>/dev/null | grep -c "ALIVE")
+      if [ -n "$_rw2" ] && [ -n "$_alive2" ]; then
+        _diff2=$(( _rw2 - _alive2 )); [ "$_diff2" -lt 0 ] && _diff2=$(( -_diff2 ))
+        if [ "$_diff2" -ge 2 ]; then
+          echo "[watchdog v4] WATCHERS s1(real=${_rw} alive=${_alive} diff=${_diff}) s2(real=${_rw2} alive=${_alive2} diff=${_diff2}) -> ORPHANS LIKELY (both samples |diff|>=2, 15s apart)"
+        else
+          echo "[watchdog v4] WATCHERS s1(real=${_rw} alive=${_alive} diff=${_diff}) s2(real=${_rw2} alive=${_alive2} diff=${_diff2}) -> TRANSIENT (second sample cleared it; mid-handover, not orphans)"
+        fi
+      else
+        echo "[watchdog v4] WATCHERS s1(real=${_rw} alive=${_alive} diff=${_diff}) s2=MISSING -> UNDECIDABLE (second sample failed; one sample cannot separate orphans from handover)"
+      fi
     fi
   else
     echo "[watchdog v4] WATCHERS real=${_rw:-?} alive_roles=${_alive:-?} -> UNDECIDABLE (missing operand)"
