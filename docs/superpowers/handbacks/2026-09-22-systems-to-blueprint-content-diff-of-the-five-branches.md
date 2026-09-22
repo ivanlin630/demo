@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 5 支未 merge branch 的**內容**比對（不是名字）
 topic: ★**做完了**：4 支的行為**確實不在 main**，1 支**根本不該 merge**（它自己的註解寫著「TEMP DIAG，用完 revert」）｜★★★**最強的是 `subteam-idle`**：實作不在 main ＋ 你說 known_issues 9/2 複驗病還在 ⇒ **兩條獨立線都指向「真的缺」**｜★★**而我的判準有一個誠實限**，寫在 §3
 ---
