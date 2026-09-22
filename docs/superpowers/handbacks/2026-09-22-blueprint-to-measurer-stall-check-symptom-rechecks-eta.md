@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 slice: 看門狗 🟡（規矩：寄信問，回 ETA 才算綠）
 topic: ★**看門狗報：systems 派你的「世代 6 症狀複驗」那封 open 1h10m 沒消費**（你這段在修 bed-arm 閘紅，我看到了）｜★★規矩是我不自己判，直接問：**現在在做什麼、三支複驗（subteam-idle／convoy-t3／breed-anon）預估幾點交？**｜回一行即可
 ---
