@@ -1,0 +1,49 @@
+{
+  "slice": "世代6/HW-2 四格症狀複驗（派工：2026-09-22-systems-to-measurer-DISPATCH-symptom-rechecks-in-generation-6.md）",
+  "measured_at_head": "90e273aa8",
+  "touches": [
+    "scripts/simulation/faction_ai_system.gd",
+    "scripts/simulation/resource_system.gd"
+  ],
+  "raw_logs": [
+    "docs/measurements/forage-evict-recheck-8d7346068-seed1337-1mo.log",
+    "docs/measurements/forage-evict-recheck-8d7346068-seed2024-1mo.log",
+    "docs/measurements/convoy-return-conservation-8d7346068-seed1337-1mo.log",
+    "docs/measurements/convoy-return-conservation-8d7346068-seed1337-3mo-warring.log",
+    "docs/measurements/convoy-return-closure-8d7346068.log",
+    "docs/measurements/breed-rate-test-8d7346068.log",
+    "docs/measurements/surplus-vs-breedsignal-8d7346068.log"
+  ],
+  "specimen_trace": null,
+  "hardware_stamp": "[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16",
+  "generation_stamp": "世代6（邊界 3fb2c3201），量測程式碼落於 8d7346068→483f7e5a5，比對於 HEAD 90e273aa8",
+  "①_subteam_idle_forage_blanket_evict": {
+    "verdict": "★症狀確認存在（非不可判、非消失）",
+    "method": "新tap(subteam.forage_arrived/merge.forage_blanket_evicted/collect.forage_subteam_task_collected)，seeded兩輪1mo，warring_states config",
+    "seed1337_1mo": {"arrived": 43, "evicted": 43, "ratio": 1.0, "collected_passive": 63, "distinct_parent": 15, "thrash_dist": {"1": 3, "2": 5, "3": 2, "4": 2, "5": 2, "6+": 1}},
+    "seed2024_1mo": {"arrived": 42, "evicted": 41, "ratio": 0.9762, "collected_passive": 5, "distinct_parent": 13, "thrash_dist": {"1": 2, "2": 5, "3": 1, "4": 2, "5": 1, "6+": 2}},
+    "checkpoint_curve_seed1337": "tick2000~6000=0(啟動期), tick8000起持續非0成長至tick42000=42 ⇒ 每個checkpoint比例皆~100%,非母體不足",
+    "honest_note": "★systems先前用舊版(300s窗)只跑到tick8000看到3/3,已用完整1mo曲線回覆非不可判；兩seed交叉corroborate=強訊號"
+  },
+  "②_failure_memory_structural_identity": {
+    "verdict": "本輪不動（WHAT裁：排在跨tick快取決定之後）"
+  },
+  "③_convoy_return_t3_budget": {
+    "verdict": "★母體非0,有訊號(return duration outlier)，不足以量化RETURN_ABS_CAP_TICKS門檻本身(main無此常數)",
+    "config_note": "peaceful_economy config母體恆0(1mo+3mo皆porters_tracked=0，該config無convoy情境)⇒改用warring_states",
+    "warring_1mo_day30": {"porters_tracked": 64, "dispatch": 64, "deliver": 33, "settled": 20, "return": 58, "fates": {"merged_home": 58, "ghost_alive": 4, "still_convoy": 2}, "return_task_share": "997/1671=59.7%(RETURN期間task仍是運輸的佔比,40.3%被搶走)", "preempted_convoys": "11/23=47.8%"},
+    "return_duration_outliers": "typical 0.4~4.7日；兩筆離群值 15.1日／16.9日(porter150/145，皆在RETURN階段被搶task後才拖長)⇒與branch描述的「返程無上限拖長」症狀方向一致",
+    "honest_limit": "只跑到1mo checkpoint(3mo跑法因GODOT_TIMEOUT/Bash timeout配錯exit98中斷)；沒有main上的RETURN_ABS_CAP_TICKS對照組，無法量化「加cap後會少多少」，只能證明「現在確實存在無上限拖長的樣本」"
+  },
+  "④_breed_anon_eligible": {
+    "verdict": "★main上現成床皆ALL PASS，未觀察到症狀,依派工指示不開票",
+    "breed_rate_test": "ALL PASS（fail=0），涵蓋anon+named混合資格判斷、冷啟動、單調性、LOD等價",
+    "surplus_vs_breedsignal_bed": "跑完DONE，無FAIL，非空breed.rate_sample=24/24 cap、breed.born=1（有實際生育）",
+    "honest_limit": "沒有第二條線佐證branch要修的具體症狀（_breed_safety_proxy/named_eligible缺失），依派工指示症狀不在就結案"
+  },
+  "incomplete": [
+    "③3個月warring_states完整窗未跑完(exit98,Bash工具timeout早於GODOT_TIMEOUT砍掉)，只有1mo(day30)checkpoint可用",
+    "④無RETURN_ABS_CAP_TICKS門檻量化(main無此常數,無法算「加了會差多少」)"
+  ],
+  "summary": "①強訊號確認存在(建議續開修法票)；②本輪不動；③母體非0且有離群拖長樣本佐證branch描述方向,但未窮盡(1mo足夠給方向,判不可判提升為判存在)；④main上無症狀,依指示不開票"
+}
