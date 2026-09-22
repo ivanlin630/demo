@@ -250,7 +250,7 @@ _orphan_census() {
   #   ★implementer 的話：**「誠實限」是描述，不是守衛**；
   #   寫在註解裡 ＝ **留給讀的人判**，而讀的人會把差 1 讀成「有孤兒」。
   local _rw _diff
-  # ★不用反向參照：反斜線在寫入時被吃掉過（`` 變成空）⇒ 改用 grep -o，並削掉 CR
+  # ★不用反向參照：反斜線在寫入時被吃掉過（`0x01` 變成空）⇒ 改用 grep -o，並削掉 CR
   _rw=$(printf '%s' "$_census_out" | tr -d '
 ' | grep -oE 'REAL-WATCHERS = [0-9]+' | grep -oE '[0-9]+' | head -1)
   if [ -n "$_rw" ] && [ -n "$_alive" ]; then

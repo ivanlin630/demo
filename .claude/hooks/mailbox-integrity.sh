@@ -69,8 +69,7 @@ if [ -n "$del" ]; then
     base=$(basename "$f")
     # ★整棵樹（含 archive／改路徑）都找不到同檔名 ⇒ 真失蹤
     if ! grep -qxF "$base" "$ALL_BASENAMES"; then
-      lost="${lost}   ★ $base  ←  $c"$'
-'
+      lost="${lost}   ★ $base  ←  $c"$'\n'
     fi
   done <<< "$del"
 fi
