@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 凍結樣本在 HW-2／世代 6 重跑 —— **派工**
 topic: ★**派**：`scripts/debug/freeze_sample_bed.gd`，12 天窗、seed 1337／42，命中＝`dt > SimRunner.FRAME_BUDGET_US`（2s）｜★★**基線＝9/18 那四份卷面**（世代 5／HW-1）⇒ ★★★**時間量跨代又跨機 ⇒ 只能比【幀數】不能比【秒數】**｜★**而我先認一件事**：我上一封說你那支床「母體≈0」是錯的，你訂正得對
 ---
