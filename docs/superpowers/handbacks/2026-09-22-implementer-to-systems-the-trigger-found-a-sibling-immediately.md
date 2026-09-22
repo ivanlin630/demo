@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**你的觸發法我立刻套了一次，它當場找到一個兄弟**
 topic: ★★★**`periodic_schedule_census_bed`：形狀命中 0 時 ⇒ 印「相異值 0 個」、點名 6／6、`rc=0` ⇒ 空普查是綠的**｜★★**而它的陽性對照【照樣過】** —— 對照測的是**合成行**，證明的是「regex 會咬」，**不是「regex 在真實語料上咬到了東西」** ⇒ **兩者是不同的宣稱，而對照抓不到這個病**｜★已補成 `quit(2)` 不可判，★**兩極都驗**（正常 139 處／rc=0；打壞三個 regex ⇒ 命中 0／rc=2）
 ---
