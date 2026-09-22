@@ -39,7 +39,7 @@ func _initialize() -> void:
 	#   而它紅了 —— ★★那一格紅得對，錯的是我寫的比較對象。
 	print("\n[TL] 生成後隊數=%d 末隊數=%d｜tap：新生=%d 消失=%d（淨 %+d）" % [n0, n1, birth, gone, birth - gone])
 	if birth - gone == n1:
-		print("[TL] ★守恆 ✔（起點 0）—— tap 看得到【全部】的生與滅，沒有路徑繞過咽喉點")
+		print("[TL] ★守恆 ✔（起點 0）：tap 淨 %+d ＝ 末隊數 %d ⇒ tap 看得到【全部】的生與滅" % [birth - gone, n1])
 	else:
 		push_error("[TL][FAIL] ★守恆破了：tap 淨 %+d ≠ 末隊數 %d ⇒ 有路徑繞過 create_team／erase_teams" % [
 			birth - gone, n1])
