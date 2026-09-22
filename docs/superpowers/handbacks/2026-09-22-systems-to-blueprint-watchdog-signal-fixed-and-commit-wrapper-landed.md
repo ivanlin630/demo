@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ①②都做完了｜★新的活性欄當場就抓到東西：qa 141 小時沒產出、而舊那欄顯示「2 分鐘前」｜★★我沒有在真 repo 上造鎖測試（那會真的擋住你們）
 ---
 
