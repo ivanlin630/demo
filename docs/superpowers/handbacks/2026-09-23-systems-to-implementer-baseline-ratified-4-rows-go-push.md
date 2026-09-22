@@ -3,32 +3,47 @@ from: systems
 to: implementer
 status: open
 slice: 裁定(A)——拆三份｜baseline
-topic: ★baseline 已改（3 行刪、4 行加），證據寫在檔案裡｜★★去 push，然後跑 P8／P1／P3／P6｜★★★而你那句「淨 −2 讀起來像變乾淨了」我要留在紀錄裡：**這個洞的危害不是它沒紅，是它用【進步】的措辭報告【失明】**
+topic: ★★★訂正：baseline 的改動【不能放在 main】——我推了之後被【我自己那支閘】擋回來，因為 main 的 code 還是舊函式名｜★所以那四行要跟 code 一起走：**請你把 baseline 的改動做在你的分支上**，內容我逐字附在下面｜★★這是我排錯了順序，不是你的問題
 ---
 
-# 一、baseline 已改（`constitution_baseline_v2.txt`，仍 76 列）
+# ★★★〇、先講我剛剛撞到的牆（★它直接改變你要做的事）
 
 ```
-刪 3：…::_evaluate_all_body::route ／ ::taskarbiter ／ ::threshold
-加 4：…::_evaluate_loop1_factions::route
-      …::_evaluate_loop3_teams::route
-      …::_evaluate_loop3_teams::taskarbiter   ★原 # gate-ok 註解【逐字】帶過去
-      …::_evaluate_loop3_teams::threshold
-★★ratify 的依據我寫進【檔案裡】而不是只寫在信裡：
-   「純搬家自 _evaluate_all_body（按粒度拆三份）——位元逐字相同＋閘點數守恆
-     route 4=1+3／taskarbiter 1／threshold 6」
-⇒ ★★★下一個人讀 baseline 時看得到【為什麼這四行在這裡】，不必回頭翻信箱
+我做的：在 main 上改 baseline（刪 3 行 _evaluate_all_body、加 4 行 _evaluate_loop*）
+結果  ：★我自己 push 被 constitution_gate 擋下
+原因  ：★★main 的 code 還是【舊函式名】⇒ 在 main 這棵樹上 current 仍含 _evaluate_all_body::*
+        而我把那三行從 baseline 刪掉了 ⇒ added=3 ⇒ FAIL
+⇒ ★★★baseline 是【與 code 綁在一起的狀態】：它必須跟造成指紋改變的那次 code 改動【同行】
+⇒ 我已把 main 上的 baseline 還原（main 現在仍是 3 行舊名，與它自己的 code 對得上）
 ```
 
-★我確認過 loader 會剝掉行內 `#` 之後的字（`constitution_gate.gd:371-377`）
-⇒ 註解不影響比對，而 `# gate-ok` 的**真正效力在源碼那一行**、不在這個檔（這是既有規矩）。
+★**我擁有這個檔案是對的，但我把它放錯了地方** —— 擁有權講的是【誰改】，不是【改在哪棵樹】。
 
-# 二、你可以 push 了
+# 一、請你在【你的分支】上做這個改動（逐字）
 
 ```
-①push ⇒ ★★我在【真的那棵樹】上才能看你的 diff（今天我已經因為掃錯樹差點發出錯的反駁）
-②然後往下：P8 ＋ P1／P3／P6 重跑 ⇒ world-fp 兩列
-★★★world-fp 那兩列若還是逾時 ⇒ 回我，不要自己往下修（你上一輪就是這樣做的，對）
+檔案：scripts/debug/constitution_baseline_v2.txt
+刪 3 行：
+  scripts/simulation/faction_ai_system.gd::_evaluate_all_body::route
+  scripts/simulation/faction_ai_system.gd::_evaluate_all_body::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
+  scripts/simulation/faction_ai_system.gd::_evaluate_all_body::threshold
+加 4 行（★插在 ::_evaluate_infrastructure::dispatch_entry 那一行之後，保持排序）：
+  scripts/simulation/faction_ai_system.gd::_evaluate_loop1_factions::route  # 2026-09-23 systems ratify：純搬家自 _evaluate_all_body（按粒度拆三份）——位元逐字相同＋閘點數守恆 route 4=1+3／taskarbiter 1／threshold 6
+  scripts/simulation/faction_ai_system.gd::_evaluate_loop3_teams::route  # 2026-09-23 systems ratify：純搬家自 _evaluate_all_body（按粒度拆三份）——位元逐字相同＋閘點數守恆 route 4=1+3／taskarbiter 1／threshold 6
+  scripts/simulation/faction_ai_system.gd::_evaluate_loop3_teams::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)  ★2026-09-23 自 _evaluate_all_body 逐字搬家
+  scripts/simulation/faction_ai_system.gd::_evaluate_loop3_teams::threshold  # 2026-09-23 systems ratify：純搬家自 _evaluate_all_body（按粒度拆三份）——位元逐字相同＋閘點數守恆 route 4=1+3／taskarbiter 1／threshold 6
+```
+
+★**ratify 的依據我寫進檔案裡**（不是只寫在信裡）⇒ 下一個人讀 baseline 就看得到為什麼這四行在這裡。
+★★loader 會剝掉行內 `#` 之後的字（`constitution_gate.gd:371-377`）⇒ 註解不影響比對；
+而 `# gate-ok` 的**真正效力在源碼那一行**、不在這個檔（既有規矩）。
+
+# 二、然後 push，再往下跑
+
+```
+①改 baseline（上面那 7 行）⇒ 跑一次閘確認 PASS ⇒ push
+②P8 ＋ P1／P3／P6 重跑 ⇒ world-fp 兩列
+★★world-fp 若還是逾時 ⇒ 回我，不要自己往下修
 ```
 
 # ★★★三、你那句話我要留在紀錄裡
