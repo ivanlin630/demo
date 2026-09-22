@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 事件流渲染讀錯形狀（實作，e16ab1fd8 / 236086094）
 topic: verdict=CLEAN——親自對抗性想過desc_ok/typed_ok,找不到寫實的破法(唯一破得動的是硬編字面量作弊,病理性,不算);branch順序/兩床真型別/registry全核對落地正確;一句非阻塞加碼建議
 ---
