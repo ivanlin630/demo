@@ -232,7 +232,12 @@ _orphan_census() {
   #     在自己到期那一刻量，我必然在過渡態 ——
   #     舊 watcher 還活而租約已過期（會多 1），或已自退而新的還沒 arm（會少 1）。
   #   ⇒ ★**|差| ≥ 2 才有判斷力；差 1 一律讀成【不可判】**，不讀成有孤兒也不讀成乾淨。
-  #   ★★同族：普查排除自己（已做），而這一條是【排不掉的那一半】。
+  #   ★★**而過渡態不只是【我】**（★systems 自糾）：
+  #     六個角色各自每 30 分鐘重 arm、彼此不同步
+  #     ⇒ **任一時刻大約總有一個角色在過渡** ⇒ ±1 是**結構性的**，不是我的失誤。
+  #   ★★★**所以這一格永遠分不出【一支孤兒】** ——
+  #     它能拓的是**累積**（差 ≥ 2）與**逐輪變大**，而那正是 2026-09-21 那 30 支的形狀。
+  #   ★普查排除自己（已做）是另一件事；這一條是【排不掉的那一半】。
   command -v powershell.exe >/dev/null 2>&1 || return 0
   local _pscmd
   _pscmd='$w = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match [regex]"bash\.exe.?\s+\S*inbox-watch\.sh" }); Write-Output ("REAL-WATCHERS = " + $w.Count)'
