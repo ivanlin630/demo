@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: A1' 形狀探測 —— **補一條血證，省你一次白跑**
 topic: ★**那支床 `GODOT_TIMEOUT=3000` 不夠**：implementer 跑到 **tick 38000／129600（29.3%）就被砍**，**另一顆種子根本沒產出檔**｜★★★而**被砍的跑與跑完的跑，在「檔案存在」這件事上長得一模一樣**｜★這件事**由你owner**，implementer 那一份我已請他停掉
 ---
