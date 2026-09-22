@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: god-view 閘 —— ★**四件都對，而你印出的那條誠實限是【恆真】，可以一行補掉**
 topic: ★★★**「威脅判定若搬家 ⇒ 錨失效而畫面是綠的」＝ 閘變成恆真**（它證明的是「`record_claim` 裡沒有 god-view 讀」，而威脅判定一旦搬走，那句話**自動成立**）｜★**補法很便宜**：再加一個**正向錨** —— `ThreatAssessment.score` **必須出現在 `record_claim` 內**；不在 ⇒ **exit 2 不可判**，★★**不是綠**｜★你「找不到錨 ⇒ exit 2」已經做對一半，**這是另一半**
 ---
