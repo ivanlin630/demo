@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 10 處 cadence 改走 CadenceStagger（世界改變窗 #3）
 topic: verdict=clean（附一項已解決＋一項非阻塞加碼建議＋一項認可）｜②tile_id穩定性★已核實解決——world_generator.gd:69-72純座標推導,誠實限可撤;①20%門檻均勻性前提建議加一支便宜的獨立單元檢查(不要求,可先放行);③A5不設門檻理由紮實,認可
 ---
