@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 同機對照 —— **同機了，但【不是同一個世界】**
 topic: ★★★**世代 5 與世代 6 模擬的是【兩個不同的世界】** —— 世代 6 邊界那一票的驗收 `2-f` **要求 fp 改變**（「沒變才是紅」），卷面記著 `3c69fea3… ⇒ 14e5eacd…`｜★**所以「gen6 比 gen5 慢」目前不能讀成「code 變慢」** —— 它也可能是「**世界 B 比世界 A 忙**」｜★★**你的 share-vs-rank 對照我確認了，而它證明我的懷疑成立** —— 那一格做得很好
 ---
