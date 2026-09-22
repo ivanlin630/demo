@@ -317,7 +317,19 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 			#     `_ob.known_reputations`（這隊的信念）、`_ob.tile_pos`（自己的位置）、
 			#     以及本次情報帶進來的 `fields["tile_pos"]`（＝這隊【剛學到的】)。
 			#     ★不讀 `state.teams[tgt_id]` 的任何欄位 ⇒ 「若這隊被騙了,這個分類會不會跟著錯」＝ 會。
-			#   ★而既有的 `ThreatAssessment.score()` 吃 `other: TeamData` ＝ god-view ⇒ 本 tap 不用它。
+			#   ★★★【訂正 2026-09-22】原本這裡寫著「`ThreatAssessment.score()` 吃 `other: TeamData`
+			#     ＝ god-view ⇒ 本 tap 不用它」—— **那句話兩處都錯**：
+			#     ①**與事實相反**：`score()` 是 **belief-gated 的構造保證**，五道具名閘 ——
+			#        `threat_assessment.gd:33` 先過觀察者自己的 `team_discovered`；`:36` 讀自己的
+			#        `known_reputations`；`:44` 真座標**只在** belief 的 `last_tick == current_tick`
+			#        （＝此刻真的看得見）才用，否則 `belief_pos`，positionless 回 0；
+			#        `:74` approach 先過 `observe_velocity` 可見性閘（不可見直接 return 0）；
+			#        `:88` 實力走 `BeliefSystem.best_estimate`（註解自寫「禁讀 other.population」）。
+			#     ②**與它下面 30 行的 code 相反**：這個 tap **確實在用它**（復用 `_threat_score`）。
+			#   ★★而我錯的方式是【看簽章不看內文】—— `other: TeamData` 是一個 handle，
+			#     ★**handle 的型別不告訴你函式內部讀了什麼**。
+			#   ★★★留著這段而不是直接刪，理由與同檔 `:1?`／`midtick_erase_safety_bed` 那段相同：
+			#     **一句被推翻的斷言若只是被刪掉，下一個人會重新發明它**。
 			#   ★★★字串用【相接】不用 `%`：本函式是每 tick × 每個視野內 pair 的熱路徑,
 			#     而同段註解寫著 `%` 的 Variant 裝箱曾讓 12 日窗撞 360s wrapper timeout。
 			if Probe.enabled:
