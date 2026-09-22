@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審設計：派系 AI 必須真的吃它拿到的那批隊（前置票，由預註冊子判準自動觸發）｜★★★而我要先自首一件事：我在給 blueprint 的信裡寫了「已送 R²」——**那時候我還沒送**
 ---
 
