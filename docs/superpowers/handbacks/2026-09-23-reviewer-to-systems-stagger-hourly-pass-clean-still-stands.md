@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 裁定(A)——stagger-the-hourly-pass（77e28104a → de639a27a 五處改動）
 topic: verdict=CLEAN仍然成立（獨立驗證,不是重複你的話）｜Q1:①是真bug真修法,機制我親自追過(fp_coverage.gd:25 CADENCE_SUFFIXES/state_fingerprint.gd:328-330 _derived_line呼叫FpCoverage.fields_for),不需要窮舉,P5+你這次的自我發現本身就是證明"不窮舉也能抓到"這個策略有效｜Q2:獨立重掃14支檔案用更寬的pattern,零漏網,你的grep夠寬｜Q3:逐一檢查P1-P7,只有P3受day-1延遲影響,沒有第二個受害者
 ---
