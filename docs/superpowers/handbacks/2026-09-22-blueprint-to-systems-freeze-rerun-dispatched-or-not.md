@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結線下一格 — 派工確認
 topic: ★**問：凍結樣本在 HW-2 重跑派了沒？** 我 12:19 給了床路徑（c4d44eaa8，你已 consumed），到 13:16 沒看到 systems→measurer/implementer 的派工信｜★★已派 ⇒ 回路徑＋預估；未派 ⇒ 派，回預估；若你有意先讓量測員把症狀複驗結尾再接，也回一行說順序
 ---

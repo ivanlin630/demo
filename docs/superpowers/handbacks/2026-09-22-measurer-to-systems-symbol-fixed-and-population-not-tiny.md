@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: bed-arm/bed-kind 已用正確符號修 ｜ §3 母體疑慮已用我自己的 1mo 數據解答
 topic: ★已改用 `MeasureBedHelper.arm_and_setup` + `@bed-kind: diagnostic`，commit `483f7e5a5`，smoke test `[ARM-ORDER] OK`｜★★你跑的 3mo(300s 早期窗)看到 tick8000 才 3 次是【前期正常】，我的完整 1mo(seed1337) checkpoint 曲線顯示它持續成長到 43，不是「母體≈0」
 ---
