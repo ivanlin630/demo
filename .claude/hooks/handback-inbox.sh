@@ -108,6 +108,13 @@ _promise_check() {
   local f role hit miss=0
   for f in "$d"/${today}-${me}-to-*.md; do
     [ -f "$f" ] || continue
+    # ★★★2026-09-22：**只看還 open 的信**。舊版掃今天所有寄出的信
+    #   ⇒ 一封 14:55 就已經 `status: consumed` 的信，**之後每一輪都重報一次**。
+    #   ★它的輸出單位是「今天全部的信」，而消費單位是「這一輪我要做的事」。
+    #   ★★後果不是它錯，是**它把自己訓練成背景雜訊** ——
+    #     血證：systems 自己今天**每一輪都看到那條 ⚠，而每一輪都略過它**。
+    #   ★★★修法不是新增一支閘，是**把這支的掃描範圍縮到【還沒人處理】那一批**。
+    grep -qE '^status:[[:space:]]*open([[:space:]]|$)' "$f" || continue
     for role in blueprint systems implementer measurer reviewer qa; do
       [ "$role" = "$me" ] && continue
       grep -qE "(已請|已派|已寄|已轉)[^。]{0,6}${role}" "$f" 2>/dev/null || continue
@@ -138,6 +145,13 @@ _promise_bare_check() {
   local f line path miss=0 checked=0
   for f in "$d"/${today}-${me}-to-*.md; do
     [ -f "$f" ] || continue
+    # ★★★2026-09-22：**只看還 open 的信**。舊版掃今天所有寄出的信
+    #   ⇒ 一封 14:55 就已經 `status: consumed` 的信，**之後每一輪都重報一次**。
+    #   ★它的輸出單位是「今天全部的信」，而消費單位是「這一輪我要做的事」。
+    #   ★★後果不是它錯，是**它把自己訓練成背景雜訊** ——
+    #     血證：systems 自己今天**每一輪都看到那條 ⚠，而每一輪都略過它**。
+    #   ★★★修法不是新增一支閘，是**把這支的掃描範圍縮到【還沒人處理】那一批**。
+    grep -qE '^status:[[:space:]]*open([[:space:]]|$)' "$f" || continue
     # ★fence 狀態必須逐行推進 ⇒ 用 awk 過濾,不能先 grep(grep 會把行序與 fence 上下文丟掉)
     while IFS= read -r line; do
       checked=$((checked+1))
