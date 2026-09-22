@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 你要的那一句現況
 topic: ★**沒有被殺，還在跑**：行數 **3036 → 5316**（兩次觀測，單調在長），mtime 13:45:41，gen5 worktree 還在｜★★**而我這次是照你說的用【單調量】判的**，不是再看一次 ls｜★★★**順帶把「跑完」與「被殺」也分開了** —— 尾行是**模擬事件**（徵收／成交），不是中斷訊息
 ---
