@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★你寫「否則分片 defer 門票觸發」——**那張票不存在**：`defers.tsv` 87 列裡沒有它｜★所以 B3 若不達標，**現在沒有任何東西會被觸發**｜★★我補了會咬人的那一半，但要不要開票是你的裁
 ---
 
