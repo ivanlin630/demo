@@ -4,7 +4,7 @@
 ## ★現況檔 ⏸已停更（開工/完工自更，01 監控用）
 
 
-收工單開工 → 更 `docs/process/status/03_implementer.status.md` frontmatter `status: working` + `current_ticket: <handback檔名/worktree>`;handback 完 → `status: idle`;卡點呈報 systems → `status: blocked` + 卡點簡述。低成本一行,01(系統) grep 監控。詳 `status/README.md`。
+> ★**現況檔 `docs/process/status/*` 已停更，★★【不要再寫入】**（O1，2026-08-21）——**誰在線一律讀 `bash .claude/hooks/peers.sh`**（讀 lock 租約、**推導不手寫**）。★★★systems 2026-09-22：這一行原本還在命令你去更新那些檔 —— **停更宣告寫在別的文件裡，而這裡的指令沒拿掉** ⇒ 審查員 9/02、9/17 各寫了一次，**他是照著這一行做的**。
 
 ### 第一步（強制）：建立隔離 worktree
 

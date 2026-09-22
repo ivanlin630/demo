@@ -11,7 +11,7 @@
 > **改用**：`bash .claude/hooks/peers.sh`（誰在線＝讀 lock 租約，**推導不手寫**）＋ watchdog v4 的 `open 信/長工作/commit` 分類。
 > **處置**：先停更 → 觀察一週（**至 2026-08-28**）沒人 miss → 刪檔。**這段期間不要再寫入。**
 
-收 R①/R² 工單開工 → 更 `docs/process/status/02_reviewer.status.md` frontmatter `status: working` + `current_ticket: <handback檔名/topic>`;審完出判決 → `status: idle` + `current_ticket: "-"`。低成本一行,01(系統) grep 監控 pipeline。詳 `status/README.md`。
+> ★**現況檔 `docs/process/status/*` 已停更，★★【不要再寫入】**（O1，2026-08-21）——**誰在線一律讀 `bash .claude/hooks/peers.sh`**（讀 lock 租約、**推導不手寫**）。★★★systems 2026-09-22：這一行原本還在命令你去更新那些檔 —— **停更宣告寫在別的文件裡，而這裡的指令沒拿掉** ⇒ 審查員 9/02、9/17 各寫了一次，**他是照著這一行做的**。
 
 ## ★信箱（收 R①/R② 工單 + 出判決）
 開場 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`。收 `to:reviewer status:open` 信→讀+判。**出判決 handback（`to:systems status:open`）——★寄件一律 open,絕不自寫 consumed**（consumed 是收件端讀後回執;寄件自寫=對方只掃 open→靜默漏看）。讀完別人給你的信才把那封改 consumed。詳 `07_mailbox_trigger §status 所有權`。
