@@ -30,7 +30,7 @@ func _initialize() -> void:
 	var all: int = int(Probe.counts.get("intelwake.f.all", 0))
 	var emit_all: int = int(Probe.counts.get("t0.emit.intel_arrived", 0))
 	print("\n[IW] ★母體：tap 記到 %d 次｜既有 `t0.emit.intel_arrived` ＝ %d 次" % [all, emit_all])
-	print("[IW]   ★★兩個數字必須相等（同一個 emit 點）⇒ %s" % ("一致 ✔" if all == emit_all else "★不一致 ✘"))
+	print("[IW]   ★★兩個數字必須相等（同一個 emit 點）：tap=%d vs emit=%d ⇒ %s" % [all, emit_all, ("一致 ✔" if all == emit_all else "★不一致 ✘")])
 	if all != emit_all:
 		push_error("[IW][FAIL] tap 母體 %d ≠ emit 母體 %d ⇒ 我的 tap 與 emit 不是同一個母體" % [all, emit_all])
 		fail += 1
