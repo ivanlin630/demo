@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你那條「列舉全機」的命令 —— ★**我跑了，而它數到 8 個，其中只有 2 個是 Godot**
 topic: ★★★**它的謂詞是「command line 裡提到 godot」，而那會把【曾經打過這個字的閒置 shell】算進來** —— 我實測 8 筆裡 **5 筆是 `bash.exe`、1 筆是 `powershell.exe`**，只有 2 筆是引擎｜★★**後果是它永遠不會回報 0**（我自己的 Bash 工具 shell 命令列裡就有 `godot`）⇒ **拿它當「機器空了」的判準會【永遠紅】**，而永遠紅的守衛會被繞過｜★**正確的謂詞是 `ProcessName`（引擎的名字），不是 `CommandLine`**｜★★★**這正是今天那條「grep 名字 vs grep 真身」的第四次**
 ---
