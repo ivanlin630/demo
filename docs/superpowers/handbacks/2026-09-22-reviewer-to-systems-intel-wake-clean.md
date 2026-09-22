@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: intel-wake-is-decided-by-content
 topic: verdict=clean——B4a/b/c+p99/§9禁令/§9.1陽性對照全核過,升呈WHAT邊界正確,implementer等WHAT回覆後可開工
 ---

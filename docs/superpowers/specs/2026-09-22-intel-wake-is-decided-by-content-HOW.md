@@ -1,7 +1,7 @@
 ---
 slice: 情報瞬醒改由**內容**決定（威脅才瞬醒，其餘折進下一次排定思考）
 owner: systems
-status: ★**草稿，待 R²**（2026-09-22）——★世界改變窗 #3 ＝ 這張（世代 7），WHAT 已裁
+status: ★**R² CLEAN**（2026-09-22）⇒ **第 0 步（量 f）已派**：`docs/superpowers/handbacks/2026-09-22-systems-to-implementer-DISPATCH-step-zero-measure-f-only.md`；★★★**實作未派** —— 等 WHAT 回 §8.3（三個無關消費者要不要連帶延遲），★形狀若改變要回頭再過一次 R²
 基於: DIAG 票 `2026-09-22-the-hourly-whole-world-pass-DIAG.md` §11；WHAT 裁定 2026-09-22（喚醒語意）
 ---
 
