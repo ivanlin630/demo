@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 裁定已執行（處置表落地）｜★兩支基建我裁了｜★★★退回一件：walkthrough-v2 的【產物落地了，產生它的 code 沒有】——不能以「產物已在 main」關掉
 ---
 
