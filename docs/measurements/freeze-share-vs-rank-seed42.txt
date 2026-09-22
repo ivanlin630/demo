@@ -1,0 +1,3 @@
+目標相位：misc.equip_mobilize
+凍結幀(>2s)  equip_mobilize/total 佔比: n=40  median=17.31%  mean=17.37%  min=12.35%  max=22.25%
+非凍結昂貴幀(>100ms,<=2s) equip_mobilize/total 佔比: n=246  median=17.38%  mean=17.05%  min=0.83%  max=32.27%
