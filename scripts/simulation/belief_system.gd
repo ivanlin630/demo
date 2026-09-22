@@ -290,7 +290,95 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 			var _cv: Dictionary = _c["value"]
 			if _cv.has("tile_pos"): _known_pos = _cv["tile_pos"]; break
 		if _known_pos == null or _known_pos != fields["tile_pos"]:
-			WorldEvents.emit(state, "intel_arrived", [obs_id])
+			# ★★★票 §11／§10.1：**緊迫由【內容】決定，不由【管道】決定** ——
+			#   非威脅的情報仍然【寫進 belief】（上面那些行照跑），只是**不把思考路徑叫醒**；
+			#   它會在該隊自己的相位被用上（`SimRunner.NEAR_CADENCE` 上界一個週期）。
+			# ★謂詞＝**既有的那把秤**（`ThreatAssessment.score` ≥ `THREAT_BASE_THRESHOLD`）
+			#   ⇒ **零新常數**；門檻的血統寫在 `threat_assessment.gd:6-20`。
+			# ★★感知鐵律：`score()` 自己是 belief-gated（位置只在【此刻真的看得見】時用真值，
+			#   否則 `belief_pos`；approach 先過可見性閘；實力走 `best_estimate`）。
+			# ★★★硬規（票 §9）：**不得使用或延伸 `:264-271` 的 `_o`／`_t`** ——
+			#   那一段的 gate-ok 作用域【僅限統計】。這裡取的是【新的】handle，
+			#   而且整個交給 `score()`，**不讀它任何欄位、不呼叫它任何非 belief-gated 方法**。
+			var _ob: TeamData = state.teams.get(obs_id)
+			var _tgt: TeamData = state.teams.get(tgt_id)
+			var _threat_score: float = -1.0
+			var _wake: bool = true
+			if _ob != null and _tgt != null:
+				_threat_score = ThreatAssessment.score(state, _ob, _tgt)
+				_wake = _threat_score >= ThreatAssessment.THREAT_BASE_THRESHOLD
+			# ★★取不到 handle（目標剛消失）⇒ **保守側：照舊喚醒**
+			#   —— ★不確定時維持現狀，而不是靜默吞掉一個喚醒。
+			WorldEvents.emit(state, "intel_arrived", [obs_id], _wake)
+			# ★★★DIAG 第 0 步（票 §4）：量「這 5386 次 intel_arrived 裡威脅佔比 f」。
+			#   ★★★我【不自己定義威脅】—— 定義是 systems 的欄,我射箭畫靶的話 f 會變成我選的。
+			#     ⇒ 記【定義無關的維度】的交叉表,f 由 systems 挑格子加總。
+			#   ★★感知鐵律（票 §3）：只讀【觀察者自己的】東西 ——
+			#     `_ob.known_reputations`（這隊的信念）、`_ob.tile_pos`（自己的位置）、
+			#     以及本次情報帶進來的 `fields["tile_pos"]`（＝這隊【剛學到的】)。
+			#     ★不讀 `state.teams[tgt_id]` 的任何欄位 ⇒ 「若這隊被騙了,這個分類會不會跟著錯」＝ 會。
+			#   ★★★【訂正 2026-09-22】原本這裡寫著「`ThreatAssessment.score()` 吃 `other: TeamData`
+			#     ＝ god-view ⇒ 本 tap 不用它」—— **那句話兩處都錯**：
+			#     ①**與事實相反**：`score()` 是 **belief-gated 的構造保證**，五道具名閘 ——
+			#        `threat_assessment.gd:33` 先過觀察者自己的 `team_discovered`；`:36` 讀自己的
+			#        `known_reputations`；`:44` 真座標**只在** belief 的 `last_tick == current_tick`
+			#        （＝此刻真的看得見）才用，否則 `belief_pos`，positionless 回 0；
+			#        `:74` approach 先過 `observe_velocity` 可見性閘（不可見直接 return 0）；
+			#        `:88` 實力走 `BeliefSystem.best_estimate`（註解自寫「禁讀 other.population」）。
+			#     ②**與它下面 30 行的 code 相反**：這個 tap **確實在用它**（復用 `_threat_score`）。
+			#   ★★而我錯的方式是【看簽章不看內文】—— `other: TeamData` 是一個 handle，
+			#     ★**handle 的型別不告訴你函式內部讀了什麼**。
+			#   ★★★留著這段而不是直接刪，理由與同檔 `:1?`／`midtick_erase_safety_bed` 那段相同：
+			#     **一句被推翻的斷言若只是被刪掉，下一個人會重新發明它**。
+			#   ★★★字串用【相接】不用 `%`：本函式是每 tick × 每個視野內 pair 的熱路徑,
+			#     而同段註解寫著 `%` 的 Variant 裝箱曾讓 12 日窗撞 360s wrapper timeout。
+			if Probe.enabled:
+				if _ob != null:
+					var _d: int = FactionAISystem._hex_dist(_ob.tile_pos, fields["tile_pos"])
+					var _db: String = "d7p"
+					if _d == 0: _db = "d0"
+					elif _d == 1: _db = "d1"
+					elif _d <= 3: _db = "d2_3"
+					elif _d <= 6: _db = "d4_6"
+					var _hb: String = "nonhostile"
+					if float(_ob.known_reputations.get(tgt_id, ThreatAssessment.REPUTATION_NEUTRAL)) 							< ThreatAssessment.REPUTATION_NEUTRAL:
+						_hb = "hostile"
+					var _fb: String = "moved" if _known_pos != null else "first_seen"
+					Probe.bump("intelwake.f.all")
+					Probe.bump("intelwake.f.dist." + _db)
+					Probe.bump("intelwake.f.rep." + _hb)
+					Probe.bump("intelwake.f.kind." + _fb)
+					Probe.bump("intelwake.f.x." + _hb + "." + _db)
+					# ★★★systems 裁：尺已經存在 ⇒ 用 `ThreatAssessment.score` 的既有門檻,
+					#   **零新常數**（我自己挑「距離≤3」就是下一代的手抄物理）。
+					#   ★而它註解自寫「∴ 威脅評估全 belief」(Slice D 已折掉 god-view):
+					#     位置只在 belief.last_tick == current_tick（＝此刻真的看得見）才用真值,
+					#     approach 先過 `observe_velocity` 可見性閘,實力走 `best_estimate`
+					#   ⇒ ★★感知鐵律是【構造保證】,不是我的承諾。
+					# ★★★而【量測用的呼叫不得污染被觀測的計數器】：`score()` 自己會 bump
+					#   `threat.score_n`／`threat.comp.*` ⇒ 呼叫前後把 Probe 關掉再開,
+					#   否則我的儀器會把那些欄位灌水（同族:觀測不得改變被觀測物）。
+					# ★★★tap 復用【上面已經算好的】分數 —— 不重算：
+					#   ★重算會讓 `score()` 被呼叫兩次 ⇒ `threat.score_n` 母體翻倍,
+					#     而那是【我的儀器改變被觀測物】。
+					#   ★★也不再需要抑制 Probe：那個呼叫現在是 **production 決策**,不是量測。
+					if _threat_score < 0.0:
+						Probe.bump("intelwake.f.ta.no_target")
+					elif _wake:
+						Probe.bump("intelwake.f.ta.threat")
+					else:
+						Probe.bump("intelwake.f.ta.nonthreat")
+					# ★★★方向守衛（systems 裁 2026-09-22）：交叉表 (是否威脅 × 是否喚醒)。
+					#   ★★`_is_threat` 必須【獨立於 `_wake`】算一次 —— 若兩者共用同一個運算式,
+					#     比較方向一反、兩邊一起動 ⇒ **什麼都測不到**。
+					#   ★這是【刻意的重複】：tap 手上握一份【意圖】的獨立副本,
+					#     生產邏輯偏離它時交叉表才會破。
+					#   ★★★誠實限：若有人把【兩邊都】反過來,這個守衛也是瞎的
+					#     —— 它擋的是「生產邏輯單方面漂掉」,不是「有人故意改兩處」。
+					if _threat_score >= 0.0:
+						var _is_threat: bool = _threat_score >= ThreatAssessment.THREAT_BASE_THRESHOLD
+						Probe.bump("intelwake.pair." + ("T" if _is_threat else "N")
+							+ "." + ("wake" if _wake else "nowake"))
 	var firsthand: bool = source_type == "親見" and source_id == obs_id
 	# ★★★反向斷言（systems 裁 2026-09-05：留發現不留機制）——
 	#   ★實測：三個 production firsthand 寫入點全部同時寫 `tile_pos` ⇒ 等式成立

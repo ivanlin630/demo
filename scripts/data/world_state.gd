@@ -154,6 +154,13 @@ var next_order_id: int = 1
 # ★不入 state_fingerprint：因為它【單 tick 內清空】（tick 結尾 WorldEvents.consume_and_clear），
 #   不跨 tick 存活＝非持久狀態。分批消費會讓這個正當性失效。
 var pending_rethink: Dictionary = {}
+# ★★★思考路徑專用的喚醒集合（票 §10.1，WHAT 裁 (乙)）：
+#   ★`pending_rethink` 是【共用水管】—— INDEP_INFRA／LADDER／GOAL ＋ faction 層查詢都讀它。
+#     「剛好共用同一根水管」不是改變它們行為的理由 ⇒ 抑制只作用在【主決策 T0 思考路徑】。
+#   ★★`pending_think ⊆ pending_rethink`（只有 `wake_thinking=true` 的 emit 兩邊都寫）。
+#   ★★★**不入 `state_fingerprint`** —— 正當性與 `pending_rethink` 逐字相同（`world_events.gd:6`）：
+#     【單 tick 內清空】。⇒ 它必須在**同一點**清，否則這個正當性當場破掉。
+var pending_think: Dictionary = {}
 # ★★★純觀測（Probe-gated 才寫）：這面旗子【有沒有人讀過】。
 #   ★動機：「窗內有沒有被走訪」這個問法會被 tick 內順序污染（走訪在 emit 之前 vs 之後
 #     長得一樣）——★★我已經在 pass_done 那顆上踩過同一個病一次。
