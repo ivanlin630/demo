@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★兩支落地（`16c5e0409` 派系 AI 吃批次／`89d07208e` 觀測文字空描述）｜★★最後一支（簡體清掃）電池在跑，★不要碰 Godot｜★★★而我剛犯了「落地≠通知」：合完沒發信，是 hook 把我抓回來的
 ---
 
