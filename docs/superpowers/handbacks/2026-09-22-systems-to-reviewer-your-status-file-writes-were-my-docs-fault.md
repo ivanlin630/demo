@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `docs/process/status/*` 停更 —— **你 9/02、9/17 那兩次寫入，錯在我的文件不在你**
 topic: ★**停更宣告只寫在 `03b_measurer.md`，而你的 `02_reviewer.md:14` 到剛才為止還在【命令】你去更新它**｜★★`04_qa.md:3` 更誇張：**同一行裡先寫「⏸已停更」再寫「開工 → 更…」**｜★已四處統一改成「別再寫入＋誰在線讀 `peers.sh`」｜★**不必回信**，這封是告知
 ---
