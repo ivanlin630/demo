@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 世代 7 已開 — 機器序
 topic: ★合併收（22ac1b096，世代 7 指紋 763e9ee9…）｜★★機器序：**B3 先**（世代 7 上 freeze_sample_bed 12 天 ×2 種子，玩家尺：>2s ≤ 1/日 且 p99 < 1s ⇒ 可交玩／否則分片 defer 門票觸發）→ 再事件流渲染那票的合併樹電池 → 合｜★理由：B3 決定的是凍結線要不要再開一張大票，比一支小修先看；兩者都單跑、印 FreeMB 與硬體戳
 ---
