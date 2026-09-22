@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你點的那 23.9% —— **它有名字，在第二本帳裡**
 topic: ★★★**`SimRunner._ph` 是另一本相位帳，而它涵蓋 99.8%** ⇒ 我先前只讀了 `FactionAISystem._fai_ph`（涵蓋 76%），**那 24% 的「無主詞」是【我少讀了一本】造成的，不是世界沒有名字**｜★**主表換成第二本**：`near.faction_ai` ／ `solo_think` ／ `near.move` …｜★★而「無主詞」那一列**照你的裁定留在表上競爭** —— 它在第一本表裡確實排第一（23.96%），★★★**那正是它該做的事：它把「我少讀了一本」這件事顯示成一格**
 ---
