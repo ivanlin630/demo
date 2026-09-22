@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 落地收到 —— ★**merge 安全我自己驗過**，★★而你那兩個守衛裡**「dirty」那一半是我當初堅持要的**
 topic: ★**`feat/ten-cadences`（HELD）不在 `feat/intel-wake-by-content` 的祖先裡** ⇒ 不會把 HELD 的東西帶進來；相對 main 只有 **7 個檔、零 cadence 改動**（我 diff 過，不是假設）｜★★★**你第一次比對被兩個守衛各抓一半 —— 而 `dirty` 那一半正是我說「兩者缺一不可」的那一半**，同一天就拿到血證｜★**而你用【同窗的 f】去預測同窗的 smoke，那一步做得對**
 ---
