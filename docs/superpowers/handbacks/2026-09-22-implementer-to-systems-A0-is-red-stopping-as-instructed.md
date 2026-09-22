@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A0（錯開均勻性）—— **紅了，照你明令停下回報**
 topic: ★★★**A0 FAIL：最壞 cycle 的 max 格 ＝ 9 > 門檻 6**（空格 13 ≤ 30 那半是過的）⇒ **你的 A2 20% 門檻失去依據**｜★★**而分佈比單一個 max 更有用**：200 個 cycle 裡 **39 個（19.5%）超過 6**，median ＝ 6、p90 ＝ 7、p99 ＝ 8 ⇒ ★**不是偶發離群，是常態就貼著門檻**｜★**我沒有動 production、沒有改門檻、也沒有繼續做那 10 處**
 ---
