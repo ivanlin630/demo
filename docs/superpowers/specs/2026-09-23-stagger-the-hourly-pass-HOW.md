@@ -194,6 +194,55 @@ R① 坐實：它的 `pos_map` 是**從批次 `team_ids` 建的**（`sim_runner.
 不是因為我們修好了它。★★若之後有人要把它移進錯開組，**先改成從 `state.teams` 全域建 `pos_map`、
 只對批次內的隊寫入快照**——但那不是這張票。
 
+### ★★★3f `faction_ai` 那一列是**三個不同粒度的系統穿著同一個名字**（2026-09-23，★第三層）
+
+★**背景**：§3e 把 `faction_ai` 改成勢力相位之後，**它仍然慢 1.9 倍**，而 102.7% 的增量落在它身上。
+★★量測排除了「世界變忙」這條解釋：**錯開臂處理的隊-次總量少 7.8%，而成本多 1.9 倍**。
+
+```
+_evaluate_all_body（分支上 408 行）的頂層迴圈：
+  :1264 / :1287  for fid in state.factions      ← loop1：★勢力粒度（§3e 已修）
+  :1380          for tid in state.teams         ← ★★loop2：【整個世界的隊】
+  :1441          for sub_id in merge_queue      ← loop2 的衍生（子隊歸建）
+  :1466          for tid in state.teams.keys()  ← ★★loop3：【整個世界的隊】
+```
+
+★**loop2／loop3 不是維護工作**：裡面是 `_evaluate_subteam`／`_evaluate_independent_strategy`／
+野心與訂單的排程／滅團（`_on_team_extinct`）與繼承（「唯一偵測點」）。
+⇒ **那是 per-team 的決策工作，而它吃的是 `state.teams` 不是批次。**
+
+★★★**所以勢力相位之後它每小時被呼叫 ~8 次（每勢力一次）⇒ loop2／loop3 跟著整個世界掃 8 遍**
+⇒ 這就是那 2.3 倍的固定成本。**粒度又一次不對齊，只是換了一組。**
+
+★**而 registry 上那一列的名字叫 `faction_ai`** ——
+「綱要與簽章都會說謊，只有函式體不會」這條，**這次說謊的是 registry 的【名字】**。
+
+#### 修法：按粒度拆三份
+
+```
+loop1 ⇒ 維持勢力相位（shape "factions"，吃 due_factions）     ★已做
+loop2 ⇒ registry 自己一列，shape "teams"，吃 due_teams        ★隊粒度 ⇒ 回到按隊錯開
+loop3 ⇒ registry 自己一列，shape "teams"，吃 due_teams
+⇒ 每隊每小時仍然恰好一次（頻率不動）；而【全世界掃描消失】——變成掃那一批（平均 1.2 隊）
+```
+
+★★**順序是行為的一部分**：今天一次呼叫裡的順序是 **loop1 → loop2 → loop3**
+⇒ 拆出來的三列必須**連續**佔住原本 `faction_ai` 那一格，**照同一個順序**。
+★★★**而樁關掉時三者對所有隊同時到期 ⇒ 順序與今天逐字相同 ⇒ P5 的指紋那一格就是這件事的檢測器**。
+
+#### ★否決：原地加「每小時只做一次」的閘
+
+那會讓 loop2／loop3 變成**每小時一次、全世界一起** ⇒ **正是這張票要消滅的尖峰形狀**，
+等於把一半的 pass 搬回整點。
+
+#### ★★★已知後果（要 reviewer 判、可能要 blueprint 知道）
+
+`_assign_tasks(state, f)` 會對成員隊下 `TaskArbiter.try_set(...)` ⇒ **loop1 寫的是隊的任務狀態**，
+而 loop2／loop3 接著讓那些隊行動。
+⇒ ★拆開之後，**相位早於自己勢力的隊，會用【上一個小時】的指派行動**（延遲上界 1 小時）。
+★★這是**行為改變**，不是效能副作用；而它是否「更好」是 WHAT 的問題：
+**命令瞬間到達本來就是一種 god-view 味道的便利**，延遲一小時未必更差 —— 但那要 blueprint 說。
+
 ### 3d `forced_event` 逾時區塊：留在整點（systems 裁，非阻塞問題）
 
 它讀的是**單一全域** `state.player_forced_event`，語意是「上一個小時刻給玩家的窗口到期」。
