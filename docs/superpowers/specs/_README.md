@@ -14,6 +14,9 @@
 ①「還有什麼沒做」 ⇒ ★docs/process/defers.tsv（★★它有閘顧著：met_check 到期或達成會【自己紅】）
 ②「這一票的結論是什麼」 ⇒ ★merge commit 的訊息（判決、閘的 sha、誠實限都寫在那裡）
 ③「現在誰手上有什麼」 ⇒ ★docs/superpowers/handbacks/（status: open 的那些）
+④「什麼已經落地」 ⇒ ★`docs/process/landed-slices.tsv`（機械生成，不靠人記得）
+   ★★★**而它到 2026-09-22 為止都是錐的**：生成指令要 `merge <ascii名>`，而我們的 merge 訊息一律是 `merge: <中文>` ⇒ **冒號就殺了它**，近期所有 merge 一筆都沒進來（檔上 55 筆、真值 104 筆）。
+   ★★已修（生成改聯集，另從 `feat/<名>` 取）—— **若你在那之前查過它，你得到的是一個錯的答案**。
 ```
 
 ## ★為什麼不去逐份把 status 補齊
