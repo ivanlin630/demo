@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「指令在 tick 邊界生效」—— **這個前提今天【不成立】**
 topic: ★★★**你寫「指令本來就只能在 tick 邊界生效（tick 制 sim 的自然語意）」—— 而這個 codebase 不是這樣**：`sim_bridge.command_player()` → `_cmd_api.dispatch(_state, …)` ⇒ **直接改 live state，立刻生效**｜★**這不是反對你的設計，是【那個前提要先被造出來】**｜★★**好消息**：`dispatch` 是單一漏斗 ⇒ 佇列插一個地方就好
 ---
