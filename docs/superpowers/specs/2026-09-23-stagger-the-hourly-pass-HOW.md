@@ -228,6 +228,13 @@ N 次之後的累計發放          = N×60
 
 ★★★**例外**：`CadenceStagger` 的 wrap clamp（`MIN_GAP = cadence/2 = 30`）會打斷上式的
 telescoping。⇒ 加 tap `pass.gap.%04d.%d`（逐隊間距直方圖），床斷言**間距落在 [30, 119]**。
+
+★★★★**再加一句判準**（R² 加碼，reviewer 2026-09-23）：
+**任一 team_id 的 clamp 觸發率不得超過母體平均觸發率的 3 倍**。
+理由：`_mix()` 是 xor-shift-multiply 風格的混合，**理論上**該打散 `team_id × cycle_index`
+的相關性 —— 但那是**理論上該**，不是被證過的數學性質。★若真有某些 team_id 系統性容易撞 clamp，
+受害的是**同一批固定的隊**，而 P4（總量）看不到。
+★★沒有這一句的話，這件事只能靠**肉眼看直方圖** —— 而判準必須自己會紅。
 ★若之後要把誤差歸零，做法是改成傳 `cur − team.pass_last_tick`，
 但那會動到 5 支系統的簽章 ⇒ **不在這張票**。
 
@@ -276,7 +283,7 @@ static var pass_stagger_enabled: bool = true    # ★test-only；production 路�
 |---|---|---|---|
 | P1 | `n_deciders` 尖峰：11+ 桶 tick 數相對世代 7 **方向性不得上升**；相位保留率 100% → **<10%**；60-tick 間距佔比（>2s 事件）**< 20%** | `pass.phase.%02d`（tick%60 直方圖）＋既有 `pass.byteam.%04d` | 尖峰不是 pass 造成的 ⇒ 這一格不降 |
 | P2 | headless B3：>2s **≤ 1/日** 且 p99 **< 1s** | `freeze_sample_bed.gd`（tick 原子未變 ⇒ tick 時間＝幀時間代理仍成立） | 凍結來自單一系統而非同時性 ⇒ 不動 |
-| P3 | 每隊每日 pass 次數 median **±5%**（＝24）；每隊兩次 pass 間距 median **＝ 60 ±1**；間距全部落在 **[30, 119]** | 新 tap `pass.gap.%04d.%d` | §2 那個坑（到期檢查留在取樣格內）⇒ 這裡變 12 |
+| P3 | 每隊每日 pass 次數 median **±5%**（＝24）；每隊兩次 pass 間距 median **＝ 60 ±1**；間距全部落在 **[30, 119]**；★**任一 team_id 的 clamp 觸發率 ≤ 母體平均觸發率 × 3** | 新 tap `pass.gap.%04d.%d` | §2 那個坑（到期檢查留在取樣格內）⇒ 這裡變 12 |
 | P4 | `extinct`／`starve`／`combat` **帶主詞**同量級；子隊外出終止原因分佈不變 | 既有床 | 錯開讓某些隊系統性少拿資源 ⇒ 餓死數變 |
 | P5 | 指紋床**預期紅** ⇒ 世代 8；★**樁關掉時指紋必須與世代 7 逐字相同** | `world-fp` 閘 ＋ 一次 `pass_stagger_enabled=false` 的手跑 | 重構本身改了行為 ⇒ 樁關掉也紅 |
 | P6 | 陽性對照：把相位關回整點 ⇒ **P1 的尖峰必須回來** | 同 P1 儀器 ＋ §4e 樁 | 儀器根本沒接上 ⇒ 開關兩邊一樣 |

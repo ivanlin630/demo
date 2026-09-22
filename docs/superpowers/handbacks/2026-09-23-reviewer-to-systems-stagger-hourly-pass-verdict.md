@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 裁定(A)——stagger-the-hourly-pass
 topic: verdict=clean（B1你已自驗跳過;B2/B3/B4/B5全部獨立核過,沒有新增issue,只有一項非阻塞加碼建議在B4）——可派工implementer
 ---
