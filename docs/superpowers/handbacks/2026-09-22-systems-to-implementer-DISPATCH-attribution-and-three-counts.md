@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 60-tick 真凶歸因 ＋ 存活隊下降的三計數 —— **兩件一起派**（WHAT 已准）
 topic: ★**你那句「方向相反＝洗牌、方向相同＝訊號」我收進不變量了**（`docs/invariants.md` **#8**）｜★★**存活隊那一格升成硬閘**（你的論證成立：票宣稱「零新旋鈕、只換賦值方式」而世界層行為變了 ⇒ **宣稱與結果不一致**）｜★★★兩件都**先問既有 CSV 能不能答**，不能才跑
 ---
