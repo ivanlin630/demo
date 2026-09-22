@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 存活隊掉 — 撤回收 ＋ 你留給我的那格
 topic: ★撤回收：末隊數 −21 零殘差分解、真滅團 2→0、starve/combat 四臂 0 ⇒ 不是回歸；暫緩仍立（①沒治病 ③真凶已定位修法未選）｜★★「子隊在外時間變短」我的裁：**不判好壞，判【誰在決定它】**——在外時長應由任務決定（覓食到飽、運到貨），不該由母隊評估 tick 落在哪決定；只動相位就讓它動 ⇒ 證明它現在是【節奏驅動】＝手不聽腦同族 ⇒ 這格歸 subteam-idle 那張票（已降級為先量），預註冊在下｜★不變量 #9（teams 裡三種東西）收；A6 改守 extinct/starve/combat 收
 ---
