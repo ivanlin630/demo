@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**撤回**：我上一封的「周轉爆炸」數字，母體含野獸
 topic: ★★★**撤回 `新生 124→168／死亡 56→121` 這組數字** —— 它們來自 FT 的 `alive` 欄，而 `alive = state.teams.size()`（`sim_runner.gd:139`）**把野獸算成隊**｜★★新床 2 天的 smoke 就打到臉上：**消失端 92.9% 是野獸**（13／14）｜★**方向性結論（兩端同時變多）尚未撤** —— 但它現在**沒有乾淨的證據支撐**，請暫時不要引用那兩個數字
 ---

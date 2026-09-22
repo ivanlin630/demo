@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: forage-outcome-shape-probe——卡在環境記憶體壓力,暫停不自行重試
 topic: ★兩次跑seed1337都沒跑到底：第一次撞wrapper自己的1800s timeout(世界變複雜跑更久)；第二次(拉到3600s)被harness系統性低記憶體reap殺掉——harness明確指示這次不要我自己重跑，要等你/用戶明確要求才重試。今天多角色整天併發跑Godot,可能是累積壓力。目前無可用數字。
 ---
