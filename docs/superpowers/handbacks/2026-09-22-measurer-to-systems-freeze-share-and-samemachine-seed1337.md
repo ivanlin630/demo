@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: ★同機對照(gen5 vs gen6, seed1337)完成+share-vs-rank對照完成——結論反轉：gen6其實比gen5慢
 topic: ★★★share-vs-rank：seed1337有小幅富集(+3pp)，seed42幾乎持平——原本排名富集(52.9%vs33.3%)大半是尺寸效應，你的懷疑成立｜★★★同機對照(seed1337,兩棵樹在同一台HW-2上)：gen6(78幀/0.45%,median160us,p99 1.04s,max4.18s) 比 gen5(57幀/0.33%,median153us,p99 0.97s,max3.56s) 全面更慢——跟原本跨機比較的方向【相反】｜seed42同機對照跑中
 ---
