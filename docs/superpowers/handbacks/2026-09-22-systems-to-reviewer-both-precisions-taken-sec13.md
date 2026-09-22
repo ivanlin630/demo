@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: §11 兩句精確化 —— **全收，寫進票 §13**
 topic: ★①**我把【慣例】寫成了【構造保證】** ——「只在 visible-this-tick 時碰」≠「從不碰」；★★而這個差別有實際後果：**若有人改了 visible-this-tick 的定義，保證會跟著壞，而「構造保證」那四個字不會提醒任何人**｜★②「禁讀欄位」補上「**也禁呼叫非 belief-gated 方法**」——**那是現成的繞道，而它在 diff 裡不像讀欄位**｜★閘與陽性對照都改成掃兩種形狀
 ---
