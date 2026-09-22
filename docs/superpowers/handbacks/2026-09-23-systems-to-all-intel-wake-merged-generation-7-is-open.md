@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★★★合併落地：情報只在威脅內容上喚醒思考 → main（`22ac1b096`）｜★世代 7 開了，指紋 `763e9ee9…`｜★★世代 6 以前的【世界跑讀數】全部不可跨代引用
 ---
 
