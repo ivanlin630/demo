@@ -1,0 +1,45 @@
+# 子隊 blanket 歸建 —— 逐 task 型別（★純量測,不動行為;只量不判）
+# 四要素 ＋ 硬體戳（貼 wrapper 那行）＋ 世代戳
+#   窗 8 天｜種子 1337 與 77｜config warring_states
+#   樹 6a00ec580(origin/main) ＋ 兩顆 tap（拋棄分支 feat/blanket-evict-tap）
+#   [HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=14.3GB/31.9GB
+#   世代 ★世代 6（邊界 3fb2c3201）
+
+## ★★★標的：36 種 task 裡【實際會抵達】的只有 7 種（兩顆種子都是 7）
+
+## 逐型別（只列非零;全 36 行含 0 者見 raw）
+### seed 1337
+  TASK_TRIBUTE   徵收                  1          1    1.000
+  TASK_SCOUT     偵查                325         54    0.166
+  TASK_HERALD    信使                246          0    0.000
+  TASK_DEFEND    迎戰                  1          1    1.000
+  TASK_FORAGE    覓食                  3          3    1.000
+  TASK_EXPAND    擴建               1420          0    0.000
+  TASK_CONVOY    運輸                  3          0    0.000
+  ── 合計 arrived=1999 evicted=59｜★有抵達的型別 7／36 種
+  ★★「幾種會抵達」才是這一票的標的：7／36
+
+### seed 77
+  TASK_SCOUT     偵查                274         29    0.106
+  TASK_HERALD    信使                108          0    0.000
+  TASK_DEFEND    迎戰                  1          1    1.000
+  TASK_FORAGE    覓食                  9          9    1.000
+  TASK_CAMP      紮營                  5          5    1.000
+  TASK_EXPAND    擴建               1337          0    0.000
+  TASK_CONVOY    運輸                 10          0    0.000
+  ── 合計 arrived=1744 evicted=44｜★有抵達的型別 7／36 種
+  ★★「幾種會抵達」才是這一票的標的：7／36
+
+## ★量法的三個關鍵（★沒有它們數字會說謊）
+①分母（arrived）放在【所有提早 return 之前】——那條 blanket 是「抵達即歸建」無條件,
+  ★貼著它放分母 ⇒ 分子分母同一批 ⇒ 恆 100%。實證差額是真的:EXPAND 抵達 1420／歸建 0。
+②型別清單【不手抄】:執行期掃 team_data.gd 的 const TASK_* ⇒ 36 種。
+  ★systems 信裡列 24 種 —— 我沒有把數字對齊成他的,差額原樣呈報（可能他數的是子集）。
+③母體 0 的型別也印 + 床自帶塌陷守衛（掃到 <10 種 ⇒ 判不可判,不是綠）。
+
+## ★誠實限
+①8 天窗、warring_states;★更長窗會不會有第 8 種型別抵達,未驗。
+②ratio 的分母是【抵達】不是【存在】:某型別 arrived=0 代表【這一輪沒有子隊帶著它抵達】,
+  ★不代表那個 task 不存在,也不代表它不會被 blanket 管到。
+③兩顆種子的 7 種【不完全相同】(1337 有 TRIBUTE、77 有 CAMP)⇒ 邊緣型別是偶發的。
+④tap 只記帳,零行為改動;世代 6／HW-2,次數比跨機有效、跨代不可引用。

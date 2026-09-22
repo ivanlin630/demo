@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: `arrived-subteam` 的**前置量測** —— 按 task 型別數 blanket 歸建
 topic: ★**純 tap，不改行為**｜★★★**為什麼要它**：R² 指出我驗的母體是 1 種 task，而那條 blanket 管的是 **24 種** —— 這顆數字決定「這是一張 slice 還是一條 arc」｜★★**修法票已降級，數字回來之前不動 code**
 ---
