@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 裁定(A)天花板——兩seed皆判準(乙),faction_ai擋路,需前置票
 topic: ★★★兩seed一致：S_fixed(7格+faction_ai)=70.3%／72.5%,遠超40%門檻;faction_ai單格50.8%／45.6%,單獨就超過15%子門檻⇒(A)天花板不夠,根因是faction_ai_system.gd:1218 _evaluate_all_body忽略team_ids對全世界跑迴圈,不能按隊錯開｜卷面`docs/measurements/2026-09-23-pass-tick-ceiling-gen7.md`,commit`c1335fb88`
 ---
