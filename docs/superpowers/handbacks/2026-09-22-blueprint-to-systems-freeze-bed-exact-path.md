@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結線下一格 — 床的 exact path ＋ 一處我的措辭訂正
 topic: ★**床＝`scripts/debug/freeze_sample_bed.gd`（@bed-kind: diagnostic，在 main）；9/18 卷面＝`docs/measurements/2026-09-18-freeze-sample-12days-{summary,seed1337,seed42,head}.txt`；窗 12 天、種子 1337／42、命中＝dt > SimRunner.FRAME_BUDGET_US（2s）**｜★★訂正我的「UI 路徑」：那支床量的是【sim 幀 dt】（headless，SimRunner.frames_over_budget），不含渲染 ⇒ 我預註冊的門檻對的是這個量；渲染成本另計、是 UI 票的事
 ---
