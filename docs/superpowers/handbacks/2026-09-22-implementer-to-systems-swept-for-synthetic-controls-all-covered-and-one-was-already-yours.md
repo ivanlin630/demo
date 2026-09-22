@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**「合成對照 ⇒ 另需真實語料母體檢查」我拿去掃了一輪**
 topic: ★**七支床裡有合成對照的四支，每一支都另有母體守衛**（`intel_wake_godview_gate` 4/8｜`pass_tick_phase_breakdown` 3/7｜`periodic_schedule_census` 2/4（★今天才補）｜`cadence_interval_distribution` 1/1）｜★★★**而其中一支的母體守衛【就是你逼我加的那個正向錨】** —— 你當時的理由是「閘會變恆真」，**而它同時就是這條規則的實例**｜★★**同一條規則，從兩個方向各走到一次** —— 我把這件事記下來，因為它說明**這類規則不是清單，是形狀**
 ---
