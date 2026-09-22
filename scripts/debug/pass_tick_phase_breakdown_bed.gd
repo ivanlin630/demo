@@ -337,6 +337,31 @@ func _initialize() -> void:
 			print("[PP] ★★★判準(甲)：每pass平均 < 1000ms ⇒ (A) 的天花板【夠】，p99<1s 摸得到")
 		elif ceil_ms_per_pass >= 1000.0:
 			print("[PP] ★★★判準(乙)：每pass平均 ≥ 1000ms ⇒ (A) 也摸不到門檻")
+
+		# ★★★讀數規則補充(systems 2026-09-23 另一封)：near.faction_ai 也算進「必須整點」那桶
+		#   理由：_evaluate_all_body 忽略傳進去的 team_ids,直接對 state.factions 跑全世界迴圈
+		#   ⇒ 按隊錯開會讓它被重複執行 60 次,不能照原樣錯開
+		var fai_v: int = int(pass_sr_over2s.get("near.faction_ai", 0))
+		var has_fai: bool = pass_sr_over2s.has("near.faction_ai")
+		print("[PP] ── ★讀數規則補充：near.faction_ai 單獨列(★需併入 S_fixed) ──")
+		if has_fai:
+			print("[PP]   near.faction_ai [必須整點,因_evaluate_all_body忽略team_ids全世界跑] = %d us（每 pass 平均 %d us）" % [
+				fai_v, int(fai_v / maxi(pass_n_over2s, 1))])
+		else:
+			print("[PP]   near.faction_ai = ★找不到（丙：不可判）")
+		if has_fai:
+			var s_fixed_sum: int = ceil_sum + fai_v
+			var s_fixed_pct: float = 100.0 * float(s_fixed_sum) / float(maxi(pass_dt_over2s, 1))
+			var fai_pct: float = 100.0 * float(fai_v) / float(maxi(pass_dt_over2s, 1))
+			print("[PP] ★★★S_fixed(7格+faction_ai) = %d us ＝ %.1f%%（門檻 ≤40%%，佔>2s母體自身總dt的份額，非外部參照）" % [
+				s_fixed_sum, s_fixed_pct])
+			print("[PP]   ★faction_ai 單格佔比 = %.1f%%（子門檻：S_fixed>40%%且此值≥15%%⇒(乙)前置票）" % fai_pct)
+			if s_fixed_pct <= 40.0:
+				print("[PP] ★★★子判準(甲)：S_fixed ≤ 40%% ⇒ 夠，faction_ai 留整點就行")
+			elif fai_pct >= 15.0:
+				print("[PP] ★★★子判準(乙)：S_fixed > 40%% 且 faction_ai 單格 ≥ 15%% ⇒ 成為【前置票】(要先讓_evaluate_all_body真的吃team_ids)")
+			else:
+				print("[PP] ★★★子判準：S_fixed > 40%% 但 faction_ai < 15%% ⇒ 照原本三格判準另議")
 		print("[PP]   ★丙類(找不到對應標籤)：%d 格：%s" % [
 			ceil_missing.size(), ", ".join(ceil_missing) if not ceil_missing.is_empty() else "（無，本次全部找到，但2組各3/3格黏一起不可拆）"])
 	# ★不計入 cells／9 到場點名(那組是既有9格的自檢基準,本區塊是額外派工,不動原有計數)
