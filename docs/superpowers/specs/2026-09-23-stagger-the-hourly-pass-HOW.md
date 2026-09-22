@@ -346,6 +346,28 @@ HexTileData ★排除 34 欄，含 apothecary_level／mint_level 這種【會影
 ★但「**永遠**為空」與「這一顆 tick 剛好沒有」長得一樣 ⇒ 床必須驗
 **一個完整小時內每一隊恰好出現一次**（§6 P3）。
 
+### ★5a-1 錯開組裡【沒有】裸 modulo 閘 —— 掃過了，這是負斷言不是印象
+
+一支系統一旦只在「自己那一隊的相位 tick」上跑，它**內部**若還有
+`current_tick % INTERVAL == 0` 這種閘，那個閘就只在**相位恰好整除 INTERVAL**
+的隊身上成立 ⇒ ★**絕大多數隊永遠等不到** —— 而那是靜默的。
+
+```
+掃法：grep -rn "current_tick %" scripts/simulation --include=*.gd
+命中 12 行，逐行分類：
+  sim_runner.gd:155/334/344/358/415/434  ⇒ ★外層閘（日邊界／溢位／harvest／pass 本身），不在錯開組內
+  manpower_system.gd:270  CAPTIVE_CADENCE ⇒ ★`_step_captives` 每 tick 跑、在 pass 之外 ⇒ 不受影響
+  day_night_system.gd:5／harvest_system.gd:53 ⇒ 取相位【值】不是閘（沒有 == 0）
+  faction_ai_system.gd:1257／:8147／world_events.gd:85 ⇒ ★Probe 標籤／診斷值，非語意閘
+⇒ ★★錯開組那 14 支【內部】零個裸 modulo 閘
+```
+
+★**為什麼它現在是零**：第⑦票已經把這一類遷成 `*_eval_next_tick`
+（`salary_system.gd:31` 那一段的註解逐字寫著「⑦ 之後【閘不再是 modulo】」），
+而 `modulo-phase` 那支 merge 閘**擋住新出現的**。
+★★★所以這一格的正確讀法是「**已經有人做過這件事，而且留了守衛**」，
+不是「我們運氣好」。
+
 ### 5b 新隊／死隊
 新隊 `pass_next_tick == 0` ⇒ 4b 的首次分支排相位。
 死隊在 tick 末由 `_step_cleanup_extinct_teams` 清除，與今天相同。

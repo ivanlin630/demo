@@ -4167,7 +4167,18 @@ settle 把隊變成 PRODUCE ⇒ 薪資系統 early-return ⇒ ①【薪資從未
 ★★★**不要另外發明一種表示法** —— 而它會 touch 全域 belief 讀取端，**是一張獨立的票**。
 
 ## ★★★★裸 `current_tick % INTERVAL` 在 LOD far pass 下會【週期性漏拍】—— 而它是距離依賴的世界扭曲（2026-09-05）
-★**狀態：已知未修**｜**回訪：觸發事件 —— ⑦票（遷 `CadenceStagger`）落地**
+★**狀態：★前提已消失（2026-09-23 查證）**｜**回訪：觸發事件 —— ⑦票（遷 `CadenceStagger`）落地**
+★★★**受害條件整個不存在了**：本條的受害條件是「長在 LOD **far pass** 裡」，
+而 **far pass 在第⑧票被刪掉**（`sim_runner.gd:419` 逐字：「far pass 已刪（第⑧票）：它的存在就是分班本身」）。
+★機械查證：`grep -rn "FAR_ZONE_INTERVAL" scripts/ --include=*.gd` 扣掉註解行之後，
+  production **零命中**（只剩註解與一支床的 regex 字串）⇒ 那個常數已經不存在。
+★★而點名的那兩處也各自處理掉了：`salary_system.gd` 已遷成 `salary_eval_next_tick`
+  （同檔註解逐字：「⑦ 之後【閘不再是 modulo】」），`modulo-phase` 那支 merge 閘擋住新出現的。
+★★★**但它有一個後繼形態，而那個形態今天正在飛**：一支系統若只在「自己那一隊的相位 tick」
+  上跑，它內部的裸 modulo 閘就只對「相位恰好整除 INTERVAL」的隊成立 ⇒ 絕大多數隊永遠等不到。
+  ⇒ 已掃過並寫進 `2026-09-23-stagger-the-hourly-pass-HOW.md` §5a-1：
+    錯開組那 14 支【內部】零個裸 modulo 閘（12 行命中逐行分類過）。
+  ⇒ ★**本條保留不刪**：它記的是【這一類病長什麼樣】，而那個知識還會再用到。
 ```
 ★受害條件:【裸 modulo 閘】長在 shape:"teams" 且 LOD_BOTH 的 step 裡,
    而 INTERVAL 不是 FAR_ZONE_INTERVAL(600) 的倍數
