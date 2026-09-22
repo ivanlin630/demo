@@ -291,6 +291,34 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 			if _cv.has("tile_pos"): _known_pos = _cv["tile_pos"]; break
 		if _known_pos == null or _known_pos != fields["tile_pos"]:
 			WorldEvents.emit(state, "intel_arrived", [obs_id])
+			# ★★★DIAG 第 0 步（票 §4）：量「這 5386 次 intel_arrived 裡威脅佔比 f」。
+			#   ★★★我【不自己定義威脅】—— 定義是 systems 的欄,我射箭畫靶的話 f 會變成我選的。
+			#     ⇒ 記【定義無關的維度】的交叉表,f 由 systems 挑格子加總。
+			#   ★★感知鐵律（票 §3）：只讀【觀察者自己的】東西 ——
+			#     `_ob.known_reputations`（這隊的信念）、`_ob.tile_pos`（自己的位置）、
+			#     以及本次情報帶進來的 `fields["tile_pos"]`（＝這隊【剛學到的】)。
+			#     ★不讀 `state.teams[tgt_id]` 的任何欄位 ⇒ 「若這隊被騙了,這個分類會不會跟著錯」＝ 會。
+			#   ★而既有的 `ThreatAssessment.score()` 吃 `other: TeamData` ＝ god-view ⇒ 本 tap 不用它。
+			#   ★★★字串用【相接】不用 `%`：本函式是每 tick × 每個視野內 pair 的熱路徑,
+			#     而同段註解寫著 `%` 的 Variant 裝箱曾讓 12 日窗撞 360s wrapper timeout。
+			if Probe.enabled:
+				var _ob: TeamData = state.teams.get(obs_id)
+				if _ob != null:
+					var _d: int = FactionAISystem._hex_dist(_ob.tile_pos, fields["tile_pos"])
+					var _db: String = "d7p"
+					if _d == 0: _db = "d0"
+					elif _d == 1: _db = "d1"
+					elif _d <= 3: _db = "d2_3"
+					elif _d <= 6: _db = "d4_6"
+					var _hb: String = "nonhostile"
+					if float(_ob.known_reputations.get(tgt_id, ThreatAssessment.REPUTATION_NEUTRAL)) 							< ThreatAssessment.REPUTATION_NEUTRAL:
+						_hb = "hostile"
+					var _fb: String = "moved" if _known_pos != null else "first_seen"
+					Probe.bump("intelwake.f.all")
+					Probe.bump("intelwake.f.dist." + _db)
+					Probe.bump("intelwake.f.rep." + _hb)
+					Probe.bump("intelwake.f.kind." + _fb)
+					Probe.bump("intelwake.f.x." + _hb + "." + _db)
 	var firsthand: bool = source_type == "親見" and source_id == obs_id
 	# ★★★反向斷言（systems 裁 2026-09-05：留發現不留機制）——
 	#   ★實測：三個 production firsthand 寫入點全部同時寫 `tile_pos` ⇒ 等式成立
