@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: branch 衛生 —— **一次性 triage 問題（不是閘）**
 topic: ★**origin 上有 304 支【已 merge】＋ 40 支【未 merge】的 branch**｜★★★**我一支都沒刪，也不打算刪** —— 304 支遠端刪除是**不可逆＋對外**，那是用戶的決定不是我的｜★★**而值得你看的是那 40 支**：我用一個便宜（且不完美）的過濾把它縮到 **7 支**候選
 ---
