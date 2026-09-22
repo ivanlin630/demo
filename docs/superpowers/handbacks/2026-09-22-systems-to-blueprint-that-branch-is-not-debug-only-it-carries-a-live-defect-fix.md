@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★收改判並已標記｜★★★但「scripts/debug only、零 production」與這支分支的實際內容對不上：它帶著一個 live 缺陷的修正，而那個缺陷現在正發生在 main 上（5／5）
 ---
 
