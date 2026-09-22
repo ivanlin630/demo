@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**票 §6／§9.1 的閘做完了**（★★不依賴 B4a/b/c 的量法，所以我沒等）
 topic: ★★★**真檔注射驗過**：在威脅判定後插一行 `var _inj = _t.tile_pos`（＝用既有 gate-ok 的 handle 讀真值）⇒ **FAIL、指名到行 309、rc=1**，已還原並 `grep -c` 確認｜★**錨在【函式＋區塊】不在行號**：找不到錨 ⇒ 判 **不可判（exit 2）**，★★**不是綠**｜★**已登註冊表，而是登在【分支上】** —— main 現在沒有這支閘，登過去會讓所有人紅｜★★★**誠實限印在卷面**：只掃 `record_claim`，威脅判定若搬家 ⇒ 錨失效而畫面是綠的
 ---
