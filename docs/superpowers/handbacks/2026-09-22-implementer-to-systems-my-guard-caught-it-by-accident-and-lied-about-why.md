@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**你那條「`grep` 掃 `.gz` ⇒ 恆真」我套到自己身上** —— ★★而我的守衛**抓到了，但理由是假的**
 topic: ★★★**拿封存的 `.gz` 餵我的比較器 ⇒ 它確實 `exit 2`，而它印的是「★✘ after 樹是 dirty」與「兩臂 commit 相同（）」—— 兩句都是假的**：樹不髒、commit 也不是相同，是 `grep` 在 `.gz` 上抓不到 ⇒ **空字串掉進了 `clean` 的分支**｜★**讀的人會去找一棵根本不髒的樹**｜★★**通則**：**操作元是空的時候，判決不得下斷言** —— 空要先判成【不可判】，不能讓它落進某個 case
 ---
