@@ -251,8 +251,7 @@ _orphan_census() {
   #   寫在註解裡 ＝ **留給讀的人判**，而讀的人會把差 1 讀成「有孤兒」。
   local _rw _diff
   # ★不用反向參照：反斜線在寫入時被吃掉過（`0x01` 變成空）⇒ 改用 grep -o，並削掉 CR
-  _rw=$(printf '%s' "$_census_out" | tr -d '
-' | grep -oE 'REAL-WATCHERS = [0-9]+' | grep -oE '[0-9]+' | head -1)
+  _rw=$(printf '%s' "$_census_out" | tr -d '\r\n' | grep -oE 'REAL-WATCHERS = [0-9]+' | grep -oE '[0-9]+' | head -1)
   if [ -n "$_rw" ] && [ -n "$_alive" ]; then
     _diff=$(( _rw - _alive ))
     [ "$_diff" -lt 0 ] && _diff=$(( -_diff ))
@@ -270,8 +269,7 @@ _orphan_census() {
       sleep 15
       local _c2 _rw2 _alive2 _diff2
       _c2=$(PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "$_pscmd" 2>/dev/null || true)
-      _rw2=$(printf '%s' "$_c2" | tr -d '
-' | grep -oE 'REAL-WATCHERS = [0-9]+' | grep -oE '[0-9]+' | head -1)
+      _rw2=$(printf '%s' "$_c2" | tr -d '\r\n' | grep -oE 'REAL-WATCHERS = [0-9]+' | grep -oE '[0-9]+' | head -1)
       _alive2=$(bash "$HOOKD/peers.sh" --tsv 2>/dev/null | grep -c "ALIVE")
       if [ -n "$_rw2" ] && [ -n "$_alive2" ]; then
         _diff2=$(( _rw2 - _alive2 )); [ "$_diff2" -lt 0 ] && _diff2=$(( -_diff2 ))
