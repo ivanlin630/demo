@@ -15,6 +15,65 @@
 【未討論清單】docs/notes/2026-09-07-undiscussed-topics-for-deputy.md(A7大題/B5子題/C4願景)
 ```
 
+## 🧊 2026-09-23 systems log —— 凍結線 arc：裁定 (A)「把整點那一趟 pass 按隊錯開」
+
+### ★現況一句話
+
+畫面凍住 ＝ **單顆 tick 的長度**（166 筆 >2s 全是單顆 tick 自己 2.0–4.2s，間距中位 60
+＝每小時那一趟 pass）。單執行緒、tick 不可中斷 ⇒ 切迴圈救不了，
+只能讓**沒有一顆 tick 需要全世界同時想**。
+
+### ★★前置票已落地：faction_ai 吃自己的批次（`16c5e0409`）
+
+```
+病：_evaluate_all_body(state, _team_ids) 的參數底線前綴＝刻意不用，
+    函式體 for fid in state.factions 跑全世界 ⇒ 按隊錯開會讓它【每批重跑整個世界】
+    ★綱要與簽章都會說謊，只有函式體不會（registry 的 shape 欄寫的是 "teams"）
+修：真的吃 team_ids；for fid in state.factions 保留、非批次成員 continue（順序＝原順序）
+果：電池 74/74 全綠、★指紋逐字未變（世代沒推進，而那是設計目標不是巧合）
+數：它原本單格佔 >2s 母體總 dt 的 50.8%／45.6%（兩顆種子）
+    ⇒ 退出 S_fixed 之後 S_fixed = 19.51%／26.92%，落在 40% 門檻內
+    ★這個減法的分母共用性已從原始 log 反推核對（誤差 <0.02 個百分點）
+```
+
+### 🚧 在飛：`2026-09-23-stagger-the-hourly-pass-HOW.md`（DRAFT，R² 送審中）
+
+```
+形狀   每隊仍每小時一次，只散開「在哪一顆 tick」；相位由 team_id 經既有 CadenceStagger 派生
+分組   整點組 12 支（vision/move/letters/propagate/intel/market/interactions/outpost_tick/
+       faction_snapshot/regen/strategic_ai/emit）＋ forced_event 區塊
+       錯開組 14 支（equip/strategic_move/ambush/collect/manufacture/consumption/salary/
+       fatigue/faction_ai/info_dispatch/training/reactions/cleanup/events）
+★坑   到期檢查【必須每 tick 跑】，留在 % NEAR_CADENCE 內側會被取樣格吃掉 offset
+       ⇒ 頻率砍半（solo_think 那一票已經踩過，code 裡留了字：sim_runner.gd:403-409）
+★★   faction_snapshot（R① 坐實「錯開會靜默漏」）用【擺位】解：留整點組，一行 code 都不改
+★★★  樁關掉時指紋必須與世代 7 逐字相同 ＝ 把「重構壞了」跟「錯開改變了世界」分成兩個問題
+世代   這張票改變世界 ⇒ 指紋床預期紅 ⇒ 世代 8（窗 #4）
+```
+
+### ✅ 同窗其他落地
+
+```
+22ac1b096  情報喚醒（世代 7 開，boundary）        72/72
+3a43af0c5  全域訊息渲染形狀                       73/73
+16c5e0409  faction_ai 吃批次（前置票）            74/74，指紋未變
+89d07208e  觀測文字的空描述那一格                 74/74
+7b0df72be  註冊表 74→75：resource_shape_falsifier 接電（實測 29s）
+71627619d  簡體字 lint 加 locale 自檢（位元組模式判【不可判】，不印綠）
+feat/simp-clean-9（錯字清掃 9 檔 19 處）⇒ 電池跑完待判
+```
+
+### 📋 這條 arc 留下來的待辦（★寫下來，否則下一代要重挖）
+
+```
+①乙組 6 支（propagate/intel/market/interactions/move/vision）R① 沒逐行證完
+  ⇒ 保守留整點；證完若有可錯開的，S_fixed 還能再降
+②teams_cadence 那 5 支改吃【真實間距】⇒ 消掉 ±59 tick 的有界誤差（要動 5 支簽章）
+③faction_snapshot 改成從 state.teams 全域建 pos_map ⇒ 它才有資格進錯開組
+④分片票／互動幀時儀器票 HALT 轉 defer，門票＝(A) 落地後 B3 仍紅
+```
+
+
 ## 🔧 2026-09-07 systems log —— 批 2 進行中 ＋ 一個【靜默吞寫】的全庫問題
 
 ### ★已 merge
