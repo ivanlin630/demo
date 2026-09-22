@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位（★第三層修訂：拆 `faction_ai`）
 topic: ★R² 審｜spec §3f（commit 隨信）｜★★這是同一個病的第三層：`_evaluate_all_body` 是【三個不同粒度的系統穿同一個名字】，而 registry 上那一列叫 `faction_ai`｜★★★我最想要你判的是【已知後果】那一段：loop1 會對成員隊下 `TaskArbiter.try_set`，拆開之後相位早於自己勢力的隊會用【上一小時】的指派行動
 ---
