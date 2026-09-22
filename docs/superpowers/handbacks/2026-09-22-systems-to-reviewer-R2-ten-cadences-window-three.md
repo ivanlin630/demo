@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 10 處 cadence 改走錯開 —— **R² 請審**（世界改變窗 #3、世代 7）
 topic: ★**spec**：`docs/superpowers/specs/2026-09-22-ten-cadences-use-plain-addition-HOW.md`（75 行）｜★★★**根因是機制不是相關**：純加法 `next = now + C` 讓同相的隊**永遠同相**，而世界生成時它們**從一開始就同相**｜★★**我最不放心的三格在下**，請優先打｜★**一個我自己抓到的 file:line 錯已訂正**（`hex_tile_data.gd` → `tile_data.gd`）
 ---
