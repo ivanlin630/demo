@@ -61,7 +61,11 @@ static func all_kinds() -> Array:
 	return MESSAGE_KINDS + FUNC_KINDS + STATE_KINDS
 
 # 標記：subjects 內每一隊在【本 tick】可立即重新思考。
-static func emit(state: WorldState, kind: String, subjects: Array) -> void:
+# ★★★`wake_thinking` 預設 **true**（票 §10.1）：
+#   ⇒ **任何未來新增的 emit 都會自動維持瞬醒** ＝ 構造保證。
+#   ★反過來設計（預設 false、需要的人自己打開）＝ 清單保證 ⇒ 漏改一處就【靜默失去瞬醒】。
+static func emit(state: WorldState, kind: String, subjects: Array,
+		wake_thinking: bool = true) -> void:
 	if state == null or subjects.is_empty():
 		return
 	for tid in subjects:
@@ -69,6 +73,8 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 		if id == -1 or not state.teams.has(id):
 			continue
 		state.pending_rethink[id] = true
+		if wake_thinking:
+			state.pending_think[id] = true
 	if Probe.enabled:
 		Probe.bump("t0.emit")
 		Probe.bump("t0.emit." + kind)
@@ -107,6 +113,20 @@ static func pending_source(state: WorldState, team_id: int) -> String:
 
 static func is_pending(state: WorldState, team_id: int) -> bool:
 	return pending_source(state, team_id) != ""
+
+# ★★★思考路徑專用（票 §10.1）：形狀逐字鏡射 `pending_source`／`is_pending`，
+#   ★只換讀哪一個集合 —— **不發明第二種寫法**（同檔 `reaction_system.gd:57` 的理由）。
+#   ★★`pending_visit`／`pending_seen` 仍記在共用那一份：它們量的是「這一隊被走訪／被讀」，
+#     而那與「它進的是哪一個集合」無關。
+static func pending_think_source(state: WorldState, team_id: int) -> String:
+	if Probe.enabled: state.pending_visit[team_id] = state.world.current_tick
+	if state.pending_think.has(team_id):
+		if Probe.enabled: state.pending_seen[team_id] = state.world.current_tick
+		return "cur"
+	return ""
+
+static func is_pending_think(state: WorldState, team_id: int) -> bool:
+	return pending_think_source(state, team_id) != ""
 
 # ★★faction 層的查詢：pending_rethink 是【team_id 索引】，而五支 T3 節律是 faction 級。
 #   ★這不是第二套機制 —— 它讀的是同一份 pending_rethink，只是換一個 scope 問。
@@ -149,6 +169,11 @@ static func is_pending_faction(state: WorldState, faction) -> bool:
 # ★而【旗子命運結算】留著：單緩衝下它量的就是【每 tick 有多少喚醒沒人讀到】——
 #   ★★那正是 per-actor 那一票要用的基線，而且它現在量的是【真實現況】不是某個修法的效果。
 static func consume_and_clear(state: WorldState) -> void:
+	# ★★★新集合必須在【同一點】清空（票 §10.2①）——而且要清在【早退之前】：
+	#   ★下面那個 `is_empty()` 早退會跳過函式尾端的 clear ⇒ 若只在尾端清，早退路徑會殘留。
+	#   ★★目前 `pending_think ⊆ pending_rethink` ⇒ 早退時它【應該】也是空的，
+	#   ★★★但那是一條沒有人在檢查的不變量 ⇒ 不靠它，無條件清。
+	state.pending_think.clear()
 	if state.pending_rethink.is_empty():
 		if Probe.enabled: state.pending_seen = {}
 		return

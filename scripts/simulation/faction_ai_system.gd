@@ -8082,7 +8082,10 @@ func tick_solo_think(state: WorldState) -> void:
 		#   ⇒ ★★★否則這個閘會【包住既有的 _should_reeval 事件早退路徑】，
 		#     而那正是 spec 護欄①明文禁止的事。
 		var _due: bool = state.world.current_tick >= team.solo_think_next_tick
-		var _woke: bool = WorldEvents.is_pending(state, team.team_id)
+		# ★★★票 §10.1：思考路徑改讀 `pending_think`（WHAT 裁 (乙)：抑制只作用在這裡）。
+		#   ★它仍然吃得到其餘 11 種事件（被襲等）—— **護欄①不受影響**,
+		#     因為那些 emit 的 `wake_thinking` 是預設的 true。
+		var _woke: bool = WorldEvents.is_pending_think(state, team.team_id)
 		# ★★★DIAG tap（守不變量 #7：`Probe.enabled` 後只記帳、零語意）：
 		#   問題＝「solo_think 每 tick 都跑、相位也散開了，為什麼時間 96% 落在 pass tick 上」。
 		#   ★掛在 `continue` 【之前】⇒ 母體完整（skip 那一格也要有數,否則比率沒有分母）。
