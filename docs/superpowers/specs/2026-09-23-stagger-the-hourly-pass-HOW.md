@@ -147,12 +147,38 @@ R① 坐實：它的 `pos_map` 是**從批次 `team_ids` 建的**（`sim_runner.
 ### 4a 新欄位（★沿用既有形狀，零新結構）
 
 ```gdscript
-# scripts/data/team_data.gd —— 逐字沿用 solo_think_next_tick／solo_think_last_tick 的形狀
+# scripts/data/team_data.gd —— ★只加【一個】欄位
 var pass_next_tick: int = 0     # 下次進入每小時 pass 的 tick
-var pass_last_tick: int = 0     # 上次真的跑過 pass 的 tick（量間距用）
 ```
 
-★**兩個都必須進存檔與指紋**：它們是排程狀態，掉了會讓載入後的世界重排相位。
+★**它必須進存檔**（排程狀態，掉了會讓載入後的世界重排一次相位），
+★★**而它【不會】進指紋 —— 這是構造保證，不是我的期望**：
+
+```
+fp_coverage.gd:25  CADENCE_SUFFIXES = ["_eval_next_tick", "_next_tick", "_check_tick"]
+fp_coverage.gd     _is_cadence(n) 命中 ⇒ 該欄進 cadence 桶，【不進 in_ruler】
+state_fingerprint.gd:380  _derived_line(t,…) 只吐 FpCoverage.fields_for()＝in_ruler
+⇒ `pass_next_tick` 以 `_next_tick` 結尾 ⇒ 自動歸 cadence ⇒ fp 看不到它
+★而 `_emit_teams` 的格式字串是【手寫欄位表】，本票不動它
+```
+
+### ★★★4a-1 為什麼【沒有】`pass_last_tick` —— 它會當場打死 P5
+
+我原本照 `solo_think_next_tick`／`solo_think_last_tick` 抄了兩個欄位。**那是錯的**：
+
+```
+`pass_last_tick` 的字尾是 `_last_tick`，★不在 CADENCE_SUFFIXES 裡
+⇒ 分類器走下一格：sim 原始碼裡有 `.pass_last_tick` ⇒ 判 in_ruler ⇒ ★★進 fp
+⇒ ★★★樁關掉時 fp 也會與世代 7 不同（多了一個欄位）
+   ⇒ §4e 那個「把重構壞掉與世界改變拆成兩問」的等價證明【當場失效】
+```
+
+⇒ **間距直方圖要的「上次是哪一顆 tick」放在 Probe 那一層**（`Probe.enabled` 之下的
+一個 `{team_id: tick}`），**不要放在 TeamData 上**。
+★世界本身**不需要**它：`CadenceStagger.next_tick(cur, cur, …)` 的 `last_eval_tick`
+傳的就是 `cur`，排程不靠持久化的 last。
+★★既有的 `solo_think_last_tick` 就是這個形狀的前例 —— **而它已經在 fp 裡了**
+（那是既有的疣，不是本票要修的東西，但**不要再多一顆**）。
 
 ### 4b 到期與排程（★逐字照抄 `faction_ai_system.gd:8119-8167` 的形狀）
 
@@ -293,8 +319,23 @@ static var pass_stagger_enabled: bool = true    # ★test-only；production 路�
 ```
 
 關掉 ⇒ 所有隊在 `% 60 == 0` 一起到期 ⇒ **那一趟 pass 與今天逐字相同**。
-★★★因此「關掉之後指紋必須與世代 7 **逐字相同**」是一個**極強的等價證明**：
+★★★因此「關掉之後指紋必須與世代 7 **逐字相同**」是一個**強的等價證明**：
 它把「重構本身有沒有改行為」跟「錯開有沒有改行為」**分成兩個可以各自判的問題**。
+
+★**它的強度要標明**（`known_issues`「fp 的子層級盲區第一次有數字」，回訪條件逐字是
+「下一次有人拿 fp 當單腿證據時」⇒ **在這裡到期**）：
+
+```
+TeamData    尺內 30 欄 ／ ★沒看到被讀 97 欄
+HexTileData ★排除 34 欄，含 apothecary_level／mint_level 這種【會影響產出】的設施等級
+⇒ 正確措辭是「★fp 覆蓋範圍內無變化」，不是「沒有改行為」
+```
+
+★★**本票有沒有碰到排除清單裡的欄位**（那一條規定要附的句子）：
+**沒有**。本票唯一新增的持久欄是 `pass_next_tick`（cadence 桶，本來就在尺外），
+其餘改的是**呼叫時機與批次**，不改任何 TeamData／HexTileData 欄位的值語意。
+★★★所以這一格仍然是**單腿**：它證明的是「fp 看得到的那部分沒變」。
+另一條腿是 P7（吞吐 ±5%）與 P3（每隊次數與間距）——**三格一起看才是等價**。
 
 ---
 
