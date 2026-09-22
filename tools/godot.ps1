@@ -206,6 +206,31 @@ try {
 } catch {
     Write-Output "[TREE] path=$provPath commit=UNKNOWN (git unavailable)"
 }
+# --- Hardware stamp (2026-09-22) --------------------------------------------
+# Why this exists, in one line: a TIME number from another machine is not a
+# number, and until now the only way to know which machine produced a figure
+# was for a human to remember. docs/measurements/_generation-boundary.md says
+# so itself: "the real fix is for the run to stamp its own hardware; until
+# then every cross-machine comparison needs a human to vouch for it."
+# HW-1's CPU is recorded as UNKNOWN in that table precisely because nobody
+# stamped it and we refuse to invent one. This line is what stops that
+# happening again -- it costs one WMI call and it is never wrong.
+# Note this stamps TIME-comparability only. Logical quantities (counts,
+# ratios, fingerprints) are unaffected by hardware and must not be voided
+# just because this line changed.
+try {
+    $cpuName = (Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name).Trim()
+    $cpuCores = (Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty NumberOfCores)
+    $cpuThreads = (Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty NumberOfLogicalProcessors)
+    $osInfo = Get-CimInstance Win32_OperatingSystem
+    $freeGB = [math]::Round($osInfo.FreePhysicalMemory/1MB,1)
+    $totGB = [math]::Round($osInfo.TotalVisibleMemorySize/1MB,1)
+    Write-Output "[HW] cpu=$cpuName cores=$cpuCores threads=$cpuThreads mem_free=${freeGB}GB/${totGB}GB"
+    Write-Output "[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***"
+} catch {
+    Write-Output "[HW] cpu=UNKNOWN (WMI unavailable) -- treat every time figure from this run as cross-machine-unusable"
+}
+# ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
 # --- Time-scale stamp (2026-09-07) ------------------------------------------
 # Blood evidence: three people in a row read "1000 tick" as "a long run".
