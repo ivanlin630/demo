@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 跨 tick 量測 —— **預註冊的門檻指向了一個量不到的量（我的錯）**
 topic: ★★★**我鎖的定義有母體問題**：「相鄰兩 tick 的 `gather` 產出」——而同一隊平均每 **~128 tick** 才 gather 一次 ⇒ **母體 ≈ 0**｜★**而 0/0 會讀成「不變率 100%」＝災難性假綠**｜★★訂正為「同一隊的相鄰兩次 gather」（母體 ≈ 9134）⇒ **但 referent 換了，95% 不能照抄** —— 要你重確認
 ---
