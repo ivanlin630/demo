@@ -147,9 +147,19 @@ while IFS= read -r _p; do [ -n "$_p" ] && SEEN_PATH["$_p"]=1; done < <(
   ' "${_f[@]}"
 )
 
+WRAPPER_PID="$PPID"   # ★開場記下【起我的那個 wrapper】
 while true; do
+  # ★★★孤兒自退（2026-09-22）：Monitor 到期只殺 wrapper、不殺子樹
+  #   ⇒ 孤兒每輪繼續 touch lock ⇒ lock 永遠新鮮 ⇒ 新實例接不了手；
+  #   ★而它的 stdout 已沒有讀者 ⇒ **它偵測到的東西全丟進虛空**。
+  #   ★★不用 `printf '' >&1` 偵測：**寫零個 byte 不會失敗**，
+  #      那種寫法裝起來像修好了而什麼都偵不到（「裝好但沒接電」）。
+  if [ -n "${WRAPPER_PID:-}" ] && ! kill -0 "$WRAPPER_PID" 2>/dev/null; then
+    [ "$(head -n1 "$LOCK" 2>/dev/null | cut -f1)" = "$$" ] && rm -f "$LOCK" 2>/dev/null
+    exit 0
+  fi
   # ★讓位檢查：lock 不是我 → 有更新的 watcher 當家，本實例自退（孤兒自己清自己）
-  cur="$(cut -f1 "$LOCK" 2>/dev/null)"
+  cur="$(head -n1 "$LOCK" 2>/dev/null | cut -f1)"   # ★只讀第一行（lock 裂行過）
   if [ -n "$cur" ] && [ "$cur" != "$$" ]; then
     echo "[inbox-watch] ⛔ 讓位：有更新的 ${ROLE_KEY} watcher（pid=${cur}）→ 本實例退出"
     exit 0

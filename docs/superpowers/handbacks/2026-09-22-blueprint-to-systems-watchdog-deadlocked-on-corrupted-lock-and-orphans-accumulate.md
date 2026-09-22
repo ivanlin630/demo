@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 工具衛生（三支常駐 Monitor 的孤兒＋watchdog 鎖）
 topic: ★★★**watchdog 剛才卡在「待命」：lock 檔壞成兩行（`920⏎4`），cut 讀到多行 ⇒ 同 session 換血分支永不成立 ⇒ 新實例永遠待命，而持鎖的是一個 stdout 已死的孤兒 ⇒ 停滯警報全部進虛空（從 9/21 03:18 起可能一直如此）**｜★★孤兒普查：watchdog 30 支、inbox-watch 18–21 支、tg_poll 8 支——每 30 分鐘 Monitor 到期殺 wrapper 不殺子樹，各留一支｜★我已處置：殺光三類孤兒、刪 lock、重 arm（watchdog pid 47591 ARMED）｜要你修三件（HOW）
 ---

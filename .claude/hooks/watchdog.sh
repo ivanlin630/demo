@@ -62,11 +62,13 @@ LOCK_FIELDS_V4=3
 #   ⇒ 同 SID ⇒ 直接接手,不問死活;跨 session 才維持原本的讓位/人工語意。
 claim_lock() {
   local cur age nf sid
-  cur="$(cut -f1 "$LOCK" 2>/dev/null)"
-  sid="$(cut -f2 "$LOCK" 2>/dev/null)"
+  # ★★★2026-09-22：**只讀第一行** —— lock 被兩個寫者同時 `>` 截斷時會裂成兩行
+  #   ⇒ cur/sid 帶換行 ⇒ **同 session 換血分支永不成立** ⇒ 新實例永遠待命。
+  cur="$(head -n1 "$LOCK" 2>/dev/null | cut -f1)"
+  sid="$(head -n1 "$LOCK" 2>/dev/null | cut -f2)"
   if [ -n "$cur" ] && [ "$cur" != "$$" ] && [ -n "$sid" ] && [ "$sid" = "$MYSID" ]; then
     printf '%s	%s	%s	proto=4
-' "$$" "$MYSID" "$MYCPID" > "$LOCK" 2>/dev/null
+' "$$" "$MYSID" "$MYCPID" > "$LOCK.$$" 2>/dev/null && mv -f "$LOCK.$$" "$LOCK" 2>/dev/null   # ★原子換：兩個寫者不再把 lock 截成半行
     echo "[watchdog v4] ♻ 同 session 換血接手：前任 pid=${cur} 的 lock 已由本進程 pid=$$ 接管（不問死活）" >&2
     return 0
   fi
@@ -209,7 +211,26 @@ announce() {
 STANDBY_MAX_ROUNDS="${STANDBY_MAX_ROUNDS:-8}"   # 8 × POLL ≈ 2h
 ESCALATE_EVERY="${ESCALATE_EVERY:-8}"           # 升級訊息複述間隔（輪）——說一次會被錯過
 last_class="OK"; last_fire=0; run_since=0; run_src=""; run_maxrun_ok=0; run_true_s=0; standby_said=0; standby_rounds=0; claim_rc=0; holder=""
+# ── ★孤兒普查（開場一次，不加闘、只印，2026-09-22）────────────
+#   ★★MSYS 的 `ps` 看不到參數（COMMAND 只有 exe 路徑）⇒ 孤兒在這邊天生隱形，
+#   ★★★而它們 2026-09-21 累到 30 支都沒人看到 ⇒ 要用 Windows 側的 CommandLine 才數得出來。
+#   ★PSExecutionPolicyPreference：Bash spawn 的 powershell 拿不到 harness 給 PowerShell 側的 Bypass。
+_orphan_census() {
+  command -v powershell.exe >/dev/null 2>&1 || return 0
+  PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "foreach (\$n in @('watchdog.sh','inbox-watch.sh','tg_poll.py')) { \$c = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { \$_.CommandLine -like ('*' + \$n + '*') }).Count; if (\$c -gt 2) { Write-Output ('[watchdog v4] ORPHAN-CENSUS ' + \$n + ' = ' + \$c + ' (>2)') } }" 2>/dev/null || true
+}
+_orphan_census
+WRAPPER_PID="$PPID"   # ★開場記下【起我的那個 wrapper】
 while true; do
+  # ★★★孤兒自退（2026-09-22）：Monitor 到期只殺 wrapper、不殺子樹
+  #   ⇒ 孤兒每輪繼續 touch lock ⇒ lock 永遠新鮮 ⇒ 新實例接不了手；
+  #   ★而它的 stdout 已沒有讀者 ⇒ **它偵測到的東西全丟進虛空**。
+  #   ★★不用 `printf '' >&1` 偵測：**寫零個 byte 不會失敗**，
+  #      那種寫法裝起來像修好了而什麼都偵不到（「裝好但沒接電」）。
+  if [ -n "${WRAPPER_PID:-}" ] && ! kill -0 "$WRAPPER_PID" 2>/dev/null; then
+    [ "$(head -n1 "$LOCK" 2>/dev/null | cut -f1)" = "$$" ] && rm -f "$LOCK" 2>/dev/null
+    exit 0
+  fi
   claim_lock; claim_rc=$?
   if [ "$claim_rc" != "0" ]; then
     # ★ONCE 模式搶不到必須退出（草案 bug：ONCE 只在成功那趟結尾才判 ⇒ 搶不到就無窮迴圈）
