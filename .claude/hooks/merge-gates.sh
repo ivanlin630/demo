@@ -6,6 +6,13 @@
 #     ⇒ 現在：★★exit code 通過【還不夠】，輸出必須命中 expect；★★★沒寫 expect 的行直接 FAIL。
 #   ★誠實限：runner 讓「跑」變便宜，但【跑得久】仍會讓人跳過 ⇒ 報每支耗時與總時。
 set -u
+# ★★★離開碼印在卷面上（systems 2026-09-23，implementer 指出）：
+#   我在信裡要人回報「BATTERY_RC= 那一行的數字」——★而這支 runner 從來沒印過那個字面，
+#   那一行只存在於【我自己那層 shell 的 echo】⇒ 我要的是一個【不存在於這份卷面】的東西。
+#   ★★而回報的人只能改口報離開碼，那一步靠的是他誠實，不是靠卷面。
+#   ⇒ 用 trap 印在【每一條離開路徑】上：包含 exit 1／exit 2／提前 exit 0，一條都不會漏。
+#   ★★★這是【構造保證】：在每個 exit 前面各加一行，會因為有人新增一條路徑而漏掉。
+trap 'echo "[MERGE-GATES] BATTERY_RC=$?"' EXIT
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
 REG="docs/process/merge-gates.tsv"
 
