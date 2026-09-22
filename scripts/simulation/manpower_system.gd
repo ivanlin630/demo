@@ -225,7 +225,7 @@ static func _spawn_breakaway(state: WorldState, holder: TeamData, detached: Dict
 			placed += 1
 	if AnonCohort.total(nt.anon_cohorts) <= 0:
 		return
-	state.create_team(nt)   # S9 chokepoint：註冊 + known/discovered init
+	state.create_team(nt, "manpower")   # S9 chokepoint：註冊 + known/discovered init
 
 
 # ───── guard-cap：captive_cap = guard_n × GUARD_CAP_MULT，超限強制處置超額（逼決策別囤）─────

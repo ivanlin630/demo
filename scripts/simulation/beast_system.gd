@@ -32,7 +32,7 @@ func build_beast_team(state: WorldState, kind: String, pos: Vector2i) -> int:
 	AnonCohort.add(t.anon_cohorts, AnonCohort.TIER_PLEB, "healthy", int(prof["count"]))
 	ResourceBank.clear_all(t, "beast_spawn_init")
 	t.armed_anon_ratio = 1.0   # 全員上場
-	state.create_team(t)   # S9 chokepoint：註冊 + known/discovered init
+	state.create_team(t, "beast")   # S9 chokepoint：註冊 + known/discovered init
 	return t.team_id
 
 # 獸戰結束：勝方得肉(food)+皮(material)，清除獸隊。
@@ -53,4 +53,4 @@ func reward_and_cleanup(state: WorldState, winner_id: int, beast_id: int) -> voi
 	_cleanup(state, beast_id)
 
 func _cleanup(state: WorldState, beast_id: int) -> void:
-	state.erase_team(beast_id)
+	state.erase_team(beast_id, "beast")

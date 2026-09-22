@@ -484,7 +484,7 @@ static func _setup_random_player(state, config, rng) -> void:
 		state.add_member(team, m.id)
 
 	_setup_anon_tiers(team, {}, target_pop)
-	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init
+	state.create_team(team, "world_gen")   # S9 chokepoint：註冊 + known/discovered init
 	state.player_state = { "inventory": [],
 	                       "coin": float(starting.get("coin", 0)) }
 
@@ -659,7 +659,7 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 		state.add_member(team, m.id)
 
 	_setup_anon_tiers(team, {}, target_pop)
-	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init
+	state.create_team(team, "world_gen")   # S9 chokepoint：註冊 + known/discovered init
 	return team
 
 # ── explicit mode ─────────────────────────────────────────────────
@@ -747,7 +747,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 	for k in t_cfg.get("resources", {}):
 		base_res[k] = t_cfg["resources"][k]
 	team.resources = base_res
-	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init
+	state.create_team(team, "world_gen")   # S9 chokepoint：註冊 + known/discovered init
 	var leader_cfg: Dictionary = t_cfg.get("leader", {})
 	var leader: PersonData = _make_person(state, team.team_id, leader_cfg, true)
 	state.persons[leader.id] = leader

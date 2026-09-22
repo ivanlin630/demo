@@ -92,7 +92,7 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	var named_in_sub: int = sub.named_members.size() + (1 if sub.leader_id != -1 else 0)
 	var anon_to_sub: int = maxi(pop_count - named_in_sub, 0)
 	AnonTierSystem.transfer_proportional(parent, sub, anon_to_sub)
-	state.create_team(sub)   # S9 chokepoint：註冊 + known/discovered init
+	state.create_team(sub, "subteam_spawn")   # S9 chokepoint：註冊 + known/discovered init
 	state.set_subteam_parent(sub, parent_id)         # 母子關係走入口（雙向同步 subteam_ids）
 	state.set_team_faction(sub, parent.faction_id)   # 子隊繼承 parent faction 走入口（雙向同步 member_team_ids）
 	print("[Sub] Team%d 派出子隊 Team%d leader=P%d advisors=%s (pop=%d cap=%d task=%s)" % [
@@ -130,7 +130,7 @@ func dispatch_anon_migrants(state: WorldState, parent_id: int, k: int,
 	var rations: float = float(k) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * MIGRANT_RATION_DAYS
 	var paid: float = ResourceBank.remove(parent, "food", rations, "migrant_rations")
 	ResourceBank.add(sub, "food", paid, "migrant_rations_in")
-	state.create_team(sub)
+	state.create_team(sub, "subteam_spawn")
 	state.set_subteam_parent(sub, parent_id)
 	state.set_team_faction(sub, parent.faction_id)
 	return sub.team_id
@@ -157,7 +157,7 @@ func dispatch_anon_messenger(state: WorldState, parent_id: int, task: String, re
 	state.set_team_tags(sub, [TeamData.TAG_SUBTEAM], "anon_msg_init")
 	# ★empty-handed：只搬 1 anon pop、零 resource transfer（不沿 dispatch() 的 proportional resource split）。
 	AnonTierSystem.transfer_proportional(parent, sub, 1)
-	state.create_team(sub)
+	state.create_team(sub, "subteam_spawn")
 	state.set_subteam_parent(sub, parent_id)
 	state.set_team_faction(sub, parent.faction_id)
 	return sub.team_id
@@ -209,7 +209,7 @@ func _transfer_proportional_assets(absorber: TeamData, absorbed: TeamData, frac:
 
 # 滅團清理：統一走 erase_team chokepoint（faction member/known_member_states + registry + 交叉 ref）
 func _erase_absorbed_team(state: WorldState, absorbed_id: int) -> void:
-	state.erase_team(absorbed_id)
+	state.erase_team(absorbed_id, "subteam_absorb")
 
 func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		transfer_npc_ids: Array = [], transfer_anon: int = -1) -> void:

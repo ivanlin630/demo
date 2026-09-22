@@ -693,22 +693,32 @@ func set_solo_intent(team: TeamData, itype: String, why: String, mode: String, r
 #   team_intel row 由 belief_system lazy init（此不碰）。known/discovered 用無條件 = []（mirror 原 10 站點無條件寫）。
 # CI-scan（強制閘地基）: grep -n 'state\.teams\[.*\] *=' scripts/simulation scripts/data
 #   → 除 world_state.gd 自身應為 0（debug/ fixture 除外）。
-func create_team(team: TeamData) -> void:
+func create_team(team: TeamData, reason: String = "unknown") -> void:
 	teams[team.team_id] = team
 	team_known[team.team_id] = []
 	team_discovered[team.team_id] = []
+	# ★★★新生 tap（守不變量 #7：`Probe.enabled` 後只記帳，零語意）。
+	#   ★掛在【咽喉點】而不是照呼叫點名單掛 —— 名單會漏，而漏掉的那一支不會紅。
+	#   ★★`reason` 預設 "unknown"：★★★有人新增建隊路徑而沒給 reason，
+	#     它會以 `teamlife.birth.reason.unknown` 【現形】，不是靜默併進別欄。
+	if Probe.enabled:
+		var _bd: int = int(world.current_tick / WorldState.TICKS_PER_DAY)
+		Probe.bump("teamlife.birth.all")
+		Probe.bump("teamlife.birth.day.d%04d" % _bd)
+		Probe.bump("teamlife.birth.reason.%s" % reason)
+		Probe.bump("teamlife.birth.reason.%s.d%04d" % [reason, _bd])
 
 # 單一 team 移除 chokepoint：語意 = erase_teams([tid])（薄 wrapper，呼叫端零改動）。
 # 所有 team 移除（滅團/合併/野獸清除）都須走此/erase_teams 入口。
-func erase_team(tid: int) -> void:
-	erase_teams([tid])
+func erase_team(tid: int, reason: String = "unknown") -> void:
+	erase_teams([tid], reason)
 
 # 批次 team 移除 chokepoint：清光所有指向 dead set 的 ref，使「無懸空 team_id」成不變量。
 # die-off 潮 K 隊逐隊 erase = K 趟 O(N) 全掃 spike（違效能域「早晚期成本無延遲差」）
 # → 批次收斂：每隊局部步驟（步1 母子/步2 faction）照原順序逐隊做（語意/連鎖順序不變）；
 # 步3/4/4b 合一單趟：dead set Dictionary O(1) membership，一趟 teams + 一趟 known/discovered/intel
 # （每 observer row 逐 dead tid erase，row 內 O(1)）。O(K·N) → O(N + K)。
-func erase_teams(tids: Array) -> void:
+func erase_teams(tids: Array, reason: String = "unknown") -> void:
 	var dead: Dictionary = {}
 	var dead_list: Array = []
 	for tid in tids:
@@ -717,6 +727,15 @@ func erase_teams(tids: Array) -> void:
 			dead_list.append(tid)
 	if dead_list.is_empty():
 		return
+	# ★★★消失 tap（同上，守 #7）。★★掛在 `dead_list` 定案【之後】：
+	#   `tids` 可能含已不存在或重複的 id ⇒ 拿 tids 記帳會把「要求刪」記成「真的刪了」。
+	if Probe.enabled:
+		var _gd: int = int(world.current_tick / WorldState.TICKS_PER_DAY)
+		for _g in dead_list:
+			Probe.bump("teamlife.gone.all")
+			Probe.bump("teamlife.gone.day.d%04d" % _gd)
+			Probe.bump("teamlife.gone.reason.%s" % reason)
+			Probe.bump("teamlife.gone.reason.%s.d%04d" % [reason, _gd])
 	# ★T0-A1 ②：同批死亡 → 死者的 faction 同僚立即重新思考（盟主/成員結構剛變）
 	var _notify: Array = []
 	for _dtid in dead_list:

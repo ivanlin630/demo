@@ -140,7 +140,7 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 		ResourceBank.set_amt(ot, res, amt, "overflow_split")
 		ResourceBank.add(origin, res, -amt, "overflow_split")
 	AnonTierSystem.transfer_proportional(origin, ot, overflow_pop)
-	state.create_team(ot)   # S9 chokepoint：註冊 + known/discovered init
+	state.create_team(ot, "population")   # S9 chokepoint：註冊 + known/discovered init
 	var promoted := PersonGenerator.generate_for_team(state, ot, "member")
 	if promoted != null:
 		ot.leader_id  = promoted.id

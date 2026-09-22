@@ -4991,9 +4991,17 @@ func _on_team_extinct(state: WorldState, team: TeamData) -> void:
 	# loop3 beast-skip 已令 beast 正常走不到此（combat cleanup 擁有 beast 清理）→ 此守衛冗餘但防未來別條 extinct 路誤計。
 	if Probe.enabled and team.beast_kind == "":
 		# 滅團死因分類（盡力，無完美標記→extinct.other 兜底）：餓死計時>0=餓主因，否則戰鬥標記，否則其他
-		if team.famine_days > 0.0: Probe.bump("extinct.starve")
-		elif team.combat_target != -1: Probe.bump("extinct.combat")
-		else: Probe.bump("extinct.other")
+		# ★★★逐日（systems 派工②要求時間對齊：差距是第 4~6 天才轉負的，總數看不出來）
+		var _xd: int = int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+		if team.famine_days > 0.0:
+			Probe.bump("extinct.starve")
+			Probe.bump("extinct.cause.starve.d%04d" % _xd)
+		elif team.combat_target != -1:
+			Probe.bump("extinct.combat")
+			Probe.bump("extinct.cause.combat.d%04d" % _xd)
+		else:
+			Probe.bump("extinct.other")
+			Probe.bump("extinct.cause.other.d%04d" % _xd)
 		# 死隊 forage 斷點定位（blueprint 2026-07-12）：死亡當下 task 是否為覓食/求生 + owner 狀態
 		var _has_home: bool = ResourceSystem.own_granary_tile(state, team) != null
 		if team.famine_days > 0.0:   # 只在餓死組分類，非本次判準的戰鬥/其他死不混入
@@ -5032,7 +5040,7 @@ func cleanup_extinct_teams(state: WorldState) -> void:
 			continue
 		_route_extinct_assets(state, state.teams[tid])
 		routed.append(tid)
-	state.erase_teams(routed)   # 批次清光所有 ref（含 detach、registry、交叉）
+	state.erase_teams(routed, "extinct")   # 批次清光所有 ref（含 detach、registry、交叉）
 	# ★★★【消失≠死】（2026-09-02）：`state.teams` 裡不見了有四條路 ——
 	#   滅團（這裡）、被吸納（`subteam_system.gd:212`）、encounter 收編（`encounter_system.gd:1460`）、野獸。
 	#   ★而床只能看到「不在 teams 裡】 ⇒ ★★四條路全被讀成「死了」，

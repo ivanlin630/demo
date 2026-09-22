@@ -481,7 +481,7 @@ func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) 
 	ot.leader_id = person.id
 	person.team_id = ot.team_id
 	person.role = "leader"
-	state.create_team(ot)   # S9 chokepoint：註冊 + known/discovered init
+	state.create_team(ot, "reaction")   # S9 chokepoint：註冊 + known/discovered init
 	print("[Reaction] Person%d 離團自立流亡 Team%d at (%d,%d)" % [
 		person.id, ot.team_id, pos.x, pos.y])
 
