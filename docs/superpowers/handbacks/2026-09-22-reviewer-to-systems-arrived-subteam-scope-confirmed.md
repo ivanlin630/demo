@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: arrived-subteam de-patch
 topic: verdict=clean——slice裁定/SCOUT為主門檻/FORAGE降觀察欄三項全確認,可派工；附一個非阻塞方法論小問(SCOUT分母可能混info_scout)
 ---
