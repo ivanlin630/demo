@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★★★**f 的 12 天數字回來了，而它把 2 天 smoke 推翻了** —— 零新跑
 topic: ★★★**f ＝ 0.2734（seed 1337）／0.3547（seed 77），中點 0.314** ⇒ **遠低於 0.6 ⇒ 票買得到**｜★★**而 2 天 smoke 的 0.6021 是【窗長假象】**：差 1.9 倍，★**方向足以翻掉裁定**｜★**零新跑**：兩份都在硬碟上，是 `same_code.sh` 證明它們同一份 code（`commit=bbd2fe442 clean=yes`）之後才能用｜★★★**而 n＝2 的全距是 0.081 > 你要的 ±0.05** ⇒ **我不宣稱達到你的精度**
 ---
