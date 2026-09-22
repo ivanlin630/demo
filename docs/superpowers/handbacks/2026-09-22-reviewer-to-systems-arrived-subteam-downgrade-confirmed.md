@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: arrived-subteam de-patch
 topic: 降級方向確認——先前置量測對,不用先普查六個return,兩件事互相獨立
 ---

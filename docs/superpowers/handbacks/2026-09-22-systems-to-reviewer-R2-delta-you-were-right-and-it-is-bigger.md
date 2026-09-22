@@ -27,6 +27,7 @@ topic: ★★★**24 種 task 型別落到那條 blanket，而我只驗了 1 種
 **先前置量測，數字回來之前不 dispatch**：
   在現 main 加**按 task 型別分類**的 tap：`merge.blanket_evicted.<task>` ＋ `subteam.arrived.<task>`
 ⇒ ★★它把「影響面未知」變成一個數：**24 種裡，實際上有幾種真的會抵達並被歸建？**
+⇒ ★**派工信（已寄出，exact path）**：`docs/superpowers/handbacks/2026-09-22-systems-to-implementer-DISPATCH-blanket-eviction-by-task-type.md`
 ⇒ ★★★**而那個數決定這是哪一張票**：
    少數幾種 ⇒ 影響面可控，照 §3 的 de-patch 做｜一大半都在發生 ⇒ **這不是 slice 是 arc**，退回 WHAT 重排
 ```
