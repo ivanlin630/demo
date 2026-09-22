@@ -43,6 +43,11 @@ func _initialize() -> void:
 	var runner := SimRunner.new()
 	var n_ticks: int = days * WorldState.TICKS_PER_DAY
 
+	# ★★★第二本相位帳：`SimRunner._ph`（encounter／day_boundary／harvest／solo_think…）
+	#   ★它是【SimRunner 層】的標籤，而 `_fai_ph` 是【FactionAISystem 內部】的
+	#   ⇒ ★★兩本【不可相加】（solo_think 這類會同時出現在兩邊）⇒ 各印各的佔比。
+	#   ★★★「無主詞的 24%」的候選名字很可能就在這一本 —— 我先前只讀了一本。
+	var pass_sr: Dictionary = {}
 	var pass_ph: Dictionary = {}
 	var pass_dt: int = 0
 	var pass_n: int = 0
@@ -64,6 +69,8 @@ func _initialize() -> void:
 				pass_ph[k] = int(pass_ph.get(k, 0)) + v
 				sub += v
 			pass_cov_num += sub
+			for k2sr in runner._ph:
+				pass_sr[k2sr] = int(pass_sr.get(k2sr, 0)) + int(runner._ph[k2sr])
 		else:
 			other_n += 1
 			other_dt += dt
@@ -129,21 +136,46 @@ func _initialize() -> void:
 		if String(FactionAISystem.PHASE_PARENT.get(kk, "")) != "*multi": keys.append(kk)
 	keys.sort_custom(func(a, b): return int(selfus[a]) > int(selfus[b]))
 	print("\n[PP] pass tick 相位排名（★按 self 排，不按 tot；相異相位 %d 個）" % keys.size())
+	# ★★★「沒被相位蓋住的時間」＝ 一列【沒有主詞的時間】,systems 裁它是候選答案不是誤差
+	#   ⇒ 讓它進排名跟其他相位競爭：★若它排第一,那就是「最大的一塊還沒有名字」。
+	var unnamed: int = pass_dt - self_sum
+	var rows: Array = []
+	for kk2 in keys: rows.append({"n": String(kk2), "v": int(selfus[kk2]), "tot": int(pass_ph[kk2])})
+	rows.append({"n": "★(無主詞：未被相位蓋住)", "v": unnamed, "tot": unnamed})
+	rows.sort_custom(func(a, b): return int(a["v"]) > int(b["v"]))
 	print("[PP] %-38s %14s %14s %9s %12s" % ["相位", "self us", "tot us", "佔dt", "每 pass us"])
-	for i3 in range(mini(20, keys.size())):
-		var k2: String = String(keys[i3])
-		print("[PP] %-38s %14d %14d %8.2f%% %12d" % [k2, int(selfus[k2]), int(pass_ph[k2]),
-			100.0 * float(selfus[k2]) / float(maxi(pass_dt, 1)), int(int(selfus[k2]) / maxi(pass_n, 1))])
+	for i3 in range(mini(21, rows.size())):
+		var r3: Dictionary = rows[i3]
+		print("[PP] %-38s %14d %14d %8.2f%% %12d" % [String(r3["n"]), int(r3["v"]), int(r3["tot"]),
+			100.0 * float(r3["v"]) / float(maxi(pass_dt, 1)), int(int(r3["v"]) / maxi(pass_n, 1))])
 	cells += 1
 
-	var top1: float = 100.0 * float(selfus[keys[0]]) / float(maxi(pass_dt, 1))
+	# ★三格的輸入也含【無主詞】那一列 —— 否則它永遠不會被選中,而它可能就是最大的一塊
+	var top1: float = 100.0 * float(rows[0]["v"]) / float(maxi(pass_dt, 1))
 	var top3: float = 0.0
-	for i4 in range(mini(3, keys.size())):
-		top3 += 100.0 * float(selfus[keys[i4]]) / float(maxi(pass_dt, 1))
+	for i4 in range(mini(3, rows.size())):
+		top3 += 100.0 * float(rows[i4]["v"]) / float(maxi(pass_dt, 1))
+	print("[PP]   ★top-1 是【%s】" % String(rows[0]["n"]))
 	print("\n[PP] ★三格判準的輸入（★判準與門檻是 systems 的欄，我不判）：")
 	print("[PP]   ★佔的是【整個 pass tick 的 dt】不是佔 Σ相位：top-1 = %.2f%%｜top-3 = %.2f%%" % [top1, top3])
 	print("[PP]   ★★相異相位 %d 個｜涵蓋率 %.1f%%（沒被相位蓋住的 %.1f%% 本身也是一格答案）" % [
 		keys.size(), cov, 100.0 - cov])
+	# ★★★主表是【第二本帳】：它涵蓋 99%+ ⇒ 三格要用它判，第一本是鑽進 near.faction_ai 裡面的。
+	#   ★我先前只讀第一本 ⇒ 那張表的「無主詞 24%」其實在第二本裡【有名字】。
+	var srk0: Array = pass_sr.keys()
+	srk0.sort_custom(func(a, b): return int(pass_sr[a]) > int(pass_sr[b]))
+	var sr_tot: int = 0
+	for vv in pass_sr.values(): sr_tot += int(vv)
+	if srk0.is_empty():
+		push_error("[PP][不可判] 第二本帳空 ⇒ 三格沒有主表可判")
+		fail += 1
+	else:
+		var s1: float = 100.0 * float(pass_sr[srk0[0]]) / float(maxi(pass_dt, 1))
+		var s3: float = 0.0
+		for i6 in range(mini(3, srk0.size())):
+			s3 += 100.0 * float(pass_sr[srk0[i6]]) / float(maxi(pass_dt, 1))
+		print("[PP]   ★★★【主表＝第二本帳，涵蓋 %.1f%%】top-1 = %s %.2f%%｜top-3 = %.2f%%｜標籤 %d 個" % [
+			100.0 * float(sr_tot) / float(maxi(pass_dt, 1)), String(srk0[0]), s1, s3, srk0.size()])
 	print("[PP]   ★★★①單一大頭 ②幾個中等的頭 ③攤平 —— 三格，而【中間那格】最容易被漏掉")
 	cells += 1
 
@@ -155,6 +187,22 @@ func _initialize() -> void:
 			String(mm), int(pass_ph[mm]), int(int(pass_ph[mm]) / maxi(pass_n, 1)),
 			100.0 * float(pass_ph[mm]) / float(maxi(pass_dt, 1))])
 
+	print("[PP] ── ★★★第二本帳：`SimRunner._ph`（★不與上表相加：兩層標籤會互相包含）──")
+	var srk: Array = pass_sr.keys()
+	srk.sort_custom(func(a, b): return int(pass_sr[a]) > int(pass_sr[b]))
+	var sr_sum: int = 0
+	for v5 in pass_sr.values(): sr_sum += int(v5)
+	print("[PP]   相異標籤 %d 個｜Σ = %d us ＝ pass 總 dt 的 %.1f%%" % [
+		srk.size(), sr_sum, 100.0 * float(sr_sum) / float(maxi(pass_dt, 1))])
+	for s5 in srk:
+		print("[PP]   [SR] %-28s %14d us｜每 pass %10d us｜佔 dt %6.2f%%" % [
+			String(s5), int(pass_sr[s5]), int(int(pass_sr[s5]) / maxi(pass_n, 1)),
+			100.0 * float(pass_sr[s5]) / float(maxi(pass_dt, 1))])
+	if srk.is_empty():
+		push_error("[PP][不可判] 第二本帳是空的 ⇒ `_ph` 沒接上（不是它沒花時間）")
+		fail += 1
+	cells += 1
+
 	print("\n[PP] ── production 自己的 phase_report（同一份資料，另一支既有的眼睛）──")
 	print(FactionAISystem.phase_report(pass_ph, pass_dt))
 	cells += 1   # ★跨父桶另表 ＋ production 自己的 phase_report
@@ -163,9 +211,9 @@ func _initialize() -> void:
 	print("[誠實限]   那個 I/O 在 dt 量完【之後】發生,但會壓到【下一個 tick】的量測")
 	print("[誠實限] ②相位只涵蓋有掛 label 的段落 ⇒ 見涵蓋率那一格,不可當成 100%%")
 	print("[誠實限] ③時間數字只能跟【同一顆 CPU】的數字比（見卷首 [HW] 行）")
-	print("=== pass_tick_phase_breakdown DONE（fail=%d｜到場點名 %d／6）===" % [fail, cells])
-	if cells != 6:
-		push_error("[FAIL] 到場點名 %d／6 ⇒ 有格沒跑到" % cells)
+	print("=== pass_tick_phase_breakdown DONE（fail=%d｜到場點名 %d／7）===" % [fail, cells])
+	if cells != 7:
+		push_error("[FAIL] 到場點名 %d／7 ⇒ 有格沒跑到" % cells)
 		fail += 1
 	quit(1 if fail > 0 else 0)
 
