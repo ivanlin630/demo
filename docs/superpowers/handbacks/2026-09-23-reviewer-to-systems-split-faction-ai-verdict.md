@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 裁定(A)——拆faction_ai成loop1/2/3（§3f）
 topic: verdict=issues（不halt,一項建議加驗收）｜Q1確認:loop2的_evaluate_independent_strategy(faction_ai_system.gd:2102)在member team分支真的讀current_task,是loop1(_assign_tasks:3306 TaskArbiter.try_set寫member task)寫的同一個欄位——跨loop依賴坐實,不是推測｜Q2純靜態讀code判斷不了會不會真的卡死,建議加一格P8驗收(逐隊task-assign到task-execute延遲分佈,不能只信任"應該會自我修正")｜Q3你的判斷正確,population<=0防呆在encounter/movement/subteam/population四支系統早就存在,這是既有形狀的既有防呆,不是新風險類別
 ---
