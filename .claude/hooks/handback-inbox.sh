@@ -117,7 +117,7 @@ _promise_check() {
     grep -qE '^status:[[:space:]]*open([[:space:]]|$)' "$f" || continue
     for role in blueprint systems implementer measurer reviewer qa; do
       [ "$role" = "$me" ] && continue
-      grep -qE "(已請|已派|已寄|已轉)[^。]{0,6}${role}" "$f" 2>/dev/null || continue
+      grep -qE "(已請|已派|已寄|已轉|已登|登好|已落地|已補上)[^。]{0,6}${role}" "$f" 2>/dev/null || continue
       hit=$(ls "$d"/${today}-${me}-to-${role}-*.md 2>/dev/null | head -1)
       [ -n "$hit" ] && continue
       echo "  ⚠ $(basename "$f") 宣稱已通知 ${role}，但今天沒有 ${me}-to-${role} 的信"
@@ -159,7 +159,19 @@ _promise_bare_check() {
       _lno=${line%%:*}; _txt=${line#*:}
       _para=$(awk -v n="$_lno" 'NR>=n { if (NR>n && $0 ~ /^[[:space:]]*$/) exit; print }' "$f")
       path=$(printf '%s' "$_para" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z]+-to-[a-z]+-[A-Za-z0-9-]+\.md' | head -1)
-      [ -n "$path" ] && [ -f "$d/$path" ] && continue
+      # ★★★謂詞修正（2026-09-22）：舊版檢 `[ -f ]` ＝ **磁碟上有檔**，
+      #   而真實的失敗是 **staged 但沒 commit** ⇒ ★**磁碟會說「有」**
+      #   ⇒ ★★只有 `git show HEAD:` 抓得到；★★★而兩個都印，讓它自己說是哪一種。
+      if [ -n "$path" ]; then
+        _ondisk=no; _inhead=no
+        [ -f "$d/$path" ] && _ondisk=yes
+        git show "HEAD:$d/$path" >/dev/null 2>&1 && _inhead=yes
+        [ "$_inhead" = "yes" ] && continue
+        if [ "$_ondisk" = "yes" ]; then
+          echo "  ⚠ $(basename "$f"): 票路徑 disk=yes head=no ⇒ **staged 但沒 commit**（$path）"
+          miss=$((miss+1)); continue
+        fi
+      fi
       line="$_txt"
       # ★★★「同時送/一併送/也寄 X」型:有角色名【也不放行】(2026-09-04 血證,blueprint 指出)
       #   ★上面那道(_promise_check)查的是「今天有沒有寄信給該角色」,而我今天寄了幾十封 ⇒ 一定通過
@@ -177,16 +189,16 @@ _promise_bare_check() {
       fence { next }
       /^(#|topic:|slice:|from:|to:|status:|tier:|touches:)/ { next }
       # ★這行【引用過】這個詞 ⇒ 整行當在討論規則(血證那行沒有引用,仍會響)
-      /[「『](已請|已派|已寄|已轉)/ { next }
+      /[「『](已請|已派|已寄|已轉|已登|登好|已落地|已補上)/ { next }
       # ★★判準從【同一行】放寬到【同一段落】(到下一個空行為止)——★不是放水,是從代理特徵改到本體:
       #   要求的本體是「下游驗不驗得到這個承諾」,而同段落的票路徑【一樣驗得到】;
       #   ★★同一行只是那個要求的代理特徵,而它讓閘每回合對同幾封已寄出的信重複告警
       #   ⇒ ★★★雜訊會讓人開始忽略警告 —— 那比漏抓更貴(2026-09-04,被自己的閘教會)
       { para[NR] = $0 }
       # ★★★2026-09-04:「同時送 X／一併寄 X」也是承諾,而它【沒有「已」字】⇒ 舊偵測層掃不到
-      /(已請|已派|已寄|已轉)|((同時|一併|另外|順便)[^。]*(送|寄|發))/ {
+      /(已請|已派|已寄|已轉|已登|登好|已落地|已補上)|((同時|一併|另外|順便)[^。]*(送|寄|發))/ {
         line = $0
-        gsub(/[「『](已請|已派|已寄|已轉)/, "", line)   # ★開引號緊貼動詞 = 引述,剝掉
+        gsub(/[「『](已請|已派|已寄|已轉|已登|登好|已落地|已補上)/, "", line)   # ★開引號緊貼動詞 = 引述,剝掉
         # ★★★2026-09-09：把上面那條【補完】,不是第九輪調校 ——
         #   舊版只剝「開引號緊貼那四個動詞」的形狀,所以
         #   `我先前寫了「拿到清單我另外寄」` 這種【引述整句】仍然響。
@@ -194,7 +206,7 @@ _promise_bare_check() {
         #   ★可被證偽:若有人把真承諾整句寫進「」裡就逃得掉 —— 而那讀起來就是引文,
         #     ★★代價是【對自己的檢討文字重複告警】,而雜訊比漏抓更貴(這條檔案裡本來就寫著)。
         gsub(/[「『][^」』]*[」』]/, "", line)
-        if (line ~ /(已請|已派|已寄|已轉)|((同時|一併|另外|順便)[^。]*(送|寄|發))/) print NR":"$0
+        if (line ~ /(已請|已派|已寄|已轉|已登|登好|已落地|已補上)|((同時|一併|另外|順便)[^。]*(送|寄|發))/) print NR":"$0
       }
     ' "$f")
   done
