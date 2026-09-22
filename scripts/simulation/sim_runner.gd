@@ -252,14 +252,27 @@ static var _registry_assumptions_checked: bool = false
 #   ★沒有人會刻意預設它們為 true ⇒ 屬累積型，清。
 static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
+	# ★checked 改成【衍生值】：舊版是手抄的 2，而手抄的數字不會跟著新增的 static 走。
+	#   ★★改接線不改數值：下一個人加第四顆時，這個數字自己會跟上。
+	var checked: int = 0
 	if frames_over_budget != 0 or frames_total != 0:
 		cleared["SimRunner.frames_*"] = "%d/%d" % [frames_over_budget, frames_total]
 	frames_reset()
+	checked += 1
 	if _registry_assumptions_checked: cleared["SimRunner._registry_assumptions_checked"] = true
-	if _observer_guard_warned: cleared["SimRunner._observer_guard_warned"] = true
 	_registry_assumptions_checked = false
+	checked += 1
+	if _observer_guard_warned: cleared["SimRunner._observer_guard_warned"] = true
 	_observer_guard_warned = false
-	return {"checked": 2, "cleared": cleared}
+	checked += 1
+	# ★★★錯開票新增的累積型 static：床裡手動 clear 不夠 ——
+	#   清單保證（床記得）vs 構造保證（登記表記得）。
+	#   ★不登記的話，下一支跑兩個世界的床會把【跨世界的差值】當成第一筆間距
+	#   ⇒ ★★進直方圖、巨大、看起來像一個真缺陷。
+	if not _pass_gap_last.is_empty(): cleared["SimRunner._pass_gap_last"] = _pass_gap_last.size()
+	_pass_gap_last.clear()
+	checked += 1
+	return {"checked": checked, "cleared": cleared}
 
 static func check_registry_assumptions() -> void:
 	if _registry_assumptions_checked:
@@ -302,10 +315,16 @@ func _collect_due_teams(state: WorldState, all_teams: Array, cur: int, hour_tick
 		if team == null:
 			continue
 		if not WorldState.pass_stagger_enabled:
-			# ★樁關：所有隊在整點一起到期 ⇒ 那一趡 pass 與今天逐字相同。
+			# ★樁關：所有隊在整點一起到期 ⇒ 那一趟 pass 與今天逐字相同。
 			#   ★★且【不碰 pass_next_tick】⇒ 欄位恆為 0，存檔與行為都不變。
 			if hour_tick:
 				due.append(tid)
+				# ★★★樁關也要記帳：否則 P6 的對照臂【沒有母體】
+				#   ⇒ peak_stub 恆為 0 ⇒ 床的斷言 stub > stag*3 恆假 ⇒ P6 必紅，
+				#   ★而它紅起來的樣子是「把相位關回整點、尖峰沒有回來」
+				#   ⇒ ★★自然結論是「尖峰本來就不是 pass 造成的」⇒ 整張票的前提被自己的床推翻。
+				#   ★★★對照自己沒打中，而陰性結果讀起來就是「這裡沒有問題」。
+				_note_pass_gap(int(tid), cur)
 			continue
 		if team.pass_next_tick == 0:
 			# ★首次【不當場跑】而是排一個錯開過的到期時間 ——
@@ -313,7 +332,7 @@ func _collect_due_teams(state: WorldState, all_teams: Array, cur: int, hour_tick
 			# ★★已知副作用（spec §4b-1，本票接受）：第一次被推遲 [c/2, 2c) ＝ [30, 120)
 			#   ⇒ ★★★P3 的【第一個遊戲日】每隊會少一次（各自少，不同時）——
 			#     床要麼跳過第 1 天，要麼把第 1 天的期望寫成 23–24。
-			#     沒寫這一句的話，它會以「P3 紅」的樣子出現，而結論會被讀成「頻率被砂」。
+			#     沒寫這一句的話，它會以「P3 紅」的樣子出現，而結論會被讀成「頻率被砍」。
 			team.pass_next_tick = CadenceStagger.next_tick(cur, cur, int(tid), NEAR_CADENCE)
 			continue
 		# ★★★必須是 >= 不是 ==：ambush 早退或任何原因讓一顆 tick 沒跑完，
