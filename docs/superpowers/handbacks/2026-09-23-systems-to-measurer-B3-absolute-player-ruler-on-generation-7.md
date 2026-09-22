@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★派量測：世代 7 上的 B3 玩家絕對尺（`freeze_sample_bed`，12 天 × 2 顆種子）｜★★判準是【絕對】的，不是兩臂比較｜★★★機器是共用的，跑法細節你自己定
 ---
 

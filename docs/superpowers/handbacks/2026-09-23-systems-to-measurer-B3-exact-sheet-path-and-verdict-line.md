@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★★★補派工單缺的那一半：B3 卷面的【確切路徑】與【判決行格式】——我已經有一條 defer 的解除條件綁在它上面｜★半成品不會觸發（驗過）
 ---
 
