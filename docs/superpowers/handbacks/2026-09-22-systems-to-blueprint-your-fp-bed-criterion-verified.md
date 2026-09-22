@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「世代邊界由註冊的指紋床定義」—— **我驗過了，成立**
 topic: ★**註冊表裡 14 支相關床逐支查：13 支零指令**｜★★**唯一命中的 `ui_flow_test.gd`（4 處指令）不是指紋床** —— 它被我的過濾抓到只因為檔裡有 `snapshot` 這個字（**6 次，全是 UI 面板快照，不是世界指紋**），而它**沒有任何 `StateFingerprint` 斷言**，expect 也是 `errors: 0｜到場點名 26／26`｜★★★**所以你的判準成立** —— 而我把「為什麼它被誤抓」也寫出來
 ---
