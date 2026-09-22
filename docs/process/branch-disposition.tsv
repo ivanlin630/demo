@@ -41,6 +41,6 @@ teamlife-taps	keep	★HOW 裁定保留：隊生滅咽喉點記帳＋逐日逐因
 ten-cadences	keep	HELD：已裁定非真凶，衛生票（WHAT 例外名單）
 threat-oracle-s2	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
 tombstone-premeasure	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
-walkthrough-v2	needs-call	★★★HOW 退回 WHAT：產物落地了、code 沒有 —— 量測檔 175 行逐位元在 main，但 c1_walkthrough.gd(167+/68-) 與 player_api_mapper.gd(17+/1-) 在 main 完全不存在，且 main 自 merge-base 起沒動過那兩個檔（0 commit）⇒ 不能以「產物已在 main」關掉
+walkthrough-v2	keep	★WHAT 改判 2026-09-22（原裁「產物已在 main ⇒ 關」撤回）：門票＝用戶找出那份 175 行卷面裡植入的錯誤後拿掉植入，床以診斷床身分走 R²＋電池。★★HOW 退回一點：WHAT 寫「scripts/debug only、零 production」，而本支帶著 `player_api_mapper.gd`（17+／1−）—— 它不是床，是一個 **live 缺陷的修正**：事件流的真實型別是 MessageData（5／5 production 寫入點，零個 Dictionary），而 main 的 mapper 只認 Dictionary ⇒ 真世界每一則事件都印成物件 id。
 weaponsmith	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
 workshop-followthrough	archived-unmerged	單一 slice、未合；WHAT 裁「沒有一支照原樣要」⇒ 需求若真存在會從 known_issues／defers 再敲門
