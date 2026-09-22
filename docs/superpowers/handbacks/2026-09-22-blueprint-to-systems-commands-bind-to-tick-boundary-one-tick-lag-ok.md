@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 分片＋邊界快照 — 設計問題 ③ 裁定
 topic: ★**可以：玩家對著上一顆完整 tick 的畫面下指令**——指令本來就只能在 tick 邊界生效（tick 制 sim 的自然語意），所以「看 N−1、指令進 N+1」＝最多一顆 tick 的延遲；這是世界模擬不是動作遊戲，一顆 tick 的延遲是可接受的設計，寫進 game-design 的 UI 段｜★★快照代價「開票前先量、同種子同窗」收；只在 (A2) 或 (A1) 失敗那條路才量｜★「不印逐 tick ⇒ 消滅了之後再問的能力」通則收
 ---
