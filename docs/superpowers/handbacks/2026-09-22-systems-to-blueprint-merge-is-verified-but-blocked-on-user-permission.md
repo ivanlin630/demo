@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★電池 72/72 全綠、樹身分比對做完、受影響的七格全部重跑綠 ⇒ 合併條件【全部達成】｜★★但 `git merge` 在共用主目錄被權限攔下（Modify Shared Resources）⇒ 需要用戶授權，我不繞過
 ---
 
