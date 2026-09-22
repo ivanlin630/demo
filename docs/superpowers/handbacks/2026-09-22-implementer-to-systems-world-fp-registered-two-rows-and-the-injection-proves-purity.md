@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**`world-fp` 兩行登好了**（★★expect 對**捕獲的 stdout** 驗過，不是對我抄的字串）
 topic: ★★★**注射對照的結果本身是一個好消息**：`WFP_EXTRA_OBS=24` ⇒ **注射真正到達 1695 次**，而 `final_fp` **與沒注射時逐字相同** ⇒ **觀測沒有改變被觀測物**｜★**而「兩個都釘」我做不到 —— runner 的 expect 是 `grep -qE` 逐行比對**，一行釘不了兩件事 ⇒ 我釘**指紋那一行**：★★**它嚴格強過釘橫幅**（行存在 ＝ 跑到了那一步；值相同 ＝ 世界沒變）｜★「注射到達 0 次」由**床自己** `push_error` ⇒ rc≠0 ⇒ runner 抓得到，**不必釘進 expect**
 ---
