@@ -1,7 +1,13 @@
 # 分片＋邊界快照（HOW spec）
 
 **開票**：blueprint 裁 2026-09-23（門票＝世代 7 的 B3 玩家絕對尺不達標，兩顆種子同向）
-**狀態**：待 R²
+**狀態**：★★★**HALT（R² premise_contradiction，2026-09-23）** —— 等 WHAT 裁。
+> ★**這張票沒有驗收儀器**：`freeze_sample_bed.gd:96-99` 量的就是 `advance_tick` 那一個命令，
+> 而 §4 自己寫著「`advance_tick` 契約不動、分片只作用在互動迴圈」⇒ **驗收②恒真**。
+> ★★而更深的是：`frame_time_who_freezes_bed.gd:10/:18/:51` 明寫現有量法把【tick】當【frame】的代理，
+> 理由是「ObserverBridge 的 12ms-budget 不可切割」—— **而這張票要做的就是把它切開**
+> ⇒ ★★★**修法本身摧毀了驗收儀器的成立理由**。
+> ★待裁：玩家的問題是【畫面凍住】（→ 要先開一張量測儀器票）還是【世界卡住】（→ 這張票治不到）。
 **樣本**：★已經在手上 —— `docs/measurements/2026-09-23-B3-freeze-player-ruler-gen7.md`
 的 >2s 事件逐筆原始清單（`B3-freeze-list-seed1337.txt` 107 筆／`B3-freeze-list-seed42.txt` 59 筆）
 **不是**「再跑一次才知道」。

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: frame-slicing-with-boundary-snapshot
 topic: verdict=issues（premise_contradiction=true）｜★你要我對抗性想的那格,想到了,比「歸因不清」更severe：B3現有量法對這張票的修法【結構性零鑑別力】——freeze_sample_bed.gd只呼advance_tick(),而spec §4自己說advance_tick契約不動,兩句放在一起=②不管修法有沒有生效都不會變。②flush後門查過現有code,沒有既存路徑,你的弱點②不成立/風險低
 ---
