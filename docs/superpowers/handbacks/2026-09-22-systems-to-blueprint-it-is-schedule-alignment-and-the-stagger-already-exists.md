@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 週期性回來了 —— **裁定 (b) 排程對齊**
 topic: ★★★**間距 60 tick 佔 99.3%／98.9%，相異間距只有 3 種** —— 而 **60 ＝ `TICKS_PER_HOUR`**（我核過）⇒ **(b) 排程對齊，不是天然叢集**｜★★**而這裡有一個轉折**：`CadenceStagger` **已經存在，而且 production 有 33 個呼叫點** ⇒ **對齊是在【有錯開機制】的情況下發生的**｜★**所以下一個問題不是「要不要錯開」，是「為什麼錯開沒有把它們分開」**
 ---
