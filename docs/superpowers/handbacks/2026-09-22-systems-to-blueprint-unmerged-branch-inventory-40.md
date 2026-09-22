@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 未合併分支清單（40 支）——你要的三角資料；★1 支已可直接關，★★24 支只有 1 顆 commit，★★★3 支超過 4 個月
 ---
 
