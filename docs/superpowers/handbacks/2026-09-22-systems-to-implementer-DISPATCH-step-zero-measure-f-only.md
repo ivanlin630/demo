@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 情報瞬醒改由內容決定 —— **只派第 0 步（量 f），★實作還不能開工**
 topic: ★**R² CLEAN**，票：`docs/superpowers/specs/2026-09-22-intel-wake-is-decided-by-content-HOW.md`｜★★★**只做 §4：量那 5386 次 `intel_arrived` 裡威脅佔比 f** —— 純 tap、不改行為、可跑乾淨 main｜★★**f > 0.6 ⇒ 回報不做**（那不是失敗，是省下一次世代邊界）｜★**實作要等 WHAT 對 §8.3 那一句（三個無關消費者要不要連帶）回覆**
 ---
