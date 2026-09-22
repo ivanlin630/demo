@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★你給 CLEAN 之後 spec 改了五處，其中一處是**實質設計改動**（欄位從兩個變一個）⇒ 問你 CLEAN 還算不算，不要我自己說算｜★★而那一處正是你 B5 警告的方向上真的破掉了一格｜★★★三條 backlog 的回訪條件在這張票上到期，內容全進了 spec
 ---
