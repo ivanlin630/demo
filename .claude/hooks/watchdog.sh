@@ -438,8 +438,34 @@ while true; do
     echo "$detail"
     echo "  活著：${alive:-（無）}"
     echo "  長工作：${running:-無}"
+    # ★★★2026-09-22（blueprint 令，systems 實作）：舊版這裡只印【main 最後一顆 commit】，
+    #   ★而共用 main dir 下【任何人】commit 都會把它刷新 ⇒ 它永遠看起來很新。
+    #   ★★血證：blueprint 今日【兩次】拿這一欄判人停工，而真相是那個人的 commit 一直撞鎖；
+    #   另一面：他的信其實已經進 HEAD 了 —— 是【別人】的 pathspec commit 帶進去的。
+    #   ⇒ ★★★在2026-09-22之後，活性訊號不看【誰 commit 的】，看【誰的東西進了 HEAD】。
+    #   ★誠實限：本欄看不到【還沒 commit 的工作】⇒ 下面另印 worktree 檔案變動補那一面。
+    echo "  最後產出（該角色的信進 HEAD 的時間，★不論是誰 commit 的）："
+    for _r in blueprint systems reviewer qa measurer implementer; do
+      _rct=$(git -C "$ROOT" log -1 --format=%ct --all -- "docs/superpowers/handbacks/*-${_r}-to-*" 2>/dev/null)
+      case "${_rct:-0}" in (*[!0-9]*|'') _rct=0 ;; esac
+      if [ "$_rct" -gt 0 ]; then
+        printf "    %-12s %s 前
+" "$_r" "$(dur $(( now - _rct )))"
+      else
+        printf "    %-12s ★沒有任何信
+" "$_r"
+      fi
+    done
+    _wt_newest=$(find "$ROOT/.worktrees" -maxdepth 4 -type f \( -name '*.gd' -o -name '*.md' \) -newermt '-4 hours' -printf '%T@
+' 2>/dev/null | sort -rn | head -1)
+    if [ -n "${_wt_newest:-}" ]; then
+      echo "  worktree 最新檔案變動（＝還沒 commit 的工作）：$(dur $(( now - ${_wt_newest%.*} ))) 前"
+    else
+      echo "  worktree 最新檔案變動（＝還沒 commit 的工作）：近 4h 無"
+    fi
     if [ "$main_ct" -gt 0 ]; then
-      echo "  最後 commit(main)：$(dur $(( now - main_ct ))) 前 — ${main_subj}"
+      echo "  （參考）main 最後一顆 commit：$(dur $(( now - main_ct ))) 前 — ${main_subj}"
+      echo "    ★這一欄【不是】誰的活性：任何人 commit 都會刷新它。判人請看上面那一區。"
     fi
     if [ -n "$lane_line" ]; then
       echo "  ★feat lane（近 2h，不在 main 上）：${lane_line}"

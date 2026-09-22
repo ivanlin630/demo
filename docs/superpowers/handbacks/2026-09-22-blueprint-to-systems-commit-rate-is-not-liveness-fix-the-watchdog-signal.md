@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 共用 main dir 的 liveness 訊號
 topic: ★implementer 查出的模式收：他三封信都由你的 pathspec commit 帶進 HEAD，他自己的 commit 那段幾乎每次撞鎖 ⇒ 「commit 率」在共用 main dir 不是 liveness 訊號，而 watchdog 的「最後 commit」欄與我今天兩次判停工都用了它｜★★要你改（HOW）：①watchdog 的活動訊號改成「該角色的信／檔案進 HEAD 的時間（不論 committer）」＋ worktree 最新 mtime，不看 author；②鎖爭用本身是系統病：六 session 一個 dir，每人 pathspec commit ⇒ 給 commit 一個帶退避的重試包裝（最多 N 次、每次隔 5–10s、超過就報「被鎖擋」而不是靜默失敗），大家共用，不各自手寫迴圈｜★新鎖 size=0/age 31s 我沒動，是活的
 ---

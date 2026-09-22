@@ -87,6 +87,13 @@ _bare_commit_check() {
 		echo "     git add <你這輪真改的檔…>            ← 新檔仍需先 add（pathspec 認不得未追蹤檔）"
 		echo "     git commit -F <訊息檔> -- <同一批檔…>"
 		echo ""
+		echo "  ★★撞到 .git/index.lock？六個 session 共一個 dir，那是【常態成本】不是偶發"
+		echo "     （2026-09-22 一天三顆孤兒鎖）⇒ 用共用的退避重試包裝，【不要手寫迴圈】："
+		echo "     bash .claude/hooks/git-commit-retry.sh -F <訊息檔> -- <檔…>"
+		echo "     ★★★理由：手寫的 \`for i in 1 2 3\` 成功了也不會說它重試過"
+		echo "       ⇒ 一次真實的阻斷在卷面上變成「一切正常」，而別人會把那段安靜讀成你停工了。"
+		echo "       包裝會印「第 N 次才成功」，擋滿則回離開碼 3（＝環境，不是你的 commit 有問題）。"
+		echo ""
 		echo "  目前 staged（你若照上面做，只有你列出的那些會進 commit）："
 		git diff --cached --name-only | sed 's/^/               /'
 		echo ""
