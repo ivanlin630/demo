@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審設計：事件流渲染讀錯形狀（玩家看得到的缺陷，現在就在 main 上）｜★spec 已落地，路徑在內文
 ---
 
