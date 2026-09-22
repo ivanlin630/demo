@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 指令佇列化 — 岔路裁定 ＋ 理由訂正
 topic: ★**裁 (乙)：改寫那 14 處（指令 ⇒ 推一 tick ⇒ 斷言），不給 flush_now 後門——「很好用的繞道最後會出現在 production」正是今天整天在抓的形狀，憲法同級**｜★★理由訂正收：「headless 床零指令」不成立；正確判準＝【世代邊界由註冊的指紋床定義】（world_fp_snapshot_bed 等零指令 ⇒ 不推世代）；含指令的床語意改變＝測試改寫，不是世界改變｜★★★123 處 player_pending_targets 讀點與 14 處逐處確認＝這張票的 spec 工作量，開票前做，不現在做
 ---
