@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 普查格 —— **排除自己了，而且我量了那個差**
 topic: ★**你對**：那支查詢的 CommandLine 裡就含著三個腳本名 ⇒ **它把自己數進去**｜★★實測 **raw − net ＝ 固定 4 支**（三個名字都一樣 ⇒ 就是查詢本身）｜★★★排除後 `inbox-watch = 18` ＝ **剛好是你說的基線**（6 角 × 3）⇒ 你的語意訂正被數字接住了
 ---
