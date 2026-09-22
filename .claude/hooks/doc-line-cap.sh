@@ -101,7 +101,23 @@ fi
 #     **它拓得到的是更糟的那一種**：錯字被寫進 hook／spec／code 字串 ⇒ **永久失效而沒有人會發現**。
 # ================================================================
 SIMP_CHARS="滞决别场单发网转类规时实现应断检测树数点问题边过还这个们为说会来对从与样复机义买卖总结论变条级学习记录两颗种邻缮"
-simp_list=$(grep -rl "[$SIMP_CHARS]" docs .claude/hooks scripts   --include="*.md" --include="*.sh" --include="*.gd" --include="*.tsv"   --exclude-dir=archive --exclude-dir=_archive 2>/dev/null \n  | grep -v "doc-line-cap.sh")   # ★排掉偵測器自己：它的對照表就是那些字（自我命中＝雜訊）
+# ★★★儀器自檢（2026-09-23，implementer 撞到才發現的，不是我想出來的）：
+#   bracket 運算式在 `LC_ALL=C` 下是【位元組集合】不是【字元集合】——
+#   同一個 pattern、同一棵樹、同一批檔：git grep 預設引擎＝593 檔、GNU grep（UTF-8 locale）＝9 檔。
+#   ⇒ ★位元組模式下【任何中文】都會命中 ⇒ 清單會是幾百檔的假陽性，
+#     而雜訊會讓真正的那幾檔一起被忽略。
+# ★對照串【只含正體字】：UTF-8 locale 下不該命中；命中＝本輪在位元組模式。
+#   ★★三格實測（2026-09-23）：UTF-8 下 rc=1（不命中）／`LC_ALL=C` 下 rc=0（命中）／簡體「滞」rc=0（命中）
+#   ⇒ 這格會因為【假設為假】而變色，不是恆真項。
+_simp_ctrl_trad="為說會來對從與樣複機義買賣總結論變條級學習記錄兩顆種鄰繕"
+if printf '%s' "$_simp_ctrl_trad" | grep -q "[$SIMP_CHARS]"; then
+  echo "[simp-lint] ⚪ 本格【不可判】—— 本輪跑在位元組模式（locale=${LC_ALL:-${LANG:-未設}}）"
+  echo "[simp-lint]   ⇒ 這個 pattern 在位元組模式下會把任何中文都算命中 ⇒ 不列清單"
+  echo "[simp-lint]   ★★這【不是綠】：本輪根本沒有掃過，不得讀成「沒有簡體形近字」。"
+  echo "[simp-lint]   ★修法不在本檔：把它從一個會 export LC_ALL=C 的 runner 裡搬出來，或在那裡改用 grep -P。"
+  exit 0
+fi
+simp_list=$(grep -rl "[$SIMP_CHARS]" docs .claude/hooks scripts   --include="*.md" --include="*.sh" --include="*.gd" --include="*.tsv"   --exclude-dir=archive --exclude-dir=_archive 2>/dev/null | grep -v "doc-line-cap.sh")   # ★排掉偵測器自己：它的對照表就是那些字（自我命中＝雜訊）
 # ★★★2026-09-23：拿掉 `--exclude-dir=measurements`（用戶硬規：正體中文無例外）。
 #   ★而它是【零成本】的：用本閘自己的 include 過濾量過——納入前後都是 13 檔，**零新增**。
 #   ★★因為本閘只掃 *.md *.sh *.gd *.tsv，而那個目錄底下的命中全在 *.txt。
