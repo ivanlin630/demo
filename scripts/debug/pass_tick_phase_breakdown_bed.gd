@@ -187,6 +187,57 @@ func _initialize() -> void:
 			String(mm), int(pass_ph[mm]), int(int(pass_ph[mm]) / maxi(pass_n, 1)),
 			100.0 * float(pass_ph[mm]) / float(maxi(pass_dt, 1))])
 
+	# ── ★★★兩本帳互驗（systems 裁）：不可相加 ≠ 不可互驗 ──
+	#   ★把第一本的 self 沿 PHASE_PARENT 歸到【根】,則：
+	#     根 `loop2.solo` 的子樹  應 ≈ 第二本的 `solo_think`
+	#     其餘所有根的總和        應 ≈ 第二本的 `near.faction_ai`
+	#   ★★不一致 ⇒ ★★★**其中一本在對讀它的人說謊** —— 而那本身就是要回報的發現。
+	#   ★這一格不用多跑一次：兩個數字同一輪都在手上。
+	var by_root: Dictionary = {}
+	for nm4 in selfus:
+		if String(FactionAISystem.PHASE_PARENT.get(nm4, "")) == "*multi": continue
+		var cur: String = String(nm4)
+		var hops: int = 0
+		while hops < 12:
+			var pp: String = String(FactionAISystem.PHASE_PARENT.get(cur, ""))
+			if pp == "" or pp == "*multi": break
+			cur = pp
+			hops += 1
+		by_root[cur] = int(by_root.get(cur, 0)) + int(selfus[nm4])
+	var solo_sub: int = int(by_root.get("loop2.solo", 0))
+	var rest_sub: int = 0
+	for rk in by_root:
+		if String(rk) != "loop2.solo": rest_sub += int(by_root[rk])
+	var sr_solo: int = int(pass_sr.get("solo_think", 0))
+	var sr_fai: int = int(pass_sr.get("near.faction_ai", 0))
+	print("[PP] ── ★★★兩本帳互驗（★不用多跑一輪）──")
+	print("[PP]   loop2.solo 子樹 = %d us ｜ 第二本 solo_think = %d us ｜ 比值 = %.3f" % [
+		solo_sub, sr_solo, float(solo_sub) / maxf(float(sr_solo), 1.0)])
+	print("[PP]   其餘根總和      = %d us ｜ 第二本 near.faction_ai = %d us ｜ 比值 = %.3f" % [
+		rest_sub, sr_fai, float(rest_sub) / maxf(float(sr_fai), 1.0)])
+	print("[PP]   ★門檻是 systems 的欄；我只在比值落在 [0.5, 1.5] 之外時標【需人看】")
+	var r1: float = float(solo_sub) / maxf(float(sr_solo), 1.0)
+	var r2: float = float(rest_sub) / maxf(float(sr_fai), 1.0)
+	if sr_solo == 0 or sr_fai == 0:
+		push_error("[PP][不可判] 第二本缺 solo_think／near.faction_ai ⇒ 互驗沒有對象")
+		fail += 1
+	elif r1 < 0.5 or r1 > 1.5 or r2 < 0.5 or r2 > 1.5:
+		push_error("[PP][需人看] 互驗比值 %.3f／%.3f 落在 [0.5,1.5] 之外 ⇒ ★兩本帳其中一本在說謊" % [r1, r2])
+		fail += 1
+	# ── ★★★陽性對照：證明這個互驗【真的會紅】（★一次就過的檢查沒有鑑別力）──
+	#   ★做法：把 `loop2.solo` 子樹【故意錯歸】到另一邊（＝「有人把 solo 登記成 faction_ai 的兒子」）
+	#   ⇒ 比值必須因此跑出 [0.5, 1.5]。★★用的是【同一份真實資料】,不是我捏的數字。
+	var r2_bad: float = float(rest_sub + solo_sub) / maxf(float(sr_fai), 1.0)
+	var ctrl_fires: bool = (r2_bad < 0.5 or r2_bad > 1.5)
+	print("[PP]   ★陽性對照（把 solo 子樹錯歸給 near.faction_ai）：比值 = %.3f ⇒ %s" % [
+		r2_bad, "會紅 ✔（互驗有鑑別力）" if ctrl_fires else "★不會紅 ✘（互驗對這種錯歸不敏感）"])
+	print("[PP]   ★★而它【只贏 %.3f】—— 這個帶寬對【這一種】錯歸幾乎不敏感。" % absf(r2_bad - 1.5))
+	print("[PP]   ★★★門檻是 systems 的欄；我只回報：現在的 [0.5,1.5] 是【勉強】點火，不是穩穩點火。")
+	if not ctrl_fires:
+		push_error("[PP][FAIL] 陽性對照沒點火 ⇒ ★這個互驗對【歸錯父親】不敏感,綠了也不代表兩本一致")
+		fail += 1
+	cells += 1
+
 	print("[PP] ── ★★★第二本帳：`SimRunner._ph`（★不與上表相加：兩層標籤會互相包含）──")
 	var srk: Array = pass_sr.keys()
 	srk.sort_custom(func(a, b): return int(pass_sr[a]) > int(pass_sr[b]))
@@ -211,9 +262,9 @@ func _initialize() -> void:
 	print("[誠實限]   那個 I/O 在 dt 量完【之後】發生,但會壓到【下一個 tick】的量測")
 	print("[誠實限] ②相位只涵蓋有掛 label 的段落 ⇒ 見涵蓋率那一格,不可當成 100%%")
 	print("[誠實限] ③時間數字只能跟【同一顆 CPU】的數字比（見卷首 [HW] 行）")
-	print("=== pass_tick_phase_breakdown DONE（fail=%d｜到場點名 %d／7）===" % [fail, cells])
-	if cells != 7:
-		push_error("[FAIL] 到場點名 %d／7 ⇒ 有格沒跑到" % cells)
+	print("=== pass_tick_phase_breakdown DONE（fail=%d｜到場點名 %d／8）===" % [fail, cells])
+	if cells != 8:
+		push_error("[FAIL] 到場點名 %d／8 ⇒ 有格沒跑到" % cells)
 		fail += 1
 	quit(1 if fail > 0 else 0)
 
