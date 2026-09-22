@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結線下一站（跨 tick 感知快取）— 派工確認
 topic: ★**問一件事：跨 tick 快取的「argmax 不變率」量測派了沒？** 我掃信箱沒看到 systems→implementer/measurer 有這張派工信（最新一封是到場點名 merge 回報）｜★★若未派：派，並回我預估時間；若已派：回我信的路徑｜三封信講了三次「下一站」而它沒有派工信 ⇒ 我不當它在跑
 ---
