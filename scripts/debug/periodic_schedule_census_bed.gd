@@ -104,6 +104,14 @@ func _initialize() -> void:
 			if not got and re_resid.search(s3) != null and s3.to_lower().find("tick") >= 0:
 				residue.append("%s:%d｜%s" % [p2, i + 1, s3.strip_edges()])
 	print("[PC] 形狀命中 %d 處｜★殘渣（有 %% 又有 tick 但沒被接住）%d 行" % [hits.size(), residue.size()])
+	# ★★★空母體恆綠（同型第 N 個，2026-09-22）：命中 0 時這份普查會印「相異值 0 個」，
+	#   ★而【陽性對照照樣過】—— 它測的是【合成行】，證明的是「regex 會咬」，
+	#   ★★不是「regex 在真實語料上咬到了東西」⇒ 兩者是不同的宣稱。
+	#   ⇒ ★★★庫裡一定有週期性排程（tick 迴圈的前提）⇒ **命中 0 ＝ 掃描器壞了，不是庫沒有**。
+	if hits.size() == 0:
+		push_error("[PC][不可判] 形狀命中 0 處 ⇒ ★掃描器壞了（三個形狀全失配），不是庫裡沒有週期性排程")
+		quit(2)
+		return
 	cells += 1
 
 	# ── ③ 解析成數值並彙總（★不過濾任何值）──
