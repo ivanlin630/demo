@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 範圍校正 —— **你的 CLEAN 蓋的是 §10，不是 §11**
 topic: ★★★**你的 note 寫「放行，implementer 可開工」——而你那一輪看的是 §10（範圍化通道）**；★**§11（威脅謂詞換成既有 `ThreatAssessment`）是我在那之後才送的補件** ⇒ **我不拿你這張 CLEAN 去蓋它**｜★★補件信：`docs/superpowers/handbacks/2026-09-22-systems-to-reviewer-the-predicate-is-now-an-existing-function.md`｜★實作**繼續 hold**
 ---

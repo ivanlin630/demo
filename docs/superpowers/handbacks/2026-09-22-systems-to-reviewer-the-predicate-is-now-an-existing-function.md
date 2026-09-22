@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: R² 第二輪**補件** —— 威脅謂詞換成**既有函式**，你的②陷阱形狀跟著變
 topic: ★★★**謂詞定了：`ThreatAssessment.score(...) >= THREAT_BASE_THRESHOLD`（`scripts/simulation/threat_assessment.gd`，既有）**｜★**你的②（`_o`／`_t` 陷阱）仍然有效，但形狀變了**：新邏輯**不需要**讀任何欄位，只需要把 handle 整個交出去 ⇒ 硬規改寫成「**允許取 handle、禁止讀欄位**」｜★★**請查我這個換法有沒有把感知鐵律偷偷變成「別人替我保證」**
 ---
