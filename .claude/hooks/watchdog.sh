@@ -223,13 +223,18 @@ last_class="OK"; last_fire=0; run_since=0; run_src=""; run_maxrun_ok=0; run_true
 #   ★而【孤兒】的真判準是「wrapper 已死」—— 那是上面 `kill -0` 逐進程在判的事，
 #     **數量本身分不出來** ⇒ 這格只留數字給人對照，不下結論。
 _orphan_census() {
-  # ★★★**普查必須排除自己**：這支查詢的 CommandLine 裡面就含著
-  #   'watchdog.sh'/'inbox-watch.sh'/'tg_poll.py' 這三個字串 ⇒ **它會把自己數進去**。
-  #   ★實測：raw − net ＝ **固定 4 支**（三個名字都一樣 ⇒ 就是查詢本身）。
-  #   ★★同一形態 implementer 在週期普查上先踩過（床把自己的合成對照行當成真週期）
-  #   ⇒ ★★★**普查類一律先問：我的樣本裡有沒有我自己？**
+  # ★★★**謂詞要落在【那個東西是什麼】，不是【哪裡出現過那個字】**（2026-09-22）
+  #   舊版 `CommandLine -like '*inbox-watch.sh*'` ⇒ **19**（含 wrapper 殼與只是提到它的 shell）
+  #   ★新版只數【script 當 argv】那一種形狀 ⇒ **6**，而同時 ALIVE 角色也是 **6**
+  #   ★★這是跟【外部來源】（lock 租約）比，不是自己跟自己比 ⇒ 它真的判得出孤兒
+  #   ★★★判法：**REAL-WATCHERS > ALIVE-ROLES ⇒ 差額就是孤兒**（只印，人來判）
   command -v powershell.exe >/dev/null 2>&1 || return 0
-  PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "foreach (\$n in @('watchdog.sh','inbox-watch.sh','tg_poll.py')) { \$c = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { \$_.CommandLine -like ('*' + \$n + '*') -and \$_.CommandLine -notlike '*Get-CimInstance*' }).Count; Write-Output ('[watchdog v4] PROC-CENSUS ' + \$n + ' = ' + \$c + '  (1 chain = 3 procs; baseline = chains x 3)') }" 2>/dev/null || true
+  local _pscmd
+  _pscmd='$w = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match [regex]"bash\.exe.?\s+\S*inbox-watch\.sh" }); Write-Output ("REAL-WATCHERS = " + $w.Count)'
+  PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "$_pscmd" 2>/dev/null || true
+  local _alive
+  _alive=$(bash "$HOOKD/peers.sh" --tsv 2>/dev/null | grep -c "ALIVE")
+  echo "[watchdog v4] ALIVE-ROLES = ${_alive}  <-- compare with REAL-WATCHERS above"
 }
 _orphan_census
 WRAPPER_PID="$PPID"   # ★開場記下【起我的那個 wrapper】
