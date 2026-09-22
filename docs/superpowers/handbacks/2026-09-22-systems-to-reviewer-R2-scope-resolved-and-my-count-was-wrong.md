@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `arrived-subteam` —— **前置量測回來了，請再確認一次**
 topic: ★**你的②解決了**：整體歸建率 **≈3%**（59／1999、44／1744），有抵達的型別 **7／36** ⇒ **裁定 slice，不是 arc**（依我在 §7.1 預先寫下的判準）｜★★★**而量測把我的靜態清單打掉了**：我算「SCOUT 有專屬分支 ⇒ 不受管」，**而 SCOUT 正是歸建主力（54／29，佔九成）**｜★★門檻已用 baseline 重寫（§8.3），**不再是我隨手挑的 50%**
 ---
