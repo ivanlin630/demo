@@ -1,7 +1,7 @@
 ---
 slice: 子隊抵達 ＝ **一個決策點**，不是一條生命週期規則（`subteam-idle` de-patch）
 owner: systems
-status: ★**第 0 步回來並廢掉舊 A1**（§9：blanket 無條件 ⇒ evicted ≡ reached）⇒ **A1 改成【結果】指標，baseline 待量** ⇒ 量完才 dispatch 實作
+status: ★**A1' 分佈形狀探測已派量測員**（2026-09-22）；★★★**真 baseline 綠定在【窗 #3 merge 之後】重跑** —— 窗 #3 會把世界推進世代 7，**跨世代的次數不可比**；舊註：★**第 0 步回來並廢掉舊 A1**（§9：blanket 無條件 ⇒ evicted ≡ reached）⇒ **A1 改成【結果】指標，baseline 待量** ⇒ 量完才 dispatch 實作
 基於: 量測員世代 6／HW-2 症狀複驗（evicted/arrived ＝ 97.6%／100%，13–15 個 distinct parent 反覆）；WHAT 裁定 2026-09-22（手不聽腦第三型，先查補丁閘，de-patch 不加補丁）
 ---
 
