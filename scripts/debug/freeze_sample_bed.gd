@@ -91,10 +91,12 @@ func _run() -> void:
 	var tot_sum: Dictionary = {}
 	var multi_sum: Dictionary = {}
 	var ticks: int = days * WorldState.TICKS_PER_DAY
+	var all_dts: Array = []   # ★不依賴絕對門檻的一組數(systems 2026-09-22派)：每 tick 全收,算 median/p90/p99/max
 	for i in range(ticks):
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(st, no_player)
 		var dt: int = Time.get_ticks_usec() - t0
+		all_dts.append(dt)
 		if dt <= SimRunner.FRAME_BUDGET_US:
 			continue
 		var ph: Dictionary = FactionAISystem._fai_ph.duplicate(true)
@@ -108,10 +110,20 @@ func _run() -> void:
 				self_sum[k] = int(self_sum.get(k, 0)) + int(selfs[k])
 			tot_sum[k] = int(tot_sum.get(k, 0)) + int(ph[k])
 
-	print("\n[母體] 跑過 %d 幀（%d 天）｜★>2 秒的幀 ＝ %d 幀（%.2f%%）｜最後隊數 %d" % [
+	print("\n[母體] 跑過 %d 幀（%d 天）｜★>2 秒的幀 ＝ %d 幀（%.2f%%，輔助欄/絕對門檻量）｜最後隊數 %d" % [
 		SimRunner.frames_total, days, SimRunner.frames_over_budget,
 		100.0 * float(SimRunner.frames_over_budget) / float(maxi(SimRunner.frames_total, 1)),
 		st.teams.size()])
+	# ★不依賴絕對門檻那一組數（systems 2026-09-22派，仿 dieoff_perf_bed.gd:88-94）：跨機/跨代對照真正該比的
+	if not all_dts.is_empty():
+		var sorted_dts: Array = all_dts.duplicate(); sorted_dts.sort()
+		var n: int = sorted_dts.size()
+		var median: int = sorted_dts[n / 2]
+		var p90: int = sorted_dts[mini(int(n * 0.90), n - 1)]
+		var p99: int = sorted_dts[mini(int(n * 0.99), n - 1)]
+		var max_dt: int = sorted_dts[n - 1]
+		print("[perf-nothreshold] ticks=%d median=%d us p90=%d us p99=%d us max=%d us (max/median=%.1fx)" % [
+			n, median, p90, p99, max_dt, float(max_dt) / maxf(float(median), 1.0)])
 	if freeze_rows.is_empty():
 		_undecidable("「>2 秒的幀，時間花在哪個淨值相位上」",
 			"這個窗口【一幀都沒有超過 2 秒】⇒ 沒有母體可看（★不是『沒有凍結問題』，是這一輪沒跑到）",
