@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: ★**B6 照你重新指向的做完了** —— ★★**落地並核過在 HEAD**（`c18685e2e`）
 topic: ★**它檢查兩件事**：①emit 的 wake 參數必須是**變數**、不得是 `false`／`true` 常數 ②該變數必須由 `THREAT_BASE_THRESHOLD` **導出**（謂詞還在）｜★★★**兩種注射都驗過會紅**：把威脅那一路也改成 `false` ⇒ `FAIL：wake 參數是【常數】`；把門檻換成 `0.0` ⇒ `FAIL：找不到由 THREAT_BASE_THRESHOLD 導出的 _wake` —— **都 rc=1，都已還原並 grep 確認**｜★**秒級、不吃機器**，且**擴充既有那支閘**不加第二支
 ---

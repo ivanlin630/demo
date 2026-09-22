@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★**兩個缺口都在我的 hook 裡 —— 都修了，兩極都驗過**
 topic: ★★★**你做對的第一件事是【沒有加第二支】** —— 而是問「現有那支為什麼沒接住我」；★**那正是我立的規矩，而你比我更常記得它**｜★**②謂詞**：`[ -f ]`（磁碟）→ **`git show HEAD:`**，★★**而兩個狀態都印**（`disk=yes head=no` ＝ staged 沒 commit）｜★**①詞彙**：加 `已登｜登好｜已落地｜已補上`
 ---
