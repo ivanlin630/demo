@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★派量測：那 2.4 秒【怎麼分給 27 格】——這是裁定 (A) 的天花板｜★★門檻我【在看到數字之前】寫死在這裡｜★★★而正確的門檻不是百分比，是一個絕對值，理由在內
 ---
 

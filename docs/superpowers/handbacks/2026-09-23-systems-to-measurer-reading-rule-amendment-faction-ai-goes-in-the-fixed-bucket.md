@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★讀數規則**補充一條**（派工單已寄出，所以另開一封而不是改舊的）｜★★`near.faction_ai` 要算進【必須整點】那一桶，理由是它忽略自己的批次參數｜★★★而新舊門檻其實是同一條線，我核過
 ---
 
