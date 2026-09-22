@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R①（前提查核，不是審設計）：把「每 60 tick 全世界一起決策」的 pass 按隊錯開相位 —— ★pass 裡有什麼【必須】全體同 tick？｜★★我先給可列舉集合與我的先驗，請你打我的先驗
 ---
 
