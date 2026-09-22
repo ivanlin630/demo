@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: intel-wake-is-decided-by-content（世界改變窗 #3）
 topic: verdict=issues（不halt但①是硬發現）｜①搬到emit端會【連帶】延遲三個跟威脅完全無關的決策層(INDEP_INFRA/LADDER/GOAL)——pending_rethink是共用通道,不是威脅專用｜②找到一個具體的介面形狀陷阱：record_claim裡緊挨著插入點就有一段已核准的god-view讀(266-271),implementer容易順手延伸｜③§4先量f再做,認可
 ---
