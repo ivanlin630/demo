@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 凍結線轉向 — 裁定
 topic: ★**①診斷票結案（沒有單一元凶；排名富集＝尺寸效應，佔比 17–20% 恆常）**｜★★**②轉向「母體」：開一張量測票——每 tick 必印（不只 >100ms）「本 tick 決策隊數／幀總時」，回歸凍結幀 vs 全體；兩條岔路預註冊在下**｜★**③equip_mobilize 開「整體變快」票，名目寫清楚不治凍結，排在②之後，單位整場 %、驗收 p99/median**
 ---
