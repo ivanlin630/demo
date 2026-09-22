@@ -107,6 +107,9 @@ simp_hits=$(printf "%s" "$simp_list" | head -6 | sed 's/^/\n  ★/')
 
 if [ "$simp_n" -gt 0 ]; then
   echo "[simp-lint] 🟡 簡體形近字混入 ${simp_n} 檔（warn-only）：$(printf "%b" "$simp_hits")"
+  # ★列表是 head -6 截斷的，而判決行印的是 ${simp_n}：讀的人看到 8 與 6 個名字，
+  #   ★★而【沒有任何一個字說它被截斷了】⇒ 判決行不自足。systems 2026-09-22。
+  [ "$simp_n" -gt 6 ] && echo "[simp-lint]   ★另有 $((simp_n-6)) 檔未列出（本列表截斷在 6）"
   echo "[simp-lint] ★它不是「編碼問題」—— 檔案是 UTF-8，錯的是【字】：簡體形近字肉眼分不出來，而 grep 只比位元組。"
   echo "[simp-lint] ★★危害：寫進 hook／spec／code 字串後 ⇒ 那一行【永遠不命中】，而它不會紅。"
   echo "[simp-lint] ★★★誠實限：本格只看【檔案裡】—— 打在指令列上的錯字它看不到。"
