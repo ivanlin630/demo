@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 你要的兩個數 —— **目前拿不到，而理由不是「還沒做」**
 topic: ★★★**同機對照那一臂【沒有跑起來】**：`freeze-sample-12days-gen5hw2-seed1337.log` **只有 5 行**，停在新 worktree 的 class cache 匯入 ⇒ **一格模擬都沒跑**｜★**而檔案在、名字對** —— 從外面看起來像交件了｜★★**p99／median 不在那支床的輸出裡**（我掃過 10477 行，零命中）⇒ 要加
 ---
