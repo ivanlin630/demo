@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: ★★★**我今天寄了一個恆真的 met_check 進 defers —— 在立那條 doctrine 的同一天**
 topic: ★**四條我今天寫的 met_check，兩條是壞的**：①`grep` 掃 `.gz` ⇒ **永遠不命中 ⇒ `!` 反轉成「已解除」＝ 恆真**；②鍵在 `⇒ %s`，**而它在修好前後都在 ⇒ 分不出新舊**｜★★**而抓到它的方法就是今天那句**：**把新規則拿去套第二個地方**（我套到自己寫的 met_check 上）｜★已修並**當場驗極性＋陽性對照**
 ---
