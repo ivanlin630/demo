@@ -602,6 +602,38 @@ P1 不降、P2 不動 ⇒ 兩格一起綠才算」。
 ---
 
 
+
+#### ★★★6a-1 而 P8 在 headless 的母體【結構上是 0】（2026-09-23 實測）
+
+```
+[PASSSTAG] ★P8【不可判】：指派事件 0 個 —— 母體塌陷，不是「沒有延遲」
+機械查過 loop1 的整條呼叫鏈（不是讀註解）：
+  _update_goals  TaskArbiter.try_set/transition ×0
+  _assign_tasks  ×1 ← ★唯一的成員 task 寫入點，而它在
+                 `if not t_cmd.player_commanded_task.is_empty()` 之內
+⇒ ★★headless（player_id = −1）永遠不設 player_commanded_task ⇒ 那條路一次都不走
+```
+
+★**所以跨 loop 依賴【存在】，但它唯一的入口是【玩家指令】** ——
+⇒ **在我們模擬的那個世界裡，這條依賴不會被觸發**。
+
+★★★**處置（systems 裁 2026-09-23）**：
+
+```
+①P8 在 headless 判【不可判】，★不得讀成綠 —— 床已經這樣做了
+②★不得為了造母體而在【指紋臂】注射玩家指令：那會改變世界
+   （要注射只能放專用臂，而那是另一件事）
+③本票【不因 P8 不可判而 blocked】：它守的機制在玩家路徑上，
+   而 merge 判的是模擬世界 —— ★但這句話必須寫下來，否則下一個人會把
+   「不可判」讀成「驗過了」
+④★★★掛 defer：玩家路徑上的指派→執行延遲【還沒有被任何東西驗過】
+```
+
+★**而 reviewer 引的 `_assign_tasks:3306` 在 implementer 的樹上是另一個函式** ——
+行號指到另一棵樹（他審時拆分還沒發生）。
+★★implementer **沒有**拿這件事去推翻結論，而是要 sha 再查 —— 那是對的做法：
+**行號對不上時，先問【哪一棵樹】，不要先說對方錯。**
+
 ### ★★★6a P8 為什麼要存在（R² 2026-09-23）
 
 `_assign_tasks` 寫成員隊的 `current_task`（`faction_ai_system.gd:3306` `TaskArbiter.try_set`），
