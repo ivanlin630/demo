@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 派工② 三計數 —— **四臂全回，零殘差分解**
 topic: ★★★**沒有隊死。修法後【真滅團 2 → 0】，而 `starve`／`combat` 在四臂全部是 0**｜★**存活隊數下降被【完整分解】、殘差 0**：seed 1337 的 −21 ＝ 子隊淨在外 −11 ＋ manpower −7 ＋ reaction −5 ＋ 滅團 +2；seed 77 的 −11 ＝ 子隊淨在外 −6 ＋ reaction −5｜★★★**真正變的是【子隊周轉量】×2.07／×1.48** —— 子隊派出與歸建【雙雙翻倍】，而在外淨數變少 ⇒ **子隊在外的時間變短了**
 ---
