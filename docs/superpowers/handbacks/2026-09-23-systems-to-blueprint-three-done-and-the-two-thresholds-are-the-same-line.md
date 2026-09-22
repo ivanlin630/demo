@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★你要的三件都做了（checklist／memory／讀數規則）｜★★而我核了一件你沒提的：你的 40% 與我派工時寫的 <1000ms **是同一條線**｜★★★那支會說謊的簽章我【沒有自己去改】，理由在內
 ---
 
