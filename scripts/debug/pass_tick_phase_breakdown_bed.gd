@@ -326,16 +326,17 @@ func _initialize() -> void:
 			else:
 				ceil_missing.append(label)
 				print("[PP]   %-46s [%s] = ★找不到（丙：不可判，未量到）" % [label, tag])
-		var ceil_ms: float = float(ceil_sum) / 1000.0
-		print("[PP] ★7格對應的5個可量標籤合計 = %d us（%.1f ms），每 pass 平均 %.1f ms" % [
-			ceil_sum, ceil_ms, ceil_ms / float(pass_n_over2s)])
-		print("[PP]   ★誠實限：此合計是【超集】(含 strategic_move/outpost_tick/ambush 三個非目標格的時間)，")
+		var ceil_ms_total: float = float(ceil_sum) / 1000.0   # ★跨 pass_n_over2s 個tick的累計,不是判準用的那個數
+		var ceil_ms_per_pass: float = ceil_ms_total / float(pass_n_over2s)   # ★★判準比的是這個(單一pass tick該花多少)
+		print("[PP] ★7格對應的5個可量標籤累計(跨%d個>2s pass tick) = %d us（%.1f ms），★判準用【每 pass 平均】= %.1f ms" % [
+			pass_n_over2s, ceil_sum, ceil_ms_total, ceil_ms_per_pass])
+		print("[PP]   ★誠實限：每 pass 平均是【超集】(含 strategic_move/outpost_tick/ambush 三個非目標格的時間)，")
 		print("[PP]     ⇒ 若超集 < 1000ms，真正7格子集必然也 < 1000ms(甲成立更穩)；")
 		print("[PP]     ⇒ 若超集 ≥ 1000ms，不能反推子集也 ≥（丙的訊息還在：propagate/intel/faction_snapshot本身不可判）")
-		if ceil_missing.is_empty() and ceil_ms < 1000.0:
-			print("[PP] ★★★判準(甲)：合計 < 1000ms ⇒ (A) 的天花板【夠】，p99<1s 摸得到")
-		elif ceil_ms >= 1000.0:
-			print("[PP] ★★★判準(乙)：合計 ≥ 1000ms ⇒ (A) 也摸不到門檻")
+		if ceil_missing.is_empty() and ceil_ms_per_pass < 1000.0:
+			print("[PP] ★★★判準(甲)：每pass平均 < 1000ms ⇒ (A) 的天花板【夠】，p99<1s 摸得到")
+		elif ceil_ms_per_pass >= 1000.0:
+			print("[PP] ★★★判準(乙)：每pass平均 ≥ 1000ms ⇒ (A) 也摸不到門檻")
 		print("[PP]   ★丙類(找不到對應標籤)：%d 格：%s" % [
 			ceil_missing.size(), ", ".join(ceil_missing) if not ceil_missing.is_empty() else "（無，本次全部找到，但2組各3/3格黏一起不可拆）"])
 	# ★不計入 cells／9 到場點名(那組是既有9格的自檢基準,本區塊是額外派工,不動原有計數)
