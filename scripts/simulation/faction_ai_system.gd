@@ -1031,6 +1031,10 @@ static func _reset_cross_run() -> Dictionary:
 	if not _mk_verify_rows.is_empty(): cleared["FactionAISystem._mk_verify_rows"] = _mk_verify_rows.size()
 	if not _churn_last.is_empty(): cleared["FactionAISystem._churn_last"] = _churn_last.size()
 	if not _forage_watch.is_empty(): cleared["FactionAISystem._forage_watch"] = _forage_watch.size()
+	# ★P8 的量測表也要登記：床裡手動 clear 是【清單保證】，登記表才是【構造保證】。
+	#   ★不登記的話，下一支跑兩個世界的床會把【跨世界的差值】當成延遲 ⇒ 巨大、看起來像真缺陷。
+	if not _p8_assigned.is_empty(): cleared["FactionAISystem._p8_assigned"] = _p8_assigned.size()
+	_p8_assigned.clear()
 	if _mk_path != "other": cleared["FactionAISystem._mk_path"] = _mk_path
 	_a2b_remote_tribute_payers.clear()
 	_fai_ph.clear()
@@ -1243,6 +1247,9 @@ func evaluate_factions(state: WorldState, faction_ids: Array) -> void:
 # ★★我【沒有】去證明「零活成員的派系不存在」——證不如構造：兩種情況都接住，
 #   那個問題就不影響正確性。（而今天批次＝全部隊 ⇒ ③在今天等價於舊行為。）
 # ★★★散相位落地後③要重新檢視：那時「不在這批」與「不存在」仍然是兩件事，而②已經分開它們。
+# ★P8：team_id → loop1 指派它的 tick（量測層，不進 TeamData／指紋）。
+static var _p8_assigned: Dictionary = {}
+
 static func _faction_in_batch(state: WorldState, f, batch: Dictionary) -> bool:
 	var has_live: bool = false
 	for mid in f.member_team_ids:
@@ -1418,6 +1425,12 @@ func _evaluate_loop2_teams(state: WorldState, team_ids: Array) -> void:
 	for tid in state.teams:
 		if WorldState.pass_stagger_enabled and not _bset.has(tid):
 			continue
+		# ★P8：這一隊被 loop1 指派過嗎？是的話記【指派到執行】的延遲。
+		if Probe.enabled and _p8_assigned.has(int(tid)):
+			var _d: int = state.world.current_tick - int(_p8_assigned[int(tid)])
+			_p8_assigned.erase(int(tid))
+			Probe.bump("p8.delay.%d" % _d)
+			Probe.note("p8.delay_max", float(_d))
 		var team: TeamData = state.teams[tid]
 		# 野獸(beast_kind!="")不進決策迴圈：非-agent 無「腦」不該經引擎的秤（憲法決策模型）。
 		# 生命週期(spawn/combat/reward/cleanup)全在 encounter/npc_combat/beast_system，不評 strategy/solo/infra。
@@ -3382,6 +3395,15 @@ func _assign_tasks(state: WorldState, f) -> void:
 		if loyalty_cmd >= 0.4:
 			TaskArbiter.try_set(state, t_cmd, t_cmd.player_commanded_task,
 				t_cmd.move_target, TaskArbiter.PRIO_PLAYER, "player_command")
+			# ★★★P8 儀器（reviewer 加的驗收格，2026-09-23）：
+			#   loop1 在這裡寫【成員隊】的 current_task，而 loop2 的
+			#   _evaluate_independent_strategy 成員分支會【讀】它
+			#   ⇒ ★拆開之後，相位早於自己勢力的隊【用上一小時的指派行動】。
+			# ★★而【它應該會自我修正】是沒有證據的話 —— 純靜態讀 code 判斷不了
+			#   會不會真的卡死 ⇒ ★★★把它變成一個【會紅的數】。
+			if Probe.enabled:
+				_p8_assigned[int(tid_cmd)] = state.world.current_tick
+				Probe.bump("p8.assigned")
 		else:
 			UnrestBank.add(t_cmd, 1, "faction")
 			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])

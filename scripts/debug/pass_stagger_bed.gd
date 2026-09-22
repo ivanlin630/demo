@@ -76,6 +76,18 @@ func _initialize() -> void:
 	_ok(clamp_ratio <= 3.0,
 		"P3 任一隊 clamp 觸發率 <= 母體平均 x3（實測 %.2f）★問的是有沒有系統性偏袒同一批隊,不是分佈均不均" % clamp_ratio)
 	# ★P1／P6：樁關掉時所有隊擠在相位 0 ⇒ 尖峰必須回來
+	# ★★★P8（reviewer 加的）：loop1 指派成員 → 該隊下一次 loop2 執行的延遲。
+	#   ★【它應該會自我修正】是沒有證據的話 ⇒ 把它變成一個會紅的數。
+	#   ★★母體：指派事件數 > 0，否則【不可判】不是綠。
+	var p8_n: int = int(stag["p8_assigned"])
+	var p8_max: int = int(stag["p8_max"])
+	var p8_left: int = int(stag["p8_left"])
+	print("[PASSSTAG] ★P8：指派事件=%d  延遲 p100=%d tick  結束時未執行=%d（判準：p100 <= 119）" % [
+		p8_n, p8_max, p8_left])
+	if p8_n <= 0:
+		print("[PASSSTAG] ★★P8【不可判】：指派事件 0 個 ⇒ 母體塌陷，不是【沒有延遲】")
+	else:
+		_ok(p8_max <= 119, "P8 指派到執行的延遲 p100=%d <= 119 tick（小於 2 個 cadence）" % p8_max)
 	_ok(int(stub["peak"]) > int(stag["peak"]) * 3,
 		"P6 陽性對照：樁關掉 ⇒ 尖峰回來（stub %d vs stag %d）" % [int(stub["peak"]), int(stag["peak"])])
 
@@ -96,6 +108,7 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 -- 臂：%s --" % ("錯開（樁開）" if stagger else "★對照（樁關 ⇒ 全員整點）"))
 	WorldState.pass_stagger_enabled = stagger
 	SimRunner._pass_gap_last.clear()
+	FactionAISystem._p8_assigned.clear()   # ★兩臂之間要清，否則第二臂會拿到第一臂的殘留
 	seed(sd)
 	Probe.reset(); Probe.arm()
 	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % cfg)
@@ -201,7 +214,10 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 		tot_cost += float(Probe.amounts.get("syscost." + String(nm2), 0.0))
 	print("   ★總量：Γcalls=%d  Γbatch_sum=%d  Γcost=%.1f ms｜世界：teams=%d persons=%d" % [
 		tot_calls, int(round(tot_batch)), tot_cost / 1000.0, st.teams.size(), st.persons.size()])
-	return {"calls": calls, "tot_calls": tot_calls, "tot_batch": tot_batch, "tot_cost": tot_cost,
+	var _p8left: int = FactionAISystem._p8_assigned.size()
+	return {"p8_assigned": int(Probe.counts.get("p8.assigned", 0)),
+		"p8_max": int(Probe.peaks.get("p8.delay_max", 0.0)), "p8_left": _p8left,
+		"calls": calls, "tot_calls": tot_calls, "tot_batch": tot_batch, "tot_cost": tot_cost,
 		"persons": st.persons.size(),
 		"gaps": gaps, "peak": peak, "teams": per_team_total.size(),
 		"clamp_worst": worst, "clamp_mean": mean_rate,
