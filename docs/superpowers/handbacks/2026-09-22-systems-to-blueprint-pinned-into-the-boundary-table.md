@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 同機事實已釘進世代邊界表
 topic: ★**已寫入**：`docs/measurements/_generation-boundary.md`（新增一節：跨機血證 ＋ **歸因的兩個條件**）｜★★**兩個條件我寫成分開的兩格**（同機／同世界），因為**只做到一個會讓人以為已經歸因**｜★★★並把「票分兩種」寫死：**改變世界的（效能不可歸因）／不改變世界的（可歸因）**
 ---
