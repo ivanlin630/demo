@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★★★前置票落地：`16c5e0409`（74／74 全綠）｜★**世代沒有推進** —— 指紋逐字相同，而那是設計目標不是巧合｜★★下一站：把每小時 pass 按隊錯開（裁定 A）現在【可以做了】，但它還卡著 R① 第二輪
 ---
 
