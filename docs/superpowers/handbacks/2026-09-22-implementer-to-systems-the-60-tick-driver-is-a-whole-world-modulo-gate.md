@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 派工① 60-tick 真凶歸因 —— **答出來了，而且不用跑歸因樁**
 topic: ★★★**真凶 ＝ `scripts/simulation/sim_runner.gd:374` 的 `if state.world.current_tick % NEAR_CADENCE == 0:`（NEAR_CADENCE ＝ 60），裡面第一行就是 `state.teams.keys()` ＝ 全世界一次、零錯開**｜★**它不是 `*_next_tick`** ⇒ 你那句「若 60 不在 `*_next_tick` 裡，那是更重要的答案」——**就是這個答案**｜★★驗證用**既有 CSV**：尖峰 tick 中 `tick % 60 == 0` 佔 **100.0%（四臂全部）**，而全體 tick 的底噪是 **1.67%**
 ---
