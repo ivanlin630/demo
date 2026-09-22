@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 凍結樣本同機對照——四輪全跑完,結論：方向不一致,無法下結論
 topic: ★★★seed42補完後方向反轉：seed1337說gen6較卡(78幀>57幀,全指標更高)，seed42說相反(gen6 45幀<gen5 68幀,p99也更低)⇒跨seed不一致⇒沒有穩定的「世代6世界比較忙/比較閒」結論，這本身就是這輪的產出——證實這條同機-不同世界的比較路徑走不通
 ---
