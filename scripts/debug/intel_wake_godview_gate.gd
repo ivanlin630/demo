@@ -99,6 +99,39 @@ func _initialize() -> void:
 		return
 	cells += 1
 
+	# ── ★★★B6（systems 2026-09-22 重新指向）：**抑制必須由【內容】決定，不得是常數** ──
+	#   ★原本的 B6 是「把威脅也折進排定 ⇒ B2 惡化」,而 B2 已降級 ⇒ 它的目標消失了。
+	#   ★★新目標：**構造檢查** —— emit 的 wake 參數必須是【由威脅判定導出的變數】,
+	#     而不是 `false`／`true` 這種常數。★★★把它改成常數 ⇒ 這一格必須紅。
+	#   ★它是秒級的靜態檢查,不吃機器 —— 比舊版好。
+	var emit_line: String = ""
+	var wake_asg: String = ""
+	for bi in range(fn_start, fn_end):
+		var bl: String = String(lines[bi])
+		var bc: String = bl
+		var bh: int = bc.find("#")
+		if bh >= 0: bc = bc.substr(0, bh)
+		if bc.find("WorldEvents" + ".emit(") >= 0 and bc.find("intel_arrived") >= 0:
+			emit_line = bc.strip_edges()
+		if bc.find("_wake" + " = ") >= 0 and bc.find("THREAT_BASE_THRESHOLD") >= 0:
+			wake_asg = bc.strip_edges()
+	print("[GV] ★★★B6 構造檢查（抑制必須由內容決定,不得是常數）")
+	print("[GV]   emit 那一行：%s" % (emit_line if emit_line != "" else "★找不到"))
+	print("[GV]   _wake 的來源：%s" % (wake_asg if wake_asg != "" else "★找不到"))
+	var b6_ok: bool = true
+	if emit_line == "":
+		push_error("[GV][不可判] 找不到 intel_arrived 的 emit ⇒ 錨腐爛,不是沒有違規")
+		b6_ok = false
+	elif emit_line.find(", false)") >= 0 or emit_line.find(", true)") >= 0:
+		push_error("[GV][FAIL] B6：emit 的 wake 參數是【常數】⇒ ★抑制不再由內容決定")
+		b6_ok = false
+	if wake_asg == "":
+		push_error("[GV][FAIL] B6：找不到由 `THREAT_BASE_THRESHOLD` 導出的 `_wake` ⇒ ★謂詞不見了")
+		b6_ok = false
+	if b6_ok: print("[GV]   ⇒ ✔ wake 參數是變數且由威脅門檻導出（emit 帶變數 ＋ 賦值含 THREAT_BASE_THRESHOLD）")
+	else: fail += 1
+	cells += 1
+
 	print("[GV] 掃到違規 %d 處（★掃的是 `record_claim` 內、gate-ok 區塊外）" % hits.size())
 	for h in hits: print("[GV]   ★%s" % String(h))
 	if hits.size() > 0:
@@ -154,9 +187,9 @@ func _initialize() -> void:
 	cells += 1
 
 	print("[GV] ★★誠實限：本閘只掃 `record_claim`；威脅判定若被搬到別的函式，★錨會失效而畫面是綠的")
-	print("=== INTEL-WAKE-GODVIEW-GATE %s（fail=%d｜到場點名 %d／6）===" % [
+	print("=== INTEL-WAKE-GODVIEW-GATE %s（fail=%d｜到場點名 %d／7）===" % [
 		"PASS" if fail == 0 else "FAIL", fail, cells])
-	if cells != 6:
-		push_error("[GV][FAIL] 到場點名 %d／6 ⇒ 有格沒跑到" % cells)
+	if cells != 7:
+		push_error("[GV][FAIL] 到場點名 %d／7 ⇒ 有格沒跑到" % cells)
 		fail += 1
 	quit(1 if fail > 0 else 0)
