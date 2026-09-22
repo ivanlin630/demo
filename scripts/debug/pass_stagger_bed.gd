@@ -176,7 +176,11 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 	for nm in names:
 		var c2: int = int(calls[nm])
 		var avg: float = float(bsum.get(nm, 0.0)) / float(maxi(c2, 1))
-		print("     %-18s calls=%-7d 平均批次=%.1f" % [String(nm), c2, avg])
+		# ★★★印【總和】不是只印平均：守恆的宣稱若用【平均×次數】回推，
+		#   而平均是四捨五入過的 ⇒ 同一份資料 1.05 與 1.1 差 5.8%。
+		#   ★總和是【直接量到的】，平均是從它算出來的 ⇒ 要比就比總和。
+		print("     %-18s calls=%-7d batch_sum=%-8d 平均=%.2f" % [
+			String(nm), c2, int(round(float(bsum.get(nm, 0.0)))), avg])
 	return {"calls": calls, "gaps": gaps, "peak": peak, "teams": per_team_total.size(),
 		"clamp_worst": worst, "clamp_mean": mean_rate,
 		"dup": int(Probe.counts.get("pass.dup_in_cycle", 0)),
