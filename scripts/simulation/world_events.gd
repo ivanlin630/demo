@@ -72,6 +72,11 @@ static func emit(state: WorldState, kind: String, subjects: Array) -> void:
 	if Probe.enabled:
 		Probe.bump("t0.emit")
 		Probe.bump("t0.emit." + kind)
+		# ★★★DIAG（2026-09-22）：只多【一個維度】——這個 emit 落在 pass tick 還是非 pass tick。
+		#   ★`t0.emit.<kind>` 這顆早就在數了 ⇒ 不另造第二套計數,只補這一維
+		#   （★★造東西前先看誰已經在做這件事；第二套從出生就開始漂）。
+		Probe.bump("t0.emit.%s.%s" % [kind,
+			("pass" if state.world.current_tick % SimRunner.NEAR_CADENCE == 0 else "nonpass")])
 		# ★★★emit 當下把【主體隊 + 它的勢力 + 有沒有領袖】一起記下來。
 		#   ★為什麼要記 faction：勢力層那五支的 actor 是【勢力】而 subjects 是【隊】
 		#     ⇒ 不帶 faction 就 join 不起來，★★而 join 不起來會被誤讀成「沒人醒」。

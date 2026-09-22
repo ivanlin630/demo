@@ -8079,6 +8079,21 @@ func tick_solo_think(state: WorldState) -> void:
 		#     而那正是 spec 護欄①明文禁止的事。
 		var _due: bool = state.world.current_tick >= team.solo_think_next_tick
 		var _woke: bool = WorldEvents.is_pending(state, team.team_id)
+		# ★★★DIAG tap（守不變量 #7：`Probe.enabled` 後只記帳、零語意）：
+		#   問題＝「solo_think 每 tick 都跑、相位也散開了，為什麼時間 96% 落在 pass tick 上」。
+		#   ★掛在 `continue` 【之前】⇒ 母體完整（skip 那一格也要有數,否則比率沒有分母）。
+		#   ★★四格不是兩格：due_only／woke_only／both／skip —— ★★★而「both」被吞掉的話,
+		#     「事件喚醒造成的」與「本來就到期」會看起來一樣多。
+		if Probe.enabled:
+			var _pc: String = "pass" if state.world.current_tick % SimRunner.NEAR_CADENCE == 0 else "nonpass"
+			if _due and _woke: Probe.bump("solo.fire.both." + _pc)
+			elif _due: Probe.bump("solo.fire.due_only." + _pc)
+			elif _woke: Probe.bump("solo.fire.woke_only." + _pc)
+			else: Probe.bump("solo.fire.skip." + _pc)
+			if _woke:
+				# ★喚醒來源＝【誰】把它叫起來的 —— 這才是「pass 產生事件」這個假設的直接證據
+				var _ws: String = WorldEvents.pending_source(state, team.team_id)
+				Probe.bump("solo.wake.src.%s.%s" % [(_ws if _ws != "" else "none"), _pc])
 		if not _due and not _woke:
 			continue
 		# ★驗收②的新 tap：掛在【到期檢查之後】—— 只在真的往下跑思考時 bump。
