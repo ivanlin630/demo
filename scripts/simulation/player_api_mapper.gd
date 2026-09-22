@@ -794,7 +794,34 @@ static func map_global_messages(state: WorldState, n: int = 10) -> Array:
 	var start: int = maxi(0, state.global_messages.size() - n)
 	for i in range(start, state.global_messages.size()):
 		var m = state.global_messages[i]
-		msgs.append(m.get("description", str(m)) if m is Dictionary else str(m))
+		# ★世界寫進 global_messages 的是 MessageData（5／5 個 production 寫入點，零個 Dictionary）。
+		#   舊版只認 Dictionary ⇒ 每一則都退回 str(m) ＝ <RefCounted#…>，
+		#   而這支函式是【面向玩家】的那一支。
+		# ★★沒有 description 時說出【它是哪一種事件】（type），
+		#   ★★★不得退回印物件 id——物件 id 對玩家是雜訊，而它【看起來像內容】。
+		if m is MessageData:
+			var md: MessageData = m
+			if md.description != "":
+				msgs.append(md.description)
+			elif md.type != "":
+				msgs.append("(%s)" % md.type)
+			else:
+				msgs.append("(無描述事件)")
+		elif m is Dictionary:
+			# ★legacy 分支保留：「現在 5／5 是 MessageData」不保證以後沒人 append Dictionary。
+			var d: String = String(m.get("description", ""))
+			var dt: String = String(m.get("type", ""))
+			if d != "":
+				msgs.append(d)
+			elif dt != "":
+				msgs.append("(%s)" % dt)
+			else:
+				msgs.append("(無描述事件)")
+		elif m is Object:
+			# ★不認得的物件也不印 id：它仍然是【給玩家看】的一列。
+			msgs.append("(未知事件物件:%s)" % (m as Object).get_class())
+		else:
+			msgs.append(str(m))
 	return msgs
 
 # ── Visible teams render ───────────────────────────────────────────────────────

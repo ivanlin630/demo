@@ -10,6 +10,10 @@ extends SceneTree
 var _fails: int = 0
 var _sections: int = 0
 const EXPECT_SECTIONS: int = 5
+# ★事件流那一段餵進去幾則——判決行的 rendered 要跟這顆常數比，不跟自己比。
+const GM_FED: int = 3
+# ★無 description 那一則餵的型別：餵料與期望值共用同一顆常數，不手抄兩次。
+const GM_TYPE_ONLY: String = "order_buy"
 
 func _initialize() -> void:
 	# ★★★命令與查詢的信封【鍵名不同】：command → "payload"、query → "data"
@@ -161,13 +165,61 @@ func _test_event_stream() -> void:
 	print("-- ★事件流 wrapper（機制早有、只接了 GUI）--")
 	var w: Array = _mk()
 	var st: WorldState = w[0]
-	st.global_messages.append({ "description": "測試事件 A" })
-	st.global_messages.append({ "description": "測試事件 B" })
+	# ★★★餵料用【真世界型別】MessageData，不是自己 append 的 Dictionary 字面量。
+	#   舊版餵 Dictionary ⇒ 100% 覆蓋了一條 production 【永遠不會走到】的分支，
+	#   而真正被走的那一條把每一則都渲成 <RefCounted#…>。
+	#   ★這支床本身就是發現那個盲點的證物 ⇒ 改它＝構造保證（下次有人重構讀取端，這格自動會紅）。
+	st.global_messages.append(_msg("測試事件 A", "test_a"))
+	st.global_messages.append(_msg("測試事件 B", "test_b"))
+	# ★第三則：有 type 、無 description ⇒ 認定【說出型別】而不是退回物件 id。
+	st.global_messages.append(_msg("", GM_TYPE_ONLY))
 	var q := PlayerQueryApi.new()
 	var r: Dictionary = q.get_event_stream(st, 5)
 	var events: Array = r.get("data", {}).get("events", [])
 	print("    get_event_stream(5) → ok=%s｜events=%s" % [str(r.get("ok", false)), str(events)])
 	_ok(bool(r.get("ok", false)), "★event wrapper 回 ok")
-	_ok(events.size() == 2 and String(events[1]).contains("B"),
+	_ok(events.size() == GM_FED and String(events[1]).contains("B"),
 		"★agent 層【讀得到】事件流（之前唯一呼叫點是 ui/sim_bridge，REPL 碰不到）")
+	# ── ★判決行：同一行自帶操作元，不靠共用旗標 ──
+	#   ★★object_id_like ＝ 渲染結果裡命中 RefCounted# 或 Object# 的則數。
+	#   ★★★rendered 要跟【餵進去的常數 GM_FED】比，不是跟它自己比——
+	#     否則母體塌陷時 rendered=0 / object_id_like=0 會是【空的綠】。
+	#   ★★★★object_id_like 單獨【沒有鑑別力】——實測（2026-09-22 陰性對照 B）：
+	#     把 MessageData 分支拿掉、保留 Object 分支 ⇒ 三則全渲成
+	#     "(未知事件物件:RefCounted)"，而它沒有 "#" ⇒ object_id_like 仍然是 0
+	#     ⇒ 舊版判決行會【假綠】。⇒ 同一行還要帶【它真正在判的那個量】：
+	#     desc_ok＝渲染結果逖字等於餵進去的 description 的則數；
+	#     typed_ok＝無 description 那一則真的說出了型別的則數。
+	var oid: int = 0
+	for e in events:
+		var es: String = String(e)
+		if es.contains("RefCounted#") or es.contains("Object#"):
+			oid += 1
+	var desc_ok: int = 0
+	for d in ["測試事件 A", "測試事件 B"]:
+		for e2 in events:
+			if String(e2) == String(d):
+				desc_ok += 1
+				break
+	# ★逖字相等，不用 .contains()：「命中某個字串」正是注射 B 鑽過去的那扇門。
+	#   ★★實測（2026-09-22 臂 C）：把 mapper 改成印 "[%s]"，
+	#     舊的 .contains() 寫法 typed_ok=1 ⇒ 闘放行；逖字相等 typed_ok=0 ⇒ 紅。
+	var typed_expect: String = "(%s)" % GM_TYPE_ONLY
+	var typed_ok: int = 1 if (events.size() > 2 and String(events[2]) == typed_expect) else 0
+	print("[GLOBALMSG] rendered=%d  object_id_like=%d  desc_ok=%d  typed_ok=%d  (餵料 %d 則全部是 MessageData)" % [
+		events.size(), oid, desc_ok, typed_ok, GM_FED])
+	_ok(desc_ok == 2, "★★desc_ok=%d（應 2）：有 description 的兩則逖字渲出來" % desc_ok)
+	_ok(events.size() == GM_FED, "★★母體：渲染出 %d 則，與餵進去的 %d 則相符" % [events.size(), GM_FED])
+	_ok(oid == 0, "★★★零物件 id：玩家看到的是內容，不是 <RefCounted#…>")
+	_ok(typed_ok == 1,
+		"★無 description 的事件說出【型別】：逖字等於 %s（實測：%s）" % [
+			typed_expect, str(events[2]) if events.size() > 2 else "—"])
 	_sections += 1
+
+# ★真世界型別的最小造物（欄位跟 production 寫入點同形）
+func _msg(desc: String, type: String) -> MessageData:
+	var m := MessageData.new()
+	m.type = type
+	m.description = desc
+	m.origin_team_id = 9
+	return m
