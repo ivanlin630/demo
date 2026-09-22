@@ -134,7 +134,11 @@ if [ "$simp_n" -gt 0 ]; then
   [ "$simp_n" -gt 6 ] && echo "[simp-lint]   ★另有 $((simp_n-6)) 檔未列出（本列表截斷在 6）"
   echo "[simp-lint] ★它不是「編碼問題」—— 檔案是 UTF-8，錯的是【字】：簡體形近字肉眼分不出來，而 grep 只比位元組。"
   echo "[simp-lint] ★★危害：寫進 hook／spec／code 字串後 ⇒ 那一行【永遠不命中】，而它不會紅。"
-  echo "[simp-lint] ★★★誠實限：本格只看【檔案裡】—— 打在指令列上的錯字它看不到。"
+  echo "[simp-lint] ★★★誠實限①：本格只看【檔案裡】—— 打在指令列上的錯字它看不到。"
+  echo "[simp-lint] ★★★誠實限②：它命中【討論這些字的文件本身】——信裡寫「两→兩」是【正當的提及】。"
+  echo "[simp-lint]   ⇒ 2026-09-23 逐行核過一次：12 份 handback 的命中，11 份是對照表／字表／引用缺陷，"
+  echo "[simp-lint]     真正【誤用】的只有 1 處。★★「談論一個字」與「用它下判決」在文字上不可分（同 merge-gates 那支的舊病）。"
+  echo "[simp-lint]   ⇒ ★★★所以這個數字【不是待清掃的債】：看清單要一行一行看，不要看總數。"
 else
   echo "[simp-lint] ✅ 無簡體形近字混入"
 fi
