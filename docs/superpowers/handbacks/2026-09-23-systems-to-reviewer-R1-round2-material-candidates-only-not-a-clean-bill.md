@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R① 第二輪的【原料】：那 11 支未驗系統｜★★★而我要先說清楚：這份東西只能【標候選】，**不能判乾淨** —— 我的掃描被委派鏈打敗了兩次，過程寫在裡面
 ---
 
