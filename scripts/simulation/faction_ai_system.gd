@@ -4349,7 +4349,11 @@ const TRAVEL_TASKS: Array = [
 
 func _should_reeval(state: WorldState, team: TeamData) -> bool:
 	if WorldEvents.is_pending(state, team.team_id):
-		if Probe.enabled: Probe.bump("reeval.event")
+		if Probe.enabled:
+			Probe.bump("reeval.event")              # ★舊鍵不動：`s4b_wake_coverage.gd:119` 在讀它
+			# ★★補具名 K：這一支本來只有【無後綴】的鍵 ⇒ 它在逐消費者表上【看不見】。
+			#   ★★★而 `s4b_wake_coverage.gd` 的 K 清單是【手抄的 9 條】⇒ 漏的那幾支不會出現。
+			Probe.bump("reeval.event.REEVAL")
 		return true      # ★事件瞬醒：不等 cadence
 	if team.current_task == TeamData.TASK_IDLE:
 		if Probe.enabled: Probe.bump("reeval.idle")
@@ -8085,6 +8089,12 @@ func tick_solo_think(state: WorldState) -> void:
 		#   ★★四格不是兩格：due_only／woke_only／both／skip —— ★★★而「both」被吞掉的話,
 		#     「事件喚醒造成的」與「本來就到期」會看起來一樣多。
 		if Probe.enabled:
+			# ★★★補進【既有的】逐消費者喚醒帳（`DecisionTier.tap_wake`）——
+			#   ★它本來沒有 SOLO 這一支,而 SOLO 佔 pass tick 時間的 34.7% ⇒ 帳上最大的一塊缺席。
+			#   ★★用 "cur" 字面值而不再呼叫一次 `pending_source`：後者在熱路徑上,
+			#     而 `is_pending` 內部已經呼叫過它了（★語意相同：非空即 woke）。
+			DecisionTier.tap_wake("SOLO", team.team_id, state.world.current_tick,
+				("cur" if _woke else ""), _due)
 			var _pc: String = "pass" if state.world.current_tick % SimRunner.NEAR_CADENCE == 0 else "nonpass"
 			if _due and _woke: Probe.bump("solo.fire.both." + _pc)
 			elif _due: Probe.bump("solo.fire.due_only." + _pc)

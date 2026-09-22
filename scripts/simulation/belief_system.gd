@@ -319,6 +319,26 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 					Probe.bump("intelwake.f.rep." + _hb)
 					Probe.bump("intelwake.f.kind." + _fb)
 					Probe.bump("intelwake.f.x." + _hb + "." + _db)
+					# ★★★systems 裁：尺已經存在 ⇒ 用 `ThreatAssessment.score` 的既有門檻,
+					#   **零新常數**（我自己挑「距離≤3」就是下一代的手抄物理）。
+					#   ★而它註解自寫「∴ 威脅評估全 belief」(Slice D 已折掉 god-view):
+					#     位置只在 belief.last_tick == current_tick（＝此刻真的看得見）才用真值,
+					#     approach 先過 `observe_velocity` 可見性閘,實力走 `best_estimate`
+					#   ⇒ ★★感知鐵律是【構造保證】,不是我的承諾。
+					# ★★★而【量測用的呼叫不得污染被觀測的計數器】：`score()` 自己會 bump
+					#   `threat.score_n`／`threat.comp.*` ⇒ 呼叫前後把 Probe 關掉再開,
+					#   否則我的儀器會把那些欄位灌水（同族:觀測不得改變被觀測物）。
+					var _tgt: TeamData = state.teams.get(tgt_id)
+					if _tgt != null:
+						Probe.enabled = false
+						var _sc: float = ThreatAssessment.score(state, _ob, _tgt)
+						Probe.enabled = true
+						if _sc >= ThreatAssessment.THREAT_BASE_THRESHOLD:
+							Probe.bump("intelwake.f.ta.threat")
+						else:
+							Probe.bump("intelwake.f.ta.nonthreat")
+					else:
+						Probe.bump("intelwake.f.ta.no_target")
 	var firsthand: bool = source_type == "親見" and source_id == obs_id
 	# ★★★反向斷言（systems 裁 2026-09-05：留發現不留機制）——
 	#   ★實測：三個 production firsthand 寫入點全部同時寫 `tile_pos` ⇒ 等式成立
