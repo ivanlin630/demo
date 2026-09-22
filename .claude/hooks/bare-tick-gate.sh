@@ -83,7 +83,7 @@ esac
 #   ★★而【缺 token 也要紅】：否則「不寫 token」就成了繞過閘的方法。
 LANDED="$WT/docs/process/landed-slices.tsv"
 if [ ! -f "$LANDED" ]; then
-  echo "[BARE-TICK-GATE] FAIL：找不到已落地清單 $LANDED ⇒ §2 無法判（★不静默放行）"
+  echo "[BARE-TICK-GATE] FAIL：找不到已落地清單 $LANDED ⇒ §2 無法判（★不靜默放行）"
   exit 1
 fi
 while IFS='|' read -r _h _d HITS TOK SRC; do

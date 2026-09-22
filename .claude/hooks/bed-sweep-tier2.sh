@@ -119,7 +119,7 @@ TMP="docs/measurements/.bed-sweep-inprogress.tsv"
 # ★★★ 2026-09-08 血證（implementer）：這一行把【已經掃完的 136 列】清掉了。
 #   triage 裡的續掃判準（只跳過 green/red）是我加的，
 #   而 tier2 在【呼叫它之前】就把表截斷 ⇒ ★兩個機制互相抵銷，
-#   續掃永遠沒有東西可續，而且每一次跑都【静默銷毀上一次的成果】。
+#   續掃永遠沒有東西可續，而且每一次跑都【靜默銷毀上一次的成果】。
 #   ⇒ ★★只在【檔案不存在】時建立；要重頭掃請自己先刪掉它（顯式動作）。
 if [ ! -f "$TMP" ]; then : > "$TMP"; fi
 echo "[tier2] 全床掃描開始（$(grep -c . "$LIST") 支）"
@@ -161,17 +161,17 @@ fi
 # ── diff：只報【綠→紅】 ────────────────────────────────
 alerts=0
 # ★★★ baseline 的鍵必須唯一（systems 2026-09-17，implementer 實測引出）
-#   血證：舊 baseline 裡 4 支床各有 2–3 列 ⇒ 下面的 `head -1` 静默地挑了第一列
+#   血證：舊 baseline 裡 4 支床各有 2–3 列 ⇒ 下面的 `head -1` 靜默地挑了第一列
 #     ⇒ 實測報出 game_sim_test.gd（green → 60）—— 而 60 是秒數，不是判決。
 #   ★而它能造假警報，就同樣能蓋掉真的 —— 同一個 head -1。
 #   ★★所以這裡不是「選一個比較好的列」，是【無法比對就要大聲說】。
 # ★★★訂正（2026-09-17）：舊版只查 $BASELINE（diff 舊側），而重複鍵在 $TMP（新側）
 #   ⇒ ★它不是「表乾淨所以不亮」，是「看錯表所以永遠不亮」。
-_dupes=$( { awk -F'	' '/^scripts\//{print $1}' "$TMP" 2>/dev/null | sort | uniq -d; awk -F'	' '/^scripts\//{print $1}' "$BASELINE" 2>/dev/null | sort | uniq -d; } | sort -u)   # ★★★兩表【各自】查再聯集 —— 接起來再 uniq -d 會讓【每一支】都重複（實測 137 vs 4）⇒ _dupe_bad 恆真 ⇒ 告警静默關掉而畫面不紅
+_dupes=$( { awk -F'	' '/^scripts\//{print $1}' "$TMP" 2>/dev/null | sort | uniq -d; awk -F'	' '/^scripts\//{print $1}' "$BASELINE" 2>/dev/null | sort | uniq -d; } | sort -u)   # ★★★兩表【各自】查再聯集 —— 接起來再 uniq -d 會讓【每一支】都重複（實測 137 vs 4）⇒ _dupe_bad 恆真 ⇒ 告警靜默關掉而畫面不紅
 if [ -n "$_dupes" ]; then
   echo "[tier2] ✗ baseline 的鍵【不唯一】⇒ diff 結果不可信（本輪不報 diff）："
   echo "$_dupes" | head -6 | sed 's/^/[tier2]     ★重複鍵：/'
-  echo "[tier2]   ★理由：比對用的是 head -1 ⇒ 它會静默地挑一列；能造假警報就能蓋掉真的。"
+  echo "[tier2]   ★理由：比對用的是 head -1 ⇒ 它會靜默地挑一列；能造假警報就能蓋掉真的。"
   echo "[tier2]   ★★修法：重建 baseline（整表重寫、一床一列），不要手改那幾列。"
   _dupe_bad=1
 else

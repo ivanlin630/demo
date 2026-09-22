@@ -100,7 +100,7 @@ debug/c1_info_reconciliation_bed.gd:168 st.global_messages.append({ "description
   寫入端 1 個（`message_system.gd:76` → `MessageData.new()`，同型別）；
   讀取端全部走 MessageData 欄位，零個假設 Dictionary。
   ★★★而面向人的那一支（`observer_event_text.gd`）**比本票改的那一支更強**：
-  静態型別寫在**簽章上**（`msg: MessageData`）⇒ 餵 Dictionary 會**執行期錯**，
+  靜態型別寫在**簽章上**（`msg: MessageData`）⇒ 餵 Dictionary 會**執行期錯**，
   不會靜靜印出物件 id；預設分支也是 `_: return msg.description`。
   ★systems 抽驗過（不照收）：簽章確實是 MessageData、`is Dictionary`/`.get("description"` 零命中、
   `observer_messages` 裸掃 14 個命中（與他報的數字一致）、預設分支逐行看過。

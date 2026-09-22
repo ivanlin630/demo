@@ -240,7 +240,7 @@ fi
 # ★★★2026-09-15 第二個洞（同一段）：舊條件只看【分支＋工作區乾淨】，沒看【有沒有跑完】
 #   ⇒ ★一輪 **分批跑**（MG_FROM/MG_TO）會拿【邨分的紅數】去寫基線
 #   ⇒ ★★而配上剛加的 ratchet（降低就寫）**反而更壞**：分批跑的紅數天生較小
-#     ⇒ **基線會被一輪沒跑完的路静默地洗到 0**。
+#     ⇒ **基線會被一輪沒跑完的路靜默地洗到 0**。
 #   ⇒ ★★★**只有完整跑的那一輪才有資格碰基線。**
 if [ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" = "main" ] && [ -z "$(git --no-optional-locks status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ] && [ "$MG_FROM" = "0" ] && [ "$MG_TO" = "0" ]; then
   # ★★★2026-09-15：基線【只准往下】（ratchet）—— 血證：本輪跑出一個【新】紅（defer-phrase），
@@ -267,7 +267,7 @@ else
   [ -n "$(git --no-optional-locks status --porcelain -- scripts .claude docs/process/merge-gates.tsv 2>/dev/null)" ] && _mg_why="$_mg_why scripts/.claude/註冊表有未-commit 改動"
   { [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; } && _mg_why="$_mg_why 本輪是分批跑（沒跑完整註冊表）"
   echo "[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數 —— 原因：$_mg_why"
-  echo "[MERGE-GATES]   ⇒ ★★這一行必須存在：静默的【沒有記下來】跟【記下來了】在畫面上長得一樣。"
+  echo "[MERGE-GATES]   ⇒ ★★這一行必須存在：靜默的【沒有記下來】跟【記下來了】在畫面上長得一樣。"
 fi
 # ★★★2026-09-22：【環境紅】先於【測試紅】報，而且它讓本輪【不可判】
 #   ★理由：引擎沒啟動的那幾支，網與紅【都不算】—— 它們根本沒有被執行過
