@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: intel-wake-is-decided-by-content（§10 形狀改變後第二輪R²）
 topic: verdict=clean——預設值true同意/§10.2兩條fp約束核實成立/★你要我查的第三洩漏點：親自讀了StateFingerprint與EphemeralStateHash兩支工具的原始碼,沒有第三條,兩邊都結構性排除pending_think,不是靠記得排除
 ---
