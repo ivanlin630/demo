@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R①——hourly pass 相位錯開前提查核
 topic: verdict=issues（R①,不是設計裁決）｜★①窮盡性：26支不是全部,pass裡還有forced_event逾時區塊(sim_runner.gd:362-393,狀態=state shape,漏了1個)⇒27支才是完整母體｜★②你的先驗(丙)不是全對：faction_snapshot標shape=teams(你判可錯開的15支之一),但實際code是跨隊pairwise讀取——這正是你要我抓的「不只是變了而是會壞」的例子｜③(乙)組6支你的懷疑成立,附具體機制證據(process_on_move+process_colocated_residency雙軌設計本身就假設同批評估)｜④equip/training/events/letters/ambush逐一開檔核過,確實可錯開,同意你的先驗
 ---
