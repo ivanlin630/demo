@@ -1,0 +1,13 @@
+母體：raw log 認得出 self_us 明細的凍結幀 = 70（[凍結幀逐筆] 印出清單 12，>2s 幀數官方母體 70）
+
+[凍結當下 top-5]（依『在多少凍結幀裡拿下該幀 self 最大』排序）
+  misc.equip_mobilize                拿下 top1 的凍結幀數= 37／70  出現於凍結幀數= 70  平均self=0.468s
+  unified.rank.from_solo_body        拿下 top1 的凍結幀數= 26／70  出現於凍結幀數= 70  平均self=0.438s
+  loop2.solo_engine                  拿下 top1 的凍結幀數=  7／70  出現於凍結幀數= 70  平均self=0.397s
+
+[對照：依『self_us 跨凍結幀加總』排序前5]（與床自己印的[★self_us排行]同口徑，交叉驗證）
+  misc.equip_mobilize                加總self=32.750s  出現於凍結幀數= 70
+  unified.rank.from_solo_body        加總self=30.681s  出現於凍結幀數= 70
+  loop2.solo_engine                  加總self=27.775s  出現於凍結幀數= 70
+  unified.rank.from_member           加總self=9.088s  出現於凍結幀數= 70
+  unified.rank.from_leader           加總self=8.010s  出現於凍結幀數= 70
