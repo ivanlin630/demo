@@ -1,7 +1,7 @@
 # 事件流渲染讀錯形狀（HOW spec）
 
 **開票**：blueprint 2026-09-22（(乙) 拆出獨立票，不等那場尋找）
-**狀態**：待 R²
+**狀態**：R² verdict=issues（不 halt）已收、一項裁死已寫回 §3-4 ⇒ **可派工**
 **範圍**：`scripts/simulation/player_api_mapper.gd` 一支函式 ＋ 兩支床的餵料形狀
 **不碰**：`feat/walkthrough-v2` 的診斷床（那是 (甲)，照原門票等用戶找完）
 
@@ -52,9 +52,16 @@ debug/c1_info_reconciliation_bed.gd:168 st.global_messages.append({ "description
    ★但它**不再是被測到的那一條**——見 4。
 3. ★**血統**：`feat/walkthrough-v2` 上已有一版（`player_api_mapper.gd` 17+／1−）
    ⇒ **參考非基底**（那支分支另有門票，不得以它為 base）。
-4. ★★**缺陷要變成對照**（blueprint 令）：
-   `agent_verbs_c1_bed` 與 `c1_info_reconciliation_bed` 的餵料改成**真世界型別 `MessageData`**，
-   **或**新增一格餵 MessageData 的床。兩者擇一，理由寫進 code。
+4. ★★**缺陷要變成對照**（blueprint 令；R² 2026-09-22 **裁死為單選**）：
+   **必須把 `agent_verbs_c1_bed.gd:164` 與 `c1_info_reconciliation_bed.gd:168` 這兩支床
+   本身的餵料改成真世界型別 `MessageData`**。
+   ★**不接受**「新增一支餵 MessageData 的旁床、舊兩支維持 Dictionary 不動」。
+   ★★理由（R² 寫的，不是偏好）：**這兩支床本身就是發現這個盲點的證物**。
+     改它們＝**構造保證**（下次有人重構讀取端，舊床自動會測到）；
+     新增旁床＝**清單保證**（舊兩支繼續綠著騙人，而它們仍然在鐵證目錄上）。
+   ★★★R² 附帶條件：這兩支床除了 `global_messages.append` 那一行之外
+     可能還在驗別的事 ⇒ **只換餵料的【形狀】，不動它們原本驗的那件事**；
+     落地時順手核一下，確保覆蓋範圍沒被縮掉。
 
 ## §4 判準（expect 行自帶操作元）
 
