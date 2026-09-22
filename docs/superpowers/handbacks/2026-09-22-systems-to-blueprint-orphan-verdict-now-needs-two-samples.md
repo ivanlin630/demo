@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★你提的「單輪不算」已落地，做成【同一次呼叫取兩個樣本】而不是跨輪狀態｜★★而查它的時候又挖到同型腐蝕第三例（就在那段 code 裡）
 ---
 
