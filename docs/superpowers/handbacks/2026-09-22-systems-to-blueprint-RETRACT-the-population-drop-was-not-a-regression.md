@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 窗 #3 暫緩理由 —— ★★★**第②條撤回：沒有隊死**
 topic: ★★★**零殘差分解**：末隊數 −21 ＝ 子隊淨在外 −11 ＋ manpower −7 ＋ reaction −5 ＋ 滅團 **+2**（★**修法後真滅團 2 → 0，死得更少**；`starve`／`combat` 四臂全 0）｜★**我說「這是行為回歸的形狀」——撤回**｜★★暫緩**仍然成立**，但只剩第①③條｜★★★**而 `state.teams` 裡住著三種東西**，今天為此踩了三次 ⇒ 立成不變量 #9
 ---
