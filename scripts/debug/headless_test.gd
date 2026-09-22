@@ -17395,13 +17395,33 @@ func _test_observer_event_text() -> void:
 	assert(not ("Team19" in s), "probe 味未改寫：%s" % s)
 	var rel: Array = ObserverEventText.related_teams(m)
 	assert(19 in rel and 3 in rel, "隊過濾集錯：%s" % str(rel))
-	# 未知 type fallback description
+	# ── 未知 type 的 fallback：★兩半各自具名，不用一個包包全的名字 ──
+	#   ★★舊版只有一行，叫「fallback 失效」——名字讀起來管【整個】fallback，
+	#     而它只餵了「description 非空」那一支 ⇒ 另一半從來沒被跑過，
+	#     而看測試清單的人會以為 fallback 驗過了。
+	#   ★★★名字是作者的意圖，餵料才是母體。
+	# (a) 未知 type ＋ description 非空
 	var m2 := MessageData.new()
 	m2.type = "weird_type"
 	m2.origin_team_id = 19
 	m2.description = "某事發生"
-	assert("某事發生" in ObserverEventText.render(state, m2), "fallback 失效")
-	print("observer event text OK")
+	assert("某事發生" in ObserverEventText.render(state, m2),
+		"(a) 未知 type ＋ description 非空 ⇒ 該印出 description")
+	# (b) 未知 type ＋ description 【為空】——★這一支以前從來沒被跑過
+	#   ★★這裡故意【不】斷言「它只剩時間戳」：那等於把缺口釘成正確行為，
+	#     將來有人修好它（讓它說出 type）這一格會紅。
+	#   ★★★斷的是【修好之前後都成立的底線】：給玩家看的那一行
+	#     永遠不得是物件 id，且時間戳必須在。
+	#     ⇒ 具體會接住的回歸：有人把 fallback 改成 str(msg) 或 「%s」 % msg。
+	var m3 := MessageData.new()
+	m3.type = "weird_type"
+	m3.origin_team_id = 19
+	m3.description = ""
+	var s3: String = ObserverEventText.render(state, m3)
+	assert(s3.begins_with("[月"), "(b) 未知 type ＋ description 空 ⇒ 時間戳仍須在：%s" % s3)
+	assert(not ("#" in s3), "(b) 未知 type ＋ description 空 ⇒ 不得退回物件 id：%s" % s3)
+	# ★讓缺口【不安靜】：印出實際渲出來的東西，讀 log 的人看得到。
+	print("observer event text OK｜★已知缺口：未知 type ＋空 description 渲出「%s」（說出 type 是另一張票）" % s3)
 
 # ── means-end 磚：取得手段鏈（B 型＝製造品）──
 # ★第一顆測試就是 spec 指定的那條：「缺設施」與「缺原料」必須分得開。
