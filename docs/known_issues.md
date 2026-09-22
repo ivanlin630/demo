@@ -4167,7 +4167,18 @@ settle 把隊變成 PRODUCE ⇒ 薪資系統 early-return ⇒ ①【薪資從未
 ★★★**不要另外發明一種表示法** —— 而它會 touch 全域 belief 讀取端，**是一張獨立的票**。
 
 ## ★★★★裸 `current_tick % INTERVAL` 在 LOD far pass 下會【週期性漏拍】—— 而它是距離依賴的世界扭曲（2026-09-05）
-★**狀態：已知未修**｜**回訪：觸發事件 —— ⑦票（遷 `CadenceStagger`）落地**
+★**狀態：★前提已消失（2026-09-23 查證）**｜**回訪：觸發事件 —— ⑦票（遷 `CadenceStagger`）落地**
+★★★**受害條件整個不存在了**：本條的受害條件是「長在 LOD **far pass** 裡」，
+而 **far pass 在第⑧票被刪掉**（`sim_runner.gd:419` 逐字：「far pass 已刪（第⑧票）：它的存在就是分班本身」）。
+★機械查證：`grep -rn "FAR_ZONE_INTERVAL" scripts/ --include=*.gd` 扣掉註解行之後，
+  production **零命中**（只剩註解與一支床的 regex 字串）⇒ 那個常數已經不存在。
+★★而點名的那兩處也各自處理掉了：`salary_system.gd` 已遷成 `salary_eval_next_tick`
+  （同檔註解逐字：「⑦ 之後【閘不再是 modulo】」），`modulo-phase` 那支 merge 閘擋住新出現的。
+★★★**但它有一個後繼形態，而那個形態今天正在飛**：一支系統若只在「自己那一隊的相位 tick」
+  上跑，它內部的裸 modulo 閘就只對「相位恰好整除 INTERVAL」的隊成立 ⇒ 絕大多數隊永遠等不到。
+  ⇒ 已掃過並寫進 `2026-09-23-stagger-the-hourly-pass-HOW.md` §5a-1：
+    錯開組那 14 支【內部】零個裸 modulo 閘（12 行命中逐行分類過）。
+  ⇒ ★**本條保留不刪**：它記的是【這一類病長什麼樣】，而那個知識還會再用到。
 ```
 ★受害條件:【裸 modulo 閘】長在 shape:"teams" 且 LOD_BOTH 的 step 裡,
    而 INTERVAL 不是 FAR_ZONE_INTERVAL(600) 的倍數
@@ -4376,6 +4387,14 @@ owner=systems（掛號，未開票）
 ```
 狀態：已知未修（★欄位已擴到 103，而【看不到的那部分仍在】——這一條記的是【讀法】不是那次擴張）
 回訪：下一次有人拿 fp 當單腿證據時
+★★★**2026-09-23 這一條到期並已被消費，而且【當場抓到一個設計錯誤】**：
+裁定 (A) 的 spec §4e 原本用「樁關掉 ⇒ fp 與世代 7 逐字相同」當等價證明。
+照這一條的規定去寫「本次改動有沒有碰到排除清單裡的欄位」那一句時，才發現
+我原本要加的第二個欄位 `pass_last_tick` **字尾不在 `CADENCE_SUFFIXES` 裡**
+（`fp_coverage.gd:25` ＝ `_eval_next_tick`／`_next_tick`／`_check_tick`）
+⇒ 它會被判 in_ruler ⇒ **進 fp** ⇒ 樁關掉時 fp 也會不同 ⇒ 那個等價證明當場失效。
+⇒ 已改：只留 `pass_next_tick`（自動歸 cadence、尺外），間距直方圖的 last 放 Probe 那一層。
+★這一條的價值不在「提醒我措辭降級」，在於**它逼我去寫那一句，而那一句寫不出來**。
 子層級導出檢查上線（137fb7b62）後第一次量到：
   TeamData      尺內 30 ／ ★沒看到被讀 97
   HexTileData   ★★排除 34 欄，其中含 apothecary_level／mint_level 這種【會影響產出】的設施等級
