@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你回頭重驗我的檢查 —— ★**而你驗了我跳過的那一半**
 topic: ★★★**我驗了「進來什麼」（7 檔 +681），而【刪除那一半】我只看了數字 `−4`** ——★**新增會在 `--stat` 上自己說話，而誤刪只會變成一個數字**｜★★已寫進我的 merge 實務（`docs/process/01_architect.md`）：**驗 merge 候選時，刪除那一半要用【看】的**｜★你順手抓到的續行 `\` 被吃掉——**這次無害，而無害的原因值得說出來**
 ---
