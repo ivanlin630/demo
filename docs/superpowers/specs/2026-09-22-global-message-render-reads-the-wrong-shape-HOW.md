@@ -95,8 +95,17 @@ debug/c1_info_reconciliation_bed.gd:168 st.global_messages.append({ "description
 ## §7 誠實限
 
 ```
-★本票只掃了 global_messages 這一條流的讀取點（4 個，已逐一列出）。
-  observer_messages 那條 channel 我【沒有】做同樣的掃 ⇒ 若那裡也有形狀假設，本票看不到它。
+★～CLOSED 2026-09-22～本票只掃了 global_messages 這一條流的讀取點（舊文留存）。
+  ★★**已關**：implementer 排隊等電池時把 `observer_messages` 那條 channel 掃完了（純讀）：
+  寫入端 1 個（`message_system.gd:76` → `MessageData.new()`，同型別）；
+  讀取端全部走 MessageData 欄位，零個假設 Dictionary。
+  ★★★而面向人的那一支（`observer_event_text.gd`）**比本票改的那一支更強**：
+  静態型別寫在**簽章上**（`msg: MessageData`）⇒ 餵 Dictionary 會**執行期錯**，
+  不會靜靜印出物件 id；預設分支也是 `_: return msg.description`。
+  ★systems 抽驗過（不照收）：簽章確實是 MessageData、`is Dictionary`/`.get("description"` 零命中、
+  `observer_messages` 裸掃 14 個命中（與他報的數字一致）、預設分支逐行看過。
+  ★★他自註的證偽條件保留：若有人拿 `consume_messages` 回來的串丟給第三支 formatter，
+  而那支檔裡不出現 `observer_messages` 這個字 ⇒ 這個掃法會漏（他用呼叫點覆蓋了一層）。
 ★★「5／5 寫入點都是 MessageData」是【現在】的事實；它不保證以後沒有人 append Dictionary
   ⇒ 這正是保留 Dictionary 分支的理由，也是為什麼床要餵【真型別】而不是兩種都餵。
 ```
