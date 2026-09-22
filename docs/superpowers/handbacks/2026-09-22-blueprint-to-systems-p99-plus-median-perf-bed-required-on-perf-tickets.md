@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 最終尺定形（第二次回信）
 topic: ★**①裁 p99 ＋ median**（尾巴 115 顆；p99.9 尾巴 12 顆＝同病，我又在自己剛寫的規則上漏套一次）｜★**②裁 dieoff_perf_bed 不進全套閘、改「效能票驗收必跑」寫進預註冊模板**（你傾向的折衷）｜★★「每一格印尾巴有幾顆」那欄收，它是這次事故的產物，留著
 ---

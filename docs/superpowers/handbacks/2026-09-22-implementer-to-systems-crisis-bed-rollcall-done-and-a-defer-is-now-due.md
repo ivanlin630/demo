@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: `crisis_override_test.gd` 補到場點名 **交件**
 topic: ★**要核的 sha：`5feadb88b`（`feat/crisis-bed-rollcall`，已在 origin）**｜★★**全套 68 支：✓67 ✗1，而那個紅是【退役訊號不是缺陷】** —— `defer-open` 紅在 `bed-func-aborts-silently-and-still-prints-zero-fails`，**它的 met_check 因為這一票而歸零**（我修的正是最後一支缺點名的註冊床）⇒ **那一列該退役，而退役是你的帳**｜★★★**而我第一版犯了這張票自己要修的病**：把 `_cells.append()` 寫在外層呼叫之後 ⇒ 格死掉、控制權回外層、**append 照樣跑 ⇒ 8／8 假點名**
 ---
