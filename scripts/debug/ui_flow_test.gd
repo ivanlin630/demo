@@ -1111,6 +1111,26 @@ func _test_pages_skylight() -> void:
 	# ★★★機器可讀的一行（systems 要的）：票B 每接好一欄它就變小 ⇒ 這是「天窗遞減」的讀數。
 	print("[UI-SKYLIGHT] count=%d declared=%d" % [total, declared])
 	print("  ★票A 交付時絕大多數格子是天窗（共 %d 個）—— 這是預期不是缺陷" % total)
+	# ★★★P4 強化（reviewer R² 的非阻塞建議，2026-09-23）：
+	#   ★缺口：接出一欄卻忘了把它從宣告拿掉 ⇒ 畫面會【同時印值與天窗】
+	#     —— 而那比純天窗更糟：它同時說「有」跟「沒有」。
+	#   ★★page0／page1 的兩欄已用動態 is_empty() 綁死不會脫鉤；
+	#     風險留在【尚未接出的靜態清單】（page1-4），而那正是這一格守的東西。
+	#   ⇒ 判法：同一頁裡，★★★某欄位既印了天窗、又有另一行以它的名字開頭 ⇒ 紅。
+	var dup: Array = []
+	for i in range(0, UiPages.PAGE_ORDER.size()):
+		node._page_idx = i
+		var ls: PackedStringArray = node._build_state_str().split("\n")
+		var body: Array = _page_body(ls, UiPages.header(i))
+		for f in node._page_skylight_fields(i):
+			var name: String = String(f).split("（")[0]
+			for ln in body:
+				var t: String = String(ln)
+				if t.ends_with("未接出（票B）"): continue
+				if t.begins_with(name):
+					dup.append("第 %d 頁「%s」既有天窗又有內容行：%s" % [i + 1, name, t])
+	for d in dup: print("    ✗ %s" % String(d))
+	_check("沒有欄位【同時】印值與天窗（%d 筆）" % dup.size(), dup.is_empty())
 	# ★★★P4 原本判「天窗總數 0 ⇒ 紅」，而【票B 的成功條件正是天窗歸零】
 	#   ⇒ ★票B 做完的那一天，這一格會因為【票B 成功】而變紅 —— 那是一個有到期日的守衛。
 	#   ⇒ ★★所以判準換掉：★★★不是「必須有天窗」，是【宣告未接的欄位，每一個都要印出天窗】。
