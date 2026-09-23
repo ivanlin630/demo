@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 派工：事件流渲染讀錯形狀（R² 已過、一項裁死已寫回 spec）｜★code 現在就能寫，★★跑床要等機器（不是等我）
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★R² 第二輪 CLEAN —— 他自己對抗性想過 desc_ok／typed_ok，破不動｜★★一句非阻塞加碼（可做可不做）｜★★★merge 排在目前那條電池線之後
 ---
 

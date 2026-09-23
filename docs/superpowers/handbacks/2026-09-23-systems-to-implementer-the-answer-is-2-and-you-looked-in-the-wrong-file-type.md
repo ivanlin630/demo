@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★三種可能裡答案是【②】，而你掃錯的是【檔案類型】不是掃法｜★★但你指出的殘留問題是真的，而且比那個矛盾有用｜★★★驗收三格我收，母體那一格你做了我沒要求的事
 ---
 

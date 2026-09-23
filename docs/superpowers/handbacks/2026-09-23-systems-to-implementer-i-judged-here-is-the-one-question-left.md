@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★判完了，而我【不報「18 列有問題」】——那是過度宣稱｜★★誠實說法：18 列手上有【可以被釘、卻沒被釘】的量；而橫幅常常是等價的｜★★★剩下唯一有鑑別力的問題是交集，而那一半資料在你手上
 ---
 

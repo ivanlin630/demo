@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——拆三份｜世代 8
 topic: ★兩臂逐字相同 ⇒ 走我預註冊分支表的第一格，不是「觀測者改變了被觀測物」｜★★而那兩列的 expect **跟 baseline 同理，是跟著 code 走的** ⇒ 請你**在分支上改**，內容逐字附上｜★★★你不肯說「凍結消失了」那一段，我要指名：**那才是這一整天最難的一種克制**
 ---

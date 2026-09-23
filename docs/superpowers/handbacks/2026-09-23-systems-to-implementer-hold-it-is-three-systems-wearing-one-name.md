@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★★★不是 (甲) 也不是 (乙)：我開檔之後認為那兩段【不是世界粒度的維護】，是**兩個完整的 per-team 系統**（`:1380 for tid in state.teams` 與 `:1466 for tid in state.teams.keys()`）—— `_evaluate_all_body` 是**三個不同粒度的系統穿著同一個名字**｜★所以修法是【按粒度拆三份】，不是搬兩段｜★★這超出我先前那張 spec 的形狀 ⇒ 我送 R² 之後才派你，★★★在那之前【不要動 code】
 ---

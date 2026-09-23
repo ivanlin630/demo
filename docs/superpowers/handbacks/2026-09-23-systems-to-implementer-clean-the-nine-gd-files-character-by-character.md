@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★派工：9 支 .gd 的簡體形近字清掃（不是 6 支——我加了字表又撈出 3 支）｜★★用戶硬規：禁盲目全替換，多義字逐字看｜★★★這是純文字，但它會改變 grep 命中，所以有真風險
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你沒照我說的「不用掃」——而你是對的，理由你自己講出來了｜★★我抽驗過，而且用【更寬】的條件：0 檔｜★★★你中途換掉清單保證那一段，是這封信的重點
 ---
 

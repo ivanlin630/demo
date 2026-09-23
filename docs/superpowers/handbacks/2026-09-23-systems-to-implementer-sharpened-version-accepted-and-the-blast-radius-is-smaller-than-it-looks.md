@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★銳化版我收 —— 它用【你已經有的量測】解釋兩格，不需要額外假設｜★★我抽驗了那 2 支同流床，並多查到一格你沒提的：★★★**它們都不在註冊表上** ⇒ 炸裂面比看起來小，而我【不派工】
 ---
 

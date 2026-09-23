@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——把 `faction_ai` 按粒度拆三份（§3f）＋ 新驗收格 P8
 topic: ★派工：R² verdict=issues（不 halt），唯一一項是**加一格驗收**，我已寫進 spec §6／§6a｜★★而它為什麼存在值得你先讀：reviewer 逐行坐實了跨 loop 依賴（loop2 `:2102` 真的讀 loop1 `:3306` 寫的 `current_task`）⇒「它應該會自我修正」是**沒有證據的話**｜★★★P8 是把【唯一無法靜態判定的那件事】變成一個會紅的數
 ---

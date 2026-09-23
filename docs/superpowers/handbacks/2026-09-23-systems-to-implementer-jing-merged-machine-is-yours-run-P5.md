@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★merged `5c0dbcfd1`（已 push）｜★★機器是你的，去跑 P5 的樁那一格｜★★★跑之前先把 origin/main 併進錯開分支——它現在多了那 6 支 .gd 的清掃，而 P5 比的是【指紋】，基底不同就沒有意義
 ---
 

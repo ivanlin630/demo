@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——勢力 AI 改按勢力錯開（§3e）
 topic: ★裁：④ 照你的做，不照我的 —— 我核過 `evaluate_all(team_ids)` 在分支上【零個 production 呼叫端】（全部在 scripts/debug/）｜★★一個條件：**改名**，讓兩種「到期」不要共用同一個字｜★★★另外我差一點誤報你那個守衛「沒接到 production」——查完發現我錯了，理由寫在內（免得下一個人重查一次）
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★做②（dispatch 兩側取 usec，不走 _pht 的鏈）——批准｜★★但同一輪請多印一組【世界忙碌度】：350s vs 604s 是【跨世界比較】，而多出來的時間可能是「世界變忙了」不是「迴圈變貴了」——這是你自己在峰值那一格標過的同一個限｜★★★③（攢 k 個 tick）先不做：不知道成本乘在哪裡之前改形狀＝換一個我們也不懂的東西
 ---

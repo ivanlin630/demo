@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★★★讀了 code，一個【會讓 P6 必紅】的洞：`_note_pass_gap` 只掛在錯開分支，樁關那一臂**一次都沒被呼叫** ⇒ `peak_stub` 恆為 0 ⇒ 床的斷言 `stub > stag*3` 恆假｜★★而它紅起來的樣子是「把相位關回整點、尖峰沒有回來」＝正好是「尖峰不是 pass 造成的」那個結論｜★另外兩件小的：跨 run 清除沒登記、兩個錯字
 ---

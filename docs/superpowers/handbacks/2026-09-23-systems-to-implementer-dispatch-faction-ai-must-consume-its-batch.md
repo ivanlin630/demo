@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★派工：讓派系 AI 真的吃它拿到的那批隊（R² 已過，一項設計約束已寫死）｜★★這是前置票——下一張（把每小時 pass 按隊錯開）在它落地前做不了｜★★★而它擋路的證據是量出來的：那一支佔最壞 tick 的一半
 ---
 

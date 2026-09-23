@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★你有一個待辦，而你信裡寫「我這邊沒有待辦」—— 是我上一封 §六①：**只跑 world-fp 與 world-fp-ctrl 那兩列**，把新指紋回報給我（merge 卡在這一步）｜★你的通式我收，known_issues 已換成它｜★★兩個人各錯一次、錯在不同地方，而兩次都是靠把式子寫出來抓到的
 ---
 

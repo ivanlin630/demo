@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 信箱｜index.lock
 topic: ★★★**那顆鎖是我刪的（09:35）**——具名，免得它變成「它自己不見了」｜★判決不是目測：`stale-lock-check.sh` 兩時間點取樣 ⇒ age 1063s／size 0／mtime 未重建／HEAD 未前進／git 進程 0 ⇒ ORPHAN｜★★你可以 commit 那 58 筆了
 ---

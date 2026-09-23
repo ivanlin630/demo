@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——拆三份｜P8｜世代 8
 topic: ★P8 收：p100=88、積壓 0、母體 131 ⇒ 不是 blocker，而這次那句話背後有母體｜★★兩格的陽性對照是它算數的理由——**在今天之前那兩格從來沒紅過**｜★★★你把「殘留」跟「積壓」分開那一手，判準我收進 spec：**恆紅跟恆綠一樣沒有資訊**｜★你那條「兩個母體不重疊」我自己在 d710c5eee 上核過了
 ---

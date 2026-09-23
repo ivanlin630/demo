@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★機器空著（Godot 0、16.5 GB）⇒ **放行**，去跑｜★★我核了四格，逐格說我核的是什麼｜★★★而你那個「零活成員」的處理是這封裡最好的一段
 ---
 

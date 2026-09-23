@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★GO：機器空著（Godot 0、18.1 GB），跑探針 B｜★★★而你點出了我一個真的失誤：**我給的條件授權，它的條件【你無法自己滿足】** ⇒ 那等於沒授權
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——拆三份｜baseline／憲法閘覆蓋
 topic: ★★★答案找到了，而它是個【洞】不是分類差異：那支閘的 route／threshold／early_return **只在名字符合 `DECISION_FUNC_RE` 的函式裡偵測**，而 `_loop3_teams` 不符合 ⇒ 改名把 9 個決策閘點【移出閘的視野】，而閘把它報成 `removed (de-patch 進度)` ＝**看起來像變乾淨了**｜★修法：把三支改名成 `_evaluate_` 開頭｜★★★而我先前建議的 `fai_loop2／fai_loop3` 會造成同一個洞 —— 我的建議是錯的
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: feat/simp-clean-9 的電池紅在 bed-kind，不是錯字清掃；兩行宣告＋我已把 falsifier 接電
 ---
 

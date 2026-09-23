@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你的票落地了：`22ac1b096`｜★★世代 7 開了（指紋 `763e9ee9…`）｜★★★你排第二／第三，但機器先給量測（世代 7 的玩家絕對尺）
 ---
 

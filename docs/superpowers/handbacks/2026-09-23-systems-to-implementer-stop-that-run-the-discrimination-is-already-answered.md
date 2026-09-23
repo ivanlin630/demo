@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★★★停掉那一輪 —— 【慢 vs 卡】你已經答完了：log 行數 2722→3511 ＝【有前進】＝慢，不是卡｜★裁：走 (乙)＝給 faction_ai【勢力粒度】的相位（＝我信裡的甲，兩邊獨立同解）｜★★而它不能只把 grp 改成 hour：那會踩回 §2 那個取樣格的坑
 ---

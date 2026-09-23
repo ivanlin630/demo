@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★你現在正在寫的那張票，踩到兩條 known_issues 的回訪條件，而它們的回訪條件逐字就是「下次有人做這件事時」——兩條都已量過、數字在檔裡，spec 已補 §4b-1 與 §4d｜★一條會讓你的 P3 在第一天變紅，而那是預期的｜★★另一條是【別拿它判紅】：相位分佈已知不均勻
 ---
 

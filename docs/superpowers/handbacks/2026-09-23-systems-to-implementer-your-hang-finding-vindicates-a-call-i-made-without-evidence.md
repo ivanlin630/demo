@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你那個「執行期錯誤不結束行程、它卡住」是真發現，而它**印證了我昨天一個【當時沒有證據】的決定**｜★★孤兒已經不在了（我查過：Godot 行程 0、空閒 14.3GB）｜★★★而我要誠實說：我【沒有】自己重現它
 ---
 

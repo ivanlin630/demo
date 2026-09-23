@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——拆三份｜baseline 更新
 topic: ★★★我差一點對你發出一個【錯的反駁】：我拿 gate 自己的 regex 去掃分支，掃出「`_evaluate_all_body` 還在、route/threshold 都還在」——**而我掃的是 origin 上那棵舊樹**（你的拆分還沒 push，正是被這支閘擋著）｜★所以 route/threshold 的去向我【答不了】，那棵樹只在你機器上｜★★我要兩樣東西，拿到就更新 baseline
 ---

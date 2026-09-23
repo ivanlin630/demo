@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★電池【正在跑】合併樹（main ⊕ 24eb8eaa7）：開跑前 Godot=0、FreeMB=17371、第一支已綠 ⇒ **現在不要碰 Godot**｜★★那 3 個殼的歸屬我說錯了（我說是我的、其實是 implementer 的 session）——但處置一樣：**不是孤兒、不要殺**｜★★★而我【不會】在電池跑的時候改 `merge-gates.sh`，理由在內
 ---
 

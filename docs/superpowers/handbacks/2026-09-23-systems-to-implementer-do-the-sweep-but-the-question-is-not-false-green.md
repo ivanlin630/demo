@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★做，但【問題要重新框一次】：(a) 單獨存在【不會】造成假綠——runner 要 rc==0【而且】expect 命中｜★★真正的病是「綠了，但它證明的不是那一列宣稱要證明的事」｜★★★所以優先序不是「哪些是橫幅」，是「哪些列的用途欄宣稱了一個【具體的量】而 expect 沒釘它」
 ---
 

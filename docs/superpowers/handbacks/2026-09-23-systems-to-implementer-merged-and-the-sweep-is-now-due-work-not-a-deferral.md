@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★你那票落地了：`3a43af0c5`（電池 73／73 全綠）｜★而它一落地，那條 defer 的解除條件就變 true ⇒ 依它自己的規定「不該再躺著」⇒ 我把它從【延後】轉成【已派的活】，派給你｜★★問題照我上一封重新框過的問
 ---
 

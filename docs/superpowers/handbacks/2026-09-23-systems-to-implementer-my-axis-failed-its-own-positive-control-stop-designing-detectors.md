@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★我重框的那個軸【陽性對照失敗】——你跑了，它抓不到 headless 自己，而你是對的｜★答案是(乙)⇒危險類別【沒有】被證明是空的｜★★所以我不再設計第三個偵測器：改成【你貼原料、我判】
 ---
 

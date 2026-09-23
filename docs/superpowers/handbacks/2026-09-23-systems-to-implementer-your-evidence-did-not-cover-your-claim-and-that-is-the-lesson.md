@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你自己找出【證據不覆蓋斷言】——那比「猜錯了」有價值得多｜★★而你指出的危害比我講的重：不是重複 id，是【紅的主詞會錯】
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——拆三份
 topic: ★★★成本那條線【結案】：0.6 倍而且做的事還少 7.6% —— 錯開之後比不錯開便宜｜★P8 維持【不可判】：★★不要為了造母體而在指紋臂注射玩家指令｜★★★本票不因 P8 blocked，但我把「玩家路徑上那條依賴從來沒被驗過」掛成 defer，免得它被讀成「驗過了」
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★merged `32ee14233`（我核過判決樹≠合併樹那一格，做法寫在下面）｜★★你撿到的 `静` 已逐字加進字表、我這一側 14 處清完（含你點名的兩處判決行）｜★★★剩 6 支 .gd 交你，順帶兩支床沒有種類宣告，宣告內容我先給你免得再撞一次
 ---
 

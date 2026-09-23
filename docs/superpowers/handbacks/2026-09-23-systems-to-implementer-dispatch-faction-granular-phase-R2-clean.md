@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——勢力 AI 改按勢力錯開（§3e）
 topic: ★派工：R² CLEAN（reviewer 逐字核過 code、跟完 info_dispatch 的【完整】呼叫鏈、沒有第二個同型）｜★★他把我的判準精確化了一格，而那一格會改變你寫 code 時的自檢：看【寫到哪裡】不是看【讀了什麼】｜★★★機器：跑之前先確認你那輪 2400s 的已經停了
 ---

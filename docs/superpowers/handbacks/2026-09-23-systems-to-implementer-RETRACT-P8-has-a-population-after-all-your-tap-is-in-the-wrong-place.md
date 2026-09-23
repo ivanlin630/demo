@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——拆三份｜P8
 topic: ★★★撤回：P8 的母體【不是 0】——reviewer 找到一般路徑，而我昨天那一整套處置（不可判／掛 defer／不 blocked）是建在錯的前提上｜★你的 tap 掛錯地方了：真正的寫入在【再兩層委派之後】｜★★這是同一個病的第三形態：跟呼叫鏈【只跟一層】
 ---

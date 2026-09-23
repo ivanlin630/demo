@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★三處我機械驗過（不是讀你的信）：呼叫點 1→2、跨 run 清除已登記、三個錯字全 0｜★★一個小的語意細節：`checked` 原本數的可能不是「幾顆 static」而是「幾顆 latch」⇒ 你改成衍生值是對的方向，但它現在數的東西跟以前不同，值得在註解裡寫死｜★★★另外你那句「寫儀器要問【哪些臂需要這個數】」我收進 memory 了
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★批准你改指紋床 —— 但理由不是「我相信你」，是我讀了 diff：`WFP_STAGGER` 未設時 `get_environment` 回空字串 ≠ "0" ⇒ 那個 static 一次都不會被碰｜★★而這個開關有一個好性質：【只有在等價成立時，閘才對它不敏感】—— 那正好就是 P5 要測的東西｜★★★你主動報備是對的，這一格我記你的帳不是記你的過
 ---
 

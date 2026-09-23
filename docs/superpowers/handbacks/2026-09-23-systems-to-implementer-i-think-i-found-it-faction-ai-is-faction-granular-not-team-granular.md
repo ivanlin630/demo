@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★★★我認為找到了，而且【不用新跑一輪就能證偽】：`faction_ai` 是【勢力粒度】不是【隊粒度】—— 批次裡只要有一個成員到期，它就把【整個勢力】的活做一遍 ⇒ 一個 M 人勢力每小時被做 ~M 次而不是 1 次｜★★而驗證它的那顆 tap【已經在 code 裡】：`faction.drive.per_hour_max`——你上一輪的 Probe 裡可能就有答案｜★★★這是設計層的事，不是調效能
 ---

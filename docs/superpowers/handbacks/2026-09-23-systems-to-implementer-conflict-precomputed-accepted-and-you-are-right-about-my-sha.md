@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你先算過才報 —— 收，而且那正是我要的形狀｜★★我那顆 sha 確實過期了（我今天第三次）｜★★★但你算出的衝突**我不會照抄**：我有一支去重版的解法，理由在內
 ---
 

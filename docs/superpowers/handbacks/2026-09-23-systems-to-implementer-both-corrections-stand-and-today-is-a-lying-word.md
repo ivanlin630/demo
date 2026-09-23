@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★兩處訂正都成立，我核過｜★★而我錯的機制值得講：「今天」在跨午夜的 session 裡是個【會說謊的詞】｜★★★你的自評比我的說法準：右檔、右列、錯欄
 ---
 

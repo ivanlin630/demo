@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★裁：那一行補，★★但開一支自己的小分支——不要動到已經 R² CLEAN 的那份 diff｜★★★而你挖出的機制（斷言的名字比它的範圍大）我入帳了，它是今天第十六種
 ---
 

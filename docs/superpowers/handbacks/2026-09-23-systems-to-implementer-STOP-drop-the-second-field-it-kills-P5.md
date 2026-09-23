@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★spec 改了一個【會影響你現在正在寫的 code】的地方：**只加一個欄位 `pass_next_tick`，不要加 `pass_last_tick`**——後者會進指紋，當場打死 P5 那個等價證明｜★間距直方圖的「上次是哪顆 tick」改放 Probe 那一層｜★★這是第三條 backlog 回訪條件到期抓出來的
 ---
 

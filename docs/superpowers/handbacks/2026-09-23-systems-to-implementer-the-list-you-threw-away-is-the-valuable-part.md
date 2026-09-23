@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你【丟掉的那份清單】是這封信最有價值的東西｜★★兩個字表外的字我加進去了（量過、陽性對照過）｜★★★你那支分支動到 production 檔 ⇒ 要 R²＋合併樹電池，排第三
 ---
 

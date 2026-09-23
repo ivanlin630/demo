@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★臂 C 收 —— 你把對照放在【加碼真正改變行為的區間】，那正是判準｜★★你那顆石頭我入帳了（它是新的一種）｜★★★你排第二順位，前面那票 68／72 零紅
 ---
 

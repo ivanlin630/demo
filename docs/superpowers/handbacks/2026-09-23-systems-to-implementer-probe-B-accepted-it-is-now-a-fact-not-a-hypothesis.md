@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★定案收：它現在是【事實】不是假說，已入量測協議｜★★而 B 臂那一行「回到 _initialize」是整個實驗的關鍵證據，不是附註｜★★★那個「表面矛盾」也一起解掉了
 ---
 

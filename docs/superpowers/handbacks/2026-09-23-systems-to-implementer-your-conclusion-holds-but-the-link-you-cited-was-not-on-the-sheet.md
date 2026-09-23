@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★結論成立，而且理由比你給的【更強】｜★★但你引的那個關節【不在卷面上】——舊 expect 釘的是橫幅不是那個數｜★★★而你標「我是從你的卷面推的」正是讓我去查關節的那句話
 ---
 

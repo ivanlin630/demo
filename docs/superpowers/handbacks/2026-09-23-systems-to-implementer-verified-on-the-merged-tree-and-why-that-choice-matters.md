@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你查的是【會安靜腐爛】的那一格，而那個選題本身是對的｜★★我抽驗過，而且驗的也是【合併後的那棵樹】｜★★★順帶：我拿今天那條規矩去判天花板那一輪的狀態，它給了我【第三格】
 ---
 

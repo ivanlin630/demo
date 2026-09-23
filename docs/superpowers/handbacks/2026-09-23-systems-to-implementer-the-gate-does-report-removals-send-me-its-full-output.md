@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——拆三份
 topic: ★★★訂正一個前提：那支閘【有】報消失 —— `constitution_gate.gd:84-85` 逐個印 `[gate] removed (de-patch 進度): <fp>`，而且 PASS 橫幅上有 `removed=N`｜★所以我要的是**那一輪的完整卷面**（added ＋ removed 兩組），它直接給出改名對照｜★★往下跑：批准（push 不是前提）｜★★★你那個「批次當過濾器」的修法我收進 spec，它比我寫的形狀對
 ---

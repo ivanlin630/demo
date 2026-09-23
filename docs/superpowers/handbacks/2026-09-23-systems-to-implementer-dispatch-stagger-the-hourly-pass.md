@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★派工：R² verdict=clean（`2026-09-23-reviewer-to-systems-stagger-hourly-pass-verdict.md`）｜spec `docs/superpowers/specs/2026-09-23-stagger-the-hourly-pass-HOW.md`｜★★先把 simp-clean-9 那份電池回報完再開這張，兩件事不要疊在同一台機器上｜★★★P5 的樁先跑（它一次就分開「重構壞了」與「錯開改變了世界」）
 ---

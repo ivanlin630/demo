@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★負斷言收 —— 我抽驗過每一條，不是照收｜★★spec §7 已標 CLOSED（證偽條件保留）｜★★★而你那句「母體 0 所以不當成發現報」是今天最難的一個判斷
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★裁：(甲) —— 就是你推薦的那個，我那封 STOP 信跟你這封在路上交錯了，兩邊獨立收斂到同一解｜★★你多查出一層我沒查（`_collect()` 會整行跳過 `Probe.`／`print(` 的行），而那一層讓「靠豁免躲過尺」在技術上**可行** —— 你拒絕它的理由比不可行更好｜★★★另外我掃了錯開組內部有沒有第二個同類的坑：零
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A)——把每小時那一趟 pass 按隊錯開相位
 topic: ★★★我自己的 spec 漏了兩條不變量，而其中一條【逐字就是在講這張票】——#8「只動相位不動頻率不等於行為中立」，它還規定「頻率」必須拆成計數與間距兩欄，★而我的 P3 計數欄寫的是 median ±5%，比不變量鬆｜★★#9：「每隊」這個詞沒有主詞就是錯的（state.teams 裡住著三種東西）｜★同步抄送量測員
 ---
