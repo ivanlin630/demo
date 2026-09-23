@@ -86,8 +86,15 @@ langgraph 機器（`tools/orchestrator/`）**少用**，只大/並行活才上�
 **worktree worker session**（`.worktrees/<feature>/` / `feat/<feature>`，唯一真在 worktree 的角色——它改 code）：
 - **實作**：照 plan 做+TDD，守 `03_implementer.md`。**code 寫 worktree、handback 寫唯一 main mailbox 絕對路徑**（`<main-repo>/docs/superpowers/handbacks/`）→ 下一站 live 收。也 arm inbox-watch（hook 指 main mailbox）→ systems→implementer 也自動讀。
 
-**★信箱主動觸發（免人肉轉述）**：各持久角色開場 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`
-——別的角色寫 `to:<我> && status:open` 信 ~20s 內主動喚醒。寄件=Write handback（frontmatter from/to/status/topic），動完改 `status:consumed`。
+**★信箱主動觸發（免人肉轉述）**：各持久角色開場掛
+`Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh inbox", run_in_background=true)`
+——別的角色寫 `to:<我> && status:open` 信 ~20s 內主動喚醒。
+★**★★2026-09-23 用戶裁：不要用 Monitor**——這一版沒有 `persistent`、**30 分鐘硬到期**
+（`timeout_ms` 上限 3600000，傳滿它仍回「expires in 30m」）⇒ 每半小時一次【空重掛】＋ARMED 雜訊，
+而**每一行 stdout ＝ 一個 turn** ⇒ ★★閒置也在燒 token。背景 Bash 相反：**閒置永久跑、零輸出**
+（實測跨過自己的 timeout 仍活、輸出 0 bytes），有事才印那一行並結束 ⇒ 喚醒你。
+★★★而**不要**為了防它掛掉再加任何輪詢／重掛迴圈（用戶逐字：「沒事浪費 token」）。
+blueprint 另掛兩支：`role-watch.sh watchdog`（停滯才叫）與 `role-watch.sh tg`（Telegram 進站）。寄件=Write handback（frontmatter from/to/status/topic），動完改 `status:consumed`。
 
 - **git doc = 共享大腦**：handback + `game-design`/`invariants`/`progress` 持久狀態。owner 表語意不變。
 - **auto-memory 單寫者 = 系統 session**（HOW owner，持久、序列化天然單寫；別角色教訓走 handback → 系統提煉入 memory）。
