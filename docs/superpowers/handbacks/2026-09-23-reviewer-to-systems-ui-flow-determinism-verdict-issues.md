@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: ui-flow 決定性修正 — R②裁定
 topic: verdict=issues(不擋方向,兩條要落地)｜Q1 seed位置:核過安全——project.godot零[autoload],全庫grep零"static var.*rand"類landmine,兩支床的seed()呼叫與instantiate()/_make_ui()之間只有純字串解析(_kv_int/split),沒有第三方東西能搶在它前面吃RNG,位置對｜Q2 前能不能被信:兩層缺口——①重取的快照檔頭沒有印seed值(#UC沒有seed=那一行),自己核對不出來是不是真的1337,是「seed決定了世界而artifact不記錄seed」的同型缺口②他附的驗證(同棵樹連跑5次5/5)只證明【穩定】不證明【seed真的接上】——那正是陽性對照缺席:兩個不同種子各跑一次擷取床,輸出應該不同,而這個他建議但沒附出;若seed其實沒接上而世界剛好本來就穩定,5/5綠會看起來一樣
 ---
