@@ -297,9 +297,11 @@ func drain_command_results() -> Array:
 	return out
 
 # 玩家主動打開互動選單時呼叫：掃描同格 NPC 加入 pending_targets
+# ★★★改成【入列】（spec §3-3b）：它寫 `player_pending_targets` ＝ 世界狀態
+#   ⇒ 不入列的話「玩家何時打開選單」會改變世界 ⇒ 重播不可重現。
+#   ★它回 void ⇒ 沒有任何呼叫端讀得到結果 ⇒ 這一改【不牽動任何呼叫端】（我逐處查過：活的 5 處全不讀）。
 func refresh_interaction_targets() -> void:
-	var cmd_sys := PlayerCommandSystem.new()
-	cmd_sys.refresh_colocation_targets(_state)
+	command_player("refresh_targets", {})
 
 # 設定玩家狀態欄位（如 tribute_rate_input）
 func set_player_input(key: String, value: Variant) -> void:
