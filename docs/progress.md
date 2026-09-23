@@ -2543,3 +2543,61 @@ merge 電池跑在 merged result（不是分支——★world-fp 兩行只登在
   ⇒ 數字回來那一刻，結論是【被規則決定的】不是被我讀出來的。
   而它救的正是①那個錯：「設計一個沒有人量過天花板的修法」。
 ```
+
+## 2026-09-23（下午）：凍結線出口之後 —— UI 五分頁兩張票開工
+
+★**世代 8 已開、凍結線已交玩**（P2 兩顆種子 >2s 天數 0/12、p99 257/267ms）
+⇒ blueprint 裁「下一站＝UI 五分頁兩張票 ＋ 給用戶一行怎麼開來玩」。
+
+```
+★交用戶的啟動指令（GUI、main、世代 8；★blueprint 已原句轉用戶，含「沒跑過」三個字）：
+  A:\GDS\demo\tools\godot\Godot_v4.2.2-stable_win64.exe --path A:\GDS\demo
+  ★不需要 build（Godot 4 直接跑 .gd）；★★.godot/ 已存在 ⇒ 不會卡首次 import
+  ★★★靜態驗過三件（exe 存在／main_scene 指向 TextUI.tscn 且該檔在／.godot 有 imported）——
+     【沒驗過畫面真的開起來】，而那是刻意的：用戶開起來的那一瞬間就是最好的測試
+```
+
+### ★★★這張票開工前抓到的事故（差一點發生，不是已發生）
+
+```
+scripts/ui/right_sidebar.gd  ← 我第一封信指給 blueprint 的地方
+  它只被 scenes/RightSidebar.tscn 用，而它只被 scenes/Main.tscn 用，
+  ★而 scenes/Main.tscn【全庫零引用】（最後動 2026-05-31）
+⇒ ★★照那封信派工 ⇒ 五分頁蓋在死碼上 ⇒ 【每一支閘都會綠】（沒有測試載入 Main.tscn）
+   而用戶打開遊戲什麼都看不到
+⇒ 玩家真正的路徑是 project.godot:14 的 TextUI.tscn（text_ui_main.gd 2018 行）
+★★★而這件事【2026-07-04 就寫在 known_issues.md 檔頭】：「Main.tscn 本體仍 dormant」
+   —— 它寫在【導言】不是【條目】⇒ 沒有狀態欄、沒有回訪條件、搜不到
+   ⇒ 已登 defers.tsv `dead-scene-tree-cleanup` 給它一個會叫醒人的掛鉤（不搭本票：刪除不可逆）
+```
+
+### 兩張票與判準
+
+```
+票A ＝ 五分頁的【框】（切得過去／頁首帶 (i/5)／未接欄位印具名天窗）
+票B ＝ 把欄位【餵進去】（母體＝走查今天印得出來的那些，不是「119 欄」）
+★合成一張時一個空格子有兩種解釋（框沒做好／沒接出）⇒ 紅燈沒有語意
+★★分頁名單 blueprint 裁 (乙)：生存／經濟／威脅／社交／記憶（意圖帳 line 42 他已改）
+   —— ★而 HOW 仍要求走查與畫面【共用一個常數】：裁定消滅今天的分歧，常數消滅明天再長一份
+★★★分頁狀態是一個 enum，不進 text_ui_main 那 11 個互斥模式旗標的 if 鏈（分頁與 overlay 是兩個軸）
+```
+
+**★★儀器訂正（blueprint 指錯、我抓到、他收）**：
+`--obs-*` 截圖 harness 畫的是 **ObserverMain（觀測 GUI）**，不是玩家的 TextUI
+⇒ 拿它截「五個分頁」會截到**沒有分頁的那棵樹**，而**那一格仍然會綠**（它只是存了一張圖）。
+⇒ 判準改走註冊表**既有**的 `ui-flow`（`merge-gates.tsv:93`，**不加閘**）：
+實例化 `TextUI.tscn` ＋ 驅鍵盤 handler ＋ 斷言 label 字串。
+★**文字 diff 優於截圖 diff**：截圖 diff 非空也可能只是時鐘走了一秒，而它說不出哪一格變了。
+★★截圖留一格冒煙，職責改成「**畫得出來、不是全黑不是崩**」——不是「內容對」。
+
+**狀態**：spec `docs/superpowers/specs/2026-09-23-ui-five-tabs-HOW.md` 已寫、**在 R²（reviewer）手上**；
+CLEAN 才派實作端。★實作端現在在跑改名驗證那輪（佔機器），**不搶**。
+
+### ★今天第二次「答案已經在庫裡，而我重新推導了一遍」
+```
+Q1（Main.tscn 死不死）  ⇒ 答案在 known_issues.md 檔頭（2026-07-04）
+Q2（TextUI 吃不吃鍵盤事件）⇒ 答案在 auto-memory（key-injection driver，2026-06-16 端到端驗過）
+⇒ ★★先問「有沒有人寫過」的成本，一直低於重新推導的成本
+⇒ ★★★而兩次都不是「忘了查」，是【查的地方不對】：一個在導言裡、一個在 memory 裡，
+   兩者都【不在我掃 code 的那條管道上】
+```
