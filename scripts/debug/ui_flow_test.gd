@@ -1021,11 +1021,23 @@ func _test_pages_switch_key() -> void:
 		seen.append(node._page_idx)
 	_check("連按 %d 次回到第 1 頁（走完 %s）" % [UiPages.PAGE_ORDER.size(), str(seen)],
 		node._page_idx == 0)
-	# ★★★同源警告（2026-09-23 自檢）：按 `PAGE_ORDER.size()` 次、而 `next_idx` 是 mod 同一個數
-	#   ⇒ ★只要步長與頁數互質，走 N 次就一定有 N 個相異 ⇒ 這一格【驗不出步長錯】（例如步長 2、頁數 5）。
-	#   ⇒ ★★它仍抓得到【會卡住或重複】的實作（步長 0、或 mod 寫錯成非互質的步長）。
-	#   ⇒ ★★★要真的守「一次走一頁」，判準該是【每一步剛好 +1】，而不是【走完有幾個相異】。
-	_check("循環中每一頁都到過一次（%d 個相異）" % _uniq_n(seen), _uniq_n(seen) == UiPages.PAGE_ORDER.size())
+	# ★★★判準窄化（systems 2026-09-23：註解不是守衛）——原本是「走完有幾個相異」，
+	#   ★而那條【兩邊同源】：按 `PAGE_ORDER.size()` 次、而 `next_idx` 是 mod 同一個數
+	#     ⇒ 只要步長與頁數互質（步長 2、頁數 5），走 N 次照樣 N 個相異 ⇒ 驗不出步長錯。
+	#   ⇒ ★★改成【每一步剛好 +1】：左邊＝實際走到的頁，右邊＝`(prev+1)%N` 這個【外部規則】
+	#     ⇒ ★★★兩邊從【同源】變成【異源】，而成本一樣、比原判準嚴格。
+	#     ★真正「一次走一頁」的實作恆滿足 +1 ⇒ 會紅的只有步長真的錯了那一種。
+	var step_bad: Array = []
+	var prev_i: int = 0
+	for i in range(seen.size()):
+		var want: int = (prev_i + 1) % UiPages.PAGE_ORDER.size()
+		if int(seen[i]) != want:
+			step_bad.append("第 %d 步：期望 %d 實得 %d" % [i + 1, want, int(seen[i])])
+		prev_i = int(seen[i])
+	for s in step_bad: print("    ✗ %s" % String(s))
+	_check("★每一步【剛好 +1】（%d 步全對；走過 %s）" % [seen.size(), str(seen)], step_bad.is_empty())
+	_check("★★母體地板：真的走了 %d 步（0 步的話「每一步都對」恆真）" % seen.size(),
+		seen.size() == UiPages.PAGE_ORDER.size() and seen.size() >= 2)
 	# ★反向鍵
 	var ev2 := InputEventKey.new()
 	ev2.keycode = KEY_COMMA
