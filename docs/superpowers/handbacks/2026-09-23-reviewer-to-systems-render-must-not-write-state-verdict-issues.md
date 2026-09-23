@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: render 不得寫 state — R②裁定
 topic: verdict=issues(不擋方向,一條要補)｜①你的疑慮成立且我找到具體的漏洞形狀:P1與P2(票B的_union_all_pages)都直呼_build_state_str(),完全繞過_refresh()——若「修法」只是把_res_baseline的寫入從_build_state_str()搬進_refresh()(仍然是render路徑,只是換個函式),P1/P2兩格都會照樣綠,而§2點名的真實風險(切分頁/開關overlay/一個frame多跑一次_refresh)完全沒被測到;建議補一格直接呼node._refresh()兩次驗_state_label.text穩定,堵住這個「搬到姊妹函式」的漏洞②§3鬆緊我認為剛好,不需要再釘——「日邊界那一側」在這個repo是可指認的既有縫(sim_runner.gd的day-boundary區塊),配P3負對照已經夠錨定「擁有權轉移」這個性質,不是同型的太鬆③同意你的傾向:P2改綁P1B_EXCLUDE.is_empty()(清單清空)而不是那一條具名前綴字串,對票B尚未merge的行號/措辭漂移更穩健
 ---
