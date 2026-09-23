@@ -100,9 +100,22 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	#   ★★成本：O(隊數) 的欄位比較，且【已登記的隊直接 continue】。
 	state.auto_register_stub_sweep()
 	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick（不計時，非真 tick）
+	# ★★★凍結分支【也要消費】（systems 裁 2026-09-24，spec §3-2 訂正）——
+	#   ★病不是「選繼承人那條卡住」，是【凍結世界裡的每一條指令都被靜默丟棄】：
+	#     玩家等繼承人時按移動，什麼都不會發生、也沒有任何一句話
+	#     ⇒ 而 blueprint 裁的「拒絕禁靜默」【沒有寫「凍結時除外」】。
+	#   ★★而死鎖只是它最尖的那個症狀：唯一能解凍世界的那條指令，
+	#     自己也在「不會被消費」的那一批裡 ⇒ 永久卡住。
+	#   ★★★消費的【位置】有三處，消費的【實作】仍然只有一份
+	#     —— P3（無後門）的判準因此從「只有一處呼叫 dispatch」改成
+	#        「只有 `_consume_player_commands()` 這一支會呼叫 dispatch」。
+	#   ★這裡記到的 tick 是【沒有遞增的那個】—— 凍結時 current_tick 不動，
+	#     所以「記遞增後的值」那條規則在這裡沒有第二個候選，不是例外。
 	if state.game_over:
+		_consume_player_commands(state)
 		return "game_over"
 	if state.player_forced_event.get("action", "") == "choose_heir":
+		_consume_player_commands(state)
 		return "awaiting_heir"
 	# #3 tick 計時：包真 tick 工作的 wall-time（含 encounter / ambush / 常規三路徑）
 	var _perf_t0: int = Time.get_ticks_usec()

@@ -31,7 +31,8 @@ const BAD_TILE: Vector2i = Vector2i(9999, 9999)
 const EXPECTED_CELLS: Array = ["_test_replay_same_fp", "_test_negative_boundary_shift", "_test_queue_defers",
 	"_test_p9_enqueue_echo", "_test_p10_result_lines", "_test_p12_reject_comes_late",
 	"_test_p13_queries_are_pure", "_test_p13b_confirm_has_a_landing_point",
-	"_test_p14_reading_does_not_change_the_world", "_test_p14b_results_expire_by_tick"]
+	"_test_p14_reading_does_not_change_the_world", "_test_p14b_results_expire_by_tick",
+	"_test_p16_frozen_world_still_answers"]
 
 
 func _cell(name: String) -> void:
@@ -277,6 +278,7 @@ func _initialize() -> void:
 	_test_p13b_confirm_has_a_landing_point()
 	_test_p14_reading_does_not_change_the_world()
 	_test_p14b_results_expire_by_tick()
+	_test_p16_frozen_world_still_answers()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
@@ -607,3 +609,80 @@ func _test_p14b_results_expire_by_tick() -> void:
 	_check("★★★走過一小時 ⇒ 它自己過期了（%d）—— 清除是世界的函數，不是觀眾的函數"
 		% st.command_results.size(), st.command_results.is_empty())
 	_cell("_test_p14b_results_expire_by_tick")
+
+
+# ══════════ P16［凍結的世界也要回話，而且解得開］（systems 立 2026-09-24）══════════
+# ★★★缺陷變對照：2026-09-24 第一次跑抓到死鎖 —— `game_over`／`choose_heir` 在
+#   `_advance_tick_body()` 【被呼叫之前】就 return，而消費點在它裡面
+#   ⇒ 凍結世界裡的每一條指令都被【靜默丟棄】，而唯一能解凍的那條也在裡面 ⇒ 永久卡住。
+# ★而病不是死鎖，死鎖只是最尖的症狀：★★真正的病是【凍結分支不在消費點的母體裡】。
+#   ⇒ 修了症狀而沒有守衛的話，下一次有人在 `_advance_tick_body` 之前再加一條 early return，
+#     同樣的病會回來，★★★而它回來的樣子仍然是「玩家按了沒反應」——一個沒有任何東西會紅的症狀。
+# ★母體地板：那一輪必須【真的處在凍結狀態】（斷言 advance_tick 回 "awaiting_heir"），
+#   否則這一格會在一個從未凍結的世界上恆綠。
+func _test_p16_frozen_world_still_answers() -> void:
+	print("
+── P16 凍結的世界也要回話，而且解得開 ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var runner: SimRunner = pair[1]
+	var bridge := SimBridge.new(runner, st)
+	if st.player_id < 0 or not st.persons.has(st.player_id):
+		_errors += 1
+		print("  ★[不可判] 沒有玩家")
+		_cell("_test_p16_frozen_world_still_answers")
+		return
+	var ptid: int = int(st.persons[st.player_id].team_id)
+	var pt: TeamData = st.teams[ptid]
+	# 佈置：leader 已死、等待選繼承人（★沿用 ui_flow_test 既有的佈置形狀，不另造一份）
+	var cands: Array = []
+	for pid in pt.named_members:
+		if pid != pt.leader_id:
+			cands.append(pid)
+		if cands.size() >= 2:
+			break
+	while cands.size() < 2:
+		var np := PersonData.new()
+		np.id = 91000 + cands.size()
+		np.team_id = ptid
+		np.person_name = "候選%d" % cands.size()
+		st.persons[np.id] = np
+		pt.named_members.append(np.id)
+		cands.append(np.id)
+	pt.leader_id = -1
+	st.player_forced_event = {"action": "choose_heir", "team_id": ptid, "candidates": cands}
+	st.player_forced_event_id = "heir-replay"
+	# ★★母體地板：世界【真的】凍住了
+	var r0: String = runner.advance_tick(st, Vector2i(-1, -1))
+	_check("★★母體地板：世界真的處在凍結狀態（advance_tick 回「%s」）" % r0, r0 == "awaiting_heir")
+	if r0 != "awaiting_heir":
+		print("  ⇒ 沒有凍住 ⇒ 下面兩格會在一個【從未凍結的世界】上恆綠 ⇒ 不可判")
+		_cell("_test_p16_frozen_world_still_answers")
+		return
+	# ①凍結時送一條【非解凍】指令 ⇒ 必須有回話，不是沉默
+	st.command_results = []
+	bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})
+	var r1: String = runner.advance_tick(st, Vector2i(-1, -1))
+	_check("★仍在凍結中（「%s」）" % r1, r1 == "awaiting_heir")
+	for e in st.command_results:
+		print("  凍結中的回話：「%s」" % String(e.get("text", "")))
+	_check("★★★凍結時送指令【有回話】而不是沉默（%d 句）" % st.command_results.size(),
+		st.command_results.size() >= 1)
+	_check("★而它進了帳（command_log %d 條）" % st.command_log.size(), st.command_log.size() >= 1)
+	# ②再送【解凍】指令 ⇒ 世界必須真的解凍
+	bridge.command_player("respond_to_forced",
+		{"interaction_id": "heir-replay", "response_id": "heir_%d" % int(cands[0])})
+	# ★★★時點：凍結檢查在【消費之前】⇒ 消費的那一顆 tick【必然】仍回 awaiting_heir。
+	#   ★我第一版就斷在那一顆上，而它紅了 —— 但同一行印出的 leader_id 已經換人了
+	#     ⇒ 指令【有生效】，錯的是我的觀察時點，不是產品。
+	#   ⇒ ★★所以要走兩顆：第一顆消費（世界在這一顆的開頭還是凍的），第二顆才觀察得到。
+	#   ★★★而這一格因此同時守住兩件事：解凍要生效、而且【下一顆 tick 就要看得到】
+	#     —— 不是「再過一小時自己好了」。
+	var r2: String = runner.advance_tick(st, Vector2i(-1, -1))
+	var heir_now: int = int(pt.leader_id)
+	var r3: String = runner.advance_tick(st, Vector2i(-1, -1))
+	print("  消費那一顆：「%s」｜leader_id=%d ⇒ 下一顆：「%s」" % [r2, heir_now, r3])
+	_check("★消費的那一顆 tick 仍回 awaiting_heir（凍結檢查在消費之前）", r2 == "awaiting_heir")
+	_check("★★繼承人【真的就位】（leader_id 從 -1 變成 %d）" % heir_now, heir_now == int(cands[0]))
+	_check("★★★下一顆 tick 世界就解凍了（「%s」）" % r3, r3 != "awaiting_heir")
+	_cell("_test_p16_frozen_world_still_answers")
