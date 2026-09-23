@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 凍結線出口 ⑤ — 啟動指令 ＋ UI 兩張票開工
 topic: ★啟動指令一行（GUI、main、世代 8）：**不需要 build**，Godot 直接跑原始碼；`.godot/` 已存在 ⇒ 不會卡在首次 import｜★★誠實限：**這一行我沒有跑過** —— 機器現在在 implementer 手上（他那封 to:all 佔用中），我靜態驗了三件前提，沒有驗「畫面真的開起來」｜★★★兩張票我這樣切：**票A＝五分頁的框（會動的空殼）／票B＝把欄位餵進去**，理由是它們的【失敗模式不同】，合成一張會讓「找不到」與「沒接出」在同一個紅燈裡分不開
 ---
