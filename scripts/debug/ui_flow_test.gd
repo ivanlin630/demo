@@ -1415,42 +1415,56 @@ func _test_render_idempotent() -> void:
 	await _free_ui(node)
 	_cell("_test_render_idempotent")
 
-# ★★★P1b[堵住「搬到姊妹函式」]：★比較【不同呼叫次數的歷史】，不是連續呼叫兩次。
-#   ★★reviewer 2026-09-23 訂正（而我自己送審時就標了懷疑）：
-#     連續呼叫兩次【測不到】「把寫入搬進 `_refresh()`」這個非修法 ——
-#     兩次之間世界沒有變化，第一次就把基準寫定，第二次讀到同一個值，
-#     ⇒ ★不管擁有者在哪，兩次都會一致 ⇒ 那一格【恆綠】。
-#   ★★★原始症狀的真實形狀是【1 次 vs 5 次】（票B 的 P1-b 就是撞到這個）：
-#     「前」是單獨一次產生的，「後」是聯集比對呼叫了 5 次 ⇒ 呼叫史不同 ⇒ 箭頭不一致。
-#   ⇒ 所以這裡開【兩個世界相同的 node】，一個畫 1 次、一個畫 5 次，比最後那一次的字。
-#     ★兩個 node 走同一支 `_make_ui()`（內含 seed）⇒ 世界相同 ⇒ 差的只有呼叫史。
-#   ⇒ ★★這樣本票【不必等票B merge】就有真正的鑑別力。
+# ★★★P1b[堵住「搬到姊妹函式」]：★塞一個【陳舊的基準】，畫一次，看 render 動不動它。
+#
+# ★★這一格改過兩次，兩次都是因為前一版【證明得出來是恆綠的】：
+#   v1「連續呼叫 _build_state_str() 兩次」⇒ 繞過 _refresh()，把寫入搬進 _refresh() 照樣綠。
+#   v2「呼叫史 1 次 vs 5 次」⇒ ★reviewer 2026-09-23 提疑、而我靜態推完證實他對：
+#      壞設計下第 1 次就把基準寫定，第 2–5 次 `day == _res_baseline_day` 直接跳過
+#      ⇒ n1 與 n5 算出【同一個值】⇒ 恆綠。★★整段測試沒有 tick 推進，世界資源不會變，
+#        「這個 instance 第一次 render 時基準＝當下資源」對兩邊同樣成立。
+#   ⇒ ★★★所以鑑別力的真來源不是【畫幾次】，是【基準與現值不同】——
+#     而那個差異我可以直接塞進去，不必等世界跨日。
+#
+# 塞法：`_res_baseline` 設成比現值高一截、`_res_baseline_day` 設成一個不可能等於今天的值。
+#   壞設計（render 會寫）⇒ 它看到 day != -999 ⇒ 當場把基準覆寫成現值 ⇒ 箭頭【持平】、且欄位被改。
+#   好設計（render 只讀）⇒ 基準留著 ⇒ 現值 < 基準 ⇒ 箭頭【↓】、且欄位原封不動。
+# ★兩個方向都驗：只驗「沒被改寫」的話，一支【根本不讀基準】的 render 也會綠。
 func _test_refresh_idempotent() -> void:
 	_selftest_gate("_test_refresh_idempotent").noop()
 	print("
-── render P1b 呼叫史 1 次 vs 5 次 ──")
-	var n1 = await _make_ui()
-	n1._page_idx = 1
-	n1._refresh()
-	var once: String = n1._state_label.text
-	await _free_ui(n1)
-	var n5 = await _make_ui()
-	n5._page_idx = 1
-	for _i in range(5):
-		n5._refresh()
-	var five: String = n5._state_label.text
-	_check("★母體地板：_state_label 真的有內容（%d 字）" % once.length(), once.length() > 50)
-	_check("★★母體地板：這一輪真的有資源行（「食:」）—— 沒有的話箭頭不存在 ⇒ 恆真", once.contains("食:"))
-	_check("★★★畫 1 次與畫 5 次的輸出逐字相同（呼叫史不得影響畫面）", once == five)
-	if once != five:
-		var la: PackedStringArray = once.split(chr(10))
-		var lb: PackedStringArray = five.split(chr(10))
-		for i in range(min(la.size(), lb.size())):
-			if la[i] != lb[i]:
-				print("    第 %d 行不同：
-      1 次「%s」
-      5 次「%s」" % [i, la[i], lb[i]])
-	await _free_ui(n5)
+── render P1b 陳舊基準：render 只准讀不准寫 ──")
+	var node = await _make_ui()
+	node._page_idx = 1
+	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
+	var res: Dictionary = ct.get("resources", {})
+	_check("★母體地板：查詢面真的有資源（%d 個欄位）—— 沒有的話下面全是空談" % res.size(),
+		not res.is_empty())
+	if res.is_empty():
+		await _free_ui(node)
+		_cell("_test_refresh_idempotent")
+		return
+	const STALE_DAY: int = -999
+	var planted: Dictionary = {
+		"food": float(res.get("food", 0)) + 1000.0,
+		"coin": float(res.get("coin", 0)) + 1000.0,
+		"material": float(res.get("material", 0)) + 1000.0}
+	node._res_baseline = planted.duplicate()
+	node._res_baseline_day = STALE_DAY
+	node._refresh()
+	var txt: String = node._state_label.text
+	_check("★★render 沒有改寫基準的【日】（仍是 %d）" % STALE_DAY,
+		node._res_baseline_day == STALE_DAY)
+	_check("★★render 沒有改寫基準的【值】", node._res_baseline == planted)
+	# ★★★而它必須【讀】那個基準 —— 否則「沒被改寫」對一支根本不讀它的 render 也成立
+	_check("★★★而它讀了：現值低於基準 ⇒ 資源行出現「↓」（實際：%s）" % (
+			"有" if txt.contains("↓") else "沒有"), txt.contains("↓"))
+	# 附帶：呼叫史不得影響畫面（★這一項【自己】沒有鑑別力，見上面的 v2 檢討，留著當附加約束）
+	var first: String = txt
+	for _i in range(4):
+		node._refresh()
+	_check("附帶：再畫 4 次，輸出逐字相同（★此項單獨不具鑑別力）", node._state_label.text == first)
+	await _free_ui(node)
 	_cell("_test_refresh_idempotent")
 
 # P2[債還了]：★綁【清單長度】不綁那一條的名字 ——
