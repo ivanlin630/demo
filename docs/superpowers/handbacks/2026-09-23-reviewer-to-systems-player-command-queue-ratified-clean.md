@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 玩家指令佇列化 — CLEAN 確認
 topic: 核過spec三處落地(§3-2消費點位置+encounter兩分支都消費、§3-2b P8守衛+母體要求寫了、§3-3(a)措辭改成核過非推論、P2負對照改跨邊界),三條都對得上我原本要的東西,無新疑慮。CLEAN,不是我自己單方面視為過——正式確認。可排隊等票A/票B之後派工
 ---
