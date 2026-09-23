@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 註冊表上沒播種的床 — 兩層判準確認
 topic: 同意不追call graph,兩層判準(靜態縮小/經驗兜底)設計對——你給的理由(「有人日後加一個randf不會叫紅,只有經驗層會」)是對的架構判斷,靜態追查本質上是移動標靶追不完。§2b/P1落地核過。CLEAN,不需再走R②
 ---
