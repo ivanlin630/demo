@@ -12,7 +12,39 @@ set -u
 #   ★★而回報的人只能改口報離開碼，那一步靠的是他誠實，不是靠卷面。
 #   ⇒ 用 trap 印在【每一條離開路徑】上：包含 exit 1／exit 2／提前 exit 0，一條都不會漏。
 #   ★★★這是【構造保證】：在每個 exit 前面各加一行，會因為有人新增一條路徑而漏掉。
-trap 'echo "[MERGE-GATES] BATTERY_RC=$?"' EXIT
+trap '_rc=$?; rm -f "${MG_RUNFLAG:-}" 2>/dev/null; echo "[MERGE-GATES] BATTERY_RC=$_rc"' EXIT
+
+# ★★★【一次只准一份】的剎車（blueprint 指派 2026-09-23，血證：兩輪電池平行跑把機器吃爆）
+#   ★★為什麼不用「掃命令列裡有沒有 merge-gates」：★那會抓到【正在查這件事的那條指令自己】
+#     —— 2026-09-23 同一小時內三個人各踩一次（systems／implementer／blueprint）
+#     ⇒ 普查的第一個問題不是「有沒有別人」，是【樣本裡有沒有我自己】。
+#   ⇒ ★改成【構造】而不是【普查】：自己寫一個標記檔，裡面放自己的 PID。
+# ★★★而標記檔【單獨不夠】：harness 殺 shell 時 trap 不會跑 ⇒ 標記是舊的，
+#   而它的 Windows 子樹【還活著】（那正是 2026-09-23 那兩輪孤兒電池的形狀）
+#   ⇒ 所以第二道是【Godot 行程數】：開跑前不是 0 就不可判。
+MG_RUNFLAG=".claude/hooks/.merge-gates-running"
+if [ -f "$MG_RUNFLAG" ]; then
+  _mg_other=$(cat "$MG_RUNFLAG" 2>/dev/null)
+  if [ -n "$_mg_other" ] && kill -0 "$_mg_other" 2>/dev/null; then
+    echo "[MERGE-GATES] ★★★本輪【不可判】：已經有一輪電池在跑（PID $_mg_other）"
+    echo "[MERGE-GATES]   ⇒ 兩輪平行跑會互相拖慢並把機器吃爆（2026-09-23 血證）"
+    echo "[MERGE-GATES]   ⇒ ★等它跑完，或確認那顆 PID 已死之後刪 $MG_RUNFLAG"
+    exit 2
+  fi
+  echo "[MERGE-GATES] ★舊標記（PID $_mg_other 已不在）⇒ 接手。★★而【標記舊】不代表機器空：見下一格"
+fi
+echo $$ > "$MG_RUNFLAG"
+# 只留數字：不要用含跳脫字元的寫法（那個跳脫在寫檔時會變成真的換行，今天已經咬過兩次）
+_mg_godot_n=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' | tr -dc '0-9')
+if [ "${_mg_godot_n:-0}" != "0" ]; then
+  echo "[MERGE-GATES] ★★★本輪【不可判】：開跑前 Godot 行程數 ＝ $_mg_godot_n（必須是 0）"
+  echo "[MERGE-GATES]   ⇒ 可能是①別人在跑床 ②用戶自己的遊戲 ③上一輪被殺之後留下的【孤兒子樹】"
+  echo "[MERGE-GATES]   ⇒ ★★③的清法是【殺整棵樹】不是殺根：Windows 上殺父不會帶走子孫"
+  echo "[MERGE-GATES]   ⇒ ★★★而②【不准殺】—— 機器是跟用戶的遊戲共用的"
+  rm -f "$MG_RUNFLAG"
+  exit 2
+fi
+
 
 # ★★★記憶體卷面（blueprint 要求 2026-09-23，上一輪在第 6／75 支被 OOM 收掉）：
 #   ★跑前印 FreeMB ＋ top-5；跑中每 5 支印一次 ⇒ 下次被殺時，卷面自己說得出【當時剩多少】。
