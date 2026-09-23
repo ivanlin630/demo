@@ -134,9 +134,17 @@ text_ui_main.gd 今天有 11 個互斥的模式旗標：
 ```
 位置：TextUI.tscn 的 StateLabel 欄（右欄，custom_minimum_size 220）
       ＝ text_ui_main.gd:667 `_build_state_str()` 的產物
-切鍵：★★★**釘死 [<] [>]（即 `,` 與 `.`）—— [Tab] 明文排除**（implementer 靜態查證 2026-09-23）
+切鍵：★★★**釘死 [,] [.] —— [Tab] 明文排除**（implementer 靜態查證 2026-09-23）
+      ★★★提示字串寫 `[,][.]` 不寫 `[<][>]`（systems 收 implementer 的訂正 2026-09-23）：
+        `text_ui_main.gd` 全檔【沒有任何一處檢查 shift】（`grep shift_pressed` ⇒ 0 命中）
+        ⇒ `<`／`>` 的 keycode 就是 `KEY_COMMA`／`KEY_PERIOD`，按不按 shift 完全一樣
+        ⇒ ★寫 `[<][>]` 會讓玩家【以為要按 shift】—— 那是**畫面在誤導人**，行為卻一樣
       理由：`,`／`.` 只在【三個 overlay 的 handler】裡被吃，main 模式沒有 ⇒ 不撞，
             ★而且它【天然符合】「overlay 開著時切鍵不吃」這條判準（不必另寫防護）
+      ★★而「overlay 開著時切鍵不吃」是**結構性免費**的（implementer 實查）：
+        `_input()` 裡每一個 overlay 都在 main 的 `match` 之前 `return`
+        ⇒ ★不必另寫守衛；★★而 `,`／`.` 在 interact／storage／trade 裡是翻頁
+          （`:972`／`:1509`／`:1783`）⇒ 同一顆實體鍵在兩個情境各做各的，互不干擾
       ★★Tab 風險最高：Godot 的 Control 系統預設拿 Tab 做焦點切換，
         ★★★可能在 `_input` 之前就被吃掉 ⇒ 那會讓 P2 變成一格【看不出為什麼紅】的紅
       —— ★進 MODE_KEYMAP["main"] 的提示字串
