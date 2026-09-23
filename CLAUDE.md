@@ -76,6 +76,11 @@ langgraph 機器（`tools/orchestrator/`）**少用**，只大/並行活才上�
 詳 `docs/process/00_roles.md`（角色/owner/邊界本體）+ `07_mailbox_trigger.md`（信箱）+ `08_machine_workflow_v2.md`（機器軌）。
 
 **持久設計/驗收 session（`A:\GDS\demo` / `main`，平行開）**——啟動 `$env:SESSION_ROLE='<role>'; claude`：
+★**藍圖那個終端多帶一個**：`$env:CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP='1'; $env:SESSION_ROLE='blueprint'; claude`
+（用戶裁 2026-09-24，逐字：**「會死掉的看門狗 不是合格的看門狗」**——看門狗當天被 harness 的記憶體收割兩次。
+★★**只有藍圖那個終端要設**：跑 Godot／跑電池的 session【不要】，那些才是真的會吃記憶體的。
+★★★量：藍圖那個 session 不跑 Godot，唯一的背景 shell 就是看門狗＝一支睡著的 bash，幾 MB ⇒ 收割它省不到記憶體。
+★而 shell 裡設無效，只能在啟動 claude 時設。）
 - **藍圖**（WHAT）：願景/feature/平衡意圖。owner=`game-design.md`。
 - **系統**（HOW）：seam/契約/invariant/流程。owner=`invariants.md`/流程 docs/`progress.md`/`CLAUDE.md`/`docs/process/*`。守 `01_architect.md`。
 - **審查**（02 對抗）：factcheck/審 spec，skeptical/只信 file:line。守 `02_reviewer.md`。

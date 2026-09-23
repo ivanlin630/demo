@@ -54,6 +54,13 @@ git log --oneline 3da01d731..origin/main -- defers.tsv           ⇒ 3 顆
  5. ★跑全電池（釘死 HEAD 的 worktree）
  6. ★★讀法順序：`[TREE] HEAD=… registry=clean|DIRTY` → 母體數字 → 顏色
  7. ★★★判決看 `[MERGE-GATES] BATTERY_RC=<n>`，不看 shell rc
+ 8. ★★★**在【主 dir】跑一次 `.	ools\godot.ps1 --headless --import`，再 `--check-only` 玩家入口**
+    ⇒ ★血證（2026-09-24，**用戶開遊戲失敗**）：`text_ui_main.gd` Parse Error「UiPages not declared」
+      —— 主 dir 的 `.godot/global_script_class_cache.cfg` 停在 09-23 11:11，
+      而票A 新增的 `class_name UiPages` 不在裡面
+    ⇒ ★★真因不是 code：**電池跑在 worktree，主 dir 從來沒有 `--import` 過**
+    ⇒ ★★★**80／80 全綠，而遊戲開不起來** —— 因為**我們驗的地方不是玩家跑的地方**。
+    ★這一步不是提醒，是**判準**：`--check-only` 有錯 ⇒ **main 還不可交玩**。
 ```
 
 ★**這份表存在的理由**：做 merge 的是我，而**我的狀態帳會過期** —— 今天已經證明過我會拿記憶當現況。
