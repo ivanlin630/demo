@@ -27,8 +27,15 @@ HB="docs/superpowers/handbacks"
 [ -d "$HB" ] || exit 0
 n=$(ls "$HB"/*.md 2>/dev/null | wc -l | tr -d ' ')
 [ "${n:-0}" -le "$THRESHOLD" ] && exit 0
+# ★★★節流的【例外】（systems 2026-09-23，血證見下）：
+#   MIN_GAP_H 的用途是「六個角色開場不要互相踩 index.lock」，不是「讓信箱可以無限長」。
+#   ★實測 2026-09-23：上次歸檔（09-22T14:51）之後 20 小時內熱目錄 187 → 635，
+#     而 merge gate `mailbox-size` 的硬上限是 600 ⇒ ★★電池紅了，而節流讓它【最多 20 小時無法被清掉】
+#   ⇒ ★★★所以：熱目錄一旦逼近硬上限（MUST 以上），節流不適用 —— 否則守衛紅了而沒有人有權限修它。
+#   ★MUST 刻意低於 CEIL(600)：要在【紅之前】就動，不是等紅了才動。
+MUST=500
 stamp=".claude/hooks/.archive-last"
-if [ -f "$stamp" ]; then
+if [ -f "$stamp" ] && [ "${n:-0}" -lt "$MUST" ]; then
   last=$(head -1 "$stamp" 2>/dev/null | awk '{print $1}')
   case "$last" in (*[!0-9]*|'') last=0 ;; esac
   [ $(( $(date +%s) - last )) -lt $(( MIN_GAP_H * 3600 )) ] && exit 0

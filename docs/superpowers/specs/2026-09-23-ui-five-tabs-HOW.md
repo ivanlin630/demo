@@ -134,7 +134,12 @@ text_ui_main.gd 今天有 11 個互斥的模式旗標：
 ```
 位置：TextUI.tscn 的 StateLabel 欄（右欄，custom_minimum_size 220）
       ＝ text_ui_main.gd:667 `_build_state_str()` 的產物
-切鍵：[<] [>]（或 [Tab]）循環 —— ★進 MODE_KEYMAP["main"] 的提示字串
+切鍵：★★★**釘死 [<] [>]（即 `,` 與 `.`）—— [Tab] 明文排除**（implementer 靜態查證 2026-09-23）
+      理由：`,`／`.` 只在【三個 overlay 的 handler】裡被吃，main 模式沒有 ⇒ 不撞，
+            ★而且它【天然符合】「overlay 開著時切鍵不吃」這條判準（不必另寫防護）
+      ★★Tab 風險最高：Godot 的 Control 系統預設拿 Tab 做焦點切換，
+        ★★★可能在 `_input` 之前就被吃掉 ⇒ 那會讓 P2 變成一格【看不出為什麼紅】的紅
+      —— ★進 MODE_KEYMAP["main"] 的提示字串
       ★★在【任何 overlay 開著時】切鍵不吃（overlay 的鍵優先）⇒ 與 §2-2 的兩軸一致
 頁首：每頁第一行 `── 生存 (2/5) ──` ⇒ ★★★「我現在在第幾頁」必須在畫面上，
       否則用戶按了鍵卻不確定有沒有切過去（而他會以為是壞的）
@@ -310,7 +315,8 @@ Q5 [fp] 不變（同 P6）
 ①本 spec 全程【沒有跑 Godot】（機器在 implementer 手上）⇒ 所有斷言都是靜態 file:line
    ★★沒有驗過的：TextUI 真的畫得出來、切鍵不與現有鍵衝突
    （★MODE_KEYMAP["main"] 已佔用 WASD/Enter/M/Space/G/I/P/F/O/K/U/V/T/Q
-     ⇒ 切鍵選 [<][>] 或 [Tab] 是【看表挑的】，實作端請在第一次跑起來時確認）
+     ⇒ ★已收斂：implementer 2026-09-23 靜態查證 ⇒ 釘 [<][>]、排除 [Tab]，見 §2-3
+       ★★仍未跑過的只剩「Godot 實機上 `,`／`.` 真的進得了 `_input`」）
 ②分頁名單未經用戶簽（§0-4）⇒ 票A 的價值【不依賴名單正確】：框對了，改名是一行
 ③「Main.tscn 是死碼」＝ grep 零引用；★它不能排除「某個人手動在編輯器裡開它」
 ④★★而 ①的「切鍵沒驗過」**不等於 P2 判不了**：TextUI 可用 key-injection driver 驅動
