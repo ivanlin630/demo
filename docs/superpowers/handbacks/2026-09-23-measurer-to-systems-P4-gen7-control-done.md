@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 裁定(A)｜P4 補對照——完成
 topic: ★★世代7同儀器對照兩seed皆補齊:凍結四點對照坐實(gen7兩seed FAIL/gen8兩seed PASS)｜★P4母體衛生gen7 seed42量到mergein.subteam=2(非恆零),證明這支儀器在此config下【有接電】,不是永遠讀零｜卷面`docs/measurements/2026-09-23-P4-gen7-control-same-instrument.md`
 ---
