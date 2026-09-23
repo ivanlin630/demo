@@ -262,10 +262,25 @@ while IFS=$'	' read -r id cmd purpose expect; do
   #   ★誠實限：本判準只認【已知的環境簽名】；新的環境毛病會被归回測試紅（而那時就把它釘進來）
   _mg_env=0
   if ! { [ $RC -eq 0 ] && printf '%s' "$OUT" | grep -qE -- "$expect"; }; then
-    if printf '%s' "$OUT" | grep -qE 'UnauthorizedAccess|已停用指令碼執行|running scripts is disabled|無法載入.*\.ps1|cannot be loaded|這一輪沒有真的重跑'; then _mg_env=1; fi
+    # ★★★2026-09-23 追加 0xC0000142（implementer 血證）：`child exit=-1073741502`
+    #   ＝ DLL initialization failed ⇒ ★【行程根本沒起來】—— 引擎一次都沒被執行
+    #   ⇒ ★★它與「測試失敗」是兩件事，而它在畫面上長得一模一樣（都是一支紅）
+    #   ★★★而它那一輪是在【記憶體壓力】之下發生的（同一輪電池稍後被 harness 收掉）
+    #     ⇒ 這個碼出現時要先看 FreeMB，不要先查那支床
+    # ★★★而【成因要分開講】：這一行原本對所有環境紅都印「PowerShell 停用指令碼執行」
+    #   ⇒ 而 0xC0000142 那一種根本不是那個成因 ⇒ ★守衛印了一個【錯的解釋】，
+    #     那比不印更糟（讀的人會照著它去查錯的東西）。
+    _mg_env_why=""
+    if printf '%s' "$OUT" | grep -qE 'UnauthorizedAccess|已停用指令碼執行|running scripts is disabled|無法載入.*\.ps1|cannot be loaded'; then
+      _mg_env=1; _mg_env_why="PowerShell 停用指令碼執行（★修法：PSExecutionPolicyPreference=Bypass）"
+    elif printf '%s' "$OUT" | grep -qE 'child exit=-1073741502|0xC0000142'; then
+      _mg_env=1; _mg_env_why="DLL init failed（0xC0000142）＝行程根本沒起來 ★先看 FreeMB，不要先查那支床"
+    elif printf '%s' "$OUT" | grep -qE '這一輪沒有真的重跑'; then
+      _mg_env=1; _mg_env_why="這一輪沒有真的重跑"
+    fi
   fi
   if [ "$_mg_env" = "1" ]; then
-    echo "[MERGE-GATES] ⚡ENV $id （${DT}s）—— ★★★環境失敗：引擎【一次都沒被啟動】（PowerShell 停用指令碼執行）"
+    echo "[MERGE-GATES] ⚡ENV $id （${DT}s）—— ★★★環境失敗：引擎【一次都沒被啟動】（${_mg_env_why:-成因未分類}）"
     printf '%s
 ' "$OUT" | grep -E 'UnauthorizedAccess|已停用指令碼執行|無法載入|沒有真的重跑' | head -2
     ENVFAIL+=("$id"); continue
@@ -403,6 +418,8 @@ if [ ${#ENVFAIL[@]} -gt 0 ]; then
   echo "[MERGE-GATES]   ⇒ ★另一件同族的（跑之前先做）：電池要跑在【釘死 HEAD 的 worktree】，"
   echo "[MERGE-GATES]      否則共用 main dir 上 20 分鐘內 HEAD 會被別的角色推動 ⇒ 判【一輪之內兩棵樹】："
   echo "[MERGE-GATES]        git worktree add --detach .worktrees/battery \"\$(git rev-parse HEAD)\""
+  echo "[MERGE-GATES]   ⇒ ★另一種環境紅：child exit=-1073741502（0xC0000142，DLL init failed）"
+  echo "[MERGE-GATES]     ＝【行程根本沒起來】⇒ ★★先看 FreeMB（實測它與記憶體壓力同時發生），不要先查那支床"
   echo "[MERGE-GATES]   ⇒ ★★★本輪不更新基線、不計入任何統計"
   [ -n "${STALE_NOTE:-}" ] && echo "[MERGE-GATES]   ⇒ ★且本輪【少跑了】：$STALE_NOTE"
   exit 2
