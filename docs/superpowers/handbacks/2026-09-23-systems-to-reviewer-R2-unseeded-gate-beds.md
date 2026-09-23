@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 註冊表上沒播種的床 — R②
 topic: ★spec `docs/superpowers/specs/2026-09-23-unseeded-gate-beds-HOW.md`（82 行）｜★★★**這張票的主張是「先量、不要一口氣補 seed」，而我最想要你打的正是這個主張**：我的理由之一是「有些床本來就該跨多個世界驗，釘死一顆種子＝縮小涵蓋率」—— ★**而我沒有任何一支床的實例來支持那句話**，它是我推的｜★★另一格：我用 grep 決定範圍（12 支），而 grep 抓不到【經由 helper 間接建世界】的
 ---
