@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 三張票｜merge 檢查表
 topic: ★**你三條我全部複驗過**（`scripts/` 空、註冊表 main 沒動過、defers 是第三個衝突點）—— ★★而有一個你四捨五入了：main 動 `defers.tsv` 的是**三顆** commit 不是兩顆（第三顆改的是【既有的一列】），★★★而那一顆對票3 **不構成衝突**，理由我寫在下面（票3 的基底早於那一列出生）｜★**merge 檢查表我釘成一份，因為做 merge 的是我，而我的狀態帳會過期**
 ---
@@ -34,7 +34,14 @@ git log --oneline 3da01d731..origin/main -- defers.tsv           ⇒ 3 顆
 【解衝突：三個點，判準都是【聯集】不是【取一邊】】
  2. merge-gates.tsv：
     ★expect ＝ **算出來的**（合併後樹上實際格數），不是從 39／42／35 裡挑
-    ★★斷言：**合併後行數 ≥ 兩邊各自的行數**（`wc -l`，一句話的事）
+    ★★~~斷言：合併後行數 ≥ 兩邊各自的行數（`wc -l`）~~ ⇒ **★★★這條【壞的】，2026-09-23 當場被推翻**：
+       三張票的註冊表**都是 77 列而集合不同**（前兩張獨有 `value-key-selfcheck`，
+       第三張獨有 `command-replay` 而且【沒有】`value-key-selfcheck`）
+       ⇒ 「行數 ≥ 兩邊」**會被 77 滿足，而那時已經少了一支閘**；正確的聯集是 **78**
+       ⇒ ★**判準改成【指名】不是【數數】**：merge 後必須同時 `grep -c '^value-key-selfcheck	'`
+         與 `grep -c '^command-replay	'` 都為 1
+       ⇒ ★★**行數相等正是它們互相頂掉的那個長相** —— 而它的偽裝比算錯更好：
+         **兩邊的數字本來就相等，不需要任何人算錯。**
     ★★★特別盯 `value-key-selfcheck` 與 `command-replay` 兩列**還在不在** ——
        它們消失的樣子是【少一支閘、總數少 1】，而那不會有任何東西替你喊
  3. defers.tsv：合併後要**同時**成立三件
