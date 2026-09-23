@@ -707,6 +707,9 @@ func _build_state_str() -> String:
 		lines.append("── 未分類（票B 將搬走：%d 行）──" % _unclassified.size())
 		lines.append_array(_unclassified)
 	else:
+		# ★票B：已接出的欄位【先印真值】，沒接出的【仍然印天窗】——
+		#   ★★不許先把天窗拿掉再說（spec §3②），否則畫面會宣稱一個還沒發生的完成度。
+		lines.append_array(_build_page_connected_lines(_page_idx, ct))
 		for _f in _page_skylight_fields(_page_idx):
 			lines.append(UiPages.skylight(_f))
 
@@ -727,6 +730,30 @@ func _build_state_str() -> String:
 
 # ★:680-738 原樣搬出來（票A：搬位置、不改字）。★★它只 append、不讀 _page_idx ——
 #   ⇒ 這樣「第 1 頁少了東西」與「分頁框壞了」是兩個不同的失敗，紅燈分得開。
+
+# ★票B 第 1 批：【資源】那一段從「未分類」搬到【經濟】頁。
+#   ★★★搬動不改字：底下每一行都是從 _build_unclassified_lines 原樣移過來的，
+#     一個字都沒動 —— 要改措辭是另一件事，混進來會讓 Q3 的 diff 講不清楚。
+#   ★讀點仍然是 `ct.get("resources")` ＝ 查詢面快照（player_api_mapper 產的），
+#     ★★不是直接讀 state，也不是常數。
+func _build_economy_lines(ct: Dictionary) -> Array:
+	var lines: Array = []
+	var res: Dictionary = ct.get("resources", {})
+	var day: int = _bridge.get_current_tick() / WorldState.TICKS_PER_DAY
+	if day != _res_baseline_day:
+		_res_baseline_day = day
+		_res_baseline = res.duplicate()
+	lines.append("────────────────")
+	lines.append("資源:")
+	lines.append("  食:%d%s 幣:%d%s 材:%d%s" % [
+		res.get("food", 0),     _resource_trend(float(_res_baseline.get("food", res.get("food", 0))), float(res.get("food", 0))),
+		res.get("coin", 0),     _resource_trend(float(_res_baseline.get("coin", res.get("coin", 0))), float(res.get("coin", 0))),
+		res.get("material", 0), _resource_trend(float(_res_baseline.get("material", res.get("material", 0))), float(res.get("material", 0)))])
+	lines.append("  低武:%d 高武:%d" % [res.get("weapon_melee_low", 0), res.get("weapon_melee_high", 0)])
+	lines.append("  低甲:%d 高甲:%d" % [res.get("armor_low", 0), res.get("armor_high", 0)])
+	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])
+	return lines
+
 func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
 	var lines: Array = []
 	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
@@ -750,20 +777,6 @@ func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -
 		if not skill_parts.is_empty():
 			lines.append("  " + " ".join(skill_parts))
 
-	var res: Dictionary = ct.get("resources", {})
-	var day: int = _bridge.get_current_tick() / WorldState.TICKS_PER_DAY
-	if day != _res_baseline_day:
-		_res_baseline_day = day
-		_res_baseline = res.duplicate()
-	lines.append("────────────────")
-	lines.append("資源:")
-	lines.append("  食:%d%s 幣:%d%s 材:%d%s" % [
-		res.get("food", 0),     _resource_trend(float(_res_baseline.get("food", res.get("food", 0))), float(res.get("food", 0))),
-		res.get("coin", 0),     _resource_trend(float(_res_baseline.get("coin", res.get("coin", 0))), float(res.get("coin", 0))),
-		res.get("material", 0), _resource_trend(float(_res_baseline.get("material", res.get("material", 0))), float(res.get("material", 0)))])
-	lines.append("  低武:%d 高武:%d" % [res.get("weapon_melee_low", 0), res.get("weapon_melee_high", 0)])
-	lines.append("  低甲:%d 高甲:%d" % [res.get("armor_low", 0), res.get("armor_high", 0)])
-	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])
 
 	if _selected != Vector2i(-1, -1):
 		var sel_tile: Dictionary = _bridge.query_tile(_selected.x, _selected.y)
@@ -795,9 +808,17 @@ func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -
 # 第 2–5 頁的【預定但未接】欄位。★票A 交付時絕大多數是天窗，這是預期不是缺陷。
 # ★★欄位名取自走查腳本印得出來的那一層（spec §3①），
 #   ★★★而不是「117 欄」那個數字——那是名字比對的產物（progress.md 2026-09-10 逐字警告）。
+# 票B：某一頁【已經接出來】的內容。★沒接出的頁回空陣列 ⇒ 那一頁全是天窗。
+func _build_page_connected_lines(idx: int, ct: Dictionary) -> Array:
+	match idx:
+		1: return _build_economy_lines(ct)
+		_: return []
+
 func _page_skylight_fields(idx: int) -> Array:
 	match idx:
-		1: return ["糧食收支", "庫存與價格", "生產線", "貿易對象"]
+		# ★「庫存與價格」已由 _build_economy_lines 接出 ⇒ 從宣告裡【拿掉】
+		#   ⇒ ★★declared 變小 ⇒ [UI-SKYLIGHT] count 跟著變小 ＝ 票B 的進度讀數
+		1: return ["糧食收支", "生產線", "貿易對象"]
 		2: return ["鄰近敵對", "戰力對比", "邊境事件", "防務狀態"]
 		3: return ["盟友與敵意", "勢力關係", "成員情緒", "請求與承諾"]
 		4: return ["近期事件", "已知情報", "傳聞來源", "決策紀錄"]

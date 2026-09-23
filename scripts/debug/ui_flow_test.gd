@@ -873,7 +873,12 @@ func _test_pages_zero_loss() -> void:
 		await _free_ui(node)
 		_cell("_test_pages_zero_loss")
 		return
-	var after: Array = node._build_state_str().split("\n")
+	# ★★★票B 之後，「零損失」的比對對象必須是【五頁的聯集】不是第 1 頁：
+	#   ★票B 的工作【就是】把行從未分類搬到對應頁 ⇒ 只比第 1 頁的話，
+	#     每搬走一行這一格就紅一次 ⇒ ★★守衛會變成阻礙，而它擋的是【正確的改動】。
+	#   ⇒ 聯集怎麼組：狀態列（頁首之前）＋ 每一頁的【分頁區】＋ 頁尾（Tick·Day 那段），
+	#     ★★★而框架那兩段【只取一次】—— 它們每頁都印，直接全串會讓計數 ×5。
+	var after: Array = _union_all_pages(node)
 	var cb: Dictionary = {}
 	for l in before: cb[l] = int(cb.get(l, 0)) + 1
 	var ca: Dictionary = {}
@@ -950,6 +955,32 @@ func _page_skylight_fields_of(node: Node, idx: int) -> Array:
 
 # 撈出【第一條含 key 的行】。★找不到回空字串（★★空字串＝【沒有那一行】，
 #   不是【那一行是空的】—— 這兩件事在判準上不一樣）。
+# 把五頁的內容組成【一個沒有重複框架】的聯集：狀態列 ＋ 各頁分頁區 ＋ 頁尾。
+# ★用途：票B 把行搬到別頁之後，「有沒有東西不見了」仍然問得出來。
+func _union_all_pages(node: Node) -> Array:
+	var out: Array = []
+	var keep: int = node._page_idx
+	for i in range(UiPages.PAGE_ORDER.size()):
+		node._page_idx = i
+		var ls: PackedStringArray = node._build_state_str().split("\n")
+		var head: String = UiPages.header(i)
+		var hi: int = -1
+		for li in range(ls.size()):
+			if String(ls[li]) == head: hi = li; break
+		if hi == -1: continue
+		if i == 0:
+			# ★狀態列（頁首之前）只取一次
+			for li in range(hi): out.append(String(ls[li]))
+		var li2: int = hi + 1
+		while li2 < ls.size() and not String(ls[li2]).begins_with("────"):
+			out.append(String(ls[li2]))
+			li2 += 1
+		if i == 0:
+			# ★頁尾（Tick·Day 那段）只取一次
+			for li in range(li2, ls.size()): out.append(String(ls[li]))
+	node._page_idx = keep
+	return out
+
 func _line_with(text: String, key: String) -> String:
 	for ln in text.split("\n"):
 		if String(ln).contains(key): return String(ln)
