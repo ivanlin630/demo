@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 12→3 收斂 — R②裁定
 topic: verdict=issues(不擋方向,一條要查)｜獨立核過bare=0/rng.>0三檔數字(game_setup 0/15、world_generator 0/44、person_generator 0/16,跟你的15/44/16或16/45/18相近,方法論差異不影響bare=0這個關鍵結論)｜逐一查了11支「推進0⇒不必seed」床實際呼叫的函式(不是只看有沒有提到類別名):9支核過乾淨(呼叫的具體函式本身零bare RNG,含crisis_override_test的_famine_crisis／unified_commerce_test的_resolve_market_at_outpost／team_ui_test的add_anon／envoy_ptype_reconcile_test的_dispatch_envoy／minor_population_merge_test的_tick_migrant／occupy_target_belief_bed的_find_occupy_target等)｜★★★但zhagen_controlled_bed.gd呼叫_decide_unified(faction_ai_system.gd:3486,510行的統一決策引擎)——這正是你自己要我查的那種邊界案例:床在建世界之外還跑了別的東西;_decide_unified本體逐行grep是0命中randf/randi,但它是個510行的大dispatcher,會往下呼叫一批評分/人格加權helper,而docs/invariants.md:63明寫「人格加權機率決策=...seeded」,不確定那條RNG路徑在不在512行以外的call graph裡,沒有窮盡追完;建議這支別直接歸零風險,補跑跟另外3支一樣的5跑陽性對照再定案
 ---

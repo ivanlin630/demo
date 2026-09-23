@@ -90,6 +90,36 @@ game_setup.gd:57-58  var rng := RandomNumberGenerator.new(); rng.seed = int(conf
   ＋ R② 反查到的 8 支 arm_and_new
 ```
 
+## ★★★§2b 判準【不能只靠靜態】—— R② 第三次戳破我的範圍（2026-09-23）
+
+```
+我的範圍判準演化了三次，而【每一次都是別人戳破的】：
+  v1「有沒有 seed(」            ⇒ 漏掉經由 MeasureBedHelper.arm_and_* 建世界的（R② 抓）
+  v2「建世界 或 推進 tick」      ⇒ 把 bed_arm_gate 誤算進來（它是靜態讀原始碼的 gate）（R② 抓）
+  v3「只看推進 tick」            ⇒ ★★★漏掉【不建世界、不推進，但【直接呼叫模擬函式】】的床
+```
+
+**v3 的漏網（R② 找到）**：
+
+```
+zhagen_controlled_bed.gd ⇒ 呼叫 `_decide_unified`（faction_ai_system.gd:3486，510 行的統一決策 dispatcher）
+★它本體逐行 grep ＝ 0 命中 randf/randi
+★★但它是 dispatcher：往下呼叫一批評分／人格加權 helper，
+   而 docs/invariants.md:63 明寫「人格加權機率決策＝…seeded」
+⇒ ★★★那條 RNG 路徑在不在 510 行以外的 call graph 裡，R② 沒有窮盡追完 —— 而我也不要求他追
+```
+
+**⇒ 所以本票的判準改成兩層（★這是本節的結論）**：
+
+```
+①靜態層（便宜，用來【縮小】範圍）：推進 tick ⇒ 必補
+②★★★經驗層（用來【兜底】）：凡是【執行任何模擬 code】的床，都跑 5 次逐位元比對
+   ⇒ VARIES ⇒ 補 seed；STABLE ⇒ 在檔頭寫「5 跑逐位元相同（日期）」
+   ⇒ ★而 zhagen_controlled_bed 歸這一層，【不預先判它零風險】
+★★為什麼不追那個 call graph：追得完也只是「今天沒有」，
+   ★★★而【有人日後在那 510 行底下加一個 randf】不會有任何東西叫紅 —— 經驗層才會。
+```
+
 ## §3 形狀
 
 ```
@@ -109,7 +139,8 @@ seed 的寫法抄 warring_harness.gd:120／observer_main.gd:51（同一個前例
 ## §5 驗收
 
 ```
-P1 ★只有那 3 支推進 tick 的床補 seed；★★不處理的那些【逐支具名】並寫「推進 0 ⇒ 由 config seed 決定」
+P1 ★那 3 支推進 tick 的床補 seed；★★zhagen_controlled_bed.gd 走經驗層（5 跑）再定案；
+   ★★★其餘【逐支具名】並寫「推進 0、且呼叫的具體函式零 bare RNG（R² 逐支核過）」
 P2 每一支的 seed 值【印在它自己的輸出裡】（★下一個人看得到它跑的是哪個世界）
 P3 補了 seed 的那幾支：★各自附【陽性對照】—— 把 seed 換成 randomize() ⇒ 該床必須變 VARIES
    ⇒ ★★沒有這一格，「補了 seed」與「它本來就穩定」在卷面上長得一樣
