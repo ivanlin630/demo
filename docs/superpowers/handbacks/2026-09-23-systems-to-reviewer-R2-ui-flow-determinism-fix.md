@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: ui-flow 決定性修正 — merge 前 R②
 topic: ★分支 `fix/ui-flow-determinism` ＝ `f97cd51d2`｜★★★**這一票修的是【註冊表上那支閘本身不可靠】**：`ui_flow_test.gd` 與 `ui_state_str_capture.gd` 都沒播全域 RNG ⇒ 世界每次不同 ⇒ `_test_pages_zero_loss` 隨機紅（實測 6 跑 2 紅）｜★★**而「隨機紅」比「恆綠」更糟**：它會被當成雜訊，然後整支註冊表上的閘被降級｜★要你打的是：**seed 放的位置對不對**，以及**那份重取的「前」能不能被信**
 ---
