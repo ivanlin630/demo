@@ -338,14 +338,21 @@ func _initialize() -> void:
 		elif ceil_ms_per_pass >= 1000.0:
 			print("[PP] ★★★判準(乙)：每pass平均 ≥ 1000ms ⇒ (A) 也摸不到門檻")
 
-		# ★★★讀數規則補充(systems 2026-09-23 另一封)：near.faction_ai 也算進「必須整點」那桶
-		#   理由：_evaluate_all_body 忽略傳進去的 team_ids,直接對 state.factions 跑全世界迴圈
-		#   ⇒ 按隊錯開會讓它被重複執行 60 次,不能照原樣錯開
+		# ★★★讀數規則補充(systems 2026-09-23)：near.faction_ai 也算進「必須整點」那桶
+		#   ★舊理由已失效(世代 8)：原本是「_evaluate_all_body 忽略 team_ids 對全世界跑,
+		#     按隊錯開會讓它被重複執行 60 次」—— 那支函式已拆三份且真的吃 team_ids(16c5e0409)。
+		#   ★★現行理由：`faction_ai` 這一列是【勢力粒度】(shape=factions),它按【勢力】錯開,
+		#     而本床的「必須整點」桶要的是【不能按隊錯開的】⇒ 它仍然留在這一桶,但★理由換了。
+		#   ★★★而這個數【涵蓋範圍沒變】：sim_runner 的 `tl` 是【群組邊界】不是逐列標籤
+		#     (sim_runner.gd:465-467 `if phase_timing and tl != "": _pht(tl, _t)`),
+		#     fai_loop2／fai_loop3 的 tl 為空 ⇒ 它們的時間由下一個 `near.faction_ai` 標記
+		#     (info_dispatch 那一列)一併收走 ⇒ ★near.faction_ai 仍含 loop1+loop2+loop3。
+		#     ⇒ ★★所以這個數【可以】跟世代 7 的同名數比,不像 Probe 鍵 evaluate_loop1.* 那樣換了單位。
 		var fai_v: int = int(pass_sr_over2s.get("near.faction_ai", 0))
 		var has_fai: bool = pass_sr_over2s.has("near.faction_ai")
 		print("[PP] ── ★讀數規則補充：near.faction_ai 單獨列(★需併入 S_fixed) ──")
 		if has_fai:
-			print("[PP]   near.faction_ai [必須整點,因_evaluate_all_body忽略team_ids全世界跑] = %d us（每 pass 平均 %d us）" % [
+			print("[PP]   near.faction_ai [必須整點,因它是勢力粒度、按勢力錯開;含 loop1+loop2+loop3] = %d us（每 pass 平均 %d us）" % [
 				fai_v, int(fai_v / maxi(pass_n_over2s, 1))])
 		else:
 			print("[PP]   near.faction_ai = ★找不到（丙：不可判）")
@@ -359,7 +366,9 @@ func _initialize() -> void:
 			if s_fixed_pct <= 40.0:
 				print("[PP] ★★★子判準(甲)：S_fixed ≤ 40%% ⇒ 夠，faction_ai 留整點就行")
 			elif fai_pct >= 15.0:
-				print("[PP] ★★★子判準(乙)：S_fixed > 40%% 且 faction_ai 單格 ≥ 15%% ⇒ 成為【前置票】(要先讓_evaluate_all_body真的吃team_ids)")
+				print("[PP] ★★★子判準(乙)：S_fixed > 40%% 且 faction_ai 單格 ≥ 15%% ⇒ 成為【前置票】")
+				print("[PP]   ★而它原本寫的處方(『先讓 _evaluate_all_body 真的吃 team_ids』)【已經做完了】(16c5e0409+世代 8 拆三份)")
+				print("[PP]   ⇒ ★★所以這一格若現在點火,它指的是【一個新的、還沒被診斷的成因】,不是那張舊前置票")
 			else:
 				print("[PP] ★★★子判準：S_fixed > 40%% 但 faction_ai < 15%% ⇒ 照原本三格判準另議")
 		print("[PP]   ★丙類(找不到對應標籤)：%d 格：%s" % [
