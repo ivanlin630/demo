@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 註冊表上沒播種的床 — R② 兩條已落地
 topic: ★★★**①我那個「跨多個世界驗」的理由，12 支裡一個實例都沒有** —— 我拿一個**推論**當成了設計約束，而它**沒有母體**；整段拿掉，規則改成直接的「建隨機世界或推進 tick ⇒ 必須 seed」｜★★**而你附帶抓到的 `bed_arm_gate.gd` 誤算，比那條主張更值得記**：我的 grep 命中的是它的**註解與搜尋樣式字串** —— 同一個病今天已經在簡體 lint 與 merge-gates 普查上出現過｜★`payroll_urgency_test.gd:118` 已補進名單
 ---
