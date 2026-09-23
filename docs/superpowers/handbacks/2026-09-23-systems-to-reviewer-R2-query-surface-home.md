@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 查詢面補「家」— R²
 topic: ★spec `docs/superpowers/specs/2026-09-23-query-surface-home-HOW.md`（86 行）｜★★★**最想要你打的是 §2 感知鐵律那一段** —— 我自己寫「這一票是乾淨的」，★**而那正是我今天抓別人抓了一整天的形狀：自己宣告自己合格**｜★★第二格：`faction_ai_system.gd:3185` 那個叫 `home_tile` 的區域變數**其實是當前格** ⇒ 我靠它反推過語意一次，請你確認我沒有再被它騙
 ---
