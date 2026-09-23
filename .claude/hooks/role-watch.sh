@@ -13,10 +13,17 @@
 #   ・有事：把那一行印出來並結束 ⇒ 你被叫醒（滿足 1/2/3）
 #   ・而「重掛」只發生在【真的有事】之後，夾在你本來就要處理它的那一輪裡。
 #
-# ★判準（三支共用，而且是它們自己的慣例，不是我發明的）：
-#   ・`[…]` 開頭 ＝ 狀態噪音（ARMED／換血／讓位／普查／CLEAN）⇒ 進 log，不喚醒
-#   ・其餘 ＝ 事件（📬 收信／🟡🔴 STALL／Telegram 訊息本文）⇒ 印出來並結束
-#   ⇒ ★★三支腳本的狀態行【都】以 `[` 開頭，而三種事件行【都】不是（已逐支核過）
+# ★★★判準【逐 kind 各自定】—— ★2026-09-23 blueprint 當場打掉我上一版的「三支共用一條規則」：
+#   我原本寫「`[…]` 開頭＝噪音，其餘＝事件」，★而 watchdog 會印 `REAL-WATCHERS = 6` 這種
+#   【不以 [ 開頭的普查行】⇒ 被當成事件 ⇒ 它一秒就退。
+#   ⇒ ★★我只驗了【事件行長怎樣】，沒驗【噪音行是不是全都有前綴】—— 只看了一邊。
+#   ⇒ ★★★所以規則改成【白名單事件】，不是【黑名單噪音】：認不出來的一律當噪音（安靜），
+#     因為漏叫一次的代價，遠小於【每次都假叫、然後大家把它關掉】。
+#   inbox    ：📬 開頭          （inbox-watch.sh:200 的收信行）
+#   watchdog ：🟡／🔴 開頭      （watchdog.sh:456 `${icon} STALL / …`）
+#              ★★而停滯報告是【多行】的（detail／活著／長工作／最後產出）⇒ 收完整塊再退，
+#              否則 blueprint 會拿到一份【被砍頭的報告】。
+#   tg       ：不以 `[tg-poll]` 開頭（tg_poll.py 契約：每行 stdout ＝ 一次喚醒；狀態行都有前綴）
 #
 # 用法（每個角色開場，一種掛一支；★不要為了防掛掉再加任何輪詢／重掛迴圈）：
 #   Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh inbox",    run_in_background=true)
@@ -50,21 +57,32 @@ exec 3< <("${INNER[@]}" 2>>"$LOG")
 CHILD=$!
 trap 'kill "$CHILD" 2>/dev/null; exec 3<&- 2>/dev/null' EXIT
 
-while IFS= read -r line <&3; do
-  case "$line" in
-    "["*)
-      # 狀態噪音：ARMED／換血／讓位／普查／CLEAN ⇒ 只進 log
-      echo "[role-watch $(_ts)] (quiet) $line" >> "$LOG"
-      ;;
-    "")
-      : ;;
-    *)
-      # ★事件：印出來並結束 ⇒ 背景任務結束 ⇒ session 被喚醒
-      printf '%s\n' "$line"
-      echo "[role-watch $(_ts)] EVENT ⇒ exit：$line" >> "$LOG"
-      exit 0
-      ;;
+_is_event() {
+  case "$KIND" in
+    inbox)    case "$1" in "📬"*) return 0 ;; esac ;;
+    watchdog) case "$1" in "🟡"*|"🔴"*) return 0 ;; esac ;;
+    tg)       case "$1" in "[tg-poll]"*) : ;; "") : ;; *) return 0 ;; esac ;;
   esac
+  return 1
+}
+
+while IFS= read -r line <&3; do
+  if _is_event "$line"; then
+    printf '%s
+' "$line"
+    echo "[role-watch $(_ts)] EVENT：$line" >> "$LOG"
+    if [ "$KIND" = "watchdog" ]; then
+      # ★停滯報告是多行 ⇒ 把後續 detail 一起收（2 秒內沒有下一行就當它講完了）
+      while IFS= read -r -t 2 more <&3; do
+        case "$more" in "["*) break ;; esac
+        printf '%s
+' "$more"
+        echo "[role-watch $(_ts)] EVENT+：$more" >> "$LOG"
+      done
+    fi
+    exit 0
+  fi
+  [ -n "$line" ] && echo "[role-watch $(_ts)] (quiet) $line" >> "$LOG"
 done
 
 echo "[role-watch $(_ts)] child ended without an event" >> "$LOG"
