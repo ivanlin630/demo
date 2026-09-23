@@ -19,8 +19,8 @@ scripts/simulation/event_system.gd::process_events	19	L	守完之後【取出那
 scripts/simulation/faction_ai_system.gd::_commit_conquest_attack	374	L	守完之後【取出那支隊】做事 @380 var prey_t: TeamData = state.teams.get(prey_id)
 scripts/simulation/faction_ai_system.gd::_tick_conquest_scout	424	L	守完之後把它【當參數派出去】 @433 _commit_conquest_attack(state, team, prey_id)
 scripts/simulation/faction_ai_system.gd::_has_resident_team_on_tile	622	L	守完之後【取出那支隊】做事 @623 var t: TeamData = state.teams[tid]
-scripts/simulation/faction_ai_system.gd::_evaluate_all_body	1009	L	守完之後【取出那支隊】做事 @1011 var sub: TeamData = state.teams[sub_id]
-scripts/simulation/faction_ai_system.gd::_evaluate_all_body	1034	L	守完之後【取出那支隊】做事 @1036 var team: TeamData = state.teams[tid]
+scripts/simulation/faction_ai_system.gd::_evaluate_loop2_teams	1495	L	守完之後【取出那支隊】做事 @1011 var sub: TeamData = state.teams[sub_id]
+scripts/simulation/faction_ai_system.gd::_evaluate_loop3_teams	1531	L	守完之後【取出那支隊】做事 @1036 var team: TeamData = state.teams[tid]
 scripts/simulation/faction_ai_system.gd::_precond_met	1597	L	守完之後把它【當參數派出去】 @1599 var tgt_pos: Vector2i = BeliefSystem.belief_pos(state, f.leader_team_i
 scripts/simulation/faction_ai_system.gd::_report_to_leader	1808	L	守完之後把它【當參數派出去】 @1814 var ok: bool = _dispatch_envoy(state, team, f.leader_team_id, "member_
 scripts/simulation/faction_ai_system.gd::_return_is_hopeless	3528	G	守完之後函式內不再出現 ⇒ 純存在問句／dangling 清理
