@@ -25,11 +25,74 @@ extends SceneTree
 func _initialize() -> void:
 	_run()
 
+# ★★★自檢（systems R② 要求 ＋ 2026-09-23 實測後改寫）：
+#   ★原版斷言「兩顆種子 ⇒ 輸出不同」，而實測否證了它的【前提】：
+#     seed(11111)/seed(22222) 之後緊接的 randf() ＝ 0.509536624 / 0.612230062（不同）
+#     ⇒ ★★seed() 【有效】，但兩個世界的畫面【逐字相同】
+#     ⇒ ★★★結論：這條建世界的路徑【真的不吃全域 RNG】（世界由 config 決定）
+#   ⇒ 所以「兩顆種子輸出必須不同」在這支床上【永遠會紅】——
+#     ★而永遠紅的守衛跟永遠綠的一樣沒用，只是方向相反。
+#   ⇒ 改成驗兩件【真的可能壞】的事：
+#     ①seed() 本身有效（randf 不同）—— 否則「種子」這個詞在檔頭是空話
+#     ②同一顆種子建兩次世界 ⇒ 輸出【逐字相同】（世界建構可重現）
+#       ★★★②才是這份「前」能被拿來比對的前提，而它壞掉時會【真的紅】。
+func _seed_selftest() -> bool:
+	var probes: Array = []
+	var outs: Array = []
+	for sd2 in [11111, 11111]:
+		seed(sd2)
+		probes.append(randf())
+		var n2 = load("res://scenes/TextUI.tscn").instantiate()
+		get_root().add_child(n2)
+		await process_frame
+		await process_frame
+		var st2: WorldState = n2._bridge.get_state()
+		var t0b: int = st2.world.current_tick
+		var g2: int = 0
+		while st2.world.current_tick - t0b < 120 and g2 < 2000:
+			if not n2._bridge.is_advancing():
+				n2._bridge.request_advance(120 - (st2.world.current_tick - t0b))
+			await process_frame
+			g2 += 1
+		outs.append(n2._build_state_str())
+		n2.queue_free()
+		await process_frame
+	seed(4242)
+	var other: float = randf()
+	print("[UC][自檢] seed(11111) 的 randf=%.9f／%.9f｜seed(4242) 的 randf=%.9f" % [
+		float(probes[0]), float(probes[1]), other])
+	var a2: String = String(outs[0])
+	var b2: String = String(outs[1])
+	if a2.strip_edges() == "" or b2.strip_edges() == "":
+		push_error("[UC][不可判] 自檢的某一邊輸出是空的 ⇒ ★『相同』可能只是兩邊都空")
+		return false
+	if float(probes[0]) == other:
+		push_error("[UC][FAIL] seed(11111) 與 seed(4242) 的 randf 相同 ⇒ ★★★seed() 沒有生效")
+		return false
+	if a2 != b2:
+		push_error("[UC][FAIL] 同一顆種子建兩次世界，畫面【不同】⇒ ★★★世界建構不可重現")
+		push_error("[UC]   ⇒ 這份「前」無法被任何人拿去比對；★不是「世界很豐富」")
+		return false
+	print("[UC][自檢] ★seed() 有效、且同種子兩次建構逐字相同")
+	print("[UC][自檢] ★★已知性質（實測 2026-09-23）：這條路徑【不吃全域 RNG】")
+	print("[UC]   ⇒ ★★★所以【不同種子產出相同畫面】是正常的，不要把它當缺陷")
+	return true
+
 func _run() -> void:
 	var want_ticks: int = int(OS.get_environment("UC_TICKS")) if OS.has_environment("UC_TICKS") else 120
 	var budget_s: int = int(OS.get_environment("UC_BUDGET_S")) if OS.has_environment("UC_BUDGET_S") else 240
 	var out_path: String = OS.get_environment("UC_OUT") if OS.has_environment("UC_OUT") else ""
 	print("=== _build_state_str 擷取（目標 ticks=%d 預算=%ds）===" % [want_ticks, budget_s])
+	# ★自檢先跑（它會動 RNG）⇒ ★★主擷取在它之後【重新 seed】，順序不能反
+	# ★UC_SELFTEST=0 只在【調查種子機制本身】時用 —— ★★它是一個【會被記錄在卷面上】的
+	#   跳過，不是靜默略過：跳過的那一輪自己印出來，免得有人拿它當「自檢過了」。
+	if OS.get_environment("UC_SELFTEST") == "0":
+		print("[UC][種子自檢] ★★★本輪【跳過】(UC_SELFTEST=0) —— 這一輪【不能】被當成自檢通過")
+	else:
+		var seed_ok: bool = await _seed_selftest()
+		if not seed_ok:
+			quit(1)
+			return
 	if out_path == "":
 		push_error("[UC][不可判] 沒給 UC_OUT ⇒ ★沒有落地路徑的擷取等於沒有擷取")
 		quit(2)
@@ -40,7 +103,8 @@ func _run() -> void:
 	#     而它的後果不是「世界不一樣」，是【每次都不一樣】⇒ ★★這份『前』是浮動的。
 	#   ⇒ ★★★而浮動的『前』會讓 P1-b 隨機紅，那比它永遠綠更糟：
 	#     它會被當成雜訊，然後整支閘被降級。
-	seed(int(OS.get_environment("UC_SEED")) if OS.has_environment("UC_SEED") else 1337)
+	var sd: int = int(OS.get_environment("UC_SEED")) if OS.has_environment("UC_SEED") else 1337
+	seed(sd)
 	var node = load("res://scenes/TextUI.tscn").instantiate()
 	get_root().add_child(node)
 	await process_frame
@@ -100,6 +164,9 @@ func _run() -> void:
 	# ★★★檔頭印的是【量到的】不是【請求的】：tick 寫實際值，世界規模現場數
 	#   ⇒ 這樣下一個人拿檔頭去重現時，比對的是同一個東西。
 	#   ★而檔頭行以 `#UC ` 起頭（正文不可能長這樣）⇒ 比對時跳過。
+	# ★★★印【變數】不印字面值 1337 —— ★印字面值就是又一句無條件的安慰話：
+	#   種子改了它還是印 1337，而那一行正是【給下一個人重現用的】。
+	f.store_line("#UC seed=%d" % sd)
 	f.store_line("#UC tree=%s" % _head())
 	f.store_line("#UC tick=%d（起點 %d，實際推進 %d；請求 %d）" % [
 		st.world.current_tick, start_tick, st.world.current_tick - start_tick, want_ticks])

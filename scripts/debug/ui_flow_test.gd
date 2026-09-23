@@ -595,6 +595,14 @@ func _check(label: String, ok: bool) -> void:
 
 # 實例化 TextUI 場景 + 等 _ready。回傳 node。
 func _make_ui() -> Node:
+	# ★★★每一格都要拿到【一樣的世界】，而它不是自動的：
+	#   ★這支床有 31 格，每一格各自 instantiate 一次；★★而 class 級（static）的殘留
+	#     會跨格帶過去 ⇒ 第 27 格拿到的世界，與它單獨跑時【不是同一個】。
+	#   ⇒ ★★★血證：同一棵樹跑三次 ⇒ 紅／紅／綠，而變的是 `狀態: <task_summary>`；
+	#     而【擷取床單獨跑五次逐字相同】⇒ 變因不在擷取路徑，在【跨格殘留】。
+	#   ★CrossRunReset 就是為這件事存在的（18 類），而這支床【從來沒叫過它】。
+	CrossRunReset.run()
+	seed(1337)   # ★與 ui_state_str_capture.gd 的 UC_SEED 預設同值
 	var node = load("res://scenes/TextUI.tscn").instantiate()
 	get_root().add_child(node)
 	await process_frame
@@ -793,7 +801,7 @@ func _test_pages_zero_loss() -> void:
 	#   ⇒ ★`狀態: <task_summary>` 這一行會隨機變 ⇒ 這一格【隨機紅】（實測 3 次裡紅 2 次）
 	#   ⇒ ★★而隨機紅比恆綠更糟：它會被讀成雜訊，然後整支註冊表上的閘被降級
 	#   ★★★seed 必須在 _make_ui() 之前：場景在 _ready 建世界，吃的是全域 RNG
-	seed(1337)   # ← 與 ui_state_str_capture.gd 的 UC_SEED 預設同值
+	# ★seed 與 CrossRunReset 已統一在 _make_ui() 裡做（每一格都要，不只這一格）
 	var want_tick: int = -1
 	var want_teams: int = -1
 	var want_persons: int = -1
