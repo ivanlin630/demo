@@ -29,7 +29,8 @@ var _cells_ran: Array = []
 # ★格式對但世界不允許：座標不在地圖上 ⇒ dispatch 認得 name、handler 會拒絕
 const BAD_TILE: Vector2i = Vector2i(9999, 9999)
 const EXPECTED_CELLS: Array = ["_test_replay_same_fp", "_test_negative_boundary_shift", "_test_queue_defers",
-	"_test_p9_enqueue_echo", "_test_p10_result_lines", "_test_p12_reject_comes_late"]
+	"_test_p9_enqueue_echo", "_test_p10_result_lines", "_test_p12_reject_comes_late",
+	"_test_p13_queries_are_pure"]
 
 
 func _cell(name: String) -> void:
@@ -206,7 +207,15 @@ func _test_queue_defers() -> void:
 	st.command_seq += 1
 	st.pending_commands.append({"name": String(c["name"]), "args": c["args"], "seq": st.command_seq})
 	var after_queue: String = StateFingerprint.compute(st)
-	_check("★入列之後、推進之前：世界指紋未變", before == after_queue)
+	# ★★★誠實限（我自己查出來的，不寫的話這一格會被讀得比它強）：
+	#   `pending_commands`／`command_seq`／`command_log`／`command_results` 四個新欄位
+	#   【都不在 StateFingerprint 的涵蓋範圍內】（`_emit_player` 沒有它們）
+	#   ⇒ ★「入列之後指紋未變」有一半是【由構造保證】的，不是這一格測出來的。
+	#   ⇒ ★★它仍然抓得到一件事：入列的動作【順手改到別的世界狀態】。
+	#   ⇒ ★★★而「佇列該不該進指紋」是憲法層的問題（全量暫態可觀測性 vs spec P6
+	#     要求 world-fp 逐字不變），已呈報 systems，不在這支床自己決定。
+	_check("★入列之後、推進之前：世界指紋未變（★見上方誠實限：佇列本身不在指紋裡）",
+		before == after_queue)
 	_check("★★母體地板：佇列裡真的有一條（%d）" % st.pending_commands.size(),
 		st.pending_commands.size() == 1)
 	runner.advance_tick(st, Vector2i(-1, -1))
@@ -228,6 +237,7 @@ func _initialize() -> void:
 	_test_p9_enqueue_echo()
 	_test_p10_result_lines()
 	_test_p12_reject_comes_late()
+	_test_p13_queries_are_pure()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
@@ -318,3 +328,56 @@ func _test_p12_reject_comes_late() -> void:
 	_check("★★母體地板：那條指令真的進了帳（command_log %d）" % st.command_log.size(),
 		st.command_log.size() == 1)
 	_cell("_test_p12_reject_comes_late")
+
+
+# ══════════ P13［被分類為查詢的端點，真的不寫］（systems 立 2026-09-23）══════════
+# ★★★為什麼要有這一格：我用【靜態掃描】宣告過「這兩支純讀」，而那個掃描器
+#   在同一天錯了三次，★三次都往同一個方向錯（全部是假的「這支不寫」）。
+#   ⇒ ★★靜態只負責【縮小範圍】，兜底一定是經驗層 —— 同「未加種子的閘床」那個兩層判準。
+# ★做法：同一個世界連呼 5 次 ⇒ world-fp 逐字不變。
+#   ★★母體地板：至少一支要真的回 ok=true —— 全部早退的話，「不寫」是一句
+#     【對什麼都沒做的東西為真】的話。
+#   ★★★負對照：呼一支【會寫】的（_action_trade 寫 player_state["pending_trade_target"]，
+#     而那一欄在 StateFingerprint._emit_player 的涵蓋範圍內）⇒ fp 必須【不同】。
+#     ★沒有這個負對照的話，一個【根本不看 player_state】的 fp 也會讓上面那格恆綠。
+func _test_p13_queries_are_pure() -> void:
+	print("
+── P13 查詢端點不得有副作用 ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var bridge := SimBridge.new(pair[1], st)
+	if st.player_id < 0 or not st.persons.has(st.player_id):
+		_errors += 1
+		print("  ★[不可判] 沒有玩家 ⇒ 這不是綠")
+		_cell("_test_p13_queries_are_pure")
+		return
+	var ptid: int = int(st.persons[st.player_id].team_id)
+	# 找一個真的能讓查詢回 ok 的目標（★不是隨便挑一個然後讓它早退）
+	var target: int = -1
+	var which: String = ""
+	for tid in st.teams.keys():
+		if int(tid) == ptid: continue
+		if bool(bridge.query_inquiry_options(int(tid)).get("ok", false)):
+			target = int(tid); which = "打聽"; break
+		if bool(bridge.query_recruit_menu(int(tid)).get("ok", false)):
+			target = int(tid); which = "招募"; break
+	_check("★★母體地板：找得到一個讓查詢真的回 ok 的目標（%s Team%d）" % [which, target], target >= 0)
+	if target < 0:
+		print("  ⇒ ★全部早退 ⇒ 「不寫」會是一句對空集合為真的話 ⇒ 不可判")
+		_cell("_test_p13_queries_are_pure")
+		return
+	var before: String = StateFingerprint.compute(st)
+	for _i in range(5):
+		bridge.query_inquiry_options(target)
+		bridge.query_recruit_menu(target)
+	_check("★★★同一個世界連呼 5 次（兩支各 5 次）⇒ world-fp 逐字不變",
+		StateFingerprint.compute(st) == before)
+	# ★負對照：呼一支會寫的，fp 必須動
+	var sys := PlayerCommandSystem.new()
+	var pt: TeamData = st.teams[ptid]
+	var fp_mid: String = StateFingerprint.compute(st)
+	for _i in range(5):
+		sys._action_trade(st, target, pt, ptid)
+	_check("★負對照：呼 5 次【會寫的】_action_trade ⇒ fp 必須【不同】（否則這支 fp 看不見這種寫）",
+		StateFingerprint.compute(st) != fp_mid)
+	_cell("_test_p13_queries_are_pure")
