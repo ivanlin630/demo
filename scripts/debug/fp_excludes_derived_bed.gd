@@ -53,6 +53,25 @@ func _test_trigger_sample() -> void:
 	# ★★母體地板：`size() <= 30` 會被 `size() == 0` 滿足，而 0 正是【推導器壞了】的長相
 	#   ⇒ ★★★沒有這一道，棘輪會在推導器死掉的那一天變成最綠的一格。
 	_ok(d.size() > 0, "①母體地板：推導器真的吐出東西（%d 欄）—— 0 欄不是「沒有盲區」，是它壞了" % d.size())
+	# ★★★地板的陽性對照（systems 指出它不必留成未驗，2026-09-24）——
+	#   ★我原本說「要驗它必須弄壞 state_fingerprint.gd，而我不為了驗守衛去改產品」；
+	#     ★★而那是我把範圍看窄了：`derive_from(ws_script, src)` 是【純函式】，
+	#     ②③ 早就在餵合成的 fake ⇒ 餵一個【所有欄位都被讀到】的 fake 就回 0 欄，
+	#     ★★★零產品改動。
+	#   ⇒ 這一格斷言的是【「0 欄」是可達的】，不是假想出來的危險。
+	#   ★而「棘輪對 0 會是綠」我【只印不斷言】—— `0 <= 30` 是恆真，
+	#     把它寫成斷言就是在這一格裡種一條永遠不會紅的話。
+	var fake_all := GDScript.new()
+	fake_all.source_code = "extends RefCounted
+var solo: int = 0
+"
+	fake_all.reload()
+	var d0: Array = StateFingerprint.derive_from(fake_all, "func _emit(state):
+	buf.append(state.solo)
+")
+	_ok(d0.is_empty(), "①★地板的陽性對照：存在一種輸入讓推導器回【0 欄】（實得 %d）" % d0.size())
+	print("    ⇒ ★★而棘輪對那個 0 是【%s】（0 ≤ %d）⇒ ★★★擋住它的是【地板】不是棘輪" % [
+		"綠" if d0.size() <= BLIND_CEILING else "紅", BLIND_CEILING])
 	_ok(d.size() <= BLIND_CEILING,
 		"①★棘輪：盲區 %d 欄 ≤ 上限 %d（只准變小；要調高須由 systems 裁）" % [d.size(), BLIND_CEILING])
 	# ★而盲區必須【真的印在卷面上】，不是只活在某個 API 回傳值裡。
