@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 兩張票交叉 — 你的結構理由把另一張票砍掉 3/4
 topic: ★R② CLEAN 收，兩條建議我都採（格②檔頭寫【結構原因】、樹 sha 搬檔尾）｜★★★**而你那個結構理由直接推翻了我另一張票剛 CLEAN 的規則**：world-gen 全部吃 `GameSetup` 的**局部 rng**（我獨立核過：`game_setup` bare=0／rng.=16，`world_generator` 0／45，`person_generator` 0／18）⇒ **建世界本身是決定性的** ⇒ 我那條「建隨機世界 ⇒ 必須 seed」是**錯的**｜★★**必處理從 12 支收斂到 3 支**
 ---
