@@ -17,7 +17,9 @@ extends SceneTree
 #   ③沒有自己的時間預算 ⇒ 撞 wrapper 的 600s 逾時。而那一輪我還誤判成「wrapper 騙人」，
 #     ★真相是我自己的指令結尾有 `| tail`，管線的離開碼是 tail 的（wrapper 回的是 98）。
 #
-# env：UC_TICKS（預設 120）／UC_BUDGET_S（預設 240）／UC_OUT（必填）
+# env：UC_TICKS（預設 120）／UC_BUDGET_S（預設 240）／UC_OUT（必填）／UC_SELECT（預設開，=0 關）
+#   ★UC_SELECT：把游標選在玩家隊那一格，★★逼出 :716-738 那 ~23 行
+#     ⇒ 不逼的話那一段【一行都不會渲染】，而 P1 是前後比對 ⇒ ★★★沒渲染到的區塊改壞了也不會紅
 #   ★沒有 UC_CONFIG：世界由 TextUI 自己決定，這支床只負責【記錄它實際拿到什麼】。
 
 func _initialize() -> void:
@@ -61,6 +63,18 @@ func _run() -> void:
 			quit(2)
 			return
 
+	# ★★★把【選中格】那一段也逼出來（text_ui_main.gd:716 `if _selected != Vector2i(-1,-1)`）：
+	#   ★預設 _selected 是 (-1,-1) ⇒ 那 ~23 行【一行都不會渲染】
+	#   ⇒ ★★而 P1 是【前後比對】：沒渲染到的區塊，就算被我改壞也不會紅
+	#   ⇒ ★★★所以「前」要取【蓋得比較廣】的那一份 —— 那個 if 只會【追加】行，
+	#     選中之後的輸出是沒選中的【超集】，不會蓋掉任何東西。
+	var did_select: bool = false
+	if OS.get_environment("UC_SELECT") != "0":
+		var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
+		var cp: Dictionary = ct.get("position", {})
+		if not cp.is_empty():
+			node._selected = Vector2i(int(cp.get("q", 0)), int(cp.get("r", 0)))
+			did_select = true
 	var s: String = node._build_state_str()
 	var raw_lines: PackedStringArray = s.split("\n")
 	# ★母體地板：空輸出與「沒接上」長得一樣 ⇒ 先判不可判，不要存一個空檔案然後說「取過了」
@@ -86,6 +100,8 @@ func _run() -> void:
 	f.store_line("#UC 世界規模（現場數，非設定值）：teams=%d factions=%d persons=%d" % [
 		st.teams.size(), st.factions.size(), st.persons.size()])
 	f.store_line("#UC 逐字原樣；★不 strip、不排序、不去重（P1 用逐行計數比）")
+	f.store_line("#UC 選中格=%s（★關掉的話 :716-738 那 ~23 行不會渲染 ⇒ P1 蓋不到它）" % (
+		str(node._selected) if did_select else "無"))
 	f.store_line("#UC 行數=%d" % raw_lines.size())
 	for ln in raw_lines:
 		f.store_line(ln)
