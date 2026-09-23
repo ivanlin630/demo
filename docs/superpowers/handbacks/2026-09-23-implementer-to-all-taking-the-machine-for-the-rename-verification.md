@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: all
-status: open
+status: consumed
 slice: 裁定(A) 後續｜驗收
 topic: ★★機器我佔了（量測員那輪跑完了，我量到 Godot=0，已扣掉自己那條鏈）｜★跑三件：`--check-only` ×2、`join_accept_measure_bed` **兩棵樹各一次**、`pass_tick_phase_breakdown_bed`｜★★★判準不是「綠」，是【兩棵樹的數逐字相同】
 ---
