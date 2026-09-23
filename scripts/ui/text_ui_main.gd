@@ -700,6 +700,7 @@ func _build_state_str() -> String:
 	#   ★為什麼不順手分類：那是票B。混進來的話，紅燈就分不出是【框沒做好】還是【分類錯了】。
 	lines.append(UiPages.header(_page_idx))
 	if _page_idx == 0:
+		lines.append_array(_build_survival_lines(ct, ps))
 		var _unclassified: Array = _build_unclassified_lines(ct, ps, lc)
 		# ★★區塊標題必須寫「未分類」：這一段裡有【資源】（屬經濟）而它印在【生存】頁下面
 		#   ⇒ 不標示等於【在畫面上說謊】，而用戶簽分頁時會簽到一個假的分類。
@@ -712,6 +713,9 @@ func _build_state_str() -> String:
 		if not _unclassified.is_empty():
 			lines.append("── 未分類（票B 將搬走：%d 行）──" % _unclassified.size())
 			lines.append_array(_unclassified)
+		# ★沒接出的生存欄位【仍然印天窗】（不先拿掉再說）
+		for _f in _page_skylight_fields(0):
+			lines.append(UiPages.skylight(_f))
 	else:
 		# ★票B：已接出的欄位【先印真值】，沒接出的【仍然印天窗】——
 		#   ★★不許先把天窗拿掉再說（spec §3②），否則畫面會宣稱一個還沒發生的完成度。
@@ -760,20 +764,21 @@ func _build_economy_lines(ct: Dictionary) -> Array:
 	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])
 	return lines
 
-func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
+
+# ★票B 第 2 批：【生存】頁 —— blueprint 裁「這一隊現在活得下去嗎」的四題。
+#   ①糧撐幾天（跑道與趨勢，★不是收支明細）②人的狀態（含被聚焦的那個人）
+#   ③身在何處、家在哪 ④當下在做什麼、為什麼
+# ★★★界線（blueprint 定，寫死在這裡免得下一個人「順手統一」）：
+#   生存＝【會不會死／幾天內】的急迫讀數；經濟＝【怎麼賺】的流量與價格
+#   ⇒ ★糧食會出現在兩頁，而【問的問題不同】—— 那不是重複。
+# ★★單一來源：本函式與常駐狀態列【共用同一份 _cached_snapshot】（參數 ct/ps 由呼叫端傳入），
+#   ⇒ ★★★不得各自再去查一次 —— 兩個來源會 drift，而 drift 不會紅。
+func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 	var lines: Array = []
-	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
 	var food_days: float = float(ct.get("food_days", 99.0))
 	var starving: bool = bool(ct.get("starving", false))
 	lines.append("糧: %.1f 天%s" % [food_days, "  ⚠斷糧" if starving else ""])
-	var cap: Dictionary = ct.get("capabilities", {})
-	if not cap.is_empty():
-		lines.append("狩獵 %d%%/%.0f糧  戰力 %.0f  日耗 %.1f食(撐%.0f天)" % [
-			int(float(cap.get("hunt_chance", 0.0)) * 100), float(cap.get("hunt_yield", 0.0)),
-			float(cap.get("combat_power", 0.0)), float(cap.get("food_burn_per_day", 0.0)),
-			food_days])
 	lines.append(_member_health_line(ct.get("members", [])))
-
 	if ps.get("player_exists", false):
 		lines.append("────────────────")
 		lines.append("玩家: %s  HP:%s" % [ps.get("player_name", ""), ps.get("hp_status", "")])
@@ -782,6 +787,24 @@ func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -
 			skill_parts.append("%s:%.2f" % [sk, float(ps["skills"][sk])])
 		if not skill_parts.is_empty():
 			lines.append("  " + " ".join(skill_parts))
+	# ★②「含被聚焦的那個人」：focused_member 是【現成的查詢面 key】，畫面先前從來沒讀過
+	var fm: Dictionary = _cached_snapshot.get("focused_member", {})
+	if not fm.is_empty():
+		lines.append("聚焦: %s  %s" % [String(fm.get("name", "?")), String(fm.get("status", ""))])
+	return lines
+
+func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
+	var lines: Array = []
+	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
+	var food_days: float = float(ct.get("food_days", 99.0))
+	# ★`starving` 隨「糧: X 天」那一行搬去生存頁了 ⇒ 這裡不再需要（留著會是未用變數警告）
+	var cap: Dictionary = ct.get("capabilities", {})
+	if not cap.is_empty():
+		lines.append("狩獵 %d%%/%.0f糧  戰力 %.0f  日耗 %.1f食(撐%.0f天)" % [
+			int(float(cap.get("hunt_chance", 0.0)) * 100), float(cap.get("hunt_yield", 0.0)),
+			float(cap.get("combat_power", 0.0)), float(cap.get("food_burn_per_day", 0.0)),
+			food_days])
+
 
 
 	if _selected != Vector2i(-1, -1):
@@ -824,6 +847,9 @@ func _page_skylight_fields(idx: int) -> Array:
 	match idx:
 		# ★「庫存與價格」已由 _build_economy_lines 接出 ⇒ 從宣告裡【拿掉】
 		#   ⇒ ★★declared 變小 ⇒ [UI-SKYLIGHT] count 跟著變小 ＝ 票B 的進度讀數
+		# ★生存頁四題（blueprint 2026-09-23）：★★用【問題】命名不用資料表名——天窗是印給玩家看的
+		#   ★★★「人的狀態」已由 _build_survival_lines 接出（成員健康＋玩家＋聚焦者）⇒ 從宣告拿掉
+		0: return ["糧食跑道", "位置與家", "任務與目標"]
 		1: return ["糧食收支", "生產線", "貿易對象"]
 		2: return ["鄰近敵對", "戰力對比", "邊境事件", "防務狀態"]
 		3: return ["盟友與敵意", "勢力關係", "成員情緒", "請求與承諾"]
