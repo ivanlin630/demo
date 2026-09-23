@@ -263,6 +263,19 @@ while IFS=$'	' read -r id cmd purpose expect; do
 ' "$OUT" | grep -E 'UnauthorizedAccess|已停用指令碼執行|無法載入|沒有真的重跑' | head -2
     ENVFAIL+=("$id"); continue
   fi
+  # ★★★2026-09-23：紅的時候把【該支的完整輸出】落檔（systems 補，血證在下）。
+  #   血證：ui-flow 在一輪電池裡紅了，而卷面上只留 expect 與實際那一行
+  #   ⇒ ★格名在更前面的輸出裡，而那段【沒有被存下來】
+  #   ⇒ ★★一個【不可重現】的紅，它的診斷資訊是一次性的 —— 錯過就沒有了
+  #   ⇒ ★★★而這不是加閘：是讓既有的閘把【它已經拿在手上的東西】存下來。
+  #   ★只在紅的時候寫（綠的輸出沒有人會回頭讀，寫了只是讓目錄長大）。
+  _mg_dump() {
+    local _d="$_mg_root/docs/measurements/.gate-fail"
+    mkdir -p "$_d" 2>/dev/null
+    local _f="$_d/$(date +%Y%m%d-%H%M%S)-$1.txt"
+    printf '%s
+' "$OUT" > "$_f" 2>/dev/null && echo "[MERGE-GATES]   ⇒ ★完整輸出已落檔：${_f#$_mg_root/}"
+  }
   if [ $RC -ne 0 ]; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— $purpose"
     # ★★★2026-09-15：原本這裡只印【最後五行】⇒ 而【被點名的那幾行】常常在前面
@@ -276,11 +289,12 @@ while IFS=$'	' read -r id cmd purpose expect; do
     if [ -n "$_mg_named" ]; then printf '%s
 ' "$_mg_named"; fi
     printf '%s
-' "$OUT" | tail -5; FAILED+=("$id")
+' "$OUT" | tail -5; _mg_dump "$id"; FAILED+=("$id")
   elif ! printf '%s' "$OUT" | grep -qE -- "$expect"; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— ★★跑完了但【沒有印出它該印的結論】"
     echo "    expect: $expect"; printf '%s
 ' "$OUT" | tail -3
+    _mg_dump "$id-no-verdict"
     FAILED+=("$id(no-verdict)")
   else
     echo "[MERGE-GATES] ✓ $id （${DT}s）"

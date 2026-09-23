@@ -73,3 +73,8 @@ docs/measurements/.bed-sweep-inprogress.tsv
 # ★掃床暫存/debris（每輪重生，不進 repo）——2026-09-09 當機後盤點加上
 docs/measurements/.sweep-timeout-*.txt
 docs/measurements/.bed-sweep-*.tsv
+
+# ★電池紅燈的完整輸出落檔（systems 2026-09-23）：是【診斷素材】不是產出
+#   ⇒ 不進 git：它每紅一次就多一份，而它的用途是【當場查】，不是留存
+#   ★要留的那一份請自己複製出來並在信裡標 exact path
+docs/measurements/.gate-fail/
