@@ -289,6 +289,15 @@ func get_and_clear_alerts() -> Array:
 #     ⇒ ★呼叫端原本當場讀 `message`／`ok` 的（實測 66 個呼叫端、54 個當場讀）
 #       現在拿不到結果 —— 那個【玩家回饋】要怎麼補，systems 還沒裁，本檔不自己選。
 func command_player(name: String, args: Dictionary) -> Dictionary:
+	# ★★★入列當下【唯一】會擋的一件事（systems 裁 2026-09-24，(乙) 的那一句）：
+	#   `dispatch` 的 match 認不認得這個 name。★它不是合法性判斷 —— 合法性歸消費點，
+	#   而「這個 name 根本不存在」【不會因為推進一顆 tick 而改變】⇒ 擋在這裡沒有第二份真相。
+	#   ★★判準走 `VERB` —— 而 P9 保證 `VERB` ≡ `dispatch()` 的 match 名單（異源比對）
+	#     ⇒ ★★★這裡不是再抄一份白名單，是用那份【有守衛的】白名單。
+	#   ★我原本漏了這一句，是 headless_test 的「unknown cmd: ok=false」紅出來的。
+	if not PlayerCommandApi.VERB.has(name):
+		return {"ok": false, "queued": false, "code": "unknown_command",
+			"message": "沒有這個指令：%s" % name}
 	_state.command_seq += 1
 	_state.pending_commands.append({
 		"name": name, "args": args.duplicate(true), "seq": _state.command_seq})

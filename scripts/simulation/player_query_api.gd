@@ -16,7 +16,14 @@ func _query_menu(state: WorldState, target_id: int, action_id: String) -> Dictio
 	var pre := _check_player_with_team(state)
 	if pre["code"] != "ok":
 		return PlayerApiMapper.map_query_envelope(false, pre["code"], pre["msg"], {})
-	if not state.teams.has(target_id):
+	# ★★★不是 `teams.has()` 而是 `can_be_player_target()`（＝`is_live_team`）——
+	#   ★`has()` 對【待刪除的殭屍隊】也是 true ⇒ 玩家會對一支正在被移除的隊開選單。
+	#   ★★這是 live-team-ratchet 抓出來的（2026-09-24 第一次跑）：我寫的是 [L] 形
+	#     （守 `has()` 之後還把 target_id 派出去），而那支棘輪的判準就是為了這個。
+	#   ★★★而它【不是偽陽】：全庫兩個玩家面路徑（interaction_system.gd:309、
+	#     player_command_system.gd:974）用的都是 `can_be_player_target` ——
+	#     我漏的是【這個專案既有的那道守衛】，不是棘輪太嚴。
+	if not state.can_be_player_target(target_id):
 		return PlayerApiMapper.map_query_envelope(false, "not_found", "目標不存在", {})
 	var p: PersonData = state.persons[state.player_id]
 	var pt: TeamData = state.teams[p.team_id]

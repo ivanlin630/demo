@@ -4389,15 +4389,28 @@ func _run_sim_test() -> void:
 	print("  [OK] query_player no player: ok=false")
 
 	# command_player move_to valid tile → ok
+	# ★★★指令佇列化（2026-09-24）：`command_player()` 只是【入列】，回的是
+	#   {ok:true, queued:true, seq:n} —— ★它【永遠】ok=true，因為合法性在消費點才判。
+	#   ⇒ 這裡原本兩條斷言都要改：
+	#     ①「move_target set」要等下一顆 tick（入列之後世界還沒動）
+	#     ②「invalid tile ⇒ ok=false」★不再成立 —— 入列的 ok 不是動作的 ok
+	#       ⇒ 改讀【消費點的帳】`command_log` 的 ok，那才是動作成不成功。
 	var _cmd_r1 := _sb_bridge.command_player("move_to", {"tile_q": 1, "tile_r": 0})
-	assert(_cmd_r1.get("ok"), "move_to valid tile: ok=true")
-	assert(_sb_state.teams[0].move_target == Vector2i(1, 0), "move_target set")
-	print("  [OK] command_player move_to: move_target set")
+	assert(_cmd_r1.get("queued"), "move_to valid tile: queued=true")
+	assert(_sb_state.teams[0].move_target != Vector2i(1, 0), "入列當下【還沒】生效")
+	_sb_runner.advance_tick(_sb_state, Vector2i(-1, -1))
+	assert(_sb_state.teams[0].move_target == Vector2i(1, 0), "推進一 tick 後 move_target set")
+	print("  [OK] command_player move_to: 入列≠生效，推進一 tick 後 move_target set")
 
-	# command_player move_to invalid tile → ok=false
+	# command_player move_to invalid tile → ★入列成功、消費點拒絕
+	var _log_n0: int = _sb_state.command_log.size()
 	var _cmd_r2 := _sb_bridge.command_player("move_to", {"tile_q": 99, "tile_r": 99})
-	assert(not _cmd_r2.get("ok"), "move_to invalid tile: ok=false")
-	print("  [OK] command_player move_to invalid: ok=false")
+	assert(_cmd_r2.get("queued"), "move_to invalid tile: 仍然【入列成功】")
+	_sb_runner.advance_tick(_sb_state, Vector2i(-1, -1))
+	assert(_sb_state.command_log.size() == _log_n0 + 1, "★母體地板：那一條真的被消費了")
+	assert(not bool(_sb_state.command_log[_sb_state.command_log.size() - 1].get("ok", true)),
+		"move_to invalid tile: ★消費點的 ok=false（不是入列的 ok）")
+	print("  [OK] command_player move_to invalid: 入列成功、消費點拒絕")
 
 	# command_player unknown command → ok=false
 	var _cmd_r3 := _sb_bridge.command_player("nonexistent_cmd", {})
