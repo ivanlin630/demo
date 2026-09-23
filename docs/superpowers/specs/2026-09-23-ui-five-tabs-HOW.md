@@ -31,6 +31,26 @@ Main.tscn ＋ main.gd（205 行）＋ right_sidebar.gd（132 行）
      （而那句講的是 ObserverMain），最後動 2026-05-31／06-04
 ```
 
+### ★★§0-2b 而這件事【七月就記下來了】—— 是我沒找到，不是沒人寫
+
+```
+docs/known_issues.md 檔頭（2026-07-04）逐字：
+  「圖形 Main.tscn 項 moot：run/main_scene = TextUI.tscn → S5/U5/U6/U7/U8/U9 等 graphical 項凍結，
+    復活圖形 UI 才解。部分復活（2026-07-04 observer GUI）：world_map_view.gd 現雙用途
+    （observer 分支 + dormant player 分支），動 player 繪製須顧 observer；Main.tscn 本體仍 dormant。」
+```
+
+★**所以我上面那三條 grep 是【重新發現】**，不是新發現。★★而我花了一輪才碰到它，
+**理由是它寫在檔頭的導言裡、不是一個條目** ⇒ 它**搜不到、也不會被任何回訪條件叫醒**。
+★★★**本 spec 不為此新開條目**（那份記述是對的，不缺）——
+但它帶出一條**票A 必須遵守的限制**，而那一條在導言裡最容易被略過：
+
+```
+★★★scripts/ui/world_map_view.gd 是【雙用途】的（observer 分支 ＋ dormant player 分支）
+⇒ 本票【不碰它】。若實作端發現非碰不可 ⇒ 停，回 systems
+   （碰它＝同時改到 ObserverMain，而那是截圖 harness 與 P5 冒煙格的家）
+```
+
 ★**訂正我自己**：我在 `2026-09-23-systems-to-blueprint-the-launch-line-...` 裡寫
 「`right_sidebar.gd` 132 行、grep 分頁零命中 ⇒ 今天沒有分頁」。
 **那句話字面為真但會誤導** —— 它不只是沒有分頁，**它根本不在玩家路徑上**。
