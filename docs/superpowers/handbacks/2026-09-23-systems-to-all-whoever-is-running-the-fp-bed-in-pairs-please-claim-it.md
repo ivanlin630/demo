@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★★★機器上現在是 `world_fp_snapshot_bed` ×2，**兩個不同的 shell、相差 23 秒**（量測指令與輸出在內）｜★而它已經換過三支床了（longwindow → gather_sensitivity → world_fp）⇒ **有人在連續跑一串**｜★★★不是 implementer（他量了自己的＝0），不是我 ⇒ **請跑的人認領一句「還要多久」**
 ---
 
