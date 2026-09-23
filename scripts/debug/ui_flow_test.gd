@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -64,6 +64,14 @@ func _initialize() -> void:
 	await _test_q7_5_dispatch_subteam_task()
 	await _test_q7_6_faction_gate_leader()
 	await _test_n1_subteam_promote_anon_hint()
+	# ★★★點名是【快照】：_roll_call_suffix() 一算就定了 ⇒ 在它【之後】跑的格永遠點不到名，
+	#   而卷面會印「有格沒有跑完」——★那條訊息是對的，錯的是呼叫順序。
+	#   ⇒ ★★新增格一律加在這一行【之前】。
+	await _test_pages_frame()
+	await _test_pages_zero_loss()
+	await _test_pages_switch_key()
+	await _test_pages_skylight()
+	await _test_pages_single_source()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -701,3 +709,203 @@ func _test_hunt_action_listed() -> void:
 	_check("腳下 wild_game → available_actions 含 hunt", "hunt" in ids)
 	await _free_ui(node)
 	_cell("_test_hunt_action_listed")
+
+# ════════ 票A：UI 五分頁（spec 2026-09-23-ui-five-tabs-HOW.md §4）════════
+
+# P1-a[框]：五個頁名都印得出來，且頁首帶 (i/5)。
+# ★頁名【來自 UiPages.PAGE_ORDER】不是字面值 —— 寫死在這裡的話，這一格會變成
+#   「我抄的字串等於我抄的字串」，改名時它照樣綠而畫面已經壞了。
+func _test_pages_frame() -> void:
+	_selftest_gate("_test_pages_frame").noop()
+	print("\n── 票A P1-a 五分頁頁首 ──")
+	var node = await _make_ui()
+	_check("PAGE_ORDER 有 5 頁（現況 %d）" % UiPages.PAGE_ORDER.size(), UiPages.PAGE_ORDER.size() == 5)
+	for i in range(UiPages.PAGE_ORDER.size()):
+		node._page_idx = i
+		var s: String = node._build_state_str()
+		var want: String = UiPages.header(i)
+		_check("第 %d 頁的頁首出現：%s" % [i + 1, want], s.contains(want))
+		# ★★任一頁【全空白】＝紅（spec P4）：頁首之後必須還有東西
+		var after_head: String = s.substr(s.find(want) + want.length())
+		_check("第 %d 頁頁首之後非空白" % (i + 1), after_head.strip_edges() != "")
+	await _free_ui(node)
+	_cell("_test_pages_frame")
+
+# P1-b[零損失]：舊 `_build_state_str()` 的每一條 raw 行，在（狀態列 ∪ 第 1 頁）裡
+#   出現次數必須相同。★不 strip、★★不用集合測試（舊輸出有 4 條一模一樣的分隔線）。
+# ★★★「前」來自票A 落地【之前】取的快照：
+#     docs/measurements/2026-09-23-ui-ticketA-before-state-str.txt（commit 7738e52f6）
+#   而它是在【特定世界＋特定 tick＋游標選在玩家格】取的 ⇒ 本格必須把世界對回去。
+#   ⇒ ★對不上就判【不可判】，★★不判紅 —— 世界不同造成的差異不是這一票的缺陷。
+func _test_pages_zero_loss() -> void:
+	_selftest_gate("_test_pages_zero_loss").noop()
+	print("\n── 票A P1-b 零損失（raw／逐行計數／不 strip）──")
+	var path: String = "res://docs/measurements/2026-09-23-ui-ticketA-before-state-str.txt"
+	if not FileAccess.file_exists(path):
+		print("  ★★★【不可判】找不到「前」快照：%s" % path)
+		print("    ⇒ ★這不是綠也不是紅：沒有「前」就沒有零損失可言")
+		_errors += 1   # ★沒有基準【就是】缺陷（基準是這一票的交付物之一）
+		_cell("_test_pages_zero_loss")
+		return
+	var txt: String = FileAccess.get_file_as_string(path)
+	var want_tick: int = -1
+	var want_teams: int = -1
+	var want_persons: int = -1
+	var before: Array = []
+	for ln in txt.split("\n"):
+		if ln.begins_with("#UC "):
+			if ln.begins_with("#UC tick="):
+				want_tick = int(ln.substr(9).split("（")[0])
+			if ln.contains("teams="):
+				# ★不用 RegEx：那需要反斜線，而反斜線在【產生這支檔的工具鏈】上被吃過兩次
+				#   （產生這支檔的 heredoc 把【兩個反斜線】收成【一個】⇒ GDScript 報 Invalid escape）
+				#   ⇒ 用 split 解析，整條路上一個反斜線都不需要。
+				# ★用 find 不用 token 前綴：那一行是「…非設定值）：teams=16 …」，
+				#   ★★teams= 前面【沒有空白】（緊接在全形冒號後）⇒ split(" ") 的那一段
+				#   會是「非設定值）：teams=16」而 begins_with("teams=") 為假 ⇒ 靜靜解析成 -1。
+				#   ★★★而 -1 會讓下面判成【不可判】—— 看起來像「世界對不上」，其實是我的剖析壞了。
+				want_teams = _kv_int(ln, "teams=")
+				want_persons = _kv_int(ln, "persons=")
+			continue
+		before.append(ln)
+	# ★★★檔案往返的產物：存檔是一行一個 store_line ⇒ 檔尾有換行 ⇒ split 出一個【尾端空字串】。
+	#   而 `_build_state_str()` 回傳的字串【沒有】尾端換行 ⇒ 新輸出不會有那一個空元素。
+	#   ⇒ ★不處理的話這一格會報「舊 1 次 → 新 0 次：（空行）」，而那不是【少印了一行】。
+	#   ★★只砍【最後一個】而且【只砍空的那一個】—— 輸出中間若真的有空行，它仍然要被比。
+	if not before.is_empty() and String(before[before.size() - 1]) == "":
+		before.remove_at(before.size() - 1)
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	# ★把世界推到同一個 tick（★★看【世界的 tick 到了沒】，不是看請求過幾次）
+	var guard: int = 0
+	while st.world.current_tick < want_tick and guard < 4000:
+		if not node._bridge.is_advancing():
+			node._bridge.request_advance(want_tick - st.world.current_tick)
+		await process_frame
+		guard += 1
+	# ★★游標也要對回去（沒選格 ⇒ text_ui_main.gd:716 那 ~23 行一行都不會渲染）
+	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
+	var cp: Dictionary = ct.get("position", {})
+	if not cp.is_empty():
+		node._selected = Vector2i(int(cp.get("q", 0)), int(cp.get("r", 0)))
+	node._page_idx = 0
+	var same_world: bool = (st.world.current_tick == want_tick
+		and st.teams.size() == want_teams and st.persons.size() == want_persons)
+	print("  世界：tick=%d/%d teams=%d/%d persons=%d/%d ⇒ %s" % [
+		st.world.current_tick, want_tick, st.teams.size(), want_teams,
+		st.persons.size(), want_persons, "對得上" if same_world else "對不上"])
+	if not same_world:
+		print("  ★★★【不可判】世界與「前」不同 ⇒ 差異不歸這一票")
+		print("    ⇒ ★重取「前」：scripts/debug/ui_state_str_capture.gd（UC_OUT 指到那個路徑）")
+		await _free_ui(node)
+		_cell("_test_pages_zero_loss")
+		return
+	var after: Array = node._build_state_str().split("\n")
+	var cb: Dictionary = {}
+	for l in before: cb[l] = int(cb.get(l, 0)) + 1
+	var ca: Dictionary = {}
+	for l in after: ca[l] = int(ca.get(l, 0)) + 1
+	var lost: int = 0
+	for l in cb:
+		var n_old: int = int(cb[l])
+		var n_new: int = int(ca.get(l, 0))
+		if n_new != n_old:
+			lost += 1
+			print("  ✗ 舊 %d 次 → 新 %d 次：%s" % [n_old, n_new, String(l).substr(0, 40)])
+	_check("零損失：舊 %d 條相異行的出現次數全部相同（不 strip、不用集合）" % cb.size(), lost == 0)
+	# ★母體地板：★★「零損失」在【空的前】上恆真 —— 那是恆真項不是判準
+	_check("「前」的母體非空（%d 條相異行，且有重複行才測得出計數）" % cb.size(), cb.size() >= 10)
+	var dup_max: int = 0
+	for l in cb:
+		if int(cb[l]) > dup_max: dup_max = int(cb[l])
+	_check("「前」裡有重複行（最大 %d 次）⇒ 逐行計數這件事測得到" % dup_max, dup_max >= 2)
+	await _free_ui(node)
+	_cell("_test_pages_zero_loss")
+
+# P2[鍵]：切鍵循環 5 次回原頁；overlay 開著時切鍵不吃。
+# ★★★形狀是硬的（spec）：InputEventKey.new() ＋ node._input(ev)，抄 _test_u15_overlay_input_guard。
+#   ★明文禁止 node._process(...) / node._bridge.set_player_input(...) ——
+#   ★★那 25 支繞過 _input() 的 cell 綠的是「函式被呼叫」，不是「鍵盤按得到」。
+func _test_pages_switch_key() -> void:
+	_selftest_gate("_test_pages_switch_key").noop()
+	print("\n── 票A P2 切鍵（真鍵盤路徑）──")
+	var node = await _make_ui()
+	node._page_idx = 0
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_PERIOD
+	ev.pressed = true
+	var seen: Array = []
+	for i in range(UiPages.PAGE_ORDER.size()):
+		node._input(ev)
+		seen.append(node._page_idx)
+	_check("連按 %d 次回到第 1 頁（走完 %s）" % [UiPages.PAGE_ORDER.size(), str(seen)],
+		node._page_idx == 0)
+	_check("循環中每一頁都到過一次（%d 個相異）" % _uniq_n(seen), _uniq_n(seen) == UiPages.PAGE_ORDER.size())
+	# ★反向鍵
+	var ev2 := InputEventKey.new()
+	ev2.keycode = KEY_COMMA
+	ev2.pressed = true
+	node._input(ev2)
+	_check("[,] 反向切到最後一頁（idx=%d）" % node._page_idx, node._page_idx == UiPages.PAGE_ORDER.size() - 1)
+	# ★★overlay 開著時不吃：★★★守衛是【結構性】的（_input 裡每個 overlay 先 return），
+	#   而這一格就是在驗那個結構真的擋得住 —— 不是驗我寫了一個 if。
+	node._page_idx = 2
+	node._encounter_view.visible = true
+	node._input(ev)
+	_check("overlay 可見時切鍵被吞（頁仍是 2，實得 %d）" % node._page_idx, node._page_idx == 2)
+	node._encounter_view.visible = false
+	node._input(ev)
+	_check("overlay 收起後切鍵恢復（頁變 3，實得 %d）" % node._page_idx, node._page_idx == 3)
+	await _free_ui(node)
+	_cell("_test_pages_switch_key")
+
+# 從一行文字裡撈 `key=<整數>`。★找不到回 -1（★★而 -1 的意思是【沒撈到】，不是 0）。
+func _kv_int(line: String, key: String) -> int:
+	var i: int = line.find(key)
+	if i == -1: return -1
+	var rest: String = line.substr(i + key.length())
+	var digits: String = ""
+	for ch in rest:
+		if ch >= "0" and ch <= "9": digits += ch
+		else: break
+	return int(digits) if digits != "" else -1
+
+func _uniq_n(a: Array) -> int:
+	var d: Dictionary = {}
+	for x in a: d[x] = true
+	return d.size()
+
+# P4[天窗]：第 2–5 頁的未接欄位必須印「未接出（票B）」，不得靜默空白。
+func _test_pages_skylight() -> void:
+	_selftest_gate("_test_pages_skylight").noop()
+	print("\n── 票A P4 天窗 ──")
+	var node = await _make_ui()
+	var total: int = 0
+	for i in range(1, UiPages.PAGE_ORDER.size()):
+		node._page_idx = i
+		var s: String = node._build_state_str()
+		var n: int = s.count("未接出（票B）")
+		total += n
+		_check("第 %d 頁（%s）有 %d 個具名天窗" % [i + 1, String(UiPages.PAGE_ORDER[i]), n], n > 0)
+	print("  ★票A 交付時絕大多數格子是天窗（共 %d 個）—— 這是預期不是缺陷" % total)
+	# ★母體地板：天窗總數 0 ⇒ 不是「都接好了」，是這一格沒接上
+	_check("天窗母體非空（%d）⇒ 0 的意思是這一格壞了，不是欄位都接好了" % total, total > 0)
+	await _free_ui(node)
+	_cell("_test_pages_skylight")
+
+# P3[單一來源]：text_ui_main.gd 不得有頁名字面值；c1_walkthrough.gd 不得自帶 PAGE_ORDER。
+# ★★這一格掃的是【原始碼文字】，而它防的是「明天再長出第二份名單」。
+func _test_pages_single_source() -> void:
+	_selftest_gate("_test_pages_single_source").noop()
+	print("\n── 票A P3 單一來源 ──")
+	var ui_src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	var walk_src: String = FileAccess.get_file_as_string("res://scripts/debug/c1_walkthrough.gd")
+	_check("原始碼撈得到（text_ui %d 字元／walkthrough %d 字元）" % [ui_src.length(), walk_src.length()],
+		ui_src.length() > 1000 and walk_src.length() > 500)
+	for name in UiPages.PAGE_ORDER:
+		# ★只看【字串字面值】形態："生存"：註解裡提到頁名不算違規
+		var lit: String = "\"%s\"" % String(name)
+		_check("text_ui_main.gd 沒有頁名字面值 %s" % lit, not ui_src.contains(lit))
+	_check("c1_walkthrough.gd 不再自帶 PAGE_ORDER", not walk_src.contains("const PAGE_ORDER"))
+	_check("c1_walkthrough.gd 改讀 UiPages.PAGE_ORDER", walk_src.contains("UiPages.PAGE_ORDER"))
+	_cell("_test_pages_single_source")
