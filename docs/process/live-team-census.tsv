@@ -16,8 +16,8 @@
 site	func	class	reason
 scripts/simulation/encounter_system.gd:1403	_find_resident_team_on_tile	A	挑一支居民隊來互動——挑到殭屍＝跟死人交涉
 scripts/simulation/faction_ai_system.gd:630	_has_inflight_settler	A	「同派系已有人在去拓殖的路上」＝殭屍會讓活隊誤以為有人去了 ⇒ 拓殖被抑制
-scripts/simulation/faction_ai_system.gd:953	_evaluate_all_body	A	★主決策迴圈：殭屍隊【還會做一次決策】（它這 tick 已判死）
-scripts/simulation/faction_ai_system.gd:1033	_evaluate_all_body	A	同上第二段；它有 teams.has 復查（防 erase）★但沒有 pending 復查（不防殭屍窗）
+scripts/simulation/faction_ai_system.gd:1425	_evaluate_loop2_teams	A	★主決策迴圈：殭屍隊【還會做一次決策】（它這 tick 已判死）★d710c5eee 更名：原 _evaluate_all_body 拆三份，語意不變
+scripts/simulation/faction_ai_system.gd:1528	_evaluate_loop3_teams	A	同上第二段；它有 teams.has 復查（防 erase）★但沒有 pending 復查（不防殭屍窗）★d710c5eee 更名：同上
 scripts/simulation/faction_ai_system.gd:2479	tick_relocations_all	A	對隊執行遷移＝對死人做事
 scripts/simulation/faction_ai_system.gd:2841	_resolve_scout_target	A	挑同派系隊當斥候目標
 scripts/simulation/faction_ai_system.gd:4825	_try_resume_construction	A	「已有人施工」⇒ 殭屍佔著位置 ⇒ 工地無人續建
