@@ -28,5 +28,12 @@ esac
 _gc="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"
 HOOKD="$(dirname "${_gc:-.git}")/.claude/hooks"
 F="$HOOKD/.peer-addr.${ROLE}"
-printf '%s\t%s\t%s\t%s\n' "$ADDR" "${CLAUDE_SESSION_ID:--}" "$$" "$(date +%FT%T)" > "$F"
+# ★★★2026-09-24：第三欄寫的是【claude 進程 pid】（env CLAUDE_PID），不是這支 bash 的 $$。
+#   ★血證：blueprint 重開之後 .inbox-watch.blueprint.lock 的 claude_pid 仍是舊的 24004（已死），
+#     而 peers.sh 把那一欄當成「終端還在不在」的判準 ⇒ 它把重開後的 blueprint 判成 DEAD。
+#   ★★真因是我自己造的：我在【inbox watcher 退役】的同一天，把 peers.sh 的判準改成讀那一欄
+#     ⇒ ★★★讀者還在、寫者沒了 ⇒ 那一欄從此【凍結在最後一次的值】。
+#   ⇒ liveness 來源改成【每次開場都會被重寫的這個檔】；lock 的第三欄降級成 legacy 後備。
+printf '%s	%s	%s	%s
+' "$ADDR" "${CLAUDE_CODE_SESSION_ID:-${CLAUDE_SESSION_ID:--}}" "${CLAUDE_PID:--}" "$(date +%FT%T)" > "$F"
 echo "✅ 通訊錄：${ROLE} → ${ADDR}（別的角色現在敲得到你）"

@@ -67,6 +67,19 @@ for r in $ROLES; do
     addr="${addr:--}"
     amt=$(stat -c %Y "$af" 2>/dev/null || echo 0)
     [ $(( NOW - amt )) -gt 86400 ] && addr="${addr}?"   # ★超過一天＝可能已換 session
+    # ★★★2026-09-24：claude_pid 優先取自【通訊錄】而不是 lock。
+    #   ★lock 的第三欄由 inbox-watch 寫，而 inbox-watch 已退役 ⇒ ★★**讀者還在、寫者沒了**
+    #     ⇒ 那一欄凍結在最後一次的值。血證：blueprint 重開後 lock 仍是舊 pid 24004（已死）
+    #     ⇒ 這支把它判成 DEAD，而它其實開著。
+    #   ★★★通訊錄每次開場都會被重寫（whoami.sh），所以它是【有寫者】的那一個。
+    #   ★★★而【舊格式的記錄不能信】：2026-09-24 之前 whoami.sh 第三欄寫的是【bash 的 $$】
+    #     ⇒ 那是一個早就死掉的 pid，★而 Windows 會回收 pid ⇒ 它可能【剛好對上別的進程】
+    #     ⇒ **舊記錄會產生假 OPEN**（實測：五個角色一起變成 OPEN，而它們的第三欄是 9 小時前的 bash pid）
+    #   ⇒ 判準：**舊格式的 session_id 欄是 `-`**（舊碼讀的是不存在的 CLAUDE_SESSION_ID）
+    #     ⇒ 只有第二欄【不是 `-`】的記錄，它的 pid 才採信。
+    if [ -n "${_apid:-}" ] && [ "${_apid}" != "-" ] && [ -n "${_asid:-}" ] && [ "${_asid}" != "-" ]; then
+      cpid="$_apid"
+    fi
   fi
   if [ "$TSV" = "1" ]; then
     printf "%s	%s	%s	%s	%s	%s
