@@ -725,9 +725,21 @@ func _test_pages_frame() -> void:
 		var s: String = node._build_state_str()
 		var want: String = UiPages.header(i)
 		_check("第 %d 頁的頁首出現：%s" % [i + 1, want], s.contains(want))
-		# ★★任一頁【全空白】＝紅（spec P4）：頁首之後必須還有東西
-		var after_head: String = s.substr(s.find(want) + want.length())
-		_check("第 %d 頁頁首之後非空白" % (i + 1), after_head.strip_edges() != "")
+		# ★★任一頁【全空白】＝紅（spec P4）。
+		# ★★★第一版我寫「頁首之後非空白」——那是【恆真項】：頁尾的 Tick·Day 永遠跟在後面，
+		#   所以就算整頁內容被拿光，那一格還是綠。（血證：注射「第 3 頁天窗不印」時它 PASS。）
+		# ⇒ 改成只看【分頁區】：頁首 → 下一條分隔線（Tick·Day 那一段的起點）之間。
+		var lines_s: PackedStringArray = s.split("\n")
+		var hi: int = -1
+		for li in range(lines_s.size()):
+			if String(lines_s[li]) == want: hi = li; break
+		_check("第 %d 頁找得到頁首行" % (i + 1), hi != -1)
+		var body: Array = []
+		for li in range(hi + 1, lines_s.size()):
+			if String(lines_s[li]).begins_with("────"): break
+			body.append(String(lines_s[li]))
+		var body_txt: String = "".join(body).strip_edges()
+		_check("第 %d 頁的【分頁區】非空（%d 行）" % [i + 1, body.size()], body_txt != "")
 	await _free_ui(node)
 	_cell("_test_pages_frame")
 
@@ -870,6 +882,11 @@ func _kv_int(line: String, key: String) -> int:
 		else: break
 	return int(digits) if digits != "" else -1
 
+# ★宣告清單從【畫面那一支】拿，不在測試裡複製一份 —— ★★複製的那份不會跟著票B 變短，
+#   而它會讓這一格在票B 接好之後【對著一份過期的宣告】判紅。
+func _page_skylight_fields_of(node: Node, idx: int) -> Array:
+	return node._page_skylight_fields(idx)
+
 func _uniq_n(a: Array) -> int:
 	var d: Dictionary = {}
 	for x in a: d[x] = true
@@ -881,15 +898,30 @@ func _test_pages_skylight() -> void:
 	print("\n── 票A P4 天窗 ──")
 	var node = await _make_ui()
 	var total: int = 0
+	var declared: int = 0
 	for i in range(1, UiPages.PAGE_ORDER.size()):
 		node._page_idx = i
 		var s: String = node._build_state_str()
 		var n: int = s.count("未接出（票B）")
+		var d: int = _page_skylight_fields_of(node, i).size()
 		total += n
-		_check("第 %d 頁（%s）有 %d 個具名天窗" % [i + 1, String(UiPages.PAGE_ORDER[i]), n], n > 0)
+		declared += d
+		_check("第 %d 頁（%s）印出的天窗 %d ＝ 宣告未接 %d" % [
+			i + 1, String(UiPages.PAGE_ORDER[i]), n, d], n == d)
+	# ★★★機器可讀的一行（systems 要的）：票B 每接好一欄它就變小 ⇒ 這是「天窗遞減」的讀數。
+	print("[UI-SKYLIGHT] count=%d declared=%d" % [total, declared])
 	print("  ★票A 交付時絕大多數格子是天窗（共 %d 個）—— 這是預期不是缺陷" % total)
-	# ★母體地板：天窗總數 0 ⇒ 不是「都接好了」，是這一格沒接上
-	_check("天窗母體非空（%d）⇒ 0 的意思是這一格壞了，不是欄位都接好了" % total, total > 0)
+	# ★★★P4 原本判「天窗總數 0 ⇒ 紅」，而【票B 的成功條件正是天窗歸零】
+	#   ⇒ ★票B 做完的那一天，這一格會因為【票B 成功】而變紅 —— 那是一個有到期日的守衛。
+	#   ⇒ ★★所以判準換掉：★★★不是「必須有天窗」，是【宣告未接的欄位，每一個都要印出天窗】。
+	#     declared 由 _page_skylight_fields() 宣告；票B 接好一欄就把它從宣告裡拿掉
+	#     ⇒ declared 降到 0 時 total 也是 0 ⇒ 這一格【自然變綠】，不必有人回來改它。
+	_check("每一個宣告未接的欄位都印出天窗（印 %d／宣告 %d）" % [total, declared], total == declared)
+	# ★而【母體地板】改釘在【宣告】上：宣告 0 且票B 還沒做完 ⇒ 是這一格自己壞了
+	#   ⇒ ★★所以這條只在票B 尚未交付時有意義，交付後它會與上面那條一起自然放行。
+	if declared == 0:
+		print("  ★★★宣告數 0 ⇒ 兩種可能：①票B 已把五頁全接完 ②_page_skylight_fields 壞了")
+		print("    ⇒ ★這一格【不判】——請看 [UI-SKYLIGHT] 那一行的歷史走勢，而不是看這一格的顏色")
 	await _free_ui(node)
 	_cell("_test_pages_skylight")
 
