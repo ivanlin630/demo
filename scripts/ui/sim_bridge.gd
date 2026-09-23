@@ -13,7 +13,6 @@ var _runner: SimRunner
 var _state: WorldState
 var _ticks_remaining: int = 0
 var _query_api: PlayerQueryApi = PlayerQueryApi.new()
-var _cmd_api: PlayerCommandApi = PlayerCommandApi.new()
 
 func _init(runner: SimRunner, state: WorldState) -> void:
 	_runner = runner
@@ -274,8 +273,17 @@ func query_trade_direct_preview(target_team_id: int) -> Dictionary:
 func get_and_clear_alerts() -> Array:
 	return PlayerQueryApi.new().get_and_clear_alerts(_state)
 
+# ★★★不再當場套用：推進佇列，由 sim_runner 在【tick 邊界】消費（spec §3-1）。
+#   ★沒有「立刻套用」的旁路（spec §3-4）—— 只要存在一條同步路徑，
+#     重播就要問「那一次走的是哪條」，而卷面上兩條路徑長得一模一樣。
+#   ★★回傳形狀照 spec §3-1 逐字：{ ok, queued, seq }。
+#     ⇒ ★呼叫端原本當場讀 `message`／`ok` 的（實測 66 個呼叫端、54 個當場讀）
+#       現在拿不到結果 —— 那個【玩家回饋】要怎麼補，systems 還沒裁，本檔不自己選。
 func command_player(name: String, args: Dictionary) -> Dictionary:
-	return _cmd_api.dispatch(_state, name, args)
+	_state.command_seq += 1
+	_state.pending_commands.append({
+		"name": name, "args": args.duplicate(true), "seq": _state.command_seq})
+	return {"ok": true, "queued": true, "seq": _state.command_seq}
 
 # 玩家主動打開互動選單時呼叫：掃描同格 NPC 加入 pending_targets
 func refresh_interaction_targets() -> void:

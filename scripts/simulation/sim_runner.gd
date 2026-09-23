@@ -46,6 +46,7 @@ var _strategic_ai_system: StrategicAiSystem
 var _encounter_system: EncounterSystem
 var _training_system: TrainingSystem
 var _player_cmd: PlayerCommandSystem
+var _cmd_api: PlayerCommandApi   # ★玩家指令的唯一套用者（消費點在 _consume_player_commands）
 var _ambush_system: AmbushSystem
 
 # #3 tick 計時 instrument：累積本 day 的 tick wall-time，日邊界 flush（無 per-tick spam）
@@ -76,6 +77,7 @@ func _init() -> void:
 	_encounter_system    = EncounterSystem.new()
 	_training_system     = TrainingSystem.new()
 	_player_cmd          = PlayerCommandSystem.new()
+	_cmd_api             = PlayerCommandApi.new()
 	_ambush_system       = AmbushSystem.new()
 
 # ★T4 觀察者守衛（一次性、不洗版）：呼叫端宣稱無玩家（player_pos=(-1,-1)）卻 state 說有玩家
@@ -474,6 +476,38 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, due_faction
 func _seam3_dummy_step(_state: WorldState) -> void:
 	Probe.bump("seam3.dummy")
 
+# ══════════ 玩家指令的【唯一】消費點（HOW spec §3-2）══════════
+# ★★★位置：每一次 `_step1_advance_time()` 的【正後方】，兩個分支都放。
+#   ★為什麼是【之後】不是之前：`current_tick += 1` 發生在 `_step1_advance_time()` 裡
+#     ⇒ 放之前 ⇒ command_log 記到舊值；放之後 ⇒ 記到本 tick 真正在用的那個值。
+#     ★★全庫其餘印 tick 的地方（DayNight／Probe／FaiPhase…）都讀【遞增後】的 current_tick
+#     ⇒ ★★★記錯側【不會馬上紅】：兩種選法各自內部一致，只有跟別的 tick 來源對帳時才現形。
+# ★分支A（encounter_active）【也消費】，理由：
+#   ①一條【沒有例外】的規則比兩條好 ——「指令永遠在下一個 tick 邊界生效」玩家講得出來；
+#     「除非你正在遭遇戰」是一句沒有人會記得的例外。
+#   ②不消費 ⇒ 佇列在遭遇戰期間持續累積，結束那一刻【一次全部生效】
+#     ⇒ ★那是被動產生的行為，不是誰設計的。
+#   ③合法性不歸佇列管 —— handler 自己有前置檢查，不合法就回 ok=false，
+#     ★而那一條【照樣進 command_log】⇒ 重播重現得出來。
+#   ★而「遭遇戰期間玩家其實按不到鍵」是真的 ⇒ 這個分支【多半】是空的；
+#     ★★但「多半空」不是「保證空」，所以規則寫死，不靠它空。
+# ★一次吃光，沒有上限（spec §7-③：玩家手速有限）。
+func _consume_player_commands(state: WorldState) -> void:
+	if state.pending_commands.is_empty():
+		return
+	# ★取走整批再跑：handler 可能自己再入列（例如連鎖），那些屬於【下一顆 tick】
+	#   ⇒ ★★否則同一顆 tick 會把新入列的也吃掉，而「在哪一個 tick 生效」就不再由 seq 決定。
+	var batch: Array = state.pending_commands
+	state.pending_commands = []
+	batch.sort_custom(func(x, y): return int(x.get("seq", 0)) < int(y.get("seq", 0)))
+	for c in batch:
+		var name: String = String(c.get("name", ""))
+		var args: Dictionary = c.get("args", {})
+		var res: Dictionary = _cmd_api.dispatch(state, name, args)
+		state.command_log.append({
+			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)),
+			"name": name, "args": args, "ok": bool(res.get("ok", false))})
+
 func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if phase_timing: _ph.clear()   # 相位計時：每 tick 重置
 	if state.encounter_active:
@@ -482,10 +516,12 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		if result not in ["ongoing", "player_turn"]:
 			_encounter_system.resolve_encounter_end(state, result)
 		_step1_advance_time(state)
+		_consume_player_commands(state)   # ★★分支A 也消費（理由見函式檔頭）
 		if phase_timing: _pht("encounter", _te)
 		WorldEvents.consume_and_clear(state)   # ★T0-A1 單 tick 清空（encounter 路也要，否則跨 tick 存活）
 		return result    # propagate to bridge
 	_step1_advance_time(state)
+	_consume_player_commands(state)
 	var _t: int = Time.get_ticks_usec() if phase_timing else 0   # 相位計時鏈起點
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / WorldState.TICKS_PER_DAY))

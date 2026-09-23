@@ -183,6 +183,22 @@ var pending_seen: Dictionary = {}
 #     ★★★不是逐支逐 tick 的粗標記 —— 那顆分不出「這一隊」有沒有被碰到，只能當上界。
 var pending_visit: Dictionary = {}
 var player_state: Dictionary = {}
+
+# ══════════ 玩家指令佇列（HOW spec「玩家指令佇列化」§3-1）══════════
+# ★★★目標是【重播可重現】：同種子 ＋ 同一串指令（每條帶被套用的 tick）⇒ 同一個世界。
+#   ★今天不決定的原因不是理論競態：`tick_step()` 一次吃 min(60, remaining) 個 tick 且
+#     【無 delta-time 縮放】⇒ 幀率決定單位時間吃掉幾個 tick；而 `_input()` 完全不看
+#     `is_advancing()` ⇒ 玩家在多 tick 批次進行中照樣按得到鍵
+#     ⇒ ★★同一個操作在不同幀率的機器上會落在【不同的 tick 之後】。
+# ★每筆：{ "name": String, "args": Dictionary, "seq": int }
+#   ★★seq 遞增 ⇒ 同一顆 tick 內的多條指令，順序＝玩家下的順序（spec §3-2b①）
+var pending_commands: Array = []
+var command_seq: int = 0
+# ★★★重播用的帳：每條【被套用】的指令一筆，帶它真正生效的 tick。
+#   ★記的是 `_step1_advance_time()` 之【後】的 current_tick —— 全庫其餘印 tick 的地方
+#     （DayNight／Probe／FaiPhase…）都讀遞增後的值，記錯側不會馬上紅，
+#     只有跟別的 tick 來源對帳時才現形（spec §3-2）。
+var command_log: Array = []
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []
 # Array[int] — 同格、無敵意 NPC team_ids，等玩家選擇互動類型或忽略
