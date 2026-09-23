@@ -879,16 +879,22 @@ func _test_pages_zero_loss() -> void:
 	# ★具名排除：兩邊都排，★★而排掉幾行要印出來（不是靜默略過）
 	var n_ex_b: int = 0
 	var n_ex_a: int = 0
+	var n_st_b: int = 0
+	var n_st_a: int = 0
 	var before2: Array = []
 	for l in before:
-		if _p1b_excluded(String(l)): n_ex_b += 1
+		if _p1b_structural(String(l)): n_st_b += 1
+		elif _p1b_excluded(String(l)): n_ex_b += 1
 		else: before2.append(l)
 	var after2: Array = []
 	for l in after:
-		if _p1b_excluded(String(l)): n_ex_a += 1
+		if _p1b_structural(String(l)): n_st_a += 1
+		elif _p1b_excluded(String(l)): n_ex_a += 1
 		else: after2.append(l)
 	print("  ★P1-b 具名排除 %d 條規則｜前排除 %d 行／後排除 %d 行" % [
 		P1B_EXCLUDE.size(), n_ex_b, n_ex_a])
+	print("  ★結構行（頁首／未分類標題／天窗，spec 本來就不比）：前 %d 行／後 %d 行" % [
+		n_st_b, n_st_a])
 	for e in P1B_EXCLUDE:
 		print("    排除「%s…」：%s" % [String(e["prefix"]), String(e["why"])])
 	before = before2
@@ -1020,6 +1026,21 @@ const P1B_EXCLUDE: Array = [
 ]
 
 # 回傳「這一行是否被具名排除」。★只比【前綴】且前綴必須來自上面那張表。
+# ★★★【結構行】不進比對 —— 這不是豁免，是 spec 本來就寫的範圍（AMEND 2026-09-23 逐字：
+#   「新增的行（頁首、未分類標題、天窗）不在比對範圍內」）。
+#   ★而「前」是【票A 之後】拍的 ⇒ 它【已經含有】這些結構行 ⇒ 兩邊都要排，否則：
+#     ①頁首：聯集用分頁區組，本來就不含頁首 ⇒ 「前」有、「後」沒有 ⇒ 假紅
+#     ②★★未分類標題帶著行數（「將搬走 16 行」）⇒ 票B 每搬一批它【必然改變】
+#        ⇒ ★★★拿它逐字比，等於要求票B 不要做事
+# ★這與 P1B_EXCLUDE 是【兩件事】：那張表是【有代價的豁免】（該比而不比，要還債），
+#   這裡是【本來就不該比的東西】—— ★★所以分開兩個函式，不混成一張表。
+func _p1b_structural(line: String) -> bool:
+	if line.begins_with("── 未分類（"): return true
+	if line.ends_with("未接出（票B）"): return true
+	for i in range(UiPages.PAGE_ORDER.size()):
+		if line == UiPages.header(i): return true
+	return false
+
 func _p1b_excluded(line: String) -> bool:
 	for e in P1B_EXCLUDE:
 		if line.begins_with(String(e["prefix"])): return true
