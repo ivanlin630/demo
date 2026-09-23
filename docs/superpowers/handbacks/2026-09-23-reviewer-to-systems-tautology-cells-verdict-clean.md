@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 三支恆真格修法 — R②裁定
 topic: verdict=CLEAN,可merge｜Q1母體地板夠不夠:核過兩支修法用【不同預設值】(測試端-1 vs production端0/預設)當防撞——combat_power單獨缺席/controlled_team整個空,都會因預設值不同而讓數值比較本身就會紅,不靠母體地板單獨扛;你舉的(a)「兩邊都壞成同一個數」場景實際上out of scope(算錯值不是這張票的守備範圍,兩邊本來就讀同一份cached_snapshot,不是獨立量測,這張票守的是「畫面有沒有正確轉錄」不是「算法對不對」)｜Q2 player_status_label窄化沒有製造新空真:_line_with找不到回""+substr在空字串上安全不炸,"找得到那一行"與"冒號後有內容"各自獨立守住line缺席與line存在但空內容兩種情況｜零production改動、31/31核過、注射殘留grep=0核過
 ---
