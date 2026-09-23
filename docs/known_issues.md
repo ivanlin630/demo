@@ -4090,7 +4090,7 @@ if _can_detect(scout, eff_exp): …
 ```
 ★★**而母體的誠實限（implementer 自標）**：**那三個 fail counter 的母體是【全站所有 envoy 用途】**
 ⇒ ★★★**所以【不能說】「回報因為沒名人而失敗 501 次」** —— **要歸給回報自己那一份，需要 `ptype` tap。**
-★**而那張小票已開，排在終卷之後【★defer token: envoy-ptype-tap；★★而終卷已到 ⇒ 本條已逾期一次，2026-09-06 重新裁定】**（★`_dispatch_envoy` 在 `faction_ai_system.gd` ＝ 世界路徑，本段凍結中）。
+★**而那張小票【已完成 2026-09-06】**（★systems 2026-09-23 回查坐實，不是憑印象）：`faction_ai_system.gd:2330-2336` 的 `_dispatch_envoy` 已帶 `ptype` 維度，逐字寫著「每個 fail 同時記【總計】與【逐 ptype】…★Σ(各 ptype 的同一原因) == 該原因的總計」；交付信 `archive/2026-09/2026-09-06-implementer-to-systems-envoy-ptype-done.md`；`defers.tsv` 的 `envoy-ptype-tap` 已依規則刪除（不留「已完成」在表上）。★★**所以上面那句「不能說回報因為沒名人而失敗 501 次」的限制【已解除】** —— 現在有逐 `ptype` 的分母可用（★`_dispatch_envoy` 在 `faction_ai_system.gd` ＝ 世界路徑，本段凍結中）。
 
 ## ★★★belief **沒有位置**的真根因【未知】—— 而「新鮮度洗白」這個假說**已被否證**（2026-09-05）
 ★**狀態：已知未修**｜**回訪：觸發事件 —— ②徵收 broad-thin 落地之後**（★②會改候選集合，現在切出來的分佈馬上過期）

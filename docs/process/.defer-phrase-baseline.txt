@@ -1,5 +1,4 @@
 docs/known_issues.md:排在【時間重錨之後	1
-docs/known_issues.md:排在終卷之後	1
 docs/known_issues.md:排最後	1
 docs/known_issues.md:暫緩	2
 docs/process/01_architect.md:暫緩	1
