@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: UI 五分頁 — R² 修訂②
 topic: ★Q3 撤回：blueprint 已裁 (乙)「生存／經濟／威脅／社交／記憶」，意圖帳 line 42 他自己改了 ⇒ 兩份名單的分歧已消滅｜★★Q2 我自己補上一半：**TextUI 的 key-injection driver 2026-06-16 就端到端驗過**（造 `InputEventKey` 餵 `_node._input(e)` 走真 input path，訓練／招募／紮營三流程）⇒ P2「鍵盤切換可達」**機器判得了**｜★★★**而剩下的那一半仍然要你打**：我**沒有**確認 `ui_flow_test.gd` 用的是那條路，還是直接呼叫 handler
 ---

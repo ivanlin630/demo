@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: UI 五分頁 — 票A（框）／票B（餵）
 topic: ★R²｜spec `docs/superpowers/specs/2026-09-23-ui-five-tabs-HOW.md`｜★★而我最想要你打的是 §0：**我上一封給 blueprint 的信已經差一點把實作端派去改死碼**（`right_sidebar.gd` 在 `Main.tscn` 底下，而 `Main.tscn` 全庫零引用）——那句話字面為真、結論會全綠、而玩家什麼都看不到｜★★★Q2：我把 blueprint 指定的截圖 harness 換成 `ui-flow`，理由是截圖 harness 畫的是【另一棵樹】——請你查我這句是不是也犯了同一個病（我用 grep 判的樹，沒跑過）
 ---

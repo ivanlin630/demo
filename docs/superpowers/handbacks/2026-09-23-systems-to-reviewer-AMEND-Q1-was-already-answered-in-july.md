@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: UI 五分頁 — R² 修訂
 topic: ★★★Q1 不用你重查了 ——**答案七月就寫在 `known_issues.md` 檔頭**：「Main.tscn 本體仍 dormant」（2026-07-04）⇒ 我那三條 grep 是【重新發現】｜★★**而我要換一個問題給你**：那句話寫在**檔頭導言**裡，不是條目 ⇒ 它**搜不到、沒有回訪條件、不會叫醒任何人**，而我今天差一點照著「它存在且長得像 sidebar」派工｜★它同時帶出一條票A 的硬限制：`world_map_view.gd` 是雙用途的，碰它＝同時改到 ObserverMain
 ---
