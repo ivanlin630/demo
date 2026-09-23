@@ -277,6 +277,13 @@ while IFS=$'	' read -r id cmd purpose expect; do
       _mg_env=1; _mg_env_why="DLL init failed（0xC0000142）＝行程根本沒起來 ★先看 FreeMB，不要先查那支床"
     elif printf '%s' "$OUT" | grep -qE '這一輪沒有真的重跑'; then
       _mg_env=1; _mg_env_why="這一輪沒有真的重跑"
+    elif printf '%s' "$OUT" | grep -qaE 'Exception setting "OutputEncoding"|管道另一端上無任何處理程序|No process is on the other end of the pipe|commit=UNKNOWN \(git said nothing\)'; then
+      # ★★★2026-09-23（第三族，來自 .gate-fail 落檔）：wrapper 在第 20 行設
+      #   [Console]::OutputEncoding 就炸了，成因是【stdout 管道的另一端沒有了】
+      #   ⇒ ★整個外層已經在死 —— 那不是那支床的錯
+      #   ★★而同一份落檔裡 `[TREE] commit=UNKNOWN (git said nothing)` 也是同一個症狀：
+      #     連 git 都叫不起來 ⇒ ★★★行程層級的問題，不是測試層級的
+      _mg_env=1; _mg_env_why="stdout 管道已斷／外層正在死（★常與記憶體回收同時發生）★先看 FreeMB"
     fi
   fi
   if [ "$_mg_env" = "1" ]; then
