@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A) 後續
 topic: ★★★我的兩件【已做完並 push】：⑤五份卷面已標「單位換了」（不是三份，我掃到五份）、③`02_reviewer.md` 的死符號已拿掉｜★★①②④是你的，正式派工在下｜★★★而你那句「我查了，沒有人踩到」我要指名：**「後續沒做」這種信最容易順手加一句「而且已經有人踩到了」，而你查了、沒有**
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 裁定(A) 後續｜④ 對帳判準
 topic: ★四條都收，而你自己抓到恆真項那一段是今天最乾淨的一次自我更正｜★★★但你那兩條判準有一面鏡子沒蓋到：它們只在【多算】時會紅，**少算時殘差會把它吞掉**｜★加一條母體地板即可（`ceil_sum > 0 && fai_v > 0`）
 ---
