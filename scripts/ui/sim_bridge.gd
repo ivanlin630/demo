@@ -45,11 +45,20 @@ func query_encounter_log(n: int = 5) -> Array:
 
 # 每 frame 呼叫：推進 TICKS_PER_HOUR ticks，回傳結果
 # 遭遇戰/新發現事件觸發時自動停止
+# ★★★一次 `tick_step()` 最多吃幾個 tick —— ★把它【具名】出來，不是為了好看：
+#   `SimRunner.RESULT_TTL_TICKS` 必須 ≥ 這個數，否則一次 step 之內產生的結果句
+#   會在同一次 step 裡過期 ⇒ ★★玩家看不到前面那幾十顆 tick 的拒絕訊息，
+#   而「拒絕禁靜默」是 (乙) 的核心 ⇒ 兩條規矩互相吃掉。
+#   ⇒ ★★★沒有名字的話，那個依賴只存在於【兩處湊巧都寫 TICKS_PER_HOUR】，
+#     而床去斷言它就是拿常數跟自己比 —— 改這裡不會有任何東西紅。
+#   ⇒ 現在它有名字：`command_replay_bed` 的 P14b 直接比這兩個常數。
+const STEP_TICK_BOUND: int = WorldState.TICKS_PER_HOUR
+
 # 返回 { "events": Array, "done": bool }
 func tick_step() -> Dictionary:
 	if _ticks_remaining <= 0:
 		return { "events": [], "done": true }
-	var n: int = mini(WorldState.TICKS_PER_HOUR, _ticks_remaining)
+	var n: int = mini(STEP_TICK_BOUND, _ticks_remaining)
 	var events := advance_ticks(n)
 	_ticks_remaining = maxi(0, _ticks_remaining - n)
 	if events.size() > 0:

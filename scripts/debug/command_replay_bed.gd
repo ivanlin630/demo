@@ -498,6 +498,13 @@ func _test_p14b_results_expire_by_tick() -> void:
 	bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})
 	runner.advance_tick(st, Vector2i(-1, -1))
 	_check("★母體地板：產生了結果句（%d）" % st.command_results.size(), st.command_results.size() == 1)
+	# ★★★兩邊都從【各自的具名常數】讀（systems 要的那一行）——
+	#   哪天有人為了效能把 `SimBridge.STEP_TICK_BOUND` 改成 `TICKS_PER_HOUR * 2`，
+	#   這一行會紅，而【畫面不會靜靜地少講話】。
+	#   ★不是拿 TICKS_PER_HOUR 跟 TICKS_PER_HOUR 比：那樣改上界不會有東西紅。
+	_check("★★★結果存活 %d tick ≥ 一次 step 的上界 %d tick" % [
+		SimRunner.RESULT_TTL_TICKS, SimBridge.STEP_TICK_BOUND],
+		SimRunner.RESULT_TTL_TICKS >= SimBridge.STEP_TICK_BOUND)
 	# ★★沒有人讀，只是讓世界走 —— 走【不到】一小時：必須還在
 	for _i in range(WorldState.TICKS_PER_HOUR - 2):
 		runner.advance_tick(st, Vector2i(-1, -1))
