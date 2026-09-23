@@ -16,6 +16,20 @@ const GM_FED: int = 3
 const GM_TYPE_ONLY: String = "order_buy"
 
 func _initialize() -> void:
+	# ★★★播種（票：未加種子的閘床，2026-09-23）——
+	#   ★Godot【每個行程開機時全域 RNG 是隨機的】（實測 4 個未 seed 行程：
+	#     0.336／0.970／0.761／0.207）⇒ 不 seed 的床每一次跑的都是【另一個世界】
+	#     ⇒ ★★它的綠不可重現，而那種綠跟真綠在卷面上長得一樣。
+	#   ★★★env 名【三張床統一用 BED_SEED】，不是每床一個名 ——
+	#     各自取名的話，記混就悄悄吃預設值，而離開碼照樣 0（今天踩過）。
+	#   ★建世界不吃這條流（game_setup.gd:57-58 用自己的 RandomNumberGenerator，
+	#     seed 來自 config 的 42）—— 這裡餵的是【推進 tick 時那 72 處 bare randf/randi】。
+	# ★★★本床的【反向驗結果】（2026-09-23 實測，逐字記在這裡而不是只寫在信裡）：
+	#   BED_SEED=1337 五跑逐位元相同；★而 BED_SEED=9999 的輸出【與 1337 完全相同】
+	#   ⇒ ★★所以這支床的輸出【不吃全域 RNG】—— 種子留著是防未來有人加 randf，
+	#     ★★★但【不要】把它的穩定當成「種子在保護它」：今天保護它的是它自己不隨機。
+	#   ⇒ 若哪天反向驗開始出現差異，那代表有人在它底下加了隨機 —— 那是【資訊】不是壞掉。
+	seed(int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337)
 	# ★★★命令與查詢的信封【鍵名不同】：command → "payload"、query → "data"
 	#   （player_api_mapper.gd:15/18）。第一版我兩邊都讀 "data" ⇒ order_id 讀成 -1
 	#   ⇒ ★後面三格連鎖紅，而【紅的原因不在被測的東西上】。

@@ -63,6 +63,17 @@ func _inline_cell_shape_count() -> int:
 	return re.search_all(src).size()
 
 func _initialize() -> void:
+	# ★★★播種（票：未加種子的閘床，2026-09-23）——
+	#   ★Godot【每個行程開機時全域 RNG 是隨機的】（實測 4 個未 seed 行程：
+	#     0.336／0.970／0.761／0.207）⇒ 不 seed 的床每一次跑的都是【另一個世界】
+	#     ⇒ ★★它的綠不可重現，而那種綠跟真綠在卷面上長得一樣。
+	#   ★★★env 名【三張床統一用 BED_SEED】，不是每床一個名 ——
+	#     各自取名的話，記混就悄悄吃預設值，而離開碼照樣 0（今天踩過）。
+	#   ★建世界不吃這條流（game_setup.gd:57-58 用自己的 RandomNumberGenerator，
+	#     seed 來自 config 的 42）—— 這裡餵的是【推進 tick 時那 72 處 bare randf/randi】。
+	# ★反向驗（2026-09-23 實測）：1337 五跑逐位元相同；9999 的輸出【不同】
+	#   ⇒ ★★種子確實在被使用（不是「把種子吃掉了」）。
+	seed(int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337)
 	print("=== merchant_turnover: 四格 ===")
 	# ★★★一律用【真世界 + 跑一天】：
 	#   手工組的 WorldState 裡 `local_value` 恆為 0（它要讀 tile/庫存脆絡）

@@ -28,6 +28,27 @@ func _check(name: String, ok: bool, detail: String) -> void:
 		print("  [FAIL] %s ── %s" % [name, detail])
 
 func _initialize() -> void:
+	# ★★★播種（票：未加種子的閘床，2026-09-23）——
+	#   ★Godot【每個行程開機時全域 RNG 是隨機的】（實測 4 個未 seed 行程：
+	#     0.336／0.970／0.761／0.207）⇒ 不 seed 的床每一次跑的都是【另一個世界】
+	#     ⇒ ★★它的綠不可重現，而那種綠跟真綠在卷面上長得一樣。
+	#   ★★★env 名【三張床統一用 BED_SEED】，不是每床一個名 ——
+	#     各自取名的話，記混就悄悄吃預設值，而離開碼照樣 0（今天踩過）。
+	#   ★建世界不吃這條流（game_setup.gd:57-58 用自己的 RandomNumberGenerator，
+	#     seed 來自 config 的 42）—— 這裡餵的是【推進 tick 時那 72 處 bare randf/randi】。
+	# ★反向驗（2026-09-23 實測）：1337 五跑逐位元相同；9999 的輸出【不同】
+	#   ⇒ ★★種子確實在被使用。
+	#   ★★★比對母體（reviewer R² 訂正過兩次，兩次都改變了結論）：
+	#     v1 整行扣掉 [TickPerf]／[PhaseSpike]／[FaiPhase] ⇒ ★太寬：那幾行【同時帶著】
+	#        teams=／factions= 等真實計數，整行扣會把內容差異一起扣掉。
+	#     v2 只把時間數字換成 <T> ⇒ ★★這支床【仍然 5 個相異指紋】——
+	#        殘差是 `self<N>us/tot<N>us`（我的正規式漏抓）＋【逐相位清單的順序】，
+	#        而那個順序【本身就是依時間排的】。
+	#     v3（現行）保留 tick=／teams=／factions=／phases=／spike#=／登記 N/N，
+	#        丟掉逐相位清單 ⇒ ★★★五跑逐位元相同、換種子不同。
+	#   ⇒ ★教訓：我第一版的『全部穩定』是【靠過寬的 filter 撐出來的】——
+	#     ★★而過寬的 filter 與恆綠的守衛是同一件事。
+	seed(int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337)
 	print("=== 根守恆床 ===")
 	# 同一份相位表，餵兩種登記：巢狀的兩層（solo 與它的桶）
 	var ph: Dictionary = {
