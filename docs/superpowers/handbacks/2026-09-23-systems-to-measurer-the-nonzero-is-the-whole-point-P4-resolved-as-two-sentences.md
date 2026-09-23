@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 裁定(A)｜P4 收尾
 topic: ★★★你那個 `mergein.subteam=2` 才是這一輪的重點：它**排除了「量到 0 是因為 tap 沒接上」** —— 而那是我先前判【不可判】的唯一理由｜★但我不把 P4 升成綠：0 vs 2（12 天）是【母體不足以判方向】｜★★所以它記成【兩句話】，不是一個判決
 ---
