@@ -82,12 +82,16 @@ func _initialize() -> void:
 	var p8_n: int = int(stag["p8_assigned"])
 	var p8_max: int = int(stag["p8_max"])
 	var p8_left: int = int(stag["p8_left"])
-	print("[PASSSTAG] ★P8：指派事件=%d  延遲 p100=%d tick  結束時未執行=%d（判準：p100 <= 119）" % [
-		p8_n, p8_max, p8_left])
+	print("[PASSSTAG] ★P8：指派事件=%d  延遲 p100=%d tick  結束時未執行=%d（其中年齡 > %d 的 %d 個，最老 %d tick）" % [
+		p8_n, p8_max, p8_left, SimRunner.NEAR_CADENCE, int(stag["p8_stale"]), int(stag["p8_oldest"])])
+	print("[PASSSTAG]   ★判準兩條（systems 2026-09-23）：p100 <= 119 且【未執行積壓】= 0")
+	print("[PASSSTAG]   ★★「殘留」≠「積壓」：最後一個 cadence 窗內才指派的隊還沒輪到它 ⇒ 結構性尾巴，不算積壓")
 	if p8_n <= 0:
 		print("[PASSSTAG] ★★P8【不可判】：指派事件 0 個 ⇒ 母體塌陷，不是【沒有延遲】")
 	else:
 		_ok(p8_max <= 119, "P8 指派到執行的延遲 p100=%d <= 119 tick（小於 2 個 cadence）" % p8_max)
+		_ok(int(stag["p8_stale"]) == 0, "P8 未執行積壓=%d（年齡 > %d tick 的殘留）" % [
+			int(stag["p8_stale"]), SimRunner.NEAR_CADENCE])
 	_ok(int(stub["peak"]) > int(stag["peak"]) * 3,
 		"P6 陽性對照：樁關掉 ⇒ 尖峰回來（stub %d vs stag %d）" % [int(stub["peak"]), int(stag["peak"])])
 
@@ -214,9 +218,19 @@ func _run_arm(stagger: bool, days: int, sd: int, cfg: String) -> Dictionary:
 		tot_cost += float(Probe.amounts.get("syscost." + String(nm2), 0.0))
 	print("   ★總量：Γcalls=%d  Γbatch_sum=%d  Γcost=%.1f ms｜世界：teams=%d persons=%d" % [
 		tot_calls, int(round(tot_batch)), tot_cost / 1000.0, st.teams.size(), st.persons.size()])
+	# ★殘留的【年齡】才是「積壓」與「尾巴」的分界：
+	#   ★最後一個 cadence 窗內才被指派的隊，本來就還沒輪到它的 loop2 ⇒ 那是【結構性尾巴】。
+	#   ★★而年齡超過一個 cadence 還沒被執行的，才是 systems 問的【未執行積壓】。
 	var _p8left: int = FactionAISystem._p8_assigned.size()
+	var _p8_stale: int = 0
+	var _p8_oldest: int = 0
+	for _k in FactionAISystem._p8_assigned:
+		var _age: int = st.world.current_tick - int(FactionAISystem._p8_assigned[_k])
+		if _age > _p8_oldest: _p8_oldest = _age
+		if _age > SimRunner.NEAR_CADENCE: _p8_stale += 1
 	return {"p8_assigned": int(Probe.counts.get("p8.assigned", 0)),
 		"p8_max": int(Probe.peaks.get("p8.delay_max", 0.0)), "p8_left": _p8left,
+		"p8_stale": _p8_stale, "p8_oldest": _p8_oldest,
 		"calls": calls, "tot_calls": tot_calls, "tot_batch": tot_batch, "tot_cost": tot_cost,
 		"persons": st.persons.size(),
 		"gaps": gaps, "peak": peak, "teams": per_team_total.size(),

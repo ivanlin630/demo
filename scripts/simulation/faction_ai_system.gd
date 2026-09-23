@@ -3395,15 +3395,13 @@ func _assign_tasks(state: WorldState, f) -> void:
 		if loyalty_cmd >= 0.4:
 			TaskArbiter.try_set(state, t_cmd, t_cmd.player_commanded_task,
 				t_cmd.move_target, TaskArbiter.PRIO_PLAYER, "player_command")
-			# ★★★P8 儀器（reviewer 加的驗收格，2026-09-23）：
-			#   loop1 在這裡寫【成員隊】的 current_task，而 loop2 的
-			#   _evaluate_independent_strategy 成員分支會【讀】它
-			#   ⇒ ★拆開之後，相位早於自己勢力的隊【用上一小時的指派行動】。
-			# ★★而【它應該會自我修正】是沒有證據的話 —— 純靜態讀 code 判斷不了
-			#   會不會真的卡死 ⇒ ★★★把它變成一個【會紅的數】。
-			if Probe.enabled:
-				_p8_assigned[int(tid_cmd)] = state.world.current_tick
-				Probe.bump("p8.assigned")
+			# ★★★P8 的 tap【不在這裡】（systems 撤回，2026-09-23）：
+			#   這一站是【窄案例】—— 只有 `player_commanded_task` 非空的隊會到。
+			#   ★真正每小時、每個成員都會走的寫入點在【再兩層委派之後】：
+			#     _assign_member_tasks → _decide_unified(src=="member") → 引擎統一路唯一的 try_set
+			#   ⇒ tap 已搬到那一站（搜 `p8.assigned`）。
+			# ★★而這兩個母體【不重疊】：_assign_member_tasks 對
+			#   `player_commanded_task` 非空的隊 `continue`（見該函式）⇒ 這一站的隊到不了那一站。
 		else:
 			UnrestBank.add(t_cmd, 1, "faction")
 			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])
@@ -3850,6 +3848,15 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		#   ★這裡是【引擎統一路唯一的 try_set】⇒ 一個站點就覆蓋所有 option，
 		#   ★★而不必動 `_source`（它會寫進 `task_reason` 並與 `ENGINE_SOURCES` 比對）。
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "unified", opt, float(e.get("u", -1.0)))
+		# ★★★P8 儀器（systems 撤回後重掛，2026-09-23）：【指派 → 執行】的跨 loop 延遲。
+		#   ★定位不靠行號靠內容：這一行就是上面註解寫的「引擎統一路唯一的 try_set」。
+		#   ★★只算 `src == "member"` —— 那才是【勢力指派給成員】那件事；
+		#     "leader"／"solo"／"threat" 三個呼叫端不是（leader 是勢力自己的隊，solo/threat 不經 loop1 指派）。
+		#   ★★★只在 `_set_ok` 為真時記：try_set 會 no-op（優先序被佔），
+		#     而【沒被設上的任務】沒有「執行延遲」可言 —— 記了就是把 0 母體灌成有母體。
+		if Probe.enabled and src == "member" and _set_ok:
+			_p8_assigned[int(team.team_id)] = state.world.current_tick
+			Probe.bump("p8.assigned")
 		# ★★★【偵查的來源分流】（systems 裁 2026-09-15）：另一條路是 `_commit_conquest_attack` 的走廊
 		#   （`g3.scout_dispatch`，`task_reason == "scout"`）—— ★而它**也會讓偵查出現**，
 		#   ★★早期窗正是 `confident_enough` 最容易為假的時候
