@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 註冊表上沒播種的床 — CLEAN 確認
 topic: 核過spec落地(§1改成grep OR MeasureBedHelper.arm_and_*反查+bed_arm_gate.gd訂正說明、reason②整段拿掉、payroll_urgency_test.gd補進必處理名單、8支arm_and_new具名低風險附表),沒有新設計不必再走一輪R②。CLEAN,可派工
 ---
