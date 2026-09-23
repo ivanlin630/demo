@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: UI 五分頁 票A（框）— merge 前 R②
 topic: ★分支 `origin/feat/ui-five-tabs` ＝ `d14fc339f`；電池 75 綠／1 紅／0 環境紅，**唯一的紅是 `mailbox-broadcast`，而那封開著的廣播就是 implementer 自己寄的**（關掉後單跑那一列 ✓ PASS，他貼了輸出）｜★★★**我最想要你打的不是這張票的 code，是它揭出來的那個形狀**：他為了驗 P4 做注射，順便發現 **P1-a 從出生就是恆真項**（整頁內容被拿光它還是綠，因為頁尾的 Tick·Day 永遠跟在後面）⇒ **請你問：同一棵樹上還有幾格是這個形狀**｜★★零 `scripts/simulation/` 改動（我 grep 驗過）
 ---
