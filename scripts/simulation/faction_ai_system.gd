@@ -1031,6 +1031,10 @@ static func _reset_cross_run() -> Dictionary:
 	if not _mk_verify_rows.is_empty(): cleared["FactionAISystem._mk_verify_rows"] = _mk_verify_rows.size()
 	if not _churn_last.is_empty(): cleared["FactionAISystem._churn_last"] = _churn_last.size()
 	if not _forage_watch.is_empty(): cleared["FactionAISystem._forage_watch"] = _forage_watch.size()
+	# ★P8 的量測表也要登記：床裡手動 clear 是【清單保證】，登記表才是【構造保證】。
+	#   ★不登記的話，下一支跑兩個世界的床會把【跨世界的差值】當成延遲 ⇒ 巨大、看起來像真缺陷。
+	if not _p8_assigned.is_empty(): cleared["FactionAISystem._p8_assigned"] = _p8_assigned.size()
+	_p8_assigned.clear()
 	if _mk_path != "other": cleared["FactionAISystem._mk_path"] = _mk_path
 	_a2b_remote_tribute_payers.clear()
 	_fai_ph.clear()
@@ -1209,8 +1213,29 @@ static func _fai_pht_s(name: String, t0: int) -> int:
 #   ⇒ ★★clear 與 dump 都搬到 `sim_runner`（tick 開始清、tick 結束判並印）
 #     ⇒ faction 側與 solo 側在【同一本帳】裡，self_us 才有意義。
 #   ⇒ ★★★而兩個容器的數字【永遠不可相加】，即使統一之後也不能回頭加舊表。
+# ★這是【床面向】的入口（傳隊、立即評估）。
+#   ★★production 【不走這裡】—— 它走 sim_runner 的 due_factions（勢力相位）。
+#   ★★★兩者的【到期】語意不同：
+#     這裡 ＝【批次裡有沒有我的成員】（_faction_in_batch）
+#     production ＝【這個勢力自己到期了嗎】（f.pass_next_tick）
+#   ⇒ ★所以這支謓詞不得叫 due —— 兩種「到期」共用同一個字，
+#     下一個人改其中一邊時不會知道另一邊存在。
 func evaluate_all(state: WorldState, team_ids: Array) -> void:
-	_evaluate_all_body(state, team_ids)
+	# ★三份都跑 —— 否則床的行為會變（它們原本一次呼叫就拿到三個迴圈）。
+	evaluate_factions(state, factions_of(state, team_ids))
+	evaluate_loop2(state, team_ids)
+	evaluate_loop3(state, team_ids)
+
+# ★loop2／loop3 的公開入口：registry 各自一列，吃 due_teams。
+func evaluate_loop2(state: WorldState, team_ids: Array) -> void:
+	_evaluate_loop2_teams(state, team_ids)
+
+func evaluate_loop3(state: WorldState, team_ids: Array) -> void:
+	_evaluate_loop3_teams(state, team_ids)
+
+# ★★★勢力粒度的入口：吃【這顆 tick 到期的勢力】。
+func evaluate_factions(state: WorldState, faction_ids: Array) -> void:
+	_evaluate_loop1_factions(state, faction_ids)
 	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
 	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
 	SpecimenTracer.heartbeat_sweep(state)
@@ -1222,7 +1247,10 @@ func evaluate_all(state: WorldState, team_ids: Array) -> void:
 # ★★我【沒有】去證明「零活成員的派系不存在」——證不如構造：兩種情況都接住，
 #   那個問題就不影響正確性。（而今天批次＝全部隊 ⇒ ③在今天等價於舊行為。）
 # ★★★散相位落地後③要重新檢視：那時「不在這批」與「不存在」仍然是兩件事，而②已經分開它們。
-static func _faction_due(state: WorldState, f, batch: Dictionary) -> bool:
+# ★P8：team_id → loop1 指派它的 tick（量測層，不進 TeamData／指紋）。
+static var _p8_assigned: Dictionary = {}
+
+static func _faction_in_batch(state: WorldState, f, batch: Dictionary) -> bool:
 	var has_live: bool = false
 	for mid in f.member_team_ids:
 		if batch.has(int(mid)):
@@ -1249,7 +1277,27 @@ static func _note_faction_drive(state: WorldState, fid: int) -> void:
 	Probe.note("faction.drive.per_hour_max", float(n))
 	Probe.bump("faction.drive.total")
 
-func _evaluate_all_body(state: WorldState, team_ids: Array) -> void:
+# ★從隊批次推出勢力集合，★★照 `state.factions` 的原順序回傳（構造保證）。
+static func factions_of(state: WorldState, team_ids: Array) -> Array:
+	var batch: Dictionary = {}
+	for t in team_ids:
+		batch[int(t)] = true
+	var out: Array = []
+	for fid in state.factions:
+		if _faction_in_batch(state, state.factions[fid], batch):
+			out.append(fid)
+	return out
+
+# ★★★按粒度拆三份（systems 裁 2026-09-23 §3f）。
+#   舊的 `_evaluate_all_body` 是【三個不同粒度的系統穿著同一個名字】：
+#     loop1 勢力粒度｜loop2 隊粒度｜loop3 隊粒度
+#   ★而 loop2／loop3 舊寫法吃的是 `state.teams`（全世界）不是批次
+#     ⇒ 勢力相位之後每小時被呼叫 ~8 次 ⇒ 全世界掃 8 遍
+#     ⇒ ★★實測：faction_ai 佔總增量 102.7%（cost 2.3 倍而 batch_sum 不變）
+#   ★★★registry 上那一列叫 `faction_ai` —— 而它跑的是勢力＋兩個 per-team 系統
+#     ⇒ 「綱要與簽章都會說謊」這一次說謊的是【名字】。
+
+func _evaluate_loop1_factions(state: WorldState, faction_ids: Array) -> void:
 	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,T3追查)：本函式呼叫次數+factions是否為空+代表性tick值
 		Probe.bump("evaluate_all_body.entry")
 		Probe.add_amount("evaluate_all_body.factions_size_sum", float(state.factions.size()))
@@ -1263,12 +1311,13 @@ func _evaluate_all_body(state: WorldState, team_ids: Array) -> void:
 	# ★★而迴圈順序是【設計約束】不是意圖句：這裡仍然走 `state.factions` 的原順序，
 	#   只把【不屬於這一批】的派系 `continue` 掉。
 	#   ⇒ ★★★順序相等是【構造保證】，不是事後靠指紋去發現。
-	var _batch: Dictionary = {}
-	for _bt in team_ids:
-		_batch[int(_bt)] = true
+	var _due: Dictionary = {}
+	for _bf in faction_ids:
+		_due[int(_bf)] = true
+	# ★仍然走 `state.factions` 的原順序，只把不在這一批的 continue 掉。
 	for fid in state.factions:
 		var f = state.factions[fid]
-		if not _faction_due(state, f, _batch):
+		if not _due.has(int(fid)):
 			continue
 		_note_faction_drive(state, int(fid))
 		var _tf: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
@@ -1358,8 +1407,30 @@ func _evaluate_all_body(state: WorldState, team_ids: Array) -> void:
 		if SimRunner.phase_timing: _fai_pht("loop1.betray", _tf)
 
 	if SimRunner.phase_timing: _t = _fai_pht("loop1.factions", _t)
+
+# ★loop2（隊粒度）：子隊評估／獨立策略／成員策略 ＋ merge_queue 的消費。
+#   ★★吃【這一批】：舊寫法 `for tid in state.teams` 是全世界。
+func _evaluate_loop2_teams(state: WorldState, team_ids: Array) -> void:
+	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var merge_queue: Array = []
+	# ★★★迴圈頭保持原樣（走 state.teams 的【當下】快照），錯開只是【過濾】。
+	#   ★為什麼不直接 `for tid in team_ids`：batch 是【tick 開頭】取的，
+	#     而 loop1／loop2 期間會建立／刪除隊 ⇒ 兩者的可見性不同
+	#     ⇒ ★★樁關掉時指紋會變（實測：P5 紅，fp=2b412247…）。
+	#   ★★★所以過濾只在【錯開開著】時生效 —— 樁關 ＝ 不錯開 ＝ 與今天逐字相同。
+	var _bset: Dictionary = {}
+	if WorldState.pass_stagger_enabled:
+		for _bt in team_ids:
+			_bset[_bt] = true
 	for tid in state.teams:
+		if WorldState.pass_stagger_enabled and not _bset.has(tid):
+			continue
+		# ★P8：這一隊被 loop1 指派過嗎？是的話記【指派到執行】的延遲。
+		if Probe.enabled and _p8_assigned.has(int(tid)):
+			var _d: int = state.world.current_tick - int(_p8_assigned[int(tid)])
+			_p8_assigned.erase(int(tid))
+			Probe.bump("p8.delay.%d" % _d)
+			Probe.note("p8.delay_max", float(_d))
 		var team: TeamData = state.teams[tid]
 		# 野獸(beast_kind!="")不進決策迴圈：非-agent 無「腦」不該經引擎的秤（憲法決策模型）。
 		# 生命週期(spawn/combat/reward/cleanup)全在 encounter/npc_combat/beast_system，不評 strategy/solo/infra。
@@ -1445,7 +1516,18 @@ func _evaluate_all_body(state: WorldState, team_ids: Array) -> void:
 				sub.move_target = parent.tile_pos
 
 	if SimRunner.phase_timing: _t = _fai_pht("loop2b.merge", _t)
-	for tid in state.teams.keys():   # keys() 快照 → 滅團可安全 erase
+
+# ★loop3（隊粒度）：滅團／繼承／野心與訂單排程／威脅／據點／雜項。
+func _evaluate_loop3_teams(state: WorldState, team_ids: Array) -> void:
+	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	# ★同 loop2：迴圈頭保持 keys() 快照（滅團可安全 erase），錯開只是過濾。
+	var _bset3: Dictionary = {}
+	if WorldState.pass_stagger_enabled:
+		for _bt3 in team_ids:
+			_bset3[_bt3] = true
+	for tid in state.teams.keys():
+		if WorldState.pass_stagger_enabled and not _bset3.has(tid):
+			continue
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
@@ -3313,6 +3395,13 @@ func _assign_tasks(state: WorldState, f) -> void:
 		if loyalty_cmd >= 0.4:
 			TaskArbiter.try_set(state, t_cmd, t_cmd.player_commanded_task,
 				t_cmd.move_target, TaskArbiter.PRIO_PLAYER, "player_command")
+			# ★★★P8 的 tap【不在這裡】（systems 撤回，2026-09-23）：
+			#   這一站是【窄案例】—— 只有 `player_commanded_task` 非空的隊會到。
+			#   ★真正每小時、每個成員都會走的寫入點在【再兩層委派之後】：
+			#     _assign_member_tasks → _decide_unified(src=="member") → 引擎統一路唯一的 try_set
+			#   ⇒ tap 已搬到那一站（搜 `p8.assigned`）。
+			# ★★而這兩個母體【不重疊】：_assign_member_tasks 對
+			#   `player_commanded_task` 非空的隊 `continue`（見該函式）⇒ 這一站的隊到不了那一站。
 		else:
 			UnrestBank.add(t_cmd, 1, "faction")
 			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])
@@ -3759,6 +3848,15 @@ func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown")
 		#   ★這裡是【引擎統一路唯一的 try_set】⇒ 一個站點就覆蓋所有 option，
 		#   ★★而不必動 `_source`（它會寫進 `task_reason` 並與 `ENGINE_SOURCES` 比對）。
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for_need(state, team, opt), "unified", opt, float(e.get("u", -1.0)))
+		# ★★★P8 儀器（systems 撤回後重掛，2026-09-23）：【指派 → 執行】的跨 loop 延遲。
+		#   ★定位不靠行號靠內容：這一行就是上面註解寫的「引擎統一路唯一的 try_set」。
+		#   ★★只算 `src == "member"` —— 那才是【勢力指派給成員】那件事；
+		#     "leader"／"solo"／"threat" 三個呼叫端不是（leader 是勢力自己的隊，solo/threat 不經 loop1 指派）。
+		#   ★★★只在 `_set_ok` 為真時記：try_set 會 no-op（優先序被佔），
+		#     而【沒被設上的任務】沒有「執行延遲」可言 —— 記了就是把 0 母體灌成有母體。
+		if Probe.enabled and src == "member" and _set_ok:
+			_p8_assigned[int(team.team_id)] = state.world.current_tick
+			Probe.bump("p8.assigned")
 		# ★★★【偵查的來源分流】（systems 裁 2026-09-15）：另一條路是 `_commit_conquest_attack` 的走廊
 		#   （`g3.scout_dispatch`，`task_reason == "scout"`）—— ★而它**也會讓偵查出現**，
 		#   ★★早期窗正是 `confident_enough` 最容易為假的時候

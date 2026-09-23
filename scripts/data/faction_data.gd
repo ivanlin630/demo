@@ -18,6 +18,13 @@ var intent: Dictionary = {}        # {type:String, target_id:int, why:String} �
 #   ★舊實作是 `current_tick % C == 0` ⇒ 所有 faction 【同一批 tick 到期】
 #     （實測指紋：間隔範圍 [4320, 4320] 完全剛性）—— 而那正是 CadenceStagger 存在的理由。
 #   ★★搬完的直接證據不是統計量，是【範圍要散開】。
+# ★錯開票 (乙)：每小時那一趣 pass 的【勢力粒度】下次到期 tick。
+#   ★為什麼不跟著成員隊：faction_ai 是【勢力粒度】的系統 ——
+#     批次裡只要有一個成員到期它就把整個勢力的活做一遛
+#     ⇒ ★★隊粒度錯開之下，一個 M 成員的勢力每小時會被做 ~M 次而不是 1 次。
+#     ⇒ ★★★那不是「慢」是【重複執行】，而 faction-drive-once 那一列就是來擋這個的。
+#   ★`_next_tick` 字尾 ⇒ FpCoverage 的 CADENCE_SUFFIXES 自動排除在指紋外（同 TeamData 那顆）。
+var pass_next_tick: int = 0
 var infra_eval_next_tick: int = 0
 var faction_update_next_tick: int = 0
 var betray_eval_next_tick: int = 0

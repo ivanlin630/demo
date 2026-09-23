@@ -17,13 +17,14 @@ scripts/simulation/faction_ai_system.gd::_commit_conquest_attack::taskarbiter  #
 scripts/simulation/faction_ai_system.gd::_decide_subteam::route
 scripts/simulation/faction_ai_system.gd::_decide_subteam::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_decide_unified::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
-scripts/simulation/faction_ai_system.gd::_evaluate_all_body::route
-scripts/simulation/faction_ai_system.gd::_evaluate_all_body::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
-scripts/simulation/faction_ai_system.gd::_evaluate_all_body::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::route
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::dispatch_entry
+scripts/simulation/faction_ai_system.gd::_evaluate_loop1_factions::route  # 2026-09-23 systems ratify：純搬家自 _evaluate_all_body（按粒度拆三份）——位元逐字相同＋闘點數守恆 route 4=1+3／taskarbiter 1／threshold 6
+scripts/simulation/faction_ai_system.gd::_evaluate_loop3_teams::route  # 2026-09-23 systems ratify：純搬家自 _evaluate_all_body（按粒度拆三份）——位元逐字相同＋闘點數守恆 route 4=1+3／taskarbiter 1／threshold 6
+scripts/simulation/faction_ai_system.gd::_evaluate_loop3_teams::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)  ★2026-09-23 自 _evaluate_all_body 逐字搬家
+scripts/simulation/faction_ai_system.gd::_evaluate_loop3_teams::threshold  # 2026-09-23 systems ratify：純搬家自 _evaluate_all_body（按粒度拆三份）——位元逐字相同＋闘點數守恆 route 4=1+3／taskarbiter 1／threshold 6
 scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_solo_body::early_return
 scripts/simulation/faction_ai_system.gd::_evaluate_solo_body::route
