@@ -30,7 +30,7 @@ var _cells_ran: Array = []
 const BAD_TILE: Vector2i = Vector2i(9999, 9999)
 const EXPECTED_CELLS: Array = ["_test_replay_same_fp", "_test_negative_boundary_shift", "_test_queue_defers",
 	"_test_p9_enqueue_echo", "_test_p10_result_lines", "_test_p12_reject_comes_late",
-	"_test_p13_queries_are_pure"]
+	"_test_p13_queries_are_pure", "_test_p13b_confirm_has_a_landing_point"]
 
 
 func _cell(name: String) -> void:
@@ -238,6 +238,7 @@ func _initialize() -> void:
 	_test_p10_result_lines()
 	_test_p12_reject_comes_late()
 	_test_p13_queries_are_pure()
+	_test_p13b_confirm_has_a_landing_point()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
@@ -381,3 +382,62 @@ func _test_p13_queries_are_pure() -> void:
 	_check("★負對照：呼 5 次【會寫的】_action_trade ⇒ fp 必須【不同】（否則這支 fp 看不見這種寫）",
 		StateFingerprint.compute(st) != fp_mid)
 	_cell("_test_p13_queries_are_pure")
+
+
+# ══════════ P13b［指令層有沒有落點］（systems 加 2026-09-23）══════════
+# ★★★blueprint 把「打聽」拆成兩層：開選單＝查詢（免費）／真去問人＝指令（可有成本）。
+#   我做的正好對上（`_action_gather_intel` 走查詢、`confirm_gather_intel` 進佇列）。
+# ★而這一格問的是【另一個問題】：那個「指令層」今天在 code 裡【有沒有落點】？
+#   ⇒ 做法：連呼 `confirm_gather_intel` 5 次，看 world-fp 動不動。
+#   ★★這一格【不是紅綠】——兩種結果都是事實，都要印出來：
+#     fp 變了  ⇒ 指令層有落點（它真的動了世界）
+#     fp 不變  ⇒ ★★★指令層【今天還沒有落點】—— 那是要回報 blueprint 的事實，
+#              不是我要順手補的東西（補它＝替 WHAT 決定「打聽要付什麼代價」）。
+func _test_p13b_confirm_has_a_landing_point() -> void:
+	print("
+── P13b 指令層（confirm_gather_intel）有沒有落點 ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var bridge := SimBridge.new(pair[1], st)
+	if st.player_id < 0 or not st.persons.has(st.player_id):
+		_errors += 1
+		print("  ★[不可判] 沒有玩家")
+		_cell("_test_p13b_confirm_has_a_landing_point")
+		return
+	var ptid: int = int(st.persons[st.player_id].team_id)
+	var pt: TeamData = st.teams[ptid]
+	var target: int = -1
+	var choice: String = ""
+	for tid in st.teams.keys():
+		if int(tid) == ptid: continue
+		var q: Dictionary = bridge.query_inquiry_options(int(tid))
+		var opts: Array = q.get("data", {}).get("inquiry_options", [])
+		if bool(q.get("ok", false)) and not opts.is_empty():
+			target = int(tid)
+			choice = String((opts[0] as Dictionary).get("id", ""))
+			break
+	_check("★★母體地板：找得到一個有可打聽選項的目標（Team%d 選項「%s」）" % [target, choice],
+		target >= 0 and choice != "")
+	if target < 0 or choice == "":
+		print("  ⇒ 沒有可打聽的對象 ⇒ 這一格【不可判】，不是「沒有落點」")
+		_cell("_test_p13b_confirm_has_a_landing_point")
+		return
+	# ★設參數【之後】才取基準 —— player_state 本身在 canon 裡，設它會動 fp
+	st.player_state["gather_intel_npc_id"] = target
+	st.player_state["gather_intel_choice"] = choice
+	var sys := PlayerCommandSystem.new()
+	var before: String = StateFingerprint.compute(st)
+	var ok_n: int = 0
+	for _i in range(5):
+		if bool(sys._action_confirm_gather_intel(st, target, pt, ptid).get("ok", false)):
+			ok_n += 1
+	var after: String = StateFingerprint.compute(st)
+	_check("★母體地板：那 5 次真的執行成功（%d／5）—— 全失敗的話下面那句沒有主詞" % ok_n, ok_n == 5)
+	if after != before:
+		print("  ⇒ ★fp 變了 ⇒ 【指令層有落點】：confirm_gather_intel 真的動了世界")
+	else:
+		print("  ⇒ ★★★fp 【不變】 ⇒ 指令層今天在 code 裡【還沒有落點】——")
+		print("     打聽問完之後世界完全沒變（連「誰問過誰」都沒留下）。")
+		print("     ★這是要回報 blueprint 的事實（他要的成本掛在這一層），不是這支床的紅燈，")
+		print("     ★★也不是我順手補的東西 —— 補它等於替 WHAT 決定打聽要付什麼代價。")
+	_cell("_test_p13b_confirm_has_a_landing_point")
