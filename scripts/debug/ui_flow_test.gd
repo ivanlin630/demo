@@ -595,6 +595,23 @@ func _check(label: String, ok: bool) -> void:
 
 # 實例化 TextUI 場景 + 等 _ready。回傳 node。
 func _make_ui() -> Node:
+	# ★★★每一格都要拿到【一樣的世界】，而它不是自動的：
+	#   ★這支床有 31 格，每一格各自 instantiate 一次；★★而 class 級（static）的殘留
+	#     會跨格帶過去 ⇒ 第 27 格拿到的世界，與它單獨跑時【不是同一個】。
+	#   ⇒ ★★★血證：同一棵樹跑三次 ⇒ 紅／紅／綠，而變的是 `狀態: <task_summary>`；
+	#     而【擷取床單獨跑五次逐字相同】⇒ 變因不在擷取路徑，在【跨格殘留】。
+	#   ★CrossRunReset 就是為這件事存在的（18 類），而這支床【從來沒叫過它】。
+	# ★CrossRunReset.run() 拿掉了：它是 no-op —— game_setup.gd:43 本來就叫，
+	#   而 _make_ui() 一定走到 GameSetup.setup()（text_ui_main.gd:124）。
+	#   ★★保留一個 no-op 會讓下一個人以為「殘留」是這裡的問題，而它不是。
+	# ★★★真因（33＋6 輪實驗定案）：Godot【每個行程開機時全域 RNG 是隨機的】
+	#   —— 實測 4 個行程的第一個 randf()：0.336／0.970／0.761／0.207。
+	#   而模擬會吃它 ⇒ 不 seed 的床【每次跑的世界都不同】⇒ `狀態: <task_summary>` 會變。
+	# ★兩個被【數據】排除的假說（留著，因為它們看起來都很合理）：
+	#   ①推進路徑：紅的那次與綠的逐字相同（frames=2 requests=2 [60,60]）
+	#   ②前 30 格的殘留：★把這一格【單獨】跑，照樣紅 1/6
+	# ⇒ ★★所以 seed() 是【必要的】，不是「多做一件事剛好壓住」。
+	seed(1337)   # ★與 ui_state_str_capture.gd 的 UC_SEED 預設同值
 	var node = load("res://scenes/TextUI.tscn").instantiate()
 	get_root().add_child(node)
 	await process_frame
@@ -789,6 +806,11 @@ func _test_pages_zero_loss() -> void:
 		_cell("_test_pages_zero_loss")
 		return
 	var txt: String = FileAccess.get_file_as_string(path)
+	# ★★★世界要跟「前」同一顆種子：ui_flow_test 全檔【沒有 seed】⇒ 世界每次不同
+	#   ⇒ ★`狀態: <task_summary>` 這一行會隨機變 ⇒ 這一格【隨機紅】（實測 3 次裡紅 2 次）
+	#   ⇒ ★★而隨機紅比恆綠更糟：它會被讀成雜訊，然後整支註冊表上的閘被降級
+	#   ★★★seed 必須在 _make_ui() 之前：場景在 _ready 建世界，吃的是全域 RNG
+	# ★seed 與 CrossRunReset 已統一在 _make_ui() 裡做（每一格都要，不只這一格）
 	var want_tick: int = -1
 	var want_teams: int = -1
 	var want_persons: int = -1
@@ -824,6 +846,16 @@ func _test_pages_zero_loss() -> void:
 			node._bridge.request_advance(want_tick - st.world.current_tick)
 		await process_frame
 		guard += 1
+	# ★★★用完 guard ≠ 到達目標：★第一版沒有分開這兩件事，而它讓「推不動」
+	#   看起來像「世界對得上」——實測血證：注射多推 1440 tick 時，世界【卡在 120】
+	#   燒光 2000 frame，而卷面照樣往下比。
+	if st.world.current_tick < want_tick:
+		print("  ★★★【不可判】推不到「前」的 tick：目標 %d 實得 %d（frames=%d 已用完）" % [
+			want_tick, st.world.current_tick, guard])
+		print("    ⇒ ★這不是紅也不是綠：沒有推到同一個世界，零損失就無從比起")
+		await _free_ui(node)
+		_cell("_test_pages_zero_loss")
+		return
 	# ★★游標也要對回去（沒選格 ⇒ text_ui_main.gd:716 那 ~23 行一行都不會渲染）
 	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
 	var cp: Dictionary = ct.get("position", {})
