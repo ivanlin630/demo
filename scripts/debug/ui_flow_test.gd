@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -80,6 +80,9 @@ func _initialize() -> void:
 	await _test_home_p4_multi()
 	await _test_home_p5_halfset()
 	await _test_home_p6_zero_is_real()
+	await _test_render_idempotent()
+	await _test_refresh_idempotent()
+	await _test_p1b_exclude_empty()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1030,9 +1033,14 @@ func _union_all_pages(node: Node) -> Array:
 #   ★每一條都帶【為什麼】，★★而【不是】用「含 ↓↑ 就忽略」那種模糊比對：
 #     模糊比對會連【真的掉了一行含箭頭的內容】也一起放過。
 #   ★★★清單長度會印出來 ⇒ 它變長時有人看得見。
+# ★★★【空了】—— 2026-09-23「render 不得寫 state」那張票把債還掉了。
+#   原本唯一那一條是「  食:」（資源趨勢箭頭）：`_build_state_str()` 會寫 `_res_baseline*`
+#   ⇒ 同一份世界、不同呼叫史就不是同一行字 ⇒ 該比而不比。
+#   ★現在基準線的擁有者搬到日邊界（`_update_day_baseline()`，由 `_process()` 呼叫）
+#   ⇒ render 只讀不寫 ⇒ 不需要豁免。
+# ★★而這張清單【空著本身就是判準】（`_test_p1b_exclude_empty`）——
+#   ★★★下一個人要再加一條，那一格會紅，他就必須說明為什麼那筆債可以欠。
 const P1B_EXCLUDE: Array = [
-	{"prefix": "  食:", "why": "資源趨勢箭頭：_build_state_str() 非冪等（會寫 _res_baseline*）"
-		+ " ⇒ 同一份世界、不同呼叫史就不是同一行字；真修法＝讓它冪等，已由 systems 開獨立票"},
 ]
 
 # 回傳「這一行是否被具名排除」。★只比【前綴】且前綴必須來自上面那張表。
@@ -1380,3 +1388,94 @@ func _test_home_p6_zero_is_real() -> void:
 	_check("離家距離照印（7）", s.contains("離家 7"))
 	await _free_ui(node)
 	_cell("_test_home_p6_zero_is_real")
+
+
+# ══════════ 票「render 不得寫 state」的驗收（HOW spec §4）══════════
+
+# P1[冪等]：連續呼叫 `_build_state_str()` 兩次 ⇒ 逐字相同。
+#   ★★母體地板：那一輪必須真的有【資源行】—— 否則兩次都沒有箭頭 ⇒ 這一格恆真。
+func _test_render_idempotent() -> void:
+	_selftest_gate("_test_render_idempotent").noop()
+	print("
+── render P1 冪等 ──")
+	var node = await _make_ui()
+	node._page_idx = 1   # 經濟頁：資源行在這一頁
+	var a: String = node._build_state_str()
+	var b: String = node._build_state_str()
+	_check("★母體地板：這一輪真的有資源行（「食:」）—— 沒有的話冪等恆真", a.contains("食:"))
+	_check("連續兩次 _build_state_str() 逐字相同", a == b)
+	if a != b:
+		var la: PackedStringArray = a.split(String.chr(10))
+		var lb: PackedStringArray = b.split(String.chr(10))
+		for i in range(min(la.size(), lb.size())):
+			if la[i] != lb[i]:
+				print("    第 %d 行不同：
+      前「%s」
+      後「%s」" % [i, la[i], lb[i]])
+	await _free_ui(node)
+	_cell("_test_render_idempotent")
+
+# ★★★P1b[堵住「搬到姊妹函式」]：★塞一個【陳舊的基準】，畫一次，看 render 動不動它。
+#
+# ★★這一格改過兩次，兩次都是因為前一版【證明得出來是恆綠的】：
+#   v1「連續呼叫 _build_state_str() 兩次」⇒ 繞過 _refresh()，把寫入搬進 _refresh() 照樣綠。
+#   v2「呼叫史 1 次 vs 5 次」⇒ ★reviewer 2026-09-23 提疑、而我靜態推完證實他對：
+#      壞設計下第 1 次就把基準寫定，第 2–5 次 `day == _res_baseline_day` 直接跳過
+#      ⇒ n1 與 n5 算出【同一個值】⇒ 恆綠。★★整段測試沒有 tick 推進，世界資源不會變，
+#        「這個 instance 第一次 render 時基準＝當下資源」對兩邊同樣成立。
+#   ⇒ ★★★所以鑑別力的真來源不是【畫幾次】，是【基準與現值不同】——
+#     而那個差異我可以直接塞進去，不必等世界跨日。
+#
+# 塞法：`_res_baseline` 設成比現值高一截、`_res_baseline_day` 設成一個不可能等於今天的值。
+#   壞設計（render 會寫）⇒ 它看到 day != -999 ⇒ 當場把基準覆寫成現值 ⇒ 箭頭【持平】、且欄位被改。
+#   好設計（render 只讀）⇒ 基準留著 ⇒ 現值 < 基準 ⇒ 箭頭【↓】、且欄位原封不動。
+# ★兩個方向都驗：只驗「沒被改寫」的話，一支【根本不讀基準】的 render 也會綠。
+func _test_refresh_idempotent() -> void:
+	_selftest_gate("_test_refresh_idempotent").noop()
+	print("
+── render P1b 陳舊基準：render 只准讀不准寫 ──")
+	var node = await _make_ui()
+	node._page_idx = 1
+	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
+	var res: Dictionary = ct.get("resources", {})
+	_check("★母體地板：查詢面真的有資源（%d 個欄位）—— 沒有的話下面全是空談" % res.size(),
+		not res.is_empty())
+	if res.is_empty():
+		await _free_ui(node)
+		_cell("_test_refresh_idempotent")
+		return
+	const STALE_DAY: int = -999
+	var planted: Dictionary = {
+		"food": float(res.get("food", 0)) + 1000.0,
+		"coin": float(res.get("coin", 0)) + 1000.0,
+		"material": float(res.get("material", 0)) + 1000.0}
+	node._res_baseline = planted.duplicate()
+	node._res_baseline_day = STALE_DAY
+	node._refresh()
+	var txt: String = node._state_label.text
+	_check("★★render 沒有改寫基準的【日】（仍是 %d）" % STALE_DAY,
+		node._res_baseline_day == STALE_DAY)
+	_check("★★render 沒有改寫基準的【值】", node._res_baseline == planted)
+	# ★★★而它必須【讀】那個基準 —— 否則「沒被改寫」對一支根本不讀它的 render 也成立
+	_check("★★★而它讀了：現值低於基準 ⇒ 資源行出現「↓」（實際：%s）" % (
+			"有" if txt.contains("↓") else "沒有"), txt.contains("↓"))
+	# 附帶：呼叫史不得影響畫面（★這一項【自己】沒有鑑別力，見上面的 v2 檢討，留著當附加約束）
+	var first: String = txt
+	for _i in range(4):
+		node._refresh()
+	_check("附帶：再畫 4 次，輸出逐字相同（★此項單獨不具鑑別力）", node._state_label.text == first)
+	await _free_ui(node)
+	_cell("_test_refresh_idempotent")
+
+# P2[債還了]：★綁【清單長度】不綁那一條的名字 ——
+#   綁名字的判準會隨措辭漂成恆綠或恆紅（spec §4）。
+#   ★★這一格不是形式：豁免清單變短【就是這張票的成果本身】。
+func _test_p1b_exclude_empty() -> void:
+	_selftest_gate("_test_p1b_exclude_empty").noop()
+	print("
+── render P2 豁免清單已清空 ──")
+	_check("P1B_EXCLUDE 是空的（目前 %d 條）⇒ 零損失比對不再放過任何一行" % P1B_EXCLUDE.size(),
+		P1B_EXCLUDE.is_empty())
+	print("  ★★而【結構行】清單（P1B_STRUCTURAL，%d 條）是另一件事：那是 spec 本來就不比的，不是債。"
+		% P1B_STRUCTURAL.size())
+	_cell("_test_p1b_exclude_empty")
