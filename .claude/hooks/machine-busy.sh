@@ -22,17 +22,26 @@ _root="$(cd "$(dirname "$_gc")" && pwd)"
 FLAG="$_root/.claude/hooks/.merge-gates-running"
 
 busy=0
-if [ -f "$FLAG" ]; then
+# ★★★掃【所有樹】的標記，不只 main（systems 修 2026-09-23，implementer 當場逮到）：
+#   main 的 merge-gates.sh 今天改成把標記寫進 main 工作樹，★而【別棵樹上的 code 還是舊版】
+#   ——分支／worktree 要等它們把 main 併進來才會拿到那個修法。
+#   ⇒ ★★所以舊版寫的標記仍然落在【它自己那棵樹】⇒ 只看 main 就會回 FREE，而電池正在跑。
+#   ⇒ ★★★通則：**一個依賴「大家都跑新版」的守衛不是守衛。**
+#     讀取端要能看見【舊寫入端會寫的每一個位置】，而不是只看新位置。
+for FLAG in "$_root/.claude/hooks/.merge-gates-running" "$_root"/.worktrees/*/.claude/hooks/.merge-gates-running; do
+  [ -f "$FLAG" ] || continue
   pid=$(awk '{print $1; exit}' "$FLAG" 2>/dev/null)
   rest=$(awk '{$1=""; print; exit}' "$FLAG" 2>/dev/null)
+  _where="${FLAG#$_root/}"
   if [ -n "${pid:-}" ] && kill -0 "$pid" 2>/dev/null; then
     echo "[machine] ⛔ BUSY：電池在跑（PID $pid${rest:+ —$rest}）"
+    echo "[machine]   ⇒ 標記：$_where"
     echo "[machine]   ⇒ ★★這一格【不看 Godot 行程數】—— 電池在兩支床之間那個數是 0"
     busy=1
   else
-    echo "[machine] ⚪ 舊標記（PID ${pid:-?} 已不在）⇒ 不算忙；★而【標記舊】不代表機器空，繼續看下一格"
+    echo "[machine] ⚪ 舊標記（PID ${pid:-?} 已不在）：$_where ⇒ 不算忙；★而【標記舊】不代表機器空"
   fi
-fi
+done
 
 n=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' 2>/dev/null | tr -dc '0-9')
 if [ "${n:-0}" != "0" ]; then

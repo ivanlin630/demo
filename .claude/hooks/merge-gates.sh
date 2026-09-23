@@ -31,16 +31,24 @@ trap '_rc=$?; rm -f "${MG_RUNFLAG:-}" 2>/dev/null; echo "[MERGE-GATES] BATTERY_R
 _mg_gc="$(git rev-parse --git-common-dir 2>/dev/null || echo .git)"
 _mg_root="$(cd "$(dirname "$_mg_gc")" && pwd)"
 MG_RUNFLAG="$_mg_root/.claude/hooks/.merge-gates-running"
-if [ -f "$MG_RUNFLAG" ]; then
-  _mg_other=$(awk '{print $1; exit}' "$MG_RUNFLAG" 2>/dev/null)
+# ★★★偵測端要掃【所有樹】，不只 main（systems 修 2026-09-23，implementer 當場逮到）：
+#   上面那個「標記落 main 工作樹」的修法只存在於【已經把 main 併進來的樹】——
+#   分支／worktree 上的這支檔案可能還是舊版，而舊版把標記寫進【它自己那棵樹】。
+#   ⇒ ★只看 main 的路徑 ⇒ 看不到舊版正在跑的那一輪 ⇒ 兩輪同時跑。
+#   ⇒ ★★★通則：**一個依賴「大家都跑新版」的守衛不是守衛。**
+#     寫入端可以只寫新位置；★讀取端必須看得見【舊寫入端會寫的每一個位置】。
+for _mg_f in "$MG_RUNFLAG" "$_mg_root"/.worktrees/*/.claude/hooks/.merge-gates-running; do
+  [ -f "$_mg_f" ] || continue
+  _mg_other=$(awk '{print $1; exit}' "$_mg_f" 2>/dev/null)
   if [ -n "$_mg_other" ] && kill -0 "$_mg_other" 2>/dev/null; then
     echo "[MERGE-GATES] ★★★本輪【不可判】：已經有一輪電池在跑（PID $_mg_other）"
+    echo "[MERGE-GATES]   ⇒ 標記：${_mg_f#$_mg_root/}"
     echo "[MERGE-GATES]   ⇒ 兩輪平行跑會互相拖慢並把機器吃爆（2026-09-23 血證）"
-    echo "[MERGE-GATES]   ⇒ ★等它跑完，或確認那顆 PID 已死之後刪 $MG_RUNFLAG"
+    echo "[MERGE-GATES]   ⇒ ★等它跑完，或確認那顆 PID 已死之後刪那個檔"
     exit 2
   fi
-  echo "[MERGE-GATES] ★舊標記（PID $_mg_other 已不在）⇒ 接手。★★而【標記舊】不代表機器空：見下一格"
-fi
+  echo "[MERGE-GATES] ★舊標記（PID ${_mg_other:-?} 已不在）：${_mg_f#$_mg_root/} ⇒ 接手。★★而【標記舊】不代表機器空：見下一格"
+done
 # ★只寫數字在第一行（後面那些欄位是給【人】讀的，程式只讀第一個 token）——
 #   含跳脫字元的寫法在寫檔時會變成真的換行，今天已經咬過兩次。
 printf '%s tree=%s since=%s
