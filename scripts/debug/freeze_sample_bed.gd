@@ -92,6 +92,7 @@ func _run() -> void:
 	var multi_sum: Dictionary = {}
 	var ticks: int = days * WorldState.TICKS_PER_DAY
 	var all_dts: Array = []   # ★不依賴絕對門檻的一組數(systems 2026-09-22派)：每 tick 全收,算 median/p90/p99/max
+	var freeze_days: Dictionary = {}   # ★B3判決行用(systems 2026-09-23派)：>2s幀落在第幾天(1-indexed,loop index為準)
 	for i in range(ticks):
 		var t0: int = Time.get_ticks_usec()
 		runner.advance_tick(st, no_player)
@@ -99,6 +100,7 @@ func _run() -> void:
 		all_dts.append(dt)
 		if dt <= SimRunner.FRAME_BUDGET_US:
 			continue
+		freeze_days[int(i / WorldState.TICKS_PER_DAY) + 1] = true
 		var ph: Dictionary = FactionAISystem._fai_ph.duplicate(true)
 		freeze_rows.append({"tick": st.world.current_tick, "dt": dt, "teams": st.teams.size(), "n_ph": ph.size()})
 		# ★淨值：與 production 同一支函式的口徑（★不要在床裡自己算一份會 drift 的）
@@ -144,6 +146,13 @@ func _run() -> void:
 		var max_dt: int = sorted_dts[n - 1]
 		print("[perf-nothreshold] ticks=%d median=%d us p90=%d us p99=%d us max=%d us (max/median=%.1fx)" % [
 			n, median, p90, p99, max_dt, float(max_dt) / maxf(float(median), 1.0)])
+		# ★★★[B3-FREEZE]判決行(systems 2026-09-23派,格式不能改)——機器可讀錨,defer met_check直接grep它
+		var _gen: String = OS.get_environment("FS_GEN") if OS.has_environment("FS_GEN") else "?"
+		var _p99_ms: float = float(p99) / 1000.0
+		var _over2s_days: int = freeze_days.size()
+		var _verdict: String = "PASS" if (SimRunner.frames_over_budget <= days and _p99_ms < 1000.0) else "FAIL"
+		print("[B3-FREEZE] gen=%s seed=%d days=%d/%d over2s_days=%d/%d p99_ms=%d verdict=%s" % [
+			_gen, seed_val, days, days, _over2s_days, days, int(_p99_ms), _verdict])
 	if freeze_rows.is_empty():
 		_undecidable("「>2 秒的幀，時間花在哪個淨值相位上」",
 			"這個窗口【一幀都沒有超過 2 秒】⇒ 沒有母體可看（★不是『沒有凍結問題』，是這一輪沒跑到）",
