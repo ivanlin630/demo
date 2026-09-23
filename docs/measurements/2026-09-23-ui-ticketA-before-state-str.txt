@@ -1,5 +1,5 @@
 #UC seed=1337
-#UC tree=cfba3a0ae
+#UC tree=2eb158de8
 #UC tick=120（起點 0，實際推進 120；請求 120）
 #UC 世界規模（現場數，非設定值）：teams=16 factions=2 persons=43
 #UC 逐字原樣；★不 strip、不排序、不去重（P1 用逐行計數比）
