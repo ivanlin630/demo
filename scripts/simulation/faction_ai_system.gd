@@ -1298,12 +1298,17 @@ static func factions_of(state: WorldState, team_ids: Array) -> Array:
 #     ⇒ 「綱要與簽章都會說謊」這一次說謊的是【名字】。
 
 func _evaluate_loop1_factions(state: WorldState, faction_ids: Array) -> void:
+	# ★★★鍵名 2026-09-23 由 `evaluate_all_body.*` 改成 `evaluate_loop1.*`（世代 8 拆三份之後）：
+	#   舊名量的是【完整 pass 數】（一次呼叫跑完 loop1+loop2+loop3），
+	#   新名量的是【loop1 的批次呼叫數】——★不是涵蓋面變窄，是【單位換掉了】。
+	#   ★★兩者都非零、都好看、都不報錯 ⇒ 跨世代把它們擺在一起比是無效的。
+	#   ★★★邊界寫在五份既有卷面的 `_unit_change_warning_2026_09_23` 欄位裡（systems 標的）。
 	if Probe.enabled:   # ★measurer L3 tap(2026-08-21,T3追查)：本函式呼叫次數+factions是否為空+代表性tick值
-		Probe.bump("evaluate_all_body.entry")
-		Probe.add_amount("evaluate_all_body.factions_size_sum", float(state.factions.size()))
-		Probe.bump_sample("evaluate_all_body.tick_sample", {"tick": state.world.current_tick,
+		Probe.bump("evaluate_loop1.entry")
+		Probe.add_amount("evaluate_loop1.factions_size_sum", float(state.factions.size()))
+		Probe.bump_sample("evaluate_loop1.tick_sample", {"tick": state.world.current_tick,
 			"mod_infra": state.world.current_tick % INFRA_INTERVAL, "n_factions": state.factions.size()}, 5)
-		Probe.note("evaluate_all_body.last_tick", state.world.current_tick)
+		Probe.note("evaluate_loop1.last_tick", state.world.current_tick)
 	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	# ★★★本函式必須【真的吃它拿到的那批隊】（spec 2026-09-23）：
 	#   舊寫法 `for fid in state.factions` 跑全世界，而呼叫端傳進來的 team_ids 完全沒用。
