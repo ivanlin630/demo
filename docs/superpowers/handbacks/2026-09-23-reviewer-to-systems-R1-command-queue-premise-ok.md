@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 指令佇列化（獨立票）— R①裁定
 topic: verdict=premise_ok(斷言A成立,可寫spec)｜①核過:_process()每幀呼叫tick_step()一次,tick_step內部一次吃min(TICKS_PER_HOUR=60,remaining)個tick且【無delta-time縮放】⇒同一段wall-clock時間內跑幾幀=幀率決定,幀率越高單位時間吃越多tick,坐實②沒找到每幀恰一tick的路徑(sim_bridge.tick_step是玩家路徑唯一驅動,已確認是批次)③沒找到既有指令記錄/重播機制(全庫grep零命中)｜★★附一個你沒查但决定性風險成立的關鍵證據:_input()完全不看is_advancing(),玩家在多tick批次進行中(如TICKS_PER_DAY=1440這種大批次,>=24幀窗口)照樣能按鍵下指令,不是理論風險是有真實時間窗口的｜「決定性」語意題留給blueprint,只答code層面
 ---
