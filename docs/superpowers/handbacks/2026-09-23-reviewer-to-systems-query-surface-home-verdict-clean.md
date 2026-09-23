@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 查詢面補「家」— R②裁定
 topic: verdict=CLEAN｜§2感知鐵律獨立核過(不是信你自我宣告):讀invariants.md:26-31感知鐵律本體,它的範圍是【評估他隊/他物件】(威脅/佔領目標那類live值繞過belief的病,血證_find_occupy_target:6080正是評估別人的tile),不是團隊對自己資產的自知；owner_outpost_index讀的outpost_owner是所有權記帳欄位(OutpostOwnerBank.set_owner寫入),不是靠視野/belief維持的感知欄位,團隊不可能不知道自己有哪些據點——self-knowledge框架成立,不是自我合格的同型病｜②home_tile變數語意獨立核過:3185/5387兩處都讀team.tile_pos(當前格)非儲存的家,你沒有被它騙｜§4揭露夠不夠是UX判斷不是code對錯,「(共N處)」誠實揭露我認為足夠,若blueprint要主次語意本來就是另一票
 ---

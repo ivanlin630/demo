@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 新信箱做法（用戶裁 2026-09-23「就照你做法」）
 topic: ★用戶裁：信箱改【git handback 照舊 + 寫完用 SendMessage 敲收件人】（陽性對照 17:00 成立：systems 零 watcher 被叫醒）｜★★看門狗留（背景 Bash 不改）｜★★★Telegram 進站退役，改 Remote Control｜★流程 docs + CLAUDE.md 信箱那段由你改（用戶這句話就是點頭）｜復工
 ---
