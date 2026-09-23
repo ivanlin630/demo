@@ -603,7 +603,40 @@ P1 不降、P2 不動 ⇒ 兩格一起綠才算」。
 
 
 
-#### ★★★6a-1 而 P8 在 headless 的母體【結構上是 0】（2026-09-23 實測）
+#### ★★★6a-1 ~~P8 在 headless 的母體結構上是 0~~ —— **★撤回（2026-09-23，reviewer 找到更強的路徑）**
+
+★**撤回的是結論，不是那次量測**：`[PASSSTAG] P8 指派事件=0` 是真的，
+但「所以母體結構上是 0」是**錯的** —— 那顆 tap 掛錯地方了。
+
+```
+★一般路徑（每小時、每個 member 都會走，reviewer 2026-09-23 於樹 164c7a8ef 逐字核）：
+  _assign_tasks 的【兩個分支】（survival／非 survival）結尾都【無條件】呼叫
+      → _assign_member_tasks
+      → 對每個 member 呼 _decide_unified(state, mt, "member")
+      → ★該函式裡那一次 try_set ＝ 註解自己標的「引擎統一路唯一的 try_set」
+★★而先前掃到的 `_assign_tasks` 直接那一次 try_set，確實在
+   `if not t_cmd.player_commanded_task.is_empty()` 之內 ⇒ 那是【窄案例】
+⇒ ★★★漏掉的原因：掃的是「`_assign_tasks` 函式體裡有沒有 try_set」，
+   而真正的寫入在【再兩層委派之後】
+```
+
+★**這是同一個病的第三形態**：`evaluate_all → _evaluate_all_body`（我）／
+迴圈頭 vs 迴圈體（implementer）／**跟呼叫鏈但只跟一層**（這次）。
+⇒ ★★**「我掃過了」要同句說出【掃到第幾層委派】。**
+
+★★★**後果（處置全部改寫）**：
+
+```
+①P8 的母體【不是 0】——它是每小時每個 member 一次 ⇒ ★P8 變成【可量且必量】
+②tap 要掛在【統一引擎那一次 try_set】上（by content 不 by line：
+   註解逐字寫著「引擎統一路唯一的 try_set」），並限定 role=="member" 那條
+③★跨 loop 延遲的風險【不是邊角案例】：每個 member 每小時都會遇到
+④defer `p8-player-path-assign-to-exec-delay` ⇒ ★★刪除（它的前提已被推翻）
+```
+
+<!-- 以下為撤回前的原文，留作紀錄 -->
+
+#### ~~6a-1（撤回前）：P8 在 headless 的母體結構上是 0~~
 
 ```
 [PASSSTAG] ★P8【不可判】：指派事件 0 個 —— 母體塌陷，不是「沒有延遲」

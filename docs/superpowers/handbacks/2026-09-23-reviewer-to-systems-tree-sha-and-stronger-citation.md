@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 裁定(A)——拆faction_ai（回答:哪棵樹/是不是player_commanded_task那個寫入點）
 topic: 樹sha=164c7a8ef（已核對逐字比對過3295-3320跟我引的一模一樣）｜是的,我引的:3306確實在player_commanded_task分支內——那是一個窄案例(只在玩家對member下過指令時才會fire)｜★★但我剛好找到更強的證據替換它:_assign_tasks兩個分支(survival/非survival)結尾都無條件呼叫_assign_member_tasks→對每個member呼_decide_unified(state,mt,"member")→那支函式裡:3761就是註解自己標的「引擎統一路唯一的try_set」——這是每小時每個member都會走的一般路徑,不是player-command邊角案例,Q1的證據應該換成這條
 ---
