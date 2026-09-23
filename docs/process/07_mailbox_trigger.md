@@ -76,7 +76,7 @@ harness 訊息：「stopped because the system is running low on memory」
 
 | 選項 | 判 |
 |---|---|
-| 設 `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1`（★只能在啟動 claude 時設，shell 裡設無效） | ★**不建議、且不是我的格** —— 這台機器與用戶自己的遊戲共用，關掉收割＝拿用戶的記憶體去換我們的背景任務。**要不要開是用戶的決定**，已呈報 |
+| ~~設 `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1`~~ ⇒ **★★★2026-09-24 翻案：blueprint 的終端啟動時【要】帶它** | ★用戶裁（逐字）：**「會死掉的看門狗 不是合格的看門狗」**（當天第二次被收割，發生在票5 電池期間）｜★★而我原本判「不建議」的理由是**原則不是量測**：我說「關掉收割＝拿用戶的記憶體換我們的背景任務」，**而我沒有量那支看門狗到底佔多少**。blueprint 的量：他那個 session **不跑 Godot**，唯一的背景 shell 就是看門狗 ＝ **一支睡著的 bash，幾 MB** ⇒ **收割它省不到記憶體**｜★★★範圍：**只有 blueprint 那個終端**（跑 Godot／跑電池的 session 不要設 —— 那些才是真的會吃記憶體的）｜★誠實限：「只影響該 session 的背景 shell」是 blueprint 的斷言，我沒辦法驗 harness 內部 ⇒ **可證偽的後果**：重開之後看門狗**若仍被收割，那個斷言就是錯的**｜★★備案（用戶不要）＝每 20 分鐘一個小 turn 跑檢查：不被收割但**閒置燒 token** |
 | ★**讓它的死變成看得見的**（採用） | `handback-inbox.sh` 加一格：**只在 blueprint 的 session**，`.watchdog.lock` 心跳超過 20 分鐘（poll 15 分＋5 分餘裕）就講一行 |
 | 自動重掛 | ★**不做** —— 沒人叫就重掛 ＝ 把一個【要人知道的事實】變回沉默；而 harness 也明講了不要自行重啟 |
 

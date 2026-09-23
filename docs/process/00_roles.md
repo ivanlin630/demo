@@ -187,6 +187,11 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
        ★★★它死掉的樣子跟它正常工作的樣子一樣（都是不說話）⇒ `handback-inbox.sh` 有一格
        只對 blueprint 講「看門狗心跳停了 N 分鐘」。★不自動重掛（沒人叫就重掛＝把事實變回沉默）
         Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh watchdog", run_in_background=true)
+        ★★★2026-09-24 用戶裁：**「會死掉的看門狗 不是合格的看門狗」** ⇒ **blueprint 的終端啟動時帶**
+          `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1`（★只能在啟動 claude 時設，shell 裡設無效）
+          ★只有 blueprint 那個終端要設 —— 跑 Godot／跑電池的 session【不要】，那些才真的吃記憶體
+          ★★量：blueprint 那個 session 不跑 Godot，唯一背景 shell ＝ 一支睡著的 bash（幾 MB）
+          ★★★而我原本判「不建議」是【原則不是量測】：我沒有量它佔多少就下了判斷
 ```
 
 **★用戶要的四件（逐字）**：①真有信才叫的信箱 ②真停工一段時間才叫的看門狗 ③TG收信
