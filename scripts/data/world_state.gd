@@ -124,6 +124,7 @@ var teams_by_tile: Dictionary = {}   # tile_id(int = x*1000+y) → Array[int] te
 # 純加速結構、非真值源：表由 world.tiles **迭代序**整表重建、每 owner 只留第一個命中
 # ＝完全重現舊掃「迭代序中的第一個符合者」語意（HOW spec §3）。失效走 OwnerOutpostIndex.epoch。
 var _oo_map: Dictionary = {}      # team_id → tile_id（owner=-1 亦入表，與舊掃對任何輸入皆等價）
+var _oo_count: Dictionary = {}   # owner → 據點數（與 _oo_map 同 epoch，同一次重建填）
 var _oo_epoch: int = 0            # 0 = 尚未建（OwnerOutpostIndex.epoch 從 1 起）
 # ★own-camp-in-decision-model：L0 營地的姊妹索引（★不與 _oo_map 共用——欄位不同，見 owner_camp_index.gd）
 var _oc_map: Dictionary = {}      # team_id → tile_id（camp_team_id -1 不入表：無主營地不屬於任何隊）
@@ -287,6 +288,12 @@ static func _reset_cross_run() -> Dictionary:
 # ★效能 arc B：owner → 自家據點查表（等價替換 `for tile_id in world.tiles` 全圖掃）。
 # 回傳該 team 在 world.tiles 迭代序中的第一個 outpost_level>0 據點 tile，無則 null。
 # 失效即整表重建（見 OwnerOutpostIndex 檔頭：整表重建天然免疫 spec §3 的「後設蓋前者」陷阱）。
+# 自己擁有幾個據點（★與 own_outpost_tile 同一個 epoch、同一次重建）。
+func own_outpost_count(team_id: int) -> int:
+	if _oo_epoch != OwnerOutpostIndex.epoch:
+		_rebuild_owner_outpost()
+	return int(_oo_count.get(team_id, 0))
+
 func own_outpost_tile(team_id: int) -> HexTileData:
 	if _oo_epoch != OwnerOutpostIndex.epoch:
 		_rebuild_owner_outpost()
@@ -362,10 +369,16 @@ func _rebuild_facility_existence() -> void:
 
 func _rebuild_owner_outpost() -> void:
 	_oo_map.clear()
+	_oo_count.clear()
 	for tile_id in world.tiles:   # ★依 world.tiles 迭代序 → 每 owner 只留第一個命中＝舊掃同一選擇
 		var t: HexTileData = world.tiles[tile_id]
 		if t.outpost_level > 0 and not _oo_map.has(t.outpost_owner):
 			_oo_map[t.outpost_owner] = tile_id
+		# ★★★「共幾處」計在【同一次重建】裡 —— 不是每次查詢再掃一遍。
+		#   ★畫面每幀都會問這個數，而重掃全圖會把一個顯示欄位變成效能問題。
+		#   ★★它與 _oo_map 共用同一個 epoch ⇒ 兩者不可能各自過期。
+		if t.outpost_level > 0:
+			_oo_count[t.outpost_owner] = int(_oo_count.get(t.outpost_owner, 0)) + 1
 	_oo_epoch = OwnerOutpostIndex.epoch
 	if Probe.enabled: Probe.bump("owner_outpost.rebuild")
 
