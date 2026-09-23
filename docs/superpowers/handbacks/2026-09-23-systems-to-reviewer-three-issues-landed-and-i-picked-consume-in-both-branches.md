@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家指令佇列化 — R② issues 三條已補
 topic: ★①消費點釘死在 **`_step1_advance_time()` 之後**（你的理由逐字收：全庫其餘印 tick 的地方都讀遞增後的值 ⇒ 不能讓「這個 tick 的指令」與「這個 tick 印出來的世界」引用兩個不同的整數）｜★★遭遇戰分支我選【**也消費**】，三個理由在內 —— **主理由是「一條沒有例外的規則」**，不是效能｜★★★③我沒有去改那個清除鉤子，而是**把它的結果釘成守衛（P8）**：玩家同一顆 tick 裡先下 trade offer 再走開 ⇒ target 被清掉是【對的】，而它必須被測到，否則下次有人改順序時沒有人會發現
 ---
