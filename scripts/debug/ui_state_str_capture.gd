@@ -39,11 +39,27 @@ func _initialize() -> void:
 #     ②同一顆種子建兩次世界 ⇒ 輸出【逐字相同】（世界建構可重現）
 #       ★★★②才是這份「前」能被拿來比對的前提，而它壞掉時會【真的紅】。
 func _seed_selftest() -> bool:
-	var probes: Array = []
+	# ★★★兩格合起來才叫「種子接上了」—— 單獨任何一格都不是（systems 2026-09-23）。
+	#   格①【未播種的 RNG 真的是隨機的】⇒ 所以「不 seed」是危險的，不是中性的
+	#   格②【同一顆種子跑兩次 ⇒ 輸出逐字相同】⇒ 這才是「決定性」的定義
+	# ★舊版斷言「兩顆不同種子 ⇒ 輸出必須不同」已拿掉：靈敏度太低 ——
+	#   ★★實證：seed 11111 與 22222 的畫面【剛好相同】⇒ 那一格會把「有效」誤判成「無效」。
+	var r1: float = 0.0
+	var r2: float = 0.0
+	randomize()
+	r1 = randf()
+	randomize()
+	r2 = randf()
+	print("[UC][自檢①] randomize() 兩次的 randf ＝ %.9f／%.9f" % [r1, r2])
+	if r1 == r2:
+		push_error("[UC][FAIL] 未播種的 RNG 兩次給出【同一個值】⇒ ★這台機器的 randomize 沒作用")
+		push_error("[UC]   ⇒ ★★那代表『不 seed 也無所謂』—— 而本床其餘判準都建立在相反的前提上")
+		return false
+	print("[UC][自檢①] ★未播種的 RNG 每次不同 ⇒ ★★所以【不 seed 的床每次是另一個世界】")
+
 	var outs: Array = []
-	for sd2 in [11111, 11111]:
-		seed(sd2)
-		probes.append(randf())
+	for _pass in [0, 1]:
+		seed(1337)
 		var n2 = load("res://scenes/TextUI.tscn").instantiate()
 		get_root().add_child(n2)
 		await process_frame
@@ -59,29 +75,16 @@ func _seed_selftest() -> bool:
 		outs.append(n2._build_state_str())
 		n2.queue_free()
 		await process_frame
-	seed(4242)
-	var other: float = randf()
-	print("[UC][自檢] seed(11111) 的 randf=%.9f／%.9f｜seed(4242) 的 randf=%.9f" % [
-		float(probes[0]), float(probes[1]), other])
 	var a2: String = String(outs[0])
 	var b2: String = String(outs[1])
 	if a2.strip_edges() == "" or b2.strip_edges() == "":
-		push_error("[UC][不可判] 自檢的某一邊輸出是空的 ⇒ ★『相同』可能只是兩邊都空")
-		return false
-	if float(probes[0]) == other:
-		push_error("[UC][FAIL] seed(11111) 與 seed(4242) 的 randf 相同 ⇒ ★★★seed() 沒有生效")
+		push_error("[UC][不可判] 自檢②某一邊輸出是空的 ⇒ ★『相同』可能只是兩邊都空")
 		return false
 	if a2 != b2:
-		push_error("[UC][FAIL] 同一顆種子建兩次世界，畫面【不同】⇒ ★★★世界建構不可重現")
+		push_error("[UC][FAIL] 同一顆種子跑兩次，畫面【不同】⇒ ★★★這支床不是決定性的")
 		push_error("[UC]   ⇒ 這份「前」無法被任何人拿去比對；★不是「世界很豐富」")
 		return false
-	print("[UC][自檢] ★seed() 有效、且同種子兩次建構逐字相同")
-	print("[UC][自檢] ★★★撤回一條我寫錯的『已知性質』（2026-09-23 同日）：")
-	print("[UC]   ★我曾用【2 個樣本】寫下「這條路徑不吃全域 RNG」——那是錯的。")
-	print("[UC]   ★★真相：Godot【每個行程開機時全域 RNG 是隨機的】（實測 4 個行程 4 個值），")
-	print("[UC]     而模擬會吃它 ⇒ 不 seed 的床【每次跑的世界都不同】。")
-	print("[UC]   ⇒ ★★★所以 seed() 是【必要的】，不是裝飾；而『兩顆種子輸出相同』只是")
-	print("[UC]     那 2 次剛好沒分岔 —— ★2 個樣本不足以推翻一條機制。")
+	print("[UC][自檢②] ★同一顆種子兩次 ⇒ 輸出逐字相同（%d 字元）" % a2.length())
 	return true
 
 func _run() -> void:
