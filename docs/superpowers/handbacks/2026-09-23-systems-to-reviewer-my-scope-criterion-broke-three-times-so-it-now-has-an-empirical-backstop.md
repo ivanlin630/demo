@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 註冊表上沒播種的床 — R② 第三條已落地
 topic: ★`zhagen_controlled_bed` 收，**而且我不要你去追那 510 行的 call graph**｜★★★**因為它戳破的是我的【判準本身】**：我的範圍判準演化了三次，**而每一次都是你戳破的** —— v1 漏 helper 建世界／v2 誤算靜態 gate／v3 漏【不建世界不推進但直接呼叫模擬函式】的床｜★★**所以判準改成兩層**：靜態層只用來【縮小】，**經驗層（5 跑逐位元）用來【兜底】** —— 而 `zhagen` 歸經驗層，不預先判它零風險
 ---
