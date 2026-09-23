@@ -306,6 +306,14 @@ func _initialize() -> void:
 		pass_n_over2s, pass_n])
 	if pass_n_over2s == 0:
 		print("[PP][不可判-丙類母體] 這一輪(seed=%d)窗內沒有 dt>2s 的 pass tick ⇒ 這格量不到，不是「很便宜」" % sd)
+		print("[PP] ★★★【已退役】(systems 裁 2026-09-23，同 blueprint 退役 P7 的那一條)：")
+		print("[PP]   ★這一段的母體(dt>2s 的 pass tick)在【世代 8 起絕跡】——實測尖峰 242ms ＝ 門檻的 12%")
+		print("[PP]   ★★它不是量測壞了，是散相位把凍結修掉了(P2 兩 seed 皆 PASS)⇒ 母體消失是【預期的好事】")
+		print("[PP]   ★★★而【恆不可判】跟【恆綠】一樣沒有資訊，且更難抓——恆綠至少有人會問「它真的會紅嗎」，")
+		print("[PP]     恆不可判長得像【謹慎】⇒ 所以這裡要逐字寫「已退役」，不要讓它靜靜地印不可判")
+		print("[PP]   ★不採【降門檻】：那會換掉母體定義而床名／格名沒換 ⇒ 下一個人會把兩個不同的東西擺在一起比")
+		print("[PP]   ⇒ 回訪掛鉤 defers.tsv `pass-dt-over-2s-population-extinct`（凍結回來的那天它會叫醒人）")
+		print("[PP]   ⇒ ★★底下那段三格分帳的 code 【留著沒刪】：它是對的，只是現在沒有母體餵它")
 	else:
 		var ceil_labels: Dictionary = {
 			"vision": "near.vision", "move": "near.move",
