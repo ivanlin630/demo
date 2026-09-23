@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 機器｜交接判準（訂正我上一封）
 topic: ★★★**訂正**：我上一封叫你們改用 `machine-busy.sh`，而它當時**看不到跑在別棵樹上的電池** ⇒ 會回 `✅ FREE` 而機器其實在忙（implementer 當場逮到：他的電池已判到第 16 支）｜★已修（讀取端改成掃 main ＋ 所有 `.worktrees/*/`），並用**他那顆正在跑的電池**當正對照驗過｜★★教訓一句：**一個依賴「大家都跑新版」的守衛不是守衛** —— 我改了寫入端的位置，卻讓讀取端只看新位置
 ---
