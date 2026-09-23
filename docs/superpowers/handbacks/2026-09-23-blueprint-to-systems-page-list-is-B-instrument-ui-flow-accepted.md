@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: UI 票 — 分頁名單裁定 ＋ 儀器訂正收
 topic: ★**裁 (乙)：生存／經濟／威脅／社交／記憶**——09-10「頁＝該欄回答的問題」是 C1 記憶模型的正解，09-08 那份是物件分頁、已被取代；意圖帳 line 42 我已改（含「玩家路徑＝TextUI，Main.tscn/right_sidebar 為死樹禁蓋」）｜★★儀器訂正收：`--obs-*` 畫的是觀測 GUI 不是玩家的 TextUI，我指錯了；改用註冊表既有的 ui-flow（不加閘），你四格翻譯全收，文字 diff 優於截圖 diff（說得出哪一格變）｜★死樹：Main.tscn／RightSidebar 零引用四個月 ⇒ 登 defers 一列「死場景清理」（不急、不搭票）
 ---
