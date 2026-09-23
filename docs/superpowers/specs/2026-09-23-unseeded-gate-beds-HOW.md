@@ -6,67 +6,82 @@ owner: systems ｜ 2026-09-23 ｜ player_reachable: no
 
 ---
 
-## ★§1 範圍（★我量出來的，不是估的）
+## ★§1 範圍（★R② 2026-09-23 訂正過兩處，不是我原本 grep 出來的那一份）
 
 ```
-scripts/debug/ 共 475 支｜有 seed( 的 251｜★沒有的 224
-而【註冊表 merge-gates.tsv 引用到的】床 45 支，其中沒有 seed( 且會建世界或推進 tick ＝ 12 支：
-  agent_verbs_c1_bed.gd            建世界1 推進3
-  ui_flow_test.gd                  建世界1 推進6   ★已在修（fix/ui-flow-determinism）
-  merchant_turnover_test.gd        建世界0 推進1
-  phase_root_conservation_bed.gd   建世界0 推進1
-  bed_arm_gate.gd                  建世界3 推進0
-  crisis_override_test.gd          建世界3 推進0
-  team_ui_test.gd                  建世界2 推進0
+起點：ui-flow 9 跑紅 4（~44%），根因＝Godot 每行程開機隨機播種
+      （implementer 實測四個未 seed 行程 randf ＝ 0.336／0.970／0.761／0.207）
+```
+
+**R② 訂正①：`bed_arm_gate.gd` 被我【誤算】進來**
+
+```
+★它是【靜態讀原始碼】的 gate，不是世界建構者 —— 我的 grep 命中的是它的註解與搜尋樣式字串
+⇒ ★★我的判準（grep 關鍵字）把【討論那件事的文字】當成【做那件事的程式】
+   —— 那正是今天在簡體 lint／merge-gates 普查上出現過的同一個病
+⇒ 移出名單
+```
+
+**R② 訂正②：grep 漏掉【經由 helper 建世界】的（★這是真缺口，不是假設）**
+
+```
+reviewer 用 MeasureBedHelper.arm_and_* 反查註冊表 45 支 ⇒ 找到 9 支躲過我的 grep
+  ★其中 8 支只用 arm_and_new（手工組世界）⇒ 風險低，但【要具名】不是忽略
+  ★★★而 payroll_urgency_test.gd:118 呼叫 arm_and_setup("res://config/warring_states.json")
+     ＝ 貨真價實的 GameSetup.setup() 隨機世界 ⇒ 跟 ui-flow 同一個病
+     ⇒ ★而它【完全不在我原本那份名單裡】
+```
+
+**修訂後的名單**：
+
+```
+必處理（建隨機世界 或 推進 tick）：
+  agent_verbs_c1_bed.gd（建1 推3）｜ui_flow_test.gd（建1 推6，★已在自己的票上）
+  merchant_turnover_test.gd（推1）｜phase_root_conservation_bed.gd（推1）
+  crisis_override_test.gd（建3）｜team_ui_test.gd（建2）
   grudge_ledger_bed.gd／material_buy_test.gd／plan_speed_move_cost_test.gd
-  ／ui_logic_test.gd／unified_commerce_test.gd     建世界1 推進0
-★判準是 grep：`seed(` 有無 ＋ `WorldState.new|GameSetup.setup|TextUI.tscn|ObserverMain.tscn`
-  ＋ `advance_tick|request_advance|tick_step|advance_ticks`
-★★誠實限：grep 抓不到【經由 helper 間接建世界】的；⇒ §5 的量測會抓到它們（跑出來會變）
+  ／ui_logic_test.gd／unified_commerce_test.gd（各建1）
+  ★★payroll_urgency_test.gd（arm_and_setup ⇒ 隨機世界）★R② 新增
+具名低風險（手工組世界，不建隨機世界、不推進）：★那 8 支 arm_and_new ——
+  ⇒ ★★寫進本 spec 的附表即可，不動它們；★★★理由要寫「手工組世界」，不是「看起來沒事」
 ```
 
-## ★★★§2 第一步是【量】，不是【補 seed】
+## ★★§2 規則（★R② 裁掉我原本的「先量再說」）
 
 ```
-★不要一口氣把 12 支都加上 seed —— 兩個理由：
-  ①有些床【推進 0】，它的斷言可能只看建構後的靜態性質 ⇒ RNG 碰不到它 ⇒ 補了是裝飾
-  ②★★更重要：有些床【本來就應該跨多個世界驗】，把它釘死在一顆種子上＝【縮小它的涵蓋率】
-    ⇒ ★★★那會把「它其實只驗過一個世界」這件事藏起來，而卷面照樣全綠
+★我原本的理由②「有些床本來就該跨多個世界驗 ⇒ 釘死種子會縮小涵蓋率」
+  ⇒ ★★R② 逐一查完 12 支：【一個實例都沒有】⇒ 我那段是【想像出來的保守】
+  ⇒ ★★★整段拿掉。而我要記住的是：**我拿一個推論當成了設計約束，而它沒有母體。**
 ```
 
-**量法（每一支都一樣，★可平行）**：
+**規則（直接、不繞）**：
 
 ```
-同一棵樹、同一個 config，連跑 5 次，比對【完整 stdout 逐位元】
-  5 次逐位元相同 ⇒ 標 STABLE（★不代表它決定性，只代表這 5 次沒抓到 —— 見 §4）
-  出現任何差異   ⇒ 標 VARIES，並把【第一處差異的那一行】記下來
+建【隨機世界】（GameSetup.setup，含 arm_and_setup） 或 【推進 tick】 ⇒ ★必須 seed
+其餘（手工 arm_and_new 且不推進）⇒ ★★不動，而在附表裡具名並寫「手工組世界」
 ```
 
-## §3 逐支處置（★量完才決定，先寫死規則免得看到數字再想）
+## §3 形狀
 
 ```
-VARIES ＋ 它的斷言【依賴那個變動的東西】 ⇒ ★補 seed（形狀抄 warring_harness.gd:120）
-VARIES ＋ 斷言【不依賴】它（只是 log 在變）   ⇒ ★★不補 seed，改把那段 log 移出比對範圍
-                                              （★補 seed 會讓它從此只驗一個世界）
-STABLE                                      ⇒ ★★★【不動】，而在該床檔頭寫一行
-                                              「本床未播種：5 跑逐位元相同（2026-09-23）」
-                                              ⇒ 下一個人看到的是【量過的事實】，不是沉默
+seed 的寫法抄 warring_harness.gd:120／observer_main.gd:51（同一個前例）
+★放在【建世界之前】；★★種子值寫成常數並印出來（★★★印【變數】不是印字面值
+  —— 今天已經有三次「拿字面值當目標」的血證）
 ```
 
-## ★§4 這張票【不宣稱】的（寫在前面，免得後人把它讀太大）
+## ★§4 這張票【不宣稱】的
 
 ```
-★「5 跑相同」不是「決定性」的證明 —— ui-flow 的紅率是 44%，而它仍然可能有 1% 的床
-⇒ ★★所以 STABLE 只代表【這 5 跑沒抓到】，那一行檔頭要照這個措辭寫，不得寫成「它是決定性的」
-⇒ ★★★而真正能斷言決定性的只有【同種子兩次逐字相同 ＋ 未播種兩行程 randf 不同】那一對格，
-  那是 ui-flow 那張票在做的事，本票不重做
+★補了 seed ＝【每次同一個世界】，不等於【那個世界是對的】
+⇒ ★★它換來的是【可重現】：紅了能重現、綠了不是運氣
+⇒ ★★★而「它驗的那件事對不對」不歸本票 —— 本票只讓答案穩定下來
 ```
 
 ## §5 驗收
 
 ```
-P1 12 支各有一份 5 跑的原始輸出，落地在 docs/measurements/（★exact path 進 handback）
-P2 每一支都有處置標籤（VARIES-補seed／VARIES-移出比對／STABLE-檔頭記一行）
+P1 名單內每一支都補上 seed（ui_flow_test 除外，它在自己的票上），★而附表裡的 8 支具名保留
+P2 每一支的 seed 值【印在它自己的輸出裡】（★下一個人看得到它跑的是哪個世界）
 P3 補了 seed 的那幾支：★各自附【陽性對照】—— 把 seed 換成 randomize() ⇒ 該床必須變 VARIES
    ⇒ ★★沒有這一格，「補了 seed」與「它本來就穩定」在卷面上長得一樣
 P4 全電池綠（★本票只動 scripts/debug/，零 production）

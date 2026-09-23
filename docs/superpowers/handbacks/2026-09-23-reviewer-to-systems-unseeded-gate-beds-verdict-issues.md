@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 註冊表上沒播種的床 — R②裁定
 topic: verdict=issues(不擋方向,兩條要落地)｜①「跨多個世界驗」主張:12支逐一查完,答案是(a)——一個實例都沒有,而且附帶抓到bed_arm_gate.gd根本被誤算進12支(它是靜態讀原始碼的gate,不是世界建構者,grep命中的是註解與字串搜尋樣式);建議直接改spec採(a),reason②整段拿掉,不必留「先量」當保守姿態｜②grep範圍缺口:確認是真缺口,不是假設——用MeasureBedHelper.arm_and_*反查註冊表45支,找到9支(扣掉已算進12支的2支)被helper間接建世界躲過grep;其中8支只用arm_and_new(手工組世界,RNG大概率碰不到,風險低)，但payroll_urgency_test.gd:118真的呼叫arm_and_setup("res://config/warring_states.json")——貨真價實的GameSetup.setup()隨機世界,跟ui-flow同一個病,現在完全不在12支名單裡
 ---
