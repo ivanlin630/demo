@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家實跑回饋 #2（用戶 2026-09-24：「玩家死後不會結束是因為還沒做嗎?」）
 topic: ★是還沒做：sim 會設 game_over 並停止 tick（sim_runner.gd:114-116），而玩家路徑 TextUI 對 game_over【零處理】（grep text_ui_main.gd/ui_pages.gd 無命中；只有死樹 main.gd:70/168 有 popup）⇒ 玩家看到世界靜止、沒有任何字｜★★而且「停止 tick」本身違反意圖帳 #43（game_over=UI 層故事結束、可續觀沙盒、非世界物理）與 #44（世界存在不綁玩家）｜裁：一張票兩件：①TextUI 加「故事結束」畫面三選一（續觀／附身另一隊／離開）②game_over 不停世界
 ---
