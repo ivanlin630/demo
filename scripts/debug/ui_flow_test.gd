@@ -1405,8 +1405,8 @@ func _test_render_idempotent() -> void:
 	_check("★母體地板：這一輪真的有資源行（「食:」）—— 沒有的話冪等恆真", a.contains("食:"))
 	_check("連續兩次 _build_state_str() 逐字相同", a == b)
 	if a != b:
-		var la: PackedStringArray = a.split(chr(10))
-		var lb: PackedStringArray = b.split(chr(10))
+		var la: PackedStringArray = a.split(String.chr(10))
+		var lb: PackedStringArray = b.split(String.chr(10))
 		for i in range(min(la.size(), lb.size())):
 			if la[i] != lb[i]:
 				print("    第 %d 行不同：
