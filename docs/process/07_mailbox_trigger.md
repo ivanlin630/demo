@@ -39,10 +39,22 @@
 
 ## 用法
 
-### 收件端（每角色 session 開場 arm 一次）
+### 收件端（每角色 session 開場掛一次）
+
+★★★**2026-09-23 用戶裁：不要用 Monitor，改掛背景 Bash。**
 ```
-Monitor(command="bash .claude/hooks/inbox-watch.sh", persistent=true, description="<role> 信箱")
+Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh inbox", run_in_background=true, description="<role> 信箱")
 ```
+★**為什麼換**（實測，不是偏好）：這一版 Monitor **沒有 `persistent`、30 分鐘硬到期**
+（`timeout_ms` 上限 3600000，而傳滿它仍回「expires in 30m」）⇒ 每半小時一次【空重掛】＋每次 ARMED 雜訊，
+而**每一行 stdout ＝ 一個 turn** ⇒ 閒置也在燒 token。
+★★背景任務相反：**閒置永久跑、一個字都不輸出**（實測起跑後 10 分鐘以上仍活、輸出檔 0 bytes、
+不受自己的 `timeout` 參數綁），**有事才印那一行並結束 ⇒ 喚醒你**。
+★★★而「重掛」只發生在【真的有事】之後，夾在你本來就要處理它的那一輪裡 —— 不會多出空 turn。
+⇒ ★**不要**為了防它掛掉再加任何輪詢／重掛迴圈（用戶逐字：「沒事浪費 token」）。
+
+`role-watch.sh` 的過濾判準是三支 watcher **自己的慣例**：`[…]` 開頭＝狀態噪音（ARMED／換血／讓位／普查／CLEAN）
+進 log；其餘＝事件（📬 收信／🟡🔴 STALL／Telegram 訊息本文）才喚醒。
 - 常駐輪詢（預設 20s，`INBOX_POLL_S` 可調）找 `to:<我> && status:open && 沒見過` → 每封新信吐一行事件 → **本 session 自動醒、讀信、動工**。
 - emit-once（key=path+mtime）：同信不重觸；revise 重開（mtime 變）→ 重新吐。
 - **★arm 是搶佔式（v2，2026-08-21）**：不比誰心跳新，比誰後 arm。**新的一定贏**；舊的下一輪讀到 lock 不是自己 → 印 `⛔ 讓位` 後自退（孤兒自己清自己）。
@@ -64,9 +76,10 @@ Monitor(command="bash .claude/hooks/inbox-watch.sh", persistent=true, descriptio
 #### ★blueprint 專屬：Telegram 進站 Monitor（開場**額外** arm 一條、與信箱並列，存活 restart/compact）
 用戶要遠端用 Telegram 驅動 blueprint（免盯 CLI）。**只 blueprint 一個 session** 開場多 arm 這條（其他角色不 arm、走 git 信箱）：
 ```
-Monitor(command="source tools/telegram/config.local.sh && python tools/telegram/tg_poll.py",
-        persistent=true, description="Telegram 進站(用戶訊息喚醒 blueprint)")
+Bash(command="SESSION_ROLE=blueprint bash .claude/hooks/role-watch.sh tg", run_in_background=true,
+     description="Telegram 進站(用戶訊息喚醒 blueprint)")
 ```
+★★同上：★2026-09-23 起走背景 Bash，不用 Monitor。★★而看門狗同理：`role-watch.sh watchdog`（blueprint 一支）。
 - **只 blueprint 一 poller**（`getUpdates` offset 消費、多 poller 互搶同一 update）；其他角色走 git 信箱不變。
 - 進站事件 `📱 [Telegram] 用戶: <text>` → **當用戶輸入處理**（≠背景事件）→ `bash tools/telegram/send.sh --file <utf8檔>` 回（UTF-8 via 檔避 CP950）。
 - **出站只在真需用戶裁**推（WHAT fork／授權／QA 綠／喬不攏）；role-to-role 不推（免手機噪音）。

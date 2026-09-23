@@ -14,7 +14,7 @@
 > ★**現況檔 `docs/process/status/*` 已停更，★★【不要再寫入】**（O1，2026-08-21）——**誰在線一律讀 `bash .claude/hooks/peers.sh`**（讀 lock 租約、**推導不手寫**）。★★★systems 2026-09-22：這一行原本還在命令你去更新那些檔 —— **停更宣告寫在別的文件裡，而這裡的指令沒拿掉** ⇒ 審查員 9/02、9/17 各寫了一次，**他是照著這一行做的**。
 
 ## ★信箱（收 R①/R② 工單 + 出判決）
-開場 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`。收 `to:reviewer status:open` 信→讀+判。**出判決 handback（`to:systems status:open`）——★寄件一律 open,絕不自寫 consumed**（consumed 是收件端讀後回執;寄件自寫=對方只掃 open→靜默漏看）。讀完別人給你的信才把那封改 consumed。詳 `07_mailbox_trigger §status 所有權`。
+開場掛 `Bash(SESSION_ROLE=reviewer bash .claude/hooks/role-watch.sh inbox, run_in_background=true)`（★2026-09-23 用戶裁：**不要用 Monitor**——那一版沒有 `persistent`、30 分鐘硬到期）。收 `to:reviewer status:open` 信→讀+判。**出判決 handback（`to:systems status:open`）——★寄件一律 open,絕不自寫 consumed**（consumed 是收件端讀後回執;寄件自寫=對方只掃 open→靜默漏看）。讀完別人給你的信才把那封改 consumed。詳 `07_mailbox_trigger §status 所有權`。
 
 ## ★★框外挑框（異質 skeptic，用戶挖 2026-07-09）
 判斷層（blueprint/systems）清一色 Opus=groupthink 根，自驗驗不了自己的框。∴ reviewer 在**大框 call**（觸發三對齊：①強結論+redirect 大量工作 ②相關跳因果 ③覺得 ironclad+難逆 build/ship/merge）時**升格為框外挑框**：
