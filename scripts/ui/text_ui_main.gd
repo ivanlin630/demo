@@ -335,6 +335,7 @@ func _input(event: InputEvent) -> void:
 				#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
 				#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
 				#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
+				pass   # ★上面那段註解記錄了這裡原本有什麼；GDScript 的區塊不能只有註解
 			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_refresh()
 		KEY_SPACE:

@@ -226,6 +226,11 @@ func _test_forced_choose_heir_ui() -> void:
 	_check("forced responses 列候選（非只拒絕）", resp_ids.size() == 2 and ("heir_%d" % int(cands[0])) in resp_ids)
 	# 驅動選第一候選（forced 回應 = num 0 → KEY_1,因 fe_count>0 時 idx 0 對應第一 response）
 	node._handle_interact_mode(KEY_1)
+	# ★★★指令佇列化之後，按鍵只是【入列】—— 世界要等下一顆 tick 才變（2026-09-24 實測）。
+	#   ★我原本的分類表掃的是【床裡的 command_player 呼叫點】，而這一格是
+	#     透過真實輸入路徑下指令（command_player 在 text_ui_main.gd 裡）⇒ ★★掃不到。
+	#   ⇒ ★★★母體選錯了軸：「哪些格會下指令」≠「哪幾行寫了 command_player」。
+	_apply_queue(node)
 	_check("choose_heir 後 leader 接位", st.teams[ptid].leader_id == int(cands[0]))
 	_check("choose_heir 後 forced 清除", st.player_forced_event.is_empty())
 	await _free_ui(node)
@@ -258,6 +263,11 @@ func _test_forced_aid_request_ui() -> void:
 	# give 是第一 response（options ["give","refuse"]）→ KEY_1
 	var food_before: float = float(pt.resources["food"]) + float(b.resources["food"])
 	node._handle_interact_mode(KEY_1)
+	# ★★★指令佇列化之後，按鍵只是【入列】—— 世界要等下一顆 tick 才變（2026-09-24 實測）。
+	#   ★我原本的分類表掃的是【床裡的 command_player 呼叫點】，而這一格是
+	#     透過真實輸入路徑下指令（command_player 在 text_ui_main.gd 裡）⇒ ★★掃不到。
+	#   ⇒ ★★★母體選錯了軸：「哪些格會下指令」≠「哪幾行寫了 command_player」。
+	_apply_queue(node)
 	_check("aid give 後 beggar 收糧", float(b.resources["food"]) > 0.0)
 	_check("aid give 守恆", is_equal_approx(food_before, float(pt.resources["food"]) + float(b.resources["food"])))
 	_check("aid 後 forced 清除", st.player_forced_event.is_empty())
@@ -316,6 +326,11 @@ func _test_recruit_named_reachable() -> void:
 	# 選記名候選（第 1 個）→ recruit_named 真執行
 	var coin_before: float = float(st.teams[ptid].resources.get("coin", 0))
 	node._handle_recruit_mode(KEY_1)
+	# ★★★指令佇列化之後，按鍵只是【入列】—— 世界要等下一顆 tick 才變（2026-09-24 實測）。
+	#   ★我原本的分類表掃的是【床裡的 command_player 呼叫點】，而這一格是
+	#     透過真實輸入路徑下指令（command_player 在 text_ui_main.gd 裡）⇒ ★★掃不到。
+	#   ⇒ ★★★母體選錯了軸：「哪些格會下指令」≠「哪幾行寫了 command_player」。
+	_apply_queue(node)
 	_check("recruit_named 執行：成員轉到玩家隊", st.persons[43211].team_id == ptid)
 	_check("recruit_named 執行：coin 扣 150", abs(coin_before - float(st.teams[ptid].resources.get("coin", 0)) - 150.0) < 0.01)
 	await _free_ui(node)
@@ -1613,9 +1628,18 @@ func _test_p15_echo_at_most_twice() -> void:
 ── P15 同一條指令的回音 ≤ 2 次 ──")
 	var node = await _make_ui()
 	var st: WorldState = node._bridge.get_state()
-	var r: Dictionary = node._bridge.command_player("move_to", {"tile_q": 9999, "tile_r": 9999})
-	# 入列那一句（畫面上第 1 次）
-	var enqueue_msg: String = String(r.get("message", ""))
+	# ★★★走【真實鍵盤路徑】不是直呼 bridge（2026-09-24 實測訂正）：
+	#   直呼 `command_player()` 【繞過了印回音的那一行】（text_ui_main.gd:322 的 KEY_M
+	#   分支才會 `_set_feedback(r.ok, r.message)`）⇒ 畫面上 0 次 ⇒ 「≤2」恆真。
+	#   ★而那是這一格的母體地板抓到的 —— 它紅在「入列之後畫面至少講了一次（0）」。
+	#   ⇒ ★★地板第二次證明它不是形式：這次它擋的是【我自己的格沒走對路徑】。
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_M
+	ev.pressed = true
+	var tq: int = node._cursor.x
+	var tr: int = node._cursor.y
+	node._input(ev)
+	var enqueue_msg: String = node._feedback_line.text
 	node._refresh()
 	var screen_after_enqueue: String = _all_screen_text(node)
 	var ap: Dictionary = _apply_queue(node)
@@ -1624,7 +1648,7 @@ func _test_p15_echo_at_most_twice() -> void:
 	_check("★母體地板：那一條真的走完了入列→消費（消費點吃到 %d 條）" % int(ap.get("applied", 0)),
 		int(ap.get("applied", 0)) >= 1)
 	# ★數的是【動作的人話】出現幾次 —— 不是整句比對（整句比對會因為前後綴不同而漏數）
-	var needle: String = PlayerCommandApi.describe("move_to", {"tile_q": 9999, "tile_r": 9999})
+	var needle: String = PlayerCommandApi.describe("move_to", {"tile_q": tq, "tile_r": tr})
 	var n_enq: int = screen_after_enqueue.count(needle)
 	var n_app: int = screen_after_apply.count(needle)
 	print("  入列那一句：「%s」｜關鍵字：「%s」" % [enqueue_msg, needle])
