@@ -82,3 +82,11 @@ docs/measurements/.gate-fail/
 # ★Godot PID 信標（systems 2026-09-23）：tools/godot.ps1 為它起的每個 Godot 落一個檔，
 #   machine-busy.sh 讀它做【歸屬】。是【此刻的狀態】不是產出 ⇒ 不進 git。
 .claude/hooks/.godot-pids/
+
+# ★產生物，不是編輯：construction-duration 閘每跑一次就重寫它（內容是行號，隨 code 位移）
+#   ⇒ 追蹤它的話【每一輪電池之後工作區必然 dirty 一個檔】
+#   ★★危害不是髒，是【噪音會蓋住真的髒】：merge 前我們靠 git status 判斷工作區乾不乾淨，
+#     而一個恆常 modified 的檔會讓人養成「跳過那一行」的習慣（2026-09-24 systems 裁）
+#   ★★★核過沒有消費者：construction_duration_source_gate.gd 只 WRITE 它（:133-135），
+#     那支床讀的是另一個路徑（:75）；全庫其餘命中只有 defers.tsv 在【談論】它
+docs/measurements/.construction-duration-source-gate.txt
