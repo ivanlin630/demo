@@ -125,6 +125,15 @@ func _run() -> void:
 		else: _real_n += 1
 	print("[母體三欄] 真隊=%d｜野獸pseudo-team=%d｜在外子隊=%d｜總計=%d(應等於最後隊數)" % [
 		_real_n, _beast_n, _sub_n, _real_n + _beast_n + _sub_n])
+
+	# ★★★P4母體衛生(systems 2026-09-23派)：同一輪production tap,不必另跑
+	print("[P4-死因] extinct.starve=%d｜extinct.combat=%d｜extinct.other=%d" % [
+		int(Probe.counts.get("extinct.starve", 0)), int(Probe.counts.get("extinct.combat", 0)),
+		int(Probe.counts.get("extinct.other", 0))])
+	print("[P4-子隊終止] mergein.dissolve=%d｜mergein.subteam=%d｜convoy.stranded=%d(parent_gone=%d/no_path=%d/timeout=%d)" % [
+		int(Probe.counts.get("mergein.dissolve", 0)), int(Probe.counts.get("mergein.subteam", 0)),
+		int(Probe.counts.get("convoy.stranded", 0)), int(Probe.counts.get("convoy.stranded.parent_gone", 0)),
+		int(Probe.counts.get("convoy.stranded.no_path", 0)), int(Probe.counts.get("convoy.stranded.timeout", 0))])
 	# ★不依賴絕對門檻那一組數（systems 2026-09-22派，仿 dieoff_perf_bed.gd:88-94）：跨機/跨代對照真正該比的
 	if not all_dts.is_empty():
 		var sorted_dts: Array = all_dts.duplicate(); sorted_dts.sort()
