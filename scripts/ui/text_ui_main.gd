@@ -173,9 +173,27 @@ func _refresh_snapshot() -> void:
 	var _result := _bridge.query_player(request)
 	_cached_snapshot = _result.get("data", {}).get("snapshot", {})
 
+# ★★★日邊界的【擁有者】（HOW spec §3：判準是【誰有權設它】不是【它現在是什麼值】）。
+#   ★為什麼是這裡：世界的 tick 只在 `_process()` 的 `tick_step()` 走 ⇒ 換日只可能發生在這一點。
+#   ★★而它【不在 render 路徑上】—— 這正是本票的性質：多畫一次、少畫一次都不會改變基準。
+#   ★★★資源取自【當下重查的快照】：換日這一刻與緊接著的 `_refresh()` 是同一個 tick、
+#     中間沒有狀態變化 ⇒ 玩家看到的箭頭【內容不變】，改的只是它【何時被決定】。
+func _update_day_baseline() -> void:
+	var day: int = _bridge.get_current_tick() / WorldState.TICKS_PER_DAY
+	if day == _res_baseline_day:
+		return
+	_refresh_snapshot()
+	# ★先記日：資源沒接到的時候【也要記】，否則每一 frame 都會重查一次快照
+	#   ⇒ ★★那會把「接不到資源」變成一個【每 frame 付費】的狀態，而它不該有成本。
+	_res_baseline_day = day
+	var res: Dictionary = _cached_snapshot.get("controlled_team", {}).get("resources", {})
+	if not res.is_empty():
+		_res_baseline = res.duplicate()
+
 func _process(_delta: float) -> void:
 	if not _bridge.is_advancing(): return
 	var result := _bridge.tick_step()
+	_update_day_baseline()   # ★★日邊界的擁有者在這裡，不在 render
 	_events.append_array(result.get("events", []))
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
@@ -758,10 +776,11 @@ func _build_economy_lines(ct: Dictionary) -> Array:
 	if ct.get("resources", {}).is_empty():
 		return []
 	var res: Dictionary = ct.get("resources", {})
-	var day: int = _bridge.get_current_tick() / WorldState.TICKS_PER_DAY
-	if day != _res_baseline_day:
-		_res_baseline_day = day
-		_res_baseline = res.duplicate()
+	# ★★★這裡【只讀不寫】：基準線的擁有者是日邊界那一側（`_update_day_baseline()`，
+	#   由 `_process()` 在 `tick_step()` 之後呼叫）。★本函式曾經在這裡寫 `_res_baseline*` ——
+	#   ⇒ 同一份世界，【呼叫第幾次】會決定箭頭 ⇒ 畫面不是唯一的。
+	#   ⇒ ★★而那不只是測試的問題：切分頁／開關 overlay／一個 frame 多跑一次 `_refresh()`
+	#     都會讓玩家看到的箭頭變或不變（HOW spec §2）。
 	lines.append("────────────────")
 	lines.append("資源:")
 	lines.append("  食:%d%s 幣:%d%s 材:%d%s" % [

@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -80,6 +80,9 @@ func _initialize() -> void:
 	await _test_home_p4_multi()
 	await _test_home_p5_halfset()
 	await _test_home_p6_zero_is_real()
+	await _test_render_idempotent()
+	await _test_refresh_idempotent()
+	await _test_p1b_exclude_empty()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1030,9 +1033,14 @@ func _union_all_pages(node: Node) -> Array:
 #   ★每一條都帶【為什麼】，★★而【不是】用「含 ↓↑ 就忽略」那種模糊比對：
 #     模糊比對會連【真的掉了一行含箭頭的內容】也一起放過。
 #   ★★★清單長度會印出來 ⇒ 它變長時有人看得見。
+# ★★★【空了】—— 2026-09-23「render 不得寫 state」那張票把債還掉了。
+#   原本唯一那一條是「  食:」（資源趨勢箭頭）：`_build_state_str()` 會寫 `_res_baseline*`
+#   ⇒ 同一份世界、不同呼叫史就不是同一行字 ⇒ 該比而不比。
+#   ★現在基準線的擁有者搬到日邊界（`_update_day_baseline()`，由 `_process()` 呼叫）
+#   ⇒ render 只讀不寫 ⇒ 不需要豁免。
+# ★★而這張清單【空著本身就是判準】（`_test_p1b_exclude_empty`）——
+#   ★★★下一個人要再加一條，那一格會紅，他就必須說明為什麼那筆債可以欠。
 const P1B_EXCLUDE: Array = [
-	{"prefix": "  食:", "why": "資源趨勢箭頭：_build_state_str() 非冪等（會寫 _res_baseline*）"
-		+ " ⇒ 同一份世界、不同呼叫史就不是同一行字；真修法＝讓它冪等，已由 systems 開獨立票"},
 ]
 
 # 回傳「這一行是否被具名排除」。★只比【前綴】且前綴必須來自上面那張表。
@@ -1380,3 +1388,63 @@ func _test_home_p6_zero_is_real() -> void:
 	_check("離家距離照印（7）", s.contains("離家 7"))
 	await _free_ui(node)
 	_cell("_test_home_p6_zero_is_real")
+
+
+# ══════════ 票「render 不得寫 state」的驗收（HOW spec §4）══════════
+
+# P1[冪等]：連續呼叫 `_build_state_str()` 兩次 ⇒ 逐字相同。
+#   ★★母體地板：那一輪必須真的有【資源行】—— 否則兩次都沒有箭頭 ⇒ 這一格恆真。
+func _test_render_idempotent() -> void:
+	_selftest_gate("_test_render_idempotent").noop()
+	print("
+── render P1 冪等 ──")
+	var node = await _make_ui()
+	node._page_idx = 1   # 經濟頁：資源行在這一頁
+	var a: String = node._build_state_str()
+	var b: String = node._build_state_str()
+	_check("★母體地板：這一輪真的有資源行（「食:」）—— 沒有的話冪等恆真", a.contains("食:"))
+	_check("連續兩次 _build_state_str() 逐字相同", a == b)
+	if a != b:
+		var la: PackedStringArray = a.split(chr(10))
+		var lb: PackedStringArray = b.split(chr(10))
+		for i in range(min(la.size(), lb.size())):
+			if la[i] != lb[i]:
+				print("    第 %d 行不同：
+      前「%s」
+      後「%s」" % [i, la[i], lb[i]])
+	await _free_ui(node)
+	_cell("_test_render_idempotent")
+
+# ★★★P1b[堵住「搬到姊妹函式」]：直接呼 `node._refresh()` 兩次，驗 `_state_label.text` 穩定。
+#   ★reviewer 抓到的漏洞：P1 直呼 `_build_state_str()`，【完全繞過 `_refresh()`】
+#   ⇒ 若「修法」只是把寫入從 `_build_state_str()` 搬進 `_refresh()`（仍在 render 路徑，只是換一支函式）
+#     ⇒ P1 照樣綠，而 spec §2 點名的真實風險（切分頁／開關 overlay／一 frame 多跑一次 _refresh）一格都沒測到。
+#   ⇒ ★★通則：判準要打在【使用者真的會走的那條路】上，不是打在我方便呼叫的那支函式上。
+func _test_refresh_idempotent() -> void:
+	_selftest_gate("_test_refresh_idempotent").noop()
+	print("
+── render P1b _refresh() 兩次 ──")
+	var node = await _make_ui()
+	node._page_idx = 1
+	node._refresh()
+	var a: String = node._state_label.text
+	node._refresh()
+	var b: String = node._state_label.text
+	_check("★母體地板：_state_label 真的有內容（%d 字）" % a.length(), a.length() > 50)
+	_check("★★母體地板：這一輪真的有資源行（「食:」）", a.contains("食:"))
+	_check("★★★連呼 _refresh() 兩次 ⇒ _state_label.text 逐字相同", a == b)
+	await _free_ui(node)
+	_cell("_test_refresh_idempotent")
+
+# P2[債還了]：★綁【清單長度】不綁那一條的名字 ——
+#   綁名字的判準會隨措辭漂成恆綠或恆紅（spec §4）。
+#   ★★這一格不是形式：豁免清單變短【就是這張票的成果本身】。
+func _test_p1b_exclude_empty() -> void:
+	_selftest_gate("_test_p1b_exclude_empty").noop()
+	print("
+── render P2 豁免清單已清空 ──")
+	_check("P1B_EXCLUDE 是空的（目前 %d 條）⇒ 零損失比對不再放過任何一行" % P1B_EXCLUDE.size(),
+		P1B_EXCLUDE.is_empty())
+	print("  ★★而【結構行】清單（P1B_STRUCTURAL，%d 條）是另一件事：那是 spec 本來就不比的，不是債。"
+		% P1B_STRUCTURAL.size())
+	_cell("_test_p1b_exclude_empty")
