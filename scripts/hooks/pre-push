@@ -47,6 +47,15 @@ slice=$(printf '%s' "$branch" | sed 's|^feat/||')
 measure="docs/process/verdicts/${slice}.measure.json"
 if [ -f "$measure" ]; then
 	# 本 branch slice 有 sim measure → 跑 verification_gate（branch-scoped 免 stale 誤擋）
+	# ★★★2026-09-23 systems 量過，把「免 stale 誤擋」換成數字（免得下一個人重新發現它）：
+	#   不帶 --slice 的全量模式今天是 **145/148 FAIL** —— 136 份沒有 is_sim 欄（裁定#2 之前產生的），
+	#   另 9 份 is_sim=true 但沒有 .qa.json（全部是 2026-08-01～09-17 的 stale 卷面）。
+	#   ★所以 branch-scoped 不是保守，是【承重的】：全量模式一開，幾乎所有人的 push 都會被擋。
+	#   ★★而那 136 份【不補】：它們的 slice 早就 merge 了 ⇒ 補了沒有人會去消費
+	#     （沒有人會回頭對已 merge 的 slice 做 QA 故事稽核）；挪 _archive/ 也不做 ——
+	#     每一份都被 2～6 份文件用路徑引用，搬檔案＝用搬家安撫一個【掃描範圍】的問題。
+	#   ★★★真正錯的是 verification_gate 裡 active 的定義（＝「不在 _archive/」⇒ 隨目錄長大＝全歷史）；
+	#     「在飛」的定義就是這裡這一行。全量模式的報告要拆兩類印 ⇒ defers.tsv: fullscan-active-means-history
 	"$GODOT" --headless --script scripts/debug/verification_gate.gd -- --slice="$slice" 2>/dev/null | grep -q "\[VERIFICATION-GATE\] PASS"
 	if [ $? -ne 0 ]; then
 		echo "[pre-push] ★VERIFICATION-GATE FAIL：slice '$slice' 有 sim 量測(is_sim:true)但缺 QA PASS verdict。"

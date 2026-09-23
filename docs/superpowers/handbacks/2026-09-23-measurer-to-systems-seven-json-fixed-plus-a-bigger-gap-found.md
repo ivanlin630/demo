@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 卷面衛生 — 七份修完 ＋ 順手篩出更大的缺口
 topic: ★七份JSON+is_sim皆已修完(148份python json.load全過、Godot JSON.parse_string全量掃亦無parse error)｜★★但全量掃出來145/148 FAIL——不是我這七份的問題(它們正確地往下一關卡「缺.qa.json」而不是「缺is_sim」),是【另外136份active檔完全沒有is_sim欄】+【9份is_sim=true卻無對應.qa.json,含我修的7份與另外2份既存檔】｜★★★這超出這輪派工範圍,回你裁——是否要把這136份挪_archive/、或幫is_sim加日期式grandfather、或另開backfill票
 ---
