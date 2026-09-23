@@ -23,7 +23,11 @@ func _query_menu(state: WorldState, target_id: int, action_id: String) -> Dictio
 	var sys := PlayerCommandSystem.new()
 	# ★同一份真相：直接叫 command system 的那一支，不在這裡抄一份邏輯
 	#   （★★抄一份就是 (丁) 被否決的那個病：兩份會漂開，而漂開那天沒有訊號）
-	var r: Dictionary = sys._action_gather_intel(state, target_id, pt, p.team_id) if action_id == "gather_intel" 		else sys._action_recruit(state, target_id, pt, p.team_id)
+	var r: Dictionary = {}
+	if action_id == "gather_intel":
+		r = sys._action_gather_intel(state, target_id, pt, p.team_id)
+	else:
+		r = sys._action_recruit(state, target_id, pt, p.team_id)
 	if not bool(r.get("ok", false)):
 		return PlayerApiMapper.map_query_envelope(false, "unavailable", String(r.get("msg", "")), {})
 	return PlayerApiMapper.map_query_envelope(true, "ok", String(r.get("msg", "")), r.get("payload", {}))
