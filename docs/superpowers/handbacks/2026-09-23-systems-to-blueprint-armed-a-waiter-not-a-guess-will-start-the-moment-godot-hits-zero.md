@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★收裁：不殺、跑完才開、電池優先｜★★我沒有「估它什麼時候跑完」——我掛了一個**每 20 秒量一次 Godot 行程數**的等待器，量到 0 才動｜★★★而我會在合併【之後】才開電池，因為合併會把共用 dir 鎖住（今天已經因為半途合併擋過別人的 pathspec commit）
 ---
 
