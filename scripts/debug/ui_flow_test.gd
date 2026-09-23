@@ -846,6 +846,16 @@ func _test_pages_zero_loss() -> void:
 			node._bridge.request_advance(want_tick - st.world.current_tick)
 		await process_frame
 		guard += 1
+	# ★★★用完 guard ≠ 到達目標：★第一版沒有分開這兩件事，而它讓「推不動」
+	#   看起來像「世界對得上」——實測血證：注射多推 1440 tick 時，世界【卡在 120】
+	#   燒光 2000 frame，而卷面照樣往下比。
+	if st.world.current_tick < want_tick:
+		print("  ★★★【不可判】推不到「前」的 tick：目標 %d 實得 %d（frames=%d 已用完）" % [
+			want_tick, st.world.current_tick, guard])
+		print("    ⇒ ★這不是紅也不是綠：沒有推到同一個世界，零損失就無從比起")
+		await _free_ui(node)
+		_cell("_test_pages_zero_loss")
+		return
 	# ★★游標也要對回去（沒選格 ⇒ text_ui_main.gd:716 那 ~23 行一行都不會渲染）
 	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
 	var cp: Dictionary = ct.get("position", {})

@@ -67,11 +67,22 @@ func _seed_selftest() -> bool:
 		var st2: WorldState = n2._bridge.get_state()
 		var t0b: int = st2.world.current_tick
 		var g2: int = 0
-		while st2.world.current_tick - t0b < 120 and g2 < 2000:
+		# ★目標存成變數，★★而底下的守衛【比同一個變數】——
+		#   ★★★第一版守衛寫死 120，而注射把目標改成 1560 時它照樣放行：
+		#     同一個病（拿字面值當目標），只是換到守衛這一側。
+		var target2: int = 120
+		while st2.world.current_tick - t0b < target2 and g2 < 2000:
 			if not n2._bridge.is_advancing():
 				n2._bridge.request_advance(120 - (st2.world.current_tick - t0b))
 			await process_frame
 			g2 += 1
+		# ★★★用完 guard 就【不能當作到達了】：第一版我跑完 2000 frame 之後照樣往下走，
+		#   而卷面上看不出差別 ⇒ ★我因此把「注射沒生效」誤讀成「這一格靈敏度低」。
+		if st2.world.current_tick - t0b < target2:
+			push_error("[UC][不可判] 自檢②推不到目標 %d：只走到 +%d（frames=%d 已用完）" % [
+				target2, st2.world.current_tick - t0b, g2])
+			n2.queue_free()
+			return false
 		outs.append(n2._build_state_str())
 		n2.queue_free()
 		await process_frame
