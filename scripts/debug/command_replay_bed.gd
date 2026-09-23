@@ -280,19 +280,72 @@ func _initialize() -> void:
 
 
 # ══════════ P9［入列有回音］（spec §3-5①，blueprint 裁 (乙)）══════════
-# ★母體地板：那句話必須含【動作】—— 只印「已排入」等於沒說，而它會恆綠。
+# ★★★母體從 1 換成【真的母體】（systems 2026-09-23）：原本只驗 `move_to` 一條，
+#   ⇒ 它的母體是 1，而真正的母體是 `dispatch()` 白名單裡的【每一個 name】。
+#   ★病是真的：VERB 漏一個 name ⇒ `describe()` 回英文 id ⇒ 玩家看到 "post_buy_order"。
+#   ★★而判準【不能】寫成「回音不得含 ascii 識別字」—— `掛買單 food×3` 的 `food`
+#     就是 ascii 識別字 ⇒ 那樣會誤紅（我第一版就是這樣寫的）。
+#   ⇒ ★★★改成【異源比對】：左＝從 `player_command_api.gd` 的 `dispatch()` 原始碼抽出的 match 名單，
+#     右＝`VERB` 這個常數。兩邊各自能改變 ⇒ 漏一個就會紅。
+#   ★另外逐 name 驗一次「回音不含它自己的英文 id」—— 那是 describe() 掉到 fallback 的長相。
 func _test_p9_enqueue_echo() -> void:
 	print("
-── P9 入列有回音 ──")
+── P9 入列有回音（母體＝dispatch 白名單全部）──")
+	var f := FileAccess.open("res://scripts/simulation/player_command_api.gd", FileAccess.READ)
+	if f == null:
+		_errors += 1
+		print("  ★[不可判] 讀不到 player_command_api.gd")
+		_cell("_test_p9_enqueue_echo")
+		return
+	var src: String = f.get_as_text()
+	f.close()
+	# 取 dispatch() 的函式體，再抽 `"name":` 那些 match 分支
+	var at: int = src.find("func dispatch(")
+	var names: Array = []
+	if at != -1:
+		var body: String = src.substr(at)
+		var rx := RegEx.new()
+		rx.compile('^		"([a-z_]+)":')
+		for line in body.split(chr(10)):
+			if line.begins_with("func ") and not line.begins_with("func dispatch("):
+				break
+			var m := rx.search(line)
+			if m != null and not names.has(m.get_string(1)):
+				names.append(m.get_string(1))
+	# ★母體地板：跟【外部期望】比，不是跟自己抽到的陣列比
+	#   spec §3-3 說 12、我數出 13、加了 refresh_targets 之後是 14 ⇒ 下限釘 10，抽不到就是抽壞了
+	_check("★★母體地板：從 dispatch() 原始碼抽到 %d 個 name（下限 10；抽 0 個＝正則壞了不是沒有指令）"
+		% names.size(), names.size() >= 10)
+	if names.size() < 10:
+		_cell("_test_p9_enqueue_echo")
+		return
+	# ①每一個可派送的 name 都要有【人話】
+	var missing: Array = []
+	for n in names:
+		if not PlayerCommandApi.VERB.has(n):
+			missing.append(n)
+	for n in missing: print("    ✗ VERB 沒有「%s」⇒ 玩家會看到英文 id" % String(n))
+	_check("★★★dispatch 的每一個 name 在 VERB 裡都有人話（缺 %d 個）" % missing.size(),
+		missing.is_empty())
+	# ②逐 name 驗回音不含它自己的英文 id（＝describe 掉到 fallback 的長相）
+	var fellback: Array = []
+	for n in names:
+		var d: String = PlayerCommandApi.describe(String(n), {})
+		if d.contains(String(n)):
+			fellback.append("%s ⇒ 「%s」" % [String(n), d])
+	for x in fellback: print("    ✗ %s" % String(x))
+	_check("★逐 name：回音不含它自己的英文 id（%d 個掉到 fallback）" % fellback.size(),
+		fellback.is_empty())
+	# ③真的送一條，驗回音的形狀（含動作、含參數）
 	var pair: Array = _fresh()
 	var st: WorldState = pair[0]
 	var bridge := SimBridge.new(pair[1], st)
 	var r: Dictionary = bridge.command_player("move_to", {"tile_q": 3, "tile_r": 4})
 	var msg: String = String(r.get("message", ""))
-	print("  回音：「%s」" % msg)
+	print("  回音樣本：「%s」" % msg)
 	_check("回了 queued", bool(r.get("queued", false)))
 	_check("★有回音（message 非空）", msg != "")
-	_check("★★母體地板：回音含【動作】而不只是「已排入」（找「移動」）", msg.contains("移動"))
+	_check("★★回音含【動作】而不只是「已排入」（找「移動」）", msg.contains("移動"))
 	_check("★★★而它含【參數】—— 否則兩條不同的指令回同一句話", msg.contains("3") and msg.contains("4"))
 	_cell("_test_p9_enqueue_echo")
 
