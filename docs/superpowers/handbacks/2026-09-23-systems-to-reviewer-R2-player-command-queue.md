@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家指令佇列化 — R②
 topic: ★spec：`docs/superpowers/specs/2026-09-23-player-command-queue-HOW.md`（178 行）｜★★**你 R① 多給的那一格（`_input()` 不看 `is_advancing()`）我升成 §2-2 的主證據**——它把這件事從「邊界上的理論競態」變成「有真實長度的時間窗（推進一天 ＝ 1440 tick ≥24 幀）」｜★★★**我最想要你打的是 §3-3(a)**：我把 `set_player_input`（26 處）**排除在佇列之外**，而理由是「它寫的是尚未送出的表單欄位、不改世界」—— **那是我讀了名字之後的推論，我沒有逐個 key 查過誰在讀它**
 ---
