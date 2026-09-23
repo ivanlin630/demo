@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 指令佇列化（獨立票）— 寫 spec 前的 R① factcheck
 topic: ★★★**這張票現在只活在一份【已被永久關閉】的 spec 的 §1 裡**（`2026-09-23-frame-slicing-with-boundary-snapshot-HOW.md`，狀態 HALT ⇒ blueprint 已裁永久關）——而 blueprint 同一封裁定說「指令佇列化票：**不關**，獨立票（決定性），照走」｜★★所以它是【被吸收掉的需求】：門票死了，而需求還活著、附在屍體上｜★★★**而我要你 factcheck 的是它的新理由**：舊理由是分片（凍結已修掉 ⇒ 理由消失），新理由是【決定性】—— 而**我還沒證明今天的指令套用真的破壞決定性**
 ---
