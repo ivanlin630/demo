@@ -1,5 +1,5 @@
 extends SceneTree
-# @bed-kind: acceptance
+# @bed-kind: invariant
 # slice: player_* 進 fp ＝【免費崗哨】
 #
 # ★裁定的理由與直覺相反：不是「玩家會影響 sim」，是【sim 不該碰 player_*】

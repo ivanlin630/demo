@@ -1,5 +1,5 @@
 extends SceneTree
-# @bed-kind: acceptance
+# @bed-kind: invariant
 # slice: fp 的「本尺排除」必須由 code 導出（不是手抄字串）
 #
 # ★這張票修的不是 bug，是【一個儀器對自己說的謊】：那一行說「本尺排除 X/Y/Z」，
