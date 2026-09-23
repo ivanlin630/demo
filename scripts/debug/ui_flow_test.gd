@@ -998,7 +998,10 @@ func _test_pages_skylight() -> void:
 	var node = await _make_ui()
 	var total: int = 0
 	var declared: int = 0
-	for i in range(1, UiPages.PAGE_ORDER.size()):
+	# ★★★從 0 開始，不是從 1：舊版跳過第 1 頁，而票B 第 2 批替生存頁加了宣告欄位
+	#   ⇒ ★那四欄【不在母體裡】⇒ 印不印天窗都不會紅（systems 核出來的）。
+	#   ★★這一族今天第四次：母體的起點寫死了一個【當時成立、後來不成立】的假設。
+	for i in range(0, UiPages.PAGE_ORDER.size()):
 		node._page_idx = i
 		var s: String = node._build_state_str()
 		var n: int = s.count("未接出（票B）")

@@ -711,7 +711,10 @@ func _build_state_str() -> String:
 		#     ⇒ 票B 完成那天，一個【沒有內容的生存頁】會照樣綠。
 		#   ⇒ ★★★這是同一個病的第三次：一段【一定會出現】的文字撐著一個斷言。
 		if not _unclassified.is_empty():
-			lines.append("── 未分類（票B 將搬走：%d 行）──" % _unclassified.size())
+			# ★★★完成條件②（systems 裁）：剩下的若全是【已具名的跨頁混合行】，就把名單印出來
+			#   ⇒ ★沒有名單的話，「還剩 3 行」跟「還有 3 行沒人處理」在畫面上長得一樣。
+			var _mixed: String = _unclassified_mixed_note()
+			lines.append("── 未分類（票B 將搬走：%d 行%s）──" % [_unclassified.size(), _mixed])
 			lines.append_array(_unclassified)
 		# ★沒接出的生存欄位【仍然印天窗】（不先拿掉再說）
 		for _f in _page_skylight_fields(0):
@@ -773,6 +776,12 @@ func _build_economy_lines(ct: Dictionary) -> Array:
 #   ⇒ ★糧食會出現在兩頁，而【問的問題不同】—— 那不是重複。
 # ★★單一來源：本函式與常駐狀態列【共用同一份 _cached_snapshot】（參數 ct/ps 由呼叫端傳入），
 #   ⇒ ★★★不得各自再去查一次 —— 兩個來源會 drift，而 drift 不會紅。
+# 未分類區塊裡【已判定為跨頁混合】的行：它們因為「搬動不改字」×「一行裡有兩頁的東西」
+# 而【結構上搬不走】—— ★拆行是另一張票（它會改變 P1-b 的判準本身：從「raw 行還在」
+# 變成「內容還在」）⇒ ★★這裡只【具名】，不處理。
+func _unclassified_mixed_note() -> String:
+	return "，皆為跨頁混合：人口/武裝、狩獵/戰力、選中格"
+
 func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 	var lines: Array = []
 	var food_days: float = float(ct.get("food_days", 99.0))
