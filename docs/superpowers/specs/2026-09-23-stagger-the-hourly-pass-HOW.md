@@ -638,6 +638,9 @@ P1 不降、P2 不動 ⇒ 兩格一起綠才算」。
 
 #### ~~6a-1（撤回前）：P8 在 headless 的母體結構上是 0~~
 
+> ★★★**以下整段已被推翻（見上方 6a-1）。留著是為了記錄【我們怎麼錯的】，
+> 不是為了記錄【事實】。任何人引用以下內容之前，先讀上面那一段。**
+
 ```
 [PASSSTAG] ★P8【不可判】：指派事件 0 個 —— 母體塌陷，不是「沒有延遲」
 機械查過 loop1 的整條呼叫鏈（不是讀註解）：
@@ -669,7 +672,10 @@ P1 不降、P2 不動 ⇒ 兩格一起綠才算」。
 
 ### ★★★6a P8 為什麼要存在（R² 2026-09-23）
 
-`_assign_tasks` 寫成員隊的 `current_task`（`faction_ai_system.gd:3306` `TaskArbiter.try_set`），
+`_assign_tasks` 寫成員隊的 `current_task` —— ★**而寫入點在【再兩層委派之後】**
+（`_assign_tasks` → `_assign_member_tasks` → `_decide_unified(state, mt, "member")`
+→ 那支函式裡註解逐字標著「引擎統一路唯一的 try_set」；★**by content 不 by line**，
+因為行號會隨拆分漂走），
 而 loop2 的 `_evaluate_independent_strategy`（`:2102` 的 member team 分支）**真的讀那個欄位** ——
 ★**跨 loop 依賴是坐實的，不是我推測的**（reviewer 逐行核過）。
 
