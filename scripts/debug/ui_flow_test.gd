@@ -1021,6 +1021,10 @@ func _test_pages_switch_key() -> void:
 		seen.append(node._page_idx)
 	_check("連按 %d 次回到第 1 頁（走完 %s）" % [UiPages.PAGE_ORDER.size(), str(seen)],
 		node._page_idx == 0)
+	# ★★★同源警告（2026-09-23 自檢）：按 `PAGE_ORDER.size()` 次、而 `next_idx` 是 mod 同一個數
+	#   ⇒ ★只要步長與頁數互質，走 N 次就一定有 N 個相異 ⇒ 這一格【驗不出步長錯】（例如步長 2、頁數 5）。
+	#   ⇒ ★★它仍抓得到【會卡住或重複】的實作（步長 0、或 mod 寫錯成非互質的步長）。
+	#   ⇒ ★★★要真的守「一次走一頁」，判準該是【每一步剛好 +1】，而不是【走完有幾個相異】。
 	_check("循環中每一頁都到過一次（%d 個相異）" % _uniq_n(seen), _uniq_n(seen) == UiPages.PAGE_ORDER.size())
 	# ★反向鍵
 	var ev2 := InputEventKey.new()
@@ -1186,6 +1190,11 @@ func _test_pages_skylight() -> void:
 	for i in range(0, UiPages.PAGE_ORDER.size()):
 		node._page_idx = i
 		var s: String = node._build_state_str()
+		# ★★★這一格是【一致性】檢查，不是【正確性】檢查 —— 兩邊同源（2026-09-23 自檢）：
+		#   n 來自畫面，而畫面是【照 `_page_skylight_fields(i)` 印出來的】；d 也是它。
+		#   ⇒ ★它抓得到：宣告了卻沒印（render 壞掉／函式被截斷）、印了卻沒宣告。
+		#   ⇒ ★★它【抓不到】：宣告本身是錯的（少宣告一欄，兩邊一起少，照樣綠）。
+		#   ⇒ ★★★那個缺口要由【外部錨】補：spec 裡的欄位清單。今天沒有那個錨，寫在這裡不假裝有。
 		var n: int = s.count("未接出（票B）")
 		var d: int = _page_skylight_fields_of(node, i).size()
 		total += n
