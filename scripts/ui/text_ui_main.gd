@@ -751,6 +751,12 @@ func _build_state_str() -> String:
 #     ★★不是直接讀 state，也不是常數。
 func _build_economy_lines(ct: Dictionary) -> Array:
 	var lines: Array = []
+	# ★★★Q2 成對對照（spec §5）：把這一欄從【查詢面】拿掉 ⇒ 這一格要變【天窗】，
+	#   ★而不是整頁壞掉、也不是印一排 0。
+	#   ⇒ ★★印 0 是最糟的那一種：它【看起來像世界真的沒有資源】，
+	#     而真相是【我們沒接到】—— 那正是票② §2 硬規②在講的「沉默的空白」。
+	if ct.get("resources", {}).is_empty():
+		return []
 	var res: Dictionary = ct.get("resources", {})
 	var day: int = _bridge.get_current_tick() / WorldState.TICKS_PER_DAY
 	if day != _res_baseline_day:
@@ -874,8 +880,23 @@ func _page_skylight_fields(idx: int) -> Array:
 		#   ⇒ ★★declared 變小 ⇒ [UI-SKYLIGHT] count 跟著變小 ＝ 票B 的進度讀數
 		# ★生存頁四題（blueprint 2026-09-23）：★★用【問題】命名不用資料表名——天窗是印給玩家看的
 		#   ★★★「人的狀態」已由 _build_survival_lines 接出（成員健康＋玩家＋聚焦者）⇒ 從宣告拿掉
-		0: return ["糧食跑道", "位置與家", "任務與目標"]
-		1: return ["糧食收支", "生產線", "貿易對象"]
+		0:
+			# ★★★Q2 的機制在這裡看得最乾淨：`focused_member` 是【只有生存頁在吃】的欄位
+			#   （我逐 key grep 過：票B 之前全畫面對它的讀點＝0）
+			#   ⇒ ★查詢面有給 ⇒ 它是【已接出】，不印天窗
+			#   ⇒ ★★沒給   ⇒ 它回到天窗清單 —— ★★★而【不是】靜靜消失
+			var _base: Array = ["糧食跑道", "位置與家", "任務與目標"]
+			if _cached_snapshot.get("focused_member", {}).is_empty():
+				_base.append("被聚焦的人")
+			return _base
+		1:
+			# ★「庫存與價格」是否算已接出，取決於【查詢面現在有沒有給】——
+			#   ★★寫死成「已接出」的話，Q2 把那一欄拿掉時這一格會【靜靜地少一個天窗】，
+			#   ★★★而畫面上什麼都不會說。
+			var _ct: Dictionary = _cached_snapshot.get("controlled_team", {})
+			if _ct.get("resources", {}).is_empty():
+				return ["糧食收支", "庫存與價格", "生產線", "貿易對象"]
+			return ["糧食收支", "生產線", "貿易對象"]
 		2: return ["鄰近敵對", "戰力對比", "邊境事件", "防務狀態"]
 		3: return ["盟友與敵意", "勢力關係", "成員情緒", "請求與承諾"]
 		4: return ["近期事件", "已知情報", "傳聞來源", "決策紀錄"]
