@@ -813,6 +813,14 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 			skill_parts.append("%s:%.2f" % [sk, float(ps["skills"][sk])])
 		if not skill_parts.is_empty():
 			lines.append("  " + " ".join(skill_parts))
+	# ★★★blueprint ④「當下在做什麼、為什麼」——★而【做什麼】已經在常駐狀態列（一眼），
+	#   這裡要的是【那一眼看不完的部分】：為什麼是這個任務（systems 的 HOW 裁定）。
+	#   ⇒ 讀 `faction_goal` 與 `player_goal_override`（查詢面現成的 key）。
+	var _fg: String = str(_cached_snapshot.get("faction_goal", ""))
+	var _pg: String = str(_cached_snapshot.get("player_goal_override", ""))
+	if _fg != "" or _pg != "":
+		lines.append("目標: %s%s" % [_fg if _fg != "" else "（無勢力目標）",
+			"  ★玩家指定: " + _pg if _pg != "" else ""])
 	# ★②「含被聚焦的那個人」：focused_member 是【現成的查詢面 key】，畫面先前從來沒讀過
 	var fm: Dictionary = _cached_snapshot.get("focused_member", {})
 	if not fm.is_empty():
@@ -885,7 +893,14 @@ func _page_skylight_fields(idx: int) -> Array:
 			#   （我逐 key grep 過：票B 之前全畫面對它的讀點＝0）
 			#   ⇒ ★查詢面有給 ⇒ 它是【已接出】，不印天窗
 			#   ⇒ ★★沒給   ⇒ 它回到天窗清單 —— ★★★而【不是】靜靜消失
-			var _base: Array = ["糧食跑道", "位置與家", "任務與目標"]
+			# ★★★天窗也要有【理由】—— 一個沒有理由的天窗，跟「還沒做」與「做不到」分不開。
+			#   糧食跑道：畫面已有「糧: X 天」，★但 blueprint 要的是【跑道與趨勢】，
+			#             而查詢面【沒有趨勢】⇒ 這一半接不出來 ⇒ 仍是天窗
+			#   位置與家：★★查詢面【沒有】「家在哪／離家多遠」——`outpost_*`／`settlement`
+			#             是【游標那一格】的屬性，不是【我們的家】
+			#             ⇒ ★★★硬接等於把欄位名指向另一個問題（＝在畫面上說謊）
+			#   任務與目標：★已接出（faction_goal／player_goal_override）⇒ 從清單拿掉
+			var _base: Array = ["糧食跑道（缺趨勢）", "位置與家（查詢面無此欄）"]
 			if _cached_snapshot.get("focused_member", {}).is_empty():
 				_base.append("被聚焦的人")
 			return _base
