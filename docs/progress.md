@@ -2637,3 +2637,56 @@ verification_gate.gd:41-47 把 active 定義成「不在 _archive/」⇒ 而 ver
 `defers.tsv: fullscan-active-means-history`（回訪＝有人把它註冊進電池時，報告拆兩類印）。
 ★**而那一列的 met_check 我寫錯過一次（方向相反），前一列寫成恆真** ——
 ★★**我在寫回訪條件時會下意識抄【現況長什麼樣】，而該寫的是【未來會變成什麼樣】。**
+
+### 2026-09-23（晚）：電池 76/76 全綠，而它花了三輪 —— 兩輪的失敗都不是 code
+
+```
+輪① BATTERY_RC=2 不可判：50 支「引擎【一次都沒被啟動】」＋ HEAD 漂移（★我自己跑到一半 commit）
+輪② BATTERY_RC=1 不可判：HEAD 漂移（★我全程沒寫檔 —— 漂移來自別的角色）1182 秒白跑
+輪③ BATTERY_RC=0 ★PASS：76 綠／0 紅／0 環境紅／1225 秒｜HEAD=d2bbf6600 釘死在 .worktrees/battery
+```
+
+**★★★三件機器事實（全部已落成機制，不是只寫在信裡）**
+
+```
+①執行原則：這台機器四個 scope 全 Undefined ⇒ 有效值 Restricted
+   ★Bash 工具起的 powershell 拿到 Restricted ⇒ 跑 .ps1 直接 UnauthorizedAccess
+   ★★PowerShell 工具起的是 Bypass ⇒ 同一台機器、同一支 .ps1、兩個工具兩種結果
+   ⇒ 修法 PSExecutionPolicyPreference=Bypass（子行程繼承，不必動註冊表 76 列、
+     ★★★也不要改機器的執行原則 —— 那是動整台機器的安全設定去遷就一個 shell）
+   ⇒ ★而這一行現在【印在電池自己的環境紅訊息裡】：舊訊息逐字寫著「修法不在 repo」
+     然後什麼都沒印（implementer 用我自己那條「規矩只活在一封信裡＝它不存在」點我）
+
+②HEAD 漂移：六個角色共用 main dir，而電池要跑 20 分鐘 ⇒ HEAD 一定會動
+   ⇒ ★不要靠「大家別 commit」的紀律（撐不過第二次）——把判決搬到不會動的樹上
+   ⇒ .worktrees/battery（detached，釘 sha）
+
+③★★★交接訊號本身有洞（implementer 抓到）：「Godot 行程數 = 0」對【一連串短跑】天生盲目
+   —— 他量到 0 的那一刻我的電池正在跑；那個 0 是【兩支床之間的空檔】
+   ⇒ 新增 .claude/hooks/machine-busy.sh：第一格是【構造的】標記檔，第二格才是行程數
+   ⇒ ★順帶修掉我當天下午自己造出來的第二層：標記檔用相對路徑 ⇒ 搬進 worktree 之後
+     main 裡的人看不到它，而且「一次只跑一輪」那道煞車【會被 worktree 破解】
+```
+
+**★三個誠實標（寫下來免得後人把綠讀得比它大）**
+
+```
+①判決適用於 d2bbf6600，不是當時的 HEAD；★之後那幾顆 commit 零 scripts/ 改動（grep 驗過）
+②那顆 probe-key-loop1 的 merge 是【在綠燈之前】被別人 push 上去的
+   ⇒ ★★正確說法是「已在 main 的樹事後被判全綠」，不是「確認全綠之後才讓它上去」
+   ⇒ ★★★「先 local merge、等綠再 push」在共用 main dir 上【不成立】：
+     別人 push 時會把你未 push 的 commit 一起帶走
+③信箱那一支真紅（635 > 600）與該 merge 無關，已清（歸檔 409 封，剩 226）
+```
+
+**★★信箱歸檔觸發器：「誰觸發」這一問的第三個答案**
+
+```
+v1 答「人」          ⇒ 人沒跑（建好之後一次都沒被觸發，長到 1997 封）
+v2 答「SessionStart」⇒ ★六個角色的 session 是【持久】的，幾乎不重啟
+                       ⇒ 實測 20 小時內 187 → 635，而硬上限是 600
+v3 答「watcher 每次 arm」⇒ Monitor ≤30 分鐘到期重 arm ＝ 本專案唯一以分鐘為級距、
+                          且每個角色都會發生的事件
+★另加硬上限例外：熱目錄 ≥500 時節流不適用 —— 否則守衛紅了而【沒有人有權限修它】（最長卡 20 小時）
+★★共同教訓：前兩個答案都選了【不會按需要的頻率發生的事件】。
+```
