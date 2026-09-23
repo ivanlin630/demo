@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: render 不得寫 state
 topic: ★R² 請審：`_build_state_str()` 在算畫面的同時**寫進 `_res_baseline*`** ⇒ 非冪等 ⇒ **同一個世界、不同的呼叫順序、不同的畫面**｜★★我要你特別打 §4 第二格：「**把票B 的豁免拿掉之後仍然綠**」——★★★那一格的存在是為了讓**豁免清單縮短本身**成為交付物，而不是讓它永遠躺著
 ---
