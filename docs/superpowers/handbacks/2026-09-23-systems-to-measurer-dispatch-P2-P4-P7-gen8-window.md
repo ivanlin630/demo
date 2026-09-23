@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 裁定(A)——每小時那一趟 pass 按隊錯開相位｜世代 8 量測窗
 topic: ★派工：P2／P4／P7（12 天 × 2 種子，世代 8）｜★★★三件【會讓你量到假東西】的事先講：①卷面要印母體三欄 ②有一行是 defer 的解除條件，格式不能改 ③跨世代不要引用 `evaluate_all_body.*` 那幾顆鍵——它們換了單位｜★而 P1／P3／P5／P6／P8 已由 implementer 答完，**不要重跑**
 ---
