@@ -114,6 +114,17 @@ func _run() -> void:
 		SimRunner.frames_total, days, SimRunner.frames_over_budget,
 		100.0 * float(SimRunner.frames_over_budget) / float(maxi(SimRunner.frames_total, 1)),
 		st.teams.size()])
+	# ★不變量#9母體三欄(systems 2026-09-23派)：「存活隊數」沒有主詞就是錯的
+	var _real_n: int = 0
+	var _beast_n: int = 0
+	var _sub_n: int = 0
+	for _tid in st.teams:
+		var _t: TeamData = st.teams[_tid]
+		if String(_t.beast_kind) != "": _beast_n += 1
+		elif _t.parent_team_id != -1: _sub_n += 1
+		else: _real_n += 1
+	print("[母體三欄] 真隊=%d｜野獸pseudo-team=%d｜在外子隊=%d｜總計=%d(應等於最後隊數)" % [
+		_real_n, _beast_n, _sub_n, _real_n + _beast_n + _sub_n])
 	# ★不依賴絕對門檻那一組數（systems 2026-09-22派，仿 dieoff_perf_bed.gd:88-94）：跨機/跨代對照真正該比的
 	if not all_dts.is_empty():
 		var sorted_dts: Array = all_dts.duplicate(); sorted_dts.sort()
