@@ -1415,25 +1415,42 @@ func _test_render_idempotent() -> void:
 	await _free_ui(node)
 	_cell("_test_render_idempotent")
 
-# ★★★P1b[堵住「搬到姊妹函式」]：直接呼 `node._refresh()` 兩次，驗 `_state_label.text` 穩定。
-#   ★reviewer 抓到的漏洞：P1 直呼 `_build_state_str()`，【完全繞過 `_refresh()`】
-#   ⇒ 若「修法」只是把寫入從 `_build_state_str()` 搬進 `_refresh()`（仍在 render 路徑，只是換一支函式）
-#     ⇒ P1 照樣綠，而 spec §2 點名的真實風險（切分頁／開關 overlay／一 frame 多跑一次 _refresh）一格都沒測到。
-#   ⇒ ★★通則：判準要打在【使用者真的會走的那條路】上，不是打在我方便呼叫的那支函式上。
+# ★★★P1b[堵住「搬到姊妹函式」]：★比較【不同呼叫次數的歷史】，不是連續呼叫兩次。
+#   ★★reviewer 2026-09-23 訂正（而我自己送審時就標了懷疑）：
+#     連續呼叫兩次【測不到】「把寫入搬進 `_refresh()`」這個非修法 ——
+#     兩次之間世界沒有變化，第一次就把基準寫定，第二次讀到同一個值，
+#     ⇒ ★不管擁有者在哪，兩次都會一致 ⇒ 那一格【恆綠】。
+#   ★★★原始症狀的真實形狀是【1 次 vs 5 次】（票B 的 P1-b 就是撞到這個）：
+#     「前」是單獨一次產生的，「後」是聯集比對呼叫了 5 次 ⇒ 呼叫史不同 ⇒ 箭頭不一致。
+#   ⇒ 所以這裡開【兩個世界相同的 node】，一個畫 1 次、一個畫 5 次，比最後那一次的字。
+#     ★兩個 node 走同一支 `_make_ui()`（內含 seed）⇒ 世界相同 ⇒ 差的只有呼叫史。
+#   ⇒ ★★這樣本票【不必等票B merge】就有真正的鑑別力。
 func _test_refresh_idempotent() -> void:
 	_selftest_gate("_test_refresh_idempotent").noop()
 	print("
-── render P1b _refresh() 兩次 ──")
-	var node = await _make_ui()
-	node._page_idx = 1
-	node._refresh()
-	var a: String = node._state_label.text
-	node._refresh()
-	var b: String = node._state_label.text
-	_check("★母體地板：_state_label 真的有內容（%d 字）" % a.length(), a.length() > 50)
-	_check("★★母體地板：這一輪真的有資源行（「食:」）", a.contains("食:"))
-	_check("★★★連呼 _refresh() 兩次 ⇒ _state_label.text 逐字相同", a == b)
-	await _free_ui(node)
+── render P1b 呼叫史 1 次 vs 5 次 ──")
+	var n1 = await _make_ui()
+	n1._page_idx = 1
+	n1._refresh()
+	var once: String = n1._state_label.text
+	await _free_ui(n1)
+	var n5 = await _make_ui()
+	n5._page_idx = 1
+	for _i in range(5):
+		n5._refresh()
+	var five: String = n5._state_label.text
+	_check("★母體地板：_state_label 真的有內容（%d 字）" % once.length(), once.length() > 50)
+	_check("★★母體地板：這一輪真的有資源行（「食:」）—— 沒有的話箭頭不存在 ⇒ 恆真", once.contains("食:"))
+	_check("★★★畫 1 次與畫 5 次的輸出逐字相同（呼叫史不得影響畫面）", once == five)
+	if once != five:
+		var la: PackedStringArray = once.split(chr(10))
+		var lb: PackedStringArray = five.split(chr(10))
+		for i in range(min(la.size(), lb.size())):
+			if la[i] != lb[i]:
+				print("    第 %d 行不同：
+      1 次「%s」
+      5 次「%s」" % [i, la[i], lb[i]])
+	await _free_ui(n5)
 	_cell("_test_refresh_idempotent")
 
 # P2[債還了]：★綁【清單長度】不綁那一條的名字 ——
