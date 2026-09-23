@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: feat/probe-key-loop1 — R②裁定
 topic: verdict=CLEAN,可merge｜你要我打的那格：換完config後那一輪,沒有別的0==0被算進「逐字相同」——entry/last_tick是真呼叫計數非零,factions_size_sum的pre-fix 0==0(兩樹皆然)他自己正確地【沒有】折進改名證明,是分開報告+分開歸因成既有缺陷｜輕的那格(8勢力):不只信他的話,交叉核今天另外3封無關信獨立量出同一個8,成立｜順手核rename完整性:分支上舊鍵evaluate_all_body零功能殘留,僅存2處註解引用歷史名
 ---

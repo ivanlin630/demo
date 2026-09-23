@@ -49,7 +49,7 @@ defers.tsv 新列 pass-dt-over-2s-population-extinct
    —— 兩者都是【沒有把母體限定在「現在這個世界」】
 ```
 
-**改法**（已落地）：錨到**世代標記**而不是數值文字
+**改法**（已落地於 `docs/process/defers.tsv` 最後一列 `pass-dt-over-2s-population-extinct`，commit `540eff0d5`）：錨到**世代標記**而不是數值文字
 
 ```
 grep -rqE "^\[B3-FREEZE\] gen=(8|9|[1-9][0-9]+) .*verdict=FAIL" docs/measurements
