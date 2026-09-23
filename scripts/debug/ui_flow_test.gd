@@ -1184,10 +1184,11 @@ func _line_with(text: String, key: String) -> String:
 		if String(ln).contains(key): return String(ln)
 	return ""
 
-func _uniq_n(a: Array) -> int:
-	var d: Dictionary = {}
-	for x in a: d[x] = true
-	return d.size()
+# ★`_uniq_n()` 已刪（2026-09-23）：它唯一的用途是切頁那格的「走完有幾個相異」，
+#   而那個判準【兩邊同源、驗不出步長錯】，已窄化成「每一步剛好 +1」⇒ 這支沒有呼叫端了。
+#   ★刪前驗過：全檔 `_uniq_n` 只剩【定義本身】一處出現（0 個呼叫端）。
+#   ★★留這行字的理由跟刪掉那 8 行 `_log_event` 一樣：一個被刪掉的東西如果沒有留下
+#     它在哪的紀錄，下一個人會以為它從來不存在 —— 而休眠的死碼正是靠「沒人記得」活下來的。
 
 # P4[天窗]：第 2–5 頁的未接欄位必須印「未接出（票B）」，不得靜默空白。
 func _test_pages_skylight() -> void:
