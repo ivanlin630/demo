@@ -72,7 +72,7 @@ topic: <一行>
 1. **發送方寫信一律 `status: open`**——不管你自己「做完沒」。open/consumed 表**收件端讀了沒**,非寄件端做完沒。**寄件端絕不自寫 `consumed`**（自寫=收件 Monitor 只掃 open→這封永不被主動喚醒送達→靜默漏看）。「我這輪做完了」=寫一封 open 信給下一站,那封的 consumed 由**下一站**改。詳 `07_mailbox_trigger §status 所有權`。
 2. **每 session 開頭掃 `handbacks/`，讀 `to: 本角色 / status: open` 的**（義務）。
    - **自動 📬（hook，gitignore 本地）**：`SessionStart → session-role.sh`（開頭掃一次）+ `UserPromptSubmit → handback-inbox.sh`（**每 turn 掃**，補 session 中途別角色寫的；空則靜默）。掃 frontmatter `to:$SESSION_ROLE status:open` = 讀真值源，免 QUEUE.md drift。消滅人肉轉述。
-   - **★`/clear`·`/compact` 會重觸 SessionStart hook**（`source="clear"/"compact"`）→ `session-role.sh` **自動重注入職責 + arm 指令**。∴ 清 ctx 後職責**自動重載、忘不了**，agent 只需重 arm inbox-watch。**注意**：`/clear` 本身是**用戶鍵入動作**（agent/hook 都不能自 issue）。
+   - **★`/clear`·`/compact` 會重觸 SessionStart hook**（`source="clear"/"compact"`）→ `session-role.sh` **自動重注入職責 + arm 指令**。∴ 清 ctx 後職責**自動重載、忘不了**，agent **什麼都不用重掛**（★2026-09-23 起 inbox watcher 已退役；看門狗那支才需要重掛）。**注意**：`/clear` 本身是**用戶鍵入動作**（agent/hook 都不能自 issue）。
 3. **收件端**讀完動工後才改 `status: consumed`（＝收件簽收回執，不刪檔留軌跡）。**只有收件端改,寄件端從不改自己寄出的信。**
 4. 待決事項的**歸宿仍是 owner doc**：handback 只是載體。例：藍圖裁定殲滅模型 → 寫進 `game-design.md` → handback consumed。系統定 seam → 寫進 `invariants.md`/spec → consumed。
 
@@ -162,7 +162,7 @@ memory [[feedback-never-wrap]]。
 | 「信裡承諾了一張票、但票沒開」 | 📜 | **無機器，且全自動化不可行**（**prose ≠ schema**）。★血證：systems 自己犯兩次（T3 派工單沒推／gate9 票只寫在被 consumed 的信裡）|
 | 量測主張保鮮期（R6） | 🔒 | `stale-claims.sh`（exit 1／2）**但只綁新寫的** |
 | 交接縫產物齊全（P9） | **🔒** | ★**2026-08-21 已轉 HARD（預設擋 merge）**。轉前兩件對齊完成（measurer `.measure.json` `slice`＝branch id；HARD 只管轄**有含 `tier` 派工單**的 slice）＋逐 slice 表**零誤殺**。逃生門 `SEAM_MODE=soft`。**已 merge 的舊 slice 仍讀紅＝歷史殘影，閘不會再擋它們**（見 `01_architect §P9`） |
-| 信箱主動觸發（別人寫信會叫醒你） | 🔔 | `inbox-watch.sh`（Monitor 事件） |
+| 信箱主動觸發（別人寫信會叫醒你） | 🔔 | ★2026-09-23 起＝**寄件端 `SendMessage` 敲門**（`inbox-watch.sh` 已退役） |
 | 每 turn 未讀提醒 | 🔔 | `handback-inbox.sh` |
 | **watcher 失聰偵測** | 🔔 | `handback-inbox.sh` 每 turn 閘（**warn-only／fail-open，刻意不擋**） |
 | 停滯／鏈斷（含出貨沒推下一站） | 🔔 | `watchdog.sh` v4（喚醒 blueprint，**blueprint 才決定推不推用戶**） |
@@ -171,7 +171,7 @@ memory [[feedback-never-wrap]]。
 | 長跑必經 QA 故事稽核 | 🔔 | `longrun-qa-gate.sh`（PostToolUse 注入，**攔不住**） |
 | **感知鐵律**（決策讀 belief 非 god-view） | 🔒**半** | `constitution_gate` 抓得到 `gv_mapscan`/`gv_teamstate` 這類**已指紋化**的 god-view；**新形態的隔空作用抓不到** |
 | **R② 每 slice 必過 reviewer** | **🔒**（受 P9 管轄的 slice） | P9 HARD 後，**有含 `tier` 派工單的 slice 缺 R² verdict ＝ 擋 merge**；未宣告的仍在母體外（📜） |
-| status 所有權（寄件端不自寫 consumed） | 📜→🔔 | inbox-watch v2 會把「誤寫 consumed」的信**撈出來一次**（治得到症狀，治不到寫的人） |
+| status 所有權（寄件端不自寫 consumed） | 📜 | ★★**這一格退回純紀律**：撈回機制隨 `inbox-watch` 一起退役了（2026-09-23）——★★★而它本來就只治症狀不治人 |
 | **QA-ref 鎖閘**（含因果結論的 handback 必帶 `QA:<ref\|PENDING>`；無則 systems 拒鎖 spec） | 📜 | **無機器**——寫在 00_roles:30、由 systems 人工守。★「這段有沒有下因果結論」是判斷題，機器判不了；能機器化的只有「宣告了要 QA 卻沒附 ref」 |
 | 無斷點自動鏈（收信＝做完＋推下一站） | 📜 | 只有 `COMMIT-NO-LETTER` 間接偵測；**「有沒有推對下一站」沒有東西在看** |
 

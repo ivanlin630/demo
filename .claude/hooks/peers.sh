@@ -12,12 +12,18 @@
 #   舊：<watcher_pid>
 #   新：<watcher_pid>\t<session_id>\t<claude_pid>     ← P4/階段4 之後
 #
-# 三態判定（★不輸出「需要被解讀的狀態」，輸出「已判完的結果」）：
-#   ALIVE      心跳新鮮（< STALE_S）             → 這角色的 watcher 正在跑
-#   NO-WATCH   心跳過期，但 claude.exe 還活著     → 終端開著、watcher 掉了（re-arm 即可）
-#   DEAD       心跳過期，且 claude_pid 不存活/未知 → 終端沒開（★只有用戶能開）
-# ★誠實註記（階段 4 前）：舊格式 lock 沒有 claude_pid ⇒ NO-WATCH 永遠不會 fire，過期一律落 DEAD。
-#   這是保守正確的：watcher 死了就沒人叫得醒該角色，本來就該推用戶。階段 4 換格式後 NO-WATCH 才會生效。
+# ★★★2026-09-23 第二次改（新信箱第二版，用戶裁「不掛 watcher」）：
+#   ★本支原本的 ALIVE 靠【watcher 每 20s touch lock】—— ★★而 watcher 已經整個退役
+#   ⇒ 若原樣不動，這張表會【永遠六個 DEAD】。
+#   ⇒ ★★★而「永遠給同一個答案的守衛」＝ 沒有守衛，還更糟：它看起來在回答。
+#   所以狀態改判在【終端本身】（claude_pid 還在不在），心跳降級成一個純資訊欄：
+#     OPEN  終端開著（敲得到；★敲 = SendMessage 到 ADDR 欄）
+#     DEAD  終端沒開（★只有用戶能開）
+#     ?     lock 是舊格式、沒有 claude_pid ⇒ ★判不出來就說判不出來
+#
+# ADDR 欄 = `.peer-addr.<role>`，由各角色開場自己用 whoami.sh 登記（★別人代填＝猜）。
+#   `-`  還沒登記 ⇒ ★**敲不到**（要先請它登記；git handback 照樣寫得進去，只是它不會醒）
+#   `?`  登記超過 24h ⇒ 可能已經換 session，地址可疑
 set -u
 STALE_S="${PEERS_STALE_S:-140}"     # = inbox-watch POLL(20) + 120
 ROLES="blueprint systems reviewer qa measurer implementer"
@@ -34,7 +40,8 @@ _pid_alive() {
   return 1
 }
 
-[ "$TSV" = "0" ] && printf "%-12s %-9s %-10s %-38s %-9s %s\n" ROLE STATE HEARTBEAT SESSION_ID CLAUDE_PID WATCHER_PID
+[ "$TSV" = "0" ] && printf "%-12s %-6s %-9s %-9s %-38s %s
+" ROLE STATE ADDR HEARTBEAT SESSION_ID CLAUDE_PID
 for r in $ROLES; do
   lock="$HOOK_DIR/.inbox-watch.${r}.lock"
   if [ ! -f "$lock" ]; then
@@ -42,21 +49,30 @@ for r in $ROLES; do
   else
     mt=$(stat -c %Y "$lock" 2>/dev/null || echo 0)
     age_s=$(( NOW - mt ))
-    IFS=$'\t' read -r wpid sid cpid < "$lock" 2>/dev/null
+    IFS=$'\t' read -r wpid sid cpid _rest < "$lock"   # ★第4欄 proto=2 必須有地方接，否則它會黏在 cpid 後面（本檔 2026-09-23 血證：CLAUDE_PID 印成 "24004	proto=2" ⇒ tasklist 查無 ⇒ 六個角色全誤判 DEAD） 2>/dev/null
     wpid="${wpid:--}"; sid="${sid:--}"; cpid="${cpid:--}"
-    if [ "$age_s" -lt "$STALE_S" ]; then
-      state="ALIVE"
-    else
-      if _pid_alive "$cpid"; then state="NO-WATCH"; else state="DEAD"; fi
-    fi
+    # ★狀態改判在【終端】而非 watcher 心跳（watcher 已退役，見抬頭）
+    if   [ "$cpid" = "-" ]; then state="?"
+    elif _pid_alive "$cpid"; then state="OPEN"
+    else state="DEAD"; fi
     if   [ "$age_s" -lt 90 ];   then age="${age_s}s"
     elif [ "$age_s" -lt 5400 ]; then age="$(( age_s / 60 ))m"
     else                             age="$(( age_s / 3600 ))h$(( (age_s % 3600) / 60 ))m"
     fi
   fi
+  # ADDR：通訊錄（各角色開場自己用 whoami.sh 登記）
+  af="$HOOK_DIR/.peer-addr.${r}"; addr="-"
+  if [ -f "$af" ]; then
+    IFS=$'	' read -r addr _asid _apid _ats < "$af" 2>/dev/null
+    addr="${addr:--}"
+    amt=$(stat -c %Y "$af" 2>/dev/null || echo 0)
+    [ $(( NOW - amt )) -gt 86400 ] && addr="${addr}?"   # ★超過一天＝可能已換 session
+  fi
   if [ "$TSV" = "1" ]; then
-    printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$r" "$state" "${age_s:--}" "$sid" "$cpid" "$wpid"
+    printf "%s	%s	%s	%s	%s	%s
+" "$r" "$state" "$addr" "${age_s:--}" "$sid" "$cpid"
   else
-    printf "%-12s %-9s %-10s %-38s %-9s %s\n" "$r" "$state" "$age" "$sid" "$cpid" "$wpid"
+    printf "%-12s %-6s %-9s %-9s %-38s %s
+" "$r" "$state" "$addr" "$age" "$sid" "$cpid"
   fi
 done

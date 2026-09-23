@@ -6,7 +6,7 @@
 
 | 軌 | 用於 | 機制 |
 |---|---|---|
-| **信箱 relay（本 doc）** | 小/序列活、設計討論、來回修 | 各角色 = 持久 claude session，git handback 信箱 + **Monitor 主動觸發** |
+| **信箱 relay（本 doc）** | 小/序列活、設計討論、來回修 | 各角色 = 持久 claude session，git handback 信箱 + **寄件端 SendMessage 敲門** |
 | **langgraph 機器** | 大/並行活、自動 pipeline | `tools/orchestrator/`，見 `08_machine_workflow_v2.md` |
 
 信箱軌 = 「回到最早的 relay 工作流」，但補上**主動觸發**：別的角色寫信 → 收件角色 session 被喚醒動工，免人肉轉述。
@@ -25,12 +25,12 @@
 | hook | 事件 | 何時觸發 | 角色 |
 |---|---|---|---|
 | `handback-inbox.sh` | UserPromptSubmit | **人在該 session 打字時**掃未讀 → 注入 📬 | 被動（補漏，人主動時） |
-| `inbox-watch.sh` | Monitor tool | **session idle 掛著時**，新信主動喚醒 | ★主動觸發（本 doc 核心） |
+| ~~`inbox-watch.sh`~~ | ~~Monitor／背景 Bash~~ | **★2026-09-23 整支退役**（見下「收件端」）——主動觸發改由**寄件端 `SendMessage` 敲門** | ★★它留在表上是為了讓看過舊版的人知道它去哪了，不是還在用 |
 
 ## ★★status 所有權（2026-07-13 用戶戳：measurer 寄件卻自寫 consumed）
 
 **`status` 欄的所有權=收件端，不是寄件端。** 三條鐵律，不可誤讀：
-1. **寄件端寫信一律 `status: open`**——不管你「做完沒」。open/consumed 表的是**收件端讀了沒**，非寄件端做完沒。**寄件端絕不自寫 `consumed`**（自寫 consumed = 收件端 Monitor 只掃 open → **這封信永遠不會被主動喚醒送達** → 靜默漏看）。
+1. **寄件端寫信一律 `status: open`**——不管你「做完沒」。open/consumed 表的是**收件端讀了沒**，非寄件端做完沒。**寄件端絕不自寫 `consumed`**（自寫 consumed = 掃 open 的工具看不到它 → **靜默漏看**；★敲門制下這條仍成立：`handback-inbox.sh` 與 watchdog 都只認 open）。
 2. **`consumed` 只有收件端、讀完動工後才改**（open→consumed）＝「我收到並處理了」的回執。
 3. 「我(寄件)這輪工作做完了」≠「consumed」。你做完 = 寫一封 `open` 信給下一站；那封信的 consumed 由**下一站**改。
 4. **★v2 補了一個 singleton 治不了的洞（2026-08-21）**：寄件端誤寫 `consumed` 的信，watcher 過濾條件已放寬成 `to:我 && ( status:open || 啟動後動過 )` → **仍會被吐一次**。★但只在「這封信從沒露過面」時吐——否則**我自己把信改成 consumed 就會把自己叫醒＝自我通知迴圈**。（這條不免除鐵律 1：寄件端還是一律寫 `open`。）
@@ -39,79 +39,85 @@
 
 ## 用法
 
-### 收件端（每角色 session 開場掛一次）
+### 收件端（★★★2026-09-23 第二版：**什麼都不用掛**）
 
-★★★**2026-09-23 用戶裁：不要用 Monitor，改掛背景 Bash。**
-```
-Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh inbox", run_in_background=true, description="<role> 信箱")
-```
-★**為什麼換**（實測，不是偏好）：這一版 Monitor **沒有 `persistent`、30 分鐘硬到期**
-（`timeout_ms` 上限 3600000，而傳滿它仍回「expires in 30m」）⇒ 每半小時一次【空重掛】＋每次 ARMED 雜訊，
-而**每一行 stdout ＝ 一個 turn** ⇒ 閒置也在燒 token。
-★★背景任務相反：**閒置永久跑、一個字都不輸出**（實測起跑後 10 分鐘以上仍活、輸出檔 0 bytes、
-不受自己的 `timeout` 參數綁），**有事才印那一行並結束 ⇒ 喚醒你**。
-★★★而「重掛」只發生在【真的有事】之後，夾在你本來就要處理它的那一輪裡 —— 不會多出空 turn。
-⇒ ★**不要**為了防它掛掉再加任何輪詢／重掛迴圈（用戶逐字：「沒事浪費 token」）。
+**不掛任何 inbox watcher。** 別的角色寫完 handback 之後會用 `SendMessage` 敲你，
+harness 把訊息直接送進你的對話 ⇒ 你就醒了。
+★陽性對照（2026-09-23 17:00）：systems 在**零 watcher**的狀態下被 blueprint 敲醒 —— 不是推論，是發生過的一次。
 
-`role-watch.sh` 的過濾判準是三支 watcher **自己的慣例**：`[…]` 開頭＝狀態噪音（ARMED／換血／讓位／普查／CLEAN）
-進 log；其餘＝事件（📬 收信／🟡🔴 STALL／Telegram 訊息本文）才喚醒。
-- 常駐輪詢（預設 20s，`INBOX_POLL_S` 可調）找 `to:<我> && status:open && 沒見過` → 每封新信吐一行事件 → **本 session 自動醒、讀信、動工**。
-- emit-once（key=path+mtime）：同信不重觸；revise 重開（mtime 變）→ 重新吐。
-- **★arm 是搶佔式（v2，2026-08-21）**：不比誰心跳新，比誰後 arm。**新的一定贏**；舊的下一輪讀到 lock 不是自己 → 印 `⛔ 讓位` 後自退（孤兒自己清自己）。
-  - v1 病：開機判一次、`exit 0` 走人；舊進程每 20s touch ⇒ lock 永遠新鮮 ⇒ **只要舊進程活著就永遠沒辦法合法重新 arm**，唯一出路是手動殺進程。
-  - ★取捨：誤開第二個同角色 session，被踢的是舊的（可能才是正在工作的那個）——但**它會印出來，看得見**。土法分辨：**5 分鐘內看到第二次「讓位」＝ 真的有另一個同角色 session 活著**。
-- **★arm 完必須看到這三行之一**，否則就是沒 arm 成功——**不要自己解釋成「已有實例覆蓋」**：
-  - `✅ ARMED role=<你> pid=<n>（無前任）`
-  - `✅ ARMED …（前任 pid=… 將於下輪自退）` / `（前任同 session 但已死，已接手）`
-  - `✅ 覆蓋仍在（同 session，watcher pid=X 存活，已驗）` ← **這句現在是可驗證的事實，不是猜測**
-  - ★通則（值得記）：**守衛不要輸出「需要被解讀的狀態」，要輸出「已經處置完的結果」。**
-    `已有實例在跑 → 退出` 是狀態，agent 得猜下一步；`✅ ARMED（前任將自退）` 是結果，沒有東西要猜。
-- **★不再吐 `[開場既存]` 全量 backlog**（v2 刪）：那件事本來就有人做、而且做得更好
-  （`session-role.sh` SessionStart 注入待辦 + `handback-inbox.sh` **每 turn** 掃）。**Monitor 現在只做一件事：吐真正新到的信。**
-- **★SEEN 落地成檔** `.claude/hooks/.inbox-seen.<role>`：新 watcher 繼承前任吐過什麼 → **重 arm 不重吐**。
-  （沒有這條：auto-compact → 重 arm → SEEN 空 → 全部 open 信重吐 → ctx 又漲 → 再 compact…**自我循環**。）
-- **★每 turn 閘**（掛在 `handback-inbox.sh`）：watcher 沒在跑 → 你**下一次打字**就會看到 ⛔，而不是幾小時後才發現失聰。
-  **兩條紀律不可妥協**：**只警告絕不阻擋**（閘門自己有 bug 就 brick 六個 session）、**fail-open**（讀不到 `session_id`／舊格式 lock 就退回現行行為，**絕不因為讀不到就報警**）。
+**為什麼三代 watcher 全退（實測，不是偏好）**：
 
-#### ★blueprint 專屬：Telegram 進站 Monitor（開場**額外** arm 一條、與信箱並列，存活 restart/compact）
-用戶要遠端用 Telegram 驅動 blueprint（免盯 CLI）。**只 blueprint 一個 session** 開場多 arm 這條（其他角色不 arm、走 git 信箱）：
+| 代 | 機制 | 病 |
+|---|---|---|
+| v1–v2 | `Monitor(inbox-watch.sh, persistent)` | 這一版 Monitor **沒有 `persistent`、30 分鐘硬到期**（`timeout_ms` 上限 3600000，傳滿它仍回「expires in 30m」⇒ 那個上限不是參數決定的）⇒ 每半小時一次【空重掛】＋每次 ARMED 雜訊 |
+| v3 | 背景 Bash `role-watch.sh inbox` | 閒置確實安靜（實測跨過自己的 `timeout`、輸出 0 bytes），**但它印完那一行就結束** ⇒ **每收一封信就要重掛一次**（那天 ~20 次/小時） |
+| ★v4 | **`SendMessage` 敲門** | 零 watcher、零重掛、**閒置零 token** |
+
+★★★共同病叫得出名字：**前三代都是「我去看有沒有人找我」，v4 是「找我的人直接叫我」** ——
+輪詢與推播之差，而**前者的成本隨【角色數 × 小時數】長，後者隨【真實信件數】長**。
+
+★**看門狗不在此列，照舊掛**：它要偵測的是「**沒有**事發生」，而那件事**沒有人會來敲你**
+⇒ ★★★輪詢是它唯一可能的形狀。
 ```
-Bash(command="SESSION_ROLE=blueprint bash .claude/hooks/role-watch.sh tg", run_in_background=true,
-     description="Telegram 進站(用戶訊息喚醒 blueprint)")
+Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh watchdog", run_in_background=true)
 ```
-★★同上：★2026-09-23 起走背景 Bash，不用 Monitor。★★而看門狗同理：`role-watch.sh watchdog`（blueprint 一支）。
-- **只 blueprint 一 poller**（`getUpdates` offset 消費、多 poller 互搶同一 update）；其他角色走 git 信箱不變。
-- 進站事件 `📱 [Telegram] 用戶: <text>` → **當用戶輸入處理**（≠背景事件）→ `bash tools/telegram/send.sh --file <utf8檔>` 回（UTF-8 via 檔避 CP950）。
+
+### ★通訊錄：角色 → session 名（`whoami.sh`，2026-09-23 立）
+
+git 信箱用**角色**定址（`to: systems`），SendMessage 用 **session 名**定址（`demo-95`），
+★而中間本來沒有任何東西把兩者接起來 —— 手上有角色名，卻不知道要敲誰。
+★★session 名**只有本人看得到**：`ListAgents` 在自己那邊印「This session is demo-XX」，
+在別人那邊只印 `demo-XX`、不印角色 ⇒ ★★★這張表**只能各自登記，沒有人能代填**（代填＝猜）。
+
+```
+每個角色開場（緊接在 ListAgents 之後）：
+  SESSION_ROLE=<role> bash .claude/hooks/whoami.sh demo-XX
+讀：bash .claude/hooks/peers.sh   ← ADDR 欄
+```
+★誠實限：表記的是【登記當下】的名字。session 關掉重開會換名，而**舊的一行不會自己消失**
+⇒ 每行帶時間戳，超過 24h 的 peers.sh 標 `?`：★寧可標成可疑，不要靜靜給錯地址。
+
+#### ~~★blueprint 專屬：Telegram 進站~~ ⇒ **★★★進站退役（用戶裁 2026-09-23），改 Remote Control**
+
+```
+退役的只有【進站】（tg_poll.py 輪詢 getUpdates）—— ★理由同上：那也是一支要人重掛的 watcher。
+★★出站【留著】：`bash tools/telegram/send.sh --file <utf8檔>`（UTF-8 走檔避 CP950）。
+★★★而「用戶遠端驅動 blueprint」這個需求沒有消失，它改由 Remote Control 承擔。
+```
 - **出站只在真需用戶裁**推（WHAT fork／授權／QA 綠／喬不攏）；role-to-role 不推（免手機噪音）。
 - bridge 本地 `tools/telegram/`（機密 `config.local.sh` gitignored 不進 git）；細節+安全見 `tools/telegram/README.md`（本地）。
 
 ### 寄件端（任意角色）
 1. Write 一封信到 `docs/superpowers/handbacks/YYYY-MM-DD-<from>-to-<to>-<topic>.md`。
 2. frontmatter：`from: <me>` / `to: <role>` / `status: open` / `topic: <一句>`。
-3. 就這樣——收件 session 的 Monitor ~20s 內醒。
+3. ★★★**立刻 `SendMessage` 敲收件人**——`to:` 填 `peers.sh` **ADDR** 欄查到的 session 名；
+   message **第一行**寫清楚「這封信是什麼＋檔名」（收件人那邊只先看到第一行）。
+   - ADDR 是 `-` ⇒ 那個角色還沒登記 ⇒ ★**敲不到**（信寫得進去，但它不會醒）⇒ 先請它跑 `whoami.sh`。
+★**為什麼這一步不能省**：git 信箱現在【沒有人在掃】。「落地 ≠ 通知」那條教訓
+（memory `feedback_landed_needs_notify`）以前是「容易忘」，★★這一版把它變成**結構上必然**：不敲就真的沒人看。
 
 ### 消費（收件端動完）
-- 把該信 `status: open` → `status: consumed`。下輪 Monitor 不再吐。**沒改 = 會再被 handback-inbox.sh 每 turn 提醒**（但 Monitor 因 seen-set 不重吐）。
+- 把該信 `status: open` → `status: consumed`。**沒改 = 會再被 `handback-inbox.sh` 每 turn 提醒**（★那支還在，它是【人打字時】的補漏網，不是 watcher）。
 
 ### ★★無斷點自動鏈（用戶定 2026-07-09）
-- **收 handback → 做完 + 立刻寫下一站 handback**（inbox-watch ~20s 自動喚下一角色）→ **鏈自動流到底，不停在自己這站等下個觸發**。
+- **收 handback → 做完 + 立刻寫下一站 handback ＋ SendMessage 敲他**（★兩步缺一，鏈就斷在通知這一段）→ **鏈自動流到底，不停在自己這站等下個觸發**。
 - **禁自造斷點**：不「park／排隊／下個 session／等下再做／非急擱著」。有輸入就往前推。
 - **只為真需用戶裁決停**（願景 fork／授權／喬不攏優先序），給具體待裁問題，非「要不要繼續/收工」。詳 `00_roles §無斷點自動鏈` + memory [[feedback-never-wrap]]。
 
 ### ★禁 append 到 consumed 信（通則，2026-07-09 用戶定）
 - **一封信 = 一次完整交付**；寄出後**禁分批 append 補內容到已寄信**。理由=**信箱競態**：收件端讀完即 `consumed`，義務只掃 `to:我 && status:open` → **append 的晚到內容靜默漏看**（measurer 分批補數字 → QA 用不完整報告判 merge 是活教訓）。
-- **要補/修訂 → 開一封新 `status: open` 信**（Monitor 重吐、收件端義務重掃）。原 consumed 信留軌跡不動。
-- 特例（同封 revise）：發送方**在收件端尚未 consumed 前**改同封（mtime 變 → Monitor 重吐）OK；一旦 consumed，一律另開新信。
+- **要補/修訂 → 開一封新 `status: open` 信 ＋ 重敲一次**。原 consumed 信留軌跡不動。
+- 特例（同封 revise）：發送方**在收件端尚未 consumed 前**改同封 OK（★但要再敲一次說「那封我改了」——mtime 變沒有人在看）；一旦 consumed，一律另開新信。
 - 交付型角色（measurer）更嚴：**全量完成才寄一封**（見 `03b_measurer.md` 鐵律6），連 open 態部分信都不寄。
 
 ## 成本（信不多前提，用戶確認可忽略）
 - 輪詢無新信 = **零 stdout = 零 token**（純 shell）。
-- 每封真信 = 一次事件 + 一個 model turn（讀信+動工）= **本來就要付的**，Monitor 只自動化觸發。
+- 每封真信 = 一次事件 + 一個 model turn（讀信+動工）= **本來就要付的**，敲門只自動化觸發。
 - 久 idle 後喚醒 = 該 turn context 掉出 prompt cache 重算（稀疏觸發固有；信少可忽略）。
-- ★腳本必須 emit-once + 嚴格過濾，否則假喚醒燒 token（太吵 Monitor 會被自動停）。
+- ★敲門一封信只敲一次（emit-once 現在是**人的紀律**，不是腳本的 seen-set）——重複敲＝對方多一個 turn。
 
 ## 邊界
-- Monitor 只喚**活著的 session**（idle 掛 prompt + monitor armed）。關窗 = 斷；重開再 arm。
+- SendMessage 只到**開著的 session**；關窗 ⇒ 投遞結果會說（`peers.sh` 的 STATE 欄事前就看得到 OPEN／DEAD）。
 - 要喚**人**（非 session）用 `PushNotification`（桌面/手機）——寄件端可選加，提醒用戶某軌有事。
 
 ---

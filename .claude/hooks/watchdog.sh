@@ -86,8 +86,15 @@ claim_lock() {
 }
 
 # ── S1 哪些角色活著（★單一事實來源＝peers.sh）────────────────────
+# ★★★2026-09-23 改判準（blueprint 17:09 報假警報：它說「systems 沒開」，而 systems 17:00 才回過信）：
+#   ★舊判準 `ALIVE` ＝ **inbox watcher 每 20s touch lock** —— ★★而 watcher 已整個退役
+#   ⇒ 六個角色永遠沒有心跳 ⇒ 這支會【把全員讀成沒開】，然後對每一封信報 DEAD-ROLE。
+#   ⇒ ★★★那不是「壞掉」，是更糟的一種：它**照常出報告**，而報告全錯。
+#   新判準 `OPEN` ＝ **那個終端的 claude 進程還在不在**（peers.sh 用 tasklist 查 claude_pid）。
+#   ★這才是 DEAD-ROLE 真正想問的事：「信寄過去，有沒有人在那頭」。
+#   ★★而「有沒有在做事」是另一格在判（IDLE：看 commit 與最後一封信的時間，不看心跳）。
 alive_roles() {
-  bash "$HOOKD/peers.sh" --tsv 2>/dev/null | awk -F'\t' '$2=="ALIVE"{printf "%s ", $1}' | sed 's/ $//'
+  bash "$HOOKD/peers.sh" --tsv 2>/dev/null | awk -F'	' '$2=="OPEN"{printf "%s ", $1}' | sed 's/ $//'
 }
 
 # ── S2 open 信：「秒齡<TAB>收件人<TAB>檔名」，最老在前 ────────────
@@ -244,8 +251,12 @@ _orphan_census() {
   local _census_out
   _census_out=$(PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "$_pscmd" 2>/dev/null || true)
   echo "$_census_out"
-  local _alive
-  _alive=$(bash "$HOOKD/peers.sh" --tsv 2>/dev/null | grep -c "ALIVE")
+  # ★★★2026-09-23：期望值從【ALIVE 角色數】改成**常數 0** ——
+  #   inbox watcher 已退役（新信箱＝SendMessage 敲門）⇒ ★一支都不該有，跑著的就是孤兒。
+  #   ★★而這同時**消掉了上面整段「差 1 不可判」的結構性雜訊**：那個 ±1 來自
+  #   「六角色各自每 30 分鐘重 arm、彼此不同步」—— ★★★沒有重 arm 了，就沒有過渡態。
+  #   ⇒ 下面兩次取樣的保險留著（它擋的是【剛被殺還沒收屍】那種瞬態），但門檻降回 1。
+  local _alive=0
   # ★★★把「差 1 不可判」從【註解】改成【它自己印】（2026-09-22）——
   #   ★implementer 的話：**「誠實限」是描述，不是守衛**；
   #   寫在註解裡 ＝ **留給讀的人判**，而讀的人會把差 1 讀成「有孤兒」。
@@ -256,13 +267,11 @@ _orphan_census() {
     _diff=$(( _rw - _alive ))
     [ "$_diff" -lt 0 ] && _diff=$(( -_diff ))
     if [ "$_diff" -eq 0 ]; then
-      echo "[watchdog v4] WATCHERS real=${_rw} alive_roles=${_alive} diff=0 -> CLEAN (a mid-handover role would show +-1, so 0 means none)"
-    elif [ "$_diff" -eq 1 ]; then
-      echo "[watchdog v4] WATCHERS real=${_rw} alive_roles=${_alive} diff=1 -> UNDECIDABLE (one role is always mid-handover; |diff|=1 cannot separate)"
+      echo "[watchdog v4] WATCHERS real=0 expected=0 -> CLEAN (inbox watchers are retired; zero is the only clean count)"
     else
       # ★★★2026-09-22（blueprint 提，systems 實作）：單一瞬時取樣分不出
-      #   【真的有孤兒】與【换血瞬間新舊兩條鏈同時存在】。
-      #   ★血證：real=9 vs alive_roles=5 diff=4 —— 實查是六角色正在换血，一支孤兒都沒有。
+      #   【真的有孤兒】與【換血瞬間新舊兩條鏈同時存在】。
+      #   ★血證：real=9 vs alive_roles=5 diff=4 —— 實查是六角色正在換血，一支孤兒都沒有。
       #   ⇒ ★★改成【單調量】：再取一個樣本，兩次都 ≥ 2 才標孤兒；
       #     只有一次 ⇒ 【暫態】（換血窗）。★★★成本只落在這個分支，
       #     正常情況（diff 0/1）零延遲。
@@ -270,10 +279,10 @@ _orphan_census() {
       local _c2 _rw2 _alive2 _diff2
       _c2=$(PSExecutionPolicyPreference=Bypass powershell.exe -NoProfile -Command "$_pscmd" 2>/dev/null || true)
       _rw2=$(printf '%s' "$_c2" | tr -d '\r\n' | grep -oE 'REAL-WATCHERS = [0-9]+' | grep -oE '[0-9]+' | head -1)
-      _alive2=$(bash "$HOOKD/peers.sh" --tsv 2>/dev/null | grep -c "ALIVE")
+      _alive2=0
       if [ -n "$_rw2" ] && [ -n "$_alive2" ]; then
         _diff2=$(( _rw2 - _alive2 )); [ "$_diff2" -lt 0 ] && _diff2=$(( -_diff2 ))
-        if [ "$_diff2" -ge 2 ]; then
+        if [ "$_diff2" -ge 1 ]; then
           echo "[watchdog v4] WATCHERS s1(real=${_rw} alive=${_alive} diff=${_diff}) s2(real=${_rw2} alive=${_alive2} diff=${_diff2}) -> ORPHANS LIKELY (both samples |diff|>=2, 15s apart)"
         else
           echo "[watchdog v4] WATCHERS s1(real=${_rw} alive=${_alive} diff=${_diff}) s2(real=${_rw2} alive=${_alive2} diff=${_diff2}) -> TRANSIENT (second sample cleared it; mid-handover, not orphans)"

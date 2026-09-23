@@ -91,12 +91,17 @@ ${UNREAD}"
     systems|blueprint|qa|reviewer|measurer|implementer)
       CTX="${CTX}
 
-★★★本 session 的**第一個動作**是掛信箱（★用戶裁 2026-09-23：**不要再用 Monitor**）：
-Bash(command=\"SESSION_ROLE=${ROLE_KEY} bash \\\"${_MAIN_REPO}/.claude/hooks/role-watch.sh\\\"\", run_in_background=true, description=\"${ROLE_KEY} 信箱\")
-★理由（實測）：這一版 Monitor 沒有 persistent、**30 分鐘硬到期** ⇒ 每半小時一次空重掛＋ARMED 雜訊；
-  ★★role-watch 是【背景、閒置零輸出、有信才結束並喚醒你】—— 而那一次喚醒你本來就在處理那封信。
-★★★而【不要】為了防它掛掉再設任何輪詢／重掛迴圈 —— 用戶逐字：「沒事浪費 token」。
-掛完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 的信會主動喚醒你。詳 docs/process/07_mailbox_trigger.md。
+★★★**信箱（2026-09-23 第二版，用戶裁）**：**不掛任何 watcher**。
+  收信 ＝ 別的角色寫完 handback 之後用 `SendMessage` 敲你（harness 原生投遞，會直接叫醒你）；
+  寄信 ＝ ①Write handback 進 main mailbox ②**立刻 `SendMessage` 敲收件人那一句**（★沒敲＝沒送到）。
+★理由：Monitor 30 分鐘硬到期、背景 watcher 印完就結束 ⇒ 兩者都要【重掛】；
+  ★★而 SendMessage 是推播：零 watcher、零重掛、閒置零 token（★★★17:00 陽性對照：
+  systems 在【沒有任何 watcher】的情況下被 blueprint 敲醒）。
+★★**開場唯一要做的一件事＝登記通訊錄**（否則別人敲不到你，信寫得進去但你不會醒）：
+  ①`ListAgents` → 第一行「This session is demo-XX」就是你的地址
+  ②`SESSION_ROLE=<你的角色> bash .claude/hooks/whoami.sh demo-XX`
+  ③查別人：`bash .claude/hooks/peers.sh` 的 ADDR 欄
+登記完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 的信會主動喚醒你。詳 docs/process/07_mailbox_trigger.md。
 
 ★★剛開場（含 /clear·/compact 重觸）：掛完信箱後、動工前，**先重讀你那格 docs**（00_roles §文檔導覽表 map role→doc）。/compact 洗掉 active 記憶，別靠殘存印象動工——最容易忘的規則就在那幾份 md，動工前塞回。
 

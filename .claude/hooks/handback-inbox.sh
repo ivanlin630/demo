@@ -45,12 +45,12 @@ if [ -n "${CLAUDE_CODE_SESSION_ID:-}" ]; then
     fi
     # ${_lsid} 空 = 舊格式 lock → ★fail-open，不報警
   fi
-  # ★★★2026-09-23 用戶裁：【不要每輪掃、不要教人重掛】。
-  #   舊版每一次 prompt 都算 lock 心跳並印一段「請重 arm：Monitor(..., persistent=true, ...)」
-  #   ⇒ ★而 persistent 這個參數【這一版根本不存在】（實測：只收 command/description/timeout_ms）
-  #   ⇒ ★★所以它每輪燒 token，教的還是一個做不到的動作。
-  #   ⇒ ★★★改成【只印一行、只講該做什麼】，而且不再宣稱「請重 arm」。
-  [ -n "$_why" ] && GATE="⛔ 信箱沒在聽（${_why}）⇒ 掛一次：Bash(command=\"SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh\", run_in_background=true)"
+  # ★★★2026-09-23（第二次改，用戶裁「採用新信箱」）：**這一格整個退役**。
+  #   新做法 ＝ git handback 照舊 ＋ 寫完用 SendMessage 敲收件人（harness 原生投遞）
+  #   ⇒ ★【沒有 watcher 了】⇒ 「watcher 沒在跑」不再是缺陷，而這一格會【每一輪都叫】
+  #   ⇒ ★★一個恆真的警告 ＝ 噪音，而噪音會讓人把整段訊息跳過去（連未讀清單一起）
+  #   ⇒ ★★★所以不是改判準，是【拿掉】—— 它守的那個東西已經不存在了。
+  _why=""
 fi
 shopt -s nullglob
 files=("$HANDBACK_DIR"/*.md)

@@ -63,7 +63,7 @@ git push -u origin feat/<feature>
    `<main-repo>/docs/superpowers/handbacks/YYYY-MM-DD-implementer-to-<to>-<feature>.md`，frontmatter `from: implementer / to: <measurer|systems|qa> / status: open / topic:`。
    - main-repo 算法：`git rev-parse --path-format=absolute --git-common-dir` 去掉尾 `/.git`（從 worktree 也算得出）。
    - **★為何**：信箱靠實體資料夾共享，你 worktree 的 `docs/handbacks/` 是**另一個資料夾**、下一站 main dir session 看不到。寫 main mailbox 才 live 觸發下一站。**code 留 worktree、handback 寫 main mailbox。**
-   - 開場也 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`（hook 已指 main mailbox）→ systems 寫 to:implementer 的信你也自動讀。
+   - 開場**不掛 watcher**（★2026-09-23 退役）：只 `ListAgents` + `SESSION_ROLE=implementer bash .claude/hooks/whoami.sh demo-XX` 登記通訊錄 → systems 寫 to:implementer 的信會用 `SendMessage` 敲你。
 
 **★★問題/卡點 → `to:systems` handback，禁在自己終端直接問 user（用戶定 2026-07-11）**：
 - 遇「設計不明／spec 有歧義／不確定怎麼做／發現前提不對／需裁決」→ **寫 `to:systems` 的 handback 問**（systems 是你的上游、答疑窗口）。**禁在你 worktree 終端直接問 user**——user 是整條鏈的**問題 backstop**，非 implementer 的答疑/QA 窗口；直接問 user = 破壞角色鏈（systems 該接的丟給 user 人肉轉述）。
@@ -103,13 +103,13 @@ topic: <功能名稱> 實作交付 — <一句摘要>
 
 ## ★每-task lifecycle（待命↔worktree，2026-07-09 用戶定）
 
-1. **待命**：session 在主目錄 `A:\GDS\demo`（main branch）、arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`，等 `to:implementer` 信。
+1. **待命**：session 在主目錄 `A:\GDS\demo`（main branch）、**通訊錄已登記**（`whoami.sh`），等 systems 敲門送 `to:implementer` 信。
 2. **接 task**：收信 → `git worktree add .worktrees/<feature> -b feat/<feature>`（已存在則 `cd` 進）→ `cd .worktrees/<feature>`。所有實作/commit/push 在此。
 3. **做**：照 plan TDD、逐 task commit、跑 godot 驗。**★改既有機制前先查 `docs/mechanism-intents.md`（WHAT 權威方向表）；發現 code 與表不符=呈報 owner 非默改**（用戶立法 2026-08-14；code 服從表、表只服從用戶）。**★報 TDD PASS/FAIL 數字前必實際跑一次、讀印出的 `=== DONE ===` 行真實計數**（別憑印象/半途 grep 湊；連續 S6/S7/A1 三輪自報數≠實際=reviewer grep 抓，2026-07-25 流程項）。**★execution-end TDD 禁 teleport 繞真觸發**（movement/arrival/cadence）——teleport 到 target 會遮 same-tile-no-arrival 型 bug（A1 血證）；須驅真 `MovementSystem.process()` tick 迴圈+`arrived_tick>=0` 斷言，抵達後才驗效果（連 memory `feedback_verify_execution_end`）。
 4. **交付（task 完成）**：寫 handback（X-to-Y frontmatter）到**唯一 main mailbox 絕對路徑**（見上 §2）→ **`cd` 回主目錄 `A:\GDS\demo`**（確認 `git branch --show-current`=**main**；worktree 的 feat 分支不動、只 shell 回家；★絕不在主目錄 checkout feat）。
 5. **★hold warm 等裁決（完成判定歸 01，非自判）**：**先別清 ctx**。task 是否真完成由**下游裁決**（measure→QA→01/②判），因為 QA 可能 redo。context held warm、待命等 `to:implementer` 的裁決信：
    - **`[REDO]` 信**（要改）→ 你 context 還在，直接改 → 新 handback（回步 4）。**不冷啟**。
-   - **`[DONE]` 信**（approved/merged）→ 這時才收尾：**consume 該信 → cd 回主目錄 → 重 arm inbox-watch → 待命下一 task**。**ctx 不用手動清**（`/clear` 是用戶鍵入、agent/hook 不能自 issue → 不強制）；context 累積到滿 Claude Code **自動 compact**，`/compact` 重觸 SessionStart(source=compact) → **職責自動重載**。Stop-hook `implementer-cleanup.sh` 偵 `[DONE]` 逼你做這幾步。
+   - **`[DONE]` 信**（approved/merged）→ 這時才收尾：**consume 該信 → cd 回主目錄 → 待命下一 task**（★不用重 arm 任何東西）。**ctx 不用手動清**（`/clear` 是用戶鍵入、agent/hook 不能自 issue → 不強制）；context 累積到滿 Claude Code **自動 compact**，`/compact` 重觸 SessionStart(source=compact) → **職責自動重載**。Stop-hook `implementer-cleanup.sh` 偵 `[DONE]` 逼你做這幾步。
 
 ∴ 完成判定歸 01（防過早清 ctx→redo 冷啟）、主目錄恆 main、worktree 隔離改 code、handback 走 main mailbox 自動觸發下一站、職責 compact 後自動重載、**零手動鍵入**。
 
