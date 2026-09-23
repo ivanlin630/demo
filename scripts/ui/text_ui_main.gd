@@ -32,6 +32,11 @@ static func _subteam_task_from_index(idx_1based: int) -> String:
 
 var _cursor: Vector2i = Vector2i(4, 4)
 var _selected: Vector2i = Vector2i(-1, -1)
+# ★★★分頁 index（spec §2-2）：這是【一個 enum】，不是第 12 個互斥 bool。
+#   ★分頁與模式是【兩個軸】：模式＝疊上去的 overlay（一次一個）；分頁＝右欄常駐的內容選擇，
+#     ★★永遠有一個是選中的 ⇒ 它【不進】_current_mode_name()，也【不加】MODE_KEYMAP 第 13 列。
+#   ★★★做成第 12 個 bool 會掉進 _current_mode_name() 那串 if 的排序裡，而它不該互斥。
+var _page_idx: int = 0
 var _player_tid: int = 0
 var _events: Array = []
 
@@ -258,6 +263,18 @@ func _input(event: InputEvent) -> void:
 		_handle_storage_mode(event.keycode)
 		return
 	match event.keycode:
+		# ★★★切頁 [,] [.]（spec §2-3）：★這裡是 main 的 match，而【每一個 overlay 在上面都已經 return】
+		#   ⇒ ★★「overlay 開著時切鍵不吃」是【結構性】保證，不是我另外寫的守衛。
+		#   ★★★而 , . 在 interact／storage／trade 三個 overlay 裡是【翻頁】（:972/:1509/:1783），
+		#     那三處在上面就接走了 ⇒ 同一顆實體鍵在兩個情境各做各的，互不干擾。
+		#   ★提示字串寫 [,][.] 而不是 [<][>]：全檔沒有任何一處檢查 shift，寫 < > 會讓玩家
+		#     以為要按 shift（實際按不按都一樣），而那是畫面在誤導人。
+		KEY_COMMA:
+			_page_idx = UiPages.next_idx(_page_idx, -1)
+			_refresh()
+		KEY_PERIOD:
+			_page_idx = UiPages.next_idx(_page_idx, 1)
+			_refresh()
 		KEY_W: _move_cursor(Vector2i(0, -1))
 		KEY_S: _move_cursor(Vector2i(0,  1))
 		KEY_A: _move_cursor(Vector2i(-1, 0))
@@ -606,7 +623,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
 	"interact":      "[1-9]選目標/行動 [Esc]返回",
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
@@ -677,6 +694,41 @@ func _build_state_str() -> String:
 		pos.get("q", 0), pos.get("r", 0),
 		ct.get("faction_display", "?")])
 	lines.append("狀態: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
+
+	# ★★★五分頁（spec §2-3b，票A）：狀態列（頁外常駐）已經在上面兩行印完，
+	#   底下是【分頁區】—— 而 :680-738 那一段【一個字都沒改】，只是搬到第 1 頁下面。
+	#   ★為什麼不順手分類：那是票B。混進來的話，紅燈就分不出是【框沒做好】還是【分類錯了】。
+	lines.append(UiPages.header(_page_idx))
+	if _page_idx == 0:
+		var _unclassified: Array = _build_unclassified_lines(ct, ps, lc)
+		# ★★區塊標題必須寫「未分類」：這一段裡有【資源】（屬經濟）而它印在【生存】頁下面
+		#   ⇒ 不標示等於【在畫面上說謊】，而用戶簽分頁時會簽到一個假的分類。
+		#   ★★★而那個 N 就是票B 的母體 —— 票B 每搬一批它就變短，不必另外做一張清單。
+		lines.append("── 未分類（票B 將搬走：%d 行）──" % _unclassified.size())
+		lines.append_array(_unclassified)
+	else:
+		for _f in _page_skylight_fields(_page_idx):
+			lines.append(UiPages.skylight(_f))
+
+	lines.append("────────────────")
+	lines.append("Tick: %d  (Day %d)" % [
+		_bridge.get_current_tick(),
+		_bridge.get_current_tick() / WorldState.TICKS_PER_DAY])
+	var _pending_n: int = _cached_snapshot.get("pending_targets", []).size()
+	var _forced_n:  int = 0 if _cached_snapshot.get("forced_interaction", {}).get("interaction_id", "").is_empty() else 1
+	if _pending_n > 0 or _forced_n > 0:
+		var _hint: String = "[T] 互動"
+		if _pending_n > 0: _hint += ": 同格%d隊" % _pending_n
+		if _forced_n > 0:  _hint += "  ⚠強制事件"
+		lines.append(_hint)
+	return "\n".join(lines)
+
+
+
+# ★:680-738 原樣搬出來（票A：搬位置、不改字）。★★它只 append、不讀 _page_idx ——
+#   ⇒ 這樣「第 1 頁少了東西」與「分頁框壞了」是兩個不同的失敗，紅燈分得開。
+func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
+	var lines: Array = []
 	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
 	var food_days: float = float(ct.get("food_days", 99.0))
 	var starving: bool = bool(ct.get("starving", false))
@@ -738,19 +790,18 @@ func _build_state_str() -> String:
 		else:
 			lines.append("選中: (%d,%d) [無效格]" % [_selected.x, _selected.y])
 
-	lines.append("────────────────")
-	lines.append("Tick: %d  (Day %d)" % [
-		_bridge.get_current_tick(),
-		_bridge.get_current_tick() / WorldState.TICKS_PER_DAY])
-	var _pending_n: int = _cached_snapshot.get("pending_targets", []).size()
-	var _forced_n:  int = 0 if _cached_snapshot.get("forced_interaction", {}).get("interaction_id", "").is_empty() else 1
-	if _pending_n > 0 or _forced_n > 0:
-		var _hint: String = "[T] 互動"
-		if _pending_n > 0: _hint += ": 同格%d隊" % _pending_n
-		if _forced_n > 0:  _hint += "  ⚠強制事件"
-		lines.append(_hint)
-	return "\n".join(lines)
+	return lines
 
+# 第 2–5 頁的【預定但未接】欄位。★票A 交付時絕大多數是天窗，這是預期不是缺陷。
+# ★★欄位名取自走查腳本印得出來的那一層（spec §3①），
+#   ★★★而不是「117 欄」那個數字——那是名字比對的產物（progress.md 2026-09-10 逐字警告）。
+func _page_skylight_fields(idx: int) -> Array:
+	match idx:
+		1: return ["糧食收支", "庫存與價格", "生產線", "貿易對象"]
+		2: return ["鄰近敵對", "戰力對比", "邊境事件", "防務狀態"]
+		3: return ["盟友與敵意", "勢力關係", "成員情緒", "請求與承諾"]
+		4: return ["近期事件", "已知情報", "傳聞來源", "決策紀錄"]
+		_: return []
 func _build_debug_str() -> String:
 	var tick: int  = _bridge.get_current_tick()
 	# ★S1b 白名單(c)：以下 24 / 30 / 12 全是【曆法結構】，不是 tick 量 ——
