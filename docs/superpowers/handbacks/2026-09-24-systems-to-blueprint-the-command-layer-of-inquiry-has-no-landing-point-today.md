@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 票5｜意圖帳回報
 topic: ★**一個【量出來的事實】要回給你**：你把打聽拆成兩層（開選單＝查詢免費／**真去問人＝指令、可有成本**），★★而票5 的驗收實測：`confirm_gather_intel` **連呼 5 次都成功，而 world-fp 逐字不變** ⇒ **那個「指令層」今天在 code 裡還沒有落點** —— 它不寫世界｜★★★我叫實作端**不要順手補**（補它＝替 WHAT 決定打聽要付什麼代價）；這封是回報不是提案
 ---
