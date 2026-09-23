@@ -14,7 +14,9 @@ extends SceneTree
 #     做法是把它從 team.ctx_snapshot 抹掉，★★★而不是在印的時候跳過它
 #     ⇒ 走查那一格必須自己變成天窗；若它還印得出值，代表畫面讀的是快取／自己算的，不是查詢面。）
 
-const PAGE_ORDER: Array = ["生存", "經濟", "威脅", "社交", "記憶"]
+# ★名單搬去 scripts/ui/ui_pages.gd（spec §2-1）：畫面與走查共用同一份。
+#   ★★理由不是「整潔」，是 2026-09-23 之前這個 repo 真的有【兩份不一樣的】分頁名單，
+#     而【裁定只消滅今天的分歧】—— 共用常數消滅的是「明天再長出第三份」。
 
 func _initialize() -> void:
 	var days: int = int(OS.get_environment("WALK_DAYS")) if OS.has_environment("WALK_DAYS") else 2
@@ -37,7 +39,7 @@ func _initialize() -> void:
 	var fields: Dictionary = _ctx_fields(q, st)
 	var page_map: Dictionary = _page_map()
 	var seeded: Array = _seed_errors(fields, n_err)
-	for page in PAGE_ORDER:
+	for page in UiPages.PAGE_ORDER:
 		_print_page(page, page_map, fields)
 	_print_supplement(q, st)
 	print("")
