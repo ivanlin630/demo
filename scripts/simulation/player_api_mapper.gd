@@ -65,6 +65,32 @@ static func map_player_summary(state: WorldState) -> Dictionary:
 
 # ── Controlled team ────────────────────────────────────────────────────────────
 
+
+# ★「家」三欄的唯一取值點 —— ★★三個 helper 都走同一個 `own_outpost_tile()`，
+#   所以「三欄同時給或同時 null」是【結構保證】不是三處各自記得要對齊。
+# ★★★營地不是家（blueprint §6）：這裡只認 outpost_level > 0，不認 L0 營地。
+static func _home_tile(state: WorldState, t: TeamData) -> HexTileData:
+	return state.own_outpost_tile(t.team_id)
+
+static func _home_pos(state: WorldState, t: TeamData):
+	var h: HexTileData = _home_tile(state, t)
+	if h == null: return null   # ★明確 null —— 不是 (0,0)、不是 (-1,-1)（spec §3）
+	return {"q": h.tile_pos.x, "r": h.tile_pos.y}
+
+static func _home_kind(state: WorldState, t: TeamData):
+	var h: HexTileData = _home_tile(state, t)
+	if h == null: return null
+	return h.outpost_type   # ★沿用 tile 既有分類，不新造詞（spec §3）
+
+static func _home_distance(state: WorldState, t: TeamData):
+	var h: HexTileData = _home_tile(state, t)
+	if h == null: return null
+	var a: Vector2i = t.tile_pos
+	var b: Vector2i = h.tile_pos
+	var dx: int = b.x - a.x
+	var dy: int = b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
 static func map_controlled_team(state: WorldState) -> Dictionary:
 	var pid: int = state.player_id
 	var p: PersonData = state.persons.get(pid) if pid != -1 else null
@@ -99,6 +125,17 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"faction": str(t.faction_id) if t.faction_id != -1 else "",
 		"faction_display": ("勢力%d" % t.faction_id) if t.faction_id >= 0 else "獨立",
 		"position": {"q": t.tile_pos.x, "r": t.tile_pos.y},
+		# ★★★「家」三欄（票：查詢面補「家」，2026-09-23）——★三欄【同時】給或【同時】null。
+		#   半套會讓畫面印出「家：？ 離家 3」這種句子（spec §3 逐字）。
+		# ★語意＝【本城】（blueprint 裁 2026-09-23；而它不是新語意——機制意圖帳 #55⑤ 2026-09-10 已裁）。
+		#   ★★本城欄【尚未落地】⇒ 本票取值用 owner_outpost_index，
+		#     語意＝「state.world.tiles 迭代序中第一個自家據點」⇒ ★★★所以畫面必須標【暫代】。
+		# ★感知鐵律：自己擁有哪些據點＝self-knowledge，不是 god-view；
+		#   距離只用【我的當前格】與【我自己的據點格】兩個我本來就知道的位置。
+		"home_pos": _home_pos(state, t),
+		"home_kind": _home_kind(state, t),
+		"home_distance": _home_distance(state, t),
+		"home_count": state.own_outpost_count(t.team_id),
 		"members": members,
 		"resources": {
 			"food":               int(t.resources.get("food", 0)),

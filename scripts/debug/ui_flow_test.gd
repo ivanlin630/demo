@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -74,6 +74,12 @@ func _initialize() -> void:
 	await _test_pages_single_source()
 	await _test_pages_q1_source()
 	await _test_pages_q3_changes()
+	await _test_home_p1_value()
+	await _test_home_p2_pair()
+	await _test_home_p3_none()
+	await _test_home_p4_multi()
+	await _test_home_p5_halfset()
+	await _test_home_p6_zero_is_real()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1235,3 +1241,142 @@ func _test_pages_q3_changes() -> void:
 	_check("時鐘確實前進了（兩次不是同一顆 tick）", clock_changed)
 	await _free_ui(node)
 	_cell("_test_pages_q3_changes")
+
+
+# ════════ 票：查詢面補「家」（P1–P4）════════
+# ★★★P3／P4 是【母體地板】：沒有它們，P1 在「剛好每隊都有且只有一個據點」的世界裡恆綠。
+
+func _home_page_text(node: Node) -> String:
+	node._page_idx = 0
+	return node._build_state_str()
+
+# 把玩家隊的據點數改成 n（0 或 2）。★走 tile 的真實欄位＋invalidate，不偽造快照。
+func _home_set_outposts(node: Node, n: int) -> void:
+	var st = node._bridge.get_state()
+	var tid: int = st.persons[st.player_id].team_id
+	var made: int = 0
+	for key in st.world.tiles:
+		var t = st.world.tiles[key]
+		if t.outpost_owner == tid and t.outpost_level > 0:
+			t.outpost_level = 0
+			t.outpost_owner = -1
+	if n > 0:
+		var home: Vector2i = st.teams[tid].tile_pos
+		for key2 in st.world.tiles:
+			var t2 = st.world.tiles[key2]
+			if made >= n: break
+			t2.outpost_owner = tid
+			t2.outpost_level = 1
+			t2.outpost_type = "civilian"
+			made += 1
+	OwnerOutpostIndex.invalidate()
+	node._bridge.request_advance(1)
+	await process_frame
+
+# P1[天窗消失]：查詢面給得出來 ⇒ 生存頁印真值，且「位置與家」不再是天窗
+func _test_home_p1_value() -> void:
+	_selftest_gate("_test_home_p1_value").noop()
+	print("
+── 家 P1 天窗消失、改印真值 ──")
+	var node = await _make_ui()
+	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
+	_check("查詢面有 home_pos 這個 key（★母體地板：沒有 key 的話下面全是空談）", ct.has("home_pos"))
+	_check("三欄【同時】存在（pos/kind/distance）",
+		ct.has("home_pos") and ct.has("home_kind") and ct.has("home_distance"))
+	var s: String = _home_page_text(node)
+	_check("生存頁不再印「位置與家」天窗", not s.contains("位置與家"))
+	_check("生存頁印出「家：」那一行", s.contains("家："))
+	await _free_ui(node)
+	_cell("_test_home_p1_value")
+
+# P2[成對對照]：把 home_pos 從查詢面拿掉 ⇒ ★那一格變回天窗（不是整頁壞掉）
+func _test_home_p2_pair() -> void:
+	_selftest_gate("_test_home_p2_pair").noop()
+	print("
+── 家 P2 成對對照 ──")
+	var node = await _make_ui()
+	var before: String = _home_page_text(node)
+	_check("注射前：不是天窗", not before.contains("位置與家"))
+	# ★只拿掉 home_pos 這一個 key —— ★★不動共用欄位（打共用欄位會讓整頁塌，那是零資訊）
+	node._cached_snapshot["controlled_team"].erase("home_pos")
+	var after: String = _home_page_text(node)
+	_check("拿掉 home_pos ⇒ 「位置與家」變回天窗", after.contains("位置與家"))
+	_check("★而整頁沒壞：其他行還在（人口／糧）", after.contains("糧") or after.contains("人口"))
+	await _free_ui(node)
+	_cell("_test_home_p2_pair")
+
+# P3[無家]：沒有據點 ⇒ 三欄皆 null ⇒ 印「家：無」★而不是 (0,0)
+func _test_home_p3_none() -> void:
+	_selftest_gate("_test_home_p3_none").noop()
+	print("
+── 家 P3 沒有據點 ──")
+	var node = await _make_ui()
+	await _home_set_outposts(node, 0)
+	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
+	_check("home_pos 為 null（★不是 (0,0)、不是 (-1,-1)）", ct.get("home_pos", 1) == null)
+	_check("三欄【同時】為 null", ct.get("home_pos", 1) == null and ct.get("home_kind", 1) == null and ct.get("home_distance", 1) == null)
+	var s: String = _home_page_text(node)
+	_check("畫面印「家：無」", s.contains("家：無"))
+	_check("★畫面沒有印出 (0,0)", not s.contains("家：(0,0)"))
+	await _free_ui(node)
+	_cell("_test_home_p3_none")
+
+# P4[多據點]：★「暫代」兩個字是判準的一部分，不是文案 —— grep 不到 ⇒ 紅
+func _test_home_p4_multi() -> void:
+	_selftest_gate("_test_home_p4_multi").noop()
+	print("
+── 家 P4 多據點與【暫代】 ──")
+	var node = await _make_ui()
+	await _home_set_outposts(node, 2)
+	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
+	_check("home_count ≥ 2（★母體地板：造不出兩個據點就別談多據點）", int(ct.get("home_count", 0)) >= 2)
+	var s: String = _home_page_text(node)
+	_check("畫面標出「（共 %d 處）」" % int(ct.get("home_count", 0)), s.contains("（共 "))
+	_check("★★★畫面標出【暫代】—— 本城欄未落地，沒有這兩個字就分不出【這就是家】與【先湊一個】",
+		s.contains("【暫代】"))
+	await _free_ui(node)
+	_cell("_test_home_p4_multi")
+
+
+# P5[半套]：合約說三欄同時給或同時 null —— ★而合約破掉時要【看得見地壞】。
+#   ★★這一格是從 P3 的陽性對照長出來的：那次注射讓 home_pos 單獨有值，
+#     結果 `int(null)` 丟錯【把整個 _build_survival_lines 砍斷】，而點名照樣滿分。
+func _test_home_p5_halfset() -> void:
+	_selftest_gate("_test_home_p5_halfset").noop()
+	print("
+── 家 P5 半套要看得見地壞 ──")
+	var node = await _make_ui()
+	node._cached_snapshot["controlled_team"]["home_pos"] = {"q": 3, "r": 4}
+	node._cached_snapshot["controlled_team"]["home_kind"] = null
+	node._cached_snapshot["controlled_team"]["home_distance"] = null
+	node._page_idx = 0
+	var s: String = node._build_state_str()
+	_check("半套時印出【半套】而不是崩掉", s.contains("【半套】"))
+	_check("★而後面的行還在（函式沒有被砍斷）", s.contains("糧") or s.contains("人口"))
+	await _free_ui(node)
+	_cell("_test_home_p5_halfset")
+
+
+# P6[(0,0) 是真座標不是哨兵]：reviewer 2026-09-23 的非阻塞建議，補成永久格。
+#   ★為什麼要有：「沒有家」的表示法是 null，而 (0,0) 是【地圖上一個真的格子】。
+#     ★★如果哪天有人把「沒有家」改成回 (0,0)（很常見的偷懶），畫面會印出
+#       「家：(0,0)」而那是【一句謊】—— 而它不會有任何別的訊號。
+#   ★★★這一格只驗畫面：production 端用 `_hp == null` 判、不是比座標值，
+#     所以這裡釘的是【那個性質不准退化】，不是在補一個現在會紅的洞。
+func _test_home_p6_zero_is_real() -> void:
+	_selftest_gate("_test_home_p6_zero_is_real").noop()
+	print("
+── 家 P6 (0,0) 是真座標不是哨兵 ──")
+	var node = await _make_ui()
+	var ct: Dictionary = node._cached_snapshot["controlled_team"]
+	ct["home_pos"] = {"q": 0, "r": 0}
+	ct["home_kind"] = "營地"
+	ct["home_distance"] = 7
+	node._page_idx = 0
+	var s: String = node._build_state_str()
+	_check("三欄同時給、pos=(0,0) ⇒ 畫面印出座標", s.contains("家：(0,0)"))
+	_check("★而【不是】「家：無」（(0,0) 不可被當成沒有家）", not s.contains("家：無"))
+	_check("★★也不是【半套】（三欄齊全 ⇒ 不該走降級路徑）", not s.contains("【半套】"))
+	_check("離家距離照印（7）", s.contains("離家 7"))
+	await _free_ui(node)
+	_cell("_test_home_p6_zero_is_real")

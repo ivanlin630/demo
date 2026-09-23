@@ -54,6 +54,12 @@ var b = d.get("單次假鍵", 0)
 ' "$_S2" | grep -q '^POP	[1-9]' || {
     echo "[LOOKUP-KEY] ★SELFCHECK FAIL：母體 0 ⇒ 【什麼都沒掃到】被讀成通過"; exit 3; }
   rm -f "$T/c.gd"
+  # ── ★★★第三段：比對器自己的成對對照（implementer 2026-09-23，systems 派工）──
+  #   ★掃描器的 `["X"]` 分不出【字典索引】與【一元素陣列字面值】而誤咬過一次；
+  #     窄化落地後【沒有任何東西釘住它】⇒ 下一個人拿掉 lookahead，卷面看起來一模一樣。
+  #   ★★兩個方向都驗（誤咬不可中／真索引必須中）—— 只驗前者的話，把整條規則刪掉也會綠。
+  python .claude/hooks/lookup_key_scan.py --selfcheck || {
+    echo "[VALUE-KEY] ★SELFCHECK FAIL：比對器的形狀對照沒過（見上）"; exit 3; }
   echo "[VALUE-KEY] SELFCHECK PASS（註解不算讀點／同檔真讀點保留／單次查表 key 成對／code 壞鍵仍抓得到）"
   exit 0
 fi

@@ -821,6 +821,33 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 	if _fg != "" or _pg != "":
 		lines.append("目標: %s%s" % [_fg if _fg != "" else "（無勢力目標）",
 			"  ★玩家指定: " + _pg if _pg != "" else ""])
+	# ★★★blueprint ③「身在何處、家在哪」——查詢面現在給得出來了（本票）。
+	#   ★沒有據點 ⇒ 三欄皆 null ⇒ 印「家：無」，★★【不是】(0,0)：
+	#     一個座標長得像答案，而「無」才是真的答案。
+	#   ★★★多據點 ⇒ 標「（共 N 處）【暫代】」——「暫代」三個字是【分流器】：
+	#     沒有它，玩家與下一個讀 code 的人分不出【這就是家】與【這只是先湊一個】。
+	#     （本城欄尚未落地 ⇒ 現在取的是 tiles 迭代序的第一個）
+	var _hp = ct.get("home_pos", null)
+	# ★★★三欄是【同時給或同時 null】的合約（player_api_mapper 的四個 helper 走同一個取值點）。
+	#   ★而合約破掉時【不能安靜】：實測把 home_pos 單獨改成 (0,0) 而 kind/distance 仍為 null ⇒
+	#     `int(null)` 丟 "Nonexistent 'int' constructor" ⇒ ★★整個 _build_survival_lines 被砍斷，
+	#     而卷面照樣「到場點名 37／37」——那正是今天咬過一次的形狀。
+	#   ⇒ ★★★所以這裡自己檢查半套：任一欄 null ⇒ 當成【無家】並印出【半套】三個字，
+	#     讓它【看得見地壞】而不是把後面的行一起帶走。
+	var _hk = ct.get("home_kind", null)
+	var _hd = ct.get("home_distance", null)
+	if _hp != null and (_hk == null or _hd == null):
+		lines.append("家：【半套】查詢面只給了一部分（pos=%s kind=%s dist=%s）" % [
+			str(_hp), str(_hk), str(_hd)])
+		_hp = null
+	if _hp == null:
+		lines.append("家：無")
+	else:
+		var _hc: int = int(ct.get("home_count", 1))
+		lines.append("家：(%d,%d) %s  離家 %d%s" % [
+			int(_hp.get("q", 0)), int(_hp.get("r", 0)), str(_hk),
+			int(_hd),
+			"  （共 %d 處）【暫代】" % _hc if _hc > 1 else ""])
 	# ★②「含被聚焦的那個人」：focused_member 是【現成的查詢面 key】，畫面先前從來沒讀過
 	var fm: Dictionary = _cached_snapshot.get("focused_member", {})
 	if not fm.is_empty():
@@ -896,11 +923,20 @@ func _page_skylight_fields(idx: int) -> Array:
 			# ★★★天窗也要有【理由】—— 一個沒有理由的天窗，跟「還沒做」與「做不到」分不開。
 			#   糧食跑道：畫面已有「糧: X 天」，★但 blueprint 要的是【跑道與趨勢】，
 			#             而查詢面【沒有趨勢】⇒ 這一半接不出來 ⇒ 仍是天窗
-			#   位置與家：★★查詢面【沒有】「家在哪／離家多遠」——`outpost_*`／`settlement`
+			#   位置與家：★【以下這段是歷史，2026-09-23 已被「查詢面補家」那張票推翻】——
+			#     當時查詢面【沒有】「家在哪／離家多遠」，`outpost_*`／`settlement`
 			#             是【游標那一格】的屬性，不是【我們的家】
 			#             ⇒ ★★★硬接等於把欄位名指向另一個問題（＝在畫面上說謊）
 			#   任務與目標：★已接出（faction_goal／player_goal_override）⇒ 從清單拿掉
-			var _base: Array = ["糧食跑道（缺趨勢）", "位置與家（查詢面無此欄）"]
+			# ★「位置與家」已接出（本票補了查詢面的 home_pos/kind/distance）⇒ 從天窗清單拿掉
+			#   ★★而它【不是】無條件拿掉：查詢面沒給（home_pos 為 null 以外的情形，
+			#     例如整個欄位被移除）時要變回天窗 —— 那正是 P2 成對對照要驗的。
+			var _base: Array = ["糧食跑道（缺趨勢）"]
+			# ★這個函式的作用域沒有 ct —— 走 _cached_snapshot（與畫面同一份快照，
+			#   ★★systems 要求的「不得各自再查一次」在這裡也適用）
+			var _ct0: Dictionary = _cached_snapshot.get("controlled_team", {})
+			if not _ct0.has("home_pos"):
+				_base.append("位置與家（查詢面無此欄）")
 			if _cached_snapshot.get("focused_member", {}).is_empty():
 				_base.append("被聚焦的人")
 			return _base
