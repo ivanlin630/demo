@@ -13,6 +13,15 @@ set -u
 #   ⇒ 用 trap 印在【每一條離開路徑】上：包含 exit 1／exit 2／提前 exit 0，一條都不會漏。
 #   ★★★這是【構造保證】：在每個 exit 前面各加一行，會因為有人新增一條路徑而漏掉。
 trap 'echo "[MERGE-GATES] BATTERY_RC=$?"' EXIT
+
+# ★★★記憶體卷面（blueprint 要求 2026-09-23，上一輪在第 6／75 支被 OOM 收掉）：
+#   ★跑前印 FreeMB ＋ top-5；跑中每 5 支印一次 ⇒ 下次被殺時，卷面自己說得出【當時剩多少】。
+#   ★★沒有這一格的話，「為什麼被殺」永遠只能事後猜。
+_mg_freemb() {
+  powershell -NoProfile -Command "[int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory/1KB)" 2>/dev/null | tr -d "
+"
+}
+
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
 REG="docs/process/merge-gates.tsv"
 
@@ -154,6 +163,10 @@ ENVFAIL=()
 #   而編輯工具把它換成 0x0A ⇒ 下一行的 ${id%...} 變成剝換行 ⇒ read 早就剝掉了 ⇒ ★純 no-op。
 #   ⇒ ★★守衛死了、語法仍合法、不報錯;腐蝕方向是【綠→紅】(:174 expect 未命中不走 pass) 所以沒造假綠。
 #   ⇒ ★★★修法:文件裡【不要放那個位元組本身】,寫它的名字。改動本檔後必跑剝除的陽性對照。
+echo "[MERGE-GATES] ★開跑前 FreeMB=$(_mg_freemb)｜top-5 記憶體："
+powershell -NoProfile -Command "Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 5 Name,@{n='MB';e={[int](\$_.WorkingSet64/1MB)}} | ForEach-Object { '[MERGE-GATES]   ' + \$_.Name + ' ' + \$_.MB + 'MB' }" 2>/dev/null
+echo "[MERGE-GATES]   ★Godot 行程數=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' 2>/dev/null | tr -d '
+')（★開跑前必須是 0）"
 while IFS=$'	' read -r id cmd purpose expect; do
   id="${id%$''}"; cmd="${cmd%$''}"; purpose="${purpose%$''}"; expect="${expect%$''}"
   case "$id" in ''|'#'*) continue;; esac
@@ -161,6 +174,9 @@ while IFS=$'	' read -r id cmd purpose expect; do
   if [ "$MG_FROM" != "0" ] && [ "$N" -lt "$MG_FROM" ]; then continue; fi
   if [ "$MG_TO" != "0" ] && [ "$N" -gt "$MG_TO" ]; then continue; fi
   RUN_N=$((RUN_N+1))
+  if [ $((RUN_N % 5)) -eq 1 ]; then
+    echo "[MERGE-GATES] ★記憶體：第 ${RUN_N} 支之前 FreeMB=$(_mg_freemb)"
+  fi
   if [ -z "${expect:-}" ]; then
     echo "[MERGE-GATES] ✗ $id —— ★沒有 expect 欄：不能有「沒有判準也算過」的路徑"
     FAILED+=("$id(no-expect)"); continue
