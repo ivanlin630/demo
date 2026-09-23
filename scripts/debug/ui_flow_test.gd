@@ -876,6 +876,23 @@ func _test_pages_zero_loss() -> void:
 	#   ⇒ 聯集怎麼組：狀態列（頁首之前）＋ 每一頁的【分頁區】＋ 頁尾（Tick·Day 那段），
 	#     ★★★而框架那兩段【只取一次】—— 它們每頁都印，直接全串會讓計數 ×5。
 	var after: Array = _union_all_pages(node)
+	# ★具名排除：兩邊都排，★★而排掉幾行要印出來（不是靜默略過）
+	var n_ex_b: int = 0
+	var n_ex_a: int = 0
+	var before2: Array = []
+	for l in before:
+		if _p1b_excluded(String(l)): n_ex_b += 1
+		else: before2.append(l)
+	var after2: Array = []
+	for l in after:
+		if _p1b_excluded(String(l)): n_ex_a += 1
+		else: after2.append(l)
+	print("  ★P1-b 具名排除 %d 條規則｜前排除 %d 行／後排除 %d 行" % [
+		P1B_EXCLUDE.size(), n_ex_b, n_ex_a])
+	for e in P1B_EXCLUDE:
+		print("    排除「%s…」：%s" % [String(e["prefix"]), String(e["why"])])
+	before = before2
+	after = after2
 	var cb: Dictionary = {}
 	for l in before: cb[l] = int(cb.get(l, 0)) + 1
 	var ca: Dictionary = {}
@@ -993,6 +1010,21 @@ func _union_all_pages(node: Node) -> Array:
 #   票B 就壞了：搬到經濟頁的資源段【開頭就是一條分隔線】⇒ 整頁被判成 0 行，
 #   ★而那讓 P1-a 與 P1-b 同時誤紅（看起來像「內容不見了」，其實是【我沒讀到】）。
 # ⇒ 改成錨在【Tick: 那一行】：頁尾是「Tick: 前面那條分隔線」開始的那一段。
+# ★★★P1-b 的【具名排除清單】（systems 裁 2026-09-23）——
+#   ★每一條都帶【為什麼】，★★而【不是】用「含 ↓↑ 就忽略」那種模糊比對：
+#     模糊比對會連【真的掉了一行含箭頭的內容】也一起放過。
+#   ★★★清單長度會印出來 ⇒ 它變長時有人看得見。
+const P1B_EXCLUDE: Array = [
+	{"prefix": "  食:", "why": "資源趨勢箭頭：_build_state_str() 非冪等（會寫 _res_baseline*）"
+		+ " ⇒ 同一份世界、不同呼叫史就不是同一行字；真修法＝讓它冪等，已由 systems 開獨立票"},
+]
+
+# 回傳「這一行是否被具名排除」。★只比【前綴】且前綴必須來自上面那張表。
+func _p1b_excluded(line: String) -> bool:
+	for e in P1B_EXCLUDE:
+		if line.begins_with(String(e["prefix"])): return true
+	return false
+
 func _page_body(ls: PackedStringArray, head: String) -> Array:
 	var hi: int = -1
 	for i in range(ls.size()):
