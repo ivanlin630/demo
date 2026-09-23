@@ -51,10 +51,6 @@ for r in $ROLES; do
     age_s=$(( NOW - mt ))
     IFS=$'\t' read -r wpid sid cpid _rest < "$lock"   # ★第4欄 proto=2 必須有地方接，否則它會黏在 cpid 後面（本檔 2026-09-23 血證：CLAUDE_PID 印成 "24004	proto=2" ⇒ tasklist 查無 ⇒ 六個角色全誤判 DEAD） 2>/dev/null
     wpid="${wpid:--}"; sid="${sid:--}"; cpid="${cpid:--}"
-    # ★狀態改判在【終端】而非 watcher 心跳（watcher 已退役，見抬頭）
-    if   [ "$cpid" = "-" ]; then state="?"
-    elif _pid_alive "$cpid"; then state="OPEN"
-    else state="DEAD"; fi
     if   [ "$age_s" -lt 90 ];   then age="${age_s}s"
     elif [ "$age_s" -lt 5400 ]; then age="$(( age_s / 60 ))m"
     else                             age="$(( age_s / 3600 ))h$(( (age_s % 3600) / 60 ))m"
@@ -79,8 +75,19 @@ for r in $ROLES; do
     #     ⇒ 只有第二欄【不是 `-`】的記錄，它的 pid 才採信。
     if [ -n "${_apid:-}" ] && [ "${_apid}" != "-" ] && [ -n "${_asid:-}" ] && [ "${_asid}" != "-" ]; then
       cpid="$_apid"
+      # ★同一個理由，SESSION_ID 欄也要跟著走通訊錄 —— 否則它會印【重開之前】那個 session
+      #   ⇒ ★★一欄新一欄舊，而讀的人不會知道哪一欄是舊的（blueprint 重開後實際發生）
+      sid="$_asid"
     fi
   fi
+  # ★★★狀態判定【必須在通訊錄覆寫之後】（2026-09-24 blueprint 抓到）：
+  #   ★第一版把它留在 lock 區塊裡 ⇒ **印出來的 pid 是新的、判的是舊的**
+  #   ⇒ ★★同一行的兩欄自相矛盾（CLAUDE_PID=9740 而 STATE=DEAD）——
+  #     而那正是我自己記過的抓法：**把兩個數印在同一行，矛盾就看得見**。
+  #   ⇒ ★★★通則：**改了一個值的來源，就要去看【誰在它之前就已經用過它】。**
+  if   [ "${cpid:--}" = "-" ]; then state="?"
+  elif _pid_alive "$cpid";    then state="OPEN"
+  else                             state="DEAD"; fi
   if [ "$TSV" = "1" ]; then
     printf "%s	%s	%s	%s	%s	%s
 " "$r" "$state" "$addr" "${age_s:--}" "$sid" "$cpid"
