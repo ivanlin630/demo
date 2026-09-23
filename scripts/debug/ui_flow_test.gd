@@ -780,10 +780,7 @@ func _test_pages_frame() -> void:
 		for li in range(lines_s.size()):
 			if String(lines_s[li]) == want: hi = li; break
 		_check("第 %d 頁找得到頁首行" % (i + 1), hi != -1)
-		var body: Array = []
-		for li in range(hi + 1, lines_s.size()):
-			if String(lines_s[li]).begins_with("────"): break
-			body.append(String(lines_s[li]))
+		var body: Array = _page_body(lines_s, want)
 		var body_txt: String = "".join(body).strip_edges()
 		_check("第 %d 頁的【分頁區】非空（%d 行）" % [i + 1, body.size()], body_txt != "")
 	await _free_ui(node)
@@ -960,8 +957,17 @@ func _page_skylight_fields_of(node: Node, idx: int) -> Array:
 func _union_all_pages(node: Node) -> Array:
 	var out: Array = []
 	var keep: int = node._page_idx
+	# ★★★`_build_state_str()` 【不是冪等的】：它會寫 `_res_baseline_day`／`_res_baseline`
+	#   （text_ui_main.gd 的資源趨勢箭頭靠它算）⇒ ★第一次呼叫與第二次呼叫【輸出不同】。
+	#   ★★血證：聯集呼叫它 5 次，而「前」是【單獨一次】產生的
+	#     ⇒ 少了那個 `↓` ⇒ 零損失報「舊 1 次 → 新 0 次：  食:49↓ 幣:2085 材:5」。
+	#   ⇒ ★★★所以每一頁都要從【同一個起點】renders —— 存起來、每次還原。
+	var keep_day: int = node._res_baseline_day
+	var keep_base: Dictionary = node._res_baseline.duplicate()
 	for i in range(UiPages.PAGE_ORDER.size()):
 		node._page_idx = i
+		node._res_baseline_day = keep_day
+		node._res_baseline = keep_base.duplicate()
 		var ls: PackedStringArray = node._build_state_str().split("\n")
 		var head: String = UiPages.header(i)
 		var hi: int = -1
@@ -971,14 +977,34 @@ func _union_all_pages(node: Node) -> Array:
 		if i == 0:
 			# ★狀態列（頁首之前）只取一次
 			for li in range(hi): out.append(String(ls[li]))
-		var li2: int = hi + 1
-		while li2 < ls.size() and not String(ls[li2]).begins_with("────"):
-			out.append(String(ls[li2]))
-			li2 += 1
+		for _b in _page_body(ls, head): out.append(String(_b))
+		var li2: int = ls.size()
+		for _k in range(ls.size() - 1, hi, -1):
+			if String(ls[_k]).begins_with("Tick: "): li2 = _k; break
+		if li2 - 1 > hi and String(ls[li2 - 1]).begins_with("────"): li2 -= 1
 		if i == 0:
 			# ★頁尾（Tick·Day 那段）只取一次
 			for li in range(li2, ls.size()): out.append(String(ls[li]))
 	node._page_idx = keep
+	return out
+
+# 取【分頁區】＝頁首之後、頁尾之前。
+# ★★★頁尾的判準【不能是「第一條 ────」】——那是我第一版的寫法，而它一撞到
+#   票B 就壞了：搬到經濟頁的資源段【開頭就是一條分隔線】⇒ 整頁被判成 0 行，
+#   ★而那讓 P1-a 與 P1-b 同時誤紅（看起來像「內容不見了」，其實是【我沒讀到】）。
+# ⇒ 改成錨在【Tick: 那一行】：頁尾是「Tick: 前面那條分隔線」開始的那一段。
+func _page_body(ls: PackedStringArray, head: String) -> Array:
+	var hi: int = -1
+	for i in range(ls.size()):
+		if String(ls[i]) == head: hi = i; break
+	if hi == -1: return []
+	var ti: int = ls.size()
+	for i in range(ls.size() - 1, hi, -1):
+		if String(ls[i]).begins_with("Tick: "): ti = i; break
+	# ★Tick 行前面那條分隔線也屬於頁尾
+	if ti - 1 > hi and String(ls[ti - 1]).begins_with("────"): ti -= 1
+	var out: Array = []
+	for i in range(hi + 1, ti): out.append(String(ls[i]))
 	return out
 
 func _line_with(text: String, key: String) -> String:

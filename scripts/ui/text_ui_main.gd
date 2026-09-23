@@ -810,7 +810,12 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 	# ★②「含被聚焦的那個人」：focused_member 是【現成的查詢面 key】，畫面先前從來沒讀過
 	var fm: Dictionary = _cached_snapshot.get("focused_member", {})
 	if not fm.is_empty():
-		lines.append("聚焦: %s  %s" % [String(fm.get("name", "?")), String(fm.get("status", ""))])
+		# ★★★GDScript 4 沒有 `String(x)` 建構子 —— 用 str(x)。
+		#   ★血證：寫成 String(...) 時 :814 丟 "Invalid call. Nonexistent 'String' constructor."，
+		#     而它【把整個函式從中間砍斷】⇒ 回傳 null ⇒ 型別化成空 Array ⇒ ★★呼叫端看到 0 行。
+		#   ⇒ ★★★而那一輪的卷面是「errors: 1｜到場點名 31／31」—— 一個執行期錯誤
+		#     靜靜吃掉半個函式，而點名照樣滿分。
+		lines.append("聚焦: %s  %s" % [str(fm.get("name", "?")), str(fm.get("status", ""))])
 	return lines
 
 func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
