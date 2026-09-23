@@ -1226,9 +1226,11 @@ func _handle_interact_mode(keycode: int) -> void:
 				# 進入 gather_intel 子模式
 				_intel_target_id = _interact_target
 				_bridge.set_player_input("pending_intel_target", _intel_target_id)
-				var ir: Dictionary = _bridge.command_player(
-					act.get("command_name", "execute_action"), act.get("command_args", {}))
-				_intel_options = ir.get("payload", {}).get("inquiry_options", [])
+				# ★★★開選單這一步是【查詢】不是指令（systems 裁 2026-09-23）：
+				#   它不改世界 ⇒ 進佇列的話重播帳裡會多一條「什麼都沒做」的指令。
+				#   ★真正改世界的是選完之後那一條（confirm_gather_intel）⇒ 那條照常進佇列。
+				var ir: Dictionary = _bridge.query_inquiry_options(_interact_target)
+				_intel_options = ir.get("data", {}).get("inquiry_options", [])
 				if _intel_options.is_empty():
 					_log_event("[打聽] 無可用問題")
 				else:
@@ -1236,12 +1238,13 @@ func _handle_interact_mode(keycode: int) -> void:
 					_interact_mode = false
 			elif action_id == "recruit":
 				# recruit 回 menu payload → 進招募子模式（記名候選 + 匿名選項）
-				var rr: Dictionary = _bridge.command_player(
-					act.get("command_name", "execute_action"), act.get("command_args", {}))
+				# ★同上：開招募選單是查詢（成功路徑純讀；失敗路徑的 erase 由查詢端擋掉，
+				#   而隊伍死亡的清理 world_state.gd:878 本來就有）
+				var rr: Dictionary = _bridge.query_recruit_menu(_interact_target)
 				if not rr.get("ok", false):
-					_log_event("[招募] %s" % rr.get("message", rr.get("msg", "無法招募")))
+					_log_event("[招募] %s" % rr.get("message", "無法招募"))
 				else:
-					var rp: Dictionary = rr.get("payload", {})
+					var rp: Dictionary = rr.get("data", {})
 					_recruit_members        = rp.get("willing_members", [])
 					_recruit_anon_available = rp.get("anon_available", false)
 					_recruit_anon_cost      = int(rp.get("anon_cost", 0))
@@ -1258,8 +1261,11 @@ func _handle_interact_mode(keycode: int) -> void:
 				_log_event("[互動] %s" % result.get("message", ""))
 				_set_feedback(result.get("ok", true), result.get("message", ""))
 				# 貿易預覽流程：進入 trade submode
-				if result.get("ok") and result.get("payload", {}).get("requires_preview", false):
-					_trade_target_id = result.get("payload", {}).get("preview_target_id", -1)
+				# ★★★不讀 payload（systems 裁）：`preview_target_id` 就是呼叫端自己傳進去的 target，
+				#   而佇列化之後 `result` 只會是「已排入」——★讀它等於讀一個還沒發生的事的結果。
+				#   ★判斷改由【我自己知道的 action_id】決定（"trade" ＝ player_command_system.gd:88）。
+				if action_id == "trade":
+					_trade_target_id = _interact_target
 					_bridge.set_player_input("trade_offer", {"player_gives": {}, "player_wants": {}})
 					_trade_page = 0
 					_trade_mode = true

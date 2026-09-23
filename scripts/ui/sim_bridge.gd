@@ -305,6 +305,13 @@ func refresh_interaction_targets() -> void:
 func set_player_input(key: String, value: Variant) -> void:
 	_state.player_state[key] = value
 
+# ★這兩支【不進佇列】：它們不改世界（稽核見 player_query_api 檔頭）
+func query_inquiry_options(target_id: int) -> Dictionary:
+	return PlayerQueryApi.new().get_inquiry_options(_state, target_id)
+
+func query_recruit_menu(target_id: int) -> Dictionary:
+	return PlayerQueryApi.new().get_recruit_menu(_state, target_id)
+
 func query_faction_panel() -> Dictionary:
 	return PlayerQueryApi.new().query_faction_panel(_state)
 

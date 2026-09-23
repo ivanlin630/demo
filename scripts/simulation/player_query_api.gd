@@ -1,5 +1,39 @@
 class_name PlayerQueryApi
 
+# ══════════ 兩支【披著指令外衣的查詢】（systems 裁 2026-09-23）══════════
+# ★★★為什麼搬到這裡：它們【不改世界】—— 放進指令佇列＝把查詢當指令，
+#   而重播帳裡會多出兩條「什麼都沒做」的指令 ⇒ ★帳本身變得不誠實。
+# ★稽核（遞移閉包，切掉儀器鏈；★我第一版用名字解析呼叫，閉包爆成 886 支＝過寬過濾，已改窄）：
+#   `InquirySystem.get_options` ⇒ 11 支函式、**0 個寫點**
+#     （它走 `BeliefSystem.best_estimate` ⇒ ★讀 belief 不讀 god-view，感知鐵律沒破）
+#   `_action_recruit` ⇒ 2 支、1 個寫點，而那個寫點在【失敗路徑】：
+#     `state.player_pending_targets.erase(target_id)`（目標不存在時的清理）
+#     ⇒ ★★查詢不得有副作用 ⇒ 這裡【先檢查存在】、不讓它走到那一行。
+#     ⇒ ★★★而那個清理沒有消失：隊伍死亡時 `world_state.gd:878` 本來就會 erase。
+# ★真正改世界的是【選完之後】那一條（confirm_gather_intel／recruit_named／recruit_anon）
+#   —— 那一條照常走 `command_player` 進佇列。
+func _query_menu(state: WorldState, target_id: int, action_id: String) -> Dictionary:
+	var pre := _check_player_with_team(state)
+	if pre["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, pre["code"], pre["msg"], {})
+	if not state.teams.has(target_id):
+		return PlayerApiMapper.map_query_envelope(false, "not_found", "目標不存在", {})
+	var p: PersonData = state.persons[state.player_id]
+	var pt: TeamData = state.teams[p.team_id]
+	var sys := PlayerCommandSystem.new()
+	# ★同一份真相：直接叫 command system 的那一支，不在這裡抄一份邏輯
+	#   （★★抄一份就是 (丁) 被否決的那個病：兩份會漂開，而漂開那天沒有訊號）
+	var r: Dictionary = sys._action_gather_intel(state, target_id, pt, p.team_id) if action_id == "gather_intel" 		else sys._action_recruit(state, target_id, pt, p.team_id)
+	if not bool(r.get("ok", false)):
+		return PlayerApiMapper.map_query_envelope(false, "unavailable", String(r.get("msg", "")), {})
+	return PlayerApiMapper.map_query_envelope(true, "ok", String(r.get("msg", "")), r.get("payload", {}))
+
+func get_inquiry_options(state: WorldState, target_id: int) -> Dictionary:
+	return _query_menu(state, target_id, "gather_intel")
+
+func get_recruit_menu(state: WorldState, target_id: int) -> Dictionary:
+	return _query_menu(state, target_id, "recruit")
+
 func get_player_snapshot(state: WorldState, request: Dictionary) -> Dictionary:
 	var player_check := _check_player_with_team(state)
 	if player_check["code"] != "ok":
