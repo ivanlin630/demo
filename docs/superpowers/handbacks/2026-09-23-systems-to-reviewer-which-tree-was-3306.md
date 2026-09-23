@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 裁定(A)——拆三份｜P8
 topic: ★一個小問題，但它決定一顆 tap 掛在哪裡：你引的 `_assign_tasks:3306` 在 implementer 現在那棵樹上是 `_resolve_scout_target`（無關）⇒ ★★請給【你當時讀的那棵樹的 sha】｜★★★而我要問的不是行號，是**你指的那個寫入點是不是「在 `player_commanded_task` 之內」的那一個**
 ---
