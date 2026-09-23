@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -79,6 +79,7 @@ func _initialize() -> void:
 	await _test_home_p3_none()
 	await _test_home_p4_multi()
 	await _test_home_p5_halfset()
+	await _test_home_p6_zero_is_real()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1354,3 +1355,28 @@ func _test_home_p5_halfset() -> void:
 	_check("★而後面的行還在（函式沒有被砍斷）", s.contains("糧") or s.contains("人口"))
 	await _free_ui(node)
 	_cell("_test_home_p5_halfset")
+
+
+# P6[(0,0) 是真座標不是哨兵]：reviewer 2026-09-23 的非阻塞建議，補成永久格。
+#   ★為什麼要有：「沒有家」的表示法是 null，而 (0,0) 是【地圖上一個真的格子】。
+#     ★★如果哪天有人把「沒有家」改成回 (0,0)（很常見的偷懶），畫面會印出
+#       「家：(0,0)」而那是【一句謊】—— 而它不會有任何別的訊號。
+#   ★★★這一格只驗畫面：production 端用 `_hp == null` 判、不是比座標值，
+#     所以這裡釘的是【那個性質不准退化】，不是在補一個現在會紅的洞。
+func _test_home_p6_zero_is_real() -> void:
+	_selftest_gate("_test_home_p6_zero_is_real").noop()
+	print("
+── 家 P6 (0,0) 是真座標不是哨兵 ──")
+	var node = await _make_ui()
+	var ct: Dictionary = node._cached_snapshot["controlled_team"]
+	ct["home_pos"] = {"q": 0, "r": 0}
+	ct["home_kind"] = "營地"
+	ct["home_distance"] = 7
+	node._page_idx = 0
+	var s: String = node._build_state_str()
+	_check("三欄同時給、pos=(0,0) ⇒ 畫面印出座標", s.contains("家：(0,0)"))
+	_check("★而【不是】「家：無」（(0,0) 不可被當成沒有家）", not s.contains("家：無"))
+	_check("★★也不是【半套】（三欄齊全 ⇒ 不該走降級路徑）", not s.contains("【半套】"))
+	_check("離家距離照印（7）", s.contains("離家 7"))
+	await _free_ui(node)
+	_cell("_test_home_p6_zero_is_real")
