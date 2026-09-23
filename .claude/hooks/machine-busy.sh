@@ -17,6 +17,14 @@
 #   ★★它不知道【誰】在用：FREE 只代表「現在沒有人在跑」，不代表「沒有人正要跑」。
 #     ⇒ 交接仍然要寄信，這支只是讓那封信裡的數字是對的。
 set -u
+# ★★★2026-09-23：本支【可以直接幫你擋】—— 用法二（implementer 血證）：
+#     bash .claude/hooks/machine-busy.sh -- <你的指令…>
+#   ⇒ FREE 才執行那個指令；BUSY 就【不執行】並回 1。
+#   ★血證：他寫 `machine-busy.sh; <指令>` —— ★★那個 `;` 讓檢查【只是印字】，
+#     而指令照樣跑上我的電池。⇒ ★★★「回傳碼 1」只有在呼叫端【接了】它的時候才算擋。
+#   ⇒ 所以把「要記得用 && 或 if」換成【本支自己執行那個指令】：★規矩變成會擋的東西。
+_mb_cmd_mode=0
+if [ "${1:-}" = "--" ]; then _mb_cmd_mode=1; shift; fi
 _gc="$(git rev-parse --git-common-dir 2>/dev/null || echo .git)"
 _root="$(cd "$(dirname "$_gc")" && pwd)"
 FLAG="$_root/.claude/hooks/.merge-gates-running"
@@ -62,5 +70,17 @@ fi
 if [ "$busy" = 0 ]; then
   echo "[machine] ✅ FREE：無電池標記、Godot 行程數 = ${n:-0}"
   echo "[machine]   ⇒ ★這是【此刻】的答案，不是預約 —— 要用機器請寄信說一聲（交接靠信，不靠這個數）"
+else
+  echo "[machine]   ⇒ ★★★若你是用 \`machine-busy.sh; <指令>\` 這種寫法：那個 \`;\` 不會擋你。"
+  echo "[machine]     改用：bash .claude/hooks/machine-busy.sh -- <你的指令…>（FREE 才跑）"
+fi
+if [ "$_mb_cmd_mode" = 1 ]; then
+  if [ "$busy" != 0 ]; then
+    echo "[machine] ⛔ 不執行你的指令（機器忙）：$*"
+    exit 1
+  fi
+  echo "[machine] ▶ 機器空，執行：$*"
+  "$@"
+  exit $?
 fi
 exit "$busy"
