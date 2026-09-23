@@ -1,5 +1,6 @@
 {
   "slice": "S2-root-reanchor-landing",
+  "is_sim": true,
   "★★★這是merged base純度終量——比較main落地前(746ff6e7^=49d25911)vs main落地後(746ff6e7)，不是branch vs main": true,
   "測法": {
     "worktree": "A:/GDS/demo/.worktrees/measure-s2-after（獨立乾淨worktree）",
@@ -16,7 +17,7 @@
       "before_peaceful":"observer_guard=none first_nonadvance=none effective_window=7200/7200(100%)",
       "before_warring": "observer_guard=stripped first_nonadvance=none effective_window=7200/7200(100%)"
     },
-    "★四床全部100%有效窗口，沒有任何一邊提早game_over(advance_tick回傳值偵測沒觸發)"
+    "★備註": "四床全部100%有效窗口，沒有任何一邊提早game_over(advance_tick回傳值偵測沒觸發)"
   },
 
   "★★★peaceful_economy(teams 12→12，母體不變，per-team-day=raw per-day，無需重算)": {

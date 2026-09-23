@@ -1,5 +1,6 @@
 {
   "slice": "outpost-arc-closure",
+  "is_sim": true,
   "ticket": "systems強先驗(設施組合變了⇒沒設施那桶變多)要求證偽——製造-7.5%三桶切分+設施普查",
   "裁決": "★★★先驗被直接證偽——設施普查兩邊完全相同(3/6/0/0/0)，facility數量與類型一顆都沒變；即使noop_no_facility表面上真的漲了+20.1%(方向跟先驗預測一致)，普查證明那不是【設施組合改變】造成的，是別的東西",
 
@@ -29,5 +30,5 @@
     "after_raw": "docs/measurements/mfg-probe-after-qty-peaceful_economy-30d.txt",
     "before_raw": "docs/measurements/mfg-probe-before-qty-peaceful_economy-30d.txt"
   },
-  "床改動": {"檔案": "scripts/debug/qty_tap_bed.gd", "層級": "L3(讀既有Probe.counts+讀state.world.tiles，零新tap零控制流)", "★兩邊都用after側746ff6e7的床覆寫跑(床是儀器)"}
+  "床改動": {"檔案": "scripts/debug/qty_tap_bed.gd", "層級": "L3(讀既有Probe.counts+讀state.world.tiles，零新tap零控制流)", "★備註": "兩邊都用after側746ff6e7的床覆寫跑(床是儀器)"}
 }

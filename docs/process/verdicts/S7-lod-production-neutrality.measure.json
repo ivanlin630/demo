@@ -1,5 +1,6 @@
 {
   "slice": "S7-lod-production-neutrality",
+  "is_sim": true,
   "推導要坐實的": "同一座工坊、隊在遠區(far)時每日真產量是否≈近區(near)的1/10",
   "量法": "手造最小合成場景(單隊、population=11起始、workshop手動設manufacturing_level=2已建成、material/food/tools/horses/gem全塞爆量避免料瓶頸)——一組player_pos=團隊位置(near)，一組player_pos=極遠(far)，同seed=1337，各跑30日，讀manufacture.output.<res>真實產出量(不是runs_per_day估算函式)",
   "床": "scripts/debug/s7_lod_neutrality_bed.gd(新檔，純觀測，零production改動)",
@@ -19,7 +20,7 @@
   "★★★③誠實限——一個我沒能完全排除的confound": {
     "population分岔": "near跑完population=1，far跑完population=9(起始都是11)——★兩邊population不是我承諾的『pop固定』",
     "★★為什麼我認為它大致不影響本次比較": "本實驗只有單一團隊在該tile，LaborSystem.pool_of()只加總同tile的PRODUCE隊pop，本例分母分子都是同一隊自己的pop，labor_share=team_pop/pool≈1.0，不管團隊pop絕對值是11還是1(只要>0)，這條channel理論上不受population分岔影響",
-    "★★★但我沒有辦法完全排除population分岔本身透過其他路徑(如skill成長速率)間接影響輸出量，這是本次量法的已知局限，不是我能修的（合成場景本身有emergent行為，非床的bug）",
+    "★備註": "但我沒有辦法完全排除population分岔本身透過其他路徑(如skill成長速率)間接影響輸出量，這是本次量法的已知局限，不是我能修的（合成場景本身有emergent行為，非床的bug）",
     "population為何分岔": "near/far兩邊都出現多次Person10(leader)的N1_flee/loyalty下滑事件(loyalty掉到0.18)，但population下滑機制(哪個anon成員何時離開)沒有對應的log行可查——標記為未解但已排除的候選解釋不是material/food短缺(兩邊都塞爆量)"
   },
 

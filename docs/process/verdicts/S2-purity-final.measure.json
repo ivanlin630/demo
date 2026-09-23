@@ -1,9 +1,10 @@
 {
   "slice": "S2-statistical-equivalence-after",
+  "is_sim": true,
   "★★★這是S2純度終量——S1c(封閉母體120顆全處置,NEEDS_HUMAN=0)之後的一次性終量vs before。S3之後還會有第二次終量(分層效果本身有價值),這不是最終那次": true,
   "commit": "b05750ef",
   "測法": {"worktree": "A:/GDS/demo/.worktrees/measure-s2-after（獨立乾淨worktree,非implementer的old-growth）", "seed": 1337, "days": 30, "beds": ["peaceful_economy", "warring_states"]},
-  "機械檢查": {"跑前跑後HEAD": "b05750ef / b05750ef（兩床皆驗）", "status跑後": "空（乾淨）", "warring首輪跑到一半被外部中斷(status killed非我主動停,原因不明,可能是session層級動作)重跑一次拿到完整版"},
+  "機械檢查": {"跑前跑後HEAD": "b05750ef / b05750ef（兩床皆驗）", "status跑後": "空（乾淨）", "★備註": "warring首輪跑到一半被外部中斷(status killed非我主動停,原因不明,可能是session層級動作)重跑一次拿到完整版"},
 
   "★★★peaceful_economy(teams 12→12，跟before一致，人口穩定世界)": {
     "採集food_taken_每日":     {"before": 24.04, "after": 24.80, "相對差": "+3.2%"},

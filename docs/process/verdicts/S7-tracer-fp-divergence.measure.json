@@ -1,5 +1,6 @@
 {
   "slice": "observer-safety-impact",
+  "is_sim": true,
   "問題": "開tracer與不開tracer,同seed跑出來的世界是不是同一個",
   "測法": "warring_states,seed=1337,commit c78039e0,15遊戲日,逐日印state_fingerprint；specimen_team_ids=[0,9,19,29,39](確定性strided取樣，同SpecimenDumpHelper手法)",
   "床": "scripts/debug/s7_tracer_fp_divergence_bed.gd(新檔，純觀測，零production改動，走MeasureBedHelper.arm_and_setup)",
@@ -8,7 +9,7 @@
     "結果": "15天全部逐位元相同(day1~day15)",
     "off_day1": "247a0693b84c424fafa1b9ac7415395e", "on_day1": "247a0693b84c424fafa1b9ac7415395e",
     "off_day15": "3417207b12a17906cd4aa791c8043684", "on_day15": "3417207b12a17906cd4aa791c8043684",
-    "★完整15天序列兩邊逐位元相同，無任何分岔日"
+    "★備註": "完整15天序列兩邊逐位元相同，無任何分岔日"
   },
 
   "★★②兩端陽性對照(硬條款，先驗才能讀①)": {

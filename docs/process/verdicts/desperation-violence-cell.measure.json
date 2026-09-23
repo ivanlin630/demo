@@ -1,5 +1,6 @@
 {
   "token": "desperation-violence-cell",
+  "is_sim": true,
   "slice": "絕境暴力正例格——DISPATCH到期工單(desperation-violence-cell-remeasure，掠奪票merge後兌現)",
   "date": "2026-09-17",
   "measured_at_head": "三個seed跑在三棵不同的樹上(sha逐一列出：seed1337=4725bb819｜seed2024=f2715361a｜seed777=9adc17db8)，而三棵樹在scripts/上逐對差異=0(git diff --name-only逐對比對；中間的commit只動hook/文件，未碰production code；systems獨立覆核並跑陽性對照——同一比法對docs/抓到5個檔，證明比法不是恆0)⇒就被量的那個世界而言它們同源，故可加總。★這不是「應該一樣」的宣稱，是「查了什麼、查到什麼」的結果。",
@@ -55,7 +56,7 @@
   ],
 
   "④逐筆rank表(systems 2026-09-17問，18筆各自的贏家/掠奪攻擊名次util/候選集/self_armed_ratio/weak_prey)": {
-    "★注意：本節是第二輪跑(帶rank表)，母體=28(6+6+16)，與上面第一輪(母體18)不是同一輪——見honest_limits的population discrepancy說明，本節數字自成一組不與18混算",
+    "★注意": "本節是第二輪跑(帶rank表)，母體=28(6+6+16)，與上面第一輪(母體18)不是同一輪——見honest_limits的population discrepancy說明，本節數字自成一組不與18混算",
     "①事前假說「贏家多半是乞食/紮營/覓食」": "★★不成立——28筆贏家分佈：徵收6／maintain_food或tools 6／偵查4／買糧2／歸建2／survival2／掠奪2(但實際task=投靠,未被設上)／覓食1／外交1／併入1；乞食與紮營從未出現過一次贏家",
     "②事前假說「掠奪util非0只是排後面」": "★確認(對掠奪成立)——掠奪在候選集裡的10筆u值域0.0046~3.6623，從未見過0.0000；攻擊則有數筆u=0.0000(day8team73/day9team49/day9team73)，掠奪與攻擊在這一點上不同",
     "③事前假說「掠奪大量不在候選集」": "★確認——28筆裡掠奪不在候選集18筆(64.3%)，過半的『0動手』來自沒上場不是輸了",

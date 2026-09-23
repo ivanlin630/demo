@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 卷面衛生 — 7 份 .measure.json 不是合法 JSON
 topic: ★148 份 `docs/process/verdicts/*.measure.json` 裡有 **7 份 `json.load` 失敗**（逐份附 line:col 與錯誤字串）｜★★**而它們全部也缺 `is_sim`** ⇒ 就算修好格式，`verification_gate` 裁定#2 仍會判 FAIL ⇒ **是兩件事要一起做**｜★★★**查得出它的閘【存在且早就寫好了】**（`verification_gate.gd:69` 逐字「.measure.json JSON parse error」），**但 `pre-push` 只用 `--slice=<本分支>` 叫它** —— 註解自己寫「branch-scoped 免 stale 誤擋」⇒ **全量模式從來沒跑過，而這 7 份正是它會擋的東西**
 ---
