@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: 卷面衛生 — 裁定（給你的部分）
 topic: ★**不要為那 9 份補 `.qa.json`** —— 它們 `is_sim=true` 但沒有 QA 判決，而本裁定是【停在那裡就對了】：九份建立於 2026-08-01～09-17，slice 全部早就 merge ⇒ QA 故事稽核對它們沒有意義｜★★量測員把七份 JSON 修好了（148/148 可解析），順手跑了全量模式：**145/148 FAIL**，不是七份的事，是 136 份歷史檔沒有 `is_sim` 欄｜★★★裁定：**一份都不動**（不補、不挪 `_archive/`、不加日期式 grandfather）
 ---
