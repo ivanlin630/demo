@@ -290,11 +290,12 @@ func command_player(name: String, args: Dictionary) -> Dictionary:
 func pending_command_count() -> int:
 	return _state.pending_commands.size()
 
-# ★★★結果句由【非 render 路徑】排空（見 world_state.command_results 檔頭）。
-func drain_command_results() -> Array:
-	var out: Array = _state.command_results
-	_state.command_results = []
-	return out
+# ★★★【唯讀】：讀結果句不得改變世界（systems 裁 2026-09-23）。
+#   ★原本這支是破壞性排空 ⇒ 掛上一個 UI 就會改變 fp ＝ 觀測改變被觀測物。
+#   ★★現在清除由消費點依 tick 做（sim_runner.RESULT_TTL_TICKS）
+#   ⇒ 呼叫端自己記「我印到哪一條」（UI 端的 local state，不是世界狀態）。
+func read_command_results() -> Array:
+	return _state.command_results
 
 # 玩家主動打開互動選單時呼叫：掃描同格 NPC 加入 pending_targets
 # ★★★改成【入列】（spec §3-3b）：它寫 `player_pending_targets` ＝ 世界狀態

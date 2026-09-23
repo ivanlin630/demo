@@ -492,7 +492,27 @@ func _seam3_dummy_step(_state: WorldState) -> void:
 #   ★而「遭遇戰期間玩家其實按不到鍵」是真的 ⇒ 這個分支【多半】是空的；
 #     ★★但「多半空」不是「保證空」，所以規則寫死，不靠它空。
 # ★一次吃光，沒有上限（spec §7-③：玩家手速有限）。
+# ★★★結果句的存活時間（systems 裁 2026-09-23）：綁 tick，【不綁「有沒有人來排空」】。
+#   ★原本是 UI 在 `_process()` 裡破壞性排空 ⇒ **掛上一個 UI 會改變世界指紋**
+#     ⇒ 正面命中「觀測改變被觀測物」，而且踩到 fp 存在的理由：
+#       fp 要回答「這兩跑是不是同一個世界」，★★不該回答「這兩跑有沒有人在看」。
+#   ★★★而「N 產生、N+1 清掉」不夠：`tick_step()` 一次吃 min(60, remaining) 個 tick
+#     ⇒ 那樣 UI 只看得到【最後一顆 tick】的結果，前面 59 顆的拒絕訊息會靜靜消失
+#     ⇒ 而「拒絕禁靜默」正是 (乙) 的核心 ⇒ 兩條規矩會互相吃掉。
+#   ⇒ 存活時間取 `TICKS_PER_HOUR` ＝【一次 bridge step 的上界】：
+#     ★任何【每個 step 讀一次】的觀察者都看得到全部，而它仍然純粹是 tick 的函數。
+const RESULT_TTL_TICKS: int = WorldState.TICKS_PER_HOUR
+
 func _consume_player_commands(state: WorldState) -> void:
+	# ★過期清除【在最前面、且不看佇列空不空】——
+	#   ★★放在 `if pending.is_empty(): return` 後面的話，沒有新指令的 tick 就不會清
+	#   ⇒ 那會讓「這一欄的內容」取決於【後來有沒有人下指令】，又變回非 tick 的函數。
+	if not state.command_results.is_empty():
+		var keep: Array = []
+		for r in state.command_results:
+			if state.world.current_tick - int(r.get("tick", 0)) < RESULT_TTL_TICKS:
+				keep.append(r)
+		state.command_results = keep
 	if state.pending_commands.is_empty():
 		return
 	# ★取走整批再跑：handler 可能自己再入列（例如連鎖），那些屬於【下一顆 tick】
@@ -513,7 +533,7 @@ func _consume_player_commands(state: WorldState) -> void:
 		#   ★★原因取自 handler 自己回的 message ⇒ 零第二份真相（這正是 (丁) 被否決的理由）。
 		var why: String = String(res.get("message", res.get("msg", "")))
 		state.command_results.append({
-			"tick": state.world.current_tick, "ok": ok,
+			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok,
 			"text": ("%s：完成" % PlayerCommandApi.describe(name, args)) if ok
 				else ("%s：被拒絕（%s）" % [PlayerCommandApi.describe(name, args),
 					why if why != "" else "沒有給原因"])})

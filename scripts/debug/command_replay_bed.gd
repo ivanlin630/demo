@@ -30,7 +30,8 @@ var _cells_ran: Array = []
 const BAD_TILE: Vector2i = Vector2i(9999, 9999)
 const EXPECTED_CELLS: Array = ["_test_replay_same_fp", "_test_negative_boundary_shift", "_test_queue_defers",
 	"_test_p9_enqueue_echo", "_test_p10_result_lines", "_test_p12_reject_comes_late",
-	"_test_p13_queries_are_pure", "_test_p13b_confirm_has_a_landing_point"]
+	"_test_p13_queries_are_pure", "_test_p13b_confirm_has_a_landing_point",
+	"_test_p14_reading_does_not_change_the_world", "_test_p14b_results_expire_by_tick"]
 
 
 func _cell(name: String) -> void:
@@ -239,6 +240,8 @@ func _initialize() -> void:
 	_test_p12_reject_comes_late()
 	_test_p13_queries_are_pure()
 	_test_p13b_confirm_has_a_landing_point()
+	_test_p14_reading_does_not_change_the_world()
+	_test_p14b_results_expire_by_tick()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
@@ -441,3 +444,67 @@ func _test_p13b_confirm_has_a_landing_point() -> void:
 		print("     ★這是要回報 blueprint 的事實（他要的成本掛在這一層），不是這支床的紅燈，")
 		print("     ★★也不是我順手補的東西 —— 補它等於替 WHAT 決定打聽要付什麼代價。")
 	_cell("_test_p13b_confirm_has_a_landing_point")
+
+
+# ══════════ P14［讀結果句不得改變世界］（systems 裁 2026-09-23）══════════
+# ★★★他要的那句話是「同一顆種子，有 UI 跑與 headless 跑，fp 逐字相同」。
+#   ★我改成【等價而且可判】的形狀，理由寫在這裡不藏起來：
+#     兩支不同的 entry point 會各自建自己的世界，「同一顆種子」也保證不了兩邊
+#     跑的是同一棵樹（TextUI 自己載 config）⇒ 那個比對的主詞會很模糊。
+#   ⇒ ★★這裡改成【直接測那個性質】：同一個世界，讀 5 次 ⇒ fp 逐字不變。
+#     那正是「有沒有人在看不得改變世界」，而且主詞只有一個。
+#   ★★★負對照不可少：做一次【破壞性排空】（＝修法前的舊行為）⇒ fp 必須變。
+#     沒有它的話，一支【根本不把 command_results 放進 fp】的指紋也會讓上面那格恆綠。
+func _test_p14_reading_does_not_change_the_world() -> void:
+	print("
+── P14 讀結果句不得改變世界 ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var runner: SimRunner = pair[1]
+	var bridge := SimBridge.new(runner, st)
+	var plan: Array = _script_for(st)
+	if plan.is_empty():
+		_errors += 1
+		print("  ★[不可判] 造不出指令串")
+		_cell("_test_p14_reading_does_not_change_the_world")
+		return
+	bridge.command_player("move_to", (plan[0] as Dictionary)["args"])
+	bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})
+	runner.advance_tick(st, Vector2i(-1, -1))
+	_check("★★母體地板：真的有結果句可以讀（%d 句）—— 0 句的話「讀不改變」恆真"
+		% st.command_results.size(), st.command_results.size() >= 2)
+	var before: String = StateFingerprint.compute(st)
+	for _i in range(5):
+		bridge.read_command_results()
+	_check("★★★讀 5 次 ⇒ world-fp 逐字不變", StateFingerprint.compute(st) == before)
+	# ★負對照：修法前的舊行為（破壞性排空）
+	var fp_mid: String = StateFingerprint.compute(st)
+	st.command_results = []
+	_check("★負對照：做一次破壞性排空（＝修法前的行為）⇒ fp 必須【不同】",
+		StateFingerprint.compute(st) != fp_mid)
+	_cell("_test_p14_reading_does_not_change_the_world")
+
+
+# ══════════ P14b［結果句依 tick 過期，不依「有沒有人讀」］══════════
+# ★存活上界取 TICKS_PER_HOUR ＝ 一次 `tick_step()` 的上界
+#   ⇒ ★★任何【每個 step 讀一次】的觀察者都看得到全部（拒絕禁靜默不被這條規矩吃掉）。
+func _test_p14b_results_expire_by_tick() -> void:
+	print("
+── P14b 結果句依 tick 過期 ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var runner: SimRunner = pair[1]
+	var bridge := SimBridge.new(runner, st)
+	bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})
+	runner.advance_tick(st, Vector2i(-1, -1))
+	_check("★母體地板：產生了結果句（%d）" % st.command_results.size(), st.command_results.size() == 1)
+	# ★★沒有人讀，只是讓世界走 —— 走【不到】一小時：必須還在
+	for _i in range(WorldState.TICKS_PER_HOUR - 2):
+		runner.advance_tick(st, Vector2i(-1, -1))
+	_check("★★走了不到一小時、而且【沒有人讀過】⇒ 結果句還在（%d）"
+		% st.command_results.size(), st.command_results.size() == 1)
+	for _i in range(4):
+		runner.advance_tick(st, Vector2i(-1, -1))
+	_check("★★★走過一小時 ⇒ 它自己過期了（%d）—— 清除是世界的函數，不是觀眾的函數"
+		% st.command_results.size(), st.command_results.is_empty())
+	_cell("_test_p14b_results_expire_by_tick")

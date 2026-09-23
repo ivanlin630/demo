@@ -92,6 +92,9 @@ var _feedback_line: Label          # 指令成敗 feedback（著色，持續到�
 var _hint_line: Label              # 當前模式可用鍵
 var _res_baseline: Dictionary = {} # 資源每日基準（日邊界更新）→ 趨勢箭頭
 var _res_baseline_day: int = -1
+# ★「我印到第幾條了」＝【UI 自己的】狀態，不是世界狀態
+#   ★★所以它不進 fp，也不會讓「有沒有人在看」改變世界（systems 裁 2026-09-23）。
+var _last_shown_result_seq: int = 0
 
 # ── Pre-encounter submode ────────────────────────────────────────────────────
 var _pre_encounter_mode: bool = false
@@ -203,7 +206,10 @@ func _process(_delta: float) -> void:
 	#   在 render 裡排空就是 render 又在寫 state，而那是「render 不得寫 state」那張票剛還掉的債。
 	#   ★★拒絕禁靜默 ⇒ 成功與失敗【都】進事件流；失敗另外推上 feedback 行，因為
 	#     它是玩家【按了鍵卻沒發生事】的唯一解釋。
-	for r in _bridge.drain_command_results():
+	for r in _bridge.read_command_results():
+		if int(r.get("seq", 0)) <= _last_shown_result_seq:
+			continue
+		_last_shown_result_seq = int(r.get("seq", 0))
 		_events.append("%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))])
 		if not bool(r.get("ok", false)):
 			_feedback_line.text = _feedback_text(false, String(r.get("text", "")))
