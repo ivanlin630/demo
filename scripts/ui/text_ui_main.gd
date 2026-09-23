@@ -199,6 +199,15 @@ func _process(_delta: float) -> void:
 	var result := _bridge.tick_step()
 	_update_day_baseline()   # ★★日邊界的擁有者在這裡，不在 render
 	_events.append_array(result.get("events", []))
+	# ★★★指令結果句排空（spec §3-5②）——★在【這裡】不在 `_refresh()`：
+	#   在 render 裡排空就是 render 又在寫 state，而那是「render 不得寫 state」那張票剛還掉的債。
+	#   ★★拒絕禁靜默 ⇒ 成功與失敗【都】進事件流；失敗另外推上 feedback 行，因為
+	#     它是玩家【按了鍵卻沒發生事】的唯一解釋。
+	for r in _bridge.drain_command_results():
+		_events.append("%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))])
+		if not bool(r.get("ok", false)):
+			_feedback_line.text = _feedback_text(false, String(r.get("text", "")))
+			_feedback_line.modulate = _feedback_color(false)
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 
@@ -598,7 +607,12 @@ func _refresh() -> void:
 			log_lines.append("[T%d] %s" % [_bridge.get_current_tick(), str(e)])
 		_event_label.text = "\n".join(log_lines)
 	# 常駐 chrome：hint（當前模式鍵表）+ LogStrip（與 panel 共存，永遠顯最新 N 條）
-	_hint_line.text = _mode_keymap(_current_mode_name())
+	# ★★★頁腳常駐「待執行 N 道」（spec §3-5③）：玩家要看得到他按的東西【還沒生效】。
+	#   ★常駐＝0 也印 —— ★★只在非零時才出現的東西，玩家學不會它的意思，
+	#     而「沒看到」與「沒有這個功能」在畫面上長得一樣。
+	#   ★這裡【只讀】不寫（render 不得寫 state）。
+	_hint_line.text = "%s｜待執行 %d 道" % [
+		_mode_keymap(_current_mode_name()), _bridge.pending_command_count()]
 	_log_strip.text = _log_strip_text(_events, 3)
 	_check_alerts()
 

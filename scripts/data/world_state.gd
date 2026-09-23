@@ -199,6 +199,11 @@ var command_seq: int = 0
 #     （DayNight／Probe／FaiPhase…）都讀遞增後的值，記錯側不會馬上紅，
 #     只有跟別的 tick 來源對帳時才現形（spec §3-2）。
 var command_log: Array = []
+# ★★★消費點產出的【結果句】（spec §3-5②，blueprint 裁 (乙)）：一條指令一句話。
+#   ★拒絕【禁靜默】—— 玩家按了鍵而世界不動，他分不出「被拒絕」與「沒吃到鍵」。
+#   ★★它由 UI 在【非 render 路徑】上排空（`_process()`）——
+#     在 `_refresh()` 裡排空就是 render 又在寫 state，那是另一張票剛還掉的債。
+var command_results: Array = []
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []
 # Array[int] — 同格、無敵意 NPC team_ids，等玩家選擇互動類型或忽略

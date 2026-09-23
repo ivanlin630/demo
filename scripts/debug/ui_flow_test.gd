@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -83,6 +83,7 @@ func _initialize() -> void:
 	await _test_render_idempotent()
 	await _test_refresh_idempotent()
 	await _test_p1b_exclude_empty()
+	await _test_p11_pending_footer()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1479,3 +1480,29 @@ func _test_p1b_exclude_empty() -> void:
 	print("  ★★而【結構行】清單（P1B_STRUCTURAL，%d 條）是另一件事：那是 spec 本來就不比的，不是債。"
 		% P1B_STRUCTURAL.size())
 	_cell("_test_p1b_exclude_empty")
+# ══════════ P11［頁腳常駐「待執行 N 道」］（spec §3-5③）══════════
+# ★常駐＝0 也要印：只在非零時才出現的東西，玩家學不會它的意思，
+#   而「沒看到」與「沒有這個功能」在畫面上長得一樣。
+# ★★★負對照：入列之後【不推進】⇒ N 必須【維持】不歸零 ——
+#   ★沒有這一格的話，一支「每次 render 都把佇列清掉」的實作也會 0→1→0 看起來很對。
+func _test_p11_pending_footer() -> void:
+	_selftest_gate("_test_p11_pending_footer").noop()
+	print("
+── P11 頁腳「待執行 N 道」──")
+	var node = await _make_ui()
+	node._refresh()
+	_check("★0 也印（常駐）", node._hint_line.text.contains("待執行 0 道"))
+	node._bridge.command_player("move_to", {"tile_q": 9999, "tile_r": 9999})
+	node._refresh()
+	_check("入列一條 ⇒ 「待執行 1 道」", node._hint_line.text.contains("待執行 1 道"))
+	node._bridge.command_player("move_to", {"tile_q": 9998, "tile_r": 9998})
+	node._bridge.command_player("cancel_move", {})
+	node._refresh()
+	_check("再入列兩條 ⇒ 「待執行 3 道」", node._hint_line.text.contains("待執行 3 道"))
+	# ★★★負對照：多畫幾次但【不推進】⇒ N 不准變
+	for _i in range(4):
+		node._refresh()
+	_check("★★★不推進而連畫 4 次 ⇒ N 仍是 3（render 不得消費佇列）",
+		node._hint_line.text.contains("待執行 3 道"))
+	await _free_ui(node)
+	_cell("_test_p11_pending_footer")

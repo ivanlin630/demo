@@ -25,7 +25,11 @@ const HOUR: int = 60
 
 var _errors: int = 0
 var _cells_ran: Array = []
-const EXPECTED_CELLS: Array = ["_test_replay_same_fp", "_test_negative_boundary_shift", "_test_queue_defers"]
+
+# ★格式對但世界不允許：座標不在地圖上 ⇒ dispatch 認得 name、handler 會拒絕
+const BAD_TILE: Vector2i = Vector2i(9999, 9999)
+const EXPECTED_CELLS: Array = ["_test_replay_same_fp", "_test_negative_boundary_shift", "_test_queue_defers",
+	"_test_p9_enqueue_echo", "_test_p10_result_lines", "_test_p12_reject_comes_late"]
 
 
 func _cell(name: String) -> void:
@@ -221,6 +225,9 @@ func _initialize() -> void:
 	_test_queue_defers()
 	_test_replay_same_fp()
 	_test_negative_boundary_shift()
+	_test_p9_enqueue_echo()
+	_test_p10_result_lines()
+	_test_p12_reject_comes_late()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
@@ -231,3 +238,83 @@ func _initialize() -> void:
 	print("=== command_replay DONE === errors: %d｜到場點名 %d／%d" % [
 		_errors, _cells_ran.size(), EXPECTED_CELLS.size()])
 	quit(1 if _errors > 0 else 0)
+
+
+# ══════════ P9［入列有回音］（spec §3-5①，blueprint 裁 (乙)）══════════
+# ★母體地板：那句話必須含【動作】—— 只印「已排入」等於沒說，而它會恆綠。
+func _test_p9_enqueue_echo() -> void:
+	print("
+── P9 入列有回音 ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var bridge := SimBridge.new(pair[1], st)
+	var r: Dictionary = bridge.command_player("move_to", {"tile_q": 3, "tile_r": 4})
+	var msg: String = String(r.get("message", ""))
+	print("  回音：「%s」" % msg)
+	_check("回了 queued", bool(r.get("queued", false)))
+	_check("★有回音（message 非空）", msg != "")
+	_check("★★母體地板：回音含【動作】而不只是「已排入」（找「移動」）", msg.contains("移動"))
+	_check("★★★而它含【參數】—— 否則兩條不同的指令回同一句話", msg.contains("3") and msg.contains("4"))
+	_cell("_test_p9_enqueue_echo")
+
+
+# ══════════ P10［消費點必回結果句］══════════
+# ★★★這一格最容易恆綠：母體地板要求那一輪【同時】有①會成功②會被拒絕的指令 ——
+#   沒有②的話，「拒絕禁靜默」是一句【對空集合為真】的話。
+func _test_p10_result_lines() -> void:
+	print("
+── P10 消費點必回結果句（成功＋拒絕都要有）──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var runner: SimRunner = pair[1]
+	var bridge := SimBridge.new(runner, st)
+	var plan: Array = _script_for(st)
+	if plan.is_empty():
+		_errors += 1
+		print("  ★[不可判] 造不出會成功的指令 ⇒ 這不是綠")
+		_cell("_test_p10_result_lines")
+		return
+	bridge.command_player("move_to", (plan[0] as Dictionary)["args"])          # 應成功
+	bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})  # 應被拒
+	runner.advance_tick(st, Vector2i(-1, -1))
+	var ok_n: int = 0
+	var bad_n: int = 0
+	for r in st.command_results:
+		if bool(r.get("ok", false)): ok_n += 1
+		else: bad_n += 1
+		print("  「%s」" % String(r.get("text", "")))
+	_check("★★★母體地板：這一輪【同時】有成功（%d）與被拒（%d）" % [ok_n, bad_n],
+		ok_n >= 1 and bad_n >= 1)
+	_check("結果句數 ＝ 指令數（%d／2）" % st.command_results.size(), st.command_results.size() == 2)
+	var has_reason: bool = false
+	for r in st.command_results:
+		if not bool(r.get("ok", false)):
+			var t: String = String(r.get("text", ""))
+			has_reason = t.contains("被拒絕") and not t.contains("沒有給原因")
+	_check("★拒絕那一句【帶原因】（不是「沒有給原因」）", has_reason)
+	_cell("_test_p10_result_lines")
+
+
+# ══════════ P12［拒絕要晚到］══════════
+# ★★★這一格專門擋「順手把 `_check_*` 提前到入列」＝ (丁) 從後門回來。
+#   ★格式對、世界不允許的指令：入列當下【必須】回「已排入」，到消費點才被拒。
+func _test_p12_reject_comes_late() -> void:
+	print("
+── P12 拒絕要晚到（擋 (丁) 從後門回來）──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var runner: SimRunner = pair[1]
+	var bridge := SimBridge.new(runner, st)
+	var before: String = StateFingerprint.compute(st)
+	var r: Dictionary = bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})
+	_check("★入列當下回 ok=true（不在這裡判合法性）", bool(r.get("ok", false)))
+	_check("★★入列當下【沒有】結果句", st.command_results.is_empty())
+	_check("★★★而世界也沒變（指紋相同）", StateFingerprint.compute(st) == before)
+	runner.advance_tick(st, Vector2i(-1, -1))
+	_check("推進一 tick 後才出現結果句（%d 句）" % st.command_results.size(),
+		st.command_results.size() == 1)
+	if st.command_results.size() == 1:
+		_check("★而那一句是【拒絕】", not bool(st.command_results[0].get("ok", true)))
+	_check("★★母體地板：那條指令真的進了帳（command_log %d）" % st.command_log.size(),
+		st.command_log.size() == 1)
+	_cell("_test_p12_reject_comes_late")

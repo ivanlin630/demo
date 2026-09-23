@@ -283,7 +283,18 @@ func command_player(name: String, args: Dictionary) -> Dictionary:
 	_state.command_seq += 1
 	_state.pending_commands.append({
 		"name": name, "args": args.duplicate(true), "seq": _state.command_seq})
-	return {"ok": true, "queued": true, "seq": _state.command_seq}
+	return {"ok": true, "queued": true, "seq": _state.command_seq,
+		"message": "已排入：%s" % PlayerCommandApi.describe(name, args)}
+
+# 頁腳常駐用（spec §3-5③）：★★「待執行 N 道」——★玩家要看得到他按的東西還沒生效。
+func pending_command_count() -> int:
+	return _state.pending_commands.size()
+
+# ★★★結果句由【非 render 路徑】排空（見 world_state.command_results 檔頭）。
+func drain_command_results() -> Array:
+	var out: Array = _state.command_results
+	_state.command_results = []
+	return out
 
 # 玩家主動打開互動選單時呼叫：掃描同格 NPC 加入 pending_targets
 func refresh_interaction_targets() -> void:

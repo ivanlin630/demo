@@ -218,6 +218,34 @@ func advance_ticks(state: WorldState, runner: SimRunner, n: int) -> Dictionary:
 		"first_stall_tick": stalled_at, "stall_reason": stall_reason,
 	})
 
+# ★★★指令的【人話】（spec §3-5①）：入列時要能印「已排入：移動到 (3,4)」。
+#   ★母體地板寫在驗收裡（P9）：那句話必須含【動作】—— 只印「已排入」等於沒說。
+#   ★★這裡刻意不查 state：入列當下不做任何合法性判斷（否則 (丁) 從後門回來）。
+const VERB: Dictionary = {
+	"move_to": "移動", "cancel_move": "取消移動", "execute_action": "行動",
+	"respond_to_forced": "回應事件", "equip_item": "裝備", "unequip_item": "卸下",
+	"deposit_item": "存入", "take_team_item": "取出", "post_buy_order": "掛買單",
+	"post_sell_order": "掛賣單", "cancel_order": "取消掛單",
+	"possess": "附身", "unpossess": "解除附身",
+}
+
+static func describe(name: String, args: Dictionary) -> String:
+	var verb: String = String(VERB.get(name, name))
+	match name:
+		"move_to":
+			return "%s到 (%d,%d)" % [verb, int(args.get("tile_q", 0)), int(args.get("tile_r", 0))]
+		"execute_action":
+			return "%s：%s" % [verb, String(args.get("action_id", ""))]
+		"respond_to_forced":
+			return "%s：%s" % [verb, String(args.get("response_id", ""))]
+		"equip_item", "unequip_item":
+			return "%s：%s" % [verb, String(args.get("slot_id", ""))]
+		"deposit_item", "take_team_item":
+			return "%s %s×%d" % [verb, String(args.get("item_grade", "")), int(args.get("qty", 0))]
+		"post_buy_order", "post_sell_order":
+			return "%s %s×%d" % [verb, String(args.get("res", "")), int(args.get("qty", 0))]
+	return verb
+
 func dispatch(state: WorldState, name: String, args: Dictionary) -> Dictionary:
 	match name:
 		"move_to":

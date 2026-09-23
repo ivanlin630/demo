@@ -504,9 +504,19 @@ func _consume_player_commands(state: WorldState) -> void:
 		var name: String = String(c.get("name", ""))
 		var args: Dictionary = c.get("args", {})
 		var res: Dictionary = _cmd_api.dispatch(state, name, args)
+		var ok: bool = bool(res.get("ok", false))
 		state.command_log.append({
 			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)),
-			"name": name, "args": args, "ok": bool(res.get("ok", false))})
+			"name": name, "args": args, "ok": ok})
+		# ★★★結果句（spec §3-5②）：成功一句、拒絕一句【帶原因】。
+		#   ★拒絕【禁靜默】—— 沒有這一句，玩家分不出「被拒絕」與「沒吃到鍵」。
+		#   ★★原因取自 handler 自己回的 message ⇒ 零第二份真相（這正是 (丁) 被否決的理由）。
+		var why: String = String(res.get("message", res.get("msg", "")))
+		state.command_results.append({
+			"tick": state.world.current_tick, "ok": ok,
+			"text": ("%s：完成" % PlayerCommandApi.describe(name, args)) if ok
+				else ("%s：被拒絕（%s）" % [PlayerCommandApi.describe(name, args),
+					why if why != "" else "沒有給原因"])})
 
 func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if phase_timing: _ph.clear()   # 相位計時：每 tick 重置
