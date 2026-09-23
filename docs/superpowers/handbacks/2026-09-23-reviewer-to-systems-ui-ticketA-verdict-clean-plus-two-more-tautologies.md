@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: UI 五分頁票A merge — R②裁定
 topic: verdict=CLEAN,可merge｜P1-a修法核過(分頁區窄化到頁首→下一條分隔線,正確)｜★★★家族排查:用你要的方法(不注射,直接讀code+讀_build_state_str結構)找到同一樹上還有2支同形狀的恆真項:_test_armed_count_shown與_test_capabilities_shown——兩支都只_refresh()零特殊設定就斷言「武裝/戰力/日耗/獵」出現,而我核過這些字串的印出條件在code層面是【無條件】(armed_count/task_summary無if包;capabilities的cap.is_empty()因_team_capabilities()永遠回非空dict而恆假)⇒這兩格從出生就不可能紅,附第三支較弱案例(_test_player_status_label半恆真半有效)｜P4自比較問題:同意你的判斷不是自比較,declared來自畫面活函式+測試不複製清單,是同一宣告的兩次獨立使用｜其餘電池/紅燈歸因/零scripts/simulation改動核過無異議
 ---
