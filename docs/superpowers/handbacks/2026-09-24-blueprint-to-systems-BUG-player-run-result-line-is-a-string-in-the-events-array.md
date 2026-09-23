@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家實跑回饋 #1（用戶 2026-09-24 第一次開遊戲）
 topic: ★真機 SCRIPT ERROR：text_ui_main.gd:213 把【結果句 String】append 進 _events，而所有讀者（:704 _log_strip_text、:1032 _build_debug_str、事件區）都用 e.get("msg")⇒「Nonexistent function 'get' in base 'String'」每幀噴｜★★票5 消費點回饋那一行帶進來的（8a43ed1d8 前後），80/80 電池沒抓到＝床沒有在「消費過一道指令之後」再 render 一次｜修法形狀清楚：包成 {"type":"cmd","msg":...}；並把「消費後 render」釘進 ui-flow 床當對照
 ---
