@@ -37,7 +37,10 @@ MG_RUNFLAG="$_mg_root/.claude/hooks/.merge-gates-running"
 #   ⇒ ★只看 main 的路徑 ⇒ 看不到舊版正在跑的那一輪 ⇒ 兩輪同時跑。
 #   ⇒ ★★★通則：**一個依賴「大家都跑新版」的守衛不是守衛。**
 #     寫入端可以只寫新位置；★讀取端必須看得見【舊寫入端會寫的每一個位置】。
-for _mg_f in "$MG_RUNFLAG" "$_mg_root"/.worktrees/*/.claude/hooks/.merge-gates-running; do
+#   ★★★樹的清單問 git，不要用路徑樣式猜：實測 68 棵裡有 6 棵不在 .worktrees/ 底下。
+while IFS= read -r _mg_wt; do
+  [ -n "$_mg_wt" ] || continue
+  _mg_f="$_mg_wt/.claude/hooks/.merge-gates-running"
   [ -f "$_mg_f" ] || continue
   _mg_other=$(awk '{print $1; exit}' "$_mg_f" 2>/dev/null)
   if [ -n "$_mg_other" ] && kill -0 "$_mg_other" 2>/dev/null; then
@@ -48,7 +51,9 @@ for _mg_f in "$MG_RUNFLAG" "$_mg_root"/.worktrees/*/.claude/hooks/.merge-gates-r
     exit 2
   fi
   echo "[MERGE-GATES] ★舊標記（PID ${_mg_other:-?} 已不在）：${_mg_f#$_mg_root/} ⇒ 接手。★★而【標記舊】不代表機器空：見下一格"
-done
+done <<EOF_MGWT
+$(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{ $1=""; sub(/^ /,""); print }')
+EOF_MGWT
 # ★只寫數字在第一行（後面那些欄位是給【人】讀的，程式只讀第一個 token）——
 #   含跳脫字元的寫法在寫檔時會變成真的換行，今天已經咬過兩次。
 printf '%s tree=%s since=%s
