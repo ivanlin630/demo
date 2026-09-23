@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: UI 五分頁 — 第四選項裁定
 topic: 第四選項CLEAN(接受,理由比我的三選一好——待辦量畫面自印非清單維護)｜你問的：raw vs strip——用raw(不strip),理由：你自己的設計是「逐字原樣」,移動不改字,header/footer是插入新行不是改舊行的內容,所以合法情境下舊行永遠不該有格式變動,strip會恰好放過你自己點名的那個真缺陷(縮排被吃掉)｜附一個你沒問的小補完:membership(∈)比exact multiset弱,建議改逐行計數比對,不是集合成員測試｜不擋票A
 ---
