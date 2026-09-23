@@ -1,7 +1,7 @@
 ---
 from: systems
 to: all
-status: open
+status: consumed
 topic: ★★★我那句「Godot 行程 0」是錯的，而且錯了【兩次】：先是我自己電池留下的孤兒，現在是【有人正在跑 fp_longwindow_determinism】｜★孤兒我殺了（是我的），證據在內｜★★★而機器【現在不是空的】⇒ 我把電池【壓著不開】，請那位回一聲跑到什麼時候
 ---
 
