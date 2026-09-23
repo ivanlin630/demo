@@ -28,13 +28,47 @@ func _ok(cond: bool, msg: String) -> void:
 		_fails += 1
 		push_error("[FAIL] " + msg)
 
+# 盲區只准變小 —— ★★★這一格從【觸發樣本】改成【棘輪】（systems 裁 2026-09-24）。
+#
+# ★原本它釘的是「`player_pending_targets` 必須在盲區裡」，而那個欄位【已經被修好了】
+#   （`state_fingerprint.gd` 的 `_emit_player` 現在讀它）⇒ ★★這一格從此恆紅 ＝【到期】。
+# ★★而換一個真實欄位只是把到期日往後推，還更糟：現在盲區裡是 `encounter_*` 那一族，
+#   而它們【本來就該進 fp】（它們是世界狀態）⇒ 挑它們當「必須留在盲區」的樣本
+#   ⇒ ★★★等於把一格守衛的存活，綁在一個缺陷的存活上。
+#
+# ★★★本格的獵物（已經發生過，我們有它的血證）：
+#   2026-09-24 票5 一次加了四個 `player_*` 欄位（`pending_commands`／`command_seq`／
+#   `command_log`／`command_results`）而【一個 tap 都沒接】—— 靠 implementer 自己回頭
+#   發現，★而在那之前【沒有任何東西會紅】。那就是這一格存在的原因。
+#
+# ★紀律（systems 裁，同 defers 那條）：有人新增一個【真的不該進 fp】的欄位 ⇒ 本格會紅
+#   ⇒ ★★【不准默默把上限改大】，要寫信由 systems 裁。理由：**一個可以被自己調高的棘輪，不是棘輪。**
+#   ⇒ 而【調低】不需要問任何人 —— 那正是這一格希望發生的事。
+const BLIND_CEILING: int = 30   # ★2026-09-24 實測值（origin/main 9c4b5cbe4）
+
 func _test_trigger_sample() -> void:
-	print("-- ① 觸發樣本必須在第一版就被抓到 --")
+	print("-- ① 盲區只准變小（棘輪）--")
 	var d: Array = StateFingerprint.derived_excludes()
 	print("    導出的頂層排除 %d 欄，前 5：%s" % [d.size(), str(d.slice(0, 5))])
-	_ok("player_pending_targets" in d, "①player_pending_targets 現形（★這張票的觸發樣本）")
-	_ok(StateFingerprint.blind_note().contains("player_pending_targets"),
-		"①而它真的印在 blind_note 那一行裡（不是只存在於某個 API 回傳值）")
+	# ★★母體地板：`size() <= 30` 會被 `size() == 0` 滿足，而 0 正是【推導器壞了】的長相
+	#   ⇒ ★★★沒有這一道，棘輪會在推導器死掉的那一天變成最綠的一格。
+	_ok(d.size() > 0, "①母體地板：推導器真的吐出東西（%d 欄）—— 0 欄不是「沒有盲區」，是它壞了" % d.size())
+	_ok(d.size() <= BLIND_CEILING,
+		"①★棘輪：盲區 %d 欄 ≤ 上限 %d（只准變小；要調高須由 systems 裁）" % [d.size(), BLIND_CEILING])
+	# ★而盲區必須【真的印在卷面上】，不是只活在某個 API 回傳值裡。
+	#   ★★我第一版斷言「那一行含得下 `str(d.size())`」—— 而那是我【假設】的形狀：
+	#     `blind_note()` 印的是【欄位名接起來】，不是欄位數 ⇒ 它當場紅給我看。
+	#   ⇒ ★★★改成驗真正的那個性質：**每一個盲區欄位都要出現在那一行裡**
+	#     （左＝API 的清單，右＝渲染出來的那一行 ⇒ 兩邊不同源）。
+	var note: String = StateFingerprint.blind_note()
+	var not_printed: Array = []
+	for f in d:
+		if not note.contains(String(f)):
+			not_printed.append(String(f))
+	for f in not_printed: print("    ✗ 盲區有「%s」而那一行沒印它" % String(f))
+	_ok(not_printed.is_empty(),
+		"①每一個盲區欄位都【真的印在 blind_note 那一行裡】（%d／%d 有印）" % [
+			d.size() - not_printed.size(), d.size()])
 	_sections += 1
 
 func _test_paired_controls() -> void:
