@@ -308,9 +308,19 @@ func _test_capabilities_shown() -> void:
 	node._refresh()
 	# status label 應含能力讀數關鍵字
 	var s: String = node._state_label.text
-	_check("status 含獵率", s.contains("獵") or s.contains("狩獵"))
-	_check("status 含戰力", s.contains("戰力"))
-	_check("status 含日耗", s.contains("日耗") or s.contains("耗"))
+	# ★★★舊版三句都是 `contains(關鍵字)`，而 :686-689 的唯一閘是 `cap.is_empty()`，
+	#   又因 player_api_mapper.gd 的 _team_capabilities() 永遠回非空 dict ⇒ ★那個閘恆假
+	#   ⇒ 那一行恆印 ⇒ 三句恆真。
+	# ⇒ ★★改成比【值】：戰力取自查詢面的 combat_power，畫面上那個數字必須等於它。
+	var cap: Dictionary = node._cached_snapshot.get("controlled_team", {}).get("capabilities", {})
+	_check("查詢面有 capabilities（★母體地板）", not cap.is_empty())
+	var want_cp: int = int(round(float(cap.get("combat_power", -1.0))))
+	_check("查詢面的 combat_power 有效（%d）" % want_cp, want_cp >= 0)
+	var got_cp: int = _kv_int(s, "戰力 ")
+	_check("畫面上的戰力 %d ＝ 查詢面的 %d" % [got_cp, want_cp], got_cp == want_cp)
+	# ★欄位名仍然要在：整段被刪掉時，上面那個比較會因為【兩邊都撈不到】而意外相等
+	_check("三個欄位名都還在（獵／戰力／日耗）",
+		(s.contains("獵") or s.contains("狩獵")) and s.contains("戰力") and s.contains("日耗"))
 	await _free_ui(node)
 
 # 公庫面板：自家 outpost + 雙向資源 → 顯存入/取出 + food
@@ -407,7 +417,17 @@ func _test_armed_count_shown() -> void:
 	print("\n── 自隊武裝數顯示 ──")
 	var node = await _make_ui()
 	node._refresh()
-	_check("status 含「武裝」", node._state_label.text.contains("武裝"))
+	# ★★★舊版是 `text.contains("武裝")` —— 而 text_ui_main.gd:680 那一行【沒有 if 包】
+	#   ⇒ 只要 _refresh() 被呼叫過就一定含「武裝」⇒ ★它驗的是【函式被呼叫】不是【數字有顯示】。
+	# ⇒ ★★改成把畫面上的數字撈出來跟【查詢面】比：欄位消失／改名／沒印，三種都會紅。
+	# ★★★誠實限：若有人把它寫成【剛好等於今天這個值的常數】，這一格仍會綠——
+	#   要擋那一種得跑兩個不同的世界，本格不做，而我把限制寫出來而不是假裝沒有。
+	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
+	_check("查詢面有 controlled_team（★母體地板：空的話下面全是恆真）", not ct.is_empty())
+	var want_armed: int = int(ct.get("armed_count", -1))
+	_check("查詢面的 armed_count 有效（%d）" % want_armed, want_armed >= 0)
+	var got_armed: int = _kv_int(node._state_label.text, "武裝: ")
+	_check("畫面上的武裝數 %d ＝ 查詢面的 %d" % [got_armed, want_armed], got_armed == want_armed)
 	await _free_ui(node)
 
 # U15：遭遇戰 overlay 顯示中，主畫面 _input 須一律不處理（否則戰後按 Q→quit 閃退、WASD 漂游標）。
@@ -437,7 +457,16 @@ func _test_player_status_label() -> void:
 	var node = await _make_ui()
 	node._refresh()
 	var s: String = node._state_label.text
-	_check("狀態列用「狀態:」不用「任務:」", s.contains("狀態:") and not s.contains("任務:"))
+	# ★★★systems 裁「窄化，不是刪」：前半 `contains("狀態:")` 恆真（:679 無條件印），
+	#   而後半 `not contains("任務:")` 是真的回歸守衛。
+	# ★★【直接刪前半句】是錯的修法：只留 not-contains 的話，★★★一個【空字串】也會過
+	#   ⇒ 那是【反方向的恆真】：從「範圍裡總有東西」變成「什麼都沒有也算對」。
+	# ⇒ 窄化成：那一行要【存在】、且【冒號後面有內容】，再加回歸守衛。
+	var line: String = _line_with(s, "狀態: ")
+	_check("找得到狀態列那一行", line != "")
+	var body: String = line.substr(line.find("狀態: ") + 4).strip_edges()
+	_check("狀態列冒號後有內容（「%s」）" % body.substr(0, 20), body != "")
+	_check("★回歸守衛：沒有退回舊措辭「任務:」", not s.contains("任務:"))
 	await _free_ui(node)
 
 # Q7-3：戰後 loot_pool 非空 → [K]take_loot 經 bridge 真把戰利品入庫、清 last_encounter_result。
@@ -886,6 +915,13 @@ func _kv_int(line: String, key: String) -> int:
 #   而它會讓這一格在票B 接好之後【對著一份過期的宣告】判紅。
 func _page_skylight_fields_of(node: Node, idx: int) -> Array:
 	return node._page_skylight_fields(idx)
+
+# 撈出【第一條含 key 的行】。★找不到回空字串（★★空字串＝【沒有那一行】，
+#   不是【那一行是空的】—— 這兩件事在判準上不一樣）。
+func _line_with(text: String, key: String) -> String:
+	for ln in text.split("\n"):
+		if String(ln).contains(key): return String(ln)
+	return ""
 
 func _uniq_n(a: Array) -> int:
 	var d: Dictionary = {}
