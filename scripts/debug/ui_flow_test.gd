@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -85,6 +85,7 @@ func _initialize() -> void:
 	await _test_p1b_exclude_empty()
 	await _test_p11_pending_footer()
 	await _test_p15_echo_at_most_twice()
+	await _test_p17_consume_then_render()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1675,3 +1676,72 @@ func _all_screen_text(node) -> String:
 		if node.get(nm) != null:
 			parts.append(String(node.get(nm).text))
 	return String.chr(10).join(parts)
+
+
+# ══════════ P17［入列 → 推進 → 再 render，按玩家的順序接起來］（systems 立 2026-09-24）══════════
+# ★★★這一格的存在理由是一個【床從頭到尾沒有在看的病】：
+#   2026-09-24 真機每一幀噴 `Nonexistent function 'get' in base 'String'`，而電池 80／80 是綠的。
+#   根因：`text_ui_main.gd` 把指令結果句以 **String** append 進 `_events`，
+#   而 `_events` 的讀者（`_log_strip_text` :711、`_build_debug_str` :1018）都用 `e.get("msg")`。
+# ★而床為什麼沒抓到：它有「入列」的格（P11）、有「消費」的格（重播床）、有「render」的格（P1／P1b）
+#   —— ★★而沒有一格把三件事【按玩家的順序】接起來。
+#
+# ★★★而我這一格的【第一版自己也是假綠】，留著這段因為它正是同一個病：
+#   第一版用 `_apply_queue(node)` 推進，而那支 helper 只叫 `tick_step()`、★【沒有叫 `_process()`】
+#   ⇒ 而把結果句排進 `_events` 的那段就在 `_process()` 裡
+#   ⇒ ★`_events` 全程是空的 ⇒ 我那兩條形狀斷言【在空陣列上恆真】（卷面上寫著「共 0」）
+#   ⇒ ★★而母體地板也沒接住，因為它找的是「畫面上有那句人話」——
+#     而【入列回音】與【消費結果句】含同一句人話 ⇒ 它命中了前者
+#   ⇒ ★★★所以這一版改成走【真的 `_process()`】，並把地板釘在 `_events` 裡的那一筆上。
+func _test_p17_consume_then_render() -> void:
+	_selftest_gate("_test_p17_consume_then_render").noop()
+	print("
+── P17 入列 → 推進 → 再 render ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_M
+	ev.pressed = true
+	var tq: int = node._cursor.x
+	var tr: int = node._cursor.y
+	var ev_n0: int = node._events.size()
+	var log_n0: int = st.command_log.size()
+	node._input(ev)                                  # ①入列（真實鍵盤路徑）
+	# ②★走【玩家真的走的那條路】：`_process()` 自己會 tick_step ＋ 排空結果句 ＋ 在結尾 _refresh
+	node._bridge.request_advance(1)
+	node._process(0.1)
+	_check("★母體地板①：消費點真的吃到了（command_log %d → %d）" % [log_n0, st.command_log.size()],
+		st.command_log.size() > log_n0)
+	# ★★母體地板②：結果句真的【進了 `_events`】—— 不是「畫面上有那句人話」
+	#   （入列回音也含同一句人話 ⇒ 用畫面找會命中錯的那一個）
+	var needle: String = PlayerCommandApi.describe("move_to", {"tile_q": tq, "tile_r": tr})
+	var hit: int = 0
+	for e in node._events:
+		if (e is Dictionary) and String((e as Dictionary).get("msg", "")).contains(needle):
+			hit += 1
+	_check("★★母體地板②：結果句進了 _events（%d 筆命中「%s」；事件數 %d → %d）" % [
+		hit, needle, ev_n0, node._events.size()], hit >= 1)
+	# ★★★形狀：走讀者【真的會走的那條路】—— `_events` 混進 String 就會在這裡丟錯，
+	#   而那個錯會把這一格砍斷 ⇒ 到場點名少一格（那就是它的偵測方式）
+	var strip: String = TextUiMain._log_strip_text(node._events, 3)
+	var dbg: String = node._build_debug_str()
+	_check("★★★讀者走得過去且真的有東西：_log_strip_text() 回了 %d 字（0 字＝事件流是空的）" % strip.length(),
+		strip.length() > 0)
+	_check("★_build_debug_str() 印了事件段", dbg.contains("Events(last10)"))
+	_check("★★而那一段裡看得到指令結果（type 標成 cmd）", dbg.contains("[cmd]"))
+	# ★★★判準窄化成【必須是 Dictionary】，不是【必須有 msg】（2026-09-24 實測訂正）：
+	#   玩家入口跑 1200 tick 之後這一條紅了（壞形狀 1／共 12），★而那【不是產品錯】——
+	#   `sim_bridge._diff_events()` 合法地產出【只有 type 沒有 msg】的事件
+	#   （`{"type":"encounter_triggered"}`／`{"type":"new_team_spotted"}`），
+	#   而讀者用 `.get("msg", "")` 本來就容忍它。
+	#   ⇒ ★★所以 `_events` 有【兩種合法形狀】，而我把其中一種寫成了缺陷。
+	#   ⇒ ★★★窄化的方向要對：真 bug 是【String 混進來】（`String` 沒有 `.get()`）
+	#     ⇒ 判「是不是 Dictionary」仍然抓得到它，而不會誤咬 type-only 那一種。
+	var bad_shape: int = 0
+	for e in node._events:
+		if not (e is Dictionary):
+			bad_shape += 1
+	_check("★_events 每一個元素都是 Dictionary（★String 混進來就會在讀者身上丟錯）（壞形狀 %d／共 %d，★共 0 是不可判不是綠）" % [
+		bad_shape, node._events.size()], bad_shape == 0 and node._events.size() > 0)
+	await _free_ui(node)
+	_cell("_test_p17_consume_then_render")
