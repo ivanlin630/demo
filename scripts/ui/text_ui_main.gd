@@ -210,7 +210,18 @@ func _process(_delta: float) -> void:
 		if int(r.get("seq", 0)) <= _last_shown_result_seq:
 			continue
 		_last_shown_result_seq = int(r.get("seq", 0))
-		_events.append("%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))])
+		# ★★★形狀要照【這個檔既有的慣例】：`_events` 的元素是 Dictionary
+	#   （`_log_event()`（:1209）就是 `{"type":"ui","msg":msg}`，而讀者 :704／:1032 都用 `e.get("msg")`）
+	#   ★我這裡原本 append 的是【String】⇒ `String` 沒有 `.get()`
+	#     ⇒ ★★玩家只要下過一道指令就【每一幀】噴 SCRIPT ERROR，而電池 80／80 是綠的。
+	#   ⇒ ★★★這不是「型別設計沒想清楚」，是【漏用了十行之外就有的慣例】——
+	#     同殭屍隊那次（`can_be_player_target()` 早就存在）。
+	#   ★`type` 用 `"cmd"` 不用 `"ui"`：:1032 會印 `[type]msg`
+	#     ⇒ 玩家看得出這一行是【指令的結果】而不是 UI 自己的話，那正是 (乙) 要的回話語意。
+	#   ★★而【不改讀者去容忍 String】—— 那會讓 `_events` 從此有兩種形狀，
+	#     而下一個人只會遇到其中一種。
+		_events.append({"type": "cmd",
+			"msg": "%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))]})
 		if not bool(r.get("ok", false)):
 			_feedback_line.text = _feedback_text(false, String(r.get("text", "")))
 			_feedback_line.modulate = _feedback_color(false)
