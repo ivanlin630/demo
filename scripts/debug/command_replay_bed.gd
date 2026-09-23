@@ -85,7 +85,10 @@ func _script_for(st: WorldState) -> Array:
 	var at: int = 3 * HOUR
 	for d in dirs:
 		var t: Vector2i = here + d
-		if not st.tiles.has(t):
+		# ★鍵是 `q*1000 + r`，而且掛在 `world` 底下（sim_bridge.gd:137 是同一份真相）
+		#   ★★我原本寫 `st.tiles.has(Vector2i)` —— 那是我【假設】的形狀，實跑丟
+		#     `Invalid get index 'tiles'` 五次，把 `_script_for()` 整支砍斷 ⇒ 五格判【不可判】。
+		if not st.world.tiles.has(t.x * 1000 + t.y):
 			continue
 		out.append({"at": at, "name": "move_to", "args": {"tile_q": t.x, "tile_r": t.y}})
 		at += HOUR + 7   # ★刻意不對齊整點：否則每一條都落在同一種相位上
@@ -195,7 +198,14 @@ func _test_negative_boundary_shift() -> void:
 	var moved: int = -1
 	for i in range(plan.size()):
 		var c: Dictionary = (plan[i] as Dictionary).duplicate(true)
-		if i == 0:
+		# ★★★位移【最後一條】不是第一條（2026-09-24 實測訂正）：
+		#   第一版位移第 0 條 ⇒ fp【相同】⇒ 這一格紅了。我沒有猜，我量了：
+		#   改成位移最後一條 ⇒ fp 不同（fc2110c9… vs e516b8c2…）⇒ 差別不在「重播壞掉」，
+		#   ★在於每條 `move_to` 會【覆蓋前一條的目標】⇒ 第一條的位移效果被後面五條抹掉。
+		#   ⇒ ★★而被斷言的量是【終局 fp】：第 0 條的 tick 根本活不到那裡。
+		#   ⇒ ★★★同一條規矩第三次：**對照要擾動的是【被斷言的那個量】，不是它附近的量。**
+		#     最後一條是有原則的選擇 —— 沒有任何後續指令可以覆蓋它。
+		if i == plan.size() - 1:
 			var at: int = int(c["at"])
 			# ★推到【下一個整點之後】：保證跨過一個 hour 邊界，而不是同一小時內挪動
 			var next_hour: int = (at / HOUR + 1) * HOUR
