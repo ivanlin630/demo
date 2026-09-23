@@ -45,7 +45,12 @@ if [ -n "${CLAUDE_CODE_SESSION_ID:-}" ]; then
     fi
     # ${_lsid} 空 = 舊格式 lock → ★fail-open，不報警
   fi
-  [ -n "$_why" ] && GATE="⛔ 你的信箱 watcher 沒在跑（${_why}）→ 收不到主動喚醒，別人寫給你的信會石沉大海。請重 arm：Monitor(command=\"bash .claude/hooks/inbox-watch.sh\", persistent=true, description=\"${ROLE_KEY} 信箱\")"
+  # ★★★2026-09-23 用戶裁：【不要每輪掃、不要教人重掛】。
+  #   舊版每一次 prompt 都算 lock 心跳並印一段「請重 arm：Monitor(..., persistent=true, ...)」
+  #   ⇒ ★而 persistent 這個參數【這一版根本不存在】（實測：只收 command/description/timeout_ms）
+  #   ⇒ ★★所以它每輪燒 token，教的還是一個做不到的動作。
+  #   ⇒ ★★★改成【只印一行、只講該做什麼】，而且不再宣稱「請重 arm」。
+  [ -n "$_why" ] && GATE="⛔ 信箱沒在聽（${_why}）⇒ 掛一次：Bash(command=\"SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh\", run_in_background=true)"
 fi
 shopt -s nullglob
 files=("$HANDBACK_DIR"/*.md)

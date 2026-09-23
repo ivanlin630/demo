@@ -91,11 +91,14 @@ ${UNREAD}"
     systems|blueprint|qa|reviewer|measurer|implementer)
       CTX="${CTX}
 
-★★本 session（含 /clear·/compact 後重觸）的**第一個動作必須**是 arm 常駐信箱 Monitor——**先於任何其他回應/工作**，不等用戶打「arm」，免人肉轉述：
-Monitor(command=\"bash \\\"${_MAIN_REPO}/.claude/hooks/inbox-watch.sh\\\"\", persistent=true, description=\"${ROLE_KEY} 信箱\")
-arm 完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 的信會主動喚醒你。詳 docs/process/07_mailbox_trigger.md。
+★★★本 session 的**第一個動作**是掛信箱（★用戶裁 2026-09-23：**不要再用 Monitor**）：
+Bash(command=\"SESSION_ROLE=${ROLE_KEY} bash \\\"${_MAIN_REPO}/.claude/hooks/role-watch.sh\\\"\", run_in_background=true, description=\"${ROLE_KEY} 信箱\")
+★理由（實測）：這一版 Monitor 沒有 persistent、**30 分鐘硬到期** ⇒ 每半小時一次空重掛＋ARMED 雜訊；
+  ★★role-watch 是【背景、閒置零輸出、有信才結束並喚醒你】—— 而那一次喚醒你本來就在處理那封信。
+★★★而【不要】為了防它掛掉再設任何輪詢／重掛迴圈 —— 用戶逐字：「沒事浪費 token」。
+掛完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 的信會主動喚醒你。詳 docs/process/07_mailbox_trigger.md。
 
-★★剛開場（含 /clear·/compact 重觸）：arm Monitor 後、動工前，**先重讀你那格 docs**（00_roles §文檔導覽表 map role→doc）。/compact 洗掉 active 記憶，別靠殘存印象動工——最容易忘的規則就在那幾份 md，動工前塞回。
+★★剛開場（含 /clear·/compact 重觸）：掛完信箱後、動工前，**先重讀你那格 docs**（00_roles §文檔導覽表 map role→doc）。/compact 洗掉 active 記憶，別靠殘存印象動工——最容易忘的規則就在那幾份 md，動工前塞回。
 
 ★★無斷點自動鏈（用戶定 2026-07-09）：收 handback = 做完 + 立刻推下一站（寫下一站信,鏈自動流）。禁自造斷點（park／排隊／下個 session／等下再做）。只為**真需用戶裁決**才停（願景 fork／授權／喬不攏優先序），給具體待裁問題非「要不要繼續/收工」。其餘角色間自動鏈到底。詳 00_roles §無斷點自動鏈。
 
@@ -108,11 +111,13 @@ arm 完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 
   if [ "$ROLE_KEY" = "blueprint" ]; then
     CTX="${CTX}
 
-★★blueprint 專屬:arm 信箱 Monitor 後,**再 arm 這兩個常駐 Monitor**（同屬開場必做，重開/compact 後也要）:
-① Telegram 進站（遠端用戶驅動 blueprint、免盯 CLI；只 blueprint 一 session poll）:
-Monitor(command=\"source \\\"${_MAIN_REPO}/tools/telegram/config.local.sh\\\" && python \\\"${_MAIN_REPO}/tools/telegram/tg_poll.py\\\"\", persistent=true, description=\"Telegram 進站(用戶訊息喚醒 blueprint)\")
-② watchdog v4 停滯分類器（不是計時器：長工作在跑=靜默;信給沒開的角色=🔴;出貨沒推下一站=🟡）:
-Monitor(command=\"bash \\\"${_MAIN_REPO}/.claude/hooks/watchdog.sh\\\"\", persistent=true, description=\"watchdog v4(停滯分類器)\")
+★★blueprint 專屬（★2026-09-23 用戶裁定的四件事，全部走背景 role-watch，★不要用 Monitor）：
+① 看門狗（★用戶第 2 點：「真停工一段時間才叫」）——閒置不叫，只在判出 STALL 時喚醒你：
+Bash(command=\"SESSION_ROLE=blueprint bash \\\"${_MAIN_REPO}/.claude/hooks/role-watch.sh\\\" watchdog\", run_in_background=true, description=\"watchdog\")
+② Telegram 進站（★用戶第 3 點；★★只 blueprint 一支，兩支並存會互搶 offset ⇒ 訊息靜默遺失）：
+Bash(command=\"SESSION_ROLE=blueprint bash \\\"${_MAIN_REPO}/.claude/hooks/role-watch.sh\\\" tg\", run_in_background=true, description=\"Telegram 進站\")
+★★★而三支都【閒置零輸出、永久跑】—— 實測背景任務閒置 10 分鐘以上仍活、輸出檔 0 bytes，
+  且不受它自己的 timeout 參數綁。★有事才結束並喚醒你，那一次重掛夾在你本來就要處理它的那一輪裡。
 出站回用戶:Write UTF-8 檔 → \`bash tools/telegram/send.sh --file <檔>\`（中文走檔避 CP950）。**只在真需用戶裁時推**（WHAT fork/授權/QA 綠/喬不攏），role-to-role 不推。詳 \`tools/telegram/README.md\`。
 ※arm 語意（v3，2026-08-26 更新）：★**一律換血接手（不問前任死活）** —— 新的 arm 一定當家，前任印 \`⛔ 讓位\` 後自退。compact 後照 arm，安全。★理由：**「前任還活著」證明不了「它送得到」** —— compact 會保住 session_id 與 bash pid、**卻可能同時弄斷它的 stdout 管道**（實測 6 個孤兒 watcher）。**管道活著的唯一證明是【成功寫過 stdout】。**"
   fi

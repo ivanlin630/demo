@@ -1,78 +1,72 @@
 #!/usr/bin/env bash
-# role-watch.sh —— ★★★取代 Monitor 掛 inbox-watch 的那個用法（systems 立 2026-09-23，用戶裁）。
+# role-watch.sh <kind> —— ★★★背景常駐監視器的【統一外殼】（systems 立 2026-09-23，用戶裁）。
 #
-# ★用戶原話：「如果這東西不能用了 就找別的工具 我不要一直重掛」
-#   ⇒ Monitor 這一版【30 分鐘硬到期】（實測：timeout_ms 最大只收 3600000，
-#     而即使傳 3600000，它仍回「expires in 30m」⇒ ★那個上限不是那個參數決定的、我拿不到更長的）
-#   ⇒ ★★所以不是把重掛做得更漂亮，是【換一個不會到期的機制】。
+# ★用戶要的四件（逐字）：
+#   1.真有信才叫的信箱  2.真停工一段時間才叫的看門狗  3.TG收信  4.以上監視器永久跑 沒事不叫
 #
-# ★★機制：背景 Bash 任務【結束時】會把 session 叫醒（且不受 timeout 參數綁 ——
-#   實測同日一支 timeout=900000 的背景電池跑了 1225 秒）。
-#   ⇒ 本支的形狀是：**沒事就一直等（不輸出、不結束）；一有【可行動事件】就印出來並結束**。
-#   ⇒ ★★★於是「喚醒」與「重掛」合併成同一個動作：我被叫醒、處理完、再掛一次 —— 而那一次
-#     本來就是我要做的事。沒有「每 30 分鐘一次的空重掛」。
+# ★★為什麼不用 Monitor：這一版沒有 persistent、**30 分鐘硬到期**（實測：timeout_ms 上限 3600000，
+#   而即使傳 3600000 它仍回「expires in 30m」⇒ 那個上限不是參數決定的）
+#   ⇒ 每半小時一次【空重掛】＋每次 ARMED 雜訊 ＝ 閒置也在燒 token。
 #
-# ★★★噪音（blueprint 同日要求，票：monitor-token-cost）：
-#   stdout 只放【可行動】的：📬 收信／🟡🔴 停滯／📱 Telegram／⛔ 真錯誤
-#   ARMED／讓位／普查／CLEAN 一律進 log，不進 stdout ——
-#   ★理由：每一行 stdout 都是一個 turn；六個角色 × 每半小時數行 ＝ 原本要省的 token 被工具雜訊吃掉。
+# ★★★形狀：背景 Bash 任務【結束時】會喚醒 session ⇒ 所以
+#   ・閒置：一直跑、**一個字都不輸出**（滿足 4）
+#   ・有事：把那一行印出來並結束 ⇒ 你被叫醒（滿足 1/2/3）
+#   ・而「重掛」只發生在【真的有事】之後，夾在你本來就要處理它的那一輪裡。
 #
-# 用法（角色 session 開場一次）：
-#   Bash(command="bash .claude/hooks/role-watch.sh", run_in_background=true)
-#   ⇒ 它結束時你會被叫醒，stdout 就是那件事；處理完【再掛一次】。
+# ★判準（三支共用，而且是它們自己的慣例，不是我發明的）：
+#   ・`[…]` 開頭 ＝ 狀態噪音（ARMED／換血／讓位／普查／CLEAN）⇒ 進 log，不喚醒
+#   ・其餘 ＝ 事件（📬 收信／🟡🔴 STALL／Telegram 訊息本文）⇒ 印出來並結束
+#   ⇒ ★★三支腳本的狀態行【都】以 `[` 開頭，而三種事件行【都】不是（已逐支核過）
+#
+# 用法（每個角色開場，一種掛一支；★不要為了防掛掉再加任何輪詢／重掛迴圈）：
+#   Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh inbox",    run_in_background=true)
+#   Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh watchdog", run_in_background=true)
+#   Bash(command="SESSION_ROLE=blueprint bash .claude/hooks/role-watch.sh tg",    run_in_background=true)  # 只 blueprint
 #
 # ★誠實限：
-#   ①本支【不改】inbox-watch.sh 的語意（lock／換血／SEEN 都是它的）——
-#     它只是把它當子行程跑，並在第一個可行動事件出現時把它收掉。
-#   ②★★所以「同角色只留最新一支」這件事仍然由 inbox-watch 的換血負責，本支不另外判。
-#   ③★★★若 inbox-watch 自己死了（不是因為事件），本支也會結束並在 stdout 說明 ——
-#     那是【要人看的】，不是靜默重啟。
+#   ①本支【不改】內層三支的語意（lock／換血／SEEN／baseline 都是它們的）。
+#   ②★★內層自己死掉（不是因為事件）⇒ 本支會印一行【⛔】並結束 —— 那是要人看的，不靜默重啟。
+#   ③★★★「永久」的界線是【這個 session】：session 結束它就沒了。沒有跨 session 的常駐。
 set -u
+KIND="${1:-inbox}"
 _gc="$(git rev-parse --git-common-dir 2>/dev/null || echo .git)"
 ROOT="$(cd "$(dirname "$_gc")" && pwd)"
 cd "$ROOT" || exit 2
 ROLE="${SESSION_ROLE:-unknown}"
-LOG="$ROOT/.claude/hooks/.role-watch.${ROLE}.log"
+HOOKD="$ROOT/.claude/hooks"
+LOG="$HOOKD/.role-watch.${ROLE}.${KIND}.log"
 : > "$LOG" 2>/dev/null || true
-
 _ts() { date +%FT%T; }
-echo "[role-watch $(_ts)] start role=$ROLE pid=$$" >> "$LOG"
 
-# 子行程：inbox-watch（它自己做 lock／換血／SEEN）
-exec 3< <(bash "$ROOT/.claude/hooks/inbox-watch.sh" 2>>"$LOG")
+case "$KIND" in
+  inbox)    INNER=(bash "$HOOKD/inbox-watch.sh") ;;
+  watchdog) INNER=(bash "$HOOKD/watchdog.sh") ;;
+  tg)       INNER=(bash -c "source \"$ROOT/tools/telegram/config.local.sh\" && python \"$ROOT/tools/telegram/tg_poll.py\"") ;;
+  *) echo "⛔ role-watch：不認得的 kind='$KIND'（只收 inbox／watchdog／tg）"; exit 2 ;;
+esac
+
+echo "[role-watch $(_ts)] start kind=$KIND role=$ROLE pid=$$" >> "$LOG"
+exec 3< <("${INNER[@]}" 2>>"$LOG")
 CHILD=$!
-trap 'kill "$CHILD" 2>/dev/null; exec 3<&-' EXIT
+trap 'kill "$CHILD" 2>/dev/null; exec 3<&- 2>/dev/null' EXIT
 
 while IFS= read -r line <&3; do
   case "$line" in
-    *📬*|*🟡*|*🔴*|*📱*)
-      # ★可行動：印出來並結束 ⇒ 背景任務結束 ⇒ session 被叫醒
-      printf '%s\n' "$line"
-      echo "[role-watch $(_ts)] actionable ⇒ exit：$line" >> "$LOG"
-      exit 0
-      ;;
-    *⛔*)
-      case "$line" in
-        *讓位*)
-          # ★讓位＝有更新的同角色 watcher 接手 ⇒ 這是【正常換血】不是事件
-          echo "[role-watch $(_ts)] 讓位（正常換血，不喚醒）：$line" >> "$LOG"
-          exit 0
-          ;;
-        *)
-          printf '%s\n' "$line"
-          echo "[role-watch $(_ts)] error ⇒ exit：$line" >> "$LOG"
-          exit 0
-          ;;
-      esac
-      ;;
-    *)
-      # ARMED／普查／CLEAN／其餘一律進 log
+    "["*)
+      # 狀態噪音：ARMED／換血／讓位／普查／CLEAN ⇒ 只進 log
       echo "[role-watch $(_ts)] (quiet) $line" >> "$LOG"
+      ;;
+    "")
+      : ;;
+    *)
+      # ★事件：印出來並結束 ⇒ 背景任務結束 ⇒ session 被喚醒
+      printf '%s\n' "$line"
+      echo "[role-watch $(_ts)] EVENT ⇒ exit：$line" >> "$LOG"
+      exit 0
       ;;
   esac
 done
 
-# 走到這裡 ＝ 子行程自己結束了，而不是因為事件
-echo "[role-watch $(_ts)] child ended without an actionable event" >> "$LOG"
-echo "⛔ role-watch：inbox-watch 自己結束了（不是因為收信）⇒ ★看 ${LOG#$ROOT/} 再決定要不要重掛"
+echo "[role-watch $(_ts)] child ended without an event" >> "$LOG"
+echo "⛔ role-watch[$KIND]：內層自己結束了（不是因為事件）⇒ ★看 ${LOG#$ROOT/} 再決定要不要重掛"
 exit 1
