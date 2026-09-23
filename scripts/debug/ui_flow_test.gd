@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -72,6 +72,8 @@ func _initialize() -> void:
 	await _test_pages_switch_key()
 	await _test_pages_skylight()
 	await _test_pages_single_source()
+	await _test_pages_q1_source()
+	await _test_pages_q3_changes()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -780,10 +782,7 @@ func _test_pages_frame() -> void:
 		for li in range(lines_s.size()):
 			if String(lines_s[li]) == want: hi = li; break
 		_check("第 %d 頁找得到頁首行" % (i + 1), hi != -1)
-		var body: Array = []
-		for li in range(hi + 1, lines_s.size()):
-			if String(lines_s[li]).begins_with("────"): break
-			body.append(String(lines_s[li]))
+		var body: Array = _page_body(lines_s, want)
 		var body_txt: String = "".join(body).strip_edges()
 		_check("第 %d 頁的【分頁區】非空（%d 行）" % [i + 1, body.size()], body_txt != "")
 	await _free_ui(node)
@@ -873,7 +872,37 @@ func _test_pages_zero_loss() -> void:
 		await _free_ui(node)
 		_cell("_test_pages_zero_loss")
 		return
-	var after: Array = node._build_state_str().split("\n")
+	# ★★★票B 之後，「零損失」的比對對象必須是【五頁的聯集】不是第 1 頁：
+	#   ★票B 的工作【就是】把行從未分類搬到對應頁 ⇒ 只比第 1 頁的話，
+	#     每搬走一行這一格就紅一次 ⇒ ★★守衛會變成阻礙，而它擋的是【正確的改動】。
+	#   ⇒ 聯集怎麼組：狀態列（頁首之前）＋ 每一頁的【分頁區】＋ 頁尾（Tick·Day 那段），
+	#     ★★★而框架那兩段【只取一次】—— 它們每頁都印，直接全串會讓計數 ×5。
+	var after: Array = _union_all_pages(node)
+	# ★具名排除：兩邊都排，★★而排掉幾行要印出來（不是靜默略過）
+	var n_ex_b: int = 0
+	var n_ex_a: int = 0
+	var n_st_b: int = 0
+	var n_st_a: int = 0
+	var before2: Array = []
+	for l in before:
+		if _p1b_structural(String(l)): n_st_b += 1
+		elif _p1b_excluded(String(l)): n_ex_b += 1
+		else: before2.append(l)
+	var after2: Array = []
+	for l in after:
+		if _p1b_structural(String(l)): n_st_a += 1
+		elif _p1b_excluded(String(l)): n_ex_a += 1
+		else: after2.append(l)
+	print("  ★P1-b 具名排除 %d 條規則｜前排除 %d 行／後排除 %d 行" % [
+		P1B_EXCLUDE.size(), n_ex_b, n_ex_a])
+	print("  ★結構行（spec 本來就不比）：前 %d 行／後 %d 行｜規則 %d 條，逐條指回 spec：" % [
+		n_st_b, n_st_a, P1B_STRUCTURAL.size()])
+	for e in P1B_STRUCTURAL:
+		print("    [%s] %s" % [String(e["kind"]), String(e["spec"])])
+	for e in P1B_EXCLUDE:
+		print("    排除「%s…」：%s" % [String(e["prefix"]), String(e["why"])])
+	before = before2
+	after = after2
 	var cb: Dictionary = {}
 	for l in before: cb[l] = int(cb.get(l, 0)) + 1
 	var ca: Dictionary = {}
@@ -950,6 +979,106 @@ func _page_skylight_fields_of(node: Node, idx: int) -> Array:
 
 # 撈出【第一條含 key 的行】。★找不到回空字串（★★空字串＝【沒有那一行】，
 #   不是【那一行是空的】—— 這兩件事在判準上不一樣）。
+# 把五頁的內容組成【一個沒有重複框架】的聯集：狀態列 ＋ 各頁分頁區 ＋ 頁尾。
+# ★用途：票B 把行搬到別頁之後，「有沒有東西不見了」仍然問得出來。
+func _union_all_pages(node: Node) -> Array:
+	var out: Array = []
+	var keep: int = node._page_idx
+	# ★★★`_build_state_str()` 【不是冪等的】：它會寫 `_res_baseline_day`／`_res_baseline`
+	#   （text_ui_main.gd 的資源趨勢箭頭靠它算）⇒ ★第一次呼叫與第二次呼叫【輸出不同】。
+	#   ★★血證：聯集呼叫它 5 次，而「前」是【單獨一次】產生的
+	#     ⇒ 少了那個 `↓` ⇒ 零損失報「舊 1 次 → 新 0 次：  食:49↓ 幣:2085 材:5」。
+	#   ⇒ ★★★所以每一頁都要從【同一個起點】renders —— 存起來、每次還原。
+	var keep_day: int = node._res_baseline_day
+	var keep_base: Dictionary = node._res_baseline.duplicate()
+	for i in range(UiPages.PAGE_ORDER.size()):
+		node._page_idx = i
+		node._res_baseline_day = keep_day
+		node._res_baseline = keep_base.duplicate()
+		var ls: PackedStringArray = node._build_state_str().split("\n")
+		var head: String = UiPages.header(i)
+		var hi: int = -1
+		for li in range(ls.size()):
+			if String(ls[li]) == head: hi = li; break
+		if hi == -1: continue
+		if i == 0:
+			# ★狀態列（頁首之前）只取一次
+			for li in range(hi): out.append(String(ls[li]))
+		for _b in _page_body(ls, head): out.append(String(_b))
+		var li2: int = ls.size()
+		for _k in range(ls.size() - 1, hi, -1):
+			if String(ls[_k]).begins_with("Tick: "): li2 = _k; break
+		if li2 - 1 > hi and String(ls[li2 - 1]).begins_with("────"): li2 -= 1
+		if i == 0:
+			# ★頁尾（Tick·Day 那段）只取一次
+			for li in range(li2, ls.size()): out.append(String(ls[li]))
+	node._page_idx = keep
+	return out
+
+# 取【分頁區】＝頁首之後、頁尾之前。
+# ★★★頁尾的判準【不能是「第一條 ────」】——那是我第一版的寫法，而它一撞到
+#   票B 就壞了：搬到經濟頁的資源段【開頭就是一條分隔線】⇒ 整頁被判成 0 行，
+#   ★而那讓 P1-a 與 P1-b 同時誤紅（看起來像「內容不見了」，其實是【我沒讀到】）。
+# ⇒ 改成錨在【Tick: 那一行】：頁尾是「Tick: 前面那條分隔線」開始的那一段。
+# ★★★P1-b 的【具名排除清單】（systems 裁 2026-09-23）——
+#   ★每一條都帶【為什麼】，★★而【不是】用「含 ↓↑ 就忽略」那種模糊比對：
+#     模糊比對會連【真的掉了一行含箭頭的內容】也一起放過。
+#   ★★★清單長度會印出來 ⇒ 它變長時有人看得見。
+const P1B_EXCLUDE: Array = [
+	{"prefix": "  食:", "why": "資源趨勢箭頭：_build_state_str() 非冪等（會寫 _res_baseline*）"
+		+ " ⇒ 同一份世界、不同呼叫史就不是同一行字；真修法＝讓它冪等，已由 systems 開獨立票"},
+]
+
+# 回傳「這一行是否被具名排除」。★只比【前綴】且前綴必須來自上面那張表。
+# ★★★【結構行】不進比對 —— 這不是豁免，是 spec 本來就寫的範圍（AMEND 2026-09-23 逐字：
+#   「新增的行（頁首、未分類標題、天窗）不在比對範圍內」）。
+#   ★而「前」是【票A 之後】拍的 ⇒ 它【已經含有】這些結構行 ⇒ 兩邊都要排，否則：
+#     ①頁首：聯集用分頁區組，本來就不含頁首 ⇒ 「前」有、「後」沒有 ⇒ 假紅
+#     ②★★未分類標題帶著行數（「將搬走 16 行」）⇒ 票B 每搬一批它【必然改變】
+#        ⇒ ★★★拿它逐字比，等於要求票B 不要做事
+# ★這與 P1B_EXCLUDE 是【兩件事】：那張表是【有代價的豁免】（該比而不比，要還債），
+#   這裡是【本來就不該比的東西】—— ★★所以分開兩個函式，不混成一張表。
+# 【範圍表】—— ★★★每一條都要指回 spec 的【哪一句】（systems 裁 2026-09-23）。
+#   ★理由：範圍表與欠債表的【防長大】機制不一樣 ——
+#     欠債表靠「帶票號 ＋ 印長度」；★★範圍表靠「每條指得回去」。
+#   ★★★否則它會變成【為了讓守衛變綠而搬進來的地方】，
+#     而那比欠債更隱形：★欠債至少承認自己是債。
+const P1B_STRUCTURAL: Array = [
+	{"kind": "page_header", "spec": "2026-09-23-ui-five-tabs-HOW.md AMEND：「新增的行（頁首、未分類標題、天窗）不在比對範圍內」"},
+	{"kind": "unclassified_header", "spec": "同上 —— ★而它【帶著行數】，票B 每搬一批必然改變"},
+	{"kind": "skylight", "spec": "同上 —— 天窗是票A 新增的行，不是舊畫面上的內容"},
+]
+
+# 回傳這一行屬於哪一種結構行；不是結構行回空字串。
+func _p1b_structural_kind(line: String) -> String:
+	if line.begins_with("── 未分類（"): return "unclassified_header"
+	if line.ends_with("未接出（票B）"): return "skylight"
+	for i in range(UiPages.PAGE_ORDER.size()):
+		if line == UiPages.header(i): return "page_header"
+	return ""
+
+func _p1b_structural(line: String) -> bool:
+	return _p1b_structural_kind(line) != ""
+
+func _p1b_excluded(line: String) -> bool:
+	for e in P1B_EXCLUDE:
+		if line.begins_with(String(e["prefix"])): return true
+	return false
+
+func _page_body(ls: PackedStringArray, head: String) -> Array:
+	var hi: int = -1
+	for i in range(ls.size()):
+		if String(ls[i]) == head: hi = i; break
+	if hi == -1: return []
+	var ti: int = ls.size()
+	for i in range(ls.size() - 1, hi, -1):
+		if String(ls[i]).begins_with("Tick: "): ti = i; break
+	# ★Tick 行前面那條分隔線也屬於頁尾
+	if ti - 1 > hi and String(ls[ti - 1]).begins_with("────"): ti -= 1
+	var out: Array = []
+	for i in range(hi + 1, ti): out.append(String(ls[i]))
+	return out
+
 func _line_with(text: String, key: String) -> String:
 	for ln in text.split("\n"):
 		if String(ln).contains(key): return String(ln)
@@ -967,7 +1096,10 @@ func _test_pages_skylight() -> void:
 	var node = await _make_ui()
 	var total: int = 0
 	var declared: int = 0
-	for i in range(1, UiPages.PAGE_ORDER.size()):
+	# ★★★從 0 開始，不是從 1：舊版跳過第 1 頁，而票B 第 2 批替生存頁加了宣告欄位
+	#   ⇒ ★那四欄【不在母體裡】⇒ 印不印天窗都不會紅（systems 核出來的）。
+	#   ★★這一族今天第四次：母體的起點寫死了一個【當時成立、後來不成立】的假設。
+	for i in range(0, UiPages.PAGE_ORDER.size()):
 		node._page_idx = i
 		var s: String = node._build_state_str()
 		var n: int = s.count("未接出（票B）")
@@ -979,6 +1111,26 @@ func _test_pages_skylight() -> void:
 	# ★★★機器可讀的一行（systems 要的）：票B 每接好一欄它就變小 ⇒ 這是「天窗遞減」的讀數。
 	print("[UI-SKYLIGHT] count=%d declared=%d" % [total, declared])
 	print("  ★票A 交付時絕大多數格子是天窗（共 %d 個）—— 這是預期不是缺陷" % total)
+	# ★★★P4 強化（reviewer R² 的非阻塞建議，2026-09-23）：
+	#   ★缺口：接出一欄卻忘了把它從宣告拿掉 ⇒ 畫面會【同時印值與天窗】
+	#     —— 而那比純天窗更糟：它同時說「有」跟「沒有」。
+	#   ★★page0／page1 的兩欄已用動態 is_empty() 綁死不會脫鉤；
+	#     風險留在【尚未接出的靜態清單】（page1-4），而那正是這一格守的東西。
+	#   ⇒ 判法：同一頁裡，★★★某欄位既印了天窗、又有另一行以它的名字開頭 ⇒ 紅。
+	var dup: Array = []
+	for i in range(0, UiPages.PAGE_ORDER.size()):
+		node._page_idx = i
+		var ls: PackedStringArray = node._build_state_str().split("\n")
+		var body: Array = _page_body(ls, UiPages.header(i))
+		for f in node._page_skylight_fields(i):
+			var name: String = String(f).split("（")[0]
+			for ln in body:
+				var t: String = String(ln)
+				if t.ends_with("未接出（票B）"): continue
+				if t.begins_with(name):
+					dup.append("第 %d 頁「%s」既有天窗又有內容行：%s" % [i + 1, name, t])
+	for d in dup: print("    ✗ %s" % String(d))
+	_check("沒有欄位【同時】印值與天窗（%d 筆）" % dup.size(), dup.is_empty())
 	# ★★★P4 原本判「天窗總數 0 ⇒ 紅」，而【票B 的成功條件正是天窗歸零】
 	#   ⇒ ★票B 做完的那一天，這一格會因為【票B 成功】而變紅 —— 那是一個有到期日的守衛。
 	#   ⇒ ★★所以判準換掉：★★★不是「必須有天窗」，是【宣告未接的欄位，每一個都要印出天窗】。
@@ -1009,3 +1161,77 @@ func _test_pages_single_source() -> void:
 	_check("c1_walkthrough.gd 不再自帶 PAGE_ORDER", not walk_src.contains("const PAGE_ORDER"))
 	_check("c1_walkthrough.gd 改讀 UiPages.PAGE_ORDER", walk_src.contains("UiPages.PAGE_ORDER"))
 	_cell("_test_pages_single_source")
+
+
+# ★票B Q1[來源]：接出來的欄位必須走【公開查詢面】—— 不得直接讀 state、不得是常數。
+#   ★★這一格掃的是【原始碼文字】，而它防的是「接出來的值其實是自己算的／寫死的」。
+func _test_pages_q1_source() -> void:
+	_selftest_gate("_test_pages_q1_source").noop()
+	print("
+── 票B Q1 來源走查詢面 ──")
+	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	_check("撈得到原始碼（%d 字元）" % src.length(), src.length() > 1000)
+	for fn in ["_build_survival_lines", "_build_economy_lines"]:
+		var a: int = src.find("func " + fn)
+		_check("找得到 %s" % fn, a != -1)
+		if a == -1: continue
+		var b: int = src.find("
+func ", a + 5)
+		var body: String = src.substr(a, (b - a) if b != -1 else src.length() - a)
+		# ★禁止：直接讀 state／runner；★★而 _cached_snapshot 與參數 ct/ps 是查詢面快照，允許
+		_check("%s 不直接讀 state" % fn, not body.contains("_bridge.get_state()") and not body.contains("state."))
+		_check("%s 不直接持有 runner" % fn, not body.contains("_runner"))
+	_cell("_test_pages_q1_source")
+
+# ★票B Q3[會動]：同一顆種子、兩個不同 tick ⇒ 畫面 diff 非空，★並印出【哪一行】變了。
+#   ★★★母體地板：兩邊都要真的推到目標 —— 推不到就判【不可判】，
+#     因為「沒有 diff」與「沒有推進」在卷面上長得一樣（★今天已經踩過一次）。
+func _test_pages_q3_changes() -> void:
+	_selftest_gate("_test_pages_q3_changes").noop()
+	print("
+── 票B Q3 世界動了畫面跟著動 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var snaps: Array = []
+	var reached: Array = []
+	for target in [60, 120]:
+		var g: int = 0
+		while st.world.current_tick < target and g < 600:
+			if not node._bridge.is_advancing():
+				node._bridge.request_advance(target - st.world.current_tick)
+			await process_frame
+			g += 1
+		reached.append(st.world.current_tick)
+		snaps.append(node._build_state_str())
+	print("  推進實得：%s（目標 60／120）" % str(reached))
+	if int(reached[0]) != 60 or int(reached[1]) != 120:
+		print("  ★★★【不可判】沒有推到兩個不同的 tick ⇒ 「沒有 diff」與「沒有推進」分不開")
+		await _free_ui(node)
+		_cell("_test_pages_q3_changes")
+		return
+	var a2: PackedStringArray = String(snaps[0]).split("
+")
+	var b2: PackedStringArray = String(snaps[1]).split("
+")
+	var changed: Array = []
+	var n: int = maxi(a2.size(), b2.size())
+	for i in range(n):
+		var x: String = String(a2[i]) if i < a2.size() else "（無）"
+		var y: String = String(b2[i]) if i < b2.size() else "（無）"
+		if x != y: changed.append("第 %d 行：「%s」→「%s」" % [i + 1, x, y])
+	# ★★★時鐘不算數：`Tick: N (Day D)` 每一顆 tick 都會變
+	#   ⇒ ★就算【世界完全沒動、畫面完全沒更新】，只比「diff 非空」也會綠
+	#   ⇒ ★★這與票A 的 P1-a 是同一個形狀（那一格被【頁尾的 Tick·Day】撐著恆綠，
+	#     窄化到分頁區才修掉）—— ★★★所以這裡也要把【框架】排掉再問。
+	var clock_changed: bool = false
+	var real: Array = []
+	for c in changed:
+		if String(c).contains("Tick: "): clock_changed = true
+		else: real.append(c)
+	print("  ★變了 %d 行（其中時鐘 %s）：" % [changed.size(), "有變" if clock_changed else "沒變"])
+	for c in changed: print("    %s" % String(c))
+	_check("★時鐘以外還有東西變了（%d 行）—— 時鐘不算數" % real.size(), not real.is_empty())
+	# ★而時鐘【該】變：它沒變代表兩次其實是同一個 tick ⇒ 那是【不可判】不是綠
+	_check("時鐘確實前進了（兩次不是同一顆 tick）", clock_changed)
+	await _free_ui(node)
+	_cell("_test_pages_q3_changes")

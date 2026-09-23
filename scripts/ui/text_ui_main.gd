@@ -700,13 +700,29 @@ func _build_state_str() -> String:
 	#   ★為什麼不順手分類：那是票B。混進來的話，紅燈就分不出是【框沒做好】還是【分類錯了】。
 	lines.append(UiPages.header(_page_idx))
 	if _page_idx == 0:
+		lines.append_array(_build_survival_lines(ct, ps))
 		var _unclassified: Array = _build_unclassified_lines(ct, ps, lc)
 		# ★★區塊標題必須寫「未分類」：這一段裡有【資源】（屬經濟）而它印在【生存】頁下面
 		#   ⇒ 不標示等於【在畫面上說謊】，而用戶簽分頁時會簽到一個假的分類。
 		#   ★★★而那個 N 就是票B 的母體 —— 票B 每搬一批它就變短，不必另外做一張清單。
-		lines.append("── 未分類（票B 將搬走：%d 行）──" % _unclassified.size())
-		lines.append_array(_unclassified)
+		# ★★★N == 0 ⇒ 【整段不印】（標題也不印）—— systems 裁 2026-09-23：
+		#   ①畫面不再留一句已經不成立的話（「將搬走 0 行」）
+		#   ②★★而更重要的是：那一行【本身】會讓「頁首之後非空」恆真
+		#     ⇒ 票B 完成那天，一個【沒有內容的生存頁】會照樣綠。
+		#   ⇒ ★★★這是同一個病的第三次：一段【一定會出現】的文字撐著一個斷言。
+		if not _unclassified.is_empty():
+			# ★★★完成條件②（systems 裁）：剩下的若全是【已具名的跨頁混合行】，就把名單印出來
+			#   ⇒ ★沒有名單的話，「還剩 3 行」跟「還有 3 行沒人處理」在畫面上長得一樣。
+			var _mixed: String = _unclassified_mixed_note(_unclassified)
+			lines.append("── 未分類（票B 將搬走：%d 行%s）──" % [_unclassified.size(), _mixed])
+			lines.append_array(_unclassified)
+		# ★沒接出的生存欄位【仍然印天窗】（不先拿掉再說）
+		for _f in _page_skylight_fields(0):
+			lines.append(UiPages.skylight(_f))
 	else:
+		# ★票B：已接出的欄位【先印真值】，沒接出的【仍然印天窗】——
+		#   ★★不許先把天窗拿掉再說（spec §3②），否則畫面會宣稱一個還沒發生的完成度。
+		lines.append_array(_build_page_connected_lines(_page_idx, ct))
 		for _f in _page_skylight_fields(_page_idx):
 			lines.append(UiPages.skylight(_f))
 
@@ -727,29 +743,20 @@ func _build_state_str() -> String:
 
 # ★:680-738 原樣搬出來（票A：搬位置、不改字）。★★它只 append、不讀 _page_idx ——
 #   ⇒ 這樣「第 1 頁少了東西」與「分頁框壞了」是兩個不同的失敗，紅燈分得開。
-func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
+
+# ★票B 第 1 批：【資源】那一段從「未分類」搬到【經濟】頁。
+#   ★★★搬動不改字：底下每一行都是從 _build_unclassified_lines 原樣移過來的，
+#     一個字都沒動 —— 要改措辭是另一件事，混進來會讓 Q3 的 diff 講不清楚。
+#   ★讀點仍然是 `ct.get("resources")` ＝ 查詢面快照（player_api_mapper 產的），
+#     ★★不是直接讀 state，也不是常數。
+func _build_economy_lines(ct: Dictionary) -> Array:
 	var lines: Array = []
-	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
-	var food_days: float = float(ct.get("food_days", 99.0))
-	var starving: bool = bool(ct.get("starving", false))
-	lines.append("糧: %.1f 天%s" % [food_days, "  ⚠斷糧" if starving else ""])
-	var cap: Dictionary = ct.get("capabilities", {})
-	if not cap.is_empty():
-		lines.append("狩獵 %d%%/%.0f糧  戰力 %.0f  日耗 %.1f食(撐%.0f天)" % [
-			int(float(cap.get("hunt_chance", 0.0)) * 100), float(cap.get("hunt_yield", 0.0)),
-			float(cap.get("combat_power", 0.0)), float(cap.get("food_burn_per_day", 0.0)),
-			food_days])
-	lines.append(_member_health_line(ct.get("members", [])))
-
-	if ps.get("player_exists", false):
-		lines.append("────────────────")
-		lines.append("玩家: %s  HP:%s" % [ps.get("player_name", ""), ps.get("hp_status", "")])
-		var skill_parts: Array = []
-		for sk in ps.get("skills", {}):
-			skill_parts.append("%s:%.2f" % [sk, float(ps["skills"][sk])])
-		if not skill_parts.is_empty():
-			lines.append("  " + " ".join(skill_parts))
-
+	# ★★★Q2 成對對照（spec §5）：把這一欄從【查詢面】拿掉 ⇒ 這一格要變【天窗】，
+	#   ★而不是整頁壞掉、也不是印一排 0。
+	#   ⇒ ★★印 0 是最糟的那一種：它【看起來像世界真的沒有資源】，
+	#     而真相是【我們沒接到】—— 那正是票② §2 硬規②在講的「沉默的空白」。
+	if ct.get("resources", {}).is_empty():
+		return []
 	var res: Dictionary = ct.get("resources", {})
 	var day: int = _bridge.get_current_tick() / WorldState.TICKS_PER_DAY
 	if day != _res_baseline_day:
@@ -764,6 +771,80 @@ func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -
 	lines.append("  低武:%d 高武:%d" % [res.get("weapon_melee_low", 0), res.get("weapon_melee_high", 0)])
 	lines.append("  低甲:%d 高甲:%d" % [res.get("armor_low", 0), res.get("armor_high", 0)])
 	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])
+	return lines
+
+
+# ★票B 第 2 批：【生存】頁 —— blueprint 裁「這一隊現在活得下去嗎」的四題。
+#   ①糧撐幾天（跑道與趨勢，★不是收支明細）②人的狀態（含被聚焦的那個人）
+#   ③身在何處、家在哪 ④當下在做什麼、為什麼
+# ★★★界線（blueprint 定，寫死在這裡免得下一個人「順手統一」）：
+#   生存＝【會不會死／幾天內】的急迫讀數；經濟＝【怎麼賺】的流量與價格
+#   ⇒ ★糧食會出現在兩頁，而【問的問題不同】—— 那不是重複。
+# ★★單一來源：本函式與常駐狀態列【共用同一份 _cached_snapshot】（參數 ct/ps 由呼叫端傳入），
+#   ⇒ ★★★不得各自再去查一次 —— 兩個來源會 drift，而 drift 不會紅。
+# 未分類區塊裡【已判定為跨頁混合】的行：它們因為「搬動不改字」×「一行裡有兩頁的東西」
+# 而【結構上搬不走】—— ★拆行是另一張票（它會改變 P1-b 的判準本身：從「raw 行還在」
+# 變成「內容還在」）⇒ ★★這裡只【具名】，不處理。
+const MIXED_PAGE_LINES: Array = ["人口:", "狩獵 ", "選中: "]
+
+func _unclassified_mixed_note(unclassified: Array) -> String:
+	# ★★★這一句只有在【剩下的每一行都是已具名的混合行】時才成立 ——
+	#   ★第一版我寫成無條件回傳那串字，而那是【硬編的安慰話】：
+	#     還有十幾行沒判定時，它照樣宣稱「皆為跨頁混合」⇒ 畫面在說謊。
+	#   ⇒ ★★逐行比對：有任何一行不在具名清單裡 ⇒ ★★★不印那句話（寧可少講，不要講錯）。
+	for ln in unclassified:
+		var hit: bool = false
+		for k in MIXED_PAGE_LINES:
+			if String(ln).begins_with(String(k)): hit = true; break
+		if not hit: return ""
+	return "，皆為跨頁混合（拆行是另一張票）"
+
+func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
+	var lines: Array = []
+	var food_days: float = float(ct.get("food_days", 99.0))
+	var starving: bool = bool(ct.get("starving", false))
+	lines.append("糧: %.1f 天%s" % [food_days, "  ⚠斷糧" if starving else ""])
+	lines.append(_member_health_line(ct.get("members", [])))
+	if ps.get("player_exists", false):
+		lines.append("────────────────")
+		lines.append("玩家: %s  HP:%s" % [ps.get("player_name", ""), ps.get("hp_status", "")])
+		var skill_parts: Array = []
+		for sk in ps.get("skills", {}):
+			skill_parts.append("%s:%.2f" % [sk, float(ps["skills"][sk])])
+		if not skill_parts.is_empty():
+			lines.append("  " + " ".join(skill_parts))
+	# ★★★blueprint ④「當下在做什麼、為什麼」——★而【做什麼】已經在常駐狀態列（一眼），
+	#   這裡要的是【那一眼看不完的部分】：為什麼是這個任務（systems 的 HOW 裁定）。
+	#   ⇒ 讀 `faction_goal` 與 `player_goal_override`（查詢面現成的 key）。
+	var _fg: String = str(_cached_snapshot.get("faction_goal", ""))
+	var _pg: String = str(_cached_snapshot.get("player_goal_override", ""))
+	if _fg != "" or _pg != "":
+		lines.append("目標: %s%s" % [_fg if _fg != "" else "（無勢力目標）",
+			"  ★玩家指定: " + _pg if _pg != "" else ""])
+	# ★②「含被聚焦的那個人」：focused_member 是【現成的查詢面 key】，畫面先前從來沒讀過
+	var fm: Dictionary = _cached_snapshot.get("focused_member", {})
+	if not fm.is_empty():
+		# ★★★GDScript 4 沒有 `String(x)` 建構子 —— 用 str(x)。
+		#   ★血證：寫成 String(...) 時 :814 丟 "Invalid call. Nonexistent 'String' constructor."，
+		#     而它【把整個函式從中間砍斷】⇒ 回傳 null ⇒ 型別化成空 Array ⇒ ★★呼叫端看到 0 行。
+		#   ⇒ ★★★而那一輪的卷面是「errors: 1｜到場點名 31／31」—— 一個執行期錯誤
+		#     靜靜吃掉半個函式，而點名照樣滿分。
+		lines.append("聚焦: %s  %s" % [str(fm.get("name", "?")), str(fm.get("status", ""))])
+	return lines
+
+func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
+	var lines: Array = []
+	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
+	var food_days: float = float(ct.get("food_days", 99.0))
+	# ★`starving` 隨「糧: X 天」那一行搬去生存頁了 ⇒ 這裡不再需要（留著會是未用變數警告）
+	var cap: Dictionary = ct.get("capabilities", {})
+	if not cap.is_empty():
+		lines.append("狩獵 %d%%/%.0f糧  戰力 %.0f  日耗 %.1f食(撐%.0f天)" % [
+			int(float(cap.get("hunt_chance", 0.0)) * 100), float(cap.get("hunt_yield", 0.0)),
+			float(cap.get("combat_power", 0.0)), float(cap.get("food_burn_per_day", 0.0)),
+			food_days])
+
+
 
 	if _selected != Vector2i(-1, -1):
 		var sel_tile: Dictionary = _bridge.query_tile(_selected.x, _selected.y)
@@ -795,9 +876,42 @@ func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -
 # 第 2–5 頁的【預定但未接】欄位。★票A 交付時絕大多數是天窗，這是預期不是缺陷。
 # ★★欄位名取自走查腳本印得出來的那一層（spec §3①），
 #   ★★★而不是「117 欄」那個數字——那是名字比對的產物（progress.md 2026-09-10 逐字警告）。
+# 票B：某一頁【已經接出來】的內容。★沒接出的頁回空陣列 ⇒ 那一頁全是天窗。
+func _build_page_connected_lines(idx: int, ct: Dictionary) -> Array:
+	match idx:
+		1: return _build_economy_lines(ct)
+		_: return []
+
 func _page_skylight_fields(idx: int) -> Array:
 	match idx:
-		1: return ["糧食收支", "庫存與價格", "生產線", "貿易對象"]
+		# ★「庫存與價格」已由 _build_economy_lines 接出 ⇒ 從宣告裡【拿掉】
+		#   ⇒ ★★declared 變小 ⇒ [UI-SKYLIGHT] count 跟著變小 ＝ 票B 的進度讀數
+		# ★生存頁四題（blueprint 2026-09-23）：★★用【問題】命名不用資料表名——天窗是印給玩家看的
+		#   ★★★「人的狀態」已由 _build_survival_lines 接出（成員健康＋玩家＋聚焦者）⇒ 從宣告拿掉
+		0:
+			# ★★★Q2 的機制在這裡看得最乾淨：`focused_member` 是【只有生存頁在吃】的欄位
+			#   （我逐 key grep 過：票B 之前全畫面對它的讀點＝0）
+			#   ⇒ ★查詢面有給 ⇒ 它是【已接出】，不印天窗
+			#   ⇒ ★★沒給   ⇒ 它回到天窗清單 —— ★★★而【不是】靜靜消失
+			# ★★★天窗也要有【理由】—— 一個沒有理由的天窗，跟「還沒做」與「做不到」分不開。
+			#   糧食跑道：畫面已有「糧: X 天」，★但 blueprint 要的是【跑道與趨勢】，
+			#             而查詢面【沒有趨勢】⇒ 這一半接不出來 ⇒ 仍是天窗
+			#   位置與家：★★查詢面【沒有】「家在哪／離家多遠」——`outpost_*`／`settlement`
+			#             是【游標那一格】的屬性，不是【我們的家】
+			#             ⇒ ★★★硬接等於把欄位名指向另一個問題（＝在畫面上說謊）
+			#   任務與目標：★已接出（faction_goal／player_goal_override）⇒ 從清單拿掉
+			var _base: Array = ["糧食跑道（缺趨勢）", "位置與家（查詢面無此欄）"]
+			if _cached_snapshot.get("focused_member", {}).is_empty():
+				_base.append("被聚焦的人")
+			return _base
+		1:
+			# ★「庫存與價格」是否算已接出，取決於【查詢面現在有沒有給】——
+			#   ★★寫死成「已接出」的話，Q2 把那一欄拿掉時這一格會【靜靜地少一個天窗】，
+			#   ★★★而畫面上什麼都不會說。
+			var _ct: Dictionary = _cached_snapshot.get("controlled_team", {})
+			if _ct.get("resources", {}).is_empty():
+				return ["糧食收支", "庫存與價格", "生產線", "貿易對象"]
+			return ["糧食收支", "生產線", "貿易對象"]
 		2: return ["鄰近敵對", "戰力對比", "邊境事件", "防務狀態"]
 		3: return ["盟友與敵意", "勢力關係", "成員情緒", "請求與承諾"]
 		4: return ["近期事件", "已知情報", "傳聞來源", "決策紀錄"]
