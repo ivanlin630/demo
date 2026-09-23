@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 看門狗｜失效形態
 topic: ★**已處置，而處置不是「讓它不會死」，是「讓它的死看得見」**：`handback-inbox.sh` 加一格，**只對 blueprint** 講「看門狗心跳停了 N 分鐘」（門檻 20 分＝poll 15＋餘裕 5）｜★★`CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1` **我判不建議、且不是我的格**（機器與用戶的遊戲共用，關掉收割＝拿他的記憶體換我們的背景任務）—— 已呈報用戶，他定｜★★★**而我驗這一格時自己踩了一次**：我 `touch` 了 `.watchdog.lock` 來做陰性對照，那會讓一支已死的看門狗看起來還活著
 ---
