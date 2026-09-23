@@ -218,12 +218,55 @@ func advance_ticks(state: WorldState, runner: SimRunner, n: int) -> Dictionary:
 		"first_stall_tick": stalled_at, "stall_reason": stall_reason,
 	})
 
+# ★★★指令的【人話】（spec §3-5①）：入列時要能印「已排入：移動到 (3,4)」。
+#   ★母體地板寫在驗收裡（P9）：那句話必須含【動作】—— 只印「已排入」等於沒說。
+#   ★★這裡刻意不查 state：入列當下不做任何合法性判斷（否則 (丁) 從後門回來）。
+const VERB: Dictionary = {
+	"move_to": "移動", "cancel_move": "取消移動", "execute_action": "行動",
+	"respond_to_forced": "回應事件", "equip_item": "裝備", "unequip_item": "卸下",
+	"deposit_item": "存入", "take_team_item": "取出", "post_buy_order": "掛買單",
+	"post_sell_order": "掛賣單", "cancel_order": "取消掛單",
+	"possess": "附身", "unpossess": "解除附身",
+	"refresh_targets": "重掃同格對象",
+}
+
+static func describe(name: String, args: Dictionary) -> String:
+	var verb: String = String(VERB.get(name, name))
+	match name:
+		"move_to":
+			return "%s到 (%d,%d)" % [verb, int(args.get("tile_q", 0)), int(args.get("tile_r", 0))]
+		"execute_action":
+			return "%s：%s" % [verb, String(args.get("action_id", ""))]
+		"respond_to_forced":
+			return "%s：%s" % [verb, String(args.get("response_id", ""))]
+		"equip_item", "unequip_item":
+			return "%s：%s" % [verb, String(args.get("slot_id", ""))]
+		"deposit_item", "take_team_item":
+			return "%s %s×%d" % [verb, String(args.get("item_grade", "")), int(args.get("qty", 0))]
+		"post_buy_order", "post_sell_order":
+			return "%s %s×%d" % [verb, String(args.get("res", "")), int(args.get("qty", 0))]
+	return verb
+
+# ★★★重掃同格互動對象（spec §3-3b）：它【寫世界狀態】(`player_pending_targets`)
+#   ⇒ 必須進佇列。★不進的話，「玩家何時打開選單」會改變世界 ⇒ 重播不可重現。
+#   ★★這跟打聽／招募【不同】：那兩支純讀所以改走查詢面；這一支真的寫，所以留在指令側。
+#   ★★★代價（我寫下來，不讓它變成默認）：選單開起來時看到的是【上一顆 tick 掃到的】對象。
+#     玩家走進一格再立刻按互動，第一次會看到空清單 —— 這是 (乙) 的語意，不是 bug。
+func refresh_targets(state: WorldState) -> Dictionary:
+	var pre := _check_controlled_team(state)
+	if not pre.is_empty():
+		return pre
+	_cmd_sys.refresh_colocation_targets(state)
+	return PlayerApiMapper.map_command_result(true, "ok", "已重掃同格對象", {})
+
 func dispatch(state: WorldState, name: String, args: Dictionary) -> Dictionary:
 	match name:
 		"move_to":
 			return move_to(state, args.get("tile_q", -1), args.get("tile_r", -1))
 		"cancel_move":
 			return cancel_move(state)
+		"refresh_targets":
+			return refresh_targets(state)
 		"execute_action":
 			return execute_action(state, args.get("action_id", ""), args.get("target", {}))
 		"respond_to_forced":

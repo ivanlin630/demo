@@ -13,7 +13,6 @@ var _runner: SimRunner
 var _state: WorldState
 var _ticks_remaining: int = 0
 var _query_api: PlayerQueryApi = PlayerQueryApi.new()
-var _cmd_api: PlayerCommandApi = PlayerCommandApi.new()
 
 func _init(runner: SimRunner, state: WorldState) -> void:
 	_runner = runner
@@ -46,11 +45,20 @@ func query_encounter_log(n: int = 5) -> Array:
 
 # 每 frame 呼叫：推進 TICKS_PER_HOUR ticks，回傳結果
 # 遭遇戰/新發現事件觸發時自動停止
+# ★★★一次 `tick_step()` 最多吃幾個 tick —— ★把它【具名】出來，不是為了好看：
+#   `SimRunner.RESULT_TTL_TICKS` 必須 ≥ 這個數，否則一次 step 之內產生的結果句
+#   會在同一次 step 裡過期 ⇒ ★★玩家看不到前面那幾十顆 tick 的拒絕訊息，
+#   而「拒絕禁靜默」是 (乙) 的核心 ⇒ 兩條規矩互相吃掉。
+#   ⇒ ★★★沒有名字的話，那個依賴只存在於【兩處湊巧都寫 TICKS_PER_HOUR】，
+#     而床去斷言它就是拿常數跟自己比 —— 改這裡不會有任何東西紅。
+#   ⇒ 現在它有名字：`command_replay_bed` 的 P14b 直接比這兩個常數。
+const STEP_TICK_BOUND: int = WorldState.TICKS_PER_HOUR
+
 # 返回 { "events": Array, "done": bool }
 func tick_step() -> Dictionary:
 	if _ticks_remaining <= 0:
 		return { "events": [], "done": true }
-	var n: int = mini(WorldState.TICKS_PER_HOUR, _ticks_remaining)
+	var n: int = mini(STEP_TICK_BOUND, _ticks_remaining)
 	var events := advance_ticks(n)
 	_ticks_remaining = maxi(0, _ticks_remaining - n)
 	if events.size() > 0:
@@ -274,17 +282,56 @@ func query_trade_direct_preview(target_team_id: int) -> Dictionary:
 func get_and_clear_alerts() -> Array:
 	return PlayerQueryApi.new().get_and_clear_alerts(_state)
 
+# ★★★不再當場套用：推進佇列，由 sim_runner 在【tick 邊界】消費（spec §3-1）。
+#   ★沒有「立刻套用」的旁路（spec §3-4）—— 只要存在一條同步路徑，
+#     重播就要問「那一次走的是哪條」，而卷面上兩條路徑長得一模一樣。
+#   ★★回傳形狀照 spec §3-1 逐字：{ ok, queued, seq }。
+#     ⇒ ★呼叫端原本當場讀 `message`／`ok` 的（實測 66 個呼叫端、54 個當場讀）
+#       現在拿不到結果 —— 那個【玩家回饋】要怎麼補，systems 還沒裁，本檔不自己選。
 func command_player(name: String, args: Dictionary) -> Dictionary:
-	return _cmd_api.dispatch(_state, name, args)
+	# ★★★入列當下【唯一】會擋的一件事（systems 裁 2026-09-24，(乙) 的那一句）：
+	#   `dispatch` 的 match 認不認得這個 name。★它不是合法性判斷 —— 合法性歸消費點，
+	#   而「這個 name 根本不存在」【不會因為推進一顆 tick 而改變】⇒ 擋在這裡沒有第二份真相。
+	#   ★★判準走 `VERB` —— 而 P9 保證 `VERB` ≡ `dispatch()` 的 match 名單（異源比對）
+	#     ⇒ ★★★這裡不是再抄一份白名單，是用那份【有守衛的】白名單。
+	#   ★我原本漏了這一句，是 headless_test 的「unknown cmd: ok=false」紅出來的。
+	if not PlayerCommandApi.VERB.has(name):
+		return {"ok": false, "queued": false, "code": "unknown_command",
+			"message": "沒有這個指令：%s" % name}
+	_state.command_seq += 1
+	_state.pending_commands.append({
+		"name": name, "args": args.duplicate(true), "seq": _state.command_seq})
+	return {"ok": true, "queued": true, "seq": _state.command_seq,
+		"message": "已排入：%s" % PlayerCommandApi.describe(name, args)}
+
+# 頁腳常駐用（spec §3-5③）：★★「待執行 N 道」——★玩家要看得到他按的東西還沒生效。
+func pending_command_count() -> int:
+	return _state.pending_commands.size()
+
+# ★★★【唯讀】：讀結果句不得改變世界（systems 裁 2026-09-23）。
+#   ★原本這支是破壞性排空 ⇒ 掛上一個 UI 就會改變 fp ＝ 觀測改變被觀測物。
+#   ★★現在清除由消費點依 tick 做（sim_runner.RESULT_TTL_TICKS）
+#   ⇒ 呼叫端自己記「我印到哪一條」（UI 端的 local state，不是世界狀態）。
+func read_command_results() -> Array:
+	return _state.command_results
 
 # 玩家主動打開互動選單時呼叫：掃描同格 NPC 加入 pending_targets
+# ★★★改成【入列】（spec §3-3b）：它寫 `player_pending_targets` ＝ 世界狀態
+#   ⇒ 不入列的話「玩家何時打開選單」會改變世界 ⇒ 重播不可重現。
+#   ★它回 void ⇒ 沒有任何呼叫端讀得到結果 ⇒ 這一改【不牽動任何呼叫端】（我逐處查過：活的 5 處全不讀）。
 func refresh_interaction_targets() -> void:
-	var cmd_sys := PlayerCommandSystem.new()
-	cmd_sys.refresh_colocation_targets(_state)
+	command_player("refresh_targets", {})
 
 # 設定玩家狀態欄位（如 tribute_rate_input）
 func set_player_input(key: String, value: Variant) -> void:
 	_state.player_state[key] = value
+
+# ★這兩支【不進佇列】：它們不改世界（稽核見 player_query_api 檔頭）
+func query_inquiry_options(target_id: int) -> Dictionary:
+	return PlayerQueryApi.new().get_inquiry_options(_state, target_id)
+
+func query_recruit_menu(target_id: int) -> Dictionary:
+	return PlayerQueryApi.new().get_recruit_menu(_state, target_id)
 
 func query_faction_panel() -> Dictionary:
 	return PlayerQueryApi.new().query_faction_panel(_state)

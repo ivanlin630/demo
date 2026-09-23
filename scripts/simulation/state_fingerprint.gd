@@ -262,6 +262,20 @@ static func _emit_player(state: WorldState, buf: PackedStringArray) -> void:
 	buf.append("P|hostile=%s" % str(state.player_hostile_teams))
 	buf.append("P|pending_targets=%s" % str(state.player_pending_targets))
 	buf.append("P|alerts=%d" % state.player_alerts.size())
+	# ══════════ 指令佇列（systems 裁 2026-09-23）══════════
+	# ★★★形式是【另起一行】不是塞進既有那幾行 —— 舊有每一行【逐字不變】
+	#   ⇒ 歷史指紋只要刪掉這一行就還原得回去 ⇒ ★不用重取基準、不失去歷史可比。
+	# ★為什麼它該在 canon 裡：這四個是 player_* 家族，而本檔 :251-256 寫的理由是
+	#   「player_* 進 canon【不是】因為玩家會影響 sim，而是因為【sim 不該碰 player_*】」
+	#   ⇒ 一顆【無玩家】的跑若讓這一行不是全 0，那就是有系統在沒有玩家的世界裡動了佇列。
+	# ★★誠實限（我自己的，寫在這裡因為它會咬到比對）：`command_results` 由 UI 在
+	#   `_process()` 排空 ⇒ ★同一個世界，【有 UI 跑】與【headless 跑】這一欄會不同。
+	#   ⇒ 拿 UI 跑的指紋跟 headless 跑的比，會在這一欄上分岔，而那【不是世界不一樣】。
+	# ★★★`pend` 印【內容】不印個數：兩條不同的待執行指令在「個數」上長得一樣，
+	#   而佇列的重點就是【裡面是哪幾條、什麼順序】。
+	buf.append("PQ|pend=%s|seq=%d|log=%d|res=%d" % [
+		str(state.pending_commands), state.command_seq,
+		state.command_log.size(), state.command_results.size()])
 	for pair in [["state", state.player_state], ["forced_event", state.player_forced_event],
 			["pending_orders", state.player_pending_orders], ["pre_encounter", state.player_pre_encounter]]:
 		var d: Dictionary = pair[1]

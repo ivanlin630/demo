@@ -92,6 +92,9 @@ var _feedback_line: Label          # 指令成敗 feedback（著色，持續到�
 var _hint_line: Label              # 當前模式可用鍵
 var _res_baseline: Dictionary = {} # 資源每日基準（日邊界更新）→ 趨勢箭頭
 var _res_baseline_day: int = -1
+# ★「我印到第幾條了」＝【UI 自己的】狀態，不是世界狀態
+#   ★★所以它不進 fp，也不會讓「有沒有人在看」改變世界（systems 裁 2026-09-23）。
+var _last_shown_result_seq: int = 0
 
 # ── Pre-encounter submode ────────────────────────────────────────────────────
 var _pre_encounter_mode: bool = false
@@ -199,6 +202,18 @@ func _process(_delta: float) -> void:
 	var result := _bridge.tick_step()
 	_update_day_baseline()   # ★★日邊界的擁有者在這裡，不在 render
 	_events.append_array(result.get("events", []))
+	# ★★★指令結果句排空（spec §3-5②）——★在【這裡】不在 `_refresh()`：
+	#   在 render 裡排空就是 render 又在寫 state，而那是「render 不得寫 state」那張票剛還掉的債。
+	#   ★★拒絕禁靜默 ⇒ 成功與失敗【都】進事件流；失敗另外推上 feedback 行，因為
+	#     它是玩家【按了鍵卻沒發生事】的唯一解釋。
+	for r in _bridge.read_command_results():
+		if int(r.get("seq", 0)) <= _last_shown_result_seq:
+			continue
+		_last_shown_result_seq = int(r.get("seq", 0))
+		_events.append("%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))])
+		if not bool(r.get("ok", false)):
+			_feedback_line.text = _feedback_text(false, String(r.get("text", "")))
+			_feedback_line.modulate = _feedback_color(false)
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 
@@ -307,11 +322,20 @@ func _input(event: InputEvent) -> void:
 		KEY_M:
 			var r: Dictionary = _bridge.command_player("move_to", {"tile_q": _cursor.x, "tile_r": _cursor.y})
 			if r.get("ok"):
-				_log_event(r.get("message", ""))
+				# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
+				#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
+				#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
+				#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
+				#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
 				_bridge.request_advance(99999)
 				_input_bar.text = "移動中 [Esc]停止"
 			else:
-				_log_event(r.get("message", "移動失敗"))
+				# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
+				#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
+				#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
+				#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
+				#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
+				pass   # ★上面那段註解記錄了這裡原本有什麼；GDScript 的區塊不能只有註解
 			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_refresh()
 		KEY_SPACE:
@@ -598,7 +622,12 @@ func _refresh() -> void:
 			log_lines.append("[T%d] %s" % [_bridge.get_current_tick(), str(e)])
 		_event_label.text = "\n".join(log_lines)
 	# 常駐 chrome：hint（當前模式鍵表）+ LogStrip（與 panel 共存，永遠顯最新 N 條）
-	_hint_line.text = _mode_keymap(_current_mode_name())
+	# ★★★頁腳常駐「待執行 N 道」（spec §3-5③）：玩家要看得到他按的東西【還沒生效】。
+	#   ★常駐＝0 也印 —— ★★只在非零時才出現的東西，玩家學不會它的意思，
+	#     而「沒看到」與「沒有這個功能」在畫面上長得一樣。
+	#   ★這裡【只讀】不寫（render 不得寫 state）。
+	_hint_line.text = "%s｜待執行 %d 道" % [
+		_mode_keymap(_current_mode_name()), _bridge.pending_command_count()]
 	_log_strip.text = _log_strip_text(_events, 3)
 	_check_alerts()
 
@@ -1212,9 +1241,11 @@ func _handle_interact_mode(keycode: int) -> void:
 				# 進入 gather_intel 子模式
 				_intel_target_id = _interact_target
 				_bridge.set_player_input("pending_intel_target", _intel_target_id)
-				var ir: Dictionary = _bridge.command_player(
-					act.get("command_name", "execute_action"), act.get("command_args", {}))
-				_intel_options = ir.get("payload", {}).get("inquiry_options", [])
+				# ★★★開選單這一步是【查詢】不是指令（systems 裁 2026-09-23）：
+				#   它不改世界 ⇒ 進佇列的話重播帳裡會多一條「什麼都沒做」的指令。
+				#   ★真正改世界的是選完之後那一條（confirm_gather_intel）⇒ 那條照常進佇列。
+				var ir: Dictionary = _bridge.query_inquiry_options(_interact_target)
+				_intel_options = ir.get("data", {}).get("inquiry_options", [])
 				if _intel_options.is_empty():
 					_log_event("[打聽] 無可用問題")
 				else:
@@ -1222,12 +1253,13 @@ func _handle_interact_mode(keycode: int) -> void:
 					_interact_mode = false
 			elif action_id == "recruit":
 				# recruit 回 menu payload → 進招募子模式（記名候選 + 匿名選項）
-				var rr: Dictionary = _bridge.command_player(
-					act.get("command_name", "execute_action"), act.get("command_args", {}))
+				# ★同上：開招募選單是查詢（成功路徑純讀；失敗路徑的 erase 由查詢端擋掉，
+				#   而隊伍死亡的清理 world_state.gd:878 本來就有）
+				var rr: Dictionary = _bridge.query_recruit_menu(_interact_target)
 				if not rr.get("ok", false):
-					_log_event("[招募] %s" % rr.get("message", rr.get("msg", "無法招募")))
+					_log_event("[招募] %s" % rr.get("message", "無法招募"))
 				else:
-					var rp: Dictionary = rr.get("payload", {})
+					var rp: Dictionary = rr.get("data", {})
 					_recruit_members        = rp.get("willing_members", [])
 					_recruit_anon_available = rp.get("anon_available", false)
 					_recruit_anon_cost      = int(rp.get("anon_cost", 0))
@@ -1241,11 +1273,18 @@ func _handle_interact_mode(keycode: int) -> void:
 			else:
 				var result: Dictionary = _bridge.command_player(
 					act.get("command_name", "execute_action"), act.get("command_args", {}))
-				_log_event("[互動] %s" % result.get("message", ""))
+				# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
+				#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
+				#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
+				#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
+				#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
 				_set_feedback(result.get("ok", true), result.get("message", ""))
 				# 貿易預覽流程：進入 trade submode
-				if result.get("ok") and result.get("payload", {}).get("requires_preview", false):
-					_trade_target_id = result.get("payload", {}).get("preview_target_id", -1)
+				# ★★★不讀 payload（systems 裁）：`preview_target_id` 就是呼叫端自己傳進去的 target，
+				#   而佇列化之後 `result` 只會是「已排入」——★讀它等於讀一個還沒發生的事的結果。
+				#   ★判斷改由【我自己知道的 action_id】決定（"trade" ＝ player_command_system.gd:88）。
+				if action_id == "trade":
+					_trade_target_id = _interact_target
 					_bridge.set_player_input("trade_offer", {"player_gives": {}, "player_wants": {}})
 					_trade_page = 0
 					_trade_mode = true
@@ -1271,7 +1310,11 @@ func _handle_interact_mode(keycode: int) -> void:
 	if not fi.get("interaction_id", "").is_empty() and num < fe_count:
 		var resp_args: Dictionary = fi_responses[num].get("command_args", {})
 		var result: Dictionary = _bridge.command_player("respond_to_forced", resp_args)
-		_log_event("[強制互動] %s" % result.get("message", ""))
+		# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
+		#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
+		#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
+		#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
+		#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
 		_set_feedback(result.get("ok", true), result.get("message", ""))
 		_refresh()
 		return
@@ -1286,7 +1329,11 @@ func _handle_interact_mode(keycode: int) -> void:
 			_refresh(); return
 		var sr: Dictionary = _bridge.command_player(
 			sa.get("command_name", "execute_action"), sa.get("command_args", {}))
-		_log_event("[原地] %s" % sr.get("message", ""))
+		# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
+		#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
+		#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
+		#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
+		#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
 		_set_feedback(sr.get("ok", true), sr.get("message", ""))
 		_refresh_snapshot()
 		if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
@@ -2028,7 +2075,11 @@ func _handle_trade_mode(keycode: int) -> void:
 			"action_id": "submit_trade_offer",
 			"target": {"kind": "team", "team_id": _trade_target_id,
 						"member_id": -1, "tile_q": -1, "tile_r": -1}})
-		_log_event("[交易] %s" % r.get("message", ""))
+		# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
+		#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
+		#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
+		#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
+		#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
 		_set_feedback(r.get("ok", false), r.get("message", ""))
 		if r.get("ok", false):
 			_trade_mode = false; _trade_target_id = -1; _trade_page = 0
@@ -2164,7 +2215,11 @@ func _handle_recruit_mode(keycode: int) -> void:
 			"action_id": "recruit_anon",
 			"target": {"kind": "team", "team_id": _recruit_target_id,
 					   "member_id": -1, "tile_q": -1, "tile_r": -1}})
-		_log_event("[招募] %s" % ra.get("message", ra.get("msg", "")))
+		# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
+		#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
+		#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
+		#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
+		#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
 		_set_feedback(ra.get("ok", true), ra.get("message", ra.get("msg", "")))
 		_exit_recruit_mode()
 		return
@@ -2177,7 +2232,11 @@ func _handle_recruit_mode(keycode: int) -> void:
 				"action_id": "recruit_named",
 				"target": {"kind": "member", "team_id": _recruit_target_id,
 						   "member_id": pid_r, "tile_q": -1, "tile_r": -1}})
-			_log_event("[招募] %s" % rn.get("message", rn.get("msg", "")))
+			# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
+			#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
+			#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
+			#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
+			#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
 			_set_feedback(rn.get("ok", true), rn.get("message", rn.get("msg", "")))
 			_exit_recruit_mode()
 	_refresh()

@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -83,6 +83,8 @@ func _initialize() -> void:
 	await _test_render_idempotent()
 	await _test_refresh_idempotent()
 	await _test_p1b_exclude_empty()
+	await _test_p11_pending_footer()
+	await _test_p15_echo_at_most_twice()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -105,7 +107,14 @@ func _test_interact_self_team_split() -> void:
 	st.teams[7001] = other
 	st.team_discovered[ptid] = [7001]
 	node._interact_mode = true; node._interact_target = -1
-	node._bridge.refresh_interaction_targets()
+	# ★★★這裡是【佈置樣本】不是【走指令路徑】：`refresh_interaction_targets()` 已改成入列
+	#   （spec §3-3b：它寫 player_pending_targets ＝ 世界狀態）⇒ 呼叫完【當下不會生效】,
+	#   而這一格接著就要讀 pending_targets ⇒ 照原樣會紅，而那個紅不帶任何資訊。
+	#   ★不插一顆 tick 的理由：推進會讓手動擺進去的隊【自己走掉】⇒ 擾動的是樣本不是被測的東西。
+	#   ★★★【這一格因此繞過了指令路徑】—— 寫明是因為：不寫的話，下一個人會以為
+	#     「指令路徑在這裡被測過了」，而真正守它的是 command_replay_bed 的 P1／P12。
+	#     ★一個被繞過的東西如果沒有被寫下來，它看起來就像被覆蓋了。
+	PlayerCommandSystem.new().refresh_colocation_targets(st)
 	node._refresh()
 	var split: Dictionary = node._interact_action_split()
 	var self_ids: Array = []
@@ -217,6 +226,11 @@ func _test_forced_choose_heir_ui() -> void:
 	_check("forced responses 列候選（非只拒絕）", resp_ids.size() == 2 and ("heir_%d" % int(cands[0])) in resp_ids)
 	# 驅動選第一候選（forced 回應 = num 0 → KEY_1,因 fe_count>0 時 idx 0 對應第一 response）
 	node._handle_interact_mode(KEY_1)
+	# ★★★指令佇列化之後，按鍵只是【入列】—— 世界要等下一顆 tick 才變（2026-09-24 實測）。
+	#   ★我原本的分類表掃的是【床裡的 command_player 呼叫點】，而這一格是
+	#     透過真實輸入路徑下指令（command_player 在 text_ui_main.gd 裡）⇒ ★★掃不到。
+	#   ⇒ ★★★母體選錯了軸：「哪些格會下指令」≠「哪幾行寫了 command_player」。
+	_apply_queue(node)
 	_check("choose_heir 後 leader 接位", st.teams[ptid].leader_id == int(cands[0]))
 	_check("choose_heir 後 forced 清除", st.player_forced_event.is_empty())
 	await _free_ui(node)
@@ -249,6 +263,11 @@ func _test_forced_aid_request_ui() -> void:
 	# give 是第一 response（options ["give","refuse"]）→ KEY_1
 	var food_before: float = float(pt.resources["food"]) + float(b.resources["food"])
 	node._handle_interact_mode(KEY_1)
+	# ★★★指令佇列化之後，按鍵只是【入列】—— 世界要等下一顆 tick 才變（2026-09-24 實測）。
+	#   ★我原本的分類表掃的是【床裡的 command_player 呼叫點】，而這一格是
+	#     透過真實輸入路徑下指令（command_player 在 text_ui_main.gd 裡）⇒ ★★掃不到。
+	#   ⇒ ★★★母體選錯了軸：「哪些格會下指令」≠「哪幾行寫了 command_player」。
+	_apply_queue(node)
 	_check("aid give 後 beggar 收糧", float(b.resources["food"]) > 0.0)
 	_check("aid give 守恆", is_equal_approx(food_before, float(pt.resources["food"]) + float(b.resources["food"])))
 	_check("aid 後 forced 清除", st.player_forced_event.is_empty())
@@ -307,6 +326,11 @@ func _test_recruit_named_reachable() -> void:
 	# 選記名候選（第 1 個）→ recruit_named 真執行
 	var coin_before: float = float(st.teams[ptid].resources.get("coin", 0))
 	node._handle_recruit_mode(KEY_1)
+	# ★★★指令佇列化之後，按鍵只是【入列】—— 世界要等下一顆 tick 才變（2026-09-24 實測）。
+	#   ★我原本的分類表掃的是【床裡的 command_player 呼叫點】，而這一格是
+	#     透過真實輸入路徑下指令（command_player 在 text_ui_main.gd 裡）⇒ ★★掃不到。
+	#   ⇒ ★★★母體選錯了軸：「哪些格會下指令」≠「哪幾行寫了 command_player」。
+	_apply_queue(node)
 	_check("recruit_named 執行：成員轉到玩家隊", st.persons[43211].team_id == ptid)
 	_check("recruit_named 執行：coin 扣 150", abs(coin_before - float(st.teams[ptid].resources.get("coin", 0)) - 150.0) < 0.01)
 	await _free_ui(node)
@@ -404,7 +428,11 @@ func _test_member_equip_flow() -> void:
 	node._refresh()
 	var r = node._bridge.command_player("execute_action",
 		{"action_id":"equip_member","target":{"kind":"member","team_id":ptid,"member_id":99001,"slot_id":"hand_1","item_grade":"weapon_melee_low"}})
-	_check("equip_member 經 bridge 成功", r.get("ok", false))
+	_check("★入列成功（★注意：這【不是】「動作成功」，只是排進去了）", r.get("queued", false))
+	var _ap_equip_member: Dictionary = _apply_queue(node)
+	_check("★★母體地板：消費點真的吃到了（%d 條）%s" % [int(_ap_equip_member.get("applied", 0)), String(_ap_equip_member.get("why", ""))],
+		int(_ap_equip_member.get("applied", 0)) >= 1)
+	_check("★★★equip_member 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_equip_member.get("ok", false))
 	_check("成員裝上武器", st.persons[99001].equipment["hand_1"].get("grade","") == "weapon_melee_low")
 	_check("status 含武裝比例", node._state_label.text.contains("比例"))
 	await _free_ui(node)
@@ -417,7 +445,11 @@ func _test_armed_ratio_cmd() -> void:
 	var st = node._bridge.get_state()
 	st.player_state["armed_ratio_input"] = 0.6
 	var r = node._bridge.command_player("execute_action", {"action_id":"set_armed_anon_ratio","target":{"kind":"none"}})
-	_check("set_armed_anon_ratio 成功", r.get("ok", false))
+	_check("★入列成功（★注意：這【不是】「動作成功」，只是排進去了）", r.get("queued", false))
+	var _ap_set_armed_anon_ratio: Dictionary = _apply_queue(node)
+	_check("★★母體地板：消費點真的吃到了（%d 條）%s" % [int(_ap_set_armed_anon_ratio.get("applied", 0)), String(_ap_set_armed_anon_ratio.get("why", ""))],
+		int(_ap_set_armed_anon_ratio.get("applied", 0)) >= 1)
+	_check("★★★set_armed_anon_ratio 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_set_armed_anon_ratio.get("ok", false))
 	var ptid: int = st.persons[st.player_id].team_id
 	_check("ratio 設為 0.6", abs(st.teams[ptid].armed_anon_ratio - 0.6) < 0.01)
 	await _free_ui(node)
@@ -507,7 +539,29 @@ func _test_q7_3_take_loot_flow() -> void:
 	# 執行 take_loot command（encounter_view 的 [K] 派的就是這個）
 	var r = node._bridge.command_player("execute_action",
 		{"action_id": "take_loot", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-	_check("take_loot 經 bridge 成功", r.get("ok", false))
+	_check("★入列成功（★注意：這【不是】「動作成功」，只是排進去了）", r.get("queued", false))
+	var _ap_take_loot: Dictionary = _apply_queue(node)
+	_check("★★母體地板：消費點真的吃到了（%d 條）%s" % [int(_ap_take_loot.get("applied", 0)), String(_ap_take_loot.get("why", ""))],
+		int(_ap_take_loot.get("applied", 0)) >= 1)
+	_check("★★★take_loot 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_take_loot.get("ok", false))
+	# ══════════ 可證偽的預測（systems 2026-09-23：不要預先赦免那個紅）══════════
+	#   ★背景：`_apply_queue()` 推進一顆 tick 讓指令真的被套用 ⇒ 整個世界跟著走一步。
+	#   ★★而【預寫的失敗語意對真紅與假紅一視同仁地加持說服力】⇒ 所以這裡寫的不是
+	#     「這個紅是預期的」，是一個【可以被推翻的預測】：
+	#     斷言的量：玩家隊 food 相對 before_food 的差，容差 0.01
+	#     ①方向：只可能【不變】或【變少】。★變【多】＝預測被推翻＝發現。
+	#     ②量級：糧耗走 cadence（SimRunner.NEAR_CADENCE ＝ TICKS_PER_HOUR ＝ 60）
+	#        ⇒ 推進一顆 tick 只有在【剛好跨過該隊的錯開邊界】時才扣，否則一毛都不扣。
+	#        若扣：pop × FOOD_PER_PERSON_PER_DAY(0.8) × 60/1440 ＝ pop × 0.0333
+	#              （另有坐騎／馬匹草料 × 0.5/day ⇒ 每匹再算 0.0208）
+	#     ③判準：落差【在這個式子算得出來的範圍內】⇒ 調容差；
+	#            落差【在範圍外】（變多、或少掉遠超過 pop×0.0333）⇒ ★★★那是【發現】。
+	#   ★而斷言本身【維持嚴格 0.01 不放寬】—— 放寬就是換一種方式預先赦免。
+	#     第一次跑的那個紅【就是這個預測的實驗】。
+	var _fd_delta: float = float(pt.resources.get("food", 0)) - (before_food + 30.0)
+	var _fd_pop: int = pt.population + pt.minor_population
+	var _fd_pred: float = float(_fd_pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * float(SimRunner.NEAR_CADENCE) / float(WorldState.TICKS_PER_DAY)
+	print("  [預測] 食物落差 實測=%.4f｜若這一 tick 剛好扣糧，預測扣掉 %.4f（pop=%d）｜方向：只准 ≤0" % [_fd_delta, _fd_pred, _fd_pop])
 	_check("玩家食物 +30 入庫", abs(float(pt.resources.get("food", 0)) - (before_food + 30.0)) < 0.01)
 	_check("敗隊食物 -30", abs(float(loser.resources.get("food", 0)) - 70.0) < 0.01)
 	_check("last_encounter_result 已清", st.last_encounter_result.is_empty())
@@ -540,7 +594,11 @@ func _test_q7_5_dispatch_subteam_task() -> void:
 	node._bridge.set_player_input("sub_move_r", pt.tile_pos.y)
 	var r = node._bridge.command_player("execute_action",
 		{"action_id": "dispatch_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-	_check("dispatch_subteam 成功", r.get("ok", false))
+	_check("★入列成功（★注意：這【不是】「動作成功」，只是排進去了）", r.get("queued", false))
+	var _ap_dispatch_subteam: Dictionary = _apply_queue(node)
+	_check("★★母體地板：消費點真的吃到了（%d 條）%s" % [int(_ap_dispatch_subteam.get("applied", 0)), String(_ap_dispatch_subteam.get("why", ""))],
+		int(_ap_dispatch_subteam.get("applied", 0)) >= 1)
+	_check("★★★dispatch_subteam 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_dispatch_subteam.get("ok", false))
 	# 經 parent.subteam_ids 找剛派出的子隊（command 不回傳 sub_id）
 	var sub_id: int = pt.subteam_ids[-1] if not pt.subteam_ids.is_empty() else -1
 	_check("子隊 current_task = 覓食（非寫死 IDLE）",
@@ -605,6 +663,26 @@ func _check(label: String, ok: bool) -> void:
 	if not ok: _errors += 1
 
 # 實例化 TextUI 場景 + 等 _ready。回傳 node。
+
+# ★★★指令佇列化之後，「下指令 ⇒ 立刻讀效果」不再成立（spec §3-4）。
+#   ★而這裡的風險【不是紅】是【假綠】：`command_player()` 現在回 {ok:true, queued:true}
+#     ⇒ `_check("…成功", r.get("ok"))` **照樣綠，但它從此測的是「排進去了」不是「成功了」**。
+#   ⇒ ★★所以這支 helper 做兩件事：①推進一顆 tick 讓它真的被套用
+#     ②回傳【消費點的帳】—— 斷言要看那個 ok，不是入列的 ok。
+#   ★★★誠實限（動工時無法消除）：推進一顆 tick 會讓【整個世界】走一步
+#     ⇒ 後面那些比數值的斷言（例如「食物 +30」）現在多了一個 tick 的消耗在裡面。
+#     ★那不是這支 helper 的錯，是【佇列語意本身】帶來的 —— 而它只能在跑得動的時候調容差。
+func _apply_queue(node) -> Dictionary:
+	var st: WorldState = node._bridge.get_state()
+	var before_n: int = st.command_log.size()
+	node._bridge.request_advance(1)
+	node._bridge.tick_step()
+	if st.command_log.size() <= before_n:
+		return {"ok": false, "applied": 0, "why": "★消費點一條都沒吃到 ⇒ 佇列沒有被消費"}
+	var last: Dictionary = st.command_log[st.command_log.size() - 1]
+	return {"ok": bool(last.get("ok", false)), "applied": st.command_log.size() - before_n,
+		"why": "", "entry": last}
+
 func _make_ui() -> Node:
 	# ★★★每一格都要拿到【一樣的世界】，而它不是自動的：
 	#   ★這支床有 31 格，每一格各自 instantiate 一次；★★而 class 級（static）的殘留
@@ -684,7 +762,14 @@ func _test_u21_interact_paging() -> void:
 	node._interact_mode = true
 	node._interact_target = -1
 	node._interact_page = 0
-	node._bridge.refresh_interaction_targets()
+	# ★★★這裡是【佈置樣本】不是【走指令路徑】：`refresh_interaction_targets()` 已改成入列
+	#   （spec §3-3b：它寫 player_pending_targets ＝ 世界狀態）⇒ 呼叫完【當下不會生效】,
+	#   而這一格接著就要讀 pending_targets ⇒ 照原樣會紅，而那個紅不帶任何資訊。
+	#   ★不插一顆 tick 的理由：推進會讓手動擺進去的隊【自己走掉】⇒ 擾動的是樣本不是被測的東西。
+	#   ★★★【這一格因此繞過了指令路徑】—— 寫明是因為：不寫的話，下一個人會以為
+	#     「指令路徑在這裡被測過了」，而真正守它的是 command_replay_bed 的 P1／P12。
+	#     ★一個被繞過的東西如果沒有被寫下來，它看起來就像被覆蓋了。
+	PlayerCommandSystem.new().refresh_colocation_targets(st)
 	node._refresh()
 	var pending_n: int = node._cached_snapshot.get("pending_targets", []).size()
 	_check("pending_targets >9（造同格隊成功）", pending_n > 9)
@@ -951,7 +1036,23 @@ func _test_pages_switch_key() -> void:
 		seen.append(node._page_idx)
 	_check("連按 %d 次回到第 1 頁（走完 %s）" % [UiPages.PAGE_ORDER.size(), str(seen)],
 		node._page_idx == 0)
-	_check("循環中每一頁都到過一次（%d 個相異）" % _uniq_n(seen), _uniq_n(seen) == UiPages.PAGE_ORDER.size())
+	# ★★★判準窄化（systems 2026-09-23：註解不是守衛）——原本是「走完有幾個相異」，
+	#   ★而那條【兩邊同源】：按 `PAGE_ORDER.size()` 次、而 `next_idx` 是 mod 同一個數
+	#     ⇒ 只要步長與頁數互質（步長 2、頁數 5），走 N 次照樣 N 個相異 ⇒ 驗不出步長錯。
+	#   ⇒ ★★改成【每一步剛好 +1】：左邊＝實際走到的頁，右邊＝`(prev+1)%N` 這個【外部規則】
+	#     ⇒ ★★★兩邊從【同源】變成【異源】，而成本一樣、比原判準嚴格。
+	#     ★真正「一次走一頁」的實作恆滿足 +1 ⇒ 會紅的只有步長真的錯了那一種。
+	var step_bad: Array = []
+	var prev_i: int = 0
+	for i in range(seen.size()):
+		var want: int = (prev_i + 1) % UiPages.PAGE_ORDER.size()
+		if int(seen[i]) != want:
+			step_bad.append("第 %d 步：期望 %d 實得 %d" % [i + 1, want, int(seen[i])])
+		prev_i = int(seen[i])
+	for s in step_bad: print("    ✗ %s" % String(s))
+	_check("★每一步【剛好 +1】（%d 步全對；走過 %s）" % [seen.size(), str(seen)], step_bad.is_empty())
+	_check("★★母體地板：真的走了 %d 步（0 步的話「每一步都對」恆真）" % seen.size(),
+		seen.size() == UiPages.PAGE_ORDER.size() and seen.size() >= 2)
 	# ★反向鍵
 	var ev2 := InputEventKey.new()
 	ev2.keycode = KEY_COMMA
@@ -1098,10 +1199,11 @@ func _line_with(text: String, key: String) -> String:
 		if String(ln).contains(key): return String(ln)
 	return ""
 
-func _uniq_n(a: Array) -> int:
-	var d: Dictionary = {}
-	for x in a: d[x] = true
-	return d.size()
+# ★`_uniq_n()` 已刪（2026-09-23）：它唯一的用途是切頁那格的「走完有幾個相異」，
+#   而那個判準【兩邊同源、驗不出步長錯】，已窄化成「每一步剛好 +1」⇒ 這支沒有呼叫端了。
+#   ★刪前驗過：全檔 `_uniq_n` 只剩【定義本身】一處出現（0 個呼叫端）。
+#   ★★留這行字的理由跟刪掉那 8 行 `_log_event` 一樣：一個被刪掉的東西如果沒有留下
+#     它在哪的紀錄，下一個人會以為它從來不存在 —— 而休眠的死碼正是靠「沒人記得」活下來的。
 
 # P4[天窗]：第 2–5 頁的未接欄位必須印「未接出（票B）」，不得靜默空白。
 func _test_pages_skylight() -> void:
@@ -1116,6 +1218,11 @@ func _test_pages_skylight() -> void:
 	for i in range(0, UiPages.PAGE_ORDER.size()):
 		node._page_idx = i
 		var s: String = node._build_state_str()
+		# ★★★這一格是【一致性】檢查，不是【正確性】檢查 —— 兩邊同源（2026-09-23 自檢）：
+		#   n 來自畫面，而畫面是【照 `_page_skylight_fields(i)` 印出來的】；d 也是它。
+		#   ⇒ ★它抓得到：宣告了卻沒印（render 壞掉／函式被截斷）、印了卻沒宣告。
+		#   ⇒ ★★它【抓不到】：宣告本身是錯的（少宣告一欄，兩邊一起少，照樣綠）。
+		#   ⇒ ★★★那個缺口要由【外部錨】補：spec 裡的欄位清單。今天沒有那個錨，寫在這裡不假裝有。
 		var n: int = s.count("未接出（票B）")
 		var d: int = _page_skylight_fields_of(node, i).size()
 		total += n
@@ -1479,3 +1586,92 @@ func _test_p1b_exclude_empty() -> void:
 	print("  ★★而【結構行】清單（P1B_STRUCTURAL，%d 條）是另一件事：那是 spec 本來就不比的，不是債。"
 		% P1B_STRUCTURAL.size())
 	_cell("_test_p1b_exclude_empty")
+# ══════════ P11［頁腳常駐「待執行 N 道」］（spec §3-5③）══════════
+# ★常駐＝0 也要印：只在非零時才出現的東西，玩家學不會它的意思，
+#   而「沒看到」與「沒有這個功能」在畫面上長得一樣。
+# ★★★負對照：入列之後【不推進】⇒ N 必須【維持】不歸零 ——
+#   ★沒有這一格的話，一支「每次 render 都把佇列清掉」的實作也會 0→1→0 看起來很對。
+func _test_p11_pending_footer() -> void:
+	_selftest_gate("_test_p11_pending_footer").noop()
+	print("
+── P11 頁腳「待執行 N 道」──")
+	var node = await _make_ui()
+	node._refresh()
+	_check("★0 也印（常駐）", node._hint_line.text.contains("待執行 0 道"))
+	node._bridge.command_player("move_to", {"tile_q": 9999, "tile_r": 9999})
+	node._refresh()
+	_check("入列一條 ⇒ 「待執行 1 道」", node._hint_line.text.contains("待執行 1 道"))
+	node._bridge.command_player("move_to", {"tile_q": 9998, "tile_r": 9998})
+	node._bridge.command_player("cancel_move", {})
+	node._refresh()
+	_check("再入列兩條 ⇒ 「待執行 3 道」", node._hint_line.text.contains("待執行 3 道"))
+	# ★★★負對照：多畫幾次但【不推進】⇒ N 不准變
+	for _i in range(4):
+		node._refresh()
+	_check("★★★不推進而連畫 4 次 ⇒ N 仍是 3（render 不得消費佇列）",
+		node._hint_line.text.contains("待執行 3 道"))
+	await _free_ui(node)
+	_cell("_test_p11_pending_footer")
+
+
+# ══════════ P15［同一條指令的回音不得超過兩次］（systems 立 2026-09-23）══════════
+# ★★★為什麼要有：(a) 那 13 處【玩家回饋】的刪除【不會紅】—— 它們只會【多講一次話】
+#   （入列一次、消費點一次、它們自己第三次）⇒ ★電池看不到，只有人看得到。
+#   ★★而 systems 的判準是：「要靠人看」的驗收【在忙的那一天會變成沒看】，
+#     而它沒看的樣子跟看過的樣子一模一樣 ⇒ 用戶的眼球不是 QA。
+#   ⇒ ★★★「多講一次話」是【數得出來的】：入列 1 ＋ 消費點 1 ＝ 上限 2，第三次就是沒刪乾淨的那一處。
+# ★母體地板：那一輪必須真的有【≥1 條指令走完入列→消費】—— 否則 0 次也 ≤2（恆真）。
+# ★★負對照：故意讓畫面多講一次 ⇒ 必須紅。
+func _test_p15_echo_at_most_twice() -> void:
+	_selftest_gate("_test_p15_echo_at_most_twice").noop()
+	print("
+── P15 同一條指令的回音 ≤ 2 次 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	# ★★★走【真實鍵盤路徑】不是直呼 bridge（2026-09-24 實測訂正）：
+	#   直呼 `command_player()` 【繞過了印回音的那一行】（text_ui_main.gd:322 的 KEY_M
+	#   分支才會 `_set_feedback(r.ok, r.message)`）⇒ 畫面上 0 次 ⇒ 「≤2」恆真。
+	#   ★而那是這一格的母體地板抓到的 —— 它紅在「入列之後畫面至少講了一次（0）」。
+	#   ⇒ ★★地板第二次證明它不是形式：這次它擋的是【我自己的格沒走對路徑】。
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_M
+	ev.pressed = true
+	var tq: int = node._cursor.x
+	var tr: int = node._cursor.y
+	node._input(ev)
+	var enqueue_msg: String = node._feedback_line.text
+	node._refresh()
+	var screen_after_enqueue: String = _all_screen_text(node)
+	var ap: Dictionary = _apply_queue(node)
+	node._refresh()
+	var screen_after_apply: String = _all_screen_text(node)
+	_check("★母體地板：那一條真的走完了入列→消費（消費點吃到 %d 條）" % int(ap.get("applied", 0)),
+		int(ap.get("applied", 0)) >= 1)
+	# ★數的是【動作的人話】出現幾次 —— 不是整句比對（整句比對會因為前後綴不同而漏數）
+	var needle: String = PlayerCommandApi.describe("move_to", {"tile_q": tq, "tile_r": tr})
+	var n_enq: int = screen_after_enqueue.count(needle)
+	var n_app: int = screen_after_apply.count(needle)
+	print("  入列那一句：「%s」｜關鍵字：「%s」" % [enqueue_msg, needle])
+	print("  畫面出現次數：入列後 %d 次｜消費後 %d 次" % [n_enq, n_app])
+	# ══════════ ★★★這道地板的【真實獵物】（2026-09-23，當天就發生了）══════════
+	#   systems 兩次裁定要把「(a) 那 13 處呼叫端自己印 message」刪掉，理由是「多講一次話」。
+	#   ★而 (乙)① 要求入列當下印「已排入：<動作>」，`command_player` 回的 message【就是那一句】
+	#   ⇒ ★★那些呼叫端不是【多講一次】的人，是【唯一講第一次】的人。
+	#   ⇒ ★★★照那個裁定刪下去，入列回音會整個消失，而【這一道地板會紅】。
+	#     （實際沒有刪成：implementer 動手前逐處驗前提，發現 14 處裡只有 7 處印兩遍。）
+	#   ⇒ 所以這道地板擋的不是「別人寫錯」，★是【這一票自己的兩個決定互相打架】。
+	#   ★一個地板有真實的獵物，下一個人才不會拿掉它 —— 這行字就是那隻獵物。
+	_check("★★母體地板：入列之後畫面上【至少講了一次】（%d）—— 0 次的話下面恆真" % n_enq, n_enq >= 1)
+	_check("★★★消費之後，同一條指令的回音 ≤ 2 次（實測 %d）—— 第三次就是沒刪乾淨的那一處" % n_app,
+		n_app <= 2)
+	await _free_ui(node)
+	_cell("_test_p15_echo_at_most_twice")
+
+# 取【整個畫面】的文字：★分開的 Label 各自一段，漏掉任一段就會少數到回音
+func _all_screen_text(node) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for nm in ["_state_label", "_event_label", "_log_strip", "_feedback_line", "_hint_line",
+			"_alert_bar", "_input_bar", "_map_label", "_debug_bar"]:
+		if node.get(nm) != null:
+			parts.append(String(node.get(nm).text))
+	return String.chr(10).join(parts)

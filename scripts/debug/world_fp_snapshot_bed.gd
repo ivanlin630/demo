@@ -62,6 +62,14 @@ func _initialize() -> void:
 		if (t + 1) % 1000 == 0:
 			traj.append(StateFingerprint.compute(st))
 	var fp: String = StateFingerprint.compute(st)
+	# ★★★把 canon 新增的那一行【原文印出來】（systems 裁 2026-09-24）——
+	#   P6 要求「無人世界：新增的行恰好是 PQ|、其值全為 0」，而在印出來之前那是【推論】。
+	#   ★★把一個【沒被看過的值】釘成基準，等於把「未知」升格成「真理」，
+	#     而它之後每一次綠都在替那個未知背書。
+	#   ★這一行不進 fp（它只是把 fp 裡已經有的東西印出來給人看）。
+	for _pl in StateFingerprint.player_section(st).split(String.chr(10)):
+		if _pl.begins_with("PQ|"):
+			print("[WFP] canon 新增行原文：%s" % _pl)
 	print("[WFP] final_fp = %s" % fp)
 	print("[WFP] traj_fp  = %s   （每 1000 tick 取樣 %d 點，串接後再取指紋）" % [
 		("\n".join(traj)).sha256_text(), traj.size()])

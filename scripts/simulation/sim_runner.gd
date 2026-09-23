@@ -46,6 +46,7 @@ var _strategic_ai_system: StrategicAiSystem
 var _encounter_system: EncounterSystem
 var _training_system: TrainingSystem
 var _player_cmd: PlayerCommandSystem
+var _cmd_api: PlayerCommandApi   # ★玩家指令的唯一套用者（消費點在 _consume_player_commands）
 var _ambush_system: AmbushSystem
 
 # #3 tick 計時 instrument：累積本 day 的 tick wall-time，日邊界 flush（無 per-tick spam）
@@ -76,6 +77,7 @@ func _init() -> void:
 	_encounter_system    = EncounterSystem.new()
 	_training_system     = TrainingSystem.new()
 	_player_cmd          = PlayerCommandSystem.new()
+	_cmd_api             = PlayerCommandApi.new()
 	_ambush_system       = AmbushSystem.new()
 
 # ★T4 觀察者守衛（一次性、不洗版）：呼叫端宣稱無玩家（player_pos=(-1,-1)）卻 state 說有玩家
@@ -98,9 +100,22 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	#   ★★成本：O(隊數) 的欄位比較，且【已登記的隊直接 continue】。
 	state.auto_register_stub_sweep()
 	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick（不計時，非真 tick）
+	# ★★★凍結分支【也要消費】（systems 裁 2026-09-24，spec §3-2 訂正）——
+	#   ★病不是「選繼承人那條卡住」，是【凍結世界裡的每一條指令都被靜默丟棄】：
+	#     玩家等繼承人時按移動，什麼都不會發生、也沒有任何一句話
+	#     ⇒ 而 blueprint 裁的「拒絕禁靜默」【沒有寫「凍結時除外」】。
+	#   ★★而死鎖只是它最尖的那個症狀：唯一能解凍世界的那條指令，
+	#     自己也在「不會被消費」的那一批裡 ⇒ 永久卡住。
+	#   ★★★消費的【位置】有三處，消費的【實作】仍然只有一份
+	#     —— P3（無後門）的判準因此從「只有一處呼叫 dispatch」改成
+	#        「只有 `_consume_player_commands()` 這一支會呼叫 dispatch」。
+	#   ★這裡記到的 tick 是【沒有遞增的那個】—— 凍結時 current_tick 不動，
+	#     所以「記遞增後的值」那條規則在這裡沒有第二個候選，不是例外。
 	if state.game_over:
+		_consume_player_commands(state)
 		return "game_over"
 	if state.player_forced_event.get("action", "") == "choose_heir":
+		_consume_player_commands(state)
 		return "awaiting_heir"
 	# #3 tick 計時：包真 tick 工作的 wall-time（含 encounter / ambush / 常規三路徑）
 	var _perf_t0: int = Time.get_ticks_usec()
@@ -474,6 +489,68 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, due_faction
 func _seam3_dummy_step(_state: WorldState) -> void:
 	Probe.bump("seam3.dummy")
 
+# ══════════ 玩家指令的【唯一】消費點（HOW spec §3-2）══════════
+# ★★★位置：每一次 `_step1_advance_time()` 的【正後方】，兩個分支都放。
+#   ★為什麼是【之後】不是之前：`current_tick += 1` 發生在 `_step1_advance_time()` 裡
+#     ⇒ 放之前 ⇒ command_log 記到舊值；放之後 ⇒ 記到本 tick 真正在用的那個值。
+#     ★★全庫其餘印 tick 的地方（DayNight／Probe／FaiPhase…）都讀【遞增後】的 current_tick
+#     ⇒ ★★★記錯側【不會馬上紅】：兩種選法各自內部一致，只有跟別的 tick 來源對帳時才現形。
+# ★分支A（encounter_active）【也消費】，理由：
+#   ①一條【沒有例外】的規則比兩條好 ——「指令永遠在下一個 tick 邊界生效」玩家講得出來；
+#     「除非你正在遭遇戰」是一句沒有人會記得的例外。
+#   ②不消費 ⇒ 佇列在遭遇戰期間持續累積，結束那一刻【一次全部生效】
+#     ⇒ ★那是被動產生的行為，不是誰設計的。
+#   ③合法性不歸佇列管 —— handler 自己有前置檢查，不合法就回 ok=false，
+#     ★而那一條【照樣進 command_log】⇒ 重播重現得出來。
+#   ★而「遭遇戰期間玩家其實按不到鍵」是真的 ⇒ 這個分支【多半】是空的；
+#     ★★但「多半空」不是「保證空」，所以規則寫死，不靠它空。
+# ★一次吃光，沒有上限（spec §7-③：玩家手速有限）。
+# ★★★結果句的存活時間（systems 裁 2026-09-23）：綁 tick，【不綁「有沒有人來排空」】。
+#   ★原本是 UI 在 `_process()` 裡破壞性排空 ⇒ **掛上一個 UI 會改變世界指紋**
+#     ⇒ 正面命中「觀測改變被觀測物」，而且踩到 fp 存在的理由：
+#       fp 要回答「這兩跑是不是同一個世界」，★★不該回答「這兩跑有沒有人在看」。
+#   ★★★而「N 產生、N+1 清掉」不夠：`tick_step()` 一次吃 min(60, remaining) 個 tick
+#     ⇒ 那樣 UI 只看得到【最後一顆 tick】的結果，前面 59 顆的拒絕訊息會靜靜消失
+#     ⇒ 而「拒絕禁靜默」正是 (乙) 的核心 ⇒ 兩條規矩會互相吃掉。
+#   ⇒ 存活時間取 `TICKS_PER_HOUR` ＝【一次 bridge step 的上界】：
+#     ★任何【每個 step 讀一次】的觀察者都看得到全部，而它仍然純粹是 tick 的函數。
+const RESULT_TTL_TICKS: int = WorldState.TICKS_PER_HOUR
+
+func _consume_player_commands(state: WorldState) -> void:
+	# ★過期清除【在最前面、且不看佇列空不空】——
+	#   ★★放在 `if pending.is_empty(): return` 後面的話，沒有新指令的 tick 就不會清
+	#   ⇒ 那會讓「這一欄的內容」取決於【後來有沒有人下指令】，又變回非 tick 的函數。
+	if not state.command_results.is_empty():
+		var keep: Array = []
+		for r in state.command_results:
+			if state.world.current_tick - int(r.get("tick", 0)) < RESULT_TTL_TICKS:
+				keep.append(r)
+		state.command_results = keep
+	if state.pending_commands.is_empty():
+		return
+	# ★取走整批再跑：handler 可能自己再入列（例如連鎖），那些屬於【下一顆 tick】
+	#   ⇒ ★★否則同一顆 tick 會把新入列的也吃掉，而「在哪一個 tick 生效」就不再由 seq 決定。
+	var batch: Array = state.pending_commands
+	state.pending_commands = []
+	batch.sort_custom(func(x, y): return int(x.get("seq", 0)) < int(y.get("seq", 0)))
+	for c in batch:
+		var name: String = String(c.get("name", ""))
+		var args: Dictionary = c.get("args", {})
+		var res: Dictionary = _cmd_api.dispatch(state, name, args)
+		var ok: bool = bool(res.get("ok", false))
+		state.command_log.append({
+			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)),
+			"name": name, "args": args, "ok": ok})
+		# ★★★結果句（spec §3-5②）：成功一句、拒絕一句【帶原因】。
+		#   ★拒絕【禁靜默】—— 沒有這一句，玩家分不出「被拒絕」與「沒吃到鍵」。
+		#   ★★原因取自 handler 自己回的 message ⇒ 零第二份真相（這正是 (丁) 被否決的理由）。
+		var why: String = String(res.get("message", res.get("msg", "")))
+		state.command_results.append({
+			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok,
+			"text": ("%s：完成" % PlayerCommandApi.describe(name, args)) if ok
+				else ("%s：被拒絕（%s）" % [PlayerCommandApi.describe(name, args),
+					why if why != "" else "沒有給原因"])})
+
 func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if phase_timing: _ph.clear()   # 相位計時：每 tick 重置
 	if state.encounter_active:
@@ -482,10 +559,12 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		if result not in ["ongoing", "player_turn"]:
 			_encounter_system.resolve_encounter_end(state, result)
 		_step1_advance_time(state)
+		_consume_player_commands(state)   # ★★分支A 也消費（理由見函式檔頭）
 		if phase_timing: _pht("encounter", _te)
 		WorldEvents.consume_and_clear(state)   # ★T0-A1 單 tick 清空（encounter 路也要，否則跨 tick 存活）
 		return result    # propagate to bridge
 	_step1_advance_time(state)
+	_consume_player_commands(state)
 	var _t: int = Time.get_ticks_usec() if phase_timing else 0   # 相位計時鏈起點
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / WorldState.TICKS_PER_DAY))
