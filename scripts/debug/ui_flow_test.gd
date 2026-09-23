@@ -435,7 +435,14 @@ func _test_member_equip_flow() -> void:
 		int(_ap_equip_member.get("applied", 0)) >= 1)
 	_check("★★★equip_member 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_equip_member.get("ok", false))
 	_check("成員裝上武器", st.persons[99001].equipment["hand_1"].get("grade","") == "weapon_melee_low")
-	_check("status 含武裝比例", node._state_label.text.contains("比例"))
+	# ★★★這一行原本讀的是【指令下達之前】那次 render 的字（上一次 `_refresh()` 在 :429，
+	#   而中間隔著 `command_player()` 與 `_apply_queue()`）⇒ ★它不可能反映那道指令。
+	#   ★★而 `_apply_queue()` 只叫 `tick_step()`【不叫 `_refresh()`】——
+	#     那正是 P17 第一版踩過的同一支 helper：★★★現成的工具會把你帶回它原本服務的那條路。
+	#   ⇒ 這裡補一次 render，讓這一行讀的是【指令生效之後】的畫面。
+	node._refresh()
+	_check("status 含武裝比例（★讀的是指令生效【之後】那一次 render）",
+		node._state_label.text.contains("比例"))
 	await _free_ui(node)
 	_cell("_test_member_equip_flow")
 
