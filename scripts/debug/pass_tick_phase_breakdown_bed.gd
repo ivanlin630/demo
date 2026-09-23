@@ -338,39 +338,58 @@ func _initialize() -> void:
 		elif ceil_ms_per_pass >= 1000.0:
 			print("[PP] ★★★判準(乙)：每pass平均 ≥ 1000ms ⇒ (A) 也摸不到門檻")
 
-		# ★★★讀數規則補充(systems 2026-09-23)：near.faction_ai 也算進「必須整點」那桶
-		#   ★舊理由已失效(世代 8)：原本是「_evaluate_all_body 忽略 team_ids 對全世界跑,
-		#     按隊錯開會讓它被重複執行 60 次」—— 那支函式已拆三份且真的吃 team_ids(16c5e0409)。
-		#   ★★現行理由：`faction_ai` 這一列是【勢力粒度】(shape=factions),它按【勢力】錯開,
-		#     而本床的「必須整點」桶要的是【不能按隊錯開的】⇒ 它仍然留在這一桶,但★理由換了。
-		#   ★★★而這個數【涵蓋範圍沒變】：sim_runner 的 `tl` 是【群組邊界】不是逐列標籤
-		#     (sim_runner.gd:465-467 `if phase_timing and tl != "": _pht(tl, _t)`),
-		#     fai_loop2／fai_loop3 的 tl 為空 ⇒ 它們的時間由下一個 `near.faction_ai` 標記
-		#     (info_dispatch 那一列)一併收走 ⇒ ★near.faction_ai 仍含 loop1+loop2+loop3。
-		#     ⇒ ★★所以這個數【可以】跟世代 7 的同名數比,不像 Probe 鍵 evaluate_loop1.* 那樣換了單位。
+		# ★★★讀數規則（systems 裁 2026-09-23 第二封）：這裡要【三格】不是兩格。
+		#   ★世界原本被分成①必須整點②可按【隊】錯開，而世代 8 之後多了第三種：
+		#     ③按【勢力】錯開 —— `faction_ai`(shape=factions) 現在在這一格。
+		#   ★★把它塞①會【高估 S_fixed】(它其實已經散開了)；塞②會【說謊】(它不是按隊散的,
+		#     而「按隊」正是上一輪的病根) ⇒ 二分法的 else 吞掉第三格。
+		#   ★★★所以 S_fixed 的定義同步收窄成【對所有隊在同一顆 tick 上跑】,
+		#     而 faction_ai 不再符合 ⇒ ★它【退出】S_fixed。
+		#   ⇒ ★★與世代 7 的 S_fixed【不可直接比】：★★★單位換了而名字沒換（同 Probe 鍵那顆的形狀）。
+		#
+		# ★涵蓋範圍另記：sim_runner 的 `tl` 是【群組邊界】不是逐列標籤
+		#   (sim_runner.gd:465-467 `if phase_timing and tl != "": _pht(tl, _t)`)
+		#   ⇒ fai_loop2／fai_loop3 的 tl 雖為空,它們的時間由下一個 `near.faction_ai` 標記
+		#     (info_dispatch 那一列)一併收走 ⇒ near.faction_ai 仍含 loop1+loop2+loop3。
+		#   ★★28 列裡有 15 列 tl 為空 ⇒ 空是【常態】,不是拆三份造成的異常。
 		var fai_v: int = int(pass_sr_over2s.get("near.faction_ai", 0))
 		var has_fai: bool = pass_sr_over2s.has("near.faction_ai")
-		print("[PP] ── ★讀數規則補充：near.faction_ai 單獨列(★需併入 S_fixed) ──")
-		if has_fai:
-			print("[PP]   near.faction_ai [必須整點,因它是勢力粒度、按勢力錯開;含 loop1+loop2+loop3] = %d us（每 pass 平均 %d us）" % [
-				fai_v, int(fai_v / maxi(pass_n_over2s, 1))])
+		print("[PP] ── ★★★三格分帳（★S_fixed 的定義在世代 8 換過，見上註解）──")
+		if not has_fai:
+			print("[PP]   ③勢力相位 near.faction_ai = ★找不到（丙：不可判）")
 		else:
-			print("[PP]   near.faction_ai = ★找不到（丙：不可判）")
-		if has_fai:
-			var s_fixed_sum: int = ceil_sum + fai_v
-			var s_fixed_pct: float = 100.0 * float(s_fixed_sum) / float(maxi(pass_dt_over2s, 1))
-			var fai_pct: float = 100.0 * float(fai_v) / float(maxi(pass_dt_over2s, 1))
-			print("[PP] ★★★S_fixed(7格+faction_ai) = %d us ＝ %.1f%%（門檻 ≤40%%，佔>2s母體自身總dt的份額，非外部參照）" % [
-				s_fixed_sum, s_fixed_pct])
-			print("[PP]   ★faction_ai 單格佔比 = %.1f%%（子門檻：S_fixed>40%%且此值≥15%%⇒(乙)前置票）" % fai_pct)
-			if s_fixed_pct <= 40.0:
-				print("[PP] ★★★子判準(甲)：S_fixed ≤ 40%% ⇒ 夠，faction_ai 留整點就行")
-			elif fai_pct >= 15.0:
-				print("[PP] ★★★子判準(乙)：S_fixed > 40%% 且 faction_ai 單格 ≥ 15%% ⇒ 成為【前置票】")
+			var tot_over2s: int = maxi(pass_dt_over2s, 1)
+			var rest_v: int = pass_dt_over2s - ceil_sum - fai_v
+			var p1: float = 100.0 * float(ceil_sum) / float(tot_over2s)
+			var p3: float = 100.0 * float(fai_v) / float(tot_over2s)
+			var p2: float = 100.0 * float(rest_v) / float(tot_over2s)
+			print("[PP]   ①必須整點 S_fixed(7格/5標籤，★已不含 faction_ai) = %d us（%.1f%%，每 pass 平均 %d us）" % [
+				ceil_sum, p1, int(ceil_sum / maxi(pass_n_over2s, 1))])
+			print("[PP]   ③按【勢力】錯開 near.faction_ai(含 loop1+loop2+loop3) = %d us（%.1f%%，每 pass 平均 %d us）" % [
+				fai_v, p3, int(fai_v / maxi(pass_n_over2s, 1))])
+			print("[PP]   ②按【隊】錯開＋未貼標籤 = %d us（%.1f%%）★★這一格是【殘差】不是量到的：" % [rest_v, p2])
+			print("[PP]     ⇒ 它＝總 dt 減掉①③,所以它同時吃下【沒有 tl 的那些段落】⇒ ★不可當成「按隊錯開的成本」")
+			# ★★★不要在這裡印「①+②+③ = 總量」：②是用【總量減①③】算出來的
+			#   ⇒ 那條等式【恆真】，它不是判準是複述。恆真項紅不起來，等於沒有守衛。
+			# ★真正會紅的是這一條：①與③都是【量到的】，它們的和不得超過母體總 dt。
+			#   超過 ⇒ 標籤重複計數／母體對不上 ⇒ 分帳自己壞了（不是世界的問題）。
+			print("[PP]   ★貼到標籤的份額 = %.1f%%（①%.1f%% + ③%.1f%%）｜殘差②%.1f%% 內含所有【沒有 tl】的段落" % [
+				p1 + p3, p1, p3, p2])
+			if ceil_sum + fai_v > pass_dt_over2s:
+				push_error("[PP][FAIL] ①+③ = %d us > 母體總 dt %d us ⇒ ★標籤重複計數或母體對不上" % [
+					ceil_sum + fai_v, pass_dt_over2s])
+				fail += 1
+			if rest_v < 0:
+				push_error("[PP][FAIL] 殘差②為負(%d us) ⇒ ★同上，分帳壞了" % rest_v)
+				fail += 1
+			if p1 <= 40.0:
+				print("[PP] ★★★子判準(甲)：S_fixed %.1f%% ≤ 40%% ⇒ 夠" % p1)
+			elif p3 >= 15.0:
+				print("[PP] ★★★子判準(乙)：S_fixed > 40%% 且勢力相位 ≥ 15%% ⇒ 成為【前置票】")
 				print("[PP]   ★而它原本寫的處方(『先讓 _evaluate_all_body 真的吃 team_ids』)【已經做完了】(16c5e0409+世代 8 拆三份)")
 				print("[PP]   ⇒ ★★所以這一格若現在點火,它指的是【一個新的、還沒被診斷的成因】,不是那張舊前置票")
 			else:
-				print("[PP] ★★★子判準：S_fixed > 40%% 但 faction_ai < 15%% ⇒ 照原本三格判準另議")
+				print("[PP] ★★★子判準：S_fixed > 40%% 但勢力相位 < 15%% ⇒ 照原本三格判準另議")
 		print("[PP]   ★丙類(找不到對應標籤)：%d 格：%s" % [
 			ceil_missing.size(), ", ".join(ceil_missing) if not ceil_missing.is_empty() else "（無，本次全部找到，但2組各3/3格黏一起不可拆）"])
 	# ★不計入 cells／9 到場點名(那組是既有9格的自檢基準,本區塊是額外派工,不動原有計數)
