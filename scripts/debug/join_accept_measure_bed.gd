@@ -71,13 +71,13 @@ func _run() -> void:
 	# ★systems票(2026-08-26)：分母——_dispatch_builder 嘗試總數(掛所有 early-return 之前)
 	lines.append("  ★分母(dispatch_builder.attempt,真count) = %d" % int(Probe.counts.get("dispatch_builder.attempt", 0)))
 	# ★追查infra.entry=0異常：先確認_evaluate_all_body本身是否有跑
-	lines.append("★★追查：_evaluate_all_body本身呼叫次數(判斷faction迴圈整體死活)：")
-	lines.append("  evaluate_all_body.entry              = %d" % int(Probe.counts.get("evaluate_all_body.entry", 0)))
-	lines.append("  evaluate_all_body.factions_size_sum   = %.0f" % float(Probe.counts.get("evaluate_all_body.factions_size_sum", 0.0)))
-	lines.append("  evaluate_all_body.last_tick(最後一次呼叫時的tick) = %s" % str(Probe.peaks.get("evaluate_all_body.last_tick", "無")))
-	if Probe.samples.has("evaluate_all_body.tick_sample"):
+	lines.append("★★追查：_evaluate_loop1_factions 的呼叫次數(★世代 8 拆三份後只涵蓋 loop1,不是『faction 迴圈整體』)：")
+	lines.append("  evaluate_loop1.entry              = %d" % int(Probe.counts.get("evaluate_loop1.entry", 0)))
+	lines.append("  evaluate_loop1.factions_size_sum   = %.0f" % float(Probe.counts.get("evaluate_loop1.factions_size_sum", 0.0)))
+	lines.append("  evaluate_loop1.last_tick(最後一次呼叫時的tick) = %s" % str(Probe.peaks.get("evaluate_loop1.last_tick", "無")))
+	if Probe.samples.has("evaluate_loop1.tick_sample"):
 		lines.append("  前5筆tick樣本：")
-		for smp3 in (Probe.samples["evaluate_all_body.tick_sample"] as Array):
+		for smp3 in (Probe.samples["evaluate_loop1.tick_sample"] as Array):
 			lines.append("    %s" % str(smp3))
 	# ★systems票T3：_evaluate_infrastructure entry次數 + 四格停駐分佈(定案，非猜)
 	lines.append("★★T3 infra entry四格停駐分佈：")
