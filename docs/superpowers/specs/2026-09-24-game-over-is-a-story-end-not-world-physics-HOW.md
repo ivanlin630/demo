@@ -9,8 +9,12 @@ blueprint 裁（意圖帳 #43／#44 早裁而 code 沒服從）：**一張票兩
 sim_runner.gd:114-116   if state.game_over: _consume_player_commands(state); return "game_over"
   ⇒ ★世界【完全不推進】：不是「玩家不能動」，是【時間停了】
 設定點只有兩處：event_system.gd:80｜player_command_system.gd:929
-玩家路徑對 game_over 【零處理】（blueprint grep：text_ui_main.gd／ui_pages.gd 無命中；
-  只有【死樹】main.gd:70/168 有 popup）⇒ ★★玩家看到的是【靜止 ＋ 沒有任何字】
+玩家路徑對 game_over 【零處理】—— ★★★2026-09-24 已【量到】不是推想：
+  `grep game_over scripts/ui/*.gd` ⇒ **0 處**（implementer 普查）
+  ⇒ 玩家看到的是【靜止 ＋ 沒有任何字】
+★產線認識 game_over 共 10 處：2 欄位宣告／2 寫入者／2 讀者
+  （`encounter_system.gd:1385` 的守衛【留著】；`sim_runner.gd:114-116` 的凍結世界＝要移除的那一處）
+⇒ ★★**要移除的是【產線唯一的那一處】** —— 動作本身很小，而它的大小是量出來的
 ```
 
 ## ★★§2 這是 de-patch 不是新功能
@@ -28,6 +32,15 @@ sim_runner.gd:114-116   if state.game_over: _consume_player_commands(state); ret
 ```
 ①`sim_runner`：**移除對 `game_over` 的讀取**（連同那一支的消費呼叫一起走）
   ★`awaiting_heir` 那一支與它的消費呼叫【不動】（P16 仍然守它）
+★★★③**同一張票要一起做的第二件**（implementer 普查時撈到，systems 裁 2026-09-24 併入）：
+  `sim_bridge.advance_ticks()`（`scripts/ui/sim_bridge.gd:71-80`）**完全不看 `advance_tick` 的回傳值**
+  ⇒ game_over 期間空轉 n 圈**而且安靜**；★而它在【等待繼承人】時**同樣空轉同樣安靜**
+  ⇒ ★★**兩個狀態共用同一個沉默** —— 而本票只解掉 game_over 那一半，
+    **另一半會原地留下，且長得跟修好之前一模一樣**
+  ⇒ ★★★而正確的形狀【已經存在】：`player_command_api.advance_ticks`（:209-218）已經回
+    「真的推進了幾 tick」＋ `first_stall_tick` ＋ `stall_reason`
+  ⇒ **所以這不是新設計，是【兩個推進路徑其中一個沒跟上】** ⇒ 讓 `sim_bridge` 那支跟上同一個形狀
+  ★而它與 blueprint 的「拒絕禁靜默」是同一條：**推不動也要說為什麼推不動**
 ②TextUI：偵測 `game_over` ⇒ 顯示「故事結束」畫面，三個選項
   ★★★**動手之前先驗每一個選項【現在就能走通】** ——
     續觀：世界照跑、玩家無隊 ⇒ 畫面要能在【沒有 controlled_team】時不炸
@@ -37,7 +50,20 @@ sim_runner.gd:114-116   if state.game_over: _consume_player_commands(state); ret
   ⇒ ★**一個按了沒反應的選項，比沒有那個選項更糟**（同「拒絕禁靜默」那一族）
 ```
 
-## ★★★§4 動手前的兩份普查（★不要假設，去數）
+## ★★★§4 兩份普查（★2026-09-24 已做完，結果在下面；★★連同它的誠實限一起留著）
+
+```
+①誰假設玩家還活著 ＝ **11 處、全部有守衛、0 處無守衛**
+  ★★而第一版報「4 處無守衛」——**四處全是誤報**：偵測器的守衛詞表少了 `_check_player_with_team(`
+  ⇒ ★★★**偵測器詞表不全，長相跟「真的有四個缺陷」一模一樣**
+  ⇒ 抓法：**逐處開檔看上文**（不是再讀一次那份報告）
+  ★誠實限（implementer 自報，我留著）：母體只涵蓋 `state.persons[state.player_id]` 這一種寫法，
+    **沒涵蓋** `get_player_team_id()` 之後的假設／`forced_event` 的處理／「玩家隊還在」這種間接假設
+    ⇒ 它回答的是【直接索引那一族有沒有裸的】，**不是【沒有人假設玩家活著】**
+②誰假設世界會在 game_over 停下來：見 §1（產線 10 處、UI 0 處）
+```
+
+## ~~§4 動手前的兩份普查~~（原文，保留）
 
 ```
 ①**誰假設玩家還活著**：grep `state.player_id` 的消費者，逐處判「玩家已死而世界照跑時它會怎樣」
@@ -60,6 +86,11 @@ P4 [★★續觀不炸] 玩家無隊的狀態下連 render 5 次 ⇒ SCRIPT ERRO
    ⇒ ★這一格直接對應今天第二次真機回饋的形狀：**玩家走的那條路要有人走一次**
 P5 [fp] ★world-fp **會變**（世界多跑了）⇒ 基準要重設，而**重設與造成它的改動要原子落地**
 P6 [電池] merge 前全電池；★★交玩前照 merge 檢查表第 8／9 步（主 dir `--import` ＋ 玩家入口真的跑）
+P7 [★★★推不動要說為什麼] 在【等待繼承人】狀態呼叫 `sim_bridge.advance_ticks(n)`
+   ⇒ ★回傳要能分辨【真的推了幾 tick】與【卡住了】，並帶 `stall_reason`
+   ★★母體地板：那一輪要**真的處在等待繼承人**（否則它在一個推得動的世界上恆綠）
+   ★★★負對照：把回傳值改回忽略 ⇒ 這一格必須紅
+   ⇒ ★而這一格守的是【兩個推進路徑不准再分岔】：判準比對的是 `player_command_api` 已有的那個形狀
 ```
 
 ## §6 不在本票
