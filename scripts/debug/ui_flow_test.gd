@@ -1650,4 +1650,4 @@ func _all_screen_text(node) -> String:
 			"_alert_bar", "_input_bar", "_map_label", "_debug_bar"]:
 		if node.get(nm) != null:
 			parts.append(String(node.get(nm).text))
-	return chr(10).join(parts)
+	return String.chr(10).join(parts)

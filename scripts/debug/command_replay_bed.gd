@@ -131,17 +131,17 @@ func _run(plan: Array) -> Dictionary:
 #   ★★★這兩格是我拿 systems 那條新規矩（比較的兩邊必須能各自獨立地改變）
 #     回頭掃自己今天寫的每一格時抓到的 —— 一張票的裁定弄壞了另一張票的斷言，而它不會自己喊。
 func _pq_line(st: WorldState) -> String:
-	for l in StateFingerprint.player_section(st).split(chr(10)):
+	for l in StateFingerprint.player_section(st).split(String.chr(10)):
 		if l.begins_with("PQ|"):
 			return l
 	return "（沒有 PQ| 行）"
 
 func _player_section_sans_queue(st: WorldState) -> String:
 	var keep: PackedStringArray = PackedStringArray()
-	for l in StateFingerprint.player_section(st).split(chr(10)):
+	for l in StateFingerprint.player_section(st).split(String.chr(10)):
 		if not l.begins_with("PQ|"):
 			keep.append(l)
-	return chr(10).join(keep)
+	return String.chr(10).join(keep)
 
 func _plan_from_log(log: Array) -> Array:
 	var out: Array = []
@@ -306,7 +306,7 @@ func _test_p9_enqueue_echo() -> void:
 		var body: String = src.substr(at)
 		var rx := RegEx.new()
 		rx.compile('^		"([a-z_]+)":')
-		for line in body.split(chr(10)):
+		for line in body.split(String.chr(10)):
 			if line.begins_with("func ") and not line.begins_with("func dispatch("):
 				break
 			var m := rx.search(line)
