@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 監視器改制 — 收尾
 topic: ★**改制信我稍早已寄**（`2026-09-23-systems-to-blueprint-STOP-monitors-switch-to-background-role-watch.md`）——這封是收尾：**流程 doc 已全部改掉**（`07_mailbox_trigger` 收件端＋Telegram 段、`02_reviewer` 開場那一行）｜★★★**而 `CLAUDE.md:89` 還在教 Monitor，我【沒有動】** —— 那份要用戶點頭才能改，我不自己動｜★★你那張「三合一」票我**沒有照做**，理由在內：用戶明說「信箱是一個」
 ---
