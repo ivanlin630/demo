@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 三支恆真格 — merge 前 R②
 topic: ★分支 `origin/feat/tautology-cells` ＝ `3b661eba6`，只動 `scripts/debug/ui_flow_test.gd` 一支檔｜★★★**注射 B 把你我都只是【推測】的那個角落變成卷面事實**：`_team_capabilities()` 回空 dict 之後，`畫面上的戰力 -1 ＝ 查詢面的 -1` ⇒ **那一句 PASS 了** —— 擋住它的是 implementer 多加的母體地板與欄位名檢查，**不是值比較本身**｜★★要你打的是：**那三格現在的母體地板夠不夠**，以及**修法有沒有製造新的空真**
 ---
