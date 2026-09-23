@@ -106,7 +106,12 @@ func _test_interact_self_team_split() -> void:
 	st.teams[7001] = other
 	st.team_discovered[ptid] = [7001]
 	node._interact_mode = true; node._interact_target = -1
-	node._bridge.refresh_interaction_targets()
+	# ★★★這裡是【佈置樣本】不是【走指令路徑】：`refresh_interaction_targets()` 已改成入列
+	#   （spec §3-3b：它寫 player_pending_targets ＝ 世界狀態）⇒ 呼叫完【當下不會生效】,
+	#   而這一格接著就要讀 pending_targets ⇒ 照原樣會紅，而那個紅不帶任何資訊。
+	#   ★不插一顆 tick 的理由：推進會讓手動擺進去的隊【自己走掉】⇒ 擾動的是樣本不是被測的東西。
+	#   ★★而佇列路徑本身【有自己的格在守】（command_replay_bed 的 P1／P12）⇒ 這裡不需要重複走它。
+	PlayerCommandSystem.new().refresh_colocation_targets(st)
 	node._refresh()
 	var split: Dictionary = node._interact_action_split()
 	var self_ids: Array = []
@@ -405,7 +410,11 @@ func _test_member_equip_flow() -> void:
 	node._refresh()
 	var r = node._bridge.command_player("execute_action",
 		{"action_id":"equip_member","target":{"kind":"member","team_id":ptid,"member_id":99001,"slot_id":"hand_1","item_grade":"weapon_melee_low"}})
-	_check("equip_member 經 bridge 成功", r.get("ok", false))
+	_check("★入列成功（★注意：這【不是】「動作成功」，只是排進去了）", r.get("queued", false))
+	var _ap_equip_member: Dictionary = _apply_queue(node)
+	_check("★★母體地板：消費點真的吃到了（%d 條）%s" % [int(_ap_equip_member.get("applied", 0)), String(_ap_equip_member.get("why", ""))],
+		int(_ap_equip_member.get("applied", 0)) >= 1)
+	_check("★★★equip_member 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_equip_member.get("ok", false))
 	_check("成員裝上武器", st.persons[99001].equipment["hand_1"].get("grade","") == "weapon_melee_low")
 	_check("status 含武裝比例", node._state_label.text.contains("比例"))
 	await _free_ui(node)
@@ -418,7 +427,11 @@ func _test_armed_ratio_cmd() -> void:
 	var st = node._bridge.get_state()
 	st.player_state["armed_ratio_input"] = 0.6
 	var r = node._bridge.command_player("execute_action", {"action_id":"set_armed_anon_ratio","target":{"kind":"none"}})
-	_check("set_armed_anon_ratio 成功", r.get("ok", false))
+	_check("★入列成功（★注意：這【不是】「動作成功」，只是排進去了）", r.get("queued", false))
+	var _ap_set_armed_anon_ratio: Dictionary = _apply_queue(node)
+	_check("★★母體地板：消費點真的吃到了（%d 條）%s" % [int(_ap_set_armed_anon_ratio.get("applied", 0)), String(_ap_set_armed_anon_ratio.get("why", ""))],
+		int(_ap_set_armed_anon_ratio.get("applied", 0)) >= 1)
+	_check("★★★set_armed_anon_ratio 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_set_armed_anon_ratio.get("ok", false))
 	var ptid: int = st.persons[st.player_id].team_id
 	_check("ratio 設為 0.6", abs(st.teams[ptid].armed_anon_ratio - 0.6) < 0.01)
 	await _free_ui(node)
@@ -508,7 +521,11 @@ func _test_q7_3_take_loot_flow() -> void:
 	# 執行 take_loot command（encounter_view 的 [K] 派的就是這個）
 	var r = node._bridge.command_player("execute_action",
 		{"action_id": "take_loot", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-	_check("take_loot 經 bridge 成功", r.get("ok", false))
+	_check("★入列成功（★注意：這【不是】「動作成功」，只是排進去了）", r.get("queued", false))
+	var _ap_take_loot: Dictionary = _apply_queue(node)
+	_check("★★母體地板：消費點真的吃到了（%d 條）%s" % [int(_ap_take_loot.get("applied", 0)), String(_ap_take_loot.get("why", ""))],
+		int(_ap_take_loot.get("applied", 0)) >= 1)
+	_check("★★★take_loot 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_take_loot.get("ok", false))
 	_check("玩家食物 +30 入庫", abs(float(pt.resources.get("food", 0)) - (before_food + 30.0)) < 0.01)
 	_check("敗隊食物 -30", abs(float(loser.resources.get("food", 0)) - 70.0) < 0.01)
 	_check("last_encounter_result 已清", st.last_encounter_result.is_empty())
@@ -541,7 +558,11 @@ func _test_q7_5_dispatch_subteam_task() -> void:
 	node._bridge.set_player_input("sub_move_r", pt.tile_pos.y)
 	var r = node._bridge.command_player("execute_action",
 		{"action_id": "dispatch_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-	_check("dispatch_subteam 成功", r.get("ok", false))
+	_check("★入列成功（★注意：這【不是】「動作成功」，只是排進去了）", r.get("queued", false))
+	var _ap_dispatch_subteam: Dictionary = _apply_queue(node)
+	_check("★★母體地板：消費點真的吃到了（%d 條）%s" % [int(_ap_dispatch_subteam.get("applied", 0)), String(_ap_dispatch_subteam.get("why", ""))],
+		int(_ap_dispatch_subteam.get("applied", 0)) >= 1)
+	_check("★★★dispatch_subteam 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_dispatch_subteam.get("ok", false))
 	# 經 parent.subteam_ids 找剛派出的子隊（command 不回傳 sub_id）
 	var sub_id: int = pt.subteam_ids[-1] if not pt.subteam_ids.is_empty() else -1
 	_check("子隊 current_task = 覓食（非寫死 IDLE）",
@@ -606,6 +627,26 @@ func _check(label: String, ok: bool) -> void:
 	if not ok: _errors += 1
 
 # 實例化 TextUI 場景 + 等 _ready。回傳 node。
+
+# ★★★指令佇列化之後，「下指令 ⇒ 立刻讀效果」不再成立（spec §3-4）。
+#   ★而這裡的風險【不是紅】是【假綠】：`command_player()` 現在回 {ok:true, queued:true}
+#     ⇒ `_check("…成功", r.get("ok"))` **照樣綠，但它從此測的是「排進去了」不是「成功了」**。
+#   ⇒ ★★所以這支 helper 做兩件事：①推進一顆 tick 讓它真的被套用
+#     ②回傳【消費點的帳】—— 斷言要看那個 ok，不是入列的 ok。
+#   ★★★誠實限（動工時無法消除）：推進一顆 tick 會讓【整個世界】走一步
+#     ⇒ 後面那些比數值的斷言（例如「食物 +30」）現在多了一個 tick 的消耗在裡面。
+#     ★那不是這支 helper 的錯，是【佇列語意本身】帶來的 —— 而它只能在跑得動的時候調容差。
+func _apply_queue(node) -> Dictionary:
+	var st: WorldState = node._bridge.get_state()
+	var before_n: int = st.command_log.size()
+	node._bridge.request_advance(1)
+	node._bridge.tick_step()
+	if st.command_log.size() <= before_n:
+		return {"ok": false, "applied": 0, "why": "★消費點一條都沒吃到 ⇒ 佇列沒有被消費"}
+	var last: Dictionary = st.command_log[st.command_log.size() - 1]
+	return {"ok": bool(last.get("ok", false)), "applied": st.command_log.size() - before_n,
+		"why": "", "entry": last}
+
 func _make_ui() -> Node:
 	# ★★★每一格都要拿到【一樣的世界】，而它不是自動的：
 	#   ★這支床有 31 格，每一格各自 instantiate 一次；★★而 class 級（static）的殘留
@@ -685,7 +726,12 @@ func _test_u21_interact_paging() -> void:
 	node._interact_mode = true
 	node._interact_target = -1
 	node._interact_page = 0
-	node._bridge.refresh_interaction_targets()
+	# ★★★這裡是【佈置樣本】不是【走指令路徑】：`refresh_interaction_targets()` 已改成入列
+	#   （spec §3-3b：它寫 player_pending_targets ＝ 世界狀態）⇒ 呼叫完【當下不會生效】,
+	#   而這一格接著就要讀 pending_targets ⇒ 照原樣會紅，而那個紅不帶任何資訊。
+	#   ★不插一顆 tick 的理由：推進會讓手動擺進去的隊【自己走掉】⇒ 擾動的是樣本不是被測的東西。
+	#   ★★而佇列路徑本身【有自己的格在守】（command_replay_bed 的 P1／P12）⇒ 這裡不需要重複走它。
+	PlayerCommandSystem.new().refresh_colocation_targets(st)
 	node._refresh()
 	var pending_n: int = node._cached_snapshot.get("pending_targets", []).size()
 	_check("pending_targets >9（造同格隊成功）", pending_n > 9)
