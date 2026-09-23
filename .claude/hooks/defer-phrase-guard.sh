@@ -32,6 +32,9 @@ if [ "$N_NEW" -gt 0 ]; then
   echo "      「歸某 arc／歸某 backlog」 ⇒ ★【合法的家】—— roadmap 是用戶駕駛的，不需要 token"
   echo "      「排某事件之後／排最後／等 X 再做」 ⇒ ★★【要 token】—— 它綁的是一個事件，而事件會過去而沒有人回頭"
   echo "    是 ⇒ 去 docs/process/defers.tsv 加一行（★含可執行的 met_check）"
+  echo "         ★★★然後【仍然】把這一句加進 baseline，並在 commit message 寫上那個 token 名"
+  echo "           —— 本閘只看得到【這句話是不是新出現的】，看不到你有沒有真的去加那一行；"
+  echo "           ★★commit message 是這兩者之間【唯一】的連結（2026-09-23 systems 自查補註）"
   echo "    否 ⇒ 把它加進 $BASE 並在 commit message 說明為什麼不是"
   echo "[DEFER-PHRASE] ★★★而【不要】把它悄悄留在散文裡 —— 那正是「排最後」躺 16 天的原形"
   echo "[DEFER-PHRASE] FAIL"; exit 1
