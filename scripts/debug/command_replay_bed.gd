@@ -123,6 +123,26 @@ func _run(plan: Array) -> Dictionary:
 
 
 # 把 command_log 轉回【可重播的計畫】：生效 tick − 1 ＝ 入列 tick（見檔頭時序）。
+
+# ★★★(丁) 落地之後 `PQ|` 進了 fp ⇒ 「入列之後指紋不變」這句話【從今天起是假的】。
+#   ★修法不是刪掉那個斷言（那是反方向的空真），是把它【分成三句】：
+#     ①世界本體沒變 ②玩家段除了 PQ| 之外逐字沒變 ③★而 PQ| 那一行【確實變了】
+#   ★★沒有③的話，①②對「佇列根本沒被記錄進 fp」也同樣成立。
+#   ★★★這兩格是我拿 systems 那條新規矩（比較的兩邊必須能各自獨立地改變）
+#     回頭掃自己今天寫的每一格時抓到的 —— 一張票的裁定弄壞了另一張票的斷言，而它不會自己喊。
+func _pq_line(st: WorldState) -> String:
+	for l in StateFingerprint.player_section(st).split(chr(10)):
+		if l.begins_with("PQ|"):
+			return l
+	return "（沒有 PQ| 行）"
+
+func _player_section_sans_queue(st: WorldState) -> String:
+	var keep: PackedStringArray = PackedStringArray()
+	for l in StateFingerprint.player_section(st).split(chr(10)):
+		if not l.begins_with("PQ|"):
+			keep.append(l)
+	return chr(10).join(keep)
+
 func _plan_from_log(log: Array) -> Array:
 	var out: Array = []
 	for e in log:
@@ -204,19 +224,24 @@ func _test_queue_defers() -> void:
 		_cell("_test_queue_defers")
 		return
 	var before: String = StateFingerprint.compute(st)
+	var dom_before: Dictionary = StateFingerprint.compute_domains(st)
+	var ps_before: String = _player_section_sans_queue(st)
+	var pq_before: String = _pq_line(st)
 	var c: Dictionary = plan[0]
 	st.command_seq += 1
 	st.pending_commands.append({"name": String(c["name"]), "args": c["args"], "seq": st.command_seq})
 	var after_queue: String = StateFingerprint.compute(st)
-	# ★★★誠實限（我自己查出來的，不寫的話這一格會被讀得比它強）：
-	#   `pending_commands`／`command_seq`／`command_log`／`command_results` 四個新欄位
-	#   【都不在 StateFingerprint 的涵蓋範圍內】（`_emit_player` 沒有它們）
-	#   ⇒ ★「入列之後指紋未變」有一半是【由構造保證】的，不是這一格測出來的。
-	#   ⇒ ★★它仍然抓得到一件事：入列的動作【順手改到別的世界狀態】。
-	#   ⇒ ★★★而「佇列該不該進指紋」是憲法層的問題（全量暫態可觀測性 vs spec P6
-	#     要求 world-fp 逐字不變），已呈報 systems，不在這支床自己決定。
-	_check("★入列之後、推進之前：世界指紋未變（★見上方誠實限：佇列本身不在指紋裡）",
-		before == after_queue)
+	# ★★★這段原本是一條誠實限：「四個新欄位都不在 fp 裡，所以『入列後指紋未變』
+	#   有一半是由構造保證的」。★★它【已經過期】—— systems 2026-09-23 裁定佇列進 fp
+	#   （`PQ|` 另起一行）⇒ 入列【會】改變整體指紋。
+	#   ⇒ ★留著這段字比刪掉危險：它會讓下一個人以為下面那幾格在測別的東西。
+	#   ⇒ ★★★而過期的不是那條限制本身，是它描述的世界 —— 改了 fp 就要回頭改讀它的人。
+	_check("★世界本體（非玩家段）逐字未變",
+		str(dom_before) == str(StateFingerprint.compute_domains(st)))
+	_check("★★玩家段【除了 PQ| 那一行】逐字未變", ps_before == _player_section_sans_queue(st))
+	_check("★★★而 PQ| 那一行【確實變了】—— 沒有這一格的話，上面兩格對「佇列根本沒被記錄進 fp」也成立",
+		pq_before != _pq_line(st))
+	_check("（整體指紋因此【應該】不同：入列是世界狀態的改變）", before != after_queue)
 	_check("★★母體地板：佇列裡真的有一條（%d）" % st.pending_commands.size(),
 		st.pending_commands.size() == 1)
 	runner.advance_tick(st, Vector2i(-1, -1))
@@ -320,10 +345,14 @@ func _test_p12_reject_comes_late() -> void:
 	var runner: SimRunner = pair[1]
 	var bridge := SimBridge.new(runner, st)
 	var before: String = StateFingerprint.compute(st)
+	var dom0: Dictionary = StateFingerprint.compute_domains(st)
 	var r: Dictionary = bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})
 	_check("★入列當下回 ok=true（不在這裡判合法性）", bool(r.get("ok", false)))
 	_check("★★入列當下【沒有】結果句", st.command_results.is_empty())
-	_check("★★★而世界也沒變（指紋相同）", StateFingerprint.compute(st) == before)
+	_check("★★★而【世界本體】沒變（佇列以外一個字都沒動）",
+		str(dom0) == str(StateFingerprint.compute_domains(st)))
+	_check("★而整體指紋【變了】—— 因為佇列本身是世界狀態（(丁) 之後 PQ| 進了 fp）",
+		StateFingerprint.compute(st) != before)
 	runner.advance_tick(st, Vector2i(-1, -1))
 	_check("推進一 tick 後才出現結果句（%d 句）" % st.command_results.size(),
 		st.command_results.size() == 1)
