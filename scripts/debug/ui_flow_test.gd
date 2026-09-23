@@ -789,6 +789,11 @@ func _test_pages_zero_loss() -> void:
 		_cell("_test_pages_zero_loss")
 		return
 	var txt: String = FileAccess.get_file_as_string(path)
+	# ★★★世界要跟「前」同一顆種子：ui_flow_test 全檔【沒有 seed】⇒ 世界每次不同
+	#   ⇒ ★`狀態: <task_summary>` 這一行會隨機變 ⇒ 這一格【隨機紅】（實測 3 次裡紅 2 次）
+	#   ⇒ ★★而隨機紅比恆綠更糟：它會被讀成雜訊，然後整支註冊表上的閘被降級
+	#   ★★★seed 必須在 _make_ui() 之前：場景在 _ready 建世界，吃的是全域 RNG
+	seed(1337)   # ← 與 ui_state_str_capture.gd 的 UC_SEED 預設同值
 	var want_tick: int = -1
 	var want_teams: int = -1
 	var want_persons: int = -1

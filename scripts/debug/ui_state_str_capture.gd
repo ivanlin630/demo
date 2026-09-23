@@ -17,7 +17,7 @@ extends SceneTree
 #   ③沒有自己的時間預算 ⇒ 撞 wrapper 的 600s 逾時。而那一輪我還誤判成「wrapper 騙人」，
 #     ★真相是我自己的指令結尾有 `| tail`，管線的離開碼是 tail 的（wrapper 回的是 98）。
 #
-# env：UC_TICKS（預設 120）／UC_BUDGET_S（預設 240）／UC_OUT（必填）／UC_SELECT（預設開，=0 關）
+# env：UC_SEED（預設 1337，★決定世界）／UC_TICKS（預設 120）／UC_BUDGET_S（預設 240）／UC_OUT（必填）／UC_SELECT（預設開，=0 關）
 #   ★UC_SELECT：把游標選在玩家隊那一格，★★逼出 :716-738 那 ~23 行
 #     ⇒ 不逼的話那一段【一行都不會渲染】，而 P1 是前後比對 ⇒ ★★★沒渲染到的區塊改壞了也不會紅
 #   ★沒有 UC_CONFIG：世界由 TextUI 自己決定，這支床只負責【記錄它實際拿到什麼】。
@@ -35,6 +35,12 @@ func _run() -> void:
 		quit(2)
 		return
 
+	# ★★★seed 必須在 instantiate【之前】：場景在 _ready 裡建世界，用的是全域 RNG。
+	#   ★第一版我有 seed，改寫時【跟著 UC_CONFIG 一起被我拿掉了】——
+	#     而它的後果不是「世界不一樣」，是【每次都不一樣】⇒ ★★這份『前』是浮動的。
+	#   ⇒ ★★★而浮動的『前』會讓 P1-b 隨機紅，那比它永遠綠更糟：
+	#     它會被當成雜訊，然後整支閘被降級。
+	seed(int(OS.get_environment("UC_SEED")) if OS.has_environment("UC_SEED") else 1337)
 	var node = load("res://scenes/TextUI.tscn").instantiate()
 	get_root().add_child(node)
 	await process_frame
