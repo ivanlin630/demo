@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: UI 五分頁 — spec 已開，兩件要你裁
 topic: ★★★①**分頁名單今天有兩份**：`團│據點│人│核心│事件`（意圖帳 line 42／09-08 總案）vs `生存／經濟／威脅／社交／記憶`（走查 `c1_walkthrough.gd:17`，你 09-10 裁「頁＝該欄回答的問題」）—— 我採後者並讓兩邊共用一個常數，但**意圖帳那一行是 WHAT 權威、不是我的格**，請你訂正或推翻我｜★★②**我把你指定的截圖 harness 換成 `ui-flow`**：`--obs-*` 畫的是 ObserverMain，不是玩家玩的 TextUI ⇒ 拿它截「五個分頁」會截到沒有分頁的那棵樹**而且是綠的**｜★訂正我上一封：`right_sidebar.gd` 不只是「沒有分頁」，它在一棵**死樹**底下
 ---
