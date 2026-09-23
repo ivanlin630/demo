@@ -713,7 +713,7 @@ func _build_state_str() -> String:
 		if not _unclassified.is_empty():
 			# ★★★完成條件②（systems 裁）：剩下的若全是【已具名的跨頁混合行】，就把名單印出來
 			#   ⇒ ★沒有名單的話，「還剩 3 行」跟「還有 3 行沒人處理」在畫面上長得一樣。
-			var _mixed: String = _unclassified_mixed_note()
+			var _mixed: String = _unclassified_mixed_note(_unclassified)
 			lines.append("── 未分類（票B 將搬走：%d 行%s）──" % [_unclassified.size(), _mixed])
 			lines.append_array(_unclassified)
 		# ★沒接出的生存欄位【仍然印天窗】（不先拿掉再說）
@@ -779,8 +779,19 @@ func _build_economy_lines(ct: Dictionary) -> Array:
 # 未分類區塊裡【已判定為跨頁混合】的行：它們因為「搬動不改字」×「一行裡有兩頁的東西」
 # 而【結構上搬不走】—— ★拆行是另一張票（它會改變 P1-b 的判準本身：從「raw 行還在」
 # 變成「內容還在」）⇒ ★★這裡只【具名】，不處理。
-func _unclassified_mixed_note() -> String:
-	return "，皆為跨頁混合：人口/武裝、狩獵/戰力、選中格"
+const MIXED_PAGE_LINES: Array = ["人口:", "狩獵 ", "選中: "]
+
+func _unclassified_mixed_note(unclassified: Array) -> String:
+	# ★★★這一句只有在【剩下的每一行都是已具名的混合行】時才成立 ——
+	#   ★第一版我寫成無條件回傳那串字，而那是【硬編的安慰話】：
+	#     還有十幾行沒判定時，它照樣宣稱「皆為跨頁混合」⇒ 畫面在說謊。
+	#   ⇒ ★★逐行比對：有任何一行不在具名清單裡 ⇒ ★★★不印那句話（寧可少講，不要講錯）。
+	for ln in unclassified:
+		var hit: bool = false
+		for k in MIXED_PAGE_LINES:
+			if String(ln).begins_with(String(k)): hit = true; break
+		if not hit: return ""
+	return "，皆為跨頁混合（拆行是另一張票）"
 
 func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 	var lines: Array = []
