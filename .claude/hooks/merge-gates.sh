@@ -290,6 +290,22 @@ while IFS=$'	' read -r id cmd purpose expect; do
 ' "$_mg_named"; fi
     printf '%s
 ' "$OUT" | tail -5; _mg_dump "$id"; FAILED+=("$id")
+  elif printf '%s' "$OUT" | grep -qaE '^(SCRIPT ERROR|USER SCRIPT ERROR|FATAL):'; then
+    # ★★★2026-09-23：執行期錯誤【不能算綠】（systems 加，血證在下）。
+    #   血證：ui_flow_test 一輪印了 64 次 `SCRIPT ERROR: Invalid call. Nonexistent 'String' constructor.`
+    #     —— 那個錯把 `_build_survival_lines` 從中間砍斷（前面兩個 append 的結果一起消失），
+    #     ★而那一輪的卷面是「errors: 1｜到場點名 31／31」：**點名滿分**。
+    #   ⇒ ★★「到場點名」守的是【格有沒有跑完】，它守不住【格裡面的函式有沒有被砍斷】。
+    #   ⇒ ★★★而 rc 也守不住：Godot 對執行期錯誤不改離開碼（這一輪 child exit=0）。
+    #   ★三支既有 hook 早就認得這個形狀（bed-triage-sweep／headless-regression／test-ran-floor），
+    #     ★★而 runner 本身【不認得】—— 這裡補的是那個缺口，不是新增一支閘。
+    _mg_se=$(printf '%s' "$OUT" | grep -acE '^(SCRIPT ERROR|USER SCRIPT ERROR|FATAL):')
+    echo "[MERGE-GATES] ✗ $id （${DT}s）—— ★★★執行期錯誤 ${_mg_se} 次（★expect 有命中、rc 也是 0，而它【不算綠】）"
+    printf '%s' "$OUT" | grep -aE '^(SCRIPT ERROR|USER SCRIPT ERROR|FATAL):' | sort | uniq -c | sort -rn | head -3
+    echo "[MERGE-GATES]   ⇒ ★一個執行期錯誤可以把【函式從中間砍斷】而讓它回傳空值，"
+    echo "[MERGE-GATES]     ★★而呼叫端看到的是「這裡沒有東西」——那與「這裡本來就沒有東西」在卷面上長得一樣。"
+    _mg_dump "$id-script-error"
+    FAILED+=("$id(script-error)")
   elif ! printf '%s' "$OUT" | grep -qE -- "$expect"; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— ★★跑完了但【沒有印出它該印的結論】"
     echo "    expect: $expect"; printf '%s
