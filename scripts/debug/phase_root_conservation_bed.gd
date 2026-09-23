@@ -38,8 +38,16 @@ func _initialize() -> void:
 	#     seed 來自 config 的 42）—— 這裡餵的是【推進 tick 時那 72 處 bare randf/randi】。
 	# ★反向驗（2026-09-23 實測）：1337 五跑逐位元相同；9999 的輸出【不同】
 	#   ⇒ ★★種子確實在被使用。
-	#   ★★★比對母體要先扣掉【時間數字】：[TickPerf]／[PhaseSpike]／[FaiPhase] 帶微秒，
-	#     它們每跑必變而與世界狀態無關 —— 不扣的話這支床【永遠】判成不穩定。
+	#   ★★★比對母體（reviewer R² 訂正過兩次，兩次都改變了結論）：
+	#     v1 整行扣掉 [TickPerf]／[PhaseSpike]／[FaiPhase] ⇒ ★太寬：那幾行【同時帶著】
+	#        teams=／factions= 等真實計數，整行扣會把內容差異一起扣掉。
+	#     v2 只把時間數字換成 <T> ⇒ ★★這支床【仍然 5 個相異指紋】——
+	#        殘差是 `self<N>us/tot<N>us`（我的正規式漏抓）＋【逐相位清單的順序】，
+	#        而那個順序【本身就是依時間排的】。
+	#     v3（現行）保留 tick=／teams=／factions=／phases=／spike#=／登記 N/N，
+	#        丟掉逐相位清單 ⇒ ★★★五跑逐位元相同、換種子不同。
+	#   ⇒ ★教訓：我第一版的『全部穩定』是【靠過寬的 filter 撐出來的】——
+	#     ★★而過寬的 filter 與恆綠的守衛是同一件事。
 	seed(int(OS.get_environment("BED_SEED")) if OS.has_environment("BED_SEED") else 1337)
 	print("=== 根守恆床 ===")
 	# 同一份相位表，餵兩種登記：巢狀的兩層（solo 與它的桶）
