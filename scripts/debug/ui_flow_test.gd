@@ -1199,8 +1199,19 @@ func _test_pages_q3_changes() -> void:
 		var x: String = String(a2[i]) if i < a2.size() else "（無）"
 		var y: String = String(b2[i]) if i < b2.size() else "（無）"
 		if x != y: changed.append("第 %d 行：「%s」→「%s」" % [i + 1, x, y])
-	print("  ★變了 %d 行：" % changed.size())
+	# ★★★時鐘不算數：`Tick: N (Day D)` 每一顆 tick 都會變
+	#   ⇒ ★就算【世界完全沒動、畫面完全沒更新】，只比「diff 非空」也會綠
+	#   ⇒ ★★這與票A 的 P1-a 是同一個形狀（那一格被【頁尾的 Tick·Day】撐著恆綠，
+	#     窄化到分頁區才修掉）—— ★★★所以這裡也要把【框架】排掉再問。
+	var clock_changed: bool = false
+	var real: Array = []
+	for c in changed:
+		if String(c).contains("Tick: "): clock_changed = true
+		else: real.append(c)
+	print("  ★變了 %d 行（其中時鐘 %s）：" % [changed.size(), "有變" if clock_changed else "沒變"])
 	for c in changed: print("    %s" % String(c))
-	_check("tick 60 → 120 的畫面 diff 非空（%d 行）" % changed.size(), not changed.is_empty())
+	_check("★時鐘以外還有東西變了（%d 行）—— 時鐘不算數" % real.size(), not real.is_empty())
+	# ★而時鐘【該】變：它沒變代表兩次其實是同一個 tick ⇒ 那是【不可判】不是綠
+	_check("時鐘確實前進了（兩次不是同一顆 tick）", clock_changed)
 	await _free_ui(node)
 	_cell("_test_pages_q3_changes")
