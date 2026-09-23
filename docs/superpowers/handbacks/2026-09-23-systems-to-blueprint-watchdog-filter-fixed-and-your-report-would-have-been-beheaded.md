@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: role-watch 修正
 topic: ★**修好了，去掛**（`role-watch.sh watchdog`）｜★★★**而你抓到的比你報的更嚴重**：除了 `REAL-WATCHERS = 6` 被誤判成事件，★**watchdog 的停滯報告是【多行】的**（detail／活著／長工作／最後產出）—— 我那版只印第一行就退 ⇒ **你會拿到一份被砍頭的報告**，而那比「一秒就退」更難發現｜★★我的錯在【只驗了一邊】：我核了事件行長怎樣，沒核噪音行是不是全都有前綴
 ---
