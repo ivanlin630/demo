@@ -22,9 +22,17 @@ trap '_rc=$?; rm -f "${MG_RUNFLAG:-}" 2>/dev/null; echo "[MERGE-GATES] BATTERY_R
 # ★★★而標記檔【單獨不夠】：harness 殺 shell 時 trap 不會跑 ⇒ 標記是舊的，
 #   而它的 Windows 子樹【還活著】（那正是 2026-09-23 那兩輪孤兒電池的形狀）
 #   ⇒ 所以第二道是【Godot 行程數】：開跑前不是 0 就不可判。
-MG_RUNFLAG=".claude/hooks/.merge-gates-running"
+# ★★★標記檔必須落在【main 工作樹】，不是「跑的人所在的那棵樹」（systems 修 2026-09-23）：
+#   2026-09-23 起電池改在 worktree 跑（共用 main dir 上 HEAD 會漂移）⇒ 相對路徑的標記
+#   會寫進【worktree 自己的】.claude/hooks/ ⇒ ★main 裡的人看不到它
+#   ⇒ ★★這道「一次只跑一輪」的煞車會【被 worktree 破解】（兩棵樹各跑一輪，互相看不見）
+#   ⇒ ★★★而更常見的後果是交接誤判：別的角色量「Godot=0」就以為機器空了 —— 見下一格。
+#   `--git-common-dir` 在 worktree 裡回傳 main 的 .git；在 main 裡回傳 .git ⇒ 一份程式碼兩邊都對。
+_mg_gc="$(git rev-parse --git-common-dir 2>/dev/null || echo .git)"
+_mg_root="$(cd "$(dirname "$_mg_gc")" && pwd)"
+MG_RUNFLAG="$_mg_root/.claude/hooks/.merge-gates-running"
 if [ -f "$MG_RUNFLAG" ]; then
-  _mg_other=$(cat "$MG_RUNFLAG" 2>/dev/null)
+  _mg_other=$(awk '{print $1; exit}' "$MG_RUNFLAG" 2>/dev/null)
   if [ -n "$_mg_other" ] && kill -0 "$_mg_other" 2>/dev/null; then
     echo "[MERGE-GATES] ★★★本輪【不可判】：已經有一輪電池在跑（PID $_mg_other）"
     echo "[MERGE-GATES]   ⇒ 兩輪平行跑會互相拖慢並把機器吃爆（2026-09-23 血證）"
@@ -33,7 +41,10 @@ if [ -f "$MG_RUNFLAG" ]; then
   fi
   echo "[MERGE-GATES] ★舊標記（PID $_mg_other 已不在）⇒ 接手。★★而【標記舊】不代表機器空：見下一格"
 fi
-echo $$ > "$MG_RUNFLAG"
+# ★只寫數字在第一行（後面那些欄位是給【人】讀的，程式只讀第一個 token）——
+#   含跳脫字元的寫法在寫檔時會變成真的換行，今天已經咬過兩次。
+printf '%s tree=%s since=%s
+' "$$" "$(pwd)" "$(date +%FT%T)" > "$MG_RUNFLAG"
 # 只留數字：不要用含跳脫字元的寫法（那個跳脫在寫檔時會變成真的換行，今天已經咬過兩次）
 _mg_godot_n=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' | tr -dc '0-9')
 if [ "${_mg_godot_n:-0}" != "0" ]; then
