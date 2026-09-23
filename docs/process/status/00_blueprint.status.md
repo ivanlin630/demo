@@ -32,4 +32,4 @@ watchdog v4.3 我持哨(proto=4,✅ARMED);inbox 六支=舊碼「已修未部署�
 transcript JSONL 的 usage 欄逐回合精確;腳本模式:掃 ~/.claude/projects/A--GDS-demo/*.jsonl 按 sid 對 peers 表歸角色;本週 8/18-25 總輸出 ~18.4M(大考 33%/settlement17%/harness10%/時間憲法 9%/磚 9%/建材 7%...)。
 
 ## compact 後開場(必做)
-arm 三 Monitor(inbox-watch/tg_poll/watchdog,冪等;watchdog 若被同代持有=等待正常)→讀 CLAUDE.md+00_roles+本檔+mechanism-intents→查 open handbacks→**先看懸決三題有無用戶回覆**→續鏈。凍改令持續有效直到用戶解除。
+掛看門狗一支(背景 Bash:`SESSION_ROLE=blueprint bash .claude/hooks/role-watch.sh watchdog` run_in_background;★2026-09-23 用戶裁:信箱不掛 watcher=寫完 handback 用 SendMessage 敲收件人;Telegram 進站退役改 Remote Control)→讀 CLAUDE.md+00_roles+本檔+mechanism-intents→查 open handbacks→**先看懸決三題有無用戶回覆**→續鏈。凍改令持續有效直到用戶解除。
