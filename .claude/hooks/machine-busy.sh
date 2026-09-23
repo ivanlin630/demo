@@ -63,7 +63,33 @@ EOF_WT
 n=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' 2>/dev/null | tr -dc '0-9')
 if [ "${n:-0}" != "0" ]; then
   echo "[machine] ⛔ BUSY：Godot 行程數 = $n"
-  echo "[machine]   ⇒ ①別人在跑床 ②★用戶自己的遊戲（★★不准殺）③上一輪被殺留下的孤兒子樹"
+  # ★★★歸屬（systems 2026-09-23）：今天有兩次「看到 Godot=2 而查不出是誰的」，
+  #   而規矩是【不准殺用戶的遊戲】⇒ 查不出來時唯一安全的動作是【什麼都不做】，
+  #   ★而那也表示孤兒永遠不會被清。⇒ tools/godot.ps1 現在會為它起的每一個 Godot 落一個 PID 信標，
+  #   ★★這裡把它讀回來，把「不知道」換成【我們的 N／不知道是誰的 M】。
+  #   ★★★而 M > 0 仍然【不准殺】—— 它的意思是【去問】，不是【去清】。
+  _mb_bdir="$_root/.claude/hooks/.godot-pids"
+  _mb_ours=0
+  if [ -d "$_mb_bdir" ]; then
+    for _bf in "$_mb_bdir"/*.txt; do
+      [ -f "$_bf" ] || continue
+      _bp=$(basename "$_bf" .txt)
+      if kill -0 "$_bp" 2>/dev/null; then
+        _mb_ours=$((_mb_ours+1))
+        echo "[machine]     ・我們的：$(head -1 "$_bf")"
+      else
+        rm -f "$_bf" 2>/dev/null   # ★死掉的信標順手清（它不是證據，是殘骸）
+      fi
+    done
+  fi
+  _mb_unknown=$(( n - _mb_ours ))
+  echo "[machine]   ⇒ 歸屬：我們起的 ${_mb_ours}／不知道是誰的 $(( _mb_unknown < 0 ? 0 : _mb_unknown ))"
+  if [ "$_mb_unknown" -gt 0 ]; then
+    echo "[machine]   ⇒ ★★★不知道是誰的 > 0 ⇒【不要殺】：可能是用戶自己在玩（他優先）"
+    echo "[machine]     ⇒ ★要清孤兒，先在信裡問過；★★而殺的時候要殺整棵樹（Windows 殺父不帶走子孫）"
+    echo "[machine]   ⇒ ★★誠實限：信標是 2026-09-23 才加的 ⇒【在那之前起的 Godot 沒有信標】"
+    echo "[machine]     ⇒ 所以「不知道是誰的」也可能是【我們起的、只是起得比信標早】——★★★不要讀成「一定是孤兒」"
+  fi
   busy=1
 fi
 

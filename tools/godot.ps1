@@ -305,6 +305,25 @@ $proc = Start-Process -FilePath $exe -ArgumentList $args `
 # with and without WaitForExit). `exit $null` is exit 0 -- which is exactly how 27 gates
 # came to be incapable of failing on rc. Do not "clean up" this line.
 $null = $proc.Handle
+# GODOT PID BEACON (2026-09-23, systems). Why: twice today a role saw "Godot = 2" and could
+# not tell whether those were another role's beds, the user's own game, or orphans -- and the
+# rule is "never kill the user's game". Attribution was unanswerable, so the safe action was
+# always "do nothing", which also means orphans never get cleaned. This makes it mechanical:
+# every Godot we launch drops a file named after its PID; machine-busy.sh then reports
+# "ours N / unknown M". Unknown > 0 still means DO NOT KILL -- it means ask.
+# Fail-open: any error here is swallowed; it must never affect the run.
+# NOTE: this file must stay ASCII-only (PS 5.1 reads BOM-less files as ANSI).
+try {
+    $gitCommon = (& git rev-parse --git-common-dir 2>$null)
+    if ($LASTEXITCODE -eq 0 -and $gitCommon) {
+        $repoRoot = Split-Path -Parent (Resolve-Path $gitCommon).Path
+        $beaconDir = Join-Path $repoRoot ".claude\hooks\.godot-pids"
+        if (-not (Test-Path $beaconDir)) { New-Item -ItemType Directory -Force $beaconDir | Out-Null }
+        $beacon = Join-Path $beaconDir ("" + $proc.Id + ".txt")
+        "pid=$($proc.Id) wrapper=$PID tree=$(Get-Location) since=$(Get-Date -Format s)" |
+            Out-File -FilePath $beacon -Encoding utf8 -Force
+    }
+} catch { }
 $sb = New-Object System.Text.StringBuilder
 $script:pos = 0
 function Pump-Out {

@@ -78,3 +78,7 @@ docs/measurements/.bed-sweep-*.tsv
 #   ⇒ 不進 git：它每紅一次就多一份，而它的用途是【當場查】，不是留存
 #   ★要留的那一份請自己複製出來並在信裡標 exact path
 docs/measurements/.gate-fail/
+
+# ★Godot PID 信標（systems 2026-09-23）：tools/godot.ps1 為它起的每個 Godot 落一個檔，
+#   machine-busy.sh 讀它做【歸屬】。是【此刻的狀態】不是產出 ⇒ 不進 git。
+.claude/hooks/.godot-pids/
