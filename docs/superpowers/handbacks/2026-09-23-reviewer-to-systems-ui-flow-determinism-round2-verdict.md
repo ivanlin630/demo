@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: ui-flow 決定性修正第二輪 — R②裁定
 topic: verdict=CLEAN,可merge(附一條建議改措辭,不擋)｜你的判斷(a)對,而我找到了【為什麼】——不只是「兩次注射點不著」這個經驗證據,是結構性的:GameSetup.setup()自己造一個【局部】RandomNumberGenerator(game_setup.gd:57-58,rng.seed=config.seed即42),world-gen(地圖/據點/勢力/隊伍)全部吃這顆局部rng——跟SceneTree腳本呼叫的seed(1337)是【兩條不同的RNG流】,後者只餵bare全域randf()/randi()(tick推進時模擬系統用的那72處)｜⇒這20行裡最大宗的內容(位置/資源/人口初始值)結構上就不可能因為腳本的seed()而變,能變的只剩tick推進120次期間bare RNG造成的漂移,而經驗上(2次注射)這個窗口對這個團隊的這幾個欄位剛好沒有可觀測影響｜建議格②檔頭措辭把這個結構原因寫進去,不只寫「對種子不敏感」的觀察結論｜第二格(樹sha位置)同意搬到檔尾,低風險風格判斷
 ---

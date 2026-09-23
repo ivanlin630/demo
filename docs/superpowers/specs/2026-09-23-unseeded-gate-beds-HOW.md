@@ -54,11 +54,40 @@ reviewer 用 MeasureBedHelper.arm_and_* 反查註冊表 45 支 ⇒ 找到 9 支�
   ⇒ ★★★整段拿掉。而我要記住的是：**我拿一個推論當成了設計約束，而它沒有母體。**
 ```
 
-**規則（直接、不繞）**：
+**★★★規則（2026-09-23 第二次訂正 —— 我上一版把它寫寬了）**：
 
 ```
-建【隨機世界】（GameSetup.setup，含 arm_and_setup） 或 【推進 tick】 ⇒ ★必須 seed
-其餘（手工 arm_and_new 且不推進）⇒ ★★不動，而在附表裡具名並寫「手工組世界」
+★只有【推進 tick】的床需要 seed。★★【建世界】本身不需要。
+```
+
+**為什麼（★結構理由，reviewer 在另一張票上挖出來、我獨立核過）**：
+
+```
+game_setup.gd:57-58  var rng := RandomNumberGenerator.new(); rng.seed = int(config.get("seed", 42))
+★world-gen 全部吃【這顆局部 rng】——我實測：
+   game_setup.gd        bare rand ＝ 0 ｜ rng. ＝ 16
+   world_generator.gd   bare rand ＝ 0 ｜ rng. ＝ 45
+   person_generator.gd  bare rand ＝ 0 ｜ rng. ＝ 18
+⇒ ★★建世界【結構上就是決定性的】（它只吃 config 的 seed:42）
+⇒ ★★★腳本呼叫的 seed(1337) 餵的是【另一條流】：tick 推進時模擬系統用的那 72 處 bare randf/randi
+   —— 兩條 RNG 流從頭到尾不相交
+```
+
+⇒ **所以我上一版那條「建隨機世界 ⇒ 必須 seed」是【錯的】**，而它的代價很具體：
+★**會讓 7 支不推進的床各補一個不會有任何作用的 seed**，
+★★**而那 7 個裝飾會讓下一個人以為「這些床已經被處理過了」。**
+
+**修訂後的名單（★必處理只剩 3 支，ui_flow_test 在自己的票上）**：
+
+```
+必處理（推進 tick）：
+  agent_verbs_c1_bed.gd（推3）｜merchant_turnover_test.gd（推1）｜phase_root_conservation_bed.gd（推1）
+  ＋ ui_flow_test.gd（推6）★已在 fix/ui-flow-determinism
+不處理（推進 0 ⇒ 只建世界 ⇒ 已由 config seed 決定）：★而要【具名並寫理由】，不是靜默略過
+  payroll_urgency_test.gd（arm_and_setup 但推進 0）｜crisis_override_test.gd｜team_ui_test.gd
+  ｜grudge_ledger_bed.gd｜material_buy_test.gd｜plan_speed_move_cost_test.gd
+  ｜ui_logic_test.gd｜unified_commerce_test.gd
+  ＋ R② 反查到的 8 支 arm_and_new
 ```
 
 ## §3 形狀
@@ -80,7 +109,7 @@ seed 的寫法抄 warring_harness.gd:120／observer_main.gd:51（同一個前例
 ## §5 驗收
 
 ```
-P1 名單內每一支都補上 seed（ui_flow_test 除外，它在自己的票上），★而附表裡的 8 支具名保留
+P1 ★只有那 3 支推進 tick 的床補 seed；★★不處理的那些【逐支具名】並寫「推進 0 ⇒ 由 config seed 決定」
 P2 每一支的 seed 值【印在它自己的輸出裡】（★下一個人看得到它跑的是哪個世界）
 P3 補了 seed 的那幾支：★各自附【陽性對照】—— 把 seed 換成 randomize() ⇒ 該床必須變 VARIES
    ⇒ ★★沒有這一格，「補了 seed」與「它本來就穩定」在卷面上長得一樣
