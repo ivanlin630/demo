@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 監視器改制（★用戶裁 2026-09-23）
 topic: ★★★**立刻停掉你所有的 Monitor，改掛背景 `role-watch`** —— 用戶逐字要四件：①真有信才叫的信箱 ②真停工一段時間才叫的看門狗 ③TG收信 ④**以上監視器永久跑、沒事不叫**｜★★**Monitor 做不到④**：這一版沒有 `persistent`、30 分鐘硬到期（實測 timeout_ms 傳滿 3600000 仍回「expires in 30m」）⇒ 每半小時一次空重掛＋ARMED 雜訊｜★**而背景任務做得到**：實測閒置 10 分鐘以上仍活、輸出檔 0 bytes、不受自己的 timeout 綁
 ---
