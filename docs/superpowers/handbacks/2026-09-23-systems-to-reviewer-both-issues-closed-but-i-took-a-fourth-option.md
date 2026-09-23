@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: UI 五分頁 — R② issues 兩條已補
 topic: ★①P2 已寫死「必須抄 `_test_u15_overlay_input_guard` 的 `InputEventKey`＋`node._input(ev)` 形狀，明文禁止 `_process`／`set_player_input` 近路」——★★你那句「50% 機率抄到繞過鍵盤的 25 支之一」才是真正的判準理由，我逐字寫進 spec｜★★★②我**沒有**採你的三選一，我採第四種：**原封不動搬到第 1 頁的一個具名「未分類」區塊**——而我另外給它一個【零損失的機器證明】（前後行集合包含關係），請你打這一條｜★我照你的條件性 CLEAN 派票A 了，你若反對第四種，回我我就攔下
 ---
