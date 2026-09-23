@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -72,6 +72,8 @@ func _initialize() -> void:
 	await _test_pages_switch_key()
 	await _test_pages_skylight()
 	await _test_pages_single_source()
+	await _test_pages_q1_source()
+	await _test_pages_q3_changes()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1139,3 +1141,66 @@ func _test_pages_single_source() -> void:
 	_check("c1_walkthrough.gd 不再自帶 PAGE_ORDER", not walk_src.contains("const PAGE_ORDER"))
 	_check("c1_walkthrough.gd 改讀 UiPages.PAGE_ORDER", walk_src.contains("UiPages.PAGE_ORDER"))
 	_cell("_test_pages_single_source")
+
+
+# ★票B Q1[來源]：接出來的欄位必須走【公開查詢面】—— 不得直接讀 state、不得是常數。
+#   ★★這一格掃的是【原始碼文字】，而它防的是「接出來的值其實是自己算的／寫死的」。
+func _test_pages_q1_source() -> void:
+	_selftest_gate("_test_pages_q1_source").noop()
+	print("
+── 票B Q1 來源走查詢面 ──")
+	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	_check("撈得到原始碼（%d 字元）" % src.length(), src.length() > 1000)
+	for fn in ["_build_survival_lines", "_build_economy_lines"]:
+		var a: int = src.find("func " + fn)
+		_check("找得到 %s" % fn, a != -1)
+		if a == -1: continue
+		var b: int = src.find("
+func ", a + 5)
+		var body: String = src.substr(a, (b - a) if b != -1 else src.length() - a)
+		# ★禁止：直接讀 state／runner；★★而 _cached_snapshot 與參數 ct/ps 是查詢面快照，允許
+		_check("%s 不直接讀 state" % fn, not body.contains("_bridge.get_state()") and not body.contains("state."))
+		_check("%s 不直接持有 runner" % fn, not body.contains("_runner"))
+	_cell("_test_pages_q1_source")
+
+# ★票B Q3[會動]：同一顆種子、兩個不同 tick ⇒ 畫面 diff 非空，★並印出【哪一行】變了。
+#   ★★★母體地板：兩邊都要真的推到目標 —— 推不到就判【不可判】，
+#     因為「沒有 diff」與「沒有推進」在卷面上長得一樣（★今天已經踩過一次）。
+func _test_pages_q3_changes() -> void:
+	_selftest_gate("_test_pages_q3_changes").noop()
+	print("
+── 票B Q3 世界動了畫面跟著動 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var snaps: Array = []
+	var reached: Array = []
+	for target in [60, 120]:
+		var g: int = 0
+		while st.world.current_tick < target and g < 600:
+			if not node._bridge.is_advancing():
+				node._bridge.request_advance(target - st.world.current_tick)
+			await process_frame
+			g += 1
+		reached.append(st.world.current_tick)
+		snaps.append(node._build_state_str())
+	print("  推進實得：%s（目標 60／120）" % str(reached))
+	if int(reached[0]) != 60 or int(reached[1]) != 120:
+		print("  ★★★【不可判】沒有推到兩個不同的 tick ⇒ 「沒有 diff」與「沒有推進」分不開")
+		await _free_ui(node)
+		_cell("_test_pages_q3_changes")
+		return
+	var a2: PackedStringArray = String(snaps[0]).split("
+")
+	var b2: PackedStringArray = String(snaps[1]).split("
+")
+	var changed: Array = []
+	var n: int = maxi(a2.size(), b2.size())
+	for i in range(n):
+		var x: String = String(a2[i]) if i < a2.size() else "（無）"
+		var y: String = String(b2[i]) if i < b2.size() else "（無）"
+		if x != y: changed.append("第 %d 行：「%s」→「%s」" % [i + 1, x, y])
+	print("  ★變了 %d 行：" % changed.size())
+	for c in changed: print("    %s" % String(c))
+	_check("tick 60 → 120 的畫面 diff 非空（%d 行）" % changed.size(), not changed.is_empty())
+	await _free_ui(node)
+	_cell("_test_pages_q3_changes")
