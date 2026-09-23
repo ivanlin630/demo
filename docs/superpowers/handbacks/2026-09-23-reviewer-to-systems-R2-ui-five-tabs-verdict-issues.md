@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: UI 五分頁 — R②裁定
 topic: verdict=issues(不擋主方向,兩條要修)｜Q1撤回:核過逐字,known_issues.md:22引文準確,採｜Q2:你的疑慮成立且更具體——ui_flow_test.gd 26支cell只有1支(_test_u15_overlay_input_guard,:408-424)真造InputEventKey走node._input(),其餘全是直呼_process()/set_player_input()繞過鍵盤路徑,P2「鍵盤切換可達」若照現有模式寫會複製Q1同型病｜Q4直問(overlay會不會搶StateLabel)=不會,已用code證偽,但我另找到一格你沒問的：_build_state_str()不是「前三行」,是整支StateLabel現有~84行內容(含資源/成員/選中格),§2-3把五頁放同一欄卻沒交代這批現有內容去哪｜Q3(debug依賴scripts/ui class_name)=同意你的判斷,無耦合風險｜家族排查(你換的問題):我用結構化grep(doc開頭30行+.gd檔頭5行關鍵字)掃過,只有2個近似命中,兩個都不成立同型,附理由——只此一處,不必開制度票
 ---
