@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 玩家指令佇列化 — R②裁定
 topic: verdict=issues(不擋方向)｜(1)你最想要的那格：set_player_input的24個實際key(不是26,是呼叫點數)逐一核過讀點——全部只在player_command_system.gd的handler函式裡讀,而這些handler只透過PlayerCommandApi.dispatch()白名單(execute_action/respond_to_forced)才可達,不存在系統直讀路徑,豁免成立｜★★但順手抓到player_state這個dict另有【第三個寫入者】:sim_runner.gd:458每tick移動相位會直接erase一個key(pending_trade_target),不在set_player_input的24鍵清單裡但同一容器,新排隊設計下有新的同tick覆蓋風險，附細節｜(2)§3-2消費點位置有真實兩義:_step1_advance_time()的current_tick+=1發生在"tick開頭"的哪一側決定command_log記錄的tick值差1,且_advance_tick_body有個encounter_active早退分支完全跳過系統迴圈,消費點要不要也擺進那個分支未定義｜(3)負對照(±1 tick)確實弱,你的疑慮成立,建議換成跨小時/日邊界的位移
 ---

@@ -66,7 +66,8 @@ scripts/ui/sim_bridge.gd:277 command_player → _cmd_api.dispatch(_state, …)
 ```
 scripts/ui/text_ui_main.gd 對 bridge 的【會改世界】呼叫，逐個數：
   command_player               38 處   ← ★主入口（agent_repl／headless_test／ui_flow_test 也走它）
-  set_player_input             26 處   ← 寫 state.player_state[key]（sim_bridge.gd:286）
+  set_player_input             26 處   ← ★那是【呼叫次數】；去重後是 **24 個 key**（R② 逐一列出並核過）
+                                        寫 state.player_state[key]（sim_bridge.gd:286）
   refresh_interaction_targets   3 處   ← ★★掃同格 NPC 並寫 pending_targets（開選單的副作用）
   （request_advance／cancel_advance／tick_step 不算：那是【推進】不是【指令】）
 ```
@@ -88,21 +89,79 @@ state.pending_commands: Array[Dictionary]
 ★★★回傳型別改變 ⇒ 所有呼叫端要面對「我還不知道它成不成功」——見 §3-4
 ```
 
-### ★★§3-2 消費點：tick 邊界，一次吃光
+### ★★§3-2 消費點：**`_step1_advance_time()` 之後、系統迴圈之前**（★R② 訂正，兩個位置都釘死）
 
 ```
-sim_runner 的 tick 開頭（★在任何系統跑之前）：
-  for c in state.pending_commands: PlayerCommandApi.dispatch(state, c.name, c.args)
-  記錄 ⇒ state.command_log.append({tick, seq, name, args, result_ok})
-  state.pending_commands.clear()
-★為什麼是【開頭】而不是結尾：玩家的意圖是「從現在起」，而
-  ★★若放結尾，指令會在【它所看到的那顆 tick 已經跑完之後】才生效 ⇒ 畫面與因果差一拍
+scripts/simulation/sim_runner.gd 的 _advance_tick_body：
+  :479  if state.encounter_active: … _step1_advance_time(state) … return   ← 分支A（跳過系統迴圈）
+  :488  _step1_advance_time(state)                                          ← 分支B（正常）
+  :519+ hour_tick／due_teams／due_factions… 系統迴圈本體
+⇒ ★★★消費點放在【每一次 _step1_advance_time() 的正後方】（兩個分支【都】放）
+```
+
+**為什麼是它之後，不是之前（★R② 抓的，差 1 而且不會馬上紅）**：
+
+```
+current_tick += 1 發生在 _step1_advance_time() 裡
+⇒ 放【之前】⇒ command_log 記到舊值；放【之後】⇒ 記到本 tick 真正在用的那個值
+⇒ ★而全庫其餘印 tick 的地方（DayNight／Probe／FaiPhase…）都讀【遞增後】的 current_tick
+⇒ ★★消費點跟著用同一個值，才不會出現「這個 tick 的指令」與「這個 tick 印出來的世界」
+   引用兩個不同的整數
+⇒ ★★★記錯側【不會馬上紅】：兩種選法【各自內部一致】，只有跟別的 tick 來源對帳時才現形
+```
+
+**分支A（`encounter_active`）：★二選一，我選【也消費】**：
+
+```
+★理由①：一條【沒有例外】的規則比兩條規則好 ——
+  「指令永遠在下一個 tick 邊界生效」是玩家講得出來的語意；
+  「除非你正在遭遇戰」是一句沒有人會記得的例外。
+★★理由②：不消費 ⇒ 佇列在遭遇戰期間【持續累積但不消費】，
+  而遭遇戰結束那一刻會一次全部生效 —— ★那是【被動產生】的行為，不是誰設計的。
+★★★理由③：合法性不歸佇列管 —— handler 自己有 _check_controlled_team 等前置檢查，
+  不合法就回 ok=false，而【那一條會被記進 command_log】⇒ 重播照樣重現得出來。
+⇒ ★而「遭遇戰期間玩家其實按不到鍵」（_input 轉給 encounter_view）是【真的】，
+  所以這個分支【多半】是空的 —— ★★但「多半空」不是「保證空」，所以規則要寫死，不是靠它空。
+```
+
+### ★★★§3-2b `player_state` 有【第三個寫入者】——新設計下的同 tick 競態（R② 多找到的）
+
+```
+scripts/simulation/sim_runner.gd:458      if 玩家格子變了: _player_cmd.clear_pending_targets(state)
+scripts/simulation/player_command_system.gd:960-962
+    state.player_pending_targets.clear()；state.player_state.erase("pending_trade_target")
+⇒ ★這是【tick pipeline 自己】在寫 player_state ⇒ 它不是純粹的 UI→command 單向管道
+```
+
+**新設計下才會出現的窗口（★舊設計沒有）**：
+
+```
+舊：玩家下 trade 指令 ⇒ 立刻寫 pending_trade_target ⇒ 立刻被讀（時間點由玩家控制，
+    幾乎不可能與該 tick 的 move 相位同時發生）
+新：trade 指令在 tick 開頭被消費 ⇒ 寫 pending_trade_target
+    ⇒ ★同一顆 tick 稍後的 move 相位若判玩家格子變了 ⇒ 把它清掉
+```
+
+**★★處置：不改那個清除鉤子，而是【把行為釘死】**：
+
+```
+①佇列以 seq 遞增順序消費（★同一顆 tick 內的兩條指令，順序是玩家下的順序）
+②★清除鉤子【保留原樣】：玩家若在同一顆 tick 裡既下 trade offer 又移動走，
+  那個 target 被清掉是【對的】——你不能跟一個你剛走開的人交易
+③★★★而它必須【被測到】，否則下次有人改順序時沒有人會發現：
+  驗收加一格（P8）：同一顆 tick 內先 trade offer 再 move ⇒ 斷言 pending_trade_target 被清掉
+  ⇒ ★這一格【不是在測 bug】，是把一個【順序決定的結果】釘成守衛
 ```
 
 ### ★★★§3-3 另外兩支入口的處置（★不可以默默忽略）
 
 ```
-(a) set_player_input（26 處）⇒ ★【不進佇列】，而理由必須寫在 code 註解裡：
+(a) set_player_input（26 處呼叫／**24 個 key**）⇒ ★【不進佇列】——★★★R② 已逐一核過讀點，豁免成立：
+    那 24 個 key 的讀點【全部】集中在 `player_command_system.gd` 的 handler 函式內，
+    而那些 handler 只能經由 `PlayerCommandApi.dispatch()` 的 12 個白名單 name 到達
+    （`execute_action`／`respond_to_forced` 兩支路由過去）⇒ **沒有系統直讀路徑**
+    ⇒ ★而這不是「我讀名字推的」了：是逐個 key grep 過 `scripts/simulation/**.gd` 的結果
+    ★理由仍然要寫在 code 註解裡：
     它寫的是 state.player_state[key] ＝【尚未送出的表單欄位】（例：tribute_rate_input），
     ★★真正生效的是之後那一條 command_player ⇒ 它不改世界，只改「玩家打了什麼字」
     ⇒ ★★★驗收要證明這一句：§5 P4
@@ -145,8 +204,12 @@ sim_runner 的 tick 開頭（★在任何系統跑之前）：
 P1 [佇列] 下一條指令之後、在推進之前讀世界 ⇒ ★世界【沒有】改變；推進一個 tick ⇒ 改變了
 P2 [★★★重播] 同種子 ＋ 同一份 command_log 重跑 ⇒ **final_fp 逐字相同**
    ★這一格是本票的全部意義；★★母體必須【非空】：那份 log 至少要有 N≥5 條真的改到世界的指令
-   ★★★並附【負對照】：把 log 裡某一條的 tick 編號改掉一格 ⇒ fp 必須【不同】
-     （否則「相同」可能只是因為那些指令根本沒生效）
+   ★★★【負對照】（R② 訂正 2026-09-23）：**把某一條指令的 tick 位移到【跨過一個小時或一天邊界】**，
+     fp 必須【不同】。
+     ★不用固定的 ±1：同一小時內位移一格，很可能逐字相同 ⇒ ★★負對照恆綠（我自己標的疑慮，R② 證實）
+     ★★★跨邊界則【母體選擇本身帶保證】：day_boundary 上 `check_starvation_deaths`／
+       `flush_forage_episodes`／訊息剪枝本來就在動東西（`sim_runner.gd:490` 一帶），
+       hour_tick 上有 NEAR_CADENCE 的到期檢查 ⇒ 前後保證有世界差異，不是「可能有」
 P3 [無後門] grep 斷言：production 路徑上沒有任何 dispatch 的直接呼叫（只有消費點那一處）
 P4 [set_player_input 的豁免不是我說了算] 對每一個被寫進 player_state 的 key：
    ★證明它【不被任何系統讀】，只被之後的 command_player 讀
@@ -155,6 +218,10 @@ P5 [ui-flow] 註冊表 `ui-flow` 仍綠（★指令語意改了 ⇒ 那 26 支 c
 P6 [fp] ★world-fp 不變 —— 無人世界不下指令 ⇒ 佇列恆空 ⇒ 世界必須逐字相同
    ★★這一格是【陽性對照的反面】：它證明本票沒有順手改到別的東西
 P7 [電池] merge 前全部 merge-gates
+P8 [★同 tick 競態被釘死] 同一顆 tick 內：先 trade offer、再 move（兩條都進同一批佇列）
+   ⇒ 斷言 `player_state["pending_trade_target"]` 在該 tick 結束時【已被清除】
+   ★這一格不是在測 bug，是把 §3-2b 那個【由順序決定的結果】釘成守衛
+   ★★母體要求：那一條 move 必須真的讓玩家格子改變（否則清除鉤子不會觸發 ⇒ 恆綠）
 ```
 
 ## §6 不在本票
