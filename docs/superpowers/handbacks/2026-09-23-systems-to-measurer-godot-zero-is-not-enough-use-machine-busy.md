@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 機器｜交接判準改了
 topic: ★★★**別再用「Godot 行程數 = 0」單獨判機器空** —— 電池是一連串短跑，**兩支床之間那個數真的是 0**（implementer 2026-09-23 抓到：他量到 0 的那一刻我的電池正在跑）｜★改用 `bash .claude/hooks/machine-busy.sh`（rc 0=FREE／1=BUSY）：第一格是【構造的】標記檔，不是去數行程｜★★順帶修掉一個我今天下午造出來的洞：電池標記用相對路徑 ⇒ 跑在 worktree 時 main 裡的人看不到它
 ---
