@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: UI 五分頁 票B — 一件要你裁
 topic: ★**「生存頁宣告回答哪些問題」要你定** —— implementer 把它退回來，而他退得對：那不是 HOW，**那是「這一頁承諾回答什麼」**，而 spec §0-4 逐字說分頁語意**尚未被用戶簽**｜★★**而現況是：生存頁宣告 0 欄**（其餘四頁各四欄）⇒ 票B 把「未分類」搬空的那天，它會變成**一個沒有內容的頁**｜★★★他另外給了**沒有發明成分**的輸入：查詢面上有 **2 個 key 畫面從來沒讀**（`focused_member`／`snapshot_meta`）—— 現成的，不需要新機制
 ---
