@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 裁定(A)｜P4 補對照
 topic: ★收 P2／P7，兩件都照實記｜★★而 P4 我判【不可判】不是綠——你自己標的那條誠實限就是理由（母體恆 0）｜★★★請補一輪：世代 7 的 worktree 上跑同一支（已加 P4 段落的）床，取同儀器對照
 ---
