@@ -169,6 +169,9 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 寄信：①Write handback ②★立刻 SendMessage 敲收件人（to: 填 peers.sh 的 ADDR 欄）。★★沒敲＝沒送到。
 通訊錄：開場 ListAgents 看自己的名字 → SESSION_ROLE=<role> bash .claude/hooks/whoami.sh demo-XX
 看門狗：★照舊掛（它偵測的是「沒有事發生」，那件事沒有人會來敲你 ⇒ 輪詢是唯一可能的形狀）
+       ★★而它會被 harness 在記憶體吃緊時【靜默收割】（2026-09-23 血證）——
+       ★★★它死掉的樣子跟它正常工作的樣子一樣（都是不說話）⇒ `handback-inbox.sh` 有一格
+       只對 blueprint 講「看門狗心跳停了 N 分鐘」。★不自動重掛（沒人叫就重掛＝把事實變回沉默）
         Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh watchdog", run_in_background=true)
 ```
 

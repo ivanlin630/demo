@@ -62,6 +62,32 @@ harness 把訊息直接送進你的對話 ⇒ 你就醒了。
 Bash(command="SESSION_ROLE=<role> bash .claude/hooks/role-watch.sh watchdog", run_in_background=true)
 ```
 
+#### ★★★看門狗的新失效形態：**背景 Bash 會被靜默收割**（2026-09-23）
+
+```
+harness 訊息：「stopped because the system is running low on memory」
+  ⇒ session 閒置時記憶體吃緊 ⇒ 收割背景 shell（★不是那支腳本出錯）
+⇒ ★而看門狗正是那個負責偵測「沒有事發生」的東西
+  ⇒ ★★**它死掉的樣子，跟它正常工作的樣子一模一樣：都是不說話。**
+⇒ ★★★而新信箱之下【沒有別的 watcher 看著它】—— 唯一還會定時執行的東西是 `handback-inbox.sh`
+```
+
+**處置（systems 判，2026-09-23）**：
+
+| 選項 | 判 |
+|---|---|
+| 設 `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1`（★只能在啟動 claude 時設，shell 裡設無效） | ★**不建議、且不是我的格** —— 這台機器與用戶自己的遊戲共用，關掉收割＝拿用戶的記憶體去換我們的背景任務。**要不要開是用戶的決定**，已呈報 |
+| ★**讓它的死變成看得見的**（採用） | `handback-inbox.sh` 加一格：**只在 blueprint 的 session**，`.watchdog.lock` 心跳超過 20 分鐘（poll 15 分＋5 分餘裕）就講一行 |
+| 自動重掛 | ★**不做** —— 沒人叫就重掛 ＝ 把一個【要人知道的事實】變回沉默；而 harness 也明講了不要自行重啟 |
+
+★那一格**不是恆真**：lock 新鮮就完全不出聲。已做三向對照（門檻 99999 ⇒ 0 行／門檻 1 ⇒ 1 行／
+換成 systems 角色即使過期也 ⇒ 0 行）。★★`lock 不存在`**不報警**：那代表這台機器從沒掛過看門狗，不是它死了。
+
+★★★**而我在驗它的時候踩了一次**：我 `touch` 了 `.watchdog.lock` 來做陰性對照 ——
+**那會讓一支已死的看門狗看起來還活著，把真警告壓掉 20 分鐘**。
+⇒ 規矩：**不要用「動它的狀態」來測一個讀狀態的守衛**，改動門檻（本例 `WATCHDOG_STALE_S`）。
+
+
 ### ★通訊錄：角色 → session 名（`whoami.sh`，2026-09-23 立）
 
 git 信箱用**角色**定址（`to: systems`），SendMessage 用 **session 名**定址（`demo-95`），

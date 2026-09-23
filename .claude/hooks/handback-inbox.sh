@@ -30,27 +30,33 @@ esac
 #   ② fail-open——拿不到 session_id、或 lock 是舊格式讀不出 sid，就【退回現行行為】，
 #      絕不因為「讀不到」就報警（讀不到 ≠ 壞了）。
 GATE=""
-if [ -n "${CLAUDE_CODE_SESSION_ID:-}" ]; then
-  _LOCK="${HANDBACK_DIR%/docs/*}/.claude/hooks/.inbox-watch.${ROLE_KEY}.lock"
-  _why=""
-  if [ ! -f "$_LOCK" ]; then
-    _why="lock 不存在"
-  else
-    IFS=$'\t' read -r _lpid _lsid _ < "$_LOCK" 2>/dev/null
-    _age=$(( $(date +%s) - $(stat -c %Y "$_LOCK" 2>/dev/null || echo 0) ))
-    if [ "$_age" -ge 140 ]; then
-      _why="watcher 心跳停了 ${_age}s（>140s）"
-    elif [ -n "${_lsid:-}" ] && [ "${_lsid}" != "$CLAUDE_CODE_SESSION_ID" ]; then
-      _why="信箱被另一個 session 的 watcher 佔著（sid=${_lsid%%-*}…）"
+# ★★★2026-09-23（第二次改，用戶裁「採用新信箱」）：原本的「inbox watcher 沒在跑」那一格**整個退役** ——
+#   新做法 ＝ git handback ＋ 寄件端 SendMessage 敲門 ⇒ ★沒有 watcher 了 ⇒ 那一格會【每一輪都叫】，
+#   ★★而一個恆真的警告 ＝ 噪音，噪音會讓人把整段訊息跳過去（連未讀清單一起）。
+#
+# ★★★2026-09-23（同日第三次）：換上【看門狗還在不在】—— 而它不是把舊的那格改個判準，是**守一個新的、真的會發生的事**：
+#   血證：blueprint 的看門狗背景任務被 harness 收割，訊息是
+#     「stopped because the system is running low on memory」（閒置時記憶體吃緊 ⇒ 收割背景 shell）
+#   ⇒ ★**背景 Bash 會【靜默消失】** —— 而看門狗正是那個負責偵測「沒有事發生」的東西
+#     ⇒ ★★**它死掉的樣子，跟它正常工作的樣子一模一樣（都是不說話）**。
+#   ⇒ ★★★而新信箱之下【沒有別的 watcher 可以看著它】⇒ 唯一還會定時執行的東西，就是本 hook。
+# ★三條紀律（同舊格，不可妥協）：
+#   ①只警告絕不阻擋 ②fail-open（讀不到一律不報警；讀不到 ≠ 壞了）
+#   ③★**只在 blueprint 那個 session 講** —— 看門狗只有它掛一支，對別人說＝對不負責的人報警＝噪音。
+# ★★而這一格【不是恆真】：lock 新鮮就完全不出聲；它只在真的停掉時亮，而那是一個有人能處置的狀態。
+if [ "$ROLE_KEY" = "blueprint" ]; then
+  _WLOCK="${HANDBACK_DIR%/docs/*}/.claude/hooks/.watchdog.lock"
+  # 門檻 ＝ 看門狗的 poll（預設 900s）＋ 300s 餘裕：★寧可晚 5 分鐘講，不要在它正常的兩次心跳之間誤報
+  _WSTALE="${WATCHDOG_STALE_S:-1200}"
+  if [ -f "$_WLOCK" ]; then
+    _wage=$(( $(date +%s) - $(stat -c %Y "$_WLOCK" 2>/dev/null || echo 0) ))
+    if [ "$_wage" -ge "$_WSTALE" ]; then
+      GATE="🟠 看門狗心跳停了 $(( _wage / 60 )) 分鐘（門檻 $(( _WSTALE / 60 )) 分）——★背景 Bash 會被 harness 在記憶體吃緊時【靜默收割】，那是已知形態，不是它壞了。
+   ⇒ 要不要重掛是你的判斷（★不要自動重掛：沒人叫就重掛 ＝ 把一個【要人知道的事實】變回沉默）。
+   ⇒ 重掛：Bash(command=\"SESSION_ROLE=blueprint bash .claude/hooks/role-watch.sh watchdog\", run_in_background=true)"
     fi
-    # ${_lsid} 空 = 舊格式 lock → ★fail-open，不報警
   fi
-  # ★★★2026-09-23（第二次改，用戶裁「採用新信箱」）：**這一格整個退役**。
-  #   新做法 ＝ git handback 照舊 ＋ 寫完用 SendMessage 敲收件人（harness 原生投遞）
-  #   ⇒ ★【沒有 watcher 了】⇒ 「watcher 沒在跑」不再是缺陷，而這一格會【每一輪都叫】
-  #   ⇒ ★★一個恆真的警告 ＝ 噪音，而噪音會讓人把整段訊息跳過去（連未讀清單一起）
-  #   ⇒ ★★★所以不是改判準，是【拿掉】—— 它守的那個東西已經不存在了。
-  _why=""
+  # ★lock 不存在 ⇒ **不報警**：那代表這台機器上從來沒掛過看門狗（例如剛 clone），不是它死了。
 fi
 shopt -s nullglob
 files=("$HANDBACK_DIR"/*.md)
