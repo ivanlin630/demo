@@ -79,7 +79,14 @@ _mg_freemb() {
 }
 
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 2
-REG="docs/process/merge-gates.tsv"
+# ★★★2026-09-23：讓註冊表路徑可被 MG_REG 覆寫 —— ★理由是【這支 runner 自己要能被驗】。
+#   血證：我當天加了「執行期錯誤 ⇒ 判紅」這條判決，★而我【拿不出它會紅的證據】——
+#     真正的註冊表上 76 支沒有一支會印 SCRIPT ERROR（那是好事），
+#     ⇒ ★★所以那條新判決在真實電池上【永遠不會被走到】，它跟一條恆綠的守衛沒有差別。
+#   ⇒ ★★★而我整天都在要求別人「拿出它會紅的注射」—— 這一行就是讓我能對自己做同一件事。
+#   ★預設不變；只有明確設了 MG_REG 才換（★而換了會在開頭印出來，不讓它靜默）。
+REG="${MG_REG:-docs/process/merge-gates.tsv}"
+[ "$REG" != "docs/process/merge-gates.tsv" ] && echo "[MERGE-GATES] ★★註冊表被覆寫：$REG（★這一輪【不是】正式判決）"
 
 # ★★★判決要落地（2026-09-07 血證）：本 runner 的判決原本【只走 stdout】。
 #   ★外層 shell 被殺 ⇒ 閘跑完了，而判決消失在一個沒有人接收的管道裡。
