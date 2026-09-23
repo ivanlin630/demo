@@ -893,8 +893,10 @@ func _test_pages_zero_loss() -> void:
 		else: after2.append(l)
 	print("  ★P1-b 具名排除 %d 條規則｜前排除 %d 行／後排除 %d 行" % [
 		P1B_EXCLUDE.size(), n_ex_b, n_ex_a])
-	print("  ★結構行（頁首／未分類標題／天窗，spec 本來就不比）：前 %d 行／後 %d 行" % [
-		n_st_b, n_st_a])
+	print("  ★結構行（spec 本來就不比）：前 %d 行／後 %d 行｜規則 %d 條，逐條指回 spec：" % [
+		n_st_b, n_st_a, P1B_STRUCTURAL.size()])
+	for e in P1B_STRUCTURAL:
+		print("    [%s] %s" % [String(e["kind"]), String(e["spec"])])
 	for e in P1B_EXCLUDE:
 		print("    排除「%s…」：%s" % [String(e["prefix"]), String(e["why"])])
 	before = before2
@@ -1034,12 +1036,27 @@ const P1B_EXCLUDE: Array = [
 #        ⇒ ★★★拿它逐字比，等於要求票B 不要做事
 # ★這與 P1B_EXCLUDE 是【兩件事】：那張表是【有代價的豁免】（該比而不比，要還債），
 #   這裡是【本來就不該比的東西】—— ★★所以分開兩個函式，不混成一張表。
-func _p1b_structural(line: String) -> bool:
-	if line.begins_with("── 未分類（"): return true
-	if line.ends_with("未接出（票B）"): return true
+# 【範圍表】—— ★★★每一條都要指回 spec 的【哪一句】（systems 裁 2026-09-23）。
+#   ★理由：範圍表與欠債表的【防長大】機制不一樣 ——
+#     欠債表靠「帶票號 ＋ 印長度」；★★範圍表靠「每條指得回去」。
+#   ★★★否則它會變成【為了讓守衛變綠而搬進來的地方】，
+#     而那比欠債更隱形：★欠債至少承認自己是債。
+const P1B_STRUCTURAL: Array = [
+	{"kind": "page_header", "spec": "2026-09-23-ui-five-tabs-HOW.md AMEND：「新增的行（頁首、未分類標題、天窗）不在比對範圍內」"},
+	{"kind": "unclassified_header", "spec": "同上 —— ★而它【帶著行數】，票B 每搬一批必然改變"},
+	{"kind": "skylight", "spec": "同上 —— 天窗是票A 新增的行，不是舊畫面上的內容"},
+]
+
+# 回傳這一行屬於哪一種結構行；不是結構行回空字串。
+func _p1b_structural_kind(line: String) -> String:
+	if line.begins_with("── 未分類（"): return "unclassified_header"
+	if line.ends_with("未接出（票B）"): return "skylight"
 	for i in range(UiPages.PAGE_ORDER.size()):
-		if line == UiPages.header(i): return true
-	return false
+		if line == UiPages.header(i): return "page_header"
+	return ""
+
+func _p1b_structural(line: String) -> bool:
+	return _p1b_structural_kind(line) != ""
 
 func _p1b_excluded(line: String) -> bool:
 	for e in P1B_EXCLUDE:
