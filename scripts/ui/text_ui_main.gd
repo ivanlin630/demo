@@ -174,7 +174,11 @@ func _refresh_snapshot() -> void:
 	_cached_snapshot = _result.get("data", {}).get("snapshot", {})
 
 # ★★★日邊界的【擁有者】（HOW spec §3：判準是【誰有權設它】不是【它現在是什麼值】）。
-#   ★為什麼是這裡：世界的 tick 只在 `_process()` 的 `tick_step()` 走 ⇒ 換日只可能發生在這一點。
+#   ★為什麼是這裡：★★★措辭要精確（reviewer 2026-09-23 訂正）——「世界的 tick 只在這裡走」
+#     【字面上不成立】：全庫有兩百多支 debug 床直呼 `runner.advance_tick()` 繞過 `tick_step()`。
+#     ★而它們全是 headless SceneTree，沒有一支會 instantiate TextUI 或呼叫 `_build_state_str()`
+#     ⇒ ★★正確的說法是【對 TextUI 而言】：驅動這支 render 的 tick 只在 `_process()` 走。
+#     ⇒ ★★★這一條差別現在無害，但寫錯的措辭會在下一個人把 render 接到別的驅動上時【變成錯的前提】。
 #   ★★而它【不在 render 路徑上】—— 這正是本票的性質：多畫一次、少畫一次都不會改變基準。
 #   ★★★資源取自【當下重查的快照】：換日這一刻與緊接著的 `_refresh()` 是同一個 tick、
 #     中間沒有狀態變化 ⇒ 玩家看到的箭頭【內容不變】，改的只是它【何時被決定】。
