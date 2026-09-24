@@ -214,15 +214,49 @@ func _claim_source_type(giver: TeamData, receiver: TeamData) -> String:
 	return "流民"
 
 # TODO gossip（Phase D 接口）：此處交換第三方 protector_rep 意見 → receiver update_protector_rep(third, decayed, "gossip")。現留縫。
-func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void:
+# ★★★打聽 v1（spec 2026-09-25 §3(A)）加了兩個【有預設值的尾參數】，舊呼叫端逐字不受影響：
+#   ·`topic == ""` ⇒ 現況（`:187-188` 的到達交換 ＋ 7 個 debug 床）
+#   ·`topic != ""` ⇒ 只寫該主題涵蓋的那一段（打聽只問到他問的那件事）
+#   ·`out` ⇒ 把【這一次的 mode】交回呼叫端。
+# ★★為什麼需要 out 而不是讓呼叫端自己再叫一次 `_decide_exchange_mode()`：
+#   那支函式裡有 `randf()`（`:192` hostile 那一支）⇒ ★再叫一次會【多耗一次全域 RNG】
+#   而且兩次答案可能不同 ⇒ 同時犯「觀測改變被觀測物」與「兩把秤」。
+#   ⇒ ★★★秤只准轉一次，而轉出來的結果由這裡交出去。
+func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
+		topic: String = "", out: Dictionary = {}) -> void:
 	var giver: TeamData    = state.teams.get(giver_id)
 	var receiver: TeamData = state.teams.get(receiver_id)
 	if giver == null or receiver == null: return
 
 	var mode: String = _decide_exchange_mode(state, giver, receiver)
+	out["mode"] = mode
+	# ★★★歸零：`out` 必須由【做事的那一趟】完整寫滿 ——
+	#   沒有這一行，它帶的是「這一趟 ＋ 之前不知道幾趟」。
+	# ★而它同時讓一個語言問題【不必被回答】：`out: Dictionary = {}` 這個預設值
+	#   是每次呼叫新建、還是整支函式共用一個？—— ★★量過了（out_default_probe，見下），
+	#   而【即使答案是每次新建，這一行仍然要在】：契約不該依賴一個語言細節。
+	# ★★★到達交換（`:187-188`）不傳 out ⇒ 走預設值。
+	# ★而「預設值是共用還是每次新建」我【量過了】，不是推論
+	#   （`scripts/debug/default_arg_identity_probe.gd`，2026-09-25 於 feat/inquiry-v1）：
+	#     Dictionary 預設值連呼三次 ⇒ 1 / 1 / 1
+	#     Array      預設值連呼三次 ⇒ 1 / 1 / 1
+	#     對照組（每次自己傳新 dict）⇒ 1 / 1 / 1   ★它只驗儀器有在動，分辨不了兩個假設
+	#   讀法：1/1/1 ＝【每次新建】；1/2/3 ＝整支共用。⇒ **GDScript 是每次新建。**
+	# ★★所以到達那條路【今天沒有】隱藏累積物 —— 而這一行仍然留著：
+	#   ★★★契約不該依賴一個語言細節，而 `out` 必須由【做事的那一趟】完整寫滿。
+	out["written"] = 0
+	# ★被問方知道多少（P5 母體地板要的那個數）—— ★在 silent 之前就記，
+	#   否則「他不願多說」與「他什麼都不知道」在卷面上分不出來。
+	out["giver_known"] = BeliefSystem.known_targets(state, giver_id).size()
 	if mode == "silent": return
+	# ★★★主題 → 涵蓋哪一段（spec §3(D)）：
+	#   ·訊息複製那一段＝「最近發生什麼」 ·逐 target claim 那一段＝「誰在哪」／「敵人動向」
+	#   ⇒ 打聽只寫他問的那一段；`topic == ""`（到達交換）兩段都走，逐字不變。
+	var want_msgs: bool = (topic == "" or topic == "ask_recent_events")
+	var want_claims: bool = (topic == "" or topic == "ask_team_location"
+		or topic == "ask_enemy_movement")
 
-	var giver_known: Array = state.team_known.get(giver_id, [])
+	var giver_known: Array = state.team_known.get(giver_id, []) if want_msgs else []
 	if not state.team_known.has(receiver_id):
 		state.team_known[receiver_id] = []
 	for msg in giver_known:
@@ -242,8 +276,15 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 	var rep2: float = float(giver.known_reputations.get(receiver_id, 0.5))
 	if rep2 < 0.3 and (giver.faction_id == -1 or giver.faction_id != receiver.faction_id):
 		return
+	if not want_claims:
+		return
 	for tgt_id in BeliefSystem.known_targets(state, giver_id):
 		if tgt_id == receiver_id: continue
+		# ★「敵人動向」只問非同勢力的那些 —— 判準抄 `inquiry_system.gd:61` 既有那一行，不另寫
+		if topic == "ask_enemy_movement":
+			var _t2: TeamData = state.teams.get(tgt_id)
+			if _t2 == null or _t2.faction_id == receiver.faction_id:
+				continue
 		var src_val: Dictionary = BeliefSystem.best_estimate(state, giver_id, tgt_id)
 		var entry: Dictionary = DistortionEngine.distort_intel_entry(src_val, mode, HOP_DECAY)
 		if entry.is_empty(): continue
@@ -275,6 +316,7 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 				state.team_discovered[receiver_id] = []
 			state.team_discovered[receiver_id].append(tgt_id)
 		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)
+		out["written"] = int(out.get("written", 0)) + 1
 
 func process_pending(_state: WorldState) -> void:
 	# 未來：處理 pending delivery queue（據點同步、信使到達）
