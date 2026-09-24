@@ -208,8 +208,13 @@ func _test_p4_filter_uses_the_same_function() -> void:
 	_check("★母體地板：找得到過濾器（找不到＝不可判）", at != -1)
 	if at != -1:
 		var body: String = src.substr(at, 700)
-		_check("★★它呼叫 BeliefSystem.has_belief（＝NPC 用的那一支）",
-			body.contains("BeliefSystem.has_belief("))
+		# ★★★判準隨裁定改（systems 2026-09-24 收緊）：他隊先不放行
+		#   ⇒ 這裡【不該】再呼叫 `has_belief()`（那道門是 belief 形狀、不是 belief 粒度的）。
+		#   ★而它仍然【不准另寫一條規則】：同-faction 那一條走的是既有的通道事實
+		#     （`belief_system.gd:123` 檔頭的通道分流），不是本票發明的。
+		_check("★★他隊【沒有】走 has_belief 那道門（收緊後不該再呼叫它）",
+			not body.contains("BeliefSystem.has_belief("))
+		_check("★★同-faction 那一條走既有通道（比 faction_id）", body.contains("faction_id"))
 		# ★★★預設不給：函式裡要有「沒有玩家 ⇒ return false」那一條
 		_check("★★★預設是【不給】（沒有玩家就 return false）", body.contains("return false"))
 	_cell("_test_p4_filter_uses_the_same_function")
@@ -239,14 +244,33 @@ func _test_p5_other_teams_do_not_leak() -> void:
 	var n_after: int = st.player_events.size()
 	print("   對一支看不到的隊 emit 之後，佇列 %d 筆" % n_after)
 	_check("★★看不到的他隊事件【沒有】進玩家佇列", n_after == 0)
-	# ★陽性對照：同一支隊，給玩家一筆 belief 之後【必須】進得來
-	#   ⇒ 沒有這一格，「沒進來」也可能是【emit 整個壞掉】
-	# 簽章：(state, obs, tgt, source_id, source_type, fields, credibility, distorted)
+	# ★★★收緊之後（systems 裁 2026-09-24）：有 belief 也【不再】進得來 ——
+	#   因為 `has_belief()` 是 belief【形狀】的、不是 belief【粒度】的。
+	#   簽章：(state, obs, tgt, source_id, source_type, fields, credibility, distorted)
 	BeliefSystem.record_claim(st, ptid, unknown, ptid, "firsthand", {"pop": 5.0}, 1.0, false)
 	WorldEvents.emit(st, "leader_death", [unknown])
-	print("   給了 belief 之後，佇列 %d 筆" % st.player_events.size())
-	_check("★★★陽性對照：有 belief 之後同一件事【進得來】（證明不是 emit 壞了）",
+	print("   給了 belief 之後，佇列 %d 筆（★收緊後應仍為 0）" % st.player_events.size())
+	_check("★★★有 belief 也不放行（牆不是 belief 形狀的門）", st.player_events.size() == n_after)
+	# ★陽性對照改走【同-faction】那條既有通道 ——
+	#   ★★沒有它，「沒進來」也可能是【emit 整個壞掉】而不是【過濾器在工作】
+	var pteam2: TeamData = st.teams[ptid]
+	# ★★★母體實測：預設開局【玩家隊沒有勢力】（faction_id = -1）
+	#   ⇒ 同-faction 那一條對【今天的玩家】是【休眠】的 —— 它不是死 code（玩家之後可能
+	#     建國／加入），但今天它一次都不會 fire。★★所以這裡要【兩邊都造】才驗得到它，
+	#     而「兩邊都造」本身就是那句休眠的證據。
+	var old_pfid: int = int(pteam2.faction_id)
+	print("   ★母體：玩家隊 faction_id=%d（-1 ＝ 沒有勢力）｜那支隊 faction_id=%d" % [
+		old_pfid, int(st.teams[unknown].faction_id)])
+	var old_fid: int = int(st.teams[unknown].faction_id)
+	if old_pfid == -1:
+		pteam2.faction_id = 777   # ★造一個共同勢力（兩邊都設，否則這一格驗不到那條通道）
+	st.teams[unknown].faction_id = int(pteam2.faction_id)
+	WorldEvents.emit(st, "leader_death", [unknown])
+	print("   把它改成同-faction 之後，佇列 %d 筆" % st.player_events.size())
+	_check("★★★陽性對照：同-faction 的同一件事【進得來】（證明不是 emit 壞了）",
 		st.player_events.size() > n_after)
+	st.teams[unknown].faction_id = old_fid
+	pteam2.faction_id = old_pfid
 	_cell("_test_p5_other_teams_do_not_leak")
 
 

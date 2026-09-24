@@ -240,12 +240,25 @@ static func _player_perceives(state: WorldState, subjects: Array) -> bool:
 	var ptid: int = state.get_player_team_id()
 	if ptid == -1:
 		return false   # ★沒有玩家 ⇒ 不給（預設不給，而不是「給全部」）
+	var pteam: TeamData = state.teams.get(ptid)
+	var pfid: int = int(pteam.faction_id) if pteam != null else -1
 	for tid in subjects:
 		var id: int = int(tid)
 		if id == ptid:
 			return true   # ①自家隊 self-knowledge
-		if BeliefSystem.has_belief(state, ptid, id):
-			return true   # ②情報到了／看得見（同一支函式）
+		# ②同-faction 自家人：★走的是 `belief_system.gd:123` 檔頭寫的【那條既有通道】
+		#   （同-faction 自家人 → `faction.known_member_states`，自帶 last_tick、不經 BeliefSystem）
+		#   ⇒ ★「自家全知」站在 code 上，不是站在 spec 上。
+		var t2: TeamData = state.teams.get(id)
+		if t2 != null and pfid != -1 and int(t2.faction_id) == pfid:
+			return true
+	# ★★★③他隊：【先不放行】（systems 裁 2026-09-24）。
+	#   ★原本這裡是 `BeliefSystem.has_belief()` —— 而它是 belief【形狀】的、不是 belief【粒度】的：
+	#     它回答「我對那支隊有沒有任何 claim」，★不是「我知不知道【這件事】發生了」
+	#     ⇒ 一筆 30 天前的舊情報，會讓玩家【即時】看到那支隊今天的領袖死訊。
+	#   ★★牆漏了就不再是例外，是 god-view —— 而漏的形狀正好是最難發現的那種：
+	#     它【有 belief 撐著】，所以看起來合法。
+	#   ★★★解除條件：有了 staleness gate（`belief_pos` 用的那個）或 per-event 感知之後再放行。
 	return false
 
 # 寫入佇列。★只由 `emit()` 呼叫 —— 它是那個唯一寫入點的實作，不是第二個入口。
