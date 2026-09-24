@@ -200,7 +200,8 @@ func _test_p3_single_write_point() -> void:
 
 # ══════════ P4［過濾用 NPC 決定 belief 的那同一支函式］══════════
 # ★不准另寫一條「玩家看得到什麼」的規則 —— 那會是第二份真相。
-# 負對照：把 `BeliefSystem.has_belief()` 換成自己另寫的 `team_discovered.has()` 規則 ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
+
+# 負對照：把 `has_belief()` 那道門【加回來】（收緊後他隊不該再走它） ⇒ 已於 feat/player-event-feed（2026-09-24 收緊後這一輪） 實測紅
 func _test_p4_filter_uses_the_same_function() -> void:
 	print("\n── P4 過濾器用同一支函式 ──")
 	var src: String = FileAccess.get_file_as_string("res://scripts/simulation/world_events.gd")
@@ -223,7 +224,7 @@ func _test_p4_filter_uses_the_same_function() -> void:
 # ══════════ P5［他隊不外洩］══════════
 # ★★母體地板：那一輪要【真的有】一件玩家看不到的他隊事件 ——
 #   否則「佇列裡沒有它」在【根本沒發生】時恆真。
-# 負對照：把 `if not _player_perceives(...)` 改成 `if false:`（＝過濾整個拿掉） ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
+# 負對照：把 `if not _player_perceives(...)` 改成 `if false:`（＝那道牆拿掉、他隊一律放行） ⇒ 已於 feat/player-event-feed（2026-09-24 收緊後這一輪） 實測紅
 func _test_p5_other_teams_do_not_leak() -> void:
 	print("\n── P5 看不到的他隊事件不外洩 ──")
 	var pair: Array = _fresh()
