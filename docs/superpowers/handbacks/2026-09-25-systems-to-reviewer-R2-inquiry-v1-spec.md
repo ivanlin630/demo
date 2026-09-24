@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 打聽 v1（情報必進 belief ＋ 代價＝對方同意）
 topic: R② 審設計。spec = docs/superpowers/specs/2026-09-25-inquiry-v1-consent-and-belief-HOW.md。★最該打的三處我先指出來（見下），★★而最大的一個主張是「blueprint 要的那把秤已經在 code 裡」——那一條如果我讀錯，整張票的形狀就錯了
 ---
