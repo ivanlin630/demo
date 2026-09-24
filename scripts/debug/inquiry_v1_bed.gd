@@ -16,6 +16,11 @@ extends SceneTree
 
 var _errors: int = 0
 var _cells_ran: Array = []
+# ★★★失敗行要帶一個【不隨措辭變】的 token ＝ 目前這一格的名字。
+#   ★理由是實測到的：負對照驅動器的 `expect` 是【格子訊息的第二份拷貝】
+#     ⇒ 我改一次措辭，驅動器就報 NOT-RED，而那一格其實紅了（2026-09-25 發生三次）。
+#   ★★而 token 讓驅動器可以認【格】而不是認【句子】⇒ 措辭再改也不會誤報。
+var _cur_cell: String = ""
 
 const EXPECTED_CELLS: Array = [
 	"_test_p1_intel_enters_belief",
@@ -37,7 +42,7 @@ func _check(msg: String, cond: bool) -> void:
 		print("  PASS: " + msg)
 	else:
 		_errors += 1
-		push_error("[FAIL] " + msg)
+		push_error("[FAIL][%s] %s" % [_cur_cell, msg])
 
 # ★★★母體：t=0 時【沒有任何隊有 belief】—— belief 是 vision 逐 tick 建起來的
 #   ⇒ 不先推進，`_colocated_npc()` 永遠找不到「自己有情報」的隊（實測：回 -1）
@@ -112,7 +117,9 @@ func _initialize() -> void:
 #   ⇒ 本票把它【翻過來】：現在「fp 變」才是對的。
 # ★母體地板（spec P5）：印出實際 mode 與 giver 的 known 數 —— 沒有它們這一格會在
 #   「每次都 honest 且對方什麼都知道」的世界裡恆綠。
+# 負對照：把打聽那一次 `_exchange_intel(...)` 換成 `pass`（spec P2 指名） ⇒ 已於 feat/inquiry-v1（2026-09-24 這一輪） 實測紅
 func _test_p1_intel_enters_belief() -> void:
+	_cur_cell = "_test_p1_intel_enters_belief"
 	print("\n── P1 情報進 belief ──")
 	var pair: Array = _fresh()
 	var st: WorldState = pair[0]
@@ -146,7 +153,9 @@ func _test_p1_intel_enters_belief() -> void:
 
 # ══════════ P3［拒答：零寫入 ＋ 專屬句子］══════════
 # ★母體地板：要印出【實際的 mode】—— 若它不是 silent，這一格驗的就不是拒答。
+# 負對照：把「他不願多說」換成與第三句相同的字串 ⇒ 已於 feat/inquiry-v1（2026-09-24 這一輪） 實測紅
 func _test_p3_silence_writes_nothing() -> void:
+	_cur_cell = "_test_p3_silence_writes_nothing"
 	print("\n── P3 拒答 ──")
 	var pair: Array = _fresh()
 	var st: WorldState = pair[0]
@@ -179,7 +188,9 @@ func _test_p3_silence_writes_nothing() -> void:
 # ══════════ P4［「不知道」≠「不願說」］══════════
 # ★★★判準是【兩個不同的字串】：混成一句的話，玩家分不出「關係壞」與「他真的沒情報」，
 #   而那兩件事的處置完全相反（一個要修關係、一個要換人問）。
+# 負對照：把「他也不知道」併進第三句 ⇒ 已於 feat/inquiry-v1（2026-09-24 這一輪） 實測紅
 func _test_p4_unknown_is_not_silence() -> void:
+	_cur_cell = "_test_p4_unknown_is_not_silence"
 	print("\n── P4 不知道 ≠ 不願說 ──")
 	var pair: Array = _fresh()
 	var st: WorldState = pair[0]
@@ -214,7 +225,9 @@ func _test_p4_unknown_is_not_silence() -> void:
 
 
 # ══════════ P6［來源＝被問隊］══════════
+# 負對照：`record_claim` 的 source 改成填 receiver 自己／或把記憶頁守衛換回 `is_empty()`（面板恆空） ⇒ 已於 feat/inquiry-v1（2026-09-24 這一輪） 實測紅
 func _test_p6_source_is_the_asked_team() -> void:
+	_cur_cell = "_test_p6_source_is_the_asked_team"
 	print("\n── P6 來源是被問的那支隊 ──")
 	var pair: Array = _fresh()
 	var st: WorldState = pair[0]
@@ -260,7 +273,9 @@ func _test_p6_source_is_the_asked_team() -> void:
 # ⇒ ★★改成驗【被守的性質本身】：`topic == ""` 必須【兩段都走】——
 #   訊息複製那一段（team_known 變多）＋ claim 那一段（written > 0）。
 #   ★★★把 `topic == ""` 從任一段的條件裡拿掉 ⇒ 那一段就不走 ⇒ 這一格紅。
+# 負對照：把 `topic == ""` 從 `want_claims` 的條件裡拿掉 ⇒ 已於 feat/inquiry-v1（2026-09-24 這一輪） 實測紅
 func _test_p7_topic_empty_is_verbatim() -> void:
+	_cur_cell = "_test_p7_topic_empty_is_verbatim"
 	print("
 ── P7 topic=\"\" 兩段都走 ──")
 	var pair: Array = _fresh()
@@ -303,7 +318,9 @@ func _test_p7_topic_empty_is_verbatim() -> void:
 
 # ══════════ P8［食物收窄：沒見過的格不得出現］══════════
 # ★負對照在對照腳本裡（把母體改回全圖 ⇒ 這一格必紅）。
+# 負對照：把食物母體改回 `state.world.tiles`（全圖） ⇒ 已於 feat/inquiry-v1（2026-09-24 這一輪） 實測紅
 func _test_p8_food_narrowed_to_seen_tiles() -> void:
+	_cur_cell = "_test_p8_food_narrowed_to_seen_tiles"
 	print("\n── P8 食物只給【他見過的格】──")
 	var pair: Array = _fresh()
 	var st: WorldState = pair[0]
@@ -364,7 +381,9 @@ func _test_p8_food_narrowed_to_seen_tiles() -> void:
 #     ⇒ 不剝的話這一格會把我的註解算進去（2026-09-25 實測：4 被數成 5、1 被數成 3）。
 #   ★★而 `_exchange_intel(` 那一條要排除【定義行】與【`_step3b_exchange_intel(`】
 #     —— 後者是子字串誤中，下一個人數出 11 還會以為自己對。
+# 負對照：在別處另寫一個 `record_claim(` 呼叫點 ⇒ 已於 feat/inquiry-v1（2026-09-24 這一輪） 實測紅
 func _test_counts_one_write_path() -> void:
+	_cur_cell = "_test_counts_one_write_path"
 	print("\n── 數字格：寫入路徑與 relay 呼叫端 ──")
 	var files: Array = ["scripts/simulation/faction_ai_system.gd",
 		"scripts/simulation/interaction_system.gd", "scripts/simulation/message_system.gd",
