@@ -61,7 +61,13 @@ if [ -n "$rev_open" ]; then
   printf '%s' "$rev_open"
   fail=1
 else
-  echo "[MAILBOX-GATE] ①回退：窗內 $n_rev 次 consumed→open，★現在【都不是 open】⇒ 已結案"
+  # ★不得講「都不是 open」—— 被豁免的那幾封**仍然是 open**，只是有聲明。
+  #   ★★否則這一行會在【有豁免】的那一輪講一句假話（同一日我自己寫出來的）。
+  if [ -n "$rev_exempt" ]; then
+    echo "[MAILBOX-GATE] ①回退：窗內 $n_rev 次 consumed→open，★仍是 open 的【都已聲明】（見 ①b）"
+  else
+    echo "[MAILBOX-GATE] ①回退：窗內 $n_rev 次 consumed→open，★現在【都不是 open】⇒ 已結案"
+  fi
 fi
 # ★豁免必印（紅綠都印）—— 安靜的逃生口等於沒有閘。
 if [ -n "$rev_exempt" ]; then
