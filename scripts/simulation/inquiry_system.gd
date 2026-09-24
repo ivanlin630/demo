@@ -21,7 +21,10 @@ const ALL_INQUIRY_IDS: Array = [
 func get_options(state: WorldState, player_team: TeamData,
 		npc_team: TeamData) -> Array:
 	var options: Array = []
-	var rel: float = _calc_relationship(state, player_team, npc_team)
+	# ★★★方向修正（spec §3(E)）：秤的是【被問方對問話方】的評價 ——
+	#   原本是 `(player_team, npc_team)` ＝「我喜不喜歡他」在決定「他給不給我」
+	#   ⇒ 而給不給是【他】的決定。★與 (B) 的那把秤同源，不要兩把。
+	var rel: float = _calc_relationship(state, npc_team, player_team)
 	for id in ALL_INQUIRY_IDS:
 		if not _passes_filter(id, state, player_team, npc_team): continue
 		var req_rel: float = float(INQUIRY_RELATION_THRESHOLD.get(id, 0.0))
@@ -38,7 +41,9 @@ func get_options(state: WorldState, player_team: TeamData,
 func resolve_inquiry(state: WorldState, player_team: TeamData,
 		npc_team: TeamData, inquiry_id: String) -> Dictionary:
 	var result: Dictionary = {}
-	var rel: float  = _calc_relationship(state, player_team, npc_team)
+	# ★同上：方向修正。★★而 `honest` 也吃它 ⇒ 誰說實話跟著改，
+	#   那是【修對】不是副作用：說不說實話本來就該由說話的人決定。
+	var rel: float  = _calc_relationship(state, npc_team, player_team)
 	var honest: bool = rel > 0.5
 	match inquiry_id:
 		"ask_team_location":
@@ -113,10 +118,22 @@ func _score_option(id: String, state: WorldState,
 func _calc_relationship(_state: WorldState, a: TeamData, b: TeamData) -> float:
 	return float(a.known_reputations.get(b.team_id, 0.5))
 
+# ★★★母體收窄（spec §3(D)）：從【全圖真值】改成【被問隊見過的格】。
+#   ★原本 `for tile_id in state.world.tiles` ＝ 掃全圖 ⇒ 它給的不是被問隊知道的事，是世界的事。
+#   ★★現在母體是 `state.team_tile_known[被問隊]`（`belief_system.gd:474` harvest 出來的：
+#     兩源＝bounded vision ＋ relay）⇒ **他沒見過的格給不了**。
+#   ★★★而【食物的量】仍是即時真值（spec §3(D) 明寫，那一半登待辦：
+#     食物要像據點那樣有自己的時戳子記錄，`belief_system.gd:487-500` 已示範）
+#     ⇒ 所以下面還留一行 `state.world.tiles[...]` 取值。
+#     ★那一行【不是】收斂沒做完，是【待辦那一半還沒做】——
+#       到 0 的唯一路是做掉那一半，而它在 spec §5 明寫不在本票。已呈報 systems。
 func _find_food_tiles(state: WorldState, near_team: TeamData, honest: bool) -> Array:
 	var results: Array = []
-	for tile_id in state.world.tiles:
-		var tile: HexTileData = state.world.tiles[tile_id]
+	var seen: Dictionary = state.team_tile_known.get(near_team.team_id, {})
+	for tile_id in seen:
+		var tile: HexTileData = state.world.tiles.get(tile_id)   # gate-ok: 母體已是【他見過的格】；★延後表 id＝food-amount-has-no-timestamped-subrecord（spec §3(D)／§5）
+		if tile == null:
+			continue
 		if float(tile.resources.get("food", 0)) > 100.0:
 			var pos: Vector2i = tile.tile_pos
 			if not honest:

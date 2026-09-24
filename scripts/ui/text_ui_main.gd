@@ -1075,7 +1075,29 @@ func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -
 func _build_page_connected_lines(idx: int, ct: Dictionary) -> Array:
 	match idx:
 		1: return _build_economy_lines(ct)
+		4: return _build_memory_lines()
 		_: return []
+
+# ★★★記憶頁（打聽 v1 spec §3(G)）：打聽寫進 belief 的東西要【看得見】。
+#   ★它只接出查詢面供得出的那兩欄（已知情報／傳聞來源）——
+#     「近期事件」「決策紀錄」查詢面沒有 ⇒ ★★仍然印天窗，不許先拿掉再說。
+#   ★★而【唯讀】：這裡呼叫查詢面（同 `_build_hover_truth_lines()` 呼 `query_tile` 的前例），
+#     render 不寫 state。
+func _build_memory_lines() -> Array:
+	var lines: Array = []
+	var env: Dictionary = _bridge.query_memory_panel()
+	var rows: Array = env.get("data", {}).get("memory", [])
+	# ★★★0 筆也印一行 —— 常駐：只在非零時才出現的東西，玩家學不會它的意思，
+	#   而「沒看到」與「沒有這個功能」在畫面上長得一樣。
+	lines.append("已知情報：%d 個對象" % rows.size())
+	if rows.is_empty():
+		lines.append("  （還沒有人告訴你任何事）")
+	for r in rows:
+		lines.append("  Team%d：%d 筆｜最新 T%d｜傳聞來源 %s%s" % [
+			int(r.get("target_id", -1)), int(r.get("claim_count", 0)),
+			int(r.get("latest_tick", 0)), String(r.get("source", "不明")),
+			"（有疑點）" if bool(r.get("is_suspicious", false)) else ""])
+	return lines
 
 func _page_skylight_fields(idx: int) -> Array:
 	match idx:
@@ -1118,7 +1140,9 @@ func _page_skylight_fields(idx: int) -> Array:
 			return ["糧食收支", "生產線", "貿易對象"]
 		2: return ["鄰近敵對", "戰力對比", "邊境事件", "防務狀態"]
 		3: return ["盟友與敵意", "勢力關係", "成員情緒", "請求與承諾"]
-		4: return ["近期事件", "已知情報", "傳聞來源", "決策紀錄"]
+		# ★「已知情報」「傳聞來源」已由 _build_memory_lines 接出（打聽 v1）⇒ 從宣告拿掉
+		#   ★★而「近期事件」「決策紀錄」查詢面【沒有】⇒ 它們留著，不許先拿掉再說
+		4: return ["近期事件", "決策紀錄"]
 		_: return []
 func _build_debug_str() -> String:
 	var tick: int  = _bridge.get_current_tick()

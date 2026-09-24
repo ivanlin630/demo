@@ -45,6 +45,46 @@ func get_inquiry_options(state: WorldState, target_id: int) -> Dictionary:
 func get_recruit_menu(state: WorldState, target_id: int) -> Dictionary:
 	return _query_menu(state, target_id, "recruit")
 
+# ★★★記憶頁（spec §3(G)）：打聽寫進去的東西，玩家要【看得見】。
+#   ★沒有它，(A) 做完了玩家也看不見 ⇒ 而【看不見的需求不會回來敲門】：
+#     它會變成「打聽好像沒用」然後沒有人再提。
+#   ★★【唯讀、零寫、零 RNG】—— 它只讀 `state.team_intel[ptid]`（走 BeliefSystem 的
+#     `known_targets()`／`claims()`，不自己解析那個結構：解析兩份會漂）。
+func query_memory_panel(state: WorldState) -> Dictionary:
+	# ★★★守衛要照【本檔的】慣例：`_check_player_with_team()` 回的 Dictionary【永遠非空】
+	#   （成功時是 `{"code": "ok", ...}`）⇒ 用 `is_empty()` 判會【永遠提早返回】。
+	#   ★我第一版抄了 `player_command_api` 的 `if not pre.is_empty()` —— 那個檔的慣例不同
+	#   ⇒ ★★後果是面板【恆空】，而它不會噴錯：P6 的「記憶頁非空」紅出來才看到。
+	var check: Dictionary = _check_player_with_team(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	var ptid: int = state.get_player_team_id()
+	var rows: Array = []
+	for tgt in BeliefSystem.known_targets(state, ptid):
+		var cs: Array = BeliefSystem.claims(state, ptid, int(tgt))
+		if cs.is_empty(): continue
+		var latest: int = 0
+		var src: int = -1
+		var suspicious: bool = false
+		for c in cs:
+			var t: int = int(c.get("last_tick", 0))
+			if t >= latest:
+				latest = t
+				src = int(c.get("source_id", -1))
+			if bool(c.get("is_suspicious", false)):
+				suspicious = true
+		rows.append({
+			"target_id": int(tgt),
+			"claim_count": cs.size(),
+			"latest_tick": latest,
+			# ★來源印【隊名】而不是只有 id —— 驗收句要的是「來自 TeamX」
+			"source": ("Team%d" % src) if src != -1 else "不明",
+			"source_id": src,
+			"is_suspicious": suspicious,
+		})
+	rows.sort_custom(func(a, b): return int(a["target_id"]) < int(b["target_id"]))
+	return PlayerApiMapper.map_query_envelope(true, "ok", "", {"memory": rows})
+
 func get_player_snapshot(state: WorldState, request: Dictionary) -> Dictionary:
 	var player_check := _check_player_with_team(state)
 	if player_check["code"] != "ok":

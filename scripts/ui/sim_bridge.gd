@@ -183,6 +183,10 @@ func render_text_map(player_tid: int, cursor: Vector2i) -> String:
 
 # ── Step 3: data query wrappers ────────────────────────────────────────────────
 
+# ★記憶頁（打聽 v1 spec §3(G)）：唯讀轉出 —— ★render 讀它不寫 state（同 query_tile 的前例）
+func query_memory_panel() -> Dictionary:
+	return _query_api.query_memory_panel(_state)
+
 func query_body_slots() -> Dictionary:
 	return PlayerApiMapper.map_body_slots(_state)
 

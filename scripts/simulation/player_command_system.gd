@@ -807,8 +807,49 @@ func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamDa
 	if npc_gi == null or choice_gi.is_empty():
 		return { "ok": false, "msg": "參數遺漏" }
 	var result_gi: Dictionary = InquirySystem.new().resolve_inquiry(state, pt, npc_gi, choice_gi)
-	print("[PlayerCmd] gather_intel choice=%s 結果筆數=%d" % [choice_gi, result_gi.size()])
-	return { "ok": true, "msg": "情報獲取", "payload": result_gi }
+	# ══════ 打聽 v1（spec 2026-09-25）══════
+	# ★★★情報【必進 belief】，而走的是既有那條 relay —— `_exchange_intel()`（單向：我問他）。
+	#   ★單向的理由：打聽是「我問他」，不是互換。`message_system.gd:187-188` 那兩行是
+	#     【到達】的語意，不是本票的。
+	#   ★★而這裡【不另寫一份 claim 組裝碼】：全庫 `record_claim(` 的 production 呼叫點
+	#     動工前 4 個、動工後仍是 4 個 —— ★★★出現第五個就是這一票寫錯了。
+	# ★`ask_faction_status` 是【刻意的例外】，不寫 belief：它問的是玩家自己的 faction
+	#   ＝ self-knowledge，不是別人給的情報（spec §2／§3(D)）。
+	var msg_gi: String = "情報獲取"
+	var out_gi: Dictionary = {}
+	if choice_gi == "ask_faction_status":
+		msg_gi = "你確認了自家勢力的狀況"
+	else:
+		SimMessageSystem.new()._exchange_intel(state, npc_id_gi, _pt_id, choice_gi, out_gi)
+		# ★★★三句話要【機械可判】＝三個不同的字串（spec §3(C)，床 grep 它們）：
+		#   ①拒答（mode == silent）②答了但他也不知道（零筆寫入）③給了東西
+		#   ⇒ ★「他不願多說」與「他也不知道」【必須不同】——
+		#     混成一句的話，玩家分不出「關係壞」與「他真的沒情報」，
+		#     而那兩件事的處置完全相反（一個要修關係，一個要換人問）。
+		var mode_gi: String = String(out_gi.get("mode", ""))
+		var wrote_gi: int = int(out_gi.get("written", 0))
+		if mode_gi == "silent":
+			msg_gi = "他不願多說"
+		elif wrote_gi <= 0 and _inquiry_payload_empty(result_gi):
+			msg_gi = "他也不知道"
+		else:
+			msg_gi = "他說了些事情（記下 %d 筆，來自 Team%d）" % [wrote_gi, npc_id_gi]
+	print("[PlayerCmd] gather_intel choice=%s mode=%s 寫入=%d 結果筆數=%d" % [
+		choice_gi, String(out_gi.get("mode", "n/a")), int(out_gi.get("written", 0)), result_gi.size()])
+	return { "ok": true, "msg": msg_gi, "payload": result_gi }
+
+# ★★★「他也不知道」的判準：不能用 `result_gi.is_empty()` ——
+#   `resolve_inquiry()` 會回 `{"locations": []}` 這種【有 key 但陣列是空的】形狀
+#   ⇒ `is_empty()` 為 false ⇒ 第三句永遠搶在第二句前面（實測 P4 紅）。
+#   ★★所以要看【裡面有沒有東西】，不是【有沒有 key】。
+func _inquiry_payload_empty(p: Dictionary) -> bool:
+	for k in p:
+		var v = p[k]
+		if v is Array:
+			if not (v as Array).is_empty(): return false
+		elif v != null:
+			return false
+	return true
 
 func _action_clear_member_order(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	# player_state 需設定：order_member_id（目標 team）
