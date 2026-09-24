@@ -2312,9 +2312,10 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
 #     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
 #     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
-const CONTROL_FLOOR_UI: int = 13
+const CONTROL_FLOOR_UI: int = 14
 const CONTROL_FLOOR_REPLAY: int = 2
 
+# 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
 	print("\n── P19 負對照覆蓋率棘輪 ──")
