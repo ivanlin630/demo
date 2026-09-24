@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -90,6 +90,7 @@ func _initialize() -> void:
 	await _test_hover_p2_title()
 	await _test_hover_p3_no_state_write()
 	await _test_hover_p5_empty_and_crowded()
+	await _test_recruit_pay_matches_delivery()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1886,3 +1887,84 @@ func _test_hover_p5_empty_and_crowded() -> void:
 			listed == n_here)
 	await _free_ui(node)
 	_cell("_test_hover_p5_empty_and_crowded")
+# ══════════ 收費與交付必須成對（spec 2026-09-25，用戶回報「招募不 work」）══════════
+# ★★★真相是三個獨立的錯疊在一起，而玩家只看得到第三個：
+#   ①`_target_has_anon` 用 `population > 1` ＝【代理量】—— 它問「人夠多嗎」而不是「真的有匿名嗎」
+#   ②`transfer_proportional` 的回傳【沒有人看】（沒有匿名可搬 ⇒ 搬 0）
+#   ③照印「招募成功」
+#   ⇒ 玩家：扣 50 coin、搬 0 人、畫面說成功。
+# ★★母體地板（spec 指名）：那一輪要【同時】有招得到與招不到的目標各至少一個
+#   —— 否則「成對」會在【全部都招得到】的樣本上恆真，而招不到那一支才是今天的病。
+# ★負對照：把 moved 檢查拿掉（還原今天的行為）⇒ 必須紅。
+func _recruit_once(node, tgt_id: int) -> Dictionary:
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = int(st.persons[st.player_id].team_id)
+	var pt: TeamData = st.teams[ptid]
+	var coin0: float = float(pt.resources.get("coin", 0))
+	var pop0: int = AnonTierSystem.total_pop(pt)
+	node._bridge.command_player("execute_action", {"action_id": "recruit_anon",
+		"target": {"kind": "team", "team_id": tgt_id, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+	var ap: Dictionary = _apply_queue(node)
+	return {"ok": bool(ap.get("ok", false)), "applied": int(ap.get("applied", 0)),
+		"coin_delta": float(pt.resources.get("coin", 0)) - coin0,
+		"anon_delta": AnonTierSystem.total_pop(pt) - pop0}
+
+func _test_recruit_pay_matches_delivery() -> void:
+	_selftest_gate("_test_recruit_pay_matches_delivery").noop()
+	print("
+── 招募：收費與交付必須成對 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = int(st.persons[st.player_id].token_id) if false else int(st.persons[st.player_id].team_id)
+	var pt: TeamData = st.teams[ptid]
+	ResourceBank.set_amt(pt, "coin", 9999.0, "test_seed_coin")
+	# 造兩個目標，★都擺在玩家腳下（recruit 需要同格）
+	var ids: Array = []
+	for tid in st.teams.keys():
+		if int(tid) != ptid:
+			ids.append(int(tid))
+		if ids.size() >= 2:
+			break
+	_check("★母體地板①：找得到兩支非玩家隊（%d）" % ids.size(), ids.size() >= 2)
+	if ids.size() < 2:
+		await _free_ui(node)
+		_cell("_test_recruit_pay_matches_delivery")
+		return
+	var rich: TeamData = st.teams[ids[0]]    # 有匿名 ⇒ 招得到
+	var barren: TeamData = st.teams[ids[1]]  # 全具名 ⇒ 招不到
+	rich.tile_pos = pt.tile_pos
+	barren.tile_pos = pt.tile_pos
+	# barren：把匿名清光（★這正是今天那個病的觸發樣本 —— 全具名的目標）
+	for tier in AnonCohort.TIER_ORDER:
+		for health in AnonCohort.HEALTH_ORDER:
+			AnonCohort.remove(barren.anon_cohorts, tier, health, 999999)
+	# rich：確保真的有匿名
+	if AnonTierSystem.total_pop(rich) <= 0:
+		AnonCohort.add(rich.anon_cohorts, AnonCohort.TIER_ORDER[0], AnonCohort.HEALTH_ORDER[0], 3)
+	_check("★★母體地板②：招得到那支真的有匿名（%d）" % AnonTierSystem.total_pop(rich),
+		AnonTierSystem.total_pop(rich) > 0)
+	_check("★★★母體地板③：招不到那支真的【沒有】匿名（%d）—— 這才是今天的病的樣本"
+		% AnonTierSystem.total_pop(barren), AnonTierSystem.total_pop(barren) == 0)
+	node._bridge.refresh_interaction_targets()
+	_apply_queue(node)
+	# ① 招得到：收費與交付成對
+	var a: Dictionary = _recruit_once(node, int(ids[0]))
+	print("  招得到那支：ok=%s coin_delta=%.0f anon_delta=%d" % [
+		str(a["ok"]), float(a["coin_delta"]), int(a["anon_delta"])])
+	_check("★招得到：真的搬了人（anon +%d）" % int(a["anon_delta"]), int(a["anon_delta"]) > 0)
+	_check("★★招得到：收費與交付成對（扣 %.0f coin ÷ 單價 %d ＝ %d 人，實搬 %d 人）" % [
+			-float(a["coin_delta"]), int(PlayerCommandSystem.RECRUIT_COST_ANON),
+			int(round(-float(a["coin_delta"]) / float(PlayerCommandSystem.RECRUIT_COST_ANON))),
+			int(a["anon_delta"])],
+		is_equal_approx(-float(a["coin_delta"]),
+			float(PlayerCommandSystem.RECRUIT_COST_ANON) * float(a["anon_delta"])))
+	# ② 招不到：不扣錢、ok=false
+	var b: Dictionary = _recruit_once(node, int(ids[1]))
+	print("  招不到那支：ok=%s coin_delta=%.0f anon_delta=%d" % [
+		str(b["ok"]), float(b["coin_delta"]), int(b["anon_delta"])])
+	_check("★★★招不到：一毛都沒扣（coin_delta=%.0f）—— 這一條就是今天那個缺陷"
+		% float(b["coin_delta"]), is_equal_approx(float(b["coin_delta"]), 0.0))
+	_check("★招不到：一個人都沒搬（anon_delta=%d）" % int(b["anon_delta"]), int(b["anon_delta"]) == 0)
+	_check("★★招不到：消費點回 ok=false（不是「成功」）", not bool(b["ok"]))
+	await _free_ui(node)
+	_cell("_test_recruit_pay_matches_delivery")

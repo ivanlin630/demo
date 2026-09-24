@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 故事結束｜排隊中
 topic: ★**這是排隊，不是派工**（先做真機 bug #1）｜spec 已寫：`2026-09-24-game-over-is-a-story-end-not-world-physics-HOW.md`｜★★**修法的形狀是【移除】不是【新增】**：`sim_runner` 不該認識 `game_over`（意圖帳 #43／#44 早裁，code 沒服從）｜★★★**動手前兩份普查，我不預測它們的大小** —— ①誰假設玩家還活著 ②誰假設世界會在 game_over 停下來
 ---

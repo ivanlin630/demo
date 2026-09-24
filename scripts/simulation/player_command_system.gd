@@ -70,9 +70,15 @@ func get_registered_actions() -> Array:
 		_setup_registry()
 	return _action_registry.keys()
 
-# recruit_anon 前提：目標人口 > 1（_recruit_anon_internal 拒 pop<=1）
+# recruit_anon 前提：★★★目標【真的有匿名】—— 不是「人夠多」。
+#   ★原本寫 `tgt.population > 1`，那是【代理量】：它問的是「人夠多嗎」，
+#     而要問的是「有匿名可以搬嗎」⇒ 對方【全具名】時它照樣回 true
+#     ⇒ 玩家被扣 50 coin、搬 0 個人、而畫面印「招募成功」（2026-09-25 用戶回報）。
+#   ★★改問 `AnonTierSystem.total_pop()`（＝ anon_cohorts 的總量）——
+#     ★★★而不是自己算「人口減具名數」：那會是第二份真相，
+#       而兩份真相今天已經咬過我們好幾次（同 (丁) 被否決的理由）。
 func _target_has_anon(tgt: TeamData) -> bool:
-	return tgt.population > 1
+	return AnonTierSystem.total_pop(tgt) > 0
 
 # invite_settle 前提：玩家腳下為自家 outpost（_action_invite_settle 需 settle_pos 指向自家 outpost）
 func _can_invite_settle(state: WorldState, pt: TeamData, tgt: TeamData) -> bool:
@@ -1146,24 +1152,42 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 	if coin < RECRUIT_COST_ANON:
 		state.player_pending_targets.erase(target_id)
 		return { "ok": false, "msg": "金幣不足（需%d）" % int(RECRUIT_COST_ANON) }
-	if tgt.population <= 1:
+	# ★★★不變量：**收費與交付必須成對**（systems 裁 2026-09-25）。
+	#   ★原本這裡問 `tgt.population <= 1` —— 又是那個代理量 ⇒ 全具名的目標過得去，
+	#     然後扣錢、搬 0 人、印「招募成功」。
+	#   ★★改問【真的有沒有匿名】，而且【先搬再收費】：
+	#     ⇒ 搬 0 人就不會走到收費那一行 —— 那比「收了再退」強，因為它不需要退款路徑。
+	#   ★★★而 `share` 必須用【搬之前】的人數算 ⇒ 它排在 transfer 之前。
+	var avail_anon: int = AnonTierSystem.total_pop(tgt)
+	if avail_anon <= 0:
 		state.player_pending_targets.erase(target_id)
-		return { "ok": false, "msg": "目標人口不足" }
-	ResourceBank.set_amt(pt, "coin", coin - RECRUIT_COST_ANON, "recruit_anon_pay")
-	# 守恆：買人付給對方，coin 不蒸發
-	ResourceBank.add(tgt, "coin", RECRUIT_COST_ANON, "recruit_anon_receive")
-	# 被招募 anon 帶走在原團的 treasury 份額
+		return { "ok": false, "msg": "對方沒有可招募的無名之人（全是具名成員）" }
+	# 被招募 anon 帶走在原團的 treasury 份額（★用搬之前的人數算）
 	var tgt_named: int = tgt.named_members.size() + (1 if tgt.leader_id != -1 else 0)
 	var tgt_anon: int = maxi(tgt.population - tgt_named, 1)
 	var share: float = minf(tgt.anon_treasury / float(tgt_anon), tgt.anon_treasury)
+	# ★先搬，看真的搬了幾個 —— ★★`transfer_proportional` 回的是【逐 tier 的搬運量】，
+	#   而原本【沒有人看那個回傳值】（那是這個缺陷的第二層）。
+	var moved: Dictionary = AnonTierSystem.transfer_proportional(tgt, pt, 1)
+	var moved_n: int = 0
+	for _t in moved:
+		moved_n += int(moved[_t])
+	if moved_n <= 0:
+		# ★★★拒絕禁靜默：說得出原因，而且【一毛都不收】
+		state.player_pending_targets.erase(target_id)
+		return { "ok": false, "msg": "招募失敗：一個人都沒搬過來（未收費）" }
+	ResourceBank.set_amt(pt, "coin", coin - RECRUIT_COST_ANON, "recruit_anon_pay")
+	# 守恆：買人付給對方，coin 不蒸發
+	ResourceBank.add(tgt, "coin", RECRUIT_COST_ANON, "recruit_anon_receive")
 	AnonTreasuryBank.transfer(tgt, pt, share, "recruit_share")
-	AnonTierSystem.transfer_proportional(tgt, pt, 1)
 	state.player_pending_targets.erase(target_id)
-	print("[Recruit] 匿名 Team%d←%d, 花%.0f coin, 新人口=%d" % [
-		pt_id, target_id, RECRUIT_COST_ANON, pt.population])
-	return { "ok": true, "msg": "招募成功（花費%d coin，新人口%d）" % [
-		int(RECRUIT_COST_ANON), pt.population],
-		"payload": {"has_willing_named": false, "refresh_required": true} }
+	print("[Recruit] 匿名 Team%d←%d, 招到 %d 人, 花%.0f coin, 新人口=%d" % [
+		pt_id, target_id, moved_n, RECRUIT_COST_ANON, pt.population])
+	# ★把 moved 印出來 —— ★★玩家從此分辨得出「招到 0 人」與「沒招成」，
+	#   而今天這兩者在畫面上是【同一句話】。
+	return { "ok": true, "msg": "招到 %d 人（花費%d coin，新人口%d）" % [
+		moved_n, int(RECRUIT_COST_ANON), pt.population],
+		"payload": {"has_willing_named": false, "refresh_required": true, "moved": moved_n} }
 
 # ── 查詢 API（Phase 1 新增） ─────────────────────────
 

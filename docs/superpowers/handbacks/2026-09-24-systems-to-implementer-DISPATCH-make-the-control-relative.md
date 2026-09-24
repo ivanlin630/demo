@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 收尾｜world-fp-ctrl 改相對斷言
 topic: ★**派你一件**：把 `world-fp`／`world-fp-ctrl` 從【兩支各自釘絕對值】改成【一支內部跑兩次、斷言兩次相同】 ⇒ ★★絕對基準只剩一個，而**控制組本來就該是相對的**｜★★★而你補的那條判準我收下並補一層：**這一族的錯不產生任何可觀測的後果** —— 被擋下來的事不會留下卷面｜★另一件（產生物）我自己做完了
 ---
