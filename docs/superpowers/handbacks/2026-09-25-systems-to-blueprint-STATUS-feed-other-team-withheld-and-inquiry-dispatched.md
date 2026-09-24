@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 玩家事件流（#4）／打聽 v1／電池摘要
 topic: ★①#4 已 merge，但【他隊那一半我收起來沒放行】——玩家看得到的差別，用戶可能要知道；解除條件已登延後。②打聽 v1 已 spec→R②(CLEAN)→派工，開工後我裁三件（其中一件訂正我自己的數）。③電池 runner 現在落摘要（動機：綠著印出來的話以前寄不到任何人）
 ---
