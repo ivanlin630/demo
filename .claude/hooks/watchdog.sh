@@ -491,9 +491,16 @@ while true; do
     else
       echo "  worktree 最新檔案變動（＝還沒 commit 的工作）：近 4h 無"
     fi
+    # ★★★2026-09-25（implementer 回報）：他在 feat/player-event-feed 上 5 顆 commit 且都 push，
+    #   而他讀到的報告讓他以為本支說「兩小時零 commit」。
+    #   ★查清楚了：判準（CHAIN-BROKEN 的 any_age）吃的是 `for-each-ref --all` ⇒ **它看得到 feat branch**；
+    #     真正只看主線的是【這一欄參考值】與 COMMIT-NO-LETTER 的 main_ct。
+    #   ⇒ ★★所以修法不是去掃分支（判準本來就掃了，再掃會吵），是**讓這一欄自己說出它的母體**：
+    #     一個守衛印出來的數字，要讓讀的人知道【它算的是哪一塊】——否則沉默與警告都會被讀成全域的。
     if [ "$main_ct" -gt 0 ]; then
       echo "  （參考）main 最後一顆 commit：$(dur $(( now - main_ct ))) 前 — ${main_subj}"
       echo "    ★這一欄【不是】誰的活性：任何人 commit 都會刷新它。判人請看上面那一區。"
+      echo "    ★★母體＝【主線】：feature branch 上的 commit 【不計入這一欄】（下面 feat lane 另印）"
     fi
     if [ -n "$lane_line" ]; then
       echo "  ★feat lane（近 2h，不在 main 上）：${lane_line}"
