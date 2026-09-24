@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -101,6 +101,7 @@ func _initialize() -> void:
 	await _test_p15b_footer_labels_same_source()
 	await _test_p16b_pending_zero_after_advance()
 	await _test_p18_unbounded_sentinel_is_named()
+	await _test_p19_control_coverage_ratchet()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -2294,3 +2295,48 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 	_check("★★母體地板：UI 用到夾具 1 處（實測 %d）" % clamp, clamp == 1)
 	_check("★★★UI 沒有裸的 99999", not ui.contains("99999"))
 	_cell("_test_p18_unbounded_sentinel_is_named")
+
+# P19［負對照覆蓋率棘輪］：留下【已實測紅】紀錄的格數，只准增加。
+# ★★★形狀＝把一個【存量問題】變成一個【單調量】（同 `derived_excludes().size() <= 30`）：
+#   ★單調量不需要有人記得它，也不需要一列 defer —— 尺自己會長。
+# ★而它【不是】在說「其餘那些格是壞的」：沒被證明會紅 ≠ 空的。
+#   ★★它守的是【不准往回走】—— 有人刪掉一行紀錄、或改了一格而沒有重新點火，這裡會紅。
+# ★★★數的是【固定格式】那一行（`# 負對照：… ⇒ 已於 … 實測紅`），不是隨便含「實測紅」的字：
+#   格式一致是它可被機械數的前提。而 spec 抄進註解的「★負對照：… ⇒ 必須紅」是【要求】
+#   不是【紀錄】⇒ 那個格式刻意不會命中它（2026-09-24 被這件事咬過一次：
+#   加註記的腳本用「負對照：」去重，把兩格真紀錄跳過了）。
+# ★母體地板：先斷言兩個檔都數得到而且各自【非零】—— 否則「>= 地板」在【檔案讀空】時
+#   也會是「0 >= 0」那種綠。
+# ★★★它【不硬紅】：往上走時只印一句提醒，不強迫立刻抬地板。
+#   ·棘輪的目的是【不准倒退】，不是【強迫前進】⇒ 對往前走開紅燈是在懲罰我們想要的行為
+#   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
+#     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
+#     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
+const CONTROL_FLOOR_UI: int = 13
+const CONTROL_FLOOR_REPLAY: int = 2
+
+func _test_p19_control_coverage_ratchet() -> void:
+	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
+	print("\n── P19 負對照覆蓋率棘輪 ──")
+	var n_ui: int = _count_fired("res://scripts/debug/ui_flow_test.gd")
+	var n_cr: int = _count_fired("res://scripts/debug/command_replay_bed.gd")
+	print("   已實測紅紀錄：ui_flow_test %d（地板 %d）／command_replay_bed %d（地板 %d）" % [
+		n_ui, CONTROL_FLOOR_UI, n_cr, CONTROL_FLOOR_REPLAY])
+	_check("★母體地板：兩個檔都數得到非零（%d／%d）" % [n_ui, n_cr], n_ui > 0 and n_cr > 0)
+	_check("★★ui_flow_test 的紀錄數沒有往回走（%d >= %d）" % [n_ui, CONTROL_FLOOR_UI],
+		n_ui >= CONTROL_FLOOR_UI)
+	_check("★★command_replay_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cr, CONTROL_FLOOR_REPLAY],
+		n_cr >= CONTROL_FLOOR_REPLAY)
+	if n_ui > CONTROL_FLOOR_UI or n_cr > CONTROL_FLOOR_REPLAY:
+		print("   ★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值（%d／%d）" % [n_ui, n_cr])
+	_cell("_test_p19_control_coverage_ratchet")
+
+# 數【固定格式】那一行：`# 負對照：<怎麼點火> ⇒ 已於 <分支> 實測紅`
+static func _count_fired(path: String) -> int:
+	var src: String = FileAccess.get_file_as_string(path)
+	var n: int = 0
+	for l in src.split("\n"):
+		var t: String = l.strip_edges()
+		if t.begins_with("# 負對照：") and t.contains(" ⇒ 已於 ") and t.ends_with("實測紅"):
+			n += 1
+	return n
