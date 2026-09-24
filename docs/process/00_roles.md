@@ -163,6 +163,9 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 ```
 收信：什麼都不用掛。別人寫完 handback 會用 SendMessage 敲你 ⇒ 你就醒了。
 寄信：①Write handback ②★立刻 SendMessage 敲收件人（to: 填 peers.sh 的 ADDR 欄）。★★沒敲＝沒送到。
+★★★動完 `docs/superpowers/handbacks/` 之後，跑 `bash .claude/hooks/mailbox-integrity.sh`（38s，不必全電池）
+  ★理由（implementer 自認 2026-09-25）：舊紀律只寫【動 scripts/ 要跑電池】，而信箱那一半從來沒補
+  ⇒ ★★信箱系的閘正是會抽那件事的閘（幽靈喚醒／失蹤信／未追蹤）
 通訊錄：開場 ListAgents 看自己的名字 → SESSION_ROLE=<role> bash .claude/hooks/whoami.sh demo-XX
 看門狗：★照舊掛（它偵測的是「沒有事發生」，那件事沒有人會來敲你 ⇒ 輪詢是唯一可能的形狀）
        ★★而它會被 harness 在記憶體吃緊時【靜默收割】（2026-09-23 血證）——
