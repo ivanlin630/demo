@@ -253,26 +253,51 @@ func _test_p6_source_is_the_asked_team() -> void:
 	_cell("_test_p6_source_is_the_asked_team")
 
 
-# ══════════ P7［重構零行為：topic=="" 那條路不動］══════════
-# ★★★這一格守的是【抽參數沒有改到既有行為】，不是功能 ——
-#   同一顆種子、同一串到達交換，兩邊 fp 必須逐字相同。
+# ══════════ P7［重構零行為：topic=="" 兩段都走］══════════
+# ★★★第一版是【兩邊同源】：我拿「三參數呼叫」與「五參數 topic=\"\" 呼叫」比 fp，
+#   而它們走的是【同一條 code path】⇒ 我把那條路改壞，兩邊一起壞、差異仍然是空
+#   ⇒ 負對照【不紅】（2026-09-25 實測）。★那正是「比較的兩邊同源 ⇒ 差異集合恆空」。
+# ⇒ ★★改成驗【被守的性質本身】：`topic == ""` 必須【兩段都走】——
+#   訊息複製那一段（team_known 變多）＋ claim 那一段（written > 0）。
+#   ★★★把 `topic == ""` 從任一段的條件裡拿掉 ⇒ 那一段就不走 ⇒ 這一格紅。
 func _test_p7_topic_empty_is_verbatim() -> void:
-	print("\n── P7 topic=\"\" 逐字不變 ──")
-	var a: Array = _fresh()
-	var sa: WorldState = a[0]
-	var ms_a := SimMessageSystem.new()
-	var ids_a: Array = sa.teams.keys()
-	ms_a._exchange_intel(sa, int(ids_a[0]), int(ids_a[1]))
-	var fp_a: String = StateFingerprint.compute(sa)
-	var b: Array = _fresh()
-	var sb: WorldState = b[0]
-	var ms_b := SimMessageSystem.new()
-	var ids_b: Array = sb.teams.keys()
-	ms_b._exchange_intel(sb, int(ids_b[0]), int(ids_b[1]), "", {})
-	var fp_b: String = StateFingerprint.compute(sb)
-	print("   舊呼叫 fp=%s…｜帶預設參數 fp=%s…" % [fp_a.substr(0, 12), fp_b.substr(0, 12)])
-	_check("★母體地板：兩邊都真的產出 fp（非空）", fp_a != "" and fp_b != "")
-	_check("★★★三參數呼叫與五參數（topic=\"\"）呼叫【逐字同一個世界】", fp_a == fp_b)
+	print("
+── P7 topic=\"\" 兩段都走 ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var ms := SimMessageSystem.new()
+	# 找一對【giver 有情報、也有訊息】的隊，否則這一格的母體是空的
+	var giver: int = -1
+	var recv: int = -1
+	for tid in st.teams:
+		if BeliefSystem.known_targets(st, int(tid)).size() > 0 				and not st.team_known.get(int(tid), []).is_empty():
+			giver = int(tid)
+			break
+	for tid in st.teams:
+		if int(tid) != giver:
+			recv = int(tid)
+			break
+	_check("★母體地板①：找得到一支【有情報也有訊息】的 giver（tid=%d）" % giver, giver != -1)
+	_check("★母體地板②：找得到 receiver（tid=%d）" % recv, recv != -1)
+	if giver == -1 or recv == -1:
+		_cell("_test_p7_topic_empty_is_verbatim")
+		return
+	# ★讓它願意說（否則 silent 之後兩段都不走，這一格會誤判成「沒走」）
+	st.teams[giver].known_reputations[recv] = 0.9
+	st.player_hostile_teams.erase(recv)
+	var msgs_before: int = st.team_known.get(recv, []).size()
+	var out: Dictionary = {}
+	ms._exchange_intel(st, giver, recv, "", out)
+	var msgs_after: int = st.team_known.get(recv, []).size()
+	print("   mode=%s｜giver known=%d｜訊息 %d → %d｜claim 寫入 %d 筆" % [
+		String(out.get("mode", "?")), int(out.get("giver_known", -1)),
+		msgs_before, msgs_after, int(out.get("written", 0))])
+	_check("★母體地板③：這一輪不是拒答（mode=%s）" % String(out.get("mode", "?")),
+		String(out.get("mode", "")) != "silent")
+	_check("★★topic=\"\" 走了【訊息複製】那一段（%d → %d）" % [msgs_before, msgs_after],
+		msgs_after > msgs_before)
+	_check("★★★topic=\"\" 也走了【claim】那一段（寫入 %d 筆）" % int(out.get("written", 0)),
+		int(out.get("written", 0)) > 0)
 	_cell("_test_p7_topic_empty_is_verbatim")
 
 
@@ -302,18 +327,34 @@ func _test_p8_food_narrowed_to_seen_tiles() -> void:
 	var secret: HexTileData = st.world.tiles[secret_id]
 	secret.resources["food"] = 9999.0
 	var secret_pos: Vector2i = secret.tile_pos
+	# ★★★母體必須鎖在【誠實】那一支：`_find_food_tiles()` 在 `honest == false` 時會把
+	#   報出來的座標【隨機偏移】（`pos += randi_range(-2,2)`）⇒ 偏移後的格自然不在「見過」清單裡
+	#   ⇒ ★那是【說謊】不是【洩漏】，而判準必須分得開這兩件事（2026-09-25 實測紅出來的）。
+	#   ★★鎖法是動那把既有的秤的【輸入】（被問方對玩家的評價）——不是改判準。
+	st.teams[npc].known_reputations[ptid] = 0.95
 	# ★母體地板②：他見過的格【裡面】要有東西可給，否則「沒有洩漏」也可能是「什麼都沒給」
 	print("   ★母體：他見過 %d 格｜藏的那格 tile_id=%d pos=%s food=9999" % [
 		seen.size(), secret_id, str(secret_pos)])
 	var res: Dictionary = InquirySystem.new().resolve_inquiry(
 		st, st.teams[ptid], st.teams[npc], "ask_food_source")
 	var tiles: Array = res.get("food_tiles", [])
-	var leaked: bool = false
+	# ★★★判準是【回的每一塊都必須是他見過的】，不是【那一格有沒有洩漏】：
+	#   `_find_food_tiles()` 取到 3 塊就 break ⇒ 藏的那格可能【排不進前 3】
+	#   ⇒ 只看那一格的版本，負對照（母體改回全圖）【不紅】（2026-09-25 實測）。
+	var outsiders: Array = []
 	for t in tiles:
-		if Vector2i(t.get("tile_pos", Vector2i(-1, -1))) == secret_pos:
-			leaked = true
-	print("   回了 %d 塊｜藏的那格有沒有洩漏=%s" % [tiles.size(), str(leaked)])
-	_check("★★★他沒見過的高食物格【不得】出現", not leaked)
+		var pp: Vector2i = Vector2i(t.get("tile_pos", Vector2i(-1, -1)))
+		if not seen.has(pp.x * 1000 + pp.y):
+			outsiders.append(str(pp))
+	print("   回了 %d 塊｜其中【他沒見過】的有 %d 塊：%s" % [
+		tiles.size(), outsiders.size(), str(outsiders)])
+	# ★母體地板：要真的回了東西 —— 回 0 塊的話「沒有外來的」恆真
+	_check("★母體地板②：真的回了至少 1 塊（%d）" % tiles.size(), tiles.size() >= 1)
+	_check("★母體地板③：這一輪是【誠實】的（rel=%.2f > 0.5）⇒ 座標沒被偏移"
+		% float(st.teams[npc].known_reputations.get(ptid, 0.5)),
+		float(st.teams[npc].known_reputations.get(ptid, 0.5)) > 0.5)
+	_check("★★★回的每一塊都是【他見過的格】（外來 %d 塊）" % outsiders.size(),
+		outsiders.is_empty())
 	_cell("_test_p8_food_narrowed_to_seen_tiles")
 
 
