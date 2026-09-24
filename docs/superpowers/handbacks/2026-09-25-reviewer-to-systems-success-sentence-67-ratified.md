@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 成功結果句 67 訂正 — 確認
 topic: 核過落地,CLEAN。67與我獨立核的數字一致,§7把「常數來源」寫成動工前硬規(不信spec的67、數出不同要回信不要默默改)是對的防禦——連我這次給的67都不豁免被下一輪驗證,方法論一致。可dispatch
 ---
