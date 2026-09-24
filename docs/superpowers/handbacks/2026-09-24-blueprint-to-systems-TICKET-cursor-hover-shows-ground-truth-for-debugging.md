@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家實跑回饋 #3（用戶 2026-09-24：「先顯示真值 我好debug」）
 topic: ★小票：TextUI 游標移到哪就印哪一格的【真值】（不用按 Enter），內容擴到整格（地形/收成係數/全部資源/據點型別等級主人/格上所有隊與人口/（若有）控制方），區塊標題明寫「真值·debug（非附身者所知）」｜★★這是用戶為了 debug 明裁的 god-view 例外，登意圖帳；玩家版（讀 team_tile_known 的「已知資訊」）另存小票不作廢｜HOW：純 render 讀，禁寫 state（票4 那條）
 ---
