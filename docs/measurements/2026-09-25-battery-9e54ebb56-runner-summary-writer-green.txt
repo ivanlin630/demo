@@ -1,0 +1,97 @@
+# 電池卷面：驗 merge-gates.sh 的【摘要 writer】改動本身沒有把 runner 弄壞
+# ★跑在釘死 HEAD 的 worktree（.worktrees/battery，detached 9e54ebb56）⇒ 一輪之內一棵樹
+# ★★PSExecutionPolicyPreference=Bypass（否則整批「引擎一次都沒被啟動」）
+# ★★★baseline 那一欄寫「未讀」是正確的：本輪不在 main 上 ⇒ 沒有資格碰基線 ⇒ 也就沒去讀它
+
+run-id: 17527-20260924-234853
+runner-self: 752ba124
+[TREE] HEAD-start=9e54ebb56 HEAD-end=9e54ebb56
+[TREE] registry=clean runner=clean code-dirty=0
+range: MG_FROM=0 MG_TO=0｜註冊表 82 支｜實跑 82 支
+baseline: 上一次 main 基線紅數=未讀｜本輪紅數=0
+BATTERY_RC: 0
+---- 逐格（id / 秒 / 結果）----
+constitution	4s	PASS
+bare-tick	9s	PASS
+build-duration	4s	PASS
+bed-parse	75s	PASS
+bed-arm	4s	PASS
+ki-anchor	4s	PASS
+mailbox-integrity	37s	PASS
+cherrypick-fidelity	2s	PASS
+ki-status	12s	PASS
+single-writer	0s	PASS
+tree-div	0s	PASS
+headless	22s	PASS
+cross-run-static	11s	PASS
+own-camp-link	6s	PASS
+zero-caller	4s	PASS
+exam-freeze	0s	PASS
+print-join	0s	PASS
+belief-freshness-invariant	7s	PASS
+unified-commerce	7s	PASS
+defer-open	21s	PASS
+defer-phrase	1s	PASS
+modulo-phase	0s	PASS
+ledger-drop-visible	6s	PASS
+lod-split	1s	PASS
+valuation-clamp	7s	PASS
+world-schedule-due	6s	PASS
+envoy-ptype	7s	PASS
+mailbox-size	0s	PASS
+mailbox-broadcast	0s	PASS
+board-price	7s	PASS
+swallow-setter	0s	PASS
+tier2-sweep-staleness	1s	PASS
+minor-merge	6s	PASS
+escrow-audit	7s	PASS
+computed-prop	0s	PASS
+bed-kind	2s	PASS
+wage-penalty	6s	PASS
+payroll-urgency	7s	PASS
+merchant-turnover	12s	PASS
+team-ui	6s	PASS
+player-entry-smoke	8s	PASS
+ui-flow	11s	PASS
+command-replay	23s	PASS
+player-event-feed	8s	PASS
+ui-logic	7s	PASS
+value-key	2s	PASS
+value-key-selfcheck	1s	PASS
+plan-speed	6s	PASS
+material-buy	6s	PASS
+gateA	6s	PASS
+gateA-hysteresis	7s	PASS
+restock-burn	13s	PASS
+failure-feedback-coverage	8s	PASS
+gather-purity	6s	PASS
+role-commit-scope	1s	PASS
+watchdog-beacon	1s	PASS
+live-team-census	1s	PASS
+fp-longwindow	32s	PASS
+live-team-ratchet	0s	PASS
+grudge-ledger-a	6s	PASS
+raid-expected-value	7s	PASS
+stale-pos-recon	6s	PASS
+anchoredness-freshness	6s	PASS
+outpost-belief	7s	PASS
+sister-sites-outpost	6s	PASS
+occupy-target-belief	7s	PASS
+phase-tree-net-cost	6s	PASS
+phase-root-conservation	8s	PASS
+fp-gather-sensitivity	35s	PASS
+day-length-single-source	10s	PASS
+det-observation-noise	6s	PASS
+crisis-override	6s	PASS
+world-fp	255s	PASS
+world-fp-ctrl	510s	PASS
+intel-wake-godview	4s	PASS
+intel-wake-direction	11s	PASS
+globalmsg-shape	7s	PASS
+faction-drive-once	18s	PASS
+shape-falsifier	25s	PASS
+pass-stagger	62s	PASS
+fp-excludes-derived	6s	PASS
+player-fp-sentinel	11s	PASS
+---- ★綠著印出來、否則沒人看得到的話（carry 規則見本檔 MG_CARRY_RE）----
+（本輪沒有）
