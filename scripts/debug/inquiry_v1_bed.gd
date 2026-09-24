@@ -404,8 +404,24 @@ func _test_counts_one_write_path() -> void:
 			if t.contains("_exchange_intel(") and not t.contains("func _exchange_intel") \
 					and not t.contains("_step3b_exchange_intel("):
 				ex_sites += 1
+	# ★★★數法要跟數字一起印（systems 審 2026-09-25）：
+	#   直接 `grep -c 'state.world.tiles' inquiry_system.gd` 會得到 3（1 行 code ＋ 2 行註解），
+	#   而 spec 寫「2 → 1」⇒ ★下一個人不知道數法，會把 3 讀成回歸。
+	#   ★★而這正是同一族：【註解裡解釋指標的句子本身含有它要數的字串】。
+	print("   ★數法：只數【非註解行】、排除定義行；`_exchange_intel` 另排除 `_step3b_exchange_intel(`")
 	print("   production record_claim 呼叫點=%d（期望 4）｜_exchange_intel 呼叫點=%d（期望 3）" % [
 		rc_sites, ex_sites])
+	# ★把【收窄那個指標】也印進同一格：它的數法與上面兩個一樣（剝註解）
+	var iq_raw: String = FileAccess.get_file_as_string("res://scripts/simulation/inquiry_system.gd")
+	var iq_code: int = 0
+	var iq_all: int = 0
+	for l in iq_raw.split("\n"):
+		iq_all += l.count("state.world.tiles")
+		if not l.strip_edges().begins_with("#"):
+			iq_code += l.count("state.world.tiles")
+	print("   inquiry_system 的 state.world.tiles：非註解行=%d（期望 1）｜含註解=%d（★直接 grep 會看到這個數）"
+		% [iq_code, iq_all])
+	_check("★★食物母體已收窄：非註解行只剩 1 處取值（實測 %d）" % iq_code, iq_code == 1)
 	# ★4 來自 spec §3(A)：「只要出現第二個 record_claim 呼叫點，這一票就寫錯了」
 	_check("★★★寫入路徑仍然只有既有那 4 處（實測 %d）" % rc_sites, rc_sites == 4)
 	# ★3 ＝ message_system 的 :187,188 兩行到達交換 ＋ player_command_system 打聽那一次
