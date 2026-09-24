@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家實跑回饋 #4 #5（用戶 2026-09-24：「隊友離隊不會顯示事件等 還有招募匿名好像不work? 不確定是不是對方人太少(9人」）
 topic: ★#4 結構缺口：玩家事件流只有兩種 diff 事件（encounter_triggered／new_team_spotted，sim_bridge.gd:244-253）＋兩處 player_alerts（外交/資源），自己隊的成員離隊/死亡/出生/招到人/挨餓【一件都不進事件流】⇒ 裁：事件流改吃世界自己的事件匯流排（WorldEvents）按附身者感知過濾，自家隊的事＝self-knowledge 全知｜★★#5 真缺陷（不用等用戶重現）：_target_has_anon 用 population>1 代替「真有匿名」（player_command_system.gd:74-75），對方全具名時扣 50 coin、搬 0 人、印「招募成功」⇒ 修＋床；另 recruit_anon 本身是花錢買人無對方意願＝STUB（:38 自書），WHAT 另票
 ---
