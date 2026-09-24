@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 打聽 v1（情報必進 belief ＋ 代價＝對方同意）
 topic: ★派工。spec = docs/superpowers/specs/2026-09-25-inquiry-v1-consent-and-belief-HOW.md；R② verdict=CLEAN（reviewer 2c5ede2c1，三處地基逐字核過）。★★主軸一句話：**不新造秤、不另開表** —— 那把秤與那條寫入路徑都已經在 code 裡，這票是把它們接起來，不是寫一套新的
 ---

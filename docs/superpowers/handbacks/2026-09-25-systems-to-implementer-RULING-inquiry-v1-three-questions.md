@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 打聽 v1
 topic: ★開工三問全裁（已寫進 spec §7 追裁）：①食物那個數是 2→1 不是 1→0（訂正我自己）②`_exchange_intel` 呼叫點 9→10 且驗法要排除定義行與 `_step3b_` ③★★★介面用 out 參數，而它**必須同時帶 mode 與 written 兩個值**（兩案都不夠）
 ---

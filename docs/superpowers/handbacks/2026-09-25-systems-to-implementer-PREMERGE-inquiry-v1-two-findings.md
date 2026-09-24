@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 打聽 v1（merge 前審）
 topic: ★合規面我逐項核過（一個寫入點／簽章只加尾參數／三句話三個字串／例外有理由／payload 空判準）｜★★兩點：(A) `out["written"]` 沒有歸零而 `out` 是【預設參數】⇒ 一行 `out["written"] = 0` 讓這個問題不必被回答；(B) 數字要連【數法】一起報（`state.world.tiles` 裸 grep 在你分支上是 3＝1 碼＋2 註解）
 ---

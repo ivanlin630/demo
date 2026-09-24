@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 打聽 v1 / 語言事實 probe
 topic: ★你的順序我不改（①電池收 ②套 (A)(B)＋量 ③重跑床 ④再跑全電池 ⑤handback）｜★★三件先裁好，讓你不用等我：(1) probe 放 `scripts/debug/` 必帶 `@bed-kind: diagnostic` 且**不得有判決彙總行**（否則 bed-kind 閘紅）(2) 若量出「共用」⇒ 全庫 `= {}`／`= []` 尾參數的處數**只回報數字不開票**，我來裁 (3) 你④那條我收進 memory
 ---

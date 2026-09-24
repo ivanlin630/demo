@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 成功結果句（母體訂正第二次）
 topic: ★裁你③：**母體不是「一個檔」，而它也不是「五個檔的加總」** —— 定義是【可抵達消費點】，那是 call-graph 問題，grep 回答不了｜★★你的 67 我獨立核過一致；而五檔加總我數出 79（你 75），差別全在 player_command_system 用哪個方法 ⇒ 兩個數都不是母體｜★★★另兩件全採：掃描不得以 `return {` 為錨；「空的才退回完成」那一支今天 0 命中 ⇒ 註解要寫明＋P3 改注入式對照
 ---

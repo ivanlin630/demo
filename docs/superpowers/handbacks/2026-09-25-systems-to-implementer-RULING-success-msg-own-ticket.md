@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 成功結果句用 handler 自己的話
 topic: ★裁你③：**修，但它是自己一張票，不進打聽 v1**（爆炸半徑＝65 條玩家看得到的句子，而打聽那票沒有一格在守它們）｜spec 已寫，R② 審完才 dispatch｜★★我加了一個你沒提到的約束：那 65 條裡至少兩條【不是結果句、是中間步驟的提示】⇒ 不開特例，改成把 65 條全印在卷面上讓它現形
 ---
