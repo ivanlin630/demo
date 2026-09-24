@@ -142,39 +142,21 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
   —— 只驗「不再誤咬」的話，★★把整條規則刪掉也會綠。
 ```
 
-## ★★★機器交接（systems 立 2026-09-23 —— 這一天撞了兩次機、白跑了兩輪電池）
+## ★★★機器交接（systems 立 2026-09-23；★血證與為什麼 → `detail/00_roles-cases.md` 同標題節）
 
 ```
-★要用機器：bash .claude/hooks/machine-busy.sh -- <你的指令…>
-  ⇒ FREE 才跑；BUSY 就【不跑】並回 1
-★★【不要】寫成 `machine-busy.sh; <指令>` —— 那個 `;` 讓檢查【只是印字】
-   （血證 2026-09-23：BUSY 印出來了，而指令照樣跑上別人的電池）
-⇒ ★★★「回傳碼 1」只有在呼叫端【接了】它的時候才算擋 ——
-   所以用 `-- ` 模式，讓工具替你動手，而不是要你記得。
+要用機器：bash .claude/hooks/machine-busy.sh -- <你的指令…>   ⇒ FREE 才跑
+★【不要】寫成 `machine-busy.sh; <指令>` —— 那個 `;` 讓檢查【只是印字】
+  （回傳碼 1 只有在呼叫端【接了】它的時候才算擋）
+★★【不要】拿「Godot 行程數＝0」當判準 —— 電池是一串短跑，兩支床之間真的是 0
+
+跑全電池三件：
+  ①釘死 HEAD 的 worktree：git worktree add --detach .worktrees/battery "$(git rev-parse HEAD)"
+  ②PSExecutionPolicyPreference=Bypass（否則【引擎一次都沒被啟動】）
+  ③結論看 `[MERGE-GATES] BATTERY_RC=<n>` 那一行，不是 shell 的回傳碼
 ```
 
-**為什麼不能只看「Godot 行程數 ＝ 0」**：
-
-```
-★電池是【一連串短跑】，兩支床之間那個數【真的是 0】
-  （血證：他量到 0 的那一刻，我的電池正在跑）
-⇒ ★★取樣式判準對「一串短工作」天生盲目 —— 不是量錯，是量在錯的軸上
-⇒ machine-busy 的第一格是【構造的】標記檔（跑的人自己寫 PID），第二格才是行程數
-```
-
-**跑全電池**：
-
-```
-①★釘死 HEAD 的 worktree（共用 main dir 上 20 分鐘內 HEAD 一定會動 ⇒ 判【一輪之內兩棵樹】）
-   git worktree add --detach .worktrees/battery "$(git rev-parse HEAD)"
-②★★PSExecutionPolicyPreference=Bypass（Bash 工具起的 powershell 拿到 Restricted
-   ⇒ 50 支「引擎一次都沒被啟動」；PowerShell 工具那邊是 Bypass ⇒ 同機兩工具兩種結果）
-③★★★結論看 `[MERGE-GATES] BATTERY_RC=<n>` 那一行，不是 shell 的回傳碼
-   —— 指令結尾接了管線（`| tail`），rc 就是最後一段的。
-```
-
-★**而這三件都【不取代寄信】**：工具只讓信裡的數字是對的；
-★★**「機器現在空」不代表「沒有人正要用它」**。
+★這三件【不取代寄信】；★★「機器現在空」不代表「沒有人正要用它」。
 
 ## ★★★信箱與監視器（用戶裁 2026-09-23 第二版 —— ★**inbox watcher 整個退役**）
 
