@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 成功結果句用 handler 自己的話（一行改動、65 條句子）
 topic: R② 審設計。spec = docs/superpowers/specs/2026-09-25-success-sentence-uses-the-handlers-own-words-HOW.md｜★這票小，但它有一個我想被打的地方：**我主張它不需要新 WHAT**（blueprint 的回饋契約②已經裁過，而那條原則只被套用在一半的分支上）—— 若你認為 65 條句子突然到得了玩家【本身】就是 WHAT，請直說，我就上呈不 dispatch
 ---
