@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -102,6 +102,7 @@ func _initialize() -> void:
 	await _test_p16b_pending_zero_after_advance()
 	await _test_p18_unbounded_sentinel_is_named()
 	await _test_p19_control_coverage_ratchet()
+	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -2341,3 +2342,51 @@ static func _count_fired(path: String) -> int:
 		if t.begins_with("# 負對照：") and t.contains(" ⇒ 已於 ") and t.ends_with("實測紅"):
 			n += 1
 	return n
+
+# P2［整天不漏］：推進【一天】＝24 次 step，而佇列壽命只有【一小時】
+#   ⇒ ★讀者必須【每一次 step 之後都讀】，漏一次就漏掉整整一小時的事件。
+# ★★★這一格守的是【讀點的位置】，不是「事件有沒有被 emit」（spec §4 P2 逐字）。
+#   ⇒ 所以它逐小時各塞一件事件，然後數畫面上收到幾件：
+#     ·讀點在迴圈裡 ⇒ 24 件全到
+#     ·讀點搬到整天結束後才讀一次 ⇒ 只剩最後一小時那件（其餘被 TTL 清掉）⇒ 紅
+# ★母體地板：先斷言【真的塞進去了 24 件】—— 沒塞進去的話「收到 0 件」也會等於「沒漏」。
+# 負對照：把 `_process()` 裡那段撈取搬到迴圈之外（只在最後讀一次）⇒ 必須紅
+func _test_p2_whole_day_not_dropped() -> void:
+	_selftest_gate("_test_p2_whole_day_not_dropped").noop()
+	print("\n── P2 推進一天不漏事件 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.get_player_team_id()
+	_check("★母體地板①：有玩家隊（tid=%d）" % ptid, ptid != -1)
+	if ptid == -1:
+		await _free_ui(node)
+		_cell("_test_p2_whole_day_not_dropped")
+		return
+	var hours: int = WorldState.TICKS_PER_DAY / WorldState.TICKS_PER_HOUR
+	var before: int = 0
+	for e in node._events:
+		if String(e.get("type", "")) == "world": before += 1
+	var injected: int = 0
+	# ★★★判準＝【佇列曾接受的筆數 == 畫面收到的筆數】，不是「== 我注入的數」：
+	#   我第一版寫 `got == injected`，而它【假設那一天不會有別的事件】——
+	#   實測那一天世界自己也產了 9 件 ⇒ 33 vs 24 ⇒ 紅在一個不存在的缺陷上。
+	#   ⇒ `player_event_seq` 是【佇列接受過幾筆】的累計器 ⇒ 拿它比，覆蓋注入的與自產的。
+	var seq_before: int = st.player_event_seq
+	# ★每一次 step 之前塞一件【自家隊】的事件，然後跑一幀（＝一小時）
+	for h in range(hours):
+		WorldEvents.emit(st, "leader_death", [ptid])
+		injected += 1
+		node._bridge.request_advance(WorldState.TICKS_PER_HOUR)
+		node._process(0.1)
+	var accepted: int = st.player_event_seq - seq_before
+	var got: int = 0
+	for e in node._events:
+		if String(e.get("type", "")) == "world": got += 1
+	got -= before
+	print("   逐小時各塞 1 件、共 %d 小時｜佇列接受 %d 件 ⇒ 畫面收到 %d 件（★TTL=%d tick）" % [
+		injected, accepted, got, SimRunner.RESULT_TTL_TICKS])
+	_check("★母體地板②：真的塞進去了 %d 件" % injected, injected == hours)
+	_check("★母體地板③：佇列接受的筆數 ≥ 注入數（%d ≥ %d）" % [accepted, injected], accepted >= injected)
+	_check("★★★整天一件都沒漏（佇列接受 %d ＝ 畫面收到 %d）" % [accepted, got], got == accepted)
+	await _free_ui(node)
+	_cell("_test_p2_whole_day_not_dropped")

@@ -262,6 +262,13 @@ static func _emit_player(state: WorldState, buf: PackedStringArray) -> void:
 	buf.append("P|hostile=%s" % str(state.player_hostile_teams))
 	buf.append("P|pending_targets=%s" % str(state.player_pending_targets))
 	buf.append("P|alerts=%d" % state.player_alerts.size())
+	# ★★★玩家事件佇列（spec 2026-09-25 §2④）：★另起一行，舊有每一行【逐字不變】
+	#   ⇒ 歷史 canon 只要刪掉這一行就還原得回去。
+	#   ★而【雜湊會變】是必然的（compute 把所有行接起來再雜湊）
+	#     ⇒ `world-fp` 的絕對基準必須與這一顆改動【原子落地】。
+	#   ★★它該在 canon 裡的理由同上面那一段：一顆【無玩家】的跑若讓這一行不是全 0，
+	#     那就是有系統在沒有玩家的世界裡寫了玩家佇列。
+	buf.append("P|evt=%d|seq=%d" % [state.player_events.size(), state.player_event_seq])
 	# ══════════ 指令佇列（systems 裁 2026-09-23）══════════
 	# ★★★形式是【另起一行】不是塞進既有那幾行 —— 舊有每一行【逐字不變】
 	#   ⇒ 歷史指紋只要刪掉這一行就還原得回去 ⇒ ★不用重取基準、不失去歷史可比。

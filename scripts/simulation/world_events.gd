@@ -43,6 +43,20 @@ const FUNC_KINDS: Array = [
 	"construction_abandoned",   # ★承諾【真的消失】：換 task 且不 serves ／ 工地易主。這個才是執行型失敗進料口。
 	"plan_invalidated",    # ★FailureMemory.record_invalidation（當前計畫已不可行→該隊當 tick 重想）
 	"rung_changed",        # ★AmbitionLadder.update 升/降野心階（ambition_ladder.gd）
+	# ══ 本票新增（spec 2026-09-25 #4）：玩家事件流原本對自家隊【全盲】 ══
+	# ★★★這四種都用 `wake_thinking = false` —— 理由不是效能，是【範圍】：
+	#   它們是【給玩家看的資訊事件】，而本票的目的是「玩家看得見」，不是「改 NPC 行為」。
+	#   ⇒ 傳 true 會順便改 NPC 的 thinking 排程 ＝ 這張票沒有被要求的行為改動。
+	# ★★而【誠實限】：`emit()` 仍然無條件設 `pending_rethink[id]` ⇒
+	#   ★★★行為面【沒有】被完全關掉，而那是 spec 要求「寫入點在 emit 內」的必然結果
+	#   （一個事件進了匯流排，就會喚醒它的主體）。實測這一輪零漂移，但那是【量到的】
+	#   不是【結構保證的】—— 已呈報 systems 判要不要讓這四種真的喚醒 NPC。
+	# ★★★掛點刻意【不是】 `state.remove_member()`：它 13 個產品呼叫端裡只有 3 個是真的
+	#   離隊／死亡，其餘是分家出母隊／繼任 leader 出 named／轉隊 ⇒ 掛那裡會噴假事件。
+	"member_left",         # ★ReactionSystem N1_flee／N3_defect（★帶 reason，spec P6）
+	"member_died",         # ★HealthSystem.check_starvation_deaths（★帶 cause：餓死／失血而亡）
+	"came_of_age",         # ★PopulationSystem 未成年長大（帶人數）
+	"member_joined",       # ★PlayerCommandSystem 招募匿名成功（帶實際搬過來的人數）
 	                       #   ★★這一顆【不是「我們沒想到的事件」，是我們自己 S3 開的洞】：
 	                       #     rung 是意圖資格的閘（faction_ai_system.gd:1181
 	                       #     `ambition_rung >= RUNG_EXPAND` 才選得了擴張），
@@ -65,7 +79,7 @@ static func all_kinds() -> Array:
 #   ⇒ **任何未來新增的 emit 都會自動維持瞬醒** ＝ 構造保證。
 #   ★反過來設計（預設 false、需要的人自己打開）＝ 清單保證 ⇒ 漏改一處就【靜默失去瞬醒】。
 static func emit(state: WorldState, kind: String, subjects: Array,
-		wake_thinking: bool = true) -> void:
+		wake_thinking: bool = true, info: Dictionary = {}) -> void:
 	if state == null or subjects.is_empty():
 		return
 	for tid in subjects:
@@ -75,6 +89,10 @@ static func emit(state: WorldState, kind: String, subjects: Array,
 		state.pending_rethink[id] = true
 		if wake_thinking:
 			state.pending_think[id] = true
+	# ★★★玩家可見事件佇列的【唯一寫入點】（spec §2①）——
+	#   寫在這裡而不是各呼叫端，是因為「緩衝不是來源」：emit 一次，同時進匯流排與玩家佇列。
+	#   ★繞過 emit 直接寫佇列 ＝ 第二本帳 ⇒ P3 用 grep 斷言只有這一處。
+	_feed_player(state, kind, subjects, info)
 	if Probe.enabled:
 		Probe.bump("t0.emit")
 		Probe.bump("t0.emit." + kind)
@@ -199,3 +217,85 @@ static func consume_and_clear(state: WorldState) -> void:
 					"fid": int(_lt.faction_id) if _lt != null else -1}, 40000)
 		state.pending_seen = {}
 	state.pending_rethink.clear()
+
+# ══════════ 玩家可見事件佇列（spec 2026-09-25）══════════
+
+# ★★★過濾器：【預設不給】，例外是白名單、逐條具名（blueprint 釘的 WHAT）。
+#   ★白名單第①條：**自家隊 self-knowledge** —— 而它不是本票發明的例外，
+#     `belief_system.gd:123` 的檔頭就寫著通道分流：同-faction 自家人走
+#     `faction.known_member_states`（自帶 last_tick、不經 BeliefSystem），跨-faction 才走 belief。
+#     ⇒ ★★所以「自家隊全知」是【既有的通道事實】，不是為玩家開的後門。
+#   ★白名單第②條：**情報到了／看得見** ⇒ 走 `BeliefSystem.has_belief()`
+#     ——【NPC 決定 belief 用的那同一支函式】，★不另寫一條「玩家看得到什麼」的規則。
+#     而「看得見」不需要另一支函式：`VisionSystem.tick_discovery()` 偵測到就
+#     `_write_tier01()` 寫 belief ⇒ **看得見是 has_belief 的上游**，它已經被涵蓋。
+#
+# ★★★而我要把一個【誠實限】寫在這裡，因為它是真的、而且我沒有權限自己收緊：
+#   `has_belief()` 回答的是「我對那支隊【有沒有任何 claim】」，
+#   ★不是「我知不知道【這件事】發生了」⇒ 一筆 30 天前的舊情報，會讓玩家【即時】
+#   看到那支隊今天的領袖死訊。⇒ 那是 god-view 從一扇 belief 形狀的門漏出來。
+#   ★★真正對齊的判準需要 staleness gate（`belief_pos` 用的那一個）或
+#     per-event 的感知，而兩者都是【設計決定】不是實作細節 ⇒ 已呈報 systems。
+static func _player_perceives(state: WorldState, subjects: Array) -> bool:
+	var ptid: int = state.get_player_team_id()
+	if ptid == -1:
+		return false   # ★沒有玩家 ⇒ 不給（預設不給，而不是「給全部」）
+	for tid in subjects:
+		var id: int = int(tid)
+		if id == ptid:
+			return true   # ①自家隊 self-knowledge
+		if BeliefSystem.has_belief(state, ptid, id):
+			return true   # ②情報到了／看得見（同一支函式）
+	return false
+
+# 寫入佇列。★只由 `emit()` 呼叫 —— 它是那個唯一寫入點的實作，不是第二個入口。
+static func _feed_player(state: WorldState, kind: String, subjects: Array, info: Dictionary = {}) -> void:
+	if state == null:
+		return
+	if not _player_perceives(state, subjects):
+		return
+	state.player_event_seq += 1
+	state.player_events.append({
+		"tick": state.world.current_tick, "seq": state.player_event_seq,
+		"kind": kind, "subjects": subjects.duplicate(),
+		"info": info.duplicate(), "text": describe(state, kind, subjects, info)})
+
+# kind → 人話。★放在本檔＝跟 `MESSAGE_KINDS`／`FUNC_KINDS` 那兩張清單【同一個地方】
+#   ⇒ 新增一個 kind 的人，會在同一個檔裡看到「它還要有一句人話」。
+static func describe(state: WorldState, kind: String, subjects: Array, info: Dictionary = {}) -> String:
+	var who: String = _team_name(state, subjects[0] if not subjects.is_empty() else -1)
+	match kind:
+		"member_left":
+			# ★★★原因是【必印】不是可選：spec P6 —— 一個沒有原因的「有人離隊了」
+			#   會讓玩家去猜，而猜出來的因果比沒有因果更糟。
+			return "%s：%s 離隊了（%s）" % [who, String(info.get("name", "有人")),
+				String(info.get("reason", "原因不明"))]
+		"member_died":
+			return "%s：%s 死了（%s）" % [who, String(info.get("name", "有人")),
+				String(info.get("cause", "死因不明"))]
+		"came_of_age":
+			return "%s：%d 名未成年長大成人" % [who, int(info.get("n", 0))]
+		"member_joined":
+			return "%s：招到 %d 人" % [who, int(info.get("n", 0))]
+		"leader_death":          return "%s 的領袖死了" % who
+		"team_extinct":          return "%s 全滅了" % who
+		"teams_erased":          return "%s 沒了" % who
+		"combat_engaged":        return "%s 捲進了戰鬥" % who
+		"betrayed":              return "%s 被盟友背叛" % who
+		"intel_arrived":         return "%s 收到了情報" % who
+		"convoy_stranded":       return "%s 的運輸隊回不去，轉為自立" % who
+		"construction_stalled":  return "%s 的工地停擺" % who
+		"construction_abandoned":return "%s 放棄了工地" % who
+		"plan_invalidated":      return "%s 的計畫行不通了" % who
+		"rung_changed":          return "%s 的野心變了" % who
+		_:                       return "%s：%s" % [who, kind]
+
+static func _team_name(state: WorldState, tid: int) -> String:
+	if tid == -1 or not state.teams.has(tid):
+		return "某支隊伍"
+	# ★TeamData 沒有名字欄位（team_data.gd 只有 named_members）——
+	#   ★★我原本寫 `t.get("team_name", "")`，而 TeamData 是 Object：它的 `get()` 只吃一個參數
+	#   ⇒ 噴 151 次「Invalid call to function 'get'」而 headless 的 HARD-FAILS 仍是 3（＝基準值）
+	#   ⇒ ★★★那正是「離開碼／彙總數字看起來正常，而 stderr 在尖叫」——
+	#     抓到它的是 grep SCRIPT ERROR，不是 rc。
+	return "Team%d" % tid

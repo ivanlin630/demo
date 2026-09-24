@@ -1181,6 +1181,9 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 	ResourceBank.add(tgt, "coin", RECRUIT_COST_ANON, "recruit_anon_receive")
 	AnonTreasuryBank.transfer(tgt, pt, share, "recruit_share")
 	state.player_pending_targets.erase(target_id)
+	# ★事件流（spec #4）：★人數用 `moved_n` ＝【真的搬過來的】那個數
+	#   —— 不是 `share`（那是搬之前算的期望值）。招募那張票的教訓：報告的字要與事實相符。
+	WorldEvents.emit(state, "member_joined", [pt_id], false, {"n": moved_n})
 	print("[Recruit] 匿名 Team%d←%d, 招到 %d 人, 花%.0f coin, 新人口=%d" % [
 		pt_id, target_id, moved_n, RECRUIT_COST_ANON, pt.population])
 	# ★把 moved 印出來 —— ★★玩家從此分辨得出「招到 0 人」與「沒招成」，

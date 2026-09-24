@@ -418,6 +418,9 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			person.stress = maxf(person.stress - 0.3, 0.0)
 			if team.named_members.has(person.id):
 				state.remove_member(team, person.id)   # 離隊：erase + team_id=-1
+				# ★事件流（spec #4）：離隊要【帶原因】—— N1_flee ＝ 壓力把人逼走
+				WorldEvents.emit(state, "member_left", [team.team_id], false,
+					{"name": String(person.person_name), "reason": "受不了壓力，逃走了"})
 				if Probe.enabled: Probe.bump("death.defect_leave")
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
@@ -433,6 +436,9 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			LoyaltyBank.set_baseline(person, 0.0, "defect")
 			if team.named_members.has(person.id):
 				state.remove_member(team, person.id)   # 離隊：erase + team_id=-1
+				# ★事件流（spec #4）：N3_defect ＝ 忠誠歸零而叛離（★與 flee 不同因，不可共用一句）
+				WorldEvents.emit(state, "member_left", [team.team_id], false,
+					{"name": String(person.person_name), "reason": "忠誠崩潰，叛離出走"})
 				if Probe.enabled: Probe.bump("death.defect_leave")
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:

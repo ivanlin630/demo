@@ -93,6 +93,8 @@ func _mature_minors(state: WorldState) -> void:
 			Probe.bump("pop.mature.batches")
 			Probe.add_amount("pop.mature.n", float(n))
 		print("[PopMgmt] Team%d %d 名未成年長大成人（平民）" % [tid, n])
+		# ★事件流（spec #4）：★人數用 `n` —— 與上面那個 print 和 Probe 同一個來源
+		WorldEvents.emit(state, "came_of_age", [tid], false, {"n": n})
 
 # ★§4b 唯一新常數（TEST VALUE、R² 判 margin 優於純 delay）：機械拆隊保底的觸發倍率。
 # population > cap × 此值 才機械介入；之間的小超額留給決策層（擴點）自己解。
