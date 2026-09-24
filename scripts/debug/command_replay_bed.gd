@@ -300,6 +300,7 @@ func _initialize() -> void:
 #   ⇒ ★★★改成【異源比對】：左＝從 `player_command_api.gd` 的 `dispatch()` 原始碼抽出的 match 名單，
 #     右＝`VERB` 這個常數。兩邊各自能改變 ⇒ 漏一個就會紅。
 #   ★另外逐 name 驗一次「回音不含它自己的英文 id」—— 那是 describe() 掉到 fallback 的長相。
+# 負對照：讓 `describe("move_to")` 回一句【固定】而且含 3 含 4 的話（如「移動（第34筆）」） ⇒ ★舊判準 `contains("3") and contains("4")` 會【綠】、新判準才紅 ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p9_enqueue_echo() -> void:
 	print("
 ── P9 入列有回音（母體＝dispatch 白名單全部）──")
@@ -358,13 +359,25 @@ func _test_p9_enqueue_echo() -> void:
 	_check("回了 queued", bool(r.get("queued", false)))
 	_check("★有回音（message 非空）", msg != "")
 	_check("★★回音含【動作】而不只是「已排入」（找「移動」）", msg.contains("移動"))
-	_check("★★★而它含【參數】—— 否則兩條不同的指令回同一句話", msg.contains("3") and msg.contains("4"))
+	# ★★★這一句原本是 `msg.contains("3") and msg.contains("4")` —— 而它是【空的】：
+	#   判準錨在「字串裡任何位置有 3 有 4」⇒ tick 號、筆數、id 都能餵飽它
+	#   （「已排入第 34 筆」就綠了）⇒ ★它錨在【附帶線索】上，不是錨在被守的性質上。
+	# ⇒ ★★換成【被守的性質本身】：兩條不同參數的指令，不准回同一句話。
+	#   ★★★那個判準【不可能被附帶數字滿足】，而且【不依賴回音的措辭】——
+	#     有人把文案整個改寫，它照樣測得出「兩條不同的指令分不分得出來」。
+	var r2: Dictionary = bridge.command_player("move_to", {"tile_q": 5, "tile_r": 6})
+	var msg2: String = String(r2.get("message", ""))
+	print("  第二條（不同參數）：「%s」" % msg2)
+	_check("★母體地板：第二條也真的入列了（否則兩句都空也會「不相同」不成立）",
+		bool(r2.get("queued", false)) and msg2 != "")
+	_check("★★★參數不同 ⇒ 回音【不相同】（(3,4) vs (5,6)）", msg != msg2)
 	_cell("_test_p9_enqueue_echo")
 
 
 # ══════════ P10［消費點必回結果句］══════════
 # ★★★這一格最容易恆綠：母體地板要求那一輪【同時】有①會成功②會被拒絕的指令 ——
 #   沒有②的話，「拒絕禁靜默」是一句【對空集合為真】的話。
+# 負對照：只讓【第一筆】拒絕不帶「被拒絕」（`sim_runner` 那一行加 `if name == "move_to"` 分支） ⇒ ★舊的覆寫寫法只看最後一筆會【綠】、累積寫法紅（1／2） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p10_result_lines() -> void:
 	print("
 ── P10 消費點必回結果句（成功＋拒絕都要有）──")
@@ -379,7 +392,14 @@ func _test_p10_result_lines() -> void:
 		_cell("_test_p10_result_lines")
 		return
 	bridge.command_player("move_to", (plan[0] as Dictionary)["args"])          # 應成功
-	bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})  # 應被拒
+	bridge.command_player("move_to", {"tile_q": BAD_TILE.x, "tile_r": BAD_TILE.y})  # 應被拒①
+	# ★★★第二筆拒絕是【刻意加的】，而理由是這一格自己的判準需要它：
+	#   下面「被拒的每一筆都帶原因」在【只有一筆】被拒時，
+	#   ★「累積」與「迴圈裡覆寫單一變數」會給出【一模一樣】的答案
+	#   ⇒ 那條剛修好的判準【沒有守衛】。⇒ 母體要 ≥2 筆，那個修正才被守住。
+	# ★★而它刻意用【不同種類】的拒絕（不是再送一條同型 move_to）：
+	#   同型的第二條有可能被消費點視為「覆寫前一個目標」⇒ 那樣就不是兩筆拒絕。
+	bridge.command_player("execute_action", {"action_id": "no_such_action_xyz"})     # 應被拒②
 	runner.advance_tick(st, Vector2i(-1, -1))
 	var ok_n: int = 0
 	var bad_n: int = 0
@@ -389,13 +409,26 @@ func _test_p10_result_lines() -> void:
 		print("  「%s」" % String(r.get("text", "")))
 	_check("★★★母體地板：這一輪【同時】有成功（%d）與被拒（%d）" % [ok_n, bad_n],
 		ok_n >= 1 and bad_n >= 1)
-	_check("結果句數 ＝ 指令數（%d／2）" % st.command_results.size(), st.command_results.size() == 2)
-	var has_reason: bool = false
+	_check("結果句數 ＝ 指令數（%d／3）" % st.command_results.size(), st.command_results.size() == 3)
+	# ★★★這一段原本用【單一變數】在迴圈裡記結果 ⇒ 每一圈覆寫上一圈
+	#   ⇒ 只有【最後一筆】被拒的算 ⇒ 兩筆拒絕而第一筆沒帶原因【也會綠】。
+	#   ⇒ ★那是「迴圈裡的單一變數把母體塌成 1」：跑了 N 圈，判決只反映 1 圈。
+	# ⇒ ★★改成【累積】：數被拒幾筆、數帶原因幾筆，兩個數都印出來再比。
+	var rejected: int = 0
+	var with_reason: int = 0
 	for r in st.command_results:
 		if not bool(r.get("ok", false)):
+			rejected += 1
 			var t: String = String(r.get("text", ""))
-			has_reason = t.contains("被拒絕") and not t.contains("沒有給原因")
-	_check("★拒絕那一句【帶原因】（不是「沒有給原因」）", has_reason)
+			if t.contains("被拒絕") and not t.contains("沒有給原因"):
+				with_reason += 1
+	print("  被拒 %d 筆，其中帶原因 %d 筆" % [rejected, with_reason])
+	# ★★★母體地板：那一輪要【真的有】被拒的筆數 —— 0 筆的話「全都帶原因」恆真。
+	# ★★★母體地板要求 ≥2：只有一筆的話，「累積」與「覆寫」給出同一個答案
+	#   ⇒ 剛修好的那個累積寫法【不會被任何東西守住】。
+	_check("★母體地板：這一輪有【至少兩筆】被拒（實測 %d 筆）" % rejected, rejected >= 2)
+	_check("★★被拒的【每一筆】都帶原因（%d／%d）" % [with_reason, rejected],
+		rejected >= 1 and with_reason == rejected)
 	_cell("_test_p10_result_lines")
 
 

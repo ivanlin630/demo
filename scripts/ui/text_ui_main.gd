@@ -238,7 +238,7 @@ func _process(_delta: float) -> void:
 	if result.get("done", false):
 		var mt2: Vector2i = _bridge.get_player_move_target()
 		if _input_bar.text.begins_with("移動中") and mt2 != Vector2i(-1, -1):
-			_bridge.request_advance(99999)
+			_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
 		else:
 			_input_bar.text = ""
 	elif not _input_bar.text.begins_with("移動中"):
@@ -338,7 +338,7 @@ func _input(event: InputEvent) -> void:
 				#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
 				#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
 				#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
-				_bridge.request_advance(99999)
+				_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
 				_input_bar.text = "移動中 [Esc]停止"
 			else:
 				# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
@@ -351,6 +351,15 @@ func _input(event: InputEvent) -> void:
 			_refresh()
 		KEY_SPACE:
 			_bridge.request_advance(WorldState.TICKS_PER_DAY)
+		# ★★★推進一小時（spec §4b，用戶裁 #6）——★【不新開推進路徑】：照上面 SPACE 那一支的
+		#   寫法呼叫【既有的】 `request_advance()`。理由是 2026-09-24 剛踩過的那條：
+		#   兩個推進路徑其中一個沒跟上 ⇒ 我們不再製造第三條。
+		# ★★單位：只准引用 `WorldState.TICKS_PER_HOUR`，★★★不准寫 60 ——
+		#   `world_state.gd:12` 寫著它是【唯一自由參數】⇒ 寫死一個 60 就是把那個旋鈕複製了一份，
+		#   而複製出來的那一份【不會跟著轉】。
+		# ★Esc 中斷沿用 SPACE 那一支已經有的行為（`:422` 的 `cancel_advance()`），不另外做。
+		KEY_X:
+			_bridge.request_advance(WorldState.TICKS_PER_HOUR)
 		KEY_G:
 			_input_mode = true
 			_input_mode_type = "numeric"
@@ -511,7 +520,7 @@ func _handle_input_mode(keycode: int) -> void:
 					_refresh()
 				elif int(_input_buffer) > 0:
 					# 舊有行為：跳過 N tick
-					var n: int = mini(int(_input_buffer), 99999)
+					var n: int = mini(int(_input_buffer), SimBridge.ADVANCE_MAX_REQUEST)
 					_input_mode = false
 					_input_bar.text = ""
 					_bridge.request_advance(n)
@@ -637,8 +646,18 @@ func _refresh() -> void:
 	#   ★常駐＝0 也印 —— ★★只在非零時才出現的東西，玩家學不會它的意思，
 	#     而「沒看到」與「沒有這個功能」在畫面上長得一樣。
 	#   ★這裡【只讀】不寫（render 不得寫 state）。
-	_hint_line.text = "%s｜待執行 %d 道" % [
-		_mode_keymap(_current_mode_name()), _bridge.pending_command_count()]
+	# ★★★而「N 道」單獨是看不懂的（用戶問「同格招募，待辦為何 3 還 4 道」）
+	#   ⇒ 後面列【動作人話】（最多 3 個，spec §4c①）。
+	#   ★文案走 `_bridge.pending_command_labels()` ＝ `PlayerCommandApi.describe()`
+	#     ＝【與入列回音同一份字串】—— ★★不在這裡另寫一份：
+	#     兩份文案會漂，而漂了【沒有任何東西會紅】（P15b grep 這兩處同源）。
+	var _pend_n: int = _bridge.pending_command_count()
+	var _pend_txt: String = "待執行 %d 道" % _pend_n
+	if _pend_n > 0:
+		var _labels: Array = _bridge.pending_command_labels(3)
+		_pend_txt += "（%s%s）" % [
+			"、".join(_labels), "…" if _pend_n > _labels.size() else ""]
+	_hint_line.text = "%s｜%s" % [_mode_keymap(_current_mode_name()), _pend_txt]
 	_log_strip.text = _log_strip_text(_events, 3)
 	_check_alerts()
 
@@ -685,7 +704,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [X]推進1小時 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
 	"interact":      "[1-9]選目標/行動 [Esc]返回",
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
@@ -788,6 +807,7 @@ func _build_state_str() -> String:
 		for _f in _page_skylight_fields(_page_idx):
 			lines.append(UiPages.skylight(_f))
 
+	lines.append_array(_build_hover_truth_lines())
 	lines.append("────────────────")
 	lines.append("Tick: %d  (Day %d)" % [
 		_bridge.get_current_tick(),
@@ -920,6 +940,75 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 		#   ⇒ ★★★而那一輪的卷面是「errors: 1｜到場點名 31／31」—— 一個執行期錯誤
 		#     靜靜吃掉半個函式，而點名照樣滿分。
 		lines.append("聚焦: %s  %s" % [str(fm.get("name", "?")), str(fm.get("status", ""))])
+	return lines
+
+# ══════════ 游標懸停印整格真值（debug）══════════
+# ★★★這是【用戶明裁的 god-view 例外】（「先顯示真值 我好 debug」，意圖帳 #42）——
+#   而例外的正當性【只存在於「這是畫給人看的」這件事上】。
+# ⇒ ★所以這支函式的形狀本身就是那道牆：
+#   ①它只在 render 路徑被呼叫，而它【只讀不寫】—— 沒有任何一行寫 state，
+#     ★★連快取進 `player_state` 都沒有（spec §1①明文禁止）
+#   ②它回的是 Array[String]，★★★而字串進不了決策 —— 決策讀的是 belief，不是畫面
+#   ⇒ ★★★**沒有儲存，就沒有消費者** —— 這比「規定大家不要讀它」強，
+#     因為它不依賴任何人記得。
+# ★而標題那一行不是裝飾（spec §3）：用戶拿真值 debug 時會看到【附身者不知道的事】
+#   ⇒ 「AI 怎麼這麼笨」與「AI 根本不知道」在畫面上長得一樣
+#   ⇒ ★★那一行讓每一次觀察【自帶它的來源標籤】，否則用它得出的每一個
+#     「遊戲合不合理」的結論，都建在一個玩家拿不到的資訊上。
+# ★即時性不是我加的：`_move_cursor()` 本來就在結尾呼叫 `_refresh()`
+#   ⇒ 這個區塊讀 `_cursor`（不是 `_selected`）就自動是【不用按 Enter】的。
+# ★★誠實限：勢力印的是 `faction_id` 而不是名字 —— `get_teams_at_tile()` 給的是 id，
+#   而畫面上那個好看的 `faction_display` 是【belief 推導的】⇒ 把它混進真值區塊
+#   會讓這一段變成「一半真值一半信念」，那比少一個名字糟。
+const HOVER_TRUTH_TITLE: String = "真值·debug（非附身者所知）"
+
+func _build_hover_truth_lines() -> Array:
+	var lines: Array = []
+	if _cursor == Vector2i(-1, -1):
+		return lines
+	var t: Dictionary = _bridge.query_tile(_cursor.x, _cursor.y)
+	# ★★★不印裸分隔線（2026-09-25 實測訂正）：原本我在標題上面多加一條
+	#   `────────────────`，而那條線【與畫面上既有的分隔線同字】
+	#   ⇒ 票B 的零損失比對（單次 render vs 五頁聯集）看到它從 4 次變 9 次而紅。
+	#   ★那不是零損失壞了，是我多了一個【撞名的】分隔符 —— 而聯集有五頁，所以多五條。
+	#   ⇒ ★★讓標題行自己當分隔：一個區塊一個界線，本來就不該有兩個。
+	lines.append("── %s ──" % HOVER_TRUTH_TITLE)
+	if t.is_empty():
+		lines.append("  游標 (%d,%d) tile_id=%d ⇒ ★這一格不在地圖上" % [
+			_cursor.x, _cursor.y, _cursor.x * 1000 + _cursor.y])
+		return lines
+	lines.append("  格 (%d,%d)  tile_id=%d  地形:%s  收成係數:%.3f" % [
+		_cursor.x, _cursor.y, _cursor.x * 1000 + _cursor.y,
+		String(t.get("terrain", "?")), float(t.get("harvest_factor", 0.0))])
+	# ★全部 resources —— ★★鍵排序後印：不排序的話同一格在兩次 render 之間可能換順序，
+	#   而那會讓「畫面穩定」那一類的斷言變得取決於字典的內部順序。
+	var res: Dictionary = t.get("resources", {})
+	if res.is_empty():
+		lines.append("  資源：（空）")
+	else:
+		var ks: Array = res.keys()
+		ks.sort()
+		var parts: PackedStringArray = PackedStringArray()
+		for k in ks:
+			parts.append("%s=%s" % [String(k), str(res[k])])
+		lines.append("  資源：%s" % " ".join(parts))
+	var olv: int = int(t.get("outpost_level", 0))
+	if olv > 0:
+		lines.append("  據點：%s Lv%d  主人(控制方)=%s" % [
+			String(t.get("outpost_type", "?")), olv, str(t.get("outpost_owner", -1))])
+	else:
+		lines.append("  據點：無（outpost_level=0）")
+	# ★格上所有隊 —— ★★用既有的 `get_teams_at_tile()`（`bottom_bar` 已經是它的消費者）
+	#   ⇒ 不自己再掃一次全隊，否則同一個問題會有兩份答案
+	var here: Array = _bridge.get_teams_at_tile(_cursor.x, _cursor.y)
+	if here.is_empty():
+		lines.append("  格上隊伍：0 支")
+	else:
+		lines.append("  格上隊伍：%d 支" % here.size())
+		for o in here:
+			lines.append("    Team%d  人口:%d  勢力id:%d  任務:%s" % [
+				int(o.get("id", -1)), int(o.get("population", 0)),
+				int(o.get("faction_id", -1)), String(o.get("current_task", ""))])
 	return lines
 
 func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:

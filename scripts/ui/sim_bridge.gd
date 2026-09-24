@@ -21,6 +21,25 @@ func _init(runner: SimRunner, state: WorldState) -> void:
 func get_state() -> WorldState:
 	return _state
 
+# 「一直推到有事件擋住它」的哨兵。
+# ★★★名字刻意【不叫】 ADVANCE_UNBOUNDED —— 它不是無界：
+#   99999 tick ÷ TICKS_PER_DAY(1440) ＝ 約 69.4 天，那是一個【有限天花板】。
+#   ★一個承諾得比它交付的多的名字會說謊，而【沒有任何一格在驗名字】
+#   ⇒ ★★它的失效是靜的：真的推到 69 天還沒有事件 ⇒ 安靜停下，而畫面看起來像「移動完成了」。
+# ★★實務上永遠先被事件擋住：`tick_step()` 一遇到玩家相關事件就把 remaining 歸零。
+# ★★★真正無界（`-1` 由 bridge 解讀）另立小票 —— 那會改 `is_advancing()` 的語意，
+#   而爆炸半徑已經數過：`_ticks_remaining` 全庫 9 處【都在本檔】，外面沒有人讀它。
+# 一個 `request_advance()` 請求容許的上限（≈69.4 天）。
+# ★它同時是 UI 夾玩家輸入（G 鍵「跳過 N tick」）的上限 —— 那是【夾具】的語意。
+const ADVANCE_MAX_REQUEST: int = 99999
+
+# 「一直推到有事件擋住它」的哨兵 ＝ 請求上限。
+# ★★★刻意【衍生】而不是再寫一次 99999：哨兵請求的量不可以超過請求上限，
+#   而那個依賴是真的 ⇒ 衍生會讓它們不可能漂開。
+# ★★而它們是【兩個名字】不是一個：哨兵是「推到有事件」、夾具是「別超過上限」——
+#   共用一個名字會把兩件事黏在一起（今天已在 99999 vs ObserverBridge 的 1000000 上犯過）。
+const ADVANCE_UNTIL_EVENT: int = ADVANCE_MAX_REQUEST
+
 # 請求推進 n ticks（非阻塞，由 tick_step 每 frame 分批執行）
 func request_advance(n: int) -> void:
 	_ticks_remaining = n
@@ -32,6 +51,15 @@ func cancel_advance() -> void:
 # 是否正在推進
 func is_advancing() -> bool:
 	return _ticks_remaining > 0
+
+# 還要推進幾顆（唯讀觀測口）。
+# ★★★它存在的理由是一個【量錯對象】的實測（2026-09-25）：P8 原本量「世界走了幾顆」，
+#   而 `tick_step()` 遇到事件會把 remaining 歸零 ⇒ 請求一天、第一幀走完一小時就被擋住
+#   ⇒ ★【1440 與 60 在卷面上長得一模一樣】，負對照因此不紅。
+# ⇒ ★★被守的性質是「按 X【請求】的是一小時」，而請求量是這裡這個數
+#   ——【走了多少】是世界的權利，不是那個鍵的承諾。
+func ticks_remaining() -> int:
+	return _ticks_remaining
 
 # 是否處於遭遇戰（text UI 不直存 state.encounter_active）
 func is_encounter_active() -> bool:
@@ -298,6 +326,21 @@ func command_player(name: String, args: Dictionary) -> Dictionary:
 	if not PlayerCommandApi.VERB.has(name):
 		return {"ok": false, "queued": false, "code": "unknown_command",
 			"message": "沒有這個指令：%s" % name}
+	# ★★★同批重複去重（spec §4c②，用戶問「同格招募，待辦為何 3 還 4 道」）：
+	#   真因＝每按一次 T 就入列一道 `refresh_targets`（text_ui_main 的 KEY_T 分支）。
+	# ★★而它【不准搬出佇列】：那支會寫 `player_pending_targets` ＝ 世界狀態
+	#   ⇒ 不入列的話「玩家何時開選單」會改變世界 ⇒ 把票5 修掉的不決定性放回來。
+	#   ⇒ 處置是【去重 ＋ 列名】，不是【搬出去】。
+	# ★★★判準刻意只看【尾端】：它合併的是「連續、同名、無參數」那一種 ＝【按鍵按太多次】的形狀；
+	#   而 `[refresh, move, refresh]` 的第二個【要保留】—— 移動之後可見對象會變，那時它的意義不同。
+	#   ⇒ P14 就是守這件事（把判準放寬成「佇列裡有就不加」⇒ 必須紅）。
+	# ★只比尾端那一筆的 name ＝【不讀世界】⇒ 不違反「入列當下只擋不讀世界的」那條裁定。
+	if _merges_into_tail(name, args):
+		var tail: Dictionary = _state.pending_commands[-1]
+		# ★回的字要與事實相符：它【確實在佇列裡】，而【沒有多排一道】——兩件都說。
+		#   ★★這一句是 2026-09-25 招募那張的教訓：回報的字與事實不符，玩家只看得到那一個。
+		return {"ok": true, "queued": true, "merged": true, "seq": int(tail.get("seq", 0)),
+			"message": "已排入：%s（同一道，沒有重複排）" % PlayerCommandApi.describe(name, args)}
 	_state.command_seq += 1
 	_state.pending_commands.append({
 		"name": name, "args": args.duplicate(true), "seq": _state.command_seq})
@@ -307,6 +350,26 @@ func command_player(name: String, args: Dictionary) -> Dictionary:
 # 頁腳常駐用（spec §3-5③）：★★「待執行 N 道」——★玩家要看得到他按的東西還沒生效。
 func pending_command_count() -> int:
 	return _state.pending_commands.size()
+
+# 「連續、同名、無參數」＝按鍵按太多次的形狀 ⇒ 併進尾端那一道。
+# ★★★為什麼要求【無參數】兩邊都成立：`move_to(3,4)` 與 `move_to(5,6)` 同名而意思不同 ——
+#   合併它們會把玩家的第二個決定吃掉，而他不會知道。
+func _merges_into_tail(name: String, args: Dictionary) -> bool:
+	if not args.is_empty(): return false
+	if _state.pending_commands.is_empty(): return false
+	var tail: Dictionary = _state.pending_commands[-1]
+	if String(tail.get("name", "")) != name: return false
+	return Dictionary(tail.get("args", {})).is_empty()
+
+# 頁腳列名用（spec §4c①）：待辦的【動作人話】，最多 max_n 個。
+# ★★★文案走 `PlayerCommandApi.describe()` ＝【與入列回音同一份字串】——
+#   不另寫一份。★兩份文案會漂，而漂了【沒有任何東西會紅】（P15b 就是 grep 這兩處同源）。
+func pending_command_labels(max_n: int = 3) -> Array:
+	var out: Array = []
+	for c in _state.pending_commands:
+		if out.size() >= max_n: break
+		out.append(PlayerCommandApi.describe(String(c.get("name", "")), Dictionary(c.get("args", {}))))
+	return out
 
 # ★★★【唯讀】：讀結果句不得改變世界（systems 裁 2026-09-23）。
 #   ★原本這支是破壞性排空 ⇒ 掛上一個 UI 就會改變 fp ＝ 觀測改變被觀測物。
