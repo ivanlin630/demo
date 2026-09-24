@@ -2313,8 +2313,10 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
 #     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
 #     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
-const CONTROL_FLOOR_UI: int = 14
+const CONTROL_FLOOR_UI: int = 15
 const CONTROL_FLOOR_REPLAY: int = 2
+# ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
+const CONTROL_FLOOR_FEED: int = 7
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p19_control_coverage_ratchet() -> void:
@@ -2329,8 +2331,13 @@ func _test_p19_control_coverage_ratchet() -> void:
 		n_ui >= CONTROL_FLOOR_UI)
 	_check("★★command_replay_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cr, CONTROL_FLOOR_REPLAY],
 		n_cr >= CONTROL_FLOOR_REPLAY)
-	if n_ui > CONTROL_FLOOR_UI or n_cr > CONTROL_FLOOR_REPLAY:
-		print("   ★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值（%d／%d）" % [n_ui, n_cr])
+	var n_fe: int = _count_fired("res://scripts/debug/player_event_feed_bed.gd")
+	print("   player_event_feed_bed %d（地板 %d）" % [n_fe, CONTROL_FLOOR_FEED])
+	_check("★★母體地板：新床也數得到非零（%d）" % n_fe, n_fe > 0)
+	_check("★★player_event_feed_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fe, CONTROL_FLOOR_FEED],
+		n_fe >= CONTROL_FLOOR_FEED)
+	if n_ui > CONTROL_FLOOR_UI or n_cr > CONTROL_FLOOR_REPLAY or n_fe > CONTROL_FLOOR_FEED:
+		print("   ★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值（%d／%d／%d）" % [n_ui, n_cr, n_fe])
 	_cell("_test_p19_control_coverage_ratchet")
 
 # 數【固定格式】那一行：`# 負對照：<怎麼點火> ⇒ 已於 <分支> 實測紅`
@@ -2351,6 +2358,7 @@ static func _count_fired(path: String) -> int:
 #     ·讀點搬到整天結束後才讀一次 ⇒ 只剩最後一小時那件（其餘被 TTL 清掉）⇒ 紅
 # ★母體地板：先斷言【真的塞進去了 24 件】—— 沒塞進去的話「收到 0 件」也會等於「沒漏」。
 # 負對照：把 `_process()` 裡那段撈取搬到迴圈之外（只在最後讀一次）⇒ 必須紅
+# 負對照：把 `_process()` 裡那段撈取改成永遠讀空（＝只在整天之後才讀一次）⇒ 畫面收到 0 件 ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p2_whole_day_not_dropped() -> void:
 	_selftest_gate("_test_p2_whole_day_not_dropped").noop()
 	print("\n── P2 推進一天不漏事件 ──")

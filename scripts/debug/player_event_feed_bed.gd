@@ -82,6 +82,7 @@ func _initialize() -> void:
 # ★★★母體地板＝【逐種】斷言 ≥1，不是「總數 ≥5」——
 #   五筆全是同一種也會滿足「總數 ≥5」，而那正是「計數是有損投影」。
 # ★負對照：拿掉任一種 emit ⇒ 那一種必須紅（而其餘仍綠 ⇒ 指名得出是哪一種掉了）。
+# 負對照：逐種拿掉那一支 emit（reaction／health／population／player_command）⇒ 只有那一種紅、其餘仍綠 ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p1_five_kinds_reach_the_feed() -> void:
 	print("\n── P1 五種事件都到得了 ──")
 	var pair: Array = _fresh()
@@ -172,6 +173,7 @@ func _test_p1_five_kinds_reach_the_feed() -> void:
 # ══════════ P3［單一寫入點］══════════
 # ★grep 斷言：寫 `player_events` 的地方只有 `world_events.gd` 一處。
 # ★★母體地板：先斷言【真的找到了那一處】—— 找不到＝不可判，不是綠。
+# 負對照：在 `sim_runner` 另加一行 `state.player_events.append({})` ⇒ 實測 2 處 ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p3_single_write_point() -> void:
 	print("\n── P3 玩家佇列只有一個寫入點 ──")
 	var hits: Array = []
@@ -198,6 +200,7 @@ func _test_p3_single_write_point() -> void:
 
 # ══════════ P4［過濾用 NPC 決定 belief 的那同一支函式］══════════
 # ★不准另寫一條「玩家看得到什麼」的規則 —— 那會是第二份真相。
+# 負對照：把 `BeliefSystem.has_belief()` 換成自己另寫的 `team_discovered.has()` 規則 ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p4_filter_uses_the_same_function() -> void:
 	print("\n── P4 過濾器用同一支函式 ──")
 	var src: String = FileAccess.get_file_as_string("res://scripts/simulation/world_events.gd")
@@ -215,6 +218,7 @@ func _test_p4_filter_uses_the_same_function() -> void:
 # ══════════ P5［他隊不外洩］══════════
 # ★★母體地板：那一輪要【真的有】一件玩家看不到的他隊事件 ——
 #   否則「佇列裡沒有它」在【根本沒發生】時恆真。
+# 負對照：把 `if not _player_perceives(...)` 改成 `if false:`（＝過濾整個拿掉） ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p5_other_teams_do_not_leak() -> void:
 	print("\n── P5 看不到的他隊事件不外洩 ──")
 	var pair: Array = _fresh()
@@ -248,6 +252,7 @@ func _test_p5_other_teams_do_not_leak() -> void:
 
 # ══════════ P6［離隊帶原因］══════════
 # ★★而它要驗的是【原因不同、句子就不同】—— 只驗「句子裡有括號」會被一句寫死的話滿足。
+# 負對照：把 N3_defect 的 reason 改成與 N1_flee 同一句 ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p6_departure_carries_a_reason() -> void:
 	print("\n── P6 離隊帶原因 ──")
 	var pair: Array = _fresh()
@@ -300,6 +305,7 @@ func _test_p6_departure_carries_a_reason() -> void:
 # ══════════ P7［TTL 與 step 上界共用同一個常數］══════════
 # ★spec 要求「新佇列的 TTL 併入既有那條 >= STEP_TICK_BOUND 斷言」——
 #   ★★而我做的比那更強：【共用同一個常數】⇒ 沒有第二個數字，就沒有第二條斷言要維護。
+# 負對照：把 `RESULT_TTL_TICKS` 改成 `TICKS_PER_HOUR / 2`（＝比 step 上界小） ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p7_ttl_shares_one_constant() -> void:
 	print("\n── P7 TTL 不是第二個數字 ──")
 	print("   RESULT_TTL_TICKS=%d｜STEP_TICK_BOUND=%d｜TICKS_PER_HOUR=%d" % [
@@ -323,6 +329,7 @@ func _test_p7_ttl_shares_one_constant() -> void:
 # ★★母體地板：先斷言 canon 真的產得出來（空字串的話下面全是空談）。
 # ★★★而它【不驗那個絕對雜湊】—— 那是 `world-fp` 那一格的工作，
 #   在這裡再寫一次就是兩份真相，而其中一份遲早不會跟著改。
+# 負對照：把 `state_fingerprint` 裡 `P|evt=` 那一行換成 `pass` ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p8_queue_is_in_canon() -> void:
 	print("\n── P8 佇列進 canon ──")
 	var pair: Array = _fresh()
