@@ -238,7 +238,7 @@ func _process(_delta: float) -> void:
 	if result.get("done", false):
 		var mt2: Vector2i = _bridge.get_player_move_target()
 		if _input_bar.text.begins_with("移動中") and mt2 != Vector2i(-1, -1):
-			_bridge.request_advance(99999)
+			_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
 		else:
 			_input_bar.text = ""
 	elif not _input_bar.text.begins_with("移動中"):
@@ -338,7 +338,7 @@ func _input(event: InputEvent) -> void:
 				#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
 				#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
 				#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
-				_bridge.request_advance(99999)
+				_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
 				_input_bar.text = "移動中 [Esc]停止"
 			else:
 				# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
@@ -520,7 +520,7 @@ func _handle_input_mode(keycode: int) -> void:
 					_refresh()
 				elif int(_input_buffer) > 0:
 					# 舊有行為：跳過 N tick
-					var n: int = mini(int(_input_buffer), 99999)
+					var n: int = mini(int(_input_buffer), SimBridge.ADVANCE_MAX_REQUEST)
 					_input_mode = false
 					_input_bar.text = ""
 					_bridge.request_advance(n)

@@ -21,6 +21,25 @@ func _init(runner: SimRunner, state: WorldState) -> void:
 func get_state() -> WorldState:
 	return _state
 
+# 「一直推到有事件擋住它」的哨兵。
+# ★★★名字刻意【不叫】 ADVANCE_UNBOUNDED —— 它不是無界：
+#   99999 tick ÷ TICKS_PER_DAY(1440) ＝ 約 69.4 天，那是一個【有限天花板】。
+#   ★一個承諾得比它交付的多的名字會說謊，而【沒有任何一格在驗名字】
+#   ⇒ ★★它的失效是靜的：真的推到 69 天還沒有事件 ⇒ 安靜停下，而畫面看起來像「移動完成了」。
+# ★★實務上永遠先被事件擋住：`tick_step()` 一遇到玩家相關事件就把 remaining 歸零。
+# ★★★真正無界（`-1` 由 bridge 解讀）另立小票 —— 那會改 `is_advancing()` 的語意，
+#   而爆炸半徑已經數過：`_ticks_remaining` 全庫 9 處【都在本檔】，外面沒有人讀它。
+# 一個 `request_advance()` 請求容許的上限（≈69.4 天）。
+# ★它同時是 UI 夾玩家輸入（G 鍵「跳過 N tick」）的上限 —— 那是【夾具】的語意。
+const ADVANCE_MAX_REQUEST: int = 99999
+
+# 「一直推到有事件擋住它」的哨兵 ＝ 請求上限。
+# ★★★刻意【衍生】而不是再寫一次 99999：哨兵請求的量不可以超過請求上限，
+#   而那個依賴是真的 ⇒ 衍生會讓它們不可能漂開。
+# ★★而它們是【兩個名字】不是一個：哨兵是「推到有事件」、夾具是「別超過上限」——
+#   共用一個名字會把兩件事黏在一起（今天已在 99999 vs ObserverBridge 的 1000000 上犯過）。
+const ADVANCE_UNTIL_EVENT: int = ADVANCE_MAX_REQUEST
+
 # 請求推進 n ticks（非阻塞，由 tick_step 每 frame 分批執行）
 func request_advance(n: int) -> void:
 	_ticks_remaining = n

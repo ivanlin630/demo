@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -100,6 +100,7 @@ func _initialize() -> void:
 	await _test_p14_dedupe_does_not_eat_meaningful()
 	await _test_p15b_footer_labels_same_source()
 	await _test_p16b_pending_zero_after_advance()
+	await _test_p18_unbounded_sentinel_is_named()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1856,7 +1857,13 @@ func _test_hover_p3_no_state_write() -> void:
 	seen[str(node._cursor)] = true
 	for key in [KEY_D, KEY_S, KEY_A, KEY_W, KEY_D, KEY_S]:
 		_hover_move(node, key)
-		node._build_state_str()   # ★每一步都真的 render 一次（不 render 就沒有讀真值）
+		# ★★★走【玩家真正經歷的 render 入口】`_refresh()`，不是只叫 `_build_state_str()`：
+		#   後者是我寫真值區塊時【手邊最方便】的那一支，而 `_refresh()` 還會建
+		#   map／debug bar／hint line／log strip ⇒ ★render 路徑上【別的部分】若寫了 state，
+		#   只叫 `_build_state_str()` 的版本看不到。
+		#   ★★本票正好動了 render 路徑（頁腳現在讀 `pending_command_labels()`）
+		#     ⇒ 這一格的覆蓋範圍要跟著那個改動一起長。
+		node._refresh()
 		seen[str(node._cursor)] = true
 	_check("★★母體地板：游標真的走過 %d 個【不同】的格（1 個的話 fp 不變恆真）" % seen.size(),
 		seen.size() >= 3)
@@ -2245,3 +2252,31 @@ func _test_p16b_pending_zero_after_advance() -> void:
 	_check("★★推進一小時之後待辦歸零", after == 0)
 	await _free_ui(node)
 	_cell("_test_p16b_pending_zero_after_advance")
+
+# P18［無界哨兵要有名字］：UI 不得再出現裸的 99999。
+# ★★★它守的不只是「魔術數字難看」：`99999` 與 ObserverBridge 的 `1000000` 曾經
+#   看起來像「同一個意圖的兩個魔術數字」—— ★而它們不是（一個綁事件、一個綁幀預算，
+#   而且分屬玩家路徑與儀器路徑）⇒ 沒有名字的話，下一個人會把它們統一，
+#   而那是【把兩件事黏在一起】，不是收斂。
+# ★★而 UI 裡那三處 99999 也不是同一件事（這是套用時才發現的）：
+#   兩處是【哨兵】（推到有事件擋住）、一處是【夾具】（把玩家打的數字夾到上限）
+#   ⇒ 所以是【兩個名字、一個值衍生】，不是一個名字用三次。
+# ★母體地板：兩種用法都要真的在 UI 裡 —— 否則「沒有裸 99999」在【那些行被整個刪掉】時也會綠。
+func _test_p18_unbounded_sentinel_is_named() -> void:
+	_selftest_gate("_test_p18_unbounded_sentinel_is_named").noop()
+	print("\n── P18 無界哨兵要有名字 ──")
+	var ui: String = _code_only(FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd"))
+	var br: String = FileAccess.get_file_as_string("res://scripts/ui/sim_bridge.gd")
+	_check("★母體地板：兩個常數本體都存在（哨兵 ＋ 夾具）",
+		br.contains("const ADVANCE_UNTIL_EVENT") and br.contains("const ADVANCE_MAX_REQUEST"))
+	# ★★★哨兵【衍生】自上限 —— 而不是再寫一次 99999：那個依賴是真的
+	#   （哨兵請求的量不可以超過請求上限）⇒ 衍生讓它們不可能漂開。
+	_check("★★哨兵是從上限衍生的（不是各寫一次同一個數字）",
+		br.contains("const ADVANCE_UNTIL_EVENT: int = ADVANCE_MAX_REQUEST"))
+	var used: int = ui.count("SimBridge.ADVANCE_UNTIL_EVENT")
+	var clamp: int = ui.count("SimBridge.ADVANCE_MAX_REQUEST")
+	print("   UI：哨兵 %d 處、夾具 %d 處" % [used, clamp])
+	_check("★★母體地板：UI 用到哨兵 2 處（實測 %d）" % used, used == 2)
+	_check("★★母體地板：UI 用到夾具 1 處（實測 %d）" % clamp, clamp == 1)
+	_check("★★★UI 沒有裸的 99999", not ui.contains("99999"))
+	_cell("_test_p18_unbounded_sentinel_is_named")
