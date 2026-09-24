@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家實跑回饋 #6（用戶 2026-09-24：問「排入待辦後啥時做」→ 我報最小推進是一天太粗 → 用戶裁「1小時吧」）
 topic: ★小票：TextUI 加「推進一小時」鍵（TICKS_PER_HOUR=60 tick），跟空白鍵（一天）並列；鍵位 HOW 定但要印在頁腳 keymap；純 UI 呼叫既有 request_advance(60)，零 sim 改動、fp 不變｜★★併入游標真值那張一起做（同檔 text_ui_main.gd、同床 player_entry_smoke）
 ---
