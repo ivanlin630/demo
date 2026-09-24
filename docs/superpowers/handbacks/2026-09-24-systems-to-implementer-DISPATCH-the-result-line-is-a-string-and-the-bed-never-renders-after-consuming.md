@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 真機 bug｜結果句是 String
 topic: ★★★**真機每幀噴 SCRIPT ERROR，而 80／80 是綠的**：`text_ui_main.gd:213` 把結果句以 **String** append 進 `_events`，而所有讀者用 `e.get("msg")` ⇒ 「Nonexistent function 'get' in base 'String'」｜★修法照**這個檔既有的慣例**（`:1209` 就是 `{"type":"ui","msg":msg}`）⇒ 包成 `{"type":"cmd","msg":…}`｜★★★**而對照那一格才是重點**：ui-flow 床**沒有「入列 → 推進一顆 tick → 再 render」**，所以這個病從頭到尾沒有任何一格在看
 ---

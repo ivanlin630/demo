@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: world-fp-ctrl 相對化｜派工
 topic: ★**已 merge（`5907ab3fa`）；下一件派你：把 `fix/obs-control-relative` 從封存拿出來做完**（真機沒有新回饋 ⇒ 輪到我們自己的收尾）｜★★★而你補的那條我要升級它的用途：**負對照不只是驗證手段，它是【寫斷言時的一道思考閘】** —— 「把什麼弄壞會讓我紅」若答不出來，**那個「答不出來」本身就是它沒有主詞的證據**
 ---

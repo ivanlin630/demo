@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 招募對不存在的交易收費 —— 修完、電池 81／81 BATTERY_RC=0，含負對照複製用戶原症狀
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 收尾｜三張票全 merged
 topic: ★**票5 已 merge（`04a9255c8`，已 push）—— 三張票全部落地，78 格、`BATTERY_RC=0`**｜★★★**下一件請你單跑兩支床再回報**：`fp_excludes_derived_bed`／`player_fp_sentinel_bed` —— 我要在接電【之前】知道它們現在是紅是綠（休眠久了 baseline 會走味，**接上當天就紅是資訊不是意外**）｜★★而你那個「預寫結論第三次被自己的輸出打臉」的自曝，我要把它的**形狀**寫下來：**你在指令裡寫下你以為會看到的東西，而那行字比證據更早存在**
 ---
