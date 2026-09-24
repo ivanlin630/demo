@@ -6,13 +6,67 @@
 #     ⇒ 現在：★★exit code 通過【還不夠】，輸出必須命中 expect；★★★沒寫 expect 的行直接 FAIL。
 #   ★誠實限：runner 讓「跑」變便宜，但【跑得久】仍會讓人跳過 ⇒ 報每支耗時與總時。
 set -u
+# 逐格一行：id / 秒 / 結果。★**每一條判決分支都要呼到**，漏一條⇒摘要會少一格而不會报錯。
+_mg_row() { printf '%s\t%ss\t%s\n' "$id" "$DT" "$1" >> "$MG_ROWS" 2>/dev/null; }
+# ★★把【綠著印出來、否則無人可見】的行搶下來（具名血證：P19 棘輪的「抬到現值」）。
+_mg_carry() { printf '%s' "$OUT" | grep -aE -- "$MG_CARRY_RE" | while IFS= read -r _l; do printf '%s\t%s\n' "$id" "$_l" >> "$MG_CARRY"; done; }
+
+# ★★★--selfcheck：這支 carry 的**陽性對照**。
+#   ★理由：carry 今天的母體是【空的】—— P19 的地板正好等於現值（15/2/7）
+#     ⇒ 那句「抬到現值」現在不會印。
+#   ⇒ ★★而【恒空母體的守衛】與【根本沒接電】在卷面上一模一樣：都是「（本輪沒有）」。
+#   ⇒ ★★★所以要有一個【不靠真的一輪電池】就能跑的對照：餵它一段假 OUT，看它接不接得住。
+if [ "${1:-}" = "--selfcheck" ]; then
+  MG_ROWS="$(mktemp)"; MG_CARRY="$(mktemp)"; MG_CARRY_RE="抬到現值|^\[NOTE\]"; _sc_fail=0
+  id="fake-gate"; DT=3
+  OUT="一般的綠色正文
+   ★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值（16／2／7）
+[NOTE] 另一種携帶標記
+又一行沒人要的正文"
+  _mg_row "PASS"; _mg_carry
+  if grep -q "^fake-gate	3s	PASS$" "$MG_ROWS"; then echo "[MG-SELFCHECK] ✓ 逐格行寫得出來"; else echo "[MG-SELFCHECK] ✗ 逐格行"; _sc_fail=1; fi
+  _n=$(wc -l < "$MG_CARRY" | tr -d " ")
+  if [ "$_n" = "2" ]; then echo "[MG-SELFCHECK] ✓ carry 接到 2 行（抬到現值 ＋ [NOTE]）"; else echo "[MG-SELFCHECK] ✗ carry 接到 $_n 行（應為 2）"; _sc_fail=1; fi
+  if grep -q "又一行沒人要的" "$MG_CARRY"; then echo "[MG-SELFCHECK] ✗ ★它把不該搬的也搬了（摘要會變成第二份卷面）"; _sc_fail=1; else echo "[MG-SELFCHECK] ✓ ★負對照：普通正文沒被搬進來"; fi
+  rm -f "$MG_ROWS" "$MG_CARRY"
+  if [ "$_sc_fail" = "0" ]; then echo "[MG-SELFCHECK] ✅ 全綠"; exit 0; fi
+  echo "[MG-SELFCHECK] ❌"; exit 1
+fi
 # ★★★離開碼印在卷面上（systems 2026-09-23，implementer 指出）：
 #   我在信裡要人回報「BATTERY_RC= 那一行的數字」——★而這支 runner 從來沒印過那個字面，
 #   那一行只存在於【我自己那層 shell 的 echo】⇒ 我要的是一個【不存在於這份卷面】的東西。
 #   ★★而回報的人只能改口報離開碼，那一步靠的是他誠實，不是靠卷面。
 #   ⇒ 用 trap 印在【每一條離開路徑】上：包含 exit 1／exit 2／提前 exit 0，一條都不會漏。
 #   ★★★這是【構造保證】：在每個 exit 前面各加一行，會因為有人新增一條路徑而漏掉。
-trap '_rc=$?; rm -f "${MG_RUNFLAG:-}" 2>/dev/null; echo "[MERGE-GATES] BATTERY_RC=$_rc"' EXIT
+# ★★★2026-09-25（systems）：【電池摘要 writer】。
+#   ★病：runner **不 dump 通過那幾支的 stdout**（刻意的——綠的正文沒人回頭讀）
+#     ⇒ 而一支【綠著印出來的話】就此無人可見。具名血證：`ui_flow_test.gd:2340`
+#       「★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值」只在 P19 **通過**時印
+#       ⇒ ★★**那句話今天寄不到任何人手上**。
+#   ⇒ ★★★修法不是多一支閘（用戶 2026-09-10 立規），是讓這一支**把它已經拿在手上的東西存下來**。
+#   ★卷面落在 docs/measurements/.battery/（gitignore）—— 要當 merge 證據就**明確**複製成一個有名字的檔再 commit，
+#     ★★不要讓它自動進版控：共用 main dir 下每跑一輪就動一個 tracked 檔 ＝ 保證衝突，
+#     ★★★而且我自己踩過【目錄 pathspec 把未追蹤檔一起掃進 commit】那一次（424 個檔）。
+_mg_write_summary() {
+  [ -n "${MG_ROWS:-}" ] && [ -f "${MG_ROWS:-}" ] || return 0
+  mkdir -p "$MG_SUMDIR" 2>/dev/null || return 0
+  local f="$MG_SUMDIR/${MG_RUNID}.txt"
+  {
+    echo "run-id: ${MG_RUNID}"
+    echo "runner-self: ${_mg_self:-?}"
+    echo "[TREE] HEAD-start=${_mg_head:-?} HEAD-end=$(git rev-parse --short HEAD 2>/dev/null || echo '?')"
+    echo "[TREE] registry=$([ -n "${_mg_reg:-}" ] && echo DIRTY || echo clean) runner=$([ -n "${_mg_run:-}" ] && echo DIRTY || echo clean) code-dirty=${_mg_code:-?}"
+    echo "range: MG_FROM=${MG_FROM:-0} MG_TO=${MG_TO:-0}｜註冊表 ${N:-0} 支｜實跑 ${RUN_N:-0} 支"
+    echo "baseline: 上一次 main 基線紅數=${_mg_prev:-未讀}｜本輪紅數=${#FAILED[@]}"
+    echo "BATTERY_RC: $1"
+    echo "---- 逐格（id / 秒 / 結果）----"
+    cat "$MG_ROWS"
+    echo "---- ★綠著印出來、否則沒人看得到的話（carry 規則見本檔 MG_CARRY_RE）----"
+    if [ -s "${MG_CARRY:-/nonexistent}" ]; then cat "$MG_CARRY"; else echo "（本輪沒有）"; fi
+  } > "$f" 2>/dev/null && echo "[MERGE-GATES] ★摘要已落檔：${f#${_mg_root:-}/}"
+  rm -f "$MG_ROWS" "${MG_CARRY:-}" 2>/dev/null
+}
+trap '_rc=$?; rm -f "${MG_RUNFLAG:-}" 2>/dev/null; _mg_write_summary "$_rc"; echo "[MERGE-GATES] BATTERY_RC=$_rc"' EXIT
 
 # ★★★【一次只准一份】的剎車（blueprint 指派 2026-09-23，血證：兩輪電池平行跑把機器吃爆）
 #   ★★為什麼不用「掃命令列裡有沒有 merge-gates」：★那會抓到【正在查這件事的那條指令自己】
@@ -115,7 +169,17 @@ _mg_code=$(git --no-optional-locks status --porcelain -- scripts tools 2>/dev/nu
 #   ⇒ 修法：**讓 runner 宣告自己是哪一份** —— **沉默就不再是證據，缺席變得可見。**
 _mg_self="$(git hash-object "${BASH_SOURCE[0]}" 2>/dev/null | cut -c1-8)"
 [ -z "$_mg_self" ] && _mg_self="?"
-echo "[MERGE-GATES] runner-self=$_mg_self lines=$(wc -l < "${BASH_SOURCE[0]}" | tr -d ' ') run-id=$$-$(date +%H%M%S)｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**"
+# ★run-id 提成變數：印出來的那一串與摘要檔名**必須是同一個** —— 兩串＝兩個答案。
+MG_RUNID="$$-$(date +%Y%m%d-%H%M%S)"
+MG_SUMDIR="$_mg_root/docs/measurements/.battery"
+MG_ROWS="$_mg_root/.claude/hooks/.merge-gates-rows.$$"
+MG_CARRY="$_mg_root/.claude/hooks/.merge-gates-carry.$$"
+# ★★carry 規則：**逐條具名**，不用泛型樣式。
+#   ★★★理由：泛型樣式（例如「有三顆星的行」）會把半份卷面搬進來 ⇒ 摘要變成第二份卷面，而沒人讀。
+#   ★新增一條＝在這裡加一個字面（並在 --selfcheck 裡給它一個陽性對照）。
+MG_CARRY_RE="${MG_CARRY_RE:-抬到現值|^\[NOTE\]}"
+: > "$MG_ROWS"; : > "$MG_CARRY"
+echo "[MERGE-GATES] runner-self=$_mg_self lines=$(wc -l < "${BASH_SOURCE[0]}" | tr -d ' ') run-id=$MG_RUNID｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**"
 echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code"
 if [ -n "$_mg_reg$_mg_run" ]; then
   echo "[MERGE-GATES] ★★本次判決【只適用於你的工作區】——註冊表或 runner 有未 commit 的修改"
@@ -242,7 +306,7 @@ while IFS=$'	' read -r id cmd purpose expect; do
   fi
   if [ -z "${expect:-}" ]; then
     echo "[MERGE-GATES] ✗ $id —— ★沒有 expect 欄：不能有「沒有判準也算過」的路徑"
-    FAILED+=("$id(no-expect)"); continue
+    DT=0; _mg_row "NO-EXPECT"; FAILED+=("$id(no-expect)"); continue
   fi
   OUT=$(eval "$cmd" 2>&1); RC=$?
   DT=$((SECONDS-T0))
@@ -290,7 +354,7 @@ while IFS=$'	' read -r id cmd purpose expect; do
     echo "[MERGE-GATES] ⚡ENV $id （${DT}s）—— ★★★環境失敗：引擎【一次都沒被啟動】（${_mg_env_why:-成因未分類}）"
     printf '%s
 ' "$OUT" | grep -E 'UnauthorizedAccess|已停用指令碼執行|無法載入|沒有真的重跑' | head -2
-    ENVFAIL+=("$id"); continue
+    _mg_row "ENV"; ENVFAIL+=("$id"); continue
   fi
   # ★★★2026-09-23：紅的時候把【該支的完整輸出】落檔（systems 補，血證在下）。
   #   血證：ui-flow 在一輪電池裡紅了，而卷面上只留 expect 與實際那一行
@@ -318,7 +382,7 @@ while IFS=$'	' read -r id cmd purpose expect; do
     if [ -n "$_mg_named" ]; then printf '%s
 ' "$_mg_named"; fi
     printf '%s
-' "$OUT" | tail -5; _mg_dump "$id"; FAILED+=("$id")
+' "$OUT" | tail -5; _mg_dump "$id"; _mg_row "FAIL"; FAILED+=("$id")
   elif printf '%s' "$OUT" | grep -qaE '^(SCRIPT ERROR|USER SCRIPT ERROR|FATAL):'; then
     # ★★★2026-09-23：執行期錯誤【不能算綠】（systems 加，血證在下）。
     #   血證：ui_flow_test 一輪印了 64 次 `SCRIPT ERROR: Invalid call. Nonexistent 'String' constructor.`
@@ -334,15 +398,16 @@ while IFS=$'	' read -r id cmd purpose expect; do
     echo "[MERGE-GATES]   ⇒ ★一個執行期錯誤可以把【函式從中間砍斷】而讓它回傳空值，"
     echo "[MERGE-GATES]     ★★而呼叫端看到的是「這裡沒有東西」——那與「這裡本來就沒有東西」在卷面上長得一樣。"
     _mg_dump "$id-script-error"
-    FAILED+=("$id(script-error)")
+    _mg_row "SCRIPT-ERROR"; FAILED+=("$id(script-error)")
   elif ! printf '%s' "$OUT" | grep -qE -- "$expect"; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— ★★跑完了但【沒有印出它該印的結論】"
     echo "    expect: $expect"; printf '%s
 ' "$OUT" | tail -3
     _mg_dump "$id-no-verdict"
-    FAILED+=("$id(no-verdict)")
+    _mg_row "NO-VERDICT"; FAILED+=("$id(no-verdict)")
   else
     echo "[MERGE-GATES] ✓ $id （${DT}s）"
+    _mg_row "PASS"; _mg_carry
   fi
 done < "$REG"
 # ★★★2026-09-16：**一輪之內兩棵樹**。血證：55 支正在跑的時候有人 commit

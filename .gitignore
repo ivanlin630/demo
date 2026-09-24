@@ -90,3 +90,4 @@ docs/measurements/.gate-fail/
 #   ★★★核過沒有消費者：construction_duration_source_gate.gd 只 WRITE 它（:133-135），
 #     那支床讀的是另一個路徑（:75）；全庫其餘命中只有 defers.tsv 在【談論】它
 docs/measurements/.construction-duration-source-gate.txt
+docs/measurements/.battery/
