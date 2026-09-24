@@ -300,6 +300,7 @@ func _initialize() -> void:
 #   ⇒ ★★★改成【異源比對】：左＝從 `player_command_api.gd` 的 `dispatch()` 原始碼抽出的 match 名單，
 #     右＝`VERB` 這個常數。兩邊各自能改變 ⇒ 漏一個就會紅。
 #   ★另外逐 name 驗一次「回音不含它自己的英文 id」—— 那是 describe() 掉到 fallback 的長相。
+# 負對照：讓 `describe("move_to")` 回一句【固定】而且含 3 含 4 的話（如「移動（第34筆）」） ⇒ ★舊判準 `contains("3") and contains("4")` 會【綠】、新判準才紅 ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p9_enqueue_echo() -> void:
 	print("
 ── P9 入列有回音（母體＝dispatch 白名單全部）──")
@@ -376,6 +377,7 @@ func _test_p9_enqueue_echo() -> void:
 # ══════════ P10［消費點必回結果句］══════════
 # ★★★這一格最容易恆綠：母體地板要求那一輪【同時】有①會成功②會被拒絕的指令 ——
 #   沒有②的話，「拒絕禁靜默」是一句【對空集合為真】的話。
+# 負對照：只讓【第一筆】拒絕不帶「被拒絕」（`sim_runner` 那一行加 `if name == "move_to"` 分支） ⇒ ★舊的覆寫寫法只看最後一筆會【綠】、累積寫法紅（1／2） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p10_result_lines() -> void:
 	print("
 ── P10 消費點必回結果句（成功＋拒絕都要有）──")

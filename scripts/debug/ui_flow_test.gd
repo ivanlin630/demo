@@ -1797,6 +1797,7 @@ func _hover_move(node, key: int) -> void:
 #   ⇒ 這一格驗的是【那個區塊讀的是 `_cursor` 而不是 `_selected`】。
 # ★★母體地板：游標要【真的動了】（而且 `_selected` 要維持未選狀態，否則印出來的
 #   可能是舊的「選中」區塊，而那一段本來就存在 ⇒ 這一格會在沒做事時也綠）。
+# 負對照：拿掉 `_move_cursor()` 結尾的 `_refresh()`（＝把即時觸發拿掉） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_hover_p1_live() -> void:
 	_selftest_gate("_test_hover_p1_live").noop()
 	print("
@@ -1828,6 +1829,7 @@ func _test_hover_p1_live() -> void:
 #   ⇒ 「AI 怎麼這麼笨」與「AI 根本不知道」在畫面上長得一樣。
 # ★★判準綁常數 `HOVER_TRUTH_TITLE` 而不是抄一份字面值 —— 抄一份的話改字時
 #   這一格會【自己跟著改】而不紅，那就不是判準了。
+# 負對照：把 `HOVER_TRUTH_TITLE` 改成「格子資訊」（＝拿掉那句來源標籤） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_hover_p2_title() -> void:
 	_selftest_gate("_test_hover_p2_title").noop()
 	print("
@@ -1846,6 +1848,7 @@ func _test_hover_p2_title() -> void:
 #   ★這一格是這張票的【真正判準】：真值只准被看，不准被存。
 #   ★★母體地板：那 N 次要【真的移動到不同的格】—— 否則「fp 不變」在游標沒動時恆真。
 #   ★★★負對照（手動、跑完還原）：把真值快取進 `player_state` ⇒ 必須紅。
+# 負對照：在 `_build_hover_truth_lines()` 開頭寫一行 `_bridge.get_state().player_state["hover_cache"] = str(_cursor)` ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_hover_p3_no_state_write() -> void:
 	_selftest_gate("_test_hover_p3_no_state_write").noop()
 	print("
@@ -1874,6 +1877,7 @@ func _test_hover_p3_no_state_write() -> void:
 
 # P5[空格與滿格都要走]：0 支隊的格與 ≥2 支隊的格各一次 ⇒ 都不炸、都印得出。
 # ★負對照：把多隊那一支的迴圈上限寫死成 1 ⇒ 必須紅（手動）。
+# 負對照：把多隊那一支的迴圈上限寫死成 1 ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_hover_p5_empty_and_crowded() -> void:
 	_selftest_gate("_test_hover_p5_empty_and_crowded").noop()
 	print("
@@ -2028,6 +2032,7 @@ static func _code_only(src: String) -> String:
 #   ①按鍵之後必須【真的在推進】（否則 delta==0 與「什麼都沒發生」長得一樣）
 #   ②這一輪【不能被事件提前擋住】—— tick_step 遇事件會把 remaining 歸零
 #     ⇒ 那時 delta < 一小時而它【不是缺陷】⇒ 判【不可判】，不假裝綠也不假裝紅。
+# 負對照：把 KEY_X 那一行改成 `request_advance(WorldState.TICKS_PER_DAY)` ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p8_x_advances_one_hour() -> void:
 	_selftest_gate("_test_p8_x_advances_one_hour").noop()
 	print("\n── P8 按 X 推進一小時 ──")
@@ -2060,6 +2065,7 @@ func _test_p8_x_advances_one_hour() -> void:
 #   理由：鍵位綁法若改成查表，這個錨會找不到 ⇒ 沒有地板它會變成「恆空母體恆綠」。
 # ★範圍只到【那一個呼叫】，不全檔掃 60 —— 全檔掃會咬到合法的 60
 #   （TICKS_PER_HOUR 的定義本身就是 60、秒、百分比）⇒ 那一格會恆紅，而恆紅與恆綠一樣是沒有守衛。
+# 負對照：把 `KEY_X:` 改名成 `KEY_Y:`（打地板：找不到＝不可判，不是綠） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p8s_x_uses_the_constant() -> void:
 	_selftest_gate("_test_p8s_x_uses_the_constant").noop()
 	print("\n── P8s X 那一行的單位（靜態孿生）──")
@@ -2084,6 +2090,7 @@ func _test_p8s_x_uses_the_constant() -> void:
 
 # P9［同一條路］：★不得新開推進路徑 —— UI 只准透過 bridge 的 request_advance／tick_step 推進。
 # ★母體地板：request_advance( 至少 2 處（SPACE ＋ X）⇒ 否則這一格在【檔案讀空】時恆綠。
+# 負對照：在 `_process()` 插一行 `if false: get_parent().advance_tick()` ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p9_single_advance_path() -> void:
 	_selftest_gate("_test_p9_single_advance_path").noop()
 	print("\n── P9 只有一條推進路徑 ──")
@@ -2102,6 +2109,7 @@ func _test_p9_single_advance_path() -> void:
 
 # P10［頁腳有字＋單位統一］：keymap 的 X 那一項寫「1小時」不是「60tick」。
 # ★判準只看【那一項的字串】（[X] 到下一個 [ 之間），不是全檔掃 60。
+# 負對照：把 keymap 那一項改成 `[X]推進60tick` ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p10_footer_x_says_one_hour() -> void:
 	_selftest_gate("_test_p10_footer_x_says_one_hour").noop()
 	print("\n── P10 頁腳 X 那一項 ──")
@@ -2127,6 +2135,7 @@ func _test_p10_footer_x_says_one_hour() -> void:
 #   ⇒ ★★所以 X 鍵的可中斷窗口【只有一幀寬】（按鍵到下一次 _process 之間）
 #   ⇒ ★★★那不是缺陷，是那兩個常數相等的必然結果；SPACE（一天＝24 幀）才有寬窗口。
 # ★母體地板：按 Esc 之前必須【真的在推進中】（否則「停下來了」在根本沒開始時恆真）。
+# 負對照：把 `KEY_ESCAPE:` 底下的 `if _bridge.is_advancing():` 改成 `if false:` ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p11_esc_interrupts_x() -> void:
 	_selftest_gate("_test_p11_esc_interrupts_x").noop()
 	print("\n── P11 Esc 中斷 ──")
@@ -2150,6 +2159,7 @@ func _test_p11_esc_interrupts_x() -> void:
 # P13［去重］：連按 T 三次 ⇒ 待辦 1 道。★守的是「1」不是「少於 3」。
 # ★★母體地板：光看 ==1 不夠 —— 若只入列過一次，1 是【假綠】
 #   ⇒ 另外要一個【合併真的發生過】的機器可讀證據：直呼同名無參數，必須回 merged=true。
+# 負對照：把 `if _merges_into_tail(name, args):` 改成 `if false:`（＝去重整個拿掉） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p13_dedupe_repeated_t() -> void:
 	_selftest_gate("_test_p13_dedupe_repeated_t").noop()
 	print("\n── P13 連按 T 去重 ──")
@@ -2189,6 +2199,7 @@ func _test_p13_dedupe_repeated_t() -> void:
 #   ⇒ ★★而把去重放寬成「佇列裡有就不加」之後【還是 2】⇒ 負對照不會紅 ⇒ 那一格是空的。
 # ⇒ ★★★所以這一格走 bridge，讓兩個 refresh【真的被一個別的指令隔開】：
 #   [refresh, move, refresh] ＝ 3 道；放寬成「佇列裡有就不加」⇒ 2 道 ⇒ 紅。
+# 負對照：把 `_merges_into_tail()` 放寬成「佇列裡【有】就不加」（不只看尾端） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p14_dedupe_does_not_eat_meaningful() -> void:
 	_selftest_gate("_test_p14_dedupe_does_not_eat_meaningful").noop()
 	print("\n── P14 去重不吃掉有意義的那一個 ──")
@@ -2210,6 +2221,7 @@ func _test_p14_dedupe_does_not_eat_meaningful() -> void:
 # ★★★判準不是「兩邊看起來一樣」，是【兩邊都走 PlayerCommandApi.describe()】——
 #   ★兩份文案會漂，而漂了沒有任何東西會紅。
 # ★母體地板：那一刻頁腳要真的有待辦（0 道時列名區塊不出現 ⇒ 什麼都不印也會「相符」）。
+# 負對照：把頁腳的 `"、".join(_labels)` 換成一句自己另寫的文案 ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p15b_footer_labels_same_source() -> void:
 	_selftest_gate("_test_p15b_footer_labels_same_source").noop()
 	print("\n── P15b 頁腳列名與回音同源 ──")
@@ -2235,6 +2247,7 @@ func _test_p15b_footer_labels_same_source() -> void:
 
 # P16b［推進後歸零］：推進一小時 ⇒ 待辦 0 道。
 # ★母體地板：推進前要真的有 ≥1 道（否則「0 道」在一開始就恆真）。
+# ★負對照：尚未點火（母體地板已驗：推進前真的有 ≥1 道；行為已被 P8 的請求量那一格覆蓋大半）
 func _test_p16b_pending_zero_after_advance() -> void:
 	_selftest_gate("_test_p16b_pending_zero_after_advance").noop()
 	print("\n── P16b 推進後待辦歸零 ──")
@@ -2262,6 +2275,7 @@ func _test_p16b_pending_zero_after_advance() -> void:
 #   兩處是【哨兵】（推到有事件擋住）、一處是【夾具】（把玩家打的數字夾到上限）
 #   ⇒ 所以是【兩個名字、一個值衍生】，不是一個名字用三次。
 # ★母體地板：兩種用法都要真的在 UI 裡 —— 否則「沒有裸 99999」在【那些行被整個刪掉】時也會綠。
+# 負對照：把 `SimBridge.ADVANCE_UNTIL_EVENT` 改回裸的 `99999` ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_p18_unbounded_sentinel_is_named() -> void:
 	_selftest_gate("_test_p18_unbounded_sentinel_is_named").noop()
 	print("\n── P18 無界哨兵要有名字 ──")
