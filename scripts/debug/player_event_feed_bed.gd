@@ -285,8 +285,15 @@ func _test_p6_departure_carries_a_reason() -> void:
 	if txts.size() >= 2:
 		_check("★★句子帶原因（含括號）",
 			String(txts[0]).contains("（") and String(txts[1]).contains("（"))
-		# ★★★不同因 ⇒ 不同句：這一格不可能被【一句寫死的原因】滿足
-		_check("★★★逃走與叛離是【不同的兩句話】", String(txts[0]) != String(txts[1]))
+		# ★★★第一版寫 `txts[0] != txts[1]` —— 而負對照抓到它是【空的】：
+		#   把兩種原因改成同一句之後它【還是綠】，因為兩句話的【人名】不同
+		#   ⇒ 那個不等號是被【名字】滿足的，不是被【原因】滿足的。
+		# ⇒ 窄化成比【括號裡那一段】＝真正被守的東西。
+		var r0: String = _reason_of(String(txts[0]))
+		var r1: String = _reason_of(String(txts[1]))
+		print("   兩個原因：「%s」 vs 「%s」" % [r0, r1])
+		_check("★母體地板：兩句都抽得出原因（找不到＝不可判）", r0 != "" and r1 != "")
+		_check("★★★逃走與叛離是【不同的原因】", r0 != r1)
 	_cell("_test_p6_departure_carries_a_reason")
 
 
@@ -331,3 +338,11 @@ func _test_p8_queue_is_in_canon() -> void:
 	_check("★母體地板：fp 產得出來（非空）", fp0 != "" and fp1 != "")
 	_check("★★★佇列的內容【進得了 fp】（加一筆 ⇒ fp 變）", fp0 != fp1)
 	_cell("_test_p8_queue_is_in_canon")
+
+# 抽出「…（<原因>）」括號裡那一段。★找不到回空字串 ⇒ 由呼叫端判【不可判】，不是回一個假值。
+func _reason_of(t: String) -> String:
+	var a: int = t.find("（")
+	var b: int = t.rfind("）")
+	if a == -1 or b == -1 or b <= a + 1:
+		return ""
+	return t.substr(a + 1, b - a - 1)
