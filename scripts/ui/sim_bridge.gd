@@ -33,6 +33,15 @@ func cancel_advance() -> void:
 func is_advancing() -> bool:
 	return _ticks_remaining > 0
 
+# 還要推進幾顆（唯讀觀測口）。
+# ★★★它存在的理由是一個【量錯對象】的實測（2026-09-25）：P8 原本量「世界走了幾顆」，
+#   而 `tick_step()` 遇到事件會把 remaining 歸零 ⇒ 請求一天、第一幀走完一小時就被擋住
+#   ⇒ ★【1440 與 60 在卷面上長得一模一樣】，負對照因此不紅。
+# ⇒ ★★被守的性質是「按 X【請求】的是一小時」，而請求量是這裡這個數
+#   ——【走了多少】是世界的權利，不是那個鍵的承諾。
+func ticks_remaining() -> int:
+	return _ticks_remaining
+
 # 是否處於遭遇戰（text UI 不直存 state.encounter_active）
 func is_encounter_active() -> bool:
 	return _state.encounter_active

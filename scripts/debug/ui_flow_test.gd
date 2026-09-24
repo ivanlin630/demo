@@ -1807,9 +1807,15 @@ func _test_hover_p1_live() -> void:
 	_hover_move(node, KEY_D)
 	_check("★★母體地板：游標真的動了（%s → %s）" % [str(c0), str(node._cursor)],
 		node._cursor != c0)
-	var s: String = node._build_state_str()
-	_check("★不按 Enter ⇒ 真值區塊出現", s.contains(TextUiMain.HOVER_TRUTH_TITLE))
-	_check("★★而它印的是【游標那一格】（找 tile_id=%d）" % (node._cursor.x * 1000 + node._cursor.y),
+	# ★★★讀【畫面上那一行】（`_state_label.text`），★不是自己現叫一次 `_build_state_str()`：
+	#   2026-09-25 負對照抓到的 —— 我原本現建一份字串，於是把 `_move_cursor()` 結尾的
+	#   `_refresh()` 整個拿掉之後這一格【還是綠的】⇒ 它驗的是「區塊讀 _cursor」，
+	#   ★★而【即時性】（游標一動、畫面就變）根本沒有被驗到。
+	#   ⇒ 讀畫面才驗得到即時：沒有 `_refresh()` 的話 label 會停在【移動前】那一格。
+	var s: String = String(node._state_label.text)
+	_check("★不按 Enter ⇒ 真值區塊出現在【畫面上】", s.contains(TextUiMain.HOVER_TRUTH_TITLE))
+	_check("★★而畫面上印的是【游標現在那一格】（找 tile_id=%d）"
+		% (node._cursor.x * 1000 + node._cursor.y),
 		s.contains("tile_id=%d" % (node._cursor.x * 1000 + node._cursor.y)))
 	_check("★★★_selected 仍然未選（證明它讀的是 _cursor 不是 _selected）",
 		node._selected == Vector2i(-1, -1))
@@ -2023,20 +2029,22 @@ func _test_p8_x_advances_one_hour() -> void:
 	var t0: int = st.world.current_tick
 	_press_key(node, KEY_X)
 	_check("★母體地板①：按 X 之後真的在推進中", node._bridge.is_advancing())
+	# ★★★判準＝【請求量】，不是【世界走了多少】—— 這是 2026-09-25 負對照量出來的：
+	#   把那一行改成 TICKS_PER_DAY 之後，第一幀走完一小時就被事件擋住（remaining 歸零）
+	#   ⇒ delta 還是 60 ⇒ 【1440 與 60 在卷面上長得一模一樣】⇒ 負對照【不紅】。
+	#   ⇒ ★被守的性質是「那個鍵【承諾】一小時」，而【走了多少】是世界的權利。
+	var asked: int = node._bridge.ticks_remaining()
+	print("   請求量=%d（TICKS_PER_HOUR=%d）" % [asked, WorldState.TICKS_PER_HOUR])
+	_check("★★按 X ⇒ 請求量正好是 TICKS_PER_HOUR（實測 %d／期望 %d）" % [
+		asked, WorldState.TICKS_PER_HOUR], asked == WorldState.TICKS_PER_HOUR)
 	var frames: int = 0
 	while node._bridge.is_advancing() and frames < 64:
 		node._process(0.1)
 		frames += 1
 	var delta: int = st.world.current_tick - t0
-	# ★★被事件提前擋住的偵測：沒走完一小時、而又已經不在推進中 ⇒ remaining 被歸零了
-	var evented: bool = (delta < WorldState.TICKS_PER_HOUR) and (not node._bridge.is_advancing())
-	print("   delta=%d（TICKS_PER_HOUR=%d）frames=%d" % [delta, WorldState.TICKS_PER_HOUR, frames])
-	if evented:
-		_check("★母體地板②【不可判】：這一輪被事件提前擋住（delta=%d < %d）" % [
-			delta, WorldState.TICKS_PER_HOUR], false)
-	else:
-		_check("★★按 X ⇒ 正好推進 TICKS_PER_HOUR（實測 %d／期望 %d）" % [
-			delta, WorldState.TICKS_PER_HOUR], delta == WorldState.TICKS_PER_HOUR)
+	print("   實際走了 delta=%d frames=%d（★≤ 請求量：事件可以把它截短，不能讓它超過）" % [delta, frames])
+	_check("★★★世界走的不超過那個請求（delta=%d ≤ %d）" % [delta, WorldState.TICKS_PER_HOUR],
+		delta <= WorldState.TICKS_PER_HOUR)
 	await _free_ui(node)
 	_cell("_test_p8_x_advances_one_hour")
 
@@ -2139,16 +2147,31 @@ func _test_p13_dedupe_repeated_t() -> void:
 	_selftest_gate("_test_p13_dedupe_repeated_t").noop()
 	print("\n── P13 連按 T 去重 ──")
 	var node = await _make_ui()
-	_press_key(node, KEY_T)
-	_press_key(node, KEY_T)
-	_press_key(node, KEY_T)
+	# ★★★這一格第一版是【空的】，而是負對照抓出來的（2026-09-25）：
+	#   我原本連按三次 KEY_T 然後斷言「待辦 1 道」。★把去重【整個拿掉】之後它【還是 1】
+	#   ⇒ 那個 1 不是去重換來的。★★真因：第一次按 T 進入互動模式之後，
+	#     `_input` 就被 `_handle_interact_mode()` 接走 ⇒ 第 2、3 次按鍵【到不了 KEY_T 分支】。
+	#   ⇒ ★★★所以「按鍵三次只入列一次」是【按鍵路由】的結果，不是合併的結果。
+	# ⇒ 改走那個鍵【真正呼叫的那一支】，讓它真的被要求入列三次。
+	node._bridge.refresh_interaction_targets()
+	node._bridge.refresh_interaction_targets()
+	node._bridge.refresh_interaction_targets()
 	var n: int = node._bridge.pending_command_count()
-	print("   連按 T 三次 ⇒ 待辦 %d 道" % n)
-	_check("★連按 T 三次 ⇒ 待辦 1 道（不是 2 也不是 3）", n == 1)
+	print("   同名無參數入列三次 ⇒ 待辦 %d 道" % n)
+	_check("★入列三次 ⇒ 待辦 1 道（不是 2 也不是 3）", n == 1)
 	var r: Dictionary = node._bridge.command_player("refresh_targets", {})
-	_check("★★★同名無參數再來一次 ⇒ 回 merged=true（合併路徑真的走過）",
+	_check("★★★而第四次回 merged=true（合併路徑真的走過，不是從數字反推）",
 		bool(r.get("merged", false)))
 	_check("★而它仍然回 queued=true（那一道確實在佇列裡）", bool(r.get("queued", false)))
+	# ★按鍵路由那件事本身留一個觀測（不是斷言）——★它是上面那段註解的證據，
+	#   而下一個人若把互動模式的輸入接管改掉，這個數字會變，他會在卷面上看到。
+	var node2 = await _make_ui()
+	_press_key(node2, KEY_T)
+	_press_key(node2, KEY_T)
+	_press_key(node2, KEY_T)
+	print("   ★對照觀測：連按 KEY_T 三次 ⇒ 待辦 %d 道（互動模式接走了後兩次按鍵）"
+		% node2._bridge.pending_command_count())
+	await _free_ui(node2)
 	await _free_ui(node)
 	_cell("_test_p13_dedupe_repeated_t")
 
