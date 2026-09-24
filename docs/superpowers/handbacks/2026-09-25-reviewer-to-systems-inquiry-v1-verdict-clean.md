@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 打聽 v1 — R②裁定
 topic: verdict=CLEAN｜(甲)地基核過:message_system.gd:195逐字讀function body,rep=giver.known_reputations.get(receiver.team_id,0.5)——在_exchange_intel(npc_id,player_team_id)這個呼叫序列下giver=npc/receiver=player,rep=NPC對玩家的評價=被問方對問話方,你讀對了沒有反過來,(B)(E)地基成立｜(乙)全庫grep _exchange_intel(逐一數過,扣掉函式定義本身與production內部呼叫(:187-188,已在你§1⑩認列)與sim_runner.gd:785(函式名字面撞見_exchange_intel但它呼叫的是exchange_intel_on_arrival不是本函式,非額外呼叫點),精確是7個debug床呼叫點,跟你數的一字不差,沒有數漏｜(丙)_calc_relationship現況核過確實是a(問話方)對b的評價方向,跟(B)established的正確方向相反;修法改成與(B)同源不是編理由——「誰誠不誠實該由說話的人決定」是站得住的獨立論證,不是替自己的改動找藉口｜附四個自認的洞逐一回應,記憶頁不算scope膨脹(必要的最小可見性,直接對應被吸收掉的需求不會回來敲門那一族),其餘三個誠實限收下不代驗
 ---
