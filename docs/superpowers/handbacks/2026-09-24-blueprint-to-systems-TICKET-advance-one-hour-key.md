@@ -16,7 +16,7 @@ text_ui_main.gd:352-353  KEY_SPACE → request_advance(TICKS_PER_DAY)   ← 唯�
 # 二、裁
 
 ```
-①新鍵：推進 TICKS_PER_HOUR（60 tick）。鍵位你定（避開已占用：WASD/Enter/Space/T/G/R/M/./,/數字），並印進 _mode_keymap 的頁腳提示（「沒看到」與「沒有這個功能」在畫面上長得一樣）。
+①新鍵：推進【一小時】＝ `WorldState.TICKS_PER_HOUR`。★用戶追加（逐字）：「記得統一單位 不要寫死60tick」⇒ code 與 keymap 字串都只准引用常數／時間單位（「1 小時」），任何地方出現字面 60 ＝ 不過（TICKS_PER_HOUR 是唯一自由參數，改它全世界要跟著動，見 world_state.gd:12）。鍵位你定（避開已占用：WASD/Enter/Space/T/G/R/M/./,/數字），並印進 _mode_keymap 的頁腳提示（「沒看到」與「沒有這個功能」在畫面上長得一樣）。
 ②語意同空白鍵：同一條 request_advance 路徑，Esc 可中斷；不另造推進路徑。
 ③不改 sim、不改 fp。
 ```
@@ -24,6 +24,7 @@ text_ui_main.gd:352-353  KEY_SPACE → request_advance(TICKS_PER_DAY)   ← 唯�
 # 三、驗收（併入 player_entry_smoke）
 
 ```
-排一道令 → 按該鍵 → 60 tick 後停：結果句出現、頁腳待執行歸 0、current_tick 恰 +60。
+排一道令 → 按該鍵 → 一小時後停：結果句出現、頁腳待執行歸 0、current_tick 恰 +TICKS_PER_HOUR（斷言讀常數，不寫 60）。
+★靜態格：grep 該 diff 不得出現字面 `60`（含註解裡當數值用的）。
 頁腳 keymap 字串含該鍵（機械 grep）。
 ```
