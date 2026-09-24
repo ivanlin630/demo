@@ -788,6 +788,7 @@ func _build_state_str() -> String:
 		for _f in _page_skylight_fields(_page_idx):
 			lines.append(UiPages.skylight(_f))
 
+	lines.append_array(_build_hover_truth_lines())
 	lines.append("────────────────")
 	lines.append("Tick: %d  (Day %d)" % [
 		_bridge.get_current_tick(),
@@ -920,6 +921,75 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 		#   ⇒ ★★★而那一輪的卷面是「errors: 1｜到場點名 31／31」—— 一個執行期錯誤
 		#     靜靜吃掉半個函式，而點名照樣滿分。
 		lines.append("聚焦: %s  %s" % [str(fm.get("name", "?")), str(fm.get("status", ""))])
+	return lines
+
+# ══════════ 游標懸停印整格真值（debug）══════════
+# ★★★這是【用戶明裁的 god-view 例外】（「先顯示真值 我好 debug」，意圖帳 #42）——
+#   而例外的正當性【只存在於「這是畫給人看的」這件事上】。
+# ⇒ ★所以這支函式的形狀本身就是那道牆：
+#   ①它只在 render 路徑被呼叫，而它【只讀不寫】—— 沒有任何一行寫 state，
+#     ★★連快取進 `player_state` 都沒有（spec §1①明文禁止）
+#   ②它回的是 Array[String]，★★★而字串進不了決策 —— 決策讀的是 belief，不是畫面
+#   ⇒ ★★★**沒有儲存，就沒有消費者** —— 這比「規定大家不要讀它」強，
+#     因為它不依賴任何人記得。
+# ★而標題那一行不是裝飾（spec §3）：用戶拿真值 debug 時會看到【附身者不知道的事】
+#   ⇒ 「AI 怎麼這麼笨」與「AI 根本不知道」在畫面上長得一樣
+#   ⇒ ★★那一行讓每一次觀察【自帶它的來源標籤】，否則用它得出的每一個
+#     「遊戲合不合理」的結論，都建在一個玩家拿不到的資訊上。
+# ★即時性不是我加的：`_move_cursor()` 本來就在結尾呼叫 `_refresh()`
+#   ⇒ 這個區塊讀 `_cursor`（不是 `_selected`）就自動是【不用按 Enter】的。
+# ★★誠實限：勢力印的是 `faction_id` 而不是名字 —— `get_teams_at_tile()` 給的是 id，
+#   而畫面上那個好看的 `faction_display` 是【belief 推導的】⇒ 把它混進真值區塊
+#   會讓這一段變成「一半真值一半信念」，那比少一個名字糟。
+const HOVER_TRUTH_TITLE: String = "真值·debug（非附身者所知）"
+
+func _build_hover_truth_lines() -> Array:
+	var lines: Array = []
+	if _cursor == Vector2i(-1, -1):
+		return lines
+	var t: Dictionary = _bridge.query_tile(_cursor.x, _cursor.y)
+	# ★★★不印裸分隔線（2026-09-25 實測訂正）：原本我在標題上面多加一條
+	#   `────────────────`，而那條線【與畫面上既有的分隔線同字】
+	#   ⇒ 票B 的零損失比對（單次 render vs 五頁聯集）看到它從 4 次變 9 次而紅。
+	#   ★那不是零損失壞了，是我多了一個【撞名的】分隔符 —— 而聯集有五頁，所以多五條。
+	#   ⇒ ★★讓標題行自己當分隔：一個區塊一個界線，本來就不該有兩個。
+	lines.append("── %s ──" % HOVER_TRUTH_TITLE)
+	if t.is_empty():
+		lines.append("  游標 (%d,%d) tile_id=%d ⇒ ★這一格不在地圖上" % [
+			_cursor.x, _cursor.y, _cursor.x * 1000 + _cursor.y])
+		return lines
+	lines.append("  格 (%d,%d)  tile_id=%d  地形:%s  收成係數:%.3f" % [
+		_cursor.x, _cursor.y, _cursor.x * 1000 + _cursor.y,
+		String(t.get("terrain", "?")), float(t.get("harvest_factor", 0.0))])
+	# ★全部 resources —— ★★鍵排序後印：不排序的話同一格在兩次 render 之間可能換順序，
+	#   而那會讓「畫面穩定」那一類的斷言變得取決於字典的內部順序。
+	var res: Dictionary = t.get("resources", {})
+	if res.is_empty():
+		lines.append("  資源：（空）")
+	else:
+		var ks: Array = res.keys()
+		ks.sort()
+		var parts: PackedStringArray = PackedStringArray()
+		for k in ks:
+			parts.append("%s=%s" % [String(k), str(res[k])])
+		lines.append("  資源：%s" % " ".join(parts))
+	var olv: int = int(t.get("outpost_level", 0))
+	if olv > 0:
+		lines.append("  據點：%s Lv%d  主人(控制方)=%s" % [
+			String(t.get("outpost_type", "?")), olv, str(t.get("outpost_owner", -1))])
+	else:
+		lines.append("  據點：無（outpost_level=0）")
+	# ★格上所有隊 —— ★★用既有的 `get_teams_at_tile()`（`bottom_bar` 已經是它的消費者）
+	#   ⇒ 不自己再掃一次全隊，否則同一個問題會有兩份答案
+	var here: Array = _bridge.get_teams_at_tile(_cursor.x, _cursor.y)
+	if here.is_empty():
+		lines.append("  格上隊伍：0 支")
+	else:
+		lines.append("  格上隊伍：%d 支" % here.size())
+		for o in here:
+			lines.append("    Team%d  人口:%d  勢力id:%d  任務:%s" % [
+				int(o.get("id", -1)), int(o.get("population", 0)),
+				int(o.get("faction_id", -1)), String(o.get("current_task", ""))])
 	return lines
 
 func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
