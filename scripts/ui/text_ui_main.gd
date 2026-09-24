@@ -39,6 +39,9 @@ var _selected: Vector2i = Vector2i(-1, -1)
 var _page_idx: int = 0
 var _player_tid: int = 0
 var _events: Array = []
+# ★★★「我印到世界事件的第幾筆」＝【UI 本地游標】，不是世界狀態（spec §2③）。
+#   ★它不進 fp、不進 state —— 誰讀到第幾筆是觀眾的事。
+var _last_world_event_seq: int = 0
 
 var _input_mode: bool   = false
 var _input_buffer: String = ""
@@ -202,6 +205,19 @@ func _process(_delta: float) -> void:
 	var result := _bridge.tick_step()
 	_update_day_baseline()   # ★★日邊界的擁有者在這裡，不在 render
 	_events.append_array(result.get("events", []))
+	# ★★★把【世界事件匯流排】上、玩家感知得到的那些撈進畫面（spec 2026-09-25 §2）。
+	#   ★這是本票的核心：在此之前事件流只有 `_diff_events()` 那兩種（遭遇戰觸發／看到新隊）
+	#     ⇒ 自家隊死了人、離了隊、招到人，畫面【一個字都不會說】。
+	#   ★★唯讀 ＋ 自己記游標：不排空佇列（排空＝觀測改變被觀測物，票5 的教訓）。
+	#   ★★★放在 `tick_step()` 之後、`_refresh()` 之前 —— 而那不是風格：
+	#     佇列壽命是一小時而 `tick_step()` 一次最多吃一小時
+	#     ⇒ **每次 step 之後都要讀一次**，漏一次就漏掉整整一小時的事件。
+	for we in _bridge.read_player_events():
+		var sq: int = int(we.get("seq", 0))
+		if sq <= _last_world_event_seq:
+			continue
+		_last_world_event_seq = sq
+		_events.append({"type": "world", "msg": String(we.get("text", ""))})
 	# ★★★指令結果句排空（spec §3-5②）——★在【這裡】不在 `_refresh()`：
 	#   在 render 裡排空就是 render 又在寫 state，而那是「render 不得寫 state」那張票剛還掉的債。
 	#   ★★拒絕禁靜默 ⇒ 成功與失敗【都】進事件流；失敗另外推上 feedback 行，因為

@@ -95,6 +95,18 @@ func _initialize() -> void:
 			bad += 1
 	_ok(bad == 0, "事件流每一筆都是 Dictionary（★String 混進來就會在讀者身上丟錯）（壞形狀 %d／共 %d）" % [bad, node._events.size()])
 	_ok(node._state_label.text.length() > 50, "畫面主文非空（%d 字）" % node._state_label.text.length())
+	# ★★★逐【型別】印出來 —— 只印總數的話，「事件流 22 筆」在
+	#   【全部都是指令回音】與【世界事件真的進來了】兩種情況下長得一模一樣。
+	var by_type: Dictionary = {}
+	for e in node._events:
+		if e is Dictionary:
+			var k: String = String(e.get("type", "?"))
+			by_type[k] = int(by_type.get(k, 0)) + 1
+	var parts: Array = []
+	for k in by_type: parts.append("%s=%d" % [k, int(by_type[k])])
+	parts.sort()
+	print("[PE] 事件流逐型別：%s｜世界事件佇列現存 %d 筆" % [
+		", ".join(parts), node._bridge.player_event_count()])
 	print("[PE] 走了 %d tick、%d frames、下了 %d 道指令｜事件流 %d 筆｜command_log %d 筆" % [
 		st.world.current_tick - start_tick, frames, issued, node._events.size(), st.command_log.size()])
 	print("=== player_entry_smoke DONE === FAILS=%d" % _fails)

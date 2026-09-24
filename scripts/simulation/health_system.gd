@@ -246,6 +246,10 @@ static func check_starvation_deaths(state: WorldState) -> void:
 		if Probe.enabled: Probe.bump("death.starve_named_hunger" if p.hunger >= 0.7 else "death.starve_named_bleed")   # ★measurer L3 tap(2026-08-21,量測盲點:此路徑原僅print無Probe計數)
 		p.is_dead = true   # 留屍標記：反向 roster audit 跳過（team_id 保留但不在 roster）
 		state.remove_member(team, pid, false)   # 死亡留屍不改籍（保 get_player_team_id）
+		# ★事件流（spec #4）：★cause 用它【上面已經算好】的那個變數 —— 不另算一次
+		#   （另算一次就是第二份真相，而兩份遲早會漂）
+		WorldEvents.emit(state, "member_died", [team.team_id], false,
+			{"name": String(p.person_name), "cause": cause})
 		if team.leader_id == pid:
 			team.leader_id = -1
 		# population 為 getter（leader+named+anon）→ named/leader 移除後自動反映，無須手動扣。

@@ -378,6 +378,15 @@ func pending_command_labels(max_n: int = 3) -> Array:
 func read_command_results() -> Array:
 	return _state.command_results
 
+# ★★★玩家事件佇列的【唯讀】口（spec 2026-09-25 §2③）——同樣不是破壞性排空：
+#   讀者自己記「我印到第幾筆」（那是觀眾的事，不是世界的事）。
+#   ★清除由消費點依 tick 做（`SimRunner.RESULT_TTL_TICKS`，★與指令結果共用同一個常數）。
+func read_player_events() -> Array:
+	return _state.player_events
+
+func player_event_count() -> int:
+	return _state.player_events.size()
+
 # 玩家主動打開互動選單時呼叫：掃描同格 NPC 加入 pending_targets
 # ★★★改成【入列】（spec §3-3b）：它寫 `player_pending_targets` ＝ 世界狀態
 #   ⇒ 不入列的話「玩家何時打開選單」會改變世界 ⇒ 重播不可重現。

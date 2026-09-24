@@ -204,6 +204,16 @@ var command_log: Array = []
 #   ★★它由 UI 在【非 render 路徑】上排空（`_process()`）——
 #     在 `_refresh()` 裡排空就是 render 又在寫 state，那是另一張票剛還掉的債。
 var command_results: Array = []
+
+# ★★★玩家可見事件佇列（spec 2026-09-25 §2）——【緩衝，不是來源】。
+#   ★寫入【只在 `WorldEvents.emit` 那一個呼叫點】（P3 用 grep 斷言）
+#     ⇒ 任何地方繞過 emit 直接寫這裡 ＝ 第二本帳。
+#   ★★為什麼需要它：`pending_rethink` 只活【一個 tick】而玩家按一次「推進一小時」＝60 tick
+#     ⇒ 直接讀旗子會漏掉其中 59 tick 的事件，★而漏掉的樣子跟「什麼都沒發生」長得一模一樣。
+#   ★★★壽命與讀法【完全照抄 command_results】：綁 tick、唯讀、讀者自己記游標
+#     ⇒ 不製造第三種機制（那是「兩個推進路徑其中一個沒跟上」的預防版）。
+var player_events: Array = []
+var player_event_seq: int = 0
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []
 # Array[int] — 同格、無敵意 NPC team_ids，等玩家選擇互動類型或忽略

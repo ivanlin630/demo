@@ -520,10 +520,28 @@ func _consume_player_commands(state: WorldState) -> void:
 	# ★過期清除【在最前面、且不看佇列空不空】——
 	#   ★★放在 `if pending.is_empty(): return` 後面的話，沒有新指令的 tick 就不會清
 	#   ⇒ 那會讓「這一欄的內容」取決於【後來有沒有人下指令】，又變回非 tick 的函數。
+	# ★★★玩家事件佇列的壽命【重用 RESULT_TTL_TICKS】，不另立一個常數：
+	#   spec §3 要求「新佇列的 TTL 併入既有那條 `>= STEP_TICK_BOUND` 斷言」——
+	#   ★而【共用同一個常數】比「另立一個再加一條斷言」更強：
+	#     沒有第二個數字，就沒有第二條斷言要維護，也沒有東西可以漂開。
+	if not state.player_events.is_empty():
+		var keep_ev: Array = []
+		for e in state.player_events:
+			# ★★★`<=` 不是 `<`，而這一個 tick 的差是【量出來的】不是風格：
+			#   一次 `tick_step()` 上界 ＝ STEP_TICK_BOUND ＝ TTL ＝ 60，而讀者在 step
+			#   【之後】才讀 ⇒ 一件在 step 開頭產生的事件，被讀到的那一刻年齡【正好 60】
+			#   ⇒ `< 60` 會把它判成過期 ⇒ ★★推進一天的 24 件事件【一件都到不了畫面】。
+			#   ★血證：P2 實測注入 24 件、收到 0 件（畫面上那 9 件是世界自己產的）。
+			#   ⇒ ★★★spec §3 說「壽命一小時剛好夠」——【剛好不夠】，差的就是這一個 tick。
+			if state.world.current_tick - int(e.get("tick", 0)) <= RESULT_TTL_TICKS:
+				keep_ev.append(e)
+		state.player_events = keep_ev
 	if not state.command_results.is_empty():
 		var keep: Array = []
 		for r in state.command_results:
-			if state.world.current_tick - int(r.get("tick", 0)) < RESULT_TTL_TICKS:
+			# ★同上：`<=`。指令結果句原本沒被咬到，是因為入列→消費只差 1 tick；
+			#   而匯流排事件是在 step【中間】產生的 ⇒ 邊界對它是致命的。
+			if state.world.current_tick - int(r.get("tick", 0)) <= RESULT_TTL_TICKS:
 				keep.append(r)
 		state.command_results = keep
 	if state.pending_commands.is_empty():
