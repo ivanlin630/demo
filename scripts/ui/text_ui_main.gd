@@ -351,6 +351,15 @@ func _input(event: InputEvent) -> void:
 			_refresh()
 		KEY_SPACE:
 			_bridge.request_advance(WorldState.TICKS_PER_DAY)
+		# ★★★推進一小時（spec §4b，用戶裁 #6）——★【不新開推進路徑】：照上面 SPACE 那一支的
+		#   寫法呼叫【既有的】 `request_advance()`。理由是 2026-09-24 剛踩過的那條：
+		#   兩個推進路徑其中一個沒跟上 ⇒ 我們不再製造第三條。
+		# ★★單位：只准引用 `WorldState.TICKS_PER_HOUR`，★★★不准寫 60 ——
+		#   `world_state.gd:12` 寫著它是【唯一自由參數】⇒ 寫死一個 60 就是把那個旋鈕複製了一份，
+		#   而複製出來的那一份【不會跟著轉】。
+		# ★Esc 中斷沿用 SPACE 那一支已經有的行為（`:422` 的 `cancel_advance()`），不另外做。
+		KEY_X:
+			_bridge.request_advance(WorldState.TICKS_PER_HOUR)
 		KEY_G:
 			_input_mode = true
 			_input_mode_type = "numeric"
@@ -637,8 +646,18 @@ func _refresh() -> void:
 	#   ★常駐＝0 也印 —— ★★只在非零時才出現的東西，玩家學不會它的意思，
 	#     而「沒看到」與「沒有這個功能」在畫面上長得一樣。
 	#   ★這裡【只讀】不寫（render 不得寫 state）。
-	_hint_line.text = "%s｜待執行 %d 道" % [
-		_mode_keymap(_current_mode_name()), _bridge.pending_command_count()]
+	# ★★★而「N 道」單獨是看不懂的（用戶問「同格招募，待辦為何 3 還 4 道」）
+	#   ⇒ 後面列【動作人話】（最多 3 個，spec §4c①）。
+	#   ★文案走 `_bridge.pending_command_labels()` ＝ `PlayerCommandApi.describe()`
+	#     ＝【與入列回音同一份字串】—— ★★不在這裡另寫一份：
+	#     兩份文案會漂，而漂了【沒有任何東西會紅】（P15b grep 這兩處同源）。
+	var _pend_n: int = _bridge.pending_command_count()
+	var _pend_txt: String = "待執行 %d 道" % _pend_n
+	if _pend_n > 0:
+		var _labels: Array = _bridge.pending_command_labels(3)
+		_pend_txt += "（%s%s）" % [
+			"、".join(_labels), "…" if _pend_n > _labels.size() else ""]
+	_hint_line.text = "%s｜%s" % [_mode_keymap(_current_mode_name()), _pend_txt]
 	_log_strip.text = _log_strip_text(_events, 3)
 	_check_alerts()
 
@@ -685,7 +704,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [X]推進1小時 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
 	"interact":      "[1-9]選目標/行動 [Esc]返回",
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",

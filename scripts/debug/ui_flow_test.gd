@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -91,6 +91,15 @@ func _initialize() -> void:
 	await _test_hover_p3_no_state_write()
 	await _test_hover_p5_empty_and_crowded()
 	await _test_recruit_pay_matches_delivery()
+	await _test_p8_x_advances_one_hour()
+	await _test_p8s_x_uses_the_constant()
+	await _test_p9_single_advance_path()
+	await _test_p10_footer_x_says_one_hour()
+	await _test_p11_esc_interrupts_x()
+	await _test_p13_dedupe_repeated_t()
+	await _test_p14_dedupe_does_not_eat_meaningful()
+	await _test_p15b_footer_labels_same_source()
+	await _test_p16b_pending_zero_after_advance()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
 	quit()
@@ -1769,11 +1778,18 @@ func _test_p17_consume_then_render() -> void:
 # ★這一組的重點不是「印得出來」，是【它結構上流不進決策】——
 #   所以 P3（不寫 state）才是這一票真正的判準，P1／P2 是它的前提（東西真的在）。
 
-func _hover_move(node, key: int) -> void:
+# ★★★按一個鍵 —— 走【真實鍵盤路徑】（`node._input`），不直呼 bridge。
+#   ★理由是 2026-09-24 P17 的血証：現成的工具會把你帶回它原本服務的那條路，
+#     而【玩家那條路】恰恰是沒有現成工具的那一條。
+func _press_key(node, key: int) -> void:
 	var ev := InputEventKey.new()
 	ev.keycode = key
 	ev.pressed = true
 	node._input(ev)
+
+# ★游標移動＝按鍵的一個特例 ⇒ 委派，不另寫一份（兩份實作會漂）
+func _hover_move(node, key: int) -> void:
+	_press_key(node, key)
 
 # P1[即時]：移動游標【不按 Enter】⇒ 該格真值出現。
 # ★即時性不是新加的機制：`_move_cursor()` 結尾本來就 `_refresh()`
@@ -1968,3 +1984,241 @@ func _test_recruit_pay_matches_delivery() -> void:
 	_check("★★招不到：消費點回 ok=false（不是「成功」）", not bool(b["ok"]))
 	await _free_ui(node)
 	_cell("_test_recruit_pay_matches_delivery")
+
+# ★★★把【整行註解】剝掉之後的原始碼 —— 給所有「掃原始碼」的格用。
+#   ★它存在的理由是一個實測到的假紅（2026-09-25）：P9 斷言「UI 沒有直接呼叫
+#     runner 推進」，而 `text_ui_main.gd:181` 有一行【註解】在【討論】
+#     `runner.advance_tick()` ⇒ 判準命中了那句討論，紅在一個不存在的缺陷上。
+#   ★★而它跟同一天早上那個 bare-tick 的病是【鏡像】：
+#     ·bare-tick：作者【沒】寫「tick」那個字 ⇒ 缺陷靜靜溜過（假綠）
+#     ·這裡：註解【提到】那個呼叫 ⇒ 假紅
+#     ⇒ ★★★同一個根：判準錨在【原始碼那串字】，而不是錨在【有沒有真的呼叫】。
+#   ★★★誠實限（寫出來，因為它還在）：只剝【整行】註解 ——
+#     行尾的 inline 註解若提到那個字，這一支仍然會誤判。★要修就是繼續窄化，不是放棄掃描。
+static func _code_only(src: String) -> String:
+	var out: PackedStringArray = PackedStringArray()
+	for l in src.split("\n"):
+		if l.strip_edges().begins_with("#"):
+			continue
+		out.append(l)
+	return String.chr(10).join(out)
+
+# ══════════ §4b「推進一小時」鍵（spec 2026-09-25，用戶裁 #6）══════════
+# ★★★這一組刻意做成【行為格 ＋ 靜態孿生】成對，而不是只有一邊：
+#   ·靜態格＝早期警報（不用跑就紅），★但它錨在【原始碼那串字】上 ⇒ 可以被改寫繞過
+#   ·行為格＝真判準（不受重寫影響）★★衝突時【行為格贏】—— 我們在乎的是行為
+#   ⇒ ★★★systems 2026-09-25 立的規矩：沒有行為層孿生的靜態格，只是早期警報，不算守衛。
+
+# P8［行為］：按 X ⇒ current_tick 增加 TICKS_PER_HOUR。
+# ★負對照：把那一行改成 TICKS_PER_DAY ⇒ 必須紅（★守的是「一小時」不是「會動」）。
+# ★★母體地板兩道，各擋一種恆綠：
+#   ①按鍵之後必須【真的在推進】（否則 delta==0 與「什麼都沒發生」長得一樣）
+#   ②這一輪【不能被事件提前擋住】—— tick_step 遇事件會把 remaining 歸零
+#     ⇒ 那時 delta < 一小時而它【不是缺陷】⇒ 判【不可判】，不假裝綠也不假裝紅。
+func _test_p8_x_advances_one_hour() -> void:
+	_selftest_gate("_test_p8_x_advances_one_hour").noop()
+	print("\n── P8 按 X 推進一小時 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var t0: int = st.world.current_tick
+	_press_key(node, KEY_X)
+	_check("★母體地板①：按 X 之後真的在推進中", node._bridge.is_advancing())
+	var frames: int = 0
+	while node._bridge.is_advancing() and frames < 64:
+		node._process(0.1)
+		frames += 1
+	var delta: int = st.world.current_tick - t0
+	# ★★被事件提前擋住的偵測：沒走完一小時、而又已經不在推進中 ⇒ remaining 被歸零了
+	var evented: bool = (delta < WorldState.TICKS_PER_HOUR) and (not node._bridge.is_advancing())
+	print("   delta=%d（TICKS_PER_HOUR=%d）frames=%d" % [delta, WorldState.TICKS_PER_HOUR, frames])
+	if evented:
+		_check("★母體地板②【不可判】：這一輪被事件提前擋住（delta=%d < %d）" % [
+			delta, WorldState.TICKS_PER_HOUR], false)
+	else:
+		_check("★★按 X ⇒ 正好推進 TICKS_PER_HOUR（實測 %d／期望 %d）" % [
+			delta, WorldState.TICKS_PER_HOUR], delta == WorldState.TICKS_PER_HOUR)
+	await _free_ui(node)
+	_cell("_test_p8_x_advances_one_hour")
+
+# P8s［靜態孿生］：X 那一行寫的是 TICKS_PER_HOUR，不是字面量。
+# ★★★母體地板：先斷言【抓到了那一行】—— 找不到＝不可判，★不是綠。
+#   理由：鍵位綁法若改成查表，這個錨會找不到 ⇒ 沒有地板它會變成「恆空母體恆綠」。
+# ★範圍只到【那一個呼叫】，不全檔掃 60 —— 全檔掃會咬到合法的 60
+#   （TICKS_PER_HOUR 的定義本身就是 60、秒、百分比）⇒ 那一格會恆紅，而恆紅與恆綠一樣是沒有守衛。
+func _test_p8s_x_uses_the_constant() -> void:
+	_selftest_gate("_test_p8s_x_uses_the_constant").noop()
+	print("\n── P8s X 那一行的單位（靜態孿生）──")
+	var src: String = _code_only(FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd"))
+	_check("撈得到原始碼（剝掉整行註解後 %d 字元）" % src.length(), src.length() > 1000)
+	var at: int = src.find("KEY_X:")
+	_check("★母體地板：找得到 KEY_X 那一支（找不到＝不可判，不是綠）", at != -1)
+	if at != -1:
+		var nxt: int = src.find("KEY_", at + 6)
+		var body: String = src.substr(at, (nxt - at) if nxt != -1 else 300)
+		var ln: String = ""
+		for l in body.split("\n"):
+			if l.contains("request_advance("):
+				ln = l
+				break
+		_check("★母體地板：那一段裡找得到 request_advance( 那一行", ln != "")
+		if ln != "":
+			print("   那一行：%s" % ln.strip_edges())
+			_check("★★寫的是 WorldState.TICKS_PER_HOUR", ln.contains("WorldState.TICKS_PER_HOUR"))
+			_check("★★★沒有裸數字 60（單位只准引用那個唯一自由參數）", not ln.contains("60"))
+	_cell("_test_p8s_x_uses_the_constant")
+
+# P9［同一條路］：★不得新開推進路徑 —— UI 只准透過 bridge 的 request_advance／tick_step 推進。
+# ★母體地板：request_advance( 至少 2 處（SPACE ＋ X）⇒ 否則這一格在【檔案讀空】時恆綠。
+func _test_p9_single_advance_path() -> void:
+	_selftest_gate("_test_p9_single_advance_path").noop()
+	print("\n── P9 只有一條推進路徑 ──")
+	var raw: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	# ★剝掉整行註解 —— 否則【討論】那個呼叫的註解會讓這一格假紅（實測過，見 _code_only 檔頭）
+	var src: String = _code_only(raw)
+	_check("★母體地板：剝註解之後還有 code（%d → %d 字元）" % [raw.length(), src.length()],
+		src.length() > 1000)
+	var n_req: int = src.count("_bridge.request_advance(")
+	print("   _bridge.request_advance( 出現 %d 次" % n_req)
+	_check("★母體地板：request_advance( 至少 2 處（SPACE ＋ X）", n_req >= 2)
+	_check("★★UI 沒有直接呼叫 runner 推進（advance_tick）", not src.contains(".advance_tick("))
+	_check("★★★UI 沒有自己的 advance_ticks 實作（那會是第三條路）",
+		not src.contains("func advance_ticks"))
+	_cell("_test_p9_single_advance_path")
+
+# P10［頁腳有字＋單位統一］：keymap 的 X 那一項寫「1小時」不是「60tick」。
+# ★判準只看【那一項的字串】（[X] 到下一個 [ 之間），不是全檔掃 60。
+func _test_p10_footer_x_says_one_hour() -> void:
+	_selftest_gate("_test_p10_footer_x_says_one_hour").noop()
+	print("\n── P10 頁腳 X 那一項 ──")
+	var node = await _make_ui()
+	node._refresh()
+	var hint: String = String(node._hint_line.text)
+	var at: int = hint.find("[X]")
+	_check("★母體地板：頁腳 keymap 裡找得到 [X]（找不到＝不可判）", at != -1)
+	if at != -1:
+		var rest: String = hint.substr(at + 3)
+		var nxt: int = rest.find("[")
+		var item: String = rest.substr(0, nxt) if nxt != -1 else rest
+		print("   那一項：「%s」" % item)
+		_check("★★那一項寫的是「1小時」", item.contains("1小時"))
+		_check("★★★那一項沒有寫死的 60（用戶逐字：不要寫死60tick）", not item.contains("60"))
+	await _free_ui(node)
+	_cell("_test_p10_footer_x_says_one_hour")
+
+# P11［Esc 中斷］：推進中按 Esc ⇒ 真的停下來。
+# ★★★而這一格要先講一件【量出來的事實】，否則下一個人會以為它寫得太弱：
+#   SimBridge.STEP_TICK_BOUND == WorldState.TICKS_PER_HOUR（sim_bridge.gd）
+#   ⇒ ★一次 _process 就把【整個一小時】吃完
+#   ⇒ ★★所以 X 鍵的可中斷窗口【只有一幀寬】（按鍵到下一次 _process 之間）
+#   ⇒ ★★★那不是缺陷，是那兩個常數相等的必然結果；SPACE（一天＝24 幀）才有寬窗口。
+# ★母體地板：按 Esc 之前必須【真的在推進中】（否則「停下來了」在根本沒開始時恆真）。
+func _test_p11_esc_interrupts_x() -> void:
+	_selftest_gate("_test_p11_esc_interrupts_x").noop()
+	print("\n── P11 Esc 中斷 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var t0: int = st.world.current_tick
+	_press_key(node, KEY_X)
+	_check("★母體地板：Esc 之前真的在推進中", node._bridge.is_advancing())
+	_press_key(node, KEY_ESCAPE)
+	_check("★★Esc 之後不再推進", not node._bridge.is_advancing())
+	node._process(0.1)
+	var delta: int = st.world.current_tick - t0
+	print("   Esc 後再跑一幀，delta=%d（未中斷會是 %d）" % [delta, WorldState.TICKS_PER_HOUR])
+	_check("★★★世界沒有走掉那一小時（delta=%d < %d）" % [delta, WorldState.TICKS_PER_HOUR],
+		delta < WorldState.TICKS_PER_HOUR)
+	await _free_ui(node)
+	_cell("_test_p11_esc_interrupts_x")
+
+# ══════════ §4c 待辦數看不懂：去重 ＋ 列名 ══════════
+
+# P13［去重］：連按 T 三次 ⇒ 待辦 1 道。★守的是「1」不是「少於 3」。
+# ★★母體地板：光看 ==1 不夠 —— 若只入列過一次，1 是【假綠】
+#   ⇒ 另外要一個【合併真的發生過】的機器可讀證據：直呼同名無參數，必須回 merged=true。
+func _test_p13_dedupe_repeated_t() -> void:
+	_selftest_gate("_test_p13_dedupe_repeated_t").noop()
+	print("\n── P13 連按 T 去重 ──")
+	var node = await _make_ui()
+	_press_key(node, KEY_T)
+	_press_key(node, KEY_T)
+	_press_key(node, KEY_T)
+	var n: int = node._bridge.pending_command_count()
+	print("   連按 T 三次 ⇒ 待辦 %d 道" % n)
+	_check("★連按 T 三次 ⇒ 待辦 1 道（不是 2 也不是 3）", n == 1)
+	var r: Dictionary = node._bridge.command_player("refresh_targets", {})
+	_check("★★★同名無參數再來一次 ⇒ 回 merged=true（合併路徑真的走過）",
+		bool(r.get("merged", false)))
+	_check("★而它仍然回 queued=true（那一道確實在佇列裡）", bool(r.get("queued", false)))
+	await _free_ui(node)
+	_cell("_test_p13_dedupe_repeated_t")
+
+# P14［不過度去重］：★★★spec 原本寫「按鍵 [T, 移動, T] ⇒ 待辦 2 道」——
+#   而我實測發現那個【路線】驗不到它要驗的東西：KEY_T 是 toggle
+#   （text_ui_main.gd 的 _interact_mode = not _interact_mode，只在【進入】時才 refresh）
+#   ⇒ 第三次按 T 是【離開】互動模式 ⇒ 它【根本不入列】⇒ 佇列是 [refresh, move] ＝ 2
+#   ⇒ ★★而把去重放寬成「佇列裡有就不加」之後【還是 2】⇒ 負對照不會紅 ⇒ 那一格是空的。
+# ⇒ ★★★所以這一格走 bridge，讓兩個 refresh【真的被一個別的指令隔開】：
+#   [refresh, move, refresh] ＝ 3 道；放寬成「佇列裡有就不加」⇒ 2 道 ⇒ 紅。
+func _test_p14_dedupe_does_not_eat_meaningful() -> void:
+	_selftest_gate("_test_p14_dedupe_does_not_eat_meaningful").noop()
+	print("\n── P14 去重不吃掉有意義的那一個 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = int(st.persons[st.player_id].team_id)
+	var tp: Vector2i = st.teams[ptid].tile_pos
+	node._bridge.command_player("refresh_targets", {})
+	node._bridge.command_player("move_to", {"tile_q": int(tp.x) + 1, "tile_r": int(tp.y)})
+	var r3: Dictionary = node._bridge.command_player("refresh_targets", {})
+	var n: int = node._bridge.pending_command_count()
+	print("   [refresh, move, refresh] ⇒ 待辦 %d 道" % n)
+	_check("★★★被別的指令隔開的第二個 refresh【要保留】⇒ 3 道", n == 3)
+	_check("★而它【沒有】被標成 merged（隔開了就不是同一道）", not bool(r3.get("merged", false)))
+	await _free_ui(node)
+	_cell("_test_p14_dedupe_does_not_eat_meaningful")
+
+# P15b［列名同源］：頁腳列出的動作人話，與入列回音【同一份字串】。
+# ★★★判準不是「兩邊看起來一樣」，是【兩邊都走 PlayerCommandApi.describe()】——
+#   ★兩份文案會漂，而漂了沒有任何東西會紅。
+# ★母體地板：那一刻頁腳要真的有待辦（0 道時列名區塊不出現 ⇒ 什麼都不印也會「相符」）。
+func _test_p15b_footer_labels_same_source() -> void:
+	_selftest_gate("_test_p15b_footer_labels_same_source").noop()
+	print("\n── P15b 頁腳列名與回音同源 ──")
+	var node = await _make_ui()
+	var r: Dictionary = node._bridge.command_player("refresh_targets", {})
+	var echo: String = String(r.get("message", ""))
+	_check("★母體地板：真的有一道待辦", node._bridge.pending_command_count() >= 1)
+	node._refresh()
+	var hint: String = String(node._hint_line.text)
+	var label: String = PlayerCommandApi.describe("refresh_targets", {})
+	print("   回音：「%s」｜describe：「%s」" % [echo, label])
+	_check("★入列回音含 describe() 那一份字串", echo.contains(label))
+	_check("★★頁腳也含同一份字串（「%s」）" % label, hint.contains(label))
+	var bsrc: String = FileAccess.get_file_as_string("res://scripts/ui/sim_bridge.gd")
+	var at: int = bsrc.find("func pending_command_labels")
+	_check("★母體地板：找得到 pending_command_labels（找不到＝不可判）", at != -1)
+	if at != -1:
+		var body: String = bsrc.substr(at, 400)
+		_check("★★★列名走 PlayerCommandApi.describe()（不是另寫一份文案）",
+			body.contains("PlayerCommandApi.describe("))
+	await _free_ui(node)
+	_cell("_test_p15b_footer_labels_same_source")
+
+# P16b［推進後歸零］：推進一小時 ⇒ 待辦 0 道。
+# ★母體地板：推進前要真的有 ≥1 道（否則「0 道」在一開始就恆真）。
+func _test_p16b_pending_zero_after_advance() -> void:
+	_selftest_gate("_test_p16b_pending_zero_after_advance").noop()
+	print("\n── P16b 推進後待辦歸零 ──")
+	var node = await _make_ui()
+	node._bridge.command_player("refresh_targets", {})
+	var before: int = node._bridge.pending_command_count()
+	_check("★母體地板：推進前真的有 ≥1 道（實測 %d）" % before, before >= 1)
+	_press_key(node, KEY_X)
+	var frames: int = 0
+	while node._bridge.is_advancing() and frames < 64:
+		node._process(0.1)
+		frames += 1
+	var after: int = node._bridge.pending_command_count()
+	print("   推進前 %d 道 ⇒ 推進後 %d 道（frames=%d）" % [before, after, frames])
+	_check("★★推進一小時之後待辦歸零", after == 0)
+	await _free_ui(node)
+	_cell("_test_p16b_pending_zero_after_advance")

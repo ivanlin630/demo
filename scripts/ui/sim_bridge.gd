@@ -298,6 +298,21 @@ func command_player(name: String, args: Dictionary) -> Dictionary:
 	if not PlayerCommandApi.VERB.has(name):
 		return {"ok": false, "queued": false, "code": "unknown_command",
 			"message": "沒有這個指令：%s" % name}
+	# ★★★同批重複去重（spec §4c②，用戶問「同格招募，待辦為何 3 還 4 道」）：
+	#   真因＝每按一次 T 就入列一道 `refresh_targets`（text_ui_main 的 KEY_T 分支）。
+	# ★★而它【不准搬出佇列】：那支會寫 `player_pending_targets` ＝ 世界狀態
+	#   ⇒ 不入列的話「玩家何時開選單」會改變世界 ⇒ 把票5 修掉的不決定性放回來。
+	#   ⇒ 處置是【去重 ＋ 列名】，不是【搬出去】。
+	# ★★★判準刻意只看【尾端】：它合併的是「連續、同名、無參數」那一種 ＝【按鍵按太多次】的形狀；
+	#   而 `[refresh, move, refresh]` 的第二個【要保留】—— 移動之後可見對象會變，那時它的意義不同。
+	#   ⇒ P14 就是守這件事（把判準放寬成「佇列裡有就不加」⇒ 必須紅）。
+	# ★只比尾端那一筆的 name ＝【不讀世界】⇒ 不違反「入列當下只擋不讀世界的」那條裁定。
+	if _merges_into_tail(name, args):
+		var tail: Dictionary = _state.pending_commands[-1]
+		# ★回的字要與事實相符：它【確實在佇列裡】，而【沒有多排一道】——兩件都說。
+		#   ★★這一句是 2026-09-25 招募那張的教訓：回報的字與事實不符，玩家只看得到那一個。
+		return {"ok": true, "queued": true, "merged": true, "seq": int(tail.get("seq", 0)),
+			"message": "已排入：%s（同一道，沒有重複排）" % PlayerCommandApi.describe(name, args)}
 	_state.command_seq += 1
 	_state.pending_commands.append({
 		"name": name, "args": args.duplicate(true), "seq": _state.command_seq})
@@ -307,6 +322,26 @@ func command_player(name: String, args: Dictionary) -> Dictionary:
 # 頁腳常駐用（spec §3-5③）：★★「待執行 N 道」——★玩家要看得到他按的東西還沒生效。
 func pending_command_count() -> int:
 	return _state.pending_commands.size()
+
+# 「連續、同名、無參數」＝按鍵按太多次的形狀 ⇒ 併進尾端那一道。
+# ★★★為什麼要求【無參數】兩邊都成立：`move_to(3,4)` 與 `move_to(5,6)` 同名而意思不同 ——
+#   合併它們會把玩家的第二個決定吃掉，而他不會知道。
+func _merges_into_tail(name: String, args: Dictionary) -> bool:
+	if not args.is_empty(): return false
+	if _state.pending_commands.is_empty(): return false
+	var tail: Dictionary = _state.pending_commands[-1]
+	if String(tail.get("name", "")) != name: return false
+	return Dictionary(tail.get("args", {})).is_empty()
+
+# 頁腳列名用（spec §4c①）：待辦的【動作人話】，最多 max_n 個。
+# ★★★文案走 `PlayerCommandApi.describe()` ＝【與入列回音同一份字串】——
+#   不另寫一份。★兩份文案會漂，而漂了【沒有任何東西會紅】（P15b 就是 grep 這兩處同源）。
+func pending_command_labels(max_n: int = 3) -> Array:
+	var out: Array = []
+	for c in _state.pending_commands:
+		if out.size() >= max_n: break
+		out.append(PlayerCommandApi.describe(String(c.get("name", "")), Dictionary(c.get("args", {}))))
+	return out
 
 # ★★★【唯讀】：讀結果句不得改變世界（systems 裁 2026-09-23）。
 #   ★原本這支是破壞性排空 ⇒ 掛上一個 UI 就會改變 fp ＝ 觀測改變被觀測物。
