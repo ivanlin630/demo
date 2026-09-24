@@ -32,13 +32,26 @@ rev_hits=$(git log -n "$WIN" --format='@@C %h %s' -p -U0 "$REF" -- "$MB" 2>/dev/
 /^\+status: open/    { if(p){ print f "\t" c } p=0; next }
                      { if($0 !~ /^[-+]/) p=0 }
 ')
-rev_open=""
+rev_open=""; rev_exempt=""
 if [ -n "$rev_hits" ]; then
   while IFS=$'\t' read -r f c; do
     [ -z "$f" ] && continue
     cur=$(git show "$REF:$f" 2>/dev/null | grep -m1 '^status:' | tr -d '\r')
+    # ★★★2026-09-25 窄化（systems，而觸發它的是我自己下的一道令）：
+    #   ★consumed→open 不是永遠都是 bug —— 有一種正當情形：**那個 consumed 本來就標錯了**
+    #   （血證：implementer 一次把七封 open 改 consumed，而其中一封是【下一張票的派工】
+    #    —— 工作還沒開始，標著 consumed 才是謊；改回 open 是訂正）
+    #   ⇒ ★★修法是【窄化】不是【刪除】：要免紅，信的 frontmatter 必須帶一行
+    #     `reopened: <理由>`（非空）⇒ 理由住在【信裡】而不是 commit 訊息裡（後者沒人會再讀）。
+    #   ⇒ ★★★而豁免【必須被印出來】：逃生口一旦安靜，它就會變成預設。
+    ro=$(git show "$REF:$f" 2>/dev/null | sed -n '1,14p' | sed -n 's/^reopened:[[:space:]]*\(.*\)/\1/p' | head -1 | tr -d '\r')
     case "$cur" in
-      *open*) rev_open="${rev_open}   ★ $f  ←  $c"$'\n' ;;
+      *open*)
+        if [ -n "$ro" ]; then
+          rev_exempt="${rev_exempt}   ✓ $f  —— reopened: $ro"$'\n'
+        else
+          rev_open="${rev_open}   ★ $f  ←  $c"$'\n'
+        fi ;;
     esac
   done <<< "$rev_hits"
 fi
@@ -49,6 +62,12 @@ if [ -n "$rev_open" ]; then
   fail=1
 else
   echo "[MAILBOX-GATE] ①回退：窗內 $n_rev 次 consumed→open，★現在【都不是 open】⇒ 已結案"
+fi
+# ★豁免必印（紅綠都印）—— 安靜的逃生口等於沒有閘。
+if [ -n "$rev_exempt" ]; then
+  echo "[MAILBOX-GATE] ①b 【已聲明的重開】（consumed→open 且信裡帶 reopened:）："
+  printf '%s' "$rev_exempt"
+  echo "[MAILBOX-GATE]   ★這不是綠燈，是【有人負了責】：理由寫在信裡，下一個人讀得到。"
 fi
 
 # ── ②被刪掉的信（★★最嚴重：收件人從來沒收到）──────────────────────────

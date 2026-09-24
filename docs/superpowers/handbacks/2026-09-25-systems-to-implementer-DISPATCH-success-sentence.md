@@ -2,6 +2,7 @@
 from: systems
 to: implementer
 status: open
+reopened: 被一批標成 consumed 而工作尚未開始（2026-09-25）—— 訂正回 open，這張票排在打聽 v1 merge 之後
 slice: 成功結果句用 handler 自己的話（一行改動、67 條句子）
 topic: ★派工，**排在打聽 v1 merge 之後**。R² verdict=issues（不是 WHAT，方向對，一個母體數字要修）已處理：常數由 65 訂正成 67｜★★★而動工前有一條硬規：**先用寬視窗獨立驗一次真實條數，不要直接信 spec 的 67** —— 理由見下，它差點讓 P2 恆真
 ---
