@@ -150,9 +150,16 @@ P6 ui-flow 綠；merge 前全電池 BATTERY_RC=0
 
 ```
 ①`_action_registry` 的 action 數（今日 **51**）—— `:166` 這一條邊涵蓋它們全部
-②**不經 registry 的路徑**逐處列名 —— 今日至少：
-   `:156 choose_heir`（早返）、`:160-161 ignore`（inline）、
-   以及把別的系統的 dict 轉出那幾處（`:423`／`:439` 一带，行號逐樹會飄）
+②**不經 registry 而可抵達的路徑**逐處列名 —— ★不是「至少」，是**機械導出的完整候選**：
+   ·`choose_heir`（registry 空時的早返）、`ignore`（inline）
+   ·★★**第二條分派邊** `execute_action_with_target()` 的 4 個 case：
+     `recruit_named`（走 `_recruit_named_internal`）／`set_member_salary`／`equip_member`／`unequip_member`
+   ·把別的系統的 dict 轉出那幾處：`_action_confirm_trade`、`_action_submit_trade_offer`
+     （★列【函式名】不要只列行號 —— 行號逐樹會飄）
+   ★★★**導出方法（可複核、不靠人記得）**：`func _action_*` 的定義集合 減掉 registry 值的集合
+     ⇒ 差集就是「定義了但不走 registry」的那些，**而它們必然有第二條路（否則是死碼）**。
+     實測（我獨立跑過）：定義 54／registry 51／**差集 3**
+     （`_action_set_member_salary`／`_action_equip_member`／`_action_unequip_member`）
 ③`player_command_system` 自己的成功回傳逐條列名（寬視窗，今日 **67**）
 ★邊界句（必印）：「本格沒數【收了但沒人轉出】的回傳」
 ★★而邊界非印不可的理由（implementer 補的，收下）：
