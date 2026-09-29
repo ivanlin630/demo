@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 按一下=一顆tick+吸附 — R②裁定
 topic: verdict=CLEAN｜(甲)36核過精確;單一咽喉主張核過成立——窮盡掃描sim_bridge.gd全檔對_state.*的直接寫入,整檔只有兩處:command_player()自己內部的pending_commands.append(那正是被掛鉤的函式本體)、set_player_input()的player_state[key]=value(你已排除)。特別追了一條我自己記得曾被列為第三入口的refresh_interaction_targets——它現在的實作是func refresh_interaction_targets():command_player("refresh_targets",{}),已經內部route進command_player,不是繞過,你的涵蓋主張成立,沒找到第37條路｜(乙)不是多慮——sim_bridge.gd:147 get_current_tick()回傳_state.world.current_tick,是live讀取不是快照,UI確實拿得到權威值;但這條警語該留著不是白寫的,因為_cached_snapshot裡也有一份tick欄位(每次_refresh()才更新的那份)是implementer最自然會誤用的那個,建議spec直接點名要用_bridge.get_current_tick()這個既有方法,不要讓implementer自己選錯來源｜(丙)沒有抄反——去重讀了成功結果句spec現在的P5(implementer動工時已自行訂正成「文字不進fp,逐字不變」,我核過state_fingerprint.gd:283-285只算size()那個理由成立),本票P5(會變)跟那張是相反方向,而相反是對的:那張只改字串內容,這張改的是tick推進的時機/顆粒度,兩張票改的東西性質不同,兩個結論不是同一件事的兩種答案,沒有抄反的問題
 ---

@@ -39,7 +39,10 @@ owner: systems ｜ 2026-09-29 ｜ **player_reachable: yes**
 ②X／Space 改成【吸附】：
      n = C - (tick_now % C)        # C ＝ TICKS_PER_HOUR 或 TICKS_PER_DAY
      ★剛好站在邊界（餘 0）⇒ n = C（推整段），**不是 0**
-   ★★`tick_now` 用【權威的 current_tick】不是畫面快照——
+   ★★`tick_now` **必須呼 `_bridge.get_current_tick()`**（`sim_bridge.gd:147`，它 live 讀 `_state.world.current_tick`）
+     ★★★**不得用 `_cached_snapshot` 裡那一份 tick**（那份只在 `_refresh()` 才更新）
+     —— R² 指出它是【實作端最自然會誤用的那個來源】，所以這裡**把該叫哪一個方法寫死**，
+     不讓他自己選。★畫面是「上一顆完整 tick」的快照——
      畫面是「上一顆完整 tick」的快照，而①會讓它們差一顆 ⇒ 用快照算會吸到前一格。
 ③頁腳「待執行 N 道」保留、重播語意不變（指令仍綁 tick）。
 ```
