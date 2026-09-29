@@ -50,6 +50,19 @@
 #      啟用觸發記在 `docs/known_issues.md`（狀態：已知未實裝）＝production 指名率 ≥ 50%。
 #
 # 欄位：id 	 指令 	 用途（一句） 	 ★expect（必須出現在輸出裡的 regex）
+# ★★☰2026-09-29 實測（implementer 回報、systems 量）：Godot 在 Windows 的 stdout 【靜默丟掉】部分字元。
+#   探針（print 一行再經 wrapper 回來，`cat -A` 看位元）：
+#     圓圈數字 U+2460-2464：【全數消失】｜`⇒`U+21D2：【消失】｜`✓`、`✗`：【兩個都消失】
+#     而 `★`U+2605、`→`U+2192、CJK、ASCII：【全部存活】
+#   ⇒ ★所以 expect 的錐【不得用圓圈數字／⇒／✓／✗】；用 ASCII 或 CJK（★ 可以）。
+#   ★★而丟掉只發生在【stdout 邊界】：
+#     ·床拿自己記憶體裡的字串互比 ⇒ **不受影響**
+#     ·床印一個 token、而 hook 之後 grep 它 ⇒ **這一條才會中彈**
+#     ·hook 讀【檔案】（非 stdout）⇒ 不受影響
+#   ★★★今日存量暴露＝**0**（已逐條核：3 列 expect 含那些字，其中 2 列是 bash 閘、
+#     1 列用的是存活的 `★`；4 支床的 7 處是記憶體字串比對；1 支 hook 讀的是源碼檔）
+#     ⇒ ★而存量為 0 不等於陳安全：下一個把那些字当 judgement token 印出來的人會遇到
+#       【靜默不命中】—— 而不命中的長相是那一格安靜地不存在。
 constitution	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/constitution_gate.gd	憲法 site-freeze：禁新增引擎外 task 指派	CONSTITUTION-GATE\] PASS .*到場點名 3／3
 bare-tick	bash .claude/hooks/bare-tick-gate.sh .	裸 tick：擋【新出現而沒人判過】的形狀（NEEDS_HUMAN=0，★不是總數）	BARE-TICK-GATE\] PASS
 build-duration	powershell -NoProfile -File ./tools/godot.ps1 --headless --script scripts/debug/construction_duration_source_gate.gd	工期單一真值：擋「有人再開第二張工期表」｜★不加點名：通過橫幅印在 _run 裡面 ⇒ 死掉沒橫幅 ⇒ expect 不命中才紅;★★實測 rc=0、1 秒、無橫幅（★不是 timeout）⇒ runner 第一道 RC 判準抓不到 ⇒ expect 的字串必須印在最後一格之後｜★★★2026-09-23 systems：**這一列曾經是真的假綠**。舊 expect 是 `DONE.*[免疫]…` —— `.*` 跨過了「（fail=N）」，而 `:47` 是裸 `quit()` ⇒ rc 恆 0；`:114-122` 有失敗時**不提前返回**、`:136` 橫幅**無條件印** ⇒ ★它可以印著 fail=3 而判綠。★★坐實方式：拿舊 expect 去比對一條合成的 `（fail=3）` 行 ⇒ **照樣命中**（零風險、不碰 repo）。★★★修法：expect 釘住「（fail=0）」。★而本列的【免疫設計】是對的（橫幅印在 `_run` 裡、`:32` 實測過注射⇒無橫幅）—— 它擋得住【中途死掉】，擋不住【跑完但有違規】。★★兩種壞法要各自有守衛。	construction_duration_source_gate DONE（fail=0）.*\[免疫\] 橫幅在 _run 內＝true
