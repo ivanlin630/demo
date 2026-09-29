@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #9 補（用戶 2026-09-29：「兩個點 一個是之前說的地圖記憶圖塊 一個是記憶圖塊可視化」）
 topic: ★#9 拆成明確兩件：(一)記憶圖塊【資料】＝哪些格算記得（team_tile_known，段1 先量）；(二)記憶圖塊【可視化】＝地圖上四種格狀態要一眼分得開，並有圖例｜可視化規格在此，WHAT 定字元語言、HOW 定顏色/寬度
 ---
