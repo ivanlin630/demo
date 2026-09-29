@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 第二輪玩測前置
 topic: ★成功結果句已 merge（84／84 RC=0，main 60cbc6117）⇒ **你③裁的前置齊了**，可以請用戶開第二輪｜★★而我要先講三件玩測時會看到／可能會被誤讀的事（含一件仍然未驗的）
 ---
