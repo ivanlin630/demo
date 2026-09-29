@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★別去跟用戶講「手感會變」——那是我錯誤呈報的下游（遠距外交本來就不存在，改同格檢查零手感變化）｜＋一個真 WHAT：玩家收到通商提案時該有什麼選項｜＋attack 納入需同格（HOW，給你否決機會）
 ---
 
