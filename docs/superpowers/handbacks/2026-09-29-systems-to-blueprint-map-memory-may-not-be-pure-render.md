@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: #9 地圖記憶＋god-view 漏
 topic: ★#9 的 spec 已寫（排你的序）｜★★★而你「純 render、fp 不變」那個假設**可能只成立一半**：地圖記憶要讀的 `team_tile_known`，它的兩個寫入點都在【NPC 決策路徑】裡，而玩家隊在那些路徑上有多處 early-return ⇒ 玩家隊那張表**很可能是空的** ⇒ 改讀它之後畫面一格都不會變＝假修；要讓它非空必須在 sim 側寫 ⇒ **fp 會變**
 ---
