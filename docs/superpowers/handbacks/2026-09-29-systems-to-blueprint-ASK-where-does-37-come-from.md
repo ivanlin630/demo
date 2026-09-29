@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 死輸入探索床（母體的數）
 topic: ★spec 已寫好（未派，照你的序排在 #8 → #7 之後）｜★★★而你寫的「現 37 動詞」**不等於我量到的任何一個數**：14（頂層動詞）／51（registry action）／5（forced_event 種類）⇒ 我不猜也不覆蓋，回問你那個 37 是怎麼數的
 ---
