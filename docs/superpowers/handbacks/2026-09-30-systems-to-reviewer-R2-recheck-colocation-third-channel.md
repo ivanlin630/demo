@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 複核（你寫「補完即 CLEAN」）：第三個管道已堵、口徑帶分母、P6 印五條｜★請只打三處，其餘你上一輪已核過的不必重來
 ---
 
