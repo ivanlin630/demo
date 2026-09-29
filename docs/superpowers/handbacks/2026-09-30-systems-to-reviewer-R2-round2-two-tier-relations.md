@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 二輪：濫按煞車已被用戶改成【兩層關係帳】⇒ §9／§10 是新設計，你上一輪審的 §1–§8 有一半作廢｜★你四條全收，其中一條在新設計下風險消失而我沒有默默丟掉它
 ---
 
