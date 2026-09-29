@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 按一下＝做一顆 tick ＋ X／Space 吸附（#8，先於 #7）
 topic: ★R② 審設計。spec = docs/superpowers/specs/2026-09-29-press-is-one-tick-and-snap-HOW.md｜★★本票的核心是【那個 hook 掛在哪】：我裁掛在 `SimBridge.command_player()` 這個單一咽喉，而不是 UI 的 36 個呼叫點｜★★★請打那個「36」與「單一咽喉真的涵蓋得住」
 ---
