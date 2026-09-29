@@ -166,6 +166,16 @@ _selfcheck() {
   got=$(beacon_started_s "$d/does-not-exist"); \
     { [ "$got" = "0" ] && echo "  ✓ 檔不存在 ⇒ 0"; } || { echo "  ✗ 檔不存在卻回 $got"; fail=1; }
   rm -rf "$d"
+  # ★★★2026-09-30 新增一格：UNRESPONSIVE 必須【讀過產出齡】且【用同一個窗口】
+  #   獲物：同一份報告兩行自相矛盾（判 implementer UNRESPONSIVE，而下方印他 0m 前有產出）
+  #   —— 今日四次，每次靠人工讀下面那欄否決。
+  #   ★誠實限：這一格比的是【本檔有沒有那個子句】，不是跑一次真報告；
+  #     它抳得住的具體破壞是【有人把那個子句刪掉】或【把窗口改成字面數】。
+  if grep -q '_to_age" -lt "\$T_UNRESP"' "$0" && grep -q '_to_ct=\$(git -C "\$ROOT" log -1' "$0"; then
+    echo "  ✓ UNRESPONSIVE 讀產出齡且窗口＝T_UNRESP（未被刪／未被改成字面數）"
+  else
+    echo "  ✗ ★UNRESPONSIVE 的產出齡子句不見了或窗口不再是 T_UNRESP ⇒ 它會回到【兩行自相矛盾】"; fail=1
+  fi
   [ "$fail" = 0 ] && echo "[watchdog --selfcheck] ✅ 全綠" || echo "[watchdog --selfcheck] ❌ 有格不符"
   return $fail
 }
@@ -456,13 +466,26 @@ while true; do
     if [ "$a" -ge "$T_UNRESP" ]; then
       _busy_role=""
       case "${running:-}" in beacon:*) _busy_role="${running#beacon:}" ;; esac
-      if [ -n "$_busy_role" ] && [ "$_busy_role" = "$to" ]; then
+      # ★★★2026-09-30（blueprint 揭，同一份報告今日第四次誤報）：
+      #   舊版只看【信 open 多久】就判 UNRESPONSIVE，而同一份報告下方的
+      #   【最後產出】欄印著該角色 0m 前 ⇒ **兩行自相矛盾**。
+      #   ★真因不是判準寫錯，是**兩個窗口沒對齊**：一邊是信齡、一邊是產出齡，
+      #     而它只讀了一邊。★★而那個數字**報告自己已經有了**（:528 同一個 git log）
+      #     ⇒ 處置是讓它自己讀，不是再加一支閘。
+      #   ★★★而要用**同一個窗口**（T_UNRESP）比，否則只是把不對齊換了一個地方。
+      _to_ct=$(git -C "$ROOT" log -1 --format=%ct --all -- "docs/superpowers/handbacks/*-${to}-to-*" 2>/dev/null)
+      case "${_to_ct:-0}" in (*[!0-9]*|'') _to_ct=0 ;; esac
+      _to_age=$(( now - _to_ct ))
+      if [ "$_to_ct" -gt 0 ] && [ "$_to_age" -lt "$T_UNRESP" ]; then
+        :   # ★該角色在同一個窗口內有產出 ⇒ **不判停工**（他在做別的章）
+      elif [ -n "$_busy_role" ] && [ "$_busy_role" = "$to" ]; then
         :   # ★該角色自己掛了 beacon 且信正是給他 ⇒ 合法豁免，靜默
       else
         class="UNRESPONSIVE"; via="pre-RUNNING/beacon-exempt-checked"
         detail="  ${to} 活著但 ${bn} 已 open $(dur "$a") 沒消費
   ★派工信 open ≠ 停工：**一張正在做的票，它的派工信本來就該是 open**
-  ⇒ ★★判停工要配合下面【feat lane】與【worktree 檔案變動】兩欄，不要只看這一行"
+  ⇒ ★★判停工要配合下面【feat lane】與【worktree 檔案變動】兩欄，不要只看這一行
+  ★而本判已經讀過產出齡：${to} 最後產出 $( [ "${_to_ct:-0}" -gt 0 ] && dur "$_to_age" || echo '★沒有任何信' ) 前（窗口 $(dur "$T_UNRESP")）"
         [ -n "${running:-}" ] && detail="${detail}
   ★有長工作在跑（${running}），但它不是 ${to} 的 beacon ⇒ 不構成豁免"
       fi
