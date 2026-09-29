@@ -196,6 +196,27 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 		target.update_reputation(sender.team_id, -0.05)
 		print("[Diplomacy] Team%d 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05" % target.team_id)
 
+# ★★★接受通商的【全部】效果 —— 一個真相只存一份（spec 2026-09-30 §2①）。
+#   NPC↔NPC 那一支與玩家 handler **都呼這一支**（呼叫點恰好 2 個，床 P2(a) 指名斷言）。
+#   ★為什麼不讓玩家端呼 `handle_diplomacy_message`：那一支會重跑 `score > 0.4`
+#     ⇒ 而玩家的決定是【玩家按的】，不是秤出來的 ⇒ 重跑那把秤＝把玩家的決定交還給 AI。
+#   ★★為什麼不在玩家端複製那兩行：複製的那一份會漂
+#     —— 下一次有人改這個係數只會改到一邊。⇒ 係數留在這裡，玩家端不得出現它的字面。
+# ★★★而【只寫 team 名聲，一個字都不多】：
+#   上游裁定寫「名聲／好感加分」，而這一支 code 走的是 `known_reputations`（**team 名聲**），
+#   **不是** `p.relations`（**person 好感**）。
+#   ⇒ 若玩家端順手也寫好感，玩家就得到一個【NPC 得不到的效果】＝**特例**，
+#     而那正好違反這條裁定自己的原則（零特例）。
+const TRADE_ACCEPT_REP: float = 0.05
+
+# ★不吃 `state`：這一支只動兩個 TeamData 的名聲欄。
+#   ★★刻意不加一個沒用到的參數 —— 一個假參數會讓下一個人以為它還寫了別的世界狀態。
+static func apply_trade_accept(a: TeamData, b: TeamData) -> void:
+	if a == null or b == null:
+		return
+	a.update_reputation(b.team_id, TRADE_ACCEPT_REP)
+	b.update_reputation(a.team_id, TRADE_ACCEPT_REP)
+
 func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 		sender_team: TeamData, action: String, gift: Dictionary = {}) -> String:
 	if Probe.enabled: Probe.bump("dip.proposal_handled")
@@ -209,8 +230,7 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 			return "reject"
 		"propose_trade":
 			if score > 0.4:
-				self_team.update_reputation(sender_team.team_id, 0.05)
-				sender_team.update_reputation(self_team.team_id, 0.05)
+				apply_trade_accept(self_team, sender_team)
 				if Probe.enabled: Probe.bump("dip.proposal_accept")
 				return "accept"
 			return "reject"
