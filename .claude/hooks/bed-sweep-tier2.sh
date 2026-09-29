@@ -78,7 +78,15 @@ if [ "${1:-}" = "--check-staleness" ]; then
     echo "[tier2]     bash .claude/hooks/bed-sweep-tier2.sh      # 約 15-25 分鐘，只在【由綠轉紅】時吵人"
     exit 1
   fi
-  now=$(date +%s); last=$(cat "$STAMP" 2>/dev/null || echo 0)
+  # ★★☰2026-09-29：寫端改成【時戳＋工作量】之後，**讀端必須跟著改**——
+  #   ★舊讀法 `cat "$STAMP"` 拿到整行 ⇒ 非純數字 ⇒ 它會報「內容不是時間戳」
+  #     ⇒ ★★而那正好是我記過的【讀者還在、寫者改了】—— 所以兩邊同一顆 commit。
+  #   ★★★取第一欄 ⇒ **舊格式（光秃時戳）也讀得動**（向前相容）。
+  now=$(date +%s); last=$(cut -d" " -f1 "$STAMP" 2>/dev/null || echo 0)
+  _work=$(cut -d" " -f2- "$STAMP" 2>/dev/null)
+  # ★`cut -d" " -f2-` 在【沒有分隔符】的舊格式上會回整行
+  #   ⇒ 它會把時戳本身印成「工作量」（實測到）⇒ 兩者相等就當作沒有
+  [ "$_work" = "$last" ] && _work=""
   case "$last" in ''|*[!0-9]*) echo "[tier2] ★$STAMP 內容不是時間戳 ⇒ 視為未跑過"; exit 1;; esac
   age=$(( (now - last) / 86400 ))
   if [ "$age" -gt "$MAX_AGE_DAYS" ]; then
@@ -93,7 +101,7 @@ if [ "${1:-}" = "--check-staleness" ]; then
     echo "[tier2]     ⇒ ★★那一輪的「綠→紅 0 支」**不是健康證明**，只是「這一輪沒比」"
     exit 1
   fi
-  echo "[TIER2-STALENESS] PASS 上次全床掃描 $age 天前（上限 $MAX_AGE_DAYS）"
+  echo "[TIER2-STALENESS] PASS 上次全床掃描 $age 天前（上限 $MAX_AGE_DAYS）｜★上一輪的工作量：${_work:-（舊格式、沒有記工作量）}"
   exit 0
 fi
 
@@ -253,7 +261,15 @@ fi
   printf "%s
 " "$_keep"
 } > "$BASELINE"
-date +%s > "$STAMP"
+# ★★☰2026-09-29（implementer 提形狀、systems 立）：時戳要帶【工作量】。
+#   ★前例就在同一個 repo：`.archive-last` 寫的是「搬=424 熱目錄剩=30 時間=…」
+#     ⇒ 一輪 no-op 會留下「搬=0」⇒ **假綠在卷面上直接讀得出來**。
+#   ★★而舊的 `.sweep-last` 只有時間 ⇒ 它不可能分辨「跑了但沒事做」與「根本沒跑」。
+#   ★★★而它與「新增 0 列⇒ABORT」**不重複**：一個擋當下，一個留證據給下一個人。
+#   ★那兩個數本來就算好了（印在螢幕上）—— 只是沒被寫進戲里。
+printf "%s 本輪新增=%s baseline列數=%s 時間=%s
+" "$(date +%s)" "${_rows_new:-?}" "$(printf '%s
+' "$_keep" | grep -c '^scripts/')" "$(date +%FT%T)" > "$STAMP"
 echo "[tier2] 完成：$rows 支｜★綠→紅 $alerts 支｜baseline 已更新｜時間戳已蓋"
 [ "$alerts" -gt 0 ] && exit 1
 exit 0
