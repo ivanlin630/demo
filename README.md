@@ -25,7 +25,7 @@ Godot 4.2.2 GDScript 世界模擬器:**無玩家也要好玩**——世界自己
 ```powershell
 # ★玩(玩家文字介面;main_scene=TextUI.tscn)。merge 過之後第一次開之前先跑下面那行 --import,
 #   否則新 class_name 不在主 dir 的類別快取裡會 Parse Error(2026-09-24 血證)
-.	ools\godot\Godot_v4.2.2-stable_win64.exe --path A:\GDS\demo
+.\tools\godot\Godot_v4.2.2-stable_win64.exe --path A:\GDS\demo
 
 # 觀測 GUI(主要看世界用):god-view 地圖+事件 ticker+隊伍 inspect+速度四檔
 .\tools\godot.ps1 scenes/ObserverMain.tscn -- --obs-seed=1337
