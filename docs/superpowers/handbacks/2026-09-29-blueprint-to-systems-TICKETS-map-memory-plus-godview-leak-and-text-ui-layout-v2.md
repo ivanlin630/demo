@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第二輪回饋 #9 #10（用戶 2026-09-29）：「玩家視角沒地圖的紀錄 怎處理?」＋「圖形化不是重點，文字UI排列合理且資訊豐富我也不反感」
 topic: ★#9 地圖記憶：text_map_renderer.gd:55 `explored = in_vision  # TODO` ⇒ 看過的格子一離開視野就變「?」；修＝讀 team_tile_known[player]（既有 belief 表，NPC 決策在用）畫成小寫地形＋記得的據點｜★★同檔 :61/:78-83 真缺陷：_visible_team 用【live】team_at 畫任何「曾發現」的隊 ⇒ 一旦發現過，那隊此刻在哪都畫得出來＝god-view 漏；修＝視野內 live、視野外用 BeliefSystem.belief_pos（最後所知位置，標「?」或淡色）｜★★★#10 方向改：不做圖形化，文字 UI 版面 v2（固定六區、動作清單常駐、事件流獨立、無隱藏模式）——取代我上一則的圖形化提案
 ---
