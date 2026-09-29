@@ -163,7 +163,57 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 		_setup_registry()
 	if not _action_registry.has(action):
 		return { "ok": false, "msg": "未知行動: %s" % action }
+	# ★★★同格閘（spec 2026-09-30）：這條不變量原本只有【兩處】執法 ——
+	#   NPC 側 `diplomatic_ai_system.gd:138`、玩家【畫面】側 `refresh_colocation_targets`
+	#   ⇒ 而第三條管道（直呼 API／agent）**一處都沒有** ⇒ 可對任意隊隔空索貢／提案／勒索。
+	#   ★而那不是「畫面守得不夠嚴」，是【守在錯的層】：畫面是一條管道，
+	#     而不變量是世界的性質 ⇒ 守畫面等於只對我們自己走的那條路執法，
+	#     ★★而缺陷從來躲在我們不走的管道。
+	# ★★★判準錨在【動作的契約】，不是【這次傳進來的數字】（systems 訂正 2026-09-30）：
+	#   我第一版寫「若 `state.teams.get(target_id)` 非 null 就要同格」——
+	#   ★而 `target_id` 只是個 int，自家隊動作【只是慣例上】傳 -1，沒有東西強制它
+	#   ⇒ 走程式介面呼 `execute_action(state, 5, "hunt")` ⇒ `teams.get(5)` 非 null
+	#     ⇒ **hunt 會被誤判成「對方不在你的格上」**
+	#   ⇒ ★★而那個誤判的方向是【擋掉合法動作】，症狀是「某些自家隊動作偶爾莫名被拒」
+	#     —— **比洞更難查**。
+	#   ⇒ ★★★所以條件是「action ∈ 團體目標動詞集合」，而那個集合有單一來源：
+	#     `get_available_actions` 回的那些 ⇒ 見 `TEAM_TARGET_ACTIONS` 的檔頭。
+	#   ★既有兩支自己也查（`_action_beg`／`_action_invite_settle`）⇒ 雙查同答案，無害；
+	#     ★★不把它們拆掉：那兩處的措辭是它們自己領域的話（「需同格才能乞討」）。
+	var _far: Dictionary = _colocation_gate(state, action, target_id, pt)
+	if not _far.is_empty():
+		return _far
 	return _action_registry[action].call(state, target_id, pt, pt_id)
+
+# ★★★【團體目標動詞】＝ 契約上 target 指的是【別隊】的那些動作。
+#   ★單一來源是 `get_available_actions`（本檔 :39）—— 它就是「對一支別隊可以做什麼」那份清單。
+#   ★★而這個 const 是它的【鏡子】不是第二份真相：床有一格做異源比對
+#     （抽 `get_available_actions` 裡所有 `actions.append("…")` 的字面 ⇒ 集合必須相等）
+#     ⇒ 有人往那支函式加一個新動詞而忘了這裡，那一格會紅。
+#   ★★★`ignore` 留在清單裡是因為它【契約上】也是對別隊的動作（它清的是對那支隊的 pending）；
+#     而它在 `execute_action` 更上面就 early-return ⇒ 實際走不到這一閘。列著是為了讓
+#     異源比對的兩邊【同一個定義域】—— 把它剔掉會讓集合相等那一格永遠差一個。
+const TEAM_TARGET_ACTIONS: Array = [
+	"ignore", "attack", "trade", "propose_alliance", "demand_tribute", "extort",
+	"recruit", "recruit_anon", "invite_settle", "gather_intel", "beg",
+]
+
+# 同格閘的本體。★回空字典 ＝ 放行（★不回 bool：呼叫端要的是【那句人話】，
+#   而把訊息與判斷放在同一個回傳裡，下一個人就不會另寫一份措辭）。
+func _colocation_gate(state: WorldState, action: String, target_id: int, pt: TeamData) -> Dictionary:
+	if not TEAM_TARGET_ACTIONS.has(action):
+		return {}   # ★★契約上 target 不是別隊（自家隊動作／tile 動作）⇒ 本閘無關
+	if pt == null:
+		return {}   # ★沒有玩家隊 ⇒ 這一閘沒有主詞；null 由上面既有的守衛負責回話
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null:
+		return {}   # ★目標不存在 ⇒ 由各 handler 自己回話（不搶它的措辭）
+	if tgt.team_id == pt.team_id:
+		return {}   # ★對自己 ⇒ 永遠同格
+	if pt.tile_pos != tgt.tile_pos:
+		# ★人話（spec §2②）：玩家要看得懂【為什麼不行】，而不是一個錯碼。
+		return { "ok": false, "msg": "對方不在你的格上" }
+	return {}
 
 # ── Action Handlers ───────────────────────────────────────────
 
