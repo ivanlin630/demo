@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 濫按索貢煞車(結怨) — R②裁定
 topic: verdict=issues(不擋方向,兩條要改)｜常數全核對無誤(FEUD_BASE_FACTOR/HONOR_W/BELLIGERENCE_W/MIN/SEVERITY表逐字match);intensity=amount/coin_before的恆等成立(同源推導不是自比,方向對);form_feud回傳值全庫7個呼叫點窮盡核過,只有3個headless_test.gd的assert在讀,語意不變不用改,你的claim成立｜★★★但§2「飽和疊加(每次0.30)」這個數字算錯了——它應該用遠程索貢的實際per-event intensity(severity 0.1×typical factor 0.75≈0.075)不是0.30(那是(甲)分支special_taxed的severity,屬於你沒選的另一個設計),重算後要到第14-15次才flip不是第4次,雖仍在P2的20次預算內但「第4次」這句話寫進§7呈報給blueprint會嚴重低估濫按需要的次數,建議訂正並在呈報裡標成真實量級｜②form_feud reader母體我幫你數完六個production讀者,五個是continuous-weight或被FEUD_ATTACK_MIN(0.5)/VENDETTA_INTENSITY(0.6)這種高門檻擋住不受影響,唯一一個真正敏感的是interaction_system.gd:1821 _views_as_foe——它用intensity>0.0(任何非零就算)不是門檻比較,新出現的小邊會讓更多情境被判定「視為敵」,這是一個真實行為改變但§7沒有點名它,建議補上｜③grudge_ledger_bed格7那條理由同意你的懷疑,它是理由②(邊沒有記憶)的偵測手段不是獨立架構理由,建議只留前兩條｜P2③的確在賭,而且賭得比你想的更兇(baseline score若不夠低,20次內可能一次refuse都不會出現)——建議P2造leader時明確控制人格值讓算術保證會flip,不要靠典型/預設值僥倖,並把score_no_edge印出來當母體地板
 ---

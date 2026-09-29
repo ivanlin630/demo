@@ -170,6 +170,21 @@ _promise_bare_check() {
       _lno=${line%%:*}; _txt=${line#*:}
       _para=$(awk -v n="$_lno" 'NR>=n { if (NR>n && $0 ~ /^[[:space:]]*$/) exit; print }' "$f")
       path=$(printf '%s' "$_para" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z]+-to-[a-z]+-[A-Za-z0-9-]+\.md' | head -1)
+      # ★★★2026-09-30【判準問錯了問題】（它誤報了 systems 自己一封信）：
+      #   上面那個 regex 只認【信的檔名形狀】（<日期>-<角色>-to-<角色>-*.md），
+      #   而「已落地」的兑現物很常是一份 **spec**（docs/superpowers/specs/*.md）。
+      #   ⇒ ★它問的是「這裡有沒有一個信的檔名」，該問的是「這裡有沒有一個【存在的】檔」。
+      #   ★★而它錯的方向是【多算】（把已兑現的報成裸承諾）⇒ 不是漏抱，是雜訊；
+      #     而雜訊的下場與本檔 :159 那段註解寫的一模一樣：每一輪都看到、每一輪都略過。
+      #   ⇒ 窄化而不放寬：只多接受【repo 內相對路徑且 git 讀得到】的 .md，
+      #     ★仍然用 `git show HEAD:` 審議（磁碟有檔不算——同 :176 那條謂詞修正）。
+      #   ★★不碰【同時送/一併送】那一型：那型的兑現物本來就是一封信，它走下面別的分支。
+      if [ -z "$path" ]; then
+        _spec=$(printf '%s' "$_para" | grep -oE '(docs|scripts|tools)/[A-Za-z0-9._/-]+\.md' | head -1)
+        if [ -n "${_spec:-}" ] && git show "HEAD:$_spec" >/dev/null 2>&1; then
+          continue
+        fi
+      fi
       # ★★★謂詞修正（2026-09-22）：舊版檢 `[ -f ]` ＝ **磁碟上有檔**，
       #   而真實的失敗是 **staged 但沒 commit** ⇒ ★**磁碟會說「有」**
       #   ⇒ ★★只有 `git show HEAD:` 抓得到；★★★而兩個都印，讓它自己說是哪一種。
