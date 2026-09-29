@@ -120,7 +120,7 @@ func _initialize() -> void:
 # ══ P1：DTO 三個欄位都有人話，且不含原樣 id ═════════════════════════════════
 # ★這一格與 ui_flow 那一格【分工不同】：這裡驗 DTO 的三個欄位各自成句，
 #   ui_flow 驗玩家畫面真的印出它們。★兩邊都要，因為「DTO 對」與「畫面對」是兩件事。
-# 負對照：把 `proposal_phrase` 的 propose_alliance 那一行刪掉 ⇒ 面板印回 propose_alliance ⇒ 必紅
+# 負對照：把 `proposal_phrase` 的 propose_alliance 那一行刪掉（面板印回原樣 id） ⇒ 已於 feat/forced-event-panel（2026-09-29 這一輪） 實測紅
 func _test_p1_panel_three_lines_dto() -> void:
 	print("\n── P1 面板三行（DTO）──")
 	var pair: Array = _fresh()
@@ -155,7 +155,7 @@ func _test_p1_panel_three_lines_dto() -> void:
 #   會靜默變成空字串，而空字串在畫面上長得跟「沒有這件事」一樣。
 # ★母體不是假設而是量出來的：本格順手把【全庫 order_task 的具體值】那一個
 #   （TASK_TRIBUTE_OFFER）也走一次 —— 它是第三個會撞同一個病灶的字串。
-# 負對照：把 `proposal_phrase` 的 fallback 從「提議（未知：%s）」改成 ""（吞掉）⇒ 必紅
+# 負對照：把 `proposal_phrase` 的 fallback 改成 ""（吞掉） ⇒ 已於 feat/forced-event-panel（2026-09-29 這一輪） 實測紅
 func _test_p2_unknown_id_not_swallowed() -> void:
 	print("\n── P2 未知 id 不吞 ──")
 	var pair: Array = _fresh()
@@ -192,7 +192,7 @@ func _test_p2_unknown_id_not_swallowed() -> void:
 #   下一個新增強制事件的人不會知道還要 emit，★而漏掉的長相就是「玩家沒看到」＝靜默。
 # ★母體邊界（必印）：本格【只數產品碼】—— `scripts/debug/` 的床照舊直接賦值
 #   （床是佈置樣本，不是產生端），而那正是本格【不】把它們算進來的理由。
-# 負對照：把任一產生端改回直接賦值 ⇒ 非法賦值 0 → 1 ⇒ 必紅
+# 負對照：把 `diplomatic_ai_system` 那個產生端改回直接賦值（繞過 setter，0 → 1 處） ⇒ 已於 feat/forced-event-panel（2026-09-29 這一輪） 實測紅
 func _test_p3_single_arrival_writer() -> void:
 	print("\n── P3 到達唯一寫入口 ──")
 	var files: Array = _product_gd_files()
@@ -254,7 +254,7 @@ func _walk(dir: String, out: Array) -> void:
 # ★母體地板：每一點都要先斷言【它真的發生了】（到達 ⇒ forced_event 非空；
 #   回應 ⇒ respond 真的回了東西；逾時 ⇒ forced_event 真的被清掉），
 #   否則「佇列裡沒有那一句」會在一個【什麼都沒發生】的世界裡恆綠。
-# 負對照：把 `set_player_forced_event` 裡的 emit 拿掉 ⇒ 到達那一句不見 ⇒ 必紅
+# 負對照：把 `set_player_forced_event` 裡的 emit 換成 `pass`（到達那一句不進佇列） ⇒ 已於 feat/forced-event-panel（2026-09-29 這一輪） 實測紅
 func _test_p4_three_lifecycle_points_in_feed() -> void:
 	print("\n── P4 生命週期三點進事件流 ──")
 	# ── 第一點：到達
@@ -310,7 +310,7 @@ func _test_p4_three_lifecycle_points_in_feed() -> void:
 # ★★★誠實限（這一格自己的邊界）：它讀【原始碼】不讀 stdout ⇒ 它擋的是
 #   「那一行被刪掉／被改回印 dict」，★不擋「它在真實跑動裡有沒有印出來」。
 #   後者的證據在 headless 卷面（本輪到達／回應兩句逐字出現），而逾時那一句由 P4 的佇列版覆蓋。
-# 負對照：把 sim_runner 那一行改回 `str(state.player_forced_event)` ⇒ 必紅
+# 負對照：把 sim_runner 逾時那一行改回 `str(state.player_forced_event)` ⇒ 已於 feat/forced-event-panel（2026-09-29 這一輪） 實測紅
 func _test_p5_three_terminal_prints_exist() -> void:
 	print("\n── P5 終端三點 ──")
 	var srcs: Dictionary = {
@@ -340,7 +340,7 @@ func _test_p5_three_terminal_prints_exist() -> void:
 #   成因就是那兩半不在同一個地方被維護。若哪天有人把中文片語複製進 world_events.gd，
 #   兩邊就會各自漂 —— 而漂開的樣子在卷面上是綠的（兩邊各自都「有人話」）。
 # ★判準能紅在哪：把任一句中文片語複製進 world_events.gd ⇒ 必紅。
-# 負對照：在 world_events.gd 裡寫死「提議與你結盟」⇒ 必紅
+# 負對照：在 `world_events.gd` 裡多寫一句中文片語（＝第二張表） ⇒ 已於 feat/forced-event-panel（2026-09-29 這一輪） 實測紅
 func _test_p6_one_table_not_two() -> void:
 	print("\n── P6 一張表不是兩張 ──")
 	var we: String = _code_only(FileAccess.get_file_as_string(

@@ -2314,17 +2314,18 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
 #     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
 #     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
-const CONTROL_FLOOR_UI: int = 15
+const CONTROL_FLOOR_UI: int = 16   # ★+1：#7 那一格的負對照已實測紅（2026-09-29）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
+const CONTROL_FLOOR_FEP: int = 6    # forced_event_panel_bed（#7①③，2026-09-29）
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 # ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
 #   不是讀 DTO：上一輪的教訓是「DTO 對」與「畫面對」是兩件事。
 # ★母體地板：先斷言強制事件真的在（forced_event 非空 ＋ 面板 interaction_id 對得上）,
 #   否則「面板沒有原樣 id」會在一個【根本沒有面板】的世界裡恆綠。
-# 負對照：★尚未點火
+# 負對照：讓 UI 不印後果／不回應那兩行（`for extra in []`） ⇒ 已於 feat/forced-event-panel（2026-09-29 這一輪） 實測紅
 func _test_p20_forced_panel_three_lines() -> void:
 	_selftest_gate("_test_p20_forced_panel_three_lines").noop()
 	print("
@@ -2376,6 +2377,11 @@ func _test_p19_control_coverage_ratchet() -> void:
 		n_ui >= CONTROL_FLOOR_UI)
 	_check("★★command_replay_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cr, CONTROL_FLOOR_REPLAY],
 		n_cr >= CONTROL_FLOOR_REPLAY)
+	var n_fp: int = _count_fired("res://scripts/debug/forced_event_panel_bed.gd")
+	print("   forced_event_panel_bed %d（地板 %d）" % [n_fp, CONTROL_FLOOR_FEP])
+	_check("★★母體地板：#7 那支床也數得到非零（%d）" % n_fp, n_fp > 0)
+	_check("★★forced_event_panel_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fp, CONTROL_FLOOR_FEP],
+		n_fp >= CONTROL_FLOOR_FEP)
 	var n_fe: int = _count_fired("res://scripts/debug/player_event_feed_bed.gd")
 	print("   player_event_feed_bed %d（地板 %d）" % [n_fe, CONTROL_FLOOR_FEED])
 	_check("★★母體地板：新床也數得到非零（%d）" % n_fe, n_fe > 0)
