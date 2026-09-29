@@ -116,8 +116,15 @@ EOF_MGWT
 #   ⇒ ★★而主人的唯一權威來源是【跑它的那個終端自己】 ⇒ 寫 $SESSION_ROLE，
 #     ★★★**不要拿 tree 路徑去推角色** —— worktree 名與角色沒有權威對應表，
 #     推出來的對應會因為有人改名字而默默錯。
+# ★★★2026-09-30：pid 欄寫 `/proc/$$/winpid`（**不是 `$$`**）——
+#   bash 的 `$$` 不是 Windows pid ⇒ 讀旗的人用任何 Windows 工具（tasklist／Get-CimInstance）
+#   都解不開它 ⇒ 「主人還在嗎」這個問題**結構性地只有一個答案：不在**。
+#   ★血証 2026-09-30：systems 據此誤判電池被收割、清掉一面**活著的**旗
+#     ⇒ 機器對其他四個終端變 FREE（接住別人的是本檔自己那條「開跑前 Godot 必須 0」）。
+#   ★★而落到 `$$` 是刻意的後路：非 Git Bash 環境沒有 /proc/…/winpid，
+#     那時候 `kill -0` 本來就看得到它 ⇒ **兩個環境各自有一個可解的答案**。
 printf '%s tree=%s role=%s since=%s
-' "$$" "$(pwd)" "${SESSION_ROLE:-?}" "$(date +%FT%T)" > "$MG_RUNFLAG"
+' "$(cat /proc/$$/winpid 2>/dev/null || echo $$)" "$(pwd)" "${SESSION_ROLE:-?}" "$(date +%FT%T)" > "$MG_RUNFLAG"
 # 只留數字：不要用含跳脫字元的寫法（那個跳脫在寫檔時會變成真的換行，今天已經咬過兩次）
 _mg_godot_n=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' | tr -dc '0-9')
 if [ "${_mg_godot_n:-0}" != "0" ]; then
@@ -301,7 +308,11 @@ powershell -NoProfile -Command "Get-Process | Sort-Object WorkingSet64 -Descendi
 echo "[MERGE-GATES]   ★Godot 行程數=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' 2>/dev/null | tr -d '
 ')（★開跑前必須是 0）"
 while IFS=$'	' read -r id cmd purpose expect; do
-  id="${id%$''}"; cmd="${cmd%$''}"; purpose="${purpose%$''}"; expect="${expect%$''}"
+  id="${id%$'
+'}"; cmd="${cmd%$'
+'}"; purpose="${purpose%$'
+'}"; expect="${expect%$'
+'}"
   case "$id" in ''|'#'*) continue;; esac
   N=$((N+1)); T0=$SECONDS
   if [ "$MG_FROM" != "0" ] && [ "$N" -lt "$MG_FROM" ]; then continue; fi
