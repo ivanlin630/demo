@@ -262,6 +262,11 @@ func _test_p4_one_chokepoint_covers_all_callsites() -> void:
 	for fname in live_ui:
 		var n: int = _count_callsites("res://scripts/ui/" + String(fname))
 		var note: String = ""
+		# closure-exception: sim_bridge.gd —— ★這一行【比檔名】的 if 是可達性閉包的唯一例外，
+		#   而它刻意留著（systems 裁 2026-09-30）：機械化它要靠【呼叫者身分】，
+		#   ★★而「呼叫者身分」正是今天錯三次的那一維 ⇒ 為一個成員建同族的新判準，期望值是負的。
+		#   ★★★這個 `closure-exception:` 字面是 defers.tsv 那一列的【可 grep 錨】：
+		#     它讓那條 defer 有東西可以錨，而不是錨在一句散文上。
 		if String(fname) == "sim_bridge.gd":
 			# ★咽喉自己那一個不算「玩家按得到的呼叫點」：它是 refresh_interaction_targets
 			#   的內部自呼。★★它仍然要被【列在活集合裡】—— 遺漏它就是上一版的盲點。
