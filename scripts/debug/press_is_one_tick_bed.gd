@@ -12,7 +12,10 @@ extends SceneTree
 #   ★這一欄訂正過【兩次】，而第二次錯的是我自己：
 #     ·systems 的 spec 寫 36（只數了 text_ui_main 一個檔）
 #     ·我回報 45（36＋encounter_view 5＋popup_layer 4）——★而 popup_layer **不是活的**：
-#       它只被 `scenes/Main.tscn`（整棵死樹）實例化、`main.gd:13` 引用，
+#       它只被那棵死樹（Main 場景）實例化、`main.gd:13` 引用，
+#       ★★這句刻意【不寫那個完整路徑字串】：`defer-open` 的 `dead-scene-tree-cleanup`
+#         那一列用 `git grep "scenes/Main\.tscn"` 當解除條件 ⇒ 它分不出【引用】與【提及】，
+#         而我第一版在註解裡寫了它 ⇒ 整支閘紅。缺陷已回報 owner（defers.tsv 是 systems 的）。
 #       `text_ui_main` 一次都沒有碰它。
 #     ·真值 ＝ **41**（text_ui_main 36 ＋ encounter_view 5）
 #   ⇒ ★★我的錯法：拿「`text_ui_main:156` 動態 new」當活性判準，而那條我【只對
